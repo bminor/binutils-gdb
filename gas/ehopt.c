@@ -95,7 +95,9 @@ eh_frame_code_alignment ()
   segT current_seg;
   subsegT current_subseg;
   fragS *f;
+  fixS *fix;
   int offset;
+  int eh_state;
 
   if (code_alignment != 0)
     return code_alignment;
@@ -106,6 +108,7 @@ eh_frame_code_alignment ()
   current_subseg = now_subseg;
   subseg_new (".eh_frame", 0);
   f = seg_info (now_seg)->frchainP->frch_root;
+  fix = seg_info (now_seg)->frchainP->fix_root;
   subseg_set (current_seg, current_subseg);
 
   /* Look through the frags of the section to find the code alignment.  */
@@ -148,6 +151,7 @@ eh_frame_code_alignment ()
   /* Skip the augmentation (a null terminated string).  */
 
   ++offset;
+  eh_state = 0;
   while (1)
     {
       while (f != NULL && offset >= f->fr_fix)
@@ -161,7 +165,23 @@ eh_frame_code_alignment ()
 	  return -1;
 	}
       while (offset < f->fr_fix && f->fr_literal[offset] != '\0')
-	++offset;
+	{
+	  switch (eh_state)
+	    {
+	    case 0:
+	      if (f->fr_literal[offset] == 'e')
+		eh_state = 1;
+	      break;
+	    case 1:
+	      if (f->fr_literal[offset] == 'h')
+		eh_state = 2;
+	      break;
+	    default:
+	      eh_state = 3;
+	      break;
+	    }
+	  ++offset;
+	}
       if (offset < f->fr_fix)
 	break;
     }
@@ -175,6 +195,30 @@ eh_frame_code_alignment ()
     {
       code_alignment = -1;
       return -1;
+    }
+
+  /* If the augmentation field is "eh", then we have to skip a
+     pointer.  Unfortunately, we don't know how large it is.  We find
+     out by looking for a matching fixup.  */
+  if (eh_state == 2)
+    {
+      while (fix != NULL
+	     && (fix->fx_frag != f || fix->fx_where != offset))
+	fix = fix->fx_next;
+      if (fix == NULL)
+	offset += 4;
+      else
+	offset += fix->fx_size;
+      while (f != NULL && offset >= f->fr_fix)
+	{
+	  offset -= f->fr_fix;
+	  f = f->fr_next;
+	}
+      if (f == NULL)
+	{
+	  code_alignment = -1;
+	  return -1;
+	}
     }
 
   /* We're now at the code alignment factor, which is a ULEB128.  If
@@ -248,7 +292,7 @@ check_eh_frame (exp, pnbytes)
 	  /* Don't optimize.  */
 	}
       else if (exp->X_add_number % ca == 0
-	  && exp->X_add_number / ca < 0x40)
+	       && exp->X_add_number / ca < 0x40)
 	{
 	  loc4_frag->fr_literal[loc4_fix]
 	    = DW_CFA_advance_loc | (exp->X_add_number / ca);
@@ -280,6 +324,8 @@ check_eh_frame (exp, pnbytes)
 
       frag_var (rs_cfa, 4, 0, 0, make_expr_symbol (exp),
 		loc4_fix, (char *) loc4_frag);
+
+      return 1;
     }
   else
     saw_advance_loc4 = 0;
@@ -375,4 +421,5 @@ eh_frame_convert_frag (frag)
 
   frag->fr_fix += frag->fr_subtype;
   frag->fr_type = rs_fill;
+  frag->fr_offset = 0;
 }
