@@ -28,12 +28,6 @@
 
 #include "i386/tm-i386.h"
 
-#if 0
-#define IN_SOLIB_CALL_TRAMPOLINE(pc, name) skip_trampoline_code (pc, name)
-#define SKIP_TRAMPOLINE_CODE(pc)           skip_trampoline_code (pc, 0)
-extern CORE_ADDR skip_trampoline_code (CORE_ADDR pc, char *name);
-#endif
-
 #define ATTACH_NO_WAIT
 #define SOLIB_ADD(filename, from_tty, targ, readsyms) child_solib_add(filename, from_tty, targ, readsyms)
 #define SOLIB_LOADED_LIBRARY_PATHNAME(pid) child_solib_loaded_library_pathname(pid)
