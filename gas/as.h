@@ -211,6 +211,10 @@ extern char **environ;
 #define EXIT_FAILURE 1
 #endif
 
+#ifndef SEEK_SET
+#define SEEK_SET 0
+#endif
+
 #define obstack_chunk_alloc xmalloc
 #define obstack_chunk_free xfree
 

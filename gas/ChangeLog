@@ -1,3 +1,7 @@
+2000-04-14  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
+
+        * as.h (SEEK_SET): Define if undefined.
+
 2000-04-13  Alan Modra  <alan@linuxcare.com.au>
 
 	* config/tc-arm.c (md_apply_fix3): Don't use UL suffix on

@@ -1,3 +1,10 @@
+2000-04-14  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
+
+	* arlex.l: Add directives to increase lex buffer size.
+
+	* objdump.c, readelf.c: Don't include strarg.h or varargs.h. They are
+        already included by bucomm.h.
+
 2000-04-10  Philippe De Muyter  <phdm@macqel.be>
 
 	* readelf (dynamic_segment_mips_val): Call `sprintf', not
