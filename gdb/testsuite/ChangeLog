@@ -1,3 +1,24 @@
+Tue Nov 26 17:23:28 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure, */configure: Rebuild with autoconf 2.12.
+
+Sat Nov 23 13:32:15 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.base/a1-selftest.exp: Change x86 linux setup_xfails to
+	use new i*86-pc-linux*-gnu quads.
+	* gdb.base/corefile.exp: Ditto.
+	* gdb.base/signals.exp: Ditto.
+	* gdb.base/sigall.exp: Ditto.
+	* gdb.base/interrupt.exp: Ditto.
+
+	* gdb.base/signals.exp (signal_tests_1): Remove setup_xfail
+	"i*86-*-linux" for "signal SIGUSR1".  Now works, at least with
+	RedHat 4.0.
+	
+	* gdb.threads/pthreads.c (_MIT_POSIX_THREADS): Define if target is
+ 	linux.  This allows the test case to at least compile on latest
+ 	linux, but still not run due to missing the threads runtime library.
+
 Fri Nov 22 10:13:29 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* gdb.base/a1-selftest.exp (do_steps_and_nexts):  Reinitialize source
@@ -13,8 +34,9 @@ Thu Nov 21 09:17:19 1996  Fred Fish  <fnf@cygnus.com>
 
 	* lib/gdb.exp (CFLAGS): Remove, unreferenced.
 	(CXXFLAGS): Remove, unreferenced.
-	(B_OPTIONS): Add for -B options and add code to initialize with previous
-	-B options and also add -B option to pick up cross compiled runtime.
+	(B_OPTIONS): Add for -B options and add code to initialize with
+ 	previous -B options and also add -B option to pick up cross compiled
+ 	runtime.
 	(TARGET_INCLUDES): Add for -I options and add code to initialize when
 	doing cross compiles.
 	(target_alias): Declare global.
