@@ -62,15 +62,15 @@ char *slash = ":";
 
 static search_dirs_type **search_tail_ptr = &search_head;
 
-typedef struct search_arch 
+typedef struct search_arch
 {
-  char *name; 
+  char *name;
   struct search_arch *next;
 } search_arch_type;
 
 static search_arch_type *search_arch_head;
 static search_arch_type **search_arch_tail_ptr = &search_arch_head;
- 
+
 static FILE *try_open PARAMS ((const char *name, const char *exten));
 
 void
@@ -166,7 +166,7 @@ ldfile_open_file_search (arch, entry, lib, suffix)
 
   for (search = search_head;
        search != (search_dirs_type *)NULL;
-       search = search->next) 
+       search = search->next)
     {
       char *string;
 
@@ -189,8 +189,8 @@ ldfile_open_file_search (arch, entry, lib, suffix)
 		 lib, entry->filename, arch, suffix);
       else if (entry->filename[0] == '/' || entry->filename[0] == '.'
 #if defined (__MSDOS__) || defined (_WIN32)
-	       || entry->filename[0] == '\\' 
-	       || (isalpha (entry->filename[0]) 
+	       || entry->filename[0] == '\\'
+	       || (isalpha (entry->filename[0])
 	           && entry->filename[1] == ':')
 #endif
 	  )
@@ -247,7 +247,7 @@ ldfile_open_file (entry)
 	  if (ldemul_find_potential_libraries (arch->name, entry))
 	    return;
 	}
-      
+
       einfo (_("%F%P: cannot find %s\n"), entry->local_sym_name);
     }
 }
@@ -263,7 +263,7 @@ try_open (name, exten)
   char buff[1000];
 
   result = fopen (name, "r");
-  
+
   if (trace_file_tries)
     {
       if (result == NULL)
@@ -279,7 +279,7 @@ try_open (name, exten)
     {
       sprintf (buff, "%s%s", name, exten);
       result = fopen (buff, "r");
-      
+
       if (trace_file_tries)
 	{
 	  if (result == NULL)
@@ -314,13 +314,13 @@ ldfile_find_command_file (name, extend)
 	   search = search->next)
 	{
 	  sprintf (buffer,"%s%s%s", search->name, slash, name);
-	  
+
 	  result = try_open (buffer, extend);
 	  if (result)
 	    break;
 	}
     }
-  
+
   return result;
 }
 
@@ -336,9 +336,9 @@ ldfile_open_command_file (name)
       bfd_set_error (bfd_error_system_call);
       einfo (_("%P%F: cannot open linker script file %s: %E\n"), name);
     }
-  
+
   lex_push_file (ldlex_input_stack, name);
-  
+
   ldfile_input_filename = name;
   lineno = 1;
   had_script = true;
@@ -363,7 +363,6 @@ gnu960_map_archname (name)
 	NULL, ""
   };
   struct tabentry *tp;
-  
 
   for (tp = arch_tab; tp->cmd_switch != NULL; tp++)
     {
@@ -373,7 +372,7 @@ gnu960_map_archname (name)
 
   if (tp->cmd_switch == NULL)
     einfo (_("%P%F: unknown architecture: %s\n"),name);
-  
+
   return tp->arch;
 }
 
@@ -384,7 +383,6 @@ ldfile_add_arch (name)
   search_arch_type *new =
     (search_arch_type *)xmalloc ((bfd_size_type)(sizeof (search_arch_type)));
 
-
   if (*name != '\0')
     {
       if (ldfile_output_machine_name[0] != '\0')
@@ -392,7 +390,7 @@ ldfile_add_arch (name)
 	  einfo (_("%P%F: target architecture respecified\n"));
 	  return;
 	}
-      
+
       ldfile_output_machine_name = name;
     }
 
@@ -403,7 +401,6 @@ ldfile_add_arch (name)
 }
 
 #else	/* not GNU960 */
-
 
 void
 ldfile_add_arch (in_name)

@@ -45,7 +45,6 @@ static lang_statement_union_type *new_statement PARAMS ((enum statement_enum,
 							 size_t,
 							 lang_statement_list_type*));
 
-
 /* LOCALS */
 static struct obstack stat_obstack;
 
@@ -192,7 +191,6 @@ struct lang_nocrossrefs *nocrossref_list;
 
 etree_type *base; /* Relocation base - or null */
 
-
 #if defined(__STDC__) || defined(ALMOST_STDC)
 #define cat(a,b) a##b
 #else
@@ -226,7 +224,7 @@ walk_wild_section (ptr, section, file, callback, data)
      callback_t callback;
      PTR data;
 {
-  /* Don't process sections from files which were excluded. */
+  /* Don't process sections from files which were excluded.  */
   if (ptr->exclude_filename_list != NULL)
     {
       struct name_list *list_tmp;
@@ -637,7 +635,6 @@ lang_memory_region_lookup (name)
   }
 }
 
-
 static lang_memory_region_type *
 lang_memory_default (section)
      asection *section;
@@ -913,7 +910,6 @@ struct already_linked
 
 static struct bfd_hash_table already_linked_table;
 
-/*ARGSUSED*/
 static void
 section_already_linked (abfd, sec, data)
      bfd *abfd;
@@ -1214,7 +1210,7 @@ wild_doit (ptr, section, output, file)
       if (section->flags & SEC_BLOCK)
         {
           section->output_section->flags |= SEC_BLOCK;
-          /* FIXME: This value should really be obtained from the bfd... */
+          /* FIXME: This value should really be obtained from the bfd...  */
           output->block_value = 128;
         }
     }
@@ -1524,8 +1520,6 @@ load_symbols (entry, place)
   entry->loaded = true;
 }
 
-
-
 /* Handle a wild statement.  SECTION or FILE or both may be NULL,
    indicating that it is a wildcard.  Separate lang_input_section
    statements are created for each part of the expansion; they are
@@ -1672,7 +1666,7 @@ closest_target_match (target, data)
     }
 
   /* Oh dear, we now have two potential candidates for a successful match.
-     Compare their names and choose the better one. */
+     Compare their names and choose the better one.  */
   if (name_compare (target->name, original->name) > name_compare (winner->name, original->name))
     winner = target;
 
@@ -1930,7 +1924,6 @@ lang_reasonable_defaults ()
   default_common_section =
     lang_output_section_statement_lookup (".bss");
 
-
   if (placed_commons == false)
     {
       lang_wild_statement_type *new =
@@ -2009,7 +2002,6 @@ map_input_to_output_sections (s, target, output_section_statement)
     {
       switch (s->header.type)
 	{
-
 
 	case lang_wild_statement_enum:
 	  wild (&s->wild_statement, s->wild_statement.section_name,
@@ -2607,7 +2599,6 @@ insert_pad (this_ptr, fill, power, output_section_statement, dot)
       new->padding_statement.size = alignment_needed * opb;
     }
 
-
   /* Remember the most restrictive alignment */
   if (power > output_section_statement->alignment_power)
     {
@@ -3179,7 +3170,7 @@ lang_do_assignments (s, output_section_statement, fill, dot)
 	    if (os->load_base)
 	      {
 		/* If nothing has been placed into the output section then
-		   it won't have a bfd_section. */
+		   it won't have a bfd_section.  */
 		if (os->bfd_section)
 		  {
 		    os->bfd_section->lma
@@ -3678,7 +3669,6 @@ lang_place_orphans ()
     }
 }
 
-
 void
 lang_set_flags (ptr, flags, invert)
      lang_memory_region_type *ptr;
@@ -3821,7 +3811,6 @@ lang_add_output (name, from_script)
     }
 }
 
-
 static lang_output_section_statement_type *current_section;
 
 static int
@@ -3861,8 +3850,6 @@ lang_enter_output_section_statement (output_section_statement_name,
   current_section =
    os =
     lang_output_section_statement_lookup (output_section_statement_name);
-
-
 
   /* Add this statement to tree */
   /*  add_statement(lang_output_section_statement_enum,
@@ -4066,7 +4053,6 @@ lang_process ()
      */
   map_input_to_output_sections (statement_list.head, (char *) NULL,
 				(lang_output_section_statement_type *) NULL);
-
 
   /* Find any sections not attached explicitly and handle them */
   lang_place_orphans ();

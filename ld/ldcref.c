@@ -145,7 +145,6 @@ cref_hash_newfunc (entry, table, string)
 /* Add a symbol to the cref hash table.  This is called for every
    symbol that is seen during the link.  */
 
-/*ARGSUSED*/
 void
 add_cref (name, abfd, section, value)
      const char *name;
@@ -242,7 +241,7 @@ output_cref (fp)
   len = strlen (msg);
   while (len < FILECOL)
     {
-      putc (' ' , fp);
+      putc (' ', fp);
       ++len;
     }
   fprintf (fp, _("File\n"));
@@ -350,7 +349,6 @@ check_nocrossrefs ()
 
 /* Check one symbol to see if it is a prohibited cross reference.  */
 
-/*ARGSUSED*/
 static boolean
 check_nocrossref (h, ignore)
      struct cref_hash_entry *h;

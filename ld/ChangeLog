@@ -1,3 +1,12 @@
+2000-09-29  Kazu Hirata  <kazu@hxi.com>
+
+	* ldcref.c: Fix formatting.
+	* ldctor.c: Likewise.
+	* ldemul.c: Likewise.
+	* ldexp.c: Likewise.
+	* ldfile.c: Likewise.
+	* ldlang.c: Likewise.
+
 2000-09-28  Paul Sokolovsky  <Paul.Sokolovsky@technologist.com>
 
 	* pe-dll.c (process_def_file): Uninitialized data wasn't
