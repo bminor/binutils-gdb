@@ -1,3 +1,9 @@
+2003-01-30  Jim Blandy  <jimb@redhat.com>
+
+	* symfile.c (find_separate_debug_file): Assert that the objfile's
+	directory name we compute ends with a slash, and then assume that
+	that's so everywhere we use it.
+
 2003-01-30  Daniel Jacobowitz  <drow@mvista.com>
 
 	* valops.c (value_assign): Flush frame cache after stores to memory

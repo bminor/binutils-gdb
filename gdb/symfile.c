@@ -1167,12 +1167,16 @@ find_separate_debug_file (struct objfile *objfile)
   
   dir = xstrdup (objfile->name);
 
-  /* Strip off filename part */
+  /* Strip off the final filename part, leaving the directory name,
+     followed by a slash.  Objfile names should always be absolute and
+     tilde-expanded, so there should always be a slash in there
+     somewhere.  */
   for (i = strlen(dir) - 1; i >= 0; i--)
     {
       if (IS_DIR_SEPARATOR (dir[i]))
 	break;
     }
+  gdb_assert (i >= 0 && IS_DIR_SEPARATOR (dir[i]));
   dir[i+1] = '\0';
   
   debugfile = alloca (strlen (debug_file_directory) + 1
@@ -1210,7 +1214,6 @@ find_separate_debug_file (struct objfile *objfile)
   strcpy (debugfile, debug_file_directory);
   strcat (debugfile, "/");
   strcat (debugfile, dir);
-  strcat (debugfile, "/");
   strcat (debugfile, basename);
 
   if (separate_debug_file_exists (debugfile, crc32))
