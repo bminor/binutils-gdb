@@ -1,5 +1,10 @@
 2004-02-29  Daniel Jacobowitz  <drow@mvista.com>
 
+	* inflow.c (terminal_inferior): Don't give up the terminal if we
+	previously couldn't get the inferior's terminal state.
+
+2004-02-29  Daniel Jacobowitz  <drow@mvista.com>
+
 	* regcache.c (read_pc_pid): Restore inferior_ptid after reading
 	PC_REGNUM.
 
