@@ -25,6 +25,8 @@ Do-first:
 Things-to-keep:
 
 arc.exp
+branch.s
+branch.d
 flag.s
 flag.d
 j.s
