@@ -1,3 +1,15 @@
+2003-10-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bfd-in.h (bfd_elf32_ia64_after_parse): New prototype.
+	(bfd_elf64_ia64_after_parse): Likewise.
+	* bfd-in2.h: Regenerated.
+
+	* elfxx-ia64.c (oor_ip): New.
+	(oor_branch_size): Likewise.
+	(bfd_elfNN_ia64_after_parse): Likewise.
+	(elfNN_ia64_relax_section): Use oor_ip if oor_branch_size
+	equals sizeof (oor_ip).
+
 2003-10-12  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* elf64-sh64.c (sh_elf64_relocate_section): Tidy up for the

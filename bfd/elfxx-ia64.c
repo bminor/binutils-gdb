@@ -656,6 +656,28 @@ static const bfd_byte oor_brl[16] =
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  /*               brl.sptk.few tgt;; */
   0x00, 0x00, 0x00, 0xc0
 };
+
+static const bfd_byte oor_ip[48] =
+{
+  0x04, 0x00, 0x00, 0x00, 0x01, 0x00,  /*  [MLX]        nop.m 0            */
+  0x00, 0x00, 0x00, 0x00, 0x00, 0xe0,  /*               movl r15=0         */
+  0x01, 0x00, 0x00, 0x60,
+  0x03, 0x00, 0x00, 0x00, 0x01, 0x00,  /*  [MII]        nop.m 0            */
+  0x00, 0x01, 0x00, 0x60, 0x00, 0x00,  /*               mov r16=ip;;       */
+  0xf2, 0x80, 0x00, 0x80,              /*               add r16=r15,r16;;  */
+  0x11, 0x00, 0x00, 0x00, 0x01, 0x00,  /*  [MIB]        nop.m 0            */
+  0x60, 0x80, 0x04, 0x80, 0x03, 0x00,  /*               mov b6=r16         */
+  0x60, 0x00, 0x80, 0x00               /*               br b6;;            */
+};
+
+static size_t oor_branch_size = sizeof (oor_brl);
+
+void
+bfd_elfNN_ia64_after_parse (int itanium)
+{
+  oor_branch_size = itanium ? sizeof (oor_ip) : sizeof (oor_brl);
+}
+
 
 /* These functions do relaxation for IA-64 ELF.  */
 
@@ -891,9 +913,7 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 	      if (tsec == ia64_info->plt_sec)
 		size = sizeof (plt_full_entry);
 	      else
-		{
-		  size = sizeof (oor_brl);
-		}
+		size = oor_branch_size;
 
 	      /* Resize the current section to make room for the new branch. */
 	      trampoff = (sec->_cooked_size + 15) & (bfd_vma) -16;
@@ -914,10 +934,22 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 		}
 	      else
 		{
-		  memcpy (contents + trampoff, oor_brl, size);
-		  irel->r_info = ELFNN_R_INFO (ELFNN_R_SYM (irel->r_info),
-					       R_IA64_PCREL60B);
-		  irel->r_offset = trampoff + 2;
+		  if (size == sizeof (oor_ip))
+		    {
+		      memcpy (contents + trampoff, oor_ip, size);
+		      irel->r_info = ELFNN_R_INFO (ELFNN_R_SYM (irel->r_info),
+						   R_IA64_PCREL64I);
+		      irel->r_addend -= 16;
+		      irel->r_offset = trampoff + 2;
+		    }
+		  else
+		    {
+		      memcpy (contents + trampoff, oor_brl, size);
+		      irel->r_info = ELFNN_R_INFO (ELFNN_R_SYM (irel->r_info),
+						   R_IA64_PCREL60B);
+		      irel->r_offset = trampoff + 2;
+		    }
+
 		}
 
 	      /* Record the fixup so we don't do it again this section.  */

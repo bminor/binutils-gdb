@@ -1,3 +1,13 @@
+2003-10-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am (eelf64_ia64.c): Also depend on
+	$(srcdir)/emultempl/ia64elf.em.
+	* Makefile.in: Regenerated.
+
+	* emulparams/elf64_ia64.sh (EXTRA_EM_FILE): Set to ia64elf.
+
+	* emultempl/ia64elf.em: New.
+
 2003-10-12  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* emulparams/shelf32_nbsd.sh (OTHER_SECTIONS): Redefine.

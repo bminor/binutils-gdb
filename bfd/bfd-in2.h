@@ -831,6 +831,13 @@ extern int bfd_ticoff_get_section_load_page
 extern bfd_vma bfd_h8300_pad_address
   (bfd *, bfd_vma);
 
+/* IA64 Itanium code generation.  Called from linker.  */
+extern void bfd_elf32_ia64_after_parse
+  (int);
+
+extern void bfd_elf64_ia64_after_parse
+  (int);
+
 /* Extracted from init.c.  */
 void bfd_init (void);
 
