@@ -1,3 +1,16 @@
+Sun Aug 17 17:33:34 1997  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* remote-sds.c: Remove unused remnants of remote.c.
+	(tob64): Return the result length.
+	(sds_interrupt): Send a stop message.
+	(sds_wait): Add debug output for signal interpretation, flag
+	that signal was due to a trap.
+	(sds_fetch_registers): Fill the registers array correctly for
+ 	PowerPC.
+	(sds_store_registers): Get the right values from registers array.
+	(putmessage): Tweak length handling so checksum comes out right.
+	(sds_insert_breakpoint, sds_remove_breakpoint): Do correctly.
+
 start-sanitize-gdbtk
 Sun Aug 17 00:42:11 1997  Martin M. Hunt  <hunt@cygnus.com>
 
@@ -5,7 +18,6 @@ Sun Aug 17 00:42:11 1997  Martin M. Hunt  <hunt@cygnus.com>
 	a list of all the functions in a source file.
 
 end-sanitize-gdbtk
-
 Fri Aug 15 13:59:37 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* infrun.c (wait_for_inferior):  Add the symbols for any

@@ -118,38 +118,19 @@ static struct target_ops sds_ops;	/* Forward decl */
    was static int sds_timeout = 2; */
 static int sds_timeout = 2;
 
-/* This variable chooses whether to send a ^C or a break when the user
-   requests program interruption.  Although ^C is usually what remote
-   systems expect, and that is the default here, sometimes a break is
-   preferable instead.  */
-
-static int sds_break;
-
 /* Descriptor for I/O to remote machine.  Initialize it to NULL so
    that sds_open knows that we don't have a file open when the program
    starts.  */
 
 static serial_t sds_desc = NULL;
 
-/* Having this larger than 400 causes us to be incompatible with m68k-stub.c
-   and i386-stub.c.  Normally, no one would notice because it only matters
-   for writing large chunks of memory (e.g. in downloads).  Also, this needs
-   to be more than 400 if required to hold the registers (see below, where
-   we round it up based on REGISTER_BYTES).  */
-#define	PBUFSIZ	400
+/* This limit comes from the monitor.  */
+
+#define	PBUFSIZ	250
 
 /* Maximum number of bytes to read/write at once.  The value here
    is chosen to fill up a packet (the headers account for the 32).  */
 #define MAXBUFBYTES ((PBUFSIZ-32)/2)
-
-/* Round up PBUFSIZ to hold all the registers, at least.  */
-/* The blank line after the #if seems to be required to work around a
-   bug in HP's PA compiler.  */
-#if REGISTER_BYTES > MAXBUFBYTES
-
-#undef PBUFSIZ
-#define	PBUFSIZ	(REGISTER_BYTES * 2 + 32)
-#endif
 
 static int next_msg_id;
 
@@ -337,10 +318,12 @@ tob64 (inbuf, outbuf, len)
      int len;
 {
   int i, sum;
+  char *p;
 
   if (len % 3 != 0)
     error ("bad length");
 
+  p = outbuf;
   for (i = 0; i < len; i += 3)
     {
       /* Collect the next three bytes into a number.  */
@@ -349,11 +332,12 @@ tob64 (inbuf, outbuf, len)
       sum |= ((long) *inbuf++);
 
       /* Spit out 4 6-bit encodings.  */
-      *outbuf++ = ((sum >> 18) & 0x3f) + '0';
-      *outbuf++ = ((sum >> 12) & 0x3f) + '0';
-      *outbuf++ = ((sum >>  6) & 0x3f) + '0';
-      *outbuf++ = (sum & 0x3f) + '0';
+      *p++ = ((sum >> 18) & 0x3f) + '0';
+      *p++ = ((sum >> 12) & 0x3f) + '0';
+      *p++ = ((sum >>  6) & 0x3f) + '0';
+      *p++ = (sum & 0x3f) + '0';
     }
+  return (p - outbuf);
 }
 
 static int
@@ -408,29 +392,29 @@ sds_resume (pid, step, siggnal)
   sds_send (buf, 2);
 }
 
-/* Send ^C to target to halt it.  Target will respond, and send us a
-   packet.  */
+/* Send a message to target to halt it.  Target will respond, and send
+   us a message pending notice.  */
 
 static void
 sds_interrupt (signo)
      int signo;
 {
+  unsigned char buf[PBUFSIZ];
+
   /* If this doesn't work, try more severe steps.  */
   signal (signo, sds_interrupt_twice);
   
   if (remote_debug)
     printf_unfiltered ("sds_interrupt called\n");
 
-  /* Send a break or a ^C, depending on user preference.  */
-  if (sds_break)
-    SERIAL_SEND_BREAK (sds_desc);
-  else
-    SERIAL_WRITE (sds_desc, "\003", 1);
+  buf[0] = 25;
+  sds_send (buf, 1);
 }
 
 static void (*ofunc)();
 
 /* The user typed ^C twice.  */
+
 static void
 sds_interrupt_twice (signo)
      int signo;
@@ -496,8 +480,15 @@ sds_wait (pid, status)
 	{
 	  buf[0] = 26;
 	  retlen = sds_send (buf, 1);
+	  if (remote_debug)
+	    {
+	      fprintf_unfiltered (gdb_stderr, "Signals: %04x %02x %02x\n",
+				  ((int) buf[0]) << 8 + buf[1],
+				  buf[2], buf[3]);
+	    }
 	  message_pending = 0;
 	  status->kind = TARGET_WAITKIND_STOPPED;
+	  status->value.sig = TARGET_SIGNAL_TRAP;
 	  goto got_status;
 	}
     }
@@ -505,8 +496,7 @@ sds_wait (pid, status)
   return inferior_pid;
 }
 
-/* Number of bytes of registers this stub implements.  */
-static int register_bytes_found;
+static unsigned char sprs[16];
 
 /* Read the remote registers into the block REGS.  */
 /* Currently we just read all the registers, so we don't use regno.  */
@@ -517,7 +507,7 @@ sds_fetch_registers (regno)
      int regno;
 {
   unsigned char buf[PBUFSIZ];
-  int i, len;
+  int i, retlen;
   char *p;
   char regs[REGISTER_BYTES];
 
@@ -525,36 +515,31 @@ sds_fetch_registers (regno)
   memset (regs, 0, REGISTER_BYTES);
 
   buf[0] = 18;
-  buf[1] = 2;
-  buf[2] = 0;
-  len = sds_send (buf, 3);
-
-  /* Reply describes registers byte by byte.  Suck them all up, then
-     supply them to the register cacheing/storage mechanism.  */
-
-  for (i = 0; i < len; i++)
-    regs[i] = buf[i];
-
-  buf[0] = 18;
   buf[1] = 1;
   buf[2] = 0;
-  len = sds_send (buf, 3);
+  retlen = sds_send (buf, 3);
 
-  for (i = 0; i < 4 * 6; i++)
-    {
-      regs[i + 4 * 32 + 8 * 32] = buf[i];
-    }
+  for (i = 0; i < 4 * 6; ++i)
+    regs[i + 4 * 32 + 8 * 32] = buf[i];
+  for (i = 0; i < 4 * 4; ++i)
+    sprs[i] = buf[i + 4 * 7];
+
+  buf[0] = 18;
+  buf[1] = 2;
+  buf[2] = 0;
+  retlen = sds_send (buf, 3);
+
+  for (i = 0; i < retlen; i++)
+    regs[i] = buf[i];
 
   /* (should warn about reply too short) */
 
- supply_them:
   for (i = 0; i < NUM_REGS; i++)
     supply_register (i, &regs[REGISTER_BYTE(i)]);
 }
 
-/* Prepare to store registers.  Since we may send them all (using a
-   'G' request), we have to read out the ones we don't want to change
-   first.  */
+/* Prepare to store registers.  Since we may send them all, we have to
+   read out the ones we don't want to change first.  */
 
 static void 
 sds_prepare_to_store ()
@@ -570,71 +555,36 @@ static void
 sds_store_registers (regno)
      int regno;
 {
-  unsigned char buf[PBUFSIZ];
+  unsigned char *p, buf[PBUFSIZ];
   int i;
-  char *p;
 
-  buf[0] = 19;
-  buf[1] = 2;
-  buf[2] = 0;
-  buf[3] = 0;
+  /* Store all the special-purpose registers.  */
+  p = buf;
+  *p++ = 19;
+  *p++ = 1;
+  *p++ = 0;
+  *p++ = 0;
+  for (i = 0; i < 4 * 6; i++)
+    *p++ = registers[i + 4 * 32 + 8 * 32];
+  for (i = 0; i < 4 * 1; i++)
+    *p++ = 0;
+  for (i = 0; i < 4 * 4; i++)
+    *p++ = sprs[i];
 
-  p = buf + 4;
+  sds_send (buf, p - buf);
 
+  /* Store all the general-purpose registers.  */
+  p = buf;
+  *p++ = 19;
+  *p++ = 2;
+  *p++ = 0;
+  *p++ = 0;
   for (i = 0; i < 4 * 32; i++)
-    p[i] = registers[i];
+    *p++ = registers[i];
 
-  sds_send (buf, 4 + 4 * 32);
+  sds_send (buf, p - buf);
 
-  buf[0] = 19;
-  buf[1] = 1;
-  buf[2] = 0;
-  buf[3] = 0;
-
-  p = buf + 4;
-
-  for (i = 0; i < 4 * 10; i++)
-    p[i] = registers[i];
-
-  sds_send (buf, 4 + 4 * 10);
 }
-
-/* 
-   Use of the data cache *used* to be disabled because it loses for looking at
-   and changing hardware I/O ports and the like.  Accepting `volatile'
-   would perhaps be one way to fix it.  Another idea would be to use the
-   executable file for the text segment (for all SEC_CODE sections?
-   For all SEC_READONLY sections?).  This has problems if you want to
-   actually see what the memory contains (e.g. self-modifying code,
-   clobbered memory, user downloaded the wrong thing).  
-
-   Because it speeds so much up, it's now enabled, if you're playing
-   with registers you turn it of (set remotecache 0)
-*/
-
-/* Read a word from remote address ADDR and return it.
-   This goes through the data cache.  */
-
-#if 0	/* unused? */
-static int
-sds_fetch_word (addr)
-     CORE_ADDR addr;
-{
-  return dcache_fetch (sds_dcache, addr);
-}
-
-/* Write a word WORD into remote address ADDR.
-   This goes through the data cache.  */
-
-static void
-sds_store_word (addr, word)
-     CORE_ADDR addr;
-     int word;
-{
-  dcache_poke (sds_dcache, addr, word);
-}
-#endif	/* 0 (unused?) */
-
 
 /* Write memory data directly to the remote machine.  This does not
    inform the data cache; the data cache uses this.  MEMADDR is the
@@ -767,7 +717,7 @@ static void
 sds_files_info (ignore)
      struct target_ops *ignore;
 {
-  puts_filtered ("Debugging a target over a serial line.\n");
+  puts_filtered ("Debugging over a serial connection, using SDS protocol.\n");
 }
 
 /* Stuff for dealing with the packets which are part of this protocol.
@@ -798,6 +748,9 @@ readchar (timeout)
       return ch & 0x7f;
     }
 }
+
+/* An SDS-style checksum is a sum of the bytes modulo 253.  (Presumably
+   because 253, 254, and 255 are special flags in the protocol.)  */
 
 static int
 compute_checksum (csum, buf, len)
@@ -833,7 +786,7 @@ putmessage (buf, len)
      unsigned char *buf;
      int len;
 {
-  int i;
+  int i, enclen;
   unsigned char csum = 0;
   char buf2[PBUFSIZ], buf3[PBUFSIZ];
   unsigned char header[3];
@@ -844,7 +797,7 @@ putmessage (buf, len)
   /* Copy the packet into buffer BUF2, encapsulating it
      and giving it a checksum.  */
 
-  if (len > (int) sizeof (buf2) - 5)		/* Prosanity check */
+  if (len > 170)		/* Prosanity check */
     abort();
 
   if (remote_debug)
@@ -858,31 +811,27 @@ putmessage (buf, len)
   p = buf2;
   *p++ = '$';
 
-  header[1] = next_msg_id;
-
   if (len % 3 != 0)
     {
       buf[len] = '\0';
       buf[len+1] = '\0';
     }
 
-  len = ((len + 2) / 3) * 3;
+  header[1] = next_msg_id;
 
   header[2] = len;
 
   csum = compute_checksum (csum, buf, len);
-  csum = compute_checksum (csum, header+1, 2);
+  csum = compute_checksum (csum, header + 1, 2);
 
   header[0] = csum;
 
   tob64 (header, p, 3);
   p += 4;
-  tob64 (buf, buf3, len);
+  enclen = tob64 (buf, buf3, ((len + 2) / 3) * 3);
 
-  for (i = 0; i < (len / 3) * 4; i++)
-    {
-      *p++ = buf3[i];
-    }
+  for (i = 0; i < enclen; ++i)
+    *p++ = buf3[i];
   *p++ = '\r';
   *p++ = '\n';
 
@@ -944,7 +893,8 @@ read_frame (buf)
 	  {
 	    *bp = '\000';
 	    if (remote_debug)
-	      printf_filtered ("Received encoded: \"%s\"\n", buf);
+	      fprintf_unfiltered (gdb_stderr, "Received encoded: \"%s\"\n",
+				  buf);
 	    return 1;
 	  }
 
@@ -1160,13 +1110,23 @@ sds_insert_breakpoint (addr, contents_cache)
      CORE_ADDR addr;
      char *contents_cache;
 {
-  int retlen;
-  unsigned char buf[PBUFSIZ];
+  int i, retlen;
+  unsigned char *p, buf[PBUFSIZ];
 
-  buf[0] = 16;
-  buf[1] = 0;
+  p = buf;
+  *p++ = 16;
+  *p++ = 0;
+  *p++ = (int) (addr >> 24) & 0xff;
+  *p++ = (int) (addr >> 16) & 0xff;
+  *p++ = (int) (addr >>  8) & 0xff;
+  *p++ = (int) (addr      ) & 0xff;
+  
+  retlen = sds_send (buf, p - buf);
 
-  retlen = sds_send (buf, 7);
+  for (i = 0; i < 4; ++i)
+    contents_cache[i] = buf[i + 2];
+
+  return 0;
 }
 
 static int
@@ -1174,13 +1134,22 @@ sds_remove_breakpoint (addr, contents_cache)
      CORE_ADDR addr;
      char *contents_cache;
 {
-  int retlen;
-  unsigned char buf[PBUFSIZ];
+  int i, retlen;
+  unsigned char *p, buf[PBUFSIZ];
 
-  buf[0] = 17;
-  buf[1] = 0;
+  p = buf;
+  *p++ = 17;
+  *p++ = 0;
+  *p++ = (int) (addr >> 24) & 0xff;
+  *p++ = (int) (addr >> 16) & 0xff;
+  *p++ = (int) (addr >>  8) & 0xff;
+  *p++ = (int) (addr      ) & 0xff;
+  for (i = 0; i < 4; ++i)
+    *p++ = contents_cache[i];
 
-  retlen = sds_send (buf, 7);
+  retlen = sds_send (buf, p - buf);
+
+  return 0;
 }
 
 /* Define the target operations vector. */
@@ -1239,7 +1208,7 @@ sds_command (args, from_tty)
      int from_tty;
 {
   char *p;
-  int i, len, resp_len;
+  int i, len, retlen;
   unsigned char buf[1000];
 
   /* Convert hexadecimal chars into a byte buffer.  */
@@ -1253,10 +1222,10 @@ sds_command (args, from_tty)
       p += 2;
     }
 
-  len = sds_send (buf, len);
+  retlen = sds_send (buf, len);
 
   printf_filtered ("Reply is ");
-  for (i = 0; i < len; ++i)
+  for (i = 0; i < retlen; ++i)
     {
       printf_filtered ("%02x", buf[i]);
     }  
