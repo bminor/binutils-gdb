@@ -1,5 +1,15 @@
 2004-06-26  Mark Kettenis  <kettenis@gnu.org>
 
+	* amd64fbsd-nat.c: Don't include <sys/procfs.h> and "gregset.h".
+	(gregset_t, fpregset_t): Remove typedefs.
+	(REG_OFFSET): Rename argument.
+	(amd64bsd_r_reg_offset): Rename from reg_offset.
+	(supply_gregset, fill_gregset, supply_fpregset, fill_fpregset):
+	Remove functions.
+	(_initialize_amd64fbsd_nat): Use amd64fbsd64_r_reg_offset instead
+	of reg_offset.
+	* Makefile.in (amd64fbsd-nat.o): Update dependencies.
+
 	* amd64-nat.c (amd64_supply_native_gregset): Fix comment.
 
 	* vax-tdep.c: Tweak comment.

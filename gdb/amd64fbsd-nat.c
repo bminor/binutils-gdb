@@ -31,30 +31,17 @@
 #include <sys/sysctl.h>
 #include <machine/reg.h>
 
-#ifdef HAVE_SYS_PROCFS_H
-#include <sys/procfs.h>
-#endif
-
-#ifndef HAVE_GREGSET_T
-typedef struct reg gregset_t;
-#endif
-
-#ifndef HAVE_FPREGSET_T
-typedef struct fpreg fpregset_t;
-#endif
-
-#include "gregset.h"
 #include "amd64-tdep.h"
 #include "amd64-nat.h"
 
 
-/* Offset to the gregset_t location where REG is stored.  */
-#define REG_OFFSET(reg) offsetof (gregset_t, reg)
+/* Offset in `struct reg' where MEMBER is stored.  */
+#define REG_OFFSET(member) offsetof (struct reg, member)
 
-/* At reg_offset[REGNUM] you'll find the offset to the gregset_t
-   location where the GDB register REGNUM is stored.  Unsupported
-   registers are marked with `-1'.  */
-static int reg_offset[] =
+/* At amd64fbsd64_r_reg_offset[REGNUM] you'll find the offset in
+   `struct reg' location where the GDB register REGNUM is stored.
+   Unsupported registers are marked with `-1'.  */
+static int amd64fbsd64_r_reg_offset[] =
 {
   REG_OFFSET (r_rax),
   REG_OFFSET (r_rbx),
@@ -104,47 +91,6 @@ static int amd64fbsd32_r_reg_offset[I386_NUM_GREGS] =
 };
 
 
-/* Transfering the registers between GDB, inferiors and core files.  */
-
-/* Fill GDB's register array with the general-purpose register values
-   in *GREGSETP.  */
-
-void
-supply_gregset (gregset_t *gregsetp)
-{
-  amd64_supply_native_gregset (current_regcache, gregsetp, -1);
-}
-
-/* Fill register REGNUM (if it is a general-purpose register) in
-   *GREGSETPS with the value in GDB's register array.  If REGNUM is -1,
-   do this for all registers.  */
-
-void
-fill_gregset (gregset_t *gregsetp, int regnum)
-{
-  amd64_collect_native_gregset (current_regcache, gregsetp, regnum);
-}
-
-/* Fill GDB's register array with the floating-point register values
-   in *FPREGSETP.  */
-
-void
-supply_fpregset (fpregset_t *fpregsetp)
-{
-  amd64_supply_fxsave (current_regcache, -1, fpregsetp);
-}
-
-/* Fill register REGNUM (if it is a floating-point register) in
-   *FPREGSETP with the value in GDB's register array.  If REGNUM is -1,
-   do this for all registers.  */
-
-void
-fill_fpregset (fpregset_t *fpregsetp, int regnum)
-{
-  amd64_collect_fxsave (current_regcache, regnum, fpregsetp);
-}
-
-
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 void _initialize_amd64fbsd_nat (void);
 
@@ -154,7 +100,7 @@ _initialize_amd64fbsd_nat (void)
   int offset;
 
   amd64_native_gregset32_reg_offset = amd64fbsd32_r_reg_offset;
-  amd64_native_gregset64_reg_offset = reg_offset;
+  amd64_native_gregset64_reg_offset = amd64fbsd64_r_reg_offset;
 
   /* To support the recognition of signal handlers, i386bsd-tdep.c
      hardcodes some constants.  Inclusion of this file means that we
