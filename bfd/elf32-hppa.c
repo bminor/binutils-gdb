@@ -114,7 +114,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    :		be,n 0(%sr0,%rp)		; inter-space return  */
 
 #define PLT_ENTRY_SIZE 8
-#define PLABEL_PLT_ENTRY_SIZE PLT_ENTRY_SIZE
 #define GOT_ENTRY_SIZE 4
 #define ELF_DYNAMIC_INTERPRETER "/lib/ld.so.1"
 
@@ -344,7 +343,7 @@ static boolean elf32_hppa_adjust_dynamic_symbol
 static boolean mark_PIC_calls
   PARAMS ((struct elf_link_hash_entry *, PTR));
 
-static boolean allocate_PIC_calls
+static boolean allocate_plt_static
   PARAMS ((struct elf_link_hash_entry *, PTR));
 
 static boolean allocate_dynrelocs
@@ -2008,10 +2007,11 @@ mark_PIC_calls (h, inf)
   return true;
 }
 
-/* Allocate space in the .plt for pic_call entries.  */
+/* Allocate space in the .plt for entries that won't have relocations.
+   ie. pic_call and plabel entries.  */
 
 static boolean
-allocate_PIC_calls (h, inf)
+allocate_plt_static (h, inf)
      struct elf_link_hash_entry *h;
      PTR inf;
 {
@@ -2027,18 +2027,48 @@ allocate_PIC_calls (h, inf)
   htab = hppa_link_hash_table (info);
   if (((struct elf32_hppa_link_hash_entry *) h)->pic_call)
     {
-      /* Make an entry in the .plt section.  */
+      /* Make an entry in the .plt section for non-pic code that is
+	 calling pic code.  */
       s = htab->splt;
       h->plt.offset = s->_raw_size;
-      if (PLABEL_PLT_ENTRY_SIZE != PLT_ENTRY_SIZE
-	  && ((struct elf32_hppa_link_hash_entry *) h)->plabel
-	  && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
+      s->_raw_size += PLT_ENTRY_SIZE;
+    }
+  else if (htab->elf.dynamic_sections_created
+	   && h->plt.refcount > 0)
+    {
+      /* Make sure this symbol is output as a dynamic symbol.
+	 Undefined weak syms won't yet be marked as dynamic.  */
+      if (h->dynindx == -1
+	  && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0
+	  && h->type != STT_PARISC_MILLI)
 	{
-	  /* Add some extra space for the dynamic linker to use.  */
-	  s->_raw_size += PLABEL_PLT_ENTRY_SIZE;
+	  if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+	    return false;
+	}
+
+      if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, info, h))
+	{
+	  /* Allocate these later.  */
+	}
+      else if (((struct elf32_hppa_link_hash_entry *) h)->plabel)
+	{
+	  /* Make an entry in the .plt section for plabel references
+	     that won't have a .plt entry for other reasons.  */
+	  s = htab->splt;
+	  h->plt.offset = s->_raw_size;
+	  s->_raw_size += PLT_ENTRY_SIZE;
 	}
       else
-	s->_raw_size += PLT_ENTRY_SIZE;
+	{
+	  /* No .plt entry needed.  */
+	  h->plt.offset = (bfd_vma) -1;
+	  h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
+	}
+    }
+  else
+    {
+      h->plt.offset = (bfd_vma) -1;
+      h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
     }
 
   return true;
@@ -2064,54 +2094,19 @@ allocate_dynrelocs (h, inf)
 
   info = (struct bfd_link_info *) inf;
   htab = hppa_link_hash_table (info);
-  if ((htab->elf.dynamic_sections_created
-       && h->plt.refcount > 0)
-      || ((struct elf32_hppa_link_hash_entry *) h)->pic_call)
+  if (htab->elf.dynamic_sections_created
+      && h->plt.offset != (bfd_vma) -1
+      && !((struct elf32_hppa_link_hash_entry *) h)->pic_call
+      && WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, info, h))
     {
-      /* Make sure this symbol is output as a dynamic symbol.
-	 Undefined weak syms won't yet be marked as dynamic.  */
-      if (h->dynindx == -1
-	  && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0
-	  && h->type != STT_PARISC_MILLI
-	  && !((struct elf32_hppa_link_hash_entry *) h)->pic_call)
-	{
-	  if (! bfd_elf32_link_record_dynamic_symbol (info, h))
-	    return false;
-	}
+      /* Make an entry in the .plt section.  */
+      s = htab->splt;
+      h->plt.offset = s->_raw_size;
+      s->_raw_size += PLT_ENTRY_SIZE;
 
-      if (((struct elf32_hppa_link_hash_entry *) h)->pic_call)
-	{
-	  /* Already handled by allocate_PIC_calls.  */
-	}
-      else if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, info, h))
-	{
-	  /* Make an entry in the .plt section.  */
-	  s = htab->splt;
-	  h->plt.offset = s->_raw_size;
-	  if (PLABEL_PLT_ENTRY_SIZE != PLT_ENTRY_SIZE
-	      && ((struct elf32_hppa_link_hash_entry *) h)->plabel
-	      && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
-	    {
-	      /* Add some extra space for the dynamic linker to use.  */
-	      s->_raw_size += PLABEL_PLT_ENTRY_SIZE;
-	    }
-	  else
-	    s->_raw_size += PLT_ENTRY_SIZE;
-
-	  /* We also need to make an entry in the .rela.plt section.  */
-	  htab->srelplt->_raw_size += sizeof (Elf32_External_Rela);
-	  htab->need_plt_stub = 1;
-	}
-      else
-	{
-	  h->plt.offset = (bfd_vma) -1;
-	  h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
-	}
-    }
-  else
-    {
-      h->plt.offset = (bfd_vma) -1;
-      h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
+      /* We also need to make an entry in the .rela.plt section.  */
+      htab->srelplt->_raw_size += sizeof (Elf32_External_Rela);
+      htab->need_plt_stub = 1;
     }
 
   if (h->got.refcount > 0)
@@ -2400,8 +2395,10 @@ elf32_hppa_size_dynamic_sections (output_bfd, info)
 	}
     }
 
-  if (! info->shared)
-    elf_link_hash_traverse (&htab->elf, allocate_PIC_calls, (PTR) info);
+  /* Do all the .plt entries without relocs first.  The dynamic linker
+     uses the last .plt reloc to find the end of the .plt (and hence
+     the start of the .got) for lazy linking.  */
+  elf_link_hash_traverse (&htab->elf, allocate_plt_static, (PTR) info);
 
   /* Allocate global sym .plt and .got entries, and space for global
      sym dynamic relocs.  */

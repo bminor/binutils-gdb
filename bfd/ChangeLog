@@ -1,3 +1,10 @@
+2001-11-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-hppa.c (PLABEL_PLT_ENTRY_SIZE): Delete.
+	(allocate_PIC_calls): Rename to allocate_plt_static.
+	(allocate_dynrelocs): Move most of code handling .plt entries to..
+	(allocate_plt_static): ..here.  Don't drop plabel entries.
+
 2001-11-19  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* mmo.c: Adjust documentation tags to use texinfo 4 features.
