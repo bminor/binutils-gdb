@@ -1,3 +1,7 @@
+Thu May 14 18:39:16 1998  Richard Henderson  <rth@cygnus.com>
+
+	* emulparams/m32relf.sh (TEMPLATE_NAME): Define.
+
 Thu May 14 14:51:24 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* ldemul.h: Add new prototype: ldemul_list_emulation_options.
