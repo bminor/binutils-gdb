@@ -1,3 +1,23 @@
+Mon May 24 00:24:47 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t00/teststrategy.exp: For p "foo", remove sun4 XFAIL (the bug
+	still exists but isn't reproduced by this test anymroe), and remove
+	rs6000 XFAIL (the bug is fixed).
+
+	* gdb.t03/ptype.exp: Comment out a lot of tests which are basically
+	duplicated from whatis.exp.  For those that are left, accept
+	"long", "long int", or "int" for long variables (whatis.exp already
+	has an XFAIL for "int", so no need to fail it here).
+
+	* gdb.t02/whatis.exp, gdb.t10/crossload.exp:
+	Deal with GCC's names for types now that GDB uses the compiler's names.
+
+	* gdb.t02/{Makefile.in,gdbme.c,whatis.exp}:  If not GCC, do some
+	setup_xfail's for sunos4.  If we #defined the signed keyword away,
+	don't expect GDB to know that char it is signed.
+
+	* gdb.t00/teststrategy.exp: Update for symbolic signal names.
+
 Sun May 23 08:44:55 1993  Fred Fish  (fnf@cygnus.com)
 
 	* configure.in (configdirs):  Add gdb.t24 for C++ tests that
