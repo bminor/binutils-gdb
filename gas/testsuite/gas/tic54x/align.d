@@ -5,7 +5,7 @@
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .text         000000c0  00000000  00000000  0000....  2..7
+  0 .text         00000089  00000000  00000000  0000....  2..7
                   CONTENTS, ALLOC, LOAD, ....
   1 .data         00000005  00000000  00000000  0000....  2..1
                   CONTENTS, ALLOC, LOAD, DATA
@@ -53,4 +53,3 @@ Disassembly of section .text:
   86:	0005.*
   87:	0006.*
   88:	0007.*
-	...

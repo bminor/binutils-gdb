@@ -20,6 +20,8 @@ align8	.word	8
 align128 .byte	4
 	.word	0,1,2,3,4,5,6,7
 * TI .text section total size is 0x89 words; GAS fills to 0xc0
+* no, it doesn't fill post 2002-05-23 write.c change since we don't define
+# HANDLE_ALIGN or SUB_SEGMENT_ALIGN.
 	.data
 	.field	2, 3
 	.field	11, 8
