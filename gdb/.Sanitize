@@ -245,6 +245,7 @@ remote-hms.c
 remote-mips.c
 remote-mm.c
 remote-nindy.c
+remote-nrom.c
 remote-os9k.c
 remote-pa.c
 remote-sim.c
