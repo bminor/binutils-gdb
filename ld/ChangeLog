@@ -1,3 +1,10 @@
+Fri Dec 31 16:12:06 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ldgram.y (yyerror): Make argument const char *, and actually
+	print it out rather than assuming it is a syntax error.
+	* ldmisc.h: Change declaration of yyerror.
+	* ldemul.c, ldwrite.c: Add /*ARGSUSED*/ as appropriate.
+
 Fri Dec 31 11:37:28 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* emulparams/i386mach.sh (NONPAGED_TEXT_START_ADDR): Don't include
