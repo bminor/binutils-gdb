@@ -7,6 +7,9 @@
 
 1999-09-11  Donn Terry  <donn@interix.com>
 
+	* peigen.c (_bfd_pei_swap_scnhdr_out): Remove code which sets
+	section flags based on the section name.
+
 	* peicode.h (coff_swap_scnhdr_in): If COFF_IMAGE_WITH_PE, the
 	get the overflow of the s_nlnno field from the s_nreloc field.
 	* peigen.c (_bfd_pei_swap_scnhdr_out): If doing a final link, swap

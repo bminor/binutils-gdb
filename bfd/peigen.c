@@ -909,52 +909,8 @@ _bfd_pei_swap_scnhdr_out (abfd, in, out)
   /* FIXME: even worse, I don't see how to get the original alignment field*/
   /*        back...                                                        */
 
-  /* FIXME: Basing this on section names is bogus.  Also, this should
-     be in sec_to_styp_flags.  */
-
   {
     int flags = scnhdr_int->s_flags;
-    if (strcmp (scnhdr_int->s_name, ".data")  == 0 ||
-	strcmp (scnhdr_int->s_name, ".CRT")   == 0 ||
-	strcmp (scnhdr_int->s_name, ".bss")   == 0)
-      flags |= IMAGE_SCN_MEM_READ | IMAGE_SCN_MEM_WRITE;
-    else if (strcmp (scnhdr_int->s_name, ".text") == 0)
-      flags |= IMAGE_SCN_MEM_READ | IMAGE_SCN_MEM_EXECUTE;
-    else if (strcmp (scnhdr_int->s_name, ".reloc") == 0)
-      flags = (SEC_DATA | IMAGE_SCN_MEM_READ | IMAGE_SCN_MEM_DISCARDABLE
-	       | IMAGE_SCN_MEM_SHARED);
-    else if (strcmp (scnhdr_int->s_name, ".idata") == 0)
-      flags = IMAGE_SCN_MEM_READ | IMAGE_SCN_MEM_WRITE | SEC_DATA;     
-    else if (strcmp (scnhdr_int->s_name, ".rdata") == 0
-	     || strcmp (scnhdr_int->s_name, ".edata") == 0)
-      flags =  IMAGE_SCN_MEM_READ | SEC_DATA;     
-    else if (strcmp (scnhdr_int->s_name, ".pdata") == 0)
-      flags = IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN_ALIGN_4BYTES |
-			  IMAGE_SCN_MEM_READ ;
-    /* Remember this field is a max of 8 chars, so the null is _not_ there
-       for an 8 character name like ".reldata". (yep. Stupid bug) */
-    else if (strncmp (scnhdr_int->s_name, ".reldata", 8) == 0)
-      flags =  IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN_ALIGN_8BYTES |
-	       IMAGE_SCN_MEM_READ | IMAGE_SCN_MEM_WRITE ;
-    else if (strcmp (scnhdr_int->s_name, ".ydata") == 0)
-      flags =  IMAGE_SCN_CNT_INITIALIZED_DATA | IMAGE_SCN_ALIGN_8BYTES |
-	       IMAGE_SCN_MEM_READ | IMAGE_SCN_MEM_WRITE ;
-    else if (strncmp (scnhdr_int->s_name, ".drectve", 8) == 0)
-      flags =  IMAGE_SCN_LNK_INFO | IMAGE_SCN_LNK_REMOVE ;
-    else if (strncmp (scnhdr_int->s_name, ".stab", 5) == 0)
-      flags |= (IMAGE_SCN_LNK_INFO | IMAGE_SCN_MEM_DISCARDABLE
-		| IMAGE_SCN_MEM_SHARED | IMAGE_SCN_MEM_READ);
-    else if (strcmp (scnhdr_int->s_name, ".rsrc")  == 0)
-      flags |= IMAGE_SCN_MEM_READ | IMAGE_SCN_MEM_SHARED;
-    else
-      {
-	flags |= IMAGE_SCN_MEM_READ;
-	if (! (flags & SEC_READONLY))
-	  flags |= IMAGE_SCN_MEM_WRITE;
-	if (flags & SEC_SHARED)
-	  flags |= IMAGE_SCN_MEM_SHARED;
-      }
-
     bfd_h_put_32(abfd, flags, (bfd_byte *) scnhdr_ext->s_flags);
   }
 
