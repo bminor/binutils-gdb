@@ -5,6 +5,9 @@
 
 1999-09-11  Donn Terry  <donn@interix.com>
 
+	* cofflink.c (_bfd_coff_write_global_sym): Handle section symbol
+	aux entries.
+
 	* cofflink.c (coff_link_add_symbols): Don't warn about symbol type
 	changes when the base type is unknown.
 

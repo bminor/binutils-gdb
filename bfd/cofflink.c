@@ -2477,11 +2477,64 @@ _bfd_coff_write_global_sym (h, data)
 
   ++obj_raw_syment_count (output_bfd);
 
-  /* Write out any associated aux entries.  There normally will be
-     none.  If there are any, I have no idea how to modify them.  */
+  /* Write out any associated aux entries.  Most of the aux entries
+     will have been modified in _bfd_coff_link_input_bfd.  We have to
+     handle section aux entries here, now that we have the final
+     relocation and line number counts.  */
   for (i = 0; i < isym.n_numaux; i++)
     {
-      bfd_coff_swap_aux_out (output_bfd, (PTR) (h->aux + i), isym.n_type,
+      union internal_auxent *auxp;
+
+      auxp = h->aux + i;
+
+      /* Look for a section aux entry here using the same tests that
+         coff_swap_aux_out uses.  */
+      if (i == 0
+	  && (isym.n_sclass == C_STAT
+	      || isym.n_sclass == C_HIDDEN)
+	  && isym.n_type == T_NULL
+	  && (h->root.type == bfd_link_hash_defined
+	      || h->root.type == bfd_link_hash_defweak))
+	{
+	  asection *sec;
+
+	  sec = h->root.u.def.section->output_section;
+	  if (sec != NULL)
+	    {
+	      auxp->x_scn.x_scnlen = (sec->_cooked_size != 0
+				      ? sec->_cooked_size
+				      : sec->_raw_size);
+
+	      /* For PE, an overflow on the final link reportedly does
+                 not matter.  FIXME: Why not?  */
+
+	      if (sec->reloc_count > 0xffff
+		  && (! obj_pe (output_bfd)
+		      || finfo->info->relocateable))
+		(*_bfd_error_handler)
+		  (_("%s: %s: reloc overflow: 0x%lx > 0xffff"),
+		   bfd_get_filename (output_bfd),
+		   bfd_get_section_name (output_bfd, sec),
+		   sec->reloc_count);
+
+	      if (sec->lineno_count > 0xffff
+		  && (! obj_pe (output_bfd)
+		      || finfo->info->relocateable))
+		(*_bfd_error_handler)
+		  (_("%s: warning: %s: line number overflow: 0x%lx > 0xffff"),
+		   bfd_get_filename (output_bfd),
+		   bfd_get_section_name (output_bfd, sec),
+		   sec->lineno_count);
+
+	      auxp->x_scn.x_nreloc = sec->reloc_count;
+	      auxp->x_scn.x_nlinno = sec->lineno_count;
+	      auxp->x_scn.x_checksum = 0;
+	      auxp->x_scn.x_associated = 0;
+	      auxp->x_scn.x_comdat = 0;
+	    }
+	}
+
+      bfd_coff_swap_aux_out (output_bfd, (PTR) auxp, isym.n_type,
 			     isym.n_sclass, i, isym.n_numaux,
 			     (PTR) finfo->outsyms);
       if (bfd_write (finfo->outsyms, symesz, 1, output_bfd) != symesz)
