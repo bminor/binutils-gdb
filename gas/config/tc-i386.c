@@ -3115,6 +3115,14 @@ i386_index_check (operand_string)
 	{
 	  i.prefix[ADDR_PREFIX] = ADDR_PREFIX_OPCODE;
 	  i.prefixes += 1;
+	  /* Change the size of any displacement too.  At most one of
+	     Disp16 or Disp32 is set.
+	     FIXME.  There doesn't seem to be any real need for separate
+	     Disp16 and Disp32 flags.  The same goes for Imm16 and Imm32.
+	     Removing them would probably clean up the code quite a lot.
+	  */
+	  if (i.types[this_operand] & (Disp16|Disp32))
+	     i.types[this_operand] ^= (Disp16|Disp32);
 	  fudged = 1;
 	  goto tryprefix;
 	}

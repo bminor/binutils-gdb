@@ -200,7 +200,14 @@
  147 0137 89341D00 000000   		mov	%esi,\(,%ebx,1\)
  148 013e 80250000 00007F   		andb	\$~0x80,foo
  149                       	
- 150                       		# Force a good alignment.
- 151 0145 00000000 00000000[ 	]*.p2align	4,0
- 151      000000
-
+ 150                       	#check 16-bit code auto address prefix
+ 151                       	.code16gcc
+ 152 0145 67668D95 00FFFFFF 		leal	-256\(%ebp\),%edx
+ 153 014d 6788857F FFFFFF   		mov	%al,-129\(%ebp\)
+ 154 0154 67886580          		mov	%ah,-128\(%ebp\)
+ 155 0158 67668D9D 20F9FFFF 		leal	-1760\(%ebp\),%ebx
+ 156 0160 67668984 248C0000 		movl	%eax,140\(%esp\)
+ 156      00
+ 157                       	
+ 158                       		# Force a good alignment.
+ 159 0169 00000000 000000[ 	]*.p2align	4,0

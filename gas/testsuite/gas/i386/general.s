@@ -147,5 +147,13 @@
 	mov	%esi,(,%ebx,1)
 	andb	$~0x80,foo
 
+#check 16-bit code auto address prefix
+.code16gcc
+	leal	-256(%ebp),%edx
+	mov	%al,-129(%ebp)
+	mov	%ah,-128(%ebp)
+	leal	-1760(%ebp),%ebx
+	movl	%eax,140(%esp)
+
 	# Force a good alignment.
 	.p2align	4,0
