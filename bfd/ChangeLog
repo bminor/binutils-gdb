@@ -1,3 +1,39 @@
+Tue May 25 14:03:56 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* libbfd.c (COERCE64): Rewrite to avoid out-of-range values.
+
+	* coff-sh.c (rtype2howto): Put error message on stderr.
+	(extra_case): Delete unused variable.
+
+	* coff-mips.c (ecoff_print_symbol): Cast bfd_vma values to long
+	before calling printf.
+
+	* elfcode.h: New file, almost completely derived from old elf32.c.
+	* elf32.c: Now just define ARCH_SIZE and include elfcode.h.
+	* Makefile.in (elf64.o): List dependencies, don't build by
+	default.
+	(elf64.c): Add to list of sources.
+	(elf32.o): Update dependencies.
+	* elf32-*.c: Updated type/macro/structure names.  Cleaned up
+	namespace pollution; rename vectors.
+	* targets.c, config/*-elf.mt: Updated.
+	* All uses of 32-bit versions of structures, routines, and macros
+	renamed.
+
+	* Makefile.in (archures.o, targets.o): Depend on Makefile.
+
+Mon May 24 15:53:13 1993  Ken Raeburn  (raeburn@cygnus.com)
+
+	* elf32-i386.c (enum reloc_type): No comma after last enumerator.
+
+	* elf32.c (elf_string_from_elf_section): Handle index of zero
+	specially.
+	(bfd_section_from_shdr, elf_slurp_symbol_table): Don't need to do
+	so here.
+	(elf_write_object_contents): Deleted one unused variable and
+	initialized another to avoid gcc warnings.
+	(elf_set_section_contents): Delete unused variable.
+
 Fri May 21 19:04:21 1993  Stu Grossman  (grossman@cygnus.com)
 
 	* i386lynx.c:  New module for Lynx variant of a.out.
