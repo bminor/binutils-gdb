@@ -1,3 +1,10 @@
+Tue Jan  2 13:10:25 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf32-ppc.c: Remove trailing newline from calls to
+        _bfd_error_handler.
+	(ppc_elf_merge_private_bfd_data): Only warn about endianness
+	difference if target endianness is known.
+
 Thu Dec 21 12:43:49 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* elf32-ppc.c (ppc_elf_howto_raw): Add a phony reloc to handle the
