@@ -1,3 +1,9 @@
+2001-06-29  H.J. Lu  <hjl@gnu.org>
+
+	* elf32-hppa.c (elf32_hppa_finish_dynamic_sections): Check if
+	hplink->sgot is NULL before filling GOT. Checck if hplink->splt
+	is NULL before filling PLT.
+
 2001-06-29  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.h (elf_link_output_extsym): Revert 1999-04-10.

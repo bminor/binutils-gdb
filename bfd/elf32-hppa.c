@@ -4334,7 +4334,7 @@ elf32_hppa_finish_dynamic_sections (output_bfd, info)
 	}
     }
 
-  if (hplink->sgot->_raw_size != 0)
+  if (hplink->sgot != NULL && hplink->sgot->_raw_size != 0)
     {
       /* Fill in the first entry in the global offset table.
 	 We use it to point to our dynamic section, if we have one.  */
@@ -4352,7 +4352,7 @@ elf32_hppa_finish_dynamic_sections (output_bfd, info)
 	->this_hdr.sh_entsize = GOT_ENTRY_SIZE;
     }
 
-  if (hplink->splt->_raw_size != 0)
+  if (hplink->splt != NULL && hplink->splt->_raw_size != 0)
     {
       /* Set plt entry size.  */
       elf_section_data (hplink->splt->output_section)
