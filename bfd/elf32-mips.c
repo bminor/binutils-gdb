@@ -7099,7 +7099,7 @@ _bfd_mips_elf_create_dynamic_sections (abfd, info)
 	return false;
     }
 
-  if (IRIX_COMPAT (abfd) == ict_irix5 || IRIX_COMPAT (abfd) == ict_none
+  if ((IRIX_COMPAT (abfd) == ict_irix5 || IRIX_COMPAT (abfd) == ict_none)
       && !info->shared
       && bfd_get_section_by_name (abfd, ".rld_map") == NULL)
     {
@@ -8636,7 +8636,8 @@ _bfd_mips_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
   if (! info->shared)
     {
       if (! mips_elf_hash_table (info)->use_rld_obj_head
-	  && strcmp (name, "__rld_map") == 0 || strcmp (name, "__RLD_MAP") == 0)
+	  && (strcmp (name, "__rld_map") == 0
+	      || strcmp (name, "__RLD_MAP") == 0))
 	{
 	  asection *s = bfd_get_section_by_name (dynobj, ".rld_map");
 	  BFD_ASSERT (s != NULL);

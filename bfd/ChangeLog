@@ -1,3 +1,8 @@
+2000-07-18  Ulf Carlsson  <ulfc@engr.sgi.com>
+
+	* elf32-mips.c (_bfd_mips_elf_finish_dynamic_symbol): Add
+	paranthesis in if statement.
+
 2000-07-17  Koundinya K  <kk@ddeorg.soft.net>
 
 	Enable the support for Traditional MIPS. 
