@@ -1,3 +1,8 @@
+Sat Sep 18 11:36:12 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* hppa-dis.c: Finish constifying various completers, register
+	names, etc etc.
+
 1999-09-14  Michael Meissner  <meissner@cygnus.com>
 
 	* configure.in (Canonicalization of target names): Remove adding

@@ -59,7 +59,7 @@ typedef unsigned int CORE_ADDR;
 /* Some of these have been converted to 2-d arrays because they
    consume less storage this way.  If the maintenance becomes a
    problem, convert them back to const 1-d pointer arrays.  */
-static const char control_reg[][6] = {
+static const char *const control_reg[] = {
   "rctr", "cr1", "cr2", "cr3", "cr4", "cr5", "cr6", "cr7",
   "pidr1", "pidr2", "ccr", "sar", "pidr3", "pidr4",
   "iva", "eiem", "itmr", "pcsq", "pcoq", "iir", "isr",
@@ -67,26 +67,26 @@ static const char control_reg[][6] = {
   "tr4", "tr5", "tr6", "tr7"
 };
 
-static const char compare_cond_names[][5] = {
+static const char *const compare_cond_names[] = {
   "", ",=", ",<", ",<=", ",<<", ",<<=", ",sv", ",od",
   ",tr", ",<>", ",>=", ",>", ",>>=", ",>>", ",nsv", ",ev"
 };
-static const char compare_cond_64_names[][6] = {
+static const char *const compare_cond_64_names[] = {
   "", ",*=", ",*<", ",*<=", ",*<<", ",*<<=", ",*sv", ",*od",
   ",*tr", ",*<>", ",*>=", ",*>", ",*>>=", ",*>>", ",*nsv", ",*ev"
 };
-static const char cmpib_cond_64_names[][6] = {
+static const char *const cmpib_cond_64_names[] = {
   ",*<<", ",*=", ",*<", ",*<=", ",*>>=", ",*<>", ",*>=", ",*>"
 };
-static const char add_cond_names[][5] = {
+static const char *const add_cond_names[] = {
   "", ",=", ",<", ",<=", ",nuv", ",znv", ",sv", ",od",
   ",tr", ",<>", ",>=", ",>", ",uv", ",vnz", ",nsv", ",ev"
 };
-static const char add_cond_64_names[][6] = {
+static const char *const add_cond_64_names[] = {
   "", ",*=", ",*<", ",*<=", ",*nuv", ",*znv", ",*sv", ",*od",
   ",*tr", ",*<>", ",*>=", ",*>", ",*uv", ",*vnz", ",*nsv", ",*ev"
 };
-static const char wide_add_cond_names[][5] = {
+static const char *const wide_add_cond_names[] = {
   "", ",=", ",<", ",<=", ",nuv", ",*=", ",*<", ",*<=",
   ",tr", ",<>", ",>=", ",>", ",uv", ",*<>", ",*>=", ",*>"
 };
@@ -104,35 +104,33 @@ static const char *const unit_cond_64_names[] = {
   "", ",*swz", ",*sbz", ",*shz", ",*sdc", ",*swc", ",*sbc", ",*shc",
   ",*tr", ",*nwz", ",*nbz", ",*nhz", ",*ndc", ",*nwc", ",*nbc", ",*nhc"
 };
-static const char shift_cond_names[][4] = {
+static const char *const shift_cond_names[] = {
   "", ",=", ",<", ",od", ",tr", ",<>", ",>=", ",ev"
 };
-static const char shift_cond_64_names[][5] = {
+static const char *const shift_cond_64_names[] = {
   "", ",*=", ",*<", ",*od", ",*tr", ",*<>", ",*>=", ",*ev"
 };
-static const char bb_cond_64_names[][5] = {
+static const char *const bb_cond_64_names[] = {
   ",*<", ",*>="
 };
-static const char index_compl_names[][4] = {"", ",m", ",s", ",sm"};
-static const char short_ldst_compl_names[][4] = {"", ",ma", "", ",mb"};
+static const char *const index_compl_names[] = {"", ",m", ",s", ",sm"};
+static const char *const short_ldst_compl_names[] = {"", ",ma", "", ",mb"};
 static const char *const short_bytes_compl_names[] = {
   "", ",b,m", ",e", ",e,m"
 };
 static const char *const float_format_names[] = {",sgl", ",dbl", "", ",quad"};
-static const char float_comp_names[][8] =
+static const char *const float_comp_names[] =
 {
   ",false?", ",false", ",?", ",!<=>", ",=", ",=t", ",?=", ",!<>",
   ",!?>=", ",<", ",?<", ",!>=", ",!?>", ",<=", ",?<=", ",!>",
   ",!?<=", ",>", ",?>", ",!<=", ",!?<", ",>=", ",?>=", ",!<",
   ",!?=", ",<>", ",!=", ",!=t", ",!?", ",<=>", ",true?", ",true"
 };
-static const char *const signed_unsigned_names[][3] = {",u", ",s"};
-static const char *const mix_half_names[][3] = {",l", ",r"};
-static const char *const saturation_names[][4] = {",us", ",ss", 0, ""};
-static const char *const read_write_names[][3] = {",r", ",w"};
-static const char *const add_compl_names[] = {
-  0, "", ",l", ",tsv"
-};
+static const char *const signed_unsigned_names[] = {",u", ",s"};
+static const char *const mix_half_names[] = {",l", ",r"};
+static const char *const saturation_names[] = {",us", ",ss", 0, ""};
+static const char *const read_write_names[] = {",r", ",w"};
+static const char *const add_compl_names[] = { 0, "", ",l", ",tsv" };
 
 /* For a bunch of different instructions form an index into a 
    completer name table. */
