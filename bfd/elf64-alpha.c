@@ -2479,17 +2479,6 @@ elf64_alpha_output_extsym (h, data)
 
   return true;
 }
-
-/* FIXME:  Create a runtime procedure table from the .mdebug section.
-
-static boolean
-mips_elf_create_procedure_table (handle, abfd, info, s, debug)
-     PTR handle;
-     bfd *abfd;
-     struct bfd_link_info *info;
-     asection *s;
-     struct ecoff_debug_info *debug;
-*/
 
 /* Search for and possibly create a got entry.  */
 
