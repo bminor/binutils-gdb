@@ -1,9 +1,18 @@
+Tue Jul 11 12:29:49 1995  Rick Sladkey  <jrs@world.std.com>
+
+	* elf.c (_bfd_elf_find_nearest_line): Handle the simple case where
+	there is no debugging information.
+
 Mon Jul 10 11:45:55 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* makefile.dos (OBJS): Add binary.o and tekhex.o.  From DJ
 	Delorie.
 
 Mon Jul 10 11:09:58 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* linker.c (set_symbol_from_hash): bfd_link_hash_new case: Don't
+	abort; it can happen for constructor symbols when not building
+	constructors.
 
 	* coff-i960.c (coff_i960_relocate): Correct typo: use ! on strcmp,
 	not on string.

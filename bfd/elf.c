@@ -15,7 +15,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /*
 
@@ -2589,14 +2589,17 @@ _bfd_elf_set_arch_mach (abfd, arch, machine)
   return bfd_default_set_arch_mach (abfd, arch, machine);
 }
 
+/* Find the nearest line to a particular section and offset, for error
+   reporting.  */
+
 boolean
 _bfd_elf_find_nearest_line (abfd,
-		       section,
-		       symbols,
-		       offset,
-		       filename_ptr,
-		       functionname_ptr,
-		       line_ptr)
+			    section,
+			    symbols,
+			    offset,
+			    filename_ptr,
+			    functionname_ptr,
+			    line_ptr)
      bfd *abfd;
      asection *section;
      asymbol **symbols;
@@ -2605,7 +2608,47 @@ _bfd_elf_find_nearest_line (abfd,
      CONST char **functionname_ptr;
      unsigned int *line_ptr;
 {
-  return false;
+  const char *filename;
+  asymbol *func;
+  asymbol **p;
+
+  if (symbols == NULL)
+    return false;
+
+  filename = NULL;
+  func = NULL;
+
+  for (p = symbols; *p != NULL; p++)
+    {
+      elf_symbol_type *q;
+
+      q = (elf_symbol_type *) *p;
+
+      if (bfd_get_section (&q->symbol) != section)
+	continue;
+
+      switch (ELF_ST_TYPE (q->internal_elf_sym.st_info))
+	{
+	default:
+	  break;
+	case STT_FILE:
+	  filename = bfd_asymbol_name (&q->symbol);
+	  break;
+	case STT_FUNC:
+	  if (func == NULL
+	      || q->symbol.value <= offset)
+	    func = (asymbol *) q;
+	  break;
+	}
+    }
+
+  if (func == NULL)
+    return false;
+
+  *filename_ptr = filename;
+  *functionname_ptr = bfd_asymbol_name (func);
+  *line_ptr = 0;
+  return true;
 }
 
 int
