@@ -294,6 +294,8 @@ for host in ${hosts} ; do
 		defaulttargets=true
 	fi
 
+	host_makefile_frag=config/hmake-${host}
+
 #### configure.in per-host parts come in here.
 
 if [ ! -f xconfig/${host} ]; then
@@ -312,6 +314,8 @@ hostfile=`awk '$1 == "XM_FILE=" { print $2 }' <xconfig/$host`
 		if [ -n "${verbose}" ] ; then
 			echo "	target=\"${target}\""
 		fi
+
+		target_makefile_frag=config/tmake-${target}
 
 #### configure.in per-target parts come in here.
 
@@ -479,15 +483,6 @@ fi
 			# add "Makefile.in" (or whatever it's called)
 			cat ${srcdir}/${Makefile_in} >> ${Makefile}
 
-			# and shake thoroughly.
-			if [ -z "${host_makefile_frag}" ] ; then
-				host_makefile_frag=config/hmake-${host}
-			fi
-
-			if [ -z "${target_makefile_frag}" ] ; then
-				target_makefile_frag=config/tmake-${target}
-			fi
-
 			# Conditionalize the makefile for this host.
 			if [ -f ${srcdir}/${host_makefile_frag} ] ; then
 				sed -e "/^####/  r ${srcdir}/${host_makefile_frag}" ${Makefile} > Makefile.tem
@@ -509,10 +504,6 @@ fi
 				sed "s:^destdir =.*$:destdir = ${destdir}:" ${Makefile} > Makefile.tem
 				mv Makefile.tem ${Makefile}
 			fi
-
-			# Remove all formfeeds, since some Makes get confused by them.
-			sed "s///" ${Makefile} >> Makefile.tem
-			mv Makefile.tem ${Makefile}
 
 			# reset SUBDIRS
 			sed "s:^SUBDIRS =.*$:SUBDIRS = ${configdirs}:" ${Makefile} > Makefile.tem
@@ -668,7 +659,12 @@ exit 0
 
 #
 # $Log$
-# Revision 1.8  1991/07/05 00:04:58  gnu
+# Revision 1.9  1991/07/06 04:35:51  gnu
+# Fix bug in configure when iterating targets.
+# Depend on alldeps.mak, not ${srcdir}/alldeps.mak, so it can be found
+# in either spot.
+#
+# Revision 1.8  1991/07/05  00:04:58  gnu
 # Thu Jul  4 14:47:06 1991  John Gilmore  (gnu at cygint.cygnus.com)
 #
 #         * configure.in, Makefile.in:  Avoid rebuilding "depend" as much.
