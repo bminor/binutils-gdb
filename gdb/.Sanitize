@@ -37,6 +37,7 @@ Projects
 README
 TODO
 WHATS.NEW
+a68v-xdep.c
 alldeps.mak
 alloca.c
 altos-xdep.c
@@ -132,6 +133,7 @@ nindy-share
 nindy-tdep.c
 ns32k-opcode.h
 ns32k-pinsn.c
+os68k-xdep.c
 parse.c
 parser-defs.h
 partial-stab.h
@@ -205,6 +207,7 @@ tm-mips.h
 tm-news.h
 tm-nindy960.h
 tm-np1.h
+tm-os68k.h
 tm-pn.h
 tm-pyr.h
 tm-rs6000.h
@@ -241,6 +244,7 @@ xm-3b1.h
 xm-m88k.h
 xm-altos.h
 xm-amix.h
+xm-apollo68v.h
 xm-arm.h
 xm-bigmips.h
 xm-convex.h
