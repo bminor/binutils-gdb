@@ -1,3 +1,7 @@
+2002-04-18  Michael Snyder  <msnyder@redhat.com>
+
+	* arm-tdep.h: Change regnum defines to enums for ease of debugging.
+
 2002-04-22  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* vax-tdep.c (vax_frame_chain): New function.
@@ -386,6 +390,10 @@
 2002-04-18  David S. Miller  <davem@redhat.com>
 
 	* MAINTAINERS: Add myself to write-after-approval.
+
+2002-04-17  Michael Snyder  <msnyder@redhat.com>
+
+	* MAINTAINERS: Add myself as co-maintainer of testsuite/gdb.asm.
 
 2002-04-17  Andrew Cagney  <ac131313@redhat.com>
 
