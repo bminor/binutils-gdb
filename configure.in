@@ -106,7 +106,8 @@ case "${host}" in
   *-sun-*)		  host_makefile_frag=config/mh-sun ;;
   *-hp-hpux)              host_makefile_frag=config/mh-hpux ;;
   *-*-hiux*)              host_makefile_frag=config/mh-hpux ;;
-  *-*-lynxos*)	  	  host_makefile_frag=config/mh-lynxos ;;
+  *-*-lynxos*)	  	  host_makefile_frag=config/mh-lynxos
+				cross_only="xiberty" ;;
   *-*-sysv4*)             host_makefile_frag=config/mh-sysv4 ;;
   *-*-sysv*)              host_makefile_frag=config/mh-sysv ;;
 esac

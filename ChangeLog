@@ -1,4 +1,10 @@
+Thu Oct 21 11:38:28 1993  Stan Shebs  (shebs@rtl.cygnus.com)
+
+	* configure.in: Build newlib for LynxOS native.
+
 Wed Oct 20 09:56:12 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* config.guess: Add support for delta 88k running SVR3.
 
 	* configure.in: Add comment about HP compiler vs. emacs.
 
