@@ -802,7 +802,7 @@ print_contents (bfd *abfd)
 
   if (verbose)
     /* xgettext:c-format */
-    printf (_("\n<member %s>\n\n"), bfd_get_filename (abfd));
+    printf (_("\n<%s>\n\n"), bfd_get_filename (abfd));
 
   bfd_seek (abfd, (file_ptr) 0, SEEK_SET);
 
