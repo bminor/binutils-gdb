@@ -1,3 +1,8 @@
+2004-03-04  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.in (distclean): Remove config.h, stamp-h, and config.log.
+	Unify with other clean targets.
+
 2004-02-29  Daniel Jacobowitz  <drow@mvista.com>
 
 	* server.c (handle_v_cont): Call set_desired_inferior.
