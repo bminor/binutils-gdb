@@ -1,3 +1,29 @@
+Wed Jun 21 05:57:56 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* monitor.c: Turn on caching.
+	(monitor_printf): If a ^C was sent, don't expect to see its
+	echo.
+	(monitor_open): Enable caching.
+	(monitor_resume, monitor_load): Flush cache.
+	(monitor_xfer_memory): Call cache routine.
+	(monitor_dump_regs): New.
+	(monitor_fetch_registers):  If monitor_dump_regs available
+	then use it.
+	(monitor_load): Don't ref exec_bfd if it's NULL.
+	(monitor_load_srec): Use new monitor_make_srec calling convention.
+	(monitor_make_srec): Rewrite to cope with two, three and four byte
+	addresses.
+	* remote-hms.c (hms_cmds): Initialze end-of-command delim.
+	* dcache.h, dcache.h: Rewritten.
+	* remote.c: Reenable caching.
+	(getpkt): Reduce MAX_TRIES to 3.
+	(remote_xfer_memory): Use dcache_xfer_memory.
+	* defs.h (error_hook): New.
+	* top.c (error_hook): New definition.
+	* utils.c (error): Use error_hook if initialized.
+	* sparcl-tdep.c (HAVE_SOCKETS): Don't define if GO32 or WIN32. Use 
+	HAVE_SOCKETS in place of #ifndef GO32.
+
 Tue Jun 20 22:17:44 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* config/pa/tm-hppa.h (PSW_*): Define processor status word masks.
