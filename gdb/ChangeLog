@@ -1,5 +1,8 @@
 2001-11-13  Jim Blandy  <jimb@redhat.com>
 
+	* valops.c (default_coerce_float_to_double,
+	standard_coerce_float_to_double): Doc fixes.
+
 	Patch from Peter Schauer:
 	
 	* symtab.c (find_pc_sect_line): If we can't find the function

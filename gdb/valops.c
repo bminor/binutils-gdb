@@ -1092,16 +1092,34 @@ default_push_arguments (int nargs, value_ptr *args, CORE_ADDR sp,
 }
 
 
-/* A default function for COERCE_FLOAT_TO_DOUBLE: do the coercion only
-   when we don't have any type for the argument at hand.  This occurs
-   when we have no debug info, or when passing varargs.
+/* Functions to use for the COERCE_FLOAT_TO_DOUBLE gdbarch method.
 
-   This is an annoying default: the rule the compiler follows is to do
-   the standard promotions whenever there is no prototype in scope,
-   and almost all targets want this behavior.  But there are some old
-   architectures which want this odd behavior.  If you want to go
-   through them all and fix them, please do.  Modern gdbarch-style
-   targets may find it convenient to use standard_coerce_float_to_double.  */
+   How you should pass arguments to a function depends on whether it
+   was defined in K&R style or prototype style.  If you define a
+   function using the K&R syntax that takes a `float' argument, then
+   callers must pass that argument as a `double'.  If you define the
+   function using the prototype syntax, then you must pass the
+   argument as a `float', with no promotion.
+
+   Unfortunately, on certain older platforms, the debug info doesn't
+   indicate reliably how each function was defined.  A function type's
+   TYPE_FLAG_PROTOTYPED flag may be clear, even if the function was
+   defined in prototype style.  When calling a function whose
+   TYPE_FLAG_PROTOTYPED flag is clear, GDB consults the
+   COERCE_FLOAT_TO_DOUBLE gdbarch method to decide what to do.
+
+   For modern targets, it is proper to assume that, if the prototype
+   flag is clear, that can be trusted: `float' arguments should be
+   promoted to `double'.  You should register the function
+   `standard_coerce_float_to_double' to get this behavior.
+
+   For some older targets, if the prototype flag is clear, that
+   doesn't tell us anything.  So we guess that, if we don't have a
+   type for the formal parameter (i.e., the first argument to
+   COERCE_FLOAT_TO_DOUBLE is null), then we should promote it;
+   otherwise, we should leave it alone.  The function
+   `default_coerce_float_to_double' provides this behavior; it is the
+   default value, for compatibility with older configurations.  */
 int
 default_coerce_float_to_double (struct type *formal, struct type *actual)
 {
@@ -1109,10 +1127,6 @@ default_coerce_float_to_double (struct type *formal, struct type *actual)
 }
 
 
-/* Always coerce floats to doubles when there is no prototype in scope.
-   If your architecture follows the standard type promotion rules for
-   calling unprototyped functions, your gdbarch init function can pass
-   this function to set_gdbarch_coerce_float_to_double to use its logic.  */
 int
 standard_coerce_float_to_double (struct type *formal, struct type *actual)
 {
