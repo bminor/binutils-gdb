@@ -26,21 +26,85 @@
 
 #define EH_FRAME_HDR_SIZE 8
 
-#define read_uleb128(VAR, BUF)					\
-do								\
-  {								\
-    (VAR) = read_unsigned_leb128 (abfd, buf, &leb128_tmp);	\
-    (BUF) += leb128_tmp;					\
-  }								\
-while (0)
+/* If *ITER hasn't reached END yet, read the next byte into *RESULT and
+   move onto the next byte.  Return true on success.  */
 
-#define read_sleb128(VAR, BUF)					\
-do								\
-  {								\
-    (VAR) = read_signed_leb128 (abfd, buf, &leb128_tmp);	\
-    (BUF) += leb128_tmp;					\
-  }								\
-while (0)
+static inline bfd_boolean
+read_byte (bfd_byte **iter, bfd_byte *end, unsigned char *result)
+{
+  if (*iter >= end)
+    return FALSE;
+  *result = *((*iter)++);
+  return TRUE;
+}
+
+/* Move *ITER over LENGTH bytes, or up to END, whichever is closer.
+   Return true it was possible to move LENGTH bytes.  */
+
+static inline bfd_boolean
+skip_bytes (bfd_byte **iter, bfd_byte *end, bfd_size_type length)
+{
+  if ((bfd_size_type) (end - *iter) < length)
+    {
+      *iter = end;
+      return FALSE;
+    }
+  *iter += length;
+  return TRUE;
+}
+
+/* Move *ITER over an leb128, stopping at END.  Return true if the end
+   of the leb128 was found.  */
+
+static bfd_boolean
+skip_leb128 (bfd_byte **iter, bfd_byte *end)
+{
+  unsigned char byte;
+  do
+    if (!read_byte (iter, end, &byte))
+      return FALSE;
+  while (byte & 0x80);
+  return TRUE;
+}
+
+/* Like skip_leb128, but treat the leb128 as an unsigned value and
+   store it in *VALUE.  */
+
+static bfd_boolean
+read_uleb128 (bfd_byte **iter, bfd_byte *end, bfd_vma *value)
+{
+  bfd_byte *start, *p;
+
+  start = *iter;
+  if (!skip_leb128 (iter, end))
+    return FALSE;
+
+  p = *iter;
+  *value = *--p;
+  while (p > start)
+    *value = (*value << 7) | (*--p & 0x7f);
+
+  return TRUE;
+}
+
+/* Like read_uleb128, but for signed values.  */
+
+static bfd_boolean
+read_sleb128 (bfd_byte **iter, bfd_byte *end, bfd_signed_vma *value)
+{
+  bfd_byte *start, *p;
+
+  start = *iter;
+  if (!skip_leb128 (iter, end))
+    return FALSE;
+
+  p = *iter;
+  *value = ((*--p & 0x7f) ^ 0x40) - 0x40;
+  while (p > start)
+    *value = (*value << 7) | (*--p & 0x7f);
+
+  return TRUE;
+}
 
 /* Return 0 if either encoding is variable width, or not yet known to bfd.  */
 
@@ -221,7 +285,6 @@ _bfd_elf_discard_section_eh_frame
   struct elf_link_hash_table *htab;
   struct eh_frame_hdr_info *hdr_info;
   struct eh_frame_sec_info *sec_info = NULL;
-  unsigned int leb128_tmp;
   unsigned int cie_usage_count, offset;
   unsigned int ptr_size;
 
@@ -293,6 +356,8 @@ _bfd_elf_discard_section_eh_frame
   for (;;)
     {
       unsigned char *aug;
+      bfd_byte *start, *end;
+      bfd_size_type length;
 
       if (sec_info->count == sec_info->alloced)
 	{
@@ -318,19 +383,22 @@ _bfd_elf_discard_section_eh_frame
       /* If we are at the end of the section, we still need to decide
 	 on whether to output or discard last encountered CIE (if any).  */
       if ((bfd_size_type) (buf - ehbuf) == sec->size)
-	hdr.id = (unsigned int) -1;
+	{
+	  hdr.id = (unsigned int) -1;
+	  end = buf;
+	}
       else
 	{
 	  /* Read the length of the entry.  */
-	  REQUIRE ((bfd_size_type) (buf - ehbuf) + 4 <= sec->size);
-	  hdr.length = bfd_get_32 (abfd, buf);
-	  buf += 4;
+	  REQUIRE (skip_bytes (&buf, ehbuf + sec->size, 4));
+	  hdr.length = bfd_get_32 (abfd, buf - 4);
 
 	  /* 64-bit .eh_frame is not supported.  */
 	  REQUIRE (hdr.length != 0xffffffff);
 
 	  /* The CIE/FDE must be fully contained in this input section.  */
 	  REQUIRE ((bfd_size_type) (buf - ehbuf) + hdr.length <= sec->size);
+	  end = buf + hdr.length;
 
 	  this_inf->offset = last_fde - ehbuf;
 	  this_inf->size = 4 + hdr.length;
@@ -348,8 +416,8 @@ _bfd_elf_discard_section_eh_frame
 	    }
 	  else
 	    {
-	      hdr.id = bfd_get_32 (abfd, buf);
-	      buf += 4;
+	      REQUIRE (skip_bytes (&buf, end, 4));
+	      hdr.id = bfd_get_32 (abfd, buf - 4);
 	      REQUIRE (hdr.id != (unsigned int) -1);
 	    }
 	}
@@ -392,7 +460,7 @@ _bfd_elf_discard_section_eh_frame
 	  cie_usage_count = 0;
 	  memset (&cie, 0, sizeof (cie));
 	  cie.hdr = hdr;
-	  cie.version = *buf++;
+	  REQUIRE (read_byte (&buf, end, &cie.version));
 
 	  /* Cannot handle unknown versions.  */
 	  REQUIRE (cie.version == 1 || cie.version == 3);
@@ -407,15 +475,18 @@ _bfd_elf_discard_section_eh_frame
 	      /* We cannot merge "eh" CIEs because __EXCEPTION_TABLE__
 		 is private to each CIE, so we don't need it for anything.
 		 Just skip it.  */
-	      buf += ptr_size;
+	      REQUIRE (skip_bytes (&buf, end, ptr_size));
 	      SKIP_RELOCS (buf);
 	    }
-	  read_uleb128 (cie.code_align, buf);
-	  read_sleb128 (cie.data_align, buf);
+	  REQUIRE (read_uleb128 (&buf, end, &cie.code_align));
+	  REQUIRE (read_sleb128 (&buf, end, &cie.data_align));
 	  if (cie.version == 1)
-	    cie.ra_column = *buf++;
+	    {
+	      REQUIRE (buf < end);
+	      cie.ra_column = *buf++;
+	    }
 	  else
-	    read_uleb128 (cie.ra_column, buf);
+	    REQUIRE (read_uleb128 (&buf, end, &cie.ra_column));
 	  ENSURE_NO_RELOCS (buf);
 	  cie.lsda_encoding = DW_EH_PE_omit;
 	  cie.fde_encoding = DW_EH_PE_omit;
@@ -426,7 +497,7 @@ _bfd_elf_discard_section_eh_frame
 	      if (*aug == 'z')
 		{
 		  aug++;
-		  read_uleb128 (cie.augmentation_size, buf);
+		  REQUIRE (read_uleb128 (&buf, end, &cie.augmentation_size));
 	  	  ENSURE_NO_RELOCS (buf);
 		}
 
@@ -434,12 +505,12 @@ _bfd_elf_discard_section_eh_frame
 		switch (*aug++)
 		  {
 		  case 'L':
-		    cie.lsda_encoding = *buf++;
+		    REQUIRE (read_byte (&buf, end, &cie.lsda_encoding));
 		    ENSURE_NO_RELOCS (buf);
 		    REQUIRE (get_DW_EH_PE_width (cie.lsda_encoding, ptr_size));
 		    break;
 		  case 'R':
-		    cie.fde_encoding = *buf++;
+		    REQUIRE (read_byte (&buf, end, &cie.fde_encoding));
 		    ENSURE_NO_RELOCS (buf);
 		    REQUIRE (get_DW_EH_PE_width (cie.fde_encoding, ptr_size));
 		    break;
@@ -447,14 +518,15 @@ _bfd_elf_discard_section_eh_frame
 		    {
 		      int per_width;
 
-		      cie.per_encoding = *buf++;
+		      REQUIRE (read_byte (&buf, end, &cie.per_encoding));
 		      per_width = get_DW_EH_PE_width (cie.per_encoding,
 						      ptr_size);
 		      REQUIRE (per_width);
 		      if ((cie.per_encoding & 0xf0) == DW_EH_PE_aligned)
-			buf = (ehbuf
-			       + ((buf - ehbuf + per_width - 1)
-				  & ~((bfd_size_type) per_width - 1)));
+			{
+			  length = -(buf - ehbuf) & (per_width - 1);
+			  REQUIRE (skip_bytes (&buf, end, length));
+			}
 		      ENSURE_NO_RELOCS (buf);
 		      /* Ensure we have a reloc here, against
 			 a global symbol.  */
@@ -487,7 +559,7 @@ _bfd_elf_discard_section_eh_frame
 			    cookie->rel++;
 			  while (GET_RELOC (buf) != NULL);
 			}
-		      buf += per_width;
+		      REQUIRE (skip_bytes (&buf, end, per_width));
 		    }
 		    break;
 		  default:
@@ -569,18 +641,21 @@ _bfd_elf_discard_section_eh_frame
 	      cie_usage_count++;
 	      hdr_info->fde_count++;
 	    }
-	  if (cie.lsda_encoding != DW_EH_PE_omit)
-	    {
-	      unsigned int dummy;
+	  /* Skip the initial location and address range.  */
+	  start = buf;
+	  length = get_DW_EH_PE_width (cie.fde_encoding, ptr_size);
+	  REQUIRE (skip_bytes (&buf, end, 2 * length));
 
-	      aug = buf;
-	      buf += 2 * get_DW_EH_PE_width (cie.fde_encoding, ptr_size);
-	      if (cie.augmentation[0] == 'z')
-		read_uleb128 (dummy, buf);
-	      /* If some new augmentation data is added before LSDA
-		 in FDE augmentation area, this need to be adjusted.  */
-	      this_inf->lsda_offset = (buf - aug);
-	    }
+	  /* Skip the augmentation size, if present.  */
+	  if (cie.augmentation[0] == 'z')
+	    REQUIRE (skip_leb128 (&buf, end));
+
+	  /* Of the supported augmentation characters above, only 'L'
+	     adds augmentation data to the FDE.  This code would need to
+	     be adjusted if any future augmentations do the same thing.  */
+	  if (cie.lsda_encoding != DW_EH_PE_omit)
+	    this_inf->lsda_offset = buf - start;
+
 	  buf = last_fde + 4 + hdr.length;
 	  SKIP_RELOCS (buf);
 	}
@@ -792,7 +867,6 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
   struct eh_frame_sec_info *sec_info;
   struct elf_link_hash_table *htab;
   struct eh_frame_hdr_info *hdr_info;
-  unsigned int leb128_tmp;
   unsigned int ptr_size;
   struct eh_cie_fde *ent;
 
@@ -894,7 +968,7 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 	    {
 	      unsigned char *aug;
 	      unsigned int action, extra_string, extra_data;
-	      unsigned int dummy, per_width, per_encoding;
+	      unsigned int per_width, per_encoding;
 
 	      /* Need to find 'R' or 'L' augmentation's argument and modify
 		 DW_EH_PE_* value.  */
@@ -908,9 +982,9 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 	      buf += 9;
 	      aug = buf;
 	      buf = strchr (buf, '\0') + 1;
-	      read_uleb128 (dummy, buf);
-	      read_sleb128 (dummy, buf);
-	      read_uleb128 (dummy, buf);
+	      skip_leb128 (&buf, end);
+	      skip_leb128 (&buf, end);
+	      skip_leb128 (&buf, end);
 	      if (*aug == 'z')
 		{
 		  /* The uleb128 will always be a single byte for the kind
@@ -923,6 +997,7 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
 	      memmove (buf + extra_string + extra_data, buf, end - buf);
 	      memmove (aug + extra_string, aug, buf - aug);
 	      buf += extra_string;
+	      end += extra_string + extra_data;
 
 	      if (ent->add_augmentation_size)
 		{

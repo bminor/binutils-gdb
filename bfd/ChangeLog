@@ -1,5 +1,17 @@
 2005-01-17  Richard Sandiford  <rsandifo@redhat.com>
 
+	* elf-bfd.h (struct cie): Use bfd_vmas for code_align, ra_column and
+	augmentation_size.  Use bfd_signed_vmas for data_align.
+	* elf-eh-frame.c (read_uleb128, read_sleb128): Delete in favor of...
+	(read_byte, skip_leb128, read_uleb128, read_sleb128): ...these new
+	functions.  Don't read past the end of the enclosing CIE or FDE.
+	(skip_bytes): New utility function.
+	(_bfd_elf_discard_section_eh_frame): Use new functions, adding more
+	sanity checking.
+	(_bfd_elf_write_section_eh_frame): Use new functions.
+
+2005-01-17  Richard Sandiford  <rsandifo@redhat.com>
+
 	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Use an
 	assert-style REQUIRE() macro to handle sanity checks.
 

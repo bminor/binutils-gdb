@@ -1,6 +1,6 @@
 /* BFD back-end data structures for ELF files.
    Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004 Free Software Foundation, Inc.
+   2002, 2003, 2004, 2005 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -270,10 +270,10 @@ struct cie
   struct cie_header hdr;
   unsigned char version;
   unsigned char augmentation[20];
-  unsigned int code_align;
-  int data_align;
-  unsigned int ra_column;
-  unsigned int augmentation_size;
+  bfd_vma code_align;
+  bfd_signed_vma data_align;
+  bfd_vma ra_column;
+  bfd_vma augmentation_size;
   struct elf_link_hash_entry *personality;
   unsigned char per_encoding;
   unsigned char lsda_encoding;
