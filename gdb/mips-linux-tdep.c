@@ -1,6 +1,6 @@
 /* Target-dependent code for GNU/Linux on MIPS processors.
 
-   Copyright 2001, 2002, 2004 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -976,6 +976,7 @@ mips_linux_o32_sigframe_init (const struct tramp_frame *self,
   int ireg, reg_position;
   CORE_ADDR sigcontext_base = func - SIGFRAME_CODE_OFFSET;
   const struct mips_regnum *regs = mips_regnum (current_gdbarch);
+  CORE_ADDR regs_base;
 
   if (self == &mips_linux_o32_sigframe)
     sigcontext_base += SIGFRAME_SIGCONTEXT_OFFSET;
@@ -985,36 +986,52 @@ mips_linux_o32_sigframe_init (const struct tramp_frame *self,
   /* I'm not proud of this hack.  Eventually we will have the
      infrastructure to indicate the size of saved registers on a
      per-frame basis, but right now we don't; the kernel saves eight
-     bytes but we only want four.  */
+     bytes but we only want four.  Use regs_base to access any
+     64-bit fields.  */
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-    sigcontext_base += 4;
+    regs_base = sigcontext_base + 4;
+  else
+    regs_base = sigcontext_base;
 
 #if 0
   trad_frame_set_reg_addr (this_cache, ORIG_ZERO_REGNUM + NUM_REGS,
-			   sigcontext_base + SIGCONTEXT_REGS);
+			   regs_base + SIGCONTEXT_REGS);
 #endif
 
   for (ireg = 1; ireg < 32; ireg++)
     trad_frame_set_reg_addr (this_cache,
 			     ireg + MIPS_ZERO_REGNUM + NUM_REGS,
-			     sigcontext_base + SIGCONTEXT_REGS
+			     regs_base + SIGCONTEXT_REGS
 			     + ireg * SIGCONTEXT_REG_SIZE);
 
+  /* The way that floating point registers are saved, unfortunately,
+     depends on the architecture the kernel is built for.  For the r3000 and
+     tx39, four bytes of each register are at the beginning of each of the
+     32 eight byte slots.  For everything else, the registers are saved
+     using double precision; only the even-numbered slots are initialized,
+     and the high bits are the odd-numbered register.  Assume the latter
+     layout, since we can't tell, and it's much more common.  Which bits are
+     the "high" bits depends on endianness.  */
   for (ireg = 0; ireg < 32; ireg++)
-    trad_frame_set_reg_addr (this_cache, ireg + regs->fp0 + NUM_REGS,
-			     sigcontext_base + SIGCONTEXT_FPREGS
-			     + ireg * SIGCONTEXT_REG_SIZE);
+    if ((TARGET_BYTE_ORDER == BFD_ENDIAN_BIG) != (ireg & 1))
+      trad_frame_set_reg_addr (this_cache, ireg + regs->fp0 + NUM_REGS,
+			       sigcontext_base + SIGCONTEXT_FPREGS + 4
+			       + (ireg & ~1) * SIGCONTEXT_REG_SIZE);
+    else
+      trad_frame_set_reg_addr (this_cache, ireg + regs->fp0 + NUM_REGS,
+			       sigcontext_base + SIGCONTEXT_FPREGS
+			       + (ireg & ~1) * SIGCONTEXT_REG_SIZE);
 
   trad_frame_set_reg_addr (this_cache, regs->pc + NUM_REGS,
-			   sigcontext_base + SIGCONTEXT_PC);
+			   regs_base + SIGCONTEXT_PC);
 
   trad_frame_set_reg_addr (this_cache,
 			   regs->fp_control_status + NUM_REGS,
 			   sigcontext_base + SIGCONTEXT_FPCSR);
   trad_frame_set_reg_addr (this_cache, regs->hi + NUM_REGS,
-			   sigcontext_base + SIGCONTEXT_HI);
+			   regs_base + SIGCONTEXT_HI);
   trad_frame_set_reg_addr (this_cache, regs->lo + NUM_REGS,
-			   sigcontext_base + SIGCONTEXT_LO);
+			   regs_base + SIGCONTEXT_LO);
   trad_frame_set_reg_addr (this_cache, regs->cause + NUM_REGS,
 			   sigcontext_base + SIGCONTEXT_CAUSE);
   trad_frame_set_reg_addr (this_cache, regs->badvaddr + NUM_REGS,

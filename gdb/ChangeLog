@@ -1,3 +1,9 @@
+2005-04-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* mips-linux-tdep.c (mips_linux_o32_sigframe_init): Adjust
+	big-endian correction code to not offset 32-bit registers.
+	Locate floating point registers correctly.
+
 2005-04-02  Mark Kettenis  <kettenis@gnu.org>
 
 	* main.c: Update copyright year.
