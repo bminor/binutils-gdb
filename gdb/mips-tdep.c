@@ -150,6 +150,36 @@ static const char *mips_saved_regsize_string = size_auto;
 
 #define MIPS_SAVED_REGSIZE (mips_saved_regsize())
 
+/* Return the contents of register REGNUM as a signed integer.  */
+
+static LONGEST
+read_signed_register (int regnum)
+{
+  void *buf = alloca (REGISTER_RAW_SIZE (regnum));
+  deprecated_read_register_gen (regnum, buf);
+  return (extract_signed_integer (buf, REGISTER_RAW_SIZE (regnum)));
+}
+
+static LONGEST
+read_signed_register_pid (int regnum, ptid_t ptid)
+{
+  ptid_t save_ptid;
+  LONGEST retval;
+
+  if (ptid_equal (ptid, inferior_ptid))
+    return read_signed_register (regnum);
+
+  save_ptid = inferior_ptid;
+
+  inferior_ptid = ptid;
+
+  retval = read_signed_register (regnum);
+
+  inferior_ptid = save_ptid;
+
+  return retval;
+}
+
 /* Return the MIPS ABI associated with GDBARCH.  */
 enum mips_abi
 mips_abi (struct gdbarch *gdbarch)

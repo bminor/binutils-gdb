@@ -1208,36 +1208,6 @@ read_register_pid (int regnum, ptid_t ptid)
   return retval;
 }
 
-/* Return the contents of register REGNUM as a signed integer.  */
-
-LONGEST
-read_signed_register (int regnum)
-{
-  void *buf = alloca (REGISTER_RAW_SIZE (regnum));
-  deprecated_read_register_gen (regnum, buf);
-  return (extract_signed_integer (buf, REGISTER_RAW_SIZE (regnum)));
-}
-
-LONGEST
-read_signed_register_pid (int regnum, ptid_t ptid)
-{
-  ptid_t save_ptid;
-  LONGEST retval;
-
-  if (ptid_equal (ptid, inferior_ptid))
-    return read_signed_register (regnum);
-
-  save_ptid = inferior_ptid;
-
-  inferior_ptid = ptid;
-
-  retval = read_signed_register (regnum);
-
-  inferior_ptid = save_ptid;
-
-  return retval;
-}
-
 /* Store VALUE into the raw contents of register number REGNUM.  */
 
 void
