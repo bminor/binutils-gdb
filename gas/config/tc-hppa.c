@@ -57,8 +57,10 @@ typedef elf_symbol_type obj_symbol_type;
 #if TARGET_ARCH_SIZE == 64
 /* How to generate a relocation.  */
 #define hppa_gen_reloc_type _bfd_elf64_hppa_gen_reloc_type
+#define elf_hppa_reloc_final_type elf64_hppa_reloc_final_type
 #else
 #define hppa_gen_reloc_type _bfd_elf32_hppa_gen_reloc_type
+#define elf_hppa_reloc_final_type elf32_hppa_reloc_final_type
 #endif
 
 /* ELF objects can have versions, but apparently do not have anywhere
@@ -8373,6 +8375,7 @@ int
 hppa_fix_adjustable (fixp)
      fixS *fixp;
 {
+  reloc_type code;
   struct hppa_fix_struct *hppa_fix;
 
   hppa_fix = (struct hppa_fix_struct *) fixp->tc_fix_data;
@@ -8384,9 +8387,57 @@ hppa_fix_adjustable (fixp)
 #endif
 
 #ifdef OBJ_ELF
-  if (fixp->fx_r_type == (int) R_PARISC_GNU_VTINHERIT
-      || fixp->fx_r_type ==  (int) R_PARISC_GNU_VTENTRY)
-    return 0;
+  /* LR/RR selectors are implicitly used for a number of different relocation
+     types.  We must ensure that none of these types are adjusted (see below)
+     even if they occur with a different selector.  */
+  code = elf_hppa_reloc_final_type (stdoutput, fixp->fx_r_type,
+		  		    hppa_fix->fx_r_format,
+				    hppa_fix->fx_r_field);
+
+  switch (code)
+    {
+    /* Relocation types which use e_lrsel.  */
+    case R_PARISC_DIR21L:
+    case R_PARISC_DLTIND21L:
+    case R_PARISC_DLTREL21L:
+    case R_PARISC_DPREL21L:
+    case R_PARISC_LTOFF_FPTR21L:
+    case R_PARISC_LTOFF_TP21L:
+    case R_PARISC_PCREL21L:
+    case R_PARISC_PLABEL21L:
+    case R_PARISC_PLTOFF21L:
+
+    /* Relocation types which use e_rrsel.  */
+    case R_PARISC_DIR14R:
+    case R_PARISC_DIR14DR:
+    case R_PARISC_DIR14WR:
+    case R_PARISC_DIR17R:
+    case R_PARISC_DLTIND14R:
+    case R_PARISC_DLTIND14DR:
+    case R_PARISC_DLTIND14WR:
+    case R_PARISC_DLTREL14R:
+    case R_PARISC_DLTREL14DR:
+    case R_PARISC_DLTREL14WR:
+    case R_PARISC_DPREL14R:
+    case R_PARISC_DPREL14DR:
+    case R_PARISC_DPREL14WR:
+    case R_PARISC_PCREL14R:
+    case R_PARISC_PCREL17R:
+    case R_PARISC_PLABEL14R:
+    case R_PARISC_LTOFF_FPTR14R:
+    case R_PARISC_LTOFF_FPTR14DR:
+    case R_PARISC_LTOFF_FPTR14WR:
+    case R_PARISC_LTOFF_TP14R:
+    case R_PARISC_LTOFF_TP14DR:
+    case R_PARISC_LTOFF_TP14WR:
+
+    /* Other types that we reject for reduction.  */
+    case R_PARISC_GNU_VTENTRY:
+    case R_PARISC_GNU_VTINHERIT:
+      return 0;
+    default:
+      break;
+    }
 #endif
 
   if (fixp->fx_addsy && (S_IS_EXTERNAL (fixp->fx_addsy)
