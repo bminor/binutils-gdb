@@ -89,6 +89,7 @@ tm-3b1.h
 tm-apollo68b.h
 tm-cisco.h
 tm-delta68.h
+tm-est.h
 tm-m68k.h
 tm-m68klynx.h
 tm-altos.h
