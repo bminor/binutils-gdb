@@ -75,8 +75,8 @@ fork_inferior (exec_file, allargs, env, traceme_fun, init_trace_fun)
   /* The user might want tilde-expansion, and in general probably wants
      the program to behave the same way as if run from
      his/her favorite shell.  So we let the shell run it for us.
-     FIXME, this should probably search the local environment (as
-     modified by the setenv command), not the env gdb inherited.  */
+     FIXME-maybe, we might want a "set shell" command so the user can change
+     the shell from within GDB.  */
   shell_file = getenv ("SHELL");
   if (shell_file == NULL)
     shell_file = default_shell_file;
