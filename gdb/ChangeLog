@@ -1,5 +1,8 @@
 2004-01-17  Andrew Cagney  <cagney@redhat.com>
 
+	* cris-tdep.c (cris_gdbarch_init): Do not set
+	deprecated_extract_struct_value_address.
+
 	* xstormy16-tdep.c: Update copyright.
 	(xstormy16_extract_struct_value_address): Update to current
 	extract struct value address interface.

@@ -4243,8 +4243,6 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_pop_frame (gdbarch, cris_pop_frame);
 
   set_gdbarch_deprecated_store_struct_return (gdbarch, cris_store_struct_return);
-  set_gdbarch_deprecated_extract_struct_value_address
-    (gdbarch, cris_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, always_use_struct_convention);
 
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, cris_frame_init_saved_regs);
