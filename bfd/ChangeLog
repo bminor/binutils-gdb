@@ -1,5 +1,10 @@
 2002-05-22  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-ppc.c (ppc64_elf_size_stubs): Don't strip .branch_lt.
+	(ppc64_elf_relocate_section): Handle unresolved relocs in opd.
+
+2002-05-22  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf64-ppc.c (ppc64_elf_relocate_section): Return false for
 	unresolved relocs.
 	(ppc64_elf_size_dynamic_sections): Check for splt NULL.

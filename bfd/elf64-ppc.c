@@ -4834,12 +4834,10 @@ ppc64_elf_size_stubs (output_bfd, stub_bfd, info, group_size,
       (*htab->layout_sections_again) ();
     }
 
-  if (htab->sbrlt->_raw_size == 0)
-    {
-      _bfd_strip_section_from_output (info, htab->sbrlt);
-      if (htab->srelbrlt != NULL)
-	_bfd_strip_section_from_output (info, htab->srelbrlt);
-    }
+  /* It would be nice to strip .branch_lt from the output if the
+     section is empty, but it's too late.  If we strip sections here,
+     the dynamic symbol table is corrupted since the section symbol
+     for the stripped section isn't written.  */
 
   ret = true;
 
@@ -5559,6 +5557,16 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  relocate = true;
 		  if (r_type == R_PPC64_ADDR64 || r_type == R_PPC64_TOC)
 		    {
+		      if (is_opd && h != NULL && info->shared)
+			{
+			  /* Lie about opd entries.  This case occurs
+			     when building shared libraries and we
+			     reference a function in another shared
+			     lib.  In that case we won't use the opd
+			     entry in this lib;  We ought to edit the
+			     opd section to remove unused entries.  */
+			  unresolved_reloc = false;
+			}
 		      outrel.r_info = ELF64_R_INFO (0, R_PPC64_RELATIVE);
 		    }
 		  else
