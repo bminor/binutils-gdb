@@ -12694,7 +12694,7 @@ tc_gen_reloc (section, fixp)
      stop md_apply_fix3 from subtracting twice in the first place since
      the fake addend is required for variant frags above.  */
   if (fixp->fx_addsy != NULL && OUTPUT_FLAVOR == bfd_target_elf_flavour
-      && code == BFD_RELOC_GPREL16
+      && (code == BFD_RELOC_GPREL16 || code == BFD_RELOC_MIPS16_GPREL)
       && reloc->addend != 0
       && mips_need_elf_addend_fixup (fixp))
     reloc->addend += S_GET_VALUE (fixp->fx_addsy);
