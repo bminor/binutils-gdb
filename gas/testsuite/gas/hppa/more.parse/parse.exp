@@ -38,7 +38,7 @@ proc do_string_tests {} {
 	    -re "^ +\[0-9\]+ 0014 09307831\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+      3233\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "\[^\n\]*\n"				{ }
-	    timeout				{ error "timeout\n"; break }
+	    timeout				{ perror "timeout\n"; break }
 	    eof					{ break }
 	}
     }
@@ -65,7 +65,7 @@ proc do_lsel_test {} {
 	    -re "^ +\[0-9\]+ 0008 22A04000\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "^ +\[0-9\]+ 000c 36B50100\[^\n\]*\n"	{ set x [expr $x+1] }
 	    -re "\[^\n\]*\n"				{ }
-	    timeout				{ error "timeout\n"; break }
+	    timeout				{ perror "timeout\n"; break }
 	    eof					{ break }
 	}
     }
@@ -105,7 +105,7 @@ proc do_valid_align_tests {} {
 	    -re "^ +\[0-9\]+ 0828\[^\n\]*BLOCK\[^\n\]*4\[^\n\]*\n"
 		{ set x [expr $x+1] }
 	    -re "\[^\n\]*\n"				{ }
-	    timeout				{ error "timeout\n"; break }
+	    timeout				{ perror "timeout\n"; break }
 	    eof					{ break }
 	}
     }
