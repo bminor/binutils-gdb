@@ -1,7 +1,7 @@
 AC_PREREQ(2.0)
 AC_INIT(z8k-dis.c)
 #    configure.in script for the opcodes library.
-#    Copyright (C) 1995 Free Software Foundation, Inc.
+#    Copyright (C) 1995, 1996 Free Software Foundation, Inc.
 #    Written by Cygnus Support.
 # 
 # This program is free software; you can redistribute it and/or modify
@@ -54,8 +54,8 @@ AC_ARG_PROGRAM
 
 ALLLIBS='$(TARGETLIB)'
 PICFLAG=
-SHLIB=
-SHLINK=
+SHLIB=unused-shlib
+SHLINK=unused-shlink
 if test "${shared}" = "true"; then
   ALLLIBS='$(TARGETLIB) $(SHLIB) $(SHLINK)'
   PICFLAG=-fpic
@@ -77,16 +77,17 @@ AC_PROG_CC
 . ${srcdir}/../bfd/configure.host
 
 AC_SUBST(HDEFINES)
-AC_CHECK_PROG(AR, ar, ar, :)
-AC_PROG_RANLIB
+AC_CHECK_TOOL(AR, ar)
+AC_CHECK_TOOL(RANLIB, ranlib, :)
 AC_PROG_INSTALL
 
 if test "${shared}" = "true"; then
   if test "${GCC}" != "yes" && test "${shared_non_gcc}" != "yes"; then
     AC_MSG_WARN([opcodes --enable-shared only supported when using gcc])
     shared=false
+    ALLLIBS='$(TARGETLIB)'
     PICFLAG=
-    SHLIB=
+    SHLIB=unused-shlib
   fi
 fi
 
@@ -97,10 +98,14 @@ AC_SUBST(SHLIB_CC)
 AC_SUBST(SHLIB_CFLAGS)
 if test "${commonbfdlib}" = "true"; then
   COMMON_SHLIB=yes
+  # Rebuild the shared library if libiberty or libbfd changes.
+  SHLIB_DEP="../libiberty/libiberty.a ../bfd/libbfd.a"
 else
   COMMON_SHLIB=
+  SHLIB_DEP=
 fi
 AC_SUBST(COMMON_SHLIB)
+AC_SUBST(SHLIB_DEP)
 AC_SUBST(SHLINK)
 
 AC_CHECK_HEADERS(string.h strings.h)

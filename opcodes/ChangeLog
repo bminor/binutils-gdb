@@ -1,3 +1,14 @@
+Tue Mar 26 15:47:14 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Use AC_CHECK_TOOL to find ar and ranlib.  From
+	Miles Bader <miles@gnu.ai.mit.edu>.
+	* configure: Rebuild.
+
+Sat Mar 16 13:04:07 1996  Fred Fish  <fnf@cygnus.com>
+
+	* z8kgen.c (internal, gas): Call xmalloc rather than unchecked
+	malloc.
+
 Tue Mar 12 12:14:10 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure: Rebuild with autoconf 2.8.
