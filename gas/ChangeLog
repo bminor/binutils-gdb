@@ -1,3 +1,10 @@
+Sun Feb 20 18:01:54 1994  Ian Lance Taylor  (ian@lisa.cygnus.com)
+
+	* config/obj-coff.h (obj_coff_section): Declare.
+	* config/obj-coff.c (obj_pseudo_table): For "section", use
+	obj_coff_section.
+	(obj_coff_section): Rewrite.
+
 Fri Feb 18 14:16:32 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* configure.in (i386-*-mach3*): New target; uses BFD.
