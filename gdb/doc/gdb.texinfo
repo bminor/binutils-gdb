@@ -2502,36 +2502,6 @@ cont
 end
 @end example
 
-@ignore
-@c I don't think this is true any longer, now that only readline
-@c switches to or from raw mode.  In any event, it is a (relatively
-@c easily fixable) GDB bug if it switches to or from raw mode except
-@c when it has to in order to read input from the terminal.  kingdon -6 Jul 93.
-One deficiency in the operation of automatically continuing breakpoints
-under Unix appears when your program uses raw mode for the terminal.
-@value{GDBN} switches back to its own terminal modes (not raw) before executing
-commands, and then must switch back to raw mode when your program is
-continued.  This causes any pending terminal input to be lost.
-@c FIXME: revisit below when GNU sys avail.
-@c In the GNU system, this will be fixed by changing the behavior of
-@c terminal modes.
-
-Under Unix, you can get around this problem by writing actions into
-the breakpoint condition rather than in commands.  For example,
-
-@example
-condition 5  (x = y + 4), 0
-@end example
-
-@noindent
-specifies a condition expression (@pxref{Expressions, ,Expressions}) that will
-change @code{x} as needed, then always have the value zero so your
-program will not stop.  No input is lost here, because @value{GDBN} evaluates
-break conditions without changing the terminal modes.  When you want
-to have nontrivial conditions for performing the side effects, the
-operators @samp{&&}, @samp{||} and @samp{?@dots{}:} may be useful.
-@end ignore
-
 @ifclear CONLY
 @node Breakpoint Menus
 @subsection Breakpoint menus
