@@ -1,3 +1,8 @@
+Fri Aug 21 16:07:52 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* d30v-opc.c (d30v_opcode_table): Add FLAG_MUL32 to MAC, MACS,
+	MSUB and MSUBS instructions.
+
 start-sanitize-r5900
 Tue Aug 18 16:48:52 1998  Ian Lance Taylor  <ian@cygnus.com>
 
