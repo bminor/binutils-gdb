@@ -1,3 +1,9 @@
+start-sanitize-tic80
+Fri Feb 21 20:58:51 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* configure.in (tic80-*-*): Build compiler.
+
+end-sanitize-tic80
 start-sanitize-d30v
 Sun Feb 16 15:41:09 1997  Andrew Cagney  <cagney@critters.cygnus.com>
 
