@@ -1,3 +1,9 @@
+Thu Mar 13 12:41:20 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* interp.c: Delete redundant prototypes of sim_foo fns.
+	(sim_open): New SIM_DESC result.  Argument is now in argv form.
+	(other sim_*): New SIM_DESC argument.
+
 Thu Mar 13 10:29:04 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* simops.c (trace_{input,output}_func): Call flush_stdout from the
