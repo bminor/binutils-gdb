@@ -1,5 +1,9 @@
 2001-08-18  Alan Modra  <amodra@bigpond.net.au>
 
+	* emultempl/aix.em: Formatting fixes.
+
+2001-08-18  Alan Modra  <amodra@bigpond.net.au>
+
 	* ldlang.c (insert_pad): Make use of an existing pad statement if
 	available.  Move code calculating alignment, adjusting section
 	alignment power, and adjusting dot to ..

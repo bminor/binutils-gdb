@@ -117,7 +117,7 @@ static unsigned int symbol_mode = 0x04;
 /* This routine is called before anything else is done.  */
 
 static void
-gld${EMULATION_NAME}_before_parse()
+gld${EMULATION_NAME}_before_parse ()
 {
 #ifndef TARGET_			/* I.e., if not generic.  */
   const bfd_arch_info_type *arch = bfd_scan_arch ("${OUTPUT_ARCH}");
@@ -136,7 +136,7 @@ gld${EMULATION_NAME}_before_parse()
    * The link_info.[init|fini]_functions are initialized in ld/lexsup.c.
    * Override them here so we can use the link_info.init_function as a
    * state flag that lets the backend know that -binitfini has been done.
-   */ 
+   */
   link_info.init_function = NULL;
   link_info.fini_function = NULL;
 
@@ -159,72 +159,72 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
 
   enum {
     OPTION_IGNORE = 300,
-    OPTION_AUTOIMP, 
-    OPTION_ERNOTOK, 
-    OPTION_EROK, 
-    OPTION_EXPORT, 
-    OPTION_IMPORT, 
-    OPTION_INITFINI, 
-    OPTION_LOADMAP, 
-    OPTION_MAXDATA, 
-    OPTION_MAXSTACK, 
-    OPTION_MODTYPE, 
-    OPTION_NOAUTOIMP, 
-    OPTION_NOSTRCMPCT, 
-    OPTION_PD, 
-    OPTION_PT, 
-    OPTION_STRCMPCT, 
+    OPTION_AUTOIMP,
+    OPTION_ERNOTOK,
+    OPTION_EROK,
+    OPTION_EXPORT,
+    OPTION_IMPORT,
+    OPTION_INITFINI,
+    OPTION_LOADMAP,
+    OPTION_MAXDATA,
+    OPTION_MAXSTACK,
+    OPTION_MODTYPE,
+    OPTION_NOAUTOIMP,
+    OPTION_NOSTRCMPCT,
+    OPTION_PD,
+    OPTION_PT,
+    OPTION_STRCMPCT,
     OPTION_UNIX
   };
 
   /*
     b64 is an empty option.  The native linker uses -b64 for xcoff64 support
-    Our linker uses -m aixppc64 for xcoff64 support. The choice for the 
+    Our linker uses -m aixppc64 for xcoff64 support. The choice for the
     correct emulation is done in collect2.c via the environmental varible
     LDEMULATION.
-	
+
     binitfini has special handling in the linker backend.  The native linker
     uses the arguemnts to generate a table of init and fini functions for
     the executable.  The important use for this option is to support aix 4.2+
     c++ constructors and destructors.  This is tied into gcc via collect2.c.
-	The function table is accessed by the runtime linker/loader by checking if
-	the first symbol in the loader symbol table is "__rtinit".  The native
-	linker generates this table and the loader symbol.  The gnu linker looks
-	for the symbol "__rtinit" and makes it the first loader symbol.  It is the
-	responsiblity of the user to define the __rtinit symbol.  The format for
-	__rtinit is given by the aix system file /usr/include/rtinit.h.  You can
-	look at collect2.c to see an example of how this is done for 32 and 64 bit.
-	Below is an exmaple of a 32 bit assembly file that defines __rtinit.
+    The function table is accessed by the runtime linker/loader by checking if
+    the first symbol in the loader symbol table is "__rtinit".  The native
+    linker generates this table and the loader symbol.  The gnu linker looks
+    for the symbol "__rtinit" and makes it the first loader symbol.  It is the
+    responsiblity of the user to define the __rtinit symbol.  The format for
+    __rtinit is given by the aix system file /usr/include/rtinit.h.  You can
+    look at collect2.c to see an example of how this is done for 32 and 64 bit.
+    Below is an exmaple of a 32 bit assembly file that defines __rtinit.
 
-	.file	"my_rtinit.s"
-	
-	.csect .data[RW],3
-	.globl __rtinit
-	.extern init_function
-	.extern fini_function
-	
-	__rtinit:
-	        .long 0
-	        .long f1i - __rtinit
-	        .long f1f - __rtinit
-	        .long f2i - f1i
-	        .align 3
-	f1i:	.long init_function
-	        .long s1i - __rtinit
-	        .long 0
-	f2i:	.long 0
-	        .long 0
-	        .long 0
-	f1f:	.long fini_function
-	        .long s1f - __rtinit
-	        .long 0
-	f2f:	.long 0
-	        .long 0
-	        .long 0
-	        .align 3
-	s1i:	.string "init_function"
-	        .align 3
-	s1f:	.string "fini_function"
+    .file   "my_rtinit.s"
+
+    .csect .data[RW],3
+    .globl __rtinit
+    .extern init_function
+    .extern fini_function
+
+    __rtinit:
+            .long 0
+            .long f1i - __rtinit
+            .long f1f - __rtinit
+            .long f2i - f1i
+            .align 3
+    f1i:    .long init_function
+            .long s1i - __rtinit
+            .long 0
+    f2i:    .long 0
+            .long 0
+            .long 0
+    f1f:    .long fini_function
+            .long s1f - __rtinit
+            .long 0
+    f2f:    .long 0
+            .long 0
+            .long 0
+            .align 3
+    s1i:    .string "init_function"
+            .align 3
+    s1f:    .string "fini_function"
 
    */
 
@@ -287,20 +287,24 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
      The AIX linker uses : to separate the option from the argument;
      changing it to = lets us treat it as a getopt option.  */
   indx = optind;
-  if (indx == 0) {
-    indx = 1;
-  }
-
-  if (indx < argc && strncmp (argv[indx], "-b", 2) == 0) {
-    char *s;
-    
-    for (s = argv[indx]; *s != '\0'; s++) {
-      if (*s == ':') {
-	*s = '=';
-	break;
-      }
+  if (indx == 0)
+    {
+      indx = 1;
     }
-  }
+
+  if (indx < argc && strncmp (argv[indx], "-b", 2) == 0)
+    {
+      char *s;
+
+      for (s = argv[indx]; *s != '\0'; s++)
+	{
+	  if (*s == ':')
+	    {
+	      *s = '=';
+	      break;
+	    }
+	}
+    }
 
 
   /* We add s and u so to the short options list so that -s and -u on
@@ -362,39 +366,45 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
     case OPTION_IGNORE:
       break;
 
-    case OPTION_INITFINI: {
-      /* 
-       * The aix linker init fini has the format :
-       *
-       * -binitfini:[ Initial][:Termination][:Priority]
-       *
-       * it allows the Termination and Priority to be optional.
-       *
-       * Since we support only one init/fini pair, we ignore the Priority.
-       * 
-       * Define the special symbol __rtinit.
-       *
-       * strtok does not correctly handle the case of -binitfini::fini: so
-       * do it by hand
-       */
-      char *t, *i, *f;
+    case OPTION_INITFINI:
+      {
+	/*
+	 * The aix linker init fini has the format :
+	 *
+	 * -binitfini:[ Initial][:Termination][:Priority]
+	 *
+	 * it allows the Termination and Priority to be optional.
+	 *
+	 * Since we support only one init/fini pair, we ignore the Priority.
+	 *
+	 * Define the special symbol __rtinit.
+	 *
+	 * strtok does not correctly handle the case of -binitfini::fini: so
+	 * do it by hand
+	 */
+	char *t, *i, *f;
 
-      i = t = optarg;
-      while (*t && ':' != *t) t++;
-      if (*t) *t++ = 0;
+	i = t = optarg;
+	while (*t && ':' != *t)
+	  t++;
+	if (*t)
+	  *t++ = 0;
 
-      if (0 != strlen(i)) {
-	link_info.init_function = i;
+	if (0 != strlen (i))
+	  {
+	    link_info.init_function = i;
+	  }
+
+	f = t;
+	while (*t && ':' != *t)
+	  t++;
+	*t = 0;
+
+	if (0 != strlen (f))
+	  {
+	    link_info.fini_function = f;
+	  }
       }
-
-      f = t;
-      while (*t && ':' != *t) t++;
-      *t = 0;
-
-      if (0 != strlen(f)) {
-	link_info.fini_function = f;
-      }
-    }
     break;
 
     case OPTION_AUTOIMP:
@@ -435,8 +445,7 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
     case OPTION_MAXDATA:
       val = strtoull (optarg, &end, 0);
       if (*end != '\0')
-	einfo ("%P: warning: ignoring invalid -bmaxdata number %s\n",
-	       optarg);
+	einfo ("%P: warning: ignoring invalid -bmaxdata number %s\n", optarg);
       else
 	maxdata = val;
       break;
@@ -444,8 +453,7 @@ gld${EMULATION_NAME}_parse_args (argc, argv)
     case OPTION_MAXSTACK:
       val = strtoull (optarg, &end, 0);
       if (*end != '\0')
-	einfo ("%P: warning: ignoring invalid -bmaxstack number %s\n",
-	       optarg);
+	einfo ("%P: warning: ignoring invalid -bmaxstack number %s\n", optarg);
       else
 	maxstack = val;
       break;
@@ -625,15 +633,16 @@ gld${EMULATION_NAME}_before_allocation ()
   /* Handle the import and export files, if any.  */
   for (fl = import_files; fl != NULL; fl = fl->next)
     gld${EMULATION_NAME}_read_file (fl->name, true);
-  for (el = export_symbols; el != NULL; el = el->next) {
-    struct bfd_link_hash_entry *h;
-    
-    h = bfd_link_hash_lookup (link_info.hash, el->name, false, false, false);
-    if (h == NULL)
-      einfo ("%P%F: bfd_link_hash_lookup of export symbol failed: %E\n");
-    if (! bfd_xcoff_export_symbol (output_bfd, &link_info, h, el->syscall))
-      einfo ("%P%F: bfd_xcoff_export_symbol failed: %E\n");
-  }
+  for (el = export_symbols; el != NULL; el = el->next)
+    {
+      struct bfd_link_hash_entry *h;
+
+      h = bfd_link_hash_lookup (link_info.hash, el->name, false, false, false);
+      if (h == NULL)
+	einfo ("%P%F: bfd_link_hash_lookup of export symbol failed: %E\n");
+      if (! bfd_xcoff_export_symbol (output_bfd, &link_info, h, el->syscall))
+	einfo ("%P%F: bfd_xcoff_export_symbol failed: %E\n");
+    }
 
   /* Track down all relocations called for by the linker script (these
      are typically constructor/destructor entries created by
@@ -681,113 +690,124 @@ gld${EMULATION_NAME}_before_allocation ()
 
   /* Look through the special sections, and put them in the right
      place in the link ordering.  This is especially magic.  */
-  for (i = 0; i < XCOFF_NUMBER_OF_SPECIAL_SECTIONS; i++) {
-    asection *sec;
-    lang_output_section_statement_type *os;
-    lang_statement_union_type **pls;
-    lang_input_section_type *is;
-    const char *oname;
-    boolean start;
+  for (i = 0; i < XCOFF_NUMBER_OF_SPECIAL_SECTIONS; i++)
+    {
+      asection *sec;
+      lang_output_section_statement_type *os;
+      lang_statement_union_type **pls;
+      lang_input_section_type *is;
+      const char *oname;
+      boolean start;
 
-    sec = special_sections[i];
-    if (sec == NULL)
-      continue;
+      sec = special_sections[i];
+      if (sec == NULL)
+	continue;
 
-    /* Remove this section from the list of the output section.
-       This assumes we know what the script looks like.  */
-    is = NULL;
-    os = lang_output_section_find (sec->output_section->name);
-    if (os == NULL) {
-      einfo ("%P%F: can't find output section %s\n",
-	     sec->output_section->name);
-    }
-
-    for (pls = &os->children.head; *pls != NULL; pls = &(*pls)->next) {
-
-      if ((*pls)->header.type == lang_input_section_enum && 
-	  (*pls)->input_section.section == sec)	{
-	is = (lang_input_section_type *) *pls;
-	*pls = (*pls)->next;
-	break;
+      /* Remove this section from the list of the output section.
+	 This assumes we know what the script looks like.  */
+      is = NULL;
+      os = lang_output_section_find (sec->output_section->name);
+      if (os == NULL) {
+	einfo ("%P%F: can't find output section %s\n",
+	       sec->output_section->name);
       }
-	
-      if ((*pls)->header.type == lang_wild_statement_enum) {
-	lang_statement_union_type **pwls;
-	
-	for (pwls = &(*pls)->wild_statement.children.head;
-	     *pwls != NULL;
-	     pwls = &(*pwls)->next) {
 
-	  if ((*pwls)->header.type == lang_input_section_enum && 
-	      (*pwls)->input_section.section == sec) {
+      for (pls = &os->children.head; *pls != NULL; pls = &(*pls)->header.next)
+	{
 
-	      is = (lang_input_section_type *) *pwls;
-	      *pwls = (*pwls)->next;
+	  if ((*pls)->header.type == lang_input_section_enum &&
+	      (*pls)->input_section.section == sec)
+	    {
+	      is = (lang_input_section_type *) *pls;
+	      *pls = (*pls)->header.next;
 	      break;
-	  }
+	    }
+
+	  if ((*pls)->header.type == lang_wild_statement_enum)
+	    {
+	      lang_statement_union_type **pwls;
+
+	      for (pwls = &(*pls)->wild_statement.children.head;
+		   *pwls != NULL;
+		   pwls = &(*pwls)->header.next)
+		{
+
+		  if ((*pwls)->header.type == lang_input_section_enum &&
+		      (*pwls)->input_section.section == sec)
+		    {
+
+		      is = (lang_input_section_type *) *pwls;
+		      *pwls = (*pwls)->header.next;
+		      break;
+		    }
+		}
+
+	      if (is != NULL)
+		break;
+	    }
 	}
-	
-	if (is != NULL)
+
+      if (is == NULL)
+	{
+	  einfo ("%P%F: can't find %s in output section\n",
+		 bfd_get_section_name (sec->owner, sec));
+	}
+
+      /* Now figure out where the section should go.  */
+      switch (i)
+	{
+
+	default: /* to avoid warnings */
+	case XCOFF_SPECIAL_SECTION_TEXT:
+	  /* _text */
+	  oname = ".text";
+	  start = true;
 	  break;
-      }
-    }	
 
-    if (is == NULL) {
-      einfo ("%P%F: can't find %s in output section\n",
-	     bfd_get_section_name (sec->owner, sec));
+	case XCOFF_SPECIAL_SECTION_ETEXT:
+	  /* _etext */
+	  oname = ".text";
+	  start = false;
+	  break;
+
+	case XCOFF_SPECIAL_SECTION_DATA:
+	  /* _data */
+	  oname = ".data";
+	  start = true;
+	  break;
+
+	case XCOFF_SPECIAL_SECTION_EDATA:
+	  /* _edata */
+	  oname = ".data";
+	  start = false;
+	  break;
+
+	case XCOFF_SPECIAL_SECTION_END:
+	case XCOFF_SPECIAL_SECTION_END2:
+	  /* _end and end */
+	  oname = ".bss";
+	  start = false;
+	  break;
+	}
+
+      os = lang_output_section_find (oname);
+
+      if (start)
+	{
+	  is->header.next = os->children.head;
+	  os->children.head = (lang_statement_union_type *) is;
+	}
+      else
+	{
+	  is->header.next = NULL;
+	  lang_statement_append (&os->children,
+				 (lang_statement_union_type *) is,
+				 &is->header.next);
+	}
     }
-     
-    /* Now figure out where the section should go.  */
-    switch (i) {
-
-    default: /* to avoid warnings */
-    case XCOFF_SPECIAL_SECTION_TEXT:
-      /* _text */
-      oname = ".text";
-      start = true;
-      break;
-    
-    case XCOFF_SPECIAL_SECTION_ETEXT:
-      /* _etext */
-      oname = ".text";
-      start = false;
-      break;
-
-    case XCOFF_SPECIAL_SECTION_DATA:
-      /* _data */
-      oname = ".data";
-      start = true;
-      break;
-    
-    case XCOFF_SPECIAL_SECTION_EDATA:
-      /* _edata */
-      oname = ".data";
-      start = false;
-      break;
-
-    case XCOFF_SPECIAL_SECTION_END:
-    case XCOFF_SPECIAL_SECTION_END2:
-      /* _end and end */
-      oname = ".bss";
-      start = false;
-      break;
-    }
-
-    os = lang_output_section_find (oname);
-
-    if (start) {
-      is->header.next = os->children.head;
-      os->children.head = (lang_statement_union_type *) is;
-    } else {
-      is->header.next = NULL;
-      lang_statement_append (&os->children,
-			     (lang_statement_union_type *) is,
-			     &is->header.next);
-    }
-  }
 }
 
-static int change_symbol_mode (char *input) 
+static int change_symbol_mode (char *input)
 {
   /*
    * 1 : state changed
@@ -804,22 +824,24 @@ static int change_symbol_mode (char *input)
   unsigned int bit;
   char *string;
 
-  for (bit = 0; ; bit++) {
-    string = symbol_mode_string[bit];
-    if (NULL == string)
-      return 0;
-    
-    if (0 == strcmp(input, string)) {
-      symbol_mode = (1 << bit);
-      return 1;
+  for (bit = 0; ; bit++)
+    {
+      string = symbol_mode_string[bit];
+      if (NULL == string)
+	return 0;
+
+      if (0 == strcmp (input, string))
+	{
+	  symbol_mode = (1 << bit);
+	  return 1;
+	}
     }
-  }
   /* should not be here */
   return 0;
 }
 
 
-static int is_syscall(char *input)
+static int is_syscall (char *input)
 {
   /*
    * 1 : yes
@@ -828,7 +850,7 @@ static int is_syscall(char *input)
    */
   unsigned int bit;
   char *string;
-  
+
   char *syscall_string[] = {
     "svc",	     /* 0x01 */
     "svc32",	     /* 0x02 */
@@ -841,21 +863,27 @@ static int is_syscall(char *input)
     NULL
   };
 
-  for (bit = 0; ;bit++) {
-    
-    string = syscall_string[bit];
-    if (NULL == string) {
-      return -1;
-    }
+  for (bit = 0; ;bit++)
+    {
 
-    if (0 == strcmp(input, string)) {
-      if (1 << bit & ${SYSCALL_MASK}) {
-	return 1;
-      } else {
-	return 0;
-      }
+      string = syscall_string[bit];
+      if (NULL == string)
+	{
+	  return -1;
+	}
+
+      if (0 == strcmp (input, string))
+	{
+	  if (1 << bit & ${SYSCALL_MASK})
+	    {
+	      return 1;
+	    }
+	  else
+	    {
+	      return 0;
+	    }
+	}
     }
-  }
   /* should not be here */
   return -1;
 }
@@ -897,7 +925,7 @@ gld${EMULATION_NAME}_read_file (filename, import)
 
   lineno = 0;
 
-  /* 
+  /*
    * default to 32 and 64 bit mode
    * symbols at top of /lib/syscalls.exp do not have a mode modifier and they
    * are not repeated, assume 64 bit routines also want to use them.
@@ -925,11 +953,11 @@ gld${EMULATION_NAME}_read_file (filename, import)
       s = (char *) obstack_base (o);
       while (isspace ((unsigned char) *s))
 	++s;
-      if (*s == '\0'  || 
-	  *s == '*' ||
-	  change_symbol_mode (s) ||
-	  (*s == '#' && s[1] == ' ') ||
-	  (! import && *s == '#' && s[1] == '!'))
+      if (*s == '\0'
+	  || *s == '*'
+	  || change_symbol_mode (s)
+	  || (*s == '#' && s[1] == ' ')
+	  || (! import && *s == '#' && s[1] == '!'))
 	{
 	  obstack_free (o, obstack_base (o));
 	  continue;
@@ -1008,111 +1036,115 @@ gld${EMULATION_NAME}_read_file (filename, import)
 	  continue;
 	}
 
-      if (symbol_mode & ${SYMBOL_MODE_MASK}) { 
+      if (symbol_mode & ${SYMBOL_MODE_MASK})
+	{
+	  /* This is a symbol to be imported or exported.  */
+	  symname = s;
+	  syscall = false;
+	  address = (bfd_vma) -1;
 
-	/* This is a symbol to be imported or exported.  */
-	symname = s;
-	syscall = false;
-	address = (bfd_vma) -1;
+	  while (! isspace ((unsigned char) *s) && *s != '\0')
+	    ++s;
+	  if (*s != '\0')
+	    {
+	      char *se;
 
-	while (! isspace ((unsigned char) *s) && *s != '\0')
-	  ++s;
-	if (*s != '\0')
-	  {
-	    char *se;
-	    
-	    *s++ = '\0';
+	      *s++ = '\0';
 
-	    while (isspace ((unsigned char) *s))
-	      ++s;
+	      while (isspace ((unsigned char) *s))
+		++s;
 
-	    se = s;
-	    while (! isspace ((unsigned char) *se) && *se != '\0')
-	      ++se;
-	    if (*se != '\0')
-	      {
-		*se++ = '\0';
-		while (isspace ((unsigned char) *se))
-		  ++se;
-		if (*se != '\0')
-		  einfo ("%s%d: warning: syntax error in import/export file\n",
-			 filename, lineno);
-	      }
-
-	    if (s != se) {
-	      int status;
-	      char *end;
-			  
-	      status = is_syscall(s);
-			  
-	      switch (status) {
-	      case 1:
-		/* this is a system call */
-		syscall = true;
-		break;
-					  
-	      case 0:
-		/* ignore this system call */
-		break;
-					  
-	      default:
-		/* not a system call, check for address */
-		address = strtoul (s, &end, 0);
-		if (*end != '\0') {
-		  einfo ("%s:%d: warning: syntax error in import/export file\n", filename, lineno);
-			 
+	      se = s;
+	      while (! isspace ((unsigned char) *se) && *se != '\0')
+		++se;
+	      if (*se != '\0')
+		{
+		  *se++ = '\0';
+		  while (isspace ((unsigned char) *se))
+		    ++se;
+		  if (*se != '\0')
+		    einfo ("%s%d: warning: syntax error in import/export file\n",
+			   filename, lineno);
 		}
-	      }
+
+	      if (s != se)
+		{
+		  int status;
+		  char *end;
+
+		  status = is_syscall (s);
+
+		  switch (status)
+		    {
+		    case 1:
+		      /* this is a system call */
+		      syscall = true;
+		      break;
+
+		    case 0:
+		      /* ignore this system call */
+		      break;
+
+		    default:
+		      /* not a system call, check for address */
+		      address = strtoul (s, &end, 0);
+		      if (*end != '\0')
+			{
+			  einfo ("%s:%d: warning: syntax error in import/export file\n",
+				 filename, lineno);
+
+			}
+		    }
+		}
 	    }
-	  }
 
-	if (! import)
-	  {
-	    struct export_symbol_list *n;
+	  if (! import)
+	    {
+	      struct export_symbol_list *n;
 
-	    ldlang_add_undef (symname);
-	    n = ((struct export_symbol_list *)
-		 xmalloc (sizeof (struct export_symbol_list)));
-	    n->next = export_symbols;
-	    n->name = xstrdup (symname);
-	    n->syscall = syscall;
-	    export_symbols = n;
-	  }
-	else
-	  {
-	    h = bfd_link_hash_lookup (link_info.hash, symname, false, false,
-				      true);
-	    if (h == NULL || h->type == bfd_link_hash_new)
-	      {
-		/* We can just ignore attempts to import an unreferenced
-		   symbol.  */
-	      }
-	    else
-	      {
-		if (! bfd_xcoff_import_symbol (output_bfd, &link_info, h,
-					       address, imppath, impfile,
-					       impmember))
-		  einfo ("%X%s:%d: failed to import symbol %s: %E\n",
-			 filename, lineno, symname);
-	      }
-	  }
-      }
+	      ldlang_add_undef (symname);
+	      n = ((struct export_symbol_list *)
+		   xmalloc (sizeof (struct export_symbol_list)));
+	      n->next = export_symbols;
+	      n->name = xstrdup (symname);
+	      n->syscall = syscall;
+	      export_symbols = n;
+	    }
+	  else
+	    {
+	      h = bfd_link_hash_lookup (link_info.hash, symname, false, false,
+					true);
+	      if (h == NULL || h->type == bfd_link_hash_new)
+		{
+		  /* We can just ignore attempts to import an unreferenced
+		     symbol.  */
+		}
+	      else
+		{
+		  if (! bfd_xcoff_import_symbol (output_bfd, &link_info, h,
+						 address, imppath, impfile,
+						 impmember))
+		    einfo ("%X%s:%d: failed to import symbol %s: %E\n",
+			   filename, lineno, symname);
+		}
+	    }
+	}
       obstack_free (o, obstack_base (o));
     }
-  
+
   if (obstack_object_size (o) > 0)
     {
-	  einfo ("%s:%d: warning: ignoring unterminated last line\n",
-		 filename, lineno);
-	  obstack_free (o, obstack_base (o));
-	}
-
-      if (! keep)
-	{
-	  obstack_free (o, NULL);
-	  free (o);
-	}
+      einfo ("%s:%d: warning: ignoring unterminated last line\n",
+	     filename, lineno);
+      obstack_free (o, obstack_base (o));
     }
+
+  if (! keep)
+    {
+      obstack_free (o, NULL);
+      free (o);
+    }
+}
 
 /* This routine saves us from worrying about declaring free.  */
 
@@ -1194,7 +1226,7 @@ gld${EMULATION_NAME}_find_exp_assignment (exp)
 }
 
 static char *
-gld${EMULATION_NAME}_get_script(isfile)
+gld${EMULATION_NAME}_get_script (isfile)
      int *isfile;
 EOF
 
@@ -1206,7 +1238,7 @@ then
 sc="-f ${srcdir}/emultempl/ostring.sed"
 
 cat >>e${EMULATION_NAME}.c <<EOF
-{			     
+{
   *isfile = 0;
 
   if (link_info.relocateable == true && config.build_constructors == true)
@@ -1227,7 +1259,7 @@ else
 # Scripts read from the filesystem.
 
 cat >>e${EMULATION_NAME}.c <<EOF
-{			     
+{
   *isfile = 1;
 
   if (link_info.relocateable == true && config.build_constructors == true)
@@ -1247,7 +1279,7 @@ fi
 
 cat >>e${EMULATION_NAME}.c <<EOF
 
-struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation = 
+struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
 {
   gld${EMULATION_NAME}_before_parse,
   syslib_default,
