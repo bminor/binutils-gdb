@@ -283,12 +283,12 @@ read_memory_integer (memaddr, len)
   return extract_signed_integer (buf, len);
 }
 
-unsigned LONGEST
+ULONGEST
 read_memory_unsigned_integer (memaddr, len)
      CORE_ADDR memaddr;
      int len;
 {
-  char buf[sizeof (unsigned LONGEST)];
+  char buf[sizeof (ULONGEST)];
 
   read_memory (memaddr, buf, len);
   return extract_unsigned_integer (buf, len);

@@ -915,7 +915,7 @@ parse_number (p, len, parsed_float, putithere)
      here, and we do kind of silly things like cast to unsigned.  */
   register LONGEST n = 0;
   register LONGEST prevn = 0;
-  unsigned LONGEST un;
+  ULONGEST un;
 
   register int i = 0;
   register int c;
@@ -928,7 +928,7 @@ parse_number (p, len, parsed_float, putithere)
   /* We have found a "L" or "U" suffix.  */
   int found_suffix = 0;
 
-  unsigned LONGEST high_bit;
+  ULONGEST high_bit;
   struct type *signed_type;
   struct type *unsigned_type;
 
@@ -1051,7 +1051,7 @@ parse_number (p, len, parsed_float, putithere)
 	 on 0x123456789 when LONGEST is 32 bits.  */
       if (c != 'l' && c != 'u' && n != 0)
 	{	
-	  if ((unsigned_p && (unsigned LONGEST) prevn >= (unsigned LONGEST) n))
+	  if ((unsigned_p && (ULONGEST) prevn >= (ULONGEST) n))
 	    error ("Numeric constant too large.");
 	}
       prevn = n;
@@ -1069,11 +1069,11 @@ parse_number (p, len, parsed_float, putithere)
      the case where it is we just always shift the value more than
      once, with fewer bits each time.  */
 
-  un = (unsigned LONGEST)n >> 2;
+  un = (ULONGEST)n >> 2;
   if (long_p == 0
       && (un >> (TARGET_INT_BIT - 2)) == 0)
     {
-      high_bit = ((unsigned LONGEST)1) << (TARGET_INT_BIT-1);
+      high_bit = ((ULONGEST)1) << (TARGET_INT_BIT-1);
 
       /* A large decimal (not hex or octal) constant (between INT_MAX
 	 and UINT_MAX) is a long or unsigned long, according to ANSI,
@@ -1087,20 +1087,20 @@ parse_number (p, len, parsed_float, putithere)
   else if (long_p <= 1
 	   && (un >> (TARGET_LONG_BIT - 2)) == 0)
     {
-      high_bit = ((unsigned LONGEST)1) << (TARGET_LONG_BIT-1);
+      high_bit = ((ULONGEST)1) << (TARGET_LONG_BIT-1);
       unsigned_type = builtin_type_unsigned_long;
       signed_type = builtin_type_long;
     }
   else
     {
-      high_bit = (((unsigned LONGEST)1)
+      high_bit = (((ULONGEST)1)
 		  << (TARGET_LONG_LONG_BIT - 32 - 1)
 		  << 16
 		  << 16);
       if (high_bit == 0)
 	/* A long long does not fit in a LONGEST.  */
 	high_bit =
-	  (unsigned LONGEST)1 << (sizeof (LONGEST) * HOST_CHAR_BIT - 1);
+	  (ULONGEST)1 << (sizeof (LONGEST) * HOST_CHAR_BIT - 1);
       unsigned_type = builtin_type_unsigned_long_long;
       signed_type = builtin_type_long_long;
     }

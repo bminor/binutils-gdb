@@ -63,7 +63,7 @@ typedef union
 
   {
     LONGEST lval;
-    unsigned LONGEST ulval;
+    ULONGEST ulval;
     struct {
       LONGEST val;
       struct type *type;

@@ -676,10 +676,10 @@ unpack_double (type, valaddr, invp)
     {
       /* Unsigned -- be sure we compensate for signed LONGEST.  */
 #ifndef _MSC_VER
-      return (unsigned LONGEST) unpack_long (type, valaddr);
+      return (ULONGEST) unpack_long (type, valaddr);
 #else
 #if (_MSC_VER > 800)
-      return (unsigned LONGEST) unpack_long (type, valaddr);
+      return (ULONGEST) unpack_long (type, valaddr);
 #else
       /* FIXME!!! msvc22 doesn't support unsigned __int64 -> double */
       return (LONGEST) unpack_long (type, valaddr);
@@ -1147,8 +1147,8 @@ unpack_field_as_long (type, valaddr, fieldno)
      char *valaddr;
      int fieldno;
 {
-  unsigned LONGEST val;
-  unsigned LONGEST valmask;
+  ULONGEST val;
+  ULONGEST valmask;
   int bitpos = TYPE_FIELD_BITPOS (type, fieldno);
   int bitsize = TYPE_FIELD_BITSIZE (type, fieldno);
   int lsbcount;
@@ -1168,7 +1168,7 @@ unpack_field_as_long (type, valaddr, fieldno)
 
   if ((bitsize > 0) && (bitsize < 8 * (int) sizeof (val)))
     {
-      valmask = (((unsigned LONGEST) 1) << bitsize) - 1;
+      valmask = (((ULONGEST) 1) << bitsize) - 1;
       val &= valmask;
       if (!TYPE_UNSIGNED (TYPE_FIELD_TYPE (type, fieldno)))
 	{
@@ -1220,9 +1220,9 @@ modify_field (addr, fieldval, bitpos, bitsize)
 
   /* Mask out old value, while avoiding shifts >= size of oword */
   if (bitsize < 8 * (int) sizeof (oword))
-    oword &= ~(((((unsigned LONGEST)1) << bitsize) - 1) << bitpos);
+    oword &= ~(((((ULONGEST)1) << bitsize) - 1) << bitpos);
   else
-    oword &= ~((~(unsigned LONGEST)0) << bitpos);
+    oword &= ~((~(ULONGEST)0) << bitpos);
   oword |= fieldval << bitpos;
 
   store_signed_integer (addr, sizeof oword, oword);

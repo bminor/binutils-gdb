@@ -411,13 +411,13 @@ extern void mips_pop_frame PARAMS ((void));
       if (mips_fpu == MIPS_FPU_NONE)					\
 	{								\
 	  store_unsigned_integer (dummyname + 3 * 4, 4,			\
-				  (unsigned LONGEST) 0);		\
+				  (ULONGEST) 0);			\
 	  store_unsigned_integer (dummyname + 4 * 4, 4,			\
-				  (unsigned LONGEST) 0);		\
+				  (ULONGEST) 0);			\
 	  store_unsigned_integer (dummyname + 5 * 4, 4,			\
-				  (unsigned LONGEST) 0);		\
+				  (ULONGEST) 0);			\
 	  store_unsigned_integer (dummyname + 6 * 4, 4,			\
-				  (unsigned LONGEST) 0);		\
+				  (ULONGEST) 0);			\
 	}								\
       else if (mips_fpu == MIPS_FPU_SINGLE)				\
 	{								\

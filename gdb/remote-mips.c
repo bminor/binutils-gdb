@@ -1732,7 +1732,7 @@ static void
 mips_fetch_registers (regno)
      int regno;
 {
-  unsigned LONGEST val;
+  ULONGEST val;
   int err;
 
   if (regno == -1)

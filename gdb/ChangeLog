@@ -1,3 +1,16 @@
+Tue Nov 12 12:18:29 1996  Jim Wilson  <wilson@cygnus.com>
+
+	* defs.h (ULONGEST): New macro.
+	* alpha-tdep.c, breakpoint.c, c-exp.y, ch-exp.c, convex-xdep.c,
+	corefile.c, defs.h, f-exp.y, findvar.c, gdbcore.h, m2-exp.y,
+	m88k-tdep.c, printcmd.c, remote-hms.c, remote-mips.c, sparc-tdep.c,
+	valarith.c, valops.c, values.c, config/gould/tm-np1.h,
+	config/mips/tm-mips.h, mswin/prebuilt/gdb/cexptab.c,
+	mswin/prebuilt/gdb/fexptab.c, mswin/prebuilt/gdb/m2exptab.c:
+ 	Change all occurances of unsigned LONGEST to ULONGEST.
+
+	* configure.host (mips-sgi-irix6): Add.
+	
 Tue Nov 12 12:16:40 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* sh-tdep.c: Add functionality for target function calls.
