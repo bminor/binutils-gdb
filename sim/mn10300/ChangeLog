@@ -1,3 +1,20 @@
+Wed Mar 12 15:04:00 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* simops.c: Fix typos in bset insns.  Fix arguments to store_mem
+	for bset imm8,(d8,an) and bclr imm8,(d8,an).
+
+Wed Mar  5 15:00:10 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* simops.c: Fix register references when computing Z and N bits
+	for lsr imm8,dn.
+
+Tue Feb  4 13:33:30 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* Makefile.in (@COMMON_MAKEFILE_FRAG): Use
+	COMMON_{PRE,POST}_CONFIG_FRAG instead.
+	* configure.in: sinclude ../common/aclocal.m4.
+	* configure: Regenerated.
+
 Fri Jan 24 10:47:25 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* interp.c (init_system): Allocate 2^19 bytes of space for the
