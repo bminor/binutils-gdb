@@ -1,3 +1,11 @@
+2002-01-15  Rodney Brown  <rbrown64@csc.com.au>
+
+	* config/i386/tm-i386v4.h: Define HAVE_I387_REGS.
+	* config/i386/i386v42mp.mh: Add i387-nat.o .
+	* i386v4-nat.c: Include i387-nat.h.
+	(supply_fpregset): Use i387_supply_fsave.
+	(fill_fpregset): Use i387_fill_fsave.
+
 2002-01-30  Richard Earnshaw  <rearnsha@arm.com>
 
 	* arm-tdep.c (arm_call_dummy_words): Define.

@@ -24,7 +24,7 @@
 #define TM_I386V4_H 1
 
 /* Pick up most of what we need from the generic i386 target include file. */
-
+#define HAVE_I387_REGS
 #include "i386/tm-i386.h"
 
 /* Pick up more stuff from the generic SVR4 host include file. */
