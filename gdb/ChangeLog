@@ -1,3 +1,9 @@
+start-sanitize-sky
+Wed Apr 22 13:40:16 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* txvu-tdep.c (txvu_print_insn): Fix thinko.
+
+end-sanitize-sky
 Wed Apr 22 12:58:23 1998 Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	Handle missing shared libraries during the examination of a core
