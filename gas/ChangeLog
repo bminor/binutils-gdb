@@ -4,6 +4,10 @@ Tue Jul  5 15:42:09 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 	(gpdisp_hi16_howto): Now points to const.
 	(load_insn_table, alpha_ip): Fix uses of const.
 
+	* doc/internals.texi: Updates to COFF description.  Added "@end
+	defmac" as needed, and some extra heading and "@bye" so it'll
+	format as a separate document.
+
 Tue Jul  5 13:54:00 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* config/obj-elf.h (S_GET_ALIGN, S_SET_ALIGN): Define.
