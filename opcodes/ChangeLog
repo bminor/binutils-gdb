@@ -1,5 +1,8 @@
 Thu Oct 10 10:25:58 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* mn10300-opc.c (mn10300_opcodes): Fix destination register
+	for shift-by-register opcodes.
+
 	* mn10300-opc.c (mn10300_operands): Break DN, DM, AN, AM
 	into [AD][MN][01] for encoding the position of the register
 	in the opcode.
