@@ -2,11 +2,11 @@
 # elf tests
 #
 
-proc run_list_test { name opts } {
+proc run_list_test { name suffix opts } {
     global READELF
     global srcdir subdir
     set testname "elf $name list"
-    set file $srcdir/$subdir/$name
+    set file $srcdir/$subdir/$readelf
     gas_run ${name}.s "$opts -o dump.o" ">&dump.out"
     if { [regexp_diff "dump.out" "${file}.l"] } then {
 	fail $testname
@@ -21,7 +21,7 @@ proc run_list_test { name opts } {
 	return
     }
     verbose_eval {[file_contents "dump.out"]} 3
-    if { [regexp_diff "dump.out" "${file}.e"] } then {
+    if { [regexp_diff "dump.out" "${file}.e${suffix}"] } then {
 	fail $testname
 	verbose "output is [file_contents "dump.out"]" 2
 	return
@@ -38,8 +38,12 @@ if { ([istarget "*-*-elf*"]
      && ![istarget *-*-linux*coff*]
      && ![istarget *-*-linux*oldld*]
 } then {
+    set target_machine ""
+    if [istarget "mips*-*-*"] then {
+	set target_machine -mips
+    }
     run_dump_test "ehopt0"
     run_dump_test "section0" 
     run_dump_test "section1" 
-    run_list_test "section2" "-al"
+    run_list_test "section2" "$target_machine" "-al"
 }

@@ -1,5 +1,12 @@
 2001-06-07  H.J. Lu  <hjl@gnu.org>
 
+	* gas/elf/section2.e-mips: New file.
+
+	* gas/elf/elf.exp (run_list_test): Add suffix.
+	Pass -mips as suffix to run_list_test for mips.
+
+2001-06-07  H.J. Lu  <hjl@gnu.org>
+
 	* gas/elf/section2.l: Match ".*GAS.*" instead of
 	"GAS LISTING .*".
 
