@@ -1,5 +1,9 @@
 2001-11-14  Dave Brolley  <brolley@redhat.com>
 
+	* cgen-dis.c (count_decodable_bits): New function.
+	(add_insn_to_hash_chain): New function.
+	(hash_insn_array): Call add_insn_to_hash_chain.
+	(hash_insn_list): Call add_insn_to_hash_chain.
 	* m32r-dis.c: Regenerated.
 	* fr30-dis.c: Regenerated.
 
