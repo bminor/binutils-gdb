@@ -1,5 +1,9 @@
 2003-06-29  Daniel Jacobowitz  <drow@mvista.com>
 
+	* sparc-tdep.c (sparc_y_regnum): Make external again.
+
+2003-06-29  Daniel Jacobowitz  <drow@mvista.com>
+
 	* cli/cli-logging.c (pop_output_files): Add void to function
 	definition.
 
