@@ -1,5 +1,10 @@
 2004-05-13  J. Brobecker  <brobecker@gnat.com>
 
+	* aix-thread.c (store_regs_kernel_thread): Fix a little obvious
+	error that was causing the build to fail.
+
+2004-05-13  J. Brobecker  <brobecker@gnat.com>
+
 	* aix-thread.c: #include "gdb_string.h". Needed for memset and memcopy.
 	* Makefile.in (aix-thread.o): Add dependency on gdb_string.h.
 

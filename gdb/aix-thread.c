@@ -1468,7 +1468,6 @@ store_regs_kernel_thread (int regno, pthdb_tid_t tid)
   struct ptxsprs sprs64;
   struct ptsprs  sprs32;
   int i;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
   if (debug_aix_thread)
     fprintf_unfiltered (gdb_stdlog, 
