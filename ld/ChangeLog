@@ -1,3 +1,7 @@
+2000-05-22  David O'Brien  <obrien@FreeBSD.org>
+
+        * configure.tgt: Recognize alpha-*-freebsd*.
+
 2000-05-26  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* ldmain.c: Include filenames.h.

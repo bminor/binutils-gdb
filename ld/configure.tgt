@@ -248,6 +248,7 @@ mips*-*-linux-gnu*)	targ_emul=elf32bsmip
 mips*-*-lnews*)		targ_emul=mipslnews ;;
 mn10200-*-*)		targ_emul=mn10200 ;;
 mn10300-*-*)		targ_emul=mn10300 ;;
+alpha-*-freebsd*)	targ_emul=elf64alpha ;;
 alpha*-*-linuxecoff*)	targ_emul=alpha targ_extra_emuls=elf64alpha
 			tdir_elf64alpha=`echo ${targ_alias} | sed -e 's/ecoff//'`
 			;;
