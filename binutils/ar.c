@@ -839,8 +839,6 @@ replace_members(files_to_move)
 	    current = *current_ptr;
 	    
 	    if (!strcmp(normalize(*files_to_move), current->filename)) {
-		/* snip out this entry from the chain */
-		*current_ptr = current->next;
 		if (newer_only) {
 		    struct stat     fsbuf,
 		                    asbuf;
@@ -864,6 +862,8 @@ replace_members(files_to_move)
 			goto next_file;
 		}
 
+		/* snip out this entry from the chain */
+		*current_ptr = current->next;
 
 		after_bfd = get_pos_bfd(&inarch->next, pos_end);
 		temp = *after_bfd;
