@@ -1,5 +1,12 @@
 2001-08-11  Andrew Cagney  <ac131313@redhat.com>
 
+	* config/mn10300/mn10300.mt (TM_FILE): Delete.
+	* configure.tgt: Add mn10300 to list of mulit-arch targets.
+	* config/mn10300/tm-mn10300.h: Delete file. Move contents ...
+	* mn10300-tdep.c: To here.
+
+2001-08-11  Andrew Cagney  <ac131313@redhat.com>
+
 	* config/i386/tm-symmetry.h (REGISTER_CONVERT_TO_VIRTUAL): Make
 	val a DOUBLEST.  Use floatformat_to_doublest.
 	(REGISTER_CONVERT_TO_RAW): Ditto.  Use foatformat_from_doublest.

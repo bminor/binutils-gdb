@@ -324,4 +324,5 @@ case "${gdb_target}" in
 cris)		gdb_multi_arch=yes ;;
 d10v)		gdb_multi_arch=yes ;;
 m68hc11)	gdb_multi_arch=yes ;;
+mn10300)	gdb_multi_arch=yes ;;
 esac
