@@ -1,5 +1,10 @@
 2003-09-23  Alan Modra  <alan@modra.org>
 
+	* simple.c (bfd_simple_get_relocated_section_contents): Free the
+	hash table using _bfd_generic_link_hash_table_free.
+
+2003-09-23  Alan Modra  <alan@modra.org>
+
 	* elf-bfd.h (struct bfd_elf_special_section): Remove "suffix".  Change
 	type of prefix_length and suffix_length to int.  Rename "attributes"
 	to "attr".  Comment.

@@ -265,7 +265,7 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
   bfd_map_over_sections (abfd, simple_restore_output_info, saved_offsets);
   free (saved_offsets);
 
-  bfd_link_hash_table_free (abfd, link_info.hash);
+  _bfd_generic_link_hash_table_free (link_info.hash);
 
   RETURN (contents);
 }
