@@ -1,3 +1,7 @@
+2002-02-11  Alexandre Oliva  <aoliva@redhat.com>
+
+	* config/tc-sh.c (dot): Removed unused function.
+
 2002-02-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: "make dep-am".
