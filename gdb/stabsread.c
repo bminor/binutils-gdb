@@ -169,6 +169,8 @@ static int
 read_cfront_member_functions (struct field_info *, char **,
 			      struct type *, struct objfile *);
 
+static char *find_name_end (char *name);
+
 /* end new functions added for cfront support */
 
 static void
@@ -1271,7 +1273,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	       struct objfile *objfile)
 {
   register struct symbol *sym;
-  char *p = (char *) strchr (string, ':');
+  char *p = (char *) find_name_end (string);
   int deftype;
   int synonym = 0;
   register int i;
@@ -2004,7 +2006,8 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
          a typedef for "foo".  Unfortunately, cfront never makes the typedef
          when translating C++ into C.  We make the typedef here so that
          "ptype foo" works as expected for cfront translated code.  */
-      else if (current_subfile->language == language_cplus)
+      else if ((current_subfile->language == language_cplus)
+	       || (current_subfile->language == language_objc))
 	synonym = 1;
 
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
@@ -5613,6 +5616,32 @@ finish_global_stabs (struct objfile *objfile)
       patch_block_stabs (global_symbols, global_stabs, objfile);
       xfree (global_stabs);
       global_stabs = NULL;
+    }
+}
+
+/* Find the end of the name, delimited by a ':', but don't match
+   ObjC symbols which look like -[Foo bar::]:bla.  */
+static char *
+find_name_end (char *name)
+{
+  char *s = name;
+  if (s[0] == '-' || *s == '+')
+    {
+      /* Must be an ObjC method symbol.  */
+      if (s[1] != '[')
+	{
+	  error ("invalid symbol name \"%s\"", name);
+	}
+      s = strchr (s, ']');
+      if (s == NULL)
+	{
+	  error ("invalid symbol name \"%s\"", name);
+	}
+      return strchr (s, ':');
+    }
+  else
+    {
+      return strchr (s, ':');
     }
 }
 

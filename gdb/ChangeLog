@@ -1,3 +1,8 @@
+2002-10-18  Adam Fedor  <fedor@gnu.org>
+
+	* stabsread.c (find_name_end): New function.
+	(define_symbol): Use it.
+
 2002-10-18  Daniel Jacobowitz  <drow@mvista.com>
 
 	* config/alpha/nm-fbsd.h (CANNOT_STEP_BREAKPOINT): Define to 1.
