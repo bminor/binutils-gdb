@@ -53,6 +53,7 @@ obstack.h
 os9k.h
 opcode
 progress.h
+regs
 remote-sim.h
 symcat.h
 wait.h
