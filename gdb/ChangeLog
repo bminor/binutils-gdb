@@ -1,3 +1,16 @@
+Wed Jul  8 00:11:02 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* dbxread.c (dbx_symfile_init):  Init stab_section_info to NULL to
+	prevent crashes when examining cross-targets.
+	* dbxread.c (process_one_symbol):  Include directory name when
+	calling start_subfile for SOL & BINCL symbols.  This allows gdb to
+	find include files, and yacc/lex sources when the cwd doesn't match
+	that in which the object was compiled.
+	* objfiles.h (ALL_MSYMBOLS):  Don't seg fault when there are no
+	msymbols.
+	* symtab.c (lookup_symtab_1):  Rewrite.  It now handles include
+	files.
+
 Tue Jul  7 09:00:42 1992  Fred Fish  (fnf@cygnus.com)
 
 	* maint.c (maintenance_command, maintenance_info_command):

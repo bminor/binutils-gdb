@@ -134,63 +134,74 @@ lookup_symtab_1 (name)
   register struct symtab *s;
   register struct partial_symtab *ps;
   register char *slash;
-  register int len;
   register struct objfile *objfile;
 
-  ALL_SYMTABS (objfile, s)
-    {
-      if (strcmp (name, s->filename) == 0)
-	{
-	  return (s);
-	}
-    }
+ got_symtab:
 
-  ALL_PSYMTABS (objfile, ps)
-    {
-      if (strcmp (name, ps -> filename) == 0)
-	{
-	  if (ps -> readin)
-	    {
-	      error ("Internal: readin pst for `%s' found when no symtab found.", name);
-	    }
-	  return (PSYMTAB_TO_SYMTAB (ps));
-	}
-    }
+  /* First, search for an exact match */
+
+  ALL_SYMTABS (objfile, s)
+    if (strcmp (name, s->filename) == 0)
+      return s;
 
   slash = strchr (name, '/');
-  len = strlen (name);
+
+  /* Now, search for a matching tail (only if name doesn't have any dirs) */
 
   if (!slash)
-    {
-      ALL_SYMTABS (objfile, s)
-	{
-	  int l = strlen (s->filename);
-	  
-	  if (l > len
-	      && s->filename[l - len -1] == '/'
-	      && (strcmp (s->filename + l - len, name) == 0))
-	    {
-	      return (s);
-	    }
-	}
+    ALL_SYMTABS (objfile, s)
+      {
+	char *p = s -> filename;
+	char *tail = strrchr (p, '/');
 
-      ALL_PSYMTABS (objfile, ps)
-	{
-	  int l = strlen (ps -> filename);
+	if (tail)
+	  p = tail + 1;
 
-	  if (l > len
-	      && ps -> filename[l - len - 1] == '/'
-	      && (strcmp (ps->filename + l - len, name) == 0))
-	    {
-	      if (ps -> readin)
-		{
-		  error ("Internal: readin pst for `%s' found when no symtab found.", name);
-		}
-	      return (PSYMTAB_TO_SYMTAB (ps));
-	    }
-	}
-    }
+	if (strcmp (p, name) == 0)
+	  return s;
+      }
+
+  /* Same search rules as above apply here, but now we look thru the
+     psymtabs.  */
+
+  ALL_PSYMTABS (objfile, ps)
+    if (strcmp (name, ps -> filename) == 0)
+      goto got_psymtab;
+
+  if (!slash)
+    ALL_PSYMTABS (objfile, ps)
+      {
+	char *p = ps -> filename;
+	char *tail = strrchr (p, '/');
+
+	if (tail)
+	  p = tail + 1;
+
+	if (strcmp (p, name) == 0)
+	  goto got_psymtab;
+      }
+
   return (NULL);
+
+ got_psymtab:
+
+  if (ps -> readin)
+    error ("Internal: readin pst for `%s' found when no symtab found.", name);
+
+  s = PSYMTAB_TO_SYMTAB (ps);
+
+  if (s)
+    return s;
+
+  /* At this point, we have located the psymtab for this file, but
+     the conversion to a symtab has failed.  This usually happens
+     when we are looking up an include file.  In this case,
+     PSYMTAB_TO_SYMTAB doesn't return a symtab, even though one has
+     been created.  So, we need to run through the symtabs again in
+     order to find the file.
+     XXX - This is a crock, and should be fixed inside of the the
+     symbol parsing routines. */
+  goto got_symtab;
 }
 
 /* Lookup the symbol table of a source file named NAME.  Try a couple

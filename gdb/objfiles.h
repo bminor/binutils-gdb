@@ -358,6 +358,7 @@ have_minimal_symbols PARAMS ((void));
 
 #define	ALL_MSYMBOLS(objfile, m) \
   ALL_OBJFILES (objfile)	 \
-    ALL_OBJFILE_MSYMBOLS (objfile, m)
+    if ((objfile)->msymbols)	 \
+      ALL_OBJFILE_MSYMBOLS (objfile, m)
 
 #endif	/* !defined (OBJFILES_H) */

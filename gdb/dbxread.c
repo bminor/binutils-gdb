@@ -545,6 +545,7 @@ dbx_symfile_init (objfile)
 #endif
   /* FIXME POKING INSIDE BFD DATA STRUCTURES */
 
+  DBX_SYMFILE_INFO (objfile)->stab_section_info = NULL;
   DBX_TEXT_SECT (objfile) = bfd_get_section_by_name (sym_bfd, ".text");
   if (!DBX_TEXT_SECT (objfile))
     error ("Can't find .text section in symbol file");
@@ -1800,17 +1801,17 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 	 (whose name was given in the N_SO symbol.)  */
       /* Relocate for dynamic loading */
       valu += ANOFFSET (section_offsets, SECT_OFF_TEXT);
-      start_subfile (name, NULL);
+      start_subfile (name, current_subfile->dirname);
       break;
 
     case N_BINCL:
       push_subfile ();
       add_new_header_file (name, valu);
-      start_subfile (name, NULL);
+      start_subfile (name, current_subfile->dirname);
       break;
 
     case N_EINCL:
-      start_subfile (pop_subfile (), NULL);
+      start_subfile (pop_subfile (), current_subfile->dirname);
       break;
 
     case N_EXCL:
