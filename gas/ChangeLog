@@ -1,5 +1,9 @@
 Fri Mar 28 13:08:33 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	From Ralf Baechle <ralf@gnu.ai.mit.edu>:
+	* configure.in: Set emulations for mips-*-linux*-*.
+	* configure: Rebuild.
+
 	* config/tc-mips.c (struct mips_set_options): Define.
 	(mips_opts): New static variable.
 	(mips_isa): Remove.  Now a field in mips_opts.  Change all

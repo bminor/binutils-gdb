@@ -226,6 +226,7 @@ changequote([,])dnl
       mips-*-irix6*)	    fmt=elf targ=mips-big ;;
       mips-*-irix5*)        fmt=elf targ=mips-big ;;
       mips-*-irix*)         fmt=ecoff targ=mips-big ;;
+      mips-*-lnews*)        fmt=ecoff targ=mips-lit em=lnews ;;
       mips-*-riscos*)       fmt=ecoff targ=mips-big ;;
       mips-*-sysv*)         fmt=ecoff targ=mips-big ;;
       mips-*-elf* | mips-*-rtems* | mips-*-linux*)
@@ -245,6 +246,7 @@ changequote([,])dnl
 			    esac
                             ;;
       ppc-*-aix*)           fmt=coff ;;
+      ppc-*-beos*)          fmt=coff ;;
       ppc-*-elf* | ppc-*-eabi* | ppc-*-sysv4*)
 			    fmt=elf
 			    case "$endian" in
@@ -367,19 +369,19 @@ changequote([,])dnl
 	;;
 
       mips)
-	`echo ${extra_objects}` | grep -s "itbl-parse.o" 
+	echo ${extra_objects} | grep -s "itbl-parse.o" 
 	if test $? -ne 0 ; then
-	extra_objects="$extra_objects itbl-parse.o"
+	  extra_objects="$extra_objects itbl-parse.o"
 	fi
 
-	`echo ${extra_objects}` | grep -s "itbl-lex.o" 
+	echo ${extra_objects} | grep -s "itbl-lex.o" 
 	if test $? -ne 0 ; then
-	extra_objects="$extra_objects itbl-lex.o"
+	  extra_objects="$extra_objects itbl-lex.o"
 	fi
 
-	`echo ${extra_objects}` | grep -s "itbl-ops.o" 
+	echo ${extra_objects} | grep -s "itbl-ops.o" 
 	if test $? -ne 0 ; then
-	extra_objects="$extra_objects itbl-ops.o"
+	  extra_objects="$extra_objects itbl-ops.o"
 	fi
 	;;
 
@@ -408,6 +410,11 @@ changequote([,])dnl
 
     case ${generic_target}-${fmt} in
       mips-*-irix5*-*)	emulation="mipsbelf mipslelf mipself mipsbecoff mipslecoff mipsecoff" ;;
+      mips-*-linux*-*)	case "$endian" in
+			big)	emulation="mipsbelf mipslelf mipself mipsbecoff mipslecoff mipsecoff" ;;
+			*)	emulation="mipslelf mipsbelf mipself mipslecoff mipsbecoff mipsecoff" ;;
+			esac ;;
+      mips-*-lnews*-ecoff) ;;
       mips-*-*-ecoff)	case "$endian" in
 			big)	emulation="mipsbecoff mipslecoff mipsecoff" ;;
 			*)	emulation="mipslecoff mipsbecoff mipsecoff" ;;
@@ -415,6 +422,10 @@ changequote([,])dnl
       mips-*-*-elf)	case "$endian" in
 			big)	emulation="mipsbelf mipslelf mipself" ;;
 			*)	emulation="mipslelf mipsbelf mipself" ;;
+      # Uncommenting the next line will turn on support for i386 COFF
+      # in any i386 ELF configuration.  This probably doesn't work
+      # correctly.
+      # i386-*-*-elf)	emulation="i386coff i386elf" ;;
 			esac ;;
     esac
 
@@ -509,6 +520,10 @@ for em in . $emulations ; do
 	fmt=elf   file=mipself ;;
     mipsbecoff | mipslecoff)
 	fmt=ecoff file=mipsecoff ;;
+    i386coff)
+	fmt=coff  file=i386coff ;;
+    i386elf)
+	fmt=elf   file=i386elf ;;
   esac
   formats="$formats $fmt"
   emfiles="$emfiles e-$file.o"
@@ -544,15 +559,6 @@ AC_SUBST(extra_objects)
 AC_DEFINE_UNQUOTED(EMULATIONS, $EMULATIONS)
 AC_DEFINE_UNQUOTED(DEFAULT_EMULATION, "$DEFAULT_EMULATION")
 
-files="config/tc-${target_cpu_type}.c config/tc-${target_cpu_type}.h \
-	config/obj-${obj_format}.h config/obj-${obj_format}.c \
-	config/te-${te_file}.h config/atof-${atof}.c \
-	config/itbl-${target_cpu_type}.h \
-	$extra_files"
-links="targ-cpu.c targ-cpu.h obj-format.h obj-format.c targ-env.h atof-targ.c \
-	itbl-cpu.h \
-	$extra_links"
-
 case ${primary_bfd_gas}-${target_cpu_type}-${obj_format} in
   yes-*-coff)	need_bfd=yes ;;
   no-*-coff)	need_bfd=yes
@@ -569,10 +575,9 @@ esac
 
 AC_SUBST(target_cpu_type)
 AC_SUBST(obj_format)
+AC_SUBST(te_file)
 AC_SUBST(atof)
 dnl AC_SUBST(emulation)
-
-AC_LINK_FILES($files, $links)
 
 case "${primary_bfd_gas}" in
   yes)	AC_DEFINE(BFD_ASSEMBLER)
@@ -771,4 +776,19 @@ AC_SUBST(HLDENV)
 AC_SUBST(RPATH_ENVVAR)
 
 dnl This must come last.
-AC_OUTPUT(Makefile doc/Makefile .gdbinit:gdbinit.in)
+
+dnl We used to make symlinks to files in the source directory, but now
+dnl we just use the right name for .c files, and create .h files in
+dnl the build directory which include the right .h file.  Make sure
+dnl the old symlinks don't exist, so that a reconfigure in an existing
+dnl directory behaves reasonably.
+
+AC_OUTPUT(Makefile doc/Makefile .gdbinit:gdbinit.in,
+[rm -f targ-cpu.c targ-cpu.h obj-format.h obj-format.c targ-env.h atof-targ.c itbl-cpu.h
+ echo '#include "tc-'"${target_cpu_type}"'.h"' > targ-cpu.h
+ echo '#include "obj-'"${obj_format}"'.h"' > obj-format.h
+ echo '#include "te-'"${te_file}"'.h"' > targ-env.h
+ echo '#include "itbl-'"${target_cpu_type}"'.h"' > itbl-cpu.h],
+[target_cpu_type=${target_cpu_type}
+ obj_format=${obj_format}
+ te_file=${te_file}])
