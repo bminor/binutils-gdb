@@ -73,7 +73,7 @@ CC_FOR_BUILD = {CC}
 
 INCDIR = "{topsrcdir}"include
 #CSEARCH = -i : -i {srcdir} -i {INCDIR}:
-CSEARCH =  -i "{INCDIR}","{INCDIR}":,"{topsrcdir}"extra-include:,"{srcdir}"
+CSEARCH =  -i "{INCDIR}","{INCDIR}":,"{INCDIR}":mpw:,::extra-include:,"{srcdir}"
 DEP = mkdep
 
 SUBDIRS = doc

@@ -1,3 +1,10 @@
+Tue Feb 15 12:44:30 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* mpw-make.in (CSEARCH): Add include/mpw to search path.
+	* hosts/mpw.h (stat): Remove incomplete definition, now in
+	include/mpw/sys.
+	(POSIX_UTIME): Define.
+
 Sat Jan 22 13:30:57 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* mpw-config.in: Create sysdep.h using forward-include.
