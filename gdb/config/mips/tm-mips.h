@@ -212,10 +212,9 @@ extern CORE_ADDR mips_skip_prologue PARAMS ((CORE_ADDR addr, int lenient));
 #endif
 
 /* Store the address of the place in which to copy the structure the
-   subroutine will return.  This is called from call_function. */
+   subroutine will return.  Handled by mips_push_arguments.  */
 
-#define STORE_STRUCT_RETURN(addr, sp) \
-  { sp = push_word(sp, addr);}
+#define STORE_STRUCT_RETURN(addr, sp)	/**/
 
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,
