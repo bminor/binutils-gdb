@@ -409,7 +409,7 @@ value_true PARAMS ((struct value *));
 
 extern struct type * lang_bool_type PARAMS ((void));
 
-/* The type used for Boolean values in teh current language. */
+/* The type used for Boolean values in the current language. */
 #define LA_BOOL_TYPE lang_bool_type ()
 
 /* Misc:  The string representing a particular enum language.  */
