@@ -4002,7 +4002,7 @@ ecoff_slurp_armap (abfd)
   /* This code used to overlay the symdefs over the raw archive data,
      but that doesn't work on a 64 bit host.  */
 
-  stringbase = raw_ptr + count * (2 * LONG_SIZE) + LONG_SIZE;
+  stringbase = raw_armap + count * (2 * LONG_SIZE) + 2 * LONG_SIZE;
 
 #ifdef CHECK_ARMAP_HASH
   {

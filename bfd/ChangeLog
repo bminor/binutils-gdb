@@ -1,3 +1,8 @@
+Mon Aug  9 11:29:53 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* ecoff.c (ecoff_slurp_armap): Correct bug in initialization of
+	stringbase.
+
 Sun Aug  8 12:21:13 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* configure.in: Remove unneeded test.
