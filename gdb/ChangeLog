@@ -1,3 +1,7 @@
+2001-03-09  Keith Seitz  <keiths@cygnus.com>
+
+	* MAINTAINERS: Add myself to write after approval list.
+
 2001-03-09  Mark Kettenis  <kettenis@gnu.org>
 
 	* i387-tdep.c (print_i387_status_word): Fix printing of Stack
