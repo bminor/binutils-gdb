@@ -652,7 +652,8 @@ mips_convert_register_p (int regnum, struct type *type)
 {
   return (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
 	  && register_size (current_gdbarch, regnum) == 4
-	  && (regnum) >= mips_regnum (current_gdbarch)->fp0 && (regnum) < mips_regnum (current_gdbarch)->fp0 + 32
+	  && (regnum % NUM_REGS) >= mips_regnum (current_gdbarch)->fp0
+	  && (regnum % NUM_REGS) < mips_regnum (current_gdbarch)->fp0 + 32
 	  && TYPE_CODE(type) == TYPE_CODE_FLT
 	  && TYPE_LENGTH(type) == 8);
 }
@@ -6030,6 +6031,10 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_deprecated_pop_frame (gdbarch, mips_pop_frame);
   set_gdbarch_frame_align (gdbarch, mips_frame_align);
   set_gdbarch_deprecated_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
+
+  set_gdbarch_convert_register_p (gdbarch, mips_convert_register_p);
+  set_gdbarch_register_to_value (gdbarch, mips_register_to_value);
+  set_gdbarch_value_to_register (gdbarch, mips_value_to_register);
 
   set_gdbarch_deprecated_frame_chain (gdbarch, mips_frame_chain);
   set_gdbarch_frameless_function_invocation (gdbarch, 

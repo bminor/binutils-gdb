@@ -1,3 +1,10 @@
+2004-01-12  Andrew Cagney  <cagney@redhat.com>
+
+	* mips-tdep.c (mips_convert_register_p): Handle both raw and
+	cooked floating-point registers.
+	(mips_gdbarch_init): Set convert_register_p, register_to_value,
+	and value_to_register.
+
 2004-01-13  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh (FUNCTION_START_OFFSET): Make zero the default.
