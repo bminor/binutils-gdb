@@ -1,3 +1,37 @@
+Fri Dec  9 17:22:55 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* scripttempl/elf.sc: Move .ctors and .dtors from .text segment to
+	.data segment.  They must be writable when creating a shared
+	library.  From H.J. Lu <hjl@nynexst.com>.
+
+Fri Dec  2 14:09:00 1994  Ian Lance Taylor  <ian@rtl.cygnus.com>
+
+	* emultempl/miposecoff.em: New file.
+	* emulparams/mipsidt.sh (TEMPLATE_NAME): Set to mipsecoff.
+	* emulparams/mipsidtl.sh (TEMPLATE_NAME): Likewise.
+	* scripttempl/mips.sc: Put .rel.sdata sections in .text, and
+	provide __runtime_reloc_start and __runtime_reloc_stop if they are
+	used.   Align _fdata to a 16 byte boundary.
+	* Makefile.in (emipsidt.c): Depend upon mipsecoff.em rather than
+	generic.em.
+	(emipsidtl.c): Likewise.
+	(check): Pass CC_FOR_HOST and CFLAGS_FOR_HOST to runtest.
+
+	* ld.h (args_type): Add new field embedded_relocs.
+	* ldemul.h (ldemul_after_open, after_open_default): Declare.
+	(ld_emulation_xfer_struct): Add new field after_open.
+	* ldemul.c (ldemul_after_open): New function.
+	(after_open_default): New function.
+	* ldlang.c (lang_process): Call ldemul_after_open.
+	* lexsup.c (parse_args): Handle --embedded-relocs.
+	* emultempl/elf32.em (ld_${EMULATION_NAME}_emulation): Initialize
+	new after_open field to after_open_default.
+	* emultempl/generic.em, emultempl/gld960.em: Likewise.
+	* emultempl/gld960c.em, emultempl/hppaelf.em: Likewise.
+	* emultempl/linux.em, emultempl/m88kbcs.em: Likewise.
+	* emultempl/sunos.em, emultempl/vanilla.em: Likewise.
+	* ld.texinfo, ld.1: Mention -embedded-relocs.
+
 Wed Nov 23 22:04:47 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 	* Makefile.in: Add eshl.o.
