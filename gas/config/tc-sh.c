@@ -388,7 +388,7 @@ sh_elf_cons (nbytes)
   input_line_pointer--;		/* Put terminator back into stream.  */
   if (*input_line_pointer == '#' || *input_line_pointer == '!')
     {
-       while (! is_end_of_line[*input_line_pointer++]);
+       while (! is_end_of_line[(unsigned char) *input_line_pointer++]);
     }
   else
     demand_empty_rest_of_line ();
@@ -1861,7 +1861,7 @@ md_assemble (str)
   unsigned char *op_end;
   sh_operand_info operand[3];
   sh_opcode_info *opcode;
-  unsigned int size;
+  unsigned int size = 0;
 
   opcode = find_cooked_opcode (&str);
   op_end = str;
@@ -2505,7 +2505,7 @@ md_convert_frag (headers, seg, fragP)
 
 valueT
 md_section_align (seg, size)
-     segT seg;
+     segT seg ATTRIBUTE_UNUSED;
      valueT size;
 {
 #ifdef BFD_ASSEMBLER

@@ -5,6 +5,10 @@
 	accordingly.  Stabilize frag by updating fix part and resetting
 	variant part.
 	<undefined symbol, unconditional jump>: Ditto.
+	(sh_elf_cons): Cast *input_line_pointer to unsigned char when
+	indexing is_end_of_line[].
+	(md_assemble): Initialize size to 0.
+	(md_section_align): Mark parameter seg as unused.
 
 2000-11-28  Kazu Hirata  <kazu@hxi.com>
 
