@@ -48,6 +48,10 @@ case "${target}" in
 			;;
   m68k-ericsson-ose)	my_target=ose68
 			;;
+  m680[01234]0-ericsson-ose) my_target=ose68
+			;;
+  m683?2-ericsson-ose)	my_target=ose68
+			;;
   *-tandem-none)	my_target=st2000 # FIXME needs better name
 			;;
   i386-go32-*)		my_target=go32

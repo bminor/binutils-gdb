@@ -1,3 +1,13 @@
+Mon Dec 28 11:15:35 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* m68kcoff.sc-sh: define _end as well as end, for consistency with
+	aout.sc-sh.
+
+	* configure.in: accept *-ericsson-ose for any m68k CPU.
+
+	* ldwrite.c (write_rel): don't always set SEC_HAS_CONTENTS flag
+	for each output section.
+
 Mon Dec 21 16:06:59 1992  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* ldexp.c, ldlang.c, ldmain.c, ldsym.c, ldwarn.c:  Use new
