@@ -3,6 +3,7 @@ Fri Mar  6 11:22:23 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* gas/dvp/upper-2.d (loi): Fix expected output.
 	* gas/dvp/vif-1.[sd]: Add more tests.
+	* gas/dvp/vif-2.[sd]: New testcases.
 	* gas/dvp/gif{packed,reglist,image}-1.[sd]: New testcases.
 	* gas/dvp/dvp.exp: Run them.  Pass -I${srcdir}/${subdir} to gas.
 
