@@ -23,6 +23,7 @@
 #include "inferior.h"
 #include "regcache.h"
 
+#include "mips-tdep.h"
 #include "mipsnbsd-tdep.h"
 
 #include <sys/types.h>
@@ -33,7 +34,7 @@
 static int
 getregs_supplies (int regno)
 {
-  return ((regno) >= ZERO_REGNUM && (regno) <= PC_REGNUM);
+  return ((regno) >= MIPS_ZERO_REGNUM && (regno) <= PC_REGNUM);
 }
 
 void

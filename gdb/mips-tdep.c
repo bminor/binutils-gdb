@@ -951,17 +951,17 @@ after_prologue (CORE_ADDR pc)
 static t_inst
 mips_fetch_instruction (CORE_ADDR addr)
 {
-  char buf[MIPS_INSTLEN];
+  char buf[MIPS32_INSN_SIZE];
   int instlen;
   int status;
 
   if (pc_is_mips16 (addr))
     {
-      instlen = MIPS16_INSTLEN;
+      instlen = MIPS16_INSN_SIZE;
       addr = unmake_mips16_addr (addr);
     }
   else
-    instlen = MIPS_INSTLEN;
+    instlen = MIPS32_INSN_SIZE;
   status = deprecated_read_memory_nobpt (addr, buf, instlen);
   if (status)
     memory_error (status, addr);
@@ -971,16 +971,14 @@ mips_fetch_instruction (CORE_ADDR addr)
 static ULONGEST
 mips16_fetch_instruction (CORE_ADDR addr)
 {
-  char buf[MIPS_INSTLEN];
-  int instlen;
+  char buf[MIPS16_INSN_SIZE];
   int status;
 
-  instlen = MIPS16_INSTLEN;
   addr = unmake_mips16_addr (addr);
-  status = deprecated_read_memory_nobpt (addr, buf, instlen);
+  status = deprecated_read_memory_nobpt (addr, buf, sizeof (buf));
   if (status)
     memory_error (status, addr);
-  return extract_unsigned_integer (buf, instlen);
+  return extract_unsigned_integer (buf, sizeof (buf));
 }
 
 /* These the fields of 32 bit mips instructions */
@@ -1613,7 +1611,7 @@ mips_mdebug_frame_cache (struct frame_info *next_frame, void **this_cache)
 	}
 
     cache->saved_regs[NUM_REGS + mips_regnum (current_gdbarch)->pc]
-      = cache->saved_regs[NUM_REGS + RA_REGNUM];
+      = cache->saved_regs[NUM_REGS + MIPS_RA_REGNUM];
   }
 
   /* SP_REGNUM, contains the value and not the address.  */
@@ -1803,7 +1801,7 @@ mips16_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
   if (limit_pc > start_pc + 200)
     limit_pc = start_pc + 200;
 
-  for (cur_pc = start_pc; cur_pc < limit_pc; cur_pc += MIPS16_INSTLEN)
+  for (cur_pc = start_pc; cur_pc < limit_pc; cur_pc += MIPS16_INSN_SIZE)
     {
       /* Save the previous instruction.  If it's an EXTEND, we'll extract
          the immediate offset extension from it in mips16_get_imm.  */
@@ -1819,7 +1817,7 @@ mips16_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
          over the extend.  */
       if ((inst & 0xf800) == 0xf000)    /* extend */
         {
-          extend_bytes = MIPS16_INSTLEN;
+          extend_bytes = MIPS16_INSN_SIZE;
           continue;
         }
 
@@ -1853,12 +1851,12 @@ mips16_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
       else if ((inst & 0xff00) == 0x6200)	/* sw $ra,n($sp) */
 	{
 	  offset = mips16_get_imm (prev_inst, inst, 8, 4, 0);
-	  set_reg_offset (this_cache, RA_REGNUM, sp + offset);
+	  set_reg_offset (this_cache, MIPS_RA_REGNUM, sp + offset);
 	}
       else if ((inst & 0xff00) == 0xfa00)	/* sd $ra,n($sp) */
 	{
 	  offset = mips16_get_imm (prev_inst, inst, 8, 8, 0);
-	  set_reg_offset (this_cache, RA_REGNUM, sp + offset);
+	  set_reg_offset (this_cache, MIPS_RA_REGNUM, sp + offset);
 	}
       else if (inst == 0x673d)	/* move $s1, $sp */
 	{
@@ -1888,7 +1886,7 @@ mips16_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
                && (inst & 0x700) != 0x700)	/* entry */
 	entry_inst = inst;	/* save for later processing */
       else if ((inst & 0xf800) == 0x1800)	/* jal(x) */
-	cur_pc += MIPS16_INSTLEN;	/* 32-bit instruction */
+	cur_pc += MIPS16_INSN_SIZE;	/* 32-bit instruction */
       else if ((inst & 0xff1c) == 0x6704)	/* move reg,$a0-$a3 */
         {
           /* This instruction is part of the prologue, but we don't
@@ -1933,7 +1931,7 @@ mips16_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
       offset = -4;
       if (entry_inst & 0x20)
 	{
-	  set_reg_offset (this_cache, RA_REGNUM, sp + offset);
+	  set_reg_offset (this_cache, MIPS_RA_REGNUM, sp + offset);
 	  offset -= mips_abi_regsize (current_gdbarch);
 	}
 
@@ -1954,7 +1952,7 @@ mips16_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
          be able to get rid of the assignment below, evetually. But it's
          still needed for now.  */
       this_cache->saved_regs[NUM_REGS + mips_regnum (current_gdbarch)->pc]
-        = this_cache->saved_regs[NUM_REGS + RA_REGNUM];
+        = this_cache->saved_regs[NUM_REGS + MIPS_RA_REGNUM];
     }
 
   /* If we didn't reach the end of the prologue when scanning the function
@@ -2119,7 +2117,7 @@ mips32_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
 restart:
 
   frame_offset = 0;
-  for (cur_pc = start_pc; cur_pc < limit_pc; cur_pc += MIPS_INSTLEN)
+  for (cur_pc = start_pc; cur_pc < limit_pc; cur_pc += MIPS32_INSN_SIZE)
     {
       unsigned long inst, high_word, low_word;
       int reg;
@@ -2239,7 +2237,7 @@ restart:
                    || high_word == 0x3408 /* ori $t0,$zero,n */
                   ))
        {
-          load_immediate_bytes += MIPS_INSTLEN;     /* FIXME!! */
+          load_immediate_bytes += MIPS32_INSN_SIZE;     	/* FIXME!  */
        }
       else
        {
@@ -2263,7 +2261,7 @@ restart:
          this assignment below, eventually.  But it's still needed
          for now.  */
       this_cache->saved_regs[NUM_REGS + mips_regnum (current_gdbarch)->pc]
-        = this_cache->saved_regs[NUM_REGS + RA_REGNUM];
+        = this_cache->saved_regs[NUM_REGS + MIPS_RA_REGNUM];
     }
 
   /* If we didn't reach the end of the prologue when scanning the function
@@ -2401,13 +2399,13 @@ mips_stub_frame_cache (struct frame_info *next_frame, void **this_cache)
   (*this_cache) = this_trad_cache;
 
   /* The return address is in the link register.  */
-  trad_frame_set_reg_realreg (this_trad_cache, PC_REGNUM, RA_REGNUM);
+  trad_frame_set_reg_realreg (this_trad_cache, PC_REGNUM, MIPS_RA_REGNUM);
 
   /* Frame ID, since it's a frameless / stackless function, no stack
      space is allocated and SP on entry is the current SP.  */
   pc = frame_pc_unwind (next_frame);
   find_pc_partial_function (pc, NULL, &start_addr, NULL);
-  stack_addr = frame_unwind_register_signed (next_frame, SP_REGNUM);
+  stack_addr = frame_unwind_register_signed (next_frame, MIPS_SP_REGNUM);
   trad_frame_set_id (this_trad_cache, frame_id_build (start_addr, stack_addr));
 
   /* Assume that the frame's base is the same as the
@@ -2594,7 +2592,7 @@ heuristic_proc_start (CORE_ADDR pc)
   if (heuristic_fence_post == UINT_MAX || fence < VM_MIN_ADDRESS)
     fence = VM_MIN_ADDRESS;
 
-  instlen = pc_is_mips16 (pc) ? MIPS16_INSTLEN : MIPS_INSTLEN;
+  instlen = pc_is_mips16 (pc) ? MIPS16_INSN_SIZE : MIPS32_INSN_SIZE;
 
   /* search back for previous return */
   for (start_pc -= instlen;; start_pc -= instlen)
@@ -2660,7 +2658,8 @@ heuristic-fence-post' command.\n", paddr_nz (pc), paddr_nz (pc));
       }
     else if (mips_about_to_return (start_pc))
       {
-	start_pc += 2 * MIPS_INSTLEN;	/* skip return, and its delay slot */
+	/* Skip return and its delay slot.  */
+	start_pc += 2 * MIPS32_INSN_SIZE;
 	break;
       }
 
@@ -2678,7 +2677,7 @@ heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
   memset (&temp_proc_desc, '\0', sizeof (temp_proc_desc));
   PROC_LOW_ADDR (&temp_proc_desc) = start_pc;
   PROC_FRAME_REG (&temp_proc_desc) = MIPS_SP_REGNUM;
-  PROC_PC_REG (&temp_proc_desc) = RA_REGNUM;
+  PROC_PC_REG (&temp_proc_desc) = MIPS_RA_REGNUM;
 
   if (pc_is_mips16 (start_pc))
     mips16_scan_prologue (start_pc, limit_pc, next_frame, this_cache);
@@ -3136,11 +3135,11 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* For shared libraries, "t9" needs to point at the function
      address.  */
-  regcache_cooked_write_signed (regcache, T9_REGNUM, func_addr);
+  regcache_cooked_write_signed (regcache, MIPS_T9_REGNUM, func_addr);
 
   /* Set the return address register to point to the entry point of
      the program, where a breakpoint lies in wait.  */
-  regcache_cooked_write_signed (regcache, RA_REGNUM, bp_addr);
+  regcache_cooked_write_signed (regcache, MIPS_RA_REGNUM, bp_addr);
 
   /* First ensure that the stack and structure return address (if any)
      are properly aligned.  The stack has to be at least 64-bit
@@ -3165,7 +3164,7 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			paddr_nz (sp), (long) align_up (len, 16));
 
   /* Initialize the integer and float register pointers.  */
-  argreg = A0_REGNUM;
+  argreg = MIPS_A0_REGNUM;
   float_argreg = mips_fpa0_regnum (current_gdbarch);
 
   /* The struct_return pointer occupies the first parameter-passing reg.  */
@@ -3455,11 +3454,11 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* For shared libraries, "t9" needs to point at the function
      address.  */
-  regcache_cooked_write_signed (regcache, T9_REGNUM, func_addr);
+  regcache_cooked_write_signed (regcache, MIPS_T9_REGNUM, func_addr);
 
   /* Set the return address register to point to the entry point of
      the program, where a breakpoint lies in wait.  */
-  regcache_cooked_write_signed (regcache, RA_REGNUM, bp_addr);
+  regcache_cooked_write_signed (regcache, MIPS_RA_REGNUM, bp_addr);
 
   /* First ensure that the stack and structure return address (if any)
      are properly aligned.  The stack has to be at least 64-bit
@@ -3482,7 +3481,7 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			paddr_nz (sp), (long) align_up (len, 16));
 
   /* Initialize the integer and float register pointers.  */
-  argreg = A0_REGNUM;
+  argreg = MIPS_A0_REGNUM;
   float_argreg = mips_fpa0_regnum (current_gdbarch);
 
   /* The struct_return pointer occupies the first parameter-passing reg.  */
@@ -3738,7 +3737,7 @@ mips_n32n64_return_value (struct gdbarch *gdbarch,
          mips_xfer_lower.  */
       int offset;
       int regnum;
-      for (offset = 0, regnum = V0_REGNUM;
+      for (offset = 0, regnum = MIPS_V0_REGNUM;
 	   offset < TYPE_LENGTH (type);
 	   offset += register_size (current_gdbarch, regnum), regnum++)
 	{
@@ -3759,7 +3758,7 @@ mips_n32n64_return_value (struct gdbarch *gdbarch,
          justified.  */
       int offset;
       int regnum;
-      for (offset = 0, regnum = V0_REGNUM;
+      for (offset = 0, regnum = MIPS_V0_REGNUM;
 	   offset < TYPE_LENGTH (type);
 	   offset += register_size (current_gdbarch, regnum), regnum++)
 	{
@@ -3794,11 +3793,11 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* For shared libraries, "t9" needs to point at the function
      address.  */
-  regcache_cooked_write_signed (regcache, T9_REGNUM, func_addr);
+  regcache_cooked_write_signed (regcache, MIPS_T9_REGNUM, func_addr);
 
   /* Set the return address register to point to the entry point of
      the program, where a breakpoint lies in wait.  */
-  regcache_cooked_write_signed (regcache, RA_REGNUM, bp_addr);
+  regcache_cooked_write_signed (regcache, MIPS_RA_REGNUM, bp_addr);
 
   /* First ensure that the stack and structure return address (if any)
      are properly aligned.  The stack has to be at least 64-bit
@@ -3821,7 +3820,7 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			paddr_nz (sp), (long) align_up (len, 16));
 
   /* Initialize the integer and float register pointers.  */
-  argreg = A0_REGNUM;
+  argreg = MIPS_A0_REGNUM;
   float_argreg = mips_fpa0_regnum (current_gdbarch);
 
   /* The struct_return pointer occupies the first parameter-passing reg.  */
@@ -4188,7 +4187,7 @@ mips_o32_return_value (struct gdbarch *gdbarch, struct type *type,
          mips_xfer_lower.  */
       int offset;
       int regnum;
-      for (offset = 0, regnum = V0_REGNUM;
+      for (offset = 0, regnum = MIPS_V0_REGNUM;
 	   offset < TYPE_LENGTH (type);
 	   offset += register_size (current_gdbarch, regnum), regnum++)
 	{
@@ -4211,7 +4210,7 @@ mips_o32_return_value (struct gdbarch *gdbarch, struct type *type,
          the ISA.  mips_stack_argsize controls this.  */
       int offset;
       int regnum;
-      for (offset = 0, regnum = V0_REGNUM;
+      for (offset = 0, regnum = MIPS_V0_REGNUM;
 	   offset < TYPE_LENGTH (type);
 	   offset += mips_stack_argsize (gdbarch), regnum++)
 	{
@@ -4248,11 +4247,11 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* For shared libraries, "t9" needs to point at the function
      address.  */
-  regcache_cooked_write_signed (regcache, T9_REGNUM, func_addr);
+  regcache_cooked_write_signed (regcache, MIPS_T9_REGNUM, func_addr);
 
   /* Set the return address register to point to the entry point of
      the program, where a breakpoint lies in wait.  */
-  regcache_cooked_write_signed (regcache, RA_REGNUM, bp_addr);
+  regcache_cooked_write_signed (regcache, MIPS_RA_REGNUM, bp_addr);
 
   /* First ensure that the stack and structure return address (if any)
      are properly aligned.  The stack has to be at least 64-bit
@@ -4275,7 +4274,7 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			paddr_nz (sp), (long) align_up (len, 16));
 
   /* Initialize the integer and float register pointers.  */
-  argreg = A0_REGNUM;
+  argreg = MIPS_A0_REGNUM;
   float_argreg = mips_fpa0_regnum (current_gdbarch);
 
   /* The struct_return pointer occupies the first parameter-passing reg.  */
@@ -4960,17 +4959,16 @@ is_delayed (unsigned long insn)
 int
 mips_step_skips_delay (CORE_ADDR pc)
 {
-  char buf[MIPS_INSTLEN];
+  char buf[MIPS32_INSN_SIZE];
 
   /* There is no branch delay slot on MIPS16.  */
   if (pc_is_mips16 (pc))
     return 0;
 
-  if (target_read_memory (pc, buf, MIPS_INSTLEN) != 0)
+  if (target_read_memory (pc, buf, sizeof buf) != 0)
     /* If error reading memory, guess that it is not a delayed branch.  */
     return 0;
-  return is_delayed ((unsigned long)
-		     extract_unsigned_integer (buf, MIPS_INSTLEN));
+  return is_delayed (extract_unsigned_integer (buf, sizeof buf));
 }
 
 /* To skip prologues, I use this predicate.  Returns either PC itself
@@ -5303,7 +5301,7 @@ mips_skip_trampoline_code (CORE_ADDR pc)
      target PC is in $31 ($ra).  */
   if (strcmp (name, "__mips16_ret_sf") == 0
       || strcmp (name, "__mips16_ret_df") == 0)
-    return read_signed_register (RA_REGNUM);
+    return read_signed_register (MIPS_RA_REGNUM);
 
   if (strncmp (name, "__mips16_call_stub_", 19) == 0)
     {
@@ -5348,7 +5346,7 @@ mips_skip_trampoline_code (CORE_ADDR pc)
 	      /* Scan through this _fn_stub_ code for the lui/addiu pair.
 	         The limit on the search is arbitrarily set to 20
 	         instructions.  FIXME.  */
-	      for (i = 0, pc = 0; i < 20; i++, target_pc += MIPS_INSTLEN)
+	      for (i = 0, pc = 0; i < 20; i++, target_pc += MIPS32_INSN_SIZE)
 		{
 		  inst = mips_fetch_instruction (target_pc);
 		  if ((inst & 0xffff0000) == 0x3c010000)	/* lui $at */
@@ -5794,7 +5792,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     case MIPS_ABI_O32:
       set_gdbarch_push_dummy_call (gdbarch, mips_o32_push_dummy_call);
       set_gdbarch_return_value (gdbarch, mips_o32_return_value);
-      tdep->mips_last_arg_regnum = A0_REGNUM + 4 - 1;
+      tdep->mips_last_arg_regnum = MIPS_A0_REGNUM + 4 - 1;
       tdep->mips_last_fp_arg_regnum = tdep->regnum->fp0 + 12 + 4 - 1;
       tdep->default_mask_address_p = 0;
       set_gdbarch_long_bit (gdbarch, 32);
@@ -5807,7 +5805,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 						 mips_o64_store_return_value);
       set_gdbarch_deprecated_extract_return_value (gdbarch,
 						   mips_o64_extract_return_value);
-      tdep->mips_last_arg_regnum = A0_REGNUM + 4 - 1;
+      tdep->mips_last_arg_regnum = MIPS_A0_REGNUM + 4 - 1;
       tdep->mips_last_fp_arg_regnum = tdep->regnum->fp0 + 12 + 4 - 1;
       tdep->default_mask_address_p = 0;
       set_gdbarch_long_bit (gdbarch, 32);
@@ -5821,7 +5819,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 						 mips_eabi_store_return_value);
       set_gdbarch_deprecated_extract_return_value (gdbarch,
 						   mips_eabi_extract_return_value);
-      tdep->mips_last_arg_regnum = A0_REGNUM + 8 - 1;
+      tdep->mips_last_arg_regnum = MIPS_A0_REGNUM + 8 - 1;
       tdep->mips_last_fp_arg_regnum = tdep->regnum->fp0 + 12 + 8 - 1;
       tdep->default_mask_address_p = 0;
       set_gdbarch_long_bit (gdbarch, 32);
@@ -5837,7 +5835,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 						 mips_eabi_store_return_value);
       set_gdbarch_deprecated_extract_return_value (gdbarch,
 						   mips_eabi_extract_return_value);
-      tdep->mips_last_arg_regnum = A0_REGNUM + 8 - 1;
+      tdep->mips_last_arg_regnum = MIPS_A0_REGNUM + 8 - 1;
       tdep->mips_last_fp_arg_regnum = tdep->regnum->fp0 + 12 + 8 - 1;
       tdep->default_mask_address_p = 0;
       set_gdbarch_long_bit (gdbarch, 64);
@@ -5850,7 +5848,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     case MIPS_ABI_N32:
       set_gdbarch_push_dummy_call (gdbarch, mips_n32n64_push_dummy_call);
       set_gdbarch_return_value (gdbarch, mips_n32n64_return_value);
-      tdep->mips_last_arg_regnum = A0_REGNUM + 8 - 1;
+      tdep->mips_last_arg_regnum = MIPS_A0_REGNUM + 8 - 1;
       tdep->mips_last_fp_arg_regnum = tdep->regnum->fp0 + 12 + 8 - 1;
       tdep->default_mask_address_p = 0;
       set_gdbarch_long_bit (gdbarch, 32);
@@ -5863,7 +5861,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     case MIPS_ABI_N64:
       set_gdbarch_push_dummy_call (gdbarch, mips_n32n64_push_dummy_call);
       set_gdbarch_return_value (gdbarch, mips_n32n64_return_value);
-      tdep->mips_last_arg_regnum = A0_REGNUM + 8 - 1;
+      tdep->mips_last_arg_regnum = MIPS_A0_REGNUM + 8 - 1;
       tdep->mips_last_fp_arg_regnum = tdep->regnum->fp0 + 12 + 8 - 1;
       tdep->default_mask_address_p = 0;
       set_gdbarch_long_bit (gdbarch, 64);
@@ -6092,7 +6090,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: mips_stack_argsize() = %d\n",
 		      mips_stack_argsize (current_gdbarch));
-  fprintf_unfiltered (file, "mips_dump_tdep: A0_REGNUM = %d\n", A0_REGNUM);
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: ADDR_BITS_REMOVE # %s\n",
 		      XSTRING (ADDR_BITS_REMOVE (ADDR)));
@@ -6132,18 +6129,13 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 		      "mips_dump_tdep: MACHINE_CPROC_SP_OFFSET = %d\n",
 		      MACHINE_CPROC_SP_OFFSET);
 #endif
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: MIPS16_INSTLEN = %d\n",
-		      MIPS16_INSTLEN);
   fprintf_unfiltered (file, "mips_dump_tdep: MIPS_DEFAULT_ABI = FIXME!\n");
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: MIPS_EFI_SYMBOL_NAME = multi-arch!!\n");
   fprintf_unfiltered (file,
-		      "mips_dump_tdep: MIPS_INSTLEN = %d\n", MIPS_INSTLEN);
-  fprintf_unfiltered (file,
 		      "mips_dump_tdep: MIPS_LAST_ARG_REGNUM = %d (%d regs)\n",
 		      MIPS_LAST_ARG_REGNUM,
-		      MIPS_LAST_ARG_REGNUM - A0_REGNUM + 1);
+		      MIPS_LAST_ARG_REGNUM - MIPS_A0_REGNUM + 1);
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: MIPS_NUMREGS = %d\n", MIPS_NUMREGS);
   fprintf_unfiltered (file,
@@ -6165,7 +6157,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file, "mips_dump_tdep: PROC_REG_OFFSET = function?\n");
   fprintf_unfiltered (file, "mips_dump_tdep: PROC_SYMBOL = function?\n");
   fprintf_unfiltered (file, "mips_dump_tdep: PS_REGNUM = %d\n", PS_REGNUM);
-  fprintf_unfiltered (file, "mips_dump_tdep: RA_REGNUM = %d\n", RA_REGNUM);
 #ifdef SAVED_BYTES
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: SAVED_BYTES = %d\n", SAVED_BYTES);
@@ -6202,7 +6193,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: STOPPED_BY_WATCHPOINT # %s\n",
 		      XSTRING (STOPPED_BY_WATCHPOINT (WS)));
-  fprintf_unfiltered (file, "mips_dump_tdep: T9_REGNUM = %d\n", T9_REGNUM);
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: TABULAR_REGISTER_OUTPUT = used?\n");
   fprintf_unfiltered (file,
@@ -6232,12 +6222,9 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: UNUSED_REGNUM = %d\n", UNUSED_REGNUM);
 #endif
-  fprintf_unfiltered (file, "mips_dump_tdep: V0_REGNUM = %d\n", V0_REGNUM);
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: VM_MIN_ADDRESS = %ld\n",
 		      (long) VM_MIN_ADDRESS);
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: ZERO_REGNUM = %d\n", ZERO_REGNUM);
 }
 
 extern initialize_file_ftype _initialize_mips_tdep;	/* -Wmissing-prototypes */

@@ -26,6 +26,8 @@
 #include "value.h"
 #include "osabi.h"
 
+#include "gdb_string.h"
+
 #include "nbsd-tdep.h"
 #include "mipsnbsd-tdep.h"
 #include "mips-tdep.h"
@@ -194,15 +196,16 @@ static const unsigned char sigtramp_retcode_mipseb[RETCODE_SIZE] =
 };
 
 static LONGEST
-mipsnbsd_sigtramp_offset (CORE_ADDR pc)
+mipsnbsd_sigtramp_offset (struct frame_info *next_frame)
 {
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
   const char *retcode = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
   	? sigtramp_retcode_mipseb : sigtramp_retcode_mipsel;
   unsigned char ret[RETCODE_SIZE], w[4];
   LONGEST off;
   int i;
 
-  if (deprecated_read_memory_nobpt (pc, (char *) w, sizeof (w)) != 0)
+  if (!safe_frame_unwind_memory (next_frame, pc, w, sizeof (w)))
     return -1;
 
   for (i = 0; i < RETCODE_NWORDS; i++)
@@ -216,7 +219,7 @@ mipsnbsd_sigtramp_offset (CORE_ADDR pc)
   off = i * 4;
   pc -= off;
 
-  if (deprecated_read_memory_nobpt (pc, (char *) ret, sizeof (ret)) != 0)
+  if (!safe_frame_unwind_memory (next_frame, pc, ret, sizeof (ret)))
     return -1;
 
   if (memcmp (ret, retcode, RETCODE_SIZE) == 0)
@@ -226,8 +229,8 @@ mipsnbsd_sigtramp_offset (CORE_ADDR pc)
 }
 
 /* Figure out where the longjmp will land.  We expect that we have
-   just entered longjmp and haven't yet setup the stack frame, so
-   the args are still in the argument regs.  A0_REGNUM points at the
+   just entered longjmp and haven't yet setup the stack frame, so the
+   args are still in the argument regs.  MIPS_A0_REGNUM points at the
    jmp_buf structure from which we extract the PC that we will land
    at.  The PC is copied into *pc.  This routine returns true on
    success.  */
@@ -245,7 +248,7 @@ mipsnbsd_get_longjmp_target (CORE_ADDR *pc)
 
   buf = alloca (NBSD_MIPS_JB_ELEMENT_SIZE);
 
-  jb_addr = read_register (A0_REGNUM);
+  jb_addr = read_register (MIPS_A0_REGNUM);
 
   if (target_read_memory (jb_addr + NBSD_MIPS_JB_OFFSET, buf,
   			  NBSD_MIPS_JB_ELEMENT_SIZE))
@@ -259,14 +262,14 @@ mipsnbsd_get_longjmp_target (CORE_ADDR *pc)
 static int
 mipsnbsd_cannot_fetch_register (int regno)
 {
-  return (regno == ZERO_REGNUM
+  return (regno == MIPS_ZERO_REGNUM
 	  || regno == mips_regnum (current_gdbarch)->fp_implementation_revision);
 }
 
 static int
 mipsnbsd_cannot_store_register (int regno)
 {
-  return (regno == ZERO_REGNUM
+  return (regno == MIPS_ZERO_REGNUM
 	  || regno == mips_regnum (current_gdbarch)->fp_implementation_revision);
 }
 
@@ -289,7 +292,7 @@ mipsnbsd_ilp32_solib_svr4_fetch_link_map_offsets (void)
 
       lmo.link_map_size = 24;
 
-      lmo.l_addr_offset = 0;
+      lmo.l_addr_offset = 4;
       lmo.l_addr_size   = 4;
 
       lmo.l_name_offset = 8;

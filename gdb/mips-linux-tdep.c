@@ -975,7 +975,7 @@ mips_linux_o32_sigframe_init (const struct tramp_frame *self,
 #endif
 
   for (ireg = 1; ireg < 32; ireg++)
-    trad_frame_set_reg_addr (this_cache, ireg + ZERO_REGNUM + NUM_REGS,
+    trad_frame_set_reg_addr (this_cache, ireg + MIPS_ZERO_REGNUM + NUM_REGS,
 			     sigcontext_base + SIGCONTEXT_REGS
 			     + ireg * SIGCONTEXT_REG_SIZE);
 
@@ -1097,7 +1097,7 @@ mips_linux_n32n64_sigframe_init (const struct tramp_frame *self,
 #endif
 
   for (ireg = 1; ireg < 32; ireg++)
-    trad_frame_set_reg_addr (this_cache, ireg + ZERO_REGNUM + NUM_REGS,
+    trad_frame_set_reg_addr (this_cache, ireg + MIPS_ZERO_REGNUM + NUM_REGS,
 			     sigcontext_base + N64_SIGCONTEXT_REGS
 			     + ireg * N64_SIGCONTEXT_REG_SIZE);
 
