@@ -1,3 +1,8 @@
+Tue Dec 13 15:42:27 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* config/tc-ppc.c (tc_gen_reloc): Remove OBJ_ELF hack which
+	appears to no longer be needed.
+
 Tue Dec 13 08:04:15 1994  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (macro_build): Accept BFD_RELOC_PCREL* without
