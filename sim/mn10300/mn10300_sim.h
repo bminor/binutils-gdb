@@ -6,7 +6,16 @@
 #include <limits.h>
 #include "remote-sim.h"
 
+#ifndef INLINE
+#ifdef __GNUC__
+#define INLINE inline
+#else
+#define INLINE
+#endif
+#endif
+
 extern host_callback *mn10300_callback;
+extern SIM_DESC simulator;
 
 #define DEBUG_TRACE		0x00000001
 #define DEBUG_VALUES		0x00000002
@@ -64,6 +73,7 @@ struct _state
 				   lir, lar, mdrq */
   uint8 *mem;			/* main memory */
   int exception;
+  int exited;
 } State;
 
 extern uint32 OP[4];
@@ -87,6 +97,9 @@ extern struct simops Simops[];
 #define REG_LAR 13
 #define REG_MDRQ 14
 
+#if WITH_COMMON
+/* These definitions conflict with similar macros in common.  */
+#else
 #define SEXT3(x)	((((x)&0x7)^(~0x3))+0x4)	
 
 /* sign-extend a 4-bit number */
@@ -111,13 +124,207 @@ extern struct simops Simops[];
 #define MIN32	0xff80000000LL
 #define MASK32	0xffffffffLL
 #define MASK40	0xffffffffffLL
-
-#define RLW(x) load_mem (x, 4)
+#endif  /* not WITH_COMMON */
 
 #ifdef _WIN32
 #define SIGTRAP 5
 #define SIGQUIT 3
 #endif
+
+#if WITH_COMMON
+
+#define FETCH32(a,b,c,d) \
+ ((a)+((b)<<8)+((c)<<16)+((d)<<24))
+
+#define FETCH16(a,b) ((a)+((b)<<8))
+
+#define load_byte(ADDR) \
+sim_core_read_unaligned_1 (STATE_CPU (simulator, 0), PC, read_map, (ADDR))
+
+#define load_half(ADDR) \
+sim_core_read_unaligned_2 (STATE_CPU (simulator, 0), PC, read_map, (ADDR))
+
+#define load_word(ADDR) \
+sim_core_read_unaligned_4 (STATE_CPU (simulator, 0), PC, read_map, (ADDR))
+
+#define store_byte(ADDR, DATA) \
+sim_core_write_unaligned_1 (STATE_CPU (simulator, 0), \
+			    PC, write_map, (ADDR), (DATA))
+
+
+#define store_half(ADDR, DATA) \
+sim_core_write_unaligned_2 (STATE_CPU (simulator, 0), \
+			    PC, write_map, (ADDR), (DATA))
+
+
+#define store_word(ADDR, DATA) \
+sim_core_write_unaligned_4 (STATE_CPU (simulator, 0), \
+			    PC, write_map, (ADDR), (DATA))
+#endif  /* WITH_COMMON */
+
+#if WITH_COMMON
+#else
+#define load_mem_big(addr,len) \
+  (len == 1 ? *((addr) + State.mem) : \
+   len == 2 ? ((*((addr) + State.mem) << 8) \
+	       | *(((addr) + 1) + State.mem)) : \
+   len == 3 ? ((*((addr) + State.mem) << 16) \
+	       | (*(((addr) + 1) + State.mem) << 8) \
+	       | *(((addr) + 2) + State.mem)) : \
+	      ((*((addr) + State.mem) << 24) \
+	       | (*(((addr) + 1) + State.mem) << 16) \
+	       | (*(((addr) + 2) + State.mem) << 8) \
+	       | *(((addr) + 3) + State.mem)))
+
+static INLINE uint32
+load_byte (addr)
+     SIM_ADDR addr;
+{
+  uint8 *p = (addr & 0xffffff) + State.mem;
+
+#ifdef CHECK_ADDR
+  if ((addr & 0xffffff) > max_mem)
+    abort ();
+#endif
+
+  return p[0];
+}
+
+static INLINE uint32
+load_half (addr)
+     SIM_ADDR addr;
+{
+  uint8 *p = (addr & 0xffffff) + State.mem;
+
+#ifdef CHECK_ADDR
+  if ((addr & 0xffffff) > max_mem)
+    abort ();
+#endif
+
+  return p[1] << 8 | p[0];
+}
+
+static INLINE uint32
+load_3_byte (addr)
+     SIM_ADDR addr;
+{
+  uint8 *p = (addr & 0xffffff) + State.mem;
+
+#ifdef CHECK_ADDR
+  if ((addr & 0xffffff) > max_mem)
+    abort ();
+#endif
+
+  return p[2] << 16 | p[1] << 8 | p[0];
+}
+
+static INLINE uint32
+load_word (addr)
+     SIM_ADDR addr;
+{
+  uint8 *p = (addr & 0xffffff) + State.mem;
+
+#ifdef CHECK_ADDR
+  if ((addr & 0xffffff) > max_mem)
+    abort ();
+#endif
+
+  return p[3] << 24 | p[2] << 16 | p[1] << 8 | p[0];
+}
+
+static INLINE uint32
+load_mem (addr, len)
+     SIM_ADDR addr;
+     int len;
+{
+  uint8 *p = (addr & 0xffffff) + State.mem;
+
+#ifdef CHECK_ADDR
+  if ((addr & 0xffffff) > max_mem)
+    abort ();
+#endif
+
+  switch (len)
+    {
+    case 1:
+      return p[0];
+    case 2:
+      return p[1] << 8 | p[0];
+    case 3:
+      return p[2] << 16 | p[1] << 8 | p[0];
+    case 4:
+      return p[3] << 24 | p[2] << 16 | p[1] << 8 | p[0];
+    default:
+      abort ();
+    }
+}
+
+static INLINE void
+store_byte (addr, data)
+     SIM_ADDR addr;
+     uint32 data;
+{
+  uint8 *p = (addr & 0xffffff) + State.mem;
+
+#ifdef CHECK_ADDR
+  if ((addr & 0xffffff) > max_mem)
+    abort ();
+#endif
+
+  p[0] = data;
+}
+
+static INLINE void
+store_half (addr, data)
+     SIM_ADDR addr;
+     uint32 data;
+{
+  uint8 *p = (addr & 0xffffff) + State.mem;
+
+#ifdef CHECK_ADDR
+  if ((addr & 0xffffff) > max_mem)
+    abort ();
+#endif
+
+  p[0] = data;
+  p[1] = data >> 8;
+}
+
+static INLINE void
+store_3_byte (addr, data)
+     SIM_ADDR addr;
+     uint32 data;
+{
+  uint8 *p = (addr & 0xffffff) + State.mem;
+
+#ifdef CHECK_ADDR
+  if ((addr & 0xffffff) > max_mem)
+    abort ();
+#endif
+
+  p[0] = data;
+  p[1] = data >> 8;
+  p[2] = data >> 16;
+}
+
+static INLINE void
+store_word (addr, data)
+     SIM_ADDR addr;
+     uint32 data;
+{
+  uint8 *p = (addr & 0xffffff) + State.mem;
+
+#ifdef CHECK_ADDR
+  if ((addr & 0xffffff) > max_mem)
+    abort ();
+#endif
+
+  p[0] = data;
+  p[1] = data >> 8;
+  p[2] = data >> 16;
+  p[3] = data >> 24;
+}
+#endif  /* not WITH_COMMON */
 
 /* Function declarations.  */
 
@@ -127,8 +334,5 @@ uint8 get_byte PARAMS ((uint8 *));
 void put_word PARAMS ((uint8 *, uint32));
 void put_half PARAMS ((uint8 *, uint16));
 void put_byte PARAMS ((uint8 *, uint8));
-
-extern uint32 load_mem PARAMS ((SIM_ADDR addr, int len));
-extern void store_mem PARAMS ((SIM_ADDR addr, int len, uint32 data));
 
 extern uint8 *map PARAMS ((SIM_ADDR addr));
