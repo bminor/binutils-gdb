@@ -1,3 +1,7 @@
+2001-09-14  Ralf Habacker <Ralf.Habacker@freenet.de>
+
+	* pe-dll.c (pe_walk_relocs_of_symbol): Fix memory leak.
+
 2001-09-14  Kevin Lo <kevlo@openbsd.org>
 
 	* configure.tgt: Add arm-openbsd target.

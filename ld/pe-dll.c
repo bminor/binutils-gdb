@@ -41,101 +41,91 @@
 #include "deffile.h"
 #include "pe-dll.h"
 
-/************************************************************************
+/*  This file turns a regular Windows PE image into a DLL.  Because of
+    the complexity of this operation, it has been broken down into a
+    number of separate modules which are all called by the main function
+    at the end of this file.  This function is not re-entrant and is
+    normally only called once, so static variables are used to reduce
+    the number of parameters and return values required.
+    
+    See also: ld/emultempl/pe.em.  */
 
- This file turns a regular Windows PE image into a DLL.  Because of
- the complexity of this operation, it has been broken down into a
- number of separate modules which are all called by the main function
- at the end of this file.  This function is not re-entrant and is
- normally only called once, so static variables are used to reduce
- the number of parameters and return values required.
+/*  Auto-import feature by Paul Sokolovsky
 
- See also: ld/emultempl/pe.em
+    Quick facts:
 
- ************************************************************************/
+    1. With this feature on, DLL clients can import variables from DLL
+    without any concern from their side (for example, without any source
+    code modifications).
 
-/************************************************************************
+    2. This is done completely in bounds of the PE specification (to be fair,
+    there's a place where it pokes nose out of, but in practise it works).
+    So, resulting module can be used with any other PE compiler/linker.
 
- Auto-import feature by Paul Sokolovsky
+    3. Auto-import is fully compatible with standard import method and they
+    can be mixed together.
 
- Quick facts:
+    4. Overheads: space: 8 bytes per imported symbol, plus 20 for each
+    reference to it; load time: negligible; virtual/physical memory: should be
+    less than effect of DLL relocation, and I sincerely hope it doesn't affect
+    DLL sharability (too much).
 
- 1. With this feature on, DLL clients can import variables from DLL
- without any concern from their side (for example, without any source
- code modifications).
+    Idea
 
- 2. This is done completely in bounds of the PE specification (to be fair,
- there's a place where it pokes nose out of, but in practise it works).
- So, resulting module can be used with any other PE compiler/linker.
+    The obvious and only way to get rid of dllimport insanity is to make client
+    access variable directly in the DLL, bypassing extra dereference. I.e.,
+    whenever client contains someting like
 
- 3. Auto-import is fully compatible with standard import method and they
- can be mixed together.
+    mov dll_var,%eax,
 
- 4. Overheads: space: 8 bytes per imported symbol, plus 20 for each
- reference to it; load time: negligible; virtual/physical memory: should be
- less than effect of DLL relocation, and I sincerely hope it doesn't affect
- DLL sharability (too much).
+    address of dll_var in the command should be relocated to point into loaded
+    DLL. The aim is to make OS loader do so, and than make ld help with that.
+    Import section of PE made following way: there's a vector of structures
+    each describing imports from particular DLL. Each such structure points
+    to two other parellel vectors: one holding imported names, and one which
+    will hold address of corresponding imported name. So, the solution is
+    de-vectorize these structures, making import locations be sparse and
+    pointing directly into code. Before continuing, it is worth a note that,
+    while authors strives to make PE act ELF-like, there're some other people
+    make ELF act PE-like: elfvector, ;-) .
 
- Idea
+    Implementation
 
- The obvious and only way to get rid of dllimport insanity is to make client
- access variable directly in the DLL, bypassing extra dereference. I.e.,
- whenever client contains someting like
+    For each reference of data symbol to be imported from DLL (to set of which
+    belong symbols with name <sym>, if __imp_<sym> is found in implib), the
+    import fixup entry is generated. That entry is of type
+    IMAGE_IMPORT_DESCRIPTOR and stored in .idata$3 subsection. Each
+    fixup entry contains pointer to symbol's address within .text section
+    (marked with __fuN_<sym> symbol, where N is integer), pointer to DLL name
+    (so, DLL name is referenced by multiple entries), and pointer to symbol
+    name thunk. Symbol name thunk is singleton vector (__nm_th_<symbol>)
+    pointing to IMAGE_IMPORT_BY_NAME structure (__nm_<symbol>) directly
+    containing imported name. Here comes that "om the edge" problem mentioned
+    above: PE specification rambles that name vector (OriginalFirstThunk)
+    should run in parallel with addresses vector (FirstThunk), i.e. that they
+    should have same number of elements and terminated with zero. We violate
+    this, since FirstThunk points directly into machine code. But in practise,
+    OS loader implemented the sane way: it goes thru OriginalFirstThunk and
+    puts addresses to FirstThunk, not something else. It once again should be
+    noted that dll and symbol name structures are reused across fixup entries
+    and should be there anyway to support standard import stuff, so sustained
+    overhead is 20 bytes per reference. Other question is whether having several
+    IMAGE_IMPORT_DESCRIPTORS for the same DLL is possible. Answer is yes, it is
+    done even by native compiler/linker (libth32's functions are in fact reside
+    in windows9x kernel32.dll, so if you use it, you have two
+    IMAGE_IMPORT_DESCRIPTORS for kernel32.dll). Yet other question is whether
+    referencing the same PE structures several times is valid. The answer is why
+    not, prohibitting that (detecting violation) would require more work on
+    behalf of loader than not doing it.
 
- mov dll_var,%eax,
-
- address of dll_var in the command should be relocated to point into loaded
- DLL. The aim is to make OS loader do so, and than make ld help with that.
- Import section of PE made following way: there's a vector of structures
- each describing imports from particular DLL. Each such structure points
- to two other parellel vectors: one holding imported names, and one which
- will hold address of corresponding imported name. So, the solution is
- de-vectorize these structures, making import locations be sparse and
- pointing directly into code. Before continuing, it is worth a note that,
- while authors strives to make PE act ELF-like, there're some other people
- make ELF act PE-like: elfvector, ;-) .
-
- Implementation
-
- For each reference of data symbol to be imported from DLL (to set of which
- belong symbols with name <sym>, if __imp_<sym> is found in implib), the
- import fixup entry is generated. That entry is of type
- IMAGE_IMPORT_DESCRIPTOR and stored in .idata$3 subsection. Each
- fixup entry contains pointer to symbol's address within .text section
- (marked with __fuN_<sym> symbol, where N is integer), pointer to DLL name
- (so, DLL name is referenced by multiple entries), and pointer to symbol
- name thunk. Symbol name thunk is singleton vector (__nm_th_<symbol>)
- pointing to IMAGE_IMPORT_BY_NAME structure (__nm_<symbol>) directly
- containing imported name. Here comes that "om the edge" problem mentioned
- above: PE specification rambles that name vector (OriginalFirstThunk)
- should run in parallel with addresses vector (FirstThunk), i.e. that they
- should have same number of elements and terminated with zero. We violate
- this, since FirstThunk points directly into machine code. But in practise,
- OS loader implemented the sane way: it goes thru OriginalFirstThunk and
- puts addresses to FirstThunk, not something else. It once again should be
- noted that dll and symbol name structures are reused across fixup entries
- and should be there anyway to support standard import stuff, so sustained
- overhead is 20 bytes per reference. Other question is whether having several
- IMAGE_IMPORT_DESCRIPTORS for the same DLL is possible. Answer is yes, it is
- done even by native compiler/linker (libth32's functions are in fact reside
- in windows9x kernel32.dll, so if you use it, you have two
- IMAGE_IMPORT_DESCRIPTORS for kernel32.dll). Yet other question is whether
- referencing the same PE structures several times is valid. The answer is why
- not, prohibitting that (detecting violation) would require more work on
- behalf of loader than not doing it.
-
-
- See also: ld/emultempl/pe.em
-
- ************************************************************************/
+    See also: ld/emultempl/pe.em.  */
 
 static void
-add_bfd_to_link (bfd *abfd, CONST char *name, 
-                 struct bfd_link_info *link_info);
+add_bfd_to_link PARAMS ((bfd *, const char *, struct bfd_link_info *));
 
-/* for emultempl/pe.em */
+/* For emultempl/pe.em.  */
 
-def_file *pe_def_file = 0;
+def_file * pe_def_file = 0;
 int pe_dll_export_everything = 0;
 int pe_dll_do_default_excludes = 1;
 int pe_dll_kill_ats = 0;
@@ -144,39 +134,40 @@ int pe_dll_warn_dup_exports = 0;
 int pe_dll_compat_implib = 0;
 int pe_dll_extra_pe_debug = 0;
 
-/************************************************************************
-
- static variables and types
-
- ************************************************************************/
+/* Static variables and types.  */
 
 static bfd_vma image_base;
-
 static bfd *filler_bfd;
 static struct sec *edata_s, *reloc_s;
 static unsigned char *edata_d, *reloc_d;
 static size_t edata_sz, reloc_sz;
 
-typedef struct {
-  char *target_name;
-  char *object_target;
-  unsigned int imagebase_reloc;
-  int pe_arch;
-  int bfd_arch;
-  int underscored;
-} pe_details_type;
+typedef struct
+  {
+    char *target_name;
+    char *object_target;
+    unsigned int imagebase_reloc;
+    int pe_arch;
+    int bfd_arch;
+    int underscored;
+  }
+pe_details_type;
 
-typedef struct {
-  char *name;
-  int len;
-} autofilter_entry_type;
+typedef struct
+  {
+    char *name;
+    int len;
+  }
+autofilter_entry_type;
 
 #define PE_ARCH_i386	1
 #define PE_ARCH_sh	2
 #define PE_ARCH_mips	3
 #define PE_ARCH_arm	4
+#define PE_ARCH_arm_epoc 5
 
-static pe_details_type pe_detail_list[] = {
+static pe_details_type pe_detail_list[] =
+{
   {
     "pei-i386",
     "pe-i386",
@@ -209,12 +200,21 @@ static pe_details_type pe_detail_list[] = {
     bfd_arch_arm,
     0
   },
+  {
+    "epoc-pei-arm-little",
+    "epoc-pe-arm-little",
+    11 /* ARM_RVA32 */,
+    PE_ARCH_arm_epoc,
+    bfd_arch_arm,
+    0
+  },
   { NULL, NULL, 0, 0, 0, 0 }
 };
 
 static pe_details_type *pe_details;
 
-static autofilter_entry_type autofilter_symbollist[] = {
+static autofilter_entry_type autofilter_symbollist[] =
+{
   { "DllMain@12", 10 },
   { "DllEntryPoint@0", 15 },
   { "DllMainCRTStartup@12", 20 },
@@ -224,25 +224,32 @@ static autofilter_entry_type autofilter_symbollist[] = {
   { "impure_ptr", 10 },
   { NULL, 0 }
 };
-/* Do not specify library suffix explicitly, to allow for dllized versions */
-static autofilter_entry_type autofilter_liblist[] = {
+
+/* Do not specify library suffix explicitly, to allow for dllized versions.  */
+static autofilter_entry_type autofilter_liblist[] =
+{
   { "libgcc.", 7 },
   { "libstdc++.", 10 },
   { "libmingw32.", 11 },
   { NULL, 0 }
 };
-static autofilter_entry_type autofilter_objlist[] = {
+
+static autofilter_entry_type autofilter_objlist[] =
+{
   { "crt0.o", 6 },
   { "crt1.o", 6 },
   { "crt2.o", 6 },
   { NULL, 0 }
 };
-static autofilter_entry_type autofilter_symbolprefixlist[] = {
-/*  { "__imp_", 6 }, */
-/* Do __imp_ explicitly to save time */
+
+static autofilter_entry_type autofilter_symbolprefixlist[] =
+{
+  /*  { "__imp_", 6 }, */
+  /* Do __imp_ explicitly to save time.  */
   { "__rtti_", 7 },
   { "__builtin_", 10 },
-  { "_head_", 6 }, /* don't export symbols specifying internal DLL layout */
+  /* Don't export symbols specifying internal DLL layout.  */
+  { "_head_", 6 },
   { "_fmode", 6 },
   { "_impure_ptr", 11 },
   { "cygwin_attach_dll", 17 },
@@ -253,7 +260,9 @@ static autofilter_entry_type autofilter_symbolprefixlist[] = {
   { "environ", 7 },
   { NULL, 0 }
 };
-static autofilter_entry_type autofilter_symbolsuffixlist[] = {
+
+static autofilter_entry_type autofilter_symbolsuffixlist[] =
+{
   { "_iname", 6 },
   { NULL, 0 }
 };
@@ -289,6 +298,7 @@ pe_dll_id_target (target)
      const char *target;
 {
   int i;
+
   for (i = 0; pe_detail_list[i].target_name; i++)
     if (strcmp (pe_detail_list[i].target_name, target) == 0
 	|| strcmp (pe_detail_list[i].object_target, target) == 0)
@@ -300,18 +310,16 @@ pe_dll_id_target (target)
   exit (1);
 }
 
-/************************************************************************
+/* Helper functions for qsort.  Relocs must be sorted so that we can write 
+   them out by pages.  */
 
- Helper functions for qsort.  Relocs must be sorted so that we can write
- them out by pages.
-
- ************************************************************************/
-
-typedef struct {
-  bfd_vma vma;
-  char type;
-  short extra;
-} reloc_data_type;
+typedef struct
+  {
+    bfd_vma vma;
+    char type;
+    short extra;
+  }
+reloc_data_type;
 
 static int
 reloc_sort (va, vb)
@@ -319,6 +327,7 @@ reloc_sort (va, vb)
 {
   bfd_vma a = ((reloc_data_type *) va)->vma;
   bfd_vma b = ((reloc_data_type *) vb)->vma;
+
   return (a > b) ? 1 : ((a < b) ? -1 : 0);
 }
 
@@ -328,14 +337,11 @@ pe_export_sort (va, vb)
 {
   def_file_export *a = (def_file_export *) va;
   def_file_export *b = (def_file_export *) vb;
+
   return strcmp (a->name, b->name);
 }
 
-/************************************************************************
-
- Read and process the .DEF file
-
- ************************************************************************/
+/* Read and process the .DEF file.  */
 
 /* These correspond to the entries in pe_def_file->exports[].  I use
    exported_symbol_sections[i] to tag whether or not the symbol was
@@ -343,7 +349,6 @@ pe_export_sort (va, vb)
 
 static bfd_vma *exported_symbol_offsets;
 static struct sec **exported_symbol_sections;
-
 static int export_table_size;
 static int count_exported;
 static int count_exported_byname;
@@ -352,10 +357,12 @@ static const char *dll_name;
 static int min_ordinal, max_ordinal;
 static int *exported_symbols;
 
-typedef struct exclude_list_struct {
-  char *string;
-  struct exclude_list_struct *next;
-} exclude_list_struct;
+typedef struct exclude_list_struct
+  {
+    char *string;
+    struct exclude_list_struct *next;
+  }
+exclude_list_struct;
 
 static struct exclude_list_struct *excludes = 0;
 
@@ -384,10 +391,9 @@ pe_dll_add_excludes (new_excludes)
   free (local_copy);
 }
 
-/*
-   abfd is a bfd containing n (or NULL)
-   It can be used for contextual checks.
-*/
+/* abfd is a bfd containing n (or NULL)
+   It can be used for contextual checks.  */
+
 static int
 auto_export (abfd, d, n)
      bfd *abfd;
@@ -398,26 +404,29 @@ auto_export (abfd, d, n)
   struct exclude_list_struct *ex;
   autofilter_entry_type *afptr;
 
-  /* we should not re-export imported stuff */
+  /* We should not re-export imported stuff.  */
   if (strncmp (n, "_imp__", 6) == 0)
     return 0;
 
   for (i = 0; i < d->num_exports; i++)
     if (strcmp (d->exports[i].name, n) == 0)
       return 0;
+
   if (pe_dll_do_default_excludes)
     {
+      char * p;
+      int    len;
+
       if (pe_dll_extra_pe_debug)
-	{
-	  printf ("considering exporting: %s, abfd=%p, abfd->my_arc=%p\n",
-		  n, abfd, abfd->my_archive);
-	}
+	printf ("considering exporting: %s, abfd=%p, abfd->my_arc=%p\n",
+		n, abfd, abfd->my_archive);
 
       /* First of all, make context checks:
-         Don't export anything from libgcc */
+         Don't export anything from libgcc.  */
       if (abfd && abfd->my_archive)
 	{
 	  afptr = autofilter_liblist;
+
 	  while (afptr->name)
 	    {
 	      if (strstr (abfd->my_archive->filename, afptr->name))
@@ -426,60 +435,62 @@ auto_export (abfd, d, n)
 	    }
 	}
 
-      /* Next, exclude symbols from certain startup objects */
-      {
-	char *p;
-	afptr = autofilter_objlist;
-	while (afptr->name)
-	  {
-	    if (abfd && 
-	        (p = strstr (abfd->filename, afptr->name)) &&
-	        (*(p + afptr->len - 1) == 0))
-	      return 0;
-	    afptr++;
-	  }
-      }
+      /* Next, exclude symbols from certain startup objects.  */
+      afptr = autofilter_objlist;
+
+      while (afptr->name)
+	{
+	  if (abfd && 
+	      (p = strstr (abfd->filename, afptr->name)) &&
+	      (*(p + afptr->len - 1) == 0))
+	    return 0;
+
+	  afptr ++;
+	}
 
       /* Don't try to blindly exclude all symbols
 	 that begin with '__'; this was tried and
-	 it is too restrictive */
+	 it is too restrictive.  */
 
-      /* Then, exclude specific symbols */
+      /* Then, exclude specific symbols.  */
       afptr = autofilter_symbollist;
       while (afptr->name)
 	{
 	  if (strcmp (n, afptr->name) == 0)
 	    return 0;
-	  afptr++;
+
+	  afptr ++;
 	}
 
-      /* Next, exclude symbols starting with ... */
+      /* Next, exclude symbols starting with ...  */
       afptr = autofilter_symbolprefixlist;
       while (afptr->name)
 	{
 	  if (strncmp (n, afptr->name, afptr->len) == 0)
 	    return 0;
-	  afptr++;
+
+	  afptr ++;
 	}
 
-      /* Finally, exclude symbols ending with ... */
-      {
-	int len = strlen(n);
-	afptr = autofilter_symbolsuffixlist;
-	while (afptr->name)
-	  {
-	    if ((len >= afptr->len) && 
-		/* add 1 to insure match with trailing '\0' */
-		strncmp (n + len - afptr->len, afptr->name, 
-			 afptr->len + 1) == 0)
-	      return 0;
-	    afptr++;
-	  }
-      }
+      /* Finally, exclude symbols ending with ...  */
+      len = strlen (n);
+      afptr = autofilter_symbolsuffixlist;
+      while (afptr->name)
+	{
+	  if ((len >= afptr->len) && 
+	      /* Add 1 to insure match with trailing '\0'.  */
+	      strncmp (n + len - afptr->len, afptr->name, 
+		       afptr->len + 1) == 0)
+	    return 0;
+
+	  afptr ++;
+	}
     }
+
   for (ex = excludes; ex; ex = ex->next)
     if (strcmp (n, ex->string) == 0)
       return 0;
+
   return 1;
 }
 
@@ -499,7 +510,6 @@ process_def_file (abfd, info)
 
   /* First, run around to all the objects looking for the .drectve
      sections, and push those into the def file too.  */
-
   for (b = info->input_bfds; b; b = b->link_next)
     {
       s = bfd_get_section_by_name (b, ".drectve");
@@ -507,6 +517,7 @@ process_def_file (abfd, info)
 	{
 	  int size = bfd_get_section_size_before_reloc (s);
 	  char *buf = xmalloc (size);
+
 	  bfd_get_section_contents (b, s, buf, 0, size);
 	  def_file_add_directive (pe_def_file, buf, size);
 	  free (buf);
@@ -514,7 +525,6 @@ process_def_file (abfd, info)
     }
 
   /* Now, maybe export everything else the default way.  */
-
   if (pe_dll_export_everything || pe_def_file->num_exports == 0)
     {
       for (b = info->input_bfds; b; b = b->link_next)
@@ -530,18 +540,18 @@ process_def_file (abfd, info)
 	    {
 	      /* We should export symbols which are either global or not
 	         anything at all.  (.bss data is the latter)
-	         We should not export undefined symbols
-	      */
+	         We should not export undefined symbols.  */
 	      if (symbols[j]->section != &bfd_und_section
 		  && ((symbols[j]->flags & BSF_GLOBAL)
 		      || (symbols[j]->flags == BFD_FORT_COMM_DEFAULT_VALUE)))
 		{
 		  const char *sn = symbols[j]->name;
 
-		  /* we should not re-export imported stuff */
+		  /* We should not re-export imported stuff.  */
 		  {
 		    char *name = (char *) xmalloc (strlen (sn) + 2 + 6);
 		    sprintf (name, "%s%s", U("_imp_"), sn);
+
 		    blhe = bfd_link_hash_lookup (info->hash, name,
 						  false, false, false);
 		    free (name);
@@ -552,11 +562,12 @@ process_def_file (abfd, info)
 
 		  if (*sn == '_')
 		    sn++;
+
 		  if (auto_export (b, pe_def_file, sn))
 		    {
 		      def_file_export *p;
 		      p=def_file_add_export (pe_def_file, sn, 0, -1);
-		      /* Fill data flag properly, from dlltool.c */
+		      /* Fill data flag properly, from dlltool.c.  */
 		      p->flag_data = !(symbols[j]->flags & BSF_FUNCTION);
 		    }
 		}
@@ -568,7 +579,6 @@ process_def_file (abfd, info)
 #define NE pe_def_file->num_exports
 
   /* Canonicalize the export list.  */
-
   if (pe_dll_kill_ats)
     {
       for (i = 0; i < NE; i++)
@@ -579,6 +589,7 @@ process_def_file (abfd, info)
 	         pointing to the same memory as name, or might not
 	         have.  */
 	      char *tmp = xstrdup (pe_def_file->exports[i].name);
+
 	      *(strchr (tmp, '@')) = 0;
 	      pe_def_file->exports[i].name = tmp;
 	    }
@@ -592,6 +603,7 @@ process_def_file (abfd, info)
 	  if (strchr (pe_def_file->exports[i].name, '@'))
 	    {
 	      char *tmp = xstrdup (pe_def_file->exports[i].name);
+
 	      *(strchr (tmp, '@')) = 0;
 	      if (auto_export (NULL, pe_def_file, tmp))
 		def_file_add_export (pe_def_file, tmp,
@@ -638,6 +650,7 @@ process_def_file (abfd, info)
 		einfo (_("Warning, duplicate EXPORT: %s\n"),
 		       e[j - 1].name);
 	    }
+
 	  if (e[i].ordinal != -1)
 	    e[j - 1].ordinal = e[i].ordinal;
 	  e[j - 1].flag_private |= e[i].flag_private;
@@ -657,6 +670,7 @@ process_def_file (abfd, info)
   for (i = 0; i < NE; i++)
     {
       char *name = (char *) xmalloc (strlen (pe_def_file->exports[i].internal_name) + 2);
+
       if (pe_details->underscored)
 	{
 	  *name = '_';
@@ -717,11 +731,7 @@ process_def_file (abfd, info)
     }
 }
 
-/************************************************************************
-
- Build the bfd that will contain .edata and .reloc sections
-
- ************************************************************************/
+/* Build the bfd that will contain .edata and .reloc sections.  */
 
 static void
 build_filler_bfd (include_edata)
@@ -770,16 +780,13 @@ build_filler_bfd (include_edata)
       einfo ("%X%P: can not create .reloc section: %E\n");
       return;
     }
+
   bfd_set_section_size (filler_bfd, reloc_s, 0);
 
   ldlang_add_file (filler_file);
 }
 
-/************************************************************************
-
- Gather all the exported symbols and build the .edata section
-
- ************************************************************************/
+/* Gather all the exported symbols and build the .edata section.  */
 
 static void
 generate_edata (abfd, info)
@@ -792,19 +799,15 @@ generate_edata (abfd, info)
 
   /* First, we need to know how many exported symbols there are,
      and what the range of ordinals is.  */
-
   if (pe_def_file->name)
-    {
-      dll_name = pe_def_file->name;
-    }
+    dll_name = pe_def_file->name;
   else
     {
       dll_name = abfd->filename;
+
       for (dlnp = dll_name; *dlnp; dlnp++)
-	{
-	  if (*dlnp == '\\' || *dlnp == '/' || *dlnp == ':')
-	    dll_name = dlnp + 1;
-	}
+	if (*dlnp == '\\' || *dlnp == '/' || *dlnp == ':')
+	  dll_name = dlnp + 1;
     }
 
   if (count_with_ordinals && max_ordinal > count_exported)
@@ -817,8 +820,8 @@ generate_edata (abfd, info)
       min_ordinal = 1;
       max_ordinal = count_exported;
     }
-  export_table_size = max_ordinal - min_ordinal + 1;
 
+  export_table_size = max_ordinal - min_ordinal + 1;
   exported_symbols = (int *) xmalloc (export_table_size * sizeof (int));
   for (i = 0; i < export_table_size; i++)
     exported_symbols[i] = -1;
@@ -832,6 +835,7 @@ generate_edata (abfd, info)
 	    {
 	      int ei = pe_def_file->exports[i].ordinal - min_ordinal;
 	      int pi = exported_symbols[ei];
+
 	      if (pi != -1)
 		{
 		  /* xgettext:c-format */
@@ -852,15 +856,15 @@ generate_edata (abfd, info)
       if (pe_def_file->exports[i].ordinal == -1)
 	{
 	  while (exported_symbols[next_ordinal - min_ordinal] != -1)
-	    next_ordinal++;
+	    next_ordinal ++;
+
 	  exported_symbols[next_ordinal - min_ordinal] = i;
 	  pe_def_file->exports[i].ordinal = next_ordinal;
 	}
 
   /* OK, now we can allocate some memory.  */
-
-  edata_sz = (40		/* directory */
-	      + 4 * export_table_size	/* addresses */
+  edata_sz = (40				/* directory */
+	      + 4 * export_table_size		/* addresses */
 	      + 4 * count_exported_byname	/* name ptrs */
 	      + 2 * count_exported_byname	/* ordinals */
 	      + name_table_size + strlen (dll_name) + 1);
@@ -880,6 +884,7 @@ fill_exported_offsets (abfd, info)
   for (i = 0; i < pe_def_file->num_exports; i++)
     {
       char *name = (char *) xmalloc (strlen (pe_def_file->exports[i].internal_name) + 2);
+
       if (pe_details->underscored)
 	{
 	  *name = '_';
@@ -893,9 +898,8 @@ fill_exported_offsets (abfd, info)
 				   false, false, true);
 
       if (blhe && (blhe->type == bfd_link_hash_defined))
-	{
-	  exported_symbol_offsets[i] = blhe->u.def.value;
-	}
+	exported_symbol_offsets[i] = blhe->u.def.value;
+
       free (name);
     }
 }
@@ -933,6 +937,7 @@ fill_edata (abfd, info)
       bfd_put_16 (abfd, pe_def_file->version_major, edata_d + 8);
       bfd_put_16 (abfd, pe_def_file->version_minor, edata_d + 10);
     }
+
   bfd_put_32 (abfd, ERVA (enamestr), edata_d + 12);
   strcpy (enamestr, dll_name);
   enamestr += strlen (enamestr) + 1;
@@ -950,6 +955,7 @@ fill_edata (abfd, info)
   for (i = 0; i < export_table_size; i++)
     {
       int s = exported_symbols[i];
+
       if (s != -1)
 	{
 	  struct sec *ssec = exported_symbol_sections[s];
@@ -960,6 +966,7 @@ fill_edata (abfd, info)
 
 	  bfd_put_32 (abfd, srva - image_base,
 		      (void *) (eaddresses + ord - min_ordinal));
+
 	  if (!pe_def_file->exports[s].flag_noname)
 	    {
 	      char *ename = pe_def_file->exports[s].name;
@@ -989,25 +996,25 @@ pe_walk_relocs_of_symbol (info, name, cb)
 
   for (b = info->input_bfds; b; b = b->link_next)
     {
-      arelent **relocs;
-      int relsize, nrelocs, i;
+      asymbol **symbols;
+      int nsyms, symsize;
+
+      symsize = bfd_get_symtab_upper_bound (b);
+      symbols = (asymbol **) xmalloc (symsize);
+      nsyms   = bfd_canonicalize_symtab (b, symbols);
 
       for (s = b->sections; s; s = s->next)
 	{
-	  asymbol **symbols;
-	  int nsyms, symsize;
+	  arelent **relocs;
+	  int relsize, nrelocs, i;
 	  int flags = bfd_get_section_flags (b, s);
 
-	  /* Skip discarded linkonce sections */
+	  /* Skip discarded linkonce sections.  */
 	  if (flags & SEC_LINK_ONCE
 	      && s->output_section == bfd_abs_section_ptr)
 	    continue;
 
 	  current_sec = s;
-
-	  symsize = bfd_get_symtab_upper_bound (b);
-	  symbols = (asymbol **) xmalloc (symsize);
-	  nsyms = bfd_canonicalize_symtab (b, symbols);
 
 	  relsize = bfd_get_reloc_upper_bound (b, s);
 	  relocs = (arelent **) xmalloc ((size_t) relsize);
@@ -1016,9 +1023,13 @@ pe_walk_relocs_of_symbol (info, name, cb)
 	  for (i = 0; i < nrelocs; i++)
 	    {
 	      struct symbol_cache_entry *sym = *relocs[i]->sym_ptr_ptr;
-	      if (!strcmp(name,sym->name)) cb(relocs[i], s);
+
+	      if (!strcmp (name, sym->name))
+		cb (relocs[i], s);
 	    }
+
 	  free (relocs);
+
 	  /* Warning: the allocated symbols are remembered in BFD and reused
 	     later, so don't free them! */
 	  /* free (symbols); */
@@ -1026,11 +1037,7 @@ pe_walk_relocs_of_symbol (info, name, cb)
     }
 }
 
-/************************************************************************
-
- Gather all the relocations and build the .reloc section
-
- ************************************************************************/
+/* Gather all the relocations and build the .reloc section.  */
 
 static void
 generate_reloc (abfd, info)
@@ -1107,6 +1114,7 @@ generate_reloc (abfd, info)
 		{
 		  bfd_vma sym_vma;
 		  struct symbol_cache_entry *sym = *relocs[i]->sym_ptr_ptr;
+
 		  sym_vma = (relocs[i]->addend
 			     + sym->value
 			     + sym->section->vma
@@ -1160,7 +1168,6 @@ generate_reloc (abfd, info)
   /* At this point, we have total_relocs relocation addresses in
      reloc_addresses, which are all suitable for the .reloc section.
      We must now create the new sections.  */
-
   qsort (reloc_data, total_relocs, sizeof (*reloc_data), reloc_sort);
 
   for (i = 0; i < total_relocs; i++)
@@ -1169,7 +1176,7 @@ generate_reloc (abfd, info)
 
       if (this_page != sec_page)
 	{
-	  reloc_sz = (reloc_sz + 3) & ~3;	/* 4-byte align */
+	  reloc_sz = (reloc_sz + 3) & ~3;	/* 4-byte align.  */
 	  reloc_sz += 8;
 	  sec_page = this_page;
 	}
@@ -1179,54 +1186,59 @@ generate_reloc (abfd, info)
       if (reloc_data[i].type == 4)
 	reloc_sz += 2;
     }
-  reloc_sz = (reloc_sz + 3) & ~3;	/* 4-byte align */
-
+  
+  reloc_sz = (reloc_sz + 3) & ~3;	/* 4-byte align.  */
   reloc_d = (unsigned char *) xmalloc (reloc_sz);
-
   sec_page = (unsigned long) (-1);
   reloc_sz = 0;
   page_ptr = (unsigned long) (-1);
   page_count = 0;
+
   for (i = 0; i < total_relocs; i++)
     {
       unsigned long rva = reloc_data[i].vma - image_base;
       unsigned long this_page = (rva & ~0xfff);
+
       if (this_page != sec_page)
 	{
 	  while (reloc_sz & 3)
 	    reloc_d[reloc_sz++] = 0;
+
 	  if (page_ptr != (unsigned long) (-1))
 	    bfd_put_32 (abfd, reloc_sz - page_ptr, reloc_d + page_ptr + 4);
+
 	  bfd_put_32 (abfd, this_page, reloc_d + reloc_sz);
 	  page_ptr = reloc_sz;
 	  reloc_sz += 8;
 	  sec_page = this_page;
 	  page_count = 0;
 	}
+
       bfd_put_16 (abfd, (rva & 0xfff) + (reloc_data[i].type << 12),
 		  reloc_d + reloc_sz);
       reloc_sz += 2;
+
       if (reloc_data[i].type == 4)
 	{
 	  bfd_put_16 (abfd, reloc_data[i].extra, reloc_d + reloc_sz);
 	  reloc_sz += 2;
 	}
+
       page_count++;
     }
+
   while (reloc_sz & 3)
     reloc_d[reloc_sz++] = 0;
+
   if (page_ptr != (unsigned long) (-1))
     bfd_put_32 (abfd, reloc_sz - page_ptr, reloc_d + page_ptr + 4);
+
   while (reloc_sz < reloc_s->_raw_size)
     reloc_d[reloc_sz++] = 0;
 }
 
-/************************************************************************
-
- Given the exiting def_file structure, print out a .DEF file that
- corresponds to it.
-
- ************************************************************************/
+/* Given the exiting def_file structure, print out a .DEF file that
+   corresponds to it.  */
 
 static void
 quoteput (s, f, needs_quotes)
@@ -1235,6 +1247,7 @@ quoteput (s, f, needs_quotes)
      int needs_quotes;
 {
   char *cp;
+
   for (cp = s; *cp; cp++)
     if (*cp == '\''
 	|| *cp == '"'
@@ -1243,16 +1256,20 @@ quoteput (s, f, needs_quotes)
 	|| *cp == ','
 	|| *cp == ';')
       needs_quotes = 1;
+
   if (needs_quotes)
     {
       putc ('"', f);
+
       while (*s)
 	{
 	  if (*s == '"' || *s == '\\')
 	    putc ('\\', f);
+
 	  putc (*s, f);
 	  s++;
 	}
+
       putc ('"', f);
     }
   else
@@ -1265,12 +1282,11 @@ pe_dll_generate_def_file (pe_out_def_filename)
 {
   int i;
   FILE *out = fopen (pe_out_def_filename, "w");
+
   if (out == NULL)
-    {
-      /* xgettext:c-format */
-      einfo (_("%s: Can't open output def file %s\n"),
-	     program_name, pe_out_def_filename);
-    }
+    /* xgettext:c-format */
+    einfo (_("%s: Can't open output def file %s\n"),
+	   program_name, pe_out_def_filename);
 
   if (pe_def_file)
     {
@@ -1280,7 +1296,9 @@ pe_dll_generate_def_file (pe_out_def_filename)
 	    fprintf (out, "LIBRARY ");
 	  else
 	    fprintf (out, "NAME ");
+
 	  quoteput (pe_def_file->name, out, 1);
+
 	  if (pe_data (output_bfd)->pe_opthdr.ImageBase)
 	    fprintf (out, " BASE=0x%lx",
 		     (unsigned long) pe_data (output_bfd)->pe_opthdr.ImageBase);
@@ -1308,6 +1326,7 @@ pe_dll_generate_def_file (pe_out_def_filename)
 		 pe_def_file->stack_reserve, pe_def_file->stack_commit);
       else if (pe_def_file->stack_reserve != -1)
 	fprintf (out, "STACKSIZE 0x%x\n", pe_def_file->stack_reserve);
+
       if (pe_def_file->heap_commit != -1)
 	fprintf (out, "HEAPSIZE 0x%x,0x%x\n",
 		 pe_def_file->heap_reserve, pe_def_file->heap_commit);
@@ -1317,23 +1336,30 @@ pe_dll_generate_def_file (pe_out_def_filename)
       if (pe_def_file->num_section_defs > 0)
 	{
 	  fprintf (out, "\nSECTIONS\n\n");
+
 	  for (i = 0; i < pe_def_file->num_section_defs; i++)
 	    {
 	      fprintf (out, "    ");
 	      quoteput (pe_def_file->section_defs[i].name, out, 0);
+
 	      if (pe_def_file->section_defs[i].class)
 		{
 		  fprintf (out, " CLASS ");
 		  quoteput (pe_def_file->section_defs[i].class, out, 0);
 		}
+
 	      if (pe_def_file->section_defs[i].flag_read)
 		fprintf (out, " READ");
+
 	      if (pe_def_file->section_defs[i].flag_write)
 		fprintf (out, " WRITE");
+
 	      if (pe_def_file->section_defs[i].flag_execute)
 		fprintf (out, " EXECUTE");
+
 	      if (pe_def_file->section_defs[i].flag_shared)
 		fprintf (out, " SHARED");
+
 	      fprintf (out, "\n");
 	    }
 	}
@@ -1341,24 +1367,31 @@ pe_dll_generate_def_file (pe_out_def_filename)
       if (pe_def_file->num_exports > 0)
 	{
 	  fprintf (out, "EXPORTS\n");
+
 	  for (i = 0; i < pe_def_file->num_exports; i++)
 	    {
 	      def_file_export *e = pe_def_file->exports + i;
 	      fprintf (out, "    ");
 	      quoteput (e->name, out, 0);
+
 	      if (e->internal_name && strcmp (e->internal_name, e->name))
 		{
 		  fprintf (out, " = ");
 		  quoteput (e->internal_name, out, 0);
 		}
+
 	      if (e->ordinal != -1)
 		fprintf (out, " @%d", e->ordinal);
+
 	      if (e->flag_private)
 		fprintf (out, " PRIVATE");
+
 	      if (e->flag_constant)
 		fprintf (out, " CONSTANT");
+
 	      if (e->flag_noname)
 		fprintf (out, " NONAME");
+
 	      if (e->flag_data)
 		fprintf (out, " DATA");
 
@@ -1369,22 +1402,27 @@ pe_dll_generate_def_file (pe_out_def_filename)
       if (pe_def_file->num_imports > 0)
 	{
 	  fprintf (out, "\nIMPORTS\n\n");
+
 	  for (i = 0; i < pe_def_file->num_imports; i++)
 	    {
 	      def_file_import *im = pe_def_file->imports + i;
 	      fprintf (out, "    ");
+
 	      if (im->internal_name
 		  && (!im->name || strcmp (im->internal_name, im->name)))
 		{
 		  quoteput (im->internal_name, out, 0);
 		  fprintf (out, " = ");
 		}
+
 	      quoteput (im->module->name, out, 0);
 	      fprintf (out, ".");
+
 	      if (im->name)
 		quoteput (im->name, out, 0);
 	      else
 		fprintf (out, "%d", im->ordinal);
+
 	      fprintf (out, "\n");
 	    }
 	}
@@ -1393,17 +1431,11 @@ pe_dll_generate_def_file (pe_out_def_filename)
     fprintf (out, _("; no contents available\n"));
 
   if (fclose (out) == EOF)
-    {
-      /* xgettext:c-format */
-      einfo (_("%P: Error closing file `%s'\n"), pe_out_def_filename);
-    }
+    /* xgettext:c-format */
+    einfo (_("%P: Error closing file `%s'\n"), pe_out_def_filename);
 }
 
-/************************************************************************
-
- Generate the import library
-
- ************************************************************************/
+/* Generate the import library.  */
 
 static asymbol **symtab;
 static int symptr;
@@ -1451,6 +1483,7 @@ quick_symbol (abfd, n1, n2, n3, sec, flags, addr)
 {
   asymbol *sym;
   char *name = (char *) xmalloc (strlen (n1) + strlen (n2) + strlen (n3) + 1);
+
   strcpy (name, n1);
   strcat (name, n2);
   strcat (name, n3);
@@ -1491,6 +1524,7 @@ static void
 save_relocs (asection *sec)
 {
   int i;
+
   sec->relocation = reltab;
   sec->reloc_count = relcount;
   sec->orelocation = (arelent **) xmalloc ((relcount + 1) * sizeof (arelent *));
@@ -1502,24 +1536,22 @@ save_relocs (asection *sec)
   relcount = relsize = 0;
 }
 
-/*
- *	.section	.idata$2
- *	.global		__head_my_dll
- * __head_my_dll:
- *	.rva		hname
- *	.long		0
- *	.long		0
- *	.rva		__my_dll_iname
- *	.rva		fthunk
- *
- *	.section	.idata$5
- *	.long		0
- * fthunk:
- *
- *	.section	.idata$4
- *	.long		0
- * hname:
- */
+/*	.section	.idata$2
+ 	.global		__head_my_dll
+   __head_my_dll:
+ 	.rva		hname
+ 	.long		0
+ 	.long		0
+ 	.rva		__my_dll_iname
+ 	.rva		fthunk
+ 
+ 	.section	.idata$5
+ 	.long		0
+   fthunk:
+ 
+ 	.section	.idata$4
+ 	.long		0
+   hname:                              */
 
 static bfd *
 make_head (parent)
@@ -1559,7 +1591,7 @@ make_head (parent)
   d2 = (unsigned char *) xmalloc (20);
   id2->contents = d2;
   memset (d2, 0, 20);
-  d2[0] = d2[16] = 4; /* reloc addend */
+  d2[0] = d2[16] = 4; /* Reloc addend.  */
   quick_reloc (abfd,  0, BFD_RELOC_RVA, 2);
   quick_reloc (abfd, 12, BFD_RELOC_RVA, 4);
   quick_reloc (abfd, 16, BFD_RELOC_RVA, 1);
@@ -1585,16 +1617,14 @@ make_head (parent)
   return abfd;
 }
 
-/*
- *	.section	.idata$4
- *	.long		0
- *	.section	.idata$5
- *	.long		0
- *	.section	idata$7
- *	.global		__my_dll_iname
- *__my_dll_iname:
- *	.asciz		"my.dll"
- */
+/*	.section	.idata$4
+ 	.long		0
+ 	.section	.idata$5
+ 	.long		0
+ 	.section	idata$7
+ 	.global		__my_dll_iname
+  __my_dll_iname:
+ 	.asciz		"my.dll"       */
 
 static bfd *
 make_tail (parent)
@@ -1652,55 +1682,52 @@ make_tail (parent)
   return abfd;
 }
 
-/*
- *	.text
- *	.global		_function
- *	.global		___imp_function
- *	.global		__imp__function
- *_function:
- *	jmp		*__imp__function:
- *
- *	.section	idata$7
- *	.long		__head_my_dll
- *
- *	.section	.idata$5
- *___imp_function:
- *__imp__function:
- *iat?
- *	.section	.idata$4
- *iat?
- *	.section	.idata$6
- *ID<ordinal>:
- *	.short		<hint>
- *	.asciz		"function" xlate? (add underscore, kill at)
- */
+/*	.text
+ 	.global		_function
+ 	.global		___imp_function
+ 	.global		__imp__function
+  _function:
+ 	jmp		*__imp__function:
+ 
+ 	.section	idata$7
+ 	.long		__head_my_dll
+ 
+ 	.section	.idata$5
+  ___imp_function:
+  __imp__function:
+  iat?
+  	.section	.idata$4
+  iat?
+ 	.section	.idata$6
+  ID<ordinal>:
+ 	.short		<hint>
+ 	.asciz		"function" xlate? (add underscore, kill at)  */
 
-static unsigned char jmp_ix86_bytes[] = {
+static unsigned char jmp_ix86_bytes[] =
+{
   0xff, 0x25, 0x00, 0x00, 0x00, 0x00, 0x90, 0x90
 };
 
-/*
- *_function:
- *	mov.l	ip+8,r0
- *	mov.l	@r0,r0
- *	jmp	@r0
- *	nop
- *	.dw	__imp_function
- */
+/* _function:
+ 	mov.l	ip+8,r0
+ 	mov.l	@r0,r0
+ 	jmp	@r0
+ 	nop
+ 	.dw	__imp_function   */
 
-static unsigned char jmp_sh_bytes[] = {
+static unsigned char jmp_sh_bytes[] =
+{
   0x01, 0xd0, 0x02, 0x60, 0x2b, 0x40, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
-/*
- *_function:
- *	lui	$t0,<high:__imp_function>
- *	lw	$t0,<low:__imp_function>
- *	jr	$t0
- *	nop
- */
+/* _function:
+ 	lui	$t0,<high:__imp_function>
+ 	lw	$t0,<low:__imp_function>
+ 	jr	$t0
+ 	nop                              */
 
-static unsigned char jmp_mips_bytes[] = {
+static unsigned char jmp_mips_bytes[] =
+{
   0x00, 0x00, 0x08, 0x3c,  0x00, 0x00, 0x08, 0x8d,
   0x08, 0x00, 0x00, 0x01,  0x00, 0x00, 0x00, 0x00
 };
@@ -1732,6 +1759,8 @@ make_one (exp, parent)
       jmp_bytes = jmp_mips_bytes;
       jmp_byte_count = sizeof (jmp_mips_bytes);
       break;
+    default:
+      abort ();
     }
 
   oname = (char *) xmalloc (20);
@@ -1756,35 +1785,38 @@ make_one (exp, parent)
     quick_symbol (abfd, U (""), exp->internal_name, "", tx, BSF_GLOBAL, 0);
   quick_symbol (abfd, U ("_head_"), dll_symname, "", UNDSEC, BSF_GLOBAL, 0);
   quick_symbol (abfd, U ("_imp__"), exp->internal_name, "", id5, BSF_GLOBAL, 0);
-  /* symbol to reference ord/name of imported symbol, used to implement
-     auto-import */
+  /* Symbol to reference ord/name of imported
+     symbol, used to implement auto-import.  */
   quick_symbol (abfd, U("_nm__"), exp->internal_name, "", id6, BSF_GLOBAL, 0);
   if (pe_dll_compat_implib)
     quick_symbol (abfd, U ("__imp_"), exp->internal_name, "",
 		  id5, BSF_GLOBAL, 0);
 
   if (! exp->flag_data)
-  {
-    bfd_set_section_size (abfd, tx, jmp_byte_count);
-    td = (unsigned char *) xmalloc (jmp_byte_count);
-    tx->contents = td;
-    memcpy (td, jmp_bytes, jmp_byte_count);
-    switch (pe_details->pe_arch)
-      {
-      case PE_ARCH_i386:
-        quick_reloc (abfd, 2, BFD_RELOC_32, 2);
-        break;
-      case PE_ARCH_sh:
-        quick_reloc (abfd, 8, BFD_RELOC_32, 2);
-        break;
-      case PE_ARCH_mips:
-        quick_reloc (abfd, 0, BFD_RELOC_HI16_S, 2);
-        quick_reloc (abfd, 0, BFD_RELOC_LO16, 0); /* MIPS_R_PAIR */
-        quick_reloc (abfd, 4, BFD_RELOC_LO16, 2);
-        break;
-      }
-    save_relocs (tx);
-  }
+    {
+      bfd_set_section_size (abfd, tx, jmp_byte_count);
+      td = (unsigned char *) xmalloc (jmp_byte_count);
+      tx->contents = td;
+      memcpy (td, jmp_bytes, jmp_byte_count);
+
+      switch (pe_details->pe_arch)
+	{
+	case PE_ARCH_i386:
+	  quick_reloc (abfd, 2, BFD_RELOC_32, 2);
+	  break;
+	case PE_ARCH_sh:
+	  quick_reloc (abfd, 8, BFD_RELOC_32, 2);
+	  break;
+	case PE_ARCH_mips:
+	  quick_reloc (abfd, 0, BFD_RELOC_HI16_S, 2);
+	  quick_reloc (abfd, 0, BFD_RELOC_LO16, 0); /* MIPS_R_PAIR */
+	  quick_reloc (abfd, 4, BFD_RELOC_LO16, 2);
+	  break;
+	default:
+	  abort ();
+	}
+      save_relocs (tx);
+    }
 
   bfd_set_section_size (abfd, id7, 4);
   d7 = (unsigned char *) xmalloc (4);
@@ -1797,6 +1829,7 @@ make_one (exp, parent)
   d5 = (unsigned char *) xmalloc (4);
   id5->contents = d5;
   memset (d5, 0, 4);
+
   if (exp->flag_noname)
     {
       d5[0] = exp->ordinal;
@@ -1813,6 +1846,7 @@ make_one (exp, parent)
   d4 = (unsigned char *) xmalloc (4);
   id4->contents = d4;
   memset (d4, 0, 4);
+
   if (exp->flag_noname)
     {
       d4[0] = exp->ordinal;
@@ -1862,8 +1896,7 @@ make_singleton_name_thunk (import, parent)
      char *import;
      bfd *parent;
 {
-  /* name thunks go to idata$4 */
-
+  /* Name thunks go to idata$4.  */
   asection *id4;
   unsigned char *d4;
   char *oname;
@@ -1905,7 +1938,7 @@ static char *
 make_import_fixup_mark (rel)
      arelent *rel;
 {
-  /* we convert reloc to symbol, for later reference */
+  /* We convert reloc to symbol, for later reference.  */
   static int counter;
   static char *fixup_name = NULL;
   static unsigned int buffer_len = 0;
@@ -1922,13 +1955,13 @@ make_import_fixup_mark (rel)
     }
 
   if (strlen (sym->name) + 25 > buffer_len)
-  /* assume 25 chars for "__fu" + counter + "_".  If counter is 
+  /* Assume 25 chars for "__fu" + counter + "_".  If counter is 
      bigger than 20 digits long, we've got worse problems than
-     overflowing this buffer... */
+     overflowing this buffer...  */
     {
       free (fixup_name);
-      /* new buffer size is length of symbol, plus 25, but then
-	 rounded up to the nearest multiple of 128 */
+      /* New buffer size is length of symbol, plus 25, but then
+	 rounded up to the nearest multiple of 128.  */
       buffer_len = ((strlen (sym->name) + 25) + 127) & ~127;
       fixup_name = (char *) xmalloc (buffer_len);
     }
@@ -1940,23 +1973,19 @@ make_import_fixup_mark (rel)
 				rel->address, NULL, true, false,
 				(struct bfd_link_hash_entry **) &myh);
 
-/*
-  printf("type:%d\n",myh->type);
-  printf("%s\n",myh->root.u.def.section->name);
-*/
+#if 0
+    printf ("type:%d\n", myh->type);
+    printf ("%s\n", myh->root.u.def.section->name);
+#endif
   return fixup_name;
 }
 
-
-/*
- *	.section	.idata$3
- *	.rva		__nm_thnk_SYM (singleton thunk with name of func)
- *	.long		0
- *	.long		0
- *	.rva		__my_dll_iname (name of dll)
- *	.rva		__fuNN_SYM (pointer to reference (address) in text)
- *
- */
+/*	.section	.idata$3
+  	.rva		__nm_thnk_SYM (singleton thunk with name of func)
+ 	.long		0
+ 	.long		0
+ 	.rva		__my_dll_iname (name of dll)
+ 	.rva		__fuNN_SYM (pointer to reference (address) in text)  */
 
 static bfd *
 make_import_fixup_entry (name, fixup_name, dll_symname,parent)
@@ -1984,9 +2013,10 @@ make_import_fixup_entry (name, fixup_name, dll_symname,parent)
   symptr = 0;
   symtab = (asymbol **) xmalloc (6 * sizeof (asymbol *));
   id3 = quick_section (abfd, ".idata$3", SEC_HAS_CONTENTS, 2);
-/*  
-  quick_symbol (abfd, U("_head_"), dll_symname, "", id2, BSF_GLOBAL, 0); 
-*/
+
+#if 0  
+  quick_symbol (abfd, U ("_head_"), dll_symname, "", id2, BSF_GLOBAL, 0); 
+#endif
   quick_symbol (abfd, U ("_nm_thnk_"), name, "", UNDSEC, BSF_GLOBAL, 0);
   quick_symbol (abfd, U (""), dll_symname, "_iname", UNDSEC, BSF_GLOBAL, 0);
   quick_symbol (abfd, "", fixup_name, "", UNDSEC, BSF_GLOBAL, 0);
@@ -2028,12 +2058,13 @@ pe_create_import_fixup (rel)
       bfd *b = make_singleton_name_thunk (name, output_bfd);
       add_bfd_to_link (b, b->filename, &link_info);
 
-      /* If we ever use autoimport, we have to cast text section writable */
+      /* If we ever use autoimport, we have to cast text section writable.  */
       config.text_read_only = false;
     }
 
   {
-    extern char *pe_data_import_dll;
+    extern char * pe_data_import_dll;  /* Defined in emultempl/pe.em.  */
+    
     bfd *b = make_import_fixup_entry (name, fixup_name, pe_data_import_dll,
 				      output_bfd);
     add_bfd_to_link (b, b->filename, &link_info);
@@ -2076,7 +2107,6 @@ pe_dll_generate_implib (def, impfilename)
   outarch->has_armap = 1;
 
   /* Work out a reasonable size of things to put onto one line.  */
-
   ar_head = make_head (outarch);
 
   for (i = 0; i < def->num_exports; i++)
@@ -2084,6 +2114,7 @@ pe_dll_generate_implib (def, impfilename)
       /* The import library doesn't know about the internal name.  */
       char *internal = def->exports[i].internal_name;
       bfd *n;
+
       def->exports[i].internal_name = def->exports[i].name;
       n = make_one (def->exports + i, outarch);
       n->next = head;
@@ -2097,7 +2128,6 @@ pe_dll_generate_implib (def, impfilename)
     return;
 
   /* Now stick them all into the archive.  */
-
   ar_head->next = head;
   ar_tail->next = ar_head;
   head = ar_tail;
@@ -2123,11 +2153,13 @@ add_bfd_to_link (abfd, name, link_info)
      struct bfd_link_info *link_info;
 {
   lang_input_statement_type *fake_file;
+
   fake_file = lang_add_input_file (name,
 				   lang_input_file_is_fake_enum,
 				   NULL);
   fake_file->the_bfd = abfd;
   ldlang_add_file (fake_file);
+
   if (!bfd_link_add_symbols (abfd, link_info))
     einfo ("%Xaddsym %s: %s\n", name, bfd_errmsg (bfd_get_error ()));
 }
@@ -2138,6 +2170,7 @@ pe_process_import_defs (output_bfd, link_info)
      struct bfd_link_info *link_info;
 {
   def_file_module *module;
+
   pe_dll_id_target (bfd_get_target (output_bfd));
 
   if (!pe_def_file)
@@ -2206,13 +2239,9 @@ pe_process_import_defs (output_bfd, link_info)
     }
 }
 
-/************************************************************************
-
- We were handed a *.DLL file.  Parse it and turn it into a set of
- IMPORTS directives in the def file.  Return true if the file was
- handled, false if not.
-
- ************************************************************************/
+/* We were handed a *.DLL file.  Parse it and turn it into a set of
+   IMPORTS directives in the def file.  Return true if the file was
+   handled, false if not.  */
 
 static unsigned int
 pe_get16 (abfd, where)
@@ -2220,6 +2249,7 @@ pe_get16 (abfd, where)
      int where;
 {
   unsigned char b[2];
+
   bfd_seek (abfd, where, SEEK_SET);
   bfd_read (b, 1, 2, abfd);
   return b[0] + (b[1] << 8);
@@ -2231,6 +2261,7 @@ pe_get32 (abfd, where)
      int where;
 {
   unsigned char b[4];
+
   bfd_seek (abfd, where, SEEK_SET);
   bfd_read (b, 1, 4, abfd);
   return b[0] + (b[1] << 8) + (b[2] << 16) + (b[3] << 24);
@@ -2243,6 +2274,7 @@ pe_as16 (ptr)
      void *ptr;
 {
   unsigned char *b = ptr;
+
   return b[0] + (b[1] << 8);
 }
 
@@ -2253,6 +2285,7 @@ pe_as32 (ptr)
      void *ptr;
 {
   unsigned char *b = ptr;
+
   return b[0] + (b[1] << 8) + (b[2] << 16) + (b[3] << 24);
 }
 
@@ -2269,13 +2302,13 @@ pe_implied_import_dll (filename)
 
   /* No, I can't use bfd here.  kernel32.dll puts its export table in
      the middle of the .rdata section.  */
-
   dll = bfd_openr (filename, pe_details->target_name);
   if (!dll)
     {
       einfo ("%Xopen %s: %s\n", filename, bfd_errmsg (bfd_get_error ()));
       return false;
     }
+
   /* PEI dlls seem to be bfd_objects.  */
   if (!bfd_check_format (dll, bfd_object))
     {
@@ -2291,14 +2324,17 @@ pe_implied_import_dll (filename)
   pe_header_offset = pe_get32 (dll, 0x3c);
   opthdr_ofs = pe_header_offset + 4 + 20;
   num_entries = pe_get32 (dll, opthdr_ofs + 92);
-  if (num_entries < 1) /* no exports */
+
+  if (num_entries < 1) /* No exports.  */
     return false;
+
   export_rva = pe_get32 (dll, opthdr_ofs + 96);
   export_size = pe_get32 (dll, opthdr_ofs + 100);
   nsections = pe_get16 (dll, pe_header_offset + 4 + 2);
   secptr = (pe_header_offset + 4 + 20 +
 	    pe_get16 (dll, pe_header_offset + 4 + 16));
   expptr = 0;
+
   for (i = 0; i < nsections; i++)
     {
       char sname[8];
@@ -2306,8 +2342,10 @@ pe_implied_import_dll (filename)
       unsigned long vaddr = pe_get32 (dll, secptr1 + 12);
       unsigned long vsize = pe_get32 (dll, secptr1 + 16);
       unsigned long fptr = pe_get32 (dll, secptr1 + 20);
+
       bfd_seek (dll, secptr1, SEEK_SET);
       bfd_read (sname, 1, 8, dll);
+
       if (vaddr <= export_rva && vaddr + vsize > export_rva)
 	{
 	  expptr = fptr + (export_rva - vaddr);
@@ -2329,10 +2367,12 @@ pe_implied_import_dll (filename)
   name_rvas = pe_as32 (expdata + 32);
   ordinals = pe_as32 (expdata + 36);
   ordbase = pe_as32 (expdata + 16);
+
   for (i = 0; i < nexp; i++)
     {
       unsigned long name_rva = pe_as32 (erva + name_rvas + i * 4);
       def_file_import *imp;
+
       imp = def_file_add_import (pe_def_file, erva + name_rva, dll_name,
 				 i, 0);
     }
@@ -2340,14 +2380,10 @@ pe_implied_import_dll (filename)
   return true;
 }
 
-/************************************************************************
-
- These are the main functions, called from the emulation.  The first
- is called after the bfds are read, so we can guess at how much space
- we need.  The second is called after everything is placed, so we
- can put the right values in place.
-
- ************************************************************************/
+/* These are the main functions, called from the emulation.  The first
+   is called after the bfds are read, so we can guess at how much space
+   we need.  The second is called after everything is placed, so we
+   can put the right values in place.  */
 
 void
 pe_dll_build_sections (abfd, info)
