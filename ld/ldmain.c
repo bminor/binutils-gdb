@@ -219,13 +219,13 @@ main (argc, argv)
   if (config.relocateable_output) {
     output_bfd->flags &= ~EXEC_P;
 
-    ldwrite(write_map);
+    ldwrite();
     bfd_close(output_bfd);
   }
   else {
     output_bfd->flags |= EXEC_P;
 
-    ldwrite(write_map);
+    ldwrite();
 
     if (config.make_executable == false && force_make_executable ==false) {
 

@@ -387,8 +387,7 @@ DEFUN_VOID(write_rel)
 }
 
 void
-DEFUN(ldwrite, (write_map),
-      boolean write_map)
+DEFUN_VOID(ldwrite)
 {
   data_area = (PTR) ldmalloc(largest_section);
   if (config.relocateable_output == true)
@@ -404,9 +403,9 @@ DEFUN(ldwrite, (write_map),
 
   /* Print a map, if requested.  */
 
-  if (write_map) {
+  if (config.map_file) {
     ldsym_print_symbol_table ();
-    lang_map(stdout);
+    lang_map();
   }
 
   ldsym_write ();
