@@ -155,9 +155,6 @@ extern void mcore_virtual_frame_pointer (CORE_ADDR, int *, LONGEST *);
 #define TARGET_VIRTUAL_FRAME_POINTER(PC, REGP, OFFP) \
 	mcore_virtual_frame_pointer ((PC), (REGP), (OFFP))
 
-/* MCore can be bi-endian. */
-#define TARGET_BYTE_ORDER_SELECTABLE_P 1
-
 /* For PE, gcc will tell us what th real type of
    arguments are when it promotes arguments. */
 #define BELIEVE_PCC_PROMOTION 1

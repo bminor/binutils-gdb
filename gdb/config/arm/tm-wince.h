@@ -31,8 +31,4 @@
 
 void wince_software_single_step (unsigned int, int);
 
-/* Target byte order is little endian and not selectable on WinCE. */
-#undef  TARGET_BYTE_ORDER_SELECTABLE_P
-#define TARGET_BYTE_ORDER_SELECTABLE_P	0
-
 #endif /* TM_WINCE_H */

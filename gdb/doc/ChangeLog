@@ -1,5 +1,10 @@
 2002-01-20  Andrew Cagney  <ac131313@redhat.com>
 
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	description of TARGET_BYTE_ORDER_SELECTABLE_P.
+
+2002-01-20  Andrew Cagney  <ac131313@redhat.com>
+
 	* gdbint.texinfo (Host Definition): Revise.  xm-xyz.h and xyz.mh
 	are no longer needed.
 	(Porting GDB): Add maintainer note about configure.host.

@@ -1,3 +1,28 @@
+2002-01-20  Andrew Cagney  <ac131313@redhat.com>
+
+	* remote-sim.c (gdbsim_open): Simplify code testing the macro
+	TARGET_BYTE_ORDER_SELECTABLE_P.  Assume the target is always
+	byte-order selectable.
+	* sparc-tdep.c (sparc_target_architecture_hook): Ditto.
+	* arch-utils.c: Ditto.
+	(set_endian): Ditto.
+	(set_endian_from_file): Ditto.
+	* gdbserver/low-sim.c (create_inferior): Ditto.
+	* gdbarch.sh: Ditto.
+	* gdbarch.h: Re-generate.
+	* config/powerpc/tm-ppc-eabi.h (TARGET_BYTE_ORDER_SELECTABLE_P): 
+	* config/sparc/tm-sparclite.h (TARGET_BYTE_ORDER_SELECTABLE): 
+	* config/sparc/tm-sparclet.h (TARGET_BYTE_ORDER_SELECTABLE): 
+	* config/mcore/tm-mcore.h (TARGET_BYTE_ORDER_SELECTABLE_P): 
+	* config/arm/tm-wince.h (TARGET_BYTE_ORDER_SELECTABLE_P): 
+	* config/arm/tm-linux.h (TARGET_BYTE_ORDER_SELECTABLE_P): 
+	* config/arc/tm-arc.h (TARGET_BYTE_ORDER_SELECTABLE): 
+	* config/arm/tm-arm.h (TARGET_BYTE_ORDER_SELECTABLE_P): Delete
+	macro definition.
+	* config/mips/tm-wince.h: Remove #undef of macro
+	TARGET_BYTE_ORDER_SELECTABLE.
+	* config/sh/tm-wince.h: Ditto.
+
 2002-01-20  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdbtypes.h (struct cplus_struct_type): Add is_artificial to

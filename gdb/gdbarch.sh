@@ -1056,33 +1056,7 @@ extern void register_gdbarch_swap (void *data, unsigned long size, gdbarch_swap_
 
 /* The target-system-dependent byte order is dynamic */
 
-/* TARGET_BYTE_ORDER_SELECTABLE_P determines if the target endianness
-   is selectable at runtime.  The user can use the \`\`set endian''
-   command to change it.  TARGET_BYTE_ORDER_AUTO is nonzero when
-   target_byte_order should be auto-detected (from the program image
-   say). */
-
-#if GDB_MULTI_ARCH
-/* Multi-arch GDB is always bi-endian. */
-#define TARGET_BYTE_ORDER_SELECTABLE_P 1
-#endif
-
-#ifndef TARGET_BYTE_ORDER_SELECTABLE_P
-/* compat - Catch old targets that define TARGET_BYTE_ORDER_SLECTABLE
-   when they should have defined TARGET_BYTE_ORDER_SELECTABLE_P 1 */
-#ifdef TARGET_BYTE_ORDER_SELECTABLE
-#define TARGET_BYTE_ORDER_SELECTABLE_P 1
-#else
-#define TARGET_BYTE_ORDER_SELECTABLE_P 0
-#endif
-#endif
-
 extern int target_byte_order;
-#ifdef TARGET_BYTE_ORDER_SELECTABLE
-/* compat - Catch old targets that define TARGET_BYTE_ORDER_SELECTABLE
-   and expect defs.h to re-define TARGET_BYTE_ORDER. */
-#undef TARGET_BYTE_ORDER
-#endif
 #ifndef TARGET_BYTE_ORDER
 #define TARGET_BYTE_ORDER (target_byte_order + 0)
 #endif

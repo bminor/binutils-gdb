@@ -2200,15 +2200,8 @@ sparc_target_architecture_hook (const bfd_arch_info_type *ap)
 
   if (ap->mach == bfd_mach_sparc_sparclite_le)
     {
-      if (TARGET_BYTE_ORDER_SELECTABLE_P)
-	{
-	  target_byte_order = BFD_ENDIAN_LITTLE;
-	  bi_endian = 1;
-	}
-      else
-	{
-	  warning ("This GDB does not support little endian sparclite.");
-	}
+      target_byte_order = BFD_ENDIAN_LITTLE;
+      bi_endian = 1;
     }
   else
     bi_endian = 0;

@@ -88,10 +88,8 @@ create_inferior (char *program, char **argv)
 {
   bfd *abfd;
   int pid = 0;
-#ifdef TARGET_BYTE_ORDER_SELECTABLE
   char **new_argv;
   int nargs;
-#endif
 
   abfd = bfd_openr (program, 0);
   if (!abfd)
@@ -108,7 +106,6 @@ create_inferior (char *program, char **argv)
       exit (1);
     }
 
-#ifdef TARGET_BYTE_ORDER_SELECTABLE
   /* Add "-E big" or "-E little" to the argument list depending on the
      endianness of the program to be loaded.  */
   for (nargs = 0; argv[nargs] != NULL; nargs++)		/* count the args */
@@ -120,7 +117,6 @@ create_inferior (char *program, char **argv)
   new_argv[nargs + 1] = bfd_big_endian (abfd) ? "big" : "little";
   new_argv[nargs + 2] = NULL;
   argv = new_argv;
-#endif
 
   /* Create an instance of the simulator.  */
   default_callback.init (&default_callback);

@@ -399,23 +399,6 @@ generic_register_virtual_size (int regnum)
 
 /* Functions to manipulate the endianness of the target.  */
 
-#ifdef TARGET_BYTE_ORDER_SELECTABLE
-/* compat - Catch old targets that expect a selectable byte-order to
-   default to BFD_ENDIAN_BIG */
-#ifndef TARGET_BYTE_ORDER_DEFAULT
-#define TARGET_BYTE_ORDER_DEFAULT BFD_ENDIAN_BIG
-#endif
-#endif
-#if !TARGET_BYTE_ORDER_SELECTABLE_P
-#ifndef TARGET_BYTE_ORDER_DEFAULT
-/* compat - Catch old non byte-order selectable targets that do not
-   define TARGET_BYTE_ORDER_DEFAULT and instead expect
-   TARGET_BYTE_ORDER to be used as the default.  For targets that
-   defined neither TARGET_BYTE_ORDER nor TARGET_BYTE_ORDER_DEFAULT the
-   below will get a strange compiler warning. */
-#define TARGET_BYTE_ORDER_DEFAULT TARGET_BYTE_ORDER
-#endif
-#endif
 #ifndef TARGET_BYTE_ORDER_DEFAULT
 #define TARGET_BYTE_ORDER_DEFAULT BFD_ENDIAN_BIG /* arbitrary */
 #endif
@@ -453,11 +436,7 @@ show_endian (char *args, int from_tty)
 static void
 set_endian (char *ignore_args, int from_tty, struct cmd_list_element *c)
 {
-  if (!TARGET_BYTE_ORDER_SELECTABLE_P)
-    {
-      printf_unfiltered ("Byte order is not selectable.");
-    }
-  else if (set_endian_string == endian_auto)
+  if (set_endian_string == endian_auto)
     {
       target_byte_order_auto = 1;
     }
@@ -508,33 +487,20 @@ set_endian (char *ignore_args, int from_tty, struct cmd_list_element *c)
 static void
 set_endian_from_file (bfd *abfd)
 {
+  int want;
   if (GDB_MULTI_ARCH)
     internal_error (__FILE__, __LINE__,
 		    "set_endian_from_file: not for multi-arch");
-  if (TARGET_BYTE_ORDER_SELECTABLE_P)
-    {
-      int want;
-      
-      if (bfd_big_endian (abfd))
-	want = BFD_ENDIAN_BIG;
-      else
-	want = BFD_ENDIAN_LITTLE;
-      if (TARGET_BYTE_ORDER_AUTO)
-	target_byte_order = want;
-      else if (TARGET_BYTE_ORDER != want)
-	warning ("%s endian file does not match %s endian target.",
-		 want == BFD_ENDIAN_BIG ? "big" : "little",
-		 TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? "big" : "little");
-    }
+  if (bfd_big_endian (abfd))
+    want = BFD_ENDIAN_BIG;
   else
-    {
-      if (bfd_big_endian (abfd)
-	  ? TARGET_BYTE_ORDER != BFD_ENDIAN_BIG
-	  : TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-	warning ("%s endian file does not match %s endian target.",
-		 bfd_big_endian (abfd) ? "big" : "little",
-		 TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? "big" : "little");
-    }
+    want = BFD_ENDIAN_LITTLE;
+  if (TARGET_BYTE_ORDER_AUTO)
+    target_byte_order = want;
+  else if (TARGET_BYTE_ORDER != want)
+    warning ("%s endian file does not match %s endian target.",
+	     want == BFD_ENDIAN_BIG ? "big" : "little",
+	     TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? "big" : "little");
 }
 
 

@@ -39,8 +39,6 @@
 /* Say that we're using ELF, not XCOFF.  */
 #define ELF_OBJECT_FORMAT 1
 
-#define TARGET_BYTE_ORDER_SELECTABLE_P 1
-
 /* The value of symbols of type N_SO and N_FUN maybe null when 
    it shouldn't be. */
 #define SOFUN_ADDRESS_MAYBE_MISSING

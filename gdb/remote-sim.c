@@ -474,8 +474,7 @@ gdbsim_open (char *args, int from_tty)
   strcpy (arg_buf, "gdbsim");	/* 7 */
   /* Specify the byte order for the target when it is both selectable
      and explicitly specified by the user (not auto detected). */
-  if (TARGET_BYTE_ORDER_SELECTABLE_P
-      && !TARGET_BYTE_ORDER_AUTO)
+  if (!TARGET_BYTE_ORDER_AUTO)
     {
       switch (TARGET_BYTE_ORDER)
 	{

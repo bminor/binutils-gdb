@@ -34,10 +34,6 @@
 extern struct link_map_offsets *arm_linux_svr4_fetch_link_map_offsets (void);
 #define SVR4_FETCH_LINK_MAP_OFFSETS() arm_linux_svr4_fetch_link_map_offsets ()
 
-/* Target byte order on ARM Linux is little endian and not selectable.  */
-#undef TARGET_BYTE_ORDER_SELECTABLE_P
-#define TARGET_BYTE_ORDER_SELECTABLE_P	0
-
 /* Under ARM Linux the traditional way of performing a breakpoint is to
    execute a particular software interrupt, rather than use a particular
    undefined instruction to provoke a trap.  Upon exection of the software

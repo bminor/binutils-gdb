@@ -45,7 +45,6 @@ enum {
 /* overrides of tm-sparc.h */
 
 #undef TARGET_BYTE_ORDER
-#define TARGET_BYTE_ORDER_SELECTABLE
 
 /* Select the sparclite disassembler.  Slightly different instruction set from
    the V8 sparc.  */

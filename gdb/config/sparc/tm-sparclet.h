@@ -49,7 +49,6 @@ enum {
 /* overrides of tm-sparc.h */
 
 #undef TARGET_BYTE_ORDER
-#define TARGET_BYTE_ORDER_SELECTABLE
 
 /* Sequence of bytes for breakpoint instruction (ta 1). */
 #undef BREAKPOINT
