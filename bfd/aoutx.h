@@ -2906,7 +2906,8 @@ NAME(aout,bfd_free_cached_info) (abfd)
 {
   asection *o;
 
-  if (bfd_get_format (abfd) != bfd_object)
+  if (bfd_get_format (abfd) != bfd_object
+      || abfd->tdata.aout_data == NULL)
     return true;
 
 #define BFCI_FREE(x) if (x != NULL) { free (x); x = NULL; }

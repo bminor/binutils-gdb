@@ -1,3 +1,8 @@
+2001-02-27  H.J. Lu  <hjl@gnu.org>
+
+	* aoutx.h (NAME(aout,bfd_free_cached_info)): Return true if
+	abfd->tdata.aout_data == NULL.
+
 2001-02-27  Alan Modra  <alan@linuxcare.com.au>
 
 	* elf32-hppa.c: Correct field selector in stub comments.
