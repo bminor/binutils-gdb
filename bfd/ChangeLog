@@ -1,3 +1,17 @@
+Fri May  6 13:34:14 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* nlmcode.h (nlm_swap_auxiliary_headers_in): Rework custom header
+	handling for latest suggested format.
+	(nlm_swap_auxiliary_headers_out): Likewise.
+	(nlm_compute_section_file_positions): Likewise.
+
+Thu May  5 15:40:47 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	Patches from Ralph Campbell:
+	* mipsbsd.c (mips_fix_jmp_addr): New function.
+	(mips_fix_hi16_s): Use bfd_is_com_section.
+	(mips_howto_table_ext): Call mips_fix_jmp_addr for MIPS_RELOC_JMP.
+
 Wed May  4 11:09:53 1994  Ian Lance Taylor  (ian@cygnus.com)
 
 	Changed m68k-aout to set flags to 0; m68k-sunos still uses 1.
@@ -3749,6 +3763,4 @@ See file ChangeLog.1
 Local Variables:
 mode: indented-text
 left-margin: 8
-fill-column: 74
-version-control: never
-End:
+fill-column: 7
