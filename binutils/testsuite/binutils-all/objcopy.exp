@@ -314,6 +314,7 @@ if {$low == "" || $origstart == ""} then {
 # Test stripping an object.
 
 proc strip_test { } {
+    global AR
     global CC
     global STRIP
     global STRIPFLAGS
@@ -323,6 +324,34 @@ proc strip_test { } {
     global subdir
 
     set test "strip"
+
+    if { [target_compile $srcdir/$subdir/testprog.c tmpdir/testprog.o object debug] != "" } {
+	untested $test
+	return
+    }
+
+    if [is_remote host] {
+	set archive libstrip.a
+	set objfile [remote_download host tmpdir/testprog.o];
+	remote_file host delete $archive
+    } else {
+	set archive tmpdir/libstrip.a
+	set objfile tmpdir/testprog.o
+    }
+
+    remote_file build delete tmpdir/libstrip.a
+
+    set exec_output [binutils_run $AR "rc $archive ${objfile}"]
+    if ![string match "" $exec_output] {
+	fail $test
+	return
+    }
+
+    set exec_output [binutils_run $STRIP "$STRIPFLAGS $archive"]
+    if ![string match "" $exec_output] {
+	fail $test
+	return
+    }
 
     if { [target_compile $srcdir/$subdir/testprog.c tmpdir/testprog.o object debug] != "" } {
 	untested $test

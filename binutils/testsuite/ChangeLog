@@ -1,3 +1,7 @@
+2001-11-29  H.J. Lu <hjl@gnu.org>
+
+	* binutils-all/objcopy.exp (strip_test): Add strip on archive.
+
 2001-11-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* binutils-all/objcopy.exp: Allow '? main', to suit powerpc64.
