@@ -1,5 +1,13 @@
 2004-07-26  Andrew Cagney  <cagney@gnu.org>
 
+	* MAINTAINERS: Mark the xstormy16, sh64, ns32k, mn10300, mcore,
+	and h8300 as broken.
+	* NEWS: END-OF-LIFE frame compatibility module.
+	* PROBLEMS: For "Stack backtraces", remove powerpc, hppa and mips
+	specific comments.
+
+2004-07-26  Andrew Cagney  <cagney@gnu.org>
+
 	* cli/cli-decode.c (deprecated_add_show_from_set): Deprecate.
 	* xcoffsolib.c (_initialize_xcoffsolib): Update.
 	* wince.c (_initialize_wince): Update.

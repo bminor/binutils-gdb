@@ -121,24 +121,3 @@ gdb/1505: [regression] gdb prints a bad backtrace for a thread
 When backtracing a thread, gdb does not stop when it reaches the
 outermost frame, instead continuing until it hits garbage.  This is
 sensitive to the operating system and thread library.
-
-hppa*-*-*
-mips*-*-*
-
-The MIPS and HPPA backtrace code has only very recently been updated
-to use GDB's new frame mechanism.  At present there are still a few
-problems, in particular backtraces through signal handlers do not
-work.
-
-People encountering problems with these architectures should consult
-GDB's web pages and mailing lists (http://www.gnu.org/software/gdb/)
-to see if there are updates.
-
-powerpc*-*-*
-
-PowerPC architecture support, in 6.1, does not use the new frame code.
-
-Fortunately, PowerPC architecture support, in GDB's mainline sources,
-have been updated.  People encountering problems should consider
-downloading a more current snapshot of GDB
-(http://www.gnu.org/software/gdb/current/).
