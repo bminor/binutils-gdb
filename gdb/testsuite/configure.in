@@ -14,51 +14,61 @@ configdirs="gdb.base gdb.c++ gdb.chill gdb.disasm"
 # debugging format.
 stabsdirs="gdb.stabs"
 
+# Directories to use for a configuration which supports signals.
+# This usually excludes cross targets.
+signaldirs="gdb.signals"
+
 # per-host:
 
 # per-target:
 
-	# everything defaults to unix for a target
+# everything defaults to unix for a target
 target_abbrev=unix
 target_makefile_frag=config/mt-unix
 
-	# this section is for all targets
+# this section is for all targets
 case "${target}" in
 	i[345]86-*-aout)	target_makefile_frag=config/mt-i386-aout ;;
-	*-*-lynx)	target_makefile_frag=config/mt-lynx ;;
-	*-*-netware)	target_makefile_frag=config/mt-netware ;;
-	*-*-vxworks*)	target_makefile_frag=config/mt-vxworks ;;
-	m68k-*-*)	target_makefile_frag=config/mt-m68k ;;
-	i960-*-nindy)	target_makefile_frag=config/mt-i960-nindy ;;
-	a29k-*-udi)	target_makefile_frag=config/mt-a29k-udi ;;
-	sparclite-*-*)	target_makefile_frag=config/mt-slite ;;
-	sparc-*-aout)	target_makefile_frag=config/mt-sparc-aout ;;
-	mips-*-ecoff)	target_makefile_frag=config/mt-mips-ecoff ;;
+	*-*-lynx)		target_makefile_frag=config/mt-lynx ;;
+	*-*-netware)		target_makefile_frag=config/mt-netware ;;
+	*-*-vxworks*)		target_makefile_frag=config/mt-vxworks ;;
+	m68k-*-*)		target_makefile_frag=config/mt-m68k ;;
+	i960-*-nindy)		target_makefile_frag=config/mt-i960-nindy ;;
+	a29k-*-udi)		target_makefile_frag=config/mt-a29k-udi ;;
+	sparclite-*-*)		target_makefile_frag=config/mt-slite ;;
+	sparc-*-aout)		target_makefile_frag=config/mt-sparc-aout ;;
+	mips-*-ecoff)		target_makefile_frag=config/mt-mips-ecoff ;;
 esac
 
+# add stabs tests for appropriate targets
 case "${target}" in
+	rs6000-*-aix*)		configdirs="${configdirs} ${stabsdirs}" ;;
+	*-*-bsd*)		configdirs="${configdirs} ${stabsdirs}" ;;
+	*-*-go32*)		configdirs="${configdirs} ${stabsdirs}" ;;
+	*-*-linux*)		configdirs="${configdirs} ${stabsdirs}" ;;
+	*-*-lynxos*)		configdirs="${configdirs} ${stabsdirs}" ;;
+	*-sun-*)		configdirs="${configdirs} ${stabsdirs}" ;;
+	hppa*-*-*)		configdirs="${configdirs} ${stabsdirs}" ;;
 
-rs6000-*-aix*)		configdirs="${configdirs} ${stabsdirs}" ;;
-*-*-bsd*)		configdirs="${configdirs} ${stabsdirs}" ;;
-*-*-go32*)		configdirs="${configdirs} ${stabsdirs}" ;;
-*-*-linux*)		configdirs="${configdirs} ${stabsdirs}" ;;
-*-*-lynxos*)		configdirs="${configdirs} ${stabsdirs}" ;;
-*-sun-*)		configdirs="${configdirs} ${stabsdirs}" ;;
-hppa*-*-*)		configdirs="${configdirs} ${stabsdirs}" ;;
-
-*)			if [ x${with_stabs} = xyes ]; then
-			  configdirs="${configdirs} ${stabsdirs}"
-			fi
-			;;
+	*)			if [ x${with_stabs} = xyes ]; then
+				  configdirs="${configdirs} ${stabsdirs}"
+				fi
+				;;
 esac
 
-	# link in the lib directory if needed
+# add signal tests for appropriate targets
+case "${target}" in
+	sh*-hms)	;;
+	*)		configdirs="${configdirs} ${signaldirs}" ;;
+esac
+
+# link in the lib directory if needed
 #if [ ! -d lib ] ; then
 #    files="lib"
 #    links="lib"
 #fi
 
-	# make list of files and links based on tool name
+# make list of files and links based on tool name
 tool_list="${tool_list} gdb"
 #for i in ${tool_list};
 #do
