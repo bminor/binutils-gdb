@@ -86,6 +86,7 @@ Appendixes:
                                 and GNU stabs in xcoff
 * Sun-differences::             Differences between GNU stabs and Sun
                                 native stabs
+* Stabs-in-elf::		Stabs in an ELF file.
 @end menu
 @end ifinfo
 
@@ -799,12 +800,13 @@ nesting is reflected in the nested bracketing stabs (@code{N_LBRAC},
 @chapter Variables
 
 @menu
-* Automatic variables:: locally scoped
-* Global Variables::
-* Register variables::
-* Initialized statics::
-* Un-initialized statics::
-* Parameters::
+* Automatic variables:: 	Variables allocated on the stack.
+* Global Variables::		Variables used by more than one source file.
+* Common Blocks::		Variables statically allocated together.
+* Register variables::		Variables in registers.
+* Initialized statics::		Static variables with values.
+* Un-initialized statics::	Static variables initialialized to 0.
+* Parameters::			Passing variables to functions.
 @end menu
 
 @node Automatic variables
@@ -929,9 +931,9 @@ number of the register where the variable data will be stored.
 The value is the register number.
 
 AIX defines a separate symbol descriptor @samp{d} for floating point
-registers.  This seems incredibly stupid---why not just just give
-floating point registers different register numbers?  I have not
-verified whether the compiler actually uses @samp{d}.
+registers.  This seems unnecessary---why not just just give floating
+point registers different register numbers?  I have not verified whether
+the compiler actually uses @samp{d}.
 
 If the register is explicitly allocated to a global variable, but not
 initialized, as in
@@ -942,6 +944,20 @@ register int g_bar asm ("%g5");
 
 the stab may be emitted at the end of the object file, with
 the other bss symbols.
+
+@node Common Blocks
+@section Common Blocks
+
+A common block is a statically allocated section of memory which can be
+referred to by several source files.  It may contain several variables.
+I believe @sc{fortran} is the only language with this feature.  A
+@code{N_BCOMM} stab begins a common block and an @code{N_ECOMM} stab
+ends it.  The only thing which is significant about these two stabs is
+their name, which can be used to look up a normal (non-debugging) symbol
+which gives the address of the common block.  Each variable in the
+common block has a @code{N_ECOML} stab, whose value is the offset within
+the common block of that variable.  I'm not sure what symbol descriptor
+is used for the @code{N_ECOML} stabs.
 
 @node Initialized statics
 @section Initialized static variables 
@@ -3096,13 +3112,13 @@ Modula2 scope information (Sun linker), @xref{N_SCOPE}.
 End of a lexical block, @xref{Block Structure}.
 
 @item 0xe2     N_BCOMM   
-Begin named common block, @xref{N_BCOMM}.
+Begin named common block, @xref{Common Blocks}.
 
 @item 0xe4     N_ECOMM   
-End named common block, @xref{N_ECOMM}.
+End named common block, @xref{Common Blocks}.
 
 @item 0xe8     N_ECOML   
-End common (local name), @xref{N_ECOML}.
+Member of a common block, @xref{Common Blocks}.
 
 @c FIXME: How does this really work?  Move it to main body of document.
 @item 0xea N_WITH
@@ -3409,9 +3425,6 @@ Finally, any further information.
 * N_LSYM::      Automatic variable
 * N_ENTRY::     Alternate entry point
 * N_SCOPE::     Modula2 scope information (Sun only)
-* N_BCOMM::     Begin named common block
-* N_ECOMM::     End named common block
-* N_ECOML::     End common
 * Gould::       non-base register symbols used on Gould systems
 * N_LENG::      Length of preceding entry
 @end menu
@@ -3661,30 +3674,6 @@ Value is its address.
 Modula2 scope information (Sun linker)
 <<?>>
 
-@node N_BCOMM
-@section 226 - 0xe2 - N_BCOMM     
-
-Begin named common block.  
-
-Only the name is significant.
-<<?>>
-
-@node N_ECOMM
-@section 228 - 0xe4 - N_ECOMM     
-
-End named common block.  
-
-Only the name is significant and it should match the N_BCOMM 
-<<?>>
-
-@node N_ECOML
-@section  232 - 0xe8 - N_ECOML   
-
-End common (local name) 
-
-value is address.
-<<?>>
-
 @node Gould
 @section Non-base registers on Gould systems
 
@@ -3855,7 +3844,7 @@ new type defined in the compilation.  GNU C stabs use the type number
 alone, with no source file number.  
 @end itemize
 
-@node stabs-in-elf
+@node Stabs-in-elf
 @appendix Using stabs with the ELF object file format.
 
 The ELF object file format allows tools to create object files with custom
