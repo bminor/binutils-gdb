@@ -825,7 +825,7 @@ process_xcoff_symbol (cs)
 	    TYPE_NAME (ttype) = concat (
 		TYPE_CODE (ttype) == TYPE_CODE_UNION ? "union " :
 		TYPE_CODE (ttype) == TYPE_CODE_STRUCT? "struct " : "enum ",
-		SYMBOL_NAME (sym), "");
+		SYMBOL_NAME (sym), NULL);
 
 	else if (!TYPE_NAME (ttype))      /* else, regular typedef. */
 	    TYPE_NAME (ttype) = SYMBOL_NAME (sym);

@@ -910,7 +910,7 @@ DEFUN(struct_type, (dip, thisdie, enddie),
       TYPE_LENGTH (type) = dip -> at_byte_size;
       tpart3 = "";
     }
-  TYPE_NAME (type) = concat (tpart1, tpart2, tpart3);
+  TYPE_NAME (type) = concat (tpart1, tpart2, tpart3, NULL);
   thisdie += dip -> dielength;
   while (thisdie < enddie)
     {
@@ -1326,7 +1326,7 @@ DEFUN(enum_type, (dip), struct dieinfo *dip)
       TYPE_LENGTH (type) = dip -> at_byte_size;
       tpart3 = "";
     }
-  TYPE_NAME (type) = concat (tpart1, tpart2, tpart3);
+  TYPE_NAME (type) = concat (tpart1, tpart2, tpart3, NULL);
   if ((scan = dip -> at_element_list) != NULL)
     {
       (void) memcpy (&temp, scan, sizeof (temp));

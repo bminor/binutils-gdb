@@ -384,7 +384,7 @@ lookup_internalvar (name)
       return var;
 
   var = (struct internalvar *) xmalloc (sizeof (struct internalvar));
-  var->name = concat (name, "", "");
+  var->name = concat (name, NULL);
   var->value = allocate_value (builtin_type_void);
   release_value (var->value);
   var->next = internalvars;

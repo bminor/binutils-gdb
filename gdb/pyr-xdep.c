@@ -342,7 +342,7 @@ core_file_command (filename, from_tty)
 	corefile = savestring (filename, strlen (filename));
       else
 	{
-	  corefile = concat (current_directory, "/", filename);
+	  corefile = concat (current_directory, "/", filename, NULL);
 	}
 
 #if 1 || defined(PYRAMID_CONTROL_FRAME_DEBUGGING)

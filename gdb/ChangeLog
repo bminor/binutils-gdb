@@ -1,3 +1,15 @@
+Tue Nov 12 09:40:07 1991  Fred Fish  (fnf at cygnus.com)
+
+	* utils.c, rem-multi.shar:  Remove fixed arg count version of
+	concat().
+
+	* altos-xdep.c, arm-xdep.c, coffread.c, command.c, convex-xdep.c,
+	core.c, dwarfread.c, gould-xdep.c, infcmd.c, language.c,
+	m88k-xdep.c, main.c, printcmd.c, pyr-xdep.c, source.c,
+	sun386-xdep.c, symm-xdep.c, umax-xdep.c, values.c, xcoffread.c:
+	Change all instances of use of fixed args concat() to variable
+	args concat() now located in libiberty.
+
 Tue Nov 12 07:23:46 1991  John Gilmore  (gnu at cygnus.com)
 
 	* Makefile.in:  Add xcoffread.c, xcoffexec.c.

@@ -1484,7 +1484,7 @@ patch_type (type, real_type)
     {
       if (TYPE_NAME (target))
 	free (TYPE_NAME (target));
-      TYPE_NAME (target) = concat (TYPE_NAME (real_target), "", "");
+      TYPE_NAME (target) = concat (TYPE_NAME (real_target), NULL);
     }
 }
 
@@ -1691,7 +1691,7 @@ process_coff_symbol (cs, aux)
 	    if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0 
 		&& (TYPE_FLAGS (SYMBOL_TYPE (sym)) & TYPE_FLAG_PERM) == 0)
 	      TYPE_NAME (SYMBOL_TYPE (sym))
-					  = concat (SYMBOL_NAME (sym), "", "");
+					  = concat (SYMBOL_NAME (sym), NULL);
 
 	    /* Keep track of any type which points to empty structured type,
 		so it can be filled from a definition from another file */
@@ -1719,7 +1719,7 @@ process_coff_symbol (cs, aux)
 			   ? "enum "
 			   : (cs->c_sclass == C_STRTAG
 			      ? "struct " : "union ")),
-			  SYMBOL_NAME (sym));
+			  SYMBOL_NAME (sym), NULL);
 	    add_symbol_to_list (sym, &file_symbols);
 	    break;
 
@@ -1870,7 +1870,7 @@ decode_base_type (cs, c_type, aux)
 	    /* anonymous structure type */
 	    type = coff_alloc_type (cs->c_symnum);
 	    TYPE_CODE (type) = TYPE_CODE_STRUCT;
-	    TYPE_NAME (type) = concat ("struct ", "<opaque>", "");
+	    TYPE_NAME (type) = concat ("struct ", "<opaque>", NULL);
 	    TYPE_LENGTH (type) = 0;
 	    TYPE_FIELDS (type) = 0;
 	    TYPE_NFIELDS (type) = 0;
@@ -1888,7 +1888,7 @@ decode_base_type (cs, c_type, aux)
 	  {
 	    /* anonymous union type */
 	    type = coff_alloc_type (cs->c_symnum);
-	    TYPE_NAME (type) = concat ("union ", "<opaque>", "");
+	    TYPE_NAME (type) = concat ("union ", "<opaque>", NULL);
 	    TYPE_LENGTH (type) = 0;
 	    TYPE_FIELDS (type) = 0;
 	    TYPE_NFIELDS (type) = 0;

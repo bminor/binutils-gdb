@@ -112,7 +112,7 @@ core_open (filename, from_tty)
 
   filename = tilde_expand (filename);
   if (filename[0] != '/') {
-    temp = concat (current_directory, "/", filename);
+    temp = concat (current_directory, "/", filename, NULL);
     free (filename);
     filename = temp;
   }

@@ -913,7 +913,7 @@ core_file_command (filename, from_tty)
       if (filename[0] == '/')
 	corefile = savestring (filename, strlen (filename));
       else
-	corefile = concat (current_directory, "/", filename);
+	corefile = concat (current_directory, "/", filename, NULL);
 
       printf_filtered ("Program %s ", u.u_comm);
 

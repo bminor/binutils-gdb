@@ -216,7 +216,7 @@ add_show_from_set (setcmd, list)
   /* Replace "set " at start of docstring with "show ".  */
   if (setcmd->doc[0] == 'S' && setcmd->doc[1] == 'e'
       && setcmd->doc[2] == 't' && setcmd->doc[3] == ' ')
-    showcmd->doc = concat ("Show ", setcmd->doc + 4, "");
+    showcmd->doc = concat ("Show ", setcmd->doc + 4, NULL);
   else
     fprintf (stderr, "GDB internal error: Bad docstring for set command\n");
   

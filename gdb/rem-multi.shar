@@ -292,18 +292,6 @@ savestring (ptr, size)
   return p;
 }
 
-char *
-concat (s1, s2, s3)
-     char *s1, *s2, *s3;
-{
-  register int len = strlen (s1) + strlen (s2) + strlen (s3) + 1;
-  register char *val = (char *) xmalloc (len);
-  strcpy (val, s1);
-  strcat (val, s2);
-  strcat (val, s3);
-  return val;
-}
-
 void
 print_spaces (n, file)
      register int n;

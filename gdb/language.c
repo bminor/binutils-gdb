@@ -299,7 +299,7 @@ set_lang_str()
    if (language_mode == language_mode_auto)
       prefix = "auto; currently ";
 
-   language = concat(prefix, current_language->la_name, "");
+   language = concat(prefix, current_language->la_name, NULL);
 }
 
 void
@@ -326,7 +326,7 @@ set_type_str()
       error ("Unrecognized type check setting.");
    }
 
-   type = concat(prefix,tmp,"");
+   type = concat(prefix,tmp,NULL);
 }
 
 void
@@ -353,7 +353,7 @@ set_range_str()
       error ("Unrecognized range check setting.");
    }
 
-   range = concat(pref,tmp,"");
+   range = concat(pref,tmp,NULL);
 }
 
 
