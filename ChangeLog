@@ -1,3 +1,13 @@
+Mon Jul  8 17:33:14 1996  Jim Wilson  <wilson@cygnus.com>
+
+	* configure.in (mips-sgi-irix6*): Use mh-irix6 instead of mh-irix5.
+
+start-sanitize-d10v
+Mon Jul  1 13:31:35 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config.sub (basic_machine): Recognize d10v as a valid processor.
+end-sanitize-d10v
+
 Fri Jun 28 12:14:35 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-configure: Add support for --bindir.
