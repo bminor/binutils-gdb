@@ -1,3 +1,13 @@
+2003-08-20  Michael Snyder  <msnyder@redhat.com>
+
+	* sh-tdep.h (struct gdbarch_tdep): New member FLOAT_ARGLAST_REG.
+	* sh-tdep.c (sh_gdbarch_init): For sh2e, sh3e, and sh4, set 
+	FLOAT_ARG0_REGNUM and FLOAT_ARGLAST_REGNUM, to be used for 
+	argument passing.
+	(sh_push_dummy_call_fpu, sh_push_dummy_call_nofpu): New 
+	functions, replace sh_push_dummy_call.
+	(sh_gdbarch_init): Set push_dummy_call to one of new methods.
+
 2003-08-20  Michael Chastain  <mec@shout.net>
 
 	* gdbtypes.h (struct main_type): Rearrange to save space.

@@ -2034,13 +2034,17 @@ sh_frame_align (struct gdbarch *ignore, CORE_ADDR sp)
   return sp & ~3;
 }
 
-/* Function: push_arguments
+/* Function: sh_push_dummy_call (formerly push_arguments)
    Setup the function arguments for calling a function in the inferior.
 
    On the Hitachi SH architecture, there are four registers (R4 to R7)
    which are dedicated for passing function arguments.  Up to the first
    four arguments (depending on size) may go into these registers.
    The rest go on the stack.
+
+   MVS: Except on SH variants that have floating point registers.
+   In that case, float and double arguments are passed in the same
+   manner, but using FP registers instead of GP registers.
 
    Arguments that are smaller than 4 bytes will still take up a whole
    register or a whole 32-bit word on the stack, and will be 
@@ -2054,6 +2058,11 @@ sh_frame_align (struct gdbarch *ignore, CORE_ADDR sp)
    As far as I know, there is no upper limit to the size of aggregates 
    that will be passed in this way; in other words, the convention of 
    passing a pointer to a large aggregate instead of a copy is not used.
+
+   MVS: The above appears to be true for the SH variants that do not
+   have an FPU, however those that have an FPU appear to copy the 
+   aggregate argument onto the stack (and not place it in registers)
+   if it is larger than 16 bytes (four GP registers).
 
    An exceptional case exists for struct arguments (and possibly other
    aggregates such as arrays) if the size is larger than 4 bytes but 
@@ -2078,11 +2087,124 @@ sh_frame_align (struct gdbarch *ignore, CORE_ADDR sp)
    to R7.   */
 
 static CORE_ADDR
-sh_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
-		    struct regcache *regcache, CORE_ADDR bp_addr, int nargs,
-		    struct value **args, CORE_ADDR sp, int struct_return,
-		    CORE_ADDR struct_addr)
+sh_push_dummy_call_fpu (struct gdbarch *gdbarch, 
+			CORE_ADDR func_addr,
+			struct regcache *regcache, 
+			CORE_ADDR bp_addr, int nargs,
+			struct value **args, 
+			CORE_ADDR sp, int struct_return,
+			CORE_ADDR struct_addr)
+{
+  int stack_offset, stack_alloc;
+  int argreg, flt_argreg;
+  int argnum;
+  struct type *type;
+  CORE_ADDR regval;
+  char *val;
+  char valbuf[4];
+  int len;
+  int odd_sized_struct;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch); 
 
+  /* first force sp to a 4-byte alignment */
+  sp = sh_frame_align (gdbarch, sp);
+
+  /* The "struct return pointer" pseudo-argument has its own dedicated 
+     register */
+  if (struct_return)
+    regcache_cooked_write_unsigned (regcache, 
+				    STRUCT_RETURN_REGNUM, 
+				    struct_addr);
+
+  /* Now make sure there's space on the stack */
+  for (argnum = 0, stack_alloc = 0; argnum < nargs; argnum++)
+    stack_alloc += ((TYPE_LENGTH (VALUE_TYPE (args[argnum])) + 3) & ~3);
+  sp -= stack_alloc;		/* make room on stack for args */
+
+  /* Now load as many as possible of the first arguments into
+     registers, and push the rest onto the stack.  There are 16 bytes
+     in four registers available.  Loop thru args from first to last.  */
+
+  argreg = tdep->ARG0_REGNUM;
+  flt_argreg = tdep->FLOAT_ARG0_REGNUM;
+  for (argnum = 0, stack_offset = 0; argnum < nargs; argnum++)
+    {
+      type = VALUE_TYPE (args[argnum]);
+      len = TYPE_LENGTH (type);
+      memset (valbuf, 0, sizeof (valbuf));
+      if (len < 4)
+	{
+	  /* value gets right-justified in the register or stack word */
+	  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+	    memcpy (valbuf + (4 - len),
+		    (char *) VALUE_CONTENTS (args[argnum]), len);
+	  else
+	    memcpy (valbuf, (char *) VALUE_CONTENTS (args[argnum]), len);
+	  val = valbuf;
+	}
+      else
+	val = (char *) VALUE_CONTENTS (args[argnum]);
+
+      if (len > 4 && (len & 3) != 0)
+	odd_sized_struct = 1;	/* Such structs go entirely on stack.  */
+      else if (len > 16)
+	odd_sized_struct = 1;	/* So do aggregates bigger than 4 words.  */
+      else
+	odd_sized_struct = 0;
+      while (len > 0)
+	{
+	  if ((TYPE_CODE (type) == TYPE_CODE_FLT 
+	       && flt_argreg > tdep->FLOAT_ARGLAST_REGNUM) 
+	      || argreg > tdep->ARGLAST_REGNUM
+	      || odd_sized_struct)
+	    {			
+	      /* must go on the stack */
+	      write_memory (sp + stack_offset, val, 4);
+	      stack_offset += 4;
+	    }
+	  /* NOTE WELL!!!!!  This is not an "else if" clause!!!
+	     That's because some *&^%$ things get passed on the stack
+	     AND in the registers!   */
+	  if (TYPE_CODE (type) == TYPE_CODE_FLT &&
+	      flt_argreg > 0 && flt_argreg <= tdep->FLOAT_ARGLAST_REGNUM)
+	    {
+	      /* Argument goes in a single-precision fp reg.  */
+	      regval = extract_unsigned_integer (val, register_size (gdbarch,
+								     argreg));
+	      regcache_cooked_write_unsigned (regcache, flt_argreg++, regval);
+	    }
+	  else if (argreg <= tdep->ARGLAST_REGNUM)
+	    {			
+	      /* there's room in a register */
+	      regval = extract_unsigned_integer (val, register_size (gdbarch,
+								     argreg));
+	      regcache_cooked_write_unsigned (regcache, argreg++, regval);
+	    }
+	  /* Store the value 4 bytes at a time.  This means that things
+	     larger than 4 bytes may go partly in registers and partly
+	     on the stack.  */
+	  len -= register_size (gdbarch, argreg);
+	  val += register_size (gdbarch, argreg);
+	}
+    }
+
+  /* Store return address. */
+  regcache_cooked_write_unsigned (regcache, tdep->PR_REGNUM, bp_addr);
+
+  /* Update stack pointer.  */
+  regcache_cooked_write_unsigned (regcache, SP_REGNUM, sp);
+
+  return sp;
+}
+
+static CORE_ADDR
+sh_push_dummy_call_nofpu (struct gdbarch *gdbarch, 
+			  CORE_ADDR func_addr,
+			  struct regcache *regcache, 
+			  CORE_ADDR bp_addr, 
+			  int nargs, struct value **args, 
+			  CORE_ADDR sp, int struct_return, 
+			  CORE_ADDR struct_addr)
 {
   int stack_offset, stack_alloc;
   int argreg;
@@ -2101,7 +2223,9 @@ sh_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
   /* The "struct return pointer" pseudo-argument has its own dedicated 
      register */
   if (struct_return)
-    regcache_cooked_write_unsigned (regcache, STRUCT_RETURN_REGNUM, struct_addr);
+    regcache_cooked_write_unsigned (regcache, 
+				    STRUCT_RETURN_REGNUM, 
+				    struct_addr);
 
   /* Now make sure there's space on the stack */
   for (argnum = 0, stack_alloc = 0; argnum < nargs; argnum++)
@@ -4374,7 +4498,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_push_dummy_code (gdbarch, sh_push_dummy_code);
       set_gdbarch_store_return_value (gdbarch, sh_default_store_return_value);
       set_gdbarch_extract_return_value (gdbarch, sh_default_extract_return_value);
-      set_gdbarch_push_dummy_call (gdbarch, sh_push_dummy_call);
+      set_gdbarch_push_dummy_call (gdbarch, sh_push_dummy_call_nofpu);
       set_gdbarch_extract_struct_value_address (gdbarch, sh_extract_struct_value_address);
 
       set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sh_nofp_frame_init_saved_regs);
@@ -4387,7 +4511,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_push_dummy_code (gdbarch, sh_push_dummy_code);
       set_gdbarch_store_return_value (gdbarch, sh_default_store_return_value);
       set_gdbarch_extract_return_value (gdbarch, sh_default_extract_return_value);
-      set_gdbarch_push_dummy_call (gdbarch, sh_push_dummy_call);
+      set_gdbarch_push_dummy_call (gdbarch, sh_push_dummy_call_nofpu);
       set_gdbarch_extract_struct_value_address (gdbarch, sh_extract_struct_value_address);
 
       set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sh_nofp_frame_init_saved_regs);
@@ -4404,13 +4528,16 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_fp0_regnum (gdbarch, 25);
       set_gdbarch_store_return_value (gdbarch, sh3e_sh4_store_return_value);
       set_gdbarch_extract_return_value (gdbarch, sh3e_sh4_extract_return_value);
-      set_gdbarch_push_dummy_call (gdbarch, sh_push_dummy_call);
+      set_gdbarch_push_dummy_call (gdbarch, sh_push_dummy_call_fpu);
       set_gdbarch_extract_struct_value_address (gdbarch, sh_extract_struct_value_address);
       tdep->FPUL_REGNUM = 23;
       tdep->FPSCR_REGNUM = 24;
       tdep->FP_LAST_REGNUM = 40;
+      tdep->FLOAT_ARG0_REGNUM = 29;	/* FIXME use constants! */
+      tdep->FLOAT_ARGLAST_REGNUM = 36;	/* FIXME use constants! */
 
-      set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sh_nofp_frame_init_saved_regs);
+      set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, 
+						    sh_nofp_frame_init_saved_regs);
       break;
     case bfd_mach_sh_dsp:
       set_gdbarch_register_name (gdbarch, sh_sh_dsp_register_name);
@@ -4421,7 +4548,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_register_sim_regno (gdbarch, sh_dsp_register_sim_regno);
       set_gdbarch_store_return_value (gdbarch, sh_default_store_return_value);
       set_gdbarch_extract_return_value (gdbarch, sh_default_extract_return_value);
-      set_gdbarch_push_dummy_call (gdbarch, sh_push_dummy_call);
+      set_gdbarch_push_dummy_call (gdbarch, sh_push_dummy_call_nofpu);
       set_gdbarch_extract_struct_value_address (gdbarch, sh_extract_struct_value_address);
       tdep->DSR_REGNUM = 24;
       tdep->A0G_REGNUM = 25;
@@ -4448,7 +4575,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_push_dummy_code (gdbarch, sh_push_dummy_code);
       set_gdbarch_store_return_value (gdbarch, sh_default_store_return_value);
       set_gdbarch_extract_return_value (gdbarch, sh_default_extract_return_value);
-      set_gdbarch_push_dummy_call (gdbarch, sh_push_dummy_call);
+      set_gdbarch_push_dummy_call (gdbarch, sh_push_dummy_call_nofpu);
       set_gdbarch_extract_struct_value_address (gdbarch, sh_extract_struct_value_address);
       tdep->SSR_REGNUM = 41;
       tdep->SPC_REGNUM = 42;
@@ -4467,11 +4594,13 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_fp0_regnum (gdbarch, 25);
       set_gdbarch_store_return_value (gdbarch, sh3e_sh4_store_return_value);
       set_gdbarch_extract_return_value (gdbarch, sh3e_sh4_extract_return_value);
-      set_gdbarch_push_dummy_call (gdbarch, sh_push_dummy_call);
+      set_gdbarch_push_dummy_call (gdbarch, sh_push_dummy_call_fpu);
       set_gdbarch_extract_struct_value_address (gdbarch, sh_extract_struct_value_address);
       tdep->FPUL_REGNUM = 23;
       tdep->FPSCR_REGNUM = 24;
       tdep->FP_LAST_REGNUM = 40;
+      tdep->FLOAT_ARG0_REGNUM = 29;	/* FIXME use constants! */
+      tdep->FLOAT_ARGLAST_REGNUM = 36;	/* FIXME use constants! */
       tdep->SSR_REGNUM = 41;
       tdep->SPC_REGNUM = 42;
 
@@ -4486,7 +4615,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_register_sim_regno (gdbarch, sh_dsp_register_sim_regno);
       set_gdbarch_store_return_value (gdbarch, sh_default_store_return_value);
       set_gdbarch_extract_return_value (gdbarch, sh_default_extract_return_value);
-      set_gdbarch_push_dummy_call (gdbarch, sh_push_dummy_call);
+      set_gdbarch_push_dummy_call (gdbarch, sh_push_dummy_call_nofpu);
       set_gdbarch_extract_struct_value_address (gdbarch, sh_extract_struct_value_address);
       tdep->DSR_REGNUM = 24;
       tdep->A0G_REGNUM = 25;
@@ -4519,7 +4648,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_pseudo_register_write (gdbarch, sh_pseudo_register_write);
       set_gdbarch_store_return_value (gdbarch, sh3e_sh4_store_return_value);
       set_gdbarch_extract_return_value (gdbarch, sh3e_sh4_extract_return_value);
-      set_gdbarch_push_dummy_call (gdbarch, sh_push_dummy_call);
+      set_gdbarch_push_dummy_call (gdbarch, sh_push_dummy_call_fpu);
       set_gdbarch_extract_struct_value_address (gdbarch, sh_extract_struct_value_address);
       tdep->FPUL_REGNUM = 23;
       tdep->FPSCR_REGNUM = 24;
@@ -4530,6 +4659,8 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       tdep->DR_LAST_REGNUM = 66;
       tdep->FV0_REGNUM = 67;
       tdep->FV_LAST_REGNUM = 70;
+      tdep->FLOAT_ARG0_REGNUM = 29;	/* FIXME use constants! */
+      tdep->FLOAT_ARGLAST_REGNUM = 36;	/* FIXME use constants! */
 
       set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, sh_fp_frame_init_saved_regs);
       break;
