@@ -1129,7 +1129,7 @@ end_symtab (end_addr)
      file_symbols is still good).  */
   cleanup_undefined_types ();
 
-  /* Finish defining all the blocks of this symtab.  */
+  /* Define the STATIC_BLOCK and GLOBAL_BLOCK, and build the blockvector.  */
   finish_block (0, &file_symbols, 0, last_source_start_addr, end_addr);
   finish_block (0, &global_symbols, 0, last_source_start_addr, end_addr);
   blockvector = make_blockvector ();
@@ -2483,6 +2483,8 @@ end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
 	  subpst->textlow =
 	    subpst->texthigh = 0;
 
+      /* We could save slight bits of space by only making one of these,
+	 shared by the entire set of include files.  FIXME-someday.  */
       subpst->dependencies = (struct partial_symtab **)
 	obstack_alloc (psymbol_obstack,
 		       sizeof (struct partial_symtab *));
@@ -5366,4 +5368,6 @@ _initialize_dbxread ()
   undef_types_length = 0;
   undef_types = (struct type **) xmalloc (undef_types_allocated *
 					  sizeof (struct type *));
+
+  dbx_new_init ();
 }
