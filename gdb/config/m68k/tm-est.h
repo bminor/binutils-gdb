@@ -19,8 +19,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 
-#define	DEFAULT_PROMPT		"(estgdb) "
-
 /* GCC is probably the only compiler used on this configuration.  So
    get this right even if the code which detects gcc2_compiled. is
    still broken.  */
@@ -32,9 +30,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "m68k/tm-m68k.h"
 
-/* We are guaranteed to have a zero frame pointer at bottom of stack, too. */
-#undef	FRAME_CHAIN
-#undef	FRAME_CHAIN_VALID
+#undef FRAME_CHAIN
+#undef FRAME_CHAIN_VALID
 
 /* Takes the current frame-struct pointer and returns the chain-pointer
    to get to the calling frame.
@@ -42,33 +39,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    If our current frame pointer is zero, we're at the top; else read out
    the saved FP from memory pointed to by the current FP.  */
 
-#define FRAME_CHAIN(thisframe) ((thisframe)->frame? read_memory_integer ((thisframe)->frame, 4): 0)
+#define FRAME_CHAIN(thisframe) \
+  ((thisframe)->frame? read_memory_integer ((thisframe)->frame, 4): 0)
 
 /* If the chain pointer is zero (either because the saved value fetched
    by FRAME_CHAIN was zero, or because the current FP was zero so FRAME_CHAIN
    never fetched anything), we are at the top of the stack.  */
 
 #define FRAME_CHAIN_VALID(chain, thisframe) (chain != 0)
-
-/* FIXME, Longjmp information stolen from Sun-3 config.  Dunno if right.  */
-/* Offsets (in target ints) into jmp_buf.  Not defined by Sun, but at least
-   documented in a comment in <machine/setjmp.h>! */
-
-#define JB_ELEMENT_SIZE 4
-
-#define JB_ONSSTACK 0
-#define JB_SIGMASK 1
-#define JB_SP 2
-#define JB_PC 3
-#define JB_PSL 4
-#define JB_D2 5
-#define JB_D3 6
-#define JB_D4 7
-#define JB_D5 8
-#define JB_D6 9
-#define JB_D7 10
-#define JB_A2 11
-#define JB_A3 12
-#define JB_A4 13
-#define JB_A5 14
-#define JB_A6 15
