@@ -1,3 +1,10 @@
+Tue May  3 19:43:21 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* cache.c: Rewrote to work correctly.
+	* libbfd.h: Rebuilt.
+	* opncls.c (bfd_cache_init, bfd_open_file): Don't declare.
+	(bfd_fdopenr): Check return value of bfd_cache_init.
+
 Fri Apr 29 15:08:23 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* cf-m68klynx.c (CALC_ADDEND): Check for PC relative relocs by
