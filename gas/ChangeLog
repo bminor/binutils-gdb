@@ -1,5 +1,7 @@
 2001-03-30  Alan Modra  <alan@linuxcare.com.au>
 
+	* dwarf2dbg.c (dwarf2_directive_file): Fix warnings.
+
 	* frags.h (struct frag): Add last_fr_address.  Reorder fields for
 	better packing.
 	* symbols.c (resolve_symbol_value): Don't fix expression values
