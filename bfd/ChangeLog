@@ -1,3 +1,8 @@
+2002-09-09  Richard Henderson  <rth@redhat.com>
+
+	* elfxx-ia64.c (elfNN_ia64_relax_section): Handle PCREL21M
+	and PCREL21F like PCREL21B.
+
 2002-09-04  Kevin Buettner  <kevinb@redhat.com>
 
  	* config.bfd (mips*-*-irix6*): Add new ABI vectors.  Make n32 default
