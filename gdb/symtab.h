@@ -514,7 +514,8 @@ struct symtab
     struct symtab *next;
     /* List of all symbol scope blocks for this symtab.  */
     struct blockvector *blockvector;
-    /* Table mapping core addresses to line numbers for this file.  */
+    /* Table mapping core addresses to line numbers for this file.
+       Can be NULL if none.  */
     struct linetable *linetable;
     /* Name of this source file.  */
     char *filename;
@@ -636,7 +637,6 @@ int current_source_line;
 #define BLOCKLIST(symtab) (symtab)->blockvector
 #define BLOCKVECTOR(symtab) (symtab)->blockvector
 
-#define LINELIST(symtab) (symtab)->linetable
 #define LINETABLE(symtab) (symtab)->linetable
 
 /* Macros normally used to access components of symbol table structures.  */
@@ -915,9 +915,6 @@ void select_source_symtab (
 			   );
 
 char **make_symbol_completion_list ();
-
-/* The entry point of a file we are reading.  */
-extern CORE_ADDR entry_point;
 
 /* Maximum and minimum values of built-in types */
 #define	MAX_OF_TYPE(t)	\

@@ -327,67 +327,6 @@ explicit_lookup_type (real_filenum, index)
 }
 #endif
 
-/* Handle an N_SOL symbol, which indicates the start of
-   code that came from an included (or otherwise merged-in)
-   source file with a different name.  */
-
-void
-start_subfile (name, dirname)
-     char *name;
-     char *dirname;
-{
-  register struct subfile *subfile;
-
-  /* Save the current subfile's line vector data.  */
-
-  if (current_subfile)
-    {
-      current_subfile->line_vector_index = line_vector_index;
-      current_subfile->line_vector_length = line_vector_length;
-      current_subfile->prev_line_number = prev_line_number;
-    }
-
-  /* See if this subfile is already known as a subfile of the
-     current main source file.  */
-
-  for (subfile = subfiles; subfile; subfile = subfile->next)
-    {
-      if (!strcmp (subfile->name, name))
-	{
-	  line_vector = subfile->line_vector;
-	  line_vector_index = subfile->line_vector_index;
-	  line_vector_length = subfile->line_vector_length;
-	  prev_line_number = subfile->prev_line_number;
-	  current_subfile = subfile;
-	  return;
-	}
-    }
-
-  /* This subfile is not known.  Add an entry for it.  */
-
-  line_vector_index = 0;
-  line_vector_length = 1000;
-  prev_line_number = -2;	/* Force first line number to be explicit */
-  line_vector = (struct linetable *)
-    xmalloc (sizeof (struct linetable)
-	      + line_vector_length * sizeof (struct linetable_entry));
-
-  /* Make an entry for this subfile in the list of all subfiles
-     of the current main source file.  */
-
-  subfile = (struct subfile *) xmalloc (sizeof (struct subfile));
-  subfile->next = subfiles;
-  subfile->name = obsavestring (name, strlen (name));
-  if (dirname == NULL)
-    subfile->dirname = NULL;
-  else
-    subfile->dirname = obsavestring (dirname, strlen (dirname));
-  
-  subfile->line_vector = line_vector;
-  subfiles = subfile;
-  current_subfile = subfile;
-}
-
 /* Handle the N_BINCL and N_EINCL symbol types
    that act like N_SOL for switching source files
    (different subfiles, as we call them) within one object file,
@@ -1920,7 +1859,7 @@ process_symbol_pair (type1, desc1, value1, name1,
   /* No need to check PCC_SOL_BROKEN, on the assumption that such
      broken PCC's don't put out N_SO pairs.  */
   if (last_source_file)
-    (void)end_symtab (value2);
+    (void)end_symtab (value2, 0, 0);
   start_symtab (name2, name1, value2);
 }
 
@@ -2083,7 +2022,7 @@ read_ofile_symtab (desc, stringtab, stringtab_size, sym_offset,
         }
     }
 
-  return end_symtab (text_offset + text_size);
+  return end_symtab (text_offset + text_size, 0, 0);
 }
 
 int
@@ -2310,7 +2249,7 @@ process_one_symbol (type, desc, valu, name)
 	}
 #endif
       if (last_source_file)
-	(void)end_symtab (valu);
+	(void)end_symtab (valu, 0, 0);
       start_symtab (name, NULL, valu);
       break;
 
@@ -2343,7 +2282,7 @@ process_one_symbol (type, desc, valu, name)
 #ifndef SUN_FIXED_LBRAC_BUG
       last_pc_address = valu;	/* Save for SunOS bug circumcision */
 #endif
-      record_line (desc, valu);
+      record_line (current_subfile, desc, valu);
       break;
 
     case N_BCOMM:

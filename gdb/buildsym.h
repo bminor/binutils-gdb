@@ -47,6 +47,7 @@ extern void finish_block ();
 extern struct blockvector *make_blockvector ();
 extern void add_undefined_type ();
 extern void really_free_pendings ();
+extern void start_subfile ();
 extern struct symtab *end_symtab ();
 extern void scan_file_globals ();
 extern void buildsym_new_init ();
@@ -79,8 +80,6 @@ struct subfile
   char *dirname;
   struct linetable *line_vector;
   int line_vector_length;
-  int line_vector_index;
-  int prev_line_number;
 };
 
 EXTERN struct subfile *subfiles;
@@ -107,22 +106,6 @@ EXTERN struct type **type_vector;
 /* Number of elements allocated for type_vector currently.  */
 
 EXTERN int type_vector_length;
-
-/* Vector of line number information.  */
-
-EXTERN struct linetable *line_vector;
-
-/* Index of next entry to go in line_vector_index.  */
-
-EXTERN int line_vector_index;
-
-/* Last line number recorded in the line vector.  */
-
-EXTERN int prev_line_number;
-
-/* Number of elements allocated for line_vector currently.  */
-
-EXTERN int line_vector_length;
 
 /* Hash table of global symbols whose values are not known yet.
    They are chained thru the SYMBOL_VALUE_CHAIN, since we don't
@@ -155,7 +138,16 @@ EXTERN struct pending *file_symbols;	/* static at top level, and types */
 
 EXTERN struct pending *global_symbols;	/* global functions and variables */
 
-EXTERN struct pending *local_symbols;	/* everything local to lexical context */
+EXTERN struct pending *local_symbols;	/* everything local to lexic context */
+
+/* Kludge for xcoffread.c */
+struct pending_stabs {
+  int	count, length;
+  char	*stab[1];
+};
+
+EXTERN struct pending_stabs *global_stabs;
+EXTERN struct pending_stabs *file_stabs;
 
 /* List of symbols declared since the last BCOMM.  This list is a tail
    of local_symbols.  When ECOMM is seen, the symbols on the list

@@ -1489,6 +1489,8 @@ find_pc_line (pc, notcurrent)
     {
       /* Find the best line in this symtab.  */
       l = LINETABLE (s);
+      if (!l)
+        continue;
       len = l->nitems;
       prev_line = -1;
       first_line = -1;
@@ -1637,6 +1639,8 @@ find_line_common (l, lineno, exact_match)
   int best = 0;
 
   if (lineno <= 0)
+    return -1;
+  if (l == 0)
     return -1;
 
   len = l->nitems;

@@ -1,3 +1,25 @@
+Sun Oct 27 14:09:25 1991  John Gilmore  (gnu at cygnus.com)
+
+	* buildsym.c:  Break out initial malloc sizes.
+	(record_line):  Record directly in a subfile.  Alloc on demand.
+	(compare_line_numbers):  Add from xcoffread.c.
+	(end_symtab):  New params say whether to sort pendings and
+	linetable.  Patch block stabs if defined.  Shrink linetable before
+	allocating the symtab.
+	* buildsym.h:  Delete line_vector* and prev_line_number.  Add 
+	global_stabs and file_stabs for xcoffread.
+	* dbxread.c (start_subfile):  Move to buildsym.  Change above calls.
+	* symtab.h:  LINETABLE(symtab) can now be null.  Zap LINELIST.
+	* symmisc.c, symtab.c:  Cope with null LINETABLEs.
+
+	* blockframe.c:  Pass fromleaf to INIT_EXTRA_FRAME_INFO.
+	* tm-29k.h, tm-88k.h, tm-i960.h, tm-irix3.h, tm-mips.h, tm-pyr.h,
+	tm-sparc.h:  Accept fromleaf parameter.
+	* c-exp.y (yyerror):  Pass error message if given.
+	* configure.in:  Add rs6000 host and target.
+	* inflow.c (new_tty):  O_NOCTTY kludge for RS/6000.
+	* symfile.h (entry_point):  Add.
+
 Sat Oct 26 00:16:32 1991  John Gilmore  (gnu at cygus.com)
 
 	* buildsym.c:  New file.  Breaks out symbol-table-building routines

@@ -46,9 +46,10 @@ extern double atof ();
 
 /* Things we export from outside, and probably shouldn't.  FIXME.  */
 extern void new_object_header_files ();
-extern void start_subfile ();
 extern char *next_symbol_text ();
 extern int hashname ();
+extern void patch_block_stabs ();	/* AIX xcoffread.c */
+#define patch_block_stabs abort		/* FIXME scaffolding */
 
 static struct symbol *define_symbol ();
 static void cleanup_undefined_types ();
@@ -70,6 +71,12 @@ static const char vb_name[] =   { '_','v','b',CPLUS_MARKER,'\0' };
 static struct type **undef_types;
 static int undef_types_allocated, undef_types_length;
 
+/* Initial sizes of data structures.  These are realloc'd larger if needed,
+   and realloc'd down to the size actually used, when completed.  */
+
+#define	INITIAL_CONTEXT_STACK_SIZE	10
+#define	INITIAL_TYPE_VECTOR_LENGTH	160
+#define	INITIAL_LINE_VECTOR_LENGTH	1000
 
 /* Complaints about the symbols we have encountered.  */
 
@@ -174,6 +181,7 @@ dbx_create_type ()
 /* Make sure there is a type allocated for type numbers TYPENUMS
    and return the type object.
    This can create an empty (zeroed) type object.
+OBSOLETE -- call dbx_create_type instead -- FIXME:
    TYPENUMS may be (-1, -1) to return a new type object that is not
    put into the type vector, and so may not be referred to by number. */
 
@@ -191,6 +199,7 @@ dbx_alloc_type (typenums)
     }
   else
     {
+      abort();		/* FIXME -- Must give a real type number now */
       type_addr = 0;
       type = 0;
     }
@@ -445,10 +454,53 @@ make_blockvector ()
   return blockvector;
 }
 
-/* Manage the vector of line numbers.  */
+/* Start recording information about source code that came from an included
+   (or otherwise merged-in) source file with a different name.  */
 
 void
-record_line (line, pc)
+start_subfile (name, dirname)
+     char *name;
+     char *dirname;
+{
+  register struct subfile *subfile;
+
+  /* See if this subfile is already known as a subfile of the
+     current main source file.  */
+
+  for (subfile = subfiles; subfile; subfile = subfile->next)
+    {
+      if (!strcmp (subfile->name, name))
+	{
+	  current_subfile = subfile;
+	  return;
+	}
+    }
+
+  /* This subfile is not known.  Add an entry for it.
+     Make an entry for this subfile in the list of all subfiles
+     of the current main source file.  */
+
+  subfile = (struct subfile *) xmalloc (sizeof (struct subfile));
+  subfile->next = subfiles;
+  subfiles = subfile;
+  current_subfile = subfile;
+
+  /* Save its name and compilation directory name */
+  subfile->name = obsavestring (name, strlen (name));
+  if (dirname == NULL)
+    subfile->dirname = NULL;
+  else
+    subfile->dirname = obsavestring (dirname, strlen (dirname));
+  
+  /* Initialize line-number recording for this subfile.  */
+  subfile->line_vector = 0;
+}
+
+/* Manage the vector of line numbers for each subfile.  */
+
+void
+record_line (subfile, line, pc)
+     register struct subfile *subfile;
      int line;
      CORE_ADDR pc;
 {
@@ -458,20 +510,36 @@ record_line (line, pc)
   if (line == 0xffff)
     return;
 
-  /* Make sure line vector is big enough.  */
+  /* Make sure line vector exists and is big enough.  */
+  if (!subfile->line_vector) {
+    subfile->line_vector_length = INITIAL_LINE_VECTOR_LENGTH;
+    subfile->line_vector = (struct linetable *)
+	xmalloc (sizeof (struct linetable)
+	  + subfile->line_vector_length * sizeof (struct linetable_entry));
+    subfile->line_vector->nitems = 0;
+  }
 
-  if (line_vector_index + 1 >= line_vector_length)
+  if (subfile->line_vector->nitems + 1 >= subfile->line_vector_length)
     {
-      line_vector_length *= 2;
-      line_vector = (struct linetable *)
-	xrealloc (line_vector,
-		  (sizeof (struct linetable)
-		   + line_vector_length * sizeof (struct linetable_entry)));
-      current_subfile->line_vector = line_vector;
+      subfile->line_vector_length *= 2;
+      subfile->line_vector = (struct linetable *)
+	xrealloc (subfile->line_vector, (sizeof (struct linetable)
+	   + subfile->line_vector_length * sizeof (struct linetable_entry)));
     }
 
-  e = line_vector->item + line_vector_index++;
+  e = subfile->line_vector->item + subfile->line_vector->nitems++;
   e->line = line; e->pc = pc;
+}
+
+
+/* Needed in order to sort line tables from IBM xcoff files.  Sigh!  */
+
+/* static */
+int
+compare_line_numbers (ln1, ln2)
+     struct linetable_entry *ln1, *ln2;
+{
+  return ln1->line - ln2->line;
 }
 
 /* Start a new symtab for a new source file.
@@ -489,17 +557,19 @@ start_symtab (name, dirname, start_addr)
   last_source_start_addr = start_addr;
   file_symbols = 0;
   global_symbols = 0;
+  global_stabs = 0;		/* AIX COFF */
+  file_stabs = 0;		/* AIX COFF */
   within_function = 0;
 
   /* Context stack is initially empty, with room for 10 levels.  */
-  context_stack
-    = (struct context_stack *) xmalloc (10 * sizeof (struct context_stack));
-  context_stack_size = 10;
+  context_stack_size = INITIAL_CONTEXT_STACK_SIZE;
+  context_stack = (struct context_stack *)
+    xmalloc (context_stack_size * sizeof (struct context_stack));
   context_stack_depth = 0;
 
   new_object_header_files ();
 
-  type_vector_length = 160;
+  type_vector_length = INITIAL_TYPE_VECTOR_LENGTH;
   type_vector = (struct type **)
     xmalloc (type_vector_length * sizeof (struct type *));
   bzero (type_vector, type_vector_length * sizeof (struct type *));
@@ -520,8 +590,10 @@ start_symtab (name, dirname, start_addr)
    END_ADDR is the address of the end of the file's text.  */
 
 struct symtab *
-end_symtab (end_addr)
+end_symtab (end_addr, sort_pending, sort_linevec)
      CORE_ADDR end_addr;
+     int sort_pending;
+     int sort_linevec;
 {
   register struct symtab *symtab;
   register struct blockvector *blockvector;
@@ -542,42 +614,82 @@ end_symtab (end_addr)
 		    cstk->start_addr, end_addr);
     }
 
+  /* It is unfortunate that in aixcoff, pending blocks might not be ordered
+     in this stage. Especially, blocks for static functions will show up at
+     the end.  We need to sort them, so tools like `find_pc_function' and
+     `find_pc_block' can work reliably. */
+  if (sort_pending) {
+    /* FIXME!  Remove this horrid bubble sort and use qsort!!! */
+    int swapped;
+    do {
+      struct pending_block *pb, *pbnext;
+
+      pb = pending_blocks, pbnext = pb->next;
+      swapped = 0;
+
+      while ( pbnext ) {
+
+	  /* swap blocks if unordered! */
+
+	  if (BLOCK_START(pb->block) < BLOCK_START(pbnext->block)) {
+	    struct block *tmp = pb->block;
+	    pb->block = pbnext->block;
+	    pbnext->block = tmp;
+	    swapped = 1;
+	  }
+	  pb = pbnext;
+	  pbnext = pbnext->next;
+      }
+    } while (swapped);
+  }
+
   /* Cleanup any undefined types that have been left hanging around
      (this needs to be done before the finish_blocks so that
      file_symbols is still good).  */
   cleanup_undefined_types ();
+
+  if (file_stabs) {
+    patch_block_stabs (file_symbols, file_stabs);
+    free (file_stabs);
+    file_stabs = 0;
+  }
+
+  if (global_stabs) {
+    patch_block_stabs (global_symbols, global_stabs);
+    free (global_stabs);
+    global_stabs = 0;
+  }
 
   /* Define the STATIC_BLOCK and GLOBAL_BLOCK, and build the blockvector.  */
   finish_block (0, &file_symbols, 0, last_source_start_addr, end_addr);
   finish_block (0, &global_symbols, 0, last_source_start_addr, end_addr);
   blockvector = make_blockvector ();
 
-  current_subfile->line_vector_index = line_vector_index;
-
   /* Now create the symtab objects proper, one for each subfile.  */
   /* (The main file is the last one on the chain.)  */
 
   for (subfile = subfiles; subfile; subfile = nextsub)
     {
+      if (subfile->line_vector) {
+	/* First, shrink the linetable to make more memory.  */
+	subfile->line_vector = (struct linetable *)
+	  xrealloc (subfile->line_vector, (sizeof (struct linetable)
+	    + subfile->line_vector->nitems * sizeof (struct linetable_entry)));
+
+	if (sort_linevec)
+	  qsort (subfile->line_vector->item, subfile->line_vector->nitems,
+		 sizeof (struct linetable_entry), compare_line_numbers);
+      }
+
+      /* Now, allocate a symbol table.  */
       symtab = allocate_symtab (subfile->name);
 
       /* Fill in its components.  */
       symtab->blockvector = blockvector;
-      lv = subfile->line_vector;
-      lv->nitems = subfile->line_vector_index;
-      symtab->linetable = (struct linetable *)
-	xrealloc (lv, (sizeof (struct linetable)
-		       + lv->nitems * sizeof (struct linetable_entry)));
-
+      symtab->linetable = subfile->line_vector;
       symtab->dirname = subfile->dirname;
-
       symtab->free_code = free_linetable;
       symtab->free_ptr = 0;
-
-      /* There should never already be a symtab for this name, since
-	 any prev dups have been removed when the psymtab was read in.
-  	 FIXME, there ought to be a way to check this here.  */
-      /* FIXME blewit |= free_named_symtabs (symtab->filename);  */
 
       /* Link the new symtab into the list of such.  */
       symtab->next = symtab_list;
@@ -590,9 +702,9 @@ end_symtab (end_addr)
   free ((char *) type_vector);
   type_vector = 0;
   type_vector_length = -1;
-  line_vector = 0;
-  line_vector_length = -1;
+
   last_source_file = 0;
+  current_subfile = 0;
 
   return symtab;
 }

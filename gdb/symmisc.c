@@ -172,13 +172,15 @@ print_symtabs (filename)
   for (s = symtab_list; s; s = s->next)
     {
       /* First print the line table.  */
-      fprintf (outfile, "Symtab for file %s\n\n", s->filename);
-      fprintf (outfile, "Line table:\n\n");
+      fprintf (outfile, "Symtab for file %s\n", s->filename);
       l = LINETABLE (s);
-      len = l->nitems;
-      for (i = 0; i < len; i++)
-	fprintf (outfile, " line %d at %x\n", l->item[i].line,
-		 l->item[i].pc);
+      if (l) {
+	fprintf (outfile, "\nLine table:\n\n");
+	len = l->nitems;
+	for (i = 0; i < len; i++)
+	  fprintf (outfile, " line %d at %x\n", l->item[i].line,
+		   l->item[i].pc);
+      }
       /* Now print the block info.  */
       fprintf (outfile, "\nBlockvector:\n\n");
       bv = BLOCKVECTOR (s);
