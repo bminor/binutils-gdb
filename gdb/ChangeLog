@@ -1,3 +1,8 @@
+2000-06-06  Michael Snyder  <msnyder@seadog.cygnus.com>
+
+	* configure.in: Enable autoconf to find curses.h on Solaris 2.8.
+	* configure: Regenerate.
+
 Tue Jun  6 21:14:47 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* command.c (do_setshow_command): Accept an enum option immediatly

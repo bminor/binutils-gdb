@@ -95,7 +95,7 @@ dnl Solaris 7 needs _MSE_INT_H defined to avoid a clash between <widec.h>
 dnl and <wchar.h> that causes AC_CHECK_HEADERS to think <curses.h> doesn't
 dnl exist.
 
-case $host_os in solaris2.7) case "$GCC" in yes)
+case $host_os in solaris2.7 | solaris2.8) case "$GCC" in yes)
     AC_DEFINE(_MSE_INT_H)
 esac; esac
 
