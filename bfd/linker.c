@@ -74,7 +74,7 @@ SUBSECTION
 @cindex target vector (_bfd_link_hash_table_create)
 	The linker routines must create a hash table, which must be
 	derived from <<struct bfd_link_hash_table>> described in
-	<<bfdlink.c>>.  @xref{Hash Tables} for information on how to
+	<<bfdlink.c>>.  @xref{Hash Tables}, for information on how to
 	create a derived hash table.  This entry point is called using
 	the target vector of the linker output file.
 

@@ -1,3 +1,10 @@
+1999-06-04  Franz Sirl <Franz.Sirl-kernel@lauterbach.com>
+
+	* elf32-ppc.c (ppc_elf_relocate_section): Don't barf on out of
+	range undefweak symbols.
+	* hash.c: Add missing comma after @xref{}
+	* linker.c: Likewise.
+
 1999-06-04  Nick Clifton  <nickc@cygnus.com>
 
 	* elfxx-target.h (ELF_MAXPAGESIZE): Produce an error message

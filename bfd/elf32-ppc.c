@@ -3751,46 +3751,51 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 				    relocation,
 				    addend);
 
-      if (r != bfd_reloc_ok)
+      if (r == bfd_reloc_ok)
+	;
+      else if (r == bfd_reloc_overflow)
 	{
-	  ret = false;
-	  switch (r)
+	  const char *name;
+
+	  if (h != NULL)
 	    {
-	    default:
-	      break;
+	      if (h->root.type == bfd_link_hash_undefweak
+		  && howto->pc_relative)
+		{
+		  /* Assume this is a call protected by other code that
+		     detect the symbol is undefined.  If this is the case,
+		     we can safely ignore the overflow.  If not, the
+		     program is hosed anyway, and a little warning isn't
+		     going to help.  */
 
-	    case bfd_reloc_overflow:
-	      {
-		const char *name;
+		  continue;
+		}
 
-		if (h != NULL)
-		  name = h->root.root.string;
-		else
-		  {
-		    name = bfd_elf_string_from_elf_section (input_bfd,
-							    symtab_hdr->sh_link,
-							    sym->st_name);
-		    if (name == NULL)
-		      break;
-
-		    if (*name == '\0')
-		      name = bfd_section_name (input_bfd, sec);
-		  }
-
-		(*info->callbacks->reloc_overflow)(info,
-						   name,
-						   howto->name,
-						   (bfd_vma) 0,
-						   input_bfd,
-						   input_section,
-						   offset);
-	      }
-	      break;
-
+	      name = h->root.root.string;
 	    }
-	}
-    }
+	  else
+	    {
+	      name = bfd_elf_string_from_elf_section (input_bfd,
+						      symtab_hdr->sh_link,
+						      sym->st_name);
+	      if (name == NULL)
+		continue;
+	      if (*name == '\0')
+		name = bfd_section_name (input_bfd, sec);
+	    }
 
+	  (*info->callbacks->reloc_overflow)(info,
+					     name,
+					     howto->name,
+					     (bfd_vma) 0,
+					     input_bfd,
+					     input_section,
+					     offset);
+	  ret = false;
+	}
+      else
+	ret = false;
+    }
 
 #ifdef DEBUG
   fprintf (stderr, "\n");
