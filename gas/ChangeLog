@@ -1,3 +1,12 @@
+Wed Jul 10 00:23:30 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-ppc.c (md_apply_fix3): Give a useful error message
+	when an unsupported PC relative reloc is seen, rather than calling
+	abort.
+
+	* app.c (do_scrub_chars): Remove not_cpp_line local variable.
+	Instead, check state when '#' comment is seen.
+
 Mon Jul  8 14:11:49 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (mips_regmask_frag): Only define if OBJ_ELF or
