@@ -36,6 +36,10 @@ Fri Apr 17 18:27:51 1992  Per Bothner  (bothner@cygnus.com)
 
 	* configure: mkdir ${subdir} as needed.
 
+Wed Apr 15 17:37:22 1992  K. Richard Pixley  (rich@cygnus.com)
+
+	* Makefile.in,configure.in: added autoconf.
+
 Wed Apr 15 17:27:34 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
 
 	* Makefile.in: no longer pass against on recursion.
