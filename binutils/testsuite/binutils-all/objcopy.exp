@@ -26,16 +26,16 @@ if {[which $OBJCOPY] == 0} then {
 
 send_user "Version [binutil_version $OBJCOPY]"
 
+if [istarget hppa*-*-*] then {
+    # bintest.s doesn't assemble, and we don't have any other tests
+    return
+}
+
 if {![binutils_assemble $AS $srcdir$subdir/bintest.s tmpdir/bintest.o]} then {
     return
 }
 
 # Test that objcopy does not modify a file when copying it.
-
-# Since some versions of the assembler don't use BFD to generate the
-# object file, we shouldn't assume that the version written by BFD will
-# be bit-for-bit identical.  It need merely be functionally identical.
-setup_xfail "sh-*-coff"
 
 set got [binutils_run $OBJCOPY "$OBJCOPYFLAGS tmpdir/bintest.o tmpdir/copy.o"]
 
@@ -48,6 +48,8 @@ if ![string match "" $got] then {
 
     # On some systems the result of objcopy will not be identical.
     # Those systems should use setup_xfail here.
+
+    setup_xfail "sh-*-coff"
 
     if [string match "" $exec_output] then {
 	pass "objcopy (simple copy)"

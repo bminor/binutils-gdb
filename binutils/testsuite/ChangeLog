@@ -1,3 +1,13 @@
+Wed Dec 14 15:54:46 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* binutils-all/size.exp: Skip tests requiring bintest.o on hppa,
+	since it (correctly) generates syntax errors on that platform.
+	* binutils-all/objdump.exp: Ditto.
+	* binutils-all/nm.exp: Ditto.
+	* binutils-all/objcopy.exp: Ditto.  Also, move setup_xfail for
+	sh-coff to branch where objcopy execution produced no error
+	messages.
+
 Thu Dec  8 14:36:15 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* binutils-all/objdump.exp (cpus_expected): New variable, taken
