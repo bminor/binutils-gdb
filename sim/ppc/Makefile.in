@@ -883,7 +883,7 @@ config.status: configure
 
 install: installdirs
 	n=`echo run | sed '$(program_transform_name)'`; \
-	$(INSTALL_PROGRAM) run$(EXEEXT) $(bindir)/$$n$(EXEEXT)
+	$(INSTALL_PROGRAM) run$(EXEEXT) $(DESTDIR)$(bindir)/$$n$(EXEEXT)
 
 installdirs:
-	$(SHELL) $(srcdir)/../../mkinstalldirs $(bindir)
+	$(SHELL) $(srcdir)/../../mkinstalldirs $(DESTDIR)$(bindir)

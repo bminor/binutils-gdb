@@ -119,10 +119,10 @@ install: install-man
 
 install-man: installdirs
 	n=`echo run | sed '$(program_transform_name)'`; \
-	$(INSTALL_DATA) $(srcdir)/run.1 $(man1dir)/$$n.1
+	$(INSTALL_DATA) $(srcdir)/run.1 $(DESTDIR)$(man1dir)/$$n.1
 
 installdirs:
-	$(SHELL) $(srcdir)/../../mkinstalldirs $(man1dir)
+	$(SHELL) $(srcdir)/../../mkinstalldirs $(DESTDIR)$(man1dir)
 
 Makefile: Makefile.in config.status
 	$(SHELL) ./config.status
