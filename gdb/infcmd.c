@@ -365,6 +365,9 @@ step_1 (skip_subroutines, single_inst, count_string)
 	    {
 	      struct minimal_symbol *msymbol;
 
+	      /* FIXME: we should be using containing_function_bounds or
+		 a cleaned up version thereof.  */
+
 	      msymbol = lookup_minimal_symbol_by_pc (stop_pc);
 	      target_terminal_ours ();
 	      printf_filtered ("Current function has no line number information.\n");
@@ -372,7 +375,7 @@ step_1 (skip_subroutines, single_inst, count_string)
 
 	      /* No info or after _etext ("Can't happen") */
 	      if (msymbol == NULL || SYMBOL_NAME (msymbol + 1) == NULL)
-		error ("No data available on pc function.");
+		error ("Cannot find bounds of current function.");
 
 	      printf_filtered ("Single stepping until function exit.\n");
 	      fflush (stdout);
@@ -874,17 +877,25 @@ path_command (dirname, from_tty)
     path_info ((char *)NULL, from_tty);
 }
 
+/* XXX - This routine is getting awfully cluttered with #if's.  It's probably
+   time to turn this into target_read_pc.  Ditto for write_pc.  */
+
 CORE_ADDR
 read_pc ()
 {
-#if GDB_TARGET_IS_HPPA
+#ifdef GDB_TARGET_IS_HPPA
   int flags = read_register(FLAGS_REGNUM);
 
   if (flags & 2)
-    return read_register(31) & ~0x3;
-#endif
-
+    return read_register(31) & ~0x3; /* User PC is here when in sys call */
+  return read_register (PC_REGNUM) & ~0x3;
+#else
+#ifdef GDB_TARGET_IS_H8500
+  return (read_register (SEG_C_REGNUM) << 16) | read_register (PC_REGNUM);
+#else
   return ADDR_BITS_REMOVE ((CORE_ADDR) read_register (PC_REGNUM));
+#endif
+#endif
 }
 
 void
@@ -893,7 +904,13 @@ write_pc (val)
 {
   write_register (PC_REGNUM, (long) val);
 #ifdef NPC_REGNUM
-  write_register (NPC_REGNUM, (long) val+4);
+  write_register (NPC_REGNUM, (long) val + 4);
+#ifdef NNPC_REGNUM
+  write_register (NNPC_REGNUM, (long) val + 8);
+#endif
+#endif
+#ifdef GDB_TARGET_IS_H8500
+  write_register (SEG_C_REGNUM, val >> 16);
 #endif
   pc_changed = 0;
 }
@@ -1079,7 +1096,7 @@ attach_command (args, from_tty)
       if (query ("A program is being debugged already.  Kill it? "))
 	target_kill ();
       else
-	error ("Inferior not killed.");
+	error ("Not killed.");
     }
 
   target_attach (args, from_tty);
