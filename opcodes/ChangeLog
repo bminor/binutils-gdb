@@ -2,10 +2,10 @@
 
 	* disassemble.c (disassembler_usage): Add invocation of
 	print_mips_disassembler_options.
-	* mips-dis.c (print_mips_disassembler_options)
-	(set_default_mips_dis_options, parse_mips_dis_option)
-	(parse_mips_dis_options, choose_abi_by_name, choose_arch_by_name)
-	(choose_arch_by_number): New functions.
+	* mips-dis.c: Include libiberty.h.
+	(print_mips_disassembler_options, set_default_mips_dis_options)
+	(parse_mips_dis_option, parse_mips_dis_options, choose_abi_by_name)
+	(choose_arch_by_name, choose_arch_by_number): New functions.
 	(mips_abi_choice, mips_arch_choice): New structures.
 	(mips32_reg_names, mips64_reg_names, reg_names): Remove.
 	(mips_gpr_names_numeric, mips_gpr_names_oldabi)
