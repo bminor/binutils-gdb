@@ -125,7 +125,6 @@ parse_insn_word (line_ref *line,
 	char *end;
 	int len;
 	insn_field_cond *new_cond = ZALLOC (insn_field_cond);
-	insn_field_cond **last;
 	
 	/* determine the conditional test */
 	switch (*chp)
@@ -144,7 +143,7 @@ parse_insn_word (line_ref *line,
 	chp++; 
 	chp = skip_spaces (chp);
 	start = chp;
-	chp = skip_to_separator (chp, "+,:");
+	chp = skip_to_separator (chp, "+,:!=");
 	end = back_spaces (start, chp);
 	len = end - start;
 	if (len == 0)
@@ -174,10 +173,12 @@ parse_insn_word (line_ref *line,
 	  error (line, "Only single conditional when `=' allowed\n");
 
 	/* insert it */
-	last = &new_field->conditions;
-	while (*last != NULL)
-	  last = &(*last)->next;
-	*last = new_cond;
+	{
+	  insn_field_cond **last = &new_field->conditions;
+	  while (*last != NULL)
+	    last = &(*last)->next;
+	  *last = new_cond;
+	}
       }
 
     /* NOW verify that the field was finished */

@@ -592,8 +592,6 @@ print_includes (lf *file)
   lf_printf (file, "\n");
   lf_printf (file, "#include \"sim-inline.c\"\n");
   lf_printf (file, "\n");
-  lf_printf (file, "#include \"sim-main.h\"\n");
-  lf_printf (file, "\n");
   print_include_inline (file, options.module.itable);
   print_include_inline (file, options.module.idecode);
   print_include_inline (file, options.module.support);
@@ -1061,7 +1059,11 @@ main (int argc,
       printf ("\n");
       printf ("  -P <prefix>\n");
       printf ("\t Prepend global names (except itable) with the string <prefix>.\n");
-      printf ("\t Specify -P <module>=<prefix> to set the <modules> prefix.\n");
+      printf ("\t Specify -P <module>=<prefix> to set a specific <module>'s prefix.\n");
+      printf ("\n");
+      printf ("  -S <suffix>\n");
+      printf ("\t Replace a global name (suffix) (except itable) with the string <suffix>.\n");
+      printf ("\t Specify -S <module>=<suffix> to change a specific <module>'s name (suffix).\n");
       printf ("\n");
       printf ("  -Werror\n");
       printf ("\t Make warnings errors\n");
@@ -1206,8 +1208,10 @@ main (int argc,
 	  break;
 	  
 	case 'P':
+	case 'S':
 	  {
 	    igen_module *names;
+	    igen_name *name;
 	    char *chp;
 	    chp = strchr (optarg, '=');
 	    if (chp == NULL)
@@ -1252,15 +1256,24 @@ main (int argc,
 		    error (NULL, "Prefix `%s' unreconized\n", optarg);
 		  }
 	      }
-	    names->prefix.u = strdup (chp);
-	    names->prefix.l = strdup (chp);
-	    chp = names->prefix.u;
+	    switch (ch)
+	      {
+	      case 'P':
+		name = &names->prefix;
+		break;
+	      case 'S':
+		name = &names->suffix;
+		break;
+	      }
+	    name->u = strdup (chp);
+	    name->l = strdup (chp);
+	    chp = name->u;
 	    while (*chp) {
 	      if (islower(*chp))
 		*chp = toupper(*chp);
 	      chp++;
 	    }
-	    if (names == &options.module.global)
+	    if (name == &options.module.global.prefix)
 	      {
 		options.module.engine.prefix = options.module.global.prefix;
 		options.module.icache.prefix = options.module.global.prefix;
@@ -1268,6 +1281,15 @@ main (int argc,
 		/* options.module.itable.prefix = options.module.global.prefix; */
 		options.module.semantics.prefix = options.module.global.prefix;
 		options.module.support.prefix = options.module.global.prefix;
+	      }
+	    if (name == &options.module.global.suffix)
+	      {
+		options.module.engine.suffix = options.module.global.suffix;
+		options.module.icache.suffix = options.module.global.suffix;
+		options.module.idecode.suffix = options.module.global.suffix;
+		/* options.module.itable.suffix = options.module.global.suffix; */
+		options.module.semantics.suffix = options.module.global.suffix;
+		options.module.support.suffix = options.module.global.suffix;
 	      }
 	    break;
 	  }

@@ -1,3 +1,10 @@
+Tue Apr 14 10:57:26 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* ld-insn.c (parse_insn_word): Treat `!' and `=' as valid
+ 	separator tokens when parsing a conditional.
+
+	* igen.h (main): Add option -S so that suffix can be specified.
+
 Tue Apr 14 08:44:53 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* igen.h (struct igen_trace_options): Add members insn_expansion
