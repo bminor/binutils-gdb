@@ -1,3 +1,62 @@
+Thu Jun  2 17:39:22 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	Add linker support for SunOS shared libraries.
+	* sunos.c: Include bfdlink.h.  Add many new functions and
+	definitions for SunOS shared library support.
+	* bfd-in.h (bfd_sunos_record_link_assignment): Declare.
+	(bfd_sunos_size_dynamic_sections): Declare.
+	* bfd-in2.h: Rebuilt.
+	* aoutx.h (struct aout_link_hash_entry): Move to libaout.h.
+	(struct aout_link_hash_table): Likewise.
+	(aout_link_hash_lookup, aout_link_hash_traverse): Likewise.
+	(aout_hash_table): Likewise.
+	(NAME(aout,link_hash_newfunc)): Rename from aout_link_hash_newfunc
+	and make externally visible.
+	(NAME(aout,link_hash_table_init)): New function.
+	(NAME(aout,link_hash_table_create)): Call
+	NAME(aout,link_hash_table_init), not _bfd_link_hash_table_init.
+	(aout_link_add_symbols): Don't fail if no symbols.  If it exists,
+	call add_dynamic_symbols backend entry point for dynamic objects.
+	Use add_one_symbol backend entry point if it exists.
+	(NAME(aout,final_link)): Call finish_dynamic_link backend entry
+	point, if it exists.
+	(aout_link_input_bfd): For a dynamic object, call
+	link_dynamic_object backend entry point, if it exists.
+	(aout_link_write_other_symbol): Call write_dynamic_symbol backend
+	entry point, if it exists.
+	(aout_link_input_section): Don't read the relocs if they have
+	already been read.
+	(aout_link_input_section_std): When doing a final link, for a
+	reloc against an external symbol, call check_dynamic_reloc backend
+	entry point, if it exists.
+	(aout_link_input_section_ext): Likewise.
+	* libaout.h: Protect against multiple inclusion.  Include
+	bfdlink.h.
+	(struct aout_link_hash_entry): Move in from aoutx.h.
+	(struct aout_link_hash_table): Likewise.
+	(aout_link_hash_lookup, aout_link_hash_traverse): Likewise.
+	(aout_hash_table): Likewise.
+	(struct aout_backend_data): Add fields add_dynamic_symbols,
+	add_one_symbol, link_dynamic_object, write_dynamic_symbol,
+	check_dynamic_reloc, and finish_dynamic_link.
+	(struct aout_section_data_struct): Define new structure.
+	(aout_section_data): Define new accessor macro.
+	(NAME(aout,link_hash_newfunc)): Declare.
+	(NAME(aout,link_hash_table_init)): Declare.
+	* aoutf1.h (sunos4_aout_backend): Initialize new aout_backend_data
+	fields.
+	* aout-target.h (MY(backend_data)): Likewise.
+	* i386aout.c (MY(backend_data)): Likewise.
+	* i386mach3.c (MY(backend_data)): Likewise.
+	* mipsbsd.c (MY(backend_data)): Likewise.
+	* sparclynx.c (sparclynx_aout_backend): Likewise.
+
+	* aoutx.h (NAME(aout,slurp_symbol_table)): Don't zero out cached
+	until we know it is non-NULL.
+	(aout_link_write_symbols): Don't skip a warning symbol even if it
+	has already been written out.  If skipping an indirect symbol,
+	skip the next symbol as well.
+
 Wed Jun  1 14:37:50 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* hosts/sun3.h: Don't declare qsort, malloc or realloc.

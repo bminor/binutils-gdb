@@ -18,9 +18,14 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+#ifndef LIBAOUT_H
+#define LIBAOUT_H
+
 /* We try to encapsulate the differences in the various a.out file
    variants in a few routines, and otherwise share large masses of code.
    This means we only have to fix bugs in one place, most of the time.  */
+
+#include "bfdlink.h"
 
 /* Parameterize the a.out code based on whether it is being built
    for a 32-bit architecture or a 64-bit architecture.  */
@@ -50,7 +55,42 @@ struct external_exec;
 struct external_nlist;
 struct reloc_ext_external;
 struct reloc_std_external;
+
+/* a.out backend linker hash table entries.  */
 
+struct aout_link_hash_entry
+{
+  struct bfd_link_hash_entry root;
+  /* Symbol index in output file.  */
+  int indx;
+};
+
+/* a.out backend linker hash table.  */
+
+struct aout_link_hash_table
+{
+  struct bfd_link_hash_table root;
+};
+
+/* Look up an entry in an a.out link hash table.  */
+
+#define aout_link_hash_lookup(table, string, create, copy, follow) \
+  ((struct aout_link_hash_entry *) \
+   bfd_link_hash_lookup (&(table)->root, (string), (create), (copy), (follow)))
+
+/* Traverse an a.out link hash table.  */
+
+#define aout_link_hash_traverse(table, func, info)			\
+  (bfd_link_hash_traverse						\
+   (&(table)->root,							\
+    (boolean (*) PARAMS ((struct bfd_link_hash_entry *, PTR))) (func),	\
+    (info)))
+
+/* Get the a.out link hash table from the info structure.  This is
+   just a cast.  */
+
+#define aout_hash_table(p) ((struct aout_link_hash_table *) ((p)->hash))
+
 /* Back-end information for various a.out targets.  */
 struct aout_backend_data
 {
@@ -62,6 +102,9 @@ struct aout_backend_data
      text section, which starts immediately after the file header.
      If not, the text section starts on the next page.  */
   unsigned char text_includes_header;
+
+  /* The value to pass to N_SET_FLAGS.  */
+  unsigned char exec_hdr_flags;
 
   /* If the text section VMA isn't specified, and we need an absolute
      address, use this as the default.  If we're producing a relocatable
@@ -79,6 +122,39 @@ struct aout_backend_data
      to the size of the text section in the file for alignment purposes but
      does *not* get counted in the length of the text section. */
   unsigned char exec_header_not_counted;
+
+  /* Callback from the add symbols phase of the linker code to handle
+     a dynamic object.  */
+  boolean (*add_dynamic_symbols) PARAMS ((bfd *, struct bfd_link_info *));
+
+  /* Callback from the add symbols phase of the linker code to handle
+     adding a single symbol to the global linker hash table.  */
+  boolean (*add_one_symbol) PARAMS ((struct bfd_link_info *, bfd *,
+				     const char *, flagword, asection *,
+				     bfd_vma, const char *, boolean,
+				     boolean,
+				     struct bfd_link_hash_entry **));
+
+  /* Called to handle linking a dynamic object.  */
+  boolean (*link_dynamic_object) PARAMS ((struct bfd_link_info *, bfd *));
+
+  /* Called for each global symbol being written out by the linker.
+     This should write out the dynamic symbol information.  */
+  boolean (*write_dynamic_symbol) PARAMS ((bfd *, struct bfd_link_info *,
+					   struct aout_link_hash_entry *));
+
+  /* This callback is called by the linker for each reloc against an
+     external symbol.  RELOC is a pointer to the unswapped reloc.  If
+     *SKIP is set to true, the reloc will be skipped.  */
+  boolean (*check_dynamic_reloc) PARAMS ((struct bfd_link_info *info,
+					  bfd *input_bfd,
+					  asection *input_section,
+					  struct aout_link_hash_entry *h,
+					  PTR reloc, boolean *skip));
+
+  /* Called at the end of a link to finish up any dynamic linking
+     information.  */
+  boolean (*finish_dynamic_link) PARAMS ((bfd *, struct bfd_link_info *));
 };
 #define aout_backend_info(abfd) \
 	((CONST struct aout_backend_data *)((abfd)->xvec->backend_data))
@@ -269,10 +345,25 @@ struct  aout_data_struct {
    macro is only ever applied to an asymbol */
 #define aout_symbol(asymbol) ((aout_symbol_type *)(&(asymbol)->the_bfd))
 
+/* Information we keep for each a.out section.  This is currently only
+   used by the a.out backend linker.  */
+
+struct aout_section_data_struct
+{
+  /* The unswapped relocation entries for this section.  */
+  PTR relocs;
+};
+
+#define aout_section_data(s) \
+  ((struct aout_section_data_struct *) (s)->used_by_bfd)
+
 /* Prototype declarations for functions defined in aoutx.h  */
 
 boolean
 NAME(aout,squirt_out_relocs) PARAMS ((bfd *abfd, asection *section));
+
+boolean
+NAME(aout,make_sections) PARAMS ((bfd *));
 
 bfd_target *
 NAME(aout,some_aout_object_p) PARAMS ((bfd *abfd,
@@ -374,6 +465,17 @@ void
 NAME(aout,swap_exec_header_out) PARAMS ((bfd *abfd,
        struct internal_exec *execp, struct external_exec *raw_bytes));
 
+struct bfd_hash_entry *
+NAME(aout,link_hash_newfunc)
+  PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
+
+boolean
+NAME(aout,link_hash_table_init)
+     PARAMS ((struct aout_link_hash_table *, bfd *,
+	      struct bfd_hash_entry *(*) (struct bfd_hash_entry *,
+					  struct bfd_hash_table *,
+					  const char *)));
+
 struct bfd_link_hash_table *
 NAME(aout,link_hash_table_create) PARAMS ((bfd *));
 
@@ -453,3 +555,5 @@ aout_stab_name PARAMS ((int code));
 	    }								      \
       }									      
 #endif
+
+#endif /* ! defined (LIBAOUT_H) */
