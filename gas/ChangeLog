@@ -1,3 +1,28 @@
+Wed Sep  6 21:13:06 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* app.c (do_scrub_chars): In MRI mode, silently end quoted strings
+	at newline characters.  In MRI mode, always keep spaces in the
+	operands field.  In MRI mode, treat a line comment character as a
+	regular comment character following a space.
+	* cond.c (ignore_input): Use strncasecmp rather than strncmp when
+	looking for special pseudo-ops.
+	* read.c (cons_worker): In MRI mode, the expressions stop at the
+	first unquoted space.
+	(equals): Likewise.
+
+start-sanitize-sh3e
+Wed Sep  6 15:03:53 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
+
+	* config/tc-sh.c (get_operands): Read third arg if it exists.
+	Otherwise, clear it.
+	(get_specific, case F_FR0): Add.
+
+end-sanitize-sh3e
+Wed Sep  6 15:03:53 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
+
+	* config/tc-sh.c (get_specific): Delete arg_to_test.
+	(md_assemble): Increase operand array from 2 to 3.
+
 Tue Sep  5 16:47:36 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* config/tc-mips.c: Remove CYGNUS LOCAL comments.

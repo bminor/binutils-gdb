@@ -61,19 +61,23 @@ s_ifdef (arg)
     {
       as_bad ("invalid identifier for \".ifdef\"");
       obstack_1grow (&cond_obstack, 0);
+      ignore_rest_of_line ();
     }
   else
     {
-      get_symbol_end ();
-      ++input_line_pointer;
+      char c;
+
+      c = get_symbol_end ();
       symbolP = symbol_find (name);
+      *input_line_pointer = c;
 
       initialize_cframe (&cframe);
       cframe.ignoring = cframe.dead_tree || !((symbolP != 0) ^ arg);
-      current_cframe = (struct conditional_frame *) obstack_copy (&cond_obstack, &cframe, sizeof (cframe));
+      current_cframe = ((struct conditional_frame *)
+			obstack_copy (&cond_obstack, &cframe,
+				      sizeof (cframe)));
+      demand_empty_rest_of_line ();
     }				/* if a valid identifyer name */
-
-  return;
 }				/* s_ifdef() */
 
 void 
@@ -85,10 +89,19 @@ s_if (arg)
   int t;
 
   SKIP_WHITESPACE ();		/* Leading whitespace is part of operand. */
-  expression (&operand);
 
-  if (operand.X_op != O_constant)
-    as_bad ("non-constant expression in \".if\" statement");
+  if (current_cframe != NULL && current_cframe->ignoring)
+    {
+      operand.X_add_number = 0;
+      while (! is_end_of_line[(unsigned char) *input_line_pointer])
+	++input_line_pointer;
+    }
+  else
+    {
+      expression (&operand);
+      if (operand.X_op != O_constant)
+	as_bad ("non-constant expression in \".if\" statement");
+    }
 
   switch ((operatorT) arg)
     {
@@ -108,7 +121,8 @@ s_if (arg)
   cframe.ignoring = cframe.dead_tree || ! t;
   current_cframe = ((struct conditional_frame *)
 		    obstack_copy (&cond_obstack, &cframe, sizeof (cframe)));
-  return;
+
+  demand_empty_rest_of_line ();
 }				/* s_if() */
 
 /* Get a string for the MRI IFC or IFNC pseudo-ops.  */
@@ -268,14 +282,16 @@ ignore_input ()
     }
 
   /* We cannot ignore certain pseudo ops.  */
-  if ((s[0] == 'i'
-       && (!strncmp (s, "if", 2)
-	   || !strncmp (s, "ifdef", 5)
-	   || !strncmp (s, "ifndef", 6)))
-      || (s[0] == 'e'
-	  && (!strncmp (s, "else", 4)
-	      || !strncmp (s, "endif", 5)
-	      || !strncmp (s, "endc", 4))))
+  if (((s[0] == 'i'
+	|| s[0] == 'I')
+       && (!strncasecmp (s, "if", 2)
+	   || !strncasecmp (s, "ifdef", 5)
+	   || !strncasecmp (s, "ifndef", 6)))
+      || ((s[0] == 'e'
+	   || s[0] == 'E')
+	  && (!strncasecmp (s, "else", 4)
+	      || !strncasecmp (s, "endif", 5)
+	      || !strncasecmp (s, "endc", 4))))
     return 0;
 
   return (current_cframe != NULL) && (current_cframe->ignoring);
