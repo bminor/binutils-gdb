@@ -2316,20 +2316,32 @@ hppa_frame_prev_register_helper (struct frame_info *next_frame,
 				 enum lval_type *lvalp, CORE_ADDR *addrp,
 				 int *realnump, void *valuep)
 {
-  int pcoqt = (regnum == HPPA_PCOQ_TAIL_REGNUM);
-  struct gdbarch *gdbarch = get_frame_arch (next_frame);
-  int regsize = register_size (gdbarch, HPPA_PCOQ_HEAD_REGNUM);
+  if (regnum == HPPA_PCOQ_TAIL_REGNUM)
+    {
+      if (valuep)
+	{
+	  CORE_ADDR pc;
 
-  if (pcoqt)
-    regnum = HPPA_PCOQ_HEAD_REGNUM;
+	  trad_frame_prev_register (next_frame, saved_regs,
+				    HPPA_PCOQ_HEAD_REGNUM, optimizedp,
+				    lvalp, addrp, realnump, valuep);
+
+	  pc = extract_unsigned_integer (valuep, 4);
+	  store_unsigned_integer (valuep, 4, pc + 4);
+	}
+
+      /* It's a computed value.  */
+      *optimizedp = 0;
+      *lvalp = not_lval;
+      *addrp = 0;
+      *realnump = -1;
+      return;
+    }
 
   trad_frame_prev_register (next_frame, saved_regs, regnum,
                             optimizedp, lvalp, addrp, realnump, valuep);
-
-  if (pcoqt)
-    store_unsigned_integer (valuep, regsize, 
-		      	    extract_unsigned_integer (valuep, regsize) + 4);
 }
+
 
 /* Here is a table of C type sizes on hppa with various compiles
    and options.  I measured this on PA 9000/800 with HP-UX 11.11
@@ -2559,4 +2571,3 @@ be no argument or the argument must be a depth.\n"), NULL);
 				  &hppa_debug, "Set hppa debugging.\n\
 When non-zero, hppa specific debugging is enabled.", &setdebuglist), &showdebuglist);
 }
-
