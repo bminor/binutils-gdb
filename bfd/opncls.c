@@ -34,7 +34,8 @@ FILE *bfd_open_file PARAMS ((bfd *));
 
 /* Return a new BFD.  All BFD's are allocated through this routine.  */
 
-bfd *new_bfd PARAMS ((void))
+bfd *
+new_bfd PARAMS ((void))
 {
   bfd *nbfd;
 
@@ -58,26 +59,27 @@ bfd *new_bfd PARAMS ((void))
   nbfd->output_has_begun = false;
   nbfd->section_count = 0;
   nbfd->usrdata = (PTR)NULL;
-  nbfd->sections = (asection *)NULL;
   nbfd->cacheable = false;
   nbfd->flags = NO_FLAGS;
   nbfd->mtime_set = false;
-
 
   return nbfd;
 }
 
 /* Allocate a new BFD as a member of archive OBFD.  */
 
-bfd *new_bfd_contained_in(obfd)
-bfd *obfd;
+bfd *
+new_bfd_contained_in (obfd)
+     bfd *obfd;
 {
-	bfd *nbfd = new_bfd();
-	nbfd->xvec = obfd->xvec;
-	nbfd->my_archive = obfd;
-	nbfd->direction = read_direction;
-	nbfd->target_defaulted = obfd->target_defaulted;
-	return nbfd;
+  bfd *nbfd;
+
+  nbfd = new_bfd();
+  nbfd->xvec = obfd->xvec;
+  nbfd->my_archive = obfd;
+  nbfd->direction = read_direction;
+  nbfd->target_defaulted = obfd->target_defaulted;
+  return nbfd;
 }
 
 /*
@@ -158,8 +160,8 @@ DESCRIPTION
 	 If the caller desires that this file descriptor be cached by BFD
 	 (opened as needed, closed as needed to free descriptors for
 	 other opens), with the supplied @var{fd} used as an initial
-	 file descriptor (but subject to closure at any time), set
-	 bfd->cacheable nonzero in the returned BFD.  The default is to
+	 file descriptor (but subject to closure at any time), call
+	 bfd_set_cacheable(bfd, 1) on the returned BFD.  The default is to
 	 assume no cacheing; the file descriptor will remain open until
 	 bfd_close, and will not be affected by BFD operations on other
 	 files.
@@ -440,7 +442,7 @@ FUNCTION
 	bfd_create
 
 SYNOPSIS
-	bfd *bfd_create(CONST char *filename, bfd *template);
+	bfd *bfd_create(CONST char *filename, bfd *templ);
 
 DESCRIPTION
 	This routine creates a new BFD in the manner of
@@ -451,9 +453,9 @@ DESCRIPTION
 */
 
 bfd *
-DEFUN(bfd_create,(filename, template),
+DEFUN(bfd_create,(filename, templ),
       CONST char *filename AND
-      bfd *template)
+      bfd *templ)
 {
   bfd *nbfd = new_bfd();
   if (nbfd == (bfd *)NULL) {
@@ -461,8 +463,8 @@ DEFUN(bfd_create,(filename, template),
     return (bfd *)NULL;
   }
   nbfd->filename = filename;
-  if(template) {
-    nbfd->xvec = template->xvec;
+  if(templ) {
+    nbfd->xvec = templ->xvec;
   }
   nbfd->direction = no_direction;
   bfd_set_format(nbfd, bfd_object);

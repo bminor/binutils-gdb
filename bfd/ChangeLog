@@ -1,3 +1,8 @@
+Thu Nov  4 14:46:14 1993  John Gilmore  (gnu@rtl.cygnus.com)
+
+	* bfd-in.h (bfd_get_cacheable, bfd_set_cacheable):  New accessors.
+	* bfd.c, opncls.c:  Improve comments on file descriptor cacheing.
+
 Thu Nov  4 08:54:30 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* From Pete Hoogenboom (hoogen@cs.utah.edu)

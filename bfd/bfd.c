@@ -48,7 +48,8 @@ CODE_FRAGMENT
 .       is the result of an fopen on the filename. *}
 .    char *iostream;
 .
-.    {* Is the file being cached *}
+.    {* Is the file descriptor being cached?  That is, can it be closed as
+.       needed, and re-opened when accessed later?  *}
 .
 .    boolean cacheable;
 .
@@ -156,9 +157,11 @@ CODE_FRAGMENT
 .      struct bout_data_struct *bout_data;
 .      struct sun_core_struct *sun_core_data;
 .      struct trad_core_struct *trad_core_data;
-.      struct hppa_data_struct *hppa_data;
+.      struct som_data_struct *som_data;
 .      struct hpux_core_struct *hpux_core_data;
 .      struct sgi_core_struct *sgi_core_data;
+.      struct lynx_core_struct *lynx_core_data;
+.      struct osf_core_struct *osf_core_data;
 .      PTR any;
 .      } tdata;
 .  
@@ -181,17 +184,12 @@ CODE_FRAGMENT
 #include "coff/sym.h"
 #include "libcoff.h"
 #include "libecoff.h"
+#undef obj_symbols
+#include "libelf.h"
 
 #undef strerror
 extern char *strerror();
 
-
-CONST short _bfd_host_big_endian = 0x0100;
-        /* Accessing the above as (*(char*)&_bfd_host_big_endian), will
-           return 1 if the host is big-endian, 0 otherwise.
-           (assuming that a short is two bytes long!!!  FIXME)
-           (See HOST_IS_BIG_ENDIAN_P in bfd.h.)  */
-
 /** Error handling
     o - Most functions return nonzero on success (check doc for
         precise semantics); 0 or NULL on error.
@@ -605,8 +603,8 @@ SYNOPSIS
 
 DESCRIPTION
 	Set the maximum size of objects to be optimized using the GP
-	register under MIPS ECOFF.  This is typically set by the -G
-	argument to the compiler, assembler or linker.
+	register under ECOFF or MIPS ELF.  This is typically set by
+	the -G argument to the compiler, assembler or linker.
 */
 
 void
@@ -616,6 +614,82 @@ bfd_set_gp_size (abfd, i)
 {
   if (abfd->xvec->flavour == bfd_target_ecoff_flavour)
     ecoff_data (abfd)->gp_size = i;
+  else if (abfd->xvec->flavour == bfd_target_elf_flavour)
+    elf_gp_size (abfd) = i;
+}
+
+/*
+FUNCTION
+	bfd_scan_vma
+
+DESCRIPTION
+	Converts, like strtoul, a numerical expression as a
+	string into a bfd_vma integer, and returns that integer.
+	(Though without as many bells and whistles as strtoul.)
+	The expression is assumed to be unsigned (i.e. positive).
+	If given a base, it is used as the base for conversion.
+	A base of 0 causes the function to interpret the string
+	in hex if a leading "0x" or "0X" is found, otherwise
+	in octal if a leading zero is found, otherwise in decimal.
+
+	Overflow is not detected.
+
+SYNOPSIS
+	bfd_vma bfd_scan_vma(CONST char *string, CONST char **end, int base);
+*/
+
+bfd_vma
+DEFUN(bfd_scan_vma,(string, end, base),
+      CONST char *string AND
+      CONST char **end AND
+      int base)
+{
+  bfd_vma value;
+  int digit;
+
+  /* Let the host do it if possible.  */
+  if (sizeof(bfd_vma) <= sizeof(unsigned long))
+    return (bfd_vma) strtoul (string, 0, base);
+
+  /* A negative base makes no sense, and we only need to go as high as hex.  */
+  if ((base < 0) || (base > 16))
+    return (bfd_vma) 0;
+
+  if (base == 0)
+    {
+      if (string[0] == '0')
+	{
+	  if ((string[1] == 'x') || (string[1] == 'X'))
+	    base = 16;
+	  /* XXX should we also allow "0b" or "0B" to set base to 2? */
+	  else
+	    base = 8;
+	}
+      else
+	base = 10;
+    }
+  if ((base == 16) &&
+      (string[0] == '0') && ((string[1] == 'x') || (string[1] == 'X')))
+    string += 2;
+  /* XXX should we also skip over "0b" or "0B" if base is 2? */
+    
+/* Speed could be improved with a table like hex_value[] in gas.  */
+#define HEX_VALUE(c) \
+  (isxdigit(c) ?				\
+    (isdigit(c) ?				\
+      (c - '0') :				\
+      (10 + c - (islower(c) ? 'a' : 'A'))) :	\
+    42)
+
+  for (value = 0; (digit = HEX_VALUE(*string)) < base; string++)
+    {
+      value = value * base + digit;
+    }
+
+  if (end)
+    *end = string;
+
+  return value;
 }
 
 /*
