@@ -1,3 +1,9 @@
+2002-08-01  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-arm.c (add_to_lit_pool): Ensure that offset to literal
+	pool is computed using signed arithmetic so that proper sign
+	extension is performed if X_add_number is a 64-bit integer.
+
 2002-08-01  H.J. Lu  <hjl@gnu.org>
 	    Daniel Jacobowitz  <drow@mvista.com>
 

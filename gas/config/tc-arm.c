@@ -2237,7 +2237,7 @@ add_to_lit_pool ()
     }
 
   inst.reloc.exp.X_op         = O_symbol;
-  inst.reloc.exp.X_add_number = (entry) * 4 - 8;
+  inst.reloc.exp.X_add_number = ((int) entry) * 4 - 8;
   inst.reloc.exp.X_add_symbol = pool->symbol;
 
   return SUCCESS;
@@ -9682,7 +9682,7 @@ md_apply_fix3 (fixP, valP, seg)
 	      {
 		as_bad_where (fixP->fx_file, fixP->fx_line,
 			      _("unable to compute ADRL instructions for PC offset of 0x%lx"),
-			      value);
+			      (long) value);
 		break;
 	      }
 
@@ -10048,7 +10048,8 @@ md_apply_fix3 (fixP, valP, seg)
 
 	  if ((value + 2) & ~0x3fe)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  _("invalid offset, value too big (0x%08lX)"), value);
+			  _("invalid offset, value too big (0x%08lX)"),
+			  (long) value);
 
 	  /* Round up, since pc will be rounded down.  */
 	  newval |= (value + 2) >> 2;
@@ -10057,28 +10058,32 @@ md_apply_fix3 (fixP, valP, seg)
 	case 9: /* SP load/store.  */
 	  if (value & ~0x3fc)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  _("invalid offset, value too big (0x%08lX)"), value);
+			  _("invalid offset, value too big (0x%08lX)"),
+			  (long) value);
 	  newval |= value >> 2;
 	  break;
 
 	case 6: /* Word load/store.  */
 	  if (value & ~0x7c)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  _("invalid offset, value too big (0x%08lX)"), value);
+			  _("invalid offset, value too big (0x%08lX)"),
+			  (long) value);
 	  newval |= value << 4; /* 6 - 2.  */
 	  break;
 
 	case 7: /* Byte load/store.  */
 	  if (value & ~0x1f)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  _("invalid offset, value too big (0x%08lX)"), value);
+			  _("invalid offset, value too big (0x%08lX)"),
+			  (long) value);
 	  newval |= value << 6;
 	  break;
 
 	case 8: /* Halfword load/store.  */
 	  if (value & ~0x3e)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
-			  _("invalid offset, value too big (0x%08lX)"), value);
+			  _("invalid offset, value too big (0x%08lX)"),
+			  (long) value);
 	  newval |= value << 5; /* 6 - 1.  */
 	  break;
 
