@@ -1,3 +1,17 @@
+Tue Feb 25 13:17:27 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* cond.c (s_ifdef): If we should omit conditionals from listings,
+	call listing_list.
+	(s_if, s_ifc, s_endif, s_else, s_ifeqs): Likewise.
+	* listing.c (list_info_struct): Add EDICT_NOLIST_NEXT.
+	(listing_listing): Handle EDICT_NOLIST_NEXT.
+	(listing_list): An argument of 2 means EDICT_NOLIST_NEXT.
+	* listing.h (LISTING_NOCOND): Define.
+	(LISTING_SKIP_COND): Define.
+	* as.c (show_usage): Mention c as a suboption of -a.
+	(parse_args): Handle c as a suboption of -a.
+	* doc/as.texinfo: Document -alc.
+
 start-sanitize-tic80
 Mon Feb 24 23:34:14 1997  Fred Fish  <fnf@cygnus.com>
 
