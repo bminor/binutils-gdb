@@ -966,9 +966,9 @@ fill_edata (bfd *abfd, struct bfd_link_info *info ATTRIBUTE_UNUSED)
   hint = 0;
   for (s = 0; s < NE; s++)
     {
-      if (pe_def_file->exports[s].ordinal != -1)
+      struct bfd_section *ssec = exported_symbol_sections[s];
+      if (ssec && pe_def_file->exports[s].ordinal != -1)
 	{
-	  struct bfd_section *ssec = exported_symbol_sections[s];
 	  unsigned long srva = (exported_symbol_offsets[s]
 				+ ssec->output_section->vma
 				+ ssec->output_offset);

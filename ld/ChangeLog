@@ -1,3 +1,8 @@
+2004-02-25  Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* pe-dll.c (fill_edata): Check that exported_symbol_sections is
+	not NULL.
+
 2004-02-23  Ian Lance Taylor  <ian@wasabisystems.com>
 
 	* ldlang.c (lang_check): Use %P, not %E, in error message.
