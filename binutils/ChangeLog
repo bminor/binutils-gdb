@@ -1,3 +1,8 @@
+Tue Oct  8 15:13:20 1991  Per Bothner  (bothner at cygnus.com)
+
+	* configure.in: Get host file from ../bfd/config, not config.
+	* config/*: Remove config directory and its files.
+
 Tue Oct  8 13:58:59 1991  Roland H. Pesch  (pesch at cygnus.com)
 
 	* Makefile.in: new targets binutils.dvi, binutils.info
