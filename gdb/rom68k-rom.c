@@ -44,48 +44,7 @@ static char *rom68k_regnames[NUM_REGS] = {
  * strings. We also need a CR or LF on the end.
  */
 
-static struct target_ops rom68k_ops = {
-  "rom68k",			/* to_shortname */
-  "Rom68k debug monitor for the IDP Eval board", /* to_longname */
-  "Debug on a Motorola IDP eval board running the ROM68K monitor.\n\
-Specify the serial device it is connected to (e.g. /dev/ttya).",
-  rom68k_open,			/* to_open */
-  monitor_close,		/* to_close */
-  NULL,				/* to_attach */
-  monitor_detach,		/* to_detach */
-  monitor_resume,		/* to_resume */
-  monitor_wait,			/* to_wait */
-  monitor_fetch_registers,	/* to_fetch_registers */
-  monitor_store_registers,	/* to_store_registers */
-  monitor_prepare_to_store,	/* to_prepare_to_store */
-  monitor_xfer_memory,		/* to_xfer_memory */
-  monitor_files_info,		/* to_files_info */
-  monitor_insert_breakpoint,	/* to_insert_breakpoint */
-  monitor_remove_breakpoint,	/* to_remove_breakpoint */
-  0,				/* to_terminal_init */
-  0,				/* to_terminal_inferior */
-  0,				/* to_terminal_ours_for_output */
-  0,				/* to_terminal_ours */
-  0,				/* to_terminal_info */
-  monitor_kill,			/* to_kill */
-  monitor_load,			/* to_load */
-  0,				/* to_lookup_symbol */
-  NULL,				/* to_create_inferior */
-  monitor_mourn_inferior,	/* to_mourn_inferior */
-  0,				/* to_can_run */
-  0, 				/* to_notice_signals */
-  0,                            /* to_stop */
-  process_stratum,		/* to_stratum */
-  0,				/* to_next */
-  1,				/* to_has_all_memory */
-  1,				/* to_has_memory */
-  1,				/* to_has_stack */
-  1,				/* to_has_registers */
-  1,				/* to_has_execution */
-  0,				/* sections */
-  0,				/* sections_end */
-  OPS_MAGIC			/* to_magic */
-};
+static struct target_ops rom68k_ops;
 
 static char *rom68k_loadtypes[] = {"none", "srec", "default", NULL};
 static char *rom68k_loadprotos[] = {"none", NULL};
@@ -147,6 +106,14 @@ rom68k_open(args, from_tty)
 void
 _initialize_rom68k ()
 {
+  init_monitor_ops (&rom68k_ops);
+
+  rom68k_ops.to_shortname = "rom68k";
+  rom68k_ops.to_longname = "Rom68k debug monitor for the IDP Eval board";
+  rom68k_ops.to_doc = "Debug on a Motorola IDP eval board running the ROM68K monitor.\n\
+Specify the serial device it is connected to (e.g. /dev/ttya).";
+  rom68k_ops.to_open = rom68k_open;
+
   add_target (&rom68k_ops);
 
   /* this is the default, since it's the only baud rate supported by the hardware */

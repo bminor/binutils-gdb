@@ -44,48 +44,7 @@ extern int mips_set_processor_type();
  * strings. We also need a CR or LF on the end.
  */
 
-static struct target_ops array_ops = {
-  "array",			/* to_shortname */
-  "Debug using the standard GDB remote protocol for the Array Tech target.",
-  "Debug using the standard GDB remote protocol for the Array Tech target.\n\
-Specify the serial device it is connected to (e.g. /dev/ttya).",
-  array_open,			/* to_open */
-  monitor_close,		/* to_close */
-  NULL,				/* to_attach */
-  monitor_detach,		/* to_detach */
-  monitor_resume,		/* to_resume */
-  monitor_wait,			/* to_wait */
-  monitor_fetch_registers,	/* to_fetch_registers */
-  monitor_store_registers,	/* to_store_registers */
-  monitor_prepare_to_store,	/* to_prepare_to_store */
-  monitor_xfer_memory,		/* to_xfer_memory */
-  monitor_files_info,		/* to_files_info */
-  monitor_insert_breakpoint,	/* to_insert_breakpoint */
-  monitor_remove_breakpoint,	/* to_remove_breakpoint */
-  0,				/* to_terminal_init */
-  0,				/* to_terminal_inferior */
-  0,				/* to_terminal_ours_for_output */
-  0,				/* to_terminal_ours */
-  0,				/* to_terminal_info */
-  monitor_kill,			/* to_kill */
-  monitor_load,			/* to_load */
-  0,				/* to_lookup_symbol */
-  NULL,				/* to_create_inferior */
-  monitor_mourn_inferior,	/* to_mourn_inferior */
-  0,				/* to_can_run */
-  0, 				/* to_notice_signals */
-  0,                            /* to_stop */
-  process_stratum,		/* to_stratum */
-  0,				/* to_next */
-  1,				/* to_has_all_memory */
-  1,				/* to_has_memory */
-  1,				/* to_has_stack */
-  1,				/* to_has_registers */
-  1,				/* to_has_execution */
-  0,				/* sections */
-  0,				/* sections_end */
-  OPS_MAGIC			/* to_magic */
-};
+static struct target_ops array_ops;
 
 static char *array_loadtypes[] = {"none", "srec", "default", NULL};
 static char *array_loadprotos[] = {"none", NULL};
@@ -152,6 +111,14 @@ array_open(args, from_tty)
 void
 _initialize_array ()
 {
+  init_monitor_ops (&array_ops);
+
+  array_ops.to_shortname = "array";
+  array_ops.to_longname = "Debug using the standard GDB remote protocol for the Array Tech target.";
+  array_ops.to_doc = "Debug using the standard GDB remote protocol for the Array Tech target.\n\
+Specify the serial device it is connected to (e.g. /dev/ttya).";
+  array_ops.to_open = array_open;
+
   add_target (&array_ops);
   baud_rate = 4800;			/* this is the only supported baud rate */
 }

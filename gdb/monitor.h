@@ -122,22 +122,6 @@ extern struct monitor_ops        *current_monitor;
 #define SREC_SIZE 160
 #define GDBPROTO		((current_monitor->type) ? 0: 1)
 
-extern void monitor_open PARAMS ((char *args, struct monitor_ops *ops, int from_tty));
-extern void monitor_close PARAMS ((int quitting));
-extern void monitor_detach PARAMS ((char *args, int from_tty));
-extern void monitor_resume PARAMS ((int pid, int step, enum target_signal sig));
-extern int  monitor_wait PARAMS ((int pid, struct target_waitstatus *status));
-extern void monitor_fetch_registers PARAMS ((int regno));
-extern void monitor_store_registers PARAMS ((int regno));
-extern void monitor_prepare_to_store();
-extern int  monitor_xfer_memory PARAMS ((CORE_ADDR memaddr, char *myaddr, int len, int write, struct target_ops *target));
-extern void monitor_files_info();
-extern int  monitor_insert_breakpoint();
-extern int  monitor_remove_breakpoint();
-extern void monitor_kill();
-extern void monitor_load();
-extern void monitor_mourn_inferior PARAMS ((void));
-
 /*
  * FIXME: These are to temporarily maintain compatability with the
  *	old monitor structure till remote-mon.c is fixed to work
@@ -147,3 +131,5 @@ extern void monitor_mourn_inferior PARAMS ((void));
 #define MEM_SET_CMD		(current_monitor->setmem)
 #define MEM_DIS_CMD		(current_monitor->getmem)
 #define REG_DELIM               (current_monitor->regset.delim)
+
+extern void monitor_open PARAMS ((char *args, struct monitor_ops *ops, int from_tty));
