@@ -1,3 +1,8 @@
+Thu Nov  4 17:00:05 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* write.c (chain_frchains_together): Update pointer to last
+	frag for a segment in the seginfo structure.
+
 Thu Nov 04 09:09:35 1993  Jeffrey Wheat  (cassidy@cygnus.com)
 
 	*  Makefile.in: Changed RUNTESTFLAGS to RUNTEST_FLAGS

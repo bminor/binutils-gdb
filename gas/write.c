@@ -305,7 +305,8 @@ chain_frchains_together (abfd, section, xxx)
      subseg_new, so it is possible that seg_info is NULL.  */
   info = seg_info (section);
   if (info != (segment_info_type *) NULL)
-    chain_frchains_together_1 (section, info->frchainP);
+   info->frchainP->frch_last
+     = chain_frchains_together_1 (section, info->frchainP);
 }
 
 #endif
@@ -1896,8 +1897,15 @@ fixup_segment (fixP, this_segment_type)
 		    add_number -= S_GET_VALUE (sub_symbolP);
 		  }
 #ifdef DIFF_EXPR_OK
-		else if (!pcrel
-			 && S_GET_SEGMENT (sub_symbolP) == this_segment_type)
+		else if (S_GET_SEGMENT (sub_symbolP) == this_segment_type
+#if 0
+			 /* Do this even if it's already described as
+			    pc-relative.  For example, on the m68k, an
+			    operand of "pc@(foo-.-2)" should address "foo"
+			    in a pc-relative mode.  */
+			 && pcrel
+#endif
+			 )
 		  {
 		    /* Make it pc-relative.  */
 		    add_number += (md_pcrel_from (fixP)
