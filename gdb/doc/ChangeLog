@@ -1,6 +1,7 @@
 2002-01-30  Michael Snyder  <msnyder@redhat.com>
 
-	* gdb.texinfo (set trust-readonly-sections): Document.
+	* gdb.texinfo: (remote protocol): Gramatical fix-up.
+	(set trust-readonly-sections): Document.
 
 2002-01-29  Andrew Cagney  <ac131313@redhat.com>
 

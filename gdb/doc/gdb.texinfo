@@ -14290,8 +14290,8 @@ See @samp{i} and @samp{S} for likely syntax and semantics.
 @item kill request
 @tab @code{k}
 @tab
-FIXME: @emph{There is no description of how operate when a specific
-thread context has been selected (ie. does 'k' kill only that thread?)}.
+FIXME: @emph{There is no description of how to operate when a specific
+thread context has been selected (ie.@: does 'k' kill only that thread?)}.
 
 @item reserved
 @tab @code{l}
