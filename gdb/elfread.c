@@ -76,7 +76,7 @@ static void elf_symfile_finish (struct objfile *);
 
 static void elf_symtab_read (struct objfile *, int);
 
-static void free_elfinfo (void *);
+static void free_elfinfo (PTR);
 
 static struct minimal_symbol *record_minimal_symbol_and_info (char *,
 							      CORE_ADDR,
@@ -88,7 +88,7 @@ static struct minimal_symbol *record_minimal_symbol_and_info (char *,
 							      struct objfile
 							      *);
 
-static void elf_locate_sections (bfd *, asection *, void *);
+static void elf_locate_sections (bfd *, asection *, PTR);
 
 /* We are called once per section from elf_symfile_read.  We
    need to examine each section we are passed, check to see

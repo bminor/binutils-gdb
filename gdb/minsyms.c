@@ -77,7 +77,7 @@ static int msym_count;
 
 /* Prototypes for local functions. */
 
-static int compare_minimal_symbols (const void *, const void *);
+static int compare_minimal_symbols (const PTR, const PTR);
 
 static int
 compact_minimal_symbols (struct minimal_symbol *, int, struct objfile *);

@@ -378,7 +378,7 @@ static PTR xzalloc (unsigned int);
 
 static void sort_blocks (struct symtab *);
 
-static int compare_blocks (const void *, const void *);
+static int compare_blocks (const PTR, const PTR);
 
 static struct partial_symtab *new_psymtab (char *, struct objfile *);
 

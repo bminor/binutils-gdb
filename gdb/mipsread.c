@@ -185,7 +185,7 @@ struct alphacoff_dynsecinfo
     asection *got_sect;		/* Section pointer for .got section */
   };
 
-static void alphacoff_locate_sections (bfd *, asection *, void *);
+static void alphacoff_locate_sections (bfd *, asection *, PTR);
 
 /* We are called once per section from read_alphacoff_dynamic_symtab.
    We need to examine each section we are passed, check to see

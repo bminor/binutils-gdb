@@ -2,6 +2,11 @@
 
 	* symfile.c (compare_psymbols, compare_symbols): Declare using
 	PTR, as in the definition.
+	* minsyms.c (compare_minimal_symbols): Likewise.
+	* coffread.c (find_targ_sec): Likewise.
+	* elfread.c (free_elfinfo, elf_locate_sections): Likewise.
+	* mipsread.c (alphacoff_locate_sections): Likewise.
+	* mdebugread.c (compare_blocks): Likewise.
 
 2001-05-25  Nick Duffek  <nsd@redhat.com>
 
