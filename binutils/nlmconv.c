@@ -59,7 +59,7 @@
 extern char *strerror PARAMS ((int));
 
 #ifndef localtime
-extern struct tm *localtime ();
+extern struct tm *localtime PARAMS ((const time_t *));
 #endif
 
 #ifndef SEEK_SET
@@ -121,6 +121,8 @@ static struct option long_options[] =
 };
 
 /* Local routines.  */
+
+int main PARAMS ((int, char **));
 
 static void show_usage PARAMS ((FILE *, int));
 static const char *select_output_format PARAMS ((enum bfd_architecture,
