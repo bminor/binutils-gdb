@@ -963,7 +963,7 @@ ALLPARAM = config/a29k/nm-ultra3.h config/a29k/tm-a29k.h \
 	config/m88k/xm-delta88.h config/m88k/xm-delta88v4.h \
 	config/m88k/xm-dgux.h config/m88k/xm-m88k.h \
 	config/mips/nm-irix3.h \
-	config/mips/nm-irix4.h config/mips/irix5.h \
+	config/mips/nm-irix4.h config/mips/nm-irix5.h \
 	config/mips/nm-mips.h config/mips/nm-riscos.h \
 	config/mips/nm-news-mips.h config/mips/tm-bigmips.h \
 	config/mips/tm-idt.h config/mips/tm-idtl.h \

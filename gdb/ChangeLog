@@ -1,3 +1,7 @@
+Mon Jan 17 13:35:01 1994  Fred Fish  (fnf@cygnus.com)
+
+	* Makefile.in (ALLPARAM):  Change irix5.h to nm-irix5.h.
+
 Mon Jan 17 12:35:42 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* README:  Update notes for alpha port.
