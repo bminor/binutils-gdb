@@ -1,3 +1,7 @@
+Fri Sep 25 17:53:43 1992  John Gilmore  (gnu@cygnus.com)
+
+	* messages.c:  Comment changes.
+
 Fri Sep 25 14:12:58 1992  Ken Raeburn  (raeburn@kyriath.cygnus.com)
 
 	* as.h: Test if __STDC__ is defined only, don't test its value.
