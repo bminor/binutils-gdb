@@ -1,7 +1,7 @@
 2001-08-31  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* elf32-arm.h (elf32_arm_relocate_section): Do not rightshift
-	recomputed addend during relocatable link.
+	recomputed addend during relocatable link if not USE_REL.
 
 	* elflink.h (elf_gc_propagate_vtable_entries_used): Fix off-by-one
 	error.
