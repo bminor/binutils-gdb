@@ -1,3 +1,10 @@
+Wed Feb 23 10:44:18 1994  Jim Kingdon  (kingdon@rtl.cygnus.com)
+
+	* stabs.texinfo: Document N_RBRAC as function relative for COFF as
+	well as for ELF and SOM.  Unify the descriptions of ELF and SOM
+	as "stabs in sections" rather than just saying "ELF and SOM".
+	Also make that stuff apply to COFF.
+
 Fri Feb 18 08:25:58 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.texinfo (Formatting Documentation): Change GhostScript to

@@ -84,7 +84,8 @@ This document describes the stabs debugging format.
                                 and GNU stabs in XCOFF
 * Sun Differences::		Differences between GNU stabs and Sun
                                 native stabs
-* Stabs In ELF::		Stabs in an ELF file.
+* Stab Sections::		In some object file formats, stabs are
+                                in sections.
 * Symbol Types Index::          Index of symbolic stab symbol type names.
 @end menu
 @end ifinfo
@@ -483,11 +484,10 @@ file.  @code{C_BINCL} and @code{C_EINCL} do not nest.
 
 @findex N_SLINE
 An @code{N_SLINE} symbol represents the start of a source line.  The
-desc field contains the line number and the value
-contains the code address for the start of that source line.  On most
-machines the address is absolute; for Sun's stabs-in-ELF and GNU's 
-stabs-in-SOM, it is relative to the function in which the @code{N_SLINE} 
-symbol occurs.
+desc field contains the line number and the value contains the code
+address for the start of that source line.  On most machines the address
+is absolute; for stabs in sections (@pxref{Stab Sections}), it is
+relative to the function in which the @code{N_SLINE} symbol occurs.
 
 @findex N_DSLINE
 @findex N_BSLINE
@@ -538,8 +538,8 @@ things up in the ELF symbols would probably be slow, I'm not sure how to
 find which symbol of that name is the right one, and this doesn't
 provide any way to deal with nested functions, it would probably be
 better to make the value of the stab an address relative to the start of
-the file.  See @ref{Stabs In ELF} for more information on linker
-relocation of stabs in ELF files.
+the file, or just absolute.  See @ref{ELF Linker Relocation} for more
+information on linker relocation of stabs in ELF files.
 
 The type information of the stab represents the return type of the
 function; thus @samp{foo:f5} means that foo is a function returning type
@@ -651,6 +651,11 @@ produces the stabs:
 
 @findex N_LBRAC
 @findex N_RBRAC
+@c For GCC 2.5.8 or so stabs-in-coff, these are absolute instead of
+@c function relative (as documented below).  But GDB has never been able
+@c to deal with that (it had wanted them to be relative to the file, but
+@c I just fixed that (between GDB 4.12 and 4.13)), so it is function
+@c relative just like ELF and SOM and the below documentation.
 The program's block structure is represented by the @code{N_LBRAC} (left
 brace) and the @code{N_RBRAC} (right brace) stab types.  The variables
 defined inside a block precede the @code{N_LBRAC} symbol for most
@@ -660,8 +665,8 @@ RISC machine, and Sun @code{acc} compilers, put the variables after the
 @code{N_RBRAC} symbols are the start and end addresses of the code of
 the block, respectively.  For most machines, they are relative to the
 starting address of this source file.  For the Gould NP1, they are
-absolute.  For Sun's stabs-in-ELF and GNU's stabs-in-SOM, they are relative 
-to the function in which they occur.
+absolute.  For stabs in sections (@pxref{Stab Sections}), they are
+relative to the function in which they occur.
 
 The @code{N_LBRAC} and @code{N_RBRAC} stabs that describe the block
 scope of a procedure are located after the @code{N_FUN} stab that
@@ -958,7 +963,7 @@ The clean way to do all this would be to have a the value of a symbol
 descriptor @samp{S} symbol be an offset relative to the start of the
 file, just like everything else, but that introduces obvious
 compatibility problems.  For more information on linker stab relocation,
-@xref{Stabs In ELF}.
+@xref{ELF Linker Relocation}.
 
 @node Based Variables
 @section Fortran Based Variables
@@ -2160,7 +2165,8 @@ relocatable address and the linker turns it into an absolute address.
 @menu
 * Transformations On Static Variables::
 * Transformations On Global Variables::
-* ELF and SOM Transformations::	       In ELF, things are a bit different.
+* Stab Section Transformations::	   For some object file formats,
+                                           things are a bit different.
 @end menu
 
 @node Transformations On Static Variables
@@ -2236,16 +2242,17 @@ entry now holds an absolute address:
 0000e008 D _g_foo
 @end example
 
-@node ELF and SOM Transformations
-@subsection Transformations of Stabs in ELF and SOM Files
+@node Stab Section Transformations
+@subsection Transformations of Stabs in separate sections
 
-For ELF and SOM files, use @code{objdump --stabs} instead of @code{nm} to show
-the stabs in an object or executable file.  @code{objdump} is a GNU
-utility; Sun does not provide any equivalent.
+For object file formats using stabs in separate sections (@pxref{Stab
+Sections}), use @code{objdump --stabs} instead of @code{nm} to show the
+stabs in an object or executable file.  @code{objdump} is a GNU utility;
+Sun does not provide any equivalent.
 
 The following example is for a stab whose value is an address is
-relative to the compilation unit (@pxref{Stabs In ELF}).  For example,
-if the source line
+relative to the compilation unit (@pxref{ELF Linker Relocation}).  For
+example, if the source line
 
 @example
 static int ld = 5;
@@ -2985,8 +2992,9 @@ description in the class stab shows this ordering.
 
 The following are all the possible values for the stab type field, for
 @code{a.out} files, in numeric order.  This does not apply to XCOFF, but
-it does apply to stabs in ELF and stabs in SOM.  Stabs in ECOFF use these 
-values but add 0x8f300 to distinguish them from non-stab symbols.
+it does apply to stabs in sections (@pxref{Stab Sections}).  Stabs in
+ECOFF use these values but add 0x8f300 to distinguish them from non-stab
+symbols.
 
 The symbolic names are defined in the file @file{include/aout/stabs.def}.
 
@@ -3848,18 +3856,32 @@ incremented for each new type defined in the compilation.  GNU C stabs
 use the type number alone, with no source file number.
 @end itemize
 
-@node Stabs In ELF
-@appendix Using Stabs With The ELF Object File Format
+@node Stab Sections
+@appendix Using Stabs in Their Own Sections
 
-The ELF object file format allows tools to create object files with
-custom sections containing any arbitrary data.  To use stabs in ELF
-object files, the tools create two custom sections, a section named
-@code{.stab} which contains an array of fixed length structures, one
-struct per stab, and a section named @code{.stabstr} containing all the
-variable length strings that are referenced by stabs in the @code{.stab}
-section.  The byte order of the stabs binary data matches the byte order
-of the ELF file itself, as determined from the @code{EI_DATA} field in
-the @code{e_ident} member of the ELF header.
+Many object file formats allow tools to create object files with custom
+sections containing any arbitrary data.  For any such object file
+format, stabs can be embedded in special sections.  This is how stabs
+are used with ELF and SOM, and aside from ECOFF and XCOFF, is how stabs
+are used with COFF.
+
+@menu
+* Stab Section Basics::    How to embed stabs in sections
+* ELF Linker Relocation::  Sun ELF hacks
+@end menu
+
+@node Stab Section Basics
+@appendixsec How to Embed Stabs in Sections
+
+The assembler creates two custom sections, a section named @code{.stab}
+which contains an array of fixed length structures, one struct per stab,
+and a section named @code{.stabstr} containing all the variable length
+strings that are referenced by stabs in the @code{.stab} section.  The
+byte order of the stabs binary data depends on the object file format.
+For ELF, it matches the byte order of the ELF file itself, as determined
+from the @code{EI_DATA} field in the @code{e_ident} member of the ELF
+header.  For SOM, it is always big-endian (is this true??? FIXME).  For
+COFF, it matches the byte order of the COFF headers.
 
 The first stab in the @code{.stab} section for each compilation unit is
 synthetic, generated entirely by the assembler, with no corresponding
@@ -3893,37 +3915,47 @@ The ELF section header for the @code{.stab} section has its
 @code{sh_link} member set to the section number of the @code{.stabstr}
 section, and the @code{.stabstr} section has its ELF section
 header @code{sh_type} member set to @code{SHT_STRTAB} to mark it as a
-string table.
+string table.  SOM and COFF have no way of linking the sections together
+or marking them as string tables.
+
+@node ELF Linker Relocation
+@appendixsec Having the Linker Relocate Stabs in ELF 
+
+This section describes some Sun hacks for Stabs in ELF; it does not
+apply to COFF or SOM.
 
 To keep linking fast, you don't want the linker to have to relocate very
-many stabs.  Thus Sun has invented a scheme in which addresses in the
-@code{n_value} field are relative to the source file (or some entity
-smaller than a source file, like a function).  To find the address of
-each section corresponding to a given source file, the compiler puts out
-symbols giving the address of each section for a given source file.
-Since these are ELF (not stab) symbols, the linker relocates them
-correctly without having to touch the stabs section.  They are named
-@code{Bbss.bss} for the bss section, @code{Ddata.data} for the data
-section, and @code{Drodata.rodata} for the rodata section.  For the text
-section, there is no such symbol (but there should be, see below).  For
-an example of how these symbols work, @xref{ELF and SOM Transformations}.  GCC
-does not provide these symbols; it instead relies on the stabs getting
-relocated.  Thus addresses which would normally be relative to
-@code{Bbss.bss}, etc., are already relocated.  The Sun linker provided
-with Solaris 2.2 and earlier relocates stabs using normal ELF relocation
-information, as it would do for any section.  Sun has been threatening
-to kludge their linker to not do this (to speed up linking), even though
-the correct way to avoid having the linker do these relocations is to
-have the compiler no longer output relocatable values.  Last I heard
-they had been talked out of the linker kludge.  See Sun point patch
-101052-01 and Sun bug 1142109.  With the Sun compiler this affects
-@samp{S} symbol descriptor stabs (@pxref{Statics}) and functions
-(@pxref{Procedures}).  In the latter case, to adopt the clean solution
-(making the value of the stab relative to the start of the compilation
-unit), it would be necessary to invent a @code{Ttext.text} symbol,
-analogous to the @code{Bbss.bss}, etc., symbols.  I recommend this
-rather than using a zero value and getting the address from the ELF
-symbols.
+many stabs.  Making sure this is done for @code{N_SLINE},
+@code{N_RBRAC}, and @code{N_LBRAC} stabs is the most important thing
+(see the descriptions of those stabs for more information).  But Sun's
+stabs in ELF has taken this further, to make all addresses in the
+@code{n_value} field (functions and static variables) relative to the
+source file.  For the @code{N_SO} symbol itself, Sun simply omits the
+address.  To find the address of each section corresponding to a given
+source file, the compiler puts out symbols giving the address of each
+section for a given source file.  Since these are ELF (not stab)
+symbols, the linker relocates them correctly without having to touch the
+stabs section.  They are named @code{Bbss.bss} for the bss section,
+@code{Ddata.data} for the data section, and @code{Drodata.rodata} for
+the rodata section.  For the text section, there is no such symbol (but
+there should be, see below).  For an example of how these symbols work,
+@xref{Stab Section Transformations}.  GCC does not provide these symbols;
+it instead relies on the stabs getting relocated.  Thus addresses which
+would normally be relative to @code{Bbss.bss}, etc., are already
+relocated.  The Sun linker provided with Solaris 2.2 and earlier
+relocates stabs using normal ELF relocation information, as it would do
+for any section.  Sun has been threatening to kludge their linker to not
+do this (to speed up linking), even though the correct way to avoid
+having the linker do these relocations is to have the compiler no longer
+output relocatable values.  Last I heard they had been talked out of the
+linker kludge.  See Sun point patch 101052-01 and Sun bug 1142109.  With
+the Sun compiler this affects @samp{S} symbol descriptor stabs
+(@pxref{Statics}) and functions (@pxref{Procedures}).  In the latter
+case, to adopt the clean solution (making the value of the stab relative
+to the start of the compilation unit), it would be necessary to invent a
+@code{Ttext.text} symbol, analogous to the @code{Bbss.bss}, etc.,
+symbols.  I recommend this rather than using a zero value and getting
+the address from the ELF symbols.
 
 Finding the correct @code{Bbss.bss}, etc., symbol is difficult, because
 the linker simply concatenates the @code{.stab} sections from each
