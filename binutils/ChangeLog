@@ -34,6 +34,11 @@
 	* srconv.c: Fix formatting.
 	* sysdump.c: Fix formatting.
 
+2002-01-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
 2002-01-18  Andreas Jaeger  <aj@suse.de>
 
 	* version.c (print_version): Update year.

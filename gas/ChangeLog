@@ -24,6 +24,12 @@
 	* config/tc-mn10300.c (xr_registers): Move `pc'...
 	(other_registers): ... here.
 
+2002-01-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* gas/po/POTFILES.in: Regenerate.
+
 2002-01-21  DJ Delorie  <dj@redhat.com>
 
 	* config/obj-coff.c (obj_coff_init_stab_section): Make the
