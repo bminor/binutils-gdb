@@ -32,13 +32,15 @@ TREE := devo
 
 include $(TREE)/release-info
 
+# Set TIME to time to get timings.  Not done by default because time
+# ignores the exit status.
+TIME 		:=
 
-TIME 		:= time
 CONFIG_SHELL	:= 
-GCC 		:= $(host)-gcc -O 
+GCC 		:= $(host)-gcc -O2 
 GNUC		:= CC="$(GCC)"
 CFLAGS		:= -g
-CXXFLAGS	:= -g -O
+CXXFLAGS	:= -g -O2
 GNU_MAKE 	:= /usr/latest/bin/make -w 
 MAKEINFOFLAGS	:=
 
@@ -62,6 +64,12 @@ GNU_MAKE := $(MAKE)
 CONFIG_SHELL 	:= /bin/bash
 endif
 
+ifeq ($(patsubst %-m68k-hp-hpux,m68k-hp-hpux,$(host)),m68k-hp-hpux)
+SHELL := /usr/unsupported/bin/bash
+GNU_MAKE := $(MAKE)
+CONFIG_SHELL 	:= /usr/unsupported/bin/bash
+endif
+
 ifneq ($(build),$(host))
 
 # We are building on a machine other than the host.  We rely upon
@@ -77,9 +85,9 @@ BISON		:= byacc
 CC		:= $(host)-gcc
 CC_FOR_BUILD	:= gcc
 CC_FOR_TARGET	:= $(target)-gcc
-CXX		:= $(host)-c++
-CXX_FOR_TARGET	:= $(target)-c++
-GCC		:= $(host)-gcc -O
+CXX		:= $(host)-gcc 
+CXX_FOR_TARGET	:= $(target)-gcc
+GCC		:= $(host)-gcc -O2
 GXX		:= $(host)-g++
 GXX_FOR_TARGET	:= $(target)-g++
 HOST_PREFIX	:= $(build)-
@@ -162,7 +170,11 @@ ifeq ($(host),mips-sgi-irix4)
 CC := cc -cckr -Wf,-XNg1500 -Wf,-XNk1000 -Wf,-XNh2000
 endif
 
-ifeq ($(host),mips-mips-riscos5)
+ifeq ($(host),hppa1.1-hp-hpux)
+CC := cc -Wp,-H256000
+endif
+
+ifeq ($(host),mips-mips-riscos5sysv)
 CC := cc -non_shared -systype sysv
 endif
 
@@ -174,7 +186,6 @@ ifeq ($(host),m68k-sun-sunos4.1.1)
 CC := cc -J
 endif
 
-
 # We want to use stabs for MIPS targets.
 ifeq ($(target),mips-idt-ecoff)
 configargs = -with-stabs
@@ -185,6 +196,14 @@ configargs = -with-stabs
 endif
 
 ifeq ($(target),mips-sgi-irix4)
+configargs = -with-stabs
+endif
+
+ifeq ($(target),mips-sgi-irix5.2)
+configargs = -with-stabs
+endif
+
+ifeq ($(target),alpha-dec-osf1.3)
 configargs = -with-stabs
 endif
 
@@ -201,7 +220,6 @@ endif
 ifeq ($(patsubst %-lynxos,lynxos,$(host)),lynxos)
 FLAGS_TO_PASS := "CONFIG_SHELL=$(CONFIG_SHELL)" $(FLAGS_TO_PASS)
 endif
-
 
 # These are the prefixes used for Cygnus builds.
 prefixes	= --prefix=$(release_root) --exec-prefix=$(release_root)/H-$(host)
@@ -251,6 +269,26 @@ ifneq ($(target),$(host))
 arch 		= $(host)-x-$(target)
 config  	= -host=$(host) -target=$(target)
 FLAGS_TO_PASS	:= $(FLAGS_TO_PASS) "target=$(target)"
+
+ifeq ($(patsubst %-lynx,lynx,$(target)),lynx)
+configargs := $(configargs) --with-headers=/s1/cygnus/dejagnu/$(target)/include \
+                --with-libs=/s1/cygnus/dejagnu/$(target)/lib
+endif
+
+ifeq ($(patsubst %-i386-sysv4.2,i386-sysv4.2,$(target)),i386-sysv4.2)
+configargs := $(configargs) --with-headers=/s1/cygnus/dejagnu/$(target)/include \
+                --with-libs=/s1/cygnus/dejagnu/$(target)/lib
+endif
+
+ifeq ($(patsubst %-sparc-sun-sunos4.1.3,sparc-sun-sunos4.1.3,$(target)),sparc-sun-sunos4.1.3)
+configargs := $(configargs) --with-headers=/s1/cygnus/dejagnu/$(target)/include \
+                --with-libs=/s1/cygnus/dejagnu/$(target)/lib
+endif
+
+ifeq ($(patsubst %-sparc-sun-solaris2,sparc-sun-solaris2,$(target)),sparc-sun-solaris2)
+configargs := $(configargs) --with-headers=/s1/cygnus/dejagnu/$(target)/include \
+                --with-libs=/s1/cygnus/dejagnu/$(target)/lib
+endif
 
 ifneq ($(build),$(host))
 all:	do-cygnus do-latest
@@ -548,8 +586,13 @@ $(host)-stamp-stage2:
 	touch $@
 
 
+# The SunOS make program gets confused when it is deleted while running.
+# The signal handlers return to the wrong place, or something, and the
+# program dumps core.  To avoid trouble with installing make over itself,
+# we delete the installed make program.
 $(host)-stamp-stage2-installed: $(host)-stamp-stage2-checked
-	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" install host=$(host)
+	-rm -f $(relbindir)/make
+	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(GNU_MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" install host=$(host)
 	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" install-info host=$(host)
 	touch $@
 
@@ -589,8 +632,13 @@ $(host)-stamp-stage3:
 	touch $@
 
 
+# The SunOS make program gets confused when it is deleted while running.
+# The signal handlers return to the wrong place, or something, and the
+# program dumps core.  To avoid trouble with installing make over itself,
+# we delete the installed make program.
 $(host)-stamp-stage3-installed: $(host)-stamp-stage3-checked
-	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" install host=$(host)
+	-rm -f $(relbindir)/make
+	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(GNU_MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" install host=$(host)
 	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" install-info host=$(host)
 	if [ -f VAULT-INSTALL ] ; then \
 	  $(SET_CYGNUS_PATH) cd $(CYGNUSDIR) ; $(MAKE) $(FLAGS_TO_PASS) $(GNUC) vault-install ; \
@@ -731,6 +779,14 @@ MAKE_HOLE := make
 endif
 
 ifeq ($(host),m68k-lynx)
+MAKE_HOLE := make
+endif
+
+ifeq ($(host),sparc-lynx)
+MAKE_HOLE := make
+endif
+
+ifeq ($(host),rs6000-lynx)
 MAKE_HOLE := make
 endif
 
