@@ -1311,8 +1311,9 @@ function_entry_point:
 	  /* shared library function trampoline code entry point. */
 	  else if (CSECT_SCLAS (&main_aux) == XMC_GL) {
 
-	    /* record trampoline code entries as mst_unknown symbol. When we
-	       lookup mst symbols, we will choose mst_text over mst_unknown. */
+	    /* record trampoline code entries as mst_solib_trampoline symbol.
+	       When we lookup mst symbols, we will choose mst_text over
+	       mst_solib_trampoline. */
 
 #if 1
 	    /* After the implementation of incremental loading of shared
@@ -1323,21 +1324,23 @@ function_entry_point:
 	       consistient with gdb's behaviour on a SUN platform. */
 
 	    /* Trying to prefer *real* function entry over its trampoline,
-	       by assigning `mst_unknown' type to trampoline entries fails.
-	       Gdb treats those entries as chars. FIXME. */
+	       by assigning `mst_solib_trampoline' type to trampoline entries
+	       fails.  Gdb treats those entries as chars. FIXME. */
 
 	    /* Recording this entry is necessary. Single stepping relies on
 	       this vector to get an idea about function address boundaries. */
 
 	    prim_record_minimal_symbol_and_info
-	      ("<trampoline>", cs->c_value, mst_unknown,
+	      ("<trampoline>", cs->c_value, mst_solib_trampoline,
 	       (char *)NULL, cs->c_secnum, objfile);
 #else
 
-	    /* record trampoline code entries as mst_unknown symbol. When we
-	       lookup mst symbols, we will choose mst_text over mst_unknown. */
+	    /* record trampoline code entries as mst_solib_trampoline symbol.
+	       When we lookup mst symbols, we will choose mst_text over
+	       mst_solib_trampoline. */
 
-	    RECORD_MINIMAL_SYMBOL (cs->c_name, cs->c_value, mst_unknown,
+	    RECORD_MINIMAL_SYMBOL (cs->c_name, cs->c_value,
+				   mst_solib_trampoline,
 				   symname_alloced, objfile);
 #endif
 	    continue;

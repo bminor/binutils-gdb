@@ -378,6 +378,7 @@ write_exp_msymbol (msymbol, text_symbol_type, data_symbol_type)
     {
     case mst_text:
     case mst_file_text:
+    case mst_solib_trampoline:
       write_exp_elt_type (text_symbol_type);
       break;
 

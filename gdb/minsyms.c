@@ -97,9 +97,7 @@ lookup_minimal_symbol (name, objf)
   struct minimal_symbol *msymbol;
   struct minimal_symbol *found_symbol = NULL;
   struct minimal_symbol *found_file_symbol = NULL;
-#ifdef IBM6000_TARGET
   struct minimal_symbol *trampoline_symbol = NULL;
-#endif
 
   for (objfile = object_files;
        objfile != NULL && found_symbol == NULL;
@@ -125,34 +123,17 @@ lookup_minimal_symbol (name, objf)
 		      found_file_symbol = msymbol;
 		      break;
 
-		    case mst_unknown:
-#ifdef IBM6000_TARGET
-		      /* I *think* all platforms using shared
-			 libraries (and trampoline code) will suffer
-			 this problem. Consider a case where there are
-			 5 shared libraries, each referencing `foo'
-			 with a trampoline entry. When someone wants
-			 to put a breakpoint on `foo' and the only
-			 info we have is minimal symbol vector, we
-			 want to use the real `foo', rather than one
-			 of those trampoline entries. MGO */
+		    case mst_solib_trampoline:
 
 		      /* If a trampoline symbol is found, we prefer to
 			 keep looking for the *real* symbol. If the
-			 actual symbol not found, then we'll use the
-			 trampoline entry. Sorry for the machine
-			 dependent code here, but I hope this will
-			 benefit other platforms as well. For
-			 trampoline entries, we used mst_unknown
-			 earlier. Perhaps we should define a
-			 `mst_trampoline' type?? */
-
+			 actual symbol is not found, then we'll use the
+			 trampoline entry. */
 		      if (trampoline_symbol == NULL)
 			trampoline_symbol = msymbol;
 		      break;
-#else
-		      /* FALLTHROUGH */
-#endif
+
+		    case mst_unknown:
 		    default:
 		      found_symbol = msymbol;
 		      break;
@@ -169,11 +150,9 @@ lookup_minimal_symbol (name, objf)
   if (found_file_symbol)
     return found_file_symbol;
 
-  /* Symbols for IBM shared library trampolines are next best.  */
-#ifdef IBM6000_TARGET
+  /* Symbols for shared library trampolines are next best.  */
   if (trampoline_symbol)
     return trampoline_symbol;
-#endif
 
   return NULL;
 }

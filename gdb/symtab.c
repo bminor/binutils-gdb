@@ -73,7 +73,7 @@ static void
 sources_info PARAMS ((char *, int));
 
 static void
-list_symbols PARAMS ((char *, int, int));
+list_symbols PARAMS ((char *, int, int, int));
 
 static void
 output_source_filename PARAMS ((char *, int *));
@@ -2517,10 +2517,11 @@ sources_info (ignore, from_tty)
    we find.  */
 
 static void
-list_symbols (regexp, class, bpt)
+list_symbols (regexp, class, bpt, from_tty)
      char *regexp;
      int class;
      int bpt;
+     int from_tty;
 {
   register struct symtab *s;
   register struct partial_symtab *ps;
@@ -2540,9 +2541,15 @@ list_symbols (regexp, class, bpt)
   static enum minimal_symbol_type types[]
     = {mst_data, mst_text, mst_abs, mst_unknown};
   static enum minimal_symbol_type types2[]
-    = {mst_bss,  mst_text, mst_abs, mst_unknown};
+    = {mst_bss,  mst_file_text, mst_abs, mst_unknown};
+  static enum minimal_symbol_type types3[]
+    = {mst_file_data,  mst_solib_trampoline, mst_abs, mst_unknown};
+  static enum minimal_symbol_type types4[]
+    = {mst_file_bss,   mst_text, mst_abs, mst_unknown};
   enum minimal_symbol_type ourtype = types[class];
   enum minimal_symbol_type ourtype2 = types2[class];
+  enum minimal_symbol_type ourtype3 = types3[class];
+  enum minimal_symbol_type ourtype4 = types4[class];
 
   if (regexp != NULL)
     {
@@ -2643,7 +2650,9 @@ list_symbols (regexp, class, bpt)
       ALL_MSYMBOLS (objfile, msymbol)
 	{
 	  if (MSYMBOL_TYPE (msymbol) == ourtype ||
-	      MSYMBOL_TYPE (msymbol) == ourtype2)
+	      MSYMBOL_TYPE (msymbol) == ourtype2 ||
+	      MSYMBOL_TYPE (msymbol) == ourtype3 ||
+	      MSYMBOL_TYPE (msymbol) == ourtype4)
 	    {
 	      if (regexp == NULL || SYMBOL_MATCHES_REGEXP (msymbol))
 		{
@@ -2710,7 +2719,7 @@ list_symbols (regexp, class, bpt)
 			    strcpy (string, s->filename);
 			    strcat (string, ":");
 			    strcat (string, SYMBOL_NAME(sym));
-			    break_command (string, 0);
+			    break_command (string, from_tty);
 			  }
 		      }
 		    else if (!found_in_file)
@@ -2768,7 +2777,9 @@ list_symbols (regexp, class, bpt)
       ALL_MSYMBOLS (objfile, msymbol)
 	{
 	  if (MSYMBOL_TYPE (msymbol) == ourtype ||
-	      MSYMBOL_TYPE (msymbol) == ourtype2)
+	      MSYMBOL_TYPE (msymbol) == ourtype2 ||
+	      MSYMBOL_TYPE (msymbol) == ourtype3 ||
+	      MSYMBOL_TYPE (msymbol) == ourtype4)
 	    {
 	      if (regexp == NULL || SYMBOL_MATCHES_REGEXP (msymbol))
 		{
@@ -2802,7 +2813,7 @@ variables_info (regexp, from_tty)
      char *regexp;
      int from_tty;
 {
-  list_symbols (regexp, 0, 0);
+  list_symbols (regexp, 0, 0, from_tty);
 }
 
 static void
@@ -2810,7 +2821,7 @@ functions_info (regexp, from_tty)
      char *regexp;
      int from_tty;
 {
-  list_symbols (regexp, 1, 0);
+  list_symbols (regexp, 1, 0, from_tty);
 }
 
 static void
@@ -2818,7 +2829,7 @@ types_info (regexp, from_tty)
      char *regexp;
      int from_tty;
 {
-  list_symbols (regexp, 2, 0);
+  list_symbols (regexp, 2, 0, from_tty);
 }
 
 #if 0
@@ -2827,7 +2838,7 @@ static void
 methods_info (regexp)
      char *regexp;
 {
-  list_symbols (regexp, 3, 0);
+  list_symbols (regexp, 3, 0, from_tty);
 }
 #endif /* 0 */
 
@@ -2837,7 +2848,7 @@ rbreak_command (regexp, from_tty)
      char *regexp;
      int from_tty;
 {
-  list_symbols (regexp, 1, 1);
+  list_symbols (regexp, 1, 1, from_tty);
 }
 
 

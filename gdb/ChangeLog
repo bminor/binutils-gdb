@@ -1,3 +1,24 @@
+Tue Mar 15 13:39:23 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	For Sunos 4.x targets, enable gdb to set breakpoints in shared
+	library functions before the executable is run. Retrieve dynamic
+	symbols from stripped executables.
+	* symtab.h (minimal_symbol_type):  Add mst_solib_trampoline type.
+	* parse.c (write_exp_msymbol), symmisc.c (dump_msymbols),
+	symtab.c (list_symbols):  Handle mst_solib_trampoline.
+	* minsyms.c (lookup_minimal_symbol):  Handle mst_solib_trampoline
+	for all targets, remove IBM6000_TARGET dependencies.
+	* dbxread.c (read_dbx_dynamic_symtab):  New function.
+	* dbxread.c (dbx_symfile_read):  Use it.
+	* dbxread.c (SET_NAMESTRING):  Set namestring to
+	"<bad string table index>" instead of "foo" if the string index is
+	corrupt.
+	* xcoffread.c (read_xcoff_symtab):  Use mst_solib_trampoline instead
+	of mst_unknown.
+	* symtab.c (list_symbols):  Take from_tty as parameter and pass it
+	to break_command. Handle mst_file_* minimal symbol types.
+	* config/i386/tm-i386bsd.h: Give just macro name, not args, to #undef.
+
 Tue Mar 15 11:40:43 1994  Kung Hsu  (kung@mexican.cygnus.com)
 
 	* c-exp.y(yylex): fix potential memory overflow.
