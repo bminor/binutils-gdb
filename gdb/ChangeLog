@@ -1,5 +1,10 @@
 2002-02-19  Richard Earnshaw  <rearnsha@arm.com>
 
+	* arm-tdep.c (arm_gdbarch_init): Initialize TARGET_CHAR_SIGNED.
+	Initialize CALL_DUMMY_LENGTH.
+
+2002-02-19  Richard Earnshaw  <rearnsha@arm.com>
+
 	* armnbsd-tdep.c (arm_netbsd_aout_in_solib_call_trampoline): New
 	function.
 	(arm_netbsd_aout_init_abi): Initialize IN_SOLIB_CALL_TRAMPOLINE.

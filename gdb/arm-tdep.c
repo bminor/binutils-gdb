@@ -1267,10 +1267,10 @@ static LONGEST arm_call_dummy_words[] =
    breakpoint to the proper address in the call dummy, so that
    `finish' after a stop in a call dummy works.
 
-   XXX Tweeking current_gdbarch is not an optimal solution, but the
-   call to arm_fix_call_dummy is immediately followed by a call to
-   run_stack_dummy, which is the only function where
-   call_dummy_breakpoint_offset is actually used.  */
+   FIXME rearnsha 2002-02018: Tweeking current_gdbarch is not an
+   optimal solution, but the call to arm_fix_call_dummy is immediately
+   followed by a call to run_stack_dummy, which is the only function
+   where call_dummy_breakpoint_offset is actually used.  */
 
 
 static void
@@ -2078,8 +2078,8 @@ gdb_print_insn_arm (bfd_vma memaddr, disassemble_info *info)
    abi-specific code during establishment of the gdbarch vector.  */
 
 
-/* XXX for now we allow a non-multi-arch gdb to override these
-   definitions.  */
+/* NOTE rearnsha 2002-02-18: for now we allow a non-multi-arch gdb to
+   override these definitions.  */
 #ifndef ARM_LE_BREAKPOINT
 #define ARM_LE_BREAKPOINT {0xFE,0xDE,0xFF,0xE7}
 #endif
@@ -2796,6 +2796,9 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 		      "arm_gdbarch_init: bad byte order for float format");
     }
 
+  /* On ARM targets char defaults to unsigned.  */
+  set_gdbarch_char_signed (gdbarch, 0);
+
   /* This should be low enough for everything.  */
   tdep->lowest_pc = 0x20;
   tdep->jb_pc = -1; /* Longjump support not enabled by default.  */
@@ -2814,6 +2817,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_words (gdbarch, arm_call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (arm_call_dummy_words));
   set_gdbarch_call_dummy_start_offset (gdbarch, 0);
+  set_gdbarch_call_dummy_length (gdbarch, 0);
 
   set_gdbarch_fix_call_dummy (gdbarch, arm_fix_call_dummy);
 
