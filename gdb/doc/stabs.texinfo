@@ -1010,6 +1010,17 @@ There is at least one case where GCC uses a @samp{p}/@samp{r} pair
 rather than @samp{P}; this is where the argument is passed in the
 argument list and then loaded into a register.
 
+On the sparc and hppa, for a @samp{P} symbol whose type is a structure
+or union, the register contains the address of the structure.  On the
+sparc, this is also true of a @samp{p}/@samp{r} pair (using Sun cc) or a
+@samp{p} symbol.  However, if a (small) structure is really in a
+register, @samp{r} is used.  And, to top it all off, on the hppa it
+might be a structure which was passed on the stack and loaded into a
+register and for which there is a @samp{p}/@samp{r} pair!  I believe
+that symbol descriptor @samp{i} is supposed to deal with this case, but
+I don't know details or what compilers or debuggers use it, if any (not
+GDB or GCC).
+
 There is another case similar to an argument in a register, which is an
 argument which is actually stored as a local variable.  Sometimes this
 happens when the argument was passed in a register and then the compiler
