@@ -1,3 +1,26 @@
+Mon Jun  7 16:32:05 1993  Fred Fish  (fnf@cygnus.com)
+
+	* Makefile.in (BFD_SRC_DIR):  Renamed def and usages from BFD_DIR.
+	* Makefile.in (BFD_OBJ_DIR):  New definition for the bfd build
+	directory to find automatically generated header files and library.
+	* Makefile.in (BFD_LIB):  Use BFD_OBJ_DIR.
+	* Makefile.in (LINTFLAGS):  Include BFD_OBJ_DIR.
+	* Makefile.in (saber_gdb):  Include BFD_OBJ_DIR.
+	* Makefile.in (depend):  Include BFD_OBJ_DIR in gcc args.
+	* Makefile.in (paread.o, xcoffexec.o):  Remove, now in depend.
+	* depend, alldeps.mak:  Rebuild after Makefile.in changes.
+
+Fri Jun  4 10:18:51 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* configure.in: change lynx support to CPU-*-lynxos*
+
+	* Makefile.in (subdir_do): change test from existence of directory
+	to existence of Makefile (the directory may exist but not be configured)
+
+Thu Jun  3 01:18:51 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* config/sparc/xm-sun4sol2.h: define MEM_FNS_DECLARED
+
 Fri Jun  4 10:43:33 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* configure.in (mips-idt-ecoffl*): New target; use idtl.

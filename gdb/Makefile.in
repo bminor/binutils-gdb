@@ -109,11 +109,11 @@ MMALLOC_LIB = ./../mmalloc${subdir}/libmmalloc.a
 #MMALLOC_CHECK = -DNO_MMALLOC_CHECK
 MMALLOC_CFLAGS = ${MMALLOC_CHECK} ${MMALLOC_DISABLE}
 
-# Where is the source dir for the BFD library?  Traditionally ../bfd or ./bfd
-# (When we want the binary library built from it, we use ${BFD_DIR}${subdir}.)
-BFD_DIR =  ${srcdir}/../bfd
-BFD_DEP = $$(BFD_DIR)
-BFD_LIB = ./../bfd${subdir}/libbfd.a
+# Where are the source and binary directories for the BFD library?
+BFD_SRC_DIR =  ${srcdir}/../bfd
+BFD_OBJ_DIR = ./../bfd${subdir}
+BFD_DEP = $$(BFD_SRC_DIR)
+BFD_LIB = $(BFD_OBJ_DIR)/libbfd.a
 
 # Where is the source dir for the READLINE library?  Traditionally in .. or .
 # (For the binary library built from it, we use ${READLINE_DIR}${subdir}.)
@@ -174,7 +174,7 @@ VERSION = 4.9.1
 DIST=gdb
 
 LINT=/usr/5bin/lint
-LINTFLAGS= -I${BFD_DIR}
+LINTFLAGS= -I${BFD_SRC_DIR} -I${BFD_OBJ_DIR}
 
 RUNTEST=runtest
 RUNTESTFLAGS=
@@ -462,7 +462,7 @@ gdb: $(OBS) $(TSOBS) ${ADD_DEPS} ${CDEPS} init.o
 	  init.o $(OBS) $(TSOBS) $(ADD_FILES) $(CLIBS) $(LOADLIBES)
 
 saber_gdb: $(SFILES) $(DEPFILES) copying.c version.c
-	#setopt load_flags $(CFLAGS) -I$(BFD_DIR) -DHOST_SYS=SUN4_SYS
+	#setopt load_flags $(CFLAGS) -I$(BFD_SRC_DIR) -I${BFD_OBJ_DIR} -DHOST_SYS=SUN4_SYS
 	#load ./init.c $(SFILES)
 	#unload ${srcdir}/c-exp.y ${srcdir}/m2-exp.y ${srcdir}/ch-exp.y
 	#unload ${srcdir}/vx-share/*.h
@@ -555,8 +555,8 @@ depend: $(SOURCES) Makefile.in
 	@echo Ignore errors about non-existent system-supplied include files
 	@echo for systems other than the one you are using.
 	@echo Also ignore any errors in arm-convert.s.
-	-$(GCC) -MM -nostdinc -I/usr/include -I${BFD_DIR} \
-	  -I${READLINE_DIR} $(INTERNAL_CFLAGS) \
+	-$(GCC) -MM -nostdinc -I/usr/include -I${BFD_SRC_DIR} \
+	  -I${BFD_OBJ_DIR} -I${READLINE_DIR} $(INTERNAL_CFLAGS) \
 	  `ls $(SOURCES) | grep -v '\.[hy]$$' | \
 	  sort -u` >depend.tmp
 #BEGIN COMMENTED OUT CODE -- this should now be taken care of below.
@@ -605,7 +605,10 @@ depend: $(SOURCES) Makefile.in
 # There is one exception: the *.tab.c files can exist either in srcdir
 # or in ., so make sure not to use an explicit rule for them.
 #
-# Adding -I${BFD_DIR} is required for all the files which use BFD internals
+# Adding -I${BFD_SRC_DIR} and -I${BFD_OBJ_DIR} is required for all the files
+# which use BFD internals.  This is because some bfd include files are in the
+# source directory, and some (bfd.h for example) are generated in the bfd
+# build directory.
 # Adding -I${READLINE_DIR} is required because the readline header files
 # are in readline not in include.  They probably should be moved.
 	<depend.tm3 sed \
@@ -615,13 +618,13 @@ depend: $(SOURCES) Makefile.in
 	  -e 'g' \
 	  -e '/:.*\.tab\.c/d' \
 	  -e 's/.*:\(.*\.c\).*/	$${CC} -c $${INTERNAL_CFLAGS} \1/' \
-	  -e 's;$${srcdir}/xcoffread.c;-I$${BFD_DIR} &;' \
-	  -e 's;$${srcdir}/stabsread.c;-I$${BFD_DIR} &;' \
-	  -e 's;$${srcdir}/dwarfread.c;-I$${BFD_DIR} &;' \
-	  -e 's;$${srcdir}/elfread.c;-I$${BFD_DIR} &;' \
-	  -e 's;$${srcdir}/mipsread.c;-I$${BFD_DIR} &;' \
-	  -e 's;$${srcdir}/coffread.c;-I$${BFD_DIR} &;' \
-	  -e 's;$${srcdir}/dbxread.c;-I$${BFD_DIR} &;' \
+	  -e 's;$${srcdir}/xcoffread.c;-I$${BFD_SRC_DIR} -I$${BFD_OBJ_DIR} &;' \
+	  -e 's;$${srcdir}/stabsread.c;-I$${BFD_SRC_DIR} -I$${BFD_OBJ_DIR} &;' \
+	  -e 's;$${srcdir}/dwarfread.c;-I$${BFD_SRC_DIR} -I$${BFD_OBJ_DIR} &;' \
+	  -e 's;$${srcdir}/elfread.c;-I$${BFD_SRC_DIR} -I$${BFD_OBJ_DIR} &;' \
+	  -e 's;$${srcdir}/mipsread.c;-I$${BFD_SRC_DIR} -I$${BFD_OBJ_DIR} &;' \
+	  -e 's;$${srcdir}/coffread.c;-I$${BFD_SRC_DIR} -I$${BFD_OBJ_DIR} &;' \
+	  -e 's;$${srcdir}/dbxread.c;-I$${BFD_SRC_DIR} -I$${BFD_OBJ_DIR} &;' \
 	  -e 's;$${srcdir}/main.c;-I$${READLINE_DIR} &;' \
 	  -e ': end' \
 	  >depend.tm4;
@@ -710,6 +713,8 @@ setup-to-dist: update-depend force_update
 # of files to be checked for dependencies.
 update-depend: update-alldeps force_update
 	../configure none -norecursion
+	(cd ../bfd; ../configure sun4 -norecursion; rm -f stmp-bfd.h)
+	(cd ../bfd; $(MAKE) $(MFLAGS) bfd.h)
 	rm -f depend
 	$(MAKE) $(MFLAGS) depend
 
@@ -788,7 +793,7 @@ STAGESTUFF=${OBS} ${TSOBS} ${NTSOBS} ${ADD_FILES} init.c init.o version.c gdb
 
 subdir_do: force
 	@for i in $(DODIRS); do \
-		if [ -d ./$$i ] ; then \
+		if [ -f ./$$i/Makefile ] ; then \
 			if (cd ./$$i; \
 				$(MAKE) $(FLAGS_TO_PASS) $(DO)) ; then true ; \
 			else exit 1 ; fi ; \
@@ -878,19 +883,6 @@ m2-exp.tab.c: $(srcdir)/m2-exp.y $(srcdir)/Makefile.in
 	     -e 's/realloc/xrealloc/g' \
 	  < y.tab.c > ././m2-exp.tab.c
 	-rm y.tab.c
-
-# Used on HP-PA native.
-# This rule fails to get automatically generated in depend because gcc -MM
-# ends up trying to include ../bfd/sysdep.h, which does not exist in an
-# unconfigured BFD directory, and the resulting error suppresses the
-# output of dependency information.  For now, just punt.  (FIXME)
-paread.o: ${srcdir}/paread.c
-	${CC} -c ${INTERNAL_CFLAGS} -I$(BFD_DIR) ${srcdir}/paread.c
-# Used on RS6000 native.
-# This rule fails to get automatically generated in depend if
-# sys/ldr.h does not exist.  (FIXME)
-xcoffexec.o: ${srcdir}/xcoffexec.c
-	${CC} -c ${INTERNAL_CFLAGS} -I${BFD_DIR} ${srcdir}/xcoffexec.c
 
 lint: $(LINTFILES)
 	$(LINT) $(INCLUDE_CFLAGS) $(LINTFLAGS) $(LINTFILES) \

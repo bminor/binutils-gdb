@@ -78,6 +78,7 @@ ${srcdir}/rs6000-pinsn.c\
 ${srcdir}/rs6000-tdep.c\
 ${srcdir}/ser-go32.c\
 ${srcdir}/ser-tcp.c\
+${srcdir}/sh-tdep.c\
 ${srcdir}/solib.c\
 ${srcdir}/sparc-nat.c\
 ${srcdir}/sparc-pinsn.c\
@@ -217,6 +218,7 @@ ${srcdir}/config/romp/xm-rtbsd.h\
 ${srcdir}/config/rs6000/nm-rs6000.h\
 ${srcdir}/config/rs6000/tm-rs6000.h\
 ${srcdir}/config/rs6000/xm-rs6000.h\
+${srcdir}/config/sh/tm-sh.h\
 ${srcdir}/config/sparc/nm-sun4os4.h\
 ${srcdir}/config/sparc/tm-sparclite.h\
 ${srcdir}/config/sparc/tm-spc-em.h\
@@ -337,6 +339,7 @@ ${srcdir}/config/pyr/pyramid.mt\
 ${srcdir}/config/romp/rtbsd.mh\
 ${srcdir}/config/rs6000/rs6000.mh\
 ${srcdir}/config/rs6000/rs6000.mt\
+${srcdir}/config/sh/sh.mt\
 ${srcdir}/config/sparc/sparc-em.mt\
 ${srcdir}/config/sparc/sparclite.mt\
 ${srcdir}/config/sparc/sun4os4.mh\
