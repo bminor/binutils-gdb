@@ -2015,6 +2015,11 @@ pa_ip (str)
 	      nullif = pa_parse_nullif (&s);
 	      INSERT_FIELD_AND_CONTINUE (opcode, nullif, 1);
 
+	    /* Handle a nullification completer for copr and spop insns.  */
+	    case 'N':
+	      nullif = pa_parse_nullif (&s);
+	      INSERT_FIELD_AND_CONTINUE (opcode, nullif, 5);
+
 	    /* Handle a 11 bit immediate at 31.  */
 	    case 'i':
 	      the_insn.field_selector = pa_chk_field_selector (&s);
@@ -2247,12 +2252,51 @@ pa_ip (str)
 	      CHECK_FIELD (num, 7, 0, 0);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 6);
 
-	    /* We don't support any of these.  FIXME.  */
+	    /* Handle a 20 bit SOP field for spop0.  */
 	    case 'O':
-	      get_expression (s);
+	      num = pa_get_absolute_expression (&the_insn, &s);
 	      s = expr_end;
-	      abort ();
-	      continue;
+	      CHECK_FIELD (num, 1048575, 0, 0);
+	      num = (num & 0x1f) | ((num & 0x000fffe0) << 6);
+	      INSERT_FIELD_AND_CONTINUE (opcode, num, 0);
+
+	    /* Handle a 15bit SOP field for spop1.  */
+	    case 'o':
+	      num = pa_get_absolute_expression (&the_insn, &s);
+	      s = expr_end;
+	      CHECK_FIELD (num, 32767, 0, 0);
+	      INSERT_FIELD_AND_CONTINUE (opcode, num, 11);
+
+	    /* Handle a 10bit SOP field for spop3.  */
+	    case '0':
+	      num = pa_get_absolute_expression (&the_insn, &s);
+	      s = expr_end;
+	      CHECK_FIELD (num, 1023, 0, 0);
+	      num = (num & 0x1f) | ((num & 0x000003e0) << 6);
+	      INSERT_FIELD_AND_CONTINUE (opcode, num, 0);
+
+	    /* Handle a 15 bit SOP field for spop2.  */
+	    case '1':
+	      num = pa_get_absolute_expression (&the_insn, &s);
+	      s = expr_end;
+	      CHECK_FIELD (num, 32767, 0, 0);
+	      num = (num & 0x1f) | ((num & 0x00007fe0) << 6);
+	      INSERT_FIELD_AND_CONTINUE (opcode, num, 0);
+
+	    /* Handle a 3-bit co-processor ID field.  */
+	    case 'u':
+	      num = pa_get_absolute_expression (&the_insn, &s);
+	      s = expr_end;
+	      CHECK_FIELD (num, 7, 0, 0);
+	      INSERT_FIELD_AND_CONTINUE (opcode, num, 6);
+
+	    /* Handle a 22bit SOP field for copr.  */
+	    case '2':
+	      num = pa_get_absolute_expression (&the_insn, &s);
+	      s = expr_end;
+	      CHECK_FIELD (num, 4194303, 0, 0);
+	      num = (num & 0x1f) | ((num & 0x003fffe0) << 4);
+	      INSERT_FIELD_AND_CONTINUE (opcode, num, 0);
 
 	    /* Handle a source FP operand format completer.  */
 	    case 'F':
