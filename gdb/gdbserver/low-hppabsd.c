@@ -18,7 +18,7 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#include "defs.h"
+#include "server.h"
 #include <sys/wait.h>
 #include "frame.h"
 #include "inferior.h"
@@ -41,8 +41,6 @@ char *registers = my_registers;
 #include <machine/reg.h>
 
 extern int errno;
-extern int inferior_pid;
-void perror_with_name ();
 
 /* Start an inferior process and returns its pid.
    ALLARGS is a vector of program-name and args. */

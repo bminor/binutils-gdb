@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-#include "defs.h"
+#include "server.h"
 #include <sys/types.h>
 #include <sys/wait.h>
 #include "frame.h"
@@ -33,11 +33,6 @@ char *registers = my_registers;
 
 #include <sys/ptrace.h>
 #include <machine/reg.h>
-
-// extern int sys_nerr;
-// extern char **sys_errlist;
-extern int inferior_pid;
-void perror_with_name ();
 
 #define RF(dst, src) \
 	memcpy(&registers[REGISTER_BYTE(dst)], &src, sizeof(src))

@@ -1,3 +1,22 @@
+2001-01-23  J.T. Conklin  <jtc@redback.com>
+	
+	* config/m32r/m32r.mt (GDBSERVER_LIBS): Added ../../intl/libintl.a.
+	* config/mips/vr5000.mt (GDBSERVER_LIBS): Likewise.
+	* config/tic80/tic80.mt (GDBSERVER_LIBS): Likewise.
+	* gdbserver/low-sim.c (#include "defs.h"): Removed.
+	(mygeneric_load): Rename from generic_load.
+	
+	* gdbserver/low-hppabsd.c (#include "server.h"): Added.
+	(#include "defs.h"): Removed.
+	(inferior_pid, perror_with_name): Remove declarations.
+	* gdbserver/low-linux.c: Likewise.
+	* gdbserver/low-nbsd.c: Likewise.
+	* gdbserver/low-sparc.c: Likewise.
+	* gdbserver/low-sun3.c: Likewise.
+
+	* i386-stub.c: Re-indent.
+	* m68k-stub.c: Re-indent.
+
 2001-01-22  Nicholas Duffek  <nsd@redhat.com>
 
 	* gdbarch.sh (PARM_BOUNDARY): Define.

@@ -18,9 +18,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#include "defs.h"
-#include "bfd.h"
 #include "server.h"
+#include "bfd.h"
 #include "callback.h"		/* GDB simulator callback interface */
 #include "remote-sim.h"		/* GDB simulator interface */
 
@@ -41,7 +40,7 @@ static SIM_DESC gdbsim_desc = 0;
    does not support loading itself.  */
 
 static void
-generic_load (bfd *loadfile_bfd)
+mygeneric_load (bfd *loadfile_bfd)
 {
   asection *s;
 
@@ -131,7 +130,7 @@ create_inferior (char *program, char **argv)
   /* Load the program into the simulator.  */
   if (abfd)
     if (sim_load (gdbsim_desc, program, NULL, 0) == SIM_RC_FAIL)
-      generic_load (abfd);
+      mygeneric_load (abfd);
 
   /* Create an inferior process in the simulator.  This initializes SP.  */
   sim_create_inferior (gdbsim_desc, abfd, argv, /* env */ NULL);
