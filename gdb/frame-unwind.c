@@ -83,16 +83,19 @@ frame_unwind_find_by_pc (struct gdbarch *gdbarch, CORE_ADDR pc)
   int i;
   struct frame_unwind_table *table =
     gdbarch_data (gdbarch, frame_unwind_data);
-  /* Seriously old code.  Don't even try to use this new mechanism.  */
   if (!DEPRECATED_USE_GENERIC_DUMMY_FRAMES)
-    return trad_frame_unwind;
+    /* Seriously old code.  Don't even try to use this new mechanism.
+       (Note: The variable USE_GENERIC_DUMMY_FRAMES is deprecated, not
+       the dummy frame mechanism.  All architectures should be using
+       generic dummy frames).  */
+    return legacy_saved_regs_unwind;
   for (i = 0; i < table->nr; i++)
     {
       const struct frame_unwind *desc = table->p[i] (pc);
       if (desc != NULL)
 	return desc;
     }
-  return trad_frame_unwind;
+  return legacy_saved_regs_unwind;
 }
 
 void

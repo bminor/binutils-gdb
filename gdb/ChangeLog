@@ -1,3 +1,55 @@
+2003-03-13  Andrew Cagney  <cagney@redhat.com>
+
+	* d10v-tdep.c (d10v_frame_this_id): Replace d10v_frame_id_unwind.
+	(d10v_frame_unwind): Update.
+	(d10v_frame_prev_register): Replace d10v_frame_register_unwind.
+	(d10v_frame_unwind_cache): Replace this "fi" with "next_frame".
+	(saved_regs_unwinder): Replace this "frame" with "next_frame", and
+	"saved_regs" with "this_saved_regs".
+
+	* dummy-frame.c (dummy_frame_unwind): Update.
+	(cached_find_dummy_frame): Delete.
+
+	* frame.c (legacy_frame_p): New function.
+	(get_prev_frame): Call legacy_frame_p.
+	* frame.h (legacy_frame_p): Declare.
+
+	* dummy-frame.c (dummy_frame_prev_register): Rename
+	dummy_frame_register_unwind.
+	(dummy_frame_this_id): Replace dummy_frame_id_unwind.
+
+
+	* sentinel-frame.c (sentinel_frame_prev_register): Replace
+	sentinel_frame_register_unwind.
+	(sentinel_frame_this_id): Replace sentinel_frame_id_unwind.
+	(sentinel_frame_unwinder): Update.
+
+	* frame-unwind.c (frame_unwind_find_by_pc): Return
+	legacy_saved_regs_unwind instead of trad_frame_unwind.  Update
+	comment.
+
+	* frame.c (create_sentinel_frame): Initialize prologue_cache.
+	(frame_register_unwind): Call this frame's prev_register with the
+	next frame and this frame's prologue cache.  Add commented out
+	code to cache the value.
+	(get_prev_frame): Call prev frame's this_id with this frame and
+	prev frame's prologue cache.  Document that this call is shifted
+	one to the left when compared to the frame_register_unwind call.
+	(legacy_saved_regs_prev_register): Replace
+	frame_saved_regs_register_unwind.
+	(legacy_saved_regs_this_id): Replace frame_saved_regs_id_unwind.
+	(legacy_saved_regs_unwinder): Replace trad_frame_unwinder.
+	(legacy_saved_regs_unwind): Replace trad_frame_unwind.
+
+	* frame.h (legacy_saved_regs_unwind): Replace trad_frame_unwind.
+	(struct frame_info): Rename "unwind_cache" to "prolog_cache".
+
+	* frame-unwind.h (frame_this_id_ftype): Replace
+	frame_unwind_id_ftype.
+	(frame_prev_register_ftype): Replace frame_unwind_reg_ftype.
+	(struct frame_unwind): Update.  Rename "id" to "this_id".  Rename
+	"reg" to "prev_register".
+
 2003-03-13  D. Venkatasubramanian <dvenkat@noida.hcltech.com>
 
         * MAINTAINERS (write after approval): Alphabetically
