@@ -643,7 +643,7 @@ gld${EMULATION_NAME}_after_open ()
   struct bfd_link_needed_list *needed, *l;
 
   /* We only need to worry about this when doing a final link.  */
-  if (link_info.relocateable || link_info.shared)
+  if (link_info.relocateable || !link_info.executable)
     return;
 
   /* Get the list of files which appear in DT_NEEDED entries in
@@ -1180,7 +1180,7 @@ gld${EMULATION_NAME}_place_orphan (file, s)
 
   /* If this is a final link, then always put .gnu.warning.SYMBOL
      sections into the .text section to get them out of the way.  */
-  if (! link_info.shared
+  if (link_info.executable
       && ! link_info.relocateable
       && strncmp (secname, ".gnu.warning.", sizeof ".gnu.warning." - 1) == 0
       && hold_text.os != NULL)
@@ -1474,6 +1474,14 @@ if cmp -s ldscripts/${EMULATION_NAME}.x ldscripts/${EMULATION_NAME}.xn; then : ;
 echo '  ; else if (!config.magic_demand_paged) return' >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xn                 >> e${EMULATION_NAME}.c
 fi
+if test -n "$GENERATE_PIE_SCRIPT" ; then
+if test -n "$GENERATE_COMBRELOC_SCRIPT" ; then
+echo '  ; else if (link_info.pie && link_info.combreloc) return' >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xdc                >> e${EMULATION_NAME}.c
+fi
+echo '  ; else if (link_info.pie) return'	       >> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xd                 >> e${EMULATION_NAME}.c
+fi
 if test -n "$GENERATE_SHLIB_SCRIPT" ; then
 if test -n "$GENERATE_COMBRELOC_SCRIPT" ; then
 echo '  ; else if (link_info.shared && link_info.combreloc) return' >> e${EMULATION_NAME}.c
@@ -1509,6 +1517,18 @@ else
 cat >>e${EMULATION_NAME}.c <<EOF
   else if (!config.magic_demand_paged)
     return "ldscripts/${EMULATION_NAME}.xn";
+EOF
+fi
+if test -n "$GENERATE_PIE_SCRIPT" ; then
+if test -n "$GENERATE_COMBRELOC_SCRIPT" ; then
+cat >>e${EMULATION_NAME}.c <<EOF
+  else if (link_info.pie && link_info.combreloc)
+    return "ldscripts/${EMULATION_NAME}.xdc";
+EOF
+fi
+cat >>e${EMULATION_NAME}.c <<EOF
+  else if (link_info.pie)
+    return "ldscripts/${EMULATION_NAME}.xd";
 EOF
 fi
 if test -n "$GENERATE_SHLIB_SCRIPT" ; then

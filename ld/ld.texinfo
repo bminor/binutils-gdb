@@ -1209,6 +1209,18 @@ command @code{OUTPUT_FORMAT} can also specify the output format, but
 this option overrides it.  @xref{BFD}.
 @end ifclear
 
+@kindex -pie
+@kindex --pic-executable
+@item -pie
+@itemx --pic-executable
+@cindex position independent executables
+Create a position independent executable.  This is currently only supported on
+ELF platforms.  Position independent executables are similar to shared
+libraries in that they are relocated by the dynamic linker to the virtual
+address OS chooses for them (which can varry between invocations), like
+normal dynamically linked executables they can be executed and symbols
+defined in the executable cannot be overridden by shared libraries.
+
 @kindex -qmagic
 @item -qmagic
 This option is ignored for Linux compatibility.

@@ -474,7 +474,7 @@ elf_link_add_object_symbols (abfd, info)
      .gnu.warning.SYMBOL are treated as warning symbols for the given
      symbol.  This differs from .gnu.warning sections, which generate
      warnings when they are included in an output file.  */
-  if (! info->shared)
+  if (info->executable)
     {
       asection *s;
 
@@ -1321,7 +1321,7 @@ elf_link_add_object_symbols (abfd, info)
 		}
 	      else
 		new_flag = ELF_LINK_HASH_DEF_REGULAR;
-	      if (info->shared
+	      if (! info->executable
 		  || (old_flags & (ELF_LINK_HASH_DEF_DYNAMIC
 				   | ELF_LINK_HASH_REF_DYNAMIC)) != 0)
 		dynsym = TRUE;
@@ -2174,7 +2174,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
       if (bfd_get_section_by_name (output_bfd, ".preinit_array") != NULL)
 	{
 	  /* DT_PREINIT_ARRAY is not allowed in shared library.  */
-	  if (info->shared)
+	  if (! info->executable)
 	    {
 	      bfd *sub;
 	      asection *o;
@@ -2440,7 +2440,7 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 
       if (info->flags_1)
 	{
-	  if (! info->shared)
+	  if (info->executable)
 	    info->flags_1 &= ~ (DF_1_INITFIRST
 				| DF_1_NODELETE
 				| DF_1_NOOPEN);
@@ -4417,7 +4417,8 @@ elf_link_output_extsym (h, data)
      referenced by regular files, because we will already have issued
      warnings for them.  */
   if (! finfo->info->relocateable
-      && (! finfo->info->shared || ! finfo->info->allow_shlib_undefined)
+      && (finfo->info->executable
+	  || ! finfo->info->allow_shlib_undefined)
       && h->root.type == bfd_link_hash_undefined
       && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) != 0
       && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR) == 0

@@ -1781,7 +1781,7 @@ sparc64_elf_size_dynamic_sections (output_bfd, info)
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       /* Set the contents of the .interp section to the interpreter.  */
-      if (! info->shared)
+      if (info->executable)
 	{
 	  s = bfd_get_section_by_name (dynobj, ".interp");
 	  BFD_ASSERT (s != NULL);
@@ -1880,7 +1880,7 @@ sparc64_elf_size_dynamic_sections (output_bfd, info)
       struct elf_strtab_hash *dynstr;
       struct elf_link_hash_table *eht = elf_hash_table (info);
 
-      if (!info->shared)
+      if (info->executable)
 	{
 	  if (!add_dynamic_entry (DT_DEBUG, 0))
 	    return FALSE;

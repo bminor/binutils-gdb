@@ -1,3 +1,30 @@
+2003-05-30  Ulrich Drepper  <drepper@redhat.com>
+	    Jakub Jelinek  <jakub@redhat.com>
+
+	* lexsup.c (OPTION_PIE): Define.
+	(ld_options): Add -pie and --pic-executable options.
+	(parse_args): Handle OPTION_PIE.
+	* ldmain.c (main): Initialize link_info.pie and
+	link_info.executable.
+	* genscripts.sh: Generate PIE scripts.
+	* ld.texinfo: Document -pie and --pic-executable options.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_after_open):
+	(gld${EMULATION_NAME}_place_orphan): Likewise.
+	(gld${EMULATION_NAME}_get_script): Include PIE scripts.
+	* scripttempl/elf.sc: In PIE scripts set . the same way as in
+	shared scripts.
+	* emulparams/elf_i386.sh (GENERATE_PIE_SCRIPT): Set to yes.
+	* emulparams/elf64_ia64.sh (GENERATE_PIE_SCRIPT): Likewise.
+	* emulparams/elf32ppc.sh (GENERATE_PIE_SCRIPT): Likewise.
+	* emulparams/elf64ppc.sh (GENERATE_PIE_SCRIPT): Likewise.
+	* emulparams/elf_x86_64.sh (GENERATE_PIE_SCRIPT): Likewise.
+	* emulparams/elf_s390.sh (GENERATE_PIE_SCRIPT): Likewise.
+	* emulparams/elf32_sparc.sh (GENERATE_PIE_SCRIPT): Likewise.
+	* emulparams/elf64_sparc.sh (GENERATE_PIE_SCRIPT): Likewise.
+	* emulparams/elf64alpha.sh (GENERATE_PIE_SCRIPT): Likewise.
+	* emulparams/elf64_s390.sh (GENERATE_PIE_SCRIPT): Likewise.
+	* emulparams/elf_i386.sh (GENERATE_PIE_SCRIPT): Likewise.
+
 2003-05-30  H.J. Lu <hongjiu.lu@intel.com>
 
 	* genscripts.sh: Create tmpdir/libpath.exp.

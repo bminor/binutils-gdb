@@ -1797,7 +1797,7 @@ elf_i386_size_dynamic_sections (output_bfd, info)
   if (htab->elf.dynamic_sections_created)
     {
       /* Set the contents of the .interp section to the interpreter.  */
-      if (! info->shared)
+      if (info->executable)
 	{
 	  s = bfd_get_section_by_name (dynobj, ".interp");
 	  if (s == NULL)
@@ -1963,7 +1963,7 @@ elf_i386_size_dynamic_sections (output_bfd, info)
 #define add_dynamic_entry(TAG, VAL) \
   bfd_elf32_add_dynamic_entry (info, (bfd_vma) (TAG), (bfd_vma) (VAL))
 
-      if (! info->shared)
+      if (info->executable)
 	{
 	  if (!add_dynamic_entry (DT_DEBUG, 0))
 	    return FALSE;

@@ -236,6 +236,31 @@ if test -n "$GENERATE_SHLIB_SCRIPT"; then
     rm -f ${COMBRELOC}
     COMBRELOC=
   fi
+  unset CREATE_SHLIB
+fi
+
+if test -n "$GENERATE_PIE_SCRIPT"; then
+  LD_FLAG=pie
+  DATA_ALIGNMENT=${DATA_ALIGNMENT_s-${DATA_ALIGNMENT_}}
+  CREATE_PIE=" "
+  # Note that TEXT_START_ADDR is set to NONPAGED_TEXT_START_ADDR.
+  (
+    echo "/* Script for ld -pie: link position independent executable */"
+    . ${srcdir}/emulparams/${EMULATION_NAME}.sh
+    . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
+  ) | sed -e '/^ *$/d;s/[ 	]*$//' > ldscripts/${EMULATION_NAME}.xd
+  if test -n "$GENERATE_COMBRELOC_SCRIPT"; then
+    LD_FLAG=cpie
+    DATA_ALIGNMENT=${DATA_ALIGNMENT_sc-${DATA_ALIGNMENT}}
+    COMBRELOC=ldscripts/${EMULATION_NAME}.xc.tmp
+    ( echo "/* Script for -pie -z combreloc: position independent executable, combine & sort relocs */"
+      . ${srcdir}/emulparams/${EMULATION_NAME}.sh
+      . ${srcdir}/scripttempl/${SCRIPT_NAME}.sc
+    ) | sed -e '/^ *$/d;s/[ 	]*$//' > ldscripts/${EMULATION_NAME}.xdc
+    rm -f ${COMBRELOC}
+    COMBRELOC=
+  fi
+  unset CREATE_PIE
 fi
 
 case " $EMULATION_LIBPATH " in

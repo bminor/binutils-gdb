@@ -1,3 +1,24 @@
+2003-05-30  Ulrich Drepper  <drepper@redhat.com>
+	    Jakub Jelinek  <jakub@redhat.com>
+
+	* elflink.h (elf_link_add_object_symbols): Use !info->executable
+	instead of info->shared where appropriate.
+	(bfd_elfNN_size_dynamic_sections, elf_link_output_extsym): Likewise.
+	* elflink.c (_bfd_elf_create_got_section): Likewise.
+	(_bfd_elf_link_create_dynamic_sections): Likewise.
+	(_bfd_elf_link_assign_sym_version): Likewise.
+	* elf32-i386.c (elf_i386_size_dynamic_sections): Create .interp section
+	and DT_DEBUG dynamic tag even for position independent executables.
+	* elf32-ppc.c (ppc_elf_size_dynamic_sections): Likewise.
+	* elf32-s390.c (elf_s390_size_dynamic_sections: Likewise.
+	* elf64-ppc.c (ppc64_elf_size_dynamic_sections: Likewise.
+	* elf64-s390.c (elf_s390_size_dynamic_sections: Likewise.
+	* elf64-x86-64.c (elf64_x86_64_size_dynamic_sections: Likewise.
+	* elfxx-ia64.c (elfNN_ia64_size_dynamic_sections: Likewise.
+	* elf32-sparc.c (elf32_sparc_size_dynamic_sections: Likewise.
+	* elf64-alpha.c (elf64_alpha_size_dynamic_sections: Likewise.
+	* elf64-sparc.c (sparc64_elf_size_dynamic_sections: Likewise.
+
 2003-05-30  Kris Warkentin <kewarken@qnx.com>
 
 	* elf.c (elfcore_grok_nto_status): Only set lwpid for the active or

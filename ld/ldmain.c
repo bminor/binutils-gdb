@@ -291,6 +291,8 @@ main (argc, argv)
   link_info.emitrelocations = FALSE;
   link_info.task_link = FALSE;
   link_info.shared = FALSE;
+  link_info.pie = FALSE;
+  link_info.executable = FALSE;
   link_info.symbolic = FALSE;
   link_info.export_dynamic = FALSE;
   link_info.static_link = FALSE;
@@ -367,6 +369,9 @@ main (argc, argv)
       if (command_line.auxiliary_filters)
 	einfo (_("%P%F: -f may not be used without -shared\n"));
     }
+
+  if (! link_info.shared || link_info.pie)
+    link_info.executable = TRUE;
 
   /* Treat ld -r -s as ld -r -S -x (i.e., strip all local symbols).  I
      don't see how else this can be handled, since in this case we

@@ -138,6 +138,7 @@ int parsing_defsym = 0;
 #define OPTION_NO_STRIP_DISCARDED	(OPTION_STRIP_DISCARDED + 1)
 #define OPTION_ACCEPT_UNKNOWN_INPUT_ARCH    (OPTION_NO_STRIP_DISCARDED + 1)
 #define OPTION_NO_ACCEPT_UNKNOWN_INPUT_ARCH (OPTION_ACCEPT_UNKNOWN_INPUT_ARCH + 1)
+#define OPTION_PIE			(OPTION_NO_ACCEPT_UNKNOWN_INPUT_ARCH + 1)
 
 /* The long options.  This structure is used for both the option
    parsing and the help text.  */
@@ -370,6 +371,10 @@ static const struct ld_option ld_options[] =
       '\0', NULL, N_("Create a shared library"), ONE_DASH },
   { {"Bshareable", no_argument, NULL, OPTION_SHARED }, /* FreeBSD.  */
       '\0', NULL, NULL, ONE_DASH },
+  { {"pie", no_argument, NULL, OPTION_PIE},
+      '\0', NULL, N_("Create a position independent executable"), ONE_DASH },
+  { {"pic-executable", no_argument, NULL, OPTION_PIE},
+      '\0', NULL, NULL, TWO_DASHES },
   { {"sort-common", no_argument, NULL, OPTION_SORT_COMMON},
       '\0', NULL, N_("Sort common symbols by size"), TWO_DASHES },
   { {"sort_common", no_argument, NULL, OPTION_SORT_COMMON},
@@ -958,6 +963,15 @@ parse_args (argc, argv)
 	    link_info.shared = TRUE;
 	  else
 	    einfo (_("%P%F: -shared not supported\n"));
+	  break;
+	case OPTION_PIE:
+	  if (config.has_shared)
+	    {
+	      link_info.shared = TRUE;
+	      link_info.pie = TRUE;
+	    }
+	  else
+	    einfo (_("%P%F: -pie not supported\n"));
 	  break;
 	case 'h':		/* Used on Solaris.  */
 	case OPTION_SONAME:
