@@ -730,6 +730,7 @@ ppc_tdep_h = ppc-tdep.h
 proc_utils_h = proc-utils.h
 regcache_h = regcache.h
 reggroups_h = reggroups.h
+regset_h = regset.h
 remote_fileio_h = remote-fileio.h
 remote_h = remote.h
 remote_utils_h = remote-utils.h $(target_h)

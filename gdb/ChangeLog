@@ -1,3 +1,8 @@
+2003-09-26  Mark Kettenis  <kettenis@gnu.org>
+
+	* regset.h: New file.
+	* Makefile.in (regset_h): Add.
+
 2003-09-25  Andrew Cagney  <cagney@redhat.com>
 
 	* frame.h (deprecated_frame_saved_regs): Rename
