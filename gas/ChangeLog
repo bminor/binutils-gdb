@@ -1,3 +1,13 @@
+1999-10-21  Gavin Romig-Koch  <gavin@cygnus.com>
+
+	* config/tc-mips.c (ISA_HAS_COPROC_DELAYS) : New.
+	(ISA_HAS_64_BIT_REGS) New.
+	(gpr_interlocks,md_begin,reg_needs_delay,append_insn,
+	mips_emit_delays,macro_build,load_register,load_addresss,
+	macro,macro2,mips_ip,s_cprestore,s_cpadd): Simplify
+	and/or use new ISA_xxx macros in expressions involving
+	ISA, particularly mips_opts.isa.
+
 1999-10-18  Michael Meissner  <meissner@cygnus.com>
 
 	* expr.h (operatorT): Add machine dependent operators md1..md8.
