@@ -497,7 +497,7 @@ read_a_source_file (name)
 			  as_bad ("Unknown pseudo-op:  `%s'", s);
 			  *input_line_pointer = c;
 			  s_ignore (0);
-			  break;
+			  continue;
 			}
 
 		      /* Put it back for error messages etc. */
@@ -512,13 +512,7 @@ read_a_source_file (name)
 		       * Input_line_pointer->1st non-blank char
 		       * after pseudo-operation.
 		       */
-		      if (!pop)
-			{
-			  ignore_rest_of_line ();
-			  break;
-			}
-		      else
-			(*pop->poc_handler) (pop->poc_val);
+		      (*pop->poc_handler) (pop->poc_val);
 		    }
 		  else
 #endif
@@ -1059,14 +1053,14 @@ s_lcomm (needs_align)
   p = input_line_pointer;
   *p = c;
   SKIP_WHITESPACE ();
-  if (*input_line_pointer != ',')
-    {
-      as_bad ("Expected comma after name");
-      ignore_rest_of_line ();
-      return;
-    }
 
-  ++input_line_pointer;
+  /* Accept an optional comma after the name.  The comma used to be
+     required, but Irix 5 cc does not generate it.  */
+  if (*input_line_pointer == ',')
+    {
+      ++input_line_pointer;
+      SKIP_WHITESPACE ();
+    }
 
   if (*input_line_pointer == '\n')
     {
@@ -1085,7 +1079,10 @@ s_lcomm (needs_align)
 #if defined (OBJ_ECOFF) || defined (OBJ_ELF)
   /* For MIPS ECOFF or ELF, small objects are put in .sbss.  */
   if (temp <= bfd_get_gp_size (stdoutput))
-    bss_seg = subseg_new (".sbss", 1);
+    {
+      bss_seg = subseg_new (".sbss", 1);
+      seg_info (bss_seg)->bss = 1;
+    }
 #endif
 #endif
 
@@ -2915,10 +2912,11 @@ s_xstab (what)
 
   /* To get the name of the stab string section, simply .str to
      the stab section name.  */
-  stabstr_secname = alloca (strlen (stab_secname) + 4);
+  stabstr_secname = (char *) xmalloc (strlen (stab_secname) + 4);
   strcpy (stabstr_secname, stab_secname);
   strcat (stabstr_secname, "str");
   s_stab_generic (what, stab_secname, stabstr_secname);
+  free (stabstr_secname);
 }
 
 #ifdef S_SET_DESC
