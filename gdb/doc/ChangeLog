@@ -1,3 +1,8 @@
+Thu Apr 21 14:20:51 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* Makefile.in (clean): Don't remove GDBvn.texi (apparently on Jan
+	16 I meant to make this change but did not).  Do remove gdb-cfg.texi.
+
 Wed Apr 20 11:22:48 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabs.texinfo (Stab Section Basics): Say what is in .stab

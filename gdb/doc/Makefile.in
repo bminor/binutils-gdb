@@ -141,7 +141,7 @@ mostlyclean: clean-info clean-dvi
 	rm -f gdbint.?? gdbint.??? stabs.?? stabs.???
 
 clean: mostlyclean
-	rm -f GDBvn.texi rluser.texinfo inc-hist.texi
+	rm -f rluser.texinfo inc-hist.texi gdb-cfg.texi
 
 distclean: clean
 	rm -f Makefile config.status
