@@ -150,13 +150,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    to virtual format for register REGNUM.  */
 
 #define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,FROM,TO)	\
-  bcopy ((FROM), (TO), REGISTER_VIRTUAL_SIZE(REGNUM));
+  memcpy ((TO), (FROM), REGISTER_VIRTUAL_SIZE(REGNUM));
 
 /* Convert data from virtual format for register REGNUM
    to raw format for register REGNUM.  */
 
 #define REGISTER_CONVERT_TO_RAW(REGNUM,FROM,TO)	\
-  bcopy ((FROM), (TO), REGISTER_VIRTUAL_SIZE(REGNUM));
+  memcpy ((TO), (FROM), REGISTER_VIRTUAL_SIZE(REGNUM));
 
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
@@ -181,7 +181,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    into VALBUF.  */
 
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
-  bcopy (REGBUF, VALBUF, TYPE_LENGTH (TYPE))
+  memcpy (VALBUF, REGBUF, TYPE_LENGTH (TYPE))
 
 /* Write into appropriate registers a function return value
    of type TYPE, given in virtual format.  */

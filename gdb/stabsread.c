@@ -547,9 +547,11 @@ define_symbol (valu, string, desc, type, objfile)
       SYMBOL_LANGUAGE (sym) = current_subfile -> language;
       SYMBOL_NAME (sym)	= (char *)
 	obstack_alloc (&objfile -> symbol_obstack, ((p - string) + 1));
-      /* Open-coded bcopy--saves function call time.  */
+      /* Open-coded memcpy--saves function call time.  */
       /* FIXME:  Does it really?  Try replacing with simple strcpy and
 	 try it on an executable with a large symbol table. */
+      /* FIXME: considering that gcc can open code memcpy anyway, I
+	 doubt it.  xoxorich. */
       {
 	register char *p1 = string;
 	register char *p2 = SYMBOL_NAME (sym);

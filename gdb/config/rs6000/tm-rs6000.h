@@ -122,7 +122,6 @@ function_frame_info PARAMS ((CORE_ADDR, struct aix_framedata *));
    if ((W)==0x57c && breakpoints_inserted) {	\
      mark_breakpoints_out ();		\
      insert_breakpoints ();		\
-     insert_step_breakpoint ();		\
    }					\
    resume (0, 0);			\
    continue;				\
@@ -311,13 +310,13 @@ extern void xcoff_relocate_core PARAMS ((void));
    to virtual format for register REGNUM.  */
 
 #define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,FROM,TO)	\
-   bcopy ((FROM), (TO), REGISTER_RAW_SIZE (REGNUM))
+   memcpy ((TO), (FROM), REGISTER_RAW_SIZE (REGNUM))
 
 /* Convert data from virtual format for register REGNUM
    to raw format for register REGNUM.  */
 
 #define REGISTER_CONVERT_TO_RAW(REGNUM,FROM,TO)	\
-   bcopy ((FROM), (TO), REGISTER_RAW_SIZE (REGNUM))
+   memcpy ((TO), (FROM), REGISTER_RAW_SIZE (REGNUM))
 
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
@@ -343,7 +342,7 @@ extern unsigned int rs6000_struct_return_address;
    into VALBUF.  */
 
 /* #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
-  bcopy (REGBUF, VALBUF, TYPE_LENGTH (TYPE)) */
+  memcpy (VALBUF, REGBUF, TYPE_LENGTH (TYPE)) */
 
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
   extract_return_value(TYPE,REGBUF,VALBUF)

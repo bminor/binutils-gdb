@@ -174,7 +174,7 @@ i386_skip_prologue PARAMS ((int));
 { if ((REGNUM) >= FP0_REGNUM && (REGNUM) < FPC_REGNUM)	\
     i387_to_double ((FROM), (TO));			\
   else							\
-    bcopy ((FROM), (TO), 4); }
+    memcpy ((TO), (FROM), 4); }
 
 extern void
 i387_to_double PARAMS ((char *, char *));
@@ -186,7 +186,7 @@ i387_to_double PARAMS ((char *, char *));
 { if ((REGNUM) >= FP0_REGNUM && (REGNUM) < FPC_REGNUM)	\
     double_to_i387 ((FROM), (TO));	\
   else					\
-    bcopy ((FROM), (TO), 4); }
+    memcpy ((TO), (FROM), 4); }
 
 extern void
 double_to_i387 PARAMS ((char *, char *));
@@ -209,7 +209,7 @@ double_to_i387 PARAMS ((char *, char *));
    into VALBUF.  */
 
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
-  bcopy (REGBUF + REGISTER_BYTE (TYPE_CODE (TYPE) == TYPE_CODE_FLT ? FP0_REGNUM : 11), VALBUF, TYPE_LENGTH (TYPE))
+  memcpy (VALBUF, REGBUF + REGISTER_BYTE (TYPE_CODE (TYPE) == TYPE_CODE_FLT ? FP0_REGNUM : 11), TYPE_LENGTH (TYPE))
 
 /* Write into appropriate registers a function return value
    of type TYPE, given in virtual format.  */

@@ -1942,7 +1942,7 @@ init_stringtab(abfd, offset, objfile)
   if (strtbl == NULL)
     return -1;
 
-  bcopy(&length, strtbl, sizeof length);
+  memcpy(strtbl, &length, sizeof length);
   if (length == sizeof length)
     return 0;
 

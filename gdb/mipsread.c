@@ -853,7 +853,7 @@ parse_symbol (sh, ax, ext_sh, bigend)
       /* Generate a template for the type of this function.  The
 	 types of the arguments will be added as we read the symbol
 	 table. */
-      bcopy (SYMBOL_TYPE (s), lookup_function_type (t), sizeof (struct type));
+      memcpy (lookup_function_type (t), SYMBOL_TYPE (s), sizeof (struct type));
 #else
       SYMBOL_TYPE (s) = lookup_function_type (t);
 #endif

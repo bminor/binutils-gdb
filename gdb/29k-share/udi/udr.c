@@ -146,7 +146,7 @@ int	size;
 	{   udr_errno =  UDIErrorIPCInternal;
 	    return -1;
         }
-	bcopy((char*)object_p, udrs->putbytes, size);
+	memcpy(udrs->putbytes, (char*)object_p, size);
     	udrs->putbytes += size;
     	if(udrs->putbytes > udrs->putend) udrs->putend = udrs->putbytes;
     }
@@ -169,7 +169,7 @@ int	size;
 	        return -1;		/* return error code */
     	    }
     	}		/* read data from character stream buffer */
-	bcopy(udrs->getbytes, (char*)object_p,  size);
+	memcpy((char*)object_p,  udrs->getbytes, size);
     	udrs->getbytes += size;
     }
     else

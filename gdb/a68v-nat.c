@@ -43,16 +43,16 @@ fetch_inferior_registers ()
 	  (PTRACE_ARG3_TYPE) &inferior_fp_registers, 0);
 #endif 
   
-  bcopy (&inferior_registers, registers, 16 * 4);
+  memcpy (registers, &inferior_registers, 16 * 4);
 #ifdef FP0_REGNUM
-  bcopy (&inferior_fp_registers, &registers[REGISTER_BYTE (FP0_REGNUM)],
+  memcpy (&registers[REGISTER_BYTE (FP0_REGNUM)], &inferior_fp_registers,
 	 sizeof inferior_fp_registers.fps_regs);
 #endif 
   *(int *)&registers[REGISTER_BYTE (PS_REGNUM)] = inferior_registers.r_ps;
   *(int *)&registers[REGISTER_BYTE (PC_REGNUM)] = inferior_registers.r_pc;
 #ifdef FP0_REGNUM
-  bcopy (&inferior_fp_registers.fps_control,
-	 &registers[REGISTER_BYTE (FPC_REGNUM)],
+  memcpy (&registers[REGISTER_BYTE (FPC_REGNUM)],
+	 &inferior_fp_registers.fps_control,
 	 sizeof inferior_fp_registers - sizeof inferior_fp_registers.fps_regs);
 #endif 
 }
@@ -71,17 +71,17 @@ store_inferior_registers (regno)
 #endif
   extern char registers[];
 
-  bcopy (registers, &inferior_registers, 16 * 4);
+  memcpy (&inferior_registers, registers, 16 * 4);
 #ifdef FP0_REGNUM
-  bcopy (&registers[REGISTER_BYTE (FP0_REGNUM)], &inferior_fp_registers,
+  memcpy (&inferior_fp_registers, &registers[REGISTER_BYTE (FP0_REGNUM)],
 	 sizeof inferior_fp_registers.fps_regs);
 #endif
   inferior_registers.r_ps = *(int *)&registers[REGISTER_BYTE (PS_REGNUM)];
   inferior_registers.r_pc = *(int *)&registers[REGISTER_BYTE (PC_REGNUM)];
 
 #ifdef FP0_REGNUM
-  bcopy (&registers[REGISTER_BYTE (FPC_REGNUM)],
-	 &inferior_fp_registers.fps_control,
+  memcpy (&inferior_fp_registers.fps_control,
+	 &registers[REGISTER_BYTE (FPC_REGNUM)],
 	 sizeof inferior_fp_registers - sizeof inferior_fp_registers.fps_regs);
 #endif
 
@@ -108,7 +108,7 @@ fetch_core_registers (core_reg_sect, core_reg_size, which)
     if (core_reg_size < sizeof (struct regs))
       error ("Can't find registers in core file");
 
-    bcopy ((char *)regs, registers, 16 * 4);
+    memcpy (registers, (char *)regs, 16 * 4);
     supply_register (PS_REGNUM, &regs->r_ps);
     supply_register (PC_REGNUM, &regs->r_pc);
 
@@ -119,11 +119,11 @@ fetch_core_registers (core_reg_sect, core_reg_size, which)
     if (core_reg_size >= sizeof (struct fpu))
       {
 #ifdef FP0_REGNUM
-	bcopy (fpustruct->f_fpstatus.fps_regs,
-	      &registers[REGISTER_BYTE (FP0_REGNUM)],
+	memcpy (&registers[REGISTER_BYTE (FP0_REGNUM)],
+	      fpustruct->f_fpstatus.fps_regs,
 	      sizeof fpustruct->f_fpstatus.fps_regs);
-	bcopy (&fpustruct->f_fpstatus.fps_control,
-	      &registers[REGISTER_BYTE (FPC_REGNUM)],
+	memcpy (&registers[REGISTER_BYTE (FPC_REGNUM)],
+	      &fpustruct->f_fpstatus.fps_control,
 	      sizeof fpustruct->f_fpstatus - 
 		sizeof fpustruct->f_fpstatus.fps_regs);
 #endif

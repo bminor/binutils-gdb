@@ -101,19 +101,19 @@ core_file_command (filename, from_tty)
 	data_offset = sizeof corestr;
 	stack_offset = sizeof corestr + corestr.c_dsize;
 
-	bcopy (&corestr.c_regs, registers, sizeof corestr.c_regs);
+	memcpy (registers, &corestr.c_regs, sizeof corestr.c_regs);
 
-	bcopy (corestr.c_fpu.f_fpstatus.f_st,
-	       &registers[REGISTER_BYTE (FP0_REGNUM)],
+	memcpy (&registers[REGISTER_BYTE (FP0_REGNUM)],
+	       corestr.c_fpu.f_fpstatus.f_st,
 	       sizeof corestr.c_fpu.f_fpstatus.f_st);
-	bcopy (&corestr.c_fpu.f_fpstatus.f_ctrl,
-	       &registers[REGISTER_BYTE (FPC_REGNUM)],
+	memcpy (&registers[REGISTER_BYTE (FPC_REGNUM)],
+	       &corestr.c_fpu.f_fpstatus.f_ctrl,
 	       sizeof corestr.c_fpu.f_fpstatus -
 	       sizeof corestr.c_fpu.f_fpstatus.f_st);
 
 	/* the struct aouthdr of sun coff is not the struct exec stored
 	   in the core file. */
-	bcopy (&corestr.c_aouthdr, &core_aouthdr, sizeof (struct exec));
+	memcpy (&core_aouthdr, &corestr.c_aouthdr, sizeof (struct exec));
 #ifndef COFF_ENCAPSULATE
 	core_aouthdr.magic = corestr.c_aouthdr.a_info;
 	core_aouthdr.vstamp = /*SUNVERSION*/ 31252;
@@ -216,12 +216,12 @@ fetch_inferior_registers (regno)
   ptrace (PTRACE_GETFPREGS, inferior_pid,
 	  (PTRACE_ARG3_TYPE) &inferior_fp_registers);
 
-  bcopy (&inferior_registers, registers, sizeof inferior_registers);
+  memcpy (registers, &inferior_registers, sizeof inferior_registers);
 
-  bcopy (inferior_fp_registers.f_st,&registers[REGISTER_BYTE (FP0_REGNUM)],
+  memcpy (&registers[REGISTER_BYTE (FP0_REGNUM)],inferior_fp_registers.f_st,
 	 sizeof inferior_fp_registers.f_st);
-  bcopy (&inferior_fp_registers.f_ctrl,
-	 &registers[REGISTER_BYTE (FPC_REGNUM)],
+  memcpy (&registers[REGISTER_BYTE (FPC_REGNUM)],
+	 &inferior_fp_registers.f_ctrl,
 	 sizeof inferior_fp_registers - sizeof inferior_fp_registers.f_st);
 }
 
@@ -237,12 +237,13 @@ store_inferior_registers (regno)
   struct fp_state inferior_fp_registers;
   extern char registers[];
 
-  bcopy (registers, &inferior_registers, 20 * 4);
+  memcpy (&inferior_registers, registers, 20 * 4);
 
-  bcopy (&registers[REGISTER_BYTE (FP0_REGNUM)],inferior_fp_registers.f_st,
+  memcpy (inferior_fp_registers.f_st,
+	 &registers[REGISTER_BYTE (FP0_REGNUM)],
 	 sizeof inferior_fp_registers.f_st);
-  bcopy (&registers[REGISTER_BYTE (FPC_REGNUM)],
-	 &inferior_fp_registers.f_ctrl,
+  memcpy (&inferior_fp_registers.f_ctrl,
+	 &registers[REGISTER_BYTE (FPC_REGNUM)],
 	 sizeof inferior_fp_registers - sizeof inferior_fp_registers.f_st);
   
 #ifdef PTRACE_FP_BUG

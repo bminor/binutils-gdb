@@ -271,7 +271,7 @@ child_xfer_memory (memaddr, myaddr, len, write, target)
 
       /* Copy data to be written over corresponding part of buffer */
 
-      bcopy (myaddr, (char *) buffer + (memaddr & (sizeof (int) - 1)), len);
+      memcpy ((char *) buffer + (memaddr & (sizeof (int) - 1)), myaddr, len);
 
       /* Write the entire buffer.  */
 
@@ -303,7 +303,7 @@ child_xfer_memory (memaddr, myaddr, len, write, target)
 	}
 
       /* Copy appropriate bytes out of the buffer.  */
-      bcopy ((char *) buffer + (memaddr & (sizeof (int) - 1)), myaddr, len);
+      memcpy (myaddr, (char *) buffer + (memaddr & (sizeof (int) - 1)), len);
     }
   return len;
 }

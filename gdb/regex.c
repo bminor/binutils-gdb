@@ -32,7 +32,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #else  /* not emacs */
 
-#define bcopy(s,d,n)	memcpy((d),(s),(n))
 #define bcmp(s1,s2,n)	memcmp((s1),(s2),(n))
 #define bzero(s,n)	memset((s),0,(n))
 
@@ -1297,7 +1296,7 @@ re_match_2 (pbufp, string1, size1, string2, size2, pos, regs, mstop)
 		return -2;
 	      stackx = (unsigned char **) alloca (2 * (stacke - stackb)
 					 * sizeof (char *));
-	      bcopy (stackb, stackx, (stacke - stackb) * sizeof (char *));
+	      memcpy (stackx, stackb, (stacke - stackb) * sizeof (char *));
 	      stackp = stackx + (stackp - stackb);
 	      stacke = stackx + 2 * (stacke - stackb);
 	      stackb = stackx;
@@ -1377,7 +1376,7 @@ re_match_2 (pbufp, string1, size1, string2, size2, pos, regs, mstop)
 	      unsigned char **stackx
 		= (unsigned char **) alloca (2 * (stacke - stackb)
 					     * sizeof (char *));
-	      bcopy (stackb, stackx, (stacke - stackb) * sizeof (char *));
+	      memcpy (stackx, stackb, (stacke - stackb) * sizeof (char *));
 	      stackp = stackx + (stackp - stackb);
 	      stacke = stackx + 2 * (stacke - stackb);
 	      stackb = stackx;

@@ -350,7 +350,7 @@ value_of_trapped_internalvar (var)
     {
       long vm[4];
       long i, *p;
-      bcopy (read_vector_register_1 (VM_REGNUM), vm, sizeof vm);
+      memcpy (vm, read_vector_register_1 (VM_REGNUM), sizeof vm);
       range_type =
 	create_range_type ((struct type *) NULL, builtin_type_int, 0, len - 1);
       type =
@@ -368,8 +368,9 @@ value_of_trapped_internalvar (var)
 	create_array_type ((struct type *) NULL, builtin_type_long_long,
 			   range_type);
       val = allocate_value (type);
-      bcopy (read_vector_register_1 (name[1] - '0'),
-	     VALUE_CONTENTS (val), TYPE_LENGTH (type));
+      memcpy (VALUE_CONTENTS (val),
+	     read_vector_register_1 (name[1] - '0'),
+	     TYPE_LENGTH (type));
     }
   else if (name[0] == 'v')
     {

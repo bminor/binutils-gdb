@@ -90,7 +90,7 @@ core_file_command (filename, from_tty)
 	stack_offset = data_offset + u.pt_dsize;
 	reg_offset = 0;
 
-	bcopy (&u.pt_aouthdr, &core_aouthdr, sizeof (AOUTHDR));
+	memcpy (&core_aouthdr, &u.pt_aouthdr, sizeof (AOUTHDR));
 	printf ("Core file is from \"%s\".\n", u.pt_comm);
 	if (u.pt_signal > 0)
 	  printf ("Program terminated with signal %d, %s.\n",

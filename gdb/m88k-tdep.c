@@ -774,7 +774,7 @@ collect_returned_value (rval, value_type, struct_return, nargs, args)
 {
   char retbuf[REGISTER_BYTES];
 
-  bcopy (registers, retbuf, REGISTER_BYTES);
+  memcpy (retbuf, registers, REGISTER_BYTES);
   *rval = value_being_returned (value_type, retbuf, struct_return);
   return;
 }

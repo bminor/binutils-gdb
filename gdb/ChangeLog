@@ -1,3 +1,24 @@
+Wed Sep  1 13:12:43 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
+
+	* a68v-nat.c, altos-xdep.c, convex-tdep.c, convex-xdep.c,
+	  findvar.c, hppab-nat.c, hppah-nat.c, i386mach-nat.c,
+	  irix4-nat.c, m68k-tdep.c, m88k-tdep.c, mipsread.c, regex.c,
+	  remote-bug.c, remote-hms.c, rs6000-nat.c, rs6000-tdep.c,
+	  sparc-nat.c, stabsread.c, sun3-nat.c, sun386-nat.c, symfile.c,
+	  umax-xdep.c, xcoffread.c, 29k-share/udi/udip2soc.c,
+	  29k-share/udi/udr.c, config/a29k/tm-a29k.h, config/arm/tm-arm.h,
+	  config/convex/tm-convex.h, config/gould/tm-np1.h,
+	  config/gould/tm-pn.h, config/h8300/tm-h8300.h,
+	  config/h8500/tm-h8500.h, config/i386/tm-i386aix.h,
+	  config/i386/tm-sun386.h, config/i386/tm-symmetry.h,
+	  config/i960/tm-i960.h, config/m68k/tm-news.h,
+	  config/m88k/tm-m88k.h, config/mips/tm-mips.h,
+	  config/ns32k/tm-merlin.h, config/ns32k/tm-umax.h,
+	  config/pa/tm-hppa.h, config/pyr/tm-pyr.h,
+	  config/rs6000/tm-rs6000.h, config/sh/tm-sh.h,
+	  config/tahoe/tm-tahoe.h, config/vax/tm-vax.h,
+	  config/z8k/tm-z8k.h, nindy-share/nindy.c: bcopy -> memcpy
+
 Wed Sep  1 05:05:53 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* mipsread.c (parse_partial_symbols):  Use language from FDR if it

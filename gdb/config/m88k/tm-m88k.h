@@ -277,13 +277,13 @@ extern CORE_ADDR skip_prologue ();
    to virtual format for register REGNUM.  */
 
 #define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,FROM,TO) \
-  {bcopy ((FROM), (TO), REGISTER_RAW_SIZE (REGNUM));}
+  {memcpy ((TO), (FROM), REGISTER_RAW_SIZE (REGNUM));}
 
 /* Convert data from virtual format for register REGNUM
    to raw format for register REGNUM.  */
 
 #define REGISTER_CONVERT_TO_RAW(REGNUM,FROM,TO) \
-  {bcopy ((FROM), (TO), REGISTER_RAW_SIZE (REGNUM));}
+  {memcpy ((TO), (FROM), REGISTER_RAW_SIZE (REGNUM));}
 
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
@@ -294,7 +294,7 @@ extern CORE_ADDR skip_prologue ();
    into consecutive registers starting from r2.  */
 
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
-  bcopy (&(((char *)REGBUF)[REGISTER_BYTE(RV_REGNUM)]), (VALBUF), TYPE_LENGTH (TYPE))
+  memcpy ((VALBUF), &(((char *)REGBUF)[REGISTER_BYTE(RV_REGNUM)]), TYPE_LENGTH (TYPE))
 
 #define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) (*(int *)(REGBUF))
 

@@ -174,7 +174,7 @@ extern struct ext_format ext_format_i960;
   if ((REGNUM) >= FP0_REGNUM)   \
     ieee_extended_to_double (&ext_format_i960, (FROM), (double *)(TO));     \
   else                                  \
-    bcopy ((FROM), (TO), 4);	\
+    memcpy ((TO), (FROM), 4);	\
 }
 
 /* Convert data from virtual format for register REGNUM
@@ -185,7 +185,7 @@ extern struct ext_format ext_format_i960;
   if ((REGNUM) >= FP0_REGNUM)   \
     double_to_ieee_extended (&ext_format_i960, (double *)(FROM), (TO));     \
   else                                  \
-    bcopy ((FROM), (TO), 4); 	\
+    memcpy ((TO), (FROM), 4); 	\
 }
 
 
@@ -221,7 +221,7 @@ extern struct ext_format ext_format_i960;
    On the i960 we just take as many bytes as we need from G0 through G3.  */
 
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
-	bcopy(REGBUF+REGISTER_BYTE(G0_REGNUM), VALBUF, TYPE_LENGTH (TYPE))
+	memcpy(VALBUF, REGBUF+REGISTER_BYTE(G0_REGNUM), TYPE_LENGTH (TYPE))
 
 /* If USE_STRUCT_CONVENTION produces a 1, 
    extract from an array REGBUF containing the (raw) register state

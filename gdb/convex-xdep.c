@@ -747,11 +747,11 @@ select_thread (thread)
   if (thread == inferior_thread)
     return;
 
-  bcopy (registers, thread_regs[inferior_thread], REGISTER_BYTES);
+  memcpy (thread_regs[inferior_thread], registers, REGISTER_BYTES);
   ps.pi_thread = inferior_thread = thread;
   if (have_inferior_p ())
     ioctl (inferior_fd, PISETRWTID, &ps);
-  bcopy (thread_regs[thread], registers, REGISTER_BYTES);
+  memcpy (registers, thread_regs[thread], REGISTER_BYTES);
 }
   
 /* Routine to set or clear a psw bit in the psw and also all psws

@@ -18,14 +18,8 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
-#include "ieee-float.h"
 #include "frame.h"
 #include "symtab.h"
-
-const struct ext_format ext_format_68881 = {
-/* tot sbyte smask expbyte manbyte */
-   12, 0,    0x80, 0,1,	   4,8		/* mc68881 */
-};
 
 
 /* Things needed for making the inferior call functions.
@@ -193,6 +187,120 @@ CORE_ADDR ip;
   return (ip);
 }
 
+void
+m68k_find_saved_regs (frame_info, saved_regs)
+     struct frame_info *frame_info;
+     struct frame_saved_regs *saved_regs;
+{
+  register int regnum;							
+  register int regmask;							
+  register CORE_ADDR next_addr;						
+  register CORE_ADDR pc;
+
+  /* First possible address for a pc in a call dummy for this frame.  */
+  CORE_ADDR possible_call_dummy_start =
+    (frame_info)->frame - CALL_DUMMY_LENGTH - FP_REGNUM*4 - 4
+#if defined (HAVE_68881)
+      - 8*12
+#endif
+	;
+
+  int nextinsn;
+  memset (saved_regs, 0, sizeof (*saved_regs));
+  if ((frame_info)->pc >= possible_call_dummy_start
+      && (frame_info)->pc <= (frame_info)->frame)
+    {
+
+      /* It is a call dummy.  We could just stop now, since we know
+	 what the call dummy saves and where.  But this code proceeds
+	 to parse the "prologue" which is part of the call dummy.
+	 This is needlessly complex, confusing, and also is the only
+	 reason that the call dummy is customized based on HAVE_68881.
+	 FIXME.  */
+
+      next_addr = (frame_info)->frame;
+      pc = possible_call_dummy_start;
+    }
+  else   								
+    {
+      pc = get_pc_function_start ((frame_info)->pc); 			
+      /* Verify we have a link a6 instruction next;			
+	 if not we lose.  If we win, find the address above the saved   
+	 regs using the amount of storage from the link instruction.  */
+      if (044016 == read_memory_integer (pc, 2))			
+	next_addr = (frame_info)->frame + read_memory_integer (pc += 2, 4), pc+=4; 
+      else if (047126 == read_memory_integer (pc, 2))			
+	next_addr = (frame_info)->frame + read_memory_integer (pc += 2, 2), pc+=2; 
+      else goto lose;							
+      /* If have an addal #-n, sp next, adjust next_addr.  */		
+      if ((0177777 & read_memory_integer (pc, 2)) == 0157774)		
+	next_addr += read_memory_integer (pc += 2, 4), pc += 4;		
+    }									
+  regmask = read_memory_integer (pc + 2, 2);				
+#if defined (HAVE_68881)
+  /* Here can come an fmovem.  Check for it.  */		
+  nextinsn = 0xffff & read_memory_integer (pc, 2);			
+  if (0xf227 == nextinsn						
+      && (regmask & 0xff00) == 0xe000)					
+    { pc += 4; /* Regmask's low bit is for register fp7, the first pushed */ 
+      for (regnum = FP0_REGNUM + 7; regnum >= FP0_REGNUM; regnum--, regmask >>= 1)		
+	if (regmask & 1)						
+          saved_regs->regs[regnum] = (next_addr -= 12);		
+      regmask = read_memory_integer (pc + 2, 2); }
+#endif
+  /* next should be a moveml to (sp) or -(sp) or a movl r,-(sp) */	
+  if (0044327 == read_memory_integer (pc, 2))				
+    { pc += 4; /* Regmask's low bit is for register 0, the first written */ 
+      for (regnum = 0; regnum < 16; regnum++, regmask >>= 1)		
+	if (regmask & 1)						
+          saved_regs->regs[regnum] = (next_addr += 4) - 4; }	
+  else if (0044347 == read_memory_integer (pc, 2))			
+    {
+      pc += 4; /* Regmask's low bit is for register 15, the first pushed */ 
+      for (regnum = 15; regnum >= 0; regnum--, regmask >>= 1)		
+	if (regmask & 1)						
+          saved_regs->regs[regnum] = (next_addr -= 4);
+    }
+  else if (0x2f00 == (0xfff0 & read_memory_integer (pc, 2)))		
+    {
+      regnum = 0xf & read_memory_integer (pc, 2); pc += 2;		
+      saved_regs->regs[regnum] = (next_addr -= 4);
+      /* gcc, at least, may use a pair of movel instructions when saving
+	 exactly 2 registers.  */
+      if (0x2f00 == (0xfff0 & read_memory_integer (pc, 2)))
+	{
+	  regnum = 0xf & read_memory_integer (pc, 2);
+	  pc += 2;
+	  saved_regs->regs[regnum] = (next_addr -= 4);
+	}
+    }
+#if defined (HAVE_68881)
+  /* fmovemx to index of sp may follow.  */				
+  regmask = read_memory_integer (pc + 2, 2);				
+  nextinsn = 0xffff & read_memory_integer (pc, 2);			
+  if (0xf236 == nextinsn						
+      && (regmask & 0xff00) == 0xf000)					
+    { pc += 10; /* Regmask's low bit is for register fp0, the first written */ 
+      for (regnum = FP0_REGNUM + 7; regnum >= FP0_REGNUM; regnum--, regmask >>= 1)		
+	if (regmask & 1)						
+          saved_regs->regs[regnum] = (next_addr += 12) - 12;	
+      regmask = read_memory_integer (pc + 2, 2); }			
+#endif
+  /* clrw -(sp); movw ccr,-(sp) may follow.  */				
+  if (0x426742e7 == read_memory_integer (pc, 4))			
+    saved_regs->regs[PS_REGNUM] = (next_addr -= 4);		
+  lose: ;								
+  saved_regs->regs[SP_REGNUM] = (frame_info)->frame + 8;		
+  saved_regs->regs[FP_REGNUM] = (frame_info)->frame;		
+  saved_regs->regs[PC_REGNUM] = (frame_info)->frame + 4;		
+#ifdef SIG_SP_FP_OFFSET
+  /* Adjust saved SP_REGNUM for fake _sigtramp frames.  */
+  if (frame_info->signal_handler_caller && frame_info->next)
+    saved_regs->regs[SP_REGNUM] = frame_info->next->frame + SIG_SP_FP_OFFSET;
+#endif
+}
+
+
 #ifdef USE_PROC_FS	/* Target dependent support for /proc */
 
 #include <sys/procfs.h>
@@ -317,7 +425,7 @@ int regno;
 	{
 	  from = (char *) &registers[REGISTER_BYTE (regi)];
 	  to = (char *) &(fpregsetp -> f_fpregs[regi-FP0_REGNUM][0]);
-	  bcopy (from, to, REGISTER_RAW_SIZE (regi));
+	  memcpy (to, from, REGISTER_RAW_SIZE (regi));
 	}
     }
   if ((regno == -1) || (regno == FPC_REGNUM))
@@ -348,38 +456,38 @@ int
 get_longjmp_target(pc)
      CORE_ADDR *pc;
 {
+  char buf[TARGET_PTR_BIT / TARGET_CHAR_BIT];
   CORE_ADDR sp, jb_addr;
 
   sp = read_register(SP_REGNUM);
 
-  if (target_read_memory(sp + SP_ARG0, /* Offset of first arg on stack */
-			 &jb_addr,
-			 sizeof(CORE_ADDR)))
+  if (target_read_memory (sp + SP_ARG0, /* Offset of first arg on stack */
+			  buf,
+			  TARGET_PTR_BIT / TARGET_CHAR_BIT))
     return 0;
 
+  jb_addr = extract_address (buf, TARGET_PTR_BIT / TARGET_CHAR_BIT);
 
-  SWAP_TARGET_AND_HOST(&jb_addr, sizeof(CORE_ADDR));
-
-  if (target_read_memory(jb_addr + JB_PC * JB_ELEMENT_SIZE, pc,
-			 sizeof(CORE_ADDR)))
+  if (target_read_memory (jb_addr + JB_PC * JB_ELEMENT_SIZE, buf,
+			  TARGET_PTR_BIT / TARGET_CHAR_BIT))
     return 0;
 
-  SWAP_TARGET_AND_HOST(pc, sizeof(CORE_ADDR));
+  *pc = extract_address (buf, TARGET_PTR_BIT / TARGET_CHAR_BIT);
 
   return 1;
 }
 #endif /* GET_LONGJMP_TARGET */
 
 /* Immediately after a function call, return the saved pc before the frame
-   is setup.  We check for the common case of being inside of a system call,
-   and if so, we know that Sun pushes the call # on the stack prior to doing
-   the trap. */
+   is setup.  For sun3's, we check for the common case of being inside of a
+   system call, and if so, we know that Sun pushes the call # on the stack
+   prior to doing the trap. */
 
 CORE_ADDR
 m68k_saved_pc_after_call(frame)
      struct frame_info *frame;
 {
-#ifdef sun
+#ifdef GDB_TARGET_IS_SUN3
   int op;
 
   op = read_memory_integer (frame->pc, 2);
@@ -388,6 +496,6 @@ m68k_saved_pc_after_call(frame)
   if (op == P_TRAP)
     return read_memory_integer (read_register (SP_REGNUM) + 4, 4);
   else
-#endif /* sun */
+#endif /* GDB_TARGET_IS_SUN3 */
     return read_memory_integer (read_register (SP_REGNUM), 4);
 }

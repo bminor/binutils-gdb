@@ -88,9 +88,6 @@ symfile_bfd_open PARAMS ((char *));
 static void
 find_sym_fns PARAMS ((struct objfile *));
 
-void
-clear_symtab_users_once PARAMS ((void));
-
 /* List of all available sym_fns.  On gdb startup, each object file reader
    calls add_symtab_fns() to register information on each format it is
    prepared to read. */
@@ -111,12 +108,7 @@ int symbol_reloading = 0;
 #endif
 
 
-/* In the following sort, we always make sure that
-   register debug symbol declarations always come before regular
-   debug symbol declarations (as might happen when parameters are
-   then put into registers by the compiler).
-
-   Since this function is called from within qsort, in an ANSI environment
+/* Since this function is called from within qsort, in an ANSI environment
    it must conform to the prototype for qsort, which specifies that the
    comparison function takes two "void *" pointers. */
 
@@ -126,22 +118,11 @@ compare_symbols (s1p, s2p)
      const PTR s2p;
 {
   register struct symbol **s1, **s2;
-  register int namediff;
 
   s1 = (struct symbol **) s1p;
   s2 = (struct symbol **) s2p;
 
-  /* Compare the initial characters.  */
-  namediff = SYMBOL_NAME (*s1)[0] - SYMBOL_NAME (*s2)[0];
-  if (namediff != 0) return namediff;
-
-  /* If they match, compare the rest of the names.  */
-  namediff = STRCMP (SYMBOL_NAME (*s1), SYMBOL_NAME (*s2));
-  if (namediff != 0) return namediff;
-
-  /* For symbols of the same name, registers should come first.  */
-  return ((SYMBOL_CLASS (*s2) == LOC_REGISTER)
-	  - (SYMBOL_CLASS (*s1) == LOC_REGISTER));
+  return (STRCMP (SYMBOL_NAME (*s1), SYMBOL_NAME (*s2)));
 }
 
 /*
@@ -259,7 +240,7 @@ obsavestring (ptr, size, obstackp)
      struct obstack *obstackp;
 {
   register char *p = (char *) obstack_alloc (obstackp, size + 1);
-  /* Open-coded bcopy--saves function call time.
+  /* Open-coded memcpy--saves function call time.
      These strings are usually short.  */
   {
     register char *p1 = ptr;
@@ -378,12 +359,21 @@ syms_from_objfile (objfile, addr, mainline, verbo)
 {
   struct section_offsets *section_offsets;
   asection *lowest_sect;
+  struct cleanup *old_chain;
 
   init_entry_point_info (objfile);
   find_sym_fns (objfile);
 
+  /* Make sure that partially constructed symbol tables will be cleaned up
+     if an error occurs during symbol reading.  */
+  old_chain = make_cleanup (free_objfile, objfile);
+
   if (mainline) 
     {
+      /* We will modify the main symbol table, make sure that all its users
+	 will be cleaned up if an error occurs during symbol reading.  */
+      make_cleanup (clear_symtab_users, 0);
+
       /* Since no error yet, throw away the old symbol table.  */
 
       if (symfile_objfile != NULL)
@@ -488,9 +478,13 @@ syms_from_objfile (objfile, addr, mainline, verbo)
      that this does not mean we found any symbols... */
 
   objfile -> flags |= OBJF_SYMS;
+
+  /* Discard cleanups as symbol reading was successful.  */
+
+  discard_cleanups (old_chain);
 }
 
-/* Perform required actions immediately after either reading in the initial
+/* Perform required actions after either reading in the initial
    symbols for a new objfile, or mapping in the symbols from a reusable
    objfile. */
    
@@ -500,22 +494,24 @@ new_symfile_objfile (objfile, mainline, verbo)
      int mainline;
      int verbo;
 {
+
+  /* If this is the main symbol file we have to clean up all users of the
+     old main symbol file. Otherwise it is sufficient to fixup all the
+     breakpoints that may have been redefined by this symbol file.  */
   if (mainline)
     {
       /* OK, make it the "real" symbol file.  */
       symfile_objfile = objfile;
-    }
 
-  /* If we have wiped out any old symbol tables, clean up.  */
-  clear_symtab_users_once ();
+      clear_symtab_users ();
+    }
+  else
+    {
+      breakpoint_re_set ();
+    }
 
   /* We're done reading the symbol file; finish off complaints.  */
   clear_complaints (0, verbo);
-
-  /* Fixup all the breakpoints that may have been redefined by this
-     symbol file. */
-
-  breakpoint_re_set ();
 }
 
 /* Process a symbol file, as either the main file or as a dynamically
@@ -554,11 +550,6 @@ symbol_file_add (name, from_tty, addr, mainline, mapped, readnow)
       && from_tty
       && !query ("Load new symbol table from \"%s\"? ", name))
       error ("Not confirmed.");
-      
-  /* Getting new symbols may change our opinion about what is
-     frameless.  */
-
-  reinit_frame_cache ();
 
   objfile = allocate_objfile (abfd, mapped);
 
@@ -594,8 +585,6 @@ symbol_file_add (name, from_tty, addr, mainline, mapped, readnow)
       syms_from_objfile (objfile, addr, mainline, from_tty);
     }      
 
-  new_symfile_objfile (objfile, mainline, from_tty);
-
   /* We now have at least a partial symbol table.  Check to see if the
      user requested that all symbols be read on initial access via either
      the gdb startup command line or on a per symbol file basis.  Expand
@@ -623,6 +612,13 @@ symbol_file_add (name, from_tty, addr, mainline, mapped, readnow)
       printf_filtered ("done.\n");
       fflush (stdout);
     }
+
+  new_symfile_objfile (objfile, mainline, from_tty);
+      
+  /* Getting new symbols may change our opinion about what is
+     frameless.  */
+
+  reinit_frame_cache ();
 
   return (objfile);
 }
@@ -652,8 +648,6 @@ symbol_file_command (args, from_tty)
 	error ("Not confirmed.");
       free_all_objfiles ();
       symfile_objfile = NULL;
-      current_source_symtab = NULL;
-      current_source_line = 0;
       if (from_tty)
 	{
 	  printf ("No symbol file now.\n");
@@ -759,7 +753,7 @@ symfile_bfd_open (name)
   name = absolute_name;		/* Keep 2nd malloc'd copy in bfd */
 				/* It'll be freed in free_objfile(). */
 
-  sym_bfd = bfd_fdopenr (name, NULL, desc);
+  sym_bfd = bfd_fdopenr (name, gnutarget, desc);
   if (!sym_bfd)
     {
       close (desc);
@@ -826,6 +820,81 @@ load_command (arg, from_tty)
      int from_tty;
 {
   target_load (arg, from_tty);
+}
+
+/* This version of "load" should be usable for any target.  Currently
+   it is just used for remote targets, not inftarg.c or core files,
+   on the theory that only in that case is it useful.
+
+   Avoiding xmodem and the like seems like a win (a) because we don't have
+   to worry about finding it, and (b) On VMS, fork() is very slow and so
+   we don't want to run a subprocess.  On the other hand, I'm not sure how
+   performance compares.  */
+void
+generic_load (filename, from_tty)
+    char *filename;
+    int from_tty;
+{
+  struct cleanup *old_cleanups;
+  asection *s;
+  bfd *loadfile_bfd = bfd_openr (filename, gnutarget);
+  if (loadfile_bfd == NULL)
+    {
+      perror_with_name (filename);
+      return;
+    }
+  old_cleanups = make_cleanup (bfd_close, loadfile_bfd);
+
+  if (!bfd_check_format (loadfile_bfd, bfd_object)) 
+    {
+      error ("\"%s\" is not an object file: %s", filename,
+	     bfd_errmsg (bfd_error));
+    }
+  
+  for (s = loadfile_bfd->sections; s; s = s->next) 
+    {
+      if (s->flags & SEC_LOAD) 
+	{
+	  bfd_size_type size;
+
+	  size = bfd_get_section_size_before_reloc (s);
+	  if (size > 0)
+	    {
+	      char *buffer;
+	      struct cleanup *old_chain;
+	      bfd_vma vma;
+
+	      buffer = xmalloc (size);
+	      old_chain = make_cleanup (free, buffer);
+
+	      vma = bfd_get_section_vma (loadfile_bfd, s);
+
+	      /* Is this really necessary?  I guess it gives the user something
+		 to look at during a long download.  */
+	      printf_filtered ("Loading section %s, size 0x%x vma 0x%x\n",
+			       bfd_get_section_name (loadfile_bfd, s),
+			       size, vma);
+
+	      bfd_get_section_contents (loadfile_bfd, s, buffer, 0, size);
+
+	      target_write_memory (vma, buffer, size);
+
+	      do_cleanups (old_chain);
+	    }
+	}
+    }
+
+  /* We were doing this in remote-mips.c, I suspect it is right
+     for other targets too.  */
+  write_pc (loadfile_bfd->start_address);
+
+  /* FIXME: are we supposed to call symbol_file_add or not?  According to
+     a comment from remote-mips.c (where a call to symbol_file_add was
+     commented out), making the call confuses GDB if more than one file is
+     loaded in.  remote-nindy.c had no call to symbol_file_add, but remote-vx.c
+     does.  */
+
+  do_cleanups (old_cleanups);
 }
 
 /* This function allows the addition of incrementally linked object files.
@@ -1057,6 +1126,23 @@ allocate_psymtab (filename, objfile)
 }
 
 
+/* Reset all data structures in gdb which may contain references to symbol
+   table date.  */
+
+void
+clear_symtab_users ()
+{
+  /* Someday, we should do better than this, by only blowing away
+     the things that really need to be blown.  */
+  clear_value_history ();
+  clear_displays ();
+  clear_internalvars ();
+  breakpoint_re_set ();
+  set_default_breakpoint (0, 0, 0, 0);
+  current_source_symtab = 0;
+  current_source_line = 0;
+}
+
 /* clear_symtab_users_once:
 
    This function is run after symbol reading, or from a cleanup.
@@ -1082,10 +1168,16 @@ allocate_psymtab (filename, objfile)
    reading, is because the cleanup protects us in case of errors, but is
    discarded if symbol reading is successful.  */
 
+#if 0
+  /* FIXME:  As free_named_symtabs is currently a big noop this function
+     is no longer needed.
+static void
+clear_symtab_users_once PARAMS ((void));
+
 static int clear_symtab_users_queued;
 static int clear_symtab_users_done;
 
-void
+static void
 clear_symtab_users_once ()
 {
   /* Enforce once-per-`do_cleanups'-semantics */
@@ -1093,17 +1185,9 @@ clear_symtab_users_once ()
     return;
   clear_symtab_users_done = clear_symtab_users_queued;
 
-  printf ("Resetting debugger state after updating old symbol tables\n");
-
-  /* Someday, we should do better than this, by only blowing away
-     the things that really need to be blown.  */
-  clear_value_history ();
-  clear_displays ();
-  clear_internalvars ();
-  breakpoint_re_set ();
-  set_default_breakpoint (0, 0, 0, 0);
-  current_source_symtab = 0;
+  clear_symtab_users ();
 }
+#endif
 
 /* Delete the specified psymtab, and any others that reference it.  */
 
@@ -1367,19 +1451,24 @@ add_psymbol_addr_to_list (name, namelength, namespace, class, list, val,
 void
 _initialize_symfile ()
 {
-
-  add_com ("symbol-file", class_files, symbol_file_command,
+  struct cmd_list_element *c;
+  
+  c = add_cmd ("symbol-file", class_files, symbol_file_command,
    "Load symbol table from executable file FILE.\n\
 The `file' command can also load symbol tables, as well as setting the file\n\
-to execute.");
+to execute.", &cmdlist);
+  c->completer = filename_completer;
 
-  add_com ("add-symbol-file", class_files, add_symbol_file_command,
+  c = add_cmd ("add-symbol-file", class_files, add_symbol_file_command,
    "Load the symbols from FILE, assuming FILE has been dynamically loaded.\n\
-The second argument provides the starting address of the file's text.");
+The second argument provides the starting address of the file's text.",
+	       &cmdlist);
+  c->completer = filename_completer;
 
-  add_com ("load", class_files, load_command,
+  c = add_cmd ("load", class_files, load_command,
    "Dynamically load FILE into the running program, and record its symbols\n\
-for access from GDB.");
+for access from GDB.", &cmdlist);
+  c->completer = filename_completer;
 
   add_show_from_set
     (add_set_cmd ("symbol-reloading", class_support, var_boolean,

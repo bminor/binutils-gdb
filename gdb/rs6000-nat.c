@@ -228,20 +228,20 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
   if (which == 0) {
 
     /* copy GPRs first. */
-    bcopy (core_reg_sect, registers, 32 * 4);
+    memcpy (registers, core_reg_sect, 32 * 4);
 
     /* gdb's internal register template and bfd's register section layout
        should share a common include file. FIXMEmgo */
     /* then comes special registes. They are supposed to be in the same
        order in gdb template and bfd `.reg' section. */
     core_reg_sect += (32 * 4);
-    bcopy (core_reg_sect, &registers [REGISTER_BYTE (FIRST_SP_REGNUM)],
+    memcpy (&registers [REGISTER_BYTE (FIRST_SP_REGNUM)], core_reg_sect, 
     			(LAST_SP_REGNUM - FIRST_SP_REGNUM + 1) * 4);
   }
 
   /* fetch floating point registers from register section 2 in core bfd. */
   else if (which == 2)
-    bcopy (core_reg_sect, &registers [REGISTER_BYTE (FP0_REGNUM)], 32 * 8);
+    memcpy (&registers [REGISTER_BYTE (FP0_REGNUM)], core_reg_sect, 32 * 8);
 
   else
     fprintf (stderr, "Gdb error: unknown parameter to fetch_core_registers().\n");

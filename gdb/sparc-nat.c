@@ -98,8 +98,8 @@ fetch_inferior_registers (regno)
 	    perror("ptrace_getfpregs");
       memcpy (&registers[REGISTER_BYTE (FP0_REGNUM)], &inferior_fp_registers,
 	      sizeof inferior_fp_registers.fpu_fr);
-      /* bcopy (&inferior_fp_registers.Fpu_fsr,
-	     &registers[REGISTER_BYTE (FPS_REGNUM)],
+      /* memcpy (&registers[REGISTER_BYTE (FPS_REGNUM)],
+	     &inferior_fp_registers.Fpu_fsr,
 	     sizeof (FPU_FSR_TYPE));  FIXME???  -- gnu@cyg */
       for (i = FP0_REGNUM; i <= FP0_REGNUM+31; i++)
 	register_valid[i] = 1;

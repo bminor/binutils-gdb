@@ -274,11 +274,11 @@ switch (regno) { \
 
 #undef REGISTER_CONVERT_TO_VIRTUAL
 #define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,FROM,TO)	\
-((REGNUM < 3) ? bcopy ((FROM), (TO), 4) : \
+((REGNUM < 3) ? memcpy ((TO), (FROM), 4) : \
 (REGNUM < 5) ? i387_to_double((FROM), (TO)) : \
-(REGNUM < 8) ? bcopy ((FROM), (TO), 4) : \
+(REGNUM < 8) ? memcpy ((TO), (FROM), 4) : \
 (REGNUM < 14) ? i387_to_double((FROM), (TO)) : \
-    bcopy ((FROM), (TO), 4))
+    memcpy ((TO), (FROM), 4))
 
 extern void
 i387_to_double PARAMS ((char *, char *));
@@ -288,11 +288,11 @@ i387_to_double PARAMS ((char *, char *));
 
 #undef REGISTER_CONVERT_TO_RAW
 #define REGISTER_CONVERT_TO_RAW(REGNUM,FROM,TO)	\
-((REGNUM < 3) ? bcopy ((FROM), (TO), 4) : \
+((REGNUM < 3) ? memcpy ((TO), (FROM), 4) : \
 (REGNUM < 5) ? double_to_i387((FROM), (TO)) : \
-(REGNUM < 8) ? bcopy ((FROM), (TO), 4) : \
+(REGNUM < 8) ? memcpy ((TO), (FROM), 4) : \
 (REGNUM < 14) ? double_to_i387((FROM), (TO)) : \
-    bcopy ((FROM), (TO), 4))
+    memcpy ((TO), (FROM), 4))
 
 extern void
 double_to_i387 PARAMS ((char *, char *));

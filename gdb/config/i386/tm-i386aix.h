@@ -116,14 +116,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    to virtual format for register REGNUM.  */
 #undef REGISTER_CONVERT_TO_VIRTUAL
 #define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,FROM,TO) \
-  ((REGNUM < FP0_REGNUM) ? bcopy ((FROM), (TO), 4) : \
+  ((REGNUM < FP0_REGNUM) ? memcpy ((TO), (FROM), 4) : \
    i387_to_double((FROM), (TO)))
 
 /* Convert data from virtual format for register REGNUM
    to raw format for register REGNUM.  */
 #undef REGISTER_CONVERT_TO_RAW
 #define REGISTER_CONVERT_TO_RAW(REGNUM,FROM,TO) \
-  ((REGNUM < FP0_REGNUM) ? bcopy ((FROM), (TO), 4) : \
+  ((REGNUM < FP0_REGNUM) ? memcpy ((TO), (FROM), 4) : \
    double_to_i387((FROM), (TO)))
 
 /* Return the GDB type object for the "standard" data type

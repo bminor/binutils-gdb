@@ -41,7 +41,7 @@ Here is an m-news.h file for gdb.  It supports the 68881 registers.
 			       &REGBUF[REGISTER_BYTE (FP0_REGNUM)], VALBUF); \
       } \
     else \
-      bcopy (REGBUF, VALBUF, TYPE_LENGTH (TYPE)); }
+      memcpy (VALBUF, REGBUF, TYPE_LENGTH (TYPE)); }
 
 /* Write into appropriate registers a function return value
    of type TYPE, given in virtual format.  */

@@ -171,7 +171,7 @@ extern CORE_ADDR mz8k_skip_prologue PARAMS ((CORE_ADDR ip));
 
 
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
-  bcopy(REGBUF + REGISTER_BYTE(2), VALBUF, TYPE_LENGTH(TYPE));
+  memcpy(VALBUF, REGBUF + REGISTER_BYTE(2), TYPE_LENGTH(TYPE));
 
 /* Write into appropriate registers a function return value
    of type TYPE, given in virtual format. */

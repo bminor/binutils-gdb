@@ -296,8 +296,8 @@ UDIConnect(Config, Session)
 	  }
 
         soc_con[cnt].tip_sockaddr.sa_family = domain;
-        bcopy(soc_con[cnt].tip_string,
-	      soc_con[cnt].tip_sockaddr.sa_data,
+        memcpy(soc_con[cnt].tip_sockaddr.sa_data,
+	      soc_con[cnt].tip_string,
 	      sizeof(soc_con[cnt].tip_sockaddr.sa_data));
     	if (connect(soc_con[cnt].dfe_sd,
 		    &soc_con[cnt].tip_sockaddr,
@@ -372,8 +372,8 @@ UDIConnect(Config, Session)
 	    	dfe_errno = UDIErrorNoSuchConnection;
 		goto tip_failure;
 	      }
-	    bcopy(tip_info_p->h_addr,
-		  (char *)&soc_con[cnt].tip_sockaddr_in.sin_addr,
+	    memcpy((char *)&soc_con[cnt].tip_sockaddr_in.sin_addr,
+		  tip_info_p->h_addr,
 		  tip_info_p->h_length);
 	  }
 	soc_con[cnt].tip_sockaddr_in.sin_port

@@ -181,7 +181,7 @@ extern CORE_ADDR h8300_skip_prologue ();
 /* FIXME: Won't work with both h8/300's.  */
 
 #define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
-  bcopy ((char *)(REGBUF), VALBUF, TYPE_LENGTH(TYPE))
+  memcpy (VALBUF, (char *)(REGBUF), TYPE_LENGTH(TYPE))
 
 /* Write into appropriate registers a function return value
    of type TYPE, given in virtual format.  Assumes floats are passed

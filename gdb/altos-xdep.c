@@ -115,7 +115,7 @@ core_file_command (filename, from_tty)
 	if (reg_offset > NBPG * UPAGES)
 	  reg_offset -= KERNEL_U_ADDR;
 
-	bcopy (&u.u_exdata, &core_aouthdr, sizeof (AOUTHDR));
+	memcpy (&core_aouthdr, &u.u_exdata, sizeof (AOUTHDR));
 	printf ("Core file is from \"%s\".\n", u.u_comm);
 
 	/* I don't know where to find this info.

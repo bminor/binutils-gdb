@@ -173,13 +173,13 @@ extern CORE_ADDR mips_skip_prologue PARAMS ((CORE_ADDR addr, int lenient));
    to virtual format for register REGNUM.  */
 
 #define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,FROM,TO)	\
-  bcopy ((FROM), (TO), 4);
+  memcpy ((TO), (FROM), 4);
 
 /* Convert data from virtual format for register REGNUM
    to raw format for register REGNUM.  */
 
 #define REGISTER_CONVERT_TO_RAW(REGNUM,FROM,TO)	\
-  bcopy ((FROM), (TO), 4);
+  memcpy ((TO), (FROM), 4);
 
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
