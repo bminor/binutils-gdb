@@ -1,3 +1,11 @@
+Fri Feb 18 23:12:59 1994  Stu Grossman  (grossman at cygnus.com)
+
+	* sparclite/Makefile.in, sparclite/salib.c, sparclite/sparclite.h:
+	Fixup cache_on and flush_i_cache so that they work for both the
+	930 and 932 processors.  Rewrite most low level funcs (uart
+	access & cache stuff) to use new ASI access macros in sparclite.h.
+	Also make it easy to access second serial port.
+
 Fri Feb 18 22:17:33 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* hp300ux-nat.c: Don't incloude <sys/dir.h>, <sys/ioctl.h>, or
