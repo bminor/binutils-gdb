@@ -5309,7 +5309,7 @@ swap_out_syms (abfd, sttp, relocatable_p)
       symtab_shndx_hdr->sh_entsize = sizeof (Elf_External_Sym_Shndx);
     }
 
-  /* now generate the data (for "contents") */
+  /* Now generate the data (for "contents").  */
   {
     /* Fill in zeroth symbol and swap it out.  */
     Elf_Internal_Sym sym;
@@ -5375,6 +5375,7 @@ swap_out_syms (abfd, sttp, relocatable_p)
 	      value += sec->output_offset;
 	      sec = sec->output_section;
 	    }
+
 	  /* Don't add in the section vma for relocatable output.  */
 	  if (! relocatable_p)
 	    value += sec->vma;
@@ -5426,7 +5427,16 @@ swap_out_syms (abfd, sttp, relocatable_p)
 		     section of a symbol to be a section that is
 		     actually in the output file.  */
 		  sec2 = bfd_get_section_by_name (abfd, sec->name);
-		  BFD_ASSERT (sec2 != 0);
+		  if (sec2 == NULL)
+		    {
+		      _bfd_error_handler (_("\
+Unable to find equivalent output section for symbol '%s' from section '%s'"),
+					  syms[idx]->name ? syms[idx]->name : "<Local sym>",
+					  sec->name);
+		      bfd_set_error (bfd_error_invalid_operation);      
+		      return FALSE;
+		    }
+  
 		  shndx = _bfd_elf_section_from_bfd_section (abfd, sec2);
 		  BFD_ASSERT (shndx != -1);
 		}
@@ -5447,7 +5457,7 @@ swap_out_syms (abfd, sttp, relocatable_p)
       if (syms[idx]->section->flags & SEC_THREAD_LOCAL)
 	type = STT_TLS;
 
-      /* Processor-specific types */
+      /* Processor-specific types.  */
       if (type_ptr != NULL
 	  && bed->elf_backend_get_symbol_type)
 	type = ((*bed->elf_backend_get_symbol_type)

@@ -1,7 +1,13 @@
+2003-02-07  Nick Clifton  <nickc@redhat.com>
+
+	* elf.c (swap_out_syms): Generate an error message if an
+	equivalent output section cannot be found for a symbol.
+
 2003-02-07  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf64-alpha.c (elf64_alpha_relax_section): Don't crash if
 	local_got_entries is NULL.
+
 
 2003-02-06  Andreas Schwab  <schwab@suse.de>
 
