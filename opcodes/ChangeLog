@@ -1,5 +1,10 @@
 Mon May  5 14:28:41 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* i386-dis.c: (dis386_twobyte): Add MMX instructions.
+	(twobyte_has_modrm): Likewise.
+	(grps): Likewise.
+	(OP_MMX, OP_EM, OP_MS): New static functions.
+
 	* i386-dis.c: Revert patch of April 4.  The output now matches
 	what gcc generates.
 
