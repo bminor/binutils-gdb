@@ -1,3 +1,12 @@
+Tue Jan 14 22:34:00 1992  Fred Fish  (fnf at cygnus.com)
+
+	* dwarfread.c (locval):  Add offreg flag to indicate location
+	values that are computed off a base register.
+
+	* dwarfread.c (new_symbol):  Rework TAG_global_variable and
+	TAG_local_variable cases to account for static variables
+	within function scopes.
+
 Tue Jan 14 12:28:52 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* inflow.c:  remove #include <sys/dir.h>.  Not necessary, and

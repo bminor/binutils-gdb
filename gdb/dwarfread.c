@@ -186,6 +186,7 @@ static char *dbbase;	/* Base pointer to dwarf info */
 static int dbroff;	/* Relative offset from start of .debug section */
 static char *lnbase;	/* Base pointer to line section */
 static int isreg;	/* Kludge to identify register variables */
+static int offreg;	/* Kludge to identify basereg references */
 
 static CORE_ADDR baseaddr;	/* Add to each symbol value */
 
@@ -1737,6 +1738,7 @@ DEFUN(locval, (loc), char *loc)
   stacki = 0;
   stack[stacki] = 0;
   isreg = 0;
+  offreg = 0;
   for (loc += sizeof (short); loc < end; loc += sizeof (long))
     {
       switch (*loc++) {
@@ -1752,6 +1754,7 @@ DEFUN(locval, (loc), char *loc)
       case OP_BASEREG:
 	/* push value of register (number) */
 	/* Actually, we compute the value as if register has 0 */
+	offreg = 1;
 	(void) memcpy (&regno, loc, sizeof (long));
 	if (regno == R_FP)
 	  {
@@ -2443,30 +2446,26 @@ DEFUN(new_symbol, (dip), struct dieinfo *dip)
 	    }
 	  break;
 	case TAG_global_variable:
-	case TAG_local_variable:
 	  if (dip -> at_location != NULL)
 	    {
 	      SYMBOL_VALUE (sym) = locval (dip -> at_location);
-	    }
-	  if (dip -> dietag == TAG_global_variable)
-	    {
 	      add_symbol_to_list (sym, &global_symbols);
 	      SYMBOL_CLASS (sym) = LOC_STATIC;
 	      SYMBOL_VALUE (sym) += baseaddr;
 	    }
-	  else
+	  break;
+	case TAG_local_variable:
+	  if (dip -> at_location != NULL)
 	    {
+	      SYMBOL_VALUE (sym) = locval (dip -> at_location);
 	      add_symbol_to_list (sym, list_in_scope);
-	      if (context_stack_depth > 0)
+	      if (isreg)
 		{
-		  if (isreg)
-		    {
-		      SYMBOL_CLASS (sym) = LOC_REGISTER;
-		    }
-		  else
-		    {
-		      SYMBOL_CLASS (sym) = LOC_LOCAL;
-		    }
+		  SYMBOL_CLASS (sym) = LOC_REGISTER;
+		}
+	      else if (offreg)
+		{
+		  SYMBOL_CLASS (sym) = LOC_LOCAL;
 		}
 	      else
 		{
