@@ -31,66 +31,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "coff/symconst.h"
 #include "coff/ecoff-ext.h"
 #include "libcoff.h"
-
-/* `Tdata' information kept for ECOFF files.  */
-
-#define ecoff_data(abfd) ((abfd)->tdata.ecoff_obj_data)
-
-typedef struct ecoff_tdata
-{
-  /* The reloc file position, set by
-     ecoff_compute_section_file_positions.  */
-  file_ptr reloc_filepos;
-
-  /* The symbol table file position, set by ecoff_mkobject_hook.  */
-  file_ptr sym_filepos;
-
-  /* The start and end of the text segment.  Only valid for an
-     existing file, not for one we are creating.  */
-  unsigned long text_start;
-  unsigned long text_end;
-
-  /* The cached gp value.  This is used when relocating.  */
-  bfd_vma gp;
-
-  /* The register masks.  When linking, all the masks found in the
-     input files are combined into the masks of the output file.  */
-  unsigned long gprmask;
-  unsigned long cprmask[4];
-
-  /* The size of the unswapped ECOFF symbolic information.  */
-  bfd_size_type raw_size;
-
-  /* The unswapped ECOFF symbolic information.  */
-  PTR raw_syments;
-
-  /* The swapped ECOFF symbolic header.  */
-  HDRR symbolic_header;
-
-  /* Pointers to the unswapped symbolic information.  */
-  unsigned char *line;
-  struct dnr_ext *external_dnr;
-  struct pdr_ext *external_pdr;
-  struct sym_ext *external_sym;
-  struct opt_ext *external_opt;
-  union aux_ext *external_aux;
-  char *ss;
-  char *ssext;
-  struct fdr_ext *external_fdr;
-  struct rfd_ext *external_rfd;
-  struct ext_ext *external_ext;
-
-  /* The swapped FDR information.  */
-  FDR *fdr;
-
-  /* The FDR index.  This is set for an input BFD to a link so that
-     the external symbols can set their FDR index correctly.  */
-  unsigned int ifdbase;
-
-  /* The canonical BFD symbols.  */
-  struct ecoff_symbol_struct *canonical_symbols;
-
-} ecoff_data_type;
+#include "libecoff.h"
 
 /* Each canonical asymbol really looks like this.  */
 
@@ -150,7 +91,6 @@ static boolean ecoff_set_arch_mach_hook PARAMS ((bfd *abfd, PTR filehdr));
 static long ecoff_sec_to_styp_flags PARAMS ((CONST char *name,
 					     flagword flags));
 static flagword ecoff_styp_to_sec_flags PARAMS ((bfd *abfd, PTR hdr));
-static boolean ecoff_slurp_symbolic_info PARAMS ((bfd *abfd));
 static asymbol *ecoff_make_empty_symbol PARAMS ((bfd *abfd));
 static void ecoff_set_symbol_info PARAMS ((bfd *abfd, SYMR *ecoff_sym,
 					   asymbol *asym, int ext));
@@ -498,9 +438,11 @@ ecoff_styp_to_sec_flags (abfd, hdr)
 }
 
 /* Read in and swap the important symbolic information for an ECOFF
-   object file.  */
+   object file.  FIXME: This is called by gdb.  If there is ever
+   another ECOFF target, it should be moved into some sort of target
+   specific structure.  */
 
-static boolean
+boolean
 ecoff_slurp_symbolic_info (abfd)
      bfd *abfd;
 {
@@ -704,7 +646,6 @@ ecoff_set_symbol_info (abfd, ecoff_sym, asym, ext)
     case stLabel:
     case stProc:
     case stStaticProc:
-    case stBlock:
     case stNil:
       break;
     default:
@@ -2479,6 +2420,7 @@ ecoff_get_debug (output_bfd, seclet, section, relocateable)
   struct sym_ext *sym_out;
   ecoff_symbol_type *esym_ptr;
   ecoff_symbol_type *esym_end;
+  unsigned long pdr_off;
   FDR *fdr_ptr;
   FDR *fdr_end;
   struct fdr_ext *fdr_out;
@@ -2645,6 +2587,15 @@ ecoff_get_debug (output_bfd, seclet, section, relocateable)
       memcpy (output_ecoff->external_pdr + output_symhdr->ipdMax,
 	      input_ecoff->external_pdr,
 	      input_symhdr->ipdMax * sizeof (struct pdr_ext));
+      if (input_symhdr->ipdMax == 0)
+	pdr_off = 0;
+      else
+	{
+	  PDR pdr;
+
+	  ecoff_swap_pdr_in (input_bfd, input_ecoff->external_pdr, &pdr);
+	  pdr_off = pdr.adr;
+	}
       memcpy (output_ecoff->external_opt + output_symhdr->ioptMax,
 	      input_ecoff->external_opt,
 	      input_symhdr->ioptMax * sizeof (struct opt_ext));
@@ -2657,6 +2608,7 @@ ecoff_get_debug (output_bfd, seclet, section, relocateable)
       struct pdr_ext *pdr_in;
       struct pdr_ext *pdr_end;
       struct pdr_ext *pdr_out;
+      int first_pdr;
       struct opt_ext *opt_in;
       struct opt_ext *opt_end;
       struct opt_ext *opt_out;
@@ -2677,12 +2629,19 @@ ecoff_get_debug (output_bfd, seclet, section, relocateable)
       pdr_in = input_ecoff->external_pdr;
       pdr_end = pdr_in + input_symhdr->ipdMax;
       pdr_out = output_ecoff->external_pdr + output_symhdr->ipdMax;
+      first_pdr = 1;
+      pdr_off = 0;
       for (; pdr_in < pdr_end; pdr_in++, pdr_out++)
 	{
 	  PDR pdr;
 
 	  ecoff_swap_pdr_in (input_bfd, pdr_in, &pdr);
 	  ecoff_swap_pdr_out (output_bfd, &pdr, pdr_out);
+	  if (first_pdr)
+	    {
+	      pdr_off = pdr.adr;
+	      first_pdr = 0;
+	    }
 	}
       opt_in = input_ecoff->external_opt;
       opt_end = opt_in + input_symhdr->ioptMax;
@@ -2710,10 +2669,13 @@ ecoff_get_debug (output_bfd, seclet, section, relocateable)
       fdr = *fdr_ptr;
 
       /* The memory address for this fdr is the address for the seclet
-	 plus the offset to this fdr within input_bfd.  */
+	 plus the offset to this fdr within input_bfd.  For some
+	 reason the offset of the first procedure pointer is also
+	 added in.  */
       fdr.adr = (bfd_get_section_vma (output_bfd, section)
 		 + seclet->offset
-		 + (fdr_ptr->adr - input_ecoff->fdr->adr));
+		 + (fdr_ptr->adr - input_ecoff->fdr->adr)
+		 + pdr_off);
 
       fdr.issBase += output_symhdr->issMax;
       fdr.isymBase += output_symhdr->isymMax;

@@ -1,3 +1,21 @@
+Mon Feb 22 15:03:07 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* coff-mips.c (ecoff_set_symbol_info): stBlock symbols are always
+	debugging symbols.
+	(ecoff_get_debug): Offset the fdr adr by the adr of the first pdr,
+	for compatibility with tools from MIPS.
+
+	* config/bigmips.mt: New file; default vector is ecoff_big_vec.
+	* config/irix3.mt, config/irix4.mt: Removed.
+	* configure.in (mips-*-ecoff): New target; uses bigmips.mt.
+	(mips-sgi-*, mips-big-*): Use bigmips rather than irix3.
+
+Wed Feb 17 23:40:41 1993  John Gilmore  (gnu@cygnus.com)
+
+	* hosts/hp300bsd.h:  Add gross hack to determine whether we
+	are running on BSD 4.3 or BSD 4.4, and use appropriate include
+	files (and set other parameters) to match.
+
 Wed Feb 17 12:28:13 1993  K. Richard Pixley  (rich@cygnus.com)
 
 	* trad-core.c (trad_unix_make_empty_symbol): wrap PARAMS around an
