@@ -955,6 +955,7 @@ frame_chain (frame)
   int my_framesize, caller_framesize;
   struct unwind_table_entry *u;
   CORE_ADDR frame_base;
+  struct frame_info *tmp_frame;
 
   /* Handle HPUX, BSD, and OSF1 style interrupt frames first.  These
      are easy; at *sp we have a full save state strucutre which we can
@@ -1003,9 +1004,10 @@ frame_chain (frame)
      We use information from unwind descriptors to determine if %r3
      is saved into the stack (Entry_GR field has this information).  */
 
-  while (frame)
+  tmp_frame = frame;
+  while (tmp_frame)
     {
-      u = find_unwind_entry (frame->pc);
+      u = find_unwind_entry (tmp_frame->pc);
 
       if (!u)
 	{
@@ -1013,34 +1015,73 @@ frame_chain (frame)
 	     think anyone has actually written any tools (not even "strip")
 	     which leave them out of an executable, so maybe this is a moot
 	     point.  */
-	  warning ("Unable to find unwind for PC 0x%x -- Help!", frame->pc);
+	  warning ("Unable to find unwind for PC 0x%x -- Help!", tmp_frame->pc);
 	  return 0;
 	}
 
       /* Entry_GR specifies the number of callee-saved general registers
 	 saved in the stack.  It starts at %r3, so %r3 would be 1.  */
       if (u->Entry_GR >= 1 || u->Save_SP
-	  || frame->signal_handler_caller
-	  || pc_in_interrupt_handler (frame->pc))
+	  || tmp_frame->signal_handler_caller
+	  || pc_in_interrupt_handler (tmp_frame->pc))
 	break;
       else
-	frame = frame->next;
+	tmp_frame = tmp_frame->next;
     }
 
-  if (frame)
+  if (tmp_frame)
     {
       /* We may have walked down the chain into a function with a frame
 	 pointer.  */
       if (u->Save_SP
-	  && !frame->signal_handler_caller
-	  && !pc_in_interrupt_handler (frame->pc))
-	return read_memory_integer (frame->frame, 4);
+	  && !tmp_frame->signal_handler_caller
+	  && !pc_in_interrupt_handler (tmp_frame->pc))
+	return read_memory_integer (tmp_frame->frame, 4);
       /* %r3 was saved somewhere in the stack.  Dig it out.  */
       else 
 	{
 	  struct frame_saved_regs saved_regs;
 
-	  get_frame_saved_regs (frame, &saved_regs);
+	  /* Sick.
+
+	     For optimization purposes many kernels don't have the
+	     callee saved registers into the save_state structure upon
+	     entry into the kernel for a syscall; the optimization
+	     is usually turned off if the process is being traced so
+	     that the debugger can get full register state for the
+	     process.
+	      
+	     This scheme works well except for two cases:
+
+	       * Attaching to a process when the process is in the
+	       kernel performing a system call (debugger can't get
+	       full register state for the inferior process since
+	       the process wasn't being traced when it entered the
+	       system call).
+
+	       * Register state is not complete if the system call
+	       causes the process to core dump.
+
+
+	     The following heinous code is an attempt to deal with
+	     the lack of register state in a core dump.  It will
+	     fail miserably if the function which performs the
+	     system call has a variable sized stack frame.  */
+
+	  get_frame_saved_regs (tmp_frame, &saved_regs);
+
+	  /* Abominable hack.  */
+	  if (current_target.to_has_execution == 0
+	      && saved_regs.regs[FLAGS_REGNUM]
+	      && (read_memory_integer (saved_regs.regs[FLAGS_REGNUM], 4) & 0x2))
+	    {
+	      u = find_unwind_entry (FRAME_SAVED_PC (frame));
+	      if (!u)
+		return read_memory_integer (saved_regs.regs[FP_REGNUM], 4);
+	      else
+		return frame_base - (u->Total_frame_size << 3);
+	    }
+	
 	  return read_memory_integer (saved_regs.regs[FP_REGNUM], 4);
 	}
     }
