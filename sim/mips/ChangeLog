@@ -1,5 +1,13 @@
 2002-03-05  Chris Demetriou  <cgd@broadcom.com>
 
+	* mips.igen (check_fpu): Enable check for coprocessor 1 usability.
+	* sim-main.h (COP_Usable): Define, but for now coprocessor 1
+	is always enabled.
+	(SignalExceptionCoProcessorUnusable): Take as argument the
+	unusable coprocessor number.
+
+2002-03-05  Chris Demetriou  <cgd@broadcom.com>
+
 	* mips.igen: Fix formatting of all SignalException calls.
 
 2002-03-05  Chris Demetriou  <cgd@broadcom.com>

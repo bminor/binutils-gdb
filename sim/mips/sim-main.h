@@ -653,7 +653,7 @@ void signal_exception (SIM_DESC sd, sim_cpu *cpu, address_word cia, int exceptio
 #define SignalExceptionSimulatorFault(buf)   signal_exception (SD, CPU, cia, SimulatorFault, buf)
 #define SignalExceptionFPE()                 signal_exception (SD, CPU, cia, FPE)
 #define SignalExceptionIntegerOverflow()     signal_exception (SD, CPU, cia, IntegerOverflow)
-#define SignalExceptionCoProcessorUnusable() signal_exception (SD, CPU, cia, CoProcessorUnusable)
+#define SignalExceptionCoProcessorUnusable(cop) signal_exception (SD, CPU, cia, CoProcessorUnusable)
 #define SignalExceptionNMIReset()            signal_exception (SD, CPU, cia, NMIReset)
 #define SignalExceptionTLBRefillStore()      signal_exception (SD, CPU, cia, TLBStore, TLB_REFILL)
 #define SignalExceptionTLBRefillLoad()       signal_exception (SD, CPU, cia, TLBLoad, TLB_REFILL)
@@ -662,6 +662,9 @@ void signal_exception (SIM_DESC sd, sim_cpu *cpu, address_word cia, int exceptio
 #define SignalExceptionTLBModification()     signal_exception (SD, CPU, cia, TLBModification)
 
 /* Co-processor accesses */
+
+/* XXX FIXME: For now, assume that FPU (cp1) is always usable.  */
+#define COP_Usable(coproc_num)		(coproc_num == 1)
 
 void cop_lw  PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int coproc_num, int coproc_reg, unsigned int memword));
 void cop_ld  PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_word cia, int coproc_num, int coproc_reg, uword64 memword));

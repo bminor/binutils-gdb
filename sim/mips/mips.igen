@@ -3087,10 +3087,8 @@
 *vr5000:
 *r3900:
 {
-#if 0	/* XXX FIXME: For now, never treat the FPU as disabled.  */
   if (! COP_Usable (1))
     SignalExceptionCoProcessorUnusable (1);
-#endif
 }
 
 
