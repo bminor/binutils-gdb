@@ -22,6 +22,13 @@ for d in obsolete regress regress.m68k testscripts ; do
     fi
 done
 
+# Remember the current list of files in config.
+if test -d config; then
+  gas_config_files=`cd config; echo *`
+else
+  gas_config_files=
+fi
+
 # All files listed between the "Things-to-keep:" line and the
 # "Do-last:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -534,6 +541,22 @@ for lost in .. $lose_these_too; do
         echo '***' File $lost was sanitized out but is still mentioned in gas/$i 1>&2
       fi
     done
+  fi
+done
+
+# Check each file we removed from gas/config, and make sure it is not
+# mentioned in Makefiles or configure files.
+for lost in .. $gas_config_files; do
+  if test $lost != ..; then
+    if test -f config/$lost; then
+      :
+    else
+      for i in Makefile.am Makefile.in configure.in configure; do
+        if fgrep $lost $i >/dev/null 2>&1; then
+          echo '***' File gas/config/$lost was sanitized out but is still mentioned in gas/$i 1>&2
+        fi
+      done
+    fi
   fi
 done
 
