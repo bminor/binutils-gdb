@@ -1,3 +1,7 @@
+Mon Jul  8 15:15:37 1996  Jason Merrill  <jason@yorick.cygnus.com>
+
+	* mt-sparcpic (PICFLAG_FOR_TARGET): Use -fPIC.
+
 Fri Jul  5 11:49:02 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* mh-irix4 (RANLIB): Don't define; Irix 4 does have ranlib.
