@@ -1,3 +1,10 @@
+1998-09-15  Geoff Keating  <geoffk@ozemail.com.au>
+
+	* elf32-ppc.c (ppc_elf_relocate_section): Reverse output_offset
+	part of Vladimir's change of 1998-08-19.  Make a R_PPC_SDAREL16
+	reloc to the wrong section a warning, not an error.  .dynsbss
+	is not an output section, so there is no need to check for it.
+
 Tue Sep 15 12:40:05 1998  Catherine Moore  <clm@cygnus.com>
 
        * elf-bfd.h:  Add argument to elf_backend_get_symbol_type.
