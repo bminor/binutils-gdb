@@ -172,12 +172,14 @@ convert_floatformat_to_doublest (const struct floatformat *fmt,
 
   special_exponent = exponent == 0 || exponent == fmt->exp_nan;
 
-/* Don't bias NaNs. Use minimum exponent for denorms. For simplicity,
-   we don't check for zero as the exponent doesn't matter. */
+  /* Don't bias NaNs. Use minimum exponent for denorms. For simplicity,
+     we don't check for zero as the exponent doesn't matter.  Note the cast
+     to int; exp_bias is unsigned, so it's important to make sure the
+     operation is done in signed arithmetic.  */
   if (!special_exponent)
     exponent -= fmt->exp_bias;
   else if (exponent == 0)
-    exponent = 1 - fmt->exp_bias;
+    exponent = 1 - (int) fmt->exp_bias;
 
   /* Build the result algebraically.  Might go infinite, underflow, etc;
      who cares. */
