@@ -33,15 +33,15 @@ fi
 
 gdbtk_files="gdbtk.c gdbtk.tcl mswin"
 
-if ( echo $* | grep keep\-gdbtk > /dev/null ) ; then
-	keep_these_too="${gdbtk_files} ${keep_these_too}"
-	if [ -n "${verbose}" ] ; then
-		echo Keeping ${gdbtk_files}
-	fi
-else
+if ( echo $* | grep lose\-gdbtk > /dev/null ) ; then
 	lose_these_too="${gdbtk_files} ${lose_these_too}"
 	if [ -n "${verbose}" ] ; then
 		echo Deleting ${gdbtk_files}
+	fi
+else
+	keep_these_too="${gdbtk_files} ${keep_these_too}"
+	if [ -n "${verbose}" ] ; then
+		echo Keeping ${gdbtk_files}
 	fi
 fi
 
