@@ -24,6 +24,7 @@
 #include "arch-utils.h"
 #include "command.h"
 #include "dummy-frame.h"
+#include "dwarf-frame.h"
 #include "doublest.h"
 #include "floatformat.h"
 #include "frame.h"
@@ -1717,6 +1718,11 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
 
+  /* Hook in the DWARF CFI frame unwinder.  */
+  frame_unwind_append_predicate (gdbarch, dwarf_frame_p);
+  frame_base_append_predicate (gdbarch, dwarf_frame_base_p);
+  set_gdbarch_dwarf2_build_frame_info (gdbarch, dwarf2_build_frame_info);
+  
   frame_unwind_append_predicate (gdbarch, i386_frame_p);
   frame_base_set_default (gdbarch, &i386_frame_base);
 

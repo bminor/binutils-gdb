@@ -1,5 +1,15 @@
 2003-05-04  Mark Kettenis  <kettenis@gnu.org>
 
+	* dwarf-frame.c, dwarf-frame.h: New files.
+	* i386-tdep.c: Include "dwarf-frame.h".
+	(i386_gdbarch_init): Hook in the DWARF CFI frame unwinder.
+	* Makefile.in (SFILES): Add dwarf-frame.c
+	(dwarf_frame_h): Define.
+	(COMMON_OBS): Add dwarf-frame.o
+	(dwarf-frame.o): Add dependencies.
+
+2003-05-04  Mark Kettenis  <kettenis@gnu.org>
+
 	* i386-tdep.c: Put header files in alphabetical orde.
 	(i386_frameless_function_invocation): Removed.
 	(i386_frame_this_id, i386_sigtramp_frame_this_id): Adjust stack

@@ -513,8 +513,8 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	charset.c cli-out.c coffread.c coff-pe-read.c \
 	complaints.c completer.c corefile.c \
 	cp-abi.c cp-support.c cp-namespace.c cp-valprint.c \
-	dbxread.c demangle.c disasm.c doublest.c \
-	dummy-frame.c dwarfread.c dwarf2expr.c dwarf2loc.c dwarf2read.c \
+	dbxread.c demangle.c disasm.c doublest.c dummy-frame.c \
+	dwarf-frame.c dwarfread.c dwarf2expr.c dwarf2loc.c dwarf2read.c \
 	elfread.c environ.c eval.c event-loop.c event-top.c expprint.c \
 	f-exp.y f-lang.c f-typeprint.c f-valprint.c findvar.c frame.c \
 	frame-base.c \
@@ -635,6 +635,7 @@ disasm_h = disasm.h
 doublest_h = doublest.h $(floatformat_h)
 dst_h = dst.h
 dummy_frame_h = dummy-frame.h
+dwarf_frame_h = dwarf-frame.h
 dwarf2cfi_h = dwarf2cfi.h
 dwarf2expr_h = dwarf2expr.h
 dwarf2loc_h = dwarf2loc.h
@@ -854,6 +855,7 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
 	dbxread.o coffread.o coff-pe-read.o elfread.o \
 	dwarfread.o dwarf2read.o mipsread.o stabsread.o corefile.o \
 	dwarf2expr.o dwarf2loc.o \
+	dwarf-frame.o \
 	c-lang.o f-lang.o objc-lang.o \
 	ui-out.o cli-out.o \
 	varobj.o wrapper.o \
@@ -1665,6 +1667,9 @@ dummy-frame.o: dummy-frame.c $(defs_h) $(dummy_frame_h) $(regcache_h) \
 	$(frame_h) $(inferior_h) $(gdb_assert_h) $(frame_unwind_h)
 dve3900-rom.o: dve3900-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 	$(serial_h) $(inferior_h) $(command_h) $(gdb_string_h) $(regcache_h)
+dwarf-frame.o: dwarf-frame.c $(defs_h) $(dwarf_frame_h) $(frame_h) \
+	$(gdbcore_h) $(gdbtypes_h) $(symtab_h) $(objfiles_h) $(regcache_h) \
+	$(gdb_assert_h) $(gdb_string_h) $(dwarf_frame_h)
 dwarf2cfi.o: dwarf2cfi.c $(defs_h) $(gdbcore_h) $(symtab_h) $(symfile_h) \
 	$(objfiles_h) $(target_h) $(elf_dwarf2_h) $(inferior_h) \
 	$(regcache_h) $(dwarf2cfi_h) $(gdb_assert_h)
