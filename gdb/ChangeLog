@@ -1,3 +1,9 @@
+2003-05-31  Andrew Cagney  <cagney@redhat.com>
+
+	* mips-tdep.c (mips_gdbarch_init): Do not set
+	deprecated_max_register_raw_size, register_virtual_size, and
+	deprecated_max_register_virtual_size.
+
 2003-05-31  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.c: Include "dwarf2-frame.h".

@@ -5717,8 +5717,6 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_double_bit (gdbarch, 64);
   set_gdbarch_long_double_bit (gdbarch, 64);
   set_gdbarch_register_raw_size (gdbarch, mips_register_raw_size);
-  set_gdbarch_deprecated_max_register_raw_size (gdbarch, 8);
-  set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 8);
   tdep->found_abi = found_abi;
   tdep->mips_abi = mips_abi;
 
@@ -5964,7 +5962,6 @@ mips_gdbarch_init (struct gdbarch_info info,
   /* There are MIPS targets which do not yet use this since they still
      define REGISTER_VIRTUAL_TYPE.  */
   set_gdbarch_register_virtual_type (gdbarch, mips_register_virtual_type);
-  set_gdbarch_register_virtual_size (gdbarch, generic_register_size);
 
   set_gdbarch_print_registers_info (gdbarch, mips_print_registers_info);
   set_gdbarch_pc_in_sigtramp (gdbarch, mips_pc_in_sigtramp);
