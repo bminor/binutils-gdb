@@ -1,3 +1,26 @@
+2002-05-01  Alan Modra  <amodra@bigpond.net.au>
+
+	Long branch stubs, multiple stub sections.
+	* emultempl/ppc64elf.em: Include ldctor.h.
+	(stub_file): New var.
+	(group_size): New var.
+	(ppc_create_output_section_statements): New function.
+	(struct hook_stub_info): New.
+	(hook_in_stub): New function.
+	(ppc_add_stub_section): New function.
+	(ppc_layout_sections_again): New function.
+	(build_section_lists): New function.
+	(gld${EMULATION_NAME}_finish): Rewrite.
+	(real_func): New var.
+	(ppc_for_each_input_file_wrapper): New function.
+	(ppc_lang_for_each_input_file): New function.
+	(lang_for_each_input_file): Define.
+	(PARSE_AND_LIST_PROLOGUE): Define.
+	(PARSE_AND_LIST_LONGOPTS): Define.
+	(PARSE_AND_LIST_OPTIONS): Define.
+	(PARSE_AND_LIST_ARGS_CASES): Define.
+	(LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS): Define.
+
 2002-04-30  Tom Rix  <trix@redhat.com>
 
 	* emultempl/aix.em (gld*_parse_arge, gld*_before_allocation): Add 
