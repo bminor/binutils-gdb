@@ -1,3 +1,13 @@
+2002-10-23  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* mi-cmd-var.c: Change all remaining occurrences of ui_out_tuple_begin 
+	to make_cleanup_ui_out_tuple_begin_end.  Change all remaining 
+	occurrences of ui_out_list_begin to make_cleanup_ui_out_list_begin_end.
+	Use do_cleanups instead of ui_out_list_end or ui_out_tuple_end.  This 
+	is a fix for PR gdb/680.
+	* mi-cmd-stack.c: Ditto.
+	* mi-main.c: Ditto.
+
 2002-10-22  Keith Seitz  <keiths@redhat.com>
 
 	* mi-main.c (mi_cmd_thread_select): Only return MI_CMD_CAUGHT_ERROR
