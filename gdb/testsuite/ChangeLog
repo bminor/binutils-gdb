@@ -1,3 +1,8 @@
+2003-04-14  Elena Zannoni  <ezannoni@redhat.com>
+
+        * gdb.base/attach.exp: Add new message from ptrace in case of
+        attaching to nonexistent process.
+	
 2003-04-11  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.c++/derivation.exp, gdb.c++/overload.exp,
