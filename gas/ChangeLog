@@ -1,3 +1,8 @@
+2002-01-02  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* config/tc-m68k.c (md_estimate_size_before_relax): Test for a
+	NULL frag link.
+
 2001-12-31  Richard Henderson  <rth@redhat.com>
 
 	* config/tc-ia64.c (errata_nop_necessary_p): Prototype.
@@ -6,7 +11,7 @@
 	* config/tc-ia64.c (has_suffix_p): New.
 	(note_register_values): Use it instead of strstr.
 
-Mon Dec 31 16:48:07 2001  Jeffrey A Law  (law@redhat.com)
+2001-12-31  Jeffrey A Law  (law@redhat.com)
 
         * config/tc-hppa.c (pa_ip): Handle new 'c' mode completers,
         'X', 'M', and 'A'.

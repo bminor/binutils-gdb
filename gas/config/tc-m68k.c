@@ -4674,7 +4674,7 @@ md_estimate_size_before_relax (fragP, segment)
 	    {
 	      fragS *l;
 
-	      for (l = fragP->fr_next; l != sym_frag; l = l->fr_next)
+	      for (l = fragP->fr_next; l && l != sym_frag; l = l->fr_next)
 		if (l->fr_fix != 0)
 		  break;
 	      if (l == sym_frag)
