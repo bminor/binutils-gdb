@@ -1,3 +1,13 @@
+Mon Jul 24 15:23:39 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldlang.c (lang_process): Call reset_memory_regions for each
+	relaxation pass.
+
+Fri Jul 21 22:49:44 1995  Michael Meissner  <meissner@cygnus.com>
+
+	* scripttempl/elfppc.sc: Add support for .sdata, .sbss, and
+	_SDA_BASE.
+
 Thu Jul 20 16:26:55 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* ldmain.c (constructor_callback): Allocate set_name in stack
