@@ -1,5 +1,9 @@
 Tue Jul 27 12:07:38 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* remote-udi.c: Remove old comment about download not implemented.
+
+	* serial.h, ser-{unix,go32,tcp}.c: Add flush_input.
+
 	* stack.c (print_frame_info): Revise comment about `pathological'
 	case (there was a wrong FIXME about text labels; also asm() can
 	trigger this as well as versions of ar which truncate .o names).

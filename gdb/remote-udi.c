@@ -27,12 +27,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
  - Originally written by Daniel Mann at AMD for MiniMON and gdb 3.91.6.
  - David Wood (wood@lab.ultra.nyu.edu) at New York University adapted this
 	file to gdb 3.95.  I was unable to get this working on sun3os4
-	with termio, only with sgtty.  Because we are only attempting to
-	use this module to debug our kernel, which is already loaded when
-	gdb is started up, I did not code up the file downloading facilities.  
-	As a result this module has only the stubs to download files. 
-	You should get tagged at compile time if you need to make any 
-	changes/additions.
+	with termio, only with sgtty.
  - Daniel Mann at AMD took the 3.95 adaptions above and replaced
    	MiniMON interface with UDI-p interface.	  */
  
