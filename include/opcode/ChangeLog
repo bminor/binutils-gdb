@@ -1,3 +1,11 @@
+Fri Nov  1 10:31:02 1996  Richard Henderson  <rth@tamu.edu>
+
+	* alpha.h: Don't include "bfd.h"; private relocation types are now
+ 	negative to minimize problems with shared libraries.  Organize
+ 	instruction subsets by AMASK extensions and PALcode
+ 	implementation.
+	(struct alpha_operand): Move flags slot for better packing.
+
 start-sanitize-v850
 Tue Oct 29 12:19:10 1996  Jeffrey A Law  (law@cygnus.com)
 
