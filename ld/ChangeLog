@@ -1,3 +1,9 @@
+Wed Jan 11 11:24:45 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* ldexp.c (fold_binary): Adding or subtracting an absolute value
+	to a relative value does not require forcing the relative value to
+	be absolute.  Also, reindent function.
+
 Wed Dec 28 22:05:52 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 	* ldwrite.c (clone_section): Create a symbol with the
