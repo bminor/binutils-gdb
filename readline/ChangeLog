@@ -1,3 +1,7 @@
+Fri Oct 22 07:55:08 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* configure.in: Add * to end of all OS names.
+
 Tue Oct  5 12:33:51 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* readline.c: Add stuff for HIUX to place where we detect termio
