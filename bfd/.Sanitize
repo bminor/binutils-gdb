@@ -263,7 +263,7 @@ else
 	done
 fi
 
-rce_files="ChangeLog archures.c config.bfd configure.in targets.c"
+rce_files="ChangeLog archures.c bfd-in2.h config.bfd configure.in targets.c"
 if ( echo $* | grep keep\-rce > /dev/null ) ; then
 	for i in $rce_files ; do
 		if test ! -d $i && (grep sanitize-rce $i > /dev/null) ; then

@@ -563,22 +563,49 @@ md_atof (type, litP, sizeP)
     }
   return 0;
 }
+
+CONST char *md_shortopts = "";
+struct option md_longopts[] = {
+
+#define OPTION_RELAX  (OPTION_MD_BASE)
+#define OPTION_LITTLE (OPTION_MD_BASE+1)
+
+  {"relax", no_argument, NULL, OPTION_RELAX},
+  {"little", no_argument, NULL, OPTION_LITTLE},
+  {NULL, no_argument, NULL, 0}
+};
+size_t md_longopts_size = sizeof(md_longopts);
 
 int
-md_parse_option (argP, cntP, vecP)
-     char **argP;
-     int *cntP;
-     char ***vecP;
-
+md_parse_option (c, arg)
+     int c;
+     char *arg;
 {
-  if (!strcmp (*argP, "relax"))
+  switch (c)
     {
+    case OPTION_RELAX:
       relax = 1;
-      **argP = 0;
+      break;
+    case OPTION_LITTLE:
+      abort ();
+      break;
+
+    default:
+      return 0;
     }
+
   return 1;
 }
 
+void
+md_show_usage (stream)
+     FILE *stream;
+{
+  fprintf(stream, "\
+RCE options:\n\
+-relax			alter jump instructions for long displacements\n");
+}
+
 int md_short_jump_size;
 
 void

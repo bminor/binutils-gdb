@@ -1,4 +1,4 @@
-/* BFD back-end for SOP a.out binaries.
+/* BFD back-end for RCE a.out binaries.
    Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -32,7 +32,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "aout/stab_gnu.h"
 #include "aout/ar.h"
 #include "libaout.h"
-#define DEFAULT_ARCH bfd_arch_sop
-#define MY(OP) CAT(sop_aout_,OP)
-#define TARGETNAME "a.out-sop"
+#define DEFAULT_ARCH bfd_arch_rce
+#define MY(OP) CAT(rce_aout_,OP)
+#define TARGETNAME "a.out-rce"
 #include "aout-target.h"

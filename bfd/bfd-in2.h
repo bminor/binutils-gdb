@@ -1027,6 +1027,9 @@ enum bfd_architecture
   bfd_arch_alpha,      /* Dec Alpha */
   bfd_arch_arm,        /* Advanced Risc Machines ARM */
   bfd_arch_ns32k,      /* National Semiconductors ns32000 */
+  /* start-sanitize-rce */
+  bfd_arch_rce,	       /* Experimental Motorola RCE */
+  /* end-sanitize-rce */
   bfd_arch_last
   };
 

@@ -72,7 +72,7 @@ static bfd_arch_info_type arch_info_struct[] =
 
 
 void
-DEFUN_VOID(bfd_sop_arch)
+DEFUN_VOID(bfd_rce_arch)
 {
   bfd_arch_linkin(&arch_info_struct[0]);
 }
