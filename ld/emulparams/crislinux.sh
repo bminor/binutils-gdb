@@ -16,8 +16,6 @@ TEXT_START_ADDR=0x80000
 
 MAXPAGESIZE=8192
 
-# FIXME: GOT, PLT...
-
 # We don't do the hoops through DEFINED to provide [_]*start, as it
 # doesn't work with --gc-sections, and the start-name is pretty fixed
 # anyway.

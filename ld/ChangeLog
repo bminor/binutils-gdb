@@ -1,3 +1,12 @@
+2001-04-05  Hans-Peter Nilsson  <hp@axis.com>
+
+	* emulparams/criself.sh (EXECUTABLE_SYMBOLS): Cannot provide
+	correct value of __Stext here.
+	(TEXT_START_SYMBOLS): Define; always define __Stext, to start of
+	.startup section.
+
+	* emulparams/crislinux.sh: Remove FIXME.
+
 2001-04-02  Alan Modra  <alan@linuxcare.com.au>
 
 	* emulparams/hppalinux.sh (MAXPAGESIZE): Set to 64k.

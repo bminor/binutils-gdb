@@ -15,14 +15,16 @@ TEXT_START_ADDR=0
 # Put crt0 for flash/eprom etc. in this section.
 INITIAL_READONLY_SECTIONS='.startup : { KEEP(*(.startup)) }'
 
-# TEXT_START_SYMBOLS doesn't get what we want which is the start of
-# all read-only sections; there's at least .init and .fini before it.
-# We have to resort to trickery.
-#
+# Setting __Stext to . in TEXT_START_SYMBOLS doesn't get what we want
+# most of the time, which is the start of all read-only sections;
+# there's at least .startup and .init before it.  We have to resort to
+# trickery.  Note that __Stext is always defined, not PROVIDE:d, since
+# external tools look for it.
+TEXT_START_SYMBOLS='__Stext = ADDR (.startup);'
+
 # The __start dance is to get us through assumptions about entry
 # symbols, and to clear _start for normal use with sane programs.
 EXECUTABLE_SYMBOLS='
-PROVIDE (__Stext = .);
 __start = DEFINED(__start) ? __start : 
   DEFINED(_start) ? _start : 
     DEFINED(start) ? start :
