@@ -256,8 +256,23 @@ find_proc_desc(pc, next_frame)
 {
   mips_extra_func_info_t proc_desc;
   struct block *b = block_for_pc(pc);
-  struct symbol *sym =
-      b ? lookup_symbol(MIPS_EFI_SYMBOL_NAME, b, LABEL_NAMESPACE, 0, NULL) : NULL;
+  struct symbol *sym;
+  CORE_ADDR startaddr;
+
+  find_pc_partial_function (pc, NULL, &startaddr, NULL);
+  if (b == NULL)
+    sym = NULL;
+  else
+    {
+      if (startaddr > BLOCK_START (b))
+	/* This is the "pathological" case referred to in a comment in
+	   print_frame_info.  It might be better to move this check into
+	   symbol reading.  */
+	sym = NULL;
+      else
+	sym = lookup_symbol (MIPS_EFI_SYMBOL_NAME, b, LABEL_NAMESPACE,
+			     0, NULL);
+    }
 
   if (sym)
     {
@@ -300,8 +315,11 @@ find_proc_desc(pc, next_frame)
 	      && PROC_HIGH_ADDR(&link->info) > pc)
 	      return &link->info;
 
+      if (startaddr == 0)
+	startaddr = heuristic_proc_start (pc);
+
       proc_desc =
-	heuristic_proc_desc (heuristic_proc_start (pc), pc, next_frame);
+	heuristic_proc_desc (startaddr, pc, next_frame);
     }
   return proc_desc;
 }
@@ -359,14 +377,33 @@ init_extra_frame_info(fci)
 
       /* If this is the innermost frame, and we are still in the
 	 prologue (loosely defined), then the registers may not have
-	 been saved yet.  But they haven't been clobbered either, so
-	 it's fine to say they have not been saved.  */
+	 been saved yet.  */
       if (fci->next == NULL
           && !PROC_DESC_IS_DUMMY(proc_desc)
 	  && mips_in_lenient_prologue (PROC_LOW_ADDR (proc_desc), fci->pc))
-	/* We already zeroed the saved regs.  */
-	;
-      else if (proc_desc == &temp_proc_desc)
+	{
+	  /* Can't just say that the registers are not saved, because they
+	     might get clobbered halfway through the prologue.
+	     heuristic_proc_desc already has the right code to figure out
+	     exactly what has been saved, so use it.  As far as I know we
+	     could be doing this (as we do on the 68k, for example)
+	     regardless of whether we are in the prologue; I'm leaving in
+	     the check for being in the prologue only out of conservatism
+	     (I'm not sure whether heuristic_proc_desc handles all cases,
+	     for example).
+
+	     This stuff is ugly (and getting uglier by the minute).  Probably
+	     the best way to clean it up is to ignore the proc_desc's from
+	     the symbols altogher, and get all the information we need by
+	     examining the prologue (provided we can make the prologue
+	     examining code good enough to get all the cases...).  */
+	  proc_desc =
+	    heuristic_proc_desc (PROC_LOW_ADDR (proc_desc),
+				 fci->pc,
+				 fci->next);
+	}
+
+      if (proc_desc == &temp_proc_desc)
 	*fci->saved_regs = temp_saved_regs;
       else
 	{
@@ -622,60 +659,65 @@ static void
 mips_print_register (regnum, all)
      int regnum, all;
 {
-      unsigned char raw_buffer[MAX_REGISTER_RAW_SIZE];
-      REGISTER_TYPE val;
+  unsigned char raw_buffer[MAX_REGISTER_RAW_SIZE];
+  REGISTER_TYPE val;
 
-      /* Get the data in raw format.  */
-      if (read_relative_register_raw_bytes (regnum, raw_buffer))
-	{
-	  printf_filtered ("%s: [Invalid]", reg_names[regnum]);
-	  return;
-	}
-      
-      /* If an even floating pointer register, also print as double. */
-      if (regnum >= FP0_REGNUM && regnum < FP0_REGNUM+32
-	  && !((regnum-FP0_REGNUM) & 1)) {
-	  char dbuffer[MAX_REGISTER_RAW_SIZE]; 
+  /* Get the data in raw format.  */
+  if (read_relative_register_raw_bytes (regnum, raw_buffer))
+    {
+      printf_filtered ("%s: [Invalid]", reg_names[regnum]);
+      return;
+    }
 
-	  read_relative_register_raw_bytes (regnum, dbuffer);
-	  read_relative_register_raw_bytes (regnum+1, dbuffer+4);
+  /* If an even floating pointer register, also print as double. */
+  if (regnum >= FP0_REGNUM && regnum < FP0_REGNUM+32
+      && !((regnum-FP0_REGNUM) & 1)) {
+    char dbuffer[MAX_REGISTER_RAW_SIZE]; 
+
+    read_relative_register_raw_bytes (regnum, dbuffer);
+    read_relative_register_raw_bytes (regnum+1, dbuffer+4);
 #ifdef REGISTER_CONVERT_TO_TYPE
-          REGISTER_CONVERT_TO_TYPE(regnum, builtin_type_double, dbuffer);
+    REGISTER_CONVERT_TO_TYPE(regnum, builtin_type_double, dbuffer);
 #endif
-	  printf_filtered ("(d%d: ", regnum-FP0_REGNUM);
-	  val_print (builtin_type_double, dbuffer, 0,
-		     stdout, 0, 1, 0, Val_pretty_default);
-	  printf_filtered ("); ");
-      }
-      fputs_filtered (reg_names[regnum], stdout);
-#ifndef NUMERIC_REG_NAMES
-      if (regnum < 32)
-	  printf_filtered ("(r%d): ", regnum);
+    printf_filtered ("(d%d: ", regnum-FP0_REGNUM);
+    val_print (builtin_type_double, dbuffer, 0,
+	       stdout, 0, 1, 0, Val_pretty_default);
+    printf_filtered ("); ");
+  }
+  fputs_filtered (reg_names[regnum], stdout);
+
+  /* The problem with printing numeric register names (r26, etc.) is that
+     the user can't use them on input.  Probably the best solution is to
+     fix it so that either the numeric or the funky (a2, etc.) names
+     are accepted on input.  */
+  if (regnum < 32)
+    printf_filtered ("(r%d): ", regnum);
+  else
+    printf_filtered (": ");
+
+  /* If virtual format is floating, print it that way.  */
+  if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (regnum)) == TYPE_CODE_FLT
+      && ! INVALID_FLOAT (raw_buffer, REGISTER_VIRTUAL_SIZE(regnum))) {
+    val_print (REGISTER_VIRTUAL_TYPE (regnum), raw_buffer, 0,
+	       stdout, 0, 1, 0, Val_pretty_default);
+  }
+  /* Else print as integer in hex.  */
+  else
+    {
+      long val;
+
+      val = extract_signed_integer (raw_buffer,
+				    REGISTER_RAW_SIZE (regnum));
+
+      if (val == 0)
+	printf_filtered ("0");
+      else if (all)
+	/* FIXME: We should be printing this in a fixed field width, so that
+	   registers line up.  */
+	printf_filtered (local_hex_format(), val);
       else
-#endif
-	  printf_filtered (": ");
-
-      /* If virtual format is floating, print it that way.  */
-      if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (regnum)) == TYPE_CODE_FLT
-	  && ! INVALID_FLOAT (raw_buffer, REGISTER_VIRTUAL_SIZE(regnum))) {
-	  val_print (REGISTER_VIRTUAL_TYPE (regnum), raw_buffer, 0,
-		     stdout, 0, 1, 0, Val_pretty_default);
-      }
-      /* Else print as integer in hex.  */
-      else
-	{
-	  long val;
-
-	  val = extract_signed_integer (raw_buffer,
-					REGISTER_RAW_SIZE (regnum));
-
-	  if (val == 0)
-	    printf_filtered ("0");
-	  else if (all)
-	    printf_filtered (local_hex_format(), val);
-	  else
-	    printf_filtered ("%s=%d", local_hex_string(val), val);
-	}
+	printf_filtered ("%s=%d", local_hex_string(val), val);
+    }
 }
 
 /* Replacement for generic do_registers_info.  */
