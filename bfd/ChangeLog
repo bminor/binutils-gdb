@@ -1,3 +1,7 @@
+2002-07-23  Daniel Jacobowitz  <drow@mvista.com>
+
+	* po/bfd.pot: Regenerated.
+
 2002-07-23  Nick Clifton  <nickc@redhat.com>
 
 	* elf-bfd.h (struct elf_backend_data): Add new bitfield
