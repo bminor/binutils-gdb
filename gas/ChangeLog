@@ -1,3 +1,10 @@
+2003-06-18  Svein E. Seldal  <Svein.Seldal@solidas.com>
+
+	* configure.in: Add c4x as an architecture variant to tic4x.
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+
 2003-06-13  Richard Earnshaw  <rearnsha@arm.com>
 
 	* tc-arm.c (FPU_DEFAULT, case TE_LINUX): Default to FPU_ARCH_FPA.
