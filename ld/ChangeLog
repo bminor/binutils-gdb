@@ -1,3 +1,15 @@
+Mon Jul 13 13:20:23 1998  Steve Chamberlain  <sac@transmeta.com>
+
+	* ldlex.l: Accept ASSERT.
+	* ldgram.y (exp): Add ASSERT_K case.
+	* ldexp.h (node_type): Add etree_assert to node_class enum.
+	(etree_type): Add assert_s field.
+	(exp_assert): Declare.
+	* ldexp.c (exp_fold_tree): Handle etree_assert.
+	(exp_assert): New function.
+	(exp_print_tree): Handle etree_assert.
+	* ld.texinfo (Miscellaneous Commands): Document ASSERT.
+
 Wed Jul  8 14:03:12 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldgram.y: Change MAX to MAX_K and MIN to MIN_K, to avoid
