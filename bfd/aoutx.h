@@ -97,11 +97,11 @@ produce a BFD target that will access ordinary a.out files on your host.
 
 To configure a new machine to use host-aout.c, specify:
 
-TDEFINES = -DDEFAULT_VECTOR=host_aout_big_vec
+TDEFAULTS = -DDEFAULT_VECTOR=host_aout_big_vec
 TDEPFILES= host-aout.o trad-core.o
 
-in the config/t-XXX file, and modify configure.in to use the
-t-XXX file (by setting "bfd_target=XXX") when your configuration is
+in the config/mt-XXX file, and modify configure.in to use the
+mt-XXX file (by setting "bfd_target=XXX") when your configuration is
 selected.
 
 */
