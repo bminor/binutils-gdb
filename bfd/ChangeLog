@@ -1,3 +1,7 @@
+Thu Dec 30 15:47:54 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* i386mach3.c (N_TXTADDR): Define.
+
 Thu Dec 30 13:37:24 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	Extensive changes to move the bulk of the linker into BFD so that
