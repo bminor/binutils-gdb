@@ -1,3 +1,11 @@
+Mon Jul 12 10:57:03 1993  Ken Raeburn  (raeburn@deneb.cygnus.com)
+
+	* scripttempl/elf.sc: Include .init, .fini, .rodata sections.
+	Create symbol "end" instead of "__end".  Comment out some parts
+	that may not be needed (yet) for elf.
+
+	* configure.in: Accept sparc-elf and sparc-solaris2 configs.
+
 Thu Jul  8 15:33:32 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* Makefile.in (ALL_EMULATIONS): Include $(OTHER_EMULATIONS).
