@@ -2708,14 +2708,15 @@ MEMORY
 @end group
 @end smallexample
 
-If you have defined a memory region named @samp{mem}, you can direct the
-linker to place specific output sections into that memory region by
-using the @samp{>@var{region}} output section attribute.  @xref{Output
-Section Region}.  If no address was specified for the output section,
-the linker will set the address to the next available address within the
-memory region.  If the combined output sections directed to a memory
-region are too large for the region, the linker will issue an error
-message.
+Once you define a memory region, you can direct the linker to place
+specific output sections into that memory region by using the
+@samp{>@var{region}} output section attribute.  For example, if you have
+a memory region named @samp{mem}, you would use @samp{>mem} in the
+output section definition.  @xref{Output Section Region}.  If no address
+was specified for the output section, the linker will set the address to
+the next available address within the memory region.  If the combined
+output sections directed to a memory region are too large for the
+region, the linker will issue an error message.
 
 @node PHDRS
 @section PHDRS Command
