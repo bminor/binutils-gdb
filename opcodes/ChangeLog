@@ -1,3 +1,14 @@
+2001-04-24  Christian Groessler  <cpg@aladdin.de>
+
+	* z8k-dis.c: add names of control registers (ctrl_names);
+	(seg_length): provides instruction length fixup for segmented
+	mode; (unpack_instr): correctly handle ARG_DISP16, ARG_DISP12,
+	CLASS_0DISP7, CLASS_1DISP7, CLASS_DISP8 and CLASS_PR cases;
+	(unparse_intr): handle CLASS_PR, print addresses without '#'
+	* z8k-opc.h: re-created with new z8kgen
+	* z8kgen.c: merged in fixes which were in existing z8k-opc.h; new
+	entries for ldctl/ldctlb instruction
+
 2001-04-06  Andreas Jaeger  <aj@suse.de>
 
 	* i386-dis.c: Add ffreep instruction.

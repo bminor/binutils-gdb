@@ -1107,7 +1107,17 @@ build_bytes (this_try, operand)
 	  *output_ptr++ = reg[c & 0xf];
 	  break;
 	case CLASS_DISP:
+          switch (c & ARG_MASK)
+            {
+            case ARG_DISP12:
+              output_ptr = apply_fix (output_ptr, R_CALLR, da_operand, 4);
+              break;
+            case ARG_DISP16:
+              output_ptr = apply_fix (output_ptr, R_REL16, da_operand, 4);
+              break;
+            default:
 	  output_ptr = apply_fix (output_ptr, R_IMM16, da_operand, 4);
+            }
 	  da_operand = 0;
 	  break;
 

@@ -1,3 +1,8 @@
+2001-04-24  Christian Groessler  <cpg@aladdin.de>
+
+	* coff-z8k.c (extra_case): added handler for R_DISP7, R_CALLR
+	and R_REL16 reloc types; accept odd values for R_REL16 type
+
 2001-04-24  Johan Rydberg  <jrydberg@opencores.org>
 
 	* cpu-openrisc.c: New file.

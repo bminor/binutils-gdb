@@ -132,7 +132,31 @@ man_MANS = as.1
 
 info_TEXINFOS = as.texinfo gasp.texi
 
-CPU_DOCS =  	c-a29k.texi 	c-arc.texi 	c-arm.texi 	c-d10v.texi 	c-h8300.texi 	c-h8500.texi 	c-hppa.texi 	c-i370.texi 	c-i386.texi 	c-i860.texi 	c-i960.texi 	c-m32r.texi 	c-m68hc11.texi 	c-m68k.texi 	c-mips.texi 	c-ns32k.texi 	c-pdp11.texi 	c-pj.texi 	c-sh.texi 	c-sparc.texi         c-tic54x.texi 	c-vax.texi 	c-v850.texi 	c-z8k.texi
+CPU_DOCS = \
+	c-a29k.texi \
+	c-arc.texi \
+	c-arm.texi \
+	c-d10v.texi \
+	c-h8300.texi \
+	c-h8500.texi \
+	c-hppa.texi \
+	c-i370.texi \
+	c-i386.texi \
+	c-i860.texi \
+	c-i960.texi \
+	c-m32r.texi \
+	c-m68hc11.texi \
+	c-m68k.texi \
+	c-mips.texi \
+	c-ns32k.texi \
+	c-pdp11.texi \
+	c-pj.texi \
+	c-sh.texi \
+	c-sparc.texi \
+        c-tic54x.texi \
+	c-vax.texi \
+	c-v850.texi \
+	c-z8k.texi
 
 
 # This one isn't ready for prime time yet.  Not even a little bit.
@@ -340,7 +364,7 @@ distdir: $(DISTFILES)
 	@for file in $(DISTFILES); do \
 	  if test -f $$file; then d=.; else d=$(srcdir); fi; \
 	  if test -d $$d/$$file; then \
-	    cp -pr $$/$$file $(distdir)/$$file; \
+	    cp -pr $$d/$$file $(distdir)/$$file; \
 	  else \
 	    test -f $(distdir)/$$file \
 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \

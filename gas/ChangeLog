@@ -1,3 +1,8 @@
+2001-04-24  Christian Groessler  <cpg@aladdin.de>
+
+	* config/tc-z8k.c (build_bytes): 12 and 16 bit displacements now
+	generate R_CALLR and R_REL16 relocations
+
 2000-04-20  Jason Eckhardt  <jle@redhat.com>
 
 	* config/tc-d10v.h (tc_frob_label): Update the symbol's frag

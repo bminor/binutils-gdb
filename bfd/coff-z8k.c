@@ -49,9 +49,22 @@ HOWTO (R_IMM8, 0, 1, 8, false, 0,
        complain_overflow_bitfield, 0, "r_imm8", true, 0x000000ff, 0x000000ff,
        false);
 
+static reloc_howto_type r_rel16 =
+HOWTO (R_REL16, 0, 1, 16, false, 0,
+       complain_overflow_bitfield, 0, "r_rel16", true, 0x0000ffff, 0x0000ffff,
+       true);
+
 static reloc_howto_type r_jr =
 HOWTO (R_JR, 0, 1, 8, true, 0, complain_overflow_signed, 0,
        "r_jr", true, 0, 0, true);
+
+static reloc_howto_type r_disp7 =
+HOWTO (R_DISP7, 0, 1, 7, true, 0, complain_overflow_bitfield, 0,
+       "r_disp7", true, 0, 0, true);
+
+static reloc_howto_type r_callr =
+HOWTO (R_CALLR, 0, 1, 12, true, 0, complain_overflow_signed, 0,
+       "r_callr", true, 0xfff, 0xfff, true);
 
 /* Turn a howto into a reloc number */
 
@@ -96,6 +109,15 @@ rtype2howto (internal, dst)
       break;
     case R_JR:
       internal->howto = &r_jr;
+      break;
+    case R_DISP7:
+      internal->howto = &r_disp7;
+      break;
+    case R_CALLR:
+      internal->howto = &r_callr;
+      break;
+    case R_REL16:
+      internal->howto = &r_rel16;
       break;
     case R_IMM32:
       internal->howto = &r_imm32;
@@ -213,6 +235,87 @@ extra_case (in_abfd, link_info, link_order, reloc, data, src_ptr, dst_ptr)
 	bfd_put_8 (in_abfd, gap, data + *dst_ptr);
 	(*dst_ptr)++;
 	(*src_ptr)++;
+	break;
+      }
+
+    case R_DISP7:
+      {
+	bfd_vma dst = bfd_coff_reloc16_get_value (reloc, link_info,
+						  input_section);
+	bfd_vma dot = (link_order->offset
+		       + *dst_ptr
+		       + input_section->output_section->vma);
+	int gap = dst - dot - 1;/* -1 since were in the odd byte of the
+				    word and the pc's been incremented */
+
+	if (gap & 1)
+	  abort ();
+	gap /= 2;
+
+	if (gap > 0 || gap < -128)
+	  {
+	    if (! ((*link_info->callbacks->reloc_overflow)
+		   (link_info, bfd_asymbol_name (*reloc->sym_ptr_ptr),
+		    reloc->howto->name, reloc->addend, input_section->owner,
+		    input_section, reloc->address)))
+	      abort ();
+	  }
+	bfd_put_8 (in_abfd,
+                   (bfd_get_8 ( in_abfd, data + *dst_ptr) & 0x80) + (-gap & 0x7f),
+                   data + *dst_ptr);
+	(*dst_ptr)++;
+	(*src_ptr)++;
+	break;
+      }
+
+    case R_CALLR:
+      {
+	bfd_vma dst = bfd_coff_reloc16_get_value (reloc, link_info,
+						  input_section);
+	bfd_vma dot = (link_order->offset
+		       + *dst_ptr
+		       + input_section->output_section->vma);
+	int gap = dst - dot - 2;
+
+	if (gap & 1)
+	  abort ();
+	gap /= 2;
+	if (gap > 8191 || gap < -8192)
+	  {
+	    if (! ((*link_info->callbacks->reloc_overflow)
+		   (link_info, bfd_asymbol_name (*reloc->sym_ptr_ptr),
+		    reloc->howto->name, reloc->addend, input_section->owner,
+		    input_section, reloc->address)))
+	      abort ();
+	  }
+	bfd_put_16 (in_abfd,
+                    (bfd_get_16 ( in_abfd, data + *dst_ptr) & 0xf000) | (-gap & 0x0fff),
+                    data + *dst_ptr);
+	(*dst_ptr) += 2;
+	(*src_ptr) += 2;
+	break;
+      }
+
+    case R_REL16:
+      {
+	bfd_vma dst = bfd_coff_reloc16_get_value (reloc, link_info,
+						  input_section);
+	bfd_vma dot = (link_order->offset
+		       + *dst_ptr
+		       + input_section->output_section->vma);
+	int gap = dst - dot - 2;
+
+	if (gap > 32767 || gap < -32768)
+	  {
+	    if (! ((*link_info->callbacks->reloc_overflow)
+		   (link_info, bfd_asymbol_name (*reloc->sym_ptr_ptr),
+		    reloc->howto->name, reloc->addend, input_section->owner,
+		    input_section, reloc->address)))
+	      abort ();
+	  }
+	bfd_put_16 (in_abfd,gap,data + *dst_ptr);
+	(*dst_ptr) += 2;
+	(*src_ptr) += 2;
 	break;
       }
     default:

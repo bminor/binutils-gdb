@@ -1,13 +1,12 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright 1998, 1999, 2000 Free Software Foundation, Inc.
-# (C) YEAR 
+# Copyright (C) YEAR Free Software Foundation, Inc.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2001-03-06 12:07-0800\n"
+"POT-Creation-Date: 2001-04-24 17:11+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -23,25 +22,21 @@ msgstr ""
 msgid "jump hint unaligned"
 msgstr ""
 
-#: arc-dis.c:52
-msgid "Illegal limm reference in last instruction!\n"
-msgstr ""
-
-#: arm-dis.c:489
+#: arm-dis.c:490
 msgid "<illegal precision>"
 msgstr ""
 
-#: arm-dis.c:904
+#: arm-dis.c:922
 #, c-format
 msgid "Unrecognised register name set: %s\n"
 msgstr ""
 
-#: arm-dis.c:911
+#: arm-dis.c:929
 #, c-format
 msgid "Unrecognised disassembler option: %s\n"
 msgstr ""
 
-#: arm-dis.c:1083
+#: arm-dis.c:1101
 msgid ""
 "\n"
 "The following ARM specific disassembler options are supported for use with\n"
@@ -81,12 +76,12 @@ msgid "<unknown register %d>"
 msgstr ""
 
 #. Can't happen.
-#: dis-buf.c:56
+#: dis-buf.c:57
 #, c-format
 msgid "Unknown error %d\n"
 msgstr ""
 
-#: dis-buf.c:61
+#: dis-buf.c:62
 #, c-format
 msgid "Address 0x%x is out of bounds.\n"
 msgstr ""
@@ -124,11 +119,6 @@ msgstr ""
 #: fr30-asm.c:566 m32r-asm.c:574
 #, c-format
 msgid "bad instruction `%.50s'"
-msgstr ""
-
-#. Default text to print if an instruction isn't recognized.
-#: fr30-dis.c:39 m32r-dis.c:39
-msgid "*unknown*"
 msgstr ""
 
 #: fr30-dis.c:300 m32r-dis.c:239
@@ -192,10 +182,6 @@ msgstr ""
 msgid "%02x\t\t*unknown*"
 msgstr ""
 
-#: i386-dis.c:2742
-msgid "<internal disassembler error>"
-msgstr ""
-
 #: m10200-dis.c:199
 #, c-format
 msgid "unknown\t0x%02x"
@@ -211,12 +197,12 @@ msgstr ""
 msgid "unknown\t0x%04x"
 msgstr ""
 
-#: m68k-dis.c:429
+#: m68k-dis.c:430
 #, c-format
 msgid "<internal error in opcode table: %s %s>\n"
 msgstr ""
 
-#: m68k-dis.c:1007
+#: m68k-dis.c:1008
 #, c-format
 msgid "<function code %d>"
 msgstr ""
@@ -226,7 +212,7 @@ msgstr ""
 msgid "# <dis error: %08x>"
 msgstr ""
 
-#: mips-dis.c:273
+#: mips-dis.c:274
 #, c-format
 msgid "# internal error, undefined modifier(%c)"
 msgstr ""
@@ -237,54 +223,54 @@ msgstr ""
 #. * aoffsetp by since whatever generated this is broken
 #. * anyway!
 #.
-#: ns32k-dis.c:618
+#: ns32k-dis.c:619
 msgid "$<undefined>"
 msgstr ""
 
-#: ppc-opc.c:619 ppc-opc.c:650
+#: ppc-opc.c:620 ppc-opc.c:651
 msgid "invalid conditional option"
 msgstr ""
 
-#: ppc-opc.c:652
+#: ppc-opc.c:653
 msgid "attempt to set y bit when using + or - modifier"
 msgstr ""
 
-#: ppc-opc.c:707
+#: ppc-opc.c:708
 msgid "ignoring least significant bits in branch offset"
 msgstr ""
 
-#: ppc-opc.c:742 ppc-opc.c:779
+#: ppc-opc.c:743 ppc-opc.c:780
 msgid "illegal bitmask"
 msgstr ""
 
-#: ppc-opc.c:848
+#: ppc-opc.c:849
 msgid "value out of range"
 msgstr ""
 
-#: ppc-opc.c:922
+#: ppc-opc.c:923
 msgid "index register in load range"
 msgstr ""
 
-#: ppc-opc.c:937
+#: ppc-opc.c:938
 msgid "invalid register operand when updating"
 msgstr ""
 
 #. Mark as non-valid instruction
-#: sparc-dis.c:748
+#: sparc-dis.c:749
 msgid "unknown"
 msgstr ""
 
-#: sparc-dis.c:823
+#: sparc-dis.c:824
 #, c-format
 msgid "Internal error:  bad sparc-opcode.h: \"%s\", %#.8lx, %#.8lx\n"
 msgstr ""
 
-#: sparc-dis.c:834
+#: sparc-dis.c:835
 #, c-format
 msgid "Internal error: bad sparc-opcode.h: \"%s\", %#.8lx, %#.8lx\n"
 msgstr ""
 
-#: sparc-dis.c:883
+#: sparc-dis.c:884
 #, c-format
 msgid "Internal error: bad sparc-opcode.h: \"%s\" == \"%s\"\n"
 msgstr ""

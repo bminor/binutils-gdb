@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2001-04-24 16:35+0100\n"
+"POT-Creation-Date: 2001-04-24 17:11+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -564,13 +564,13 @@ msgstr ""
 
 #: elf-m10200.c:451 elf-m10300.c:663 elf32-arm.h:1939 elf32-avr.c:842
 #: elf32-cris.c:1335 elf32-d10v.c:478 elf32-fr30.c:648 elf32-i860.c:1049
-#: elf32-m32r.c:1266 elf32-openrisc.c:448 elf32-v850.c:1681
+#: elf32-m32r.c:1266 elf32-openrisc.c:449 elf32-v850.c:1681
 msgid "internal error: out of range error"
 msgstr ""
 
 #: elf-m10200.c:455 elf-m10300.c:667 elf32-arm.h:1943 elf32-avr.c:846
 #: elf32-cris.c:1339 elf32-d10v.c:482 elf32-fr30.c:652 elf32-i860.c:1053
-#: elf32-m32r.c:1270 elf32-mips.c:7046 elf32-openrisc.c:452 elf32-v850.c:1685
+#: elf32-m32r.c:1270 elf32-mips.c:7046 elf32-openrisc.c:453 elf32-v850.c:1685
 msgid "internal error: unsupported relocation error"
 msgstr ""
 
@@ -581,7 +581,7 @@ msgstr ""
 
 #: elf-m10200.c:463 elf-m10300.c:675 elf32-arm.h:1951 elf32-avr.c:854
 #: elf32-cris.c:1347 elf32-d10v.c:490 elf32-fr30.c:660 elf32-i860.c:1061
-#: elf32-m32r.c:1278 elf32-openrisc.c:460 elf32-v850.c:1705
+#: elf32-m32r.c:1278 elf32-openrisc.c:461 elf32-v850.c:1705
 msgid "internal error: unknown error"
 msgstr ""
 
@@ -736,7 +736,7 @@ msgid "<Unrecognised flag bits set>"
 msgstr ""
 
 #: elf32-avr.c:850 elf32-cris.c:1343 elf32-fr30.c:656 elf32-i860.c:1057
-#: elf32-openrisc.c:456 elf32-v850.c:1689
+#: elf32-openrisc.c:457 elf32-v850.c:1689
 msgid "internal error: dangerous relocation"
 msgstr ""
 
