@@ -234,6 +234,46 @@ read_memory_unsigned_integer (memaddr, len)
   return extract_unsigned_integer (buf, len);
 }
 
+#if 0
+/* Enable after 4.12.  It is not tested.  */
+
+/* Search code.  Targets can just make this their search function, or
+   if the protocol has a less general search function, they can call this
+   in the cases it can't handle.  */
+void
+generic_search (len, data, mask, startaddr, increment, lorange, hirange
+		addr_found, data_found)
+     int len;
+     char *data;
+     char *mask;
+     CORE_ADDR startaddr;
+     int increment;
+     CORE_ADDR lorange;
+     CORE_ADDR hirange;
+     CORE_ADDR *addr_found;
+     char *data_found;
+{
+  int i;
+  CORE_ADDR curaddr = startaddr;
+
+  while (curaddr >= lorange && curaddr < hirange)
+    {
+      read_memory (curaddr, data_found, len);
+      for (i = 0; i < len; ++i)
+	if ((data_found[i] & mask[i]) != data[i])
+	  goto try_again;
+      /* It matches.  */
+      *addr_found = curaddr;
+      return;
+
+    try_again:
+      curaddr += increment;
+    }
+  *addr_found = (CORE_ADDR)0;
+  return;
+}
+#endif /* 0 */
+
 /* The current default bfd target.  Points to storage allocated for
    gnutarget_string.  */
 char *gnutarget;

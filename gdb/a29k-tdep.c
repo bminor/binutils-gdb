@@ -418,10 +418,20 @@ init_frame_info (innermost_frame, fci)
       /* Search backward to find the trace-back tag.  However,
 	 do not trace back beyond the start of the text segment
 	 (just as a sanity check to avoid going into never-never land).  */
+#if 1
       while (p >= text_start
 	     && ((insn = read_memory_integer (p, 4)) & TAGWORD_ZERO_MASK) != 0)
 	p -= 4;
-      
+#else /* 0 */
+      char pat[4] = {0, 0, 0, 0};
+      char mask[4];
+      char insn_raw[4];
+      store_unsigned_integer (mask, 4, TAGWORD_ZERO_MASK);
+      /* Enable this once target_search is enabled and tested.  */
+      target_search (4, pat, mask, p, -4, text_start, p+1, &p, &insn_raw);
+      insn = extract_unsigned_integer (insn_raw, 4);
+#endif /* 0 */
+
       if (p < text_start)
 	{
 	  /* Couldn't find the trace-back tag.

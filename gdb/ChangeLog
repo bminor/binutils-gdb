@@ -1,5 +1,12 @@
 Thu Jan 13 10:32:38 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	Add search to target vector (#if 0'd until after 4.12):
+	* target.h (to_search, target_search): Add.
+	* gdbcore.h, core.c (generic_search): Add.
+	* remote.c (remote_search): Add.
+	* a29k-tdep.c (init_frame_info): Use target_search to find traceback
+	tag.
+
 	* printcmd.c (print_address_symbolic): If set print fast-symbolic-addr
 	is on, call find_pc_function rather than relying just on the minimal
 	symbols (probably only matters for symbol readers which don't put
