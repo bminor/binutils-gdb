@@ -1,3 +1,36 @@
+Sat May 22 00:21:41 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* config/mips/tm-irix3.h: Clean up, use tm-bigmips.h and redefine
+	the necessary bits.
+	* findvar.c (value_from_register): Fix uninitialized first_addr
+	which caused problems with assignment of doubles to register variables
+	on some targets.
+	* mipsread.c: Remove TM_FILE_OVERRIDE, include tm.h and provide the
+	missing mips definitions if necessary.
+
+	Fix handling of double register variables for mips targets and big
+	endian hosts. These patches are from Paul Flinders <ptf@delcam.co.uk>.
+	* config/mips/tm-mips.h: Increase MAX_REGISTER_{RAW,VIRTUAL}_SIZE to
+	  8 bytes for doubles.
+	* config/mips/tm-mips.h (REGISTER_CONVERT_TO_TYPE): New macro for
+	  conversion of type held in multiple registers to host format.
+	* config/mips/tm-mips.h (REGISTER_CONVERT_FROM_TYPE): New macro,
+	  companion to REGISTER_CONVERT_TO_TYPE.
+	* config/mips/tm-mips.h (EXTRACT_RETURN_VALUE, STORE_RETURN_VALUE):
+	  Convert to function calls.
+	* config/mips/tm-mips.h (FIX_CALL_DUMMY): New code for big endian
+	  mips targets.
+	* mips-tdep.c (mips_print_register): Raw buffer now needs just
+	  MAX_REGISTER_RAW_SIZE bytes.
+	* mips-tdep.c (mips_print_register): Use REGISTER_CONVERT_TO_TYPE
+	  (if defined) for doubles.
+	* mips-tdep.c: (mips_extract_return_value, mips_store_return_value):
+	  New functions, take care of REGISTER_CONVERT_TO/FROM_TYPE.
+	* valops.c (value_assign): Use REGISTER_CONVERT_TO_TYPE if
+	  defined.
+	* findvar.c (value_from_register): Use REGISTER_CONVERT_TO_TYPE if
+	  defined.
+
 Fri May 21 09:04:25 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* configure.in: Add i[34]86-*-isc*.

@@ -45,9 +45,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    This module can read all four of the known byte-order combinations,
    on any type of host.  */
 
-#define	TM_FILE_OVERRIDE
 #include "defs.h"
-#include "mips/tm-mips.h"
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "gdbcore.h"
@@ -57,6 +55,25 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "buildsym.h"
 #include "stabsread.h"
 #include "complaints.h"
+
+/* These are needed if the tm.h file does not contain the necessary
+   mips specific definitions.  */
+
+#ifndef MIPS_EFI_SYMBOL_NAME
+#define MIPS_EFI_SYMBOL_NAME "__GDB_EFI_INFO__"
+#include "coff/sym.h"
+#include "coff/symconst.h"
+typedef struct mips_extra_func_info {
+        long    numargs;
+        PDR     pdr;
+} *mips_extra_func_info_t;
+#ifndef RA_REGNUM
+#define RA_REGNUM 0
+#endif
+#ifndef FP0_REGNUM
+#define FP0_REGNUM 0
+#endif
+#endif
 
 #ifdef USG
 #include <sys/types.h>
@@ -415,8 +432,6 @@ mipscoff_psymtab_to_symtab (pst)
       printf_filtered ("Reading in symbols for %s...", pst->filename);
       fflush (stdout);
     }
-  /* Get the BFD and list of pending typedefs */
-  cur_bfd = CUR_BFD (pst);
 
   next_symbol_text_func = mips_next_symbol_text;
 
@@ -2392,8 +2407,15 @@ psymtab_to_symtab_1 (pst, filename)
 			     pst->dependencies[i]->filename);
       }
 
+  /* Do nothing if this is a dummy psymtab.  */
+
+  if (pst->n_global_syms == 0 && pst->n_static_syms == 0
+      && pst->textlow == 0 && pst->texthigh == 0)
+    return;
+
   /* Now read the symbols for this symtab */
 
+  cur_bfd = CUR_BFD (pst);
   current_objfile = pst->objfile;
   cur_fd = FDR_IDX (pst);
   fh = (cur_fd == -1) ? (FDR *) NULL : ecoff_data (cur_bfd)->fdr + cur_fd;

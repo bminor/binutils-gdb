@@ -32,7 +32,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif
 
 #include <sys/param.h>
-#include <sys/dir.h>
 #include <signal.h>
 #include <sys/ioctl.h>
 
@@ -613,7 +612,7 @@ static void
 mips_print_register (regnum, all)
      int regnum, all;
 {
-      unsigned char raw_buffer[MAX_REGISTER_RAW_SIZE * 2]; /* *2 for doubles */
+      unsigned char raw_buffer[MAX_REGISTER_RAW_SIZE];
       REGISTER_TYPE val;
 
       /* Get the data in raw format.  */
@@ -626,9 +625,15 @@ mips_print_register (regnum, all)
       /* If an even floating pointer register, also print as double. */
       if (regnum >= FP0_REGNUM && regnum < FP0_REGNUM+32
 	  && !((regnum-FP0_REGNUM) & 1)) {
-	  read_relative_register_raw_bytes (regnum+1, raw_buffer+4);
+	  char dbuffer[MAX_REGISTER_RAW_SIZE]; 
+
+	  read_relative_register_raw_bytes (regnum, dbuffer);
+	  read_relative_register_raw_bytes (regnum+1, dbuffer+4);
+#ifdef REGISTER_CONVERT_TO_TYPE
+          REGISTER_CONVERT_TO_TYPE(regnum, builtin_type_double, dbuffer);
+#endif
 	  printf_filtered ("(d%d: ", regnum-FP0_REGNUM);
-	  val_print (builtin_type_double, raw_buffer, 0,
+	  val_print (builtin_type_double, dbuffer, 0,
 		     stdout, 0, 1, 0, Val_pretty_default);
 	  printf_filtered ("); ");
       }
@@ -801,6 +806,44 @@ mips_skip_prologue(pc)
 #endif
 }
 
+/* Given a return value in `regbuf' with a type `valtype', 
+   extract and copy its value into `valbuf'.  */
+void
+mips_extract_return_value (valtype, regbuf, valbuf)
+    struct type *valtype;
+    char regbuf[REGISTER_BYTES];
+    char *valbuf;
+{
+  int regnum;
+  
+  regnum = TYPE_CODE (valtype) == TYPE_CODE_FLT && mips_fpu ? FP0_REGNUM : 2;
+
+  memcpy (valbuf, regbuf + REGISTER_BYTE (regnum), TYPE_LENGTH (valtype));
+#ifdef REGISTER_CONVERT_TO_TYPE
+  REGISTER_CONVERT_TO_TYPE(regnum, valtype, valbuf);
+#endif
+}
+
+/* Given a return value in `regbuf' with a type `valtype', 
+   write it's value into the appropriate register.  */
+void
+mips_store_return_value (valtype, valbuf)
+    struct type *valtype;
+    char *valbuf;
+{
+  int regnum;
+  char raw_buffer[MAX_REGISTER_RAW_SIZE];
+  
+  regnum = TYPE_CODE (valtype) == TYPE_CODE_FLT && mips_fpu ? FP0_REGNUM : 2;
+  memcpy(raw_buffer, valbuf, TYPE_LENGTH (valtype));
+
+#ifdef REGISTER_CONVERT_FROM_TYPE
+  REGISTER_CONVERT_FROM_TYPE(regnum, valtype, raw_buffer);
+#endif
+
+  write_register_bytes(REGISTER_BYTE (regnum), raw_buffer, TYPE_LENGTH (valtype));
+}
+
 /* Let the user turn off floating point and set the fence post for
    heuristic_proc_start.  */
 
@@ -819,7 +862,7 @@ or dealing with return values.", &setlist),
     (add_set_cmd ("heuristic-fence-post", class_support, var_uinteger,
 		  (char *) &heuristic_fence_post,
 		  "Set the distance searched for the start of a function.\n\
-Set number of bytes to be searched backward to find the beginning of a
+Set number of bytes to be searched backward to find the beginning of a\n\
 function without symbols.", &setlist),
      &showlist);
 }
