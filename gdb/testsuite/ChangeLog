@@ -50,7 +50,7 @@ Sun Feb  4 17:32:21 2001  Andrew Cagney  <cagney@redhat.com>
 	(dm_type_unsigned_int): Ditto.
 	(dm_type_void): Ditto.
 	(dm_type_void_star): Ditto.
-	* gdb.base/cplusfuncs.exp (probe_demangler): New function.
+	* gdb.c++/cplusfuncs.exp (probe_demangler): New function.
 	Probe the gdb demangler and set variables to accommodate
 	formatting differences.
 	(info_func_regexp): New function.  Same as info_func, but
