@@ -301,6 +301,11 @@ print_insn_sh (memaddr, info)
     {
     case bfd_mach_sh:
       target_arch = arch_sh1;
+      /* SH coff object files lack information about the machine type, so
+         we end up with bfd_mach_sh unless it was set explicitly (which
+	 could have happended if this is a call from gdb or the simulator.)  */
+      if (bfd_asymbol_flavour(*info->symbols) == bfd_target_coff_flavour)
+	target_arch = arch_sh4;
       break;
     case bfd_mach_sh2:
       target_arch = arch_sh2;
