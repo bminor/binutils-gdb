@@ -1,3 +1,12 @@
+Wed Nov  3 11:08:33 1993  Ken Raeburn  (raeburn@rtl.cygnus.com)
+
+	* configure.in: Don't build ld on i386-solaris2, same as for
+	sparc-solaris2.
+
+Tue Nov  2 14:21:25 1993  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* Makefile.in (taz): Add texinfo/lgpl.texinfo (for libg++).
+
 Tue Nov  2 13:38:30 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* configure.in:  Configure gdb for alpha.
