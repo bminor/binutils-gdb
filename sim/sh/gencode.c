@@ -226,22 +226,22 @@ op tab[] =
     "R[n] = (R[m] & 0xffff);",
   },
 
-  /* sh3e */
+  /* sh2e */
   { "", "", "fabs <FREG_N>", "1111nnnn01011101",
     "FP_UNARY (n, fabs);",
     "/* FIXME: FR(n) &= 0x7fffffff; */",
   },
 
-  /* sh3e */
+  /* sh2e */
   { "", "", "fadd <FREG_M>,<FREG_N>", "1111nnnnmmmm0000",
     "FP_OP (n, +, m);",
   },
 
-  /* sh3e */
+  /* sh2e */
   { "", "", "fcmp/eq <FREG_M>,<FREG_N>", "1111nnnnmmmm0100",
     "FP_CMP (n, ==, m);",
   },
-  /* sh3e */
+  /* sh2e */
   { "", "", "fcmp/gt <FREG_M>,<FREG_N>", "1111nnnnmmmm0101",
     "FP_CMP (n, >, m);",
   },
@@ -278,7 +278,7 @@ op tab[] =
     "}",
   },
 
-  /* sh3e */
+  /* sh2e */
   { "", "", "fdiv <FREG_M>,<FREG_N>", "1111nnnnmmmm0011",
     "FP_OP (n, /, m);",
     "/* FIXME: check for DP and (n & 1) == 0? */",
@@ -291,19 +291,19 @@ op tab[] =
     "/* FIXME: check for DP and (n & 1) == 0? */",
   },
 
-  /* sh3e */
+  /* sh2e */
   { "", "", "fldi0 <FREG_N>", "1111nnnn10001101",
     "SET_FR (n, (float)0.0);",
     "/* FIXME: check for DP and (n & 1) == 0? */",
   },
 
-  /* sh3e */
+  /* sh2e */
   { "", "", "fldi1 <FREG_N>", "1111nnnn10011101",
     "SET_FR (n, (float)1.0);",
     "/* FIXME: check for DP and (n & 1) == 0? */",
   },
 
-  /* sh3e */
+  /* sh2e */
   { "", "", "flds <FREG_N>,FPUL", "1111nnnn00011101",
     "  union",
     "  {",
@@ -314,7 +314,7 @@ op tab[] =
     "  FPUL = u.i;",
   },
 
-  /* sh3e */
+  /* sh2e */
   { "", "", "float FPUL,<FREG_N>", "1111nnnn00101101",
     /* sh4 */
     "if (FPSCR_PR)",
@@ -325,13 +325,13 @@ op tab[] =
     "}",
   },
 
-  /* sh3e */
+  /* sh2e */
   { "", "", "fmac <FREG_0>,<FREG_M>,<FREG_N>", "1111nnnnmmmm1110",
     "SET_FR (n, FR(m) * FR(0) + FR(n));",
     "/* FIXME: check for DP and (n & 1) == 0? */",
   },
 
-  /* sh3e */
+  /* sh2e */
   { "", "", "fmov <FREG_M>,<FREG_N>", "1111nnnnmmmm1100",
     /* sh4 */
     "if (FPSCR_SZ) {",
@@ -345,7 +345,7 @@ op tab[] =
     "  SET_FR (n, FR (m));",
     "}",
   },
-  /* sh3e */
+  /* sh2e */
   { "", "", "fmov.s <FREG_M>,@<REG_N>", "1111nnnnmmmm1010",
     /* sh4 */
     "if (FPSCR_SZ) {",
@@ -358,7 +358,7 @@ op tab[] =
     "  WLAT (R[n], FI(m));",
     "}",
   },
-  /* sh3e */
+  /* sh2e */
   { "", "", "fmov.s @<REG_M>,<FREG_N>", "1111nnnnmmmm1000",
     /* sh4 */
     "if (FPSCR_SZ) {",
@@ -371,7 +371,7 @@ op tab[] =
     "  SET_FI(n, RLAT(R[m]));",
     "}",
   },
-  /* sh3e */
+  /* sh2e */
   { "", "", "fmov.s @<REG_M>+,<FREG_N>", "1111nnnnmmmm1001",
     /* sh4 */
     "if (FPSCR_SZ) {",
@@ -386,7 +386,7 @@ op tab[] =
     "  R[m] += 4;",
     "}",
   },
-  /* sh3e */
+  /* sh2e */
   { "", "", "fmov.s <FREG_M>,@-<REG_N>", "1111nnnnmmmm1011",
     /* sh4 */
     "if (FPSCR_SZ) {",
@@ -401,7 +401,7 @@ op tab[] =
     "  WLAT (R[n], FI(m));",
     "}",
   },
-  /* sh3e */
+  /* sh2e */
   { "", "", "fmov.s @(R0,<REG_M>),<FREG_N>", "1111nnnnmmmm0110",
     /* sh4 */
     "if (FPSCR_SZ) {",
@@ -414,7 +414,7 @@ op tab[] =
     "  SET_FI(n, RLAT(R[0] + R[m]));",
     "}",
   },
-  /* sh3e */
+  /* sh2e */
   { "", "", "fmov.s <FREG_M>,@(R0,<REG_N>)", "1111nnnnmmmm0111",
     /* sh4 */
     "if (FPSCR_SZ) {",
@@ -430,12 +430,12 @@ op tab[] =
 
   /* sh4: See fmov instructions above for move to/from extended fp registers */
 
-  /* sh3e */
+  /* sh2e */
   { "", "", "fmul <FREG_M>,<FREG_N>", "1111nnnnmmmm0010",
     "FP_OP(n, *, m);",
   },
 
-  /* sh3e */
+  /* sh2e */
   { "", "", "fneg <FREG_N>", "1111nnnn01001101",
     "FP_UNARY(n, -);",
   },
@@ -455,12 +455,12 @@ op tab[] =
     "FP_UNARY(n, sqrt);",
   },
 
-  /* sh3e */
+  /* sh2e */
   { "", "", "fsub <FREG_M>,<FREG_N>", "1111nnnnmmmm0001",
     "FP_OP(n, -, m);",
   },
 
-  /* sh3e */
+  /* sh2e */
   { "", "", "ftrc <FREG_N>, FPUL", "1111nnnn00111101",
     /* sh4 */
     "if (FPSCR_PR) {",
@@ -476,7 +476,7 @@ op tab[] =
     "  FPUL = (int)FR(n);",
   },
 
-  /* sh3e */
+  /* sh2e */
   { "", "", "fsts FPUL,<FREG_N>", "1111nnnn00001101",
     "  union",
     "  {",
@@ -561,11 +561,11 @@ op tab[] =
     "SREG (m) = RLAT(R[n]);",
     "R[n] += 4;",
   },
-  /* sh3e / sh-dsp (lds <REG_N>,DSR) */
+  /* sh2e / sh-dsp (lds <REG_N>,DSR) */
   { "", "n", "lds <REG_N>,FPSCR", "0100nnnn01101010",
     "SET_FPSCR(R[n]);",
   },
-  /* sh3e / sh-dsp (lds.l @<REG_N>+,DSR) */
+  /* sh2e / sh-dsp (lds.l @<REG_N>+,DSR) */
   { "", "n", "lds.l @<REG_N>+,FPSCR", "0100nnnn01100110",
     "MA (1);",
     "SET_FPSCR (RLAT(R[n]));",
