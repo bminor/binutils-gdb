@@ -1238,7 +1238,6 @@ static CONST struct elf_reloc_map mips_reloc_map[] =
   { BFD_RELOC_16, R_MIPS_16 },
   { BFD_RELOC_32, R_MIPS_32 },
   { BFD_RELOC_CTOR, R_MIPS_32 },
-  { BFD_RELOC_32_PCREL, R_MIPS_REL32 },
   { BFD_RELOC_MIPS_JMP, R_MIPS_26 },
   { BFD_RELOC_HI16_S, R_MIPS_HI16 },
   { BFD_RELOC_LO16, R_MIPS_LO16 },
@@ -4416,7 +4415,8 @@ mips_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      bfd_byte *cr;
 
 	      if ((info->shared
-		   || (h != NULL
+		   || (elf_hash_table (info)->dynamic_sections_created
+		       && h != NULL
 		       && ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)
 			   == 0)))
 		  && (input_section->flags & SEC_ALLOC) != 0)
@@ -4956,36 +4956,39 @@ mips_elf_check_relocs (abfd, info, sec, relocs)
 	  if ((info->shared || h != NULL)
 	      && (sec->flags & SEC_ALLOC) != 0)
 	    {
-	      /* When creating a shared object, we must copy these
-                 reloc types into the output file as R_MIPS_REL32
-		 relocs.  We create the .rel.dyn reloc section in
-		 dynobj and make room for this reloc.  */
-	      if (sreloc == NULL)
+	      if (info->shared)
 		{
-		  const char *name = ".rel.dyn";
-
-		  sreloc = bfd_get_section_by_name (dynobj, name);
+		  /* When creating a shared object, we must copy these
+		     reloc types into the output file as R_MIPS_REL32
+		     relocs.  We create the .rel.dyn reloc section in
+		     dynobj and make room for this reloc.  */
 		  if (sreloc == NULL)
 		    {
-		      sreloc = bfd_make_section (dynobj, name);
-		      if (sreloc == NULL
-			  || ! bfd_set_section_flags (dynobj, sreloc,
-						      (SEC_ALLOC
-						       | SEC_LOAD
-						       | SEC_HAS_CONTENTS
-						       | SEC_IN_MEMORY
-						       | SEC_READONLY))
-			  || ! bfd_set_section_alignment (dynobj, sreloc, 4))
-			return false;
+		      const char *name = ".rel.dyn";
 
-		      /* Add a null element. */
-		      sreloc->_raw_size += sizeof (Elf32_External_Rel);
-		      ++sreloc->reloc_count;
+		      sreloc = bfd_get_section_by_name (dynobj, name);
+		      if (sreloc == NULL)
+			{
+			  sreloc = bfd_make_section (dynobj, name);
+			  if (sreloc == NULL
+			      || ! bfd_set_section_flags (dynobj, sreloc,
+							  (SEC_ALLOC
+							   | SEC_LOAD
+							   | SEC_HAS_CONTENTS
+							   | SEC_IN_MEMORY
+							   | SEC_READONLY))
+			      || ! bfd_set_section_alignment (dynobj, sreloc,
+							      4))
+			    return false;
+
+			  /* Add a null element. */
+			  sreloc->_raw_size += sizeof (Elf32_External_Rel);
+			  ++sreloc->reloc_count;
+			}
 		    }
-		}
 
-	      if (info->shared)
-		sreloc->_raw_size += sizeof (Elf32_External_Rel);
+		  sreloc->_raw_size += sizeof (Elf32_External_Rel);
+		}
 	      else
 		{
 		  struct mips_elf_link_hash_entry *hmips;
@@ -5383,6 +5386,7 @@ mips_elf_size_dynamic_sections (output_bfd, info)
     struct bfd_strtab_hash *dynstr;
     struct mips_got_info *g;
 
+    c = 0;
     if (elf_hash_table (info)->dynamic_sections_created)
       {
 	if (SGI_COMPAT (output_bfd))
@@ -6128,7 +6132,11 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap =
 #define TARGET_BIG_NAME			"elf32-bigmips"
 #define ELF_ARCH			bfd_arch_mips
 #define ELF_MACHINE_CODE		EM_MIPS
-#define ELF_MAXPAGESIZE			0x10000
+
+/* The SVR4 MIPS ABI says that this should be 0x10000, but Irix 5 uses
+   a value of 0x1000, and we are compatible.  */
+#define ELF_MAXPAGESIZE			0x1000
+
 #define elf_backend_collect		true
 #define elf_backend_type_change_ok	true
 #define elf_info_to_howto		0
