@@ -1,5 +1,26 @@
 2000-06-16  Nicholas Duffek  <nsd@redhat.com>
 
+	* bfd-in.h (bfd_family_coff): Define.
+	* bfd-in2.h: Regenerate.
+	* coffgen.c (coff_count_linenumbers, coff_symbol_from,
+	coff_find_nearest_line): Check COFFness using bfd_family_coff()
+	instead of bfd_target_coff_flavour.
+	* cofflink.c (_bfd_coff_final_link): Likewise.
+	* cpu-ns32k.c (do_ns32k_reloc): Don't strcmp() target name to
+	exclude XCOFF files.
+	* reloc.c (bfd_perform_relocation, bfd_install_relocation):
+	Likewise.
+	* targets.c (enum bfd_flavour): Add bfd_target_xcoff_flavour.
+	* xcoff-target.h (TARGET_SYM): Use bfd_target_xcoff_flavour.
+	* xcofflink.c (XCOFF_XVECP): Delete.
+	(bfd_xcoff_link_record_set, bfd_xcoff_import_symbol,
+	bfd_xcoff_export_symbol, bfd_xcoff_link_count_reloc,
+	bfd_xcoff_record_link_assignment,
+	bfd_xcoff_size_dynamic_sections): Replace XCOFF_XVECP() with
+	check for bfd_target_xcoff_flavour.
+
+2000-06-16  Nicholas Duffek  <nsd@redhat.com>
+
 	* rs6000-core.c: Support 64-bit core files, support pre-4.3 core
 	files on AIX 4.3.
 	(read_hdr): New function.

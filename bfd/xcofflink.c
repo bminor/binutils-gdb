@@ -29,15 +29,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define STRING_SIZE_SIZE (4)
 
-/* In order to support linking different object file formats into an
-   XCOFF format, we need to be able to determine whether a particular
-   bfd_target is an XCOFF vector.  FIXME: We need to rethink this
-   whole approach.  */
-#define XCOFF_XVECP(xv) \
-  (strcmp ((xv)->name, "aixcoff-rs6000") == 0 \
-   || strcmp ((xv)->name, "aixcoff64-rs6000") == 0 \
-   || strcmp ((xv)->name, "xcoff-powermac") == 0)
-
 /* Get the XCOFF hash table entries for a BFD.  */
 #define obj_xcoff_sym_hashes(bfd) \
   ((struct xcoff_link_hash_entry **) obj_coff_sym_hashes (bfd))
@@ -2916,7 +2907,7 @@ bfd_xcoff_link_record_set (output_bfd, info, harg, size)
   struct xcoff_link_hash_entry *h = (struct xcoff_link_hash_entry *) harg;
   struct xcoff_link_size_list *n;
 
-  if (! XCOFF_XVECP (output_bfd->xvec))
+  if (bfd_get_flavour (output_bfd) != bfd_target_xcoff_flavour)
     return true;
 
   /* This will hardly ever be called.  I don't want to burn four bytes
@@ -2952,7 +2943,7 @@ bfd_xcoff_import_symbol (output_bfd, info, harg, val, imppath, impfile,
 {
   struct xcoff_link_hash_entry *h = (struct xcoff_link_hash_entry *) harg;
 
-  if (! XCOFF_XVECP (output_bfd->xvec))
+  if (bfd_get_flavour (output_bfd) != bfd_target_xcoff_flavour)
     return true;
 
   /* A symbol name which starts with a period is the code for a
@@ -3066,7 +3057,7 @@ bfd_xcoff_export_symbol (output_bfd, info, harg, syscall)
 {
   struct xcoff_link_hash_entry *h = (struct xcoff_link_hash_entry *) harg;
 
-  if (! XCOFF_XVECP (output_bfd->xvec))
+  if (bfd_get_flavour (output_bfd) != bfd_target_xcoff_flavour)
     return true;
 
   h->flags |= XCOFF_EXPORT;
@@ -3131,7 +3122,7 @@ bfd_xcoff_link_count_reloc (output_bfd, info, name)
 {
   struct xcoff_link_hash_entry *h;
 
-  if (! XCOFF_XVECP (output_bfd->xvec))
+  if (bfd_get_flavour (output_bfd) != bfd_target_xcoff_flavour)
     return true;
 
   h = ((struct xcoff_link_hash_entry *)
@@ -3165,7 +3156,7 @@ bfd_xcoff_record_link_assignment (output_bfd, info, name)
 {
   struct xcoff_link_hash_entry *h;
 
-  if (! XCOFF_XVECP (output_bfd->xvec))
+  if (bfd_get_flavour (output_bfd) != bfd_target_xcoff_flavour)
     return true;
 
   h = xcoff_link_hash_lookup (xcoff_hash_table (info), name, true, true,
@@ -3250,7 +3241,7 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
   struct bfd_strtab_hash *debug_strtab;
   bfd_byte *debug_contents = NULL;
 
-  if (! XCOFF_XVECP (output_bfd->xvec))
+  if (bfd_get_flavour (output_bfd) != bfd_target_xcoff_flavour)
     {
       for (i = 0; i < 6; i++)
 	special_sections[i] = NULL;

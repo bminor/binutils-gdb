@@ -151,7 +151,7 @@ extern unsigned int _bfd_xcoff_swap_aux_out PARAMS ((bfd *, PTR, int, int, int, 
 const bfd_target TARGET_SYM =
 {
   TARGET_NAME,
-  bfd_target_coff_flavour,
+  bfd_target_xcoff_flavour,
   BFD_ENDIAN_BIG,		/* data byte order is big */
   BFD_ENDIAN_BIG,		/* header byte order is big */
 

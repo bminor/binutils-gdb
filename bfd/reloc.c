@@ -728,9 +728,6 @@ bfd_perform_relocation (abfd, reloc_entry, data, input_section, output_bfd,
 
 	  /* WTF?? */
 	  if (abfd->xvec->flavour == bfd_target_coff_flavour
-	      && strcmp (abfd->xvec->name, "aixcoff-rs6000") != 0
-	      && strcmp (abfd->xvec->name, "aixcoff64-rs6000") != 0
-	      && strcmp (abfd->xvec->name, "xcoff-powermac") != 0
 	      && strcmp (abfd->xvec->name, "coff-Intel-little") != 0
 	      && strcmp (abfd->xvec->name, "coff-Intel-big") != 0)
 	    {
@@ -1125,9 +1122,6 @@ bfd_install_relocation (abfd, reloc_entry, data_start, data_start_offset,
 
       /* WTF?? */
       if (abfd->xvec->flavour == bfd_target_coff_flavour
-	  && strcmp (abfd->xvec->name, "aixcoff-rs6000") != 0
-	  && strcmp (abfd->xvec->name, "aixcoff64-rs6000") != 0
-	  && strcmp (abfd->xvec->name, "xcoff-powermac") != 0
 	  && strcmp (abfd->xvec->name, "coff-Intel-little") != 0
 	  && strcmp (abfd->xvec->name, "coff-Intel-big") != 0)
 	{

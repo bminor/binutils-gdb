@@ -141,6 +141,7 @@ DESCRIPTION
 .  bfd_target_aout_flavour,
 .  bfd_target_coff_flavour,
 .  bfd_target_ecoff_flavour,
+.  bfd_target_xcoff_flavour,
 .  bfd_target_elf_flavour,
 .  bfd_target_ieee_flavour,
 .  bfd_target_nlm_flavour,

@@ -290,8 +290,7 @@ do_ns32k_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
 	  reloc_entry->address += input_section->output_offset;
 
 	  /* WTF?? */
-	  if (abfd->xvec->flavour == bfd_target_coff_flavour
-	      && strcmp (abfd->xvec->name, "aixcoff-rs6000") != 0)
+	  if (abfd->xvec->flavour == bfd_target_coff_flavour)
 	    {
 #if 1
 	      /* For m68k-coff, the addend was being subtracted twice during

@@ -525,7 +525,7 @@ coff_count_linenumbers (abfd)
     {
       asymbol *q_maybe = *p;
 
-      if (bfd_asymbol_flavour (q_maybe) == bfd_target_coff_flavour)
+      if (bfd_family_coff (bfd_asymbol_bfd (q_maybe)))
 	{
 	  coff_symbol_type *q = coffsymbol (q_maybe);
 
@@ -564,7 +564,7 @@ coff_symbol_from (ignore_abfd, symbol)
      bfd *ignore_abfd ATTRIBUTE_UNUSED;
      asymbol *symbol;
 {
-  if (bfd_asymbol_flavour (symbol) != bfd_target_coff_flavour)
+  if (!bfd_family_coff (bfd_asymbol_bfd (symbol)))
     return (coff_symbol_type *) NULL;
 
   if (bfd_asymbol_bfd (symbol)->tdata.coff_obj_data == (coff_data_type *) NULL)
@@ -2200,7 +2200,7 @@ coff_find_nearest_line (abfd, section, symbols, offset, filename_ptr,
   *line_ptr = 0;
 
   /* Don't try and find line numbers in a non coff file */
-  if (abfd->xvec->flavour != bfd_target_coff_flavour)
+  if (!bfd_family_coff (abfd))
     return false;
 
   if (cof == NULL)

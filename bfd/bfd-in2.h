@@ -489,6 +489,9 @@ extern int bfd_stat PARAMS ((bfd *abfd, struct stat *));
 #define bfd_get_format(abfd) ((abfd)->format)
 #define bfd_get_target(abfd) ((abfd)->xvec->name)
 #define bfd_get_flavour(abfd) ((abfd)->xvec->flavour)
+#define bfd_family_coff(abfd) \
+  (bfd_get_flavour (abfd) == bfd_target_coff_flavour || \
+   bfd_get_flavour (abfd) == bfd_target_xcoff_flavour)
 #define bfd_big_endian(abfd) ((abfd)->xvec->byteorder == BFD_ENDIAN_BIG)
 #define bfd_little_endian(abfd) ((abfd)->xvec->byteorder == BFD_ENDIAN_LITTLE)
 #define bfd_header_big_endian(abfd) \
@@ -3057,6 +3060,7 @@ enum bfd_flavour {
   bfd_target_aout_flavour,
   bfd_target_coff_flavour,
   bfd_target_ecoff_flavour,
+  bfd_target_xcoff_flavour,
   bfd_target_elf_flavour,
   bfd_target_ieee_flavour,
   bfd_target_nlm_flavour,

@@ -894,8 +894,7 @@ _bfd_coff_final_link (abfd, info)
       for (p = o->link_order_head; p != NULL; p = p->next)
 	{
 	  if (p->type == bfd_indirect_link_order
-	      && (bfd_get_flavour (p->u.indirect.section->owner)
-		  == bfd_target_coff_flavour))
+	      && bfd_family_coff (p->u.indirect.section->owner))
 	    {
 	      sub = p->u.indirect.section->owner;
 	      if (! bfd_coff_link_output_has_begun (sub, & finfo))
