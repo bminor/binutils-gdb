@@ -153,7 +153,8 @@ static unsigned long som_count_spaces PARAMS ((bfd *));
 static unsigned long som_count_subspaces PARAMS ((bfd *));
 static int compare_syms PARAMS ((asymbol **, asymbol **));
 static unsigned long som_compute_checksum PARAMS ((bfd *));
-
+static boolean som_prep_headers PARAMS ((bfd *));
+ 
 static reloc_howto_type som_hppa_howto_table[] =
 {
   {R_NO_RELOCATION, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_NO_RELOCATION"},
@@ -1161,6 +1162,98 @@ som_mkobject (abfd)
     {
       bfd_error = no_memory;
       return false;
+    }
+  return true;
+}
+
+/* Initialize some information in the file header.  This routine makes
+   not attempt at doing the right thing for a full executable; it
+   is only meant to handle relocatable objects.  */
+
+static boolean
+som_prep_headers (abfd)
+     bfd *abfd;
+{
+  struct header *file_hdr = obj_som_file_hdr (abfd);
+  asection *section;
+
+  /* FIXME.  This should really be conditional based on whether or not
+     PA1.1 instructions/registers have been used.  */
+  file_hdr->system_id = HP9000S800_ID;
+
+  /* FIXME.  Only correct for building relocatable objects.  */
+  if (abfd->flags & EXEC_P)
+    abort ();
+  else
+    file_hdr->a_magic = RELOC_MAGIC;
+
+  /* Only new format SOM is supported.  */
+  file_hdr->version_id = NEW_VERSION_ID;
+
+  /* These fields are optional, and embedding timestamps is not always
+     a wise thing to do, it makes comparing objects during a multi-stage
+     bootstrap difficult.  */
+  file_hdr->file_time.secs = 0;
+  file_hdr->file_time.nanosecs = 0; 
+
+  if (abfd->flags & EXEC_P)
+    abort ();
+  else
+    {
+      file_hdr->entry_space = 0;
+      file_hdr->entry_subspace = 0;
+      file_hdr->entry_offset = 0;
+    }
+  
+  /* FIXME.  I do not know if we ever need to put anything other
+     than zero in this field.  */
+  file_hdr->presumed_dp = 0;
+
+  /* Now iterate over the sections translating information from
+     BFD sections to SOM spaces/subspaces.  */
+
+  for (section = abfd->sections; section != NULL; section = section->next)
+    {
+      /* Ignore anything which has not been marked as a space or
+	 subspace.  */
+      if (som_section_data (section)->is_space == 0
+
+	  && som_section_data (section)->is_subspace == 0)
+	continue;
+
+      if (som_section_data (section)->is_space)
+	{
+	  /* Set space attributes.  Note most attributes of SOM spaces
+	     are set based on the subspaces it contains.  */
+	  som_section_data (section)->space_dict.loader_fix_index = -1;
+	  som_section_data (section)->space_dict.init_pointer_index = -1;
+	}
+      else
+	{
+	  /* Set subspace attributes.  Basic stuff is done here, additional
+	     attributes are filled in later as more information becomes
+	     available.  */
+	  if (section->flags & SEC_IS_COMMON)
+	    {
+	      som_section_data (section)->subspace_dict.dup_common = 1;
+	      som_section_data (section)->subspace_dict.is_common = 1;
+	    }
+
+	  if (section->flags & SEC_ALLOC)
+	    som_section_data (section)->subspace_dict.is_loadable = 1;
+
+	  if (section->flags & SEC_CODE)
+	    som_section_data (section)->subspace_dict.code_only = 1;
+
+	  som_section_data (section)->subspace_dict.subspace_start = 
+	    section->vma;
+	  som_section_data (section)->subspace_dict.subspace_length =
+	    bfd_section_size (abfd, section);
+	  som_section_data (section)->subspace_dict.initialization_length =
+	    bfd_section_size (abfd, section);
+	  som_section_data (section)->subspace_dict.alignment = 
+	    1 << section->alignment_power;
+	}
     }
   return true;
 }

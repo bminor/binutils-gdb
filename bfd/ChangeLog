@@ -1,5 +1,7 @@
 Fri Nov 12 15:29:36 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* som.c (som_prep_headers): New function.
+
 	* som.c (som_count_spaces): New function.
 	(som_count_subspaces): New function.
 	(compare_syms): New function.
