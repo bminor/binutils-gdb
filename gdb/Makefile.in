@@ -539,7 +539,7 @@ SFILES = ax-general.c ax-gdb.c bcache.c blockframe.c breakpoint.c \
 	m2-exp.y m2-lang.c m2-typeprint.c m2-valprint.c main.c maint.c \
 	memattr.c mem-break.c minsyms.c mipsread.c nlmread.c objfiles.c \
 	p-exp.y p-lang.c p-typeprint.c p-valprint.c parse.c \
-	macrotab.c macroexp.c \
+	macrotab.c macroexp.c macrocmd.c macroscope.c \
 	printcmd.c remote.c remote-nrom.c scm-exp.c scm-lang.c \
 	scm-valprint.c source.c stabsread.c stack.c symfile.c \
 	symmisc.c symtab.c linespec.c target.c thread.c top.c tracepoint.c \
@@ -639,6 +639,7 @@ language_h =	language.h
 linespec_h =	linespec.h
 macroexp_h =	macroexp.h
 macrotab_h =    macrotab.h $(obstack_h) $(bcache_h)
+macroscope_h =  macroscope.h $(macrotab_h) $(symtab_h)
 memattr_h =     memattr.h
 monitor_h =	monitor.h
 objfiles_h =	objfiles.h
@@ -677,7 +678,7 @@ HFILES_NO_SRCDIR = bcache.h buildsym.h call-cmds.h coff-solib.h defs.h \
 	gdb-stabs.h $(inferior_h) language.h minimon.h monitor.h \
 	objfiles.h parser-defs.h serial.h solib.h \
 	symfile.h stabsread.h target.h terminal.h typeprint.h xcoffsolib.h \
-	macrotab.h macroexp.h \
+	macrotab.h macroexp.h macroscope.h \
 	c-lang.h ch-lang.h f-lang.h \
 	jv-lang.h \
 	m2-lang.h  p-lang.h \
@@ -720,7 +721,7 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
 	source.o values.o eval.o valops.o valarith.o valprint.o printcmd.o \
 	symtab.o symfile.o symmisc.o linespec.o infcmd.o infrun.o \
 	expprint.o environ.o stack.o thread.o \
-	macrotab.o macroexp.o \
+	macrotab.o macrocmd.o macroexp.o macroscope.o \
 	event-loop.o event-top.o inf-loop.o completer.o \
 	gdbarch.o arch-utils.o gdbtypes.o copying.o $(DEPFILES) \
 	memattr.o mem-break.o target.o parse.o language.o $(YYOBJ) buildsym.o \
@@ -2141,6 +2142,11 @@ macroexp.o: macroexp.c $(defs_h) $(macrotab_h)
 
 macrotab.o: macrotab.c $(defs_h) $(obstack_h) $(objfiles_h) $(symtab_h) \
 	$(macrotab_h) $(splay_tree_h) gdb_assert.h $(bcache_h)
+
+macroscope.o: macroscope.c $(defs_h) $(macroscope_h)
+
+macrocmd.o: macrocmd.c $(defs_h) $(macrotab_h) $(macroexp_h) \
+	$(macroscope_h) $(command_h) $(gdbcmd_h)
 
 target.o: target.c $(bfd_h) $(defs_h) $(gdbcmd_h) $(inferior_h) \
 	$(objfiles_h) $(symfile_h) $(target_h) $(gdb_string_h) $(regcache_h)
