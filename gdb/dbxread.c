@@ -138,6 +138,9 @@ static unsigned string_table_offset;
    offset for the current and next .o files. */
 static unsigned int file_string_table_offset;
 static unsigned int next_file_string_table_offset;
+
+/* This is the lowest text address we have yet encountered.  */
+static CORE_ADDR lowest_text_address;
 
 /* Complaints about the symbols we have encountered.  */
 
@@ -449,6 +452,10 @@ record_minimal_symbol (name, address, type, objfile)
 
     default:      ms_type = mst_unknown; break;
   }
+
+  if (ms_type == mst_file_text || ms_type == mst_text
+      && address < lowest_text_address)
+    lowest_text_address = address;
 
   prim_record_minimal_symbol
     (obsavestring (name, strlen (name), &objfile -> symbol_obstack),
@@ -881,12 +888,7 @@ read_dbx_symtab (section_offsets, objfile, text_addr, text_size)
 
   last_source_file = NULL;
 
-#ifdef END_OF_TEXT_DEFAULT
-  end_of_text_addr = END_OF_TEXT_DEFAULT;
-#else
-  end_of_text_addr = text_addr + section_offsets->offsets[SECT_OFF_TEXT]
-			       + text_size;	/* Relocate */
-#endif
+  lowest_text_address = (CORE_ADDR)-1;
 
   symfile_bfd = objfile->obfd;	/* For next_text_symbol */
   abfd = objfile->obfd;
@@ -959,7 +961,10 @@ read_dbx_symtab (section_offsets, objfile, text_addr, text_size)
   if (pst)
     {
       end_psymtab (pst, psymtab_include_list, includes_used,
-		   symnum * symbol_size, end_of_text_addr,
+		   symnum * symbol_size,
+		   (lowest_text_address == (CORE_ADDR)-1
+		    ? text_addr : lowest_text_address)
+		   + text_size,
 		   dependency_list, dependencies_used);
     }
 
@@ -1025,7 +1030,6 @@ end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
      CORE_ADDR capping_text;
      struct partial_symtab **dependency_list;
      int number_dependencies;
-/*     struct partial_symbol *capping_global, *capping_static;*/
 {
   int i;
   struct partial_symtab *p1;
@@ -1104,7 +1108,7 @@ end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
   if (pst->textlow == 0)
     /* This loses if the text section really starts at address zero
        (generally true when we are debugging a .o file, for example).
-       That is why this whole thing is inside N_SO_ADDRESS_MIGHT_LIE.  */
+       That is why this whole thing is inside N_SO_ADDRESS_MAYBE_MISSING.  */
     pst->textlow = pst->texthigh;
 
   /* If we know our own starting text address, then walk through all other
@@ -1124,7 +1128,7 @@ end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
   }
 
   /* End of kludge for patching Solaris textlow and texthigh.  */
-#endif /* NO_SO_ADDRESS_MAYBE_MISSING.  */
+#endif /* N_SO_ADDRESS_MAYBE_MISSING.  */
 
   pst->n_global_syms =
     objfile->global_psymbols.next - (objfile->global_psymbols.list + pst->globals_offset);
@@ -1518,12 +1522,14 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
      N_STSYM or N_GSYM for SunOS4 acc; N_FUN for other compilers.  */
   static int function_stab_type = 0;
 
-  /* This is true for Solaris (and all other stabs-in-elf systems, hopefully,
-     since it would be silly to do things differently from Solaris), and
-     false for SunOS4 and other a.out file formats.  */
+  /* This is true for Solaris (and all other systems which put stabs
+     in sections, hopefully, since it would be silly to do things
+     differently from Solaris), and false for SunOS4 and other a.out
+     file formats.  */
   block_address_function_relative =
-    (0 == strncmp (bfd_get_target (objfile->obfd), "elf", 3))
-     || (0 == strncmp (bfd_get_target (objfile->obfd), "som", 3));
+    ((0 == strncmp (bfd_get_target (objfile->obfd), "elf", 3))
+     || (0 == strncmp (bfd_get_target (objfile->obfd), "som", 3))
+     || (0 == strncmp (bfd_get_target (objfile->obfd), "coff", 4)));
 
   if (!block_address_function_relative)
     /* N_LBRAC, N_RBRAC and N_SLINE entries are not relative to the
@@ -1818,8 +1824,7 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
     case N_NBBSS:
     case N_NBSTS:
     case N_NBLCS:
-      complain (&unknown_symtype_complaint,
-		local_hex_string((unsigned long) type));
+      complain (&unknown_symtype_complaint, local_hex_string (type));
       /* FALLTHROUGH */
 
     /* The following symbol types don't need the address field relocated,

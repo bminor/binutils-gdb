@@ -1,5 +1,15 @@
 Tue Mar  8 06:56:13 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* dbxread.c: New variable lowest_text_address.
+	(record_minimal_symbol, read_dbx_symtab): Set it.
+	(read_dbx_symtab): Use lowest_text_address + text_size instead of
+	end_of_text_address.
+	* config/gould/tm-pn.h: Add comment regarding END_OF_TEXT_DEFAULT.
+
+	* dbxread.c (end_psymtab): Remove old and commented out
+	capping_global and capping_static.  Fix comments regarding
+	N_SO_ADDRESS_MAYBE_MISSING to match the real name of the macro.
+
 	* parser-defs.h: Add "extern" to start of variable declarations so
 	we don't end up with commons.
 	* parse.c: Define these variables.
