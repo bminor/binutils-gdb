@@ -1,3 +1,8 @@
+Fri Jun 25 12:00:46 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t{02,13}/{Makefile.in,gdbme.c,comp-info.c}: New way of
+	generating comp-info.exp which works for cross-compilation.
+
 Thu Jun 24 16:55:05 1993  Fred Fish  (fnf@cygnus.com)
 
 	* gdb.t11/list.exp:  For SVR4 xfails, match "*-*-sysv4*", not
