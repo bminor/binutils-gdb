@@ -251,7 +251,7 @@ typedef struct dlist
 typedef struct export
 {
   char *name;
-  char *equal;
+  char *internal_name;
   int ordinal;
   int constant;
   int noname;
@@ -277,9 +277,9 @@ yyerror ()
 }
 
 void
-def_exports (name, equal, ordinal, noname, constant)
+def_exports (name, internal_name, ordinal, noname, constant)
      char *name;
-     char *equal;
+     char *internal_name;
      int ordinal;
      int noname;
      int constant;
@@ -287,23 +287,13 @@ def_exports (name, equal, ordinal, noname, constant)
   struct export *p = (struct export *) xmalloc (sizeof (*p));
 
   p->name = name;
-  p->equal = equal;
+  p->internal_name = internal_name ? internal_name : name;
   p->ordinal = ordinal;
   p->constant = constant;
   p->noname = noname;
   p->next = d_exports;
   d_exports = p;
   d_nfuncs++;
-
-
-  printf ("EXPORTS %s", name);
-  if (equal)
-    printf ("=%s", equal);
-  if (ordinal > 0)
-    printf ("@%d", ordinal);
-  if (constant)
-    printf (" CONSTANT");
-  printf ("\n");
 }
 
 void
@@ -542,10 +532,12 @@ FILE *f;
   fprintf(f,"\n");
   for (i = 0, exp = d_exports; exp; i++, exp = exp->next)
     {
-      fprintf (f, "%s  %d %s @ %d %s%s\n",
+      fprintf (f, "%s  %d = %s %s @ %d %s%s\n",
 	       ASM_C,
 	       i,
-	       exp->name, exp->ordinal,
+	       exp->name, 
+	       exp->internal_name, 
+	       exp->ordinal,
 	       exp->noname ? "NONAME " : "",
 	       exp->constant ? "CONSTANT" : "");
     }
@@ -599,7 +591,7 @@ gen_exp_file ()
 		   i, exp->ordinal - 1);
 	  i = exp->ordinal;
 	}
-      fprintf (f, "\t%s	%s\t%s %d\n", ASM_LONG, exp->name, ASM_C, exp->ordinal);
+      fprintf (f, "\t%s	%s\t%s %d\n", ASM_LONG, exp->internal_name, ASM_C, exp->ordinal);
       i++;
     }
 
