@@ -24,6 +24,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "symtab.h"
 #include "target.h"
 #include "gdbcore.h"
+#include "symfile.h"
+#include "objfiles.h"
 
 #include "xcoffsolib.h"
 
@@ -214,6 +216,7 @@ skip_prologue (pc, fdata)
   int cr_reg = 0;
   int reg;
   int framep = 0;
+  int minimal_toc_loaded = 0;
   static struct rs6000_framedata zero_frame;
 
   *fdata = zero_frame;
@@ -262,10 +265,12 @@ skip_prologue (pc, fdata)
 
       } else if ((op & 0xffff0000) == 0x3c000000) {	/* addis 0,0,NUM, used for >= 32k frames */
 	fdata->offset = (op & 0x0000ffff) << 16;
+	fdata->frameless = 0;
 	continue;
 
       } else if ((op & 0xffff0000) == 0x60000000) {	/* ori 0,0,NUM, 2nd half of >= 32k frames */
 	fdata->offset |= (op & 0x0000ffff);
+	fdata->frameless = 0;
 	continue;
 
       } else if ((op & 0xffff0000) == lr_reg) {		/* st Rx,NUM(r1) where Rx == lr */
@@ -282,6 +287,9 @@ skip_prologue (pc, fdata)
       } else if (op == 0x48000005) {			/* bl .+4 used in -mrelocatable */
 	continue;
 
+      } else if (op == 0x48000004) {			/* b .+4 (xlc) */
+	break;
+
       } else if (((op & 0xffff0000) == 0x801e0000 ||	/* lwz 0,NUM(r30), used in V.4 -mrelocatable */
 		  op == 0x7fc0f214) &&			/* add r30,r0,r30, used in V.4 -mrelocatable */
 		 lr_reg == 0x901e0000) {
@@ -293,6 +301,7 @@ skip_prologue (pc, fdata)
 
       } else if ((op & 0xfc000000) == 0x48000000) {	/* bl foo, to save fprs??? */
 
+	fdata->frameless = 0;
 	/* Don't skip over the subroutine call if it is not within the first
 	   three instructions of the prologue.  */
 	if ((pc - orig_pc) > 8)
@@ -312,16 +321,20 @@ skip_prologue (pc, fdata)
 
       /* update stack pointer */
       } else if ((op & 0xffff0000) == 0x94210000) {	/* stu r1,NUM(r1) */
+	fdata->frameless = 0;
 	fdata->offset = SIGNED_SHORT (op);
 	offset = fdata->offset;
 	continue;
 
       } else if (op == 0x7c21016e) {			/* stwux 1,1,0 */
+	fdata->frameless = 0;
 	offset = fdata->offset;
 	continue;
 
       /* Load up minimal toc pointer */
-      } else if ((op >> 22) == 0x20f) {			/* l r31,... or l r30,... */
+      } else if ((op >> 22) == 0x20f
+	         && ! minimal_toc_loaded) {	/* l r31,... or l r30,... */
+	minimal_toc_loaded = 1;
 	continue;
 
       /* store parameters in stack */
@@ -340,8 +353,16 @@ skip_prologue (pc, fdata)
       /* Set up frame pointer */
       } else if (op == 0x603f0000			/* oril r31, r1, 0x0 */
 		 || op == 0x7c3f0b78) {			/* mr r31, r1 */
+	fdata->frameless = 0;
 	framep = 1;
 	fdata->alloca_reg = 31;
+	continue;
+
+      /* Another way to set up the frame pointer.  */
+      } else if ((op & 0xfc1fffff) == 0x38010000) {	/* addi rX, r1, 0x0 */
+	fdata->frameless = 0;
+	framep = 1;
+	fdata->alloca_reg = (op & ~0x38010000) >> 21;
 	continue;
 
       } else {
@@ -376,7 +397,6 @@ skip_prologue (pc, fdata)
   }
 #endif /* 0 */
  
-  fdata->frameless = (pc == orig_pc);
   fdata->offset = - fdata->offset;
   return pc;
 }
@@ -1194,13 +1214,32 @@ find_toc_address (pc)
 {
   int ii, toc_entry, tocbase = 0;
 
+  toc_entry = -1;
   for (ii=0; ii < loadinfotextindex; ++ii)
     if (pc > loadinfo[ii].textorg && loadinfo[ii].textorg > tocbase) {
       toc_entry = ii;
       tocbase = loadinfo[ii].textorg;
     }
 
+  if (toc_entry == -1)
+    error ("Unable to find TOC entry for pc 0x%x\n", pc);
   return loadinfo[toc_entry].dataorg + loadinfo[toc_entry].toc_offset;
+}
+
+/* Return nonzero if ADDR (a function pointer) is in the data space and
+   is therefore a special function pointer.  */
+
+int
+is_magic_function_pointer (addr)
+     CORE_ADDR addr;
+{
+  struct obj_section *s;
+
+  s = find_pc_section (addr);
+  if (s && s->the_bfd_section->flags & SEC_CODE)
+    return 0;
+  else
+    return 1;
 }
 
 #ifdef GDB_TARGET_POWERPC

@@ -21,6 +21,8 @@ Do-first:
 
 Things-to-keep:
 
+aix4.mh
+aix4.mt
 nm-rs6000.h
 nm-rs6000ly.h
 rs6000.mh
@@ -29,6 +31,7 @@ rs6000.mt
 rs6000lynx.mt
 tm-rs6000.h
 tm-rs6000ly.h
+tm-rs6000-aix4.h
 xm-rs6000.h
 xm-rs6000ly.h
 

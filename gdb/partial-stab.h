@@ -484,6 +484,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 	      if (*p++ == 'e')
 		{
+		  /* The aix4 compiler emits extra crud before the members.  */
+		  if (*p == '-')
+		    {
+		      /* Skip over the type (?).  */
+		      while (*p != ':')
+			p++;
+
+		      /* Skip over the colon.  */
+		      p++;
+		    }
+
 		  /* We have found an enumerated type.  */
 		  /* According to comments in read_enum_type
 		     a comma could end it instead of a semicolon.

@@ -379,6 +379,7 @@ pn-*-*)			gdb_target=pn ;;
 powerpc-*-netware*)	gdb_target=ppc-nw
 			configdirs="${configdirs} nlm" ;;
 
+powerpc-*-aix4*)	gdb_target=aix4 ;;
 powerpc-*-aix*)		gdb_target=aix ;;
 powerpc-*-eabi*)	gdb_target=ppc-eabi ;;
 powerpcle-*-eabi*)	gdb_target=ppcle-eabi ;;
@@ -386,6 +387,7 @@ powerpcle-*-eabi*)	gdb_target=ppcle-eabi ;;
 pyramid-*-*)		gdb_target=pyramid ;;
 
 rs6000-*-lynxos*)	gdb_target=rs6000lynx ;;
+rs6000-*-aix4*)		gdb_target=aix4 ;;
 rs6000-*-*)		gdb_target=rs6000 ;;
 
 sparc-*-aout*)		gdb_target=sparc-em ;;

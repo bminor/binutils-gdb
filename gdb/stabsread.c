@@ -3073,6 +3073,18 @@ read_enum_type (pp, type, objfile)
 	return error_type (pp);
     }
 
+  /* The aix4 compiler emits an extra field before the enum members;
+     my guess is it's a type of some sort.  Just ignore it.  */
+  if (**pp == '-')
+    {
+      /* Skip over the type.  */
+      while (**pp != ':')
+        (*pp)++;
+
+      /* Skip over the colon.  */
+      (*pp)++;
+    }
+
   /* Read the value-names and their values.
      The input syntax is NAME:VALUE,NAME:VALUE, and so on.
      A semicolon or comma instead of a NAME means the end.  */

@@ -1,4 +1,4 @@
-/* Macro definitions for Power PC running AIX.
+/* Macro definitions for Power PC running AIX4.
    Copyright 1995 Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -17,12 +17,16 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#ifndef TM_PPC_AIX_H
-#define TM_PPC_AIX_H
+#ifndef TM_PPC_AIX4_H
+#define TM_PPC_AIX4_H
+
+/* The main executable doesn't need relocation in aix4.  Otherwise
+   it looks just like any other AIX system.  */
+#define DONT_RELOCATE_SYMFILE_OBJFILE
 
 /* Use generic RS6000 definitions. */
 #include "rs6000/tm-rs6000.h"
 
 #define GDB_TARGET_POWERPC
 
-#endif /* TM_PPC_AIX_H */
+#endif /* TM_PPC_AIX4_H */

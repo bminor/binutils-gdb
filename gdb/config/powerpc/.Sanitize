@@ -23,12 +23,15 @@ Things-to-keep:
 
 aix.mh
 aix.mt
+aix4.mh
+aix4.mt
 gdbserve.mt
 nm-aix.h
 ppc-eabi.mt
 ppc-nw.mt
 ppcle-eabi.mt
 tm-ppc-aix.h
+tm-ppc-aix4.h
 tm-ppc-eabi.h
 tm-ppc-nw.h
 tm-ppcle-eabi.h
