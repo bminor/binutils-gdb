@@ -1,3 +1,8 @@
+Fri Aug 16 17:24:35 1996  Dawn Perchik <dawn@critters.cygnus.com>
+
+        * symtab.h: changed namespace to _namespace for compiling under 
+	MFC v4.0.
+
 Fri Aug 16 13:52:21 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-make.sed: Update for various recent changes, add some
