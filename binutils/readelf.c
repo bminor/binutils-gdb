@@ -88,6 +88,7 @@
 #include "elf/x86-64.h"
 #include "elf/xstormy16.h"
 #include "elf/iq2000.h"
+#include "elf/xtensa.h"
 
 #include "bucomm.h"
 #include "getopt.h"
@@ -771,6 +772,8 @@ guess_is_rela (e_machine)
     case EM_IP2K:
     case EM_IP2K_OLD:
     case EM_IQ2000:
+    case EM_XTENSA:
+    case EM_XTENSA_OLD:
       return TRUE;
 
     case EM_MMA:
@@ -1272,6 +1275,11 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	case EM_IQ2000:
 	  rtype = elf_iq2000_reloc_type (type);
 	  break;
+
+	case EM_XTENSA_OLD:
+	case EM_XTENSA:
+	  rtype = elf_xtensa_reloc_type (type);
+	  break;
 	}
 
       if (rtype == NULL)
@@ -1757,6 +1765,8 @@ get_machine_name (e_machine)
     case EM_IP2K_OLD:
     case EM_IP2K:		return "Ubicom IP2xxx 8-bit microcontrollers";
     case EM_IQ2000:       	return "Vitesse IQ2000";
+    case EM_XTENSA_OLD:
+    case EM_XTENSA:		return "Tensilica Xtensa Processor";
     default:
       sprintf (buff, _("<unknown>: %x"), e_machine);
       return buff;

@@ -1,3 +1,12 @@
+2003-04-01  Bob Wilson  <bob.wilson@acm.org>
+
+        * readelf.c: Include "elf/xtensa.h".
+        (guess_is_rela): Add EM_XTENSA and EM_XTENSA_OLD to list of
+        targets that use RELA relocations.
+        (dump_relocations): Call elf_xtensa_reloc_type for
+        EM_XTENSA and EM_XTENSA_OLD.
+        (get_machine_name): Handle EM_XTENSA and EM_XTENSA_OLD.
+
 2003-04-01  Nick Clifton  <nickc@redhat.com>
 
 	* configure.in: Change "arm-pe*" to "arm-*-pe*".  Similarly for
