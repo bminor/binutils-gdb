@@ -1,3 +1,18 @@
+Thu May 20 13:35:10 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabs.texinfo: Remove node Quick Reference and put its children
+	directly under the main menu.
+
+	* stabs.texinfo: Many more changes to bring it into line with
+	AIX documentation and reality.  I think it now has all the
+	information from the AIX documentation, except that I burned
+	out when I got to variant records (Pascal and Modula-2) and
+	all the COBOL types.  Oh well, we can add them later when we're
+	worrying more about those languages.
+
+	* stabs.texinfo (Automatic variables): Talk about what it means
+	to omit the symbol descriptor.
+
 Tue May 18 17:59:18 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabs.texinfo (Parameters): Add "(sometimes)" when describing
@@ -368,3 +383,10 @@ Thu Dec  5 22:46:12 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
 	  and shift gpl to v2.  Added ChangeLog if it didn't exist. docdir
 	  and mandir now keyed off datadir by default.
 
+
+Local Variables:
+mode: indented-text
+left-margin: 8
+fill-column: 74
+version-control: never
+End:
