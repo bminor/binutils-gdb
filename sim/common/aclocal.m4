@@ -56,6 +56,10 @@ AC_CHECK_HEADERS(sys/time.h sys/resource.h)
 AC_CHECK_HEADERS(fcntl.h fpu_control.h)
 AC_CHECK_FUNCS(getrusage time sigaction __setfpucw)
 
+# Check for socket libraries
+AC_CHECK_LIB(socket, bind)
+AC_CHECK_LIB(nsl, gethostbyname)
+
 . ${srcdir}/../../bfd/configure.host
 
 dnl Standard (and optional) simulator options.
@@ -201,6 +205,8 @@ AC_SUBST(sim_profile)
 dnl Types used by common code
 AC_TYPE_SIGNAL
 
+dnl Detect exe extension
+AM_EXEEXT
 
 dnl These are available to append to as desired.
 sim_link_files=
@@ -551,44 +557,65 @@ AC_SUBST(sim_default_model)
 
 
 dnl --enable-sim-hardware is for users of the simulator
-dnl arg[1] is a space separated list of devices that override the defaults
-dnl arg[2] is a space separated list of extra target specific devices.
+dnl arg[1] Enable sim-hw by default? ("yes" or "no")
+dnl arg[2] is a space separated list of devices that override the defaults
+dnl arg[3] is a space separated list of extra target specific devices.
 AC_DEFUN(SIM_AC_OPTION_HARDWARE,
 [
-sim_hardware="-DWITH_HW=1"
-sim_hw_obj="hw-device.o hw-ports.o hw-properties.o hw-base.o hw-tree.o sim-hw.o"
-hardware="ifelse([$1],,[core pal glue],[$1]) ifelse([$2],,,[$2])"
+if test x"[$1]" = x"yes"; then
+  sim_hw_p=yes
+else
+  sim_hw_p=no
+fi
+if test "[$2]"; then
+  hardware="core pal glue"
+else
+  hardware="core pal glue [$3]"
+fi
+sim_hw_cflags="-DWITH_HW=1"
+sim_hw="$hardware"
+sim_hw_objs="\$(SIM_COMMON_HW_OBJS) `echo $sim_hw | sed -e 's/\([[^ ]][[^ ]]*\)/dv-\1.o/g'`"
 AC_ARG_ENABLE(sim-hardware,
 [  --enable-sim-hardware=LIST		Specify the hardware to be included in the build.],
 [
 case "${enableval}" in
-  yes)	;;
-  no)	hardware=""; sim_hardware="-DWITH_HW=0"; sim_hw_obj="";;
-  ,*)   hardware="${hardware} `echo ${enableval} | sed -e 's/,/ /'`";;
-  *,)   hardware="`echo ${enableval} | sed -e 's/,/ /'` ${hardware}";;
-  *)	hardware="`echo ${enableval} | sed -e 's/,/ /'`"'';;
+  yes)	sim_hw_p=yes;;
+  no)	sim_hw_p=no;;
+  ,*)   sim_hw_p=yes; hardware="${hardware} `echo ${enableval} | sed -e 's/,/ /'`";;
+  *,)   sim_hw_p=yes; hardware="`echo ${enableval} | sed -e 's/,/ /'` ${hardware}";;
+  *)	sim_hw_p=yes; hardware="`echo ${enableval} | sed -e 's/,/ /'`"'';;
 esac
-dnl remove duplicates
-sim_hw=""
-for i in x $hardware ; do
-  case " $f " in
-    x) ;;
-    *" $i "*) ;;
-    *) sim_hw="$sim_hw $i" ;;
-  esac
-done
-sim_hw_obj="$sim_hw_obj `echo $sim_hw | sed -e 's/\([[^ ]][[^ ]]*\)/dv-\1.o/g'`"
-if test x"$silent" != x"yes" && test x"$hardware" != x""; then
-  echo "Setting hardware to $sim_hardware, $sim_hw, $sim_hw_obj"
+if test "$sim_hw_p" != yes; then
+  sim_hw_objs=
+  sim_hw_cflags="-DWITH_HW=0"
+  sim_hw=
+else
+  sim_hw_cflags="-DWITH_HW=1"
+  # remove duplicates
+  sim_hw=""
+  sim_hw_objs="\$(SIM_COMMON_HW_OBJS)"
+  for i in x $hardware ; do
+    case " $f " in
+      x) ;;
+      *" $i "*) ;;
+      *) sim_hw="$sim_hw $i" ; sim_hw_objs="$sim_hw_objs dv-$i.o";;
+    esac
+  done
+fi
+if test x"$silent" != x"yes" && test "$sim_hw_p" = "yes"; then
+  echo "Setting hardware to $sim_hw_cflags, $sim_hw, $sim_hw_objs"
 fi],[
-sim_hw="$hardware"
-sim_hw_obj="$sim_hw_obj `echo $sim_hw | sed -e 's/\([[^ ]][[^ ]]*\)/dv-\1.o/g'`"
+if test "$sim_hw_p" != yes; then
+  sim_hw_objs=
+  sim_hw_cflags="-DWITH_HW=0"
+  sim_hw=
+fi
 if test x"$silent" != x"yes"; then
-  echo "Setting hardware to $sim_hardware, $sim_hw, $sim_hw_obj"
+  echo "Setting hardware to $sim_hw_cflags, $sim_hw, $sim_hw_objs"
 fi])dnl
 ])
-AC_SUBST(sim_hardware)
-AC_SUBST(sim_hw_obj)
+AC_SUBST(sim_hw_cflags)
+AC_SUBST(sim_hw_objs)
 AC_SUBST(sim_hw)
 
 
@@ -755,22 +782,27 @@ fi],[sim_xor_endian="-DWITH_XOR_ENDIAN=${default_sim_xor_endian}"])dnl
 AC_SUBST(sim_xor_endian)
 
 
-dnl --enable-sim-warnings is for developers of the simulator.
+dnl --enable-build-warnings is for developers of the simulator.
 dnl it enables extra GCC specific warnings.
 AC_DEFUN(SIM_AC_OPTION_WARNINGS,
 [
-AC_ARG_ENABLE(sim-warnings,
-[  --enable-sim-warnings=opts		Extra CFLAGS for turning on compiler warnings],
-[case "${enableval}" in
-  yes)	sim_warnings="-Werror -Wall -Wpointer-arith -Wmissing-prototypes -Wmissing-declarations ";;
-  no)	sim_warnings="-w";;
-  *)	sim_warnings=`echo "${enableval}" | sed -e "s/,/ /g"`;;
+AC_ARG_ENABLE(build-warnings,
+[  --enable-build-warnings[=LIST]		Enable build-time compiler warnings],
+[build_warnings="-Wall -Wpointer-arith -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations"
+case "${enableval}" in
+  yes)	;;
+  no)	build_warnings="-w";;
+  ,*)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
+	build_warnings="${build_warnings} ${t}";;
+  *,)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
+	build_warnings="${t} ${build_warnings}";;
+  *)	build_warnings=`echo "${enableval}" | sed -e "s/,/ /g"`;;
 esac
-if test x"$silent" != x"yes" && test x"$sim_warnings" != x""; then
-  echo "Setting warning flags = $sim_warnings" 6>&1
-fi],[sim_warnings=""])dnl
+if test x"$silent" != x"yes" && test x"$build_warnings" != x""; then
+  echo "Setting warning flags = $build_warnings" 6>&1
+fi],[build_warnings=""])dnl
 ])
-AC_SUBST(sim_warnings)
+AC_SUBST(build_warnings)
 
 
 dnl Generate the Makefile in a target specific directory.
@@ -1142,4 +1174,49 @@ AC_DEFUN(AM_LC_MESSAGES,
       AC_DEFINE(HAVE_LC_MESSAGES)
     fi
   fi])
+
+# Check to see if we're running under Cygwin32, without using
+# AC_CANONICAL_*.  If so, set output variable CYGWIN32 to "yes".
+# Otherwise set it to "no".
+
+dnl AM_CYGWIN32()
+dnl You might think we can do this by checking for a cygwin32-specific
+dnl cpp define.
+AC_DEFUN(AM_CYGWIN32,
+[AC_CACHE_CHECK(for Cygwin32 environment, am_cv_cygwin32,
+[AC_TRY_COMPILE(,[int main () { return __CYGWIN32__; }],
+am_cv_cygwin32=yes, am_cv_cygwin32=no)
+rm -f conftest*])
+CYGWIN32=
+test "$am_cv_cygwin32" = yes && CYGWIN32=yes])
+
+# Check to see if we're running under Win32, without using
+# AC_CANONICAL_*.  If so, set output variable EXEEXT to ".exe".
+# Otherwise set it to "".
+
+dnl AM_EXEEXT()
+dnl This knows we add .exe if we're building in the Cygwin32
+dnl environment. But if we're not, then it compiles a test program
+dnl to see if there is a suffix for executables.
+AC_DEFUN(AM_EXEEXT,
+dnl AC_REQUIRE([AC_PROG_CC])AC_REQUIRE([AM_CYGWIN32])
+AC_MSG_CHECKING([for executable suffix])
+[AC_CACHE_VAL(am_cv_exeext,
+[if test "$CYGWIN32" = yes; then
+am_cv_exeext=.exe
+else
+cat > am_c_test.c << 'EOF'
+int main() {
+/* Nothing needed here */
+}
+EOF
+${CC-cc} -o am_c_test $CFLAGS $CPPFLAGS $LDFLAGS am_c_test.c $LIBS 1>&5
+am_cv_exeext=`ls am_c_test.* | grep -v am_c_test.c | sed -e s/am_c_test//`
+rm -f am_c_test*])
+test x"${am_cv_exeext}" = x && am_cv_exeext=no
+fi
+EXEEXT=""
+test x"${am_cv_exeext}" != xno && EXEEXT=${am_cv_exeext}
+AC_MSG_RESULT(${am_cv_exeext})
+AC_SUBST(EXEEXT)])
 

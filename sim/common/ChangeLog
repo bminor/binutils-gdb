@@ -1,3 +1,96 @@
+Wed Oct 28 12:00:57 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* aclocal.m4 (enable-build-warnings): Replace
+ 	enable-sim-warnings. Extend =LIST syntax so that prepend and
+ 	append of options is possible.  Drop -Werror, add
+ 	-Wstrict-prototypes for GDB compatibility.
+	* Make-common.in (SIM_WARNINGS): Update.
+
+Mon Oct 19 13:56:32 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* Make-common.in (CGEN_INCLUDE_DEPS): Define.
+	(sim-core.o): Delete duplicate dependence on $(SIM_EXTRA_DEPS).
+	(sim-cpu.o,sim-endian.o,sim-hw.o): Ditto.
+	(cgen-run.o,cgen-scache.o,cgen-trace.o,cgen-utils.o): Delete
+	explicit cgen header dependencies, require SIM_EXTRA_DEPS to include
+	CGEN_INCLUDE_DEPS.
+	* cgen-cpu.h: New file.
+	* cgen-engine.h: New file.
+	* cgen-scache.h: New file.
+	* cgen-sim.h: Delete portions moved to new files.
+	* genmloop.sh: Generate two files eng.hin,mloop.cin explicitly,
+	rather than sending result to stdout.
+
+Fri Oct  9 14:20:22 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* Make-common.in (sim-reg.o): New rule.
+	(cgen-run.o): New rule.
+	* cgen-ops.h: Delete many BI macros.  Change all UBI -> BI.
+	* cgen-run.c (prime_cpu): New function.
+	* cgen-scache.c: Add pseudo-basic-block (pbb) scaching support.
+	(scache_option_handler, case OPTION_PROFILE_SCACHE): Handle explicitly
+	mentioned cpu.
+	(scache_flush_cpu,scache_lookup,scache_lookup_or_alloc): New fns.
+	* cgen-sim.h (CGEN_INSN_VIRTUAL_TYPE): New enum.
+	(CGEN_INSN_VIRTUAL_P): New macro.
+	(SEM_PC): New typedef.
+	(SEMANTIC_FN): Change type of result to SEM_PC.
+	(SEM_SET_FULL_CODE,SEM_SET_FAST_CODE,SEM_SET_CODE): New macros.
+	(IDESC_CTI_P,IDESC_SKIP_P): New macros.
+	(SCACHE_MAP): New typedef.
+	(CPU_SCACHE): Add pbb support.
+	(scace_lookup,scache_lookup_or_alloc,scache_flush_cpu): Declare.
+	(SEM_BRANCH_INIT_EXTRACT,SEM_BRANCH_INIT,SEM_BRANCH_FINI): New macros.
+	(CGEN_CPU): New members running_p,insn_count,{fast,full}_engine_fn,
+	max_slice_insns.
+	(INSN_NAME): Delete.
+	(cgen_insn_name): Declare.
+	(sim_engine_invalid_insn): Renamed from sim_engine_illegal_insn.
+	* cgen-trace.c (trace_buf): Shrink from 1024 to 256 bytes.
+	(first_insn_p): Make static.
+	(trace_insn): Handle virtual insns specially.
+	(cgen_trace_printf): Ensure we haven't overflowed the buffer.
+	* cgen-types.h (UBI): Delete.
+	(MODE_TYPE): New enum.
+	(HOSTINT,HOSTUINT,HOSTPTR): Delete.
+	* cgen-utils.c (mode_names): Delete UBI.  Add INT,UINT,PTR.
+	(cgen_virtual_opcode_table): New global.
+	(cgen_insn_name): New function.
+	(sim_disassemble_insn): Ignore virtual insns.
+	* genmloop.sh: Delete top level loop generation.  Add pbb support.
+	* sim-cpu.h (CPU_INSN_NAME_FN): New typedef.
+	(sim_cpu_base): New members max_insns,insn_name,model_data.
+	(CPU_PC_GET,CPU_PC_SET): New macros.
+	(sim_pc_get,sim_pc_set): Declare.
+	* sim-model.c (model_set): Call model init fn.
+	* sim-model.h (MODEL_FN): New typedef.
+	(INSN_TIMING): New member model_fn.
+	(MODEL): New members num,init.
+	* sim-profile.c (sim_profile_print_bar): Renamed from print_bar.
+	All callers updated.
+	(profile_insn_init): New fn.
+	(profile_print_insn): Update, INSN_NAME -> CPU_INSN_NAME.
+	Exit early if insn profiling not supported.
+	(profile_print_memory): Update, MAX_MODES -> MODE_TARGET_MAX.
+	(profile_install): Record profile_insn_init as init fn.
+	(profile_uninstall): Free PROFILE_INSN_COUNT if non-null.
+	* sim-profile.h: Update, MAX_MODES -> MODE_TARGET_MAX.
+	(PROFILE_DATA): Delete member exec_time.
+	Change insn_count to pointer to array, rather than the array.
+	(sim_profile_print_bar): Declare.
+
+Wed Oct  7 16:56:42 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* cgen-run.c: New file.
+	* sim-reg.c: New file.
+
+Mon Sep 14 10:58:19 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* aclocal.m4: Add checks for -lsocket and -lnsl.
+
+	* dv-sockser.c (dv_sockser_init): Use SO_REUSEADDR to
+	allow local port reuse on listening socket.
+
 Tue Sep  1 15:36:52 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* sim-config.h: Remove reference to linux kernel header.

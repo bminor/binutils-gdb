@@ -1,3 +1,11 @@
+Wed Oct 28 12:32:58 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (--enable-build-warnings): Finish rename from
+ 	--enable-warnings.
+	(enable-build-warnings): Add -Wpointer-arth, allow =* for
+ 	sim/common compatibility.
+	* configure: Re-generate.
+
 Wed Oct 21 08:44:30 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* 29k-share/udi/udip2soc.c: Replace sys_errlist with strerror().

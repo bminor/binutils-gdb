@@ -94,7 +94,7 @@ SIM_RESERVED_BITS = @sim_reserved_bits@
 SIM_SCACHE = @sim_scache@
 SIM_SMP = @sim_smp@
 SIM_STDCALL = @sim_stdcall@
-SIM_WARNINGS = @sim_warnings@
+SIM_WARNINGS = @build_warnings@
 SIM_XOR_ENDIAN = @sim_xor_endian@
 
 HDEFINES = @HDEFINES@
@@ -175,7 +175,13 @@ SIM_NEW_COMMON_OBJS = \
 	\
 	$(SIM_HW_OBJS) \
 
-
+CGEN_INCLUDE_DEPS = \
+	$(srccom)/cgen-types.h \
+	$(srccom)/cgen-sim.h \
+	$(srccom)/cgen-scache.h \
+	$(srccom)/cgen-cpu.h \
+	$(srccom)/cgen-trace.h \
+	$(srcdir)/../../include/opcode/cgen.h
 
 ## End COMMON_PRE_CONFIG_FRAG
 
@@ -357,16 +363,13 @@ sim-config.o: $(srccom)/sim-config.c $(sim-config_h) \
 	$(CC) -c $(srccom)/sim-config.c $(ALL_CFLAGS)
 
 sim-core.o: $(srccom)/sim-core.c $(sim_main_headers) \
-	  $(sim-core_h) $(sim-n-core_h) \
-	  $(SIM_EXTRA_DEPS)
+	  $(sim-core_h) $(sim-n-core_h)
 	$(CC) -c $(srccom)/sim-core.c $(ALL_CFLAGS)
 
-sim-cpu.o: $(srccom)/sim-cpu.c $(sim_main_headers) \
-	  $(SIM_EXTRA_DEPS)
+sim-cpu.o: $(srccom)/sim-cpu.c $(sim_main_headers)
 	$(CC) -c $(srccom)/sim-cpu.c $(ALL_CFLAGS)
 
-sim-endian.o: $(srccom)/sim-endian.c $(sim-endian_h) $(sim-n-endian_h) \
-	  $(SIM_EXTRA_DEPS)
+sim-endian.o: $(srccom)/sim-endian.c $(sim-endian_h) $(sim-n-endian_h)
 	$(CC) -c $(srccom)/sim-endian.c $(ALL_CFLAGS)
 
 sim-engine.o: $(srccom)/sim-engine.c $(sim_main_headers) $(sim-engine_h)
@@ -390,7 +393,7 @@ sim-hrw.o: $(srccom)/sim-hrw.c $(sim-assert_h) $(sim_core_h) \
 	  $(SIM_EXTRA_DEPS)
 	$(CC) -c $(srccom)/sim-hrw.c $(ALL_CFLAGS)
 
-sim-hw.o: $(srccom)/sim-hw.c $(sim_main_headers) $(SIM_EXTRA_DEPS)
+sim-hw.o: $(srccom)/sim-hw.c $(sim_main_headers)
 	$(CC) -c $(srccom)/sim-hw.c $(ALL_CFLAGS)
 
 sim-info.o: $(srccom)/sim-info.c $(sim-assert_h) \
@@ -423,6 +426,10 @@ sim-options.o: $(srccom)/sim-options.c $(sim_main_headers) \
 sim-reason.o: $(srccom)/sim-reason.c $(sim_main_headers) \
 	  $(srcroot)/include/remote-sim.h
 	$(CC) -c $(srccom)/sim-reason.c $(ALL_CFLAGS)
+
+sim-reg.o: $(srccom)/sim-reg.c $(sim_main_headers) \
+	  $(srcroot)/include/remote-sim.h
+	$(CC) -c $(srccom)/sim-reg.c $(ALL_CFLAGS)
 
 sim-resume.o: $(srccom)/sim-resume.c $(sim_main_headers) \
 	  $(srcroot)/include/remote-sim.h
@@ -509,6 +516,7 @@ hw-properties.o: $(srccom)/hw-properties.c $(hw_main_headers)
 hw-tree.o: $(srccom)/hw-tree.c $(hw_main_headers) $(hw-tree_h)
 	$(CC) -c $(srccom)/hw-tree.c $(ALL_CFLAGS)
 
+# Devices.
 
 dv-core.o: $(srccom)/dv-core.c $(hw_main_headers) $(sim_main_headers)
 	$(CC) -c $(srccom)/dv-core.c $(ALL_CFLAGS)
@@ -519,29 +527,28 @@ dv-glue.o: $(srccom)/dv-glue.c $(hw_main_headers) $(sim_main_headers)
 dv-pal.o: $(srccom)/dv-pal.c $(hw_main_headers) $(sim_main_headers)
 	$(CC) -c $(srccom)/dv-pal.c $(ALL_CFLAGS)
 
+dv-sockser.o: $(srccom)/dv-sockser.h $(sim_main_headers)
+	$(CC) -c $(srccom)/dv-sockser.c $(ALL_CFLAGS)
+
 
 nrun.o: $(srccom)/nrun.c config.h tconfig.h \
 	  $(srcroot)/include/remote-sim.h $(srcroot)/include/callback.h \
 	  $(sim_main_headers)
 	$(CC) -c $(srccom)/nrun.c $(ALL_CFLAGS)
 
-# Devices.
-
-dv-sockser.o: $(srccom)/dv-sockser.h $(sim_main_headers)
-	$(CC) -c $(srccom)/dv-sockser.c $(ALL_CFLAGS)
-
 # CGEN support.
 
-cgen-scache.o: $(srccom)/cgen-scache.c $(sim_main_headers) \
-	  $(srccom)/cgen-sim.h
+cgen-run.o: $(srccom)/cgen-run.c $(sim_main_headers)
+	$(CC) -c $(srccom)/cgen-run.c $(ALL_CFLAGS)
+
+cgen-scache.o: $(srccom)/cgen-scache.c $(sim_main_headers)
 	$(CC) -c $(srccom)/cgen-scache.c $(ALL_CFLAGS)
 
-cgen-trace.o: $(srccom)/cgen-trace.c $(sim_main_headers) \
-	  $(srccom)/cgen-sim.h $(srccom)/cgen-trace.h
+cgen-trace.o: $(srccom)/cgen-trace.c $(sim_main_headers)
 	$(CC) -c $(srccom)/cgen-trace.c $(ALL_CFLAGS)
 
 cgen-utils.o: $(srccom)/cgen-utils.c $(sim_main_headers) \
-	  $(srccom)/cgen-sim.h $(srccom)/cgen-mem.h $(srccom)/cgen-ops.h
+	  $(srccom)/cgen-mem.h $(srccom)/cgen-ops.h
 	$(CC) -c $(srccom)/cgen-utils.c $(ALL_CFLAGS)
 
 # Support targets.
@@ -550,7 +557,7 @@ install: install-common $(SIM_EXTRA_INSTALL)
 
 install-common: installdirs
 	n=`echo run | sed '$(program_transform_name)'`; \
-	$(INSTALL_PROGRAM) run$(EXEEXT) $(bindir)/$$n
+	$(INSTALL_PROGRAM) run$(EXEEXT) $(bindir)/$$n$(EXEEXT)
 	n=`echo libsim.a | sed s/libsim.a/lib$(target_alias)-sim.a/`; \
 	$(INSTALL_DATA) libsim.a $(libdir)/$$n ; \
 	( cd $(libdir) ; $(RANLIB) $$n )
@@ -584,6 +591,7 @@ clean: $(SIM_EXTRA_CLEAN)
 	if [ ! -f Make-common.in ] ; then \
 		rm -f $(BUILT_SRC_FROM_COMMON) ; \
 	fi
+	rm -f tmp-mloop.hin tmp-mloop.h tmp-mloop.cin tmp-mloop.c
 
 distclean mostlyclean maintainer-clean realclean: clean
 	rm -f TAGS
@@ -614,48 +622,55 @@ stamp-h: config.in config.status
 
 # CGEN support
 
-SCHEME = @SCHEME@
-SCHEMEFLAGS = -s
-srccgen = $(srcroot)/cgen
+CGENDIR = @cgendir@
+CGEN = @cgen@
+CGENFLAGS = -v
+srccgen = $(CGENDIR)
 
-CGEN_VERBOSE = -v
-CGEN_MAIN_SCM = $(srccgen)/object.scm $(srccgen)/utils.scm \
+CGEN_MAIN_SCM = $(srccgen)/cos.scm $(srccgen)/utils.scm \
 	$(srccgen)/attr.scm $(srccgen)/enum.scm $(srccgen)/types.scm \
 	$(srccgen)/utils-cgen.scm $(srccgen)/cpu.scm \
 	$(srccgen)/mode.scm $(srccgen)/mach.scm \
 	$(srccgen)/model.scm $(srccgen)/hardware.scm \
 	$(srccgen)/ifield.scm $(srccgen)/iformat.scm \
 	$(srccgen)/operand.scm $(srccgen)/insn.scm \
-	$(srccgen)/cdl-c.scm $(srccgen)/sim.scm
+	$(srccgen)/rtl.scm $(srccgen)/sim.scm
 CGEN_CPU_SCM = $(srccgen)/sim-cpu.scm $(srccgen)/sim-model.scm
 CGEN_DECODE_SCM = $(srccgen)/sim-decode.scm
 
 # Various choices for which cpu specific files to generate.
 CGEN_CPU_EXTR = -E tmp-ext.c1
 CGEN_CPU_READ = -R tmp-read.c1
+CGEN_CPU_WRITE = -W tmp-write.c1
 CGEN_CPU_SEM = -S tmp-sem.c1
-CGEN_CPU_SEMSW = -W tmp-semsw.c1
+CGEN_CPU_SEMSW = -X tmp-semsw.c1
+
+CGEN_FLAGS_TO_PASS = \
+	CGEN=$(CGEN) \
+	CGENFLAGS=$(CGENFLAGS)
 
 # We store the generated files in the source directory until we decide to
 # ship a Scheme interpreter with gdb/binutils.  Maybe we never will.
 
 cgen-arch: force
 	$(SHELL) $(srccom)/cgen.sh arch $(srcdir) \
-		$(SCHEME) $(SCHEMEFLAGS) \
-		$(srccgen) $(CGEN_VERBOSE) \
+		$(CGEN) $(CGENDIR) $(CGENFLAGS) \
 		$(arch) "$(FLAGS)" ignored ignored ignored ignored
 
 cgen-cpu: force
 	$(SHELL) $(srccom)/cgen.sh cpu $(srcdir) \
-		$(SCHEME) $(SCHEMEFLAGS) \
-		$(srccgen) $(CGEN_VERBOSE) \
+		$(CGEN) $(CGENDIR) $(CGENFLAGS) \
 		$(arch) "$(FLAGS)" $(cpu) $(mach) "$(SUFFIX)" "$(EXTRAFILES)"
 
 cgen-decode: force
 	$(SHELL) $(srccom)/cgen.sh decode $(srcdir) \
-		$(SCHEME) $(SCHEMEFLAGS) \
-		$(srccgen) $(CGEN_VERBOSE) \
+		$(CGEN) $(CGENDIR) $(CGENFLAGS) \
 		$(arch) "$(FLAGS)" $(cpu) $(mach) "$(SUFFIX)" ignored
+
+cgen-cpu-decode: force
+	$(SHELL) $(srccom)/cgen.sh cpu-decode $(srcdir) \
+		$(CGEN) $(CGENDIR) $(CGENFLAGS) \
+		$(arch) "$(FLAGS)" $(cpu) $(mach) "$(SUFFIX)" "$(EXTRAFILES)"
 
 # end-sanitize-cygnus
 
