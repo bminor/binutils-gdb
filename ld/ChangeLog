@@ -1,5 +1,20 @@
 Mon Jul 10 13:38:28 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	Based on patches from H.J. Lu <hjl@nynexst.com>:
+	* ldlang.h (lang_input_statement_type): Add new field dynamic.
+	* ldlang.c (new_afile): Set dynamic from config.dynamic_link.
+	* ldfile.c: Include bfdlink.h.
+	(ldfile_open_file): Check dynamic field of entry, not global
+	dynamic_link field.  Don't do a dynamic search when doing a
+	relocateable link.
+	* ldmain.c (main): Don't warn about dynamic_link for a
+	relocateable link.
+	* emultempl/sunos.em (gld${EMULATION_NAME}_find_so): Skip file if
+	dynamic is false.
+	(gld${EMULATION_NAME}_create_output_section_statements): Always
+	loop over input files.
+	* Makefile.in: Rebuild dependencies.
+
 	* ld.texinfo, ld.1: Document -Bstatic, -Bdynamic, -Bshared, and
 	-shared.
 

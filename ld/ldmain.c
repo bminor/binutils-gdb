@@ -220,8 +220,6 @@ main (argc, argv)
     {
       if (command_line.relax)
 	einfo ("%P%F: -relax and -r may not be used together\n");
-      if (config.dynamic_link)
-	einfo ("%P%F: -r and -call_shared may not be used together\n");
       if (link_info.shared)
 	einfo ("%P%F: -r and -shared may not be used together\n");
     }
