@@ -123,39 +123,85 @@ OP_660 ()
 }
 
 
-/* add reg, reg
-
-   XXX condition codes.  */
+/* add reg, reg */
 void
 OP_1C0 ()
 {
-  State.regs[OP[1]] += State.regs[OP[0]];
+  unsigned int op0, op1, result, z, s, cy, ov;
+
+  /* Compute the result.  */
+  op0 = State.regs[OP[0]];
+  op1 = State.regs[OP[1]];
+  result = op0 + op1;
+
+  /* Compute the condition codes.  */
+  z = (result == 0);
+  s = (result & 0x80000000);
+  cy = (result < op0 || result < op1);
+  ov = ((op0 & 0x80000000) == (op1 & 0x80000000)
+	&& (op0 & 0x80000000) != (result & 0x80000000));
+
+  /* Store the result and condition codes.  */
+  State.regs[OP[1]] = result;
+  State.psw &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0));
 }
 
-/* add sign_extend(imm5), reg
-
-   XXX condition codes.  */
+/* add sign_extend(imm5), reg */
 void
 OP_240 ()
 {
-  int value = OP[0];
- 
-  value = (value << 27) >> 27;
+  unsigned int op0, op1, result, z, s, cy, ov;
+  int temp;
 
-  State.regs[OP[1]] += value;
+  /* Compute the result.  */
+  temp = (OP[0] & 0x1f);
+  temp = (temp << 27) >> 27;
+  op0 = temp;
+  op1 = State.regs[OP[1]];
+  result = op0 + op1;
+  
+  /* Compute the condition codes.  */
+  z = (result == 0);
+  s = (result & 0x80000000);
+  cy = (result < op0 || result < op1);
+  ov = ((op0 & 0x80000000) == (op1 & 0x80000000)
+	&& (op0 & 0x80000000) != (result & 0x80000000));
+
+  /* Store the result and condition codes.  */
+  State.regs[OP[1]] = result;
+  State.psw &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0));
 }
 
-/* addi sign_extend(imm16), reg, reg
-
-   XXX condition codes.  */
+/* addi sign_extend(imm16), reg, reg */
 void
 OP_600 ()
 {
-  int value = OP[0];
- 
-  value = (value << 16) >> 16;
+  unsigned int op0, op1, result, z, s, cy, ov;
+  int temp;
 
-  State.regs[OP[2]] = State.regs[OP[1]] + value;
+  /* Compute the result.  */
+  temp = (OP[0] & 0xffff);
+  temp = (temp << 16) >> 16;
+  op0 = temp;
+  op1 = State.regs[OP[1]];
+  result = op0 + op1;
+  
+  /* Compute the condition codes.  */
+  z = (result == 0);
+  s = (result & 0x80000000);
+  cy = (result < op0 || result < op1);
+  ov = ((op0 & 0x80000000) == (op1 & 0x80000000)
+	&& (op0 & 0x80000000) != (result & 0x80000000));
+
+  /* Store the result and condition codes.  */
+  State.regs[OP[2]] = result;
+  State.psw &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
+  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0)
+		| (cy ? PSW_CY : 0) | (ov ? PSW_OV : 0));
 }
 
 /* sub reg1, reg2
@@ -327,15 +373,6 @@ OP_80 ()
 {
 }
 
-/* not reg1, reg2
-
-   XXX condition codes */
-void
-OP_20 ()
-{
-  State.regs[OP[1]] = ~State.regs[OP[0]];
-}
-
 /* sar zero_extend(imm5),reg1
 
    XXX condition codes.  */
@@ -413,70 +450,148 @@ OP_7E0 ()
 {
 }
 
-/* or reg, reg
-
-   XXX condition codes.  */
+/* or reg, reg */
 void
 OP_100 ()
 {
-  State.regs[OP[1]] |= State.regs[OP[0]];
+  unsigned int op0, op1, result, z, s, cy, ov;
+
+  /* Compute the result.  */
+  op0 = State.regs[OP[0]];
+  op1 = State.regs[OP[1]];
+  result = op0 | op1;
+
+  /* Compute the condition codes.  */
+  z = (result == 0);
+  s = (result & 0x80000000);
+
+  /* Store the result and condition codes.  */
+  State.regs[OP[1]] = result;
+  State.psw &= ~(PSW_Z | PSW_S | PSW_OV);
+  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
 }
 
-/* ori zero_extend(imm16), reg, reg
-
-   XXX condition codes */
+/* ori zero_extend(imm16), reg, reg */
 void
 OP_680 ()
 {
-  int value = OP[0];
- 
-  value &= 0xffff;
+  unsigned int op0, op1, result, z, s, cy, ov;
 
-  State.regs[OP[2]] = State.regs[OP[1]] | value;
+  op0 = OP[0] & 0xffff;
+  op1 = State.regs[OP[1]];
+  result = op0 | op1;
+
+  /* Compute the condition codes.  */
+  z = (result == 0);
+  s = (result & 0x80000000);
+
+  /* Store the result and condition codes.  */
+  State.regs[OP[2]] = result;
+  State.psw &= ~(PSW_Z | PSW_S | PSW_OV);
+  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
+  State.psw |= (z ? PSW_Z : 0);
 }
 
-/* and reg, reg
-
-   XXX condition codes.  */
+/* and reg, reg */
 void
 OP_140 ()
 {
-  State.regs[OP[1]] &= State.regs[OP[0]];
+  unsigned int op0, op1, result, z, s, cy, ov;
+
+  /* Compute the result.  */
+  op0 = State.regs[OP[0]];
+  op1 = State.regs[OP[1]];
+  result = op0 & op1;
+
+  /* Compute the condition codes.  */
+  z = (result == 0);
+  s = (result & 0x80000000);
+
+  /* Store the result and condition codes.  */
+  State.regs[OP[1]] = result;
+  State.psw &= ~(PSW_Z | PSW_S | PSW_OV);
+  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
 }
 
-/* andi zero_extend(imm16), reg, reg
-
-   XXX condition codes.  */
+/* andi zero_extend(imm16), reg, reg */
 void
 OP_6C0 ()
 {
-  int value = OP[0];
- 
-  value &= 0xffff;
+  unsigned int op0, op1, result, z, s, cy, ov;
 
-  State.regs[OP[2]] = State.regs[OP[1]] & value;
+  op0 = OP[0] & 0xffff;
+  op1 = State.regs[OP[1]];
+  result = op0 & op1;
+
+  /* Compute the condition codes.  */
+  z = (result == 0);
+
+  /* Store the result and condition codes.  */
+  State.regs[OP[2]] = result;
+  State.psw &= ~(PSW_Z | PSW_S | PSW_OV);
+  State.psw |= (z ? PSW_Z : 0);
 }
 
-/* xor reg, reg
-
-   XXX condition codes.  */
+/* xor reg, reg */
 void
 OP_120 ()
 {
-  State.regs[OP[1]] ^= State.regs[OP[0]];
+  unsigned int op0, op1, result, z, s, cy, ov;
+
+  /* Compute the result.  */
+  op0 = State.regs[OP[0]];
+  op1 = State.regs[OP[1]];
+  result = op0 ^ op1;
+
+  /* Compute the condition codes.  */
+  z = (result == 0);
+  s = (result & 0x80000000);
+
+  /* Store the result and condition codes.  */
+  State.regs[OP[1]] = result;
+  State.psw &= ~(PSW_Z | PSW_S | PSW_OV);
+  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
 }
 
-/* xori zero_extend(imm16), reg, reg
-
-   XXX condition codes.  */
+/* xori zero_extend(imm16), reg, reg */
 void
 OP_6A0 ()
 {
-  int value = OP[0];
- 
-  value &= 0xffff;
+  unsigned int op0, op1, result, z, s, cy, ov;
 
-  State.regs[OP[2]] = State.regs[OP[1]] ^ value;
+  op0 = OP[0] & 0xffff;
+  op1 = State.regs[OP[1]];
+  result = op0 ^ op1;
+
+  /* Compute the condition codes.  */
+  z = (result == 0);
+  s = (result & 0x80000000);
+
+  /* Store the result and condition codes.  */
+  State.regs[OP[2]] = result;
+  State.psw &= ~(PSW_Z | PSW_S | PSW_OV);
+  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
+  State.psw |= (z ? PSW_Z : 0);
+}
+
+/* not reg1, reg2 */
+void
+OP_20 ()
+{
+  unsigned int op0, result, z, s, cy, ov;
+
+  /* Compute the result.  */
+  op0 = State.regs[OP[0]];
+  result = ~op0;
+
+  /* Compute the condition codes.  */
+  z = (result == 0);
+  s = (result & 0x80000000);
+
+  /* Store the result and condition codes.  */
+  State.regs[OP[1]] = result;
+  State.psw &= ~(PSW_Z | PSW_S | PSW_OV);
+  State.psw |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0));
 }
 
 void

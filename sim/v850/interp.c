@@ -28,12 +28,28 @@ static long
 hash(insn)
      long insn;
 {
-  /* XXX This isn't right for 32bit opcodes, hell it isn't even
-     right for 16bit opcodes!  */
-  if (insn & 0x0600)
-    return ((insn & 0x3F000000) >> 24);
-  else
-    return((insn & 0x07E0) >> 5);
+  if ((insn & 0x30) == 0
+      || (insn & 0x38) == 0x10)
+    return (insn & 0x07e0) >> 5;
+  if ((insn & 0x3c) == 0x18
+      || (insn & 0x3c) == 0x1c
+      || (insn & 0x3c) == 0x20
+      || (insn & 0x3c) == 0x24
+      || (insn & 0x3c) == 0x28
+      || (insn & 0x3c) == 0x23)
+    return (insn & 0x07c0) >> 6;
+  if ((insn & 0x38) == 0x30)
+    return (insn & 0x07e0) >> 5;
+  /* What about sub-op field? XXX */
+  if ((insn & 0x38) == 0x38)
+    return (insn & 0x07e0) >> 5;
+  if ((insn & 0x3e) == 0x3c)
+    return (insn & 0x07c0) >> 6;
+  if ((insn & 0x3f) == 0x3e)
+    return (insn & 0xc7e0) >> 5;
+  /* Not really correct.  XXX */
+  return insn & 0xffffffff;
+  
 }
 
 static struct hash_entry *
@@ -42,10 +58,7 @@ lookup_hash (ins)
 {
   struct hash_entry *h;
 
-  if (ins & 0x0f00)
-    h = &hash_table[(ins & 0x3F000000) >> 24];
-  else
-    h = &hash_table[(ins & 0x07E0) >> 5];
+  h = &hash_table[hash(ins)];
 
   while ( (ins & h->mask) != h->opcode)
     {
@@ -60,56 +73,108 @@ lookup_hash (ins)
 }
 
 uint32
-get_longword_swap (x)
-      uint16 x;
+get_longword (x)
+      uint8 *x;
 {
-  uint8 *a = (uint8 *)(x + State.imem);
-  return (a[0]<<24) + (a[1]<<16) + (a[2]<<8) + (a[3]);
+  uint8 *a = x;
+  return (a[3]<<24) + (a[2]<<16) + (a[1]<<8) + (a[0]);
+}
+
+int64
+get_longlong (x)
+      uint8 *x;
+{
+  uint8 *a = x;
+  return ((int64)a[0]<<56) + ((int64)a[1]<<48) + ((int64)a[2]<<40) + ((int64)a[3]<<32) +
+    ((int64)a[4]<< 24) + ((int64)a[5]<<16) + ((int64)a[6]<<8) + (int64)a[7];
 }
 
 uint16
-get_word_swap (x)
-      uint16 x;
+get_word (x)
+      uint8 *x;
 {
-  uint8 *a = (uint8 *)(x + State.imem);
-  return (a[0]<<8) + a[1];
+  uint8 *a = x;
+  return ((uint16)a[0]<<8) + a[1];
 }
 
+
 void
-write_word_swap (addr, data)
-     uint16 addr, data;
+write_word (addr, data)
+     uint8 *addr;
+     uint16 data;
 {
-  uint8 *a = (uint8 *)(addr + State.imem);
+  uint8 *a = addr;
   a[0] = data >> 8;
   a[1] = data & 0xff;
 }
 
-static void
-do_format_1 (insn)
-     uint32 insn;
+void
+write_longword (addr, data)
+     uint8 *addr;
+     uint32 data;
 {
-  printf("format 1 0x%x\n", insn >> 16);
+  addr[0] = (data >> 24) & 0xff;
+  addr[1] = (data >> 16) & 0xff;
+  addr[2] = (data >> 8) & 0xff;
+  addr[3] = data & 0xff;
+}
+
+void
+write_longlong (addr, data)
+     uint8 *addr;
+     int64 data;
+{
+  uint8 *a = addr;
+  a[0] = data >> 56;
+  a[1] = (data >> 48) & 0xff;
+  a[2] = (data >> 40) & 0xff;
+  a[3] = (data >> 32) & 0xff;
+  a[4] = (data >> 24) & 0xff;
+  a[5] = (data >> 16) & 0xff;
+  a[6] = (data >> 8) & 0xff;
+  a[7] = data & 0xff;
 }
 
 static void
-do_format_2 (insn)
+get_operands (struct simops *s, uint32 ins)
+{
+  int i, shift, bits, flags;
+  uint32 mask;
+  for (i=0; i < s->numops; i++)
+    {
+      shift = s->operands[3*i];
+      bits = s->operands[3*i+1];
+      flags = s->operands[3*i+2];
+      mask = 0x7FFFFFFF >> (31 - bits);
+      OP[i] = (ins >> shift) & mask;
+    }
+}
+
+static void
+do_format_1_2 (insn)
      uint32 insn;
 {
-  printf("format 2 0x%x\n", insn >> 16);
+  struct hash_entry *h;
+  printf("format 1 or 2 0x%x\n", insn);
+
+  h = lookup_hash (insn);
+  OP[0] = insn & 0x1f;
+  OP[1] = (insn >> 11) & 0x1f;
+  (h->ops->func) ();
 }
 
 static void
 do_format_3 (insn)
      uint32 insn;
 {
-  printf("format 3 0x%x\n", insn >> 16);
+  printf("format 3 0x%x\n", insn);
 }
 
 static void
 do_format_4 (insn)
      uint32 insn;
 {
-  printf("format 4 0x%x\n", insn >> 16);
+  printf("format 4 0x%x\n", insn);
 }
 
 static void
@@ -123,7 +188,14 @@ static void
 do_format_6 (insn)
      uint32 insn;
 {
+  struct hash_entry *h;
   printf("format 6 0x%x\n", insn);
+
+  h = lookup_hash (insn);
+  OP[0] = (insn >> 16) & 0xffff;
+  OP[1] = insn & 0x1f;
+  OP[2] = (insn >> 11) & 0x1f;
+  (h->ops->func) ();
 }
 
 static void
@@ -144,7 +216,13 @@ static void
 do_formats_9_10 (insn)
      uint32 insn;
 {
+  struct hash_entry *h;
   printf("formats 9 and 10 0x%x\n", insn);
+
+  h = lookup_hash (insn);
+  OP[0] = insn & 0x1f;
+  OP[1] = (insn >> 11) & 0x1f;
+  (h->ops->func) ();
 }
 
 void
@@ -263,15 +341,11 @@ sim_resume (step, siggnal)
    {
      inst = RLW (PC);
      oldpc = PC;
-     opcode = (inst & 0x07e00000) >> 21;
-     if ((opcode & 0x30) == 0)
+     opcode = (inst & 0x07e0) >> 5;
+     if ((opcode & 0x30) == 0
+	 || (opcode & 0x38) == 0x10)
        {
-	 do_format_1 (inst >> 16);
-	 PC += 2;
-       }
-     else if ((opcode & 0x38) == 0x10)
-       {
-	 do_format_2 (inst >> 16);
+	 do_format_1_2 (inst & 0xffff);
 	 PC += 2;
        }
      else if ((opcode & 0x3C) == 0x18
@@ -280,13 +354,13 @@ sim_resume (step, siggnal)
 	      || (opcode & 0x3C) == 0x24
 	      || (opcode & 0x3C) == 0x28)
        {
-	 do_format_4 (inst >> 16);
+	 do_format_4 (inst & 0xffff);
 	 PC += 2;
        }
-     else if ((opcode& 0x3C) == 0x23)
+     else if ((opcode & 0x3C) == 0x23)
        {
-	 do_format_3 (inst >> 16);
-	 PC += 2;
+	 do_format_3 (inst & 0xffff);
+	 /* No PC update, it's done in the instruction.  */
        }
      else if ((opcode & 0x38) == 0x30)
        {
@@ -303,7 +377,7 @@ sim_resume (step, siggnal)
 	 do_format_5 (inst);
 	 PC += 4;
        }
-     else if ((opcode & 0x3E) == 0x3C)
+     else if ((opcode & 0x3F) == 0x3E)
        {
 	 do_format_8 (inst);
 	 PC += 4;

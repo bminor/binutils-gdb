@@ -1,5 +1,26 @@
 Thu Aug 29 13:53:29 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* interp.c (hash): Update to be more accurate.
+	(lookup_hash): Call hash rather than computing the hash
+	code here.
+	(do_format_1_2): Handle format 1 and format 2 instructions.
+	Get operands correctly and call the target function.
+	(do_format_6): Get operands correctly and call the target
+	function.
+	(do_formats_9_10): Rough cut so shift ops will work.
+	(sim_resume): Tweak to deal with format 1 and format 2
+	handling in a single funtion.  Don't update the PC
+	for format 3 insns.  Fix typos.
+	* simops.c: Slightly reorganize.  Add condition code handling
+	to "add", "addi", "and", "andi", "or", "ori", "xor", "xori"
+	and "not" instructions.
+	* v850_sim.h (reg_t): Registers are 32bits.
+	(_state): The V850 has 32 general registers.  Add a 32bit
+	psw and pc register too.  Add accessor macros
+
+	* Makefile.in, interp.c, v850_sim.h: Bring over endianness
+	changes from the d10v simulator.
+
 	* simops.c: Add shift support.
 
 	* simops.c: Add multiply & divide support.  Abort for system
