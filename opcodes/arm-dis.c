@@ -286,7 +286,7 @@ print_insn_arm (pc, info, given)
 				{
 				  int offset = given & 0xfff;
 				  if (offset)
-				    func (stream, ", %s#%d",
+				    func (stream, ", #%s%d",
 					  (((given & 0x00800000) == 0)
 					   ? "-" : ""), offset);
 				}
@@ -307,7 +307,7 @@ print_insn_arm (pc, info, given)
 				{
 				  int offset = given & 0xfff;
 				  if (offset)
-				    func (stream, "], %s#%d",
+				    func (stream, "], #%s%d",
 					  (((given & 0x00800000) == 0)
 					   ? "-" : ""), offset);
 				  else
@@ -350,7 +350,7 @@ print_insn_arm (pc, info, given)
                                   /* Immediate.  */
                                   int offset = ((given & 0xf00) >> 4) | (given & 0xf);
 				  if (offset)
-				    func (stream, ", %s#%d",
+				    func (stream, ", #%s%d",
 					  (((given & 0x00800000) == 0)
 					   ? "-" : ""), offset);
 				}
@@ -374,7 +374,7 @@ print_insn_arm (pc, info, given)
                                   /* Immediate.  */
                                   int offset = ((given & 0xf00) >> 4) | (given & 0xf);
 				  if (offset)
-				    func (stream, "], %s#%d",
+				    func (stream, "], #%s%d",
 					  (((given & 0x00800000) == 0)
 					   ? "-" : ""), offset);
 				  else
@@ -451,7 +451,7 @@ print_insn_arm (pc, info, given)
 			  int offset = given & 0xff;
 
 			  if (offset)
-			    func (stream, ", %s#%d]%s",
+			    func (stream, ", #%s%d]%s",
 				  ((given & 0x00800000) == 0 ? "-" : ""),
 				  offset * 4,
 				  ((given & 0x00200000) != 0 ? "!" : ""));
@@ -467,7 +467,7 @@ print_insn_arm (pc, info, given)
 			  if (given & (1 << 21))
 			    {
 			      if (offset)
-				func (stream, ", %s#%d",
+				func (stream, ", #%s%d",
 				      ((given & 0x00800000) == 0 ? "-" : ""),
 				      offset * 4);
 			    }
@@ -876,12 +876,12 @@ print_insn_arm (pc, info, given)
 			  if (offset)
 			    {
 			      if ((given & 0x01000000) != 0)
-				func (stream, ", %s#%d]%s",
+				func (stream, ", #%s%d]%s",
 				      ((given & 0x00800000) == 0 ? "-" : ""),
 				      offset * multiplier,
 				      ((given & 0x00200000) != 0 ? "!" : ""));
 			      else
-				func (stream, "], %s#%d",
+				func (stream, "], #%s%d",
 				      ((given & 0x00800000) == 0 ? "-" : ""),
 				      offset * multiplier);
 			    }
