@@ -201,6 +201,11 @@ FLAGS_TO_PASS := \
 	"RELEASE_TAG=$(RELEASE_TAG)" \
 	"SHELL=$(SHELL)"
 
+# set GNU_MAKE and CONFIG_SHELL correctly in sub-builds
+ifeq ($(patsubst %-lynxos,lynxos,$(canonhost)),lynxos)
+FLAGS_TO_PASS := $(FLAGS_TO_PASS) "GNU_MAKE=$(MAKE)" "CONFIG_SHELL=/bin/bash"
+endif
+
 all-emacs:
 	@echo build started at `date`
 	[ -d $(INSTALLDIR) ] || mkdir $(INSTALLDIR)
