@@ -1,3 +1,8 @@
+Fri Oct 14 12:02:18 1994  Eric Youngdale  (eric@aib.com)
+
+	* scripttempl/elf.sc: Add .rel.ctors, .rela.ctors, .rel.dtors, and
+	.rela.dtors to the list of .rel* sections.
+
 Thu Oct 13 14:16:27 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* configure.in (all_targets): Handle i386-linux*.
