@@ -1,5 +1,10 @@
 2002-01-21  Andrew Cagney  <ac131313@redhat.com>
 
+	* gdb.texinfo (Remote Debugging): Create a menu.
+	(Top): Add ``Remote Debugging'' to menu.
+
+2002-01-21  Andrew Cagney  <ac131313@redhat.com>
+
 	* gdb.texinfo (Remote): Move the sub-section ``The GDB remote
 	serial protocol'' from here.
 	(Remote Debugging): To here.  New chapter.

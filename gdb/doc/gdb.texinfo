@@ -137,6 +137,7 @@ Copyright (C) 1988-2002 Free Software Foundation, Inc.
 * Altering::                    Altering execution
 * GDB Files::                   @value{GDBN} files
 * Targets::                     Specifying a debugging target
+* Remote Debugging::            Debugging remote programs
 * Configurations::              Configuration-specific information
 * Controlling GDB::             Controlling @value{GDBN}
 * Sequences::                   Canned sequences of commands
@@ -192,6 +193,7 @@ Copyright (C) 1988-2000 Free Software Foundation, Inc.
 * Altering::                    Altering execution
 * GDB Files::                   @value{GDBN} files
 * Targets::                     Specifying a debugging target
+* Remote Debugging::            Debugging remote programs
 * Configurations::              Configuration-specific information
 * Controlling GDB::             Controlling @value{GDBN}
 * Sequences::                   Canned sequences of commands
@@ -9942,6 +9944,13 @@ is supported other than to try it.
 
 @node Remote Debugging
 @chapter Debugging remote programs
+
+@menu
+* Server::	                Using the gdbserver program
+* NetWare::                     Using the gdbserve.nlm program
+* remote stub::                 Implementing a remote stub
+* Protocol::                    Communication protocol
+@end menu
 
 @node Server
 @section Using the @code{gdbserver} program
