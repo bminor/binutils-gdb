@@ -265,7 +265,7 @@ rdi/adp protocol	Fernando Nasser		fnasser@cygnus.com
 			Jim Ingham		jingham@apple.com
 documentation		Eli Zaretskii		eliz@gnu.org
 testsuite		Fernando Nasser		fnasser@cygnus.com
-  hp tests (gdb.hp)	Jimmy Guo		guo@cup.hp.com
+  hp tests (gdb.hp)	(vacant)
   Java tests (gdb.java)	Anthony Green 		green@cygnus.com
 Kernel Object Display	Fernando Nasser		fnasser@cygnus.com
 dcache.c		J.T. Conklin		jtc@redback.com
@@ -282,8 +282,8 @@ libgui (w/foundry, sn)	Syd Polk		spolk@cygnus.com
 mi (gdb/mi)		Andrew Cagney		cagney@cygnus.com
 			Elena Zannoni           ezannoni@cygnus.com
 			Fernando Nasser		fnasser@cygnus.com
-tui			Technical Contact Point	wdb@cup.hp.com
-			Jimmy Guo		guo@cup.hp.com
+tui			(vacant)
+			Technical Contact Point	wdb@cup.hp.com
 
 
 Misc:
@@ -328,6 +328,12 @@ Martin Hunt					hunt@redhat.com
 Matt Hiller					hiller@redhat.com
 Philip Blundell					philb@gnu.org
 Keith Seitz					keiths@cygnus.com
+
+
+			Past Maintainers
+
+Jimmy Guo (gdb.hp, tui)				guo@cup.hp.com
+
 
 Folks that have been caught up in a paper trail:
 

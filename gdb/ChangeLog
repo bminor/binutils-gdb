@@ -1,5 +1,10 @@
 2001-03-19  Andrew Cagney  <ac131313@redhat.com>
 
+	* MAINTAINERS: Jimmy Guo stepped down as a maintiner (TUI,
+	gdb.hp).
+
+2001-03-19  Andrew Cagney  <ac131313@redhat.com>
+
 	* remote.c (remote_cisco_section_offsets): Do not cast result from
 	bfd_get_section_name.
 	(compare_sections_command): Ditto.
