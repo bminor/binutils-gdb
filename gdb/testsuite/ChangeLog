@@ -1,3 +1,8 @@
+Wed Jan 19 12:40:25 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* gdb.t06/signals.exp:  Handle blocked SIGTRAP on sun3 for bash
+	versions prior to 1.13.5.
+
 Tue Jan 18 20:10:50 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.t00/default.exp (show prompt): In FAIL case, only match if
