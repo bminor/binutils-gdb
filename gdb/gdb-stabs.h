@@ -37,7 +37,7 @@
 #define	SECT_OFF_DATA	1
 #define	SECT_OFF_BSS	2
 #define	SECT_OFF_RODATA	3
-#define	SECT_OFF_MAX	16	/* Count of possible values */
+#define	SECT_OFF_MAX    40	/* Count of possible values */
 
 /* The stab_section_info chain remembers info from the ELF symbol table,
    while psymtabs are being built for the other symbol tables in the 

@@ -1,3 +1,7 @@
+2000-04-21  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* gdb-stabs.h (SECT_OFF_MAX): Increase to 40.
+
 2000-04-20  Christopher Faylor  <cgf@cygnus.com>
 
 	* win32-nat.c (thread_rec): Be more defensive about suspending already
