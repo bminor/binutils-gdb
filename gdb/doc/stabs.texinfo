@@ -965,11 +965,11 @@ In XCOFF files, the stab type need not indicate the section;
 @code{C_STSYM} can be used for all statics.  Also, each static variable
 is enclosed in a static block.  A @code{C_BSTAT} (emitted with a
 @samp{.bs} assembler directive) symbol begins the static block; its
-value is the address of the static block, its section is the section of
-the variables in that static block, and its name is @samp{.bs}.  A
-@code{C_ESTAT} (emitted with a @samp{.es} assembler directive) symbol
-ends the static block; its name is @samp{.es} and its value and section
-are ignored.
+value is the symbol number of the csect symbol whose value is the
+address of the static block, its section is the section of the variables
+in that static block, and its name is @samp{.bs}.  A @code{C_ESTAT}
+(emitted with a @samp{.es} assembler directive) symbol ends the static
+block; its name is @samp{.es} and its value and section are ignored.
 
 In ECOFF files, the storage class is used to specify the section, so the
 stab type need not indicate the section.

@@ -1,3 +1,8 @@
+Wed Jun  1 16:10:45 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabs.texinfo (Statics): Value of xcoff C_BSTAT points to
+	another symbol, it is not the address itself.
+
 Thu May  5 20:23:36 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* stabs.texinfo (Stab Section Basics): Add comment about alignment
