@@ -122,6 +122,7 @@ if { [istarget mips*-*-*] } then {
 	run_dump_test "mul"
     }
     run_dump_test "rol"
+    run_dump_test "rol64"
     if !$aout { run_dump_test "sb" }
     run_dump_test "trunc"
     if !$aout { run_dump_test "ulh" }

@@ -6686,6 +6686,17 @@ macro2 (ip)
       --mips_opts.noreorder;
       break;
 
+    case M_DROL:
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "dsubu",
+		   "d,v,t", AT, 0, treg);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "dsrlv",
+		   "d,t,s", AT, sreg, AT);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "dsllv",
+		   "d,t,s", dreg, sreg, treg);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "or",
+		   "d,v,t", dreg, dreg, AT);
+      break;
+
     case M_ROL:
       macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "subu",
 		   "d,v,t", AT, 0, treg);
@@ -6697,15 +6708,55 @@ macro2 (ip)
 		   "d,v,t", dreg, dreg, AT);
       break;
 
+    case M_DROL_I:
+      {
+	unsigned int rot;
+	char *l, *r;
+
+	if (imm_expr.X_op != O_constant)
+	  as_bad (_("rotate count too large"));
+	rot = imm_expr.X_add_number & 0x3f;
+	if (! rot)
+	  break;
+	l = (rot < 0x20) ? "dsll" : "dsll32";
+	r = ((0x40 - rot) < 0x20) ? "dsrl" : "dsrl32";
+	rot &= 0x1f;
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL, l,
+		     "d,w,<", AT, sreg, rot);
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL, r,
+		     "d,w,<", dreg, sreg, (0x20 - rot) & 0x1f);
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "or",
+		     "d,v,t", dreg, dreg, AT);
+      }
+      break;
+
     case M_ROL_I:
-      if (imm_expr.X_op != O_constant)
-	as_bad (_("rotate count too large"));
-      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "sll", "d,w,<",
-		   AT, sreg, (int) (imm_expr.X_add_number & 0x1f));
-      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "srl", "d,w,<",
-		   dreg, sreg, (int) ((0 - imm_expr.X_add_number) & 0x1f));
-      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "or", "d,v,t",
-		   dreg, dreg, AT);
+      {
+	unsigned int rot;
+
+	if (imm_expr.X_op != O_constant)
+	  as_bad (_("rotate count too large"));
+	rot = imm_expr.X_add_number & 0x1f;
+	if (! rot)
+	  break;
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "sll",
+		     "d,w,<", AT, sreg, rot);
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "srl",
+		     "d,w,<", dreg, sreg, (0x20 - rot) & 0x1f);
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "or",
+		     "d,v,t", dreg, dreg, AT);
+      }
+      break;
+
+    case M_DROR:
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "dsubu",
+		   "d,v,t", AT, 0, treg);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "dsllv",
+		   "d,t,s", AT, sreg, AT);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "dsrlv",
+		   "d,t,s", dreg, sreg, treg);
+      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "or",
+		   "d,v,t", dreg, dreg, AT);
       break;
 
     case M_ROR:
@@ -6719,15 +6770,44 @@ macro2 (ip)
 		   "d,v,t", dreg, dreg, AT);
       break;
 
+    case M_DROR_I:
+      {
+	unsigned int rot;
+	char *l, *r;
+
+	if (imm_expr.X_op != O_constant)
+	  as_bad (_("rotate count too large"));
+	rot = imm_expr.X_add_number & 0x3f;
+	if (! rot)
+	  break;
+	r = (rot < 0x20) ? "dsrl" : "dsrl32";
+	l = ((0x40 - rot) < 0x20) ? "dsll" : "dsll32";
+	rot &= 0x1f;
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL, r,
+		     "d,w,<", AT, sreg, rot);
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL, l,
+		     "d,w,<", dreg, sreg, (0x20 - rot) & 0x1f);
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "or",
+		     "d,v,t", dreg, dreg, AT);
+      }
+      break;
+
     case M_ROR_I:
-      if (imm_expr.X_op != O_constant)
-	as_bad (_("rotate count too large"));
-      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "srl", "d,w,<",
-		   AT, sreg, (int) (imm_expr.X_add_number & 0x1f));
-      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "sll", "d,w,<",
-		   dreg, sreg, (int) ((0 - imm_expr.X_add_number) & 0x1f));
-      macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "or", "d,v,t",
-		   dreg, dreg, AT);
+      {
+	unsigned int rot;
+
+	if (imm_expr.X_op != O_constant)
+	  as_bad (_("rotate count too large"));
+	rot = imm_expr.X_add_number & 0x1f;
+	if (! rot)
+	  break;
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "srl",
+		     "d,w,<", AT, sreg, rot);
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "sll",
+		     "d,w,<", dreg, sreg, (0x20 - rot) & 0x1f);
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL, "or",
+		     "d,v,t", dreg, dreg, AT);
+      }
       break;
 
     case M_S_DOB:

@@ -1,3 +1,7 @@
+2002-05-22  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* mips-opc.c (mips_builtin_opcodes): Add drol, dror macros.
+
 Fri May 17 14:26:44 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* disassemble.c (disassembler): Just use print_insn_sh for bfd_arch_sh.

@@ -1,3 +1,9 @@
+2002-05-22  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* gas/mips/rol64.s: New file, test of drol, dror macros.
+	* gas/mips/rol64.d: Likewise.
+	* gas/mips/mips.exp: Add new test.
+
 2002-05-20  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* gas/arm/arm.exp: Replace deprecated command line switches

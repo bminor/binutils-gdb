@@ -492,6 +492,10 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"dremu",   "z,s,t",    0x0000001f, 0xfc00ffff, RD_s|RD_t|WR_HILO,      I3      },
 {"dremu",   "d,v,t",	3,    (int) M_DREMU_3,	INSN_MACRO,		I3	},
 {"dremu",   "d,v,I",	3,    (int) M_DREMU_3I,	INSN_MACRO,		I3	},
+{"drol",    "d,v,t",	0,    (int) M_DROL,	INSN_MACRO,		I3	},
+{"drol",    "d,v,I",	0,    (int) M_DROL_I,	INSN_MACRO,		I3	},
+{"dror",    "d,v,t",	0,    (int) M_DROR,	INSN_MACRO,		I3	},
+{"dror",    "d,v,I",	0,    (int) M_DROR_I,	INSN_MACRO,		I3	},
 {"dsllv",   "d,t,s",	0x00000014, 0xfc0007ff,	WR_d|RD_t|RD_s,		I3	},
 {"dsll32",  "d,w,<",	0x0000003c, 0xffe0003f, WR_d|RD_t,		I3	},
 {"dsll",    "d,w,s",	0x00000014, 0xfc0007ff,	WR_d|RD_t|RD_s,		I3	}, /* dsllv */
