@@ -42,6 +42,7 @@ static void obj_coff_scl PARAMS ((int));
 static void obj_coff_tag PARAMS ((int));
 static void obj_coff_val PARAMS ((int));
 static void obj_coff_type PARAMS ((int));
+static void obj_coff_ident PARAMS ((int));
 #ifdef BFD_ASSEMBLER
 static void obj_coff_loc PARAMS((int));
 #endif
@@ -550,6 +551,35 @@ obj_coff_loc (ignore)
   demand_empty_rest_of_line ();
 
   add_lineno (frag_now, frag_now_fix (), lineno);
+}
+
+/* Handle the .ident pseudo-op.  */
+
+static void
+obj_coff_ident (ignore)
+     int ignore ATTRIBUTE_UNUSED;
+{
+  segT current_seg = now_seg;
+  subsegT current_subseg = now_subseg;
+
+#ifdef TE_PE
+  {
+    segT sec;
+
+    /* We could put it in .comment, but that creates an extra section
+       that shouldn't be loaded into memory, which requires linker
+       changes...  For now, until proven otherwise, use .rdata.  */
+    sec = subseg_new (".rdata$zzz", 0);
+    bfd_set_section_flags (stdoutput, sec,
+			   ((SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_DATA)
+			    & bfd_applicable_section_flags (stdoutput)));
+  }
+#else
+  subseg_new (".comment", 0);
+#endif
+
+  stringer (1);
+  subseg_set (current_seg, current_subseg);
 }
 
 /*
@@ -1626,7 +1656,6 @@ static void adjust_stab_section PARAMS ((bfd *abfd, segT seg));
 static void obj_coff_lcomm PARAMS ((int));
 static void obj_coff_text PARAMS ((int));
 static void obj_coff_data PARAMS ((int));
-static void obj_coff_ident PARAMS ((int));
 void obj_coff_section PARAMS ((int));
 
 /* When not using BFD_ASSEMBLER, we permit up to 40 sections.
@@ -4521,15 +4550,14 @@ const pseudo_typeS obj_pseudo_table[] =
      earlier versions of gas.  */
   {"bss", obj_coff_bss, 0},
   {"weak", obj_coff_weak, 0},
+  {"ident", obj_coff_ident, 0},
 #ifndef BFD_ASSEMBLER
   {"use", obj_coff_section, 0},
   {"text", obj_coff_text, 0},
   {"data", obj_coff_data, 0},
   {"lcomm", obj_coff_lcomm, 0},
-  {"ident", obj_coff_ident, 0},
 #else
   {"optim", s_ignore, 0},	/* For sun386i cc (?) */
-  {"ident", s_ignore, 0},	/* we don't yet handle this. */
 #endif
   {"version", s_ignore, 0},
   {"ABORT", s_abort, 0},
