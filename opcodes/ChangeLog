@@ -1,3 +1,14 @@
+Wed Oct  1 14:10:20 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Use a diversion to set enable_shared before the
+	arguments are parsed.
+	* configure: Rebuild.
+
+Thu Sep 25 13:04:59 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* m68k-opc.c (TBL1): Use ! rather than `.
+	* m68k-dis.c (print_insn_arg): Remove ` operand specifier.
+
 Wed Sep 24 11:29:35 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* m68k-opc.c: Correct bchg, bclr, bset, and btst on ColdFire.
