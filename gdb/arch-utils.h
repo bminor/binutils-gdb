@@ -146,4 +146,8 @@ extern int generic_register_raw_size (int regnum);
 
 extern int generic_register_virtual_size (int regnum);
 
+/* Initialize a ``struct info''.  Can't use memset(0) since some
+   default values are not zero.  */
+extern void gdbarch_info_init (struct gdbarch_info *info);
+
 #endif

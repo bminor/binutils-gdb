@@ -21,6 +21,7 @@
 #include "defs.h"
 
 #if GDB_MULTI_ARCH
+#include "arch-utils.h"
 #include "gdbcmd.h"
 #include "inferior.h"		/* enum CALL_DUMMY_LOCATION et.al. */
 #else
@@ -466,7 +467,7 @@ set_endian (char *ignore_args, int from_tty, struct cmd_list_element *c)
       if (GDB_MULTI_ARCH)
 	{
 	  struct gdbarch_info info;
-	  memset (&info, 0, sizeof info);
+	  gdbarch_info_init (&info);
 	  info.byte_order = BFD_ENDIAN_LITTLE;
 	  if (! gdbarch_update_p (info))
 	    {
@@ -484,7 +485,7 @@ set_endian (char *ignore_args, int from_tty, struct cmd_list_element *c)
       if (GDB_MULTI_ARCH)
 	{
 	  struct gdbarch_info info;
-	  memset (&info, 0, sizeof info);
+	  gdbarch_info_init (&info);
 	  info.byte_order = BIG_ENDIAN;
 	  if (! gdbarch_update_p (info))
 	    {
@@ -663,7 +664,7 @@ set_architecture (char *ignore_args, int from_tty, struct cmd_list_element *c)
   else if (GDB_MULTI_ARCH)
     {
       struct gdbarch_info info;
-      memset (&info, 0, sizeof info);
+      gdbarch_info_init (&info);
       info.bfd_arch_info = bfd_scan_arch (set_architecture_string);
       if (info.bfd_arch_info == NULL)
 	internal_error (__FILE__, __LINE__,
@@ -695,7 +696,7 @@ set_gdbarch_from_file (bfd *abfd)
   if (GDB_MULTI_ARCH)
     {
       struct gdbarch_info info;
-      memset (&info, 0, sizeof info);
+      gdbarch_info_init (&info);
       info.abfd = abfd;
       if (! gdbarch_update_p (info))
 	error ("Architecture of file not recognized.\n");
@@ -732,7 +733,7 @@ initialize_current_architecture (void)
 
   /* determine a default architecture and byte order. */
   struct gdbarch_info info;
-  memset (&info, 0, sizeof (info));
+  gdbarch_info_init (&info);
   
   /* Find a default architecture. */
   if (info.bfd_arch_info == NULL
@@ -830,6 +831,18 @@ initialize_current_architecture (void)
   }
 }
 
+
+/* Initialize a gdbarch info to values that will be automatically
+   overridden.  Note: Originally, this ``struct info'' was initialized
+   using memset(0).  Unfortunatly, that ran into problems, namely
+   BFD_ENDIAN_BIG is zero.  An explicit initialization function that
+   can explicitly set each field to a well defined value is used.  */
+
+void
+gdbarch_info_init (struct gdbarch_info *info)
+{
+  memset (info, 0, sizeof (struct gdbarch_info));
+}
 
 /* */
 

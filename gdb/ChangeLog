@@ -1,3 +1,14 @@
+2001-12-19  Andrew Cagney  <ac131313@redhat.com>
+
+	* arch-utils.h (gdbarch_info_init): Declare.
+	* arch-utils.c: Include "arch-utils.h".
+	(gdbarch_info_init): Define.
+	(set_endian, set_architecture, set_gdbarch_from_file)
+	(initialize_current_architecture): Use gdbarch_info_init.
+	* rs6000-nat.c (set_host_arch): Ditto.
+	* cris-tdep.c	(cris_version_update, cris_mode_update)
+	(cris_abi_update): Ditto.
+
 2001-12-19  Jim Blandy  <jimb@redhat.com>
 
 	* c-lang.c (c_emit_char): Print ASCII 11 as '\v', to match

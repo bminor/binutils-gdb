@@ -3615,7 +3615,7 @@ cris_version_update (char *ignore_args, int from_tty,
       usr_cmd_cris_version_valid = 1;
   
       /* Update the current architecture, if needed.  */
-      memset (&info, 0, sizeof info);
+      gdbarch_info_init (&info);
       if (!gdbarch_update_p (info))
         internal_error (__FILE__, __LINE__, "cris_gdbarch_update: failed to update architecture.");
     }  
@@ -3633,7 +3633,7 @@ cris_mode_update (char *ignore_args, int from_tty,
       usr_cmd_cris_mode_valid = 1;
   
       /* Update the current architecture, if needed.  */
-      memset (&info, 0, sizeof info);
+      gdbarch_info_init (&info);
       if (!gdbarch_update_p (info))
         internal_error (__FILE__, __LINE__, "cris_gdbarch_update: failed to update architecture.");
     }
@@ -3651,7 +3651,7 @@ cris_abi_update (char *ignore_args, int from_tty,
       usr_cmd_cris_abi_valid = 1;
   
       /* Update the current architecture, if needed.  */
-      memset (&info, 0, sizeof info);
+      gdbarch_info_init (&info);
       if (!gdbarch_update_p (info))
         internal_error (__FILE__, __LINE__, "cris_gdbarch_update: failed to update architecture.");
     }

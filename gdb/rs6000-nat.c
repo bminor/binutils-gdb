@@ -926,7 +926,7 @@ set_host_arch (int pid)
     }
   bfd_default_set_arch_mach (&abfd, arch, mach);
 
-  memset (&info, 0, sizeof info);
+  gdbarch_info_init (&info);
   info.bfd_arch_info = bfd_get_arch_info (&abfd);
 
   if (!gdbarch_update_p (info))
