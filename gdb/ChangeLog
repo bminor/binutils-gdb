@@ -1,5 +1,8 @@
 Thu Oct 24 09:33:44 1991  John Gilmore  (gnu at cygnus.com)
 
+	* stack.c (frame_command):  Always print.  Use new
+	frame_select_command to select a frame without printing.	
+
 	* dwarfread.c:  Use <varargs.h>, since <stdarg.h> is not portable.
 
 Thu Oct 24 01:32:51 1991  Fred Fish  (fnf at cygnus.com)
@@ -65,6 +68,18 @@ Thu Oct 24 01:32:51 1991  Fred Fish  (fnf at cygnus.com)
 	replace them with a pointer to private data for each different
 	flavor of object file reader to initialize appropriately.
 
+Wed Oct 23 09:38:20 1991  John Gilmore  (gnu at cygnus.com)
+
+	* xconfig/sun[34]os4:  Add note about strstr botch on sunos4.0.3c
+	and previous.
+
+	* mipsread.c (fixup_undef_type):  New function.  If a struct /
+	union / enum is defined in a header file but nowhere else used,
+	(by typedefing, pointer referencing or declaration) the mipsread code
+	builds the complete tree for the structure but leaves its code as
+	TYPE_CODE_UNDEF as it doesn't know what kind of aggregate it is.
+	Guess its type based on the details of the members.
+
 Tue Oct 22 18:04:32 1991  Stu Grossman  (grossman at cygnus.com)
 
 	* infrun.c (wait_for_inferior):  Check return value from
@@ -74,6 +89,13 @@ Mon Oct 21 17:47:03 1991  Stu Grossman  (grossman at cygnus.com)
 
 	* infrun.c (wait_for_inferior):  fix stepi/nexti that was broken
 	by my last edit to this routine.
+
+Mon Oct 21 14:27:43 1991  John Gilmore  (gnu at cygnus.com)
+
+	* tm-sun3.h (FIX_CALL_DUMMY): problem with cross debugging.
+	FIX_CALL_DUMMY does unaligned accesses and/or forgets to byte swap
+	the values before putting them into the dummy code.  (From Peter
+	Schauer)
 
 Mon Oct 21 10:04:39 1991  Steve Chamberlain  (steve at rtl.cygnus.com)
 

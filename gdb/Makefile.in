@@ -293,7 +293,7 @@ saber_gdb: $(SFILES) $(DEPFILES) copying.c version.c
 	#load ./init.c $(SFILES)
 	#unload ${srcdir}/c-exp.y ${srcdir}/m2-exp.y ${srcdir}/vx-share/*.h
 	#unload ${srcdir}/nindy-share/[A-Z]*
-	#load ${srcdir}/c-exp.tab.c ${srcdir}/m2-exp.tab.c
+	#load c-exp.tab.c m2-exp.tab.c
 	#load copying.c version.c
 	#load `echo " "$(DEPFILES) | sed -e 's/\.o/.c/g' -e 's, , ../,g'`
 	#load ${LIBIBERTY_DIR}/*.c
@@ -589,20 +589,20 @@ copying.c : COPYING copying.awk
 version.c : Makefile.in
 	echo 'char *version = "$(VERSION)";' >version.c
 
-# c-exp.tab.c is generated in srcdir from c-exp.y, then compiled in target
-# directory to c-exp.tab.o.
-c-exp.tab.o: ${srcdir}/c-exp.tab.c
-${srcdir}/c-exp.tab.c : $(srcdir)/c-exp.y
+# c-exp.tab.c is generated in target dir from c-exp.y if it doesn't exist
+# in srcdir, then compiled in target dir to c-exp.tab.o.
+c-exp.tab.o: c-exp.tab.c
+c-exp.tab.c: $(srcdir)/c-exp.y
 	@echo 'Expect 4 shift/reduce conflicts.'
 	${YACC} $(srcdir)/c-exp.y
-	mv y.tab.c ${srcdir}/c-exp.tab.c
+	mv y.tab.c c-exp.tab.c
 
-# m2-exp.tab.c is generated in srcdir from m2-exp.y, then compiled in target
-# directory to m2-exp.tab.o.
-m2-exp.tab.o: ${srcdir}/m2-exp.tab.c
-${srcdir}/m2-exp.tab.c : $(srcdir)/m2-exp.y
+# m2-exp.tab.c is generated in target dir from m2-exp.y if it doesn't exist
+# in srcdir, then compiled in target dir to m2-exp.tab.o.
+m2-exp.tab.o: m2-exp.tab.c
+m2-exp.tab.c: $(srcdir)/m2-exp.y
 	${YACC} $(srcdir)/m2-exp.y
-	mv y.tab.c ${srcdir}/m2-exp.tab.c
+	mv y.tab.c m2-exp.tab.c
 
 # dbxread, coffread, mipsread, elfread have dependencies on BFD header files.
 dbxread.o: ${srcdir}/dbxread.c

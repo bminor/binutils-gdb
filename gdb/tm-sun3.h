@@ -120,5 +120,10 @@ taken for the arguments.  */
    into a call sequence of the above form stored at DUMMYNAME.  */
 
 #define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p)     \
-{ *(int *)((char *) dummyname + 20) = nargs * 4;  \
-  *(int *)((char *) dummyname + 14) = fun; }
+{ int temp;                                             \
+  temp = nargs * 4;                                     \
+  SWAP_TARGET_AND_HOST (temp, 4);                       \
+  bcopy ((char *)&temp, (char *)(dummyname) + 20, 4);   \
+  temp = fun;                                           \
+  SWAP_TARGET_AND_HOST (temp, 4);                       \
+  bcopy ((char *)&temp, (char *)(dummyname) + 14, 4); }

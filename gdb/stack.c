@@ -360,7 +360,10 @@ frame_info (addr_exp)
 
   wrap_here ("   ");
   if (funname)
-    printf_filtered (" in %s", funname);
+    {
+      printf_filtered (" in ");
+      fputs_demangled (funname, stdout, 1);
+    }
   wrap_here ("   ");
   if (sal.symtab)
     printf_filtered (" (%s:%d)", sal.symtab->filename, sal.line);
@@ -925,14 +928,14 @@ find_relative_frame (frame, level_offset_ptr)
   return frame;
 }
 
-/* The "frame" command.  With no arg, print selected frame briefly.
+/* The "frame_select" command.  With no arg, NOP.
    With arg LEVEL_EXP, select the frame at level LEVEL if it is a
    valid level.  Otherwise, treat level_exp as an address expression
-   and print it.  See parse_frame_specification for more info on proper
+   and select it.  See parse_frame_specification for more info on proper
    frame expressions. */
 
 static void
-frame_command (level_exp, from_tty)
+frame_select_command (level_exp, from_tty)
      char *level_exp;
      int from_tty;
 {
@@ -958,10 +961,18 @@ frame_command (level_exp, from_tty)
     level = 0;
 
   select_frame (frame, level);
+}
 
-  if (!from_tty)
-    return;
+/* The "frame" command.  With no arg, print selected frame briefly.
+   With arg, behaves like frame_select and then prints the selected
+   frame.  */
 
+static void
+frame_command (level_exp, from_tty)
+     char *level_exp;
+     int from_tty;
+{
+  frame_select_command (level_exp, from_tty);
   print_stack_frame (selected_frame, selected_frame_level, 1);
 }
 
@@ -1147,6 +1158,11 @@ With argument, nothing is printed if input is coming from\n\
 a command file or a user-defined command.");
 
   add_com_alias ("f", "frame", class_stack, 1);
+
+  add_com ("frame-select", class_stack, frame_select_command,
+	   "Select a stack frame without printing anything.\n\
+An argument specifies the frame to select.\n\
+It can be a stack frame number or the address of the frame.\n");
 
   add_com ("backtrace", class_stack, backtrace_command,
 	   "Print backtrace of all stack frames, or innermost COUNT frames.\n\
