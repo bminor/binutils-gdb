@@ -845,7 +845,10 @@ output_cie (struct cie_entry *cie)
   out_one (0);
   out_uleb128 (DWARF2_LINE_MIN_INSN_LENGTH);	/* Code alignment */
   out_sleb128 (DWARF2_CIE_DATA_ALIGNMENT);	/* Data alignment */
-  out_one (cie->return_column);			/* Return column */
+  if (DW_CIE_VERSION == 1)			/* Return column.  */
+    out_one (cie->return_column);
+  else
+    out_uleb128 (cie->return_column);
   out_uleb128 (1);				/* Augmentation size */
 #if defined DIFF_EXPR_OK || defined tc_cfi_emit_pcrel_expr
   out_one (DW_EH_PE_pcrel | DW_EH_PE_sdata4);

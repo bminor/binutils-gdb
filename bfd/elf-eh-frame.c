@@ -1,5 +1,5 @@
 /* .eh_frame section optimization.
-   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
    Written by Jakub Jelinek <jakub@redhat.com>.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -410,7 +410,7 @@ _bfd_elf_discard_section_eh_frame
 	  cie.version = *buf++;
 
 	  /* Cannot handle unknown versions.  */
-	  if (cie.version != 1)
+	  if (cie.version != 1 && cie.version != 3)
 	    goto free_no_table;
 	  if (strlen (buf) > sizeof (cie.augmentation) - 1)
 	    goto free_no_table;
@@ -434,7 +434,10 @@ _bfd_elf_discard_section_eh_frame
 	     ports this will not matter as the value will be less than 128.
 	     For the others (eg FRV, SH, MMIX, IA64) they need a fixed GCC
 	     which conforms to the DWARF3 standard.  */
-	  read_uleb128 (cie.ra_column, buf);
+	  if (cie.version == 1)
+	    cie.ra_column = *buf++;
+	  else
+	    read_uleb128 (cie.ra_column, buf);
 	  ENSURE_NO_RELOCS (buf);
 	  cie.lsda_encoding = DW_EH_PE_omit;
 	  cie.fde_encoding = DW_EH_PE_omit;

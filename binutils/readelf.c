@@ -1,5 +1,5 @@
 /* readelf.c -- display contents of an ELF format file
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    Originally developed by Eric Youngdale <eric@andante.jic.com>
    Modifications by Nick Clifton <nickc@redhat.com>
@@ -8968,7 +8968,14 @@ display_debug_frames (Elf_Internal_Shdr *section,
 	    {
 	      fc->code_factor = LEB ();
 	      fc->data_factor = SLEB ();
-	      fc->ra = byte_get (start, 1); start += 1;
+	      if (version == 1)
+		{
+		  fc->ra = GET (1);
+		}
+	      else
+		{
+		  fc->ra = LEB ();
+		}
 	      augmentation_data_len = LEB ();
 	      augmentation_data = start;
 	      start += augmentation_data_len;
@@ -8978,13 +8985,27 @@ display_debug_frames (Elf_Internal_Shdr *section,
 	      start += addr_size;
 	      fc->code_factor = LEB ();
 	      fc->data_factor = SLEB ();
-	      fc->ra = byte_get (start, 1); start += 1;
+	      if (version == 1)
+		{
+		  fc->ra = GET (1);
+		}
+	      else
+		{
+		  fc->ra = LEB ();
+		}
 	    }
 	  else
 	    {
 	      fc->code_factor = LEB ();
 	      fc->data_factor = SLEB ();
-	      fc->ra = byte_get (start, 1); start += 1;
+	      if (version == 1)
+		{
+		  fc->ra = GET (1);
+		}
+	      else
+		{
+		  fc->ra = LEB ();
+		}
 	    }
 	  cie = fc;
 
