@@ -1,3 +1,10 @@
+Mon Jan 22 16:59:40 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* remote.c (remotebreak): New GDB variable.
+	(remote_break): New global.
+	(remote_interrupt): Send a break instead of ^C if remote_break.
+	* NEWS: Describe the new variable.
+
 Mon Jan 22 16:24:11 1996  Doug Evans  <dje@charmed.cygnus.com>
 
 	* sparc-tdep.c (_initialize_sparc_tdep): Always use print_insn_sparc.
