@@ -1,3 +1,7 @@
+2001-04-30  Andreas Jaeger  <aj@suse.de>
+
+	* emulparms/elf_x86_64.sh (MAXPAGESIZE): Fix value.
+
 2001-04-28  Paul Sokolovsky  <Paul.Sokolovsky@technologist.com>
 
         * ldlang.c (load_symbols): Give emulation a chance
@@ -10,14 +14,14 @@
 	* scripttempl/armcoff.sc: Support .text or .data as a section name
 	prefix.
 	Define _etext.
-	
+
 2001-04-13  J.T. Conklin  <jtc@redback.com>
 
 	* ld.texinfo: Document --fatal-warnings.
 	* ld.1: Regenerate.
 
 	* ldmisc.c (vfinfo): Set flag to inhibit making executable if
- 	warnings have been turned into errors.
+	warnings have been turned into errors.
 	* lexsup.c (OPTION_WARN_FATAL): Define.
 	(ld_options): Entry for --fatal-warnings.
 	(parse_args): Handle OPTION_WARN_FATAL.
@@ -48,7 +52,7 @@
 
 	* emulparams/elf32ltsmip.sh: New. Traditional little endian
 	MIPS taget.
-	* emulparams/elf64btsmip.sh: New. Traditional 64bit big endian 
+	* emulparams/elf64btsmip.sh: New. Traditional 64bit big endian
 	target.
 	* emulparams/elf64ltsmip.sh: New. Traditional 64bit little
 	endian target.
