@@ -1891,7 +1891,7 @@ print_insn (pc, info)
   mode_64bit = (info->mach == bfd_mach_x86_64_intel_syntax
 		|| info->mach == bfd_mach_x86_64);
 
-  if (intel_syntax == -1)
+  if (intel_syntax == (char) -1)
     intel_syntax = (info->mach == bfd_mach_i386_i386_intel_syntax
 		    || info->mach == bfd_mach_x86_64_intel_syntax);
 
