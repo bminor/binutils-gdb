@@ -1,3 +1,23 @@
+Wed Jul  1 16:44:12 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* Make-common.in (SCHEME,SCHEMEFLAGS): Delete.
+	(CGENDIR,CGEN): New variables.
+	(CGEN_VERBOSE): Renamed to CGENFLAGS.
+	(cgen-arch,cgen-cpu,cgen-decode): Update.
+	(CGEN_CPU_WRITE): New variable.
+	(CGEN_CPU_SEMSW): -W -> -X.
+	(CGEN_FLAGS_TO_PASS): Delete SCHEME.  Add CGEN,CGENFLAGS.
+	* cgen.sh: Delete args scheme,schemeflags.  New arg cgen.
+
+	* cgen-sim.h (RECORD_IADDR): Delete.
+	* cgen-types.h (HOSTINT,HOSTUINT,HOSTPTR): New types.
+	* genmloop.sh (engine_resume_{full,fast}): Delete icount.
+
+Wed Jun 17 12:25:08 1998  Mark Alexander  <marka@cygnus.com>
+
+	* gennltvals.def (mn10200): Add entry.
+	* nltvals.def: Regenerate with MN10200 additions.
+
 Wed Jun 17 13:18:28 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-inline.h (EXTERN_*): Replace with EXTERN_*_P. Correct

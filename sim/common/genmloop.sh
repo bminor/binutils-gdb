@@ -92,15 +92,15 @@ cat <<EOF
 #include "cpu-sim.h"
 #include "sim-assert.h"
 
-/* Tell sim_main_loop to use the cache if it's active.
+/* Tell sim_main_loop to use the scache if it's active.
    Collecting profile data and tracing slow us down so we don't do them in
    "fast mode".
    There are 2 possibilities on 2 axes:
-   - use or don't use the cache
+   - use or don't use the scache
    - run normally (full featured) or run fast
    Supporting all four possibilities in one executable is a bit much but
    supporting full/fast seems reasonable.
-   If the cache is configured in it is always used.
+   If the scache is configured in it is always used.
    ??? Need to see whether it speeds up profiling significantly or not.
    Speeding up tracing doesn't seem worth it.
    ??? Sometimes supporting more than one set of semantic functions will make
@@ -263,7 +263,6 @@ engine_resume_full (SIM_DESC sd)
   /* current_{state,cpu} exist for the generated code to use.  */
   SIM_DESC current_state = sd;
   sim_cpu *current_cpu = STATE_CPU (sd, 0);
-${parallel+  int icount = 0;}
 
 EOF
 
@@ -276,13 +275,12 @@ cat << EOF
 
 #if defined (HAVE_PARALLEL_EXEC) && defined (__GNUC__)
   {
-    static read_init_p = 0;
-    if (! read_init_p)
+    if (! CPU_IDESC_READ_INIT_P (current_cpu))
       {
 /* ??? Later maybe paste read.c in when building mainloop.c.  */
 #define DEFINE_LABELS
 #include "readx.c"
-	read_init_p = 1;
+	CPU_IDESC_READ_INIT_P (current_cpu) = 1;
       }
   }
 #endif
@@ -362,7 +360,6 @@ engine_resume_full (SIM_DESC sd)
   sim_cpu *current_cpu = STATE_CPU (sd, 0);
   SCACHE cache[MAX_LIW_INSNS];
   SCACHE *sc = &cache[0];
-${parallel+  int icount = 0;}
 
 EOF
 
@@ -375,13 +372,12 @@ cat << EOF
 
 #if defined (HAVE_PARALLEL_EXEC) && defined (__GNUC__)
   {
-    static read_init_p = 0;
-    if (! read_init_p)
+    if (! CPU_IDESC_READ_INIT_P (current_cpu))
       {
 /* ??? Later maybe paste read.c in when building mainloop.c.  */
 #define DEFINE_LABELS
 #include "readx.c"
-	read_init_p = 1;
+	CPU_IDESC_READ_INIT_P (current_cpu) = 1;
       }
   }
 #endif
@@ -432,7 +428,6 @@ engine_resume_fast (SIM_DESC sd)
 #define FAST_P 1
   SIM_DESC current_state = sd;
   sim_cpu *current_cpu = STATE_CPU (sd, 0);
-${parallel+  int icount = 0;}
 
 EOF
 
@@ -445,13 +440,12 @@ cat << EOF
 
 #if defined (HAVE_PARALLEL_EXEC) && defined (__GNUC__)
   {
-    static read_init_p = 0;
-    if (! read_init_p)
+    if (! CPU_IDESC_READ_INIT_P (current_cpu))
       {
 /* ??? Later maybe paste read.c in when building mainloop.c.  */
 #define DEFINE_LABELS
 #include "readx.c"
-	read_init_p = 1;
+	CPU_IDESC_READ_INIT_P (current_cpu) = 1;
       }
   }
 #endif
@@ -463,13 +457,12 @@ cat <<EOF
 
 #if defined (WITH_SEM_SWITCH_FAST) && defined (__GNUC__)
   {
-    static decode_init_p = 0;
-    if (! decode_init_p)
+    if (! CPU_IDESC_SEM_INIT_P (current_cpu))
       {
 /* ??? Later maybe paste sem-switch.c in when building mainloop.c.  */
 #define DEFINE_LABELS
 #include "sem-switch.c"
-	decode_init_p = 1;
+	CPU_IDESC_SEM_INIT_P (current_cpu) = 1;
       }
   }
 #endif
@@ -531,7 +524,6 @@ engine_resume_fast (SIM_DESC sd)
   sim_cpu *current_cpu = STATE_CPU (sd, 0);
   SCACHE cache[MAX_LIW_INSNS];
   SCACHE *sc = &cache[0];
-${parallel+  int icount = 0;}
 
 EOF
 
@@ -544,13 +536,12 @@ cat << EOF
 
 #if defined (HAVE_PARALLEL_EXEC) && defined (__GNUC__)
   {
-    static read_init_p = 0;
-    if (! read_init_p)
+    if (! CPU_IDESC_READ_INIT_P (current_cpu))
       {
 /* ??? Later maybe paste read.c in when building mainloop.c.  */
 #define DEFINE_LABELS
 #include "readx.c"
-	read_init_p = 1;
+	CPU_IDESC_READ_INIT_P (current_cpu) = 1;
       }
   }
 #endif

@@ -39,10 +39,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* Execution support.  */
 
-/* Forward decls.  Defined in the machine generated arch.h and cpu.h files.  */
+/* Forward decls.  Defined in the machine generated files.  */
 typedef struct argbuf ARGBUF;
 typedef struct scache SCACHE;
 typedef struct parexec PAREXEC;
+typedef struct idesc IDESC;
 
 #ifdef SCACHE_P
 
@@ -64,7 +65,7 @@ typedef ARGBUF *SEM_ARG;
 
 #endif /* ! SCACHE_P */
 
-/* Semantic functions come in two versions on two axis:
+/* Semantic functions come in two versions on two axes:
    fast and full (featured), and using or not using scache.
    A full featured simulator is always provided.  --enable-sim-fast includes
    support for fast execution by duplicating the semantic code but leaving
@@ -88,32 +89,6 @@ typedef CIA (SEMANTIC_FN) (SIM_CPU *, ARGBUF *, PAREXEC *);
 typedef CIA (SEMANTIC_FN) (SIM_CPU *, ARGBUF *);
 #endif
 #endif
-
-/* DECODE struct, there is one per instruction.  */
-
-typedef struct {
-  /* Using cgen_insn_type requires <cpu>-opc.h.  */
-  int /*enum cgen_insn_type*/ insn_type;
-  const struct cgen_insn *opcode;
-  EXTRACT_FN *extract;
-#ifdef HAVE_PARALLEL_EXEC
-#ifdef __GNUC__
-  void *read;
-#else
-  int read;
-#endif
-#endif
-  SEMANTIC_FN *semantic;
-  SEMANTIC_FN *semantic_fast;
-#if WITH_SEM_SWITCH_FULL && defined (__GNUC__)
-  /* Set at runtime.  */
-  void *sem_full_lab;
-#endif
-#if WITH_SEM_SWITCH_FAST && defined (__GNUC__)
-  /* Set at runtime.  */
-  void *semantic_lab; /* FIXME: Rename to sem_fast_lab.  */
-#endif
-} DECODE;
 
 /* Scache data for each cpu.  */
 
@@ -199,18 +174,10 @@ do { \
 
 #define CIA_ADDR(cia) (cia)
 
-/* extract.c support */
-/* scache_unset is a cache entry that is never used.
-   It's raison d'etre is so BRANCH_VIA_CACHE doesn't have to test for
-   newval.cache == NULL.  */
-extern struct scache scache_unset;
-#define RECORD_IADDR(fld, val) \
-do { (fld) = (val); } while (0)
-
 /* semantics.c support */
 #define SEM_ARGBUF(sem_arg) (&(sem_arg) -> argbuf)
 #define SEM_INSN(sem_arg) shouldnt_be_used
-#define SEM_NEXT_PC(sc) ((sc) -> next)
+#define SEM_NEXT_PC(sc, len) ((sc) -> next)
 #define SEM_BRANCH_VIA_CACHE(sc, newval) (newval)
 #define SEM_BRANCH_VIA_ADDR(sc, newval) (newval)
 /* Return address a branch insn will branch to.
@@ -221,14 +188,11 @@ do { (fld) = (val); } while (0)
 
 #define CIA_ADDR(cia) (cia)
 
-/* extract.c support */
-#define RECORD_IADDR(fld, val) \
-do { (fld) = (val); } while (0)
-
 /* semantics.c support */
 #define SEM_ARGBUF(sem_arg) (sem_arg)
 #define SEM_INSN(sem_arg) (SEM_ARGBUF (sem_arg) -> insn)
-#define SEM_NEXT_PC(abuf) (abuf -> addr + abuf -> length)
+/* FIXME:wip */
+#define SEM_NEXT_PC(abuf, len) (abuf -> addr + abuf -> length)
 #define SEM_BRANCH_VIA_CACHE(abuf, newval) (newval)
 #define SEM_BRANCH_VIA_ADDR(abuf, newval) (newval)
 #define SEM_NEW_PC_ADDR(new_pc) (new_pc)
@@ -288,10 +252,28 @@ typedef struct cgen_state {
    The member's name must be `cgen_cpu'.  */
 
 typedef struct {
-  /* Simulator's execution cache.  */
-#if WITH_SCACHE
+  /* Simulator's execution cache.
+     Allocate space for this even if not used as some simulators may have
+     one machine variant that uses the scache and another that doesn't and
+     we don't want members in this struct to move about.  */
   CPU_SCACHE scache;
-#endif /* WITH_SCACHE */
+
+  /* Instruction descriptor table.  */
+  IDESC *idesc;
+#define CPU_IDESC(cpu) ((cpu)->cgen_cpu.idesc)
+
+  /* Whether the read,semantic entries have been initialized or not.
+     These are computed goto labels.  */
+  int idesc_read_init_p;
+#define CPU_IDESC_READ_INIT_P(cpu) ((cpu)->cgen_cpu.idesc_read_init_p)
+  int idesc_sem_init_p;
+#define CPU_IDESC_SEM_INIT_P(cpu) ((cpu)->cgen_cpu.idesc_sem_init_p)
+
+  /* Function to fetch the opcode table entry in the IDESC.  */
+  const CGEN_INSN * (*opcode) (SIM_CPU *, int);
+#define CPU_OPCODE(cpu) ((cpu)->cgen_cpu.opcode)
+  /* Return name of instruction numbered INUM.  */
+#define INSN_NAME(cpu, inum) CGEN_INSN_NAME ((* CPU_OPCODE (cpu)) ((cpu), (inum)))
 
   /* Allow slop in size calcs for case where multiple cpu types are supported
      and space for the specified cpu is malloc'd at run time.  */
@@ -301,10 +283,13 @@ typedef struct {
 /* Various utilities.  */
 
 /* Called after sim_post_argv_init to do any cgen initialization.  */
-void cgen_init (SIM_DESC);
+extern void cgen_init (SIM_DESC);
 
-void
-sim_disassemble_insn (SIM_CPU *, const struct cgen_insn *,
+/* Return the maximum number of extra bytes required for a sim_cpu struct.  */
+extern int cgen_cpu_max_extra_bytes (void);
+
+extern void
+sim_disassemble_insn (SIM_CPU *, const CGEN_INSN *,
 		      const struct argbuf *, PCADDR, char *);
 
 #endif /* CGEN_SIM_H */
