@@ -1,5 +1,11 @@
 2002-03-19  Chris Demetriou  <cgd@broadcom.com>
 
+	* cp1.c (FP_S_s, FP_D_s, FP_S_be, FP_D_be, FP_S_e, FP_D_e, FP_S_f)
+	(FP_D_f, FP_S_fb, FP_D_fb, FPINF_SINGLE, FPINF_DOUBLE): Remove
+	unused definitions.
+
+2002-03-19  Chris Demetriou  <cgd@broadcom.com>
+
 	* cp1.c: Fix many formatting issues.
 
 2002-03-19  Chris G. Demetriou  <cgd@broadcom.com>

@@ -50,31 +50,11 @@
  *      i = 63bits = integer
  */
 
-/* Extract sign-bit:  */
-#define FP_S_s(v)       (((v) & (((unsigned) 1) << 31)) ? 1 : 0)
-#define FP_D_s(v)       (((v) & (((uword64) 1) << 63)) ? 1 : 0)
-/* Extract biased exponent:  */
-#define FP_S_be(v)      (((v) >> 23) & 0xFF)
-#define FP_D_be(v)      (((v) >> 52) & 0x7FF)
-/* Extract unbiased Exponent:  */
-#define FP_S_e(v)       (FP_S_be (v) - 0x7F)
-#define FP_D_e(v)       (FP_D_be (v) - 0x3FF)
-/* Extract complete fraction field:  */
-#define FP_S_f(v)       ((v) & ~(((unsigned) 0x1FF) << 23))
-#define FP_D_f(v)       ((v) & ~(((uword64) 0xFFF) << 52))
-/* Extract numbered fraction bit:  */
-#define FP_S_fb(b, v)   (((v) & (1 << (23 - (b)))) ? 1 : 0)
-#define FP_D_fb(b, v)   (((v) & (1 << (52 - (b)))) ? 1 : 0)
-
 /* Explicit QNaN values used when value required:  */
 #define FPQNaN_SINGLE   (0x7FBFFFFF)
 #define FPQNaN_WORD     (0x7FFFFFFF)
 #define FPQNaN_DOUBLE   ((((uword64) 0x7FF7FFFF) << 32) | 0xFFFFFFFF)
 #define FPQNaN_LONG     ((((uword64) 0x7FFFFFFF) << 32) | 0xFFFFFFFF)
-
-/* Explicit Infinity values used when required:  */
-#define FPINF_SINGLE    (0x7F800000)
-#define FPINF_DOUBLE    ((((uword64) 0x7FF00000) << 32) | 0x00000000)
 
 static const char *fpu_format_name (FP_formats fmt);
 #ifdef DEBUG
