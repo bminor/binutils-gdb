@@ -1667,46 +1667,6 @@ v850_insert_operand (insn, operand, val, file, line)
      char *file;
      unsigned int line;
 {
-  if (operand->bits != 32)
-    {
-      long min, max;
-      offsetT test;
-
-      if ((operand->flags & V850_OPERAND_SIGNED) != 0)
-        {
-	  if (! warn_signed_overflows)
-	    max = (1 << operand->bits) - 1;
-	  else
-	    max = (1 << (operand->bits - 1)) - 1;
-	  
-          min = - (1 << (operand->bits - 1));
-        }
-      else
-        {
-          max = (1 << operand->bits) - 1;
-	  
-	  if (! warn_unsigned_overflows)
-	    min = - (1 << (operand->bits - 1));
-	  else
-	    min = 0;
-        }
-
-      test = val;
-
-      if (test < (offsetT) min || test > (offsetT) max)
-        {
-          const char * err =
-            "operand out of range (%s not between %ld and %ld)";
-          char buf[100];
-
-          sprint_value (buf, test);
-          if (file == (char *) NULL)
-            as_warn (err, buf, min, max);
-          else
-            as_warn_where (file, line, err, buf, min, max);
-        }
-    }
-
   if (operand->insert)
     {
       const char * message = NULL;
@@ -1721,7 +1681,48 @@ v850_insert_operand (insn, operand, val, file, line)
 	}
     }
   else
-    insn |= (((long) val & ((1 << operand->bits) - 1)) << operand->shift);
+    {
+      if (operand->bits != 32)
+	{
+	  long    min, max;
+	  offsetT test;
+
+	  if ((operand->flags & V850_OPERAND_SIGNED) != 0)
+	    {
+	      if (! warn_signed_overflows)
+		max = (1 << operand->bits) - 1;
+	      else
+		max = (1 << (operand->bits - 1)) - 1;
+	      
+	      min = - (1 << (operand->bits - 1));
+	    }
+	  else
+	    {
+	      max = (1 << operand->bits) - 1;
+	      
+	      if (! warn_unsigned_overflows)
+		min = - (1 << (operand->bits - 1));
+	      else
+		min = 0;
+	    }
+	  
+	  test = val;
+	  
+	  if (test < (offsetT) min || test > (offsetT) max)
+	    {
+	      const char * err = "operand out of range (%s not between %ld and %ld)";
+	      char         buf[100];
+	      
+	      sprint_value (buf, test);
+	      if (file == (char *) NULL)
+		as_warn (err, buf, min, max);
+	      else
+		as_warn_where (file, line, err, buf, min, max);
+	    }
+	}
+
+      insn |= (((long) val & ((1 << operand->bits) - 1)) << operand->shift);
+    }
   
   return insn;
 }
