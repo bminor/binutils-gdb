@@ -107,8 +107,7 @@ static const char *size_enums[] = {
 };
 
 /* Some MIPS boards don't support floating point while others only
-   support single-precision floating-point operations.  See also
-   FP_REGISTER_DOUBLE. */
+   support single-precision floating-point operations.  */
 
 enum mips_fpu_type
 {
@@ -137,7 +136,6 @@ struct gdbarch_tdep
   enum mips_fpu_type mips_fpu_type;
   int mips_last_arg_regnum;
   int mips_last_fp_arg_regnum;
-  int mips_fp_register_double;
   int default_mask_address_p;
   /* Is the target using 64-bit raw integer registers but only
      storing a left-aligned 32-bit value in each?  */
@@ -374,11 +372,6 @@ mips2_fp_compat (void)
 
   return 0;
 }
-
-/* Indicate that the ABI makes use of double-precision registers
-   provided by the FPU (rather than combining pairs of registers to
-   form double-precision values).  See also MIPS_FPU_TYPE.  */
-#define FP_REGISTER_DOUBLE (gdbarch_tdep (current_gdbarch)->mips_fp_register_double)
 
 /* The amount of space reserved on the stack for registers. This is
    different to MIPS_ABI_REGSIZE as it determines the alignment of
@@ -2646,10 +2639,10 @@ return_value_location (struct type *valtype,
       && ((MIPS_FPU_TYPE == MIPS_FPU_DOUBLE && (len == 4 || len == 8))
 	  || (MIPS_FPU_TYPE == MIPS_FPU_SINGLE && len == 4)))
     {
-      if (!FP_REGISTER_DOUBLE && len == 8)
+      if (mips_abi_regsize (current_gdbarch) < 8 && len == 8)
 	{
 	  /* We need to break a 64bit float in two 32 bit halves and
-	     spread them across a floating-point register pair. */
+	     spread them across a floating-point register pair.  */
 	  lo->buf_offset = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? 4 : 0;
 	  hi->buf_offset = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? 0 : 4;
 	  lo->reg_offset = ((TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
@@ -2857,7 +2850,8 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
          up before the check to see if there are any FP registers
          left.  Non MIPS_EABI targets also pass the FP in the integer
          registers so also round up normal registers.  */
-      if (!FP_REGISTER_DOUBLE && fp_register_arg_p (typecode, arg_type))
+      if (mips_abi_regsize (gdbarch) < 8
+	  && fp_register_arg_p (typecode, arg_type))
 	{
 	  if ((float_argreg & 1))
 	    float_argreg++;
@@ -2878,7 +2872,7 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
       if (fp_register_arg_p (typecode, arg_type)
 	  && float_argreg <= MIPS_LAST_FP_ARG_REGNUM)
 	{
-	  if (!FP_REGISTER_DOUBLE && len == 8)
+	  if (mips_abi_regsize (gdbarch) < 8 && len == 8)
 	    {
 	      int low_offset = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? 4 : 0;
 	      unsigned long regval;
@@ -3496,7 +3490,8 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
          up before the check to see if there are any FP registers
          left.  O32/O64 targets also pass the FP in the integer
          registers so also round up normal registers.  */
-      if (!FP_REGISTER_DOUBLE && fp_register_arg_p (typecode, arg_type))
+      if (mips_abi_regsize (gdbarch) < 8
+	  && fp_register_arg_p (typecode, arg_type))
 	{
 	  if ((float_argreg & 1))
 	    float_argreg++;
@@ -3515,7 +3510,7 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
       if (fp_register_arg_p (typecode, arg_type)
 	  && float_argreg <= MIPS_LAST_FP_ARG_REGNUM)
 	{
-	  if (!FP_REGISTER_DOUBLE && len == 8)
+	  if (mips_abi_regsize (gdbarch) < 8 && len == 8)
 	    {
 	      int low_offset = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? 4 : 0;
 	      unsigned long regval;
@@ -3562,7 +3557,7 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 		fprintf_unfiltered (gdb_stdlog, " - reg=%d val=%s",
 				    argreg, phex (regval, len));
 	      write_register (argreg, regval);
-	      argreg += FP_REGISTER_DOUBLE ? 1 : 2;
+	      argreg += (mips_abi_regsize (gdbarch) == 8) ? 1 : 2;
 	    }
 	  /* Reserve space for the FP register.  */
 	  stack_offset += align_up (len, mips_stack_argsize (gdbarch));
@@ -3948,7 +3943,8 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
          up before the check to see if there are any FP registers
          left.  O32/O64 targets also pass the FP in the integer
          registers so also round up normal registers.  */
-      if (!FP_REGISTER_DOUBLE && fp_register_arg_p (typecode, arg_type))
+      if (mips_abi_regsize (gdbarch) < 8
+	  && fp_register_arg_p (typecode, arg_type))
 	{
 	  if ((float_argreg & 1))
 	    float_argreg++;
@@ -3967,7 +3963,7 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
       if (fp_register_arg_p (typecode, arg_type)
 	  && float_argreg <= MIPS_LAST_FP_ARG_REGNUM)
 	{
-	  if (!FP_REGISTER_DOUBLE && len == 8)
+	  if (mips_abi_regsize (gdbarch) < 8 && len == 8)
 	    {
 	      int low_offset = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? 4 : 0;
 	      unsigned long regval;
@@ -4014,7 +4010,7 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 		fprintf_unfiltered (gdb_stdlog, " - reg=%d val=%s",
 				    argreg, phex (regval, len));
 	      write_register (argreg, regval);
-	      argreg += FP_REGISTER_DOUBLE ? 1 : 2;
+	      argreg += (mips_abi_regsize (gdbarch) == 8) ? 1 : 2;
 	    }
 	  /* Reserve space for the FP register.  */
 	  stack_offset += align_up (len, mips_stack_argsize (gdbarch));
@@ -5626,7 +5622,6 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     case MIPS_ABI_O32:
       set_gdbarch_push_dummy_call (gdbarch, mips_o32_push_dummy_call);
       set_gdbarch_return_value (gdbarch, mips_o32_return_value);
-      tdep->mips_fp_register_double = 0;
       tdep->mips_last_arg_regnum = A0_REGNUM + 4 - 1;
       tdep->mips_last_fp_arg_regnum = tdep->regnum->fp0 + 12 + 4 - 1;
       tdep->default_mask_address_p = 0;
@@ -5640,7 +5635,6 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 						 mips_o64_store_return_value);
       set_gdbarch_deprecated_extract_return_value (gdbarch,
 						   mips_o64_extract_return_value);
-      tdep->mips_fp_register_double = 1;
       tdep->mips_last_arg_regnum = A0_REGNUM + 4 - 1;
       tdep->mips_last_fp_arg_regnum = tdep->regnum->fp0 + 12 + 4 - 1;
       tdep->default_mask_address_p = 0;
@@ -5656,7 +5650,6 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 						 mips_eabi_store_return_value);
       set_gdbarch_deprecated_extract_return_value (gdbarch,
 						   mips_eabi_extract_return_value);
-      tdep->mips_fp_register_double = 0;
       tdep->mips_last_arg_regnum = A0_REGNUM + 8 - 1;
       tdep->mips_last_fp_arg_regnum = tdep->regnum->fp0 + 12 + 8 - 1;
       tdep->default_mask_address_p = 0;
@@ -5674,7 +5667,6 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 						 mips_eabi_store_return_value);
       set_gdbarch_deprecated_extract_return_value (gdbarch,
 						   mips_eabi_extract_return_value);
-      tdep->mips_fp_register_double = 1;
       tdep->mips_last_arg_regnum = A0_REGNUM + 8 - 1;
       tdep->mips_last_fp_arg_regnum = tdep->regnum->fp0 + 12 + 8 - 1;
       tdep->default_mask_address_p = 0;
@@ -5689,7 +5681,6 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     case MIPS_ABI_N32:
       set_gdbarch_push_dummy_call (gdbarch, mips_n32n64_push_dummy_call);
       set_gdbarch_return_value (gdbarch, mips_n32n64_return_value);
-      tdep->mips_fp_register_double = 1;
       tdep->mips_last_arg_regnum = A0_REGNUM + 8 - 1;
       tdep->mips_last_fp_arg_regnum = tdep->regnum->fp0 + 12 + 8 - 1;
       tdep->default_mask_address_p = 0;
@@ -5700,7 +5691,6 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     case MIPS_ABI_N64:
       set_gdbarch_push_dummy_call (gdbarch, mips_n32n64_push_dummy_call);
       set_gdbarch_return_value (gdbarch, mips_n32n64_return_value);
-      tdep->mips_fp_register_double = 1;
       tdep->mips_last_arg_regnum = A0_REGNUM + 8 - 1;
       tdep->mips_last_fp_arg_regnum = tdep->regnum->fp0 + 12 + 8 - 1;
       tdep->default_mask_address_p = 0;
@@ -5905,9 +5895,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 			  tdep->default_mask_address_p);
     }
   fprintf_unfiltered (file,
-		      "mips_dump_tdep: FP_REGISTER_DOUBLE = %d\n",
-		      FP_REGISTER_DOUBLE);
-  fprintf_unfiltered (file,
 		      "mips_dump_tdep: MIPS_DEFAULT_FPU_TYPE = %d (%s)\n",
 		      MIPS_DEFAULT_FPU_TYPE,
 		      (MIPS_DEFAULT_FPU_TYPE == MIPS_FPU_NONE ? "none"
@@ -5922,9 +5909,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 		       : MIPS_FPU_TYPE == MIPS_FPU_SINGLE ? "single"
 		       : MIPS_FPU_TYPE == MIPS_FPU_DOUBLE ? "double"
 		       : "???"));
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: FP_REGISTER_DOUBLE = %d\n",
-		      FP_REGISTER_DOUBLE);
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: mips_stack_argsize() = %d\n",
 		      mips_stack_argsize (current_gdbarch));

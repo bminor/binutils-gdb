@@ -1,3 +1,12 @@
+2004-04-29  Andrew Cagney  <cagney@redhat.com>
+
+	* mips-tdep.c (struct gdbarch_tdep): Delete
+	mips_fp_register_double.
+	(FP_REGISTER_DOUBLE): Delete macro, replace with test for
+	mips_abi_regsize.
+	(mips_gdbarch_init): Do not set mips_fp_register_double.
+	(mips_dump_tdep): Do not print FP_REGISTER_DOUBLE.
+
 2004-04-29  Joel Brobecker  <brobecker@gnat.com>
 
 	Committed by Andrew Cagney.
