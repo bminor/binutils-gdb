@@ -205,7 +205,7 @@ AC_ARG_ENABLE(sim-smp,
 esac
 if test x"$silent" != x"yes" && test x"$sim_smp" != x""; then
   echo "Setting smp flags = $sim_smp" 6>&1
-fi],[sim_smp="-DWITH_SMP=0"
+fi],[sim_smp="-DWITH_SMP=5"
 if test x"$silent" != x"yes"; then
   echo "Setting smp flags = $sim_smp" 6>&1
 fi])dnl
@@ -216,7 +216,10 @@ AC_ARG_ENABLE(sim-xor-endian,
   yes)	sim_xor_endian="-DWITH_XOR_ENDIAN=8";;
   no)	sim_xor_endian="-DWITH_XOR_ENDIAN=0";;
   *)	sim_xor_endian="-DWITH_XOR_ENDIAN=$enableval";;
-esac],[sim_xor_endian=""])dnl
+esac
+if test x"$silent" != x"yes" && test x"$sim_xor_endian" != x""; then
+  echo "Setting xor-endian flag = $sim_xor_endian" 6>&1
+fi],[sim_xor_endian=""])dnl
 
 AC_ARG_ENABLE(sim-bitsize,
 [  --enable-sim-bitsize=n		Specify target bitsize (32 or 64).],

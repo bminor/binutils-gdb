@@ -23,11 +23,15 @@ Do-first:
 
 Things-to-keep:
 
+.gdbinit
+BUGS
 COPYING
 COPYING.LIB
 ChangeLog
+INSTALL
 Makefile.in
-README.psim
+README
+RUN
 PROBLEMS
 basics.h
 bits.c
