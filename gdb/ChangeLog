@@ -1,3 +1,9 @@
+2002-03-21  Daniel Jacobowitz  <drow@mvista.com>
+
+	 * dbxread.c (process_one_symbol): Extend the first N_SLINE
+	 in a function to cover the entire beginning of the function
+	 as well if it does not already.
+
 2002-03-21  Tom Rix  <trix@redhat.com>
 
 	* rs6000-nat.c (rs6000_ptrace32): Renamed from ptrace32.

@@ -2707,6 +2707,15 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
      used to relocate these symbol types rather than SECTION_OFFSETS.  */
   static CORE_ADDR function_start_offset;
 
+  /* This holds the address of the start of a function, without the system
+     peculiarities of function_start_offset.  */
+  static CORE_ADDR last_function_start;
+
+  /* If this is nonzero, we've seen an N_SLINE since the start of the current
+     function.  Initialized to nonzero to assure that last_function_start
+     is never used uninitialized.  */
+  static int sline_found_in_function = 1;
+
   /* If this is nonzero, we've seen a non-gcc N_OPT symbol for this source
      file.  Used to detect the SunPRO solaris compiler.  */
   static int n_opt_found;
@@ -2758,9 +2767,13 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 	  break;
 	}
 
+      sline_found_in_function = 0;
+
       /* Relocate for dynamic loading */
       valu += ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
       valu = SMASH_TEXT_ADDRESS (valu);
+      last_function_start = valu;
+
       goto define_a_symbol;
 
     case N_LBRAC:
@@ -2953,7 +2966,15 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 #ifdef SUN_FIXED_LBRAC_BUG
       last_pc_address = valu;	/* Save for SunOS bug circumcision */
 #endif
-      record_line (current_subfile, desc, valu);
+      /* If this is the first SLINE note in the function, record it at
+	 the start of the function instead of at the listed location.  */
+      if (within_function && sline_found_in_function == 0)
+	{
+	  record_line (current_subfile, desc, last_function_start);
+	  sline_found_in_function = 1;
+	}
+      else
+	record_line (current_subfile, desc, valu);
       break;
 
     case N_BCOMM:
