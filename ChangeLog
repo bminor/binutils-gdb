@@ -1,3 +1,12 @@
+Tue Jul 14 13:22:18 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ltmain.sh: Add some hacks to make SunOS --enable-shared work
+	when using GNU ld.
+
+Fri Jul 10 13:18:23 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ltmain.sh: Correct install when using a different shell.
+
 Tue Jul  7 15:24:38 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ltconfig, ltmain.sh: Update to libtool 1.2b.
