@@ -1,5 +1,10 @@
 2003-04-14  Elena Zannoni  <ezannoni@redhat.com>
 
+	* gdb.threads/schedlock.c: Change type of thread function argument
+	to long, to avoid warnings on 64-bit platforms.
+
+2003-04-14  Elena Zannoni  <ezannoni@redhat.com>
+
         * gdb.base/attach.exp: Add new message from ptrace in case of
         attaching to nonexistent process.
 	
