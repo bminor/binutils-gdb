@@ -185,35 +185,38 @@ main(argc, argv)
      */
 getnfile()
 {
-    FILE	*nfile;
-    int		valcmp();
+  bfd	*abfd;
+  int		valcmp();
 
-    nfile = fopen( a_outname ,"r");
-    if (nfile == NULL) {
-	perror( a_outname );
-	done();
-    }
-    fread(&xbuf, 1, sizeof(xbuf), nfile);
-    if (N_BADMAG(xbuf)) {
-	fprintf(stderr, "%s: %s: bad format\n", whoami , a_outname );
-	done();
-    }
-    getstrtab(nfile);
-    getsymtab(nfile);
-    gettextspace( nfile );
-    qsort(nl, nname, sizeof(nltype), valcmp);
-    fclose(nfile);
+  abfd = bfd_openr (a_outname, NULL);
+
+  if (abfd == NULL) {
+    perror (a_outname);
+    done();
+  }
+
+  if (!bfd_check_format (abfd, bfd_object)) {
+    fprintf (stderr, "%s: %s: bad format\n", whoami, a_outname);
+    done();
+  }
+
+/*  getstrtab(nfile); */
+  getsymtab(abfd);
+  gettextspace( abfd );
+  qsort(nl, nname, sizeof(nltype), valcmp);
+
 #   ifdef DEBUG
-	if ( debug & AOUTDEBUG ) {
-	    register int j;
-
-	    for (j = 0; j < nname; j++){
-		printf("[getnfile] 0X%08x\t%s\n", nl[j].value, nl[j].name);
-	    }
-	}
+  if ( debug & AOUTDEBUG ) {
+    register int j;
+    
+    for (j = 0; j < nname; j++){
+      printf("[getnfile] 0X%08x\t%s\n", nl[j].value, nl[j].name);
+    }
+  }
 #   endif DEBUG
 }
 
+#if 0
 getstrtab(nfile)
     FILE	*nfile;
 {
@@ -236,30 +239,33 @@ getstrtab(nfile)
 	done();
     }
 }
-
+#endif	/* 0 */
     /*
      * Read in symbol table
      */
-getsymtab(nfile)
-    FILE	*nfile;
+getsymtab(abfd)
+bfd	*abfd;
 {
     register long	i;
     int			askfor;
-    struct nlist	nbuf;
+    int			nosyms;
+    asymbol		**syms;
+    i = get_symtab_upper_bound (abfd);	/* This will probably give us more
+					 * than we need, but that's ok.
+					 */
+    syms = malloc (i);
+    nosyms = bfd_canonicalize_symtab (abfd, syms);
 
-    /* pass1 - count symbols */
-    fseek(nfile, (long)N_SYMOFF(xbuf), 0);
     nname = 0;
-    for (i = xbuf.a_syms; i > 0; i -= sizeof(struct nlist)) {
-	fread(&nbuf, sizeof(nbuf), 1, nfile);
-	if ( ! funcsymbol( &nbuf ) ) {
-	    continue;
-	}
-	nname++;
+    for (i = 0; i < nosyms; i++) {
+      if (!funcsymbol (syms[i]))
+	continue;
+      nname++;
     }
+
     if (nname == 0) {
-	fprintf(stderr, "%s: %s: no symbols\n", whoami , a_outname );
-	done();
+      fprintf(stderr, "%s: %s: no symbols\n", whoami , a_outname );
+      done();
     }
     askfor = nname + 1;
     nl = (nltype *) calloc( askfor , sizeof(nltype) );
@@ -270,66 +276,65 @@ getsymtab(nfile)
     }
 
     /* pass2 - read symbols */
-    fseek(nfile, (long)N_SYMOFF(xbuf), 0);
     npe = nl;
     nname = 0;
-    for (i = xbuf.a_syms; i > 0; i -= sizeof(struct nlist)) {
-	fread(&nbuf, sizeof(nbuf), 1, nfile);
-	if ( ! funcsymbol( &nbuf ) ) {
+    for (i = 0; i < nosyms; i++) {
+      if (!funcsymbol (syms[i])) {
 #	    ifdef DEBUG
-		if ( debug & AOUTDEBUG ) {
-		    printf( "[getsymtab] rejecting: 0x%x %s\n" ,
-			    nbuf.n_type , strtab + nbuf.n_un.n_strx );
-		}
-#	    endif DEBUG
-	    continue;
+	if ( debug & AOUTDEBUG ) {
+	  printf( "[getsymtab] rejecting: 0x%x %s\n" ,
+		 syms[i]->value, syms[i]->name);
 	}
-	npe->value = nbuf.n_value;
-	npe->name = strtab+nbuf.n_un.n_strx;
+#	    endif DEBUG
+	continue;
+      }
+      npe->value = syms[i]->value + syms[i]->section->vma;
+      npe->name = syms[i]->name;
 #	ifdef DEBUG
-	    if ( debug & AOUTDEBUG ) {
-		printf( "[getsymtab] %d %s 0x%08x\n" ,
-			nname , npe -> name , npe -> value );
-	    }
+      if ( debug & AOUTDEBUG ) {
+	printf( "[getsymtab] %d %s 0x%08x\n" ,
+	       nname , npe -> name , npe -> value );
+      }
 #	endif DEBUG
-	npe++;
-	nname++;
+      npe++;
+      nname++;
     }
     npe->value = -1;
 }
 
-    /*
-     *	read in the text space of an a.out file
-     */
-gettextspace( nfile )
-    FILE	*nfile;
+/*
+ *	read in the text space of an a.out file
+ */
+gettextspace( abfd )
+     bfd	*abfd;
 {
-    char	*malloc();
+  asection	*texsec;
     
-    if ( cflag == 0 ) {
-	return;
-    }
-    textspace = (u_char *) malloc( xbuf.a_text );
-    if ( textspace == 0 ) {
-	fprintf( stderr , "%s: ran out room for %d bytes of text space:  " ,
-			whoami , xbuf.a_text );
-	fprintf( stderr , "can't do -c\n" );
-	return;
-    }
-    (void) fseek( nfile , N_TXTOFF( xbuf ) , 0 );
-    if ( fread( textspace , 1 , xbuf.a_text , nfile ) != xbuf.a_text ) {
-	fprintf( stderr , "%s: couldn't read text space:  " , whoami );
-	fprintf( stderr , "can't do -c\n" );
-	free( textspace );
-	textspace = 0;
-	return;
-    }
+  if ( cflag == 0 ) {
+    return;
+  }
+
+  texsec = bfd_get_section_by_name (abfd, ".text");
+  if (texsec == NULL) {
+    return;
+  }
+
+  textspace = (u_char *) malloc( texsec->size );
+
+  if ( textspace == 0 ) {
+    fprintf( stderr , "%s: ran out room for %d bytes of text space:  " ,
+	    whoami , texsec->size);
+    fprintf( stderr , "can't do -c\n" );
+    return;
+  }
+  bfd_get_section_contents (abfd, texsec, textspace, texsec->filepos, 
+			    texsec->size);
 }
-    /*
-     *	information from a gmon.out file is in two parts:
-     *	an array of sampling hits within pc ranges,
-     *	and the arcs.
-     */
+/*
+ *	information from a gmon.out file is in two parts:
+ *	an array of sampling hits within pc ranges,
+ *	and the arcs.
+ */
 getpfile(filename)
     char *filename;
 {
@@ -656,32 +661,39 @@ alignentries()
 }
 
 bool
-funcsymbol( nlistp )
-    struct nlist	*nlistp;
+funcsymbol( symp )
+     asymbol *symp;
 {
-    extern char	*strtab;	/* string table from a.out */
-    extern int	aflag;		/* if static functions aren't desired */
-    char	*name;
+  extern char	*strtab;	/* string table from a.out */
+  extern int	aflag;		/* if static functions aren't desired */
+  char	*name;
+  
+  /*
+   *	must be a text symbol,
+   *	and static text symbols don't qualify if aflag set.
+   */
+  
+  if (!symp->section)
+    return FALSE;
 
-	/*
-	 *	must be a text symbol,
-	 *	and static text symbols don't qualify if aflag set.
-	 */
-    if ( ! (  ( nlistp -> n_type == ( N_TEXT | N_EXT ) )
-	   || ( ( nlistp -> n_type == N_TEXT ) && ( aflag == 0 ) ) ) ) {
-	return FALSE;
+  if (!aflag && (symp->flags&BSF_LOCAL)) {
+#ifdef	DEBUG
+    fprintf (stderr, "%s(%d):  %s:  not a function\n", __FILE__, __LINE__, symp->name);
+#endif
+    return FALSE;
+  }
+
+  /*
+   *	can't have any `funny' characters in name,
+   *	where `funny' includes	`.', .o file names
+   *			and	`$', pascal labels.
+   */
+  for (name = symp->name; *name; name++) {
+    if ( *name == '.' || *name == '$' ) {
+      return FALSE;
     }
-	/*
-	 *	can't have any `funny' characters in name,
-	 *	where `funny' includes	`.', .o file names
-	 *			and	`$', pascal labels.
-	 */
-    for ( name = strtab + nlistp -> n_un.n_strx ; *name ; name += 1 ) {
-	if ( *name == '.' || *name == '$' ) {
-	    return FALSE;
-	}
-    }
-    return TRUE;
+  }
+  return TRUE;
 }
 
 done()

@@ -19,10 +19,11 @@
  *	@(#)gprof.h	5.9 (Berkeley) 6/1/90
  */
 
+#include <stdio.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <a.out.h>
-#include <stdio.h>
+#include "bfd.h"
 #include "gmon.h"
 
 #ifdef	MACHINE_H
@@ -164,7 +165,6 @@ double	scale;			/* scale factor converting samples to pc
 				   values: each sample covers scale bytes */
 char	*strtab;		/* string table in core */
 off_t	ssiz;			/* size of the string table */
-struct	exec xbuf;		/* exec header of a.out */
 unsigned char	*textspace;		/* text space of a.out in core */
 
     /*
