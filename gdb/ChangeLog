@@ -1,3 +1,9 @@
+Wed Nov  1 12:58:14 1995  Fred Fish  <fnf@cygnus.com>
+
+	* symtab.c (in_prologue): Document func_start and when it is zero
+	don't call SKIP_PROLOGUE (which typically leads unconditionally to
+	an error when we try to access a prologue at address 0).
+
 Tue Oct 31 13:01:15 1995  Fred Fish  <fnf@cygnus.com>
 
 	* elfread.c: Include elf-bfd.h rather than libelf.h.
