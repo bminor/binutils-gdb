@@ -1,3 +1,8 @@
+Thu Aug 24 18:50:19 1995  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Makefile.in (gasp.new): Depend upon ../libiberty/libiberty.a.
+	Just link against libiberty, not against $(LIBS).
+
 Wed Aug 23 15:18:20 1995  Ian Lance Taylor  (ian@cygnus.com)
 
 	* sb.c (sb_build): Undefine abort before calling it, since gasp
