@@ -1,5 +1,12 @@
 2004-04-01  Jim Blandy  <jimb@redhat.com>
 
+	* rs6000-tdep.c (rs6000_dwarf2_stab_reg_to_regnum): New, unified
+	function for register numbers on all the rs6000-derived targets.
+	(rs6000_gdbarch_init): Don't register a separate
+	gdbarch_dwarf2_reg_to_regnum function for the E500.  Use
+	rs6000_dwarf2_stab_reg_to_regnum for both Dwarf 2 and stabs on all
+	variants.
+
 	* i386-tdep.c: Add FIXME regarding STABS vs. Dwarf 2 register
 	numbering.
 
