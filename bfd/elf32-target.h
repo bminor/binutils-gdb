@@ -51,6 +51,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define bfd_elf32_bfd_make_debug_symbol \
   ((asymbol *(*) PARAMS ((bfd *, void *, unsigned long))) bfd_nullvoidptr)
 
+#ifndef elf_info_to_howto_rel
+#define elf_info_to_howto_rel 0
+#endif
+
+#ifndef ELF_MAXPAGESIZE
+#define ELF_MAXPAGESIZE 1
+#endif
+
 static CONST struct elf_backend_data elf32_bed =
 {
 #ifdef USE_REL
@@ -61,11 +69,8 @@ static CONST struct elf_backend_data elf32_bed =
   0,				/* elf_64_p */
   ELF_ARCH,			/* arch */
   elf_info_to_howto,		/* elf_info_to_howto */
-#ifdef elf_info_to_howto_rel
   elf_info_to_howto_rel,	/* elf_info_to_howto_rel */
-#else
-  0,				/* elf_info_to_howto_rel */
-#endif
+  ELF_MAXPAGESIZE,		/* maxpagesize */
   bfd_elf32__write_relocs,	/* write_relocs */
 };
 
