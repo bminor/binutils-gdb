@@ -15,12 +15,12 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 # Please email any bugs, comments, and/or additions to this file to:
-# DejaGnu@cygnus.com
+# bug-dejagnu@prep.ai.mit.edu
 
 # This file was written by Rob Savoye. (rob@cygnus.com)
 
 #
-# nm_test -- run nm and test the result.
+# util_test -- run a utility and test the result.
 #             Takes four parameters.
 #             Parameters:
 #                First one is the command line arguments
@@ -33,27 +33,26 @@
 #                0 if the test passes,
 #               -1 if there was an internal error.
 #
-proc nm_test { args } {
+proc util_test { args } {
     global verbose
-    global comp_output
-    global NM
-    global NMFLAGS
 
     # get the parameters
-    set cmd_arg [lindex $args 0]
-    set file    [lindex $args 1]
-    set pattern [lindex $args 2]
+    set cmd	[lindex $args 0]
+    verbose 	"Utility to execute is $cmd" 2
+    set cmd_arg [lindex $args 1]
+    verbose 	"Command line arguments are $cmd_arg" 2
+    set file    [lindex $args 2]
+    verbose 	"The file name to use is $file" 2
+    set pattern [lindex $args 3]
+    verbose	"The pattern to match is \"$pattern\"" 2
 
-    if [llength $args]==4 then {
-	set message [lindex $args 3]
+    if [llength $args]==5 then {
+	set message [lindex $args 4]
     } else {
 	set message "$arg option"
     }
 
-    if $verbose>2 then {
-	send_user "Looking to match \"$pattern\"\n"
-	send_user "Message is \"$message\"\n"
-    }
+    verbose "Looking to match \"$pattern\"\nMessage is \"$message\"" 1
 
     if ![file exists $file] then {
         error "$file doesn't exist"
@@ -61,87 +60,44 @@ proc nm_test { args } {
     }
 
 #
-# run nm and analyze the results
+# run the utility to be tested and analyze the results
 #
-    set nm_flags_orig $NMFLAGS
-    append NMFLAGS " $cmd_arg"
-    nm_start $file
-
-    if [string match "" $comp_output] then {
-	fail "$message"
-	warning "Got no output."
-	set NMFLAGS $nm_flags_orig
-	return 1
-    }
+    set comp_output [util_start $cmd $cmd_arg $file]
 
     if [regexp "$pattern" $comp_output] then {
 	pass "$message"
-	set NMFLAGS $nm_flags_orig
 	return 0
     }
 
+    if [string match "" $comp_output] then {
+	warning "Got no output."
+	return 1
+    }
+
     fail "$message"
-    set NMFLAGS $nm_flags_orig
     return 1
 }
 
-# since nm is purely host based, all the init module use these
-# same procedures
+# util_start -- run the utility.
+#               return NULL or the output
+#
+proc util_start { args } {
+    set cmd	[lindex $args 0]
+    set cmd_arg [lindex $args 1]
+    set file    [lindex $args 2]
 
-#
-# default_nm_version -- extract and print the version number of nm
-#
-proc default_nm_version {} {
-    global NM
-    set tmp [exec $NM +version]
-    regexp " \[0-9\.\]+" $tmp version
-    clone_output "[which $NM] version $version\n"
-    unset tmp
-    unset version
-}
-
-#
-# default_nm_load -- loads the program. For nm, we just execute it
-#
-proc default_nm_load { arg } {
-    global verbose
-    global exec_output
-    if ![file exists $args] then {
-        error $args does not exist"
-        return -1
+    if {[which $cmd] == 0} then {
+        error "Can't find $cmd"
+	return ""
     }
-    set status [catch "exec $arg" exec_output]
-    if $verbose>1 then {
-	send_user "Executed $arg\n"
-    }
-    return $status
-}
 
-#
-# default_nm_exit -- just a stub for nm
-#
-proc default_nm_exit {} {
-}
-
-#
-# nm_start -- start GDB running
-#
-proc default_nm_start { arg } {
-    global verbose
-    global NM
-    global NMFLAGS
-    global comp_output
-
-    if $verbose>1 then {
-	send_user "Spawning \"$NM $NMFLAGS $arg\"\n"
-    }
-    catch "exec $NM $NMFLAGS $arg" comp_output
-    if ![string match "" $comp_output] then {
+    verbose "Spawning \"$cmd $cmd_arg $file\"" 1
+    catch "exec $cmd $cmd_arg $file" comp_output
+    if ![string match "" $comp_output] then {	
         send_log "$comp_output\n"
-        if $verbose>3 then {
-            send_user "$comp_output\n"
-        }
+        verbose "$comp_output" 1
     }
+    return $comp_output
 }
 
 #
