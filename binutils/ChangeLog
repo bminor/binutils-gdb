@@ -1,3 +1,8 @@
+2001-07-05  H.J. Lu  <hjl@gnu.org>
+
+	* objcopy.c (filter_symbols): Don't turn undefined symbols
+	into local.
+
 2001-07-03  H.J. Lu <hjl@gnu.org>
 
 	* doc/Makefile.am (addr2line.1): Use addr2line.pod instead of

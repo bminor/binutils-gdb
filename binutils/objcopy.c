@@ -723,6 +723,7 @@ filter_symbols (abfd, obfd, osyms, isyms, symcount)
       flagword flags = sym->flags;
       const char *name = bfd_asymbol_name (sym);
       int keep;
+      boolean undefined;
 
       if (redefine_sym_list)
 	{
@@ -755,10 +756,12 @@ filter_symbols (abfd, obfd, osyms, isyms, symcount)
 	    }
 	}
 
+      undefined = bfd_is_und_section (bfd_get_section (sym));
+
       if (remove_leading_char
 	  && ((flags & BSF_GLOBAL) != 0
 	      || (flags & BSF_WEAK) != 0
-	      || bfd_is_und_section (bfd_get_section (sym))
+	      || undefined
 	      || bfd_is_com_section (bfd_get_section (sym)))
 	  && name[0] == bfd_get_symbol_leading_char (abfd))
 	name = bfd_asymbol_name (sym) = name + 1;
@@ -781,7 +784,7 @@ filter_symbols (abfd, obfd, osyms, isyms, symcount)
 	keep = 1;
       else if ((flags & BSF_GLOBAL) != 0	/* Global symbol.  */
 	       || (flags & BSF_WEAK) != 0
-	       || bfd_is_und_section (bfd_get_section (sym))
+	       || undefined
 	       || bfd_is_com_section (bfd_get_section (sym)))
 	keep = strip_symbols != STRIP_UNNEEDED;
       else if ((flags & BSF_DEBUGGING) != 0)	/* Debugging symbol.  */
@@ -811,7 +814,7 @@ filter_symbols (abfd, obfd, osyms, isyms, symcount)
 	  sym->flags &=~ BSF_GLOBAL;
 	  sym->flags |= BSF_WEAK;
 	}
-      if (keep && (flags & (BSF_GLOBAL | BSF_WEAK))
+      if (keep && !undefined && (flags & (BSF_GLOBAL | BSF_WEAK))
 	  && (is_specified_symbol (name, localize_specific_list)
 	      || (keepglobal_specific_list != NULL
 		  && ! is_specified_symbol (name, keepglobal_specific_list))))
