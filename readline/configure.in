@@ -18,6 +18,10 @@ m88kbcs | sysv*)
 	host_makefile_frag=config/mh-sysv
 	;;
 
+svr4)
+	host_makefile_frag=config/mh-svr4
+	;;
+
 aix*)
 	host_makefile_frag=config/mh-sysv
 	case "${host_cpu}" in
