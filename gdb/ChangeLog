@@ -1,5 +1,14 @@
 2004-01-17  Andrew Cagney  <cagney@redhat.com>
 
+	* mips-tdep.c (mips_write_pc): New function.
+	(mips_gdbarch_init): Set "write_pc" to "mips_write_pc".
+	(mips_read_pc): Use mips_regnum instead of PC_REGNUM.
+	(mips_find_saved_regs, mips_software_single_step: Ditto.
+	(mips_frame_saved_pc, mips_frame_saved_pc): Ditto.
+	mips_init_extra_frame_info, mips_pop_frame): Ditto.
+
+2004-01-17  Andrew Cagney  <cagney@redhat.com>
+
 	* mips-tdep.c: Re-indent.  Group functions by ABI.
 
 2004-01-17  Andrew Cagney  <cagney@redhat.com>

@@ -807,7 +807,13 @@ pc_is_mips16 (bfd_vma memaddr)
 static CORE_ADDR
 mips_read_pc (ptid_t ptid)
 {
-  return read_signed_register_pid (PC_REGNUM, ptid);
+  return read_signed_register_pid (mips_regnum (current_gdbarch)->pc, ptid);
+}
+
+static void
+mips_write_pc (CORE_ADDR pc, ptid_t ptid)
+{
+  write_register_pid (mips_regnum (current_gdbarch)->pc, pc, ptid);
 }
 
 /* This returns the PC of the first inst after the prologue.  If we can't
@@ -1478,7 +1484,7 @@ mips_find_saved_regs (struct frame_info *fci)
 			  reg_position);
 	}
 
-      set_reg_offset (saved_regs, PC_REGNUM,
+      set_reg_offset (saved_regs, mips_regnum (current_gdbarch)->pc,
 		      get_frame_base (fci) + SIGFRAME_PC_OFF);
       /* SP_REGNUM, contains the value and not the address.  */
       set_reg_offset (saved_regs, SP_REGNUM, get_frame_base (fci));
@@ -1636,7 +1642,8 @@ mips_find_saved_regs (struct frame_info *fci)
 	  reg_position -= mips_saved_regsize (tdep);
 	}
 
-    set_reg_offset (saved_regs, PC_REGNUM, saved_regs[RA_REGNUM]);
+    set_reg_offset (saved_regs, mips_regnum (current_gdbarch)->pc,
+		    saved_regs[RA_REGNUM]);
   }
 
   /* SP_REGNUM, contains the value and not the address.  */
@@ -1710,7 +1717,7 @@ mips_software_single_step (enum target_signal sig, int insert_breakpoints_p)
 
   if (insert_breakpoints_p)
     {
-      pc = read_register (PC_REGNUM);
+      pc = read_register (mips_regnum (current_gdbarch)->pc);
       next_pc = mips_next_pc (pc);
 
       target_insert_breakpoint (next_pc, break_mem);
@@ -1742,7 +1749,7 @@ mips_frame_saved_pc (struct frame_info *frame)
   if (DEPRECATED_PC_IN_CALL_DUMMY (get_frame_pc (frame), 0, 0))
     {
       /* Always unwind the cooked PC register value.  */
-      saved_pc = frame_unwind_register_signed (frame, NUM_REGS + PC_REGNUM);
+      saved_pc = frame_unwind_register_signed (frame, NUM_REGS + mips_regnum (current_gdbarch)->pc);
     }
   else
     {
@@ -1756,7 +1763,8 @@ mips_frame_saved_pc (struct frame_info *frame)
 	{
 	  /* We have to get the saved pc from the sigcontext if it is
 	     a signal handler frame.  */
-	  int pcreg = (get_frame_type (frame) == SIGTRAMP_FRAME ? PC_REGNUM
+	  int pcreg = (get_frame_type (frame) == SIGTRAMP_FRAME
+		       ? mips_regnum (current_gdbarch)->pc
 		       : proc_desc ? PROC_PC_REG (proc_desc) : RA_REGNUM);
 	  saved_pc = read_next_frame_reg (frame, NUM_REGS + pcreg);
 	}
@@ -2590,7 +2598,7 @@ mips_init_extra_frame_info (int fromleaf, struct frame_info *fci)
 	         may be found.  */
 	      set_reg_offset (temp_saved_regs, SP_REGNUM,
 			      get_frame_base (fci));
-	      set_reg_offset (temp_saved_regs, PC_REGNUM,
+	      set_reg_offset (temp_saved_regs, mips_regnum (current_gdbarch)->pc,
 			      temp_saved_regs[RA_REGNUM]);
 	      memcpy (deprecated_get_frame_saved_regs (fci), temp_saved_regs,
 		      SIZEOF_FRAME_SAVED_REGS);
@@ -4311,10 +4319,11 @@ mips_pop_frame (void)
     }
 
   proc_desc = get_frame_extra_info (frame)->proc_desc;
-  write_register (PC_REGNUM, DEPRECATED_FRAME_SAVED_PC (frame));
+  write_register (mips_regnum (current_gdbarch)->pc,
+		  DEPRECATED_FRAME_SAVED_PC (frame));
   mips_find_saved_regs (frame);
   for (regnum = 0; regnum < NUM_REGS; regnum++)
-    if (regnum != SP_REGNUM && regnum != PC_REGNUM
+    if (regnum != SP_REGNUM && regnum != mips_regnum (current_gdbarch)->pc
 	&& deprecated_get_frame_saved_regs (frame)[regnum])
       {
 	/* Floating point registers must not be sign extended, in case
@@ -6014,7 +6023,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      as 32-bit programs by default.  */
 
   set_gdbarch_read_pc (gdbarch, mips_read_pc);
-  set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
+  set_gdbarch_write_pc (gdbarch, mips_write_pc);
   set_gdbarch_deprecated_target_read_fp (gdbarch, mips_read_sp);	/* Draft FRAME base.  */
   set_gdbarch_read_sp (gdbarch, mips_read_sp);
 
