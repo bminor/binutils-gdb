@@ -46,6 +46,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* start-sanitize-tic80 */
 #define ARCH_tic80
 /* end-sanitize-tic80 */
+/* start-sanitize-sky */
+#define ARCH_txvu
+/* end-sanitize-sky */
 #define ARCH_v850
 #define ARCH_w65
 #define ARCH_z8k
@@ -202,6 +205,13 @@ disassembler (abfd)
       break;
 #endif
 /* end-sanitize-tic80 */
+/* start-sanitize-sky */
+#ifdef ARCH_txvu_foo
+    case bfd_arch_txvu:
+      disassemble = print_insn_txvu;
+      break;
+#endif
+/* end-sanitize-sky */
 #ifdef ARCH_v850
     case bfd_arch_v850:
       disassemble = print_insn_v850;
@@ -226,33 +236,3 @@ disassembler (abfd)
   return disassemble;
 }
 
-/* Notify the disassembler of the address associated with the
-   instruction being decoded: */
-
-void
-disasm_symaddr (sym, info)
-     asymbol *sym;
-     disassemble_info *info;
-{
-#ifdef ARCH_arm
-  /* decide if symbol is thumb or not */
-  if (info->flavour == bfd_target_coff_flavour)
-    {
-/* This is not ideal including these here, since we may not be
-   building a COFF targetted world at all... so coffsymbol() may not
-   be available. (TO BE SORTED OUT) */
-#include "coff/internal.h"
-#include "libcoff.h"
-      coff_symbol_type *cs = coffsymbol (sym);
-      if (   cs->native->u.syment.n_sclass == C_THUMBEXT
-          || cs->native->u.syment.n_sclass == C_THUMBSTAT
-          || cs->native->u.syment.n_sclass == C_THUMBLABEL
-          || cs->native->u.syment.n_sclass == C_THUMBEXTFUNC
-          || cs->native->u.syment.n_sclass == C_THUMBSTATFUNC)
-       info->flags |= 0x1;
-      else
-       info->flags &= ~0x1;
-    }
-#endif
-  /* Do nothing for other architectures at the moment */
-}

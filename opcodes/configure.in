@@ -1,6 +1,13 @@
 dnl Process this file with autoconf to produce a configure script.
 dnl
 
+dnl Default to a non shared library.  This may be overridden by the
+dnl configure option --enable-shared.  The divert stuff is a hack
+dnl to set the variable before argument parsing is done.
+divert(AC_DIVERSION_INIT)
+enable_shared=no
+divert(-1)
+
 AC_PREREQ(2.5)
 AC_INIT(z8k-dis.c)
 
@@ -8,9 +15,11 @@ AC_CANONICAL_SYSTEM
 
 AM_INIT_AUTOMAKE(opcodes, 2.8.2)
 
-dnl Default to a non shared library.  This may be overridden by the
-dnl configure option --enable-shared.
-enable_shared=no
+dnl These must be called before AM_PROG_LIBTOOL, because it may want
+dnl to call AC_CHECK_PROG.
+AC_CHECK_TOOL(AR, ar)
+AC_CHECK_TOOL(RANLIB, ranlib, :)
+
 AM_PROG_LIBTOOL
 
 AC_ARG_ENABLE(targets,
@@ -47,8 +56,6 @@ AC_PROG_CC
 . ${srcdir}/../bfd/configure.host
 
 AC_SUBST(HDEFINES)
-AC_CHECK_TOOL(AR, ar)
-AC_CHECK_TOOL(RANLIB, ranlib, :)
 AM_PROG_INSTALL
 
 AC_CHECK_HEADERS(string.h strings.h stdlib.h)
@@ -130,13 +137,14 @@ if test x${all_targets} = xfalse ; then
 # start-sanitize-tic80
 	bfd_tic80_arch)		ta="$ta tic80-dis.lo tic80-opc.lo" ;;
 # end-sanitize-tic80
+# start-sanitize-sky
+	bfd_txvu_arch)		ta="$ta" ;;
+# end-sanitize-sky
 	bfd_v850_arch)		ta="$ta v850-opc.lo v850-dis.lo" ;;
 # start-sanitize-v850e
 	bfd_v850e_arch)		ta="$ta v850-opc.lo v850-dis.lo" ;;
+	bfd_v850ea_arch)	ta="$ta v850-opc.lo v850-dis.lo" ;;
 # end-sanitize-v850e
-# start-sanitize-v850eq
-	bfd_v850eq_arch)	ta="$ta v850-opc.lo v850-dis.lo" ;;
-# end-sanitize-v850eq
 	bfd_vax_arch)		;;
 	bfd_w65_arch)		ta="$ta w65-dis.lo" ;;
 	bfd_we32k_arch)		;;
