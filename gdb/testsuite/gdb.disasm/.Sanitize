@@ -1,6 +1,6 @@
-# .Sanitize for deja-gnu.
+# .Sanitize for devo/gdb/testsuite/gdb.disasm.
 
-# Each directory to survive it's way into a release will need a file
+# Each directory to survive its way into a release will need a file
 # like this one called "./.Sanitize".  All keyword lines must exist,
 # and must exist in the order specified by this file.  Each directory
 # in the tree will be processed, top down, in the following order.
@@ -24,12 +24,14 @@ Do-first:
 Things-to-keep:
 
 Makefile.in
+configure
 configure.in
 hppa.exp
 hppa.mt
 hppa.s
 
 Things-to-lose:
+
 sh3.exp
 sh3.mt
 sh3.s

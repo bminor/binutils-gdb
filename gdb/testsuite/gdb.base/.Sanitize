@@ -1,4 +1,4 @@
-# .Sanitize for gdb/testsuite/gdb.base.
+# .Sanitize for devo/gdb/testsuite/gdb.base.
 
 # Each directory to survive its way into a release will need a file
 # like this one called "./.Sanitize".  All keyword lines must exist,
@@ -35,6 +35,7 @@ callfuncs.c
 callfuncs.exp
 commands.exp
 compiler.c
+configure
 configure.in
 corefile.exp
 coremaker.c

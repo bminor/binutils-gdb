@@ -1,4 +1,6 @@
-# Each directory to survive it's way into a release will need a file
+# .Sanitize for devo/gdb/testsuite/gdb.stabs.
+
+# Each directory to survive its way into a release will need a file
 # like this one called "./.Sanitize".  All keyword lines must exist,
 # and must exist in the order specified by this file.  Each directory
 # in the tree will be processed, top down, in the following order.
@@ -24,7 +26,9 @@ Things-to-keep:
 Makefile.in
 alpha.mt
 aout.mt
+configure
 configure.in
+default.mt
 ecoff.mt
 aout.sed
 ecoff.sed
