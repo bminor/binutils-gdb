@@ -55,7 +55,7 @@ sparc32nbsd_supply_gregset (const struct regset *regset,
 			    struct regcache *regcache,
 			    int regnum, const void *gregs, size_t len)
 {
-  sparc32_supply_gregset (regset->descr, regcache, regnum, gregs);
+  sparc32_supply_gregset (&sparc32nbsd_gregset, regcache, regnum, gregs);
 
   /* Traditional NetBSD core files don't use multiple register sets.
      Instead, the general-purpose and floating-point registers are
@@ -274,12 +274,10 @@ sparc32nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_long_double_bit (gdbarch, 64);
   set_gdbarch_long_double_format (gdbarch, &floatformat_ieee_double_big);
 
-  tdep->gregset = regset_alloc (gdbarch, &sparc32nbsd_gregset,
-                                sparc32nbsd_supply_gregset, NULL);
+  tdep->gregset = regset_alloc (gdbarch, sparc32nbsd_supply_gregset, NULL);
   tdep->sizeof_gregset = 20 * 4;
 
-  tdep->fpregset = regset_alloc (gdbarch, NULL,
-                                 sparc32nbsd_supply_fpregset, NULL);
+  tdep->fpregset = regset_alloc (gdbarch, sparc32nbsd_supply_fpregset, NULL);
   tdep->sizeof_fpregset = 33 * 4;
 
   frame_unwind_append_sniffer (gdbarch, sparc32nbsd_sigtramp_frame_sniffer);

@@ -1,3 +1,41 @@
+2004-05-22  Mark Kettenis  <kettenis@gnu.org>
+
+	* regset.c: Tweak comment.
+	(regset_alloc): Remove descr argument.  Use GDBARCH_OBSTACK_ZALLOC
+	macro.
+	* regset.h: Update copyright year.
+	(struct regset): Remove `descr' member, add `gdbarch' member.
+	(regset_alloc): Adjust prototype and comment.
+	* i386-tdep.c (i386_supply_gregset): Get TDEP from REGSET->arch.
+	(i386_supply_fpregset): Likewise.
+	(i386_regset_from_core_section): Update call to regset_alloc.
+	* i386obsd-tdep.c (i386obsd_aout_supply_regset): Get TDEP from
+	REGSET->arch.
+	(i386obsd_aout_regset_from_core_section): Update call to
+	regset_alloc.
+	* i386nbsd-tdep.c (i386nbsd_aout_supply_regset): Get TDEP from
+	REGSET->arch.
+	(i386nbsd_aout_regset_from_core_section): Update call to
+	regset_alloc.
+	* amd64-tdep.c (amd64_supply_fpregset): Get TDEP from
+	REGSET->arch.
+	(amd64_regset_from_core_section): Update call to regset_alloc.
+	* amd64obsd-tdep.c (amd64obsd_supply_regset): Get TDEP from
+	REGSET->arch.
+	(amd64obsd_regset_from_core_section): Update call to regset_alloc.
+	* sparcnbsd-tdep.c (sparc32nbsd_supply_gregset): Directly pass
+	&sparc32nbsd_gregset in sparc32_supply_gregset call.
+	(sparc32nbsd_init_abi): Update call to regset_alloc.
+	* sparc64obsd-tdep.c (sparc64obsd_supply_gregset): Directly pass
+	&sparc64obsd_core_gregset in sparc64_supply_gregset call.
+	(sparc64obsd_init_abi): Update call to regset_alloc.
+	* sparc64nbsd-tdep.c (sparc64nbsd_supply_gregset): Directly pass
+	&sparc64nbsd_gregset in sparc64_supply_gregset call.
+	(sparc64nbsd_init_abi): Update call to regset_alloc.
+	* sparc64fbsd-tdep.c (sparc64fbsd_supply_gregset): Directly pass
+	&sparc64fbsd_gregset in sparc64_supply_gregset call.
+	(sparc64fbsd_init_abi): Update call to regset_alloc.
+
 2004-05-22  Jim Blandy  <jimb@redhat.com>
 
 	* ppc-tdep.h (spe_register_p): New declaration.

@@ -1616,7 +1616,7 @@ void
 i386_supply_gregset (const struct regset *regset, struct regcache *regcache,
 		     int regnum, const void *gregs, size_t len)
 {
-  const struct gdbarch_tdep *tdep = regset->descr;
+  const struct gdbarch_tdep *tdep = gdbarch_tdep (regset->arch);
   const char *regs = gregs;
   int i;
 
@@ -1638,7 +1638,7 @@ static void
 i386_supply_fpregset (const struct regset *regset, struct regcache *regcache,
 		      int regnum, const void *fpregs, size_t len)
 {
-  const struct gdbarch_tdep *tdep = regset->descr;
+  const struct gdbarch_tdep *tdep = gdbarch_tdep (regset->arch);
 
   if (len == I387_SIZEOF_FXSAVE)
     {
@@ -1662,8 +1662,7 @@ i386_regset_from_core_section (struct gdbarch *gdbarch,
   if (strcmp (sect_name, ".reg") == 0 && sect_size == tdep->sizeof_gregset)
     {
       if (tdep->gregset == NULL)
-        tdep->gregset = regset_alloc (gdbarch, tdep,
-                                      i386_supply_gregset, NULL);
+        tdep->gregset = regset_alloc (gdbarch, i386_supply_gregset, NULL);
       return tdep->gregset;
     }
 
@@ -1672,8 +1671,7 @@ i386_regset_from_core_section (struct gdbarch *gdbarch,
 	  && sect_size == I387_SIZEOF_FXSAVE))
     {
       if (tdep->fpregset == NULL)
-        tdep->fpregset = regset_alloc (gdbarch, tdep,
-                                       i386_supply_fpregset, NULL);
+        tdep->fpregset = regset_alloc (gdbarch, i386_supply_fpregset, NULL);
       return tdep->fpregset;
     }
 

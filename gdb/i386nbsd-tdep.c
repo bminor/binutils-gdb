@@ -64,7 +64,7 @@ i386nbsd_aout_supply_regset (const struct regset *regset,
 			     struct regcache *regcache, int regnum,
 			     const void *regs, size_t len)
 {
-  const struct gdbarch_tdep *tdep = regset->descr;
+  const struct gdbarch_tdep *tdep = gdbarch_tdep (regset->arch);
 
   gdb_assert (len >= tdep->sizeof_gregset + I387_SIZEOF_FSAVE);
 
@@ -86,8 +86,8 @@ i386nbsd_aout_regset_from_core_section (struct gdbarch *gdbarch,
       && sect_size >= tdep->sizeof_gregset + I387_SIZEOF_FSAVE)
     {
       if (tdep->gregset == NULL)
-        tdep->gregset = regset_alloc (gdbarch, tdep,
-                                      i386nbsd_aout_supply_regset, NULL);
+        tdep->gregset =
+	  regset_alloc (gdbarch, i386nbsd_aout_supply_regset, NULL);
       return tdep->gregset;
     }
 

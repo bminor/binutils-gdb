@@ -1,4 +1,4 @@
-/* Regset support functions, for GDB.
+/* Manage register sets.
 
    Copyright 2004 Free Software Foundation, Inc.
 
@@ -21,21 +21,26 @@
 
 #include "defs.h"
 #include "regset.h"
+
 #include "gdb_assert.h"
 
+/* Allocate a fresh 'struct regset' whose supply_regset function is
+   SUPPLY_REGSET, and whose collect_regset function is COLLECT_REGSET.
+   If the regset has no collect_regset function, pass NULL for
+   COLLECT_REGSET.
+
+   The object returned is allocated on ARCH's obstack.  */
 
 struct regset *
 regset_alloc (struct gdbarch *arch,
-              const void *descr,
               supply_regset_ftype *supply_regset,
               collect_regset_ftype *collect_regset)
 {
-  struct regset *r
-    = (struct regset *) gdbarch_obstack_zalloc (arch, sizeof (*r));
+  struct regset *regset = GDBARCH_OBSTACK_ZALLOC (arch, struct regset);
 
-  r->descr = descr;
-  r->supply_regset = supply_regset;
-  r->collect_regset = collect_regset;
+  regset->arch = arch;
+  regset->supply_regset = supply_regset;
+  regset->collect_regset = collect_regset;
 
-  return r;
+  return regset;
 }

@@ -1056,7 +1056,7 @@ static void
 amd64_supply_fpregset (const struct regset *regset, struct regcache *regcache,
 		       int regnum, const void *fpregs, size_t len)
 {
-  const struct gdbarch_tdep *tdep = regset->descr;
+  const struct gdbarch_tdep *tdep = gdbarch_tdep (regset->arch);
 
   gdb_assert (len == tdep->sizeof_fpregset);
   amd64_supply_fxsave (regcache, regnum, fpregs);
@@ -1074,8 +1074,7 @@ amd64_regset_from_core_section (struct gdbarch *gdbarch,
   if (strcmp (sect_name, ".reg2") == 0 && sect_size == tdep->sizeof_fpregset)
     {
       if (tdep->fpregset == NULL)
-        tdep->fpregset = regset_alloc (gdbarch, tdep,
-                                       amd64_supply_fpregset, NULL);
+        tdep->fpregset = regset_alloc (gdbarch, amd64_supply_fpregset, NULL);
 
       return tdep->fpregset;
     }

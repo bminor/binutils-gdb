@@ -54,7 +54,7 @@ sparc64fbsd_supply_gregset (const struct regset *regset,
 			    struct regcache *regcache,
 			    int regnum, const void *gregs, size_t len)
 {
-  sparc64_supply_gregset (regset->descr, regcache, regnum, gregs);
+  sparc64_supply_gregset (&sparc64fbsd_gregset, regcache, regnum, gregs);
 }
 
 static void
@@ -199,12 +199,10 @@ sparc64fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  tdep->gregset = regset_alloc (gdbarch, &sparc64fbsd_gregset,
-                                sparc64fbsd_supply_gregset, NULL);
+  tdep->gregset = regset_alloc (gdbarch, sparc64fbsd_supply_gregset, NULL);
   tdep->sizeof_gregset = 256;
 
-  tdep->fpregset = regset_alloc (gdbarch, NULL,
-                                 sparc64fbsd_supply_fpregset, NULL);
+  tdep->fpregset = regset_alloc (gdbarch, sparc64fbsd_supply_fpregset, NULL);
   tdep->sizeof_fpregset = 272;
 
   frame_unwind_append_sniffer (gdbarch, sparc64fbsd_sigtramp_frame_sniffer);
