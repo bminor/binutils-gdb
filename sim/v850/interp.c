@@ -17,6 +17,7 @@
 #define MEM_SIZE 18	/* V850 memory size is 18 bits XXX */
 
 host_callback *v850_callback;
+int v850_debug;
 
 
 uint32 OP[4];
@@ -75,7 +76,7 @@ lookup_hash (ins)
     {
       if (h->next == NULL)
 	{
-	  printf ("ERROR looking up hash for %x\n",ins);
+	  (*v850_callback->printf_filtered) (v850_callback, "ERROR looking up hash for %x\n", ins);
 	  exit(1);
 	}
       h = h->next;
@@ -248,7 +249,7 @@ sim_size (power)
   State.mem = (uint8 *)calloc(1,1<<MEM_SIZE);
   if (!State.mem)
     {
-      fprintf (stderr,"Memory allocation failed.\n");
+      (*v850_callback->printf_filtered) (v850_callback, "Memory allocation failed.\n");
       exit(1);
     }
 }
@@ -283,7 +284,14 @@ sim_open (args)
   struct simops *s;
   struct hash_entry *h;
   if (args != NULL)
-      printf ("sim_open %s\n",args);
+    {
+#ifdef DEBUG
+      if (strcmp (args, "-t") == 0)
+	d10v_debug = DEBUG;
+      else
+#endif
+	(*d10v_callback->printf_filtered) (d10v_callback, "ERROR: unsupported option(s): %s\n",args);
+    }
 
   /* put all the opcodes in the hash table */
   for (s = Simops; s->func; s++)
@@ -317,14 +325,14 @@ void
 sim_set_profile (n)
      int n;
 {
-  printf ("sim_set_profile %d\n",n);
+  (*v850_callback->printf_filtered) (v850_callback, "sim_set_profile %d\n", n);
 }
 
 void
 sim_set_profile_size (n)
      int n;
 {
-  printf ("sim_set_profile_size %d\n",n);
+  (*v850_callback->printf_filtered) (v850_callback, "sim_set_profile_size %d\n", n);
 }
 
 void
@@ -396,15 +404,18 @@ sim_resume (step, siggnal)
 int
 sim_trace ()
 {
-  printf ("sim_trace\n");
-  return 0;
+#ifdef DEBUG
+  v850_debug = DEBUG;
+#endif
+  sim_resume (0, 0);
+  return 1;
 }
 
 void
 sim_info (verbose)
      int verbose;
 {
-  printf ("sim_info\n");
+  (*v850_callback->printf_filtered) (v850_callback, "sim_info\n");
 }
 
 void
@@ -480,7 +491,7 @@ void
 sim_do_command (cmd)
      char *cmd;
 { 
-  printf("sim_do_command: %s\n",cmd);
+  (*v850_callback->printf_filtered) (v850_callback, "sim_do_command: %s\n", cmd);
 }
 
 int

@@ -1,3 +1,26 @@
+Wed Sep 11 16:44:37 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* simops.c: Add tracing support.  Use SEXTxx macros instead of
+	doing hardwired shifts.
+
+	* configure.in (--enable-sim-cflags): Add switch to add additional
+	flags to simulator buld.  If --enable-sim-cflags=trace, turn on
+	tracing.
+	* configure: Regenerate.
+
+	* Makefile.in: Don't require a VPATH capable make if configuring
+	in the same directory.  Don't use CFLAGS for configuration flags.
+	Add flags from --enable-sim-cflags.  Support canadian cross
+	builds.  Rebuild whole simulator if include files change.
+
+	* interp.c (v850_debug): New global for debugging.
+	(lookup_hash,sim_size,sim_set_profile): Use
+	printf_filtered callback, instead of calling printf directly.
+	(sim_{open,trace}): Enable tracing if -t and compiled for tracing.
+
+	* v850_sim.h: Use limits.h to set the various sized types.
+	(SEXT{5,7,16,22}): New macros.
+
 Mon Sep  9 20:50:46 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* interp.c (hash): Make this an inline function
