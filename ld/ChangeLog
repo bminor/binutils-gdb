@@ -1,3 +1,7 @@
+Wed Dec 18 22:57:35 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-make.sed: Use NewFolderRecursive for installation.
+
 start-sanitize-v850
 Fri Dec 13 14:08:50 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 

@@ -150,6 +150,7 @@ readline_headers =\
 install \\Option-f all install-only\
 \
 install-only \\Option-f \
+	NewFolderRecursive "{bindir}"\
 	Duplicate -y gdb "{bindir}"gdb\
 	If "`Exists SiowGDB`" != ""\
 		Duplicate -y SiowGDB "{bindir}"SiowGDB\
