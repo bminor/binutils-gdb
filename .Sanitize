@@ -38,6 +38,7 @@ configdos.bat
 configure
 configure.in
 configure.man
+configure.texi
 cvs
 diff
 emacs
