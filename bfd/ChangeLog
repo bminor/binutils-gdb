@@ -1,3 +1,8 @@
+Thu Dec 12 15:07:20 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* elf32-ppc.c (ppc_elf_check_relocs): Move R_PPC_PLTREL24 into the
+	supported relocs.
+
 Thu Dec 12 14:55:41 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ppcboot.c (ppcboot_set_arch_mach): Don't define; it's a
