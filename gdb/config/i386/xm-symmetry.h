@@ -53,6 +53,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifdef _SEQUENT_
 /* ptx does attach as of ptx version 2.1 */
 #define ATTACH_DETACH 1
+#endif
 
 #define HOST_BYTE_ORDER LITTLE_ENDIAN
 

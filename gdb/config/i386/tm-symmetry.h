@@ -54,8 +54,8 @@ extern int ptx_coff_regno_to_gdb();
 #define ABOUT_TO_RETURN(pc) (read_memory_integer (pc, 1) == 0xc9)
 
 #if 0
- --- this code can't be used unless we know we are running native,
-     since it uses host specific ptrace calls.
+/* --- this code can't be used unless we know we are running native,
+       since it uses host specific ptrace calls. */
 /* code for 80387 fpu.  Functions are from i386-dep.c, copied into
  * symm-dep.c.
  */
@@ -409,7 +409,7 @@ i387_to_double PARAMS ((char *, char *));
 #define REGISTER_CONVERT_TO_RAW(TYPE,REGNUM,FROM,TO) \
 { \
   double val = extract_floating ((FROM), TYPE_LENGTH (TYPE)); \
-  double_to_i387((char *)&val, (TO))) \
+  double_to_i387((char *)&val, (TO)); \
 }
 extern void
 double_to_i387 PARAMS ((char *, char *));
@@ -434,7 +434,7 @@ double_to_i387 PARAMS ((char *, char *));
 #undef STORE_STRUCT_RETURN
 #define STORE_STRUCT_RETURN(ADDR, SP) \
   { (SP) -= sizeof (ADDR);		\
-    write_memory ((SP), &(ADDR), sizeof (ADDR)); \
+    write_memory ((SP), (char *) &(ADDR), sizeof (ADDR)); \
     write_register(0, (ADDR)); }
 
 /* Extract from an array REGBUF containing the (raw) register state

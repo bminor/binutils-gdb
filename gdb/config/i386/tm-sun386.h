@@ -181,7 +181,7 @@ i387_to_double PARAMS ((char *, char *));
 #define REGISTER_CONVERT_TO_RAW(TYPE,REGNUM,FROM,TO) \
 { \
   double val = extract_floating ((FROM), TYPE_LENGTH (TYPE)); \
-  double_to_i387((char *)&val, (TO))) \
+  double_to_i387((char *)&val, (TO)); \
 }
 extern void
 double_to_i387 PARAMS ((char *, char *));
