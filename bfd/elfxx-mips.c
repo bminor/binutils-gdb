@@ -6137,7 +6137,12 @@ _bfd_mips_elf_modify_segment_map (abfd)
      .dynamic end up in PT_DYNAMIC.  However, we do have to insert a
      PT_OPTIONS segment immediately following the program header
      table.  */
-  if (NEWABI_P (abfd))
+  if (NEWABI_P (abfd)
+      /* On non-IRIX6 new abi, we'll have already created a segment
+	 for this section, so don't create another.  I'm not sure this
+	 is not also the case for IRIX 6, but I can't test it right
+	 now.  */
+      && IRIX_COMPAT (abfd) == ict_irix6)
     {
       for (s = abfd->sections; s; s = s->next)
 	if (elf_section_data (s)->this_hdr.sh_type == SHT_MIPS_OPTIONS)

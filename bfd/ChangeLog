@@ -1,5 +1,11 @@
 2002-10-22  Alexandre Oliva  <aoliva@redhat.com>
 
+	* elfxx-mips.c (_bfd_mips_elf_modify_segment_map): Don't move
+	the options section into a separate section unless IRIX 6
+	compatibility is enabled.
+
+2002-10-22  Alexandre Oliva  <aoliva@redhat.com>
+
 	* elflink.h (struct elf_link_sort_rela): Turn rel and rela
 	into arrays.
 	(elf_link_sort_cmp1, elf_link_sort_cmp2): Adjust.
