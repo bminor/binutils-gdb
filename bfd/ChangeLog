@@ -1,3 +1,8 @@
+2003-07-04  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* elf32-sh.c (sh_elf_create_dynamic_sections): Don't call
+	bfd_make_section for existing sections.
+
 2003-07-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-sparc.c (elf32_sparc_check_relocs): Don't call
