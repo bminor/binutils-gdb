@@ -9150,3 +9150,20 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap =
 #define bfd_elf32_bfd_print_private_bfd_data \
 					_bfd_mips_elf_print_private_bfd_data
 #include "elf32-target.h"
+
+/* Support for traditional mips targets */
+
+#define INCLUDED_TARGET_FILE            /* More a type of flag */
+
+#undef TARGET_LITTLE_SYM
+#undef TARGET_LITTLE_NAME
+#undef TARGET_BIG_SYM
+#undef TARGET_BIG_NAME
+
+#define TARGET_LITTLE_SYM               bfd_elf32_tradlittlemips_vec
+#define TARGET_LITTLE_NAME              "elf32-tradlittlemips"
+#define TARGET_BIG_SYM                  bfd_elf32_tradbigmips_vec
+#define TARGET_BIG_NAME                 "elf32-tradbigmips"
+
+/* Include the target file again for this target */
+#include "elf32-target.h"
