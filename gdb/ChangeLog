@@ -1,3 +1,7 @@
+2000-07-17  matthew green  <mrg@redhat.com>
+
+	* config/sparc/nm-nbsd.h (GDB_GREGSET_T, GDB_FPREGSET_T): Define.
+
 Mon Jul 17 13:08:10 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* values.c (value_as_pointer): When VAL is an integer, explictly
