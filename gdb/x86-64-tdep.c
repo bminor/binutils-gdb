@@ -481,7 +481,7 @@ amd64_return_value (struct gdbarch *gdbarch, struct type *type,
 
 static CORE_ADDR
 amd64_push_arguments (struct regcache *regcache, int nargs,
-		      struct value **args, CORE_ADDR sp)
+		      struct value **args, CORE_ADDR sp, int struct_return)
 {
   static int integer_regnum[] =
   {
@@ -504,6 +504,10 @@ amd64_push_arguments (struct regcache *regcache, int nargs,
   int integer_reg = 0;
   int sse_reg = 0;
   int i;
+
+  /* Reserve a register for the "hidden" argument.  */
+  if (struct_return)
+    integer_reg++;
 
   for (i = 0; i < nargs; i++)
     {
@@ -613,7 +617,7 @@ amd64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
   char buf[8];
 
   /* Pass arguments.  */
-  sp = amd64_push_arguments (regcache, nargs, args, sp);
+  sp = amd64_push_arguments (regcache, nargs, args, sp, struct_return);
 
   /* Pass "hidden" argument".  */
   if (struct_return)

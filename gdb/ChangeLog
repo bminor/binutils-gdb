@@ -1,5 +1,10 @@
 2004-01-10  Mark Kettenis  <kettenis@gnu.org>
 
+	* x86-64-tdep.c (amd64_push_arguments): Add struct_return
+	argument.  Use it to reserve a register if necessary.
+	(amd64_push_dummy_call): Pass STRUCT_RETURN in call to
+	amd64_push_arguments.
+
 	* x86-64-tdep.c (amd64_classify_aggregate): Ignore static fields.
 
 	* x86-64-tdep.c (amd64_register_info): Add %cs and %ss.  Adjust
