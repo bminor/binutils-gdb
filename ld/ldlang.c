@@ -240,6 +240,7 @@ bfd_boolean lang_float_flag = FALSE;
 bfd_boolean delete_output_file_on_failure = FALSE;
 struct lang_nocrossrefs *nocrossref_list;
 struct unique_sections *unique_section_list;
+static bfd_boolean ldlang_sysrooted_script = FALSE;
 
 etree_type *base; /* Relocation base - or null */
 
@@ -547,6 +548,7 @@ new_afile (name, file_type, target, add_to_list)
 
   lang_has_input_file = TRUE;
   p->target = target;
+  p->sysrooted = FALSE;
   switch (file_type)
     {
     case lang_input_file_is_symbols_only_enum:
@@ -582,6 +584,7 @@ new_afile (name, file_type, target, add_to_list)
       p->search_dirs_flag = TRUE;
       break;
     case lang_input_file_is_search_file_enum:
+      p->sysrooted = ldlang_sysrooted_script;
       p->filename = name;
       p->is_archive = FALSE;
       p->real = TRUE;
@@ -1539,6 +1542,7 @@ load_symbols (entry, place)
       bfd_error_type err;
       lang_statement_list_type *hold;
       bfd_boolean bad_load = TRUE;
+      bfd_boolean save_ldlang_sysrooted_script;
 
       err = bfd_get_error ();
 
@@ -1570,12 +1574,15 @@ load_symbols (entry, place)
 
       hold = stat_ptr;
       stat_ptr = place;
+      save_ldlang_sysrooted_script = ldlang_sysrooted_script;
+      ldlang_sysrooted_script = entry->sysrooted;
 
       ldfile_assumed_script = TRUE;
       parser_input = input_script;
       yyparse ();
       ldfile_assumed_script = FALSE;
 
+      ldlang_sysrooted_script = save_ldlang_sysrooted_script;
       stat_ptr = hold;
 
       return ! bad_load;

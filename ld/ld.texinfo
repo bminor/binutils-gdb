@@ -2305,10 +2305,13 @@ then you can put @samp{INPUT (subr.o)} in your linker script.
 In fact, if you like, you can list all of your input files in the linker
 script, and then invoke the linker with nothing but a @samp{-T} option.
 
-The linker will first try to open the file in the current directory.  If
-it is not found, the linker will search through the archive library
-search path.  See the description of @samp{-L} in @ref{Options,,Command
-Line Options}.
+In case a @dfn{sysroot prefix} is configured, and the filename starts
+with the @samp{/} character, and the script being processed was
+located inside the @dfn{sysroot prefix}, the filename will be looked
+for in the @dfn{sysroot prefix}.  Otherwise, the linker will try to
+open the file in the current directory.  If it is not found, the
+linker will search through the archive library search path.  See the
+description of @samp{-L} in @ref{Options,,Command Line Options}.
 
 If you use @samp{INPUT (-l@var{file})}, @command{ld} will transform the
 name to @code{lib@var{file}.a}, as with the command line argument

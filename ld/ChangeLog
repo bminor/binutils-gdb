@@ -1,3 +1,20 @@
+2003-03-03  Alexandre Oliva  <aoliva@redhat.com>
+
+	* ldfile.h (struct search_dirs): Added sysrooted field.
+	* ldlang.h (struct lang_input_statement_struct): Likewise.
+	* ldfile.c (ldfile_add_library_path): Mark sysrooted paths.
+	(ldfile_open_file_search): Look for sysrooted filename starting
+	with / in ld_sysroot instead of in the current directory.  Clear
+	sysrooted flag if it's found in the current directory.  Set it
+	from the search directory's sysrooted flag where it is found
+	otherwise.
+	* ldlang.c (ldlang_sysrooted_script): New static variable.
+	(new_afile): Mark search_file_enums as sysrooted if
+	ldlang_sysrooted_script.
+	(load_symbols): Set ldlang_sysrooted_script according to the
+	script's sysrooted field while processing it.
+	* ld.texinfo: Document INPUT behavior in sysroot.
+
 2003-03-02  Danny Smith  <dannysmith@users.sourceforge.net>
 
 	* scripttempl/pe.sc: Use PROVIDE with etext, end, _end,

@@ -92,7 +92,12 @@ ldfile_add_library_path (name, cmdline)
   /* If a directory is marked as honoring sysroot, prepend the sysroot path
      now.  */
   if (new->name[0] == '=')
-    new->name = concat (ld_sysroot, &new->name[1], NULL);
+    {
+      new->name = concat (ld_sysroot, &new->name[1], NULL);
+      new->sysrooted = TRUE;
+    }
+  else
+    new->sysrooted = FALSE;
 }
 
 /* Try to open a BFD for a lang_input_statement.  */
@@ -265,8 +270,22 @@ ldfile_open_file_search (arch, entry, lib, suffix)
      directory first.  */
   if (! entry->is_archive)
     {
-      if (ldfile_try_open_bfd (entry->filename, entry))
-	return TRUE;
+      if (entry->sysrooted && entry->filename[0] == '/')
+	{
+	  char *name = concat (ld_sysroot, entry->filename,
+			       (const char *) NULL);
+	  if (ldfile_try_open_bfd (name, entry))
+	    {
+	      entry->filename = name;
+	      return TRUE;
+	    }
+	  free (name);
+	}
+      else if (ldfile_try_open_bfd (entry->filename, entry))
+	{
+	  entry->sysrooted = FALSE;
+	  return TRUE;
+	}
     }
 
   for (search = search_head;
@@ -278,7 +297,10 @@ ldfile_open_file_search (arch, entry, lib, suffix)
       if (entry->dynamic && ! link_info.relocateable)
 	{
 	  if (ldemul_open_dynamic_archive (arch, search, entry))
-	    return TRUE;
+	    {
+	      entry->sysrooted = search->sysrooted;
+	      return TRUE;
+	    }
 	}
 
       string = (char *) xmalloc (strlen (search->name)
@@ -306,6 +328,7 @@ ldfile_open_file_search (arch, entry, lib, suffix)
       if (ldfile_try_open_bfd (string, entry))
 	{
 	  entry->filename = string;
+	  entry->sysrooted = search->sysrooted;
 	  return TRUE;
 	}
 

@@ -230,6 +230,12 @@ typedef struct lang_input_statement_struct {
   /* 1 means search a set of directories for this file.  */
   bfd_boolean search_dirs_flag;
 
+  /* 1 means this was found in a search directory marked as sysrooted,
+     if search_dirs_flag is false, otherwise, that it should be
+     searched in ld_sysroot before any other location, as long as it
+     starts with a slash.  */
+  bfd_boolean sysrooted;
+
   /* 1 means this is base file of incremental load.
      Do not load this file's text or data.
      Also default text_start to after this file's bss.  */
