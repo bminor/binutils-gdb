@@ -1,6 +1,9 @@
 2004-10-13  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 44
+	* ldcref.c (check_section_sym_xref): Delete.
+	(check_local_sym_xref): New function.
+	(check_nocrossrefs): Adjust call.
 	* emultempl/pe.em (struct orphan_save): Add os_tail.
 	(place_orphan): Backport assorted fixes from elf32.em.
 
