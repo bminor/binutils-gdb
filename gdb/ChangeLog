@@ -1,3 +1,9 @@
+Wed Mar 16 07:18:43 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* TODO: Remove item about line numbers being off.  It is useless
+	and confusing without a reproducible test case (it mentions
+	proceed(), but I was able to step through proceed without trouble).
+
 Tue Mar 15 13:39:23 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	For Sunos 4.x targets, enable gdb to set breakpoints in shared

@@ -219,9 +219,6 @@ Eliminate separate declarations of registers[] everywhere.
 
 "ena d" is ambiguous, why?  "ena delete" seems to think it is a command!
 
-Line numbers are off in some spots.  In proceed() at 1st "oneproc = 1",
-it seems to run that statement, but it doesn't actually.
-
 Perhaps move the tdep, xdep, and nat files, into the config
 subdirectories.  If not, at least straighten out their names so that
 they all start with the machine name.
