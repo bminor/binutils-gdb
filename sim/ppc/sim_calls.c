@@ -33,6 +33,7 @@
 #include "devices.h"
 
 #include "../../gdb/remote-sim.h"
+#include "../../gdb/callback.h"
 
 
 /* Structures used by the simulator, for gdb just have static structures */
@@ -288,6 +289,12 @@ void
 sim_do_command(char *cmd)
 {
   TRACE(trace_gdb, ("sim_do_commands(cmd=%s) called\n", cmd));
+}
+
+void
+sim_set_callbacks (host_callback *callback)
+{
+  TRACE(trace_gdb, ("sim_set_callbacks called\n"));
 }
 
 /****/

@@ -1,3 +1,7 @@
+Sat Oct  7 22:40:59 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* sim_calls.c (sim_set_callbacks): Define new function.
+
 Fri Oct  6 17:23:10 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* psim.c (psim_print_info): Print exit status or signal number.
