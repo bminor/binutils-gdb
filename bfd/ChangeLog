@@ -1,3 +1,8 @@
+2000-09-26  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elfcode.h (elf_object_p): Preserve and clear abfd section
+ 	information.  Restore at error.
+
 2000-09-26  Paul Sokolovsky  <Paul.Sokolovsky@technologist.com>
 
 	* peigen.c (_bfd_pei_swap_aouthdr_in): If some DataDirectory

@@ -500,8 +500,15 @@ elf_object_p (abfd)
   char *shstrtab;		/* Internal copy of section header stringtab */
   struct elf_backend_data *ebd;
   struct elf_obj_tdata *preserved_tdata = elf_tdata (abfd);
+  struct sec *preserved_sections = abfd->sections;
+  unsigned int preserved_section_count = abfd->section_count;
   struct elf_obj_tdata *new_tdata = NULL;
   asection *s;
+
+  /* Clear section information, since there might be a recognized bfd that
+     we now check if we can replace, and we don't want to append to it.  */
+  abfd->sections = NULL;
+  abfd->section_count = 0;
 
   /* Read in the ELF header in external format.  */
 
@@ -745,6 +752,8 @@ elf_object_p (abfd)
   if (new_tdata != NULL)
     bfd_release (abfd, new_tdata);
   elf_tdata (abfd) = preserved_tdata;
+  abfd->sections = preserved_sections;
+  abfd->section_count = preserved_section_count;
   return (NULL);
 }
 
