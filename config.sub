@@ -164,9 +164,9 @@ iris | iris4d)
 	;;
 
 dpx2)
-	vendor = bull
-	cpu = m68k
-	os = sysv
+	vendor=bull
+	cpu=m68k
+	os=sysv
 	;;
 isi | isi68)
 	cpu=m68k
@@ -201,17 +201,17 @@ mmax)
 news | news700 | news800 | news900)
 	cpu=m68k
 	vendor=sony
-	os=sysv # maybe?
+	os=newsos3 # Based on bsd-4.3
 	;;
 news1000)
 	cpu=m68030
 	vendor=sony
-	os=sysv # maybe?
+	os=newsos3 # ?
 	;;
 news-3600 | bigmips | risc-news)
 	cpu=mips
 	vendor=sony
-	os=newsos # maybe?
+	os=newsos4 # Presumably?
 	;;
 next)
 	cpu=m68k
