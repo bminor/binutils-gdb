@@ -810,13 +810,9 @@ PROTO(boolean,	bfd_scan_arch_mach,(CONST char *, enum bfd_architecture *,
 #define bfd_h_get_64(abfd, ptr)		BFD_SEND(abfd, bfd_h_getx64, \
 							((bfd_byte *) ptr))
 
-#define bfd_h_put_16(abfd, val, ptr)	BFD_SEND(abfd, bfd_h_putx16, \
-							(val, (bfd_byte *) ptr))
-#define bfd_h_get_16(abfd, ptr)		BFD_SEND(abfd, bfd_h_getx16, \
-							((bfd_byte *) ptr))
+#define bfd_h_put_16(abfd, val, ptr)	BFD_SEND(abfd, bfd_h_putx16, (val, (bfd_byte *) ptr))
+#define bfd_h_get_16(abfd, ptr)		BFD_SEND(abfd, bfd_h_getx16, ((bfd_byte *) ptr))
 
-#define bfd_h_put_16(abfd, val, ptr) BFD_SEND(abfd, bfd_h_putx16,(val,ptr))
-#define bfd_h_get_16(abfd, ptr)      BFD_SEND(abfd, bfd_h_getx16,(ptr))
 
 /* General purpose one fits all.  The do { } while (0) makes a single 
    statement out of it, for use in things like nested if-statements.
