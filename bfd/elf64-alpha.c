@@ -1462,17 +1462,28 @@ elf64_alpha_relax_section (abfd, sec, link_info, again)
       if (ELF64_R_SYM (irel->r_info) < symtab_hdr->sh_info)
 	{
 	  Elf_Internal_Sym isym;
+	  asection *lsec;
 
 	  /* A local symbol.  */
 	  bfd_elf64_swap_symbol_in (abfd,
 				    extsyms + ELF64_R_SYM (irel->r_info),
 				    &isym);
+	  if (isym.st_shndx == SHN_UNDEF)
+	    lsec = bfd_und_section_ptr;
+	  else if (isym.st_shndx > 0 && isym.st_shndx < SHN_LORESERVE)
+	    lsec = bfd_section_from_elf_index (abfd, isym.st_shndx);
+	  else if (isym.st_shndx == SHN_ABS)
+	    lsec = bfd_abs_section_ptr;
+	  else if (isym.st_shndx == SHN_COMMON)
+	    lsec = bfd_com_section_ptr;
+	  else 
+	    continue;	/* who knows. */
 
 	  info.h = NULL;
 	  info.gotent = local_got_entries[ELF64_R_SYM(irel->r_info)];
 	  symval = (isym.st_value
-		    + sec->output_section->vma
-		    + sec->output_offset);
+		    + lsec->output_section->vma
+		    + lsec->output_offset);
 	}
       else
 	{
@@ -2892,13 +2903,15 @@ elf64_alpha_calc_got_offsets (info)
 
 	  for (k = 0, n = elf_tdata(j)->symtab_hdr.sh_info; k < n; ++k)
 	    for (gotent = local_got_entries[k]; gotent; gotent = gotent->next)
-	      {
-		gotent->got_offset = got_offset;
-		got_offset += 8;
-	      }
+	      if (gotent->use_count > 0)
+	        {
+		  gotent->got_offset = got_offset;
+		  got_offset += 8;
+	        }
 	}
 
       alpha_elf_tdata(i)->got->_raw_size = got_offset;
+      alpha_elf_tdata(i)->got->_cooked_size = got_offset;
     }
 }
 
