@@ -1,3 +1,8 @@
+2002-10-21  Richard Sandiford  <rsandifo@redhat.com>
+
+	* gas/mips/elf-rel7.[sd]: New test.
+	* gas/mips/mips.exp: Run it.
+
 2002-10-12  Alexandre Oliva  <aoliva@redhat.com>
 
 	* gas/mips/mips.exp: Don't xfail relax.

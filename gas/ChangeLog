@@ -1,3 +1,8 @@
+2002-10-21  Richard Sandiford  <rsandifo@redhat.com>
+
+	* config/tc-mips.c (mips_need_elf_addend_fixup): Return true
+	for relocs against symbols in a merged section.
+
 2002-10-18  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/tc-mips.c (md_begin): Add $fcc registers to the symbol
