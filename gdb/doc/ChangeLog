@@ -1,3 +1,7 @@
+2000-05-09  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	* gdb.texinfo: Proofreading changes from Brian Youmans.
+
 2000-05-01  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* annotate.texi: Remove "@syncodeindex fn cp", it causes grief in

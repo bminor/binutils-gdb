@@ -8757,7 +8757,7 @@ void (*exceptionHook)() = 0;
 
 @noindent
 but if before calling @code{set_debug_traps}, you set it to point to a
-function in your program; that function is called when
+function in your program, that function is called when
 @code{@value{GDBN}} continues after stopping on a trap (for example, bus
 error).  The function indicated by @code{exceptionHook} is called with
 one parameter: an @code{int} which is the exception number.
@@ -8931,7 +8931,7 @@ So:
 @noindent
 means the same as "0000".
 
-The error response, returned for some packets includes a two character
+The error response returned for some packets includes a two character
 error number.  That number is not well defined.
 
 For any @var{command} not supported by the stub, an empty response
@@ -8945,7 +8945,7 @@ optional.
 
 Below is a complete list of all currently defined @var{command}s and
 their corresponding response @var{data}:
-
+@page
 @multitable @columnfractions .30 .30 .40
 @item Packet
 @tab Request
@@ -8955,7 +8955,7 @@ their corresponding response @var{data}:
 @tab @code{!}
 @tab
 Use the extended remote protocol.  Sticky---only needs to be set once.
-The extended remote protocol support the @samp{R} packet.
+The extended remote protocol supports the @samp{R} packet.
 @item
 @tab reply @samp{}
 @tab
@@ -8979,6 +8979,9 @@ and continue.
 
 @item set program arguments @strong{(reserved)}
 @tab @code{A}@var{arglen}@code{,}@var{argnum}@code{,}@var{arg}@code{,...}
+@tab
+@item
+@tab
 @tab
 Initialized @samp{argv[]} array passed into program. @var{arglen}
 specifies the number of bytes in the hex encoded byte stream @var{arg}.
@@ -9026,7 +9029,7 @@ Continue with signal @var{sig} (hex signal number).  If
 @tab reply
 @tab see below
 
-@item toggle debug @emph{(deprecated)}
+@item toggle debug @strong{(deprecated)}
 @tab @code{d}
 @tab
 toggle debug flag.
@@ -9039,7 +9042,7 @@ Detach @value{GDBN} from the remote system.  Sent to the remote target before
 @item
 @tab reply @emph{no response}
 @tab
-@value{GDBN} does not check for any response after sending this packet
+@value{GDBN} does not check for any response after sending this packet.
 
 @item reserved
 @tab @code{e}
@@ -9222,7 +9225,7 @@ digits for each byte in the register (target byte order).
 @item general query
 @tab @code{q}@var{query}
 @tab
-Request info about @var{query}.  In general @value{GDBN} @var{query}'s
+Request info about @var{query}.  In general @value{GDBN} queries
 have a leading upper case letter.  Custom vendor queries should use a
 company prefix (in lower case) ex: @samp{qfsf.var}.  @var{query} may
 optionally be followed by a @samp{,} or @samp{;} separated list.  Stubs
@@ -9243,7 +9246,7 @@ must ensure that they match the full @var{query} name.
 Set value of @var{var} to @var{val}.  See @samp{q} for a discussing of
 naming conventions.
 
-@item reset @emph{(deprecated)}
+@item reset @strong{(deprecated)}
 @tab @code{r}
 @tab
 Reset the entire system.
@@ -9537,6 +9540,9 @@ offset to the @code{Bss} section.}
 @item thread info request
 @tab @code{q}@code{P}@var{mode}@var{threadid}
 @tab
+@item
+@tab
+@tab
 Returns information on @var{threadid}.  Where: @var{mode} is a hex
 encoded 32 bit mode; @var{threadid} is a hex encoded 64 bit thread ID.
 @item
@@ -9546,6 +9552,9 @@ See @code{remote.c:remote_unpack_thread_info_response()}.
 
 @item remote command
 @tab @code{q}@code{Rcmd,}@var{COMMAND}
+@tab
+@item
+@tab
 @tab
 @var{COMMAND} (hex encoded) is passed to the local interpreter for
 execution.  Invalid commands should be reported using the output string.
