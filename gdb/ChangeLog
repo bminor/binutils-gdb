@@ -1,4 +1,11 @@
-2003-01-10  J. Brobecker  <brobecker@gnat.com>
+2003-01-12  J. Brobecker  <brobecker@gnat.com>
+
+	* hpread.c (set_namestring): New procedure replacing the
+	SET_NAMESTRING macro.
+	(hpread_build_psymtabs): Replace calls to SET_NAMESTRING
+	by calls to set_namestring.
+
+2003-01-11  J. Brobecker  <brobecker@gnat.com>
 
 	* hpread.c (SET_NAMESTRING): Remove an incorrect cast to fix
 	a compilation warning.
