@@ -1,3 +1,7 @@
+2001-02-02  Fred Fish  <fnf@ninemoons.com>
+
+	* Makefile.in: Fix typo.
+
 2001-02-01  Kazu Hirata  <kazu@hxi.com>
 
 	* elf-m10300.c: Fix formatting.
