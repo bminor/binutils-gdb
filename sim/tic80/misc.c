@@ -168,7 +168,7 @@ tic80_trace_alu2 (int indx,
   sprintf (tic80_trace_buffer, "%-*s 0x%.*lx/%*ld %*s => 0x%.*lx/%*ld",
 	   tic80_size_name, itable[indx].name,
 	   SIZE_HEX, input, SIZE_DECIMAL, (long)(signed32)input,
-	   SIZE_HEX + SIZE_DECIMAL + 1, "",
+	   SIZE_HEX + SIZE_DECIMAL + 2, "",
 	   SIZE_HEX, result, SIZE_DECIMAL, (long)(signed32)result);
 
   return tic80_trace_buffer;
