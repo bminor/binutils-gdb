@@ -1,3 +1,4 @@
+# Make empty definitions because MPW make doesn't default them.
 XM_ADD_FILES = 
 TM_ADD_FILES = 
 NAT_ADD_FILES = 
@@ -89,7 +90,7 @@ TERMCAP = -ltermcap
 # srcdir = :
 
 # If you use bison instead of yacc, it needs to include the "-y" argument.
-BISON=bison -y
+BISON=byacc
 #BISON=yacc
 YACC={BISON}
 
@@ -206,7 +207,7 @@ CDEPS = {XM_CDEPS} {TM_CDEPS} {NAT_CDEPS} \Option-d
 ADD_FILES = {REGEX} {XM_ADD_FILES} {TM_ADD_FILES} {NAT_ADD_FILES}
 ADD_DEPS = {REGEX1} {XM_ADD_FILES} {TM_ADD_FILES} {NAT_ADD_FILES}
 
-VERSION = 4.13.1
+VERSION = 4.14.1
 DIST=gdb
 
 LINT=:usr:5bin:lint
@@ -322,38 +323,38 @@ TARGET_FLAGS_TO_PASS = \Option-d
 
 ALLDEPFILES = "{s}"29k-share:udi:udip2soc.c "{s}"29k-share:udi:udr.c \Option-d
 	"{s}"29k-share:udi:udi2go32.c \Option-d
-	"{s}"a29k-pinsn.c "{s}"a29k-tdep.c "{s}"a68v-nat.c "{s}"alpha-nat.c "{s}"alpha-tdep.c \Option-d
+	"{s}"a29k-tdep.c "{s}"a68v-nat.c "{s}"alpha-nat.c "{s}"alpha-tdep.c \Option-d
 	"{s}"altos-xdep.c arm-convert.s \Option-d
-	"{s}"arm-pinsn.c "{s}"arm-tdep.c "{s}"arm-xdep.c "{s}"coff-solib.c "{s}"convex-pinsn.c \Option-d
+	"{s}"arm-tdep.c "{s}"arm-xdep.c "{s}"coff-solib.c \Option-d
 	"{s}"convex-tdep.c \Option-d
 	"{s}"convex-xdep.c "{s}"core-svr4.c "{s}"coredep.c "{s}"corelow.c "{s}"dcache.c "{s}"delta68-nat.c \Option-d
 	"{s}"dpx2-nat.c "{s}"dstread.c "{s}"exec.c "{s}"fork-child.c \Option-d
-	"{s}"go32-xdep.c "{s}"gould-pinsn.c "{s}"gould-xdep.c "{s}"h8300-tdep.c "{s}"h8500-tdep.c \Option-d
-	"{s}"hp300ux-nat.c "{s}"hppa-pinsn.c "{s}"hppa-tdep.c "{s}"hppab-nat.c "{s}"hppah-nat.c \Option-d
-	"{s}"i386-pinsn.c "{s}"i386-tdep.c "{s}"i386b-nat.c "{s}"i386mach-nat.c "{s}"i386v-nat.c \Option-d
+	"{s}"go32-xdep.c "{s}"gould-tdep.c "{s}"gould-xdep.c "{s}"h8300-tdep.c "{s}"h8500-tdep.c \Option-d
+	"{s}"hp300ux-nat.c "{s}"hppa-tdep.c "{s}"hppab-nat.c "{s}"hppah-nat.c \Option-d
+	"{s}"i386-tdep.c "{s}"i386b-nat.c "{s}"i386mach-nat.c "{s}"i386v-nat.c \Option-d
 	"{s}"i386aix-nat.c "{s}"i386m3-nat.c "{s}"i386v4-nat.c "{s}"i386ly-tdep.c \Option-d
 	"{s}"i387-tdep.c \Option-d
-	"{s}"i960-pinsn.c "{s}"i960-tdep.c \Option-d
+	"{s}"i960-tdep.c \Option-d
 	"{s}"infptrace.c "{s}"inftarg.c "{s}"irix4-nat.c "{s}"irix5-nat.c "{s}"isi-xdep.c \Option-d
 	"{s}"lynx-nat.c "{s}"m3-nat.c \Option-d
-	"{s}"m68k-pinsn.c "{s}"m68k-tdep.c \Option-d
-	"{s}"m88k-nat.c "{s}"m88k-pinsn.c "{s}"m88k-tdep.c "{s}"mips-nat.c "{s}"mips-pinsn.c \Option-d
+	"{s}"m68k-tdep.c \Option-d
+	"{s}"m88k-nat.c "{s}"m88k-tdep.c "{s}"mips-nat.c \Option-d
 	"{s}"mips-tdep.c "{s}"mipsm3-nat.c "{s}"news-xdep.c \Option-d
 	"{s}"nindy-share:Onindy.c "{s}"nindy-share:nindy.c \Option-d
 	"{s}"nindy-share:ttyflush.c "{s}"nindy-tdep.c \Option-d
-	"{s}"ns32k-pinsn.c "{s}"ns32km3-nat.c "{s}"osfsolib.c \Option-d
+	"{s}"ns32k-tdep.c "{s}"ns32km3-nat.c "{s}"osfsolib.c \Option-d
 	"{s}"somread.c "{s}"somsolib.c \Option-d
-	"{s}"procfs.c "{s}"pyr-pinsn.c "{s}"pyr-tdep.c "{s}"pyr-xdep.c \Option-d
+	"{s}"procfs.c "{s}"pyr-tdep.c "{s}"pyr-xdep.c \Option-d
 	"{s}"remote-adapt.c "{s}"remote-bug.c "{s}"remote-e7000.c "{s}"remote-eb.c "{s}"remote-es.c \Option-d
 	"{s}"remote-hms.c "{s}"remote-mips.c \Option-d
 	"{s}"remote-mm.c "{s}"remote-mon.c "{s}"remote-nindy.c "{s}"remote-sim.c \Option-d
 	"{s}"remote-st.c "{s}"remote-utils.c "{s}"dcache.c \Option-d
-	"{s}"remote-udi.c "{s}"remote-vx.c "{s}"remote-z8k.c "{s}"rs6000-nat.c "{s}"rs6000-pinsn.c \Option-d
+	"{s}"remote-udi.c "{s}"remote-vx.c "{s}"remote-z8k.c "{s}"rs6000-nat.c \Option-d
 	"{s}"rs6000-tdep.c "{s}"ser-go32.c "{s}"ser-tcp.c "{s}"sh-tdep.c "{s}"solib.c "{s}"sparc-nat.c \Option-d
-	"{s}"sparc-pinsn.c "{s}"sparc-tdep.c "{s}"sun3-nat.c "{s}"sun386-nat.c \Option-d
+	"{s}"sparc-tdep.c "{s}"sun3-nat.c "{s}"sun386-nat.c \Option-d
 	"{s}"symm-tdep.c "{s}"symm-nat.c \Option-d
-	"{s}"tahoe-pinsn.c "{s}"ultra3-nat.c "{s}"ultra3-xdep.c "{s}"umax-xdep.c \Option-d
-	"{s}"vax-pinsn.c \Option-d
+	"{s}"tahoe-tdep.c "{s}"ultra3-nat.c "{s}"ultra3-xdep.c "{s}"umax-xdep.c \Option-d
+	"{s}"vax-tdep.c \Option-d
 	"{s}"vx-share:xdr_ld.c "{s}"vx-share:xdr_ptrace.c "{s}"vx-share:xdr_rdb.c \Option-d
 	"{s}"xcoffexec.c "{s}"xcoffread.c "{s}"xcoffsolib.c "{s}"z8k-tdep.c
 
@@ -673,7 +674,7 @@ YYOBJ = "{o}"c-exp.tab.c.o "{o}"m2-exp.tab.c.o "{o}"ch-exp.tab.c.o "{o}"f-exp.ta
 # .c.o \Option-f 
 #	{CC} -c {INTERNAL_CFLAGS} $<
 
-all \Option-f  gdb SiowGDB MacGDB
+all \Option-f  gdb SiowGDB
 #	@{MAKE} {FLAGS_TO_PASS} DO=all "DODIRS=`echo {SUBDIRS} | sed 's:testsuite::'`" subdir_do
 
 # The check target can not use subdir_do, because subdir_do does not
@@ -752,8 +753,9 @@ uninstall \Option-f  force
 LOADLIBES = {EXTRALIBS}
 
 # Removing the old gdb first works better if it is running, at least on SunOS.
-gdb \Option-f  {OBS} {TSOBS} {ADD_DEPS} {CDEPS} "{o}"init.c.o
+gdb \Option-f  {OBS} {TSOBS} {ADD_DEPS} {CDEPS} "{o}"init.c.o "{o}"Version.r
 	Delete -i -y gdb
+	Rez -rd -o gdb "{o}"Version.r -append
 	Link {LDFLAGS} -o gdb \Option-d
 	  "{o}"init.c.o {OBS} {TSOBS} {ADD_FILES} {CLIBS} {LOADLIBES}
 
@@ -776,10 +778,11 @@ saber_gdb \Option-f  {SFILES} {DEPFILES} "{s}"copying.c "{s}"version.c
 
 # Version of GDB that uses the SIOW library.
 
-SiowGDB \Option-f  {OBS} {TSOBS} {ADD_DEPS} {CDEPS} "{o}"init.c.o
+SiowGDB \Option-f  {OBS} {TSOBS} {ADD_DEPS} {CDEPS} "{o}"init.c.o "{o}"Version.r
 	Delete -i -y SiowGDB
 	Rez -o SiowGDB {RIncludes}siow.r -append \Option-d
 		-d __kPrefSize=5000 -d __kMinSize=2000
+	Rez -rd -o SiowGDB "{o}"Version.r -append
 	Link -d -model far -o SiowGDB -t 'APPL' -c 'gdb ' \Option-d
 	  "{o}"init.c.o {OBS} {TSOBS} {ADD_FILES} {CLIBS} \Option-d
 	  "{CLibraries}"StdClib.o \Option-d
@@ -790,11 +793,44 @@ SiowGDB \Option-f  {OBS} {TSOBS} {ADD_DEPS} {CDEPS} "{o}"init.c.o
 
 # Version of GDB that uses a real library.
 
-MacGDB \Option-f  {OBS} {TSOBS} {ADD_DEPS} {CDEPS} "{o}"init.c.o
+MacGDB \Option-f  {OBS} {TSOBS} {ADD_DEPS} {CDEPS} "{o}"init.c.o "{o}"Version.r
 	Delete -i -y MacGDB
 	Rez -rd -o MacGDB "{s}"macgdb.r -append
+	Rez -rd -o MacGDB "{o}"Version.r -append
 	Link -d -model far -o MacGDB -t 'APPL' -c 'gdb ' \Option-d
 	  "{o}"init.c.o {OBS} {TSOBS} {ADD_FILES} {CLIBS} {LOADLIBES}
+
+"{o}"Version.r \Option-f "{o}"version-stamp
+
+"{o}"version-stamp \Option-f Makefile
+	Delete -i -y "{o}"version.new "{o}"version-stamp
+	Set major 0
+	Set minor 0
+	Set release 0
+	Echo '/* Version resources. */'			 > "{o}"version.new
+	Echo '#include "SysTypes.r"'			>> "{o}"version.new
+	Echo ''						>> "{o}"version.new
+	Echo "resource 'vers' (1) " `open-brace`	>> "{o}"version.new
+	Echo "	{major},"				>> "{o}"version.new
+	Echo "	{minor},"				>> "{o}"version.new
+	Echo "	{release},"				>> "{o}"version.new
+	Echo '	0,'					>> "{o}"version.new
+	Echo '	verUs,'					>> "{o}"version.new
+	Echo '	"{VERSION}",'				>> "{o}"version.new
+	Echo '	"{VERSION} (c) 1986-95 FSF, Inc. "'	>> "{o}"version.new
+	Echo '};'					>> "{o}"version.new
+	Echo ''						>> "{o}"version.new
+	Echo "resource 'vers' (2, purgeable) " `open-brace`  >> "{o}"version.new
+	Echo "	{major},"				>> "{o}"version.new
+	Echo "	{minor},"				>> "{o}"version.new
+	Echo "	{release},"				>> "{o}"version.new
+	Echo '	0,'					>> "{o}"version.new
+	Echo '	verUs,'					>> "{o}"version.new
+	Echo '	"{VERSION}",'				>> "{o}"version.new
+	Echo '	"GDB for MPW"'			>> "{o}"version.new
+	Echo '};'					>> "{o}"version.new
+	MoveIfChange "{o}"version.new "{o}"Version.r
+	Echo ' ' > "{o}"version-stamp
 
 # This is useful when debugging GDB, because some Unix's don't let you run GDB
 # on itself without copying the executable.  So "make gdb1" will make
@@ -1096,7 +1132,6 @@ MAKEOVERRIDES=
 "{o}"udr.c.o \Option-f  "{s}"29k-share:udi:udr.c {udiheaders} 
 	{CC} {INTERNAL_CFLAGS} "{s}"29k-share:udi:udr.c -o "{o}"udr.c.o
 
-"{o}"a29k-pinsn.c.o \Option-f  "{s}"a29k-pinsn.c {bfd_h} {dis_asm_h}
 "{o}"a29k-tdep.c.o \Option-f  "{s}"a29k-tdep.c {gdbcmd_h} {gdbcore_h} {inferior_h} {defs_h}
 "{o}"a68v-nat.c.o \Option-f  "{s}"a68v-nat.c {defs_h} {gdbcore_h} {inferior_h}
 
@@ -1109,7 +1144,7 @@ MAKEOVERRIDES=
 
 "{o}"annotate.c.o \Option-f  "{s}"annotate.c
 
-"{o}"arm-pinsn.c.o \Option-f  "{s}"arm-pinsn.c "{s}"{OP_INCLUDE}:arm.h {defs_h} {symtab_h}
+"{o}"arm-tdep.c.o \Option-f  "{s}"arm-tdep.c "{s}"{OP_INCLUDE}:arm.h {defs_h} {symtab_h}
 
 "{o}"blockframe.c.o \Option-f  "{s}"blockframe.c {defs_h} {gdbcore_h} {inferior_h} \Option-d
 	"{s}"objfiles.h "{s}"symfile.h "{s}"target.h
@@ -1150,9 +1185,6 @@ MAKEOVERRIDES=
 	{gdbtypes_h} {symtab_h} {value_h}
 
 "{o}"complaints.c.o \Option-f  "{s}"complaints.c "{s}"complaints.h {defs_h} {gdbcmd_h}
-
-"{o}"convex-pinsn.c.o \Option-f  "{s}"convex-pinsn.c "{s}"{OP_INCLUDE}:convex.h {defs_h} \Option-d
-	{symtab_h}
 
 "{o}"convex-tdep.c.o \Option-f  "{s}"convex-tdep.c {wait_h} {defs_h} {gdbcmd_h} \Option-d
 	{gdbcore_h} {inferior_h}
@@ -1226,7 +1258,7 @@ MAKEOVERRIDES=
 
 "{o}"go32-xdep.c.o \Option-f  "{s}"go32-xdep.c
 
-"{o}"gould-pinsn.c.o \Option-f  "{s}"gould-pinsn.c "{s}"{OP_INCLUDE}:np1.h {defs_h} {frame_h} \Option-d
+"{o}"gould-tdep.c.o \Option-f  "{s}"gould-tdep.c "{s}"{OP_INCLUDE}:np1.h {defs_h} {frame_h} \Option-d
 	{gdbcore_h} {symtab_h}
 
 "{o}"gould-xdep.c.o \Option-f  "{s}"gould-xdep.c {defs_h} {gdbcore_h} {inferior_h}
@@ -1237,14 +1269,12 @@ MAKEOVERRIDES=
 	{value_h}
 
 "{o}"hp300ux-nat.c.o \Option-f  "{s}"hp300ux-nat.c {defs_h} {gdbcore_h} {inferior_h}
-"{o}"hppa-pinsn.c.o \Option-f  "{s}"hppa-pinsn.c {bfd_h} {dis_asm_h} {defs_h} 
 
 "{o}"hppa-tdep.c.o \Option-f  "{s}"hppa-tdep.c {wait_h} {defs_h} {gdbcmd_h} {gdbcore_h} \Option-d
 	{inferior_h} "{s}"objfiles.h "{s}"symfile.h "{s}"target.h
 
 "{o}"hppab-nat.c.o \Option-f  "{s}"hppab-nat.c {bfd_h} {defs_h} {inferior_h} "{s}"target.h
 "{o}"hppah-nat.c.o \Option-f  "{s}"hppah-nat.c {bfd_h} {defs_h} {inferior_h} "{s}"target.h
-"{o}"i386-pinsn.c.o \Option-f  "{s}"i386-pinsn.c {bfd_h} {dis_asm_h} {defs_h}
 "{o}"i386-tdep.c.o \Option-f  "{s}"i386-tdep.c {defs_h} {gdbcore_h} {inferior_h} "{s}"target.h
 "{o}"i386b-nat.c.o \Option-f  "{s}"i386b-nat.c {defs_h} 
 "{o}"i386ly-nat.c.o \Option-f  "{s}"i386ly-nat.c {defs_h} {frame_h} {inferior_h} "{s}"target.h
@@ -1258,8 +1288,6 @@ MAKEOVERRIDES=
 
 "{o}"i387-tdep.c.o \Option-f  "{s}"i387-tdep.c {ieee_float_h} {defs_h} {gdbcore_h} \Option-d
 	{inferior_h} "{s}"language.h
-
-"{o}"i960-pinsn.c.o \Option-f  "{s}"i960-pinsn.c {bfd_h} {dis_asm_h} {defs_h}
 
 "{o}"i960-tdep.c.o \Option-f  "{s}"i960-tdep.c {ieee_float_h} {defs_h} {expression_h} \Option-d
 	{frame_h} {gdbtypes_h} {symtab_h} {value_h}
@@ -1295,11 +1323,12 @@ MAKEOVERRIDES=
 "{o}"m2-valprint.c.o \Option-f  "{s}"m2-valprint.c {defs_h} {gdbtypes_h} {symtab_h} \Option-d
 	"{s}"valprint.h
 
-"{o}"m68k-pinsn.c.o \Option-f  "{s}"m68k-pinsn.c {bfd_h} {dis_asm_h} {defs_h} 
 "{o}"m68k-tdep.c.o \Option-f  "{s}"m68k-tdep.c {defs_h} {frame_h} {symtab_h} 
+
 "{o}"m68kly-nat.c.o \Option-f  "{s}"m68kly-nat.c {defs_h} {frame_h} {inferior_h} "{s}"target.h
+
 "{o}"m88k-nat.c.o \Option-f  "{s}"m88k-nat.c {defs_h} {gdbcore_h} {inferior_h}
-"{o}"m88k-pinsn.c.o \Option-f  "{s}"m88k-pinsn.c {defs_h} {symtab_h} 
+
 "{o}"m88k-tdep.c.o \Option-f  "{s}"m88k-tdep.c {defs_h} {gdbcore_h} {inferior_h}
 
 "{o}"main.c.o \Option-f  "{s}"main.c {bfd_h} {getopt_h} {readline_headers} "{s}"call-cmds.h \Option-d
@@ -1323,7 +1352,6 @@ MAKEOVERRIDES=
 	{symtab_h}
 
 "{o}"mips-nat.c.o \Option-f  "{s}"mips-nat.c {defs_h} {gdbcore_h} {inferior_h} 
-"{o}"mips-pinsn.c.o \Option-f  "{s}"mips-pinsn.c {bfd_h} {dis_asm_h} {defs_h} 
 
 "{o}"mips-tdep.c.o \Option-f  "{s}"mips-tdep.c {defs_h} {gdbcmd_h} {gdbcore_h} \Option-d
 	{inferior_h} "{s}"language.h "{s}"objfiles.h "{s}"symfile.h
@@ -1350,7 +1378,7 @@ MAKEOVERRIDES=
 
 "{o}"nindy-tdep.c.o \Option-f  "{s}"nindy-tdep.c {defs_h} {frame_h} {symtab_h} 
 
-"{o}"ns32k-pinsn.c.o \Option-f  "{s}"ns32k-pinsn.c {defs_h} {gdbcore_h} "{s}"ns32k-opcode.h \Option-d
+"{o}"ns32k-tdep.c.o \Option-f  "{s}"ns32k-tdep.c {defs_h} {gdbcore_h} "{s}"ns32k-opcode.h \Option-d
 	{symtab_h}
 
 "{o}"objfiles.c.o \Option-f  "{s}"objfiles.c {bfd_h} {defs_h} "{s}"objfiles.h "{s}"symfile.h \Option-d
@@ -1374,10 +1402,8 @@ MAKEOVERRIDES=
 "{o}"procfs.c.o \Option-f  "{s}"procfs.c {command_h} {defs_h} {gdbcore_h} {inferior_h} \Option-d
 	"{s}"target.h
 
-"{o}"pyr-pinsn.c.o \Option-f  "{s}"pyr-pinsn.c "{s}"{OP_INCLUDE}:pyr.h {defs_h} {gdbcore_h} \Option-d
-	{symtab_h}
-
 "{o}"pyr-tdep.c.o \Option-f  "{s}"pyr-tdep.c {defs_h} 
+
 "{o}"pyr-xdep.c.o \Option-f  "{s}"pyr-xdep.c {defs_h} {gdbcore_h} {inferior_h} 
 
 "{o}"regex.c.o \Option-f  "{s}"regex.c "{s}"regex.h
@@ -1436,8 +1462,6 @@ MAKEOVERRIDES=
 
 "{o}"rs6000-nat.c.o \Option-f  "{s}"rs6000-nat.c {bfd_h} {defs_h} {inferior_h} "{s}"target.h
 
-"{o}"rs6000-pinsn.c.o \Option-f  "{s}"rs6000-pinsn.c "{s}"{OP_INCLUDE}:rs6k.h {defs_h}
-
 "{o}"rs6000-tdep.c.o \Option-f  "{s}"rs6000-tdep.c {defs_h} {gdbcore_h} {inferior_h} \Option-d
 	"{s}"target.h "{s}"xcoffsolib.h
 
@@ -1458,7 +1482,6 @@ MAKEOVERRIDES=
 	{gdbcore_h} "{s}"language.h "{s}"objfiles.h "{s}"regex.h "{s}"symfile.h {symtab_h}
 
 "{o}"sparc-nat.c.o \Option-f  "{s}"sparc-nat.c {bfd_h} {defs_h} {inferior_h} "{s}"target.h
-"{o}"sparc-pinsn.c.o \Option-f  "{s}"sparc-pinsn.c {bfd_h} {dis_asm_h} {defs_h}
 
 "{o}"sparc-tdep.c.o \Option-f  "{s}"sparc-tdep.c {ieee_float_h} {defs_h} {gdbcore_h} \Option-d
 	{inferior_h} "{s}"objfiles.h "{s}"symfile.h "{s}"target.h
@@ -1488,7 +1511,7 @@ MAKEOVERRIDES=
 	{gdbcmd_h} {gdbcore_h} {gdbtypes_h} "{s}"language.h "{s}"objfiles.h \Option-d
 	"{s}"regex.h "{s}"symfile.h {symtab_h} "{s}"target.h {value_h}
 
-"{o}"tahoe-pinsn.c.o \Option-f  "{s}"tahoe-pinsn.c "{s}"{OP_INCLUDE}:tahoe.h {defs_h} \Option-d
+"{o}"tahoe-tdep.c.o \Option-f  "{s}"tahoe-tdep.c "{s}"{OP_INCLUDE}:tahoe.h {defs_h} \Option-d
 	{symtab_h}
 
 "{o}"target.c.o \Option-f  "{s}"target.c {bfd_h} {defs_h} {gdbcmd_h} {inferior_h} \Option-d
@@ -1519,7 +1542,7 @@ MAKEOVERRIDES=
 "{o}"values.c.o \Option-f  "{s}"values.c {defs_h} {expression_h} {frame_h} {gdbcmd_h} \Option-d
 	{gdbcore_h} {gdbtypes_h} {symtab_h} "{s}"target.h {value_h}
 
-"{o}"vax-pinsn.c.o \Option-f  "{s}"vax-pinsn.c "{s}"{OP_INCLUDE}:vax.h {defs_h} {symtab_h}
+"{o}"vax-tdep.c.o \Option-f  "{s}"vax-tdep.c "{s}"{OP_INCLUDE}:vax.h {defs_h} {symtab_h}
 
 "{o}"xdr_ld.c.o \Option-f  "{s}"vx-share:xdr_ld.c {defs_h} "{s}"vx-share:vxTypes.h \Option-d
 	"{s}"vx-share:vxWorks.h "{s}"vx-share:xdr_ld.h

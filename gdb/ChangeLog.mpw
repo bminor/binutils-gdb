@@ -1,3 +1,24 @@
+Fri Mar 17 15:01:03 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-config.in (i386-unknown-go32): Change from aout.
+	(sh-hitachi-hms): New target.
+	* mpw-make.in (BISON): Use byacc instead of bison.
+	(VERSION): Bump to 4.14.1.
+	(*-pinsn.*): Remove mentions everywhere.
+	(all): Don't build MacGDB.
+	(gdb, SiowGDB): Depend on Version.r.
+	(Version.r): Generate from version info.
+	* main.c (main): Pass program name to START_PROGRESS, END_PROGRESS.
+	(main) [MPW]: Remove debugging hook.
+	* mac-xdep.c (debug_openp): New flag.
+	(mac_init): Set flag if env variable defined.
+	* ser-mac.c (mac_open): Clarify error message.
+	(mac_readchar): Call PROGRESS while looping.
+	(mac_write): Call sleep instead of sec_sleep.
+	(sec_sleep): Remove.
+	* source.c (openp) [MPW]: Only print debugging info if debugging.
+	* utils.c (query) [MPW]: Clarify that behavior is a bug.
+
 Wed Jan  4 17:55:39 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-make.in (init.c): Use open-brace instead of mpw-open-brace.

@@ -95,7 +95,7 @@ mac_open (scb, name)
     }
   else
     {
-      error ("You must specify a port.  Choices are `modem' or `printer'.");
+      error ("You must specify a valid serial port name; your choices are `modem' or `printer'.");
       errno = ENOENT;
       return (-1);
     }
@@ -195,6 +195,7 @@ mac_readchar (scb, timeout)
 	  if (now > start_time + timeout)
 	    return SERIAL_TIMEOUT;
 	}
+      PROGRESS (1);
     }
 }
 
@@ -267,7 +268,7 @@ mac_write (scb, str, len)
 
   if (first_mac_write++ < 4)
     {
-      sec_sleep (1);
+      sleep (1);
     }
   pb.ioRefNum = output_refnum;
   pb.ioBuffer = (Ptr) str;
@@ -278,20 +279,6 @@ mac_write (scb, str, len)
       return 1;
     }
   return 0;
-}
-
-sec_sleep (int timeout)
-{
-  unsigned long start_time, now;
-
-  time (&start_time);
-
-  while (1)
-    {
-      time (&now);
-      if (now > start_time + timeout)
-	return;
-    }
 }
 
 static void

@@ -54,7 +54,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifdef MPW
 #define QD(whatever) (qd.##whatever)
 #define QDPat(whatever) (&(qd.##whatever))
-#endif
+#endif /* MPW */
 
 #ifdef THINK_C
 #define QD(whatever) (whatever)
@@ -80,6 +80,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "language.h"
 
 #include "mac-defs.h"
+
+int debug_openp = 0;
 
 /* This is true if we are running as a standalone application.  */
 
@@ -123,6 +125,7 @@ mac_init ()
 {
   SysEnvRec se;
   int eventloopdone = 0;
+  char *str;
   Boolean gotevent;
   Point mouse;
   EventRecord event;
@@ -135,6 +138,13 @@ mac_init ()
 
   mac_app = 0;
 
+  str = getenv("DEBUG_GDB");
+  if (str != NULL && str[0] != '\0')
+    {
+      if (strcmp(str, "openp") == 0)
+	debug_openp = 1;
+    }
+  
   /* Don't do anything if we`re running under MPW. */
   if (!StandAlone)
     return;

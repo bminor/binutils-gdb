@@ -15,25 +15,26 @@ Echo "/* dummy */" >termio.h
 
 If "{target_canonical}" =~ /m68k-apple-macos/
 	forward-include "{srcdir}"config:m68k:tm-mac.h tm.h
-
 	forward-include "{srcdir}"config:m68k:tm-m68k.h 'm68k/tm-m68k.h'
+	Set tdepfiles '"{o}"m68k-tdep.c.o'
 
-	Set tdepfiles '"{o}"m68k-pinsn.c.o "{o}"m68k-tdep.c.o'
 Else If "{target_canonical}" =~ /ppc-apple-macos/
 	forward-include "{srcdir}"config:powerpc:tm-ppc.h tm.h
-
 	Set tdepfiles '"{o}"ppc-tdep.c.o'
-Else If "{target_canonical}" =~ /i386-unknown-aout/
-	forward-include "{srcdir}"config:i386:tm-i386.h tm.h
 
+Else If "{target_canonical}" =~ /i386-unknown-go32/
+	forward-include "{srcdir}"config:i386:tm-i386v.h tm.h
 	Set tdepfiles '"{o}"i386-tdep.c.o'
+
 Else If "{target_canonical}" =~ /mips-idt-ecoff/
 	forward-include "{srcdir}"config:mips:tm-idt.h tm.h
-
 	forward-include "{srcdir}"config:mips:tm-bigmips.h 'mips/tm-bigmips.h'
 	forward-include "{srcdir}"config:mips:tm-mips.h 'mips/tm-mips.h'
+	Set tdepfiles '"{o}"mips-tdep.c.o "{o}"remote-mips.c.o'
 
-	Set tdepfiles '"{o}"mips-pinsn.c.o "{o}"mips-tdep.c.o "{o}"remote-mips.c.o'
+Else If "{target_canonical}" =~ /sh-hitachi-hms/
+	forward-include "{srcdir}"config:sh:tm-sh.h tm.h
+	Set tdepfiles '"{o}"sh-tdep.c.o'
 End If
 
 If "{target_canonical}" != "{host_canonical}"
