@@ -1,5 +1,9 @@
 2002-09-30  Alan Modra  <amodra@bigpond.net.au>
 
+	* scripttempl/elfd30v.sc: Order reloc sections placing .plt last.
+	* scripttempl/elfm68hc11.sc: Likewise.
+	* scripttempl/elfm68hc12.sc: Likewise.
+
 	* emultempl/elf32.em (output_rel_find): Always place orphan loadable
 	reloc sections just before .rel.plt/.rela.plt.
 	(gld${EMULATION_NAME}_place_orphan <.rel>): Remove combreloc code.
