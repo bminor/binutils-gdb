@@ -1,3 +1,13 @@
+Thu Oct 10 17:22:18 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/tc-ppc.c (ppc_insert_operand): Change most warnings into
+	errors.
+	(ppc_elf_validate_fix): Ditto.
+	(md_assemble): Ditto.
+	(ppc_tc): Ditto.
+	(ppc_pe_section): Ditto.
+	(ppc_frob_symbol): Ditto.
+
 Thu Oct 10 12:05:45 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-mn10300.c (md_assemble): Use FMT_* macros for

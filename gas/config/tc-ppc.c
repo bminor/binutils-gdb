@@ -15,8 +15,9 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with GAS; see the file COPYING.  If not, write to
-   the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. */
+   along with GAS; see the file COPYING.  If not, write to the Free
+   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA. */
 
 #include <stdio.h>
 #include <ctype.h>
@@ -427,28 +428,31 @@ static const struct pd_reg pre_defined_registers[] =
 /* Given NAME, find the register number associated with that name, return
    the integer value associated with the given name or -1 on failure.  */
 
-static int reg_name_search PARAMS ( (char * name) );
+static int reg_name_search
+  PARAMS ((const struct pd_reg *, int, const char * name));
 
 static int
-reg_name_search (name)
-     char *name;
+reg_name_search (regs, regcount, name)
+     const struct pd_reg *regs;
+     int regcount;
+     const char *name;
 {
   int middle, low, high;
   int cmp;
 
   low = 0;
-  high = REG_NAME_CNT - 1;
+  high = regcount - 1;
 
   do
     {
       middle = (low + high) / 2;
-      cmp = strcasecmp (name, pre_defined_registers[middle].name);
+      cmp = strcasecmp (name, regs[middle].name);
       if (cmp < 0)
 	high = middle - 1;
       else if (cmp > 0)
 	low = middle + 1;
       else
-	return pre_defined_registers[middle].value;
+	return regs[middle].value;
     }
   while (low <= high);
 
@@ -485,7 +489,7 @@ register_name (expressionP)
     return false;
 
   c = get_symbol_end ();
-  reg_number = reg_name_search (name);
+  reg_number = reg_name_search (pre_defined_registers, REG_NAME_CNT, name);
 
   /* look to see if it's in the register table */
   if (reg_number >= 0) 
@@ -507,7 +511,55 @@ register_name (expressionP)
       return false;
     }
 }
+
+/* This function is called for each symbol seen in an expression.  It
+   handles the special parsing which PowerPC assemblers are supposed
+   to use for condition codes.  */
 
+/* Whether to do the special parsing.  */
+static boolean cr_operand;
+
+/* Names to recognize in a condition code.  This table is sorted.  */
+static const struct pd_reg cr_names[] =
+{
+  { "cr0", 0 },
+  { "cr1", 1 },
+  { "cr2", 2 },
+  { "cr3", 3 },
+  { "cr4", 4 },
+  { "cr5", 5 },
+  { "cr6", 6 },
+  { "cr7", 7 },
+  { "eq", 2 },
+  { "gt", 1 },
+  { "lt", 0 },
+  { "so", 3 },
+  { "un", 3 }
+};
+
+/* Parsing function.  This returns non-zero if it recognized an
+   expression.  */
+
+int
+ppc_parse_name (name, expr)
+     const char *name;
+     expressionS *expr;
+{
+  int val;
+
+  if (! cr_operand)
+    return 0;
+
+  val = reg_name_search (cr_names, sizeof cr_names / sizeof cr_names[0],
+			 name);
+  if (val < 0)
+    return 0;
+
+  expr->X_op = O_constant;
+  expr->X_add_number = val;
+
+  return 1;
+}
 
 /* Local variables.  */
 
@@ -994,9 +1046,9 @@ ppc_insert_operand (insn, operand, val, file, line)
 
 	  sprint_value (buf, test);
 	  if (file == (char *) NULL)
-	    as_warn (err, buf, min, max);
+	    as_bad (err, buf, min, max);
 	  else
-	    as_warn_where (file, line, err, buf, min, max);
+	    as_bad_where (file, line, err, buf, min, max);
 	}
     }
 
@@ -1007,7 +1059,7 @@ ppc_insert_operand (insn, operand, val, file, line)
       errmsg = NULL;
       insn = (*operand->insert) (insn, (long) val, &errmsg);
       if (errmsg != (const char *) NULL)
-	as_warn (errmsg);
+	as_bad (errmsg);
     }
   else
     insn |= (((long) val & ((1 << operand->bits) - 1))
@@ -1310,8 +1362,8 @@ ppc_elf_validate_fix (fixp, seg)
       if ((seg->flags & (SEC_READONLY | SEC_CODE)) != 0
 	  || fixp->fx_r_type != BFD_RELOC_CTOR)
 	{
-	  as_warn_where (fixp->fx_file, fixp->fx_line,
-			 "Relocation cannot be done when using -mrelocatable");
+	  as_bad_where (fixp->fx_file, fixp->fx_line,
+			"Relocation cannot be done when using -mrelocatable");
 	}
     }
 }
@@ -1548,7 +1600,7 @@ md_assemble (str)
 	{
 	  insn = (*operand->insert) (insn, 0L, &errmsg);
 	  if (errmsg != (const char *) NULL)
-	    as_warn (errmsg);
+	    as_bad (errmsg);
 	  continue;
 	}
 
@@ -1561,7 +1613,7 @@ md_assemble (str)
 	    {
 	      insn = (*operand->insert) (insn, 0L, &errmsg);
 	      if (errmsg != (const char *) NULL)
-		as_warn (errmsg);
+		as_bad (errmsg);
 	    }
 	  if ((operand->flags & PPC_OPERAND_NEXT) != 0)
 	    next_opindex = *opindex_ptr + 1;
@@ -1638,7 +1690,7 @@ md_assemble (str)
 		  assert (ex.X_add_symbol != NULL);
 		  if (ex.X_add_symbol->bsym->section != tocdata_section)
 		    {
-		      as_warn("[tocv] symbol is not a toc symbol");
+		      as_bad("[tocv] symbol is not a toc symbol");
 		    }
 		}
 
@@ -1684,8 +1736,15 @@ md_assemble (str)
 
       else
 #endif		/* TE_PE */
-	if (!register_name(&ex))
-	  expression (&ex);
+	{
+	  if (! register_name (&ex))
+	    {
+	      if ((operand->flags & PPC_OPERAND_CR) != 0)
+		cr_operand = true;
+	      expression (&ex);
+	      cr_operand = false;
+	    }
+	}
 
       str = input_line_pointer;
       input_line_pointer = hold;
@@ -2993,7 +3052,7 @@ ppc_tc (ignore)
 	label = ppc_current_csect->sy_tc.within;
 	if (label->sy_tc.class != XMC_TC0)
 	  {
-	    as_warn (".tc with no label");
+	    as_bad (".tc with no label");
 	    ignore_rest_of_line ();
 	    return;
 	  }
@@ -3487,7 +3546,7 @@ ppc_pe_section (ignore)
 		{
 		  /* Section Contents */
 		case 'a': /* unknown */
-		  as_warn ("Unsupported section attribute -- 'a'");
+		  as_bad ("Unsupported section attribute -- 'a'");
 		  break;
 		case 'c': /* code section */
 		  flags |= SEC_CODE; 
@@ -3557,8 +3616,8 @@ ppc_pe_section (ignore)
 		  break;
 
 		default:
-		  as_warn("unknown section attribute '%c'",
-			  *input_line_pointer);
+		  as_bad("unknown section attribute '%c'",
+			 *input_line_pointer);
 		  break;
 		}
 	      ++input_line_pointer;
@@ -3575,9 +3634,9 @@ ppc_pe_section (ignore)
   if (flags != SEC_NO_FLAGS)
     {
       if (! bfd_set_section_flags (stdoutput, sec, flags))
-	as_warn ("error setting flags for \"%s\": %s",
-		 bfd_section_name (stdoutput, sec),
-		 bfd_errmsg (bfd_get_error ()));
+	as_bad ("error setting flags for \"%s\": %s",
+		bfd_section_name (stdoutput, sec),
+		bfd_errmsg (bfd_get_error ()));
     }
 
   bfd_set_section_alignment(stdoutput, sec, align);
@@ -3850,7 +3909,7 @@ ppc_frob_symbol (sym)
   if (SF_GET_FUNCTION (sym))
     {
       if (ppc_last_function != (symbolS *) NULL)
-	as_warn ("two .function pseudo-ops with no intervening .ef");
+	as_bad ("two .function pseudo-ops with no intervening .ef");
       ppc_last_function = sym;
       if (sym->sy_tc.size != (symbolS *) NULL)
 	{
@@ -3862,7 +3921,7 @@ ppc_frob_symbol (sym)
 	   && strcmp (S_GET_NAME (sym), ".ef") == 0)
     {
       if (ppc_last_function == (symbolS *) NULL)
-	as_warn (".ef with no preceding .function");
+	as_bad (".ef with no preceding .function");
       else
 	{
 	  set_end = ppc_last_function;
@@ -4343,7 +4402,31 @@ ppc_fix_adjustable (fix)
   return 0;
 }
 
-#endif
+/* A reloc from one csect to another must be kept.  The assembler
+   will, of course, keep relocs between sections, and it will keep
+   absolute relocs, but we need to force it to keep PC relative relocs
+   between two csects in the same section.  */
+
+int
+ppc_force_relocation (fix)
+     fixS *fix;
+{
+  /* At this point fix->fx_addsy should already have been converted to
+     a csect symbol.  If the csect does not include the fragment, then
+     we need to force the relocation.  */
+  if (fix->fx_pcrel
+      && fix->fx_addsy != NULL
+      && fix->fx_addsy->sy_tc.subseg != 0
+      && (fix->fx_addsy->sy_frag->fr_address > fix->fx_frag->fr_address
+	  || (fix->fx_addsy->sy_tc.next != NULL
+	      && (fix->fx_addsy->sy_tc.next->sy_frag->fr_address
+		  <= fix->fx_frag->fr_address))))
+    return 1;
+
+  return 0;
+}
+
+#endif /* OBJ_XCOFF */
 
 /* See whether a symbol is in the TOC section.  */
 
