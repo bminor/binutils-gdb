@@ -1,8 +1,8 @@
 /* Floating point routines for GDB, the GNU debugger.
 
    Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001, 2003 Free Software Foundation,
-   Inc.
+   1996, 1997, 1998, 1999, 2000, 2001, 2003, 2004 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -618,8 +618,8 @@ floatformat_from_doublest (const struct floatformat *fmt,
 
 
 /* Return a floating-point format for a floating-point variable of
-   length LEN.  Return NULL, if no suitable floating-point format
-   could be found.
+   length LEN.  If no suitable floating-point format is found, an
+   error is thrown.
 
    We need this functionality since information about the
    floating-point format of a type is not always available to GDB; the
@@ -633,12 +633,13 @@ floatformat_from_doublest (const struct floatformat *fmt,
 static const struct floatformat *
 floatformat_from_length (int len)
 {
+  const struct floatformat *format;
   if (len * TARGET_CHAR_BIT == TARGET_FLOAT_BIT)
-    return TARGET_FLOAT_FORMAT;
+    format = TARGET_FLOAT_FORMAT;
   else if (len * TARGET_CHAR_BIT == TARGET_DOUBLE_BIT)
-    return TARGET_DOUBLE_FORMAT;
+    format = TARGET_DOUBLE_FORMAT;
   else if (len * TARGET_CHAR_BIT == TARGET_LONG_DOUBLE_BIT)
-    return TARGET_LONG_DOUBLE_FORMAT;
+    format = TARGET_LONG_DOUBLE_FORMAT;
   /* On i386 the 'long double' type takes 96 bits,
      while the real number of used bits is only 80,
      both in processor and in memory.  
@@ -646,9 +647,13 @@ floatformat_from_length (int len)
   else if ((TARGET_LONG_DOUBLE_FORMAT != NULL) 
 	   && (len * TARGET_CHAR_BIT ==
                TARGET_LONG_DOUBLE_FORMAT->totalsize))
-    return TARGET_LONG_DOUBLE_FORMAT;
-
-  return NULL;
+    format = TARGET_LONG_DOUBLE_FORMAT;
+  else
+    format = NULL;
+  if (format == NULL)
+    error ("Unrecognized %d-bit floating-point type.",
+	   len & TARGET_CHAR_BIT);
+  return format;
 }
 
 const struct floatformat *
@@ -675,12 +680,6 @@ extract_floating_by_length (const void *addr, int len)
   const struct floatformat *fmt = floatformat_from_length (len);
   DOUBLEST val;
 
-  if (fmt == NULL)
-    {
-      warning ("Can't extract a floating-point number of %d bytes.", len);
-      return NAN;
-    }
-
   floatformat_to_doublest (fmt, addr, &val);
   return val;
 }
@@ -698,13 +697,6 @@ static void
 store_floating_by_length (void *addr, int len, DOUBLEST val)
 {
   const struct floatformat *fmt = floatformat_from_length (len);
-
-  if (fmt == NULL)
-    {
-      warning ("Can't store a floating-point number of %d bytes.", len);
-      memset (addr, 0, len);
-      return;
-    }
 
   floatformat_from_doublest (fmt, &val, addr);
 }
