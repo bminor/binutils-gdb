@@ -1,3 +1,10 @@
+Tue Jul  9 22:41:12 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* h8300-tdep.c: Remove some outdated comments.
+	(h8300_skip_prologue): Rework to be more correct for the H8/300H.
+	Handle stm.l insns for the H8/S.
+	(examine_prologue): Likewise.
+
 Tue Jul  9 16:48:55 1996  Raymond Jou  <rjou@mexican.cygnus.com>
 
 	* ser-mac.c (mac_close): Change a typo SetSetBuf to SerSetBuf.

@@ -39,15 +39,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define UNSIGNED_SHORT(X) ((X) & 0xffff)
 
-/* an easy to debug H8 stack frame looks like:
-0x6df6		push	r6
-0x0d76  	mov.w   r7,r6
-0x6dfn          push    reg
-0x7905 nnnn  	mov.w  #n,r5    or   0x1b87  subs #2,sp
-0x1957       	sub.w  r5,sp
-
- */
-
 #define IS_PUSH(x) ((x & 0xfff0)==0x6df0)
 #define IS_PUSH_FP(x) (x == 0x6df6)
 #define IS_MOVE_FP(x) (x == 0x0d76 || x == 0x0ff6)
@@ -71,47 +62,66 @@ h8300_skip_prologue (start_pc)
   short int w;
   int adjust = 0;
 
+  /* Skip past all push and stm insns.  */
+  while (1)
+    {
+      w = read_memory_unsigned_integer (start_pc, 2);
+      /* First look for push insns.  */
+      if (w == 0x0100 || w == 0x0110 || w == 0x0120 || w == 0x0130)
+	{
+	  w = read_memory_unsigned_integer (start_pc + 2, 2);
+	  adjust = 2;
+	}
+
+      if (IS_PUSH (w))
+	{
+	  start_pc += 2 + adjust;
+	  w = read_memory_unsigned_integer (start_pc, 2);
+	  continue;
+	}
+      adjust = 0;
+      break;
+    }
+
+  /* Skip past a move to FP, either word or long sized */
   w = read_memory_unsigned_integer (start_pc, 2);
   if (w == 0x0100)
     {
       w = read_memory_unsigned_integer (start_pc + 2, 2);
-      adjust = 2;
+      adjust += 2;
     }
 
-  /* Skip past all push insns */
-  while (IS_PUSH_FP (w))
+  if (IS_MOVE_FP (w))
     {
       start_pc += 2 + adjust;
       w = read_memory_unsigned_integer (start_pc, 2);
     }
 
-  /* Skip past a move to FP */
-  if (IS_MOVE_FP (w))
-    {
-      start_pc += 2;
-      w = read_memory_unsigned_integer (start_pc, 2);
-    }
-
-  /* Skip the stack adjust */
-
+  /* Check for loading either a word constant into r5;
+     long versions are handled by the SUBL_SP below.  */
   if (IS_MOVK_R5 (w))
     {
       start_pc += 2;
       w = read_memory_unsigned_integer (start_pc, 2);
     }
+
+  /* Now check for subtracting r5 from sp, word sized only.  */
   if (IS_SUB_R5SP (w))
     {
-      start_pc += 2;
-      w = read_memory_unsigned_integer (start_pc, 2);
-    }
-  while (IS_SUB2_SP (w) || IS_SUB4_SP (w))
-    {
-      start_pc += 2;
+      start_pc += 2 + adjust;
       w = read_memory_unsigned_integer (start_pc, 2);
     }
 
+  /* Check for subs #2 and subs #4. */
+  while (IS_SUB2_SP (w) || IS_SUB4_SP (w))
+    {
+      start_pc += 2 + adjust;
+      w = read_memory_unsigned_integer (start_pc, 2);
+    }
+
+  /* Check for a 32bit subtract.  */
   if (IS_SUBL_SP (w))
-    start_pc += 6;
+    start_pc += 6 + adjust;
 
   return start_pc;
 }
@@ -251,6 +261,8 @@ examine_prologue (ip, limit, after_prolog_fp, fsr, fi)
     {
       after_prolog_fp = read_register (SP_REGNUM);
     }
+
+  /* If the PC isn't valid, quit now.  */
   if (ip == 0 || ip & (h8300hmode ? ~0xffffff : ~0xffff))
     return 0;
 
@@ -314,13 +326,47 @@ examine_prologue (ip, limit, after_prolog_fp, fsr, fi)
 	}
     }
 
-  /* Work out which regs are stored where */
-  while (next_ip && IS_PUSH (insn_word))
+  /* Now examine the push insns to determine where everything lives
+     on the stack.  */
+  while (1)
     {
-      ip = next_ip;
-      next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn_word);
-      fsr->regs[r] = after_prolog_fp + auto_depth;
-      auto_depth += 2;
+      adjust = 0;
+      if (!next_ip)
+	break;
+
+      if (insn_word == 0x0100)
+	{
+	  ip = next_ip;
+	  next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn_word);
+	  adjust = 2;
+	}
+
+      if (IS_PUSH (insn_word))
+	{
+	  ip = next_ip;
+	  next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn_word);
+	  fsr->regs[r] = after_prolog_fp + auto_depth;
+	  auto_depth += 2 + adjust;
+	  continue;
+	}
+
+      /* Now check for push multiple insns.  */
+      if (insn_word == 0x0110 || insn_word == 0x0120 || insn_word == 0x0130)
+	{
+	  int count = ((insn_word >> 4) & 0xf) + 1;
+	  int start, i;
+
+	  ip = next_ip;
+	  next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn_word);
+	  start = insn_word & 0x7;
+
+	  for (i = start; i <= start + count; i++)
+	    {
+	      fsr->regs[i] = after_prolog_fp + auto_depth;
+	      auto_depth += 4;
+	    }
+	}
+      break;
     }
 
   /* The args are always reffed based from the stack pointer */
