@@ -8,7 +8,9 @@ Fri Aug 21 07:30:35 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* read.h (generate_lineno_debug): Add prototype.
 	* read.c (generate_lineno_debug): Make non-static.
+start-sanitize-sky
 	* config/tc-dvp.c (insert_mpg_marker): Call generate_lineno_debug.
+end-sanitize-sky
 
 Thu Aug 20 23:17:04 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
