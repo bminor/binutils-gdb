@@ -184,8 +184,6 @@ assemble_insn (str, lower_p, buf)
 	  break;
       if (*syn != '\0')
 	continue;
-      if (isalpha (*str))
-	continue;
 
       /* Scan the syntax string.  If it doesn't match, try the next one.  */
 
@@ -204,10 +202,12 @@ assemble_insn (str, lower_p, buf)
 	  const struct txvu_operand *operand;
 	  const char *errmsg;
 
-	  /* Non operand chars must match exactly.  */
+	  /* Non operand chars must match exactly.
+	     Operand chars that are letters are not part of symbols
+	     and are case insensitive.  */
 	  if (*syn < 128)
 	    {
-	      if (*str == *syn)
+	      if (tolower (*str) == tolower (*syn))
 		{
 		  if (*syn == ' ')
 		    past_opcode_p = 1;
@@ -264,6 +264,8 @@ assemble_insn (str, lower_p, buf)
 	      s = str;
 
 	      /* Pick the suffix out and parse it.  */
+	      /* ??? Hmmm ... there may not be any need to nul-terminate the
+		 string, and it may in fact complicate things.  */
 	      for (t = *s == '.' ? s + 1 : s; *t && isalpha (*t); ++t)
 		continue;
 	      c = *t;
@@ -272,9 +274,10 @@ assemble_insn (str, lower_p, buf)
 	      *t = c;
 	      if (errmsg)
 		{
-		  /* This can happen in "blle foo" and we're currently using
-		     the template "b%q%.n %j".  The "bl" insn occurs later in
-		     the table so "lle" isn't an illegal suffix.  */
+		  /* This can happen, for example, in ARC's in "blle foo" and
+		     we're currently using the template "b%q%.n %j".  The "bl"
+		     insn occurs later in the table so "lle" isn't an illegal
+		     suffix.  */
 		  break;
 		}
 	      /* Insert the suffix's value into the insn.  */
@@ -312,6 +315,7 @@ assemble_insn (str, lower_p, buf)
 	      /* Is there anything left to parse?
 		 We don't check for this at the top because we want to parse
 		 any trailing fake arguments in the syntax string.  */
+	      /* ??? This doesn't allow operands with a legal value of "".  */
 	      if (*str == '\0')
 		break;
 
@@ -355,16 +359,6 @@ assemble_insn (str, lower_p, buf)
 		  const char *errmsg = NULL;
 		  insn = (*operand->insert) (insn, operand, mods,
 					     value, &errmsg);
-#if 0
-		  if (errmsg != (const char *) NULL)
-		    as_warn (errmsg);
-#endif
-		  /* FIXME: We want to try shimm insns for limm ones.  But if
-		     the constant won't fit, we must go on to try the next
-		     possibility.  Where do we issue warnings for constants
-		     that are too big then?  At present, we'll flag the insn
-		     as unrecognizable!  Maybe have the "bad instruction"
-		     error message include our `errmsg'?  */
 		  if (errmsg != (const char *) NULL)
 		    break;
 		}
