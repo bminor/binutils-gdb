@@ -1,3 +1,8 @@
+2003-08-22  Mark Kettenis  <kettenis@gnu.org>
+
+	* reggroups.c: Add whitespace after declarations of local
+	variables in functions.
+
 2003-08-21  Michael Chastain  <mec@shout.net>
 
 	* gdbtypes.h: Change array bound type from an int to enum.
