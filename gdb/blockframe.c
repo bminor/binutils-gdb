@@ -1,6 +1,6 @@
 /* Get info from stack frames;
    convert between frames, blocks, functions and pc values.
-   Copyright 1986, 1987, 1988, 1989, 1991, 1994, 1995, 1996
+   Copyright 1986, 1987, 1988, 1989, 1991, 1994, 1995, 1996, 1997
              Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -260,6 +260,12 @@ frameless_look_for_prologue (frame)
 #endif
       return after_prologue == func_start;
     }
+  else if (frame->pc == 0)
+    /* A frame with a zero PC is usually created by dereferencing a NULL
+       function pointer, normally causing an immediate core dump of the
+       inferior. Mark function as frameless, as the inferior has no chance
+       of setting up a stack frame.  */
+    return 1;
   else
     /* If we can't find the start of the function, we don't really
        know whether the function is frameless, but we should be able
@@ -850,20 +856,23 @@ sigtramp_saved_pc (frame)
 }
 #endif /* SIGCONTEXT_PC_OFFSET */
 
+#ifdef USE_GENERIC_DUMMY_FRAMES
+
 /*
- * DUMMY FRAMES
+ * GENERIC DUMMY FRAMES
  * 
  * The following code serves to maintain the dummy stack frames for
  * inferior function calls (ie. when gdb calls into the inferior via
  * call_function_by_hand).  This code saves the machine state before 
- * the call in host memory, so it must maintain an independant stack 
+ * the call in host memory, so we must maintain an independant stack 
  * and keep it consistant etc.  I am attempting to make this code 
  * generic enough to be used by many targets.
  *
  * The cheapest and most generic way to do CALL_DUMMY on a new target
  * is probably to define CALL_DUMMY to be empty, CALL_DUMMY_LENGTH to zero,
  * and CALL_DUMMY_LOCATION to AT_ENTRY.  Then you must remember to define
- * PUSH_RETURN_ADDRESS, because there won't be a call instruction to do it.
+ * PUSH_RETURN_ADDRESS, because no call instruction will be being
+ * executed by the target.
  */
 
 static struct dummy_frame *dummy_frame_stack = NULL;
@@ -878,51 +887,16 @@ generic_find_dummy_frame (pc, fp)
      CORE_ADDR fp;
 {
   struct dummy_frame * dummyframe;
-#ifdef NEED_TEXT_START_END
-  CORE_ADDR bkpt_address;
-  extern CORE_ADDR text_end;
-#endif
 
-#if CALL_DUMMY_LOCATION == AT_ENTRY_POINT
   if (pc != entry_point_address ())
     return 0;
-#endif	/* AT_ENTRY_POINT */
-
-#if CALL_DUMMY_LOCATION == BEFORE_TEXT_END
-  bkpt_address = text_end - CALL_DUMMY_LENGTH + CALL_DUMMY_BREAKPOINT_OFFSET;
-  if (pc != bkpt_address)
-    return 0;
-#endif	/* BEFORE_TEXT_END */
-
-#if CALL_DUMMY_LOCATION == AFTER_TEXT_END
-  bkpt_address = text_end + CALL_DUMMY_BREAKPOINT_OFFSET;
-  if (pc != bkpt_address)
-    return 0;
-#endif	/* AFTER_TEXT_END */
-
-#if CALL_DUMMY_LOCATION == ON_STACK
-  /* compute the displacement from the CALL_DUMMY breakpoint 
-     to the frame pointer */
-  if (1 INNER_THAN 2)
-    pc += CALL_DUMMY_LENGTH - CALL_DUMMY_BREAKPOINT_OFFSET;
-  else
-    pc += CALL_DUMMY_BREAKPOINT_OFFSET;
-#endif /* ON_STACK */
 
   for (dummyframe = dummy_frame_stack; dummyframe != NULL;
        dummyframe = dummyframe->next)
     if (fp == dummyframe->fp || fp == dummyframe->sp)
-      {
-	/* The frame in question lies between the saved fp and sp, inclusive */
-#if CALL_DUMMY_LOCATION == ON_STACK
-	/* NOTE: a better way to do this might be simply to test whether 
-	   the pc lies between the saved (sp, fp) and CALL_DUMMY_LENGTH.
-	   */
+      /* The frame in question lies between the saved fp and sp, inclusive */
+      return dummyframe->regs;
 
-	if (pc == dummyframe->fp || pc == dummyframe->sp)
-#endif /* ON_STACK */
-	  return dummyframe->regs;
-      }
   return 0;
 }
 
@@ -1020,11 +994,9 @@ generic_frame_chain_valid (fp, fi)
      CORE_ADDR fp;
      struct frame_info *fi;
 {
-#if CALL_DUMMY_LOCATION == AT_ENTRY_POINT
   if (PC_IN_CALL_DUMMY(FRAME_SAVED_PC(fi), fp, fp))
     return 1;   /* don't prune CALL_DUMMY frames */
   else          /* fall back to default algorithm (see frame.h) */
-#endif
     return (fp != 0 && !inside_entry_file (FRAME_SAVED_PC(fi)));
 }
  
@@ -1126,6 +1098,7 @@ generic_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
   if (raw_buffer)
     read_register_gen (regnum, raw_buffer);
 }
+#endif /* USE_GENERIC_DUMMY_FRAMES */
 
 void
 _initialize_blockframe ()
