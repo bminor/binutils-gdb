@@ -64,15 +64,15 @@
 
 #define NO_FCNTL
 
+int fstat ();
+
 FILE *mpw_fopen ();
-int mpw_fstat ();
 int mpw_fseek ();
 void mpw_abort ();
 
 /* Map these standard functions to improved versions in libiberty. */
 
 #define fopen mpw_fopen
-#define fstat mpw_fstat
 #define fseek mpw_fseek
 #define abort mpw_abort
 
