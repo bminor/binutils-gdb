@@ -22,5 +22,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "config/powerpc/nm-linux.h"
 
 #define PTRACE_ARG3_TYPE void *
+#define PTRACE_XFER_TYPE long
 
 #endif /* NM_PPC64_LINUX_H */

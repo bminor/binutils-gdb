@@ -1,5 +1,8 @@
 2003-05-28  Jim Blandy  <jimb@redhat.com>
 
+	* config/powerpc/nm-ppc64-linux.h (PTRACE_XFER_TYPE): This is
+	'long' on ppc64-*-linux*.
+
 	* configure.host, configure.tgt: Add entries for
 	powerpc64-*-linux, selecting powerpc/ppc64-linux.mh and
 	powerpc/linux.mt.
