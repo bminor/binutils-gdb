@@ -439,6 +439,50 @@ i386_linux_svr4_fetch_link_map_offsets (void)
 }
 
 
+/* The register sets used in GNU/Linux ELF core-dumps are identical to
+   the register sets in `struct user' that are used for a.out
+   core-dumps.  These are also used by ptrace(2).  The corresponding
+   types are `elf_gregset_t' for the general-purpose registers (with
+   `elf_greg_t' the type of a single GP register) and `elf_fpregset_t'
+   for the floating-point registers.
+
+   Those types used to be available under the names `gregset_t' and
+   `fpregset_t' too, and GDB used those names in the past.  But those
+   names are now used for the register sets used in the `mcontext_t'
+   type, which have a different size and layout.  */
+
+/* Mapping between the general-purpose registers in `struct user'
+   format and GDB's register cache layout.  */
+
+/* From <sys/reg.h>.  */
+static int i386_linux_gregset_reg_offset[] =
+{
+  6 * 4,			/* %eax */
+  1 * 4,			/* %ecx */
+  2 * 4,			/* %edx */
+  0 * 4,			/* %ebx */
+  15 * 4,			/* %esp */
+  5 * 4,			/* %ebp */
+  3 * 4,			/* %esi */
+  4 * 4,			/* %edi */
+  12 * 4,			/* %eip */
+  14 * 4,			/* %eflags */
+  13 * 4,			/* %cs */
+  16 * 4,			/* %ss */
+  7 * 4,			/* %ds */
+  8 * 4,			/* %es */
+  9 * 4,			/* %fs */
+  10 * 4,			/* %gs */
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1,
+  11 * 4			/* "orig_eax" */
+};
+
+/* Mapping between the general-purpose registers in `struct
+   sigcontext' format and GDB's register cache layout.  */
+
 /* From <asm/sigcontext.h>.  */
 static int i386_linux_sc_reg_offset[] =
 {
@@ -475,6 +519,10 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_num_regs (gdbarch, I386_LINUX_NUM_REGS);
   set_gdbarch_register_name (gdbarch, i386_linux_register_name);
   set_gdbarch_register_reggroup_p (gdbarch, i386_linux_register_reggroup_p);
+
+  tdep->gregset_reg_offset = i386_linux_gregset_reg_offset;
+  tdep->gregset_num_regs = ARRAY_SIZE (i386_linux_gregset_reg_offset);
+  tdep->sizeof_gregset = 17 * 4;
 
   tdep->jb_pc_offset = 20;	/* From <bits/setjmp.h>.  */
 

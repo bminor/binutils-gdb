@@ -1,5 +1,9 @@
 2003-10-30  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-linux-tdep.c (i386_linux_gregset_reg_offset): New variable.
+	(i386_linux_init_abi): Initialize TDEP->gregset_reg_offset,
+	TDEP->gregset_num_regs and tdep->sizeof_gregset.
+
 	* i386-linux-tdep.c (i386_linux_sc_reg_offset): Don't explicitly
 	specify size of array.
 	(i386_linux_init_abi): Remove initialization of
