@@ -45,6 +45,25 @@ Tools.  It also discusses common usage.
 * A Walk Through::		A Walk Through
 * Final Notes::			Final Notes
 * Index::			Index
+
+ --- The Detailed Node Listing ---
+
+Some Basic Terms
+
+* Host Environments::		Host Environments
+* Configuration Time Options::	Configuration Time Options
+
+A Walk Through
+
+* Native Development Environments::  Native Development Environments
+* Emulation Environments::	Emulation Environments
+* Simple Cross Environments::	Simple Cross Environments
+* Crossing Into Targets::	Crossing Into Targets
+* Canadian Cross::		Canadian Cross
+
+Final Notes
+
+* Hacking Configurations::	Hacking Configurations
 @end menu
 
 @node Some Basic Terms, Specifics., top, top
@@ -307,7 +326,7 @@ can be used.
 * Emulation Environments::	Emulation Environments
 * Simple Cross Environments::	Simple Cross Environments
 * Crossing Into Targets::	Crossing Into Targets
-* The Three Party Cross::	The Three Party Cross
+* Canadian Cross::		Canadian Cross
 @end menu
 
 @node Native Development Environments, Emulation Environments, A Walk Through, A Walk Through
@@ -504,7 +523,7 @@ Simple cross environments are the second category of cross development
 environments.
 
 
-@node Crossing Into Targets, The Three Party Cross, Simple Cross Environments, A Walk Through
+@node Crossing Into Targets, Canadian Cross, Simple Cross Environments, A Walk Through
 @section Crossing Into Targets
 
 @example
@@ -551,8 +570,8 @@ native sun4 development environment because we would be building another
 native development environment, this one on a29k.
 
 
-@node The Three Party Cross,  , Crossing Into Targets, A Walk Through
-@section The Three Party Cross
+@node Canadian Cross,  , Crossing Into Targets, A Walk Through
+@section Canadian Cross
 
 So far you've seen that our development environment source must be
 configured for a specific host and for a specific target.  You've also
@@ -605,11 +624,13 @@ what gcc-a29k builds, a29k programs.  This development environment will
 produce programs for a sun3 because that is how it was configured.  This
 means that the resulting development environment is a simple cross.
 
+@cindex Canadian Cross
 @cindex Three party cross
 There really isn't a common name for this process because very few
 development environments are capable of being configured this
 extensively.  For the sake of discussion, let's call this process a
-@emph{three party cross}.
+@emph{Canadian cross}.  It's a three party cross, Canada has a three
+party system, hence Canadian Cross.
 
 @node Final Notes, Index, A Walk Through, top
 @chapter Final Notes
