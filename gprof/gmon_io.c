@@ -256,6 +256,9 @@ gmon_read_raw_arc (FILE *ifp, bfd_vma *fpc, bfd_vma *spc, unsigned long *cnt)
       *cnt = cnt64;
       break;
 #endif
+
+    default:
+      return 1;
     }
   return 0;
 }
