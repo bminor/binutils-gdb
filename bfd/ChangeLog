@@ -1,3 +1,7 @@
+Tue Apr  2 00:33:18 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elfcode.h: Don't include <string.h>.
+
 Mon Apr  1 10:39:24 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* linker.c (_bfd_generic_link_hash_newfunc): Renamed from
