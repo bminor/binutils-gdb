@@ -5158,41 +5158,50 @@ This means that changes such as adding a new architectures or (within
 reason) support for a new host are considered acceptable.}
 
 
-@section Obsolete any code
+@section Obsoleting code
 
 Before anything else, poke the other developers (and around the source
 code) to see if there is anything that can be removed from @value{GDBN}
 (an old target, an unused file).
 
 Obsolete code is identified by adding an @code{OBSOLETE} prefix to every
-line.  Doing this means that it is easy to identify obsolete code when
-grepping through the sources.
+line.  Doing this means that it is easy to identify something that has
+been obsoleted when greping through the sources.
 
-The process has a number of steps and is intentionally slow --- this is
-to mainly ensure that people have had a reasonable chance to respond.
-Remember, everything on the internet takes a week.
+The process is done in stages --- this is mainly to ensure that the
+wider @value{GDBN} community has a reasonable opportunity to respond.
+Remember, everything on the Internet takes a week.
 
-@itemize @bullet
+@enumerate
 @item
-announce the change on @email{gdb@@sources.redhat.com, GDB mailing list}
+Post the proposal on @email{gdb@@sources.redhat.com, the GDB mailing
+list} Creating a bug report to track the task's state, is also highly
+recommended.
 @item
-wait a week or so
+Wait a week or so.
 @item
-announce the change on @email{gdb-announce@@sources.redhat.com, GDB
-Announcement mailing list}
+Post the proposal on @email{gdb-announce@@sources.redhat.com, the GDB
+Announcement mailing list}.
 @item
-wait a week or so
+Wait a week or so.
 @item
-go through and edit all relevant files and lines (e.g., in
-@file{configure.tgt}) so that they are prefixed with the word
-@code{OBSOLETE}.
-@end itemize
+Go through and edit all relevant files and lines so that they are
+prefixed with the word @code{OBSOLETE}.
+@item
+Wait until the next GDB version, containing this obsolete code, has been
+released.
+@item
+Remove the obsolete code.
+@end enumerate
 
-@emph{Maintainer note: Removing old code, while regrettable, is a good
-thing.  Firstly it helps the developers by removing code that is either
-no longer relevant or simply wrong.  Secondly since it removes any
-history associated with the file (effectively clearing the slate) the
-developer has a much freer hand when it comes to fixing broken files.}
+@noindent
+@emph{Maintainer note: While removing old code is regrettable it is
+hopefully better for @value{GDBN}'s long term development.  Firstly it
+helps the developers by removing code that is either no longer relevant
+or simply wrong.  Secondly since it removes any history associated with
+the file (effectively clearing the slate) the developer has a much freer
+hand when it comes to fixing broken files.}
+
 
 
 @section Before the Branch
