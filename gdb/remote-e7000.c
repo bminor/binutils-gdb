@@ -700,7 +700,7 @@ e7000_close (int quitting)
    when you want to detach and do something else with your gdb.  */
 
 static void
-e7000_detach (int from_tty)
+e7000_detach (char *arg, int from_tty)
 {
   pop_target ();		/* calls e7000_close to do the real work */
   if (from_tty)
@@ -710,7 +710,7 @@ e7000_detach (int from_tty)
 /* Tell the remote machine to resume.  */
 
 static void
-e7000_resume (int pid, int step, int sig)
+e7000_resume (int pid, int step, enum target_signal sigal)
 {
   if (step)
     puts_e7000debug ("S\r");
@@ -1062,7 +1062,7 @@ e7000_prepare_to_store (void)
 }
 
 static void
-e7000_files_info (void)
+e7000_files_info (struct target_ops *ops)
 {
   printf_unfiltered ("\tAttached to %s at %d baud.\n", dev_name, baudrate);
 }
@@ -1473,7 +1473,7 @@ fast_but_for_the_pause_e7000_read_inferior_memory (CORE_ADDR memaddr,
    Returns the number of bytes transferred. */
 
 static int
-e7000_xfer_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr,
+e7000_xfer_inferior_memory (CORE_ADDR memaddr, char *myaddr,
 			    int len, int write, struct target_ops *target)
 {
   if (write)
@@ -1485,7 +1485,7 @@ e7000_xfer_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr,
 }
 
 static void
-e7000_kill (char *args, int from_tty)
+e7000_kill (void)
 {
 }
 
@@ -1696,7 +1696,7 @@ static CORE_ADDR breakaddr[MAX_BREAKPOINTS] =
 {0};
 
 static int
-e7000_insert_breakpoint (CORE_ADDR addr, unsigned char *shadow)
+e7000_insert_breakpoint (CORE_ADDR addr, char *shadow)
 {
   int i;
   char buf[200];
@@ -1739,7 +1739,7 @@ e7000_insert_breakpoint (CORE_ADDR addr, unsigned char *shadow)
 }
 
 static int
-e7000_remove_breakpoint (CORE_ADDR addr, unsigned char *shadow)
+e7000_remove_breakpoint (CORE_ADDR addr, char *shadow)
 {
   int i;
   char buf[200];

@@ -416,6 +416,12 @@ e7000pc_setbaudrate (serial_t scb, int rate)
 }
 
 static int
+e7000pc_setstopbits (serial_t scb, int rate)
+{
+  return 0;
+}
+
+static int
 e7000pc_write (serial_t scb, const char *str, int len)
 {
   dosasync_write (scb->fd, str, len);
@@ -445,6 +451,7 @@ static struct serial_ops e7000pc_ops =
   e7000pc_print_tty_state,
   e7000pc_noflush_set_tty_state,
   e7000pc_setbaudrate,
+  e7000pc_setstopbits,
   e7000pc_noop,			/* wait for output to drain */
 };
 

@@ -414,7 +414,7 @@ h8500_set_pointer_size (int newsize)
 }
 
 static void
-big_command (void)
+big_command (char *arg, int from_tty)
 {
   h8500_set_pointer_size (32);
   code_size = 4;
@@ -422,7 +422,7 @@ big_command (void)
 }
 
 static void
-medium_command (void)
+medium_command (char *arg, int from_tty)
 {
   h8500_set_pointer_size (32);
   code_size = 4;
@@ -430,7 +430,7 @@ medium_command (void)
 }
 
 static void
-compact_command (void)
+compact_command (char *arg, int from_tty)
 {
   h8500_set_pointer_size (32);
   code_size = 2;
@@ -438,7 +438,7 @@ compact_command (void)
 }
 
 static void
-small_command (void)
+small_command (char *arg, int from_tty)
 {
   h8500_set_pointer_size (16);
   code_size = 2;

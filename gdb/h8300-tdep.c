@@ -738,7 +738,7 @@ set_register_names (void)
 }
 
 static void
-h8300_command (int args, int from_tty)
+h8300_command (char *args, int from_tty)
 {
   extern int h8300hmode;
   h8300hmode = 0;
@@ -747,7 +747,7 @@ h8300_command (int args, int from_tty)
 }
 
 static void
-h8300h_command (int args, int from_tty)
+h8300h_command (char *args, int from_tty)
 {
   extern int h8300hmode;
   h8300hmode = 1;
@@ -756,7 +756,7 @@ h8300h_command (int args, int from_tty)
 }
 
 static void
-h8300s_command (int args, int from_tty)
+h8300s_command (char *args, int from_tty)
 {
   extern int h8300smode;
   extern int h8300hmode;
