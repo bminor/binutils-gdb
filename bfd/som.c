@@ -3155,7 +3155,7 @@ static boolean
 som_write_symbol_strings (abfd, current_offset, syms, num_syms, string_sizep,
 			  compilation_unit)
      bfd *abfd;
-     file_ptr current_offset;
+     unsigned long current_offset;
      asymbol **syms;
      unsigned int num_syms;
      unsigned int *string_sizep;
