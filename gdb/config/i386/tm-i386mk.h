@@ -1,5 +1,5 @@
 /* Macro definitions for i386, Mach 3.0, OSF 1/MK
-   Copyright (C) 1992 Free Software Foundation, Inc.
+   Copyright (C) 1992, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -24,3 +24,15 @@
 #define MK67 1
 
 #include "i386/tm-i386m3.h"
+
+/* FIMXE: kettenis/2000-03-26: On OSF 1, `long double' is equivalent
+   to `double'.  However, I'm not sure what is the consequence of:
+
+   #define TARGET_LONG_DOUBLE_FORMAT TARGET_DOUBLE_FORMAT
+   #define TARGET_LONG_DOUBLE_BITS TARGET_DOUBLE_BITS
+
+   So I'll go with the current status quo instead.  It looks like this
+   target won't compile anyway.  Perhaps it should be obsoleted?  */
+   
+#undef TARGET_LONG_DOUBLE_FORMAT
+#undef TARGET_LONG_DOUBLE_BITS

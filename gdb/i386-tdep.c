@@ -761,6 +761,32 @@ i386_extract_return_value (struct type *type, char *regbuf, char *valbuf)
     }
 }
 
+/* Convert data from raw format for register REGNUM in buffer FROM to
+   virtual format with type TYPE in buffer TO.  In principle both
+   formats are identical except that the virtual format has two extra
+   bytes appended that aren't used.  We set these to zero.  */
+
+void
+i386_register_convert_to_virtual (int regnum, struct type *type,
+				  char *from, char *to)
+{
+  /* Copy straight over, but take care of the padding.  */
+  memcpy (to, from, FPU_REG_RAW_SIZE);
+  memset (to + FPU_REG_RAW_SIZE, 0, TYPE_LENGTH (type) - FPU_REG_RAW_SIZE);
+}
+
+/* Convert data from virtual format with type TYPE in buffer FROM to
+   raw format for register REGNUM in buffer TO.  Simply omit the two
+   unused bytes.  */
+
+void
+i386_register_convert_to_raw (struct type *type, int regnum,
+			      char *from, char *to)
+{
+  memcpy (to, from, FPU_REG_RAW_SIZE);
+}
+
+     
 #ifdef I386V4_SIGTRAMP_SAVED_PC
 /* Get saved user PC for sigtramp from the pushed ucontext on the stack
    for all three variants of SVR4 sigtramps.  */

@@ -1,5 +1,5 @@
 /* Macro definitions for GDB on an Intel i[345]86.
-   Copyright (C) 1995, 1996 Free Software Foundation, Inc.
+   Copyright (C) 1995, 1996, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -27,6 +27,19 @@ struct frame_saved_regs;
 struct type;
 
 #define TARGET_BYTE_ORDER LITTLE_ENDIAN
+
+/* The format used for `long double' on almost all i386 targets is the
+   i387 extended floating-point format.  In fact, of all targets in the
+   GCC 2.95 tree, only OSF/1 does it different, and insists on having
+   a `long double' that's not `long' at all.  */
+
+#define TARGET_LONG_DOUBLE_FORMAT &floatformat_i387_ext
+
+/* Although the i386 extended floating-point has only 80 significant
+   bits, a `long double' actually takes up 96, probably to enforce
+   alignment.  */
+
+#define TARGET_LONG_DOUBLE_BITS 96
 
 /* Used for example in valprint.c:print_floating() to enable checking
    for NaN's */
@@ -229,7 +242,7 @@ extern int i386_register_virtual_size[];
 #define REGISTER_VIRTUAL_TYPE(N)				\
   (((N) == PC_REGNUM || (N) == FP_REGNUM || (N) == SP_REGNUM)	\
    ? lookup_pointer_type (builtin_type_void)			\
-   : IS_FP_REGNUM(N) ? builtin_type_double			\
+   : IS_FP_REGNUM(N) ? builtin_type_long_double			\
    : IS_SSE_REGNUM(N) ? builtin_type_v4sf			\
    : builtin_type_int)
 
@@ -240,24 +253,21 @@ extern int i386_register_virtual_size[];
    counterexample, this is still sloppy.  */
 #define REGISTER_CONVERTIBLE(n) (IS_FP_REGNUM (n))
 
-/* Convert data from raw format for register REGNUM in buffer FROM
-   to virtual format with type TYPE in buffer TO.  */
-extern void i387_to_double (char *, char *);
+/* Convert data from raw format for register REGNUM in buffer FROM to
+   virtual format with type TYPE in buffer TO.  */
 
-#define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,TYPE,FROM,TO)	\
-{								\
-  double val;							\
-  i387_to_double ((FROM), (char *)&val);			\
-  store_floating ((TO), TYPE_LENGTH (TYPE), val);		\
-}
+#define REGISTER_CONVERT_TO_VIRTUAL(regnum, type, from, to) \
+  i386_register_convert_to_virtual ((regnum), (type), (from), (to));
+extern void i386_register_convert_to_virtual (int regnum, struct type *type,
+					      char *from, char *to);
 
-extern void double_to_i387 (char *, char *);
+/* Convert data from virtual format with type TYPE in buffer FROM to
+   raw format for register REGNUM in buffer TO.  */
 
-#define REGISTER_CONVERT_TO_RAW(TYPE,REGNUM,FROM,TO)		\
-{								\
-  double val = extract_floating ((FROM), TYPE_LENGTH (TYPE));	\
-  double_to_i387((char *)&val, (TO));				\
-}
+#define REGISTER_CONVERT_TO_RAW(type, regnum, from, to) \
+  i386_register_convert_to_raw ((type), (regnum), (from), (to));
+extern void i386_register_convert_to_raw (struct type *type, int regnum,
+					  char *from, char *to);
 
 /* Print out the i387 floating point state.  */
 #ifdef HAVE_I387_REGS
@@ -279,10 +289,10 @@ extern void i387_float_info (void);
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF.  */
 
-#define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
-   i386_extract_return_value ((TYPE),(REGBUF),(VALBUF))
-
-extern void i386_extract_return_value PARAMS ((struct type *, char[], char *));
+#define EXTRACT_RETURN_VALUE(type, regbuf, valbuf) \
+  i386_extract_return_value ((type), (regbuf), (valbuf))
+extern void i386_extract_return_value (struct type *type, char *regbuf,
+				       char *valbuf);
 
 /* Write into appropriate registers a function return value of type TYPE, given
    in virtual format.  */

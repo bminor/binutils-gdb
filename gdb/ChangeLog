@@ -1,3 +1,30 @@
+2000-03-26  Mark Kettenis  <kettenis@gnu.org>
+
+	Provide `long double' support for most i386 targets.
+	* config/i386/tm-i386.h (TARGET_LONG_DOUBLE_FORMAT): Define as
+	&floatformat_i387_ext.
+	(TARGET_LONG_DOUBLE_BITS): Define as 96.
+	(REGISTER_VIRTUAL_TYPE): Change type for FPU registers to
+	`builtin_type_long_double'.
+	(REGISTER_CONVERT_TO_VIRTUAL): Call
+	i386_register_convert_to_virtual.
+	(REGISTER_CONVERT_TO_RAW): Call i386_register_convert_to_raw.
+	(i387_to_double, double_to_i387): Remove prototypes.
+	(i386_extract_return_value): Change prototype to match definition
+	in i386-tdep.c.
+	* config/i386/tm-i386mk.h (TARGET_LONG_DOUBLE_FORMAT): #undef.
+	(TARGET_LONG_DOUBLE_BITS): #undef.
+	* config/i386/tm-linux.h (TARGET_LONG_DOUBLE_BIT): Remove.
+	[HAVE_LONG_DOUBLE && HOST_I386] (LD_I387): Remove.
+	(i387_extract_floating, i387_store_floating): Remove prototypes.
+	(TARGET_EXTRACT_FLOATING, TARGET_STORE_FLOATING): Remove.
+	(REGISTER_CONVERT_TO_VIRTUAL, REGOISTER_CONVERT_TO_RAW): Remove.
+	(REGISTER_VIRTUAL_TYPE): Remove.
+	* i386-tdep.c (i386_register_convert_to_virtual): New function.
+	(i386_register_convert_to_raw): New function.
+	* i387-tdep.c [LD_I387] (i387_extract_floating): Remove.
+	(i387_store_floating): Remove.
+
 Sat Mar 25 18:55:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* maint.c: Re-indent.

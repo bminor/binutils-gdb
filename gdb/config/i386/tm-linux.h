@@ -30,20 +30,15 @@
 #include "i386/tm-i386.h"
 #include "tm-linux.h"
 
-/* This should probably move to tm-i386.h.  */
-#define TARGET_LONG_DOUBLE_BIT 80
+/* FIXME: kettenis/2000-03-26: We should get rid of this last piece of
+   Linux-specific `long double'-support code, probably by adding code
+   to valprint.c:print_floating() to recognize various extended
+   floating-point formats.  */
 
 #if defined(HAVE_LONG_DOUBLE) && defined(HOST_I386)
 /* The host and target are i386 machines and the compiler supports
    long doubles. Long doubles on the host therefore have the same
    layout as a 387 FPU stack register. */
-#define LD_I387
-
-extern int i387_extract_floating (PTR addr, int len, long double *dretptr);
-extern int i387_store_floating   (PTR addr, int len, long double val);
-
-#define TARGET_EXTRACT_FLOATING i387_extract_floating
-#define TARGET_STORE_FLOATING   i387_store_floating
 
 #define TARGET_ANALYZE_FLOATING					\
   do								\
@@ -60,30 +55,6 @@ extern int i387_store_floating   (PTR addr, int len, long double val);
 	&& (((high & 0x7fffffff) | low) != 0);			\
     }								\
   while (0)
-
-#undef REGISTER_CONVERT_TO_VIRTUAL
-#define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,TYPE,FROM,TO)	\
-{								\
-  long double val = *((long double *)FROM);			\
-  store_floating ((TO), TYPE_LENGTH (TYPE), val);		\
-}
-
-#undef REGISTER_CONVERT_TO_RAW
-#define REGISTER_CONVERT_TO_RAW(TYPE,REGNUM,FROM,TO)			\
-{									\
-  long double val = extract_floating ((FROM), TYPE_LENGTH (TYPE));	\
-  *((long double *)TO) = val;						\
-}
-
-/* Return the GDB type object for the "standard" data type
-   of data in register N.  */
-#undef REGISTER_VIRTUAL_TYPE
-#define REGISTER_VIRTUAL_TYPE(N)				\
-  (((N) == PC_REGNUM || (N) == FP_REGNUM || (N) == SP_REGNUM)	\
-   ? lookup_pointer_type (builtin_type_void)			\
-   : IS_FP_REGNUM(N) ? builtin_type_long_double			\
-   : IS_SSE_REGNUM(N) ? builtin_type_v4sf			\
-   : builtin_type_int)
 
 #endif
 
