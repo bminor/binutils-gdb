@@ -180,6 +180,9 @@ struct complaint pdr_for_nonsymbol_complaint =
 struct complaint pdr_static_symbol_complaint =
 {"can't handle PDR for static proc at 0x%x", 0, 0};
 
+struct complaint bad_setjmp_pdr_complaint =
+{"fixing bad setjmp PDR from libc", 0, 0};
+
 /* Macros and extra defs */
 
 /* Already-parsed symbols are marked specially */
@@ -1583,6 +1586,16 @@ parse_procedure (pr, have_stabs, first_off)
       e->pdr = *pr;
       e->pdr.isym = (long) s;
       e->pdr.adr += cur_fdr->adr - first_off;
+
+      /* Correct incorrect setjmp procedure descriptor from the library
+	 to make backtrace through setjmp work.  */
+      if (e->pdr.pcreg == 0 && strcmp (sh_name, "setjmp") == 0)
+	{
+	  complain (&bad_setjmp_pdr_complaint, 0);
+	  e->pdr.pcreg = RA_REGNUM;
+	  e->pdr.regmask = 0x80000000;
+	  e->pdr.regoffset = -4;
+	}
     }
 }
 
@@ -2824,7 +2837,18 @@ add_block (b, s)
 
 /* Add a new linenumber entry (LINENO,ADR) to a linevector LT.
    MIPS' linenumber encoding might need more than one byte
-   to describe it, LAST is used to detect these continuation lines */
+   to describe it, LAST is used to detect these continuation lines.
+
+   Combining lines with the same line number seems like a bad idea.
+   E.g: There could be a line number entry with the same line number after the
+   prologue and GDB should not ignore it (this is a better way to find
+   a prologue than mips_skip_prologue).
+   But due to the compressed line table format there are line number entries
+   for the same line which are needed to bridge the gap to the next
+   line number entry. These entries have a bogus address info with them
+   and we are unable to tell them from intended duplicate line number
+   entries.
+   This is another reason why -ggdb debugging format is preferable.  */
 
 static int
 add_line (lt, lineno, adr, last)
@@ -3170,11 +3194,12 @@ fixup_sigtramp ()
     /* align_longword(sigcontext + SIGFRAME) */
     e->pdr.frameoffset = 0x150;
     e->pdr.framereg = SP_REGNUM;
-    e->pdr.pcreg = 31;
+    /* read_next_frame_reg provides the true pc at the time of signal */
+    e->pdr.pcreg = PC_REGNUM;
     e->pdr.regmask = -2;
     e->pdr.regoffset = -(41 * sizeof (int));
     e->pdr.fregmask = -1;
-    e->pdr.fregoffset = -(37 * sizeof (int));
+    e->pdr.fregoffset = -(7 * sizeof (int));
     e->pdr.isym = (long) s;
 
     current_objfile = st->objfile;	/* Keep new_symbol happy */

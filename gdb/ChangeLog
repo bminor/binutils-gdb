@@ -1,3 +1,10 @@
+Fri Apr 16 12:27:11 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* mips-tdep.c (mips_skip_prologue): Always skip the typical prologue
+	instructions and nothing more.
+	* mipsread.c (add_line): Add comment why we have to combine line number
+	entries for the same line number.
+
 Fri Apr 16 09:42:03 1993  Jim Kingdon  (kingdon@cygnus.com)
 
 	* symtab.{c,h}: Doc fixes (remove symseg references, last relevant

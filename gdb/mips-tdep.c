@@ -87,17 +87,18 @@ read_next_frame_reg(fi, regno)
      FRAME fi;
      int regno;
 {
-#define SIGFRAME_BASE   sizeof(struct sigcontext)
-#define SIGFRAME_PC_OFF (-SIGFRAME_BASE+ 2*sizeof(int))
-#define SIGFRAME_SP_OFF (-SIGFRAME_BASE+32*sizeof(int))
-#define SIGFRAME_RA_OFF (-SIGFRAME_BASE+34*sizeof(int))
+  /* If it is the frame for sigtramp we have a complete sigcontext
+     immediately below the frame and we get the saved registers from there.
+     If the stack layout for sigtramp changes we might have to change these
+     constants and the companion fixup_sigtramp in mipsread.c  */
+#define SIGFRAME_BASE		0x12c	/* sizeof(sigcontext) */
+#define SIGFRAME_PC_OFF		(-SIGFRAME_BASE + 2 * 4)
+#define SIGFRAME_REGSAVE_OFF	(-SIGFRAME_BASE + 3 * 4)
   for (; fi; fi = fi->next)
       if (in_sigtramp(fi->pc, 0)) {
-	  /* No idea if this code works. --PB. */
 	  int offset;
 	  if (regno == PC_REGNUM) offset = SIGFRAME_PC_OFF;
-	  else if (regno == RA_REGNUM) offset = SIGFRAME_RA_OFF;
-	  else if (regno == SP_REGNUM) offset = SIGFRAME_SP_OFF;
+	  else if (regno < 32) offset = SIGFRAME_REGSAVE_OFF + regno * 4;
 	  else return 0;
 	  return read_memory_integer(fi->frame + offset, 4);
       }
@@ -728,19 +729,32 @@ mips_skip_prologue(pc)
     int offset;
     int seen_sp_adjust = 0;
 
-    /* For -g modules and most functions anyways the
-       first instruction adjusts the stack.
-       But we allow some number of stores before the stack adjustment.
-       (These are emitted by varags functions compiled by gcc-2.0. */
+    /* Skip the typical prologue instructions. These are the stack adjustment
+       instruction and the instructions that save registers on the stack
+       or in the gcc frame.  */
     for (offset = 0; offset < 100; offset += 4) {
 	inst = read_memory_integer(pc + offset, 4);
-	if ((inst & 0xffff0000) == 0x27bd0000) /* addiu $sp,$sp,offset */
+	if ((inst & 0xffff0000) == 0x27bd0000)	/* addiu $sp,$sp,offset */
 	    seen_sp_adjust = 1;
-	else if ((inst & 0xFFE00000) == 0xAFA00000) /* sw reg,n($sp) */
+	else if ((inst & 0xFFE00000) == 0xAFA00000 && (inst & 0x001F0000))
+	    continue;				/* sw reg,n($sp) */
+						/* reg != $zero */
+	else if ((inst & 0xFFE00000) == 0xE7A00000) /* swc1 freg,n($sp) */
+	    continue;
+	else if ((inst & 0xF3E00000) == 0xA3C00000 && (inst & 0x001F0000))
+						/* sx reg,n($s8) */
+	    continue;				/* reg != $zero */
+	else if (inst == 0x03A0F021)		/* move $s8,$sp */
 	    continue;
 	else
-	  break;
+	    break;
     }
+    return pc + offset;
+
+/* FIXME schauer. The following code seems no longer necessary if we
+   always skip the typical prologue instructions.  */
+
+#if 0
     if (seen_sp_adjust)
       return pc + offset;
 
@@ -764,6 +778,7 @@ mips_skip_prologue(pc)
 	return pc + 4;
 
     return pc;
+#endif
 }
 
 /* Let the user turn off floating point.  */
