@@ -1,5 +1,7 @@
 2002-07-23  Alan Modra  <amodra@bigpond.net.au>
 
+	* po/SRC-POTFILES.in: Regenerate.
+
 	* elf-hppa.h (elf_hppa_relocate_section): If relocatable, return
 	immediately.  Remove code handling relocatable linking.
 	* elf32-avr.c (elf32_avr_relocate_section): Likewise.

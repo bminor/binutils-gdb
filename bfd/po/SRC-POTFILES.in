@@ -76,6 +76,7 @@ cpu-i386.c
 cpu-i860.c
 cpu-i960.c
 cpu-ia64.c
+cpu-ip2k.c
 cpu-m10200.c
 cpu-m10300.c
 cpu-m32r.c
@@ -138,6 +139,7 @@ elf32-i386.c
 elf32-i386qnx.c
 elf32-i860.c
 elf32-i960.c
+elf32-ip2k.c
 elf32-m32r.c
 elf32-m68hc11.c
 elf32-m68hc12.c
