@@ -36,20 +36,17 @@ void
 d10v_pop_frame ()
 {
   struct frame_info *frame = get_current_frame ();
-  int fp, r13;
+  CORE_ADDR fp;
   int regnum;
   struct frame_saved_regs fsr;
   char raw_buffer[8];
 
-  fp = (int)FRAME_FP (frame);
+  fp = FRAME_FP (frame);
 
   /* fill out fsr with the address of where each */
   /* register was stored in the frame */
   get_frame_saved_regs (frame, &fsr);
   
-  /* r13 contains the old PC.  save it. */
-  r13 = (int)read_register (13);
-
   /* now update the current registers with the old values */
   for (regnum = A0_REGNUM; regnum < A0_REGNUM+2 ; regnum++)
     {
@@ -71,9 +68,9 @@ d10v_pop_frame ()
       write_register (PSW_REGNUM, read_memory_unsigned_integer (fsr.regs[PSW_REGNUM], 2));
     }
 
-  /* PC is set to r13 */
-  write_register (PC_REGNUM, (LONGEST)r13);
-  write_register (SP_REGNUM, fp - frame->size);
+  write_register (PC_REGNUM, read_register(13));
+  write_register (SP_REGNUM, fp + frame->size);
+  target_store_registers (-1);
   flush_cached_frames ();
 }
 
@@ -301,6 +298,9 @@ d10v_frame_find_saved_regs (fi, fsr)
     fi->return_pc = (read_memory_unsigned_integer(fsr->regs[13],2)-1) << 2;
   else
     fi->return_pc = (read_register(13) - 1)  << 2;
+
+  if (!fsr->regs[SP_REGNUM])
+    fsr->regs[SP_REGNUM] = read_register(FP_REGNUM) + fi->size;
 }
 
 void
