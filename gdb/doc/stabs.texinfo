@@ -1440,22 +1440,26 @@ is zero or non-zero?
 @item -21
 @code{logical*1}, 8 bit type.  This @sc{fortran} type has a split
 personality in that it is used for boolean variables, but can also be
-used for unsigned integers.
+used for unsigned integers.  0 is false, 1 is true, and other values are
+non-boolean.
 
 @item -22
 @code{logical*2}, 16 bit type.  This @sc{fortran} type has a split
 personality in that it is used for boolean variables, but can also be
-used for unsigned integers.
+used for unsigned integers.  0 is false, 1 is true, and other values are
+non-boolean.
 
 @item -23
 @code{logical*4}, 32 bit type.  This @sc{fortran} type has a split
 personality in that it is used for boolean variables, but can also be
-used for unsigned integers.
+used for unsigned integers.  0 is false, 1 is true, and other values are
+non-boolean.
 
 @item -24
 @code{logical}, 32 bit type.  This @sc{fortran} type has a split
 personality in that it is used for boolean variables, but can also be
-used for unsigned integers.
+used for unsigned integers.  0 is false, 1 is true, and other values are
+non-boolean.
 
 @item -25
 @code{complex}.  A complex type consisting of two IEEE single-precision
