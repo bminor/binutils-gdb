@@ -36,6 +36,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcore.h"
 #include "regex.h"
 #include "symfile.h"
+#include "objfiles.h"
 
 /* Prototypes for local functions. */
 
@@ -61,10 +62,10 @@ static void
 ambiguous_line_spec PARAMS ((struct symtabs_and_lines *));
 
 static void
-source_info PARAMS ((void));
+source_info PARAMS ((char *, int));
 
 static void
-show_directories PARAMS ((void));
+show_directories PARAMS ((char *, int));
 
 static void
 find_source_lines PARAMS ((struct symtab *, int));
@@ -195,9 +196,11 @@ select_source_symtab (s)
 }
 
 static void
-show_directories ()
+show_directories (ignore, from_tty)
+     char *ignore;
+     int from_tty;
 {
-  printf ("Source directories searched: %s\n", source_path);
+  printf_filtered ("Source directories searched: %s\n", source_path);
 }
 
 /* Forget what we learned about line positions in source files,
@@ -256,7 +259,7 @@ directory_command (dirname, from_tty)
   else
     mod_path (dirname, &source_path);
   if (from_tty)
-    show_directories ();
+    show_directories ((char *)0, from_tty);
   forget_cached_source_info ();
 }
 
@@ -405,24 +408,26 @@ mod_path (dirname, which_path)
 
 
 static void
-source_info ()
+source_info (ignore, from_tty)
+     char *ignore;
+     int from_tty;
 {
   register struct symtab *s = current_source_symtab;
 
   if (!s)
     {
-      printf("No current source file.\n");
+      printf_filtered("No current source file.\n");
       return;
     }
-  printf ("Current source file is %s\n", s->filename);
+  printf_filtered ("Current source file is %s\n", s->filename);
   if (s->dirname)
-    printf ("Compilation directory is %s\n", s->dirname);
+    printf_filtered ("Compilation directory is %s\n", s->dirname);
   if (s->fullname)
-    printf ("Located in %s\n", s->fullname);
+    printf_filtered ("Located in %s\n", s->fullname);
   if (s->nlines)
-    printf ("Contains %d lines\n", s->nlines);
+    printf_filtered ("Contains %d lines\n", s->nlines);
 
-  printf("Source language %s.\n", language_str (s->language));
+  printf_filtered("Source language %s.\n", language_str (s->language));
 }
 
 
@@ -502,9 +507,10 @@ openp (path, try_cwd_first, string, mode, prot, filename_opened)
 	filename[len] = 0;
       }
 
-      /* Beware the // my son, the Emacs barfs, the botch that catch... */
-      while (len > 1 && filename[len-1] == '/')
-	filename[--len] = 0;
+      /* Remove trailing slashes */
+      while (len > 0 && filename[len-1] == '/')
+       filename[--len] = 0;
+
       strcat (filename+len, "/");
       strcat (filename, string);
 
@@ -607,6 +613,7 @@ find_source_lines (s, desc)
   int lines_allocated = 1000;
   int *line_charpos;
   long exec_mtime;
+  int size;
 
   line_charpos = (int *) xmmalloc (s -> objfile -> md,
 				   lines_allocated * sizeof (int));
@@ -616,18 +623,22 @@ find_source_lines (s, desc)
   if (exec_bfd) {
     exec_mtime = bfd_get_mtime(exec_bfd);
     if (exec_mtime && exec_mtime < st.st_mtime)
-      printf ("Source file is more recent than executable.\n");
+      printf_filtered ("Source file is more recent than executable.\n");
   }
 
+  /* st_size might be a large type, but we only support source files whose 
+     size fits in an int.  FIXME. */
+  size = (int) st.st_size;
+
 #ifdef BROKEN_LARGE_ALLOCA
-  data = (char *) xmalloc (st.st_size);
+  data = (char *) xmalloc (size);
   make_cleanup (free, data);
 #else
-  data = (char *) alloca (st.st_size);
+  data = (char *) alloca (size);
 #endif
-  if (myread (desc, data, st.st_size) < 0)
+  if (myread (desc, data, size) < 0)
     perror_with_name (s->filename);
-  end = data + st.st_size;
+  end = data + size;
   p = data;
   line_charpos[0] = 0;
   nlines = 1;
@@ -838,8 +849,8 @@ ambiguous_line_spec (sals)
   int i;
 
   for (i = 0; i < sals->nelts; ++i)
-    printf("file: \"%s\", line number: %d\n",
-	   sals->sals[i].symtab->filename, sals->sals[i].line);
+    printf_filtered("file: \"%s\", line number: %d\n",
+		    sals->sals[i].symtab->filename, sals->sals[i].line);
 }
 
 
@@ -966,13 +977,15 @@ list_command (arg, from_tty)
 	error ("No source file for address %s.", local_hex_string(sal.pc));
       sym = find_pc_function (sal.pc);
       if (sym)
-	printf ("%s is in %s (%s:%d).\n",
-		local_hex_string(sal.pc), 
-		SYMBOL_NAME (sym), sal.symtab->filename, sal.line);
+	{
+	  printf_filtered ("%s is in ", local_hex_string(sal.pc));
+	  fprint_symbol (stdout, SYMBOL_NAME (sym));
+	  printf_filtered (" (%s:%d).\n", sal.symtab->filename, sal.line);
+	}
       else
-	printf ("%s is at %s:%d.\n",
-		local_hex_string(sal.pc), 
-		sal.symtab->filename, sal.line);
+	printf_filtered ("%s is at %s:%d.\n",
+			 local_hex_string(sal.pc), 
+			 sal.symtab->filename, sal.line);
     }
 
   /* If line was not specified by just a line number,
@@ -1052,15 +1065,15 @@ line_info (arg, from_tty)
 	  && find_line_pc_range (sal.symtab, sal.line, &start_pc, &end_pc))
 	{
 	  if (start_pc == end_pc)
-	    printf ("Line %d of \"%s\" is at pc %s but contains no code.\n",
-		    sal.line, sal.symtab->filename, local_hex_string(start_pc));
+	    printf_filtered ("Line %d of \"%s\" is at pc %s but contains no code.\n",
+			     sal.line, sal.symtab->filename, local_hex_string(start_pc));
 	  else
 	    {
-	      printf ("Line %d of \"%s\" starts at pc %s",
-		      sal.line, sal.symtab->filename, 
-		      local_hex_string(start_pc));
-	      printf (" and ends at %s.\n",
-		      local_hex_string(end_pc));
+	      printf_filtered ("Line %d of \"%s\" starts at pc %s",
+			       sal.line, sal.symtab->filename, 
+			       local_hex_string(start_pc));
+	      printf_filtered (" and ends at %s.\n",
+			       local_hex_string(end_pc));
 	    }
 	  /* x/i should display this line's code.  */
 	  set_next_address (start_pc);
@@ -1068,8 +1081,8 @@ line_info (arg, from_tty)
 	  last_line_listed = sal.line + 1;
 	}
       else
-	printf ("Line number %d is out of range for \"%s\".\n",
-		sal.line, sal.symtab->filename);
+	printf_filtered ("Line number %d is out of range for \"%s\".\n",
+			 sal.line, sal.symtab->filename);
     }
 }
 
@@ -1143,7 +1156,7 @@ forward_search_command (regex, from_tty)
     line++;
   }
 
-  printf ("Expression not found\n");
+  printf_filtered ("Expression not found\n");
   fclose (stream);
 }
 
@@ -1221,7 +1234,7 @@ reverse_search_command (regex, from_tty)
 	}
     }
 
-  printf ("Expression not found\n");
+  printf_filtered ("Expression not found\n");
   fclose (stream);
   return;
 }
