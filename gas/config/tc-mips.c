@@ -37,8 +37,33 @@
 
 #include "opcode/mips.h"
 
-#ifdef OBJ_ELF
+#ifdef OBJ_MAYBE_ELF
+/* Clean up namespace so we can include obj-elf.h too.  */
+static int mips_output_flavor () { return OUTPUT_FLAVOR; }
+#undef OBJ_PROCESS_STAB
+#undef OUTPUT_FLAVOR
+#undef S_GET_ALIGN
+#undef S_GET_SIZE
+#undef S_SET_ALIGN
+#undef S_SET_SIZE
+#undef TARGET_SYMBOL_FIELDS
+#undef obj_frob_file
+#undef obj_frob_symbol
+#undef obj_pop_insert
+#undef obj_sec_sym_ok_for_reloc
+
+#include "obj-elf.h"
+/* Fix any of them that we actually care about.  */
+#undef OUTPUT_FLAVOR
+#define OUTPUT_FLAVOR mips_output_flavor()
+#endif
+
+#if defined (OBJ_ELF)
 #include "elf/mips.h"
+#endif
+
+#ifndef ECOFF_DEBUGGING
+#define ECOFF_DEBUGGING 0
 #endif
 
 static char *mips_regmask_frag;
@@ -374,22 +399,12 @@ static void s_cpload PARAMS ((int));
 static void s_cprestore PARAMS ((int));
 static void s_gpword PARAMS ((int));
 static void s_cpadd PARAMS ((int));
-#ifndef ECOFF_DEBUGGING
 static void md_obj_begin PARAMS ((void));
 static void md_obj_end PARAMS ((void));
 static long get_number PARAMS ((void));
 static void s_ent PARAMS ((int));
 static void s_mipsend PARAMS ((int));
 static void s_file PARAMS ((int));
-#if 0
-static void s_frame PARAMS ((int));
-static void s_loc PARAMS ((int));
-static void s_mask PARAMS ((char));
-#endif
-#endif
-#ifdef OBJ_ELF
-static void s_elf_section PARAMS ((int));
-#endif
 
 /* Pseudo-op table.
 
@@ -409,7 +424,7 @@ static void s_elf_section PARAMS ((int));
    they are not currently supported: .asm0, .endr, .lab, .repeat,
    .struct, .weakext.  */
 
-const pseudo_typeS md_pseudo_table[] =
+static const pseudo_typeS mips_pseudo_table[] =
 {
  /* MIPS specific pseudo-ops.  */
   {"option", s_option, 0},
@@ -417,15 +432,15 @@ const pseudo_typeS md_pseudo_table[] =
   {"rdata", s_change_sec, 'r'},
   {"sdata", s_change_sec, 's'},
   {"livereg", s_ignore, 0},
-  { "abicalls", s_abicalls, 0},
-  { "cpload", s_cpload, 0},
-  { "cprestore", s_cprestore, 0},
-  { "gpword", s_gpword, 0},
-  { "cpadd", s_cpadd, 0},
+  {"abicalls", s_abicalls, 0},
+  {"cpload", s_cpload, 0},
+  {"cprestore", s_cprestore, 0},
+  {"gpword", s_gpword, 0},
+  {"cpadd", s_cpadd, 0},
 
  /* Relatively generic pseudo-ops that happen to be used on MIPS
      chips.  */
-  {"asciiz", s_stringer, 1},
+  {"asciiz", stringer, 1},
   {"bss", s_change_sec, 'b'},
   {"err", s_err, 0},
   {"half", s_cons, 1},
@@ -434,8 +449,6 @@ const pseudo_typeS md_pseudo_table[] =
  /* These pseudo-ops are defined in read.c, but must be overridden
      here for one reason or another.  */
   {"align", s_align, 0},
-  {"ascii", s_stringer, 0},
-  {"asciz", s_stringer, 1},
   {"byte", s_cons, 0},
   {"data", s_change_sec, 'd'},
   {"double", s_float_cons, 'd'},
@@ -450,11 +463,12 @@ const pseudo_typeS md_pseudo_table[] =
   {"quad", s_cons, 3},
   {"short", s_cons, 1},
   {"single", s_float_cons, 'f'},
-  {"space", s_mips_space, 0},
   {"text", s_change_sec, 't'},
   {"word", s_cons, 2},
+  { 0 },
+};
 
-#ifndef ECOFF_DEBUGGING
+static const pseudo_typeS mips_nonecoff_pseudo_table[] = {
  /* These pseudo-ops should be defined by the object file format.
     However, a.out doesn't support them, so we have versions here.  */
   {"aent", s_ent, 1},
@@ -468,21 +482,29 @@ const pseudo_typeS md_pseudo_table[] =
   {"loc", s_ignore, 0},
   {"mask", s_ignore, 'R'},
   {"verstamp", s_ignore, 0},
-#endif
+  { 0 },
+};
 
-#ifdef OBJ_ELF
-  /* We need to tweak the ELF ".section" pseudo-op a bit.  */
-  {"section", s_elf_section, 0},
-
+static const pseudo_typeS mips_elf_pseudo_table[] = {
   /* Redirect additional ELF data allocation pseudo-ops.  */
   {"2byte", s_cons, 2},
   {"4byte", s_cons, 4},
   {"8byte", s_cons, 8},
-#endif
-
- /* Sentinel.  */
+  /* Sentinel.  */
   {NULL}
 };
+
+extern void pop_insert PARAMS ((const pseudo_typeS *));
+
+void
+mips_pop_insert ()
+{
+  pop_insert (mips_pseudo_table);
+  if (! ECOFF_DEBUGGING)
+    pop_insert (mips_nonecoff_pseudo_table);
+  if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
+    pop_insert (mips_elf_pseudo_table);
+}
 
 static char *expr_end;
 
@@ -679,28 +701,27 @@ md_begin ()
 	mips_regmask_frag = frag_more (sizeof (Elf32_External_RegInfo));
 #endif
 
-#ifdef ECOFF_DEBUGGING
-	sec = subseg_new (".mdebug", (subsegT) 0);
-	(void) bfd_set_section_flags (stdoutput, sec,
-				      SEC_HAS_CONTENTS | SEC_READONLY);
-	(void) bfd_set_section_alignment (stdoutput, sec, 2);
-#endif
+	if (ECOFF_DEBUGGING)
+	  {
+	    sec = subseg_new (".mdebug", (subsegT) 0);
+	    (void) bfd_set_section_flags (stdoutput, sec,
+					  SEC_HAS_CONTENTS | SEC_READONLY);
+	    (void) bfd_set_section_alignment (stdoutput, sec, 2);
+	  }
 
 	subseg_set (seg, subseg);
       }
     }
 
-#ifndef ECOFF_DEBUGGING
-  md_obj_begin ();
-#endif
+  if (! ECOFF_DEBUGGING)
+    md_obj_begin ();
 }
 
 void
 md_mips_end ()
 {
-#ifndef ECOFF_DEBUGGING
-  md_obj_end ();
-#endif
+  if (! ECOFF_DEBUGGING)
+    md_obj_end ();
 }
 
 void
@@ -5897,16 +5918,11 @@ s_align (x)
   demand_empty_rest_of_line ();
 }
 
-/* Handle .ascii and .asciiz.  This just calls stringer and forgets
-   that there was a previous instruction.  */
-
-static void
-s_stringer (append_zero)
-     int append_zero;
+void
+mips_flush_pending_output ()
 {
   mips_emit_delays ();
   insn_label = NULL;
-  stringer (append_zero);
 }
 
 static void
@@ -5986,21 +6002,11 @@ s_change_sec (sec)
   auto_align = 1;
 }
 
-#ifdef OBJ_ELF
-
-/* Handle the ELF .section pseudo-op.  This is a wrapper around
-   obj_elf_section.  */
-
-static void
-s_elf_section (x)
-     int x;
+void
+mips_enable_auto_align ()
 {
-  mips_emit_delays ();
-  obj_elf_section (x);
   auto_align = 1;
 }
-
-#endif /* OBJ_ELF */
 
 static void
 s_cons (log_size)
@@ -6036,9 +6042,8 @@ s_extern (x)
   size = get_absolute_expression ();
   S_SET_EXTERNAL (symbolP);
 
-#ifdef ECOFF_DEBUGGING
-  symbolP->ecoff_extern_size = size;
-#endif
+  if (ECOFF_DEBUGGING)
+    symbolP->ecoff_extern_size = size;
 }
 
 static void
@@ -6222,18 +6227,6 @@ s_mipsset (x)
     }
   *input_line_pointer = ch;
   demand_empty_rest_of_line ();
-}
-
-/* The same as the usual .space directive, except that we have to
-   forget about any previous instruction.  */
-
-static void
-s_mips_space (param)
-     int param;
-{
-  mips_emit_delays ();
-  insn_label = NULL;
-  s_space (param);
 }
 
 /* Handle the .abicalls pseudo-op.  I believe this is equivalent to
@@ -6734,7 +6727,7 @@ mips_define_label (sym)
   insn_label = sym;
 }
 
-#ifdef OBJ_ELF
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
 
 /* Some special processing for a MIPS ELF file.  */
 
@@ -6763,10 +6756,8 @@ mips_elf_final_processing ()
     elf_elfheader (stdoutput)->e_flags |= EF_MIPS_PIC;
 }
 
-#endif /* OBJ_ELF */
+#endif /* OBJ_ELF || OBJ_MAYBE_ELF */
 
-#ifndef ECOFF_DEBUGGING
-
 /* These functions should really be defined by the object file format,
    since they are related to debugging information.  However, this
    code has to work for the a.out format, which does not define them,
@@ -7106,5 +7097,3 @@ s_loc (x)
   symbolP->sy_segment = now_seg;
 }
 #endif
-
-#endif /* ! defined (ECOFF_DEBUGGING) */

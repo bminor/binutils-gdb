@@ -1,5 +1,11 @@
 Tue May 16 16:29:58 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
+	* config/obj-multi.h (obj_frob_symbol, obj_frob_file, S_GET_SIZE,
+	S_SET_SIZE, S_GET_ALIGN, S_SET_ALIGN, obj_copy_symbol_attributes,
+	OBJ_PROCESS_STAB): New macros.
+	* config/tc-mips.c: Protect against redefining them also when
+	including obj-elf.h.  Test only OBJ_ELF for including elf/mips.h.
+
 	* read.c (s_lcomm): Do ELF/ECOFF test at run time, not compile
 	time.
 
