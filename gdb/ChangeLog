@@ -1,5 +1,18 @@
 2003-12-26  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386obsd-tdep.c: Include "regset.h", "gdb_assert.h" and
+	"gdb_string.h".
+	(i386obsd_r_reg_offset): New variable.
+	(i386obsd_aout_supply_regset)
+	(i386obsd_aout_regset_from_core_section): New functions.
+	(i386obsd_supply_reg, fetch_core_registers): Remove functions.
+	(i286obsd_core_fns): Remove variable.
+	(i386obsd_init_abi): Initialize TDEP->gregset_reg_offset,
+	TDEP->gregset_num_regs and TDEP->sizeof_gregset.  Set
+	regset_from_core_section.  Use ARRAY_SIZE to initialize
+	TDEP->sc_num_regs.
+	(_initialize_i386obsd_tdep): Don't call add_core_fns.
+
 	* i386bsd-tdep.c (i386bsd_core_osabi_sniffer): New function.
 	(_initialize_i386bsd_tdep): Register i386bsd_core_osabi_sniffer.
 
