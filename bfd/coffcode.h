@@ -3054,7 +3054,36 @@ coff_compute_section_file_positions (abfd)
 	     padding the previous section up if necessary */
 
 	  old_sofar = sofar;
-	  sofar = BFD_ALIGN (sofar, 1 << current->alignment_power);
+#ifdef RS6000COFF_C
+	  /* AIX loader checks the text section alignment of (vma - filepos)
+	     So even though the filepos may be aligned wrt the o_algntext, for
+	     AIX executables, this check fails. This shows up when an native 
+	     AIX executable is stripped with gnu strip because the default vma
+	     of native is 0x10000150 but default for gnu is 0x10000140.  Gnu
+	     stripped gnu excutable passes this check because the filepos is 
+	     0x0140. */
+	  if (!strcmp (current->name, _TEXT)) 
+	    {
+	      bfd_vma pad;
+	      bfd_vma align;
+
+	      sofar = BFD_ALIGN (sofar, 1 << current->alignment_power);
+
+	      align = 1 << current->alignment_power;
+	      pad = abs (current->vma - sofar) % align;
+	      
+	      if (pad) 
+		{
+		  pad = align - pad;
+		  sofar += pad;
+		}
+	    }
+	  else
+#else
+	    {
+	      sofar = BFD_ALIGN (sofar, 1 << current->alignment_power);
+	    }
+#endif
 	  if (previous != (asection *) NULL)
 	    {
 	      previous->_raw_size += sofar - old_sofar;

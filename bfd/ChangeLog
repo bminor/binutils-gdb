@@ -1,3 +1,8 @@
+2001-12-20  Tom Rix  <trix@redhat.com>
+
+	* coffcode.h (coff_compute_section_file_positions): Add special AIX 
+	loader alignment of text section.
+
 2001-12-20  Jason Thorpe  <thorpej@wasabisystems.com>
 	
 	* config.bfd (mips-dec-netbsd*): Delete alias for mips*el-*-netbsd*.
