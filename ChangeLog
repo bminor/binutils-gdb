@@ -209,9 +209,7 @@ Wed Apr 22 12:30:10 1998  Michael Meissner  <meissner@cygnus.com>
 	use -Os to compile target libraries rather than -O2.  Default to
 	using -Os for d10v and m32r if --{enable,disable}-target-optspace is
 	not used.
-start-sanitize-d30v
 	* configure.in (target_cflags): Ditto for d30v.
-end-sanitize-d30v
 
 Tue Apr 21 23:06:54 1998  Tom Tromey  <tromey@cygnus.com>
 
@@ -556,12 +554,10 @@ Wed Dec 17 11:27:59 1997  Ian Lance Taylor  <ian@cygnus.com>
 	* configure: Only put libide in GDB_TK if --enable-ide.
 
 end-sanitize-ide
-start-sanitize-d30v
 Wed Dec 17 09:53:02 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* configure.in (d30v-*-*): Allow configuring of libide, vmake, etc.
 
-end-sanitize-d30v
 Tue Dec 16 17:36:05 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in: Add libgui directory.
@@ -627,7 +623,6 @@ Mon Nov 10 15:23:21 1997  H.J. Lu  <hjl@gnu.ai.mit.edu>
 	* ltmain.sh: If mkdir fails, check whether the directory was created
 	anyhow by some other process.
 
-start-sanitize-d30v
 Mon Nov 10 14:38:03 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* configure.in (d30v-*-*): Configure all directories.
@@ -641,7 +636,6 @@ Sat Nov  8 14:42:59 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* configure.in (d30v-*-*): Configure target-libgloss on the D30V.
 
-end-sanitize-d30v
 Fri Nov  7 10:34:09 1997  Rob Savoye  <rob@darkstar.cygnus.com>
 
         * include/libiberty.h: Add extern "C" { so it can be used with C++
@@ -663,12 +657,10 @@ Wed Nov  5 11:14:44 1997  Gavin Koch  <gavin@cygnus.com>
 	with gcc/config.sub.
 
 end-sanitize-tx49
-start-sanitize-d30v
 Thu Oct 30 11:09:29 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* configure.in (d30v-*-*): Configure GCC now.
 
-end-sanitize-d30v
 start-sanitize-tx49
 Wed Oct 29 16:52:43 1997  Gavin Koch  <gavin@cygnus.com>
 
@@ -726,13 +718,11 @@ Wed Oct  1 13:11:27 1997  Ian Lance Taylor  <ian@cygnus.com>
 	infodir, libdir, libexecdir, localstatedir, mandir, oldincludedir,
 	sbindir, sharedstatedir, and sysconfdir.
 
-start-sanitize-d30v	
 Wed Sep 24 18:06:27 1997  Stu Grossman  <grossman@babylon-5.cygnus.com>
 
 	* configure.in (d30v):  Remove tcl, tk, expect, gdb, itcl, tix, db,
  	sn, and gnuserv from noconfigdirs.
 
-end-sanitize-d30v	
 Wed Sep 24 15:18:32 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ltmain.sh: Tweak shell pattern to avoid bug in NetBSD /bin/sh.
@@ -1297,13 +1287,11 @@ Tue Feb 25 18:46:14 1997  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* config.sub: Accept -lnews*.
 
-start-sanitize-d30v
 Tue Feb 25 13:19:14 1997  Andrew Cagney  <cagney@kremvax.tpgi.com.au>
 
 	* configure.in (noconfigdirs): Disable target-newlib,
  	target-examples and target-libiberty for d30v.
 
-end-sanitize-d30v
 start-sanitize-tic80
 Tue Feb 25 11:41:51 1997  Tom Tromey  <tromey@cygnus.com>
 
@@ -1321,31 +1309,25 @@ Tue Feb 25 11:41:51 1997  Tom Tromey  <tromey@cygnus.com>
 	(CLEAN_MODULES): Added clean-sn.
 
 end-sanitize-tic80
-start-sanitize-d30v
 Fri Feb 21 17:56:25 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* configure.in (noconfigdirs): Enable ld for d30v.
 
-end-sanitize-d30v
 start-sanitize-tic80
 Fri Feb 21 20:58:51 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* configure.in (tic80-*-*): Build compiler.
 
 end-sanitize-tic80
-start-sanitize-d30v
 Sun Feb 16 15:41:09 1997  Andrew Cagney  <cagney@critters.cygnus.com>
 
 	* configure.in (d30v-*): Remove sim directory from list of
  	unsupported d30v directories
 
-end-sanitize-d30v
-start-sanitize-d30v
 Tue Feb 18 17:32:42 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* config.sub, configure.in: Add d30v target cpu. 
 	
-end-sanitize-d30v
 Thu Feb 13 22:04:44 1997  Klaus Kaempf  <kkaempf@progis.de>
 
 	* makefile.vms: New file.

@@ -352,14 +352,9 @@ case "${enable_target_optspace}:${target}" in
   yes:*)
     target_makefile_frag="${target_makefile_frag} config/mt-ospace"
     ;;
-  :m32r-* |  :d10v-*)
+  :m32r-* | :d10v-* | :d30v-*)
     target_makefile_frag="${target_makefile_frag} config/mt-ospace"
     ;;
-# start-sanitize-d30v
-  :d30v-*-*)
-    target_makefile_frag="${target_makefile_frag} config/mt-ospace"
-    ;;
-# end-sanitize-d30v
   no:* | :*)
     ;;
   *)
@@ -634,10 +629,8 @@ case "${target}" in
   d10v-*-*)
     noconfigdirs="$noconfigdirs target-librx target-libg++ target-libstdc++ target-libio target-libgloss"
     ;;
-# start-sanitize-d30v
   d30v-*-*)
     ;;
-# end-sanitize-d30v
   h8300*-*-* | \
   h8500-*-*)
     noconfigdirs="$noconfigdirs target-libg++ target-libstdc++ target-libio target-librx target-libgloss"
