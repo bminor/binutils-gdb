@@ -4385,7 +4385,7 @@ display_debug_lines (section, start, file)
 	      state_machine_regs.address += adv;
 	      printf (_("  Special opcode %d: advance Address by %d to 0x%lx"),
 		      op_code, adv, state_machine_regs.address);
-	      adv    += (op_code % info.li_line_range) + info.li_line_base;
+	      adv = (op_code % info.li_line_range) + info.li_line_base;
 	      state_machine_regs.line += adv;
 	      printf (_(" and Line by %d to %d\n"),
 		      adv, state_machine_regs.line);

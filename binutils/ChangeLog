@@ -1,3 +1,8 @@
+1999-08-26  Jim Wilson  <wilson@cygnus.com>
+
+	* readelf.c (display_debug_lines, case default): Change second line
+	setting	adv to use = not +=.
+
 1999-08-19  Nick Clifton  <nickc@cygnus.com>
 
 	* dlltool.c: Added more examples to the comment at the start.
