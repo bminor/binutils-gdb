@@ -46,8 +46,9 @@ struct proc
   int cur_sc;			/* Implemented suspend count.  */
   int run_sc;			/* Default sc when the program is running. */
   int pause_sc;			/* Default sc when gdb has control. */
-  int resume_sc;		/* Sc resulting form the last resume. */
-  int detach_sc;		/* SC to leave around when detaching from program. */
+  int resume_sc;		/* Sc resulting from the last resume. */
+  int detach_sc;		/* SC to leave around when detaching
+				   from program. */
 
   thread_state_data_t state;	/* Registers, &c. */
   int state_valid : 1;		/* True if STATE is up to date. */

@@ -65,7 +65,7 @@ static void
 prune_threads PARAMS ((void));
 
 static void
-thread_switch PARAMS ((int pid));
+switch_to_thread PARAMS ((int pid));
 
 static struct thread_info *
 find_thread_id PARAMS ((int num));
@@ -162,6 +162,17 @@ pid_to_thread_id (pid)
       return tp->num;
 
   return 0;
+}
+
+int
+thread_id_to_pid (num)
+    int num;
+{
+  struct thread_info *thread = find_thread_id (num);
+  if (thread)
+    return thread->pid;
+  else
+    return -1;
 }
 
 int
@@ -309,18 +320,18 @@ info_threads_command (arg, from_tty)
 
       printf_filtered ("%d %s  ", tp->num, target_pid_to_str (tp->pid));
 
-      thread_switch (tp->pid);
+      switch_to_thread (tp->pid);
       print_stack_frame (selected_frame, -1, 0);
     }
 
-  thread_switch (current_pid);
+  switch_to_thread (current_pid);
   prune_threads ();
 }
 
 /* Switch from one thread to another. */
 
 static void
-thread_switch (pid)
+switch_to_thread (pid)
      int pid;
 {
   if (pid == inferior_pid)
@@ -338,7 +349,7 @@ restore_current_thread (pid)
      int pid;
 {
   if (pid != inferior_pid)
-    thread_switch (pid);
+    switch_to_thread (pid);
 }
 
 /* Apply a GDB command to a list of threads.  List syntax is a whitespace
@@ -365,7 +376,7 @@ thread_apply_all_command (cmd, from_tty)
 
   for (tp = thread_list; tp; tp = tp->next)
     {
-      thread_switch (tp->pid);
+      switch_to_thread (tp->pid);
       printf_filtered ("\nThread %d (%s):\n", tp->num,
 		       target_pid_to_str (inferior_pid));
       execute_command (cmd, from_tty);
@@ -428,7 +439,7 @@ thread_apply_command (tidlist, from_tty)
 	      continue;
 	    }
 
-	  thread_switch (tp->pid);
+	  switch_to_thread (tp->pid);
 	  printf_filtered ("\nThread %d (%s):\n", tp->num,
 			   target_pid_to_str (inferior_pid));
 	  execute_command (cmd, from_tty);
@@ -459,16 +470,18 @@ see the IDs of currently known threads.");
     error ("Thread ID %d not known.  Use the \"info threads\" command to\n\
 see the IDs of currently known threads.", num);
 
-  thread_switch (tp->pid);
+  switch_to_thread (tp->pid);
 
   printf_filtered ("[Switching to %s]\n", target_pid_to_str (inferior_pid));
   print_stack_frame (selected_frame, selected_frame_level, 1);
 }
 
+/* Commands with a prefix of `thread'.  */
+struct cmd_list_element *thread_cmd_list = NULL;
+
 void
 _initialize_thread ()
 {
-  static struct cmd_list_element *thread_cmd_list = NULL;
   static struct cmd_list_element *thread_apply_list = NULL;
   extern struct cmd_list_element *cmdlist;
 
