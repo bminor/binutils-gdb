@@ -96,7 +96,7 @@ i[3456]86-*-freebsd*)	gdb_target=fbsd ;;
 i[3456]86-*-netbsdelf*)	gdb_target=nbsdelf ;;
 i[3456]86-*-netbsd* | i[3456]86-*-openbsd*)
 			gdb_target=nbsdaout ;;
-i[3456]86-*-os9k)	gdb_target=i386os9k ;;
+# OBSOLETE i[3456]86-*-os9k)	gdb_target=i386os9k ;;
 i[3456]86-*-go32*)	gdb_target=i386aout ;;
 i[3456]86-*-msdosdjgpp*) gdb_target=go32 ;;
 i[3456]86-*-lynxos*)	gdb_target=i386lynx ;;

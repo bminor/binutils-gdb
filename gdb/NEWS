@@ -61,6 +61,7 @@ configurations, the next release of GDB will have their sources
 permanently REMOVED.
 
 Mitsubishi D30V					d30v-*-*
+OS/9000						i[34]86-*-os9k
 Fujitsu FR30					fr30-*-elf*
 
 * REMOVED configurations and files

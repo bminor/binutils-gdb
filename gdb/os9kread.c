@@ -1,1621 +1,1621 @@
-/* Read os9/os9k symbol tables and convert to internal format, for GDB.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001
-   Free Software Foundation, Inc.
-
-   This file is part of GDB.
-
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or
-   (at your option) any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
-
-/* This module provides three functions: os9k_symfile_init,
-   which initializes to read a symbol file; os9k_new_init, which 
-   discards existing cached information when all symbols are being
-   discarded; and os9k_symfile_read, which reads a symbol table
-   from a file.
-
-   os9k_symfile_read only does the minimum work necessary for letting the
-   user "name" things symbolically; it does not read the entire symtab.
-   Instead, it reads the external and static symbols and puts them in partial
-   symbol tables.  When more extensive information is requested of a
-   file, the corresponding partial symbol table is mutated into a full
-   fledged symbol table by going back and reading the symbols
-   for real.  os9k_psymtab_to_symtab() is the function that does this */
-
-#include "defs.h"
-#include "gdb_string.h"
-#include "gdb_assert.h"
-#include <stdio.h>
-
-#if defined(USG) || defined(__CYGNUSCLIB__)
-#include <sys/types.h>
-#include <fcntl.h>
-#endif
-
-#include "obstack.h"
-#include "gdb_stat.h"
-#include "symtab.h"
-#include "breakpoint.h"
-#include "command.h"
-#include "target.h"
-#include "gdbcore.h"		/* for bfd stuff */
-#include "libaout.h"		/* FIXME Secret internal BFD stuff for a.out */
-#include "symfile.h"
-#include "objfiles.h"
-#include "buildsym.h"
-#include "gdb-stabs.h"
-#include "demangle.h"
-#include "language.h"		/* Needed inside partial-stab.h */
-#include "complaints.h"
-#include "os9k.h"
-#include "stabsread.h"
-
-extern void _initialize_os9kread (void);
-
-/* Each partial symbol table entry contains a pointer to private data for the
-   read_symtab() function to use when expanding a partial symbol table entry
-   to a full symbol table entry.
-
-   For dbxread this structure contains the offset within the file symbol table
-   of first local symbol for this file, and count of the section
-   of the symbol table devoted to this file's symbols (actually, the section
-   bracketed may contain more than just this file's symbols).  It also contains
-   further information needed to locate the symbols if they are in an ELF file.
-
-   If ldsymcnt is 0, the only reason for this thing's existence is the
-   dependency list.  Nothing else will happen when it is read in.  */
-
-#define LDSYMOFF(p) (((struct symloc *)((p)->read_symtab_private))->ldsymoff)
-#define LDSYMCNT(p) (((struct symloc *)((p)->read_symtab_private))->ldsymnum)
-
-struct symloc
-  {
-    int ldsymoff;
-    int ldsymnum;
-  };
-
-/* Remember what we deduced to be the source language of this psymtab. */
-static enum language psymtab_language = language_unknown;
-
-/* keep partial symbol table file nested depth */
-static int psymfile_depth = 0;
-
-/* keep symbol table file nested depth */
-static int symfile_depth = 0;
-
-extern int previous_stab_code;
-
-/* Name of last function encountered.  Used in Solaris to approximate
-   object file boundaries.  */
-static char *last_function_name;
-
-/* Complaints about the symbols we have encountered.  */
-extern struct complaint lbrac_complaint;
-
-extern struct complaint unknown_symtype_complaint;
-
-extern struct complaint unknown_symchar_complaint;
-
-extern struct complaint lbrac_rbrac_complaint;
-
-extern struct complaint repeated_header_complaint;
-
-extern struct complaint repeated_header_name_complaint;
-
-#if 0
-static struct complaint lbrac_unmatched_complaint =
-{"unmatched Increment Block Entry before symtab pos %d", 0, 0};
-
-static struct complaint lbrac_mismatch_complaint =
-{"IBE/IDE symbol mismatch at symtab pos %d", 0, 0};
-#endif
-
-/* Local function prototypes */
-
-static void read_minimal_symbols (struct objfile *);
-
-static void os9k_read_ofile_symtab (struct partial_symtab *);
-
-static void os9k_psymtab_to_symtab (struct partial_symtab *);
-
-static void os9k_psymtab_to_symtab_1 (struct partial_symtab *);
-
-static void read_os9k_psymtab (struct objfile *, CORE_ADDR, int);
-
-static int fill_sym (FILE *, bfd *);
-
-static void os9k_symfile_init (struct objfile *);
-
-static void os9k_new_init (struct objfile *);
-
-static void os9k_symfile_read (struct objfile *, int);
-
-static void os9k_symfile_finish (struct objfile *);
-
-static void os9k_process_one_symbol (int, int, CORE_ADDR, char *,
-				     struct section_offsets *,
-				     struct objfile *);
-
-static struct partial_symtab *os9k_start_psymtab (struct objfile *, char *,
-						  CORE_ADDR, int, int,
-						  struct partial_symbol **,
-						  struct partial_symbol **);
-
-static struct partial_symtab *os9k_end_psymtab (struct partial_symtab *,
-						char **, int, int, CORE_ADDR,
-						struct partial_symtab **,
-						int);
-
-static void record_minimal_symbol (char *, CORE_ADDR, int, struct objfile *);
-
-#define HANDLE_RBRAC(val) \
-  if ((val) > pst->texthigh) pst->texthigh = (val);
-
-#define SWAP_STBHDR(hdrp, abfd) \
-  { \
-    (hdrp)->fmtno = bfd_get_16(abfd, (unsigned char *)&(hdrp)->fmtno); \
-    (hdrp)->crc = bfd_get_32(abfd, (unsigned char *)&(hdrp)->crc); \
-    (hdrp)->offset = bfd_get_32(abfd, (unsigned char *)&(hdrp)->offset); \
-    (hdrp)->nsym = bfd_get_32(abfd, (unsigned char *)&(hdrp)->nsym); \
-  }
-#define SWAP_STBSYM(symp, abfd) \
-  { \
-    (symp)->value = bfd_get_32(abfd, (unsigned char *)&(symp)->value); \
-    (symp)->type = bfd_get_16(abfd, (unsigned char *)&(symp)->type); \
-    (symp)->stroff = bfd_get_32(abfd, (unsigned char *)&(symp)->stroff); \
-  }
-#define N_DATA 0
-#define N_BSS 1
-#define N_RDATA 2
-#define N_IDATA 3
-#define N_TEXT 4
-#define N_ABS 6
-
-static void
-record_minimal_symbol (char *name, CORE_ADDR address, int type,
-		       struct objfile *objfile)
-{
-  enum minimal_symbol_type ms_type;
-
-  switch (type)
-    {
-    case N_TEXT:
-      ms_type = mst_text;
-      address += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
-      break;
-    case N_DATA:
-      ms_type = mst_data;
-      break;
-    case N_BSS:
-      ms_type = mst_bss;
-      break;
-    case N_RDATA:
-      ms_type = mst_bss;
-      break;
-    case N_IDATA:
-      ms_type = mst_data;
-      break;
-    case N_ABS:
-      ms_type = mst_abs;
-      break;
-    default:
-      ms_type = mst_unknown;
-      break;
-    }
-
-  prim_record_minimal_symbol (name, address, ms_type, objfile);
-}
-
-/* read and process .stb file and store in minimal symbol table */
-typedef char mhhdr[80];
-struct stbhdr
-  {
-    mhhdr comhdr;
-    char *name;
-    short fmtno;
-    int crc;
-    int offset;
-    int nsym;
-    char *pad;
-  };
-struct stbsymbol
-  {
-    int value;
-    short type;
-    int stroff;
-  };
-#define STBSYMSIZE 10
-
-static void
-read_minimal_symbols (struct objfile *objfile)
-{
-  FILE *fp;
-  bfd *abfd;
-  struct stbhdr hdr;
-  struct stbsymbol sym;
-  int ch, i, j, off;
-  char buf[64], buf1[128];
-
-  fp = objfile->auxf1;
-  if (fp == NULL)
-    return;
-  abfd = objfile->obfd;
-  fread (&hdr.comhdr[0], sizeof (mhhdr), 1, fp);
-  i = 0;
-  ch = getc (fp);
-  while (ch != -1)
-    {
-      buf[i] = (char) ch;
-      i++;
-      if (ch == 0)
-	break;
-      ch = getc (fp);
-    };
-  if (i % 2)
-    ch = getc (fp);
-  hdr.name = &buf[0];
-
-  fread (&hdr.fmtno, sizeof (hdr.fmtno), 1, fp);
-  fread (&hdr.crc, sizeof (hdr.crc), 1, fp);
-  fread (&hdr.offset, sizeof (hdr.offset), 1, fp);
-  fread (&hdr.nsym, sizeof (hdr.nsym), 1, fp);
-  SWAP_STBHDR (&hdr, abfd);
-
-  /* read symbols */
-  init_minimal_symbol_collection ();
-  off = hdr.offset;
-  for (i = hdr.nsym; i > 0; i--)
-    {
-      fseek (fp, (long) off, 0);
-      fread (&sym.value, sizeof (sym.value), 1, fp);
-      fread (&sym.type, sizeof (sym.type), 1, fp);
-      fread (&sym.stroff, sizeof (sym.stroff), 1, fp);
-      SWAP_STBSYM (&sym, abfd);
-      fseek (fp, (long) sym.stroff, 0);
-      j = 0;
-      ch = getc (fp);
-      while (ch != -1)
-	{
-	  buf1[j] = (char) ch;
-	  j++;
-	  if (ch == 0)
-	    break;
-	  ch = getc (fp);
-	};
-      record_minimal_symbol (buf1, sym.value, sym.type & 7, objfile);
-      off += STBSYMSIZE;
-    };
-  install_minimal_symbols (objfile);
-  return;
-}
-
-/* Scan and build partial symbols for a symbol file.
-   We have been initialized by a call to os9k_symfile_init, which 
-   put all the relevant info into a "struct os9k_symfile_info",
-   hung off the objfile structure.
-
-   MAINLINE is true if we are reading the main symbol
-   table (as opposed to a shared lib or dynamically loaded file).  */
-
-static void
-os9k_symfile_read (struct objfile *objfile, int mainline)
-{
-  bfd *sym_bfd;
-  struct cleanup *back_to;
-
-  sym_bfd = objfile->obfd;
-  /* If we are reinitializing, or if we have never loaded syms yet, init */
-  if (mainline
-      || (objfile->global_psymbols.size == 0
-	  && objfile->static_psymbols.size == 0))
-    init_psymbol_list (objfile, DBX_SYMCOUNT (objfile));
-
-  free_pending_blocks ();
-  back_to = make_cleanup (really_free_pendings, 0);
-
-  make_cleanup_discard_minimal_symbols ();
-  read_minimal_symbols (objfile);
-
-  /* Now that the symbol table data of the executable file are all in core,
-     process them and define symbols accordingly.  */
-  read_os9k_psymtab (objfile,
-		     DBX_TEXT_ADDR (objfile),
-		     DBX_TEXT_SIZE (objfile));
-
-  do_cleanups (back_to);
-}
-
-/* Initialize anything that needs initializing when a completely new
-   symbol file is specified (not just adding some symbols from another
-   file, e.g. a shared library).  */
-
-static void
-os9k_new_init (struct objfile *ignore)
-{
-  stabsread_new_init ();
-  buildsym_new_init ();
-  psymfile_depth = 0;
-/*
-   init_header_files ();
- */
-}
-
-/* os9k_symfile_init ()
-   It is passed a struct objfile which contains, among other things,
-   the BFD for the file whose symbols are being read, and a slot for a pointer
-   to "private data" which we fill with goodies.
-
-   Since BFD doesn't know how to read debug symbols in a format-independent
-   way (and may never do so...), we have to do it ourselves.  We will never
-   be called unless this is an a.out (or very similar) file. 
-   FIXME, there should be a cleaner peephole into the BFD environment here.  */
-
-static void
-os9k_symfile_init (struct objfile *objfile)
-{
-  bfd *sym_bfd = objfile->obfd;
-  char *name = bfd_get_filename (sym_bfd);
-  char dbgname[512], stbname[512];
-  FILE *symfile = 0;
-  FILE *minfile = 0;
-  asection *text_sect;
-
-  strcpy (dbgname, name);
-  strcat (dbgname, ".dbg");
-  strcpy (stbname, name);
-  strcat (stbname, ".stb");
-
-  if ((symfile = fopen (dbgname, "r")) == NULL)
-    {
-      warning ("Symbol file %s not found", dbgname);
-    }
-  objfile->auxf2 = symfile;
-
-  if ((minfile = fopen (stbname, "r")) == NULL)
-    {
-      warning ("Symbol file %s not found", stbname);
-    }
-  objfile->auxf1 = minfile;
-
-  /* Allocate struct to keep track of the symfile */
-  objfile->sym_stab_info = (struct dbx_symfile_info *)
-    xmmalloc (objfile->md, sizeof (struct dbx_symfile_info));
-  DBX_SYMFILE_INFO (objfile)->stab_section_info = NULL;
-
-  text_sect = bfd_get_section_by_name (sym_bfd, ".text");
-  if (!text_sect)
-    error ("Can't find .text section in file");
-  DBX_TEXT_ADDR (objfile) = bfd_section_vma (sym_bfd, text_sect);
-  DBX_TEXT_SIZE (objfile) = bfd_section_size (sym_bfd, text_sect);
-
-  DBX_SYMBOL_SIZE (objfile) = 0;	/* variable size symbol */
-  DBX_SYMCOUNT (objfile) = 0;	/* used to be bfd_get_symcount(sym_bfd) */
-  DBX_SYMTAB_OFFSET (objfile) = 0;	/* used to be SYMBOL_TABLE_OFFSET */
-}
-
-/* Perform any local cleanups required when we are done with a particular
-   objfile.  I.E, we are in the process of discarding all symbol information
-   for an objfile, freeing up all memory held for it, and unlinking the
-   objfile struct from the global list of known objfiles. */
-
-static void
-os9k_symfile_finish (struct objfile *objfile)
-{
-  if (objfile->sym_stab_info != NULL)
-    {
-      xmfree (objfile->md, objfile->sym_stab_info);
-    }
-/*
-   free_header_files ();
- */
-}
-
-
-struct st_dbghdr
-{
-  int sync;
-  short rev;
-  int crc;
-  short os;
-  short cpu;
-};
-#define SYNC 		(int)0xefbefeca
-
-#define SWAP_DBGHDR(hdrp, abfd) \
-  { \
-    (hdrp)->sync = bfd_get_32(abfd, (unsigned char *)&(hdrp)->sync); \
-    (hdrp)->rev = bfd_get_16(abfd, (unsigned char *)&(hdrp)->rev); \
-    (hdrp)->crc = bfd_get_32(abfd, (unsigned char *)&(hdrp)->crc); \
-    (hdrp)->os = bfd_get_16(abfd, (unsigned char *)&(hdrp)->os); \
-    (hdrp)->cpu = bfd_get_16(abfd, (unsigned char *)&(hdrp)->cpu); \
-  }
-
-#define N_SYM_CMPLR     0
-#define N_SYM_SLINE     1
-#define N_SYM_SYM       2
-#define N_SYM_LBRAC     3
-#define N_SYM_RBRAC     4
-#define N_SYM_SE        5
-
-struct internal_symstruct
-  {
-    short n_type;
-    short n_desc;
-    long n_value;
-    char *n_strx;
-  };
-static struct internal_symstruct symbol;
-static struct internal_symstruct *symbuf = &symbol;
-static char strbuf[4096];
-static struct st_dbghdr dbghdr;
-static short cmplrid;
-
-#define VER_PRE_ULTRAC	((short)4)
-#define VER_ULTRAC	((short)5)
-
-static int
-fill_sym (FILE *dbg_file, bfd *abfd)
-{
-  short si, nmask;
-  long li;
-  int ii;
-  char *p;
-
-  int nbytes = fread (&si, sizeof (si), 1, dbg_file);
-  if (nbytes == 0)
-    return 0;
-  if (nbytes < 0)
-    perror_with_name ("reading .dbg file.");
-  symbuf->n_desc = 0;
-  symbuf->n_value = 0;
-  symbuf->n_strx = NULL;
-  symbuf->n_type = bfd_get_16 (abfd, (unsigned char *) &si);
-  symbuf->n_type = 0xf & symbuf->n_type;
-  switch (symbuf->n_type)
-    {
-    case N_SYM_CMPLR:
-      fread (&si, sizeof (si), 1, dbg_file);
-      symbuf->n_desc = bfd_get_16 (abfd, (unsigned char *) &si);
-      cmplrid = symbuf->n_desc & 0xff;
-      break;
-    case N_SYM_SLINE:
-      fread (&li, sizeof (li), 1, dbg_file);
-      symbuf->n_value = bfd_get_32 (abfd, (unsigned char *) &li);
-      fread (&li, sizeof (li), 1, dbg_file);
-      li = bfd_get_32 (abfd, (unsigned char *) &li);
-      symbuf->n_strx = (char *) (li >> 12);
-      symbuf->n_desc = li & 0xfff;
-      break;
-    case N_SYM_SYM:
-      fread (&li, sizeof (li), 1, dbg_file);
-      symbuf->n_value = bfd_get_32 (abfd, (unsigned char *) &li);
-      si = 0;
-      do
-	{
-	  ii = getc (dbg_file);
-	  strbuf[si++] = (char) ii;
-	}
-      while (ii != 0 || si % 2 != 0);
-      symbuf->n_strx = strbuf;
-      p = (char *) strchr (strbuf, ':');
-      if (!p)
-	break;
-      if ((p[1] == 'F' || p[1] == 'f') && cmplrid == VER_PRE_ULTRAC)
-	{
-	  fread (&si, sizeof (si), 1, dbg_file);
-	  nmask = bfd_get_16 (abfd, (unsigned char *) &si);
-	  for (ii = 0; ii < nmask; ii++)
-	    fread (&si, sizeof (si), 1, dbg_file);
-	}
-      break;
-    case N_SYM_LBRAC:
-      fread (&li, sizeof (li), 1, dbg_file);
-      symbuf->n_value = bfd_get_32 (abfd, (unsigned char *) &li);
-      break;
-    case N_SYM_RBRAC:
-      fread (&li, sizeof (li), 1, dbg_file);
-      symbuf->n_value = bfd_get_32 (abfd, (unsigned char *) &li);
-      break;
-    case N_SYM_SE:
-      break;
-    }
-  return 1;
-}
-
-/* Given pointers to an a.out symbol table in core containing dbx
-   style data, setup partial_symtab's describing each source file for
-   which debugging information is available.
-   SYMFILE_NAME is the name of the file we are reading from. */
-
-static void
-read_os9k_psymtab (struct objfile *objfile, CORE_ADDR text_addr, int text_size)
-{
-  register struct internal_symstruct *bufp = 0;		/* =0 avoids gcc -Wall glitch */
-  register char *namestring;
-  int past_first_source_file = 0;
-  CORE_ADDR last_o_file_start = 0;
-#if 0
-  struct cleanup *back_to;
-#endif
-  bfd *abfd;
-  FILE *fp;
-
-  /* End of the text segment of the executable file.  */
-  static CORE_ADDR end_of_text_addr;
-
-  /* Current partial symtab */
-  static struct partial_symtab *pst = 0;
-
-  /* List of current psymtab's include files */
-  char **psymtab_include_list;
-  int includes_allocated;
-  int includes_used;
-
-  /* Index within current psymtab dependency list */
-  struct partial_symtab **dependency_list;
-  int dependencies_used, dependencies_allocated;
-
-  includes_allocated = 30;
-  includes_used = 0;
-  psymtab_include_list = (char **) alloca (includes_allocated *
-					   sizeof (char *));
-
-  dependencies_allocated = 30;
-  dependencies_used = 0;
-  dependency_list =
-    (struct partial_symtab **) alloca (dependencies_allocated *
-				       sizeof (struct partial_symtab *));
-
-  last_source_file = NULL;
-
-#ifdef END_OF_TEXT_DEFAULT
-  end_of_text_addr = END_OF_TEXT_DEFAULT;
-#else
-  end_of_text_addr = text_addr + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile))
-    + text_size;		/* Relocate */
-#endif
-
-  abfd = objfile->obfd;
-  fp = objfile->auxf2;
-  if (!fp)
-    return;
-
-  fread (&dbghdr.sync, sizeof (dbghdr.sync), 1, fp);
-  fread (&dbghdr.rev, sizeof (dbghdr.rev), 1, fp);
-  fread (&dbghdr.crc, sizeof (dbghdr.crc), 1, fp);
-  fread (&dbghdr.os, sizeof (dbghdr.os), 1, fp);
-  fread (&dbghdr.cpu, sizeof (dbghdr.cpu), 1, fp);
-  SWAP_DBGHDR (&dbghdr, abfd);
-
-  symnum = 0;
-  while (1)
-    {
-      int ret;
-      long cursymoffset;
-
-      /* Get the symbol for this run and pull out some info */
-      QUIT;			/* allow this to be interruptable */
-      cursymoffset = ftell (objfile->auxf2);
-      ret = fill_sym (objfile->auxf2, abfd);
-      if (ret <= 0)
-	break;
-      else
-	symnum++;
-      bufp = symbuf;
-
-      /* Special case to speed up readin. */
-      if (bufp->n_type == (short) N_SYM_SLINE)
-	continue;
-
-#define CUR_SYMBOL_VALUE bufp->n_value
-      /* partial-stab.h */
-
-      switch (bufp->n_type)
-	{
-	  char *p;
-
-	case N_SYM_CMPLR:
-	  continue;
-
-	case N_SYM_SE:
-	  CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
-	  if (psymfile_depth == 1 && pst)
-	    {
-	      os9k_end_psymtab (pst, psymtab_include_list, includes_used,
-				symnum, CUR_SYMBOL_VALUE,
-				dependency_list, dependencies_used);
-	      pst = (struct partial_symtab *) 0;
-	      includes_used = 0;
-	      dependencies_used = 0;
-	    }
-	  psymfile_depth--;
-	  continue;
-
-	case N_SYM_SYM:	/* Typedef or automatic variable. */
-	  namestring = bufp->n_strx;
-	  p = (char *) strchr (namestring, ':');
-	  if (!p)
-	    continue;		/* Not a debugging symbol.   */
-
-	  /* Main processing section for debugging symbols which
-	     the initial read through the symbol tables needs to worry
-	     about.  If we reach this point, the symbol which we are
-	     considering is definitely one we are interested in.
-	     p must also contain the (valid) index into the namestring
-	     which indicates the debugging type symbol.  */
-
-	  switch (p[1])
-	    {
-	    case 'S':
-	      {
-		unsigned long valu;
-		enum language tmp_language;
-		char *str, *p;
-		int n;
-
-		valu = CUR_SYMBOL_VALUE;
-		if (valu)
-		  valu += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
-		past_first_source_file = 1;
-
-		p = strchr (namestring, ':');
-		if (p)
-		  n = p - namestring;
-		else
-		  n = strlen (namestring);
-		str = alloca (n + 1);
-		strncpy (str, namestring, n);
-		str[n] = '\0';
-
-		if (psymfile_depth == 0)
-		  {
-		    if (!pst)
-		      pst = os9k_start_psymtab (objfile,
-						str, valu,
-						cursymoffset,
-						symnum - 1,
-					      objfile->global_psymbols.next,
-					     objfile->static_psymbols.next);
-		  }
-		else
-		  {		/* this is a include file */
-		    tmp_language = deduce_language_from_filename (str);
-		    if (tmp_language != language_unknown
-			&& (tmp_language != language_c
-			    || psymtab_language != language_cplus))
-		      psymtab_language = tmp_language;
-
-/*
-   if (pst && STREQ (str, pst->filename))
-   continue;
-   {
-   register int i;
-   for (i = 0; i < includes_used; i++)
-   if (STREQ (str, psymtab_include_list[i]))
-   {
-   i = -1; 
-   break;
-   }
-   if (i == -1)
-   continue;
-   }
- */
-
-		    psymtab_include_list[includes_used++] = str;
-		    if (includes_used >= includes_allocated)
-		      {
-			char **orig = psymtab_include_list;
-
-			psymtab_include_list = (char **)
-			  alloca ((includes_allocated *= 2) * sizeof (char *));
-			memcpy ((PTR) psymtab_include_list, (PTR) orig,
-				includes_used * sizeof (char *));
-		      }
-
-		  }
-		psymfile_depth++;
-		continue;
-	      }
-
-	    case 'v':
-	      add_psymbol_to_list (namestring, p - namestring,
-				   VAR_NAMESPACE, LOC_STATIC,
-				   &objfile->static_psymbols,
-				   0, CUR_SYMBOL_VALUE,
-				   psymtab_language, objfile);
-	      continue;
-	    case 'V':
-	      add_psymbol_to_list (namestring, p - namestring,
-				   VAR_NAMESPACE, LOC_STATIC,
-				   &objfile->global_psymbols,
-				   0, CUR_SYMBOL_VALUE,
-				   psymtab_language, objfile);
-	      continue;
-
-	    case 'T':
-	      if (p != namestring)	/* a name is there, not just :T... */
-		{
-		  add_psymbol_to_list (namestring, p - namestring,
-				       STRUCT_NAMESPACE, LOC_TYPEDEF,
-				       &objfile->static_psymbols,
-				       CUR_SYMBOL_VALUE, 0,
-				       psymtab_language, objfile);
-		  if (p[2] == 't')
-		    {
-		      /* Also a typedef with the same name.  */
-		      add_psymbol_to_list (namestring, p - namestring,
-					   VAR_NAMESPACE, LOC_TYPEDEF,
-					   &objfile->static_psymbols,
-				      CUR_SYMBOL_VALUE, 0, psymtab_language,
-					   objfile);
-		      p += 1;
-		    }
-		  /* The semantics of C++ state that "struct foo { ... }"
-		     also defines a typedef for "foo".  Unfortuantely, cfront
-		     never makes the typedef when translating from C++ to C.
-		     We make the typedef here so that "ptype foo" works as
-		     expected for cfront translated code.  */
-		  else if (psymtab_language == language_cplus)
-		    {
-		      /* Also a typedef with the same name.  */
-		      add_psymbol_to_list (namestring, p - namestring,
-					   VAR_NAMESPACE, LOC_TYPEDEF,
-					   &objfile->static_psymbols,
-				      CUR_SYMBOL_VALUE, 0, psymtab_language,
-					   objfile);
-		    }
-		}
-	      goto check_enum;
-	    case 't':
-	      if (p != namestring)	/* a name is there, not just :T... */
-		{
-		  add_psymbol_to_list (namestring, p - namestring,
-				       VAR_NAMESPACE, LOC_TYPEDEF,
-				       &objfile->static_psymbols,
-				       CUR_SYMBOL_VALUE, 0,
-				       psymtab_language, objfile);
-		}
-	    check_enum:
-	      /* If this is an enumerated type, we need to
-	         add all the enum constants to the partial symbol
-	         table.  This does not cover enums without names, e.g.
-	         "enum {a, b} c;" in C, but fortunately those are
-	         rare.  There is no way for GDB to find those from the
-	         enum type without spending too much time on it.  Thus
-	         to solve this problem, the compiler needs to put out the
-	         enum in a nameless type.  GCC2 does this.  */
-
-	      /* We are looking for something of the form
-	         <name> ":" ("t" | "T") [<number> "="] "e" <size>
-	         {<constant> ":" <value> ","} ";".  */
-
-	      /* Skip over the colon and the 't' or 'T'.  */
-	      p += 2;
-	      /* This type may be given a number.  Also, numbers can come
-	         in pairs like (0,26).  Skip over it.  */
-	      while ((*p >= '0' && *p <= '9')
-		     || *p == '(' || *p == ',' || *p == ')'
-		     || *p == '=')
-		p++;
-
-	      if (*p++ == 'e')
-		{
-		  /* We have found an enumerated type. skip size */
-		  while (*p >= '0' && *p <= '9')
-		    p++;
-		  /* According to comments in read_enum_type
-		     a comma could end it instead of a semicolon.
-		     I don't know where that happens.
-		     Accept either.  */
-		  while (*p && *p != ';' && *p != ',')
-		    {
-		      char *q;
-
-		      /* Check for and handle cretinous dbx symbol name
-		         continuation! 
-		         if (*p == '\\')
-		         p = next_symbol_text (objfile);
-		       */
-
-		      /* Point to the character after the name
-		         of the enum constant.  */
-		      for (q = p; *q && *q != ':'; q++)
-			;
-		      /* Note that the value doesn't matter for
-		         enum constants in psymtabs, just in symtabs.  */
-		      add_psymbol_to_list (p, q - p,
-					   VAR_NAMESPACE, LOC_CONST,
-					   &objfile->static_psymbols, 0,
-					   0, psymtab_language, objfile);
-		      /* Point past the name.  */
-		      p = q;
-		      /* Skip over the value.  */
-		      while (*p && *p != ',')
-			p++;
-		      /* Advance past the comma.  */
-		      if (*p)
-			p++;
-		    }
-		}
-	      continue;
-	    case 'c':
-	      /* Constant, e.g. from "const" in Pascal.  */
-	      add_psymbol_to_list (namestring, p - namestring,
-				   VAR_NAMESPACE, LOC_CONST,
-				&objfile->static_psymbols, CUR_SYMBOL_VALUE,
-				   0, psymtab_language, objfile);
-	      continue;
-
-	    case 'f':
-	      CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
-	      if (pst && pst->textlow == 0)
-		pst->textlow = CUR_SYMBOL_VALUE;
-
-	      add_psymbol_to_list (namestring, p - namestring,
-				   VAR_NAMESPACE, LOC_BLOCK,
-				&objfile->static_psymbols, CUR_SYMBOL_VALUE,
-				   0, psymtab_language, objfile);
-	      continue;
-
-	    case 'F':
-	      CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
-	      if (pst && pst->textlow == 0)
-		pst->textlow = CUR_SYMBOL_VALUE;
-
-	      add_psymbol_to_list (namestring, p - namestring,
-				   VAR_NAMESPACE, LOC_BLOCK,
-				&objfile->global_psymbols, CUR_SYMBOL_VALUE,
-				   0, psymtab_language, objfile);
-	      continue;
-
-	    case 'p':
-	    case 'l':
-	    case 's':
-	      continue;
-
-	    case ':':
-	      /* It is a C++ nested symbol.  We don't need to record it
-	         (I don't think); if we try to look up foo::bar::baz,
-	         then symbols for the symtab containing foo should get
-	         read in, I think.  */
-	      /* Someone says sun cc puts out symbols like
-	         /foo/baz/maclib::/usr/local/bin/maclib,
-	         which would get here with a symbol type of ':'.  */
-	      continue;
-
-	    default:
-	      /* Unexpected symbol descriptor.  The second and subsequent stabs
-	         of a continued stab can show up here.  The question is
-	         whether they ever can mimic a normal stab--it would be
-	         nice if not, since we certainly don't want to spend the
-	         time searching to the end of every string looking for
-	         a backslash.  */
-
-	      complain (&unknown_symchar_complaint, p[1]);
-	      continue;
-	    }
-
-	case N_SYM_RBRAC:
-	  CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
-#ifdef HANDLE_RBRAC
-	  HANDLE_RBRAC (CUR_SYMBOL_VALUE);
-	  continue;
-#endif
-	case N_SYM_LBRAC:
-	  continue;
-
-	default:
-	  /* If we haven't found it yet, ignore it.  It's probably some
-	     new type we don't know about yet.  */
-	  complain (&unknown_symtype_complaint,
-		    local_hex_string ((unsigned long) bufp->n_type));
-	  continue;
-	}
-    }
-
-  DBX_SYMCOUNT (objfile) = symnum;
-
-  /* If there's stuff to be cleaned up, clean it up.  */
-  if (DBX_SYMCOUNT (objfile) > 0
-/*FIXME, does this have a bug at start address 0? */
-      && last_o_file_start
-      && objfile->ei.entry_point < bufp->n_value
-      && objfile->ei.entry_point >= last_o_file_start)
-    {
-      objfile->ei.entry_file_lowpc = last_o_file_start;
-      objfile->ei.entry_file_highpc = bufp->n_value;
-    }
-
-  if (pst)
-    {
-      os9k_end_psymtab (pst, psymtab_include_list, includes_used,
-			symnum, end_of_text_addr,
-			dependency_list, dependencies_used);
-    }
-/*
-   do_cleanups (back_to);
- */
-}
-
-/* Allocate and partially fill a partial symtab.  It will be
-   completely filled at the end of the symbol list.
-
-   SYMFILE_NAME is the name of the symbol-file we are reading from, and ADDR
-   is the address relative to which its symbols are (incremental) or 0
-   (normal). */
-
-
-static struct partial_symtab *
-os9k_start_psymtab (struct objfile *objfile, char *filename, CORE_ADDR textlow,
-		    int ldsymoff, int ldsymcnt,
-		    struct partial_symbol **global_syms,
-		    struct partial_symbol **static_syms)
-{
-  struct partial_symtab *result =
-  start_psymtab_common (objfile, objfile->section_offsets,
-			filename, textlow, global_syms, static_syms);
-
-  result->read_symtab_private = (char *)
-    obstack_alloc (&objfile->psymbol_obstack, sizeof (struct symloc));
-
-  LDSYMOFF (result) = ldsymoff;
-  LDSYMCNT (result) = ldsymcnt;
-  result->read_symtab = os9k_psymtab_to_symtab;
-
-  /* Deduce the source language from the filename for this psymtab. */
-  psymtab_language = deduce_language_from_filename (filename);
-  return result;
-}
-
-/* Close off the current usage of PST.  
-   Returns PST or NULL if the partial symtab was empty and thrown away.
-   FIXME:  List variables and peculiarities of same.  */
-
-static struct partial_symtab *
-os9k_end_psymtab (struct partial_symtab *pst, char **include_list,
-		  int num_includes, int capping_symbol_cnt,
-		  CORE_ADDR capping_text,
-		  struct partial_symtab **dependency_list,
-		  int number_dependencies)
-{
-  int i;
-  struct partial_symtab *p1;
-  struct objfile *objfile = pst->objfile;
-
-  if (capping_symbol_cnt != -1)
-    LDSYMCNT (pst) = capping_symbol_cnt - LDSYMCNT (pst);
-
-  /* Under Solaris, the N_SO symbols always have a value of 0,
-     instead of the usual address of the .o file.  Therefore,
-     we have to do some tricks to fill in texthigh and textlow.
-     The first trick is in partial-stab.h: if we see a static
-     or global function, and the textlow for the current pst
-     is still 0, then we use that function's address for 
-     the textlow of the pst.
-
-     Now, to fill in texthigh, we remember the last function seen
-     in the .o file (also in partial-stab.h).  Also, there's a hack in
-     bfd/elf.c and gdb/elfread.c to pass the ELF st_size field
-     to here via the misc_info field.  Therefore, we can fill in
-     a reliable texthigh by taking the address plus size of the
-     last function in the file.
-
-     Unfortunately, that does not cover the case where the last function
-     in the file is static.  See the paragraph below for more comments
-     on this situation.
-
-     Finally, if we have a valid textlow for the current file, we run
-     down the partial_symtab_list filling in previous texthighs that
-     are still unknown.  */
-
-  if (pst->texthigh == 0 && last_function_name)
-    {
-      char *p;
-      int n;
-      struct minimal_symbol *minsym;
-
-      p = strchr (last_function_name, ':');
-      if (p == NULL)
-	p = last_function_name;
-      n = p - last_function_name;
-      p = alloca (n + 1);
-      strncpy (p, last_function_name, n);
-      p[n] = 0;
-
-      minsym = lookup_minimal_symbol (p, NULL, objfile);
-
-      if (minsym)
-	{
-	  pst->texthigh = SYMBOL_VALUE_ADDRESS (minsym) + (long) MSYMBOL_INFO (minsym);
-	}
-      else
-	{
-	  /* This file ends with a static function, and it's
-	     difficult to imagine how hard it would be to track down
-	     the elf symbol.  Luckily, most of the time no one will notice,
-	     since the next file will likely be compiled with -g, so
-	     the code below will copy the first fuction's start address 
-	     back to our texthigh variable.  (Also, if this file is the
-	     last one in a dynamically linked program, texthigh already
-	     has the right value.)  If the next file isn't compiled
-	     with -g, then the last function in this file winds up owning
-	     all of the text space up to the next -g file, or the end (minus
-	     shared libraries).  This only matters for single stepping,
-	     and even then it will still work, except that it will single
-	     step through all of the covered functions, instead of setting
-	     breakpoints around them as it usualy does.  This makes it
-	     pretty slow, but at least it doesn't fail.
-
-	     We can fix this with a fairly big change to bfd, but we need
-	     to coordinate better with Cygnus if we want to do that.  FIXME.  */
-	}
-      last_function_name = NULL;
-    }
-
-  /* this test will be true if the last .o file is only data */
-  if (pst->textlow == 0)
-    pst->textlow = pst->texthigh;
-
-  /* If we know our own starting text address, then walk through all other
-     psymtabs for this objfile, and if any didn't know their ending text
-     address, set it to our starting address.  Take care to not set our
-     own ending address to our starting address, nor to set addresses on
-     `dependency' files that have both textlow and texthigh zero.  */
-  if (pst->textlow)
-    {
-      ALL_OBJFILE_PSYMTABS (objfile, p1)
-      {
-	if (p1->texthigh == 0 && p1->textlow != 0 && p1 != pst)
-	  {
-	    p1->texthigh = pst->textlow;
-	    /* if this file has only data, then make textlow match texthigh */
-	    if (p1->textlow == 0)
-	      p1->textlow = p1->texthigh;
-	  }
-      }
-    }
-
-  /* End of kludge for patching Solaris textlow and texthigh.  */
-
-  pst->n_global_syms =
-    objfile->global_psymbols.next - (objfile->global_psymbols.list + pst->globals_offset);
-  pst->n_static_syms =
-    objfile->static_psymbols.next - (objfile->static_psymbols.list + pst->statics_offset);
-
-  pst->number_of_dependencies = number_dependencies;
-  if (number_dependencies)
-    {
-      pst->dependencies = (struct partial_symtab **)
-	obstack_alloc (&objfile->psymbol_obstack,
-		    number_dependencies * sizeof (struct partial_symtab *));
-      memcpy (pst->dependencies, dependency_list,
-	      number_dependencies * sizeof (struct partial_symtab *));
-    }
-  else
-    pst->dependencies = 0;
-
-  for (i = 0; i < num_includes; i++)
-    {
-      struct partial_symtab *subpst =
-      allocate_psymtab (include_list[i], objfile);
-
-      subpst->section_offsets = pst->section_offsets;
-      subpst->read_symtab_private =
-	(char *) obstack_alloc (&objfile->psymbol_obstack,
-				sizeof (struct symloc));
-      LDSYMOFF (subpst) =
-	LDSYMCNT (subpst) =
-	subpst->textlow =
-	subpst->texthigh = 0;
-
-      /* We could save slight bits of space by only making one of these,
-         shared by the entire set of include files.  FIXME-someday.  */
-      subpst->dependencies = (struct partial_symtab **)
-	obstack_alloc (&objfile->psymbol_obstack,
-		       sizeof (struct partial_symtab *));
-      subpst->dependencies[0] = pst;
-      subpst->number_of_dependencies = 1;
-
-      subpst->globals_offset =
-	subpst->n_global_syms =
-	subpst->statics_offset =
-	subpst->n_static_syms = 0;
-
-      subpst->readin = 0;
-      subpst->symtab = 0;
-      subpst->read_symtab = pst->read_symtab;
-    }
-
-  sort_pst_symbols (pst);
-
-  /* If there is already a psymtab or symtab for a file of this name, 
-     remove it.
-     (If there is a symtab, more drastic things also happen.)
-     This happens in VxWorks.  */
-  free_named_symtabs (pst->filename);
-
-  if (num_includes == 0
-      && number_dependencies == 0
-      && pst->n_global_syms == 0
-      && pst->n_static_syms == 0)
-    {
-      /* Throw away this psymtab, it's empty.  We can't deallocate it, since
-         it is on the obstack, but we can forget to chain it on the list.  */
-      /* Indicate that psymtab was thrown away.  */
-
-      discard_psymtab (pst);
-
-      pst = (struct partial_symtab *) NULL;
-    }
-  return pst;
-}
-
-static void
-os9k_psymtab_to_symtab_1 (struct partial_symtab *pst)
-{
-  struct cleanup *old_chain;
-  int i;
-
-  if (!pst)
-    return;
-
-  if (pst->readin)
-    {
-      fprintf_unfiltered (gdb_stderr, "Psymtab for %s already read in.  Shouldn't happen.\n",
-			  pst->filename);
-      return;
-    }
-
-  /* Read in all partial symtabs on which this one is dependent */
-  for (i = 0; i < pst->number_of_dependencies; i++)
-    if (!pst->dependencies[i]->readin)
-      {
-	/* Inform about additional files that need to be read in.  */
-	if (info_verbose)
-	  {
-	    fputs_filtered (" ", gdb_stdout);
-	    wrap_here ("");
-	    fputs_filtered ("and ", gdb_stdout);
-	    wrap_here ("");
-	    printf_filtered ("%s...", pst->dependencies[i]->filename);
-	    wrap_here ("");	/* Flush output */
-	    gdb_flush (gdb_stdout);
-	  }
-	os9k_psymtab_to_symtab_1 (pst->dependencies[i]);
-      }
-
-  if (LDSYMCNT (pst))		/* Otherwise it's a dummy */
-    {
-      /* Init stuff necessary for reading in symbols */
-      stabsread_init ();
-      buildsym_init ();
-      old_chain = make_cleanup (really_free_pendings, 0);
-
-      /* Read in this file's symbols */
-      os9k_read_ofile_symtab (pst);
-      sort_symtab_syms (pst->symtab);
-      do_cleanups (old_chain);
-    }
-
-  pst->readin = 1;
-}
-
-/* Read in all of the symbols for a given psymtab for real.
-   Be verbose about it if the user wants that.  */
-
-static void
-os9k_psymtab_to_symtab (struct partial_symtab *pst)
-{
-  bfd *sym_bfd;
-
-  if (!pst)
-    return;
-
-  if (pst->readin)
-    {
-      fprintf_unfiltered (gdb_stderr, "Psymtab for %s already read in.  Shouldn't happen.\n",
-			  pst->filename);
-      return;
-    }
-
-  if (LDSYMCNT (pst) || pst->number_of_dependencies)
-    {
-      /* Print the message now, before reading the string table,
-         to avoid disconcerting pauses.  */
-      if (info_verbose)
-	{
-	  printf_filtered ("Reading in symbols for %s...", pst->filename);
-	  gdb_flush (gdb_stdout);
-	}
-
-      sym_bfd = pst->objfile->obfd;
-      os9k_psymtab_to_symtab_1 (pst);
-
-      /* Match with global symbols.  This only needs to be done once,
-         after all of the symtabs and dependencies have been read in.   */
-      scan_file_globals (pst->objfile);
-
-      /* Finish up the debug error message.  */
-      if (info_verbose)
-	printf_filtered ("done.\n");
-    }
-}
-
-/* Read in a defined section of a specific object file's symbols. */
-static void
-os9k_read_ofile_symtab (struct partial_symtab *pst)
-{
-  register struct internal_symstruct *bufp;
-  unsigned char type;
-  unsigned max_symnum;
-  register bfd *abfd;
-  struct objfile *objfile;
-  int sym_offset;		/* Offset to start of symbols to read */
-  CORE_ADDR text_offset;	/* Start of text segment for symbols */
-  int text_size;		/* Size of text segment for symbols */
-  FILE *dbg_file;
-
-  objfile = pst->objfile;
-  sym_offset = LDSYMOFF (pst);
-  max_symnum = LDSYMCNT (pst);
-  text_offset = pst->textlow;
-  text_size = pst->texthigh - pst->textlow;
-
-  current_objfile = objfile;
-  subfile_stack = NULL;
-  last_source_file = NULL;
-
-  abfd = objfile->obfd;
-  dbg_file = objfile->auxf2;
-
-#if 0
-  /* It is necessary to actually read one symbol *before* the start
-     of this symtab's symbols, because the GCC_COMPILED_FLAG_SYMBOL
-     occurs before the N_SO symbol.
-     Detecting this in read_dbx_symtab
-     would slow down initial readin, so we look for it here instead. */
-  if (!processing_acc_compilation && sym_offset >= (int) symbol_size)
-    {
-      fseek (objefile->auxf2, sym_offset, SEEK_CUR);
-      fill_sym (objfile->auxf2, abfd);
-      bufp = symbuf;
-
-      processing_gcc_compilation = 0;
-      if (bufp->n_type == N_TEXT)
-	{
-	  if (STREQ (namestring, GCC_COMPILED_FLAG_SYMBOL))
-	    processing_gcc_compilation = 1;
-	  else if (STREQ (namestring, GCC2_COMPILED_FLAG_SYMBOL))
-	    processing_gcc_compilation = 2;
-	}
-
-      /* Try to select a C++ demangling based on the compilation unit
-         producer. */
-
-      if (processing_gcc_compilation)
-	{
-	  if (AUTO_DEMANGLING)
-	    {
-	      set_demangling_style (GNU_DEMANGLING_STYLE_STRING);
-	    }
-	}
-    }
-  else
-    {
-      /* The N_SO starting this symtab is the first symbol, so we
-         better not check the symbol before it.  I'm not this can
-         happen, but it doesn't hurt to check for it.  */
-      bfd_seek (symfile_bfd, sym_offset, SEEK_CUR);
-      processing_gcc_compilation = 0;
-    }
-#endif /* 0 */
-
-  fseek (dbg_file, (long) sym_offset, 0);
-/*
-   if (bufp->n_type != (unsigned char)N_SYM_SYM)
-   error("First symbol in segment of executable not a source symbol");
- */
-
-  for (symnum = 0; symnum < max_symnum; symnum++)
-    {
-      QUIT;			/* Allow this to be interruptable */
-      fill_sym (dbg_file, abfd);
-      bufp = symbuf;
-      type = bufp->n_type;
-
-      os9k_process_one_symbol ((int) type, (int) bufp->n_desc,
-	 (CORE_ADDR) bufp->n_value, bufp->n_strx, pst->section_offsets, objfile);
-
-      /* We skip checking for a new .o or -l file; that should never
-         happen in this routine. */
-#if 0
-      else
-      if (type == N_TEXT)
-	{
-	  /* I don't think this code will ever be executed, because
-	     the GCC_COMPILED_FLAG_SYMBOL usually is right before
-	     the N_SO symbol which starts this source file.
-	     However, there is no reason not to accept
-	     the GCC_COMPILED_FLAG_SYMBOL anywhere.  */
-
-	  if (STREQ (namestring, GCC_COMPILED_FLAG_SYMBOL))
-	    processing_gcc_compilation = 1;
-	  else if (STREQ (namestring, GCC2_COMPILED_FLAG_SYMBOL))
-	    processing_gcc_compilation = 2;
-
-	  if (AUTO_DEMANGLING)
-	    {
-	      set_demangling_style (GNU_DEMANGLING_STYLE_STRING);
-	    }
-	}
-      else if (type & N_EXT || type == (unsigned char) N_TEXT
-	       || type == (unsigned char) N_NBTEXT
-	)
-	{
-	  /* Global symbol: see if we came across a dbx defintion for
-	     a corresponding symbol.  If so, store the value.  Remove
-	     syms from the chain when their values are stored, but
-	     search the whole chain, as there may be several syms from
-	     different files with the same name. */
-	  /* This is probably not true.  Since the files will be read
-	     in one at a time, each reference to a global symbol will
-	     be satisfied in each file as it appears. So we skip this
-	     section. */
-	  ;
-	}
-#endif /* 0 */
-    }
-
-  current_objfile = NULL;
-
-  /* In a Solaris elf file, this variable, which comes from the
-     value of the N_SO symbol, will still be 0.  Luckily, text_offset,
-     which comes from pst->textlow is correct. */
-  if (last_source_start_addr == 0)
-    last_source_start_addr = text_offset;
-  pst->symtab = end_symtab (text_offset + text_size, objfile, SECT_OFF_TEXT (objfile));
-  end_stabs ();
-}
-
-
-/* This handles a single symbol from the symbol-file, building symbols
-   into a GDB symtab.  It takes these arguments and an implicit argument.
-
-   TYPE is the type field of the ".stab" symbol entry.
-   DESC is the desc field of the ".stab" entry.
-   VALU is the value field of the ".stab" entry.
-   NAME is the symbol name, in our address space.
-   SECTION_OFFSETS is a set of amounts by which the sections of this object
-   file were relocated when it was loaded into memory.
-   All symbols that refer
-   to memory locations need to be offset by these amounts.
-   OBJFILE is the object file from which we are reading symbols.
-   It is used in end_symtab.  */
-
-static void
-os9k_process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
-			 struct section_offsets *section_offsets,
-			 struct objfile *objfile)
-{
-  register struct context_stack *new;
-  /* The stab type used for the definition of the last function.
-     N_STSYM or N_GSYM for SunOS4 acc; N_FUN for other compilers.  */
-  static int function_stab_type = 0;
-
-#if 0
-  /* Something is wrong if we see real data before
-     seeing a source file name.  */
-  if (last_source_file == NULL && type != (unsigned char) N_SO)
-    {
-      /* Ignore any symbols which appear before an N_SO symbol.
-         Currently no one puts symbols there, but we should deal
-         gracefully with the case.  A complain()t might be in order,
-         but this should not be an error ().  */
-      return;
-    }
-#endif /* 0 */
-
-  switch (type)
-    {
-    case N_SYM_LBRAC:
-      /* On most machines, the block addresses are relative to the
-         N_SO, the linker did not relocate them (sigh).  */
-      valu += ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
-      new = push_context (desc, valu);
-      break;
-
-    case N_SYM_RBRAC:
-      valu += ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
-      new = pop_context ();
-
-#if !defined (OS9K_VARIABLES_INSIDE_BLOCK)
-#define OS9K_VARIABLES_INSIDE_BLOCK(desc, gcc_p) 1
-#endif
-
-      if (!OS9K_VARIABLES_INSIDE_BLOCK (desc, processing_gcc_compilation))
-	local_symbols = new->locals;
-
-      if (context_stack_depth > 1)
-	{
-	  /* This is not the outermost LBRAC...RBRAC pair in the function,
-	     its local symbols preceded it, and are the ones just recovered
-	     from the context stack.  Define the block for them (but don't
-	     bother if the block contains no symbols.  Should we complain
-	     on blocks without symbols?  I can't think of any useful purpose
-	     for them).  */
-	  if (local_symbols != NULL)
-	    {
-	      /* Muzzle a compiler bug that makes end < start.  (which
-	         compilers?  Is this ever harmful?).  */
-	      if (new->start_addr > valu)
-		{
-		  complain (&lbrac_rbrac_complaint);
-		  new->start_addr = valu;
-		}
-	      /* Make a block for the local symbols within.  */
-	      finish_block (0, &local_symbols, new->old_blocks,
-			    new->start_addr, valu, objfile);
-	    }
-	}
-      else
-	{
-	  if (context_stack_depth == 0)
-	    {
-	      within_function = 0;
-	      /* Make a block for the local symbols within.  */
-	      finish_block (new->name, &local_symbols, new->old_blocks,
-			    new->start_addr, valu, objfile);
-	    }
-	  else
-	    {
-	      /* attach local_symbols to the end of new->locals */
-	      if (!new->locals)
-		new->locals = local_symbols;
-	      else
-		{
-		  struct pending *p;
-
-		  p = new->locals;
-		  while (p->next)
-		    p = p->next;
-		  p->next = local_symbols;
-		}
-	    }
-	}
-
-      if (OS9K_VARIABLES_INSIDE_BLOCK (desc, processing_gcc_compilation))
-	/* Now pop locals of block just finished.  */
-	local_symbols = new->locals;
-      break;
-
-
-    case N_SYM_SLINE:
-      /* This type of "symbol" really just records
-         one line-number -- core-address correspondence.
-         Enter it in the line list for this symbol table. */
-      /* Relocate for dynamic loading and for ELF acc fn-relative syms.  */
-      valu += ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
-      /* FIXME: loses if sizeof (char *) > sizeof (int) */
-      gdb_assert (sizeof (name) <= sizeof (int));
-      record_line (current_subfile, (int) name, valu);
-      break;
-
-      /* The following symbol types need to have the appropriate offset added
-         to their value; then we process symbol definitions in the name.  */
-    case N_SYM_SYM:
-
-      if (name)
-	{
-	  char deftype;
-	  char *dirn, *n;
-	  char *p = strchr (name, ':');
-	  if (p == NULL)
-	    deftype = '\0';
-	  else
-	    deftype = p[1];
-
-
-	  switch (deftype)
-	    {
-	    case 'S':
-	      valu += ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
-	      n = strrchr (name, '/');
-	      if (n != NULL)
-		{
-		  *n = '\0';
-		  n++;
-		  dirn = name;
-		}
-	      else
-		{
-		  n = name;
-		  dirn = NULL;
-		}
-	      *p = '\0';
-	      if (symfile_depth++ == 0)
-		{
-		  if (last_source_file)
-		    {
-		      end_symtab (valu, objfile, SECT_OFF_TEXT (objfile));
-		      end_stabs ();
-		    }
-		  start_stabs ();
-		  os9k_stabs = 1;
-		  start_symtab (n, dirn, valu);
-		  record_debugformat ("OS9");
-		}
-	      else
-		{
-		  push_subfile ();
-		  start_subfile (n, dirn != NULL ? dirn : current_subfile->dirname);
-		}
-	      break;
-
-	    case 'f':
-	    case 'F':
-	      valu += ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
-	      function_stab_type = type;
-
-	      within_function = 1;
-	      new = push_context (0, valu);
-	      new->name = define_symbol (valu, name, desc, type, objfile);
-	      break;
-
-	    case 'V':
-	    case 'v':
-	      valu += ANOFFSET (section_offsets, SECT_OFF_DATA (objfile));
-	      define_symbol (valu, name, desc, type, objfile);
-	      break;
-
-	    default:
-	      define_symbol (valu, name, desc, type, objfile);
-	      break;
-	    }
-	}
-      break;
-
-    case N_SYM_SE:
-      if (--symfile_depth != 0)
-	start_subfile (pop_subfile (), current_subfile->dirname);
-      break;
-
-    default:
-      complain (&unknown_symtype_complaint,
-		local_hex_string ((unsigned long) type));
-      /* FALLTHROUGH */
-      break;
-
-    case N_SYM_CMPLR:
-      break;
-    }
-  previous_stab_code = type;
-}
-
-static struct sym_fns os9k_sym_fns =
-{
-  bfd_target_os9k_flavour,
-  os9k_new_init,		/* sym_new_init: init anything gbl to entire symtab */
-  os9k_symfile_init,		/* sym_init: read initial info, setup for sym_read() */
-  os9k_symfile_read,		/* sym_read: read a symbol file into symtab */
-  os9k_symfile_finish,		/* sym_finish: finished with file, cleanup */
-  default_symfile_offsets,	/* sym_offsets: parse user's offsets to internal form */
-  NULL				/* next: pointer to next struct sym_fns */
-};
-
-void
-_initialize_os9kread (void)
-{
-  add_symtab_fns (&os9k_sym_fns);
-}
+// OBSOLETE /* Read os9/os9k symbol tables and convert to internal format, for GDB.
+// OBSOLETE    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
+// OBSOLETE    1996, 1997, 1998, 1999, 2000, 2001
+// OBSOLETE    Free Software Foundation, Inc.
+// OBSOLETE 
+// OBSOLETE    This file is part of GDB.
+// OBSOLETE 
+// OBSOLETE    This program is free software; you can redistribute it and/or modify
+// OBSOLETE    it under the terms of the GNU General Public License as published by
+// OBSOLETE    the Free Software Foundation; either version 2 of the License, or
+// OBSOLETE    (at your option) any later version.
+// OBSOLETE 
+// OBSOLETE    This program is distributed in the hope that it will be useful,
+// OBSOLETE    but WITHOUT ANY WARRANTY; without even the implied warranty of
+// OBSOLETE    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// OBSOLETE    GNU General Public License for more details.
+// OBSOLETE 
+// OBSOLETE    You should have received a copy of the GNU General Public License
+// OBSOLETE    along with this program; if not, write to the Free Software
+// OBSOLETE    Foundation, Inc., 59 Temple Place - Suite 330,
+// OBSOLETE    Boston, MA 02111-1307, USA.  */
+// OBSOLETE 
+// OBSOLETE /* This module provides three functions: os9k_symfile_init,
+// OBSOLETE    which initializes to read a symbol file; os9k_new_init, which 
+// OBSOLETE    discards existing cached information when all symbols are being
+// OBSOLETE    discarded; and os9k_symfile_read, which reads a symbol table
+// OBSOLETE    from a file.
+// OBSOLETE 
+// OBSOLETE    os9k_symfile_read only does the minimum work necessary for letting the
+// OBSOLETE    user "name" things symbolically; it does not read the entire symtab.
+// OBSOLETE    Instead, it reads the external and static symbols and puts them in partial
+// OBSOLETE    symbol tables.  When more extensive information is requested of a
+// OBSOLETE    file, the corresponding partial symbol table is mutated into a full
+// OBSOLETE    fledged symbol table by going back and reading the symbols
+// OBSOLETE    for real.  os9k_psymtab_to_symtab() is the function that does this */
+// OBSOLETE 
+// OBSOLETE #include "defs.h"
+// OBSOLETE #include "gdb_string.h"
+// OBSOLETE #include "gdb_assert.h"
+// OBSOLETE #include <stdio.h>
+// OBSOLETE 
+// OBSOLETE #if defined(USG) || defined(__CYGNUSCLIB__)
+// OBSOLETE #include <sys/types.h>
+// OBSOLETE #include <fcntl.h>
+// OBSOLETE #endif
+// OBSOLETE 
+// OBSOLETE #include "obstack.h"
+// OBSOLETE #include "gdb_stat.h"
+// OBSOLETE #include "symtab.h"
+// OBSOLETE #include "breakpoint.h"
+// OBSOLETE #include "command.h"
+// OBSOLETE #include "target.h"
+// OBSOLETE #include "gdbcore.h"		/* for bfd stuff */
+// OBSOLETE #include "libaout.h"		/* FIXME Secret internal BFD stuff for a.out */
+// OBSOLETE #include "symfile.h"
+// OBSOLETE #include "objfiles.h"
+// OBSOLETE #include "buildsym.h"
+// OBSOLETE #include "gdb-stabs.h"
+// OBSOLETE #include "demangle.h"
+// OBSOLETE #include "language.h"		/* Needed inside partial-stab.h */
+// OBSOLETE #include "complaints.h"
+// OBSOLETE #include "os9k.h"
+// OBSOLETE #include "stabsread.h"
+// OBSOLETE 
+// OBSOLETE extern void _initialize_os9kread (void);
+// OBSOLETE 
+// OBSOLETE /* Each partial symbol table entry contains a pointer to private data for the
+// OBSOLETE    read_symtab() function to use when expanding a partial symbol table entry
+// OBSOLETE    to a full symbol table entry.
+// OBSOLETE 
+// OBSOLETE    For dbxread this structure contains the offset within the file symbol table
+// OBSOLETE    of first local symbol for this file, and count of the section
+// OBSOLETE    of the symbol table devoted to this file's symbols (actually, the section
+// OBSOLETE    bracketed may contain more than just this file's symbols).  It also contains
+// OBSOLETE    further information needed to locate the symbols if they are in an ELF file.
+// OBSOLETE 
+// OBSOLETE    If ldsymcnt is 0, the only reason for this thing's existence is the
+// OBSOLETE    dependency list.  Nothing else will happen when it is read in.  */
+// OBSOLETE 
+// OBSOLETE #define LDSYMOFF(p) (((struct symloc *)((p)->read_symtab_private))->ldsymoff)
+// OBSOLETE #define LDSYMCNT(p) (((struct symloc *)((p)->read_symtab_private))->ldsymnum)
+// OBSOLETE 
+// OBSOLETE struct symloc
+// OBSOLETE   {
+// OBSOLETE     int ldsymoff;
+// OBSOLETE     int ldsymnum;
+// OBSOLETE   };
+// OBSOLETE 
+// OBSOLETE /* Remember what we deduced to be the source language of this psymtab. */
+// OBSOLETE static enum language psymtab_language = language_unknown;
+// OBSOLETE 
+// OBSOLETE /* keep partial symbol table file nested depth */
+// OBSOLETE static int psymfile_depth = 0;
+// OBSOLETE 
+// OBSOLETE /* keep symbol table file nested depth */
+// OBSOLETE static int symfile_depth = 0;
+// OBSOLETE 
+// OBSOLETE extern int previous_stab_code;
+// OBSOLETE 
+// OBSOLETE /* Name of last function encountered.  Used in Solaris to approximate
+// OBSOLETE    object file boundaries.  */
+// OBSOLETE static char *last_function_name;
+// OBSOLETE 
+// OBSOLETE /* Complaints about the symbols we have encountered.  */
+// OBSOLETE extern struct complaint lbrac_complaint;
+// OBSOLETE 
+// OBSOLETE extern struct complaint unknown_symtype_complaint;
+// OBSOLETE 
+// OBSOLETE extern struct complaint unknown_symchar_complaint;
+// OBSOLETE 
+// OBSOLETE extern struct complaint lbrac_rbrac_complaint;
+// OBSOLETE 
+// OBSOLETE extern struct complaint repeated_header_complaint;
+// OBSOLETE 
+// OBSOLETE extern struct complaint repeated_header_name_complaint;
+// OBSOLETE 
+// OBSOLETE #if 0
+// OBSOLETE static struct complaint lbrac_unmatched_complaint =
+// OBSOLETE {"unmatched Increment Block Entry before symtab pos %d", 0, 0};
+// OBSOLETE 
+// OBSOLETE static struct complaint lbrac_mismatch_complaint =
+// OBSOLETE {"IBE/IDE symbol mismatch at symtab pos %d", 0, 0};
+// OBSOLETE #endif
+// OBSOLETE 
+// OBSOLETE /* Local function prototypes */
+// OBSOLETE 
+// OBSOLETE static void read_minimal_symbols (struct objfile *);
+// OBSOLETE 
+// OBSOLETE static void os9k_read_ofile_symtab (struct partial_symtab *);
+// OBSOLETE 
+// OBSOLETE static void os9k_psymtab_to_symtab (struct partial_symtab *);
+// OBSOLETE 
+// OBSOLETE static void os9k_psymtab_to_symtab_1 (struct partial_symtab *);
+// OBSOLETE 
+// OBSOLETE static void read_os9k_psymtab (struct objfile *, CORE_ADDR, int);
+// OBSOLETE 
+// OBSOLETE static int fill_sym (FILE *, bfd *);
+// OBSOLETE 
+// OBSOLETE static void os9k_symfile_init (struct objfile *);
+// OBSOLETE 
+// OBSOLETE static void os9k_new_init (struct objfile *);
+// OBSOLETE 
+// OBSOLETE static void os9k_symfile_read (struct objfile *, int);
+// OBSOLETE 
+// OBSOLETE static void os9k_symfile_finish (struct objfile *);
+// OBSOLETE 
+// OBSOLETE static void os9k_process_one_symbol (int, int, CORE_ADDR, char *,
+// OBSOLETE 				     struct section_offsets *,
+// OBSOLETE 				     struct objfile *);
+// OBSOLETE 
+// OBSOLETE static struct partial_symtab *os9k_start_psymtab (struct objfile *, char *,
+// OBSOLETE 						  CORE_ADDR, int, int,
+// OBSOLETE 						  struct partial_symbol **,
+// OBSOLETE 						  struct partial_symbol **);
+// OBSOLETE 
+// OBSOLETE static struct partial_symtab *os9k_end_psymtab (struct partial_symtab *,
+// OBSOLETE 						char **, int, int, CORE_ADDR,
+// OBSOLETE 						struct partial_symtab **,
+// OBSOLETE 						int);
+// OBSOLETE 
+// OBSOLETE static void record_minimal_symbol (char *, CORE_ADDR, int, struct objfile *);
+// OBSOLETE 
+// OBSOLETE #define HANDLE_RBRAC(val) \
+// OBSOLETE   if ((val) > pst->texthigh) pst->texthigh = (val);
+// OBSOLETE 
+// OBSOLETE #define SWAP_STBHDR(hdrp, abfd) \
+// OBSOLETE   { \
+// OBSOLETE     (hdrp)->fmtno = bfd_get_16(abfd, (unsigned char *)&(hdrp)->fmtno); \
+// OBSOLETE     (hdrp)->crc = bfd_get_32(abfd, (unsigned char *)&(hdrp)->crc); \
+// OBSOLETE     (hdrp)->offset = bfd_get_32(abfd, (unsigned char *)&(hdrp)->offset); \
+// OBSOLETE     (hdrp)->nsym = bfd_get_32(abfd, (unsigned char *)&(hdrp)->nsym); \
+// OBSOLETE   }
+// OBSOLETE #define SWAP_STBSYM(symp, abfd) \
+// OBSOLETE   { \
+// OBSOLETE     (symp)->value = bfd_get_32(abfd, (unsigned char *)&(symp)->value); \
+// OBSOLETE     (symp)->type = bfd_get_16(abfd, (unsigned char *)&(symp)->type); \
+// OBSOLETE     (symp)->stroff = bfd_get_32(abfd, (unsigned char *)&(symp)->stroff); \
+// OBSOLETE   }
+// OBSOLETE #define N_DATA 0
+// OBSOLETE #define N_BSS 1
+// OBSOLETE #define N_RDATA 2
+// OBSOLETE #define N_IDATA 3
+// OBSOLETE #define N_TEXT 4
+// OBSOLETE #define N_ABS 6
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE record_minimal_symbol (char *name, CORE_ADDR address, int type,
+// OBSOLETE 		       struct objfile *objfile)
+// OBSOLETE {
+// OBSOLETE   enum minimal_symbol_type ms_type;
+// OBSOLETE 
+// OBSOLETE   switch (type)
+// OBSOLETE     {
+// OBSOLETE     case N_TEXT:
+// OBSOLETE       ms_type = mst_text;
+// OBSOLETE       address += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
+// OBSOLETE       break;
+// OBSOLETE     case N_DATA:
+// OBSOLETE       ms_type = mst_data;
+// OBSOLETE       break;
+// OBSOLETE     case N_BSS:
+// OBSOLETE       ms_type = mst_bss;
+// OBSOLETE       break;
+// OBSOLETE     case N_RDATA:
+// OBSOLETE       ms_type = mst_bss;
+// OBSOLETE       break;
+// OBSOLETE     case N_IDATA:
+// OBSOLETE       ms_type = mst_data;
+// OBSOLETE       break;
+// OBSOLETE     case N_ABS:
+// OBSOLETE       ms_type = mst_abs;
+// OBSOLETE       break;
+// OBSOLETE     default:
+// OBSOLETE       ms_type = mst_unknown;
+// OBSOLETE       break;
+// OBSOLETE     }
+// OBSOLETE 
+// OBSOLETE   prim_record_minimal_symbol (name, address, ms_type, objfile);
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE /* read and process .stb file and store in minimal symbol table */
+// OBSOLETE typedef char mhhdr[80];
+// OBSOLETE struct stbhdr
+// OBSOLETE   {
+// OBSOLETE     mhhdr comhdr;
+// OBSOLETE     char *name;
+// OBSOLETE     short fmtno;
+// OBSOLETE     int crc;
+// OBSOLETE     int offset;
+// OBSOLETE     int nsym;
+// OBSOLETE     char *pad;
+// OBSOLETE   };
+// OBSOLETE struct stbsymbol
+// OBSOLETE   {
+// OBSOLETE     int value;
+// OBSOLETE     short type;
+// OBSOLETE     int stroff;
+// OBSOLETE   };
+// OBSOLETE #define STBSYMSIZE 10
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE read_minimal_symbols (struct objfile *objfile)
+// OBSOLETE {
+// OBSOLETE   FILE *fp;
+// OBSOLETE   bfd *abfd;
+// OBSOLETE   struct stbhdr hdr;
+// OBSOLETE   struct stbsymbol sym;
+// OBSOLETE   int ch, i, j, off;
+// OBSOLETE   char buf[64], buf1[128];
+// OBSOLETE 
+// OBSOLETE   fp = objfile->auxf1;
+// OBSOLETE   if (fp == NULL)
+// OBSOLETE     return;
+// OBSOLETE   abfd = objfile->obfd;
+// OBSOLETE   fread (&hdr.comhdr[0], sizeof (mhhdr), 1, fp);
+// OBSOLETE   i = 0;
+// OBSOLETE   ch = getc (fp);
+// OBSOLETE   while (ch != -1)
+// OBSOLETE     {
+// OBSOLETE       buf[i] = (char) ch;
+// OBSOLETE       i++;
+// OBSOLETE       if (ch == 0)
+// OBSOLETE 	break;
+// OBSOLETE       ch = getc (fp);
+// OBSOLETE     };
+// OBSOLETE   if (i % 2)
+// OBSOLETE     ch = getc (fp);
+// OBSOLETE   hdr.name = &buf[0];
+// OBSOLETE 
+// OBSOLETE   fread (&hdr.fmtno, sizeof (hdr.fmtno), 1, fp);
+// OBSOLETE   fread (&hdr.crc, sizeof (hdr.crc), 1, fp);
+// OBSOLETE   fread (&hdr.offset, sizeof (hdr.offset), 1, fp);
+// OBSOLETE   fread (&hdr.nsym, sizeof (hdr.nsym), 1, fp);
+// OBSOLETE   SWAP_STBHDR (&hdr, abfd);
+// OBSOLETE 
+// OBSOLETE   /* read symbols */
+// OBSOLETE   init_minimal_symbol_collection ();
+// OBSOLETE   off = hdr.offset;
+// OBSOLETE   for (i = hdr.nsym; i > 0; i--)
+// OBSOLETE     {
+// OBSOLETE       fseek (fp, (long) off, 0);
+// OBSOLETE       fread (&sym.value, sizeof (sym.value), 1, fp);
+// OBSOLETE       fread (&sym.type, sizeof (sym.type), 1, fp);
+// OBSOLETE       fread (&sym.stroff, sizeof (sym.stroff), 1, fp);
+// OBSOLETE       SWAP_STBSYM (&sym, abfd);
+// OBSOLETE       fseek (fp, (long) sym.stroff, 0);
+// OBSOLETE       j = 0;
+// OBSOLETE       ch = getc (fp);
+// OBSOLETE       while (ch != -1)
+// OBSOLETE 	{
+// OBSOLETE 	  buf1[j] = (char) ch;
+// OBSOLETE 	  j++;
+// OBSOLETE 	  if (ch == 0)
+// OBSOLETE 	    break;
+// OBSOLETE 	  ch = getc (fp);
+// OBSOLETE 	};
+// OBSOLETE       record_minimal_symbol (buf1, sym.value, sym.type & 7, objfile);
+// OBSOLETE       off += STBSYMSIZE;
+// OBSOLETE     };
+// OBSOLETE   install_minimal_symbols (objfile);
+// OBSOLETE   return;
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE /* Scan and build partial symbols for a symbol file.
+// OBSOLETE    We have been initialized by a call to os9k_symfile_init, which 
+// OBSOLETE    put all the relevant info into a "struct os9k_symfile_info",
+// OBSOLETE    hung off the objfile structure.
+// OBSOLETE 
+// OBSOLETE    MAINLINE is true if we are reading the main symbol
+// OBSOLETE    table (as opposed to a shared lib or dynamically loaded file).  */
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE os9k_symfile_read (struct objfile *objfile, int mainline)
+// OBSOLETE {
+// OBSOLETE   bfd *sym_bfd;
+// OBSOLETE   struct cleanup *back_to;
+// OBSOLETE 
+// OBSOLETE   sym_bfd = objfile->obfd;
+// OBSOLETE   /* If we are reinitializing, or if we have never loaded syms yet, init */
+// OBSOLETE   if (mainline
+// OBSOLETE       || (objfile->global_psymbols.size == 0
+// OBSOLETE 	  && objfile->static_psymbols.size == 0))
+// OBSOLETE     init_psymbol_list (objfile, DBX_SYMCOUNT (objfile));
+// OBSOLETE 
+// OBSOLETE   free_pending_blocks ();
+// OBSOLETE   back_to = make_cleanup (really_free_pendings, 0);
+// OBSOLETE 
+// OBSOLETE   make_cleanup_discard_minimal_symbols ();
+// OBSOLETE   read_minimal_symbols (objfile);
+// OBSOLETE 
+// OBSOLETE   /* Now that the symbol table data of the executable file are all in core,
+// OBSOLETE      process them and define symbols accordingly.  */
+// OBSOLETE   read_os9k_psymtab (objfile,
+// OBSOLETE 		     DBX_TEXT_ADDR (objfile),
+// OBSOLETE 		     DBX_TEXT_SIZE (objfile));
+// OBSOLETE 
+// OBSOLETE   do_cleanups (back_to);
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE /* Initialize anything that needs initializing when a completely new
+// OBSOLETE    symbol file is specified (not just adding some symbols from another
+// OBSOLETE    file, e.g. a shared library).  */
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE os9k_new_init (struct objfile *ignore)
+// OBSOLETE {
+// OBSOLETE   stabsread_new_init ();
+// OBSOLETE   buildsym_new_init ();
+// OBSOLETE   psymfile_depth = 0;
+// OBSOLETE /*
+// OBSOLETE    init_header_files ();
+// OBSOLETE  */
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE /* os9k_symfile_init ()
+// OBSOLETE    It is passed a struct objfile which contains, among other things,
+// OBSOLETE    the BFD for the file whose symbols are being read, and a slot for a pointer
+// OBSOLETE    to "private data" which we fill with goodies.
+// OBSOLETE 
+// OBSOLETE    Since BFD doesn't know how to read debug symbols in a format-independent
+// OBSOLETE    way (and may never do so...), we have to do it ourselves.  We will never
+// OBSOLETE    be called unless this is an a.out (or very similar) file. 
+// OBSOLETE    FIXME, there should be a cleaner peephole into the BFD environment here.  */
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE os9k_symfile_init (struct objfile *objfile)
+// OBSOLETE {
+// OBSOLETE   bfd *sym_bfd = objfile->obfd;
+// OBSOLETE   char *name = bfd_get_filename (sym_bfd);
+// OBSOLETE   char dbgname[512], stbname[512];
+// OBSOLETE   FILE *symfile = 0;
+// OBSOLETE   FILE *minfile = 0;
+// OBSOLETE   asection *text_sect;
+// OBSOLETE 
+// OBSOLETE   strcpy (dbgname, name);
+// OBSOLETE   strcat (dbgname, ".dbg");
+// OBSOLETE   strcpy (stbname, name);
+// OBSOLETE   strcat (stbname, ".stb");
+// OBSOLETE 
+// OBSOLETE   if ((symfile = fopen (dbgname, "r")) == NULL)
+// OBSOLETE     {
+// OBSOLETE       warning ("Symbol file %s not found", dbgname);
+// OBSOLETE     }
+// OBSOLETE   objfile->auxf2 = symfile;
+// OBSOLETE 
+// OBSOLETE   if ((minfile = fopen (stbname, "r")) == NULL)
+// OBSOLETE     {
+// OBSOLETE       warning ("Symbol file %s not found", stbname);
+// OBSOLETE     }
+// OBSOLETE   objfile->auxf1 = minfile;
+// OBSOLETE 
+// OBSOLETE   /* Allocate struct to keep track of the symfile */
+// OBSOLETE   objfile->sym_stab_info = (struct dbx_symfile_info *)
+// OBSOLETE     xmmalloc (objfile->md, sizeof (struct dbx_symfile_info));
+// OBSOLETE   DBX_SYMFILE_INFO (objfile)->stab_section_info = NULL;
+// OBSOLETE 
+// OBSOLETE   text_sect = bfd_get_section_by_name (sym_bfd, ".text");
+// OBSOLETE   if (!text_sect)
+// OBSOLETE     error ("Can't find .text section in file");
+// OBSOLETE   DBX_TEXT_ADDR (objfile) = bfd_section_vma (sym_bfd, text_sect);
+// OBSOLETE   DBX_TEXT_SIZE (objfile) = bfd_section_size (sym_bfd, text_sect);
+// OBSOLETE 
+// OBSOLETE   DBX_SYMBOL_SIZE (objfile) = 0;	/* variable size symbol */
+// OBSOLETE   DBX_SYMCOUNT (objfile) = 0;	/* used to be bfd_get_symcount(sym_bfd) */
+// OBSOLETE   DBX_SYMTAB_OFFSET (objfile) = 0;	/* used to be SYMBOL_TABLE_OFFSET */
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE /* Perform any local cleanups required when we are done with a particular
+// OBSOLETE    objfile.  I.E, we are in the process of discarding all symbol information
+// OBSOLETE    for an objfile, freeing up all memory held for it, and unlinking the
+// OBSOLETE    objfile struct from the global list of known objfiles. */
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE os9k_symfile_finish (struct objfile *objfile)
+// OBSOLETE {
+// OBSOLETE   if (objfile->sym_stab_info != NULL)
+// OBSOLETE     {
+// OBSOLETE       xmfree (objfile->md, objfile->sym_stab_info);
+// OBSOLETE     }
+// OBSOLETE /*
+// OBSOLETE    free_header_files ();
+// OBSOLETE  */
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE 
+// OBSOLETE struct st_dbghdr
+// OBSOLETE {
+// OBSOLETE   int sync;
+// OBSOLETE   short rev;
+// OBSOLETE   int crc;
+// OBSOLETE   short os;
+// OBSOLETE   short cpu;
+// OBSOLETE };
+// OBSOLETE #define SYNC 		(int)0xefbefeca
+// OBSOLETE 
+// OBSOLETE #define SWAP_DBGHDR(hdrp, abfd) \
+// OBSOLETE   { \
+// OBSOLETE     (hdrp)->sync = bfd_get_32(abfd, (unsigned char *)&(hdrp)->sync); \
+// OBSOLETE     (hdrp)->rev = bfd_get_16(abfd, (unsigned char *)&(hdrp)->rev); \
+// OBSOLETE     (hdrp)->crc = bfd_get_32(abfd, (unsigned char *)&(hdrp)->crc); \
+// OBSOLETE     (hdrp)->os = bfd_get_16(abfd, (unsigned char *)&(hdrp)->os); \
+// OBSOLETE     (hdrp)->cpu = bfd_get_16(abfd, (unsigned char *)&(hdrp)->cpu); \
+// OBSOLETE   }
+// OBSOLETE 
+// OBSOLETE #define N_SYM_CMPLR     0
+// OBSOLETE #define N_SYM_SLINE     1
+// OBSOLETE #define N_SYM_SYM       2
+// OBSOLETE #define N_SYM_LBRAC     3
+// OBSOLETE #define N_SYM_RBRAC     4
+// OBSOLETE #define N_SYM_SE        5
+// OBSOLETE 
+// OBSOLETE struct internal_symstruct
+// OBSOLETE   {
+// OBSOLETE     short n_type;
+// OBSOLETE     short n_desc;
+// OBSOLETE     long n_value;
+// OBSOLETE     char *n_strx;
+// OBSOLETE   };
+// OBSOLETE static struct internal_symstruct symbol;
+// OBSOLETE static struct internal_symstruct *symbuf = &symbol;
+// OBSOLETE static char strbuf[4096];
+// OBSOLETE static struct st_dbghdr dbghdr;
+// OBSOLETE static short cmplrid;
+// OBSOLETE 
+// OBSOLETE #define VER_PRE_ULTRAC	((short)4)
+// OBSOLETE #define VER_ULTRAC	((short)5)
+// OBSOLETE 
+// OBSOLETE static int
+// OBSOLETE fill_sym (FILE *dbg_file, bfd *abfd)
+// OBSOLETE {
+// OBSOLETE   short si, nmask;
+// OBSOLETE   long li;
+// OBSOLETE   int ii;
+// OBSOLETE   char *p;
+// OBSOLETE 
+// OBSOLETE   int nbytes = fread (&si, sizeof (si), 1, dbg_file);
+// OBSOLETE   if (nbytes == 0)
+// OBSOLETE     return 0;
+// OBSOLETE   if (nbytes < 0)
+// OBSOLETE     perror_with_name ("reading .dbg file.");
+// OBSOLETE   symbuf->n_desc = 0;
+// OBSOLETE   symbuf->n_value = 0;
+// OBSOLETE   symbuf->n_strx = NULL;
+// OBSOLETE   symbuf->n_type = bfd_get_16 (abfd, (unsigned char *) &si);
+// OBSOLETE   symbuf->n_type = 0xf & symbuf->n_type;
+// OBSOLETE   switch (symbuf->n_type)
+// OBSOLETE     {
+// OBSOLETE     case N_SYM_CMPLR:
+// OBSOLETE       fread (&si, sizeof (si), 1, dbg_file);
+// OBSOLETE       symbuf->n_desc = bfd_get_16 (abfd, (unsigned char *) &si);
+// OBSOLETE       cmplrid = symbuf->n_desc & 0xff;
+// OBSOLETE       break;
+// OBSOLETE     case N_SYM_SLINE:
+// OBSOLETE       fread (&li, sizeof (li), 1, dbg_file);
+// OBSOLETE       symbuf->n_value = bfd_get_32 (abfd, (unsigned char *) &li);
+// OBSOLETE       fread (&li, sizeof (li), 1, dbg_file);
+// OBSOLETE       li = bfd_get_32 (abfd, (unsigned char *) &li);
+// OBSOLETE       symbuf->n_strx = (char *) (li >> 12);
+// OBSOLETE       symbuf->n_desc = li & 0xfff;
+// OBSOLETE       break;
+// OBSOLETE     case N_SYM_SYM:
+// OBSOLETE       fread (&li, sizeof (li), 1, dbg_file);
+// OBSOLETE       symbuf->n_value = bfd_get_32 (abfd, (unsigned char *) &li);
+// OBSOLETE       si = 0;
+// OBSOLETE       do
+// OBSOLETE 	{
+// OBSOLETE 	  ii = getc (dbg_file);
+// OBSOLETE 	  strbuf[si++] = (char) ii;
+// OBSOLETE 	}
+// OBSOLETE       while (ii != 0 || si % 2 != 0);
+// OBSOLETE       symbuf->n_strx = strbuf;
+// OBSOLETE       p = (char *) strchr (strbuf, ':');
+// OBSOLETE       if (!p)
+// OBSOLETE 	break;
+// OBSOLETE       if ((p[1] == 'F' || p[1] == 'f') && cmplrid == VER_PRE_ULTRAC)
+// OBSOLETE 	{
+// OBSOLETE 	  fread (&si, sizeof (si), 1, dbg_file);
+// OBSOLETE 	  nmask = bfd_get_16 (abfd, (unsigned char *) &si);
+// OBSOLETE 	  for (ii = 0; ii < nmask; ii++)
+// OBSOLETE 	    fread (&si, sizeof (si), 1, dbg_file);
+// OBSOLETE 	}
+// OBSOLETE       break;
+// OBSOLETE     case N_SYM_LBRAC:
+// OBSOLETE       fread (&li, sizeof (li), 1, dbg_file);
+// OBSOLETE       symbuf->n_value = bfd_get_32 (abfd, (unsigned char *) &li);
+// OBSOLETE       break;
+// OBSOLETE     case N_SYM_RBRAC:
+// OBSOLETE       fread (&li, sizeof (li), 1, dbg_file);
+// OBSOLETE       symbuf->n_value = bfd_get_32 (abfd, (unsigned char *) &li);
+// OBSOLETE       break;
+// OBSOLETE     case N_SYM_SE:
+// OBSOLETE       break;
+// OBSOLETE     }
+// OBSOLETE   return 1;
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE /* Given pointers to an a.out symbol table in core containing dbx
+// OBSOLETE    style data, setup partial_symtab's describing each source file for
+// OBSOLETE    which debugging information is available.
+// OBSOLETE    SYMFILE_NAME is the name of the file we are reading from. */
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE read_os9k_psymtab (struct objfile *objfile, CORE_ADDR text_addr, int text_size)
+// OBSOLETE {
+// OBSOLETE   register struct internal_symstruct *bufp = 0;		/* =0 avoids gcc -Wall glitch */
+// OBSOLETE   register char *namestring;
+// OBSOLETE   int past_first_source_file = 0;
+// OBSOLETE   CORE_ADDR last_o_file_start = 0;
+// OBSOLETE #if 0
+// OBSOLETE   struct cleanup *back_to;
+// OBSOLETE #endif
+// OBSOLETE   bfd *abfd;
+// OBSOLETE   FILE *fp;
+// OBSOLETE 
+// OBSOLETE   /* End of the text segment of the executable file.  */
+// OBSOLETE   static CORE_ADDR end_of_text_addr;
+// OBSOLETE 
+// OBSOLETE   /* Current partial symtab */
+// OBSOLETE   static struct partial_symtab *pst = 0;
+// OBSOLETE 
+// OBSOLETE   /* List of current psymtab's include files */
+// OBSOLETE   char **psymtab_include_list;
+// OBSOLETE   int includes_allocated;
+// OBSOLETE   int includes_used;
+// OBSOLETE 
+// OBSOLETE   /* Index within current psymtab dependency list */
+// OBSOLETE   struct partial_symtab **dependency_list;
+// OBSOLETE   int dependencies_used, dependencies_allocated;
+// OBSOLETE 
+// OBSOLETE   includes_allocated = 30;
+// OBSOLETE   includes_used = 0;
+// OBSOLETE   psymtab_include_list = (char **) alloca (includes_allocated *
+// OBSOLETE 					   sizeof (char *));
+// OBSOLETE 
+// OBSOLETE   dependencies_allocated = 30;
+// OBSOLETE   dependencies_used = 0;
+// OBSOLETE   dependency_list =
+// OBSOLETE     (struct partial_symtab **) alloca (dependencies_allocated *
+// OBSOLETE 				       sizeof (struct partial_symtab *));
+// OBSOLETE 
+// OBSOLETE   last_source_file = NULL;
+// OBSOLETE 
+// OBSOLETE #ifdef END_OF_TEXT_DEFAULT
+// OBSOLETE   end_of_text_addr = END_OF_TEXT_DEFAULT;
+// OBSOLETE #else
+// OBSOLETE   end_of_text_addr = text_addr + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile))
+// OBSOLETE     + text_size;		/* Relocate */
+// OBSOLETE #endif
+// OBSOLETE 
+// OBSOLETE   abfd = objfile->obfd;
+// OBSOLETE   fp = objfile->auxf2;
+// OBSOLETE   if (!fp)
+// OBSOLETE     return;
+// OBSOLETE 
+// OBSOLETE   fread (&dbghdr.sync, sizeof (dbghdr.sync), 1, fp);
+// OBSOLETE   fread (&dbghdr.rev, sizeof (dbghdr.rev), 1, fp);
+// OBSOLETE   fread (&dbghdr.crc, sizeof (dbghdr.crc), 1, fp);
+// OBSOLETE   fread (&dbghdr.os, sizeof (dbghdr.os), 1, fp);
+// OBSOLETE   fread (&dbghdr.cpu, sizeof (dbghdr.cpu), 1, fp);
+// OBSOLETE   SWAP_DBGHDR (&dbghdr, abfd);
+// OBSOLETE 
+// OBSOLETE   symnum = 0;
+// OBSOLETE   while (1)
+// OBSOLETE     {
+// OBSOLETE       int ret;
+// OBSOLETE       long cursymoffset;
+// OBSOLETE 
+// OBSOLETE       /* Get the symbol for this run and pull out some info */
+// OBSOLETE       QUIT;			/* allow this to be interruptable */
+// OBSOLETE       cursymoffset = ftell (objfile->auxf2);
+// OBSOLETE       ret = fill_sym (objfile->auxf2, abfd);
+// OBSOLETE       if (ret <= 0)
+// OBSOLETE 	break;
+// OBSOLETE       else
+// OBSOLETE 	symnum++;
+// OBSOLETE       bufp = symbuf;
+// OBSOLETE 
+// OBSOLETE       /* Special case to speed up readin. */
+// OBSOLETE       if (bufp->n_type == (short) N_SYM_SLINE)
+// OBSOLETE 	continue;
+// OBSOLETE 
+// OBSOLETE #define CUR_SYMBOL_VALUE bufp->n_value
+// OBSOLETE       /* partial-stab.h */
+// OBSOLETE 
+// OBSOLETE       switch (bufp->n_type)
+// OBSOLETE 	{
+// OBSOLETE 	  char *p;
+// OBSOLETE 
+// OBSOLETE 	case N_SYM_CMPLR:
+// OBSOLETE 	  continue;
+// OBSOLETE 
+// OBSOLETE 	case N_SYM_SE:
+// OBSOLETE 	  CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
+// OBSOLETE 	  if (psymfile_depth == 1 && pst)
+// OBSOLETE 	    {
+// OBSOLETE 	      os9k_end_psymtab (pst, psymtab_include_list, includes_used,
+// OBSOLETE 				symnum, CUR_SYMBOL_VALUE,
+// OBSOLETE 				dependency_list, dependencies_used);
+// OBSOLETE 	      pst = (struct partial_symtab *) 0;
+// OBSOLETE 	      includes_used = 0;
+// OBSOLETE 	      dependencies_used = 0;
+// OBSOLETE 	    }
+// OBSOLETE 	  psymfile_depth--;
+// OBSOLETE 	  continue;
+// OBSOLETE 
+// OBSOLETE 	case N_SYM_SYM:	/* Typedef or automatic variable. */
+// OBSOLETE 	  namestring = bufp->n_strx;
+// OBSOLETE 	  p = (char *) strchr (namestring, ':');
+// OBSOLETE 	  if (!p)
+// OBSOLETE 	    continue;		/* Not a debugging symbol.   */
+// OBSOLETE 
+// OBSOLETE 	  /* Main processing section for debugging symbols which
+// OBSOLETE 	     the initial read through the symbol tables needs to worry
+// OBSOLETE 	     about.  If we reach this point, the symbol which we are
+// OBSOLETE 	     considering is definitely one we are interested in.
+// OBSOLETE 	     p must also contain the (valid) index into the namestring
+// OBSOLETE 	     which indicates the debugging type symbol.  */
+// OBSOLETE 
+// OBSOLETE 	  switch (p[1])
+// OBSOLETE 	    {
+// OBSOLETE 	    case 'S':
+// OBSOLETE 	      {
+// OBSOLETE 		unsigned long valu;
+// OBSOLETE 		enum language tmp_language;
+// OBSOLETE 		char *str, *p;
+// OBSOLETE 		int n;
+// OBSOLETE 
+// OBSOLETE 		valu = CUR_SYMBOL_VALUE;
+// OBSOLETE 		if (valu)
+// OBSOLETE 		  valu += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
+// OBSOLETE 		past_first_source_file = 1;
+// OBSOLETE 
+// OBSOLETE 		p = strchr (namestring, ':');
+// OBSOLETE 		if (p)
+// OBSOLETE 		  n = p - namestring;
+// OBSOLETE 		else
+// OBSOLETE 		  n = strlen (namestring);
+// OBSOLETE 		str = alloca (n + 1);
+// OBSOLETE 		strncpy (str, namestring, n);
+// OBSOLETE 		str[n] = '\0';
+// OBSOLETE 
+// OBSOLETE 		if (psymfile_depth == 0)
+// OBSOLETE 		  {
+// OBSOLETE 		    if (!pst)
+// OBSOLETE 		      pst = os9k_start_psymtab (objfile,
+// OBSOLETE 						str, valu,
+// OBSOLETE 						cursymoffset,
+// OBSOLETE 						symnum - 1,
+// OBSOLETE 					      objfile->global_psymbols.next,
+// OBSOLETE 					     objfile->static_psymbols.next);
+// OBSOLETE 		  }
+// OBSOLETE 		else
+// OBSOLETE 		  {		/* this is a include file */
+// OBSOLETE 		    tmp_language = deduce_language_from_filename (str);
+// OBSOLETE 		    if (tmp_language != language_unknown
+// OBSOLETE 			&& (tmp_language != language_c
+// OBSOLETE 			    || psymtab_language != language_cplus))
+// OBSOLETE 		      psymtab_language = tmp_language;
+// OBSOLETE 
+// OBSOLETE /*
+// OBSOLETE    if (pst && STREQ (str, pst->filename))
+// OBSOLETE    continue;
+// OBSOLETE    {
+// OBSOLETE    register int i;
+// OBSOLETE    for (i = 0; i < includes_used; i++)
+// OBSOLETE    if (STREQ (str, psymtab_include_list[i]))
+// OBSOLETE    {
+// OBSOLETE    i = -1; 
+// OBSOLETE    break;
+// OBSOLETE    }
+// OBSOLETE    if (i == -1)
+// OBSOLETE    continue;
+// OBSOLETE    }
+// OBSOLETE  */
+// OBSOLETE 
+// OBSOLETE 		    psymtab_include_list[includes_used++] = str;
+// OBSOLETE 		    if (includes_used >= includes_allocated)
+// OBSOLETE 		      {
+// OBSOLETE 			char **orig = psymtab_include_list;
+// OBSOLETE 
+// OBSOLETE 			psymtab_include_list = (char **)
+// OBSOLETE 			  alloca ((includes_allocated *= 2) * sizeof (char *));
+// OBSOLETE 			memcpy ((PTR) psymtab_include_list, (PTR) orig,
+// OBSOLETE 				includes_used * sizeof (char *));
+// OBSOLETE 		      }
+// OBSOLETE 
+// OBSOLETE 		  }
+// OBSOLETE 		psymfile_depth++;
+// OBSOLETE 		continue;
+// OBSOLETE 	      }
+// OBSOLETE 
+// OBSOLETE 	    case 'v':
+// OBSOLETE 	      add_psymbol_to_list (namestring, p - namestring,
+// OBSOLETE 				   VAR_NAMESPACE, LOC_STATIC,
+// OBSOLETE 				   &objfile->static_psymbols,
+// OBSOLETE 				   0, CUR_SYMBOL_VALUE,
+// OBSOLETE 				   psymtab_language, objfile);
+// OBSOLETE 	      continue;
+// OBSOLETE 	    case 'V':
+// OBSOLETE 	      add_psymbol_to_list (namestring, p - namestring,
+// OBSOLETE 				   VAR_NAMESPACE, LOC_STATIC,
+// OBSOLETE 				   &objfile->global_psymbols,
+// OBSOLETE 				   0, CUR_SYMBOL_VALUE,
+// OBSOLETE 				   psymtab_language, objfile);
+// OBSOLETE 	      continue;
+// OBSOLETE 
+// OBSOLETE 	    case 'T':
+// OBSOLETE 	      if (p != namestring)	/* a name is there, not just :T... */
+// OBSOLETE 		{
+// OBSOLETE 		  add_psymbol_to_list (namestring, p - namestring,
+// OBSOLETE 				       STRUCT_NAMESPACE, LOC_TYPEDEF,
+// OBSOLETE 				       &objfile->static_psymbols,
+// OBSOLETE 				       CUR_SYMBOL_VALUE, 0,
+// OBSOLETE 				       psymtab_language, objfile);
+// OBSOLETE 		  if (p[2] == 't')
+// OBSOLETE 		    {
+// OBSOLETE 		      /* Also a typedef with the same name.  */
+// OBSOLETE 		      add_psymbol_to_list (namestring, p - namestring,
+// OBSOLETE 					   VAR_NAMESPACE, LOC_TYPEDEF,
+// OBSOLETE 					   &objfile->static_psymbols,
+// OBSOLETE 				      CUR_SYMBOL_VALUE, 0, psymtab_language,
+// OBSOLETE 					   objfile);
+// OBSOLETE 		      p += 1;
+// OBSOLETE 		    }
+// OBSOLETE 		  /* The semantics of C++ state that "struct foo { ... }"
+// OBSOLETE 		     also defines a typedef for "foo".  Unfortuantely, cfront
+// OBSOLETE 		     never makes the typedef when translating from C++ to C.
+// OBSOLETE 		     We make the typedef here so that "ptype foo" works as
+// OBSOLETE 		     expected for cfront translated code.  */
+// OBSOLETE 		  else if (psymtab_language == language_cplus)
+// OBSOLETE 		    {
+// OBSOLETE 		      /* Also a typedef with the same name.  */
+// OBSOLETE 		      add_psymbol_to_list (namestring, p - namestring,
+// OBSOLETE 					   VAR_NAMESPACE, LOC_TYPEDEF,
+// OBSOLETE 					   &objfile->static_psymbols,
+// OBSOLETE 				      CUR_SYMBOL_VALUE, 0, psymtab_language,
+// OBSOLETE 					   objfile);
+// OBSOLETE 		    }
+// OBSOLETE 		}
+// OBSOLETE 	      goto check_enum;
+// OBSOLETE 	    case 't':
+// OBSOLETE 	      if (p != namestring)	/* a name is there, not just :T... */
+// OBSOLETE 		{
+// OBSOLETE 		  add_psymbol_to_list (namestring, p - namestring,
+// OBSOLETE 				       VAR_NAMESPACE, LOC_TYPEDEF,
+// OBSOLETE 				       &objfile->static_psymbols,
+// OBSOLETE 				       CUR_SYMBOL_VALUE, 0,
+// OBSOLETE 				       psymtab_language, objfile);
+// OBSOLETE 		}
+// OBSOLETE 	    check_enum:
+// OBSOLETE 	      /* If this is an enumerated type, we need to
+// OBSOLETE 	         add all the enum constants to the partial symbol
+// OBSOLETE 	         table.  This does not cover enums without names, e.g.
+// OBSOLETE 	         "enum {a, b} c;" in C, but fortunately those are
+// OBSOLETE 	         rare.  There is no way for GDB to find those from the
+// OBSOLETE 	         enum type without spending too much time on it.  Thus
+// OBSOLETE 	         to solve this problem, the compiler needs to put out the
+// OBSOLETE 	         enum in a nameless type.  GCC2 does this.  */
+// OBSOLETE 
+// OBSOLETE 	      /* We are looking for something of the form
+// OBSOLETE 	         <name> ":" ("t" | "T") [<number> "="] "e" <size>
+// OBSOLETE 	         {<constant> ":" <value> ","} ";".  */
+// OBSOLETE 
+// OBSOLETE 	      /* Skip over the colon and the 't' or 'T'.  */
+// OBSOLETE 	      p += 2;
+// OBSOLETE 	      /* This type may be given a number.  Also, numbers can come
+// OBSOLETE 	         in pairs like (0,26).  Skip over it.  */
+// OBSOLETE 	      while ((*p >= '0' && *p <= '9')
+// OBSOLETE 		     || *p == '(' || *p == ',' || *p == ')'
+// OBSOLETE 		     || *p == '=')
+// OBSOLETE 		p++;
+// OBSOLETE 
+// OBSOLETE 	      if (*p++ == 'e')
+// OBSOLETE 		{
+// OBSOLETE 		  /* We have found an enumerated type. skip size */
+// OBSOLETE 		  while (*p >= '0' && *p <= '9')
+// OBSOLETE 		    p++;
+// OBSOLETE 		  /* According to comments in read_enum_type
+// OBSOLETE 		     a comma could end it instead of a semicolon.
+// OBSOLETE 		     I don't know where that happens.
+// OBSOLETE 		     Accept either.  */
+// OBSOLETE 		  while (*p && *p != ';' && *p != ',')
+// OBSOLETE 		    {
+// OBSOLETE 		      char *q;
+// OBSOLETE 
+// OBSOLETE 		      /* Check for and handle cretinous dbx symbol name
+// OBSOLETE 		         continuation! 
+// OBSOLETE 		         if (*p == '\\')
+// OBSOLETE 		         p = next_symbol_text (objfile);
+// OBSOLETE 		       */
+// OBSOLETE 
+// OBSOLETE 		      /* Point to the character after the name
+// OBSOLETE 		         of the enum constant.  */
+// OBSOLETE 		      for (q = p; *q && *q != ':'; q++)
+// OBSOLETE 			;
+// OBSOLETE 		      /* Note that the value doesn't matter for
+// OBSOLETE 		         enum constants in psymtabs, just in symtabs.  */
+// OBSOLETE 		      add_psymbol_to_list (p, q - p,
+// OBSOLETE 					   VAR_NAMESPACE, LOC_CONST,
+// OBSOLETE 					   &objfile->static_psymbols, 0,
+// OBSOLETE 					   0, psymtab_language, objfile);
+// OBSOLETE 		      /* Point past the name.  */
+// OBSOLETE 		      p = q;
+// OBSOLETE 		      /* Skip over the value.  */
+// OBSOLETE 		      while (*p && *p != ',')
+// OBSOLETE 			p++;
+// OBSOLETE 		      /* Advance past the comma.  */
+// OBSOLETE 		      if (*p)
+// OBSOLETE 			p++;
+// OBSOLETE 		    }
+// OBSOLETE 		}
+// OBSOLETE 	      continue;
+// OBSOLETE 	    case 'c':
+// OBSOLETE 	      /* Constant, e.g. from "const" in Pascal.  */
+// OBSOLETE 	      add_psymbol_to_list (namestring, p - namestring,
+// OBSOLETE 				   VAR_NAMESPACE, LOC_CONST,
+// OBSOLETE 				&objfile->static_psymbols, CUR_SYMBOL_VALUE,
+// OBSOLETE 				   0, psymtab_language, objfile);
+// OBSOLETE 	      continue;
+// OBSOLETE 
+// OBSOLETE 	    case 'f':
+// OBSOLETE 	      CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
+// OBSOLETE 	      if (pst && pst->textlow == 0)
+// OBSOLETE 		pst->textlow = CUR_SYMBOL_VALUE;
+// OBSOLETE 
+// OBSOLETE 	      add_psymbol_to_list (namestring, p - namestring,
+// OBSOLETE 				   VAR_NAMESPACE, LOC_BLOCK,
+// OBSOLETE 				&objfile->static_psymbols, CUR_SYMBOL_VALUE,
+// OBSOLETE 				   0, psymtab_language, objfile);
+// OBSOLETE 	      continue;
+// OBSOLETE 
+// OBSOLETE 	    case 'F':
+// OBSOLETE 	      CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
+// OBSOLETE 	      if (pst && pst->textlow == 0)
+// OBSOLETE 		pst->textlow = CUR_SYMBOL_VALUE;
+// OBSOLETE 
+// OBSOLETE 	      add_psymbol_to_list (namestring, p - namestring,
+// OBSOLETE 				   VAR_NAMESPACE, LOC_BLOCK,
+// OBSOLETE 				&objfile->global_psymbols, CUR_SYMBOL_VALUE,
+// OBSOLETE 				   0, psymtab_language, objfile);
+// OBSOLETE 	      continue;
+// OBSOLETE 
+// OBSOLETE 	    case 'p':
+// OBSOLETE 	    case 'l':
+// OBSOLETE 	    case 's':
+// OBSOLETE 	      continue;
+// OBSOLETE 
+// OBSOLETE 	    case ':':
+// OBSOLETE 	      /* It is a C++ nested symbol.  We don't need to record it
+// OBSOLETE 	         (I don't think); if we try to look up foo::bar::baz,
+// OBSOLETE 	         then symbols for the symtab containing foo should get
+// OBSOLETE 	         read in, I think.  */
+// OBSOLETE 	      /* Someone says sun cc puts out symbols like
+// OBSOLETE 	         /foo/baz/maclib::/usr/local/bin/maclib,
+// OBSOLETE 	         which would get here with a symbol type of ':'.  */
+// OBSOLETE 	      continue;
+// OBSOLETE 
+// OBSOLETE 	    default:
+// OBSOLETE 	      /* Unexpected symbol descriptor.  The second and subsequent stabs
+// OBSOLETE 	         of a continued stab can show up here.  The question is
+// OBSOLETE 	         whether they ever can mimic a normal stab--it would be
+// OBSOLETE 	         nice if not, since we certainly don't want to spend the
+// OBSOLETE 	         time searching to the end of every string looking for
+// OBSOLETE 	         a backslash.  */
+// OBSOLETE 
+// OBSOLETE 	      complain (&unknown_symchar_complaint, p[1]);
+// OBSOLETE 	      continue;
+// OBSOLETE 	    }
+// OBSOLETE 
+// OBSOLETE 	case N_SYM_RBRAC:
+// OBSOLETE 	  CUR_SYMBOL_VALUE += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
+// OBSOLETE #ifdef HANDLE_RBRAC
+// OBSOLETE 	  HANDLE_RBRAC (CUR_SYMBOL_VALUE);
+// OBSOLETE 	  continue;
+// OBSOLETE #endif
+// OBSOLETE 	case N_SYM_LBRAC:
+// OBSOLETE 	  continue;
+// OBSOLETE 
+// OBSOLETE 	default:
+// OBSOLETE 	  /* If we haven't found it yet, ignore it.  It's probably some
+// OBSOLETE 	     new type we don't know about yet.  */
+// OBSOLETE 	  complain (&unknown_symtype_complaint,
+// OBSOLETE 		    local_hex_string ((unsigned long) bufp->n_type));
+// OBSOLETE 	  continue;
+// OBSOLETE 	}
+// OBSOLETE     }
+// OBSOLETE 
+// OBSOLETE   DBX_SYMCOUNT (objfile) = symnum;
+// OBSOLETE 
+// OBSOLETE   /* If there's stuff to be cleaned up, clean it up.  */
+// OBSOLETE   if (DBX_SYMCOUNT (objfile) > 0
+// OBSOLETE /*FIXME, does this have a bug at start address 0? */
+// OBSOLETE       && last_o_file_start
+// OBSOLETE       && objfile->ei.entry_point < bufp->n_value
+// OBSOLETE       && objfile->ei.entry_point >= last_o_file_start)
+// OBSOLETE     {
+// OBSOLETE       objfile->ei.entry_file_lowpc = last_o_file_start;
+// OBSOLETE       objfile->ei.entry_file_highpc = bufp->n_value;
+// OBSOLETE     }
+// OBSOLETE 
+// OBSOLETE   if (pst)
+// OBSOLETE     {
+// OBSOLETE       os9k_end_psymtab (pst, psymtab_include_list, includes_used,
+// OBSOLETE 			symnum, end_of_text_addr,
+// OBSOLETE 			dependency_list, dependencies_used);
+// OBSOLETE     }
+// OBSOLETE /*
+// OBSOLETE    do_cleanups (back_to);
+// OBSOLETE  */
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE /* Allocate and partially fill a partial symtab.  It will be
+// OBSOLETE    completely filled at the end of the symbol list.
+// OBSOLETE 
+// OBSOLETE    SYMFILE_NAME is the name of the symbol-file we are reading from, and ADDR
+// OBSOLETE    is the address relative to which its symbols are (incremental) or 0
+// OBSOLETE    (normal). */
+// OBSOLETE 
+// OBSOLETE 
+// OBSOLETE static struct partial_symtab *
+// OBSOLETE os9k_start_psymtab (struct objfile *objfile, char *filename, CORE_ADDR textlow,
+// OBSOLETE 		    int ldsymoff, int ldsymcnt,
+// OBSOLETE 		    struct partial_symbol **global_syms,
+// OBSOLETE 		    struct partial_symbol **static_syms)
+// OBSOLETE {
+// OBSOLETE   struct partial_symtab *result =
+// OBSOLETE   start_psymtab_common (objfile, objfile->section_offsets,
+// OBSOLETE 			filename, textlow, global_syms, static_syms);
+// OBSOLETE 
+// OBSOLETE   result->read_symtab_private = (char *)
+// OBSOLETE     obstack_alloc (&objfile->psymbol_obstack, sizeof (struct symloc));
+// OBSOLETE 
+// OBSOLETE   LDSYMOFF (result) = ldsymoff;
+// OBSOLETE   LDSYMCNT (result) = ldsymcnt;
+// OBSOLETE   result->read_symtab = os9k_psymtab_to_symtab;
+// OBSOLETE 
+// OBSOLETE   /* Deduce the source language from the filename for this psymtab. */
+// OBSOLETE   psymtab_language = deduce_language_from_filename (filename);
+// OBSOLETE   return result;
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE /* Close off the current usage of PST.  
+// OBSOLETE    Returns PST or NULL if the partial symtab was empty and thrown away.
+// OBSOLETE    FIXME:  List variables and peculiarities of same.  */
+// OBSOLETE 
+// OBSOLETE static struct partial_symtab *
+// OBSOLETE os9k_end_psymtab (struct partial_symtab *pst, char **include_list,
+// OBSOLETE 		  int num_includes, int capping_symbol_cnt,
+// OBSOLETE 		  CORE_ADDR capping_text,
+// OBSOLETE 		  struct partial_symtab **dependency_list,
+// OBSOLETE 		  int number_dependencies)
+// OBSOLETE {
+// OBSOLETE   int i;
+// OBSOLETE   struct partial_symtab *p1;
+// OBSOLETE   struct objfile *objfile = pst->objfile;
+// OBSOLETE 
+// OBSOLETE   if (capping_symbol_cnt != -1)
+// OBSOLETE     LDSYMCNT (pst) = capping_symbol_cnt - LDSYMCNT (pst);
+// OBSOLETE 
+// OBSOLETE   /* Under Solaris, the N_SO symbols always have a value of 0,
+// OBSOLETE      instead of the usual address of the .o file.  Therefore,
+// OBSOLETE      we have to do some tricks to fill in texthigh and textlow.
+// OBSOLETE      The first trick is in partial-stab.h: if we see a static
+// OBSOLETE      or global function, and the textlow for the current pst
+// OBSOLETE      is still 0, then we use that function's address for 
+// OBSOLETE      the textlow of the pst.
+// OBSOLETE 
+// OBSOLETE      Now, to fill in texthigh, we remember the last function seen
+// OBSOLETE      in the .o file (also in partial-stab.h).  Also, there's a hack in
+// OBSOLETE      bfd/elf.c and gdb/elfread.c to pass the ELF st_size field
+// OBSOLETE      to here via the misc_info field.  Therefore, we can fill in
+// OBSOLETE      a reliable texthigh by taking the address plus size of the
+// OBSOLETE      last function in the file.
+// OBSOLETE 
+// OBSOLETE      Unfortunately, that does not cover the case where the last function
+// OBSOLETE      in the file is static.  See the paragraph below for more comments
+// OBSOLETE      on this situation.
+// OBSOLETE 
+// OBSOLETE      Finally, if we have a valid textlow for the current file, we run
+// OBSOLETE      down the partial_symtab_list filling in previous texthighs that
+// OBSOLETE      are still unknown.  */
+// OBSOLETE 
+// OBSOLETE   if (pst->texthigh == 0 && last_function_name)
+// OBSOLETE     {
+// OBSOLETE       char *p;
+// OBSOLETE       int n;
+// OBSOLETE       struct minimal_symbol *minsym;
+// OBSOLETE 
+// OBSOLETE       p = strchr (last_function_name, ':');
+// OBSOLETE       if (p == NULL)
+// OBSOLETE 	p = last_function_name;
+// OBSOLETE       n = p - last_function_name;
+// OBSOLETE       p = alloca (n + 1);
+// OBSOLETE       strncpy (p, last_function_name, n);
+// OBSOLETE       p[n] = 0;
+// OBSOLETE 
+// OBSOLETE       minsym = lookup_minimal_symbol (p, NULL, objfile);
+// OBSOLETE 
+// OBSOLETE       if (minsym)
+// OBSOLETE 	{
+// OBSOLETE 	  pst->texthigh = SYMBOL_VALUE_ADDRESS (minsym) + (long) MSYMBOL_INFO (minsym);
+// OBSOLETE 	}
+// OBSOLETE       else
+// OBSOLETE 	{
+// OBSOLETE 	  /* This file ends with a static function, and it's
+// OBSOLETE 	     difficult to imagine how hard it would be to track down
+// OBSOLETE 	     the elf symbol.  Luckily, most of the time no one will notice,
+// OBSOLETE 	     since the next file will likely be compiled with -g, so
+// OBSOLETE 	     the code below will copy the first fuction's start address 
+// OBSOLETE 	     back to our texthigh variable.  (Also, if this file is the
+// OBSOLETE 	     last one in a dynamically linked program, texthigh already
+// OBSOLETE 	     has the right value.)  If the next file isn't compiled
+// OBSOLETE 	     with -g, then the last function in this file winds up owning
+// OBSOLETE 	     all of the text space up to the next -g file, or the end (minus
+// OBSOLETE 	     shared libraries).  This only matters for single stepping,
+// OBSOLETE 	     and even then it will still work, except that it will single
+// OBSOLETE 	     step through all of the covered functions, instead of setting
+// OBSOLETE 	     breakpoints around them as it usualy does.  This makes it
+// OBSOLETE 	     pretty slow, but at least it doesn't fail.
+// OBSOLETE 
+// OBSOLETE 	     We can fix this with a fairly big change to bfd, but we need
+// OBSOLETE 	     to coordinate better with Cygnus if we want to do that.  FIXME.  */
+// OBSOLETE 	}
+// OBSOLETE       last_function_name = NULL;
+// OBSOLETE     }
+// OBSOLETE 
+// OBSOLETE   /* this test will be true if the last .o file is only data */
+// OBSOLETE   if (pst->textlow == 0)
+// OBSOLETE     pst->textlow = pst->texthigh;
+// OBSOLETE 
+// OBSOLETE   /* If we know our own starting text address, then walk through all other
+// OBSOLETE      psymtabs for this objfile, and if any didn't know their ending text
+// OBSOLETE      address, set it to our starting address.  Take care to not set our
+// OBSOLETE      own ending address to our starting address, nor to set addresses on
+// OBSOLETE      `dependency' files that have both textlow and texthigh zero.  */
+// OBSOLETE   if (pst->textlow)
+// OBSOLETE     {
+// OBSOLETE       ALL_OBJFILE_PSYMTABS (objfile, p1)
+// OBSOLETE       {
+// OBSOLETE 	if (p1->texthigh == 0 && p1->textlow != 0 && p1 != pst)
+// OBSOLETE 	  {
+// OBSOLETE 	    p1->texthigh = pst->textlow;
+// OBSOLETE 	    /* if this file has only data, then make textlow match texthigh */
+// OBSOLETE 	    if (p1->textlow == 0)
+// OBSOLETE 	      p1->textlow = p1->texthigh;
+// OBSOLETE 	  }
+// OBSOLETE       }
+// OBSOLETE     }
+// OBSOLETE 
+// OBSOLETE   /* End of kludge for patching Solaris textlow and texthigh.  */
+// OBSOLETE 
+// OBSOLETE   pst->n_global_syms =
+// OBSOLETE     objfile->global_psymbols.next - (objfile->global_psymbols.list + pst->globals_offset);
+// OBSOLETE   pst->n_static_syms =
+// OBSOLETE     objfile->static_psymbols.next - (objfile->static_psymbols.list + pst->statics_offset);
+// OBSOLETE 
+// OBSOLETE   pst->number_of_dependencies = number_dependencies;
+// OBSOLETE   if (number_dependencies)
+// OBSOLETE     {
+// OBSOLETE       pst->dependencies = (struct partial_symtab **)
+// OBSOLETE 	obstack_alloc (&objfile->psymbol_obstack,
+// OBSOLETE 		    number_dependencies * sizeof (struct partial_symtab *));
+// OBSOLETE       memcpy (pst->dependencies, dependency_list,
+// OBSOLETE 	      number_dependencies * sizeof (struct partial_symtab *));
+// OBSOLETE     }
+// OBSOLETE   else
+// OBSOLETE     pst->dependencies = 0;
+// OBSOLETE 
+// OBSOLETE   for (i = 0; i < num_includes; i++)
+// OBSOLETE     {
+// OBSOLETE       struct partial_symtab *subpst =
+// OBSOLETE       allocate_psymtab (include_list[i], objfile);
+// OBSOLETE 
+// OBSOLETE       subpst->section_offsets = pst->section_offsets;
+// OBSOLETE       subpst->read_symtab_private =
+// OBSOLETE 	(char *) obstack_alloc (&objfile->psymbol_obstack,
+// OBSOLETE 				sizeof (struct symloc));
+// OBSOLETE       LDSYMOFF (subpst) =
+// OBSOLETE 	LDSYMCNT (subpst) =
+// OBSOLETE 	subpst->textlow =
+// OBSOLETE 	subpst->texthigh = 0;
+// OBSOLETE 
+// OBSOLETE       /* We could save slight bits of space by only making one of these,
+// OBSOLETE          shared by the entire set of include files.  FIXME-someday.  */
+// OBSOLETE       subpst->dependencies = (struct partial_symtab **)
+// OBSOLETE 	obstack_alloc (&objfile->psymbol_obstack,
+// OBSOLETE 		       sizeof (struct partial_symtab *));
+// OBSOLETE       subpst->dependencies[0] = pst;
+// OBSOLETE       subpst->number_of_dependencies = 1;
+// OBSOLETE 
+// OBSOLETE       subpst->globals_offset =
+// OBSOLETE 	subpst->n_global_syms =
+// OBSOLETE 	subpst->statics_offset =
+// OBSOLETE 	subpst->n_static_syms = 0;
+// OBSOLETE 
+// OBSOLETE       subpst->readin = 0;
+// OBSOLETE       subpst->symtab = 0;
+// OBSOLETE       subpst->read_symtab = pst->read_symtab;
+// OBSOLETE     }
+// OBSOLETE 
+// OBSOLETE   sort_pst_symbols (pst);
+// OBSOLETE 
+// OBSOLETE   /* If there is already a psymtab or symtab for a file of this name, 
+// OBSOLETE      remove it.
+// OBSOLETE      (If there is a symtab, more drastic things also happen.)
+// OBSOLETE      This happens in VxWorks.  */
+// OBSOLETE   free_named_symtabs (pst->filename);
+// OBSOLETE 
+// OBSOLETE   if (num_includes == 0
+// OBSOLETE       && number_dependencies == 0
+// OBSOLETE       && pst->n_global_syms == 0
+// OBSOLETE       && pst->n_static_syms == 0)
+// OBSOLETE     {
+// OBSOLETE       /* Throw away this psymtab, it's empty.  We can't deallocate it, since
+// OBSOLETE          it is on the obstack, but we can forget to chain it on the list.  */
+// OBSOLETE       /* Indicate that psymtab was thrown away.  */
+// OBSOLETE 
+// OBSOLETE       discard_psymtab (pst);
+// OBSOLETE 
+// OBSOLETE       pst = (struct partial_symtab *) NULL;
+// OBSOLETE     }
+// OBSOLETE   return pst;
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE os9k_psymtab_to_symtab_1 (struct partial_symtab *pst)
+// OBSOLETE {
+// OBSOLETE   struct cleanup *old_chain;
+// OBSOLETE   int i;
+// OBSOLETE 
+// OBSOLETE   if (!pst)
+// OBSOLETE     return;
+// OBSOLETE 
+// OBSOLETE   if (pst->readin)
+// OBSOLETE     {
+// OBSOLETE       fprintf_unfiltered (gdb_stderr, "Psymtab for %s already read in.  Shouldn't happen.\n",
+// OBSOLETE 			  pst->filename);
+// OBSOLETE       return;
+// OBSOLETE     }
+// OBSOLETE 
+// OBSOLETE   /* Read in all partial symtabs on which this one is dependent */
+// OBSOLETE   for (i = 0; i < pst->number_of_dependencies; i++)
+// OBSOLETE     if (!pst->dependencies[i]->readin)
+// OBSOLETE       {
+// OBSOLETE 	/* Inform about additional files that need to be read in.  */
+// OBSOLETE 	if (info_verbose)
+// OBSOLETE 	  {
+// OBSOLETE 	    fputs_filtered (" ", gdb_stdout);
+// OBSOLETE 	    wrap_here ("");
+// OBSOLETE 	    fputs_filtered ("and ", gdb_stdout);
+// OBSOLETE 	    wrap_here ("");
+// OBSOLETE 	    printf_filtered ("%s...", pst->dependencies[i]->filename);
+// OBSOLETE 	    wrap_here ("");	/* Flush output */
+// OBSOLETE 	    gdb_flush (gdb_stdout);
+// OBSOLETE 	  }
+// OBSOLETE 	os9k_psymtab_to_symtab_1 (pst->dependencies[i]);
+// OBSOLETE       }
+// OBSOLETE 
+// OBSOLETE   if (LDSYMCNT (pst))		/* Otherwise it's a dummy */
+// OBSOLETE     {
+// OBSOLETE       /* Init stuff necessary for reading in symbols */
+// OBSOLETE       stabsread_init ();
+// OBSOLETE       buildsym_init ();
+// OBSOLETE       old_chain = make_cleanup (really_free_pendings, 0);
+// OBSOLETE 
+// OBSOLETE       /* Read in this file's symbols */
+// OBSOLETE       os9k_read_ofile_symtab (pst);
+// OBSOLETE       sort_symtab_syms (pst->symtab);
+// OBSOLETE       do_cleanups (old_chain);
+// OBSOLETE     }
+// OBSOLETE 
+// OBSOLETE   pst->readin = 1;
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE /* Read in all of the symbols for a given psymtab for real.
+// OBSOLETE    Be verbose about it if the user wants that.  */
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE os9k_psymtab_to_symtab (struct partial_symtab *pst)
+// OBSOLETE {
+// OBSOLETE   bfd *sym_bfd;
+// OBSOLETE 
+// OBSOLETE   if (!pst)
+// OBSOLETE     return;
+// OBSOLETE 
+// OBSOLETE   if (pst->readin)
+// OBSOLETE     {
+// OBSOLETE       fprintf_unfiltered (gdb_stderr, "Psymtab for %s already read in.  Shouldn't happen.\n",
+// OBSOLETE 			  pst->filename);
+// OBSOLETE       return;
+// OBSOLETE     }
+// OBSOLETE 
+// OBSOLETE   if (LDSYMCNT (pst) || pst->number_of_dependencies)
+// OBSOLETE     {
+// OBSOLETE       /* Print the message now, before reading the string table,
+// OBSOLETE          to avoid disconcerting pauses.  */
+// OBSOLETE       if (info_verbose)
+// OBSOLETE 	{
+// OBSOLETE 	  printf_filtered ("Reading in symbols for %s...", pst->filename);
+// OBSOLETE 	  gdb_flush (gdb_stdout);
+// OBSOLETE 	}
+// OBSOLETE 
+// OBSOLETE       sym_bfd = pst->objfile->obfd;
+// OBSOLETE       os9k_psymtab_to_symtab_1 (pst);
+// OBSOLETE 
+// OBSOLETE       /* Match with global symbols.  This only needs to be done once,
+// OBSOLETE          after all of the symtabs and dependencies have been read in.   */
+// OBSOLETE       scan_file_globals (pst->objfile);
+// OBSOLETE 
+// OBSOLETE       /* Finish up the debug error message.  */
+// OBSOLETE       if (info_verbose)
+// OBSOLETE 	printf_filtered ("done.\n");
+// OBSOLETE     }
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE /* Read in a defined section of a specific object file's symbols. */
+// OBSOLETE static void
+// OBSOLETE os9k_read_ofile_symtab (struct partial_symtab *pst)
+// OBSOLETE {
+// OBSOLETE   register struct internal_symstruct *bufp;
+// OBSOLETE   unsigned char type;
+// OBSOLETE   unsigned max_symnum;
+// OBSOLETE   register bfd *abfd;
+// OBSOLETE   struct objfile *objfile;
+// OBSOLETE   int sym_offset;		/* Offset to start of symbols to read */
+// OBSOLETE   CORE_ADDR text_offset;	/* Start of text segment for symbols */
+// OBSOLETE   int text_size;		/* Size of text segment for symbols */
+// OBSOLETE   FILE *dbg_file;
+// OBSOLETE 
+// OBSOLETE   objfile = pst->objfile;
+// OBSOLETE   sym_offset = LDSYMOFF (pst);
+// OBSOLETE   max_symnum = LDSYMCNT (pst);
+// OBSOLETE   text_offset = pst->textlow;
+// OBSOLETE   text_size = pst->texthigh - pst->textlow;
+// OBSOLETE 
+// OBSOLETE   current_objfile = objfile;
+// OBSOLETE   subfile_stack = NULL;
+// OBSOLETE   last_source_file = NULL;
+// OBSOLETE 
+// OBSOLETE   abfd = objfile->obfd;
+// OBSOLETE   dbg_file = objfile->auxf2;
+// OBSOLETE 
+// OBSOLETE #if 0
+// OBSOLETE   /* It is necessary to actually read one symbol *before* the start
+// OBSOLETE      of this symtab's symbols, because the GCC_COMPILED_FLAG_SYMBOL
+// OBSOLETE      occurs before the N_SO symbol.
+// OBSOLETE      Detecting this in read_dbx_symtab
+// OBSOLETE      would slow down initial readin, so we look for it here instead. */
+// OBSOLETE   if (!processing_acc_compilation && sym_offset >= (int) symbol_size)
+// OBSOLETE     {
+// OBSOLETE       fseek (objefile->auxf2, sym_offset, SEEK_CUR);
+// OBSOLETE       fill_sym (objfile->auxf2, abfd);
+// OBSOLETE       bufp = symbuf;
+// OBSOLETE 
+// OBSOLETE       processing_gcc_compilation = 0;
+// OBSOLETE       if (bufp->n_type == N_TEXT)
+// OBSOLETE 	{
+// OBSOLETE 	  if (STREQ (namestring, GCC_COMPILED_FLAG_SYMBOL))
+// OBSOLETE 	    processing_gcc_compilation = 1;
+// OBSOLETE 	  else if (STREQ (namestring, GCC2_COMPILED_FLAG_SYMBOL))
+// OBSOLETE 	    processing_gcc_compilation = 2;
+// OBSOLETE 	}
+// OBSOLETE 
+// OBSOLETE       /* Try to select a C++ demangling based on the compilation unit
+// OBSOLETE          producer. */
+// OBSOLETE 
+// OBSOLETE       if (processing_gcc_compilation)
+// OBSOLETE 	{
+// OBSOLETE 	  if (AUTO_DEMANGLING)
+// OBSOLETE 	    {
+// OBSOLETE 	      set_demangling_style (GNU_DEMANGLING_STYLE_STRING);
+// OBSOLETE 	    }
+// OBSOLETE 	}
+// OBSOLETE     }
+// OBSOLETE   else
+// OBSOLETE     {
+// OBSOLETE       /* The N_SO starting this symtab is the first symbol, so we
+// OBSOLETE          better not check the symbol before it.  I'm not this can
+// OBSOLETE          happen, but it doesn't hurt to check for it.  */
+// OBSOLETE       bfd_seek (symfile_bfd, sym_offset, SEEK_CUR);
+// OBSOLETE       processing_gcc_compilation = 0;
+// OBSOLETE     }
+// OBSOLETE #endif /* 0 */
+// OBSOLETE 
+// OBSOLETE   fseek (dbg_file, (long) sym_offset, 0);
+// OBSOLETE /*
+// OBSOLETE    if (bufp->n_type != (unsigned char)N_SYM_SYM)
+// OBSOLETE    error("First symbol in segment of executable not a source symbol");
+// OBSOLETE  */
+// OBSOLETE 
+// OBSOLETE   for (symnum = 0; symnum < max_symnum; symnum++)
+// OBSOLETE     {
+// OBSOLETE       QUIT;			/* Allow this to be interruptable */
+// OBSOLETE       fill_sym (dbg_file, abfd);
+// OBSOLETE       bufp = symbuf;
+// OBSOLETE       type = bufp->n_type;
+// OBSOLETE 
+// OBSOLETE       os9k_process_one_symbol ((int) type, (int) bufp->n_desc,
+// OBSOLETE 	 (CORE_ADDR) bufp->n_value, bufp->n_strx, pst->section_offsets, objfile);
+// OBSOLETE 
+// OBSOLETE       /* We skip checking for a new .o or -l file; that should never
+// OBSOLETE          happen in this routine. */
+// OBSOLETE #if 0
+// OBSOLETE       else
+// OBSOLETE       if (type == N_TEXT)
+// OBSOLETE 	{
+// OBSOLETE 	  /* I don't think this code will ever be executed, because
+// OBSOLETE 	     the GCC_COMPILED_FLAG_SYMBOL usually is right before
+// OBSOLETE 	     the N_SO symbol which starts this source file.
+// OBSOLETE 	     However, there is no reason not to accept
+// OBSOLETE 	     the GCC_COMPILED_FLAG_SYMBOL anywhere.  */
+// OBSOLETE 
+// OBSOLETE 	  if (STREQ (namestring, GCC_COMPILED_FLAG_SYMBOL))
+// OBSOLETE 	    processing_gcc_compilation = 1;
+// OBSOLETE 	  else if (STREQ (namestring, GCC2_COMPILED_FLAG_SYMBOL))
+// OBSOLETE 	    processing_gcc_compilation = 2;
+// OBSOLETE 
+// OBSOLETE 	  if (AUTO_DEMANGLING)
+// OBSOLETE 	    {
+// OBSOLETE 	      set_demangling_style (GNU_DEMANGLING_STYLE_STRING);
+// OBSOLETE 	    }
+// OBSOLETE 	}
+// OBSOLETE       else if (type & N_EXT || type == (unsigned char) N_TEXT
+// OBSOLETE 	       || type == (unsigned char) N_NBTEXT
+// OBSOLETE 	)
+// OBSOLETE 	{
+// OBSOLETE 	  /* Global symbol: see if we came across a dbx defintion for
+// OBSOLETE 	     a corresponding symbol.  If so, store the value.  Remove
+// OBSOLETE 	     syms from the chain when their values are stored, but
+// OBSOLETE 	     search the whole chain, as there may be several syms from
+// OBSOLETE 	     different files with the same name. */
+// OBSOLETE 	  /* This is probably not true.  Since the files will be read
+// OBSOLETE 	     in one at a time, each reference to a global symbol will
+// OBSOLETE 	     be satisfied in each file as it appears. So we skip this
+// OBSOLETE 	     section. */
+// OBSOLETE 	  ;
+// OBSOLETE 	}
+// OBSOLETE #endif /* 0 */
+// OBSOLETE     }
+// OBSOLETE 
+// OBSOLETE   current_objfile = NULL;
+// OBSOLETE 
+// OBSOLETE   /* In a Solaris elf file, this variable, which comes from the
+// OBSOLETE      value of the N_SO symbol, will still be 0.  Luckily, text_offset,
+// OBSOLETE      which comes from pst->textlow is correct. */
+// OBSOLETE   if (last_source_start_addr == 0)
+// OBSOLETE     last_source_start_addr = text_offset;
+// OBSOLETE   pst->symtab = end_symtab (text_offset + text_size, objfile, SECT_OFF_TEXT (objfile));
+// OBSOLETE   end_stabs ();
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE 
+// OBSOLETE /* This handles a single symbol from the symbol-file, building symbols
+// OBSOLETE    into a GDB symtab.  It takes these arguments and an implicit argument.
+// OBSOLETE 
+// OBSOLETE    TYPE is the type field of the ".stab" symbol entry.
+// OBSOLETE    DESC is the desc field of the ".stab" entry.
+// OBSOLETE    VALU is the value field of the ".stab" entry.
+// OBSOLETE    NAME is the symbol name, in our address space.
+// OBSOLETE    SECTION_OFFSETS is a set of amounts by which the sections of this object
+// OBSOLETE    file were relocated when it was loaded into memory.
+// OBSOLETE    All symbols that refer
+// OBSOLETE    to memory locations need to be offset by these amounts.
+// OBSOLETE    OBJFILE is the object file from which we are reading symbols.
+// OBSOLETE    It is used in end_symtab.  */
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE os9k_process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
+// OBSOLETE 			 struct section_offsets *section_offsets,
+// OBSOLETE 			 struct objfile *objfile)
+// OBSOLETE {
+// OBSOLETE   register struct context_stack *new;
+// OBSOLETE   /* The stab type used for the definition of the last function.
+// OBSOLETE      N_STSYM or N_GSYM for SunOS4 acc; N_FUN for other compilers.  */
+// OBSOLETE   static int function_stab_type = 0;
+// OBSOLETE 
+// OBSOLETE #if 0
+// OBSOLETE   /* Something is wrong if we see real data before
+// OBSOLETE      seeing a source file name.  */
+// OBSOLETE   if (last_source_file == NULL && type != (unsigned char) N_SO)
+// OBSOLETE     {
+// OBSOLETE       /* Ignore any symbols which appear before an N_SO symbol.
+// OBSOLETE          Currently no one puts symbols there, but we should deal
+// OBSOLETE          gracefully with the case.  A complain()t might be in order,
+// OBSOLETE          but this should not be an error ().  */
+// OBSOLETE       return;
+// OBSOLETE     }
+// OBSOLETE #endif /* 0 */
+// OBSOLETE 
+// OBSOLETE   switch (type)
+// OBSOLETE     {
+// OBSOLETE     case N_SYM_LBRAC:
+// OBSOLETE       /* On most machines, the block addresses are relative to the
+// OBSOLETE          N_SO, the linker did not relocate them (sigh).  */
+// OBSOLETE       valu += ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
+// OBSOLETE       new = push_context (desc, valu);
+// OBSOLETE       break;
+// OBSOLETE 
+// OBSOLETE     case N_SYM_RBRAC:
+// OBSOLETE       valu += ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
+// OBSOLETE       new = pop_context ();
+// OBSOLETE 
+// OBSOLETE #if !defined (OS9K_VARIABLES_INSIDE_BLOCK)
+// OBSOLETE #define OS9K_VARIABLES_INSIDE_BLOCK(desc, gcc_p) 1
+// OBSOLETE #endif
+// OBSOLETE 
+// OBSOLETE       if (!OS9K_VARIABLES_INSIDE_BLOCK (desc, processing_gcc_compilation))
+// OBSOLETE 	local_symbols = new->locals;
+// OBSOLETE 
+// OBSOLETE       if (context_stack_depth > 1)
+// OBSOLETE 	{
+// OBSOLETE 	  /* This is not the outermost LBRAC...RBRAC pair in the function,
+// OBSOLETE 	     its local symbols preceded it, and are the ones just recovered
+// OBSOLETE 	     from the context stack.  Define the block for them (but don't
+// OBSOLETE 	     bother if the block contains no symbols.  Should we complain
+// OBSOLETE 	     on blocks without symbols?  I can't think of any useful purpose
+// OBSOLETE 	     for them).  */
+// OBSOLETE 	  if (local_symbols != NULL)
+// OBSOLETE 	    {
+// OBSOLETE 	      /* Muzzle a compiler bug that makes end < start.  (which
+// OBSOLETE 	         compilers?  Is this ever harmful?).  */
+// OBSOLETE 	      if (new->start_addr > valu)
+// OBSOLETE 		{
+// OBSOLETE 		  complain (&lbrac_rbrac_complaint);
+// OBSOLETE 		  new->start_addr = valu;
+// OBSOLETE 		}
+// OBSOLETE 	      /* Make a block for the local symbols within.  */
+// OBSOLETE 	      finish_block (0, &local_symbols, new->old_blocks,
+// OBSOLETE 			    new->start_addr, valu, objfile);
+// OBSOLETE 	    }
+// OBSOLETE 	}
+// OBSOLETE       else
+// OBSOLETE 	{
+// OBSOLETE 	  if (context_stack_depth == 0)
+// OBSOLETE 	    {
+// OBSOLETE 	      within_function = 0;
+// OBSOLETE 	      /* Make a block for the local symbols within.  */
+// OBSOLETE 	      finish_block (new->name, &local_symbols, new->old_blocks,
+// OBSOLETE 			    new->start_addr, valu, objfile);
+// OBSOLETE 	    }
+// OBSOLETE 	  else
+// OBSOLETE 	    {
+// OBSOLETE 	      /* attach local_symbols to the end of new->locals */
+// OBSOLETE 	      if (!new->locals)
+// OBSOLETE 		new->locals = local_symbols;
+// OBSOLETE 	      else
+// OBSOLETE 		{
+// OBSOLETE 		  struct pending *p;
+// OBSOLETE 
+// OBSOLETE 		  p = new->locals;
+// OBSOLETE 		  while (p->next)
+// OBSOLETE 		    p = p->next;
+// OBSOLETE 		  p->next = local_symbols;
+// OBSOLETE 		}
+// OBSOLETE 	    }
+// OBSOLETE 	}
+// OBSOLETE 
+// OBSOLETE       if (OS9K_VARIABLES_INSIDE_BLOCK (desc, processing_gcc_compilation))
+// OBSOLETE 	/* Now pop locals of block just finished.  */
+// OBSOLETE 	local_symbols = new->locals;
+// OBSOLETE       break;
+// OBSOLETE 
+// OBSOLETE 
+// OBSOLETE     case N_SYM_SLINE:
+// OBSOLETE       /* This type of "symbol" really just records
+// OBSOLETE          one line-number -- core-address correspondence.
+// OBSOLETE          Enter it in the line list for this symbol table. */
+// OBSOLETE       /* Relocate for dynamic loading and for ELF acc fn-relative syms.  */
+// OBSOLETE       valu += ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
+// OBSOLETE       /* FIXME: loses if sizeof (char *) > sizeof (int) */
+// OBSOLETE       gdb_assert (sizeof (name) <= sizeof (int));
+// OBSOLETE       record_line (current_subfile, (int) name, valu);
+// OBSOLETE       break;
+// OBSOLETE 
+// OBSOLETE       /* The following symbol types need to have the appropriate offset added
+// OBSOLETE          to their value; then we process symbol definitions in the name.  */
+// OBSOLETE     case N_SYM_SYM:
+// OBSOLETE 
+// OBSOLETE       if (name)
+// OBSOLETE 	{
+// OBSOLETE 	  char deftype;
+// OBSOLETE 	  char *dirn, *n;
+// OBSOLETE 	  char *p = strchr (name, ':');
+// OBSOLETE 	  if (p == NULL)
+// OBSOLETE 	    deftype = '\0';
+// OBSOLETE 	  else
+// OBSOLETE 	    deftype = p[1];
+// OBSOLETE 
+// OBSOLETE 
+// OBSOLETE 	  switch (deftype)
+// OBSOLETE 	    {
+// OBSOLETE 	    case 'S':
+// OBSOLETE 	      valu += ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
+// OBSOLETE 	      n = strrchr (name, '/');
+// OBSOLETE 	      if (n != NULL)
+// OBSOLETE 		{
+// OBSOLETE 		  *n = '\0';
+// OBSOLETE 		  n++;
+// OBSOLETE 		  dirn = name;
+// OBSOLETE 		}
+// OBSOLETE 	      else
+// OBSOLETE 		{
+// OBSOLETE 		  n = name;
+// OBSOLETE 		  dirn = NULL;
+// OBSOLETE 		}
+// OBSOLETE 	      *p = '\0';
+// OBSOLETE 	      if (symfile_depth++ == 0)
+// OBSOLETE 		{
+// OBSOLETE 		  if (last_source_file)
+// OBSOLETE 		    {
+// OBSOLETE 		      end_symtab (valu, objfile, SECT_OFF_TEXT (objfile));
+// OBSOLETE 		      end_stabs ();
+// OBSOLETE 		    }
+// OBSOLETE 		  start_stabs ();
+// OBSOLETE 		  os9k_stabs = 1;
+// OBSOLETE 		  start_symtab (n, dirn, valu);
+// OBSOLETE 		  record_debugformat ("OS9");
+// OBSOLETE 		}
+// OBSOLETE 	      else
+// OBSOLETE 		{
+// OBSOLETE 		  push_subfile ();
+// OBSOLETE 		  start_subfile (n, dirn != NULL ? dirn : current_subfile->dirname);
+// OBSOLETE 		}
+// OBSOLETE 	      break;
+// OBSOLETE 
+// OBSOLETE 	    case 'f':
+// OBSOLETE 	    case 'F':
+// OBSOLETE 	      valu += ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
+// OBSOLETE 	      function_stab_type = type;
+// OBSOLETE 
+// OBSOLETE 	      within_function = 1;
+// OBSOLETE 	      new = push_context (0, valu);
+// OBSOLETE 	      new->name = define_symbol (valu, name, desc, type, objfile);
+// OBSOLETE 	      break;
+// OBSOLETE 
+// OBSOLETE 	    case 'V':
+// OBSOLETE 	    case 'v':
+// OBSOLETE 	      valu += ANOFFSET (section_offsets, SECT_OFF_DATA (objfile));
+// OBSOLETE 	      define_symbol (valu, name, desc, type, objfile);
+// OBSOLETE 	      break;
+// OBSOLETE 
+// OBSOLETE 	    default:
+// OBSOLETE 	      define_symbol (valu, name, desc, type, objfile);
+// OBSOLETE 	      break;
+// OBSOLETE 	    }
+// OBSOLETE 	}
+// OBSOLETE       break;
+// OBSOLETE 
+// OBSOLETE     case N_SYM_SE:
+// OBSOLETE       if (--symfile_depth != 0)
+// OBSOLETE 	start_subfile (pop_subfile (), current_subfile->dirname);
+// OBSOLETE       break;
+// OBSOLETE 
+// OBSOLETE     default:
+// OBSOLETE       complain (&unknown_symtype_complaint,
+// OBSOLETE 		local_hex_string ((unsigned long) type));
+// OBSOLETE       /* FALLTHROUGH */
+// OBSOLETE       break;
+// OBSOLETE 
+// OBSOLETE     case N_SYM_CMPLR:
+// OBSOLETE       break;
+// OBSOLETE     }
+// OBSOLETE   previous_stab_code = type;
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE static struct sym_fns os9k_sym_fns =
+// OBSOLETE {
+// OBSOLETE   bfd_target_os9k_flavour,
+// OBSOLETE   os9k_new_init,		/* sym_new_init: init anything gbl to entire symtab */
+// OBSOLETE   os9k_symfile_init,		/* sym_init: read initial info, setup for sym_read() */
+// OBSOLETE   os9k_symfile_read,		/* sym_read: read a symbol file into symtab */
+// OBSOLETE   os9k_symfile_finish,		/* sym_finish: finished with file, cleanup */
+// OBSOLETE   default_symfile_offsets,	/* sym_offsets: parse user's offsets to internal form */
+// OBSOLETE   NULL				/* next: pointer to next struct sym_fns */
+// OBSOLETE };
+// OBSOLETE 
+// OBSOLETE void
+// OBSOLETE _initialize_os9kread (void)
+// OBSOLETE {
+// OBSOLETE   add_symtab_fns (&os9k_sym_fns);
+// OBSOLETE }

@@ -544,7 +544,7 @@ SFILES = ax-general.c ax-gdb.c bcache.c blockframe.c breakpoint.c \
 	scm-valprint.c source.c stabsread.c stack.c symfile.c \
 	symmisc.c symtab.c linespec.c target.c thread.c top.c tracepoint.c \
 	typeprint.c utils.c valarith.c valops.c valprint.c values.c \
-	serial.c ser-unix.c mdebugread.c os9kread.c \
+	serial.c ser-unix.c mdebugread.c \
 	tui/tui.c tui/tui.h tui/tuiCommand.c tui/tuiCommand.h \
 	tui/tuiData.c tui/tuiData.h tui/tuiDataWin.c tui/tuiDataWin.h \
 	tui/tuiDisassem.c tui/tuiDisassem.h tui/tuiGeneralWin.c \
@@ -743,7 +743,7 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
 	scm-exp.o scm-lang.o scm-valprint.o complaints.o typeprint.o \
 	c-typeprint.o ch-typeprint.o f-typeprint.o m2-typeprint.o \
 	c-valprint.o cp-valprint.o ch-valprint.o f-valprint.o m2-valprint.o \
-	nlmread.o serial.o mdebugread.o os9kread.o top.o utils.o \
+	nlmread.o serial.o mdebugread.o top.o utils.o \
 	ui-file.o \
 	frame.o doublest.o \
 	gnu-v2-abi.o gnu-v3-abi.o hpacc-abi.o cp-abi.o
@@ -1238,7 +1238,7 @@ ALLDEPFILES = a68v-nat.c \
 	procfs.c \
 	remote-array.c remote-bug.c remote-e7000.c \
 	remote-es.c remote-hms.c remote-mips.c \
-	remote-nindy.c remote-os9k.c remote-rdp.c remote-sim.c \
+	remote-nindy.c remote-rdp.c remote-sim.c \
 	remote-st.c remote-utils.c dcache.c \
 	remote-vx.c \
 	rs6000-nat.c rs6000-tdep.c \
@@ -1797,14 +1797,14 @@ mdebugread.o: mdebugread.c $(buildsym_h) $(complaints_h) $(bfd_h) $(defs_h) \
 
 mipsm3-nat.o: mipsm3-nat.c $(defs_h) $(inferior_h) $(regcache_h)
 
-# os9kread assumes that sizeof(char*) <= sizeof(int).  This looses on
-# 64 bit targets where often, sizeof(int)=4 but sizeof(char*)=9.
-os9kread.o: os9kread.c $(buildsym_h) $(complaints_h) $(bfd_h) $(defs_h) \
-	        $(expression_h) $(gdb_stabs_h) $(gdbcore_h) $(gdbtypes_h) \
-		$(language_h) $(objfiles_h) $(stabsread_h) $(symfile_h) \
-		$(symtab_h) $(target_h) $(gdb_string_h)
-	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) \
-		$(srcdir)/os9kread.c
+# OBSOLETE # os9kread assumes that sizeof(char*) <= sizeof(int).  This looses on
+# OBSOLETE # 64 bit targets where often, sizeof(int)=4 but sizeof(char*)=9.
+# OBSOLETE os9kread.o: os9kread.c $(buildsym_h) $(complaints_h) $(bfd_h) $(defs_h) \
+# OBSOLETE 	        $(expression_h) $(gdb_stabs_h) $(gdbcore_h) $(gdbtypes_h) \
+# OBSOLETE 		$(language_h) $(objfiles_h) $(stabsread_h) $(symfile_h) \
+# OBSOLETE 		$(symtab_h) $(target_h) $(gdb_string_h)
+# OBSOLETE 	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) \
+# OBSOLETE 		$(srcdir)/os9kread.c
 
 mem-break.o: mem-break.c $(defs_h) $(symtab_h) $(breakpoint_h) $(inferior_h) \
 	$(target_h)
@@ -2004,9 +2004,9 @@ remote-nindy.o: remote-nindy.c $(floatformat_h) $(command_h) \
 	nindy-share/env.h nindy-share/stop.h $(remote_utils_h) \
 	$(symfile_h) $(regcache_h)
 
-remote-os9k.o: remote-os9k.c $(defs_h) $(gdbcore_h) \
-	$(command_h) $(monitor_h) $(remote_utils_h) $(symtab_h) $(symfile_h) \
-	$(objfiles_h) $(gdb_stabs_h) $(gdb_string_h) $(regcache_h)
+# OBSOLETE remote-os9k.o: remote-os9k.c $(defs_h) $(gdbcore_h) \
+# OBSOLETE 	$(command_h) $(monitor_h) $(remote_utils_h) $(symtab_h) $(symfile_h) \
+# OBSOLETE 	$(objfiles_h) $(gdb_stabs_h) $(gdb_string_h) $(regcache_h)
 
 remote-sds.o: remote-sds.c $(bfd_h) $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) $(remote_utils_h) $(symfile_h) $(terminal_h) \
