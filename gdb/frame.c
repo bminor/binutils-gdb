@@ -1503,8 +1503,13 @@ void
 deprecated_update_frame_pc_hack (struct frame_info *frame, CORE_ADDR pc)
 {
   /* See comment in "frame.h".  */
-  gdb_assert (frame->next != NULL);
   frame->pc = pc;
+  /* While we're at it, update this frame's cached PC value, found in
+     the next frame.  Oh, for the day when "struct frame_info" is
+     opaque and this hack on hack can go.  */
+  gdb_assert (frame->next != NULL);
+  frame->next->pc_unwind_cache = pc;
+  frame->next->pc_unwind_cache_p = 1;
 }
 
 void

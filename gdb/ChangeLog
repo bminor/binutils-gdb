@@ -1,5 +1,10 @@
 2003-03-05  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.c (deprecated_update_frame_pc_hack): Also update the the
+	cached PC value in the next frame.
+
+2003-03-05  Andrew Cagney  <cagney@redhat.com>
+
 	* frame.h (struct frame_info): Replace "id_unwind_cache_p" and
 	"id_unwind_cache" with "id".
 	(frame_id_unwind): Delete declaration.
