@@ -1,3 +1,9 @@
+2003-05-23  Raoul Gough  <RaoulGough@yahoo.co.uk>
+
+	Committed by Elena Zannoni  <ezannoni@redhat.com>.
+  	* coffread.c(coff_symtab_read): Do relocate static symbols from PE
+	files, don't relocate absolute symbols (and do use mst_abs).
+
 2003-05-23  Andrew Cagney  <cagney@redhat.com>
 
 	* objc-lang.c: Include "gdb_assert.h".

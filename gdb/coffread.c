@@ -869,7 +869,6 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 	       print_address_symbolic work right without the (now
 	       gone) "set fast-symbolic-addr off" kludge.  */
 
-	    /* FIXME: should use mst_abs, and not relocate, if absolute.  */
 	    enum minimal_symbol_type ms_type;
 	    int sec;
 
@@ -891,12 +890,23 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 		  || cs->c_sclass == C_THUMBEXT ?
 		  mst_bss : mst_file_bss;
 	      }
+ 	    else if (cs->c_secnum == N_ABS)
+ 	      {
+ 		/* Use the correct minimal symbol type (and don't
+ 		   relocate) for absolute values. */
+ 		ms_type = mst_abs;
+ 		sec = cs_to_section (cs, objfile);
+ 		tmpaddr = cs->c_value;
+ 	      }
 	    else
 	      {
 		sec = cs_to_section (cs, objfile);
 		tmpaddr = cs->c_value;
-		if (cs->c_sclass == C_EXT || cs->c_sclass == C_THUMBEXTFUNC
-		    || cs->c_sclass == C_THUMBEXT)
+ 		/* Statics in a PE file also get relocated */
+ 		if (cs->c_sclass == C_EXT
+ 		    || cs->c_sclass == C_THUMBEXTFUNC
+ 		    || cs->c_sclass == C_THUMBEXT
+ 		    || (pe_file && (cs->c_sclass == C_STAT)))
 		  tmpaddr += ANOFFSET (objfile->section_offsets, sec);
 
 		if (sec == SECT_OFF_TEXT (objfile))
