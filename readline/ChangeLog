@@ -1,3 +1,7 @@
+Wed Jun 23 13:00:12 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* configure.in: Add comment.
+
 Mon Jun 14 14:28:55 1993  Jim Kingdon  (kingdon@eric)
 
 	* configure.in (m88k-*-sysvr4*): Use sysdep-norm.h.
