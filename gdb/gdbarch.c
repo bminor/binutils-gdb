@@ -195,8 +195,7 @@ struct gdbarch
   int call_dummy_p;
   LONGEST * call_dummy_words;
   int sizeof_call_dummy_words;
-  int call_dummy_stack_adjust_p;
-  int call_dummy_stack_adjust;
+  int deprecated_call_dummy_stack_adjust;
   gdbarch_fix_call_dummy_ftype *fix_call_dummy;
   gdbarch_deprecated_init_frame_pc_first_ftype *deprecated_init_frame_pc_first;
   gdbarch_deprecated_init_frame_pc_ftype *deprecated_init_frame_pc;
@@ -434,7 +433,6 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   0,
-  0,
   generic_in_function_epilogue_p,
   construct_inferior_arguments,
   0,
@@ -538,7 +536,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->call_dummy_p = -1;
   current_gdbarch->call_dummy_words = legacy_call_dummy_words;
   current_gdbarch->sizeof_call_dummy_words = legacy_sizeof_call_dummy_words;
-  current_gdbarch->call_dummy_stack_adjust_p = -1;
   current_gdbarch->register_convertible = generic_register_convertible_not;
   current_gdbarch->convert_register_p = legacy_convert_register_p;
   current_gdbarch->register_to_value = legacy_register_to_value;
@@ -700,12 +697,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
     fprintf_unfiltered (log, "\n\tcall_dummy_p");
   /* Skip verify of call_dummy_words, invalid_p == 0 */
   /* Skip verify of sizeof_call_dummy_words, invalid_p == 0 */
-  if ((GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->call_dummy_stack_adjust_p == -1))
-    fprintf_unfiltered (log, "\n\tcall_dummy_stack_adjust_p");
-  if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->call_dummy_stack_adjust_p && gdbarch->call_dummy_stack_adjust == 0))
-    fprintf_unfiltered (log, "\n\tcall_dummy_stack_adjust");
+  /* Skip verify of deprecated_call_dummy_stack_adjust, has predicate */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->fix_call_dummy == 0))
     fprintf_unfiltered (log, "\n\tfix_call_dummy");
@@ -1002,23 +994,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: CALL_DUMMY_P = %d\n",
                       CALL_DUMMY_P);
 #endif
-#ifdef CALL_DUMMY_STACK_ADJUST
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: CALL_DUMMY_STACK_ADJUST # %s\n",
-                      XSTRING (CALL_DUMMY_STACK_ADJUST));
-  if (CALL_DUMMY_STACK_ADJUST_P)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: CALL_DUMMY_STACK_ADJUST = 0x%08lx\n",
-                        (long) CALL_DUMMY_STACK_ADJUST);
-#endif
-#ifdef CALL_DUMMY_STACK_ADJUST_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: CALL_DUMMY_STACK_ADJUST_P # %s\n",
-                      XSTRING (CALL_DUMMY_STACK_ADJUST_P));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: CALL_DUMMY_STACK_ADJUST_P = 0x%08lx\n",
-                      (long) CALL_DUMMY_STACK_ADJUST_P);
-#endif
 #ifdef CALL_DUMMY_START_OFFSET
   fprintf_unfiltered (file,
                       "gdbarch_dump: CALL_DUMMY_START_OFFSET # %s\n",
@@ -1112,6 +1087,23 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: DECR_PC_AFTER_BREAK = %ld\n",
                       (long) DECR_PC_AFTER_BREAK);
+#endif
+#ifdef DEPRECATED_CALL_DUMMY_STACK_ADJUST_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_CALL_DUMMY_STACK_ADJUST_P()",
+                      XSTRING (DEPRECATED_CALL_DUMMY_STACK_ADJUST_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_CALL_DUMMY_STACK_ADJUST_P() = %d\n",
+                      DEPRECATED_CALL_DUMMY_STACK_ADJUST_P ());
+#endif
+#ifdef DEPRECATED_CALL_DUMMY_STACK_ADJUST
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_CALL_DUMMY_STACK_ADJUST # %s\n",
+                      XSTRING (DEPRECATED_CALL_DUMMY_STACK_ADJUST));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_CALL_DUMMY_STACK_ADJUST = %d\n",
+                      DEPRECATED_CALL_DUMMY_STACK_ADJUST);
 #endif
 #ifdef DEPRECATED_DO_REGISTERS_INFO_P
   fprintf_unfiltered (file,
@@ -3872,41 +3864,26 @@ set_gdbarch_sizeof_call_dummy_words (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_call_dummy_stack_adjust_p (struct gdbarch *gdbarch)
+gdbarch_deprecated_call_dummy_stack_adjust_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  if (gdbarch->call_dummy_stack_adjust_p == -1)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_call_dummy_stack_adjust_p invalid");
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_call_dummy_stack_adjust_p called\n");
-  return gdbarch->call_dummy_stack_adjust_p;
-}
-
-void
-set_gdbarch_call_dummy_stack_adjust_p (struct gdbarch *gdbarch,
-                                       int call_dummy_stack_adjust_p)
-{
-  gdbarch->call_dummy_stack_adjust_p = call_dummy_stack_adjust_p;
+  return gdbarch->deprecated_call_dummy_stack_adjust != 0;
 }
 
 int
-gdbarch_call_dummy_stack_adjust (struct gdbarch *gdbarch)
+gdbarch_deprecated_call_dummy_stack_adjust (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  if (gdbarch->call_dummy_stack_adjust_p && gdbarch->call_dummy_stack_adjust == 0)
-    internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_call_dummy_stack_adjust invalid");
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_call_dummy_stack_adjust called\n");
-  return gdbarch->call_dummy_stack_adjust;
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_call_dummy_stack_adjust called\n");
+  return gdbarch->deprecated_call_dummy_stack_adjust;
 }
 
 void
-set_gdbarch_call_dummy_stack_adjust (struct gdbarch *gdbarch,
-                                     int call_dummy_stack_adjust)
+set_gdbarch_deprecated_call_dummy_stack_adjust (struct gdbarch *gdbarch,
+                                                int deprecated_call_dummy_stack_adjust)
 {
-  gdbarch->call_dummy_stack_adjust = call_dummy_stack_adjust;
+  gdbarch->deprecated_call_dummy_stack_adjust = deprecated_call_dummy_stack_adjust;
 }
 
 void

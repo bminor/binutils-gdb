@@ -6027,7 +6027,6 @@ mips_gdbarch_init (struct gdbarch_info info,
   /* MIPS version of CALL_DUMMY */
 
   set_gdbarch_call_dummy_p (gdbarch, 1);
-  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
   set_gdbarch_call_dummy_address (gdbarch, mips_call_dummy_address);
   set_gdbarch_push_return_address (gdbarch, mips_push_return_address);
   set_gdbarch_deprecated_pop_frame (gdbarch, mips_pop_frame);

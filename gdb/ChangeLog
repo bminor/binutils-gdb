@@ -1,3 +1,41 @@
+2003-03-25  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (CALL_DUMMY_STACK_ADJUST_P): Delete.
+	(DEPRECATED_CALL_DUMMY_STACK_ADJUST): Replace
+	CALL_DUMMY_STACK_ADJUST with a predicate variable.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Do not set
+	call_dummy_stack_adjust_p.
+	* vax-tdep.c (vax_gdbarch_init): Ditto.
+	* v850-tdep.c (v850_gdbarch_init): Ditto.
+	* sh-tdep.c (sh_gdbarch_init): Ditto.
+	* s390-tdep.c (s390_gdbarch_init): Ditto.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Ditto.
+	* ns32k-tdep.c (ns32k_gdbarch_init): Ditto.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Ditto.
+	* mips-tdep.c (mips_gdbarch_init): Ditto.
+	* mcore-tdep.c (mcore_gdbarch_init): Ditto.
+	* m68k-tdep.c (m68k_gdbarch_init): Ditto.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Ditto.
+	* ia64-tdep.c (ia64_gdbarch_init): Ditto.
+	* i386-tdep.c (i386_gdbarch_init): Ditto.
+	* h8300-tdep.c (h8300_gdbarch_init): Ditto.
+	* frv-tdep.c (frv_gdbarch_init): Ditto.
+	* d10v-tdep.c (d10v_gdbarch_init): Ditto.
+	* cris-tdep.c (cris_gdbarch_init): Ditto.
+	* avr-tdep.c (avr_gdbarch_init): Ditto.
+	* arm-tdep.c (arm_gdbarch_init): Ditto.
+	* alpha-tdep.c (alpha_gdbarch_init): Ditto.
+	* config/sparc/tm-sp64.h (CALL_DUMMY_STACK_ADJUST): Update.
+	* config/sparc/tm-sparc.h (CALL_DUMMY_STACK_ADJUST): Update.
+	* config/sparc/tm-sp64.h (CALL_DUMMY_STACK_ADJUST): Update.
+	* sparc-tdep.c (sparc_gdbarch_init): Update.  Do not set
+	call_dummy_stack_adjust_p.
+	* inferior.h (CALL_DUMMY_STACK_ADJUST_P): Delete macro.
+	(CALL_DUMMY_STACK_ADJUST): Delete macro.
+	* sparc-tdep.c (sparc32_push_arguments): Update.
+	* valops.c (hand_function_call): Update.
+
 2003-03-25  Corinna Vinschen  <vinschen@redhat.com>
 
 	* xstormy16-tdep.c (xstormy16_gdbarch_init): Add call to

@@ -1042,13 +1042,11 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_breakpoint_offset (gdbarch, 24);
   set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_on_stack);
   set_gdbarch_call_dummy_p (gdbarch, 1);
-  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
   set_gdbarch_call_dummy_length (gdbarch, 28);
   set_gdbarch_call_dummy_start_offset (gdbarch, 12);
 
   set_gdbarch_call_dummy_words (gdbarch, call_dummy_words);
   set_gdbarch_sizeof_call_dummy_words (gdbarch, sizeof (call_dummy_words));
-  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
   set_gdbarch_fix_call_dummy (gdbarch, m68k_fix_call_dummy);
   set_gdbarch_deprecated_push_dummy_frame (gdbarch, m68k_push_dummy_frame);
   set_gdbarch_deprecated_pop_frame (gdbarch, m68k_pop_frame);

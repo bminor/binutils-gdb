@@ -603,7 +603,6 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 0);
   set_gdbarch_deprecated_use_generic_dummy_frames (gdbarch, 0);
   set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_on_stack);
-  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
 
   /* Breakpoint info */
   set_gdbarch_decr_pc_after_break (gdbarch, 0);

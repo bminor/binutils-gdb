@@ -1,3 +1,10 @@
+2003-03-25  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	reference to CALL_DUMMY_STACK_ADJUST_P.  Rename
+	CALL_DUMMY_STACK_ADJUST to DEPRECATED_CALL_DUMMY_STACK_ADJUST.
+	Add reference to PUSH_ARGUMENTS.
+
 2003-03-23  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbint.texinfo (Algorithms, Target Architecture Definition):

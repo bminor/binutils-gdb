@@ -437,18 +437,6 @@ extern int attach_flag;
 #define CALL_DUMMY_LENGTH (internal_error (__FILE__, __LINE__, "CALL_DUMMY_LENGTH"), 0)
 #endif
 
-#if defined (CALL_DUMMY_STACK_ADJUST)
-#if !defined (CALL_DUMMY_STACK_ADJUST_P)
-#define CALL_DUMMY_STACK_ADJUST_P (1)
-#endif
-#endif
-#if !defined (CALL_DUMMY_STACK_ADJUST)
-#define CALL_DUMMY_STACK_ADJUST (internal_error (__FILE__, __LINE__, "CALL_DUMMY_STACK_ADJUST"), 0)
-#endif
-#if !defined (CALL_DUMMY_STACK_ADJUST_P)
-#define CALL_DUMMY_STACK_ADJUST_P (0)
-#endif
-
 /* FIXME: cagney/2000-04-17: gdbarch should manage this.  The default
    shouldn't be necessary. */
 

@@ -1611,8 +1611,8 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 
 	  for (i = nargs - 1; i >= 0; i--)
 	    len += TYPE_LENGTH (VALUE_ENCLOSING_TYPE (args[i]));
-	  if (CALL_DUMMY_STACK_ADJUST_P)
-	    len += CALL_DUMMY_STACK_ADJUST;
+	  if (DEPRECATED_CALL_DUMMY_STACK_ADJUST_P ())
+	    len += DEPRECATED_CALL_DUMMY_STACK_ADJUST;
 	  sp -= STACK_ALIGN (len) - len;
 	}
     }
@@ -1636,8 +1636,8 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
     {
       /* If stack grows up, we must leave a hole at the bottom, note
          that sp already has been advanced for the arguments!  */
-      if (CALL_DUMMY_STACK_ADJUST_P)
-	sp += CALL_DUMMY_STACK_ADJUST;
+      if (DEPRECATED_CALL_DUMMY_STACK_ADJUST_P ())
+	sp += DEPRECATED_CALL_DUMMY_STACK_ADJUST;
       sp = STACK_ALIGN (sp);
     }
 
@@ -1646,11 +1646,11 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
   /* MVS 11/22/96: I think at least some of this stack_align code is
      really broken.  Better to let PUSH_ARGUMENTS adjust the stack in
      a target-defined manner.  */
-  if (CALL_DUMMY_STACK_ADJUST_P)
+  if (DEPRECATED_CALL_DUMMY_STACK_ADJUST_P ())
     if (INNER_THAN (1, 2))
       {
 	/* stack grows downward */
-	sp -= CALL_DUMMY_STACK_ADJUST;
+	sp -= DEPRECATED_CALL_DUMMY_STACK_ADJUST;
       }
 
   /* Store the address at which the structure is supposed to be

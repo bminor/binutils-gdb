@@ -1260,25 +1260,39 @@ extern void set_gdbarch_sizeof_call_dummy_words (struct gdbarch *gdbarch, int si
 #endif
 #endif
 
-extern int gdbarch_call_dummy_stack_adjust_p (struct gdbarch *gdbarch);
-extern void set_gdbarch_call_dummy_stack_adjust_p (struct gdbarch *gdbarch, int call_dummy_stack_adjust_p);
-#if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) && defined (CALL_DUMMY_STACK_ADJUST_P)
-#error "Non multi-arch definition of CALL_DUMMY_STACK_ADJUST_P"
-#endif
-#if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) || !defined (CALL_DUMMY_STACK_ADJUST_P)
-#define CALL_DUMMY_STACK_ADJUST_P (gdbarch_call_dummy_stack_adjust_p (current_gdbarch))
+#if defined (DEPRECATED_CALL_DUMMY_STACK_ADJUST)
+/* Legacy for systems yet to multi-arch DEPRECATED_CALL_DUMMY_STACK_ADJUST */
+#if !defined (DEPRECATED_CALL_DUMMY_STACK_ADJUST_P)
+#define DEPRECATED_CALL_DUMMY_STACK_ADJUST_P() (1)
 #endif
 #endif
 
-extern int gdbarch_call_dummy_stack_adjust (struct gdbarch *gdbarch);
-extern void set_gdbarch_call_dummy_stack_adjust (struct gdbarch *gdbarch, int call_dummy_stack_adjust);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (CALL_DUMMY_STACK_ADJUST)
-#error "Non multi-arch definition of CALL_DUMMY_STACK_ADJUST"
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_CALL_DUMMY_STACK_ADJUST_P)
+#define DEPRECATED_CALL_DUMMY_STACK_ADJUST_P() (0)
+#endif
+
+extern int gdbarch_deprecated_call_dummy_stack_adjust_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_CALL_DUMMY_STACK_ADJUST_P)
+#error "Non multi-arch definition of DEPRECATED_CALL_DUMMY_STACK_ADJUST"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_CALL_DUMMY_STACK_ADJUST_P)
+#define DEPRECATED_CALL_DUMMY_STACK_ADJUST_P() (gdbarch_deprecated_call_dummy_stack_adjust_p (current_gdbarch))
+#endif
+
+/* Default (value) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_CALL_DUMMY_STACK_ADJUST)
+#define DEPRECATED_CALL_DUMMY_STACK_ADJUST (0)
+#endif
+
+extern int gdbarch_deprecated_call_dummy_stack_adjust (struct gdbarch *gdbarch);
+extern void set_gdbarch_deprecated_call_dummy_stack_adjust (struct gdbarch *gdbarch, int deprecated_call_dummy_stack_adjust);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_CALL_DUMMY_STACK_ADJUST)
+#error "Non multi-arch definition of DEPRECATED_CALL_DUMMY_STACK_ADJUST"
 #endif
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (CALL_DUMMY_STACK_ADJUST)
-#define CALL_DUMMY_STACK_ADJUST (gdbarch_call_dummy_stack_adjust (current_gdbarch))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_CALL_DUMMY_STACK_ADJUST)
+#define DEPRECATED_CALL_DUMMY_STACK_ADJUST (gdbarch_deprecated_call_dummy_stack_adjust (current_gdbarch))
 #endif
 #endif
 

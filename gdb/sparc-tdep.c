@@ -2249,8 +2249,8 @@ sparc32_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
     }
 
   /* Make room for the arguments on the stack.  */
-  accumulate_size += CALL_DUMMY_STACK_ADJUST;
-  sp = ((sp - accumulate_size) & ~7) + CALL_DUMMY_STACK_ADJUST;
+  accumulate_size += DEPRECATED_CALL_DUMMY_STACK_ADJUST;
+  sp = ((sp - accumulate_size) & ~7) + DEPRECATED_CALL_DUMMY_STACK_ADJUST;
 
   /* `Push' arguments on the stack.  */
   for (i = 0, oregnum = 0, m_arg = sparc_args; 
@@ -3139,7 +3139,6 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_breakpoint_from_pc (gdbarch, memory_breakpoint_from_pc);
   set_gdbarch_call_dummy_breakpoint_offset_p (gdbarch, 1);
   set_gdbarch_call_dummy_p (gdbarch, 1);
-  set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 1);
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
   set_gdbarch_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, sparc_extract_struct_value_address);
@@ -3252,7 +3251,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_call_dummy_length (gdbarch, 0);
       set_gdbarch_call_dummy_words (gdbarch, call_dummy_nil);
 #endif
-      set_gdbarch_call_dummy_stack_adjust (gdbarch, 68);
+      set_gdbarch_deprecated_call_dummy_stack_adjust (gdbarch, 68);
       set_gdbarch_call_dummy_start_offset (gdbarch, 0);
       set_gdbarch_frame_args_skip (gdbarch, 68);
       set_gdbarch_function_start_offset (gdbarch, 0);
@@ -3308,7 +3307,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_call_dummy_start_offset (gdbarch, 0);
       set_gdbarch_call_dummy_words (gdbarch, call_dummy_nil);
 #endif
-      set_gdbarch_call_dummy_stack_adjust (gdbarch, 128);
+      set_gdbarch_deprecated_call_dummy_stack_adjust (gdbarch, 128);
       set_gdbarch_frame_args_skip (gdbarch, 136);
       set_gdbarch_function_start_offset (gdbarch, 0);
       set_gdbarch_long_bit (gdbarch, 8 * TARGET_CHAR_BIT);

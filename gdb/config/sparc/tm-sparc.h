@@ -649,7 +649,7 @@ extern CORE_ADDR init_frame_pc_noop (int fromleaf, struct frame_info *prev);
 
 #define CALL_DUMMY_BREAKPOINT_OFFSET (CALL_DUMMY_START_OFFSET + 0x30)
 
-#define CALL_DUMMY_STACK_ADJUST 68
+#define DEPRECATED_CALL_DUMMY_STACK_ADJUST 68
 
 /* Call dummy method (eg. on stack, at entry point, etc.) */
 
