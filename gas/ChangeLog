@@ -1,3 +1,9 @@
+2000-08-31  Alexandre Oliva  <aoliva@redhat.com>
+
+	* acinclude.m4: Include libtool and gettext macros from the
+	top level.
+	* aclocal.m4, configure: Rebuilt.
+
 2000-08-30  Mark Hatle  <mhatle@mvista.com>
 
 	* config/tc-ppc.c (md_parse_option): Recognize -m405.

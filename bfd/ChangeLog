@@ -1,3 +1,9 @@
+2000-08-31  Alexandre Oliva  <aoliva@redhat.com>
+
+	* acinclude.m4: Include libtool and gettext macros from the
+	top level.
+	* aclocal.m4, configure: Rebuilt.
+
 2000-08-29  Michael Snyder  <msnyder@seadog.cygnus.com>
 
 	* elf.c: Eliminate references to __sparcv9 macro; replace with
