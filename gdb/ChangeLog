@@ -1,3 +1,7 @@
+2005-03-10  Bob Rossi  <bob@brasko.net>
+
+	* main.c(print_gdb_help): remove the --[no]sync help message
+
 2005-03-10  Mark Kettenis  <kettenis@gnu.org>
 
 	* proc-api.c: Update copyright year.

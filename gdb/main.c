@@ -830,9 +830,6 @@ Options:\n\n\
   --args             Arguments after executable-file are passed to inferior\n\
 "), stream);
   fputs_unfiltered (_("\
-  --[no]async        Enable (disable) asynchronous version of CLI\n\
-"), stream);
-  fputs_unfiltered (_("\
   -b BAUDRATE        Set serial port baud rate used for remote debugging.\n\
   --batch            Exit after processing options.\n\
   --cd=DIR           Change current directory to DIR.\n\
