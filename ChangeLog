@@ -1,3 +1,8 @@
+Sat Aug 27 01:56:30 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* Makefile.in (all-gdb):  Add dependencies on all-gcc and all-ld
+	to make gdb/nlm/* build after the compiler and linker.
+
 Fri Aug 26 14:30:05 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
 	* config.guess (netbsd, freebsd, linux):  Accept any machine,
