@@ -1,5 +1,15 @@
 2004-09-02  Andrew Cagney  <cagney@gnu.org>
 
+	* config/m68k/tm-vx68.h: Do not include "tm-m68k.h".
+	* config/m68k/tm-os68k.h: Ditto.
+	* config/m68k/tm-monitor.h: Ditto.
+	* config/m68k/tm-cisco.h: Ditto.
+	* config/m68k/st2000.mt (TM_FILE): Delete.
+	* config/m68k/tm-vx68.h (GET_LONGJMP_TARGET): Delete.
+	* config/m68k/tm-cisco.h (GET_LONGJMP_TARGET): Delete.
+	* config/m68k/tm-m68k.h (m68k_get_longjmp_target): Delete file.
+	* m68k-tdep.c (m68k_get_longjmp_target): Make static.
+
 	* config/m68k/tm-st2000.h: Delete.
 	* config/m68k/st2000.mt (TM_FILE): Set to tm-m68k.h.
 	* config/sparc/fbsd.mt (TM_FILE): Delete.

@@ -1047,7 +1047,7 @@ fill_fpregset (fpregset_t *fpregsetp, int regno)
    we extract the pc (JB_PC) that we will land at.  The pc is copied into PC.
    This routine returns true on success. */
 
-int
+static int
 m68k_get_longjmp_target (CORE_ADDR *pc)
 {
   char *buf;
