@@ -463,7 +463,7 @@ extern void lang_leave_overlay
 
 extern struct bfd_elf_version_tree *lang_elf_version_info;
 
-extern struct bfd_elf_version_expr *lang_new_vers_regex
+extern struct bfd_elf_version_expr *lang_new_vers_pattern
   PARAMS ((struct bfd_elf_version_expr *, const char *, const char *));
 extern struct bfd_elf_version_tree *lang_new_vers_node
   PARAMS ((struct bfd_elf_version_expr *, struct bfd_elf_version_expr *));

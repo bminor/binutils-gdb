@@ -1,3 +1,12 @@
+2002-02-14  Phil Edwards  <pme@gcc.gnu.org>
+
+	* ld.texinfo (VERSION scripts):  Symbol names are globbing patterns.   
+	* ldgram.y (lang_new_vers_regex):  Rename to lang_new_vers_pattern;
+	the pattern in question is not a regexp.
+	* ldlang.c:  Likewise.
+	* ldlang.h:  Likewise.
+	* ldlex.l (V_IDENTIFIER):  Allow '[', ']', '-', '!', and '^' also.
+
 2002-02-10  Daniel Jacobowitz  <drow@mvista.com>
 
 	* lexsup.c: Remove strtoul declaration.

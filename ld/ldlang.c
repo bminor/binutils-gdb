@@ -4981,7 +4981,7 @@ lang_vers_match_lang_java (expr, sym)
 /* This is called for each variable name or match expression.  */
 
 struct bfd_elf_version_expr *
-lang_new_vers_regex (orig, new, lang)
+lang_new_vers_pattern (orig, new, lang)
      struct bfd_elf_version_expr *orig;
      const char *new;
      const char *lang;
@@ -5154,7 +5154,7 @@ lang_do_version_exports_section ()
       p = contents;
       while (p < contents + len)
 	{
-	  greg = lang_new_vers_regex (greg, p, NULL);
+	  greg = lang_new_vers_pattern (greg, p, NULL);
 	  p = strchr (p, '\0') + 1;
 	}
 
@@ -5165,7 +5165,7 @@ lang_do_version_exports_section ()
 	bfd_get_section_flags (is->the_bfd, sec) | SEC_EXCLUDE);
     }
 
-  lreg = lang_new_vers_regex (NULL, "*", NULL);
+  lreg = lang_new_vers_pattern (NULL, "*", NULL);
   lang_register_vers_node (command_line.version_exports_section,
 			   lang_new_vers_node (greg, lreg), NULL);
 }
