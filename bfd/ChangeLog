@@ -1,3 +1,15 @@
+Tue Jun  7 13:25:08 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* coffcode.h (styp_to_sec_flags): If COFF_PAGE_SIZE is defined,
+	set SEC_DEBUGGING for STYP_INFO sections.
+	(coff_compute_section_file_positions): If COFF_PAGE_SIZE is
+	defined, and D_PAGED is set, set the file position equal to the
+	section VMA modulo COFF_PAGE_SIZE.
+	* coffgen.c (coff_real_object_p): If F_EXEC is set, set D_PAGED.
+	* coff-i386.c: Set D_PAGED in BFD target.
+	(COFF_PAGE_SIZE): Define.
+	* coff-m68k.c, coff-sparc.c: Likewise.
+
 Mon Jun  6 10:57:28 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* elfcode.h (bfd_section_from_shdr): Don't turn a reloc section
