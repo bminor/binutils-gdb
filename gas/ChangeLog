@@ -1,3 +1,11 @@
+Wed Mar  8 02:57:53 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* config/tc-m68k.c (opcode_ptr): Return pointer to const.
+	(md_begin): Make hash table errors fatal.  Process opcode aliases
+	after main opcode table.
+	(md_apply_fix_2, case 4): Recode setting of lower_limit to avoid
+	gcc warning.
+
 start-sanitize-arc
 Tue Mar  7 20:42:35 1995  Doug Evans  <dje@chestnut.cygnus.com>
 
