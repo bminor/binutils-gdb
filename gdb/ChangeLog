@@ -1,3 +1,18 @@
+2002-07-03  Martin M. Hunt  <hunt@redhat.com>
+
+
+        * varobj.c (struct varobj_root): Change frame from CORE_ADDR to 
+        struct frame_id. 
+        (varobj_create): Store frame_id for root.
+        (varobj_gen_name): Use xasprintf.
+        (varobj_update): Save and restore frame using get_frame_id() and
+        frame_find_by_id().
+        (create_child): Use xasprintf.
+        (new_root_variable): Initialize frame_id.
+        (c_name_of_child): Use xasprintf. Call find_frame_by_id().
+        (c_value_of_variable): Use xasprintf. Move mem_fileopen call
+        to prevent memory leak.
+
 2002-07-03  Andrew Cagney  <ac131313@redhat.com>
 
 	* valops.c (hand_function_call): Move declaration of retbuf to
