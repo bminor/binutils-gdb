@@ -1,23 +1,53 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB-4.15:
-
-* Memory use reductions and statistics collection
-
-We have begun to implement changes that reduce gdb's memory requirements
-and to report statistics about memory usage.  Try the "maint print statistics"
-command, for example.
+*** Changes in GDB-4.16:
 
 * New native configurations
 
-Windows 95, Windows NT				i[345]86-*-win32
+Windows 95, x86 Windows NT			i[345]86-*-cygwin32
+M68K NetBSD					m68k-*-netbsd*
+PowerPC AIX 4.x					powerpc-*-aix*
+PowerPC MacOS					powerpc-*-macos*
+PowerPC Windows NT				powerpcle-*-cygwin32
+RS/6000 AIX 4.x					rs6000-*-aix4*
 
 * New targets
 
-ARM via RDP protocol				arm-*-*
-PowerPC via PPCBUG monitor			powerpc{,le}-*-eabi*
-PowerPC simulator				powerpc{,le}-*-eabi if building with GCC
+ARM with RDP protocol				arm-*-*
+I960 with MON960				i960-*-coff
+MIPS VxWorks					mips*-*-vxworks*
+MIPS VR4300 with PMON				mips64*vr4300{,el}-*-elf*
+PowerPC with PPCBUG monitor			powerpc{,le}-*-eabi*
+Hitachi SH3					sh-*-*
+Matra Sparclet					sparclet-*-*
+
+* PowerPC simulator
+
+The powerpc-eabi configuration now includes the PSIM simulator,
+contributed by Andrew Cagney, with assistance from Mike Meissner.
+PSIM is a very elaborate model of the PowerPC, including not only
+basic instruction set execution, but also details of execution unit
+performance and I/O hardware.  See sim/ppc/README for more details.
+
+* Solaris 2.5
+
+GDB now works with Solaris 2.5.
+
+* Windows 95/NT native
+
+GDB will now work as a native debugger on Windows 95 and Windows NT.
+To build it from source, you must use the "gnu-win32" environment,
+which uses a DLL to emulate enough of Unix to run the GNU tools.
+Further information, binaries, and sources are available at
+ftp.cygnus.com, under pub/gnu-win32.
+
+* dont-repeat command
+
+If a user-defined command includes the command `dont-repeat', then the
+command will not be repeated if the user just types return.  This is
+useful if the command is time-consuming to run, so that accidental
+extra keystrokes don't run the same command many times.
 
 * Send break instead of ^C
 
@@ -25,29 +55,54 @@ The standard remote protocol now includes an option to send a break
 rather than a ^C to the target in order to interrupt it.  By default,
 GDB will send ^C; to send a break, set the variable `remotebreak' to 1.
 
-* Automatic tracking of dynamic object loading (HPUX and Solaris only at
-the moment).
+* Remote protocol timeout
+
+The standard remote protocol includes a new variable `remotetimeout'
+that allows you to set the number of seconds before GDB gives up trying
+to read from the target.  The default value is 2.
+
+* Automatic tracking of dynamic object loading (HPUX and Solaris only)
 
 By default GDB will automatically keep track of objects as they are
-loaded and unloaded by the dynamic linker.  By using the command
-"set stop-on-solib-events 1" you can arrange for GDB to stop the
-inferior when shared library events occur, thus allowing you to
-set breakpoints in shared libraries which are explicitly loaded by
-the inferior.
+loaded and unloaded by the dynamic linker.  By using the command `set
+stop-on-solib-events 1' you can arrange for GDB to stop the inferior
+when shared library events occur, thus allowing you to set breakpoints
+in shared libraries which are explicitly loaded by the inferior.
 
-Note this feature does not work on hpux8.  On hpux9 you must link 
-/usr/lib/end.o into your program.  This feature should work automatically
-on hpux10.
+Note this feature does not work on hpux8.  On hpux9 you must link
+/usr/lib/end.o into your program.  This feature should work
+automatically on hpux10.
+
+* Irix 5.x hardware watchpoint support
+
+Irix 5 configurations now support the use of hardware watchpoints.
+
+* Mips protocol "SYN garbage limit"
+
+When debugging a Mips target using the `target mips' protocol, you
+may set the number of characters that GDB will ignore by setting
+the `syn-garbage-limit'.  A value of -1 means that GDB will ignore
+every character.  The default value is 1050.
 
 * Recording and replaying remote debug sessions
 
-If you set "remotelogfile" gdb will use that filename to make a
-"recording" of a remote debug session which can be replayed back to
-gdb using "gdbreplay".  See gdbserver/README for details.  This is
-useful when you have a problem with gdb while doing remote debugging.
-By making a recording of the session and sending it to the gdb
-maintainers, it is possible to recreate your problem without access to
-the remote hardware you are using.
+If you set `remotelogfile' to the name of a file, gdb will write to it
+a recording of a remote debug session.  This recording may then be
+replayed back to gdb using "gdbreplay".  See gdbserver/README for
+details.  This is useful when you have a problem with GDB while doing
+remote debugging; you can make a recording of the session and send it
+to someone else, who can then recreate the problem.
+
+* Speedups for remote debugging
+
+GDB includes speedups for downloading and stepping MIPS systems using
+the IDT monitor, fast downloads to the Hitachi SH E7000 emulator,
+and more efficient S-record downloading.
+
+* Memory use reductions and statistics collection
+
+GDB now uses less memory and reports statistics about memory usage.
+Try the `maint print statistics' command, for example.
 
 *** Changes in GDB-4.15:
 
