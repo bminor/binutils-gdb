@@ -65,7 +65,7 @@ other things to work on, if you get bored. :-)
 */
 
 #include <stdio.h>
-#include <stdarg.h>
+#include <varargs.h>
 #include <fcntl.h>
 
 #include "defs.h"
@@ -607,11 +607,14 @@ NOTES
 */
 
 static void
-DEFUN(dwarfwarn, (fmt), char *fmt DOTS)
+dwarfwarn (va_alist)
+     va_dcl
 {
   va_list ap;
+  char *fmt;
   
-  va_start (ap, fmt);
+  va_start (ap);
+  fmt = va_arg (ap, char *);
   warning_setup ();
   fprintf (stderr, "DWARF warning (ref 0x%x): ", curdie -> dieref);
   if (curdie -> at_name)

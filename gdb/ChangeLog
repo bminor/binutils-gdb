@@ -1,3 +1,7 @@
+Thu Oct 24 09:33:44 1991  John Gilmore  (gnu at cygnus.com)
+
+	* dwarfread.c:  Use <varargs.h>, since <stdarg.h> is not portable.
+
 Thu Oct 24 01:32:51 1991  Fred Fish  (fnf at cygnus.com)
 
         * dwarfread.c: New file for DWARF debugging format support.
