@@ -11285,8 +11285,7 @@ s_change_section (ignore)
 #ifdef OBJ_ELF
   char *section_name;
   char c;
-  char *next_c;
-  char *p;
+  char next_c;
   int section_type;
   int section_flag;
   int section_entry_size;
@@ -11297,14 +11296,13 @@ s_change_section (ignore)
 
   section_name = input_line_pointer;
   c = get_symbol_end ();
-  next_c = input_line_pointer + 1;
-  /* just after name is now '\0' */
-  p = input_line_pointer;
+  next_c = *(input_line_pointer + 1);
 
-  /* Do we have .section Name<,"flags">  */
-  if (c == '\n' || (c == ',' && *next_c == '"') || c == '"')
+  /* Do we have .section Name<,"flags">?  */
+  if (c != ',' || (c == ',' && next_c == '"'))
     {
-      *p = c;
+      /* just after name is now '\0'.  */
+      *input_line_pointer = c;
       input_line_pointer = section_name;
       obj_elf_section (ignore);
       return;

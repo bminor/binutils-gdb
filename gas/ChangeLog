@@ -1,3 +1,7 @@
+2002-09-18  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* config/tc-mips.c (s_change_section): Fix parsing. Code cleanup.
+
 2002-09-17  Stan Cox  <scox@redhat.com>
 
 	* tc-mips.c (load_address): Use BFD_RELOC_MIPS_GOT_DISP for newabi.
