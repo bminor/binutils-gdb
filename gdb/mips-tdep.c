@@ -34,7 +34,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define VM_MIN_ADDRESS (unsigned)0x400000
 
+#if 0
 static int mips_in_lenient_prologue PARAMS ((CORE_ADDR, CORE_ADDR));
+#endif
 
 /* Some MIPS boards don't support floating point, so we permit the
    user to turn it off.  */
@@ -210,16 +212,16 @@ heuristic_proc_desc(start_pc, limit_pc, next_frame)
 	else if ((word & 0xFFE00000) == 0xafa00000) { /* sw reg,offset($sp) */
 	    int reg = (word & 0x001F0000) >> 16;
 	    reg_mask |= 1 << reg;
-	    temp_saved_regs.regs[reg] = sp + (short)word;
+	    temp_saved_regs.regs[reg] = sp + (word & 0xffff);
 	}
 	else if ((word & 0xFFFF0000) == 0x27be0000) { /* addiu $30,$sp,size */
-	    if ((unsigned short)word != frame_size)
-		reg30 = sp + (unsigned short)word;
+	    if ((word & 0xffff) != frame_size)
+		reg30 = sp + (word & 0xffff);
 	    else if (!has_frame_reg) {
 		int alloca_adjust;
 		has_frame_reg = 1;
 		reg30 = read_next_frame_reg(next_frame, 30);
-		alloca_adjust = reg30 - (sp + (unsigned short)word);
+		alloca_adjust = reg30 - (sp + (word & 0xffff));
 		if (alloca_adjust > 0) {
 		    /* FP > SP + frame_size. This may be because
 		    /* of an alloca or somethings similar.
@@ -233,7 +235,7 @@ heuristic_proc_desc(start_pc, limit_pc, next_frame)
 	else if ((word & 0xFFE00000) == 0xafc00000) { /* sw reg,offset($30) */
 	    int reg = (word & 0x001F0000) >> 16;
 	    reg_mask |= 1 << reg;
-	    temp_saved_regs.regs[reg] = reg30 + (short)word;
+	    temp_saved_regs.regs[reg] = reg30 + (word & 0xffff);
 	}
     }
     if (has_frame_reg) {
@@ -386,38 +388,26 @@ init_extra_frame_info(fci)
 	fci->frame = READ_FRAME_REG(fci, PROC_FRAME_REG(proc_desc))
 		      + PROC_FRAME_OFFSET(proc_desc);
 
-      /* If this is the innermost frame, and we are still in the
-	 prologue (loosely defined), then the registers may not have
-	 been saved yet.  */
-      if (fci->next == NULL
-          && !PROC_DESC_IS_DUMMY(proc_desc)
-	  && mips_in_lenient_prologue (PROC_LOW_ADDR (proc_desc), fci->pc))
-	{
-	  /* Can't just say that the registers are not saved, because they
-	     might get clobbered halfway through the prologue.
-	     heuristic_proc_desc already has the right code to figure out
-	     exactly what has been saved, so use it.  As far as I know we
-	     could be doing this (as we do on the 68k, for example)
-	     regardless of whether we are in the prologue; I'm leaving in
-	     the check for being in the prologue only out of conservatism
-	     (I'm not sure whether heuristic_proc_desc handles all cases,
-	     for example).
-
-	     This stuff is ugly (and getting uglier by the minute).  Probably
-	     the best way to clean it up is to ignore the proc_desc's from
-	     the symbols altogher, and get all the information we need by
-	     examining the prologue (provided we can make the prologue
-	     examining code good enough to get all the cases...).  */
-	  proc_desc =
-	    heuristic_proc_desc (PROC_LOW_ADDR (proc_desc),
-				 fci->pc,
-				 fci->next);
-	}
-
       if (proc_desc == &temp_proc_desc)
 	*fci->saved_regs = temp_saved_regs;
-      else
+      else if (/* In any frame other than the innermost, we assume that all
+		  registers have been saved.  This assumes that all register
+		  saves in a function happen before the first function
+		  call.  */
+	       fci->next != NULL
+
+	       /* In a dummy frame we know exactly where things are saved.  */
+	       || PROC_DESC_IS_DUMMY (proc_desc)
+
+	       /* Not sure exactly what kernel_trap means, but if it means
+		  the kernel saves the registers without a prologue doing it,
+		  we better not examine the prologue to see whether registers
+		  have been saved yet.  */
+	       || kernel_trap)
 	{
+	  /* All the registers which will be saved have been saved, so we
+	     can believe the proc_desc.  */
+
 	  /* find which general-purpose registers were saved */
 	  reg_position = fci->frame + PROC_REG_OFFSET(proc_desc);
 	  mask = kernel_trap ? 0xFFFFFFFF : PROC_REG_MASK(proc_desc);
@@ -440,6 +430,58 @@ init_extra_frame_info(fci)
 		fci->saved_regs->regs[FP0_REGNUM+ireg] = reg_position;
 		reg_position -= 4;
 	      }
+	}
+      else
+	{
+	  /* We need to figure out whether the registers that the proc_desc
+	     claims are saved have been saved yet.  */
+
+	  CORE_ADDR addr;
+	  int status;
+	  char buf[4];
+	  unsigned long inst;
+	  /* Bitmasks; set if the proc_desc claims the register is saved and we
+	     haven't found a save instruction for it yet.  */
+	  unsigned long gen_mask, float_mask;
+
+	  gen_mask = PROC_REG_MASK (proc_desc);
+	  float_mask = PROC_FREG_MASK (proc_desc);
+
+	  for (addr = PROC_LOW_ADDR (proc_desc);
+	       addr < fci->pc && (gen_mask | float_mask);
+	       addr += 4)
+	    {
+	      status = read_memory_nobpt (addr, buf, 4);
+	      if (status)
+		memory_error (status, addr);
+	      inst = extract_unsigned_integer (buf, 4);
+	      if (/* sw reg,n($sp) */
+		  (inst & 0xffe00000) == 0xafa00000
+
+		  /* sw reg,n($r30) */
+		  || (inst & 0xffe00000) == 0xafc00000)
+		{
+		  /* We assume that all saves are relative to the
+		     PROC_FRAME_REG, which is what we used to set up
+		     ->frame.  */
+		  int reg = (inst & 0x001f0000) >> 16;
+		  if (gen_mask & (1 << reg))
+		    fci->saved_regs.regs[reg] = fci->frame + (inst & 0xffff);
+		  gen_mask &= ~(1 << reg);
+		}
+	      else if (/* swc1 freg,n($sp) */
+		       (inst & 0xffe00000) == 0xe7a00000
+
+		       /* swc1 freg,n($r30) */
+		       (inst & 0xffe00000) == 0xe7c00000)
+		{
+		  int reg = ((inst & 0x001f0000) >> 16);
+		  if (float_mask & (1 << reg))
+		    fci->saved_regs.regs[FP0_REGNUM + reg]
+		      = fci->frame + (inst & 0xffff);
+		  float_mask &= ~(1 << reg);
+		}
+	    }
 	}
 
       /* hack: if argument regs are saved, guess these contain args */
@@ -773,6 +815,7 @@ mips_frame_num_args(fip)
 	return -1;
 }
 
+#if 0
 /* Is this a branch with a delay slot?  */
 static int
 is_delayed (insn)
@@ -788,6 +831,7 @@ is_delayed (insn)
 				       | INSN_COND_BRANCH_DELAY
 				       | INSN_COND_BRANCH_LIKELY)));
 }
+#endif
 
 /* To skip prologues, I use this predicate.  Returns either PC itself
    if the code at PC does not look like a function prologue; otherwise
@@ -822,8 +866,10 @@ mips_skip_prologue (pc, lenient)
 	  memory_error (status, pc + offset);
 	inst = extract_unsigned_integer (buf, 4);
 
+#if 0
 	if (lenient && is_delayed (inst))
 	  continue;
+#endif
 
 	if ((inst & 0xffff0000) == 0x27bd0000)	/* addiu $sp,$sp,offset */
 	    seen_sp_adjust = 1;
@@ -874,6 +920,11 @@ mips_skip_prologue (pc, lenient)
 #endif
 }
 
+#if 0
+/* The lenient prologue stuff should be superceded by the code in
+   init_extra_frame_info which looks to see whether the stores mentioned
+   in the proc_desc have actually taken place.  */
+
 /* Is address PC in the prologue (loosely defined) for function at
    STARTADDR?  */
 
@@ -885,6 +936,7 @@ mips_in_lenient_prologue (startaddr, pc)
   CORE_ADDR end_prologue = mips_skip_prologue (startaddr, 1);
   return pc >= startaddr && pc < end_prologue;
 }
+#endif
 
 /* Given a return value in `regbuf' with a type `valtype', 
    extract and copy its value into `valbuf'.  */

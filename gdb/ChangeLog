@@ -1,3 +1,15 @@
+Fri Nov 12 09:53:26 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* mips-tdep.c (init_extra_frame_info): Check to see whether the
+	registers mentioned in the proc_desc have been saved.  This
+	generalizes mips_in_lenient_prologue in the sense that we keep
+	searching until we've found saves for all the registers, not just
+	look for a "lenient prologue" pattern.
+	* mips-tdep.c: #if 0 lenient prologue code.
+
+	* mips-tdep.c (heuristic_proc_desc): Don't assume a host short
+	is 16 bits.
+
 Thu Nov 11 19:58:05 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config/i386/i386sol2.mh: Comment out corelow.o.
