@@ -1,3 +1,17 @@
+Wed Dec 28 22:15:33 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* h8300-dis.c (bfd_h8_disassemble): Add support for 2 bit
+	immediates.
+
+start-sanitize-arc
+Tue Dec 20 10:36:55 1994  Doug Evans  <dje@canuck.cygnus.com>
+
+	* arc-dis.c (print_insn_arc): Branch offsets are relative to delay
+	slot.
+	* arc-opc.c (extract_reladdr): New function.
+	(insert_reladdr): Store address right-shifted by 2.
+end-sanitize-arc
+
 Tue Dec 20 11:25:12 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* mips-opc.c: Add dli as a synonym for li.
