@@ -1,3 +1,7 @@
+2000-05-24  Michael Hayes  <mhayes@cygnus.com>
+
+	* mips.igen (do_dmultx): Fix typo.
+
 Tue May 23 21:39:23 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.
@@ -5,6 +9,10 @@ Tue May 23 21:39:23 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 Fri Apr 28 20:48:36 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mips.igen (DMxC1): Fix format arguments for sim_io_eprintf call.
+
+2000-04-12  Frank Ch. Eigler  <fche@redhat.com>
+
+	* sim-main.h (GPR_CLEAR): Define macro.
 
 Mon Apr 10 00:07:09 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
