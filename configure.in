@@ -762,9 +762,6 @@ case "${target}" in
 	   target_configdirs="${target_configdirs} target-bsp target-libstub target-cygmon"
     fi
     ;;
-  tiny2j-*-*)
-    noconfigdirs="$noconfigdirs ld bfd gdb opcodes binutils gas target-libg++ target-libstdc++ target-libio target-librx target-libgloss"
-    ;;
   mn10200-*-*)
     noconfigdirs="$noconfigdirs"
     if [ x${is_cross_compiler} != xno ] ; then
