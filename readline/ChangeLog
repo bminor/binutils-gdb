@@ -1,3 +1,9 @@
+Thu Dec 31 12:07:01 1998  Christopher Faylor <cgf@cygnus.com>
+
+	* configure.in: Search devo libtermcap directory for termcap.h
+	when compiling for cygwin.
+	* configure: Regenerated.
+
 1998-12-30  Michael Meissner  <meissner@cygnus.com>
 
 	* Makefile.in (install): Only try to copy libreadline.a and
