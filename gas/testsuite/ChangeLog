@@ -1,5 +1,10 @@
 2005-03-03  Nick Clifton  <nickc@redhat.com>
 
+	* gas/arm/arch6zk.s: Add three nop instructions in order to pad
+	the .text section out to a 32-byte boundary as will automatically
+	be done by the arm-aout target.
+	* gas/arm/arch6zk.d: Add expected nop disassemblies.
+
 	* gas/d30v/serial.l: Remove listing lines that are no longer
 	emitted and fix up expected binary encoding.
 	* gas/d30v/serial2.l: Likewise.
