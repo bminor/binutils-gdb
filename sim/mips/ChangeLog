@@ -1,3 +1,7 @@
+Tue Oct 28 11:06:47 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips.igen: Add model filter field to records.
+
 Mon Oct 27 17:53:59 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* Makefile.in (SIM_NO_CFLAGS): Define.  Define WITH_IGEN=0.

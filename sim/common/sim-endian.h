@@ -133,12 +133,13 @@ INLINE_SIM_ENDIAN(void*) offset_16(unsigned_16 *x, unsigned ws, unsigned w);
 
 #define H2T(VARIABLE) \
 do { \
-  switch (sizeof(VARIABLE)) { \
-  case 1: VARIABLE = H2T_1(VARIABLE); break; \
-  case 2: VARIABLE = H2T_2(VARIABLE); break; \
-  case 4: VARIABLE = H2T_4(VARIABLE); break; \
-  case 8: VARIABLE = H2T_8(VARIABLE); break; \
-  /*case 16: VARIABLE = H2T_16(VARIABLE); break;*/ \
+  void *vp = &(VARIABLE); \
+  switch (sizeof (VARIABLE)) { \
+  case 1: *(unsigned_1*)vp = H2T_1(*(unsigned_1*)vp); break; \
+  case 2: *(unsigned_2*)vp = H2T_2(*(unsigned_2*)vp); break; \
+  case 4: *(unsigned_4*)vp = H2T_4(*(unsigned_4*)vp); break; \
+  case 8: *(unsigned_8*)vp = H2T_8(*(unsigned_8*)vp); break; \
+  case 16: *(unsigned_16*)vp = H2T_16(*(unsigned_16*)vp); break; \
   } \
 } while (0)
 

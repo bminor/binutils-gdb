@@ -20,17 +20,17 @@
 
 
 // The following is called when ever an illegal instruction is encountered.
-::internal::illegal
+:internal::::illegal:
 	sim_io_eprintf (SD, "0x%lx: illegal instruction\n", (unsigned long) cia.ip);
 	sim_engine_halt (SD, CPU, NULL, cia, sim_signalled, SIGILL);
 
 // The following is called when ever an FP op is attempted with FPU disabled.
-::internal::fp_unavailable
+:internal::::fp_unavailable:
 	sim_io_eprintf (SD, "0x%lx: floating-point unavailable\n", (unsigned long) cia.ip);
 	sim_engine_halt (SD, CPU, NULL, cia, sim_signalled, SIGFPE);
 
 // Handle a branch instruction
-instruction_address::function::do_branch:int annul, address_word target, int rLink_p, unsigned32 *rLink
+:function:::instruction_address:do_branch:int annul, address_word target, int rLink_p, unsigned32 *rLink
 	instruction_address nia;
 	if (annul)
 	  {
@@ -49,7 +49,7 @@ instruction_address::function::do_branch:int annul, address_word target, int rLi
 	return nia;
 
 // Signed Integer Add - add source1, source2, dest
-void::function::do_add:unsigned32 *rDest, signed32 source1, signed32 source2
+:function:::void:do_add:unsigned32 *rDest, signed32 source1, signed32 source2
 	unsigned32 result;
 	ALU_BEGIN (source1);
 	ALU_ADD (source2);
@@ -69,7 +69,7 @@ void::function::do_add:unsigned32 *rDest, signed32 source1, signed32 source2
 
 
 // Unsigned Integer Add - addu source1, source2, dest
-void::function::do_addu:unsigned32 *rDest, unsigned32 source1, unsigned32 source2
+:function:::void:do_addu:unsigned32 *rDest, unsigned32 source1, unsigned32 source2
 	unsigned32 result = source1 + source2;
 	TRACE_ALU3 (MY_INDEX, result, source1, source2);
 	*rDest = result;
@@ -85,7 +85,7 @@ void::function::do_addu:unsigned32 *rDest, unsigned32 source1, unsigned32 source
 	do_addu (_SD, rDest, LongSignedImmediate, vSource2);
 
 
-void::function::do_and:signed32 *rDest, signed32 source1, signed32 source2
+:function:::void:do_and:signed32 *rDest, signed32 source1, signed32 source2
 	unsigned32 result = source1 & source2;
 	TRACE_ALU3 (MY_INDEX, result, source1, source2);
 	*rDest = result;
@@ -140,7 +140,7 @@ void::function::do_and:signed32 *rDest, signed32 source1, signed32 source2
 
 
 // bbo[.a]
-instruction_address::function::do_bbo:instruction_address nia, int bitnum, unsigned32 source, int annul, unsigned32 offset
+:function:::instruction_address:do_bbo:instruction_address nia, int bitnum, unsigned32 source, int annul, unsigned32 offset
 	int jump_p;
 	address_word target = cia.ip + 4 * offset;
 	if (MASKED32 (source, bitnum, bitnum))
@@ -152,7 +152,7 @@ instruction_address::function::do_bbo:instruction_address nia, int bitnum, unsig
 	  jump_p = 0;
 	TRACE_COND_BR(MY_INDEX, jump_p, bitnum, target);
 	return nia;
-const char *::function::str_A:int A
+:%s::::A:int A
 	if (A)
 	  return ".a";
 	else
@@ -169,7 +169,7 @@ const char *::function::str_A:int A
 
 
 // bbz[.a]
-instruction_address::function::do_bbz:instruction_address nia, int bitnum, unsigned32 source, int annul, unsigned32 offset
+:function:::instruction_address:do_bbz:instruction_address nia, int bitnum, unsigned32 source, int annul, unsigned32 offset
 	int jump_p;
 	address_word target = cia.ip + 4 * offset;
 	if (!MASKED32 (source, bitnum, bitnum))
@@ -193,7 +193,7 @@ instruction_address::function::do_bbz:instruction_address nia, int bitnum, unsig
 
 
 // bcnd[.a]
-instruction_address::function::do_bcnd:instruction_address nia, int Cond, unsigned32 source, int annul, unsigned32 offset
+:function:::instruction_address:do_bcnd:instruction_address nia, int Cond, unsigned32 source, int annul, unsigned32 offset
 	int condition;
 	int size = EXTRACTED32 (Cond, 31 - 27, 30 - 27);
 	int code = EXTRACTED32 (Cond, 29 - 27, 27 - 27);
@@ -238,7 +238,7 @@ instruction_address::function::do_bcnd:instruction_address nia, int Cond, unsign
 
 
 // brcr
-sim_cia::function::do_brcr:instruction_address nia, int cr
+:function:::sim_cia:do_brcr:instruction_address nia, int cr
 	if (cr >= 0x4000 || !(CPU)->is_user_mode)
 	  {
 	    unsigned32 control = CR (cr);
@@ -266,7 +266,7 @@ sim_cia::function::do_brcr:instruction_address nia, int cr
 
 
 // bsr[.a]
-instruction_address::function::do_bsr:instruction_address nia, signed32 *rLink, int annul, unsigned32 offset
+:function:::instruction_address:do_bsr:instruction_address nia, signed32 *rLink, int annul, unsigned32 offset
 	address_word target = cia.ip + 4 * offset;
 	nia = do_branch (_SD, annul, target, 1, rLink);
 	TRACE_UCOND_BR (MY_INDEX, target);
@@ -283,7 +283,7 @@ instruction_address::function::do_bsr:instruction_address nia, signed32 *rLink, 
 
 
 // cmnd
-void::function::do_cmnd:signed32 source
+:function:::void:do_cmnd:signed32 source
 	int Reset = EXTRACTED32 (source, 31, 31);
 	int Halt = EXTRACTED32 (source, 30, 30);
 	int Unhalt = EXTRACTED32 (source, 29, 29);
@@ -332,7 +332,7 @@ void::function::do_cmnd:signed32 source
 	do_cmnd (_SD, LongUnsignedImmediate);
 
 // cmp
-unsigned32::function::cmp_vals:signed32 s1, unsigned32 u1, signed32 s2, unsigned32 u2
+:function:::unsigned32:cmp_vals:signed32 s1, unsigned32 u1, signed32 s2, unsigned32 u2
 	unsigned32 field = 0;
 	if (s1 == s2) field |= 0x001;
 	if (s1 != s2) field |= 0x002;
@@ -345,7 +345,7 @@ unsigned32::function::cmp_vals:signed32 s1, unsigned32 u1, signed32 s2, unsigned
 	if (u1 <  u2) field |= 0x100;
 	if (u1 >= u2) field |= 0x200;
 	return field;
-void::function::do_cmp:unsigned32 *rDest, unsigned32 source1, unsigned32 source2
+:function:::void:do_cmp:unsigned32 *rDest, unsigned32 source1, unsigned32 source2
 	unsigned32 field = 0;
 	field |= cmp_vals (_SD, source1, source1, source2, source2) << 20;
 	field |= cmp_vals (_SD, (signed16)source1, (unsigned16)source1,
@@ -366,7 +366,7 @@ void::function::do_cmp:unsigned32 *rDest, unsigned32 source1, unsigned32 source2
 
 
 // dcache
-const char *::function::str_F:int F
+:%s::::F:int F
 	if (F)
 	  return "f";
 	else

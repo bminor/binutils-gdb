@@ -1,5 +1,10 @@
 Tue Oct 28 12:29:22 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
+	* sim-endian.h (H2T): Handle 16 byte variables.
+
+	* sim-n-core.h (sim_core_read_unaligned_N): Return a dummy when an
+ 	error.
+
 	* sim-core.c: Do not generate sim_core_*_word.
 
 	* sim-n-core.h (sim_core_trace_N): Add line_nr argument.

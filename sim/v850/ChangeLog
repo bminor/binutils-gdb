@@ -1,3 +1,11 @@
+Tue Oct 28 11:06:47 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* v850.igen: Add model filter field to records.
+
+Fri Oct  3 09:28:00 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 Fri Sep 26 11:56:02 1997  Felix Lee  <flee@cygnus.com>
 
 	* sim-main.h: delete null override of SIM_ENGINE_HALT_HOOK and

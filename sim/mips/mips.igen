@@ -12,43 +12,43 @@
 
 
 // IGEN config - mips16
-:option:16:insn-bit-size:16
-:option:16:hi-bit-nr:15
-:option:16:insn-specifying-widths:true
-:option:16:gen-delayed-branch:false
+:option:16::insn-bit-size:16
+:option:16::hi-bit-nr:15
+:option:16::insn-specifying-widths:true
+:option:16::gen-delayed-branch:false
 
 // IGEN config - mips32/64..
-:option:32:insn-bit-size:32
-:option:32:hi-bit-nr:31
-:option:32:insn-specifying-widths:true
-:option:32:gen-delayed-branch:false
+:option:32::insn-bit-size:32
+:option:32::hi-bit-nr:31
+:option:32::insn-specifying-widths:true
+:option:32::gen-delayed-branch:false
 
 
 // Generate separate simulators for each target
-// :option::multi-sim:true
+// :option:::multi-sim:true
 
 
 // Models known by this simulator
-:model::mipsI:mipsI:
-:model::mipsII:mipsII:
-:model::mipsIII:mipsIII:
-:model::mipsIV:mipsIV:
-:model::mips16:mips16:
+:model:::mipsI:mipsI:
+:model:::mipsII:mipsII:
+:model:::mipsIII:mipsIII:
+:model:::mipsIV:mipsIV:
+:model:::mips16:mips16:
 // start-sanitize-r5900
-:model::r5900:r5900:
+:model:::r5900:r5900:
 // end-sanitize-r5900
-:model::r3900:r3900:
+:model:::r3900:r3900:
 // start-sanitize-tx19
-:model::tx19:tx19:
+:model:::tx19:tx19:
 // end-sanitize-tx19
 // start-sanitize-vr5400
-:model::vr5400:vr5400:
+:model:::vr5400:vr5400:
 // end-sanitize-vr5400
 
 
 
 // Pseudo instructions known by IGEN
-:internal:::illegal
+:internal::::illegal:
 {
   sim_io_eprintf (SD, "Illegal instruction at address 0x%lx\n",
 		  (unsigned long) CIA);
@@ -3404,7 +3404,7 @@
 //
 
 
-:%s:::FMT:int fmt
+:%s::::FMT:int fmt
 {
   switch (fmt)
     {
@@ -3416,7 +3416,7 @@
     }
 }
 
-:%s:::TF:int tf
+:%s::::TF:int tf
 {
   if (tf)
     return "t";
@@ -3424,7 +3424,7 @@
     return "f";
 }
 
-:%s:::ND:int nd
+:%s::::ND:int nd
 {
   if (nd)
     return "l";
@@ -3432,7 +3432,7 @@
     return "";
 }
 
-:%s:::COND:int cond
+:%s::::COND:int cond
 {
   switch (cond)
     {
@@ -4975,12 +4975,12 @@
 // end-sanitize-r5900
 
 
-:include::m16.igen
+:include:::m16.igen
 // start-sanitize-vr5400
-:include::vr5400.igen
+:include::vr5400:vr5400.igen
 // end-sanitize-vr5400
 // start-sanitize-r5900
-:include::r5900.igen
+:include::r5900:r5900.igen
 // end-sanitize-r5900
 
 // start-sanitize-cygnus-never

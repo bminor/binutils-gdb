@@ -25,12 +25,21 @@ typedef unsigned64 insn_uint;
 
 /* Common among most entries:
 
+   All non instruction records have the format:
+
+   <...> ::=
+       ":" <record-name>
+       ":" <filter-flags>
+       ":" <filter-models>
+       ":" ...
+   
  */
 
 enum {
   record_type_field = 1,
   old_record_type_field = 2,
   record_filter_flags_field = 2,
+  record_filter_models_field = 3,
 };
 
 
@@ -41,6 +50,7 @@ enum {
    <include> ::=
        ":" "include"
        ":" <filter-flags>
+       ":" <filter-models>
        ":" <filename>
        <nl>
        ;
@@ -48,8 +58,8 @@ enum {
    */
 
 enum {
-  include_record_filename_field = 3,
-  nr_include_record_fields = 4,
+  include_filename_field = 4,
+  nr_include_fields,
 };
 
 
@@ -62,6 +72,7 @@ enum {
    <option> ::=
        ":" "option"
        ":" <filter-flags>
+       ":" <filter-models>
        ":" <option-name>
        ":" <option-value>
        <nl>
@@ -89,9 +100,9 @@ enum {
 
 
 enum {
-  option_name_field = 3,
-  option_value_field = 4,
-  nr_option_fields = 5,
+  option_name_field = 4,
+  option_value_field,
+  nr_option_fields,
 };
 
 
@@ -100,9 +111,9 @@ enum {
 
    <insn-macro> ::=
        <expression>
-       ":" "define"
+       ":" ( "define" | "undef" )
        ":" <filter-flags>
-       ":"
+       ":" <filter-models>
        ":" <name>
        <nl>
        ;
@@ -122,8 +133,14 @@ enum {
        <function-spec>
        ;
 
+   <format> ::=
+       ":" ( "%s" | ... )
+       <function-spec>
+       ;
+
    <function-spec> ::=
        ":" <filter-flags>
+       ":" <filter-models>
        ":" <typedef>
        ":" <name>
        [ ":" <parameter-list> ]
@@ -134,10 +151,10 @@ enum {
    */
 
 enum {
-  function_typedef_field = 3,
-  function_name_field = 4,
-  function_param_field = 5,
-  nr_function_fields = 5,
+  function_typedef_field = 4,
+  function_name_field,
+  function_param_field,
+  nr_function_fields,
 };
 
 enum {
@@ -145,7 +162,7 @@ enum {
   old_function_type_field = 2,
   old_function_name_field = 4,
   old_function_param_field = 5,
-  nr_old_function_fields = 6,
+  nr_old_function_fields = 5, /* parameter-list is optional */
 };
 
 
@@ -153,6 +170,7 @@ typedef struct _function_entry function_entry;
 struct _function_entry {
   line_ref *line;
   filter *flags;
+  filter *models;
   char *type;
   char *name;
   char *param;
@@ -179,7 +197,8 @@ extern void function_entry_traverse
    <cache-macro> ::=
        ":" <macro-type>
        ":" <filter-flags>
-       ":" <type>
+       ":" <filter-models>
+       ":" <typedef>
        ":" <name>
        ":" <field-name> { "," <field-name> }
        ":" <expression>
@@ -208,11 +227,11 @@ extern void function_entry_traverse
    */
 
 enum {
-  cache_type_field = 3,
-  cache_name_field = 4,
-  cache_original_fields_field = 5,
-  cache_expression_field = 6,
-  nr_cache_fields = 7,
+  cache_typedef_field = 4,
+  cache_name_field,
+  cache_original_fields_field,
+  cache_expression_field,
+  nr_cache_fields,
 };
 
 typedef enum {
@@ -225,6 +244,7 @@ typedef struct _cache_entry cache_entry;
 struct _cache_entry {
   line_ref *line;
   filter *flags;
+  filter *models;
   cache_entry_type entry_type;
   char *name;
   filter *original_fields;
@@ -240,6 +260,7 @@ struct _cache_entry {
    <model-processor> ::=
        ":" "model"
        ":" <filter-flags>
+       ":" <filter-models>
        ":" <processor>
        ":" <long-processor>
        ":" <function-unit-data>
@@ -249,6 +270,7 @@ struct _cache_entry {
    <model-macro> ::=
        ":" "model-macro"
        ":" <filter-flags>
+       ":" <filter-models>
        <nl>
        <code-block>
        ;
@@ -256,6 +278,7 @@ struct _cache_entry {
    <model-data> ::=
        ":" "model-data"
        ":" <filter-flags>
+       ":" <filter-models>
        <nl>
        <code-block>
        ;
@@ -278,11 +301,11 @@ struct _cache_entry {
  */
 
 enum {
-  nr_model_macro_fields = 3,
-  nr_model_data_fields = 3,
-  nr_model_static_fields = 6,
-  nr_model_internal_fields = 6,
-  nr_model_function_fields = 6,
+  nr_model_macro_fields = 4,
+  nr_model_data_fields = 4,
+  nr_model_static_fields = nr_function_fields,
+  nr_model_internal_fields = nr_function_fields,
+  nr_model_function_fields = nr_function_fields,
 };
 
 typedef struct _model_data model_data;
@@ -295,10 +318,10 @@ struct _model_data {
 };
 
 enum {
-  model_name_field = 3,
-  model_full_name_field = 4,
-  model_unit_data_field = 5,
-  nr_model_processor_fields = 6,
+  model_name_field = 4,
+  model_full_name_field,
+  model_unit_data_field,
+  nr_model_processor_fields,
 };
 
 typedef struct _model_entry model_entry;

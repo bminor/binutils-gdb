@@ -178,6 +178,11 @@ sim_core_read_unaligned_N(sim_cpu *cpu,
 	sim_engine_abort (CPU_STATE (cpu), cpu, cia,
 			  "internal error - %s - bad switch",
 			  XSTRING (sim_core_read_unaligned_N));
+	/* to keep some compilers happy, we return a dummy */
+	{
+	  unsigned_N val[1] = { };
+	  return val[0];
+	}
       }
 }
 
