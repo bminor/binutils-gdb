@@ -1,5 +1,11 @@
 2004-08-08  Daniel Jacobowitz  <dan@debian.org>
 
+	PR gdb/1736
+	* gdb.base/sigaltstack.exp (finish_test): New procedure.  KFAIL
+	for i?86-*-linux*.
+
+2004-08-08  Daniel Jacobowitz  <dan@debian.org>
+
 	* gdb.arch/i386-prologue.exp: Compile without debug information.
 
 2004-08-08  Michael Chastain  <mec.gnu@mindspring.com>

@@ -78,11 +78,26 @@ gdb_expect_list "backtrace" ".*$gdb_prompt $" {
     "\[\r\n\]+.7 \[^\r\n\]* main .*"
 }
 
+proc finish_test { pattern msg } {
+    gdb_test_multiple "finish" $msg {
+	-re "Cannot insert breakpoint 0" {
+	    # Some platforms use a special read-only page for signal
+	    # trampolines.  We can't set a breakpoint there, and we
+	    # don't gracefully fall back to single-stepping.
+	    setup_kfail "i?86-*-linux*" gdb/1736
+	    fail "$msg (could not set breakpoint)"
+	}
+	-re "$pattern" {
+	    pass $msg
+	}
+    }
+}
+
 # Finish?
-gdb_test "finish" "signal handler called." "finish from catch LEAF"
-gdb_test "finish" "thrower .next_level=INNER, .*" "finish to throw INNER"
-gdb_test "finish" "catcher .*" "finish to catch INNER"
-gdb_test "finish" "signal handler called.*" "finish from catch INNER"
-gdb_test "finish" "thrower .next_level=OUTER, .*" "finish to OUTER"
-gdb_test "finish" "catcher .*" "finish to catch MAIN"
-gdb_test "finish" "main .*" "finish to MAIN"
+finish_test "signal handler called." "finish from catch LEAF"
+finish_test "thrower .next_level=INNER, .*" "finish to throw INNER"
+finish_test "catcher .*" "finish to catch INNER"
+finish_test "signal handler called.*" "finish from catch INNER"
+finish_test "thrower .next_level=OUTER, .*" "finish to OUTER"
+finish_test "catcher .*" "finish to catch MAIN"
+finish_test "main .*" "finish to MAIN"
