@@ -47,6 +47,7 @@ bag.c
 bag.h
 communicate.c
 communicate.h
+configure
 configure.in
 dbg_conf.h
 dbg_cp.h

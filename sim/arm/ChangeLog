@@ -1,5 +1,8 @@
 Wed Jul  5 16:15:54 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
 
+ 	* Makefile.in, configure.in: converted to autoconf.
+	* configure: New file, generated with autconf 2.4.
+
 	* arm.mt: Removed.
 
 Fri Jun 30 16:49:47 1995  Stan Shebs  <shebs@andros.cygnus.com>
