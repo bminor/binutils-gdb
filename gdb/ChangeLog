@@ -1,5 +1,17 @@
 2002-02-26  Andrew Cagney  <ac131313@redhat.com>
 
+	From Michal Ludvig <mludvig@suse.cz>:
+	* x86-64-tdep.c (value.h): Delete.
+	(gdb_assert.h): Include.
+	(x86_64_register_convert_to_virtual,
+	x86_64_register_convert_to_raw ): Add check which lets only
+	floating-point values to be converted.
+	(value_push): Delete.
+	(x86_64_push_arguments): Order of arguments pushed on stack fixed.
+	(i386_gdbarch_init): Number of register_bytes fixed.
+
+2002-02-26  Andrew Cagney  <ac131313@redhat.com>
+
 	* MAINTAINERS: Add x86-64 target.
 
 2002-02-26  Andrew Cagney  <ac131313@redhat.com>

@@ -29,7 +29,7 @@
 #include "symfile.h"
 #include "x86-64-tdep.h"
 #include "dwarf2cfi.h"
-#include "value.h"
+#include "gdb_assert.h"
 
 
 /* Register numbers of various important registers.  */
@@ -84,15 +84,15 @@ static struct type *
 x86_64_register_virtual_type (int regno)
 {
   if (regno == PC_REGNUM || regno == SP_REGNUM)
-    return lookup_pointer_type (builtin_type_void);
+    return builtin_type_void_func_ptr;
   if (IS_FP_REGNUM (regno))
-    return builtin_type_long_double;
+    return builtin_type_i387_ext;
   if (IS_SSE_REGNUM (regno))
     return builtin_type_v4sf;
   if (IS_FPU_CTRL_REGNUM (regno) || regno == MXCSR_REGNUM
       || regno == EFLAGS_REGNUM)
-    return builtin_type_int;
-  return builtin_type_long;
+    return builtin_type_int32;
+  return builtin_type_int64;
 }
 
 /* x86_64_register_convertible is true if register N's virtual format is
@@ -114,9 +114,22 @@ void
 x86_64_register_convert_to_virtual (int regnum, struct type *type,
 				    char *from, char *to)
 {
-/* Copy straight over, but take care of the padding.  */
-  memcpy (to, from, FPU_REG_RAW_SIZE);
-  memset (to + FPU_REG_RAW_SIZE, 0, TYPE_LENGTH (type) - FPU_REG_RAW_SIZE);
+  char buf[12];
+  DOUBLEST d;
+  /* We only support floating-point values.  */
+  if (TYPE_CODE (type) != TYPE_CODE_FLT)
+    {
+      warning ("Cannot convert floating-point register value "
+	       "to non-floating-point type.");
+      memset (to, 0, TYPE_LENGTH (type));
+      return;
+    }
+  /* First add the necessary padding.  */
+  memcpy (buf, from, FPU_REG_RAW_SIZE);
+  memset (buf + FPU_REG_RAW_SIZE, 0, sizeof buf - FPU_REG_RAW_SIZE);
+  /* Convert to TYPE.  This should be a no-op, if TYPE is equivalent
+     to the extended floating-point format used by the FPU.  */
+  convert_typed_floating (to, type, buf, x86_64_register_virtual_type (regnum));
 }
 
 /* Convert data from virtual format with type TYPE in buffer FROM to
@@ -127,9 +140,11 @@ void
 x86_64_register_convert_to_raw (struct type *type, int regnum,
 				char *from, char *to)
 {
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT
+	      && TYPE_LENGTH (type) == 12);
+  /* Simply omit the two unused bytes.  */
   memcpy (to, from, FPU_REG_RAW_SIZE);
 }
-
 
 /* This is the variable that is set with "set disassembly-flavour", and
    its legitimate values.  */
@@ -530,26 +545,6 @@ x86_64_frame_init_saved_regs (struct frame_info *fi)
 #define INT_REGS 6
 #define SSE_REGS 16
 
-/* Push onto the stack the specified value VALUE.  Pad it correctly for
-   it to be an argument to a function.  */
-
-static CORE_ADDR
-value_push (register CORE_ADDR sp, struct value *arg)
-{
-  register int len = TYPE_LENGTH (VALUE_ENCLOSING_TYPE (arg));
-  register int container_len = len;
-
-  /* How big is the container we're going to put this value in?  */
-  if (PARM_BOUNDARY)
-    container_len = ((len + PARM_BOUNDARY / TARGET_CHAR_BIT - 1)
-		     & ~(PARM_BOUNDARY / TARGET_CHAR_BIT - 1));
-
-  sp -= container_len;
-  write_memory (sp, VALUE_CONTENTS_ALL (arg), len);
-
-  return sp;
-}
-
 CORE_ADDR
 x86_64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		       int struct_return, CORE_ADDR struct_addr)
@@ -565,6 +560,9 @@ x86_64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 						  38, 39, 40, 41,
 						  42, 43, 44, 45,
 						  46, 47, 48, 49};
+  int stack_values_count=0;
+  int *stack_values;
+  stack_values = alloca (naregs * sizeof (int));
   for (i = 0; i < nargs; i++)
     {
       enum x86_64_reg_class class[MAX_CLASSES];
@@ -574,10 +572,10 @@ x86_64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 
       if (!n ||
 	  !examine_argument (class, n, &needed_intregs, &needed_sseregs)
-	  || intreg + needed_intregs > INT_REGS
-	  || ssereg + needed_sseregs > SSE_REGS)
+	  || intreg / 2 + needed_intregs > INT_REGS
+	  || ssereg / 2 + needed_sseregs > SSE_REGS)
 	{				/* memory class */
-	  sp = value_push (sp, args[i]);
+	  stack_values[stack_values_count++]=i;
 	}
       else
 	{
@@ -616,9 +614,10 @@ x86_64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		  ssereg++;
 		  break;
 		case X86_64_X87_CLASS:
-		case X86_64_X87UP_CLASS:
 		case X86_64_MEMORY_CLASS:
-		  sp = value_push (sp, args[i]);
+		  stack_values[stack_values_count++]=i;
+		  break;
+		case X86_64_X87UP_CLASS:
 		  break;
 		default:
 		  internal_error (__FILE__, __LINE__,
@@ -628,6 +627,15 @@ x86_64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	      ssereg += ssereg % 2;
 	    }
 	}
+    }
+  while (--stack_values_count >= 0)
+    {
+      value_ptr arg = args[stack_values[stack_values_count]];
+      int len = TYPE_LENGTH (VALUE_ENCLOSING_TYPE (arg));
+      len += 7;
+      len -= len % 8;
+      sp -= len;
+      write_memory (sp, VALUE_CONTENTS_ALL (arg), len);
     }
   return sp;
 }
@@ -844,7 +852,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Total amount of space needed to store our copies of the machine's register
      (SIZEOF_GREGS + SIZEOF_FPU_REGS + SIZEOF_FPU_CTRL_REGS + SIZEOF_SSE_REGS) */
   set_gdbarch_register_bytes (gdbarch,
-			      (18 * 8) + (8 * 10) + (8 * 4) + (8 * 16 + 4));
+			      (18 * 8) + (8 * 10) + (8 * 4) + (16 * 16 + 4));
   set_gdbarch_register_virtual_size (gdbarch, generic_register_virtual_size);
   set_gdbarch_max_register_virtual_size (gdbarch, 16);
 
