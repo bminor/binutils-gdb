@@ -160,7 +160,11 @@ extern int tc_coff_sizemachdep PARAMS ((fragS *));
 /* Whether or not the target is big endian */
 extern int target_big_endian;
 
+#ifdef TE_LINUX
+#define TARGET_FORMAT (shl ? "elf32-sh-linux" : "elf32-shbig-linux")
+#else
 #define TARGET_FORMAT (shl ? "elf32-shl" : "elf32-sh")
+#endif
 
 #define elf_tc_final_processing sh_elf_final_processing
 extern void sh_elf_final_processing PARAMS ((void));

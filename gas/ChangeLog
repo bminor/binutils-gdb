@@ -1,3 +1,9 @@
+2000-09-07  Alexandre Oliva  <aoliva@redhat.com>
+
+	* config/tc-sh.h (TARGET_FORMAT): Use sh-linux targets.
+	* configure.in (sh-*-linux*): Added.
+	* configure: Rebuilt.
+
 2000-09-06  Kazu Hirata  <kazu@hxi.com>
 
 	* config/tc-hppa.c: Fix formatting.
