@@ -1,3 +1,8 @@
+Tue Oct  1 15:38:28 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* lib/gas-defs.exp (gas_version): Fix for current version
+	printing.
+
 Sun Sep 29 07:55:58 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* gas/sparc/splet.d: Fix typo in cpusha result.
