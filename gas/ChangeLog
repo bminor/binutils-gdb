@@ -1,3 +1,9 @@
+2001-11-01  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* config/tc-m68hc11.c (build_jump_insn): Allocate worst case storage
+	for bra/bsr and use frag_variant(), this ensure that the possible
+	16-bit BFD_RELOC_16 will be in the same frag.
+
 2001-10-31  Chris Demetriou  <cgd@broadcom.com>
 
 	* config/tc-mips.c (HAVE_32BIT_ADDRESSES): If compiling embedded
