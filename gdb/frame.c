@@ -215,6 +215,14 @@ frame_pop (struct frame_info *this_frame)
       struct regcache *scratch = regcache_xmalloc (current_gdbarch);
       struct cleanup *cleanups = make_cleanup_regcache_xfree (scratch);
       regcache_save (scratch, do_frame_unwind_register, this_frame);
+      /* FIXME: cagney/2003-03-16: It should be possible to tell the
+         target's register cache that it is about to be hit with a
+         burst register transfer and that the sequence of register
+         writes should be batched.  The pair target_prepare_to_store()
+         and target_store_registers() kind of suggest this
+         functionality.  Unfortunatly, they don't implement it.  Their
+         lack of a formal definition can lead to targets writing back
+         bogus values (arguably a bug in the target code mind).  */
       /* Now copy those saved registers into the current regcache.
          Here, regcache_cpy() calls regcache_restore().  */
       regcache_cpy (current_regcache, scratch);
@@ -222,7 +230,6 @@ frame_pop (struct frame_info *this_frame)
     }
   /* We've made right mess of GDB's local state, just discard
      everything.  */
-  target_store_registers (-1);
   flush_cached_frames ();
 }
 
