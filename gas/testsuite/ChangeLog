@@ -1,3 +1,8 @@
+2003-06-16  Hans-Peter Nilsson  <hp@axis.com>
+
+	* gas/cris: Match output having $ register prefix.  Deal with
+	target variants default requiring register prefix on input.
+
 2003-06-13  Richard Earnshaw  <rearnsha@arm.com>
 
 	* gas/arm/arm.exp: Pass -mfpu=fpa option to the FPA instruction test.
