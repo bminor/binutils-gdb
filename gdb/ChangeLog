@@ -1,3 +1,7 @@
+2001-11-10  Andrew Cagney  <ac131313@redhat.com>
+
+	* p-exp.y: Strip trailing ^M.
+
 2001-11-06 Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* p-lang.c (is_pascal_string_type): New function to determine if a 
