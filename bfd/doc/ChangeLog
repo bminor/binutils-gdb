@@ -1,3 +1,7 @@
+2002-06-06  Lars Brinkhoff  <lars@nocrew.org>
+
+	* bfdint.texi: Change registry@sco.com to registry@caldera.com.
+
 2002-06-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am (libbfd.h): Add "Extracted from.." comment.
