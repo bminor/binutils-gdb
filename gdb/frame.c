@@ -767,7 +767,7 @@ static struct frame_info *
 create_sentinel_frame (struct regcache *regcache)
 {
   struct frame_info *frame = FRAME_OBSTACK_ZALLOC (struct frame_info);
-  frame->type = NORMAL_FRAME;
+  frame->type = SENTINEL_FRAME;
   frame->level = -1;
   /* Explicitly initialize the sentinel frame's cache.  Provide it
      with the underlying regcache.  In the future additional

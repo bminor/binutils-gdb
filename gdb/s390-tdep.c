@@ -1803,10 +1803,10 @@ s390_prologue_frame_unwind_cache (struct frame_info *next_frame,
       /* If the next frame is a NORMAL_FRAME, this frame *cannot* have frame 
 	 size zero.  This is only possible if the next frame is a sentinel 
 	 frame, a dummy frame, or a signal trampoline frame.  */
-      if (get_frame_type (next_frame) == NORMAL_FRAME
-	  /* For some reason, sentinel frames are NORMAL_FRAMEs
-	     -- but they have negative frame level.  */
-	  && frame_relative_level (next_frame) >= 0)
+      /* FIXME: cagney/2004-05-01: This sanity check shouldn't be
+	 needed, instead the code should simpliy rely on its
+	 analysis.  */
+      if (get_frame_type (next_frame) == NORMAL_FRAME)
 	return 0;
 
       /* If we really have a frameless function, %r14 must be valid
@@ -1850,9 +1850,9 @@ s390_prologue_frame_unwind_cache (struct frame_info *next_frame,
      treat it as frameless if we're currently within the function epilog 
      code at a point where the frame pointer has already been restored.  
      This can only happen in an innermost frame.  */
-  if (size > 0
-      && (get_frame_type (next_frame) != NORMAL_FRAME
-	  || frame_relative_level (next_frame) < 0))
+  /* FIXME: cagney/2004-05-01: This sanity check shouldn't be needed,
+     instead the code should simpliy rely on its analysis.  */
+  if (size > 0 && get_frame_type (next_frame) != NORMAL_FRAME)
     {
       /* See the comment in s390_in_function_epilogue_p on why this is
 	 not completely reliable ...  */

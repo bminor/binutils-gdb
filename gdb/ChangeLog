@@ -1,5 +1,16 @@
 2004-05-01  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.c (create_sentinel_frame): Set type to SENTINEL_FRAME.
+	* dummy-frame.c (dummy_frame_this_id): Use get_frame_type, instead
+	of frame_relative_level.
+	* sentinel-frame.c (sentinel_frame_unwinder): Set unwinder's type
+	to SENTINEL_FRAME.
+	* frame.h (enum frame_type): Add SENTINEL_FRAME.
+	* s390-tdep.c (s390_prologue_frame_unwind_cache): Delete calls to
+	frame_relative_level.
+
+2004-05-01  Andrew Cagney  <cagney@redhat.com>
+
 	* frame.h (deprecated_set_frame_type): Delete declaration.
 	* frame.c (deprecated_set_frame_type): Delete function, update
 	comments.

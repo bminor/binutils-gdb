@@ -353,7 +353,7 @@ dummy_frame_this_id (struct frame_info *next_frame,
 	 determine the dummy frame's ID.  */
       (*this_id) = gdbarch_unwind_dummy_id (current_gdbarch, next_frame);
     }
-  else if (frame_relative_level (next_frame) < 0)
+  else if (get_frame_type (next_frame) == SENTINEL_FRAME)
     {
       /* We're unwinding a sentinel frame, the PC of which is pointing
 	 at a stack dummy.  Fake up the dummy frame's ID using the

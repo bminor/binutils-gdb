@@ -355,7 +355,10 @@ enum frame_type
   DUMMY_FRAME,
   /* In a signal handler, various OSs handle this in various ways.
      The main thing is that the frame may be far from normal.  */
-  SIGTRAMP_FRAME
+  SIGTRAMP_FRAME,
+  /* Sentinel or registers frame.  This frame obtains register values
+     direct from the inferior's registers.  */
+  SENTINEL_FRAME
 };
 extern enum frame_type get_frame_type (struct frame_info *);
 
