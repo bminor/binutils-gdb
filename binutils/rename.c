@@ -139,17 +139,17 @@ smart_rename (from, to, preserve_dates)
      const char *to;
      int preserve_dates;
 {
-  int exists;
+  boolean exists;
   struct stat s;
   int ret = 0;
 
-  exists = lstat (to, &s);
+  exists = lstat (to, &s) == 0;
 
 #if defined (_WIN32) && !defined (__CYGWIN32__)
   /* Win32, unlike unix, will not erase `to' in `rename(from, to)' but
      fail instead.  Also, chown is not present.  */
 
-  if (exists == 0)
+  if (exists)
     remove (to);
 
   ret = rename (from, to);
@@ -163,7 +163,7 @@ smart_rename (from, to, preserve_dates)
 #else
   /* Use rename only if TO is not a symbolic link and has
      only one hard link.  */
-  if (exists < 0 || (!S_ISLNK (s.st_mode) && s.st_nlink == 1))
+  if (! exists || (!S_ISLNK (s.st_mode) && s.st_nlink == 1))
     {
       ret = rename (from, to);
       if (ret == 0)
