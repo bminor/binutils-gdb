@@ -1,4 +1,9 @@
-nTue Oct 31 10:29:36 1995  steve chamberlain  <sac@slash.cygnus.com>
+Tue Oct 31 16:57:32 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
+
+	* configure.in (copy_dirs): Use sys-include instead of include
+	for --with-headers option.
+
+Tue Oct 31 10:29:36 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* Makefile.in, configure.in: Make winsup builds work with
 	new scheme.

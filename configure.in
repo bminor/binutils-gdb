@@ -251,7 +251,7 @@ fi
 copy_dirs=
 
 # Handle --with-headers=XXX.  The contents of the named directory are
-# copied to $(tooldir)/include.
+# copied to $(tooldir)/sys-include.
 if [ x"${with_headers}" != x ]; then
   if [ x${is_cross_compiler} = xno ]; then
     echo 1>&2 '***' --with-headers is only supported when cross compiling
@@ -261,7 +261,7 @@ if [ x"${with_headers}" != x ]; then
   "") x=${prefix} ;;
   *) x=${exec_prefix} ;;
   esac
-  copy_dirs="${copy_dirs} ${with_headers} $x/${target_alias}/include"
+  copy_dirs="${copy_dirs} ${with_headers} $x/${target_alias}/sys-include"
 fi
 
 # Handle --with-libs=XXX.  Multiple directories are permitted.  The
