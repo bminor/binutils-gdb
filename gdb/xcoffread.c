@@ -47,7 +47,6 @@
 #include "buildsym.h"
 #include "stabsread.h"
 #include "expression.h"
-#include "language.h"		/* Needed inside partial-stab.h */
 #include "complaints.h"
 
 #include "gdb-stabs.h"
@@ -55,41 +54,6 @@
 /* For interface with stabsread.c.  */
 #include "aout/stab_gnu.h"
 
-/* For interface with partial-stab.h.  */
-#define N_UNDF	0		/* Undefined symbol */
-#undef N_ABS
-#define N_ABS 2
-#define N_TEXT 	4		/* Text sym -- defined at offset in text seg */
-#define N_DATA 	6		/* Data sym -- defined at offset in data seg */
-#define N_BSS 	8		/* BSS  sym -- defined at offset in zero'd seg */
-#define	N_COMM	0x12		/* Common symbol (visible after shared lib dynlink) */
-#define N_FN	0x1f		/* File name of .o file */
-#define	N_FN_SEQ 0x0C		/* N_FN from Sequent compilers (sigh) */
-/* Note: N_EXT can only be usefully OR-ed with N_UNDF, N_ABS, N_TEXT,
-   N_DATA, or N_BSS.  When the low-order bit of other types is set,
-   (e.g. N_WARNING versus N_FN), they are two different types.  */
-#define N_EXT 	1		/* External symbol (as opposed to local-to-this-file) */
-#define N_INDR 0x0a
-
-/* The following symbols refer to set elements.
-   All the N_SET[ATDB] symbols with the same name form one set.
-   Space is allocated for the set in the text section, and each set
-   elements value is stored into one word of the space.
-   The first word of the space is the length of the set (number of elements).
-
-   The address of the set is made into an N_SETV symbol
-   whose name is the same as the name of the set.
-   This symbol acts like a N_DATA global symbol
-   in that it can satisfy undefined external references.  */
-
-/* These appear as input to LD, in a .o file.  */
-#define	N_SETA	0x14		/* Absolute set element symbol */
-#define	N_SETT	0x16		/* Text set element symbol */
-#define	N_SETD	0x18		/* Data set element symbol */
-#define	N_SETB	0x1A		/* Bss set element symbol */
-
-/* This is output from LD.  */
-#define N_SETV	0x1C		/* Pointer to set vector in data area.  */
 
 /* We put a pointer to this structure in the read_symtab_private field
    of the psymtab.  */
@@ -2209,11 +2173,6 @@ scan_xcoff_symtab (struct objfile *objfile)
   while (ssymnum < nsyms)
     {
       int sclass;
-      /* This is the type we pass to partial-stab.h.  A less kludgy solution
-         would be to break out partial-stab.h into its various parts--shuffle
-         off the DBXREAD_ONLY stuff to dbxread.c, and make separate
-         pstab-norm.h (for most types), pstab-sol.h (for N_SOL), etc.  */
-      int stype;
 
       QUIT;
 
@@ -2538,9 +2497,59 @@ scan_xcoff_symtab (struct objfile *objfile)
 	  break;
 
 	case C_BINCL:
-	  stype = N_SOL;
-	  goto pstab;
+	  {
+	    /* Mark down an include file in the current psymtab */
+	    enum language tmp_language;
+	    swap_sym (&symbol, &main_aux[0], &namestring, &sraw_symbol,
+		      &ssymnum, objfile);
 
+	    tmp_language = deduce_language_from_filename (namestring);
+
+	    /* Only change the psymtab's language if we've learned
+	       something useful (eg. tmp_language is not language_unknown).
+	       In addition, to match what start_subfile does, never change
+	       from C++ to C.  */
+	    if (tmp_language != language_unknown
+		&& (tmp_language != language_c
+		    || psymtab_language != language_cplus))
+	      psymtab_language = tmp_language;
+
+	    /* In C++, one may expect the same filename to come round many
+	       times, when code is coming alternately from the main file
+	       and from inline functions in other files. So I check to see
+	       if this is a file we've seen before -- either the main
+	       source file, or a previously included file.
+
+	       This seems to be a lot of time to be spending on N_SOL, but
+	       things like "break c-exp.y:435" need to work (I
+	       suppose the psymtab_include_list could be hashed or put
+	       in a binary tree, if profiling shows this is a major hog).  */
+	    if (pst && STREQ (namestring, pst->filename))
+	      continue;
+	    {
+	      register int i;
+	      for (i = 0; i < includes_used; i++)
+		if (STREQ (namestring, psymtab_include_list[i]))
+		  {
+		    i = -1;
+		    break;
+		  }
+	      if (i == -1)
+		continue;
+	    }
+	    psymtab_include_list[includes_used++] = namestring;
+	    if (includes_used >= includes_allocated)
+	      {
+		char **orig = psymtab_include_list;
+
+		psymtab_include_list = (char **)
+		  alloca ((includes_allocated *= 2) *
+			  sizeof (char *));
+		memcpy ((PTR) psymtab_include_list, (PTR) orig,
+			includes_used * sizeof (char *));
+	      }
+	    continue;
+	  }
 	case C_FUN:
 	  /* The value of the C_FUN is not the address of the function (it
 	     appears to be the address before linking), but as long as it
@@ -2551,23 +2560,270 @@ scan_xcoff_symtab (struct objfile *objfile)
 	case C_ECOML:
 	case C_DECL:
 	case C_STSYM:
-	  stype = N_LSYM;
-	pstab:
-	  swap_sym (&symbol, &main_aux[0], &namestring, &sraw_symbol,
-		    &ssymnum, objfile);
-#define CUR_SYMBOL_TYPE stype
-#define CUR_SYMBOL_VALUE symbol.n_value
+	  {
 
-/* START_PSYMTAB and END_PSYMTAB are never used, because they are only
-   called from DBXREAD_ONLY or N_SO code.  Likewise for the symnum
-   variable.  */
-#define START_PSYMTAB(ofile,fname,low,symoff,global_syms,static_syms) 0
-#define END_PSYMTAB(pst,ilist,ninc,c_off,c_text,dep_list,n_deps,textlow_not_set)\
-  do {} while (0)
-/* We have already set the namestring.  */
-#define SET_NAMESTRING()	/* */
+	    static struct complaint function_outside_compilation_unit = {
+	      "function `%s' appears to be defined outside of all compilation units", 0, 0
+	    };
 
-#include "partial-stab.h"
+	    char *p;
+	    swap_sym (&symbol, &main_aux[0], &namestring, &sraw_symbol,
+		      &ssymnum, objfile);
+
+	    p = (char *) strchr (namestring, ':');
+	    if (!p)
+	      continue;			/* Not a debugging symbol.   */
+
+	    /* Main processing section for debugging symbols which
+	       the initial read through the symbol tables needs to worry
+	       about.  If we reach this point, the symbol which we are
+	       considering is definitely one we are interested in.
+	       p must also contain the (valid) index into the namestring
+	       which indicates the debugging type symbol.  */
+
+	    switch (p[1])
+	      {
+	      case 'S':
+		symbol.n_value += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA (objfile));
+#ifdef STATIC_TRANSFORM_NAME
+		namestring = STATIC_TRANSFORM_NAME (namestring);
+#endif
+		add_psymbol_to_list (namestring, p - namestring,
+				     VAR_NAMESPACE, LOC_STATIC,
+				     &objfile->static_psymbols,
+				     0, symbol.n_value,
+				     psymtab_language, objfile);
+		continue;
+
+	      case 'G':
+		symbol.n_value += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA (objfile));
+		/* The addresses in these entries are reported to be
+		   wrong.  See the code that reads 'G's for symtabs. */
+		add_psymbol_to_list (namestring, p - namestring,
+				     VAR_NAMESPACE, LOC_STATIC,
+				     &objfile->global_psymbols,
+				     0, symbol.n_value,
+				     psymtab_language, objfile);
+		continue;
+
+	      case 'T':
+		/* When a 'T' entry is defining an anonymous enum, it
+		   may have a name which is the empty string, or a
+		   single space.  Since they're not really defining a
+		   symbol, those shouldn't go in the partial symbol
+		   table.  We do pick up the elements of such enums at
+		   'check_enum:', below.  */
+		if (p >= namestring + 2
+		    || (p == namestring + 1
+			&& namestring[0] != ' '))
+		  {
+		    add_psymbol_to_list (namestring, p - namestring,
+					 STRUCT_NAMESPACE, LOC_TYPEDEF,
+					 &objfile->static_psymbols,
+					 symbol.n_value, 0,
+					 psymtab_language, objfile);
+		    if (p[2] == 't')
+		      {
+			/* Also a typedef with the same name.  */
+			add_psymbol_to_list (namestring, p - namestring,
+					     VAR_NAMESPACE, LOC_TYPEDEF,
+					     &objfile->static_psymbols,
+					     symbol.n_value, 0,
+					     psymtab_language, objfile);
+			p += 1;
+		      }
+		    /* The semantics of C++ state that "struct foo { ... }"
+		       also defines a typedef for "foo".  Unfortuantely, cfront
+		       never makes the typedef when translating from C++ to C.
+		       We make the typedef here so that "ptype foo" works as
+		       expected for cfront translated code.  */
+		    else if (psymtab_language == language_cplus)
+		      {
+			/* Also a typedef with the same name.  */
+			add_psymbol_to_list (namestring, p - namestring,
+					     VAR_NAMESPACE, LOC_TYPEDEF,
+					     &objfile->static_psymbols,
+					     symbol.n_value, 0,
+					     psymtab_language, objfile);
+		      }
+		  }
+		goto check_enum;
+
+	      case 't':
+		if (p != namestring)	/* a name is there, not just :T... */
+		  {
+		    add_psymbol_to_list (namestring, p - namestring,
+					 VAR_NAMESPACE, LOC_TYPEDEF,
+					 &objfile->static_psymbols,
+					 symbol.n_value, 0,
+					 psymtab_language, objfile);
+		  }
+	      check_enum:
+		/* If this is an enumerated type, we need to
+		   add all the enum constants to the partial symbol
+		   table.  This does not cover enums without names, e.g.
+		   "enum {a, b} c;" in C, but fortunately those are
+		   rare.  There is no way for GDB to find those from the
+		   enum type without spending too much time on it.  Thus
+		   to solve this problem, the compiler needs to put out the
+		   enum in a nameless type.  GCC2 does this.  */
+
+		/* We are looking for something of the form
+		   <name> ":" ("t" | "T") [<number> "="] "e"
+		   {<constant> ":" <value> ","} ";".  */
+
+		/* Skip over the colon and the 't' or 'T'.  */
+		p += 2;
+		/* This type may be given a number.  Also, numbers can come
+		   in pairs like (0,26).  Skip over it.  */
+		while ((*p >= '0' && *p <= '9')
+		       || *p == '(' || *p == ',' || *p == ')'
+		       || *p == '=')
+		  p++;
+
+		if (*p++ == 'e')
+		  {
+		    /* The aix4 compiler emits extra crud before the members.  */
+		    if (*p == '-')
+		      {
+			/* Skip over the type (?).  */
+			while (*p != ':')
+			  p++;
+
+			/* Skip over the colon.  */
+			p++;
+		      }
+
+		    /* We have found an enumerated type.  */
+		    /* According to comments in read_enum_type
+		       a comma could end it instead of a semicolon.
+		       I don't know where that happens.
+		       Accept either.  */
+		    while (*p && *p != ';' && *p != ',')
+		      {
+			char *q;
+
+			/* Check for and handle cretinous dbx symbol name
+			   continuation!  */
+			if (*p == '\\' || (*p == '?' && p[1] == '\0'))
+			  p = next_symbol_text (objfile);
+
+			/* Point to the character after the name
+			   of the enum constant.  */
+			for (q = p; *q && *q != ':'; q++)
+			  ;
+			/* Note that the value doesn't matter for
+			   enum constants in psymtabs, just in symtabs.  */
+			add_psymbol_to_list (p, q - p,
+					     VAR_NAMESPACE, LOC_CONST,
+					     &objfile->static_psymbols, 0,
+					     0, psymtab_language, objfile);
+			/* Point past the name.  */
+			p = q;
+			/* Skip over the value.  */
+			while (*p && *p != ',')
+			  p++;
+			/* Advance past the comma.  */
+			if (*p)
+			  p++;
+		      }
+		  }
+		continue;
+
+	      case 'c':
+		/* Constant, e.g. from "const" in Pascal.  */
+		add_psymbol_to_list (namestring, p - namestring,
+				     VAR_NAMESPACE, LOC_CONST,
+				     &objfile->static_psymbols, symbol.n_value,
+				     0, psymtab_language, objfile);
+		continue;
+
+	      case 'f':
+		if (! pst)
+		  {
+		    int name_len = p - namestring;
+		    char *name = xmalloc (name_len + 1);
+		    memcpy (name, namestring, name_len);
+		    name[name_len] = '\0';
+		    complain (&function_outside_compilation_unit, name);
+		    xfree (name);
+		  }
+		symbol.n_value += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
+		add_psymbol_to_list (namestring, p - namestring,
+				     VAR_NAMESPACE, LOC_BLOCK,
+				     &objfile->static_psymbols,
+				     0, symbol.n_value,
+				     psymtab_language, objfile);
+		continue;
+
+		/* Global functions were ignored here, but now they
+		   are put into the global psymtab like one would expect.
+		   They're also in the minimal symbol table.  */
+	      case 'F':
+		if (! pst)
+		  {
+		    int name_len = p - namestring;
+		    char *name = xmalloc (name_len + 1);
+		    memcpy (name, namestring, name_len);
+		    name[name_len] = '\0';
+		    complain (&function_outside_compilation_unit, name);
+		    xfree (name);
+		  }
+		symbol.n_value += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
+		add_psymbol_to_list (namestring, p - namestring,
+				     VAR_NAMESPACE, LOC_BLOCK,
+				     &objfile->global_psymbols,
+				     0, symbol.n_value,
+				     psymtab_language, objfile);
+		continue;
+
+		/* Two things show up here (hopefully); static symbols of
+		   local scope (static used inside braces) or extensions
+		   of structure symbols.  We can ignore both.  */
+	      case 'V':
+	      case '(':
+	      case '0':
+	      case '1':
+	      case '2':
+	      case '3':
+	      case '4':
+	      case '5':
+	      case '6':
+	      case '7':
+	      case '8':
+	      case '9':
+	      case '-':
+	      case '#':		/* for symbol identification (used in live ranges) */
+		/* added to support cfront stabs strings */
+	      case 'Z':		/* for definition continuations */
+	      case 'P':		/* for prototypes */
+		continue;
+
+	      case ':':
+		/* It is a C++ nested symbol.  We don't need to record it
+		   (I don't think); if we try to look up foo::bar::baz,
+		   then symbols for the symtab containing foo should get
+		   read in, I think.  */
+		/* Someone says sun cc puts out symbols like
+		   /foo/baz/maclib::/usr/local/bin/maclib,
+		   which would get here with a symbol type of ':'.  */
+		continue;
+
+	      default:
+		/* Unexpected symbol descriptor.  The second and subsequent stabs
+		   of a continued stab can show up here.  The question is
+		   whether they ever can mimic a normal stab--it would be
+		   nice if not, since we certainly don't want to spend the
+		   time searching to the end of every string looking for
+		   a backslash.  */
+
+		complain (&unknown_symchar_complaint, p[1]);
+
+		/* Ignore it; perhaps it is an extension that we don't
+		   know about.  */
+		continue;
+	      }
+	  }
 	}
     }
 

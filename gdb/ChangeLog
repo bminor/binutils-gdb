@@ -1,3 +1,16 @@
+2001-10-01  Elena Zannoni <ezannoni@redhat.com>
+
+        * xcoffread.c (N_UNDF, N_ABS, N_TEXT, N_DATA, N_BSS, N_COMM, N_FN,
+        N_EXT, N_INDR, N_SETA, N_SETT, N_SETD, N_SETB, N_SETV,
+        CUR_SYMBOL_TYPE, CUR_SYMBOL_VALUE, START_PSYMTAB, END_PSYMTAB,
+        SET_NAMESTRING): Delete definitions.
+        Don't include language.h any more.
+        Don't include partial-stab.h any more.
+        (scan_xcoff_symtab): Don't jump through hoops to reuse code in
+        partial-stab.h, include the code directly, instead.
+
+        * Makefile.in (xcoffread.o): Remove dependency on partial-stab.h.
+
 2001-10-01  Andrew Cagney  <ac131313@redhat.com>
 
 	* infcmd.c (do_registers_info): Delete code dumping large
