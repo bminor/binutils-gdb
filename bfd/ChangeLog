@@ -1,3 +1,9 @@
+2002-01-31  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elf32-cris.c (elf_cris_discard_excess_program_dynamics): Don't
+	unexport unreferenced symbols when --export-dynamic.  Call
+	_bfd_elf_strtab_delref when unexporting.
+
 2002-01-30  Daniel Jacobowitz  <drow@mvista.com>
 
 	* bfd-in.h: Include <stdbool.h> if it is available.

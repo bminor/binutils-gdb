@@ -2936,8 +2936,14 @@ elf_cris_discard_excess_program_dynamics (h, inf)
       /* If the locally-defined symbol isn't used by a DSO, then we don't
 	 have to export it as a dynamic symbol.  This was already done for
 	 functions; doing this for all symbols would presumably not
-	 introduce new problems.  */
-      h->root.dynindx = -1;
+	 introduce new problems.  Of course we don't do this if we're
+	 exporting all dynamic symbols.  */
+      if (! info->export_dynamic)
+	{
+	  h->root.dynindx = -1;
+	  _bfd_elf_strtab_delref (elf_hash_table (info)->dynstr,
+				  h->root.dynstr_index);
+	}
     }
 
   return true;
