@@ -1,3 +1,9 @@
+2001-03-22  Alan Modra  <alan@linuxcare.com.au>
+
+	* i386-dis.c (dis386_twobyte_att): Add entries for paddq, psubq.
+	(dis386_twobyte_intel): Likewise.
+	(twobyte_has_modrm): Set entry for paddq, psubq.
+
 2001-03-19  Jim Wilson  <wilson@redhat.com>
 
 	* ia64-gen.c (fetch_insn_class): If xsect, then ignore comment and
