@@ -1,3 +1,8 @@
+2000-03-02  Michael Meissner  <meissner@redhat.com>
+
+	* config/tc-d30v.c (check_range): Remove code that incorrectly
+	sign extended values where bits < 32.
+
 2000-03-02  H.J. Lu  (hjl@gnu.org)
 
 	* configure.in: Support --enable-targets=all on ia32.

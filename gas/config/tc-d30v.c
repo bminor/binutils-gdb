@@ -247,10 +247,6 @@ check_range (num, bits, flags)
   if (bits == 32 && sizeof(unsigned long) * CHAR_BIT == 32)
     return 0;
 
-  /* Sign extend signed values to unsigned long */
-  if ((flags & OPERAND_SIGNED) && (num & ((unsigned long)1 << (bits - 1))))
-    num |= ((long)-1 << (bits - 1));
-
   if (flags & OPERAND_SHIFT)
     {
       /* We know that all shifts are right by three bits.... */
