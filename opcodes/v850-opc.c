@@ -74,10 +74,7 @@ const struct v850_operand v850_operands[] = {
 
 /* System register operands.  */
 #define SR1	(D8+1)
-  { 5, 0, 0, 0, V850_OPERAND_SRG }, 
-
-#define SR2	(SR1+1)
-  { 5, 11, 0, 0, V850_OPERAND_SRG },
+  { 5, 0, 0, 0, V850_OPERAND_SRG }
 } ; 
 
 
@@ -145,9 +142,9 @@ const struct v850_opcode v850_opcodes[] = {
 
 /* arithmetic operation instructions */
 { "mov",        OP(0x00),		OP_MASK,	IF1, 2 },
-{ "mov",	OP(0x08),		OP_MASK,	IF2, 2 },
+{ "mov",	OP(0x10),		OP_MASK,	IF2, 2 },
 { "movea",	OP(0x31),		OP_MASK,	IF6, 4 },
-{ "movhi",	OP(0x31),		OP_MASK,	IF6, 4 },
+{ "movhi",	OP(0x32),		OP_MASK,	IF6, 4 },
 { "add",	OP(0x0e),		OP_MASK,	IF1, 2 },
 { "add",	OP(0x12),		OP_MASK,	IF2, 2 },
 { "addi",	OP(0x30),		OP_MASK,	IF6, 4 },
@@ -226,7 +223,7 @@ const struct v850_opcode v850_opcodes[] = {
 { "halt",	two(0x07e0,0x0120),	two(0xffff,0xffff),	{0}, 4 },
 { "reti",	two(0x07e0,0x0140),	two(0xffff,0xffff),	{0}, 4 },
 { "trap",	two(0x07e0,0x0100),	two(0xffe0,0xffff),	{I5U}, 4 },
-{ "ldsr",	two(0x07e0,0x0020),	two(0x07e0,0xffff),	{R1,SR2}, 4 },
+{ "ldsr",	two(0x07e0,0x0020),	two(0x07e0,0xffff),	{R2,SR1}, 4 },
 { "stsr",	two(0x07e0,0x0040),	two(0x07e0,0xffff),	{SR1,R2}, 4 },
 { "nop",	one(0x00),		one(0xff),		{0}, 2 },
 
