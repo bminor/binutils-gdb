@@ -21,8 +21,6 @@
 
 #include "server.h"
 #include <sys/wait.h>
-#include "frame.h"
-#include "inferior.h"
 
 #include <stdio.h>
 #include <sys/param.h>
