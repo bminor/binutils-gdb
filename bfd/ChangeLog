@@ -1,3 +1,11 @@
+Mon Nov 11 10:37:02 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* elf32-ppc.c (ppc_elf_adjust_dynamic_symbol): Create .got.plt
+	section.
+	(ppc_elf_check_relocs): Add support for R_PPC_LOCAL24PC.  Make
+	appropriate relocations in the .so file if shared.
+	(ppc_elf_relocate_section): Ditto.
+
 start-sanitize-m32r
 Tue Oct 29 15:03:02 1996  Doug Evans  <dje@canuck.cygnus.com>
 
