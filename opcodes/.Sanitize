@@ -39,14 +39,6 @@ else
 	lose_these_too="${sky_files} ${lose_these_too}"
 fi
 
-r5900_files="vu0.h"
-
-if ( echo $* | grep keep\-r5900 > /dev/null ) ; then
-	keep_these_too="${r5900_files} ${keep_these_too}"
-else
-	lose_these_too="${r5900_files} ${lose_these_too}"
-fi
-
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize

@@ -1,3 +1,12 @@
+start-sanitize-r5900
+Tue Aug 18 16:48:52 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* mips-opc.c: Insert contents of vu0.h, rather than including it.
+	* vu0.h: Remove.
+	* Makefile.am: Rebuild dependencies.
+	* Makefile: Rebuild.
+
+end-sanitize-r5900
 Thu Aug 13 16:23:04 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ppc-opc.c (powerpc_operands): Omit parens around additions in
