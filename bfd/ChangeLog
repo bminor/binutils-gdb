@@ -1,3 +1,8 @@
+2002-06-26  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* configure.in (vax-*-netbsd*): Set COREFILE to netbsd-core.lo.
+	* configure: Regenerate.
+
 2002-06-25  Jason Eckhardt  <jle@rice.edu>
 
 	* dwarf2.c (decode_line_info): Check unit->addr_size
