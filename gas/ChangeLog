@@ -1,3 +1,8 @@
+Sat Jan 13 11:09:08 1996  Michael Meissner  <meissner@wogglebug.tiac.net>
+
+	* config/tc-ppc.c (ppc_section*): Wrap these functions inside
+	#ifdef OBJ_ELF.
+
 Fri Jan 12 15:32:07 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/obj-elf.c (obj_elf_section): Add hooks so machine

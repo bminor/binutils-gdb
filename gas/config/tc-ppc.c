@@ -1730,6 +1730,7 @@ ppc_macro (str, macro)
   md_assemble (complete);
 }  
 
+#ifdef OBJ_ELF
 /* For ELF, add support for SHF_EXCLUDE and SHT_ORDERED */
 
 int
@@ -1784,6 +1785,7 @@ ppc_section_flags (flags, attr, type)
 
   return flags;
 }
+#endif /* OBJ_ELF */
 
 
 /* Pseudo-op handling.  */
