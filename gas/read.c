@@ -85,13 +85,18 @@ die horribly;
 #define LEX_PCT 0
 #endif
 
+#ifndef LEX_QM
+/* The PowerPC Windows NT assemblers permits ? inside label names.  */
+#define LEX_QM 0
+#endif
+
 /* used by is_... macros. our ctype[] */
 char lex_type[256] =
 {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* @ABCDEFGHIJKLMNO */
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* PQRSTUVWXYZ[\]^_ */
   0, 0, 0, 0, 3, LEX_PCT, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0,	/* _!"#$%&'()*+,-./ */
-  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,	/* 0123456789:;<=>? */
+  1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, LEX_QM,	/* 0123456789:;<=>? */
   LEX_AT, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,	/* @ABCDEFGHIJKLMNO */
   3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, LEX_BR, 0, LEX_BR, 0, 3, /* PQRSTUVWXYZ[\]^_ */
   0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,	/* `abcdefghijklmno */
@@ -948,6 +953,48 @@ read_a_source_file (name)
   input_scrub_close ();		/* Close the input file */
 }
 
+/* For most MRI pseudo-ops, the line actually ends at the first
+   nonquoted space.  This function looks for that point, stuffs a null
+   in, and sets *STOPCP to the character that used to be there, and
+   returns the location.  */
+
+char *
+mri_comment_field (stopcp)
+     char *stopcp;
+{
+  char *s;
+  int inquote = 0;
+
+  know (flag_mri);
+
+  for (s = input_line_pointer;
+       ((! is_end_of_line[(unsigned char) *s] && *s != ' ' && *s != '\t')
+	|| inquote);
+       s++)
+    {
+      if (*s == '\'')
+	inquote = ! inquote;
+    }
+  *stopcp = *s;
+  *s = '\0';
+  return s;
+}
+
+/* Skip to the end of an MRI comment field.  */
+
+void
+mri_comment_end (stop, stopc)
+     char *stop;
+     int stopc;
+{
+  know (flag_mri);
+
+  input_line_pointer = stop;
+  *stop = stopc;
+  while (! is_end_of_line[(unsigned char) *input_line_pointer])
+    ++input_line_pointer;
+}
+
 void 
 s_abort (ignore)
      int ignore;
@@ -999,6 +1046,11 @@ s_align_bytes (arg)
   char temp_fill;
   unsigned int i = 0;
   unsigned long max_alignment = 1 << 15;
+  char *stop = NULL;
+  char stopc;
+
+  if (flag_mri)
+    stop = mri_comment_field (&stopc);
 
   if (is_end_of_line[(unsigned char) *input_line_pointer])
     temp = arg;			/* Default value from pseudo-op table */
@@ -1030,6 +1082,9 @@ s_align_bytes (arg)
   else
     do_align (temp, (char *) 0);
 
+  if (flag_mri)
+    mri_comment_end (stop, stopc);
+
   demand_empty_rest_of_line ();
 }
 
@@ -1041,6 +1096,11 @@ s_align_ptwo (ignore)
   register int temp;
   char temp_fill;
   long max_alignment = 15;
+  char *stop = NULL;
+  char stopc;
+
+  if (flag_mri)
+    stop = mri_comment_field (&stopc);
 
   temp = get_absolute_expression ();
   if (temp > max_alignment)
@@ -1059,6 +1119,9 @@ s_align_ptwo (ignore)
   else
     do_align (temp, (char *) 0);
 
+  if (flag_mri)
+    mri_comment_end (stop, stopc);
+
   demand_empty_rest_of_line ();
 }
 
@@ -1071,6 +1134,11 @@ s_comm (ignore)
   register char *p;
   offsetT temp;
   register symbolS *symbolP;
+  char *stop = NULL;
+  char stopc;
+
+  if (flag_mri)
+    stop = mri_comment_field (&stopc);
 
   name = input_line_pointer;
   c = get_symbol_end ();
@@ -1081,6 +1149,8 @@ s_comm (ignore)
   if (*input_line_pointer != ',')
     {
       as_bad ("Expected comma after symbol-name: rest of line ignored.");
+      if (flag_mri)
+	mri_comment_end (stop, stopc);
       ignore_rest_of_line ();
       return;
     }
@@ -1088,6 +1158,8 @@ s_comm (ignore)
   if ((temp = get_absolute_expression ()) < 0)
     {
       as_warn (".COMMon length (%ld.) <0! Ignored.", (long) temp);
+      if (flag_mri)
+	mri_comment_end (stop, stopc);
       ignore_rest_of_line ();
       return;
     }
@@ -1098,6 +1170,8 @@ s_comm (ignore)
     {
       as_bad ("Ignoring attempt to re-define symbol `%s'.",
 	      S_GET_NAME (symbolP));
+      if (flag_mri)
+	mri_comment_end (stop, stopc);
       ignore_rest_of_line ();
       return;
     }
@@ -1122,6 +1196,10 @@ s_comm (ignore)
   }
 #endif /* not OBJ_VMS */
   know (symbolP->sy_frag == &zero_address_frag);
+
+  if (flag_mri)
+    mri_comment_end (stop, stopc);
+
   demand_empty_rest_of_line ();
 }				/* s_comm() */
 
@@ -1138,12 +1216,16 @@ s_mri_common (small)
   char *alc = NULL;
   symbolS *sym;
   offsetT align;
+  char *stop = NULL;
+  char stopc;
 
   if (! flag_mri)
     {
       s_comm (0);
       return;
     }
+
+  stop = mri_comment_field (&stopc);
 
   SKIP_WHITESPACE ();
 
@@ -1190,6 +1272,7 @@ s_mri_common (small)
 #endif
 	{
 	  as_bad ("attempt to re-define symbol `%s'", S_GET_NAME (sym));
+	  mri_comment_end (stop, stopc);
 	  ignore_rest_of_line ();
 	  return;
 	}
@@ -1220,6 +1303,9 @@ s_mri_common (small)
     input_line_pointer += 2;
   if (*input_line_pointer == ',')
     input_line_pointer += 2;
+
+  mri_comment_end (stop, stopc);
+
   demand_empty_rest_of_line ();
 }
 
@@ -1319,7 +1405,9 @@ s_end (ignore)
       /* The MRI assembler permits the start symbol to follow .end,
          but we don't support that.  */
       SKIP_WHITESPACE ();
-      if (! is_end_of_line[(unsigned char) *input_line_pointer])
+      if (! is_end_of_line[(unsigned char) *input_line_pointer]
+	  && *input_line_pointer != '*'
+	  && *input_line_pointer != '!')
 	as_warn ("start address not supported");
     }
 }
@@ -1331,12 +1419,21 @@ s_fail (ignore)
      int ignore;
 {
   offsetT temp;
+  char *stop = NULL;
+  char stopc;
+
+  if (flag_mri)
+    stop = mri_comment_field (&stopc);
 
   temp = get_absolute_expression ();
   if (temp >= 500)
     as_warn (".fail %ld encountered", (long) temp);
   else
     as_bad (".fail %ld encountered", (long) temp);
+
+  if (flag_mri)
+    mri_comment_end (stop, stopc);
+
   demand_empty_rest_of_line ();
 }
 
@@ -1408,6 +1505,11 @@ s_globl (ignore)
   char *name;
   int c;
   symbolS *symbolP;
+  char *stop = NULL;
+  char stopc;
+
+  if (flag_mri)
+    stop = mri_comment_field (&stopc);
 
   do
     {
@@ -1426,6 +1528,10 @@ s_globl (ignore)
 	}
     }
   while (c == ',');
+
+  if (flag_mri)
+    mri_comment_end (stop, stopc);
+
   demand_empty_rest_of_line ();
 }
 
@@ -2037,24 +2143,8 @@ s_space (mult)
   md_flush_pending_output ();
 #endif
 
-  /* In MRI mode, the operands end at the first unquoted space.  */
   if (flag_mri)
-    {
-      char *s;
-      int inquote = 0;
-
-      for (s = input_line_pointer;
-	   ((! is_end_of_line[(unsigned char) *s] && *s != ' ' && *s != '\t')
-	    || inquote);
-	   s++)
-	{
-	  if (*s == '\'')
-	    inquote = ! inquote;
-	}
-      stop = s;
-      stopc = *stop;
-      *stop = '\0';
-    }
+    stop = mri_comment_field (&stopc);
 
   /* Just like .fill, but temp_size = 1 */
   expression (&exp);
@@ -2126,12 +2216,7 @@ s_space (mult)
 
  getout:
   if (flag_mri)
-    {
-      input_line_pointer = stop;
-      *stop = stopc;
-      while (! is_end_of_line[(unsigned char) *input_line_pointer])
-	++input_line_pointer;
-    }
+    mri_comment_end (stop, stopc);
 
   demand_empty_rest_of_line ();
 }
@@ -2147,6 +2232,11 @@ s_float_space (float_type)
   offsetT count;
   int flen;
   char temp[MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT];
+  char *stop = NULL;
+  char stopc;
+
+  if (flag_mri)
+    stop = mri_comment_field (&stopc);
 
   count = get_absolute_expression ();
 
@@ -2154,6 +2244,8 @@ s_float_space (float_type)
   if (*input_line_pointer != ',')
     {
       as_bad ("missing value");
+      if (flag_mri)
+	mri_comment_end (stop, stopc);
       ignore_rest_of_line ();
       return;
     }
@@ -2174,6 +2266,8 @@ s_float_space (float_type)
       flen = hex_float (float_type, temp);
       if (flen < 0)
 	{
+	  if (flag_mri)
+	    mri_comment_end (stop, stopc);
 	  ignore_rest_of_line ();
 	  return;
 	}
@@ -2188,6 +2282,8 @@ s_float_space (float_type)
       if (err)
 	{
 	  as_bad ("Bad floating literal: %s", err);
+	  if (flag_mri)
+	    mri_comment_end (stop, stopc);
 	  ignore_rest_of_line ();
 	  return;
 	}
@@ -2201,6 +2297,9 @@ s_float_space (float_type)
       memcpy (p, temp, (unsigned int) flen);
     }
 
+  if (flag_mri)
+    mri_comment_end (stop, stopc);
+
   demand_empty_rest_of_line ();
 }
 
@@ -2210,8 +2309,15 @@ void
 s_struct (ignore)
      int ignore;
 {
+  char *stop = NULL;
+  char stopc;
+
+  if (flag_mri)
+    stop = mri_comment_field (&stopc);
   abs_section_offset = get_absolute_expression ();
   subseg_set (absolute_section, 0);
+  if (flag_mri)
+    mri_comment_end (stop, stopc);
   demand_empty_rest_of_line ();
 }
 
@@ -2428,29 +2534,14 @@ cons_worker (nbytes, rva)
   md_flush_pending_output ();
 #endif
 
+  if (flag_mri)
+    stop = mri_comment_field (&stopc);
+
   if (is_it_end_of_statement ())
     {
+      mri_comment_end (stop, stopc);
       demand_empty_rest_of_line ();
       return;
-    }
-
-  /* In MRI mode, the operands end at the first unquoted space.  */
-  if (flag_mri)
-    {
-      char *s;
-      int inquote = 0;
-
-      for (s = input_line_pointer;
-	   ((! is_end_of_line[(unsigned char) *s] && *s != ' ' && *s != '\t')
-	    || inquote);
-	   s++)
-	{
-	  if (*s == '\'')
-	    inquote = ! inquote;
-	}
-      stop = s;
-      stopc = *stop;
-      *stop = '\0';
     }
 
   c = 0;
@@ -2484,8 +2575,7 @@ cons_worker (nbytes, rva)
        emit_expr (&exp, (unsigned int) nbytes);
       ++c;
     }
-  while (*input_line_pointer++ == ','
-	 && (! flag_mri || input_line_pointer < stop));
+  while (*input_line_pointer++ == ',');
 
   /* In MRI mode, after an odd number of bytes, we must align to an
      even word boundary, unless the next instruction is a dc.b, ds.b
@@ -2496,12 +2586,7 @@ cons_worker (nbytes, rva)
   input_line_pointer--;		/* Put terminator back into stream. */
 
   if (flag_mri)
-    {
-      input_line_pointer = stop;
-      *stop = stopc;
-      while (! is_end_of_line[(unsigned char) *input_line_pointer])
-	++input_line_pointer;
-    }
+    mri_comment_end (stop, stopc);
 
   demand_empty_rest_of_line ();
 }
@@ -3557,7 +3642,7 @@ equals (sym_name)
 {
   register symbolS *symbolP;	/* symbol we are working with */
   char *stop;
-  int stopc;
+  char stopc;
 
   input_line_pointer++;
   if (*input_line_pointer == '=')
@@ -3566,24 +3651,8 @@ equals (sym_name)
   while (*input_line_pointer == ' ' || *input_line_pointer == '\t')
     input_line_pointer++;
 
-  /* In MRI mode, the operands end at the first unquoted space.  */
   if (flag_mri)
-    {
-      char *s;
-      int inquote = 0;
-
-      for (s = input_line_pointer;
-	   ((! is_end_of_line[(unsigned char) *s] && *s != ' ' && *s != '\t')
-	    || inquote);
-	   s++)
-	{
-	  if (*s == '\'')
-	    inquote = ! inquote;
-	}
-      stop = s;
-      stopc = *stop;
-      *stop = '\0';
-    }
+    stop = mri_comment_field (&stopc);
 
   if (sym_name[0] == '.' && sym_name[1] == '\0')
     {
@@ -3602,12 +3671,7 @@ equals (sym_name)
     }
 
   if (flag_mri)
-    {
-      input_line_pointer = stop;
-      *stop = stopc;
-      while (! is_end_of_line[(unsigned char) *input_line_pointer])
-	++input_line_pointer;
-    }
+    mri_comment_end (stop, stopc);
 }				/* equals() */
 
 /* .include -- include a file at this point. */

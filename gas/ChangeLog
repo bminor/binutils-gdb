@@ -1,5 +1,26 @@
 Wed Sep 27 12:53:58 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-ppc.h (OBJ_XCOFF): Define if OBJ_COFF and not TE_PE.
+	Change OBJ_COFF checks to check OBJ_XCOFF instead.
+	(TARGET_FORMAT): Fully parenthesize.
+	(LEX_QM): Define if TE_PE.
+	* config/tc-ppc.c: Replace OBJ_COFF by OBJ_XCOFF throughout.
+	Remove checks of TE_PE within #ifdef OBJ_XCOFF sections.
+	(init_regtable): Make i unsigned.
+	(ppc_set_current_section): Rename from setCurrentSection.  Change
+	all callers.
+	(ppc_arch): Return after as_fatal to avoid gcc warning.
+	(md_assemble): Only declare reloc if OBJ_ELF.  Add default to
+	switch on fixups[i].reloc to avoid gcc warning.
+	(IMAGE_SGN_LNK_OTHER): Fix nested comment.
+	(ppc_pe_function): Don't call ppc_canonicalize_symbol_name.
+	(ppc_frob_symbol): Remove TE_PE section checks.
+	(md_estimate_size_before_relax): Return after abort to avoid gcc
+	warning.
+	(md_apply_fix3): Add BFD_RELOC_16_GOT_PCREL to switch.
+	* read.c (LEX_QM): Define as 0 if not defined.
+	(lex_type): Use LEX_QM for '?'.
+
 	* configure.in: No need to check whether ${cpu_type} is powerpc;
 	it never will be.
 	* configure: Rebuild.

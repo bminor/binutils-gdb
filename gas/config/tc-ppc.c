@@ -46,7 +46,7 @@ static void ppc_byte PARAMS ((int));
 static int ppc_is_toc_sym PARAMS ((symbolS *sym));
 static void ppc_tc PARAMS ((int));
 
-#ifdef OBJ_COFF
+#ifdef OBJ_XCOFF
 static void ppc_comm PARAMS ((int));
 static void ppc_bb PARAMS ((int));
 static void ppc_bf PARAMS ((int));
@@ -71,6 +71,7 @@ static void ppc_elf_validate_fix PARAMS ((fixS *, segT));
 #endif
 
 #ifdef TE_PE
+static void ppc_set_current_section PARAMS ((segT));
 static void ppc_previous PARAMS ((int));
 static void ppc_pdata PARAMS ((int));
 static void ppc_ydata PARAMS ((int));
@@ -82,11 +83,7 @@ static void ppc_pe_comm PARAMS ((int));
 static void ppc_pe_section PARAMS ((int));
 static void ppc_pe_section PARAMS ((int));
 static void ppc_pe_function PARAMS ((int));
-
-segT ydata_section, pdata_section, reldata_section, rdata_section;
-
 #endif
-
 
 /* Generic assembler global variables which must be defined by all
    targets.  */
@@ -116,31 +113,24 @@ const pseudo_typeS md_pseudo_table[] =
   /* Pseudo-ops which must be overridden.  */
   { "byte",	ppc_byte,	0 },
 
-#ifdef OBJ_COFF
+#ifdef OBJ_XCOFF
   /* Pseudo-ops specific to the RS/6000 XCOFF format.  Some of these
      legitimately belong in the obj-*.c file.  However, XCOFF is based
      on COFF, and is only implemented for the RS/6000.  We just use
      obj-coff.c, and add what we need here.  */
-#ifndef TE_PE
   { "comm",	ppc_comm,	0 },
   { "lcomm",	ppc_comm,	1 },
-  { "function",	ppc_function,	0 },
-#endif
-
   { "bb",	ppc_bb,		0 },
   { "bf",	ppc_bf,		0 },
   { "bi",	ppc_biei,	0 },
   { "bs",	ppc_bs,		0 },
-
-#ifndef TE_PE
   { "csect",	ppc_csect,	0 },
-#endif
-
   { "eb",	ppc_eb,		0 },
   { "ef",	ppc_ef,		0 },
   { "ei",	ppc_biei,	1 },
   { "es",	ppc_es,		0 },
   { "extern",	ppc_extern,	0 },
+  { "function",	ppc_function,	0 },
   { "lglobl",	ppc_lglobl,	0 },
   { "rename",	ppc_rename,	0 },
   { "stabx",	ppc_stabx,	0 },
@@ -365,7 +355,8 @@ insert_reg (regname, regnum)
 static void
 init_regtable ()
 {
-  int i;
+  unsigned int i;
+
   for (i = 0; i < REG_NAME_CNT && pre_defined_registers[i].name ; ++i)
     {
       insert_reg (pre_defined_registers[i].name, 
@@ -400,7 +391,7 @@ static boolean mrelocatable = false;
 static flagword ppc_flags = 0;
 #endif
 
-#ifdef OBJ_COFF
+#ifdef OBJ_XCOFF
 
 /* The RS/6000 assembler uses the .csect pseudo-op to generate code
    using a bunch of different sections.  These assembler sections,
@@ -422,18 +413,6 @@ static symbolS *ppc_data_csects;
 
 /* The current csect.  */
 static symbolS *ppc_current_csect;
-
-/* The current csect.  */
-static segT ppc_previous_section;
-static segT ppc_current_section;
-
-void setCurrentSection(new)
-     segT new;
-{
-  ppc_previous_section = ppc_current_section;
-  ppc_current_section = new;
-}
-
 
 /* The RS/6000 assembler uses a TOC which holds addresses of functions
    and variables.  Symbols are put in the TOC with the .tc pseudo-op.
@@ -460,7 +439,19 @@ static asection *ppc_coff_debug_section;
 /* The size of the .debug section.  */
 static bfd_size_type ppc_debug_name_section_size;
 
-#endif /* OBJ_COFF */
+#endif /* OBJ_XCOFF */
+
+#ifdef TE_PE
+
+/* Various sections.  */
+
+static segT ydata_section, pdata_section, reldata_section, rdata_section;
+
+/* The current section.  */
+static segT ppc_previous_section;
+static segT ppc_current_section;
+
+#endif /* TE_PE */
 
 #ifdef OBJ_ELF
 symbolS *GOT_symbol;		/* Pre-defined "_GLOBAL_OFFSET_TABLE" */
@@ -641,7 +632,10 @@ ppc_arch ()
   else if ((ppc_cpu & PPC_OPCODE_POWER) != 0)
     return bfd_arch_rs6000;
   else
-    as_fatal ("Neither Power nor PowerPC opcodes were selected.");
+    {
+      as_fatal ("Neither Power nor PowerPC opcodes were selected.");
+      return bfd_arch_unknown;
+    }
 }
 
 /* This function is called when the assembler starts up.  It is called
@@ -726,7 +720,7 @@ md_begin ()
       target_big_endian = PPC_BIG_ENDIAN;
     }
 
-#ifdef OBJ_COFF
+#ifdef OBJ_XCOFF
   ppc_coff_debug_section = coff_section_from_bfd_index (stdoutput, N_DEBUG);
 
   /* Create dummy symbols to serve as initial csects.  This forces the
@@ -997,7 +991,9 @@ md_assemble (str)
   int fc;
   char *f;
   int i;
+#ifdef OBJ_ELF
   bfd_reloc_code_real_type reloc;
+#endif
 
   /* Get the opcode.  */
   for (s = str; *s != '\0' && ! isspace (*s); s++)
@@ -1206,6 +1202,7 @@ md_assemble (str)
 #ifdef OBJ_ELF
 	  /* Allow @HA, @L, @H on constants. */
 	  char *orig_str = str;
+
 	  if ((reloc = ppc_elf_suffix (&str)) != BFD_RELOC_UNUSED)
 	    switch (reloc)
 	      {
@@ -1347,6 +1344,8 @@ md_assemble (str)
 	    case BFD_RELOC_HI16:
 	    case BFD_RELOC_HI16_S:
 	      fixP->fx_no_overflow = 1;
+	      break;
+	    default:
 	      break;
 	    }
 	}
@@ -1499,7 +1498,7 @@ ppc_byte (ignore)
   demand_empty_rest_of_line ();
 }
 
-#ifdef OBJ_COFF
+#ifdef OBJ_XCOFF
 
 /* XCOFF specific pseudo-op handling.  */
 
@@ -2274,7 +2273,7 @@ ppc_toc (ignore)
   demand_empty_rest_of_line ();
 }
 
-#endif /* OBJ_COFF */
+#endif /* OBJ_XCOFF */
 
 /* The .tc pseudo-op.  This is used when generating either XCOFF or
    ELF.  This takes two or more arguments.
@@ -2292,7 +2291,7 @@ static void
 ppc_tc (ignore)
      int ignore;
 {
-#ifdef OBJ_COFF
+#ifdef OBJ_XCOFF
 
   /* Define the TOC symbol name.  */
   {
@@ -2346,7 +2345,7 @@ ppc_tc (ignore)
     ppc_frob_label (sym);
   }
 
-#else /* ! defined (OBJ_COFF) */
+#else /* ! defined (OBJ_XCOFF) */
 
   /* Skip the TOC symbol name.  */
   while (is_part_of_name (*input_line_pointer)
@@ -2360,7 +2359,7 @@ ppc_tc (ignore)
   frag_align (2, 0);
   record_alignment (now_seg, 2);
 
-#endif /* ! defined (OBJ_COFF) */
+#endif /* ! defined (OBJ_XCOFF) */
 
   if (*input_line_pointer != ',')
     demand_empty_rest_of_line ();
@@ -2370,7 +2369,6 @@ ppc_tc (ignore)
       cons (4);
     }
 }
-
 
 #ifdef TE_PE
 /* Pseudo-ops specific to the Windows NT PowerPC PE (coff) format */
@@ -2385,7 +2383,7 @@ ppc_tc (ignore)
 #define IMAGE_SCN_CNT_INITIALIZED_DATA       0x00000040  /* Section contains initialized data. */
 #define IMAGE_SCN_CNT_UNINITIALIZED_DATA     0x00000080  /* Section contains uninitialized data. */
 
-#define IMAGE_SCN_LNK_OTHER                  0x00000100  /* Reserved.
+#define IMAGE_SCN_LNK_OTHER                  0x00000100  /* Reserved.  */
 #define IMAGE_SCN_LNK_INFO                   0x00000200  /* Section contains comments or some other type of information. */
 #define IMAGE_SCN_LNK_REMOVE                 0x00000800  /* Section contents will not become part of image. */
 #define IMAGE_SCN_LNK_COMDAT                 0x00001000  /* Section contents comdat. */
@@ -2415,6 +2413,15 @@ ppc_tc (ignore)
 #define IMAGE_SCN_MEM_READ                   0x40000000  /* Section is readable.                   */
 #define IMAGE_SCN_MEM_WRITE                  0x80000000  /* Section is writeable.                  */
 
+/* Set the current section.  */
+
+static void
+ppc_set_current_section (new)
+     segT new;
+{
+  ppc_previous_section = ppc_current_section;
+  ppc_current_section = new;
+}
 
 /* pseudo-op: .previous
    behaviour: toggles the current section with the previous section.
@@ -2435,7 +2442,7 @@ ppc_previous(ignore)
 
   subseg_set(ppc_previous_section, 0);
 
-  setCurrentSection(ppc_previous_section);
+  ppc_set_current_section(ppc_previous_section);
 }
 
 /* pseudo-op: .pdata
@@ -2472,7 +2479,7 @@ ppc_pdata(ignore)
     {
       pdata_section = subseg_new(".pdata", 0);
     }
-  setCurrentSection(pdata_section);
+  ppc_set_current_section(pdata_section);
 }
 
 /* pseudo-op: .ydata
@@ -2506,7 +2513,7 @@ ppc_ydata(ignore)
     {
       ydata_section = subseg_new (".ydata", 0);
     }
-  setCurrentSection(ydata_section);
+  ppc_set_current_section(ydata_section);
 }
 
 /* pseudo-op: .reldata
@@ -2544,7 +2551,7 @@ ppc_reldata(ignore)
     {
       reldata_section = subseg_new (".reldata", 0);
     }
-  setCurrentSection(reldata_section);
+  ppc_set_current_section(reldata_section);
 }
 
 /* pseudo-op: .rdata
@@ -2574,7 +2581,7 @@ ppc_rdata(ignore)
     {
       rdata_section = subseg_new (".rdata", 0);
     }
-  setCurrentSection(rdata_section);
+  ppc_set_current_section(rdata_section);
 }
 
 /* pseudo-op: .ualong
@@ -2921,7 +2928,7 @@ ppc_pe_section (ignore)
 
   sec = subseg_new (name, (subsegT) exp);
 
-  setCurrentSection(sec);
+  ppc_set_current_section(sec);
 
   if (flags != SEC_NO_FLAGS)
     {
@@ -2953,19 +2960,10 @@ ppc_pe_function (ignore)
 {
   char *name;
   char endc;
-  char *s;
   symbolS *ext_sym;
-  symbolS *lab_sym;
 
   name = input_line_pointer;
   endc = get_symbol_end ();
-
-  /* Ignore any [PR] suffix.  */
-  name = ppc_canonicalize_symbol_name (name);
-  s = strchr (name, '[');
-  if (s != (char *) NULL
-      && strcmp (s + 1, "PR]") == 0)
-    *s = '\0';
 
   ext_sym = symbol_find_or_make (name);
 
@@ -2979,13 +2977,9 @@ ppc_pe_function (ignore)
   demand_empty_rest_of_line ();
 }
 
-
 #endif
-
-
-
 
-#ifdef OBJ_COFF
+#ifdef OBJ_XCOFF
 
 /* XCOFF specific symbol and file handling.  */
 
@@ -3116,7 +3110,6 @@ void
 ppc_frob_label (sym)
      symbolS *sym;
 {
-#ifndef TE_PE
   if (ppc_current_csect != (symbolS *) NULL)
     {
       if (sym->sy_tc.class == -1)
@@ -3127,7 +3120,6 @@ ppc_frob_label (sym)
 		     &symbol_lastP);
       ppc_current_csect->sy_tc.within = sym;
     }
-#endif
 }
 
 /* Change the name of a symbol just before writing it out.  Set the
@@ -3207,7 +3199,6 @@ ppc_frob_symbol (sym)
 	}
     }
 
-#ifndef TE_PE 
   if (! S_IS_EXTERNAL (sym)
       && (sym->bsym->flags & BSF_SECTION_SYM) == 0
       && S_GET_STORAGE_CLASS (sym) != C_FILE
@@ -3216,7 +3207,6 @@ ppc_frob_symbol (sym)
       && S_GET_STORAGE_CLASS (sym) != C_ESTAT
       && S_GET_SEGMENT (sym) != ppc_coff_debug_section)
     S_SET_STORAGE_CLASS (sym, C_HIDEXT);
-#endif
 
   if (S_GET_STORAGE_CLASS (sym) == C_EXT
       || S_GET_STORAGE_CLASS (sym) == C_HIDEXT)
@@ -3295,30 +3285,8 @@ ppc_frob_symbol (sym)
 	    }
 	  a->x_csect.x_smtyp = (2 << 3) | XTY_SD;
 	}
-
-#ifdef TE_PE
-      else if (S_GET_SEGMENT (sym) == pdata_section) 
-	{
-	  a->x_csect.x_scnlen.l = (bfd_section_size (stdoutput,
-						     S_GET_SEGMENT (sym))
-				   - S_GET_VALUE (sym));
-	}
-      else if (S_GET_SEGMENT (sym) == rdata_section)
-	{
-	  a->x_csect.x_scnlen.l = (bfd_section_size (stdoutput,
-						     S_GET_SEGMENT (sym))
-				   - S_GET_VALUE (sym));
-	}
-      else if (S_GET_SEGMENT (sym) == reldata_section)
-	{
-	  a->x_csect.x_scnlen.l = (bfd_section_size (stdoutput,
-						     S_GET_SEGMENT (sym))
-				   - S_GET_VALUE (sym));
-	}
-#endif
       else
 	{
-#ifndef TE_PE
 	  symbolS *csect;
 
 	  /* This is a normal symbol definition.  x_scnlen is the
@@ -3349,7 +3317,6 @@ ppc_frob_symbol (sym)
 	      coffsymbol (sym->bsym)->native[i + 1].fix_scnlen = 1;
 	    }
 	  a->x_csect.x_smtyp = XTY_LD;
-#endif
 	}
 	
       a->x_csect.x_parmhash = 0;
@@ -3392,12 +3359,10 @@ void
 ppc_frob_section (sec)
      asection *sec;
 {
-#ifndef TE_PE
   static bfd_size_type vma = 0;
 
   bfd_set_section_vma (stdoutput, sec, vma);
   vma += bfd_section_size (stdoutput, sec);
-#endif
 }
 
 /* Adjust the file by adding a .debug section if needed.  */
@@ -3419,7 +3384,7 @@ ppc_frob_file ()
     }
 }
 
-#endif /* OBJ_COFF */
+#endif /* OBJ_XCOFF */
 
 /* Turn a string in input_line_pointer into a floating point constant
    of type type, and store the appropriate bytes in *litp.  The number
@@ -3513,6 +3478,7 @@ md_estimate_size_before_relax (fragp, seg)
      asection *seg;
 {
   abort ();
+  return 0;
 }
 
 /* Convert a machine dependent frag.  We never generate these.  */
@@ -3555,7 +3521,7 @@ md_pcrel_from (fixp)
   return fixp->fx_frag->fr_address + fixp->fx_where;
 }
 
-#ifdef OBJ_COFF
+#ifdef OBJ_XCOFF
 
 /* This is called to see whether a fixup should be adjusted to use a
    section symbol.  We take the opportunity to change a fixup against
@@ -3567,12 +3533,6 @@ ppc_fix_adjustable (fix)
      fixS *fix;
 {
   valueT val;
-
-#ifdef TE_PE
-  /* FIXME: Certainly the toc stuff gets us into trouble, and should
-            not be executed. Not sure about the reloc adjustments. */
-  return 0;
-#endif
 
   resolve_symbol_value (fix->fx_addsy);
   val = S_GET_VALUE (fix->fx_addsy);
@@ -3662,7 +3622,7 @@ static int
 ppc_is_toc_sym (sym)
      symbolS *sym;
 {
-#ifdef OBJ_COFF
+#ifdef OBJ_XCOFF
   return sym->sy_tc.class == XMC_TC;
 #else
   return strcmp (segment_name (S_GET_SEGMENT (sym)), ".got") == 0;
@@ -3731,7 +3691,7 @@ md_apply_fix3 (fixp, valuep, seg)
 
       operand = &powerpc_operands[opindex];
 
-#ifdef OBJ_COFF
+#ifdef OBJ_XCOFF
       /* It appears that an instruction like
 	     l 9,LC..1(30)
 	 when LC..1 is not a TOC symbol does not generate a reloc.  It
@@ -3842,6 +3802,7 @@ md_apply_fix3 (fixp, valuep, seg)
 	case BFD_RELOC_PPC_TOC16:
 	case BFD_RELOC_16:
 	case BFD_RELOC_GPREL16:
+	case BFD_RELOC_16_GOT_PCREL:
 	  if (fixp->fx_pcrel)
 	    abort ();
 
