@@ -1,3 +1,34 @@
+Tue Nov 29 13:58:10 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* config/tc-alpha.c (in_range_signed, in_range_unsigned): New
+	routines, split from in_range.
+	(in_range): Deleted.  All calls changed to in_range_*signed.
+	(create_lita_section): Macro deleted.  Single use expanded in
+	place.
+	(alpha_ip): Handle `t' and `8' operand types.
+	(md_apply_fix): Handle BFD_RELOC_12_PCREL.  Print name of
+	unhandled relocation types.
+	* config/alpha-opcode.h: Added HALT and DRAINA.  Disabled MOVI,
+	since it doesn't work, and isn't supported by the native
+	assembler.
+
+	* input-scrub.c: Change wording of a comment to avoid interference
+	with Cygnus source-control tools.
+
+	* as.h (errno) [NEED_DECLARATION_ERRNO]: Declare.
+
+	* config/tc-m68k.c (init_table): List buscr and pcr control
+	registers.
+	(m68k_ip, case 'J'): Handle them.
+
+	start-sanitize-rce
+	Tiemann should've noted something like this:
+	* config/tc-rce.c, config/tc-rce.h: New files.
+	* as.c (main) [TC_RCE]: Call dump_literals.
+	* configure.in: Handle rce-*-aout.
+	* configure: Regenerated.
+	end-sanitize-rce
+
 Mon Nov 28 11:37:35 1994  Doug Evans  <dje@canuck.cygnus.com>
 
 	* app.c (do_scrub_next_char): Insert missing newline at end of file
