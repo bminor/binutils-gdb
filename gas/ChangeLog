@@ -6,6 +6,11 @@ Thu May  7 15:49:07 1998  Jeffrey A Law  (law@cygnus.com)
 
 Thu May  7 11:47:22 1998  Doug Evans  <devans@canuck.cygnus.com>
 
+	* Makefile.am: Update with `make dep-am'.
+	(HFILES): Add cgen.h.
+	(cgen.o): Depend on cgen.h.
+	* Makefile.in: Regenerate.
+
 	* cgen.c (cgen_md_apply_fix3): Don't pass newline to as_warn_where.
 
 Thu May  7 13:20:56 1998  Anders Blomdell  <anders.blomdell@control.lth.se>
