@@ -1356,7 +1356,6 @@ read_ofile_symtab (pst)
   unsigned char type;
   unsigned max_symnum;
   register bfd *abfd;
-  struct symtab *rtn;
   struct objfile *objfile;
   int sym_offset;		/* Offset to start of symbols to read */
   int sym_size;			/* Size of symbols to read */
@@ -2077,8 +2076,7 @@ elfstab_build_psymtabs (objfile, section_offsets, mainline,
   DBX_STRINGTAB_SIZE (objfile) = stabstrsize;
   DBX_SYMTAB_OFFSET  (objfile) = staboffset;
   
-  if (stabstrsize < 0	/* FIXME:  stabstrsize is unsigned; never true! */
-      || stabstrsize > bfd_get_size (sym_bfd))
+  if (stabstrsize > bfd_get_size (sym_bfd))
     error ("ridiculous string table size: %d bytes", stabstrsize);
   DBX_STRINGTAB (objfile) = (char *)
     obstack_alloc (&objfile->psymbol_obstack, stabstrsize+1);

@@ -1214,7 +1214,6 @@ match_float_literal ()
   char *tokptr = lexptr;
   char *buf;
   char *copy;
-  char ch;
   double dval;
   extern double strtod ();
   
@@ -1929,6 +1928,7 @@ yylex ()
 	      case LOC_ARG:
 	      case LOC_REF_ARG:
 	      case LOC_REGPARM:
+	      case LOC_REGPARM_ADDR:
 	      case LOC_LOCAL:
 	      case LOC_LOCAL_ARG:
 	      case LOC_BASEREG:

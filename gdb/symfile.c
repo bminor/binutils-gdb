@@ -1169,8 +1169,8 @@ clear_symtab_users ()
    discarded if symbol reading is successful.  */
 
 #if 0
-  /* FIXME:  As free_named_symtabs is currently a big noop this function
-     is no longer needed.
+/* FIXME:  As free_named_symtabs is currently a big noop this function
+   is no longer needed.  */
 static void
 clear_symtab_users_once PARAMS ((void));
 

@@ -286,7 +286,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	      continue;
 	  }
 
+#ifdef DBXREAD_ONLY
 	record_include_file:
+#endif
 
 	  psymtab_include_list[includes_used++] = namestring;
 	  if (includes_used >= includes_allocated)

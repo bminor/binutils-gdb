@@ -684,7 +684,9 @@ lookup_struct_elt_type (type, name, noerr)
     int noerr;
 {
   int i;
+#if 0
   char *typename;
+#endif
 
   if (TYPE_CODE (type) == TYPE_CODE_PTR ||
       TYPE_CODE (type) == TYPE_CODE_REF)

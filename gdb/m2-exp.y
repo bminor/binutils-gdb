@@ -606,6 +606,7 @@ variable:	NAME
 				case LOC_LOCAL:
 				case LOC_REF_ARG:
 				case LOC_REGPARM:
+				case LOC_REGPARM_ADDR:
 				case LOC_LOCAL_ARG:
 				case LOC_BASEREG:
 				case LOC_BASEREG_ARG:
@@ -1119,12 +1120,14 @@ yylex ()
        case LOC_ARG:
        case LOC_REF_ARG:
        case LOC_REGPARM:
+       case LOC_REGPARM_ADDR:
        case LOC_LOCAL:
        case LOC_LOCAL_ARG:
        case LOC_BASEREG:
        case LOC_BASEREG_ARG:
        case LOC_CONST:
        case LOC_CONST_BYTES:
+       case LOC_OPTIMIZED_OUT:
 	  return NAME;
 
        case LOC_TYPEDEF:

@@ -1275,11 +1275,7 @@ read_type (pp, objfile)
 	/* Name including "struct", etc.  */
 	char *type_name;
 	
-	/* Name without "struct", etc.  */
-	char *type_name_only;
-
 	{
-	  char *prefix;
 	  char *from, *to;
 	  
 	  /* Set the type code according to the following letter.  */
@@ -2005,7 +2001,6 @@ read_cpp_abbrev (fip, pp, type, objfile)
      struct objfile *objfile;
 {
   register char *p;
-  const char *prefix;
   char *name;
   char cpp_abbrev;
   struct type *context;
@@ -3112,7 +3107,7 @@ read_huge_number (pp, end, bits)
 	{
 	  if (bits != NULL)
 	    *bits = -1;
-	  return;
+	  return 0;
 	}
     }
   else
@@ -3127,7 +3122,7 @@ read_huge_number (pp, end, bits)
 	     count how many bits are in them).  */
 	  if (bits != NULL)
 	    *bits = -1;
-	  return;
+	  return 0;
 	}
       
       /* -0x7f is the same as 0x80.  So deal with it by adding one to

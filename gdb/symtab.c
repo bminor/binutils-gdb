@@ -436,8 +436,6 @@ lookup_symbol (name, block, namespace, is_a_field_of_this, symtab)
   register struct objfile *objfile;
   register struct block *b;
   register struct minimal_symbol *msymbol;
-  char *temp;
-  extern char *gdb_completer_word_break_characters;
 
   /* Search specified block and its superiors.  */
 
@@ -1964,7 +1962,6 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
   if ((copy[0] == copy [p - *argptr - 1])
       && strchr (gdb_completer_quote_characters, copy[0]) != NULL)
     {
-      char *temp;
       copy [p - *argptr - 1] = '\0';
       copy++;
     }

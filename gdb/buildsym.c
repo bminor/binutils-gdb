@@ -432,8 +432,8 @@ start_subfile (name, dirname)
 
       p = strrchr (subfile->name, '.');
       if (p != NULL
-	  && (p[1] == 'C' && p[2] == '\0'
-	      || p[1] == 'c' && p[2] == 'c' && p[3] == '\0'))
+	  && ((p[1] == 'C' && p[2] == '\0')
+	      || (p[1] == 'c' && p[2] == 'c' && p[3] == '\0')))
 	for (s = subfiles; s != NULL; s = s->next)
 	  if (s->language == language_c)
 	    s->language = language_cplus;

@@ -121,7 +121,6 @@ nlm_symtab_read (abfd, addr, objfile)
   asymbol **symbol_table;
   unsigned int number_of_symbols;
   unsigned int i;
-  int index;
   struct cleanup *back_to;
   CORE_ADDR symaddr;
   enum minimal_symbol_type ms_type;

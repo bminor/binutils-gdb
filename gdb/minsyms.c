@@ -490,7 +490,6 @@ install_minimal_symbols (objfile)
   register struct minimal_symbol *msymbols;
   int alloc_count;
   register char leading_char;
-  char *demangled_name;
 
   if (msym_count > 0)
     {

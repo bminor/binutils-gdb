@@ -2171,7 +2171,6 @@ locval (loc)
   auto long stack[64];
   int stacki;
   char *end;
-  long regno;
   int loc_atom_code;
   int loc_value_size;
   

@@ -437,7 +437,8 @@ maintenance_print_symbols (args, from_tty)
 
 /* Print symbol ARGS->SYMBOL on ARGS->OUTFILE.  ARGS->DEPTH says how
    far to indent.  ARGS is really a struct print_symbol_args *, but is
-   declared as char * to get it past catch_errors.  */
+   declared as char * to get it past catch_errors.  Returns 0 for error,
+   1 for success.  */
 
 static int
 print_symbol (args)
@@ -452,7 +453,7 @@ print_symbol (args)
     {
       fprintf (outfile, "label %s at 0x%x\n", SYMBOL_SOURCE_NAME (symbol),
 	       SYMBOL_VALUE_ADDRESS (symbol));
-      return;
+      return 1;
     }
   if (SYMBOL_NAMESPACE (symbol) == STRUCT_NAMESPACE)
     {
@@ -573,6 +574,7 @@ print_symbol (args)
 	}
     }
   fprintf (outfile, "\n");
+  return 1;
 }
 
 void
