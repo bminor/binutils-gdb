@@ -175,4 +175,10 @@ char *baud_rate;
 #define TARGET_CHAR_BIT 8
 #endif
 
+/* Number of bits in a long long or unsigned long long
+   for the target machine.  */
+#if !defined (TARGET_LONG_LONG_BIT)
+#define TARGET_LONG_LONG_BIT 64
+#endif
+
 #endif /* no DEFS_H */
