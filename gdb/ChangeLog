@@ -1,3 +1,15 @@
+2000-03-21  J.T. Conklin  <jtc@redback.com> 
+ 
+        * i386/nbsd.mh (NATDEPFILES): Change i386b-nat.o to i386nbsd-nat.o. 
+        * i386nbsd-nat.c: New file. 
+ 
+        * i386/tm-nbsd.h (NUM_REGS): Removed. 
+        (HAVE_I387_REGS): Defined. 
+        * i386/nm-nbsd.h (FLOAT_INFO): Removed. 
+ 
+        * tm-nbsd.h (IN_SOLIB_CALL_TRAMPOLINE): Define if not 
+        SVR4_SHARED_LIBS. 
+
 Wed Mar 22 11:18:59 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* MAINTAINERS: Add Jim Blandy to breakpoint maintainers.  David

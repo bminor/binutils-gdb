@@ -21,11 +21,10 @@
 #ifndef TM_NBSD_H
 #define TM_NBSD_H
 
+#define HAVE_I387_REGS
+
 #include "i386/tm-i386bsd.h"
 #include "tm-nbsd.h"
-
-#undef NUM_REGS
-#define NUM_REGS 16
 
 #define JB_ELEMENT_SIZE sizeof(int)	/* jmp_buf[_JBLEN] is array of ints */
 #define JB_PC	0		/* Setjmp()'s return PC saved here */
