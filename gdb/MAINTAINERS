@@ -225,7 +225,6 @@ generic symtabs		Jim Blandy		jimb@redhat.com
   coff reader		Philippe De Muyter	phdm@macqel.be
   xcoff reader		Any maintainer can modify this; please send tricky
 			ones to Kevin Buettner <kevinb@redhat.com>
-  linespec		Elena Zannoni		ezannoni@redhat.com
   HP/UX readers		Any [past] maintainer can modify this.
 			Please send tricky ones to the symtabs maintainers.
 
@@ -255,7 +254,6 @@ testsuite		(Global Maintainers)
 			David Carlton		carlton@bactrian.org
   mi tests (gdb.mi)     Elena Zannoni           ezannoni@redhat.com
                         Andrew Cagney           cagney@redhat.com
-  stabs (gdb.stabs)     Elena Zannoni           ezannoni@redhat.com
   threads (gdb.threads) Michael Snyder          msnyder@redhat.com
   trace (gdb.trace)     Michael Snyder          msnyder@redhat.com
   hp tests (gdb.hp)	(vacant)

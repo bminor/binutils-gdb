@@ -1,3 +1,7 @@
+2004-04-22  Elena Zannoni  <ezannoni@redhat.com>
+
+	* MAINTAINERS: Drop maintenance of gdb.stabs, and linespec.c.
+
 2004-04-22  Jim Blandy  <jimb@redhat.com>
 
 	* ppc-linux-nat.c (ppc_register_u_addr): Don't assume that r0 is
