@@ -1,3 +1,8 @@
+2004-08-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (func_desc_adjust): Give undefined dot-symbols a value
+	if we can look up their function descriptor in a regular file.
+
 2004-08-18  Nick Clifton  <nickc@redhat.com>
 
 	PR 324

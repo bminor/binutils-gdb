@@ -5061,6 +5061,24 @@ func_desc_adjust (struct elf_link_hash_entry *h, void *inf)
   info = inf;
   htab = ppc_hash_table (info);
 
+  /* Resolve undefined references to dot-symbols as the value
+     in the function descriptor, if we have one in a regular object.
+     This is to satisfy cases like ".quad .foo".  Calls to functions
+     in dynamic objects are handled elsewhere.  */
+  if (fh->elf.root.type == bfd_link_hash_undefweak
+      && fh->was_undefined
+      && (fh->oh->elf.root.type == bfd_link_hash_defined
+	  || fh->oh->elf.root.type == bfd_link_hash_defweak)
+      && get_opd_info (fh->oh->elf.root.u.def.section) != NULL
+      && opd_entry_value (fh->oh->elf.root.u.def.section,
+			  fh->oh->elf.root.u.def.value,
+			  &fh->elf.root.u.def.section,
+			  &fh->elf.root.u.def.value) != (bfd_vma) -1)
+    {
+      fh->elf.root.type = fh->oh->elf.root.type;
+      fh->elf.elf_link_hash_flags |= ELF_LINK_FORCED_LOCAL;
+    }
+
   /* If this is a function code symbol, transfer dynamic linking
      information to the function descriptor symbol.  */
   if (!fh->is_func)
