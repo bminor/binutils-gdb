@@ -1,3 +1,8 @@
+Sun Dec  6 21:57:50 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gprof.texi (Symspecs): Mention that you have to add any
+	underscore yourself when naming a symbol.
+
 Mon Nov  2 15:05:33 1998  Geoffrey Noer  <noer@cygnus.com>
 
         * configure.in: detect cygwin* instead of cygwin32*

@@ -669,34 +669,39 @@ following syntax:
 
 Here are some sample symspecs:
 
-@table @code
+@table @samp
 @item main.c
-Selects everything in file "main.c"---the
+Selects everything in file @file{main.c}---the
 dot in the string tells gprof to interpret
 the string as a filename, rather than as
 a function name.  To select a file whose
 name does not contain a dot, a trailing colon
-should be specified.  For example, "odd:" is
-interpreted as the file named "odd".
+should be specified.  For example, @samp{odd:} is
+interpreted as the file named @file{odd}.
 
 @item main
-Selects all functions named "main".  Notice
-that there may be multiple instances of the
-same function name because some of the
-definitions may be local (i.e., static).
-Unless a function name is unique in a program,
-you must use the colon notation explained
-below to specify a function from a specific
-source file.  Sometimes, function names contain
-dots.  In such cases, it is necessar to
-add a leading colon to the name.  For example,
-":.mul" selects function ".mul".
+Selects all functions named @samp{main}.
+
+Note that there may be multiple instances of the same function name
+because some of the definitions may be local (i.e., static).  Unless a
+function name is unique in a program, you must use the colon notation
+explained below to specify a function from a specific source file.
+
+Sometimes, function names contain dots.  In such cases, it is necessar
+to add a leading colon to the name.  For example, @samp{:.mul} selects
+function @samp{.mul}.
+
+In some object file formats, symbols have a leading underscore.  gprof
+will normally not print these underscores.  However, you must use the
+underscore when you name a symbol in a symspec.  You can use the
+@code{nm} program to see whether symbols have underscores for the object
+file format you are using.
 
 @item main.c:main
-Selects function "main" in file "main.c".
+Selects function @samp{main} in file @file{main.c}.
 
 @item main.c:134
-Selects line 134 in file "main.c".
+Selects line 134 in file @file{main.c}.
 @end table
 
 @node Output
