@@ -1,5 +1,7 @@
 Sun Aug  8 13:59:49 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* ser-unix.c (hardwire_send_break) [HAVE_SGTTY]: Use select not usleep.
+
 	* remote.c: Add comments about 'd', 'r', and unrecognized requests.
 
 	* inflow.c (terminal_init_inferior): Don't muck with tty state if

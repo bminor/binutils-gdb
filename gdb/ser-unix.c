@@ -359,10 +359,20 @@ hardwire_send_break (scb)
 #endif
 
 #ifdef HAVE_SGTTY
-  status = ioctl (scb->fd, TIOCSBRK, 0);
-  usleep (250000);
-  status = ioctl (scb->fd, TIOCCBRK, 0);
-  return status;
+  {
+    struct timeval timeout;
+
+    status = ioctl (scb->fd, TIOCSBRK, 0);
+
+    /* Can't use usleep; it doesn't exist in BSD 4.2.  */
+    /* Note that if this select() is interrupted by a signal it will not wait
+       the full length of time.  I think that is OK.  */
+    timeout.tv_sec = 0;
+    timeout.tv_usec = 250000;
+    select (0, 0, 0, 0, &timeout);
+    status = ioctl (scb->fd, TIOCCBRK, 0);
+    return status;
+  }
 #endif  
 }
 
