@@ -1204,7 +1204,7 @@ cris_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   if (get_next_frame (fi))
     {
       /* Called from get_prev_frame.  */
-      deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (get_next_frame (fi)));
+      deprecated_update_frame_pc_hack (fi, DEPRECATED_FRAME_SAVED_PC (get_next_frame (fi)));
     }
  
   frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
@@ -4316,7 +4316,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     (gdbarch, cris_frameless_function_invocation);
   set_gdbarch_frame_chain (gdbarch, cris_frame_chain);
 
-  set_gdbarch_frame_saved_pc (gdbarch, cris_frame_saved_pc);
+  set_gdbarch_deprecated_frame_saved_pc (gdbarch, cris_frame_saved_pc);
   set_gdbarch_saved_pc_after_call (gdbarch, cris_saved_pc_after_call);
 
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);

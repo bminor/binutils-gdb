@@ -1,3 +1,8 @@
+2003-03-12  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Rename
+	FRAME_SAVED_PC to DEPRECATED_FRAME_SAVED_PC.
+	
 2003-03-10  Corinna Vinschen  <vinschen@redhat.com>
 
 	* gdb.texinfo: Add File-I/O documentation.

@@ -2228,42 +2228,44 @@ extern void set_gdbarch_frame_chain_valid (struct gdbarch *gdbarch, gdbarch_fram
 #endif
 #endif
 
-/* NOTE: FRAME_SAVED_PC is replaced by UNWIND_PC */
+/* DEPRECATED_FRAME_SAVED_PC has been replaced by UNWIND_PC.  Please
+   note, per UNWIND_PC's doco, that while the two have similar
+   interfaces they have very different underlying implementations. */
 
-#if defined (FRAME_SAVED_PC)
-/* Legacy for systems yet to multi-arch FRAME_SAVED_PC */
-#if !defined (FRAME_SAVED_PC_P)
-#define FRAME_SAVED_PC_P() (1)
+#if defined (DEPRECATED_FRAME_SAVED_PC)
+/* Legacy for systems yet to multi-arch DEPRECATED_FRAME_SAVED_PC */
+#if !defined (DEPRECATED_FRAME_SAVED_PC_P)
+#define DEPRECATED_FRAME_SAVED_PC_P() (1)
 #endif
 #endif
 
 /* Default predicate for non- multi-arch targets. */
-#if (!GDB_MULTI_ARCH) && !defined (FRAME_SAVED_PC_P)
-#define FRAME_SAVED_PC_P() (0)
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_FRAME_SAVED_PC_P)
+#define DEPRECATED_FRAME_SAVED_PC_P() (0)
 #endif
 
-extern int gdbarch_frame_saved_pc_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (FRAME_SAVED_PC_P)
-#error "Non multi-arch definition of FRAME_SAVED_PC"
+extern int gdbarch_deprecated_frame_saved_pc_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_FRAME_SAVED_PC_P)
+#error "Non multi-arch definition of DEPRECATED_FRAME_SAVED_PC"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FRAME_SAVED_PC_P)
-#define FRAME_SAVED_PC_P() (gdbarch_frame_saved_pc_p (current_gdbarch))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_FRAME_SAVED_PC_P)
+#define DEPRECATED_FRAME_SAVED_PC_P() (gdbarch_deprecated_frame_saved_pc_p (current_gdbarch))
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (FRAME_SAVED_PC)
-#define FRAME_SAVED_PC(fi) (internal_error (__FILE__, __LINE__, "FRAME_SAVED_PC"), 0)
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_FRAME_SAVED_PC)
+#define DEPRECATED_FRAME_SAVED_PC(fi) (internal_error (__FILE__, __LINE__, "DEPRECATED_FRAME_SAVED_PC"), 0)
 #endif
 
-typedef CORE_ADDR (gdbarch_frame_saved_pc_ftype) (struct frame_info *fi);
-extern CORE_ADDR gdbarch_frame_saved_pc (struct gdbarch *gdbarch, struct frame_info *fi);
-extern void set_gdbarch_frame_saved_pc (struct gdbarch *gdbarch, gdbarch_frame_saved_pc_ftype *frame_saved_pc);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (FRAME_SAVED_PC)
-#error "Non multi-arch definition of FRAME_SAVED_PC"
+typedef CORE_ADDR (gdbarch_deprecated_frame_saved_pc_ftype) (struct frame_info *fi);
+extern CORE_ADDR gdbarch_deprecated_frame_saved_pc (struct gdbarch *gdbarch, struct frame_info *fi);
+extern void set_gdbarch_deprecated_frame_saved_pc (struct gdbarch *gdbarch, gdbarch_deprecated_frame_saved_pc_ftype *deprecated_frame_saved_pc);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_FRAME_SAVED_PC)
+#error "Non multi-arch definition of DEPRECATED_FRAME_SAVED_PC"
 #endif
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (FRAME_SAVED_PC)
-#define FRAME_SAVED_PC(fi) (gdbarch_frame_saved_pc (current_gdbarch, fi))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_FRAME_SAVED_PC)
+#define DEPRECATED_FRAME_SAVED_PC(fi) (gdbarch_deprecated_frame_saved_pc (current_gdbarch, fi))
 #endif
 #endif
 

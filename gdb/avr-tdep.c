@@ -736,7 +736,7 @@ avr_init_extra_frame_info (int fromleaf, struct frame_info *fi)
   int reg;
 
   if (get_next_frame (fi))
-    deprecated_update_frame_pc_hack (fi, FRAME_SAVED_PC (get_next_frame (fi)));
+    deprecated_update_frame_pc_hack (fi, DEPRECATED_FRAME_SAVED_PC (get_next_frame (fi)));
 
   frame_extra_info_zalloc (fi, sizeof (struct frame_extra_info));
   frame_saved_regs_zalloc (fi);
@@ -1201,7 +1201,7 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frameless_function_invocation (gdbarch, frameless_look_for_prologue);	/* ??? */
   set_gdbarch_frame_chain (gdbarch, avr_frame_chain);
-  set_gdbarch_frame_saved_pc (gdbarch, avr_frame_saved_pc);
+  set_gdbarch_deprecated_frame_saved_pc (gdbarch, avr_frame_saved_pc);
   set_gdbarch_frame_args_address (gdbarch, avr_frame_address);
   set_gdbarch_frame_locals_address (gdbarch, avr_frame_address);
   set_gdbarch_saved_pc_after_call (gdbarch, avr_saved_pc_after_call);

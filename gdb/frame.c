@@ -169,13 +169,13 @@ frame_pc_unwind (struct frame_info *this_frame)
              global register cache.  The assumption is dangerous.  */
 	  pc = read_pc ();
 	}
-      else if (FRAME_SAVED_PC_P ())
+      else if (DEPRECATED_FRAME_SAVED_PC_P ())
 	{
 	  /* FIXME: cagney/2003-03-06: Old code, but not a sentinel
              frame.  Do like was always done.  Note that this method,
              unlike unwind_pc(), tries to handle all the different
              frame cases directly.  It fails.  */
-	  pc = FRAME_SAVED_PC (this_frame);
+	  pc = DEPRECATED_FRAME_SAVED_PC (this_frame);
 	}
       else
 	internal_error (__FILE__, __LINE__, "No gdbarch_unwind_pc method");

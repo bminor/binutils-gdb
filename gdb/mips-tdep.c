@@ -1694,7 +1694,7 @@ mips_init_frame_pc_first (int fromleaf, struct frame_info *prev)
   pc = ((fromleaf)
 	? SAVED_PC_AFTER_CALL (get_next_frame (prev))
 	: get_next_frame (prev)
-	? FRAME_SAVED_PC (get_next_frame (prev))
+	? DEPRECATED_FRAME_SAVED_PC (get_next_frame (prev))
 	: read_pc ());
   tmp = SKIP_TRAMPOLINE_CODE (pc);
   return tmp ? tmp : pc;
@@ -2432,7 +2432,7 @@ mips_frame_chain (struct frame_info *frame)
 {
   mips_extra_func_info_t proc_desc;
   CORE_ADDR tmp;
-  CORE_ADDR saved_pc = FRAME_SAVED_PC (frame);
+  CORE_ADDR saved_pc = DEPRECATED_FRAME_SAVED_PC (frame);
 
   if (saved_pc == 0 || inside_entry_file (saved_pc))
     return 0;
@@ -3844,7 +3844,7 @@ mips_pop_frame (void)
       return;
     }
 
-  write_register (PC_REGNUM, FRAME_SAVED_PC (frame));
+  write_register (PC_REGNUM, DEPRECATED_FRAME_SAVED_PC (frame));
   if (get_frame_saved_regs (frame) == NULL)
     DEPRECATED_FRAME_INIT_SAVED_REGS (frame);
   for (regnum = 0; regnum < NUM_REGS; regnum++)
@@ -6027,7 +6027,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_frame_chain (gdbarch, mips_frame_chain);
   set_gdbarch_frameless_function_invocation (gdbarch, 
 					     generic_frameless_function_invocation_not);
-  set_gdbarch_frame_saved_pc (gdbarch, mips_frame_saved_pc);
+  set_gdbarch_deprecated_frame_saved_pc (gdbarch, mips_frame_saved_pc);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_frame_args_skip (gdbarch, 0);
 

@@ -3268,10 +3268,10 @@ For the frame described by @var{fi} return the number of arguments that
 are being passed.  If the number of arguments is not known, return
 @code{-1}.
 
-@item FRAME_SAVED_PC(@var{frame})
-@findex FRAME_SAVED_PC
-@anchor{FRAME_SAVED_PC} Given @var{frame}, return the pc saved there.
-This is the return address.
+@item DEPRECATED_FRAME_SAVED_PC(@var{frame})
+@findex DEPRECATED_FRAME_SAVED_PC
+@anchor{DEPRECATED_FRAME_SAVED_PC} Given @var{frame}, return the pc
+saved there.  This is the return address.
 
 This method is deprecated. @xref{unwind_pc}.
 
@@ -3291,7 +3291,7 @@ return d10v_make_iaddr (pc);
 @end smallexample
 
 @noindent
-@xref{FRAME_SAVED_PC}, which this method replaces.
+@xref{DEPRECATED_FRAME_SAVED_PC}, which this method replaces.
 
 @item FUNCTION_EPILOGUE_SIZE
 @findex FUNCTION_EPILOGUE_SIZE

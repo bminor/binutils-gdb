@@ -354,7 +354,7 @@ xstormy16_pop_frame (void)
 						      xstormy16_reg_size));
 	  }
       /* Restore the PC */
-      write_register (PC_REGNUM, FRAME_SAVED_PC (fi));
+      write_register (PC_REGNUM, DEPRECATED_FRAME_SAVED_PC (fi));
       flush_cached_frames ();
     }
   return;
@@ -836,7 +836,7 @@ xstormy16_frame_chain (struct frame_info *fi)
 static int
 xstormy16_frame_chain_valid (CORE_ADDR chain, struct frame_info *thisframe)
 {
-  return chain < 0x8000 && FRAME_SAVED_PC (thisframe) >= 0x8000 &&
+  return chain < 0x8000 && DEPRECATED_FRAME_SAVED_PC (thisframe) >= 0x8000 &&
     (get_frame_extra_info (thisframe)->frameless_p ||
      get_frame_base (thisframe) - get_frame_extra_info (thisframe)->framesize == chain);
 }
@@ -1060,7 +1060,7 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_chain (gdbarch, xstormy16_frame_chain);
   set_gdbarch_get_saved_register (gdbarch, xstormy16_get_saved_register);
   set_gdbarch_saved_pc_after_call (gdbarch, xstormy16_saved_pc_after_call);
-  set_gdbarch_frame_saved_pc (gdbarch, xstormy16_frame_saved_pc);
+  set_gdbarch_deprecated_frame_saved_pc (gdbarch, xstormy16_frame_saved_pc);
   set_gdbarch_skip_prologue (gdbarch, xstormy16_skip_prologue);
   set_gdbarch_frame_chain_valid (gdbarch, xstormy16_frame_chain_valid);
 

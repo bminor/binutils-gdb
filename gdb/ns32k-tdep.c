@@ -191,7 +191,7 @@ umax_frame_num_args (struct frame_info *fi)
     {
       pc = ((enter_addr == 1)
 	    ? SAVED_PC_AFTER_CALL (fi)
-	    : FRAME_SAVED_PC (fi));
+	    : DEPRECATED_FRAME_SAVED_PC (fi));
       insn = read_memory_integer (pc, 2);
       addr_mode = (insn >> 11) & 0x1f;
       insn = insn & 0x7ff;
@@ -573,7 +573,7 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
                                    generic_frameless_function_invocation_not);
   
   set_gdbarch_frame_chain (gdbarch, ns32k_frame_chain);
-  set_gdbarch_frame_saved_pc (gdbarch, ns32k_frame_saved_pc);
+  set_gdbarch_deprecated_frame_saved_pc (gdbarch, ns32k_frame_saved_pc);
 
   set_gdbarch_frame_args_address (gdbarch, ns32k_frame_args_address);
   set_gdbarch_frame_locals_address (gdbarch, ns32k_frame_locals_address);

@@ -99,8 +99,8 @@ extern int delta68_in_sigtramp (CORE_ADDR pc, char *name);
 #define IN_SIGTRAMP(pc,name) delta68_in_sigtramp (pc, name)
 
 extern CORE_ADDR delta68_frame_saved_pc (struct frame_info *fi);
-#undef FRAME_SAVED_PC
-#define FRAME_SAVED_PC(fi) delta68_frame_saved_pc (fi)
+#undef DEPRECATED_FRAME_SAVED_PC
+#define DEPRECATED_FRAME_SAVED_PC(fi) delta68_frame_saved_pc (fi)
 
 extern CORE_ADDR delta68_frame_args_address (struct frame_info *fi);
 #undef FRAME_ARGS_ADDRESS
