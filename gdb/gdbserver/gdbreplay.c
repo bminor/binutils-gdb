@@ -30,11 +30,15 @@
 #include <ctype.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <stdlib.h>
-#include <unistd.h>
 
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
 #ifdef HAVE_STRING_H
 #include <string.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
 #endif
 
 /* Sort of a hack... */
@@ -46,7 +50,7 @@ static int remote_desc;
    as the file name for which the error was encountered.
    Then return to command level.  */
 
-void
+static void
 perror_with_name (char *string)
 {
 #ifndef STDC_HEADERS
@@ -77,7 +81,7 @@ sync_error (FILE *fp, char *desc, int expect, int got)
   exit (1);
 }
 
-void
+static void
 remote_close (void)
 {
   close (remote_desc);
@@ -86,7 +90,7 @@ remote_close (void)
 /* Open a connection to a remote debugger.
    NAME is the filename used for communication.  */
 
-void
+static void
 remote_open (char *name)
 {
   if (!strchr (name, ':'))
@@ -234,7 +238,7 @@ logchar (FILE *fp)
 /* Accept input from gdb and match with chars from fp (after skipping one
    blank) up until a \n is read from fp (which is not matched) */
 
-void
+static void
 expect (FILE *fp)
 {
   int fromlog;
@@ -265,7 +269,7 @@ expect (FILE *fp)
 /* Play data back to gdb from fp (after skipping leading blank) up until a
    \n is read from fp (which is discarded and not sent to gdb). */
 
-void
+static void
 play (FILE *fp)
 {
   int fromlog;

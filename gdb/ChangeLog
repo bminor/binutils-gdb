@@ -1,3 +1,8 @@
+2002-07-09  David O'Brien  <obrien@FreeBSD.org>
+
+	* gdbserver/gdbreplay.c (stdlib.h, unistd.h): Conditionaly include.
+	(perror_with_name, remote_close, remote_open, expect, play): Static.
+
 2002-07-08  Andrew Cagney  <ac131313@redhat.com>
 
 	* config.in, configure: Regenerate.
