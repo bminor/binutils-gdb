@@ -145,7 +145,7 @@ static definfo init[] =
 #define IMAGEBASEOFF 0
   D(ImageBase,"__image_base__", BEOS_EXE_IMAGE_BASE),
 #define DLLOFF 1
-  {&dll, sizeof(dll), 0, "__dll__"},
+  {&dll, sizeof(dll), 0, "__dll__", 0},
   D(SectionAlignment,"__section_alignment__", PE_DEF_SECTION_ALIGNMENT),
   D(FileAlignment,"__file_alignment__", PE_DEF_FILE_ALIGNMENT),
   D(MajorOperatingSystemVersion,"__major_os_version__", 4),
