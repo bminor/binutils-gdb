@@ -1,5 +1,9 @@
 Sun Nov 14 00:28:13 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* stabsread.c: Remove #if 0'd dbx_class_complaint.  We now handle
+	this (more or less) gracefully, and complain() was never a good
+	way of dealing with this.
+
 	* stabsread.c (read_type): Skip the colon when reading a
 	cross-reference.  Only complain, not error_type, on unrecognized
 	cross-reference types.  error_type, not dump core, if the colon is

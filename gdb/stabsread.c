@@ -149,16 +149,6 @@ static const char vb_name[] =   { '_','v','b',CPLUS_MARKER,'\0' };
 #define BELIEVE_PCC_PROMOTION 0
 #endif
 
-#if 0
-struct complaint dbx_class_complaint =
-{
-  "encountered DBX-style class variable debugging information.\n\
-You seem to have compiled your program with \
-\"g++ -g0\" instead of \"g++ -g\".\n\
-Therefore GDB will not know about your class variables", 0, 0
-};
-#endif
-
 struct complaint invalid_cpp_abbrev_complaint =
   {"invalid C++ abbreviation `%s'", 0, 0};
 
