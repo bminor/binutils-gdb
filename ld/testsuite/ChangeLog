@@ -1,3 +1,16 @@
+2004-11-04  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* ld-elf/merge.d: xfail crisv32-*-*.
+	* ld-cris/dsov32-1.s, ld-cris/dsov32-2.s, ld-cris/dsov32-3.s,
+	ld-cris/dsov32-4.s, ld-cris/libdso-10.d, ld-cris/libdso-11.d,
+	ld-cris/libdso-12.d, ld-cris/libdso-13.d, ld-cris/libdso-14.d,
+	ld-cris/move-1.s, ld-cris/pv32-1.d, ld-cris/pv32.s,
+	ld-cris/start1.s, ld-cris/v10-v32.d, ld-cris/v10-va.d,
+	ld-cris/v32-ba-1.d, ld-cris/v32-ba-1.s, ld-cris/v32-bin-1.d,
+	ld-cris/v32-bin-1.s, ld-cris/v32-v10.d, ld-cris/v32-va.d,
+	ld-cris/va-v10.d, ld-cris/va-v32.d: New tests.
+	* ld-cris/ldsym1.d: Adjust for change in linker script.
+
 2004-11-02  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-cris/expdyn1.d, ld-cris/expdyn5.d, ld-cris/expdyn6.d,

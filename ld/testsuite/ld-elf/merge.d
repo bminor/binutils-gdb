@@ -4,7 +4,7 @@
 #xfail: "arc-*-*" "avr-*-*" "cris-*-*" "dlx-*-*" "fr30-*-*" "frv-*-*"
 #xfail: "hppa*-*-*" "h8300-*-*" "i960-*-*" "ip2k-*-*" "m32r-*-*" "mcore-*-*"
 #xfail: "mn10*-*-*" "mips*-*-*" "openrisc-*-*" "pj-*-*" "sparc*-*-*"
-#xfail: "xtensa-*-*"
+#xfail: "xtensa-*-*" "crisv32-*-*"
 
 .*:     file format .*elf.*
 
