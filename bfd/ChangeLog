@@ -1,3 +1,12 @@
+Fri Jan 21 16:25:35 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* bfd-in.h: Remove decls of bfd_ec type and error printing functions.
+	Remove decl of type symclass; wasn't used.
+	* bfd.c: Document error handling, including code fragments
+	containing the error decls that were in bfd-in.h.
+	Remove DEFUNs.
+	* bfd-in2.h: Regenerated.
+
 Fri Jan 21 14:11:16 1994  Sean Fagan  (sef@cygnus.com)
 
 	* nlmcode.h, liblnm.h, nlm32-alpha.c nlm32-i386.c nlm32-sparc.c:

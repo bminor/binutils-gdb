@@ -218,22 +218,13 @@ typedef enum bfd_format {
 
 /* symbols and relocation */
 
+/* A count of carsyms (canonical archive symbols).  */
 typedef unsigned long symindex;
 
 #define BFD_NO_MORE_SYMBOLS ((symindex) ~0)
 
-typedef enum bfd_symclass {
-	      bfd_symclass_unknown = 0,
-	      bfd_symclass_fcommon, /* fortran common symbols */
-	      bfd_symclass_global, /* global symbol, what a surprise */
-	      bfd_symclass_debugger, /* some debugger symbol */
-	      bfd_symclass_undefined /* none known */
-	    } symclass;
-
-
-/* general purpose part of a symbol;
-   target specific parts will be found in libcoff.h, liba.out.h etc */
-
+/* General purpose part of a symbol X;
+   target specific parts are in libcoff.h, libaout.h, etc.  */
 
 #define bfd_get_section(x) ((x)->section)
 #define bfd_get_output_section(x) ((x)->section->output_section)
@@ -245,6 +236,7 @@ typedef enum bfd_symclass {
 #define bfd_asymbol_bfd(x) ((x)->the_bfd)
 #define bfd_asymbol_flavour(x) (bfd_asymbol_bfd(x)->xvec->flavour)
 
+/* A canonical archive symbol.  */
 /* This is a type pun with struct ranlib on purpose! */
 typedef struct carsym {
   char *name;
@@ -252,7 +244,8 @@ typedef struct carsym {
 } carsym;			/* to make these you call a carsymogen */
 
   
-/* Used in generating armaps.  Perhaps just a forward definition would do? */
+/* Used in generating armaps (archive tables of contents).
+   Perhaps just a forward definition would do? */
 struct orl {			/* output ranlib */
   char **name;			/* symbol name */ 
   file_ptr pos;			/* bfd* or file position */
@@ -265,7 +258,7 @@ struct orl {			/* output ranlib */
 typedef struct lineno_cache_entry {
   unsigned int line_number;	/* Linenumber from start of function*/  
   union {
- struct symbol_cache_entry *sym;		/* Function name */
+    struct symbol_cache_entry *sym; /* Function name */
     unsigned long offset;	/* Offset into section */
   } u;
 } alent;
@@ -296,35 +289,6 @@ typedef struct sec *sec_ptr;
 
 typedef struct stat stat_type; 
 
-/* Error handling */
-
-typedef enum bfd_error
-{
-  no_error = 0,
-  system_call_error,
-  invalid_target,
-  wrong_format,
-  invalid_operation,
-  no_memory,
-  no_symbols,
-  no_more_archived_files,
-  malformed_archive,
-  file_not_recognized,
-  file_ambiguously_recognized,
-  no_contents,
-  nonrepresentable_section,
-  no_debug_section,
-  bad_value,
-  file_truncated,
-  invalid_error_code
-} bfd_ec;
-
-extern bfd_ec bfd_error;
-
-CONST char *bfd_errmsg PARAMS ((bfd_ec error_tag));
-void bfd_perror PARAMS ((CONST char *message));
-
-
 typedef enum bfd_print_symbol
 { 
   bfd_print_symbol_name,
@@ -332,13 +296,12 @@ typedef enum bfd_print_symbol
   bfd_print_symbol_all
 } bfd_print_symbol_type;
     
-
 /* Information about a symbol that nm needs.  */
 
 typedef struct _symbol_info
 {
   symvalue value;
-  char type;                   /*  */
+  char type;
   CONST char *name;            /* Symbol name.  */
   char stab_other;             /* Unused. */
   short stab_desc;             /* Info for N_TYPE.  */
@@ -1816,6 +1779,35 @@ struct _bfd
      /* Where all the allocated stuff under this BFD goes */
     struct obstack memory;
 };
+
+typedef enum bfd_error
+{
+  no_error = 0,
+  system_call_error,
+  invalid_target,
+  wrong_format,
+  invalid_operation,
+  no_memory,
+  no_symbols,
+  no_more_archived_files,
+  malformed_archive,
+  file_not_recognized,
+  file_ambiguously_recognized,
+  no_contents,
+  nonrepresentable_section,
+  no_debug_section,
+  bad_value,
+  file_truncated,
+  invalid_error_code
+} bfd_ec;
+
+extern bfd_ec bfd_error;
+
+CONST char *
+bfd_errmsg  PARAMS ((bfd_ec error_tag));
+
+void 
+bfd_perror  PARAMS ((CONST char *message));
 
 unsigned int 
 bfd_get_reloc_upper_bound PARAMS ((bfd *abfd, asection *sect));
