@@ -19,9 +19,6 @@
 
 #if defined(__unix) || defined(__CYGWIN32__)
 #  include <sys/time.h>
-#  ifdef sun
-      int gettimeofday(struct timeval *tp, struct timezone *tzp);
-#  endif
 #else
 #  include "winsock.h"
 #  include "time.h"
