@@ -1,9 +1,14 @@
+Sat Mar 16 13:28:45 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.texinfo: Add missing "@bullet" to some "@itemize"
+	commands.
+
 Sat Feb 10 03:28:36 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* gdb.texinfo (Print settings):  Document
 	`set/show print static-members' commands.
 
-Wed Jan 10 14:16:37 1996  Fred Fish  <fnf@fishpond.amigalib.com>
+Wed Jan 10 14:16:37 1996  Fred Fish  <fnf@cygnus.com>
 
 	* gdbint.texinfo (Native): Document name change, coredep.c to
 	core-aout.c.

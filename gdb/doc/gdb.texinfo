@@ -3487,7 +3487,7 @@ argument, this command is used to select a stack frame.
 This command prints a verbose description of the selected stack frame,
 including:
 
-@itemize
+@itemize @bullet
 @item 
 the address of the frame 
 @item
@@ -4052,14 +4052,14 @@ in your program.
 Variables in expressions are understood in the selected stack frame
 (@pxref{Selection, ,Selecting a frame}); they must be either:
 
-@itemize
+@itemize @bullet
 @item
 global (or static)
 @end itemize
 
 @noindent or 
 
-@itemize
+@itemize @bullet
 @item
 visible according to the scope rules of the
 programming language from the point of execution in that frame
