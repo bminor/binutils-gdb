@@ -1,5 +1,13 @@
 2002-10-14  Alan Modra  <amodra@bigpond.net.au>
 
+	* ldlang.c (load_symbols): Don't call bfd_link_add_symbols when
+	just_syms_flag.
+	(lang_reasonable_defaults): Don't compare against false.
+	(size_input_section): Likewise.
+	(lang_size_sections_1): Likewise.
+	(lang_do_assignments): Likewise.
+	(lang_add_output): Likewise.
+
 	* Makefile.am: Run "make dep-am".
 	* Makefile.in: Regenerate.
 	* ldver.c: #include "bfdver.h".
@@ -41,7 +49,7 @@
 	* configure.tgt: Add sh64eb-*-linux* and sh64-*-linux* emulations.
 	* emulparams/shelf32_linux.sh: New file.
 	* emulparams/shlelf32_linux.sh: New file.
-	
+
 2002-10-08  H.J. Lu <hjl@gnu.org>
 
 	* ldlang.c (lang_file_exist): Removed.
@@ -58,7 +66,7 @@
 2002-10-05  Elias Athanasopoulos  <eathan@otenet.gr>
 
 	* ldlang.c (lang_file_exist): New function.
-	(new_afile): Abort if the filename to be added matches the linker 
+	(new_afile): Abort if the filename to be added matches the linker
 	output filename.
 	* ldlang.h: Add prototype for lang_file_exist.
 	* lexsup.c (parse_args): Abort if the output filename matches
@@ -140,7 +148,7 @@
 
 2002-09-06  Jeffrey A Law  (law@redhat.com)
 
-        * configure.tgt (h8300-*-hms*, h8500-*-hms*): Restore.
+	* configure.tgt (h8300-*-hms*, h8500-*-hms*): Restore.
 
 2002-09-02  Nick Clifton  <nickc@redhat.com>
 
@@ -154,7 +162,7 @@
 	used.  Change INSN to start at 0x01000000 and extend for
 	256K (ignoring holes).  Start the STACK on a word aligned
 	boundary.
-        (.rodata): Start it at the READONLY_START_ADDR.
+	(.rodata): Start it at the READONLY_START_ADDR.
 
 2002-08-30  Alan Modra  <amodra@bigpond.net.au>
 
@@ -193,18 +201,18 @@
 2002-08-27  Nick Clifton  <nickc@redhat.com>
 
 	* emultempl/armelf.em:  Revert this patch, it is not needed.
-	
+
 	2002-08-22  Adam Nemet  <anemet@lnxw.com>
 
 2002-08-20 Dan Kegel <dank@kegel.com>
-	
+
 	* configure.in: added --with-lib-path argument to ld's configure
 	to set LIB_PATH.
 	* ld/NEWS: Document new switch.
 	* ld/README: Mention new switch.
 	* configure: Regenerate.
 	* Makefile.in: Regenerate.
-	
+
 	Based on this patch:
 	2001-04-25  Christopher Faylor <cgf@cygnus.com>
 
