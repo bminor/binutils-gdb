@@ -398,7 +398,6 @@ static int alpha_flag_show_after_trunc = 0;		/* -H */
  * longer than 64 characters, else longer symbol names are truncated.
  */
 
-static int alpha_basereg_clobbered;
 #endif
 
 /* A table of CPU names and opcode sets.  */
@@ -2269,16 +2268,6 @@ load_expression (targreg, exp, pbasereg, poffset)
 #ifdef OBJ_EVAX
 	offsetT link;
 
-	if (alpha_basereg_clobbered)
-	  {
-	    /* no basereg, reload basreg from 0(FP).  */
-	    set_tok_reg (newtok[0], targreg);
-	    set_tok_const (newtok[1], 0);
-	    set_tok_preg (newtok[2], AXP_REG_FP);
-	    basereg = targreg;
-	    assemble_tokens ("ldq", newtok, 3, 0);
-	  }
-
 	/* Find symbol or symbol pointer in link section.  */
 
 	if (exp->X_add_symbol == alpha_evax_proc.symbol)
@@ -2602,15 +2591,6 @@ emit_ir_load (tok, ntok, opname)
     }
 
   emit_insn (&insn);
-#ifdef OBJ_EVAX
-    /* special hack. If the basereg is clobbered for a call
-       all lda's before the call don't have a basereg.  */
-  if ((tok[0].X_op == O_register)
-     && (tok[0].X_add_number == alpha_gp_register))
-    {
-      alpha_basereg_clobbered = 1;
-    }
-#endif
 }
 
 /* Handle fp register loads, and both integer and fp register stores.
@@ -3249,19 +3229,6 @@ emit_jsrjmp (tok, ntok, vopname)
     }
 
   emit_insn (&insn);
-
-#ifdef OBJ_EVAX
-  alpha_basereg_clobbered = 0;
-
-  /* reload PV from 0(FP) if it is our current base register.  */
-  if (alpha_gp_register == AXP_REG_PV)
-    {
-      set_tok_reg (newtok[0], AXP_REG_PV);
-      set_tok_const (newtok[1], 0);
-      set_tok_preg (newtok[2], AXP_REG_FP);
-      assemble_tokens ("ldq", newtok, 3, 0);
-    }
-#endif
 }
 
 /* The ret and jcr instructions differ from their instruction
@@ -3329,9 +3296,10 @@ s_alpha_data (i)
   alpha_current_align = 0;
 }
 
-#ifdef OBJ_ECOFF
+#if defined (OBJ_ECOFF) || defined (OBJ_EVAX)
 
-/* Handle the OSF/1 .comm pseudo quirks.  */
+/* Handle the OSF/1 and openVMS .comm pseudo quirks.
+   openVMS constructs a section for every common symbol.  */
 
 static void
 s_alpha_comm (ignore)
@@ -3342,6 +3310,12 @@ s_alpha_comm (ignore)
   register char *p;
   offsetT temp;
   register symbolS *symbolP;
+
+#ifdef OBJ_EVAX
+  segT current_section = now_seg;
+  int current_subsec = now_subseg;
+  segT new_seg;
+#endif
 
   name = input_line_pointer;
   c = get_symbol_end ();
@@ -3369,6 +3343,11 @@ s_alpha_comm (ignore)
   symbolP = symbol_find_or_make (name);
   *p = c;
 
+#ifdef OBJ_EVAX
+  /* Make a section for the common symbol.  */
+  new_seg = subseg_new (xstrdup (name), 0);
+#endif
+
   if (S_IS_DEFINED (symbolP) && ! S_IS_COMMON (symbolP))
     {
       as_bad ("Ignoring attempt to re-define symbol");
@@ -3376,6 +3355,16 @@ s_alpha_comm (ignore)
       return;
     }
 
+#ifdef OBJ_EVAX
+  if (bfd_section_size (stdoutput, new_seg) > 0)
+    { 
+      if (bfd_section_size (stdoutput, new_seg) != temp)
+	as_bad ("Length of .comm \"%s\" is already %ld. Not changed to %ld.",
+		S_GET_NAME (symbolP),
+		(long) bfd_section_size (stdoutput, new_seg),
+		(long) temp);
+    }
+#else
   if (S_GET_VALUE (symbolP))
     {
       if (S_GET_VALUE (symbolP) != (valueT) temp)
@@ -3384,11 +3373,24 @@ s_alpha_comm (ignore)
 		(long) S_GET_VALUE (symbolP),
 		(long) temp);
     }
+#endif
   else
     {
+#ifdef OBJ_EVAX 
+      subseg_set (new_seg, 0);
+      p = frag_more (temp);
+      new_seg->flags |= SEC_IS_COMMON;
+      if (! S_IS_DEFINED (symbolP))
+	symbolP->bsym->section = new_seg;
+#else
       S_SET_VALUE (symbolP, (valueT) temp);
+#endif
       S_SET_EXTERNAL (symbolP);
     }
+
+#ifdef OBJ_EVAX
+  subseg_set (current_section, current_subsec);
+#endif
 
   know (symbolP->sy_frag == &zero_address_frag);
 
@@ -3490,7 +3492,6 @@ static void
 s_alpha_prologue (ignore)
      int ignore;
 {
-  alpha_basereg_clobbered = 0;
   demand_empty_rest_of_line ();
 
   return;
@@ -3886,7 +3887,6 @@ s_alpha_end (ignore)
   *input_line_pointer = c;
   demand_empty_rest_of_line ();
   alpha_evax_proc.symbol = 0;
-  alpha_basereg_clobbered = 0;
 
   return;
 }
@@ -4312,7 +4312,7 @@ const pseudo_typeS md_pseudo_table[] =
   { "end", s_alpha_end, 0},
   { "file", s_alpha_file, 0},
   { "rdata", s_alpha_section, 1},
-  { "comm", s_alpha_section, 2},
+  { "comm", s_alpha_comm, 0},
   { "link", s_alpha_section, 3},
   { "ctors", s_alpha_section, 4},
   { "dtors", s_alpha_section, 5},
