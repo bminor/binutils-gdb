@@ -1,3 +1,7 @@
+2001-06-19  H.J. Lu <hjl@gnu.org>
+
+	* ldlang.c (lang_check): Revert the change mode on 2001-06-15.
+
 2001-06-18  H.J. Lu <hjl@gnu.org>
 
         * Makefile.am (ld.1): Remove the prefix `$(srcdir)/'.

@@ -3520,11 +3520,6 @@ lang_check ()
 		   bfd_printable_name (input_bfd), input_bfd,
 		   bfd_printable_name (output_bfd));
 	}
-      else if (link_info.relocateable
-	       && bfd_get_flavour (input_bfd) != bfd_get_flavour (output_bfd))
-	einfo (_("%P%F: Relocatable linking from format %s (%B) to format %s (%B) is not supported\n"),
-	       bfd_get_target (input_bfd), input_bfd,
-	       bfd_get_target (output_bfd), output_bfd);
       else if (bfd_count_sections (input_bfd))
 	{
 	  /* If the input bfd has no contents, it shouldn't set the
