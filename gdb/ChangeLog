@@ -1,3 +1,9 @@
+Wed Dec 24 12:48:48 1997  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* dsrec.c: Cosmetic improvements.
+	(make-srec): Change indexing of format and code tables to
+	remove confusing empty entries.
+
 Mon Dec 22 21:51:53 1997  Mark Alexander  <marka@cygnus.com>
 
 	* remote-mips.c (_initialize_remote_mips): Fix DDB doc string.

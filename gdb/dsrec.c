@@ -1,5 +1,5 @@
 /* S-record download support for GDB, the GNU debugger.
-   Copyright 1995, 1996 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1997 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -22,6 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "srec.h"
 #include <time.h>
 
+int (*ui_load_progress_hook) PARAMS ((char *, unsigned long));
 extern void report_transfer_performance PARAMS ((unsigned long, time_t, time_t));
 
 extern int remote_debug;
@@ -30,16 +31,17 @@ static int make_srec PARAMS ((char *srec, CORE_ADDR targ_addr, bfd *abfd,
 			      asection *sect, int sectoff, int *maxrecsize,
 			      int flags));
 
-/*  Download an executable by converting it to S records.  DESC is a serial_t
-    to send the data to.  FILE is the name of the file to be loaded.
-    LOAD_OFFSET is the offset into memory to load data into.  It is usually
-    specified by the user and is useful with the a.out file format.
-    MAXRECSIZE is the length in chars of the largest S-record the host can
-    accomodate.  This is measured from the starting `S' to the last char of the
-    checksum.  FLAGS is various random flags, and HASHMARK is non-zero to cause
-    a `#' to be printed out for each record loaded.  WAITACK, if non-NULL, is
-    a function that waits for an acknowledgement after each S-record, and
-    returns non-zero if the ack is read correctly.  */
+/* Download an executable by converting it to S records.  DESC is a
+    serial_t to send the data to.  FILE is the name of the file to be
+    loaded.  LOAD_OFFSET is the offset into memory to load data into.
+    It is usually specified by the user and is useful with the a.out
+    file format.  MAXRECSIZE is the length in chars of the largest
+    S-record the host can accomodate.  This is measured from the
+    starting `S' to the last char of the checksum.  FLAGS is various
+    random flags, and HASHMARK is non-zero to cause a `#' to be
+    printed out for each record loaded.  WAITACK, if non-NULL, is a
+    function that waits for an acknowledgement after each S-record,
+    and returns non-zero if the ack is read correctly.  */
 
 void
 load_srec (desc, file, load_offset, maxrecsize, flags, hashmark, waitack)
@@ -59,7 +61,7 @@ load_srec (desc, file, load_offset, maxrecsize, flags, hashmark, waitack)
   time_t start_time, end_time;
   unsigned long data_count = 0;
 
-  srec = (char *)alloca (maxrecsize + 1);
+  srec = (char *) alloca (maxrecsize + 1);
 
   abfd = bfd_openr (file, 0);
   if (!abfd)
@@ -75,17 +77,26 @@ load_srec (desc, file, load_offset, maxrecsize, flags, hashmark, waitack)
     }
 
   start_time = time (NULL);
-  
+
+  /* Write a type 0 header record. no data for a type 0, and there
+     is no data, so len is 0.  */
+
+  reclen = maxrecsize;
+  make_srec (srec, 0, NULL, NULL, 0, &reclen, flags);
+  if (remote_debug)
+    fprintf_unfiltered (gdb_stderr, "%.*s\\r\n", reclen-1, srec);
+  SERIAL_WRITE (desc, srec, reclen);
+
   for (s = abfd->sections; s; s = s->next)
     if (s->flags & SEC_LOAD)
       {
 	int numbytes;
 	bfd_vma addr = bfd_get_section_vma (abfd, s) + load_offset;
 	bfd_size_type size = bfd_get_section_size_before_reloc (s);
+	char * section_name = bfd_get_section_name (abfd, s);
 
 	printf_filtered ("%s\t: 0x%08x .. 0x%08x  ",
-			 bfd_get_section_name (abfd, s),
-			 (int) addr, (int) addr + size);
+			 section_name, (int) addr, (int) addr + size);
 	gdb_flush (gdb_stdout);
 
 	data_count += size;
@@ -99,13 +110,16 @@ load_srec (desc, file, load_offset, maxrecsize, flags, hashmark, waitack)
 	    if (remote_debug)
 	      fprintf_unfiltered (gdb_stderr, "%.*s\\r\n", reclen-1, srec);
 
-	    /* Repeatedly send the S-record until a good acknowledgement
-	       is sent back.  */
+	    /* Repeatedly send the S-record until a good
+	       acknowledgement is sent back.  */
 	    do
 	      {
 	        SERIAL_WRITE (desc, srec, reclen);
+		if (ui_load_progress_hook)
+		  if (ui_load_progress_hook (section_name, (unsigned long) i))
+		    error ("Canceled the download");
 	      }
-	    while (waitack != NULL && !waitack());
+	    while (waitack != NULL && !waitack ());
 
 	    if (hashmark)
 	      {
@@ -114,16 +128,18 @@ load_srec (desc, file, load_offset, maxrecsize, flags, hashmark, waitack)
 	      }
 	  }			/* Per-packet (or S-record) loop */
 
+	if (ui_load_progress_hook)
+	  if (ui_load_progress_hook (section_name, (unsigned long) i))
+	    error ("Canceled the download");
 	putchar_unfiltered ('\n');
-      }				/* Loadable sections */
+      }
 
   if (hashmark) 
     putchar_unfiltered ('\n');
 
   end_time = time (NULL);
   
-  /* Write a type 7 terminator record. no data for a type 7, and there
-     is no data, so len is 0.  */
+  /* Write a terminator record.  */
 
   reclen = maxrecsize;
   make_srec (srec, abfd->start_address, NULL, NULL, 0, &reclen, flags);
@@ -132,7 +148,8 @@ load_srec (desc, file, load_offset, maxrecsize, flags, hashmark, waitack)
     fprintf_unfiltered (gdb_stderr, "%.*s\\r\n", reclen-1, srec);
   SERIAL_WRITE (desc, srec, reclen);
 
-  SERIAL_WRITE (desc, "\r\r", 2); /* Some monitors need these to wake up */
+  /* Some monitors need these to wake up properly.  (Which ones? -sts)  */
+  SERIAL_WRITE (desc, "\r\r", 2);
 
   SERIAL_FLUSH_INPUT (desc);
 
@@ -196,14 +213,14 @@ make_srec (srec, targ_addr, abfd, sect, sectoff, maxrecsize, flags)
   unsigned char checksum;
   int tmp;
   const static char hextab[] = "0123456789ABCDEF";
-  const static char data_code_table[] = "xx123";
-  const static char term_code_table[] = "xx987";
-  const static char *formats[] = {NULL, NULL, "S%c%02X%04X", "S%c%02X%06X",
-				    "S%c%02X%08X"};
+  const static char data_code_table[] = "123";
+  const static char term_code_table[] = "987";
+  const static char *formats[] = { "S%c%02X%04X",
+				   "S%c%02X%06X",
+				   "S%c%02X%08X" };
   char const *code_table;
   int addr_size;
   int payload_size;
-  int type_code;
   char *binbuf;
   char *p;
 
@@ -226,11 +243,11 @@ make_srec (srec, targ_addr, abfd, sect, sectoff, maxrecsize, flags)
   else if (tmp & SREC_4_BYTE_ADDR)
     addr_size = 4;
   else
-    fatal ("make_srec:  Bad address (0x%x), or bad flags (0x%x).", targ_addr,
-	   flags);
+    fatal ("make_srec:  Bad address (0x%x), or bad flags (0x%x).",
+	   targ_addr, flags);
 
-/* Now that we know the address size, we can figure out how much data this
-   record can hold.  */
+  /* Now that we know the address size, we can figure out how much
+     data this record can hold.  */
 
   if (sect)
     {
@@ -242,26 +259,26 @@ make_srec (srec, targ_addr, abfd, sect, sectoff, maxrecsize, flags)
   else
     payload_size = 0;		/* Term packets have no payload */
 
-/* Output the header.  */
+  /* Output the header.  */
 
-  sprintf (srec, formats[addr_size], code_table[addr_size],
+  sprintf (srec, formats[addr_size - 2], code_table[addr_size - 2],
 	   addr_size + payload_size + 1, targ_addr);
 
-/* Note that the checksum is calculated on the raw data, not the hexified
-   data.  It includes the length, address and the data portions of the
-   packet.  */
+  /* Note that the checksum is calculated on the raw data, not the
+     hexified data.  It includes the length, address and the data
+     portions of the packet.  */
 
   checksum = 0;
   
-  checksum += (payload_size + addr_size + 1 /* Packet length */
-	       + (targ_addr & 0xff)	/* Address... */
+  checksum += (payload_size + addr_size + 1	/* Packet length */
+	       + (targ_addr & 0xff)		/* Address... */
 	       + ((targ_addr >>  8) & 0xff)
 	       + ((targ_addr >> 16) & 0xff)
 	       + ((targ_addr >> 24) & 0xff));
   
   p = srec + 1 + 1 + 2 + addr_size * 2;
 
-  /* build the srecord */
+  /* Build the Srecord.  */
   for (tmp = 0; tmp < payload_size; tmp++)
     {
       unsigned char k;
