@@ -106,8 +106,8 @@ m68kbsd_collect_fpregset (struct regcache *regcache,
 /* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
    for all registers (including the floating-point registers).  */
 
-void
-fetch_inferior_registers (int regnum)
+static void
+m68kbsd_fetch_inferior_registers (int regnum)
 {
   if (regnum == -1 || m68kbsd_gregset_supplies_p (regnum))
     {
@@ -135,8 +135,8 @@ fetch_inferior_registers (int regnum)
 /* Store register REGNUM back into the inferior.  If REGNUM is -1, do
    this for all registers (including the floating-point registers).  */
 
-void
-store_inferior_registers (int regnum)
+static void
+m68kbsd_store_inferior_registers (int regnum)
 {
   if (regnum == -1 || m68kbsd_gregset_supplies_p (regnum))
     {
@@ -223,6 +223,13 @@ void _initialize_m68kbsd_nat (void);
 void
 _initialize_m68kbsd_nat (void)
 {
+  struct target_ops *t;
+
+  t = inf_ptrace_target ();
+  t->to_fetch_registers = vaxbsd_fetch_inferior_registers;
+  t->to_store_registers = vaxbsd_store_inferior_registers;
+  add_target (t);
+
   /* Support debugging kernel virtual memory images.  */
   bsd_kvm_add_target (m68kbsd_supply_pcb);
 }

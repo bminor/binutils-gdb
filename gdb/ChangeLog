@@ -1,3 +1,22 @@
+2004-11-07  Mark Kettenis  <kettenis@gnu.org>
+
+	* m68kbsd-nat.c (m68kbsd_fetch_inferior_registers): Rename from
+	fetch_inferior_registers.  Make static.
+	(m68kbsd_store_inferior_registers): Rename from
+	store_inferior_registers.  Make static.
+	(_initialize_m68kbsd_nat): Construct and add target vector.
+	* config/m68k/nbsdaout.mh (NATDEPFILES): Remove infptrace.o and
+	inftarg.o.  Add inf-ptrace.o.
+	(NAT_FILE): Set to tm-solib.h.
+	(LOADLIBES): New variable.
+	* config/m68k/nbsdelf.mh (NATDEPFILES): Remove infptrace.o and
+	inftarg.o.  Add inf-ptrace.o.
+	(NAT_FILE): Delete variable.
+	* config/m68k/obsd.mh (NATDEPFILES): Remove infptrace.o and
+	inftarg.o.  Add inf-ptrace.o.
+	(NAT_FILE): Set to tm-solib.h.
+	* config/m68k/nm-nbsdaout.h: Remove file.
+
 2004-11-07  Daniel Jacobowitz  <dan@debian.org>
 
 	* dwarf2-frame.c (struct dwarf2_frame_ops): Add signal_frame_p.
