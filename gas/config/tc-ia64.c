@@ -1,5 +1,5 @@
 /* tc-ia64.c -- Assembler for the HP/Intel IA-64 architecture.
-   Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
    This file is part of GAS, the GNU Assembler.
@@ -950,23 +950,28 @@ ia64_elf_section_type (str, len)
 	const char *str;
 	size_t len;
 {
-  len = sizeof (ELF_STRING_ia64_unwind_info) - 1;
-  if (strncmp (str, ELF_STRING_ia64_unwind_info, len) == 0)
+#define STREQ(s) ((len == sizeof (s) - 1) && (strncmp (str, s, sizeof (s) - 1) == 0))
+  
+  if (STREQ (ELF_STRING_ia64_unwind_info))
     return SHT_PROGBITS;
 
-  len = sizeof (ELF_STRING_ia64_unwind_info_once) - 1;
-  if (strncmp (str, ELF_STRING_ia64_unwind_info_once, len) == 0)
+  if (STREQ (ELF_STRING_ia64_unwind_info_once))
     return SHT_PROGBITS;
 
-  len = sizeof (ELF_STRING_ia64_unwind) - 1;
-  if (strncmp (str, ELF_STRING_ia64_unwind, len) == 0)
+  if (STREQ (ELF_STRING_ia64_unwind))
     return SHT_IA_64_UNWIND;
 
-  len = sizeof (ELF_STRING_ia64_unwind_once) - 1;
-  if (strncmp (str, ELF_STRING_ia64_unwind_once, len) == 0)
+  if (STREQ (ELF_STRING_ia64_unwind_once))
     return SHT_IA_64_UNWIND;
 
+  if (STREQ ("init_array"))
+    return SHT_INIT_ARRAY;
+  
+  if (STREQ ("fini_array"))
+    return SHT_FINI_ARRAY;
+  
   return -1;
+#undef STREQ
 }
 
 static unsigned int
@@ -2791,6 +2796,7 @@ static int
 setup_unwind_header (int size, unsigned char **mem)
 {
   int x, extra = 0;
+  valueT flag_value;
 
   /* pad to pointer-size boundry.  */
   x = size % md.pointer_size;
@@ -2803,13 +2809,22 @@ setup_unwind_header (int size, unsigned char **mem)
 
   /* Clear the padding area and personality.  */
   memset (*mem + 8 + size, 0 , extra + md.pointer_size);
-  /* Initialize the header area.  */
 
-  md_number_to_chars (*mem, (((bfd_vma) 1 << 48)     /* version */
-			     | (unwind.personality_routine
-				? ((bfd_vma) 3 << 32) /* U & E handler flags */
-				: 0)
-			     | ((size + extra) / md.pointer_size)), /* length */
+  /* Initialize the header area.  */
+  if (unwind.personality_routine)
+    {
+      if (md.flags & EF_IA_64_ABI64)
+	flag_value = (bfd_vma) 3 << 32;
+      else
+	/* 32-bit unwind info block.  */
+	flag_value = (bfd_vma) 0x1003 << 32;
+    }
+  else
+    flag_value = 0;
+
+  md_number_to_chars (*mem, (((bfd_vma) 1 << 48)     /* Version.  */
+			     | flag_value            /* U & E handler flags.  */
+			     | ((size + extra) / md.pointer_size)), /* Length.  */
 		      8);
 
   return extra;
@@ -3220,6 +3235,7 @@ generate_unwind_image (text_name)
       unsigned char *where;
       char *sec_name;
       expressionS exp;
+      bfd_reloc_code_real_type reloc;
 
       make_unw_section_name (SPECIAL_SECTION_UNWIND_INFO, text_name, sec_name);
       set_section (sec_name);
@@ -3249,8 +3265,24 @@ generate_unwind_image (text_name)
 	  exp.X_op  = O_symbol;
 	  exp.X_add_symbol = unwind.personality_routine;
 	  exp.X_add_number = 0;
-	  fix_new_exp (frag_now, frag_now_fix () - 8, 8,
-	  		     &exp, 0, BFD_RELOC_IA64_LTOFF_FPTR64LSB);
+
+	  if (md.flags & EF_IA_64_BE)
+	    {
+	      if (md.flags & EF_IA_64_ABI64)
+		reloc = BFD_RELOC_IA64_LTOFF_FPTR64MSB;
+	      else
+		reloc = BFD_RELOC_IA64_LTOFF_FPTR32MSB;
+	    }
+          else
+	    {
+	      if (md.flags & EF_IA_64_ABI64)
+		reloc = BFD_RELOC_IA64_LTOFF_FPTR64LSB;
+	      else
+		reloc = BFD_RELOC_IA64_LTOFF_FPTR32LSB;
+	    }
+
+	  fix_new_exp (frag_now, frag_now_fix () - md.pointer_size,
+		       md.pointer_size, & exp, 0, reloc);
 	  unwind.personality_routine = 0;
 	}
     }
@@ -6614,9 +6646,7 @@ ia64_init (argc, argv)
      int argc ATTRIBUTE_UNUSED;
      char **argv ATTRIBUTE_UNUSED;
 {
-  md.flags = EF_IA_64_ABI64;
-  if (TARGET_BYTES_BIG_ENDIAN)
-    md.flags |= EF_IA_64_BE;
+  md.flags = MD_FLAGS_DEFAULT;
 }
 
 /* Return a string for the target object file format.  */
@@ -6629,14 +6659,18 @@ ia64_target_format ()
       if (md.flags & EF_IA_64_BE)
 	{
 	  if (md.flags & EF_IA_64_ABI64)
-#ifdef TE_AIX50
+#if defined(TE_AIX50)
 	    return "elf64-ia64-aix-big";
+#elif defined(TE_HPUX)
+	    return "elf64-ia64-hpux-big";
 #else
 	    return "elf64-ia64-big";
 #endif
 	  else
-#ifdef TE_AIX50
+#if defined(TE_AIX50)
 	    return "elf32-ia64-aix-big";
+#elif defined(TE_HPUX)
+	    return "elf32-ia64-hpux-big";
 #else
 	    return "elf32-ia64-big";
 #endif
@@ -10023,6 +10057,9 @@ ia64_gen_real_reloc_type (sym, r_type)
 	  break;
 	}
       break;
+
+    case  FUNC_IPLT_RELOC:
+        break;
 
     default:
       abort ();

@@ -1,3 +1,19 @@
+2002-01-11  Steve Ellcey  <sje@cup.hp.com>
+
+	* gas/config/tc-ia64.h (MD_FLAGS_DEFAULT): New Macro for
+	setting default md.flags.
+	(SHT_INIT_ARRAY): New elf special section used by HP-UX.
+	(SHT_FINI_ARRAY): New elf special section used by HP-UX.
+	* gas/config/tc-ia64.c (setup_unwind_header): Add support
+	for 32 bit unwind info blocks.
+	(generate_unwind_image): Add support for different types
+	of unwind images (32 bits and/or big-endian).
+	(ia64_init): Use MD_FLAGS_DEFAULT to set md.flags.
+	(ia64_target_format): Add support for hpux target formats.
+	(ia64_gen_real_reloc_type): Add support for FUNC_IPLT_RELOC.
+	(ia64_elf_section_type): Add support for SHT_INIT_ARRAY and
+	SHT_FINI_ARRAY elf section types.
+
 2002-01-10  Richard Earnshaw  <rearnsha@arm.com>
 
 	* tc-arm.c (struct reg_entry): Move before prototypes.

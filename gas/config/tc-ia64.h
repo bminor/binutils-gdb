@@ -1,5 +1,5 @@
 /* tc-ia64.h -- Header file for tc-ia64.c.
-   Copyright 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
    This file is part of GAS, the GNU Assembler.
@@ -28,9 +28,11 @@
 #ifdef TE_HPUX
 #define md_number_to_chars		number_to_chars_bigendian
 #define TARGET_BYTES_BIG_ENDIAN		1
+#define MD_FLAGS_DEFAULT		EF_IA_64_BE
 #else
 #define md_number_to_chars		number_to_chars_littleendian
 #define TARGET_BYTES_BIG_ENDIAN		0
+#define MD_FLAGS_DEFAULT		EF_IA_64_ABI64
 #endif /* TE_HPUX */
 
 /* We need to set the default object file format in ia64_init and not in
@@ -122,6 +124,8 @@ extern void ia64_after_parse_args PARAMS ((void));
 #define WORKING_DOT_WORD	/* don't do broken word processing for now */
 
 #define ELF_TC_SPECIAL_SECTIONS						   \
+{ ".init_array",SHT_INIT_ARRAY,	SHF_ALLOC + SHF_WRITE                   }, \
+{ ".fini_array",SHT_FINI_ARRAY,	SHF_ALLOC + SHF_WRITE                   }, \
 { ".sbss",	SHT_NOBITS,	SHF_ALLOC + SHF_WRITE + SHF_IA_64_SHORT }, \
 { ".sdata",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_IA_64_SHORT },
 
