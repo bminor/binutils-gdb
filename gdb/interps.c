@@ -183,7 +183,7 @@ interp_set (struct interp *interp)
   if (interp->procs->resume_proc != NULL
       && (!interp->procs->resume_proc (interp->data)))
     {
-      if (!interp_set (old_interp))
+      if (old_interp == NULL || !interp_set (old_interp))
 	internal_error (__FILE__, __LINE__,
 			"Failed to initialize new interp \"%s\" %s",
 			interp->name, "and could not restore old interp!\n");
