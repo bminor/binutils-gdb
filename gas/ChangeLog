@@ -1,5 +1,7 @@
 2002-12-13  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/tc-m68k.c (tc_gen_reloc <section>): Add ATTRIBUTE_UNUSED.
+	(md_show_usage): Fix signed/unsigned warning.
 	* config/tc-m88k.c (get_reg): Make reg_prefix param unsigned.
 	(calcop): Ditto for reg_prefix var.
 	(hexval): Add cast to fix signed/unsigned warning.

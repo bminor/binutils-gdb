@@ -882,7 +882,7 @@ tc_m68k_fix_adjustable (fixP)
 
 arelent *
 tc_gen_reloc (section, fixp)
-     asection *section;
+     asection *section ATTRIBUTE_UNUSED;
      fixS *fixp;
 {
   arelent *reloc;
@@ -6920,7 +6920,8 @@ md_show_usage (stream)
      FILE *stream;
 {
   const char *default_cpu = TARGET_CPU;
-  int default_arch, i;
+  int i;
+  unsigned int default_arch;
 
   /* Get the canonical name for the default target CPU.  */
   if (*default_cpu == 'm')
