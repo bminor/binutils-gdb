@@ -1,5 +1,5 @@
 /* tc-sparc.c -- Assemble for the SPARC
-   Copyright (C) 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright (C) 1989, 90, 91, 92, 93, 94, 1995 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -35,6 +35,9 @@ static enum sparc_architecture current_architecture = v6;
 #endif
 static int architecture_requested;
 static int warn_on_bump;
+
+/* Non-zero if we are generating PIC code.  */
+int sparc_pic_code;
 
 extern int target_big_endian;
 
@@ -1882,7 +1885,8 @@ md_apply_fix (fixP, value)
      don't want to include the value of an externally visible symbol.  */
   if (fixP->fx_addsy != NULL)
     {
-      if (S_IS_EXTERN (fixP->fx_addsy)
+      if ((S_IS_EXTERN (fixP->fx_addsy)
+	   || (sparc_pic_code && ! fixP->fx_pcrel))
 	  && S_GET_SEGMENT (fixP->fx_addsy) != absolute_section
 	  && S_GET_SEGMENT (fixP->fx_addsy) != undefined_section
 	  && ! bfd_is_com_section (S_GET_SEGMENT (fixP->fx_addsy)))
@@ -1908,6 +1912,17 @@ md_apply_fix (fixP, value)
   if (fixP->fx_addsy != NULL
       && fixP->fx_r_type != BFD_RELOC_32_PCREL_S2)
     val = 0;
+
+  /* When generating PIC code, we do not want an addend for a reloc
+     against a local symbol.  We adjust fx_addnumber to cancel out the
+     value already included in val, and to also cancel out the
+     adjustment which bfd_install_relocation will create.  */
+  if (sparc_pic_code
+      && fixP->fx_r_type != BFD_RELOC_32_PCREL_S2
+      && fixP->fx_addsy != NULL
+      && ! S_IS_COMMON (fixP->fx_addsy)
+      && (fixP->fx_addsy->bsym->flags & BSF_SECTION_SYM) == 0)
+    fixP->fx_addnumber -= 2 * S_GET_VALUE (fixP->fx_addsy);
 #endif
 
   switch (fixP->fx_r_type)
@@ -1925,7 +1940,11 @@ md_apply_fix (fixP, value)
       break;
 
     case BFD_RELOC_32_PCREL_S2:
-      val = (val >>= 2) + 1;
+      val = (val >>= 2);
+      if (! sparc_pic_code
+	  || fixP->fx_addsy == NULL
+	  || (fixP->fx_addsy->bsym->flags & BSF_SECTION_SYM) != 0)
+	++val;
       buf[0] |= (val >> 24) & 0x3f;
       buf[1] = (val >> 16);
       buf[2] = val >> 8;
@@ -2115,6 +2134,49 @@ tc_gen_reloc (section, fixp)
     default:
       abort ();
     }
+
+#if defined (OBJ_ELF) || defined (OBJ_AOUT)
+  /* If we are generating PIC code, we need to generate a different
+     set of relocs.  */
+
+#ifdef OBJ_ELF
+#define GOT_NAME "_GLOBAL_OFFSET_TABLE_"
+#else
+#define GOT_NAME "__GLOBAL_OFFSET_TABLE_"
+#endif
+
+  if (sparc_pic_code)
+    {
+      switch (code)
+	{
+	case BFD_RELOC_32_PCREL_S2:
+	  if (! S_IS_DEFINED (fixp->fx_addsy)
+	      || S_IS_EXTERNAL (fixp->fx_addsy))
+	    code = BFD_RELOC_SPARC_WPLT30;
+	  break;
+	case BFD_RELOC_HI22:
+	  if (fixp->fx_addsy != NULL
+	      && strcmp (S_GET_NAME (fixp->fx_addsy), GOT_NAME) == 0)
+	    code = BFD_RELOC_SPARC_PC22;
+	  else
+	    code = BFD_RELOC_SPARC_GOT22;
+	  break;
+	case BFD_RELOC_LO10:
+	  if (fixp->fx_addsy != NULL
+	      && strcmp (S_GET_NAME (fixp->fx_addsy), GOT_NAME) == 0)
+	    code = BFD_RELOC_SPARC_PC10;
+	  else
+	    code = BFD_RELOC_SPARC_GOT10;
+	  break;
+	case BFD_RELOC_SPARC13:
+	  code = BFD_RELOC_SPARC_GOT13;
+	  break;
+	default:
+	  break;
+	}
+    }
+#endif /* defined (OBJ_ELF) || defined (OBJ_AOUT) */
+
   reloc->howto = bfd_reloc_type_lookup (stdoutput, code);
   if (reloc->howto == 0)
     {
@@ -2123,19 +2185,22 @@ tc_gen_reloc (section, fixp)
 		    fixp->fx_r_type, bfd_get_reloc_code_name (code));
       return 0;
     }
-  assert (!fixp->fx_pcrel == !reloc->howto->pc_relative);
 
   /* @@ Why fx_addnumber sometimes and fx_offset other times?  */
 #ifdef OBJ_AOUT
 
-  if (reloc->howto->pc_relative == 0)
+  if (reloc->howto->pc_relative == 0
+      || code == BFD_RELOC_SPARC_PC10
+      || code == BFD_RELOC_SPARC_PC22)
     reloc->addend = fixp->fx_addnumber;
   else
     reloc->addend = fixp->fx_offset - reloc->address;
 
 #else /* elf or coff */
 
-  if (reloc->howto->pc_relative == 0)
+  if (reloc->howto->pc_relative == 0
+      || code == BFD_RELOC_SPARC_PC10
+      || code == BFD_RELOC_SPARC_PC22)
     reloc->addend = fixp->fx_addnumber;
   else if ((fixp->fx_addsy->bsym->flags & BSF_SECTION_SYM) != 0)
     reloc->addend = (section->vma
@@ -2143,7 +2208,6 @@ tc_gen_reloc (section, fixp)
 		     + md_pcrel_from (fixp));
   else
     reloc->addend = fixp->fx_offset;
-
 #endif
 
   return reloc;
@@ -2241,7 +2305,11 @@ print_insn (insn)
 #ifdef OBJ_ELF
 CONST char *md_shortopts = "A:K:VQ:sq";
 #else
+#ifdef OBJ_AOUT
+CONST char *md_shortopts = "A:k";
+#else
 CONST char *md_shortopts = "A:";
+#endif
 #endif
 struct option md_longopts[] = {
 #define OPTION_BUMP (OPTION_MD_BASE)
@@ -2299,6 +2367,12 @@ md_parse_option (c, arg)
       /* Ignore -sparc, used by SunOS make default .s.o rule.  */
       break;
 
+#ifdef OBJ_AOUT
+    case 'k':
+      sparc_pic_code = 1;
+      break;
+#endif
+
 #ifdef OBJ_ELF
     case 'V':
       print_version_id ();
@@ -2321,10 +2395,8 @@ md_parse_option (c, arg)
       if (strcmp (arg, "PIC") != 0)
 	as_warn ("Unrecognized option following -K");
       else
-	{
-	  as_warn ("gas does not currently support PIC code for the SPARC");
-	  as_fatal ("use /usr/ccs/bin/as instead");
-	}
+	sparc_pic_code = 1;
+      break;
 #endif
 
     default:
@@ -2350,8 +2422,13 @@ md_show_usage (stream)
 			specify variant of SPARC architecture\n\
 -bump			warn when assembler switches architectures\n\
 -sparc			ignored\n");
+#ifdef OBJ_AOUT
+  fprintf (stream, "\
+-k			generate PIC\n");
+#endif
 #ifdef OBJ_ELF
-  fprintf(stream, "\
+  fprintf (stream, "\
+-KPIC			generate PIC\n\
 -V			print assembler version number\n\
 -q			ignored\n\
 -Qy, -Qn		ignored\n\
@@ -2398,7 +2475,14 @@ long
 md_pcrel_from (fixP)
      fixS *fixP;
 {
-  return fixP->fx_size + fixP->fx_where + fixP->fx_frag->fr_address;
+  long ret;
+
+  ret = fixP->fx_where + fixP->fx_frag->fr_address;
+  if (! sparc_pic_code
+      || fixP->fx_addsy == NULL
+      || (fixP->fx_addsy->bsym->flags & BSF_SECTION_SYM) != 0)
+    ret += fixP->fx_size;
+  return ret;
 }
 
 /* end of tc-sparc.c */
