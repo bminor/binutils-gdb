@@ -1,3 +1,19 @@
+Tue Sep 26 14:30:01 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	Add PowerMac support and many other enhancements.
+	* mpw-configure: New option --cc to select compiler to use,
+	paste options set according to --cc into the generated
+	Makefile, generate the Makefile by sed'ing the Unix Makefile.in
+	if mpw-make.sed is present.
+	* mpw-config.in: Don't test for gC1, test for mpw-touch,
+	add forward includes for PowerPC include files.
+	* mpw-build.in: Build using Makefile.PPC if present.
+	(do-byacc, etc): Remove separate version resource builds.
+	(do-gas): Build "stamps" before "all".
+	(do-gcc): Build "stamps-h" and "stamps-c" before "all".
+	* mpw-README: Update to reflect --cc option, PowerMac support,
+	and recently-reported compatibility problems.
+
 Fri Sep 22 12:15:42 1995  Doug Evans  <dje@deneb.cygnus.com>
 
 	* cfg-ml-com.in (m68*-*-*): Only build multilibs for
