@@ -912,7 +912,7 @@ $(CONFIGURE_TARGET_MODULES):
 	    fi; \
 	  else \
 	    true; \
-	  fi \
+	  fi; \
 	else \
 	  true; \
 	fi

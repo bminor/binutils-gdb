@@ -1,3 +1,7 @@
+Sun Jan 14 23:01:31 1996  Fred Fish  <fnf@cygnus.com>
+
+	* Makefile.in (CONFIGURE_TARGET_MODULES): Add missing ';'.
+
 Fri Jan 12 15:25:35 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Make sure that ${CC} can be used to compile an
