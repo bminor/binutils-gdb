@@ -1,3 +1,9 @@
+Wed Jul  3 14:59:47 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* netbsd.h (MY(write_object_contents)): Make sure that
+	adjust_sizes_and_vmas is called before fiddling with the magic
+	number.
+
 Tue Jul  2 23:30:39 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* stabs.c (_bfd_link_section_stabs): Fix casts of psinfo.
