@@ -46,8 +46,9 @@ enum bfd_link_hash_type
 {
   bfd_link_hash_new,		/* Symbol is new.  */
   bfd_link_hash_undefined,	/* Symbol seen before, but undefined.  */
-  bfd_link_hash_weak,		/* Symbol is weak and undefined.  */
+  bfd_link_hash_undefweak,	/* Symbol is weak and undefined.  */
   bfd_link_hash_defined,	/* Symbol is defined.  */
+  bfd_link_hash_defweak,	/* Symbol is weak and defined.  */
   bfd_link_hash_common,		/* Symbol is common.  */
   bfd_link_hash_indirect,	/* Symbol is an indirect link.  */
   bfd_link_hash_warning		/* Like indirect, but warn if referenced.  */
@@ -75,23 +76,23 @@ struct bfd_link_hash_entry
 
      Weak symbols are not kept on this list.
 
-     Defined symbols use this field as a reference marker.  If the
-     field is not NULL, or this structure is the tail of the undefined
-     symbol list, the symbol has been referenced.  If the symbol is
-     undefined and becomes defined, this field will automatically be
-     non-NULL since the symbol will have been on the undefined symbol
-     list.  */
+     Defined and defweak symbols use this field as a reference marker.
+     If the field is not NULL, or this structure is the tail of the
+     undefined symbol list, the symbol has been referenced.  If the
+     symbol is undefined and becomes defined, this field will
+     automatically be non-NULL since the symbol will have been on the
+     undefined symbol list.  */
   struct bfd_link_hash_entry *next;
   /* A union of information depending upon the type.  */
   union
     {
       /* Nothing is kept for bfd_hash_new.  */
-      /* bfd_link_hash_undefined, bfd_link_hash_weak.  */
+      /* bfd_link_hash_undefined, bfd_link_hash_undefweak.  */
       struct
 	{
 	  bfd *abfd;		/* BFD symbol was found in.  */
 	} undef;
-      /* bfd_link_hash_defined.  */
+      /* bfd_link_hash_defined, bfd_link_hash_defweak.  */
       struct
 	{
 	  bfd_vma value;	/* Symbol value.  */
@@ -106,8 +107,16 @@ struct bfd_link_hash_entry
       /* bfd_link_hash_common.  */
       struct
 	{
-	  bfd_vma size;		/* Common symbol size.  */
-	  asection *section;	/* Symbol section.  */
+	  /* The linker needs to know three things about common
+             symbols: the size, the alignment, and the section in
+             which the symbol should be placed.  On the assumption
+             that a single common symbol will not take up incredible
+             amounts of memory, we pack the size and the alignment
+             into the space of a single integer.  The alignment is
+             stored as a power of two.  */
+	  unsigned int alignment_power : 6;	/* Alignment.  */
+	  unsigned int size : 26;		/* Common symbol size.  */
+	  asection *section;			/* Symbol section.  */
 	} c;
     } u;
 };
@@ -123,7 +132,7 @@ struct bfd_link_hash_table
      type of the entries in the hash table, which is sometimes
      important information when linking object files of different
      types together.  */
-  bfd_target *creator;
+  const bfd_target *creator;
   /* A linked list of undefined and common symbols, linked through the
      next field in the bfd_link_hash_entry structure.  */
   struct bfd_link_hash_entry *undefs;
@@ -220,13 +229,15 @@ struct bfd_link_callbacks
 					  bfd_vma nval));
   /* A function which is called when a common symbol is defined
      multiple times.  NAME is the symbol appearing multiple times.
-     OBFD is the BFD of the existing symbol.  OTYPE is the type of the
-     existing symbol, either bfd_link_hash_defined or
-     bfd_link_hash_common.  If OTYPE is bfd_link_hash_common, OSIZE is
-     the size of the existing symbol.  NBFD is the BFD of the new
-     symbol.  NTYPE is the type of the new symbol, either
-     bfd_link_hash_defined or bfd_link_hash_common.  If NTYPE is
-     bfd_link_hash_common, NSIZE is the size of the new symbol.  */
+     OBFD is the BFD of the existing symbol; it may be NULL if this is
+     not known.  OTYPE is the type of the existing symbol, which may
+     be bfd_link_hash_defined, bfd_link_hash_defweak,
+     bfd_link_hash_common, or bfd_link_hash_indirect.  If OTYPE is
+     bfd_link_hash_common, OSIZE is the size of the existing symbol.
+     NBFD is the BFD of the new symbol.  NTYPE is the type of the new
+     symbol, one of bfd_link_hash_defined, bfd_link_hash_common, or
+     bfd_link_hash_indirect.  If NTYPE is bfd_link_hash_common, NSIZE
+     is the size of the new symbol.  */
   boolean (*multiple_common) PARAMS ((struct bfd_link_info *,
 				      const char *name,
 				      bfd *obfd,
