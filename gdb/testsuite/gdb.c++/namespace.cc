@@ -68,6 +68,148 @@ void marker1(void)
   return;
 }
 
+namespace
+{
+  int X = 9;
+
+  namespace G
+  {
+    int Xg = 10;
+
+    namespace
+    {
+      int XgX = 11;
+    }
+  }
+}
+
+namespace H
+{
+  int h = 14;
+}
+
+namespace I = H;
+
+namespace J
+{
+  int j = 15;
+}
+
+using namespace J;
+
+namespace K
+{
+  int k = 16;
+}
+
+namespace L
+{
+  using namespace K;
+}
+
+namespace O
+{
+  int o = 18;
+}
+
+namespace P
+{
+  using namespace O;
+}
+
+namespace Q
+{
+  using namespace P;
+}
+
+namespace R
+{
+  int r1 = 19;
+  int r2 = 20;
+}
+
+using R::r1;
+
+namespace C
+{
+  int c = 1;
+  int shadow = 12;
+
+  namespace
+  {
+    int cX = 6;
+    
+    namespace F
+    {
+      int cXf = 7;
+
+      namespace
+      {
+	int cXfX = 8;
+      }
+    }
+  }
+
+  namespace C
+  {
+    int cc = 2;
+  }
+
+  namespace E
+  {
+    int ce = 4;
+  }
+
+  namespace D
+  {
+    int cd = 3;
+    int shadow = 13;
+
+    namespace E
+    {
+      int cde = 5;
+    }
+
+    namespace M
+    {
+      int cdm = 17;
+    }
+
+    using namespace M;
+
+    void marker2 (void)
+    {
+      // NOTE: carlton/2002-10-11: I'm listing the expressions that I
+      // plan to have GDB try to print out, just to make sure that the
+      // compiler and I agree which ones should be legal!  It's easy
+      // to screw up when testing the boundaries of namespace stuff.
+      c;
+      //cc;
+      C::cc;
+      cd;
+      E::cde;
+      shadow;
+      //E::ce;
+      cX;
+      F::cXf;
+      F::cXfX;
+      X;
+      G::Xg;
+      G::XgX;
+      I::h;
+      j;
+      L::k;
+      //k;
+      cdm;
+      Q::o;
+      //o;
+      r1;
+      //r2;
+      return;
+    }
+
+  }
+}
 
 int main ()
 {
@@ -94,10 +236,6 @@ int main ()
   c1 = cl.xyzq('e');
 
   marker1();
-  
+
+  C::D::marker2 ();
 }
-
-  
-
-
-

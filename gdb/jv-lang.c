@@ -111,6 +111,7 @@ get_java_class_symtab (void)
       BLOCK_END (bl) = 0;
       BLOCK_FUNCTION (bl) = NULL;
       BLOCK_SUPERBLOCK (bl) = NULL;
+      BLOCK_USING (bl) = NULL;
       BLOCK_GCC_COMPILED (bl) = 0;
       BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK) = bl;
 

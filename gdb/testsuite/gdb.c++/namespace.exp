@@ -186,3 +186,71 @@ gdb_expect {
    timeout { fail "(timeout) break BBB::Class::xyzq" }
 }
 
+# Test to see if the appropriate namespaces are in scope when trying
+# to print out stuff from within a function defined within a
+# namespace.
+
+if ![runto "'C::D::marker2'"] then {
+    perror "couldn't run to marker2"
+    continue
+}
+
+gdb_test "print c" "\\$\[0-9\].* = 1" "print c"
+gdb_test "print cc" "No symbol \"cc\" in current context." "print cc"
+gdb_test "print 'C::cc'" "\\$\[0-9\].* = 2" "print C::cc"
+gdb_test "print cd" "\\$\[0-9\].* = 3" "print cd"
+gdb_test "print 'C::D::cd'" "\\$\[0-9\].* = 3" "print C::D::cd"
+gdb_test "print 'E::cde'" "\\$\[0-9\].* = 5" "print E::cde"
+
+# FIXME: carlton/2002-10-17: It's somewhat accidental that we
+# currently get this one right.  (Delete this comment once namespace
+# scope issues have been handled correctly!)
+
+gdb_test "print shadow" "\\$\[0-9\].* = 13" "print shadow"
+
+
+# NOTE: carlton/2002-10-17: This one won't get fixed until namespaces
+# are first-class objects.
+
+setup_xfail "*-*-*"
+gdb_test "print 'E::ce'" "No symbol \"E::ce\" in current context." "print E::ce"
+
+# Some anonymous namespace tests.
+
+gdb_test "print cX" "\\$\[0-9\].* = 6" "print cX"
+gdb_test "print 'F::cXf'" "\\$\[0-9\].* = 7" "print F::cXf"
+gdb_test "print 'F::cXfX'" "\\$\[0-9\].* = 8" "print F::cXfX"
+gdb_test "print X" "\\$\[0-9\].* = 9" "print X"
+gdb_test "print 'G::Xg'" "\\$\[0-9\].* = 10" "print G::Xg"
+gdb_test "print 'G::XgX'" "\\$\[0-9\].* = 11" "print G::XgX"
+
+# Test namespace renaming.
+
+setup_xfail "*-*-*"
+gdb_test "print 'I::h'" "\\$\[0-9\].* = 14" "print I::h"
+
+# Test using directives.
+
+# NOTE: carlton/2002-10-17: Some of these are easy, but some of these
+# have unfortunate interactions with namespace scope issues.  As of
+# this writing, some of these pass, but they pass for the wrong reasons.
+
+setup_xfail "*-*-*"
+gdb_test "print j" "\\$\[0-9\].* = 15" "print j"
+setup_xfail "*-*-*"
+gdb_test "print 'L::k'" "\\$\[0-9\].* = 16" "print L::k"
+setup_xfail "*-*-*"
+gdb_test "print k" "No symbol \"k\" in current context." "print k"
+setup_xfail "*-*-*"
+gdb_test "print cdm" "\\$\[0-9\].* = 17" "print cdm"
+setup_xfail "*-*-*"
+gdb_test "print 'Q::o'" "\\$\[0-9\].* = 18" "print Q::o"
+setup_xfail "*-*-*"
+gdb_test "print o" "No symbol \"o\" in current context." "print o"
+
+# Test using declarations.  I should probably test these more.
+
+setup_xfail "*-*-*"
+gdb_test "print r1" "\\$\[0-9\].* = 19" "print r1"
+setup_xfail "*-*-*"
+gdb_test "print r2" "No symbol \"r2\" in current context." "print r2"

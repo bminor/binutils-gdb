@@ -1,0 +1,6 @@
+2002-10-22  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/namespace.exp: Add tests involving namespaces
+	  starting from C.
+	* gdb.c++/namespace.cc: Add namespaces with names starting
+	  from C and their contents.

@@ -93,6 +93,12 @@ EXTERN unsigned char processing_acc_compilation;
 
 EXTERN unsigned char processing_hp_compilation;
 
+/* When set, the file that we're processing seems to have debugging
+   info for C++ namespaces, so buildsym.c shouldn't try to guess
+   namespace info itself.  */
+
+EXTERN unsigned char processing_has_namespace_info;
+
 /* Count symbols as they are processed, for error messages.  */
 
 EXTERN unsigned int symnum;
@@ -239,6 +245,9 @@ extern void add_symbol_to_list (struct symbol *symbol,
 
 extern struct symbol *find_symbol_in_list (struct pending *list,
 					   char *name, int length);
+
+extern void add_using_directive (const char *name, unsigned int outer_length,
+				 unsigned int inner_length);
 
 extern void finish_block (struct symbol *symbol,
 			  struct pending **listhead,

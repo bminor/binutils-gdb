@@ -367,6 +367,13 @@ static struct partial_die_info zeroed_partial_die;
    in buildsym.c.  */
 static struct pending **list_in_scope = &file_symbols;
 
+/* If we're debugging C++ code, this string should contain the name of
+   the current namespace.  Other people shouldn't have to copy it when
+   referring to it, so don't free its previous contents when setting
+   this to a new value.  */
+
+static const char *current_namespace;
+
 /* FIXME: decode_locdesc sets these variables to describe the location
    to the caller.  These ought to be a structure or something.   If
    none of the flags are set, the object lives at the address returned
@@ -816,6 +823,9 @@ static void read_structure_scope (struct die_info *, struct objfile *,
 static void read_common_block (struct die_info *, struct objfile *,
 			       const struct comp_unit_head *);
 
+static void read_namespace (struct die_info *die, struct objfile *objfile,
+			    const struct comp_unit_head *cu_header);
+
 static void read_enumeration (struct die_info *, struct objfile *,
 			      const struct comp_unit_head *);
 
@@ -858,6 +868,10 @@ static void process_die (struct die_info *, struct objfile *,
 			 const struct comp_unit_head *);
 
 static char *dwarf2_linkage_name (struct die_info *);
+
+static char *dwarf2_name (struct die_info *);
+
+static struct die_info *dwarf2_extension (struct die_info *die);
 
 static char *dwarf_tag_name (unsigned int);
 
@@ -1301,6 +1315,11 @@ scan_partial_symbols (char *info_ptr, struct objfile *objfile,
 
   int nesting_level = 1;
 
+  /* What level do we consider to be file scope?  This is normally 1,
+     but can get pushed up by DW_TAG_namespace entries.  */
+  
+  int file_scope_level = 1;
+
   *lowpc = ((CORE_ADDR) -1);
   *highpc = ((CORE_ADDR) 0);
 
@@ -1323,7 +1342,7 @@ scan_partial_symbols (char *info_ptr, struct objfile *objfile,
 		    {
 		      *highpc = pdi.highpc;
 		    }
-		  if ((pdi.is_external || nesting_level == 1)
+		  if ((pdi.is_external || nesting_level == file_scope_level)
 		      && !pdi.is_declaration)
 		    {
 		      add_partial_symbol (&pdi, objfile, cu_header);
@@ -1336,7 +1355,7 @@ scan_partial_symbols (char *info_ptr, struct objfile *objfile,
 	    case DW_TAG_structure_type:
 	    case DW_TAG_union_type:
 	    case DW_TAG_enumeration_type:
-	      if ((pdi.is_external || nesting_level == 1)
+	      if ((pdi.is_external || nesting_level == file_scope_level)
 		  && !pdi.is_declaration)
 		{
 		  add_partial_symbol (&pdi, objfile, cu_header);
@@ -1345,37 +1364,51 @@ scan_partial_symbols (char *info_ptr, struct objfile *objfile,
 	    case DW_TAG_enumerator:
 	      /* File scope enumerators are added to the partial symbol
 	         table.  */
-	      if (nesting_level == 2)
+	      if (nesting_level == file_scope_level + 1)
 		add_partial_symbol (&pdi, objfile, cu_header);
 	      break;
 	    case DW_TAG_base_type:
 	      /* File scope base type definitions are added to the partial
 	         symbol table.  */
-	      if (nesting_level == 1)
+	      if (nesting_level == file_scope_level)
 		add_partial_symbol (&pdi, objfile, cu_header);
 	      break;
+	    case DW_TAG_namespace:
+	      /* FIXME: carlton/2002-10-16: we're not yet doing
+		 anything useful with this, but for now make sure that
+		 these tags at least don't cause us to miss any
+		 important symbols.  */
+	      if (pdi.has_children)
+		file_scope_level++;
 	    default:
 	      break;
 	    }
 	}
 
-      /* If the die has a sibling, skip to the sibling.
-         Do not skip enumeration types, we want to record their
-         enumerators.  */
-      if (pdi.sibling && pdi.tag != DW_TAG_enumeration_type)
+      /* If the die has a sibling, skip to the sibling.  Do not skip
+         enumeration types, we want to record their enumerators.  Do
+         not skip namespaces, we want to record symbols inside
+         them.  */
+      if (pdi.sibling
+	  && pdi.tag != DW_TAG_enumeration_type
+	  && pdi.tag != DW_TAG_namespace)
 	{
 	  info_ptr = pdi.sibling;
 	}
       else if (pdi.has_children)
 	{
-	  /* Die has children, but the optional DW_AT_sibling attribute
-	     is missing.  */
+	  /* Die has children, but either the optional DW_AT_sibling
+	     attribute is missing or we want to look at them.  */
 	  nesting_level++;
 	}
 
       if (pdi.tag == 0)
 	{
 	  nesting_level--;
+	  /* If this is the end of a DW_TAG_namespace entry, then
+	     decrease the file_scope_level, too.  */
+	  if (nesting_level < file_scope_level)
+	    file_scope_level--;
 	}
     }
 
@@ -1550,6 +1583,9 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
   cu_header_offset = offset;
   info_ptr = dwarf_info_buffer + offset;
 
+  /* We're in the global namespace.  */
+  current_namespace = "";
+
   obstack_init (&dwarf2_tmp_obstack);
   back_to = make_cleanup (dwarf2_free_tmp_obstack, NULL);
 
@@ -1674,6 +1710,21 @@ process_die (struct die_info *die, struct objfile *objfile,
       read_common_block (die, objfile, cu_header);
       break;
     case DW_TAG_common_inclusion:
+      break;
+    case DW_TAG_namespace:
+      processing_has_namespace_info = 1;
+      read_namespace (die, objfile, cu_header);
+      break;
+    case DW_TAG_imported_declaration:
+    case DW_TAG_imported_module:
+      /* FIXME: carlton/2002-10-16: Eventually, we should use the
+	 information contained in these.  DW_TAG_imported_declaration
+	 dies shouldn't have children; DW_TAG_imported_module dies
+	 shouldn't in the C++ case, but conceivably could in the
+	 Fortran case, so we'll have to replace this gdb_assert if
+	 Fortran compilers start generating that info.  */
+      processing_has_namespace_info = 1;
+      gdb_assert (!die->has_children);
       break;
     default:
       new_symbol (die, NULL, objfile, cu_header);
@@ -2888,6 +2939,66 @@ read_common_block (struct die_info *die, struct objfile *objfile,
 	  child_die = sibling_die (child_die);
 	}
     }
+}
+
+/* Read a C++ namespace.  */
+
+/* FIXME: carlton/2002-10-16: For now, we don't actually do anything
+   useful with the namespace data: we just process its children.  */
+
+static void
+read_namespace (struct die_info *die, struct objfile *objfile,
+		const struct comp_unit_head *cu_header)
+{
+  const char *previous_namespace = current_namespace;
+  const char *name = NULL;
+  int is_anonymous;
+  struct die_info *current_die;
+
+  /* Loop through the extensions until we find a name.  */
+
+  for (current_die = die; current_die != NULL;
+       current_die = dwarf2_extension (die))
+    {
+      name = dwarf2_name (die);
+      if (name != NULL)
+	break;
+    }
+
+  /* Is it an anonymous namespace?  */
+
+  is_anonymous = (name == NULL);
+  if (is_anonymous)
+    name = "(anonymous namespace)";
+
+  /* Now build the name of the current namespace.  */
+
+  current_namespace = obconcat (&objfile->symbol_obstack,
+				previous_namespace,
+				previous_namespace[0] == '\0' ? "" : "::",
+				name);
+
+  /* If it's an anonymous namespace that we're seeing for the first
+     time, add a using directive.  */
+
+  if (is_anonymous && dwarf_attr (die, DW_AT_extension) == NULL)
+    add_using_directive (current_namespace,
+			 strlen (previous_namespace),
+			 strlen (current_namespace));
+  
+  
+  if (die->has_children)
+    {
+      struct die_info *child_die = die->next;
+      
+      while (child_die && child_die->tag)
+	{
+	  process_die (child_die, objfile, cu_header);
+	  child_die = sibling_die (child_die);
+	}
+    }
+
+  current_namespace = previous_namespace;
 }
 
 /* Extract all information from a DW_TAG_pointer_type DIE and add to
@@ -5326,6 +5437,43 @@ dwarf2_linkage_name (struct die_info *die)
   return NULL;
 }
 
+/* Get name of a die, return NULL if not found.  */
+
+static char *
+dwarf2_name (struct die_info *die)
+{
+  struct attribute *attr;
+
+  attr = dwarf_attr (die, DW_AT_name);
+  if (attr && DW_STRING (attr))
+    return DW_STRING (attr);
+  return NULL;
+}
+
+/* Return the die that this die in an extension of, or NULL if there
+   is none.  */
+
+static struct die_info *
+dwarf2_extension (struct die_info *die)
+{
+  struct attribute *attr;
+  struct die_info *extension_die;
+  unsigned int ref;
+
+  attr = dwarf_attr (die, DW_AT_extension);
+  if (attr == NULL)
+    return NULL;
+
+  ref = dwarf2_get_ref_die_offset (attr);
+  extension_die = follow_die_ref (ref);
+  if (!extension_die)
+    {
+      error ("Dwarf Error: Cannot find referent at offset %d.", ref);
+    }
+
+  return extension_die;
+}
+
 /* Convert a DIE tag into its string name.  */
 
 static char *
@@ -5429,6 +5577,22 @@ dwarf_tag_name (register unsigned tag)
       return "DW_TAG_variable";
     case DW_TAG_volatile_type:
       return "DW_TAG_volatile_type";
+    case DW_TAG_dwarf_procedure:
+      return "DW_TAG_dwarf_procedure";
+    case DW_TAG_restrict_type:
+      return "DW_TAG_restrict_type";
+    case DW_TAG_interface_type:
+      return "DW_TAG_interface_type";
+    case DW_TAG_namespace:
+      return "DW_TAG_namespace";
+    case DW_TAG_imported_module:
+      return "DW_TAG_imported_module";
+    case DW_TAG_unspecified_type:
+      return "DW_TAG_unspecified_type";
+    case DW_TAG_partial_unit:
+      return "DW_TAG_partial_unit";
+    case DW_TAG_imported_unit:
+      return "DW_TAG_imported_unit";
     case DW_TAG_MIPS_loop:
       return "DW_TAG_MIPS_loop";
     case DW_TAG_format_label:
@@ -5573,7 +5737,30 @@ dwarf_attr_name (register unsigned attr)
       return "DW_AT_virtuality";
     case DW_AT_vtable_elem_location:
       return "DW_AT_vtable_elem_location";
-
+    case DW_AT_allocated:
+      return "DW_AT_allocated";
+    case DW_AT_associated:
+      return "DW_AT_associated";
+    case DW_AT_data_location:
+      return "DW_AT_data_location";
+    case DW_AT_stride:
+      return "DW_AT_stride";
+    case DW_AT_entry_pc:
+      return "DW_AT_entry_pc";
+    case DW_AT_use_UTF8:
+      return "DW_AT_use_UTF8";
+    case DW_AT_extension:
+      return "DW_AT_extension";
+    case DW_AT_ranges:
+      return "DW_AT_ranges";
+    case DW_AT_trampoline:
+      return "DW_AT_trampoline";
+    case DW_AT_call_column:
+      return "DW_AT_call_column";
+    case DW_AT_call_file:
+      return "DW_AT_call_file";
+    case DW_AT_call_line:
+      return "DW_AT_call_line";
 #ifdef MIPS
     case DW_AT_MIPS_fde:
       return "DW_AT_MIPS_fde";
@@ -6010,6 +6197,8 @@ dwarf_type_encoding_name (register unsigned enc)
       return "DW_ATE_unsigned";
     case DW_ATE_unsigned_char:
       return "DW_ATE_unsigned_char";
+    case DW_ATE_imaginary_float:
+      return "DW_ATE_imaginary_float";
     default:
       return "DW_ATE_<unknown>";
     }

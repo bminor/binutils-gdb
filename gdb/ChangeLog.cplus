@@ -1,3 +1,62 @@
+2002-10-22  David Carlton  <carlton@math.stanford.edu>
+
+	* Makefile.in (buildsym.o): Depend on $(gdb_assert_h) and
+	$(cp_support_h).
+	(cp-support.o): Fix dependencies and add $(gdb_obstack_h) and
+	$(gdb_assert_h).
+	(symtab.o): Depend on $(cp_support_h).
+	* symtab.h: Add opaque declaration for struct using_direct_node.
+	(struct block): Add member 'language_specific'.
+	(BLOCK_USING): New macro.
+	* symtab.c: #include "cp-support.h"
+	(lookup_symbol_aux): Call lookup_symbol_aux_nonlocal and
+	lookup_symbol_aux_using when appropriate.
+	(lookup_symbol_aux_nonlocal): New function.
+	(lookup_symbol_aux_using): New function.
+	(lookup_symbol_aux_using_loop): New function.
+	* symfile.h: Add opaque declaration for struct obstack.
+	Declare obsavestring to take a const char *.
+	* symfile.c (obsavestring): Make first argument a const char *.
+	* jv-lang.c (get_java_class_symtab): Initialize BLOCK_USING.
+	* dwarf2read.c: New variable current_namespace.
+	(scan_partial_symbols): Handle DW_TAG_namespace.
+	(psymtab_to_symtab_1): Initialize current_namespace.
+	(process_die): Handle DW_TAG_namespace,
+	DW_TAG_imported_declaration, DW_TAG_imported_module.
+	(read_namespace): New function.
+	(dwarf2_name): New function.
+	(dwarf2_extension): New function.
+	(dwarf_tag_name): Add DWARF 3 names.
+	(dwarf_attr_name): Ditto.
+	(dwarf_type_encoding_name): Ditto.
+	* cp-support.h: Opaque declaration for struct obstack.
+	(struct using_direct): New struct.
+	(struct using_direct_node): New struct.
+	Add declarations for cp_add_using_obstack, cp_add_using_xmalloc,
+	cp_copy_usings, cp_free_usings,	cp_find_first_component.
+	* cp-support.c: #include "gdb_obstack.h", "gdb_assert.h".
+	Comment on demangled name pitfalls.
+	(cp_add_using_obstack): New function.
+	(cp_add_using_xmalloc): New function.
+	(cp_copy_usings): New function.
+	(cp_free_usings): New function.
+	(cp_find_first_component): New function.
+	* buildsym.h: Declare processing_has_namespace_info.
+	Declare add_using_directive.
+	* buildsym.c: #include "gdb_assert.h", "cp-support.h".
+	Change comment after #include "symfile.h".
+	New variable using_list.
+	(add_symbol_to_list): Scan for anonymous namespaces when
+	appropriate.
+	(scan_for_anonymous_namespaces): New function.
+	(add_using_directive): New function.
+	(start_symtab): Initialize processing_has_namespace_info,
+	using_list.
+	(end_symtab): Copy using_list into block.
+	(copy_usings_to_obstack): New function.
+	(finish_block): Set BLOCK_USING in general case and in C++
+	function case.
+
 2002-10-11  David Carlton  <carlton@math.stanford.edu>
 
 	* symtab.c (lookup_symbol_aux): Move chunks of code into separate

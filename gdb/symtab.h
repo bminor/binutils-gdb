@@ -25,6 +25,7 @@
 
 /* Opaque declarations.  */
 struct obstack;
+struct using_direct_node;
 
 /* Don't do this; it means that if some .o's are compiled with GNU C
    and some are not (easy to do accidentally the way we configure
@@ -373,6 +374,23 @@ struct block
 
   struct block *superblock;
 
+  /* Used for language-specific info.  */
+
+  union
+  {
+    struct
+    {
+      /* Contains information about what using directives or other
+	 similar features are added by this block.  This should always
+	 be NULL for global blocks: if there are using directives that
+	 affect an entire file, put it in the static block.  */
+      
+      struct using_direct_node *using;
+    }
+    cplus_specific;
+  }
+  language_specific;
+
   /* Version of GCC used to compile the function corresponding
      to this block, or 0 if not compiled with GCC.  When possible,
      GCC should be compatible with the native compiler, or if that
@@ -418,6 +436,7 @@ struct block
 #define BLOCK_END(bl)		(bl)->endaddr
 #define BLOCK_FUNCTION(bl)	(bl)->function
 #define BLOCK_SUPERBLOCK(bl)	(bl)->superblock
+#define BLOCK_USING(bl)		(bl)->language_specific.cplus_specific.using
 #define BLOCK_GCC_COMPILED(bl)	(bl)->gcc_compile_flag
 #define BLOCK_HASHTABLE(bl)	(bl)->hashtable
 

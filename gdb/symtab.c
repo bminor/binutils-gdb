@@ -49,6 +49,7 @@
 #include "gdb_stat.h"
 #include <ctype.h>
 #include "cp-abi.h"
+#include "cp-support.h"
 
 /* Prototype for one function in parser-defs.h,
    instead of including that entire file. */
@@ -95,6 +96,13 @@ static struct symbol *lookup_symbol_aux_local (const char *name,
 					       struct symtab **symtab);
 
 static
+struct symbol *lookup_symbol_aux_nonlocal (int block_index,
+					   const char *name,
+					   const char *mangled_name,
+					   const namespace_enum namespace,
+					   struct symtab **symtab);
+
+static
 struct symbol *lookup_symbol_aux_symtabs (int block_index,
 					  const char *name,
 					  const char *mangled_name,
@@ -107,6 +115,23 @@ struct symbol *lookup_symbol_aux_psymtabs (int block_index,
 					   const char *mangled_name,
 					   const namespace_enum namespace,
 					   struct symtab **symtab);
+
+static
+struct symbol *lookup_symbol_aux_using (const char *name,
+					const char *mangled_name,
+					const struct block *block,
+					const namespace_enum namespace,
+					struct symtab **symtab);
+
+static
+struct symbol *lookup_symbol_aux_using_loop (const char *prefix,
+					     int prefix_len,
+					     const char *rest,
+					     struct using_direct_node *using,
+					     const char *mangled_name,
+					     namespace_enum namespace,
+					     struct symtab **symtab);
+
 static
 struct symbol *lookup_symbol_aux_minsyms (const char *name,
 					  const char *mangled_name,
@@ -785,15 +810,26 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
      of the desired name as a global, then do psymtab-to-symtab
      conversion on the fly and return the found symbol. */
 
-  sym = lookup_symbol_aux_symtabs (GLOBAL_BLOCK, name, mangled_name,
-				   namespace, symtab);
-  if (sym != NULL)
-    return sym;
-
-  sym = lookup_symbol_aux_psymtabs (GLOBAL_BLOCK, name, mangled_name,
+  sym = lookup_symbol_aux_nonlocal (GLOBAL_BLOCK, name, mangled_name,
 				    namespace, symtab);
   if (sym != NULL)
     return sym;
+
+  /* If we're in the C++ case, check to see if the symbol is defined
+     in a namespace accessible via a "using" declaration.  */
+
+  /* FIXME: carlton/2002-10-10: is "is_a_field_of_this" always
+     non-NULL if we're in the C++ case?  Maybe we should always do
+     this, and delete the two previous searches: this will always
+     search the global namespace, after all.  */
+
+  if (is_a_field_of_this)
+    {
+      sym = lookup_symbol_aux_using (name, mangled_name, block, namespace,
+				     symtab);
+      if (sym != NULL)
+	return sym;
+    }
 
 #ifndef HPUXHPPA
 
@@ -816,16 +852,10 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
      desired name as a file-level static, then do psymtab-to-symtab
      conversion on the fly and return the found symbol. */
 
-  sym = lookup_symbol_aux_symtabs (STATIC_BLOCK, name, mangled_name,
-				   namespace, symtab);
-  if (sym != NULL)
-    return sym;
-  
-  sym = lookup_symbol_aux_psymtabs (STATIC_BLOCK, name, mangled_name,
+  sym = lookup_symbol_aux_nonlocal (STATIC_BLOCK, name, mangled_name,
 				    namespace, symtab);
   if (sym != NULL)
     return sym;
-
 
 #ifdef HPUXHPPA
 
@@ -901,6 +931,32 @@ lookup_symbol_aux_local (const char *name, const char *mangled_name,
     }
 
   return NULL;
+}
+
+/* Check to see if the symbol is defined in one of the symtabs or
+   psymtabs.  BLOCK_INDEX should be either GLOBAL_BLOCK or
+   STATIC_BLOCK, depending on whether or not we want to search global
+   symbols or static symbols.  */
+
+/* FIXME: carlton/2002-10-11: Should this also do some minsym
+   lookup?  */
+
+static struct symbol *
+lookup_symbol_aux_nonlocal (int block_index,
+			    const char *name,
+			    const char *mangled_name,
+			    const namespace_enum namespace,
+			    struct symtab **symtab)
+{
+  struct symbol *sym;
+
+  sym = lookup_symbol_aux_symtabs (block_index, name, mangled_name,
+				   namespace, symtab);
+  if (sym != NULL)
+    return sym;
+
+  return lookup_symbol_aux_psymtabs (block_index, name, mangled_name,
+				     namespace, symtab);
 }
 
 /* Check to see if the symbol is defined in one of the symtabs.
@@ -994,6 +1050,134 @@ lookup_symbol_aux_psymtabs (int block_index, const char *name,
   }
 
   return NULL;
+}
+
+/* This function gathers using directives from BLOCK and its
+   superblocks, and then searches for symbols in the global namespace
+   by trying to apply those various using directives.  */
+static struct symbol *lookup_symbol_aux_using (const char *name,
+					       const char *mangled_name,
+					       const struct block *block,
+					       const namespace_enum namespace,
+					       struct symtab **symtab)
+{
+  struct using_direct_node *using = NULL;
+  struct symbol *sym;
+
+  while (block != NULL)
+    {
+      using = cp_copy_usings (BLOCK_USING (block), using);
+      block = BLOCK_SUPERBLOCK (block);
+    }
+
+  sym = lookup_symbol_aux_using_loop ("", 0, name, using, mangled_name,
+				      namespace, symtab);
+  cp_free_usings (using);
+  
+  return sym;
+}
+
+/* This tries to look up REST in the namespace given by the initial
+   substring of PREFIX of length PREFIX_LEN.
+
+   Basically, assume that we have using directives adding A to the
+   global namespace, adding A::inner to namespace A, and adding B to
+   the global namespace.  Then, when looking up a symbol "foo", we
+   want to recurse by looking up stuff in A::foo and seeing which
+   using directives still apply.  The only one that still applies
+   converts that to A::inner::foo: we _don't_ want to then look at
+   B::A::foo (let alone A::A::foo!).  So we end up just looking at
+   A::foo, A::inner::foo, and B::foo.  (Though if the original caller
+   to lookup_symbol had specified A::foo, we would want to look up
+   stuff in A::A::foo, A::inner::A::foo, A::inner::foo, and
+   B::A::foo).  */
+
+/* FIXME: carlton/2002-10-11: There are still some places where this
+   will return false positives.  For example, if you have namespaces
+   C, C::D, C::E, and C::D::E, then, from a function defined in C::D,
+   all references to variables E::var _should_ be treated as
+   C::D::E::var, but this function will also see variables in
+   C::E::var.  I don't think this can be fixed without making
+   namespaces first-class objects.  (Which is certainly a good idea
+   for other reasons, but it will take a little while.)  */
+
+static struct symbol *
+lookup_symbol_aux_using_loop (const char *prefix,
+			      int prefix_len,
+			      const char *rest,
+			      struct using_direct_node *using,
+			      const char *mangled_name,
+			      namespace_enum namespace,
+			      struct symtab **symtab)
+{
+  struct using_direct_node *current;
+  struct symbol *sym;
+
+  for (current = using; current; current = current->next)
+    {
+      /* First, see if the prefix matches the start of this using
+	 directive.  */
+      if (prefix_len <= current->current->outer_length
+	  && strncmp (prefix, current->current->name, prefix_len) == 0)
+	{
+	  /* Great, it matches: now does the rest of the using
+	     directive match the rest of the name?  */
+	  
+	  const char *rest_of_outer = current->current->name + prefix_len;
+	  int rest_of_outer_len
+	    = current->current->outer_length - prefix_len;
+	  /* Should we skip some colons?  Should be true unless
+	     PREFIX_LEN is zero (and hence we're in the global
+	     namespace) or we've finished all of outer.  */
+	  if (rest_of_outer_len != 0 && *rest_of_outer == ':')
+	    {
+	      rest_of_outer += 2;
+	      rest_of_outer_len -= 2;
+	    }
+	  if (strncmp (rest_of_outer, rest, rest_of_outer_len) == 0)
+	    {
+	      /* Everything matches!  Yippee!  So apply the using
+		 directive and recurse.  */
+	      const char *new_rest = rest + rest_of_outer_len;
+	      if (*new_rest == ':')
+		new_rest += 2;
+
+	      sym = lookup_symbol_aux_using_loop
+		(current->current->name,
+		 current->current->inner_length,
+		 new_rest,
+		 using,
+		 mangled_name,
+		 namespace,
+		 symtab);
+	      if (sym != NULL)
+		return sym;
+	    }
+	}
+    }
+
+  /* We didn't find anything by applying any of the using directives
+     that are still applicable; so let's see if we've got a match
+     using the current name.  */
+  
+  if (prefix_len == 0)
+    {
+      return lookup_symbol_aux_nonlocal (GLOBAL_BLOCK, rest, mangled_name,
+					 namespace, symtab);
+    }
+  else
+    {
+      char *concatenated_name
+	= xmalloc (prefix_len + 2 + strlen (rest) + 1);
+      strncpy (concatenated_name, prefix, prefix_len);
+      strcpy (concatenated_name + prefix_len, "::");
+      strcpy (concatenated_name + prefix_len + 2, rest);
+      sym = lookup_symbol_aux_nonlocal (GLOBAL_BLOCK, concatenated_name,
+					mangled_name, namespace, symtab);
+
+      xfree (concatenated_name);
+      return sym;
+    }
 }
 
 /* Check for the possibility of the symbol being a function or a
