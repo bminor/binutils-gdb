@@ -1,3 +1,11 @@
+Thu Jul  2 17:13:25 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* cgen-sim.h (CPU_SCACHE): Make size unsigned.
+	(CPU_SCACHE_HASH_MASK): New macro.
+	(SCACHE_HASH_PC): Rewrite.
+	* genmloop.sh (engine_resume_{full,fast}): Move some of hash
+	computation out of main loop.
+
 Wed Jul  1 16:44:12 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* Make-common.in (SCHEME,SCHEMEFLAGS): Delete.
