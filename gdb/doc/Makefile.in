@@ -47,6 +47,8 @@ READLINE_DIR = ${gdbdir}/../readline/doc
 
 SET_TEXINPUTS = TEXINPUTS=${TEXIDIR}:.:$(srcdir):$(READLINE_DIR):$$TEXINPUTS
 
+DOC_CONFIG = all
+
 # Don Knuth's TeX formatter
 TEX = tex
 
@@ -154,6 +156,15 @@ lrefcard.ps : $(srcdir)/refcard.tex $(srcdir)/lpsrc.sed
 GDBvn.texi : ${gdbdir}/Makefile.in
 	echo "@set GDBVN `sed <$(srcdir)/../Makefile.in -n 's/VERSION = //p'`" > ./GDBvn.texi
 
+# Choose configuration for GDB manual (normally `all'; normally not tied into
+# `configure' script because most users prefer generic version of manual,
+# not one for their binary config---which may not be specifically
+# defined anyways).
+gdb-config.texi: ${DOC_CONFIG}-config.texi
+	ln -s ${srcdir}/${DOC_CONFIG}-config.texi gdb-config.texi || \
+	ln ${srcdir}/${DOC_CONFIG}-config.texi gdb-config.texi || \
+	cp ${srcdir}/${DOC_CONFIG}-config.texi gdb-config.texi
+
 # GDB MANUAL: texinfo source, using @set/@clear/@value/@ifset/@ifclear
 # If your texinfo or makeinfo don't support these, get a new texinfo release
 #
@@ -196,7 +207,7 @@ gdb.info: ${SFILES_DOC}
 # it out for gdb manual's include files---but only if not configured
 # in main sourcedir.
 links2roff: $(SFILES_INCLUDED)
-	if [ ! -f gdb-config.texi ]; then \
+	if [ ! -f gdb.texinfo ]; then \
 		ln -s $(SFILES_INCLUDED) . || \
 		ln $(SFILES_INCLUDED)    . || \
 		cp $(SFILES_INCLUDED)    . ; \

@@ -837,19 +837,19 @@ the time of attachment.
 @end ifset
 
 @ifset Hviii
-@node Hitachi H8/300 Remote
-@subsection @value{GDBN} and the Hitachi H8/300
-@value{GDBN} needs to know these things to talk to your H8/300: 
+@node Hitachi H8 Remote
+@subsection @value{GDBN} and the Hitachi H8/300 and H8/500
+@value{GDBN} needs to know these things to talk to your H8/300 or H8/500: 
 
 @enumerate
 @item
 that you want to use @samp{target hms}, the remote debugging
-interface for the H8/300 (this is the default when
-GDB is configured specifically for the H8/300);
+interface for the H8/300 and H8/500 (this is the default when
+GDB is configured specifically for the H8/300 or H8/500);
 
 @item
-what serial device connects your host to your H8/300 (the first serial
-device available on your host is the default);
+what serial device connects your host to your Hitachi board (the first
+serial device available on your host is the default);
 
 @ignore
 @c this is only for Unix hosts, not currently of interest.
@@ -858,34 +858,34 @@ what speed to use over the serial device.
 @end ignore
 @end enumerate
 
-@kindex device
-@cindex serial device for H8/300
 @ignore
 @c only for Unix hosts
-Use the special @code{gdb83} command @samp{device @var{port}} if you
+@kindex device
+@cindex serial device, H8/300 or H8/500
+Use the special @code{@value{GDBP}} command @samp{device @var{port}} if you
 need to explicitly set the serial device.  The default @var{port} is the
 first available port on your host.  This is only necessary on Unix
 hosts, where it is typically something like @file{/dev/ttya}.
 
 @kindex speed
-@cindex serial line speed for H8/300
-@code{gdb83} has another special command to set the communications speed
-for the H8/300: @samp{speed @var{bps}}.  This command also is only used
-from Unix hosts; on DOS hosts, set the line speed as usual from outside
-GDB with the DOS @kbd{mode} command (for instance, @w{@samp{mode
+@cindex serial line speed, H8/300 or H8/500
+@code{@value{GDBP}} has another special command to set the communications
+speed: @samp{speed @var{bps}}.  This command also is only used from Unix
+hosts; on DOS hosts, set the line speed as usual from outside GDB with
+the DOS @kbd{mode} command (for instance, @w{@samp{mode
 com2:9600,n,8,1,p}} for a 9600 bps connection).
 @end ignore
 
 @value{GDBN} depends on an auxiliary terminate-and-stay-resident program
-called @code{asynctsr} to communicate with the H8/300 development board
+called @code{asynctsr} to communicate with the development board
 through a PC serial port.  You must also use the DOS @code{mode} command
 to set up the serial port on the DOS side.
 
 The following sample session illustrates the steps needed to start a
-program under @value{GDBN} control on your H8/300.  The example uses a sample
+program under @value{GDBN} control on an H8/300.  The example uses a sample
 H8/300 program called @file{t.x}.
 
-First hook up your H8/300 development board.  In this example, we use a
+First hook up your development board.  In this example, we use a
 board attached to serial port @code{COM2}; if you use a different serial
 port, substitute its name in the argument of the @code{mode} command.
 When you call @code{asynctsr}, the auxiliary comms program used by the
@@ -907,21 +907,22 @@ COM2: 9600, n, 8, 1, p
 @emph{Warning:} We have noticed a bug in PC-NFS that conflicts with
 @code{asynctsr}.  If you also run PC-NFS on your DOS host, you may need to
 disable it, or even boot without it, to use @code{asynctsr} to control
-your H8/300 board.
+your development board.
 @end quotation
 
-Now that serial communications are set up, and the H8/300 is connected,
-you can start up @value{GDBN}.  Call @code{@value{GDBP}} with the name of your
-program as the argument.  @code{@value{GDBP}} prompts you, as usual, with the
-prompt @samp{(@value{GDBP})}.  Use two special commands to begin your debugging
-session: @samp{target hms} to specify cross-debugging to the Hitachi board,
-and the @code{load} command to download your program to the board.
-@code{load} displays the names of the
-program's sections, and a @samp{*} for each 2K of data downloaded.  (If
-you want to refresh @value{GDBN} data on symbols or on the executable file
-without downloading, use the @value{GDBN} commands @code{file} or
-@code{symbol-file}.  These commands, and @code{load} itself, are
-described in @ref{Files,,Commands to specify files}.)
+@kindex target hms
+Now that serial communications are set up, and the development board is
+connected, you can start up @value{GDBN}.  Call @code{@value{GDBP}} with
+the name of your program as the argument.  @code{@value{GDBP}} prompts
+you, as usual, with the prompt @samp{(@value{GDBP})}.  Use two special
+commands to begin your debugging session: @samp{target hms} to specify
+cross-debugging to the Hitachi board, and the @code{load} command to
+download your program to the board.  @code{load} displays the names of
+the program's sections, and a @samp{*} for each 2K of data downloaded.
+(If you want to refresh @value{GDBN} data on symbols or on the
+executable file without downloading, use the @value{GDBN} commands
+@code{file} or @code{symbol-file}.  These commands, and @code{load}
+itself, are described in @ref{Files,,Commands to specify files}.)
 
 @smallexample
 (eg-C:\H8300\TEST) @value{GDBP} t.x
@@ -947,14 +948,14 @@ resumes execution after stopping at a breakpoint.  You can use the
 @code{help} command at any time to find out more about @value{GDBN} commands.
 
 Remember, however, that @emph{operating system} facilities aren't
-available on your H8/300; for example, if your program hangs, you can't
-send an interrupt---but you can press the @sc{reset} switch!  
+available on your development board; for example, if your program hangs,
+you can't send an interrupt---but you can press the @sc{reset} switch!
 
-Use the @sc{reset} button on the H8/300 board
+Use the @sc{reset} button on the development board
 @itemize @bullet
 @item
 to interrupt your program (don't use @kbd{ctl-C} on the DOS host---it has
-no way to pass an interrupt signal to the H8/300); and
+no way to pass an interrupt signal to the development board); and
 
 @item
 to return to the @value{GDBN} command prompt after your program finishes
@@ -963,7 +964,7 @@ to detect program completion.
 @end itemize
 
 In either case, @value{GDBN} will see the effect of a @sc{reset} on the
-H8/300 board as a ``normal exit'' of your program.
+development board as a ``normal exit'' of your program.
 @end ifset
 
 @ifset SIMS
@@ -973,22 +974,22 @@ H8/300 board as a ``normal exit'' of your program.
 @ifset GENERIC
 @cindex simulator
 @cindex simulator, Z8000
-@cindex simulator, H8/300
+@cindex simulator, H8/300 or H8/500
 @cindex Z8000 simulator
-@cindex H8/300 simulator
+@cindex H8/300 or H8/500 simulator
 @cindex CPU simulator
 For some configurations, @value{GDBN} includes a CPU simulator that you
 can use instead of a hardware CPU to debug your programs.  Currently,
 a simulator is available when @value{GDBN} is configured to debug Zilog
-Z8000 or Hitachi H8/300 targets.
+Z8000 or Hitachi H8/300 or H8/500 targets.
 @end ifset
 
 @ifclear GENERIC
 @ifset Hviii
-@cindex simulator, H8/300
-@cindex Hitachi H8/300 simulator
-When configured for debugging Hitachi H8/300 targets, @value{GDBN} includes
-an H8/300 CPU simulator.
+@cindex simulator, H8/300 or H8/500
+@cindex Hitachi H8/300 or H8/500 simulator
+When configured for debugging Hitachi H8/300 or H8/500 targets,
+@value{GDBN} includes an H8/300 or H8/500 CPU simulator.
 @end ifset
 
 @ifset ZviiiK
