@@ -517,9 +517,21 @@ else
 fi
 
 for i in * ; do
-	if test ! -d $i && (grep sanitize $i > /dev/null) ; then
-		echo '***' Some mentions of Sanitize are still left in $i! 1>&2
-	fi
+  if test ! -d $i && (grep sanitize $i > /dev/null) ; then
+    echo '***' Some mentions of Sanitize are still left in gas/config/$i! 1>&2
+  fi
+done
+
+for lost in .. $lose_these_too; do
+  if test $lost != ..; then
+    for i in Makefile.am Makefile.in configure.in configure; do
+      if test -f ../$i; then
+        if fgrep $lost ../$i >/dev/null 2>&1; then
+          echo '***' File gas/config/$lost was sanitized out but is still mentioned in gas/$i 1>&2
+        fi
+      fi
+    done
+  fi
 done
 
 # eof
