@@ -1,3 +1,8 @@
+Tue Sep  2 12:00:46 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote-e7000.c (e7000_fetch_registers): Fix typo, stray paren.
+	(e7000_wait): Ditto.
+
 Mon Sep  1 11:21:03 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* top.c (init_main): Add ``set processor'' as an alias for ``set
