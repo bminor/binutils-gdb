@@ -1,3 +1,11 @@
+Mon Apr 11 10:44:35 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* remote.c: Around redefinition of PBUFSIZE, adjust whitespace.
+	* config/pa/tm-hppa.h (REGISTER_BYTES): Use 4 rather than
+	REGISTER_RAW_SIZE (1).
+	Together these changes work around a bug in HP's compiler.  Both
+	seem to be necessary.
+
 Mon Apr 11 09:18:24 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* paread.c (pa_symtab_read): Handle ST_STUB symbols and symbols

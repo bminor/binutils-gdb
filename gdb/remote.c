@@ -250,8 +250,11 @@ serial_t remote_desc = NULL;
 #define MAXBUFBYTES ((PBUFSIZ-32)/2)
 
 /* Round up PBUFSIZ to hold all the registers, at least.  */
+/* The blank line after the #if seems to be required to work around a
+   bug in HP's PA compiler.  */
 #if REGISTER_BYTES > MAXBUFBYTES
-#undef	PBUFSIZ
+
+#undef PBUFSIZ
 #define	PBUFSIZ	(REGISTER_BYTES * 2 + 32)
 #endif
 
