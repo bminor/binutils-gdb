@@ -328,6 +328,21 @@ static struct
   }
 md;
 
+/* These are not const, because they are modified to MMI for non-itanium1
+   targets below.  */
+/* MFI bundle of nops.  */
+static unsigned char le_nop[16] =
+{
+  0x0c, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
+  0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00
+};
+/* MFI bundle of nops with stop-bit.  */
+static unsigned char le_nop_stop[16] =
+{
+  0x0d, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
+  0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00
+};
+
 /* application registers:  */
 
 #define AR_K0		0
@@ -7259,6 +7274,13 @@ md_begin ()
     symbol_new (".<iplt>", undefined_section, FUNC_IPLT_RELOC,
 		&zero_address_frag);
 
+ if (md.tune != itanium1)
+   {
+     /* Convert MFI NOPs bundles into MMI NOPs bundles.  */
+     le_nop[0] = 0x8;
+     le_nop_stop[0] = 0x9;
+   }
+
   /* Compute the table of best templates.  We compute goodness as a
      base 4 value, in which each match counts for 3.  Match-failures
      result in NOPs and we use extra_goodness() to pick the execution
@@ -11516,14 +11538,6 @@ void
 ia64_handle_align (fragp)
      fragS *fragp;
 {
-  /* Use mfi bundle of nops with no stop bits.  */
-  static const unsigned char le_nop[]
-    = { 0x0c, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
-	0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00};
-  static const unsigned char le_nop_stop[]
-    = { 0x0d, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
-	0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00};
-
   int bytes;
   char *p;
   const unsigned char *nop;
