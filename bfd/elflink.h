@@ -555,6 +555,7 @@ elf_link_add_object_symbols (abfd, info)
       const char *name;
       struct elf_link_hash_entry *h;
       boolean definition;
+      boolean wasweak;
       boolean new_weakdef;
 
       elf_swap_symbol_in (abfd, esym, &sym);
@@ -641,6 +642,7 @@ elf_link_add_object_symbols (abfd, info)
       else
 	definition = true;
 
+      wasweak = false;
       if (info->hash->creator->flavour == bfd_target_elf_flavour)
 	{
 	  /* We need to look up the symbol now in order to get some of
@@ -656,6 +658,10 @@ elf_link_add_object_symbols (abfd, info)
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+	  /* Remember whether this used to be a weak definition.  */
+	  wasweak = (h->root.type == bfd_link_hash_defweak
+		     || h->root.type == bfd_link_hash_undefweak);
 
 	  /* If we are looking at a dynamic object, and this is a
 	     definition, we need to see if it has already been defined
@@ -750,7 +756,7 @@ elf_link_add_object_symbols (abfd, info)
 	  if (sym.st_size != 0
 	      && (definition || h->size == 0))
 	    {
-	      if (h->size != 0 && h->size != sym.st_size)
+	      if (h->size != 0 && h->size != sym.st_size && ! wasweak)
 		(*_bfd_error_handler)
 		  ("Warning: size of symbol `%s' changed from %lu to %lu in %s",
 		   name, (unsigned long) h->size, (unsigned long) sym.st_size,
@@ -762,7 +768,8 @@ elf_link_add_object_symbols (abfd, info)
 	      && (definition || h->type == STT_NOTYPE))
 	    {
 	      if (h->type != STT_NOTYPE
-		  && h->type != ELF_ST_TYPE (sym.st_info))
+		  && h->type != ELF_ST_TYPE (sym.st_info)
+		  && ! wasweak)
 		(*_bfd_error_handler)
 		  ("Warning: type of symbol `%s' changed from %d to %d in %s",
 		   name, h->type, ELF_ST_TYPE (sym.st_info),

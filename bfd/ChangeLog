@@ -1,3 +1,8 @@
+Tue Oct 10 01:28:29 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elflink.h (elf_link_add_object_symbols): Don't warn about
+	changing the size or type if the old definition was weak.
+
 Mon Oct  9 11:24:08 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coffcode.h (combined_entry_type): Add fix_line field.
