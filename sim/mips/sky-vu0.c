@@ -7,6 +7,7 @@
 #include "sky-device.h"
 #include "sky-vu0.h"
 
+/* these are aligned versions of zalloc() pointers - do not zfree()! */
 static char* vu0_mem0_buffer = 0;
 static char* vu0_mem1_buffer = 0;
 
@@ -64,6 +65,7 @@ vu0_attach(SIM_DESC sd)
                    NULL /*buffer*/);
 
   vu0_mem0_buffer = zalloc(VU0_MEM0_SIZE);
+  vu0_mem0_buffer = (void*) ALIGN_16((unsigned)vu0_mem0_buffer);
   sim_core_attach (sd,
 		   NULL,
                    0 /*level*/,
@@ -76,6 +78,7 @@ vu0_attach(SIM_DESC sd)
                    vu0_mem0_buffer /*buffer*/);
 
   vu0_mem1_buffer = zalloc(VU0_MEM1_SIZE);
+  vu0_mem1_buffer = (void*) ALIGN_16((unsigned)vu0_mem1_buffer);
   sim_core_attach (sd,
 		   NULL,
                    0 /*level*/,

@@ -15,6 +15,16 @@ void pke0_issue(SIM_DESC sd);
 void pke1_attach(SIM_DESC sd);
 void pke1_issue(SIM_DESC sd);
 
+/* structs declared below */
+struct pke_fifo;
+struct fifo_quadword;
+
+unsigned_4 pke_fifo_flush(struct pke_fifo*);
+void pke_fifo_reset(struct pke_fifo*);
+struct fifo_quadword* pke_fifo_fit(struct pke_fifo*);
+struct fifo_quadword* pke_fifo_access(struct pke_fifo*, unsigned_4 qwnum);
+void pke_fifo_old(struct pke_fifo*, unsigned_4 qwnum);
+
 
 /* Quadword data type */
 
@@ -344,7 +354,8 @@ enum wordclass
   wc_dma = 'D',
   wc_pkecode = 'P',
   wc_unknown = '?',
-  wc_pkedata = '.'
+  wc_pkedata = '.',
+  wc_gpuiftag = 'g'
 };
 
 
@@ -361,13 +372,13 @@ struct fifo_quadword
 
 
 /* quadword FIFO structure for PKE */ 
-struct pke_fifo
+typedef struct pke_fifo
 {
   struct fifo_quadword** quadwords; /* pointer to fifo quadwords */
   unsigned_4 origin; /* quadword serial number of quadwords[0] */
   unsigned_4 length; /* length of quadword pointer array: 0..N */
   unsigned_4 next;   /* relative index of first unfilled quadword: 0..length-1 */
-};
+} pke_fifo;
 
 #define PKE_FIFO_GROW_SIZE 1000 /* number of quadword pointers to allocate */
 #define PKE_FIFO_ARCHEOLOGY 1000 /* number of old quadwords to keep as history */
@@ -393,6 +404,13 @@ struct pke_device
   /* FIFO - private: use only pke_fifo_* routines to access */
   struct pke_fifo fifo;  /* array of FIFO quadword pointers */
   FILE* fifo_trace_file; /* stdio stream open in append mode, or 0 for no trace */
+
+  /* FIFO cache -- curry last search pke_pcrel_fifo results */
+  unsigned_4 last_fifo_pc;
+  unsigned_4 last_qw_pc;
+  unsigned_4 last_num;
+  unsigned_4 last_new_fifo_pc;
+  unsigned_4 last_new_qw_pc;
 
   /* PC */
   int fifo_pc;  /* 0 .. (fifo_num_elements-1): quadword index of next instruction */

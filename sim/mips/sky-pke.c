@@ -30,10 +30,6 @@ static int pke_io_write_buffer(device*, const void*, int, address_word,
 			       unsigned, sim_cpu*, sim_cia);
 static void pke_reset(struct pke_device*);
 static void pke_issue(SIM_DESC, struct pke_device*);
-static unsigned_4 pke_fifo_flush(struct pke_fifo*);
-static struct fifo_quadword* pke_fifo_fit(struct pke_fifo*);
-static inline struct fifo_quadword* pke_fifo_access(struct pke_fifo*, unsigned_4 qwnum);
-static void pke_fifo_old(struct pke_fifo*, unsigned_4 qwnum);
 static void pke_pc_advance(struct pke_device*, int num_words);
 static struct fifo_quadword* pke_pcrel_fifo(struct pke_device*, int operand_num, 
 					    unsigned_4** operand);
@@ -81,6 +77,7 @@ struct pke_device pke0_device =
   {}, 0,      /* FIFO write buffer */
   { NULL, 0, 0, 0 }, /* FIFO */
   NULL,           /* FIFO trace file */
+  -1, -1, 0, 0, 0, /* invalid FIFO cache */
   0, 0            /* pc */
 };
 
@@ -93,6 +90,7 @@ struct pke_device pke1_device =
   {}, 0,       /* FIFO write buffer */
   { NULL, 0, 0, 0 }, /* FIFO */
   NULL,           /* FIFO trace file */
+  -1, -1, 0, 0, 0, /* invalid FIFO cache */
   0, 0         /* pc */
 };
 
@@ -683,6 +681,27 @@ pke_fifo_flush(struct pke_fifo* fifo)
 
 
 
+/* Clear out contents of FIFO; make it really empty. */
+
+void
+pke_fifo_reset(struct pke_fifo* fifo)
+{
+  int i;
+
+  /* clear fifo quadwords */
+  for(i=0; i<fifo->next; i++)
+    {
+      zfree(fifo->quadwords[i]);
+      fifo->quadwords[i] = NULL;
+    }
+
+  /* reset pointers */
+  fifo->origin = 0;
+  fifo->next = 0;
+}
+
+
+
 /* Make space for the next quadword in the FIFO.  Allocate/enlarge
    FIFO pointer block if necessary.  Return a pointer to it. */
 
@@ -886,15 +905,29 @@ pke_pc_advance(struct pke_device* me, int num_words)
 struct fifo_quadword*
 pke_pcrel_fifo(struct pke_device* me, int operand_num, unsigned_4** operand)
 {
-  int num = operand_num;
+  int num;
   int new_qw_pc, new_fifo_pc;
   struct fifo_quadword* fq = NULL;
 
-  ASSERT(num > 0);
+  /* check for validity of last search results in cache */
+  if(me->last_fifo_pc == me->fifo_pc &&
+     me->last_qw_pc == me->qw_pc &&
+     operand_num > me->last_num)
+    {
+      /* continue search from last stop */
+      new_fifo_pc = me->last_new_fifo_pc;
+      new_qw_pc = me->last_new_qw_pc;
+      num = operand_num - me->last_num;
+    }
+  else
+    {
+      /* start search from scratch */
+      new_fifo_pc = me->fifo_pc;
+      new_qw_pc = me->qw_pc;
+      num = operand_num;
+    }
 
-  /* snapshot current pointers */
-  new_fifo_pc = me->fifo_pc;
-  new_qw_pc = me->qw_pc;
+  ASSERT(num > 0);
 
   /* printf("pke %d pcrel_fifo operand_num %d\n", me->pke_number, operand_num); */
 
@@ -944,6 +977,15 @@ pke_pcrel_fifo(struct pke_device* me, int operand_num, unsigned_4** operand)
       /* annote the word where the pseudo-PC lands as an PKE operand */
       ASSERT(fq->word_class[new_qw_pc] == wc_pkedata || fq->word_class[new_qw_pc] == wc_unknown);
       fq->word_class[new_qw_pc] = wc_pkedata;
+
+      /* store search results in cache */
+      /* keys */
+      me->last_fifo_pc = me->fifo_pc;
+      me->last_qw_pc = me->qw_pc;
+      /* values */
+      me->last_num = operand_num;
+      me->last_new_fifo_pc = new_fifo_pc;
+      me->last_new_qw_pc = new_qw_pc;
     }
 
   return fq;

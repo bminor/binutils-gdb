@@ -17,11 +17,14 @@ VectorUnitState vu1_state;
 
 #define sim_warning printf
 
+/* these are aligned versions of zalloc() pointers - do not zfree()! */
 static char* vu1_umem_buffer = 0;
 static char* vu1_mem_buffer = 0;
 
 void init_vu1(void);
-void init_vu(VectorUnitState *state, char* umem_buffer, char* mem_buffer);
+void init_vu(VectorUnitState *state,
+	     char* umem_buffer, unsigned umem_dw_size,
+	     char* mem_buffer, unsigned mem_qw_size);
 
 #if 0
 static void dump_mem() {
@@ -171,6 +174,7 @@ vu1_init(SIM_DESC sd)
                    NULL /*buffer*/);
 
   vu1_umem_buffer = zalloc(VU1_MEM0_SIZE);
+  vu1_umem_buffer = (void*) ALIGN_16((unsigned)vu1_umem_buffer);
   sim_core_attach (sd,
 		   NULL,
                    0 /*level*/,
@@ -182,7 +186,8 @@ vu1_init(SIM_DESC sd)
                    0 /*device*/,
                    vu1_umem_buffer /*buffer*/);
 
-  vu1_mem_buffer = zalloc(VU1_MEM1_SIZE);
+  vu1_mem_buffer = zalloc(VU1_MEM1_SIZE + 2*sizeof(unsigned_16));
+  vu1_mem_buffer = (void*) ALIGN_16((unsigned)vu1_mem_buffer);
   sim_core_attach (sd,
 		   NULL,
                    0 /*level*/,
@@ -225,19 +230,25 @@ static void abend2(char *fmt, char* p) {
 void getoption(VectorUnitState* state);
 
 void init_vu1(void) {
-    init_vu(&vu1_state, &vu1_umem_buffer[0], &vu1_mem_buffer[0]);
+    init_vu(&vu1_state,
+	    &vu1_umem_buffer[0], VU1_MEM0_SIZE/8,
+	    &vu1_mem_buffer[0], VU1_MEM1_SIZE/16);
 }
 
-void init_vu(VectorUnitState *state, char* umem_buffer, char* mem_buffer)
+void init_vu(VectorUnitState *state,
+	     char* umem_buffer, unsigned umem_dw_size,
+	     char* mem_buffer, unsigned mem_qw_size)
 {
 	FILE *fp;
 	int i, j;
 	u_long	data[4];
 
 	/* set up memory buffers */
-	state->uMEM = (uMEM_Entry_Type *) umem_buffer;
-	state->MEM =  (MEM_Entry_Type*)   mem_buffer;
-
+	state->uMEM_buffer = (uMEM_Entry_Type *) umem_buffer;
+	state->uMEM_size = umem_dw_size;
+	state->MEM_buffer =  (MEM_Entry_Type*)   mem_buffer;
+	state->MEM_size = mem_qw_size;
+	
 	/* set up run state */
 	state->runState = VU_READY;
 
