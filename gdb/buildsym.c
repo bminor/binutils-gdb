@@ -2244,7 +2244,7 @@ read_struct_type (pp, type)
      At the end, we see a semicolon instead of a field.
 
      For the case of overloaded operators, the format is
-     OPERATOR::*.methods, where OPERATOR is the string "operator",
+     op$::*.methods, where $ is the CPLUS_MARKER (usually '$'),
      `*' holds the place for an operator name (such as `+=')
      and `.' marks the end of the operator name.  */
   if (p[1] == ':')
@@ -2294,9 +2294,11 @@ read_struct_type (pp, type)
 	      *pp = p + 1;
 	    }
 	  else
+	    {
 	      main_fn_name = savestring (*pp, p - *pp);
-	  /* Skip past '::'.  */
-	  *pp = p + 2;
+	      /* Skip past '::'.  */
+	      *pp = p + 2;
+	    }
 	  new_mainlist->fn_fieldlist.name = main_fn_name;
 
 	  do
