@@ -34,7 +34,7 @@
 /* 'md_assemble ()' gathers together information and puts it into a
    i386_insn. */
 
-typedef struct
+struct _i386_insn
   {
     /* TM holds the template for the insn were currently assembling. */
     template tm;
@@ -85,9 +85,9 @@ typedef struct
 
     modrm_byte rm;
     base_index_byte bi;
-  }
+  };
 
-i386_insn;
+typedef struct _i386_insn i386_insn;
 
 /* This array holds the chars that always start a comment.  If the
    pre-processor is disabled, these aren't very useful */
@@ -135,8 +135,7 @@ static char digit_chars[256];
 /* put here all non-digit non-letter charcters that may occur in an operand */
 static char operand_special_chars[] = "%$-+(,)*._~/<>|&^!:";
 
-static char *ordinal_names[] =
-{"first", "second", "third"};	/* for printfs */
+static char *ordinal_names[] = {"first", "second", "third"}; /* for printfs */
 
 /* md_assemble() always leaves the strings it's passed unaltered.  To
    effect this we maintain a stack of saved characters that we've smashed
@@ -158,12 +157,11 @@ static reg_entry *ebp, *esp;
 
 static int this_operand;	/* current operand we are working on */
 
-/*
-  Interface to relax_segment.
-  There are 2 relax states for 386 jump insns: one for conditional & one
-  for unconditional jumps.  This is because the these two types of jumps
-  add different sizes to frags when we're figuring out what sort of jump
-  to choose to reach a given label.  */
+/* Interface to relax_segment.
+   There are 2 relax states for 386 jump insns: one for conditional &
+   one for unconditional jumps.  This is because the these two types
+   of jumps add different sizes to frags when we're figuring out what
+   sort of jump to choose to reach a given label.  */
 
 /* types */
 #define COND_JUMP 1		/* conditional jump */
@@ -173,6 +171,14 @@ static int this_operand;	/* current operand we are working on */
 #define WORD 1
 #define DWORD 2
 #define UNKNOWN_SIZE 3
+
+#ifndef INLINE
+#ifdef __GNUC__
+#define INLINE __inline__
+#else
+#define INLINE
+#endif
+#endif
 
 #define ENCODE_RELAX_STATE(type,size) ((type<<2) | (size))
 #define SIZE_FROM_RELAX_STATE(s) \
@@ -191,23 +197,23 @@ const relax_typeS md_relax_table[] =
   {1, 1, 0, 0},
   {1, 1, 0, 0},
 
-/* For now we don't use word displacement jumps:  they may be
-   untrustworthy. */
+  /* For now we don't use word displacement jumps; they may be
+     untrustworthy. */
   {127 + 1, -128 + 1, 0, ENCODE_RELAX_STATE (COND_JUMP, DWORD)},
-/* word conditionals add 3 bytes to frag:
-   2 opcode prefix; 1 displacement bytes */
+  /* word conditionals add 3 bytes to frag:
+     2 opcode prefix; 1 displacement bytes */
   {32767 + 2, -32768 + 2, 3, ENCODE_RELAX_STATE (COND_JUMP, DWORD)},
-/* dword conditionals adds 4 bytes to frag:
-   1 opcode prefix; 3 displacement bytes */
+  /* dword conditionals adds 4 bytes to frag:
+     1 opcode prefix; 3 displacement bytes */
   {0, 0, 4, 0},
   {1, 1, 0, 0},
 
   {127 + 1, -128 + 1, 0, ENCODE_RELAX_STATE (UNCOND_JUMP, DWORD)},
-/* word jmp adds 2 bytes to frag:
-   1 opcode prefix; 1 displacement bytes */
+  /* word jmp adds 2 bytes to frag:
+     1 opcode prefix; 1 displacement bytes */
   {32767 + 2, -32768 + 2, 2, ENCODE_RELAX_STATE (UNCOND_JUMP, DWORD)},
-/* dword jmp adds 3 bytes to frag:
-   0 opcode prefix; 3 displacement bytes */
+  /* dword jmp adds 3 bytes to frag:
+     0 opcode prefix; 3 displacement bytes */
   {0, 0, 3, 0},
   {1, 1, 0, 0},
 
@@ -220,18 +226,16 @@ static reg_entry *parse_register PARAMS ((char *reg_string));
 static void s_bss PARAMS ((void));
 #endif
 
-static unsigned long
+static INLINE unsigned long
 mode_from_disp_size (t)
      unsigned long t;
 {
-  return ((t & (Disp8))
-	  ? 1
-	  : ((t & (Disp32)) ? 2 : 0));
-}				/* mode_from_disp_size() */
+  return (t & Disp8) ? 1 : (t & Disp32) ? 2 : 0;
+}
 
-/* convert opcode suffix ('b' 'w' 'l' typically) into type specifyer */
+/* convert opcode suffix ('b' 'w' 'l' typically) into type specifier */
 
-static unsigned long
+static INLINE unsigned long
 opcode_suffix_to_type (s)
      unsigned long s;
 {
@@ -240,32 +244,32 @@ opcode_suffix_to_type (s)
 		    ? Word : DWord));
 }				/* opcode_suffix_to_type() */
 
-static int
+static INLINE int
 fits_in_signed_byte (num)
      long num;
 {
-  return ((num >= -128) && (num <= 127));
+  return (num >= -128) && (num <= 127);
 }				/* fits_in_signed_byte() */
 
-static int
+static INLINE int
 fits_in_unsigned_byte (num)
      long num;
 {
-  return ((num & 0xff) == num);
+  return (num & 0xff) == num;
 }				/* fits_in_unsigned_byte() */
 
-static int
+static INLINE int
 fits_in_unsigned_word (num)
      long num;
 {
-  return ((num & 0xffff) == num);
+  return (num & 0xffff) == num;
 }				/* fits_in_unsigned_word() */
 
-static int
+static INLINE int
 fits_in_signed_word (num)
      long num;
 {
-  return ((-32768 <= num) && (num <= 32767));
+  return (-32768 <= num) && (num <= 32767);
 }				/* fits_in_signed_word() */
 
 static int
@@ -274,13 +278,13 @@ smallest_imm_type (num)
 {
   return ((num == 1)
 	  ? (Imm1 | Imm8 | Imm8S | Imm16 | Imm32)
-	  : (fits_in_signed_byte (num)
-	     ? (Imm8S | Imm8 | Imm16 | Imm32)
-	     : (fits_in_unsigned_byte (num)
-		? (Imm8 | Imm16 | Imm32)
-		: ((fits_in_signed_word (num) || fits_in_unsigned_word (num))
-		   ? (Imm16 | Imm32)
-		   : (Imm32)))));
+	  : fits_in_signed_byte (num)
+	  ? (Imm8S | Imm8 | Imm16 | Imm32)
+	  : fits_in_unsigned_byte (num)
+	  ? (Imm8 | Imm16 | Imm32)
+	  : (fits_in_signed_word (num) || fits_in_unsigned_word (num))
+	  ? (Imm16 | Imm32)
+	  : (Imm32));
 }				/* smallest_imm_type() */
 
 /* Ignore certain directives generated by gcc. This probably should
@@ -297,7 +301,7 @@ const pseudo_typeS md_pseudo_table[] =
 #ifndef I386COFF
   {"bss", s_bss, 0},
 #endif
-#if !defined (TE_LINUX) && !defined (TE_386BSD)
+#ifndef OBJ_AOUT
   {"align", s_align_bytes, 0},
 #else
   {"align", s_align_ptwo, 0},
@@ -364,7 +368,8 @@ md_begin ()
 	    if (hash_err && *hash_err)
 	      {
 	      hash_error:
-		as_fatal ("Internal Error:  Can't hash %s: %s", prev_name, hash_err);
+		as_fatal ("Internal Error:  Can't hash %s: %s", prev_name,
+			  hash_err);
 	      }
 	    prev_name = optab->name;
 	    core_optab = (templates *) xmalloc (sizeof (templates));
@@ -629,7 +634,7 @@ reloc (size, pcrel)
 #endif
 
 /* This is the guts of the machine-dependent assembler.  LINE points to a
-   machine dependent instruction.  This funciton is supposed to emit
+   machine dependent instruction.  This function is supposed to emit
    the frags/bytes it assembles to.  */
 void
 md_assemble (line)
@@ -1611,7 +1616,7 @@ i386_operand (operand_string)
   char *displacement_string_end = NULL;
 
   /* We check for an absolute prefix (differentiating,
-	   for example, 'jmp pc_relative_label' from 'jmp *absolute_label'. */
+     for example, 'jmp pc_relative_label' from 'jmp *absolute_label'. */
   if (*op_string == ABSOLUTE_PREFIX)
     {
       op_string++;
@@ -1628,7 +1633,7 @@ i386_operand (operand_string)
 	  return 0;
 	}
       /* Check for segment override, rather than segment register by
-		   searching for ':' after %<x>s where <x> = s, c, d, e, f, g. */
+	 searching for ':' after %<x>s where <x> = s, c, d, e, f, g. */
       if ((r->reg_type & (SReg2 | SReg3)) && op_string[3] == ':')
 	{
 	  switch (r->reg_num)
@@ -2156,7 +2161,7 @@ const int md_reloc_size = 8;	/* Size of relocation record */
 void
 md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
      char *ptr;
-     long from_addr, to_addr;
+     valueT from_addr, to_addr;
      fragS *frag;
      symbolS *to_symbol;
 {
@@ -2170,7 +2175,7 @@ md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
 void
 md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
      char *ptr;
-     long from_addr, to_addr;
+     valueT from_addr, to_addr;
      fragS *frag;
      symbolS *to_symbol;
 {
@@ -2204,7 +2209,7 @@ md_parse_option (argP, cntP, vecP)
 void				/* Knows about order of bytes in address. */
 md_number_to_chars (con, value, nbytes)
      char con[];		/* Return 'nbytes' of chars here. */
-     long value;		/* The value of the bits. */
+     valueT value;		/* The value of the bits. */
      int nbytes;		/* Number of bytes in the output. */
 {
   register char *p = con;
@@ -2303,8 +2308,7 @@ md_chars_to_number (con, nbytes)
 
 /* Turn the string pointed to by litP into a floating point constant of type
    type, and emit the appropriate bytes.  The number of LITTLENUMS emitted
-   is stored in *sizeP .  An error message is returned, or NULL on OK.
-   */
+   is stored in *sizeP .  An error message is returned, or NULL on OK.  */
 char *
 md_atof (type, litP, sizeP)
      char type;
@@ -2342,8 +2346,8 @@ md_atof (type, litP, sizeP)
     input_line_pointer = t;
 
   *sizeP = prec * sizeof (LITTLENUM_TYPE);
-  /* this loops outputs the LITTLENUMs in REVERSE order; in accord with
-	   the bigendian 386 */
+  /* This loops outputs the LITTLENUMs in REVERSE order; in accord with
+     the bigendian 386.  */
   for (wordP = words + prec - 1; prec--;)
     {
       md_number_to_chars (litP, (long) (*wordP--), sizeof (LITTLENUM_TYPE));
@@ -2367,7 +2371,8 @@ output_invalid (c)
 
 static reg_entry *
 parse_register (reg_string)
-     char *reg_string;		/* reg_string starts *before* REGISTER_PREFIX */
+     /* reg_string starts *before* REGISTER_PREFIX */
+     char *reg_string;
 {
   register char *s = reg_string;
   register char *p;
@@ -2407,10 +2412,10 @@ md_operand (expressionP)
 }
 
 /* Round up a section size to the appropriate boundary.  */
-long
+valueT
 md_section_align (segment, size)
      segT segment;
-     long size;
+     valueT size;
 {
   return size;			/* Byte alignment is fine */
 }
@@ -2467,6 +2472,8 @@ tc_gen_reloc (section, fixp)
     default:
       abort ();
     }
+#undef MAP
+#undef F
 
   reloc = (arelent *) bfd_alloc_by_size_t (stdoutput, sizeof (arelent));
   assert (reloc != 0);
@@ -2497,8 +2504,7 @@ tc_aout_fix_to_chars (where, fixP, segment_address_in_file)
    * Out: GNU LD relocation length code: 0, 1, or 2.
    */
 
-  static unsigned char nbytes_r_length[] =
-  {42, 0, 1, 42, 2};
+  static const unsigned char nbytes_r_length[] = {42, 0, 1, 42, 2};
   long r_symbolnum;
 
   know (fixP->fx_addsy != NULL);
