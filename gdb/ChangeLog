@@ -1,5 +1,9 @@
 2004-03-23  Andrew Cagney  <cagney@redhat.com>
 
+	* Makefile.in: Update all dependencies.
+
+2004-03-23  Andrew Cagney  <cagney@redhat.com>
+
 	* Makefile.in (trad_frame_h): Add $(frame_h).
 	* trad-frame.h: Update copyright.  Include "frame.h".
 	(struct trad_frame_cache, trad_frame_cache_zalloc): Declare.
