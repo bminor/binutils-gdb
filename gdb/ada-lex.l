@@ -345,7 +345,7 @@ resize_tempbuf (unsigned int n)
   if (tempbufsize < n)
     {
       tempbufsize = (n+63) & ~63;
-      tempbuf = (char *) realloc (tempbuf, tempbufsize);
+      tempbuf = xrealloc (tempbuf, tempbufsize);
     }
 }
 

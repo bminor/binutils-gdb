@@ -1,3 +1,10 @@
+2004-10-15  Andrew Cagney  <cagney@gnu.org>
+
+	* ada-exp.y, ada-lex.l: Use xmalloc and xrealloc through out.
+	* inf-ptrace.c: Include "gdb_wait.h" instead of <wait.h>.
+	* Makefile.in (.y.c, .l.c): Don't replace xmalloc with xxmalloc.
+	Update dependencies.
+
 2004-10-15  Paul Hilfinger  <Hilfinger@gnat.com>
 
 	* ada-lang.c (ada_lookup_symbol): Correct comment.

@@ -852,7 +852,7 @@ write_object_renaming (struct block *orig_left_context,
 	  if (end == NULL)
 	    end = suffix + strlen (suffix);
 	  field_name.length = end - suffix;
-	  field_name.ptr = (char *) malloc (end - suffix + 1);
+	  field_name.ptr = xmalloc (end - suffix + 1);
 	  strncpy (field_name.ptr, suffix, end - suffix);
 	  field_name.ptr[end - suffix] = '\000';
 	  suffix = end;

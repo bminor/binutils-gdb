@@ -32,7 +32,7 @@
 #include "gdbcmd.h"
 #include "gdb_string.h"
 
-#include <sys/wait.h>
+#include "gdb_wait.h"
 #include <signal.h>
 
 /* HACK: Save the ptrace ops returned by ptrace_target.  */
