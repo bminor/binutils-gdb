@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Support for OpenRISC by Johan Rydberg.
+
 * New command line switch to objcopy -B (or --binary-architecture) which sets
   the archiceture of the output file to the given argument.  This option only
   makes sense, if the input target is binary.  Otherwise it is ignored.

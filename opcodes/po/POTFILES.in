@@ -69,6 +69,13 @@ mips16-opc.c
 mips-dis.c
 mips-opc.c
 ns32k-dis.c
+openrisc-asm.c
+openrisc-desc.c
+openrisc-desc.h
+openrisc-dis.c
+openrisc-ibld.c
+openrisc-opc.c
+openrisc-opc.h
 pdp11-dis.c
 pdp11-opc.c
 pj-dis.c

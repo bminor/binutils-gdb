@@ -26,6 +26,7 @@ HFILES = \
 	h8500-opc.h \
 	m32r-desc.h m32r-opc.h \
 	mcore-opc.h \
+	openrisc-desc.h openrisc-opc.h \
 	sh-opc.h \
 	sysdep.h \
 	ia64-asmtab.h \
@@ -97,6 +98,11 @@ CFILES = \
 	m10300-dis.c \
 	m10300-opc.c \
 	ns32k-dis.c \
+	openrisc-asm.c \
+	openrisc-desc.c \
+	openrisc-dis.c \
+	openrisc-ibld.c \
+	openrisc-opc.c \
 	pdp11-dis.c \
 	pdp11-opc.c \
 	pj-dis.c \
@@ -173,6 +179,11 @@ ALL_MACHINES = \
 	mips-opc.lo \
 	mips16-opc.lo \
 	ns32k-dis.lo \
+	openrisc-asm.lo \
+	openrisc-desc.lo \
+	openrisc-dis.lo \
+	openrisc-ibld.lo \
+	openrisc-opc.lo \
 	pdp11-dis.lo \
 	pdp11-opc.lo \
 	pj-dis.lo \
@@ -236,7 +247,7 @@ config.status: $(srcdir)/configure $(srcdir)/../bfd/configure.in
 	$(SHELL) ./config.status --recheck
 
 CLEANFILES = \
-	stamp-m32r stamp-fr30 \
+	stamp-m32r stamp-fr30 stamp-openrisc \
 	libopcodes.a stamp-lib dep.sed DEP DEPA DEP1 DEP2
 
 
@@ -254,9 +265,11 @@ CGENDEPS = ../cgen/stamp-cgen \
 if CGEN_MAINT
 M32R_DEPS = stamp-m32r
 FR30_DEPS = stamp-fr30
+OPENRISC_DEPS = stamp-openrisc
 else
 M32R_DEPS =
 FR30_DEPS =
+OPENRISC_DEPS = 
 endif
 
 run-cgen:
@@ -276,6 +289,11 @@ $(srcdir)/fr30-desc.h $(srcdir)/fr30-desc.c $(srcdir)/fr30-opc.h $(srcdir)/fr30-
 	@true
 stamp-fr30: $(CGENDEPS) $(CGENDIR)/fr30.cpu $(CGENDIR)/fr30.opc
 	$(MAKE) run-cgen arch=fr30 prefix=fr30 options= extrafiles=
+
+$(srcdir)/openrisc-desc.h $(srcdir)/openrisc-desc.c $(srcdir)/openrisc-opc.h $(srcdir)/openrisc-opc.c $(srcdir)/openrisc-ibld.c $(srcdir)/openrisc-asm.c $(srcdir)/openrisc-dis.c: $(OPENRISC_DEPS)
+	@true
+stamp-openrisc: $(CGENDEPS) $(CGENDIR)/openrisc.cpu $(CGENDIR)/openrisc.opc
+	$(MAKE) run-cgen arch=openrisc prefix=openrisc options= extrafiles=
 
 ia64-gen: ia64-gen.o
 	$(LINK) ia64-gen.o $(LIBIBERTY)
@@ -480,6 +498,21 @@ m10300-opc.lo: m10300-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
 ns32k-dis.lo: ns32k-dis.c $(BFD_H) $(INCDIR)/ansidecl.h \
   sysdep.h config.h $(INCDIR)/dis-asm.h $(INCDIR)/opcode/ns32k.h \
   opintl.h
+openrisc-asm.lo: openrisc-asm.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(BFD_H) $(INCDIR)/symcat.h openrisc-desc.h $(INCDIR)/opcode/cgen.h \
+  openrisc-opc.h opintl.h
+openrisc-desc.lo: openrisc-desc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(BFD_H) $(INCDIR)/symcat.h openrisc-desc.h $(INCDIR)/opcode/cgen.h \
+  openrisc-opc.h opintl.h $(INCDIR)/libiberty.h
+openrisc-dis.lo: openrisc-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h openrisc-desc.h \
+  $(INCDIR)/opcode/cgen.h openrisc-opc.h opintl.h
+openrisc-ibld.lo: openrisc-ibld.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/symcat.h openrisc-desc.h \
+  $(INCDIR)/opcode/cgen.h openrisc-opc.h opintl.h
+openrisc-opc.lo: openrisc-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
+  $(BFD_H) $(INCDIR)/symcat.h openrisc-desc.h $(INCDIR)/opcode/cgen.h \
+  openrisc-opc.h $(INCDIR)/libiberty.h
 pdp11-dis.lo: pdp11-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
   $(INCDIR)/ansidecl.h $(INCDIR)/opcode/pdp11.h
 pdp11-opc.lo: pdp11-opc.c $(INCDIR)/opcode/pdp11.h

@@ -1,3 +1,21 @@
+2001-04-27  Johan Rydberg  <jrydberg@opencores.org>
+
+        * Makefile.am: Add OpenRISC target.
+        * Makefile.in: Regenerated.
+
+        * disassemble.c (disassembler): Recognize the OpenRISC disassembly.
+
+        * configure.in (bfd_openrisc_arch): Add target.
+        * configure: Regenerated.
+
+        * openrisc-asm.c: New file.
+        * openrisc-desc.c: Likewise.
+        * openrisc-desc.h: Likewise.
+        * openrisc-dis.c: Likewise.
+        * openrisc-ibld.c: Likewise.
+        * openrisc-opc.c: Likewise.
+        * openrisc-opc.h: Likewise.
+
 2001-04-24  Christian Groessler  <cpg@aladdin.de>
 
 	* z8k-dis.c: add names of control registers (ctrl_names);

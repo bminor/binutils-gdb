@@ -1,3 +1,7 @@
+2001-04-27  Johan Rydberg  <jrydberg@opencores.org>
+
+        * NEWS: Announce support for OpenRISC.
+
 2001-04-17  Danny Smith  <dannysmith@users.sourceforge.net>
  
 	* dlltool.c (do_default_excludes): Initialise to true. 
