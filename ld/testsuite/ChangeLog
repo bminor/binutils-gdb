@@ -1,5 +1,13 @@
 2005-03-01  Nick Clifton  <nickc@redhat.com>
 
+	* ld-d10v/default_layout.d: Adjust expected offsets to allow for
+	section alignment.
+	
+	* ld-discard/extern.d: Adjust expected warning to take into
+	account the fact that the linker's name might be included and that
+	the reloc might have been adjusted to be against the section
+	symbol.
+
 	* ld-cris/warn3.d: Only run this version of the test for cris-aout
 	targets.
 	* ld-cris/warn4.d: Only run this version of the test for cris-elf
