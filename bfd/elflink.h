@@ -887,20 +887,14 @@ elf_link_add_object_symbols (abfd, info)
 	     library is a function, since common symbols always
 	     represent variables; this can cause confusion in
 	     principle, but any such confusion would seem to indicate
-	     an erroneous program or shared library.  We also treat a
-	     common symbol as a definition if the symbol in the shared
-	     library is in an uninitialized section, and it has a
-	     smaller size.  */
+	     an erroneous program or shared library.  */
 	  if (dynamic && definition)
 	    {
 	      if (h->root.type == bfd_link_hash_defined
 		  || h->root.type == bfd_link_hash_defweak
 		  || (h->root.type == bfd_link_hash_common
-		      && ((bind == STB_WEAK
-			   || ELF_ST_TYPE (sym.st_info) == STT_FUNC)
-			  || ((sec->flags & SEC_ALLOC) != 0
-			      && (sec->flags & SEC_LOAD) == 0
-			      && sym.st_size < h->size))))
+		      && (bind == STB_WEAK
+			  || ELF_ST_TYPE (sym.st_info) == STT_FUNC)))
 		{
 		  override = true;
 		  sec = bfd_und_section_ptr;
@@ -908,6 +902,36 @@ elf_link_add_object_symbols (abfd, info)
 		  size_change_ok = true;
 		  if (h->root.type == bfd_link_hash_common)
 		    type_change_ok = true;
+		}
+	    }
+
+	  /* If we already have a common symbol, and the symbol in the
+             shared library is in an uninitialized section, then treat
+             the shared library symbol as a common symbol.  This will
+             not always be correct, but it should do little harm.  */
+	  if (dynamic
+	      && definition
+	      && h->root.type == bfd_link_hash_common
+	      && (sec->flags & SEC_ALLOC) != 0
+	      && (sec->flags & SEC_LOAD) == 0)
+	    {
+	      if (! ((*info->callbacks->multiple_common)
+		     (info, h->root.root.string,
+		      h->root.u.c.p->section->owner, bfd_link_hash_common,
+		      h->root.u.c.size, abfd, bfd_link_hash_common,
+		      sym.st_size)))
+		goto error_return;
+
+	      /* If the symbol in the shared library is smaller than
+                 the one we already have, then override it to stick
+                 with the larger symbol.  Set SIZE_CHANGE_OK because
+                 we only want to warn if requested with --warn-common.  */
+	      if (sym.st_size < h->size)
+		{
+		  override = true;
+		  sec = bfd_und_section_ptr;
+		  definition = false;
+		  size_change_ok = true;
 		}
 	    }
 
