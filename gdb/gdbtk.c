@@ -3303,4 +3303,31 @@ _initialize_gdbtk ()
 
       init_ui_hook = gdbtk_init;
     }
+#ifdef __CYGWIN32__
+  else
+    {
+      DWORD ft = GetFileType (GetStdHandle (STD_INPUT_HANDLE));
+      void cygwin32_attach_handle_to_fd (char *, int, HANDLE, int, int);
+
+      switch (ft)
+	{
+	  case FILE_TYPE_DISK:
+	  case FILE_TYPE_CHAR:
+	  case FILE_TYPE_PIPE:
+	    break;
+	  default:
+	    AllocConsole();
+	    cygwin32_attach_handle_to_fd ("/dev/conin", 0,
+					  GetStdHandle (STD_INPUT_HANDLE),
+					  1, GENERIC_READ);
+	    cygwin32_attach_handle_to_fd ("/dev/conin", 1,
+					  GetStdHandle (STD_OUTPUT_HANDLE),
+					  0, GENERIC_WRITE);
+	    cygwin32_attach_handle_to_fd ("/dev/conin", 2,
+					  GetStdHandle (STD_ERROR_HANDLE),
+					  0, GENERIC_WRITE);
+	    break;
+	}
+    }
+#endif
 }
