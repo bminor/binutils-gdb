@@ -1,3 +1,9 @@
+2000-08-27  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-linux-nat.c (fetch_inferior_registers): Move call to
+	dummy_sse_values ...
+	(supply_fpregset): ... here.
+
 2000-08-27  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* pa64solib.c (pa64_solib_load_symbols): Don't use ANOFFSET as an

@@ -41,6 +41,9 @@
 /* Prototypes for i387_supply_fsave etc.  */
 #include "i387-nat.h"
 
+/* Prototypes for local functions.  */
+static void dummy_sse_values (void);
+
 /* On Linux, threads are implemented as pseudo-processes, in which
    case we may be tracing more than one process at a time.  In that
    case, inferior_pid will contain the main process ID and the
@@ -358,6 +361,7 @@ void
 supply_fpregset (elf_fpregset_t *fpregsetp)
 {
   i387_supply_fsave ((char *) fpregsetp);
+  dummy_sse_values ();
 }
 
 /* Fill register REGNO (if it is a floating-point register) in
@@ -574,7 +578,6 @@ fetch_inferior_registers (int regno)
 	 gdbarch.  Until then, this will at least make things work
 	 plausibly.  */
       fetch_fpregs (tid);
-      dummy_sse_values ();
       return;
     }
 
