@@ -883,10 +883,10 @@ address_info (exp, from_tty)
     {
       if (is_a_field_of_this)
 	{
-	  printf_unfiltered ("Symbol \"");
+	  printf_filtered ("Symbol \"");
 	  fprintf_symbol_filtered (gdb_stdout, exp,
 				   current_language->la_language, DMGL_ANSI);
-	  printf_unfiltered ("\" is a field of the local class variable `this'\n");
+	  printf_filtered ("\" is a field of the local class variable `this'\n");
 	  return;
 	}
 
@@ -894,10 +894,10 @@ address_info (exp, from_tty)
 
       if (msymbol != NULL)
 	{
-	  printf_unfiltered ("Symbol \"");
+	  printf_filtered ("Symbol \"");
 	  fprintf_symbol_filtered (gdb_stdout, exp,
 				   current_language->la_language, DMGL_ANSI);
-	  printf_unfiltered ("\" is at %s in a file compiled without debugging.\n",
+	  printf_filtered ("\" is at %s in a file compiled without debugging.\n",
 	      local_hex_string((unsigned long) SYMBOL_VALUE_ADDRESS (msymbol)));
 	}
       else
@@ -905,10 +905,10 @@ address_info (exp, from_tty)
       return;
     }
 
-  printf_unfiltered ("Symbol \"");
+  printf_filtered ("Symbol \"");
   fprintf_symbol_filtered (gdb_stdout, SYMBOL_NAME (sym),
 			   current_language->la_language, DMGL_ANSI);
-  printf_unfiltered ("\" is ", SYMBOL_NAME (sym));
+  printf_filtered ("\" is ", SYMBOL_NAME (sym));
   val = SYMBOL_VALUE (sym);
   basereg = SYMBOL_BASEREG (sym);
 
@@ -916,63 +916,63 @@ address_info (exp, from_tty)
     {
     case LOC_CONST:
     case LOC_CONST_BYTES:
-      printf_unfiltered ("constant");
+      printf_filtered ("constant");
       break;
 
     case LOC_LABEL:
-      printf_unfiltered ("a label at address %s",
+      printf_filtered ("a label at address %s",
 	      local_hex_string((unsigned long) SYMBOL_VALUE_ADDRESS (sym)));
       break;
 
     case LOC_REGISTER:
-      printf_unfiltered ("a variable in register %s", reg_names[val]);
+      printf_filtered ("a variable in register %s", reg_names[val]);
       break;
 
     case LOC_STATIC:
-      printf_unfiltered ("static storage at address %s",
+      printf_filtered ("static storage at address %s",
 	      local_hex_string((unsigned long) SYMBOL_VALUE_ADDRESS (sym)));
       break;
 
     case LOC_REGPARM:
-      printf_unfiltered ("an argument in register %s", reg_names[val]);
+      printf_filtered ("an argument in register %s", reg_names[val]);
       break;
 
     case LOC_REGPARM_ADDR:
-      printf_unfiltered ("address of an argument in register %s", reg_names[val]);
+      printf_filtered ("address of an argument in register %s", reg_names[val]);
       break;
 
     case LOC_ARG:
-      printf_unfiltered ("an argument at offset %ld", val);
+      printf_filtered ("an argument at offset %ld", val);
       break;
 
     case LOC_LOCAL_ARG:
-      printf_unfiltered ("an argument at frame offset %ld", val);
+      printf_filtered ("an argument at frame offset %ld", val);
       break;
 
     case LOC_LOCAL:
-      printf_unfiltered ("a local variable at frame offset %ld", val);
+      printf_filtered ("a local variable at frame offset %ld", val);
       break;
 
     case LOC_REF_ARG:
-      printf_unfiltered ("a reference argument at offset %ld", val);
+      printf_filtered ("a reference argument at offset %ld", val);
       break;
 
     case LOC_BASEREG:
-      printf_unfiltered ("a variable at offset %ld from register %s",
+      printf_filtered ("a variable at offset %ld from register %s",
 	      val, reg_names[basereg]);
       break;
 
     case LOC_BASEREG_ARG:
-      printf_unfiltered ("an argument at offset %ld from register %s",
+      printf_filtered ("an argument at offset %ld from register %s",
 	      val, reg_names[basereg]);
       break;
 
     case LOC_TYPEDEF:
-      printf_unfiltered ("a typedef");
+      printf_filtered ("a typedef");
       break;
 
     case LOC_BLOCK:
-      printf_unfiltered ("a function at address %s",
+      printf_filtered ("a function at address %s",
 	      local_hex_string((unsigned long) BLOCK_START (SYMBOL_BLOCK_VALUE (sym))));
       break;
 
@@ -981,10 +981,10 @@ address_info (exp, from_tty)
       break;
       
     default:
-      printf_unfiltered ("of unknown (botched) type");
+      printf_filtered ("of unknown (botched) type");
       break;
     }
-  printf_unfiltered (".\n");
+  printf_filtered (".\n");
 }
 
 static void
@@ -1928,6 +1928,8 @@ disassemble_command (arg, from_tty)
       QUIT;
       print_address (pc, gdb_stdout);
       printf_filtered (":\t");
+      /* We often wrap here if there are long symbolic names.  */
+      wrap_here ("    ");
       pc += print_insn (pc, gdb_stdout);
       printf_filtered ("\n");
     }
