@@ -1,7 +1,9 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB 6.0:
+*** Changes since GDB 6.1:
+
+*** Changes in GDB 6.1:
 
 * Removed --with-mmalloc
 

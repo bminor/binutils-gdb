@@ -1,3 +1,7 @@
+2004-02-28  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.texinfo (Contributors): Mention GDB 6.1 release engineer.
+
 2004-02-26  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* gdb.texinfo (breakpoints): Add information about the
