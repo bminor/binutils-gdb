@@ -1,3 +1,10 @@
+start-sanitize-tic80
+Sun Mar  2 22:47:54 1997  Fred Fish  <fnf@cygnus.com>
+
+	* coff-tic80.c (COFF_DEFAULT_SECTION_ALIGNMENT_POWER): Set this to 2
+	instead of 4.
+
+end-sanitize-tic80
 Sun Mar  2 16:25:35 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elflink.h (elf_link_find_version_dependencies): Check that
