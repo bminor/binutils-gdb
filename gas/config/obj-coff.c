@@ -1485,6 +1485,8 @@ size_section (abfd, idx)
 	  size += TC_COFF_SIZEMACHDEP (frag);
 	  break;
 #endif
+	case rs_space:
+	  assert (frag->fr_symbol == 0);
 	case rs_fill:
 	case rs_org:
 	  size += frag->fr_fix;
@@ -1737,6 +1739,8 @@ fill_section (abfd, h, file_cursor)
 		    }
 
 		  break;
+		case rs_space:
+		  assert (frag->fr_symbol == 0);
 		case rs_fill:
 		case rs_align:
 		case rs_org:
