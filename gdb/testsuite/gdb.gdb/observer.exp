@@ -153,7 +153,10 @@ proc reset_counters { } {
 
 proc test_normal_stop_notifications { first second third message } {
     reset_counters
-    gdb_test "call observer_notify_normal_stop ()" "" \
+    # Call observer_notify_normal_stop.  Note that this procedure
+    # takes one argument, but this argument is ignored by the observer
+    # callbacks we have installed.  So we just pass an arbitrary value.
+    gdb_test "call observer_notify_normal_stop (0)" "" \
              "sending notification ($message)"
     check_counters $first $second $third $message
 }

@@ -1,3 +1,8 @@
+2004-04-16  Joel Brobecker  <brobecker@gnat.com>
+
+	* gdb.gdb/observer.exp (test_normal_stop_notifications): Update
+	call to observer_notify_normal_stop.
+
 2004-04-15  Andrew Cagney  <cagney@redhat.com>
 
 	* gdb.base/siginfo.c: New file.
