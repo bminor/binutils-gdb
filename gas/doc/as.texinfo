@@ -195,7 +195,7 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
 @c We don't use deffn and friends for the following because they seem
 @c to be limited to one line for the header.
 @smallexample
-@value{AS} [ -a[dhlns][=file] ] [ -D ]  [ --defsym @var{sym}=@var{val} ]
+@value{AS} [ -a[cdhlns][=file] ] [ -D ]  [ --defsym @var{sym}=@var{val} ]
  [ -f ] [ --help ] [ -I @var{dir} ] [ -J ] [ -K ] [ -L ]
  [ -o @var{objfile} ] [ -R ] [ --statistics ] [ -v ] [ -version ]
  [ --version ] [ -W ] [ -w ] [ -x ] [ -Z ]
@@ -862,7 +862,7 @@ precisely what options it passes to each compilation pass, including the
 assembler.)
 
 @menu
-* a::             -a[dhlns] enable listings
+* a::             -a[cdhlns] enable listings
 * D::             -D for compatibility
 * f::             -f to work faster
 * I::             -I for .include search path
@@ -884,9 +884,10 @@ assembler.)
 @end menu
 
 @node a
-@section Enable Listings: @code{-a[dhlns]}
+@section Enable Listings: @code{-a[cdhlns]}
 
 @kindex -a
+@kindex -ac
 @kindex -ad
 @kindex -ah
 @kindex -al
@@ -904,6 +905,11 @@ You can use other letters to select specific options for the list:
 High-level listings require that a compiler debugging option like
 @samp{-g} be used, and that assembly listings (@samp{-al}) be requested
 also.
+
+Use the @samp{-ac} option to omit false conditionals from a listing.  Any lines
+which are not assembled because of a false @code{.if} (or @code{.ifdef}, or any
+other conditional), or a true @code{.if} followed by an @code{.else}, will be
+omitted from the listing.
 
 Use the @samp{-ad} option to omit debugging directives from the
 listing.
@@ -2324,10 +2330,19 @@ not dictate data to load into it before your program executes.  When
 your program starts running, all the contents of the bss
 section are zeroed bytes.
 
-Addresses in the bss section are allocated with special directives; you
-may not assemble anything directly into the bss section.  Hence there
-are no bss subsections. @xref{Comm,,@code{.comm}},
-@pxref{Lcomm,,@code{.lcomm}}.
+The @code{.lcomm} pseudo-op defines a symbol in the bss section; see
+@ref{Lcomm,,@code{.lcomm}}.
+
+The @code{.comm} pseudo-op may be used to declare a common symbol, which is
+another form of uninitialized symbol; see @xref{Comm,,@code{.comm}}.
+
+@ifset GENERIC
+When assembling for a target which supports multiple sections, such as ELF or
+COFF, you may switch into the @code{.bss} section and define symbols as usual;
+see @ref{Section,,@code{.section}}.  You may only assemble zero values into the
+section.  Typically the section will only contain symbol definitions and
+@code{.skip} directives (@pxref{Skip,,@code{.skip}}).
+@end ifset
 
 @node Symbols
 @chapter Symbols
@@ -2456,7 +2471,7 @@ If the label is written @samp{0:} then the digit is @samp{0}.
 If the label is written @samp{1:} then the digit is @samp{1}.
 And so on up through @samp{9:}.
 
-@item @ctrl{A}
+@item @kbd{C-A}
 This unusual character is included so you do not accidentally invent
 a symbol of the same name.  The character has ASCII value
 @samp{\001}.
@@ -2468,8 +2483,8 @@ number @samp{15}; @emph{etc.}.  Likewise for the other labels @samp{1:}
 through @samp{9:}.
 @end table
 
-For instance, the first @code{1:} is named @code{L1@ctrl{A}1}, the 44th
-@code{3:} is named @code{L3@ctrl{A}44}.
+For instance, the first @code{1:} is named @code{L1@kbd{C-A}1}, the 44th
+@code{3:} is named @code{L3@kbd{C-A}44}.
 
 @node Dot
 @section The Special Dot Symbol
@@ -2908,6 +2923,8 @@ Some machine configurations provide additional directives.
 
 * Endif::                       @code{.endif}
 * Equ::                         @code{.equ @var{symbol}, @var{expression}}
+* Equiv::                       @code{.equiv @var{symbol}, @var{expression}}
+* Err::				@code{.err}
 * Extern::                      @code{.extern}
 @ifclear no-file-dir
 * File::                        @code{.file @var{string}}
@@ -2969,6 +2986,9 @@ Some machine configurations provide additional directives.
 @end ifset
 
 * String::                      @code{.string "@var{str}"}
+@ifset ELF
+* Symver::                      @code{.symver @var{name},@var{name2@@nodename}}
+@end ifset
 @ifset COFF
 * Tag::                         @code{.tag @var{structname}}
 @end ifset
@@ -3137,13 +3157,26 @@ Each expression is assembled into the next byte.
 
 @cindex @code{comm} directive
 @cindex symbol, common
-@code{.comm} declares a named common area in the bss section.  Normally
-@code{@value{LD}} reserves memory addresses for it during linking, so no partial
-program defines the location of the symbol.  Use @code{.comm} to tell
-@code{@value{LD}} that it must be at least @var{length} bytes long.  @code{@value{LD}}
-allocates space for each @code{.comm} symbol that is at least as
-long as the longest @code{.comm} request in any of the partial programs
-linked.  @var{length} is an absolute expression.
+@code{.comm} declares a common symbol named @var{symbol}.  When linking, a
+common symbol in one object file may be merged with a defined or common symbol
+of the same name in another object file.  If @code{@value{LD}} does not see a
+definition for the symbol--just one or more common symbols--then it will
+allocate @var{length} bytes of uninitialized memory.  @var{length} must be an
+absolute expression.  If @code{@value{LD}} sees multiple common symbols with
+the same name, and they do not all have the same size, it will allocate space
+using the largest size.
+
+@ifset ELF
+When using ELF, the @code{.comm} directive takes an optional third argument.
+This is the desired alignment of the symbol, specified as a byte boundary (for
+example, an alignment of 16 means that the least significant 4 bits of the
+address should be zero).  The alignment must be an absolute expression, and it
+must be a power of two.  If @code{@value{LD}} allocates uninitialized memory
+for the common symbol, it will use the alignment when placing the symbol.  If
+no alignment is specified, @code{@value{AS}} will set the alignment to the
+largest power of two less than or equal to the size of the symbol, up to a
+maximum of 16.
+@end ifset
 
 @ifset HPPA
 The syntax for @code{.comm} differs slightly on the HPPA.  The syntax is
@@ -3294,6 +3327,27 @@ It is synonymous with @samp{.set}; @pxref{Set,,@code{.set}}.
 The syntax for @code{equ} on the HPPA is 
 @samp{@var{symbol} .equ @var{expression}}.
 @end ifset
+
+@node Equiv
+@section @code{.equiv @var{symbol}, @var{expression}}
+@cindex @code{equiv} directive
+The @code{.equiv} directive is like @code{.equ} and @code{.set}, except that
+the assembler will signal an error if @var{symbol} is already defined.
+
+Except for the contents of the error message, this is roughly equivalent to 
+@smallexample
+.ifdef SYM
+.err
+.endif
+.equ SYM,VAL
+@end smallexample
+
+@node Err
+@section @code{.err}
+@cindex @code{err} directive
+If @code{@value{AS}} assembles a @code{.err} directive, it will print an error
+message and, unless the @code{-Z} option was used, it will not generate an
+object file.  This can be used to signal error an conditionally compiled code.
 
 @node Extern
 @section @code{.extern}
@@ -3555,6 +3609,11 @@ those of the new local common.  The addresses are allocated in the bss
 section, so that at run-time the bytes start off zeroed.  @var{Symbol}
 is not declared global (@pxref{Global,,@code{.global}}), so is normally
 not visible to @code{@value{LD}}.
+
+@ifset GENERIC
+Some targets permit a third argument to be used with @code{.lcomm}.  This
+argument specifies the desired alignment of the symbol in the bss section.
+@end ifset
 
 @ifset HPPA
 The syntax for @code{.lcomm} differs slightly on the HPPA.  The syntax is
@@ -4036,6 +4095,8 @@ section is not loaded
 writable section
 @item d
 data section
+@item r
+read-only section
 @item x
 executable section
 @end table
@@ -4292,6 +4353,39 @@ Copy the characters in @var{str} to the object file.  You may specify more than
 one string to copy, separated by commas.  Unless otherwise specified for a
 particular machine, the assembler marks the end of each string with a 0 byte.
 You can use any of the escape sequences described in @ref{Strings,,Strings}.
+
+@ifset ELF
+@node Symver
+@section @code{.symver}
+@cindex @code{symver} directive
+@cindex symbol versioning
+@cindex versions of symbols
+Use the @code{.symver} directive to bind symbols to specific version nodes
+within a source file.  This is only supported on ELF platforms, and is
+typically used when assembling files to be linked into a shared library.
+There are cases where it may make sense to use this in objects to be bound
+into an application itself so as to override a versioned symbol from a
+shared library.
+
+For ELF targets, the @code{.symver} directive is used like this:
+@smallexample
+.symver @var{name}, @var{name2@@nodename}
+@end smallexample
+In this case, the symbol @var{name} must exist and be defined within the file
+being assembled.  The @code{.versym} directive effectively creates a symbol
+alias with the name @var{name2@@nodename}, and in fact the main reason that we
+just don't try and create a regular alias is that the @var{@@} character isn't
+permitted in symbol names.  The @var{name2} part of the name is the actual name
+of the symbol by which it will be externally referenced.  The name @var{name}
+itself is merely a name of convenience that is used so that it is possible to
+have definitions for multiple versions of a function within a single source
+file, and so that the compiler can unambiguously know which version of a
+function is being mentioned.  The @var{nodename} portion of the alias should be
+the name of a node specified in the version script supplied to the linker when
+building a shared library.  If you are attempting to override a versioned
+symbol from a shared library, then @var{nodename} should correspond to the
+nodename of the symbol you are trying to override.
+@end ifset
 
 @ifset COFF
 @node Tag
