@@ -1,3 +1,8 @@
+2002-11-06  Alexandre Oliva  <aoliva@redhat.com>
+
+	* emulparams/elf32btsmipn32.sh (TEXT_DYNAMIC): Define.
+	* emulparams/elf64btsmip.sh (TEXT_DYNAMIC): Likewise.
+
 2002-11-07  Danny Smith  <dannysmith@users.sourceforge.net>
 
 	* deffilep.y (def_lex): Handle '@' as first character of an ID.
