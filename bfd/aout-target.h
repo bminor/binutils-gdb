@@ -22,14 +22,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "aout/ar.h"
 /*#include "libaout.h"*/
 
+extern CONST struct reloc_howto_struct * NAME(aout,reloc_type_lookup) ();
+
 /* Set parameters about this a.out file that are machine-dependent.
    This routine is called from some_aout_object_p just before it returns.  */
+#ifndef MY_callback
 static bfd_target *
 DEFUN(MY(callback),(abfd),
       bfd *abfd)
 {
   struct internal_exec *execp = exec_hdr (abfd);
-  struct aout_backend_data *abdp;
 
   /* Calculate the file positions of the parts of a newly read aout header */
   obj_textsec (abfd)->_raw_size = N_TXTSIZE(*execp);
@@ -72,6 +74,7 @@ DEFUN(MY(callback),(abfd),
 
   return abfd->xvec;
 }
+#endif
 
 #ifndef MY_object_p
 /* Finish up the reading of an a.out file header */
@@ -153,7 +156,6 @@ static boolean
 DEFUN(MY(write_object_contents),(abfd),
       bfd *abfd)
 {
-  bfd_size_type data_pad = 0;
   struct external_exec exec_bytes;
   struct internal_exec *execp = exec_hdr (abfd);
 
@@ -320,7 +322,7 @@ static CONST struct aout_backend_data MY(backend_data) = {
 #define MY_bfd_debug_info_accumulat NAME(aout,bfd_debug_info_accumulat)
 #endif
 #ifndef MY_reloc_howto_type_lookup
-#define MY_reloc_howto_type_lookup 0
+#define MY_reloc_howto_type_lookup NAME(aout,reloc_type_lookup)
 #endif
 #ifndef MY_make_debug_symbol
 #define MY_make_debug_symbol 0

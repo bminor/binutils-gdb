@@ -24,6 +24,7 @@ a29k-*-*)		my_host=ultra3 ;;
 hppa*-hp-hpux)		my_host=hppahpux ;;
 hppa*-hp-bsd)		my_host=hppabsd ;;
 
+i[34]86-*-bsd)		my_host=i386bsd ;;
 i[34]86-ncr*-sysv4*)	my_host=ncr3000 ;;
 i[34]86-*-go32)		my_host=go32 ;;
 i[34]86-*-sysv4*)	my_host=i386v4 ;;

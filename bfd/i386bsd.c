@@ -1,4 +1,4 @@
-/* BFD back-end for i386 a.out binaries.
+/* BFD back-end for i386 a.out binaries under 386BSD.
    Copyright (C) 1990, 1991 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -18,32 +18,19 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 
-/* The only 386 aout system we have here is GO32 from DJ. 
-   These numbers make BFD work with that. If your aout 386 system
-   doesn't work with these, we'll have to split them into different
-   files.  Send me (sac@cygnus.com) the runes to make it work on your
-   system, and I'll stick it in for the next release.
+/* This data should be correct (or made correct) for the format used
+   under 386BSD (from Bill and Lynne Jolitz).  It may be good for BSD/386
+   (from BSDI) as well; I haven't had a chance to test it.  */
 
- */
 #define TARGET_IS_LITTLE_ENDIAN_P
 #define N_HEADER_IN_TEXT(x) 0
 #define BYTES_IN_WORD 4
 #define ARCH 32
 
-#if 0
-#define N_TXTOFF(x) 0x20
-#define N_TXTADDR(x) (N_MAGIC(x)==ZMAGIC ? 0x1020 : 0)
-#else
-#define N_TXTOFF(x) (N_MAGIC(x)==ZMAGIC ? 0x1000 : 0x20)
-#define N_TXTADDR(x) 0
-#endif
+#define N_TXTOFF(x)	(N_MAGIC(x) == ZMAGIC ? 0x1000 : 0x20)
+#define N_TXTADDR(x)	0
 
 #define N_TXTSIZE(x) ((x).a_text)
-#if 0
-#define N_DATADDR(x) (N_MAGIC(x)==OMAGIC? (N_TXTADDR(x)+(x).a_text) : (SEGMENT_SIZE + ((0x1020+(x).a_text-1) & ~(SEGMENT_SIZE-1))))
-#define NOSUBEXECB
-
-#endif
 #define PAGE_SIZE 4096
 #define SEGMENT_SIZE PAGE_SIZE
 #define DEFAULT_ARCH bfd_arch_i386
@@ -55,4 +42,5 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "sysdep.h"
 #include "libbfd.h"
 #include "libaout.h"
+
 #include "aout-target.h"

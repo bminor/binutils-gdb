@@ -178,7 +178,6 @@ reloc_howto_type howto_table_ext[] =
   HOWTO(RELOC_GLOB_DAT,0, 2,	0,  false, 0, false, true,0,"GLOB_DAT",	false, 0,0x00000000, false),
   HOWTO(RELOC_JMP_SLOT,0, 2,	0,  false, 0, false, true,0,"JMP_SLOT",	false, 0,0x00000000, false),
   HOWTO(RELOC_RELATIVE,0, 2,	0,  false, 0, false,	true,0,"RELATIVE",	false, 0,0x00000000, false),
-
 };
 
 /* Convert standard reloc records to "arelent" format (incl byte swap).  */
@@ -195,6 +194,41 @@ HOWTO( 6,	       0,  2, 	32, true,  0, false, true,0,"DISP32",   true, 0xfffffff
 HOWTO( 7,	       0,  3, 	64, true,  0, false, true,0,"DISP64",   true, 0xfeedface,0xfeedface, false),
 };
 
+CONST struct reloc_howto_struct *
+DEFUN(NAME(aout,reloc_type_lookup),(abfd,code),
+      bfd *abfd AND
+      bfd_reloc_code_real_type code)
+{
+#define EXT(i,j)	case i: return &howto_table_ext[j]
+#define STD(i,j)	case i: return &howto_table_std[j]
+  int ext = obj_reloc_entry_size (abfd) == RELOC_EXT_SIZE;
+  if (code == BFD_RELOC_CTOR)
+    switch (bfd_get_arch_info (abfd)->bits_per_address)
+      {
+      case 32:
+	code = BFD_RELOC_32;
+	break;
+      }
+  if (ext)
+    switch (code)
+      {
+	EXT (BFD_RELOC_32, 2);
+	EXT (BFD_RELOC_HI22, 8);
+	EXT (BFD_RELOC_LO10, 11);
+	EXT (BFD_RELOC_32_PCREL_S2, 6);
+      }
+  else
+    /* std relocs */
+    switch (code)
+      {
+	STD (BFD_RELOC_16, 1);
+	STD (BFD_RELOC_32, 2);
+	STD (BFD_RELOC_8_PCREL, 4);
+	STD (BFD_RELOC_16_PCREL, 5);
+	STD (BFD_RELOC_32_PCREL, 6);
+      }
+  return 0;
+}
 
 extern bfd_error_vector_type bfd_error_vector;
 
@@ -307,7 +341,7 @@ DEFUN(NAME(aout,some_aout_object_p),(abfd, execp, callback_to_real_object_p),
       struct internal_exec *execp AND
       bfd_target *(*callback_to_real_object_p) ())
 {
-  struct aout_data_struct  *rawptr;
+  struct aout_data_struct *rawptr, *oldrawptr;
   bfd_target *result;
 
   rawptr = (struct aout_data_struct  *) bfd_zalloc (abfd, sizeof (struct aout_data_struct ));
@@ -316,6 +350,7 @@ DEFUN(NAME(aout,some_aout_object_p),(abfd, execp, callback_to_real_object_p),
     return 0;
   }
 
+  oldrawptr = abfd->tdata.aout_data;
   abfd->tdata.aout_data = rawptr;
   abfd->tdata.aout_data->a.hdr = &rawptr->e;
   *(abfd->tdata.aout_data->a.hdr) = *execp;	/* Copy in the internal_exec struct */
@@ -356,19 +391,15 @@ DEFUN(NAME(aout,some_aout_object_p),(abfd, execp, callback_to_real_object_p),
   /* create the sections.  This is raunchy, but bfd_close wants to reclaim
      them */
 
-  obj_textsec (abfd) = (asection *)NULL;
-  obj_datasec (abfd) = (asection *)NULL;
-  obj_bsssec (abfd) = (asection *)NULL;
-  
-  (void)bfd_make_section(abfd, ".text");
-  (void)bfd_make_section(abfd, ".data");
-  (void)bfd_make_section(abfd, ".bss");
-/*  (void)bfd_make_section(abfd, BFD_ABS_SECTION_NAME);
-  (void)bfd_make_section (abfd, BFD_UND_SECTION_NAME);
-  (void)bfd_make_section (abfd, BFD_COM_SECTION_NAME);*/
-  abfd->sections = obj_textsec (abfd);
-  obj_textsec (abfd)->next = obj_datasec (abfd);
-  obj_datasec (abfd)->next = obj_bsssec (abfd);
+  obj_textsec (abfd) = bfd_make_section_old_way (abfd, ".text");
+  obj_datasec (abfd) = bfd_make_section_old_way (abfd, ".data");
+  obj_bsssec (abfd) = bfd_make_section_old_way (abfd, ".bss");
+
+#if 0
+  (void)bfd_make_section (abfd, ".text");
+  (void)bfd_make_section (abfd, ".data");
+  (void)bfd_make_section (abfd, ".bss");
+#endif
 
   obj_datasec (abfd)->_raw_size = execp->a_data;
   obj_bsssec (abfd)->_raw_size = execp->a_bss;
@@ -422,15 +453,6 @@ DEFUN(NAME(aout,some_aout_object_p),(abfd, execp, callback_to_real_object_p),
     break;
   }
 
-  /* Determine the size of a relocation entry */
-  switch (abfd->obj_arch) {
-  case bfd_arch_sparc:
-  case bfd_arch_a29k:
-    obj_reloc_entry_size (abfd) = RELOC_EXT_SIZE;
-  default:
-    obj_reloc_entry_size (abfd) = RELOC_STD_SIZE;
-  }
-
   adata(abfd)->page_size = PAGE_SIZE;
   adata(abfd)->segment_size = SEGMENT_SIZE;
   adata(abfd)->exec_bytes_size = EXEC_BYTES_SIZE;
@@ -460,6 +482,17 @@ DEFUN(NAME(aout,some_aout_object_p),(abfd, execp, callback_to_real_object_p),
   if ((execp->a_entry >= obj_textsec(abfd)->vma) &&
       (execp->a_entry < obj_textsec(abfd)->vma + obj_textsec(abfd)->_raw_size))
     abfd->flags |= EXEC_P;
+  if (result)
+    {
+      abfd->sections = obj_textsec (abfd);
+      obj_textsec (abfd)->next = obj_datasec (abfd);
+      obj_datasec (abfd)->next = obj_bsssec (abfd);
+    }
+  else
+    {
+      free (rawptr);
+      abfd->tdata.aout_data = oldrawptr;
+    }
   return result;
 }
 
@@ -595,6 +628,17 @@ DEFUN(NAME(aout,set_arch_mach),(abfd, arch, machine),
       NAME(aout,machine_type) (arch, machine) == M_UNKNOWN)
     return false;		/* We can't represent this type */
 
+  /* Determine the size of a relocation entry */
+  switch (arch) {
+  case bfd_arch_sparc:
+  case bfd_arch_a29k:
+    obj_reloc_entry_size (abfd) = RELOC_EXT_SIZE;
+    break;
+  default:
+    obj_reloc_entry_size (abfd) = RELOC_STD_SIZE;
+    break;
+  }
+
   return (*aout_backend_info(abfd)->set_sizes) (abfd);
 }
 
@@ -664,15 +708,16 @@ DEFUN (NAME (aout,adjust_sizes_and_vmas), (abfd, text_size, text_end),
       {
 	file_ptr pos = adata (abfd).exec_bytes_size;
 	bfd_vma vma = 0;
-	int pad;
+	int pad = 0;
 
 	obj_textsec(abfd)->filepos = pos;
 	pos += obj_textsec(abfd)->_raw_size;
 	vma += obj_textsec(abfd)->_raw_size;
 	if (!obj_datasec(abfd)->user_set_vma)
 	  {
-	    /* ?? Does alignment in the file image really matter? */
+#if 0	    /* ?? Does alignment in the file image really matter? */
 	    pad = align_power (vma, obj_datasec(abfd)->alignment_power) - vma;
+#endif
 	    obj_textsec(abfd)->_raw_size += pad;
 	    pos += pad;
 	    vma += pad;
@@ -683,7 +728,9 @@ DEFUN (NAME (aout,adjust_sizes_and_vmas), (abfd, text_size, text_end),
 	vma += obj_datasec(abfd)->_raw_size;
 	if (!obj_bsssec(abfd)->user_set_vma)
 	  {
+#if 0
 	    pad = align_power (vma, obj_bsssec(abfd)->alignment_power) - vma;
+#endif
 	    obj_datasec(abfd)->_raw_size += pad;
 	    pos += pad;
 	    vma += pad;
@@ -1282,9 +1329,9 @@ DEFUN(NAME(aout,slurp_symbol_table),(abfd),
 	      cache_ptr->symbol.name = (char *)NULL;
 	      
 	    cache_ptr->symbol.value = GET_SWORD(abfd,  sym_pointer->e_value);
-	    cache_ptr->desc = bfd_get_16(abfd, sym_pointer->e_desc);
-	    cache_ptr->other =bfd_get_8(abfd, sym_pointer->e_other);
-	    cache_ptr->type = bfd_get_8(abfd,  sym_pointer->e_type);
+	    cache_ptr->desc = bfd_h_get_16(abfd, sym_pointer->e_desc);
+	    cache_ptr->other = bfd_h_get_8(abfd, sym_pointer->e_other);
+	    cache_ptr->type = bfd_h_get_8(abfd,  sym_pointer->e_type);
 	    cache_ptr->symbol.udata = 0;
 	    translate_from_native_sym_flags (sym_pointer, cache_ptr, abfd);
 	  }
