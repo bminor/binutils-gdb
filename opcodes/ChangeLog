@@ -1,3 +1,9 @@
+start-sanitize-fr30
+Thu Dec  3 00:09:17 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* fr30-asm.c,fr30-dis.c,fr30-opc.c,fr30-opc.h: Regenerate.
+
+end-sanitize-fr30
 1998-11-30  Doug Evans  <devans@casey.cygnus.com>
 
 	* cgen-dis.c (hash_insn_array): CGEN_INSN_VALUE ->

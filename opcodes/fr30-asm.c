@@ -42,9 +42,12 @@ along with this program; if not, write to the Free Software Foundation, Inc.,
 #define INLINE
 #endif
 
+/* Used by the ifield rtx function.  */
+#define FLD(f) (fields->f)
+
 static const char * insert_normal
-     PARAMS ((CGEN_OPCODE_DESC, long, unsigned int, int, int, int,
-	      CGEN_INSN_BYTES_PTR));
+     PARAMS ((CGEN_OPCODE_DESC, long, unsigned int, unsigned int, unsigned int,
+	      unsigned int, unsigned int, unsigned int, CGEN_INSN_BYTES_PTR));
 static const char * parse_insn_normal
      PARAMS ((CGEN_OPCODE_DESC, const CGEN_INSN *,
 	      const char **, CGEN_FIELDS *));
@@ -184,6 +187,16 @@ fr30_cgen_parse_operand (od, opindex, strp, fields)
     case FR30_OPERAND_I32 :
       errmsg = cgen_parse_unsigned_integer (od, strp, FR30_OPERAND_I32, &fields->f_i32);
       break;
+    case FR30_OPERAND_I20 :
+      errmsg = cgen_parse_unsigned_integer (od, strp, FR30_OPERAND_I20, &fields->f_i20);
+      break;
+    case FR30_OPERAND_LABEL9 :
+      {
+        bfd_vma value;
+        errmsg = cgen_parse_address (od, strp, FR30_OPERAND_LABEL9, 0, NULL,  & value);
+        fields->f_rel9 = value;
+      }
+      break;
     case FR30_OPERAND_DIR8 :
       errmsg = cgen_parse_unsigned_integer (od, strp, FR30_OPERAND_DIR8, &fields->f_dir8);
       break;
@@ -193,11 +206,12 @@ fr30_cgen_parse_operand (od, opindex, strp, fields)
     case FR30_OPERAND_DIR10 :
       errmsg = cgen_parse_unsigned_integer (od, strp, FR30_OPERAND_DIR10, &fields->f_dir10);
       break;
-    case FR30_OPERAND_LABEL9 :
-      errmsg = cgen_parse_unsigned_integer (od, strp, FR30_OPERAND_LABEL9, &fields->f_rel9);
-      break;
     case FR30_OPERAND_LABEL12 :
-      errmsg = cgen_parse_signed_integer (od, strp, FR30_OPERAND_LABEL12, &fields->f_rel12);
+      {
+        bfd_vma value;
+        errmsg = cgen_parse_address (od, strp, FR30_OPERAND_LABEL12, 0, NULL,  & value);
+        fields->f_rel12 = value;
+      }
       break;
     case FR30_OPERAND_REGLIST_LOW :
       errmsg = parse_low_register_list (od, strp, FR30_OPERAND_REGLIST_LOW, &fields->f_reglist_low);
@@ -245,147 +259,162 @@ fr30_cgen_insert_operand (od, opindex, fields, buffer, pc)
      bfd_vma pc;
 {
   const char * errmsg;
+  unsigned int total_length = CGEN_FIELDS_BITSIZE (fields);
 
   switch (opindex)
     {
     case FR30_OPERAND_RI :
-      errmsg = insert_normal (od, fields->f_Ri, 0|(1<<CGEN_OPERAND_UNSIGNED), 12, 4, CGEN_FIELDS_BITSIZE (fields), buffer);
+      errmsg = insert_normal (od, fields->f_Ri, 0|(1<<CGEN_OPERAND_UNSIGNED), 0, 12, 4, 16, total_length, buffer);
       break;
     case FR30_OPERAND_RJ :
-      errmsg = insert_normal (od, fields->f_Rj, 0|(1<<CGEN_OPERAND_UNSIGNED), 8, 4, CGEN_FIELDS_BITSIZE (fields), buffer);
+      errmsg = insert_normal (od, fields->f_Rj, 0|(1<<CGEN_OPERAND_UNSIGNED), 0, 8, 4, 16, total_length, buffer);
       break;
     case FR30_OPERAND_RIC :
-      errmsg = insert_normal (od, fields->f_Ric, 0|(1<<CGEN_OPERAND_UNSIGNED), 28, 4, CGEN_FIELDS_BITSIZE (fields), buffer);
+      errmsg = insert_normal (od, fields->f_Ric, 0|(1<<CGEN_OPERAND_UNSIGNED), 16, 12, 4, 16, total_length, buffer);
       break;
     case FR30_OPERAND_RJC :
-      errmsg = insert_normal (od, fields->f_Rjc, 0|(1<<CGEN_OPERAND_UNSIGNED), 24, 4, CGEN_FIELDS_BITSIZE (fields), buffer);
+      errmsg = insert_normal (od, fields->f_Rjc, 0|(1<<CGEN_OPERAND_UNSIGNED), 16, 8, 4, 16, total_length, buffer);
       break;
     case FR30_OPERAND_CRI :
-      errmsg = insert_normal (od, fields->f_CRi, 0|(1<<CGEN_OPERAND_UNSIGNED), 28, 4, CGEN_FIELDS_BITSIZE (fields), buffer);
+      errmsg = insert_normal (od, fields->f_CRi, 0|(1<<CGEN_OPERAND_UNSIGNED), 16, 12, 4, 16, total_length, buffer);
       break;
     case FR30_OPERAND_CRJ :
-      errmsg = insert_normal (od, fields->f_CRj, 0|(1<<CGEN_OPERAND_UNSIGNED), 24, 4, CGEN_FIELDS_BITSIZE (fields), buffer);
+      errmsg = insert_normal (od, fields->f_CRj, 0|(1<<CGEN_OPERAND_UNSIGNED), 16, 8, 4, 16, total_length, buffer);
       break;
     case FR30_OPERAND_RS1 :
-      errmsg = insert_normal (od, fields->f_Rs1, 0|(1<<CGEN_OPERAND_UNSIGNED), 8, 4, CGEN_FIELDS_BITSIZE (fields), buffer);
+      errmsg = insert_normal (od, fields->f_Rs1, 0|(1<<CGEN_OPERAND_UNSIGNED), 0, 8, 4, 16, total_length, buffer);
       break;
     case FR30_OPERAND_RS2 :
-      errmsg = insert_normal (od, fields->f_Rs2, 0|(1<<CGEN_OPERAND_UNSIGNED), 12, 4, CGEN_FIELDS_BITSIZE (fields), buffer);
+      errmsg = insert_normal (od, fields->f_Rs2, 0|(1<<CGEN_OPERAND_UNSIGNED), 0, 12, 4, 16, total_length, buffer);
       break;
     case FR30_OPERAND_R13 :
-      errmsg = insert_normal (od, fields->f_nil, 0, 0, 0, CGEN_FIELDS_BITSIZE (fields), buffer);
+      errmsg = insert_normal (od, fields->f_nil, 0, 0, 0, 0, 0, total_length, buffer);
       break;
     case FR30_OPERAND_R14 :
-      errmsg = insert_normal (od, fields->f_nil, 0, 0, 0, CGEN_FIELDS_BITSIZE (fields), buffer);
+      errmsg = insert_normal (od, fields->f_nil, 0, 0, 0, 0, 0, total_length, buffer);
       break;
     case FR30_OPERAND_R15 :
-      errmsg = insert_normal (od, fields->f_nil, 0, 0, 0, CGEN_FIELDS_BITSIZE (fields), buffer);
+      errmsg = insert_normal (od, fields->f_nil, 0, 0, 0, 0, 0, total_length, buffer);
       break;
     case FR30_OPERAND_PS :
-      errmsg = insert_normal (od, fields->f_nil, 0, 0, 0, CGEN_FIELDS_BITSIZE (fields), buffer);
+      errmsg = insert_normal (od, fields->f_nil, 0, 0, 0, 0, 0, total_length, buffer);
       break;
     case FR30_OPERAND_U4 :
-      errmsg = insert_normal (od, fields->f_u4, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 8, 4, CGEN_FIELDS_BITSIZE (fields), buffer);
+      errmsg = insert_normal (od, fields->f_u4, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 0, 8, 4, 16, total_length, buffer);
       break;
     case FR30_OPERAND_U4C :
-      errmsg = insert_normal (od, fields->f_u4c, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 12, 4, CGEN_FIELDS_BITSIZE (fields), buffer);
+      errmsg = insert_normal (od, fields->f_u4c, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 0, 12, 4, 16, total_length, buffer);
       break;
     case FR30_OPERAND_M4 :
       {
         long value = fields->f_m4;
         value = ((value) & (15));
-        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 8, 4, CGEN_FIELDS_BITSIZE (fields), buffer);
+        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 0, 8, 4, 16, total_length, buffer);
       }
       break;
     case FR30_OPERAND_U8 :
-      errmsg = insert_normal (od, fields->f_u8, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), buffer);
+      errmsg = insert_normal (od, fields->f_u8, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 0, 8, 8, 16, total_length, buffer);
       break;
     case FR30_OPERAND_I8 :
-      errmsg = insert_normal (od, fields->f_i8, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 4, 8, CGEN_FIELDS_BITSIZE (fields), buffer);
+      errmsg = insert_normal (od, fields->f_i8, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 0, 4, 8, 16, total_length, buffer);
       break;
     case FR30_OPERAND_UDISP6 :
       {
         long value = fields->f_udisp6;
         value = ((unsigned int) (value) >> (2));
-        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 8, 4, CGEN_FIELDS_BITSIZE (fields), buffer);
+        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 0, 8, 4, 16, total_length, buffer);
       }
       break;
     case FR30_OPERAND_DISP8 :
-      errmsg = insert_normal (od, fields->f_disp8, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGNED), 4, 8, CGEN_FIELDS_BITSIZE (fields), buffer);
+      errmsg = insert_normal (od, fields->f_disp8, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGNED), 0, 4, 8, 16, total_length, buffer);
       break;
     case FR30_OPERAND_DISP9 :
       {
         long value = fields->f_disp9;
         value = ((int) (value) >> (1));
-        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGNED), 4, 8, CGEN_FIELDS_BITSIZE (fields), buffer);
+        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGNED), 0, 4, 8, 16, total_length, buffer);
       }
       break;
     case FR30_OPERAND_DISP10 :
       {
         long value = fields->f_disp10;
         value = ((int) (value) >> (2));
-        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGNED), 4, 8, CGEN_FIELDS_BITSIZE (fields), buffer);
+        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGNED), 0, 4, 8, 16, total_length, buffer);
       }
       break;
     case FR30_OPERAND_S10 :
       {
         long value = fields->f_s10;
         value = ((int) (value) >> (2));
-        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), buffer);
+        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGNED), 0, 8, 8, 16, total_length, buffer);
       }
       break;
     case FR30_OPERAND_U10 :
       {
         long value = fields->f_u10;
         value = ((unsigned int) (value) >> (2));
-        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), buffer);
+        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 0, 8, 8, 16, total_length, buffer);
       }
       break;
     case FR30_OPERAND_I32 :
-      errmsg = insert_normal (od, fields->f_i32, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGN_OPT)|(1<<CGEN_OPERAND_UNSIGNED), 16, 32, CGEN_FIELDS_BITSIZE (fields), buffer);
+      errmsg = insert_normal (od, fields->f_i32, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGN_OPT)|(1<<CGEN_OPERAND_UNSIGNED), 16, 0, 32, 32, total_length, buffer);
       break;
-    case FR30_OPERAND_DIR8 :
-      errmsg = insert_normal (od, fields->f_dir8, 0|(1<<CGEN_OPERAND_UNSIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), buffer);
-      break;
-    case FR30_OPERAND_DIR9 :
+    case FR30_OPERAND_I20 :
       {
-        long value = fields->f_dir9;
-        value = ((unsigned int) (value) >> (1));
-        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_UNSIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), buffer);
-      }
-      break;
-    case FR30_OPERAND_DIR10 :
-      {
-        long value = fields->f_dir10;
-        value = ((unsigned int) (value) >> (2));
-        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_UNSIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), buffer);
+do {
+  FLD (f_i20_4) = ((unsigned int) (FLD (f_i20)) >> (16));
+  FLD (f_i20_16) = ((FLD (f_i20)) & (65535));
+} while (0);
+        errmsg = insert_normal (od, fields->f_i20_4, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED)|(1<<CGEN_OPERAND_VIRTUAL), 0, 8, 4, 16, total_length, buffer);
+        if (errmsg)
+          break;
+        errmsg = insert_normal (od, fields->f_i20_16, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED)|(1<<CGEN_OPERAND_VIRTUAL), 16, 0, 16, 16, total_length, buffer);
+        if (errmsg)
+          break;
       }
       break;
     case FR30_OPERAND_LABEL9 :
       {
         long value = fields->f_rel9;
         value = ((int) (((value) - (((pc) + (2))))) >> (1));
-        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR)|(1<<CGEN_OPERAND_SIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), buffer);
+        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_PCREL_ADDR)|(1<<CGEN_OPERAND_SIGNED), 0, 8, 8, 16, total_length, buffer);
+      }
+      break;
+    case FR30_OPERAND_DIR8 :
+      errmsg = insert_normal (od, fields->f_dir8, 0|(1<<CGEN_OPERAND_UNSIGNED), 0, 8, 8, 16, total_length, buffer);
+      break;
+    case FR30_OPERAND_DIR9 :
+      {
+        long value = fields->f_dir9;
+        value = ((unsigned int) (value) >> (1));
+        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_UNSIGNED), 0, 8, 8, 16, total_length, buffer);
+      }
+      break;
+    case FR30_OPERAND_DIR10 :
+      {
+        long value = fields->f_dir10;
+        value = ((unsigned int) (value) >> (2));
+        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_UNSIGNED), 0, 8, 8, 16, total_length, buffer);
       }
       break;
     case FR30_OPERAND_LABEL12 :
       {
         long value = fields->f_rel12;
         value = ((int) (((value) - (((pc) & (-2))))) >> (1));
-        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_PCREL_ADDR)|(1<<CGEN_OPERAND_SIGNED), 5, 11, CGEN_FIELDS_BITSIZE (fields), buffer);
+        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_PCREL_ADDR)|(1<<CGEN_OPERAND_SIGNED), 0, 5, 11, 16, total_length, buffer);
       }
       break;
     case FR30_OPERAND_REGLIST_LOW :
-      errmsg = insert_normal (od, fields->f_reglist_low, 0|(1<<CGEN_OPERAND_UNSIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), buffer);
+      errmsg = insert_normal (od, fields->f_reglist_low, 0|(1<<CGEN_OPERAND_UNSIGNED), 0, 8, 8, 16, total_length, buffer);
       break;
     case FR30_OPERAND_REGLIST_HI :
-      errmsg = insert_normal (od, fields->f_reglist_hi, 0|(1<<CGEN_OPERAND_UNSIGNED), 8, 8, CGEN_FIELDS_BITSIZE (fields), buffer);
+      errmsg = insert_normal (od, fields->f_reglist_hi, 0|(1<<CGEN_OPERAND_UNSIGNED), 0, 8, 8, 16, total_length, buffer);
       break;
     case FR30_OPERAND_CC :
-      errmsg = insert_normal (od, fields->f_cc, 0|(1<<CGEN_OPERAND_UNSIGNED), 4, 4, CGEN_FIELDS_BITSIZE (fields), buffer);
+      errmsg = insert_normal (od, fields->f_cc, 0|(1<<CGEN_OPERAND_UNSIGNED), 0, 4, 4, 16, total_length, buffer);
       break;
     case FR30_OPERAND_CCC :
-      errmsg = insert_normal (od, fields->f_ccc, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 16, 8, CGEN_FIELDS_BITSIZE (fields), buffer);
+      errmsg = insert_normal (od, fields->f_ccc, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), 16, 0, 8, 16, total_length, buffer);
       break;
 
     default :
@@ -464,7 +493,7 @@ insert_1 (od, value, start, length, word_length, bufp)
   /* Written this way to avoid undefined behaviour.  */
   mask = (((1L << (length - 1)) - 1) << 1) | 1;
   if (CGEN_INSN_LSB0_P)
-    shift = start;
+    shift = (start + 1) - length;
   else
     shift = (word_length - (start + length));
   x = (x & ~(mask << shift)) | ((value & mask) << shift);
@@ -510,27 +539,26 @@ insert_1 (od, value, start, length, word_length, bufp)
 /* Default insertion routine.
 
    ATTRS is a mask of the boolean attributes.
-   START is the starting bit number, architecture origin.
+   WORD_OFFSET is the offset in bits from the start of the insn of the value.
+   WORD_LENGTH is the length of the word in bits in which the value resides.
+   START is the starting bit number in the word, architecture origin.
    LENGTH is the length of VALUE in bits.
-   TOTAL_LENGTH is the total length of the insn.
+   TOTAL_LENGTH is the total length of the insn in bits.
 
    The result is an error message or NULL if success.  */
 
 /* ??? This duplicates functionality with bfd's howto table and
    bfd_install_relocation.  */
-/* ??? For architectures where insns can be representable as ints,
-   store insn in `field' struct and add registers, etc. while parsing?  */
 /* ??? This doesn't handle bfd_vma's.  Create another function when
    necessary.  */
 
 static const char *
-insert_normal (od, value, attrs, start, length, total_length, buffer)
+insert_normal (od, value, attrs, word_offset, start, length, word_length,
+	       total_length, buffer)
      CGEN_OPCODE_DESC od;
      long value;
      unsigned int attrs;
-     int start;
-     int length;
-     int total_length;
+     unsigned int word_offset, start, length, word_length, total_length;
      CGEN_INSN_BYTES_PTR buffer;
 {
   static char errbuf[100];
@@ -540,6 +568,21 @@ insert_normal (od, value, attrs, start, length, total_length, buffer)
   /* If LENGTH is zero, this operand doesn't contribute to the value.  */
   if (length == 0)
     return NULL;
+
+  if (CGEN_INT_INSN_P
+      && word_offset != 0)
+    abort ();
+
+  if (word_length > 32)
+    abort ();
+
+  /* For architectures with insns smaller than the insn-base-bitsize,
+     word_length may be too big.  */
+#if CGEN_MIN_INSN_BITSIZE < CGEN_BASE_INSN_BITSIZE
+  if (word_offset == 0
+      && word_length > total_length)
+    word_length = total_length;
+#endif
 
   /* Ensure VALUE will fit.  */
   if ((attrs & CGEN_ATTR_MASK (CGEN_OPERAND_UNSIGNED)) != 0)
@@ -570,144 +613,23 @@ insert_normal (od, value, attrs, start, length, total_length, buffer)
 
 #if CGEN_INT_INSN_P
 
-  if (total_length > 32) /* 32 bits in a portable host int */
-    abort ();
   {
     int shift;
 
     if (CGEN_INSN_LSB0_P)
-      shift = start;
+      shift = (start + 1) - length;
     else
-      shift = total_length - (start + length);
+      shift = word_length - (start + length);
     *buffer = (*buffer & ~(mask << shift)) | ((value & mask) << shift);
   }
 
-#else
+#else /* ! CGEN_INT_INSN_P */
 
-  /* FIXME: unfinished and untested */
+  {
+    unsigned char *bufp = (unsigned char *) buffer + word_offset / 8;
 
-  /* The hard case is probably too slow for the normal cases.
-     It's certainly more difficult to understand than the normal case.
-     Thus this is split into two.  The hard case is defined
-     to be when a field straddles a (loosely defined) word boundary
-     (??? which may require target specific help to determine).  */
-
-#if 0 /*wip*/
-
-#define HARD_CASE_P 0 /* FIXME:wip */
-
-  if (HARD_CASE_P)
-    {
-      unsigned char *bufp = (unsigned char *) buffer;
-      int insn_length_left = total_length;
-
-      if (CGEN_INSN_LSB0_P)
-	{
-	  int word_offset = (CGEN_INSN_WORD_ENDIAN (od) == CGEN_ENDIAN_BIG
-			     ? ...
-			     : start / CGEN_BASE_INSN_BITSIZE);
-	  bufp += word_offset * (CGEN_BASE_INSN_BITSIZE / 8);
-	  if (CGEN_INSN_WORD_ENDIAN (od) == CGEN_ENDIAN_BIG)
-	  else
-	    start -= word_offset * CGEN_BASE_INSN_BITSIZE;
-	}
-      else
-	{
-	  int word_offset = (CGEN_INSN_WORD_ENDIAN (od) == CGEN_ENDIAN_BIG
-			     ? start / CGEN_BASE_INSN_BITSIZE
-			     : ...);
-	  bufp += word_offset * (CGEN_BASE_INSN_BITSIZE / 8);
-	  if (CGEN_INSN_WORD_ENDIAN (od) == CGEN_ENDIAN_BIG)
-	    start -= word_offset * CGEN_BASE_INSN_BITSIZE;
-	  else
-	}
-
-      /* Loop so we handle a field straddling an insn word boundary
-	 (remember, "insn word boundary" is loosely defined here).  */
-
-      while (length > 0)
-	{
-	  int this_pass_length = length;
-	  int this_pass_start = start;
-	  int this_pass_word_length = min (insn_length_left,
-					   (CGEN_BASE_INSN_BITSIZE == 8
-					    ? 32
-					    : CGEN_BASE_INSN_BITSIZE));
-
-	  insert_1 (od, value, attrs,
-		    this_pass_start, this_pass_length, this_pass_word_length,
-		    bufp);
-
-	  length -= this_pass_length;
-	  insn_length_left -= this_pass_word_length;
-	  if (???)
-	    {
-	      value >>= ???;
-	      start += ???;
-	    }
-	  else
-	    {
-	      value >>= ???;
-	      start += ???;
-	    }
-	  bufp += this_pass_word_length / 8;
-	}
-    }
-  else
-#endif /* 0 */
-    {
-      unsigned char *bufp = (unsigned char *) buffer;
-
-      if (length > 32)
-	abort ();
-
-      /* Adjust start,total_length,bufp to point to the pseudo-word that holds
-	 the value.  For example in a 48 bit insn where the value to insert
-	 (say an immediate value) is the last 16 bits then fetch_length here
-	 would be 16.  To handle a 24 bit insn with an 18 bit immediate,
-	 insert_1 handles 24 bits.  */
-
-      if (total_length > 32)
-	{
-	  int needed_width = start % 8 + length;
-	  int fetch_length = (needed_width <= 8 ? 8
-			      : needed_width <= 16 ? 16
-			      : 32);
-
-	  if (CGEN_INSN_LSB0_P)
-	    {
-	      if (CGEN_INSN_WORD_ENDIAN (od) == CGEN_ENDIAN_BIG)
-		{
-		  abort (); /* wip */
-		}
-	      else
-		{
-		  int offset = start & ~7;
-
-		  bufp += offset / 8;
-		  start -= offset;
-		  total_length = fetch_length;
-		}
-	    }
-	  else
-	    {
-	      if (CGEN_INSN_WORD_ENDIAN (od) == CGEN_ENDIAN_BIG)
-		{
-		  int offset = start & ~7;
-
-		  bufp += offset / 8;
-		  start -= offset;
-		  total_length = fetch_length;
-		}
-	      else
-		{
-		  abort (); /* wip */
-		}
-	    }
-	}
-
-      insert_1 (od, value, start, length, total_length, bufp);
-    }
+    insert_1 (od, value, start, length, word_length, bufp);
+  }
 
 #endif /* ! CGEN_INT_INSN_P */
 
@@ -846,7 +768,7 @@ insert_insn_normal (od, insn, fields, buffer, pc)
   const unsigned char * syn;
 
   CGEN_INIT_INSERT (od);
-  value = CGEN_INSN_VALUE (insn);
+  value = CGEN_INSN_BASE_VALUE (insn);
 
   /* If we're recording insns as numbers (rather than a string of bytes),
      target byte order handling is deferred until later.  */
@@ -863,8 +785,10 @@ insert_insn_normal (od, insn, fields, buffer, pc)
 
 #endif /* ! CGEN_INT_INSN_P */
 
-  /* ??? Rather than scanning the syntax string again, we could store
-     in `fields' a null terminated list of the fields that are present.  */
+  /* ??? It would be better to scan the format's fields.
+     Still need to be able to insert a value based on the operand though;
+     e.g. storing a branch displacement that got resolved later.
+     Needs more thought first.  */
 
   for (syn = CGEN_SYNTAX_STRING (syntax); * syn != '\0'; ++ syn)
     {
@@ -937,9 +861,7 @@ fr30_cgen_assemble_insn (od, str, fields, buf, errmsg)
 
       str = start;
 
-      /* Record a default length for the insn.  This will get set to the
-	 correct value while parsing.  */
-      /* FIXME: wip */
+      /* Allow parse/insert handlers to obtain length of insn.  */
       CGEN_FIELDS_BITSIZE (fields) = CGEN_INSN_BITSIZE (insn);
 
       if (! CGEN_PARSE_FN (insn) (od, insn, & str, fields))
