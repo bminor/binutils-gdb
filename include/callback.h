@@ -203,10 +203,30 @@ typedef struct cb_syscall {
   PTR p2;
   long x1,x2;
 
-  /* Callbacks for reading/writing memory (e.g. for read/write syscalls).  */
-  unsigned long (*read_mem) PARAMS ((host_callback *, struct cb_syscall *, unsigned long taddr, char *buf, unsigned long bytes));
-  unsigned long (*write_mem) PARAMS ((host_callback *, struct cb_syscall *, unsigned long taddr, const char *buf, unsigned long bytes));
+  /* Callbacks for reading/writing memory (e.g. for read/write syscalls).
+     ??? long or unsigned long might be better to use for the `count'
+     argument here.  We mimic sim_{read,write} for now.  Be careful to
+     test any changes with -Wall -Werror, mixed signed comparisons
+     will get you.  */
+  int (*read_mem) PARAMS ((host_callback *, struct cb_syscall *,
+			   unsigned long taddr, char *buf, int bytes));
+  int (*write_mem) PARAMS ((host_callback *, struct cb_syscall *,
+			    unsigned long taddr, const char *buf, int bytes));
+
+  /* For sanity checking, should be last entry.  */
+  int magic;
 } CB_SYSCALL;
+
+/* Magic number sanity checker.  */
+#define CB_SYSCALL_MAGIC 0x12344321
+
+/* Macro to initialize CB_SYSCALL.  Called first, before filling in
+   any fields.  */
+#define CB_SYSCALL_INIT(sc) \
+do { \
+  memset ((sc), 0, sizeof (*(sc))); \
+  (sc)->magic = CB_SYSCALL_MAGIC; \
+} while (0)
 
 /* Return codes for various interface routines.  */
 

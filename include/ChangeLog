@@ -1,3 +1,9 @@
+Wed Nov 26 11:39:30 1997  Doug Evans  <devans@canuck.cygnus.com>
+
+	* callback.h (CB_SYSCALL): Change byte count arguments to
+	{read,write}_mem to `int'.  New member `magic'.
+	(CB_SYSCALL_MAGIC,CB_SYSCALL_INIT): New macros.
+
 Tue Nov 25 01:35:52 1997  Doug Evans  <devans@seba.cygnus.com>
 
 	* callback.h (struct stat): Move forward decl up.
