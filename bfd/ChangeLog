@@ -1,3 +1,7 @@
+Thu Oct  5 11:45:02 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* hosts/i386bsd.h: Restore file incorrectly deleted on Sep 6.
+
 Wed Oct  4 18:15:02 1995  Jeff Law  (law@hurl.cygnus.com)
 
 	* rs6000-core.c (CORE_VERSION_1): Use CORE_VERSION_1 instead

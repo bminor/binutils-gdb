@@ -27,6 +27,7 @@ Things-to-keep:
 decstation.h
 dpx2.h
 hp300bsd.h
+i386bsd.h
 i386linux.h
 i386mach3.h
 i386nbsd.h
