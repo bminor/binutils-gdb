@@ -119,10 +119,6 @@ gasdir=gas
 use_gnu_ld=
 use_gnu_as=
 
-case "${target}" in
-  hppa*-hp-hpux*)	  target_makefile_frag=config/mt-hppa ;;
-esac
-
 # some tools are so dependent upon X11 that if we're not building with X, 
 # it's not even worth trying to configure, much less build, that tool.
 
@@ -199,13 +195,6 @@ case "${target}" in
         *) ;;
     esac
     noconfigdirs="$noconfigdirs ld binutils shellutils"
-    if [ -f ${srcdir}/pagas/configure.in ]; then
-      configdirs=`echo ${configdirs} | sed -e 's/gas /pagas /'`
-    else
-      # It'll still DTRT if "gas" directory isn't here either.
-      noconfigdirs="$noconfigdirs gas"
-    fi
-    gasdir=pagas
     ;;
   i[34]86-*-go32)
     # add the go32 support tools to the list
