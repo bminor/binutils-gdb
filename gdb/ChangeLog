@@ -1,3 +1,7 @@
+2002-02-21  Jiri Smid  <smid@suse.cz>
+
+	* config/i386/x86-64linux.mh (NATDEPFILES): Remove x86-64-nat.o.
+
 2002-02-21  Richard Earnshaw  <rearnsha@arm.com>
 
 	* Makefile.in (armnbsd-nat.o): Update dependencies.
@@ -96,7 +100,7 @@
 	determine the ABI of the inferior when we don't have one.
 	(arm_extract_return_value): Support different floating-point models.
 	(arm_store_return_value): Likewise.
-	* armnbsd-tdep.c (arm_netbsd_aout_init_abi): Set fp_model in tdep to 
+	* armnbsd-tdep.c (arm_netbsd_aout_init_abi): Set fp_model in tdep to
 	ARM_FLOAT_SOFT.
 	(arm_netbsd_elf_init_abi): Set fp_model to ARM_FLOAT_SOFT_VFP.
 
@@ -115,7 +119,7 @@
 
 2002-02-19  Richard Earnshaw  <rearnsha@arm.com>
 
-	* arm-linux-nat.c: Linux -> GNU/Linux when not talking about the 
+	* arm-linux-nat.c: Linux -> GNU/Linux when not talking about the
 	kernel.
 	* arm-linux-tdep.c: Likewise.
 	* config/arm/tm-linux.h: Likewise.
@@ -136,7 +140,7 @@
 	* armnbsd-tdep.c (arm_netbsd_aout_in_solib_call_trampoline): New
 	function.
 	(arm_netbsd_aout_init_abi): Initialize IN_SOLIB_CALL_TRAMPOLINE.
-	* config/arm/tm-nbsd.h: Don't include config/tm-nbsd.h, it only 
+	* config/arm/tm-nbsd.h: Don't include config/tm-nbsd.h, it only
 	defines one thing and that is incorrect for this port.
 	(IN_SOLIB_CALL_TRAMPOLINE): Delete.
 
@@ -269,7 +273,7 @@
 
 2002-02-14  Pierre Muller  <muller@ics.u-strasbg.fr>
 
-	* dwarf2read.c: Replace fprintf (stderr, ...) by 
+	* dwarf2read.c: Replace fprintf (stderr, ...) by
 	fprintf_unfiltered (gdb_stderr, ...).
 
 2002-02-15  Daniel Jacobowitz  <drow@mvista.com>
@@ -333,7 +337,7 @@
 
 2002-02-14  Daniel Jacobowitz  <drow@mvista.com>
 
-	Fix part of PR gdb/267.  
+	Fix part of PR gdb/267.
 	* linespec.c (find_methods): Handle constructors specially for now.
 
 2002-02-14  Corinna Vinschen  <vinschen@redhat.com>
@@ -364,7 +368,7 @@
 
 2002-02-13  Martin M. Hunt  <hunt@redhat.com>
 
-	* stack.c (print_frame_info_base): When calling 
+	* stack.c (print_frame_info_base): When calling
 	print_frame_info_listing_hook, set current_source_symtab.
 
 2002-02-14  Daniel Jacobowitz  <drow@mvista.com>
@@ -461,11 +465,11 @@
 	(make_mem_sec): Use a cast, avoid a warning.
 
 	* procfs.c (find_memory_regions_callback): Use a cast instead of
-	calling host_pointer_to_address (which complains if 
+	calling host_pointer_to_address (which complains if
 	sizeof (host pointer) != sizeof (target pointer)).
 	(procfs_make_note_section): Avoid overflow in psargs string.
 
-	* procfs.c (procfs_make_note_section): Make the default 
+	* procfs.c (procfs_make_note_section): Make the default
 	implementation return an error.
 
 2002-02-13  Rodney Brown  <rbrown64@csc.com.au>
@@ -481,8 +485,8 @@
 2002-02-13  Andrew Cagney  <ac131313@redhat.com>
 
 	From 2002-01-18 Greg McGary <greg@mcgary.org>:
-	* memattr.c (create_mem_region): Disallow useless empty region.  
-	Regions are half-open intervals, so allow [A..B) [B..C) as 
+	* memattr.c (create_mem_region): Disallow useless empty region.
+	Regions are half-open intervals, so allow [A..B) [B..C) as
 	non-overlapping.
 
 2002-02-13  Michael Chastain <mec@shout.net>
@@ -559,7 +563,7 @@
 	call_dummy_start_offset, sizeof_call_dummy_words,
 	function_start_offset, inner_than, decr_pc_after_break, fp_regnum,
 	sp_regnum, pc_regnum, register_bytes, num_regs, max_register_raw_size,
-	max_register_virtual_size, register_size.  Set up 
+	max_register_virtual_size, register_size.  Set up
 	prologue_cache.saved_regs here, rather than ...
 	(_initialize_arm_tdep): ... here.
 	* config/arm/tm-arm.h (struct type, struct value): Delete forward
@@ -640,7 +644,7 @@
 
 	* gdbarch.sh (EXTRA_STACK_ALIGNMENT_NEEDED): Don't require when
 	multi-arch partial.
-	
+
 2002-02-10  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbarch.sh: Map LEVEL onto a symbolic GT_LEVEL.  Exit on bad
@@ -681,9 +685,9 @@
 	* monitor.c (monitor_interrupt_query): Ditto.
 	* m3-nat.c (suspend_all_threads, thread_resume_command): Ditto.
 	* target.h: Update comment.
-	
+
 	* m3-nat.c, ocd.c, sparclet-rom.c: Update copyright.
-	
+
 2002-02-09  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbarch.sh (TARGET_LONG_DOUBLE_FORMAT): Default to
@@ -724,7 +728,7 @@
 
 	* MAINTAINERS (write-after-approval): Add myself.
 	(paper-trail): I've escaped!
-	
+
 2002-02-08  Christopher Faylor  <cgf@redhat.com>
 
 	* win32-nat.c (cygwin_pid_to_str): Revert 2002-02-08 change xasprintf
@@ -799,7 +803,7 @@
 
 2002-02-07  Michael Snyder  <msnyder@redhat.com>
 
-	* solib-legacy.c (legacy_svr4_fetch_link_map_offsets): 
+	* solib-legacy.c (legacy_svr4_fetch_link_map_offsets):
 	Logic bug, remove misplaced else.
 
 2002-02-07  Klee Dienes  <klee@apple.com>
@@ -808,7 +812,7 @@
 	characters that need to be quoted when building a string for the
 	shell.  Quote '!' specifically with a backslash, since CSH chokes
 	when trying to evaluate "str!str".
-	
+
 2002-02-06  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* rdi-share/host.h: Only provide a typedef for bool if it is not
@@ -818,7 +822,7 @@
 
 	* breakpoint.h (enum bptype): Add new overlay event bp type.
 	(enable_overlay_breakpoints, disable_overlay_breakpoints): Export.
-	
+
 	* breakpoint.c (create_internal_breakpoint): New function.
 	(internal_breakpoint_number): Moved into create_internal_breakpoint.
 	(create_longjmp_breakpoint): Use create_internal_breakpoint.
@@ -877,7 +881,7 @@
 
 2002-02-06  Pierre Muller  <muller@ics.u-strasbg.fr>
 
-	* win32-nat.c (_initialize_check_for_gdb_ini): 
+	* win32-nat.c (_initialize_check_for_gdb_ini):
 	Add typecast to sprintf argument to suppress a warning.
 
 2002-02-05  Pierre Muller  <muller@ics.u-strasbg.fr>
@@ -887,12 +891,12 @@
 	(DEBUG_EXCEPTION_SIMPLE): New macro, used in handle_exception,
 	that gives exception name and address.
 	(handle_exception): Use DEBUG_EXCEPTION_SIMPLE macro
-	and set last_sig value to ourstatus->value.sig. Some missing 
+	and set last_sig value to ourstatus->value.sig. Some missing
 	exceptions added.
-	(child_continue): Correctly report continue_status.	
-	(get_child_debug_event,do_initial_child_stuff): Set last_sig to 
+	(child_continue): Correctly report continue_status.
+	(get_child_debug_event,do_initial_child_stuff): Set last_sig to
 	TARGET_SIGNAL_0 (new default value).
-	(child_resume): consider sig argument passed to decide if 
+	(child_resume): consider sig argument passed to decide if
 	the exception should be passed to debuggee or not.
 
 2002-02-05  Michael Snyder  <msnyder@redhat.com>
@@ -908,7 +912,7 @@
 	ELF_MAKE_MSYMBOL_SPECIAL.
 	* gdbarch.c, gdbarch.h: Regenerate.
 	* arch-utils.c (default_make_msymbol_special): New function.
-	* arch-utils.h (default_make_msymbol_special): Export. 
+	* arch-utils.h (default_make_msymbol_special): Export.
 	* elfread.c (elf_symtab_read): Compile use of
 	ELF_MAKE_MSYMBOL_SPECIAL unconditionally because it is now
 	multiarched.
@@ -1046,13 +1050,13 @@
 2002-02-04  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	Add support for hardware watchpoints on win32 native.
-	* win32-nat.c (CONTEXT_DEBUG_DR macro): Add use of 
+	* win32-nat.c (CONTEXT_DEBUG_DR macro): Add use of
 	CONTEXT_DEBUG_REGISTERS.
-	(dr variable): New variable. Static array containing a local copy 
+	(dr variable): New variable. Static array containing a local copy
 	of debug registers.
 	(debug_registers_changed): New variable.  Reflects when debug registers
 	are changed and need to be written to inferior.
-	(debug_registers_used): New variable. Reflects when any debug register 
+	(debug_registers_used): New variable. Reflects when any debug register
 	was set, used when new threads are created.
 	(cygwin_set_dr, cygwin_set_dr7, cygwin_get_dr6): New functions used by
 	i386-nat code.
@@ -1150,7 +1154,7 @@
 	* tracepoint.c (_initialize_tracepoint): Ditto.
 	* cli/cli-decode.c (add_set_cmd): Ditto.
 	* cli/cli-cmds.c (init_cli_cmds): Ditto.
-	
+
 2002-02-01  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gnu-v3-abi.c (gnuv3_virtual_fn_field): Update comments.
@@ -1194,15 +1198,15 @@
 	* printcmd.c (disassemble_command): Remove an ancient
 	artifact of an old merge.
 
-	* symfile.h (enum overlay_debugging_state): 
+	* symfile.h (enum overlay_debugging_state):
 	Define enum constant values for overlay mode.
 	* symfile.c (overlay_debugging): Use enums instead of literals.
-	(overlay_is_mapped, overlay_auto_command, 
-	overlay_manual_command): Ditto.	
+	(overlay_is_mapped, overlay_auto_command,
+	overlay_manual_command): Ditto.
 
-	* breakpoint.c (insert_breakpoints, remove_breakpoint, 
-	breakpoint_here_p, breakpoint_inserted_here_p, 
-	breakpoint_thread_match, bpstat_stop_status, 
+	* breakpoint.c (insert_breakpoints, remove_breakpoint,
+	breakpoint_here_p, breakpoint_inserted_here_p,
+	breakpoint_thread_match, bpstat_stop_status,
 	describe_other_breakpoints, check_duplicates, clear_command):
 	Coding standard fixes.
 
@@ -1316,7 +1320,7 @@
 	(target_byte_order): Initialize to BFD_ENDIAN_BIG.
 	(initialize_current_architecture): Update target_byte_order using
 	information from BFD.
-	* config/mcore/tm-mcore.h (TARGET_BYTE_ORDER_DEFAULT): 
+	* config/mcore/tm-mcore.h (TARGET_BYTE_ORDER_DEFAULT):
 	* config/arm/tm-arm.h (TARGET_BYTE_ORDER_DEFAULT): Delete.
 
 2002-01-28  Andrew Cagney  <ac131313@redhat.com>
@@ -1352,7 +1356,7 @@
 
 2002-01-23  Elena Zannoni  <ezannoni@redhat.com>
 
-        * Makefile.in (hpread_h): Delete. 
+        * Makefile.in (hpread_h): Delete.
         (HFILES_NO_SRCDIR): Remove hpread.h.
         (ALLDEPFILES): Remove hp-psymtab-read.c and hp-symtab-read.c.
         (hpread.o): Update dependencies.
@@ -1367,7 +1371,7 @@
         January 1999.
 
         * config/pa/hpux11w.mh, config/pa/hpux11.mh,
-        config/pa/hpux1020.mh, config/pa/hppaosf.mh, 
+        config/pa/hpux1020.mh, config/pa/hppaosf.mh,
         config/pa/hppahpux.mh, config/pa/hppabsd.mh (NATDEPFILES):
         Remove hp-psymtab-read.o and hp-symtab-read.o, add hpread.o.
 
@@ -1390,7 +1394,7 @@
 	arguments is not reversed.
 	* solib-sunos.c (sunos_relocate_main_executable): Likewise.
 	* solib-svr4.c (svr4_relocate_main_executable): Likewise.
-	
+
 2002-01-22  Elena Zannoni  <ezannoni@redhat.com>
 
 	* sh-tdep.c (sh_pseudo_register_read): New function. Renamed and
@@ -1545,13 +1549,13 @@
 	* gdbserver/low-sim.c (create_inferior): Ditto.
 	* gdbarch.sh: Ditto.
 	* gdbarch.h: Re-generate.
-	* config/powerpc/tm-ppc-eabi.h (TARGET_BYTE_ORDER_SELECTABLE_P): 
-	* config/sparc/tm-sparclite.h (TARGET_BYTE_ORDER_SELECTABLE): 
-	* config/sparc/tm-sparclet.h (TARGET_BYTE_ORDER_SELECTABLE): 
-	* config/mcore/tm-mcore.h (TARGET_BYTE_ORDER_SELECTABLE_P): 
-	* config/arm/tm-wince.h (TARGET_BYTE_ORDER_SELECTABLE_P): 
-	* config/arm/tm-linux.h (TARGET_BYTE_ORDER_SELECTABLE_P): 
-	* config/arc/tm-arc.h (TARGET_BYTE_ORDER_SELECTABLE): 
+	* config/powerpc/tm-ppc-eabi.h (TARGET_BYTE_ORDER_SELECTABLE_P):
+	* config/sparc/tm-sparclite.h (TARGET_BYTE_ORDER_SELECTABLE):
+	* config/sparc/tm-sparclet.h (TARGET_BYTE_ORDER_SELECTABLE):
+	* config/mcore/tm-mcore.h (TARGET_BYTE_ORDER_SELECTABLE_P):
+	* config/arm/tm-wince.h (TARGET_BYTE_ORDER_SELECTABLE_P):
+	* config/arm/tm-linux.h (TARGET_BYTE_ORDER_SELECTABLE_P):
+	* config/arc/tm-arc.h (TARGET_BYTE_ORDER_SELECTABLE):
 	* config/arm/tm-arm.h (TARGET_BYTE_ORDER_SELECTABLE_P): Delete
 	macro definition.
 	* config/mips/tm-wince.h: Remove #undef of macro
