@@ -1,3 +1,7 @@
+Fri Jun 13 12:55:49 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* symfile.c (generic_load): Check return code of target_write_memory.
+
 Fri Jun 13 10:28:09 1997  Fred Fish  <fnf@cygnus.com>
 
 	* config/i386/nm-linux.h: Enable prototypes that were #ifdef out.

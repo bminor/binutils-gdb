@@ -1020,13 +1020,15 @@ generic_load (filename, from_tty)
 		 to look at during a long download.  */
 	      printf_filtered ("Loading section %s, size 0x%lx lma ",
 			       bfd_get_section_name (loadfile_bfd, s),
-			       (unsigned long) size);
+ 			       (unsigned long) size);
 	      print_address_numeric (lma, 1, gdb_stdout);
 	      printf_filtered ("\n");
 
 	      bfd_get_section_contents (loadfile_bfd, s, buffer, 0, size);
 
-	      target_write_memory (lma, buffer, size);
+	      if (target_write_memory (lma, buffer, size) != 0)
+		error ("Memory access error while loading section %s.", 
+		       bfd_get_section_name (loadfile_bfd, s));
 
 	      do_cleanups (old_chain);
 	    }
