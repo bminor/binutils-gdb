@@ -3910,12 +3910,52 @@ adjust_breakpoint_address (CORE_ADDR bpaddr)
 /* Allocate a struct bp_location.  */
 
 struct bp_location *
-allocate_bp_location (void)
+allocate_bp_location (struct breakpoint *bpt, enum bptype bp_type)
 {
   struct bp_location *loc, *loc_p;
 
   loc = xmalloc (sizeof (struct bp_location));
   memset (loc, 0, sizeof (*loc));
+
+  loc->owner = bpt;
+
+  switch (bp_type)
+    {
+    case bp_breakpoint:
+    case bp_until:
+    case bp_finish:
+    case bp_longjmp:
+    case bp_longjmp_resume:
+    case bp_step_resume:
+    case bp_through_sigtramp:
+    case bp_watchpoint_scope:
+    case bp_call_dummy:
+    case bp_shlib_event:
+    case bp_thread_event:
+    case bp_overlay_event:
+    case bp_catch_load:
+    case bp_catch_unload:
+      loc->loc_type = bp_loc_software_breakpoint;
+      break;
+    case bp_hardware_breakpoint:
+      loc->loc_type = bp_loc_hardware_breakpoint;
+      break;
+    case bp_hardware_watchpoint:
+    case bp_read_watchpoint:
+    case bp_access_watchpoint:
+      loc->loc_type = bp_loc_hardware_watchpoint;
+      break;
+    case bp_watchpoint:
+    case bp_catch_fork:
+    case bp_catch_vfork:
+    case bp_catch_exec:
+    case bp_catch_catch:
+    case bp_catch_throw:
+      loc->loc_type = bp_loc_other;
+      break;
+    default:
+      internal_error (__FILE__, __LINE__, "unknown breakpoint type");
+    }
 
   /* Add this breakpoint to the end of the chain.  */
 
@@ -3954,7 +3994,7 @@ set_raw_breakpoint (struct symtab_and_line sal, enum bptype bptype)
 
   b = (struct breakpoint *) xmalloc (sizeof (struct breakpoint));
   memset (b, 0, sizeof (*b));
-  b->loc = allocate_bp_location ();
+  b->loc = allocate_bp_location (b, bptype);
   b->loc->requested_address = sal.pc;
   b->loc->address = adjust_breakpoint_address (b->loc->requested_address);
   if (sal.symtab == NULL)

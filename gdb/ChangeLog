@@ -1,5 +1,12 @@
 2003-11-06  Daniel Jacobowitz  <drow@mvista.com>
 
+	* breakpoint.c (allocate_bp_location): Take bpt and bp_type
+	arguments.  Initialize owner and type for the new breakpoint
+	location item.
+	(set_raw_breakpoint): Update call to allocate_bp_location.
+
+2003-11-06  Daniel Jacobowitz  <drow@mvista.com>
+
 	* breakpoint.h (struct bp_location): Add a chain pointer.
 	* breakpoint.c (ALL_BP_LOCATIONS, ALL_BP_LOCATIONS_SAFE): New
 	macros.
