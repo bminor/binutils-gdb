@@ -92,7 +92,7 @@ i386_linux_register_raw_size (int reg)
 
    It kind of sucks that we have to read memory from the process in
    order to identify a signal trampoline, but there doesn't seem to be
-   any other way.  The IN_SIGTRAMP macro in tm-linux.h arranges to
+   any other way.  The PC_IN_SIGTRAMP macro in tm-linux.h arranges to
    only call us if no function name could be identified, which should
    be the case since the code is on the stack.
 
@@ -317,7 +317,7 @@ i386_linux_sigtramp_saved_sp (struct frame_info *frame)
    in progress when the signal trampoline was entered.  GDB mostly
    treats this frame pointer value as a magic cookie.  We detect the
    case of a signal trampoline by looking at the SIGNAL_HANDLER_CALLER
-   field, which is set based on IN_SIGTRAMP.
+   field, which is set based on PC_IN_SIGTRAMP.
 
    When a signal trampoline is invoked from a frameless function, we
    essentially have two frameless functions in a row.  In this case,

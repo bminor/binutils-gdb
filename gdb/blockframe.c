@@ -227,7 +227,7 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
   fi->frame = addr;
   fi->pc = pc;
   find_pc_partial_function (pc, &name, (CORE_ADDR *) NULL, (CORE_ADDR *) NULL);
-  fi->signal_handler_caller = IN_SIGTRAMP (fi->pc, name);
+  fi->signal_handler_caller = PC_IN_SIGTRAMP (fi->pc, name);
 
   if (INIT_EXTRA_FRAME_INFO_P ())
     INIT_EXTRA_FRAME_INFO (0, fi);
@@ -458,7 +458,7 @@ get_prev_frame (struct frame_info *next_frame)
 
   find_pc_partial_function (prev->pc, &name,
 			    (CORE_ADDR *) NULL, (CORE_ADDR *) NULL);
-  if (IN_SIGTRAMP (prev->pc, name))
+  if (PC_IN_SIGTRAMP (prev->pc, name))
     prev->signal_handler_caller = 1;
 
   return prev;
@@ -747,7 +747,7 @@ find_pc_sect_partial_function (CORE_ADDR pc, asection *section, char **name,
   /* If sigtramp is in the u area, it counts as a function (especially
      important for step_1).  */
 #if defined SIGTRAMP_START
-  if (IN_SIGTRAMP (mapped_pc, (char *) NULL))
+  if (PC_IN_SIGTRAMP (mapped_pc, (char *) NULL))
     {
       cache_pc_function_low = SIGTRAMP_START (mapped_pc);
       cache_pc_function_high = SIGTRAMP_END (mapped_pc);

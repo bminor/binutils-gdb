@@ -250,6 +250,7 @@ struct gdbarch
   gdbarch_print_insn_ftype *print_insn;
   gdbarch_skip_trampoline_code_ftype *skip_trampoline_code;
   gdbarch_in_solib_call_trampoline_ftype *in_solib_call_trampoline;
+  gdbarch_pc_in_sigtramp_ftype *pc_in_sigtramp;
   gdbarch_in_function_epilogue_p_ftype *in_function_epilogue_p;
   gdbarch_construct_inferior_arguments_ftype *construct_inferior_arguments;
   gdbarch_dwarf2_build_frame_info_ftype *dwarf2_build_frame_info;
@@ -342,6 +343,7 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   generic_get_saved_register,
+  0,
   0,
   0,
   0,
@@ -516,6 +518,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->print_insn = legacy_print_insn;
   current_gdbarch->skip_trampoline_code = generic_skip_trampoline_code;
   current_gdbarch->in_solib_call_trampoline = generic_in_solib_call_trampoline;
+  current_gdbarch->pc_in_sigtramp = legacy_pc_in_sigtramp;
   current_gdbarch->in_function_epilogue_p = generic_in_function_epilogue_p;
   current_gdbarch->construct_inferior_arguments = construct_inferior_arguments;
   current_gdbarch->elf_make_msymbol_special = default_elf_make_msymbol_special;
@@ -764,6 +767,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of print_insn, invalid_p == 0 */
   /* Skip verify of skip_trampoline_code, invalid_p == 0 */
   /* Skip verify of in_solib_call_trampoline, invalid_p == 0 */
+  /* Skip verify of pc_in_sigtramp, invalid_p == 0 */
   /* Skip verify of in_function_epilogue_p, invalid_p == 0 */
   /* Skip verify of construct_inferior_arguments, invalid_p == 0 */
   /* Skip verify of dwarf2_build_frame_info, has predicate */
@@ -1460,6 +1464,17 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: PC_IN_CALL_DUMMY = 0x%08lx\n",
                         (long) current_gdbarch->pc_in_call_dummy
                         /*PC_IN_CALL_DUMMY ()*/);
+#endif
+#ifdef PC_IN_SIGTRAMP
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "PC_IN_SIGTRAMP(pc, name)",
+                      XSTRING (PC_IN_SIGTRAMP (pc, name)));
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: PC_IN_SIGTRAMP = 0x%08lx\n",
+                        (long) current_gdbarch->pc_in_sigtramp
+                        /*PC_IN_SIGTRAMP ()*/);
 #endif
 #ifdef PC_REGNUM
   fprintf_unfiltered (file,
@@ -4406,6 +4421,24 @@ set_gdbarch_in_solib_call_trampoline (struct gdbarch *gdbarch,
                                       gdbarch_in_solib_call_trampoline_ftype in_solib_call_trampoline)
 {
   gdbarch->in_solib_call_trampoline = in_solib_call_trampoline;
+}
+
+int
+gdbarch_pc_in_sigtramp (struct gdbarch *gdbarch, CORE_ADDR pc, char *name)
+{
+  if (gdbarch->pc_in_sigtramp == 0)
+    internal_error (__FILE__, __LINE__,
+                    "gdbarch: gdbarch_pc_in_sigtramp invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_pc_in_sigtramp called\n");
+  return gdbarch->pc_in_sigtramp (pc, name);
+}
+
+void
+set_gdbarch_pc_in_sigtramp (struct gdbarch *gdbarch,
+                            gdbarch_pc_in_sigtramp_ftype pc_in_sigtramp)
+{
+  gdbarch->pc_in_sigtramp = pc_in_sigtramp;
 }
 
 int

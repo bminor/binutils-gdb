@@ -419,6 +419,24 @@ generic_register_virtual_size (int regnum)
   return TYPE_LENGTH (REGISTER_VIRTUAL_TYPE (regnum));
 }
 
+#if !defined (IN_SIGTRAMP)
+#if defined (SIGTRAMP_START)
+#define IN_SIGTRAMP(pc, name) \
+       ((pc) >= SIGTRAMP_START(pc)   \
+        && (pc) < SIGTRAMP_END(pc) \
+        )
+#else
+#define IN_SIGTRAMP(pc, name) \
+       (name && STREQ ("_sigtramp", name))
+#endif
+#endif
+
+int
+legacy_pc_in_sigtramp (CORE_ADDR pc, char *name)
+{
+  return IN_SIGTRAMP(pc, name);
+}
+
 
 /* Functions to manipulate the endianness of the target.  */
 

@@ -2108,7 +2108,7 @@ mips_init_extra_frame_info (int fromleaf, struct frame_info *fci)
 	     We can't use fci->signal_handler_caller, it is not yet set.  */
 	  find_pc_partial_function (fci->pc, &name,
 				    (CORE_ADDR *) NULL, (CORE_ADDR *) NULL);
-	  if (!IN_SIGTRAMP (fci->pc, name))
+	  if (!PC_IN_SIGTRAMP (fci->pc, name))
 	    {
 	      frame_saved_regs_zalloc (fci);
 	      memcpy (fci->saved_regs, temp_saved_regs, SIZEOF_FRAME_SAVED_REGS);
@@ -4576,9 +4576,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: IGNORE_HELPER_CALL # %s\n",
 		      XSTRING (IGNORE_HELPER_CALL (PC)));
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: IN_SIGTRAMP # %s\n",
-		      XSTRING (IN_SIGTRAMP (PC, NAME)));
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: IN_SOLIB_CALL_TRAMPOLINE # %s\n",
 		      XSTRING (IN_SOLIB_CALL_TRAMPOLINE (PC, NAME)));

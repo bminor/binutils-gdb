@@ -2268,6 +2268,44 @@ extern void set_gdbarch_in_solib_call_trampoline (struct gdbarch *gdbarch, gdbar
 #endif
 #endif
 
+/* Sigtramp is a routine that the kernel calls (which then calls the
+   signal handler).  On most machines it is a library routine that is
+   linked into the executable.
+  
+   This macro, given a program counter value and the name of the
+   function in which that PC resides (which can be null if the name is
+   not known), returns nonzero if the PC and name show that we are in
+   sigtramp.
+  
+   On most machines just see if the name is sigtramp (and if we have
+   no name, assume we are not in sigtramp).
+  
+   FIXME: cagney/2002-04-21: The function find_pc_partial_function
+   calls find_pc_sect_partial_function() which calls PC_IN_SIGTRAMP.
+   This means PC_IN_SIGTRAMP function can't be implemented by doing its
+   own local NAME lookup.
+  
+   FIXME: cagney/2002-04-21: PC_IN_SIGTRAMP is something of a mess.
+   Some code also depends on SIGTRAMP_START and SIGTRAMP_END but other
+   does not. */
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (PC_IN_SIGTRAMP)
+#define PC_IN_SIGTRAMP(pc, name) (legacy_pc_in_sigtramp (pc, name))
+#endif
+
+typedef int (gdbarch_pc_in_sigtramp_ftype) (CORE_ADDR pc, char *name);
+extern int gdbarch_pc_in_sigtramp (struct gdbarch *gdbarch, CORE_ADDR pc, char *name);
+extern void set_gdbarch_pc_in_sigtramp (struct gdbarch *gdbarch, gdbarch_pc_in_sigtramp_ftype *pc_in_sigtramp);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (PC_IN_SIGTRAMP)
+#error "Non multi-arch definition of PC_IN_SIGTRAMP"
+#endif
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (PC_IN_SIGTRAMP)
+#define PC_IN_SIGTRAMP(pc, name) (gdbarch_pc_in_sigtramp (current_gdbarch, pc, name))
+#endif
+#endif
+
 /* A target might have problems with watchpoints as soon as the stack
    frame of the current function has been destroyed.  This mostly happens
    as the first action in a funtion's epilogue.  in_function_epilogue_p()

@@ -2640,8 +2640,8 @@ handle_inferior_event (struct execution_control_state *ecs)
     ecs->update_step_sp = 1;
 
     /* Did we just take a signal?  */
-    if (IN_SIGTRAMP (stop_pc, ecs->stop_func_name)
-	&& !IN_SIGTRAMP (prev_pc, prev_func_name)
+    if (PC_IN_SIGTRAMP (stop_pc, ecs->stop_func_name)
+	&& !PC_IN_SIGTRAMP (prev_pc, prev_func_name)
 	&& INNER_THAN (read_sp (), step_sp))
       {
 	/* We've just taken a signal; go until we are back to
@@ -2752,7 +2752,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  {
 	    /* We're doing a "next".  */
 
-	    if (IN_SIGTRAMP (stop_pc, ecs->stop_func_name)
+	    if (PC_IN_SIGTRAMP (stop_pc, ecs->stop_func_name)
 		&& INNER_THAN (step_frame_address, read_sp()))
 	      /* We stepped out of a signal handler, and into its
                  calling trampoline.  This is misdetected as a
@@ -2961,8 +2961,8 @@ static void
 check_sigtramp2 (struct execution_control_state *ecs)
 {
   if (trap_expected
-      && IN_SIGTRAMP (stop_pc, ecs->stop_func_name)
-      && !IN_SIGTRAMP (prev_pc, prev_func_name)
+      && PC_IN_SIGTRAMP (stop_pc, ecs->stop_func_name)
+      && !PC_IN_SIGTRAMP (prev_pc, prev_func_name)
       && INNER_THAN (read_sp (), step_sp))
     {
       /* What has happened here is that we have just stepped the

@@ -3090,11 +3090,6 @@ The epilogue of a function is defined as the part of a function where
 the stack frame of the function already has been destroyed up to the
 final `return from function call' instruction.
 
-@item IN_SIGTRAMP (@var{pc}, @var{name})
-@findex IN_SIGTRAMP
-Define this to return non-zero if the given @var{pc} and/or @var{name}
-indicates that the current function is a @code{sigtramp}.
-
 @item SIGTRAMP_START (@var{pc})
 @findex SIGTRAMP_START
 @itemx SIGTRAMP_END (@var{pc})
@@ -3292,6 +3287,18 @@ them.
 @item PC_IN_CALL_DUMMY
 @findex PC_IN_CALL_DUMMY
 See @file{inferior.h}.
+
+@item PC_IN_SIGTRAMP (@var{pc}, @var{name})
+@findex PC_IN_SIGTRAMP
+@cindex sigtramp
+The @dfn{sigtramp} is a routine that the kernel calls (which then calls
+the signal handler).  On most machines it is a library routine that is
+linked into the executable.
+
+This function, given a program counter value in @var{pc} and the
+(possibly NULL) name of the function in which that @var{pc} resides,
+returns nonzero if the @var{pc} and/or @var{name} show that we are in
+sigtramp.
 
 @item PC_LOAD_SEGMENT
 @findex PC_LOAD_SEGMENT

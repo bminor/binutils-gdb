@@ -1,3 +1,29 @@
+2002-04-24  Andrew Cagney  <ac131313@redhat.com>
+
+	* arch-utils.h: Update copyright.
+
+	* gdbarch.sh (PC_IN_SIGTRAMP): Add.
+	* gdbarch.h, gdbarch.c: Re-generate.
+
+	* inferior.h (IN_SIGTRAMP): Delete definition.
+	* arch-utils.c (legacy_pc_in_sigtramp): New function.
+	* arch-utils.h (legacy_pc_in_sigtramp): Declare.
+
+	* mips-tdep.c (mips_init_extra_frame_info): Use PC_IN_SIGTRAMP.
+	(mips_dump_tdep): Do not print value of IN_SIGTRAMP.
+	* hppa-tdep.c (pc_in_interrupt_handler):  Use PC_IN_SIGTRAMP.
+	(find_proc_framesize): Ditto.
+	* alpha-tdep.c (alpha_osf_skip_sigtramp_frame): Ditto.
+	(alpha_init_extra_frame_info): Ditto.
+	* infrun.c (handle_inferior_event): Ditto.
+	(handle_inferior_event): Ditto.
+	(check_sigtramp2): Ditto.
+	* blockframe.c (create_new_frame): Ditto.
+	(get_prev_frame): Ditto.
+	* ppc-linux-tdep.c: Update comments.
+	* i386-linux-tdep.c: Update comments.
+	* breakpoint.c (bpstat_what): Update comment.
+
 2002-04-24  Michal Ludvig  <mludvig@suse.cz>
 
 	* gdbserver/linux-low.c (regsets_fetch_inferior_registers),

@@ -403,29 +403,6 @@ extern char *stop_registers;
 
 extern int attach_flag;
 
-/* Sigtramp is a routine that the kernel calls (which then calls the
-   signal handler).  On most machines it is a library routine that
-   is linked into the executable.
-
-   This macro, given a program counter value and the name of the
-   function in which that PC resides (which can be null if the
-   name is not known), returns nonzero if the PC and name show
-   that we are in sigtramp.
-
-   On most machines just see if the name is sigtramp (and if we have
-   no name, assume we are not in sigtramp).  */
-#if !defined (IN_SIGTRAMP)
-#if defined (SIGTRAMP_START)
-#define IN_SIGTRAMP(pc, name) \
-       ((pc) >= SIGTRAMP_START(pc)   \
-        && (pc) < SIGTRAMP_END(pc) \
-        )
-#else
-#define IN_SIGTRAMP(pc, name) \
-       (name && STREQ ("_sigtramp", name))
-#endif
-#endif
-
 /* Possible values for CALL_DUMMY_LOCATION.  */
 #define ON_STACK 1
 #define BEFORE_TEXT_END 2

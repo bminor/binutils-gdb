@@ -106,10 +106,11 @@ static int ppc_linux_at_sigtramp_return_path (CORE_ADDR pc);
 /* Determine if pc is in a signal trampoline...
 
    Ha!  That's not what this does at all.  wait_for_inferior in
-   infrun.c calls IN_SIGTRAMP in order to detect entry into a signal
-   trampoline just after delivery of a signal.  But on GNU/Linux,
-   signal trampolines are used for the return path only.  The kernel
-   sets things up so that the signal handler is called directly.
+   infrun.c calls PC_IN_SIGTRAMP in order to detect entry into a
+   signal trampoline just after delivery of a signal.  But on
+   GNU/Linux, signal trampolines are used for the return path only.
+   The kernel sets things up so that the signal handler is called
+   directly.
 
    If we use in_sigtramp2() in place of in_sigtramp() (see below)
    we'll (often) end up with stop_pc in the trampoline and prev_pc in
@@ -141,11 +142,11 @@ static int ppc_linux_at_sigtramp_return_path (CORE_ADDR pc);
    first instruction long after the fact, just in case the observed
    behavior is ever fixed.)
 
-   IN_SIGTRAMP is called from blockframe.c as well in order to set
+   PC_IN_SIGTRAMP is called from blockframe.c as well in order to set
    the signal_handler_caller flag.  Because of our strange definition
-   of in_sigtramp below, we can't rely on signal_handler_caller getting
-   set correctly from within blockframe.c.  This is why we take pains
-   to set it in init_extra_frame_info().  */
+   of in_sigtramp below, we can't rely on signal_handler_caller
+   getting set correctly from within blockframe.c.  This is why we
+   take pains to set it in init_extra_frame_info().  */
 
 int
 ppc_linux_in_sigtramp (CORE_ADDR pc, char *func_name)

@@ -633,7 +633,8 @@ pc_in_interrupt_handler (CORE_ADDR pc)
      its frame isn't a pure interrupt frame.  Deal with this.  */
   msym_us = lookup_minimal_symbol_by_pc (pc);
 
-  return u->HP_UX_interrupt_marker && !IN_SIGTRAMP (pc, SYMBOL_NAME (msym_us));
+  return (u->HP_UX_interrupt_marker
+	  && !PC_IN_SIGTRAMP (pc, SYMBOL_NAME (msym_us)));
 }
 
 /* Called when no unwind descriptor was found for PC.  Returns 1 if it
@@ -751,7 +752,7 @@ find_proc_framesize (CORE_ADDR pc)
   if (u->Save_SP
       && !pc_in_interrupt_handler (pc)
       && msym_us
-      && !IN_SIGTRAMP (pc, SYMBOL_NAME (msym_us)))
+      && !PC_IN_SIGTRAMP (pc, SYMBOL_NAME (msym_us)))
     return -1;
 
   return u->Total_frame_size << 3;

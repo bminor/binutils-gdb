@@ -208,7 +208,7 @@ alpha_osf_skip_sigtramp_frame (struct frame_info *frame, CORE_ADDR pc)
 {
   char *name;
   find_pc_partial_function (pc, &name, (CORE_ADDR *) NULL, (CORE_ADDR *) NULL);
-  if (IN_SIGTRAMP (pc, name))
+  if (PC_IN_SIGTRAMP (pc, name))
     return frame->frame;
   else
     return 0;
@@ -991,7 +991,7 @@ alpha_init_extra_frame_info (int fromleaf, struct frame_info *frame)
 	     We can't use frame->signal_handler_caller, it is not yet set.  */
 	  find_pc_partial_function (frame->pc, &name,
 				    (CORE_ADDR *) NULL, (CORE_ADDR *) NULL);
-	  if (!IN_SIGTRAMP (frame->pc, name))
+	  if (!PC_IN_SIGTRAMP (frame->pc, name))
 	    {
 	      frame->saved_regs = (CORE_ADDR *)
 		frame_obstack_alloc (SIZEOF_FRAME_SAVED_REGS);

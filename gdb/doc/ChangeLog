@@ -1,3 +1,8 @@
+2002-04-24  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Replace
+	IN_SIGTRAMP with PC_IN_SIGTRAMP.
+
 2002-04-24  David S. Miller  <davem@redhat.com>
 
 	* gdbint.texinfo (REGISTER_IN_WINDOW): Delete definition.
