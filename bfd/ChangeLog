@@ -1,3 +1,65 @@
+2003-04-21  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* elf32-m68hc1x.c: New file (from elf32-m68hc11.c and elf32-m68hc12.c)
+	(m68hc11_elf_hash_table_create): New function.
+	(elf32_m68hc11_link_hash_table_free): New function.
+	(stub_hash_newfunc): New function.
+	(m68hc11_add_stub): New function.
+	(elf32_m68hc11_add_symbol_hook): New function.
+	(elf32_m68hc11_setup_section_lists): New function.
+	(elf32_m68hc11_next_input_section): New function.
+	(elf32_m68hc11_size_stubs): New function.
+	(elf32_m68hc11_build_stubs): New function.
+	(m68hc11_get_relocation_value): New function.
+	(elf32_m68hc11_relocate_section): Call the above to redirect
+	some relocations to the trampoline code.
+	(m68hc11_elf_export_one_stub): New function.
+	(m68hc11_elf_set_symbol): New function.
+	(elf32_m68hc11_build_stubs): Call it via bfd_hash_traverse.
+	(m68hc11_elf_get_bank_parameters): Get parameters only when the info
+	is not yet initialized.
+
+	* elf32-m68hc1x.h: New file (from elf32-m68hc11.c and elf32-m68hc12.c)
+	(elf32_m68hc11_stub_hash_entry): New struct.
+	(m68hc11_page_info): Add trampoline handler address.
+	(m68hc11_elf_link_hash_table): Add stubs generation members.
+	(elf32_m68hc11_add_symbol_hook): Declare.
+	(elf32_m68hc11_setup_section_lists): Declare.
+	(elf32_m68hc11_size_stubs): Declare.
+	(elf32_m68hc11_build_stubs): Declare.
+	
+	* elf32-m68hc11.c (m68hc11_elf_ignore_reloc): Move to elf32-m68hc1x.c.
+	(elf32_m68hc11_gc_mark_hook, elf32_m68hc11_gc_sweep_hook): Likewise.
+	(elf32_m68hc11_check_relocs, elf32_m68hc11_relocate_section): Ditto.
+	(_bfd_m68hc11_elf_set_private_flags): Ditto.
+	(_bfd_m68hc11_elf_merge_private_bfd_data): Ditto.
+	(_bfd_m68hc11_elf_print_private_bfd_data): Ditto.
+	(bfd_elf32_bfd_link_hash_table_create): Define.
+	(elf_backend_add_symbol_hook): Define.
+	(m68hc11_elf_bfd_link_hash_table_create): New function.
+	(m68hc11_elf_build_one_stub): New function.
+	(m68hc11_elf_size_one_stub): New function.
+	(m68hc11_elf_bfd_link_hash_table_create): Install the above.
+	(bfd_elf32_bfd_link_hash_table_create): Define.
+
+	* elf32-m68hc12.c (m68hc11_elf_ignore_reloc): Remove.
+	(m68hc12_addr_is_banked): Remove, use m68hc11_addr_is_banked.
+	(m68hc12_phys_addr): Ditto.
+	(m68hc12_phys_page): Ditto.
+	(m68hc12_elf_special_reloc): Move to elf32-m68hc1x.c.
+	(elf32_m68hc11_gc_mark_hook): Likewise.
+	(elf32_m68hc11_gc_sweep_hook): Likewise.
+	(elf32_m68hc11_check_relocs): Likewise.
+	(elf32_m68hc11_relocate_section): Likewise.
+	(_bfd_m68hc12_elf_set_private_flags): Likewise.
+	(_bfd_m68hc12_elf_merge_private_bfd_data): Likewise.
+	(_bfd_m68hc12_elf_print_private_bfd_data): Likewise.
+	(m68hc12_elf_build_one_stub): New function.
+	(m68hc12_elf_size_one_stub): New function.
+	(m68hc12_elf_bfd_link_hash_table_create): New function, use the above.
+	(elf_backend_add_symbol_hook): Define.
+	(elf_m68hc11_howto_table): Use TRUE for pcrel relocs; fix masks.
+
 2003-04-18  Nick Clifton  <nickc@redhat.com>
 
 	* format.c (bfd_check_format_matches): Only check associated
