@@ -1,3 +1,8 @@
+Sun Feb  6 07:45:17 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* i960-dis.c (reg, mem): Just use a static array instead of
+	calling xmalloc.
+
 Sat Feb  5 00:04:02 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* hppa-dis.c (print_insn_hppa): For '?' and '@' only adjust the
