@@ -48,7 +48,7 @@ typedef struct fpreg fpregset_t;
 
 /* Transfering the registers between GDB, inferiors and core files.  */
 
-/* Fill GDB's register array with the genereal-purpose register values
+/* Fill GDB's register array with the general-purpose register values
    in *GREGSETP.  */
 
 void

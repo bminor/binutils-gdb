@@ -103,7 +103,7 @@ cannot_fetch_register (int regno)
 
 /* Transfering the registers between GDB, inferiors and core files.  */
 
-/* Fill GDB's register array with the genereal-purpose register values
+/* Fill GDB's register array with the general-purpose register values
    in *GREGSETP.  */
 
 void

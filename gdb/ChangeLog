@@ -1,3 +1,8 @@
+2001-01-03  J.T. Conklin  <jtc@redback.com>
+
+	* alphabsd-nat.c, i386-linux-nat.c, i386bsd-nat.c: Fix typo in
+ 	comment.
+
 2001-01-02  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* sh-tdep.c (sh_extract_return_value):  Allow for small return type.
