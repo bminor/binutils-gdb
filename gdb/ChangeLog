@@ -1,3 +1,23 @@
+2003-09-30  David Carlton  <carlton@kealia.com>
+
+	* dwarf2read.c (struct die_info): Add 'parent' field; replace
+	'has_children' and 'next' by 'child' and 'sibling'.
+	(read_comp_unit): Rework algorithm, breaking body into
+	read_die_and_children and read_die_and_siblings.
+	(read_die_and_children, read_die_and_siblings): New.
+	(read_full_die): Add 'has_children' argument; set it instead of
+	the die's 'has_children' field.  Minor formatting cleanup.
+	(free_die_list): Use die->child and die->sibling instead of
+	die->next.
+	(dump_die_list): Ditto.
+	(sibling_die): Use die->sibling.
+	(psymtab_to_symtab_1): Use die's 'child' field in place of its
+	'has_children' and 'next' fields.
+	(process_die, read_file_scope, read_func_scope) 
+	(read_lexical_block_scope, read_structure_scope) 
+	(read_enumeration, read_array_type, read_common_block) 
+	(read_namespace, read_subroutine_type, dump_die): Ditto.
+
 2003-09-30  Andrew Cagney  <cagney@redhat.com>
 
 	* rs6000-tdep.c (rs6000_gdbarch_init): Set the PowerOpen red zone
