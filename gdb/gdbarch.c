@@ -202,9 +202,9 @@ struct gdbarch
   int believe_pcc_promotion;
   int believe_pcc_promotion_type;
   gdbarch_deprecated_get_saved_register_ftype *deprecated_get_saved_register;
-  gdbarch_register_convertible_ftype *register_convertible;
-  gdbarch_register_convert_to_virtual_ftype *register_convert_to_virtual;
-  gdbarch_register_convert_to_raw_ftype *register_convert_to_raw;
+  gdbarch_deprecated_register_convertible_ftype *deprecated_register_convertible;
+  gdbarch_deprecated_register_convert_to_virtual_ftype *deprecated_register_convert_to_virtual;
+  gdbarch_deprecated_register_convert_to_raw_ftype *deprecated_register_convert_to_raw;
   gdbarch_convert_register_p_ftype *convert_register_p;
   gdbarch_register_to_value_ftype *register_to_value;
   gdbarch_value_to_register_ftype *value_to_register;
@@ -370,9 +370,9 @@ struct gdbarch startup_gdbarch =
   0,  /* believe_pcc_promotion */
   0,  /* believe_pcc_promotion_type */
   0,  /* deprecated_get_saved_register */
-  0,  /* register_convertible */
-  0,  /* register_convert_to_virtual */
-  0,  /* register_convert_to_raw */
+  0,  /* deprecated_register_convertible */
+  0,  /* deprecated_register_convert_to_virtual */
+  0,  /* deprecated_register_convert_to_raw */
   0,  /* convert_register_p */
   0,  /* register_to_value */
   0,  /* value_to_register */
@@ -531,7 +531,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->deprecated_pc_in_call_dummy = generic_pc_in_call_dummy;
   current_gdbarch->deprecated_call_dummy_words = legacy_call_dummy_words;
   current_gdbarch->deprecated_sizeof_call_dummy_words = legacy_sizeof_call_dummy_words;
-  current_gdbarch->register_convertible = generic_register_convertible_not;
+  current_gdbarch->deprecated_register_convertible = deprecated_register_convertible_not;
   current_gdbarch->convert_register_p = legacy_convert_register_p;
   current_gdbarch->register_to_value = legacy_register_to_value;
   current_gdbarch->value_to_register = legacy_value_to_register;
@@ -672,9 +672,9 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of deprecated_init_frame_pc_first, has predicate */
   /* Skip verify of deprecated_init_frame_pc, has predicate */
   /* Skip verify of deprecated_get_saved_register, has predicate */
-  /* Skip verify of register_convertible, invalid_p == 0 */
-  /* Skip verify of register_convert_to_virtual, invalid_p == 0 */
-  /* Skip verify of register_convert_to_raw, invalid_p == 0 */
+  /* Skip verify of deprecated_register_convertible, invalid_p == 0 */
+  /* Skip verify of deprecated_register_convert_to_virtual, invalid_p == 0 */
+  /* Skip verify of deprecated_register_convert_to_raw, invalid_p == 0 */
   /* Skip verify of convert_register_p, invalid_p == 0 */
   /* Skip verify of register_to_value, invalid_p == 0 */
   /* Skip verify of value_to_register, invalid_p == 0 */
@@ -1490,6 +1490,45 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: DEPRECATED_REGISTER_BYTES = %d\n",
                       DEPRECATED_REGISTER_BYTES);
 #endif
+#ifdef DEPRECATED_REGISTER_CONVERTIBLE
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_REGISTER_CONVERTIBLE(nr)",
+                      XSTRING (DEPRECATED_REGISTER_CONVERTIBLE (nr)));
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: DEPRECATED_REGISTER_CONVERTIBLE = <0x%08lx>\n",
+                        (long) current_gdbarch->deprecated_register_convertible
+                        /*DEPRECATED_REGISTER_CONVERTIBLE ()*/);
+#endif
+#ifdef DEPRECATED_REGISTER_CONVERT_TO_RAW
+#if GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_REGISTER_CONVERT_TO_RAW(type, regnum, from, to)",
+                      XSTRING (DEPRECATED_REGISTER_CONVERT_TO_RAW (type, regnum, from, to)));
+#endif
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: DEPRECATED_REGISTER_CONVERT_TO_RAW = <0x%08lx>\n",
+                        (long) current_gdbarch->deprecated_register_convert_to_raw
+                        /*DEPRECATED_REGISTER_CONVERT_TO_RAW ()*/);
+#endif
+#ifdef DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL
+#if GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL(regnum, type, from, to)",
+                      XSTRING (DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL (regnum, type, from, to)));
+#endif
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL = <0x%08lx>\n",
+                        (long) current_gdbarch->deprecated_register_convert_to_virtual
+                        /*DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL ()*/);
+#endif
 #ifdef DEPRECATED_REGISTER_SIZE
   fprintf_unfiltered (file,
                       "gdbarch_dump: DEPRECATED_REGISTER_SIZE # %s\n",
@@ -2070,45 +2109,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: REGISTER_BYTES_OK = <0x%08lx>\n",
                         (long) current_gdbarch->register_bytes_ok
                         /*REGISTER_BYTES_OK ()*/);
-#endif
-#ifdef REGISTER_CONVERTIBLE
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "REGISTER_CONVERTIBLE(nr)",
-                      XSTRING (REGISTER_CONVERTIBLE (nr)));
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: REGISTER_CONVERTIBLE = <0x%08lx>\n",
-                        (long) current_gdbarch->register_convertible
-                        /*REGISTER_CONVERTIBLE ()*/);
-#endif
-#ifdef REGISTER_CONVERT_TO_RAW
-#if GDB_MULTI_ARCH
-  /* Macro might contain `[{}]' when not multi-arch */
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "REGISTER_CONVERT_TO_RAW(type, regnum, from, to)",
-                      XSTRING (REGISTER_CONVERT_TO_RAW (type, regnum, from, to)));
-#endif
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: REGISTER_CONVERT_TO_RAW = <0x%08lx>\n",
-                        (long) current_gdbarch->register_convert_to_raw
-                        /*REGISTER_CONVERT_TO_RAW ()*/);
-#endif
-#ifdef REGISTER_CONVERT_TO_VIRTUAL
-#if GDB_MULTI_ARCH
-  /* Macro might contain `[{}]' when not multi-arch */
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "REGISTER_CONVERT_TO_VIRTUAL(regnum, type, from, to)",
-                      XSTRING (REGISTER_CONVERT_TO_VIRTUAL (regnum, type, from, to)));
-#endif
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: REGISTER_CONVERT_TO_VIRTUAL = <0x%08lx>\n",
-                        (long) current_gdbarch->register_convert_to_virtual
-                        /*REGISTER_CONVERT_TO_VIRTUAL ()*/);
 #endif
 #ifdef REGISTER_NAME
   fprintf_unfiltered (file,
@@ -4105,60 +4105,60 @@ set_gdbarch_deprecated_get_saved_register (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_register_convertible (struct gdbarch *gdbarch, int nr)
+gdbarch_deprecated_register_convertible (struct gdbarch *gdbarch, int nr)
 {
   gdb_assert (gdbarch != NULL);
-  if (gdbarch->register_convertible == 0)
+  if (gdbarch->deprecated_register_convertible == 0)
     internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_register_convertible invalid");
+                    "gdbarch: gdbarch_deprecated_register_convertible invalid");
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_register_convertible called\n");
-  return gdbarch->register_convertible (nr);
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_register_convertible called\n");
+  return gdbarch->deprecated_register_convertible (nr);
 }
 
 void
-set_gdbarch_register_convertible (struct gdbarch *gdbarch,
-                                  gdbarch_register_convertible_ftype register_convertible)
+set_gdbarch_deprecated_register_convertible (struct gdbarch *gdbarch,
+                                             gdbarch_deprecated_register_convertible_ftype deprecated_register_convertible)
 {
-  gdbarch->register_convertible = register_convertible;
+  gdbarch->deprecated_register_convertible = deprecated_register_convertible;
 }
 
 void
-gdbarch_register_convert_to_virtual (struct gdbarch *gdbarch, int regnum, struct type *type, char *from, char *to)
+gdbarch_deprecated_register_convert_to_virtual (struct gdbarch *gdbarch, int regnum, struct type *type, char *from, char *to)
 {
   gdb_assert (gdbarch != NULL);
-  if (gdbarch->register_convert_to_virtual == 0)
+  if (gdbarch->deprecated_register_convert_to_virtual == 0)
     internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_register_convert_to_virtual invalid");
+                    "gdbarch: gdbarch_deprecated_register_convert_to_virtual invalid");
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_register_convert_to_virtual called\n");
-  gdbarch->register_convert_to_virtual (regnum, type, from, to);
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_register_convert_to_virtual called\n");
+  gdbarch->deprecated_register_convert_to_virtual (regnum, type, from, to);
 }
 
 void
-set_gdbarch_register_convert_to_virtual (struct gdbarch *gdbarch,
-                                         gdbarch_register_convert_to_virtual_ftype register_convert_to_virtual)
+set_gdbarch_deprecated_register_convert_to_virtual (struct gdbarch *gdbarch,
+                                                    gdbarch_deprecated_register_convert_to_virtual_ftype deprecated_register_convert_to_virtual)
 {
-  gdbarch->register_convert_to_virtual = register_convert_to_virtual;
+  gdbarch->deprecated_register_convert_to_virtual = deprecated_register_convert_to_virtual;
 }
 
 void
-gdbarch_register_convert_to_raw (struct gdbarch *gdbarch, struct type *type, int regnum, char *from, char *to)
+gdbarch_deprecated_register_convert_to_raw (struct gdbarch *gdbarch, struct type *type, int regnum, const char *from, char *to)
 {
   gdb_assert (gdbarch != NULL);
-  if (gdbarch->register_convert_to_raw == 0)
+  if (gdbarch->deprecated_register_convert_to_raw == 0)
     internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_register_convert_to_raw invalid");
+                    "gdbarch: gdbarch_deprecated_register_convert_to_raw invalid");
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_register_convert_to_raw called\n");
-  gdbarch->register_convert_to_raw (type, regnum, from, to);
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_register_convert_to_raw called\n");
+  gdbarch->deprecated_register_convert_to_raw (type, regnum, from, to);
 }
 
 void
-set_gdbarch_register_convert_to_raw (struct gdbarch *gdbarch,
-                                     gdbarch_register_convert_to_raw_ftype register_convert_to_raw)
+set_gdbarch_deprecated_register_convert_to_raw (struct gdbarch *gdbarch,
+                                                gdbarch_deprecated_register_convert_to_raw_ftype deprecated_register_convert_to_raw)
 {
-  gdbarch->register_convert_to_raw = register_convert_to_raw;
+  gdbarch->deprecated_register_convert_to_raw = deprecated_register_convert_to_raw;
 }
 
 int

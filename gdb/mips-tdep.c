@@ -621,7 +621,7 @@ mips_register_convert_to_virtual (int n, struct type *virtual_type,
 
 static void
 mips_register_convert_to_raw (struct type *virtual_type, int n,
-			      char *virt_buf, char *raw_buf)
+			      const char *virt_buf, char *raw_buf)
 {
   memset (raw_buf, 0, REGISTER_RAW_SIZE (n));
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
@@ -5961,11 +5961,9 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_deprecated_pop_frame (gdbarch, mips_pop_frame);
   set_gdbarch_frame_align (gdbarch, mips_frame_align);
   set_gdbarch_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
-  set_gdbarch_register_convertible (gdbarch, mips_register_convertible);
-  set_gdbarch_register_convert_to_virtual (gdbarch, 
-					   mips_register_convert_to_virtual);
-  set_gdbarch_register_convert_to_raw (gdbarch, 
-				       mips_register_convert_to_raw);
+  set_gdbarch_deprecated_register_convertible (gdbarch, mips_register_convertible);
+  set_gdbarch_deprecated_register_convert_to_virtual (gdbarch, mips_register_convert_to_virtual);
+  set_gdbarch_deprecated_register_convert_to_raw (gdbarch, mips_register_convert_to_raw);
 
   set_gdbarch_deprecated_frame_chain (gdbarch, mips_frame_chain);
   set_gdbarch_frameless_function_invocation (gdbarch, 

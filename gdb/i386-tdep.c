@@ -1359,7 +1359,7 @@ i386_register_convert_to_virtual (int regnum, struct type *type,
 
 static void
 i386_register_convert_to_raw (struct type *type, int regnum,
-			      char *from, char *to)
+			      const char *from, char *to)
 {
   gdb_assert (i386_fp_regnum_p (regnum));
 
@@ -1686,10 +1686,9 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Call dummy code.  */
   set_gdbarch_push_dummy_call (gdbarch, i386_push_dummy_call);
 
-  set_gdbarch_register_convertible (gdbarch, i386_register_convertible);
-  set_gdbarch_register_convert_to_virtual (gdbarch,
-					   i386_register_convert_to_virtual);
-  set_gdbarch_register_convert_to_raw (gdbarch, i386_register_convert_to_raw);
+  set_gdbarch_deprecated_register_convertible (gdbarch, i386_register_convertible);
+  set_gdbarch_deprecated_register_convert_to_virtual (gdbarch, i386_register_convert_to_virtual);
+  set_gdbarch_deprecated_register_convert_to_raw (gdbarch, i386_register_convert_to_raw);
 
   set_gdbarch_extract_return_value (gdbarch, i386_extract_return_value);
   set_gdbarch_store_return_value (gdbarch, i386_store_return_value);

@@ -49,7 +49,7 @@ struct frame_info;
 
 #define DEPRECATED_EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF)		\
   if (TYPE_CODE (TYPE) == TYPE_CODE_FLT)				\
-    REGISTER_CONVERT_TO_VIRTUAL (FP0_REGNUM, TYPE,			\
+    DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL (FP0_REGNUM, TYPE,			\
 				 &REGBUF[REGISTER_BYTE (FP0_REGNUM)],	\
 				 VALBUF);				\
   else									\
@@ -69,7 +69,7 @@ struct frame_info;
   if (TYPE_CODE (TYPE) == TYPE_CODE_FLT)				\
       {									\
 	char raw_buf[REGISTER_RAW_SIZE (FP0_REGNUM)];			\
-	REGISTER_CONVERT_TO_RAW (TYPE, FP0_REGNUM, VALBUF, raw_buf);	\
+	DEPRECATED_REGISTER_CONVERT_TO_RAW (TYPE, FP0_REGNUM, VALBUF, raw_buf);	\
 	deprecated_write_register_bytes (REGISTER_BYTE (FP0_REGNUM),		\
 			      raw_buf, REGISTER_RAW_SIZE (FP0_REGNUM)); \
       }									\

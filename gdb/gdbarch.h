@@ -1447,49 +1447,58 @@ extern void set_gdbarch_deprecated_get_saved_register (struct gdbarch *gdbarch, 
 #define DEPRECATED_GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) (gdbarch_deprecated_get_saved_register (current_gdbarch, raw_buffer, optimized, addrp, frame, regnum, lval))
 #endif
 
-/* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (REGISTER_CONVERTIBLE)
-#define REGISTER_CONVERTIBLE(nr) (generic_register_convertible_not (nr))
-#endif
-
-typedef int (gdbarch_register_convertible_ftype) (int nr);
-extern int gdbarch_register_convertible (struct gdbarch *gdbarch, int nr);
-extern void set_gdbarch_register_convertible (struct gdbarch *gdbarch, gdbarch_register_convertible_ftype *register_convertible);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_CONVERTIBLE)
-#error "Non multi-arch definition of REGISTER_CONVERTIBLE"
-#endif
-#if !defined (REGISTER_CONVERTIBLE)
-#define REGISTER_CONVERTIBLE(nr) (gdbarch_register_convertible (current_gdbarch, nr))
-#endif
+/* For register <-> value conversions, replaced by CONVERT_REGISTER_P et.al.
+   For raw <-> cooked register conversions, replaced by pseudo registers. */
 
 /* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (REGISTER_CONVERT_TO_VIRTUAL)
-#define REGISTER_CONVERT_TO_VIRTUAL(regnum, type, from, to) (internal_error (__FILE__, __LINE__, "REGISTER_CONVERT_TO_VIRTUAL"), 0)
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_REGISTER_CONVERTIBLE)
+#define DEPRECATED_REGISTER_CONVERTIBLE(nr) (deprecated_register_convertible_not (nr))
 #endif
 
-typedef void (gdbarch_register_convert_to_virtual_ftype) (int regnum, struct type *type, char *from, char *to);
-extern void gdbarch_register_convert_to_virtual (struct gdbarch *gdbarch, int regnum, struct type *type, char *from, char *to);
-extern void set_gdbarch_register_convert_to_virtual (struct gdbarch *gdbarch, gdbarch_register_convert_to_virtual_ftype *register_convert_to_virtual);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_CONVERT_TO_VIRTUAL)
-#error "Non multi-arch definition of REGISTER_CONVERT_TO_VIRTUAL"
+typedef int (gdbarch_deprecated_register_convertible_ftype) (int nr);
+extern int gdbarch_deprecated_register_convertible (struct gdbarch *gdbarch, int nr);
+extern void set_gdbarch_deprecated_register_convertible (struct gdbarch *gdbarch, gdbarch_deprecated_register_convertible_ftype *deprecated_register_convertible);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_REGISTER_CONVERTIBLE)
+#error "Non multi-arch definition of DEPRECATED_REGISTER_CONVERTIBLE"
 #endif
-#if !defined (REGISTER_CONVERT_TO_VIRTUAL)
-#define REGISTER_CONVERT_TO_VIRTUAL(regnum, type, from, to) (gdbarch_register_convert_to_virtual (current_gdbarch, regnum, type, from, to))
+#if !defined (DEPRECATED_REGISTER_CONVERTIBLE)
+#define DEPRECATED_REGISTER_CONVERTIBLE(nr) (gdbarch_deprecated_register_convertible (current_gdbarch, nr))
 #endif
+
+/* For register <-> value conversions, replaced by CONVERT_REGISTER_P et.al.
+   For raw <-> cooked register conversions, replaced by pseudo registers. */
 
 /* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (REGISTER_CONVERT_TO_RAW)
-#define REGISTER_CONVERT_TO_RAW(type, regnum, from, to) (internal_error (__FILE__, __LINE__, "REGISTER_CONVERT_TO_RAW"), 0)
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL)
+#define DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL(regnum, type, from, to) (internal_error (__FILE__, __LINE__, "DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL"), 0)
 #endif
 
-typedef void (gdbarch_register_convert_to_raw_ftype) (struct type *type, int regnum, char *from, char *to);
-extern void gdbarch_register_convert_to_raw (struct gdbarch *gdbarch, struct type *type, int regnum, char *from, char *to);
-extern void set_gdbarch_register_convert_to_raw (struct gdbarch *gdbarch, gdbarch_register_convert_to_raw_ftype *register_convert_to_raw);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_CONVERT_TO_RAW)
-#error "Non multi-arch definition of REGISTER_CONVERT_TO_RAW"
+typedef void (gdbarch_deprecated_register_convert_to_virtual_ftype) (int regnum, struct type *type, char *from, char *to);
+extern void gdbarch_deprecated_register_convert_to_virtual (struct gdbarch *gdbarch, int regnum, struct type *type, char *from, char *to);
+extern void set_gdbarch_deprecated_register_convert_to_virtual (struct gdbarch *gdbarch, gdbarch_deprecated_register_convert_to_virtual_ftype *deprecated_register_convert_to_virtual);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL)
+#error "Non multi-arch definition of DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL"
 #endif
-#if !defined (REGISTER_CONVERT_TO_RAW)
-#define REGISTER_CONVERT_TO_RAW(type, regnum, from, to) (gdbarch_register_convert_to_raw (current_gdbarch, type, regnum, from, to))
+#if !defined (DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL)
+#define DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL(regnum, type, from, to) (gdbarch_deprecated_register_convert_to_virtual (current_gdbarch, regnum, type, from, to))
+#endif
+
+/* For register <-> value conversions, replaced by CONVERT_REGISTER_P et.al.
+   For raw <-> cooked register conversions, replaced by pseudo registers. */
+
+/* Default (function) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_REGISTER_CONVERT_TO_RAW)
+#define DEPRECATED_REGISTER_CONVERT_TO_RAW(type, regnum, from, to) (internal_error (__FILE__, __LINE__, "DEPRECATED_REGISTER_CONVERT_TO_RAW"), 0)
+#endif
+
+typedef void (gdbarch_deprecated_register_convert_to_raw_ftype) (struct type *type, int regnum, const char *from, char *to);
+extern void gdbarch_deprecated_register_convert_to_raw (struct gdbarch *gdbarch, struct type *type, int regnum, const char *from, char *to);
+extern void set_gdbarch_deprecated_register_convert_to_raw (struct gdbarch *gdbarch, gdbarch_deprecated_register_convert_to_raw_ftype *deprecated_register_convert_to_raw);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_REGISTER_CONVERT_TO_RAW)
+#error "Non multi-arch definition of DEPRECATED_REGISTER_CONVERT_TO_RAW"
+#endif
+#if !defined (DEPRECATED_REGISTER_CONVERT_TO_RAW)
+#define DEPRECATED_REGISTER_CONVERT_TO_RAW(type, regnum, from, to) (gdbarch_deprecated_register_convert_to_raw (current_gdbarch, type, regnum, from, to))
 #endif
 
 /* Default (function) for non- multi-arch platforms. */

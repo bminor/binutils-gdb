@@ -281,7 +281,7 @@ ia64_register_convert_to_virtual (int regnum, struct type *type,
 
 static void
 ia64_register_convert_to_raw (struct type *type, int regnum,
-                              char *from, char *to)
+                              const char *from, char *to)
 {
   if (regnum >= IA64_FR0_REGNUM && regnum <= IA64_FR127_REGNUM)
     {
@@ -2274,9 +2274,9 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, ia64_frame_init_saved_regs);
   set_gdbarch_deprecated_get_saved_register (gdbarch, ia64_get_saved_register);
 
-  set_gdbarch_register_convertible (gdbarch, ia64_register_convertible);
-  set_gdbarch_register_convert_to_virtual (gdbarch, ia64_register_convert_to_virtual);
-  set_gdbarch_register_convert_to_raw (gdbarch, ia64_register_convert_to_raw);
+  set_gdbarch_deprecated_register_convertible (gdbarch, ia64_register_convertible);
+  set_gdbarch_deprecated_register_convert_to_virtual (gdbarch, ia64_register_convert_to_virtual);
+  set_gdbarch_deprecated_register_convert_to_raw (gdbarch, ia64_register_convert_to_raw);
 
   set_gdbarch_use_struct_convention (gdbarch, ia64_use_struct_convention);
   set_gdbarch_deprecated_extract_return_value (gdbarch, ia64_extract_return_value);

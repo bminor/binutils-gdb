@@ -1,3 +1,8 @@
+2003-06-11  Andrew Cagney  <cagney@redhat.com>
+
+	* mi-main.c (get_register): Replace REGISTER_CONVERTIBLE with
+	DEPRECATED_REGISTER_CONVERTIBLE.
+
 2003-06-08  Andrew Cagney  <cagney@redhat.com>
 
 	* mi-parse.c (_initialize_mi_parse): Delete function.

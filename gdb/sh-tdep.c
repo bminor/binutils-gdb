@@ -2297,8 +2297,9 @@ sh64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 		    if (TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
 		      {
 			memset (valbuf_tmp, 0, sizeof (valbuf_tmp));
-			REGISTER_CONVERT_TO_VIRTUAL (regnum,
-						     type, val, valbuf_tmp);
+			DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL (regnum,
+								type, val,
+								valbuf_tmp);
 			val = valbuf_tmp;
 		      }
 #endif

@@ -1944,7 +1944,7 @@ rs6000_register_convert_to_virtual (int n, struct type *type,
 
 static void
 rs6000_register_convert_to_raw (struct type *type, int n,
-				char *from, char *to)
+				const char *from, char *to)
 {
   if (TYPE_LENGTH (type) != REGISTER_RAW_SIZE (n))
     {
@@ -2944,9 +2944,9 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_push_return_address (gdbarch, ppc_push_return_address);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
 
-  set_gdbarch_register_convertible (gdbarch, rs6000_register_convertible);
-  set_gdbarch_register_convert_to_virtual (gdbarch, rs6000_register_convert_to_virtual);
-  set_gdbarch_register_convert_to_raw (gdbarch, rs6000_register_convert_to_raw);
+  set_gdbarch_deprecated_register_convertible (gdbarch, rs6000_register_convertible);
+  set_gdbarch_deprecated_register_convert_to_virtual (gdbarch, rs6000_register_convert_to_virtual);
+  set_gdbarch_deprecated_register_convert_to_raw (gdbarch, rs6000_register_convert_to_raw);
   set_gdbarch_stab_reg_to_regnum (gdbarch, rs6000_stab_reg_to_regnum);
   /* Note: kevinb/2002-04-12: I'm not convinced that rs6000_push_arguments()
      is correct for the SysV ABI when the wordsize is 8, but I'm also

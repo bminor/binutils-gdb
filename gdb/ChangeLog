@@ -1,5 +1,33 @@
 2003-06-11  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh (DEPRECATED_REGISTER_CONVERTIBLE): Deprecate
+	REGISTER_CONVERTIBLE.
+	(DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL): Same.
+	(DEPRECATED_REGISTER_CONVERT_TO_RAW): Same, make "from" constant.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* arch-utils.h (deprecated_register_convertible_not): Rename
+	generic_register_convertible_not.
+	* arch-utils.c (deprecated_register_convertible_not): Rename
+	generic_register_convertible.
+	(legacy_convert_register_p, legacy_register_to_value): Update.
+	* sh-tdep.c (sh64_push_arguments): Update.
+	* m68klinux-tdep.c (m68k_linux_extract_return_value): Update.
+	* config/m68k/tm-delta68.h (DEPRECATED_EXTRACT_RETURN_VALUE): Update.
+	* m68klinux-tdep.c (m68k_linux_store_return_value): Update.
+	* config/m68k/tm-delta68.h (DEPRECATED_STORE_RETURN_VALUE): Update.
+	* arch-utils.c (legacy_value_to_register): Update.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Update.
+	(rs6000_register_convert_to_raw): Make parameter "from" const.
+	* mips-tdep.c (mips_gdbarch_init): Update.
+	(mips_register_convert_to_raw): Make  parameter"virt_buf" const.
+	* infcmd.c (default_print_registers_info): Update.
+	* ia64-tdep.c (ia64_gdbarch_init): Update.
+	(ia64_register_convert_to_raw): Make parameter "from" const.
+	* i386-tdep.c (i386_gdbarch_init): Update.
+	(i386_register_convert_to_raw): Update.
+
+2003-06-11  Andrew Cagney  <cagney@redhat.com>
+
 	* remote-fileio.c: Include "remote-fileio.h".
 	* Makefile.in (remote-fileio.o): Update dependencies.
 	(remote_fileio_h): Fix typo.

@@ -284,10 +284,10 @@ value_of_register (int regnum, struct frame_info *frame)
 
   /* Convert raw data to virtual format if necessary.  */
 
-  if (REGISTER_CONVERTIBLE (regnum))
+  if (DEPRECATED_REGISTER_CONVERTIBLE (regnum))
     {
-      REGISTER_CONVERT_TO_VIRTUAL (regnum, register_type (current_gdbarch, regnum),
-				   raw_buffer, VALUE_CONTENTS_RAW (reg_val));
+      DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL (regnum, register_type (current_gdbarch, regnum),
+					      raw_buffer, VALUE_CONTENTS_RAW (reg_val));
     }
   else if (REGISTER_RAW_SIZE (regnum) == REGISTER_VIRTUAL_SIZE (regnum))
     memcpy (VALUE_CONTENTS_RAW (reg_val), raw_buffer,

@@ -32,7 +32,7 @@ struct gdbarch_info;
 extern int gdbarch_debug;
 
 /* Fallback for register convertible. */
-extern gdbarch_register_convertible_ftype generic_register_convertible_not;
+extern gdbarch_deprecated_register_convertible_ftype deprecated_register_convertible_not;
 
 extern CORE_ADDR generic_cannot_extract_struct_value_address (char *dummy);
 
