@@ -3,22 +3,22 @@
    2001, 2002
    Free Software Foundation, Inc.
 
-This file is part of GLD, the Gnu Linker.
+   This file is part of GLD, the Gnu Linker.
 
-GLD is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
+   GLD is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
 
-GLD is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   GLD is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with GLD; see the file COPYING.  If not, write to the Free
-Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with GLD; see the file COPYING.  If not, write to the Free
+   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -54,8 +54,8 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #endif
 
 static int is_num PARAMS ((const char *, int, int, int));
-static void set_default_dirlist PARAMS ((char *dirlist_ptr));
-static void set_section_start PARAMS ((char *sect, char *valstr));
+static void set_default_dirlist PARAMS ((char *));
+static void set_section_start PARAMS ((char *, char *));
 static void help PARAMS ((void));
 
 /* Non-zero if we are processing a --defsym from the command line.  */
@@ -796,6 +796,8 @@ parse_args (argc, argv)
 	  link_info.optimize = strtoul (optarg, NULL, 0) ? true : false;
 	  break;
 	case 'o':
+	  if (lang_file_exists (optarg))
+	    einfo ("%P%F: output file %s is also an input file!\n", optarg);
 	  lang_add_output (optarg, 0);
 	  break;
 	case OPTION_OFORMAT:

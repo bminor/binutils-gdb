@@ -1,3 +1,12 @@
+2002-10-05  Elias Athanasopoulos  <eathan@otenet.gr>
+
+	* ldlang.c (lang_file_exist): New function.
+	(new_afile): Abort if the filename to be added matches the linker 
+	output filename.
+	* ldlang.h: Add prototype for lang_file_exist.
+	* lexsup.c (parse_args): Abort if the output filename matches
+	one of the input filenames.
+
 2002-10-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* emulparams/elf64ppc.sh (MAXPAGESIZE): Set to 0x10000.

@@ -3,22 +3,22 @@
    2001, 2002
    Free Software Foundation, Inc.
 
-This file is part of GLD, the Gnu Linker.
+   This file is part of GLD, the Gnu Linker.
 
-GLD is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
+   GLD is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
 
-GLD is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   GLD is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with GLD; see the file COPYING.  If not, write to the Free
-Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with GLD; see the file COPYING.  If not, write to the Free
+   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -459,6 +459,27 @@ lang_list_init (list)
   list->tail = &list->head;
 }
 
+/* Check if a file exist in the input_file_chain list.  */
+
+boolean
+lang_file_exists (name)
+    const char *name;
+{
+  lang_input_statement_type *p;
+
+  if (name == NULL)
+    return false;
+
+  for (p = (lang_input_statement_type *) input_file_chain.head;
+       p != (lang_input_statement_type *) NULL;
+       p = (lang_input_statement_type *) p->next_real_file)
+    if (p->filename != (char *) NULL
+	&& strcmp (p->filename, name) == 0)
+      return true;
+
+  return false;
+}
+
 /* Build a new statement node for the parse tree.  */
 
 static lang_statement_union_type *
@@ -494,6 +515,11 @@ new_afile (name, file_type, target, add_to_list)
 {
   lang_input_statement_type *p;
 
+  /* We abort if an input file name is identical with the output file name.  */
+  if (name != NULL && output_filename != NULL
+      && !strcmp (name, output_filename))
+    einfo ("%P%F: input file %s is also the output file!\n", name);
+ 
   if (add_to_list)
     p = new_stat (lang_input_statement, stat_ptr);
   else
