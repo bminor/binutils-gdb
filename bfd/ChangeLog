@@ -1,3 +1,9 @@
+1999-09-28  Geoffrey Keating  <geoffk@cygnus.com>
+
+	* elf32-mips.c (mips_elf_relocate_hi16): Unused, delete.
+	(mips_elf_relocate_got_local): Unused, delete.
+	(mips_elf_relocate_global_got): Unused, delete.
+
 1999-09-24  Fred Fish  <fnf@cygnus.com>
 
 	* elf.c (bfd_section_from_phdr): Add typename variable.  Use p_type

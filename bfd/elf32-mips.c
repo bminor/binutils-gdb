@@ -124,14 +124,6 @@ static boolean mips_elf_is_local_label_name
 static struct bfd_hash_entry *mips_elf_link_hash_newfunc
   PARAMS ((struct bfd_hash_entry *, struct bfd_hash_table *, const char *));
 static int gptab_compare PARAMS ((const void *, const void *));
-static void mips_elf_relocate_hi16
-  PARAMS ((bfd *, Elf_Internal_Rela *, Elf_Internal_Rela *, bfd_byte *,
-	   bfd_vma));
-static boolean mips_elf_relocate_got_local
-  PARAMS ((bfd *, bfd *, asection *, Elf_Internal_Rela *,
-	   Elf_Internal_Rela *, bfd_byte *, bfd_vma));
-static void mips_elf_relocate_global_got
-   PARAMS ((bfd *, Elf_Internal_Rela *, bfd_byte *, bfd_vma));
 static bfd_reloc_status_type mips16_jump_reloc
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 static bfd_reloc_status_type mips16_gprel_reloc
@@ -5013,124 +5005,6 @@ _bfd_mips_elf_final_link (abfd, info)
     }
 
   return true;
-}
-
-/* Handle a MIPS ELF HI16 reloc.  */
-
-static void
-mips_elf_relocate_hi16 (input_bfd, relhi, rello, contents, addend)
-     bfd *input_bfd;
-     Elf_Internal_Rela *relhi;
-     Elf_Internal_Rela *rello;
-     bfd_byte *contents;
-     bfd_vma addend;
-{
-  bfd_vma insn;
-  bfd_vma addlo;
-
-  insn = bfd_get_32 (input_bfd, contents + relhi->r_offset);
-
-  addlo = bfd_get_32 (input_bfd, contents + rello->r_offset);
-  addlo &= 0xffff;
-
-  addend += ((insn & 0xffff) << 16) + addlo;
-
-  if ((addlo & 0x8000) != 0)
-    addend -= 0x10000;
-  if ((addend & 0x8000) != 0)
-    addend += 0x10000;
-
-  bfd_put_32 (input_bfd,
-	      (insn & 0xffff0000) | ((addend >> 16) & 0xffff),
-	      contents + relhi->r_offset);
-}
-
-/* Handle a MIPS ELF local GOT16 reloc.  */
-
-static boolean
-mips_elf_relocate_got_local (output_bfd, input_bfd, sgot, relhi, rello,
-			     contents, addend)
-     bfd *output_bfd;
-     bfd *input_bfd;
-     asection *sgot;
-     Elf_Internal_Rela *relhi;
-     Elf_Internal_Rela *rello;
-     bfd_byte *contents;
-     bfd_vma addend;
-{
-  unsigned int assigned_gotno;
-  unsigned int i;
-  bfd_vma insn;
-  bfd_vma addlo;
-  bfd_vma address;
-  bfd_vma hipage;
-  bfd_byte *got_contents;
-  struct mips_got_info *g;
-
-  insn = bfd_get_32 (input_bfd, contents + relhi->r_offset);
-
-  addlo = bfd_get_32 (input_bfd, contents + rello->r_offset);
-  addlo &= 0xffff;
-
-  addend += ((insn & 0xffff) << 16) + addlo;
-
-  if ((addlo & 0x8000) != 0)
-    addend -= 0x10000;
-  if ((addend & 0x8000) != 0)
-    addend += 0x10000;
-
-  /* Get a got entry representing requested hipage.  */
-  BFD_ASSERT (elf_section_data (sgot) != NULL);
-  g = (struct mips_got_info *) elf_section_data (sgot)->tdata;
-  BFD_ASSERT (g != NULL);
-
-  assigned_gotno = g->assigned_gotno;
-  got_contents = sgot->contents;
-  hipage = addend & 0xffff0000;
-
-  for (i = MIPS_RESERVED_GOTNO; i < assigned_gotno; i++)
-    {
-      address = bfd_get_32 (input_bfd, got_contents + i * 4);
-      if (hipage == (address & 0xffff0000))
-	break;
-    }
-
-  if (i == assigned_gotno)
-    {
-      if (assigned_gotno >= g->local_gotno)
-	{
-	  (*_bfd_error_handler)
-	    (_("more got entries are needed for hipage relocations"));
-	  bfd_set_error (bfd_error_bad_value);
-	  return false;
-	}
-
-      bfd_put_32 (input_bfd, hipage, got_contents + assigned_gotno * 4);
-      ++g->assigned_gotno;
-    }
-
-  i = - ELF_MIPS_GP_OFFSET (output_bfd) + i * 4;
-  bfd_put_32 (input_bfd, (insn & 0xffff0000) | (i & 0xffff),
-	      contents + relhi->r_offset);
-
-  return true;
-}
-
-/* Handle MIPS ELF CALL16 reloc and global GOT16 reloc.  */
-
-static void
-mips_elf_relocate_global_got (input_bfd, rel, contents, offset)
-     bfd *input_bfd;
-     Elf_Internal_Rela *rel;
-     bfd_byte *contents;
-     bfd_vma offset;
-{
-  bfd_vma insn;
-
-  insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
-  bfd_put_32 (input_bfd,
-	      (insn & 0xffff0000) | (offset & 0xffff),
-	      contents + rel->r_offset);
 }
 
 /* Returns the GOT section for ABFD.  */
