@@ -1,3 +1,8 @@
+2002-04-06  Andrew Cagney  <ac131313@redhat.com>
+
+	* symtab.c (lookup_symtab): Remove ``const'' from ``rp''
+	declaration.  Fix -Werror.
+
 2002-04-05  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdbarch.sh (initialize_non_multiarch): Call init_gdbarch_swap.

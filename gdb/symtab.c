@@ -181,7 +181,7 @@ got_symtab:
 
     if (real_path != NULL)
       {
-        const char *rp = gdb_realpath (symtab_to_filename (s));
+	char *rp = gdb_realpath (symtab_to_filename (s));
         make_cleanup (xfree, rp);
 	if (FILENAME_CMP (real_path, rp) == 0)
 	  {
