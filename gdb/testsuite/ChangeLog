@@ -1,3 +1,11 @@
+Thu Aug 26 17:50:28 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t10/crossload.exp: Skip whole file (for now, until we fix it).
+
+	* config/unix-gdb.exp: Remove this version of gdb_exit
+	* lib/gdb.exp: Merge in all the crap from config/unix-gdb.exp.
+	Rob says he'll look at it when he gets back to testing boards.
+
 Thu Aug 26 07:20:00 1993  Fred Fish  (fnf@deneb.cygnus.com)
 
 	* gdb.t22/virtfunc.exp:  Accept missing struct/class names as
