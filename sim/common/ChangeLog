@@ -1,3 +1,59 @@
+Fri May  1 12:11:02 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* hw-tree.h (hw_tree_print): Paramaterize with print and file
+ 	arguments.
+	* hw-tree.c: Update.
+	
+	* hw-base.h (hw_port_event_callback): Delete CPU/CIA args.
+	* hw-device.h (hw_io_read_buffer, hw_io_write_buffer): Delete
+ 	CPU/CIA args.
+	* hw-ports.h (hw_port_event): Ditto.
+	* hw-ports.c (hw_port_event): Update.
+	* hw-base.c (panic_hw_io_read_buffer, panic_hw_io_write_buffer):
+ 	Update.
+	* dv-pal.c (hw_pal_io_read_buffer, hw_pal_io_write_buffer):
+ 	Update.
+	(hw_pal_io_write_buffer): Call hw_halt not sim_engine_halt.
+	(do_counter_event): Update.
+	* dv-glue.c (hw_glue_io_read_buffer): Update.
+	(hw_glue_port_event): Update.
+
+
+	* hw-device.h (SIM_DESC): Replace with struct sim_state.
+	* hw-base.h (hw_create): Ditto.
+	* hw-base.c (hw_create): Ditto.
+	
+	* hw-device.c (hw_abort, hw_trace, hw_hw_event_queue_schedule,
+ 	hw_event_queue_deschedule, hw_event_queue_time): Delete, moved
+ 	from here to.
+	* sim-hw.c: Here.
+	* hw-device.h (hw_system_cpu): Declare.
+	* sim-hw.c (hw_system_cpu): New function.
+
+	* sim-core.c (sim_core_map_attach, sim_core_attach): Call
+ 	sim_hw_abort not hw_abort.
+	(sim-hw.h): Include.
+	(sim_core_read_buffer, sim_core_write_buffer): Call
+ 	sim_hw_io_read_buffer and sim_hw_io_write_buffer. Do not pass CPU
+ 	argument.
+	(sim_core_set_xor): Do not pass CPU when aborting.
+
+	* sim-n-core.h (sim_core_read_aligned_N,
+ 	sim_core_write_aligned_N): Call sim_hw_abort not hw_abort.
+	(sim_core_read_aligned_N, sim_core_write_aligned_N): Call
+ 	sim_cpu_hw_io_read_buffer and sim_cpu_hw_io_write_buffer. Does not
+ 	return length.
+
+	* sim-hw.h: Declare sim_hw_io_{read,write}_buffer. Declare
+ 	sim_hw_print.
+	* sim-hw.c (sim_hw_io_read_buffer, sim_hw_io_write_buffer,
+ 	sim_cpu_hw_io_read_buffer, sim_cpu_hw_io_write_buffer): New
+ 	functions.
+	(sim_hw_print): New function.
+	
+	* sim-engine.h (sim_engine_vabort): Declare.
+	* sim-engine.c (sim_engine_vabort): New function.
+	
 Wed Apr 29 23:58:52 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-trace.c (print_data): For floating-point numbers trace raw
