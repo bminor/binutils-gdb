@@ -3,6 +3,7 @@
 	* config/tc-tic4x.c (md_assemble): Added support for one-line parallel insns.
 	(tic4x_start_line): Fixed scrub bug and added error for three-element
 	parallel insns.
+	* config/tc-tic4x.h: Added DOUBLEBAR_PARALLEL definition
 
 2003-05-18  Jason Eckhardt  <jle@rice.edu>
 
