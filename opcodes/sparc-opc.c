@@ -24,7 +24,7 @@ Boston, MA 02111-1307, USA.	*/
    slower, but would mess up some macros a bit.  xoxorich. */
 
 #include <stdio.h>
-#include "ansidecl.h"
+#include "sysdep.h"
 #include "opcode/sparc.h"
 
 /* Some defines to make life easy.  */

@@ -20,7 +20,7 @@ along with this file; see the file COPYING.  If not, write to the Free
 Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include <stdio.h>
-#include "ansidecl.h"
+#include "sysdep.h"
 #include "opcode/mips.h"
 
 /* Short hand so the lines aren't too long.  */
