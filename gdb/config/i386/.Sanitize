@@ -40,8 +40,8 @@ fi
 
 Things-to-keep:
 
-cygwin32.mh
-cygwin32.mt
+cygwin.mh
+cygwin.mt
 fbsd.mh
 fbsd.mt
 gdbserve.mt
@@ -109,7 +109,7 @@ sun386.mh
 sun386.mt
 symmetry.mh
 symmetry.mt
-tm-cygwin32.h
+tm-cygwin.h
 tm-fbsd.h
 tm-i386.h
 tm-i386aix.h
@@ -131,7 +131,7 @@ tm-ptx.h
 tm-ptx4.h
 tm-sun386.h
 tm-symmetry.h
-xm-cygwin32.h
+xm-cygwin.h
 xm-go32.h
 xm-i386aix.h
 xm-i386bsd.h
