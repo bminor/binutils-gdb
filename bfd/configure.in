@@ -45,6 +45,7 @@ case "${target}" in
   sh-*-*)		bfd_target=sh-coff ;;
   hppa*-*-bsd)		bfd_target=hppabsd ;;
   hppa*-*-hpux)		bfd_target=hppahpux ;;
+  hppa*-*-osf)		bfd_target=hppa-elf ;;
   i[34]86-*-sysv4*)	bfd_target=i386-elf ;;
   i[34]86-*-sysv*)	bfd_target=i386-coff ;;
   i[34]86-*-isc*)	bfd_target=i386-coff ;;
