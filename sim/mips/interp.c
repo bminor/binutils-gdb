@@ -185,7 +185,11 @@ enum {
   OPTION_DINERO_TRACE	= OPTION_START,
   OPTION_DINERO_FILE
 /* start-sanitize-sky */
+#ifdef TARGET_SKY
+#ifdef SKY_FUNIT
   ,OPTION_FLOAT_TYPE
+#endif
+#endif
 /* end-sanitize-sky */
 };
 
@@ -253,6 +257,8 @@ Re-compile simulator with \"-DTRACE\" to enable this option.\n");
       return SIM_RC_OK;
 
 /* start-sanitize-sky */
+#ifdef TARGET_SKY
+#ifdef SKY_FUNIT
     case OPTION_FLOAT_TYPE:
       /* Use host (fast) or target (accurate) floating point implementation. */
       if (arg && strcmp (arg, "host") == 0)
@@ -264,7 +270,10 @@ Re-compile simulator with \"-DTRACE\" to enable this option.\n");
 	  fprintf (stderr, "Unrecognized float-type option `%s'\n", arg);
 	  return SIM_RC_FAIL;
 	}
+      /*printf ("float-type=0x%08x\n", STATE_FP_TYPE_OPT (sd));*/
       return SIM_RC_OK;
+#endif
+#endif
 /* end-sanitize-sky */
     }
 
@@ -280,9 +289,13 @@ static const OPTION mips_options[] =
       '\0', "FILE", "Write dinero trace to FILE",
       mips_option_handler },
 /* start-sanitize-sky */
+#ifdef TARGET_SKY
+#ifdef SKY_FUNIT
   { {"float-type", required_argument, NULL, OPTION_FLOAT_TYPE},
       '\0', "host|target", "Use host (fast) or target (accurate) floating point",
       mips_option_handler },
+#endif
+#endif
 /* end-sanitize-sky */
   { {NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL }
 };
@@ -329,6 +342,13 @@ sim_open (kind, cb, abfd, argv)
   sim_cpu *cpu = STATE_CPU (sd, 0); /* FIXME */
 
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
+/* start-sanitize-sky */
+
+#if defined(TARGET_SKY) && defined(SKY_FUNIT)
+  /* Set "--float-type target" as the default. */
+  STATE_FP_TYPE_OPT (sd) |= STATE_FP_TYPE_OPT_TARGET;
+#endif
+/* end-sanitize-sky */
 
   /* FIXME: watchpoints code shouldn't need this */
   STATE_WATCHPOINTS (sd)->pc = &(PC);
