@@ -14,14 +14,14 @@
 }
 
 // 1000 DnDn imm8....; mov imm8,Dn (imm8 is sign extended)
-4.0x8,2.DM1,2.DN0=DM1+IMM8:S0i:::mov
+4.0x8,2.DM1,2.DN0=DM1+8.IMM8:S0i:::mov
 "mov"
 *mn10300
 // start-sanitize-am33
 *am33
 // end-sanitize-am33
 {
-  //     OP_8000 ();
+  /*  OP_8000 (); */
   signed32 immed = EXTEND8 (IMM8);
   State.regs[REG_D0+DN0] = immed;
   PC = cia;
@@ -36,7 +36,7 @@
 // end-sanitize-am33
 {
   PC = cia;
-  //    OP_80 ();
+  /* OP_80 (); */
   State.regs[REG_D0+DN0] = State.regs[REG_D0+DM1];
 }
 
@@ -49,7 +49,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F1E0 ();
+  /* OP_F1E0 (); */
   PC = cia;
   State.regs[REG_A0 + AN0] = State.regs[REG_D0 + DM1];
 }
@@ -63,14 +63,14 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F1D0 ();
+  /* OP_F1D0 (); */
   PC = cia;
   State.regs[REG_D0 + DN0] = State.regs[REG_A0 + AM1];
 }
 
 
 // 1001 AnAn imm8....; mov imm8,An (imm8 is zero-extended)
-4.0x9,2.AM1,2.AN0=AM1+IMM8:S0ai:::mov
+4.0x9,2.AM1,2.AN0=AM1+8.IMM8:S0ai:::mov
 "mov"
 *mn10300
 // start-sanitize-am33
@@ -78,7 +78,7 @@
 // end-sanitize-am33
 {
    PC = cia;
-   //     OP_9000 ();
+   /* OP_9000 (); */
    State.regs[REG_A0+AN0] = IMM8;
 }
 
@@ -92,7 +92,7 @@
 // end-sanitize-am33
 {
    PC = cia;
-   //     OP_90 ();
+   /* OP_90 (); */
    State.regs[REG_A0+AN0] = State.regs[REG_A0+AM1];
 }
 
@@ -105,7 +105,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_3C ();
+  /* OP_3C (); */
   PC = cia;
   State.regs[REG_A0 + AN0] = State.regs[REG_SP];
 }
@@ -119,7 +119,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F2F0 ();
+  /* OP_F2F0 (); */
   PC = cia;
   State.regs[REG_SP] = State.regs[REG_A0 + AM1];
 }
@@ -133,7 +133,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F2E4 ();
+  /* OP_F2E4 (); */
   PC = cia;
   State.regs[REG_D0 + DN0] = PSW;
 }
@@ -147,7 +147,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F2F3 ();
+  /* OP_F2F3 (); */
   PC = cia;
   PSW = State.regs[REG_D0 + DM1];
 }
@@ -161,7 +161,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F2E0 ();
+  /* OP_F2E0 (); */
   PC = cia;
   State.regs[REG_D0 + DN0] = State.regs[REG_MDR];
 }
@@ -175,7 +175,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F2F2 ();
+  /* OP_F2F2 (); */
   PC = cia;
   State.regs[REG_MDR] = State.regs[REG_D0 + DM1];
 }
@@ -189,7 +189,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_70 ();
+  /* OP_70 (); */
   PC = cia;
   State.regs[REG_D0 + DN1] = load_word (State.regs[REG_A0 + AM0]);
 }
@@ -203,7 +203,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F80000 ();
+  /* OP_F80000 (); */
   PC = cia;
   State.regs[REG_D0 + DN1]
     = load_word ((State.regs[REG_A0 + AM0] + EXTEND8 (D8)));
@@ -218,7 +218,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FA000000 ();
+  /* OP_FA000000 (); */
   PC = cia;
   State.regs[REG_D0 + DN1]
     = load_word ((State.regs[REG_A0 + AM0] + EXTEND16 (FETCH16(D16A, D16B))));
@@ -233,7 +233,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FC000000 ();
+  /* OP_FC000000 (); */
   PC = cia;
   State.regs[REG_D0 + DN1]
     = load_word ((State.regs[REG_A0 + AM0]
@@ -249,7 +249,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_5800 ();
+  /* OP_5800 (); */
   PC = cia;
   State.regs[REG_D0 + DN0] = load_word (State.regs[REG_SP] + D8);
 }
@@ -263,7 +263,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FAB40000 ();
+  /* OP_FAB40000 (); */
   PC = cia;
   State.regs[REG_D0 + DN0]
     = load_word (State.regs[REG_SP] + FETCH16(IMM16A, IMM16B));
@@ -278,7 +278,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FCB40000 ();
+  /* OP_FCB40000 (); */
   PC = cia;
   State.regs[REG_D0 + DN0]
      = load_word (State.regs[REG_SP] + FETCH32(IMM32A, IMM32B, IMM32C, IMM32D));
@@ -293,7 +293,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F300 ();
+  /* OP_F300 (); */
   PC = cia;
   State.regs[REG_D0 + DN2]
     = load_word ((State.regs[REG_A0 + AM0] + State.regs[REG_D0 + DI]));
@@ -308,7 +308,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_300000 ();
+  /* OP_300000 (); */
   PC = cia;
   State.regs[REG_D0 + DN0] = load_word (FETCH16(IMM16A, IMM16B));
 }
@@ -321,7 +321,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FCA40000 ();
+  /* OP_FCA40000 (); */
   PC = cia;
   State.regs[REG_D0 + DN0] = load_word (FETCH32(IMM32A, IMM32B, IMM32C, IMM32D));
 }
@@ -335,7 +335,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F000 ();
+  /* OP_F000 (); */
   PC = cia;
   State.regs[REG_A0 + AN1] = load_word (State.regs[REG_A0 + AM0]);
 }
@@ -349,7 +349,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F82000 ();
+  /* OP_F82000 (); */
   PC = cia;
   State.regs[REG_A0 + AN1]
     = load_word ((State.regs[REG_A0 + AM0] + EXTEND8 (D8)));
@@ -364,7 +364,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FA200000 ();
+  /* OP_FA200000 (); */
   PC = cia;
   State.regs[REG_A0 + AN1]
     = load_word ((State.regs[REG_A0 + AM0]
@@ -380,7 +380,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FC200000 ();
+  /* OP_FC200000 (); */
   PC = cia;
   State.regs[REG_A0 + AN1]
     = load_word ((State.regs[REG_A0 + AM0]
@@ -396,7 +396,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_5C00 ();
+  /* OP_5C00 (); */
   PC = cia;
   State.regs[REG_A0 + AN0]
     = load_word (State.regs[REG_SP] + D8);
@@ -411,7 +411,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FAB00000 ();
+  /* OP_FAB00000 (); */
   PC = cia;
   State.regs[REG_A0 + AN0]
     = load_word (State.regs[REG_SP] + FETCH16(IMM16A, IMM16B));
@@ -426,7 +426,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FCB00000 ();
+  /* OP_FCB00000 (); */
   PC = cia;
   State.regs[REG_A0 + AN0]
     = load_word (State.regs[REG_SP]
@@ -442,7 +442,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F380 ();
+  /* OP_F380 (); */
   PC = cia;
   State.regs[REG_A0 + AN2]
     = load_word ((State.regs[REG_A0 + AM0]
@@ -458,7 +458,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FAA00000 ();
+  /* OP_FAA00000 (); */
   PC = cia;
   State.regs[REG_A0 + AN0] = load_word (FETCH16(IMM16A, IMM16B));
 }
@@ -472,7 +472,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FCA00000 ();
+  /* OP_FCA00000 (); */
   PC = cia;
   State.regs[REG_A0 + AN0]
     = load_word (FETCH32(IMM32A, IMM32B, IMM32C, IMM32D));
@@ -487,7 +487,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F8F000 ();
+  /* OP_F8F000 (); */
   PC = cia;
   State.regs[REG_SP]
     = load_word ((State.regs[REG_A0 + AM0] + EXTEND8 (D8)));
@@ -502,7 +502,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_60 ();
+  /* OP_60 (); */
   PC = cia;
   store_word (State.regs[REG_A0 + AN0], State.regs[REG_D0 + DM1]);
 }
@@ -516,7 +516,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F81000 ();
+  /* OP_F81000 (); */
   PC = cia;
   store_word ((State.regs[REG_A0 + AN0] + EXTEND8 (D8)),
 	      State.regs[REG_D0 + DM1]);
@@ -531,7 +531,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FA100000 ();
+  /* OP_FA100000 (); */
   PC = cia;
   store_word ((State.regs[REG_A0 + AN0] + EXTEND16 (FETCH16(D16A, D16B))),
 	      State.regs[REG_D0 + DM1]);
@@ -546,7 +546,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FC100000 ();
+  /* OP_FC100000 (); */
   PC = cia;
   store_word ((State.regs[REG_A0 + AN0]
 	       + FETCH32(IMM32A, IMM32B, IMM32C, IMM32D)),
@@ -562,7 +562,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_4200 ();
+  /* OP_4200 (); */
   PC = cia;
   store_word (State.regs[REG_SP] + D8, State.regs[REG_D0 + DM1]);
 }
@@ -576,7 +576,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FA910000 ();
+  /* OP_FA910000 (); */
   PC = cia;
   store_word (State.regs[REG_SP] + FETCH16(IMM16A, IMM16B),
 	      State.regs[REG_D0 + DM1]);
@@ -591,7 +591,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FC910000 ();
+  /* OP_FC910000 (); */
   PC = cia;
   store_word (State.regs[REG_SP] + FETCH32(IMM32A, IMM32B, IMM32C, IMM32D),
 	      State.regs[REG_D0 + DM1]);
@@ -606,7 +606,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F340 ();
+  /* OP_F340 (); */
   PC = cia;
   store_word ((State.regs[REG_A0 + AN0] + State.regs[REG_D0 + DI]),
 	      State.regs[REG_D0 + DM2]);
@@ -621,7 +621,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_10000 ();
+  /* OP_10000 (); */
   PC = cia;
   store_word (FETCH16(IMM16A, IMM16B), State.regs[REG_D0 + DM1]);
 }
@@ -635,7 +635,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FC810000 ();
+  /* OP_FC810000 (); */
   PC = cia;
   store_word (FETCH32(IMM32A, IMM32B, IMM32C, IMM32D),
 	      State.regs[REG_D0 + DM1]);
@@ -650,7 +650,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F010 ();
+  /* OP_F010 (); */
   PC = cia;
   store_word (State.regs[REG_A0 + AN0], State.regs[REG_A0 + AM1]);
 }
@@ -664,7 +664,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F83000 ();
+  /* OP_F83000 (); */
   PC = cia;
   store_word ((State.regs[REG_A0 + AN0] + EXTEND8 (D8)),
 	      State.regs[REG_A0 + AM1]);
@@ -679,7 +679,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FA300000 ();
+  /* OP_FA300000 (); */
   PC = cia;
   store_word ((State.regs[REG_A0 + AN0] + EXTEND16 (FETCH16(D16A, D16B))),
 	      State.regs[REG_A0 + AM1]);
@@ -694,7 +694,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FC300000 ();
+  /* OP_FC300000 (); */
   PC = cia;
   store_word ((State.regs[REG_A0 + AN0]
 	       + FETCH32(IMM32A, IMM32B, IMM32C, IMM32D)),
@@ -710,7 +710,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_4300 ();
+  /* OP_4300 (); */
   PC = cia;
   store_word (State.regs[REG_SP] + (D8), State.regs[REG_A0 + (AM1)]);
 }
@@ -724,7 +724,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FA900000 ();
+  /* OP_FA900000 (); */
   PC = cia;
   store_word (State.regs[REG_SP] + FETCH16(IMM16A, IMM16B),
 	      State.regs[REG_A0 + AM1]);
@@ -739,7 +739,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FC900000 ();
+  /* OP_FC900000 (); */
   PC = cia;
   store_word (State.regs[REG_SP] + FETCH32(IMM32A, IMM32B, IMM32C, IMM32D),
 	      State.regs[REG_A0 + AM1]);
@@ -754,7 +754,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F3C0 ();
+  /* OP_F3C0 (); */
   PC = cia;
   store_word ((State.regs[REG_A0 + AN0] + State.regs[REG_D0 + DI]),
 	      State.regs[REG_A0 + AM2]);
@@ -769,7 +769,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FA800000 ();
+  /* OP_FA800000 (); */
   PC = cia;
   store_word (FETCH16(IMM16A, IMM16B),
 	      State.regs[REG_A0 + AM1]);
@@ -784,7 +784,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FC800000 ();
+  /* OP_FC800000 (); */
   PC = cia;
   store_word (FETCH32(IMM32A, IMM32B, IMM32C, IMM32D),
 	      State.regs[REG_A0 + AM1]);
@@ -799,7 +799,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F8F400 ();
+  /* OP_F8F400 (); */
   PC = cia;
   store_word (State.regs[REG_A0 + AN0] + EXTEND8 (D8),
 	      State.regs[REG_SP]);
@@ -814,7 +814,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_2C0000 ();
+  /* OP_2C0000 (); */
   unsigned long value;
 
   PC = cia;
@@ -831,7 +831,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FCCC0000 ();
+  /* OP_FCCC0000 (); */
   unsigned long value;
 
   PC = cia;
@@ -848,7 +848,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_240000 ();
+  /* OP_240000 (); */
   unsigned long value;
 
   PC = cia;
@@ -865,7 +865,7 @@
 *am33
 // end-sanitize-am33
 {
-    //    OP_FCDC0000 ();
+    /* OP_FCDC0000 (); */
     PC = cia;
     State.regs[REG_A0 + AN0] = FETCH32(IMM32A, IMM32B, IMM32C, IMM32D);
 }
@@ -879,7 +879,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F040 ();
+  /* OP_F040 (); */
   PC = cia;
   State.regs[REG_D0 + DN1]
     = load_byte (State.regs[REG_A0 + AM0]);
@@ -894,7 +894,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F84000 ();
+  /* OP_F84000 (); */
   PC = cia;
   State.regs[REG_D0 + DN1]
     = load_byte ((State.regs[REG_A0 + AM0] + EXTEND8 (D8)));
@@ -909,7 +909,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FA400000 ();
+  /* OP_FA400000 (); */
   PC = cia;
   State.regs[REG_D0 + DN1]
     = load_byte ((State.regs[REG_A0 + AM0]
@@ -925,7 +925,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FC400000 ();
+  /* OP_FC400000 (); */
   PC = cia;
   State.regs[REG_D0 + DN1]
     = load_byte ((State.regs[REG_A0 + AM0]
@@ -941,7 +941,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F8B800 ();
+  /* OP_F8B800 (); */
   PC = cia;
   State.regs[REG_D0 + DN0]
     = load_byte ((State.regs[REG_SP] + (D8)));
@@ -956,7 +956,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FAB80000 ();
+  /* OP_FAB80000 (); */
   PC = cia;
   State.regs[REG_D0 + DN0]
     = load_byte ((State.regs[REG_SP]
@@ -972,7 +972,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FCB80000 ();
+  /* OP_FCB80000 (); */
   PC = cia;
   State.regs[REG_D0 + DN0]
     = load_byte (State.regs[REG_SP]
@@ -988,7 +988,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F400 ();
+  /* OP_F400 (); */
   PC = cia;
   State.regs[REG_D0 + DN2]
     = load_byte ((State.regs[REG_A0 + AM0]
@@ -1004,7 +1004,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_340000 ();
+  /* OP_340000 (); */
   PC = cia;
   State.regs[REG_D0 + DN0] = load_byte (FETCH16(IMM16A, IMM16B));
 }
@@ -1018,7 +1018,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FCA80000 ();
+  /* OP_FCA80000 (); */
   PC = cia;
   State.regs[REG_D0 + DN0]
     = load_byte (FETCH32(IMM32A, IMM32B, IMM32C, IMM32D));
@@ -1033,7 +1033,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F050 ();
+  /* OP_F050 (); */
   PC = cia;
   store_byte (State.regs[REG_A0 + AN0], State.regs[REG_D0 + DM1]);
 }
@@ -1047,7 +1047,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F85000 ();
+  /* OP_F85000 (); */
   PC = cia;
   store_byte ((State.regs[REG_A0 + AN0] + EXTEND8 (D8)),
 	      State.regs[REG_D0 + DM1]);
@@ -1062,7 +1062,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FA500000 ();
+  /* OP_FA500000 (); */
   PC = cia;
   store_byte ((State.regs[REG_A0 + AN0] + EXTEND16 (FETCH16(D16A, D16B))),
 	      State.regs[REG_D0 + DM1]);
@@ -1077,7 +1077,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FC500000 ();
+  /* OP_FC500000 (); */
   PC = cia;
   store_byte ((State.regs[REG_A0 + AN0]
 	       + FETCH32(IMM32A, IMM32B, IMM32C, IMM32D)),
@@ -1093,7 +1093,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F89200 ();
+  /* OP_F89200 (); */
   PC = cia;
   store_byte (State.regs[REG_SP] + (D8), State.regs[REG_D0 + DM1]);
 }
@@ -1107,7 +1107,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FA920000 ();
+  /* OP_FA920000 (); */
   PC = cia;
   store_byte (State.regs[REG_SP] + FETCH16(IMM16A, IMM16B),
 	      State.regs[REG_D0 + DM1]);
@@ -1122,7 +1122,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FC920000 ();
+  /* OP_FC920000 (); */
   PC = cia;
   store_byte (State.regs[REG_SP] + FETCH32(IMM32A, IMM32B, IMM32C, IMM32D),
 	      State.regs[REG_D0 + DM1]);
@@ -1137,7 +1137,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F440 ();
+  /* OP_F440 (); */
   PC = cia;
   store_byte ((State.regs[REG_A0 + AN0] + State.regs[REG_D0 + DI]),
 	      State.regs[REG_D0 + DM2]);
@@ -1152,7 +1152,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_20000 ();
+  /* OP_20000 (); */
   PC = cia;
   store_byte (FETCH16(IMM16A, IMM16B),
 	      State.regs[REG_D0 + DM1]);
@@ -1167,7 +1167,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FC820000 ();
+  /* OP_FC820000 (); */
   PC = cia;
   store_byte (FETCH32(IMM32A, IMM32B, IMM32C, IMM32D),
 	      State.regs[REG_D0 + DM1]);
@@ -1182,7 +1182,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F060 ();
+  /* OP_F060 (); */
   PC = cia;
   State.regs[REG_D0 + DN1]
     = load_half (State.regs[REG_A0 + AM0]);
@@ -1197,7 +1197,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F86000 ();
+  /* OP_F86000 (); */
   PC = cia;
   State.regs[REG_D0 + DN1]
     = load_half ((State.regs[REG_A0 + AM0] + EXTEND8 (D8)));
@@ -1212,7 +1212,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FA600000 ();
+  /* OP_FA600000 (); */
   PC = cia;
   State.regs[REG_D0 + DN1]
     = load_half ((State.regs[REG_A0 + AM0]
@@ -1228,7 +1228,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FC600000 ();
+  /* OP_FC600000 (); */
   PC = cia;
   State.regs[REG_D0 + DN1]
     = load_half ((State.regs[REG_A0 + AM0]
@@ -1244,7 +1244,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F8BC00 ();
+  /* OP_F8BC00 (); */
   PC = cia;
   State.regs[REG_D0 + DN0]
     = load_half ((State.regs[REG_SP] + (D8)));
@@ -1259,7 +1259,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FABC0000 ();
+  /* OP_FABC0000 (); */
   PC = cia;
   State.regs[REG_D0 + DN0]
     = load_half ((State.regs[REG_SP] + FETCH16(IMM16A, IMM16B)));
@@ -1274,7 +1274,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FCBC0000 ();
+  /* OP_FCBC0000 (); */
   PC = cia;
   State.regs[REG_D0 + DN0]
     = load_half (State.regs[REG_SP] + FETCH32(IMM32A, IMM32B, IMM32C, IMM32D));
@@ -1289,7 +1289,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F480 ();
+  /* OP_F480 (); */
   PC = cia;
   State.regs[REG_D0 + DN2]
     = load_half ((State.regs[REG_A0 + AM0] + State.regs[REG_D0 + DI]));
@@ -1304,7 +1304,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_380000 ();
+  /* OP_380000 (); */
   PC = cia;
   State.regs[REG_D0 + DN0] = load_half (FETCH16(IMM16A, IMM16B));
 }
@@ -1318,7 +1318,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FCAC0000 ();
+  /* OP_FCAC0000 (); */
   PC = cia;
   State.regs[REG_D0 + DN0]
     = load_half (FETCH32(IMM32A, IMM32B, IMM32C, IMM32D));
@@ -1333,7 +1333,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F070 ();
+  /* OP_F070 (); */
   PC = cia;
   store_half (State.regs[REG_A0 + AN0],
 	      State.regs[REG_D0 + DM1]);
@@ -1348,7 +1348,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F87000 ();
+  /* OP_F87000 (); */
   PC = cia;
   store_half ((State.regs[REG_A0 + AN0] + EXTEND8 (D8)),
 	      State.regs[REG_D0 + DM1]);
@@ -1363,7 +1363,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FA700000 ();
+  /* OP_FA700000 (); */
   PC = cia;
   store_half ((State.regs[REG_A0 + AN0] + EXTEND16 (FETCH16(D16A, D16B))),
 	      State.regs[REG_D0 + DM1]);
@@ -1378,7 +1378,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FC700000 ();
+  /* OP_FC700000 (); */
   PC = cia;
   store_half ((State.regs[REG_A0 + AN0]
 	       + FETCH32(IMM32A, IMM32B, IMM32C, IMM32D)),
@@ -1394,7 +1394,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F89300 ();
+  /* OP_F89300 (); */
   PC = cia;
   store_half (State.regs[REG_SP] + (D8),
 	      State.regs[REG_D0 + DM1]);
@@ -1409,7 +1409,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FA930000 ();
+  /* OP_FA930000 (); */
   PC = cia;
   store_half (State.regs[REG_SP] + FETCH16(IMM16A, IMM16B),
 	      State.regs[REG_D0 + DM1]);
@@ -1424,7 +1424,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FC930000 ();
+  /* OP_FC930000 (); */
   PC = cia;
   store_half (State.regs[REG_SP] + FETCH32(IMM32A, IMM32B, IMM32C, IMM32D),
 	      State.regs[REG_D0 + DM1]);
@@ -1439,7 +1439,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F4C0 ();
+  /* OP_F4C0 (); */
   PC = cia;
   store_half ((State.regs[REG_A0 + AN0] + State.regs[REG_D0 + DI]),
 	      State.regs[REG_D0 + DM2]);
@@ -1454,7 +1454,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_30000 ();
+  /* OP_30000 (); */
   PC = cia;
   store_half (FETCH16(IMM16A, IMM16B), State.regs[REG_D0 + DM1]);
 }
@@ -1468,7 +1468,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FC830000 ();
+  /* OP_FC830000 (); */
   PC = cia;
   store_half (FETCH32(IMM32A, IMM32B, IMM32C, IMM32D),
 	      State.regs[REG_D0 + DM1]);
@@ -1483,7 +1483,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F2D0 ();
+  /* OP_F2D0 (); */
   PC = cia;
   if (State.regs[REG_D0 + DN0] & 0x80000000)
     State.regs[REG_MDR] = -1;
@@ -1500,7 +1500,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_10 ();
+  /* OP_10 (); */
   PC = cia;
   State.regs[REG_D0 + DN0] = EXTEND8 (State.regs[REG_D0 + DN0]);
 }
@@ -1514,7 +1514,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_14 ();
+  /* OP_14 (); */
   PC = cia;
   State.regs[REG_D0 + DN0] &= 0xff;
 }
@@ -1528,7 +1528,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_18 ();
+  /* OP_18 (); */
   PC = cia;
   State.regs[REG_D0 + DN0] = EXTEND16 (State.regs[REG_D0 + DN0]);
 }
@@ -1542,7 +1542,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_1C ();
+  /* OP_1C (); */
   PC = cia;
   State.regs[REG_D0 + DN0] &= 0xffff;
 }
@@ -1556,7 +1556,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_0 ();
+  /* OP_0 (); */
   PC = cia;
   State.regs[REG_D0 + DN1] = 0;
 
@@ -1573,7 +1573,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_E0 ();
+  /* OP_E0 (); */
   PC = cia;
   genericAdd(State.regs[REG_D0 + DM1], REG_D0 + DN0);
 }
@@ -1586,7 +1586,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F160 ();
+  /* OP_F160 (); */
   PC = cia;
   genericAdd(State.regs[REG_D0 + DM1], REG_A0 + AN0);
 }
@@ -1600,7 +1600,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F150 ();
+  /* OP_F150 (); */
   PC = cia;
   genericAdd(State.regs[REG_A0 + AM1], REG_D0 + DN0);
 }
@@ -1614,7 +1614,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F170 ();
+  /* OP_F170 (); */
   PC = cia;
   genericAdd(State.regs[REG_A0 + AM1], REG_A0 + AN0);
 }
@@ -1628,7 +1628,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_2800 ();
+  /* OP_2800 (); */
   PC = cia;
   genericAdd(EXTEND8(IMM8), REG_D0 + DN0);
 }
@@ -1642,7 +1642,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FAC00000 ();
+  /* OP_FAC00000 (); */
   PC = cia;
   genericAdd(EXTEND16(FETCH16(IMM16A, IMM16B)), REG_D0 + DN0);
 }
@@ -1656,7 +1656,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FCC00000 ();
+  /* OP_FCC00000 (); */
   PC = cia;
   genericAdd(FETCH32(IMM32A, IMM32B, IMM32C, IMM32D), REG_D0 + DN0);
 }
@@ -1670,7 +1670,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_2000 ();
+  /* OP_2000 (); */
   PC = cia;
   genericAdd(EXTEND8(IMM8), REG_A0 + AN0);
 }
@@ -1684,7 +1684,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FAD00000 ();
+  /* OP_FAD00000 (); */
   PC = cia;
   genericAdd(EXTEND16(FETCH16(IMM16A, IMM16B)), REG_A0 + AN0);
 }
@@ -1698,7 +1698,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FCD00000 ();
+  /* OP_FCD00000 (); */
   PC = cia;
   genericAdd(FETCH32(IMM32A, IMM32B, IMM32C, IMM32D), REG_A0 + AN0);
 }
@@ -1712,10 +1712,10 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F8FE00 ();
+  /* OP_F8FE00 (); */
   unsigned long imm;
 
-  // Note: no PSW changes.
+  /* Note: no PSW changes. */
   PC = cia;
   imm = EXTEND8 (IMM8);
   State.regs[REG_SP] += imm;
@@ -1730,10 +1730,10 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FAFE0000 ();
+  /* OP_FAFE0000 (); */
   unsigned long imm;
 
-  // Note: no PSW changes.
+  /* Note: no PSW changes. */
   PC = cia;
   imm = EXTEND16 (FETCH16(IMM16A, IMM16B));
   State.regs[REG_SP] += imm;
@@ -1748,10 +1748,10 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FCFE0000 ();
+  /* OP_FCFE0000 (); */
   unsigned long imm;
 
-  // Note: no PSW changes.
+  /* Note: no PSW changes. */
   PC = cia;
   imm = FETCH32(IMM32A, IMM32B, IMM32C, IMM32D);
   State.regs[REG_SP] += imm;
@@ -1766,7 +1766,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F140 ();
+  /* OP_F140 (); */
   int z, c, n, v;
   unsigned long reg1, reg2, sum;
 
@@ -1776,7 +1776,7 @@
   sum = reg1 + reg2 + ((PSW & PSW_C) != 0);
   State.regs[REG_D0 + DN0] = sum;
 
-  z = (sum == 0);
+  z = ((PSW & PSW_Z) != 0) && (sum == 0);
   n = (sum & 0x80000000);
   c = (sum < reg1) || (sum < reg2);
   v = ((reg2 & 0x80000000) == (reg1 & 0x80000000)
@@ -1796,7 +1796,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F100 ();
+  /* OP_F100 (); */
   PC = cia;
   genericSub(State.regs[REG_D0 + DM1], REG_D0 + DN0);
 }
@@ -1809,7 +1809,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F120 ();
+  /* OP_F120 (); */
   PC = cia;
   genericSub(State.regs[REG_D0 + DM1], REG_A0 + AN0);
 }
@@ -1823,7 +1823,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F110 ();
+  /* OP_F110 (); */
   PC = cia;
   genericSub(State.regs[REG_A0 + AM1], REG_D0 + DN0);
 }
@@ -1837,7 +1837,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F130 ();
+  /* OP_F130 (); */
   PC = cia;
   genericSub(State.regs[REG_A0 + AM1], REG_A0 + AN0);
 }
@@ -1851,7 +1851,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FCC40000 ();
+  /* OP_FCC40000 (); */
   PC = cia;
   genericSub(FETCH32(IMM32A, IMM32B, IMM32C, IMM32D), REG_D0 + DN0);
 }
@@ -1865,7 +1865,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FCD40000 ();
+  /* OP_FCD40000 (); */
   PC = cia;
   genericSub(FETCH32(IMM32A, IMM32B, IMM32C, IMM32D), REG_A0 + AN0);
 }
@@ -1879,7 +1879,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F180 ();
+  /* OP_F180 (); */
   int z, c, n, v;
   unsigned long reg1, reg2, difference;
 
@@ -1889,7 +1889,7 @@
   difference = reg2 - reg1 - ((PSW & PSW_C) != 0);
   State.regs[REG_D0 + DN0] = difference;
 
-  z = (difference == 0);
+  z = ((PSW & PSW_Z) != 0) && (difference == 0);
   n = (difference & 0x80000000);
   c = (reg1 > reg2);
   v = ((reg2 & 0x80000000) != (reg1 & 0x80000000)
@@ -1909,7 +1909,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F240 ();
+  /* OP_F240 (); */
   unsigned long long temp;
   int n, z;
 
@@ -1933,7 +1933,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F250 ();
+  /* OP_F250 (); */
   unsigned long long temp;
   int n, z;
 
@@ -1957,21 +1957,27 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F260 ();
-  long long temp;
-  int n, z;
+  /* OP_F260 (); */
+  signed64 temp;
+  signed32 denom;
+  int n, z, v;
 
   PC = cia;
-  temp = State.regs[REG_MDR];
-  temp <<= 32;
-  temp |= State.regs[REG_D0 + DN0];
-  State.regs[REG_MDR] = temp % (long)State.regs[REG_D0 + DM1];
-  temp /= (long)State.regs[REG_D0 + DM1];
-  State.regs[REG_D0 + DN0] = temp & 0xffffffff;
-  z = (State.regs[REG_D0 + DN0] == 0);
-  n = (State.regs[REG_D0 + DN0] & 0x80000000) != 0;
+  denom = (signed32)State.regs[REG_D0 + DM1];
+  /* still need to check for overflow */
+  if ( !(v = (0 == denom)) )
+    {
+      temp = State.regs[REG_MDR];
+      temp <<= 32;
+      temp |= State.regs[REG_D0 + DN0];
+      State.regs[REG_MDR] = temp % (signed32)State.regs[REG_D0 + DM1];
+      temp /= (signed32)State.regs[REG_D0 + DM1];
+      State.regs[REG_D0 + DN0] = temp & 0xffffffff;
+      z = (State.regs[REG_D0 + DN0] == 0);
+      n = (State.regs[REG_D0 + DN0] & 0x80000000) != 0;
+    }
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
-  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0) | (v ? PSW_V : 0));
 }
 
 
@@ -1983,21 +1989,26 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F270 ();
-  unsigned long long temp;
-  int n, z;
+  /* OP_F270 (); */
+  unsigned64 temp;
+  unsigned32 denom;
+  int n, z, v;
 
   PC = cia;
-  temp = State.regs[REG_MDR];
-  temp <<= 32;
-  temp |= State.regs[REG_D0 + DN0];
-  State.regs[REG_MDR] = temp % State.regs[REG_D0 + DM1];
-  temp /= State.regs[REG_D0 + DM1];
-  State.regs[REG_D0 + DN0] = temp & 0xffffffff;
-  z = (State.regs[REG_D0 + DN0] == 0);
-  n = (State.regs[REG_D0 + DN0] & 0x80000000) != 0;
+  denom = (unsigned32)State.regs[REG_D0 + DM1];
+  if ( !(v = (0 == denom)) ) 
+    {
+      temp = State.regs[REG_MDR];
+      temp <<= 32;
+      temp |= State.regs[REG_D0 + DN0];
+      State.regs[REG_MDR] = temp % State.regs[REG_D0 + DM1];
+      temp /= State.regs[REG_D0 + DM1];
+      State.regs[REG_D0 + DN0] = temp & 0xffffffff;
+      z = (State.regs[REG_D0 + DN0] == 0);
+      n = (State.regs[REG_D0 + DN0] & 0x80000000) != 0;
+    }
   PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
-  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0) | (v ? PSW_V : 0));
 }
 
 
@@ -2009,7 +2020,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_40 ();
+  /* OP_40 (); */
   unsigned int imm;
 
   PC = cia;
@@ -2026,7 +2037,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_41 ();
+  /* OP_41 (); */
   PC = cia;
   State.regs[REG_A0 + AN1] += 1;
 }
@@ -2040,7 +2051,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_50 ();
+  /* OP_50 (); */
   PC = cia;
   State.regs[REG_A0 + AN0] += 4;
 }
@@ -2055,7 +2066,7 @@
 // end-sanitize-am33
 {
   PC = cia;
-  //    OP_A000 ();
+  /* OP_A000 (); */
   genericCmp(EXTEND8 (IMM8), State.regs[REG_D0 + DN0]);
 }
 
@@ -2069,7 +2080,7 @@
 // end-sanitize-am33
 {
   PC = cia;
-  //    OP_A0 ();
+  /* OP_A0 (); */
   genericCmp(State.regs[REG_D0 + DM1], State.regs[REG_D0 + DN0]);
 }
 
@@ -2082,7 +2093,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F1A0 ();
+  /* OP_F1A0 (); */
   PC = cia;
   genericCmp(State.regs[REG_D0 + DM1], State.regs[REG_A0 + AN0]);
 }
@@ -2096,7 +2107,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F190 ();
+  /* OP_F190 (); */
   PC = cia;
   genericCmp(State.regs[REG_A0 + AM1], State.regs[REG_D0 + DN0]);
 }
@@ -2111,7 +2122,7 @@
 // end-sanitize-am33
 {
   PC = cia;
-  //    op_B000 ();
+  /* OP_B000 (); */
   genericCmp(IMM8,
 	     State.regs[REG_A0 + AN0]);
 }
@@ -2126,7 +2137,7 @@
 // end-sanitize-am33
 {
   PC = cia;
-  //    OP_B0 ();
+  /* OP_B0 (); */
   genericCmp(State.regs[REG_A0 + AM1], State.regs[REG_A0 + AN0]);
 }
 
@@ -2139,7 +2150,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FAC80000 ();
+  /* OP_FAC80000 (); */
   PC = cia;
   genericCmp(EXTEND16(FETCH16(IMM16A, IMM16B)),
 	     State.regs[REG_D0 + DN0]);
@@ -2154,7 +2165,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FCC80000 ();
+  /* OP_FCC80000 (); */
   PC = cia;
   genericCmp(FETCH32(IMM32A, IMM32B, IMM32C, IMM32D),
 	     State.regs[REG_D0 + DN0]);
@@ -2169,7 +2180,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FAD80000 ();
+  /* OP_FAD80000 (); */
   PC = cia;
   genericCmp(FETCH16(IMM16A, IMM16B),
 	     State.regs[REG_A0 + AN0]);
@@ -2184,7 +2195,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FCD80000 ();
+  /* OP_FCD80000 (); */
   PC = cia;
   genericCmp(FETCH32(IMM32A, IMM32B, IMM32C, IMM32D),
 	     State.regs[REG_A0 + AN0]);
@@ -2199,7 +2210,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F200 ();
+  /* OP_F200 (); */
   int n, z;
 
   PC = cia;
@@ -2219,7 +2230,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F8E000 ();
+  /* OP_F8E000 (); */
   int n, z;
 
   PC = cia;
@@ -2239,7 +2250,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FAE00000 ();
+  /* OP_FAE00000 (); */
   int n, z;
 
   PC = cia;
@@ -2259,7 +2270,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FCE00000 ();
+  /* OP_FCE00000 (); */
   int n, z;
 
   PC = cia;
@@ -2280,7 +2291,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FAFC0000 ();
+  /* OP_FAFC0000 (); */
   PC = cia;
   PSW &= FETCH16(IMM16A, IMM16B);
 }
@@ -2295,7 +2306,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F210 ();
+  /* OP_F210 (); */
   PC = cia;
   genericOr(State.regs[REG_D0 + DM1], REG_D0 + DN0);
 }
@@ -2309,7 +2320,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F8E400 ();
+  /* OP_F8E400 (); */
   PC = cia;
   genericOr(IMM8, REG_D0 + DN0);
 }
@@ -2323,7 +2334,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FAE40000 ();
+  /* OP_FAE40000 (); */
   PC = cia;
   genericOr(FETCH16(IMM16A, IMM16B), REG_D0 + DN0);
 }
@@ -2337,7 +2348,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FCE40000 ();
+  /* OP_FCE40000 (); */
   PC = cia;
   genericOr(FETCH32(IMM32A, IMM32B, IMM32C, IMM32D), REG_D0 + DN0);
 }
@@ -2351,7 +2362,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FAFD0000 ();
+  /* OP_FAFD0000 (); */
   PC = cia;
   PSW |= FETCH16(IMM16A, IMM16B);
 }
@@ -2365,7 +2376,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F220 ();
+  /* OP_F220 (); */
   PC = cia;
   genericXor(State.regs[REG_D0 + DM1], REG_D0 + DN0);
 }
@@ -2379,7 +2390,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FAE80000 ();
+  /* OP_FAE80000 (); */
   PC = cia;
   genericXor(FETCH16(IMM16A, IMM16B), REG_D0 + DN0);
 }
@@ -2393,7 +2404,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FCE80000 ();
+  /* OP_FCE80000 (); */
   PC = cia;
   genericXor(FETCH32(IMM32A, IMM32B, IMM32C, IMM32D), REG_D0 + DN0);
 }
@@ -2407,7 +2418,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F230 ();
+  /* OP_F230 (); */
   int n, z;
 
   PC = cia;
@@ -2427,7 +2438,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F8EC00 ();
+  /* OP_F8EC00 (); */
   PC = cia;
   genericBtst(IMM8, State.regs[REG_D0 + DN0]);
 }
@@ -2441,7 +2452,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FAEC0000 ();
+  /* OP_FAEC0000 (); */
   PC = cia;
   genericBtst(FETCH16(IMM16A, IMM16B), State.regs[REG_D0 + DN0]);
 }
@@ -2455,7 +2466,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FCEC0000 ();
+  /* OP_FCEC0000 (); */
   PC = cia;
   genericBtst(FETCH32(IMM32A, IMM32B, IMM32C, IMM32D),
 	      State.regs[REG_D0 + DN0]);
@@ -2470,7 +2481,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FE020000 ();
+  /* OP_FE020000 (); */
   PC = cia;
   genericBtst(IMM8,
 	      load_byte(FETCH32(IMM32A, IMM32B, IMM32C, IMM32D)));
@@ -2486,7 +2497,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FAF80000 ();
+  /* OP_FAF80000 (); */
   PC = cia;
   genericBtst(IMM8,
 	      load_byte(State.regs[REG_A0 + AN0] + EXTEND8(D8)));
@@ -2501,7 +2512,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F080 ();
+  /* OP_F080 (); */
   unsigned long temp;
   int z;
 
@@ -2524,7 +2535,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FE000000 ();
+  /* OP_FE000000 (); */
   unsigned long temp;
   int z;
 
@@ -2547,7 +2558,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FAF00000 ();
+  /* OP_FAF00000 (); */
   unsigned long temp;
   int z;
 
@@ -2569,7 +2580,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F090 ();
+  /* OP_F090 (); */
   unsigned long temp;
   int z;
 
@@ -2592,7 +2603,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FE010000 ();
+  /* OP_FE010000 (); */
   unsigned long temp;
   int z;
 
@@ -2615,7 +2626,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FAF40000 ();
+  /* OP_FAF40000 (); */
   unsigned long temp;
   int z;
 
@@ -2637,7 +2648,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F2B0 ();
+  /* OP_F2B0 (); */
   long temp;
   int z, n, c;
 
@@ -2661,7 +2672,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F8C800 ();
+  /* OP_F8C800 (); */
   long temp;
   int z, n, c;
 
@@ -2685,7 +2696,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F2A0 ();
+  /* OP_F2A0 (); */
   int z, n, c;
 
   PC = cia;
@@ -2707,7 +2718,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F8C400 ();
+  /* OP_F8C400 (); */
   int z, n, c;
 
   PC = cia;
@@ -2728,7 +2739,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F290 ();
+  /* OP_F290 (); */
   int n, z;
 
   PC = cia;
@@ -2749,7 +2760,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F8C000 ();
+  /* OP_F8C000 (); */
   int n, z;
 
   PC = cia;
@@ -2769,7 +2780,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_54 ();
+  /* OP_54 (); */
   int n, z;
   PC = cia;
 
@@ -2789,7 +2800,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F284 ();
+  /* OP_F284 (); */
   unsigned long value;
   int c,n,z;
 
@@ -2815,8 +2826,7 @@
 *am33
 // end-sanitize-am33
 {
-  // handle ror above, too.
-  //  OP_F280 ();
+  /* OP_F280 (); */
   unsigned long value;
   int c,n,z;
 
@@ -2842,7 +2852,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_C800 ();
+  /* OP_C800 (); */
   PC = cia;
   if ((PSW & PSW_Z))
     {
@@ -2860,7 +2870,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_C900 ();
+  /* OP_C900 (); */
   PC = cia;
   if (!(PSW & PSW_Z))
     {
@@ -2878,7 +2888,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_C100 ();
+  /* OP_C100 (); */
   PC = cia;
   if (!((PSW & PSW_Z)
         || (((PSW & PSW_N) != 0) ^ ((PSW & PSW_V) != 0))))
@@ -2897,7 +2907,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_C200 ();
+  /* OP_C200 (); */
   PC = cia;
   if (!(((PSW & PSW_N) != 0) ^ ((PSW & PSW_V) != 0)))
     {
@@ -2915,7 +2925,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_C300 ();
+  /* OP_C300 (); */
   PC = cia;
   if ((PSW & PSW_Z)
       || (((PSW & PSW_N) != 0) ^ ((PSW & PSW_V) != 0)))
@@ -2934,7 +2944,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_C000 ();
+  /* OP_C000 (); */
   PC = cia;
   if (((PSW & PSW_N) != 0) ^ ((PSW & PSW_V) != 0))
     {
@@ -2952,7 +2962,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_C500 ();
+  /* OP_C500 (); */
   PC = cia;
   if (!(((PSW & PSW_C) != 0) || (PSW & PSW_Z) != 0))
     {
@@ -2970,7 +2980,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_C600 ();
+  /* OP_C600 (); */
   PC = cia;
   if (!(PSW & PSW_C))
     {
@@ -2988,7 +2998,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_C700 ();
+  /* OP_C700 (); */
   PC = cia;
   if (((PSW & PSW_C) != 0) || (PSW & PSW_Z) != 0)
     {
@@ -3006,7 +3016,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_C400 ();
+  /* OP_C400 (); */
   PC = cia;
   if (PSW & PSW_C)
     {
@@ -3024,7 +3034,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F8E800 ();
+  /* OP_F8E800 (); */
   PC = cia;
   if (!(PSW & PSW_V))
     {
@@ -3042,7 +3052,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F8E900 ();
+  /* OP_F8E900 (); */
   PC = cia;
   if (PSW & PSW_V)
     {
@@ -3060,7 +3070,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F8EA00 ();
+  /* OP_F8EA00 (); */
   PC = cia;
   if (!(PSW & PSW_N))
     {
@@ -3078,7 +3088,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F8EB00 ();
+  /* OP_F8EB00 (); */
   PC = cia;
   if (PSW & PSW_N)
     {
@@ -3096,7 +3106,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_CA00 ();
+  /* OP_CA00 (); */
   PC = cia;
   State.regs[REG_PC] += EXTEND8 (D8);
   nia = PC;
@@ -3111,7 +3121,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_D8 ();
+  /* OP_D8 (); */
   PC = cia;
   if (PSW & PSW_Z)
     {
@@ -3129,7 +3139,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_D9 ();
+  /* OP_D9 (); */
   PC = cia;
   if (!(PSW & PSW_Z))
     {
@@ -3147,7 +3157,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_D1 ();
+  /* OP_D1 (); */
   PC = cia;
   if (!((PSW & PSW_Z)
         || (((PSW & PSW_N) != 0) ^ ((PSW & PSW_V) != 0))))
@@ -3166,7 +3176,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_D2 ();
+  /* OP_D2 (); */
   PC = cia;
   if (!(((PSW & PSW_N) != 0) ^ ((PSW & PSW_V) != 0)))
     {
@@ -3184,7 +3194,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_D3 ();
+  /* OP_D3 (); */
   PC = cia;
   if ((PSW & PSW_Z)
       || (((PSW & PSW_N) != 0) ^ ((PSW & PSW_V) != 0)))
@@ -3203,7 +3213,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_D0 ();
+  /* OP_D0 (); */
   PC = cia;
   if (((PSW & PSW_N) != 0) ^ ((PSW & PSW_V) != 0))
     {
@@ -3221,7 +3231,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_D5 ();
+  /* OP_D5 (); */
   PC = cia;
   if (!(((PSW & PSW_C) != 0) || (PSW & PSW_Z) != 0))
     {
@@ -3239,7 +3249,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_D6 ();
+  /* OP_D6 (); */
   PC = cia;
   if (!(PSW & PSW_C))
     {
@@ -3257,7 +3267,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_D7 ();
+  /* OP_D7 (); */
   PC = cia;
   if (((PSW & PSW_C) != 0) || (PSW & PSW_Z) != 0)
     {
@@ -3275,7 +3285,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_D4 ();
+  /* OP_D4 (); */
   PC = cia;
   if (PSW & PSW_C)
     {
@@ -3293,7 +3303,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_DA ();
+  /* OP_DA (); */
   PC = cia;
   State.regs[REG_PC] = State.regs[REG_LAR] - 4;
   nia = PC;
@@ -3308,7 +3318,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_DB ();
+  /* OP_DB (); */
   PC = cia;
   State.regs[REG_LIR] = load_word (State.regs[REG_PC] + 1);
   State.regs[REG_LAR] = State.regs[REG_PC] + 5;
@@ -3323,8 +3333,8 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F0F4 ();
-  PC = State.regs[REG_A0 + AN0];
+  /* OP_F0F4 (); */
+  PC = load_word (State.regs[REG_A0 + AN0]);
   nia = PC;
 }
 
@@ -3337,7 +3347,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_CC0000 ();
+  /* OP_CC0000 (); */
   PC = cia + EXTEND16(FETCH16(D16A, D16B));
   nia = PC;
 }
@@ -3351,7 +3361,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_DC000000 ();
+  /* OP_DC000000 (); */
   PC = cia + FETCH32(D32A, D32B, D32C, D32D);
   nia = PC;
 }
@@ -3365,7 +3375,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F0F0 ();
+  /* OP_F0F0 (); */
   unsigned int next_pc, sp;
 
   PC = cia;
@@ -3386,7 +3396,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FAFF0000 ();
+  /* OP_FAFF0000 (); */
   unsigned int next_pc, sp;
 
   PC = cia;
@@ -3407,7 +3417,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FCFF0000 ();
+  /* OP_FCFF0000 (); */
   unsigned int next_pc, sp;
 
   PC = cia;
@@ -3428,7 +3438,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F0FC ();
+  /* OP_F0FC (); */
   unsigned int sp;
 
   sp = State.regs[REG_SP];
@@ -3445,7 +3455,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F0FD ();
+  /* OP_F0FD (); */
   unsigned int sp;
 
   sp = State.regs[REG_SP];
@@ -3464,7 +3474,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F0FE ();
+  /* OP_F0FE (); */
   unsigned int sp, next_pc;
 
   PC = cia;
@@ -3483,7 +3493,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F0FF ();
+  /* OP_F0FF (); */
   PC = cia;
   abort ();
 }
@@ -3497,31 +3507,31 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_CB ();
+  /* OP_CB (); */
   PC = cia;
 }
 
 
-// 1111 0101 0000  DmDn; udf20 Dm,Dn
-8.0xf5+4.0x0,2.DN1,2.DN0:D0:::putx
+// 1111 0101 0000  DmDn; udf20 Dm,Dm
+8.0xf5+4.0x0,2.DM1,2.DM0:D0:::putx
 "putx"
 *mn10300
 {
-  //  OP_F500 ();
+  /* OP_F500 (); */
   PC = cia;
-  State.regs[REG_MDRQ] = State.regs[REG_D0 + DN0];
+  State.regs[REG_MDRQ] = State.regs[REG_D0 + DM0];
 }
 
 
-// 1111 0110 1111 DmDn; udf15 Dm,Dn
-8.0xf6+4.0xf,2.DM1,2.DN0:D0:::getx
+// 1111 0110 1111 DmDn; udf15 Dn,Dn
+8.0xf6+4.0xf,2.DN1,2.DN0:D0:::getx
 "getx"
 *mn10300
 // start-sanitize-am33
 *am33
 // end-sanitize-am33
 {
-  //  OP_F6F0 ();
+  /* OP_F6F0 (); */
   int z, n;
 
   PC = cia;
@@ -3542,7 +3552,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F600 ();
+  /* OP_F600 (); */
   unsigned long long temp;
   int n, z;
 
@@ -3566,7 +3576,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F90000 ();
+  /* OP_F90000 (); */
   unsigned long long temp;
   int n, z;
 
@@ -3590,7 +3600,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FB000000 ();
+  /* OP_FB000000 (); */
   unsigned long long temp;
   int n, z;
 
@@ -3614,7 +3624,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FD000000 ();
+  /* OP_FD000000 (); */
   unsigned long long temp;
   int n, z;
 
@@ -3638,7 +3648,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F610 ();
+  /* OP_F610 (); */
   unsigned long long temp;
   int n, z;
 
@@ -3662,7 +3672,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F91400 ();
+  /* OP_F91400 (); */
   unsigned long long temp;
   int n, z;
 
@@ -3686,7 +3696,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FB140000 ();
+  /* OP_FB140000 (); */
   unsigned long long temp;
   int n, z;
 
@@ -3710,7 +3720,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FD140000 ();
+  /* OP_FD140000 (); */
   unsigned long long temp;
   int n, z;
 
@@ -3734,7 +3744,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F640 ();
+  /* OP_F640 (); */
   int temp;
 
   PC = cia;
@@ -3753,7 +3763,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F650 ();
+  /* OP_F650 (); */
   int temp;
 
   PC = cia;
@@ -3772,7 +3782,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F670 ();
+  /* OP_F670 (); */
   int temp, c;
 
   PC = cia;
@@ -3792,7 +3802,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_F0C0 ();
+  /* OP_F0C0 (); */
   PC = cia;
   do_syscall ();
 }
@@ -3806,9 +3816,8 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_FF ();
+  /* OP_FF (); */
   PC = cia;
-  //  State.exception = SIGTRAP;
   sim_engine_halt (SD, CPU, NULL, cia, sim_stopped, SIM_SIGTRAP);
   PC -= 1;
 }
@@ -3821,7 +3830,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_CE00 ();
+  /* OP_CE00 (); */
   unsigned long sp = State.regs[REG_SP];
   unsigned long mask;
 
@@ -3919,7 +3928,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_CF00 ();
+  /* OP_CF00 (); */
   unsigned long sp = State.regs[REG_SP];
   unsigned long mask;
 
@@ -4017,7 +4026,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_CD000000 ();
+  /* OP_CD000000 (); */
   unsigned int next_pc, sp;
   unsigned long mask;
 
@@ -4125,7 +4134,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  op_DD000000();
+  /* OP_DD000000 (); */
   unsigned int next_pc, sp;
   unsigned long mask;
 
@@ -4133,11 +4142,7 @@
   sp = State.regs[REG_SP];
   next_pc = State.regs[REG_PC] + 7;
   /* could assert that nia == next_pc here */
-     store_word(sp, next_pc);
-//      store_byte(sp, next_pc & 0xff);
-//      store_byte(sp+1, (next_pc & 0xff00) >> 8 );
-//      store_byte(sp+2, (next_pc & 0xff0000) >> 16 );
-//      store_byte(sp+3, (next_pc & 0xff000000) >> 24);
+  store_word(sp, next_pc);
 
   mask = REGS;
 
@@ -4237,7 +4242,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_DF0000 ();
+  /* OP_DF0000 (); */
   unsigned int sp, offset;
   unsigned long mask;
 
@@ -4339,7 +4344,7 @@
 *am33
 // end-sanitize-am33
 {
-  //  OP_DE0000 ();
+  /* OP_DE0000 (); */
   unsigned int sp, offset;
   unsigned long mask;
 

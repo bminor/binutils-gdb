@@ -1,3 +1,8 @@
+Tue Aug 25 16:46:59 1998  Joyce Janczyn  <janczyn@cygnus.com>
+
+	* mn10300.igen (OP_F0F4): Need to load contents of register AN0
+	for jmp.
+
 Mon Aug 24 11:50:09 1998  Joyce Janczyn  <janczyn@cygnus.com>
 
 	* sim-main.h (SIM_HANDLES_LMA): Define SIM_HANDLES_LMA.
