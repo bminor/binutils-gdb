@@ -7,6 +7,7 @@ Mon Nov 13 07:31:35 1995  Kim Knuttila  <krk@cygnus.com>
 	(coff_ppc_relocate_section): Added support and fixes for IMGLUE/IFGLUE
 	(ppc_coff_rtype2howto): removed invalid IMGLUE hack
 	(coff_ppc_rtype_to_howto): removed invalid IMGLUE hack
+	(ppc_record_toc_entry): Removed a debug define (duh)
 
 	* peicode.h (coff_swap_scnhdr_out): Fixed invalid strcmp for ".reldata"
 	(pe_print_idata): New function - formats the idata section data
