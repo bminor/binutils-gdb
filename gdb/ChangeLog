@@ -1,3 +1,10 @@
+Wed Mar 29 18:30:03 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* remote-e7000.c (why_stop): Add new kinds of strings to expect
+	from the emulator.
+	(e7000_wait): Add interpretations for more stop reasons,
+	including warnings for write protect and cycle address errors.
+
 Wed Mar 29 17:09:29 1995  Stu Grossman  (grossman@cygnus.com)
 
 start-sanitize-gdbtk
