@@ -26,6 +26,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "bfdlink.h"
 #include "coff/sh.h"
 #include "coff/internal.h"
+
+#ifdef COFF_WITH_PE
+#include "coff/pe.h"
+#endif
+
 #include "libcoff.h"
 
 /* Internal functions.  */
@@ -48,11 +53,32 @@ static bfd_byte *sh_coff_get_relocated_section_contents
   PARAMS ((bfd *, struct bfd_link_info *, struct bfd_link_order *,
 	   bfd_byte *, boolean, asymbol **));
 
+#ifdef COFF_WITH_PE
+/* Can't build import tables with 2**4 alignment.  */
+#define COFF_DEFAULT_SECTION_ALIGNMENT_POWER	2
+#else
 /* Default section alignment to 2**4.  */
-#define COFF_DEFAULT_SECTION_ALIGNMENT_POWER (4)
+#define COFF_DEFAULT_SECTION_ALIGNMENT_POWER	4
+#endif
+
+#ifdef COFF_IMAGE_WITH_PE
+/* Align PE executables.  */
+#define COFF_PAGE_SIZE 0x1000
+#endif
 
 /* Generate long file names.  */
 #define COFF_LONG_FILENAMES
+
+#ifdef COFF_WITH_PE
+/* Return true if this relocation should
+   appear in the output .reloc section.  */
+static boolean in_reloc_p (abfd, howto)
+     bfd * abfd ATTRIBUTE_UNUSED;
+     reloc_howto_type * howto;
+{
+  return ! howto->pc_relative && howto->type != R_SH_IMAGEBASE;
+}     
+#endif
 
 /* The supported relocations.  There are a lot of relocations defined
    in coff/internal.h which we do not expect to ever see.  */
@@ -60,7 +86,24 @@ static reloc_howto_type sh_coff_howtos[] =
 {
   EMPTY_HOWTO (0),
   EMPTY_HOWTO (1),
+#ifdef COFF_WITH_PE
+  /* Windows CE */
+  HOWTO (R_SH_IMM32CE,		/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 sh_reloc,		/* special_function */
+	 "r_imm32ce",		/* name */
+	 true,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 false),		/* pcrel_offset */
+#else
   EMPTY_HOWTO (2),
+#endif
   EMPTY_HOWTO (3), /* R_SH_PCREL8 */
   EMPTY_HOWTO (4), /* R_SH_PCREL16 */
   EMPTY_HOWTO (5), /* R_SH_HIGH8 */
@@ -116,7 +159,23 @@ static reloc_howto_type sh_coff_howtos[] =
 	 false),		/* pcrel_offset */
 
   EMPTY_HOWTO (15),
+#ifdef COFF_WITH_PE
+  HOWTO (R_SH_IMAGEBASE,        /* type */                                 
+	 0,	                /* rightshift */                           
+	 2,	                /* size (0 = byte, 1 = short, 2 = long) */ 
+	 32,	                /* bitsize */                   
+	 false,	                /* pc_relative */                          
+	 0,	                /* bitpos */                               
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 sh_reloc,       	/* special_function */                     
+	 "rva32",	        /* name */                                 
+	 true,	                /* partial_inplace */                      
+	 0xffffffff,            /* src_mask */                             
+	 0xffffffff,            /* dst_mask */                             
+	 false),                /* pcrel_offset */
+#else
   EMPTY_HOWTO (16), /* R_SH_IMM8 */
+#endif
   EMPTY_HOWTO (17), /* R_SH_IMM8BY2 */
   EMPTY_HOWTO (18), /* R_SH_IMM8BY4 */
   EMPTY_HOWTO (19), /* R_SH_IMM4 */
@@ -303,6 +362,7 @@ static reloc_howto_type sh_coff_howtos[] =
 /* FIXME: This should not be set here.  */
 #define __A_MAGIC_SET__
 
+#ifndef COFF_WITH_PE
 /* Swap the r_offset field in and out.  */
 #define SWAP_IN_RELOC_OFFSET  bfd_h_get_32
 #define SWAP_OUT_RELOC_OFFSET bfd_h_put_32
@@ -315,6 +375,7 @@ static reloc_howto_type sh_coff_howtos[] =
       dst->r_stuff[1] = 'C';			\
     }						\
   while (0)
+#endif
 
 /* Get the value of a symbol, when performing a relocation.  */
 
@@ -333,6 +394,96 @@ get_symbol_value (symbol)
 
   return relocation;
 }
+
+#ifdef COFF_WITH_PE
+/* Convert an rtype to howto for the COFF backend linker.
+   Copied from coff-i386.  */
+#define coff_rtype_to_howto coff_sh_rtype_to_howto
+
+static reloc_howto_type *
+coff_sh_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
+     bfd * abfd;
+     asection * sec;
+     struct internal_reloc * rel;
+     struct coff_link_hash_entry * h;
+     struct internal_syment * sym;
+     bfd_vma * addendp;
+{
+  reloc_howto_type * howto;
+
+  howto = sh_coff_howtos + rel->r_type;
+
+  *addendp = 0;
+
+  if (howto->pc_relative)
+    *addendp += sec->vma;
+
+  if (sym != NULL && sym->n_scnum == 0 && sym->n_value != 0)
+    {
+      /* This is a common symbol.  The section contents include the
+	 size (sym->n_value) as an addend.  The relocate_section
+	 function will be adding in the final value of the symbol.  We
+	 need to subtract out the current size in order to get the
+	 correct result.  */
+      BFD_ASSERT (h != NULL);
+    }
+
+  if (howto->pc_relative)
+    {
+      *addendp -= 4;
+
+      /* If the symbol is defined, then the generic code is going to
+         add back the symbol value in order to cancel out an
+         adjustment it made to the addend.  However, we set the addend
+         to 0 at the start of this function.  We need to adjust here,
+         to avoid the adjustment the generic code will make.  FIXME:
+         This is getting a bit hackish.  */
+      if (sym != NULL && sym->n_scnum != 0)
+	*addendp -= sym->n_value;
+    }
+
+  if (rel->r_type == R_SH_IMAGEBASE)
+    *addendp -= pe_data (sec->output_section->owner)->pe_opthdr.ImageBase;
+
+  return howto;
+}
+
+/* This structure is used to map BFD reloc codes to SH PE relocs.  */
+struct shcoff_reloc_map
+{
+  unsigned char bfd_reloc_val;
+  unsigned char shcoff_reloc_val;
+};
+
+/* An array mapping BFD reloc codes to SH PE relocs.  */
+static const struct shcoff_reloc_map sh_reloc_map[] =
+{
+  { BFD_RELOC_32, R_SH_IMM32CE },
+  { BFD_RELOC_RVA, R_SH_IMAGEBASE },
+  { BFD_RELOC_CTOR, R_SH_IMM32CE },
+};
+
+/* Given a BFD reloc code, return the howto structure for the
+   corresponding SH PE reloc.  */
+#define coff_bfd_reloc_type_lookup	sh_coff_reloc_type_lookup
+
+static reloc_howto_type *
+sh_coff_reloc_type_lookup (abfd, code)
+     bfd * abfd ATTRIBUTE_UNUSED;
+     bfd_reloc_code_real_type code;
+{
+  unsigned int i;
+
+  for (i = 0; i < sizeof (sh_reloc_map) / sizeof (struct shcoff_reloc_map); i++)
+    {
+      if (sh_reloc_map[i].bfd_reloc_val == code)
+	return &sh_coff_howtos[(int) sh_reloc_map[i].shcoff_reloc_val];
+    }
+
+  fprintf (stderr, "SH Error: unknown reloc type %d\n", code);
+  return NULL;
+}
+#endif /* COFF_WITH_PE */
 
 /* This macro is used in coffcode.h to get the howto corresponding to
    an internal reloc.  */
@@ -401,6 +552,10 @@ sh_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
   /* Almost all relocs have to do with relaxing.  If any work must be
      done for them, it has been done in sh_relax_section.  */
   if (r_type != R_SH_IMM32
+#ifdef COFF_WITH_PE
+      && r_type != R_SH_IMM32CE
+      && r_type != R_SH_IMAGEBASE
+#endif
       && (r_type != R_SH_PCDISP
 	  || (symbol_in->flags & BSF_LOCAL) != 0))
     return bfd_reloc_ok;
@@ -414,10 +569,21 @@ sh_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
   switch (r_type)
     {
     case R_SH_IMM32:
+#ifdef COFF_WITH_PE
+    case R_SH_IMM32CE:
+#endif
       insn = bfd_get_32 (abfd, hit_data);
       insn += sym_value + reloc_entry->addend;
       bfd_put_32 (abfd, insn, hit_data);
       break;
+#ifdef COFF_WITH_PE
+    case R_SH_IMAGEBASE:
+      insn = bfd_get_32 (abfd, hit_data);
+      insn += (sym_value + reloc_entry->addend
+	       - pe_data (input_section->output_section->owner)->pe_opthdr.ImageBase);
+      bfd_put_32 (abfd, insn, hit_data);
+      break;
+#endif
     case R_SH_PCDISP:
       insn = bfd_get_16 (abfd, hit_data);
       sym_value += reloc_entry->addend;
@@ -618,7 +784,14 @@ sh_relax_section (abfd, sec, link_info, again)
       paddr += sec->vma;
       for (irelfn = internal_relocs; irelfn < irelend; irelfn++)
 	if (irelfn->r_vaddr == paddr
+#ifdef COFF_WITH_PE
+	    && (irelfn->r_type == R_SH_IMM32
+		|| irelfn->r_type == R_SH_IMM32CE
+		|| irelfn->r_type == R_SH_IMAGEBASE))
+
+#else
 	    && irelfn->r_type == R_SH_IMM32)
+#endif
 	  break;
       if (irelfn >= irelend)
 	{
@@ -996,6 +1169,10 @@ sh_relax_delete_bytes (abfd, sec, addr, count)
 	  break;
 
 	case R_SH_IMM32:
+#ifdef COFF_WITH_PE
+	case R_SH_IMM32CE:
+	case R_SH_IMAGEBASE:
+#endif
 	  /* If this reloc is against a symbol defined in this
              section, and the symbol will not be adjusted below, we
              must check the addend to see it will put the value in
@@ -1212,7 +1389,13 @@ sh_relax_delete_bytes (abfd, sec, addr, count)
 	{
 	  struct internal_syment sym;
 
+#ifdef COFF_WITH_PE
+	  if (irelscan->r_type != R_SH_IMM32
+	      && irelscan->r_type != R_SH_IMAGEBASE
+	      && irelscan->r_type != R_SH_IMM32CE)
+#else
 	  if (irelscan->r_type != R_SH_IMM32)
+#endif
 	    continue;
 
 	  bfd_coff_swap_sym_in (abfd,
@@ -1364,7 +1547,7 @@ struct sh_opcode
      mask value in the sh_major_opcode structure.  */
   unsigned short opcode;
   /* Flags for this instruction.  */
-  unsigned flags;
+  unsigned short flags;
 };
 
 /* Flag which appear in the sh_opcode structure.  */
@@ -1993,6 +2176,7 @@ sh_insn_uses_reg (insn, op, reg)
 
   return false;
 }
+
 /* See whether an instruction sets a general purpose register.  */
 
 static boolean
@@ -2200,6 +2384,7 @@ sh_load_use (i1, op1, i2, op2)
   return false;
 }
 
+#ifndef COFF_IMAGE_WITH_PE
 /* Try to align loads and stores within a span of memory.  This is
    called by both the ELF and the COFF sh targets.  ABFD and SEC are
    the BFD and section we are examining.  CONTENTS is the contents of
@@ -2419,6 +2604,7 @@ _bfd_sh_align_load_span (abfd, sec, contents, swap, relocs,
 
   return true;
 }
+#endif
 
 /* Look for loads and stores which we can align to four byte
    boundaries.  See the longer comment above sh_relax_section for why
@@ -2659,6 +2845,10 @@ sh_relocate_section (output_bfd, info, input_bfd, input_section, contents,
       /* Almost all relocs have to do with relaxing.  If any work must
          be done for them, it has been done in sh_relax_section.  */
       if (rel->r_type != R_SH_IMM32
+#ifdef COFF_WITH_PE
+	  && rel->r_type != R_SH_IMM32CE
+	  && rel->r_type != R_SH_IMAGEBASE
+#endif
 	  && rel->r_type != R_SH_PCDISP)
 	continue;
 
@@ -2703,6 +2893,11 @@ sh_relocate_section (output_bfd, info, input_bfd, input_section, contents,
 	  return false;
 	}
 
+#ifdef COFF_WITH_PE
+      if (rel->r_type == R_SH_IMAGEBASE)
+	addend -= pe_data (input_section->output_section->owner)->pe_opthdr.ImageBase;
+#endif
+      
       val = 0;
 
       if (h == NULL)
@@ -2899,7 +3094,9 @@ sh_coff_get_relocated_section_contents (output_bfd, link_info, link_order,
 
 /* The target vectors.  */
 
+#ifndef TARGET_SHL_SYM
 CREATE_BIG_COFF_TARGET_VEC (shcoff_vec, "coff-sh", BFD_IS_RELAXABLE, 0, '_', NULL)
+#endif
 
 #ifdef TARGET_SHL_SYM
 #define TARGET_SYM TARGET_SHL_SYM
@@ -2911,9 +3108,14 @@ CREATE_BIG_COFF_TARGET_VEC (shcoff_vec, "coff-sh", BFD_IS_RELAXABLE, 0, '_', NUL
 #define TARGET_SHL_NAME "coff-shl"
 #endif
 
+#ifdef COFF_WITH_PE
+CREATE_LITTLE_COFF_TARGET_VEC (TARGET_SYM, TARGET_SHL_NAME, BFD_IS_RELAXABLE,
+			       SEC_CODE | SEC_DATA, '_', NULL);
+#else
 CREATE_LITTLE_COFF_TARGET_VEC (TARGET_SYM, TARGET_SHL_NAME, BFD_IS_RELAXABLE, 0, '_', NULL)
+#endif
      
-
+#ifndef TARGET_SHL_SYM
 /* Some people want versions of the SH COFF target which do not align
    to 16 byte boundaries.  We implement that by adding a couple of new
    target vectors.  These are just like the ones above, but they
@@ -3089,3 +3291,4 @@ const bfd_target shlcoff_small_vec =
   
   (PTR) &bfd_coff_small_swap_table
 };
+#endif

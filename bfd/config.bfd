@@ -98,6 +98,12 @@ case "${targ}" in
     targ_selvecs="arm_epoc_pe_little_vec arm_epoc_pe_big_vec arm_epoc_pei_little_vec arm_epoc_pei_big_vec"
     targ_underscore=no
     ;;
+  arm-wince-pe | arm-*-wince)
+    targ_defvec=armpe_little_vec
+    targ_selvecs="armpe_little_vec armpe_big_vec armpei_little_vec armpei_big_vec"
+    targ_underscore=no
+    targ_cflags=-DARM_WINCE
+    ;;
   arm-*-pe*)
     targ_defvec=armpe_little_vec
     targ_selvecs="armpe_little_vec armpe_big_vec armpei_little_vec armpei_big_vec"
@@ -530,6 +536,11 @@ case "${targ}" in
     targ_defvec=aout_mips_little_vec
     targ_cflags=-DSTAT_FOR_EXEC
     ;;
+  mips*-*-pe*)
+    targ_defvec=mipslpe_vec
+    targ_selvecs="mipslpei_vec mipslpei_vec ecoff_little_vec ecoff_big_vec"
+    targ_underscore=yes
+    ;;
   mips*-*-sysv4*)
     targ_defvec=bfd_elf32_bigmips_vec
     targ_selvecs="bfd_elf32_littlemips_vec ecoff_big_vec ecoff_little_vec"
@@ -621,6 +632,11 @@ case "${targ}" in
   sh-*-elf* | sh-*-rtemself*)
     targ_defvec=bfd_elf32_sh_vec
     targ_selvecs="bfd_elf32_shl_vec shcoff_vec shlcoff_vec shcoff_small_vec shlcoff_small_vec"
+    targ_underscore=yes
+    ;;
+  sh-*-pe)
+    targ_defvec=shlpe_vec
+    targ_selvecs="shlpe_vec shlpei_vec"
     targ_underscore=yes
     ;;
   sh-*-* | sh-*-rtems*)

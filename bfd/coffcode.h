@@ -1,5 +1,5 @@
 /* Support for the generic parts of most COFF variants, for BFD.
-   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 97, 98, 99, 2000
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -1765,6 +1765,8 @@ coff_set_arch_mach_hook (abfd, filehdr)
 #endif
 #ifdef ARMMAGIC
     case ARMMAGIC:
+    case ARMPEMAGIC:
+    case THUMBPEMAGIC:
       arch = bfd_arch_arm;
       switch (internal_f->f_flags & F_ARM_ARCHITECTURE_MASK)
 	{
@@ -1975,7 +1977,17 @@ coff_set_arch_mach_hook (abfd, filehdr)
 #ifdef SH_ARCH_MAGIC_BIG
     case SH_ARCH_MAGIC_BIG:
     case SH_ARCH_MAGIC_LITTLE:
+#ifdef COFF_WITH_PE
+    case SH_ARCH_MAGIC_WINCE:
+#endif
       arch = bfd_arch_sh;
+      machine = 0;
+      break;
+#endif
+
+#ifdef MIPS_ARCH_MAGIC_WINCE
+    case MIPS_ARCH_MAGIC_WINCE:
+      arch = bfd_arch_mips;
       machine = 0;
       break;
 #endif
@@ -2402,7 +2414,11 @@ coff_set_flags (abfd, magicp, flagsp)
 #endif
 #ifdef ARMMAGIC
     case bfd_arch_arm:
+#ifdef ARM_WINCE
+      * magicp = ARMPEMAGIC;
+#else
       * magicp = ARMMAGIC;
+#endif
       * flagsp = 0;
       if (APCS_SET (abfd))
 	{
@@ -2497,10 +2513,21 @@ coff_set_flags (abfd, magicp, flagsp)
 
 #ifdef SH_ARCH_MAGIC_BIG
     case bfd_arch_sh:
+#ifdef COFF_IMAGE_WITH_PE
+      *magicp = SH_ARCH_MAGIC_WINCE;
+#else
       if (bfd_big_endian (abfd))
 	*magicp = SH_ARCH_MAGIC_BIG;
       else
 	*magicp = SH_ARCH_MAGIC_LITTLE;
+#endif
+      return true;
+      break;
+#endif
+
+#ifdef MIPS_ARCH_MAGIC_WINCE
+    case bfd_arch_mips:
+      *magicp = MIPS_ARCH_MAGIC_WINCE;
       return true;
       break;
 #endif
@@ -3516,6 +3543,16 @@ coff_write_object_contents (abfd)
     internal_a.magic = (abfd->flags & D_PAGED) ? RS6K_AOUTHDR_ZMAGIC :
     (abfd->flags & WP_TEXT) ? RS6K_AOUTHDR_NMAGIC :
     RS6K_AOUTHDR_OMAGIC;
+#endif
+
+#if defined(SH) && defined(COFF_WITH_PE)
+#define __A_MAGIC_SET__
+    internal_a.magic = SH_PE_MAGIC;
+#endif
+
+#if defined(MIPS) && defined(COFF_WITH_PE)
+#define __A_MAGIC_SET__
+    internal_a.magic = MIPS_PE_MAGIC;
 #endif
 
 #ifndef __A_MAGIC_SET__

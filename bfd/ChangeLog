@@ -1,3 +1,52 @@
+2000-02-28  Nick Clifton  <nickc@cygnus.com>
+
+	* Makefile.am: Add rules to build pe[i]-{sh|mips}.lo objects.
+	* Makefile.in: Regenerate.
+
+	* configure.in: Add support for mips and sh pe vectors.
+	* configure: regenerate.
+
+	* config.bfd: Add support for arm-wince, mips-pe and sh-pe
+	targets. 
+
+	* targets.c: Add mips and sh pe vectors.
+
+	* libpei.h (coff_final_link_postscript): Only define if not
+	already defined.
+
+	* coffcode.h: Add support for WinCE magic numbers.
+
+	* peigen.c (pe_print_reloc): Update comment and rearrange
+	appending of newline character.
+
+	* peicode.h: Add support for Image Library Format.
+	(pe_ILF_vars): Structure containing data used by ILF code.
+	(pe_ILF_make_a_section): New function.  Create a section based
+	on ILF data.
+	(pe_ILF_make_a_reloc): New function.  Create a reloc based on
+	ILF data.
+	(pe_ILF_make_a_symbol): New function.  Create a symbol based
+	on ILF data.
+	(pe_ILF_save_relocs): New function.  Store the relocs created
+	by pe_ILF_make_a_reloc in a section.
+	(pe_ILF_build_a_bfd): New function.  Create a BFD describing
+	an ILF object.
+	(pe_ILF_object_p): New function.  Return a bfd_target pointer
+	for an ILF object.
+	(pe_bfd_object_p): If an ILF object is detected call
+	pe_ILF_object_p on it.
+
+	* coff-arm.c: Add support for WinCE relocs which are different
+	from normal ARM COFF relocs.
+	* pe-arm.c: Unset TARGET_UNDERSCORE for a WinCE target.
+
+	* coff-sh.c: Add support for sh-pe target.
+	* pe-sh.c: New file.  Support code for sh-pe target.
+	* pei-sh.c: New file.  Support code for sh-pe target.
+
+	* pe-mips.c: New file.  Support code for mips-pe target.
+	* pei-mips.c: New file.  Support code for mips-pe target.
+
 2000-02-27  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf32-sparc.c (elf32_sparc_merge_private_bfd_data): Don't bump

@@ -1676,18 +1676,17 @@ pe_print_reloc (abfd, vfile)
 		   _("\treloc %4d offset %4x [%4lx] %s"),
 		   j, off, (long) (off + virtual_address), tbl[t]);
 
-	  /* HIGHADJ takes an argument, but there's no documentation
-	     on what it does, or what it means.  Inferred from
-	     DUMPBIN.  */
+	  /* HIGHADJ takes an argument, - the next record *is* the
+	     low 16 bits of addend.  */ 
 	  if (t == IMAGE_REL_BASED_HIGHADJ)
 	    {
-	       fprintf (file, " (%4x)\n",
+	       fprintf (file, " (%4x)",
 			((unsigned int)
 			 bfd_get_16 (abfd, data + i + 8 + j * 2 + 2)));
 	       j++;
 	    }
-	  else
-	      fprintf (file, "\n");
+	  
+	  fprintf (file, "\n");
 	}
       i += size;
     }

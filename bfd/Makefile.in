@@ -335,6 +335,10 @@ BFD32_BACKENDS = \
 	pei-mcore.lo \
 	pe-ppc.lo \
 	pei-ppc.lo \
+	pe-sh.lo \
+	pei-sh.lo \
+	pe-mips.lo \
+	pei-mips.lo \
 	peigen.lo \
 	ppcboot.lo \
 	reloc16.lo \
@@ -461,6 +465,10 @@ BFD32_BACKENDS_CFILES = \
 	pei-mcore.c \
 	pe-ppc.c \
 	pei-ppc.c \
+	pe-sh.c \
+	pei-sh.c \
+	pe-mips.c \
+	pei-mips.c \
 	peigen.c \
 	ppcboot.c \
 	reloc16.c \
@@ -1539,6 +1547,12 @@ pe-i386.lo: pe-i386.c coff-i386.c $(INCDIR)/coff/i386.h \
 pei-i386.lo: pei-i386.c coff-i386.c $(INCDIR)/coff/i386.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
   $(INCDIR)/bfdlink.h coffcode.h peicode.h libpei.h
+pe-mips.lo: pe-mips.c $(INCDIR)/coff/mipspe.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/pe.h libcoff.h $(INCDIR)/bfdlink.h coffcode.h \
+  peicode.h
+pei-mips.lo: pei-mips.c pe-mips.c $(INCDIR)/coff/mipspe.h \
+  $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
+  $(INCDIR)/bfdlink.h coffcode.h peicode.h
 pe-mcore.lo: pe-mcore.c coff-mcore.c $(INCDIR)/coff/mcore.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
   $(INCDIR)/bfdlink.h coffcode.h peicode.h libpei.h
@@ -1551,6 +1565,12 @@ pe-ppc.lo: pe-ppc.c coff-ppc.c $(INCDIR)/coff/powerpc.h \
 pei-ppc.lo: pei-ppc.c coff-ppc.c $(INCDIR)/coff/powerpc.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
   $(INCDIR)/bfdlink.h coffcode.h peicode.h libpei.h
+pe-sh.lo: pe-sh.c coff-sh.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/sh.h \
+  $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
+  coffcode.h peicode.h
+pei-sh.lo: pei-sh.c coff-sh.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/sh.h \
+  $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
+  coffcode.h peicode.h
 peigen.lo: peigen.c $(INCDIR)/coff/internal.h $(INCDIR)/coff/i386.h \
   $(INCDIR)/coff/pe.h libcoff.h $(INCDIR)/bfdlink.h libpei.h
 ppcboot.lo: ppcboot.c

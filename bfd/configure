@@ -5167,6 +5167,8 @@ do
     m68kaux_coff_vec)		tb="$tb coff-aux.lo coff-m68k.lo cofflink.lo" ;;
     m68ksysvcoff_vec)		tb="$tb coff-svm68k.lo cofflink.lo" ;;
     m88kbcs_vec)		tb="$tb coff-m88k.lo" ;;
+    mipslpe_vec)		tb="$tb pe-mips.lo cofflink.lo" ;;
+    mipslpei_vec)		tb="$tb pei-mips.lo cofflink.lo" ;;
     mcore_pe_big_vec)		tb="$tb pe-mcore.lo peigen.lo cofflink.lo" ;;
     mcore_pe_little_vec)	tb="$tb pe-mcore.lo peigen.lo cofflink.lo" ;;
     mcore_pei_big_vec)		tb="$tb pei-mcore.lo peigen.lo cofflink.lo" ;;
@@ -5191,6 +5193,8 @@ do
     shlcoff_vec)		tb="$tb coff-sh.lo cofflink.lo" ;;
     shcoff_small_vec)		tb="$tb coff-sh.lo cofflink.lo" ;;
     shlcoff_small_vec)		tb="$tb coff-sh.lo cofflink.lo" ;;
+    shlpe_vec)			tb="$tb pe-sh.lo coff-sh.lo cofflink.lo" ;;
+    shlpei_vec)			tb="$tb pei-sh.lo coff-sh.lo cofflink.lo" ;;
     som_vec)			tb="$tb som.lo" ;;
     sparcle_aout_vec)		tb="$tb aout-sparcle.lo aout32.lo" ;;
     sparclinux_vec)		tb="$tb sparclinux.lo aout32.lo" ;;
