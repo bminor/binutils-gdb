@@ -61,6 +61,7 @@
 
 /* Local labels have an "L$" prefix.  */
 #define LOCAL_LABEL(name) ((name)[0] == 'L' && (name)[1] == '$')
+#define FAKE_LABEL_NAME "L$0\001"
 #define ASEC_NULL (asection *)0
 
 /* sym1 - sym2 is valid on the PA as long as sym2 is $global$.  */
@@ -119,8 +120,5 @@ extern void cons_fix_new_hppa ();
 #define TC_EOL_IN_INSN(PTR)	(is_end_of_line[*(PTR)] && (PTR)[-1] == ',')
 
 #define tc_fix_adjustable hppa_fix_adjustable
-
-/* Disable -R on all PA targets.  It fails miserably.  FIXME!*/
-#define NO_FOLD_DATA_AND_TEXT
 
 #endif /* _TC_HPPA_H */
