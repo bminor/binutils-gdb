@@ -27,6 +27,7 @@
 #include "gdb_string.h"
 #include "gdb_wait.h"
 #include "command.h"
+#include "gdbthread.h"
 
 /* We need pstat functionality so that we can get the exec file
    for a process we attach to.
@@ -2947,7 +2948,7 @@ ptrace_wait (ptid_t ptid, int *status)
    child_acknowledge_created_inferior.)
  */
 int
-parent_attach_all (void)
+parent_attach_all (int p1, PTRACE_ARG3_TYPE p2, int p3)
 {
   int tt_status;
 
@@ -3674,7 +3675,7 @@ call_ptrace (int pt_request, int gdb_tid, PTRACE_ARG3_TYPE addr, int data)
          there's no need for any "break" statements.
        */
     case PT_SETTRC:
-      return parent_attach_all ();
+      return parent_attach_all (0, 0, 0);
 
     case PT_RUREGS:
       tt_status = read_from_register_save_state (gdb_tid,

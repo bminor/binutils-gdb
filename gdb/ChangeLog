@@ -1,5 +1,12 @@
 2003-03-30  Andrew Cagney  <cagney@redhat.com>
 
+	* infttrace.c: Include "gdbthread.h".
+	(parent_attach_all): Fix function signature.
+	(call_ptrace): Update call.
+	* Makefile.in (infttrace.o): Update dependencies.
+
+2003-03-30  Andrew Cagney  <cagney@redhat.com>
+
 	* gdbarch.sh (DEPRECATED_PUSH_RETURN_ADDRESS): Replace
 	PUSH_RETURN_ADDRESS.
 	* gdbarch.h, gdbarch.c: Regenerate.

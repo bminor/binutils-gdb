@@ -1836,7 +1836,7 @@ infrun.o: infrun.c $(defs_h) $(gdb_string_h) $(symtab_h) $(frame_h) \
 inftarg.o: inftarg.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
 	$(gdbcore_h) $(command_h) $(gdb_stat_h) $(gdb_wait_h) $(inflow_h)
 infttrace.o: infttrace.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
-	$(gdb_string_h) $(gdb_wait_h) $(command_h) $(gdbcore_h)
+	$(gdb_string_h) $(gdb_wait_h) $(command_h) $(gdbthread_h) $(gdbcore_h)
 interps.o: interps.c $(defs_h) $(gdbcmd_h) $(ui_out_h) $(event_loop_h) \
 	$(event_top_h) $(interps_h) $(completer_h) $(gdb_string_h) \
 	$(gdb_events_h) $(gdb_assert_h) $(top_h)
