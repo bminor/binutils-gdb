@@ -737,7 +737,7 @@ dbx_symfile_finish (objfile)
 
 
 /* Buffer for reading the symbol table entries.  */
-static struct internal_nlist symbuf[4096];
+static struct external_nlist symbuf[4096];
 static int symbuf_idx;
 static int symbuf_end;
 
@@ -876,6 +876,14 @@ fill_symbuf (sym_bfd)
 				(unsigned char *)&(symp)->n_value); 	\
   }
 
+#define INTERNALIZE_SYMBOL(intern, extern, abfd)			\
+  {									\
+    (intern).n_type = bfd_h_get_8 (abfd, (extern)->e_type);		\
+    (intern).n_strx = bfd_h_get_32 (abfd, (extern)->e_strx);		\
+    (intern).n_desc = bfd_h_get_16 (abfd, (extern)->e_desc);  		\
+    (intern).n_value = bfd_h_get_32 (abfd, (extern)->e_value);		\
+  }
+
 /* Invariant: The symbol pointed to by symbuf_idx is the first one
    that hasn't been swapped.  Swap the symbol at the same time
    that symbuf_idx is incremented.  */
@@ -889,13 +897,18 @@ static char *
 dbx_next_symbol_text (objfile)
      struct objfile *objfile;
 {
+  struct internal_nlist nlist;
+
   if (symbuf_idx == symbuf_end)
     fill_symbuf (symfile_bfd);
+
   symnum++;
-  SWAP_SYMBOL(&symbuf[symbuf_idx], symfile_bfd);
+  INTERNALIZE_SYMBOL(nlist, &symbuf[symbuf_idx], symfile_bfd);
   OBJSTAT (objfile, n_stabs++);
-  return symbuf[symbuf_idx++].n_strx + stringtab_global
-	  + file_string_table_offset;
+
+  symbuf_idx++;
+
+  return nlist.n_strx + stringtab_global + file_string_table_offset;
 }
 
 /* Initialize the list of bincls to contain none and have some
@@ -1121,7 +1134,9 @@ read_dbx_symtab (section_offsets, objfile, text_addr, text_size)
      CORE_ADDR text_addr;
      int text_size;
 {
-  register struct internal_nlist *bufp = 0;	/* =0 avoids gcc -Wall glitch */
+  register struct external_nlist *bufp = 0;	/* =0 avoids gcc -Wall glitch */
+  struct internal_nlist nlist;
+
   register char *namestring;
   int nsl;
   int past_first_source_file = 0;
@@ -1188,9 +1203,10 @@ read_dbx_symtab (section_offsets, objfile, text_addr, text_size)
       /*
        * Special case to speed up readin.
        */
-      if (bufp->n_type == (unsigned char)N_SLINE) continue;
+      if (bfd_h_get_8 (abfd, bufp->e_type) == N_SLINE)
+	continue;
 
-      SWAP_SYMBOL (bufp, abfd);
+      INTERNALIZE_SYMBOL (nlist, bufp, abfd);
       OBJSTAT (objfile, n_stabs++);
 
       /* Ok.  There is a lot of code duplicated in the rest of this
@@ -1205,22 +1221,23 @@ read_dbx_symtab (section_offsets, objfile, text_addr, text_size)
 	    I've imbedded it in the following macro.
 	 */
       
-/* Set namestring based on bufp.  If the string table index is invalid, 
+/* Set namestring based on nlist.  If the string table index is invalid, 
    give a fake name, and print a single error message per symbol file read,
    rather than abort the symbol reading or flood the user with messages.  */
 
 /*FIXME: Too many adds and indirections in here for the inner loop.  */
 #define SET_NAMESTRING()\
-  if (((unsigned)bufp->n_strx + file_string_table_offset) >=		\
+  if (((unsigned)CUR_SYMBOL_STRX + file_string_table_offset) >=		\
       DBX_STRINGTAB_SIZE (objfile)) {					\
     complain (&string_table_offset_complaint, symnum);			\
     namestring = "<bad string table offset>";				\
   } else								\
-    namestring = bufp->n_strx + file_string_table_offset +		\
+    namestring = CUR_SYMBOL_STRX + file_string_table_offset +		\
 		 DBX_STRINGTAB (objfile)
 
-#define CUR_SYMBOL_TYPE bufp->n_type
-#define CUR_SYMBOL_VALUE bufp->n_value
+#define CUR_SYMBOL_TYPE nlist.n_type
+#define CUR_SYMBOL_VALUE nlist.n_value
+#define CUR_SYMBOL_STRX nlist.n_strx
 #define DBXREAD_ONLY
 #define START_PSYMTAB(ofile,secoff,fname,low,symoff,global_syms,static_syms)\
   start_psymtab(ofile, secoff, fname, low, symoff, global_syms, static_syms)
@@ -1234,11 +1251,11 @@ read_dbx_symtab (section_offsets, objfile, text_addr, text_size)
   if (DBX_SYMCOUNT (objfile) > 0			/* We have some syms */
 /*FIXME, does this have a bug at start address 0? */
       && last_o_file_start
-      && objfile -> ei.entry_point < bufp->n_value
+      && objfile -> ei.entry_point < nlist.n_value
       && objfile -> ei.entry_point >= last_o_file_start)
     {
       objfile -> ei.entry_file_lowpc = last_o_file_start;
-      objfile -> ei.entry_file_highpc = bufp->n_value;
+      objfile -> ei.entry_file_highpc = nlist.n_value;
     }
 
   if (pst)
@@ -1587,7 +1604,8 @@ read_ofile_symtab (pst)
      struct partial_symtab *pst;
 {
   register char *namestring;
-  register struct internal_nlist *bufp;
+  register struct external_nlist *bufp;
+  struct internal_nlist nlist;
   unsigned char type;
   unsigned max_symnum;
   register bfd *abfd;
@@ -1626,13 +1644,13 @@ read_ofile_symtab (pst)
       bfd_seek (symfile_bfd, sym_offset - symbol_size, SEEK_CUR);
       fill_symbuf (abfd);
       bufp = &symbuf[symbuf_idx++];
-      SWAP_SYMBOL (bufp, abfd);
+      INTERNALIZE_SYMBOL (nlist, bufp, abfd);
       OBJSTAT (objfile, n_stabs++);
 
       SET_NAMESTRING ();
 
       processing_gcc_compilation = 0;
-      if (bufp->n_type == N_TEXT)
+      if (nlist.n_type == N_TEXT)
 	{
 	  const char *tempstring = namestring;
 
@@ -1669,7 +1687,7 @@ read_ofile_symtab (pst)
   if (symbuf_idx == symbuf_end)
     fill_symbuf (abfd);
   bufp = &symbuf[symbuf_idx];
-  if (bufp->n_type != (unsigned char)N_SO)
+  if (bfd_h_get_8 (abfd, bufp->e_type) != N_SO)
     error("First symbol in segment of executable not a source symbol");
 
   max_symnum = sym_size / symbol_size;
@@ -1682,15 +1700,15 @@ read_ofile_symtab (pst)
       if (symbuf_idx == symbuf_end)
 	fill_symbuf(abfd);
       bufp = &symbuf[symbuf_idx++];
-      SWAP_SYMBOL (bufp, abfd);
+      INTERNALIZE_SYMBOL (nlist, bufp, abfd);
       OBJSTAT (objfile, n_stabs++);
 
-      type = bufp->n_type;
+      type = bfd_h_get_8 (abfd, bufp->e_type);
 
       SET_NAMESTRING ();
 
       if (type & N_STAB) {
-	  process_one_symbol (type, bufp->n_desc, bufp->n_value,
+	  process_one_symbol (type, nlist.n_desc, nlist.n_value,
 			      namestring, section_offsets, objfile);
       }
       /* We skip checking for a new .o or -l file; that should never
@@ -1823,7 +1841,7 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
     case N_FUN:
     case N_FNAME:
 
-      if (! strcmp (name, ""))
+      if (*name == '\000')
 	{
 	  /* This N_FUN marks the end of a function.  This closes off the
 	     current block.  */

@@ -32,3 +32,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define NO_MMCHECK
 
 #include <malloc.h>
+
+#define SIGQUIT 3
+#define SIGTRAP 5

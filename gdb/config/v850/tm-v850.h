@@ -46,6 +46,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define V1_REGNUM 11
 #define FP_REGNUM 29
 #define RP_REGNUM 31
+#define PS_REGNUM 37
 #define PC_REGNUM 64
 
 #define REGISTER_VIRTUAL_TYPE(REG) builtin_type_int
@@ -141,3 +142,7 @@ extern int v850_pc_in_call_dummy PARAMS ((CORE_ADDR pc));
 
 #define USE_STRUCT_CONVENTION(GCC_P, TYPE) \
   	(TYPE_NFIELDS (TYPE) > 1 || TYPE_LENGTH (TYPE) > 4)
+
+/* Define this for Wingdb */
+
+#define TARGET_V850

@@ -1,3 +1,22 @@
+Thu Oct 24 10:06:58 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* dbxread.c:  Don't swap symbols in place, since internal and
+	external forms may have different sizes.  Don't assume that an
+	internal_nlist has the same layout as an external_nlist.  Create
+	symbol for n_strx element so to hide specifics of nlist from
+	partial-stab.h. 
+	* partial-stab.h:  Don't reference dbxread symbols directly.  Use
+	CUR_SYMBOL_STRX instead.
+	* config/i386/xm-windows.h:  Define SIGQUIT and SIGTRAP.
+
+start-sanitize-v850
+	* config/v850/tm-v850.h:  Define PS_REGNUM and TARGET_V850 for
+	MSVC builds.
+	* mswin/gdbwin.c (reg_order):  Define register order for V850.
+	* mswin/gui.cpp (CGuiApp::InitInstance):  Define target name for
+	V850.
+	* mswin/regdoc.h:  Define MAXREGS for V850.
+end-sanitize-v850
 start-sanitize-v850
 Tue Oct 22 16:28:20 1996  Stu Grossman  (grossman@critters.cygnus.com)
 

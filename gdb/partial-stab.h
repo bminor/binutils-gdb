@@ -145,7 +145,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 	case N_UNDF:
 #ifdef DBXREAD_ONLY
-	  if (processing_acc_compilation && bufp->n_strx == 1) {
+	  if (processing_acc_compilation && CUR_SYMBOL_STRX == 1) {
 	    /* Deal with relative offsets in the string table
 	       used in ELF+STAB under Solaris.  If we want to use the
 	       n_strx field, which contains the name of the file,
@@ -154,7 +154,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 	    past_first_source_file = 1;
 	    file_string_table_offset = next_file_string_table_offset;
 	    next_file_string_table_offset =
-	      file_string_table_offset + bufp->n_value;
+	      file_string_table_offset + CUR_SYMBOL_VALUE;
 	    if (next_file_string_table_offset < file_string_table_offset)
 	      error ("string table offset backs up at %d", symnum);
   /* FIXME -- replace error() with complaint.  */
