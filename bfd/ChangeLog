@@ -1,5 +1,11 @@
 Tue Jul 11 15:19:53 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf64-sparc.c (elf_sparc_howto_table): Set howto for WDISP16 to
+	elf64_wdisp16_reloc.
+	(elf64_wdisp16_reloc): New static function.
+	(elf64_sparc_relocate_section): New static function.
+	(elf_backend_relocate_section): Define.
+
 	* libelf.h (struct elf_size_info): Change type of last argument to
 	swap_symbol_out from char * to PTR.
 	(bfd_elf32_swap_symbol_out): Update declaration.
