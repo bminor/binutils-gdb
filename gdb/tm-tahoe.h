@@ -71,6 +71,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define SAVED_PC_AFTER_CALL(frame) FRAME_SAVED_PC(frame)
 
 /* Wrong for cross-debugging.  I don't know the real values.  */
+#include <machine/param.h>
 #define TARGET_UPAGES UPAGES
 #define TARGET_NBPG NBPG
 
@@ -327,7 +328,7 @@ printf("POP_FRAME\n");							\
 /* Insert the specified number of args and function address
    into a call sequence of the above form stored at DUMMYNAME.  */
 
-#define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, type)   \
+#define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, valtype, using_gcc) \
 { int temp = (int) fun;				\
   *((char *) dummyname + 1) = nargs;		\
   bcopy(&temp,(char *)dummyname+3,4); }

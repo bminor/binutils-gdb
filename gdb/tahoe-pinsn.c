@@ -8,7 +8,7 @@
 #include "defs.h"
 #include "param.h"
 #include "symtab.h"
-#include "opcode.h"
+#include "tahoe-opcode.h"
 
 /* Tahoe instructions are never longer than this.  */
 #define MAXLEN 62
