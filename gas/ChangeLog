@@ -1,5 +1,8 @@
 Fri Jan 12 12:04:00 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* read.c (cons_worker): Only call mri_comment_end from flag_mri.
+	From James Carlson <carlson@xylogics.com>.
+
 	* expr.c (operand): Skip whitespace after a close parenthesis.
 	From James Carlson <carlson@xylogics.com>.
 
