@@ -1,5 +1,9 @@
 Fri Jan 27 16:13:42 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elf32-mips.c (mips_elf_final_link): If the size of an input
+	.reginfo section is zero, force it to the correct size, since the
+	linker emulation code may have clobbered it.
+
 	* elfcode.h (elf_sort_hdrs): Correct SHF_ALLOC test.
 	(assign_file_positions_except_relocs): Free sorted_hdrs.
 
