@@ -50,6 +50,7 @@ config
 configdos.bat
 configure.in
 debug.c
+doc
 expr.c
 expr.h
 flonum-const.c
@@ -100,7 +101,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.7  1992/02/13 10:13:19  rich
+# Revision 1.8  1992/02/14 00:21:34  pesch
+# It's OK to keep the doc subdirectory, really.
+#
+# Revision 1.7  1992/02/13  10:13:19  rich
 # clean up Sanitize for gas
 #
 # Revision 1.6  1992/01/17  20:54:32  rich
