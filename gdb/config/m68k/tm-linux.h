@@ -99,16 +99,9 @@
 
 #define GET_LONGJMP_TARGET(ADDR) m68k_get_longjmp_target(ADDR)
 
-/* Offset to saved PC in sigcontext, from <asm/sigcontext.h>.  */
-#define SIGCONTEXT_PC_OFFSET 26
-
 #undef FRAME_SAVED_PC
-#define FRAME_SAVED_PC(FRAME) \
-  (((FRAME)->signal_handler_caller \
-    ? sigtramp_saved_pc (FRAME) \
-    : read_memory_integer ((FRAME)->frame + 4, 4)))
+#define FRAME_SAVED_PC(frame) m68k_linux_frame_saved_pc (frame)
+extern CORE_ADDR m68k_linux_frame_saved_pc (struct frame_info *);
 
-extern CORE_ADDR sigtramp_saved_pc (struct frame_info *);
-
-#define IN_SIGTRAMP(pc,name) in_sigtramp (pc)
-extern int in_sigtramp (CORE_ADDR pc);
+#define IN_SIGTRAMP(pc,name) m68k_linux_in_sigtramp (pc)
+extern int m68k_linux_in_sigtramp (CORE_ADDR pc);

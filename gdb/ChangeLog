@@ -1,3 +1,18 @@
+2002-02-26  Andreas Schwab  <schwab@suse.de>
+
+	* config/m68k/tm-linux.h (FRAME_SAVED_PC): Define as
+	m68k_linux_frame_saved_pc.
+	(IN_SIGTRAMP): Define as m68k_linux_in_sigtramp instead of
+	in_sigtramp.
+	(SIGCONTEXT_PC_OFFSET): Remove.
+	* m68klinux-nat.c (m68k_linux_frame_saved_pc,
+	m68k_linux_sigtramp_saved_pc): New functions.
+	(IS_SIGTRAMP, IS_RT_SIGTRAMP): Define.
+	(SIGCONTEXT_PC_OFFSET): Moved here from config/m68k/tm-linux.h.
+	(UCONTEXT_PC_OFFSET): Define.
+	(m68k_linux_in_sigtramp): Renamed from in_sigtramp, handle both
+	non-RT and RT signal trampolines.
+
 2002-02-26  Richard Earnshaw  <rearnsha@arm.com>
 
 	* config/arm/tm-embed.h (TARGET_UPAGES): Delete.
