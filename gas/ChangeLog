@@ -1,3 +1,8 @@
+Tue Mar  8 14:18:15 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* config/obj-coffbfd.c (w_strings): Only copy strings out if
+	their symbols are going to be written.
+
 Tue Mar  8 11:49:27 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* messages.c (as_perror): Declare arguments const.
