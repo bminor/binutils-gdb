@@ -50,7 +50,6 @@
 	* config/ns32k/tm-umax.h (INVALID_FLOAT): Delete macro that was
 	already commented out.
 
->>>>>>> 1.2087
 2002-01-26  Andreas Schwab  <schwab@suse.de>
 
 	* config/m68k/nm-linux.h (FETCH_INFERIOR_REGISTERS): Define.
