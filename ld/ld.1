@@ -99,6 +99,7 @@ ld \- the GNU linker
 \&]
 .RB "[\|" \-V "\|]"
 .RB "[\|" \-v "\|]"
+.RB "[\|" \-\-verbose "\|]"
 .RB "[\|" \-\-version "\|]"
 .RB "[\|" \-warn\-common "\|]" 
 .RB "[\|" \-warn\-once "\|]" 
@@ -549,7 +550,7 @@ common storage allocation.
 Emulate the
 .I emulation
 linker.  You can list the available emulations with the
-.I \-V
+.I \-\-verbose
 option.  This option overrides the compiled-in default, which is the
 system for which you configured
 .BR ld .
@@ -753,14 +754,14 @@ turn serve as input to \c
 \&.
 
 .TP
-.B \-V
+.B \-\-verbose
 Display the version number for \c
 .B ld
 and list the supported emulations.
 Display which input files can and can not be opened.
 
 .TP
-.B \-v
+.B \-v, \-V
 Display the version number for \c
 .B ld\c
 \&.

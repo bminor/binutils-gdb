@@ -1,4 +1,13 @@
+Wed Oct 12 16:22:58 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* lexsup.c (parse_args): Change -V to be a synonym for -v.  Add
+	--verbose to get the old -V behaviour.
+	* ld.1, ld.texinfo: Document this change.
+
 Tue Sep 27 14:56:20 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Remove
+	assertion, since it could fail with a user defined linker script.
 
 	* ldexp.c (fold_name): For DEFINED case, don't try to look up the
 	name in the hash table during the first phase--the hash table does
