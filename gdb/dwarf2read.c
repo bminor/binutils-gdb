@@ -2939,18 +2939,18 @@ read_base_type (struct die_info *die, struct objfile *objfile)
   if (attr && DW_STRING (attr))
     {
       enum type_code code = TYPE_CODE_INT;
-      int is_unsigned = 0;
+      int type_flags = 0;
 
       switch (encoding)
 	{
 	case DW_ATE_address:
 	  /* Turn DW_ATE_address into a void * pointer.  */
 	  code = TYPE_CODE_PTR;
-	  is_unsigned = 1;
+	  type_flags |= TYPE_FLAG_UNSIGNED;
 	  break;
 	case DW_ATE_boolean:
 	  code = TYPE_CODE_BOOL;
-	  is_unsigned = 1;
+	  type_flags |= TYPE_FLAG_UNSIGNED;
 	  break;
 	case DW_ATE_complex_float:
 	  code = TYPE_CODE_COMPLEX;
@@ -2963,14 +2963,14 @@ read_base_type (struct die_info *die, struct objfile *objfile)
 	  break;
 	case DW_ATE_unsigned:
 	case DW_ATE_unsigned_char:
-	  is_unsigned = 1;
+	  type_flags |= TYPE_FLAG_UNSIGNED;
 	  break;
 	default:
 	  complain (&dwarf2_unsupported_at_encoding,
 		    dwarf_type_encoding_name (encoding));
 	  break;
 	}
-      type = init_type (code, size, is_unsigned, DW_STRING (attr), objfile);
+      type = init_type (code, size, type_flags, DW_STRING (attr), objfile);
       if (encoding == DW_ATE_address)
 	TYPE_TARGET_TYPE (type) = dwarf2_fundamental_type (objfile, FT_VOID);
     }

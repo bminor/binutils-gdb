@@ -1,3 +1,9 @@
+2001-12-08  Fred Fish  <fnf@redhat.com>
+
+	* dwarf2read.c (read_base_type): Rename is_unsigned to type_flags.
+	For unsigned types set TYPE_FLAG_UNSIGNED and pass it to
+	init_type().
+
 2001-12-08  Daniel Jacobowitz  <drow@mvista.com>
 
 	* Makefile.in (cp-valprint.o): Add dependency on $(cp_abi_h).
