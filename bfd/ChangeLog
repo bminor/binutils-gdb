@@ -1,5 +1,11 @@
 2005-03-16  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-ppc.c: Divide file into general and linker specific
+	functions.  Sort linker functions into roughly the order in which
+	they are called by the ELF linker code.
+
+2005-03-16  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf32-ppc.c (ppc_elf_create_linker_section): Set SEC_LINKER_CREATED
 	on section.  Correct comment, and add FIXME.
 	(ppc_elf_additional_program_headers): Don't bump header count for
