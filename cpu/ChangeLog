@@ -1,3 +1,9 @@
+2004-04-09  Daniel Jacobowitz  <drow@mvista.com>
+
+	Merge from mainline:
+	2004-03-30  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
+	* m32r.opc (parse_hi16): Fixed shigh(0xffff8000) bug.
+
 2004-01-14  Richard Sandiford  <rsandifo@redhat.com>
 
 	* frv.cpu (UNIT): Add IACC.

@@ -3272,8 +3272,7 @@ elf32_sparc_finish_dynamic_sections (output_bfd, info)
 		      splt->contents + splt->_raw_size - 4);
 	}
 
-      elf_section_data (splt->output_section)->this_hdr.sh_entsize =
-	PLT_ENTRY_SIZE;
+      elf_section_data (splt->output_section)->this_hdr.sh_entsize = 0;
     }
 
   /* Set the first entry in the global offset table to the address of

@@ -3687,7 +3687,7 @@ lang_check (void)
 	  if (! bfd_merge_private_bfd_data (input_bfd, output_bfd))
 	    {
 	      if (command_line.warn_mismatch)
-		einfo (_("%E%X: failed to merge target specific data of file %B\n"),
+		einfo (_("%P%X: failed to merge target specific data of file %B\n"),
 		       input_bfd);
 	    }
 	  if (! command_line.warn_mismatch)

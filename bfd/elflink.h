@@ -2434,6 +2434,11 @@ NAME(bfd_elf,size_dynamic_sections) (bfd *output_bfd,
 	  if (! elf_add_dynamic_entry (info, DT_FLAGS, info->flags))
 	    return FALSE;
 	}
+      else if (info->flags & DF_BIND_NOW)
+	{
+	  if (! elf_add_dynamic_entry (info, DT_BIND_NOW, 0))
+	    return FALSE;
+	}
 
       if (info->flags_1)
 	{

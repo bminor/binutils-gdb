@@ -29,6 +29,7 @@
 @kindex -relax
 @kindex -small
 @kindex -dsp
+@kindex -renesas
 
 @item -little
 Generate little endian code.
@@ -44,6 +45,10 @@ Align sections to 4 byte boundaries, not 16.
 
 @item -dsp
 Enable sh-dsp insns, and disable sh3e / sh4 insns.
+
+@item -renesas
+Disable optimization with section symbol for compatibility with
+Renesas assembler.
 
 @item -isa=sh4 | sh4a
 Specify the sh4 or sh4a instruction set.

@@ -1053,7 +1053,7 @@ read_a_source_file (char *name)
 #endif
 	  input_line_pointer--;
 	  /* Report unknown char as ignored.  */
-	  ignore_rest_of_line ();
+	  demand_empty_rest_of_line ();
 	}
 
 #ifdef md_after_pass_hook
@@ -3020,6 +3020,10 @@ s_text (int ignore ATTRIBUTE_UNUSED)
 #endif
 }
 
+
+/* Verify that we are at the end of a line.  If not, issue an error and
+   skip to EOL.  */
+
 void
 demand_empty_rest_of_line (void)
 {
@@ -3027,28 +3031,29 @@ demand_empty_rest_of_line (void)
   if (is_end_of_line[(unsigned char) *input_line_pointer])
     input_line_pointer++;
   else
-    ignore_rest_of_line ();
-
-  /* Return having already swallowed end-of-line.  */
+    {
+      if (ISPRINT (*input_line_pointer))
+	as_bad (_("junk at end of line, first unrecognized character is `%c'"),
+		 *input_line_pointer);
+      else
+	as_bad (_("junk at end of line, first unrecognized character valued 0x%x"),
+		 *input_line_pointer);
+      ignore_rest_of_line ();
+    }
+  
+  /* Return pointing just after end-of-line.  */
+  know (is_end_of_line[(unsigned char) input_line_pointer[-1]]);
 }
+
+/* Silently advance to the end of line.  Use this after already having
+   issued an error about something bad.  */
 
 void
 ignore_rest_of_line (void)
 {
-  /* For suspect lines: gives warning.  */
-  if (!is_end_of_line[(unsigned char) *input_line_pointer])
-    {
-      if (ISPRINT (*input_line_pointer))
-	as_warn (_("rest of line ignored; first ignored character is `%c'"),
-		 *input_line_pointer);
-      else
-	as_warn (_("rest of line ignored; first ignored character valued 0x%x"),
-		 *input_line_pointer);
-
-      while (input_line_pointer < buffer_limit
-	     && !is_end_of_line[(unsigned char) *input_line_pointer])
-	input_line_pointer++;
-    }
+  while (input_line_pointer < buffer_limit
+	 && !is_end_of_line[(unsigned char) *input_line_pointer])
+    input_line_pointer++;
 
   input_line_pointer++;
 
@@ -4376,6 +4381,10 @@ s_leb128 (int sign)
   md_flush_pending_output ();
 #endif
 
+#ifdef md_flush_pending_output
+  md_flush_pending_output ();
+#endif
+
   do
     {
       expression (&exp);
@@ -4738,7 +4747,7 @@ demand_copy_string (int *lenP)
     }
   else
     {
-      as_warn (_("missing string"));
+      as_bad (_("missing string"));
       retval = NULL;
       ignore_rest_of_line ();
     }
@@ -4814,7 +4823,7 @@ equals (char *sym_name, int reassign)
   if (flag_mri)
     {
       /* Check garbage after the expression.  */
-      ignore_rest_of_line ();
+      demand_empty_rest_of_line ();
       mri_comment_end (stop, stopc);
     }
 }

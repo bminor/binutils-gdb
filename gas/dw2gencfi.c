@@ -857,6 +857,7 @@ output_cie (struct cie_entry *cie)
     for (i = cie->first; i != cie->last; i = i->next)
       output_cfi_insn (i);
 
+  frag_align (2, 0, 0);
   symbol_set_value_now (end_address);
 }
 
@@ -906,8 +907,7 @@ output_fde (struct fde_entry *fde, struct cie_entry *cie,
   for (; first; first = first->next)
     output_cfi_insn (first);
 
-  if (align)
-    frag_align (align, 0, 0);
+  frag_align (align, 0, 0);
   symbol_set_value_now (end_address);
 }
 
@@ -1035,7 +1035,7 @@ cfi_finish (void)
       struct cie_entry *cie;
 
       cie = select_cie_for_fde (fde, &first);
-      output_fde (fde, cie, first, fde->next == NULL ? EH_FRAME_ALIGNMENT : 0);
+      output_fde (fde, cie, first, fde->next == NULL ? EH_FRAME_ALIGNMENT : 2);
     }
 
   flag_traditional_format = save_flag_traditional_format;

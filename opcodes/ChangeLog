@@ -1,3 +1,28 @@
+2004-04-09  Daniel Jacobowitz  <drow@mvista.com>
+
+	Merge from mainline:
+	2004-03-30  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
+	* m32r-asm.c: Regenerate.
+
+	2004-03-08  Nick Clifton  <nickc@redhat.com>
+	* po/de.po: Updated German translation.
+
+	2004-02-26  Andrew Stubbs  <andrew.stubbs@superh.com>
+	* sh-opc.h: Move fsca and fsrra instructions from sh4a to sh4.
+	Also correct mistake in the comment.
+
+	2004-02-26  Andrew Stubbs <andrew.stubbs@superh.com>
+	* sh-dis.c (print_insn_sh): Add REG_N_D nibble type to
+	ensure that double registers have even numbers.
+	Add REG_N_B01 for nn01 (binary 01) nibble to ensure
+	that reserved instruction 0xfffd does not decode the same
+	as 0xfdfd (ftrv).
+	* sh-opc.h: Add REG_N_D nibble type and use it whereever
+	REG_N refers to a double register.
+	Add REG_N_B01 nibble type and use it instead of REG_NM
+	in ftrv.
+	Adjust the bit patterns in a few comments.
+
 2004-04-08  Alan Modra  <amodra@bigpond.net.au>
 
 	Apply from mainline.

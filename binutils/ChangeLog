@@ -1,3 +1,56 @@
+2004-04-09  Daniel Jacobowitz  <drow@mvista.com>
+
+	Merge from mainline:
+	2004-04-07  Benjamin Monate  <benjamin.monate@cea.fr>
+	PR 86
+	* arsup.c (ar_save): Use smart_rename.
+
+	2004-04-01  Dean Luick <luick@cray.com>
+	* readelf.c (display_debug_pubnames): Align offset and data
+	columns.
+	(read_and_display_attr_value): Add missing break;
+	(debug_displays): Enable the display of the .debug_pubtypes
+	section.
+
+	2004-03-21  Richard Henderson  <rth@redhat.com>
+	* readelf.c (display_debug_frames): Don't crash for mismatched
+	DW_CFA_restore_state.
+
+	2004-03-10  Ben Elliston  <bje@gnu.org>
+	* MAINTAINERS: Update my mail address.
+
+	2004-03-08  Danny Smith  <dannysmith@users.sourceforge.net>
+	* deflex.l: Handle "PRIVATE" string.
+	* defparse.y (%token): Add PRIVATE.
+	(%type): Add opt_PRIVATE.
+	(expline): Pass opt_PRIVATE to def_exports.
+	(opt_PRIVATE): Handle PRIVATE token.
+	* dlltool.h (def_exports): Add 7th param for private flag to
+	declaration.
+	* dlltool.c: Add PRIVATE to comment on EXPORTS syntax.
+	(struct export): Add 'private' field.
+	(def_exports): Set 'private' field of struct exports.
+	(scan_drectve_symbols): Adjust calls to def_exports.
+	(scan_filtered_symbols): Likewise.
+	(dump_def_info): Print 'private' field.
+	(gen_def_file): Likewise.
+	(gen_lib_file): Skip generation of lib object if private.
+	Delete tmp object files in same order as they were generated.
+	Don't delete non-existent private object files.
+
+	2004-02-27  Andreas Schwab  <schwab@suse.de>
+	* ar.c (main): Support POSIX-compatible argument parsing.
+
+	2004-02-23  Daniel Lucq  <daniel@lucq.org>
+	* readelf.c (process_mips_specific): Print conflictsno as an
+	unsigned long.
+
+	2004-02-21  Dmitry Timoshkov  <dmitry@baikal.ru>
+	* dlltool.c (gen_exp_file): Always output names for forwarded symbols.
+
+	2004-02-19  Jakub Jelinek  <jakub@redhat.com>
+	* objcopy.c (copy_section): Avoid warnings.
+
 2004-02-14  Andrew Cagney  <cagney@redhat.com>
 
 	* ar.c (remove_output): Use bfd_cache_close.

@@ -1,3 +1,134 @@
+2004-04-09  Daniel Jacobowitz  <drow@mvista.com>
+
+	Merge from mainline:
+	2004-04-07  Alan Modra  <amodra@bigpond.net.au>
+	PR 96
+	* config/tc-ppc.c (ppc_elf_suffix): Add valid32 and valid64 fields
+	to struct map_bfd.  Adjust MAP macro, and define MAP32, MAP64.
+	Update "mapping".  Restrict some @ modifiers to 32 bit.
+
+	2004-04-01  Asgari Jinia  <asgarij@kpitcummins.com>
+	Dhananjay Deshpande <dhananjayd@kpitcummins.com>
+
+	* config/tc-sh.c (dont_adjust_reloc_32): New variable.
+	(sh_fix_adjustable): Avoid adjusting BFD_RELOC_32 when
+	dont_adjust_reloc_32 is set.
+	(md_longopts): Add option -renesas.
+	(md_parse_option, md_show_usage): Likewise.
+	* doc/c-sh.texi: Likewise.
+
+	2004-04-01  Dave Korn  <dk@artimi.com>
+	* config/tc-dlx.c (md_assemble): set fx_no_overflow flag for
+	hi16 and lo16 fixS structs.
+	(md_assemble): generate bit_fixS for RELOC_DLX_LO16 in
+	exactly the same way as for RELOC_DLX_REL16.
+	(machine_ip): properly respect LO flag in the_insn and
+	output RELOC_DLX_LO16 rather than RELOC_DLX_16.
+	(md_apply_fix3): apply RELOC_DLX_LO16.
+
+	2004-03-19  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+	* tc-hppa.c (cons_fix_new_hppa): Check for PC relative base type.
+	(pa_comm): Set BSF_OBJECT in symbol flags.
+
+	2004-03-18  Nathan Sidwell  <nathan@codesourcery.com>
+	* read.c (read_a_source_file): Use demand_empty_rest_of_line.
+	(demand_empty_rest_of_line): Issue an error here.
+	(ignore_rest_of_line): Silently skip to end.
+	(demand_copy_string): Issue an error, not warning.
+	(equals): Likewise.
+	* config/obj-elf.c (obj_elf_section_name): Likewise.
+	(obj_elf_section): Likewise.
+	* config/tc-arc.c (arc_extoper): Remove bogus NULL checks.
+	(arc_extinst): Likewise.
+	* config/tc-ia64.c (dot_saveb): Use demand_empty_rest_of_line.
+	(dot_spill): Likewise.
+	(dot_unwabi): Likewise.
+	(dot_prologue): Likewise.
+
+	2004-03-18  Nathan Sidwell  <nathan@codesourcery.com>
+	* expr.c (operand): Reject ++ and --.
+	(operator): Likewise.
+
+	2004-03-12  Bob Wilson  <bob.wilson@acm.org>
+	* read.c (s_leb128): Call md_flush_pending_output.
+
+	2004-03-07  Andreas Schwab  <schwab@suse.de>
+	* doc/c-hppa.texi (HPPA Directives): Fix typo.
+
+	2004-03-07  Richard Henderson  <rth@redhat.com>
+	* dw2gencfi.c (output_cie): Align length to 4 byte boundary.
+	(cfi_finish): Likewise for fde.
+
+	2004-03-05  H.J. Lu  <hongjiu.lu@intel.com>
+	* config/tc-ia64.c (md_assemble): Properly handle NULL
+	align_frag.
+	(ia64_handle_align): Don't abort if failed to add a stop bit.
+
+	2004-03-04  H.J. Lu  <hongjiu.lu@intel.com>
+	* Makefile.in: Regenerated.
+	* aclocal.m4: Likewise.
+	* configure: Likewise.
+	* doc/Makefile.in: Likewise.
+
+	2004-03-03  H.J. Lu  <hongjiu.lu@intel.com>
+	* config/tc-ia64.c (dot_align): New.
+	(ia64_do_align): Make it static.
+	(md_pseudo_table): Use "dot_align" for "align".
+	(ia64_md_do_align): Don't set align_frag here.
+	(ia64_handle_align): Add a stop bit to the previous bundle if
+	needed.
+
+	* config/tc-ia64.h (ia64_do_align): Removed.
+
+	2004-03-02  H.J. Lu  <hongjiu.lu@intel.com>
+	* config/tc-ia64.c (align_frag): New.
+	(md_assemble): Set the tc_frag_data field in align_frag for
+	IA64_OPCODE_FIRST instructions.
+	(ia64_md_do_align): Set align_frag.
+	(ia64_handle_align): Add a stop bit if needed.
+
+	* config/tc-ia64.h (TC_FRAG_TYPE): New.
+	(TC_FRAG_INIT): New.
+
+	2004-02-27  Nick Clifton  <nickc@redhat.com>
+	* config/tc-sh.c (get_operand): Revert previous delta.
+	(tc_gen_reloc): Check for an unknown reloc type before processing
+	the addend.
+
+	2004-02-27  Hannes Reinecke  <hare@suse.de>
+	* config/tc-s390.c (s390_insn): Correct range check for opcode in
+	.insn pseudo operation.
+
+	2004-02-27  Anil Paranjpe  <anilp1@kpitcummins.com>
+	* config/tc-sh.c (get_operand):  In case of #Imm, check has been
+	added for wrong syntax.
+
+	2004-02-26  Andrew Stubbs <andrew.stubbs@superh.com>
+	* config/tc-sh.c (build_Mytes): Add REG_N_D and REG_N_B01
+	nibble types to assembler.
+
+	2004-02-25  Fred Fish  <fnf@redhat.com>
+	* config/tc-iq2000.c: Add missing \n\ in multiline string literal.
+
+	2004-02-20  James E Wilson  <wilson@specifixinc.com>
+	* config/tc-ia64.c (slot_index): New arg before_relax.  Use instead of
+	finalize_syms.
+	(fixup_unw_records): New arg before_relax.  Pass to slot_index.
+	(ia64_estimate_size_before_relax): New.
+	(ia64_convert_frag): Pass 0 to fixup_unw_records.  Add comment.
+	(generate_unwind_image): Pass 1 to fixup_unw_records.
+	* config/tc-ia64.h (ia64_estimate_size_before_relax): Declare.
+	(md_estimate_size_before_relax): Call ia64_estimate_size_before_relax.
+
+	2004-02-19  Jakub Jelinek  <jakub@redhat.com>
+	* stabs.c (generate_asm_file): Avoid warning about use of
+	uninitialized variable.
+
+	2004-02-18  David Mosberger  <davidm@hpl.hp.com>
+	* config/tc-ia64.c (ia64_flush_insns): In addition to prologue,
+	body, and endp, allow unwind records which do not have a "t"
+	(time/instruction) field.
+
 2004-03-22  Bob Wilson  <bob.wilson@acm.org>
 
 	* config/tc-xtensa.c (xtensa_post_relax_hook): Create literal

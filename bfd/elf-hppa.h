@@ -811,6 +811,28 @@ elf_hppa_reloc_final_type (bfd *abfd,
 	    }
 	  break;
 
+	case 32:
+	  switch (field)
+	    {
+	    case e_fsel:
+	      final_type = R_PARISC_PCREL32;
+	      break;
+	    default:
+	      return R_PARISC_NONE;
+	    }
+	  break;
+
+	case 64:
+	  switch (field)
+	    {
+	    case e_fsel:
+	      final_type = R_PARISC_PCREL64;
+	      break;
+	    default:
+	      return R_PARISC_NONE;
+	    }
+	  break;
+
 	default:
 	  return R_PARISC_NONE;
 	}

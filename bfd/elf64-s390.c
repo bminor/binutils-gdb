@@ -1844,9 +1844,7 @@ allocate_dynrelocs (h, inf)
 
   if (info->shared)
     {
-      if ((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0
-	  && ((h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0
-	      || info->symbolic))
+      if (SYMBOL_REFERENCES_LOCAL (info, h))
 	{
 	  struct elf_s390_dyn_relocs **pp;
 
@@ -2529,10 +2527,7 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
 		    && r_type != R_390_PC32DBL
 		    && r_type != R_390_PC64)
 		   || (h != NULL
-		       && h->dynindx != -1
-		       && (! info->symbolic
-			   || (h->elf_link_hash_flags
-			       & ELF_LINK_HASH_DEF_REGULAR) == 0))))
+		       && !SYMBOL_REFERENCES_LOCAL (info, h))))
 	      || (ELIMINATE_COPY_RELOCS
 		  && !info->shared
 		  && h != NULL

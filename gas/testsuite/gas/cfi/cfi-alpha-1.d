@@ -2,7 +2,7 @@
 #name: CFI on alpha
 The section .eh_frame contains:
 
-00000000 0000000f 00000000 CIE
+00000000 00000010 00000000 CIE
   Version:               1
   Augmentation:          "zR"
   Code alignment factor: 4
@@ -11,12 +11,19 @@ The section .eh_frame contains:
   Augmentation data:     1b
 
   DW_CFA_def_cfa_reg: r30
+  DW_CFA_nop
 
-00000013 00000019 00000017 FDE cie=00000000 pc=0000001b..0000004f
-  DW_CFA_advance_loc: 24 to 00000033
+00000014 00000020 00000018 FDE cie=00000000 pc=0000001c..00000050
+  DW_CFA_advance_loc: 24 to 00000034
   DW_CFA_def_cfa: r15 ofs 32
   DW_CFA_offset: r26 at cfa-32
   DW_CFA_offset: r9 at cfa-24
   DW_CFA_offset: r15 at cfa-16
   DW_CFA_offset: r34 at cfa-8
-
+  DW_CFA_nop
+  DW_CFA_nop
+  DW_CFA_nop
+  DW_CFA_nop
+  DW_CFA_nop
+  DW_CFA_nop
+  DW_CFA_nop

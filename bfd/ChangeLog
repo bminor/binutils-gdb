@@ -1,3 +1,114 @@
+2004-04-09  Daniel Jacobowitz  <drow@mvista.com>
+
+	Merge from mainline:
+	2004-04-06  Daniel Jacobowitz  <drow@mvista.com>
+	* elfxx-mips.c (MIPS_ELF_STUB_SECTION_NAME): Always use
+	".MIPS.stubs".
+
+	2004-04-05  H.J. Lu  <hongjiu.lu@intel.com>
+	* elfxx-ia64.c (elfNN_ia64_size_dynamic_sections): Always
+	reserve the memory for dynamic linker
+
+	2004-04-01  Andy Chittenden  <achittenden@bluearc.com>
+	* stabs.c (struct stab_link_includes_totals): Add field 'symb'
+	that keeps the characters in a B_INCL..B_EINCL range.
+	(_bfd_link_section_stabs): When computing the sum of the
+	characters in a B_INCL..B_EINCL range also keep a copy of those
+	characters.  Use this information to distinguish between
+	include sections that have the same sum and the same length
+	but which are nevertheless unique.
+
+	2004-03-31  Andy Chittenden <achittenden@bluearc.com>
+	* stabs.c (struct stab_link_includes_totals): Rename field 'total'
+	to 'sum_chars' and add field 'num_chars'.
+	(_bfd_link_section_stabs): When computing the sum of the
+	characters in a B_INCL..B_EINCL range also keep a count of the
+	number of characters.  Use this information to help distinguish
+	between include sections when have the same sum but which
+	nevertheless are still unique.
+
+	2004-03-31  Mattias Engdegård  <mattias@virtutech.se>
+	* stabs.c (_bfd_link_section_stabs): Do not skip N_EXCL stabs.
+
+	2004-03-19  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+	* elf32-hppa.c (elf32_hppa_check_relocs): Handle R_PARISC_PCREL32.
+	(final_link_relocate): Likewise.
+
+	2004-03-19  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+	* elf-hppa.h (elf_hppa_reloc_final_type): Handle selectors for
+	R_PARISC_PCREL32 and R_PARISC_PCREL64 relocations.
+
+	2004-03-17  Nathan Sidwell  <nathan@codesourcery.com>
+	* elfxx-mips.c (_bfd_mips_elf_merge_private_bfd_data): Correct
+	logic for null_input_bfd detection.
+
+	2004-03-12  Nick Clifton  <nickc@redhat.com>
+	Dave Murphy  <wintermute2k4@ntlworld.com>
+
+	* elf32-arm.h (elf32_arm_merge_private_bfd_data): Skip most checks
+	if the input bfd does not contain any code.
+
+	2004-03-02  Alexandre Oliva  <aoliva@redhat.com>
+	* elf32-frv.c (struct frv_pic_relocs_info): Added fixups and
+	dynrelocs.
+	(_frv_count_got_plt_entries): Initialize them.
+	(frv_pic_relocs_info_find): Add insert argument.  Adjust all
+	callers.
+	(frv_pic_relocs_info_for_global): Likewise.
+	(frv_pic_relocs_info_for_local): Likewise.
+	(frv_pic_merge_early_relocs_info): New.
+	(_frv_resolve_final_relocs_info): Use it in case one entry maps to
+	another.
+	(_frv_add_dyn_reloc): Add entry argument.  Adjust all callers.
+	Check that we don't exceed the allocated count for entry.
+	(_frv_add_rofixup): Likewise.
+	(_frv_emit_got_relocs_plt_entries): Adjust for coding standards.
+	(elf32_frv_finish_dynamic_sections): Improve error message in case
+	we emit too few rofixup entries.
+
+	2004-02-27  Alexandre Oliva  <aoliva@redhat.com>
+	* elf32-frv.c (elf32_frv_howto_table) <R_FRV_LABEL16>: Set
+	complain_on_overflow to signed.
+
+	2004-02-27  Jakub Jelinek  <jakub@redhat.com>
+	* elf32-s390.c (allocate_dynrelocs): Use SYMBOL_REFERENCES_LOCAL
+	for pc relative relocs.
+	(elf_s390_relocate_section): Likewise.
+	* elf64-s390.c (allocate_dynrelocs): Use SYMBOL_REFERENCES_LOCAL
+	for pc relative relocs.
+	(elf_s390_relocate_section): Likewise.
+
+	2004-02-26  H.J. Lu  <hongjiu.lu@intel.com>
+	* elfxx-ia64.c (elfNN_ia64_check_relocs): Fix call to
+	count_dyn_reloc.
+
+	2004-02-25  H.J. Lu  <hongjiu.lu@intel.com>
+	* elfxx-ia64.c (elfNN_ia64_dyn_reloc_entry): Add the reltext.
+	field to track if a relocation is against readonly section.
+	(count_dyn_reloc): Take a new argument for rent->reltext.
+	(elfNN_ia64_check_relocs): Adjust call to count_dyn_reloc.
+	(get_reloc_section): Don't set ia64_info->reltext here.
+	(allocate_dynrel_entries): Set ia64_info->reltext here.
+
+	2004-02-24  Alexandre Oliva  <aoliva@redhat.com>
+	* elf32-frv.c (FRV_SYM_LOCAL): Weak undefined doesn't imply local.
+	(_frv_emit_got_relocs_plt_entries): Decay relocation to protected
+	function's descriptor to symbol+offset, and map local undefweak
+	symbol to NULL function descriptor.
+	(elf32_frv_relocate_section): Likewise.
+
+	2004-02-23  Jakub Jelinek  <jakub@redhat.com>
+	* elflink.h (size_dynamic_sections): If not adding DT_FLAGS and
+	DF_BIND_NOW is set in info->flags, create DT_BIND_NOW dynamic entry.
+
+	2004-02-21  Danny Smith  <daanysmith@users.sourceforge.net>
+	* peXXigen.c (_bfd_XXi_swap_scnhdr_out): Clear
+	IMAGE_SCN_MEM_WRITE on known sections only.
+
+	2004-02-19  Jakub Jelinek  <jakub@redhat.com>
+	* elf32-sparc.c (elf32_sparc_finish_dynamic_sections): Clear
+	.plt sh_entsize.
+
 2004-04-08  Richard Sandiford  <rsandifo@redhat.com>
 
 	* elflink.c: Include libiberty.h.

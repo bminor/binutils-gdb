@@ -93,6 +93,9 @@ struct elfNN_ia64_dyn_sym_info
     asection *srel;
     int type;
     int count;
+
+    /* Is this reloc against readonly section? */
+    bfd_boolean reltext;
   } *reloc_entries;
 
   /* TRUE when the section contents have been updated.  */
@@ -244,9 +247,6 @@ static asection *get_pltoff
 static asection *get_reloc_section
   PARAMS ((bfd *abfd, struct elfNN_ia64_link_hash_table *ia64_info,
 	   asection *sec, bfd_boolean create));
-static bfd_boolean count_dyn_reloc
-  PARAMS ((bfd *abfd, struct elfNN_ia64_dyn_sym_info *dyn_i,
-	   asection *srel, int type));
 static bfd_boolean elfNN_ia64_check_relocs
   PARAMS ((bfd *abfd, struct bfd_link_info *info, asection *sec,
 	   const Elf_Internal_Rela *relocs));
@@ -2176,18 +2176,12 @@ get_reloc_section (abfd, ia64_info, sec, create)
 	return NULL;
     }
 
-  if (sec->flags & SEC_READONLY)
-    ia64_info->reltext = 1;
-
   return srel;
 }
 
 static bfd_boolean
-count_dyn_reloc (abfd, dyn_i, srel, type)
-     bfd *abfd;
-     struct elfNN_ia64_dyn_sym_info *dyn_i;
-     asection *srel;
-     int type;
+count_dyn_reloc (bfd *abfd, struct elfNN_ia64_dyn_sym_info *dyn_i,
+		 asection *srel, int type, bfd_boolean reltext)
 {
   struct elfNN_ia64_dyn_reloc_entry *rent;
 
@@ -2208,6 +2202,7 @@ count_dyn_reloc (abfd, dyn_i, srel, type)
       rent->count = 0;
       dyn_i->reloc_entries = rent;
     }
+  rent->reltext = reltext;
   rent->count++;
 
   return TRUE;
@@ -2492,7 +2487,8 @@ elfNN_ia64_check_relocs (abfd, info, sec, relocs)
 	      if (!srel)
 		return FALSE;
 	    }
-	  if (!count_dyn_reloc (abfd, dyn_i, srel, dynrel_type))
+	  if (!count_dyn_reloc (abfd, dyn_i, srel, dynrel_type,
+				(sec->flags & SEC_READONLY) != 0))
 	    return FALSE;
 	}
     }
@@ -2799,6 +2795,8 @@ allocate_dynrel_entries (dyn_i, data)
 	default:
 	  abort ();
 	}
+      if (rent->reltext)
+	ia64_info->reltext = 1;
       rent->srel->_raw_size += sizeof (ElfNN_External_Rela) * count;
     }
 
@@ -2943,8 +2941,12 @@ elfNN_ia64_size_dynamic_sections (output_bfd, info)
   data.ofs = (data.ofs + 31) & (bfd_vma) -32;
 
   elfNN_ia64_dyn_sym_traverse (ia64_info, allocate_plt2_entries, &data);
-  if (data.ofs != 0)
+  if (data.ofs != 0 || ia64_info->root.dynamic_sections_created)
     {
+      /* FIXME: we always reserve the memory for dynamic linker even if
+	 there are no PLT entries since dynamic linker may assume the
+	 reserved memory always exists.  */
+
       BFD_ASSERT (ia64_info->root.dynamic_sections_created);
 
       ia64_info->plt_sec->_raw_size = data.ofs;

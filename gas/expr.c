@@ -1021,6 +1021,9 @@ operand (expressionS *expressionP)
       break;
 
     case '+':
+      /* Do not accept ++e as +(+e) */
+      if (input_line_pointer[1] == '+')
+	goto target_op;
       (void) operand (expressionP);
       break;
 
@@ -1038,6 +1041,10 @@ operand (expressionS *expressionP)
     case '!':
     case '-':
       {
+        /* Do not accept --e as -(-e) */
+	if (c == '-' && input_line_pointer[1] == '-')
+	  goto target_op;
+	
 	operand (expressionP);
 	if (expressionP->X_op == O_constant)
 	  {
@@ -1289,6 +1296,7 @@ operand (expressionS *expressionP)
 	}
       else
 	{
+	target_op:
 	  /* Let the target try to parse it.  Success is indicated by changing
 	     the X_op field to something other than O_absent and pointing
 	     input_line_pointer past the expression.  If it can't parse the
@@ -1540,6 +1548,13 @@ operator (int *num_chars)
     {
     default:
       return op_encoding[c];
+
+    case '+':
+    case '-':
+      /* Do not allow a++b and a--b to be a + (+b) and a - (-b) */
+      if (input_line_pointer[1] != c)
+	return op_encoding[c];
+      return O_illegal;
 
     case '<':
       switch (input_line_pointer[1])

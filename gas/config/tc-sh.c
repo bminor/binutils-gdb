@@ -1,6 +1,6 @@
 /* tc-sh.c -- Assemble code for the Renesas / SuperH SH
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
-   Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
+   2003, 2004  Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -131,6 +131,10 @@ int sh_relax;		/* set if -relax seen */
 /* Whether -small was seen.  */
 
 int sh_small;
+
+/* Flag to generate relocations against symbol values for local symbols.  */
+
+static int dont_adjust_reloc_32;
 
 /* preset architecture set, if given; zero otherwise.  */
 
@@ -2143,6 +2147,7 @@ build_Mytes (sh_opcode_info *opcode, sh_operand_info *operand)
 	  switch (i)
 	    {
 	    case REG_N:
+	    case REG_N_D:
 	      nbuf[index] = reg_n;
 	      break;
 	    case REG_M:
@@ -2158,6 +2163,9 @@ build_Mytes (sh_opcode_info *opcode, sh_operand_info *operand)
 	      break;
 	    case REG_B:
 	      nbuf[index] = reg_b | 0x08;
+	      break;
+	    case REG_N_B01:
+	      nbuf[index] = reg_n | 0x01;
 	      break;
 	    case IMM0_4BY4:
 	      insert (output + low_byte, BFD_RELOC_SH_IMM4BY4, 0, operand);
@@ -2840,6 +2848,7 @@ struct option md_longopts[] =
 #define OPTION_SMALL (OPTION_LITTLE + 1)
 #define OPTION_DSP (OPTION_SMALL + 1)
 #define OPTION_ISA                    (OPTION_DSP + 1)
+#define OPTION_RENESAS (OPTION_ISA + 1)
 
   {"relax", no_argument, NULL, OPTION_RELAX},
   {"big", no_argument, NULL, OPTION_BIG},
@@ -2847,8 +2856,10 @@ struct option md_longopts[] =
   {"small", no_argument, NULL, OPTION_SMALL},
   {"dsp", no_argument, NULL, OPTION_DSP},
   {"isa",                    required_argument, NULL, OPTION_ISA},
+  {"renesas", no_argument, NULL, OPTION_RENESAS},
+
 #ifdef HAVE_SH64
-#define OPTION_ABI                    (OPTION_ISA + 1)
+#define OPTION_ABI                    (OPTION_RENESAS + 1)
 #define OPTION_NO_MIX                 (OPTION_ABI + 1)
 #define OPTION_SHCOMPACT_CONST_CRANGE (OPTION_NO_MIX + 1)
 #define OPTION_NO_EXPAND              (OPTION_SHCOMPACT_CONST_CRANGE + 1)
@@ -2887,6 +2898,10 @@ md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
 
     case OPTION_DSP:
       preset_target_arch = arch_sh1_up & ~arch_sh2e_up;
+      break;
+
+    case OPTION_RENESAS:
+      dont_adjust_reloc_32 = 1;
       break;
 
     case OPTION_ISA:
@@ -2972,6 +2987,8 @@ SH options:\n\
 -little			generate little endian code\n\
 -big			generate big endian code\n\
 -relax			alter jump instructions for long displacements\n\
+-renesas		disable optimization with section symbol for\n\
+			compatibility with Renesas assembler.\n\
 -small			align sections to 4 byte boundaries, not 16\n\
 -dsp			enable sh-dsp insns, and disable floating-point ISAs.\n"));
 #ifdef HAVE_SH64
@@ -3521,6 +3538,7 @@ sh_fix_adjustable (fixS *fixP)
   if (fixP->fx_r_type == BFD_RELOC_32_PLT_PCREL
       || fixP->fx_r_type == BFD_RELOC_32_GOT_PCREL
       || fixP->fx_r_type == BFD_RELOC_SH_GOTPC
+      || ((fixP->fx_r_type == BFD_RELOC_32) && dont_adjust_reloc_32)
       || fixP->fx_r_type == BFD_RELOC_RVA)
     return 0;
 
@@ -4188,10 +4206,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
     rel->addend = 0;
 
   rel->howto = bfd_reloc_type_lookup (stdoutput, r_type);
-#ifdef OBJ_ELF
-  if (rel->howto->type == R_SH_IND12W)
-      rel->addend += fixp->fx_offset - 4;
-#endif
+
   if (rel->howto == NULL)
     {
       as_bad_where (fixp->fx_file, fixp->fx_line,
@@ -4201,6 +4216,10 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
       rel->howto = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_32);
       assert (rel->howto != NULL);
     }
+#ifdef OBJ_ELF
+  else if (rel->howto->type == R_SH_IND12W)
+    rel->addend += fixp->fx_offset - 4;
+#endif
 
   return rel;
 }

@@ -636,6 +636,9 @@ static struct gr {
   valueT value;
 } gr_values[128] = {{ 1, 0, 0 }};
 
+/* Remember the alignment frag.  */
+static fragS *align_frag;
+
 /* These are the routines required to output the various types of
    unwind records.  */
 
@@ -702,6 +705,7 @@ static int ar_is_in_integer_unit PARAMS ((int regnum));
 static void set_section PARAMS ((char *name));
 static unsigned int set_regstack PARAMS ((unsigned int, unsigned int,
 					  unsigned int, unsigned int));
+static void dot_align (int);
 static void dot_radix PARAMS ((int));
 static void dot_special_section PARAMS ((int));
 static void dot_proc PARAMS ((int));
@@ -898,9 +902,10 @@ static void process_unw_records PARAMS ((unw_rec_list *, vbyte_func));
 static int calc_record_size PARAMS ((unw_rec_list *));
 static void set_imask PARAMS ((unw_rec_list *, unsigned long, unsigned long, unsigned int));
 static unsigned long slot_index PARAMS ((unsigned long, fragS *,
-					 unsigned long, fragS *));
+					 unsigned long, fragS *,
+					 int));
 static unw_rec_list *optimize_unw_records PARAMS ((unw_rec_list *));
-static void fixup_unw_records PARAMS ((unw_rec_list *));
+static void fixup_unw_records PARAMS ((unw_rec_list *, int));
 static int convert_expr_to_ab_reg PARAMS ((expressionS *, unsigned int *, unsigned int *));
 static int convert_expr_to_xy_reg PARAMS ((expressionS *, unsigned int *, unsigned int *));
 static void generate_unwind_image PARAMS ((const char *));
@@ -1092,14 +1097,36 @@ ia64_flush_insns ()
      here.  Give an error for others.  */
   for (ptr = unwind.current_entry; ptr; ptr = ptr->next)
     {
-      if (ptr->r.type == prologue || ptr->r.type == prologue_gr
-	  || ptr->r.type == body || ptr->r.type == endp)
+      switch (ptr->r.type)
 	{
+	case prologue:
+	case prologue_gr:
+	case body:
+	case endp:
 	  ptr->slot_number = (unsigned long) frag_more (0);
 	  ptr->slot_frag = frag_now;
+	  break;
+
+	  /* Allow any record which doesn't have a "t" field (i.e.,
+	     doesn't relate to a particular instruction).  */
+	case unwabi:
+	case br_gr:
+	case copy_state:
+	case fr_mem:
+	case frgr_mem:
+	case gr_gr:
+	case gr_mem:
+	case label_state:
+	case rp_br:
+	case spill_base:
+	case spill_mask:
+	  /* nothing */
+	  break;
+
+	default:
+	  as_bad (_("Unwind directive not followed by an instruction."));
+	  break;
 	}
-      else
-	as_bad (_("Unwind directive not followed by an instruction."));
     }
   unwind.current_entry = NULL;
 
@@ -1109,9 +1136,8 @@ ia64_flush_insns ()
     as_bad ("qualifying predicate not followed by instruction");
 }
 
-void
-ia64_do_align (nbytes)
-     int nbytes;
+static void
+ia64_do_align (int nbytes)
 {
   char *saved_input_line_pointer = input_line_pointer;
 
@@ -2590,14 +2616,16 @@ set_imask (region, regmask, t, type)
 
 /* Return the number of instruction slots from FIRST_ADDR to SLOT_ADDR.
    SLOT_FRAG is the frag containing SLOT_ADDR, and FIRST_FRAG is the frag
-   containing FIRST_ADDR.  */
+   containing FIRST_ADDR.  If BEFORE_RELAX, then we use worst-case estimates
+   for frag sizes.  */
 
 unsigned long
-slot_index (slot_addr, slot_frag, first_addr, first_frag)
+slot_index (slot_addr, slot_frag, first_addr, first_frag, before_relax)
      unsigned long slot_addr;
      fragS *slot_frag;
      unsigned long first_addr;
      fragS *first_frag;
+     int before_relax;
 {
   unsigned long index = 0;
 
@@ -2612,10 +2640,10 @@ slot_index (slot_addr, slot_frag, first_addr, first_frag)
     {
       unsigned long start_addr = (unsigned long) &first_frag->fr_literal;
 
-      if (finalize_syms)
+      if (! before_relax)
 	{
-	  /* We can get the final addresses only after relaxation is
-	     done. */
+	  /* We can get the final addresses only during and after
+	     relaxation.  */
 	  if (first_frag->fr_next && first_frag->fr_next->fr_address)
 	    index += 3 * ((first_frag->fr_next->fr_address
 			   - first_frag->fr_address
@@ -2694,8 +2722,9 @@ optimize_unw_records (list)
    within each record to generate an image.  */
 
 static void
-fixup_unw_records (list)
+fixup_unw_records (list, before_relax)
      unw_rec_list *list;
+     int before_relax;
 {
   unw_rec_list *ptr, *region = 0;
   unsigned long first_addr = 0, rlen = 0, t;
@@ -2706,7 +2735,7 @@ fixup_unw_records (list)
       if (ptr->slot_number == SLOT_NUM_NOT_SET)
 	as_bad (" Insn slot not set in unwind record.");
       t = slot_index (ptr->slot_number, ptr->slot_frag,
-		      first_addr, first_frag);
+		      first_addr, first_frag, before_relax);
       switch (ptr->r.type)
 	{
 	case prologue:
@@ -2730,7 +2759,8 @@ fixup_unw_records (list)
 		  last_frag = last->slot_frag;
 		  break;
 		}
-	    size = slot_index (last_addr, last_frag, first_addr, first_frag);
+	    size = slot_index (last_addr, last_frag, first_addr, first_frag,
+			       before_relax);
 	    rlen = ptr->r.record.r.rlen = size;
 	    if (ptr->r.type == body)
 	      /* End of region.  */
@@ -2830,6 +2860,35 @@ fixup_unw_records (list)
     }
 }
 
+/* Estimate the size of a frag before relaxing.  We only have one type of frag
+   to handle here, which is the unwind info frag.  */
+
+int
+ia64_estimate_size_before_relax (fragS *frag,
+				 asection *segtype ATTRIBUTE_UNUSED)
+{
+  unw_rec_list *list;
+  int len, size, pad;
+
+  /* ??? This code is identical to the first part of ia64_convert_frag.  */
+  list = (unw_rec_list *) frag->fr_opcode;
+  fixup_unw_records (list, 0);
+
+  len = calc_record_size (list);
+  /* pad to pointer-size boundary.  */
+  pad = len % md.pointer_size;
+  if (pad != 0)
+    len += md.pointer_size - pad;
+  /* Add 8 for the header + a pointer for the personality offset.  */
+  size = len + 8 + md.pointer_size;
+
+  /* fr_var carries the max_chars that we created the fragment with.
+     We must, of course, have allocated enough memory earlier.  */
+  assert (frag->fr_var >= size);
+
+  return frag->fr_fix + size;
+}
+
 /* This function converts a rs_machine_dependent variant frag into a
   normal fill frag with the unwind image from the the record list.  */
 void
@@ -2839,8 +2898,9 @@ ia64_convert_frag (fragS *frag)
   int len, size, pad;
   valueT flag_value;
 
+  /* ??? This code is identical to ia64_estimate_size_before_relax.  */
   list = (unw_rec_list *) frag->fr_opcode;
-  fixup_unw_records (list);
+  fixup_unw_records (list, 0);
 
   len = calc_record_size (list);
   /* pad to pointer-size boundary.  */
@@ -2971,6 +3031,14 @@ convert_expr_to_xy_reg (e, xy, regp)
   else
     return -1;
   return 1;
+}
+
+static void
+dot_align (int arg)
+{
+  /* The current frag is an alignment frag.  */
+  align_frag = frag_now;
+  s_align_bytes (arg);
 }
 
 static void
@@ -3264,7 +3332,7 @@ generate_unwind_image (text_name)
 
   /* Generate the unwind record.  */
   list = optimize_unw_records (unwind.list);
-  fixup_unw_records (list);
+  fixup_unw_records (list, 1);
   size = calc_record_size (list);
 
   if (size > 0 || unwind.force_unwind_entry)
@@ -3549,7 +3617,7 @@ dot_saveb (dummy)
     add_unwind_entry (output_br_mem (brmask));
 
   if (!is_end_of_line[sep] && !is_it_end_of_statement ())
-    ignore_rest_of_line ();
+    demand_empty_rest_of_line ();
 }
 
 static void
@@ -3581,7 +3649,7 @@ dot_spill (dummy)
 
   sep = parse_operand (&e);
   if (!is_end_of_line[sep] && !is_it_end_of_statement ())
-    ignore_rest_of_line ();
+    demand_empty_rest_of_line ();
 
   if (e.X_op != O_constant)
     as_bad ("Operand to .spill must be a constant");
@@ -3857,7 +3925,7 @@ dot_unwabi (dummy)
     }
   sep = parse_operand (&e2);
   if (!is_end_of_line[sep] && !is_it_end_of_statement ())
-    ignore_rest_of_line ();
+    demand_empty_rest_of_line ();
 
   if (e1.X_op != O_constant)
     {
@@ -3952,7 +4020,7 @@ dot_prologue (dummy)
 	as_bad ("No second operand to .prologue");
       sep = parse_operand (&e2);
       if (!is_end_of_line[sep] && !is_it_end_of_statement ())
-	ignore_rest_of_line ();
+	demand_empty_rest_of_line ();
 
       if (e1.X_op == O_constant)
 	{
@@ -4900,7 +4968,7 @@ const pseudo_typeS md_pseudo_table[] =
     { "lb", dot_scope, 0 },
     { "le", dot_scope, 1 },
 #endif
-    { "align", s_align_bytes, 0 },
+    { "align", dot_align, 0 },
     { "regstk", dot_regstk, 0 },
     { "rotr", dot_rot, DYNREG_GR },
     { "rotf", dot_rot, DYNREG_FR },
@@ -9933,7 +10001,27 @@ md_assemble (str)
   flags = idesc->flags;
 
   if ((flags & IA64_OPCODE_FIRST) != 0)
-    insn_group_break (1, 0, 0);
+    {
+      /* The alignment frag has to end with a stop bit only if the
+	 next instruction after the alignment directive has to be
+	 the first instruction in an instruction group.  */
+      if (align_frag)
+	{
+	  while (align_frag->fr_type != rs_align_code)
+	    {
+	      align_frag = align_frag->fr_next;
+	      if (!align_frag)
+		break;
+	    }
+	  /* align_frag can be NULL if there are directives in
+	     between.  */
+	  if (align_frag && align_frag->fr_next == frag_now)
+	    align_frag->tc_frag_data = 1;
+	}
+
+      insn_group_break (1, 0, 0);
+    }
+  align_frag = NULL;
 
   if ((flags & IA64_OPCODE_NO_PRED) != 0 && qp_regno != 0)
     {
@@ -10766,15 +10854,42 @@ ia64_handle_align (fragp)
   static const unsigned char le_nop[]
     = { 0x0c, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
 	0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00};
+  static const unsigned char le_nop_stop[]
+    = { 0x0d, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
+	0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00};
 
   int bytes;
   char *p;
+  const unsigned char *nop;
 
   if (fragp->fr_type != rs_align_code)
     return;
 
+  /* Check if this frag has to end with a stop bit.  */
+  nop = fragp->tc_frag_data ? le_nop_stop : le_nop;
+
   bytes = fragp->fr_next->fr_address - fragp->fr_address - fragp->fr_fix;
   p = fragp->fr_literal + fragp->fr_fix;
+
+  /* If no paddings are needed, we check if we need a stop bit.  */ 
+  if (!bytes && fragp->tc_frag_data)
+    {
+      if (fragp->fr_fix < 16)
+#if 1
+	/* FIXME: It won't work with
+	   .align 16
+	   alloc r32=ar.pfs,1,2,4,0
+	 */
+	;
+#else
+	as_bad_where (fragp->fr_file, fragp->fr_line,
+		      _("Can't add stop bit to mark end of instruction group"));
+#endif
+      else
+	/* Bundles are always in little-endian byte order. Make sure
+	   the previous bundle has the stop bit.  */
+	*(p - 16) |= 1;
+    }
 
   /* Make sure we are on a 16-byte boundary, in case someone has been
      putting data into a text section.  */
@@ -10788,7 +10903,7 @@ ia64_handle_align (fragp)
     }
 
   /* Instruction bundles are always little-endian.  */
-  memcpy (p, le_nop, 16);
+  memcpy (p, nop, 16);
   fragp->fr_var = 16;
 }
 
