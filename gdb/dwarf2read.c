@@ -44,6 +44,7 @@
 #include "dwarf2expr.h"
 #include "dwarf2loc.h"
 #include "cp-support.h"
+#include "splay-tree.h"
 
 #include <fcntl.h>
 #include "gdb_string.h"
@@ -258,6 +259,8 @@ struct dwarf2_cu
      FT_NUM_MEMBERS compile time constant, which is the number of predefined
      fundamental types gdb knows how to construct.  */
   struct type *ftypes[FT_NUM_MEMBERS];	/* Fundamental types */
+
+  splay_tree partial_dies;
 };
 
 /* The line number information for a compilation unit (found in the
@@ -303,26 +306,6 @@ struct line_header
      header.  These point into dwarf_line_buffer.  */
   char *statement_program_start, *statement_program_end;
 };
-
-/* When we construct a partial symbol table entry we only
-   need this much information. */
-struct partial_die_info
-  {
-    enum dwarf_tag tag;
-    unsigned char has_children;
-    unsigned char is_external;
-    unsigned char is_declaration;
-    unsigned char has_type;
-    unsigned int offset;
-    unsigned int abbrev;
-    char *name;
-    int has_pc_info;
-    CORE_ADDR lowpc;
-    CORE_ADDR highpc;
-    struct dwarf_block *locdesc;
-    unsigned int language;
-    char *sibling;
-  };
 
 /* This data structure holds the information of an abbrev. */
 struct abbrev_info
@@ -400,6 +383,29 @@ struct dwarf_block
   {
     unsigned int size;
     char *data;
+  };
+
+/* When we construct a partial symbol table entry we only
+   need this much information. */
+struct partial_die_info
+  {
+    enum dwarf_tag tag;
+    unsigned char has_children;
+    unsigned char is_external;
+    unsigned char is_declaration;
+    unsigned char has_type;
+    unsigned char has_specification;
+    unsigned int offset;
+    unsigned int abbrev;
+    char *name;
+    int has_pc_info;
+    CORE_ADDR lowpc;
+    CORE_ADDR highpc;
+    struct dwarf_block *locdesc;
+    unsigned int language;
+    char *sibling;
+    struct attribute spec_attr;
+    struct partial_die_info *die_parent, *die_child, *die_sibling;
   };
 
 #ifndef ATTR_ALLOC_CHUNK
@@ -678,8 +684,13 @@ static void dwarf2_empty_abbrev_table (void *);
 static struct abbrev_info *dwarf2_lookup_abbrev (unsigned int,
 						 struct dwarf2_cu *);
 
-static char *read_partial_die (struct partial_die_info *,
+static void load_partial_dies (bfd *, char *, struct dwarf2_cu *);
+
+static char *load_partial_die (struct partial_die_info *,
 			       bfd *, char *, struct dwarf2_cu *);
+
+static void read_partial_die (struct partial_die_info *,
+			      bfd *, char *, struct dwarf2_cu *);
 
 static char *read_full_die (struct die_info **, bfd *, char *,
 			    struct dwarf2_cu *, int *);
@@ -1236,12 +1247,14 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 
       cu.list_in_scope = &file_symbols;
 
+      cu.partial_dies = NULL;
+
       /* Read the abbrevs for this compilation unit into a table */
       dwarf2_read_abbrevs (abfd, &cu);
       make_cleanup (dwarf2_empty_abbrev_table, cu.header.dwarf2_abbrevs);
 
       /* Read the compilation unit die */
-      info_ptr = read_partial_die (&comp_unit_die, abfd, info_ptr,
+      info_ptr = load_partial_die (&comp_unit_die, abfd, info_ptr,
 				   &cu);
 
       /* Set the language we're debugging */
@@ -1283,8 +1296,12 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 	  lowpc = ((CORE_ADDR) -1);
 	  highpc = ((CORE_ADDR) 0);
 
+	  load_partial_dies (abfd, info_ptr, &cu);
+
 	  info_ptr = scan_partial_symbols (info_ptr, &lowpc, &highpc,
 					   &cu, NULL);
+
+	  splay_tree_delete (cu.partial_dies);
 
 	  /* If we didn't find a lowpc, set it to highpc to avoid
 	     complaints from `maint check'.  */
@@ -1333,19 +1350,19 @@ scan_partial_symbols (char *info_ptr, CORE_ADDR *lowpc,
 {
   struct objfile *objfile = cu->objfile;
   bfd *abfd = objfile->obfd;
-  struct partial_die_info pdi;
+  struct partial_die_info pdi, *pdi_p;
 
   /* Now, march along the PDI's, descending into ones which have
      interesting children but skipping the children of the other ones,
      until we reach the end of the compilation unit.  */
 
-  while (1)
-    {
-      /* This flag tells whether or not info_ptr has gotten updated
-	 inside the loop.  */
-      int info_ptr_updated = 0;
+  read_partial_die (&pdi, abfd, info_ptr, cu);
+  pdi_p = &pdi;
 
-      info_ptr = read_partial_die (&pdi, abfd, info_ptr, cu);
+  while (pdi_p != NULL)
+    {
+      /* FIXME */
+      read_partial_die (&pdi, abfd, pdi_p->offset + dwarf_info_buffer, cu);
 
       /* Anonymous namespaces have no name but have interesting
 	 children, so we need to look at them.  Ditto for anonymous
@@ -1387,7 +1404,6 @@ scan_partial_symbols (char *info_ptr, CORE_ADDR *lowpc,
 		{
 		  info_ptr = add_partial_structure (&pdi, info_ptr, cu,
 						    namespace);
-		  info_ptr_updated = 1;
 		}
 	      break;
 	    case DW_TAG_enumeration_type:
@@ -1395,7 +1411,6 @@ scan_partial_symbols (char *info_ptr, CORE_ADDR *lowpc,
 		{
 		  info_ptr = add_partial_enumeration (&pdi, info_ptr, cu,
 						      namespace);
-		  info_ptr_updated = 1;
 		}
 	      break;
 	    case DW_TAG_base_type:
@@ -1412,13 +1427,13 @@ scan_partial_symbols (char *info_ptr, CORE_ADDR *lowpc,
 		namespace = "";
 	      info_ptr = add_partial_namespace (&pdi, info_ptr, lowpc, highpc,
 						cu, namespace);
-	      info_ptr_updated = 1;
 	      break;
 	    default:
 	      break;
 	    }
 	}
 
+      /* FIXME unnecessary now */
       if (pdi.tag == 0)
 	break;
 
@@ -1430,8 +1445,13 @@ scan_partial_symbols (char *info_ptr, CORE_ADDR *lowpc,
 	 only pdi.tag but also whether or not pdi.name is NULL) that
 	 this seems like the easiest way to handle the issue.  */
 
+      /*
       if (!info_ptr_updated)
 	info_ptr = locate_pdi_sibling (&pdi, info_ptr, abfd, cu);
+      */
+      pdi_p = pdi_p->die_sibling;
+      // if (pdi_p)
+      // fprintf_unfiltered (gdb_stderr, "scan: Advancing to DIE %x\n", pdi_p->offset);
     }
 
   return info_ptr;
@@ -1690,35 +1710,27 @@ add_partial_structure (struct partial_die_info *struct_pdi, char *info_ptr,
          places other than the tree structure of dies if there's any
          chance that a DW_AT_specification is involved. :-( */
 
-      char *next_child = info_ptr;
+      struct partial_die_info *child_pdi = struct_pdi->die_child;
 
-      while (1)
+      while (child_pdi != NULL)
 	{
-	  struct partial_die_info child_pdi;
-
-	  next_child = read_partial_die (&child_pdi, abfd, next_child,
-					 cu);
-	  if (!child_pdi.tag)
-	    break;
-	  if (child_pdi.tag == DW_TAG_subprogram)
+	  if (child_pdi->tag == DW_TAG_subprogram)
 	    {
-	      actual_class_name = class_name_from_physname (child_pdi.name);
+	      actual_class_name = class_name_from_physname (child_pdi->name);
 	      if (actual_class_name != NULL)
 		struct_pdi->name = actual_class_name;
 	      break;
 	    }
-	  else
-	    {
-	      next_child = locate_pdi_sibling (&child_pdi, next_child,
-					       abfd, cu);
-	    }
+
+	  child_pdi = child_pdi->die_sibling;
 	}
     }
 
   add_partial_symbol (struct_pdi, cu, namespace);
   xfree (actual_class_name);
 
-  return locate_pdi_sibling (struct_pdi, info_ptr, abfd, cu);
+  return (struct_pdi->offset + dwarf_info_buffer);
+  /* return locate_pdi_sibling (struct_pdi, info_ptr, abfd, cu); */
 }
 
 /* Read a partial die corresponding to an enumeration type.  */
@@ -1729,20 +1741,19 @@ add_partial_enumeration (struct partial_die_info *enum_pdi, char *info_ptr,
 {
   struct objfile *objfile = cu->objfile;
   bfd *abfd = objfile->obfd;
-  struct partial_die_info pdi;
+  struct partial_die_info *pdi_p;
 
   if (enum_pdi->name != NULL)
     add_partial_symbol (enum_pdi, cu, namespace);
   
-  while (1)
+  pdi_p = enum_pdi->die_child;
+  while (pdi_p)
     {
-      info_ptr = read_partial_die (&pdi, abfd, info_ptr, cu);
-      if (pdi.tag == 0)
-	break;
-      if (pdi.tag != DW_TAG_enumerator || pdi.name == NULL)
+      if (pdi_p->tag != DW_TAG_enumerator || pdi_p->name == NULL)
 	complaint (&symfile_complaints, "malformed enumerator DIE ignored");
       else
-	add_partial_symbol (&pdi, cu, namespace);
+	add_partial_symbol (pdi_p, cu, namespace);
+      pdi_p = pdi_p->die_sibling;
     }
 
   return info_ptr;
@@ -1772,8 +1783,8 @@ locate_pdi_sibling (struct partial_die_info *orig_pdi, char *info_ptr,
   while (1)
     {
       struct partial_die_info pdi;
-      
-      info_ptr = read_partial_die (&pdi, abfd, info_ptr, cu);
+
+      info_ptr = load_partial_die (&pdi, abfd, info_ptr, cu);
 
       if (pdi.tag == 0)
 	return info_ptr;
@@ -4282,21 +4293,166 @@ dwarf2_lookup_abbrev (unsigned int number, struct dwarf2_cu *cu)
   return NULL;
 }
 
+/* Returns nonzero if TAG represents a type.  */
+
+static int
+is_type_tag (int tag)
+{ 
+  switch (tag)
+    {
+    case DW_TAG_array_type:
+    case DW_TAG_class_type:
+    case DW_TAG_enumeration_type:
+    case DW_TAG_pointer_type:
+    case DW_TAG_reference_type:
+    case DW_TAG_string_type:
+    case DW_TAG_structure_type:
+    case DW_TAG_subroutine_type:
+    case DW_TAG_union_type:
+    case DW_TAG_ptr_to_member_type:
+    case DW_TAG_set_type:
+    case DW_TAG_subrange_type:
+    case DW_TAG_base_type:
+    case DW_TAG_const_type:
+    case DW_TAG_file_type:
+    case DW_TAG_packed_type:
+    case DW_TAG_volatile_type:
+    case DW_TAG_typedef:
+      return 1;
+    default:
+      return 0;
+    }
+}
+
+#if 0
+/* Returns non-zero if PART_DIE might be referenced via DW_AT_specification
+   or DW_AT_abstract_origin.  */
+
+static int
+maybe_specification_partial_die (struct partial_die_info *part_die)
+{
+  if (is_type_tag (part_die->tag))
+    return 1;
+
+  /* FIXME: How does DW_AT_abstract_origin play into this?  Is it
+     possible to reference abstract origin in another CU (probably);
+     will they all be declarations (probably not?).
+
+     Understand this issue before posting patch.  */
+  if (part_die->is_declaration && !part_die->has_specification)
+    return 1;
+
+  /* FIXME: That's all GCC checks (is_symbol_die); but GCC can emit
+     DW_AT_specification for non-declarations.  I think they ought to
+     be tagged as declarations... */
+
+  return 0;
+}
+#endif
+
+/* Load all DIEs that are interesting for partial symbols into memory.  */
+
+static void
+load_partial_dies (bfd *abfd, char *info_ptr, struct dwarf2_cu *cu)
+{
+  struct partial_die_info *part_die;
+  struct partial_die_info *parent_die, *last_die;
+
+  /* FIXME: Obviously we need a nesting level passed in for incremental use.  */
+  int nesting_level = 1;
+
+  /* But if we do incremental what do we do with this??? */
+  parent_die = NULL;
+  last_die = NULL;
+
+  /* FIXME: All sorts of memory management issues.  */
+  cu->partial_dies = splay_tree_new (splay_tree_compare_ints, NULL,
+				     (splay_tree_delete_value_fn) xfree);
+  part_die = xmalloc (sizeof (struct partial_die_info));
+
+  while (1)
+    {
+      //      fprintf_unfiltered (gdb_stderr, "Loading DIE %x\n", info_ptr - dwarf_info_buffer);
+      info_ptr = load_partial_die (part_die, abfd, info_ptr, cu);
+
+      if (part_die->tag == 0)
+	{
+	  if (--nesting_level == 0)
+	    {
+	      xfree (part_die);
+	      return;
+	    }
+	  last_die = parent_die;
+	  parent_die = parent_die->die_parent;
+	  continue;
+	}
+
+      /* Check whether this DIE is interesting enough to save.  */
+      if (!is_type_tag (part_die->tag)
+	  && part_die->tag != DW_TAG_enumerator
+	  && part_die->tag != DW_TAG_subprogram
+	  && part_die->tag != DW_TAG_variable
+	  && part_die->tag != DW_TAG_namespace)
+	{
+	  /* Otherwise we skip to the next sibling, if any.  */
+	  info_ptr = locate_pdi_sibling (part_die, info_ptr, abfd, cu);
+	  continue;
+	}
+
+      /* We'll save this DIE so link it in.  */
+      part_die->die_parent = parent_die;
+      part_die->die_sibling = NULL;
+      part_die->die_child = NULL;
+
+      if (last_die && last_die == parent_die)
+	last_die->die_child = part_die;
+      else if (last_die)
+	last_die->die_sibling = part_die;
+
+      last_die = part_die;
+
+      //      fprintf_unfiltered (gdb_stderr, "Inserting DIE %x\n", part_die->offset);
+      splay_tree_insert (cu->partial_dies, part_die->offset,
+			 (splay_tree_value) part_die);
+      part_die = xmalloc (sizeof (struct partial_die_info));
+
+      /* For some DIEs we want to follow their children (if any).  */
+      if (last_die->tag == DW_TAG_namespace
+	  || last_die->tag == DW_TAG_enumeration_type
+	  || last_die->tag == DW_TAG_class_type
+	  || last_die->tag == DW_TAG_structure_type)
+	{
+	  if (last_die->has_children)
+	    {
+	      nesting_level++;
+	      parent_die = last_die;
+	      continue;
+	    }
+	}
+
+      /* Otherwise we skip to the next sibling, if any.  */
+      info_ptr = locate_pdi_sibling (last_die, info_ptr, abfd, cu);
+
+      /* Back to the top, do it again.  */
+    }
+}
+
 /* Read a minimal amount of information into the minimal die structure.  */
 
 static char *
-read_partial_die (struct partial_die_info *part_die, bfd *abfd,
+load_partial_die (struct partial_die_info *part_die, bfd *abfd,
 		  char *info_ptr, struct dwarf2_cu *cu)
 {
   unsigned int abbrev_number, bytes_read, i;
   struct abbrev_info *abbrev;
   struct attribute attr;
-  struct attribute spec_attr;
-  int found_spec_attr = 0;
   int has_low_pc_attr = 0;
   int has_high_pc_attr = 0;
 
   *part_die = zeroed_partial_die;
+
+  part_die->offset = info_ptr - dwarf_info_buffer;
+
   abbrev_number = read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
   info_ptr += bytes_read;
   if (!abbrev_number)
@@ -4308,7 +4464,7 @@ read_partial_die (struct partial_die_info *part_die, bfd *abfd,
       error ("Dwarf Error: Could not find abbrev number %d [in module %s]", abbrev_number,
 		      bfd_get_filename (abfd));
     }
-  part_die->offset = info_ptr - dwarf_info_buffer;
+
   part_die->tag = abbrev->tag;
   part_die->has_children = abbrev->has_children;
   part_die->abbrev = abbrev_number;
@@ -4368,8 +4524,8 @@ read_partial_die (struct partial_die_info *part_die, bfd *abfd,
 	  break;
 	case DW_AT_abstract_origin:
 	case DW_AT_specification:
-	  found_spec_attr = 1;
-	  spec_attr = attr;
+	  part_die->has_specification = 1;
+	  part_die->spec_attr = attr;
 	  break;
 	case DW_AT_sibling:
 	  /* Ignore absolute siblings, they might point outside of
@@ -4382,27 +4538,6 @@ read_partial_die (struct partial_die_info *part_die, bfd *abfd,
 	  break;
 	default:
 	  break;
-	}
-    }
-
-  /* If we found a reference attribute and the die has no name, try
-     to find a name in the referred to die.  */
-
-  if (found_spec_attr && part_die->name == NULL)
-    {
-      struct partial_die_info spec_die;
-      char *spec_ptr;
-
-      spec_ptr = dwarf_info_buffer
-	+ dwarf2_get_ref_die_offset (&spec_attr, cu);
-      read_partial_die (&spec_die, abfd, spec_ptr, cu);
-      if (spec_die.name)
-	{
-	  part_die->name = spec_die.name;
-
-	  /* Copy DW_AT_external attribute if it is set.  */
-	  if (spec_die.is_external)
-	    part_die->is_external = spec_die.is_external;
 	}
     }
 
@@ -4420,6 +4555,54 @@ read_partial_die (struct partial_die_info *part_die, bfd *abfd,
 	  || (bfd_get_file_flags (abfd) & HAS_RELOC)))
     part_die->has_pc_info = 1;
   return info_ptr;
+}
+
+/* Like load_partial_die, but also patch up the partial DIE's name
+   according to its specification if necessary.  */
+/* FIXME: I've over-eagerly removed calls to this.  The fixup has to happen
+   sometime.  */
+static void
+read_partial_die (struct partial_die_info *part_die, bfd *abfd,
+		  char *info_ptr, struct dwarf2_cu *cu)
+{
+  struct partial_die_info *lookup_die = NULL;
+
+  if (cu->partial_dies)
+    {
+      splay_tree_node node;
+      node = splay_tree_lookup (cu->partial_dies,
+				info_ptr - dwarf_info_buffer);
+      if (node == NULL)
+	internal_error (__FILE__, __LINE__,
+			"could not find partial DIE in cache\n");
+
+      lookup_die = (struct partial_die_info *) node->value;
+
+      *part_die = *lookup_die;
+    }
+  else
+    info_ptr = load_partial_die (part_die, abfd, info_ptr, cu);
+
+  /* If we found a reference attribute and the die has no name, try
+     to find a name in the referred to die.  */
+
+  if (part_die->has_specification && part_die->name == NULL)
+    {
+      struct partial_die_info spec_die;
+      char *spec_ptr;
+
+      spec_ptr = dwarf_info_buffer
+	+ dwarf2_get_ref_die_offset (&part_die->spec_attr, cu);
+      read_partial_die (&spec_die, abfd, spec_ptr, cu);
+      if (spec_die.name)
+	{
+	  part_die->name = spec_die.name;
+
+	  /* Copy DW_AT_external attribute if it is set.  */
+	  if (spec_die.is_external)
+	    part_die->is_external = spec_die.is_external;
+	}
+    }
 }
 
 /* Read the die from the .debug_info section buffer.  Set DIEP to

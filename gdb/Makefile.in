@@ -1706,7 +1706,8 @@ dwarf2read.o: dwarf2read.c $(defs_h) $(bfd_h) $(symtab_h) $(gdbtypes_h) \
 	$(objfiles_h) $(elf_dwarf2_h) $(buildsym_h) $(demangle_h) \
 	$(expression_h) $(filenames_h) $(macrotab_h) $(language_h) \
 	$(complaints_h) $(bcache_h) $(dwarf2expr_h) $(dwarf2loc_h) \
-	$(cp_support_h) $(gdb_string_h) $(gdb_assert_h)
+	$(cp_support_h) $(gdb_string_h) $(gdb_assert_h) \
+	$(splay_tree_h)
 dwarfread.o: dwarfread.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(objfiles_h) \
 	$(elf_dwarf_h) $(buildsym_h) $(demangle_h) $(expression_h) \
 	$(language_h) $(complaints_h) $(gdb_string_h)

@@ -1,0 +1,24 @@
+2004-02-21  Daniel Jacobowitz  <drow@mvista.com>
+
+	* dwarf2read.c: Include "splay-tree.h".
+	(struct dwarf2_cu): Add splay tree for partial DIEs.
+	(struct partial_die_info): Move after struct attribute.
+	Add has_specification, spec_attr, die_parent, die_child,
+	and die_sibling fields.
+	(load_partial_dies): New function.
+	(load_partial_die): New function, broken out from read_partial_die.
+	Correct setting of part_die->offset.  Save any specification
+	attributes for later.
+	(read_partial_die): Look up DIEs in the splay tree.
+	(dwarf2_build_psymtabs_hard): Initialize partial_dies.  Call
+	load_partial_die to read in the compilation unit DIE.  Call
+	load_partial_dies.  Free the splay tree after use.
+	(scan_partial_symbols): Follow the die_sibling chain.
+	(add_partial_structure): Use die_child and die_sibling instead of
+	read_partial_die and locate_pdi_sibling.
+	(add_partial_enumeration): Likewise.
+	(locate_pdi_sibling): Use load_partial_die instead of
+	read_partial_die.
+	(is_type_tag): New function.
+
+	* Makefile.in (dwarf2read.o): Update dependencies.
