@@ -67,4 +67,9 @@ extern int core_addr_greaterthan (CORE_ADDR lhs, CORE_ADDR rhs);
 extern const struct floatformat *default_float_format (struct gdbarch *gdbarch);
 extern const struct floatformat *default_double_format (struct gdbarch *gdbarch);
 
+/* Helper function for targets that don't know how my arguments are
+   being passed */
+extern int frame_num_args_unknown (struct frame_info *fi);
+
+
 #endif

@@ -206,6 +206,23 @@ default_double_format (struct gdbarch *gdbarch)
     }
 }
 
+/* Misc helper functions for targets. */
+
+int
+frame_num_args_unknown (fi)
+     struct frame_info *fi;
+{
+  return -1;
+}
+
+
+int
+generic_register_convertible_not (num)
+     int num;
+{
+  return 0;
+}
+  
 /* */
 
 extern initialize_file_ftype __initialize_gdbarch_utils;

@@ -3613,24 +3613,6 @@ set_architecture_from_file (bfd *abfd)
 }
 
 
-/* Misc helper functions for targets. */
-
-int
-frame_num_args_unknown (fi)
-     struct frame_info *fi;
-{
-  return -1;
-}
-
-
-int
-generic_register_convertible_not (num)
-     int num;
-{
-  return 0;
-}
-  
-
 /* Disassembler */
 
 /* Pointer to the target-dependent disassembly function.  */

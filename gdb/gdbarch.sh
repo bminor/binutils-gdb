@@ -898,11 +898,6 @@ extern void set_architecture_from_arch_mach (enum bfd_architecture, unsigned lon
 
 extern void initialize_current_architecture (void);
 
-/* Helper function for targets that don't know how my arguments are
-   being passed */
-
-extern int frame_num_args_unknown (struct frame_info *fi);
-
 
 /* gdbarch trace variable */
 extern int gdbarch_debug;
@@ -2064,24 +2059,6 @@ set_architecture_from_file (bfd *abfd)
     }
 }
 
-
-/* Misc helper functions for targets. */
-
-int
-frame_num_args_unknown (fi)
-     struct frame_info *fi;
-{
-  return -1;
-}
-
-
-int
-generic_register_convertible_not (num)
-     int num;
-{
-  return 0;
-}
-  
 
 /* Disassembler */
 
