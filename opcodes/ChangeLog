@@ -1,3 +1,8 @@
+2001-08-26  Andreas Jaeger  <aj@suse.de>
+
+	* h8500-opc.h: Add default initializers to h8500_table to shut up
+	GCC warnings.
+
 2001-08-25  Andreas Jaeger  <aj@suse.de>
 
 	* tic54x-dis.c: Add unused attributes where needed.
