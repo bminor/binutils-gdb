@@ -1,3 +1,11 @@
+2004-04-30  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (unique_section_p): Pass section parm, return true on
+	group sections.
+	(output_section_callback): Adjust.
+	* ldlang.h (unique_section_p): Update prototype.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Adjust.
+
 2004-04-30  Eric Botcazou  <ebotcazou@act-europe.fr>
 
 	* ld.texinfo (--gc-sections): Remove restriction for 

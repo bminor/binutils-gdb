@@ -1142,7 +1142,7 @@ gld${EMULATION_NAME}_place_orphan (lang_input_statement_type *file, asection *s)
       isdyn = 1;
     }
 
-  if (isdyn || (!config.unique_orphan_sections && !unique_section_p (secname)))
+  if (isdyn || (!config.unique_orphan_sections && !unique_section_p (s)))
     {
       /* Look through the script to see where to place this section.  */
       os = lang_output_section_find (secname);

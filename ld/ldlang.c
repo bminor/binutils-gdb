@@ -121,10 +121,17 @@ stat_alloc (size_t size)
 }
 
 bfd_boolean
-unique_section_p (const char *secnam)
+unique_section_p (const asection *sec)
 {
   struct unique_sections *unam;
+  const char *secnam;
 
+  if (link_info.relocatable
+      && sec->owner != NULL
+      && bfd_is_group_section (sec->owner, sec))
+    return TRUE;
+
+  secnam = sec->name;
   for (unam = unique_section_list; unam; unam = unam->next)
     if (wildcardp (unam->name)
 	? fnmatch (unam->name, secnam, 0) == 0
@@ -1262,7 +1269,7 @@ output_section_callback (lang_wild_statement_type *ptr,
   lang_statement_union_type *before;
 
   /* Exclude sections that match UNIQUE_SECTION_LIST.  */
-  if (unique_section_p (bfd_get_section_name (file->the_bfd, section)))
+  if (unique_section_p (section))
     return;
 
   /* If the wild pattern was marked KEEP, the member sections
