@@ -60,7 +60,6 @@ rom68k.exp
 sh.exp
 sim.exp
 slite.exp
-sparclet-old.exp
 sparclet.exp
 udi.exp
 unix.exp
