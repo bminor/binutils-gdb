@@ -1,3 +1,8 @@
+Thu May 30 09:43:17 1996  Mark Alexander <marka@cygnus.com>
+
+	* dsrec.c (make_srec):  Fix calculation of address size
+	to allow addresses less than 0x100.
+
 Thu May 30 04:24:09 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
 
 	* ch-exp.c (ch_lex): In case of LOC_TYPEDEF call calculate_array_length.
