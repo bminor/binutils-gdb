@@ -1,4 +1,4 @@
-2002-11-12  David Carlton  <carlton@math.stanford.edu>
+2002-11-15  David Carlton  <carlton@math.stanford.edu>
 
 	* linespec.c (locate_first_half): New function.
 	(decode_line_1): Move code into locate_first_half.
