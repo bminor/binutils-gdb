@@ -1,6 +1,6 @@
 Tue Sep 14 09:12:17 1993  Jim Kingdon  (kingdon@cirdan.cygnus.com)
 
-	* paread.c: Include <time.h> before libbfd.h.
+	* paread.c, coffread.c, elfread.c: Include <time.h> before libbfd.h.
 
 	* paread.c: Define BYTES_IN_WORD before including aout/aout64.h.
 

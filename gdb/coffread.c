@@ -32,6 +32,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <string.h>
 
+#include <time.h> /* For time_t in libbfd.h.  */
 #include "libbfd.h"		/* FIXME secret internal data from BFD */
 #include "coff/internal.h"	/* Internal format of COFF symbols in BFD */
 #include "libcoff.h"		/* FIXME secret internal data from BFD */
@@ -316,7 +317,7 @@ coff_alloc_type (index)
   return type;
 }
 
-/* Manage the vector of line numbers.  */
+/* Manage the vector of line numbers.  FIXME:  Use record_line instead.  */
 
 static void
 coff_record_line (line, pc)
@@ -405,6 +406,11 @@ coff_end_symtab (objfile)
   struct symtab *symtab;
 
   last_source_start_addr = cur_src_start_addr;
+
+  /* For no good reason, this file stores the number of entries in a
+     separate variable instead of in line_vector->nitems.  Fix it.  */
+  if (line_vector)
+    line_vector->nitems = line_vector_index;
 
   /* For COFF, we only have one subfile, so we can just look at
      subfiles and not worry about there being other elements in the
@@ -1951,7 +1957,7 @@ coff_read_enum_type (index, length, lastsym)
 
 /* Fake up support for relocating symbol addresses.  FIXME.  */
 
-struct section_offsets coff_symfile_faker = {0};
+struct section_offsets coff_symfile_faker = {{0}};
 
 struct section_offsets *
 coff_symfile_offsets (objfile, addr)
