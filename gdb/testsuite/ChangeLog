@@ -1,5 +1,9 @@
 2004-02-03  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* gdb.cp/virtfunc.exp: Accept both "ctor()" and "ctor(void)".
+
+2004-02-03  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* gdb.cp/inherit.exp: Accept both "ctor()" and "ctor(void)".
 
 2004-02-03  Michael Chastain  <mec.gnu@mindspring.com>
