@@ -1,6 +1,6 @@
 /* objdump.c -- dump information about an object file.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001
+   2000, 2001, 2002
    Free Software Foundation, Inc.
 
 This file is part of GNU Binutils.
@@ -390,11 +390,9 @@ slurp_symtab (abfd)
   storage = bfd_get_symtab_upper_bound (abfd);
   if (storage < 0)
     bfd_fatal (bfd_get_filename (abfd));
-
   if (storage)
-    {
-      sy = (asymbol **) xmalloc (storage);
-    }
+    sy = (asymbol **) xmalloc (storage);
+
   symcount = bfd_canonicalize_symtab (abfd, sy);
   if (symcount < 0)
     bfd_fatal (bfd_get_filename (abfd));
@@ -424,11 +422,9 @@ slurp_dynamic_symtab (abfd)
 
       bfd_fatal (bfd_get_filename (abfd));
     }
-
   if (storage)
-    {
-      sy = (asymbol **) xmalloc (storage);
-    }
+    sy = (asymbol **) xmalloc (storage);
+
   dynsymcount = bfd_canonicalize_dynamic_symtab (abfd, sy);
   if (dynsymcount < 0)
     bfd_fatal (bfd_get_filename (abfd));
