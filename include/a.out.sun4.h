@@ -4,7 +4,7 @@
 /* Note that some SPARCs have 4K pages, some 8K, some others.  */
 
 #define SEG_SIZE_SPARC	PAGE_SIZE
-#define	SEG_SIZE_SUN3	0x80000		/* Resolution of r/w protection hw */
+#define	SEG_SIZE_SUN3	0x20000		/* Resolution of r/w protection hw */
 
 #define TEXT_START_ADDR	PAGE_SIZE	/* Location 0 is not accessible */
 
