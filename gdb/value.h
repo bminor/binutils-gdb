@@ -375,7 +375,8 @@ extern struct value *value_struct_elt (struct value **argp,
 
 extern struct value *value_aggregate_elt (struct type *curtype,
 					  const struct block *block,
-					  const char *name);
+					  const char *name,
+					  enum noside noside);
 
 extern struct value *value_static_field (struct type *type, int fieldno);
 

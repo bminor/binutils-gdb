@@ -153,7 +153,7 @@ static int parse_number (char *, int, int, YYSTYPE *);
 
 %type <voidval> exp exp1 type_exp start variable qualified_name lcurly
 %type <lval> rcurly
-%type <tval> type typebase
+%type <tval> type typebase qualified_type
 %type <tvec> nonempty_typelist
 /* %type <bval> block */
 
@@ -898,6 +898,32 @@ typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
 			{ $$ = follow_types ($2); }
 	| typebase const_or_volatile_or_space_identifier_noopt 
 			{ $$ = follow_types ($1); }
+	| qualified_type
+	;
+
+qualified_type: typebase COLONCOLON name
+		{
+		  struct type *type = $1;
+		  struct type *new_type;
+		  char *ncopy = alloca ($3.length + 1);
+
+		  memcpy (ncopy, $3.ptr, $3.length);
+		  ncopy[$3.length] = '\0';
+
+		  if (TYPE_CODE (type) != TYPE_CODE_STRUCT
+		      && TYPE_CODE (type) != TYPE_CODE_UNION
+		      && TYPE_CODE (type) != TYPE_CODE_NAMESPACE)
+		    error ("`%s' is not defined as an aggregate type.",
+			   TYPE_NAME (type));
+
+		  new_type = lookup_nested_type (type, ncopy,
+						 expression_context_block);
+		  if (new_type == NULL)
+		    error ("No type \"%s\" within class or namespace \"%s\".",
+			   ncopy, TYPE_NAME (type));
+		  
+		  $$ = new_type;
+		}
 	;
 
 typename:	TYPENAME
@@ -1704,7 +1730,7 @@ yylex ()
 
     if (sym && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
         {
-#if 1
+#if 0
 	  char *p;
 	  char *namestart;
 	  struct type *best_type;

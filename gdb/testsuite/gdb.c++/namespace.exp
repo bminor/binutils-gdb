@@ -255,14 +255,14 @@ gdb_test "ptype ::C::CClass" "type = class C::CClass \{\r\n  public:\r\n    int 
 gdb_test "ptype ::C::CClass::NestedClass" "type = class C::CClass::NestedClass \{\r\n  public:\r\n    int y;\r\n\}"
 gdb_test "ptype ::C::NestedClass" "No symbol \"NestedClass\" in namespace \"C\"."
 gdb_test "ptype C::CClass" "No symbol \"CClass\" in namespace \"C::C\"."
-gdb_test "ptype C::CClass::NestedClass" "No symbol \"CClass\" in namespace \"C::C\"."
+gdb_test "ptype C::CClass::NestedClass" "No type \"CClass\" within class or namespace \"C::C\"."
 gdb_test "ptype C::NestedClass" "No symbol \"NestedClass\" in namespace \"C::C\"."
 
 # Tests involving multiple files
 
 gdb_test "ptype OtherFileClass" "type = class C::OtherFileClass \{\r\n  public:\r\n    int z;\r\n\}"
 gdb_test "ptype ::C::OtherFileClass" "type = class C::OtherFileClass \{\r\n  public:\r\n    int z;\r\n\}"
-gdb_test "ptype C::OtherFileClass" "No symbol \"Class\" in namespace \"C::C\"."
+gdb_test "ptype C::OtherFileClass" "No symbol \"OtherFileClass\" in namespace \"C::C\"."
 
 # Some anonymous namespace tests.
 

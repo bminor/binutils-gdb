@@ -1,3 +1,8 @@
+2003-05-07  David Carlton  <carlton@bactrian.org>
+
+	* gdb.c++/namespace.exp: Update messages to match new parser
+	changes.
+
 2003-05-02  David Carlton  <carlton@bactrian.org>
 
 	* gdb.c++/rtti.h: New.

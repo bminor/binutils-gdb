@@ -409,7 +409,8 @@ evaluate_subexp_standard (struct type *expect_type,
       (*pos) += 5 + BYTES_TO_EXP_ELEM (tem + 1);
       arg1 = value_aggregate_elt (exp->elts[pc + 1].type,
 				  exp->elts[pc + 2].block,
-				  &exp->elts[pc + 4].string);
+				  &exp->elts[pc + 4].string,
+				  noside);
       if (arg1 == NULL)
 	error ("There is no field named %s", &exp->elts[pc + 4].string);
       return arg1;

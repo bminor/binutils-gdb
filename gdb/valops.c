@@ -101,11 +101,20 @@ static struct value *value_struct_elt_for_reference (struct type *domain,
 						     int offset,
 						     struct type *curtype,
 						     const char *name,
-						     struct type *intype);
+						     struct type *intype,
+						     const struct block *
+						     block,
+						     enum noside noside);
 
 static struct value *value_namespace_elt (const struct type *curtype,
 					  const struct block *block,
-					  const char *name);
+					  const char *name,
+					  enum noside noside);
+
+static struct value *value_maybe_namespace_elt (const struct type *curtype,
+						const struct block *block,
+						const char *name,
+						enum noside noside);
 
 static CORE_ADDR allocate_space_in_inferior (int);
 
@@ -2507,15 +2516,17 @@ check_field (struct value *arg1, const char *name)
 struct value *
 value_aggregate_elt (struct type *curtype,
 		     const struct block *block,
-		     const char *name)
+		     const char *name,
+		     enum noside noside)
 {
   switch (TYPE_CODE (curtype))
     {
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
-      return value_struct_elt_for_reference (curtype, 0, curtype, name, NULL);
+      return value_struct_elt_for_reference (curtype, 0, curtype, name, NULL,
+					     block, noside);
     case TYPE_CODE_NAMESPACE:
-      return value_namespace_elt (curtype, block, name);
+      return value_namespace_elt (curtype, block, name, noside);
     default:
       error ("Internal error: non-aggregate type to value_aggregate_elt");
     }
@@ -2531,7 +2542,9 @@ value_aggregate_elt (struct type *curtype,
 static struct value *
 value_struct_elt_for_reference (struct type *domain, int offset,
 				struct type *curtype, const char *name,
-				struct type *intype)
+				struct type *intype,
+				const struct block *block,
+				enum noside noside)
 {
   register struct type *t = curtype;
   register int i;
@@ -2650,11 +2663,17 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 					  offset + base_offset,
 					  TYPE_BASECLASS (t, i),
 					  name,
-					  intype);
+					  intype,
+					  block,
+					  noside);
       if (v)
 	return v;
     }
-  return 0;
+
+  /* As a last chance, look it up using lookup_symbol_namespace: this
+     works for types.  */
+
+  return value_maybe_namespace_elt (curtype, block, name, noside);
 }
 
 /* C++: Return the member NAME of the namespace given by the type
@@ -2664,7 +2683,27 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 static struct value *
 value_namespace_elt (const struct type *curtype,
 		     const struct block *block,
-		     const char *name)
+		     const char *name,
+		     enum noside noside)
+{
+  struct value *retval = value_maybe_namespace_elt (curtype, block, name,
+						    noside);
+
+  if (retval == NULL)
+    error ("No symbol \"%s\" in namespace \"%s\".", name,
+	   TYPE_TAG_NAME (curtype));
+
+  return retval;
+}
+
+/* A helper function used by value_namespace_elt and
+   value_struct_elt_for_reference.  */
+
+static struct value *
+value_maybe_namespace_elt (const struct type *curtype,
+			   const struct block *block,
+			   const char *name,
+			   enum noside noside)
 {
   const char *namespace_name = TYPE_TAG_NAME (curtype);
   const struct symbol *sym;
@@ -2672,13 +2711,13 @@ value_namespace_elt (const struct type *curtype,
   sym = lookup_symbol_namespace (namespace_name, name, NULL,
 				 block, VAR_NAMESPACE, NULL);
 
-  /* FIXME: carlton/2002-11-24: Should this really be here, or should
-     it be in c-exp.y like the other similar messages?  Hmm...  */
-  
   if (sym == NULL)
-    error ("No symbol \"%s\" in namespace \"%s\".", name, namespace_name);
-
-  return value_of_variable (sym, block);
+    return NULL;
+  else if ((noside == EVAL_AVOID_SIDE_EFFECTS)
+	   && (SYMBOL_CLASS (sym) == LOC_TYPEDEF))
+    return allocate_value (SYMBOL_TYPE (sym));
+  else
+    return value_of_variable (sym, block);
 }
 
 /* Given a pointer value V, find the real (RTTI) type

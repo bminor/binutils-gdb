@@ -1,3 +1,17 @@
+2003-05-07  David Carlton  <carlton@bactrian.org>
+
+	* valops.c (value_aggregate_elt): Add 'noside' argument.
+	(value_struct_elt_for_reference): Add 'block', 'noside'
+	arguments.  Call value_maybe_namespace_elt.
+	(value_namespace_elt): Add 'noside' argument.  Break out code into
+	value_maybe_namespace_elt.
+	(value_maybe_namespace_elt): New.  Handle types.
+	* value.h: Update declaration for value_aggregate_elt.
+	* eval.c (evaluate_subexp_standard): Pass 'noside' to
+	value_aggregate_elt.
+	* c-exp.y: Added 'qualified_type'.
+	(yylex): Comment out nested type stuff.
+
 2003-05-02  David Carlton  <carlton@bactrian.org>
 
 	* minsyms.c: Delete declarations for lookup_minimal_symbol_linkage
