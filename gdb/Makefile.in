@@ -1583,8 +1583,8 @@ po/$(PACKAGE).pot: force
 	mv $@.new ./$*.c
 .l.c:
 	@if [ "$(FLEX)" ] && $(FLEX) --version >/dev/null 2>&1; then \
-	    echo $(FLEX) -Isit $< ">" $@; \
-	    $(FLEX) -Isit $< > $@; \
+	    echo $(FLEX) -o$@ $<; \
+	    $(FLEX) -o$@ $<; \
 	elif [ ! -f $@ -a ! -f $< ]; then \
 	    echo "$< missing and flex not available."; \
 	    false; \

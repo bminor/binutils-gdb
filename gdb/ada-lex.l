@@ -26,9 +26,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* each successive token and places a semantic value into yylval */
 /* (ada-lval), defined by the parser.   */
 
-/* Run flex with (at least) the -i option (case-insensitive), and the -I */
-/* option (interactive---no unnecessary lookahead).  */
-
 DIG	[0-9]
 NUM10	({DIG}({DIG}|_)*)
 HEXDIG	[0-9a-f]
@@ -88,6 +85,8 @@ static int name_lookup (char *, char *, int *, int);
 static int find_dot_all (const char *);
 
 %}
+
+%option case-insensitive interactive nodefault
 
 %s IN_STRING BEFORE_QUAL_QUOTE
 

@@ -1,3 +1,10 @@
+2004-10-03  Paul Hilfinger  <hilfingr@nile.gnat.com>
+
+	* Makefile.in (.l.c): Modify rule for compatibility with recent
+	versions of flex, and remove most command-line options.
+	* ada-lex.l: Add %options line in place of -I -i and -s command-line
+	options.
+
 2004-10-02  Paul N. Hilfinger  <Hilfinger@gnat.com>
 
         Turn on initial Ada support (mainly expression evaluation).
