@@ -64,8 +64,13 @@ block_depth PARAMS ((struct block *));
 static void
 print_partial_symbol PARAMS ((struct partial_symbol *, int, char *, FILE *));
 
-static void
-print_symbol PARAMS ((struct symbol *, int, FILE *));
+struct print_symbol_args {
+  struct symbol *symbol;
+  int depth;
+  FILE *outfile;
+};
+
+static int print_symbol PARAMS ((char *));
 
 static void
 free_symtab_block PARAMS ((struct objfile *, struct block *));
@@ -368,7 +373,12 @@ dump_symtab (objfile, symtab, outfile)
       blen = BLOCK_NSYMS (b);
       for (j = 0; j < blen; j++)
 	{
-	  print_symbol (BLOCK_SYM (b, j), depth + 1, outfile);
+	  struct print_symbol_args s;
+	  s.symbol = BLOCK_SYM (b, j);
+	  s.depth = depth + 1;
+	  s.outfile = outfile;
+	  catch_errors (print_symbol, &s, "Error printing symbol:\n",
+			RETURN_MASK_ERROR);
 	}
     }
   fprintf (outfile, "\n");
@@ -425,12 +435,18 @@ maintenance_print_symbols (args, from_tty)
   do_cleanups (cleanups);
 }
 
-static void
-print_symbol (symbol, depth, outfile)
-     struct symbol *symbol;
-     int depth;
-     FILE *outfile;
+/* Print symbol ARGS->SYMBOL on ARGS->OUTFILE.  ARGS->DEPTH says how
+   far to indent.  ARGS is really a struct print_symbol_args *, but is
+   declared as char * to get it past catch_errors.  */
+
+static int
+print_symbol (args)
+     char *args;
 {
+  struct symbol *symbol = ((struct print_symbol_args *)args)->symbol;
+  int depth = ((struct print_symbol_args *)args)->depth;
+  FILE *outfile = ((struct print_symbol_args *)args)->outfile;
+
   print_spaces (depth, outfile);
   if (SYMBOL_NAMESPACE (symbol) == LABEL_NAMESPACE)
     {
@@ -500,28 +516,13 @@ print_symbol (symbol, depth, outfile)
 	  break;
 
 	case LOC_ARG:
-	  if (SYMBOL_BASEREG_VALID (symbol))
-	    {
-	      fprintf (outfile, "arg at 0x%lx from register %d,",
-		       SYMBOL_VALUE (symbol), SYMBOL_BASEREG (symbol));
-	    }
-	  else
-	    {
-	      fprintf (outfile, "arg at 0x%lx,", SYMBOL_VALUE (symbol));
-	    }
+	  fprintf (outfile, "arg at 0x%lx,", SYMBOL_VALUE (symbol));
 	  break;
 
 	case LOC_LOCAL_ARG:
-	  if (SYMBOL_BASEREG_VALID (symbol))
-	    {
-	      fprintf (outfile, "arg at offset 0x%lx from register %d,",
-		       SYMBOL_VALUE (symbol), SYMBOL_BASEREG (symbol));
-	    }
-	  else
-	    {
-	      fprintf (outfile, "arg at offset 0x%lx from fp,",
-		       SYMBOL_VALUE (symbol));
-	    }
+	  fprintf (outfile, "arg at offset 0x%lx from fp,",
+		   SYMBOL_VALUE (symbol));
+	  break;
 
 	case LOC_REF_ARG:
 	  fprintf (outfile, "reference arg at 0x%lx,", SYMBOL_VALUE (symbol));
@@ -536,15 +537,17 @@ print_symbol (symbol, depth, outfile)
 	  break;
 
 	case LOC_LOCAL:
-	  if (SYMBOL_BASEREG_VALID (symbol))
-	    {
-	      fprintf (outfile, "local at 0x%lx from register %d",
-		       SYMBOL_VALUE (symbol), SYMBOL_BASEREG (symbol));
-	    }
-	  else
-	    {
-	      fprintf (outfile, "local at 0x%lx,", SYMBOL_VALUE (symbol));
-	    }
+	  fprintf (outfile, "local at 0x%lx,", SYMBOL_VALUE (symbol));
+	  break;
+
+	case LOC_BASEREG:
+	  fprintf (outfile, "local at 0x%lx from register %d",
+		   SYMBOL_VALUE (symbol), SYMBOL_BASEREG (symbol));
+	  break;
+
+	case LOC_BASEREG_ARG:
+	  fprintf (outfile, "arg at 0x%lx from register %d,",
+		   SYMBOL_VALUE (symbol), SYMBOL_BASEREG (symbol));
 	  break;
 
 	case LOC_TYPEDEF:

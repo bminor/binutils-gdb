@@ -1,5 +1,8 @@
 Fri Aug 27 09:30:40 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
+	* symmisc.c (dump_symtab): Use catch_errors around print_symbol.
+	Change calling sequence of print_symbol to fit catch_errors.
+
 	* mips-tdep.c: Call reinit_frame_cache every time the user does
 	"set heuristic-fence-post".
 
