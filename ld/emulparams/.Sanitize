@@ -39,7 +39,7 @@ h8300h.sh
 h8500.sh
 hp300bsd.sh
 hp3hpux.sh
-hppaosf.sh
+hppaelf.sh
 i386aout.sh
 i386bsd.sh
 i386coff.sh
