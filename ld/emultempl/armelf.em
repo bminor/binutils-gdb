@@ -193,14 +193,13 @@ PARSE_AND_LIST_PROLOGUE='
 #define OPTION_THUMB_ENTRY		301
 '
 
-# Note we add 'n' to the short option list in order to prevent
-# getopt_long_only from thinking that -n is a unique abbreviation
-# for --no-pipeline-knowledge.  There is no case to handle 'n' here
-# however, so instead it will be passed back to parse_args() in
-# lexsup.c where it will be handled.
-PARSE_AND_LIST_SHORTOPTS=pn
+PARSE_AND_LIST_SHORTOPTS=p
 
+# Note we have duplicate entries for no-pipeline-knowledge in order
+# to prevent getopt_long_only from thinking that -n is a unique
+# abbreviation for --no-pipeline-knowledge.
 PARSE_AND_LIST_LONGOPTS='
+  { "no-pipeline-knowledge", no_argument, NULL, '\'p\''},
   { "no-pipeline-knowledge", no_argument, NULL, '\'p\''},
   { "thumb-entry", required_argument, NULL, OPTION_THUMB_ENTRY},
 '
