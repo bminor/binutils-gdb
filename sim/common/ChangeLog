@@ -1,5 +1,7 @@
 Mon Nov 17 14:15:31 1997  Doug Evans  <devans@seba.cygnus.com>
 
+	* Make-common.in (srccom): New variable.
+
 	* Make-common.in (DEP, COMMON_DEP_CFLAGS): Define.
 	(LIB_OBJS): Add syscall.o.
 	(gentmap): Pass $(NL_TARGET) to $(CC).

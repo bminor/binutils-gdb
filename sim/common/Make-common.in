@@ -37,6 +37,7 @@
 
 VPATH = @srcdir@
 srcdir = @srcdir@
+srccom = $(srcdir)/../common
 srcroot = $(srcdir)/../..
 
 prefix = @prefix@
@@ -153,7 +154,7 @@ CONFIG_CFLAGS = @DEFS@ \
 	$(SIM_XOR_ENDIAN) \
 	$(SIM_EXTRA_CFLAGS) \
 	$(HDEFINES) $(TDEFINES)
-CSEARCH = -I. -I$(srcdir) -I../common -I$(srcdir)/../common \
+CSEARCH = -I. -I$(srcdir) -I../common -I$(srccom) \
   -I../../include -I$(srcroot)/include \
   -I../../bfd -I$(srcroot)/bfd \
   -I../../opcodes -I$(srcroot)/opcodes
@@ -184,27 +185,27 @@ run: $(SIM_RUN_OBJS) libsim.a $(LIBDEPS)
 	$(CC) $(ALL_CFLAGS) -o run \
 	  $(SIM_RUN_OBJS) libsim.a $(EXTRA_LIBS)
 
-run.o: $(srcdir)/../common/run.c config.h tconfig.h \
+run.o: $(srccom)/run.c config.h tconfig.h \
 	  $(srcroot)/include/callback.h
-	$(CC) -c $(srcdir)/../common/run.c $(ALL_CFLAGS)
+	$(CC) -c $(srccom)/run.c $(ALL_CFLAGS)
 
 # FIXME: Ideally, callback.o and friends live in a library outside of
 # both the gdb and simulator source trees (e.g. devo/remote.  Not
 # devo/libremote because this directory would contain more than just
 # a library).
 
-callback.o: $(srcdir)/../common/callback.c config.h tconfig.h \
+callback.o: $(srccom)/callback.c config.h tconfig.h \
 	  $(srcroot)/include/callback.h targ-vals.h
-	$(CC) -c $(srcdir)/../common/callback.c $(ALL_CFLAGS)
+	$(CC) -c $(srccom)/callback.c $(ALL_CFLAGS)
 
-syscall.o: $(srcdir)/../common/syscall.c config.h tconfig.h \
+syscall.o: $(srccom)/syscall.c config.h tconfig.h \
 	  $(srcroot)/include/callback.h targ-vals.h
-	$(CC) -c $(srcdir)/../common/syscall.c $(ALL_CFLAGS)
+	$(CC) -c $(srccom)/syscall.c $(ALL_CFLAGS)
 
 targ-map.o: targ-map.c targ-vals.h
 
-gentmap: Makefile $(srcdir)/../common/gentmap.c targ-vals.def
-	$(CC_FOR_BUILD) $(srcdir)/../common/gentmap.c -o gentmap $(BUILD_CFLAGS) $(NL_TARGET)
+gentmap: Makefile $(srccom)/gentmap.c targ-vals.def
+	$(CC_FOR_BUILD) $(srccom)/gentmap.c -o gentmap $(BUILD_CFLAGS) $(NL_TARGET)
 
 targ-vals.h: gentmap
 	rm -f targ-vals.h
@@ -222,35 +223,35 @@ targ-map.c: gentmap
 
 sim_main_headers = \
 	sim-main.h \
-	$(srcdir)/../common/sim-config.h \
-	$(srcdir)/../common/sim-base.h \
-	$(srcdir)/../common/sim-basics.h \
-	$(srcdir)/../common/sim-memopt.h \
-	$(srcdir)/../common/sim-model.h \
-	$(srcdir)/../common/sim-module.h \
-	$(srcdir)/../common/sim-trace.h \
-	$(srcdir)/../common/sim-profile.h \
-	$(srcdir)/../common/sim-engine.h \
-	$(srcdir)/../common/sim-events.h \
-	$(srcdir)/../common/sim-watch.h \
-	$(srcdir)/../common/sim-assert.h \
+	$(srccom)/sim-config.h \
+	$(srccom)/sim-base.h \
+	$(srccom)/sim-basics.h \
+	$(srccom)/sim-memopt.h \
+	$(srccom)/sim-model.h \
+	$(srccom)/sim-module.h \
+	$(srccom)/sim-trace.h \
+	$(srccom)/sim-profile.h \
+	$(srccom)/sim-engine.h \
+	$(srccom)/sim-events.h \
+	$(srccom)/sim-watch.h \
+	$(srccom)/sim-assert.h \
 	tconfig.h \
 	$(SIM_EXTRA_DEPS)
 
-sim-assert_h = $(srcdir)/../common/sim-assert.h
-sim-endian_h = $(srcdir)/../common/sim-endian.h
-sim-n-endian_h = $(srcdir)/../common/sim-n-endian.h
-sim-bits_h = $(srcdir)/../common/sim-bits.h
-sim-config_h = $(srcdir)/../common/sim-config.h
-sim-n-bits_h = $(srcdir)/../common/sim-n-bits.h
-sim-core_h = $(srcdir)/../common/sim-core.h
-sim-n-core_h = $(srcdir)/../common/sim-n-core.h
-sim-engine_h = $(srcdir)/../common/sim-engine.h
-sim-events_h = $(srcdir)/../common/sim-events.h
-sim-fpu_h = $(srcdir)/../common/sim-fpu.h
-sim-io_h = $(srcdir)/../common/sim-io.h
-sim-options_h = $(srcdir)/../common/sim-options.h
-sim-break_h = $(srcdir)/../common/sim-break.h
+sim-assert_h = $(srccom)/sim-assert.h
+sim-endian_h = $(srccom)/sim-endian.h
+sim-n-endian_h = $(srccom)/sim-n-endian.h
+sim-bits_h = $(srccom)/sim-bits.h
+sim-config_h = $(srccom)/sim-config.h
+sim-n-bits_h = $(srccom)/sim-n-bits.h
+sim-core_h = $(srccom)/sim-core.h
+sim-n-core_h = $(srccom)/sim-n-core.h
+sim-engine_h = $(srccom)/sim-engine.h
+sim-events_h = $(srccom)/sim-events.h
+sim-fpu_h = $(srccom)/sim-fpu.h
+sim-io_h = $(srccom)/sim-io.h
+sim-options_h = $(srccom)/sim-options.h
+sim-break_h = $(srccom)/sim-break.h
 
 # FIXME: If this complicated way of building .o files from ../common is
 # necessary, the reason should be documented here.
@@ -258,125 +259,125 @@ sim-break_h = $(srcdir)/../common/sim-break.h
 BUILT_SRC_FROM_COMMON= \
 	sim-inline.c
 
-sim-abort.o: $(srcdir)/../common/sim-abort.c \
+sim-abort.o: $(srccom)/sim-abort.c \
 	  $(SIM_EXTRA_DEPS)
-	$(CC) -c $(srcdir)/../common/sim-abort.c $(ALL_CFLAGS)
+	$(CC) -c $(srccom)/sim-abort.c $(ALL_CFLAGS)
 
-sim-bits.o: $(srcdir)/../common/sim-bits.c $(sim-bits_h) $(sim-n-bits_h) \
+sim-bits.o: $(srccom)/sim-bits.c $(sim-bits_h) $(sim-n-bits_h) \
 	  $(SIM_EXTRA_DEPS)
-	$(CC) -c $(srcdir)/../common/sim-bits.c $(ALL_CFLAGS)
+	$(CC) -c $(srccom)/sim-bits.c $(ALL_CFLAGS)
 
-sim-config.o: $(srcdir)/../common/sim-config.c $(sim-config_h) \
+sim-config.o: $(srccom)/sim-config.c $(sim-config_h) \
 	$(SIM_EXTRA_DEPS)
-	$(CC) -c $(srcdir)/../common/sim-config.c $(ALL_CFLAGS)
+	$(CC) -c $(srccom)/sim-config.c $(ALL_CFLAGS)
 
-sim-core.o: $(srcdir)/../common/sim-core.c $(sim-core_h) $(sim-n-core_h) \
+sim-core.o: $(srccom)/sim-core.c $(sim-core_h) $(sim-n-core_h) \
 	  $(SIM_EXTRA_DEPS)
-	$(CC) -c $(srcdir)/../common/sim-core.c $(ALL_CFLAGS)
+	$(CC) -c $(srccom)/sim-core.c $(ALL_CFLAGS)
 
-sim-endian.o: $(srcdir)/../common/sim-endian.c $(sim-endian_h) $(sim-n-endian_h) \
+sim-endian.o: $(srccom)/sim-endian.c $(sim-endian_h) $(sim-n-endian_h) \
 	  $(SIM_EXTRA_DEPS)
-	$(CC) -c $(srcdir)/../common/sim-endian.c $(ALL_CFLAGS)
+	$(CC) -c $(srccom)/sim-endian.c $(ALL_CFLAGS)
 
-sim-engine.o: $(srcdir)/../common/sim-engine.c $(sim_main_headers) $(sim-engine_h)
-	$(CC) -c $(srcdir)/../common/sim-engine.c $(ALL_CFLAGS)
+sim-engine.o: $(srccom)/sim-engine.c $(sim_main_headers) $(sim-engine_h)
+	$(CC) -c $(srccom)/sim-engine.c $(ALL_CFLAGS)
 
-sim-events.o: $(srcdir)/../common/sim-events.c $(sim-events_h) \
+sim-events.o: $(srccom)/sim-events.c $(sim-events_h) \
 	  $(SIM_EXTRA_DEPS)
-	$(CC) -c $(srcdir)/../common/sim-events.c $(ALL_CFLAGS)
+	$(CC) -c $(srccom)/sim-events.c $(ALL_CFLAGS)
 
-sim-fpu.o: $(srcdir)/../common/sim-fpu.c $(sim-fpu_h) \
+sim-fpu.o: $(srccom)/sim-fpu.c $(sim-fpu_h) \
 	  $(SIM_EXTRA_DEPS)
-	$(CC) -c $(srcdir)/../common/sim-fpu.c $(ALL_CFLAGS)
+	$(CC) -c $(srccom)/sim-fpu.c $(ALL_CFLAGS)
 
-sim-hload.o: $(srcdir)/../common/sim-hload.c $(sim-assert_h) \
+sim-hload.o: $(srccom)/sim-hload.c $(sim-assert_h) \
 	  $(SIM_EXTRA_DEPS)
-	$(CC) -c $(srcdir)/../common/sim-hload.c $(ALL_CFLAGS)
+	$(CC) -c $(srccom)/sim-hload.c $(ALL_CFLAGS)
 
-sim-hrw.o: $(srcdir)/../common/sim-hrw.c $(sim-assert_h) \
+sim-hrw.o: $(srccom)/sim-hrw.c $(sim-assert_h) \
 	  $(SIM_EXTRA_DEPS)
-	$(CC) -c $(srcdir)/../common/sim-hrw.c $(ALL_CFLAGS)
+	$(CC) -c $(srccom)/sim-hrw.c $(ALL_CFLAGS)
 
-sim-inline.c: $(srcdir)/../common/sim-inline.c
+sim-inline.c: $(srccom)/sim-inline.c
 	rm -f $@ tmp-$@
-	echo "# 1 \"$(srcdir)/../common/$@\"" > tmp-$@
-	cat $(srcdir)/../common/$@ >> tmp-$@
+	echo "# 1 \"$(srccom)/$@\"" > tmp-$@
+	cat $(srccom)/$@ >> tmp-$@
 	$(srcdir)/../../move-if-change tmp-$@ $@
 
-sim-io.o: $(srcdir)/../common/sim-io.c $(sim_main_headers) $(sim-io_h)
-	$(CC) -c $(srcdir)/../common/sim-io.c $(ALL_CFLAGS)
+sim-io.o: $(srccom)/sim-io.c $(sim_main_headers) $(sim-io_h)
+	$(CC) -c $(srccom)/sim-io.c $(ALL_CFLAGS)
 
-sim-memopt.o: $(srcdir)/../common/sim-memopt.c $(sim_main_headers) \
+sim-memopt.o: $(srccom)/sim-memopt.c $(sim_main_headers) \
 	  $(sim-io_h)
-	$(CC) -c $(srcdir)/../common/sim-memopt.c $(ALL_CFLAGS)
+	$(CC) -c $(srccom)/sim-memopt.c $(ALL_CFLAGS)
 
-sim-module.o: $(srcdir)/../common/sim-module.c $(sim_main_headers) \
+sim-module.o: $(srccom)/sim-module.c $(sim_main_headers) \
 	  $(sim-io_h)
-	$(CC) -c $(srcdir)/../common/sim-module.c $(ALL_CFLAGS)
+	$(CC) -c $(srccom)/sim-module.c $(ALL_CFLAGS)
 
-sim-options.o: $(srcdir)/../common/sim-options.c $(sim_main_headers) \
+sim-options.o: $(srccom)/sim-options.c $(sim_main_headers) \
 	  $(sim-options_h) $(sim-io_h)
-	$(CC) -c $(srcdir)/../common/sim-options.c $(ALL_CFLAGS)
+	$(CC) -c $(srccom)/sim-options.c $(ALL_CFLAGS)
 
-sim-reason.o: $(srcdir)/../common/sim-reason.c $(sim_main_headers)
-	$(CC) -c $(srcdir)/../common/sim-reason.c $(ALL_CFLAGS)
+sim-reason.o: $(srccom)/sim-reason.c $(sim_main_headers)
+	$(CC) -c $(srccom)/sim-reason.c $(ALL_CFLAGS)
 
-sim-resume.o: $(srcdir)/../common/sim-resume.c $(sim_main_headers)
-	$(CC) -c $(srcdir)/../common/sim-resume.c $(ALL_CFLAGS)
+sim-resume.o: $(srccom)/sim-resume.c $(sim_main_headers)
+	$(CC) -c $(srccom)/sim-resume.c $(ALL_CFLAGS)
 
-sim-run.o: $(srcdir)/../common/sim-run.c $(sim_main_headers)
-	$(CC) -c $(srcdir)/../common/sim-run.c $(ALL_CFLAGS)
+sim-run.o: $(srccom)/sim-run.c $(sim_main_headers)
+	$(CC) -c $(srccom)/sim-run.c $(ALL_CFLAGS)
 
-sim-stop.o: $(srcdir)/../common/sim-stop.c $(sim_main_headers)
-	$(CC) -c $(srcdir)/../common/sim-stop.c $(ALL_CFLAGS)
+sim-stop.o: $(srccom)/sim-stop.c $(sim_main_headers)
+	$(CC) -c $(srccom)/sim-stop.c $(ALL_CFLAGS)
 
-sim-trace.o: $(srcdir)/../common/sim-trace.c $(sim_main_headers) \
+sim-trace.o: $(srccom)/sim-trace.c $(sim_main_headers) \
 	  $(sim-options_h) $(sim-io_h)
-	$(CC) -c $(srcdir)/../common/sim-trace.c $(ALL_CFLAGS)
+	$(CC) -c $(srccom)/sim-trace.c $(ALL_CFLAGS)
 
-sim-profile.o: $(srcdir)/../common/sim-profile.c $(sim_main_headers) \
+sim-profile.o: $(srccom)/sim-profile.c $(sim_main_headers) \
 	  $(sim-options_h) $(sim-io_h)
-	$(CC) -c $(srcdir)/../common/sim-profile.c $(ALL_CFLAGS)
+	$(CC) -c $(srccom)/sim-profile.c $(ALL_CFLAGS)
 
-sim-model.o: $(srcdir)/../common/sim-model.c $(sim_main_headers) \
+sim-model.o: $(srccom)/sim-model.c $(sim_main_headers) \
 	  $(sim-io_h)
-	$(CC) -c $(srcdir)/../common/sim-model.c $(ALL_CFLAGS)
+	$(CC) -c $(srccom)/sim-model.c $(ALL_CFLAGS)
 
-sim-utils.o: $(srcdir)/../common/sim-utils.c $(sim_main_headers)
-	$(CC) -c $(srcdir)/../common/sim-utils.c $(ALL_CFLAGS)
+sim-utils.o: $(srccom)/sim-utils.c $(sim_main_headers)
+	$(CC) -c $(srccom)/sim-utils.c $(ALL_CFLAGS)
 
-sim-watch.o: $(srcdir)/../common/sim-watch.c $(sim_main_headers)
-	$(CC) -c $(srcdir)/../common/sim-watch.c $(ALL_CFLAGS)
+sim-watch.o: $(srccom)/sim-watch.c $(sim_main_headers)
+	$(CC) -c $(srccom)/sim-watch.c $(ALL_CFLAGS)
 
-sim-load.o: $(srcdir)/../common/sim-load.c $(srcroot)/include/callback.h
-	$(CC) -c $(srcdir)/../common/sim-load.c $(ALL_CFLAGS)
+sim-load.o: $(srccom)/sim-load.c $(srcroot)/include/callback.h
+	$(CC) -c $(srccom)/sim-load.c $(ALL_CFLAGS)
 
-sim-break.o: $(srcdir)/../common/sim-break.c $(sim_main_headers) \
+sim-break.o: $(srccom)/sim-break.c $(sim_main_headers) \
 	  $(sim_break_h)
-	$(CC) -c $(srcdir)/../common/sim-break.c $(ALL_CFLAGS)
+	$(CC) -c $(srccom)/sim-break.c $(ALL_CFLAGS)
 
-nrun.o: $(srcdir)/../common/nrun.c config.h tconfig.h \
+nrun.o: $(srccom)/nrun.c config.h tconfig.h \
 	  $(srcroot)/include/callback.h $(sim_main_headers)
-	$(CC) -c $(srcdir)/../common/nrun.c $(ALL_CFLAGS)
+	$(CC) -c $(srccom)/nrun.c $(ALL_CFLAGS)
 
 # CGEN support.
 
-cgen-run.o: $(srcdir)/../common/cgen-run.c $(sim_main_headers) \
-	  $(srcdir)/../common/cgen-mem.h $(srcdir)/../common/cgen-ops.h \
-	  $(srcdir)/../common/cgen-scache.h
-	$(CC) -c $(srcdir)/../common/cgen-run.c $(ALL_CFLAGS)
+cgen-run.o: $(srccom)/cgen-run.c $(sim_main_headers) \
+	  $(srccom)/cgen-mem.h $(srccom)/cgen-ops.h \
+	  $(srccom)/cgen-scache.h
+	$(CC) -c $(srccom)/cgen-run.c $(ALL_CFLAGS)
 
-cgen-scache.o: $(srcdir)/../common/cgen-scache.c $(sim_main_headers) \
-	  $(srcdir)/../common/cgen-scache.h
-	$(CC) -c $(srcdir)/../common/cgen-scache.c $(ALL_CFLAGS)
+cgen-scache.o: $(srccom)/cgen-scache.c $(sim_main_headers) \
+	  $(srccom)/cgen-scache.h
+	$(CC) -c $(srccom)/cgen-scache.c $(ALL_CFLAGS)
 
-cgen-trace.o: $(srcdir)/../common/cgen-trace.c $(sim_main_headers) \
-	  $(srcdir)/../common/cgen-trace.h
-	$(CC) -c $(srcdir)/../common/cgen-trace.c $(ALL_CFLAGS)
+cgen-trace.o: $(srccom)/cgen-trace.c $(sim_main_headers) \
+	  $(srccom)/cgen-trace.h
+	$(CC) -c $(srccom)/cgen-trace.c $(ALL_CFLAGS)
 
-cgen-utils.o: $(srcdir)/../common/cgen-utils.c $(sim_main_headers) \
-	  $(srcdir)/../common/cgen-mem.h $(srcdir)/../common/cgen-ops.h
-	$(CC) -c $(srcdir)/../common/cgen-utils.c $(ALL_CFLAGS)
+cgen-utils.o: $(srccom)/cgen-utils.c $(sim_main_headers) \
+	  $(srccom)/cgen-mem.h $(srccom)/cgen-ops.h
+	$(CC) -c $(srccom)/cgen-utils.c $(ALL_CFLAGS)
 
 # Support targets.
 
@@ -423,7 +424,7 @@ distclean mostlyclean maintainer-clean realclean: clean
 # Dummy target to force execution of dependent targets.
 force:
 
-Makefile: Makefile.in $(srcdir)/../common/Make-common.in config.status
+Makefile: Makefile.in $(srccom)/Make-common.in config.status
 	CONFIG_HEADERS= $(SHELL) ./config.status
 
 config.status: configure
@@ -433,7 +434,7 @@ config.h: stamp-h ; @true
 stamp-h: config.in config.status
 	CONFIG_FILES= CONFIG_HEADERS=config.h:config.in $(SHELL) ./config.status
 
-.gdbinit: # config.status $(srcdir)/../common/gdbinit.in
+.gdbinit: # config.status $(srccom)/gdbinit.in
 	CONFIG_FILES=$@:../common/gdbinit.in CONFIG_HEADERS= $(SHELL) ./config.status
 
 ## End COMMON_POST_CONFIG_FRAG
