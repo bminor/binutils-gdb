@@ -1,6 +1,7 @@
 Tue Nov 14 15:19:43 1995  Stu Grossman  (grossman@cygnus.com)
 
-	* gencode.c:  jsr actually saves pc+4, and rts actually uses pr+0.
+	* gencode.c:  jsr, bsr and bsrf actually save pc+4 in pr, and rts
+	actually uses pr+0.
 
 Sat Oct 21 13:01:18 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
 

@@ -58,7 +58,7 @@ op tab[] =
   {"","0","and.b #<imm>,@(R0,GBR)", "11001101i8*1....", ";WBAT(GBR+R0, RBAT(GBR+R0) & i);"},
 
   {"","","bra <bdisp12>", "1010i12.........", "ult = PC; PC=PC+(i<<1)+2;SL(ult+2);"},
-  {"","","bsr <bdisp12>", "1011i12.........", "PR = PC; PC=PC+(i<<1)+2;SL(PR+2);"},
+  {"","","bsr <bdisp12>", "1011i12.........", "PR = PC + 4; PC=PC+(i<<1)+2;SL(PR-2);"},
   {"","","bt <bdisp8>", "10001001i8p1....", "if(T) {PC+=(SEXT(i)<<1)+2;C+=2;}"},
   {"","","bf <bdisp8>", "10001011i8p1....", "if(T==0) {PC+=(SEXT(i)<<1)+2;C+=2;}"},
   {"","","bt.s <bdisp8>", "10001101i8p1....","if(T) {ult = PC; PC+=(SEXT(i)<<1)+2;C+=2;SL(ult+2);}"},
@@ -200,7 +200,7 @@ op tab[] =
   {"","nm","dmulu.l <REG_M>,<REG_N>", "0011nnnnmmmm0101", "dmul(0,R[n],R[m]);"},
   {"","nm","mac.l @<REG_M>+,@<REG_N>+", "0000nnnnmmmm1111", "abort();"},
   {"","n","braf <REG_N>", "0000nnnn00100011", "ult = PC; PC+=R[n]-2;SL(ult+2);"},
-  {"","n","bsrf <REG_N>", "0000nnnn00000011", "PR = PC; PC+=R[n]-2;SL(PR+2);"},
+  {"","n","bsrf <REG_N>", "0000nnnn00000011", "PR = PC + 4; PC+=R[n]-2;SL(PR-2);"},
 #if 0
   {"divs.l <REG_M>,<REG_N>", "0100nnnnmmmm1110", "divl(0,R[n],R[m]);"},
   {"divu.l <REG_M>,<REG_N>", "0100nnnnmmmm1101", "divl(0,R[n],R[m]);"},
