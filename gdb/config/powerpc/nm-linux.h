@@ -30,6 +30,7 @@ extern int kernel_u_size (void);
 
 #define U_REGS_OFFSET 0
 
+extern int ppc_register_u_addr (int, int);
 #define REGISTER_U_ADDR(addr, blockend, regno) \
         (addr) = ppc_register_u_addr ((blockend),(regno));
 

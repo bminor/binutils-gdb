@@ -1,5 +1,10 @@
 2001-11-19  Elena Zannoni  <ezannoni@redhat.com>
 
+	* config/powerpc/nm-linux.h (ppc_register_u_addr): Add extern 
+        declaration.
+
+2001-11-19  Elena Zannoni  <ezannoni@redhat.com>
+
 	* ppc-linux-nat.c (COPY_REG): Use regcache_collect instead of
 	accessing registers[].
 	(fill_fpregset): Ditto.
