@@ -1,3 +1,18 @@
+start-sanitize-arc
+Tue Mar  7 20:42:35 1995  Doug Evans  <dje@chestnut.cygnus.com>
+
+	* config/tc-arc.h (LITTLE_ENDIAN, BIG_ENDIAN): Define.
+	(DEFAULT_TARGET_FORMAT): Define.
+	(DEFAULT_BYTE_ORDER): Define to little endian.
+	(TARGET_FORMAT): Byte order is now selectable.
+	* config/tc-arc.c (arc_target_format): New variable.
+	(byte_order): New variable.
+	(md_longopts): New options -EL, -EB.
+	(md_parse_option): Recognize them.
+	(md_show_usage): Print them.
+	(md_begin): Set target_big_endian.
+end-sanitize-arc
+
 Tue Mar  7 16:07:10 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* doc/as.texinfo: Add documentation for SPARC V9, from Doug Evans
