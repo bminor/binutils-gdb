@@ -4478,11 +4478,10 @@
 )
 
 (define-pmacro (register-transfer
-		name op ope reg_src reg_targ pipe major1 major2 attr1 attr2
-		profile comment)
+		name op ope reg_src reg_targ pipe attrs	profile comment)
   (dni name
        (comment)
-       ((UNIT pipe) major1 major2 attr1 attr2)
+       (.splice (UNIT pipe) (.unsplice attrs))
        (.str name "$pack $" reg_src ",$" reg_targ)
        (+ pack reg_targ op (rs-null) ope reg_src)
        (set reg_targ reg_src)
@@ -4491,13 +4490,13 @@
 )
 
 (register-transfer movgf OP_03 OPE1_15
-		   GRj FRintk I0 (FR500-MAJOR I-4) (FR400-MAJOR I-4)
-		   FR-ACCESS NA
+		   GRj FRintk I0
+		   ((FR500-MAJOR I-4) (FR400-MAJOR I-4) FR-ACCESS)
 		   ((fr400 (unit u-gr2fr)) (fr500 (unit u-gr2fr)))
 		   "transfer gr to fr")
 (register-transfer movfg OP_03 OPE1_0D
-		   FRintk GRj I0 (FR500-MAJOR I-4) (FR400-MAJOR I-4)
-		   FR-ACCESS NA
+		   FRintk GRj I0
+		   ((FR500-MAJOR I-4) (FR400-MAJOR I-4) FR-ACCESS)
 		   ((fr400 (unit u-fr2gr)) (fr500 (unit u-fr2gr)))
 		   "transfer fr to gr")
 
@@ -4583,11 +4582,10 @@
 )
 
 (define-pmacro (conditional-register-transfer
-		name op ope reg_src reg_targ pipe major1 major2 mach
-		profile comment)
+		name op ope reg_src reg_targ pipe attrs	profile comment)
   (dni name
        (comment)
-       ((UNIT pipe) major1 major2 CONDITIONAL FR-ACCESS mach)
+       (.splice (UNIT pipe) CONDITIONAL FR-ACCESS (.unsplice attrs))
        (.str name "$pack $" reg_src ",$" reg_targ ",$CCi,$cond")
        (+ pack reg_targ op (rs-null) CCi cond ope reg_src)
        (if (eq CCi (or cond 2))
@@ -4597,13 +4595,11 @@
 )
 
 (conditional-register-transfer cmovgf OP_69 OPE4_0 GRj FRintk I0
-			       (FR500-MAJOR I-4) (FR400-MAJOR I-4)
-			       NA
+			       ((FR500-MAJOR I-4) (FR400-MAJOR I-4))
 			       ((fr400 (unit u-gr2fr)) (fr500 (unit u-gr2fr)))
 			       "transfer gr to fr")
 (conditional-register-transfer cmovfg OP_69 OPE4_2 FRintk GRj I0
-			       (FR500-MAJOR I-4) (FR400-MAJOR I-4)
-			       NA
+			       ((FR500-MAJOR I-4) (FR400-MAJOR I-4))
 			       ((fr400 (unit u-fr2gr)) (fr500 (unit u-fr2gr)))
 			       "transfer fr to gr")
 
@@ -5665,10 +5661,10 @@
 (invalidate-TLB itlbi itlbi OP_03 OPE1_33 "invalidate insn TLB")
 (invalidate-TLB dtlbi dtlbi OP_03 OPE1_37 "invalidate data TLB")
 
-(define-pmacro (cache-preload name cache pipe op ope profile comment)
+(define-pmacro (cache-preload name cache pipe attrs op ope profile comment)
   (dni name
        (comment)
-       ((UNIT pipe) (FR500-MAJOR C-2) (FR400-MAJOR C-2))
+       (.splice (UNIT pipe) (FR500-MAJOR C-2) (FR400-MAJOR C-2) (.unsplice attrs))
        (.str name "$pack $GRi,$GRj,$lock")
        (+ pack (misc-null-1) lock op GRi ope GRj)
        (c-call VOID (.str "@cpu@_" cache "_cache_preload") GRi GRj lock)
@@ -5676,10 +5672,10 @@
   )
 )
 
-(cache-preload icpl insn C OP_03 OPE1_30
+(cache-preload icpl insn C () OP_03 OPE1_30
 	       ((fr400 (unit u-icpl)) (fr500 (unit u-icpl)))
 	       "preload insn cache")
-(cache-preload dcpl data DCPL OP_03 OPE1_34
+(cache-preload dcpl data DCPL () OP_03 OPE1_34
 	       ((fr400 (unit u-dcpl)) (fr500 (unit u-dcpl)))
 	       "preload data cache")
 
@@ -5802,7 +5798,7 @@
 		name op ope conv mode src targ attr comment)
   (dni name
        (comment)
-       ((UNIT FMALL) (FR500-MAJOR F-1) (MACH simple,tomcat,fr500,frv) attr)
+       (.splice (UNIT FMALL) (FR500-MAJOR F-1) (.unsplice attr))
        (.str name "$pack $" src ",$" targ)
        (+ pack targ op (rs-null) ope src)
        (set targ (conv mode src))
@@ -5810,10 +5806,18 @@
   )
 )
 
-(floating-point-conversion fitos OP_79 OPE1_00 float SF FRintj FRk NA "Convert Integer to Single")
-(floating-point-conversion fstoi OP_79 OPE1_01 fix   SI FRj FRintk NA "Convert Single  to Integer")
-(floating-point-conversion fitod OP_7A OPE1_00 float DF FRintj FRdoublek (MACH frv) "Convert Integer to Double")
-(floating-point-conversion fdtoi OP_7A OPE1_01 fix   SI FRdoublej FRintk (MACH frv) "Convert Double to Integer")
+(floating-point-conversion fitos OP_79 OPE1_00 float SF FRintj FRk
+			   ((MACH simple,tomcat,fr500,frv))
+			   "Convert Integer to Single")
+(floating-point-conversion fstoi OP_79 OPE1_01 fix   SI FRj FRintk
+			   ((MACH simple,tomcat,fr500,frv))
+			   "Convert Single  to Integer")
+(floating-point-conversion fitod OP_7A OPE1_00 float DF FRintj FRdoublek
+			   ((MACH frv))
+			   "Convert Integer to Double")
+(floating-point-conversion fdtoi OP_7A OPE1_01 fix   SI FRdoublej FRintk
+			   ((MACH frv))
+			   "Convert Double to Integer")
 
 (define-pmacro (floating-point-dual-conversion
 		name op ope conv mode src src_hw targ targ_hw attr comment)
@@ -5887,14 +5891,14 @@
 (ne-floating-point-conversion nfstoi OP_79 OPE1_21 fix   SI FRj FRintk "NE convert Single to Integer")
 
 (register-transfer fmovs OP_79 OPE1_02
-		   FRj FRk FM01 (FR500-MAJOR F-1) NA
-		   (MACH simple,tomcat,fr500,frv) NA
+		   FRj FRk FM01
+		   ((FR500-MAJOR F-1) (MACH simple,tomcat,fr500,frv))
 		   ((fr500 (unit u-fr2fr)))
 		   "Move Single Float")
 (register-transfer fmovd OP_7A OPE1_02
 		   ; TODO -- unit doesn't handle extra register
-		   FRdoublej FRdoublek FM01 (FR500-MAJOR F-1) NA
-		   (MACH frv) NA
+		   FRdoublej FRdoublek FM01
+		   ((FR500-MAJOR F-1) (MACH frv))
 		   ((fr500 (unit u-fr2fr)))
 		   "Move Double Float")
 
@@ -5911,15 +5915,15 @@
 )
 
 (conditional-register-transfer cfmovs OP_6C OPE4_0 FRj FRk FM01
-			       (FR500-MAJOR F-1) NA
-			       (MACH simple,tomcat,fr500,frv)
+			       ((FR500-MAJOR F-1)
+				(MACH simple,tomcat,fr500,frv))
 			       ((fr500 (unit u-fr2fr)))
 			       "Conditional move Single Float")
 
 (define-pmacro (floating-point-neg name src targ op ope attr comment)
   (dni name
        (comment)
-       ((UNIT FMALL) (FR500-MAJOR F-1) attr)
+       (.splice (UNIT FMALL) (FR500-MAJOR F-1) (.unsplice attr))
        (.str name "$pack $" src ",$" targ)
        (+ pack src op (rs-null) ope targ)
        (set targ (neg src))
@@ -5927,8 +5931,8 @@
   )
 )
 
-(floating-point-neg fnegs FRj FRk OP_79 OPE1_03 (MACH simple,tomcat,fr500,frv) "Floating point negate, single")
-(floating-point-neg fnegd FRdoublej FRdoublek OP_7A OPE1_03 (MACH frv) "Floating point negate, double")
+(floating-point-neg fnegs FRj FRk OP_79 OPE1_03 ((MACH simple,tomcat,fr500,frv)) "Floating point negate, single")
+(floating-point-neg fnegd FRdoublej FRdoublek OP_7A OPE1_03 ((MACH frv)) "Floating point negate, double")
 
 (dni fdnegs
      "Floating point dual negate, single"
@@ -5954,7 +5958,7 @@
 (define-pmacro (float-abs name src targ op ope attr comment)
   (dni name
        (comment)
-       ((UNIT FMALL) (FR500-MAJOR F-1) attr)
+       (.splice (UNIT FMALL) (FR500-MAJOR F-1) (.unsplice attr))
        (.str name "$pack $" src ",$" targ )
        (+ pack targ op (rs-null) ope src)
        (set targ (abs src))
@@ -5962,8 +5966,8 @@
   )
 )
 
-(float-abs fabss FRj FRk OP_79 OPE1_04 (MACH simple,tomcat,fr500,frv) "Float absolute value, single")
-(float-abs fabsd FRdoublej FRdoublek OP_7A OPE1_04 (MACH frv) "Float absolute value, double")
+(float-abs fabss FRj FRk OP_79 OPE1_04 ((MACH simple,tomcat,fr500,frv)) "Float absolute value, single")
+(float-abs fabsd FRdoublej FRdoublek OP_7A OPE1_04 ((MACH frv)) "Float absolute value, double")
 
 (dni fdabss
      "Floating point dual absolute value, single"
@@ -6049,10 +6053,10 @@
      ((fr500 (unit u-float-sqrt)))
 )
 
-(define-pmacro (float-binary-op-s name pipe operation op ope major comment)
+(define-pmacro (float-binary-op-s name pipe attr operation op ope comment)
   (dni name
        (comment)
-       ((UNIT pipe) (FR500-MAJOR major) (MACH simple,tomcat,fr500,frv))
+       (.splice (UNIT pipe) (MACH simple,tomcat,fr500,frv) (.unsplice attr))
        (.str name "$pack $FRi,$FRj,$FRk")
        (+ pack FRk op FRi ope FRj)
        (set FRk (operation FRi FRj))
@@ -6060,9 +6064,9 @@
   )
 )
 
-(float-binary-op-s fadds FMALL add OP_79 OPE1_06 F-2 "add single float")
-(float-binary-op-s fsubs FMALL sub OP_79 OPE1_07 F-2 "sub single float")
-(float-binary-op-s fmuls FM01  mul OP_79 OPE1_08 F-3 "mul single float")
+(float-binary-op-s fadds FMALL ((FR500-MAJOR F-2)) add OP_79 OPE1_06 "add single float")
+(float-binary-op-s fsubs FMALL ((FR500-MAJOR F-2)) sub OP_79 OPE1_07 "sub single float")
+(float-binary-op-s fmuls FM01  ((FR500-MAJOR F-3)) mul OP_79 OPE1_08 "mul single float")
 
 (dni fdivs
      "div single float"
@@ -6089,10 +6093,11 @@
 (float-binary-op-d fmuld mul OP_7A OPE1_08 F-3 "mul double float")
 (float-binary-op-d fdivd div OP_7A OPE1_09 F-4 "div double float")
 
-(define-pmacro (conditional-float-binary-op name pipe operation op ope major comment)
+(define-pmacro (conditional-float-binary-op name pipe attr operation op ope comment)
   (dni name
        (comment)
-       ((UNIT pipe) (FR500-MAJOR major) (MACH simple,tomcat,fr500,frv))
+       (.splice (UNIT pipe) (MACH simple,tomcat,fr500,frv)
+		(.unsplice attr))
        (.str name "$pack $FRi,$FRj,$FRk,$CCi,$cond")
        (+ pack FRk op FRi CCi cond ope FRj)
        (if (eq CCi (or cond 2))
@@ -6101,15 +6106,16 @@
   )
 )
 
-(conditional-float-binary-op cfadds FMALL add OP_6D OPE4_0 F-2 "cond add single")
-(conditional-float-binary-op cfsubs FMALL sub OP_6D OPE4_1 F-2 "cond sub single")
-(conditional-float-binary-op cfmuls FM01  mul OP_6E OPE4_0 F-3 "cond mul single")
-(conditional-float-binary-op cfdivs FM01  div OP_6E OPE4_1 F-4 "cond div single")
+(conditional-float-binary-op cfadds FMALL ((FR500-MAJOR F-2)) add OP_6D OPE4_0 "cond add single")
+(conditional-float-binary-op cfsubs FMALL ((FR500-MAJOR F-2)) sub OP_6D OPE4_1 "cond sub single")
+(conditional-float-binary-op cfmuls FM01  ((FR500-MAJOR F-3)) mul OP_6E OPE4_0 "cond mul single")
+(conditional-float-binary-op cfdivs FM01  ((FR500-MAJOR F-4)) div OP_6E OPE4_1 "cond div single")
 
-(define-pmacro (ne-float-binary-op name pipe operation op ope major comment)
+(define-pmacro (ne-float-binary-op name pipe attr operation op ope comment)
   (dni name
        (comment)
-       ((UNIT pipe) (FR500-MAJOR major) (MACH simple,tomcat,fr500,frv))
+       (.splice (UNIT pipe) (MACH simple,tomcat,fr500,frv)
+		(.unsplice attr))
        (.str name "$pack $FRi,$FRj,$FRk")
        (+ pack FRk op FRi ope FRj)
        (sequence ()
@@ -6119,10 +6125,10 @@
   )
 )
 
-(ne-float-binary-op nfadds FMALL add OP_79 OPE1_26 F-2 "ne add single")
-(ne-float-binary-op nfsubs FMALL sub OP_79 OPE1_27 F-2 "ne sub single")
-(ne-float-binary-op nfmuls FM01  mul OP_79 OPE1_28 F-3 "ne mul single")
-(ne-float-binary-op nfdivs FM01  div OP_79 OPE1_29 F-4 "ne div single")
+(ne-float-binary-op nfadds FMALL ((FR500-MAJOR F-2)) add OP_79 OPE1_26 "ne add single")
+(ne-float-binary-op nfsubs FMALL ((FR500-MAJOR F-2)) sub OP_79 OPE1_27 "ne sub single")
+(ne-float-binary-op nfmuls FM01  ((FR500-MAJOR F-3)) mul OP_79 OPE1_28 "ne mul single")
+(ne-float-binary-op nfdivs FM01  ((FR500-MAJOR F-4)) div OP_79 OPE1_29 "ne div single")
 
 (define-pmacro (fcc-eq) 8)
 (define-pmacro (fcc-lt) 4)
@@ -6395,10 +6401,10 @@
 (ne-float-parallel-mul-add nfmas add OP_79 OPE1_2E "ne parallel mul/add,single")
 (ne-float-parallel-mul-add nfmss sub OP_79 OPE1_2F "ne parallel mul/sub,single")
 
-(define-pmacro (float-dual-arith name major oper1 oper2 op ope attr comment)
+(define-pmacro (float-dual-arith name attr oper1 oper2 op ope comment)
   (dni name
        (comment)
-       ((UNIT FM01) (FR500-MAJOR major) attr)
+       (.splice (UNIT FM01) (.unsplice attr))
        (.str name "$pack $FRi,$FRj,$FRk")
        (+ pack FRk op FRi ope FRj)
        (sequence ()
@@ -6409,11 +6415,11 @@
   )
 )
 
-(float-dual-arith fdadds F-6 add add OP_79 OPE1_16 (MACH simple,tomcat,fr500,frv) "dual add, single")
-(float-dual-arith fdsubs F-6 sub sub OP_79 OPE1_17 (MACH simple,tomcat,fr500,frv) "dual sub, single")
-(float-dual-arith fdmuls F-7 mul mul OP_79 OPE1_18 (MACH simple,tomcat,fr500,frv) "dual mul, single")
-(float-dual-arith fddivs F-7 div div OP_79 OPE1_19 (MACH frv) "dual div,single")
-(float-dual-arith fdsads F-6 add sub OP_79 OPE1_1E (MACH simple,tomcat,fr500,frv) "dual add/sub, single")
+(float-dual-arith fdadds ((FR500-MAJOR F-6) (MACH simple,tomcat,fr500,frv)) add add OP_79 OPE1_16 "dual add, single")
+(float-dual-arith fdsubs ((FR500-MAJOR F-6) (MACH simple,tomcat,fr500,frv)) sub sub OP_79 OPE1_17 "dual sub, single")
+(float-dual-arith fdmuls ((FR500-MAJOR F-7) (MACH simple,tomcat,fr500,frv)) mul mul OP_79 OPE1_18 "dual mul, single")
+(float-dual-arith fddivs ((FR500-MAJOR F-7) (MACH frv))                     div div OP_79 OPE1_19 "dual div,single")
+(float-dual-arith fdsads ((FR500-MAJOR F-6) (MACH simple,tomcat,fr500,frv)) add sub OP_79 OPE1_1E "dual add/sub, single")
 
 (dni fdmulcs
      "Float dual cross multiply single"
@@ -6439,10 +6445,10 @@
      ((fr500 (unit u-float-dual-arith)))
 )
 
-(define-pmacro (ne-float-dual-arith name major oper1 oper2 op ope attr comment)
+(define-pmacro (ne-float-dual-arith name attr oper1 oper2 op ope comment)
   (dni name
        (comment)
-       ((UNIT FM01) (FR500-MAJOR major) attr)
+       (.splice (UNIT FM01) (.unsplice attr))
        (.str name "$pack $FRi,$FRj,$FRk")
        (+ pack FRk op FRi ope FRj)
        (sequence ()
@@ -6455,11 +6461,11 @@
   )
 )
 
-(ne-float-dual-arith nfdadds F-6 add add OP_79 OPE1_36 (MACH simple,tomcat,fr500,frv) "ne dual add, single")
-(ne-float-dual-arith nfdsubs F-6 sub sub OP_79 OPE1_37 (MACH simple,tomcat,fr500,frv) "ne dual sub, single")
-(ne-float-dual-arith nfdmuls F-7 mul mul OP_79 OPE1_38 (MACH simple,tomcat,fr500,frv) "ne dual mul, single")
-(ne-float-dual-arith nfddivs F-7 div div OP_79 OPE1_39 (MACH frv) "ne dual div,single")
-(ne-float-dual-arith nfdsads F-6 add sub OP_79 OPE1_3E (MACH simple,tomcat,fr500,frv) "ne dual add/sub, single")
+(ne-float-dual-arith nfdadds ((FR500-MAJOR F-6) (MACH simple,tomcat,fr500,frv)) add add OP_79 OPE1_36 "ne dual add, single")
+(ne-float-dual-arith nfdsubs ((FR500-MAJOR F-6) (MACH simple,tomcat,fr500,frv)) sub sub OP_79 OPE1_37 "ne dual sub, single")
+(ne-float-dual-arith nfdmuls ((FR500-MAJOR F-7) (MACH simple,tomcat,fr500,frv)) mul mul OP_79 OPE1_38 "ne dual mul, single")
+(ne-float-dual-arith nfddivs ((FR500-MAJOR F-7) (MACH frv))                     div div OP_79 OPE1_39 "ne dual div,single")
+(ne-float-dual-arith nfdsads ((FR500-MAJOR F-6) (MACH simple,tomcat,fr500,frv)) add sub OP_79 OPE1_3E "ne dual add/sub, single")
 
 (dni nfdcmps
      "non-excepting dual float compare"

@@ -1,3 +1,18 @@
+2003-09-04  Dave Brolley  <brolley@redhat.com>
+
+	* frv.cpu (register-transfer): Pass in all attributes in on argument.
+	Update all callers.
+	(conditional-register-transfer): Ditto.
+	(cache-preload): Ditto.
+	(floating-point-conversion): Ditto.
+	(floating-point-neg): Ditto.
+	(float-abs): Ditto.
+	(float-binary-op-s): Ditto.
+	(conditional-float-binary-op): Ditto.
+	(ne-float-binary-op): Ditto.
+	(float-dual-arith): Ditto.
+	(ne-float-dual-arith): Ditto.
+
 2003-09-03  Dave Brolley  <brolley@redhat.com>
 
 	* frv.opc (parse_A, parse_A0, parse_A1): New parse handlers.
