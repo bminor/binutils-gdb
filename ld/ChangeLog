@@ -1,6 +1,6 @@
 2003-02-11 Dmitry Diky  <diwil@mail.ru>
 
-	* scripttempl/elf32msp430.sc: Add new data anchors defenitions.
+	* scripttempl/elf32msp430.sc: Add new data anchors definitions.
 	* scripttempl/elf32msp430_3.sc: Likewise.
 
 2003-02-11  Uwe Stieber  <uwe@wwws.de>
