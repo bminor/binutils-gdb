@@ -1,5 +1,6 @@
 Fri Jul 30 07:36:53 1993  Fred Fish  (fnf@deneb.cygnus.com)
 
+	* NEWS:  Add note that DEC alpha support is host only, not native.
 	* README:  Emphasize that C++ support works best with GNU C++ and
 	stabs debugging format.
 	* delta68-nat.c:  Add missing FSF copyright.

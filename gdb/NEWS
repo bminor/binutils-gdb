@@ -22,6 +22,12 @@ should wait for responses to rpc's.  You might want to use this if
 your vxworks target is, perhaps, a slow software simulator or happens
 to be on the far side of a thin network line.
 
+ * DEC alpha support
+
+This release contains support for using a DEC alpha as a GDB host for
+cross debugging.  Native alpha debugging is not supported yet.
+
+
 *** Changes in GDB-4.9:
 
  * Testsuite
