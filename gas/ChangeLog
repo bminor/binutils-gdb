@@ -1,3 +1,10 @@
+start-sanitize-m32rx
+Wed Jan 28 16:27:27 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-m32r.c (md_assemble): Fix determination of when
+	instructions can be combined in parallel.
+
+end-sanitize-m32rx
 Wed Jan 28 14:35:00 1998  Bill Moyer <billm@cygnus.com>
 
 	* as.h (flag_warn_suppress_instructionswap): added new flag.

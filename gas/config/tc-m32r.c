@@ -746,21 +746,19 @@ md_assemble (str)
 	     previous instruction to make one, parallel, 32 bit instruction.
 	     If the previous instruction (potentially) changed the flow of
 	     program control, then it cannot be combined with the current
-	     instruction, otherwise call can_make_parallel() with both
+	     instruction.  Also if the output of the previous instruction
+	     is used as an input to the current instruction then it cannot
+	     be combined.  Otherwise call can_make_parallel() with both
 	     orderings of the instructions to see if they can be combined.  */
 	  if (   ! CGEN_INSN_ATTR (prev_insn.insn, CGEN_INSN_COND_CTI)
-	      && ! CGEN_INSN_ATTR (prev_insn.insn, CGEN_INSN_UNCOND_CTI))
+	      && ! CGEN_INSN_ATTR (prev_insn.insn, CGEN_INSN_UNCOND_CTI)
+	      &&   check_parallel_io_clash (& prev_insn, &insn)
+		 )
 	    {
-	      if (can_make_parallel (& prev_insn, & insn) == NULL
-		  && check_parallel_io_clash (& prev_insn, &insn))
-		{
-		  make_parallel (insn.buffer);
-		}
-	      else if (can_make_parallel (& insn, & prev_insn.insn) == NULL
-		       && check_parallel_io_clash (& insn, & prev_insn))
-		{
-		  swap = true;
-		}
+	      if (can_make_parallel (& prev_insn, & insn) == NULL)
+		make_parallel (insn.buffer);
+	      else if (can_make_parallel (& insn, & prev_insn.insn) == NULL)
+		swap = true;
 	    }
 /* end-sanitize-phase2-m32rx */
 /* end-sanitize-m32rx */
