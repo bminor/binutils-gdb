@@ -1357,7 +1357,26 @@ read_dbx_symtab (struct objfile *objfile)
   textlow_not_set = 1;
   has_line_numbers = 0;
 
-  /* If the objfile has no .data section, try using the .bss section.  */
+  /* FIXME: jimb/2003-09-12: We don't apply the right section's offset
+     to global and static variables.  The stab for a global or static
+     variable doesn't give us any indication of which section it's in,
+     so we can't tell immediately which offset in
+     objfile->section_offsets we should apply to the variable's
+     address.
+
+     We could certainly find out which section contains the variable
+     by looking up the variable's unrelocated address with
+     find_pc_section, but that would be expensive; this is the
+     function that constructs the partial symbol tables by examining
+     every symbol in the entire executable, and it's
+     performance-critical.  So that expense would not be welcome.  I'm
+     not sure what to do about this at the moment.
+
+     What we have done for years is to simply assume that the .data
+     section's offset is appropriate for all global and static
+     variables.  Recently, this was expanded to fall back to the .bss
+     section's offset if there is no .data section, and then to the
+     .rodata section's offset.  */
   data_sect_index = objfile->sect_index_data;
   if (data_sect_index == -1)
     data_sect_index = SECT_OFF_BSS (objfile);

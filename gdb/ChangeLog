@@ -1,5 +1,8 @@
 2003-09-12  Jim Blandy  <jimb@redhat.com>
 
+	* dbxread.c (read_dbx_symtab): Add FIXME about finding section
+	offsets for global and static variables.
+
 	* dbxread.c (read_dbx_symtab): The N_DATA and N_DATA | N_EXT
 	symbol types are, by definition, in the .data section, so it is
 	correct to use SECT_OFF_DATA (objfile) here, not data_sect_index.
