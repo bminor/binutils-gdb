@@ -1,3 +1,7 @@
+2004-12-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (read_leb128): Support 64bit host.
+
 2004-12-22  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (last_pointer_size, warned_about_missing_comp_units):

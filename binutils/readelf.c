@@ -6933,7 +6933,7 @@ read_leb128 (unsigned char *data, int *length_return, int sign)
 {
   unsigned long int result = 0;
   unsigned int num_read = 0;
-  int shift = 0;
+  unsigned int shift = 0;
   unsigned char byte;
 
   do
@@ -6941,7 +6941,7 @@ read_leb128 (unsigned char *data, int *length_return, int sign)
       byte = *data++;
       num_read++;
 
-      result |= (byte & 0x7f) << shift;
+      result |= ((unsigned long int) (byte & 0x7f)) << shift;
 
       shift += 7;
 
@@ -6951,8 +6951,8 @@ read_leb128 (unsigned char *data, int *length_return, int sign)
   if (length_return != NULL)
     *length_return = num_read;
 
-  if (sign && (shift < 32) && (byte & 0x40))
-    result |= -1 << shift;
+  if (sign && (shift < 8 * sizeof (result)) && (byte & 0x40))
+    result |= -1L << shift;
 
   return result;
 }
