@@ -50,6 +50,7 @@ int dump_ar_hdrs;		/* -a */
 int with_line_numbers;		/* -l */
 int dump_stab_section_info;	/* --stabs */
 boolean disassemble;		/* -d */
+boolean disassemble_all;	/* -D */
 boolean formats_info;		/* -i */
 char *only;			/* -j secname */
 
@@ -106,11 +107,12 @@ usage (stream, status)
      int status;
 {
   fprintf (stream, "\
-Usage: %s [-ahifdrRtTxsl] [-b bfdname] [-m machine] [-j section-name]\n\
-       [--archive-headers] [--target=bfdname] [--disassemble] [--file-headers]\n\
-       [--section-headers] [--headers] [--info] [--section=section-name]\n\
-       [--line-numbers] [--architecture=machine] [--reloc] [--full-contents]\n\
-       [--stabs] [--syms] [--all-headers] [--dynamic-syms] [--dynamic-reloc]\n\
+Usage: %s [-ahifdDrRtTxsl] [-b bfdname] [-m machine] [-j section-name]\n\
+       [--archive-headers] [--target=bfdname] [--disassemble]\n\
+       [--disassemble-all] [--file-headers] [--section-headers] [--headers]\n\
+       [--info] [--section=section-name] [--line-numbers]\n\
+       [--architecture=machine] [--reloc] [--full-contents] [--stabs]\n\
+       [--syms] [--all-headers] [--dynamic-syms] [--dynamic-reloc]\n\
        [--version] [--help] objfile...\n\
 at least one option besides -l (--line-numbers) must be given\n",
 	   program_name);
@@ -123,6 +125,7 @@ static struct option long_options[]=
   {"architecture", required_argument, NULL, 'm'},
   {"archive-headers", no_argument, NULL, 'a'},
   {"disassemble", no_argument, NULL, 'd'},
+  {"disassemble-all", no_argument, NULL, 'D'},
   {"dynamic-reloc", no_argument, NULL, 'R'},
   {"dynamic-syms", no_argument, NULL, 'T'},
   {"file-headers", no_argument, NULL, 'f'},
@@ -285,11 +288,11 @@ remove_useless_symbols (symbols, count)
 
 static int 
 compare_symbols (ap, bp)
-     PTR ap;
-     PTR bp;
+     const PTR ap;
+     const PTR bp;
 {
-  asymbol *a = *(asymbol **)ap;
-  asymbol *b = *(asymbol **)bp;
+  const asymbol *a = *(const asymbol **)ap;
+  const asymbol *b = *(const asymbol **)bp;
 
   if (a->value > b->value)
     return 1;
@@ -301,6 +304,25 @@ compare_symbols (ap, bp)
   else if (a->section < b->section)
     return -1;
   return 0;
+}
+
+/* Sort relocs into address order.  */
+
+static int
+compare_relocs (ap, bp)
+     const PTR ap;
+     const PTR bp;
+{
+  const arelent *a = *(const arelent **)ap;
+  const arelent *b = *(const arelent **)bp;
+
+  if (a->address > b->address)
+    return 1;
+  else if (a->address < b->address)
+    return -1;
+
+  return compare_symbols ((const PTR) a->sym_ptr_ptr,
+			  (const PTR) b->sym_ptr_ptr);
 }
 
 /* Print VMA symbolically to INFO if possible.  */
@@ -447,7 +469,7 @@ disassemble_data (abfd)
 {
   long i;
   unsigned int (*print) () = 0; /* Old style */
-  disassembler_ftype disassemble = 0; /* New style */
+  disassembler_ftype disassemble_fn = 0; /* New style */
   struct disassemble_info disasm_info;
   struct objdump_disasm_info aux;
 
@@ -457,6 +479,51 @@ disassemble_data (abfd)
   asection *section;
 
   boolean done_dot = false;
+
+  /* If we are dumping relocation information, read the relocs for
+     each section we are going to disassemble.  We must do this before
+     we sort the symbols.  */
+  if (dump_reloc_info)
+    {
+      for (section = abfd->sections;
+	   section != (asection *) NULL;
+	   section = section->next)
+	{
+	  long relsize;
+	  arelent **relpp;
+
+	  if ((section->flags & SEC_LOAD) == 0
+	      || (! disassemble_all
+		  && only == NULL
+		  && (section->flags & SEC_CODE) == 0))
+	    continue;
+	  if (only != (char *) NULL && strcmp (only, section->name) != 0)
+	    continue;
+	  if ((section->flags & SEC_RELOC) == 0)
+	    continue;
+
+	  /* We store the reloc information in the reloc_count and
+             orelocation fields.  */
+
+	  relsize = bfd_get_reloc_upper_bound (abfd, section);
+	  if (relsize < 0)
+	    bfd_fatal (bfd_get_filename (abfd));
+
+	  if (relsize == 0)
+	    section->reloc_count = 0;
+	  else
+	    {
+	      long relcount;
+
+	      relpp = (arelent **) xmalloc (relsize);
+	      relcount = bfd_canonicalize_reloc (abfd, section, relpp, syms);
+	      if (relcount < 0)
+		bfd_fatal (bfd_get_filename (abfd));
+	      section->reloc_count = relcount;
+	      section->orelocation = relpp;
+	    }
+	}
+    }
 
   /* Replace symbol section relative values with abs values.  */
   for (i = 0; i < symcount; i++)
@@ -495,8 +562,8 @@ disassemble_data (abfd)
     }
   else
     {
-      disassemble = disassembler (abfd);
-      if (!disassemble)
+      disassemble_fn = disassembler (abfd);
+      if (!disassemble_fn)
 	{
 	  fprintf (stderr, "%s: Can't disassemble for architecture %s\n",
 		   program_name,
@@ -511,11 +578,26 @@ disassemble_data (abfd)
     {
       bfd_byte *data = NULL;
       bfd_size_type datasize = 0;
+      arelent **relpp = NULL;
+      arelent **relppend = NULL;
 
-      if (!(section->flags & SEC_LOAD))
+      if ((section->flags & SEC_LOAD) == 0
+	  || (! disassemble_all
+	      && only == NULL
+	      && (section->flags & SEC_CODE) == 0))
 	continue;
       if (only != (char *) NULL && strcmp (only, section->name) != 0)
 	continue;
+
+      if (dump_reloc_info
+	  && (section->flags & SEC_RELOC) != 0)
+	{
+	  /* Sort the relocs by address.  */
+	  qsort (section->orelocation, section->reloc_count,
+		 sizeof (arelent *), compare_relocs);
+	  relpp = section->orelocation;
+	  relppend = relpp + section->reloc_count;
+	}
 
       printf ("Disassembly of section %s:\n", section->name);
 
@@ -534,6 +616,8 @@ disassemble_data (abfd)
       i = 0;
       while (i < disasm_info.buffer_length)
 	{
+	  int bytes;
+
 	  if (data[i] == 0 && data[i + 1] == 0 && data[i + 2] == 0 &&
 	      data[i + 3] == 0)
 	    {
@@ -542,7 +626,7 @@ disassemble_data (abfd)
 		  printf ("...\n");
 		  done_dot = true;
 		}
-	      i += 4;
+	      bytes = 4;
 	    }
 	  else
 	    {
@@ -584,20 +668,69 @@ disassemble_data (abfd)
 	      objdump_print_address (section->vma + i, &disasm_info);
 	      putchar (' ');
 
-	      if (disassemble) /* New style */
+	      if (disassemble_fn)
 		{
-		  int bytes = (*disassemble)(section->vma + i,
-					     &disasm_info);
+		  /* New style */
+		  bytes = (*disassemble_fn) (section->vma + i, &disasm_info);
 		  if (bytes < 0)
 		    break;
-		  i += bytes;
 		}
-	      else /* Old style */
-		i += print (section->vma + i,
-			    data + i,
-			    stdout);
+	      else
+		{
+		  /* Old style */
+		  bytes = print (section->vma + i, data + i, stdout);
+		}
 	      putchar ('\n');
 	    }
+
+	  if (dump_reloc_info
+	      && (section->flags & SEC_RELOC) != 0)
+	    {
+	      while (relpp < relppend
+		     && ((*relpp)->address >= i
+			 && (*relpp)->address < i + bytes))
+		{
+		  arelent *q;
+		  const char *sym_name;
+
+		  q = *relpp;
+
+		  printf ("\t\tRELOC: ");
+
+		  printf_vma (section->vma + q->address);
+
+		  printf (" %s ", q->howto->name);
+
+		  if (q->sym_ptr_ptr != NULL
+		      && *q->sym_ptr_ptr != NULL)
+		    {
+		      sym_name = bfd_asymbol_name (*q->sym_ptr_ptr);
+		      if (sym_name == NULL || *sym_name == '\0')
+			{
+			  asection *sym_sec;
+
+			  sym_sec = bfd_get_section (*q->sym_ptr_ptr);
+			  sym_name = bfd_get_section_name (abfd, sym_sec);
+			  if (sym_name == NULL || *sym_name == '\0')
+			    sym_name = "*unknown*";
+			}
+		    }
+
+		  printf ("%s", sym_name);
+
+		  if (q->addend)
+		    {
+		      printf ("+0x");
+		      printf_vma (q->addend);
+		    }
+
+		  printf ("\n");
+
+		  ++relpp;
+		}
+	    }
+
+	  i += bytes;
 	}
       free (data);
     }
@@ -868,7 +1001,7 @@ display_bfd (abfd)
     dump_symbols (abfd, true);
   if (dump_stab_section_info)
     dump_stabs (abfd);
-  if (dump_reloc_info)
+  if (dump_reloc_info && ! disassemble)
     dump_relocs (abfd);
   if (dump_dynamic_reloc_info)
     dump_dynamic_relocs (abfd);
@@ -1371,7 +1504,7 @@ main (argc, argv)
 
   bfd_init ();
 
-  while ((c = getopt_long (argc, argv, "ib:m:VdlfahrRtTxsj:", long_options,
+  while ((c = getopt_long (argc, argv, "ib:m:VdDlfahrRtTxsj:", long_options,
 			   (int *) 0))
 	 != EOF)
     {
@@ -1413,6 +1546,9 @@ main (argc, argv)
 	  break;
 	case 'd':
 	  disassemble = true;
+	  break;
+	case 'D':
+	  disassemble = disassemble_all = true;
 	  break;
 	case 's':
 	  dump_section_contents = 1;

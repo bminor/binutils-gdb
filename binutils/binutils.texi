@@ -849,7 +849,8 @@ Show a summary of the options to @code{objcopy}.
 @smallexample
 objdump [ -a | --archive-headers ] 
         [ -b @var{bfdname} | --target=@var{bfdname} ]
-        [ -d | --disassemble ]  [ -f | --file-headers ]
+        [ -d | --disassemble ]  [ -D | --disassemble-all ] 
+        [ -f | --file-headers ]
         [ -h | --section-headers | --headers ]  [ -i | --info ]
         [ -j @var{section} | --section=@var{section} ]
         [ -l | --line-numbers ]
@@ -904,8 +905,14 @@ formats available with the @samp{-i} option.
 @itemx --disassemble
 @cindex disassembling object code
 @cindex machine instructions
-Display the assembler mnemonics for the machine
-instructions from @var{objfile}.
+Display the assembler mnemonics for the machine instructions from
+@var{objfile}.  This option only disassembles those sections which are
+expected to contain instructions.
+
+@item -D
+@itemx --disassemble-all
+Like @samp{-d}, but disassemble the contents of all sections, not just
+those expected to contain instructions.
 
 @item -f
 @itemx --file-header
@@ -949,7 +956,7 @@ Display information only for section @var{name}.
 @cindex source filenames for object files
 Label the display (using debugging information) with the filename
 and source line numbers corresponding to the object code shown.
-Only useful with @samp{-d}.
+Only useful with @samp{-d} or @samp{-D}.
 
 @item -m @var{machine}
 @itemx --architecture=@var{machine}
@@ -961,7 +968,9 @@ option.
 @item -r
 @itemx --reloc
 @cindex relocation entries, in object file
-Print the relocation entries of the file.
+Print the relocation entries of the file.  If used with @samp{-d} or
+@samp{-D}, the relocations are printed interspersed with the
+disassembly.
 
 @item -R
 @itemx --dynamic-reloc

@@ -1,3 +1,19 @@
+Thu Sep 15 21:43:17 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* objdump.c (disassemble_all): New global variable.
+	(usage): Document --disassemble-all.
+	(long_options): Add disassemble-all as a synonym for -D.
+	(compare_symbols): Make pointers const.
+	(compare_relocs): New static function.
+	(disassemble_data): Rename disassemble to disassemble_fn to avoid
+	shadowing.  If dump_reloc_info, print relocs along with
+	disassembly.  Skip sections which are not SEC_CODE unless
+	disassemble_all or only is set.
+	(display_bfd): Don't call dump_relocs if disassemble is set.
+	(main): Accept and handle -D.
+	* binutils.texi: Document -D/--disassemble-all.
+	* objdump.1: Likewise.
+
 Wed Sep 14 12:19:07 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* objdump.c (disassemble_data): Initialize prevline to 0.  Make
