@@ -58,6 +58,7 @@ static boolean sh64_backend_section_from_shdr
 static void sh64_elf_final_write_processing PARAMS ((bfd *, boolean));
 static boolean sh64_bfd_elf_copy_private_section_data
   PARAMS ((bfd *, asection *, bfd *, asection *));
+static void sh64_find_section_for_address PARAMS ((bfd *, asection *, PTR));
 
 /* Let elf32-sh.c handle the "bfd_" definitions, so we only have to
    intrude with an #ifndef around the function definition.  */

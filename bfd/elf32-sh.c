@@ -85,6 +85,9 @@ static boolean sh_elf_gc_sweep_hook
 	   const Elf_Internal_Rela *));
 static enum elf_reloc_type_class sh_elf_reloc_type_class
   PARAMS ((const Elf_Internal_Rela *));
+#ifdef INCLUDE_SHMEDIA
+inline static void movi_shori_putval PARAMS ((bfd *, unsigned long, char *));
+#endif
 
 /* The name of the dynamic interpreter.  This is put in the .interp
    section.  */
@@ -2808,10 +2811,10 @@ sh_elf_relax_delete_bytes (abfd, sec, addr, count)
 
 static boolean
 sh_elf_align_loads (abfd, sec, internal_relocs, contents, pswapped)
-     bfd *abfd;
+     bfd *abfd ATTRIBUTE_UNUSED;
      asection *sec;
      Elf_Internal_Rela *internal_relocs;
-     bfd_byte *contents;
+     bfd_byte *contents ATTRIBUTE_UNUSED;
      boolean *pswapped;
 {
   Elf_Internal_Rela *irel, *irelend;
