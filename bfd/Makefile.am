@@ -97,6 +97,7 @@ ALL_MACHINES_CFILES = \
 	cpu-rs6000.c \
 	cpu-sh.c \
 	cpu-sparc.c \
+	cpu-v850.c \
 	cpu-vax.c \
 	cpu-we32k.c \
 	cpu-w65.c \
@@ -142,6 +143,7 @@ BFD32_BACKENDS = \
 	coff-w65.lo \
 	coff-z8k.lo \
 	cofflink.lo \
+	dwarf2.lo \
 	ecoff.lo \
 	ecofflink.lo \
 	elf32-arc.lo \
@@ -207,7 +209,6 @@ BFD32_BACKENDS = \
 	sparclynx.lo \
 	sparcnetbsd.lo \
 	sunos.lo \
-	tekhex.lo \
 	versados.lo \
 	xcofflink.lo
 
@@ -246,6 +247,7 @@ BFD32_BACKENDS_CFILES = \
 	coff-w65.c \
 	coff-z8k.c \
 	cofflink.c \
+	dwarf2.c \
 	ecoff.c \
 	ecofflink.c \
 	elf32-arc.c \
@@ -263,6 +265,7 @@ BFD32_BACKENDS_CFILES = \
 	elf32-ppc.c \
 	elf32-sh.c \
 	elf32-sparc.c \
+	elf32-v850.c \
 	elf32.c \
 	elflink.c \
 	hp300bsd.c \
@@ -307,7 +310,6 @@ BFD32_BACKENDS_CFILES = \
 	sparclynx.c \
 	sparcnetbsd.c \
 	sunos.c \
-	tekhex.c \
 	versados.c \
 	xcofflink.c
 
@@ -422,6 +424,7 @@ libbfd_la_LIBADD = `cat ofiles`
 # everything else starts using libtool.  FIXME.
 
 noinst_LIBRARIES = libbfd.a
+libbfd_a_SOURCES =
 
 stamp-lib: libbfd.la
 	cp .libs/libbfd.a libbfd.tmp
@@ -520,14 +523,19 @@ aout-params.h: gen-aout
 gen-aout: $(srcdir)/gen-aout.c Makefile
 	$(CC) -o gen-aout $(CFLAGS) $(LFLAGS) $(srcdir)/gen-aout.c
 
-$(BFD_H): stmp-bfd.h ; @true
+$(BFD_H): stmp-bfd-h ; @true
 
-stmp-bfd.h: bfd-in3.h
+stmp-bfd-h: bfd-in3.h
 	rm -f bfd-tmp.h
 	cp bfd-in3.h bfd-tmp.h
 	$(SHELL) $(srcdir)/../move-if-change bfd-tmp.h $(BFD_H)
 	rm -f bfd-tmp.h
-	touch stmp-bfd.h
+	touch stmp-bfd-h
+
+BFD_H_FILES = bfd-in.h init.c opncls.c libbfd.c section.c archures.c \
+	reloc.c syms.c bfd.c archive.c corefile.c targets.c format.c
+LIBBFD_H_FILES = libbfd-in.h init.c libbfd.c cache.c reloc.c archures.c elf.c
+LIBCOFF_H_FILES = libcoff-in.h coffcode.h
 
 # Could really use a "copy-if-change"...
 headers:
@@ -539,36 +547,41 @@ headers:
 	cp $(docdir)/libcoff.h libcoff.h-new
 	$(SHELL) $(srcdir)/../move-if-change libcoff.h-new $(srcdir)/libcoff.h
 
-# The rules for the generated header files are here so that people can
-# type `make bfd-in2.h' if they remove it.  They are not run by default.
-$(srcdir)/bfd-in2.h:
-	(cd $(docdir); $(MAKE) bfd.h $(FLAGS_TO_PASS))
+# We only rebuild the header files automatically if we have been
+# configured with --enable-maintainer-mode.
+
+$(srcdir)/bfd-in2.h: @MAINT@ stmp-bin2-h
+stmp-bin2-h: $(BFD_H_FILES)
+	(cd $(docdir); $(MAKE) $(FLAGS_TO_PASS) bfd.h)
 	cp $(docdir)/bfd.h bfd-in2.h-new
 	$(SHELL) $(srcdir)/../move-if-change bfd-in2.h-new $(srcdir)/bfd-in2.h
-$(srcdir)/libbfd.h:
-	(cd $(docdir); $(MAKE) libbfd.h $(FLAGS_TO_PASS))
+	touch stmp-bin2-h
+
+$(srcdir)/libbfd.h: @MAINT@ stmp-lbfd-h
+stmp-lbfd-h: $(LIBBFD_H_FILES)
+	(cd $(docdir); $(MAKE) $(FLAGS_TO_PASS) libbfd.h)
 	cp $(docdir)/libbfd.h libbfd.h-new
 	$(SHELL) $(srcdir)/../move-if-change libbfd.h-new $(srcdir)/libbfd.h
-$(srcdir)/libcoff.h:
-	(cd $(docdir); $(MAKE) libcoff.h $(FLAGS_TO_PASS))
+	touch stmp-lbfd-h
+
+$(srcdir)/libcoff.h: @MAINT@ stmp-lcoff-h
+stmp-lcoff-h: $(LIBCOFF_H_FILES)
+	(cd $(docdir); $(MAKE) $(FLAGS_TO_PASS) libcoff.h)
 	cp $(docdir)/libcoff.h libcoff.h-new
 	$(SHELL) $(srcdir)/../move-if-change libcoff.h-new $(srcdir)/libcoff.h
+	touch stmp-lcoff-h
 
 MOSTLYCLEANFILES = elf32-target.h elf64-target.h ofiles stamp-ofiles \
 	targmatch.h
 
-CLEANFILES = bfd.h dep.sed stmp-bfd.h .dep .dep1 libbfd.a stamp-lib
+CLEANFILES = bfd.h dep.sed stmp-bfd-h .dep .dep1 libbfd.a stamp-lib \
+	stmp-bin2-h stmp-lbfd-h stmp-lcoff-h
 
 start-sanitize-d30v:
 elf32-d30v.lo: elf32-d30v.c elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   elf32-target.h
 end-sanitize-d30v:
-
-cpu-v850.lo: cpu-v850.c
-elf32-v850.lo: elf32-v850.c $(INCDIR)/bfdlink.h elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  elf32-target.h
 
 start-sanitize-tic80:
 cpu-tic80.lo: cpu-tic80.c
@@ -631,6 +644,7 @@ cpu-powerpc.lo: cpu-powerpc.c
 cpu-rs6000.lo: cpu-rs6000.c
 cpu-sh.lo: cpu-sh.c
 cpu-sparc.lo: cpu-sparc.c
+cpu-v850.lo: cpu-v850.c
 cpu-vax.lo: cpu-vax.c
 cpu-we32k.lo: cpu-we32k.c
 cpu-w65.lo: cpu-w65.c
@@ -726,6 +740,9 @@ coff-z8k.lo: coff-z8k.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/z8k.h \
   $(INCDIR)/coff/internal.h libcoff.h coffcode.h coffswap.h
 cofflink.lo: cofflink.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/internal.h \
   libcoff.h
+dwarf2.lo: dwarf2.c elf-bfd.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
+  $(INCDIR)/elf/dwarf2.h
 ecoff.lo: ecoff.c $(INCDIR)/bfdlink.h $(INCDIR)/aout/ar.h \
   $(INCDIR)/aout/ranlib.h $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def \
   libaout.h $(INCDIR)/aout/aout64.h $(INCDIR)/coff/internal.h \
@@ -784,6 +801,9 @@ elf32-sh.lo: elf32-sh.c $(INCDIR)/bfdlink.h elf-bfd.h \
 elf32-sparc.lo: elf32-sparc.c $(INCDIR)/bfdlink.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/elf/sparc.h elf32-target.h
+elf32-v850.lo: elf32-v850.c $(INCDIR)/bfdlink.h elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/elf/v850.h elf32-target.h
 elf32.lo: elf32.c elfcode.h $(INCDIR)/bfdlink.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   $(INCDIR)/fnmatch.h elfcore.h elflink.h

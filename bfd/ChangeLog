@@ -1,3 +1,12 @@
+Mon Dec 22 13:20:57 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am: Rebuild dependencies.
+ 	(ALL_MACHINES_CFILES): Add dwarf2.lo.
+	(ALL_MACHINES_CFILES): Add dwarf2.c.
+	* Makefile.in: Rebuild.
+
+	* coff-arm.c: Don't include obstack.h.
+
 Mon Dec 22 13:04:33 1997  Joel Sherrill  <joel@oarcorp.com>
 
         * config.bfd (i[3456]86*-go32-rtems*): Fix to be the same as
