@@ -77,7 +77,7 @@ void OP_80 ()
 /* mov dm, an */
 void OP_F1E0 ()
 {
-  State.regs[REG_A0 + ((insn & 0xc) >> 2)] = State.regs[REG_D0 + (insn & 0x3)];
+  State.regs[REG_A0 + (insn & 0x3)] = State.regs[REG_D0 + ((insn & 0xc) >> 3)];
 }
 
 /* mov am, dn */
