@@ -1,5 +1,5 @@
 \input texinfo
-@setfilename gdb-internals
+@setfilename gdbint.info
 @c $Id$
 @ifinfo
 This file documents the internals of the GNU debugger GDB.
@@ -23,7 +23,7 @@ manual under the terms of the GPL (for which purpose this text may be
 regarded as a program in the language TeX).
 @end ifinfo
 
-@setchapternewpage odd
+@setchapternewpage off
 @settitle GDB Internals
 @titlepage
 @title{Working in GDB}
@@ -58,16 +58,21 @@ are preserved on all copies.
 * Releases::			Configuring GDB for release
 * README::			The README file
 * New Architectures::		Defining a new host or target architecture
+* Host::			Adding a New Host
+* Target::			Adding a New Target
+* Config::			Extending @code{configure}
 * BFD support for GDB::		How BFD and GDB interface
 * Host versus Target::		What features are in which files
 * Symbol Reading::		Defining new symbol readers
+* Languages::			Defining new source languages
+
 @end menu
 
 @node Cleanups, Wrapping, Top, Top
 @chapter Cleanups
 
 Cleanups are a structured way to deal with things that need to be done
-later.  When your code does something (like malloc some memory, or open
+later.  When your code does something (like @code{malloc} some memory, or open
 a file) that needs to be undone later (e.g. free the memory or close
 the file), it can make a cleanup.  The cleanup will be done at some
 future point:  when the command is finished, when an error occurs, or
@@ -115,15 +120,15 @@ since they might never return to your code (they @samp{longjmp} instead).
 @node Wrapping, Releases, Cleanups, Top
 @chapter Wrapping output lines
 
-Output that goes through printf_filtered or fputs_filtered or
-fputs_demangled needs only to have calls to wrap_here() added 
+Output that goes through @code{printf_filtered} or @code{fputs_filtered} or
+@code{fputs_demangled} needs only to have calls to @code{wrap_here} added 
 in places that would be good breaking points.  The utility routines
 will take care of actually wrapping if the line width is exceeded.
 
-The argument to wrap_here() is an indentation string which is printed
-ONLY if the line breaks there.  This argument is saved away and used
-later.  It must remain valid until the next call to wrap_here() or
-until a newline has been printed through the *_filtered functions.
+The argument to @code{wrap_here} is an indentation string which is printed
+@emph{only} if the line breaks there.  This argument is saved away and used
+later.  It must remain valid until the next call to @code{wrap_here} or
+until a newline has been printed through the @code{*_filtered} functions.
 Don't pass in a local variable and then return!
 
 It is usually best to call wrap_here() after printing a comma or space.
@@ -175,7 +180,7 @@ appear anywhere else in the directory.
 
 
 
-@node New Architectures, BFD support for GDB, README, Top
+@node New Architectures, Host, README, Top
 @chapter Defining a new host or target architecture
 
 
@@ -244,7 +249,193 @@ extract data from one, write data to one, print information about one,
 etc.  Now that executable files are handled with BFD, every architecture
 should be able to use the generic exec.c rather than its own custom code.
 
-@node BFD support for GDB, Host versus Target, New Architectures, Top
+@node Host, Target, New Architectures, Top
+@chapter Adding a New Host
+
+There are two halves to making GDB work on a new machine.  First,
+you have to make it host on the new machine (compile there, handle
+that machine's terminals properly, etc).  If you will be cross-debugging
+to some other kind of system, you are done.
+
+(If you want to use GDB to debug programs that run on the new machine,
+you have to get it to understand the machine's object files, symbol
+files, and interfaces to processes.  @pxref{Target}.)
+
+Most of the work in making GDB compile on a new machine is in specifying
+the configuration of the machine.  This is done in a dizzying variety
+of header files and configuration scripts, which we hope to make more
+sensible soon.  Let's say your new host is called an XXX (e.g. sun4),
+and its full three-part configuration name is XARCH-XVEND-XOS (e.g.
+sparc-sun-sunos4).  In particular:
+
+At the top level, edit @file{config.sub} and add XARCH, XVEND, and
+XOS to the lists of supported architectures, vendors, and operating systems
+near the bottom of the file.  Also, add XXX as an alias that maps to
+XARCH-XVEND-XOS.  You can test your changes by running
+
+@example
+./config.sub XXX
+@end example
+@noindent
+and
+@example
+./config.sub XARCH-XVEND-XOS
+@end example
+@noindent
+which should both respond with XARCH-XVEND-XOS and no error messages.  
+
+Then edit @file{include/sysdep.h}.  Add a new #define for XXX_SYS, with
+a numeric value not already in use.  Add a new section that says
+
+@example
+#if HOST_SYS==XXX_SYS
+#include <sys/h-XXX.h>
+#endif
+@end example
+
+Now create a new file @file{include/sys/h-XXX.h}.  Examine the other
+h-*.h files as templates, and create one that brings in the right include
+files for your system, and defines any host-specific macros needed by
+GDB.
+
+Now, go to the bfd directory and edit @file{bfd/configure.in}.  Add shell
+script code to recognize your XARCH-XVEND-XOS configuration, and set
+bfd_host to XXX when you recognize it.  Now create a file
+@file{bfd/config/hmake-XXX}, which includes the line:
+
+@example
+HDEFINES=-DHOST_SYS=XXX_SYS
+@end example
+
+(If you have the binutils in the same tree, you'll have to do the same
+thing to in the binutils directory as you've done in the bfd directory.)
+
+It's likely that the libiberty and readline directories won't need any
+changes for your configuration, but if they do, you can change the
+@file{configure.in} file there to recognize your system and map to an
+hmake-XXX file.  Then add @file{hmake-XXX} to the @file{config/} subdirectory,
+to set any makefile variables you need.  The only current options
+in there are things like -DSYSV.
+
+Aha!  Now to configure GDB itself!  Modify @file{gdb/configure.in} to
+recognize your system and set gdb_host to XXX.  Add a file 
+@file{gdb/xconfig/XXX} which specifies XDEPFILES=(whatever is needed),
+and XM_FILE= xm-XXX.h.  Create @file{gdb/xm-XXX.h} with the appropriate
+#define's for your system (crib from existing xm-*.h files).
+If your machine needs custom support routines, you can put them in
+a file @file{gdb/XXX-xdep.c}, and add XXX-xdep.o to the XDEPFILES=
+line.  If not, you can use the generic routines for ptrace support
+(infptrace.o) and core files (coredep.o).  These can be customized
+in various ways by macros defined in your @file{xm-XXX.h} file.
+
+Now, from the top level (above bfd, gdb, etc), run:
+
+@example
+./configure -template=./configure
+@end example
+
+This will rebuild all your configure scripts, using the new
+configure.in files that you modified.  (You can also run this command
+at any subdirectory level.)  You are now ready to try configuring
+GDB to compile for your system.  Do:
+
+@example
+./configure XXX +target=vxworks960
+@end example
+
+This will configure your system to cross-compile for VxWorks on
+the Intel 960, which is probably not what you really want, but it's
+a test case that works at this stage.  (You haven't set up to be
+able to debug programs that run @emph{on} XXX yet.)
+
+If this succeeds, you can try building it all with:
+
+@example
+make
+@end example
+
+Good luck!  Comments and suggestions about this section are particularly
+welcome; send them to bug-gdb@@prep.ai.mit.edu.
+
+When hosting GDB on a new operating system, to make it possible
+to debug core files, you will need to either
+write specific code for parsing your OS's core files, or customize
+bfd/trad-core.c.   First, use whatever #include files your machine uses
+to define the struct of registers that is accessible (possibly in the
+upage) in a core file (rather than <machine/reg.h>), and an include
+file that defines whatever header exists on a core file (e.g. the
+u-area or a "struct core").  Then modify @samp{trad_unix_core_file_p}
+to use these values to set up the section information for the data
+segment, stack segment, any other segments in the core file (perhaps
+shared library contents or control information), "registers" segment,
+and if there are two discontiguous sets of registers (e.g.  integer and
+float), the "reg2" segment.  This section information basically
+delimits areas in the core file in a standard way, which the
+section-reading routines in BFD know how to seek around in.
+
+Then back in GDB, you need a matching routine called fetch_core_registers.
+If you can use the generic one, it's in core-dep.c; if not, it's in
+your foobar-xdep.c file.  It will be passed a char pointer
+to the entire "registers" segment, its length, and a zero; or a char
+pointer to the entire "regs2" segment, its length, and a 2.  The
+routine should suck out the supplied register values and install them into
+gdb's "registers" array.  (@xref{New Architectures}
+for more info about this.)
+
+@node Target, Config, Host, Top
+@chapter Adding a New Target
+
+When adding support for a new target machine, there are various areas
+of support that might need change, or might be OK.
+
+If you are using an existing object file format (a.out or COFF), 
+there is probably little to be done.  See @file{bfd/doc/bfd.texinfo}
+for more information on writing new a.out or COFF versions.
+
+If you need to add a new object file format, you are beyond the scope
+of this document right now.  Look at the structure of the a.out
+and COFF support, build a transfer vector (xvec) for your new format,
+and start populating it with routines.  Add it to the list in 
+@file{bfd/targets.c}.
+
+If you are adding a new existing CPU chip (e.g. m68k family), you'll
+need to define an XARCH-opcode.h file, a tm-XARCH.h file that gives
+the basic layout of the chip (registers, stack, etc), probably
+an XARCH-tdep.c file that has support routines for tm-XARCH.h, etc.
+
+If you are adding a new operating system for an existing CPU chip,
+add a tm-XOS.h file that describes the operating system facilities
+that are unusual (extra symbol table info; the breakpoint
+instruction needed; etc).  Then write a @file{tm-XARCH-XOS.h}
+that just #include's tm-XARCH.h and tm-XOS.h.  (Now that we have
+three-part configuration names, this will probably get revised to
+separate the OS configuration from the ARCH configuration.  FIXME.)
+
+@node Config, BFD support for GDB, Target, Top
+@chapter Extending @code{configure}
+Once you have added a new host, target, or both, you'll also need to
+extend the @code{configure} script to recognize the new configuration
+possibilities.  
+
+You shouldn't edit the @code{configure} script itself to add hosts or
+targets; instead, edit the script fragments in the file
+@code{configure.in}.  To handle new hosts, modify the segment after the
+comment @samp{# per-host}; to handle new targets, modify after @samp{#
+per-target}.
+@c Would it be simpler to just use different per-host and per-target
+@c *scripts*, and call them from {configure} ?
+
+Then fold your changes into the @code{configure} script by using the
+@code{+template} option, and specifying @code{configure} itself as the
+template:
+@example
+configure +template=configure
+@end example
+@c If "configure" is the only workable option value for +template, it's
+@c kind of silly to insist that it be provided.  If it isn't, somebody
+@c please fill in here what are others... (then delete this comment!)
+
+@node BFD support for GDB, Host versus Target, Config, Top
 @chapter Binary File Descriptor library support for GDB
 
 BFD provides support for GDB in several ways:
@@ -299,183 +490,8 @@ as I evolve it.  I have moved many things out of the xdep files
 actually, partly as a result of BFD and partly by removing duplicated
 code.
 
-@menu
-* New Host::			Adding a New Host
-* New Target::			Adding a New Target
-* New Config::			Extending @code{configure}
-@end menu
 
-@node New Host, New Target, Host versus Target, Host versus Target
-@section Adding a New Host
-
-There are two halves to making GDB work on a new machine.  First,
-you have to make it host on the new machine (compile there, handle
-that machine's terminals properly, etc).  If you will be cross-debugging
-to some other kind of system, you are done.
-
-(If you want to use GDB to debug programs that run on the new machine,
-you have to get it to understand the machine's object files, symbol
-files, and interfaces to processes.  @pxref{New Target}.)
-
-Most of the work in making GDB compile on a new machine is in specifying
-the configuration of the machine.  This is done in a dizzying variety
-of header files and configuration scripts, which we hope to make more
-sensible soon.  Let's say your new host is called an XXX (e.g. sun4),
-and its full three-part configuration name is XARCH-XVEND-XOS (e.g.
-sparc-sun-sunos4).  In particular:
-
-At the top level, edit @file{config.sub} and add XARCH, XVEND, and
-XOS to the lists of supported architectures, vendors, and operating systems
-near the bottom of the file.  Also, add XXX as an alias that maps to
-XARCH-XVEND-XOS.  You can test your changes by running
-
-	./config.sub XXX
-and	./config.sub XARCH-XVEND-XOS
-
-which should both respond with XARCH-XVEND-XOS and no error messages.  
-
-Then edit @file{include/sysdep.h}.  Add a new #define for XXX_SYS, with
-a numeric value not already in use.  Add a new section that says
-
-	#if HOST_SYS==XXX_SYS
-	#include <sys/h-XXX.h>
-	#endif
-
-Now create a new file @file{include/sys/h-XXX.h}.  Examine the other
-h-*.h files as templates, and create one that brings in the right include
-files for your system, and defines any host-specific macros needed by
-GDB.
-
-Now, go to the bfd directory and edit @file{bfd/configure.in}.  Add shell
-script code to recognize your XARCH-XVEND-XOS configuration, and set
-bfd_host to XXX when you recognize it.  Now create a file
-@file{bfd/config/hmake-XXX}, which includes the line:
-
-	HDEFINES=-DHOST_SYS=XXX_SYS
-
-(If you have the binutils in the same tree, you'll have to do the same
-thing to in the binutils directory as you've done in the bfd directory.)
-
-It's likely that the libiberty and readline directories won't need any
-changes for your configuration, but if they do, you can change the
-@file{configure.in} file there to recognize your system and map to an
-hmake-XXX file.  Then add @file{hmake-XXX} to the @file{config/} subdirectory,
-to set any makefile variables you need.  The only current options
-in there are things like -DSYSV.
-
-Aha!  Now to configure GDB itself!  Modify @file{gdb/configure.in} to
-recognize your system and set gdb_host to XXX.  Add a file 
-@file{gdb/xconfig/XXX} which specifies XDEPFILES=(whatever is needed),
-and XM_FILE= xm-XXX.h.  Create @file{gdb/xm-XXX.h} with the appropriate
-#define's for your system (crib from existing xm-*.h files).
-If your machine needs custom support routines, you can put them in
-a file @file{gdb/XXX-xdep.c}, and add XXX-xdep.o to the XDEPFILES=
-line.  If not, you can use the generic routines for ptrace support
-(infptrace.o) and core files (coredep.o).  These can be customized
-in various ways by macros defined in your @file{xm-XXX.h} file.
-
-Now, from the top level (above bfd, gdb, etc), run:
-
-	./configure -template=./configure
-
-This will rebuild all your configure scripts, using the new
-configure.in files that you modified.  (You can also run this command
-at any subdirectory level.)  You are now ready to try configuring
-GDB to compile for your system.  Do:
-
-	./configure XXX +target=vxworks960
-
-This will configure your system to cross-compile for VxWorks on
-the Intel 960, which is probably not what you really want, but it's
-a test case that works at this stage.  (You haven't set up to be
-able to debug programs that run @emph{on} XXX yet.)
-
-If this succeeds, you can try building it all with:
-
-	make
-
-Good luck!  Comments and suggestions about this section are particularly
-welcome; send them to bug-gdb@@prep.ai.mit.edu.
-
-When hosting GDB on a new operating system, to make it possible
-to debug core files, you will need to either
-write specific code for parsing your OS's core files, or customize
-bfd/trad-core.c.   First, use whatever #include files your machine uses
-to define the struct of registers that is accessible (possibly in the
-upage) in a core file (rather than <machine/reg.h>), and an include
-file that defines whatever header exists on a core file (e.g. the
-u-area or a "struct core").  Then modify @samp{trad_unix_core_file_p}
-to use these values to set up the section information for the data
-segment, stack segment, any other segments in the core file (perhaps
-shared library contents or control information), "registers" segment,
-and if there are two discontiguous sets of registers (e.g.  integer and
-float), the "reg2" segment.  This section information basically
-delimits areas in the core file in a standard way, which the
-section-reading routines in BFD know how to seek around in.
-
-Then back in GDB, you need a matching routine called fetch_core_registers.
-If you can use the generic one, it's in core-dep.c; if not, it's in
-your foobar-xdep.c file.  It will be passed a char pointer
-to the entire "registers" segment, its length, and a zero; or a char
-pointer to the entire "regs2" segment, its length, and a 2.  The
-routine should suck out the supplied register values and install them into
-gdb's "registers" array.  (@xref{New Architectures}
-for more info about this.)
-
-@node New Target, New Config, New Host, Host versus Target
-@section Adding a New Target
-
-When adding support for a new target machine, there are various areas
-of support that might need change, or might be OK.
-
-If you are using an existing object file format (a.out or COFF), 
-there is probably little to be done.  See @file{bfd/doc/bfd.texinfo}
-for more information on writing new a.out or COFF versions.
-
-If you need to add a new object file format, you are beyond the scope
-of this document right now.  Look at the structure of the a.out
-and COFF support, build a transfer vector (xvec) for your new format,
-and start populating it with routines.  Add it to the list in 
-@file{bfd/targets.c}.
-
-If you are adding a new existing CPU chip (e.g. m68k family), you'll
-need to define an XARCH-opcode.h file, a tm-XARCH.h file that gives
-the basic layout of the chip (registers, stack, etc), probably
-an XARCH-tdep.c file that has support routines for tm-XARCH.h, etc.
-
-If you are adding a new operating system for an existing CPU chip,
-add a tm-XOS.h file that describes the operating system facilities
-that are unusual (extra symbol table info; the breakpoint
-instruction needed; etc).  Then write a @file{tm-XARCH-XOS.h}
-that just #include's tm-XARCH.h and tm-XOS.h.  (Now that we have
-three-part configuration names, this will probably get revised to
-separate the OS configuration from the ARCH configuration.  FIXME.)
-
-@node New Config,  , New Target, Host versus Target
-@section Extending @code{configure}
-Once you have added a new host, target, or both, you'll also need to
-extend the @code{configure} script to recognize the new configuration
-possibilities.  
-
-You shouldn't edit the @code{configure} script itself to add hosts or
-targets; instead, edit the script fragments in the file
-@code{configure.in}.  To handle new hosts, modify the segment after the
-comment @samp{# per-host}; to handle new targets, modify after @samp{#
-per-target}.
-@c Would it be simpler to just use different per-host and per-target
-@c *scripts*, and call them from {configure} ?
-
-Then fold your changes into the @code{configure} script by using the
-@code{+template} option, and specifying @code{configure} itself as the
-template:
-@example
-configure +template=configure
-@end example
-@c If "configure" is the only workable option value for +template, it's
-@c kind of silly to insist that it be provided.  If it isn't, somebody
-@c please fill in here what are others... (then delete this comment!)
-
-@node Symbol Reading,  , Host versus Target, Top
+@node Symbol Reading, Languages, Host versus Target, Top
 @chapter Symbol Reading
 
 GDB reads symbols from "symbol files".  The usual symbol file is the
@@ -560,6 +576,101 @@ should have been set to 1, and pst->symtab should contain a
 pointer to the new corresponding symtab, or zero if there
 were no symbols in that part of the symbol file.
 @end table
+
+@node Languages,  , Host versus Target, Top
+@chapter Adding a Source Language to GDB
+
+To add other languages to GDB's expression parser, follow the following steps:
+
+@table @emph
+@item Create the expression parser.
+
+This should reside in a file called <lang>-exp.y.  Routines for building
+parsed expressions into a (struct exp_elt) list are in parser-code.c.
+
+Since we can't depend upon everyone having Bison, the following lines
+@emph{musg} be included at the top of the YACC parser:
+
+@example
+#define yyparse 	<lang>_parse
+#define yylex 		<lang>_lex
+#define yyerror 	<lang>_error
+#define yylval 	<lang>_lval
+#define yychar 	<lang>_char
+#define yydebug 	<lang>_debug
+#define yypact  	<lang>_pact 
+#define yyr1		<lang>_r1   
+#define yyr2		<lang>_r2   
+#define yydef		<lang>_def  
+#define yychk		<lang>_chk  
+#define yypgo		<lang>_pgo  
+#define yyact  	<lang>_act  
+#define yyexca  	<lang>_exca
+@end example
+
+This will prevent name conflicts between the various parsers.
+
+@item Add any evaluation routines, if necessary
+
+If you need new opcodes (that represent the operations of the language),
+add them to the ennumerated type in expression.h.
+Add support code for these operations in eval.c:evaluate_subexp()
+Add cases for new opcodes in parser-code.c:prefixify_subexp() and
+parser-code.c:length_of_subexp().  These compute the number of
+exp_elements that a given operation takes up.
+
+@item Update some existing code
+
+Add an ennumerated identifier for your language to the ennumerated type
+enum language in symtab.h.
+
+Update the routines in language.c so your language is included.  These
+routines include type predicates and such, which (in some cases) are
+language dependent.  If your language does not appear in the switch
+statement, an error is reported.
+
+Also included in language.c is the code that updates the variable
+working_lang, and the routines that translate the language_<lang>
+ennumerated identifier into a printable string.
+
+Update the function _intitialize_language to include your language.  This
+function picks the default language upon startup, so is dependent upon
+which languages that GDB is built for.
+
+Update symfile.c and/or symbol-reading code so that the language of
+each symtab (source file) is set properly.  This is used to determine the
+language to use at each stack frame level.  Currently, the language
+is set based upon the extension of the source file.  If the language
+can be better inferred from the symbol information, please set the
+language of the symtab in the symbol-reading code.
+
+Add helper code to expprint.c:print_subexp() to handle any new expression
+opcodes you have added to expression.h.  Also, add the printed
+representations of your operators to op_print_tab.
+
+@item Add a place of call
+
+Add a call to <lang>_parse() and <lang>_error in parse.c:parse_exp_1().
+
+@item Use macros to trim code
+
+The user has the option of building GDB for some or all of the languages.
+If the user decides to build GDB for the language <lang>, then every file
+dependent on language.h will have the macro _LANG_<lang> defined in it.
+Use #ifdefs to leave out large routines that the user won't need if
+he/she is not using your language.
+
+Note that you do not need to do this in your YACC parser, since if GDB is
+not build for <lang>, then <lang>-exp.tab.o (the compiled form of your
+parser) is not linked into GDB at all.
+
+See the file configure.in for how GDB is configured for different languages.
+
+@item Edit Makefile.in
+
+Add dependencies in Makefile.in.  Make sure you update the macro
+variables such as HFILES and OBJS, otherwise your code may not get linked
+in, or, worse yet, it may not get tarred into the distribution!
 
 @contents
 @bye
