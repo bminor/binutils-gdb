@@ -1,3 +1,8 @@
+2004-12-15 Jan Beulich  <jbeulich@novell.com>
+
+	* dw2gencfi.c (dot.cfi.startproc): Clear cur_cfa_offset so
+	'.cfi_startproc simple' doesn't inherit the old value.
+
 2004-12-15  Jan Beulich  <jbeulich@novell.com>
 
 	* dw2gencfi.c (output_cfi_insn): Adjust DW_CFA_def_cfa_sf generation

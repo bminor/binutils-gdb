@@ -607,6 +607,7 @@ dot_cfi_startproc (int ignored ATTRIBUTE_UNUSED)
     }
   demand_empty_rest_of_line ();
 
+  cur_cfa_offset = 0;
   if (!simple)
     tc_cfi_frame_initial_instructions ();
 }
