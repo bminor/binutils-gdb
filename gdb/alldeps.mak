@@ -46,6 +46,7 @@ remote-eb.c\
 remote-hms.c\
 remote-mm.c\
 remote-nindy.c\
+remote-udi.c\
 remote-vx.c\
 rs6000-pinsn.c\
 rs6000-tdep.c\
@@ -67,13 +68,17 @@ xcoffsolib.c
 
 ALLDEPFILES_SUBDIR=\
 nindy-share/Onindy.c\
+29k-share/dfe/mini2udi.c\
 nindy-share/nindy.c\
 nindy-share/ttybreak.c\
 nindy-share/ttyflush.c\
+29k-share/udi/udip2soc.c\
+29k-share/udi/udr.c\
 vx-share/xdr_ld.c\
 vx-share/xdr_ptrace.c\
 vx-share/xdr_rdb.c\
-vx-share/xdr_regs.c
+vx-share/xdr_regs.c\
+29k-share/dfe/yank.c
 
 ALLPARAM=\
 tm-29k.h\
@@ -166,6 +171,7 @@ ALLCONFIG=\
 ./config/3b1.mh\
 ./config/3b1.mt\
 ./config/a29k-kern.mt\
+./config/a29k-udi.mt\
 ./config/a29k.mt\
 ./config/altos.mh\
 ./config/altos.mt\
@@ -215,6 +221,7 @@ ALLCONFIG=\
 ./config/m88k.mt\
 ./config/merlin.mh\
 ./config/merlin.mt\
+./config/ncr3000.mh\
 ./config/news.mh\
 ./config/news.mt\
 ./config/news1000.mh\

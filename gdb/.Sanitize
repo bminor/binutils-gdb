@@ -26,7 +26,7 @@ Do-first:
 Things-to-keep:
 
 .gdbinit
-gdb.1
+29k-share
 COPYING
 ChangeLog
 ChangeLog-3.x
@@ -84,6 +84,7 @@ expprint.c
 expression.h
 findvar.c
 frame.h
+gdb.1
 gdbcmd.h
 gdbcore.h
 gdbtypes.c
@@ -152,6 +153,7 @@ remote-eb.c
 remote-hms.c
 remote-mm.c
 remote-nindy.c
+remote-udi.c
 remote-vx.c
 remote.c
 rs6000-pinsn.c

@@ -1,3 +1,15 @@
+mini2udi.o : ${srcdir}/29k-share/dfe/mini2udi.c ${srcdir}/29k-share/include/main.h ${srcdir}/29k-share/include/types.h \
+  ${srcdir}/29k-share/include/memspcs.h ${srcdir}/29k-share/include/macros.h ${srcdir}/29k-share/include/miniint.h \
+  ${srcdir}/29k-share/udi/udiproc.h ${srcdir}/29k-share/udi/udiphcfg.h ${srcdir}/29k-share/udi/udiphsun.h \
+  ${srcdir}/29k-share/udi/udiptcfg.h ${srcdir}/29k-share/udi/udipt29k.h ${srcdir}/29k-share/udi/udiids.h \
+  ${srcdir}/29k-share/include/udiext.h ${srcdir}/29k-share/include/versions.h 
+yank.o : ${srcdir}/29k-share/dfe/yank.c ${srcdir}/29k-share/include/coff.h ${srcdir}/29k-share/include/memspcs.h \
+  ${srcdir}/29k-share/include/main.h ${srcdir}/29k-share/include/types.h ${srcdir}/29k-share/include/miniint.h \
+  ${srcdir}/29k-share/include/macros.h ${srcdir}/29k-share/include/error.h 
+udip2soc.o : ${srcdir}/29k-share/udi/udip2soc.c ${srcdir}/29k-share/udi/udiproc.h ${srcdir}/29k-share/udi/udiphcfg.h \
+  ${srcdir}/29k-share/udi/udiphsun.h ${srcdir}/29k-share/udi/udiptcfg.h ${srcdir}/29k-share/udi/udipt29k.h ${srcdir}/29k-share/udi/udisoc.h 
+udr.o : ${srcdir}/29k-share/udi/udr.c ${srcdir}/29k-share/udi/udiproc.h ${srcdir}/29k-share/udi/udiphcfg.h \
+  ${srcdir}/29k-share/udi/udiphsun.h ${srcdir}/29k-share/udi/udiptcfg.h ${srcdir}/29k-share/udi/udipt29k.h ${srcdir}/29k-share/udi/udisoc.h 
 a68v-xdep.o : a68v-xdep.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status tm.h config.status inferior.h \
   symtab.h ${srcdir}/../include/obstack.h breakpoint.h frame.h value.h gdbtypes.h expression.h \
   gdbcore.h ${srcdir}/../include/bfd.h 
@@ -155,8 +167,8 @@ mips-xdep.o : mips-xdep.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.sta
 mipsread.o : mipsread.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status tm-mips.h ${srcdir}/../include/coff/sym.h \
   ${srcdir}/../include/coff/symconst.h symtab.h ${srcdir}/../include/obstack.h gdbtypes.h gdbcore.h \
   ${srcdir}/../include/bfd.h symfile.h objfiles.h buildsym.h ${srcdir}/../include/coff/mips.h \
-  ${srcdir}/../bfd/libaout.h ${srcdir}/../include/aout/aout64.h ${srcdir}/../include/aout/stab_gnu.h ${srcdir}/../include/aout/stab.def \
-  ${srcdir}/../include/coff/ecoff-ext.h partial-stab.h 
+  ${srcdir}/../include/coff/ecoff-ext.h ${srcdir}/../bfd/libaout.h ${srcdir}/../include/aout/aout64.h \
+  ${srcdir}/../include/aout/stab_gnu.h ${srcdir}/../include/aout/stab.def partial-stab.h 
 news-xdep.o : news-xdep.c 
 Onindy.o : ${srcdir}/nindy-share/Onindy.c ${srcdir}/nindy-share/ttycntl.h ${srcdir}/nindy-share/block_io.h \
   ${srcdir}/../include/wait.h ${srcdir}/nindy-share/env.h /usr/include/string.h 
@@ -198,11 +210,15 @@ remote-nindy.o : remote-nindy.c defs.h ${srcdir}/../include/ansidecl.h xm.h conf
   inferior.h symtab.h ${srcdir}/../include/obstack.h breakpoint.h value.h gdbtypes.h expression.h \
   target.h ${srcdir}/../include/bfd.h gdbcore.h command.h ieee-float.h ${srcdir}/../include/wait.h \
   ${srcdir}/nindy-share/ttycntl.h ${srcdir}/nindy-share/demux.h ${srcdir}/nindy-share/env.h ${srcdir}/nindy-share/stop.h 
+remote-udi.o : remote-udi.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status tm.h config.status inferior.h \
+  symtab.h ${srcdir}/../include/obstack.h breakpoint.h frame.h value.h gdbtypes.h expression.h \
+  ${srcdir}/../include/wait.h terminal.h target.h ${srcdir}/../include/bfd.h ${srcdir}/29k-share/udi/udiproc.h \
+  ${srcdir}/29k-share/udi/udiphcfg.h ${srcdir}/29k-share/udi/udiphsun.h ${srcdir}/29k-share/udi/udiptcfg.h \
+  ${srcdir}/29k-share/udi/udipt29k.h 
 remote-vx.o : remote-vx.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status tm.h config.status frame.h inferior.h \
   symtab.h ${srcdir}/../include/obstack.h breakpoint.h value.h gdbtypes.h expression.h \
   ${srcdir}/../include/wait.h target.h ${srcdir}/../include/bfd.h gdbcore.h command.h symfile.h \
-  ${srcdir}/vx-share/xdr_ptrace.h ${srcdir}/vx-share/xdr_regs.h ${srcdir}/vx-share/reg.h ${srcdir}/vx-share/xdr_ld.h \
-  ${srcdir}/vx-share/xdr_rdb.h ${srcdir}/vx-share/dbgRpcLib.h 
+  ${srcdir}/vx-share/xdr_ptrace.h ${srcdir}/vx-share/xdr_ld.h ${srcdir}/vx-share/xdr_rdb.h ${srcdir}/vx-share/dbgRpcLib.h 
 remote.o : remote.c defs.h ${srcdir}/../include/ansidecl.h xm.h config.status tm.h config.status frame.h inferior.h \
   symtab.h ${srcdir}/../include/obstack.h breakpoint.h value.h gdbtypes.h expression.h \
   target.h ${srcdir}/../include/bfd.h ${srcdir}/../include/wait.h terminal.h 

@@ -1,5 +1,8 @@
 Fri Apr 24 07:41:19 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* Makefile.in:  Add 29k/UDI support.  Improve depend.
+	* .Sanitize, alldeps.mak, configure.in, depend:  Add 29k/UDI support.
+
 	* am29k-tdep.c:  Update to use new calling conventions, and misc
 	symbol elements.
 

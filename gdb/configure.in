@@ -242,6 +242,7 @@ a29k)
 	sym1)	gdb_target=ultra3 ;;
 	kern)	gdb_target=a29k-kern ;;
 	ebmon)  gdb_target=a29k;;
+	udi)	gdb_target=a29k-udi;;
 	esac
 	;;
 	
