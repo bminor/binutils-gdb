@@ -1,3 +1,8 @@
+2004-04-09  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/bigcore.exp: Disable on Solaris; no sparse core file
+	support.
+
 2004-04-05  Andrew Cagney  <cagney@redhat.com>
 
 	* gdb.base/sigaltstack.c: New file.

@@ -41,7 +41,9 @@ if ![isnative] then {
 # consumes too many resources - gigabytes worth of disk space and and
 # I/O bandwith.
 
-if { [istarget "*-*-*bsd*"] || [istarget "*-*-hpux*"] } {
+if { [istarget "*-*-*bsd*"]
+     || [istarget "*-*-hpux*"]
+     || [istarget "*-*-solaris*"] } {
     untested "Kernel lacks sparse corefile support (PR gdb/1551)"
     return
 }
