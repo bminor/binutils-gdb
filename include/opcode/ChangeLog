@@ -1,3 +1,17 @@
+Sun Oct  4 21:00:00 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
+
+	From Robert Andrew Dale <rob@nb.net>
+	* i386.h (i386_optab): Add AMD 3DNow! instructions.
+	(AMD_3DNOW_OPCODE): Define.
+
+Tue Sep 22 17:53:47 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* d30v.h (EITHER_BUT_PREFER_MU): Define.
+
+Mon Aug 10 14:09:38 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* cgen.h (cgen_insn): #if 0 out element `cdx'.
+
 Mon Aug  3 12:21:57 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	Move all global state data into opcode table struct, and treat
@@ -436,10 +450,10 @@ Fri Oct 24 22:36:20 1997  Ken Raeburn  <raeburn@cygnus.com>
 	* mips.h: Added to comments a quick-ref list of all assigned
 	operand type characters.
 	(OP_{MASK,SH}_PERFREG): New macros.
-start-sanitize-vr5400
+start-sanitize-cygnus
 	(OP_{MASK,SH}_{VECBYTE,VECALIGN}): New macros for VR5400
 	support.
-end-sanitize-vr5400
+end-sanitize-cygnus
 
 Wed Oct 22 17:28:33 1997  Richard Henderson  <rth@cygnus.com>
 
