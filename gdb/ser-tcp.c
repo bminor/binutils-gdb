@@ -24,6 +24,7 @@
 #include "ser-unix.h"
 
 #include <sys/types.h>
+#include <sys/ioctl.h>
 #include <sys/time.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -36,38 +37,39 @@
 
 static int tcp_open (struct serial *scb, const char *name);
 static void tcp_close (struct serial *scb);
-
+extern int (*ui_loop_hook) (int);
 void _initialize_ser_tcp (void);
 
-/* Open up a raw tcp socket */
+/* seconds to wait for connect */
+#define TIMEOUT 15
+/* how many times per second to poll ui_loop_hook */
+#define POLL_INTERVAL 2
+
+/* Open a tcp socket */
 
 static int
 tcp_open (struct serial *scb, const char *name)
 {
-  char *port_str;
-  int port;
+  char *port_str, hostname[100];
+  int n, port, tmp;
   struct hostent *hostent;
   struct sockaddr_in sockaddr;
-  int tmp;
-  char hostname[100];
-  struct protoent *protoent;
-  int i;
 
   port_str = strchr (name, ':');
 
   if (!port_str)
-    error ("tcp_open: No colon in host name!");		/* Shouldn't ever happen */
+    error ("tcp_open: No colon in host name!");	   /* Shouldn't ever happen */
 
   tmp = min (port_str - name, (int) sizeof hostname - 1);
   strncpy (hostname, name, tmp);	/* Don't want colon */
   hostname[tmp] = '\000';	/* Tie off host name */
   port = atoi (port_str + 1);
 
+  /* default hostname is localhost */
   if (!hostname[0])
     strcpy (hostname, "localhost");
 
   hostent = gethostbyname (hostname);
-
   if (!hostent)
     {
       fprintf_unfiltered (gdb_stderr, "%s: unknown host\n", hostname);
@@ -75,51 +77,90 @@ tcp_open (struct serial *scb, const char *name)
       return -1;
     }
 
-  for (i = 1; i <= 15; i++)
+  scb->fd = socket (PF_INET, SOCK_STREAM, 0);
+  if (scb->fd < 0)
+    return -1;
+  
+  sockaddr.sin_family = PF_INET;
+  sockaddr.sin_port = htons (port);
+  memcpy (&sockaddr.sin_addr.s_addr, hostent->h_addr,
+	  sizeof (struct in_addr));
+
+  /* set socket nonblocking */
+  tmp = 1;
+  ioctl (scb->fd, FIONBIO, &tmp);
+
+  /* Use Non-blocking connect.  connect() will return 0 if connected already. */
+  n = connect (scb->fd, (struct sockaddr *) &sockaddr, sizeof (sockaddr));
+
+  if (n < 0 && errno != EINPROGRESS)
     {
-      scb->fd = socket (PF_INET, SOCK_STREAM, 0);
-      if (scb->fd < 0)
-	return -1;
-
-      /* Allow rapid reuse of this port. */
-      tmp = 1;
-      setsockopt (scb->fd, SOL_SOCKET, SO_REUSEADDR, (char *) &tmp, sizeof (tmp));
-
-      /* Enable TCP keep alive process. */
-      tmp = 1;
-      setsockopt (scb->fd, SOL_SOCKET, SO_KEEPALIVE, (char *) &tmp, sizeof (tmp));
-
-      sockaddr.sin_family = PF_INET;
-      sockaddr.sin_port = htons (port);
-      memcpy (&sockaddr.sin_addr.s_addr, hostent->h_addr,
-	      sizeof (struct in_addr));
-
-      if (!connect (scb->fd, (struct sockaddr *) &sockaddr, sizeof (sockaddr)))
-	break;
-
-      close (scb->fd);
-      scb->fd = -1;
-
-/* We retry for ECONNREFUSED because that is often a temporary condition, which
-   happens when the server is being restarted.  */
-
-      if (errno != ECONNREFUSED)
-	return -1;
-
-      sleep (1);
+      tcp_close (scb);
+      return -1;
     }
 
-  protoent = getprotobyname ("tcp");
-  if (!protoent)
-    return -1;
+  if (n)
+    {
+      /* looks like we need to wait for the connect */
+      struct timeval t;
+      fd_set rset, wset;
+      int polls = 0;
+      FD_ZERO (&rset);
 
-  tmp = 1;
-  if (setsockopt (scb->fd, protoent->p_proto, TCP_NODELAY,
-		  (char *) &tmp, sizeof (tmp)))
-    return -1;
+      do 
+	{
+	  /* While we wait for the connect to complete 
+	     poll the UI so it can update or the user can 
+	     interrupt. */
+	  if (ui_loop_hook)
+	    {
+	      if (ui_loop_hook (0))
+		{
+		  errno = EINTR;
+		  tcp_close (scb);
+		  return -1;
+		}
+	    }
+	  
+	  FD_SET (scb->fd, &rset);
+	  wset = rset;
+	  t.tv_sec = 0;
+	  t.tv_usec = 1000000 / POLL_INTERVAL;
+	  
+	  n = select (scb->fd + 1, &rset, &wset, NULL, &t);
+	  polls++;
+	} 
+      while (n == 0 && polls <= TIMEOUT * POLL_INTERVAL);
+      if (n < 0 || polls > TIMEOUT * POLL_INTERVAL)
+	{
+	  if (polls > TIMEOUT * POLL_INTERVAL)
+	    errno = ETIMEDOUT;
+	  tcp_close (scb);
+	  return -1;
+	}
+    }
 
-  signal (SIGPIPE, SIG_IGN);	/* If we don't do this, then GDB simply exits
-				   when the remote side dies.  */
+  /* Got something.  Is it an error? */
+  {
+    int res, err, len;
+    len = sizeof(err);
+    res = getsockopt (scb->fd, SOL_SOCKET, SO_ERROR, &err, &len);
+    if (res < 0 || err)
+      {
+	if (err)
+	  errno = err;
+	tcp_close (scb);
+	return -1;
+      }
+  } 
+  
+  /* turn off nonblocking */
+  tmp = 0;
+  ioctl (scb->fd, FIONBIO, &tmp);
+
+  /* If we don't do this, then GDB simply exits
+     when the remote side dies.  */
+  signal (SIGPIPE, SIG_IGN);
 
   return 0;
 }
