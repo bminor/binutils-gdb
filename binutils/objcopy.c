@@ -212,7 +212,7 @@ filter_symbols (abfd, osyms, isyms, symcount)
 
 void
 filter_bytes (memhunk, size)
-     PTR memhunk;
+     char *memhunk;
      bfd_size_type *size;
 {
   char *from = memhunk + copy_byte, *to = memhunk, *end = memhunk + *size;

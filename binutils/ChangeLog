@@ -1,3 +1,8 @@
+Fri Feb  4 10:46:01 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* objcopy.c (filter_bytes): Make MEMHUNK a char *, not PTR, so we
+	can do arithmetic on it.
+
 Thu Feb  3 14:06:41 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* objdump.c (dump_section_stabs, read_section_stabs,
