@@ -1,5 +1,5 @@
 /* BFD support for handling relocation entries.
-   Copyright (C) 1990, 91, 92, 93, 94, 95, 1996, 1997
+   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 1997
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -289,7 +289,7 @@ CODE_FRAGMENT
 .
 .struct reloc_howto_struct
 .{
-.       {*  The type field has mainly a documetary use - the back end can
+.       {*  The type field has mainly a documentary use - the back end can
 .           do what it wants with it, though normally the back end's
 .           external idea of what a reloc number is stored
 .           in this field. For example, a PC relative word relocation
@@ -1948,6 +1948,12 @@ ENUM
   BFD_RELOC_ALPHA_LINKAGE
 ENUMDOC
   The LINKAGE relocation outputs a linkage pair in the object file,
+     which is filled by the linker.
+
+ENUM
+  BFD_RELOC_ALPHA_CODEADDR
+ENUMDOC
+  The CODEADDR relocation outputs a STO_CA in the object file,
      which is filled by the linker.
 
 ENUM

@@ -1,3 +1,17 @@
+Tue Feb 18 15:31:48 1997  Fred Fish  <fnf@cygnus.com>
+
+	* reloc.c (struct reloc_howto_struct): Fix typo in comment.
+	* bfd-in2.h: Regenerated.
+start-sanitize-tic80
+	* coff-tic80.c (RTYPE2HOWTO): Replace abort with real function.
+	(rtype2howto): Add function.
+	(tic80_howto_table): Add.
+end-sanitize-tic80
+	
+Tue Feb 18 11:41:00 1996  Dawn Perchik  <dawn@cygnus.com>
+
+	* sysdep.h: Don't define errno in MSVC if error.h is included.
+
 start-sanitize-v850
 Tue Feb 18 10:04:13 1997  Jeffrey A Law  (law@cygnus.com)
 

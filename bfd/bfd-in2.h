@@ -1369,7 +1369,7 @@ enum complain_overflow
 
 struct reloc_howto_struct
 {
-        /*  The type field has mainly a documetary use - the back end can
+        /*  The type field has mainly a documentary use - the back end can
            do what it wants with it, though normally the back end's
            external idea of what a reloc number is stored
            in this field. For example, a PC relative word relocation
@@ -1673,6 +1673,10 @@ prediction logic which may be provided on some processors. */
 /* The LINKAGE relocation outputs a linkage pair in the object file,
 which is filled by the linker. */
   BFD_RELOC_ALPHA_LINKAGE,
+
+/* The CODEADDR relocation outputs a STO_CA in the object file,
+which is filled by the linker. */
+  BFD_RELOC_ALPHA_CODEADDR,
 
 /* Bits 27..2 of the relocation address shifted right 2 bits;
 simple reloc otherwise. */
