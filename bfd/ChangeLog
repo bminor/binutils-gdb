@@ -1,3 +1,14 @@
+1997-06-06 22:58  Ulrich Drepper  <drepper@cygnus.com>
+
+	* elflink.h (elf_link_find_version_dependencies): When searching
+	for known version symbol skip non-matching verdef records, not
+	matching records.
+
+Thu Jun  5 15:52:45 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* cofflink.c (_bfd_coff_generic_relocate_section): Write a long,
+ 	not a bfd_vma, to the base file, to match how dlltool reads it.
+
 Tue Jun  3 16:57:45 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* reloc.c: Add thumb relocations.
@@ -34,7 +45,7 @@ Wed May 28 16:16:04 1997  Ian Lance Taylor  <ian@cygnus.com>
 Wed May 28 09:48:43 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* cpu-arm.c (compatible): Add test for supersets of ARM
-	architectures. 
+	architectures.
 
 Tue May 27 19:42:03 1997  Bob Manson  <manson@charmed.cygnus.com>
 
@@ -45,7 +56,7 @@ Tue May 27 14:34:08 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* coff-arm.c (coff_arm_bfd_set_private_flags): Make global.  It is
 	called directly by gas/config/tc-arm.c.
-	
+
 Tue May 27 15:58:53 1997  Richard Henderson  <rth@tamu.edu>
 
 	* elf64-alpha.c (PLT_ENTRY_*): Use a new thread-safe format.
@@ -189,7 +200,7 @@ Fri May  9 10:15:27 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* archures.c (constants):  Added new constants to identify the
 	type of the ARM architecture: bfd_mach_arm_2, bfd_mach_arm_2a,
-	bfd_mach_arm_3,	bfd_mach_arm_3M, bfd_mach_arm_4 and bfd_mach_arm_4T. 
+	bfd_mach_arm_3,	bfd_mach_arm_3M, bfd_mach_arm_4 and bfd_mach_arm_4T.
 
 	* bfd-in2.h (constants):   Added new constants to identify
 	the type of the ARM architecture: bfd_mach_arm_2, bfd_mach_arm_2a,
@@ -201,7 +212,7 @@ Fri May  9 10:15:27 1997  Nick Clifton  <nickc@cygnus.com>
 	coff_arm_bfd_print_private_bfd_data,
 	coff_arm_bfd_set_private_flags,
 	coff_arm_bfd_copy_private_bfd_data): Added these new functions.
-	(global): Macro redefinitions set up to use these new functions. 
+	(global): Macro redefinitions set up to use these new functions.
 
 	* coffcode.h (coff_mkobject_hook): Added call to
 	coff_arm_bfd_set_private_flags().
@@ -218,7 +229,7 @@ Fri May  9 10:15:27 1997  Nick Clifton  <nickc@cygnus.com>
 	ARMv2a, ARMv3, ARMv3M, ARMv4 and ARMv4T.
 
 	* libcoff-in.h (struct coff_tdata):  Added flags field.
-		
+
 Fri May  9 17:40:02 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config.bfd (i[3456]86-*-gnu*): Don't include Mach support.
@@ -309,7 +320,7 @@ Wed Apr 16 12:43:32 1997  Martin Hunt  <hunt@cygnus.com>
 	* elf32-d30v.c (elf_d30v_howto_table): Changed size of
 	R_D30V_32_NORMAL to 2 (4 bytes).
 
-end-sanitize-d30v	
+end-sanitize-d30v
 Wed Apr 16 14:02:29 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	From Gordon W. Ross <gwr@mc.com>:
@@ -571,10 +582,10 @@ Thu Mar 27 12:55:42 1997  Ian Lance Taylor  <ian@cygnus.com>
 start-sanitize-d30v
 Thu Mar 27 00:45:57 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
-	* elf32-d30v.c (elf_d30v_howto_table): Fix a typo in the 
-	21-bit absolute that made it act as a relative. 
+	* elf32-d30v.c (elf_d30v_howto_table): Fix a typo in the
+	21-bit absolute that made it act as a relative.
 
-end-sanitize-d30v	
+end-sanitize-d30v
 Wed Mar 26 14:50:20 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elflink.c (_bfd_elf_create_linker_section): Don't set
@@ -921,7 +932,7 @@ end-sanitize-tic80
 	* coff-h8500.c: Ditto.
 	* coff-w65.c: Ditto
 	* coff-z8k.c: Ditto.
-	
+
 Wed Mar  5 13:59:09 1997  Doug Evans  <dje@seba.cygnus.com>
 
 	* elf32-m32r.c (m32r_elf_do_10_pcrel_reloc): Fix overflow calc.
@@ -1002,7 +1013,7 @@ Thu Feb 27 18:36:23 1997  Ian Lance Taylor  <ian@cygnus.com>
 	* coffgen.c (_bfd_coff_is_local_label_name): New function.
 	* libcoff-in.h (_bfd_coff_is_local_label_name): Declare.
 	* libcoff.h: Rebuild.
-	
+
 	* targets.c (BFD_JUMP_TABLE_SYMBOLS): Change _bfd_is_local_label
 	to _bfd_is_local_label_name.
 	(bfd_target): Likewise.
@@ -1032,7 +1043,7 @@ Wed Feb 26 15:19:51 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 	* elf32-d30v.c (bfd_elf_d30v_reloc): Add code to do 32-bit
 	relocations.
 
-end-sanitize-d30v	
+end-sanitize-d30v
 Wed Feb 26 13:33:03 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elflink.h (elf_link_input_bfd): Don't skip symbols from sections
@@ -1159,13 +1170,13 @@ start-sanitize-d30v
 Tue Feb 18 17:22:59 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* Makefile.in, archures.c, config.bfd, configure.in, elf.c,
-	reloc.c, targets.c: New target, elf-*-D30V. 
+	reloc.c, targets.c: New target, elf-*-D30V.
 
 	* bfd-in2.h, configure, libbfd.h: Rebuilt.
 
 	* cpu-d30v.c, elf32-d30v.c: New files.
-	
-end-sanitize-d30v	
+
+end-sanitize-d30v
 Tue Feb 18 15:31:48 1997  Fred Fish  <fnf@cygnus.com>
 
 	* reloc.c (struct reloc_howto_struct): Fix typo in comment.
@@ -1175,7 +1186,7 @@ start-sanitize-tic80
 	(rtype2howto): Add function.
 	(tic80_howto_table): Add.
 end-sanitize-tic80
-	
+
 Tue Feb 18 11:41:00 1996  Dawn Perchik  <dawn@cygnus.com>
 
 	* sysdep.h: Don't define errno in MSVC if error.h is included.
@@ -1257,10 +1268,10 @@ Mon Feb 10 23:25:00 1997  Doug Evans  <dje@seba.cygnus.com>
 
 start-sanitize-r5900
         Fri Feb  7 16:20:17 1997  Gavin Koch   <gavin@cygnus.com>
-        
+
         * config.bfd: add r5900
-        
-end-sanitize-r5900        
+
+end-sanitize-r5900
 Fri Feb  7 12:39:11 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elflink.h (elf_link_input_bfd): If we've discarded a section,
@@ -1432,7 +1443,7 @@ Fri Jan  3 16:58:31 1997  Richard Henderson  <rth@tamu.edu>
 	(bfd_elf*_mkobject): Don't define here ...
 	* elfxx-target.h: ... but rather here.  Default always_size_sections
 	hook to NULL.
-	* elf.c (elf_mkobject): Rename to bfd_elf_mkobject, since that was 
+	* elf.c (elf_mkobject): Rename to bfd_elf_mkobject, since that was
 	what the #defines in elf-bfd.h transmuted it to anyway.
 
 	* section.c: Add SEC_LINKER_CREATED flag.
@@ -1450,7 +1461,7 @@ Fri Jan  3 16:58:31 1997  Richard Henderson  <rth@tamu.edu>
 	ppc_elf_size_dynamic_sections): Likewise.
 	* elf32-sparc.c (elf32_sparc_check_relocs,
 	elf32_sparc_size_dynamic_sections): Likewise.
-	* elflink.c (_bfd_elf_create_got_section): Add SEC_LINKER_CREATED to 
+	* elflink.c (_bfd_elf_create_got_section): Add SEC_LINKER_CREATED to
 	section flags.
 	(_bfd_elf_create_dynamic_sections): Likewise.
 	(_bfd_elf_make_linker_section_rela): Likewise.
@@ -1644,7 +1655,7 @@ Tue Dec 10 23:23:52 1996  Jeffrey A Law  (law@cygnus.com)
 	* bfd-in2.h, libbfd.h: Rebuilt.
 
 	* elf32-mn10200.c: Update from elf32-mn10300.c.
- 
+
 Fri Dec  6 15:18:05 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* elf32-mn10300.c (elf_symbol_leading_char): Define.
@@ -1750,7 +1761,7 @@ Mon Nov 25 08:52:29 1996  Jeffrey A Law  (law@cygnus.com)
 	(elf32_mn10300_reloc_map): Update for new reloc types.
 	* reloc.c: Add some new relocs for the mn10300 series.
 	* bfd-in2.h, libbfd.h: Rebuilt.
-	
+
 Sat Nov 23 13:26:18 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* som.c (setup_sections): Don't lose for a space which has
@@ -1774,7 +1785,7 @@ Fri Nov 22 11:32:13 1996  Ian Lance Taylor  <ian@cygnus.com>
 	dynamic linking information if needed.
 
 Thu Nov 21 10:31:31 1996  Rob Savoye  (rob@cygnus.com)
-	
+
 	* config.bfd: Added VersaDOS format to the Ericsson configuration.
 
 Wed Nov 20 16:31:31 1996  Jeffrey A Law  (law@cygnus.com)
@@ -1944,7 +1955,7 @@ Mon Oct 14 12:37:26 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 Mon Oct 14 11:17:24 1996  Richard Henderson  <rth@tamu.edu>
 
-	* reloc.c: Create a new BFD_RELOC_ALPHA_ELF_LITERAL.  It was a 
+	* reloc.c: Create a new BFD_RELOC_ALPHA_ELF_LITERAL.  It was a
 	mistake to have reused the ECOFF LITERAL for ELF since they have
 	different semantics.
 	* elf64-alpha.c (elf_reloc_map): Map from ELF_LITERAL.
@@ -2085,7 +2096,7 @@ Wed Oct  2 21:40:55 1996  Jeffrey A Law  (law@cygnus.com)
 	* targets.c (bfd_elf32_mn10x00_vec): Declare.
 	(bfd_target_vector): Add bfd_elf32_mn10x00_vec.
 	* bfd-in2.h, configure: Rebuilt.
-	
+
 Wed Oct  2 15:46:45 1996  Klaus Kaempf  <kkaempf@progis.de>
 
 	openVMS/Alpha: Provide filename and case_hack flags via
@@ -2323,7 +2334,7 @@ Tue Sep 10 16:18:30 1996  Fred Fish  <fnf@cygnus.com>
 	(build_debug_section): Ditto.
 	(copy_name): Ditto.
 	* syms.c (coff_section_type): Ditto.
-	
+
 Mon Sep  9 22:36:01 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* bfd-in2.h: Rebuilt after m32r changes.
@@ -2341,7 +2352,7 @@ Mon Sep  9 11:48:41 1996  Jeffrey A Law  (law@cygnus.com)
 	to add in the constant part found in the instruction itself.
 	(case R_V850_HI16_S): Likewise.
 
-end-sanitize-v850 
+end-sanitize-v850
 Fri Sep  6 17:04:39 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* elf32-d10v.c (elf_d10v_howto_table): Modify the size of R_D10V_16
@@ -2510,7 +2521,7 @@ Thu Aug 22 10:54:38 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 start-sanitize-v850
 Tue Aug 20 15:06:05 1996  J.T. Conklin  <jtc@hippo.cygnus.com>
-	
+
 	* Makefile.in (ALL_MACHINES): Add cpu-v850.o.
 	(BFD32_BACKENDS) Add elf32-v850.o.
 	* archures.c: Add bfd_v850_arch.
@@ -2522,7 +2533,7 @@ Tue Aug 20 15:06:05 1996  J.T. Conklin  <jtc@hippo.cygnus.com>
 	* elf.c (prep_headers): Added case bfd_arch_v850.
 	* elf32-v850.c: New file.
 	* targets.c (bfd_elf32_v850_vec): New vector.
-	
+
 end-sanitize-v850
 Fri Aug 16 16:25:35 1996  Ian Lance Taylor  <ian@cygnus.com>
 
@@ -2849,7 +2860,7 @@ Wed Jul 17 14:51:52 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 	* reloc.c (BFD_RELOC_D10V_10_PCREL_R, BFD_RELOC_D10V_10_PCREL_L,
  	BFD_RELOC_D10V_18, BFD_RELOC_D10V_18_PCREL): Define.
 	* targets.c (bfd_elf32_d10v_vec): New vector.
-	
+
 Wed Jul 17 10:58:55 1996  Kim Knuttila  <krk@cygnus.com>
 
 	* coff-ppc.c (coff_ppc_relocate_section): Removed bogus fprintf
@@ -3033,16 +3044,16 @@ Tue Jun 25 11:41:24 1996  Richard Henderson  <rth@tamu.edu>
 	.rela.plt offset directly rather than calculating it.
 
 Mon Jun 24 17:15:10 1996  Jason Molenda  (crash@godzilla.cygnus.co.jp)
- 
-        * Makefile.in, (bindir, libdir, datadir, mandir, infodir, includedir): 
+
+        * Makefile.in, (bindir, libdir, datadir, mandir, infodir, includedir):
 	Use autoconf-set values.
-        * doc/Makefile.in (bindir, libdir, datadir, mandir, infodir, 
-	includedir, INSTALL, INSTALL_PROGRAM, INSTALL_DATA): Use autoconf-set 
+        * doc/Makefile.in (bindir, libdir, datadir, mandir, infodir,
+	includedir, INSTALL, INSTALL_PROGRAM, INSTALL_DATA): Use autoconf-set
 	values.
         (docdir): Deleted.
         * configure.in (AC_PREREQ): autoconf v2.5 or higher.
         * configure: Rebuilt.
- 
+
 Mon Jun 24 22:50:35 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* som.c (som_write_fixups): Fix typo in R_END_TRY for exception
@@ -3071,7 +3082,7 @@ Sun Jun 23 20:42:51 1996  Doug Evans  <dje@canuck.cygnus.com>
 Fri Jun 21 17:38:15 1996  Joel Sherrill  <joel@merlin.gcs.redstone.army.mil>
 
 	* config.bfd: Add support for *-*-rtems* configurations.
-	
+
 Fri Jun 21 15:19:59 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf.c (prep_headers): Add bfd_arch_alpha case.
@@ -3125,7 +3136,7 @@ Tue Jun 18 15:17:36 1996  Jeffrey A. Law  <law@rtl.cygnus.com>
 
 	* coff-h8300.c: Remove #if 0 code.
 	(compatable): Don't allow mixing/matching of different architectures.
-	
+
 	* archures.c (bfd_mach_h8300s): Add.
 	* bfd-in2.h: Rebuilt.
 	* coff-h8300.c (funcvec_hash_newfunc): Handle H8/S too.
@@ -3482,7 +3493,7 @@ Wed May 29 16:15:29 1996  Ian Lance Taylor  <ian@cygnus.com>
 	(bfd_elf64_littlemips_vec): Declare.
 	(bfd_target_vector): Add bfd_elf64_bigmips_vec and
 	bfd_elf64_littlemips_vec if BFD64 is defined.
-	
+
 	* libbfd.c (bfd_get_file_window): Add cast to fprintf argument.
 
 Tue May 28 11:42:08 1996  Ian Lance Taylor  <ian@cygnus.com>
@@ -3572,7 +3583,7 @@ Tue May  7 16:10:19 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 	* config{ure.in,.bfd}: Add support for ppcboot target.
 	* targets.c: Ditto.
 	* configure: Regenerate.
-		
+
 Tue May  7 11:15:19 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* coff-h8300.c (howto_table): Update names to match recent
@@ -3733,7 +3744,7 @@ Wed Apr 24 14:04:07 1996  Ian Lance Taylor  <ian@cygnus.com>
 	(xcoff_dynamic_reloc): New static variable.
 	(_bfd_xcoff_canonicalize_dynamic_reloc): New function.
 	(xcoff_link_add_dynamic_symbols): Use xcoff_get_section_contents.
-	
+
 Tue Apr 23 12:48:42 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* coff-sparc.c (bfd_coff_generic_reloc): Return bfd_reloc_ok even
@@ -3931,7 +3942,7 @@ Thu Apr  4 18:49:09 1996  Fred Fish  <fnf@cygnus.com>
 	* sysdep.h: Use TIME_WITH_SYS_TIME and HAVE_SYS_TIME_H
 	to control what combination of <time> and <sys/time.h>
 	get included.
-	
+
 Tue Apr  2 13:11:53 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* aoutf1.h (sunos_32_set_arch_mach): Handle M_SPARCLET.
@@ -3983,7 +3994,7 @@ Sun Mar 31 01:58:41 1996  steve chamberlain  <sac@slash.cygnus.com>
 	* peicode.h (coff_swap_aouthdr_out): Delete test for .junk.
 	* coffcode.h (coff_compute_section_file_positions): Likewise.
 	(coff_write_object_contents): Likewise.
-	
+
 Fri Mar 29 12:44:36 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* section.c (SEC_LINK_ONCE): Define.
@@ -4024,7 +4035,7 @@ Thu Mar 28 23:48:49 1996  Jeffrey A Law  (law@cygnus.com)
 	the function vector as needed.  Place the address of the function
 	vector entry in the location specified by the R_MEM_INDIRECT reloc.
 	Rewrite the vectors section contents as necessary.
-	(h8300_bfd_link_add_symbols): New function for the h8300 linker. 
+	(h8300_bfd_link_add_symbols): New function for the h8300 linker.
 	(coff_bfd_link_add_symbols): Define to use h8300 specific version.
 	(coff_bfd_link_hash_table_create): Likewise.
 
@@ -4190,7 +4201,7 @@ Thu Mar 14 16:06:06 1996  Jeffrey A Law  (law@cygnus.com)
 	(rtype2howto): Support R_MEM_INDIRECT.
 	(h8300_reloc16_extra_cases): Handle R_MEM_INDIRECT like R_RELBYTE
 	for now.
-	
+
 Tue Mar 12 12:41:17 1996  David Mosberger-Tang  <davidm@koala.azstarnet.com>
 
 	* coff-alpha.c (alpha_relocate_section): Use
@@ -4214,7 +4225,7 @@ Tue Mar 12 12:10:55 1996  Ian Lance Taylor  <ian@cygnus.com>
 	* cofflink.c (_bfd_coff_reloc_link_order): Likewise.
 	* ecoff.c (ecoff_reloc_link_order): Likewise.
 	* elflink.h (elf_link_add_object_symbols): Likewise.
-	(elf_reloc_link_order): Likewise.	
+	(elf_reloc_link_order): Likewise.
 	* linker.c (_bfd_generic_link_output_symbols): Likewise.
 	(_bfd_generic_reloc_link_order): Likewise.
 	(default_indirect_link_order): Likewise.
@@ -4844,7 +4855,7 @@ Tue Jan 30 12:09:04 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 Mon Jan 29 14:27:24 1996  Kim Knuttila  <krk@cygnus.com>
 
-	* libcoff-in.h: aligned newly exported names with bfd naming 
+	* libcoff-in.h: aligned newly exported names with bfd naming
 	conventions. Removed an erroneous define of POWERPC_LE_PE.
  	* libcoff.h: Rebuild.
 	* cofflink.c, coff-ppc.c: the above function name changes
@@ -4887,10 +4898,10 @@ Mon Jan 29 11:34:36 1996  Kim Knuttila  <krk@cygnus.com>
 
 	* libcoff-in.h: promoted the following from cofflink.c to allow
 	_bfd_coff_final_link to be overridden -  STRING_SIZE_SIZE,
-	coff_debug_merge_element, struct coff_debug_merge_type, 
+	coff_debug_merge_element, struct coff_debug_merge_type,
 	coff_debug_merge_hash_entry, coff_debug_merge_hash_table,
 	coff_debug_merge_hash_table_init,  coff_debug_merge_hash_table_free,
-	coff_debug_merge_hash_lookup, coff_link_section_info, 
+	coff_debug_merge_hash_lookup, coff_link_section_info,
 	coff_final_link_info, coff_debug_merge_hash_newfunc,
 	coff_write_global_sym, coff_link_input_bfd, coff_reloc_link_order.
 
@@ -5100,13 +5111,13 @@ Thu Jan 18 18:25:34 1996  Kim Knuttila  <krk@cygnus.com>
 	(dump_toc): fix diagnosing code to identify out-of-toc-bounds entries.
 	Also begin the toc at 4 as an eye catcher ('31313131' marks the first
 	toc entry in an objdump) for now.
-	(ppc_do_last, ppc_get_last): New function - needed to save processing 
+	(ppc_do_last, ppc_get_last): New function - needed to save processing
 	the toc owner to the end.
-	(ppc_coff_swap_sym_in_hook): Removed an incorrect hack for doing the 
+	(ppc_coff_swap_sym_in_hook): Removed an incorrect hack for doing the
 	toc owner last.
 
-	* cofflink.c (_bfd_coff_final_link): Added a new hack to keep the 
-	toc owner from being done till last. Must define POWERPC_LE_PC 
+	* cofflink.c (_bfd_coff_final_link): Added a new hack to keep the
+	toc owner from being done till last. Must define POWERPC_LE_PC
 	to enable it.
 
 	* coffcode.h (coff_set_alignment_hook): alignment setting for .stab
@@ -5222,7 +5233,7 @@ Thu Jan 11 11:23:30 1996  Ian Lance Taylor  <ian@cygnus.com>
 	* xcofflink.c (xcoff_link_add_symbols): Create the special
 	sections if we see a DYNAMIC object, in case that is the only
 	XCOFF input object we see.
-	
+
 	* elf32-mips.c: Extensive changes for a start at dynamic linking
 	support, from Kazumoto Kojima <kkojima@info.kanagawa-u.ac.jp>.
 
@@ -5368,7 +5379,7 @@ Thu Jan  4 17:12:37 1996  Fred Fish  <fnf@cygnus.com>
 	(bfd_target_vector): Add i386freebsd_vec.
 	* i386linux.c (SEGMENT_SIZE): Define as TARGET_PAGE_SIZE
 	* i386netbsd.c (SEGMENT_SIZE):  Define as TARGET_PAGE_SIZE
-	
+
 Thu Jan  4 16:27:46 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ieee.c (ieee_slurp_debug): New static function.
@@ -5612,7 +5623,7 @@ Fri Dec  1 14:46:51 1995  Ian Lance Taylor  <ian@cygnus.com>
 Thu Nov 30 19:32:26 1995  Kim Knuttila  <krk@cygnus.com>
 
 	* coff-ppc.c: Added macros to tidy up toc cell treatment. Numerous
-	uses as well. Added a new howto to deal with TOCREL16 relocs that 
+	uses as well. Added a new howto to deal with TOCREL16 relocs that
 	are TOCDEFN as well.
 	(coff_ppc_relocate_section): Expanded treatment of ADDR32NB relocs
 	to handle RVA relocs from dlltool.
@@ -5620,7 +5631,7 @@ Thu Nov 30 19:32:26 1995  Kim Knuttila  <krk@cygnus.com>
 	(coff_ppc_rtype_to_howto): TOCDEFN reloc addition.
 	(ppc_coff_reloc_type_lookup): TOCDEFN reloc addition.
 
-	* coffcode.h (coff_set_alignment_hook): check idata$X sections 
+	* coffcode.h (coff_set_alignment_hook): check idata$X sections
 	to get the right section alignment.
 
 Thu Nov 30 16:48:18 1995  Ian Lance Taylor  <ian@cygnus.com>
@@ -5839,7 +5850,7 @@ Wed Nov 15 04:09:14 1995  Ken Raeburn  <raeburn@cygnus.com>
 	(BFD_LIBS_CFILES, ALL_MACHINES_CFILES, BFD32_BACKENDS_CFILES,
 	BFD64_BACKENDS_CFILES): New variables.
 	(CFILES): Use them.
-	
+
 Tue Nov 14 11:52:23 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* peicode.h (coff_swap_aouthdr_out): For PPC PE, start isize at 0,
@@ -6126,7 +6137,7 @@ Mon Nov  6 17:13:15 1995  Harry Dolan  <dolan@ssd.intel.com>
 	(BFD32_BACKENDS): Add coff-i860.o.
 	(CFILES): Add cpu-i860.c and coff-i860.c.
 	* targets.c (i860coff_vec): Declare.
-	(bfd_target_vector): Add &i860coff_vec.	
+	(bfd_target_vector): Add &i860coff_vec.
 	* archures.c (bfd_i860_arch): Declare.
 	(bfd_archures_list): Add &bfd_i860_arch.
 	* coffcode.h (coff_set_arch_mach_hook): Handle I860 magic number.
@@ -6191,7 +6202,7 @@ Sat Nov  4 12:23:26 1995  Fred Fish  <fnf@cygnus.com>
 	* core.c: Renamed to corefile.c
 	* makefile.dos (OBJS): Change core.o to corefile.o
 	* Makefile.in (CFILES, BFD_LIBS): Use corefile.c instead of core.c
-	
+
 start-sanitize-gm
 Sat Nov  4 10:16:54 1995  Stu Grossman  (grossman@cygnus.com)
 
@@ -6374,14 +6385,14 @@ Fri Oct 27 14:42:15 1995  Niklas Hallqvist  <niklas@appli.se>
 	* libaout.h: Added M_68K4K_NETBSD magic.
 
 	* m68k4knetbsd.c: New file.
-	
+
 	* hosts/{m68k,sparc}nbsd.h: Don't define HOST_BIG_ENDIAN_P.
 
 	* hosts/nbsd.h: Define HOST_BIG_ENDIAN_P according to
 	<machine/endian.h>.
 
 	* hosts/mipsnbsd.h: New file.
-	
+
 start-sanitize-gm
 Fri Oct 27 09:41:51 1995  Stu Grossman  (grossman@cygnus.com)
 
@@ -6409,7 +6420,7 @@ Thu Oct 26 14:16:47 1995  Ian Lance Taylor  <ian@cygnus.com>
 	(rs6000coff_vec): Set symbol_leading_char to '.'.
 	* coffgen.c (coff_get_symbol_info): If fix_value is set, fix the
 	value stored in ret rather than returning a pointer value.
-	
+
 Wed Oct 25 23:10:39 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config.bfd (powerpc{,le}-{elf,sysv4,eabi,solaris2}): Remove MAC
@@ -6461,7 +6472,7 @@ Tue Oct 24 17:44:20 1995  Stan Shebs  <shebs@andros.cygnus.com>
 	* xcofflink.c (xcoff_link_add_symbols): Declare a local as PTR.
 
 	* mpw-make.sed: Generalize subdir_do edit.
-	
+
 Tue Oct 24 10:25:01 1995  Jeffrey A Law  (law@cygnus.com)
 
 	* hppabsd-core.c (make_bfd_asection): Initialize asect->filepos
@@ -6485,7 +6496,7 @@ Wed Oct 18 16:20:08 1995  steve chamberlain  <sac@slash.cygnus.com>
 	calc correct.
 	* peicode.h (add_data_entry): Use _cooked_size of data directory.
 	(coff_swap_outhdr_out): Hardwire in version number.
-	
+
 Wed Oct 18 16:50:54 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* sunos.c (sunos_add_dynamic_symbols): Rename local variables
@@ -6984,13 +6995,13 @@ Wed Sep 27 10:37:14 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 Wed Sep 27 07:23:39 1995  Kim Knuttila  <krk@nellie>
 
-	* coff-ppc.c, pe-ppc.c, pei-ppc.c: Initial bfd for coff/PE 
+	* coff-ppc.c, pe-ppc.c, pei-ppc.c: Initial bfd for coff/PE
         support on powerpc.
 	* Makefile.in: added *-ppc files
 	* coffcode.h: ppc MAGIC, and use peicode.h rather than coffswap.h to
         allow pe based .o's to be shared with other tools on ppc/NT
 	* config.bfd: added powerpc[le]-[pe|winnt] config support
-	* configure, configure.in: added bfd_powerpc[le]_pe[i]_vec 
+	* configure, configure.in: added bfd_powerpc[le]_pe[i]_vec
 	* peicode.h: Added more section flags for PE on ppc
 	             Added coff_swap_filehdr_out to allow peicode.h to be
 		     used for non-image PE files on ppc.
@@ -7250,7 +7261,7 @@ Wed Sep 13 13:27:53 1995  Ian Lance Taylor  <ian@cygnus.com>
 Thu Sep 12 12:45:34 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* coffcode.h (coff_compute_section_file_positions): Keep the
-	raw size safe. 
+	raw size safe.
 	(coff_write_object_contents): Remember if it's a relocatable
 	file.
 	* libcoff-in.h (pe_data_type): New member 'has_reloc_section'

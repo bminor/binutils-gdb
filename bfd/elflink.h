@@ -2819,7 +2819,7 @@ elf_link_find_version_dependencies (h, data)
   /* See if we already know about this version.  */
   for (t = elf_tdata (rinfo->output_bfd)->verref; t != NULL; t = t->vn_nextref)
     {
-      if (t->vn_bfd == h->verinfo.verdef->vd_bfd)
+      if (t->vn_bfd != h->verinfo.verdef->vd_bfd)
 	continue;
 
       for (a = t->vn_auxptr; a != NULL; a = a->vna_nextptr)
