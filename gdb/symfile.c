@@ -37,6 +37,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <fcntl.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <ctype.h>
 
 /* Global variables owned by this file */
 
@@ -403,6 +404,22 @@ syms_from_objfile (objfile, addr, mainline, verbo)
   TYPE_NAME (lookup_pointer_type (builtin_type_char)) = 0;
   TYPE_NAME (lookup_pointer_type (builtin_type_void)) = 0;
 
+  /* Mark the objfile has having had initial symbol read attempted.  Note
+     that this does not mean we found any symbols... */
+
+  objfile -> flags |= OBJF_SYMS;
+}
+
+/* Perform required actions immediately after either reading in the initial
+   symbols for a new objfile, or mapping in the symbols from a reusable
+   objfile. */
+   
+void
+new_symfile_objfile (objfile, mainline, verbo)
+     struct objfile *objfile;
+     int mainline;
+     int verbo;
+{
   if (mainline)
     {
       /* OK, make it the "real" symbol file.  */
@@ -491,6 +508,8 @@ symbol_file_add (name, from_tty, addr, mainline, mapped, readnow)
 	  wrap_here ("");
 	  fflush (stdout);
 	}
+      init_entry_point_info (objfile);
+      find_sym_fns (objfile);
     }
   else
     {
@@ -504,8 +523,9 @@ symbol_file_add (name, from_tty, addr, mainline, mapped, readnow)
 	  fflush (stdout);
 	}
       syms_from_objfile (objfile, addr, mainline, from_tty);
-      objfile -> flags |= OBJF_SYMS;
     }      
+
+  new_symfile_objfile (objfile, mainline, from_tty);
 
   /* We now have at least a partial symbol table.  Check to see if the
      user requested that all symbols be read on initial access via either
@@ -563,6 +583,10 @@ symbol_file_command (args, from_tty)
 	error ("Not confirmed.");
       free_all_objfiles ();
       symfile_objfile = NULL;
+      if (from_tty)
+	{
+	  printf ("No symbol file now.\n");
+	}
     }
   else
     {
@@ -1247,7 +1271,44 @@ start_psymtab_common (objfile, addr,
   psymtab -> statics_offset = static_syms - objfile -> static_psymbols.list;
   return (psymtab);
 }
+
+/* Debugging versions of functions that are usually inline macros
+   (see symfile.h).  */
 
+#if 0		/* Don't quite work nowadays... */
+
+/* Add a symbol with a long value to a psymtab.
+   Since one arg is a struct, we pass in a ptr and deref it (sigh).  */
+
+void
+add_psymbol_to_list (name, namelength, namespace, class, list, val)
+     char *name;
+     int namelength;
+     enum namespace namespace;
+     enum address_class class;
+     struct psymbol_allocation_list *list;
+     long val;
+{
+  ADD_PSYMBOL_VT_TO_LIST (name, namelength, namespace, class, (*list), val,
+			  SYMBOL_VALUE);
+}
+
+/* Add a symbol with a CORE_ADDR value to a psymtab. */
+
+void
+add_psymbol_addr_to_list (name, namelength, namespace, class, list, val)
+     char *name;
+     int namelength;
+     enum namespace namespace;
+     enum address_class class;
+     struct psymbol_allocation_list *list;
+     CORE_ADDR val;
+{
+  ADD_PSYMBOL_VT_TO_LIST (name, namelength, namespace, class, (*list), val,
+			  SYMBOL_VALUE_ADDRESS);
+}
+
+#endif /* 0 */
 
 void
 _initialize_symfile ()

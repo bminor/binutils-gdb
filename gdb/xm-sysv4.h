@@ -77,3 +77,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #ifdef USE_PROC_FS
 #define NOTICE_SIGNAL_HANDLING_CHANGE proc_signal_handling_change()
 #endif
+
+/* We have to include these files now, so that GDB will not make
+   competing definitions in defs.h.  */
+#include <limits.h>

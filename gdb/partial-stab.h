@@ -134,9 +134,25 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif /* DBXREAD_ONLY */
 	  continue;	/* Just undefined, not COMMON */
 
+	case N_UNDF:
+#ifdef DBXREAD_ONLY
+	  if (processing_acc_compilation && bufp->n_strx == 1) {
+	    /* deal with relative offsets in the string table
+	       used in ELF+STAB under Solaris */
+	    past_first_source_file = 1;
+	    file_string_table_offset = next_file_string_table_offset;
+	    next_file_string_table_offset =
+	      file_string_table_offset + bufp->n_value;
+	    if (next_file_string_table_offset < file_string_table_offset)
+	      error ("string table offset backs up at %d", symnum);
+  /* FIXME -- replace error() with complaint.  */
+	    continue;
+	  }
+#endif /* DBXREAD_ONLY */
+	  continue;
+
 	    /* Lots of symbol types we can just ignore.  */
 
-	case N_UNDF:
 	case N_ABS:
 	case N_BSS:
 	case N_NBDATA:
@@ -444,6 +460,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	      continue;
 
 	    case 'f':
+#ifdef DBXREAD_ONLY
+	      /* Kludges for ELF/STABS with Sun ACC */
+	      last_function_name = namestring;
+	      if (pst->textlow == 0)
+		pst->textlow = CUR_SYMBOL_VALUE;
+#if 0
+	      if (startup_file_end == 0)
+		startup_file_end = CUR_SYMBOL_VALUE;
+#endif
+	      /* End kludge.  */
+#endif /* DBXREAD_ONLY */
 	      ADD_PSYMBOL_TO_LIST (namestring, p - namestring,
 				   VAR_NAMESPACE, LOC_BLOCK,
 				   objfile->static_psymbols, CUR_SYMBOL_VALUE);
@@ -455,6 +482,17 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 		 FIXME, why did it used to ignore these?  That broke
 		 "i fun" on these functions.  */
 	    case 'F':
+#ifdef DBXREAD_ONLY
+	      /* Kludges for ELF/STABS with Sun ACC */
+	      last_function_name = namestring;
+	      if (pst->textlow == 0)
+		pst->textlow = CUR_SYMBOL_VALUE;
+#if 0
+	      if (startup_file_end == 0)
+		startup_file_end = CUR_SYMBOL_VALUE;
+#endif
+	      /* End kludge.  */
+#endif /* DBXREAD_ONLY */
 	      ADD_PSYMBOL_TO_LIST (namestring, p - namestring,
 				   VAR_NAMESPACE, LOC_BLOCK,
 				   objfile->global_psymbols, CUR_SYMBOL_VALUE);
@@ -567,6 +605,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	case N_LBRAC:
 	case N_NSYMS:		/* Ultrix 4.0: symbol count */
 	case N_DEFD:		/* GNU Modula-2 */
+
+	case N_OBJ:		/* two useless types from Solaris */
+	case N_OPT:
 	  /* These symbols aren't interesting; don't worry about them */
 
 	  continue;
