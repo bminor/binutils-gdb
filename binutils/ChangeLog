@@ -1,3 +1,13 @@
+Sun Dec  6 13:28:09 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* strip.1: Fix typo (-V to -v).  From Issei Hirayama
+	<iss@mail.wbs.or.jp>.
+
+1998-12-03  Ulrich Drepper  <drepper@cygnus.com>
+
+	* readelf.c (process_dynamic_segment): Improve output format for
+	various DT_* values.
+
 1998-12-02  Ulrich Drepper  <drepper@cygnus.com>
 
 	* readelf.c (process_mips_specific): Print .conflict section
