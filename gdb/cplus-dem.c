@@ -1183,7 +1183,7 @@ munge_function_name (name, arg_mode)
       /* type conversion operator.  */
       string type;
       const char *tem = name->b + 4;
-      if (do_type (&tem, &type))
+      if (do_type (&tem, &type, arg_mode))
 	{
 	  string_clear (name);
 	  string_append (name, "operator ");

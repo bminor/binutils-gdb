@@ -1,5 +1,8 @@
 Mon Nov 18 00:04:41 1991  Fred Fish  (fnf at cygnus.com)
 
+	* cplus-dem.c (munge_function_name):  Add missing third arg to
+	instance of call to do_type().
+
 	* dwarfread.c:  Changes to match new dwarf.h.  Remove 
 	AT_deriv_list, AT_loclist, AT_incomplete, AT_const_data,
 	and AT_is_external.
