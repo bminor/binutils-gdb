@@ -1,3 +1,8 @@
+2002-11-12  Andrew Cagney  <ac131313@redhat.com>
+
+	* config/djgpp/fnchange.lst: Fix typo, hang1.c to hang1.C; hang2.c
+	to hang2.C; hang3.c to hang3.C.
+
 2002-11-11  Elena Zannoni  <ezannoni@redhat.com>
 
         * findvar.c (read_var_value): Reenable TLS code.
