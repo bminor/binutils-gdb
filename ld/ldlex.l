@@ -144,7 +144,7 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^]([*?.$_a-zA-Z0-9\[\]\-\!\^]|::)*
 	}
     }
 
-<BOTH,SCRIPT,EXPRESSION>"/*"	{ comment(); }
+<BOTH,SCRIPT,EXPRESSION,VERS_START,VERS_NODE,VERS_SCRIPT>"/*"	{ comment(); }
 
 
 <DEFSYMEXP>"-"                  { RTOKEN('-');}
