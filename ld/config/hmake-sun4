@@ -1,4 +1,4 @@
-CDEFINES=-DHOST_SYS=SUN4_SYS
-YACC=yacc -tvd
+HDEFINES = -DHOST_SYS=SUN4_SYS
+YACC = yacc -tvd
 
 
