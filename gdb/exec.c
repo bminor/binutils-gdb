@@ -320,7 +320,9 @@ struct target_ops exec_ops = {
 	exec_xfer_memory, exec_files_info,
 	0, 0, /* insert_breakpoint, remove_breakpoint, */
 	0, 0, 0, 0, 0, /* terminal stuff */
-	0, 0, 0, 0, 0, /* kill, load, add_syms, call fn, lookup sym */
+	0, 0, /* kill, load */
+	add_syms_addr_command,
+	0, 0, /* call fn, lookup sym */
 	child_create_inferior,
 	0, /* mourn_inferior */
 	file_stratum, 0, /* next */
