@@ -842,6 +842,7 @@ binop_type_check(arg1,arg2,op)
       break;
 
    case BINOP_REM:
+   case BINOP_MOD:
       if (!integral_type(t1) || !integral_type(t2))
 	 type_op_error ("Arguments to %s must be of integral type.",op);
       break;

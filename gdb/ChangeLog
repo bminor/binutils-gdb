@@ -1,3 +1,25 @@
+Mon Jan  4 16:54:18 1993  Fred Fish  (fnf@cygnus.com)
+
+	* expression.h (exp_opcode):  Add BINOP_MOD.
+	* eval.c (evaluate_subexp):  Handle new BINOP_MOD.
+	* expprint.c (dump_expression):  Handle new BINOP_MOD.
+	* language.c (binop_type_check):  Handle new BINOP_MOD.
+	* main.c (float_handler):  Re-enable float handler when hit.
+	* valarith.c (language.h):  Include, need current_language.
+	* valarith.c (TRUNCATION_TOWARDS_ZERO):  Define default macro
+	for integer divide truncates towards zero for negative results.
+	* valarith.c (value_x_binop):  Handle BINOP_MOD if seen.
+	* valarith.c (value_binop):  Allow arithmetic operations on
+	TYPE_CODE_CHAR variables.  Add case to handle new BINOP_MOD.
+	**** start-sanitize-chill ****
+	* ch-exp.y (operand_4):  Add useful actions for MOD and REM.
+	* ch-exp.y (tokentab3):  Add MOD and REM.
+	* ch-exp.y (yylex):  Set innermost_block for symbols found
+	in local scopes.  Return LOCATION_NAME for local symbols.
+	* ch-lang.c (chill_op_print_tab):  Fix MOD entry to use
+	BINOP_MOD instead of BINOP_REM.  Add REM entry, using BINOP_REM.
+	**** end-sanitize-chill ****
+
 Sun Jan  3 14:24:56 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* remote-sim.c: first attempt at general simulator interface

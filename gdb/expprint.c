@@ -447,6 +447,7 @@ dump_expression (exp, stream, note)
 	  case BINOP_MUL: opcode_name = "BINOP_MUL"; break;
 	  case BINOP_DIV: opcode_name = "BINOP_DIV"; break;
 	  case BINOP_REM: opcode_name = "BINOP_REM"; break;
+	  case BINOP_MOD: opcode_name = "BINOP_MOD"; break;
 	  case BINOP_LSH: opcode_name = "BINOP_LSH"; break;
 	  case BINOP_RSH: opcode_name = "BINOP_RSH"; break;
 	  case BINOP_LOGICAL_AND: opcode_name = "BINOP_LOGICAL_AND"; break;

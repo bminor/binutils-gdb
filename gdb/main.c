@@ -2247,6 +2247,7 @@ int signo;
 {
   /* This message is based on ANSI C, section 4.7.  Note that integer
      divide by zero causes this, so "float" is a misnomer.  */
+  signal (SIGFPE, float_handler);
   error ("Erroneous arithmetic operation.");
 }
 

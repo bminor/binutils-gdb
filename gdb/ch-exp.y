@@ -757,11 +757,11 @@ operand_4	:	operand_5
 			}
 		|	operand_4 MOD operand_5
 			{
-			  $$ = 0;	/* FIXME */
+			  write_exp_elt_opcode (BINOP_MOD);
 			}
 		|	operand_4 REM operand_5
 			{
-			  $$ = 0;	/* FIXME */
+			  write_exp_elt_opcode (BINOP_REM);
 			}
 		;
 
@@ -1390,6 +1390,8 @@ static const struct token tokentab4[] =
 
 static const struct token tokentab3[] =
 {
+    { "MOD", MOD },
+    { "REM", REM },
     { "NOT", NOT },
     { "XOR", LOGXOR },
     { "AND", LOGAND }
@@ -1564,17 +1566,27 @@ yylex ()
 	      case LOC_STATIC:
 		/* Found a global or local static variable. */
 		return (LOCATION_NAME);
-	      case LOC_UNDEF:
-	      case LOC_CONST:
 	      case LOC_REGISTER:
 	      case LOC_ARG:
 	      case LOC_REF_ARG:
 	      case LOC_REGPARM:
 	      case LOC_LOCAL:
-	      case LOC_TYPEDEF:
-	      case LOC_LABEL:
-	      case LOC_CONST_BYTES:
 	      case LOC_LOCAL_ARG:
+		if (innermost_block == NULL
+		    || contained_in (block_found, innermost_block))
+		  {
+		    innermost_block = block_found;
+		  }
+		return (LOCATION_NAME);
+		break;
+	      case LOC_CONST:
+	      case LOC_LABEL:
+		return (LOCATION_NAME);
+		break;
+	      case LOC_UNDEF:
+	      case LOC_TYPEDEF:
+	      case LOC_CONST_BYTES:
+		error ("Symbol \"%s\" names no location.", simplename);
 		break;
 	      }
 	  }

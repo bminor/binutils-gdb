@@ -543,6 +543,7 @@ evaluate_subexp (expect_type, exp, pos, noside)
     case BINOP_MUL:
     case BINOP_DIV:
     case BINOP_REM:
+    case BINOP_MOD:
     case BINOP_LSH:
     case BINOP_RSH:
     case BINOP_BITWISE_AND:
@@ -556,7 +557,7 @@ evaluate_subexp (expect_type, exp, pos, noside)
 	return value_x_binop (arg1, arg2, op, OP_NULL);
       else
 	if (noside == EVAL_AVOID_SIDE_EFFECTS
-	    && (op == BINOP_DIV || op == BINOP_REM))
+	    && (op == BINOP_DIV || op == BINOP_REM || op == BINOP_MOD))
 	  return value_zero (VALUE_TYPE (arg1), not_lval);
       else
 	return value_binop (arg1, arg2, op);

@@ -52,6 +52,7 @@ enum exp_opcode
   BINOP_MUL,		/* * */
   BINOP_DIV,		/* / */
   BINOP_REM,		/* % */
+  BINOP_MOD,		/* mod (Knuth 1.2.4) */
   BINOP_LSH,		/* << */
   BINOP_RSH,		/* >> */
   BINOP_LOGICAL_AND,	/* && */
