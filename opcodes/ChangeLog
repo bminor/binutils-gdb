@@ -1,3 +1,7 @@
+2001-01-03  Richard Sandiford  <r.sandiford@redhat.com>
+
+	 cgen-dis.in (read_insn): Use bfd_get_bits()
+
 2001-01-02  Richard Sandiford  <rsandifo@redhat.com>
 
 	* cgen-dis.c (hash_insn_array): Use bfd_put_bits().

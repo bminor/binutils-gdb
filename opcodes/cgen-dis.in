@@ -211,21 +211,7 @@ read_insn (cd, pc, info, buf, buflen, ex_info, insn_value)
   ex_info->valid = (1 << buflen) - 1;
   ex_info->insn_bytes = buf;
 
-  switch (buflen)
-    {
-    case 1:
-      *insn_value = buf[0];
-      break;
-    case 2:
-      *insn_value = info->endian == BFD_ENDIAN_BIG ? bfd_getb16 (buf) : bfd_getl16 (buf);
-      break;
-    case 4:
-      *insn_value = info->endian == BFD_ENDIAN_BIG ? bfd_getb32 (buf) : bfd_getl32 (buf);
-      break;
-    default:
-      abort ();
-    }
-
+  *insn_value = bfd_get_bits (buf, buflen * 8, info->endian == BFD_ENDIAN_BIG);
   return 0;
 }
 
