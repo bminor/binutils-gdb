@@ -1,5 +1,8 @@
 Thu Aug  8 10:12:36 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
+	* symfile.c (symfile_bfd_open):  Change ifdef from __WIN32__ to
+	_WIN32.
+
 	* somread.c:  Rearrange order of includes to fix warnings under
 	hpux-10.10.  Also don't include sys/file.h.
 
