@@ -1,3 +1,9 @@
+2003-10-08  Nick Clifton  <nickc@redhat.com>
+
+	* lexsup.c (parse_args: OPTION_CALL_SHARED): Revise comment
+	describing defaults.  Change default to report unresolved symbols
+	in object files as well.
+
 2003-10-08  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* ldexp.c (fold_name) <case DEFINED>: Set section of result to
