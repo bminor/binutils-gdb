@@ -715,7 +715,8 @@ som_solib_add (char *arg_string, int from_tty, struct target_ops *target)
       if (status != 0)
 	goto err;
 
-      new_so->som_solib.next = (void *) extract_unsigned_integer (buf, 4);
+      new_so->som_solib.next =
+	address_to_host_pointer (extract_unsigned_integer (buf, 4));
 
       /* Note that we don't re-set "addr" to the next pointer
        * until after we've read the trailing data.
@@ -1263,8 +1264,10 @@ som_solib_desire_dynamic_linker_symbols (void)
       }
 
     /* Did we find everything we were looking for?  If so, stop. */
-    if ((dld_cache.load.address != NULL) && (dld_cache.load_stub.address != NULL)
-	&& (dld_cache.unload.address != NULL) && (dld_cache.unload_stub.address != NULL))
+    if ((dld_cache.load.address != 0)
+	&& (dld_cache.load_stub.address != 0)
+	&& (dld_cache.unload.address != 0)
+	&& (dld_cache.unload_stub.address != 0))
       {
 	dld_cache.is_valid = 1;
 	break;

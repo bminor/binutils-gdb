@@ -110,7 +110,7 @@ static char main_string[] = "main";
 
    Return value: 1 if ok, 0 if not */
 int
-hpread_call_pxdb (char *file_name)
+hpread_call_pxdb (const char *file_name)
 {
   char *p;
   int status;

@@ -1,3 +1,10 @@
+Tue Oct 23 14:16:10 2001  Andrew Cagney  <cagney@redhat.com>
+
+	* somsolib.c (som_solib_add): Use core_addr_to_host_pointer.
+	(som_solib_desire_dynamic_linker_symbols): Compare integers with
+ 	zero not NULL.
+	* hp-psymtab-read.c (hpread_call_pxdb): Make parameter constant.
+
 2001-10-21  Andrew Cagney  <ac131313@redhat.com>
 
 	* top.c (print_gdb_version): Do not print ``(MI_OUT)''.  MI
