@@ -174,21 +174,23 @@ scache_flush (SIM_DESC sd)
     }
 }
 
+/* Print cache access statics for CPU.  */
+
 void
-scache_print_profile (SIM_DESC sd, int verbose)
+scache_print_profile (SIM_CPU *cpu, int verbose)
 {
-  /* FIXME: Need to add smp support.  */
-  SIM_CPU *cpu = STATE_CPU (sd, 0);
+  SIM_DESC sd = CPU_STATE (cpu);
   unsigned long hits = CPU_SCACHE_HITS (cpu);
   unsigned long misses = CPU_SCACHE_MISSES (cpu);
 
   sim_io_printf (sd, "Simulator Cache Statistics\n\n");
 
-  sim_io_printf (sd, "Cache size: %d\n", CPU_SCACHE_SIZE (cpu));
-  sim_io_printf (sd, "Hits:       %d\n", hits);
-  sim_io_printf (sd, "Misses:     %d\n", misses);
+  /* One could use PROFILE_LABEL_WIDTH here.  I chose not to.  */
+  sim_io_printf (sd, "  Cache size: %d\n", CPU_SCACHE_SIZE (cpu));
+  sim_io_printf (sd, "  Hits:       %d\n", hits);
+  sim_io_printf (sd, "  Misses:     %d\n", misses);
   if (hits + misses != 0)
-    sim_io_printf (sd, "Hit rate:   %.2f%%\n",
+    sim_io_printf (sd, "  Hit rate:   %.2f%%\n",
 		   ((double) hits / ((double) hits + (double) misses)) * 100);
   sim_io_printf (sd, "\n");
 }

@@ -47,7 +47,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 /* Text is queued in TRACE_BUF because we want to output the insn's cycle
-   count first but that isn't know until after the insn has executed.  */
+   count first but that isn't known until after the insn has executed.  */
 static char trace_buf[1024];
 /* If NULL, output to stdout directly.  */
 static char *bufptr;
@@ -69,14 +69,13 @@ trace_insn_fini (SIM_CPU *cpu)
   if (CPU_PROFILE_FLAGS (cpu) [PROFILE_MODEL_IDX])
     {
       unsigned long total = PROFILE_TOTAL_CYCLE_COUNT (CPU_PROFILE_DATA (cpu));
-      fprintf (stderr, "%-*ld %-*ld ",
-	       SIZE_CYCLE_COUNT, total - last_cycle_count,
-	       SIZE_TOTAL_CYCLE_COUNT, total);
+      trace_printf (cpu, "%-*ld %-*ld ",
+		    SIZE_CYCLE_COUNT, total - last_cycle_count,
+		    SIZE_TOTAL_CYCLE_COUNT, total);
       last_cycle_count = total;
     }
 
-  fputs (trace_buf, stderr);
-  fputc ('\n', stderr);
+  trace_printf (cpu, "%s\n", trace_buf);
 }
 
 /* For communication between trace_insn and trace_result.  */
@@ -169,7 +168,7 @@ trace_extract (SIM_CPU *cpu, PCADDR pc, char *name, ...)
 
   va_start (args, name);
 
-  cgen_trace_printf (cpu, "0x%.*x: %s ", SIZE_PC, pc, name);
+  trace_printf (cpu, "Extract: 0x%.*x: %s ", SIZE_PC, pc, name);
 
   do {
     int type,ival;
@@ -179,14 +178,14 @@ trace_extract (SIM_CPU *cpu, PCADDR pc, char *name, ...)
     if (fmt)
       {
 	if (printed_one_p)
-	  cgen_trace_printf (cpu, ", ");
+	  trace_printf (cpu, ", ");
 	printed_one_p = 1;
 	type = va_arg (args, int);
 	switch (type)
 	  {
 	  case 'x' :
 	    ival = va_arg (args, int);
-	    cgen_trace_printf (cpu, fmt, ival);
+	    trace_printf (cpu, fmt, ival);
 	    break;
 	  default :
 	    abort ();
@@ -195,7 +194,7 @@ trace_extract (SIM_CPU *cpu, PCADDR pc, char *name, ...)
   } while (fmt);
 
   va_end (args);
-  cgen_trace_printf (cpu, "\n");
+  trace_printf (cpu, "\n");
 }
 
 void
@@ -225,6 +224,9 @@ trace_result (SIM_CPU *cpu, char *name, int type, ...)
   printed_result_p = 1;
   va_end (args);
 }
+
+/* Print trace output to BUFPTR if active, otherwise print normally.
+   This is only for tracing semantic code.  */
 
 void
 cgen_trace_printf (SIM_CPU *cpu, char *fmt, ...)

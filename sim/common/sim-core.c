@@ -22,38 +22,64 @@
 #ifndef _SIM_CORE_C_
 #define _SIM_CORE_C_
 
-#include "engine.h"
+#include "sim-main.h"
+#include "sim-assert.h"
 
 
-INLINE_SIM_CORE\
-(void)
-core_init(engine *system)
+/* "core" module install handler.
+   This is called via sim_module_install to install the "core" subsystem
+   into the simulator.  */
+
+EXTERN_SIM_CORE\
+(SIM_RC)
+sim_core_install (SIM_DESC sd)
 {
-  core *memory = &system->memory;
-  core_maps map;
+  sim_module_add_uninstall_fn (sd, sim_core_uninstall);
+  sim_module_add_init_fn (sd, sim_core_init);
+  return SIM_RC_OK;
+}
+
+
+/* Uninstall the "core" subsystem from the simulator.  */
+
+EXTERN_SIM_CORE\
+(void)
+sim_core_uninstall (SIM_DESC sd)
+{
+  /* FIXME: free buffers, etc. */
+}
+
+
+EXTERN_SIM_CORE\
+(SIM_RC)
+sim_core_init (SIM_DESC sd)
+{
+  sim_core *memory = &sd->core;
+  sim_core_maps map;
   for (map = 0;
-       map < nr_core_maps;
+       map < nr_sim_core_maps;
        map++) {
     /* blow away old mappings */
-    core_mapping *curr = memory->map[map].first;
+    sim_core_mapping *curr = memory->map[map].first;
     while (curr != NULL) {
-      core_mapping *tbd = curr;
+      sim_core_mapping *tbd = curr;
       curr = curr->next;
       if (tbd->free_buffer) {
-	ASSERT(tbd->buffer != NULL);
+	SIM_ASSERT(tbd->buffer != NULL);
 	zfree(tbd->buffer);
       }
       zfree(tbd);
     }
     memory->map[map].first = NULL;
   }
+  return SIM_RC_OK;
 }
 
 
 
 STATIC_INLINE_SIM_CORE\
-(core_mapping *)
-new_core_mapping(engine *system,
+(sim_core_mapping *)
+new_sim_core_mapping(SIM_DESC sd,
 		 attach_type attach,
 		 int space,
 		 unsigned_word addr,
@@ -62,7 +88,7 @@ new_core_mapping(engine *system,
 		 void *buffer,
 		 int free_buffer)
 {
-  core_mapping *new_mapping = ZALLOC(core_mapping);
+  sim_core_mapping *new_mapping = ZALLOC(sim_core_mapping);
   /* common */
   new_mapping->level = attach;
   new_mapping->space = space;
@@ -77,7 +103,7 @@ new_core_mapping(engine *system,
     new_mapping->device = device;
   }
   else {
-    engine_error(system, "new_core_mapping - internal error - unknown attach type %d\n",
+    sim_io_error (sd, "new_sim_core_mapping - internal error - unknown attach type %d\n",
 		 attach);
   }
   return new_mapping;
@@ -86,8 +112,8 @@ new_core_mapping(engine *system,
 
 STATIC_INLINE_SIM_CORE\
 (void)
-core_map_attach(engine *system,
-		core_map *access_map,
+sim_core_map_attach(SIM_DESC sd,
+		sim_core_map *access_map,
 		attach_type attach,
 		int space,
 		unsigned_word addr,
@@ -98,18 +124,18 @@ core_map_attach(engine *system,
 {
   /* find the insertion point for this additional mapping and then
      insert */
-  core_mapping *next_mapping;
-  core_mapping **last_mapping;
+  sim_core_mapping *next_mapping;
+  sim_core_mapping **last_mapping;
 
-  ASSERT((attach >= attach_callback && client != NULL && buffer == NULL && !free_buffer)
+  SIM_ASSERT((attach >= attach_callback && client != NULL && buffer == NULL && !free_buffer)
 	 || (attach == attach_raw_memory && client == NULL && buffer != NULL));
 
   /* actually do occasionally get a zero size map */
   if (nr_bytes == 0) {
 #if (WITH_DEVICES)
-    device_error(client, "called on core_map_attach with size zero");
+    device_error(client, "called on sim_core_map_attach with size zero");
 #else
-    engine_error(system, "called on core_map_attach with size zero");
+    sim_io_error (sd, "called on sim_core_map_attach with size zero");
 #endif
   }
 
@@ -128,20 +154,20 @@ core_map_attach(engine *system,
   }
 
   /* check insertion point correct */
-  ASSERT(next_mapping == NULL || next_mapping->level >= attach);
+  SIM_ASSERT(next_mapping == NULL || next_mapping->level >= attach);
   if (next_mapping != NULL && next_mapping->level == attach
       && next_mapping->base < (addr + (nr_bytes - 1))) {
 #if (WITH_DEVICES)
     device_error(client, "map overlap when attaching %d:0x%lx (%ld)",
 		 space, (long)addr, (long)nr_bytes);
 #else
-    engine_error(system, "map overlap when attaching %d:0x%lx (%ld)",
+    sim_io_error (sd, "map overlap when attaching %d:0x%lx (%ld)",
 		 space, (long)addr, (long)nr_bytes);
 #endif
   }
 
   /* create/insert the new mapping */
-  *last_mapping = new_core_mapping(system,
+  *last_mapping = new_sim_core_mapping(sd,
 				   attach,
 				   space, addr, nr_bytes,
 				   client, buffer, free_buffer);
@@ -151,7 +177,7 @@ core_map_attach(engine *system,
 
 INLINE_SIM_CORE\
 (void)
-core_attach(engine *system,
+sim_core_attach(SIM_DESC sd,
 	    attach_type attach,
 	    access_type access,
 	    int space,
@@ -160,8 +186,8 @@ core_attach(engine *system,
 	    device *client,
 	    void *optional_buffer)
 {
-  core *memory = &system->memory;
-  core_maps map;
+  sim_core *memory = &sd->core;
+  sim_core_maps map;
   void *buffer;
   int buffer_freed;
   if ((access & access_read_write_exec) == 0
@@ -169,7 +195,7 @@ core_attach(engine *system,
 #if (WITH_DEVICES)
     device_error(client, "invalid access for core attach");
 #else
-    engine_error(system, "invalid access for core attach");
+    sim_io_error (sd, "invalid access for core attach");
 #endif
   }
   /* verify the attach type */
@@ -189,44 +215,44 @@ core_attach(engine *system,
   }
   else {
 #if (WITH_DEVICES)
-    device_error(client, "core_attach - conflicting buffer and attach arguments");
+    device_error(client, "sim_core_attach - conflicting buffer and attach arguments");
 #else
-    engine_error(system, "core_attach - conflicting buffer and attach arguments");
+    sim_io_error (sd, "sim_core_attach - conflicting buffer and attach arguments");
 #endif
     buffer = NULL;
     buffer_freed = 1;
   }
   /* attach the region to all applicable access maps */
   for (map = 0; 
-       map < nr_core_maps;
+       map < nr_sim_core_maps;
        map++) {
     switch (map) {
-    case core_read_map:
+    case sim_core_read_map:
       if (access & access_read)
-	core_map_attach(system, &memory->map[map],
+	sim_core_map_attach(sd, &memory->map[map],
 			attach,
 			space, addr, nr_bytes,
 			client, buffer, !buffer_freed);
       buffer_freed ++;
       break;
-    case core_write_map:
+    case sim_core_write_map:
       if (access & access_write)
-	core_map_attach(system, &memory->map[map],
+	sim_core_map_attach(sd, &memory->map[map],
 			attach,
 			space, addr, nr_bytes,
 			client, buffer, !buffer_freed);
       buffer_freed ++;
       break;
-    case core_execute_map:
+    case sim_core_execute_map:
       if (access & access_exec)
-	core_map_attach(system, &memory->map[map],
+	sim_core_map_attach(sd, &memory->map[map],
 			attach,
 			space, addr, nr_bytes,
 			client, buffer, !buffer_freed);
       buffer_freed ++;
       break;
-    case nr_core_maps:
-      engine_error(system, "core_attach - internal error - bad switch");
+    case nr_sim_core_maps:
+      sim_io_error (sd, "sim_core_attach - internal error - bad switch");
       break;
     }
   }
@@ -234,16 +260,16 @@ core_attach(engine *system,
 
 
 STATIC_INLINE_SIM_CORE\
-(core_mapping *)
-core_map_find_mapping(engine *system,
-		      core_maps map,
+(sim_core_mapping *)
+sim_core_find_mapping(SIM_DESC sd,
+		      sim_core_maps map,
 		      unsigned_word addr,
 		      unsigned nr_bytes,
 		      int abort) /*either 0 or 1 - helps inline */
 {
-  core_mapping *mapping = system->memory.map[map].first;
-  ASSERT((addr & (nr_bytes - 1)) == 0); /* must be aligned */
-  ASSERT((addr + (nr_bytes - 1)) >= addr); /* must not wrap */
+  sim_core_mapping *mapping = sd->core.map[map].first;
+  SIM_ASSERT((addr & (nr_bytes - 1)) == 0); /* must be aligned */
+  SIM_ASSERT((addr + (nr_bytes - 1)) >= addr); /* must not wrap */
   while (mapping != NULL) {
     if (addr >= mapping->base
 	&& (addr + (nr_bytes - 1)) <= mapping->bound)
@@ -251,7 +277,7 @@ core_map_find_mapping(engine *system,
     mapping = mapping->next;
   }
   if (abort)
-    engine_error(system, "access to unmaped address 0x%x (%d bytes)\n",
+    sim_io_error (sd, "access to unmaped address 0x%x (%d bytes)\n",
 		 addr, nr_bytes);
   return NULL;
 }
@@ -259,7 +285,7 @@ core_map_find_mapping(engine *system,
 
 STATIC_INLINE_SIM_CORE\
 (void *)
-core_translate(core_mapping *mapping,
+sim_core_translate(sim_core_mapping *mapping,
 	       unsigned_word addr)
 {
   return (void *)(((char *)mapping->buffer) + addr - mapping->base);
@@ -268,8 +294,8 @@ core_translate(core_mapping *mapping,
 
 INLINE_SIM_CORE\
 (unsigned)
-core_map_read_buffer(engine *system,
-		     core_maps map,
+sim_core_read_buffer(SIM_DESC sd,
+		     sim_core_maps map,
 		     void *buffer,
 		     unsigned_word addr,
 		     unsigned len)
@@ -277,8 +303,8 @@ core_map_read_buffer(engine *system,
   unsigned count = 0;
   while (count < len) {
     unsigned_word raddr = addr + count;
-    core_mapping *mapping =
-      core_map_find_mapping(system, map,
+    sim_core_mapping *mapping =
+      sim_core_find_mapping(sd, map,
 			    raddr, 1,
 			    0); /*dont-abort*/
     if (mapping == NULL)
@@ -300,7 +326,7 @@ core_map_read_buffer(engine *system,
 #endif
       {
 	((unsigned_1*)buffer)[count] =
-	  *(unsigned_1*)core_translate(mapping, raddr);
+	  *(unsigned_1*)sim_core_translate(mapping, raddr);
 	count += 1;
       }
   }
@@ -310,8 +336,8 @@ core_map_read_buffer(engine *system,
 
 INLINE_SIM_CORE\
 (unsigned)
-core_map_write_buffer(engine *system,
-		      core_maps map,
+sim_core_write_buffer(SIM_DESC sd,
+		      sim_core_maps map,
 		      const void *buffer,
 		      unsigned_word addr,
 		      unsigned len)
@@ -319,9 +345,9 @@ core_map_write_buffer(engine *system,
   unsigned count = 0;
   while (count < len) {
     unsigned_word raddr = addr + count;
-    core_mapping *mapping = core_map_find_mapping(system, map,
-						  raddr, 1,
-						  0); /*dont-abort*/
+    sim_core_mapping *mapping = sim_core_find_mapping(sd, map,
+						      raddr, 1,
+						      0); /*dont-abort*/
     if (mapping == NULL)
       break;
 #if (WITH_DEVICES)
@@ -341,7 +367,7 @@ core_map_write_buffer(engine *system,
     else
 #endif
       {
-	*(unsigned_1*)core_translate(mapping, raddr) =
+	*(unsigned_1*)sim_core_translate(mapping, raddr) =
 	  ((unsigned_1*)buffer)[count];
 	count += 1;
       }

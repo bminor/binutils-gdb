@@ -31,11 +31,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "sim-options.h"
 #include "sim-io.h"
 
-/* This is defined in sim-config.h.  */
-#ifndef MAX_NR_PROCESSORS
-#define MAX_NR_PROCESSORS 1
-#endif
-
 /* Add a set of options to the simulator.
    TABLE is an array of OPTIONS terminated by a NULL `opt.name' entry.
    This is intended to be called by modules in their `install' handler.  */
@@ -83,19 +78,6 @@ static DECLARE_OPTION_HANDLER (standard_option_handler);
 
 #define OPTION_DEBUG_INSN	(OPTION_START + 0)
 #define OPTION_DEBUG_FILE	(OPTION_START + 1)
-#define OPTION_TRACE_INSN	(OPTION_START + 2)
-#define OPTION_TRACE_DECODE	(OPTION_START + 3)
-#define OPTION_TRACE_EXTRACT	(OPTION_START + 4)
-#define OPTION_TRACE_LINENUM	(OPTION_START + 5)
-#define OPTION_TRACE_MEMORY	(OPTION_START + 6)
-#define OPTION_TRACE_MODEL	(OPTION_START + 7)
-#define OPTION_TRACE_ALU	(OPTION_START + 8)
-#define OPTION_TRACE_FILE	(OPTION_START + 9)
-#define OPTION_PROFILE_INSN	(OPTION_START + 10)
-#define OPTION_PROFILE_MEMORY	(OPTION_START + 11)
-#define OPTION_PROFILE_MODEL	(OPTION_START + 12)
-#define OPTION_PROFILE_SIMCACHE	(OPTION_START + 13)
-#define OPTION_PROFILE_FILE	(OPTION_START + 14)
 
 static const OPTION standard_options[] =
 {
@@ -119,43 +101,9 @@ static const OPTION standard_options[] =
       '\0', "FILE NAME", "Specify debugging output file",
       standard_option_handler },
 
-  { {"trace", no_argument, NULL, 't'},
-      't', NULL, "Perform tracing",
-      standard_option_handler },
-  { {"trace-insn", no_argument, NULL, OPTION_TRACE_INSN},
-      '\0', NULL, "Perform instruction tracing",
-      standard_option_handler },
-  { {"trace-decode", no_argument, NULL, OPTION_TRACE_DECODE},
-      '\0', NULL, "Perform instruction decoding tracing",
-      standard_option_handler },
-  { {"trace-extract", no_argument, NULL, OPTION_TRACE_EXTRACT},
-      '\0', NULL, "Perform instruction extraction tracing",
-      standard_option_handler },
-  { {"trace-linenum", no_argument, NULL, OPTION_TRACE_LINENUM},
-      '\0', NULL, "Perform line number tracing",
-      standard_option_handler },
-  { {"trace-memory", no_argument, NULL, OPTION_TRACE_MEMORY},
-      '\0', NULL, "Perform memory tracing",
-      standard_option_handler },
-  { {"trace-model", no_argument, NULL, OPTION_TRACE_MODEL},
-      '\0', NULL, "Perform model tracing",
-      standard_option_handler },
-  { {"trace-alu", no_argument, NULL, OPTION_TRACE_ALU},
-      '\0', NULL, "Perform ALU tracing",
-      standard_option_handler },
-  { {"trace-file", required_argument, NULL, OPTION_TRACE_FILE},
-      '\0', "FILE NAME", "Specify tracing output file",
-      standard_option_handler },
-
 #ifdef SIM_H8300 /* FIXME: Should be movable to h8300 dir.  */
   { {"h8300h", no_argument, NULL, 'h'},
       'h', NULL, "Indicate the CPU is h8/300h or h8/300s",
-      standard_option_handler },
-#endif
-
-#ifdef SIM_HAVE_SIMCACHE
-  { {"simcache-size", required_argument, NULL, 'c'},
-      'c', "SIM CACHE SIZE", "Specify size of simulator execution cache",
       standard_option_handler },
 #endif
 
@@ -164,41 +112,6 @@ static const OPTION standard_options[] =
       'm', "MEMORY SIZE", "Specify memory size",
       standard_option_handler },
 #endif
-
-#ifdef SIM_HAVE_MAX_INSNS
-  { {"max-insns", required_argument, NULL, 'M'},
-      'M', "MAX INSNS", "Specify maximum number of instructions to execute",
-      standard_option_handler },
-#endif
-
-#ifdef SIM_HAVE_PROFILE
-  { {"profile", no_argument, NULL, 'p'},
-      'p', NULL, "Perform profiling",
-      standard_option_handler },
-  { {"profile-insn", no_argument, NULL, OPTION_PROFILE_INSN},
-      '\0', NULL, "Perform instruction profiling",
-      standard_option_handler },
-  { {"profile-memory", no_argument, NULL, OPTION_PROFILE_MEMORY},
-      '\0', NULL, "Perform memory profiling",
-      standard_option_handler },
-  { {"profile-model", no_argument, NULL, OPTION_PROFILE_MODEL},
-      '\0', NULL, "Perform model profiling",
-      standard_option_handler },
-  { {"profile-simcache", no_argument, NULL, OPTION_PROFILE_SIMCACHE},
-      '\0', NULL, "Perform simulator execution cache profiling",
-      standard_option_handler },
-  { {"profile-file", required_argument, NULL, OPTION_PROFILE_FILE},
-      '\0', "FILE NAME", "Specify profile output file",
-      standard_option_handler },
-#ifdef SIM_HAVE_PROFILE_PC
-  { {"profile-pc-frequency", required_argument, NULL, 'F'},
-      'F', "PC PROFILE FREQUENCY", "Turn on PC profiling at specified frequency",
-      standard_option_handler },
-  { {"profile-pc-size", required_argument, NULL, 'S'},
-      'S', "PC PROFILE SIZE", "Specify PC profiling size",
-      standard_option_handler },
-#endif
-#endif /* SIM_HAVE_PROFILE */
 
   { {"help", no_argument, NULL, 'H'},
       'H', NULL, "Print help information",
@@ -288,119 +201,9 @@ standard_option_handler (sd, opt, arg)
 	}
       break;
 
-    case 't' :
-      if (! WITH_TRACE)
-	sim_io_eprintf (sd, "Tracing not compiled in, `-t' ignored\n");
-      else
-	{
-	  for (n = 0; n < MAX_NR_PROCESSORS; ++n)
-	    for (i = 0; i < MAX_TRACE_VALUES; ++i)
-	      CPU_TRACE_FLAGS (STATE_CPU (sd, n))[i] = 1;
-	}
-      break;
-
-    case OPTION_TRACE_INSN :
-      if (! (WITH_TRACE & (1 << TRACE_INSN_IDX)))
-	sim_io_eprintf (sd, "Instruction tracing not compiled in, `--trace-insn' ignored\n");
-      else
-	{
-	  for (n = 0; n < MAX_NR_PROCESSORS; ++n)
-	    CPU_TRACE_FLAGS (STATE_CPU (sd, n))[TRACE_INSN_IDX] = 1;
-	}
-      break;
-
-    case OPTION_TRACE_DECODE :
-      if (! (WITH_TRACE & (1 << TRACE_DECODE_IDX)))
-	sim_io_eprintf (sd, "Decode tracing not compiled in, `--trace-decode' ignored\n");
-      else
-	{
-	  for (n = 0; n < MAX_NR_PROCESSORS; ++n)
-	    CPU_TRACE_FLAGS (STATE_CPU (sd, n))[TRACE_DECODE_IDX] = 1;
-	}
-      break;
-
-    case OPTION_TRACE_EXTRACT :
-      if (! (WITH_TRACE & (1 << TRACE_EXTRACT_IDX)))
-	sim_io_eprintf (sd, "Extract tracing not compiled in, `--trace-extract' ignored\n");
-      else
-	{
-	  for (n = 0; n < MAX_NR_PROCESSORS; ++n)
-	    CPU_TRACE_FLAGS (STATE_CPU (sd, n))[TRACE_EXTRACT_IDX] = 1;
-	}
-      break;
-
-    case OPTION_TRACE_LINENUM :
-      if (! (WITH_TRACE & (1 << TRACE_LINENUM_IDX)))
-	sim_io_eprintf (sd, "Line number tracing not compiled in, `--trace-linenum' ignored\n");
-      else
-	{
-	  for (n = 0; n < MAX_NR_PROCESSORS; ++n)
-	    CPU_TRACE_FLAGS (STATE_CPU (sd, n))[TRACE_LINENUM_IDX] = 1;
-	}
-      break;
-
-    case OPTION_TRACE_MEMORY :
-      if (! (WITH_TRACE & (1 << TRACE_MEMORY_IDX)))
-	sim_io_eprintf (sd, "Memory tracing not compiled in, `--trace-memory' ignored\n");
-      else
-	{
-	  for (n = 0; n < MAX_NR_PROCESSORS; ++n)
-	    CPU_TRACE_FLAGS (STATE_CPU (sd, n))[TRACE_MEMORY_IDX] = 1;
-	}
-      break;
-
-    case OPTION_TRACE_MODEL :
-      if (! (WITH_TRACE & (1 << TRACE_MODEL_IDX)))
-	sim_io_eprintf (sd, "Model tracing not compiled in, `--trace-model' ignored\n");
-      else
-	{
-	  for (n = 0; n < MAX_NR_PROCESSORS; ++n)
-	    CPU_TRACE_FLAGS (STATE_CPU (sd, n))[TRACE_MODEL_IDX] = 1;
-	}
-      break;
-
-    case OPTION_TRACE_ALU :
-      if (! (WITH_TRACE & (1 << TRACE_ALU_IDX)))
-	sim_io_eprintf (sd, "ALU tracing not compiled in, `--trace-alu' ignored\n");
-      else
-	{
-	  for (n = 0; n < MAX_NR_PROCESSORS; ++n)
-	    CPU_TRACE_FLAGS (STATE_CPU (sd, n))[TRACE_ALU_IDX] = 1;
-	}
-      break;
-
-    case OPTION_TRACE_FILE :
-      if (! WITH_TRACE)
-	sim_io_eprintf (sd, "Tracing not compiled in, `--trace-file' ignored\n");
-      else
-	{
-	  FILE *f = fopen (arg, "w");
-
-	  if (f == NULL)
-	    {
-	      sim_io_eprintf (sd, "Unable to open trace output file `%s'\n", arg);
-	      return SIM_RC_FAIL;
-	    }
-	  for (n = 0; n < MAX_NR_PROCESSORS; ++n)
-	    CPU_TRACE_FILE (STATE_CPU (sd, n)) = f;
-	}
-      break;
-
 #ifdef SIM_H8300 /* FIXME: Can be moved to h8300 dir.  */
     case 'h' :
       set_h8300h (1);
-      break;
-#endif
-
-#ifdef SIM_HAVE_SIMCACHE
-    case 'c':
-      n = strtol (arg, NULL, 0);
-      if (n <= 0)
-	{
-	  sim_io_eprintf (sd, "Invalid simulator cache size: %d", n);
-	  return SIM_RC_FAIL;
-	}
-      STATE_SIMCACHE_SIZE (sd) = n;
       break;
 #endif
 
@@ -417,101 +220,6 @@ standard_option_handler (sd, opt, arg)
       break;
 #endif
 
-#ifdef SIM_HAVE_MAX_INSNS
-    case 'M' :
-      ul = strtoul (arg, NULL, 0);
-      if (! isdigit (arg[0]))
-	{
-	  sim_io_eprintf (sd, "Invalid maximum instruction count: `%s'", arg);
-	  return SIM_RC_FAIL;
-	}
-      STATE_MAX_INSNS (sd) = ul;
-      break;
-#endif
-
-#ifdef SIM_HAVE_PROFILE
-    case 'p' :
-      if (! WITH_PROFILE)
-	sim_io_eprintf (sd, "Profile not compiled in, -p option ignored\n");
-      else
-	{
-	  for (n = 0; n < MAX_NR_PROCESSORS; ++n)
-	    for (i = 0; i < MAX_PROFILE_VALUES; ++i)
-	      CPU_PROFILE_FLAGS (STATE_CPU (sd, n))[i] = 1;
-	}
-      break;
-
-    case OPTION_PROFILE_INSN :
-      if (! (WITH_PROFILE & (1 << PROFILE_INSN_IDX)))
-	sim_io_eprintf (sd, "Instruction profiling not compiled in, `--profile-insn' ignored\n");
-      else
-	{
-	  for (n = 0; n < MAX_NR_PROCESSORS; ++n)
-	    CPU_PROFILE_FLAGS (STATE_CPU (sd, n))[PROFILE_INSN_IDX] = 1;
-	}
-      break;
-
-    case OPTION_PROFILE_MEMORY :
-      if (! (WITH_PROFILE & (1 << PROFILE_MEMORY_IDX)))
-	sim_io_eprintf (sd, "Memory profiling not compiled in, `--profile-memory' ignored\n");
-      else
-	{
-	  for (n = 0; n < MAX_NR_PROCESSORS; ++n)
-	    CPU_PROFILE_FLAGS (STATE_CPU (sd, n))[PROFILE_MEMORY_IDX] = 1;
-	}
-      break;
-
-    case OPTION_PROFILE_MODEL :
-      if (! (WITH_PROFILE & (1 << PROFILE_MODEL_IDX)))
-	sim_io_eprintf (sd, "Model profiling not compiled in, `--profile-model' ignored\n");
-      else
-	{
-	  for (n = 0; n < MAX_NR_PROCESSORS; ++n)
-	    CPU_PROFILE_FLAGS (STATE_CPU (sd, n))[PROFILE_MODEL_IDX] = 1;
-	}
-      break;
-
-    case OPTION_PROFILE_SIMCACHE :
-      if (! (WITH_PROFILE & (1 << PROFILE_SIMCACHE_IDX)))
-	sim_io_eprintf (sd, "Simulator cache profiling not compiled in, `--profile-simcache' ignored\n");
-      else
-	{
-	  for (n = 0; n < MAX_NR_PROCESSORS; ++n)
-	    CPU_PROFILE_FLAGS (STATE_CPU (sd, n))[PROFILE_SIMCACHE_IDX] = 1;
-	}
-      break;
-
-    case OPTION_PROFILE_FILE :
-      /* FIXME: Might want this to apply to pc profiling only,
-	 or have two profile file options.  */
-      if (! WITH_PROFILE)
-	sim_io_eprintf (sd, "Profiling not compiled in, `--profile-file' ignored\n");
-      else
-	{
-	  FILE *f = fopen (arg, "w");
-
-	  if (f == NULL)
-	    {
-	      sim_io_eprintf (sd, "Unable to open profile output file `%s'\n", arg);
-	      return SIM_RC_FAIL;
-	    }
-	  for (n = 0; n < MAX_NR_PROCESSORS; ++n)
-	    CPU_PROFILE_FILE (STATE_CPU (sd, n)) = f;
-	}
-      break;
-
-#ifdef SIM_HAVE_PROFILE_PC
-    case 'F' :
-      STATE_PROFILE_PC_FREQUENCY (sd) = atoi (arg);
-      /* FIXME: Validate arg.  */
-      break;
-    case 'S' :
-      STATE_PROFILE_PC_SIZE (sd) = atoi (arg);
-      /* FIXME: Validate arg.  */
-      break;
-#endif
-#endif /* SIM_HAVE_PROFILE */
-
     case 'H':
       sim_print_help (sd);
       if (STATE_OPEN_KIND (sd) == SIM_OPEN_STANDALONE)
@@ -523,21 +231,13 @@ standard_option_handler (sd, opt, arg)
   return SIM_RC_OK;
 }
 
-/* Initialize common parts before argument processing.
-   Called by sim_open.  */
+/* Add the standard option list to the simulator.  */
 
 SIM_RC
-sim_pre_argv_init (sd, myname)
-     SIM_DESC sd;
-     const char *myname;
+standard_install (SIM_DESC sd)
 {
-  STATE_MY_NAME (sd) = myname + strlen (myname);
-  while (STATE_MY_NAME (sd) > myname && STATE_MY_NAME (sd)[-1] != '/')
-    --STATE_MY_NAME (sd);
-
   if (sim_add_option_table (sd, standard_options) != SIM_RC_OK)
     return SIM_RC_FAIL;
-
   return SIM_RC_OK;
 }
 

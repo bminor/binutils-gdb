@@ -71,7 +71,6 @@ SIM_DEBUG = @sim_debug@
 SIM_TRACE = @sim_trace@
 SIM_PROFILE = @sim_profile@
 
-
 HDEFINES = @HDEFINES@
 TDEFINES =
 
@@ -177,8 +176,8 @@ sim_main_headers = \
 	$(srcdir)/../common/sim-config.h \
 	$(srcdir)/../common/sim-base.h \
 	$(srcdir)/../common/sim-basics.h \
-	$(srcdir)/../common/sim-module.h \
 	$(srcdir)/../common/sim-model.h \
+	$(srcdir)/../common/sim-module.h \
 	$(srcdir)/../common/sim-trace.h \
 	$(srcdir)/../common/sim-profile.h \
 	tconfig.h
@@ -193,10 +192,10 @@ sim-core_h = $(srcdir)/../common/sim-core.h
 sim-n-core_h = $(srcdir)/../common/sim-n-core.h
 sim-events_h = $(srcdir)/../common/sim-events.h
 sim-io_h = $(srcdir)/../common/sim-io.h
-sim-n-io_h = $(srcdir)/../common/sim-n-io.h
+sim-options_h = $(srcdir)/../common/sim-options.h
 
 # FIXME: If this complicated way of building .o files from ../common is
-# necessary, the reason should be documented here!
+# necessary, the reason should be documented here.
 
 BUILT_SRC_FROM_COMMON= \
 	sim-endian.c \
@@ -262,23 +261,27 @@ sim-io.c: $(srcdir)/../common/sim-io.c
 	$(srcdir)/../../move-if-change tmp-$@ $@
 
 sim-module.o: $(srcdir)/../common/sim-module.c $(sim_main_headers) \
-	  $(srcdir)/../common/sim-io.h
+	  $(sim-io_h) $(SIM_EXTRA_DEPS)
 	$(CC) -c $(srcdir)/../common/sim-module.c $(ALL_CFLAGS)
 
 sim-options.o: $(srcdir)/../common/sim-options.c $(sim_main_headers) \
-	  $(srcdir)/../common/sim-options.h
+	  $(sim-options_h) $(sim-io_h) $(SIM_EXTRA_DEPS)
 	$(CC) -c $(srcdir)/../common/sim-options.c $(ALL_CFLAGS)
 
 sim-trace.o: $(srcdir)/../common/sim-trace.c $(sim_main_headers) \
-	  $(srcdir)/../common/sim-io.h
+	  $(sim-options_h) $(sim-io_h) $(SIM_EXTRA_DEPS)
 	$(CC) -c $(srcdir)/../common/sim-trace.c $(ALL_CFLAGS)
 
 sim-profile.o: $(srcdir)/../common/sim-profile.c $(sim_main_headers) \
-	  $(srcdir)/../common/sim-io.h
+	  $(sim-options_h) $(sim-io_h) $(SIM_EXTRA_DEPS)
 	$(CC) -c $(srcdir)/../common/sim-profile.c $(ALL_CFLAGS)
 
+sim-model.o: $(srcdir)/../common/sim-model.c $(sim_main_headers) \
+	  $(sim-io_h) $(SIM_EXTRA_DEPS)
+	$(CC) -c $(srcdir)/../common/sim-model.c $(ALL_CFLAGS)
+
 sim-utils.o: $(srcdir)/../common/sim-utils.c $(sim_main_headers) \
-	$(SIM_EXTRA_DEPS)
+	  $(SIM_EXTRA_DEPS)
 	$(CC) -c $(srcdir)/../common/sim-utils.c $(ALL_CFLAGS)
 
 sim-load.o: $(srcdir)/../common/sim-load.c
@@ -287,6 +290,23 @@ sim-load.o: $(srcdir)/../common/sim-load.c
 nrun.o: $(srcdir)/../common/nrun.c config.h tconfig.h \
 	  $(srcroot)/include/callback.h $(sim_main_headers)
 	$(CC) -c $(srcdir)/../common/nrun.c $(ALL_CFLAGS)
+
+# CGEN support.
+
+cgen-scache.o: $(srcdir)/../common/cgen-scache.c $(sim_main_headers) \
+	  $(SIM_EXTRA_DEPS) $(srcdir)/../common/cgen-scache.h
+	$(CC) -c $(srcdir)/../common/cgen-scache.c $(ALL_CFLAGS)
+
+cgen-trace.o: $(srcdir)/../common/cgen-trace.c $(sim_main_headers) \
+	  $(SIM_EXTRA_DEPS) $(srcdir)/../common/cgen-trace.h
+	$(CC) -c $(srcdir)/../common/cgen-trace.c $(ALL_CFLAGS)
+
+cgen-utils.o: $(srcdir)/../common/cgen-utils.c $(sim_main_headers) \
+	  $(SIM_EXTRA_DEPS) $(srcdir)/../common/cgen-mem.h \
+	  $(srcdir)/../common/cgen-sem.h
+	$(CC) -c $(srcdir)/../common/cgen-utils.c $(ALL_CFLAGS)
+
+# Support targets.
 
 install: install-common $(SIM_EXTRA_INSTALL)
 

@@ -57,7 +57,7 @@ extern struct sim_state *current_state;
    for a single processor or
 
    struct sim_state {
-     sim_cpu cpu[MAX_CPUS]; -- could be also be array of pointers
+     sim_cpu cpu[MAX_NR_PROCESSORS]; -- could be also be array of pointers
    #define STATE_CPU(sd,n) (&(sd)->cpu[n])
      ... simulator specific members ...
      sim_state_base base;
@@ -94,6 +94,18 @@ typedef struct {
 #define STATE_CONFIG(sd) ((sd)->base.config)
 #endif
 
+  /* List of installed module `init' handlers.  */
+  MODULE_INIT_LIST *init_list;
+#define STATE_INIT_LIST(sd) ((sd)->base.init_list)
+  /* List of installed module `uninstall' handlers.  */
+  MODULE_UNINSTALL_LIST *uninstall_list;
+#define STATE_UNINSTALL_LIST(sd) ((sd)->base.uninstall_list)
+
+  /* ??? This might be more appropriate in sim_cpu.  */
+  /* Machine tables for this cpu.  See sim-model.h.  */
+  const MODEL *model;
+#define STATE_MODEL(sd) ((sd)->base.model)
+
   /* Supported options.  */
   struct option_list *options;
 #define STATE_OPTIONS(sd) ((sd)->base.options)
@@ -123,11 +135,13 @@ typedef struct {
   SIM_ADDR start_addr;
 #define STATE_START_ADDR(sd) ((sd)->base.start_addr)
 
+#if WITH_SCACHE
   /* Size of the simulator's cache, if any.
      This is not the target's cache.  It is the cache the simulator uses
      to process instructions.  */
-  unsigned int simcache_size;
-#define STATE_SIMCACHE_SIZE(sd) ((sd)->base.simcache_size)
+  unsigned int scache_size;
+#define STATE_SCACHE_SIZE(sd) ((sd)->base.scache_size)
+#endif
 
   /* FIXME: Move to top level sim_state struct (as some struct)?  */
 #ifdef SIM_HAVE_FLATMEM
@@ -149,34 +163,12 @@ typedef struct {
 
 typedef struct {
   /* Backlink to main state struct.  */
-  SIM_DESC sd;
-#define CPU_STATE(cpu) ((cpu)->base.sd)
+  SIM_DESC state;
+#define CPU_STATE(cpu) ((cpu)->base.state)
 
-  /* Maximum number of traceable entities.  */
-#ifndef MAX_TRACE_VALUES
-#define MAX_TRACE_VALUES 12
-#endif
-
-  /* Boolean array of specified tracing flags.  */
-  /* ??? It's not clear that using an array vs a bit mask is faster.
-     Consider the case where one wants to test whether any of several bits
-     are set.  */
-  char trace_flags[MAX_TRACE_VALUES];
-#define CPU_TRACE_FLAGS(cpu) ((cpu)->base.trace_flags)
-  /* Standard values.  */
-#define TRACE_INSN_IDX 0
-#define TRACE_DECODE_IDX 1
-#define TRACE_EXTRACT_IDX 2
-#define TRACE_LINENUM_IDX 3
-#define TRACE_MEMORY_IDX 4
-#define TRACE_MODEL_IDX 5
-#define TRACE_ALU_IDX 6
-#define TRACE_NEXT_IDX 8 /* simulator specific trace bits begin here */
-
-  /* Tracing output goes to this or stdout if NULL.
-     We can't store `stdout' here as stdout goes through a callback.  */
-  FILE *trace_file;
-#define CPU_TRACE_FILE(cpu) ((cpu)->base.trace_file)
+  /* Trace data.  See sim-trace.h.  */
+  TRACE_DATA trace_data;
+#define CPU_TRACE_DATA(cpu) (& (cpu)->base.trace_data)
 
   /* Maximum number of debuggable entities.
      This debugging is not intended for normal use.
@@ -198,36 +190,9 @@ typedef struct {
   FILE *debug_file;
 #define CPU_DEBUG_FILE(cpu) ((cpu)->base.debug_file)
 
-#ifdef SIM_HAVE_PROFILE
-  /* Maximum number of profilable entities.  */
-#ifndef MAX_PROFILE_VALUES
-#define MAX_PROFILE_VALUES 8
-#endif
-
-  /* Boolean array of specified profiling flags.  */
-  char profile_flags[MAX_PROFILE_VALUES];
-#define CPU_PROFILE_FLAGS(cpu) ((cpu)->base.profile_flags)
-  /* Standard masks.  */
-#define PROFILE_INSN_MASK 0
-#define PROFILE_MEMORY_MASK 1
-#define PROFILE_MODEL_MASK 2
-#define PROFILE_SIMCACHE_MASK 3
-#define PROFILE_NEXT_MASK 6 /* simulator specific profile bits begin here */
-
-  /* PC profiling attempts to determine function usage by sampling the PC
-     every so many instructions.  */
-#ifdef SIM_HAVE_PROFILE_PC
-  unsigned int profile_pc_freq;
-#define STATE_PROFILE_PC_FREQ(sd) ((sd)->base.profile_pc_freq)
-  unsigned int profile_pc_size;
-#define STATE_PROFILE_PC_SIZE(sd) ((sd)->base.profile_pc_size)
-#endif
-
-  /* Profile output goes to this or stdout if NULL.
-     We can't store `stderr' here as stdout goes through a callback.  */
-  FILE *profile_file;
-#define CPU_PROFILE_FILE(cpu) ((cpu)->base.profile_file)
-#endif /* SIM_HAVE_PROFILE */
+  /* Profile data.  See sim-profile.h.  */
+  PROFILE_DATA profile_data;
+#define CPU_PROFILE_DATA(cpu) (& (cpu)->base.profile_data)
 } sim_cpu_base;
 
 /* Functions for allocating/freeing a sim_state.  */

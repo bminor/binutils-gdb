@@ -156,6 +156,7 @@ cat <<EOF
 
 	  SIM_POST_EXEC_HOOK (current_cpu);
 
+	  ++insn_count;
 	  if (step)
 	    engine_halt (current_cpu, EXEC_STATE_STOPPED, SIM_SIGTRAP);
 	}

@@ -1,3 +1,49 @@
+Thu May  1 10:40:47 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* Makefile.in (sim-options_h): Define.
+	(sim-{module,options,trace,profile,utils}.o): Clean up dependencies.
+	(sim-model.o): Add new rule.
+	(cgen-{scache,trace,utils}.o): Add new rules.
+	* aclocal.m4 (SIM_AC_OPTION_{SCACHE,DEFAULT_MODEL}): Add.
+	* cgen-scache.c (scache_print_profile): Change `sd' arg to `cpu'.
+	Indent output by 2 spaces.
+	* cgen-scache.h (scache_print_profile): Update.
+	* cgen-trace.c (trace_insn_fini): Indent output by 2 spaces.
+	Use trace_printf, not fprintf.
+	(trace_extract): Use trace_printf, not cgen_trace_printf.
+	* genmloop.sh (!FAST case): Increment `insn_count'.
+	* sim-base.h (sim_state_base): Only include scache_size if WITH_SCACHE.
+	(sim_cpu_base): Rename member `sd' to `state' to be consistent with
+	access macro's name.
+	* sim-core.c (sim_core_init): Use EXTERN_SIM_CORE to define it.
+	Change return type to SIM_RC.
+	(sim_core_{install,uninstall}): New functions.
+	* sim-core.h (sim_core_{install,uninstall}): Declare.
+	(sim_core_init): Use EXTERN_SIM_CORE to define it.
+	Change return type to SIM_RC.
+	* sim-model.h (models,machs,model_install): Declare.
+	* sim-module.c (modules): Add scache_install, model_install.
+	(sim_post_argv_init): Set cpu->state backlinks.
+	* sim-options.c (standard_options): Delete --simcache-size,--max-insns.
+	(standard_option_handler): Likewise.
+	* sim-profile.c (PROFILE_{HISTOGRAM,LABEL}_WIDTH): Move to
+	sim-profile.h.
+	(*): Assume ANSI C.
+	(profile_options): Delete --profile-simcache.
+	(profile_option_handler): Likewise.
+	(profile_print_insn): Change `sd' arg to `cpu'.  Indent output 2
+	spaces.
+	(profile_print_{memory,model}): Likewise.
+	(profile_print_simcache): Delete.
+	(profile_print_speed): New function.
+	(profile_print): Rewrite.
+	* sim-profile.h (PROFILE_scache): Renamed from PROFILE_simcache.
+	(WITH_PROFILE_SCACHE_P): Renamed from WITH_PROFILE_SIMCACHE_P.
+	(PROFILE_DATA): Delete members simcache_{hits,misses}.
+	(PROFILE_COUNT_SIMCACHE_{HIT,MISS}): Delete.
+	(PROFILE_{CALLBACK,CPU_CALLBACK}): New types.
+	(profile_print): Update prototype.
+
 Wed Apr 30 11:34:14 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* cgen-mem.h, cgen-scache.[ch], cgen-sem.h, cgen-sim.h: New files.
