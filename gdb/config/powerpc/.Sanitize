@@ -29,12 +29,16 @@ gdbserve.mt
 nm-aix.h
 ppc-eabi.mt
 ppc-nw.mt
+ppc-sim.mt
 ppcle-eabi.mt
+ppcle-sim.mt
 tm-ppc-aix.h
 tm-ppc-aix4.h
 tm-ppc-eabi.h
 tm-ppc-nw.h
+tm-ppc-sim.h
 tm-ppcle-eabi.h
+tm-ppcle-sim.h
 xm-aix.h
 
 Things-to-lose:

@@ -381,7 +381,9 @@ powerpc-*-netware*)	gdb_target=ppc-nw
 
 powerpc-*-aix4*)	gdb_target=aix4 ;;
 powerpc-*-aix*)		gdb_target=aix ;;
+powerpc-*-eabisim*)	gdb_target=ppc-sim ;;
 powerpc-*-eabi*)	gdb_target=ppc-eabi ;;
+powerpcle-*-eabisim*)	gdb_target=ppcle-sim ;;
 powerpcle-*-eabi*)	gdb_target=ppcle-eabi ;;
 
 pyramid-*-*)		gdb_target=pyramid ;;

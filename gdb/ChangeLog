@@ -1,3 +1,12 @@
+Fri Aug 25 11:31:29 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure.in (powerpc*-*-eabisim*): Only link in the simulator
+	if the target is powerpc{,le}-*-eabisim*, since the simulator
+	needs GCC to build.
+	* config/powerpc/ppc{,le}-sim.mt: Cloned from ppc{,le}-eabi.mt.
+	* config/powerpc/ppc{,le}-eabi.mt: Remove simulator support.
+	* config/powerpc/tm-ppc{,le}-sim.mt: Include tm-ppc{,le}-sim.h.
+
 Wed Aug 23 16:55:35 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/powerpc/ppc{,le}-eabi.mt (SIM_OBJS, SIM): Link in the
