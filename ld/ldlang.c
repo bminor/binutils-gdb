@@ -1274,7 +1274,8 @@ section_already_linked (bfd *abfd, asection *sec, void *data)
       return;
     }
 
-  bfd_section_already_linked (abfd, sec);
+  if (!(abfd->flags & DYNAMIC))
+    bfd_section_already_linked (abfd, sec);
 }
 
 /* The wild routines.
