@@ -1,3 +1,8 @@
+Sat Aug  5 09:51:49 1995  Fred Fish  <fnf@rtl.cygnus.com>
+
+	* Makefile.in (GDBTK_SUPPORT_DIRS):  Define and pass as part of
+	SUPPORT_FILES to submakes.
+
 Fri Aug  4 13:04:36 1995  Fred Fish  <fnf@cygnus.com>
 
 	* Makefile.in (GDB_SUPPORT_DIRS): Add utils.
