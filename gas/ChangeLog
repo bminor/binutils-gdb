@@ -1,3 +1,7 @@
+2001-12-03  Eric Christopher  <echristo@redhat.com>
+
+	* config/tc-mips.c (tc_gen_reloc): One missed BFD_RELOC_MIPS_GPREL.
+
 2001-12-02  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* config/tc-mips.c (macro_build): Replace BFD_RELOC_MIPS_GPREL
@@ -140,7 +144,7 @@
 	offset.   Add comments to that effect.
 	* config/tc-tic54x.c: Fix bugs causing tests to fail.
 	* config/tc-tic54x.h: Ditch PARAMS macro.
-	
+
 2001-11-13  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/obj-elf.c (obj_elf_version): Ensure terminating NUL is
