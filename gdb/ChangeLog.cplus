@@ -1,3 +1,10 @@
+2004-01-11  Daniel Jacobowitz  <drow@mvista.com>
+
+	* cp-names.y (orig_lexptr): New variable.
+	(exp1): New production for parenthesized references.
+	(yyerror): Print out complete string on parse error.
+	(demangled_name_to_comp, main): Set orig_lexptr.
+
 2003-01-04  Daniel Jacobowitz  <drow@mvista.com>
 
 	* Makefile.in (cp_names_h): Remove.

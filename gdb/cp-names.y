@@ -43,7 +43,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define IN_GDB
 #include "cp-demangle.h"
 
-static const char *lexptr, *prev_lexptr;
+static const char *lexptr, *prev_lexptr, *orig_lexptr;
 
 static struct d_comp *d_qualify (struct d_comp *, int, int);
 
@@ -932,6 +932,13 @@ exp1	:	exp
 
 exp1	:	exp '>' exp
 		{ $$ = d_binary (">", $1, $3); }
+	;
+
+/* References.  Not allowed everywhere in template parameters, only
+   at the top level, but treat them as expressions in case they are wrapped
+   in parentheses.  */
+exp1	:	'&' start
+		{ $$ = cp_v3_d_make_comp (di, D_COMP_UNARY, cp_v3_d_make_operator_from_string (di, "&"), $2); }
 	;
 
 /* Expressions, not including the comma operator.  */
@@ -1989,6 +1996,7 @@ yyerror (msg)
   if (prev_lexptr)
     lexptr = prev_lexptr;
 
+  printf ("Orig expression: %s\n", orig_lexptr);
   error ("A %s in expression, near `%s'.\n", (msg ? msg : "error"), lexptr);
 }
 
@@ -2043,7 +2051,7 @@ demangled_name_to_comp (const char *demangled_name, struct d_info **di_p)
   int len = strlen (demangled_name);
 
   len = len + len / 8;
-  lexptr = demangled_name;
+  orig_lexptr = lexptr = demangled_name;
 
   di = cp_v3_d_init_info_alloc (NULL, DMGL_PARAMS | DMGL_ANSI, len);
 
@@ -2155,7 +2163,7 @@ main (int argc, char **argv)
 	/* Use DMGL_VERBOSE to get expanded standard substitutions.  */
 	c = trim_chars (buf, &extra_chars);
 	str2 = cplus_demangle (buf, DMGL_PARAMS | DMGL_ANSI | DMGL_VERBOSE);
-	lexptr = str2;
+	orig_lexptr = lexptr = str2;
 	if (lexptr == NULL)
 	  {
 	    /* printf ("Demangling error\n"); */
@@ -2182,7 +2190,7 @@ main (int argc, char **argv)
   else
     {
       int len;
-      lexptr = argv[arg];
+      orig_lexptr = lexptr = argv[arg];
       len = strlen (lexptr);
       di = cp_v3_d_init_info_alloc (NULL, DMGL_PARAMS | DMGL_ANSI, len);
       if (yyparse () || result == NULL)
