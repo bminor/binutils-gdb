@@ -55,7 +55,8 @@ if { ([istarget "*-*-elf*"]
     run_dump_test "section0" 
     run_dump_test "section1" 
     run_list_test "section2" "$target_machine" "-al" ""
-    run_dump_test "section3" 
+    run_dump_test "section3"
+    run_dump_test "section4"
     run_dump_test "symver" 
     run_list_test "type" "" "" "| grep \"1 \\\[FONT\\\]\""
 }

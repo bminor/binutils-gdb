@@ -1,6 +1,6 @@
 /* symbols.c -symbol table-
    Copyright 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003
+   1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -2260,7 +2260,16 @@ symbol_set_bfdsym (symbolS *s, asymbol *bsym)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     s = local_symbol_convert ((struct local_symbol *) s);
-  s->bsym = bsym;
+  /* Usually, it is harmless to reset a symbol to a BFD section
+     symbol. For example, obj_elf_change_section sets the BFD symbol
+     of an old symbol with the newly created section symbol. But when
+     we have multiple sections with the same name, the newly created
+     section may have the same name as an old section. We check if the
+     old symbol has been already marked as a section symbol before
+     resetting it.  */
+  if ((s->bsym->flags & BSF_SECTION_SYM) == 0)
+    s->bsym = bsym;
+  /* else XXX - What do we do now ?  */
 }
 
 #endif /* BFD_ASSEMBLER */

@@ -1,6 +1,6 @@
 /* subsegs.c - subsegments -
    Copyright 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2002
+   1999, 2000, 2002, 2004
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -524,7 +524,9 @@ section_symbol (segT sec)
   else
     {
       s = symbol_find_base (sec->symbol->name, 0);
-      if (s == NULL)
+      /* We have to make sure it is the right symbol when we
+	 have multiple sections with the same section name.  */
+      if (s == NULL || S_GET_SEGMENT (s) != sec)
 	s = symbol_new (sec->symbol->name, sec, 0, &zero_address_frag);
       else
 	{

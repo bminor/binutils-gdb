@@ -1,3 +1,15 @@
+2004-05-11  Nick Clifton  <nickc@redhat.com>
+
+	* doc/as.texinfo (Section): Document G and T flags to .section
+	directive.  Document the extra arguments that the G flag
+	requires.  Document the #tls flag.
+
+2004-05-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* subsegs.c (section_symbol): Create a new section symbol if
+	the existing one doesn't match.
+	* symbols.c (symbol_set_bfdsym): Don't reset BFD section symbol.
+
 2004-05-07  Richard Sandiford  <rsandifo@redhat.com>
 
 	* config/tc-mips.c (append_insn, mips_emit_delays): Extend -mfix-vr4120

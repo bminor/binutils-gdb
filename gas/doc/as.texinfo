@@ -5211,7 +5211,7 @@ This is one of the ELF section stack manipulation directives.  The others are
 For ELF targets, the @code{.section} directive is used like this:
 
 @smallexample
-.section @var{name} [, "@var{flags}"[, @@@var{type}[, @@@var{entsize}]]]
+.section @var{name} [, "@var{flags}"[, @@@var{type}[,@var{flag_specific_arguments}]]
 @end smallexample
 
 The optional @var{flags} argument is a quoted string which may contain any
@@ -5227,6 +5227,10 @@ section is executable
 section is mergeable
 @item S
 section contains zero terminated strings
+@item G
+section is a member of a section group
+@item T
+section is used for thread-local-storage
 @end table
 
 The optional @var{type} argument may contain one of the following constants:
@@ -5235,18 +5239,50 @@ The optional @var{type} argument may contain one of the following constants:
 section contains data
 @item @@nobits
 section does not contain data (i.e., section only occupies space)
+@item @@note
+section contains data which is used by things other than the program
 @end table
 
 Note on targets where the @code{@@} character is the start of a comment (eg
 ARM) then another character is used instead.  For example the ARM port uses the
 @code{%} character.
 
-If @var{flags} contains @code{M} flag, @var{type} argument must be specified
-as well as @var{entsize} argument. Sections with @code{M} flag but not
-@code{S} flag must contain fixed size constants, each @var{entsize} octets
-long. Sections with both @code{M} and @code{S} must contain zero terminated
-strings where each character is @var{entsize} bytes long. The linker may remove
-duplicates within sections with the same name, same entity size and same flags. 
+If @var{flags} contains the @code{M} symbol then the @var{type} argument must
+be specified as well as an extra argument - @var{entsize} - like this:
+
+@smallexample
+.section @var{name} , "@var{flags}"M, @@@var{type}, @var{entsize}
+@end smallexample
+
+Sections with the @code{M} flag but not @code{S} flag must contain fixed size
+constants, each @var{entsize} octets long. Sections with both @code{M} and
+@code{S} must contain zero terminated strings where each character is
+@var{entsize} bytes long. The linker may remove duplicates within sections with
+the same name, same entity size and same flags.  @var{entsize} must be an
+absolute expression.
+
+If @var{flags} contains the @code{G} symbol then the @var{type} argument must
+be present along with an additional field like this:
+
+@smallexample
+.section @var{name} , "@var{flags}"G, @@@var{type}, @var{GroupName}[, @var{linkage}]
+@end smallexample
+
+The @var{GroupName} field specifies the name of the section group to which this
+particular section belongs.  The optional linkage field can contain:
+@table @code
+@item comdat
+indicates that only one copy of this section should be retained
+@item .gnu.linkonce
+an alias for comdat
+@end table
+
+Note - if both the @var{M} and @var{G} flags are present then the fields for
+the Merge flag should come first, like this:
+
+@smallexample
+.section @var{name} , "@var{flags}"MG, @@@var{type}, @var{entsize}, @var{GroupName}[, @var{linkage}]
+@end smallexample
 
 If no flags are specified, the default flags depend upon the section name.  If
 the section name is not recognized, the default will be for the section to have
@@ -5269,6 +5305,8 @@ section is allocatable
 section is writable
 @item #execinstr
 section is executable
+@item #tls
+section is used for thread local storage
 @end table
 
 This directive replaces the current section and subsection.  The replaced
