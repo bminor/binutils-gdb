@@ -827,6 +827,10 @@ mi_gdb_test "-var-update *" \
 set line 208
 mi_execute_to "exec-step 7" "end-stepping-range" do_children_tests {} {.*var-cmd.c} $line {} "step $line"
 
+mi_gdb_test "-var-list-children --all-values struct_declarations.long_array" \
+        "\\^done,numchild=\"10\",children=\\\[child=\{name=\"struct_declarations.long_array.0\",exp=\"0\",numchild=\"0\",value=\"1234\",type=\"long int\"\},child=\{name=\"struct_declarations.long_array.1\",exp=\"1\",numchild=\"0\",value=\"2345\",type=\"long int\"\},child=\{name=\"struct_declarations.long_array.2\",exp=\"2\",numchild=\"0\",value=\"3456\",type=\"long int\"\},child=\{name=\"struct_declarations.long_array.3\",exp=\"3\",numchild=\"0\",value=\"4567\",type=\"long int\"\},child=\{name=\"struct_declarations.long_array.4\",exp=\"4\",numchild=\"0\",value=\"5678\",type=\"long int\"\},child=\{name=\"struct_declarations.long_array.5\",exp=\"5\",numchild=\"0\",value=\"6789\",type=\"long int\"\},child=\{name=\"struct_declarations.long_array.6\",exp=\"6\",numchild=\"0\",value=\"7890\",type=\"long int\"\},child=\{name=\"struct_declarations.long_array.7\",exp=\"7\",numchild=\"0\",value=\"8901\",type=\"long int\"\},child=\{name=\"struct_declarations.long_array.8\",exp=\"8\",numchild=\"0\",value=\"9012\",type=\"long int\"\},child=\{name=\"struct_declarations.long_array.9\",exp=\"9\",numchild=\"0\",value=\"1234\",type=\"long int\"\}\\\]" \
+                "listing of names and values of children"
+
 # Test: c_variable-5.8
 # Desc: check that long_array[3-9] changed
 mi_gdb_test "-var-update *" \
