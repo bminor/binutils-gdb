@@ -1,3 +1,11 @@
+2005-03-07  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.asm/alpha.inc, gdb.asm/frv.inc, gdb.asm/i386.inc,
+	gdb.asm/ia64.inc, gdb.asm/m68hc11.inc, gdb.asm/m68k.inc,
+	gdb.asm/mips.inc, gdb.asm/pa.inc, gdb.asm/powerpc.inc,
+	gdb.asm/s390.inc, gdb.asm/s390x.inc, gdb.asm/sh.inc,
+	gdb.asm/x86_64.inc: Use .purgem before redefining macros.
+
 2005-03-05  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.cp/ovldbreak.exp: Adjust regular expression for recent

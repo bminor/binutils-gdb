@@ -61,6 +61,7 @@
         .endm
 
 ### Declare an `int' variable.
+	.purgem gdbasm_datavar
         .macro gdbasm_datavar name value
         .data
 \name:
