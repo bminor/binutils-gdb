@@ -1,3 +1,13 @@
+Tue Jun  9 12:46:24 1998  Ian Carmichael  <iancarm@cygnus.com>
+
+	* mips.igen (BREAK): Moved code to here for 
+	simulator-reserved break instructions.
+	* gencode.c (build_instruction): Ditto.
+	* interp.c (signal_exception): Code moved from here.  Non-
+	reserved instructions now use exception vector, rather 
+	than halting sim.
+	* sim-main.h: Moved magic constants to here.
+
 start-sanitize-tx3904
 Tue Jun  9 12:29:50 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
