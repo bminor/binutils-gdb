@@ -1,3 +1,7 @@
+Thu Jan 13 12:33:27 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* som.c (hppa_som_reloc): Add new "error message" argument.
+
 Wed Jan 12 13:36:43 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	Enable gdb to write to core files on more core file readers.
@@ -9,6 +13,8 @@ Wed Jan 12 13:36:43 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 	Use bfd_generic_set_section_contents instead of bfd_false.
 
 Wed Jan 12 15:31:57 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* linker.c: Added initial documentation.
 
 	* linker.c (default_indirect_link_order): Don't expect space for
 	output relocations if there aren't any input relocations.

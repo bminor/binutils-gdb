@@ -149,7 +149,8 @@ static asection * som_section_from_subspace_index PARAMS ((bfd *,
 static int log2 PARAMS ((unsigned int));
 static bfd_reloc_status_type hppa_som_reloc PARAMS ((bfd *, arelent *,
 						     asymbol *, PTR,
-						     asection *, bfd *));
+						     asection *, bfd *,
+						     char **));
 static void som_initialize_reloc_queue PARAMS ((struct reloc_queue *));
 static void som_reloc_queue_insert PARAMS ((unsigned char *, unsigned int,
 					    struct reloc_queue *));
@@ -1311,13 +1312,15 @@ log2 (x)
 }
 
 static bfd_reloc_status_type
-hppa_som_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd)
+hppa_som_reloc (abfd, reloc_entry, symbol_in, data,
+		input_section, output_bfd, error_message)
      bfd *abfd;
      arelent *reloc_entry;
      asymbol *symbol_in;
      PTR data;
      asection *input_section;
      bfd *output_bfd;
+     char **error_message;
 {
   if (output_bfd)
     {
@@ -1366,7 +1369,12 @@ hppa_som_gen_reloc_type (abfd, base_type, format, field)
       case e_ltsel:
       case e_rtsel:
 	final_types[0] = (int *) bfd_alloc_by_size_t (abfd, sizeof (int));
-	*final_types[0] = R_FSEL;
+	if (field == e_tsel)
+	  *final_types[0] = R_FSEL;
+	else if (field == e_ltsel)
+	  *final_types[0] = R_LSEL;
+	else
+	  *final_types[0] = R_RSEL;
 	final_types[1] = final_type;
 	final_types[2] = NULL;
 	*final_type = base_type;
@@ -2592,7 +2600,7 @@ som_begin_writing (abfd)
 	}
 
       /* Write the version string.  */
-      len = obj_som_version_hdr (abfd)->string_length;
+      len = obj_som_version_hdr (abfd)->header_id.length - sizeof (int);
       obj_som_file_hdr (abfd)->aux_header_size += len;
       current_offset += len;
       if (bfd_write ((PTR) obj_som_version_hdr (abfd)->user_string,
@@ -2620,7 +2628,7 @@ som_begin_writing (abfd)
 	}
 
       /* Write the copyright string.  */
-      len = obj_som_copyright_hdr (abfd)->string_length;
+      len = obj_som_copyright_hdr (abfd)->header_id.length - sizeof (int);
       obj_som_file_hdr (abfd)->aux_header_size += len;
       current_offset += len;
       if (bfd_write ((PTR) obj_som_copyright_hdr (abfd)->copyright,
@@ -3960,30 +3968,32 @@ bfd_som_attach_aux_hdr (abfd, type, string)
   if (type == VERSION_AUX_ID)
     {
       int len = strlen (string);
+      int pad = 0;
 
       if (len % 4)
-	len += (4 - (len % 4));
+	pad = (4 - (len % 4));
       obj_som_version_hdr (abfd)
-	= bfd_zalloc (abfd,
-		      sizeof (struct aux_id) + sizeof (unsigned int) + len);
+	= bfd_zalloc (abfd, sizeof (struct aux_id)
+			      + sizeof (unsigned int) + len + pad);
       obj_som_version_hdr (abfd)->header_id.type = VERSION_AUX_ID;
-      obj_som_version_hdr (abfd)->header_id.length
-	= sizeof (struct aux_id) + sizeof (unsigned int) + len;
+      obj_som_version_hdr (abfd)->header_id.length = len + pad;
+      obj_som_version_hdr (abfd)->header_id.length += sizeof (int);
       obj_som_version_hdr (abfd)->string_length = len;
-      strcpy (obj_som_version_hdr (abfd)->user_string, string);
+      strncpy (obj_som_version_hdr (abfd)->user_string, string, len);
     }
   else if (type == COPYRIGHT_AUX_ID)
     {
       int len = strlen (string);
+      int pad = 0;
 
       if (len % 4)
-	len += (4 - (len % 4));
+	pad = (4 - (len % 4));
       obj_som_copyright_hdr (abfd)
-	= bfd_zalloc (abfd,
-		      sizeof (struct aux_id) + sizeof (unsigned int) + len);
+	= bfd_zalloc (abfd, sizeof (struct aux_id)
+			      + sizeof (unsigned int) + len + pad);
       obj_som_copyright_hdr (abfd)->header_id.type = COPYRIGHT_AUX_ID;
-      obj_som_version_hdr (abfd)->header_id.length
-	= sizeof (struct aux_id) + sizeof (unsigned int) + len;
+      obj_som_copyright_hdr (abfd)->header_id.length = len + pad;
+      obj_som_copyright_hdr (abfd)->header_id.length += sizeof (int);
       obj_som_copyright_hdr (abfd)->string_length = len;
       strcpy (obj_som_copyright_hdr (abfd)->copyright, string);
     }
@@ -4148,9 +4158,11 @@ som_get_symbol_info (ignore_abfd, symbol, ret)
 #define som_bfd_get_relocated_section_contents \
  bfd_generic_get_relocated_section_contents
 #define som_bfd_relax_section bfd_generic_relax_section
-#define som_bfd_seclet_link bfd_generic_seclet_link
 #define som_bfd_make_debug_symbol \
   ((asymbol *(*) PARAMS ((bfd *, void *, unsigned long))) bfd_nullvoidptr)
+#define som_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
+#define som_bfd_link_add_symbols _bfd_generic_link_add_symbols
+#define som_bfd_final_link _bfd_generic_final_link
 
 /* Core file support is in the hpux-core backend.  */
 #define som_core_file_failing_command	_bfd_dummy_core_file_failing_command
