@@ -199,7 +199,15 @@ case "${target}" in
   hppa*-*-osf)
     # Do configure ld/binutils/gas for this case.
     ;;
+  m68k-hp-hpux*)
+    configdirs=`echo ${configdirs} | sed -e 's/emacs//'`
+    ;;	
   hppa*-*-*)
+    # HP's C compiler doesn't handle Emacs correctly
+    case "${CC}" in
+	"" | cc*) configdirs=`echo ${configdirs} | sed -e 's/emacs//'` ;;
+        *) echo "building emacs" ;;
+    esac
     configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas /pagas /;s/shellutils//'`
     gasdir=pagas
     ;;
@@ -207,8 +215,19 @@ case "${target}" in
     # add the go32 support tools to the list
     configdirs=`echo go32 ${configdirs}`
     ;;
+  i[34]86-*-sysv4*)
+    # The SYSV4 C compiler doesn't handle Emacs correctly
+    case "${CC}" in
+	"" | cc*) configdirs=`echo ${configdirs} | sed -e 's/emacs//'` ;;
+        *) ;;
+    esac
+    # but that's okay since emacs doesn't work anyway
+    echo "no emacs for today"
+    configdirs=`echo ${configdirs} | sed -e 's/emacs//'`
+    ;;
   rs6000-*-*)
-    configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas //;s/gprof//'`
+    # a gcc built textutils will cause the linker to hang on 'join'
+    configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas //;s/gprof//;s/textutils//'`
     ;;
   mips-*-*)
     configdirs=`echo ${configdirs} | sed -e 's/gprof//'`
