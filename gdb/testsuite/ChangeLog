@@ -1,3 +1,8 @@
+Fri Jun 16 18:22:05 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdb.base/call-ar-st.exp: Rewrite all multi-line patterns so that
+ 	they use gdb_expect_list.
+
 Wed Jun  7 13:02:40 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdb.base/commands.exp: Use ``set remote

@@ -141,13 +141,14 @@ if {![target_info exists gdb,skip_float_tests]} {
 #call print_char_array(char_array)
 
 send_gdb "print print_char_array(char_array)\n"
-gdb_expect {
-    -re "array_c :\[ \t\r\n\]+=========\[ \t\r\n\]+\[ \t\r\n\]+Z\[ \t\r\n\]+aZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZ\[ \t\r\n\]+aZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZ\[ \t\r\n\]+aZaZaZaZaZaZaZaZaZa\[ \t\r\n\]+\[ \t\r\n\]+.*\[ \t\r\n\]+.*$gdb_prompt $" {
-        pass "print print_char_array(char_array)"
-      }
-    -re ".*$gdb_prompt $" { fail "print print_char_array(char_array)" }
-    timeout           { fail "(timeout) print print_char_array(char_array)" }
-  }
+gdb_expect_list "print print_char_array(char_array)" ".*$gdb_prompt $" {
+    "\[ \t\r\n\]+array_c :"
+    "\[ \t\r\n\]+========="
+    "\[ \t\r\n\]+\[ \t\r\n\]+Z"
+    "\[ \t\r\n\]+aZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZ"
+    "\[ \t\r\n\]+aZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZ"
+    "\[ \t\r\n\]+aZaZaZaZaZaZaZaZaZa\[ \t\r\n\]+\[ \t\r\n\]+"
+}
 
 
 
@@ -157,12 +158,15 @@ gdb_test "tbreak 1216" \
 "tbreakpoint line 1216"
 
 send_gdb "continue\n"
-gdb_expect {
-    -re "array_c :\[ \t\r\n\]+=========\[ \t\r\n\]+\[ \t\r\n\]+Z\[ \t\r\n\]+aZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZ\[ \t\r\n\]+aZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZ\[ \t\r\n\]+aZaZaZaZaZaZaZaZaZa\[ \t\r\n\]+\[ \t\r\n\]+\[ \t\r\n\]+main.*at.*$srcfile:1216\[ \t\r\n\]+.*print_double_array\\(double_array\\).*$gdb_prompt $" {
-        pass "continue to 1216"
-      }
-    -re ".*$gdb_prompt $" { fail "continue to 1216" }
-    timeout           { fail "(timeout) continue to 1216" }
+gdb_expect_list "continue to 1216" ".*$gdb_prompt $" {
+    "\[ \t\r\n\]+array_c :"
+    "\[ \t\r\n\]+========="
+    "\[ \t\r\n\]+\[ \t\r\n\]+Z"
+    "\[ \t\r\n\]+aZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZ"
+    "\[ \t\r\n\]+aZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZ"
+    "\[ \t\r\n\]+aZaZaZaZaZaZaZaZaZa"
+    "\[ \t\r\n\]+main.*at.*:1216"
+    "\[ \t\r\n\]+1216.*print_double_array\\(double_array\\)"
 }
 
 # I am disabling this test, because it takes too long. I verified by
@@ -368,14 +372,42 @@ gdb_expect {
 #call print_small_structs(*struct1, *struct2, *struct3, *struct4,*flags, *flags_combo,
 #*three_char, *five_char, *int_char_combo, *d1, *d2, *d3, *f1, *f2, *f3)
 if {![target_info exists gdb,skip_float_tests]} {
-  send_gdb "print print_small_structs(*struct1, *struct2, *struct3, *struct4, *flags, *flags_combo, *three_char, *five_char, *int_char_combo, *d1, *d2, *d3, *f1, *f2, *f3)\n"
-  gdb_expect {
-    -re ".*alpha\[\t\r\n \]+gamma\[\t\r\n \]+epsilon\[\t\r\n \]+alpha\[\t\r\n \]+gamma\[\t\r\n \]+epsilon\[\t\r\n \]+ch1: y.*ch2: n\[\t\r\n \]+Contents of three_char_t:\[\t\r\n \]+a.*b.*c\[\t\r\n \]+Contents of five_char_t:\[\t\r\n \]+l.*m.*n.*o.*p\[\t\r\n \]+Contents of int_char_combo_t:\[\t\r\n \]+123.*z\[\t\r\n \]+Sum of the 4 struct values and seed :\[\t\r\n \]+52\[\t\r\n \]+Contents of struct1:\[\t\r\n \]+6.*0\[\t\r\n \]+Contents of struct2:\[\t\r\n \]+10.*0\[\t\r\n \]+Contents of struct3:\[\t\r\n \]+12.*0\[\t\r\n \]+Contents of one_double_t:\[\t\r\n \]+10.500000\[\t\r\n \]+Contents of one_double_t:.*-3.375000\[\t\r\n \]+Contents of one_double_t:.*675.093750\[\t\r\n \]+Contents of two_floats_t:.*45.234001.*43.599998\[\t\r\n \]+Contents of two_floats_t:.*78.010002.*122.099998\[\t\r\n \]+Contents of two_floats_t:.*-1232.344971.*-199.210007\[\t\r\n \]+.*$gdb_prompt $" {
-      pass "print print_small_structs"
+    send_gdb "print print_small_structs(*struct1, *struct2, *struct3, *struct4, *flags, *flags_combo, *three_char, *five_char, *int_char_combo, *d1, *d2, *d3, *f1, *f2, *f3)\n"
+    gdb_expect_list "print print_small_structs" ".*$gdb_prompt $" {
+	"\[\t\r\n \]+alpha"
+	"\[\t\r\n \]+gamma"
+	"\[\t\r\n \]+epsilon"
+	"\[\t\r\n \]+alpha"
+	"\[\t\r\n \]+gamma"
+	"\[\t\r\n \]+epsilon"
+	"\[\t\r\n \]+ch1: y[ \t]*ch2: n"
+	"\[\t\r\n \]+Contents of three_char_t:"
+	"\[\t\r\n \]+a[ \t]*b[ \t]*c"
+	"\[\t\r\n \]+Contents of five_char_t:"
+	"\[\t\r\n \]+l[ \t]*m[ \t]*n[ \t]*o[ \t]*p"
+	"\[\t\r\n \]+Contents of int_char_combo_t:"
+	"\[\t\r\n \]+123[ \t]*z"
+	"\[\t\r\n \]+Sum of the 4 struct values and seed :"
+	"\[\t\r\n \]+52"
+	"\[\t\r\n \]+Contents of struct1:"
+	"\[\t\r\n \]+6[ \t]*0"
+	"\[\t\r\n \]+Contents of struct2:"
+	"\[\t\r\n \]+10[ \t]*0"
+	"\[\t\r\n \]+Contents of struct3:"
+	"\[\t\r\n \]+12[ \t]*0"
+	"\[\t\r\n \]+Contents of one_double_t:"
+	"\[\t\r\n \]+10.500000"
+	"\[\t\r\n \]+Contents of one_double_t:"
+	"\[\t\r\n \]+-3.375000"
+	"\[\t\r\n \]+Contents of one_double_t:"
+	"\[\t\r\n \]+675.093750"
+	"\[\t\r\n \]+Contents of two_floats_t:"
+	"\[\t\r\n \]+45.234001[ \t]*43.599998"
+	"\[\t\r\n \]+Contents of two_floats_t:"
+	"\[\t\r\n \]+78.010002[ \t]*122.099998"
+	"\[\t\r\n \]+Contents of two_floats_t:"
+	"\[\t\r\n \]+-1232.344971[ \t]*-199.210007"
     }
-    -re ".*$gdb_prompt $" { fail "print print_small_structs" }
-    timeout           { fail "(timeout) print_small_structs" }
-  }
 }
 
 #call compute_with_small_structs(20)
@@ -391,14 +423,14 @@ gdb_expect {
 
 #call print_ten_doubles(123.456, 123.456, -0.12, -1.23, 343434.8, 89.098, 3.14, -5678.12345, -0.11111111, 216.97065)
 if {![target_info exists gdb,skip_float_tests]} {
-  send_gdb "print print_ten_doubles(123.456, 123.456, -0.12, -1.23, 343434.8, 89.098, 3.14, -5678.12345, -0.11111111, 216.97065)\n"
-  gdb_expect {
-    -re ".*Two Doubles : 123.456000.*123.456000\[\t\r\n \]+Two Doubles : -0.120000.*-1.230000\[\t\r\n \]+Two Doubles : 343434.800000.*89.098000\[\t\r\n \]+Two Doubles : 3.140000.*-5678.123450\[\t\r\n \]+Two Doubles : -0.111111.*216.970650\[\t\r\n \]+.*$gdb_prompt $" {
-      pass "print print_ten_doubles"
+    send_gdb "print print_ten_doubles(123.456, 123.456, -0.12, -1.23, 343434.8, 89.098, 3.14, -5678.12345, -0.11111111, 216.97065)\n"
+    gdb_expect_list "print print_ten_doubles" ".*$gdb_prompt $" {
+	"\[\t\r\n \]+Two Doubles : 123.456000.*123.456000"
+	"\[\t\r\n \]+Two Doubles : -0.120000.*-1.230000"
+	"\[\t\r\n \]+Two Doubles : 343434.800000.*89.098000"
+	"\[\t\r\n \]+Two Doubles : 3.140000.*-5678.123450"
+	"\[\t\r\n \]+Two Doubles : -0.111111.*216.970650"
     }
-    -re ".*$gdb_prompt $" { fail "print print_ten_doubles" }
-    timeout           { fail "(timeout) print_ten_doubles" }
-  }
 }
 
 #go -until 1286
@@ -520,14 +552,45 @@ gdb_test continue "Continuing\\..*main \\(\\) at .*call-ar-st.c:1305\[\r\n\t \]+
 if {$hp_aCC_compiler} {setup_xfail "hppa*-*-*" CLLbs16994}
 
 if {![target_info exists gdb,skip_float_tests]} {
-  send_gdb "print print_long_arg_list(a, b, c, d, e, f, *struct1, *struct2, *struct3, *struct4, *flags, *flags_combo, *three_char, *five_char, *int_char_combo, *d1, *d2, *d3, *f1, *f2, *f3)\n"
-  gdb_expect {
-    -re ".*double : 22.250000.*double : 33.375000.*int : 0.*int : -25.*int : 100.*int : 2345.*alpha.*gamma.*epsilon.*ch1: y.*ch2: n.*Contents of three_char_t:.*x.*y.*z.*Contents of five_char_t:.*h.*e.*l.*l.*o.*Contents of int_char_combo_t:.*123.*z.*Sum of the 4 struct values and seed :.*52.*Contents of struct1:.*6\[ \]+0.*Contents of struct2:.*10\[ \]+0.*Contents of struct3:.*12.*0.*Contents of one_double_t:\[ \n\r\t\]+1.111110\[ \n\r\t\]+Contents of one_double_t:\[ \n\r\t\]+-345.340000\[ \n\r\t\]+Contents of one_double_t:\[ \n\r\t\]+546464.200000\[ \n\r\t\]+Contents of two_floats_t:\[ \n\r\t\]+0.234000.*453.100006\[ \n\r\t\]+Contents of two_floats_t:\[ \n\r\t\]+78.345001.*23.090000\[ \n\r\t\]+Contents of two_floats_t:\[ \n\r\t\]+-2.345000.*1.000000.*$gdb_prompt $" {
-      pass "print print_long_arg_list"
+    send_gdb "print print_long_arg_list(a, b, c, d, e, f, *struct1, *struct2, *struct3, *struct4, *flags, *flags_combo, *three_char, *five_char, *int_char_combo, *d1, *d2, *d3, *f1, *f2, *f3)\n"
+    gdb_expect_list "print print_long_arg_list" ".*$gdb_prompt $" {
+	"\[ \n\r\t\]+double : 22.250000"
+	"\[ \n\r\t\]+double : 33.375000"
+	"\[ \n\r\t\]+int : 0"
+	"\[ \n\r\t\]+int : -25"
+	"\[ \n\r\t\]+int : 100"
+	"\[ \n\r\t\]+int : 2345"
+	"\[ \n\r\t\]+alpha"
+	"\[ \n\r\t\]+gamma"
+	"\[ \n\r\t\]+epsilon"
+	"\[ \n\r\t\]+ch1: y\[ \t\]+ch2: n"
+	"\[ \n\r\t\]+Contents of three_char_t:"
+	"\[ \n\r\t\]+x\[ \t\]+y\[ \t\]+z"
+	"\[ \n\r\t\]+Contents of five_char_t:"
+	"\[ \n\r\t\]+h\[ \t\]+e\[ \t\]+l\[ \t\]+l\[ \t\]+o"
+	"\[ \n\r\t\]+Contents of int_char_combo_t:"
+	"\[ \n\r\t\]+123\[ \t\]+z"
+	"\[ \n\r\t\]+Sum of the 4 struct values and seed :"
+	"\[ \n\r\t\]+52"
+	"\[ \n\r\t\]+Contents of struct1:"
+	"\[ \n\r\t\]+6\[ \t\]+0"
+	"\[ \n\r\t\]+Contents of struct2:"
+	"\[ \n\r\t\]+10\[ \t\]+0"
+	"\[ \n\r\t\]+Contents of struct3:"
+	"\[ \n\r\t\]+12\[ \t\]+0"
+	"\[ \n\r\t\]+Contents of one_double_t:"
+	"\[ \n\r\t\]+1.111110"
+	"\[ \n\r\t\]+Contents of one_double_t:"
+	"\[ \n\r\t\]+-345.340000"
+	"\[ \n\r\t\]+Contents of one_double_t:"
+	"\[ \n\r\t\]+546464.200000"
+	"\[ \n\r\t\]+Contents of two_floats_t:"
+	"\[ \n\r\t\]+0.234000\[ \t\]+453.100006"
+	"\[ \n\r\t\]+Contents of two_floats_t:"
+	"\[ \n\r\t\]+78.345001\[ \t\]+23.090000"
+	"\[ \n\r\t\]+Contents of two_floats_t:"
+	"\[ \n\r\t\]+-2.345000\[ \t\]+1.000000"
     }
-    -re ".*$gdb_prompt $" { fail "print print_long_arg_list" }
-    timeout           { fail "(timeout) print_long_arg_list" }
-  }
 }
 
 
@@ -553,13 +616,14 @@ gdb_expect {
 
 #call print_struct_rep(*struct1, *struct2, *struct3)
 send_gdb "print print_struct_rep(*struct1, *struct2, *struct3)\n"
-gdb_expect {
-    -re ".*Contents of struct1:\[ \t\n\r\]+        22         0\[ \t\n\r\]+Contents of struct2:\[ \t\n\r\]+        42         0\[ \t\n\r\]+Contents of struct3:\[ \t\n\r\]+        62         0\[ \t\n\r\]+.*$gdb_prompt $" {
-        pass "print print_struct_rep(*struct1, *struct2, *struct3)"
-      }
-    -re ".*$gdb_prompt $" { fail "print print_struct_rep(*struct1, *struct2, *struct3)" }
-    timeout           { fail "(timeout) print_struct_rep(*struct1, *struct2, *struct3)" }
-  }
+gdb_expect_list "print print_struct_rep(*struct1, *struct2, *struct3)" ".*$gdb_prompt $" {
+    "\[ \t\n\r\]+Contents of struct1:"
+    "\[ \t\n\r\]+        22         0"
+    "\[ \t\n\r\]+Contents of struct2:"
+    "\[ \t\n\r\]+        42         0"
+    "\[ \t\n\r\]+Contents of struct3:"
+    "\[ \t\n\r\]+        62         0"
+}
 
 send_gdb "print print_one_large_struct(*list1)\n"
 gdb_expect {
