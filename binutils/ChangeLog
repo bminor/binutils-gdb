@@ -1,6 +1,8 @@
 2000-11-28  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* MAINTAINERS: Add Jörn Rennecke and self as SH maintainers.
+	Change sourceware.cygnus.com to sources.redhat.com.
+	Fix typo for "amongst".
 
 2000-11-28  Nick Clifton  <nickc@redhat.com>
 
