@@ -152,6 +152,7 @@ CODE_FRAGMENT
 .      struct srec_data_struct *srec_data;
 .      struct tekhex_data_struct *tekhex_data;
 .      struct elf_obj_tdata *elf_obj_data;
+.      struct nlm_obj_tdata *nlm_obj_data;
 .      struct bout_data_struct *bout_data;
 .      struct sun_core_struct *sun_core_data;
 .      struct trad_core_struct *trad_core_data;

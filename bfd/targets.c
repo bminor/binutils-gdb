@@ -135,6 +135,7 @@ of a file.
 .    bfd_target_ecoff_flavour,
 .    bfd_target_elf_flavour,
 .    bfd_target_ieee_flavour,
+.    bfd_target_nlm_flavour,
 .    bfd_target_oasys_flavour,
 .    bfd_target_tekhex_flavour,
 .    bfd_target_srec_flavour,

@@ -1,6 +1,8 @@
 Tue Jul 20 08:21:15 1993  Fred Fish  (fnf@deneb.cygnus.com)
 
 	* bfd-in.h:  Apply some of the changes that were made to bfd-in2.h.
+	* bfd.c (union tdata):  Add nlm_obj_data;
+	* targets.c (enum target_flavour):  Add bfd_target_nlm_flavour.
 
 Mon Jul 19 20:46:18 1993  Fred Fish  (fnf@deneb.cygnus.com)
 
