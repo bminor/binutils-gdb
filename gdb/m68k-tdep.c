@@ -1137,7 +1137,7 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->jb_pc = -1;
 #endif
   tdep->struct_value_regnum = M68K_A1_REGNUM;
-  tdep->struct_return = pcc_struct_return;
+  tdep->struct_return = reg_struct_return;
 
   /* Frame unwinder.  */
   set_gdbarch_unwind_dummy_id (gdbarch, m68k_unwind_dummy_id);

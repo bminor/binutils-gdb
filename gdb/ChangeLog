@@ -1,3 +1,8 @@
+2004-05-04  Michael Snyder  <msnyder@redhat.com>
+
+	* m68k-tdep.c (m68k_gdbarch_init): Default to using 
+	reg_struct_return method (as gcc usually does for cross targets).
+
 2004-05-04  Ulrich Weigand <Ulrich.Weigand@de.ibm.com>
 
 	Committed by Andrew Cagney.
