@@ -252,7 +252,7 @@ fr30_elf_i20_reloc (abfd, reloc_entry, symbol, data,
 }
 
 
-/* Utility to actually perform a R_FR30_32 reloc.  */
+/* Utility to actually perform a R_FR30_48 reloc.  */
 
 static bfd_reloc_status_type
 fr30_elf_i32_reloc (abfd, reloc_entry, symbol, data,
