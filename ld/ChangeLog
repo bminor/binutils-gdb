@@ -1,3 +1,7 @@
+Tue Sep 17 12:18:21 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.tgt: Add cases for MIPS 5000 like MIPS 4300.
+
 Mon Sep 16 17:55:21 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* scripttempl/armcoff.sc: Only define symbols if RELOCATING.  Fix
