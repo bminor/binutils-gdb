@@ -38,24 +38,7 @@
 #include "gregset.h"
 
 #include "x86-64-tdep.h"
-
-/* The register sets used in GNU/Linux ELF core-dumps are identical to
-   the register sets used by `ptrace'.  The corresponding types are
-   `elf_gregset_t' for the general-purpose registers (with
-   `elf_greg_t' the type of a single GP register) and `elf_fpregset_t'
-   for the floating-point registers.  */
-
-/* Mapping between the general-purpose registers in `struct user'
-   format and GDB's register array layout.  */
-static int regmap[] =
-{
-  RAX, RBX, RCX, RDX,
-  RSI, RDI, RBP, RSP,
-  R8, R9, R10, R11,
-  R12, R13, R14, R15,
-  RIP, EFLAGS, CS, SS, 
-  DS, ES, FS, GS
-};
+#include "x86-64-linux-tdep.h"
 
 /* Which ptrace request retrieves which registers?
    These apply to the corresponding SET requests as well.  */
@@ -76,11 +59,7 @@ static int regmap[] =
 void
 supply_gregset (elf_gregset_t *gregsetp)
 {
-  elf_greg_t *regp = (elf_greg_t *) gregsetp;
-  int i;
-
-  for (i = 0; i < X86_64_NUM_GREGS; i++)
-    supply_register (i, regp + regmap[i]);
+  x86_64_linux_supply_gregset ((char *) gregsetp);
 }
 
 /* Fill register REGNO (if it is a general-purpose register) in
@@ -90,12 +69,7 @@ supply_gregset (elf_gregset_t *gregsetp)
 void
 fill_gregset (elf_gregset_t *gregsetp, int regno)
 {
-  elf_greg_t *regp = (elf_greg_t *) gregsetp;
-  int i;
-
-  for (i = 0; i < X86_64_NUM_GREGS; i++)
-    if (regno == -1 || regno == i)
-      regcache_collect (i, regp + regmap[i]);
+  x86_64_linux_fill_gregset ((char *) gregsetp, regno);
 }
 
 /* Fetch all general-purpose registers from process/thread TID and
