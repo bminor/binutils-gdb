@@ -50,6 +50,7 @@ CXX_FOR_TARGET = ` \
     fi; \
   fi`
 
+# start-sanitize-chill
 CHILLFLAGS = $(CFLAGS)
 CHILL = gcc
 CHILL_FOR_TARGET = ` \
@@ -63,6 +64,7 @@ CHILL_FOR_TARGET = ` \
     fi; \
   fi`
 CHILL_LIB = -lchill
+# end-sanitize-chill
 
 TARGET_FLAGS_TO_PASS = \
         "prefix=$(prefix)" \
@@ -71,10 +73,12 @@ TARGET_FLAGS_TO_PASS = \
         'CC=$$(CC_FOR_TARGET)' \
         "CC_FOR_TARGET=$(CC_FOR_TARGET)" \
         "CFLAGS=$(CFLAGS)" \
+# start-sanitize-chill
         "CHILLFLAGS=$(CHILLFLAGS)" \
         'CHILL=$$(CHILL_FOR_TARGET)' \
         "CHILL_FOR_TARGET=$(CHILL_FOR_TARGET)" \
         "CHILL_LIB=$(CHILL_LIB)" \
+# end-sanitize-chill
         'CXX=$$(CXX_FOR_TARGET)' \
         "CXX_FOR_TARGET=$(CXX_FOR_TARGET)" \
         "CXXFLAGS=$(CXXFLAGS)" \

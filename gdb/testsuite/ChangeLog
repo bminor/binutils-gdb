@@ -2,8 +2,9 @@ Thu May 12 14:06:34 1994  Bill Cox  (bill@rtl.cygnus.com)
 
 	* .Sanitize: Drop the gdb.t30 and gdb.t31 directories
 	  unless keep-chill was specified on the command line.
-	* Makefile.in: Add comment lines to Sanitize out CHILL
-	  references unless keep-chill was specified.
+	* Makefile.in, config/makefile.rel.in: : Add comment lines
+          to Sanitize out CHILL references unless keep-chill
+           was specified.
 
 Tue May  3 16:08:09 1994  Kung Hsu  (kung@mexican.cygnus.com)
 
