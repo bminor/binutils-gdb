@@ -120,7 +120,6 @@ SUBSECTION
 	the entry points which call them. Too bad we can't have one
 	macro to define them both! 
 
-
 .typedef struct bfd_target
 .{
 
@@ -375,14 +374,49 @@ extern bfd_target DEFAULT_VECTOR;
 #ifdef SELECT_VECS
 
 bfd_target *target_vector[] = {
-	&icoff_little_vec,
+	SELECT_VECS,
 	0
 };
 
 #else
 
 bfd_target *target_vector[] = {
+
+#ifdef DEFAULT_VECTOR
+	&DEFAULT_VECTOR,
+#endif
+
+	&i386coff_vec,
+	&i386aout_vec,
+	&ecoff_little_vec,
+	&ecoff_big_vec,
+	&ieee_vec,
+#if 0
+	/* We have no oasys tools anymore, so we can't test any of this
+	   anymore. If you want to test the stuff yourself, go ahead...
+	   steve@cygnus.com */
+	&oasys_vec,
+#endif
+	&sunos_big_vec,
+#ifdef HOST_64_BIT
+	&demo_64_vec,	/* Only compiled if host has long-long support */
+#endif
+	&h8300coff_vec,
+	&m88kbcs_vec,
+	&srec_vec,
 	&icoff_little_vec,
+	&icoff_big_vec,
+	&elf_little_vec,
+	&elf_big_vec,
+	&b_out_vec_little_host,
+	&b_out_vec_big_host,
+	&m68kcoff_vec,
+	&a29kcoff_big_vec,
+	&rs6000coff_vec,
+
+#ifdef	TRAD_CORE
+	&trad_core_vec,
+#endif
 	NULL, /* end of list marker */
 };
 
