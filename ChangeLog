@@ -1,3 +1,7 @@
+Tue Feb 16 16:06:31 1993  K. Richard Pixley  (rich@cygnus.com)
+
+	* config.guess: add vax-ultrix in the spirit of mips-ultrix.
+
 Tue Feb 16 05:57:15 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* configure.in, Makefile.in: add hello, tar, gzip, recode, indent
