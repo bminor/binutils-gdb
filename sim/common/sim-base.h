@@ -69,7 +69,7 @@ extern struct sim_state *current_state;
 
    sim_cpu is defined to be:
 
-   typedef struct {
+   typedef struct _sim_cpu {
       ... simulator specific members ...
       sim_cpu_base base;
    } sim_cpu;
@@ -150,6 +150,7 @@ typedef struct {
 typedef struct {
   /* Backlink to main state struct.  */
   SIM_DESC sd;
+#define CPU_STATE(cpu) ((cpu)->base.sd)
 
   /* Maximum number of traceable entities.  */
 #ifndef MAX_TRACE_VALUES
@@ -175,6 +176,7 @@ typedef struct {
   /* Tracing output goes to this or stdout if NULL.
      We can't store `stdout' here as stdout goes through a callback.  */
   FILE *trace_file;
+#define CPU_TRACE_FILE(cpu) ((cpu)->base.trace_file)
 
   /* Maximum number of debuggable entities.
      This debugging is not intended for normal use.
@@ -194,6 +196,7 @@ typedef struct {
   /* Debugging output goes to this or stderr if NULL.
      We can't store `stderr' here as stderr goes through a callback.  */
   FILE *debug_file;
+#define CPU_DEBUG_FILE(cpu) ((cpu)->base.debug_file)
 
 #ifdef SIM_HAVE_PROFILE
   /* Maximum number of profilable entities.  */
@@ -223,6 +226,7 @@ typedef struct {
   /* Profile output goes to this or stdout if NULL.
      We can't store `stderr' here as stdout goes through a callback.  */
   FILE *profile_file;
+#define CPU_PROFILE_FILE(cpu) ((cpu)->base.profile_file)
 #endif /* SIM_HAVE_PROFILE */
 } sim_cpu_base;
 
