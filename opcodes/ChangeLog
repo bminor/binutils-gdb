@@ -1,3 +1,20 @@
+Tue Jul 11 11:49:49 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ppc-opc.c (powerpc_operands): Change CR to use a bitsize of 3,
+	shifted by 18, without any insertion or extraction function.
+	(insert_cr, extract_cr): Remove.
+
+start-sanitize-arc
+Mon Jul  3 11:54:31 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (ALL_MACHINES): Add arc-dis.o and arc-opc.o.
+
+end-sanitize-arc
+Wed Jun 21 20:05:39 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* m68k-dis.c (print_insn_arg, print_indexed): Print "%" before
+	register names.
+
 Thu Jun 15 17:23:31 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-config.in: Add sh and i386 configs, remove sparc config.
