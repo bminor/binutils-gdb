@@ -1,3 +1,8 @@
+2002-12-16  Andrew MacLeod  <amacleod@redhat.com>
+
+	* config/tc-xstormy16.c (md_cgen_lookup_reloc): If a relocation 
+	has already been set up, use it.
+
 2002-12-16  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* ChangeLog-9295: Fix a typo.

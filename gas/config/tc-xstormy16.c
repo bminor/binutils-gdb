@@ -340,7 +340,10 @@ md_cgen_lookup_reloc (insn, operand, fixP)
       return fixP->fx_pcrel ? BFD_RELOC_8_PCREL : BFD_RELOC_8;
 
     case XSTORMY16_OPERAND_IMM16:
+      /* This might have been processed at parse time.  */
       fixP->fx_where += 2;
+      if (fixP->fx_cgen.opinfo && fixP->fx_cgen.opinfo != BFD_RELOC_NONE)
+	return fixP->fx_cgen.opinfo;
       return fixP->fx_pcrel ? BFD_RELOC_16_PCREL : BFD_RELOC_16;
 
     case XSTORMY16_OPERAND_ABS24:
