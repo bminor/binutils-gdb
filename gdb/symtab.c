@@ -1,5 +1,5 @@
 /* Symbol table lookup for the GNU debugger, GDB.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995
              Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -110,6 +110,8 @@ void
 cplusplus_hint (name)
      char *name;
 {
+  while (*name == '\'')
+    name++;
   printf_filtered ("Hint: try '%s<TAB> or '%s<ESC-?>\n", name, name);
   printf_filtered ("(Note leading single quote.)\n");
 }
@@ -1915,9 +1917,10 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
   /* Maybe arg is FILE : LINENUM or FILE : FUNCTION */
 
   s = NULL;
-  is_quoted = (strchr(gdb_completer_quote_characters, **argptr) != NULL);
-  has_parens = (( pp = strchr(*argptr, '(')) != NULL  &&
-		 (pp = strchr(pp, ')')) != NULL);
+  is_quoted = (**argptr
+	       && strchr (gdb_completer_quote_characters, **argptr) != NULL);
+  has_parens = ((pp = strchr (*argptr, '(')) != NULL
+		 && (pp = strchr (pp, ')')) != NULL);
 
   for (p = *argptr; *p; p++)
     {
@@ -1962,7 +1965,8 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
 	    {
 	      /* Arg token is not digits => try it as a function name
 		 Find the next token(everything up to end or next blank). */
-	      if (strchr(gdb_completer_quote_characters, **argptr) != NULL)
+	      if (**argptr
+		  && strchr (gdb_completer_quote_characters, **argptr) != NULL)
 		{
 		  p = skip_quoted(*argptr);
 		  *argptr = *argptr + 1;
@@ -1998,8 +2002,11 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
 		  copy = (char *) alloca (p - *argptr + 1 );
 		  memcpy (copy, *argptr, p - *argptr);
 		  copy[p - *argptr] = '\0';
-		  if (strchr(gdb_completer_quote_characters, copy[p-*argptr-1]) != NULL)
-		    copy[p - *argptr -1] = '\0';
+		  if (p != *argptr
+		      && copy[p - *argptr - 1]
+		      && strchr (gdb_completer_quote_characters,
+				 copy[p - *argptr - 1]) != NULL)
+		    copy[p - *argptr - 1] = '\0';
 		}
 
 	      /* no line number may be specified */
@@ -2211,7 +2218,8 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
   memcpy (copy, *argptr, p - *argptr);
   copy[p - *argptr] = '\0';
   if (p != *argptr
-      && (copy[0] == copy [p - *argptr - 1])
+      && copy[0]
+      && copy[0] == copy [p - *argptr - 1]
       && strchr (gdb_completer_quote_characters, copy[0]) != NULL)
     {
       copy [p - *argptr - 1] = '\0';
@@ -3243,6 +3251,9 @@ make_symbol_completion_list (text, word)
 /* Determine if PC is in the prologue of a function.  The prologue is the area
    between the first instruction of a function, and the first executable line.
    Returns 1 if PC *might* be in prologue, 0 if definately *not* in prologue.
+
+   If non-zero, func_start is where we thing the prologue starts, possibly
+   by previous examination of symbol table information.
  */
 
 int
@@ -3275,6 +3286,11 @@ in_prologue (pc, func_start)
    is doing a stepi/nexti through code without symbols.  */
 
  nosyms:
+
+/* If func_start is zero (meaning unknown) then we don't know whether pc is
+   in the prologue or not.  I.E. it might be. */
+
+  if (!func_start) return 1;
 
 /* We need to call the target-specific prologue skipping functions with the
    function's start address because PC may be pointing at an instruction that

@@ -380,7 +380,7 @@ static struct linetable *
 shrink_linetable PARAMS ((struct linetable *));
 
 static void
-handle_psymbol_enumerators PARAMS ((struct objfile *, FDR *, int));
+handle_psymbol_enumerators PARAMS ((struct objfile *, FDR *, int, CORE_ADDR));
 
 static char *
 mdebug_next_symbol_text PARAMS ((void));
@@ -931,8 +931,11 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
 		if (nfields == 0 && type_code == TYPE_CODE_UNDEF)
 		  /* If the type of the member is Nil (or Void),
 		     without qualifiers, assume the tag is an
-		     enumeration. */
-		  if (tsym.index == indexNil)
+		     enumeration.
+		     Alpha cc -migrate enums are recognized by a zero
+		     index and a zero symbol value.  */
+		  if (tsym.index == indexNil
+		      || (tsym.index == 0 && sh->value == 0))
 		    type_code = TYPE_CODE_ENUM;
 		  else
 		    {
@@ -1777,7 +1780,8 @@ upgrade_type (fd, tpp, tq, ax, bigend, sym_name)
 	}
       fh = get_rfd (fd, rf);
 
-      indx = parse_type (fd, debug_info->external_aux + fh->iauxBase,
+      indx = parse_type (fh - debug_info->fdr,
+			 debug_info->external_aux + fh->iauxBase,
 			 id, (int *) NULL, bigend, sym_name);
 
       /* The bounds type should be an integer type, but might be anything
@@ -1851,14 +1855,14 @@ upgrade_type (fd, tpp, tq, ax, bigend, sym_name)
    to look for the function which contains the MIPS_EFI_SYMBOL_NAME symbol
    in question, or NULL to use top_stack->cur_block.  */
 
-static void parse_procedure PARAMS ((PDR *, struct symtab *, unsigned long,
+static void parse_procedure PARAMS ((PDR *, struct symtab *, CORE_ADDR,
 				     struct partial_symtab *));
 
 static void
-parse_procedure (pr, search_symtab, first_off, pst)
+parse_procedure (pr, search_symtab, lowest_pdr_addr, pst)
      PDR *pr;
      struct symtab *search_symtab;
-     unsigned long first_off;
+     CORE_ADDR lowest_pdr_addr;
      struct partial_symtab *pst;
 {
   struct symbol *s, *i;
@@ -1964,7 +1968,7 @@ parse_procedure (pr, search_symtab, first_off, pst)
       e = (struct mips_extra_func_info *) SYMBOL_VALUE (i);
       e->pdr = *pr;
       e->pdr.isym = (long) s;
-      e->pdr.adr += pst->textlow - first_off;
+      e->pdr.adr += pst->textlow - lowest_pdr_addr;
 
       /* Correct incorrect setjmp procedure descriptor from the library
 	 to make backtrace through setjmp work.  */
@@ -2113,20 +2117,20 @@ parse_external (es, bigend, section_offsets)
    with that and do not need to reorder our linetables */
 
 static void parse_lines PARAMS ((FDR *, PDR *, struct linetable *, int,
-				 struct partial_symtab *));
+				 struct partial_symtab *, CORE_ADDR));
 
 static void
-parse_lines (fh, pr, lt, maxlines, pst)
+parse_lines (fh, pr, lt, maxlines, pst, lowest_pdr_addr)
      FDR *fh;
      PDR *pr;
      struct linetable *lt;
      int maxlines;
      struct partial_symtab *pst;
+     CORE_ADDR lowest_pdr_addr;
 {
   unsigned char *base;
   int j, k;
   int delta, count, lineno = 0;
-  unsigned long first_off = pr->adr;
 
   if (fh->cbLine == 0)
     return;
@@ -2135,8 +2139,8 @@ parse_lines (fh, pr, lt, maxlines, pst)
   k = 0;
   for (j = 0; j < fh->cpd; j++, pr++)
     {
-      long l;
-      unsigned long adr;
+      CORE_ADDR l;
+      CORE_ADDR adr;
       unsigned char *halt;
 
       /* No code for this one */
@@ -2153,7 +2157,7 @@ parse_lines (fh, pr, lt, maxlines, pst)
  	halt = base + fh->cbLine;
       base += pr->cbLineOffset;
 
-      adr = pst->textlow + pr->adr - first_off;
+      adr = pst->textlow + pr->adr - lowest_pdr_addr;
 
       l = adr >> 2;		/* in words */
       for (lineno = pr->lnLow; base < halt; )
@@ -2794,7 +2798,7 @@ parse_partial_symbols (objfile, section_offsets)
 					   sh.value,
 					   psymtab_language, objfile);
 		    }
-		  handle_psymbol_enumerators (objfile, fh, sh.st);
+		  handle_psymbol_enumerators (objfile, fh, sh.st, sh.value);
 
 		  /* Skip over the block */
 		  new_sdx = sh.index;
@@ -3017,10 +3021,11 @@ parse_partial_symbols (objfile, section_offsets)
    all the the enum constants to the partial symbol table.  */
 
 static void
-handle_psymbol_enumerators (objfile, fh, stype)
+handle_psymbol_enumerators (objfile, fh, stype, svalue)
      struct objfile *objfile;
      FDR *fh;
      int stype;
+     CORE_ADDR svalue;
 {
   const bfd_size_type external_sym_size = debug_swap->external_sym_size;
   void (* const swap_sym_in) PARAMS ((bfd *, PTR, SYMR *))
@@ -3038,12 +3043,15 @@ handle_psymbol_enumerators (objfile, fh, stype)
     case stBlock:
       /* It is an enumerated type if the next symbol entry is a stMember
 	 and its auxiliary index is indexNil or its auxiliary entry
-	 is a plain btNil or btVoid.  */
+	 is a plain btNil or btVoid.
+	 Alpha cc -migrate enums are recognized by a zero index and
+	 a zero symbol value.  */
       (*swap_sym_in) (cur_bfd, ext_sym, &sh);
       if (sh.st != stMember)
 	return;
 
-      if (sh.index == indexNil)
+      if (sh.index == indexNil
+	  || (sh.index == 0 && svalue == 0))
 	break;
       (*debug_swap->swap_tir_in) (fh->fBigendian,
 				  &(debug_info->external_aux
@@ -3113,6 +3121,7 @@ psymtab_to_symtab_1 (pst, filename)
   struct symtab *st;
   FDR *fh;
   struct linetable *lines;
+  CORE_ADDR lowest_pdr_addr = 0;
 
   if (pst->readin)
     return;
@@ -3186,10 +3195,6 @@ psymtab_to_symtab_1 (pst, filename)
 
   if (processing_gcc_compilation != 0)
     {
-      char *pdr_ptr;
-      char *pdr_end;
-      int first_pdr;
-      unsigned long first_off = 0;
 
       /* This symbol table contains stabs-in-ecoff entries.  */
 
@@ -3279,21 +3284,42 @@ psymtab_to_symtab_1 (pst, filename)
 	 generated via asm statements.  */
 
       /* Fill in procedure info next.  */
-      first_pdr = 1;
-      pdr_ptr = ((char *) debug_info->external_pdr
-		 + fh->ipdFirst * external_pdr_size);
-      pdr_end = pdr_ptr + fh->cpd * external_pdr_size;
-      for (; pdr_ptr < pdr_end; pdr_ptr += external_pdr_size)
+      if (fh->cpd > 0)
 	{
-	  PDR pr;
+	  PDR *pr_block;
+	  struct cleanup *old_chain;
+	  char *pdr_ptr;
+	  char *pdr_end;
+	  PDR *pdr_in;
+	  PDR *pdr_in_end;
 
-	  (*swap_pdr_in) (cur_bfd, pdr_ptr, &pr);
-	  if (first_pdr)
+	  pr_block = (PDR *) xmalloc (fh->cpd * sizeof (PDR));
+	  old_chain = make_cleanup (free, pr_block);
+
+	  pdr_ptr = ((char *) debug_info->external_pdr
+		     + fh->ipdFirst * external_pdr_size);
+	  pdr_end = pdr_ptr + fh->cpd * external_pdr_size;
+	  pdr_in = pr_block;
+	  for (;
+	       pdr_ptr < pdr_end;
+	       pdr_ptr += external_pdr_size, pdr_in++)
 	    {
-	      first_off = pr.adr;
-	      first_pdr = 0;
+	      (*swap_pdr_in) (cur_bfd, pdr_ptr, pdr_in);
+
+	      /* Determine lowest PDR address, the PDRs are not always
+		 sorted.  */
+	      if (pdr_in == pr_block)
+		lowest_pdr_addr = pdr_in->adr;
+	      else if (pdr_in->adr < lowest_pdr_addr)
+		lowest_pdr_addr = pdr_in->adr;
 	    }
-	  parse_procedure (&pr, st, first_off, pst);
+
+	  pdr_in = pr_block;
+	  pdr_in_end = pdr_in + fh->cpd;
+	  for (; pdr_in < pdr_in_end; pdr_in++)
+	    parse_procedure (pdr_in, st, lowest_pdr_addr, pst);
+
+	  do_cleanups (old_chain);
 	}
     }
   else
@@ -3386,9 +3412,18 @@ psymtab_to_symtab_1 (pst, filename)
 	      for (;
 		   pdr_ptr < pdr_end;
 		   pdr_ptr += external_pdr_size, pdr_in++)
-		(*swap_pdr_in) (cur_bfd, pdr_ptr, pdr_in);
+		{
+		  (*swap_pdr_in) (cur_bfd, pdr_ptr, pdr_in);
 
-	      parse_lines (fh, pr_block, lines, maxlines, pst);
+		  /* Determine lowest PDR address, the PDRs are not always
+		     sorted.  */
+		  if (pdr_in == pr_block)
+		    lowest_pdr_addr = pdr_in->adr;
+		  else if (pdr_in->adr < lowest_pdr_addr)
+		    lowest_pdr_addr = pdr_in->adr;
+		}
+
+	      parse_lines (fh, pr_block, lines, maxlines, pst, lowest_pdr_addr);
 	      if (lines->nitems < fh->cline)
 		lines = shrink_linetable (lines);
 
@@ -3396,7 +3431,7 @@ psymtab_to_symtab_1 (pst, filename)
 	      pdr_in = pr_block;
 	      pdr_in_end = pdr_in + fh->cpd;
 	      for (; pdr_in < pdr_in_end; pdr_in++)
-		parse_procedure (pdr_in, 0, pr_block->adr, pst);
+		parse_procedure (pdr_in, 0, lowest_pdr_addr, pst);
 
 	      do_cleanups (old_chain);
 	    }
