@@ -125,7 +125,7 @@ static int error_index;
 %token NOLOAD DSECT COPY INFO OVERLAY
 %token NAME LNAME DEFINED TARGET_K SEARCH_DIR MAP ENTRY
 %token <integer> NEXT
-%token SIZEOF ADDR LOADADDR MAX MIN
+%token SIZEOF ADDR LOADADDR MAX_K MIN_K
 %token STARTUP HLL SYSLIB FLOAT NOFLOAT NOCROSSREFS
 %token ORIGIN FILL
 %token LENGTH CREATE_OBJECT_SYMBOLS INPUT GROUP OUTPUT CONSTRUCTORS
@@ -735,10 +735,10 @@ exp	:
 			{ $$ = exp_unop(ALIGN_K,$3); }
 	|	NAME
 			{ $$ = exp_nameop(NAME,$1); }
-	|	MAX '(' exp ',' exp ')'
-			{ $$ = exp_binop (MAX, $3, $5 ); }
-	|	MIN '(' exp ',' exp ')'
-			{ $$ = exp_binop (MIN, $3, $5 ); }
+	|	MAX_K '(' exp ',' exp ')'
+			{ $$ = exp_binop (MAX_K, $3, $5 ); }
+	|	MIN_K '(' exp ',' exp ')'
+			{ $$ = exp_binop (MIN_K, $3, $5 ); }
 	;
 
 

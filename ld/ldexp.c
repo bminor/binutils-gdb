@@ -1,5 +1,5 @@
 /* This module handles expression trees.
-Copyright (C) 1991, 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
+Copyright (C) 1991, 92, 93, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
 Written by Steve Chamberlain of Cygnus Support (sac@cygnus.com).
 
 This file is part of GLD, the Gnu Linker.
@@ -15,8 +15,9 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with GLD; see the file COPYING.  If not, write to
-the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+along with GLD; see the file COPYING.  If not, write to the Free
+Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+02111-1307, USA.  */
 
 /*
 This module is in charge of working out the contents of expressions.
@@ -106,6 +107,7 @@ exp_print_token (code)
 	{ SEARCH_DIR,"SEARCH_DIR" },
 	{ MAP,"MAP" },
 	{ QUAD,"QUAD" },
+	{ SQUAD,"SQUAD" },
 	{ LONG,"LONG" },
 	{ SHORT,"SHORT" },
 	{ BYTE,"BYTE" },
@@ -151,9 +153,9 @@ check (os, name, op)
      const char *op;
 {
   if (os == NULL)
-    einfo ("%F%P: %s uses undefined section %s\n", op, name);
+    einfo (_("%F%P: %s uses undefined section %s\n"), op, name);
   if (! os->processed)
-    einfo ("%F%P: %s forward reference of section %s\n", op, name);
+    einfo (_("%F%P: %s forward reference of section %s\n"), op, name);
 }
 
 etree_type *
@@ -265,14 +267,14 @@ fold_binary (tree, current_section, allocation_done, dot, dotp)
 	    {
 	    case '%':
 	      if (other.value == 0)
-		einfo ("%F%S %% by zero\n");
+		einfo (_("%F%S %% by zero\n"));
 	      result.value = ((bfd_signed_vma) result.value
 			      % (bfd_signed_vma) other.value);
 	      break;
 
 	    case '/':
 	      if (other.value == 0)
-		einfo ("%F%S / by zero\n");
+		einfo (_("%F%S / by zero\n"));
 	      result.value = ((bfd_signed_vma) result.value
 			      / (bfd_signed_vma) other.value);
 	      break;
@@ -294,6 +296,16 @@ fold_binary (tree, current_section, allocation_done, dot, dotp)
 	      BOP('|',|);
 	      BOP(ANDAND,&&);
 	      BOP(OROR,||);
+
+	    case MAX_K:
+	      if (result.value < other.value)
+		result = other;
+	      break;
+
+	    case MIN_K:
+	      if (result.value > other.value)
+		result = other;
+	      break;
 
 	    default:
 	      FAIL();
@@ -381,20 +393,30 @@ fold_name (tree, current_section, allocation_done, dot)
 		else if (allocation_done == lang_final_phase_enum
 			 || allocation_done == lang_allocating_phase_enum)
 		  {
-		    lang_output_section_statement_type *os;
-		
-		    os = (lang_output_section_statement_lookup
-			  (h->u.def.section->output_section->name));
+		    asection *output_section;
 
-		    /* FIXME: Is this correct if this section is being
-		       linked with -R?  */
-		    result = new_rel ((h->u.def.value
-				       + h->u.def.section->output_offset),
-				      os);
+		    output_section = h->u.def.section->output_section;
+		    if (output_section == NULL)
+		      einfo (_("%X%S: unresolvable symbol `%s' referenced in expression\n"),
+			     tree->name.name);
+		    else
+		      {
+			lang_output_section_statement_type *os;
+
+			os = (lang_output_section_statement_lookup
+			      (bfd_get_section_name (output_bfd,
+						     output_section)));
+
+			/* FIXME: Is this correct if this section is
+			   being linked with -R?  */
+			result = new_rel ((h->u.def.value
+					   + h->u.def.section->output_offset),
+					  os);
+		      }
 		  }
 	      }
 	    else if (allocation_done == lang_final_phase_enum)
-	      einfo ("%F%S: undefined symbol `%s' referenced in expression\n",
+	      einfo (_("%F%S: undefined symbol `%s' referenced in expression\n"),
 		     tree->name.name);
 	  }
 	break;
@@ -563,7 +585,7 @@ exp_fold_tree (tree, current_section, allocation_done, dot, dotp)
 	{
 	  /* Assignment to dot can only be done during allocation */
 	  if (tree->type.node_class == etree_provide)
-	    einfo ("%F%S can not PROVIDE assignment to location counter\n");
+	    einfo (_("%F%S can not PROVIDE assignment to location counter\n"));
 	  if (allocation_done == lang_allocating_phase_enum
 	      || (allocation_done == lang_final_phase_enum
 		  && current_section == abs_output_section))
@@ -573,11 +595,11 @@ exp_fold_tree (tree, current_section, allocation_done, dot, dotp)
 				      lang_allocating_phase_enum, dot,
 				      dotp);
 	      if (! result.valid)
-		einfo ("%F%S invalid assignment to location counter\n");
+		einfo (_("%F%S invalid assignment to location counter\n"));
 	      else
 		{
 		  if (current_section == NULL)
-		    einfo ("%F%S assignment to location counter invalid outside of SECTION\n");
+		    einfo (_("%F%S assignment to location counter invalid outside of SECTION\n"));
 		  else
 		    {
 		      bfd_vma nextdot;
@@ -587,7 +609,7 @@ exp_fold_tree (tree, current_section, allocation_done, dot, dotp)
 		      if (nextdot < dot
 			  && current_section != abs_output_section)
 			{
-			  einfo ("%F%S cannot move location counter backwards (from %V to %V)\n",
+			  einfo (_("%F%S cannot move location counter backwards (from %V to %V)\n"),
 				 dot, nextdot);
 			}
 		      else
@@ -615,7 +637,7 @@ exp_fold_tree (tree, current_section, allocation_done, dot, dotp)
 	      if (h == (struct bfd_link_hash_entry *) NULL)
 		{
 		  if (tree->type.node_class == etree_assign)
-		    einfo ("%P%F:%s: hash creation failed\n",
+		    einfo (_("%P%F:%s: hash creation failed\n"),
 			   tree->assign.dst);
 		}
 	      else if (tree->type.node_class == etree_provide
@@ -889,7 +911,7 @@ exp_get_vma (tree, def, name, allocation_done)
     {
       r = exp_fold_tree_no_dot (tree, abs_output_section, allocation_done);
       if (! r.valid && name != NULL)
-	einfo ("%F%S nonconstant expression for %s\n", name);
+	einfo (_("%F%S nonconstant expression for %s\n"), name);
       return r.value;
     }
   else
@@ -922,7 +944,7 @@ exp_get_abs_int (tree, def, name, allocation_done)
       res.value += res.section->bfd_section->vma;
     }
   else {
-    einfo ("%F%S non constant expression for %s\n",name);
+    einfo (_("%F%S non constant expression for %s\n"),name);
   }
   return res.value;
 }

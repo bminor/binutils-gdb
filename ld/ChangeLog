@@ -1,5 +1,8 @@
 Wed Jul  8 14:03:12 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ldgram.y: Change MAX to MAX_K and MIN to MIN_K, to avoid
+	conflicts with system header files.  Change all uses.
+
 	* Makefile.am (MAINTAINERCLEANFILES): Define.
 	* Makefile.in: Rebuild.
 

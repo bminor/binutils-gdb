@@ -4242,7 +4242,7 @@ lang_enter_overlay_section (name)
   if (overlay_max == NULL)
     overlay_max = size;
   else
-    overlay_max = exp_binop (MAX, overlay_max, size);
+    overlay_max = exp_binop (MAX_K, overlay_max, size);
 }
 
 /* Finish a section in an overlay.  There isn't any special to do
