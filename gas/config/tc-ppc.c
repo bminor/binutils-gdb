@@ -1323,7 +1323,7 @@ ppc_cleanup ()
     asection *seg = now_seg;
     subsegT subseg = now_subseg;
     asection *apuinfo_secp = (asection *) NULL;
-    int i;
+    unsigned int i;
 
     /* Create the .PPC.EMB.apuinfo section.  */
     apuinfo_secp = subseg_new (".PPC.EMB.apuinfo", 0);

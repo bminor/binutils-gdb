@@ -1,3 +1,7 @@
+2002-10-12  Elias Athanasopoulos  <eathan@otenet.gr>
+
+	* config/tc-ppc.c (ppc_cleanup): Make 'i' unsigned int.
+
 2002-10-12  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/tc-mips.h (mips_relax_frag): Take segment as argument.
