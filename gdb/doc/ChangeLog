@@ -1,3 +1,8 @@
+2001-12-31  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Free Software): New section ``Free Software Needs
+	Free Documentation''.
+
 2001-12-30  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* stabs.texinfo:
