@@ -1,3 +1,7 @@
+Sun Aug 17 20:31:57 1997  Michael Snyder  (msnyder@cleaver.cygnus.com)
+
+	* m32r-stub.c: fix typo
+
 Sun Aug 17 17:33:34 1997  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* remote-sds.c: Remove unused remnants of remote.c.
