@@ -39,6 +39,7 @@
 #define som_symbol(asymbol) ((som_symbol_type *) (&(asymbol)->the_bfd))
 
 extern void som_file_symbol PARAMS ((char *));
+extern void som_frob_file PARAMS ((void));
 extern void obj_som_version PARAMS ((int));
 extern void obj_som_init_stab_section PARAMS ((segT));
 extern void obj_som_copyright PARAMS ((int));

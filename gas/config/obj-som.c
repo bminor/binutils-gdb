@@ -27,6 +27,7 @@
 #include "obstack.h"
 
 static void obj_som_weak PARAMS ((int));
+static void adjust_stab_sections PARAMS ((bfd *, asection *, PTR));
 
 const pseudo_typeS obj_pseudo_table[] =
 {
@@ -52,7 +53,7 @@ obj_read_begin_hook ()
 
 void
 obj_som_compiler (unused)
-     int unused;
+     int unused ATTRIBUTE_UNUSED;
 {
   char *buf;
   char c;
@@ -129,7 +130,7 @@ obj_som_compiler (unused)
 
 void
 obj_som_version (unused)
-     int unused;
+     int unused ATTRIBUTE_UNUSED;
 {
   char *version, c;
 
@@ -175,7 +176,7 @@ obj_som_version (unused)
 
 void
 obj_som_copyright (unused)
-     int unused;
+     int unused ATTRIBUTE_UNUSED;
 {
   char *copyright, c;
 
@@ -283,7 +284,7 @@ static void
 adjust_stab_sections (abfd, sec, xxx)
      bfd *abfd;
      asection *sec;
-     PTR xxx;
+     PTR xxx ATTRIBUTE_UNUSED;
 {
   asection *strsec;
   char *p;

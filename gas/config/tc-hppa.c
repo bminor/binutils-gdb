@@ -7982,16 +7982,16 @@ update_subspace (space, name, loadable, code_only, comdat, common, dup_common,
 		 sort, zero, access, space_index, alignment, quadrant, section)
      sd_chain_struct *space;
      char *name;
-     int loadable;
-     int code_only;
+     int loadable ATTRIBUTE_UNUSED;
+     int code_only ATTRIBUTE_UNUSED;
      int comdat;
      int common;
      int dup_common;
-     int zero;
+     int zero ATTRIBUTE_UNUSED;
      int sort;
      int access;
-     int space_index;
-     int alignment;
+     int space_index ATTRIBUTE_UNUSED;
+     int alignment ATTRIBUTE_UNUSED;
      int quadrant;
      asection *section;
 {
@@ -8053,9 +8053,14 @@ pa_segment_to_space (seg)
   return NULL;
 }
 
-/* Return the space chain entry for the subspace with the name NAME or
-   NULL if no such subspace exists.
+/* Return the first space chain entry for the subspace with the name
+   NAME or NULL if no such subspace exists.
 
+   When there are multiple subspaces with the same name, switching to
+   the first (i.e., default) subspace is preferable in most situations.
+   For example, it wouldn't be desirable to merge COMDAT data with non
+   COMDAT data.
+    
    Uses a linear search through all the spaces and subspaces, this may
    not be appropriate if we ever being placing each function in its
    own subspace.  */
