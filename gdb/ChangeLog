@@ -1,3 +1,11 @@
+2002-08-23  Mark Kettenis  <kettenis@gnu.org>
+
+	* linux-proc.c (struct linux_corefile_thread_data): Add num_notes
+	member.
+	(linux_corefile_thread_callback): Increase args->num_notes.
+	(linux_make_note_section): Initialize thread_args.num_notes, and
+	use it to determine whether notes for any threads were created.
+
 2002-08-23  Donn Terry  <dterry@microsoft.com>
 
 	* proc-api.c (rw_table): Do not include a row for PCDSTOP if the
