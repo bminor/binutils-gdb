@@ -78,6 +78,10 @@ all:	$(ALL)
 info:	cfg-paper.info
 	$(MAKE) subdir_do DO=info "DODIRS=$(SUBDIRS)"
 
+clean-info:
+	$(MAKE) subdir_do DO=clean-info "DODIRS=$(SUBDIRS)"
+	rm -f cfg-paper.info
+
 cfg-paper.info: cfg-paper.texi
 	$(MAKEINFO) -o cfg-paper.info $(srcdir)/cfg-paper.texi
 
@@ -93,24 +97,26 @@ install-dir.info:
 	$(INSTALL_DATA) dir.info $(infodir)/dir.info
 
 # clib prms
-all.normal: all-texinfo all-bison all-byacc all-ld all-gnulib all-gdb all-make \
-	all-cvs all-emacs all-ispell
+all.normal: all-texinfo all-bison all-byacc all-flex all-ld all-gnulib \
+	all-gdb all-make all-cvs all-emacs all-ispell
 all.cross: all-bison all-ld all-gnulib all-gdb
 #	$(MAKE) subdir_do DO=all "DODIRS=$(SUBDIRS) $(OTHERS)"
 
-clean: clean-libiberty clean-texinfo clean-bfd clean-binutils clean-bison \
-	clean-byacc clean-ld clean-gas clean-gcc clean-gnulib clean-readline \
-	clean-glob clean-gdb clean-make clean-diff clean-grep clean-rcs \
-	clean-gdbm clean-cvs clean-emacs clean-ispell
+clean: clean-libiberty clean-texinfo clean-bfd clean-binutils \
+	clean-bison clean-byacc clean-flex clean-ld clean-gas \
+	clean-gcc clean-gnulib clean-readline clean-glob clean-gdb \
+	clean-make clean-diff clean-grep clean-rcs clean-gdbm \
+	clean-cvs clean-emacs clean-ispell
 	rm -rf *.a TEMP errs core *.o *~ \#* TAGS *.E
 
 install: $(INSTALL_TARGET)
 	$(INSTALL_DATA) configure.man $(man1dir)/configure.1
 
-install.all: install-dirs install-libiberty install-texinfo install-binutils install-bison \
-	install-byacc install-ld install-gas install-gcc install-gnulib \
-	install-readline install-glob install-gdb install-make install-cvs \
-	install-emacs install-ispell
+install.all: install-dirs install-libiberty install-texinfo \
+	install-binutils install-bison install-byacc install-flex \
+	install-ld install-gas install-gcc install-gnulib \
+	install-readline install-glob install-gdb install-make \
+	install-cvs install-emacs install-ispell
 install.cross: install-dirs install-libiberty install-binutils install-bison \
 	install-byacc install-ld install-gas install-gnulib \
 	install-readline install-glob install-gdb
@@ -1336,6 +1342,63 @@ clean-ispell: force
 install-ispell: install-rcs install-gdbm force
 	if [ -d $(unsubdir)/ispell ] ; then \
 		(cd $(unsubdir)/ispell$(subdir); \
+		$(MAKE) \
+			"against=$(against)" \
+			"AR=$(AR)" \
+			"AR_FLAGS=$(AR_FLAGS)" \
+			"CC=$(CC)" \
+			"RANLIB=$(RANLIB)" \
+			"LOADLIBES=$(LOADLIBES)" \
+			"LDFLAGS=$(LDFLAGS)" \
+			"BISON=$(BISON)" \
+			"MAKEINFO=$(MAKEINFO)" \
+			install) ; \
+	else \
+		true ; \
+	fi
+
+### flex
+.PHONY: all-flex just-flex
+all-flex: just-flex
+just-flex: force
+	if [ -d $(unsubdir)/flex ] ; then \
+		(cd $(unsubdir)/flex$(subdir); \
+		$(MAKE) \
+			"against=$(against)" \
+			"AR=$(AR)" \
+			"AR_FLAGS=$(AR_FLAGS)" \
+			"CC=$(CC)" \
+			"RANLIB=$(RANLIB)" \
+			"LOADLIBES=$(LOADLIBES)" \
+			"LDFLAGS=$(LDFLAGS)" \
+			"BISON=$(BISON)" \
+			"MAKEINFO=$(MAKEINFO)" \
+			all) ; \
+	else \
+		true ; \
+	fi
+
+clean-flex: force
+	if [ -d $(unsubdir)/flex ] ; then \
+		(cd $(unsubdir)/flex$(subdir); \
+		$(MAKE) \
+			"against=$(against)" \
+			"AR=$(AR)" \
+			"AR_FLAGS=$(AR_FLAGS)" \
+			"CC=$(CC)" \
+			"RANLIB=$(RANLIB)" \
+			"LOADLIBES=$(LOADLIBES)" \
+			"LDFLAGS=$(LDFLAGS)" \
+			"BISON=$(BISON)" \
+			"MAKEINFO=$(MAKEINFO)" \
+			clean) ; \
+	else \
+		true ; \
+	fi
+
+install-flex: force
+	if [ -d $(unsubdir)/flex ] ; then \
+		(cd $(unsubdir)/flex$(subdir); \
 		$(MAKE) \
 			"against=$(against)" \
 			"AR=$(AR)" \
