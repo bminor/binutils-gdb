@@ -1,5 +1,10 @@
 2004-02-22  Daniel Jacobowitz  <drow@mvista.com>
 
+	* dwarf2read.c (partial_die_full_name): Always return NULL or
+	malloc'd memory.  Don't try to free real_parent->full_name.
+
+2004-02-22  Daniel Jacobowitz  <drow@mvista.com>
+
 	* dwarf2read.c (struct dwarf2_cu): Add read_in_chain and per_cu.
 	(dwarf2_cu_tree): New variable.
 	(struct dwarf2_per_cu_data): New type.

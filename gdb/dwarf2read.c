@@ -1688,13 +1688,13 @@ static char *
 partial_die_full_name (struct partial_die_info *pdi,
 		       struct dwarf2_cu *cu)
 {
-  char *parent_name, *full_name;
+  char *parent_name = NULL, *full_name;
   struct partial_die_info *real_pdi, *real_parent;
   struct dwarf2_cu *spec_cu;
   int free_parent_name = 0;
 
-  if (pdi->full_name_set)
-    return pdi->full_name;
+  /* We shouldn't even have been called in this case.  */
+  gdb_assert (!pdi->full_name_set);
 
   /* Note: this code could probably be micro-optimized.  We may be
      able to avoid redoing the hash table lookup, and we might be able
@@ -1710,7 +1710,7 @@ partial_die_full_name (struct partial_die_info *pdi,
      CU or later in this CU.  It's correct, but somewhat inefficient.  */
 
   if (real_pdi->full_name_set)
-    return real_pdi->full_name;
+    return xstrdup (real_pdi->full_name);
 
   real_parent = real_pdi->die_parent;
   if (real_parent == NULL)
@@ -1724,12 +1724,14 @@ partial_die_full_name (struct partial_die_info *pdi,
       fixup_partial_die (real_parent, spec_cu);
       parent_name = partial_die_full_name (real_parent, spec_cu);
       /* Could cache the full name, too.  */
-      free_parent_name = 1;
+      if (parent_name != NULL)
+	free_parent_name = 1;
     }
 
   /* End hack zone.  */
 
-  parent_name = real_parent->full_name;
+  if (parent_name == NULL)
+    parent_name = real_parent->full_name;
   if (parent_name == NULL)
     parent_name = real_parent->name;
 
