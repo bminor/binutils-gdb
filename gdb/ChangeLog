@@ -1,3 +1,8 @@
+2000-03-15  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	From "Peter.Schauer" <Peter.Schauer@regent.e-technik.tu-muenchen.de>
+	* symfile.c (reread_symbols):  Clear msymbol hash table.
+
 2000-03-15  Jim Blandy  <jimb@redhat.com>
 
 	Deal with the inferior unloading shared objects.

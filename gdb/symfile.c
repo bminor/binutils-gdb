@@ -1775,6 +1775,10 @@ reread_symbols ()
 	      objfile->free_psymtabs = NULL;
 	      objfile->msymbols = NULL;
 	      objfile->minimal_symbol_count = 0;
+	      memset (&objfile->msymbol_hash, 0,
+		      sizeof (objfile->msymbol_hash));
+	      memset (&objfile->msymbol_demangled_hash, 0,
+		      sizeof (objfile->msymbol_demangled_hash));
 	      objfile->fundamental_types = NULL;
 	      if (objfile->sf != NULL)
 		{
