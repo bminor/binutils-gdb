@@ -1824,7 +1824,7 @@ lin-lwp.o: lin-lwp.c $(defs_h) $(gdb_assert_h) $(gdb_string_h) $(gdb_wait_h) \
 	$(gdbthread_h) $(inferior_h) $(target_h) $(regcache_h) $(gdbcmd_h)
 linespec.o: linespec.c $(defs_h) $(symtab_h) $(frame_h) $(command_h) \
 	$(symfile_h) $(objfiles_h) $(demangle_h) $(value_h) $(completer_h) \
-	$(cp_abi_h) $(source_h)
+	$(cp_abi_h) $(source_h) $(parser_defs_h)
 linux-proc.o: linux-proc.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(gregset_h) $(gdbcore_h) $(gdbthread_h) $(elf_bfd_h) \
 	$(cli_decode_h) $(gdb_string_h)

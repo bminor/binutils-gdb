@@ -1,3 +1,9 @@
+2002-10-23  David Carlton  <carlton@math.stanford.edu>
+
+	* linespec.c: #include "parser-defs.h".
+	Delete prototype for find_template_name_end.
+	* Makefile.in (linespec.o): Depend on $(parser_defs_h).
+
 2002-10-23  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* NEWS: add recent mi fixes.

@@ -31,11 +31,7 @@
 #include "value.h"
 #include "completer.h"
 #include "cp-abi.h"
-
-/* Prototype for one function in parser-defs.h,
-   instead of including that entire file. */
-
-extern char *find_template_name_end (char *);
+#include "parser-defs.h"
 
 /* We share this one with symtab.c, but it is not exported widely. */
 
