@@ -1,4 +1,4 @@
-/* Intel 386 native support for SYSV systems (pre-SVR4).
+/* Intel 386 native support for System V systems (pre-SVR4).
 
    Copyright 1988, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1998,
    1999, 2000, 2002 Free Software Foundation, Inc.
@@ -46,19 +46,8 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 
-
-/* FIXME: 1998-10-21/jsm: The following used to be just "#include
-   <sys/debugreg.h>", but the the Linux kernel (version 2.1.x) and
-   glibc 2.0.x are not in sync; including <sys/debugreg.h> will result
-   in an error.  With luck, these losers will get their act together
-   and we can trash this hack in the near future.  */
-
 #ifdef TARGET_HAS_HARDWARE_WATCHPOINTS
-#ifdef HAVE_ASM_DEBUGREG_H
-#include <asm/debugreg.h>
-#else
 #include <sys/debugreg.h>
-#endif
 #endif
 
 #include <sys/file.h>
@@ -73,8 +62,8 @@
 #include "target.h"
 
 
-/* this table must line up with REGISTER_NAMES in tm-i386v.h */
-/* symbols like 'EAX' come from <sys/reg.h> */
+/* Mapping between the general-purpose registers in `struct user'
+   format and GDB's register array layout.  */
 static int regmap[] =
 {
   EAX, ECX, EDX, EBX,
@@ -83,37 +72,34 @@ static int regmap[] =
   DS, ES, FS, GS,
 };
 
-/* blockend is the value of u.u_ar0, and points to the
- * place where GS is stored
- */
+/* Support for the user struct.  */
 
-int
-i386_register_u_addr (int blockend, int regnum)
+/* Return the address of register REGNUM.  BLOCKEND is the value of
+   u.u_ar0, and points to the place where GS is stored.  */
+
+CORE_ADDR
+register_u_addr (CORE_ADDR blockend, int regnum)
 {
   struct user u;
-  int fpstate;
-  int ubase;
+  CORE_ADDR fpstate;
 
-  ubase = blockend;
-  /* FIXME:  Should have better way to test floating point range */
-  if (regnum >= FP0_REGNUM && regnum <= (FP0_REGNUM + 7))
+  if (FP_REGNUM_P (regnum))
     {
-#ifdef KSTKSZ			/* SCO, and others? */
-      ubase += 4 * (SS + 1) - KSTKSZ;
-      fpstate = ubase + ((char *) &u.u_fps.u_fpstate - (char *) &u);
+#ifdef KSTKSZ			/* SCO, and others?  */
+      blockend += 4 * (SS + 1) - KSTKSZ;
+      fpstate = blockend + ((char *) &u.u_fps.u_fpstate - (char *) &u);
       return (fpstate + 0x1c + 10 * (regnum - FP0_REGNUM));
 #else
-      fpstate = ubase + ((char *) &u.i387.st_space - (char *) &u);
+      fpstate = blockend + ((char *) &u.i387.st_space - (char *) &u);
       return (fpstate + 10 * (regnum - FP0_REGNUM));
 #endif
     }
-  else
-    {
-      return (ubase + 4 * regmap[regnum]);
-    }
 
+  return (blockend + 4 * regmap[regnum]);
 }
-
+
+/* Return the size of the user struct.  */
+
 int
 kernel_u_size (void)
 {

@@ -209,8 +209,8 @@ struct op opt[] =
 
   "------", 8, 16, "0111 1010 0000 0000", "halt", 0,
   "------", 10, 16, "0011 1101 ssN0 dddd", "in rd,@rs", 0,
-  "------", 12, 16, "0011 1101 dddd 0100 imm16", "in rd,imm16", 0,
   "------", 12, 8, "0011 1100 ssN0 dddd", "inb rbd,@rs", 0,
+  "------", 12, 16, "0011 1011 dddd 0100 imm16", "in rd,imm16", 0,
   "------", 10, 8, "0011 1010 dddd 0100 imm16", "inb rbd,imm16", 0,
   "-ZSV--", 11, 16, "0010 1001 ddN0 imm4m1", "inc @rd,imm4m1", 0,
   "-ZSV--", 14, 16, "0110 1001 ddN0 imm4m1 address_dst", "inc address_dst(rd),imm4m1", 0,

@@ -137,15 +137,15 @@ extern CORE_ADDR m32r_frame_saved_pc (struct frame_info *);
 /* mvs_check  FRAME_SAVED_PC */
 #define FRAME_SAVED_PC(fi)		m32r_frame_saved_pc (fi)
 
-/* mvs_check  EXTRACT_RETURN_VALUE */
-#define EXTRACT_RETURN_VALUE(TYPE, REGBUF, VALBUF) \
+/* mvs_check  DEPRECATED_EXTRACT_RETURN_VALUE */
+#define DEPRECATED_EXTRACT_RETURN_VALUE(TYPE, REGBUF, VALBUF) \
   memcpy ((VALBUF), \
 	  (char *)(REGBUF) + REGISTER_BYTE (V0_REGNUM) + \
 	  ((TYPE_LENGTH (TYPE) > 4 ? 8 : 4) - TYPE_LENGTH (TYPE)), \
 	  TYPE_LENGTH (TYPE))
 
-/* mvs_check  STORE_RETURN_VALUE */
-#define STORE_RETURN_VALUE(TYPE, VALBUF) \
+/* mvs_check  DEPRECATED_STORE_RETURN_VALUE */
+#define DEPRECATED_STORE_RETURN_VALUE(TYPE, VALBUF) \
   write_register_bytes(REGISTER_BYTE (V0_REGNUM) + \
 		       ((TYPE_LENGTH (TYPE) > 4 ? 8:4) - TYPE_LENGTH (TYPE)),\
 		       (VALBUF), TYPE_LENGTH (TYPE));
@@ -181,7 +181,7 @@ extern void m32r_write_sp (CORE_ADDR val);
 extern use_struct_convention_fn m32r_use_struct_convention;
 #define USE_STRUCT_CONVENTION(GCC_P, TYPE) m32r_use_struct_convention (GCC_P, TYPE)
 
-#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
+#define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
   extract_address (REGBUF + REGISTER_BYTE (V0_REGNUM), \
 		   REGISTER_RAW_SIZE (V0_REGNUM))
 

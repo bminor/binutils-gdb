@@ -45,7 +45,8 @@ static boolean create_got_section
 static boolean elf_i386_create_dynamic_sections
   PARAMS((bfd *, struct bfd_link_info *));
 static void elf_i386_copy_indirect_symbol
-  PARAMS ((struct elf_link_hash_entry *, struct elf_link_hash_entry *));
+  PARAMS ((struct elf_backend_data *, struct elf_link_hash_entry *,
+	   struct elf_link_hash_entry *));
 static int elf_i386_tls_transition
   PARAMS ((struct bfd_link_info *, int, int));
 
@@ -57,7 +58,7 @@ static boolean elf_i386_check_relocs
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   const Elf_Internal_Rela *));
 static asection *elf_i386_gc_mark_hook
-  PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Rela *,
+  PARAMS ((asection *, struct bfd_link_info *, Elf_Internal_Rela *,
 	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
 static boolean elf_i386_gc_sweep_hook
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
@@ -594,7 +595,7 @@ elf_i386_mkobject (abfd)
     return false;
   return true;
 }
-                 
+
 static boolean
 elf_i386_object_p (abfd)
   bfd *abfd;
@@ -697,6 +698,7 @@ elf_i386_link_hash_table_create (abfd)
   ret->srelplt = NULL;
   ret->sdynbss = NULL;
   ret->srelbss = NULL;
+  ret->tls_ldm_got.refcount = 0;
   ret->sym_sec.abfd = NULL;
 
   return &ret->elf.root;
@@ -766,7 +768,8 @@ elf_i386_create_dynamic_sections (dynobj, info)
 /* Copy the extra info we tack onto an elf_link_hash_entry.  */
 
 static void
-elf_i386_copy_indirect_symbol (dir, ind)
+elf_i386_copy_indirect_symbol (bed, dir, ind)
+     struct elf_backend_data *bed;
      struct elf_link_hash_entry *dir, *ind;
 {
   struct elf_i386_link_hash_entry *edir, *eind;
@@ -808,7 +811,13 @@ elf_i386_copy_indirect_symbol (dir, ind)
       eind->dyn_relocs = NULL;
     }
 
-  _bfd_elf_link_hash_copy_indirect (dir, ind);
+  if (ind->root.type == bfd_link_hash_indirect
+      && dir->got.refcount <= 0)
+    {
+      edir->tls_type = eind->tls_type;
+      eind->tls_type = GOT_UNKNOWN;
+    }
+  _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
 }
 
 static int
@@ -1174,8 +1183,8 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
    relocation.  */
 
 static asection *
-elf_i386_gc_mark_hook (abfd, info, rel, h, sym)
-     bfd *abfd;
+elf_i386_gc_mark_hook (sec, info, rel, h, sym)
+     asection *sec;
      struct bfd_link_info *info ATTRIBUTE_UNUSED;
      Elf_Internal_Rela *rel;
      struct elf_link_hash_entry *h;
@@ -1205,9 +1214,7 @@ elf_i386_gc_mark_hook (abfd, info, rel, h, sym)
 	}
     }
   else
-    {
-      return bfd_section_from_elf_index (abfd, sym->st_shndx);
-    }
+    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
 
   return NULL;
 }
@@ -1400,7 +1407,7 @@ elf_i386_adjust_dynamic_symbol (info, h)
     }
 
   /* If we didn't find any dynamic relocs in read-only sections, then
-     we'll be keeping the dynamic relocs and avoiding the copy reloc.  */ 
+     we'll be keeping the dynamic relocs and avoiding the copy reloc.  */
   if (p == NULL)
     {
       h->elf_link_hash_flags &= ~ELF_LINK_NON_GOT_REF;
@@ -1552,7 +1559,7 @@ allocate_dynrelocs (h, inf)
       && !info->shared
       && h->dynindx == -1
       && elf_i386_hash_entry(h)->tls_type == GOT_TLS_IE)
-    h->got.offset = (bfd_vma) -1;    
+    h->got.offset = (bfd_vma) -1;
   else if (h->got.refcount > 0)
     {
       asection *s;
@@ -2428,7 +2435,7 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	  if (r_type == R_386_TLS_LE_32)
 	    {
-	      BFD_ASSERT (unresolved_reloc == false);
+	      BFD_ASSERT (! unresolved_reloc);
 	      if (ELF32_R_TYPE (rel->r_info) == R_386_TLS_GD)
 		{
 		  unsigned int val, type;
@@ -2562,13 +2569,17 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 	      outrel.r_offset = (htab->sgot->output_section->vma
 				 + htab->sgot->output_offset + off);
 
-	      bfd_put_32 (output_bfd, 0,
-			  htab->sgot->contents + off);
 	      indx = h && h->dynindx != -1 ? h->dynindx : 0;
 	      if (r_type == R_386_TLS_GD)
 		dr_type = R_386_TLS_DTPMOD32;
 	      else
 		dr_type = R_386_TLS_TPOFF32;
+	      if (dr_type == R_386_TLS_TPOFF32 && indx == 0)
+		bfd_put_32 (output_bfd, relocation - dtpoff_base (info),
+			    htab->sgot->contents + off);
+	      else
+		bfd_put_32 (output_bfd, 0,
+			    htab->sgot->contents + off);
 	      outrel.r_info = ELF32_R_INFO (indx, dr_type);
 	      loc = (Elf32_External_Rel *) htab->srelgot->contents;
 	      loc += htab->srelgot->reloc_count++;
@@ -2578,7 +2589,7 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 		{
 		  if (indx == 0)
 		    {
-	    	      BFD_ASSERT (unresolved_reloc == false);
+	    	      BFD_ASSERT (! unresolved_reloc);
 		      bfd_put_32 (output_bfd,
 				  relocation - dtpoff_base (info),
 				  htab->sgot->contents + off + 4);
@@ -2739,14 +2750,11 @@ elf_i386_relocate_section (output_bfd, info, input_bfd, input_section,
 	  break;
 	}
 
-      /* FIXME: Why do we allow debugging sections to escape this error?
-	 More importantly, why do we not emit dynamic relocs for
-	 R_386_32 above in debugging sections (which are ! SEC_ALLOC)?
-	 If we had emitted the dynamic reloc, we could remove the
-	 fudge here.  */
+      /* Dynamic relocs are not propagated for SEC_DEBUGGING sections
+	 because such sections are not SEC_ALLOC and thus ld.so will
+	 not process them.  */
       if (unresolved_reloc
-	  && !(info->shared
-	       && (input_section->flags & SEC_DEBUGGING) != 0
+	  && !((input_section->flags & SEC_DEBUGGING) != 0
 	       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0))
 	(*_bfd_error_handler)
 	  (_("%s(%s+0x%lx): unresolvable relocation against symbol `%s'"),
@@ -2885,7 +2893,7 @@ elf_i386_finish_dynamic_symbol (output_bfd, info, h, sym)
 	     the .plt section.  Leave the value alone.  This is a clue
 	     for the dynamic linker, to make function pointer
 	     comparisons work between an application and shared
-	     library.  */  
+	     library.  */
 	  sym->st_shndx = SHN_UNDEF;
 	}
     }
@@ -3146,4 +3154,6 @@ elf_i386_finish_dynamic_sections (output_bfd, info)
 #define elf_backend_relocate_section	      elf_i386_relocate_section
 #define elf_backend_size_dynamic_sections     elf_i386_size_dynamic_sections
 
+#ifndef ELF32_I386_C_INCLUDED
 #include "elf32-target.h"
+#endif

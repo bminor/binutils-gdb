@@ -267,7 +267,7 @@ extern CORE_ADDR sparc_skip_prologue (CORE_ADDR);
 /* Write into appropriate registers a function return value of type
    TYPE, given in virtual format.  */
 
-#define STORE_RETURN_VALUE(TYPE, VALBUF) \
+#define DEPRECATED_STORE_RETURN_VALUE(TYPE, VALBUF) \
      sparc_store_return_value (TYPE, VALBUF)
 extern void sparc_store_return_value (struct type *, char *);
 
@@ -275,7 +275,7 @@ extern void sparc_store_return_value (struct type *, char *);
    the address in which a function should return its structure value,
    as a CORE_ADDR (or an expression that can be used as one).  */
 
-#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
+#define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
      sparc_extract_struct_value_address (REGBUF)
 
 extern CORE_ADDR sparc_extract_struct_value_address (char *);
@@ -717,7 +717,7 @@ sparc32_push_arguments (int, struct value **, CORE_ADDR, int, CORE_ADDR);
    function return value of type TYPE, and copy that, in virtual
    format, into VALBUF.  */
 
-#define EXTRACT_RETURN_VALUE(TYPE, REGBUF, VALBUF) \
+#define DEPRECATED_EXTRACT_RETURN_VALUE(TYPE, REGBUF, VALBUF) \
      sparc32_extract_return_value (TYPE, REGBUF, VALBUF)
 extern void sparc32_extract_return_value (struct type *, char[], char *);
 

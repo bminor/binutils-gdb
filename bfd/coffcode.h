@@ -1739,7 +1739,7 @@ coff_mkobject_hook (abfd, filehdr, aouthdr)
   struct internal_filehdr *internal_f = (struct internal_filehdr *) filehdr;
   coff_data_type *coff;
 
-  if (coff_mkobject (abfd) == false)
+  if (! coff_mkobject (abfd))
     return NULL;
 
   coff = coff_data (abfd);
@@ -1782,8 +1782,8 @@ coff_mkobject_hook (abfd, filehdr, aouthdr)
       xcoff->toc = internal_a->o_toc;
       xcoff->sntoc = internal_a->o_sntoc;
       xcoff->snentry = internal_a->o_snentry;
-      xcoff->text_align_power = internal_a->o_algntext;
-      xcoff->data_align_power = internal_a->o_algndata;
+      bfd_xcoff_text_align_power (abfd) = internal_a->o_algntext;
+      bfd_xcoff_data_align_power (abfd) = internal_a->o_algndata;
       xcoff->modtype = internal_a->o_modtype;
       xcoff->cputype = internal_a->o_cputype;
       xcoff->maxdata = internal_a->o_maxdata;
@@ -2177,7 +2177,7 @@ symname_in_debug_hook (abfd, sym)
      bfd * abfd ATTRIBUTE_UNUSED;
      struct internal_syment *sym;
 {
-  return SYMNAME_IN_DEBUG (sym) ? true : false;
+  return SYMNAME_IN_DEBUG (sym) != 0;
 }
 
 #else
@@ -2394,7 +2394,7 @@ coff_write_relocs (abfd, first_undef)
 	return false;
 
 #ifdef COFF_WITH_PE
-      if (s->reloc_count > 0xffff)
+      if (obj_pe (abfd) && s->reloc_count >= 0xffff)
 	{
 	  /* encode real count here as first reloc */
 	  struct internal_reloc n;
@@ -2822,8 +2822,8 @@ coff_set_arch_mach (abfd, arch, machine)
   if (! bfd_default_set_arch_mach (abfd, arch, machine))
     return false;
 
-  if (arch != bfd_arch_unknown &&
-      coff_set_flags (abfd, &dummy1, &dummy2) != true)
+  if (arch != bfd_arch_unknown
+      && ! coff_set_flags (abfd, &dummy1, &dummy2))
     return false;		/* We can't represent this type */
 
   return true;			/* We're easy ...  */
@@ -3084,8 +3084,10 @@ coff_compute_section_file_positions (abfd)
 	     AIX executable is stripped with gnu strip because the default vma
 	     of native is 0x10000150 but default for gnu is 0x10000140.  Gnu
 	     stripped gnu excutable passes this check because the filepos is 
-	     0x0140. */
-	  if (!strcmp (current->name, _TEXT)) 
+	     0x0140.  This problem also show up with 64 bit shared objects. The
+	     data section must also be aligned.  */
+	  if (!strcmp (current->name, _TEXT) 
+	      || !strcmp (current->name, _DATA)) 
 	    {
 	      bfd_vma pad;
 	      bfd_vma align;
@@ -3403,7 +3405,7 @@ coff_write_object_contents (abfd)
 
   lnno_size = coff_count_linenumbers (abfd) * bfd_coff_linesz (abfd);
 
-  if (abfd->output_has_begun == false)
+  if (! abfd->output_has_begun)
     {
       if (! coff_compute_section_file_positions (abfd))
 	return false;
@@ -3418,7 +3420,7 @@ coff_write_object_contents (abfd)
     {
 #ifdef COFF_WITH_PE
       /* we store the actual reloc count in the first reloc's addr */
-      if (current->reloc_count > 0xffff)
+      if (obj_pe (abfd) && current->reloc_count >= 0xffff)
 	reloc_count ++;
 #endif
       reloc_count += current->reloc_count;
@@ -3449,7 +3451,7 @@ coff_write_object_contents (abfd)
 	  reloc_base += current->reloc_count * bfd_coff_relsz (abfd);
 #ifdef COFF_WITH_PE
 	  /* extra reloc to hold real count */
-	  if (current->reloc_count > 0xffff)
+	  if (obj_pe (abfd) && current->reloc_count >= 0xffff)
 	    reloc_base += bfd_coff_relsz (abfd);
 #endif
 	}
@@ -4194,7 +4196,7 @@ coff_set_section_contents (abfd, section, location, offset, count)
      file_ptr offset;
      bfd_size_type count;
 {
-  if (abfd->output_has_begun == false)	/* set by bfd.c handler */
+  if (! abfd->output_has_begun)	/* set by bfd.c handler */
     {
       if (! coff_compute_section_file_positions (abfd))
 	return false;
@@ -5370,6 +5372,10 @@ static const bfd_coff_backend_data bfd_coff_std_swap_table =
 
 #ifndef coff_bfd_merge_sections
 #define coff_bfd_merge_sections		    bfd_generic_merge_sections
+#endif
+
+#ifndef coff_bfd_discard_group
+#define coff_bfd_discard_group		    bfd_generic_discard_group
 #endif
 
 #define CREATE_BIG_COFF_TARGET_VEC(VAR, NAME, EXTRA_O_FLAGS, EXTRA_S_FLAGS, UNDER, ALTERNATIVE)	\

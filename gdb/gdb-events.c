@@ -119,6 +119,16 @@ architecture_changed_event (void)
   current_event_hooks->architecture_changed ();
 }
 
+void
+target_changed_event (void)
+{
+  if (gdb_events_debug)
+    fprintf_unfiltered (gdb_stdlog, "target_changed_event\n");
+  if (!current_event_hooks->target_changed)
+    return;
+  current_event_hooks->target_changed ();
+}
+
 #endif
 
 #if WITH_GDB_EVENTS
@@ -134,6 +144,14 @@ set_gdb_event_hooks (struct gdb_events *vector)
 }
 #endif
 
+#if WITH_GDB_EVENTS
+void
+clear_gdb_event_hooks (void)
+{
+  set_gdb_event_hooks (&null_event_hooks);
+}
+#endif
+
 enum gdb_event
 {
   breakpoint_create,
@@ -143,6 +161,7 @@ enum gdb_event
   tracepoint_delete,
   tracepoint_modify,
   architecture_changed,
+  target_changed,
   nr_gdb_events
 };
 
@@ -266,6 +285,14 @@ queue_architecture_changed (void)
   append (event);
 }
 
+static void
+queue_target_changed (void)
+{
+  struct event *event = XMALLOC (struct event);
+  event->type = target_changed;
+  append (event);
+}
+
 void
 gdb_events_deliver (struct gdb_events *vector)
 {
@@ -314,6 +341,9 @@ gdb_events_deliver (struct gdb_events *vector)
 	case architecture_changed:
 	  vector->architecture_changed ();
 	  break;
+	case target_changed:
+	  vector->target_changed ();
+	  break;
 	}
       delivering_events = event->next;
       xfree (event);
@@ -333,6 +363,7 @@ _initialize_gdb_events (void)
   queue_event_hooks.tracepoint_delete = queue_tracepoint_delete;
   queue_event_hooks.tracepoint_modify = queue_tracepoint_modify;
   queue_event_hooks.architecture_changed = queue_architecture_changed;
+  queue_event_hooks.target_changed = queue_target_changed;
 #endif
 
   c = add_set_cmd ("eventdebug", class_maintenance, var_zinteger,

@@ -1,3 +1,258 @@
+2002-08-16  Christian Groessler <chris@groessler.org>
+
+	* z8k-dis.c (unparse_instr): case CLASS_BA: Designate hex
+	values as those.
+	* z8kgen.c (opt): Fix definition of "in rd,imm16" opcode.
+	* z8k-opc.h: Regenerated with new z8kgen.c.
+
+2002-08-19  Elena Zannoni  <ezannoni@redhat.com> 
+
+        From  matthew green  <mrg@redhat.com>
+
+	* ppc-dis.c (powerpc_dialect): Support `-m500', `-m500x2' and
+	`-mefs'. Turn off AltiVec for E500 and efs.
+	(print_insn_powerpc): Don't print an AltiVec instruction if the
+	dialect is not efs.
+
+	* ppc-opc.c (insert_pmrn, extract_pmrn, insert_ev2, extract_ev2,
+	insert_ev4, extract_ev4, insert_ev8, extract_ev8): New functions
+	for extracting pmrn/evld/evstd/etc operands.
+	(CRB, CRFD, CRFS, DC, RD): New instruction fields.
+	(CT): Make this equal to RD + 1.
+	(PMRN): New operand.
+	(RA): Update.
+	(EVUIMM, EVUIMM_2, EVUIMM_4, EVUIMM_8): New operands.
+	(WS): Update.
+	(EVSEL, EVSEL_MASK): New instruction form and mask for EVSEL.
+	(ISEL, ISEL_MASK): New instruction form and mask for ISEL.
+	(XISEL, XISEL_MASK): New instruction form and mask for ISEL.
+	(CTX, CTX_MASK): New instruction form and mask for context cache
+	instructions.
+	(UCTX, UCTX_MASK): New instruction form and mask for user context
+	cache instructions.
+	(XC, XC_MASK, XUC, XUC_MASK): New instruction forms.
+	(CLASSIC): New define.
+	(PPCESPE): New define.
+	(PPCISEL, , PPCBRLK, PPCPMR, PPCCHLK, PPCRFMI): New
+	defines for integer select, cache control, branch
+	locking, power management, cache locking and machine check
+	APU instructions, respectively.
+	(efsabs, efsnabs, efsneg, efsadd, efssub, efsmul,
+	efsdiv, efscmpgt, efscmplt, efscmpeq, efststgt, efststlt,
+	efststeq, efscfui, efsctuiz, efscfsi, efscfuf, efscfsf,
+	efsctui, efsctsi, efsctsiz, efsctuf, efsctsf, 
+	evaddw, evaddiw, evsubfw, evsubifw, evabs, evneg, evextsb,
+	evextsh, evrndw, evcntlzw, evcntlsw, brinc, evand, evandc, evor,
+	evorc, evxor, eveqv, evnand, evnor, evrlw, evrlwi, evslw, evslwi,
+	evsrws, evsrwu, evsrwis, evsrwiu, evsplati, evsplatfi, evmergehi,
+	evmergelo, evmergehilo, evmergelohi, evcmpgts, evcmpgtu, evcmplts,
+	evcmpltu, evcmpeq, evsel, evldd, evlddx, evldw, evldwx, evldh,
+	evldhx, evlwhe, evlwhex, evlwhou, evlwhoux, evlwhos, evlwhosx,
+	evlwwsplat, evlwwsplatx, evlwhsplat, evlwhsplatx, evlhhesplat,
+	evlhhesplatx, evlhousplat, evlhousplatx, evlhossplat, evlhossplatx,
+	evstdd, evstddx, evstdw, evstdwx, evstdh, evstdhx, evstwwe,
+	evstwwex, evstwwo, evstwwox, evstwhe, evstwhex, evstwho, evstwhox,
+	evfsabs, evfsnabs, evfsneg, evfsadd, evfssub, evfsmul, evfsdiv,
+	evfscmpgt, evfscmplt, evfscmpeq, evfststgt, evfststlt, evfststeq,
+	evfscfui, evfsctuiz, evfscfsi, evfscfuf, evfscfsf, evfsctui,
+	evfsctsi, evfsctsiz, evfsctuf, evfsctsf, evsabs, evsnabs, evsneg,
+	evsadd, evssub, evsmul, evsdiv, evscmpgt, evsgmplt, evsgmpeq,
+	evststgt, evststlt, evststeq, evscfui, evscfsi, evscfuf, evscfsf,
+	evsctui, evsctuiz, evsctsi, evsctsiz, evsctuf, evsctsf, evmhossf,
+	evmhossfa, evmhosmf, evmhosmfa, evmhosmi, evmhosmia, evmhoumi,
+	evmhoumia, evmhessf, evmhessfa, evmhesmf, evmhesmfa, evmhesmi,
+	evmhesmia, evmheumi, evmheumia, evmhossfaaw, evmhossiaaw,
+	evmhosmfaaw, evmhosmiaaw, evmhousiaaw, evmhoumiaaw, evmhessfaaw,
+	evmhessiaaw, evmhesmfaaw, evmhesmiaaw, evmheusiaaw, evmheumiaaw,
+	evmhossfanw, evmhossianw, evmhosmfanw, evmhosmianw, evmhousianw,
+	evmhoumianw, evmhessfanw, evmhessianw, evmhesmfanw, evmhesmianw,
+	evmheusianw, evmheumianw, evmhogsmfaa, evmhogsmiaa, evmhogumiaa,
+	evmhegsmfaa, evmhegsmiaa, evmhegumiaa, evmhogsmfan, evmhogsmian,
+	evmhogumian, evmhegsmfan, evmhegsmian, evmhegumian, evmwhssf,
+	evmwhssfa, evmwhssfaa, evmwhssmaa, evmwhsmfaa, evmwhsmiaa,
+	evmwhusiaa, evmwhumiaa, evmwhssfan, evmwhssian, evmwhsmfan,
+	evmwhsmian, evmwhusian, evmwhumian, evmwhgssfaa, evmwhgsmfaa,
+	evmwhgsmiaa, evmwhgumiaa, evmwhgssfan, evmwhgsmfan, evmwhgsmian,
+	evmwhgumian, evmwhsmf, evmwhsmfa, evmshsmi, evmshsmia, evmshumi,
+	evmshumia, evmmlssf, evmmlssfa, evmwlsmf, evmwlsmfa, evmwlumi,
+	evmwlumia, evmwlssfaaw, evmwlssiaaw, evmwlsmfaaw, evmwlsmiaaw,
+	evmwlusiaaw, evmwlumiaaw, evmwissfanw, evmwissianw, evmwlsmfanw,
+	evmwlsmianw, evmwlusianw, evmwlumianw, evmwssf, evmwssfa,
+	evmwsmf, evmwsmfa, evmwsmi, evmwsmia, evmwumi, evmwumia,
+	evmwssfaa, evmwsmfaa, evmwsmiaa, evmwumiaa, evmwssfan, evmwsmfan,
+	evmwsmian, evmwumian, evaddssiaaw, evaddsmiaaw, evaddusiaaw,
+	evaddumiaaw, evsubfssiaaw, evsubfsmiaaw, evsubfusiaaw,
+	evsubfumiaaw, evmra, evdivws, evdivws): New e500x2 Core Complex
+	instructions.
+	(rfmci): New machine check APU instruction.
+	(isel): New integer select APU instructino.
+	(icbtls, icbtlse, icblc, icblce, dcbtls, dcbtlse, dcbtstls,
+	dcbtstlse, dcblc, dcblce): New cache control APU instructions.
+	(mtspefscr, mfspefscr): New instructions.
+	(mfpmr, mtpmr): New performance monitor APU instructions.
+	(savecontext): New context cache APU instructions.
+	(bblels, bbelr): New branch locking APU instructions.
+	(bblels, bbelr): New instructions.
+	(mftbl, mftbu, mftb): Set as CLASSIC instructions.  Add BOOKE alias.
+
+2002-08-13  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* m68hc11-opc.c: Update call operand to accept the page definition.
+	Identify instructions that are branches and calls to generate a
+	RL_JUMP relocation.
+
+2002-08-13  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* m68hc11-dis.c (print_insn): Take into account 68HC12 memory
+	banks and fix disassembling of call instruction.
+	(print_indexed_operand): New param to tell whether
+	it was an indirect addressing operand (for disassembling call).
+
+2002-08-09  Nick Clifton  <nickc@redhat.com>
+
+	* po/sv.po: Updated Swedish translation.
+
+2002-08-08  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
+
+	* mips-opc.c (mips_builtin_opcodes): Remove "dla" and "la" as
+	aliases to "daddiu" and "addiu".
+
+2002-07-30  Nick Clifton  <nickc@redhat.com>
+
+	* po/sv.po: Updated Swedish translation.
+
+2002-07-25  Nick Clifton  <nickc@redhat.com>
+
+	* po/sv.po: Updated Swedish translation.
+	* po/es.po: Updated Spanish translation.
+	* po/pr_BR.po: Updated Brazilian Portuguese translation.
+	* po/tr.po: Updated Turkish translation.
+	* po/fr.po: Updated French translation.
+
+2002-07-24  Nick Clifton  <nickc@redhat.com>
+
+	* po/sv.po: Updated Swedish translation.
+	* po/es.po: Updated Spanish translation.
+	* po/pr_BR.po: Updated Brazilian Portuguese translation.
+
+2002-07-23  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
+2002-07-23  Nick Clifton  <nickc@redhat.com>
+
+	* po/fr.po: Updated French translation.
+	* po/pr_BR.po: New Brazilian Portuguese translation.
+	* po/id.po: Updated Indonesian translation.
+	* configure.in (LINGUAS): Add pr_BR.
+	* configure: Regenerate.
+
+2002-07-18  Denis Chertykov  <denisc@overta.ru>
+	    Frank Ch. Eigler  <fche@redhat.com>
+	    Alan Lehotsky <alehotsky@cygnus.com>
+	    matthew green  <mrg@redhat.com>
+
+	* configure.in: Add support for ip2k.
+	* configure: Regenerate.
+	* Makefile.am: Add support for ip2k.
+	* Makefile.in: Regenerate.
+	* disassemble.c: Add support for ip2k.
+	* ip2k-asm.c: New generated file.
+	* ip2k-desc.c: New generated file.
+	* ip2k-desc.h: New generated file.
+	* ip2k-dis.c: New generated file.
+	* ip2k-ibld.c: New generated file.
+	* ip2k-opc.c: New generated file.
+	* ip2k-opc.h: New generated file.
+
+2002-07-17  David Mosberger  <davidm@hpl.hp.com>
+
+	* ia64-opc-b.c (bWhc): New macro.
+	(mWhc): Ditto.
+	(OpPaWhcD): Ditto.
+	(ia64_opcodes_b): Correct patterns for indirect call
+	instructions to use 3-bit "wh" field.
+	* ia64-asmtab.c: Regnerate.
+
+2002-07-09  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* mips-dis.c (mips_isa_type): Add MIPS16 insn handling.
+	* mips-opc.c (I16): New define.
+	(mips_builtin_opcodes): Make jalx an I16 insn.
+
+2002-06-18  Dave Brolley  <brolley@redhat.com>
+
+	* po/POTFILES.in: Add frv-*.[ch].
+	* disassemble.c (ARCH_frv): New macro.
+	(disassembler): Handle bfd_arch_frv.
+	* configure.in: Support frv_bfd_arch.
+	* Makefile.am (HFILES): Add frv-*.h.
+	(CFILES): Add frv-*.c
+	(ALL_MACHINES): Add frv-*.lo.
+	(CLEANFILES): Add stamp-frv.
+	(FRV_DEPS): New variable.
+	(stamp-frv): New target.
+	(frv-asm.lo): New target.
+	(frv-desc.lo): New target.
+	(frv-dis.lo): New target.
+	(frv-ibld.lo): New target.
+	(frv-opc.lo): New target.
+	(frv-*.[ch]): New files.
+
+2002-06-18  Ben Elliston  <bje@redhat.com>
+
+	* Makefile.am (CGENDEPS): Remove unnecessary stamp-cgen.
+	* Makefile.in: Regenerate.
+
+2002-06-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* a29k-dis.c: Replace CONST with const.
+	* h8300-dis.c: Likewise.
+	* m68k-dis.c: Likewise.
+	* or32-dis.c: Likewise.
+	* sparc-dis.c: Likewise.
+
+2002-06-04  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* configure.in: Add "sh5*-*" to list of targets which include
+	sh64 support.
+	* configure: Regenerate.
+
+2002-05-31  Chris G. Demetriou  <cgd@broadcom.com>
+
+	* mips-opc.c: Clean up a few whitespace issues, and sort a
+	few entries understanding that 'x' follows 'w' in the alphabet.
+	
+2002-05-31  Chris G. Demetriou  <cgd@broadcom.com>
+            Ed Satterthwaite  <ehs@broadcom.com>
+
+	* mips-opc.c: Add support for SB-1 MDMX subset and extensions.
+
+2002-05-31  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
+2002-05-30  Chris G. Demetriou  <cgd@broadcom.com>
+            Ed Satterthwaite  <ehs@broadcom.com>
+
+	* mips-dis.c (print_insn_arg): Add support for 'O', 'Q', 'X', 'Y',
+	and 'Z' formats, for MDMX.
+        (mips_isa_type): Add MDMX instructions to the ISA
+	bit mask for bfd_mach_mipsisa64.
+	* mips-opc.c: Add support for MDMX instructions.
+	(MX): New definition.
+
+	* mips-dis.c: Update copyright years to include 2002.
+
+2002-05-30  Diego Novillo  <dnovillo@redhat.com>
+
+	* d10v-opc.c (d10v_opcodes): `btsti' does not modify its
+        arguments.
+
 2002-05-28  Kuang Hwa Lin <kuang@sbcglobal.net>
 
 	* configure.in: Add DLX configuraton support.
@@ -14,7 +269,7 @@
 	* arc-dis.c: Use #include "" instead of <> for local header files.
 	* m68k-dis.c: Likewise.
 
-Wed May 22 20:11:51 2002  J"orn Rennecke <joern.rennecke@superh.com>
+2002-05-22  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* Makefile.am (sh-dis.lo): Compile with @archdefs@.
 	* Makefile.in: regenerate.
@@ -26,7 +281,7 @@ Wed May 22 20:11:51 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* mips-opc.c (mips_builtin_opcodes): Add drol, dror macros.
 
-Fri May 17 14:26:44 2002  J"orn Rennecke <joern.rennecke@superh.com>
+2002-05-17  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* disassemble.c (disassembler): Just use print_insn_sh for bfd_arch_sh.
 	* sh-dis.c (LITTLE_BIT): Delete.
@@ -152,7 +407,7 @@ Fri May 17 14:26:44 2002  J"orn Rennecke <joern.rennecke@superh.com>
 	* ppc-opc.c: Add optional field to mtmsrd.
 	(MTMSRD_L, XRLARB_MASK): Define.
 
-Mon Mar 18 21:10:43 CET 2002  Jan Hubicka  <jh@suse.cz>
+2002-03-18  Jan Hubicka  <jh@suse.cz>
 
 	* i386-dis.c (prefix_name): Fix handling of 32bit address prefix
 	in 64bit mode.
@@ -262,7 +517,7 @@ Mon Mar 18 21:10:43 CET 2002  Jan Hubicka  <jh@suse.cz>
 
 2002-02-20  Tom Rix  <trix@redhat.com>
 
-	* ppc-opc.c (powerpc_operands): Add WS feild.  Use for tlbre, tlbwe.
+	* ppc-opc.c (powerpc_operands): Add WS field.  Use for tlbre, tlbwe.
 
 2002-02-19  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
@@ -1642,7 +1897,7 @@ Mon Mar 18 21:10:43 CET 2002  Jan Hubicka  <jh@suse.cz>
 	* ia64-ic.tbl: Update from Intel.  Add setf to fr-writers.
 	* ia64-asmtab.c: Regenerate.
 
-Mon Feb 12 17:41:26 CET 2001  Jan Hubicka  <jh@suse.cz>
+2001-02-12  Jan Hubicka  <jh@suse.cz>
 
 	* i386-dis.c (prefix_user_t): Add 'Y' to SSE ineger converison
 	instructions.
@@ -1681,7 +1936,7 @@ Mon Feb 12 17:41:26 CET 2001  Jan Hubicka  <jh@suse.cz>
 	* fr30-desc.h: Regenerate with CGEN_MAX_SYNTAX_ELEMENTS.
 	* m32r-desc.h: Regenerate.
 
-Thu Feb  1 16:29:06 MET 2001  Jan Hubicka  <jh@suse.cz>
+2001-02-01  Jan Hubicka  <jh@suse.cz>
 
 	* i386-dis.c (dis386_att, grps): Use 'T' for push/pop
 	(putop): Handle 'T', alphabetize order, fix 'I' handling in Intel syntax
@@ -1694,7 +1949,7 @@ Thu Feb  1 16:29:06 MET 2001  Jan Hubicka  <jh@suse.cz>
 
 	* disassemble.c: Remove spurious white space.
 
-Sat Jan 13 01:48:24 MET 2001  Jan Hubicka  <jh@suse.cz>
+2001-01-13  Jan Hubicka  <jh@suse.cz>
 
 	* i386-dis.c (dis386_att, disx86_64_att): Fix ret, lret and iret
 	templates.

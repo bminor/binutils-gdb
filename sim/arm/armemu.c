@@ -3366,78 +3366,84 @@ check_PMUintr:
 		switch (BITS (18, 19))
 		  {
 		  case 0x0:
-		    {
-		      /* XScale MIA instruction.  Signed multiplication of two 32 bit
-			 values and addition to 40 bit accumulator.  */
-		      long long Rm = state->Reg[MULLHSReg];
-		      long long Rs = state->Reg[MULACCReg];
+		    if (BITS (4, 11) == 1 && BITS (16, 17) == 0)
+		      {
+			/* XScale MIA instruction.  Signed multiplication of
+			   two 32 bit values and addition to 40 bit accumulator.  */
+			long long Rm = state->Reg[MULLHSReg];
+			long long Rs = state->Reg[MULACCReg];
 
-		      if (Rm & (1 << 31))
-			Rm -= 1ULL << 32;
-		      if (Rs & (1 << 31))
-			Rs -= 1ULL << 32;
-		      state->Accumulator += Rm * Rs;
-		    }
-		    goto donext;
+			if (Rm & (1 << 31))
+			  Rm -= 1ULL << 32;
+			if (Rs & (1 << 31))
+			  Rs -= 1ULL << 32;
+			state->Accumulator += Rm * Rs;
+			goto donext;
+		      }
+		    break;
 
 		  case 0x2:
-		    {
-		      /* XScale MIAPH instruction.  */
-		      ARMword t1 = state->Reg[MULLHSReg] >> 16;
-		      ARMword t2 = state->Reg[MULACCReg] >> 16;
-		      ARMword t3 = state->Reg[MULLHSReg] & 0xffff;
-		      ARMword t4 = state->Reg[MULACCReg] & 0xffff;
-		      long long t5;
+		    if (BITS (4, 11) == 1 && BITS (16, 17) == 0)
+		      {
+			/* XScale MIAPH instruction.  */
+			ARMword t1 = state->Reg[MULLHSReg] >> 16;
+			ARMword t2 = state->Reg[MULACCReg] >> 16;
+			ARMword t3 = state->Reg[MULLHSReg] & 0xffff;
+			ARMword t4 = state->Reg[MULACCReg] & 0xffff;
+			long long t5;
 
-		      if (t1 & (1 << 15))
-			t1 -= 1 << 16;
-		      if (t2 & (1 << 15))
-			t2 -= 1 << 16;
-		      if (t3 & (1 << 15))
-			t3 -= 1 << 16;
-		      if (t4 & (1 << 15))
-			t4 -= 1 << 16;
-		      t1 *= t2;
-		      t5 = t1;
-		      if (t5 & (1 << 31))
-			t5 -= 1ULL << 32;
-		      state->Accumulator += t5;
-		      t3 *= t4;
-		      t5 = t3;
-		      if (t5 & (1 << 31))
-			t5 -= 1ULL << 32;
-		      state->Accumulator += t5;
-		    }
-		    goto donext;
+			if (t1 & (1 << 15))
+			  t1 -= 1 << 16;
+			if (t2 & (1 << 15))
+			  t2 -= 1 << 16;
+			if (t3 & (1 << 15))
+			  t3 -= 1 << 16;
+			if (t4 & (1 << 15))
+			  t4 -= 1 << 16;
+			t1 *= t2;
+			t5 = t1;
+			if (t5 & (1 << 31))
+			  t5 -= 1ULL << 32;
+			state->Accumulator += t5;
+			t3 *= t4;
+			t5 = t3;
+			if (t5 & (1 << 31))
+			  t5 -= 1ULL << 32;
+			state->Accumulator += t5;
+			goto donext;
+		      }
+		    break;
 
 		  case 0x3:
-		    {
-		      /* XScale MIAxy instruction.  */
-		      ARMword t1;
-		      ARMword t2;
-		      long long t5;
+		    if (BITS (4, 11) == 1)
+		      {
+			/* XScale MIAxy instruction.  */
+			ARMword t1;
+			ARMword t2;
+			long long t5;
 
-		      if (BIT (17))
-			t1 = state->Reg[MULLHSReg] >> 16;
-		      else
-			t1 = state->Reg[MULLHSReg] & 0xffff;
+			if (BIT (17))
+			  t1 = state->Reg[MULLHSReg] >> 16;
+			else
+			  t1 = state->Reg[MULLHSReg] & 0xffff;
 
-		      if (BIT (16))
-			t2 = state->Reg[MULACCReg] >> 16;
-		      else
-			t2 = state->Reg[MULACCReg] & 0xffff;
+			if (BIT (16))
+			  t2 = state->Reg[MULACCReg] >> 16;
+			else
+			  t2 = state->Reg[MULACCReg] & 0xffff;
 
-		      if (t1 & (1 << 15))
-			t1 -= 1 << 16;
-		      if (t2 & (1 << 15))
-			t2 -= 1 << 16;
-		      t1 *= t2;
-		      t5 = t1;
-		      if (t5 & (1 << 31))
-			t5 -= 1ULL << 32;
-		      state->Accumulator += t5;
-		    }
-		    goto donext;
+			if (t1 & (1 << 15))
+			  t1 -= 1 << 16;
+			if (t2 & (1 << 15))
+			  t2 -= 1 << 16;
+			t1 *= t2;
+			t5 = t1;
+			if (t5 & (1 << 31))
+			  t5 -= 1ULL << 32;
+			state->Accumulator += t5;
+			goto donext;
+		      }
+		    break;
 
 		  default:
 		    break;

@@ -273,14 +273,22 @@ supply_fpregset (fpregset_t * fpregsetp)
 void
 fill_gregset (gregset_t * gregsetp, int regno)
 {
+  int regi;
   greg_t *gregp = (greg_t *) gregsetp;
 
-  if (regno >= S390_FIRST_CR && regno <= S390_LAST_CR)
-    supply_register (regno, NULL);
-  else if (regno != -1)
-    supply_register (regno, (char *) &gregp[regno]);
-  else
-    supply_gregset (gregsetp);
+  if (regno < 0) 
+    {
+      regcache_collect (S390_PSWM_REGNUM, &gregp[S390_PSWM_REGNUM]);
+      regcache_collect (S390_PC_REGNUM, &gregp[S390_PC_REGNUM]);
+      for (regi = 0; regi < S390_NUM_GPRS; regi++)
+        regcache_collect (S390_GP0_REGNUM + regi,
+			  &gregp[S390_GP0_REGNUM + regi]);
+      for (regi = 0; regi < S390_NUM_ACRS; regi++)
+        regcache_collect (S390_FIRST_ACR + regi,
+			  &gregp[S390_FIRST_ACR + regi]);
+    }
+  else if (regno >= S390_PSWM_REGNUM && regno <= S390_LAST_ACR)
+    regcache_collect (regno, &gregp[regno]);
 }
 
 /*  Given a pointer to a floating point register set in /proc format
@@ -291,12 +299,18 @@ fill_gregset (gregset_t * gregsetp, int regno)
 void
 fill_fpregset (fpregset_t * fpregsetp, int regno)
 {
-  if (regno == -1)
-    supply_fpregset (fpregsetp);
-  else
-    supply_register (regno,
-		     &((char *) fpregsetp)[REGISTER_BYTE (regno) -
-					   REGISTER_BYTE (S390_FPC_REGNUM)]);
+  int regi;
+
+  if (regno < 0) 
+    {
+      regcache_collect (S390_FPC_REGNUM, &fpregsetp->fpc);
+      for (regi = 0; regi < S390_NUM_FPRS; regi++)
+        regcache_collect (S390_FP0_REGNUM + regi, &fpregsetp->fprs[regi]);
+    }
+  else if (regno == S390_FPC_REGNUM)
+    regcache_collect (S390_FPC_REGNUM, &fpregsetp->fpc);
+  else if (regno >= S390_FP0_REGNUM && regno <= S390_FPLAST_REGNUM)
+    regcache_collect (regno, &fpregsetp->fprs[regno - S390_FP0_REGNUM]);
 }
 
 

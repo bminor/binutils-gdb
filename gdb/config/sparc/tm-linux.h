@@ -29,6 +29,6 @@
 
 #define SIGCONTEXT_PC_OFFSET 12
 
-#include "tm-linux.h"
+#include "config/tm-linux.h"
 
 #endif /* TM_SPARCLINUX_H */

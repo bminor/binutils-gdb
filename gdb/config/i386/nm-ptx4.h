@@ -22,11 +22,11 @@
 
 #include "regcache.h"
 
-#include "nm-sysv4.h"
+#include "config/nm-sysv4.h"
 
 #undef USE_PROC_FS
 
-#include "nm-symmetry.h"
+#include "i386/nm-symmetry.h"
 
 #define PTRACE_READ_REGS(pid,regaddr) mptrace (XPT_RREGS, (pid), (regaddr), 0)
 #define PTRACE_WRITE_REGS(pid,regaddr) \

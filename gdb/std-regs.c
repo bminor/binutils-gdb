@@ -26,6 +26,7 @@
 #include "frame.h"
 #include "gdbtypes.h"
 #include "value.h"
+#include "gdb_string.h"
 
 /* Types that describe the various builtin registers.  */
 

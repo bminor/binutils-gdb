@@ -38,8 +38,9 @@
 #include "demangle.h"
 #include "inferior.h"		/* for write_pc */
 #include "gdb-stabs.h"
-#include "obstack.h"
+#include "gdb_obstack.h"
 #include "completer.h"
+#include "bcache.h"
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -1740,8 +1741,10 @@ reread_symbols (void)
 		      sizeof (objfile->static_psymbols));
 
 	      /* Free the obstacks for non-reusable objfiles */
-	      free_bcache (&objfile->psymbol_cache);
-	      free_bcache (&objfile->macro_cache);
+	      bcache_xfree (objfile->psymbol_cache);
+	      objfile->psymbol_cache = bcache_xmalloc ();
+	      bcache_xfree (objfile->macro_cache);
+	      objfile->macro_cache = bcache_xmalloc ();
 	      obstack_free (&objfile->psymbol_obstack, 0);
 	      obstack_free (&objfile->symbol_obstack, 0);
 	      obstack_free (&objfile->type_obstack, 0);
@@ -1765,10 +1768,8 @@ reread_symbols (void)
 	      objfile->md = NULL;
 	      /* obstack_specify_allocation also initializes the obstack so
 	         it is empty.  */
-	      obstack_specify_allocation (&objfile->psymbol_cache.cache, 0, 0,
-					  xmalloc, xfree);
-	      obstack_specify_allocation (&objfile->macro_cache.cache, 0, 0,
-					  xmalloc, xfree);
+	      objfile->psymbol_cache = bcache_xmalloc ();
+	      objfile->macro_cache = bcache_xmalloc ();
 	      obstack_specify_allocation (&objfile->psymbol_obstack, 0, 0,
 					  xmalloc, xfree);
 	      obstack_specify_allocation (&objfile->symbol_obstack, 0, 0,
@@ -1962,9 +1963,9 @@ init_filename_language_table (void)
       add_filename_language (".c++", language_cplus);
       add_filename_language (".java", language_java);
       add_filename_language (".class", language_java);
-      add_filename_language (".ch", language_chill);
-      add_filename_language (".c186", language_chill);
-      add_filename_language (".c286", language_chill);
+      /* OBSOLETE add_filename_language (".ch", language_chill); */
+      /* OBSOLETE add_filename_language (".c186", language_chill); */
+      /* OBSOLETE add_filename_language (".c286", language_chill); */
       add_filename_language (".f", language_fortran);
       add_filename_language (".F", language_fortran);
       add_filename_language (".s", language_asm);
@@ -2377,7 +2378,7 @@ add_psymbol_to_list (char *name, int namelength, namespace_enum namespace,
   /* Create local copy of the partial symbol */
   memcpy (buf, name, namelength);
   buf[namelength] = '\0';
-  SYMBOL_NAME (&psymbol) = bcache (buf, namelength + 1, &objfile->psymbol_cache);
+  SYMBOL_NAME (&psymbol) = bcache (buf, namelength + 1, objfile->psymbol_cache);
   /* val and coreaddr are mutually exclusive, one of them *will* be zero */
   if (val != 0)
     {
@@ -2394,7 +2395,7 @@ add_psymbol_to_list (char *name, int namelength, namespace_enum namespace,
   SYMBOL_INIT_LANGUAGE_SPECIFIC (&psymbol, language);
 
   /* Stash the partial symbol away in the cache */
-  psym = bcache (&psymbol, sizeof (struct partial_symbol), &objfile->psymbol_cache);
+  psym = bcache (&psymbol, sizeof (struct partial_symbol), objfile->psymbol_cache);
 
   /* Save pointer to partial symbol in psymtab, growing symtab if needed. */
   if (list->next >= list->list + list->size)
@@ -2429,7 +2430,7 @@ add_psymbol_with_dem_name_to_list (char *name, int namelength, char *dem_name,
 
   memcpy (buf, name, namelength);
   buf[namelength] = '\0';
-  SYMBOL_NAME (&psymbol) = bcache (buf, namelength + 1, &objfile->psymbol_cache);
+  SYMBOL_NAME (&psymbol) = bcache (buf, namelength + 1, objfile->psymbol_cache);
 
   buf = alloca (dem_namelength + 1);
   memcpy (buf, dem_name, dem_namelength);
@@ -2440,11 +2441,11 @@ add_psymbol_with_dem_name_to_list (char *name, int namelength, char *dem_name,
     case language_c:
     case language_cplus:
       SYMBOL_CPLUS_DEMANGLED_NAME (&psymbol) =
-	bcache (buf, dem_namelength + 1, &objfile->psymbol_cache);
+	bcache (buf, dem_namelength + 1, objfile->psymbol_cache);
       break;
-    case language_chill:
-      SYMBOL_CHILL_DEMANGLED_NAME (&psymbol) =
-	bcache (buf, dem_namelength + 1, &objfile->psymbol_cache);
+      /* OBSOLETE case language_chill: */
+      /* OBSOLETE   SYMBOL_CHILL_DEMANGLED_NAME (&psymbol) = */
+      /* OBSOLETE     bcache (buf, dem_namelength + 1, objfile->psymbol_cache); */
 
       /* FIXME What should be done for the default case? Ignoring for now. */
     }
@@ -2465,7 +2466,7 @@ add_psymbol_with_dem_name_to_list (char *name, int namelength, char *dem_name,
   SYMBOL_INIT_LANGUAGE_SPECIFIC (&psymbol, language);
 
   /* Stash the partial symbol away in the cache */
-  psym = bcache (&psymbol, sizeof (struct partial_symbol), &objfile->psymbol_cache);
+  psym = bcache (&psymbol, sizeof (struct partial_symbol), objfile->psymbol_cache);
 
   /* Save pointer to partial symbol in psymtab, growing symtab if needed. */
   if (list->next >= list->list + list->size)

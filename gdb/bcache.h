@@ -1,7 +1,8 @@
 /* Include file cached obstack implementation.
    Written by Fred Fish <fnf@cygnus.com>
    Rewritten by Jim Blandy <jimb@cygnus.com>
-   Copyright 1999, 2000 Free Software Foundation, Inc.
+
+   Copyright 1999, 2000, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -63,68 +64,27 @@
      any chance of sharing its space with future duplicates.  */
 
 
-/* The type used to hold a single bcache string.  The user data is
-   stored in d.data.  Since it can be any type, it needs to have the
-   same alignment as the most strict alignment of any type on the host
-   machine.  I don't know of any really correct way to do this in
-   stock ANSI C, so just do it the same way obstack.h does.
-
-   It would be nicer to have this stuff hidden away in bcache.c, but
-   struct objstack contains a struct bcache directly --- not a pointer
-   to one --- and then the memory-mapped stuff makes this a real pain.
-   We don't strictly need to expose struct bstring, but it's better to
-   have it all in one place.  */
-
-struct bstring {
-  struct bstring *next;
-  size_t length;
-
-  union
-  {
-    char data[1];
-    double dummy;
-  }
-  d;
-};
-
-
-/* The structure for a bcache itself.
-   To initialize a bcache, just fill it with zeros.  */
-struct bcache {
-  /* All the bstrings are allocated here.  */
-  struct obstack cache;
-
-  /* How many hash buckets we're using.  */
-  unsigned int num_buckets;
-  
-  /* Hash buckets.  This table is allocated using malloc, so when we
-     grow the table we can return the old table to the system.  */
-  struct bstring **bucket;
-
-  /* Statistics.  */
-  unsigned long unique_count;	/* number of unique strings */
-  long total_count;	/* total number of strings cached, including dups */
-  long unique_size;	/* size of unique strings, in bytes */
-  long total_size;      /* total number of bytes cached, including dups */
-  long structure_size;	/* total size of bcache, including infrastructure */
-};
-
+struct bcache;
 
 /* Find a copy of the LENGTH bytes at ADDR in BCACHE.  If BCACHE has
    never seen those bytes before, add a copy of them to BCACHE.  In
    either case, return a pointer to BCACHE's copy of that string.  */
 extern void *bcache (const void *addr, int length, struct bcache *bcache);
 
-/* Free all the storage that BCACHE refers to.  The result is a valid,
-   but empty, bcache.  This does not free BCACHE itself, since that
-   might be part of some larger object.  */
-extern void free_bcache (struct bcache *bcache);
+/* Free all the storage used by BCACHE.  */
+extern void bcache_xfree (struct bcache *bcache);
+
+/* Create a new bcache object.  */
+extern struct bcache *bcache_xmalloc (void);
 
 /* Print statistics on BCACHE's memory usage and efficacity at
    eliminating duplication.  TYPE should be a string describing the
    kind of data BCACHE holds.  Statistics are printed using
    `printf_filtered' and its ilk.  */
 extern void print_bcache_statistics (struct bcache *bcache, char *type);
+extern int bcache_memory_used (struct bcache *bcache);
+
 /* The hash function */
 extern unsigned long hash(const void *addr, int length);
+
 #endif /* BCACHE_H */

@@ -29,7 +29,6 @@
 #else
 /* Just include everything in sight so that the every old definition
    of macro is visible. */
-#include "gdb_string.h"
 #include "symtab.h"
 #include "frame.h"
 #include "inferior.h"
@@ -40,8 +39,10 @@
 #include "target.h"
 #include "annotate.h"
 #endif
+#include "gdb_string.h"
 #include "regcache.h"
 #include "gdb_assert.h"
+#include "sim-regno.h"
 
 #include "version.h"
 
@@ -90,6 +91,46 @@ legacy_breakpoint_from_pc (CORE_ADDR * pcptr, int *lenptr)
   return NULL;
 }
 
+/* Implementation of extract return value that grubs around in the
+   register cache.  */
+void
+legacy_extract_return_value (struct type *type, struct regcache *regcache,
+			     void *valbuf)
+{
+  char *registers = deprecated_grub_regcache_for_registers (regcache);
+  bfd_byte *buf = valbuf;
+  DEPRECATED_EXTRACT_RETURN_VALUE (type, registers, buf);
+}
+
+/* Implementation of store return value that grubs the register cache.
+   Takes a local copy of the buffer to avoid const problems.  */
+void
+legacy_store_return_value (struct type *type, struct regcache *regcache,
+			   const void *buf)
+{
+  bfd_byte *b = alloca (TYPE_LENGTH (type));
+  gdb_assert (regcache == current_regcache);
+  memcpy (b, buf, TYPE_LENGTH (type));
+  DEPRECATED_STORE_RETURN_VALUE (type, b);
+}
+
+
+int
+legacy_register_sim_regno (int regnum)
+{
+  /* Only makes sense to supply raw registers.  */
+  gdb_assert (regnum >= 0 && regnum < NUM_REGS);
+  /* NOTE: cagney/2002-05-13: The old code did it this way and it is
+     suspected that some GDB/SIM combinations may rely on this
+     behavour.  The default should be one2one_register_sim_regno
+     (below).  */
+  if (REGISTER_NAME (regnum) != NULL
+      && REGISTER_NAME (regnum)[0] != '\0')
+    return regnum;
+  else
+    return LEGACY_SIM_REGNO_IGNORE;
+}
+
 int
 generic_frameless_function_invocation_not (struct frame_info *fi)
 {
@@ -115,12 +156,18 @@ generic_in_solib_call_trampoline (CORE_ADDR pc, char *name)
 }
 
 int
+generic_in_solib_return_trampoline (CORE_ADDR pc, char *name)
+{
+  return 0;
+}
+
+int
 generic_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   return 0;
 }
 
-char *
+const char *
 legacy_register_name (int i)
 {
 #ifdef REGISTER_NAMES
@@ -223,19 +270,6 @@ default_double_format (struct gdbarch *gdbarch)
     }
 }
 
-void
-default_print_float_info (void)
-{
-#ifdef FLOAT_INFO
-#if GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL
-#error "FLOAT_INFO defined in multi-arch"
-#endif
-  FLOAT_INFO;
-#else
-  printf_filtered ("No floating point info available for this processor.\n");
-#endif
-}
-
 /* Misc helper functions for targets. */
 
 int
@@ -266,13 +300,6 @@ generic_cannot_extract_struct_value_address (char *dummy)
 {
   return 0;
 }
-
-int
-default_register_sim_regno (int num)
-{
-  return num;
-}
-
 
 CORE_ADDR
 core_addr_identity (CORE_ADDR addr)
@@ -422,6 +449,23 @@ generic_register_size (int regnum)
        (name && STREQ ("_sigtramp", name))
 #endif
 #endif
+
+/* Assume all registers are adjacent.  */
+
+int
+generic_register_byte (int regnum)
+{
+  int byte;
+  int i;
+  gdb_assert (regnum >= 0 && regnum < NUM_REGS + NUM_PSEUDO_REGS);
+  byte = 0;
+  for (i = 0; i < regnum; i++)
+    {
+      byte += TYPE_LENGTH (REGISTER_VIRTUAL_TYPE (i));
+    }
+  return byte;
+}
+
 
 int
 legacy_pc_in_sigtramp (CORE_ADDR pc, char *name)

@@ -22,6 +22,6 @@
 
 /* Symmetry version by Jay Vosburgh (fubar@sequent.com) */
 
-#include "xm-sysv4.h"
+#include "config/xm-sysv4.h"
 
-#include "xm-ptx.h"
+#include "i386/xm-ptx.h"

@@ -19,7 +19,9 @@
 ## COMMON_PRE_CONFIG_FRAG
 
 SIM_OBJS = compile.o sim-load.o
-
 ## COMMON_POST_CONFIG_FRAG
 
-compile.o: compile.c config.h
+compile.o: compile.c inst.h config.h \
+	    $(srcdir)/../../include/gdb/sim-h8300.h \
+	    $(srcdir)/../../include/gdb/remote-sim.h \
+	    $(srcdir)/../../include/gdb/callback.h

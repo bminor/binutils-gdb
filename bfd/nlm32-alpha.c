@@ -1,5 +1,5 @@
 /* Support for 32-bit Alpha NLM (NetWare Loadable Module)
-   Copyright 1993, 1994, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 2000, 2001, 2002 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -654,9 +654,7 @@ nlm_alpha_read_import (abfd, sym)
     {
       asection *section;
 
-      if (nlm_alpha_read_reloc (abfd, sym, &section,
-				&nlm_relocs -> reloc)
-	  == false)
+      if (! nlm_alpha_read_reloc (abfd, sym, &section, &nlm_relocs -> reloc))
 	return false;
       nlm_relocs -> section = section;
       nlm_relocs++;
@@ -846,18 +844,17 @@ nlm_alpha_write_external (abfd, count, sym, relocs)
 
   r.address = nlm_alpha_backend_data (abfd)->lita_address;
   r.addend = nlm_alpha_backend_data (abfd)->lita_size + 1;
-  if (nlm_alpha_write_import (abfd, (asection *) NULL, &r) == false)
+  if (! nlm_alpha_write_import (abfd, (asection *) NULL, &r))
     return false;
 
   r.address = nlm_alpha_backend_data (abfd)->gp;
   r.addend = 0;
-  if (nlm_alpha_write_import (abfd, (asection *) NULL, &r) == false)
+  if (! nlm_alpha_write_import (abfd, (asection *) NULL, &r))
     return false;
 
   for (i = 0; i < count; i++)
     {
-      if (nlm_alpha_write_import (abfd, relocs[i].sec,
-				  relocs[i].rel) == false)
+      if (! nlm_alpha_write_import (abfd, relocs[i].sec, relocs[i].rel))
 	return false;
     }
 

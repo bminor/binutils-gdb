@@ -31,8 +31,8 @@
 #include <setjmp.h>
 #include "ansidecl.h"
 #include "bfd.h"
-#include "callback.h"
-#include "remote-sim.h"
+#include "gdb/callback.h"
+#include "gdb/remote-sim.h"
 
 #define O_RECOMPILE 85
 #define DEFINE_TABLE

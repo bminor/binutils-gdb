@@ -92,8 +92,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define yytoks	ada_toks		/* With YYDEBUG defined */
 
 #ifndef YYDEBUG
-#define	YYDEBUG	0		/* Default to no yydebug support */
+#define	YYDEBUG	1		/* Default to yydebug support */
 #endif
+
+#define YYFPRINTF parser_fprintf
 
 struct name_info {
   struct symbol* sym;

@@ -22,7 +22,7 @@ SIM_OBJS = interp.o table.o simops.o endian.o sim-load.o
 SIM_EXTRA_CLEAN = clean-extra
 SIM_EXTRA_CFLAGS = -DNEED_UI_LOOP_HOOK -DSIM_HAVE_ENVIRONMENT
 
-INCLUDE = d10v_sim.h $(srcroot)/include/callback.h targ-vals.h endian.c \
+INCLUDE = d10v_sim.h $(srcroot)/include/gdb/callback.h targ-vals.h endian.c \
 	$(srcroot)/include/gdb/sim-d10v.h
 
 # This selects the d10v newlib/libgloss syscall definitions.

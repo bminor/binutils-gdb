@@ -23,7 +23,6 @@
 #include "defs.h"
 #include "frame.h"
 #include "inferior.h"
-#include "obstack.h"
 #include "target.h"
 #include "value.h"
 #include "bfd.h"
@@ -89,7 +88,7 @@ register_name (int reg, char **regs, long sizeof_regs)
     return regs[reg];
 }
 
-static char *
+static const char *
 mn10300_generic_register_name (int reg)
 {
   static char *regs[] =
@@ -102,7 +101,7 @@ mn10300_generic_register_name (int reg)
 }
 
 
-static char *
+static const char *
 am33_register_name (int reg)
 {
   static char *regs[] =
@@ -1161,7 +1160,7 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
 
   /* Stack unwinding.  */
-  set_gdbarch_get_saved_register (gdbarch, generic_get_saved_register);
+  set_gdbarch_get_saved_register (gdbarch, generic_unwind_get_saved_register);
   set_gdbarch_frame_chain_valid (gdbarch, generic_file_frame_chain_valid);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_frame_chain_valid (gdbarch, generic_file_frame_chain_valid);
@@ -1171,10 +1170,10 @@ mn10300_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_frame_init_saved_regs (gdbarch, mn10300_frame_init_saved_regs);
   set_gdbarch_frame_chain (gdbarch, mn10300_frame_chain);
   set_gdbarch_frame_saved_pc (gdbarch, mn10300_frame_saved_pc);
-  set_gdbarch_extract_return_value (gdbarch, mn10300_extract_return_value);
-  set_gdbarch_extract_struct_value_address
+  set_gdbarch_deprecated_extract_return_value (gdbarch, mn10300_extract_return_value);
+  set_gdbarch_deprecated_extract_struct_value_address
     (gdbarch, mn10300_extract_struct_value_address);
-  set_gdbarch_store_return_value (gdbarch, mn10300_store_return_value);
+  set_gdbarch_deprecated_store_return_value (gdbarch, mn10300_store_return_value);
   set_gdbarch_store_struct_return (gdbarch, mn10300_store_struct_return);
   set_gdbarch_pop_frame (gdbarch, mn10300_pop_frame);
   set_gdbarch_skip_prologue (gdbarch, mn10300_skip_prologue);

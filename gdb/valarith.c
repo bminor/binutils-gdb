@@ -859,7 +859,7 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
     /* Integral operations here.  */
     /* FIXME:  Also mixed integral/booleans, with result an integer. */
     /* FIXME: This implements ANSI C rules (also correct for C++).
-       What about FORTRAN and chill?  */
+       What about FORTRAN and (OBSOLETE) chill ?  */
     {
       unsigned int promoted_len1 = TYPE_LENGTH (type1);
       unsigned int promoted_len2 = TYPE_LENGTH (type2);
@@ -946,12 +946,12 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	    case BINOP_MOD:
 	      /* Knuth 1.2.4, integer only.  Note that unlike the C '%' op,
 	         v1 mod 0 has a defined value, v1. */
-	      /* Chill specifies that v2 must be > 0, so check for that. */
-	      if (current_language->la_language == language_chill
-		  && value_as_long (arg2) <= 0)
-		{
-		  error ("Second operand of MOD must be greater than zero.");
-		}
+	      /* OBSOLETE Chill specifies that v2 must be > 0, so check for that. */
+	      /* OBSOLETE if (current_language->la_language == language_chill */
+	      /* OBSOLETE     && value_as_long (arg2) <= 0) */
+	      /* OBSOLETE { */
+	      /* OBSOLETE   error ("Second operand of MOD must be greater than zero."); */
+	      /* OBSOLETE } */
 	      if (v2 == 0)
 		{
 		  v = v1;
@@ -1070,12 +1070,12 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	    case BINOP_MOD:
 	      /* Knuth 1.2.4, integer only.  Note that unlike the C '%' op,
 	         X mod 0 has a defined value, X. */
-	      /* Chill specifies that v2 must be > 0, so check for that. */
-	      if (current_language->la_language == language_chill
-		  && v2 <= 0)
-		{
-		  error ("Second operand of MOD must be greater than zero.");
-		}
+	      /* OBSOLETE Chill specifies that v2 must be > 0, so check for that. */
+	      /* OBSOLETE if (current_language->la_language == language_chill */
+	      /* OBSOLETE     && v2 <= 0) */
+	      /* OBSOLETE { */
+	      /* OBSOLETE   error ("Second operand of MOD must be greater than zero."); */
+	      /* OBSOLETE } */
 	      if (v2 == 0)
 		{
 		  v = v1;
@@ -1338,8 +1338,8 @@ value_neg (struct value *arg1)
     return value_from_double (result_type, -value_as_double (arg1));
   else if (TYPE_CODE (type) == TYPE_CODE_INT || TYPE_CODE (type) == TYPE_CODE_BOOL)
     {
-      /* Perform integral promotion for ANSI C/C++.
-         FIXME: What about FORTRAN and chill ?  */
+      /* Perform integral promotion for ANSI C/C++.  FIXME: What about
+         FORTRAN and (OBSOLETE) chill ?  */
       if (TYPE_LENGTH (type) < TYPE_LENGTH (builtin_type_int))
 	result_type = builtin_type_int;
 

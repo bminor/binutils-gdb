@@ -360,61 +360,61 @@ dump_filetype (char *cmd, char *mode, char *filetype)
 static void
 dump_srec_memory (char *args, int from_tty)
 {
-  dump_memory_to_file (args, "w", "srec");
+  dump_memory_to_file (args, FOPEN_WB, "srec");
 }
 
 static void
 dump_srec_value (char *args, int from_tty)
 {
-  dump_value_to_file (args, "w", "srec");
+  dump_value_to_file (args, FOPEN_WB, "srec");
 }
 
 static void
 dump_ihex_memory (char *args, int from_tty)
 {
-  dump_memory_to_file (args, "w", "ihex");
+  dump_memory_to_file (args, FOPEN_WB, "ihex");
 }
 
 static void
 dump_ihex_value (char *args, int from_tty)
 {
-  dump_value_to_file (args, "w", "ihex");
+  dump_value_to_file (args, FOPEN_WB, "ihex");
 }
 
 static void
 dump_tekhex_memory (char *args, int from_tty)
 {
-  dump_memory_to_file (args, "w", "tekhex");
+  dump_memory_to_file (args, FOPEN_WB, "tekhex");
 }
 
 static void
 dump_tekhex_value (char *args, int from_tty)
 {
-  dump_value_to_file (args, "w", "tekhex");
+  dump_value_to_file (args, FOPEN_WB, "tekhex");
 }
 
 static void
 dump_binary_memory (char *args, int from_tty)
 {
-  dump_memory_to_file (args, "w", "binary");
+  dump_memory_to_file (args, FOPEN_WB, "binary");
 }
 
 static void
 dump_binary_value (char *args, int from_tty)
 {
-  dump_value_to_file (args, "w", "binary");
+  dump_value_to_file (args, FOPEN_WB, "binary");
 }
 
 static void
 append_binary_memory (char *args, int from_tty)
 {
-  dump_memory_to_file (args, "a", "binary");
+  dump_memory_to_file (args, FOPEN_AB, "binary");
 }
 
 static void
 append_binary_value (char *args, int from_tty)
 {
-  dump_value_to_file (args, "a", "binary");
+  dump_value_to_file (args, FOPEN_AB, "binary");
 }
 
 struct dump_context
@@ -442,7 +442,7 @@ add_dump_command (char *name, void (*func) (char *args, char *mode),
   c->completer =  filename_completer;
   d = XMALLOC (struct dump_context);
   d->func = func;
-  d->mode = "w";
+  d->mode = FOPEN_WB;
   set_cmd_context (c, d);
   c->func = call_dump_func;
 
@@ -450,7 +450,7 @@ add_dump_command (char *name, void (*func) (char *args, char *mode),
   c->completer =  filename_completer;
   d = XMALLOC (struct dump_context);
   d->func = func;
-  d->mode = "a";
+  d->mode = FOPEN_AB;
   set_cmd_context (c, d);
   c->func = call_dump_func;
 
@@ -547,7 +547,7 @@ restore_section_callback (bfd *ibfd, asection *isec, void *args)
 static void
 restore_binary_file (char *filename, struct callback_data *data)
 {
-  FILE *file = fopen_with_cleanup (filename, "r");
+  FILE *file = fopen_with_cleanup (filename, FOPEN_RB);
   int status;
   char *buf;
   long len;

@@ -43,6 +43,7 @@ SIM_OBJS = \
 	$(MIPS_EXTRA_OBJS) \
 	cp1.o \
 	interp.o \
+	mdmx.o \
 	sim-main.o \
 	sim-hload.o \
 	sim-engine.o \
@@ -71,6 +72,7 @@ SIM_RUN_OBJS = nrun.o
 interp.o: $(srcdir)/interp.c config.h sim-main.h itable.h
 cp1.o: $(srcdir)/cp1.c config.h sim-main.h
 
+mdmx.o: $(srcdir)/mdmx.c $(srcdir)/sim-main.h
 
 ../igen/igen:
 	cd ../igen && $(MAKE)
@@ -81,6 +83,9 @@ IGEN_DC=$(srcdir)/mips.dc
 M16_DC=$(srcdir)/m16.dc
 IGEN_INCLUDE=\
 	$(srcdir)/m16.igen \
+	$(srcdir)/mdmx.igen \
+	$(srcdir)/mips3d.igen \
+	$(srcdir)/sb1.igen \
 	$(srcdir)/tx.igen \
 	$(srcdir)/vr.igen \
 

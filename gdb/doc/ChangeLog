@@ -1,3 +1,121 @@
+2002-08-23  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Update
+	STORE_RETURN_VALUE, mention regcache.
+
+2002-08-21  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Document
+	print_registers_info.  Note that DO_REGISTERS_INFO is deprecated.
+
+2002-08-19  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.texinfo (Remote Protocol): Reformat.  Use cross references.
+	Fix minor typos.  Add index entries.
+
+2002-08-18  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.texinfo (Data): Add ``Vector Unit'' to menu.
+
+2002-08-15  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Document
+	PRINT_VECTOR_INFO.
+	* gdb.texinfo (Vector Unit): Document "info vectors" command.
+
+2002-08-13  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.texinfo (Maintenance Commands): Document "maint print
+	registers", "maint print raw-registers" and "maint print
+	cooked-registers".
+
+2002-08-08  Grace Sainsbury  <graces@redhat.com>
+
+	From Mark Salter:            
+	* gdb.texinfo (Protocol): Document T packet extension to
+	allow watchpoint address reporting.
+
+2002-08-03  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.texinfo (Dump/Restore Files): Move `[]' to outside of @var.
+
+2002-08-01  Andrew Cagney  <cagney@redhat.com>
+
+	* stabs.texinfo, gdb.texinfo, gdbint.texinfo: Obsolete references
+	to CHILL.
+
+2002-08-01  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Coding): Revise section "Include Files".
+
+2002-07-24  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo: Obsolete references to m88k.
+	* gdb.texinfo: Ditto.
+
+2002-07-10  Joel Brobecker  <brobecker@gnat.com>
+
+	* gdbint.texinfo (Create a release candiate): Add the location
+	where the proper version of autoconf can be retrieved.
+
+2002-07-09  Don Howard  <dhoward@redhat.com>
+
+	* gdb.texinfo (Command Files): Further describe the behavior of
+	sourced command files.
+
+2002-06-27  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (User Interface): ISO C rather than ISO-C.
+	(Coding): Clarify ISO C version that GDB assumes.
+
+2002-06-26  Tom Tromey  <tromey@redhat.com>
+
+	* gdbint.texinfo (User Interface): Mention add_setshow_cmd and
+	add_setshow_cmd_full.
+
+2002-06-25  Don Howard  <dhoward@redhat.com>
+
+	* gdb.texinfo (Memory Region Attributes): Document new behavior
+	for 'mem' command.
+
+2002-06-11  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.texinfo (Symbols): Update documentation for `info source'
+	command.
+
+	* gdb.texinfo (Macros): Call the command `info macro', not
+	`show macro'.
+
+2002-06-09  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Coding): Add section ``Per-architecture module
+	data''.
+
+2002-06-09  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdbint.texinfo (Target Architecture Definition): Document
+	GDB_OSABI_GO32 and GDB_OSABI_NETWARE.
+
+2002-06-08  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Releasing GDB): Fix typos in @itemize @bullet
+	lists.
+
+2002-06-08  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Releasing GDB): Revise the section ``Cut the
+	Branch''.
+
+2002-06-01  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Add section
+	``Converting an existing Target Architecture to Multi-arch''.
+
+2002-05-30  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbint.texinfo (Releasing GDB): Rename ``Obsoleting any code''
+	to ``Obsoleting code''.  Revise.
+
 2002-05-17  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.texinfo (C Preprocessor Macros): New chapter.

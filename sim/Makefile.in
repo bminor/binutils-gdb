@@ -73,6 +73,10 @@ CC_FOR_BUILD = $(CC)
 # @target_makefile_frag@
 ###
 
+# Name of the ChangeLog file.
+ChangeLog = ChangeLog
+
+
 RUNTEST = `if [ -f $${srcdir}/../dejagnu/runtest ] ; then \
 		echo $${srcdir}/../dejagnu/runtest ; else echo runtest; \
 	   fi`
@@ -220,16 +224,20 @@ autoconf-common autoheader-common:
 	done
 
 autoconf-changelog autoheader-changelog:
-	id="`id | sed -e 's/^[^(]*(\([^)]*\).*$$/\1/'`" ; \
-	name=`grep "^$$id:" /etc/passwd | cut -f 5 -d ':'` ; \
-	host="`hostname`" ; \
-	date="`date | sed 's/ [^ ]* \([0-9]*\)$$/ \1/'`" ; \
+	id=$(ID) ; \
+	test x$$id = x && id="`id | sed -e 's/^[^(]*(\([^)]*\).*$$/\1/'`" ; \
+	name=$(NAME) ; \
+	test x$$name = x && name=`grep "^$$id:" /etc/passwd | cut -f 5 -d ':'` ; \
+	host=$(HOST) ; \
+	test x$$host = x && host="`hostname`" ; \
+	date=$(DATE) ; \
+	test x$$date = x && date="`date +%Y-%m-%d`" ; \
 	echo "$$date $$name $$id@$$host" ; \
 	for d in * ; \
 	do \
 	    if [ -d $$d -a -f $$d/configure.in ] ; \
 	    then \
-		 echo "Creating new-ChangeLog in $$d ..." ; \
+		 echo "Creating new-$(ChangeLog) in $$d ..." ; \
 		 ( echo "$$date  $$name  <$$id@$$host>" ; \
 		   echo "" ; \
 		   echo "	* configure: Regenerated to track ../common/aclocal.m4 changes." ; \
@@ -238,8 +246,8 @@ autoconf-changelog autoheader-changelog:
 		     echo "	* config.in: Ditto." ; \
 		   fi ; \
 		   echo "" ; \
-		   cat $$d/ChangeLog \
-		 ) > $$d/new-ChangeLog ; \
+		   cat $$d/$(ChangeLog) \
+		 ) > $$d/new-$(ChangeLog) ; \
 	    fi ; \
 	done
 
@@ -248,7 +256,7 @@ autoconf-install autoheader-install:
 	do \
 	    if [ -d $$d -a -f $$d/configure.in ] ; \
 	    then \
-		 echo "Moving $$d/new-ChangeLog to $$d/ChangeLog ..." ; \
-		 mv $$d/new-ChangeLog $$d/ChangeLog ; \
+		 echo "Moving $$d/new-$(ChangeLog) to $$d/$(ChangeLog) ..." ; \
+		 mv $$d/new-$(ChangeLog) $$d/$(ChangeLog) ; \
 	    fi ; \
 	done

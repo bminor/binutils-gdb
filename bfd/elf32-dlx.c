@@ -488,7 +488,7 @@ elf32_dlx_relocate26  (abfd, reloc_entry, symbol, data,
 
 /* A mapping from BFD reloc types to DLX ELF reloc types.
    Stolen from elf32-mips.c.
-   
+
    More about this table - for dlx elf relocation we do not really
    need this table, if we have a rtype defined in this table will
    caused tc_gen_relocate confused and die on us, but if we remove
@@ -500,7 +500,7 @@ struct elf_reloc_map
   enum elf_dlx_reloc_type elf_reloc_val;
 };
 
-static CONST struct elf_reloc_map dlx_reloc_map[] =
+static const struct elf_reloc_map dlx_reloc_map[] =
   {
     { BFD_RELOC_NONE,           R_DLX_NONE },
     { BFD_RELOC_16,             R_DLX_RELOC_16 },

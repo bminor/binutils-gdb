@@ -86,8 +86,8 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
 }
 
 static void
-fetch_elfcore_registers (char *core_reg_sect, unsigned core_reg_size, int which,
-                         CORE_ADDR ignore)
+fetch_elfcore_registers (char *core_reg_sect, unsigned core_reg_size,
+			 int which, CORE_ADDR ignore)
 {
   switch (which)
     {
@@ -136,16 +136,6 @@ static struct core_fns i386nbsd_elfcore_fns =
   fetch_elfcore_registers,		/* core_read_registers */
   NULL					/* next */
 };
-
-/* FIXME: should be multi-arch'd */
-int
-i386nbsd_aout_use_struct_convention (int gcc_p, struct type *type)
-{
-  return !(TYPE_LENGTH (type) == 1
-	   || TYPE_LENGTH (type) == 2
-	   || TYPE_LENGTH (type) == 4
-	   || TYPE_LENGTH (type) == 8);
-}
 
 void
 _initialize_i386nbsd_tdep (void)

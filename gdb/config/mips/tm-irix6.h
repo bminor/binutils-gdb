@@ -19,7 +19,7 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#include "mips/tm-bigmips.h"
+#include "mips/tm-bigmips64.h"
 
 /* SGI's assembler doesn't grok dollar signs in identifiers.
    So we use dots instead.  This item must be coordinated with G++. */
@@ -88,29 +88,6 @@
       ((N) - FP0_REGNUM) * sizeof(double) : \
       32 * sizeof(double) + ((N) - 32) * MIPS_REGSIZE)
 
-#undef  REGISTER_VIRTUAL_TYPE
-#define REGISTER_VIRTUAL_TYPE(N) \
-	(((N) >= FP0_REGNUM && (N) < FP0_REGNUM+32) ? builtin_type_double \
-	 : ((N) == 32 /*SR*/) ? builtin_type_uint32 \
-	 : ((N) >= 70 && (N) <= 89) ? builtin_type_uint32 \
-	 : builtin_type_int)
-
-#undef  MIPS_LAST_ARG_REGNUM
-#define MIPS_LAST_ARG_REGNUM 11	/* N32 uses R4 through R11 for args */
-
-/* MIPS_STACK_ARGSIZE -- how many bytes does a pushed function arg take
-   up on the stack? For the n32 ABI, eight bytes are reserved for each
-   register. Like MIPS_SAVED_REGSIZE but different. */
-#define MIPS_DEFAULT_STACK_ARGSIZE 8
-
-/* N32 does not reserve home space for registers used to carry
-   parameters. */
-#define MIPS_REGS_HAVE_HOME_P 0
-
-/* Force N32 ABI as the default. */
-#define MIPS_DEFAULT_ABI MIPS_ABI_N32
-
-
 /* The signal handler trampoline is called _sigtramp.  */
 #undef IN_SIGTRAMP
 #define IN_SIGTRAMP(pc, name) ((name) && STREQ ("_sigtramp", name))
@@ -137,3 +114,6 @@
 /* Select the disassembler */
 #undef TM_PRINT_INSN_MACH
 #define TM_PRINT_INSN_MACH bfd_mach_mips8000
+
+/* Undefine those methods which have been multiarched.  */
+#undef REGISTER_VIRTUAL_TYPE

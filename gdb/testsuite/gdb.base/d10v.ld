@@ -2,54 +2,57 @@ OUTPUT_FORMAT("elf32-d10v", "elf32-d10v",
 	      "elf32-d10v")
 OUTPUT_ARCH(d10v)
 ENTRY(_start)
- SEARCH_DIR(/usr/cygnus/d10v-961230/H-sparc-sun-sunos4.1//lib);
 /* Do we need any of these for elf?
    __DYNAMIC = 0;    */
+
+MEMORY
+{
+  UNIFIED : org = 0,         len = 0x1000000
+  INSN    : org = 0x1014000, len = 0x40000
+  DATA    : org = 0x2000004, len = 0x7FFC
+  STACK   : org = 0x200BFFE, len = 4
+}
+
 SECTIONS
 {
   /* Overlay sections: */
-  .ovly0  0x01010000 : AT (0x12010000) { foo.o(.text)  }
-  .ovly1  0x01010000 : AT (0x12011000) { bar.o(.text)  }
-  .ovly2  0x01011000 : AT (0x12012000) { baz.o(.text)  }
-  .ovly3  0x01011000 : AT (0x12013000) { grbx.o(.text) }
-  .data00 0x00001000 : AT (0x12014000) { foo.o(.data)  }
-  .data01 0x00001000 : AT (0x12015000) { bar.o(.data)  }
-  .data02 0x00002000 : AT (0x12016000) { baz.o(.data)  }
-  .data03 0x00002000 : AT (0x12017000) { grbx.o(.data) }
-  /* Read-only sections, merged into data segment: */
-  . = 0x00000004;
-  .interp     : { *(.interp) 	}
-  .hash          : { *(.hash)		}
-  .dynsym        : { *(.dynsym)		}
-  .dynstr        : { *(.dynstr)		}
-  .rel.text      : { *(.rel.text)		}
-  .rela.text     : { *(.rela.text) 	}
-  .rel.data      : { *(.rel.data)		}
-  .rela.data     : { *(.rela.data) 	}
-  .rel.rodata    : { *(.rel.rodata) 	}
-  .rela.rodata   : { *(.rela.rodata) 	}
-  .rel.got       : { *(.rel.got)		}
-  .rela.got      : { *(.rela.got)		}
-  .rel.ctors     : { *(.rel.ctors)	}
-  .rela.ctors    : { *(.rela.ctors)	}
-  .rel.dtors     : { *(.rel.dtors)	}
-  .rela.dtors    : { *(.rela.dtors)	}
-  .rel.init      : { *(.rel.init)	}
-  .rela.init     : { *(.rela.init)	}
-  .rel.fini      : { *(.rel.fini)	}
-  .rela.fini     : { *(.rela.fini)	}
-  .rel.bss       : { *(.rel.bss)		}
-  .rela.bss      : { *(.rela.bss)		}
-  .rel.plt       : { *(.rel.plt)		}
-  .rela.plt      : { *(.rela.plt)		}
-  .plt      : { *(.plt)	}
-  .rodata    : { *(.rodata) *(.gnu.linkonce.r*) }
-  .rodata1   : { *(.rodata1) }
-  /* Adjust the address for the data segment.  */
-  . = ALIGN(4);
+  .ovly0  0x1001000 : AT (0x8000) { foo.o(.text)  }
+  .ovly1  0x1001000 : AT (0x9000) { bar.o(.text)  }
+  .ovly2  0x1002000 : AT (0xa000) { baz.o(.text)  }
+  .ovly3  0x1002000 : AT (0xb000) { grbx.o(.text) }
+  .data00 0x2001000 : AT (0xc000) { foo.o(.data)  }
+  .data01 0x2001000 : AT (0xd000) { bar.o(.data)  }
+  .data02 0x2002000 : AT (0xe000) { baz.o(.data)  }
+  .data03 0x2002000 : AT (0xf000) { grbx.o(.data) }
+
+  .text :
+  {
+    KEEP (*(.init))
+    KEEP (*(.init.*))
+    KEEP (*(.fini))
+    KEEP (*(.fini.*))
+    *(.text)
+    *(.text.*)
+    /* .gnu.warning sections are handled specially by elf32.em.  */
+    *(.gnu.warning)
+    *(.gnu.linkonce.t*)
+    _etext = .;
+    PROVIDE (etext = .);
+  } >INSN =0
+  .rodata    : {
+    *(.rodata) 
+    *(.gnu.linkonce.r*)
+    *(.rodata.*) 
+  } >DATA
+  .rodata1   : { 
+    *(.rodata1)
+    *(.rodata1.*)
+  } >DATA
+
   .data    :
   {
     *(.data)
+    *(.data.*)
     *(.gnu.linkonce.d*)
     _ovly_table = .; 
 	LONG(ABSOLUTE(ADDR(.ovly0)));
@@ -87,34 +90,66 @@ SECTIONS
     _novlys = .;
 	LONG((_novlys - _ovly_table) / 16);
     CONSTRUCTORS
-  }
-  .data1   : { *(.data1) }
+  } >DATA
+  .data1   : {
+    *(.data1)
+    *(.data1.*)
+  } >DATA
   .ctors         :
   {
-    *(.ctors)
-  }
+    /* gcc uses crtbegin.o to find the start of
+       the constructors, so we make sure it is
+       first.  Because this is a wildcard, it
+       doesn't matter if the user does not
+       actually link against crtbegin.o; the
+       linker won't look for a file to match a
+       wildcard.  The wildcard also means that it
+       doesn't matter which directory crtbegin.o
+       is in.  */
+
+    KEEP (*crtbegin.o(.ctors))
+
+    /* We don't want to include the .ctor section from
+       from the crtend.o file until after the sorted ctors.
+       The .ctor section from the crtend file contains the
+       end of ctors marker and it must be last */
+
+    KEEP (*(EXCLUDE_FILE (*crtend.o) .ctors))
+    KEEP (*(SORT(.ctors.*)))
+    KEEP (*(.ctors))
+  } >DATA
   .dtors         :
   {
-    *(.dtors)
-  }
-  .got           : { *(.got.plt) *(.got) }
-  .dynamic       : { *(.dynamic) }
+    KEEP (*crtbegin.o(.dtors))
+    KEEP (*(EXCLUDE_FILE (*crtend.o) .dtors))
+    KEEP (*(SORT(.dtors.*)))
+    KEEP (*(.dtors))
+  } >DATA
   /* We want the small data sections together, so single-instruction offsets
      can access them all, and initialized data all before uninitialized, so
      we can shorten the on-disk segment size.  */
-  .sdata     : { *(.sdata) }
+  .sdata     : {
+    *(.sdata)
+    *(.sdata.*)
+  } >DATA
   _edata  =  .;
   PROVIDE (edata = .);
   __bss_start = .;
-  .sbss      : { *(.sbss) *(.scommon) }
+  .sbss      : { *(.sbss) *(.scommon) } >DATA
   .bss       :
   {
    *(.dynbss)
+   *(.dynbss.*)
    *(.bss)
+   *(.bss.*)
    *(COMMON)
-  }
+  } >DATA
+
   _end = . ;
   PROVIDE (end = .);
+
+  .stack : { _stack = .; *(.stack) } >STACK
+
   /* Stabs debugging sections.  */
   .stab 0 : { *(.stab) }
   .stabstr 0 : { *(.stabstr) }
@@ -122,34 +157,37 @@ SECTIONS
   .stab.exclstr 0 : { *(.stab.exclstr) }
   .stab.index 0 : { *(.stab.index) }
   .stab.indexstr 0 : { *(.stab.indexstr) }
+
   .comment 0 : { *(.comment) }
+
   /* DWARF debug sections.
-     Symbols in the .debug DWARF section are relative to the beginning of the
-     section so we begin .debug at 0.  It's not clear yet what needs to happen
-     for the others.   */
+     Symbols in the DWARF debugging sections are relative to the beginning
+     of the section so we begin them at 0.  */
+
+  /* DWARF 1 */
   .debug          0 : { *(.debug) }
-  .debug_info     0 : { *(.debug_info) }
+  .line           0 : { *(.line) }
+
+  /* GNU DWARF 1 extensions */
+  .debug_srcinfo  0 : { *(.debug_srcinfo) }
+  .debug_sfnames  0 : { *(.debug_sfnames) }
+
+  /* DWARF 1.1 and DWARF 2 */
+  .debug_aranges  0 : { *(.debug_aranges) }
+  .debug_pubnames 0 : { *(.debug_pubnames) }
+
+  /* DWARF 2 */
+  .debug_info     0 : { *(.debug_info) *(.gnu.linkonce.wi.*) }
   .debug_abbrev   0 : { *(.debug_abbrev) }
   .debug_line     0 : { *(.debug_line) }
   .debug_frame    0 : { *(.debug_frame) }
-  .debug_srcinfo  0 : { *(.debug_srcinfo) }
-  .debug_aranges  0 : { *(.debug_aranges) }
-  .debug_pubnames 0 : { *(.debug_pubnames) }
-  .debug_sfnames  0 : { *(.debug_sfnames) }
-  .line           0 : { *(.line) }
-  /* These must appear regardless of  .  */
-  /* Hmmm, there's got to be a better way.  This sets the stack to the
-     top of the simulator memory (i.e. top of 64K data space). */
-  .stack 0x00007FFE : { _stack = .; *(.stack) }
-  .text    0x1000000 :
-  {
-    *(.init)
-    *(.fini)
-    *(.text)
-    /* .gnu.warning sections are handled specially by elf32.em.  */
-    *(.gnu.warning)
-    *(.gnu.linkonce.t*)
-  } =0
-  _etext = .;
-  PROVIDE (etext = .);
+  .debug_str      0 : { *(.debug_str) }
+  .debug_loc      0 : { *(.debug_loc) }
+  .debug_macinfo  0 : { *(.debug_macinfo) }
+
+  /* SGI/MIPS DWARF 2 extensions */
+  .debug_weaknames 0 : { *(.debug_weaknames) }
+  .debug_funcnames 0 : { *(.debug_funcnames) }
+  .debug_typenames 0 : { *(.debug_typenames) }
+  .debug_varnames  0 : { *(.debug_varnames) }
 }

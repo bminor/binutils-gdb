@@ -47,12 +47,12 @@ you lose
 #endif
 
 LONGEST
-extract_signed_integer (void *addr, int len)
+extract_signed_integer (const void *addr, int len)
 {
   LONGEST retval;
-  unsigned char *p;
-  unsigned char *startaddr = (unsigned char *) addr;
-  unsigned char *endaddr = startaddr + len;
+  const unsigned char *p;
+  const unsigned char *startaddr = addr;
+  const unsigned char *endaddr = startaddr + len;
 
   if (len > (int) sizeof (LONGEST))
     error ("\
@@ -81,12 +81,12 @@ That operation is not available on integers of more than %d bytes.",
 }
 
 ULONGEST
-extract_unsigned_integer (void *addr, int len)
+extract_unsigned_integer (const void *addr, int len)
 {
   ULONGEST retval;
-  unsigned char *p;
-  unsigned char *startaddr = (unsigned char *) addr;
-  unsigned char *endaddr = startaddr + len;
+  const unsigned char *p;
+  const unsigned char *startaddr = addr;
+  const unsigned char *endaddr = startaddr + len;
 
   if (len > (int) sizeof (ULONGEST))
     error ("\

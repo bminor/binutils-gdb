@@ -96,9 +96,60 @@ mips_cannot_store_register (int regno)
   return 0;
 }
 
+static CORE_ADDR
+mips_get_pc ()
+{
+  unsigned long pc;
+  collect_register_by_name ("pc", &pc);
+  return pc;
+}
+
+static void
+mips_set_pc (CORE_ADDR pc)
+{
+  unsigned long newpc = pc;
+  supply_register_by_name ("pc", &newpc);
+}
+
+/* Correct in either endianness.  */
+static const unsigned long mips_breakpoint = 0x0005000d;
+#define mips_breakpoint_len 4
+
+/* We only place breakpoints in empty marker functions, and thread locking
+   is outside of the function.  So rather than importing software single-step,
+   we can just run until exit.  */
+static CORE_ADDR
+mips_reinsert_addr ()
+{
+  unsigned long pc;
+  collect_register_by_name ("ra", &pc);
+  return pc;
+}
+
+static int
+mips_breakpoint_at (CORE_ADDR where)
+{
+  unsigned long insn;
+
+  (*the_target->read_memory) (where, (char *) &insn, 4);
+  if (insn == mips_breakpoint)
+    return 1;
+
+  /* If necessary, recognize more trap instructions here.  GDB only uses the
+     one.  */
+  return 0;
+}
+
 struct linux_target_ops the_low_target = {
   mips_num_regs,
   mips_regmap,
   mips_cannot_fetch_register,
   mips_cannot_store_register,
+  mips_get_pc,
+  mips_set_pc,
+  (const char *) &mips_breakpoint,
+  mips_breakpoint_len,
+  mips_reinsert_addr,
+  0,
+  mips_breakpoint_at,
 };

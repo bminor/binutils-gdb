@@ -3,21 +3,21 @@
    2002 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
-This file is part of BFD, the Binary File Descriptor library.
+   This file is part of BFD, the Binary File Descriptor library.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #ifndef _LIBELF_H_
 #define _LIBELF_H_ 1
@@ -223,6 +223,12 @@ struct elf_link_local_dynamic_entry
   Elf_Internal_Sym isym;
 };
 
+struct elf_link_loaded_list
+{
+  struct elf_link_loaded_list *next;
+  bfd *abfd;
+};
+
 enum elf_link_info_type
 {
   ELF_INFO_TYPE_NONE,
@@ -297,6 +303,9 @@ struct elf_link_hash_table
 
   /* Cached start, size and alignment of PT_TLS segment.  */
   struct elf_link_tls_segment *tls_segment;
+
+  /* A linked list of BFD's loaded in the link.  */
+  struct elf_link_loaded_list *loaded;
 };
 
 /* Look up an entry in an ELF linker hash table.  */
@@ -353,6 +362,8 @@ struct elf_size_info {
     PARAMS ((bfd *));
   void (*write_relocs)
     PARAMS ((bfd *, asection *, PTR));
+  void (*swap_symbol_in)
+    PARAMS ((bfd *, const PTR, const PTR, Elf_Internal_Sym *));
   void (*swap_symbol_out)
     PARAMS ((bfd *, const Elf_Internal_Sym *, PTR, PTR));
   boolean (*slurp_reloc_table)
@@ -406,8 +417,7 @@ enum elf_reloc_type_class {
 struct elf_reloc_cookie
 {
   Elf_Internal_Rela *rels, *rel, *relend;
-  PTR locsyms;
-  PTR locsym_shndx;
+  Elf_Internal_Sym *locsyms;
   bfd *abfd;
   size_t locsymcount;
   size_t extsymoff;
@@ -490,7 +500,7 @@ struct elf_backend_data
   /* A function to handle unusual section types when creating BFD
      sections from ELF sections.  */
   boolean (*elf_backend_section_from_shdr)
-    PARAMS ((bfd *, Elf32_Internal_Shdr *, char *));
+    PARAMS ((bfd *, Elf32_Internal_Shdr *, const char *));
 
   /* A function to convert machine dependent section header flags to
      BFD internal section header flags.  */
@@ -669,10 +679,9 @@ struct elf_backend_data
     PARAMS ((bfd *));
 
   /* This function is called during section gc to discover the section a
-     particular relocation refers to.  It need not be defined for hosts
-     that have no queer relocation types.  */
+     particular relocation refers to.  */
   asection * (*gc_mark_hook)
-    PARAMS ((bfd *abfd, struct bfd_link_info *, Elf_Internal_Rela *,
+    PARAMS ((asection *sec, struct bfd_link_info *, Elf_Internal_Rela *,
 	     struct elf_link_hash_entry *h, Elf_Internal_Sym *));
 
   /* This function, if defined, is called during the sweep phase of gc
@@ -702,13 +711,14 @@ struct elf_backend_data
     PARAMS ((bfd *, struct bfd_link_info *, PTR,
 	    boolean (*) (PTR, const char *, Elf_Internal_Sym *, asection *)));
 
-  /* Copy any information related to dynamic linking from a pre-existing 
+  /* Copy any information related to dynamic linking from a pre-existing
      symbol to a newly created symbol.  Also called to copy flags and
      other back-end info to a weakdef, in which case the symbol is not
      newly created and plt/got refcounts and dynamic indices should not
      be copied.  */
   void (*elf_backend_copy_indirect_symbol)
-    PARAMS ((struct elf_link_hash_entry *, struct elf_link_hash_entry *));
+    PARAMS ((struct elf_backend_data *, struct elf_link_hash_entry *,
+	     struct elf_link_hash_entry *));
 
   /* Modify any information related to dynamic linking such that the
      symbol is not exported.  */
@@ -759,6 +769,22 @@ struct elf_backend_data
      Returns true if it did so and false if the caller should.  */
   boolean (*elf_backend_write_section)
     PARAMS ((bfd *, asection *, bfd_byte *));
+
+  /* This function, if defined, sets  up the file positions for non PT_LOAD
+     segments, especially for segments containing non-allocated sections.  */
+  void (*set_nonloadable_filepos)
+    PARAMS ((bfd *, Elf_Internal_Phdr *));
+
+  /* This function, if defined, returns true if the section is contained
+     within the segment.  File positions are compared.  */
+  boolean (*is_contained_by_filepos)
+    PARAMS ((asection *, Elf_Internal_Phdr *));
+
+  /* This function, if defined, returns true if copy_private_bfd_data
+     should be called.  It provides a way of overriding default
+     test conditions in _bfd_elf_copy_private_section_data.  */
+  boolean (*copy_private_bfd_data_p)
+    PARAMS ((bfd *, asection *, bfd *, asection *));
 
   /* The level of IRIX compatibility we're striving for.
      MIPS ELF specific function.  */
@@ -834,6 +860,10 @@ struct elf_backend_data
   unsigned can_refcount : 1;
   unsigned want_got_sym : 1;
   unsigned want_dynbss : 1;
+    /* Targets which do not support physical addressing often require
+       that the p_paddr field in the section header to be set to zero.
+       This field indicates whether this behavior is required.  */
+  unsigned want_p_paddr_set_to_zero : 1;
 };
 
 /* Information stored for each BFD section in an ELF file.  This
@@ -898,8 +928,13 @@ struct bfd_elf_section_data
   /* Type of that information.  */
   enum elf_link_info_type sec_info_type;
 
-  /* Group name, if this section is part of a group.  */
-  const char *group_name;
+  union {
+    /* Group name, if this section is a member of a group.  */
+    const char *name;
+
+    /* Group signature sym, if this is the SHT_GROUP section.  */
+    struct symbol_cache_entry *id;
+  } group;
 
   /* A linked list of sections in the group.  Circular when used by
      the linker.  */
@@ -910,11 +945,16 @@ struct bfd_elf_section_data
 
   /* Nonzero if this section uses RELA relocations, rather than REL.  */
   unsigned int use_rela_p:1;
+
+  /* Nonzero when a group is COMDAT.  */
+  unsigned int linkonce_p:1;
 };
 
 #define elf_section_data(sec)  ((struct bfd_elf_section_data*)sec->used_by_bfd)
-#define elf_group_name(sec)    (elf_section_data(sec)->group_name)
+#define elf_group_name(sec)    (elf_section_data(sec)->group.name)
+#define elf_group_id(sec)      (elf_section_data(sec)->group.id)
 #define elf_next_in_group(sec) (elf_section_data(sec)->next_in_group)
+#define elf_linkonce_p(sec)    (elf_section_data(sec)->linkonce_p)
 
 /* Return true if section has been discarded.  */
 #define elf_discarded_section(sec)					\
@@ -1180,6 +1220,9 @@ extern char *bfd_elf_string_from_elf_section
   PARAMS ((bfd *, unsigned, unsigned));
 extern char *bfd_elf_get_str_section
   PARAMS ((bfd *, unsigned));
+extern Elf_Internal_Sym *bfd_elf_get_elf_syms
+  PARAMS ((bfd *, Elf_Internal_Shdr *, size_t, size_t,
+	   Elf_Internal_Sym *, PTR, Elf_External_Sym_Shndx *));
 
 extern boolean _bfd_elf_copy_private_bfd_data
   PARAMS ((bfd *, bfd *));
@@ -1229,7 +1272,8 @@ extern struct bfd_hash_entry *_bfd_elf_link_hash_newfunc
 extern struct bfd_link_hash_table *_bfd_elf_link_hash_table_create
   PARAMS ((bfd *));
 extern void _bfd_elf_link_hash_copy_indirect
-  PARAMS ((struct elf_link_hash_entry *, struct elf_link_hash_entry *));
+  PARAMS ((struct elf_backend_data *, struct elf_link_hash_entry *,
+	   struct elf_link_hash_entry *));
 extern void _bfd_elf_link_hash_hide_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *, boolean));
 extern boolean _bfd_elf_link_hash_table_init
@@ -1241,6 +1285,10 @@ extern boolean _bfd_elf_slurp_version_tables
   PARAMS ((bfd *));
 extern boolean _bfd_elf_merge_sections
   PARAMS ((bfd *, struct bfd_link_info *));
+extern boolean bfd_elf_discard_group
+  PARAMS ((bfd *, struct sec *));
+extern void bfd_elf_set_group_contents
+  PARAMS ((bfd *, asection *, PTR));
 extern void _bfd_elf_link_just_syms
   PARAMS ((asection *, struct bfd_link_info *));
 extern boolean _bfd_elf_copy_private_symbol_data
@@ -1419,8 +1467,7 @@ extern boolean bfd_elf32_bfd_final_link
   PARAMS ((bfd *, struct bfd_link_info *));
 
 extern void bfd_elf32_swap_symbol_in
-  PARAMS ((bfd *, const Elf32_External_Sym *, const Elf_External_Sym_Shndx *,
-	   Elf_Internal_Sym *));
+  PARAMS ((bfd *, const PTR, const PTR, Elf_Internal_Sym *));
 extern void bfd_elf32_swap_symbol_out
   PARAMS ((bfd *, const Elf_Internal_Sym *, PTR, PTR));
 extern void bfd_elf32_swap_reloc_in
@@ -1472,8 +1519,7 @@ extern boolean bfd_elf64_bfd_final_link
   PARAMS ((bfd *, struct bfd_link_info *));
 
 extern void bfd_elf64_swap_symbol_in
-  PARAMS ((bfd *, const Elf64_External_Sym *, const Elf_External_Sym_Shndx *,
-	   Elf_Internal_Sym *));
+  PARAMS ((bfd *, const PTR, const PTR, Elf_Internal_Sym *));
 extern void bfd_elf64_swap_symbol_out
   PARAMS ((bfd *, const Elf_Internal_Sym *, PTR, PTR));
 extern void bfd_elf64_swap_reloc_in
@@ -1514,10 +1560,12 @@ extern Elf_Internal_Rela *_bfd_elf64_link_read_relocs
 #define bfd_elf64_link_record_dynamic_symbol \
   _bfd_elf_link_record_dynamic_symbol
 
-extern boolean _bfd_elf32_link_record_local_dynamic_symbol
+extern int elf_link_record_local_dynamic_symbol
   PARAMS ((struct bfd_link_info *, bfd *, long));
-extern boolean _bfd_elf64_link_record_local_dynamic_symbol
-  PARAMS ((struct bfd_link_info *, bfd *, long));
+#define _bfd_elf32_link_record_local_dynamic_symbol \
+  elf_link_record_local_dynamic_symbol
+#define _bfd_elf64_link_record_local_dynamic_symbol \
+  elf_link_record_local_dynamic_symbol
 
 extern boolean _bfd_elf_close_and_cleanup
   PARAMS ((bfd *));
@@ -1553,20 +1601,20 @@ extern boolean _bfd_elf64_reloc_symbol_deleted_p
   PARAMS ((bfd_vma, PTR));
 
 /* Exported interface for writing elf corefile notes. */
-extern char *elfcore_write_note 
-  PARAMS ((bfd *, char *, int *, char *, int, void *, int));
-extern char *elfcore_write_prpsinfo 
-  PARAMS ((bfd *, char *, int *, char *, char *));
-extern char *elfcore_write_prstatus 
-  PARAMS ((bfd *, char *, int *, long, int, void *));
-extern char * elfcore_write_pstatus 
-  PARAMS ((bfd *, char *, int *, long, int, void *));
-extern char *elfcore_write_prfpreg 
-  PARAMS ((bfd *, char *, int *, void *, int));
-extern char *elfcore_write_prxfpreg 
-  PARAMS ((bfd *, char *, int *, void *, int));
-extern char *elfcore_write_lwpstatus 
-  PARAMS ((bfd*, char*, int*, long, int, void*));
+extern char *elfcore_write_note
+  PARAMS ((bfd *, char *, int *, const char *, int, const PTR, int));
+extern char *elfcore_write_prpsinfo
+  PARAMS ((bfd *, char *, int *, const char *, const char *));
+extern char *elfcore_write_prstatus
+  PARAMS ((bfd *, char *, int *, long, int, const PTR));
+extern char * elfcore_write_pstatus
+  PARAMS ((bfd *, char *, int *, long, int, const PTR));
+extern char *elfcore_write_prfpreg
+  PARAMS ((bfd *, char *, int *, const PTR, int));
+extern char *elfcore_write_prxfpreg
+  PARAMS ((bfd *, char *, int *, const PTR, int));
+extern char *elfcore_write_lwpstatus
+  PARAMS ((bfd *, char *, int *, long, int, const PTR));
 
 /* SH ELF specific routine.  */
 

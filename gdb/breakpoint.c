@@ -553,6 +553,7 @@ condition_command (char *arg, int from_tty)
 	    error ("Junk at end of expression");
 	}
       breakpoints_changed ();
+      breakpoint_modify_event (b->number);
       return;
     }
 
@@ -592,6 +593,7 @@ commands_command (char *arg, int from_tty)
       free_command_lines (&b->commands);
       b->commands = l;
       breakpoints_changed ();
+      breakpoint_modify_event (b->number);
       return;
     }
   error ("No breakpoint number %d.", bnum);
@@ -713,10 +715,22 @@ insert_breakpoints (void)
   int return_val = 0;	/* return success code. */
   int val = 0;
   int disabled_breaks = 0;
+  int hw_breakpoint_error = 0;
+  int process_warning = 0;
 
   static char message1[] = "Error inserting catchpoint %d:\n";
   static char message[sizeof (message1) + 30];
 
+#ifdef ONE_PROCESS_WRITETEXT
+  process_warning = 1;
+#endif
+
+  struct ui_file *tmp_error_stream = mem_fileopen ();
+  make_cleanup_ui_file_delete (tmp_error_stream);
+
+  /* Explicitly mark the warning -- this will only be printed if
+     there was an error.  */
+  fprintf_unfiltered (tmp_error_stream, "Warning:\n");
 
   ALL_BREAKPOINTS_SAFE (b, temp)
   {
@@ -774,8 +788,9 @@ insert_breakpoints (void)
 		    /* Set a software (trap) breakpoint at the LMA.  */
 		    val = target_insert_breakpoint (addr, b->shadow_contents);
 		    if (val != 0)
-		      warning ("overlay breakpoint %d failed: in ROM?", 
-			       b->number);
+		      fprintf_unfiltered (tmp_error_stream, 
+					  "Overlay breakpoint %d failed: in ROM?", 
+					  b->number);
 		  }
 	      }
 	    /* Shall we set a breakpoint at the VMA? */
@@ -808,22 +823,34 @@ insert_breakpoints (void)
 		b->enable_state = bp_shlib_disabled;
 		if (!disabled_breaks)
 		  {
-		    target_terminal_ours_for_output ();
-		    warning ("Cannot insert breakpoint %d:", b->number);
-		    warning ("Temporarily disabling shared library breakpoints:");
+		    fprintf_unfiltered (tmp_error_stream, 
+					"Cannot insert breakpoint %d.\n", b->number);
+		    fprintf_unfiltered (tmp_error_stream, 
+					"Temporarily disabling shared library breakpoints:\n");
 		  }
 		disabled_breaks = 1;
-		warning ("breakpoint #%d ", b->number);
+		fprintf_unfiltered (tmp_error_stream, "breakpoint #%d\n", b->number);
 	      }
 	    else
 #endif
 	      {
-		target_terminal_ours_for_output ();
-		warning ("Cannot insert breakpoint %d:", b->number);
-#ifdef ONE_PROCESS_WRITETEXT
-		warning ("The same program may be running in another process.");
-#endif
-		memory_error (val, b->address);	   /* which bombs us out */
+		process_warning = 1;
+		if (b->type == bp_hardware_breakpoint)
+		  {
+		    hw_breakpoint_error = 1;
+		    fprintf_unfiltered (tmp_error_stream, 
+					"Cannot insert hardware breakpoint %d.\n",
+					b->number);
+		  }
+		else
+		  {
+		    fprintf_unfiltered (tmp_error_stream, "Cannot insert breakpoint %d.\n", b->number);
+		    fprintf_filtered (tmp_error_stream, "Error accessing memory address ");
+		    print_address_numeric (b->address, 1, tmp_error_stream);
+		    fprintf_filtered (tmp_error_stream, ": %s.\n",
+				      safe_strerror (val));
+		  }
+
 	      }
 	  }
 	else
@@ -850,9 +877,13 @@ insert_breakpoints (void)
 	if (val)
 	  {
 	    /* Couldn't set breakpoint for some reason */
-	    target_terminal_ours_for_output ();
-	    warning ("Cannot insert catchpoint %d; disabling it.",
-		     b->number);
+	    fprintf_unfiltered (tmp_error_stream, 
+				"Cannot insert catchpoint %d; disabling it.\n",
+				b->number);
+	    fprintf_filtered (tmp_error_stream, "Error accessing memory address ");
+	    print_address_numeric (b->address, 1, tmp_error_stream);
+	    fprintf_filtered (tmp_error_stream, ": %s.\n",
+			      safe_strerror (val));
 	    b->enable_state = bp_disabled;
 	  }
 	else
@@ -874,9 +905,9 @@ insert_breakpoints (void)
 	    if (val == -1)
 	      {
 		/* something went wrong */
-		target_terminal_ours_for_output ();
-		warning ("Cannot insert catchpoint %d; disabling it.",
-			 b->number);
+		fprintf_unfiltered (tmp_error_stream, 
+				    "Cannot insert catchpoint %d; disabling it.\n",
+				    b->number);
 		b->enable_state = bp_disabled;
 	      }
 	  }
@@ -909,13 +940,7 @@ insert_breakpoints (void)
 	else
 	  {
 	    struct frame_info *fi;
-
-	    /* There might be no current frame at this moment if we are
-	       resuming from a step over a breakpoint.
-	       Set up current frame before trying to find the watchpoint
-	       frame.  */
-	    get_current_frame ();
-	    fi = find_frame_addr_in_frame_chain (b->watchpoint_frame);
+	    fi = frame_find_by_id (b->watchpoint_frame);
 	    within_current_scope = (fi != NULL);
 	    if (within_current_scope)
 	      select_frame (fi);
@@ -959,7 +984,7 @@ insert_breakpoints (void)
 
 			addr = VALUE_ADDRESS (v) + VALUE_OFFSET (v);
 			len = TYPE_LENGTH (VALUE_TYPE (v));
-			type   = hw_write;
+			type = hw_write;
 			if (b->type == bp_read_watchpoint)
 			  type = hw_read;
 			else if (b->type == bp_access_watchpoint)
@@ -984,9 +1009,11 @@ insert_breakpoints (void)
 	       value chain brings us here.  */
 	    if (!b->inserted)
 	      {
+		process_warning = 1;
 		remove_breakpoint (b, mark_uninserted);
-		warning ("Could not insert hardware watchpoint %d.",
-			 b->number);
+		hw_breakpoint_error = 1;
+		fprintf_unfiltered (tmp_error_stream,
+				    "Cannot insert hardware watchpoint %d.\n", b->number);
 		val = -1;
 	      }               
 	  }
@@ -1033,8 +1060,7 @@ insert_breakpoints (void)
 	  }
 	if (val < 0)
 	  {
-	    target_terminal_ours_for_output ();
-	    warning ("Cannot insert catchpoint %d.", b->number);
+	    fprintf_unfiltered (tmp_error_stream, "Cannot insert catchpoint %d.", b->number);
 	  }
 	else
 	  b->inserted = 1;
@@ -1043,10 +1069,25 @@ insert_breakpoints (void)
 	  return_val = val;	/* remember failure */
       }
   }
+  
+  if (return_val) 
+    {
+      /* If a hardware breakpoint or watchpoint was inserted, add a
+         message about possibly exhausted resources.  */
+      if (hw_breakpoint_error)  
+	{
+	  fprintf_unfiltered (tmp_error_stream, "Could not insert hardware breakpoints:\n" 
+			      "You may have requested too many hardware breakpoints/watchpoints.\n");
+	}
 
+      if (process_warning)
+	fprintf_unfiltered (tmp_error_stream,"The same program may be running in another process.");
+
+      target_terminal_ours_for_output ();
+      error_stream (tmp_error_stream);
+    }
   return return_val;
 }
-
 
 int
 remove_breakpoints (void)
@@ -2320,7 +2361,7 @@ watchpoint_check (PTR p)
          any chance of handling watchpoints on local variables, we'll need
          the frame chain (so we can determine if we're in scope).  */
       reinit_frame_cache ();
-      fr = find_frame_addr_in_frame_chain (b->watchpoint_frame);
+      fr = frame_find_by_id (b->watchpoint_frame);
       within_current_scope = (fr != NULL);
       /* in_function_epilogue_p() returns a non-zero value if we're still
 	 in the function but the stack frame has already been invalidated.
@@ -2394,7 +2435,7 @@ which its expression is valid.\n");
 
 /* Get a bpstat associated with having just stopped at address *PC
    and frame address CORE_ADDRESS.  Update *PC to point at the
-   breakpoint (if we hit a breakpoint).  NOT_A_BREAKPOINT is nonzero
+   breakpoint (if we hit a breakpoint).  NOT_A_SW_BREAKPOINT is nonzero
    if this is known to not be a real breakpoint (it could still be a
    watchpoint, though).  */
 
@@ -2413,7 +2454,7 @@ which its expression is valid.\n");
    commands, FIXME??? fields.  */
 
 bpstat
-bpstat_stop_status (CORE_ADDR *pc, int not_a_breakpoint)
+bpstat_stop_status (CORE_ADDR *pc, int not_a_sw_breakpoint)
 {
   register struct breakpoint *b, *temp;
   CORE_ADDR bp_addr;
@@ -2427,14 +2468,13 @@ bpstat_stop_status (CORE_ADDR *pc, int not_a_breakpoint)
   "Error evaluating expression for watchpoint %d\n";
   char message[sizeof (message1) + 30 /* slop */ ];
 
-  /* Get the address where the breakpoint would have been.  
-     The "not_a_breakpoint" argument is meant to distinguish 
-     between a breakpoint trap event and a trace/singlestep
-     trap event.  For a trace/singlestep trap event, we would
-     not want to subtract DECR_PC_AFTER_BREAK from the PC. */
+  /* Get the address where the breakpoint would have been.  The
+     "not_a_sw_breakpoint" argument is meant to distinguish between a
+     breakpoint trap event and a trace/singlestep trap event.  For a
+     trace/singlestep trap event, we would not want to subtract
+     DECR_PC_AFTER_BREAK from the PC. */
 
-  bp_addr = *pc - (not_a_breakpoint && !SOFTWARE_SINGLE_STEP_P () ? 
-                   0 : DECR_PC_AFTER_BREAK);
+  bp_addr = *pc - (not_a_sw_breakpoint ? 0 : DECR_PC_AFTER_BREAK);
 
   ALL_BREAKPOINTS_SAFE (b, temp)
   {
@@ -5321,10 +5361,12 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
   if (frame)
     {
       prev_frame = get_prev_frame (frame);
-      b->watchpoint_frame = frame->frame;
+      get_frame_id (frame, &b->watchpoint_frame);
     }
   else
-    b->watchpoint_frame = (CORE_ADDR) 0;
+    {
+      memset (&b->watchpoint_frame, 0, sizeof (b->watchpoint_frame));
+    }
 
   /* If the expression is "local", then set up a "watchpoint scope"
      breakpoint at the point where we've left the scope of the watchpoint
@@ -5334,16 +5376,8 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
       if (prev_frame)
 	{
 	  struct breakpoint *scope_breakpoint;
-	  struct symtab_and_line scope_sal;
-
-	  INIT_SAL (&scope_sal);	/* initialize to zeroes */
-	  scope_sal.pc = get_frame_pc (prev_frame);
-	  scope_sal.section = find_pc_overlay (scope_sal.pc);
-
-	  scope_breakpoint = set_raw_breakpoint (scope_sal,
-	                                         bp_watchpoint_scope);
-	  set_breakpoint_count (breakpoint_count + 1);
-	  scope_breakpoint->number = breakpoint_count;
+	  scope_breakpoint = create_internal_breakpoint (get_frame_pc (prev_frame),
+							 bp_watchpoint_scope);
 
 	  scope_breakpoint->enable_state = bp_enabled;
 
@@ -6692,11 +6726,32 @@ delete_breakpoint (struct breakpoint *bpt)
 	  else
 	    val = target_insert_breakpoint (b->address, b->shadow_contents);
 
+	  /* If there was an error in the insert, print a message, then stop execution.  */
 	  if (val != 0)
 	    {
+	      struct ui_file *tmp_error_stream = mem_fileopen ();
+	      make_cleanup_ui_file_delete (tmp_error_stream);
+	     
+
+	      if (b->type == bp_hardware_breakpoint)
+		{
+		  fprintf_unfiltered (tmp_error_stream, 
+					"Cannot insert hardware breakpoint %d.\n"
+				      "You may have requested too many hardware breakpoints.\n",
+					b->number);
+		  }
+		else
+		  {
+		    fprintf_unfiltered (tmp_error_stream, "Cannot insert breakpoint %d.\n", b->number);
+		    fprintf_filtered (tmp_error_stream, "Error accessing memory address ");
+		    print_address_numeric (b->address, 1, tmp_error_stream);
+		    fprintf_filtered (tmp_error_stream, ": %s.\n",
+				      safe_strerror (val));
+		  }
+	      
+	      fprintf_unfiltered (tmp_error_stream,"The same program may be running in another process.");
 	      target_terminal_ours_for_output ();
-	      warning ("Cannot insert breakpoint %d:", b->number);
-	      memory_error (val, b->address);	/* which bombs us out */
+	      error_stream(tmp_error_stream); 
 	    }
 	  else
 	    b->inserted = 1;
@@ -6770,6 +6825,8 @@ void
 delete_command (char *arg, int from_tty)
 {
   struct breakpoint *b, *temp;
+
+  dont_repeat ();
 
   if (arg == 0)
     {
@@ -7075,18 +7132,20 @@ set_ignore_count (int bptnum, int count, int from_tty)
     if (b->number == bptnum)
     {
       b->ignore_count = count;
-      if (!from_tty)
-	return;
-      else if (count == 0)
-	printf_filtered ("Will stop next time breakpoint %d is reached.",
-			 bptnum);
-      else if (count == 1)
-	printf_filtered ("Will ignore next crossing of breakpoint %d.",
-			 bptnum);
-      else
-	printf_filtered ("Will ignore next %d crossings of breakpoint %d.",
-			 count, bptnum);
+      if (from_tty)
+	{
+	  if (count == 0)
+	    printf_filtered ("Will stop next time breakpoint %d is reached.",
+			     bptnum);
+	  else if (count == 1)
+	    printf_filtered ("Will ignore next crossing of breakpoint %d.",
+			     bptnum);
+	  else
+	    printf_filtered ("Will ignore next %d crossings of breakpoint %d.",
+			     count, bptnum);
+	}
       breakpoints_changed ();
+      breakpoint_modify_event (b->number);
       return;
     }
 
@@ -7123,8 +7182,8 @@ ignore_command (char *args, int from_tty)
   set_ignore_count (num,
 		    longest_to_int (value_as_long (parse_and_eval (p))),
 		    from_tty);
-  printf_filtered ("\n");
-  breakpoints_changed ();
+  if (from_tty)
+    printf_filtered ("\n");
 }
 
 /* Call FUNCTION on each of the breakpoints
@@ -7266,12 +7325,7 @@ do_enable_breakpoint (struct breakpoint *bpt, enum bpdisp disposition)
       if (bpt->exp_valid_block != NULL)
 	{
 	  struct frame_info *fr =
-
-	  /* Ensure that we have the current frame.  Else, this
-	     next query may pessimistically be answered as, "No,
-	     not within current scope". */
-	  get_current_frame ();
-	  fr = find_frame_addr_in_frame_chain (bpt->watchpoint_frame);
+	  fr = frame_find_by_id (bpt->watchpoint_frame);
 	  if (fr == NULL)
 	    {
 	      printf_filtered ("\

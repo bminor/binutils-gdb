@@ -500,6 +500,8 @@ source_info (char *ignore, int from_tty)
 
   printf_filtered ("Source language is %s.\n", language_str (s->language));
   printf_filtered ("Compiled with %s debugging format.\n", s->debugformat);
+  printf_filtered ("%s preprocessor macro info.\n",
+                   s->macro_table ? "Includes" : "Does not include");
 }
 
 

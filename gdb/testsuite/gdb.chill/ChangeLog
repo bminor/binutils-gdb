@@ -1,3 +1,17 @@
+2002-08-01  Andrew Cagney  <cagney@redhat.com>
+
+	* builtins.exp, callch.exp, chillvars.exp: Make files obsolete.
+	* enum.exp, gch1041.exp, gch1272.exp: Make files obsolete.
+	* gch1280.exp, gch922.exp, gch981.exp: Make files obsolete.
+	* misc.exp, powerset.exp, pr-4975.exp: Make files obsolete.
+	* pr-5016.exp, pr-5020.exp, pr-5022.exp: Make files obsolete.
+	* pr-5646.exp, pr-5984.exp, pr-6292.exp: Make files obsolete.
+	* pr-6632.exp, pr-8134.exp, pr-8136.exp: Make files obsolete.
+	* pr-8405.exp, pr-8742.exp, pr-8894.exp: Make files obsolete.
+	* pr-9095.exp, pr-9946.exp, result.exp: Make files obsolete.
+	* string.exp, tests1.exp, tests2.exp: Make files obsolete.
+	* tuples.exp, xstruct.exp: Make files obsolete.
+	
 2001-03-06  Kevin Buettner  <kevinb@redhat.com>
 
 	* builtins.exp, callch.exp, chexp.exp, chillvars.exp,

@@ -32,8 +32,9 @@
 #endif
 #include "ansidecl.h"
 #include "bfd.h"
-#include "callback.h"
-#include "remote-sim.h"
+#include "gdb/callback.h"
+#include "gdb/remote-sim.h"
+#include "gdb/sim-h8300.h"
 
 #ifndef SIGTRAP
 # define SIGTRAP 5

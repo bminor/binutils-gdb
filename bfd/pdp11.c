@@ -1479,9 +1479,9 @@ aout_get_external_symbols (abfd)
       count = exec_hdr (abfd)->a_syms / EXTERNAL_NLIST_SIZE;
 
 #ifdef USE_MMAP
-      if (bfd_get_file_window (abfd,
-			       obj_sym_filepos (abfd), exec_hdr (abfd)->a_syms,
-			       &obj_aout_sym_window (abfd), true) == false)
+      if (! bfd_get_file_window (abfd, obj_sym_filepos (abfd),
+				 exec_hdr (abfd)->a_syms,
+				 &obj_aout_sym_window (abfd), true))
 	return false;
       syms = (struct external_nlist *) obj_aout_sym_window (abfd).data;
 #else
@@ -1520,8 +1520,8 @@ aout_get_external_symbols (abfd)
       stringsize = H_GET_32 (abfd, string_chars);
 
 #ifdef USE_MMAP
-      if (bfd_get_file_window (abfd, obj_str_filepos (abfd), stringsize,
-			       &obj_aout_string_window (abfd), true) == false)
+      if (! bfd_get_file_window (abfd, obj_str_filepos (abfd), stringsize,
+				 &obj_aout_string_window (abfd), true))
 	return false;
       strings = (char *) obj_aout_string_window (abfd).data;
 #else
@@ -1841,11 +1841,9 @@ NAME(aout,slurp_symbol_table) (abfd)
 
   cached_size = obj_aout_external_sym_count (abfd);
   cached_size *= sizeof (aout_symbol_type);
-  cached = (aout_symbol_type *) bfd_malloc (cached_size);
+  cached = (aout_symbol_type *) bfd_zmalloc (cached_size);
   if (cached == NULL && cached_size != 0)
     return false;
-  if (cached_size != 0)
-    memset (cached, 0, (size_t) cached_size);
 
   /* Convert from external symbol information to internal.  */
   if (! (NAME(aout,translate_symbol_table)
@@ -2255,10 +2253,9 @@ NAME(aout,slurp_reloc_table) (abfd, asect, symbols)
     count = real_count;
   }
 
-  reloc_cache = (arelent *) bfd_malloc (count * sizeof (arelent));
+  reloc_cache = (arelent *) bfd_zmalloc (count * sizeof (arelent));
   if (reloc_cache == NULL && count != 0)
     return false;
-  memset (reloc_cache, 0, (size_t) count * sizeof (arelent));
 
   cache_ptr = reloc_cache;
 
@@ -2318,8 +2315,6 @@ NAME(aout,squirt_out_relocs) (abfd, section)
   native = (unsigned char *) bfd_zalloc (abfd, natsize);
   if (!native)
     return false;
-
-  memset ((PTR)native, 0, (size_t) natsize);
 
   generic = section->orelocation;
   if (generic != NULL)

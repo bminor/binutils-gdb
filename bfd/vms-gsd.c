@@ -426,13 +426,12 @@ _bfd_vms_slurp_gsd (abfd, objtype)
 	      else
 		{
 		  section->contents = ((unsigned char *)
-				       bfd_malloc (section->_raw_size));
+				       bfd_zmalloc (section->_raw_size));
 		  if (section->contents == NULL)
 		    {
 		      bfd_set_error (bfd_error_no_memory);
 		      return -1;
 		    }
-		  memset (section->contents, 0, (size_t) section->_raw_size);
 		}
 	      section->_cooked_size = section->_raw_size;
 #if VMS_DEBUG
@@ -618,10 +617,9 @@ _bfd_vms_slurp_gsd (abfd, objtype)
 	    section->vma = (bfd_vma)base_addr;
 	    base_addr += section->_raw_size;
 	    section->contents = ((unsigned char *)
-				 bfd_malloc (section->_raw_size));
+				 bfd_zmalloc (section->_raw_size));
 	    if (section->contents == NULL)
 	      return -1;
-	    memset (section->contents, 0, (size_t) section->_raw_size);
 	    section->_cooked_size = section->_raw_size;
 #if VMS_DEBUG
 	    vms_debug(4, "egsd psc %d (%s, flags %04x=%s) ",

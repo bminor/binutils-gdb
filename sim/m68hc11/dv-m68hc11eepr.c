@@ -1,6 +1,6 @@
 /*  dv-m68hc11eepr.c -- Simulation of the 68HC11 Internal EEPROM.
-    Copyright (C) 1999, 2000, 2001 Free Software Foundation, Inc.
-    Written by Stephane Carrez (stcarrez@worldnet.fr)
+    Copyright (C) 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+    Written by Stephane Carrez (stcarrez@nerim.fr)
     (From a driver model Contributed by Cygnus Solutions.)
     
     This program is free software; you can redistribute it and/or modify
@@ -119,7 +119,7 @@ struct m68hc11eepr
   /* Minimum time in CPU cycles for programming the EEPROM.  */
   unsigned long         eeprom_min_cycles;
 
-  char* file_name;
+  const char*           file_name;
 };
 
 

@@ -108,8 +108,8 @@ enum {
 /* sparclet register numbers */
 #define CCSR_REGNUM 72
 
-#undef EXTRACT_RETURN_VALUE
-#define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF)                       \
+#undef DEPRECATED_EXTRACT_RETURN_VALUE
+#define DEPRECATED_EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF)            \
   {                                                                    \
     memcpy ((VALBUF),                                                  \
 	    (char *)(REGBUF) + REGISTER_RAW_SIZE (O0_REGNUM) * 8 +     \
@@ -117,8 +117,8 @@ enum {
 	     ? 0 : REGISTER_RAW_SIZE (O0_REGNUM) - TYPE_LENGTH(TYPE)), \
 	    TYPE_LENGTH(TYPE));                                        \
   }
-#undef STORE_RETURN_VALUE
-#define STORE_RETURN_VALUE(TYPE,VALBUF) \
+#undef DEPRECATED_STORE_RETURN_VALUE
+#define DEPRECATED_STORE_RETURN_VALUE(TYPE,VALBUF) \
   {                                                                    \
     /* Other values are returned in register %o0.  */                  \
     write_register_bytes (REGISTER_BYTE (O0_REGNUM), (VALBUF),         \

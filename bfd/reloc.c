@@ -645,7 +645,7 @@ bfd_perform_relocation (abfd, reloc_entry, data, input_section, output_bfd,
   reloc_target_output_section = symbol->section->output_section;
 
   /* Convert input-section-relative symbol value to absolute.  */
-  if (output_bfd && howto->partial_inplace == false)
+  if (output_bfd && ! howto->partial_inplace)
     output_base = 0;
   else
     output_base = reloc_target_output_section->vma;
@@ -658,7 +658,7 @@ bfd_perform_relocation (abfd, reloc_entry, data, input_section, output_bfd,
   /* Here the variable relocation holds the final address of the
      symbol we are relocating against, plus any addend.  */
 
-  if (howto->pc_relative == true)
+  if (howto->pc_relative)
     {
       /* This is a PC relative relocation.  We want to set RELOCATION
 	 to the distance between the address of the symbol and the
@@ -691,13 +691,13 @@ bfd_perform_relocation (abfd, reloc_entry, data, input_section, output_bfd,
       relocation -=
 	input_section->output_section->vma + input_section->output_offset;
 
-      if (howto->pcrel_offset == true)
+      if (howto->pcrel_offset)
 	relocation -= reloc_entry->address;
     }
 
   if (output_bfd != (bfd *) NULL)
     {
-      if (howto->partial_inplace == false)
+      if (! howto->partial_inplace)
 	{
 	  /* This is a partial relocation, and we want to apply the relocation
 	     to the reloc entry rather than the raw data. Modify the reloc
@@ -1037,7 +1037,7 @@ bfd_install_relocation (abfd, reloc_entry, data_start, data_start_offset,
   reloc_target_output_section = symbol->section->output_section;
 
   /* Convert input-section-relative symbol value to absolute.  */
-  if (howto->partial_inplace == false)
+  if (! howto->partial_inplace)
     output_base = 0;
   else
     output_base = reloc_target_output_section->vma;
@@ -1050,7 +1050,7 @@ bfd_install_relocation (abfd, reloc_entry, data_start, data_start_offset,
   /* Here the variable relocation holds the final address of the
      symbol we are relocating against, plus any addend.  */
 
-  if (howto->pc_relative == true)
+  if (howto->pc_relative)
     {
       /* This is a PC relative relocation.  We want to set RELOCATION
 	 to the distance between the address of the symbol and the
@@ -1083,11 +1083,11 @@ bfd_install_relocation (abfd, reloc_entry, data_start, data_start_offset,
       relocation -=
 	input_section->output_section->vma + input_section->output_offset;
 
-      if (howto->pcrel_offset == true && howto->partial_inplace == true)
+      if (howto->pcrel_offset && howto->partial_inplace)
 	relocation -= reloc_entry->address;
     }
 
-  if (howto->partial_inplace == false)
+  if (! howto->partial_inplace)
     {
       /* This is a partial relocation, and we want to apply the relocation
 	 to the reloc entry rather than the raw data. Modify the reloc
@@ -1963,6 +1963,35 @@ ENUMDOC
   STO_ALPHA_STD_GPLOAD.
 
 ENUM
+  BFD_RELOC_ALPHA_TLSGD
+ENUMX
+  BFD_RELOC_ALPHA_TLSLDM
+ENUMX
+  BFD_RELOC_ALPHA_DTPMOD64
+ENUMX
+  BFD_RELOC_ALPHA_GOTDTPREL16
+ENUMX
+  BFD_RELOC_ALPHA_DTPREL64
+ENUMX
+  BFD_RELOC_ALPHA_DTPREL_HI16
+ENUMX
+  BFD_RELOC_ALPHA_DTPREL_LO16
+ENUMX
+  BFD_RELOC_ALPHA_DTPREL16
+ENUMX
+  BFD_RELOC_ALPHA_GOTTPREL16
+ENUMX
+  BFD_RELOC_ALPHA_TPREL64
+ENUMX
+  BFD_RELOC_ALPHA_TPREL_HI16
+ENUMX
+  BFD_RELOC_ALPHA_TPREL_LO16
+ENUMX
+  BFD_RELOC_ALPHA_TPREL16
+ENUMDOC
+  Alpha thread-local storage relocations.
+
+ENUM
   BFD_RELOC_MIPS_JMP
 ENUMDOC
   Bits 27..2 of the relocation address shifted right 2 bits;
@@ -2049,6 +2078,27 @@ ENUMX
   BFD_RELOC_MIPS_RELGOT
 ENUMX
   BFD_RELOC_MIPS_JALR
+COMMENT
+ENUM
+  BFD_RELOC_FRV_LABEL16
+ENUMX
+  BFD_RELOC_FRV_LABEL24
+ENUMX
+  BFD_RELOC_FRV_LO16
+ENUMX
+  BFD_RELOC_FRV_HI16
+ENUMX
+  BFD_RELOC_FRV_GPREL12
+ENUMX
+  BFD_RELOC_FRV_GPRELU12
+ENUMX
+  BFD_RELOC_FRV_GPREL32
+ENUMX
+  BFD_RELOC_FRV_GPRELHI
+ENUMX
+  BFD_RELOC_FRV_GPRELLO
+ENUMDOC
+  Fujitsu Frv Relocations.
 COMMENT
 COMMENT
 ENUMDOC
@@ -3073,6 +3123,55 @@ ENUMDOC
   32 bit rel. offset to GOT entry.
 
 ENUM
+  BFD_RELOC_IP2K_FR9
+ENUMDOC
+  Scenix IP2K - 9-bit register number / data address
+ENUM
+  BFD_RELOC_IP2K_BANK
+ENUMDOC
+  Scenix IP2K - 4-bit register/data bank number
+ENUM
+  BFD_RELOC_IP2K_ADDR16CJP
+ENUMDOC
+  Scenix IP2K - low 13 bits of instruction word address
+ENUM
+  BFD_RELOC_IP2K_PAGE3
+ENUMDOC
+  Scenix IP2K - high 3 bits of instruction word address
+ENUM
+  BFD_RELOC_IP2K_LO8DATA
+ENUMX
+  BFD_RELOC_IP2K_HI8DATA
+ENUMX
+  BFD_RELOC_IP2K_EX8DATA
+ENUMDOC
+  Scenix IP2K - ext/low/high 8 bits of data address
+ENUM
+  BFD_RELOC_IP2K_LO8INSN
+ENUMX
+  BFD_RELOC_IP2K_HI8INSN
+ENUMDOC
+  Scenix IP2K - low/high 8 bits of instruction word address
+ENUM
+  BFD_RELOC_IP2K_PC_SKIP
+ENUMDOC
+  Scenix IP2K - even/odd PC modifier to modify snb pcl.0
+ENUM
+  BFD_RELOC_IP2K_TEXT
+ENUMDOC
+  Scenix IP2K - 16 bit word address in text section.
+ENUM
+  BFD_RELOC_IP2K_FR_OFFSET
+ENUMDOC
+  Scenix IP2K - 7-bit sp or dp offset
+ENUM
+  BFD_RELOC_VPE4KMATH_DATA
+ENUMX
+  BFD_RELOC_VPE4KMATH_INSN
+ENUMDOC
+  Scenix VPE4K coprocessor - data/insn-space addressing
+
+ENUM
   BFD_RELOC_VTABLE_INHERIT
 ENUMX
   BFD_RELOC_VTABLE_ENTRY
@@ -3260,17 +3359,53 @@ ENUM
   BFD_RELOC_M68HC11_HI8
 ENUMDOC
   Motorola 68HC11 reloc.
-  This is the 8 bits high part of an absolute address.
+  This is the 8 bit high part of an absolute address.
 ENUM
   BFD_RELOC_M68HC11_LO8
 ENUMDOC
   Motorola 68HC11 reloc.
-  This is the 8 bits low part of an absolute address.
+  This is the 8 bit low part of an absolute address.
 ENUM
   BFD_RELOC_M68HC11_3B
 ENUMDOC
   Motorola 68HC11 reloc.
-  This is the 3 bits of a value.
+  This is the 3 bit of a value.
+ENUM
+  BFD_RELOC_M68HC11_RL_JUMP
+ENUMDOC
+  Motorola 68HC11 reloc.
+  This reloc marks the beginning of a jump/call instruction.
+  It is used for linker relaxation to correctly identify beginning
+  of instruction and change some branchs to use PC-relative
+  addressing mode.
+ENUM
+  BFD_RELOC_M68HC11_RL_GROUP
+ENUMDOC
+  Motorola 68HC11 reloc.
+  This reloc marks a group of several instructions that gcc generates
+  and for which the linker relaxation pass can modify and/or remove
+  some of them.
+ENUM
+  BFD_RELOC_M68HC11_LO16
+ENUMDOC
+  Motorola 68HC11 reloc.
+  This is the 16-bit lower part of an address.  It is used for 'call'
+  instruction to specify the symbol address without any special
+  transformation (due to memory bank window).
+ENUM
+  BFD_RELOC_M68HC11_PAGE
+ENUMDOC
+  Motorola 68HC11 reloc.
+  This is a 8-bit reloc that specifies the page number of an address.
+  It is used by 'call' instruction to specify the page number of
+  the symbol.
+ENUM
+  BFD_RELOC_M68HC11_24
+ENUMDOC
+  Motorola 68HC11 reloc.
+  This is a 24-bit reloc that represents the address with a 16-bit
+  value and a 8-bit page number.  The symbol address is transformed
+  to follow the 16K memory bank of 68HC12 (seen as mapped in the window).
 
 ENUM
   BFD_RELOC_CRIS_BDISP8
@@ -3419,6 +3554,15 @@ ENUMX
   BFD_RELOC_XSTORMY16_FPTR16
 ENUMDOC
   Sony Xstormy16 Relocations.
+
+ENUM
+  BFD_RELOC_VAX_GLOB_DAT
+ENUMX
+  BFD_RELOC_VAX_JMP_SLOT
+ENUMX
+  BFD_RELOC_VAX_RELATIVE
+ENUMDOC
+  Relocations used by VAX ELF.
 
 ENDSENUM
   BFD_RELOC_UNUSED

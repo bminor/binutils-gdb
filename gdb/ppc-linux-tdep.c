@@ -411,293 +411,6 @@ ppc_linux_frame_chain (struct frame_info *thisframe)
     return rs6000_frame_chain (thisframe);
 }
 
-/* FIXME: Move the following to rs6000-tdep.c (or some other file where
-   it may be used generically by ports which use either the SysV ABI or
-   the EABI */
-
-/* Until November 2001, gcc was not complying to the SYSV ABI for
-   returning structures less than or equal to 8 bytes in size.  It was
-   returning everything in memory.  When this was corrected, it wasn't
-   fixed for native platforms.  */
-int
-ppc_sysv_abi_broken_use_struct_convention (int gcc_p, struct type *value_type)
-{
-  if (TYPE_LENGTH (value_type) == 16
-      && TYPE_VECTOR (value_type))
-    return 0;
-
-  return generic_use_struct_convention (gcc_p, value_type);
-}
-
-/* Structures 8 bytes or less long are returned in the r3 & r4
-   registers, according to the SYSV ABI. */
-int
-ppc_sysv_abi_use_struct_convention (int gcc_p, struct type *value_type)
-{
-  if (TYPE_LENGTH (value_type) == 16
-      && TYPE_VECTOR (value_type))
-    return 0;
-
-  return (TYPE_LENGTH (value_type) > 8);
-}
-
-/* round2 rounds x up to the nearest multiple of s assuming that s is a
-   power of 2 */
-
-#undef round2
-#define round2(x,s) ((((long) (x) - 1) & ~(long)((s)-1)) + (s))
-
-/* Pass the arguments in either registers, or in the stack. Using the
-   ppc sysv ABI, the first eight words of the argument list (that might
-   be less than eight parameters if some parameters occupy more than one
-   word) are passed in r3..r10 registers.  float and double parameters are
-   passed in fpr's, in addition to that. Rest of the parameters if any
-   are passed in user stack. 
-
-   If the function is returning a structure, then the return address is passed
-   in r3, then the first 7 words of the parametes can be passed in registers,
-   starting from r4. */
-
-CORE_ADDR
-ppc_sysv_abi_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
-			     int struct_return, CORE_ADDR struct_addr)
-{
-  int argno;
-  /* Next available general register for non-float, non-vector arguments. */
-  int greg;
-  /* Next available floating point register for float arguments. */
-  int freg;
-  /* Next available vector register for vector arguments. */
-  int vreg;
-  int argstkspace;
-  int structstkspace;
-  int argoffset;
-  int structoffset;
-  struct value *arg;
-  struct type *type;
-  int len;
-  char old_sp_buf[4];
-  CORE_ADDR saved_sp;
-
-  greg = struct_return ? 4 : 3;
-  freg = 1;
-  vreg = 2;
-  argstkspace = 0;
-  structstkspace = 0;
-
-  /* Figure out how much new stack space is required for arguments
-     which don't fit in registers.  Unlike the PowerOpen ABI, the
-     SysV ABI doesn't reserve any extra space for parameters which
-     are put in registers. */
-  for (argno = 0; argno < nargs; argno++)
-    {
-      arg = args[argno];
-      type = check_typedef (VALUE_TYPE (arg));
-      len = TYPE_LENGTH (type);
-
-      if (TYPE_CODE (type) == TYPE_CODE_FLT)
-	{
-	  if (freg <= 8)
-	    freg++;
-	  else
-	    {
-	      /* SysV ABI converts floats to doubles when placed in
-	         memory and requires 8 byte alignment */
-	      if (argstkspace & 0x4)
-		argstkspace += 4;
-	      argstkspace += 8;
-	    }
-	}
-      else if (TYPE_CODE (type) == TYPE_CODE_INT && len == 8)	/* long long */
-	{
-	  if (greg > 9)
-	    {
-	      greg = 11;
-	      if (argstkspace & 0x4)
-		argstkspace += 4;
-	      argstkspace += 8;
-	    }
-	  else
-	    {
-	      if ((greg & 1) == 0)
-		greg++;
-	      greg += 2;
-	    }
-	}
-      else if (!TYPE_VECTOR (type))
-        {
-	  if (len > 4
-	      || TYPE_CODE (type) == TYPE_CODE_STRUCT
-	      || TYPE_CODE (type) == TYPE_CODE_UNION)
-	    {
-	      /* Rounding to the nearest multiple of 8 may not be necessary,
-		 but it is safe.  Particularly since we don't know the
-		 field types of the structure */
-	      structstkspace += round2 (len, 8);
-	    }
-	  if (greg <= 10)
-	    greg++;
-	  else
-	    argstkspace += 4;
-    	}
-      else
-        {
-          if (len == 16
-	      && TYPE_CODE (type) == TYPE_CODE_ARRAY
-	      && TYPE_VECTOR (type))
-	    {
-	      if (vreg <= 13)
-		vreg++;
-	      else
-		{
-		  /* Vector arguments must be aligned to 16 bytes on
-                     the stack. */
-		  argstkspace += round2 (argstkspace, 16);
-		  argstkspace += 16;
-		}
-	    }
-	}
-    }
-
-  /* Get current SP location */
-  saved_sp = read_sp ();
-
-  sp -= argstkspace + structstkspace;
-
-  /* Allocate space for backchain and callee's saved lr */
-  sp -= 8;
-
-  /* Make sure that we maintain 16 byte alignment */
-  sp &= ~0x0f;
-
-  /* Update %sp before proceeding any further */
-  write_register (SP_REGNUM, sp);
-
-  /* write the backchain */
-  store_address (old_sp_buf, 4, saved_sp);
-  write_memory (sp, old_sp_buf, 4);
-
-  argoffset = 8;
-  structoffset = argoffset + argstkspace;
-  freg = 1;
-  greg = 3;
-  vreg = 2;
-  /* Fill in r3 with the return structure, if any */
-  if (struct_return)
-    {
-      char val_buf[4];
-      store_address (val_buf, 4, struct_addr);
-      memcpy (&registers[REGISTER_BYTE (greg)], val_buf, 4);
-      greg++;
-    }
-  /* Now fill in the registers and stack... */
-  for (argno = 0; argno < nargs; argno++)
-    {
-      arg = args[argno];
-      type = check_typedef (VALUE_TYPE (arg));
-      len = TYPE_LENGTH (type);
-
-      if (TYPE_CODE (type) == TYPE_CODE_FLT)
-	{
-	  if (freg <= 8)
-	    {
-	      if (len > 8)
-		printf_unfiltered (
-				   "Fatal Error: a floating point parameter #%d with a size > 8 is found!\n", argno);
-	      memcpy (&registers[REGISTER_BYTE (FP0_REGNUM + freg)],
-		      VALUE_CONTENTS (arg), len);
-	      freg++;
-	    }
-	  else
-	    {
-	      /* SysV ABI converts floats to doubles when placed in
-	         memory and requires 8 byte alignment */
-	      /* FIXME: Convert floats to doubles */
-	      if (argoffset & 0x4)
-		argoffset += 4;
-	      write_memory (sp + argoffset, (char *) VALUE_CONTENTS (arg), len);
-	      argoffset += 8;
-	    }
-	}
-      else if (TYPE_CODE (type) == TYPE_CODE_INT && len == 8)	/* long long */
-	{
-	  if (greg > 9)
-	    {
-	      greg = 11;
-	      if (argoffset & 0x4)
-		argoffset += 4;
-	      write_memory (sp + argoffset, (char *) VALUE_CONTENTS (arg), len);
-	      argoffset += 8;
-	    }
-	  else
-	    {
-	      if ((greg & 1) == 0)
-		greg++;
-
-	      memcpy (&registers[REGISTER_BYTE (greg)],
-		      VALUE_CONTENTS (arg), 4);
-	      memcpy (&registers[REGISTER_BYTE (greg + 1)],
-		      VALUE_CONTENTS (arg) + 4, 4);
-	      greg += 2;
-	    }
-	}
-      else if (!TYPE_VECTOR (type))
-	{
-	  char val_buf[4];
-	  if (len > 4
-	      || TYPE_CODE (type) == TYPE_CODE_STRUCT
-	      || TYPE_CODE (type) == TYPE_CODE_UNION)
-	    {
-	      write_memory (sp + structoffset, VALUE_CONTENTS (arg), len);
-	      store_address (val_buf, 4, sp + structoffset);
-	      structoffset += round2 (len, 8);
-	    }
-	  else
-	    {
-	      memset (val_buf, 0, 4);
-	      memcpy (val_buf, VALUE_CONTENTS (arg), len);
-	    }
-	  if (greg <= 10)
-	    {
-	      memcpy (&registers[REGISTER_BYTE (greg)], val_buf, 4);
-	      greg++;
-	    }
-	  else
-	    {
-	      write_memory (sp + argoffset, val_buf, 4);
-	      argoffset += 4;
-	    }
-	}
-      else
-	{
-	  if (len == 16
-	      && TYPE_CODE (type) == TYPE_CODE_ARRAY
-	      && TYPE_VECTOR (type))
-	    {
-	      struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-	      char *v_val_buf = alloca (16);
-	      memset (v_val_buf, 0, 16);
-	      memcpy (v_val_buf, VALUE_CONTENTS (arg), len);
-	      if (vreg <= 13)
-		{
-		  memcpy (&registers[REGISTER_BYTE (tdep->ppc_vr0_regnum
-						    + vreg)],
-			  v_val_buf, 16);
-		  vreg++;
-		}
-	      else
-		{
-		  write_memory (sp + argoffset, v_val_buf, 16);
-		  argoffset += 16;
-		}
-	    }
-        }
-    }
-
-  target_store_registers (-1);
-  return sp;
-}
-
 /* ppc_linux_memory_remove_breakpoints attempts to remove a breakpoint
    in much the same fashion as memory_remove_breakpoint in mem-break.c,
    but is careful not to write back the previous contents if the code
@@ -885,4 +598,128 @@ ppc_linux_svr4_fetch_link_map_offsets (void)
     }
 
   return lmp;
+}
+
+enum {
+  ELF_NGREG = 48,
+  ELF_NFPREG = 33,
+  ELF_NVRREG = 33
+};
+
+enum {
+  ELF_GREGSET_SIZE = (ELF_NGREG * 4),
+  ELF_FPREGSET_SIZE = (ELF_NFPREG * 8)
+};
+
+void
+ppc_linux_supply_gregset (char *buf)
+{
+  int regi;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch); 
+
+  for (regi = 0; regi < 32; regi++)
+    supply_register (regi, buf + 4 * regi);
+
+  supply_register (PC_REGNUM, buf + 4 * PPC_LINUX_PT_NIP);
+  supply_register (tdep->ppc_lr_regnum, buf + 4 * PPC_LINUX_PT_LNK);
+  supply_register (tdep->ppc_cr_regnum, buf + 4 * PPC_LINUX_PT_CCR);
+  supply_register (tdep->ppc_xer_regnum, buf + 4 * PPC_LINUX_PT_XER);
+  supply_register (tdep->ppc_ctr_regnum, buf + 4 * PPC_LINUX_PT_CTR);
+  if (tdep->ppc_mq_regnum != -1)
+    supply_register (tdep->ppc_mq_regnum, buf + 4 * PPC_LINUX_PT_MQ);
+  supply_register (tdep->ppc_ps_regnum, buf + 4 * PPC_LINUX_PT_MSR);
+}
+
+void
+ppc_linux_supply_fpregset (char *buf)
+{
+  int regi;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch); 
+
+  for (regi = 0; regi < 32; regi++)
+    supply_register (FP0_REGNUM + regi, buf + 8 * regi);
+
+  /* The FPSCR is stored in the low order word of the last doubleword in the
+     fpregset.  */
+  supply_register (tdep->ppc_fpscr_regnum, buf + 8 * 32 + 4);
+}
+
+/*
+  Use a local version of this function to get the correct types for regsets.
+*/
+
+static void
+fetch_core_registers (char *core_reg_sect,
+		      unsigned core_reg_size,
+		      int which,
+		      CORE_ADDR reg_addr)
+{
+  if (which == 0)
+    {
+      if (core_reg_size == ELF_GREGSET_SIZE)
+	ppc_linux_supply_gregset (core_reg_sect);
+      else
+	warning ("wrong size gregset struct in core file");
+    }
+  else if (which == 2)
+    {
+      if (core_reg_size == ELF_FPREGSET_SIZE)
+	ppc_linux_supply_fpregset (core_reg_sect);
+      else
+	warning ("wrong size fpregset struct in core file");
+    }
+}
+
+/* Register that we are able to handle ELF file formats using standard
+   procfs "regset" structures.  */
+
+static struct core_fns ppc_linux_regset_core_fns =
+{
+  bfd_target_elf_flavour,	/* core_flavour */
+  default_check_format,		/* check_format */
+  default_core_sniffer,		/* core_sniffer */
+  fetch_core_registers,		/* core_read_registers */
+  NULL				/* next */
+};
+
+static void
+ppc_linux_init_abi (struct gdbarch_info info,
+                    struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  /* Until November 2001, gcc was not complying to the SYSV ABI for
+     returning structures less than or equal to 8 bytes in size. It was
+     returning everything in memory. When this was corrected, it wasn't
+     fixed for native platforms.  */
+  set_gdbarch_use_struct_convention (gdbarch,
+                                   ppc_sysv_abi_broken_use_struct_convention);
+
+  if (tdep->wordsize == 4)
+    {
+      /* Note: kevinb/2002-04-12: See note in rs6000_gdbarch_init regarding
+	 *_push_arguments().  The same remarks hold for the methods below.  */
+      set_gdbarch_frameless_function_invocation (gdbarch,
+        ppc_linux_frameless_function_invocation);
+      set_gdbarch_frame_chain (gdbarch, ppc_linux_frame_chain);
+      set_gdbarch_frame_saved_pc (gdbarch, ppc_linux_frame_saved_pc);
+
+      set_gdbarch_frame_init_saved_regs (gdbarch,
+                                         ppc_linux_frame_init_saved_regs);
+      set_gdbarch_init_extra_frame_info (gdbarch,
+                                         ppc_linux_init_extra_frame_info);
+
+      set_gdbarch_memory_remove_breakpoint (gdbarch,
+                                            ppc_linux_memory_remove_breakpoint);
+      set_solib_svr4_fetch_link_map_offsets
+        (gdbarch, ppc_linux_svr4_fetch_link_map_offsets);
+    }
+}
+
+void
+_initialize_ppc_linux_tdep (void)
+{
+  gdbarch_register_osabi (bfd_arch_powerpc, GDB_OSABI_LINUX,
+			  ppc_linux_init_abi);
+  add_core_fns (&ppc_linux_regset_core_fns);
 }

@@ -29,7 +29,6 @@
 #include "gdbcore.h"
 #include "gdbcmd.h"
 #include "target.h"
-#include "obstack.h"
 #include "language.h"
 #include "annotate.h"
 #include "valprint.h"
@@ -333,7 +332,7 @@ print_longest (struct ui_file *stream, int format, int use_local,
       fprintf_filtered (stream,
 			use_local ? local_decimal_format_custom ("ll")
 			: "%lld",
-			val_long);
+			(long long) val_long);
       break;
     case 'u':
       fprintf_filtered (stream, "%llu", (long long) val_long);
@@ -342,13 +341,13 @@ print_longest (struct ui_file *stream, int format, int use_local,
       fprintf_filtered (stream,
 			use_local ? local_hex_format_custom ("ll")
 			: "%llx",
-			val_long);
+			(unsigned long long) val_long);
       break;
     case 'o':
       fprintf_filtered (stream,
 			use_local ? local_octal_format_custom ("ll")
 			: "%llo",
-			val_long);
+			(unsigned long long) val_long);
       break;
     case 'b':
       fprintf_filtered (stream, local_hex_format_custom ("02ll"), val_long);

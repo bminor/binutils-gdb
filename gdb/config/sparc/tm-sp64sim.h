@@ -22,7 +22,7 @@
    but it's a good start.  */
 
 #include "sparc/tm-sp64.h"
-#include "tm-sunos.h"
+#include "config/tm-sunos.h"
 
 /* Offsets into jmp_buf.  Not defined by Sun, but at least documented in a
    comment in <machine/setjmp.h>! */

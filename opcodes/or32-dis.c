@@ -261,7 +261,7 @@ print_insn (memaddr, info)
   /* The four bytes of the instruction.  */
   unsigned long insn;
   find_byte_func_type find_byte_func = (find_byte_func_type)info->private_data;
-  struct or32_opcode CONST * opcode;
+  struct or32_opcode const * opcode;
 
   {
     int status =

@@ -45,12 +45,10 @@ static gdbarch_frame_saved_pc_ftype vax_frame_saved_pc;
 static gdbarch_frame_args_address_ftype vax_frame_args_address;
 static gdbarch_frame_locals_address_ftype vax_frame_locals_address;
 static gdbarch_frame_init_saved_regs_ftype vax_frame_init_saved_regs;
-static gdbarch_get_saved_register_ftype vax_get_saved_register;
 
 static gdbarch_store_struct_return_ftype vax_store_struct_return;
-static gdbarch_extract_return_value_ftype vax_extract_return_value;
-static gdbarch_store_return_value_ftype vax_store_return_value;
-static gdbarch_extract_struct_value_address_ftype
+static gdbarch_deprecated_extract_return_value_ftype vax_extract_return_value;
+static gdbarch_deprecated_extract_struct_value_address_ftype
     vax_extract_struct_value_address;
 
 static gdbarch_push_dummy_frame_ftype vax_push_dummy_frame;
@@ -83,7 +81,7 @@ static gdbarch_fix_call_dummy_ftype vax_fix_call_dummy;
 
 static unsigned char *print_insn_arg ();
 
-static char *
+static const char *
 vax_register_name (int regno)
 {
   static char *register_names[] =
@@ -125,51 +123,6 @@ vax_register_virtual_type (int regno)
 }
 
 static void
-vax_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
-                        struct frame_info *frame, int regnum,
-                        enum lval_type *lval)
-{
-  CORE_ADDR addr;
-
-  if (!target_has_registers)
-    error ("No registers.");
-
-  /* Normal systems don't optimize out things with register numbers.  */
-  if (optimized != NULL)
-    *optimized = 0;
-  addr = find_saved_register (frame, regnum);
-  if (addr != 0)
-    {
-      if (lval != NULL)
-	*lval = lval_memory;
-      if (regnum == SP_REGNUM)
-	{
-	  if (raw_buffer != NULL)
-	    {
-	      /* Put it back in target format.  */
-	      store_address (raw_buffer, REGISTER_RAW_SIZE (regnum),
-			     (LONGEST) addr);
-	    }
-	  if (addrp != NULL)
-	    *addrp = 0;
-	  return;
-	}
-      if (raw_buffer != NULL)
-	target_read_memory (addr, raw_buffer, REGISTER_RAW_SIZE (regnum));
-    }
-  else
-    {
-      if (lval != NULL)
-	*lval = lval_register;
-      addr = REGISTER_BYTE (regnum);
-      if (raw_buffer != NULL)
-	read_register_gen (regnum, raw_buffer);
-    }
-  if (addrp != NULL)
-    *addrp = addr;
-}
-
-static void
 vax_frame_init_saved_regs (struct frame_info *frame)
 {
   int regnum, regmask;
@@ -186,7 +139,7 @@ vax_frame_init_saved_regs (struct frame_info *frame)
 
   /* regmask's low bit is for register 0, which is the first one
      what would be pushed.  */
-  for (regnum = 0; regnum < AP_REGNUM; regnum++)
+  for (regnum = 0; regnum < VAX_AP_REGNUM; regnum++)
     {
       if (regmask & (1 << regnum))
         frame->saved_regs[regnum] = next_addr += 4;
@@ -199,7 +152,7 @@ vax_frame_init_saved_regs (struct frame_info *frame)
 
   frame->saved_regs[PC_REGNUM] = frame->frame + 16;
   frame->saved_regs[FP_REGNUM] = frame->frame + 12;
-  frame->saved_regs[AP_REGNUM] = frame->frame + 8;
+  frame->saved_regs[VAX_AP_REGNUM] = frame->frame + 8;
   frame->saved_regs[PS_REGNUM] = frame->frame + 4;
 }
 
@@ -239,7 +192,7 @@ vax_frame_args_address (struct frame_info *frame)
   if (frame->next)
     return (read_memory_integer (frame->next->frame + 8, 4));
 
-  return (read_register (AP_REGNUM));
+  return (read_register (VAX_AP_REGNUM));
 }
 
 static CORE_ADDR
@@ -276,12 +229,12 @@ vax_push_dummy_frame (void)
     sp = push_word (sp, read_register (regnum));
   sp = push_word (sp, read_register (PC_REGNUM));
   sp = push_word (sp, read_register (FP_REGNUM));
-  sp = push_word (sp, read_register (AP_REGNUM));
+  sp = push_word (sp, read_register (VAX_AP_REGNUM));
   sp = push_word (sp, (read_register (PS_REGNUM) & 0xffef) + 0x2fff0000);
   sp = push_word (sp, 0);
   write_register (SP_REGNUM, sp);
   write_register (FP_REGNUM, sp);
-  write_register (AP_REGNUM, sp + (17 * 4));
+  write_register (VAX_AP_REGNUM, sp + (17 * 4));
 }
 
 static void
@@ -296,7 +249,7 @@ vax_pop_frame (void)
 		  | (read_register (PS_REGNUM) & 0xffff0000));
   write_register (PC_REGNUM, read_memory_integer (fp + 16, 4));
   write_register (FP_REGNUM, read_memory_integer (fp + 12, 4));
-  write_register (AP_REGNUM, read_memory_integer (fp + 8, 4));
+  write_register (VAX_AP_REGNUM, read_memory_integer (fp + 8, 4));
   fp += 16;
   for (regnum = 0; regnum < 12; regnum++)
     if (regmask & (0x10000 << regnum))
@@ -351,6 +304,15 @@ static CORE_ADDR
 vax_extract_struct_value_address (char *regbuf)
 {
   return (extract_address (regbuf + REGISTER_BYTE (0), REGISTER_RAW_SIZE (0)));
+}
+
+static const unsigned char *
+vax_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
+{
+  static const unsigned char vax_breakpoint[] = { 3 };
+
+  *lenptr = sizeof(vax_breakpoint);
+  return (vax_breakpoint);
 }
 
 /* Advance PC across any function entry prologue instructions
@@ -620,13 +582,30 @@ print_insn_arg (char *d, register char *p, CORE_ADDR addr,
 static struct gdbarch *
 vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
+  struct gdbarch_tdep *tdep;
   struct gdbarch *gdbarch;
+  enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
 
-  /* Right now there is only one VAX architecture variant.  */
-  if (arches != NULL)
-    return (arches->gdbarch);
+  /* Try to determine the ABI of the object we are loading.  */
 
-  gdbarch = gdbarch_alloc (&info, NULL);
+  if (info.abfd != NULL)
+    osabi = gdbarch_lookup_osabi (info.abfd);
+
+  /* Find a candidate among extant architectures.  */
+  for (arches = gdbarch_list_lookup_by_info (arches, &info);
+       arches != NULL;
+       arches = gdbarch_list_lookup_by_info (arches->next, &info))
+    {
+      /* Make sure the ABI selection matches.  */
+      tdep = gdbarch_tdep (arches->gdbarch);
+      if (tdep && tdep->osabi == osabi)
+	return arches->gdbarch;
+    }
+
+  tdep = xmalloc (sizeof (struct gdbarch_tdep));
+  gdbarch = gdbarch_alloc (&info, tdep);
+
+  tdep->osabi = osabi;
 
   /* Register info */
   set_gdbarch_num_regs (gdbarch, VAX_NUM_REGS);
@@ -665,16 +644,13 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_frame_args_skip (gdbarch, 4);
 
-  set_gdbarch_get_saved_register (gdbarch, vax_get_saved_register);
-
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
   /* Return value info */
   set_gdbarch_store_struct_return (gdbarch, vax_store_struct_return);
-  set_gdbarch_extract_return_value (gdbarch, vax_extract_return_value);
-  set_gdbarch_store_return_value (gdbarch, vax_store_return_value);
-  set_gdbarch_extract_struct_value_address (gdbarch,
-					    vax_extract_struct_value_address);
+  set_gdbarch_deprecated_extract_return_value (gdbarch, vax_extract_return_value);
+  set_gdbarch_deprecated_store_return_value (gdbarch, vax_store_return_value);
+  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, vax_extract_struct_value_address);
 
   /* Call dummy info */
   set_gdbarch_push_dummy_frame (gdbarch, vax_push_dummy_frame);
@@ -692,18 +668,35 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
 
   /* Breakpoint info */
+  set_gdbarch_breakpoint_from_pc (gdbarch, vax_breakpoint_from_pc);
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
 
   /* Misc info */
   set_gdbarch_function_start_offset (gdbarch, 2);
+  set_gdbarch_believe_pcc_promotion (gdbarch, 1);
+
+  /* Hook in ABI-specific overrides, if they have been registered.  */
+  gdbarch_init_osabi (info, gdbarch, osabi);
 
   return (gdbarch);
+}
+
+static void
+vax_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
+  if (tdep == NULL)
+    return;
+
+  fprintf_unfiltered (file, "vax_dump_tdep: OS ABI = %s\n",
+		      gdbarch_osabi_name (tdep->osabi));
 }
 
 void
 _initialize_vax_tdep (void)
 {
-  gdbarch_register (bfd_arch_vax, vax_gdbarch_init, NULL);
+  gdbarch_register (bfd_arch_vax, vax_gdbarch_init, vax_dump_tdep);
 
   tm_print_insn = vax_print_insn;
 }

@@ -27,9 +27,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* Forward declarations.  */
 static reloc_howto_type * xstormy16_reloc_type_lookup
   PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
-static void xstormy16_info_to_howto_rela 
+static void xstormy16_info_to_howto_rela
   PARAMS ((bfd *, arelent *, Elf32_Internal_Rela *));
-static bfd_reloc_status_type xstormy16_elf_24_reloc 
+static bfd_reloc_status_type xstormy16_elf_24_reloc
   PARAMS ((bfd *abfd, arelent *reloc_entry, asymbol *symbol,
 	   PTR data, asection *input_section, bfd *output_bfd,
 	   char **error_message));
@@ -45,7 +45,7 @@ static boolean xstormy16_elf_relax_section
 	   boolean *again));
 static boolean xstormy16_elf_always_size_sections
   PARAMS ((bfd *, struct bfd_link_info *));
-static boolean xstormy16_elf_relocate_section 
+static boolean xstormy16_elf_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
 	   Elf_Internal_Rela *, Elf_Internal_Sym *, asection **));
 static boolean xstormy16_elf_finish_dynamic_sections
@@ -54,7 +54,7 @@ static boolean xstormy16_elf_gc_sweep_hook
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   const Elf_Internal_Rela *));
 static asection * xstormy16_elf_gc_mark_hook
-  PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Rela *,
+  PARAMS ((asection *, struct bfd_link_info *, Elf_Internal_Rela *,
 	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
 
 static reloc_howto_type xstormy16_elf_howto_table [] =
@@ -88,7 +88,7 @@ static reloc_howto_type xstormy16_elf_howto_table [] =
 	 0,			/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
- 
+
   /* A 16 bit absolute relocation.  */
   HOWTO (R_XSTORMY16_16,	/* type */
 	 0,			/* rightshift */
@@ -103,7 +103,7 @@ static reloc_howto_type xstormy16_elf_howto_table [] =
 	 0,			/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
- 
+
   /* An 8 bit absolute relocation.  */
   HOWTO (R_XSTORMY16_8,	/* type */
 	 0,			/* rightshift */
@@ -118,7 +118,7 @@ static reloc_howto_type xstormy16_elf_howto_table [] =
 	 0,			/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
- 
+
   /* A 32 bit pc-relative relocation.  */
   HOWTO (R_XSTORMY16_PC32,	/* type */
 	 0,			/* rightshift */
@@ -133,7 +133,7 @@ static reloc_howto_type xstormy16_elf_howto_table [] =
 	 0,			/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 true),		/* pcrel_offset */
- 
+
   /* A 16 bit pc-relative relocation.  */
   HOWTO (R_XSTORMY16_PC16,	/* type */
 	 0,			/* rightshift */
@@ -148,7 +148,7 @@ static reloc_howto_type xstormy16_elf_howto_table [] =
 	 0,			/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 true),		/* pcrel_offset */
- 
+
   /* An 8 bit pc-relative relocation.  */
   HOWTO (R_XSTORMY16_PC8,	/* type */
 	 0,			/* rightshift */
@@ -163,7 +163,7 @@ static reloc_howto_type xstormy16_elf_howto_table [] =
 	 0,			/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 true),		/* pcrel_offset */
- 
+
   /* A 12-bit pc-relative relocation suitable for the branch instructions.  */
   HOWTO (R_XSTORMY16_REL_12,	/* type */
 	 1,			/* rightshift */
@@ -178,7 +178,7 @@ static reloc_howto_type xstormy16_elf_howto_table [] =
 	 0,			/* src_mask */
 	 0x0fff,		/* dst_mask */
 	 true),		/* pcrel_offset */
- 
+
   /* A 24-bit absolute relocation suitable for the jump instructions.  */
   HOWTO (R_XSTORMY16_24,	/* type */
 	 0,			/* rightshift */
@@ -193,7 +193,7 @@ static reloc_howto_type xstormy16_elf_howto_table [] =
 	 0,			/* src_mask */
 	 0xffff00ff,		/* dst_mask */
 	 true),		/* pcrel_offset */
- 
+
   /* A 16 bit absolute relocation to a function pointer.  */
   HOWTO (R_XSTORMY16_FPTR16,	/* type */
 	 0,			/* rightshift */
@@ -209,7 +209,7 @@ static reloc_howto_type xstormy16_elf_howto_table [] =
 	 0xffffffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 };
- 
+
 static reloc_howto_type xstormy16_elf_howto_table2 [] =
 {
   /* GNU extension to record C++ vtable hierarchy */
@@ -241,7 +241,7 @@ static reloc_howto_type xstormy16_elf_howto_table2 [] =
          0,                     /* src_mask */
          0,                     /* dst_mask */
          false),                /* pcrel_offset */
- 
+
 };
 
 /* Map BFD reloc types to XSTORMY16 ELF reloc types.  */
@@ -286,7 +286,7 @@ xstormy16_reloc_type_lookup (abfd, code)
 	return entry->table + (entry->xstormy16_reloc_val
 			       - entry->table[0].type);
     }
-  
+
   return NULL;
 }
 
@@ -451,7 +451,7 @@ xstormy16_elf_check_relocs (abfd, info, sec, relocs)
 		  if (local_plt_offsets == NULL)
 		    return false;
 		  elf_local_got_offsets (abfd) = local_plt_offsets;
-	
+
 		  for (i = 0; i < symtab_hdr->sh_info; i++)
 		    local_plt_offsets[i] = (bfd_vma) -1;
 		}
@@ -471,7 +471,7 @@ xstormy16_elf_check_relocs (abfd, info, sec, relocs)
           if (!_bfd_elf32_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
             return false;
           break;
- 
+
 	  /* This relocation describes which C++ vtable entries are actually
 	     used.  Record for later use during GC.  */
         case R_XSTORMY16_GNU_VTENTRY:
@@ -578,7 +578,7 @@ xstormy16_elf_relax_section (dynobj, splt, info, again)
   if (splt->_cooked_size == 0)
     splt->_cooked_size = splt->_raw_size;
 
-  /* Map across all global symbols; see which ones happen to 
+  /* Map across all global symbols; see which ones happen to
      fall in the low 64k.  */
   relax_plt_data.splt = splt;
   relax_plt_data.again = again;
@@ -586,87 +586,51 @@ xstormy16_elf_relax_section (dynobj, splt, info, again)
 			  &relax_plt_data);
 
   /* Likewise for local symbols, though that's somewhat less convenient
-     as we have walk the list of input bfds and swap in symbol data.  */
+     as we have to walk the list of input bfds and swap in symbol data.  */
   for (ibfd = info->input_bfds; ibfd ; ibfd = ibfd->link_next)
     {
       bfd_vma *local_plt_offsets = elf_local_got_offsets (ibfd);
       Elf_Internal_Shdr *symtab_hdr;
-      Elf_Internal_Shdr *shndx_hdr;
-      Elf32_External_Sym *extsyms;
-      Elf_External_Sym_Shndx *shndx_buf;
+      Elf_Internal_Sym *isymbuf = NULL;
       unsigned int idx;
 
       if (! local_plt_offsets)
 	continue;
 
       symtab_hdr = &elf_tdata (ibfd)->symtab_hdr;
-      shndx_hdr = &elf_tdata (ibfd)->symtab_shndx_hdr;
-
-      if (symtab_hdr->contents != NULL)
-	extsyms = (Elf32_External_Sym *) symtab_hdr->contents;
-      else
+      if (symtab_hdr->sh_info != 0)
 	{
-	  bfd_size_type amt;
-
-	  amt = symtab_hdr->sh_info;
-	  amt *= sizeof (Elf32_External_Sym);
-	  extsyms = (Elf32_External_Sym *) bfd_malloc (amt);
-	  if (extsyms == NULL)
+	  isymbuf = (Elf_Internal_Sym *) symtab_hdr->contents;
+	  if (isymbuf == NULL)
+	    isymbuf = bfd_elf_get_elf_syms (ibfd, symtab_hdr,
+					    symtab_hdr->sh_info, 0,
+					    NULL, NULL, NULL);
+	  if (isymbuf == NULL)
 	    return false;
-	  if (bfd_seek (ibfd, symtab_hdr->sh_offset, SEEK_SET) != 0
-	      || bfd_bread ((PTR) extsyms, amt, ibfd) != amt)
-	    {
-	    error_ret_free_extsyms:
-	      free (extsyms);
-	      return false;
-	    }
-	}
-
-      shndx_buf = NULL;
-      if (shndx_hdr->sh_size != 0)
-	{
-	  bfd_size_type amt;
-
-	  amt = symtab_hdr->sh_info;
-	  amt *= sizeof (Elf_External_Sym_Shndx);
-	  shndx_buf = (Elf_External_Sym_Shndx *) bfd_malloc (amt);
-	  if (shndx_buf == NULL)
-	    goto error_ret_free_extsyms;
-	  if (bfd_seek (ibfd, shndx_hdr->sh_offset, SEEK_SET) != 0
-	      || bfd_bread ((PTR) shndx_buf, amt, ibfd) != amt)
-	    {
-	      free (shndx_buf);
-	      goto error_ret_free_extsyms;
-	    }
-	  shndx_hdr->contents = (bfd_byte *) shndx_buf;
 	}
 
       for (idx = 0; idx < symtab_hdr->sh_info; ++idx)
 	{
-	  Elf_External_Sym_Shndx *shndx;
-	  Elf_Internal_Sym isym;
+	  Elf_Internal_Sym *isym;
 	  asection *tsec;
 	  bfd_vma address;
 
 	  if (local_plt_offsets[idx] == (bfd_vma) -1)
 	    continue;
 
-	  shndx = shndx_buf;
-	  if (shndx != NULL)
-	    shndx += idx;
-	  bfd_elf32_swap_symbol_in (ibfd, extsyms + idx, shndx, &isym);
-	  if (isym.st_shndx == SHN_UNDEF)
+	  isym = &isymbuf[idx];
+	  if (isym->st_shndx == SHN_UNDEF)
 	    continue;
-	  else if (isym.st_shndx == SHN_ABS)
+	  else if (isym->st_shndx == SHN_ABS)
 	    tsec = bfd_abs_section_ptr;
-	  else if (isym.st_shndx == SHN_COMMON)
+	  else if (isym->st_shndx == SHN_COMMON)
 	    tsec = bfd_com_section_ptr;
 	  else
-	    tsec = bfd_section_from_elf_index (ibfd, isym.st_shndx);
+	    tsec = bfd_section_from_elf_index (ibfd, isym->st_shndx);
 
 	  address = (tsec->output_section->vma
 		     + tsec->output_offset
-		     + isym.st_value);
+		     + isym->st_value);
 	  if (address <= 0xffff)
 	    {
 	      local_plt_offsets[idx] = -1;
@@ -675,11 +639,17 @@ xstormy16_elf_relax_section (dynobj, splt, info, again)
 	    }
 	}
 
-      if (shndx_buf != NULL)
-	free (shndx_buf);
-
-      if ((Elf32_External_Sym *) symtab_hdr->contents != extsyms)
-        free (extsyms);
+      if (isymbuf != NULL
+	  && symtab_hdr->contents != (unsigned char *) isymbuf)
+	{
+	  if (! info->keep_memory)
+	    free (isymbuf);
+	  else
+	    {
+	      /* Cache the symbols for elf_link_input_bfd.  */
+	      symtab_hdr->contents = (unsigned char *) isymbuf;
+	    }
+	}
     }
 
   /* If we changed anything, walk the symbols again to reallocate
@@ -739,9 +709,6 @@ xstormy16_elf_always_size_sections (output_bfd, info)
 }
 
 /* Relocate an XSTORMY16 ELF section.
-   There is some attempt to make this function usable for many architectures,
-   both USE_REL and USE_RELA ['twould be nice if such a critter existed],
-   if only to serve as a learning tool.
 
    The RELOCATE_SECTION function is called by the new ELF backend linker
    to handle the relocations for a section.
@@ -813,19 +780,19 @@ xstormy16_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       bfd_reloc_status_type        r;
       const char *                 name = NULL;
       int                          r_type;
-      
+
       r_type = ELF32_R_TYPE (rel->r_info);
-      
+
       if (   r_type == R_XSTORMY16_GNU_VTINHERIT
 	  || r_type == R_XSTORMY16_GNU_VTENTRY)
 	continue;
-      
+
       r_symndx = ELF32_R_SYM (rel->r_info);
       howto  = xstormy16_elf_howto_table + ELF32_R_TYPE (rel->r_info);
       h      = NULL;
       sym    = NULL;
       sec    = NULL;
-      
+
       if (r_symndx < symtab_hdr->sh_info)
 	{
 	  sym = local_syms + r_symndx;
@@ -833,7 +800,7 @@ xstormy16_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  relocation = (sec->output_section->vma
 			+ sec->output_offset
 			+ sym->st_value);
-	  
+
 	  name = bfd_elf_string_from_elf_section
 	    (input_bfd, symtab_hdr->sh_link, sym->st_name);
 	  name = (name == NULL) ? bfd_section_name (input_bfd, sec) : name;
@@ -841,13 +808,13 @@ xstormy16_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       else
 	{
 	  h = sym_hashes [r_symndx - symtab_hdr->sh_info];
-	  
+
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
 	  name = h->root.root.string;
-	  
+
 	  if (h->root.type == bfd_link_hash_defined
 	      || h->root.type == bfd_link_hash_defweak)
 	    {
@@ -869,14 +836,14 @@ xstormy16_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      relocation = 0;
 	    }
 	}
-      
+
       switch (ELF32_R_TYPE (rel->r_info))
 	{
 	case R_XSTORMY16_24:
 	  {
 	    bfd_vma reloc = relocation + rel->r_addend;
 	    unsigned int x;
-	  
+
 	    x = bfd_get_32 (input_bfd, contents + rel->r_offset);
 	    x &= 0x0000ff00;
 	    x |= reloc & 0xff;
@@ -952,13 +919,13 @@ xstormy16_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		(info, name, howto->name, (bfd_vma) 0,
 		 input_bfd, input_section, rel->r_offset);
 	      break;
-	      
+
 	    case bfd_reloc_undefined:
 	      r = info->callbacks->undefined_symbol
 		(info, name, input_bfd, input_section, rel->r_offset,
 		 true);
 	      break;
-	      
+
 	    case bfd_reloc_outofrange:
 	      msg = _("internal error: out of range error");
 	      break;
@@ -1020,8 +987,8 @@ xstormy16_elf_finish_dynamic_sections (abfd, info)
    relocation.  */
 
 static asection *
-xstormy16_elf_gc_mark_hook (abfd, info, rel, h, sym)
-     bfd *                        abfd;
+xstormy16_elf_gc_mark_hook (sec, info, rel, h, sym)
+     asection *                   sec;
      struct bfd_link_info *       info ATTRIBUTE_UNUSED;
      Elf_Internal_Rela *          rel;
      struct elf_link_hash_entry * h;
@@ -1051,9 +1018,7 @@ xstormy16_elf_gc_mark_hook (abfd, info, rel, h, sym)
 	}
     }
   else
-    {
-      return bfd_section_from_elf_index (abfd, sym->st_shndx);
-    }
+    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
 
   return NULL;
 }

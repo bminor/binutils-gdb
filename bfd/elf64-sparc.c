@@ -72,6 +72,9 @@ static void sparc64_elf_symbol_processing
 static boolean sparc64_elf_merge_private_bfd_data
   PARAMS ((bfd *, bfd *));
 
+static boolean sparc64_elf_fake_sections
+  PARAMS ((bfd *, Elf32_Internal_Shdr *, asection *));
+
 static const char *sparc64_elf_print_symbol_all
   PARAMS ((bfd *, PTR, asymbol *));
 static boolean sparc64_elf_relax_section
@@ -711,7 +714,7 @@ init_insn_reloc (abfd,
       return bfd_reloc_ok;
     }
 
-  /* This works because partial_inplace == false.  */
+  /* This works because partial_inplace is false.  */
   if (output_bfd != NULL)
     return bfd_reloc_continue;
 
@@ -1386,7 +1389,7 @@ sparc64_elf_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
       return true;
     }
   else if (*namep && **namep
-	   && info->hash->creator->flavour == bfd_target_elf_flavour)
+	   && info->hash->creator == abfd->xvec)
     {
       int i;
       struct sparc64_elf_app_reg *p;
@@ -1916,6 +1919,9 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
 
+  if (info->relocateable)
+    return true;
+
   dynobj = elf_hash_table (info)->dynobj;
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
@@ -1951,28 +1957,8 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	}
       howto = sparc64_elf_howto_table + r_type;
 
-      r_symndx = ELF64_R_SYM (rel->r_info);
-
-      if (info->relocateable)
-	{
-	  /* This is a relocateable link.  We don't have to change
-	     anything, unless the reloc is against a section symbol,
-	     in which case we have to adjust according to where the
-	     section symbol winds up in the output section.  */
-	  if (r_symndx < symtab_hdr->sh_info)
-	    {
-	      sym = local_syms + r_symndx;
-	      if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
-		{
-		  sec = local_sections[r_symndx];
-		  rel->r_addend += sec->output_offset + sym->st_value;
-		}
-	    }
-
-	  continue;
-	}
-
       /* This is a final link.  */
+      r_symndx = ELF64_R_SYM (rel->r_info);
       h = NULL;
       sym = NULL;
       sec = NULL;
@@ -2565,9 +2551,11 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  break;
 	}
 
+      /* Dynamic relocs are not propagated for SEC_DEBUGGING sections
+	 because such sections are not SEC_ALLOC and thus ld.so will
+	 not process them.  */
       if (unresolved_reloc
-	  && !(info->shared
-	       && (input_section->flags & SEC_DEBUGGING) != 0
+	  && !((input_section->flags & SEC_DEBUGGING) != 0
 	       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0))
 	(*_bfd_error_handler)
 	  (_("%s(%s+0x%lx): unresolvable relocation against symbol `%s'"),
@@ -2995,6 +2983,27 @@ sparc64_elf_merge_private_bfd_data (ibfd, obfd)
     }
   return true;
 }
+
+/* MARCO: Set the correct entry size for the .stab section.  */
+
+static boolean
+sparc64_elf_fake_sections (abfd, hdr, sec)
+     bfd *abfd ATTRIBUTE_UNUSED;
+     Elf32_Internal_Shdr *hdr ATTRIBUTE_UNUSED;
+     asection *sec;
+{
+  const char *name;
+
+  name = bfd_get_section_name (abfd, sec);
+
+  if (strcmp (name, ".stab") == 0)
+    {
+      /* Even in the 64bit case the stab entries are only 12 bytes long.  */
+      elf_section_data (sec)->this_hdr.sh_entsize = 12;
+    }
+  
+  return true;
+}
 
 /* Print a STT_REGISTER symbol to file FILE.  */
 
@@ -3067,6 +3076,7 @@ const struct elf_size_info sparc64_elf_size_info =
   bfd_elf64_write_out_phdrs,
   bfd_elf64_write_shdrs_and_ehdr,
   sparc64_elf_write_relocs,
+  bfd_elf64_swap_symbol_in,
   bfd_elf64_swap_symbol_out,
   sparc64_elf_slurp_reloc_table,
   bfd_elf64_slurp_symbol_table,
@@ -3131,6 +3141,8 @@ const struct elf_size_info sparc64_elf_size_info =
   sparc64_elf_output_arch_syms
 #define bfd_elf64_bfd_merge_private_bfd_data \
   sparc64_elf_merge_private_bfd_data
+#define elf_backend_fake_sections \
+  sparc64_elf_fake_sections
 
 #define elf_backend_size_info \
   sparc64_elf_size_info
@@ -3142,6 +3154,7 @@ const struct elf_size_info sparc64_elf_size_info =
 #define elf_backend_want_got_plt 0
 #define elf_backend_plt_readonly 0
 #define elf_backend_want_plt_sym 1
+#define elf_backend_rela_normal 1
 
 /* Section 5.2.4 of the ABI specifies a 256-byte boundary for the table.  */
 #define elf_backend_plt_alignment 8

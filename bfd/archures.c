@@ -182,6 +182,7 @@ DESCRIPTION
 .#define bfd_mach_ppc_rs64ii	642
 .#define bfd_mach_ppc_rs64iii	643
 .#define bfd_mach_ppc_7400	7400
+.#define bfd_mach_ppc_e500      500
 .  bfd_arch_rs6000,    {* IBM RS/6000 *}
 .#define bfd_mach_rs6k		0
 .#define bfd_mach_rs6k_rs1	6001
@@ -247,10 +248,20 @@ DESCRIPTION
 .#define bfd_mach_am33		330
 .  bfd_arch_fr30,
 .#define bfd_mach_fr30		0x46523330
+.  bfd_arch_frv,
+.#define bfd_mach_frv		0
+.#define bfd_mach_frvsimple	1
+.#define bfd_mach_fr300		300
+.#define bfd_mach_fr400		400
+.#define bfd_mach_frvtomcat	499	{* fr500 prototype *}
+.#define bfd_mach_fr500		500
 .  bfd_arch_mcore,
 .  bfd_arch_ia64,      {* HP/Intel ia64 *}
 .#define bfd_mach_ia64_elf64	0
 .#define bfd_mach_ia64_elf32	1
+.  bfd_arch_ip2k,      {* Ubicom IP2K microcontrollers. *}
+.#define bfd_mach_ip2022	0
+.#define bfd_mach_ip2022ext	1
 .  bfd_arch_pj,
 .  bfd_arch_avr,       {* Atmel AVR microcontrollers.  *}
 .#define bfd_mach_avr1		1
@@ -315,6 +326,7 @@ extern const bfd_arch_info_type bfd_d10v_arch;
 extern const bfd_arch_info_type bfd_d30v_arch;
 extern const bfd_arch_info_type bfd_dlx_arch;
 extern const bfd_arch_info_type bfd_fr30_arch;
+extern const bfd_arch_info_type bfd_frv_arch;
 extern const bfd_arch_info_type bfd_h8300_arch;
 extern const bfd_arch_info_type bfd_h8500_arch;
 extern const bfd_arch_info_type bfd_hppa_arch;
@@ -323,6 +335,7 @@ extern const bfd_arch_info_type bfd_i386_arch;
 extern const bfd_arch_info_type bfd_i860_arch;
 extern const bfd_arch_info_type bfd_i960_arch;
 extern const bfd_arch_info_type bfd_ia64_arch;
+extern const bfd_arch_info_type bfd_ip2k_arch;
 extern const bfd_arch_info_type bfd_m32r_arch;
 extern const bfd_arch_info_type bfd_m68hc11_arch;
 extern const bfd_arch_info_type bfd_m68hc12_arch;
@@ -369,6 +382,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_d30v_arch,
     &bfd_dlx_arch,
     &bfd_fr30_arch,
+    &bfd_frv_arch,
     &bfd_h8300_arch,
     &bfd_h8500_arch,
     &bfd_hppa_arch,
@@ -377,6 +391,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_i860_arch,
     &bfd_i960_arch,
     &bfd_ia64_arch,
+    &bfd_ip2k_arch,
     &bfd_m32r_arch,
     &bfd_m68hc11_arch,
     &bfd_m68hc12_arch,

@@ -252,6 +252,14 @@ struct target_ops
     void (*to_files_info) (struct target_ops *);
     int (*to_insert_breakpoint) (CORE_ADDR, char *);
     int (*to_remove_breakpoint) (CORE_ADDR, char *);
+    int (*to_can_use_hw_breakpoint) (int, int, int);
+    int (*to_insert_hw_breakpoint) (CORE_ADDR, char *);
+    int (*to_remove_hw_breakpoint) (CORE_ADDR, char *);
+    int (*to_remove_watchpoint) (CORE_ADDR, int, int);
+    int (*to_insert_watchpoint) (CORE_ADDR, int, int);
+    int (*to_stopped_by_watchpoint) (void);
+    CORE_ADDR (*to_stopped_data_address) (void);
+    int (*to_region_size_ok_for_hw_watchpoint) (int);
     void (*to_terminal_init) (void);
     void (*to_terminal_inferior) (void);
     void (*to_terminal_ours_for_output) (void);
@@ -1041,7 +1049,8 @@ extern void (*target_new_objfile_hook) (struct objfile *);
    write).  */
 
 #ifndef STOPPED_BY_WATCHPOINT
-#define STOPPED_BY_WATCHPOINT(w) 0
+#define STOPPED_BY_WATCHPOINT(w) \
+   (*current_target.to_stopped_by_watchpoint) ()
 #endif
 
 /* HP-UX supplies these operations, which respectively disable and enable
@@ -1056,20 +1065,24 @@ extern void (*target_new_objfile_hook) (struct objfile *);
 #define TARGET_ENABLE_HW_WATCHPOINTS(pid)
 #endif
 
-/* Provide defaults for systems that don't support hardware watchpoints.  */
+/* Provide defaults for hardware watchpoint functions.  */
 
-#ifndef TARGET_HAS_HARDWARE_WATCHPOINTS
+/* If the *_hw_beakpoint functions have not been defined 
+   elsewhere use the definitions in the target vector.  */
 
 /* Returns non-zero if we can set a hardware watchpoint of type TYPE.  TYPE is
    one of bp_hardware_watchpoint, bp_read_watchpoint, bp_write_watchpoint, or
    bp_hardware_breakpoint.  CNT is the number of such watchpoints used so far
    (including this one?).  OTHERTYPE is who knows what...  */
 
-#define TARGET_CAN_USE_HARDWARE_WATCHPOINT(TYPE,CNT,OTHERTYPE) 0
+#ifndef TARGET_CAN_USE_HARDWARE_WATCHPOINT
+#define TARGET_CAN_USE_HARDWARE_WATCHPOINT(TYPE,CNT,OTHERTYPE) \
+ (*current_target.to_can_use_hw_breakpoint) (TYPE, CNT, OTHERTYPE);
+#endif
 
 #if !defined(TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT)
 #define TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT(byte_count) \
-     ((LONGEST)(byte_count) <= REGISTER_SIZE)
+    (*current_target.to_region_size_ok_for_hw_watchpoint) (byte_count)
 #endif
 
 
@@ -1077,18 +1090,25 @@ extern void (*target_new_objfile_hook) (struct objfile *);
    for write, 1 for read, and 2 for read/write accesses.  Returns 0 for
    success, non-zero for failure.  */
 
-#define target_remove_watchpoint(ADDR,LEN,TYPE) -1
-#define target_insert_watchpoint(ADDR,LEN,TYPE) -1
+#ifndef target_insert_watchpoint
+#define	target_insert_watchpoint(addr, len, type)	\
+     (*current_target.to_insert_watchpoint) (addr, len, type)
 
-#endif /* TARGET_HAS_HARDWARE_WATCHPOINTS */
+#define	target_remove_watchpoint(addr, len, type)	\
+     (*current_target.to_remove_watchpoint) (addr, len, type)
+#endif
 
 #ifndef target_insert_hw_breakpoint
-#define target_remove_hw_breakpoint(ADDR,SHADOW) -1
-#define target_insert_hw_breakpoint(ADDR,SHADOW) -1
+#define target_insert_hw_breakpoint(addr, save) \
+     (*current_target.to_insert_hw_breakpoint) (addr, save)
+
+#define target_remove_hw_breakpoint(addr, save) \
+     (*current_target.to_remove_hw_breakpoint) (addr, save)
 #endif
 
 #ifndef target_stopped_data_address
-#define target_stopped_data_address() 0
+#define target_stopped_data_address() \
+    (*current_target.to_stopped_data_address) ()
 #endif
 
 /* If defined, then we need to decr pc by this much after a hardware break-

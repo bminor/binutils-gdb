@@ -20,7 +20,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "sparc/tm-sparc.h"
-#include "tm-sunos.h"
+#include "config/tm-sunos.h"
 
 /* Redefine SKIP_TRAMPOLINE_CODE to handle PIC compiled modules
    in main executables.  */

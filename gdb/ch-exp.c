@@ -1,2233 +1,2233 @@
-/* Parser for GNU CHILL (CCITT High-Level Language)  -*- C -*-
-   Copyright 1992, 1993, 1995, 1996, 1997, 1999, 2000, 2001
-   Free Software Foundation, Inc.
-
-   This file is part of GDB.
-
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or
-   (at your option) any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1307, USA.  */
-
-/* Parse a Chill expression from text in a string,
-   and return the result as a  struct expression  pointer.
-   That structure contains arithmetic operations in reverse polish,
-   with constants represented by operations that are followed by special data.
-   See expression.h for the details of the format.
-   What is important here is that it can be built up sequentially
-   during the process of parsing; the lower levels of the tree always
-   come first in the result.
-
-   Note that the language accepted by this parser is more liberal
-   than the one accepted by an actual Chill compiler.  For example, the
-   language rule that a simple name string can not be one of the reserved
-   simple name strings is not enforced (e.g "case" is not treated as a
-   reserved name).  Another example is that Chill is a strongly typed
-   language, and certain expressions that violate the type constraints
-   may still be evaluated if gdb can do so in a meaningful manner, while
-   such expressions would be rejected by the compiler.  The reason for
-   this more liberal behavior is the philosophy that the debugger
-   is intended to be a tool that is used by the programmer when things
-   go wrong, and as such, it should provide as few artificial barriers
-   to it's use as possible.  If it can do something meaningful, even
-   something that violates language contraints that are enforced by the
-   compiler, it should do so without complaint.
-
- */
-
-#include "defs.h"
-#include "gdb_string.h"
-#include <ctype.h>
-#include "expression.h"
-#include "language.h"
-#include "value.h"
-#include "parser-defs.h"
-#include "ch-lang.h"
-#include "bfd.h"		/* Required by objfiles.h.  */
-#include "symfile.h"		/* Required by objfiles.h.  */
-#include "objfiles.h"		/* For have_full_symbols and have_partial_symbols */
-
-#ifdef __GNUC__
-#define INLINE __inline__
-#endif
-
-typedef union
-
-  {
-    LONGEST lval;
-    ULONGEST ulval;
-    struct
-      {
-	LONGEST val;
-	struct type *type;
-      }
-    typed_val;
-    double dval;
-    struct symbol *sym;
-    struct type *tval;
-    struct stoken sval;
-    struct ttype tsym;
-    struct symtoken ssym;
-  }
-YYSTYPE;
-
-enum ch_terminal
-  {
-    END_TOKEN = 0,
-    /* '\001' ... '\xff' come first. */
-    OPEN_PAREN = '(',
-    TOKEN_NOT_READ = 999,
-    INTEGER_LITERAL,
-    BOOLEAN_LITERAL,
-    CHARACTER_LITERAL,
-    FLOAT_LITERAL,
-    GENERAL_PROCEDURE_NAME,
-    LOCATION_NAME,
-    EMPTINESS_LITERAL,
-    CHARACTER_STRING_LITERAL,
-    BIT_STRING_LITERAL,
-    TYPENAME,
-    DOT_FIELD_NAME,		/* '.' followed by <field name> */
-    CASE,
-    OF,
-    ESAC,
-    LOGIOR,
-    ORIF,
-    LOGXOR,
-    LOGAND,
-    ANDIF,
-    NOTEQUAL,
-    GEQ,
-    LEQ,
-    IN,
-    SLASH_SLASH,
-    MOD,
-    REM,
-    NOT,
-    POINTER,
-    RECEIVE,
-    UP,
-    IF,
-    THEN,
-    ELSE,
-    FI,
-    ELSIF,
-    ILLEGAL_TOKEN,
-    NUM,
-    PRED,
-    SUCC,
-    ABS,
-    CARD,
-    MAX_TOKEN,
-    MIN_TOKEN,
-    ADDR_TOKEN,
-    SIZE,
-    UPPER,
-    LOWER,
-    LENGTH,
-    ARRAY,
-    GDB_VARIABLE,
-    GDB_ASSIGNMENT
-  };
-
-/* Forward declarations. */
-
-static void write_lower_upper_value (enum exp_opcode, struct type *);
-static enum ch_terminal match_bitstring_literal (void);
-static enum ch_terminal match_integer_literal (void);
-static enum ch_terminal match_character_literal (void);
-static enum ch_terminal match_string_literal (void);
-static enum ch_terminal match_float_literal (void);
-static int decode_integer_literal (LONGEST *, char **);
-static int decode_integer_value (int, char **, LONGEST *);
-static char *match_simple_name_string (void);
-static void growbuf_by_size (int);
-static void parse_case_label (void);
-static void parse_untyped_expr (void);
-static void parse_if_expression (void);
-static void parse_if_expression_body (void);
-static void parse_else_alternative (void);
-static void parse_then_alternative (void);
-static void parse_expr (void);
-static void parse_operand0 (void);
-static void parse_operand1 (void);
-static void parse_operand2 (void);
-static void parse_operand3 (void);
-static void parse_operand4 (void);
-static void parse_operand5 (void);
-static void parse_operand6 (void);
-static void parse_primval (void);
-static void parse_tuple (struct type *);
-static void parse_opt_element_list (struct type *);
-static void parse_tuple_element (struct type *);
-static void parse_named_record_element (void);
-static void parse_call (void);
-static struct type *parse_mode_or_normal_call (void);
-#if 0
-static struct type *parse_mode_call (void);
-#endif
-static void parse_unary_call (void);
-static int parse_opt_untyped_expr (void);
-static int expect (enum ch_terminal, char *);
-static enum ch_terminal ch_lex (void);
-INLINE static enum ch_terminal PEEK_TOKEN (void);
-static enum ch_terminal peek_token_ (int);
-static void forward_token_ (void);
-static void require (enum ch_terminal);
-static int check_token (enum ch_terminal);
-
-#define MAX_LOOK_AHEAD 2
-static enum ch_terminal terminal_buffer[MAX_LOOK_AHEAD + 1] =
-{
-  TOKEN_NOT_READ, TOKEN_NOT_READ, TOKEN_NOT_READ};
-static YYSTYPE yylval;
-static YYSTYPE val_buffer[MAX_LOOK_AHEAD + 1];
-
-/*int current_token, lookahead_token; */
-
-INLINE static enum ch_terminal
-PEEK_TOKEN (void)
-{
-  if (terminal_buffer[0] == TOKEN_NOT_READ)
-    {
-      terminal_buffer[0] = ch_lex ();
-      val_buffer[0] = yylval;
-    }
-  return terminal_buffer[0];
-}
-#define PEEK_LVAL() val_buffer[0]
-#define PEEK_TOKEN1() peek_token_(1)
-#define PEEK_TOKEN2() peek_token_(2)
-static enum ch_terminal
-peek_token_ (int i)
-{
-  if (i > MAX_LOOK_AHEAD)
-    internal_error (__FILE__, __LINE__,
-		    "too much lookahead");
-  if (terminal_buffer[i] == TOKEN_NOT_READ)
-    {
-      terminal_buffer[i] = ch_lex ();
-      val_buffer[i] = yylval;
-    }
-  return terminal_buffer[i];
-}
-
-#if 0
-
-static void
-pushback_token (enum ch_terminal code, YYSTYPE node)
-{
-  int i;
-  if (terminal_buffer[MAX_LOOK_AHEAD] != TOKEN_NOT_READ)
-    internal_error (__FILE__, __LINE__,
-		    "cannot pushback token");
-  for (i = MAX_LOOK_AHEAD; i > 0; i--)
-    {
-      terminal_buffer[i] = terminal_buffer[i - 1];
-      val_buffer[i] = val_buffer[i - 1];
-    }
-  terminal_buffer[0] = code;
-  val_buffer[0] = node;
-}
-
-#endif
-
-static void
-forward_token_ (void)
-{
-  int i;
-  for (i = 0; i < MAX_LOOK_AHEAD; i++)
-    {
-      terminal_buffer[i] = terminal_buffer[i + 1];
-      val_buffer[i] = val_buffer[i + 1];
-    }
-  terminal_buffer[MAX_LOOK_AHEAD] = TOKEN_NOT_READ;
-}
-#define FORWARD_TOKEN() forward_token_()
-
-/* Skip the next token.
-   if it isn't TOKEN, the parser is broken. */
-
-static void
-require (enum ch_terminal token)
-{
-  if (PEEK_TOKEN () != token)
-    {
-      internal_error (__FILE__, __LINE__,
-		      "expected token %d", (int) token);
-    }
-  FORWARD_TOKEN ();
-}
-
-static int
-check_token (enum ch_terminal token)
-{
-  if (PEEK_TOKEN () != token)
-    return 0;
-  FORWARD_TOKEN ();
-  return 1;
-}
-
-/* return 0 if expected token was not found,
-   else return 1.
- */
-static int
-expect (enum ch_terminal token, char *message)
-{
-  if (PEEK_TOKEN () != token)
-    {
-      if (message)
-	error (message);
-      else if (token < 256)
-	error ("syntax error - expected a '%c' here \"%s\"", token, lexptr);
-      else
-	error ("syntax error");
-      return 0;
-    }
-  else
-    FORWARD_TOKEN ();
-  return 1;
-}
-
-#if 0
-/* Parse a name string.  If ALLOW_ALL is 1, ALL is allowed as a postfix. */
-
-static tree
-parse_opt_name_string (int allow_all)
-{
-  int token = PEEK_TOKEN ();
-  tree name;
-  if (token != NAME)
-    {
-      if (token == ALL && allow_all)
-	{
-	  FORWARD_TOKEN ();
-	  return ALL_POSTFIX;
-	}
-      return NULL_TREE;
-    }
-  name = PEEK_LVAL ();
-  for (;;)
-    {
-      FORWARD_TOKEN ();
-      token = PEEK_TOKEN ();
-      if (token != '!')
-	return name;
-      FORWARD_TOKEN ();
-      token = PEEK_TOKEN ();
-      if (token == ALL && allow_all)
-	return get_identifier3 (IDENTIFIER_POINTER (name), "!", "*");
-      if (token != NAME)
-	{
-	  if (pass == 1)
-	    error ("'%s!' is not followed by an identifier",
-		   IDENTIFIER_POINTER (name));
-	  return name;
-	}
-      name = get_identifier3 (IDENTIFIER_POINTER (name),
-			      "!", IDENTIFIER_POINTER (PEEK_LVAL ()));
-    }
-}
-
-static tree
-parse_simple_name_string (void)
-{
-  int token = PEEK_TOKEN ();
-  tree name;
-  if (token != NAME)
-    {
-      error ("expected a name here");
-      return error_mark_node;
-    }
-  name = PEEK_LVAL ();
-  FORWARD_TOKEN ();
-  return name;
-}
-
-static tree
-parse_name_string (void)
-{
-  tree name = parse_opt_name_string (0);
-  if (name)
-    return name;
-  if (pass == 1)
-    error ("expected a name string here");
-  return error_mark_node;
-}
-
-/* Matches: <name_string>
-   Returns if pass 1: the identifier.
-   Returns if pass 2: a decl or value for identifier. */
-
-static tree
-parse_name (void)
-{
-  tree name = parse_name_string ();
-  if (pass == 1 || ignoring)
-    return name;
-  else
-    {
-      tree decl = lookup_name (name);
-      if (decl == NULL_TREE)
-	{
-	  error ("`%s' undeclared", IDENTIFIER_POINTER (name));
-	  return error_mark_node;
-	}
-      else if (TREE_CODE (TREE_TYPE (decl)) == ERROR_MARK)
-	return error_mark_node;
-      else if (TREE_CODE (decl) == CONST_DECL)
-	return DECL_INITIAL (decl);
-      else if (TREE_CODE (TREE_TYPE (decl)) == REFERENCE_TYPE)
-	return convert_from_reference (decl);
-      else
-	return decl;
-    }
-}
-#endif
-
-#if 0
-static void
-pushback_paren_expr (tree expr)
-{
-  if (pass == 1 && !ignoring)
-    expr = build1 (PAREN_EXPR, NULL_TREE, expr);
-  pushback_token (EXPR, expr);
-}
-#endif
-
-/* Matches: <case label> */
-
-static void
-parse_case_label (void)
-{
-  if (check_token (ELSE))
-    error ("ELSE in tuples labels not implemented");
-  /* Does not handle the case of a mode name.  FIXME */
-  parse_expr ();
-  if (check_token (':'))
-    {
-      parse_expr ();
-      write_exp_elt_opcode (BINOP_RANGE);
-    }
-}
-
-static int
-parse_opt_untyped_expr (void)
-{
-  switch (PEEK_TOKEN ())
-    {
-    case ',':
-    case ':':
-    case ')':
-      return 0;
-    default:
-      parse_untyped_expr ();
-      return 1;
-    }
-}
-
-static void
-parse_unary_call (void)
-{
-  FORWARD_TOKEN ();
-  expect ('(', NULL);
-  parse_expr ();
-  expect (')', NULL);
-}
-
-/* Parse NAME '(' MODENAME ')'. */
-
-#if 0
-
-static struct type *
-parse_mode_call (void)
-{
-  struct type *type;
-  FORWARD_TOKEN ();
-  expect ('(', NULL);
-  if (PEEK_TOKEN () != TYPENAME)
-    error ("expect MODENAME here `%s'", lexptr);
-  type = PEEK_LVAL ().tsym.type;
-  FORWARD_TOKEN ();
-  expect (')', NULL);
-  return type;
-}
-
-#endif
-
-static struct type *
-parse_mode_or_normal_call (void)
-{
-  struct type *type;
-  FORWARD_TOKEN ();
-  expect ('(', NULL);
-  if (PEEK_TOKEN () == TYPENAME)
-    {
-      type = PEEK_LVAL ().tsym.type;
-      FORWARD_TOKEN ();
-    }
-  else
-    {
-      parse_expr ();
-      type = NULL;
-    }
-  expect (')', NULL);
-  return type;
-}
-
-/* Parse something that looks like a function call.
-   Assume we have parsed the function, and are at the '('. */
-
-static void
-parse_call (void)
-{
-  int arg_count;
-  require ('(');
-  /* This is to save the value of arglist_len
-     being accumulated for each dimension. */
-  start_arglist ();
-  if (parse_opt_untyped_expr ())
-    {
-      int tok = PEEK_TOKEN ();
-      arglist_len = 1;
-      if (tok == UP || tok == ':')
-	{
-	  FORWARD_TOKEN ();
-	  parse_expr ();
-	  expect (')', "expected ')' to terminate slice");
-	  end_arglist ();
-	  write_exp_elt_opcode (tok == UP ? TERNOP_SLICE_COUNT
-				: TERNOP_SLICE);
-	  return;
-	}
-      while (check_token (','))
-	{
-	  parse_untyped_expr ();
-	  arglist_len++;
-	}
-    }
-  else
-    arglist_len = 0;
-  expect (')', NULL);
-  arg_count = end_arglist ();
-  write_exp_elt_opcode (MULTI_SUBSCRIPT);
-  write_exp_elt_longcst (arg_count);
-  write_exp_elt_opcode (MULTI_SUBSCRIPT);
-}
-
-static void
-parse_named_record_element (void)
-{
-  struct stoken label;
-  char buf[256];
-
-  label = PEEK_LVAL ().sval;
-  sprintf (buf, "expected a field name here `%s'", lexptr);
-  expect (DOT_FIELD_NAME, buf);
-  if (check_token (','))
-    parse_named_record_element ();
-  else if (check_token (':'))
-    parse_expr ();
-  else
-    error ("syntax error near `%s' in named record tuple element", lexptr);
-  write_exp_elt_opcode (OP_LABELED);
-  write_exp_string (label);
-  write_exp_elt_opcode (OP_LABELED);
-}
-
-/* Returns one or more TREE_LIST nodes, in reverse order. */
-
-static void
-parse_tuple_element (struct type *type)
-{
-  if (PEEK_TOKEN () == DOT_FIELD_NAME)
-    {
-      /* Parse a labelled structure tuple. */
-      parse_named_record_element ();
-      return;
-    }
-
-  if (check_token ('('))
-    {
-      if (check_token ('*'))
-	{
-	  expect (')', "missing ')' after '*' case label list");
-	  if (type)
-	    {
-	      if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
-		{
-		  /* do this as a range from low to high */
-		  struct type *range_type = TYPE_FIELD_TYPE (type, 0);
-		  LONGEST low_bound, high_bound;
-		  if (get_discrete_bounds (range_type, &low_bound, &high_bound) < 0)
-		    error ("cannot determine bounds for (*)");
-		  /* lower bound */
-		  write_exp_elt_opcode (OP_LONG);
-		  write_exp_elt_type (range_type);
-		  write_exp_elt_longcst (low_bound);
-		  write_exp_elt_opcode (OP_LONG);
-		  /* upper bound */
-		  write_exp_elt_opcode (OP_LONG);
-		  write_exp_elt_type (range_type);
-		  write_exp_elt_longcst (high_bound);
-		  write_exp_elt_opcode (OP_LONG);
-		  write_exp_elt_opcode (BINOP_RANGE);
-		}
-	      else
-		error ("(*) in invalid context");
-	    }
-	  else
-	    error ("(*) only possible with modename in front of tuple (mode[..])");
-	}
-      else
-	{
-	  parse_case_label ();
-	  while (check_token (','))
-	    {
-	      parse_case_label ();
-	      write_exp_elt_opcode (BINOP_COMMA);
-	    }
-	  expect (')', NULL);
-	}
-    }
-  else
-    parse_untyped_expr ();
-  if (check_token (':'))
-    {
-      /* A powerset range or a labeled Array. */
-      parse_untyped_expr ();
-      write_exp_elt_opcode (BINOP_RANGE);
-    }
-}
-
-/* Matches:  a COMMA-separated list of tuple elements.
-   Returns a list (of TREE_LIST nodes). */
-static void
-parse_opt_element_list (struct type *type)
-{
-  arglist_len = 0;
-  if (PEEK_TOKEN () == ']')
-    return;
-  for (;;)
-    {
-      parse_tuple_element (type);
-      arglist_len++;
-      if (PEEK_TOKEN () == ']')
-	break;
-      if (!check_token (','))
-	error ("bad syntax in tuple");
-    }
-}
-
-/* Parses: '[' elements ']'
-   If modename is non-NULL it prefixed the tuple.  */
-
-static void
-parse_tuple (struct type *mode)
-{
-  struct type *type;
-  if (mode)
-    type = check_typedef (mode);
-  else
-    type = 0;
-  require ('[');
-  start_arglist ();
-  parse_opt_element_list (type);
-  expect (']', "missing ']' after tuple");
-  write_exp_elt_opcode (OP_ARRAY);
-  write_exp_elt_longcst ((LONGEST) 0);
-  write_exp_elt_longcst ((LONGEST) end_arglist () - 1);
-  write_exp_elt_opcode (OP_ARRAY);
-  if (type)
-    {
-      if (TYPE_CODE (type) != TYPE_CODE_ARRAY
-	  && TYPE_CODE (type) != TYPE_CODE_STRUCT
-	  && TYPE_CODE (type) != TYPE_CODE_SET)
-	error ("invalid tuple mode");
-      write_exp_elt_opcode (UNOP_CAST);
-      write_exp_elt_type (mode);
-      write_exp_elt_opcode (UNOP_CAST);
-    }
-}
-
-static void
-parse_primval (void)
-{
-  struct type *type;
-  enum exp_opcode op;
-  char *op_name;
-  switch (PEEK_TOKEN ())
-    {
-    case INTEGER_LITERAL:
-    case CHARACTER_LITERAL:
-      write_exp_elt_opcode (OP_LONG);
-      write_exp_elt_type (PEEK_LVAL ().typed_val.type);
-      write_exp_elt_longcst (PEEK_LVAL ().typed_val.val);
-      write_exp_elt_opcode (OP_LONG);
-      FORWARD_TOKEN ();
-      break;
-    case BOOLEAN_LITERAL:
-      write_exp_elt_opcode (OP_BOOL);
-      write_exp_elt_longcst ((LONGEST) PEEK_LVAL ().ulval);
-      write_exp_elt_opcode (OP_BOOL);
-      FORWARD_TOKEN ();
-      break;
-    case FLOAT_LITERAL:
-      write_exp_elt_opcode (OP_DOUBLE);
-      write_exp_elt_type (builtin_type_double);
-      write_exp_elt_dblcst (PEEK_LVAL ().dval);
-      write_exp_elt_opcode (OP_DOUBLE);
-      FORWARD_TOKEN ();
-      break;
-    case EMPTINESS_LITERAL:
-      write_exp_elt_opcode (OP_LONG);
-      write_exp_elt_type (lookup_pointer_type (builtin_type_void));
-      write_exp_elt_longcst (0);
-      write_exp_elt_opcode (OP_LONG);
-      FORWARD_TOKEN ();
-      break;
-    case CHARACTER_STRING_LITERAL:
-      write_exp_elt_opcode (OP_STRING);
-      write_exp_string (PEEK_LVAL ().sval);
-      write_exp_elt_opcode (OP_STRING);
-      FORWARD_TOKEN ();
-      break;
-    case BIT_STRING_LITERAL:
-      write_exp_elt_opcode (OP_BITSTRING);
-      write_exp_bitstring (PEEK_LVAL ().sval);
-      write_exp_elt_opcode (OP_BITSTRING);
-      FORWARD_TOKEN ();
-      break;
-    case ARRAY:
-      FORWARD_TOKEN ();
-      /* This is pseudo-Chill, similar to C's '(TYPE[])EXPR'
-         which casts to an artificial array. */
-      expect ('(', NULL);
-      expect (')', NULL);
-      if (PEEK_TOKEN () != TYPENAME)
-	error ("missing MODENAME after ARRAY()");
-      type = PEEK_LVAL ().tsym.type;
-      FORWARD_TOKEN ();
-      expect ('(', NULL);
-      parse_expr ();
-      expect (')', "missing right parenthesis");
-      type = create_array_type ((struct type *) NULL, type,
-				create_range_type ((struct type *) NULL,
-						   builtin_type_int, 0, 0));
-      TYPE_ARRAY_UPPER_BOUND_TYPE (type) = BOUND_CANNOT_BE_DETERMINED;
-      write_exp_elt_opcode (UNOP_CAST);
-      write_exp_elt_type (type);
-      write_exp_elt_opcode (UNOP_CAST);
-      break;
-#if 0
-    case CONST:
-    case EXPR:
-      val = PEEK_LVAL ();
-      FORWARD_TOKEN ();
-      break;
-#endif
-    case '(':
-      FORWARD_TOKEN ();
-      parse_expr ();
-      expect (')', "missing right parenthesis");
-      break;
-    case '[':
-      parse_tuple (NULL);
-      break;
-    case GENERAL_PROCEDURE_NAME:
-    case LOCATION_NAME:
-      write_exp_elt_opcode (OP_VAR_VALUE);
-      write_exp_elt_block (NULL);
-      write_exp_elt_sym (PEEK_LVAL ().ssym.sym);
-      write_exp_elt_opcode (OP_VAR_VALUE);
-      FORWARD_TOKEN ();
-      break;
-    case GDB_VARIABLE:		/* gdb specific */
-      FORWARD_TOKEN ();
-      break;
-    case NUM:
-      parse_unary_call ();
-      write_exp_elt_opcode (UNOP_CAST);
-      write_exp_elt_type (builtin_type_int);
-      write_exp_elt_opcode (UNOP_CAST);
-      break;
-    case CARD:
-      parse_unary_call ();
-      write_exp_elt_opcode (UNOP_CARD);
-      break;
-    case MAX_TOKEN:
-      parse_unary_call ();
-      write_exp_elt_opcode (UNOP_CHMAX);
-      break;
-    case MIN_TOKEN:
-      parse_unary_call ();
-      write_exp_elt_opcode (UNOP_CHMIN);
-      break;
-    case PRED:
-      op_name = "PRED";
-      goto unimplemented_unary_builtin;
-    case SUCC:
-      op_name = "SUCC";
-      goto unimplemented_unary_builtin;
-    case ABS:
-      op_name = "ABS";
-      goto unimplemented_unary_builtin;
-    unimplemented_unary_builtin:
-      parse_unary_call ();
-      error ("not implemented:  %s builtin function", op_name);
-      break;
-    case ADDR_TOKEN:
-      parse_unary_call ();
-      write_exp_elt_opcode (UNOP_ADDR);
-      break;
-    case SIZE:
-      type = parse_mode_or_normal_call ();
-      if (type)
-	{
-	  write_exp_elt_opcode (OP_LONG);
-	  write_exp_elt_type (builtin_type_int);
-	  CHECK_TYPEDEF (type);
-	  write_exp_elt_longcst ((LONGEST) TYPE_LENGTH (type));
-	  write_exp_elt_opcode (OP_LONG);
-	}
-      else
-	write_exp_elt_opcode (UNOP_SIZEOF);
-      break;
-    case LOWER:
-      op = UNOP_LOWER;
-      goto lower_upper;
-    case UPPER:
-      op = UNOP_UPPER;
-      goto lower_upper;
-    lower_upper:
-      type = parse_mode_or_normal_call ();
-      write_lower_upper_value (op, type);
-      break;
-    case LENGTH:
-      parse_unary_call ();
-      write_exp_elt_opcode (UNOP_LENGTH);
-      break;
-    case TYPENAME:
-      type = PEEK_LVAL ().tsym.type;
-      FORWARD_TOKEN ();
-      switch (PEEK_TOKEN ())
-	{
-	case '[':
-	  parse_tuple (type);
-	  break;
-	case '(':
-	  FORWARD_TOKEN ();
-	  parse_expr ();
-	  expect (')', "missing right parenthesis");
-	  write_exp_elt_opcode (UNOP_CAST);
-	  write_exp_elt_type (type);
-	  write_exp_elt_opcode (UNOP_CAST);
-	  break;
-	default:
-	  error ("typename in invalid context");
-	}
-      break;
-
-    default:
-      error ("invalid expression syntax at `%s'", lexptr);
-    }
-  for (;;)
-    {
-      switch (PEEK_TOKEN ())
-	{
-	case DOT_FIELD_NAME:
-	  write_exp_elt_opcode (STRUCTOP_STRUCT);
-	  write_exp_string (PEEK_LVAL ().sval);
-	  write_exp_elt_opcode (STRUCTOP_STRUCT);
-	  FORWARD_TOKEN ();
-	  continue;
-	case POINTER:
-	  FORWARD_TOKEN ();
-	  if (PEEK_TOKEN () == TYPENAME)
-	    {
-	      type = PEEK_LVAL ().tsym.type;
-	      write_exp_elt_opcode (UNOP_CAST);
-	      write_exp_elt_type (lookup_pointer_type (type));
-	      write_exp_elt_opcode (UNOP_CAST);
-	      FORWARD_TOKEN ();
-	    }
-	  write_exp_elt_opcode (UNOP_IND);
-	  continue;
-	case OPEN_PAREN:
-	  parse_call ();
-	  continue;
-	case CHARACTER_STRING_LITERAL:
-	case CHARACTER_LITERAL:
-	case BIT_STRING_LITERAL:
-	  /* Handle string repetition. (See comment in parse_operand5.) */
-	  parse_primval ();
-	  write_exp_elt_opcode (MULTI_SUBSCRIPT);
-	  write_exp_elt_longcst (1);
-	  write_exp_elt_opcode (MULTI_SUBSCRIPT);
-	  continue;
-	case END_TOKEN:
-	case TOKEN_NOT_READ:
-	case INTEGER_LITERAL:
-	case BOOLEAN_LITERAL:
-	case FLOAT_LITERAL:
-	case GENERAL_PROCEDURE_NAME:
-	case LOCATION_NAME:
-	case EMPTINESS_LITERAL:
-	case TYPENAME:
-	case CASE:
-	case OF:
-	case ESAC:
-	case LOGIOR:
-	case ORIF:
-	case LOGXOR:
-	case LOGAND:
-	case ANDIF:
-	case NOTEQUAL:
-	case GEQ:
-	case LEQ:
-	case IN:
-	case SLASH_SLASH:
-	case MOD:
-	case REM:
-	case NOT:
-	case RECEIVE:
-	case UP:
-	case IF:
-	case THEN:
-	case ELSE:
-	case FI:
-	case ELSIF:
-	case ILLEGAL_TOKEN:
-	case NUM:
-	case PRED:
-	case SUCC:
-	case ABS:
-	case CARD:
-	case MAX_TOKEN:
-	case MIN_TOKEN:
-	case ADDR_TOKEN:
-	case SIZE:
-	case UPPER:
-	case LOWER:
-	case LENGTH:
-	case ARRAY:
-	case GDB_VARIABLE:
-	case GDB_ASSIGNMENT:
-	  break;
-	}
-      break;
-    }
-  return;
-}
-
-static void
-parse_operand6 (void)
-{
-  if (check_token (RECEIVE))
-    {
-      parse_primval ();
-      error ("not implemented:  RECEIVE expression");
-    }
-  else if (check_token (POINTER))
-    {
-      parse_primval ();
-      write_exp_elt_opcode (UNOP_ADDR);
-    }
-  else
-    parse_primval ();
-}
-
-static void
-parse_operand5 (void)
-{
-  enum exp_opcode op;
-  /* We are supposed to be looking for a <string repetition operator>,
-     but in general we can't distinguish that from a parenthesized
-     expression.  This is especially difficult if we allow the
-     string operand to be a constant expression (as requested by
-     some users), and not just a string literal.
-     Consider:  LPRN expr RPRN LPRN expr RPRN
-     Is that a function call or string repetition?
-     Instead, we handle string repetition in parse_primval,
-     and build_generalized_call. */
-  switch (PEEK_TOKEN ())
-    {
-    case NOT:
-      op = UNOP_LOGICAL_NOT;
-      break;
-    case '-':
-      op = UNOP_NEG;
-      break;
-    default:
-      op = OP_NULL;
-    }
-  if (op != OP_NULL)
-    FORWARD_TOKEN ();
-  parse_operand6 ();
-  if (op != OP_NULL)
-    write_exp_elt_opcode (op);
-}
-
-static void
-parse_operand4 (void)
-{
-  enum exp_opcode op;
-  parse_operand5 ();
-  for (;;)
-    {
-      switch (PEEK_TOKEN ())
-	{
-	case '*':
-	  op = BINOP_MUL;
-	  break;
-	case '/':
-	  op = BINOP_DIV;
-	  break;
-	case MOD:
-	  op = BINOP_MOD;
-	  break;
-	case REM:
-	  op = BINOP_REM;
-	  break;
-	default:
-	  return;
-	}
-      FORWARD_TOKEN ();
-      parse_operand5 ();
-      write_exp_elt_opcode (op);
-    }
-}
-
-static void
-parse_operand3 (void)
-{
-  enum exp_opcode op;
-  parse_operand4 ();
-  for (;;)
-    {
-      switch (PEEK_TOKEN ())
-	{
-	case '+':
-	  op = BINOP_ADD;
-	  break;
-	case '-':
-	  op = BINOP_SUB;
-	  break;
-	case SLASH_SLASH:
-	  op = BINOP_CONCAT;
-	  break;
-	default:
-	  return;
-	}
-      FORWARD_TOKEN ();
-      parse_operand4 ();
-      write_exp_elt_opcode (op);
-    }
-}
-
-static void
-parse_operand2 (void)
-{
-  enum exp_opcode op;
-  parse_operand3 ();
-  for (;;)
-    {
-      if (check_token (IN))
-	{
-	  parse_operand3 ();
-	  write_exp_elt_opcode (BINOP_IN);
-	}
-      else
-	{
-	  switch (PEEK_TOKEN ())
-	    {
-	    case '>':
-	      op = BINOP_GTR;
-	      break;
-	    case GEQ:
-	      op = BINOP_GEQ;
-	      break;
-	    case '<':
-	      op = BINOP_LESS;
-	      break;
-	    case LEQ:
-	      op = BINOP_LEQ;
-	      break;
-	    case '=':
-	      op = BINOP_EQUAL;
-	      break;
-	    case NOTEQUAL:
-	      op = BINOP_NOTEQUAL;
-	      break;
-	    default:
-	      return;
-	    }
-	  FORWARD_TOKEN ();
-	  parse_operand3 ();
-	  write_exp_elt_opcode (op);
-	}
-    }
-}
-
-static void
-parse_operand1 (void)
-{
-  enum exp_opcode op;
-  parse_operand2 ();
-  for (;;)
-    {
-      switch (PEEK_TOKEN ())
-	{
-	case LOGAND:
-	  op = BINOP_BITWISE_AND;
-	  break;
-	case ANDIF:
-	  op = BINOP_LOGICAL_AND;
-	  break;
-	default:
-	  return;
-	}
-      FORWARD_TOKEN ();
-      parse_operand2 ();
-      write_exp_elt_opcode (op);
-    }
-}
-
-static void
-parse_operand0 (void)
-{
-  enum exp_opcode op;
-  parse_operand1 ();
-  for (;;)
-    {
-      switch (PEEK_TOKEN ())
-	{
-	case LOGIOR:
-	  op = BINOP_BITWISE_IOR;
-	  break;
-	case LOGXOR:
-	  op = BINOP_BITWISE_XOR;
-	  break;
-	case ORIF:
-	  op = BINOP_LOGICAL_OR;
-	  break;
-	default:
-	  return;
-	}
-      FORWARD_TOKEN ();
-      parse_operand1 ();
-      write_exp_elt_opcode (op);
-    }
-}
-
-static void
-parse_expr (void)
-{
-  parse_operand0 ();
-  if (check_token (GDB_ASSIGNMENT))
-    {
-      parse_expr ();
-      write_exp_elt_opcode (BINOP_ASSIGN);
-    }
-}
-
-static void
-parse_then_alternative (void)
-{
-  expect (THEN, "missing 'THEN' in 'IF' expression");
-  parse_expr ();
-}
-
-static void
-parse_else_alternative (void)
-{
-  if (check_token (ELSIF))
-    parse_if_expression_body ();
-  else if (check_token (ELSE))
-    parse_expr ();
-  else
-    error ("missing ELSE/ELSIF in IF expression");
-}
-
-/* Matches: <boolean expression> <then alternative> <else alternative> */
-
-static void
-parse_if_expression_body (void)
-{
-  parse_expr ();
-  parse_then_alternative ();
-  parse_else_alternative ();
-  write_exp_elt_opcode (TERNOP_COND);
-}
-
-static void
-parse_if_expression (void)
-{
-  require (IF);
-  parse_if_expression_body ();
-  expect (FI, "missing 'FI' at end of conditional expression");
-}
-
-/* An <untyped_expr> is a superset of <expr>.  It also includes
-   <conditional expressions> and untyped <tuples>, whose types
-   are not given by their constituents.  Hence, these are only
-   allowed in certain contexts that expect a certain type.
-   You should call convert() to fix up the <untyped_expr>. */
-
-static void
-parse_untyped_expr (void)
-{
-  switch (PEEK_TOKEN ())
-    {
-    case IF:
-      parse_if_expression ();
-      return;
-    case CASE:
-      error ("not implemented:  CASE expression");
-    case '(':
-      switch (PEEK_TOKEN1 ())
-	{
-	case IF:
-	case CASE:
-	  goto skip_lprn;
-	case '[':
-	skip_lprn:
-	  FORWARD_TOKEN ();
-	  parse_untyped_expr ();
-	  expect (')', "missing ')'");
-	  return;
-	default:;
-	  /* fall through */
-	}
-    default:
-      parse_operand0 ();
-    }
-}
-
-int
-chill_parse (void)
-{
-  terminal_buffer[0] = TOKEN_NOT_READ;
-  if (PEEK_TOKEN () == TYPENAME && PEEK_TOKEN1 () == END_TOKEN)
-    {
-      write_exp_elt_opcode (OP_TYPE);
-      write_exp_elt_type (PEEK_LVAL ().tsym.type);
-      write_exp_elt_opcode (OP_TYPE);
-      FORWARD_TOKEN ();
-    }
-  else
-    parse_expr ();
-  if (terminal_buffer[0] != END_TOKEN)
-    {
-      if (comma_terminates && terminal_buffer[0] == ',')
-	lexptr--;		/* Put the comma back.  */
-      else
-	error ("Junk after end of expression.");
-    }
-  return 0;
-}
-
-
-/* Implementation of a dynamically expandable buffer for processing input
-   characters acquired through lexptr and building a value to return in
-   yylval. */
-
-static char *tempbuf;		/* Current buffer contents */
-static int tempbufsize;		/* Size of allocated buffer */
-static int tempbufindex;	/* Current index into buffer */
-
-#define GROWBY_MIN_SIZE 64	/* Minimum amount to grow buffer by */
-
-#define CHECKBUF(size) \
-  do { \
-    if (tempbufindex + (size) >= tempbufsize) \
-      { \
-	growbuf_by_size (size); \
-      } \
-  } while (0);
-
-/* Grow the static temp buffer if necessary, including allocating the first one
-   on demand. */
-
-static void
-growbuf_by_size (int count)
-{
-  int growby;
-
-  growby = max (count, GROWBY_MIN_SIZE);
-  tempbufsize += growby;
-  if (tempbuf == NULL)
-    {
-      tempbuf = (char *) xmalloc (tempbufsize);
-    }
-  else
-    {
-      tempbuf = (char *) xrealloc (tempbuf, tempbufsize);
-    }
-}
-
-/* Try to consume a simple name string token.  If successful, returns
-   a pointer to a nullbyte terminated copy of the name that can be used
-   in symbol table lookups.  If not successful, returns NULL. */
-
-static char *
-match_simple_name_string (void)
-{
-  char *tokptr = lexptr;
-
-  if (isalpha (*tokptr) || *tokptr == '_')
-    {
-      char *result;
-      do
-	{
-	  tokptr++;
-	}
-      while (isalnum (*tokptr) || (*tokptr == '_'));
-      yylval.sval.ptr = lexptr;
-      yylval.sval.length = tokptr - lexptr;
-      lexptr = tokptr;
-      result = copy_name (yylval.sval);
-      return result;
-    }
-  return (NULL);
-}
-
-/* Start looking for a value composed of valid digits as set by the base
-   in use.  Note that '_' characters are valid anywhere, in any quantity,
-   and are simply ignored.  Since we must find at least one valid digit,
-   or reject this token as an integer literal, we keep track of how many
-   digits we have encountered. */
-
-static int
-decode_integer_value (int base, char **tokptrptr, LONGEST *ivalptr)
-{
-  char *tokptr = *tokptrptr;
-  int temp;
-  int digits = 0;
-
-  while (*tokptr != '\0')
-    {
-      temp = *tokptr;
-      if (isupper (temp))
-	temp = tolower (temp);
-      tokptr++;
-      switch (temp)
-	{
-	case '_':
-	  continue;
-	case '0':
-	case '1':
-	case '2':
-	case '3':
-	case '4':
-	case '5':
-	case '6':
-	case '7':
-	case '8':
-	case '9':
-	  temp -= '0';
-	  break;
-	case 'a':
-	case 'b':
-	case 'c':
-	case 'd':
-	case 'e':
-	case 'f':
-	  temp -= 'a';
-	  temp += 10;
-	  break;
-	default:
-	  temp = base;
-	  break;
-	}
-      if (temp < base)
-	{
-	  digits++;
-	  *ivalptr *= base;
-	  *ivalptr += temp;
-	}
-      else
-	{
-	  /* Found something not in domain for current base. */
-	  tokptr--;		/* Unconsume what gave us indigestion. */
-	  break;
-	}
-    }
-
-  /* If we didn't find any digits, then we don't have a valid integer
-     value, so reject the entire token.  Otherwise, update the lexical
-     scan pointer, and return non-zero for success. */
-
-  if (digits == 0)
-    {
-      return (0);
-    }
-  else
-    {
-      *tokptrptr = tokptr;
-      return (1);
-    }
-}
-
-static int
-decode_integer_literal (LONGEST *valptr, char **tokptrptr)
-{
-  char *tokptr = *tokptrptr;
-  int base = 0;
-  LONGEST ival = 0;
-  int explicit_base = 0;
-
-  /* Look for an explicit base specifier, which is optional. */
-
-  switch (*tokptr)
-    {
-    case 'd':
-    case 'D':
-      explicit_base++;
-      base = 10;
-      tokptr++;
-      break;
-    case 'b':
-    case 'B':
-      explicit_base++;
-      base = 2;
-      tokptr++;
-      break;
-    case 'h':
-    case 'H':
-      explicit_base++;
-      base = 16;
-      tokptr++;
-      break;
-    case 'o':
-    case 'O':
-      explicit_base++;
-      base = 8;
-      tokptr++;
-      break;
-    default:
-      base = 10;
-      break;
-    }
-
-  /* If we found an explicit base ensure that the character after the
-     explicit base is a single quote. */
-
-  if (explicit_base && (*tokptr++ != '\''))
-    {
-      return (0);
-    }
-
-  /* Attempt to decode whatever follows as an integer value in the
-     indicated base, updating the token pointer in the process and
-     computing the value into ival.  Also, if we have an explicit
-     base, then the next character must not be a single quote, or we
-     have a bitstring literal, so reject the entire token in this case.
-     Otherwise, update the lexical scan pointer, and return non-zero
-     for success. */
-
-  if (!decode_integer_value (base, &tokptr, &ival))
-    {
-      return (0);
-    }
-  else if (explicit_base && (*tokptr == '\''))
-    {
-      return (0);
-    }
-  else
-    {
-      *valptr = ival;
-      *tokptrptr = tokptr;
-      return (1);
-    }
-}
-
-/*  If it wasn't for the fact that floating point values can contain '_'
-   characters, we could just let strtod do all the hard work by letting it
-   try to consume as much of the current token buffer as possible and
-   find a legal conversion.  Unfortunately we need to filter out the '_'
-   characters before calling strtod, which we do by copying the other
-   legal chars to a local buffer to be converted.  However since we also
-   need to keep track of where the last unconsumed character in the input
-   buffer is, we have transfer only as many characters as may compose a
-   legal floating point value. */
-
-static enum ch_terminal
-match_float_literal (void)
-{
-  char *tokptr = lexptr;
-  char *buf;
-  char *copy;
-  double dval;
-  extern double strtod ();
-
-  /* Make local buffer in which to build the string to convert.  This is
-     required because underscores are valid in chill floating point numbers
-     but not in the string passed to strtod to convert.  The string will be
-     no longer than our input string. */
-
-  copy = buf = (char *) alloca (strlen (tokptr) + 1);
-
-  /* Transfer all leading digits to the conversion buffer, discarding any
-     underscores. */
-
-  while (isdigit (*tokptr) || *tokptr == '_')
-    {
-      if (*tokptr != '_')
-	{
-	  *copy++ = *tokptr;
-	}
-      tokptr++;
-    }
-
-  /* Now accept either a '.', or one of [eEdD].  Dot is legal regardless
-     of whether we found any leading digits, and we simply accept it and
-     continue on to look for the fractional part and/or exponent.  One of
-     [eEdD] is legal only if we have seen digits, and means that there
-     is no fractional part.  If we find neither of these, then this is
-     not a floating point number, so return failure. */
-
-  switch (*tokptr++)
-    {
-    case '.':
-      /* Accept and then look for fractional part and/or exponent. */
-      *copy++ = '.';
-      break;
-
-    case 'e':
-    case 'E':
-    case 'd':
-    case 'D':
-      if (copy == buf)
-	{
-	  return (0);
-	}
-      *copy++ = 'e';
-      goto collect_exponent;
-      break;
-
-    default:
-      return (0);
-      break;
-    }
-
-  /* We found a '.', copy any fractional digits to the conversion buffer, up
-     to the first nondigit, non-underscore character. */
-
-  while (isdigit (*tokptr) || *tokptr == '_')
-    {
-      if (*tokptr != '_')
-	{
-	  *copy++ = *tokptr;
-	}
-      tokptr++;
-    }
-
-  /* Look for an exponent, which must start with one of [eEdD].  If none
-     is found, jump directly to trying to convert what we have collected
-     so far. */
-
-  switch (*tokptr)
-    {
-    case 'e':
-    case 'E':
-    case 'd':
-    case 'D':
-      *copy++ = 'e';
-      tokptr++;
-      break;
-    default:
-      goto convert_float;
-      break;
-    }
-
-  /* Accept an optional '-' or '+' following one of [eEdD]. */
-
-collect_exponent:
-  if (*tokptr == '+' || *tokptr == '-')
-    {
-      *copy++ = *tokptr++;
-    }
-
-  /* Now copy an exponent into the conversion buffer.  Note that at the 
-     moment underscores are *not* allowed in exponents. */
-
-  while (isdigit (*tokptr))
-    {
-      *copy++ = *tokptr++;
-    }
-
-  /* If we transfered any chars to the conversion buffer, try to interpret its
-     contents as a floating point value.  If any characters remain, then we
-     must not have a valid floating point string. */
-
-convert_float:
-  *copy = '\0';
-  if (copy != buf)
-    {
-      dval = strtod (buf, &copy);
-      if (*copy == '\0')
-	{
-	  yylval.dval = dval;
-	  lexptr = tokptr;
-	  return (FLOAT_LITERAL);
-	}
-    }
-  return (0);
-}
-
-/* Recognize a string literal.  A string literal is a sequence
-   of characters enclosed in matching single or double quotes, except that
-   a single character inside single quotes is a character literal, which
-   we reject as a string literal.  To embed the terminator character inside
-   a string, it is simply doubled (I.E. "this""is""one""string") */
-
-static enum ch_terminal
-match_string_literal (void)
-{
-  char *tokptr = lexptr;
-  int in_ctrlseq = 0;
-  LONGEST ival;
-
-  for (tempbufindex = 0, tokptr++; *tokptr != '\0'; tokptr++)
-    {
-      CHECKBUF (1);
-    tryagain:;
-      if (in_ctrlseq)
-	{
-	  /* skip possible whitespaces */
-	  while ((*tokptr == ' ' || *tokptr == '\t') && *tokptr)
-	    tokptr++;
-	  if (*tokptr == ')')
-	    {
-	      in_ctrlseq = 0;
-	      tokptr++;
-	      goto tryagain;
-	    }
-	  else if (*tokptr != ',')
-	    error ("Invalid control sequence");
-	  tokptr++;
-	  /* skip possible whitespaces */
-	  while ((*tokptr == ' ' || *tokptr == '\t') && *tokptr)
-	    tokptr++;
-	  if (!decode_integer_literal (&ival, &tokptr))
-	    error ("Invalid control sequence");
-	  tokptr--;
-	}
-      else if (*tokptr == *lexptr)
-	{
-	  if (*(tokptr + 1) == *lexptr)
-	    {
-	      ival = *tokptr++;
-	    }
-	  else
-	    {
-	      break;
-	    }
-	}
-      else if (*tokptr == '^')
-	{
-	  if (*(tokptr + 1) == '(')
-	    {
-	      in_ctrlseq = 1;
-	      tokptr += 2;
-	      if (!decode_integer_literal (&ival, &tokptr))
-		error ("Invalid control sequence");
-	      tokptr--;
-	    }
-	  else if (*(tokptr + 1) == '^')
-	    ival = *tokptr++;
-	  else
-	    error ("Invalid control sequence");
-	}
-      else
-	ival = *tokptr;
-      tempbuf[tempbufindex++] = ival;
-    }
-  if (in_ctrlseq)
-    error ("Invalid control sequence");
-
-  if (*tokptr == '\0'		/* no terminator */
-      || (tempbufindex == 1 && *tokptr == '\''))	/* char literal */
-    {
-      return (0);
-    }
-  else
-    {
-      tempbuf[tempbufindex] = '\0';
-      yylval.sval.ptr = tempbuf;
-      yylval.sval.length = tempbufindex;
-      lexptr = ++tokptr;
-      return (CHARACTER_STRING_LITERAL);
-    }
-}
-
-/* Recognize a character literal.  A character literal is single character
-   or a control sequence, enclosed in single quotes.  A control sequence
-   is a comma separated list of one or more integer literals, enclosed
-   in parenthesis and introduced with a circumflex character.
-
-   EX:  'a'  '^(7)'  '^(7,8)'
-
-   As a GNU chill extension, the syntax C'xx' is also recognized as a 
-   character literal, where xx is a hex value for the character.
-
-   Note that more than a single character, enclosed in single quotes, is
-   a string literal.
-
-   Returns CHARACTER_LITERAL if a match is found.
- */
-
-static enum ch_terminal
-match_character_literal (void)
-{
-  char *tokptr = lexptr;
-  LONGEST ival = 0;
-
-  if ((*tokptr == 'c' || *tokptr == 'C') && (*(tokptr + 1) == '\''))
-    {
-      /* We have a GNU chill extension form, so skip the leading "C'",
-         decode the hex value, and then ensure that we have a trailing
-         single quote character. */
-      tokptr += 2;
-      if (!decode_integer_value (16, &tokptr, &ival) || (*tokptr != '\''))
-	{
-	  return (0);
-	}
-      tokptr++;
-    }
-  else if (*tokptr == '\'')
-    {
-      tokptr++;
-
-      /* Determine which form we have, either a control sequence or the
-         single character form. */
-
-      if (*tokptr == '^')
-	{
-	  if (*(tokptr + 1) == '(')
-	    {
-	      /* Match and decode a control sequence.  Return zero if we don't
-	         find a valid integer literal, or if the next unconsumed character
-	         after the integer literal is not the trailing ')'. */
-	      tokptr += 2;
-	      if (!decode_integer_literal (&ival, &tokptr) || (*tokptr++ != ')'))
-		{
-		  return (0);
-		}
-	    }
-	  else if (*(tokptr + 1) == '^')
-	    {
-	      ival = *tokptr;
-	      tokptr += 2;
-	    }
-	  else
-	    /* fail */
-	    error ("Invalid control sequence");
-	}
-      else if (*tokptr == '\'')
-	{
-	  /* this must be duplicated */
-	  ival = *tokptr;
-	  tokptr += 2;
-	}
-      else
-	{
-	  ival = *tokptr++;
-	}
-
-      /* The trailing quote has not yet been consumed.  If we don't find
-         it, then we have no match. */
-
-      if (*tokptr++ != '\'')
-	{
-	  return (0);
-	}
-    }
-  else
-    {
-      /* Not a character literal. */
-      return (0);
-    }
-  yylval.typed_val.val = ival;
-  yylval.typed_val.type = builtin_type_chill_char;
-  lexptr = tokptr;
-  return (CHARACTER_LITERAL);
-}
-
-/* Recognize an integer literal, as specified in Z.200 sec 5.2.4.2.
-   Note that according to 5.2.4.2, a single "_" is also a valid integer
-   literal, however GNU-chill requires there to be at least one "digit"
-   in any integer literal. */
-
-static enum ch_terminal
-match_integer_literal (void)
-{
-  char *tokptr = lexptr;
-  LONGEST ival;
-
-  if (!decode_integer_literal (&ival, &tokptr))
-    {
-      return (0);
-    }
-  else
-    {
-      yylval.typed_val.val = ival;
-#if defined(CC_HAS_LONG_LONG)
-      if (ival > (LONGEST) 2147483647U || ival < -(LONGEST) 2147483648U)
-	yylval.typed_val.type = builtin_type_long_long;
-      else
-#endif
-	yylval.typed_val.type = builtin_type_int;
-      lexptr = tokptr;
-      return (INTEGER_LITERAL);
-    }
-}
-
-/* Recognize a bit-string literal, as specified in Z.200 sec 5.2.4.8
-   Note that according to 5.2.4.8, a single "_" is also a valid bit-string
-   literal, however GNU-chill requires there to be at least one "digit"
-   in any bit-string literal. */
-
-static enum ch_terminal
-match_bitstring_literal (void)
-{
-  register char *tokptr = lexptr;
-  int bitoffset = 0;
-  int bitcount = 0;
-  int bits_per_char;
-  int digit;
-
-  tempbufindex = 0;
-  CHECKBUF (1);
-  tempbuf[0] = 0;
-
-  /* Look for the required explicit base specifier. */
-
-  switch (*tokptr++)
-    {
-    case 'b':
-    case 'B':
-      bits_per_char = 1;
-      break;
-    case 'o':
-    case 'O':
-      bits_per_char = 3;
-      break;
-    case 'h':
-    case 'H':
-      bits_per_char = 4;
-      break;
-    default:
-      return (0);
-      break;
-    }
-
-  /* Ensure that the character after the explicit base is a single quote. */
-
-  if (*tokptr++ != '\'')
-    {
-      return (0);
-    }
-
-  while (*tokptr != '\0' && *tokptr != '\'')
-    {
-      digit = *tokptr;
-      if (isupper (digit))
-	digit = tolower (digit);
-      tokptr++;
-      switch (digit)
-	{
-	case '_':
-	  continue;
-	case '0':
-	case '1':
-	case '2':
-	case '3':
-	case '4':
-	case '5':
-	case '6':
-	case '7':
-	case '8':
-	case '9':
-	  digit -= '0';
-	  break;
-	case 'a':
-	case 'b':
-	case 'c':
-	case 'd':
-	case 'e':
-	case 'f':
-	  digit -= 'a';
-	  digit += 10;
-	  break;
-	default:
-	  /* this is not a bitstring literal, probably an integer */
-	  return 0;
-	}
-      if (digit >= 1 << bits_per_char)
-	{
-	  /* Found something not in domain for current base. */
-	  error ("Too-large digit in bitstring or integer.");
-	}
-      else
-	{
-	  /* Extract bits from digit, packing them into the bitstring byte. */
-	  int k = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? bits_per_char - 1 : 0;
-	  for (; TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? k >= 0 : k < bits_per_char;
-	       TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? k-- : k++)
-	    {
-	      bitcount++;
-	      if (digit & (1 << k))
-		{
-		  tempbuf[tempbufindex] |=
-		    (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-		    ? (1 << (HOST_CHAR_BIT - 1 - bitoffset))
-		    : (1 << bitoffset);
-		}
-	      bitoffset++;
-	      if (bitoffset == HOST_CHAR_BIT)
-		{
-		  bitoffset = 0;
-		  tempbufindex++;
-		  CHECKBUF (1);
-		  tempbuf[tempbufindex] = 0;
-		}
-	    }
-	}
-    }
-
-  /* Verify that we consumed everything up to the trailing single quote,
-     and that we found some bits (IE not just underbars). */
-
-  if (*tokptr++ != '\'')
-    {
-      return (0);
-    }
-  else
-    {
-      yylval.sval.ptr = tempbuf;
-      yylval.sval.length = bitcount;
-      lexptr = tokptr;
-      return (BIT_STRING_LITERAL);
-    }
-}
-
-struct token
-{
-  char *operator;
-  int token;
-};
-
-static const struct token idtokentab[] =
-{
-  {"array", ARRAY},
-  {"length", LENGTH},
-  {"lower", LOWER},
-  {"upper", UPPER},
-  {"andif", ANDIF},
-  {"pred", PRED},
-  {"succ", SUCC},
-  {"card", CARD},
-  {"size", SIZE},
-  {"orif", ORIF},
-  {"num", NUM},
-  {"abs", ABS},
-  {"max", MAX_TOKEN},
-  {"min", MIN_TOKEN},
-  {"mod", MOD},
-  {"rem", REM},
-  {"not", NOT},
-  {"xor", LOGXOR},
-  {"and", LOGAND},
-  {"in", IN},
-  {"or", LOGIOR},
-  {"up", UP},
-  {"addr", ADDR_TOKEN},
-  {"null", EMPTINESS_LITERAL}
-};
-
-static const struct token tokentab2[] =
-{
-  {":=", GDB_ASSIGNMENT},
-  {"//", SLASH_SLASH},
-  {"->", POINTER},
-  {"/=", NOTEQUAL},
-  {"<=", LEQ},
-  {">=", GEQ}
-};
-
-/* Read one token, getting characters through lexptr.  */
-/* This is where we will check to make sure that the language and the
-   operators used are compatible.  */
-
-static enum ch_terminal
-ch_lex (void)
-{
-  unsigned int i;
-  enum ch_terminal token;
-  char *inputname;
-  struct symbol *sym;
-
-  /* Skip over any leading whitespace. */
-  while (isspace (*lexptr))
-    {
-      lexptr++;
-    }
-  /* Look for special single character cases which can't be the first
-     character of some other multicharacter token. */
-  switch (*lexptr)
-    {
-    case '\0':
-      return END_TOKEN;
-    case ',':
-    case '=':
-    case ';':
-    case '!':
-    case '+':
-    case '*':
-    case '(':
-    case ')':
-    case '[':
-    case ']':
-      return (*lexptr++);
-    }
-  /* Look for characters which start a particular kind of multicharacter
-     token, such as a character literal, register name, convenience
-     variable name, string literal, etc. */
-  switch (*lexptr)
-    {
-    case '\'':
-    case '\"':
-      /* First try to match a string literal, which is any
-         sequence of characters enclosed in matching single or double
-         quotes, except that a single character inside single quotes
-         is a character literal, so we have to catch that case also. */
-      token = match_string_literal ();
-      if (token != 0)
-	{
-	  return (token);
-	}
-      if (*lexptr == '\'')
-	{
-	  token = match_character_literal ();
-	  if (token != 0)
-	    {
-	      return (token);
-	    }
-	}
-      break;
-    case 'C':
-    case 'c':
-      token = match_character_literal ();
-      if (token != 0)
-	{
-	  return (token);
-	}
-      break;
-    case '$':
-      yylval.sval.ptr = lexptr;
-      do
-	{
-	  lexptr++;
-	}
-      while (isalnum (*lexptr) || *lexptr == '_' || *lexptr == '$');
-      yylval.sval.length = lexptr - yylval.sval.ptr;
-      write_dollar_variable (yylval.sval);
-      return GDB_VARIABLE;
-      break;
-    }
-  /* See if it is a special token of length 2.  */
-  for (i = 0; i < sizeof (tokentab2) / sizeof (tokentab2[0]); i++)
-    {
-      if (STREQN (lexptr, tokentab2[i].operator, 2))
-	{
-	  lexptr += 2;
-	  return (tokentab2[i].token);
-	}
-    }
-  /* Look for single character cases which which could be the first
-     character of some other multicharacter token, but aren't, or we
-     would already have found it. */
-  switch (*lexptr)
-    {
-    case '-':
-    case ':':
-    case '/':
-    case '<':
-    case '>':
-      return (*lexptr++);
-    }
-  /* Look for a float literal before looking for an integer literal, so
-     we match as much of the input stream as possible. */
-  token = match_float_literal ();
-  if (token != 0)
-    {
-      return (token);
-    }
-  token = match_bitstring_literal ();
-  if (token != 0)
-    {
-      return (token);
-    }
-  token = match_integer_literal ();
-  if (token != 0)
-    {
-      return (token);
-    }
-
-  /* Try to match a simple name string, and if a match is found, then
-     further classify what sort of name it is and return an appropriate
-     token.  Note that attempting to match a simple name string consumes
-     the token from lexptr, so we can't back out if we later find that
-     we can't classify what sort of name it is. */
-
-  inputname = match_simple_name_string ();
-
-  if (inputname != NULL)
-    {
-      char *simplename = (char *) alloca (strlen (inputname) + 1);
-
-      char *dptr = simplename, *sptr = inputname;
-      for (; *sptr; sptr++)
-	*dptr++ = isupper (*sptr) ? tolower (*sptr) : *sptr;
-      *dptr = '\0';
-
-      /* See if it is a reserved identifier. */
-      for (i = 0; i < sizeof (idtokentab) / sizeof (idtokentab[0]); i++)
-	{
-	  if (STREQ (simplename, idtokentab[i].operator))
-	    {
-	      return (idtokentab[i].token);
-	    }
-	}
-
-      /* Look for other special tokens. */
-      if (STREQ (simplename, "true"))
-	{
-	  yylval.ulval = 1;
-	  return (BOOLEAN_LITERAL);
-	}
-      if (STREQ (simplename, "false"))
-	{
-	  yylval.ulval = 0;
-	  return (BOOLEAN_LITERAL);
-	}
-
-      sym = lookup_symbol (inputname, expression_context_block,
-			   VAR_NAMESPACE, (int *) NULL,
-			   (struct symtab **) NULL);
-      if (sym == NULL && strcmp (inputname, simplename) != 0)
-	{
-	  sym = lookup_symbol (simplename, expression_context_block,
-			       VAR_NAMESPACE, (int *) NULL,
-			       (struct symtab **) NULL);
-	}
-      if (sym != NULL)
-	{
-	  yylval.ssym.stoken.ptr = NULL;
-	  yylval.ssym.stoken.length = 0;
-	  yylval.ssym.sym = sym;
-	  yylval.ssym.is_a_field_of_this = 0;	/* FIXME, C++'ism */
-	  switch (SYMBOL_CLASS (sym))
-	    {
-	    case LOC_BLOCK:
-	      /* Found a procedure name. */
-	      return (GENERAL_PROCEDURE_NAME);
-	    case LOC_STATIC:
-	      /* Found a global or local static variable. */
-	      return (LOCATION_NAME);
-	    case LOC_REGISTER:
-	    case LOC_ARG:
-	    case LOC_REF_ARG:
-	    case LOC_REGPARM:
-	    case LOC_REGPARM_ADDR:
-	    case LOC_LOCAL:
-	    case LOC_LOCAL_ARG:
-	    case LOC_BASEREG:
-	    case LOC_BASEREG_ARG:
-	      if (innermost_block == NULL
-		  || contained_in (block_found, innermost_block))
-		{
-		  innermost_block = block_found;
-		}
-	      return (LOCATION_NAME);
-	      break;
-	    case LOC_CONST:
-	    case LOC_LABEL:
-	      return (LOCATION_NAME);
-	      break;
-	    case LOC_TYPEDEF:
-	      yylval.tsym.type = SYMBOL_TYPE (sym);
-	      return TYPENAME;
-	    case LOC_UNDEF:
-	    case LOC_CONST_BYTES:
-	    case LOC_OPTIMIZED_OUT:
-	      error ("Symbol \"%s\" names no location.", inputname);
-	      break;
-	    default:
-	      internal_error (__FILE__, __LINE__,
-			      "unhandled SYMBOL_CLASS in ch_lex()");
-	      break;
-	    }
-	}
-      else if (!have_full_symbols () && !have_partial_symbols ())
-	{
-	  error ("No symbol table is loaded.  Use the \"file\" command.");
-	}
-      else
-	{
-	  error ("No symbol \"%s\" in current context.", inputname);
-	}
-    }
-
-  /* Catch single character tokens which are not part of some
-     longer token. */
-
-  switch (*lexptr)
-    {
-    case '.':			/* Not float for example. */
-      lexptr++;
-      while (isspace (*lexptr))
-	lexptr++;
-      inputname = match_simple_name_string ();
-      if (!inputname)
-	return '.';
-      return DOT_FIELD_NAME;
-    }
-
-  return (ILLEGAL_TOKEN);
-}
-
-static void
-write_lower_upper_value (enum exp_opcode opcode,	/* Either UNOP_LOWER or UNOP_UPPER */
-			 struct type *type)
-{
-  if (type == NULL)
-    write_exp_elt_opcode (opcode);
-  else
-    {
-      struct type *result_type;
-      LONGEST val = type_lower_upper (opcode, type, &result_type);
-      write_exp_elt_opcode (OP_LONG);
-      write_exp_elt_type (result_type);
-      write_exp_elt_longcst (val);
-      write_exp_elt_opcode (OP_LONG);
-    }
-}
-
-void
-chill_error (char *msg)
-{
-  /* Never used. */
-}
+// OBSOLETE /* Parser for GNU CHILL (CCITT High-Level Language)  -*- C -*-
+// OBSOLETE    Copyright 1992, 1993, 1995, 1996, 1997, 1999, 2000, 2001
+// OBSOLETE    Free Software Foundation, Inc.
+// OBSOLETE 
+// OBSOLETE    This file is part of GDB.
+// OBSOLETE 
+// OBSOLETE    This program is free software; you can redistribute it and/or modify
+// OBSOLETE    it under the terms of the GNU General Public License as published by
+// OBSOLETE    the Free Software Foundation; either version 2 of the License, or
+// OBSOLETE    (at your option) any later version.
+// OBSOLETE 
+// OBSOLETE    This program is distributed in the hope that it will be useful,
+// OBSOLETE    but WITHOUT ANY WARRANTY; without even the implied warranty of
+// OBSOLETE    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// OBSOLETE    GNU General Public License for more details.
+// OBSOLETE 
+// OBSOLETE    You should have received a copy of the GNU General Public License
+// OBSOLETE    along with this program; if not, write to the Free Software
+// OBSOLETE    Foundation, Inc., 59 Temple Place - Suite 330,
+// OBSOLETE    Boston, MA 02111-1307, USA.  */
+// OBSOLETE 
+// OBSOLETE /* Parse a Chill expression from text in a string,
+// OBSOLETE    and return the result as a  struct expression  pointer.
+// OBSOLETE    That structure contains arithmetic operations in reverse polish,
+// OBSOLETE    with constants represented by operations that are followed by special data.
+// OBSOLETE    See expression.h for the details of the format.
+// OBSOLETE    What is important here is that it can be built up sequentially
+// OBSOLETE    during the process of parsing; the lower levels of the tree always
+// OBSOLETE    come first in the result.
+// OBSOLETE 
+// OBSOLETE    Note that the language accepted by this parser is more liberal
+// OBSOLETE    than the one accepted by an actual Chill compiler.  For example, the
+// OBSOLETE    language rule that a simple name string can not be one of the reserved
+// OBSOLETE    simple name strings is not enforced (e.g "case" is not treated as a
+// OBSOLETE    reserved name).  Another example is that Chill is a strongly typed
+// OBSOLETE    language, and certain expressions that violate the type constraints
+// OBSOLETE    may still be evaluated if gdb can do so in a meaningful manner, while
+// OBSOLETE    such expressions would be rejected by the compiler.  The reason for
+// OBSOLETE    this more liberal behavior is the philosophy that the debugger
+// OBSOLETE    is intended to be a tool that is used by the programmer when things
+// OBSOLETE    go wrong, and as such, it should provide as few artificial barriers
+// OBSOLETE    to it's use as possible.  If it can do something meaningful, even
+// OBSOLETE    something that violates language contraints that are enforced by the
+// OBSOLETE    compiler, it should do so without complaint.
+// OBSOLETE 
+// OBSOLETE  */
+// OBSOLETE 
+// OBSOLETE #include "defs.h"
+// OBSOLETE #include "gdb_string.h"
+// OBSOLETE #include <ctype.h>
+// OBSOLETE #include "expression.h"
+// OBSOLETE #include "language.h"
+// OBSOLETE #include "value.h"
+// OBSOLETE #include "parser-defs.h"
+// OBSOLETE #include "ch-lang.h"
+// OBSOLETE #include "bfd.h"		/* Required by objfiles.h.  */
+// OBSOLETE #include "symfile.h"		/* Required by objfiles.h.  */
+// OBSOLETE #include "objfiles.h"		/* For have_full_symbols and have_partial_symbols */
+// OBSOLETE 
+// OBSOLETE #ifdef __GNUC__
+// OBSOLETE #define INLINE __inline__
+// OBSOLETE #endif
+// OBSOLETE 
+// OBSOLETE typedef union
+// OBSOLETE 
+// OBSOLETE   {
+// OBSOLETE     LONGEST lval;
+// OBSOLETE     ULONGEST ulval;
+// OBSOLETE     struct
+// OBSOLETE       {
+// OBSOLETE 	LONGEST val;
+// OBSOLETE 	struct type *type;
+// OBSOLETE       }
+// OBSOLETE     typed_val;
+// OBSOLETE     double dval;
+// OBSOLETE     struct symbol *sym;
+// OBSOLETE     struct type *tval;
+// OBSOLETE     struct stoken sval;
+// OBSOLETE     struct ttype tsym;
+// OBSOLETE     struct symtoken ssym;
+// OBSOLETE   }
+// OBSOLETE YYSTYPE;
+// OBSOLETE 
+// OBSOLETE enum ch_terminal
+// OBSOLETE   {
+// OBSOLETE     END_TOKEN = 0,
+// OBSOLETE     /* '\001' ... '\xff' come first. */
+// OBSOLETE     OPEN_PAREN = '(',
+// OBSOLETE     TOKEN_NOT_READ = 999,
+// OBSOLETE     INTEGER_LITERAL,
+// OBSOLETE     BOOLEAN_LITERAL,
+// OBSOLETE     CHARACTER_LITERAL,
+// OBSOLETE     FLOAT_LITERAL,
+// OBSOLETE     GENERAL_PROCEDURE_NAME,
+// OBSOLETE     LOCATION_NAME,
+// OBSOLETE     EMPTINESS_LITERAL,
+// OBSOLETE     CHARACTER_STRING_LITERAL,
+// OBSOLETE     BIT_STRING_LITERAL,
+// OBSOLETE     TYPENAME,
+// OBSOLETE     DOT_FIELD_NAME,		/* '.' followed by <field name> */
+// OBSOLETE     CASE,
+// OBSOLETE     OF,
+// OBSOLETE     ESAC,
+// OBSOLETE     LOGIOR,
+// OBSOLETE     ORIF,
+// OBSOLETE     LOGXOR,
+// OBSOLETE     LOGAND,
+// OBSOLETE     ANDIF,
+// OBSOLETE     NOTEQUAL,
+// OBSOLETE     GEQ,
+// OBSOLETE     LEQ,
+// OBSOLETE     IN,
+// OBSOLETE     SLASH_SLASH,
+// OBSOLETE     MOD,
+// OBSOLETE     REM,
+// OBSOLETE     NOT,
+// OBSOLETE     POINTER,
+// OBSOLETE     RECEIVE,
+// OBSOLETE     UP,
+// OBSOLETE     IF,
+// OBSOLETE     THEN,
+// OBSOLETE     ELSE,
+// OBSOLETE     FI,
+// OBSOLETE     ELSIF,
+// OBSOLETE     ILLEGAL_TOKEN,
+// OBSOLETE     NUM,
+// OBSOLETE     PRED,
+// OBSOLETE     SUCC,
+// OBSOLETE     ABS,
+// OBSOLETE     CARD,
+// OBSOLETE     MAX_TOKEN,
+// OBSOLETE     MIN_TOKEN,
+// OBSOLETE     ADDR_TOKEN,
+// OBSOLETE     SIZE,
+// OBSOLETE     UPPER,
+// OBSOLETE     LOWER,
+// OBSOLETE     LENGTH,
+// OBSOLETE     ARRAY,
+// OBSOLETE     GDB_VARIABLE,
+// OBSOLETE     GDB_ASSIGNMENT
+// OBSOLETE   };
+// OBSOLETE 
+// OBSOLETE /* Forward declarations. */
+// OBSOLETE 
+// OBSOLETE static void write_lower_upper_value (enum exp_opcode, struct type *);
+// OBSOLETE static enum ch_terminal match_bitstring_literal (void);
+// OBSOLETE static enum ch_terminal match_integer_literal (void);
+// OBSOLETE static enum ch_terminal match_character_literal (void);
+// OBSOLETE static enum ch_terminal match_string_literal (void);
+// OBSOLETE static enum ch_terminal match_float_literal (void);
+// OBSOLETE static int decode_integer_literal (LONGEST *, char **);
+// OBSOLETE static int decode_integer_value (int, char **, LONGEST *);
+// OBSOLETE static char *match_simple_name_string (void);
+// OBSOLETE static void growbuf_by_size (int);
+// OBSOLETE static void parse_case_label (void);
+// OBSOLETE static void parse_untyped_expr (void);
+// OBSOLETE static void parse_if_expression (void);
+// OBSOLETE static void parse_if_expression_body (void);
+// OBSOLETE static void parse_else_alternative (void);
+// OBSOLETE static void parse_then_alternative (void);
+// OBSOLETE static void parse_expr (void);
+// OBSOLETE static void parse_operand0 (void);
+// OBSOLETE static void parse_operand1 (void);
+// OBSOLETE static void parse_operand2 (void);
+// OBSOLETE static void parse_operand3 (void);
+// OBSOLETE static void parse_operand4 (void);
+// OBSOLETE static void parse_operand5 (void);
+// OBSOLETE static void parse_operand6 (void);
+// OBSOLETE static void parse_primval (void);
+// OBSOLETE static void parse_tuple (struct type *);
+// OBSOLETE static void parse_opt_element_list (struct type *);
+// OBSOLETE static void parse_tuple_element (struct type *);
+// OBSOLETE static void parse_named_record_element (void);
+// OBSOLETE static void parse_call (void);
+// OBSOLETE static struct type *parse_mode_or_normal_call (void);
+// OBSOLETE #if 0
+// OBSOLETE static struct type *parse_mode_call (void);
+// OBSOLETE #endif
+// OBSOLETE static void parse_unary_call (void);
+// OBSOLETE static int parse_opt_untyped_expr (void);
+// OBSOLETE static int expect (enum ch_terminal, char *);
+// OBSOLETE static enum ch_terminal ch_lex (void);
+// OBSOLETE INLINE static enum ch_terminal PEEK_TOKEN (void);
+// OBSOLETE static enum ch_terminal peek_token_ (int);
+// OBSOLETE static void forward_token_ (void);
+// OBSOLETE static void require (enum ch_terminal);
+// OBSOLETE static int check_token (enum ch_terminal);
+// OBSOLETE 
+// OBSOLETE #define MAX_LOOK_AHEAD 2
+// OBSOLETE static enum ch_terminal terminal_buffer[MAX_LOOK_AHEAD + 1] =
+// OBSOLETE {
+// OBSOLETE   TOKEN_NOT_READ, TOKEN_NOT_READ, TOKEN_NOT_READ};
+// OBSOLETE static YYSTYPE yylval;
+// OBSOLETE static YYSTYPE val_buffer[MAX_LOOK_AHEAD + 1];
+// OBSOLETE 
+// OBSOLETE /*int current_token, lookahead_token; */
+// OBSOLETE 
+// OBSOLETE INLINE static enum ch_terminal
+// OBSOLETE PEEK_TOKEN (void)
+// OBSOLETE {
+// OBSOLETE   if (terminal_buffer[0] == TOKEN_NOT_READ)
+// OBSOLETE     {
+// OBSOLETE       terminal_buffer[0] = ch_lex ();
+// OBSOLETE       val_buffer[0] = yylval;
+// OBSOLETE     }
+// OBSOLETE   return terminal_buffer[0];
+// OBSOLETE }
+// OBSOLETE #define PEEK_LVAL() val_buffer[0]
+// OBSOLETE #define PEEK_TOKEN1() peek_token_(1)
+// OBSOLETE #define PEEK_TOKEN2() peek_token_(2)
+// OBSOLETE static enum ch_terminal
+// OBSOLETE peek_token_ (int i)
+// OBSOLETE {
+// OBSOLETE   if (i > MAX_LOOK_AHEAD)
+// OBSOLETE     internal_error (__FILE__, __LINE__,
+// OBSOLETE 		    "too much lookahead");
+// OBSOLETE   if (terminal_buffer[i] == TOKEN_NOT_READ)
+// OBSOLETE     {
+// OBSOLETE       terminal_buffer[i] = ch_lex ();
+// OBSOLETE       val_buffer[i] = yylval;
+// OBSOLETE     }
+// OBSOLETE   return terminal_buffer[i];
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE #if 0
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE pushback_token (enum ch_terminal code, YYSTYPE node)
+// OBSOLETE {
+// OBSOLETE   int i;
+// OBSOLETE   if (terminal_buffer[MAX_LOOK_AHEAD] != TOKEN_NOT_READ)
+// OBSOLETE     internal_error (__FILE__, __LINE__,
+// OBSOLETE 		    "cannot pushback token");
+// OBSOLETE   for (i = MAX_LOOK_AHEAD; i > 0; i--)
+// OBSOLETE     {
+// OBSOLETE       terminal_buffer[i] = terminal_buffer[i - 1];
+// OBSOLETE       val_buffer[i] = val_buffer[i - 1];
+// OBSOLETE     }
+// OBSOLETE   terminal_buffer[0] = code;
+// OBSOLETE   val_buffer[0] = node;
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE #endif
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE forward_token_ (void)
+// OBSOLETE {
+// OBSOLETE   int i;
+// OBSOLETE   for (i = 0; i < MAX_LOOK_AHEAD; i++)
+// OBSOLETE     {
+// OBSOLETE       terminal_buffer[i] = terminal_buffer[i + 1];
+// OBSOLETE       val_buffer[i] = val_buffer[i + 1];
+// OBSOLETE     }
+// OBSOLETE   terminal_buffer[MAX_LOOK_AHEAD] = TOKEN_NOT_READ;
+// OBSOLETE }
+// OBSOLETE #define FORWARD_TOKEN() forward_token_()
+// OBSOLETE 
+// OBSOLETE /* Skip the next token.
+// OBSOLETE    if it isn't TOKEN, the parser is broken. */
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE require (enum ch_terminal token)
+// OBSOLETE {
+// OBSOLETE   if (PEEK_TOKEN () != token)
+// OBSOLETE     {
+// OBSOLETE       internal_error (__FILE__, __LINE__,
+// OBSOLETE 		      "expected token %d", (int) token);
+// OBSOLETE     }
+// OBSOLETE   FORWARD_TOKEN ();
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE static int
+// OBSOLETE check_token (enum ch_terminal token)
+// OBSOLETE {
+// OBSOLETE   if (PEEK_TOKEN () != token)
+// OBSOLETE     return 0;
+// OBSOLETE   FORWARD_TOKEN ();
+// OBSOLETE   return 1;
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE /* return 0 if expected token was not found,
+// OBSOLETE    else return 1.
+// OBSOLETE  */
+// OBSOLETE static int
+// OBSOLETE expect (enum ch_terminal token, char *message)
+// OBSOLETE {
+// OBSOLETE   if (PEEK_TOKEN () != token)
+// OBSOLETE     {
+// OBSOLETE       if (message)
+// OBSOLETE 	error (message);
+// OBSOLETE       else if (token < 256)
+// OBSOLETE 	error ("syntax error - expected a '%c' here \"%s\"", token, lexptr);
+// OBSOLETE       else
+// OBSOLETE 	error ("syntax error");
+// OBSOLETE       return 0;
+// OBSOLETE     }
+// OBSOLETE   else
+// OBSOLETE     FORWARD_TOKEN ();
+// OBSOLETE   return 1;
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE #if 0
+// OBSOLETE /* Parse a name string.  If ALLOW_ALL is 1, ALL is allowed as a postfix. */
+// OBSOLETE 
+// OBSOLETE static tree
+// OBSOLETE parse_opt_name_string (int allow_all)
+// OBSOLETE {
+// OBSOLETE   int token = PEEK_TOKEN ();
+// OBSOLETE   tree name;
+// OBSOLETE   if (token != NAME)
+// OBSOLETE     {
+// OBSOLETE       if (token == ALL && allow_all)
+// OBSOLETE 	{
+// OBSOLETE 	  FORWARD_TOKEN ();
+// OBSOLETE 	  return ALL_POSTFIX;
+// OBSOLETE 	}
+// OBSOLETE       return NULL_TREE;
+// OBSOLETE     }
+// OBSOLETE   name = PEEK_LVAL ();
+// OBSOLETE   for (;;)
+// OBSOLETE     {
+// OBSOLETE       FORWARD_TOKEN ();
+// OBSOLETE       token = PEEK_TOKEN ();
+// OBSOLETE       if (token != '!')
+// OBSOLETE 	return name;
+// OBSOLETE       FORWARD_TOKEN ();
+// OBSOLETE       token = PEEK_TOKEN ();
+// OBSOLETE       if (token == ALL && allow_all)
+// OBSOLETE 	return get_identifier3 (IDENTIFIER_POINTER (name), "!", "*");
+// OBSOLETE       if (token != NAME)
+// OBSOLETE 	{
+// OBSOLETE 	  if (pass == 1)
+// OBSOLETE 	    error ("'%s!' is not followed by an identifier",
+// OBSOLETE 		   IDENTIFIER_POINTER (name));
+// OBSOLETE 	  return name;
+// OBSOLETE 	}
+// OBSOLETE       name = get_identifier3 (IDENTIFIER_POINTER (name),
+// OBSOLETE 			      "!", IDENTIFIER_POINTER (PEEK_LVAL ()));
+// OBSOLETE     }
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE static tree
+// OBSOLETE parse_simple_name_string (void)
+// OBSOLETE {
+// OBSOLETE   int token = PEEK_TOKEN ();
+// OBSOLETE   tree name;
+// OBSOLETE   if (token != NAME)
+// OBSOLETE     {
+// OBSOLETE       error ("expected a name here");
+// OBSOLETE       return error_mark_node;
+// OBSOLETE     }
+// OBSOLETE   name = PEEK_LVAL ();
+// OBSOLETE   FORWARD_TOKEN ();
+// OBSOLETE   return name;
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE static tree
+// OBSOLETE parse_name_string (void)
+// OBSOLETE {
+// OBSOLETE   tree name = parse_opt_name_string (0);
+// OBSOLETE   if (name)
+// OBSOLETE     return name;
+// OBSOLETE   if (pass == 1)
+// OBSOLETE     error ("expected a name string here");
+// OBSOLETE   return error_mark_node;
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE /* Matches: <name_string>
+// OBSOLETE    Returns if pass 1: the identifier.
+// OBSOLETE    Returns if pass 2: a decl or value for identifier. */
+// OBSOLETE 
+// OBSOLETE static tree
+// OBSOLETE parse_name (void)
+// OBSOLETE {
+// OBSOLETE   tree name = parse_name_string ();
+// OBSOLETE   if (pass == 1 || ignoring)
+// OBSOLETE     return name;
+// OBSOLETE   else
+// OBSOLETE     {
+// OBSOLETE       tree decl = lookup_name (name);
+// OBSOLETE       if (decl == NULL_TREE)
+// OBSOLETE 	{
+// OBSOLETE 	  error ("`%s' undeclared", IDENTIFIER_POINTER (name));
+// OBSOLETE 	  return error_mark_node;
+// OBSOLETE 	}
+// OBSOLETE       else if (TREE_CODE (TREE_TYPE (decl)) == ERROR_MARK)
+// OBSOLETE 	return error_mark_node;
+// OBSOLETE       else if (TREE_CODE (decl) == CONST_DECL)
+// OBSOLETE 	return DECL_INITIAL (decl);
+// OBSOLETE       else if (TREE_CODE (TREE_TYPE (decl)) == REFERENCE_TYPE)
+// OBSOLETE 	return convert_from_reference (decl);
+// OBSOLETE       else
+// OBSOLETE 	return decl;
+// OBSOLETE     }
+// OBSOLETE }
+// OBSOLETE #endif
+// OBSOLETE 
+// OBSOLETE #if 0
+// OBSOLETE static void
+// OBSOLETE pushback_paren_expr (tree expr)
+// OBSOLETE {
+// OBSOLETE   if (pass == 1 && !ignoring)
+// OBSOLETE     expr = build1 (PAREN_EXPR, NULL_TREE, expr);
+// OBSOLETE   pushback_token (EXPR, expr);
+// OBSOLETE }
+// OBSOLETE #endif
+// OBSOLETE 
+// OBSOLETE /* Matches: <case label> */
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE parse_case_label (void)
+// OBSOLETE {
+// OBSOLETE   if (check_token (ELSE))
+// OBSOLETE     error ("ELSE in tuples labels not implemented");
+// OBSOLETE   /* Does not handle the case of a mode name.  FIXME */
+// OBSOLETE   parse_expr ();
+// OBSOLETE   if (check_token (':'))
+// OBSOLETE     {
+// OBSOLETE       parse_expr ();
+// OBSOLETE       write_exp_elt_opcode (BINOP_RANGE);
+// OBSOLETE     }
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE static int
+// OBSOLETE parse_opt_untyped_expr (void)
+// OBSOLETE {
+// OBSOLETE   switch (PEEK_TOKEN ())
+// OBSOLETE     {
+// OBSOLETE     case ',':
+// OBSOLETE     case ':':
+// OBSOLETE     case ')':
+// OBSOLETE       return 0;
+// OBSOLETE     default:
+// OBSOLETE       parse_untyped_expr ();
+// OBSOLETE       return 1;
+// OBSOLETE     }
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE parse_unary_call (void)
+// OBSOLETE {
+// OBSOLETE   FORWARD_TOKEN ();
+// OBSOLETE   expect ('(', NULL);
+// OBSOLETE   parse_expr ();
+// OBSOLETE   expect (')', NULL);
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE /* Parse NAME '(' MODENAME ')'. */
+// OBSOLETE 
+// OBSOLETE #if 0
+// OBSOLETE 
+// OBSOLETE static struct type *
+// OBSOLETE parse_mode_call (void)
+// OBSOLETE {
+// OBSOLETE   struct type *type;
+// OBSOLETE   FORWARD_TOKEN ();
+// OBSOLETE   expect ('(', NULL);
+// OBSOLETE   if (PEEK_TOKEN () != TYPENAME)
+// OBSOLETE     error ("expect MODENAME here `%s'", lexptr);
+// OBSOLETE   type = PEEK_LVAL ().tsym.type;
+// OBSOLETE   FORWARD_TOKEN ();
+// OBSOLETE   expect (')', NULL);
+// OBSOLETE   return type;
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE #endif
+// OBSOLETE 
+// OBSOLETE static struct type *
+// OBSOLETE parse_mode_or_normal_call (void)
+// OBSOLETE {
+// OBSOLETE   struct type *type;
+// OBSOLETE   FORWARD_TOKEN ();
+// OBSOLETE   expect ('(', NULL);
+// OBSOLETE   if (PEEK_TOKEN () == TYPENAME)
+// OBSOLETE     {
+// OBSOLETE       type = PEEK_LVAL ().tsym.type;
+// OBSOLETE       FORWARD_TOKEN ();
+// OBSOLETE     }
+// OBSOLETE   else
+// OBSOLETE     {
+// OBSOLETE       parse_expr ();
+// OBSOLETE       type = NULL;
+// OBSOLETE     }
+// OBSOLETE   expect (')', NULL);
+// OBSOLETE   return type;
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE /* Parse something that looks like a function call.
+// OBSOLETE    Assume we have parsed the function, and are at the '('. */
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE parse_call (void)
+// OBSOLETE {
+// OBSOLETE   int arg_count;
+// OBSOLETE   require ('(');
+// OBSOLETE   /* This is to save the value of arglist_len
+// OBSOLETE      being accumulated for each dimension. */
+// OBSOLETE   start_arglist ();
+// OBSOLETE   if (parse_opt_untyped_expr ())
+// OBSOLETE     {
+// OBSOLETE       int tok = PEEK_TOKEN ();
+// OBSOLETE       arglist_len = 1;
+// OBSOLETE       if (tok == UP || tok == ':')
+// OBSOLETE 	{
+// OBSOLETE 	  FORWARD_TOKEN ();
+// OBSOLETE 	  parse_expr ();
+// OBSOLETE 	  expect (')', "expected ')' to terminate slice");
+// OBSOLETE 	  end_arglist ();
+// OBSOLETE 	  write_exp_elt_opcode (tok == UP ? TERNOP_SLICE_COUNT
+// OBSOLETE 				: TERNOP_SLICE);
+// OBSOLETE 	  return;
+// OBSOLETE 	}
+// OBSOLETE       while (check_token (','))
+// OBSOLETE 	{
+// OBSOLETE 	  parse_untyped_expr ();
+// OBSOLETE 	  arglist_len++;
+// OBSOLETE 	}
+// OBSOLETE     }
+// OBSOLETE   else
+// OBSOLETE     arglist_len = 0;
+// OBSOLETE   expect (')', NULL);
+// OBSOLETE   arg_count = end_arglist ();
+// OBSOLETE   write_exp_elt_opcode (MULTI_SUBSCRIPT);
+// OBSOLETE   write_exp_elt_longcst (arg_count);
+// OBSOLETE   write_exp_elt_opcode (MULTI_SUBSCRIPT);
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE parse_named_record_element (void)
+// OBSOLETE {
+// OBSOLETE   struct stoken label;
+// OBSOLETE   char buf[256];
+// OBSOLETE 
+// OBSOLETE   label = PEEK_LVAL ().sval;
+// OBSOLETE   sprintf (buf, "expected a field name here `%s'", lexptr);
+// OBSOLETE   expect (DOT_FIELD_NAME, buf);
+// OBSOLETE   if (check_token (','))
+// OBSOLETE     parse_named_record_element ();
+// OBSOLETE   else if (check_token (':'))
+// OBSOLETE     parse_expr ();
+// OBSOLETE   else
+// OBSOLETE     error ("syntax error near `%s' in named record tuple element", lexptr);
+// OBSOLETE   write_exp_elt_opcode (OP_LABELED);
+// OBSOLETE   write_exp_string (label);
+// OBSOLETE   write_exp_elt_opcode (OP_LABELED);
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE /* Returns one or more TREE_LIST nodes, in reverse order. */
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE parse_tuple_element (struct type *type)
+// OBSOLETE {
+// OBSOLETE   if (PEEK_TOKEN () == DOT_FIELD_NAME)
+// OBSOLETE     {
+// OBSOLETE       /* Parse a labelled structure tuple. */
+// OBSOLETE       parse_named_record_element ();
+// OBSOLETE       return;
+// OBSOLETE     }
+// OBSOLETE 
+// OBSOLETE   if (check_token ('('))
+// OBSOLETE     {
+// OBSOLETE       if (check_token ('*'))
+// OBSOLETE 	{
+// OBSOLETE 	  expect (')', "missing ')' after '*' case label list");
+// OBSOLETE 	  if (type)
+// OBSOLETE 	    {
+// OBSOLETE 	      if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
+// OBSOLETE 		{
+// OBSOLETE 		  /* do this as a range from low to high */
+// OBSOLETE 		  struct type *range_type = TYPE_FIELD_TYPE (type, 0);
+// OBSOLETE 		  LONGEST low_bound, high_bound;
+// OBSOLETE 		  if (get_discrete_bounds (range_type, &low_bound, &high_bound) < 0)
+// OBSOLETE 		    error ("cannot determine bounds for (*)");
+// OBSOLETE 		  /* lower bound */
+// OBSOLETE 		  write_exp_elt_opcode (OP_LONG);
+// OBSOLETE 		  write_exp_elt_type (range_type);
+// OBSOLETE 		  write_exp_elt_longcst (low_bound);
+// OBSOLETE 		  write_exp_elt_opcode (OP_LONG);
+// OBSOLETE 		  /* upper bound */
+// OBSOLETE 		  write_exp_elt_opcode (OP_LONG);
+// OBSOLETE 		  write_exp_elt_type (range_type);
+// OBSOLETE 		  write_exp_elt_longcst (high_bound);
+// OBSOLETE 		  write_exp_elt_opcode (OP_LONG);
+// OBSOLETE 		  write_exp_elt_opcode (BINOP_RANGE);
+// OBSOLETE 		}
+// OBSOLETE 	      else
+// OBSOLETE 		error ("(*) in invalid context");
+// OBSOLETE 	    }
+// OBSOLETE 	  else
+// OBSOLETE 	    error ("(*) only possible with modename in front of tuple (mode[..])");
+// OBSOLETE 	}
+// OBSOLETE       else
+// OBSOLETE 	{
+// OBSOLETE 	  parse_case_label ();
+// OBSOLETE 	  while (check_token (','))
+// OBSOLETE 	    {
+// OBSOLETE 	      parse_case_label ();
+// OBSOLETE 	      write_exp_elt_opcode (BINOP_COMMA);
+// OBSOLETE 	    }
+// OBSOLETE 	  expect (')', NULL);
+// OBSOLETE 	}
+// OBSOLETE     }
+// OBSOLETE   else
+// OBSOLETE     parse_untyped_expr ();
+// OBSOLETE   if (check_token (':'))
+// OBSOLETE     {
+// OBSOLETE       /* A powerset range or a labeled Array. */
+// OBSOLETE       parse_untyped_expr ();
+// OBSOLETE       write_exp_elt_opcode (BINOP_RANGE);
+// OBSOLETE     }
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE /* Matches:  a COMMA-separated list of tuple elements.
+// OBSOLETE    Returns a list (of TREE_LIST nodes). */
+// OBSOLETE static void
+// OBSOLETE parse_opt_element_list (struct type *type)
+// OBSOLETE {
+// OBSOLETE   arglist_len = 0;
+// OBSOLETE   if (PEEK_TOKEN () == ']')
+// OBSOLETE     return;
+// OBSOLETE   for (;;)
+// OBSOLETE     {
+// OBSOLETE       parse_tuple_element (type);
+// OBSOLETE       arglist_len++;
+// OBSOLETE       if (PEEK_TOKEN () == ']')
+// OBSOLETE 	break;
+// OBSOLETE       if (!check_token (','))
+// OBSOLETE 	error ("bad syntax in tuple");
+// OBSOLETE     }
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE /* Parses: '[' elements ']'
+// OBSOLETE    If modename is non-NULL it prefixed the tuple.  */
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE parse_tuple (struct type *mode)
+// OBSOLETE {
+// OBSOLETE   struct type *type;
+// OBSOLETE   if (mode)
+// OBSOLETE     type = check_typedef (mode);
+// OBSOLETE   else
+// OBSOLETE     type = 0;
+// OBSOLETE   require ('[');
+// OBSOLETE   start_arglist ();
+// OBSOLETE   parse_opt_element_list (type);
+// OBSOLETE   expect (']', "missing ']' after tuple");
+// OBSOLETE   write_exp_elt_opcode (OP_ARRAY);
+// OBSOLETE   write_exp_elt_longcst ((LONGEST) 0);
+// OBSOLETE   write_exp_elt_longcst ((LONGEST) end_arglist () - 1);
+// OBSOLETE   write_exp_elt_opcode (OP_ARRAY);
+// OBSOLETE   if (type)
+// OBSOLETE     {
+// OBSOLETE       if (TYPE_CODE (type) != TYPE_CODE_ARRAY
+// OBSOLETE 	  && TYPE_CODE (type) != TYPE_CODE_STRUCT
+// OBSOLETE 	  && TYPE_CODE (type) != TYPE_CODE_SET)
+// OBSOLETE 	error ("invalid tuple mode");
+// OBSOLETE       write_exp_elt_opcode (UNOP_CAST);
+// OBSOLETE       write_exp_elt_type (mode);
+// OBSOLETE       write_exp_elt_opcode (UNOP_CAST);
+// OBSOLETE     }
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE parse_primval (void)
+// OBSOLETE {
+// OBSOLETE   struct type *type;
+// OBSOLETE   enum exp_opcode op;
+// OBSOLETE   char *op_name;
+// OBSOLETE   switch (PEEK_TOKEN ())
+// OBSOLETE     {
+// OBSOLETE     case INTEGER_LITERAL:
+// OBSOLETE     case CHARACTER_LITERAL:
+// OBSOLETE       write_exp_elt_opcode (OP_LONG);
+// OBSOLETE       write_exp_elt_type (PEEK_LVAL ().typed_val.type);
+// OBSOLETE       write_exp_elt_longcst (PEEK_LVAL ().typed_val.val);
+// OBSOLETE       write_exp_elt_opcode (OP_LONG);
+// OBSOLETE       FORWARD_TOKEN ();
+// OBSOLETE       break;
+// OBSOLETE     case BOOLEAN_LITERAL:
+// OBSOLETE       write_exp_elt_opcode (OP_BOOL);
+// OBSOLETE       write_exp_elt_longcst ((LONGEST) PEEK_LVAL ().ulval);
+// OBSOLETE       write_exp_elt_opcode (OP_BOOL);
+// OBSOLETE       FORWARD_TOKEN ();
+// OBSOLETE       break;
+// OBSOLETE     case FLOAT_LITERAL:
+// OBSOLETE       write_exp_elt_opcode (OP_DOUBLE);
+// OBSOLETE       write_exp_elt_type (builtin_type_double);
+// OBSOLETE       write_exp_elt_dblcst (PEEK_LVAL ().dval);
+// OBSOLETE       write_exp_elt_opcode (OP_DOUBLE);
+// OBSOLETE       FORWARD_TOKEN ();
+// OBSOLETE       break;
+// OBSOLETE     case EMPTINESS_LITERAL:
+// OBSOLETE       write_exp_elt_opcode (OP_LONG);
+// OBSOLETE       write_exp_elt_type (lookup_pointer_type (builtin_type_void));
+// OBSOLETE       write_exp_elt_longcst (0);
+// OBSOLETE       write_exp_elt_opcode (OP_LONG);
+// OBSOLETE       FORWARD_TOKEN ();
+// OBSOLETE       break;
+// OBSOLETE     case CHARACTER_STRING_LITERAL:
+// OBSOLETE       write_exp_elt_opcode (OP_STRING);
+// OBSOLETE       write_exp_string (PEEK_LVAL ().sval);
+// OBSOLETE       write_exp_elt_opcode (OP_STRING);
+// OBSOLETE       FORWARD_TOKEN ();
+// OBSOLETE       break;
+// OBSOLETE     case BIT_STRING_LITERAL:
+// OBSOLETE       write_exp_elt_opcode (OP_BITSTRING);
+// OBSOLETE       write_exp_bitstring (PEEK_LVAL ().sval);
+// OBSOLETE       write_exp_elt_opcode (OP_BITSTRING);
+// OBSOLETE       FORWARD_TOKEN ();
+// OBSOLETE       break;
+// OBSOLETE     case ARRAY:
+// OBSOLETE       FORWARD_TOKEN ();
+// OBSOLETE       /* This is pseudo-Chill, similar to C's '(TYPE[])EXPR'
+// OBSOLETE          which casts to an artificial array. */
+// OBSOLETE       expect ('(', NULL);
+// OBSOLETE       expect (')', NULL);
+// OBSOLETE       if (PEEK_TOKEN () != TYPENAME)
+// OBSOLETE 	error ("missing MODENAME after ARRAY()");
+// OBSOLETE       type = PEEK_LVAL ().tsym.type;
+// OBSOLETE       FORWARD_TOKEN ();
+// OBSOLETE       expect ('(', NULL);
+// OBSOLETE       parse_expr ();
+// OBSOLETE       expect (')', "missing right parenthesis");
+// OBSOLETE       type = create_array_type ((struct type *) NULL, type,
+// OBSOLETE 				create_range_type ((struct type *) NULL,
+// OBSOLETE 						   builtin_type_int, 0, 0));
+// OBSOLETE       TYPE_ARRAY_UPPER_BOUND_TYPE (type) = BOUND_CANNOT_BE_DETERMINED;
+// OBSOLETE       write_exp_elt_opcode (UNOP_CAST);
+// OBSOLETE       write_exp_elt_type (type);
+// OBSOLETE       write_exp_elt_opcode (UNOP_CAST);
+// OBSOLETE       break;
+// OBSOLETE #if 0
+// OBSOLETE     case CONST:
+// OBSOLETE     case EXPR:
+// OBSOLETE       val = PEEK_LVAL ();
+// OBSOLETE       FORWARD_TOKEN ();
+// OBSOLETE       break;
+// OBSOLETE #endif
+// OBSOLETE     case '(':
+// OBSOLETE       FORWARD_TOKEN ();
+// OBSOLETE       parse_expr ();
+// OBSOLETE       expect (')', "missing right parenthesis");
+// OBSOLETE       break;
+// OBSOLETE     case '[':
+// OBSOLETE       parse_tuple (NULL);
+// OBSOLETE       break;
+// OBSOLETE     case GENERAL_PROCEDURE_NAME:
+// OBSOLETE     case LOCATION_NAME:
+// OBSOLETE       write_exp_elt_opcode (OP_VAR_VALUE);
+// OBSOLETE       write_exp_elt_block (NULL);
+// OBSOLETE       write_exp_elt_sym (PEEK_LVAL ().ssym.sym);
+// OBSOLETE       write_exp_elt_opcode (OP_VAR_VALUE);
+// OBSOLETE       FORWARD_TOKEN ();
+// OBSOLETE       break;
+// OBSOLETE     case GDB_VARIABLE:		/* gdb specific */
+// OBSOLETE       FORWARD_TOKEN ();
+// OBSOLETE       break;
+// OBSOLETE     case NUM:
+// OBSOLETE       parse_unary_call ();
+// OBSOLETE       write_exp_elt_opcode (UNOP_CAST);
+// OBSOLETE       write_exp_elt_type (builtin_type_int);
+// OBSOLETE       write_exp_elt_opcode (UNOP_CAST);
+// OBSOLETE       break;
+// OBSOLETE     case CARD:
+// OBSOLETE       parse_unary_call ();
+// OBSOLETE       write_exp_elt_opcode (UNOP_CARD);
+// OBSOLETE       break;
+// OBSOLETE     case MAX_TOKEN:
+// OBSOLETE       parse_unary_call ();
+// OBSOLETE       write_exp_elt_opcode (UNOP_CHMAX);
+// OBSOLETE       break;
+// OBSOLETE     case MIN_TOKEN:
+// OBSOLETE       parse_unary_call ();
+// OBSOLETE       write_exp_elt_opcode (UNOP_CHMIN);
+// OBSOLETE       break;
+// OBSOLETE     case PRED:
+// OBSOLETE       op_name = "PRED";
+// OBSOLETE       goto unimplemented_unary_builtin;
+// OBSOLETE     case SUCC:
+// OBSOLETE       op_name = "SUCC";
+// OBSOLETE       goto unimplemented_unary_builtin;
+// OBSOLETE     case ABS:
+// OBSOLETE       op_name = "ABS";
+// OBSOLETE       goto unimplemented_unary_builtin;
+// OBSOLETE     unimplemented_unary_builtin:
+// OBSOLETE       parse_unary_call ();
+// OBSOLETE       error ("not implemented:  %s builtin function", op_name);
+// OBSOLETE       break;
+// OBSOLETE     case ADDR_TOKEN:
+// OBSOLETE       parse_unary_call ();
+// OBSOLETE       write_exp_elt_opcode (UNOP_ADDR);
+// OBSOLETE       break;
+// OBSOLETE     case SIZE:
+// OBSOLETE       type = parse_mode_or_normal_call ();
+// OBSOLETE       if (type)
+// OBSOLETE 	{
+// OBSOLETE 	  write_exp_elt_opcode (OP_LONG);
+// OBSOLETE 	  write_exp_elt_type (builtin_type_int);
+// OBSOLETE 	  CHECK_TYPEDEF (type);
+// OBSOLETE 	  write_exp_elt_longcst ((LONGEST) TYPE_LENGTH (type));
+// OBSOLETE 	  write_exp_elt_opcode (OP_LONG);
+// OBSOLETE 	}
+// OBSOLETE       else
+// OBSOLETE 	write_exp_elt_opcode (UNOP_SIZEOF);
+// OBSOLETE       break;
+// OBSOLETE     case LOWER:
+// OBSOLETE       op = UNOP_LOWER;
+// OBSOLETE       goto lower_upper;
+// OBSOLETE     case UPPER:
+// OBSOLETE       op = UNOP_UPPER;
+// OBSOLETE       goto lower_upper;
+// OBSOLETE     lower_upper:
+// OBSOLETE       type = parse_mode_or_normal_call ();
+// OBSOLETE       write_lower_upper_value (op, type);
+// OBSOLETE       break;
+// OBSOLETE     case LENGTH:
+// OBSOLETE       parse_unary_call ();
+// OBSOLETE       write_exp_elt_opcode (UNOP_LENGTH);
+// OBSOLETE       break;
+// OBSOLETE     case TYPENAME:
+// OBSOLETE       type = PEEK_LVAL ().tsym.type;
+// OBSOLETE       FORWARD_TOKEN ();
+// OBSOLETE       switch (PEEK_TOKEN ())
+// OBSOLETE 	{
+// OBSOLETE 	case '[':
+// OBSOLETE 	  parse_tuple (type);
+// OBSOLETE 	  break;
+// OBSOLETE 	case '(':
+// OBSOLETE 	  FORWARD_TOKEN ();
+// OBSOLETE 	  parse_expr ();
+// OBSOLETE 	  expect (')', "missing right parenthesis");
+// OBSOLETE 	  write_exp_elt_opcode (UNOP_CAST);
+// OBSOLETE 	  write_exp_elt_type (type);
+// OBSOLETE 	  write_exp_elt_opcode (UNOP_CAST);
+// OBSOLETE 	  break;
+// OBSOLETE 	default:
+// OBSOLETE 	  error ("typename in invalid context");
+// OBSOLETE 	}
+// OBSOLETE       break;
+// OBSOLETE 
+// OBSOLETE     default:
+// OBSOLETE       error ("invalid expression syntax at `%s'", lexptr);
+// OBSOLETE     }
+// OBSOLETE   for (;;)
+// OBSOLETE     {
+// OBSOLETE       switch (PEEK_TOKEN ())
+// OBSOLETE 	{
+// OBSOLETE 	case DOT_FIELD_NAME:
+// OBSOLETE 	  write_exp_elt_opcode (STRUCTOP_STRUCT);
+// OBSOLETE 	  write_exp_string (PEEK_LVAL ().sval);
+// OBSOLETE 	  write_exp_elt_opcode (STRUCTOP_STRUCT);
+// OBSOLETE 	  FORWARD_TOKEN ();
+// OBSOLETE 	  continue;
+// OBSOLETE 	case POINTER:
+// OBSOLETE 	  FORWARD_TOKEN ();
+// OBSOLETE 	  if (PEEK_TOKEN () == TYPENAME)
+// OBSOLETE 	    {
+// OBSOLETE 	      type = PEEK_LVAL ().tsym.type;
+// OBSOLETE 	      write_exp_elt_opcode (UNOP_CAST);
+// OBSOLETE 	      write_exp_elt_type (lookup_pointer_type (type));
+// OBSOLETE 	      write_exp_elt_opcode (UNOP_CAST);
+// OBSOLETE 	      FORWARD_TOKEN ();
+// OBSOLETE 	    }
+// OBSOLETE 	  write_exp_elt_opcode (UNOP_IND);
+// OBSOLETE 	  continue;
+// OBSOLETE 	case OPEN_PAREN:
+// OBSOLETE 	  parse_call ();
+// OBSOLETE 	  continue;
+// OBSOLETE 	case CHARACTER_STRING_LITERAL:
+// OBSOLETE 	case CHARACTER_LITERAL:
+// OBSOLETE 	case BIT_STRING_LITERAL:
+// OBSOLETE 	  /* Handle string repetition. (See comment in parse_operand5.) */
+// OBSOLETE 	  parse_primval ();
+// OBSOLETE 	  write_exp_elt_opcode (MULTI_SUBSCRIPT);
+// OBSOLETE 	  write_exp_elt_longcst (1);
+// OBSOLETE 	  write_exp_elt_opcode (MULTI_SUBSCRIPT);
+// OBSOLETE 	  continue;
+// OBSOLETE 	case END_TOKEN:
+// OBSOLETE 	case TOKEN_NOT_READ:
+// OBSOLETE 	case INTEGER_LITERAL:
+// OBSOLETE 	case BOOLEAN_LITERAL:
+// OBSOLETE 	case FLOAT_LITERAL:
+// OBSOLETE 	case GENERAL_PROCEDURE_NAME:
+// OBSOLETE 	case LOCATION_NAME:
+// OBSOLETE 	case EMPTINESS_LITERAL:
+// OBSOLETE 	case TYPENAME:
+// OBSOLETE 	case CASE:
+// OBSOLETE 	case OF:
+// OBSOLETE 	case ESAC:
+// OBSOLETE 	case LOGIOR:
+// OBSOLETE 	case ORIF:
+// OBSOLETE 	case LOGXOR:
+// OBSOLETE 	case LOGAND:
+// OBSOLETE 	case ANDIF:
+// OBSOLETE 	case NOTEQUAL:
+// OBSOLETE 	case GEQ:
+// OBSOLETE 	case LEQ:
+// OBSOLETE 	case IN:
+// OBSOLETE 	case SLASH_SLASH:
+// OBSOLETE 	case MOD:
+// OBSOLETE 	case REM:
+// OBSOLETE 	case NOT:
+// OBSOLETE 	case RECEIVE:
+// OBSOLETE 	case UP:
+// OBSOLETE 	case IF:
+// OBSOLETE 	case THEN:
+// OBSOLETE 	case ELSE:
+// OBSOLETE 	case FI:
+// OBSOLETE 	case ELSIF:
+// OBSOLETE 	case ILLEGAL_TOKEN:
+// OBSOLETE 	case NUM:
+// OBSOLETE 	case PRED:
+// OBSOLETE 	case SUCC:
+// OBSOLETE 	case ABS:
+// OBSOLETE 	case CARD:
+// OBSOLETE 	case MAX_TOKEN:
+// OBSOLETE 	case MIN_TOKEN:
+// OBSOLETE 	case ADDR_TOKEN:
+// OBSOLETE 	case SIZE:
+// OBSOLETE 	case UPPER:
+// OBSOLETE 	case LOWER:
+// OBSOLETE 	case LENGTH:
+// OBSOLETE 	case ARRAY:
+// OBSOLETE 	case GDB_VARIABLE:
+// OBSOLETE 	case GDB_ASSIGNMENT:
+// OBSOLETE 	  break;
+// OBSOLETE 	}
+// OBSOLETE       break;
+// OBSOLETE     }
+// OBSOLETE   return;
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE parse_operand6 (void)
+// OBSOLETE {
+// OBSOLETE   if (check_token (RECEIVE))
+// OBSOLETE     {
+// OBSOLETE       parse_primval ();
+// OBSOLETE       error ("not implemented:  RECEIVE expression");
+// OBSOLETE     }
+// OBSOLETE   else if (check_token (POINTER))
+// OBSOLETE     {
+// OBSOLETE       parse_primval ();
+// OBSOLETE       write_exp_elt_opcode (UNOP_ADDR);
+// OBSOLETE     }
+// OBSOLETE   else
+// OBSOLETE     parse_primval ();
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE parse_operand5 (void)
+// OBSOLETE {
+// OBSOLETE   enum exp_opcode op;
+// OBSOLETE   /* We are supposed to be looking for a <string repetition operator>,
+// OBSOLETE      but in general we can't distinguish that from a parenthesized
+// OBSOLETE      expression.  This is especially difficult if we allow the
+// OBSOLETE      string operand to be a constant expression (as requested by
+// OBSOLETE      some users), and not just a string literal.
+// OBSOLETE      Consider:  LPRN expr RPRN LPRN expr RPRN
+// OBSOLETE      Is that a function call or string repetition?
+// OBSOLETE      Instead, we handle string repetition in parse_primval,
+// OBSOLETE      and build_generalized_call. */
+// OBSOLETE   switch (PEEK_TOKEN ())
+// OBSOLETE     {
+// OBSOLETE     case NOT:
+// OBSOLETE       op = UNOP_LOGICAL_NOT;
+// OBSOLETE       break;
+// OBSOLETE     case '-':
+// OBSOLETE       op = UNOP_NEG;
+// OBSOLETE       break;
+// OBSOLETE     default:
+// OBSOLETE       op = OP_NULL;
+// OBSOLETE     }
+// OBSOLETE   if (op != OP_NULL)
+// OBSOLETE     FORWARD_TOKEN ();
+// OBSOLETE   parse_operand6 ();
+// OBSOLETE   if (op != OP_NULL)
+// OBSOLETE     write_exp_elt_opcode (op);
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE parse_operand4 (void)
+// OBSOLETE {
+// OBSOLETE   enum exp_opcode op;
+// OBSOLETE   parse_operand5 ();
+// OBSOLETE   for (;;)
+// OBSOLETE     {
+// OBSOLETE       switch (PEEK_TOKEN ())
+// OBSOLETE 	{
+// OBSOLETE 	case '*':
+// OBSOLETE 	  op = BINOP_MUL;
+// OBSOLETE 	  break;
+// OBSOLETE 	case '/':
+// OBSOLETE 	  op = BINOP_DIV;
+// OBSOLETE 	  break;
+// OBSOLETE 	case MOD:
+// OBSOLETE 	  op = BINOP_MOD;
+// OBSOLETE 	  break;
+// OBSOLETE 	case REM:
+// OBSOLETE 	  op = BINOP_REM;
+// OBSOLETE 	  break;
+// OBSOLETE 	default:
+// OBSOLETE 	  return;
+// OBSOLETE 	}
+// OBSOLETE       FORWARD_TOKEN ();
+// OBSOLETE       parse_operand5 ();
+// OBSOLETE       write_exp_elt_opcode (op);
+// OBSOLETE     }
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE parse_operand3 (void)
+// OBSOLETE {
+// OBSOLETE   enum exp_opcode op;
+// OBSOLETE   parse_operand4 ();
+// OBSOLETE   for (;;)
+// OBSOLETE     {
+// OBSOLETE       switch (PEEK_TOKEN ())
+// OBSOLETE 	{
+// OBSOLETE 	case '+':
+// OBSOLETE 	  op = BINOP_ADD;
+// OBSOLETE 	  break;
+// OBSOLETE 	case '-':
+// OBSOLETE 	  op = BINOP_SUB;
+// OBSOLETE 	  break;
+// OBSOLETE 	case SLASH_SLASH:
+// OBSOLETE 	  op = BINOP_CONCAT;
+// OBSOLETE 	  break;
+// OBSOLETE 	default:
+// OBSOLETE 	  return;
+// OBSOLETE 	}
+// OBSOLETE       FORWARD_TOKEN ();
+// OBSOLETE       parse_operand4 ();
+// OBSOLETE       write_exp_elt_opcode (op);
+// OBSOLETE     }
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE parse_operand2 (void)
+// OBSOLETE {
+// OBSOLETE   enum exp_opcode op;
+// OBSOLETE   parse_operand3 ();
+// OBSOLETE   for (;;)
+// OBSOLETE     {
+// OBSOLETE       if (check_token (IN))
+// OBSOLETE 	{
+// OBSOLETE 	  parse_operand3 ();
+// OBSOLETE 	  write_exp_elt_opcode (BINOP_IN);
+// OBSOLETE 	}
+// OBSOLETE       else
+// OBSOLETE 	{
+// OBSOLETE 	  switch (PEEK_TOKEN ())
+// OBSOLETE 	    {
+// OBSOLETE 	    case '>':
+// OBSOLETE 	      op = BINOP_GTR;
+// OBSOLETE 	      break;
+// OBSOLETE 	    case GEQ:
+// OBSOLETE 	      op = BINOP_GEQ;
+// OBSOLETE 	      break;
+// OBSOLETE 	    case '<':
+// OBSOLETE 	      op = BINOP_LESS;
+// OBSOLETE 	      break;
+// OBSOLETE 	    case LEQ:
+// OBSOLETE 	      op = BINOP_LEQ;
+// OBSOLETE 	      break;
+// OBSOLETE 	    case '=':
+// OBSOLETE 	      op = BINOP_EQUAL;
+// OBSOLETE 	      break;
+// OBSOLETE 	    case NOTEQUAL:
+// OBSOLETE 	      op = BINOP_NOTEQUAL;
+// OBSOLETE 	      break;
+// OBSOLETE 	    default:
+// OBSOLETE 	      return;
+// OBSOLETE 	    }
+// OBSOLETE 	  FORWARD_TOKEN ();
+// OBSOLETE 	  parse_operand3 ();
+// OBSOLETE 	  write_exp_elt_opcode (op);
+// OBSOLETE 	}
+// OBSOLETE     }
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE parse_operand1 (void)
+// OBSOLETE {
+// OBSOLETE   enum exp_opcode op;
+// OBSOLETE   parse_operand2 ();
+// OBSOLETE   for (;;)
+// OBSOLETE     {
+// OBSOLETE       switch (PEEK_TOKEN ())
+// OBSOLETE 	{
+// OBSOLETE 	case LOGAND:
+// OBSOLETE 	  op = BINOP_BITWISE_AND;
+// OBSOLETE 	  break;
+// OBSOLETE 	case ANDIF:
+// OBSOLETE 	  op = BINOP_LOGICAL_AND;
+// OBSOLETE 	  break;
+// OBSOLETE 	default:
+// OBSOLETE 	  return;
+// OBSOLETE 	}
+// OBSOLETE       FORWARD_TOKEN ();
+// OBSOLETE       parse_operand2 ();
+// OBSOLETE       write_exp_elt_opcode (op);
+// OBSOLETE     }
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE parse_operand0 (void)
+// OBSOLETE {
+// OBSOLETE   enum exp_opcode op;
+// OBSOLETE   parse_operand1 ();
+// OBSOLETE   for (;;)
+// OBSOLETE     {
+// OBSOLETE       switch (PEEK_TOKEN ())
+// OBSOLETE 	{
+// OBSOLETE 	case LOGIOR:
+// OBSOLETE 	  op = BINOP_BITWISE_IOR;
+// OBSOLETE 	  break;
+// OBSOLETE 	case LOGXOR:
+// OBSOLETE 	  op = BINOP_BITWISE_XOR;
+// OBSOLETE 	  break;
+// OBSOLETE 	case ORIF:
+// OBSOLETE 	  op = BINOP_LOGICAL_OR;
+// OBSOLETE 	  break;
+// OBSOLETE 	default:
+// OBSOLETE 	  return;
+// OBSOLETE 	}
+// OBSOLETE       FORWARD_TOKEN ();
+// OBSOLETE       parse_operand1 ();
+// OBSOLETE       write_exp_elt_opcode (op);
+// OBSOLETE     }
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE parse_expr (void)
+// OBSOLETE {
+// OBSOLETE   parse_operand0 ();
+// OBSOLETE   if (check_token (GDB_ASSIGNMENT))
+// OBSOLETE     {
+// OBSOLETE       parse_expr ();
+// OBSOLETE       write_exp_elt_opcode (BINOP_ASSIGN);
+// OBSOLETE     }
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE parse_then_alternative (void)
+// OBSOLETE {
+// OBSOLETE   expect (THEN, "missing 'THEN' in 'IF' expression");
+// OBSOLETE   parse_expr ();
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE parse_else_alternative (void)
+// OBSOLETE {
+// OBSOLETE   if (check_token (ELSIF))
+// OBSOLETE     parse_if_expression_body ();
+// OBSOLETE   else if (check_token (ELSE))
+// OBSOLETE     parse_expr ();
+// OBSOLETE   else
+// OBSOLETE     error ("missing ELSE/ELSIF in IF expression");
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE /* Matches: <boolean expression> <then alternative> <else alternative> */
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE parse_if_expression_body (void)
+// OBSOLETE {
+// OBSOLETE   parse_expr ();
+// OBSOLETE   parse_then_alternative ();
+// OBSOLETE   parse_else_alternative ();
+// OBSOLETE   write_exp_elt_opcode (TERNOP_COND);
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE parse_if_expression (void)
+// OBSOLETE {
+// OBSOLETE   require (IF);
+// OBSOLETE   parse_if_expression_body ();
+// OBSOLETE   expect (FI, "missing 'FI' at end of conditional expression");
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE /* An <untyped_expr> is a superset of <expr>.  It also includes
+// OBSOLETE    <conditional expressions> and untyped <tuples>, whose types
+// OBSOLETE    are not given by their constituents.  Hence, these are only
+// OBSOLETE    allowed in certain contexts that expect a certain type.
+// OBSOLETE    You should call convert() to fix up the <untyped_expr>. */
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE parse_untyped_expr (void)
+// OBSOLETE {
+// OBSOLETE   switch (PEEK_TOKEN ())
+// OBSOLETE     {
+// OBSOLETE     case IF:
+// OBSOLETE       parse_if_expression ();
+// OBSOLETE       return;
+// OBSOLETE     case CASE:
+// OBSOLETE       error ("not implemented:  CASE expression");
+// OBSOLETE     case '(':
+// OBSOLETE       switch (PEEK_TOKEN1 ())
+// OBSOLETE 	{
+// OBSOLETE 	case IF:
+// OBSOLETE 	case CASE:
+// OBSOLETE 	  goto skip_lprn;
+// OBSOLETE 	case '[':
+// OBSOLETE 	skip_lprn:
+// OBSOLETE 	  FORWARD_TOKEN ();
+// OBSOLETE 	  parse_untyped_expr ();
+// OBSOLETE 	  expect (')', "missing ')'");
+// OBSOLETE 	  return;
+// OBSOLETE 	default:;
+// OBSOLETE 	  /* fall through */
+// OBSOLETE 	}
+// OBSOLETE     default:
+// OBSOLETE       parse_operand0 ();
+// OBSOLETE     }
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE int
+// OBSOLETE chill_parse (void)
+// OBSOLETE {
+// OBSOLETE   terminal_buffer[0] = TOKEN_NOT_READ;
+// OBSOLETE   if (PEEK_TOKEN () == TYPENAME && PEEK_TOKEN1 () == END_TOKEN)
+// OBSOLETE     {
+// OBSOLETE       write_exp_elt_opcode (OP_TYPE);
+// OBSOLETE       write_exp_elt_type (PEEK_LVAL ().tsym.type);
+// OBSOLETE       write_exp_elt_opcode (OP_TYPE);
+// OBSOLETE       FORWARD_TOKEN ();
+// OBSOLETE     }
+// OBSOLETE   else
+// OBSOLETE     parse_expr ();
+// OBSOLETE   if (terminal_buffer[0] != END_TOKEN)
+// OBSOLETE     {
+// OBSOLETE       if (comma_terminates && terminal_buffer[0] == ',')
+// OBSOLETE 	lexptr--;		/* Put the comma back.  */
+// OBSOLETE       else
+// OBSOLETE 	error ("Junk after end of expression.");
+// OBSOLETE     }
+// OBSOLETE   return 0;
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE 
+// OBSOLETE /* Implementation of a dynamically expandable buffer for processing input
+// OBSOLETE    characters acquired through lexptr and building a value to return in
+// OBSOLETE    yylval. */
+// OBSOLETE 
+// OBSOLETE static char *tempbuf;		/* Current buffer contents */
+// OBSOLETE static int tempbufsize;		/* Size of allocated buffer */
+// OBSOLETE static int tempbufindex;	/* Current index into buffer */
+// OBSOLETE 
+// OBSOLETE #define GROWBY_MIN_SIZE 64	/* Minimum amount to grow buffer by */
+// OBSOLETE 
+// OBSOLETE #define CHECKBUF(size) \
+// OBSOLETE   do { \
+// OBSOLETE     if (tempbufindex + (size) >= tempbufsize) \
+// OBSOLETE       { \
+// OBSOLETE 	growbuf_by_size (size); \
+// OBSOLETE       } \
+// OBSOLETE   } while (0);
+// OBSOLETE 
+// OBSOLETE /* Grow the static temp buffer if necessary, including allocating the first one
+// OBSOLETE    on demand. */
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE growbuf_by_size (int count)
+// OBSOLETE {
+// OBSOLETE   int growby;
+// OBSOLETE 
+// OBSOLETE   growby = max (count, GROWBY_MIN_SIZE);
+// OBSOLETE   tempbufsize += growby;
+// OBSOLETE   if (tempbuf == NULL)
+// OBSOLETE     {
+// OBSOLETE       tempbuf = (char *) xmalloc (tempbufsize);
+// OBSOLETE     }
+// OBSOLETE   else
+// OBSOLETE     {
+// OBSOLETE       tempbuf = (char *) xrealloc (tempbuf, tempbufsize);
+// OBSOLETE     }
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE /* Try to consume a simple name string token.  If successful, returns
+// OBSOLETE    a pointer to a nullbyte terminated copy of the name that can be used
+// OBSOLETE    in symbol table lookups.  If not successful, returns NULL. */
+// OBSOLETE 
+// OBSOLETE static char *
+// OBSOLETE match_simple_name_string (void)
+// OBSOLETE {
+// OBSOLETE   char *tokptr = lexptr;
+// OBSOLETE 
+// OBSOLETE   if (isalpha (*tokptr) || *tokptr == '_')
+// OBSOLETE     {
+// OBSOLETE       char *result;
+// OBSOLETE       do
+// OBSOLETE 	{
+// OBSOLETE 	  tokptr++;
+// OBSOLETE 	}
+// OBSOLETE       while (isalnum (*tokptr) || (*tokptr == '_'));
+// OBSOLETE       yylval.sval.ptr = lexptr;
+// OBSOLETE       yylval.sval.length = tokptr - lexptr;
+// OBSOLETE       lexptr = tokptr;
+// OBSOLETE       result = copy_name (yylval.sval);
+// OBSOLETE       return result;
+// OBSOLETE     }
+// OBSOLETE   return (NULL);
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE /* Start looking for a value composed of valid digits as set by the base
+// OBSOLETE    in use.  Note that '_' characters are valid anywhere, in any quantity,
+// OBSOLETE    and are simply ignored.  Since we must find at least one valid digit,
+// OBSOLETE    or reject this token as an integer literal, we keep track of how many
+// OBSOLETE    digits we have encountered. */
+// OBSOLETE 
+// OBSOLETE static int
+// OBSOLETE decode_integer_value (int base, char **tokptrptr, LONGEST *ivalptr)
+// OBSOLETE {
+// OBSOLETE   char *tokptr = *tokptrptr;
+// OBSOLETE   int temp;
+// OBSOLETE   int digits = 0;
+// OBSOLETE 
+// OBSOLETE   while (*tokptr != '\0')
+// OBSOLETE     {
+// OBSOLETE       temp = *tokptr;
+// OBSOLETE       if (isupper (temp))
+// OBSOLETE 	temp = tolower (temp);
+// OBSOLETE       tokptr++;
+// OBSOLETE       switch (temp)
+// OBSOLETE 	{
+// OBSOLETE 	case '_':
+// OBSOLETE 	  continue;
+// OBSOLETE 	case '0':
+// OBSOLETE 	case '1':
+// OBSOLETE 	case '2':
+// OBSOLETE 	case '3':
+// OBSOLETE 	case '4':
+// OBSOLETE 	case '5':
+// OBSOLETE 	case '6':
+// OBSOLETE 	case '7':
+// OBSOLETE 	case '8':
+// OBSOLETE 	case '9':
+// OBSOLETE 	  temp -= '0';
+// OBSOLETE 	  break;
+// OBSOLETE 	case 'a':
+// OBSOLETE 	case 'b':
+// OBSOLETE 	case 'c':
+// OBSOLETE 	case 'd':
+// OBSOLETE 	case 'e':
+// OBSOLETE 	case 'f':
+// OBSOLETE 	  temp -= 'a';
+// OBSOLETE 	  temp += 10;
+// OBSOLETE 	  break;
+// OBSOLETE 	default:
+// OBSOLETE 	  temp = base;
+// OBSOLETE 	  break;
+// OBSOLETE 	}
+// OBSOLETE       if (temp < base)
+// OBSOLETE 	{
+// OBSOLETE 	  digits++;
+// OBSOLETE 	  *ivalptr *= base;
+// OBSOLETE 	  *ivalptr += temp;
+// OBSOLETE 	}
+// OBSOLETE       else
+// OBSOLETE 	{
+// OBSOLETE 	  /* Found something not in domain for current base. */
+// OBSOLETE 	  tokptr--;		/* Unconsume what gave us indigestion. */
+// OBSOLETE 	  break;
+// OBSOLETE 	}
+// OBSOLETE     }
+// OBSOLETE 
+// OBSOLETE   /* If we didn't find any digits, then we don't have a valid integer
+// OBSOLETE      value, so reject the entire token.  Otherwise, update the lexical
+// OBSOLETE      scan pointer, and return non-zero for success. */
+// OBSOLETE 
+// OBSOLETE   if (digits == 0)
+// OBSOLETE     {
+// OBSOLETE       return (0);
+// OBSOLETE     }
+// OBSOLETE   else
+// OBSOLETE     {
+// OBSOLETE       *tokptrptr = tokptr;
+// OBSOLETE       return (1);
+// OBSOLETE     }
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE static int
+// OBSOLETE decode_integer_literal (LONGEST *valptr, char **tokptrptr)
+// OBSOLETE {
+// OBSOLETE   char *tokptr = *tokptrptr;
+// OBSOLETE   int base = 0;
+// OBSOLETE   LONGEST ival = 0;
+// OBSOLETE   int explicit_base = 0;
+// OBSOLETE 
+// OBSOLETE   /* Look for an explicit base specifier, which is optional. */
+// OBSOLETE 
+// OBSOLETE   switch (*tokptr)
+// OBSOLETE     {
+// OBSOLETE     case 'd':
+// OBSOLETE     case 'D':
+// OBSOLETE       explicit_base++;
+// OBSOLETE       base = 10;
+// OBSOLETE       tokptr++;
+// OBSOLETE       break;
+// OBSOLETE     case 'b':
+// OBSOLETE     case 'B':
+// OBSOLETE       explicit_base++;
+// OBSOLETE       base = 2;
+// OBSOLETE       tokptr++;
+// OBSOLETE       break;
+// OBSOLETE     case 'h':
+// OBSOLETE     case 'H':
+// OBSOLETE       explicit_base++;
+// OBSOLETE       base = 16;
+// OBSOLETE       tokptr++;
+// OBSOLETE       break;
+// OBSOLETE     case 'o':
+// OBSOLETE     case 'O':
+// OBSOLETE       explicit_base++;
+// OBSOLETE       base = 8;
+// OBSOLETE       tokptr++;
+// OBSOLETE       break;
+// OBSOLETE     default:
+// OBSOLETE       base = 10;
+// OBSOLETE       break;
+// OBSOLETE     }
+// OBSOLETE 
+// OBSOLETE   /* If we found an explicit base ensure that the character after the
+// OBSOLETE      explicit base is a single quote. */
+// OBSOLETE 
+// OBSOLETE   if (explicit_base && (*tokptr++ != '\''))
+// OBSOLETE     {
+// OBSOLETE       return (0);
+// OBSOLETE     }
+// OBSOLETE 
+// OBSOLETE   /* Attempt to decode whatever follows as an integer value in the
+// OBSOLETE      indicated base, updating the token pointer in the process and
+// OBSOLETE      computing the value into ival.  Also, if we have an explicit
+// OBSOLETE      base, then the next character must not be a single quote, or we
+// OBSOLETE      have a bitstring literal, so reject the entire token in this case.
+// OBSOLETE      Otherwise, update the lexical scan pointer, and return non-zero
+// OBSOLETE      for success. */
+// OBSOLETE 
+// OBSOLETE   if (!decode_integer_value (base, &tokptr, &ival))
+// OBSOLETE     {
+// OBSOLETE       return (0);
+// OBSOLETE     }
+// OBSOLETE   else if (explicit_base && (*tokptr == '\''))
+// OBSOLETE     {
+// OBSOLETE       return (0);
+// OBSOLETE     }
+// OBSOLETE   else
+// OBSOLETE     {
+// OBSOLETE       *valptr = ival;
+// OBSOLETE       *tokptrptr = tokptr;
+// OBSOLETE       return (1);
+// OBSOLETE     }
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE /*  If it wasn't for the fact that floating point values can contain '_'
+// OBSOLETE    characters, we could just let strtod do all the hard work by letting it
+// OBSOLETE    try to consume as much of the current token buffer as possible and
+// OBSOLETE    find a legal conversion.  Unfortunately we need to filter out the '_'
+// OBSOLETE    characters before calling strtod, which we do by copying the other
+// OBSOLETE    legal chars to a local buffer to be converted.  However since we also
+// OBSOLETE    need to keep track of where the last unconsumed character in the input
+// OBSOLETE    buffer is, we have transfer only as many characters as may compose a
+// OBSOLETE    legal floating point value. */
+// OBSOLETE 
+// OBSOLETE static enum ch_terminal
+// OBSOLETE match_float_literal (void)
+// OBSOLETE {
+// OBSOLETE   char *tokptr = lexptr;
+// OBSOLETE   char *buf;
+// OBSOLETE   char *copy;
+// OBSOLETE   double dval;
+// OBSOLETE   extern double strtod ();
+// OBSOLETE 
+// OBSOLETE   /* Make local buffer in which to build the string to convert.  This is
+// OBSOLETE      required because underscores are valid in chill floating point numbers
+// OBSOLETE      but not in the string passed to strtod to convert.  The string will be
+// OBSOLETE      no longer than our input string. */
+// OBSOLETE 
+// OBSOLETE   copy = buf = (char *) alloca (strlen (tokptr) + 1);
+// OBSOLETE 
+// OBSOLETE   /* Transfer all leading digits to the conversion buffer, discarding any
+// OBSOLETE      underscores. */
+// OBSOLETE 
+// OBSOLETE   while (isdigit (*tokptr) || *tokptr == '_')
+// OBSOLETE     {
+// OBSOLETE       if (*tokptr != '_')
+// OBSOLETE 	{
+// OBSOLETE 	  *copy++ = *tokptr;
+// OBSOLETE 	}
+// OBSOLETE       tokptr++;
+// OBSOLETE     }
+// OBSOLETE 
+// OBSOLETE   /* Now accept either a '.', or one of [eEdD].  Dot is legal regardless
+// OBSOLETE      of whether we found any leading digits, and we simply accept it and
+// OBSOLETE      continue on to look for the fractional part and/or exponent.  One of
+// OBSOLETE      [eEdD] is legal only if we have seen digits, and means that there
+// OBSOLETE      is no fractional part.  If we find neither of these, then this is
+// OBSOLETE      not a floating point number, so return failure. */
+// OBSOLETE 
+// OBSOLETE   switch (*tokptr++)
+// OBSOLETE     {
+// OBSOLETE     case '.':
+// OBSOLETE       /* Accept and then look for fractional part and/or exponent. */
+// OBSOLETE       *copy++ = '.';
+// OBSOLETE       break;
+// OBSOLETE 
+// OBSOLETE     case 'e':
+// OBSOLETE     case 'E':
+// OBSOLETE     case 'd':
+// OBSOLETE     case 'D':
+// OBSOLETE       if (copy == buf)
+// OBSOLETE 	{
+// OBSOLETE 	  return (0);
+// OBSOLETE 	}
+// OBSOLETE       *copy++ = 'e';
+// OBSOLETE       goto collect_exponent;
+// OBSOLETE       break;
+// OBSOLETE 
+// OBSOLETE     default:
+// OBSOLETE       return (0);
+// OBSOLETE       break;
+// OBSOLETE     }
+// OBSOLETE 
+// OBSOLETE   /* We found a '.', copy any fractional digits to the conversion buffer, up
+// OBSOLETE      to the first nondigit, non-underscore character. */
+// OBSOLETE 
+// OBSOLETE   while (isdigit (*tokptr) || *tokptr == '_')
+// OBSOLETE     {
+// OBSOLETE       if (*tokptr != '_')
+// OBSOLETE 	{
+// OBSOLETE 	  *copy++ = *tokptr;
+// OBSOLETE 	}
+// OBSOLETE       tokptr++;
+// OBSOLETE     }
+// OBSOLETE 
+// OBSOLETE   /* Look for an exponent, which must start with one of [eEdD].  If none
+// OBSOLETE      is found, jump directly to trying to convert what we have collected
+// OBSOLETE      so far. */
+// OBSOLETE 
+// OBSOLETE   switch (*tokptr)
+// OBSOLETE     {
+// OBSOLETE     case 'e':
+// OBSOLETE     case 'E':
+// OBSOLETE     case 'd':
+// OBSOLETE     case 'D':
+// OBSOLETE       *copy++ = 'e';
+// OBSOLETE       tokptr++;
+// OBSOLETE       break;
+// OBSOLETE     default:
+// OBSOLETE       goto convert_float;
+// OBSOLETE       break;
+// OBSOLETE     }
+// OBSOLETE 
+// OBSOLETE   /* Accept an optional '-' or '+' following one of [eEdD]. */
+// OBSOLETE 
+// OBSOLETE collect_exponent:
+// OBSOLETE   if (*tokptr == '+' || *tokptr == '-')
+// OBSOLETE     {
+// OBSOLETE       *copy++ = *tokptr++;
+// OBSOLETE     }
+// OBSOLETE 
+// OBSOLETE   /* Now copy an exponent into the conversion buffer.  Note that at the 
+// OBSOLETE      moment underscores are *not* allowed in exponents. */
+// OBSOLETE 
+// OBSOLETE   while (isdigit (*tokptr))
+// OBSOLETE     {
+// OBSOLETE       *copy++ = *tokptr++;
+// OBSOLETE     }
+// OBSOLETE 
+// OBSOLETE   /* If we transfered any chars to the conversion buffer, try to interpret its
+// OBSOLETE      contents as a floating point value.  If any characters remain, then we
+// OBSOLETE      must not have a valid floating point string. */
+// OBSOLETE 
+// OBSOLETE convert_float:
+// OBSOLETE   *copy = '\0';
+// OBSOLETE   if (copy != buf)
+// OBSOLETE     {
+// OBSOLETE       dval = strtod (buf, &copy);
+// OBSOLETE       if (*copy == '\0')
+// OBSOLETE 	{
+// OBSOLETE 	  yylval.dval = dval;
+// OBSOLETE 	  lexptr = tokptr;
+// OBSOLETE 	  return (FLOAT_LITERAL);
+// OBSOLETE 	}
+// OBSOLETE     }
+// OBSOLETE   return (0);
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE /* Recognize a string literal.  A string literal is a sequence
+// OBSOLETE    of characters enclosed in matching single or double quotes, except that
+// OBSOLETE    a single character inside single quotes is a character literal, which
+// OBSOLETE    we reject as a string literal.  To embed the terminator character inside
+// OBSOLETE    a string, it is simply doubled (I.E. "this""is""one""string") */
+// OBSOLETE 
+// OBSOLETE static enum ch_terminal
+// OBSOLETE match_string_literal (void)
+// OBSOLETE {
+// OBSOLETE   char *tokptr = lexptr;
+// OBSOLETE   int in_ctrlseq = 0;
+// OBSOLETE   LONGEST ival;
+// OBSOLETE 
+// OBSOLETE   for (tempbufindex = 0, tokptr++; *tokptr != '\0'; tokptr++)
+// OBSOLETE     {
+// OBSOLETE       CHECKBUF (1);
+// OBSOLETE     tryagain:;
+// OBSOLETE       if (in_ctrlseq)
+// OBSOLETE 	{
+// OBSOLETE 	  /* skip possible whitespaces */
+// OBSOLETE 	  while ((*tokptr == ' ' || *tokptr == '\t') && *tokptr)
+// OBSOLETE 	    tokptr++;
+// OBSOLETE 	  if (*tokptr == ')')
+// OBSOLETE 	    {
+// OBSOLETE 	      in_ctrlseq = 0;
+// OBSOLETE 	      tokptr++;
+// OBSOLETE 	      goto tryagain;
+// OBSOLETE 	    }
+// OBSOLETE 	  else if (*tokptr != ',')
+// OBSOLETE 	    error ("Invalid control sequence");
+// OBSOLETE 	  tokptr++;
+// OBSOLETE 	  /* skip possible whitespaces */
+// OBSOLETE 	  while ((*tokptr == ' ' || *tokptr == '\t') && *tokptr)
+// OBSOLETE 	    tokptr++;
+// OBSOLETE 	  if (!decode_integer_literal (&ival, &tokptr))
+// OBSOLETE 	    error ("Invalid control sequence");
+// OBSOLETE 	  tokptr--;
+// OBSOLETE 	}
+// OBSOLETE       else if (*tokptr == *lexptr)
+// OBSOLETE 	{
+// OBSOLETE 	  if (*(tokptr + 1) == *lexptr)
+// OBSOLETE 	    {
+// OBSOLETE 	      ival = *tokptr++;
+// OBSOLETE 	    }
+// OBSOLETE 	  else
+// OBSOLETE 	    {
+// OBSOLETE 	      break;
+// OBSOLETE 	    }
+// OBSOLETE 	}
+// OBSOLETE       else if (*tokptr == '^')
+// OBSOLETE 	{
+// OBSOLETE 	  if (*(tokptr + 1) == '(')
+// OBSOLETE 	    {
+// OBSOLETE 	      in_ctrlseq = 1;
+// OBSOLETE 	      tokptr += 2;
+// OBSOLETE 	      if (!decode_integer_literal (&ival, &tokptr))
+// OBSOLETE 		error ("Invalid control sequence");
+// OBSOLETE 	      tokptr--;
+// OBSOLETE 	    }
+// OBSOLETE 	  else if (*(tokptr + 1) == '^')
+// OBSOLETE 	    ival = *tokptr++;
+// OBSOLETE 	  else
+// OBSOLETE 	    error ("Invalid control sequence");
+// OBSOLETE 	}
+// OBSOLETE       else
+// OBSOLETE 	ival = *tokptr;
+// OBSOLETE       tempbuf[tempbufindex++] = ival;
+// OBSOLETE     }
+// OBSOLETE   if (in_ctrlseq)
+// OBSOLETE     error ("Invalid control sequence");
+// OBSOLETE 
+// OBSOLETE   if (*tokptr == '\0'		/* no terminator */
+// OBSOLETE       || (tempbufindex == 1 && *tokptr == '\''))	/* char literal */
+// OBSOLETE     {
+// OBSOLETE       return (0);
+// OBSOLETE     }
+// OBSOLETE   else
+// OBSOLETE     {
+// OBSOLETE       tempbuf[tempbufindex] = '\0';
+// OBSOLETE       yylval.sval.ptr = tempbuf;
+// OBSOLETE       yylval.sval.length = tempbufindex;
+// OBSOLETE       lexptr = ++tokptr;
+// OBSOLETE       return (CHARACTER_STRING_LITERAL);
+// OBSOLETE     }
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE /* Recognize a character literal.  A character literal is single character
+// OBSOLETE    or a control sequence, enclosed in single quotes.  A control sequence
+// OBSOLETE    is a comma separated list of one or more integer literals, enclosed
+// OBSOLETE    in parenthesis and introduced with a circumflex character.
+// OBSOLETE 
+// OBSOLETE    EX:  'a'  '^(7)'  '^(7,8)'
+// OBSOLETE 
+// OBSOLETE    As a GNU chill extension, the syntax C'xx' is also recognized as a 
+// OBSOLETE    character literal, where xx is a hex value for the character.
+// OBSOLETE 
+// OBSOLETE    Note that more than a single character, enclosed in single quotes, is
+// OBSOLETE    a string literal.
+// OBSOLETE 
+// OBSOLETE    Returns CHARACTER_LITERAL if a match is found.
+// OBSOLETE  */
+// OBSOLETE 
+// OBSOLETE static enum ch_terminal
+// OBSOLETE match_character_literal (void)
+// OBSOLETE {
+// OBSOLETE   char *tokptr = lexptr;
+// OBSOLETE   LONGEST ival = 0;
+// OBSOLETE 
+// OBSOLETE   if ((*tokptr == 'c' || *tokptr == 'C') && (*(tokptr + 1) == '\''))
+// OBSOLETE     {
+// OBSOLETE       /* We have a GNU chill extension form, so skip the leading "C'",
+// OBSOLETE          decode the hex value, and then ensure that we have a trailing
+// OBSOLETE          single quote character. */
+// OBSOLETE       tokptr += 2;
+// OBSOLETE       if (!decode_integer_value (16, &tokptr, &ival) || (*tokptr != '\''))
+// OBSOLETE 	{
+// OBSOLETE 	  return (0);
+// OBSOLETE 	}
+// OBSOLETE       tokptr++;
+// OBSOLETE     }
+// OBSOLETE   else if (*tokptr == '\'')
+// OBSOLETE     {
+// OBSOLETE       tokptr++;
+// OBSOLETE 
+// OBSOLETE       /* Determine which form we have, either a control sequence or the
+// OBSOLETE          single character form. */
+// OBSOLETE 
+// OBSOLETE       if (*tokptr == '^')
+// OBSOLETE 	{
+// OBSOLETE 	  if (*(tokptr + 1) == '(')
+// OBSOLETE 	    {
+// OBSOLETE 	      /* Match and decode a control sequence.  Return zero if we don't
+// OBSOLETE 	         find a valid integer literal, or if the next unconsumed character
+// OBSOLETE 	         after the integer literal is not the trailing ')'. */
+// OBSOLETE 	      tokptr += 2;
+// OBSOLETE 	      if (!decode_integer_literal (&ival, &tokptr) || (*tokptr++ != ')'))
+// OBSOLETE 		{
+// OBSOLETE 		  return (0);
+// OBSOLETE 		}
+// OBSOLETE 	    }
+// OBSOLETE 	  else if (*(tokptr + 1) == '^')
+// OBSOLETE 	    {
+// OBSOLETE 	      ival = *tokptr;
+// OBSOLETE 	      tokptr += 2;
+// OBSOLETE 	    }
+// OBSOLETE 	  else
+// OBSOLETE 	    /* fail */
+// OBSOLETE 	    error ("Invalid control sequence");
+// OBSOLETE 	}
+// OBSOLETE       else if (*tokptr == '\'')
+// OBSOLETE 	{
+// OBSOLETE 	  /* this must be duplicated */
+// OBSOLETE 	  ival = *tokptr;
+// OBSOLETE 	  tokptr += 2;
+// OBSOLETE 	}
+// OBSOLETE       else
+// OBSOLETE 	{
+// OBSOLETE 	  ival = *tokptr++;
+// OBSOLETE 	}
+// OBSOLETE 
+// OBSOLETE       /* The trailing quote has not yet been consumed.  If we don't find
+// OBSOLETE          it, then we have no match. */
+// OBSOLETE 
+// OBSOLETE       if (*tokptr++ != '\'')
+// OBSOLETE 	{
+// OBSOLETE 	  return (0);
+// OBSOLETE 	}
+// OBSOLETE     }
+// OBSOLETE   else
+// OBSOLETE     {
+// OBSOLETE       /* Not a character literal. */
+// OBSOLETE       return (0);
+// OBSOLETE     }
+// OBSOLETE   yylval.typed_val.val = ival;
+// OBSOLETE   yylval.typed_val.type = builtin_type_chill_char;
+// OBSOLETE   lexptr = tokptr;
+// OBSOLETE   return (CHARACTER_LITERAL);
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE /* Recognize an integer literal, as specified in Z.200 sec 5.2.4.2.
+// OBSOLETE    Note that according to 5.2.4.2, a single "_" is also a valid integer
+// OBSOLETE    literal, however GNU-chill requires there to be at least one "digit"
+// OBSOLETE    in any integer literal. */
+// OBSOLETE 
+// OBSOLETE static enum ch_terminal
+// OBSOLETE match_integer_literal (void)
+// OBSOLETE {
+// OBSOLETE   char *tokptr = lexptr;
+// OBSOLETE   LONGEST ival;
+// OBSOLETE 
+// OBSOLETE   if (!decode_integer_literal (&ival, &tokptr))
+// OBSOLETE     {
+// OBSOLETE       return (0);
+// OBSOLETE     }
+// OBSOLETE   else
+// OBSOLETE     {
+// OBSOLETE       yylval.typed_val.val = ival;
+// OBSOLETE #if defined(CC_HAS_LONG_LONG)
+// OBSOLETE       if (ival > (LONGEST) 2147483647U || ival < -(LONGEST) 2147483648U)
+// OBSOLETE 	yylval.typed_val.type = builtin_type_long_long;
+// OBSOLETE       else
+// OBSOLETE #endif
+// OBSOLETE 	yylval.typed_val.type = builtin_type_int;
+// OBSOLETE       lexptr = tokptr;
+// OBSOLETE       return (INTEGER_LITERAL);
+// OBSOLETE     }
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE /* Recognize a bit-string literal, as specified in Z.200 sec 5.2.4.8
+// OBSOLETE    Note that according to 5.2.4.8, a single "_" is also a valid bit-string
+// OBSOLETE    literal, however GNU-chill requires there to be at least one "digit"
+// OBSOLETE    in any bit-string literal. */
+// OBSOLETE 
+// OBSOLETE static enum ch_terminal
+// OBSOLETE match_bitstring_literal (void)
+// OBSOLETE {
+// OBSOLETE   register char *tokptr = lexptr;
+// OBSOLETE   int bitoffset = 0;
+// OBSOLETE   int bitcount = 0;
+// OBSOLETE   int bits_per_char;
+// OBSOLETE   int digit;
+// OBSOLETE 
+// OBSOLETE   tempbufindex = 0;
+// OBSOLETE   CHECKBUF (1);
+// OBSOLETE   tempbuf[0] = 0;
+// OBSOLETE 
+// OBSOLETE   /* Look for the required explicit base specifier. */
+// OBSOLETE 
+// OBSOLETE   switch (*tokptr++)
+// OBSOLETE     {
+// OBSOLETE     case 'b':
+// OBSOLETE     case 'B':
+// OBSOLETE       bits_per_char = 1;
+// OBSOLETE       break;
+// OBSOLETE     case 'o':
+// OBSOLETE     case 'O':
+// OBSOLETE       bits_per_char = 3;
+// OBSOLETE       break;
+// OBSOLETE     case 'h':
+// OBSOLETE     case 'H':
+// OBSOLETE       bits_per_char = 4;
+// OBSOLETE       break;
+// OBSOLETE     default:
+// OBSOLETE       return (0);
+// OBSOLETE       break;
+// OBSOLETE     }
+// OBSOLETE 
+// OBSOLETE   /* Ensure that the character after the explicit base is a single quote. */
+// OBSOLETE 
+// OBSOLETE   if (*tokptr++ != '\'')
+// OBSOLETE     {
+// OBSOLETE       return (0);
+// OBSOLETE     }
+// OBSOLETE 
+// OBSOLETE   while (*tokptr != '\0' && *tokptr != '\'')
+// OBSOLETE     {
+// OBSOLETE       digit = *tokptr;
+// OBSOLETE       if (isupper (digit))
+// OBSOLETE 	digit = tolower (digit);
+// OBSOLETE       tokptr++;
+// OBSOLETE       switch (digit)
+// OBSOLETE 	{
+// OBSOLETE 	case '_':
+// OBSOLETE 	  continue;
+// OBSOLETE 	case '0':
+// OBSOLETE 	case '1':
+// OBSOLETE 	case '2':
+// OBSOLETE 	case '3':
+// OBSOLETE 	case '4':
+// OBSOLETE 	case '5':
+// OBSOLETE 	case '6':
+// OBSOLETE 	case '7':
+// OBSOLETE 	case '8':
+// OBSOLETE 	case '9':
+// OBSOLETE 	  digit -= '0';
+// OBSOLETE 	  break;
+// OBSOLETE 	case 'a':
+// OBSOLETE 	case 'b':
+// OBSOLETE 	case 'c':
+// OBSOLETE 	case 'd':
+// OBSOLETE 	case 'e':
+// OBSOLETE 	case 'f':
+// OBSOLETE 	  digit -= 'a';
+// OBSOLETE 	  digit += 10;
+// OBSOLETE 	  break;
+// OBSOLETE 	default:
+// OBSOLETE 	  /* this is not a bitstring literal, probably an integer */
+// OBSOLETE 	  return 0;
+// OBSOLETE 	}
+// OBSOLETE       if (digit >= 1 << bits_per_char)
+// OBSOLETE 	{
+// OBSOLETE 	  /* Found something not in domain for current base. */
+// OBSOLETE 	  error ("Too-large digit in bitstring or integer.");
+// OBSOLETE 	}
+// OBSOLETE       else
+// OBSOLETE 	{
+// OBSOLETE 	  /* Extract bits from digit, packing them into the bitstring byte. */
+// OBSOLETE 	  int k = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? bits_per_char - 1 : 0;
+// OBSOLETE 	  for (; TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? k >= 0 : k < bits_per_char;
+// OBSOLETE 	       TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? k-- : k++)
+// OBSOLETE 	    {
+// OBSOLETE 	      bitcount++;
+// OBSOLETE 	      if (digit & (1 << k))
+// OBSOLETE 		{
+// OBSOLETE 		  tempbuf[tempbufindex] |=
+// OBSOLETE 		    (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+// OBSOLETE 		    ? (1 << (HOST_CHAR_BIT - 1 - bitoffset))
+// OBSOLETE 		    : (1 << bitoffset);
+// OBSOLETE 		}
+// OBSOLETE 	      bitoffset++;
+// OBSOLETE 	      if (bitoffset == HOST_CHAR_BIT)
+// OBSOLETE 		{
+// OBSOLETE 		  bitoffset = 0;
+// OBSOLETE 		  tempbufindex++;
+// OBSOLETE 		  CHECKBUF (1);
+// OBSOLETE 		  tempbuf[tempbufindex] = 0;
+// OBSOLETE 		}
+// OBSOLETE 	    }
+// OBSOLETE 	}
+// OBSOLETE     }
+// OBSOLETE 
+// OBSOLETE   /* Verify that we consumed everything up to the trailing single quote,
+// OBSOLETE      and that we found some bits (IE not just underbars). */
+// OBSOLETE 
+// OBSOLETE   if (*tokptr++ != '\'')
+// OBSOLETE     {
+// OBSOLETE       return (0);
+// OBSOLETE     }
+// OBSOLETE   else
+// OBSOLETE     {
+// OBSOLETE       yylval.sval.ptr = tempbuf;
+// OBSOLETE       yylval.sval.length = bitcount;
+// OBSOLETE       lexptr = tokptr;
+// OBSOLETE       return (BIT_STRING_LITERAL);
+// OBSOLETE     }
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE struct token
+// OBSOLETE {
+// OBSOLETE   char *operator;
+// OBSOLETE   int token;
+// OBSOLETE };
+// OBSOLETE 
+// OBSOLETE static const struct token idtokentab[] =
+// OBSOLETE {
+// OBSOLETE   {"array", ARRAY},
+// OBSOLETE   {"length", LENGTH},
+// OBSOLETE   {"lower", LOWER},
+// OBSOLETE   {"upper", UPPER},
+// OBSOLETE   {"andif", ANDIF},
+// OBSOLETE   {"pred", PRED},
+// OBSOLETE   {"succ", SUCC},
+// OBSOLETE   {"card", CARD},
+// OBSOLETE   {"size", SIZE},
+// OBSOLETE   {"orif", ORIF},
+// OBSOLETE   {"num", NUM},
+// OBSOLETE   {"abs", ABS},
+// OBSOLETE   {"max", MAX_TOKEN},
+// OBSOLETE   {"min", MIN_TOKEN},
+// OBSOLETE   {"mod", MOD},
+// OBSOLETE   {"rem", REM},
+// OBSOLETE   {"not", NOT},
+// OBSOLETE   {"xor", LOGXOR},
+// OBSOLETE   {"and", LOGAND},
+// OBSOLETE   {"in", IN},
+// OBSOLETE   {"or", LOGIOR},
+// OBSOLETE   {"up", UP},
+// OBSOLETE   {"addr", ADDR_TOKEN},
+// OBSOLETE   {"null", EMPTINESS_LITERAL}
+// OBSOLETE };
+// OBSOLETE 
+// OBSOLETE static const struct token tokentab2[] =
+// OBSOLETE {
+// OBSOLETE   {":=", GDB_ASSIGNMENT},
+// OBSOLETE   {"//", SLASH_SLASH},
+// OBSOLETE   {"->", POINTER},
+// OBSOLETE   {"/=", NOTEQUAL},
+// OBSOLETE   {"<=", LEQ},
+// OBSOLETE   {">=", GEQ}
+// OBSOLETE };
+// OBSOLETE 
+// OBSOLETE /* Read one token, getting characters through lexptr.  */
+// OBSOLETE /* This is where we will check to make sure that the language and the
+// OBSOLETE    operators used are compatible.  */
+// OBSOLETE 
+// OBSOLETE static enum ch_terminal
+// OBSOLETE ch_lex (void)
+// OBSOLETE {
+// OBSOLETE   unsigned int i;
+// OBSOLETE   enum ch_terminal token;
+// OBSOLETE   char *inputname;
+// OBSOLETE   struct symbol *sym;
+// OBSOLETE 
+// OBSOLETE   /* Skip over any leading whitespace. */
+// OBSOLETE   while (isspace (*lexptr))
+// OBSOLETE     {
+// OBSOLETE       lexptr++;
+// OBSOLETE     }
+// OBSOLETE   /* Look for special single character cases which can't be the first
+// OBSOLETE      character of some other multicharacter token. */
+// OBSOLETE   switch (*lexptr)
+// OBSOLETE     {
+// OBSOLETE     case '\0':
+// OBSOLETE       return END_TOKEN;
+// OBSOLETE     case ',':
+// OBSOLETE     case '=':
+// OBSOLETE     case ';':
+// OBSOLETE     case '!':
+// OBSOLETE     case '+':
+// OBSOLETE     case '*':
+// OBSOLETE     case '(':
+// OBSOLETE     case ')':
+// OBSOLETE     case '[':
+// OBSOLETE     case ']':
+// OBSOLETE       return (*lexptr++);
+// OBSOLETE     }
+// OBSOLETE   /* Look for characters which start a particular kind of multicharacter
+// OBSOLETE      token, such as a character literal, register name, convenience
+// OBSOLETE      variable name, string literal, etc. */
+// OBSOLETE   switch (*lexptr)
+// OBSOLETE     {
+// OBSOLETE     case '\'':
+// OBSOLETE     case '\"':
+// OBSOLETE       /* First try to match a string literal, which is any
+// OBSOLETE          sequence of characters enclosed in matching single or double
+// OBSOLETE          quotes, except that a single character inside single quotes
+// OBSOLETE          is a character literal, so we have to catch that case also. */
+// OBSOLETE       token = match_string_literal ();
+// OBSOLETE       if (token != 0)
+// OBSOLETE 	{
+// OBSOLETE 	  return (token);
+// OBSOLETE 	}
+// OBSOLETE       if (*lexptr == '\'')
+// OBSOLETE 	{
+// OBSOLETE 	  token = match_character_literal ();
+// OBSOLETE 	  if (token != 0)
+// OBSOLETE 	    {
+// OBSOLETE 	      return (token);
+// OBSOLETE 	    }
+// OBSOLETE 	}
+// OBSOLETE       break;
+// OBSOLETE     case 'C':
+// OBSOLETE     case 'c':
+// OBSOLETE       token = match_character_literal ();
+// OBSOLETE       if (token != 0)
+// OBSOLETE 	{
+// OBSOLETE 	  return (token);
+// OBSOLETE 	}
+// OBSOLETE       break;
+// OBSOLETE     case '$':
+// OBSOLETE       yylval.sval.ptr = lexptr;
+// OBSOLETE       do
+// OBSOLETE 	{
+// OBSOLETE 	  lexptr++;
+// OBSOLETE 	}
+// OBSOLETE       while (isalnum (*lexptr) || *lexptr == '_' || *lexptr == '$');
+// OBSOLETE       yylval.sval.length = lexptr - yylval.sval.ptr;
+// OBSOLETE       write_dollar_variable (yylval.sval);
+// OBSOLETE       return GDB_VARIABLE;
+// OBSOLETE       break;
+// OBSOLETE     }
+// OBSOLETE   /* See if it is a special token of length 2.  */
+// OBSOLETE   for (i = 0; i < sizeof (tokentab2) / sizeof (tokentab2[0]); i++)
+// OBSOLETE     {
+// OBSOLETE       if (STREQN (lexptr, tokentab2[i].operator, 2))
+// OBSOLETE 	{
+// OBSOLETE 	  lexptr += 2;
+// OBSOLETE 	  return (tokentab2[i].token);
+// OBSOLETE 	}
+// OBSOLETE     }
+// OBSOLETE   /* Look for single character cases which which could be the first
+// OBSOLETE      character of some other multicharacter token, but aren't, or we
+// OBSOLETE      would already have found it. */
+// OBSOLETE   switch (*lexptr)
+// OBSOLETE     {
+// OBSOLETE     case '-':
+// OBSOLETE     case ':':
+// OBSOLETE     case '/':
+// OBSOLETE     case '<':
+// OBSOLETE     case '>':
+// OBSOLETE       return (*lexptr++);
+// OBSOLETE     }
+// OBSOLETE   /* Look for a float literal before looking for an integer literal, so
+// OBSOLETE      we match as much of the input stream as possible. */
+// OBSOLETE   token = match_float_literal ();
+// OBSOLETE   if (token != 0)
+// OBSOLETE     {
+// OBSOLETE       return (token);
+// OBSOLETE     }
+// OBSOLETE   token = match_bitstring_literal ();
+// OBSOLETE   if (token != 0)
+// OBSOLETE     {
+// OBSOLETE       return (token);
+// OBSOLETE     }
+// OBSOLETE   token = match_integer_literal ();
+// OBSOLETE   if (token != 0)
+// OBSOLETE     {
+// OBSOLETE       return (token);
+// OBSOLETE     }
+// OBSOLETE 
+// OBSOLETE   /* Try to match a simple name string, and if a match is found, then
+// OBSOLETE      further classify what sort of name it is and return an appropriate
+// OBSOLETE      token.  Note that attempting to match a simple name string consumes
+// OBSOLETE      the token from lexptr, so we can't back out if we later find that
+// OBSOLETE      we can't classify what sort of name it is. */
+// OBSOLETE 
+// OBSOLETE   inputname = match_simple_name_string ();
+// OBSOLETE 
+// OBSOLETE   if (inputname != NULL)
+// OBSOLETE     {
+// OBSOLETE       char *simplename = (char *) alloca (strlen (inputname) + 1);
+// OBSOLETE 
+// OBSOLETE       char *dptr = simplename, *sptr = inputname;
+// OBSOLETE       for (; *sptr; sptr++)
+// OBSOLETE 	*dptr++ = isupper (*sptr) ? tolower (*sptr) : *sptr;
+// OBSOLETE       *dptr = '\0';
+// OBSOLETE 
+// OBSOLETE       /* See if it is a reserved identifier. */
+// OBSOLETE       for (i = 0; i < sizeof (idtokentab) / sizeof (idtokentab[0]); i++)
+// OBSOLETE 	{
+// OBSOLETE 	  if (STREQ (simplename, idtokentab[i].operator))
+// OBSOLETE 	    {
+// OBSOLETE 	      return (idtokentab[i].token);
+// OBSOLETE 	    }
+// OBSOLETE 	}
+// OBSOLETE 
+// OBSOLETE       /* Look for other special tokens. */
+// OBSOLETE       if (STREQ (simplename, "true"))
+// OBSOLETE 	{
+// OBSOLETE 	  yylval.ulval = 1;
+// OBSOLETE 	  return (BOOLEAN_LITERAL);
+// OBSOLETE 	}
+// OBSOLETE       if (STREQ (simplename, "false"))
+// OBSOLETE 	{
+// OBSOLETE 	  yylval.ulval = 0;
+// OBSOLETE 	  return (BOOLEAN_LITERAL);
+// OBSOLETE 	}
+// OBSOLETE 
+// OBSOLETE       sym = lookup_symbol (inputname, expression_context_block,
+// OBSOLETE 			   VAR_NAMESPACE, (int *) NULL,
+// OBSOLETE 			   (struct symtab **) NULL);
+// OBSOLETE       if (sym == NULL && strcmp (inputname, simplename) != 0)
+// OBSOLETE 	{
+// OBSOLETE 	  sym = lookup_symbol (simplename, expression_context_block,
+// OBSOLETE 			       VAR_NAMESPACE, (int *) NULL,
+// OBSOLETE 			       (struct symtab **) NULL);
+// OBSOLETE 	}
+// OBSOLETE       if (sym != NULL)
+// OBSOLETE 	{
+// OBSOLETE 	  yylval.ssym.stoken.ptr = NULL;
+// OBSOLETE 	  yylval.ssym.stoken.length = 0;
+// OBSOLETE 	  yylval.ssym.sym = sym;
+// OBSOLETE 	  yylval.ssym.is_a_field_of_this = 0;	/* FIXME, C++'ism */
+// OBSOLETE 	  switch (SYMBOL_CLASS (sym))
+// OBSOLETE 	    {
+// OBSOLETE 	    case LOC_BLOCK:
+// OBSOLETE 	      /* Found a procedure name. */
+// OBSOLETE 	      return (GENERAL_PROCEDURE_NAME);
+// OBSOLETE 	    case LOC_STATIC:
+// OBSOLETE 	      /* Found a global or local static variable. */
+// OBSOLETE 	      return (LOCATION_NAME);
+// OBSOLETE 	    case LOC_REGISTER:
+// OBSOLETE 	    case LOC_ARG:
+// OBSOLETE 	    case LOC_REF_ARG:
+// OBSOLETE 	    case LOC_REGPARM:
+// OBSOLETE 	    case LOC_REGPARM_ADDR:
+// OBSOLETE 	    case LOC_LOCAL:
+// OBSOLETE 	    case LOC_LOCAL_ARG:
+// OBSOLETE 	    case LOC_BASEREG:
+// OBSOLETE 	    case LOC_BASEREG_ARG:
+// OBSOLETE 	      if (innermost_block == NULL
+// OBSOLETE 		  || contained_in (block_found, innermost_block))
+// OBSOLETE 		{
+// OBSOLETE 		  innermost_block = block_found;
+// OBSOLETE 		}
+// OBSOLETE 	      return (LOCATION_NAME);
+// OBSOLETE 	      break;
+// OBSOLETE 	    case LOC_CONST:
+// OBSOLETE 	    case LOC_LABEL:
+// OBSOLETE 	      return (LOCATION_NAME);
+// OBSOLETE 	      break;
+// OBSOLETE 	    case LOC_TYPEDEF:
+// OBSOLETE 	      yylval.tsym.type = SYMBOL_TYPE (sym);
+// OBSOLETE 	      return TYPENAME;
+// OBSOLETE 	    case LOC_UNDEF:
+// OBSOLETE 	    case LOC_CONST_BYTES:
+// OBSOLETE 	    case LOC_OPTIMIZED_OUT:
+// OBSOLETE 	      error ("Symbol \"%s\" names no location.", inputname);
+// OBSOLETE 	      break;
+// OBSOLETE 	    default:
+// OBSOLETE 	      internal_error (__FILE__, __LINE__,
+// OBSOLETE 			      "unhandled SYMBOL_CLASS in ch_lex()");
+// OBSOLETE 	      break;
+// OBSOLETE 	    }
+// OBSOLETE 	}
+// OBSOLETE       else if (!have_full_symbols () && !have_partial_symbols ())
+// OBSOLETE 	{
+// OBSOLETE 	  error ("No symbol table is loaded.  Use the \"file\" command.");
+// OBSOLETE 	}
+// OBSOLETE       else
+// OBSOLETE 	{
+// OBSOLETE 	  error ("No symbol \"%s\" in current context.", inputname);
+// OBSOLETE 	}
+// OBSOLETE     }
+// OBSOLETE 
+// OBSOLETE   /* Catch single character tokens which are not part of some
+// OBSOLETE      longer token. */
+// OBSOLETE 
+// OBSOLETE   switch (*lexptr)
+// OBSOLETE     {
+// OBSOLETE     case '.':			/* Not float for example. */
+// OBSOLETE       lexptr++;
+// OBSOLETE       while (isspace (*lexptr))
+// OBSOLETE 	lexptr++;
+// OBSOLETE       inputname = match_simple_name_string ();
+// OBSOLETE       if (!inputname)
+// OBSOLETE 	return '.';
+// OBSOLETE       return DOT_FIELD_NAME;
+// OBSOLETE     }
+// OBSOLETE 
+// OBSOLETE   return (ILLEGAL_TOKEN);
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE static void
+// OBSOLETE write_lower_upper_value (enum exp_opcode opcode,	/* Either UNOP_LOWER or UNOP_UPPER */
+// OBSOLETE 			 struct type *type)
+// OBSOLETE {
+// OBSOLETE   if (type == NULL)
+// OBSOLETE     write_exp_elt_opcode (opcode);
+// OBSOLETE   else
+// OBSOLETE     {
+// OBSOLETE       struct type *result_type;
+// OBSOLETE       LONGEST val = type_lower_upper (opcode, type, &result_type);
+// OBSOLETE       write_exp_elt_opcode (OP_LONG);
+// OBSOLETE       write_exp_elt_type (result_type);
+// OBSOLETE       write_exp_elt_longcst (val);
+// OBSOLETE       write_exp_elt_opcode (OP_LONG);
+// OBSOLETE     }
+// OBSOLETE }
+// OBSOLETE 
+// OBSOLETE void
+// OBSOLETE chill_error (char *msg)
+// OBSOLETE {
+// OBSOLETE   /* Never used. */
+// OBSOLETE }

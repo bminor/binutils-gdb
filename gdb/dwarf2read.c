@@ -658,6 +658,10 @@ static struct complaint dwarf2_macro_spaces_in_definition =
 {
   "macro definition contains spaces in formal argument list:\n`%s'", 0, 0
 };
+static struct complaint dwarf2_invalid_attrib_class =
+{
+  "invalid attribute class or form for '%s' in '%s'", 0, 0
+};
 
 /* local function prototypes */
 
@@ -799,8 +803,7 @@ static void dwarf2_attach_fields_to_type (struct field_info *,
 					  struct type *, struct objfile *);
 
 static void dwarf2_add_member_fn (struct field_info *,
-				  struct die_info *, struct type *,
-				  struct objfile *objfile,
+				  struct die_info *, struct objfile *objfile,
 				  const struct comp_unit_head *);
 
 static void dwarf2_attach_fn_fields_to_type (struct field_info *,
@@ -907,6 +910,8 @@ static void dwarf_decode_macros (struct line_header *, unsigned int,
                                  char *, bfd *, const struct comp_unit_head *,
                                  struct objfile *);
 
+static int attr_form_is_block (struct attribute *);
+
 /* Try to locate the sections we need for DWARF 2 debugging
    information and return true if we have enough to do something.  */
 
@@ -1004,9 +1009,13 @@ dwarf2_build_psymtabs (struct objfile *objfile, int mainline)
   dwarf_abbrev_buffer = dwarf2_read_section (objfile,
 					     dwarf_abbrev_offset,
 					     dwarf_abbrev_size);
-  dwarf_line_buffer = dwarf2_read_section (objfile,
-					   dwarf_line_offset,
-					   dwarf_line_size);
+
+  if (dwarf_line_offset)
+    dwarf_line_buffer = dwarf2_read_section (objfile,
+					     dwarf_line_offset,
+					     dwarf_line_size);
+  else
+    dwarf_line_buffer = NULL;
 
   if (dwarf_str_offset)
     dwarf_str_buffer = dwarf2_read_section (objfile,
@@ -1803,7 +1812,7 @@ read_file_scope (struct die_info *die, struct objfile *objfile,
      header, so we can only read it if we've read the header
      successfully.  */
   attr = dwarf_attr (die, DW_AT_macro_info);
-  if (attr)
+  if (attr && line_header)
     {
       unsigned int macro_offset = DW_UNSND (attr);
       dwarf_decode_macros (line_header, macro_offset,
@@ -1871,7 +1880,24 @@ read_func_scope (struct die_info *die, struct objfile *objfile,
   attr = dwarf_attr (die, DW_AT_frame_base);
   if (attr)
     {
-      CORE_ADDR addr = decode_locdesc (DW_BLOCK (attr), objfile, cu_header);
+      CORE_ADDR addr;
+
+      /* Support the .debug_loc offsets */
+      if (attr_form_is_block (attr))
+        {
+          addr = decode_locdesc (DW_BLOCK (attr), objfile, cu_header);
+        }
+      else if (attr->form == DW_FORM_data4 || attr->form == DW_FORM_data8)
+        {
+          complain (&dwarf2_complex_location_expr);
+          addr = 0;
+        }
+      else
+        {
+          complain (&dwarf2_invalid_attrib_class, "DW_AT_frame_base", name);
+          addr = 0;
+        }
+    
       if (isderef)
 	complain (&dwarf2_unsupported_at_frame_base, name);
       else if (isreg)
@@ -2233,7 +2259,7 @@ dwarf2_attach_fields_to_type (struct field_info *fip, struct type *type,
 
 static void
 dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
-		      struct type *type, struct objfile *objfile,
+		      struct objfile *objfile,
 		      const struct comp_unit_head *cu_header)
 {
   struct attribute *attr;
@@ -2299,23 +2325,13 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
   if (die->type && TYPE_CODE (die->type) == TYPE_CODE_FUNC)
     {
       struct type *return_type = TYPE_TARGET_TYPE (die->type);
-      struct type **arg_types;
       int nparams = TYPE_NFIELDS (die->type);
-      int iparams;
 
-      /* Copy argument types from the subroutine type.  */
-      arg_types = (struct type **)
-	TYPE_ALLOC (fnp->type, (nparams + 1) * sizeof (struct type *));
-      for (iparams = 0; iparams < nparams; iparams++)
-	arg_types[iparams] = TYPE_FIELD_TYPE (die->type, iparams);
-
-      /* Set last entry in argument type vector.  */
-      if (TYPE_VARARGS (die->type))
-	arg_types[nparams] = NULL;
-      else
-	arg_types[nparams] = dwarf2_fundamental_type (objfile, FT_VOID);
-
-      smash_to_method_type (fnp->type, type, return_type, arg_types);
+      smash_to_method_type (fnp->type, die->type,
+			    TYPE_TARGET_TYPE (die->type),
+			    TYPE_FIELDS (die->type),
+			    TYPE_NFIELDS (die->type),
+			    TYPE_VARARGS (die->type));
 
       /* Handle static member functions.
          Dwarf2 has no clean way to discern C++ static and non-static
@@ -2359,7 +2375,22 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
   /* Get index in virtual function table if it is a virtual member function.  */
   attr = dwarf_attr (die, DW_AT_vtable_elem_location);
   if (attr)
-    fnp->voffset = decode_locdesc (DW_BLOCK (attr), objfile, cu_header) + 2;
+    {
+      /* Support the .debug_loc offsets */
+      if (attr_form_is_block (attr))
+        {
+          fnp->voffset = decode_locdesc (DW_BLOCK (attr), objfile, cu_header) + 2;
+        }
+      else if (attr->form == DW_FORM_data4 || attr->form == DW_FORM_data8)
+        {
+          complain (&dwarf2_complex_location_expr);
+        }
+      else
+        {
+          complain (&dwarf2_invalid_attrib_class, "DW_AT_vtable_elem_location",
+                    fieldname);
+        }
+   }
 }
 
 /* Create the vector of member function fields, and attach it to the type.  */
@@ -2485,7 +2516,7 @@ read_structure_scope (struct die_info *die, struct objfile *objfile,
 	    {
 	      /* C++ member function. */
 	      process_die (child_die, objfile, cu_header);
-	      dwarf2_add_member_fn (&fi, child_die, type, objfile, cu_header);
+	      dwarf2_add_member_fn (&fi, child_die, objfile, cu_header);
 	    }
 	  else if (child_die->tag == DW_TAG_inheritance)
 	    {
@@ -2823,7 +2854,20 @@ read_common_block (struct die_info *die, struct objfile *objfile,
   attr = dwarf_attr (die, DW_AT_location);
   if (attr)
     {
-      base = decode_locdesc (DW_BLOCK (attr), objfile, cu_header);
+      /* Support the .debug_loc offsets */
+      if (attr_form_is_block (attr))
+        {
+          base = decode_locdesc (DW_BLOCK (attr), objfile, cu_header);
+        }
+      else if (attr->form == DW_FORM_data4 || attr->form == DW_FORM_data8)
+        {
+          complain (&dwarf2_complex_location_expr);
+        }
+      else
+        {
+          complain (&dwarf2_invalid_attrib_class, "DW_AT_location",
+                    "common block member");
+        }
     }
   if (die->has_children)
     {
@@ -3469,7 +3513,20 @@ read_partial_die (struct partial_die_info *part_die, bfd *abfd,
 	  part_die->highpc = DW_ADDR (&attr);
 	  break;
 	case DW_AT_location:
-	  part_die->locdesc = DW_BLOCK (&attr);
+          /* Support the .debug_loc offsets */
+          if (attr_form_is_block (&attr))
+            {
+	       part_die->locdesc = DW_BLOCK (&attr);
+            }
+          else if (attr.form == DW_FORM_data4 || attr.form == DW_FORM_data8)
+            {
+              complain (&dwarf2_complex_location_expr);
+            }
+          else
+            {
+              complain (&dwarf2_invalid_attrib_class, "DW_AT_location",
+                        "partial symbol information");
+            }
 	  break;
 	case DW_AT_language:
 	  part_die->language = DW_UNSND (&attr);
@@ -3810,11 +3867,24 @@ read_address (bfd *abfd, char *buf, const struct comp_unit_head *cu_header,
   return retval;
 }
 
-/* Reads the initial length from a section.  The (draft) DWARF 2.1
+/* Read the initial length from a section.  The (draft) DWARF 3
    specification allows the initial length to take up either 4 bytes
    or 12 bytes.  If the first 4 bytes are 0xffffffff, then the next 8
    bytes describe the length and all offsets will be 8 bytes in length
    instead of 4.
+
+   An older, non-standard 64-bit format is also handled by this
+   function.  The older format in question stores the initial length
+   as an 8-byte quantity without an escape value.  Lengths greater
+   than 2^32 aren't very common which means that the initial 4 bytes
+   is almost always zero.  Since a length value of zero doesn't make
+   sense for the 32-bit format, this initial zero can be considered to
+   be an escape value which indicates the presence of the older 64-bit
+   format.  As written, the code can't detect (old format) lengths
+   greater than 4GB.  If it becomes necessary to handle lengths somewhat
+   larger than 4GB, we could allow other small values (such as the
+   non-sensical values of 1, 2, and 3) to also be used as escape values
+   indicating the presence of the old format.
 
    The value returned via bytes_read should be used to increment
    the relevant pointer after calling read_initial_length().
@@ -3826,14 +3896,18 @@ read_address (bfd *abfd, char *buf, const struct comp_unit_head *cu_header,
    
    [ Note:  read_initial_length() and read_offset() are based on the
      document entitled "DWARF Debugging Information Format", revision
-     2.1, draft 4, dated July 20, 2000.  This document was obtained
+     3, draft 8, dated November 19, 2001.  This document was obtained
      from:
 
-	http://reality.sgi.com/dehnert_engr/dwarf/dwarf2p1-draft4-000720.pdf
+	http://reality.sgiweb.org/davea/dwarf3-draft8-011125.pdf
      
      This document is only a draft and is subject to change.  (So beware.)
 
-     - Kevin, Aug 4, 2000
+     Details regarding the older, non-standard 64-bit format were
+     determined empirically by examining 64-bit ELF files produced
+     by the SGI toolchain on an IRIX 6.5 machine.
+
+     - Kevin, July 16, 2002
    ] */
 
 static LONGEST
@@ -3851,6 +3925,18 @@ read_initial_length (bfd *abfd, char *buf, struct comp_unit_head *cu_header,
       if (cu_header != NULL)
 	{
 	  cu_header->initial_length_size = 12;
+	  cu_header->offset_size = 8;
+	}
+    }
+  else if (retval == 0)
+    {
+      /* Handle (non-standard) 64-bit DWARF2 formats such as that used
+         by IRIX.  */
+      retval = bfd_get_64 (abfd, (bfd_byte *) buf);
+      *bytes_read = 8;
+      if (cu_header != NULL)
+	{
+	  cu_header->initial_length_size = 8;
 	  cu_header->offset_size = 8;
 	}
     }
@@ -4028,6 +4114,7 @@ set_cu_language (unsigned int lang)
       cu_language = language_java;
       break;
     case DW_LANG_Ada83:
+    case DW_LANG_Ada95:
     case DW_LANG_Cobol74:
     case DW_LANG_Cobol85:
     case DW_LANG_Pascal83:
@@ -4533,7 +4620,7 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
   char *name;
   struct attribute *attr = NULL;
   struct attribute *attr2 = NULL;
-  CORE_ADDR addr;
+  CORE_ADDR addr = 0;
 
   name = dwarf2_linkage_name (die);
   if (name)
@@ -4617,8 +4704,22 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
 	      attr2 = dwarf_attr (die, DW_AT_external);
 	      if (attr2 && (DW_UNSND (attr2) != 0))
 		{
-		  SYMBOL_VALUE_ADDRESS (sym) =
-		    decode_locdesc (DW_BLOCK (attr), objfile, cu_header);
+                  /* Support the .debug_loc offsets */
+                  if (attr_form_is_block (attr))
+                    {
+		      SYMBOL_VALUE_ADDRESS (sym) =
+		        decode_locdesc (DW_BLOCK (attr), objfile, cu_header);
+                    }
+                  else if (attr->form == DW_FORM_data4
+                           || attr->form == DW_FORM_data8)
+                    {
+                      complain (&dwarf2_complex_location_expr);
+                    }
+                  else
+                    {
+                      complain (&dwarf2_invalid_attrib_class, "DW_AT_location",
+                                "external variable");
+                    }
 		  add_symbol_to_list (sym, &global_symbols);
 
 		  /* In shared libraries the address of the variable
@@ -4641,8 +4742,23 @@ new_symbol (struct die_info *die, struct type *type, struct objfile *objfile,
 		}
 	      else
 		{
-		  SYMBOL_VALUE (sym) = addr =
-		    decode_locdesc (DW_BLOCK (attr), objfile, cu_header);
+                  /* Support the .debug_loc offsets */
+                  if (attr_form_is_block (attr))
+                    {
+		      SYMBOL_VALUE (sym) = addr =
+		        decode_locdesc (DW_BLOCK (attr), objfile, cu_header);
+                    }
+                  else if (attr->form == DW_FORM_data4
+                           || attr->form == DW_FORM_data8)
+                    {
+                      complain (&dwarf2_complex_location_expr);
+                    }
+                  else
+                    {
+                      complain (&dwarf2_invalid_attrib_class, "DW_AT_location",
+                                "external variable");
+                      addr = 0;
+                    }
 		  add_symbol_to_list (sym, list_in_scope);
 		  if (optimized_out)
 		    {
@@ -6246,12 +6362,6 @@ decode_locdesc (struct dwarf_block *blk, struct objfile *objfile,
 	  isreg = 1;
 	  unsnd = read_unsigned_leb128 (NULL, (data + i), &bytes_read);
 	  i += bytes_read;
-#if defined(HARRIS_TARGET) && defined(_M88K)
-	  /* The Harris 88110 gdb ports have long kept their special reg
-	     numbers between their gp-regs and their x-regs.  This is
-	     not how our dwarf is generated.  Punt. */
-	  unsnd += 6;
-#endif
 	  stack[++stacki] = unsnd;
 	  break;
 
@@ -6493,7 +6603,7 @@ macro_start_file (int file, int line,
      at all until we actually get a filename.  */
   if (! pending_macros)
     pending_macros = new_macro_table (&objfile->symbol_obstack,
-                                      &objfile->macro_cache);
+                                      objfile->macro_cache);
 
   if (! current_file)
     /* If we have no current file, then this must be the start_file
@@ -6810,4 +6920,16 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
           break;
         }
     }
+}
+
+/* Check if the attribute's form is a DW_FORM_block*
+   if so return true else false. */
+static int
+attr_form_is_block (struct attribute *attr)
+{
+  return (attr == NULL ? 0 :
+      attr->form == DW_FORM_block1
+      || attr->form == DW_FORM_block2
+      || attr->form == DW_FORM_block4
+      || attr->form == DW_FORM_block);
 }

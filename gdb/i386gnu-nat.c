@@ -99,7 +99,7 @@ void
 supply_gregset (gdb_gregset_t *gregs)
 {
   int i;
-  for (i = 0; i < NUM_GREGS; i++)
+  for (i = 0; i < I386_NUM_GREGS; i++)
     supply_register (i, REG_ADDR (gregs, i));
 }
 
@@ -124,7 +124,7 @@ gnu_fetch_registers (int regno)
     error ("Can't fetch registers from thread %d: No such thread",
 	   PIDGET (inferior_ptid));
 
-  if (regno < NUM_GREGS || regno == -1)
+  if (regno < I386_NUM_GREGS || regno == -1)
     {
       thread_state_t state;
 
@@ -143,7 +143,7 @@ gnu_fetch_registers (int regno)
 
 	  proc_debug (thread, "fetching all register");
 
-	  for (i = 0; i < NUM_GREGS; i++)
+	  for (i = 0; i < I386_NUM_GREGS; i++)
 	    supply_register (i, REG_ADDR (state, i));
 	  thread->fetched_regs = ~0;
 	}
@@ -156,7 +156,7 @@ gnu_fetch_registers (int regno)
 	}
     }
 
-  if (regno >= NUM_GREGS || regno == -1)
+  if (regno >= I386_NUM_GREGS || regno == -1)
     {
       proc_debug (thread, "fetching floating-point registers");
 
@@ -211,7 +211,7 @@ gnu_store_registers (int regno)
     error ("Couldn't store registers into thread %d: No such thread",
 	   PIDGET (inferior_ptid));
 
-  if (regno < NUM_GREGS || regno == -1)
+  if (regno < I386_NUM_GREGS || regno == -1)
     {
       thread_state_t state;
       thread_state_data_t old_state;
@@ -238,7 +238,7 @@ gnu_store_registers (int regno)
 	{
 	  int check_regno;
 
-	  for (check_regno = 0; check_regno < NUM_GREGS; check_regno++)
+	  for (check_regno = 0; check_regno < I386_NUM_GREGS; check_regno++)
 	    if ((thread->fetched_regs & (1 << check_regno))
 		&& memcpy (REG_ADDR (&old_state, check_regno),
 			   REG_ADDR (state, check_regno),
@@ -265,7 +265,7 @@ gnu_store_registers (int regno)
 
 	  proc_debug (thread, "storing all registers");
 
-	  for (i = 0; i < NUM_GREGS; i++)
+	  for (i = 0; i < I386_NUM_GREGS; i++)
 	    if (register_valid[i])
 	      fill (state, i);
 	}
@@ -284,7 +284,7 @@ gnu_store_registers (int regno)
 
 #undef fill
 
-  if (regno >= NUM_GREGS || regno == -1)
+  if (regno >= I386_NUM_GREGS || regno == -1)
     {
       proc_debug (thread, "storing floating-point registers");
 

@@ -125,7 +125,7 @@ extern CORE_ADDR mn10200_frame_saved_pc (struct frame_info *);
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF.  */
 
-#define EXTRACT_RETURN_VALUE(TYPE, REGBUF, VALBUF) \
+#define DEPRECATED_EXTRACT_RETURN_VALUE(TYPE, REGBUF, VALBUF) \
   { \
     if (TYPE_LENGTH (TYPE) > 8) \
       internal_error (__FILE__, __LINE__, "failed internal consistency check"); \
@@ -144,11 +144,11 @@ extern CORE_ADDR mn10200_frame_saved_pc (struct frame_info *);
       } \
   }
 
-#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
+#define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
   extract_address (REGBUF + REGISTER_BYTE (4), \
 		   REGISTER_RAW_SIZE (4))
 
-#define STORE_RETURN_VALUE(TYPE, VALBUF) \
+#define DEPRECATED_STORE_RETURN_VALUE(TYPE, VALBUF) \
   { \
     if (TYPE_LENGTH (TYPE) > 8) \
       internal_error (__FILE__, __LINE__, "failed internal consistency check"); \
@@ -197,9 +197,8 @@ extern CORE_ADDR mn10200_push_return_address (CORE_ADDR, CORE_ADDR);
 
 #define PUSH_DUMMY_FRAME	generic_push_dummy_frame ()
 
-extern CORE_ADDR
-mn10200_push_arguments (int, struct value **, CORE_ADDR,
-			unsigned char, CORE_ADDR);
+extern CORE_ADDR mn10200_push_arguments (int, struct value **, CORE_ADDR,
+					 unsigned char, CORE_ADDR);
 #define PUSH_ARGUMENTS(NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR) \
   (mn10200_push_arguments (NARGS, ARGS, SP, STRUCT_RETURN, STRUCT_ADDR))
 
@@ -214,7 +213,7 @@ extern use_struct_convention_fn mn10200_use_struct_convention;
 /* Override the default get_saved_register function with
    one that takes account of generic CALL_DUMMY frames.  */
 #define GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) \
-      generic_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
+      generic_unwind_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
 
 /* Define this for Wingdb */
 #define TARGET_MN10200

@@ -51,14 +51,6 @@ typedef enum cmd_types
   }
 cmd_types;
 
-/* Reasonable values for an AUTO_BOOLEAN variable. */
-enum cmd_auto_boolean
-{
-  CMD_AUTO_BOOLEAN_TRUE,
-  CMD_AUTO_BOOLEAN_FALSE,
-  CMD_AUTO_BOOLEAN_AUTO
-};
-
 /* Types of "set" or "show" command.  */
 typedef enum var_types
   {
@@ -67,9 +59,9 @@ typedef enum var_types
     var_boolean,
 
     /* "on" / "true" / "enable" or "off" / "false" / "disable" or
-       "auto.  *VAR is an ``enum cmd_auto_boolean''.  NOTE: In general
-       a custom show command will need to be implemented - one that
-       for "auto" prints both the "auto" and the current auto-selected
+       "auto.  *VAR is an ``enum auto_boolean''.  NOTE: In general a
+       custom show command will need to be implemented - one that for
+       "auto" prints both the "auto" and the current auto-selected
        value. */
     var_auto_boolean,
 
@@ -132,12 +124,14 @@ extern struct cmd_list_element *add_abbrev_prefix_cmd (char *,
 
 /* Set the commands corresponding callback.  */
 
+typedef void cmd_cfunc_ftype (char *args, int from_tty);
 extern void set_cmd_cfunc (struct cmd_list_element *cmd,
-			   void (*cfunc) (char *args, int from_tty));
+			   cmd_cfunc_ftype *cfunc);
 
+typedef void cmd_sfunc_ftype (char *args, int from_tty,
+			      struct cmd_list_element *c);
 extern void set_cmd_sfunc (struct cmd_list_element *cmd,
-			   void (*sfunc) (char *args, int from_tty,
-					  struct cmd_list_element * c));
+			   cmd_sfunc_ftype *sfunc);
 
 extern void set_cmd_completer (struct cmd_list_element *cmd,
 			       char **(*completer) (char *text, char *word));
@@ -216,6 +210,26 @@ extern void help_list (struct cmd_list_element *, char *,
 extern void help_cmd_list (struct cmd_list_element *, enum command_class,
 			   char *, int, struct ui_file *);
 
+extern void add_setshow_cmd (char *name,
+			     enum command_class class,
+			     var_types var_type, void *var,
+			     char *set_doc, char *show_doc,
+			     cmd_sfunc_ftype *set_func,
+			     cmd_sfunc_ftype *show_func,
+			     struct cmd_list_element **set_list,
+			     struct cmd_list_element **show_list);
+
+extern void add_setshow_cmd_full (char *name,
+				  enum command_class class,
+				  var_types var_type, void *var,
+				  char *set_doc, char *show_doc,
+				  cmd_sfunc_ftype *set_func,
+				  cmd_sfunc_ftype *show_func,
+				  struct cmd_list_element **set_list,
+				  struct cmd_list_element **show_list,
+				  struct cmd_list_element **set_result,
+				  struct cmd_list_element **show_result);
+
 extern struct cmd_list_element *add_set_cmd (char *name, enum
 					     command_class class,
 					     var_types var_type, void *var,
@@ -229,17 +243,24 @@ extern struct cmd_list_element *add_set_enum_cmd (char *name,
 						  char *doc,
 						  struct cmd_list_element **list);
 
-extern struct cmd_list_element *add_set_auto_boolean_cmd (char *name,
-							  enum command_class class,
-							  enum cmd_auto_boolean *var,
-							  char *doc,
-							  struct cmd_list_element **list);
+extern void add_setshow_auto_boolean_cmd (char *name,
+					  enum command_class class,
+					  enum auto_boolean *var,
+					  char *set_doc, char *show_doc,
+					  cmd_sfunc_ftype *set_func,
+					  cmd_sfunc_ftype *show_func,
+					  struct cmd_list_element **set_list,
+					  struct cmd_list_element **show_list);
 
-extern struct cmd_list_element *add_set_boolean_cmd (char *name,
-						     enum command_class class,
-						     int *var,
-						     char *doc,
-						     struct cmd_list_element **list);
+extern void add_setshow_boolean_cmd (char *name,
+				     enum command_class class,
+				     int *var,
+				     char *set_doc,
+				     char *show_doc,
+				     cmd_sfunc_ftype *set_func,
+				     cmd_sfunc_ftype *show_func,
+				     struct cmd_list_element **set_list,
+				     struct cmd_list_element **show_list);
 
 extern struct cmd_list_element *add_show_from_set (struct cmd_list_element *,
 						   struct cmd_list_element
@@ -258,5 +279,11 @@ extern void dont_repeat (void);
    as a class of commands.  */
 
 extern void not_just_help_class_command (char *, int);
+
+/* check function pointer */
+extern int cmd_func_p (struct cmd_list_element *cmd);
+
+/* call the command function */
+extern void cmd_func (struct cmd_list_element *cmd, char *args, int from_tty);
 
 #endif /* !defined (COMMAND_H) */

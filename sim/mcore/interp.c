@@ -24,9 +24,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <sys/param.h>
 #include <netinet/in.h>	/* for byte ordering macros */
 #include "bfd.h"
-#include "callback.h"
+#include "gdb/callback.h"
 #include "libiberty.h"
-#include "remote-sim.h"
+#include "gdb/remote-sim.h"
 
 #ifndef NUM_ELEM
 #define NUM_ELEM(A) (sizeof (A) / sizeof (A)[0])

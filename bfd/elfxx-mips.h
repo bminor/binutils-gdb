@@ -25,7 +25,7 @@ extern void _bfd_mips_elf_symbol_processing
 extern boolean _bfd_mips_elf_section_processing
   PARAMS ((bfd *, Elf_Internal_Shdr *));
 extern boolean _bfd_mips_elf_section_from_shdr
-  PARAMS ((bfd *, Elf_Internal_Shdr *, char *));
+  PARAMS ((bfd *, Elf_Internal_Shdr *, const char *));
 extern boolean _bfd_mips_elf_fake_sections
   PARAMS ((bfd *, Elf_Internal_Shdr *, asection *));
 extern boolean _bfd_mips_elf_section_from_bfd_section
@@ -62,15 +62,18 @@ extern int _bfd_mips_elf_additional_program_headers
 extern boolean _bfd_mips_elf_modify_segment_map
   PARAMS ((bfd *));
 extern asection * _bfd_mips_elf_gc_mark_hook
-  PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Rela *,
+  PARAMS ((asection *, struct bfd_link_info *, Elf_Internal_Rela *,
 	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
 extern boolean _bfd_mips_elf_gc_sweep_hook
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   const Elf_Internal_Rela *));
 extern void _bfd_mips_elf_copy_indirect_symbol
-  PARAMS ((struct elf_link_hash_entry *, struct elf_link_hash_entry *));
+  PARAMS ((struct elf_backend_data *, struct elf_link_hash_entry *,
+	   struct elf_link_hash_entry *));
 extern void _bfd_mips_elf_hide_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *, boolean));
+extern boolean _bfd_mips_elf_ignore_discarded_relocs
+  PARAMS ((asection *));
 extern boolean _bfd_mips_elf_find_nearest_line
   PARAMS ((bfd *, asection *, asymbol **, bfd_vma, const char **,
 	   const char **, unsigned int *));
@@ -89,6 +92,10 @@ extern boolean _bfd_mips_elf_set_private_flags
   PARAMS ((bfd *, flagword));
 extern boolean _bfd_mips_elf_print_private_bfd_data
   PARAMS ((bfd *, PTR));
+extern boolean _bfd_mips_elf_discard_info
+  PARAMS ((bfd *, struct elf_reloc_cookie *, struct bfd_link_info *));
+extern boolean _bfd_mips_elf_write_section
+  PARAMS ((bfd *, asection *, bfd_byte *));
 
 extern boolean _bfd_mips_elf_read_ecoff_info
   PARAMS ((bfd *, asection *, struct ecoff_debug_info *));

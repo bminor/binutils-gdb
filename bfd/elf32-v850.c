@@ -1,5 +1,5 @@
 /* V850-specific support for 32-bit ELF
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -79,12 +79,12 @@ static boolean v850_elf_link_output_symbol_hook
   PARAMS ((bfd *, struct bfd_link_info *, const char *,
 	   Elf_Internal_Sym *, asection *));
 static boolean v850_elf_section_from_shdr
-  PARAMS ((bfd *, Elf_Internal_Shdr *, char *));
+  PARAMS ((bfd *, Elf_Internal_Shdr *, const char *));
 static boolean v850_elf_gc_sweep_hook
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
 	   const Elf_Internal_Rela *));
 static asection * v850_elf_gc_mark_hook
-  PARAMS ((bfd *, struct bfd_link_info *,
+  PARAMS ((asection *, struct bfd_link_info *,
 	   Elf_Internal_Rela *, struct elf_link_hash_entry *,
 	   Elf_Internal_Sym *));
 
@@ -1322,7 +1322,7 @@ v850_elf_reloc (abfd, reloc, symbol, data, isection, obfd, err)
 		nop
 	foo:
         	nop      */
-  if (reloc->howto->pc_relative == true)
+  if (reloc->howto->pc_relative)
     {
       /* Here the variable relocation holds the final address of the
 	 symbol we are relocating against, plus any addend.  */
@@ -1529,6 +1529,9 @@ v850_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Rela *           rel;
   Elf_Internal_Rela *           relend;
 
+  if (info->relocateable)
+    return true;
+
   symtab_hdr = & elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
 
@@ -1566,28 +1569,8 @@ v850_elf_relocate_section (output_bfd, info, input_bfd, input_section,
           || r_type == R_V850_GNU_VTINHERIT)
         continue;
 
-      howto = v850_elf_howto_table + r_type;
-
-      if (info->relocateable)
-	{
-	  /* This is a relocateable link.  We don't have to change
-             anything, unless the reloc is against a section symbol,
-             in which case we have to adjust according to where the
-             section symbol winds up in the output section.  */
-	  if (r_symndx < symtab_hdr->sh_info)
-	    {
-	      sym = local_syms + r_symndx;
-	      if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
-		{
-		  sec = local_sections[r_symndx];
-		  rel->r_addend += sec->output_offset + sym->st_value;
-		}
-	    }
-
-	  continue;
-	}
-
       /* This is a final link.  */
+      howto = v850_elf_howto_table + r_type;
       h = NULL;
       sym = NULL;
       sec = NULL;
@@ -1740,8 +1723,8 @@ v850_elf_gc_sweep_hook (abfd, info, sec, relocs)
 }
 
 static asection *
-v850_elf_gc_mark_hook (abfd, info, rel, h, sym)
-       bfd *abfd;
+v850_elf_gc_mark_hook (sec, info, rel, h, sym)
+       asection *sec;
        struct bfd_link_info *info ATTRIBUTE_UNUSED;
        Elf_Internal_Rela *rel;
        struct elf_link_hash_entry *h;
@@ -1771,9 +1754,7 @@ v850_elf_gc_mark_hook (abfd, info, rel, h, sym)
        }
      }
    else
-     {
-       return bfd_section_from_elf_index (abfd, sym->st_shndx);
-     }
+     return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
 
   return NULL;
 }
@@ -2135,7 +2116,7 @@ static boolean
 v850_elf_section_from_shdr (abfd, hdr, name)
      bfd *               abfd;
      Elf_Internal_Shdr * hdr;
-     char *              name;
+     const char *        name;
 {
   /* There ought to be a place to keep ELF backend specific flags, but
      at the moment there isn't one.  We just keep track of the
@@ -2210,6 +2191,7 @@ v850_elf_fake_sections (abfd, hdr, sec)
 #define elf_backend_gc_sweep_hook               v850_elf_gc_sweep_hook
 
 #define elf_backend_can_gc_sections 1
+#define elf_backend_rela_normal 1
 
 #define bfd_elf32_bfd_is_local_label_name	v850_elf_is_local_label_name
 #define bfd_elf32_bfd_reloc_type_lookup		v850_elf_reloc_type_lookup

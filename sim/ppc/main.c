@@ -31,8 +31,8 @@
 #include "events.h" /* FIXME: psim should provide the interface */
 
 #include "bfd.h"
-#include "callback.h"
-#include "remote-sim.h"
+#include "gdb/callback.h"
+#include "gdb/remote-sim.h"
 
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>

@@ -113,6 +113,11 @@ proc do_attach_tests {} {
    gdb_expect {
       -re ".*Illegal process-id: abc.*$gdb_prompt $"\
                       {pass "attach to nonsense is prohibited"}
+      -re "Attaching to.*, process .*couldn't open /proc file.*$gdb_prompt $"\
+                      {
+                        # Response expected from /proc-based systems.
+                        pass "attach to nonsense is prohibited" 
+                      }
       -re "Attaching to.*$gdb_prompt $"\
                       {fail "attach to nonsense is prohibited (bogus pid allowed)"}
       -re "$gdb_prompt $" {fail "attach to nonsense is prohibited"}
@@ -125,14 +130,23 @@ proc do_attach_tests {} {
    #
    send_gdb "attach 0\n"
    gdb_expect {
-      # This reponse is expected on HP-UX 10.20 (i.e., ptrace-based).
       -re "Attaching to.*, process 0.*No such process.*$gdb_prompt $"\
-                      {pass "attach to nonexistent process is prohibited"}
-      # This response is expected on HP-UX 11.0 (i.e., ttrace-based).
+                      {
+                        # Response expected on HP-UX 10.20 (i.e., ptrace-based).
+                        pass "attach to nonexistent process is prohibited"
+                      }
       -re "Attaching to.*, process 0 failed.*Hint.*$gdb_prompt $"\
-                      {pass "attach to nonexistent process is prohibited"}
+                      {
+                        # Response expected on HP-UX 11.0 (i.e., ttrace-based).
+                        pass "attach to nonexistent process is prohibited"
+                      }
       -re "Attaching to.*, process 0.*denied.*$gdb_prompt $"\
                       {pass "attach to nonexistent process is prohibited"}
+      -re "Attaching to.*, process .*couldn't open /proc file.*$gdb_prompt $"\
+                      {
+                        # Response expected from /proc-based systems.
+                        pass "attach to nonexistent process is prohibited"
+                      }
       -re "$gdb_prompt $" {fail "attach to nonexistent process is prohibited"}
       timeout         {fail "(timeout) attach to nonexistent process is prohibited"}
    }
@@ -164,7 +178,7 @@ proc do_attach_tests {} {
 
    send_gdb "attach $testpid\n"
    gdb_expect {
-      -re "Attaching to program.*$binfile, process $testpid.*main.*at .*$srcfile:.*$gdb_prompt $"\
+      -re "Attaching to program.*`?$binfile'?, process $testpid.*main.*at .*$srcfile:.*$gdb_prompt $"\
                       {pass "attach1, after setting file"}
       -re "$gdb_prompt $" {fail "attach1, after setting file"}
       timeout         {fail "(timeout) attach1, after setting file"}

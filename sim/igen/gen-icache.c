@@ -132,6 +132,8 @@ print_icache_extraction (lf *file,
       else
 	return;
       break;
+    default:
+      abort (); /* Bad switch.  */
     }
   
   /* For the type, default to a simple unsigned */

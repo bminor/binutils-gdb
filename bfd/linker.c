@@ -1674,8 +1674,7 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 			  abort ();
 
 			if (! ((*info->callbacks->constructor)
-			       (info,
-				c == 'I' ? true : false,
+			       (info, c == 'I',
 				h->root.string, abfd, section, value)))
 			  return false;
 		      }
@@ -1975,12 +1974,12 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 	    else
 	      {
 		char *w;
+		size_t len = strlen (string) + 1;
 
-		w = bfd_hash_allocate (&info->hash->table,
-				       strlen (string) + 1);
+		w = bfd_hash_allocate (&info->hash->table, len);
 		if (w == NULL)
 		  return false;
-		strcpy (w, string);
+		memcpy (w, string, len);
 		sub->u.i.warning = w;
 	      }
 
@@ -2391,7 +2390,7 @@ _bfd_generic_link_output_symbols (output_bfd, input_bfd, info, psymalloc)
 	 Gross.  .bss and similar sections won't have the linker_mark
 	 field set.  */
       if ((sym->section->flags & SEC_HAS_CONTENTS) != 0
-	  && sym->section->linker_mark == false)
+	  && ! sym->section->linker_mark)
 	output = false;
 
       if (output)

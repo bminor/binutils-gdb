@@ -39,6 +39,13 @@ extern gdbarch_frame_num_args_ftype frame_num_args_unknown;
    targets that don't yet implement their own breakpoint_from_pc(). */
 extern gdbarch_breakpoint_from_pc_ftype legacy_breakpoint_from_pc;
 
+/* Implementation of extract return value that grubs around in the
+   register cache.  */
+extern gdbarch_extract_return_value_ftype legacy_extract_return_value;
+
+/* Implementation of store return value that grubs the register cache.  */
+extern gdbarch_store_return_value_ftype legacy_store_return_value;
+
 /* Frameless functions not identifable. */
 extern gdbarch_frameless_function_invocation_ftype generic_frameless_function_invocation_not;
 
@@ -48,7 +55,7 @@ extern gdbarch_frameless_function_invocation_ftype generic_frameless_function_in
 extern gdbarch_return_value_on_stack_ftype generic_return_value_on_stack_not;
 
 /* Map onto old REGISTER_NAMES. */
-extern char *legacy_register_name (int i);
+extern const char *legacy_register_name (int i);
 
 /* Accessor for old global function pointer for disassembly. */
 extern int legacy_print_insn (bfd_vma vma, disassemble_info *info);
@@ -93,11 +100,6 @@ extern void set_architecture_from_arch_mach (enum bfd_architecture, unsigned lon
    status indicates that the target did not like the change. */
 
 extern int (*target_architecture_hook) (const struct bfd_arch_info *);
-
-
-/* Default raw->sim register re-numbering - does nothing. */
-
-extern int default_register_sim_regno (int reg_nr);
 
 /* Identity function on a CORE_ADDR.  Just returns its parameter.  */
 
@@ -145,14 +147,17 @@ extern CORE_ADDR generic_skip_trampoline_code (CORE_ADDR pc);
 
 extern int generic_in_solib_call_trampoline (CORE_ADDR pc, char *name);
 
-extern int generic_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc);
+extern int generic_in_solib_return_trampoline (CORE_ADDR pc, char *name);
 
-extern void default_print_float_info (void);
+extern int generic_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc);
 
 /* Assume that the world is sane, a registers raw and virtual size
    both match its type.  */
 
 extern int generic_register_size (int regnum);
+
+/* Assume that the world is sane, the registers are all adjacent.  */
+extern int generic_register_byte (int regnum);
 
 /* Prop up old targets that use various IN_SIGTRAMP() macros.  */
 extern int legacy_pc_in_sigtramp (CORE_ADDR pc, char *name);
@@ -165,6 +170,12 @@ extern int legacy_pc_in_sigtramp (CORE_ADDR pc, char *name);
 extern int legacy_convert_register_p (int regnum);
 extern void legacy_register_to_value (int regnum, struct type *type, char *from, char *to);
 extern void legacy_value_to_register (struct type *type, int regnum, char *from, char *to);
+
+/* For compatibility with older architectures, returns
+   (LEGACY_SIM_REGNO_IGNORE) when the register doesn't have a valid
+   name.  */
+
+extern int legacy_register_sim_regno (int regnum);
 
 /* Initialize a ``struct info''.  Can't use memset(0) since some
    default values are not zero.  */

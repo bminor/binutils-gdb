@@ -36,6 +36,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define ARCH_i386
 #define ARCH_i860
 #define ARCH_i960
+#define ARCH_ip2k
 #define ARCH_ia64
 #define ARCH_fr30
 #define ARCH_m32r
@@ -66,6 +67,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define ARCH_w65
 #define ARCH_xstormy16
 #define ARCH_z8k
+#define ARCH_frv
 #define INCLUDE_SHMEDIA
 #endif
 
@@ -176,6 +178,11 @@ disassembler (abfd)
 #ifdef ARCH_ia64
     case bfd_arch_ia64:
       disassemble = print_insn_ia64;
+      break;
+#endif
+#ifdef ARCH_ip2k
+    case bfd_arch_ip2k:
+      disassemble = print_insn_ip2k;
       break;
 #endif
 #ifdef ARCH_fr30
@@ -334,6 +341,11 @@ disassembler (abfd)
 #ifdef ARCH_vax
     case bfd_arch_vax:
       disassemble = print_insn_vax;
+      break;
+#endif
+#ifdef ARCH_frv
+    case bfd_arch_frv:
+      disassemble = print_insn_frv;
       break;
 #endif
     default:

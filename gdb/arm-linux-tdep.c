@@ -532,7 +532,7 @@ arm_linux_init_abi (struct gdbarch_info info,
 				       sizeof (arm_linux_call_dummy_words));
 
   /* The following two overrides shouldn't be needed.  */
-  set_gdbarch_extract_return_value (gdbarch, arm_linux_extract_return_value);
+  set_gdbarch_deprecated_extract_return_value (gdbarch, arm_linux_extract_return_value);
   set_gdbarch_push_arguments (gdbarch, arm_linux_push_arguments);
 
   /* Shared library handling.  */

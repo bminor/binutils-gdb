@@ -52,7 +52,7 @@ static boolean cris_elf_gc_sweep_hook
 	   const Elf_Internal_Rela *));
 
 static asection * cris_elf_gc_mark_hook
-  PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Rela *,
+  PARAMS ((asection *, struct bfd_link_info *, Elf_Internal_Rela *,
 	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
 
 static boolean cris_elf_object_p PARAMS ((bfd *));
@@ -547,7 +547,7 @@ cris_elf_grok_psinfo (abfd, note)
 static const bfd_byte elf_cris_plt0_entry[PLT_ENTRY_SIZE] =
 {
   0xfc, 0xe1,
-  0x7e, 0x7e,	/* push mof. */
+  0x7e, 0x7e,	/* push mof.  */
   0x7f, 0x0d,   /*  (dip [pc+]) */
   0, 0, 0, 0,	/*  Replaced with address of .got + 4.  */
   0x30, 0x7a,	/* move [...],mof */
@@ -799,16 +799,14 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Rela *           rel;
   Elf_Internal_Rela *           relend;
 
+  if (info->relocateable)
+    return true;
+
   dynobj = elf_hash_table (info)->dynobj;
   local_got_offsets = elf_local_got_offsets (input_bfd);
   symtab_hdr = & elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
   relend     = relocs + input_section->reloc_count;
-
-  /* It seems this can happen with erroneous or unsupported input (mixing
-     a.out and elf in an archive, for example.)  */
-  if (sym_hashes == NULL)
-    return false;
 
   sgot = NULL;
   splt = NULL;
@@ -838,29 +836,8 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	  || r_type == R_CRIS_GNU_VTENTRY)
 	continue;
 
-      r_symndx = ELF32_R_SYM (rel->r_info);
-
-      if (info->relocateable)
-	{
-	  /* This is a relocateable link.  We don't have to change
-             anything, unless the reloc is against a section symbol,
-             in which case we have to adjust according to where the
-             section symbol winds up in the output section.  */
-	  if (r_symndx < symtab_hdr->sh_info)
-	    {
-	      sym = local_syms + r_symndx;
-
-	      if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
-		{
-		  sec = local_sections [r_symndx];
-		  rel->r_addend += sec->output_offset + sym->st_value;
-		}
-	    }
-
-	  continue;
-	}
-
       /* This is a final link.  */
+      r_symndx = ELF32_R_SYM (rel->r_info);
       howto  = cris_elf_howto_table + r_type;
       h      = NULL;
       sym    = NULL;
@@ -879,6 +856,11 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	}
       else
 	{
+	  /* It seems this can happen with erroneous or unsupported input
+	     (mixing a.out and elf in an archive, for example.)  */
+	  if (sym_hashes == NULL)
+	    return false;
+
 	  h = sym_hashes [r_symndx - symtab_hdr->sh_info];
 
 	  while (h->root.type == bfd_link_hash_indirect
@@ -1046,29 +1028,28 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 			&& (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
 		  {
 		    /* This wasn't checked above for ! info->shared, but
-		       must hold there if we get here; the symbol must not
-		       be used in, or defined by a DSO.  (Note that
-		       checking for ELF_LINK_HASH_DEF_REGULAR doesn't
-		       catch all cases.)  */
-		    BFD_ASSERT (info->shared
+		       must hold there if we get here; the symbol must be
+		       defined in the regular program, or be undefweak.  */
+		    BFD_ASSERT (!elf_hash_table (info)->dynamic_sections_created
+				|| info->shared
 				|| (h->elf_link_hash_flags
-				    & (ELF_LINK_HASH_REF_DYNAMIC
-				       | ELF_LINK_HASH_DEF_DYNAMIC)) == 0);
+				    & ELF_LINK_HASH_DEF_REGULAR) != 0
+				|| h->root.type == bfd_link_hash_undefweak);
 
 		    /* This is actually a static link, or it is a
-		       -Bsymbolic link and the symbol is defined
-		       locally, or the symbol was forced to be local
-		       because of a version file, or we're not creating a
-		       dynamic object and the symbol isn't referred to by
-		       a dynamic object.  We must initialize
-		       this entry in the global offset table.  Since
-		       the offset must always be a multiple of 4, we
-		       use the least significant bit to record whether
-		       we have initialized it already.
+		       -Bsymbolic link and the symbol is defined locally,
+		       or is undefweak, or the symbol was forced to be
+		       local because of a version file, or we're not
+		       creating a dynamic object.  We must initialize this
+		       entry in the global offset table.  Since the offset
+		       must always be a multiple of 4, we use the least
+		       significant bit to record whether we have
+		       initialized it already.
 
-		       When doing a dynamic link, we create a .rela.got
-		       relocation entry to initialize the value.  This
-		       is done in the finish_dynamic_symbol routine.  */
+		       If this GOT entry should be runtime-initialized, we
+		       will create a .rela.got relocation entry to
+		       initialize the value.  This is done in the
+		       finish_dynamic_symbol routine.  */
 		    if ((off & 1) != 0)
 		      off &= ~1;
 		    else
@@ -1150,7 +1131,7 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	case R_CRIS_32_GOTREL:
 	  /* This relocation must only be performed against local symbols.  */
-	  if (h != NULL)
+	  if (h != NULL && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
 	    {
 	      (*_bfd_error_handler)
 		(_("%s: relocation %s is not allowed for global symbol: `%s' from %s section"),
@@ -1190,7 +1171,7 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	  /* Resolve a PLT_PCREL reloc against a local symbol directly,
 	     without using the procedure linkage table.  */
-	  if (h == NULL)
+	  if (h == NULL || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
 	    break;
 
 	  if (h->plt.offset == (bfd_vma) -1
@@ -1215,7 +1196,7 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	  /* Resolve a PLT_GOTREL reloc against a local symbol directly,
 	     without using the procedure linkage table.  */
-	  if (h == NULL)
+	  if (h == NULL || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
 	    break;
 
 	  if (h->plt.offset == (bfd_vma) -1
@@ -1237,7 +1218,7 @@ cris_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_CRIS_16_PCREL:
 	case R_CRIS_32_PCREL:
 	  /* If the symbol was local, we need no shlib-specific handling.  */
-	  if (h == NULL)
+	  if (h == NULL || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
 	    break;
 
 	  /* Fall through.  */
@@ -1561,9 +1542,13 @@ elf_cris_finish_dynamic_symbol (output_bfd, info, h, sym)
     }
 
   /* We don't emit .got relocs for symbols that aren't in the
-     dynamic-symbols table for an ordinary program.  */
+     dynamic-symbols table for an ordinary program and are either defined
+     by the program or are undefined weak symbols.  */
   if (h->got.offset != (bfd_vma) -1
-      && (info->shared || h->dynindx != -1))
+      && (info->shared
+	  || (h->dynindx != -1
+	      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0
+	      && h->root.type != bfd_link_hash_undefweak)))
     {
       asection *sgot;
       asection *srela;
@@ -1770,8 +1755,8 @@ elf_cris_finish_dynamic_sections (output_bfd, info)
    relocation.  */
 
 static asection *
-cris_elf_gc_mark_hook (abfd, info, rel, h, sym)
-     bfd *                        abfd;
+cris_elf_gc_mark_hook (sec, info, rel, h, sym)
+     asection *                   sec;
      struct bfd_link_info *       info ATTRIBUTE_UNUSED;
      Elf_Internal_Rela *          rel;
      struct elf_link_hash_entry * h;
@@ -1801,9 +1786,7 @@ cris_elf_gc_mark_hook (abfd, info, rel, h, sym)
 	}
     }
   else
-    {
-      return bfd_section_from_elf_index (abfd, sym->st_shndx);
-    }
+    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
 
   return NULL;
 }
@@ -1900,7 +1883,8 @@ cris_elf_gc_sweep_hook (abfd, info, sec, relocs)
 	  if (r_symndx >= symtab_hdr->sh_info)
 	    {
 	      h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	      if (h->plt.refcount > 0)
+	      if (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+		  && h->plt.refcount > 0)
 		--h->plt.refcount;
 	    }
 	  break;
@@ -2068,23 +2052,23 @@ elf_cris_adjust_dynamic_symbol (info, h)
   if (h->type == STT_FUNC
       || (h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0)
     {
+      /* If we link a program (not a DSO), we'll get rid of unnecessary
+	 PLT entries; we point to the actual symbols -- even for pic
+	 relocs, because a program built with -fpic should have the same
+	 result as one built without -fpic, specifically considering weak
+	 symbols.
+	 FIXME: m68k and i386 differ here, for unclear reasons.  */
       if (! info->shared
-	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) == 0
-	  && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) == 0
-	  /* We must always create the plt entry if it was referenced by a
-	     PLT relocation.  In this case we already recorded it as a
-	     dynamic symbol.  */
-	  /* FIXME: m68k and i386 differ here, for unclear reasons.  */
-	  && h->dynindx == -1)
+	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) == 0)
 	{
 	  /* This case can occur if we saw a PLT reloc in an input file,
-	     but the symbol was never referred to by a dynamic object.  In
-	     such a case, we don't actually need to build a procedure
-	     linkage table, and we can just do a PC reloc instead, or
+	     but the symbol was not defined by a dynamic object.  In such
+	     a case, we don't actually need to build a procedure linkage
+	     table, and we can just do an absolute or PC reloc instead, or
 	     change a .got.plt index to a .got index for GOTPLT relocs.  */
 	  BFD_ASSERT ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0);
+	  h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
 	  h->plt.offset = (bfd_vma) -1;
-
 	  return
 	    elf_cris_adjust_gotplt_to_got ((struct
 					    elf_cris_link_hash_entry *) h,
@@ -2122,9 +2106,7 @@ elf_cris_adjust_dynamic_symbol (info, h)
 
       /* If this symbol is not defined in a regular file, and we are
 	 not generating a shared library, then set the symbol to this
-	 location in the .plt.  This is required to make function
-	 pointers compare as equal between the normal executable and
-	 the shared library.  */
+	 location in the .plt.  */
       if (!info->shared
 	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
 	{
@@ -2488,7 +2470,7 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 
 	  /* If this is a local symbol, we resolve it directly without
 	     creating a procedure linkage table entry.  */
-	  if (h == NULL)
+	  if (h == NULL || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
 	    continue;
 
 	  h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
@@ -2527,7 +2509,8 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 
 	      /* Make sure a plt entry is created for this symbol if it
 		 turns out to be a function defined by a dynamic object.  */
-	      h->plt.refcount++;
+	      if (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
+		h->plt.refcount++;
 	    }
 
 	  /* If we are creating a shared library and this is not a local
@@ -2560,7 +2543,7 @@ cris_elf_check_relocs (abfd, info, sec, relocs)
 	      || r_type == R_CRIS_32_PCREL)
 	    {
 	      /* If the symbol is local, then we can eliminate the reloc.  */
-	      if (h == NULL)
+	      if (h == NULL || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
 		break;
 
 	      /* If this is with -Bsymbolic and the symbol isn't weak, and
@@ -2907,10 +2890,9 @@ elf_cris_discard_excess_program_dynamics (h, inf)
 
   /* If we're not creating a shared library and have a symbol which is
      referred to by .got references, but the symbol is defined locally,
-     (or rather, not referred to by a DSO and not defined by a DSO) then
-     lose the reloc for the .got (don't allocate room for it).  */
-  if ((h->root.elf_link_hash_flags
-       & (ELF_LINK_HASH_REF_DYNAMIC | ELF_LINK_HASH_DEF_DYNAMIC)) == 0)
+     (or rather, not not defined by a DSO) then lose the reloc for the
+     .got (don't allocate room for it).  */
+  if ((h->root.elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) == 0)
     {
       if (h->root.got.refcount > 0
 	  /* The size of this section is only valid and in sync with the
@@ -2935,7 +2917,8 @@ elf_cris_discard_excess_program_dynamics (h, inf)
 	 functions; doing this for all symbols would presumably not
 	 introduce new problems.  Of course we don't do this if we're
 	 exporting all dynamic symbols.  */
-      if (! info->export_dynamic)
+      if (! info->export_dynamic
+	  && (h->root.elf_link_hash_flags & ELF_LINK_HASH_REF_DYNAMIC) == 0)
 	{
 	  h->root.dynindx = -1;
 	  _bfd_elf_strtab_delref (elf_hash_table (info)->dynstr,
@@ -3003,7 +2986,7 @@ cris_elf_merge_private_bfd_data (ibfd, obfd)
 {
   flagword old_flags, new_flags;
 
-  if (_bfd_generic_verify_endian_match (ibfd, obfd) == false)
+  if (! _bfd_generic_verify_endian_match (ibfd, obfd))
     return false;
 
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
@@ -3113,6 +3096,7 @@ elf_cris_reloc_type_class (rela)
    take the easy route.  */
 #define elf_backend_may_use_rel_p 0
 #define elf_backend_may_use_rela_p 1
+#define elf_backend_rela_normal		1
 
 #include "elf32-target.h"
 

@@ -1,4 +1,4 @@
-# Host: Motorola 88000 running DGUX
-XM_FILE= xm-dgux.h
-NAT_FILE= nm-m88k.h
-NATDEPFILES= infptrace.o inftarg.o fork-child.o m88k-nat.o
+# OBSOLETE # Host: Motorola 88000 running DGUX
+# OBSOLETE XM_FILE= xm-dgux.h
+# OBSOLETE NAT_FILE= nm-m88k.h
+# OBSOLETE NATDEPFILES= infptrace.o inftarg.o fork-child.o m88k-nat.o

@@ -26,9 +26,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "elf/x86-64.h"
 
-/* We use only the RELA entries.  */
-#define USE_RELA 1
-
 /* In case we're on a 32-bit machine, construct a 64-bit "-1" value.  */
 #define MINUS_ONE (~ (bfd_vma) 0)
 
@@ -125,9 +122,9 @@ static reloc_howto_type *elf64_x86_64_reloc_type_lookup
   PARAMS ((bfd *, bfd_reloc_code_real_type));
 static void elf64_x86_64_info_to_howto
   PARAMS ((bfd *, arelent *, Elf64_Internal_Rela *));
-static boolean elf64_x86_64_grok_prstatus 
+static boolean elf64_x86_64_grok_prstatus
   PARAMS ((bfd *, Elf_Internal_Note *));
-static boolean elf64_x86_64_grok_psinfo 
+static boolean elf64_x86_64_grok_psinfo
   PARAMS ((bfd *, Elf_Internal_Note *));
 static struct bfd_link_hash_table *elf64_x86_64_link_hash_table_create
   PARAMS ((bfd *));
@@ -137,12 +134,13 @@ static boolean create_got_section
 static boolean elf64_x86_64_create_dynamic_sections
   PARAMS((bfd *, struct bfd_link_info *));
 static void elf64_x86_64_copy_indirect_symbol
-  PARAMS ((struct elf_link_hash_entry *, struct elf_link_hash_entry *));
+  PARAMS ((struct elf_backend_data *, struct elf_link_hash_entry *,
+	   struct elf_link_hash_entry *));
 static boolean elf64_x86_64_check_relocs
   PARAMS ((bfd *, struct bfd_link_info *, asection *sec,
 	   const Elf_Internal_Rela *));
 static asection *elf64_x86_64_gc_mark_hook
-  PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Rela *,
+  PARAMS ((asection *, struct bfd_link_info *, Elf_Internal_Rela *,
 	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
 
 static boolean elf64_x86_64_gc_sweep_hook
@@ -228,11 +226,11 @@ elf64_x86_64_grok_prstatus (abfd, note)
 
       case 336:		/* sizeof(istruct elf_prstatus) on Linux/x86_64 */
 	/* pr_cursig */
-	elf_tdata (abfd)->core_signal 
+	elf_tdata (abfd)->core_signal
 	  = bfd_get_16 (abfd, note->descdata + 12);
 
 	/* pr_pid */
-	elf_tdata (abfd)->core_pid 
+	elf_tdata (abfd)->core_pid
 	  = bfd_get_32 (abfd, note->descdata + 32);
 
 	/* pr_reg */
@@ -497,7 +495,8 @@ elf64_x86_64_create_dynamic_sections (dynobj, info)
 /* Copy the extra info we tack onto an elf_link_hash_entry.  */
 
 static void
-elf64_x86_64_copy_indirect_symbol (dir, ind)
+elf64_x86_64_copy_indirect_symbol (bed, dir, ind)
+     struct elf_backend_data *bed;
      struct elf_link_hash_entry *dir, *ind;
 {
   struct elf64_x86_64_link_hash_entry *edir, *eind;
@@ -539,7 +538,7 @@ elf64_x86_64_copy_indirect_symbol (dir, ind)
       eind->dyn_relocs = NULL;
     }
 
-  _bfd_elf_link_hash_copy_indirect (dir, ind);
+  _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
 }
 
 static boolean
@@ -660,11 +659,28 @@ elf64_x86_64_check_relocs (abfd, info, sec, relocs)
 	case R_X86_64_8:
 	case R_X86_64_16:
 	case R_X86_64_32:
-	case R_X86_64_64:
 	case R_X86_64_32S:
+	  /* Let's help debug shared library creation.  These relocs
+	     cannot be used in shared libs.  Don't error out for
+	     sections we don't care about, such as debug sections or
+	     non-constant sections.  */
+	  if (info->shared
+	      && (sec->flags & SEC_ALLOC) != 0
+	      && (sec->flags & SEC_READONLY) != 0)
+	    {
+	      (*_bfd_error_handler)
+		(_("%s: relocation %s can not be used when making a shared object; recompile with -fPIC"),
+		 bfd_archive_filename (abfd),
+		 x86_64_elf_howto_table[ELF64_R_TYPE (rel->r_info)].name);
+	      bfd_set_error (bfd_error_bad_value);
+	      return false;
+	    }
+	  /* Fall through.  */
+
 	case R_X86_64_PC8:
 	case R_X86_64_PC16:
 	case R_X86_64_PC32:
+	case R_X86_64_64:
 	  if (h != NULL && !info->shared)
 	    {
 	      /* If this reloc is in a read-only section, we might
@@ -839,8 +855,8 @@ elf64_x86_64_check_relocs (abfd, info, sec, relocs)
    relocation.	*/
 
 static asection *
-elf64_x86_64_gc_mark_hook (abfd, info, rel, h, sym)
-     bfd *abfd;
+elf64_x86_64_gc_mark_hook (sec, info, rel, h, sym)
+     asection *sec;
      struct bfd_link_info *info ATTRIBUTE_UNUSED;
      Elf_Internal_Rela *rel;
      struct elf_link_hash_entry *h;
@@ -870,9 +886,7 @@ elf64_x86_64_gc_mark_hook (abfd, info, rel, h, sym)
 	}
     }
   else
-    {
-      return bfd_section_from_elf_index (abfd, sym->st_shndx);
-    }
+    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
 
   return NULL;
 }
@@ -1087,7 +1101,7 @@ elf64_x86_64_adjust_dynamic_symbol (info, h)
 
   /* We must generate a R_X86_64_COPY reloc to tell the dynamic linker
      to copy the initial value out of the dynamic object and into the
-     runtime process image. */
+     runtime process image.  */
   if ((h->root.u.def.section->flags & SEC_ALLOC) != 0)
     {
       htab->srelbss->_raw_size += sizeof (Elf64_External_Rela);
@@ -1861,9 +1875,44 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 	      else
 		{
 		  /* This symbol is local, or marked to become local.  */
-		  relocate = true;
-		  outrel.r_info = ELF64_R_INFO (0, R_X86_64_RELATIVE);
-		  outrel.r_addend = relocation + rel->r_addend;
+		  if (r_type == R_X86_64_64)
+		    {
+		      relocate = true;
+		      outrel.r_info = ELF64_R_INFO (0, R_X86_64_RELATIVE);
+		      outrel.r_addend = relocation + rel->r_addend;
+		    }
+		  else
+		    {
+		      long sindx;
+
+		      if (h == NULL)
+			sec = local_sections[r_symndx];
+		      else
+			{
+			  BFD_ASSERT (h->root.type == bfd_link_hash_defined
+				      || (h->root.type
+					  == bfd_link_hash_defweak));
+			  sec = h->root.u.def.section;
+			}
+		      if (sec != NULL && bfd_is_abs_section (sec))
+			sindx = 0;
+		      else if (sec == NULL || sec->owner == NULL)
+			{
+			  bfd_set_error (bfd_error_bad_value);
+			  return false;
+			}
+		      else
+			{
+			  asection *osec;
+
+			  osec = sec->output_section;
+			  sindx = elf_section_data (osec)->dynindx;
+			  BFD_ASSERT (sindx > 0);
+			}
+
+		      outrel.r_info = ELF64_R_INFO (sindx, r_type);
+		      outrel.r_addend = relocation + rel->r_addend;
+		    }
 		}
 
 	      sreloc = elf_section_data (input_section)->sreloc;
@@ -1888,14 +1937,11 @@ elf64_x86_64_relocate_section (output_bfd, info, input_bfd, input_section,
 	  break;
 	}
 
-      /* FIXME: Why do we allow debugging sections to escape this error?
-	 More importantly, why do we not emit dynamic relocs for
-	 R_386_32 above in debugging sections (which are ! SEC_ALLOC)?
-	 If we had emitted the dynamic reloc, we could remove the
-	 fudge here.  */
+      /* Dynamic relocs are not propagated for SEC_DEBUGGING sections
+	 because such sections are not SEC_ALLOC and thus ld.so will
+	 not process them.  */
       if (unresolved_reloc
-	  && !(info->shared
-	       && (input_section->flags & SEC_DEBUGGING) != 0
+	  && !((input_section->flags & SEC_DEBUGGING) != 0
 	       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0))
 	(*_bfd_error_handler)
 	  (_("%s(%s+0x%lx): unresolvable relocation against symbol `%s'"),

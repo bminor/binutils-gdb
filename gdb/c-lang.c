@@ -415,14 +415,14 @@ scan_macro_expansion (char *expansion)
 
 
 int
-scanning_macro_expansion ()
+scanning_macro_expansion (void)
 {
   return macro_original_text != 0;
 }
 
 
 void 
-finished_macro_expansion ()
+finished_macro_expansion (void)
 {
   /* There'd better be something to pop back to, and we better have
      saved a pointer to the start of the expanded text.  */
@@ -461,7 +461,7 @@ null_macro_lookup (const char *name, void *baton)
 
 
 static int
-c_preprocess_and_parse ()
+c_preprocess_and_parse (void)
 {
   /* Set up a lookup function for the macro expander.  */
   struct macro_scope *scope = 0;

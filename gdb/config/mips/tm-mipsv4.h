@@ -19,7 +19,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "mips/tm-bigmips.h"
-#include "tm-sysv4.h"
+#include "config/tm-sysv4.h"
 
 /* The signal handler trampoline is called _sigtramp.  */
 #undef IN_SIGTRAMP
@@ -32,9 +32,6 @@
 #define SIGFRAME_REGSAVE_OFF	(SIGFRAME_BASE + 40)
 #define SIGFRAME_PC_OFF		(SIGFRAME_BASE + 40 + 35 * 4)
 #define SIGFRAME_FPREGSAVE_OFF	(SIGFRAME_BASE + 40 + 36 * 4)
-
-/* Use the alternate method of determining valid frame chains. */
-#define FRAME_CHAIN_VALID(fp,fi) func_frame_chain_valid (fp, fi)
 
 /* Convert a DWARF register number to a gdb REGNUM.  */
 #define DWARF_REG_TO_REGNUM(num) ((num) < 32 ? (num) : (num)+FP0_REGNUM-32)

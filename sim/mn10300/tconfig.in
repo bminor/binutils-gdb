@@ -2,8 +2,8 @@
 
 /* FIXME: This is unnecessarily necessary: */
 #include "ansidecl.h"
-#include "callback.h"
-#include "remote-sim.h"
+#include "gdb/callback.h"
+#include "gdb/remote-sim.h"
 #include "sim-module.h"
 
 MODULE_INSTALL_FN dv_sockser_install;

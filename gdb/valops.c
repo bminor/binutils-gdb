@@ -45,7 +45,8 @@ extern int hp_som_som_object_present;
 extern int overload_debug;
 /* Local functions.  */
 
-static int typecmp (int staticp, struct type *t1[], struct value *t2[]);
+static int typecmp (int staticp, int varargs, int nargs,
+		    struct field t1[], struct value *t2[]);
 
 static CORE_ADDR find_function_addr (struct value *, struct type **);
 static struct value *value_arg_coerce (struct value *, struct type *, int);
@@ -360,18 +361,11 @@ value_cast (struct type *type, struct value *arg2)
 				       value_zero (t1, not_lval), 0, t1, 1);
 		  if (v)
 		    {
-		      struct value *v2 = value_ind (arg2);
-		      VALUE_ADDRESS (v2) -= VALUE_ADDRESS (v)
-			+ VALUE_OFFSET (v);
-
-                      /* JYG: adjust the new pointer value and
-			 embedded offset. */
-                      v2->aligner.contents[0] -=  VALUE_EMBEDDED_OFFSET (v);
-                      VALUE_EMBEDDED_OFFSET (v2) = 0;
-
-		      v2 = value_addr (v2);
-		      VALUE_TYPE (v2) = type;
-		      return v2;
+                      CORE_ADDR addr2 = value_as_address (arg2);
+                      addr2 -= (VALUE_ADDRESS (v)
+                                + VALUE_OFFSET (v)
+                                + VALUE_EMBEDDED_OFFSET (v));
+                      return value_from_pointer (type, addr2);
 		    }
 		}
 	    }
@@ -382,49 +376,49 @@ value_cast (struct type *type, struct value *arg2)
       VALUE_POINTED_TO_OFFSET (arg2) = 0;	/* pai: chk_val */
       return arg2;
     }
-  else if (chill_varying_type (type))
-    {
-      struct type *range1, *range2, *eltype1, *eltype2;
-      struct value *val;
-      int count1, count2;
-      LONGEST low_bound, high_bound;
-      char *valaddr, *valaddr_data;
-      /* For lint warning about eltype2 possibly uninitialized: */
-      eltype2 = NULL;
-      if (code2 == TYPE_CODE_BITSTRING)
-	error ("not implemented: converting bitstring to varying type");
-      if ((code2 != TYPE_CODE_ARRAY && code2 != TYPE_CODE_STRING)
-	  || (eltype1 = check_typedef (TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (type, 1))),
-	      eltype2 = check_typedef (TYPE_TARGET_TYPE (type2)),
-	      (TYPE_LENGTH (eltype1) != TYPE_LENGTH (eltype2)
-      /* || TYPE_CODE (eltype1) != TYPE_CODE (eltype2) */ )))
-	error ("Invalid conversion to varying type");
-      range1 = TYPE_FIELD_TYPE (TYPE_FIELD_TYPE (type, 1), 0);
-      range2 = TYPE_FIELD_TYPE (type2, 0);
-      if (get_discrete_bounds (range1, &low_bound, &high_bound) < 0)
-	count1 = -1;
-      else
-	count1 = high_bound - low_bound + 1;
-      if (get_discrete_bounds (range2, &low_bound, &high_bound) < 0)
-	count1 = -1, count2 = 0;	/* To force error before */
-      else
-	count2 = high_bound - low_bound + 1;
-      if (count2 > count1)
-	error ("target varying type is too small");
-      val = allocate_value (type);
-      valaddr = VALUE_CONTENTS_RAW (val);
-      valaddr_data = valaddr + TYPE_FIELD_BITPOS (type, 1) / 8;
-      /* Set val's __var_length field to count2. */
-      store_signed_integer (valaddr, TYPE_LENGTH (TYPE_FIELD_TYPE (type, 0)),
-			    count2);
-      /* Set the __var_data field to count2 elements copied from arg2. */
-      memcpy (valaddr_data, VALUE_CONTENTS (arg2),
-	      count2 * TYPE_LENGTH (eltype2));
-      /* Zero the rest of the __var_data field of val. */
-      memset (valaddr_data + count2 * TYPE_LENGTH (eltype2), '\0',
-	      (count1 - count2) * TYPE_LENGTH (eltype2));
-      return val;
-    }
+  /* OBSOLETE else if (chill_varying_type (type)) */
+  /* OBSOLETE   { */
+  /* OBSOLETE     struct type *range1, *range2, *eltype1, *eltype2; */
+  /* OBSOLETE     struct value *val; */
+  /* OBSOLETE     int count1, count2; */
+  /* OBSOLETE     LONGEST low_bound, high_bound; */
+  /* OBSOLETE     char *valaddr, *valaddr_data; */
+  /* OBSOLETE     *//* For lint warning about eltype2 possibly uninitialized: */
+  /* OBSOLETE     eltype2 = NULL; */
+  /* OBSOLETE     if (code2 == TYPE_CODE_BITSTRING) */
+  /* OBSOLETE       error ("not implemented: converting bitstring to varying type"); */
+  /* OBSOLETE     if ((code2 != TYPE_CODE_ARRAY && code2 != TYPE_CODE_STRING) */
+  /* OBSOLETE         || (eltype1 = check_typedef (TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (type, 1))), */
+  /* OBSOLETE       eltype2 = check_typedef (TYPE_TARGET_TYPE (type2)), */
+  /* OBSOLETE                                (TYPE_LENGTH (eltype1) != TYPE_LENGTH (eltype2) */
+  /* OBSOLETE     *//*|| TYPE_CODE (eltype1) != TYPE_CODE (eltype2) *//* ))) */
+  /* OBSOLETE      error ("Invalid conversion to varying type"); */
+  /* OBSOLETE     range1 = TYPE_FIELD_TYPE (TYPE_FIELD_TYPE (type, 1), 0); */
+  /* OBSOLETE     range2 = TYPE_FIELD_TYPE (type2, 0); */
+  /* OBSOLETE     if (get_discrete_bounds (range1, &low_bound, &high_bound) < 0) */
+  /* OBSOLETE       count1 = -1; */
+  /* OBSOLETE     else */
+  /* OBSOLETE       count1 = high_bound - low_bound + 1; */
+  /* OBSOLETE     if (get_discrete_bounds (range2, &low_bound, &high_bound) < 0) */
+  /* OBSOLETE       count1 = -1, count2 = 0;	*//* To force error before */
+  /* OBSOLETE     else */
+  /* OBSOLETE       count2 = high_bound - low_bound + 1; */
+  /* OBSOLETE     if (count2 > count1) */
+  /* OBSOLETE       error ("target varying type is too small"); */
+  /* OBSOLETE     val = allocate_value (type); */
+  /* OBSOLETE     valaddr = VALUE_CONTENTS_RAW (val); */
+  /* OBSOLETE     valaddr_data = valaddr + TYPE_FIELD_BITPOS (type, 1) / 8; */
+  /* OBSOLETE     *//* Set val's __var_length field to count2. */
+  /* OBSOLETE     store_signed_integer (valaddr, TYPE_LENGTH (TYPE_FIELD_TYPE (type, 0)), */
+  /* OBSOLETE 	    count2); */
+  /* OBSOLETE     *//* Set the __var_data field to count2 elements copied from arg2. */
+  /* OBSOLETE     memcpy (valaddr_data, VALUE_CONTENTS (arg2), */
+  /* OBSOLETE      count2 * TYPE_LENGTH (eltype2)); */
+  /* OBSOLETE     *//* Zero the rest of the __var_data field of val. */
+  /* OBSOLETE     memset (valaddr_data + count2 * TYPE_LENGTH (eltype2), '\0', */
+  /* OBSOLETE      (count1 - count2) * TYPE_LENGTH (eltype2)); */
+  /* OBSOLETE     return val; */
+  /* OBSOLETE   } */
   else if (VALUE_LVAL (arg2) == lval_memory)
     {
       return value_at_lazy (type, VALUE_ADDRESS (arg2) + VALUE_OFFSET (arg2),
@@ -632,6 +626,7 @@ value_assign (struct value *toval, struct value *fromval)
 	write_memory (changed_addr, dest_buffer, changed_len);
 	if (memory_changed_hook)
 	  memory_changed_hook (changed_addr, changed_len);
+	target_changed_event ();
       }
       break;
 
@@ -677,6 +672,9 @@ value_assign (struct value *toval, struct value *fromval)
 			      VALUE_CONTENTS (fromval), TYPE_LENGTH (type));
 #endif
 	}
+
+      target_changed_event ();
+
       /* Assigning to the stack pointer, frame pointer, and other
          (architecture and calling convention specific) registers may
          cause the frame cache to be out of date.  We just do this
@@ -764,6 +762,7 @@ value_assign (struct value *toval, struct value *fromval)
 
 	if (register_changed_hook)
 	  register_changed_hook (-1);
+	target_changed_event ();
       }
       break;
 
@@ -960,9 +959,9 @@ value_ind (struct value *arg1)
      to do.  "long long" variables are rare enough that
      BUILTIN_TYPE_LONGEST would seem to be a mistake.  */
   if (TYPE_CODE (base_type) == TYPE_CODE_INT)
-    return value_at (builtin_type_int,
-		     (CORE_ADDR) value_as_long (arg1),
-		     VALUE_BFD_SECTION (arg1));
+    return value_at_lazy (builtin_type_int,
+			  (CORE_ADDR) value_as_long (arg1),
+			  VALUE_BFD_SECTION (arg1));
   else if (TYPE_CODE (base_type) == TYPE_CODE_PTR)
     {
       struct type *enc_type;
@@ -1315,8 +1314,10 @@ hand_function_call (struct value *function, int nargs, struct value **args)
   struct type *value_type;
   unsigned char struct_return;
   CORE_ADDR struct_addr = 0;
+  struct regcache *retbuf;
+  struct cleanup *retbuf_cleanup;
   struct inferior_status *inf_status;
-  struct cleanup *old_chain;
+  struct cleanup *inf_status_cleanup;
   CORE_ADDR funaddr;
   int using_gcc;		/* Set to version of gcc in use, or zero if not gcc */
   CORE_ADDR real_pc;
@@ -1332,8 +1333,18 @@ hand_function_call (struct value *function, int nargs, struct value **args)
   if (!target_has_execution)
     noprocess ();
 
+  /* Create a cleanup chain that contains the retbuf (buffer
+     containing the register values).  This chain is create BEFORE the
+     inf_status chain so that the inferior status can cleaned up
+     (restored or discarded) without having the retbuf freed.  */
+  retbuf = regcache_xmalloc (current_gdbarch);
+  retbuf_cleanup = make_cleanup_regcache_xfree (retbuf);
+
+  /* A cleanup for the inferior status.  Create this AFTER the retbuf
+     so that this can be discarded or applied without interfering with
+     the regbuf.  */
   inf_status = save_inferior_status (1);
-  old_chain = make_cleanup_restore_inferior_status (inf_status);
+  inf_status_cleanup = make_cleanup_restore_inferior_status (inf_status);
 
   /* PUSH_DUMMY_FRAME is responsible for saving the inferior registers
      (and POP_FRAME for restoring them).  (At least on most machines)
@@ -1438,42 +1449,25 @@ hand_function_call (struct value *function, int nargs, struct value **args)
   sp = old_sp;			/* It really is used, for some ifdef's... */
 #endif
 
-  if (TYPE_CODE (ftype) == TYPE_CODE_METHOD)
-    {
-      i = 0;
-      while (TYPE_CODE (TYPE_ARG_TYPES (ftype)[i]) != TYPE_CODE_VOID)
-	i++;
-      n_method_args = i;
-      if (nargs < i)
-	error ("too few arguments in method call");
-    }
-  else if (nargs < TYPE_NFIELDS (ftype))
+  if (nargs < TYPE_NFIELDS (ftype))
     error ("too few arguments in function call");
 
   for (i = nargs - 1; i >= 0; i--)
     {
-      /* Assume that methods are always prototyped, unless they are off the
-	 end (which we should only be allowing if there is a ``...'').  
-         FIXME.  */
+      int prototyped;
+
+      /* FIXME drow/2002-05-31: Should just always mark methods as
+	 prototyped.  Can we respect TYPE_VARARGS?  Probably not.  */
       if (TYPE_CODE (ftype) == TYPE_CODE_METHOD)
-	{
-	  if (i < n_method_args)
-	    args[i] = value_arg_coerce (args[i], TYPE_ARG_TYPES (ftype)[i], 1);
-	  else
-	    args[i] = value_arg_coerce (args[i], NULL, 0);
-	}
-
-      /* If we're off the end of the known arguments, do the standard
-         promotions.  FIXME: if we had a prototype, this should only
-         be allowed if ... were present.  */
-      if (i >= TYPE_NFIELDS (ftype))
-	args[i] = value_arg_coerce (args[i], NULL, 0);
-
+	prototyped = 1;
       else
-	{
-	  param_type = TYPE_FIELD_TYPE (ftype, i);
-	  args[i] = value_arg_coerce (args[i], param_type, TYPE_PROTOTYPED (ftype));
-	}
+	prototyped = TYPE_PROTOTYPED (ftype);
+
+      if (i < TYPE_NFIELDS (ftype))
+	args[i] = value_arg_coerce (args[i], TYPE_FIELD_TYPE (ftype, i),
+				    prototyped);
+      else
+	args[i] = value_arg_coerce (args[i], NULL, 0);
 
       /*elz: this code is to handle the case in which the function to be called
          has a pointer to function as parameter and the corresponding actual argument
@@ -1485,7 +1479,7 @@ hand_function_call (struct value *function, int nargs, struct value **args)
          In cc this is not a problem. */
 
       if (using_gcc == 0)
-	if (param_type)
+	if (param_type && TYPE_CODE (ftype) != TYPE_CODE_METHOD)
 	  /* if this parameter is a pointer to function */
 	  if (TYPE_CODE (param_type) == TYPE_CODE_PTR)
 	    if (TYPE_CODE (TYPE_TARGET_TYPE (param_type)) == TYPE_CODE_FUNC)
@@ -1672,7 +1666,6 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
     SAVE_DUMMY_FRAME_TOS (sp);
 
   {
-    char *retbuf = (char*) alloca (REGISTER_BYTES);
     char *name;
     struct symbol *symbol;
 
@@ -1731,11 +1724,12 @@ Evaluation of the expression containing the function (%s) will be abandoned.",
 	  {
 	    /* The user wants to stay in the frame where we stopped (default).*/
 
-	    /* If we did the cleanups, we would print a spurious error
-	       message (Unable to restore previously selected frame),
-	       would write the registers from the inf_status (which is
-	       wrong), and would do other wrong things.  */
-	    discard_cleanups (old_chain);
+	    /* If we restored the inferior status (via the cleanup),
+	       we would print a spurious error message (Unable to
+	       restore previously selected frame), would write the
+	       registers from the inf_status (which is wrong), and
+	       would do other wrong things.  */
+	    discard_cleanups (inf_status_cleanup);
 	    discard_inferior_status (inf_status);
 
 	    /* FIXME: Insert a bunch of wrap_here; name can be very long if it's
@@ -1753,11 +1747,12 @@ Evaluation of the expression containing the function (%s) will be abandoned.",
       {
 	/* We hit a breakpoint inside the FUNCTION. */
 
-	/* If we did the cleanups, we would print a spurious error
-	   message (Unable to restore previously selected frame),
-	   would write the registers from the inf_status (which is
-	   wrong), and would do other wrong things.  */
-	discard_cleanups (old_chain);
+	/* If we restored the inferior status (via the cleanup), we
+	   would print a spurious error message (Unable to restore
+	   previously selected frame), would write the registers from
+	   the inf_status (which is wrong), and would do other wrong
+	   things.  */
+	discard_cleanups (inf_status_cleanup);
 	discard_inferior_status (inf_status);
 
 	/* The following error message used to say "The expression
@@ -1777,7 +1772,10 @@ the function call).", name);
       }
 
     /* If we get here the called FUNCTION run to completion. */
-    do_cleanups (old_chain);
+
+    /* Restore the inferior status, via its cleanup.  At this stage,
+       leave the RETBUF alone.  */
+    do_cleanups (inf_status_cleanup);
 
     /* Figure out the value returned by the function.  */
 /* elz: I defined this new macro for the hppa architecture only.
@@ -1790,10 +1788,17 @@ the function call).", name);
 
 #ifdef VALUE_RETURNED_FROM_STACK
     if (struct_return)
-      return (struct value *) VALUE_RETURNED_FROM_STACK (value_type, struct_addr);
+      {
+	do_cleanups (retbuf_cleanup);
+	return VALUE_RETURNED_FROM_STACK (value_type, struct_addr);
+      }
 #endif
 
-    return value_being_returned (value_type, retbuf, struct_return);
+    {
+      struct value *retval = value_being_returned (value_type, retbuf, struct_return);
+      do_cleanups (retbuf_cleanup);
+      return retval;
+    }
   }
 }
 
@@ -1938,13 +1943,14 @@ value_bitstring (char *ptr, int len)
 }
 
 /* See if we can pass arguments in T2 to a function which takes arguments
-   of types T1.  Both t1 and t2 are NULL-terminated vectors.  If some
-   arguments need coercion of some sort, then the coerced values are written
-   into T2.  Return value is 0 if the arguments could be matched, or the
-   position at which they differ if not.
+   of types T1.  T1 is a list of NARGS arguments, and T2 is a NULL-terminated
+   vector.  If some arguments need coercion of some sort, then the coerced
+   values are written into T2.  Return value is 0 if the arguments could be
+   matched, or the position at which they differ if not.
 
    STATICP is nonzero if the T1 argument list came from a
-   static member function.
+   static member function.  T2 will still include the ``this'' pointer,
+   but it will be skipped.
 
    For non-static member functions, we ignore the first argument,
    which is the type of the instance variable.  This is because we want
@@ -1953,30 +1959,30 @@ value_bitstring (char *ptr, int len)
    requested operation is type secure, shouldn't we?  FIXME.  */
 
 static int
-typecmp (int staticp, struct type *t1[], struct value *t2[])
+typecmp (int staticp, int varargs, int nargs,
+	 struct field t1[], struct value *t2[])
 {
   int i;
 
   if (t2 == 0)
-    return 1;
-  if (staticp && t1 == 0)
-    return t2[1] != 0;
-  if (t1 == 0)
-    return 1;
-  if (t1[!staticp] == 0)
-    return 0;
-  if (TYPE_CODE (t1[0]) == TYPE_CODE_VOID)
-    return 0;
+    internal_error (__FILE__, __LINE__, "typecmp: no argument list");
+
   /* Skip ``this'' argument if applicable.  T2 will always include THIS.  */
   if (staticp)
-    t2++;
-  for (i = !staticp; t1[i] && TYPE_CODE (t1[i]) != TYPE_CODE_VOID; i++)
+    t2 ++;
+
+  for (i = 0;
+       (i < nargs) && TYPE_CODE (t1[i].type) != TYPE_CODE_VOID;
+       i++)
     {
       struct type *tt1, *tt2;
+
       if (!t2[i])
 	return i + 1;
-      tt1 = check_typedef (t1[i]);
+
+      tt1 = check_typedef (t1[i].type);
       tt2 = check_typedef (VALUE_TYPE (t2[i]));
+
       if (TYPE_CODE (tt1) == TYPE_CODE_REF
       /* We should be doing hairy argument matching, as below.  */
 	  && (TYPE_CODE (check_typedef (TYPE_TARGET_TYPE (tt1))) == TYPE_CODE (tt2)))
@@ -2012,12 +2018,12 @@ typecmp (int staticp, struct type *t1[], struct value *t2[])
       /* We should be doing much hairier argument matching (see section 13.2
          of the ARM), but as a quick kludge, just check for the same type
          code.  */
-      if (TYPE_CODE (t1[i]) != TYPE_CODE (VALUE_TYPE (t2[i])))
+      if (TYPE_CODE (t1[i].type) != TYPE_CODE (VALUE_TYPE (t2[i])))
 	return i + 1;
     }
-  if (!t1[i])
+  if (varargs || t2[i] == NULL)
     return 0;
-  return t2[i] ? i + 1 : 0;
+  return i + 1;
 }
 
 /* Helper function used by value_struct_elt to recurse through baseclasses.
@@ -2046,11 +2052,18 @@ search_struct_field (char *name, struct value *arg1, int offset,
 	  {
 	    struct value *v;
 	    if (TYPE_FIELD_STATIC (type, i))
-	      v = value_static_field (type, i);
+	      {
+		v = value_static_field (type, i);
+		if (v == 0)
+		  error ("field %s is nonexistent or has been optimised out",
+			 name);
+	      }
 	    else
-	      v = value_primitive_field (arg1, offset, i, type);
-	    if (v == 0)
-	      error ("there is no field named %s", name);
+	      {
+		v = value_primitive_field (arg1, offset, i, type);
+		if (v == 0)
+		  error ("there is no field named %s", name);
+	      }
 	    return v;
 	  }
 
@@ -2066,20 +2079,22 @@ search_struct_field (char *name, struct value *arg1, int offset,
 		/* Look for a match through the fields of an anonymous union,
 		   or anonymous struct.  C++ provides anonymous unions.
 
-		   In the GNU Chill implementation of variant record types,
-		   each <alternative field> has an (anonymous) union type,
-		   each member of the union represents a <variant alternative>.
-		   Each <variant alternative> is represented as a struct,
-		   with a member for each <variant field>.  */
+		   In the GNU Chill (OBSOLETE) implementation of
+		   variant record types, each <alternative field> has
+		   an (anonymous) union type, each member of the union
+		   represents a <variant alternative>.  Each <variant
+		   alternative> is represented as a struct, with a
+		   member for each <variant field>.  */
 
 		struct value *v;
 		int new_offset = offset;
 
-		/* This is pretty gross.  In G++, the offset in an anonymous
-		   union is relative to the beginning of the enclosing struct.
-		   In the GNU Chill implementation of variant records,
-		   the bitpos is zero in an anonymous union field, so we
-		   have to add the offset of the union here. */
+		/* This is pretty gross.  In G++, the offset in an
+		   anonymous union is relative to the beginning of the
+		   enclosing struct.  In the GNU Chill (OBSOLETE)
+		   implementation of variant records, the bitpos is
+		   zero in an anonymous union field, so we have to add
+		   the offset of the union here. */
 		if (TYPE_CODE (field_type) == TYPE_CODE_STRUCT
 		    || (TYPE_NFIELDS (field_type) > 0
 			&& TYPE_FIELD_BITPOS (field_type, 0) == 0))
@@ -2303,6 +2318,8 @@ search_struct_method (char *name, struct value **arg1p,
 		if (TYPE_FN_FIELD_STUB (f, j))
 		  check_stub_method (type, i, j);
 		if (!typecmp (TYPE_FN_FIELD_STATIC_P (f, j),
+			      TYPE_VARARGS (TYPE_FN_FIELD_TYPE (f, j)),
+			      TYPE_NFIELDS (TYPE_FN_FIELD_TYPE (f, j)),
 			      TYPE_FN_FIELD_ARGS (f, j), args))
 		  {
 		    if (TYPE_FN_FIELD_VIRTUAL_P (f, j))
@@ -2515,7 +2532,6 @@ value_struct_elt (struct value **argp, struct value **args,
  * ARGP is a pointer to a pointer to a value (the object)
  * METHOD is a string containing the method name
  * OFFSET is the offset within the value
- * STATIC_MEMFUNCP is set if the method is static
  * TYPE is the assumed type of the object
  * NUM_FNS is the number of overloaded instances
  * BASETYPE is set to the actual type of the subobject where the method is found
@@ -2606,7 +2622,6 @@ find_method_list (struct value **argp, char *method, int offset,
  * ARGP is a pointer to a pointer to a value (the object)
  * METHOD is the method name
  * OFFSET is the offset within the value contents
- * STATIC_MEMFUNCP is set if the method is static
  * NUM_FNS is the number of overloaded instances
  * BASETYPE is set to the type of the base subobject that defines the method
  * BOFFSET is the offset of the base subobject which defines the method */
@@ -2697,6 +2712,7 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
   register int jj;
   register int ix;
   int static_offset;
+  struct cleanup *cleanups = NULL;
 
   char *obj_type_name = NULL;
   char *func_name = NULL;
@@ -2738,6 +2754,7 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
         }
 
       oload_syms = make_symbol_overload_list (fsym);
+      cleanups = make_cleanup (xfree, oload_syms);
       while (oload_syms[++i])
 	num_fns++;
       if (!num_fns)
@@ -2754,13 +2771,7 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
 	{
 	  if (TYPE_FN_FIELD_STATIC_P (fns_ptr, ix))
 	    static_offset = 1;
-	  nparms=0;
-
-	  if (TYPE_FN_FIELD_ARGS(fns_ptr,ix))
-	    {
-	      while (TYPE_CODE(TYPE_FN_FIELD_ARGS(fns_ptr,ix)[nparms]) != TYPE_CODE_VOID)
-		nparms++;
-	    }
+	  nparms = TYPE_NFIELDS (TYPE_FN_FIELD_TYPE (fns_ptr, ix));
 	}
       else
 	{
@@ -2772,7 +2783,7 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
       parm_types = (struct type **) xmalloc (nparms * (sizeof (struct type *)));
       for (jj = 0; jj < nparms; jj++)
 	parm_types[jj] = (method
-			  ? (TYPE_FN_FIELD_ARGS (fns_ptr, ix)[jj])
+			  ? (TYPE_FN_FIELD_ARGS (fns_ptr, ix)[jj].type)
 			  : TYPE_FIELD_TYPE (SYMBOL_TYPE (oload_syms[ix]), jj));
 
       /* Compare parameter types to supplied argument types.  Skip THIS for
@@ -2900,6 +2911,9 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
 	}
       *objp = temp;
     }
+  if (cleanups != NULL)
+    do_cleanups (cleanups);
+
   return oload_incompatible ? 100 : (oload_non_standard ? 10 : 0);
 }
 
@@ -3034,7 +3048,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	    {
 	      v = value_static_field (t, i);
 	      if (v == NULL)
-		error ("Internal error: could not find static variable %s",
+		error ("static field %s has been optimized out",
 		       name);
 	      return v;
 	    }
@@ -3303,10 +3317,10 @@ value_slice (struct value *array, int lowbound, int length)
   if (get_discrete_bounds (range_type, &lowerbound, &upperbound) < 0)
     error ("slice from bad array or bitstring");
   if (lowbound < lowerbound || length < 0
-      || lowbound + length - 1 > upperbound
-  /* Chill allows zero-length strings but not arrays. */
-      || (current_language->la_language == language_chill
-	  && length == 0 && TYPE_CODE (array_type) == TYPE_CODE_ARRAY))
+      || lowbound + length - 1 > upperbound)
+    /* OBSOLETE Chill allows zero-length strings but not arrays. */
+    /* OBSOLETE || (current_language->la_language == language_chill */
+    /* OBSOLETE && length == 0 && TYPE_CODE (array_type) == TYPE_CODE_ARRAY)) */
     error ("slice out of range");
   /* FIXME-type-allocation: need a way to free this type when we are
      done with it.  */
@@ -3362,8 +3376,8 @@ value_slice (struct value *array, int lowbound, int length)
   return slice;
 }
 
-/* Assuming chill_varying_type (VARRAY) is true, return an equivalent
-   value as a fixed-length array. */
+/* Assuming OBSOLETE chill_varying_type (VARRAY) is true, return an
+   equivalent value as a fixed-length array. */
 
 struct value *
 varying_to_slice (struct value *varray)

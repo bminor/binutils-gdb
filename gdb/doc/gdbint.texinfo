@@ -50,7 +50,7 @@ Software Foundation raise funds for GNU development.''
 @end tex
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1990,1991,1992,1993,1994,1996,1998,1999,2000,2001
+Copyright @copyright{} 1990,1991,1992,1993,1994,1996,1998,1999,2000,2001, 2002
    Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
@@ -722,6 +722,14 @@ the main command list, and should be used for those commands.  The usual
 place to add commands is in the @code{_initialize_@var{xyz}} routines at
 the ends of most source files.
 
+@findex add_setshow_cmd
+@findex add_setshow_cmd_full
+To add paired @samp{set} and @samp{show} commands, use
+@code{add_setshow_cmd} or @code{add_setshow_cmd_full}.  The former is
+a slightly simpler interface which is useful when you don't need to
+further modify the new command structures, while the latter returns
+the new command structures for manipulation.
+
 @cindex deprecating commands
 @findex deprecate_cmd
 Before removing commands from the command set it is a good idea to
@@ -946,7 +954,7 @@ be signaled.
 This function first opens the tuple and then establishes a cleanup
 (@pxref{Coding, Cleanups}) to close the tuple.  It provides a convenient
 and correct implementation of the non-portable@footnote{The function
-cast is not portable ISO-C.} code sequence:
+cast is not portable ISO C.} code sequence:
 @smallexample
 struct cleanup *old_cleanup;
 ui_out_tuple_begin (uiout, "...");
@@ -1826,7 +1834,7 @@ The file @file{mdebugread.c} implements reading for this format.
 DWARF 1 is a debugging format that was originally designed to be
 used with ELF in SVR4 systems.
 
-@c CHILL_PRODUCER
+@c OBSOLETE CHILL_PRODUCER
 @c GCC_PRODUCER
 @c GPLUS_PRODUCER
 @c LCC_PRODUCER
@@ -2385,6 +2393,14 @@ NetBSD using the ELF executable format
 @findex GDB_OSABI_WINCE
 @item GDB_OSABI_WINCE
 Windows CE
+
+@findex GDB_OSABI_GO32
+@item GDB_OSABI_GO32
+DJGPP
+
+@findex GDB_OSABI_NETWARE
+@item GDB_OSABI_NETWARE
+Novell NetWare
 
 @findex GDB_OSABI_ARM_EABI_V1
 @item GDB_OSABI_ARM_EABI_V1
@@ -3078,10 +3094,30 @@ library in which breakpoints cannot be set and so should be disabled.
 @findex DO_REGISTERS_INFO
 If defined, use this to print the value of a register or all registers.
 
+This method is deprecated.
+
 @item PRINT_FLOAT_INFO()
-#findex PRINT_FLOAT_INFO
+@findex PRINT_FLOAT_INFO
 If defined, then the @samp{info float} command will print information about
 the processor's floating point unit.
+
+@item print_registers_info (@var{gdbarch}, @var{frame}, @var{regnum}, @var{all})
+@findex print_registers_info
+If defined, pretty print the value of the register @var{regnum} for the
+specified @var{frame}.  If the value of @var{regnum} is -1, pretty print
+either all registers (@var{all} is non zero) or a select subset of
+registers (@var{all} is zero).
+
+The default method prints one register per line, and if @var{all} is
+zero omits floating-point registers.
+
+@item PRINT_VECTOR_INFO()
+@findex PRINT_VECTOR_INFO
+If defined, then the @samp{info vector} command will call this function
+to print information about the processor's vector unit.
+
+By default, the @samp{info vector} command will print all vector
+registers (the register's type having the vector attribute).
 
 @item DWARF_REG_TO_REGNUM
 @findex DWARF_REG_TO_REGNUM
@@ -3613,9 +3649,9 @@ for parameters/results have been allocated on the stack.
 Define this to convert sdb register numbers into @value{GDBN} regnums.  If not
 defined, no conversion will be done.
 
-@item SHIFT_INST_REGS
-@findex SHIFT_INST_REGS
-(Only used for m88k targets.)
+@c OBSOLETE @item SHIFT_INST_REGS
+@c OBSOLETE @findex SHIFT_INST_REGS
+@c OBSOLETE (Only used for m88k targets.)
 
 @item SKIP_PERMANENT_BREAKPOINT
 @findex SKIP_PERMANENT_BREAKPOINT
@@ -3665,10 +3701,11 @@ delay slot.  If a breakpoint has been placed in the instruction's delay
 slot, @value{GDBN} will single-step over that instruction before resuming
 normally.  Currently only defined for the Mips.
 
-@item STORE_RETURN_VALUE (@var{type}, @var{valbuf})
+@item STORE_RETURN_VALUE (@var{type}, @var{regcache}, @var{valbuf})
 @findex STORE_RETURN_VALUE
-A C expression that stores a function return value of type @var{type},
-where @var{valbuf} is the address of the value to be stored.
+A C expression that writes the function return value, found in
+@var{valbuf}, into the @var{regcache}.  @var{type} is the type of the
+value that is to be returned.
 
 @item SUN_FIXED_LBRAC_BUG
 @findex SUN_FIXED_LBRAC_BUG
@@ -3883,6 +3920,168 @@ facilities that are unusual (extra symbol table info; the breakpoint
 instruction needed; etc.).  Then write a @file{@var{arch}/tm-@var{os}.h}
 that just @code{#include}s @file{tm-@var{arch}.h} and
 @file{config/tm-@var{os}.h}.
+
+
+@section Converting an existing Target Architecture to Multi-arch
+@cindex converting targets to multi-arch
+
+This section describes the current accepted best practice for converting
+an existing target architecture to the multi-arch framework.
+
+The process consists of generating, testing, posting and committing a
+sequence of patches.  Each patch must contain a single change, for
+instance:
+
+@itemize @bullet
+
+@item
+Directly convert a group of functions into macros (the conversion does
+not change the behavior of any of the functions).
+
+@item
+Replace a non-multi-arch with a multi-arch mechanism (e.g.,
+@code{FRAME_INFO}).
+
+@item
+Enable multi-arch level one.
+
+@item
+Delete one or more files.
+
+@end itemize
+
+@noindent
+There isn't a size limit on a patch, however, a developer is strongly
+encouraged to keep the patch size down.
+
+Since each patch is well defined, and since each change has been tested
+and shows no regressions, the patches are considered @emph{fairly}
+obvious.  Such patches, when submitted by developers listed in the
+@file{MAINTAINERS} file, do not need approval.  Occasional steps in the
+process may be more complicated and less clear.  The developer is
+expected to use their judgment and is encouraged to seek advice as
+needed.
+
+@subsection Preparation
+
+The first step is to establish control.  Build (with @option{-Werror}
+enabled) and test the target so that there is a baseline against which
+the debugger can be compared.
+
+At no stage can the test results regress or @value{GDBN} stop compiling
+with @option{-Werror}.
+
+@subsection Add the multi-arch initialization code
+
+The objective of this step is to establish the basic multi-arch
+framework.  It involves
+
+@itemize @bullet
+
+@item
+The addition of a @code{@var{arch}_gdbarch_init} function@footnote{The
+above is from the original example and uses K&R C.  @value{GDBN}
+has since converted to ISO C but lets ignore that.} that creates
+the architecture:
+@smallexample
+static struct gdbarch *
+d10v_gdbarch_init (info, arches)
+     struct gdbarch_info info;
+     struct gdbarch_list *arches;
+@{
+  struct gdbarch *gdbarch;
+  /* there is only one d10v architecture */
+  if (arches != NULL)
+    return arches->gdbarch;
+  gdbarch = gdbarch_alloc (&info, NULL);
+  return gdbarch;
+@}
+@end smallexample
+@noindent
+@emph{}
+
+@item
+A per-architecture dump function to print any architecture specific
+information:
+@smallexample
+static void
+mips_dump_tdep (struct gdbarch *current_gdbarch,
+                struct ui_file *file)
+@{
+   @dots{} code to print architecture specific info @dots{}
+@}
+@end smallexample
+
+@item
+A change to @code{_initialize_@var{arch}_tdep} to register this new
+architecture:
+@smallexample
+void
+_initialize_mips_tdep (void)
+@{
+  gdbarch_register (bfd_arch_mips, mips_gdbarch_init,
+                    mips_dump_tdep);
+@end smallexample
+
+@item
+Add the macro @code{GDB_MULTI_ARCH}, defined as 0 (zero), to the file@*
+@file{config/@var{arch}/tm-@var{arch}.h}.
+
+@end itemize
+
+@subsection Update multi-arch incompatible mechanisms
+
+Some mechanisms do not work with multi-arch.  They include:
+
+@table @code
+@item EXTRA_FRAME_INFO
+Delete.
+@item FRAME_FIND_SAVED_REGS
+Replaced with @code{FRAME_INIT_SAVED_REGS}
+@end table
+
+@noindent
+At this stage you could also consider converting the macros into
+functions.
+
+@subsection Prepare for multi-arch level to one
+
+Temporally set @code{GDB_MULTI_ARCH} to @code{GDB_MULTI_ARCH_PARTIAL}
+and then build and start @value{GDBN} (the change should not be
+committed).  @value{GDBN} may not build, and once built, it may die with
+an internal error listing the architecture methods that must be
+provided.
+
+Fix any build problems (patch(es)).
+
+Convert all the architecture methods listed, which are only macros, into
+functions (patch(es)).
+
+Update @code{@var{arch}_gdbarch_init} to set all the missing
+architecture methods and wrap the corresponding macros in @code{#if
+!GDB_MULTI_ARCH} (patch(es)).
+
+@subsection Set multi-arch level one
+
+Change the value of @code{GDB_MULTI_ARCH} to GDB_MULTI_ARCH_PARTIAL (a
+single patch).
+
+Any problems with throwing ``the switch'' should have been fixed
+already.
+
+@subsection Convert remaining macros
+
+Suggest converting macros into functions (and setting the corresponding
+architecture method) in small batches.
+
+@subsection Set multi-arch level to two
+
+This should go smoothly.
+
+@subsection Delete the TM file
+
+The @file{tm-@var{arch}.h} can be deleted.  @file{@var{arch}.mt} and
+@file{configure.in} updated.
 
 
 @node Target Vector Definition
@@ -4446,6 +4645,143 @@ interruption must be on the cleanup chain before you call these
 functions, since they might never return to your code (they
 @samp{longjmp} instead).
 
+@section Per-architecture module data
+@cindex per-architecture module data
+@cindex multi-arch data
+@cindex data-pointer, per-architecture/per-module
+
+The multi-arch framework includes a mechanism for adding module specific
+per-architecture data-pointers to the @code{struct gdbarch} architecture
+object.
+
+A module registers one or more per-architecture data-pointers using the
+function @code{register_gdbarch_data}:
+
+@deftypefun struct gdbarch_data *register_gdbarch_data (gdbarch_data_init_ftype *@var{init}, gdbarch_data_free_ftype *@var{free})
+
+The @var{init} function is used to obtain an initial value for a
+per-architecture data-pointer.  The function is called, after the
+architecture has been created, when the data-pointer is still
+uninitialized (@code{NULL}) and its value has been requested via a call
+to @code{gdbarch_data}.  A data-pointer can also be initialize
+explicitly using @code{set_gdbarch_data}.
+
+The @var{free} function is called when a data-pointer needs to be
+destroyed.  This occurs when either the corresponding @code{struct
+gdbarch} object is being destroyed or when @code{set_gdbarch_data} is
+overriding a non-@code{NULL} data-pointer value.
+
+The function @code{register_gdbarch_data} returns a @code{struct
+gdbarch_data} that is used to identify the data-pointer that was added
+to the module.
+
+@end deftypefun
+
+A typical module has @code{init} and @code{free} functions of the form:
+
+@smallexample
+static struct gdbarch_data *nozel_handle;
+static void *
+nozel_init (struct gdbarch *gdbarch)
+@{
+  struct nozel *data = XMALLOC (struct nozel);
+  @dots{}
+  return data;
+@}
+@dots{}
+static void
+nozel_free (struct gdbarch *gdbarch, void *data)
+@{
+  xfree (data);
+@}
+@end smallexample
+
+Since uninitialized (@code{NULL}) data-pointers are initialized
+on-demand, an @code{init} function is free to call other modules that
+use data-pointers.  Those modules data-pointers will be initialized as
+needed.  Care should be taken to ensure that the @code{init} call graph
+does not contain cycles.
+
+The data-pointer is registered with the call:
+
+@smallexample
+void
+_initialize_nozel (void)
+@{
+  nozel_handle = register_gdbarch_data (nozel_init, nozel_free);
+@dots{}
+@end smallexample
+
+The per-architecture data-pointer is accessed using the function:
+
+@deftypefun void *gdbarch_data (struct gdbarch *@var{gdbarch}, struct gdbarch_data *@var{data_handle})
+Given the architecture @var{arch} and module data handle
+@var{data_handle} (returned by @code{register_gdbarch_data}, this
+function returns the current value of the per-architecture data-pointer.
+@end deftypefun
+
+The non-@code{NULL} data-pointer returned by @code{gdbarch_data} should
+be saved in a local variable and then used directly:
+
+@smallexample
+int
+nozel_total (struct gdbarch *gdbarch)
+@{
+  int total;
+  struct nozel *data = gdbarch_data (gdbarch, nozel_handle);
+  @dots{}
+  return total;
+@}
+@end smallexample
+
+It is also possible to directly initialize the data-pointer using:
+
+@deftypefun void set_gdbarch_data (struct gdbarch *@var{gdbarch}, struct gdbarch_data *handle, void *@var{pointer})
+Update the data-pointer corresponding to @var{handle} with the value of
+@var{pointer}.  If the previous data-pointer value is non-NULL, then it
+is freed using data-pointers @var{free} function.
+@end deftypefun
+
+This function is used by modules that require a mechanism for explicitly
+setting the per-architecture data-pointer during architecture creation:
+
+@smallexample
+/* Called during architecture creation.  */
+extern void
+set_gdbarch_nozel (struct gdbarch *gdbarch,
+                   int total)
+@{
+  struct nozel *data = XMALLOC (struct nozel);
+  @dots{}
+  set_gdbarch_data (gdbarch, nozel_handle, nozel);
+@}
+@end smallexample
+
+@smallexample
+/* Default, called when nozel not set by set_gdbarch_nozel().  */
+static void *
+nozel_init (struct gdbarch *gdbarch)
+@{
+  struct nozel *default_nozel = XMALLOC (struc nozel);
+  @dots{}
+  return default_nozel;
+@}
+@end smallexample
+
+@smallexample
+void
+_initialize_nozel (void)
+@{
+  nozel_handle = register_gdbarch_data (nozel_init, NULL);
+  @dots{}
+@end smallexample
+
+@noindent
+Note that an @code{init} function still needs to be registered.  It is
+used to initialize the data-pointer when the architecture creation phase
+fail to set an initial value.
+
+
 @section Wrapping Output Lines
 @cindex line wrap in output
 
@@ -4486,11 +4822,12 @@ but does not require it, @value{GDBN} requires it.
 @value{GDBN}, as described in the following sections.
 
 
-@subsection ISO-C
+@subsection ISO C
 
-@value{GDBN} assumes an ISO-C compliant compiler.
+@value{GDBN} assumes an ISO/IEC 9899:1990 (a.k.a.@: ISO C90) compliant
+compiler.
 
-@value{GDBN} does not assume an ISO-C or POSIX compliant C library.
+@value{GDBN} does not assume an ISO C or POSIX compliant C library.
 
 
 @subsection Memory Management
@@ -4749,19 +5086,30 @@ For other files @samp{-} is used as the separator.
 
 @subsection Include Files
 
-All @file{.c} files should include @file{defs.h} first.
+A @file{.c} file should include @file{defs.h} first.
 
-All @file{.c} files should explicitly include the headers for any
-declarations they refer to.  They should not rely on files being
-included indirectly.
+A @file{.c} file should directly include the @code{.h} file of every
+declaration and/or definition it directly refers to.  It cannot rely on
+indirect inclusion.
 
-With the exception of the global definitions supplied by @file{defs.h},
-a header file should explicitly include the header declaring any
-@code{typedefs} et.al.@: it refers to.
+A @file{.h} file should directly include the @code{.h} file of every
+declaration and/or definition it directly refers to.  It cannot rely on
+indirect inclusion.  Exception: The file @file{defs.h} does not need to
+be directly included.
 
-@code{extern} declarations should never appear in @code{.c} files.
+An external declaration should only appear in one include file.
 
-All include files should be wrapped in:
+An external declaration should never appear in a @code{.c} file.
+Exception: a declaration for the @code{_initialize} function that
+pacifies @option{-Wmissing-declaration}.
+
+A @code{typedef} definition should only appear in one include file.
+
+An opaque @code{struct} declaration can appear in multiple @file{.h}
+files.  Where possible, a @file{.h} file should use an opaque
+@code{struct} declaration instead of an include.
+
+All @file{.h} files should be wrapped in:
 
 @smallexample
 #ifndef INCLUDE_FILE_NAME_H
@@ -5158,41 +5506,50 @@ This means that changes such as adding a new architectures or (within
 reason) support for a new host are considered acceptable.}
 
 
-@section Obsolete any code
+@section Obsoleting code
 
 Before anything else, poke the other developers (and around the source
 code) to see if there is anything that can be removed from @value{GDBN}
 (an old target, an unused file).
 
 Obsolete code is identified by adding an @code{OBSOLETE} prefix to every
-line.  Doing this means that it is easy to identify obsolete code when
-grepping through the sources.
+line.  Doing this means that it is easy to identify something that has
+been obsoleted when greping through the sources.
 
-The process has a number of steps and is intentionally slow --- this is
-to mainly ensure that people have had a reasonable chance to respond.
-Remember, everything on the internet takes a week.
+The process is done in stages --- this is mainly to ensure that the
+wider @value{GDBN} community has a reasonable opportunity to respond.
+Remember, everything on the Internet takes a week.
 
-@itemize @bullet
+@enumerate
 @item
-announce the change on @email{gdb@@sources.redhat.com, GDB mailing list}
+Post the proposal on @email{gdb@@sources.redhat.com, the GDB mailing
+list} Creating a bug report to track the task's state, is also highly
+recommended.
 @item
-wait a week or so
+Wait a week or so.
 @item
-announce the change on @email{gdb-announce@@sources.redhat.com, GDB
-Announcement mailing list}
+Post the proposal on @email{gdb-announce@@sources.redhat.com, the GDB
+Announcement mailing list}.
 @item
-wait a week or so
+Wait a week or so.
 @item
-go through and edit all relevant files and lines (e.g., in
-@file{configure.tgt}) so that they are prefixed with the word
-@code{OBSOLETE}.
-@end itemize
+Go through and edit all relevant files and lines so that they are
+prefixed with the word @code{OBSOLETE}.
+@item
+Wait until the next GDB version, containing this obsolete code, has been
+released.
+@item
+Remove the obsolete code.
+@end enumerate
 
-@emph{Maintainer note: Removing old code, while regrettable, is a good
-thing.  Firstly it helps the developers by removing code that is either
-no longer relevant or simply wrong.  Secondly since it removes any
-history associated with the file (effectively clearing the slate) the
-developer has a much freer hand when it comes to fixing broken files.}
+@noindent
+@emph{Maintainer note: While removing old code is regrettable it is
+hopefully better for @value{GDBN}'s long term development.  Firstly it
+helps the developers by removing code that is either no longer relevant
+or simply wrong.  Secondly since it removes any history associated with
+the file (effectively clearing the slate) the developer has a much freer
+hand when it comes to fixing broken files.}
+
 
 
 @section Before the Branch
@@ -5246,37 +5603,141 @@ Close anything obviously fixed.
 The targets are listed in @file{gdb/MAINTAINERS}.
 
 
-@section Cut the branch
+@section Cut the Branch
 
-@subheading The dirty work
-
-I think something like the below was used:
+@subheading Create the branch
 
 @smallexample
-$  d=`date -u +%Y-%m-%d`
-$  echo $d
-2002-01-24
-$  cvs -f -d /cvs/src rtag -D $d-gmt \
-gdb_5_1-$d-branchpoint insight+dejagnu
-$  cvs -f -d /cvs/src rtag -b -r gdb_V_V-$d-branchpoint \
-gdb_5_1-$d-branch insight+dejagnu
+$  u=5.1
+$  v=5.2
+$  V=`echo $v | sed 's/\./_/g'`
+$  D=`date -u +%Y-%m-%d`
+$  echo $u $V $D
+5.1 5_2 2002-03-03
+$  echo cvs -f -d :ext:sources.redhat.com:/cvs/src rtag \
+-D $D-gmt gdb_$V-$D-branchpoint insight+dejagnu
+cvs -f -d :ext:sources.redhat.com:/cvs/src rtag
+-D 2002-03-03-gmt gdb_5_2-2002-03-03-branchpoint insight+dejagnu
+$  ^echo ^^
+...
+$  echo cvs -f -d :ext:sources.redhat.com:/cvs/src rtag \
+-b -r gdb_$V-$D-branchpoint gdb_$V-branch insight+dejagnu
+cvs -f -d :ext:sources.redhat.com:/cvs/src rtag \
+-b -r gdb_5_2-2002-03-03-branchpoint gdb_5_2-branch insight+dejagnu
+$  ^echo ^^
+...
 $
 @end smallexample
 
 @itemize @bullet
 @item
-the @kbd{-D YYYY-MM-DD-gmt} forces the branch to an exact date/time.
+by using @kbd{-D YYYY-MM-DD-gmt} the branch is forced to an exact
+date/time.
 @item
-the trunk is first tagged so that the branch point can easily be found
+the trunk is first taged so that the branch point can easily be found
 @item
-Insight (which includes GDB) and dejagnu are tagged at the same time
+Insight (which includes GDB) and dejagnu are all tagged at the same time
+@item
+@file{version.in} gets bumped to avoid version number conflicts
+@item
+the reading of @file{.cvsrc} is disabled using @file{-f}
 @end itemize
 
-@subheading Post the branch info
+@subheading Update @file{version.in}
+
+@smallexample
+$  u=5.1
+$  v=5.2
+$  V=`echo $v | sed 's/\./_/g'`
+$  echo $u $v$V
+5.1 5_2
+$  cd /tmp
+$  echo cvs -f -d :ext:sources.redhat.com:/cvs/src co \
+-r gdb_$V-branch src/gdb/version.in
+cvs -f -d :ext:sources.redhat.com:/cvs/src co
+ -r gdb_5_2-branch src/gdb/version.in
+$  ^echo ^^
+U src/gdb/version.in
+$  cd src/gdb
+$  echo $u.90-0000-00-00-cvs > version.in
+$  cat version.in
+5.1.90-0000-00-00-cvs
+$  cvs -f commit version.in
+@end smallexample
+
+@itemize @bullet
+@item
+@file{0000-00-00} is used as a date to pump prime the version.in update
+mechanism
+@item
+@file{.90} and the previous branch version are used as fairly arbitrary
+initial branch version number
+@end itemize
+
 
 @subheading Update the web and news pages
 
+Something?
+
 @subheading Tweak cron to track the new branch
+
+The file @file{gdbadmin/cron/crontab} contains gdbadmin's cron table.
+This file needs to be updated so that:
+
+@itemize @bullet
+@item
+a daily timestamp is added to the file @file{version.in}
+@item
+the new branch is included in the snapshot process
+@end itemize
+
+@noindent
+See the file @file{gdbadmin/cron/README} for how to install the updated
+cron table.
+
+The file @file{gdbadmin/ss/README} should also be reviewed to reflect
+any changes.  That file is copied to both the branch/ and current/
+snapshot directories.
+
+
+@subheading Update the NEWS and README files
+
+The @file{NEWS} file needs to be updated so that on the branch it refers
+to @emph{changes in the current release} while on the trunk it also
+refers to @emph{changes since the current release}.
+
+The @file{README} file needs to be updated so that it refers to the
+current release.
+
+@subheading Post the branch info
+
+Send an announcement to the mailing lists:
+
+@itemize @bullet
+@item
+@email{gdb-announce@@sources.redhat.com, GDB Announcement mailing list}
+@item
+@email{gdb@@sources.redhat.com, GDB Discsussion mailing list} and
+@email{gdb-testers@@sources.redhat.com, GDB Discsussion mailing list}
+@end itemize
+
+@emph{Pragmatics: The branch creation is sent to the announce list to
+ensure that people people not subscribed to the higher volume discussion
+list are alerted.}
+
+The announcement should include:
+
+@itemize @bullet
+@item
+the branch tag
+@item
+how to check out the branch using CVS
+@item
+the date/number of weeks until the release
+@item
+the branch commit policy
+still holds.
+@end itemize
 
 @section Stabilize the branch
 
@@ -5325,7 +5786,8 @@ Notes:
 @itemize @bullet
 @item
 Check the @code{autoconf} version carefully.  You want to be using the
-version taken from the @file{binutils} snapshot directory.  It is very
+version taken from the @file{binutils} snapshot directory, which can be
+found at @uref{ftp://sources.redhat.com/pub/binutils/}. It is very
 unlikely that a system installed version of @code{autoconf} (e.g.,
 @file{/usr/bin/autoconf}) is correct.
 @end itemize

@@ -194,10 +194,12 @@ You can use @value{GDBN} to debug programs written in C and C++.
 For more information, see @ref{Support,,Supported languages}.
 For more information, see @ref{C,,C and C++}.
 
-@cindex Chill
+@c OBSOLETE @cindex Chill
 @cindex Modula-2
-Support for Modula-2 and Chill is partial.  For information on Modula-2,
-see @ref{Modula-2,,Modula-2}.  For information on Chill, see @ref{Chill}.
+Support for Modula-2
+@c OBSOLETE and Chill
+is partial.  For information on Modula-2, see @ref{Modula-2,,Modula-2}.
+@c OBSOLETE For information on Chill, see @ref{Chill}.
 
 @cindex Pascal
 Debugging Pascal programs which use sets, subranges, file variables, or
@@ -4416,6 +4418,7 @@ Table}.
 * Convenience Vars::            Convenience variables
 * Registers::                   Registers
 * Floating Point Hardware::     Floating point hardware
+* Vector Unit::                 Vector Unit
 * Memory Region Attributes::    Memory region attributes
 * Dump/Restore Files::          Copy between memory and a file
 @end menu
@@ -5581,6 +5584,20 @@ floating point chip.  Currently, @samp{info float} is supported on
 the ARM and x86 machines.
 @end table
 
+@node Vector Unit
+@section Vector Unit
+@cindex vector unit
+
+Depending on the configuration, @value{GDBN} may be able to give you
+more information about the status of the vector unit.
+
+@table @code
+@kindex info vector
+@item info vector
+Display information about the vector unit.  The exact contents and
+layout vary depending on the hardware.
+@end table
+
 @node Memory Region Attributes
 @section Memory region attributes 
 @cindex memory region attributes
@@ -5601,9 +5618,11 @@ to enable, disable, or remove a memory region, you specify that number.
 
 @table @code
 @kindex mem
-@item mem @var{address1} @var{address2} @var{attributes}@dots{}
-Define memory region bounded by @var{address1} and @var{address2}
-with attributes @var{attributes}@dots{}.
+@item mem @var{lower} @var{upper} @var{attributes}@dots{}
+Define memory region bounded by @var{lower} and @var{upper} with
+attributes @var{attributes}@dots{}.  Note that @var{upper} == 0 is a
+special case: it is treated as the the target's maximum memory address.
+(0xffff on 16 bit targets, 0xffffffff on 32 bit targets, etc.)
 
 @kindex delete mem
 @item delete mem @var{nums}@dots{}
@@ -5769,7 +5788,7 @@ tekhex format file @var{filename}.
 @item dump tekhex value @var{filename} @var{expression}
 Dump value of @var{expression} into tekhex format file @var{filename}.
 
-@item restore @var{filename} @var{[binary]} @var{bias} @var{start} @var{end}
+@item restore @var{filename} [@var{binary}] @var{bias} @var{start} @var{end}
 Restore the contents of file @var{filename} into memory.  The @code{restore}
 command can automatically recognize any known bfd file format, except for
 raw binary.  To restore a raw binary file you must use the optional argument
@@ -5843,10 +5862,10 @@ expansions.  Since @value{GDBN} simply expands macros, but does not
 parse the result, @var{expression} need not be a valid expression; it
 can be any string of tokens.
 
-@kindex show macro
+@kindex info macro
 @cindex macro definition, showing
 @cindex definition, showing a macro's
-@item show macro @var{macro}
+@item info macro @var{macro}
 Show the definition of the macro named @var{macro}, and describe the
 source location where that definition was established.
 
@@ -5941,10 +5960,10 @@ to decide which macro definitions are in scope:
 10        printf ("Hello, world!\n");
 11      #undef N
 12        printf ("We're so creative.\n");
-(gdb) show macro ADD
+(gdb) info macro ADD
 Defined at /home/jimb/gdb/macros/play/sample.c:5
 #define ADD(x) (M + x)
-(gdb) show macro Q
+(gdb) info macro Q
 Defined at /home/jimb/gdb/macros/play/sample.h:1
   included at /home/jimb/gdb/macros/play/sample.c:2
 #define Q <
@@ -5977,7 +5996,7 @@ Breakpoint 1, main () at sample.c:10
 At line 10, the definition of the macro @code{N} at line 9 is in force:
 
 @smallexample
-(gdb) show macro N
+(gdb) info macro N
 Defined at /home/jimb/gdb/macros/play/sample.c:9
 #define N 28
 (gdb) macro expand N Q M
@@ -5995,13 +6014,13 @@ thereof) in force at each point:
 (gdb) next
 Hello, world!
 12        printf ("We're so creative.\n");
-(gdb) show macro N
+(gdb) info macro N
 The symbol `N' has no definition as a C/C++ preprocessor macro
 at /home/jimb/gdb/macros/play/sample.c:12
 (gdb) next
 We're so creative.
 14        printf ("Goodbye, world!\n");
-(gdb) show macro N
+(gdb) info macro N
 Defined at /home/jimb/gdb/macros/play/sample.c:13
 #define N 1729
 (gdb) macro expand N Q M
@@ -7112,10 +7131,10 @@ C@t{++} source file
 @itemx .F
 Fortran source file
 
-@item .ch
-@itemx .c186
-@itemx .c286
-CHILL source file
+@c OBSOLETE @item .ch
+@c OBSOLETE @itemx .c186
+@c OBSOLETE @itemx .c286
+@c OBSOLETE CHILL source file
 
 @item .mod
 Modula-2 source file
@@ -7388,7 +7407,9 @@ being set automatically by @value{GDBN}.
 @node Support
 @section Supported languages
 
-@value{GDBN} supports C, C@t{++}, Fortran, Java, Chill, assembly, and Modula-2.
+@value{GDBN} supports C, C@t{++}, Fortran, Java, 
+@c OBSOLETE Chill,
+assembly, and Modula-2.
 @c This is false ...
 Some @value{GDBN} features may be used in expressions regardless of the
 language you use: the @value{GDBN} @code{@@} and @code{::} operators,
@@ -7407,7 +7428,7 @@ language reference or tutorial.
 @menu
 * C::           C and C@t{++}
 * Modula-2::    Modula-2
-* Chill::        Chill
+@c OBSOLETE * Chill::        Chill
 @end menu
 
 @node C
@@ -8373,504 +8394,504 @@ address can be specified by an integral constant, the construct
 In @value{GDBN} scripts, the Modula-2 inequality operator @code{#} is
 interpreted as the beginning of a comment.  Use @code{<>} instead.
 
-@node Chill
-@subsection Chill
-
-The extensions made to @value{GDBN} to support Chill only support output
-from the @sc{gnu} Chill compiler.  Other Chill compilers are not currently
-supported, and attempting to debug executables produced by them is most
-likely to give an error as @value{GDBN} reads in the executable's symbol
-table.
-
-@c This used to say "... following Chill related topics ...", but since
-@c menus are not shown in the printed manual, it would look awkward.
-This section covers the Chill related topics and the features
-of @value{GDBN} which support these topics.
-
-@menu
-* How modes are displayed::        How modes are displayed
-* Locations::                        Locations and their accesses
-* Values and their Operations:: Values and their Operations
-* Chill type and range checks::
-* Chill defaults::
-@end menu
-
-@node How modes are displayed
-@subsubsection How modes are displayed
-
-The Chill Datatype- (Mode) support of @value{GDBN} is directly related
-with the functionality of the @sc{gnu} Chill compiler, and therefore deviates
-slightly from the standard specification of the Chill language. The
-provided modes are:
-
-@c FIXME: this @table's contents effectively disable @code by using @r
-@c on every @item.  So why does it need @code?
-@table @code
-@item @r{@emph{Discrete modes:}}
-@itemize @bullet
-@item
-@emph{Integer Modes} which are predefined by @code{BYTE, UBYTE, INT,
-UINT, LONG, ULONG},
-@item
-@emph{Boolean Mode} which is predefined by @code{BOOL},
-@item
-@emph{Character Mode} which is predefined by @code{CHAR},
-@item
-@emph{Set Mode} which is displayed by the keyword @code{SET}.
-@smallexample
-(@value{GDBP}) ptype x
-type = SET (karli = 10, susi = 20, fritzi = 100)
-@end smallexample
-If the type is an unnumbered set the set element values are omitted.
-@item
-@emph{Range Mode} which is displayed by
-@smallexample
-@code{type = <basemode>(<lower bound> : <upper bound>)}
-@end smallexample
-where @code{<lower bound>, <upper bound>} can be of any discrete literal
-expression (e.g. set element names).
-@end itemize
-
-@item @r{@emph{Powerset Mode:}}
-A Powerset Mode is displayed by the keyword @code{POWERSET} followed by
-the member mode of the powerset.  The member mode can be any discrete mode.
-@smallexample
-(@value{GDBP}) ptype x
-type = POWERSET SET (egon, hugo, otto)
-@end smallexample
-
-@item @r{@emph{Reference Modes:}}
-@itemize @bullet
-@item
-@emph{Bound Reference Mode} which is displayed by the keyword @code{REF}
-followed by the mode name to which the reference is bound.
-@item
-@emph{Free Reference Mode} which is displayed by the keyword @code{PTR}.
-@end itemize
-
-@item @r{@emph{Procedure mode}}
-The procedure mode is displayed by @code{type = PROC(<parameter list>)
-<return mode> EXCEPTIONS (<exception list>)}. The @code{<parameter
-list>} is a list of the parameter modes.  @code{<return mode>} indicates
-the mode of the result of the procedure if any.  The exceptionlist lists
-all possible exceptions which can be raised by the procedure.
-
-@ignore
-@item @r{@emph{Instance mode}}
-The instance mode is represented by a structure, which has a static
-type, and is therefore not really of interest.
-@end ignore
-
-@item @r{@emph{Synchronization Modes:}}
-@itemize @bullet
-@item
-@emph{Event Mode} which is displayed by
-@smallexample
-@code{EVENT (<event length>)}
-@end smallexample
-where @code{(<event length>)} is optional.
-@item
-@emph{Buffer Mode} which is displayed by
-@smallexample
-@code{BUFFER (<buffer length>)<buffer element mode>}
-@end smallexample
-where @code{(<buffer length>)} is optional.
-@end itemize
-
-@item @r{@emph{Timing Modes:}}
-@itemize @bullet
-@item
-@emph{Duration Mode} which is predefined by @code{DURATION}
-@item
-@emph{Absolute Time Mode} which is predefined by @code{TIME}
-@end itemize
-
-@item @r{@emph{Real Modes:}}
-Real Modes are predefined with @code{REAL} and @code{LONG_REAL}.
-
-@item @r{@emph{String Modes:}}
-@itemize @bullet
-@item
-@emph{Character String Mode} which is displayed by
-@smallexample
-@code{CHARS(<string length>)}
-@end smallexample
-followed by the keyword @code{VARYING} if the String Mode is a varying
-mode
-@item
-@emph{Bit String Mode} which is displayed by
-@smallexample
-@code{BOOLS(<string
-length>)}
-@end smallexample
-@end itemize
-
-@item @r{@emph{Array Mode:}}
-The Array Mode is displayed by the keyword @code{ARRAY(<range>)}
-followed by the element mode (which may in turn be an array mode).
-@smallexample
-(@value{GDBP}) ptype x
-type = ARRAY (1:42)
-          ARRAY (1:20)
-             SET (karli = 10, susi = 20, fritzi = 100)
-@end smallexample
-
-@item @r{@emph{Structure Mode}}
-The Structure mode is displayed by the keyword @code{STRUCT(<field
-list>)}.  The @code{<field list>} consists of names and modes of fields
-of the structure.  Variant structures have the keyword @code{CASE <field>
-OF <variant fields> ESAC} in their field list.  Since the current version
-of the GNU Chill compiler doesn't implement tag processing (no runtime
-checks of variant fields, and therefore no debugging info), the output
-always displays all variant fields.
-@smallexample
-(@value{GDBP}) ptype str
-type = STRUCT (
-    as x,
-    bs x,
-    CASE bs OF
-    (karli):
-        cs a
-    (ott):
-        ds x
-    ESAC
-)
-@end smallexample
-@end table
-
-@node Locations
-@subsubsection Locations and their accesses
-
-A location in Chill is an object which can contain values.
-
-A value of a location is generally accessed by the (declared) name of
-the location.  The output conforms to the specification of values in
-Chill programs.  How values are specified
-is the topic of the next section, @ref{Values and their Operations}.
-
-The pseudo-location @code{RESULT} (or @code{result}) can be used to
-display or change the result of a currently-active procedure:
-
-@smallexample
-set result := EXPR
-@end smallexample
-
-@noindent
-This does the same as the Chill action @code{RESULT EXPR} (which
-is not available in @value{GDBN}).
-
-Values of reference mode locations are printed by @code{PTR(<hex
-value>)} in case of a free reference mode, and by @code{(REF <reference
-mode>) (<hex-value>)} in case of a bound reference.  @code{<hex value>}
-represents the address where the reference points to.  To access the
-value of the location referenced by the pointer, use the dereference
-operator @samp{->}.
-
-Values of procedure mode locations are displayed by
-@smallexample
-@code{@{ PROC
-(<argument modes> ) <return mode> @} <address> <name of procedure
-location>}
-@end smallexample
-@code{<argument modes>} is a list of modes according to the parameter
-specification of the procedure and @code{<address>} shows the address of
-the entry point.
-
-@ignore
-Locations of instance modes are displayed just like a structure with two
-fields specifying the @emph{process type} and the @emph{copy number} of
-the investigated instance location@footnote{This comes from the current
-implementation of instances.  They are implemented as a structure (no
-na).  The output should be something like @code{[<name of the process>;
-<instance number>]}.}.  The field names are @code{__proc_type} and
-@code{__proc_copy}.
-
-Locations of synchronization modes are displayed like a structure with
-the field name @code{__event_data} in case of a event mode location, and
-like a structure with the field @code{__buffer_data} in case of a buffer
-mode location (refer to previous paragraph).
-
-Structure Mode locations are printed by @code{[.<field name>: <value>,
-...]}.  The @code{<field name>} corresponds to the structure mode
-definition and the layout of @code{<value>} varies depending of the mode
-of the field.  If the investigated structure mode location is of variant
-structure mode, the variant parts of the structure are enclosed in curled
-braces (@samp{@{@}}).  Fields enclosed by @samp{@{,@}} are residing
-on the same memory location and represent the current values of the
-memory location in their specific modes.  Since no tag processing is done
-all variants are displayed. A variant field is printed by
-@code{(<variant name>) = .<field name>: <value>}.  (who implements the
-stuff ???)
-@smallexample
-(@value{GDBP}) print str1 $4 = [.as: 0, .bs: karli, .<TAG>: { (karli) =
-[.cs: []], (susi) = [.ds: susi]}]
-@end smallexample
-@end ignore
-
-Substructures of string mode-, array mode- or structure mode-values
-(e.g. array slices, fields of structure locations) are accessed using
-certain operations which are described in the next section, @ref{Values
-and their Operations}.
-
-A location value may be interpreted as having a different mode using the
-location conversion.  This mode conversion is written as @code{<mode
-name>(<location>)}.  The user has to consider that the sizes of the modes
-have to be equal otherwise an error occurs.  Furthermore, no range
-checking of the location against the destination mode is performed, and
-therefore the result can be quite confusing.
-
-@smallexample
-(@value{GDBP}) print int (s(3 up 4)) XXX TO be filled in !! XXX
-@end smallexample
-
-@node Values and their Operations
-@subsubsection Values and their Operations
-
-Values are used to alter locations, to investigate complex structures in
-more detail or to filter relevant information out of a large amount of
-data.  There are several (mode dependent) operations defined which enable
-such investigations.  These operations are not only applicable to
-constant values but also to locations, which can become quite useful
-when debugging complex structures.  During parsing the command line
-(e.g. evaluating an expression) @value{GDBN} treats location names as
-the values behind these locations.
-
-This section describes how values have to be specified and which
-operations are legal to be used with such values.
-
-@table @code
-@item Literal Values
-Literal values are specified in the same manner as in @sc{gnu} Chill programs.
-For detailed specification refer to the @sc{gnu} Chill implementation Manual
-chapter 1.5.
-@c FIXME: if the Chill Manual is a Texinfo documents, the above should
-@c be converted to a @ref.
-
-@ignore
-@itemize @bullet
-@item
-@emph{Integer Literals} are specified in the same manner as in Chill
-programs (refer to the Chill Standard z200/88 chpt 5.2.4.2)
-@item
-@emph{Boolean Literals} are defined by @code{TRUE} and @code{FALSE}.
-@item
-@emph{Character Literals} are defined by @code{'<character>'}. (e.g.
-@code{'M'})
-@item
-@emph{Set Literals} are defined by a name which was specified in a set
-mode.  The value delivered by a Set Literal is the set value.  This is
-comparable to an enumeration in C/C@t{++} language.
-@item
-@emph{Emptiness Literal} is predefined by @code{NULL}.  The value of the
-emptiness literal delivers either the empty reference value, the empty
-procedure value or the empty instance value.
-
-@item
-@emph{Character String Literals} are defined by a sequence of characters
-enclosed in single- or double quotes.  If a single- or double quote has
-to be part of the string literal it has to be stuffed (specified twice).
-@item
-@emph{Bitstring Literals} are specified in the same manner as in Chill
-programs (refer z200/88 chpt 5.2.4.8).
-@item
-@emph{Floating point literals} are specified in the same manner as in
-(gnu-)Chill programs (refer @sc{gnu} Chill implementation Manual chapter 1.5).
-@end itemize
-@end ignore
-
-@item Tuple Values
-A tuple is specified by @code{<mode name>[<tuple>]}, where @code{<mode
-name>} can be omitted if the mode of the tuple is unambiguous.  This
-unambiguity is derived from the context of a evaluated expression.
-@code{<tuple>} can be one of the following:
-
-@itemize @bullet
-@item @emph{Powerset Tuple}
-@item @emph{Array Tuple}
-@item @emph{Structure Tuple}
-Powerset tuples, array tuples and structure tuples are specified in the
-same manner as in Chill programs refer to z200/88 chpt 5.2.5.
-@end itemize
-
-@item String Element Value
-A string element value is specified by
-@smallexample
-@code{<string value>(<index>)}
-@end smallexample
-where @code{<index>} is a integer expression.  It delivers a character
-value which is equivalent to the character indexed by @code{<index>} in
-the string.
-
-@item String Slice Value
-A string slice value is specified by @code{<string value>(<slice
-spec>)}, where @code{<slice spec>} can be either a range of integer
-expressions or specified by @code{<start expr> up <size>}.
-@code{<size>} denotes the number of elements which the slice contains.
-The delivered value is a string value, which is part of the specified
-string.
-
-@item Array Element Values
-An array element value is specified by @code{<array value>(<expr>)} and
-delivers a array element value of the mode of the specified array.
-
-@item Array Slice Values
-An array slice is specified by @code{<array value>(<slice spec>)}, where
-@code{<slice spec>} can be either a range specified by expressions or by
-@code{<start expr> up <size>}.  @code{<size>} denotes the number of
-arrayelements the slice contains.  The delivered value is an array value
-which is part of the specified array.
-
-@item Structure Field Values
-A structure field value is derived by @code{<structure value>.<field
-name>}, where @code{<field name>} indicates the name of a field specified
-in the mode definition of the structure.  The mode of the delivered value
-corresponds to this mode definition in the structure definition.
-
-@item Procedure Call Value
-The procedure call value is derived from the return value of the
-procedure@footnote{If a procedure call is used for instance in an
-expression, then this procedure is called with all its side
-effects.  This can lead to confusing results if used carelessly.}.
-
-Values of duration mode locations are represented by @code{ULONG} literals.
-
-Values of time mode locations appear as
-@smallexample
-@code{TIME(<secs>:<nsecs>)}
-@end smallexample
-
-
-@ignore
-This is not implemented yet:
-@item Built-in Value
-@noindent
-The following built in functions are provided:
-
-@table @code
-@item @code{ADDR()}
-@item @code{NUM()}
-@item @code{PRED()}
-@item @code{SUCC()}
-@item @code{ABS()}
-@item @code{CARD()}
-@item @code{MAX()}
-@item @code{MIN()}
-@item @code{SIZE()}
-@item @code{UPPER()}
-@item @code{LOWER()}
-@item @code{LENGTH()}
-@item @code{SIN()}
-@item @code{COS()}
-@item @code{TAN()}
-@item @code{ARCSIN()}
-@item @code{ARCCOS()}
-@item @code{ARCTAN()}
-@item @code{EXP()}
-@item @code{LN()}
-@item @code{LOG()}
-@item @code{SQRT()}
-@end table
-
-For a detailed description refer to the GNU Chill implementation manual
-chapter 1.6.
-@end ignore
-
-@item Zero-adic Operator Value
-The zero-adic operator value is derived from the instance value for the
-current active process.
-
-@item Expression Values
-The value delivered by an expression is the result of the evaluation of
-the specified expression.  If there are error conditions (mode
-incompatibility, etc.) the evaluation of expressions is aborted with a
-corresponding error message.  Expressions may be parenthesised which
-causes the evaluation of this expression before any other expression
-which uses the result of the parenthesised expression.  The following
-operators are supported by @value{GDBN}:
-
-@table @code
-@item @code{OR, ORIF, XOR}
-@itemx @code{AND, ANDIF}
-@itemx @code{NOT}
-Logical operators defined over operands of boolean mode.
-
-@item @code{=, /=}
-Equality and inequality operators defined over all modes.
-
-@item @code{>, >=}
-@itemx @code{<, <=}
-Relational operators defined over predefined modes.
-
-@item @code{+, -}
-@itemx @code{*, /, MOD, REM}
-Arithmetic operators defined over predefined modes.
-
-@item @code{-}
-Change sign operator.
-
-@item @code{//}
-String concatenation operator.
-
-@item @code{()}
-String repetition operator.
-
-@item @code{->}
-Referenced location operator which can be used either to take the
-address of a location (@code{->loc}), or to dereference a reference
-location (@code{loc->}).
-
-@item @code{OR, XOR}
-@itemx @code{AND}
-@itemx @code{NOT}
-Powerset and bitstring operators.
-
-@item @code{>, >=}
-@itemx @code{<, <=}
-Powerset inclusion operators.
-
-@item @code{IN}
-Membership operator.
-@end table
-@end table
-
-@node Chill type and range checks
-@subsubsection Chill type and range checks
-
-@value{GDBN} considers two Chill variables mode equivalent if the sizes
-of the two modes are equal.  This rule applies recursively to more
-complex datatypes which means that complex modes are treated
-equivalent if all element modes (which also can be complex modes like
-structures, arrays, etc.) have the same size.
-
-Range checking is done on all mathematical operations, assignment, array
-index bounds and all built in procedures.
-
-Strong type checks are forced using the @value{GDBN} command @code{set
-check strong}.  This enforces strong type and range checks on all
-operations where Chill constructs are used (expressions, built in
-functions, etc.) in respect to the semantics as defined in the z.200
-language specification.
-
-All checks can be disabled by the @value{GDBN} command @code{set check
-off}.
-
-@ignore
-@c Deviations from the Chill Standard Z200/88
-see last paragraph ?
-@end ignore
-
-@node Chill defaults
-@subsubsection Chill defaults
-
-If type and range checking are set automatically by @value{GDBN}, they
-both default to @code{on} whenever the working language changes to
-Chill.  This happens regardless of whether you or @value{GDBN}
-selected the working language.
-
-If you allow @value{GDBN} to set the language automatically, then entering
-code compiled from a file whose name ends with @file{.ch} sets the
-working language to Chill.  @xref{Automatically, ,Having @value{GDBN} set
-the language automatically}, for further details.
+@c OBSOLETE @node Chill
+@c OBSOLETE @subsection Chill
+@c OBSOLETE 
+@c OBSOLETE The extensions made to @value{GDBN} to support Chill only support output
+@c OBSOLETE from the @sc{gnu} Chill compiler.  Other Chill compilers are not currently
+@c OBSOLETE supported, and attempting to debug executables produced by them is most
+@c OBSOLETE likely to give an error as @value{GDBN} reads in the executable's symbol
+@c OBSOLETE table.
+@c OBSOLETE 
+@c OBSOLETE @c This used to say "... following Chill related topics ...", but since
+@c OBSOLETE @c menus are not shown in the printed manual, it would look awkward.
+@c OBSOLETE This section covers the Chill related topics and the features
+@c OBSOLETE of @value{GDBN} which support these topics.
+@c OBSOLETE 
+@c OBSOLETE @menu
+@c OBSOLETE * How modes are displayed::        How modes are displayed
+@c OBSOLETE * Locations::                        Locations and their accesses
+@c OBSOLETE * Values and their Operations:: Values and their Operations
+@c OBSOLETE * Chill type and range checks::
+@c OBSOLETE * Chill defaults::
+@c OBSOLETE @end menu
+@c OBSOLETE 
+@c OBSOLETE @node How modes are displayed
+@c OBSOLETE @subsubsection How modes are displayed
+@c OBSOLETE 
+@c OBSOLETE The Chill Datatype- (Mode) support of @value{GDBN} is directly related
+@c OBSOLETE with the functionality of the @sc{gnu} Chill compiler, and therefore deviates
+@c OBSOLETE slightly from the standard specification of the Chill language. The
+@c OBSOLETE provided modes are:
+@c OBSOLETE 
+@c OBSOLETE @c FIXME: this @table's contents effectively disable @code by using @r
+@c OBSOLETE @c on every @item.  So why does it need @code?
+@c OBSOLETE @table @code
+@c OBSOLETE @item @r{@emph{Discrete modes:}}
+@c OBSOLETE @itemize @bullet
+@c OBSOLETE @item
+@c OBSOLETE @emph{Integer Modes} which are predefined by @code{BYTE, UBYTE, INT,
+@c OBSOLETE UINT, LONG, ULONG},
+@c OBSOLETE @item
+@c OBSOLETE @emph{Boolean Mode} which is predefined by @code{BOOL},
+@c OBSOLETE @item
+@c OBSOLETE @emph{Character Mode} which is predefined by @code{CHAR},
+@c OBSOLETE @item
+@c OBSOLETE @emph{Set Mode} which is displayed by the keyword @code{SET}.
+@c OBSOLETE @smallexample
+@c OBSOLETE (@value{GDBP}) ptype x
+@c OBSOLETE type = SET (karli = 10, susi = 20, fritzi = 100)
+@c OBSOLETE @end smallexample
+@c OBSOLETE If the type is an unnumbered set the set element values are omitted.
+@c OBSOLETE @item
+@c OBSOLETE @emph{Range Mode} which is displayed by
+@c OBSOLETE @smallexample
+@c OBSOLETE @code{type = <basemode>(<lower bound> : <upper bound>)}
+@c OBSOLETE @end smallexample
+@c OBSOLETE where @code{<lower bound>, <upper bound>} can be of any discrete literal
+@c OBSOLETE expression (e.g. set element names).
+@c OBSOLETE @end itemize
+@c OBSOLETE 
+@c OBSOLETE @item @r{@emph{Powerset Mode:}}
+@c OBSOLETE A Powerset Mode is displayed by the keyword @code{POWERSET} followed by
+@c OBSOLETE the member mode of the powerset.  The member mode can be any discrete mode.
+@c OBSOLETE @smallexample
+@c OBSOLETE (@value{GDBP}) ptype x
+@c OBSOLETE type = POWERSET SET (egon, hugo, otto)
+@c OBSOLETE @end smallexample
+@c OBSOLETE 
+@c OBSOLETE @item @r{@emph{Reference Modes:}}
+@c OBSOLETE @itemize @bullet
+@c OBSOLETE @item
+@c OBSOLETE @emph{Bound Reference Mode} which is displayed by the keyword @code{REF}
+@c OBSOLETE followed by the mode name to which the reference is bound.
+@c OBSOLETE @item
+@c OBSOLETE @emph{Free Reference Mode} which is displayed by the keyword @code{PTR}.
+@c OBSOLETE @end itemize
+@c OBSOLETE 
+@c OBSOLETE @item @r{@emph{Procedure mode}}
+@c OBSOLETE The procedure mode is displayed by @code{type = PROC(<parameter list>)
+@c OBSOLETE <return mode> EXCEPTIONS (<exception list>)}. The @code{<parameter
+@c OBSOLETE list>} is a list of the parameter modes.  @code{<return mode>} indicates
+@c OBSOLETE the mode of the result of the procedure if any.  The exceptionlist lists
+@c OBSOLETE all possible exceptions which can be raised by the procedure.
+@c OBSOLETE 
+@c OBSOLETE @ignore
+@c OBSOLETE @item @r{@emph{Instance mode}}
+@c OBSOLETE The instance mode is represented by a structure, which has a static
+@c OBSOLETE type, and is therefore not really of interest.
+@c OBSOLETE @end ignore
+@c OBSOLETE 
+@c OBSOLETE @item @r{@emph{Synchronization Modes:}}
+@c OBSOLETE @itemize @bullet
+@c OBSOLETE @item
+@c OBSOLETE @emph{Event Mode} which is displayed by
+@c OBSOLETE @smallexample
+@c OBSOLETE @code{EVENT (<event length>)}
+@c OBSOLETE @end smallexample
+@c OBSOLETE where @code{(<event length>)} is optional.
+@c OBSOLETE @item
+@c OBSOLETE @emph{Buffer Mode} which is displayed by
+@c OBSOLETE @smallexample
+@c OBSOLETE @code{BUFFER (<buffer length>)<buffer element mode>}
+@c OBSOLETE @end smallexample
+@c OBSOLETE where @code{(<buffer length>)} is optional.
+@c OBSOLETE @end itemize
+@c OBSOLETE 
+@c OBSOLETE @item @r{@emph{Timing Modes:}}
+@c OBSOLETE @itemize @bullet
+@c OBSOLETE @item
+@c OBSOLETE @emph{Duration Mode} which is predefined by @code{DURATION}
+@c OBSOLETE @item
+@c OBSOLETE @emph{Absolute Time Mode} which is predefined by @code{TIME}
+@c OBSOLETE @end itemize
+@c OBSOLETE 
+@c OBSOLETE @item @r{@emph{Real Modes:}}
+@c OBSOLETE Real Modes are predefined with @code{REAL} and @code{LONG_REAL}.
+@c OBSOLETE 
+@c OBSOLETE @item @r{@emph{String Modes:}}
+@c OBSOLETE @itemize @bullet
+@c OBSOLETE @item
+@c OBSOLETE @emph{Character String Mode} which is displayed by
+@c OBSOLETE @smallexample
+@c OBSOLETE @code{CHARS(<string length>)}
+@c OBSOLETE @end smallexample
+@c OBSOLETE followed by the keyword @code{VARYING} if the String Mode is a varying
+@c OBSOLETE mode
+@c OBSOLETE @item
+@c OBSOLETE @emph{Bit String Mode} which is displayed by
+@c OBSOLETE @smallexample
+@c OBSOLETE @code{BOOLS(<string
+@c OBSOLETE length>)}
+@c OBSOLETE @end smallexample
+@c OBSOLETE @end itemize
+@c OBSOLETE 
+@c OBSOLETE @item @r{@emph{Array Mode:}}
+@c OBSOLETE The Array Mode is displayed by the keyword @code{ARRAY(<range>)}
+@c OBSOLETE followed by the element mode (which may in turn be an array mode).
+@c OBSOLETE @smallexample
+@c OBSOLETE (@value{GDBP}) ptype x
+@c OBSOLETE type = ARRAY (1:42)
+@c OBSOLETE           ARRAY (1:20)
+@c OBSOLETE              SET (karli = 10, susi = 20, fritzi = 100)
+@c OBSOLETE @end smallexample
+@c OBSOLETE 
+@c OBSOLETE @item @r{@emph{Structure Mode}}
+@c OBSOLETE The Structure mode is displayed by the keyword @code{STRUCT(<field
+@c OBSOLETE list>)}.  The @code{<field list>} consists of names and modes of fields
+@c OBSOLETE of the structure.  Variant structures have the keyword @code{CASE <field>
+@c OBSOLETE OF <variant fields> ESAC} in their field list.  Since the current version
+@c OBSOLETE of the GNU Chill compiler doesn't implement tag processing (no runtime
+@c OBSOLETE checks of variant fields, and therefore no debugging info), the output
+@c OBSOLETE always displays all variant fields.
+@c OBSOLETE @smallexample
+@c OBSOLETE (@value{GDBP}) ptype str
+@c OBSOLETE type = STRUCT (
+@c OBSOLETE     as x,
+@c OBSOLETE     bs x,
+@c OBSOLETE     CASE bs OF
+@c OBSOLETE     (karli):
+@c OBSOLETE         cs a
+@c OBSOLETE     (ott):
+@c OBSOLETE         ds x
+@c OBSOLETE     ESAC
+@c OBSOLETE )
+@c OBSOLETE @end smallexample
+@c OBSOLETE @end table
+@c OBSOLETE 
+@c OBSOLETE @node Locations
+@c OBSOLETE @subsubsection Locations and their accesses
+@c OBSOLETE 
+@c OBSOLETE A location in Chill is an object which can contain values.
+@c OBSOLETE 
+@c OBSOLETE A value of a location is generally accessed by the (declared) name of
+@c OBSOLETE the location.  The output conforms to the specification of values in
+@c OBSOLETE Chill programs.  How values are specified
+@c OBSOLETE is the topic of the next section, @ref{Values and their Operations}.
+@c OBSOLETE 
+@c OBSOLETE The pseudo-location @code{RESULT} (or @code{result}) can be used to
+@c OBSOLETE display or change the result of a currently-active procedure:
+@c OBSOLETE 
+@c OBSOLETE @smallexample
+@c OBSOLETE set result := EXPR
+@c OBSOLETE @end smallexample
+@c OBSOLETE 
+@c OBSOLETE @noindent
+@c OBSOLETE This does the same as the Chill action @code{RESULT EXPR} (which
+@c OBSOLETE is not available in @value{GDBN}).
+@c OBSOLETE 
+@c OBSOLETE Values of reference mode locations are printed by @code{PTR(<hex
+@c OBSOLETE value>)} in case of a free reference mode, and by @code{(REF <reference
+@c OBSOLETE mode>) (<hex-value>)} in case of a bound reference.  @code{<hex value>}
+@c OBSOLETE represents the address where the reference points to.  To access the
+@c OBSOLETE value of the location referenced by the pointer, use the dereference
+@c OBSOLETE operator @samp{->}.
+@c OBSOLETE 
+@c OBSOLETE Values of procedure mode locations are displayed by
+@c OBSOLETE @smallexample
+@c OBSOLETE @code{@{ PROC
+@c OBSOLETE (<argument modes> ) <return mode> @} <address> <name of procedure
+@c OBSOLETE location>}
+@c OBSOLETE @end smallexample
+@c OBSOLETE @code{<argument modes>} is a list of modes according to the parameter
+@c OBSOLETE specification of the procedure and @code{<address>} shows the address of
+@c OBSOLETE the entry point.
+@c OBSOLETE 
+@c OBSOLETE @ignore
+@c OBSOLETE Locations of instance modes are displayed just like a structure with two
+@c OBSOLETE fields specifying the @emph{process type} and the @emph{copy number} of
+@c OBSOLETE the investigated instance location@footnote{This comes from the current
+@c OBSOLETE implementation of instances.  They are implemented as a structure (no
+@c OBSOLETE na).  The output should be something like @code{[<name of the process>;
+@c OBSOLETE <instance number>]}.}.  The field names are @code{__proc_type} and
+@c OBSOLETE @code{__proc_copy}.
+@c OBSOLETE 
+@c OBSOLETE Locations of synchronization modes are displayed like a structure with
+@c OBSOLETE the field name @code{__event_data} in case of a event mode location, and
+@c OBSOLETE like a structure with the field @code{__buffer_data} in case of a buffer
+@c OBSOLETE mode location (refer to previous paragraph).
+@c OBSOLETE 
+@c OBSOLETE Structure Mode locations are printed by @code{[.<field name>: <value>,
+@c OBSOLETE ...]}.  The @code{<field name>} corresponds to the structure mode
+@c OBSOLETE definition and the layout of @code{<value>} varies depending of the mode
+@c OBSOLETE of the field.  If the investigated structure mode location is of variant
+@c OBSOLETE structure mode, the variant parts of the structure are enclosed in curled
+@c OBSOLETE braces (@samp{@{@}}).  Fields enclosed by @samp{@{,@}} are residing
+@c OBSOLETE on the same memory location and represent the current values of the
+@c OBSOLETE memory location in their specific modes.  Since no tag processing is done
+@c OBSOLETE all variants are displayed. A variant field is printed by
+@c OBSOLETE @code{(<variant name>) = .<field name>: <value>}.  (who implements the
+@c OBSOLETE stuff ???)
+@c OBSOLETE @smallexample
+@c OBSOLETE (@value{GDBP}) print str1 $4 = [.as: 0, .bs: karli, .<TAG>: { (karli) =
+@c OBSOLETE [.cs: []], (susi) = [.ds: susi]}]
+@c OBSOLETE @end smallexample
+@c OBSOLETE @end ignore
+@c OBSOLETE 
+@c OBSOLETE Substructures of string mode-, array mode- or structure mode-values
+@c OBSOLETE (e.g. array slices, fields of structure locations) are accessed using
+@c OBSOLETE certain operations which are described in the next section, @ref{Values
+@c OBSOLETE and their Operations}.
+@c OBSOLETE 
+@c OBSOLETE A location value may be interpreted as having a different mode using the
+@c OBSOLETE location conversion.  This mode conversion is written as @code{<mode
+@c OBSOLETE name>(<location>)}.  The user has to consider that the sizes of the modes
+@c OBSOLETE have to be equal otherwise an error occurs.  Furthermore, no range
+@c OBSOLETE checking of the location against the destination mode is performed, and
+@c OBSOLETE therefore the result can be quite confusing.
+@c OBSOLETE 
+@c OBSOLETE @smallexample
+@c OBSOLETE (@value{GDBP}) print int (s(3 up 4)) XXX TO be filled in !! XXX
+@c OBSOLETE @end smallexample
+@c OBSOLETE 
+@c OBSOLETE @node Values and their Operations
+@c OBSOLETE @subsubsection Values and their Operations
+@c OBSOLETE 
+@c OBSOLETE Values are used to alter locations, to investigate complex structures in
+@c OBSOLETE more detail or to filter relevant information out of a large amount of
+@c OBSOLETE data.  There are several (mode dependent) operations defined which enable
+@c OBSOLETE such investigations.  These operations are not only applicable to
+@c OBSOLETE constant values but also to locations, which can become quite useful
+@c OBSOLETE when debugging complex structures.  During parsing the command line
+@c OBSOLETE (e.g. evaluating an expression) @value{GDBN} treats location names as
+@c OBSOLETE the values behind these locations.
+@c OBSOLETE 
+@c OBSOLETE This section describes how values have to be specified and which
+@c OBSOLETE operations are legal to be used with such values.
+@c OBSOLETE 
+@c OBSOLETE @table @code
+@c OBSOLETE @item Literal Values
+@c OBSOLETE Literal values are specified in the same manner as in @sc{gnu} Chill programs.
+@c OBSOLETE For detailed specification refer to the @sc{gnu} Chill implementation Manual
+@c OBSOLETE chapter 1.5.
+@c OBSOLETE @c FIXME: if the Chill Manual is a Texinfo documents, the above should
+@c OBSOLETE @c be converted to a @ref.
+@c OBSOLETE 
+@c OBSOLETE @ignore
+@c OBSOLETE @itemize @bullet
+@c OBSOLETE @item
+@c OBSOLETE @emph{Integer Literals} are specified in the same manner as in Chill
+@c OBSOLETE programs (refer to the Chill Standard z200/88 chpt 5.2.4.2)
+@c OBSOLETE @item
+@c OBSOLETE @emph{Boolean Literals} are defined by @code{TRUE} and @code{FALSE}.
+@c OBSOLETE @item
+@c OBSOLETE @emph{Character Literals} are defined by @code{'<character>'}. (e.g.
+@c OBSOLETE @code{'M'})
+@c OBSOLETE @item
+@c OBSOLETE @emph{Set Literals} are defined by a name which was specified in a set
+@c OBSOLETE mode.  The value delivered by a Set Literal is the set value.  This is
+@c OBSOLETE comparable to an enumeration in C/C@t{++} language.
+@c OBSOLETE @item
+@c OBSOLETE @emph{Emptiness Literal} is predefined by @code{NULL}.  The value of the
+@c OBSOLETE emptiness literal delivers either the empty reference value, the empty
+@c OBSOLETE procedure value or the empty instance value.
+@c OBSOLETE 
+@c OBSOLETE @item
+@c OBSOLETE @emph{Character String Literals} are defined by a sequence of characters
+@c OBSOLETE enclosed in single- or double quotes.  If a single- or double quote has
+@c OBSOLETE to be part of the string literal it has to be stuffed (specified twice).
+@c OBSOLETE @item
+@c OBSOLETE @emph{Bitstring Literals} are specified in the same manner as in Chill
+@c OBSOLETE programs (refer z200/88 chpt 5.2.4.8).
+@c OBSOLETE @item
+@c OBSOLETE @emph{Floating point literals} are specified in the same manner as in
+@c OBSOLETE (gnu-)Chill programs (refer @sc{gnu} Chill implementation Manual chapter 1.5).
+@c OBSOLETE @end itemize
+@c OBSOLETE @end ignore
+@c OBSOLETE 
+@c OBSOLETE @item Tuple Values
+@c OBSOLETE A tuple is specified by @code{<mode name>[<tuple>]}, where @code{<mode
+@c OBSOLETE name>} can be omitted if the mode of the tuple is unambiguous.  This
+@c OBSOLETE unambiguity is derived from the context of a evaluated expression.
+@c OBSOLETE @code{<tuple>} can be one of the following:
+@c OBSOLETE 
+@c OBSOLETE @itemize @bullet
+@c OBSOLETE @item @emph{Powerset Tuple}
+@c OBSOLETE @item @emph{Array Tuple}
+@c OBSOLETE @item @emph{Structure Tuple}
+@c OBSOLETE Powerset tuples, array tuples and structure tuples are specified in the
+@c OBSOLETE same manner as in Chill programs refer to z200/88 chpt 5.2.5.
+@c OBSOLETE @end itemize
+@c OBSOLETE 
+@c OBSOLETE @item String Element Value
+@c OBSOLETE A string element value is specified by
+@c OBSOLETE @smallexample
+@c OBSOLETE @code{<string value>(<index>)}
+@c OBSOLETE @end smallexample
+@c OBSOLETE where @code{<index>} is a integer expression.  It delivers a character
+@c OBSOLETE value which is equivalent to the character indexed by @code{<index>} in
+@c OBSOLETE the string.
+@c OBSOLETE 
+@c OBSOLETE @item String Slice Value
+@c OBSOLETE A string slice value is specified by @code{<string value>(<slice
+@c OBSOLETE spec>)}, where @code{<slice spec>} can be either a range of integer
+@c OBSOLETE expressions or specified by @code{<start expr> up <size>}.
+@c OBSOLETE @code{<size>} denotes the number of elements which the slice contains.
+@c OBSOLETE The delivered value is a string value, which is part of the specified
+@c OBSOLETE string.
+@c OBSOLETE 
+@c OBSOLETE @item Array Element Values
+@c OBSOLETE An array element value is specified by @code{<array value>(<expr>)} and
+@c OBSOLETE delivers a array element value of the mode of the specified array.
+@c OBSOLETE 
+@c OBSOLETE @item Array Slice Values
+@c OBSOLETE An array slice is specified by @code{<array value>(<slice spec>)}, where
+@c OBSOLETE @code{<slice spec>} can be either a range specified by expressions or by
+@c OBSOLETE @code{<start expr> up <size>}.  @code{<size>} denotes the number of
+@c OBSOLETE arrayelements the slice contains.  The delivered value is an array value
+@c OBSOLETE which is part of the specified array.
+@c OBSOLETE 
+@c OBSOLETE @item Structure Field Values
+@c OBSOLETE A structure field value is derived by @code{<structure value>.<field
+@c OBSOLETE name>}, where @code{<field name>} indicates the name of a field specified
+@c OBSOLETE in the mode definition of the structure.  The mode of the delivered value
+@c OBSOLETE corresponds to this mode definition in the structure definition.
+@c OBSOLETE 
+@c OBSOLETE @item Procedure Call Value
+@c OBSOLETE The procedure call value is derived from the return value of the
+@c OBSOLETE procedure@footnote{If a procedure call is used for instance in an
+@c OBSOLETE expression, then this procedure is called with all its side
+@c OBSOLETE effects.  This can lead to confusing results if used carelessly.}.
+@c OBSOLETE 
+@c OBSOLETE Values of duration mode locations are represented by @code{ULONG} literals.
+@c OBSOLETE 
+@c OBSOLETE Values of time mode locations appear as
+@c OBSOLETE @smallexample
+@c OBSOLETE @code{TIME(<secs>:<nsecs>)}
+@c OBSOLETE @end smallexample
+@c OBSOLETE 
+@c OBSOLETE 
+@c OBSOLETE @ignore
+@c OBSOLETE This is not implemented yet:
+@c OBSOLETE @item Built-in Value
+@c OBSOLETE @noindent
+@c OBSOLETE The following built in functions are provided:
+@c OBSOLETE 
+@c OBSOLETE @table @code
+@c OBSOLETE @item @code{ADDR()}
+@c OBSOLETE @item @code{NUM()}
+@c OBSOLETE @item @code{PRED()}
+@c OBSOLETE @item @code{SUCC()}
+@c OBSOLETE @item @code{ABS()}
+@c OBSOLETE @item @code{CARD()}
+@c OBSOLETE @item @code{MAX()}
+@c OBSOLETE @item @code{MIN()}
+@c OBSOLETE @item @code{SIZE()}
+@c OBSOLETE @item @code{UPPER()}
+@c OBSOLETE @item @code{LOWER()}
+@c OBSOLETE @item @code{LENGTH()}
+@c OBSOLETE @item @code{SIN()}
+@c OBSOLETE @item @code{COS()}
+@c OBSOLETE @item @code{TAN()}
+@c OBSOLETE @item @code{ARCSIN()}
+@c OBSOLETE @item @code{ARCCOS()}
+@c OBSOLETE @item @code{ARCTAN()}
+@c OBSOLETE @item @code{EXP()}
+@c OBSOLETE @item @code{LN()}
+@c OBSOLETE @item @code{LOG()}
+@c OBSOLETE @item @code{SQRT()}
+@c OBSOLETE @end table
+@c OBSOLETE 
+@c OBSOLETE For a detailed description refer to the GNU Chill implementation manual
+@c OBSOLETE chapter 1.6.
+@c OBSOLETE @end ignore
+@c OBSOLETE 
+@c OBSOLETE @item Zero-adic Operator Value
+@c OBSOLETE The zero-adic operator value is derived from the instance value for the
+@c OBSOLETE current active process.
+@c OBSOLETE 
+@c OBSOLETE @item Expression Values
+@c OBSOLETE The value delivered by an expression is the result of the evaluation of
+@c OBSOLETE the specified expression.  If there are error conditions (mode
+@c OBSOLETE incompatibility, etc.) the evaluation of expressions is aborted with a
+@c OBSOLETE corresponding error message.  Expressions may be parenthesised which
+@c OBSOLETE causes the evaluation of this expression before any other expression
+@c OBSOLETE which uses the result of the parenthesised expression.  The following
+@c OBSOLETE operators are supported by @value{GDBN}:
+@c OBSOLETE 
+@c OBSOLETE @table @code
+@c OBSOLETE @item @code{OR, ORIF, XOR}
+@c OBSOLETE @itemx @code{AND, ANDIF}
+@c OBSOLETE @itemx @code{NOT}
+@c OBSOLETE Logical operators defined over operands of boolean mode.
+@c OBSOLETE 
+@c OBSOLETE @item @code{=, /=}
+@c OBSOLETE Equality and inequality operators defined over all modes.
+@c OBSOLETE 
+@c OBSOLETE @item @code{>, >=}
+@c OBSOLETE @itemx @code{<, <=}
+@c OBSOLETE Relational operators defined over predefined modes.
+@c OBSOLETE 
+@c OBSOLETE @item @code{+, -}
+@c OBSOLETE @itemx @code{*, /, MOD, REM}
+@c OBSOLETE Arithmetic operators defined over predefined modes.
+@c OBSOLETE 
+@c OBSOLETE @item @code{-}
+@c OBSOLETE Change sign operator.
+@c OBSOLETE 
+@c OBSOLETE @item @code{//}
+@c OBSOLETE String concatenation operator.
+@c OBSOLETE 
+@c OBSOLETE @item @code{()}
+@c OBSOLETE String repetition operator.
+@c OBSOLETE 
+@c OBSOLETE @item @code{->}
+@c OBSOLETE Referenced location operator which can be used either to take the
+@c OBSOLETE address of a location (@code{->loc}), or to dereference a reference
+@c OBSOLETE location (@code{loc->}).
+@c OBSOLETE 
+@c OBSOLETE @item @code{OR, XOR}
+@c OBSOLETE @itemx @code{AND}
+@c OBSOLETE @itemx @code{NOT}
+@c OBSOLETE Powerset and bitstring operators.
+@c OBSOLETE 
+@c OBSOLETE @item @code{>, >=}
+@c OBSOLETE @itemx @code{<, <=}
+@c OBSOLETE Powerset inclusion operators.
+@c OBSOLETE 
+@c OBSOLETE @item @code{IN}
+@c OBSOLETE Membership operator.
+@c OBSOLETE @end table
+@c OBSOLETE @end table
+@c OBSOLETE 
+@c OBSOLETE @node Chill type and range checks
+@c OBSOLETE @subsubsection Chill type and range checks
+@c OBSOLETE 
+@c OBSOLETE @value{GDBN} considers two Chill variables mode equivalent if the sizes
+@c OBSOLETE of the two modes are equal.  This rule applies recursively to more
+@c OBSOLETE complex datatypes which means that complex modes are treated
+@c OBSOLETE equivalent if all element modes (which also can be complex modes like
+@c OBSOLETE structures, arrays, etc.) have the same size.
+@c OBSOLETE 
+@c OBSOLETE Range checking is done on all mathematical operations, assignment, array
+@c OBSOLETE index bounds and all built in procedures.
+@c OBSOLETE 
+@c OBSOLETE Strong type checks are forced using the @value{GDBN} command @code{set
+@c OBSOLETE check strong}.  This enforces strong type and range checks on all
+@c OBSOLETE operations where Chill constructs are used (expressions, built in
+@c OBSOLETE functions, etc.) in respect to the semantics as defined in the z.200
+@c OBSOLETE language specification.
+@c OBSOLETE 
+@c OBSOLETE All checks can be disabled by the @value{GDBN} command @code{set check
+@c OBSOLETE off}.
+@c OBSOLETE 
+@c OBSOLETE @ignore
+@c OBSOLETE @c Deviations from the Chill Standard Z200/88
+@c OBSOLETE see last paragraph ?
+@c OBSOLETE @end ignore
+@c OBSOLETE 
+@c OBSOLETE @node Chill defaults
+@c OBSOLETE @subsubsection Chill defaults
+@c OBSOLETE 
+@c OBSOLETE If type and range checking are set automatically by @value{GDBN}, they
+@c OBSOLETE both default to @code{on} whenever the working language changes to
+@c OBSOLETE Chill.  This happens regardless of whether you or @value{GDBN}
+@c OBSOLETE selected the working language.
+@c OBSOLETE 
+@c OBSOLETE If you allow @value{GDBN} to set the language automatically, then entering
+@c OBSOLETE code compiled from a file whose name ends with @file{.ch} sets the
+@c OBSOLETE working language to Chill.  @xref{Automatically, ,Having @value{GDBN} set
+@c OBSOLETE the language automatically}, for further details.
 
 @node Symbols
 @chapter Examining the Symbol Table
@@ -9020,9 +9041,25 @@ collect}.
 
 @kindex info source
 @item info source
-Show the name of the current source file---that is, the source file for
-the function containing the current point of execution---and the language
-it was written in.
+Show information about the current source file---that is, the source file for
+the function containing the current point of execution:
+@itemize @bullet
+@item
+the name of the source file, and the directory containing it,
+@item
+the directory it was compiled in,
+@item
+its length, in lines,
+@item
+which programming language it is written in,
+@item
+whether the executable includes debugging information for that file, and
+if so, what format the information is in (e.g., STABS, Dwarf 2, etc.), and
+@item
+whether the debugging information includes information about
+preprocessor macros.
+@end itemize
+
 
 @kindex info sources
 @item info sources
@@ -11289,7 +11326,7 @@ configurations.
 * i960::                        Intel i960
 * M32R/D::                      Mitsubishi M32R/D
 * M68K::                        Motorola M68K
-* M88K::                        Motorola M88K
+@c OBSOLETE * M88K::                        Motorola M88K
 * MIPS Embedded::               MIPS Embedded
 * PA::                          HP PA Embedded
 * PowerPC:                      PowerPC
@@ -11724,16 +11761,16 @@ ROMBUG ROM monitor for OS/9000.
 
 @end table
 
-@node M88K
-@subsection M88K
-
-@table @code
-
-@kindex target bug
-@item target bug @var{dev}
-BUG monitor, running on a MVME187 (m88k) board.
-
-@end table
+@c OBSOLETE @node M88K
+@c OBSOLETE @subsection M88K
+@c OBSOLETE 
+@c OBSOLETE @table @code
+@c OBSOLETE 
+@c OBSOLETE @kindex target bug
+@c OBSOLETE @item target bug @var{dev}
+@c OBSOLETE BUG monitor, running on a MVME187 (m88k) board.
+@c OBSOLETE 
+@c OBSOLETE @end table
 
 @node MIPS Embedded
 @subsection MIPS Embedded
@@ -12955,8 +12992,8 @@ Execute the command file @var{filename}.
 @end table
 
 The lines in a command file are executed sequentially.  They are not
-printed as they are executed.  An error in any command terminates execution
-of the command file.
+printed as they are executed.  An error in any command terminates
+execution of the command file and control is returned to the console.
 
 Commands that would ask for confirmation if used interactively proceed
 without asking when used in a command file.  Many @value{GDBN} commands that
@@ -14173,11 +14210,38 @@ Shared library events.
 
 @end table
 
+@kindex maint print registers
+@kindex maint print raw-registers
+@kindex maint print cooked-registers
+@item maint print registers
+@itemx maint print raw-registers
+@itemx maint print cooked-registers
+Print @value{GDBN}'s internal register data structures.
+
+The command @samp{maint print raw-registers} includes the contents of
+the raw register cache; and the command @samp{maint print
+cooked-registers} includes the (cooked) value of all registers.
+@xref{Registers,, Registers, gdbint, @value{GDBN} Internals}.
+
+Takes an optional file parameter.
+
 @end table
 
 
 @node Remote Protocol
 @appendix @value{GDBN} Remote Serial Protocol
+
+@menu
+* Overview::
+* Packets::
+* Stop Reply Packets::
+* General Query Packets::
+* Register Packet Format::
+* Examples::
+@end menu
+
+@node Overview
+@section Overview
 
 There may be occasions when you need to know something about the
 protocol---for example, if there is only one serial port to your target
@@ -14241,8 +14305,9 @@ exception of @samp{#} and @samp{$} (see @samp{X} packet for additional
 exceptions).
 
 Fields within the packet should be separated using @samp{,} @samp{;} or
+@cindex remote protocol, field separator
 @samp{:}.  Except where otherwise noted all numbers are represented in
-HEX with leading zeros suppressed.
+@sc{hex} with leading zeros suppressed.
 
 Implementors should note that prior to @value{GDBN} 5.0, the character
 @samp{:} could not appear as the third character in a packet (as it
@@ -14279,166 +14344,179 @@ A stub is required to support the @samp{g}, @samp{G}, @samp{m}, @samp{M},
 @samp{c}, and @samp{s} @var{command}s.  All other @var{command}s are 
 optional.
 
-Below is a complete list of all currently defined @var{command}s and
-their corresponding response @var{data}:
-@page
-@multitable @columnfractions .30 .30 .40
-@item Packet
-@tab Request
-@tab Description
+@node Packets
+@section Packets
 
-@item extended mode
-@tab @code{!}
-@tab
+The following table provides a complete list of all currently defined
+@var{command}s and their corresponding response @var{data}.
+
+@table @r
+
+@item @code{!} --- extended mode
+@cindex @code{!} packet
+
 Enable extended mode.  In extended mode, the remote server is made
 persistent.  The @samp{R} packet is used to restart the program being
 debugged.
-@item
-@tab reply @samp{OK}
-@tab
+
+Reply:
+@table @samp
+@item OK
 The remote target both supports and has enabled extended mode.
+@end table
 
-@item last signal
-@tab @code{?}
-@tab
-Indicate the reason the target halted.  The reply is the same as for step
-and continue.
-@item
-@tab reply
-@tab see below
+@item @code{?} --- last signal
+@cindex @code{?} packet
 
+Indicate the reason the target halted.  The reply is the same as for
+step and continue.
 
-@item reserved
-@tab @code{a}
-@tab Reserved for future use
+Reply:
+@xref{Stop Reply Packets}, for the reply specifications.
 
-@item set program arguments @strong{(reserved)}
-@tab @code{A}@var{arglen}@code{,}@var{argnum}@code{,}@var{arg}@code{,...}
-@tab
-@item
-@tab
-@tab
+@item @code{a} --- reserved
+
+Reserved for future use.
+
+@item @code{A}@var{arglen}@code{,}@var{argnum}@code{,}@var{arg}@code{,@dots{}} ---  set program arguments @strong{(reserved)}
+@cindex @code{A} packet
+
 Initialized @samp{argv[]} array passed into program. @var{arglen}
 specifies the number of bytes in the hex encoded byte stream @var{arg}.
-See @file{gdbserver} for more details.
-@item
-@tab reply @code{OK}
-@item
-@tab reply @code{E}@var{NN}
+See @code{gdbserver} for more details.
 
-@item set baud @strong{(deprecated)}
-@tab @code{b}@var{baud}
-@tab
-Change the serial line speed to @var{baud}.  JTC: @emph{When does the
-transport layer state change?  When it's received, or after the ACK is
-transmitted.  In either case, there are problems if the command or the
-acknowledgment packet is dropped.} Stan: @emph{If people really wanted
-to add something like this, and get it working for the first time, they
-ought to modify ser-unix.c to send some kind of out-of-band message to a
-specially-setup stub and have the switch happen "in between" packets, so
-that from remote protocol's point of view, nothing actually
-happened.}
+Reply:
+@table @samp
+@item OK
+@item E@var{NN}
+@end table
 
-@item set breakpoint @strong{(deprecated)}
-@tab @code{B}@var{addr},@var{mode}
-@tab
+@item @code{b}@var{baud} --- set baud @strong{(deprecated)}
+@cindex @code{b} packet
+
+Change the serial line speed to @var{baud}.
+
+JTC: @emph{When does the transport layer state change?  When it's
+received, or after the ACK is transmitted.  In either case, there are
+problems if the command or the acknowledgment packet is dropped.}
+
+Stan: @emph{If people really wanted to add something like this, and get
+it working for the first time, they ought to modify ser-unix.c to send
+some kind of out-of-band message to a specially-setup stub and have the
+switch happen "in between" packets, so that from remote protocol's point
+of view, nothing actually happened.}
+
+@item @code{B}@var{addr},@var{mode} --- set breakpoint @strong{(deprecated)}
+@cindex @code{B} packet
+
 Set (@var{mode} is @samp{S}) or clear (@var{mode} is @samp{C}) a
-breakpoint at @var{addr}.  @emph{This has been replaced by the @samp{Z} and
-@samp{z} packets.}
+breakpoint at @var{addr}.  @emph{This has been replaced by the @samp{Z}
+and @samp{z} packets.}
 
-@item continue
-@tab @code{c}@var{addr}
-@tab
-@var{addr} is address to resume. If @var{addr} is omitted, resume at
+@item @code{c}@var{addr} --- continue
+@cindex @code{c} packet
+
+@var{addr} is address to resume.  If @var{addr} is omitted, resume at
 current address.
-@item
-@tab reply
-@tab see below
 
-@item continue with signal
-@tab @code{C}@var{sig}@code{;}@var{addr}
-@tab
+Reply:
+@xref{Stop Reply Packets}, for the reply specifications.
+
+@item @code{C}@var{sig}@code{;}@var{addr} --- continue with signal
+@cindex @code{C} packet
+
 Continue with signal @var{sig} (hex signal number).  If
 @code{;}@var{addr} is omitted, resume at same address.
-@item
-@tab reply
-@tab see below
 
-@item toggle debug @strong{(deprecated)}
-@tab @code{d}
-@tab
-toggle debug flag.
+Reply:
+@xref{Stop Reply Packets}, for the reply specifications.
 
-@item detach
-@tab @code{D}
-@tab
-Detach @value{GDBN} from the remote system.  Sent to the remote target before
-@value{GDBN} disconnects.
-@item
-@tab reply @emph{no response}
-@tab
+@item @code{d} --- toggle debug @strong{(deprecated)}
+@cindex @code{d} packet
+
+Toggle debug flag.
+
+@item @code{D} --- detach
+@cindex @code{D} packet
+
+Detach @value{GDBN} from the remote system.  Sent to the remote target
+before @value{GDBN} disconnects.
+
+Reply:
+@table @samp
+@item @emph{no response}
 @value{GDBN} does not check for any response after sending this packet.
+@end table
 
-@item reserved
-@tab @code{e}
-@tab Reserved for future use
+@item @code{e} --- reserved
 
-@item reserved
-@tab @code{E}
-@tab Reserved for future use
+Reserved for future use.
 
-@item reserved
-@tab @code{f}
-@tab Reserved for future use
+@item @code{E} --- reserved
 
-@item reserved
-@tab @code{F}
-@tab Reserved for future use
+Reserved for future use.
 
-@item read registers
-@tab @code{g}
-@tab Read general registers.
-@item
-@tab reply @var{XX...}
-@tab
+@item @code{f} --- reserved
+
+Reserved for future use.
+
+@item @code{F} --- reserved
+
+Reserved for future use.
+
+@item @code{g} --- read registers
+@anchor{read registers packet}
+@cindex @code{g} packet
+
+Read general registers.
+
+Reply:
+@table @samp
+@item @var{XX@dots{}}
 Each byte of register data is described by two hex digits.  The bytes
 with the register are transmitted in target byte order.  The size of
 each register and their position within the @samp{g} @var{packet} are
-determined by the @value{GDBN} internal macros @var{REGISTER_RAW_SIZE} and
-@var{REGISTER_NAME} macros.  The specification of several standard
+determined by the @value{GDBN} internal macros @var{REGISTER_RAW_SIZE}
+and @var{REGISTER_NAME} macros.  The specification of several standard
 @code{g} packets is specified below.
-@item
-@tab @code{E}@var{NN}
-@tab for an error.
+@item E@var{NN}
+for an error.
+@end table
 
-@item write regs
-@tab @code{G}@var{XX...}
-@tab
-See @samp{g} for a description of the @var{XX...} data.
-@item
-@tab reply @code{OK}
-@tab for success
-@item
-@tab reply @code{E}@var{NN}
-@tab for an error
+@item @code{G}@var{XX@dots{}} --- write regs
+@cindex @code{G} packet
 
-@item reserved
-@tab @code{h}
-@tab Reserved for future use
+@xref{read registers packet}, for a description of the @var{XX@dots{}}
+data.
 
-@item set thread 
-@tab @code{H}@var{c}@var{t...}
-@tab
+Reply:
+@table @samp
+@item OK
+for success
+@item E@var{NN}
+for an error
+@end table
+
+@item @code{h} --- reserved
+
+Reserved for future use.
+
+@item @code{H}@var{c}@var{t@dots{}} --- set thread 
+@cindex @code{H} packet
+
 Set thread for subsequent operations (@samp{m}, @samp{M}, @samp{g},
-@samp{G}, et.al.).  @var{c} = @samp{c} for thread used in step and
-continue; @var{t...} can be -1 for all threads.  @var{c} = @samp{g} for
-thread used in other operations.  If zero, pick a thread, any thread.
-@item
-@tab reply @code{OK}
-@tab for success
-@item
-@tab reply @code{E}@var{NN}
-@tab for an error
+@samp{G}, et.al.).  @var{c} depends on the operation to be performed: it
+should be @samp{c} for step and continue operations, @samp{g} for other
+operations.  The thread designator @var{t@dots{}} may be -1, meaning all
+the threads, a thread number, or zero which means pick any thread.
+
+Reply:
+@table @samp
+@item OK
+for success
+@item E@var{NN}
+for an error
+@end table
 
 @c FIXME: JTC:
 @c   'H': How restrictive (or permissive) is the thread model.  If a
@@ -14455,262 +14533,289 @@ thread used in other operations.  If zero, pick a thread, any thread.
 @c                selected, sets the registers of the register block of
 @c                that thread; otherwise sets current registers.
 
-@item cycle step @strong{(draft)}
-@tab @code{i}@var{addr}@code{,}@var{nnn}
-@tab
+@item @code{i}@var{addr}@code{,}@var{nnn} --- cycle step @strong{(draft)}
+@anchor{cycle step packet}
+@cindex @code{i} packet
+
 Step the remote target by a single clock cycle.  If @code{,}@var{nnn} is
 present, cycle step @var{nnn} cycles.  If @var{addr} is present, cycle
 step starting at that address.
 
-@item signal then cycle step @strong{(reserved)}
-@tab @code{I}
-@tab
-See @samp{i} and @samp{S} for likely syntax and semantics.
+@item @code{I} --- signal then cycle step @strong{(reserved)}
+@cindex @code{I} packet
 
-@item reserved
-@tab @code{j}
-@tab Reserved for future use
+@xref{step with signal packet}.  @xref{cycle step packet}.
 
-@item reserved
-@tab @code{J}
-@tab Reserved for future use
+@item @code{j} --- reserved
 
-@item kill request
-@tab @code{k}
-@tab
+Reserved for future use.
+
+@item @code{J} --- reserved
+
+Reserved for future use.
+
+@item @code{k} --- kill request
+@cindex @code{k} packet
+
 FIXME: @emph{There is no description of how to operate when a specific
-thread context has been selected (i.e.@: does 'k' kill only that thread?)}.
+thread context has been selected (i.e.@: does 'k' kill only that
+thread?)}.
 
-@item reserved
-@tab @code{l}
-@tab Reserved for future use
+@item @code{K} --- reserved
 
-@item reserved
-@tab @code{L}
-@tab Reserved for future use
+Reserved for future use.
 
-@item read memory
-@tab @code{m}@var{addr}@code{,}@var{length}
-@tab
+@item @code{l} --- reserved
+
+Reserved for future use.
+
+@item @code{L} --- reserved
+
+Reserved for future use.
+
+@item @code{m}@var{addr}@code{,}@var{length} --- read memory
+@cindex @code{m} packet
+
 Read @var{length} bytes of memory starting at address @var{addr}.
-Neither @value{GDBN} nor the stub assume that sized memory transfers are assumed
-using word alligned accesses. FIXME: @emph{A word aligned memory
+Neither @value{GDBN} nor the stub assume that sized memory transfers are
+assumed using word alligned accesses. FIXME: @emph{A word aligned memory
 transfer mechanism is needed.}
-@item
-@tab reply @var{XX...}
-@tab
-@var{XX...} is mem contents. Can be fewer bytes than requested if able
-to read only part of the data.  Neither @value{GDBN} nor the stub assume that
-sized memory transfers are assumed using word alligned accesses. FIXME:
-@emph{A word aligned memory transfer mechanism is needed.}
-@item
-@tab reply @code{E}@var{NN}
-@tab @var{NN} is errno
 
-@item write mem
-@tab @code{M}@var{addr},@var{length}@code{:}@var{XX...}
-@tab
+Reply:
+@table @samp
+@item @var{XX@dots{}}
+@var{XX@dots{}} is mem contents. Can be fewer bytes than requested if able
+to read only part of the data.  Neither @value{GDBN} nor the stub assume
+that sized memory transfers are assumed using word alligned
+accesses. FIXME: @emph{A word aligned memory transfer mechanism is
+needed.}
+@item E@var{NN}
+@var{NN} is errno
+@end table
+
+@item @code{M}@var{addr},@var{length}@code{:}@var{XX@dots{}} --- write mem
+@cindex @code{M} packet
+
 Write @var{length} bytes of memory starting at address @var{addr}.
-@var{XX...} is the data.
-@item
-@tab reply @code{OK}
-@tab for success
-@item
-@tab reply @code{E}@var{NN}
-@tab
+@var{XX@dots{}} is the data.
+
+Reply:
+@table @samp
+@item OK
+for success
+@item E@var{NN}
 for an error (this includes the case where only part of the data was
 written).
+@end table
 
-@item reserved
-@tab @code{n}
-@tab Reserved for future use
+@item @code{n} --- reserved
 
-@item reserved
-@tab @code{N}
-@tab Reserved for future use
+Reserved for future use.
 
-@item reserved
-@tab @code{o}
-@tab Reserved for future use
+@item @code{N} --- reserved
 
-@item reserved
-@tab @code{O}
-@tab Reserved for future use
+Reserved for future use.
 
-@item read reg @strong{(reserved)}
-@tab @code{p}@var{n...}
-@tab
-See write register.
-@item
-@tab return @var{r....}
-@tab The hex encoded value of the register in target byte order.
+@item @code{o} --- reserved
 
-@item write reg
-@tab @code{P}@var{n...}@code{=}@var{r...}
-@tab
-Write register @var{n...} with value @var{r...}, which contains two hex
+Reserved for future use.
+
+@item @code{O} --- reserved
+
+Reserved for future use.
+
+@item @code{p}@var{n@dots{}} --- read reg @strong{(reserved)}
+@cindex @code{p} packet
+
+@xref{write register packet}.
+
+Reply:
+@table @samp
+@item @var{r@dots{}.}
+The hex encoded value of the register in target byte order.
+@end table
+
+@item @code{P}@var{n@dots{}}@code{=}@var{r@dots{}} --- write register
+@anchor{write register packet}
+@cindex @code{P} packet
+
+Write register @var{n@dots{}} with value @var{r@dots{}}, which contains two hex
 digits for each byte in the register (target byte order).
-@item
-@tab reply @code{OK}
-@tab for success
-@item
-@tab reply @code{E}@var{NN}
-@tab for an error
 
-@item general query
-@tab @code{q}@var{query}
-@tab
-Request info about @var{query}.  In general @value{GDBN} queries
-have a leading upper case letter.  Custom vendor queries should use a
-company prefix (in lower case) ex: @samp{qfsf.var}.  @var{query} may
-optionally be followed by a @samp{,} or @samp{;} separated list.  Stubs
-must ensure that they match the full @var{query} name.
-@item
-@tab reply @code{XX...}
-@tab Hex encoded data from query.  The reply can not be empty.
-@item
-@tab reply @code{E}@var{NN}
-@tab error reply
-@item
-@tab reply @samp{}
-@tab Indicating an unrecognized @var{query}.
+Reply:
+@table @samp
+@item OK
+for success
+@item E@var{NN}
+for an error
+@end table
 
-@item general set
-@tab @code{Q}@var{var}@code{=}@var{val}
-@tab
-Set value of @var{var} to @var{val}.  See @samp{q} for a discussing of
-naming conventions.
+@item @code{q}@var{query} --- general query
+@anchor{general query packet}
+@cindex @code{q} packet
 
-@item reset @strong{(deprecated)}
-@tab @code{r}
-@tab
+Request info about @var{query}.  In general @value{GDBN} queries have a
+leading upper case letter.  Custom vendor queries should use a company
+prefix (in lower case) ex: @samp{qfsf.var}.  @var{query} may optionally
+be followed by a @samp{,} or @samp{;} separated list.  Stubs must ensure
+that they match the full @var{query} name.
+
+Reply:
+@table @samp
+@item @var{XX@dots{}}
+Hex encoded data from query.  The reply can not be empty.
+@item E@var{NN}
+error reply
+@item
+Indicating an unrecognized @var{query}.
+@end table
+
+@item @code{Q}@var{var}@code{=}@var{val} --- general set
+@cindex @code{Q} packet
+
+Set value of @var{var} to @var{val}.
+
+@xref{general query packet}, for a discussion of naming conventions.
+
+@item @code{r} --- reset @strong{(deprecated)}
+@cindex @code{r} packet
+
 Reset the entire system.
 
-@item remote restart
-@tab @code{R}@var{XX}
-@tab
+@item @code{R}@var{XX} --- remote restart
+@cindex @code{R} packet
+
 Restart the program being debugged.  @var{XX}, while needed, is ignored.
 This packet is only available in extended mode.
-@item
-@tab
-no reply
-@tab
-The @samp{R} packet has no reply.
 
-@item step
-@tab @code{s}@var{addr}
-@tab
+Reply:
+@table @samp
+@item @emph{no reply}
+The @samp{R} packet has no reply.
+@end table
+
+@item @code{s}@var{addr} --- step
+@cindex @code{s} packet
+
 @var{addr} is address to resume.  If @var{addr} is omitted, resume at
 same address.
-@item
-@tab reply
-@tab see below
 
-@item step with signal
-@tab @code{S}@var{sig}@code{;}@var{addr}
-@tab
+Reply:
+@xref{Stop Reply Packets}, for the reply specifications.
+
+@item @code{S}@var{sig}@code{;}@var{addr} --- step with signal
+@anchor{step with signal packet}
+@cindex @code{S} packet
+
 Like @samp{C} but step not continue.
-@item
-@tab reply
-@tab see below
 
-@item search 
-@tab @code{t}@var{addr}@code{:}@var{PP}@code{,}@var{MM}
-@tab
+Reply:
+@xref{Stop Reply Packets}, for the reply specifications.
+
+@item @code{t}@var{addr}@code{:}@var{PP}@code{,}@var{MM} --- search 
+@cindex @code{t} packet
+
 Search backwards starting at address @var{addr} for a match with pattern
-@var{PP} and mask @var{MM}.  @var{PP} and @var{MM} are 4
-bytes.  @var{addr} must be at least 3 digits.
+@var{PP} and mask @var{MM}.  @var{PP} and @var{MM} are 4 bytes.
+@var{addr} must be at least 3 digits.
 
-@item thread alive
-@tab @code{T}@var{XX}
-@tab Find out if the thread XX is alive.
-@item
-@tab reply @code{OK}
-@tab thread is still alive
-@item
-@tab reply @code{E}@var{NN}
-@tab thread is dead
+@item @code{T}@var{XX} --- thread alive
+@cindex @code{T} packet
 
-@item reserved
-@tab @code{u}
-@tab Reserved for future use
+Find out if the thread XX is alive.
 
-@item reserved
-@tab @code{U}
-@tab Reserved for future use
+Reply:
+@table @samp
+@item OK
+thread is still alive
+@item E@var{NN}
+thread is dead
+@end table
 
-@item reserved
-@tab @code{v}
-@tab Reserved for future use
+@item @code{u} --- reserved
 
-@item reserved
-@tab @code{V}
-@tab Reserved for future use
+Reserved for future use.
 
-@item reserved
-@tab @code{w}
-@tab Reserved for future use
+@item @code{U} --- reserved
 
-@item reserved
-@tab @code{W}
-@tab Reserved for future use
+Reserved for future use.
 
-@item reserved
-@tab @code{x}
-@tab Reserved for future use
+@item @code{v} --- reserved
 
-@item write mem (binary)
-@tab @code{X}@var{addr}@code{,}@var{length}@var{:}@var{XX...}
-@tab
-@var{addr} is address, @var{length} is number of bytes, @var{XX...} is
-binary data.  The characters @code{$}, @code{#}, and @code{0x7d} are
+Reserved for future use.
+
+@item @code{V} --- reserved
+
+Reserved for future use.
+
+@item @code{w} --- reserved
+
+Reserved for future use.
+
+@item @code{W} --- reserved
+
+Reserved for future use.
+
+@item @code{x} --- reserved
+
+Reserved for future use.
+
+@item @code{X}@var{addr}@code{,}@var{length}@var{:}@var{XX@dots{}} --- write mem (binary)
+@cindex @code{X} packet
+
+@var{addr} is address, @var{length} is number of bytes, @var{XX@dots{}}
+is binary data.  The characters @code{$}, @code{#}, and @code{0x7d} are
 escaped using @code{0x7d}.
-@item
-@tab reply @code{OK}
-@tab for success
-@item
-@tab reply @code{E}@var{NN}
-@tab for an error
 
-@item reserved
-@tab @code{y}
-@tab Reserved for future use
+Reply:
+@table @samp
+@item OK
+for success
+@item E@var{NN}
+for an error
+@end table
 
-@item reserved
-@tab @code{Y}
-@tab Reserved for future use
+@item @code{y} --- reserved
 
-@item remove break or watchpoint @strong{(draft)}
-@tab @code{z}@var{t}@code{,}@var{addr}@code{,}@var{length}
-@tab
-See @samp{Z}.
+Reserved for future use.
 
-@item insert break or watchpoint @strong{(draft)}
-@tab @code{Z}@var{t}@code{,}@var{addr}@code{,}@var{length}
-@tab
+@item @code{Y} reserved
+
+Reserved for future use.
+
+@item @code{z}@var{t}@code{,}@var{addr}@code{,}@var{length} --- remove break or watchpoint @strong{(draft)}
+@cindex @code{z} packet
+
+@xref{insert breakpoint or watchpoint packet}.
+
+@item @code{Z}@var{t}@code{,}@var{addr}@code{,}@var{length} --- insert break or watchpoint @strong{(draft)}
+@anchor{insert breakpoint or watchpoint packet}
+@cindex @code{Z} packet
+
 @var{t} is type: @samp{0} - software breakpoint, @samp{1} - hardware
-breakpoint, @samp{2} - write watchpoint, @samp{3} - read watchpoint,
+breakpoint, @samp{2} --- write watchpoint, @samp{3} - read watchpoint,
 @samp{4} - access watchpoint; @var{addr} is address; @var{length} is in
 bytes.  For a software breakpoint, @var{length} specifies the size of
 the instruction to be patched.  For hardware breakpoints and watchpoints
 @var{length} specifies the memory region to be monitored.  To avoid
 potential problems with duplicate packets, the operations should be
 implemented in an idempotent way.
-@item
-@tab reply @code{E}@var{NN}
-@tab for an error
-@item
-@tab reply @code{OK}
-@tab for success
-@item
-@tab @samp{}
-@tab If not supported.
 
-@item reserved
-@tab <other>
-@tab Reserved for future use
+Reply:
+@table @samp
+@item E@var{NN}
+for an error
+@item OK
+for success
+@item @samp{}
+If not supported.
+@end table
 
-@end multitable
+@end table
+
+@node Stop Reply Packets
+@section Stop Reply Packets
+@cindex stop reply packets
 
 The @samp{C}, @samp{c}, @samp{S}, @samp{s} and @samp{?} packets can
 receive any of the below as a reply.  In the case of the @samp{C},
@@ -14719,282 +14824,259 @@ when the target halts.  In the below the exact meaning of @samp{signal
 number} is poorly defined.  In general one of the UNIX signal numbering
 conventions is used.
 
-@multitable @columnfractions .4 .6
+@table @samp
 
-@item @code{S}@var{AA}
-@tab @var{AA} is the signal number
+@item S@var{AA}
+@var{AA} is the signal number
 
 @item @code{T}@var{AA}@var{n...}@code{:}@var{r...}@code{;}@var{n...}@code{:}@var{r...}@code{;}@var{n...}@code{:}@var{r...}@code{;}
-@tab
+@cindex @code{T} packet reply
+
 @var{AA} = two hex digit signal number; @var{n...} = register number
 (hex), @var{r...}  = target byte ordered register contents, size defined
 by @code{REGISTER_RAW_SIZE}; @var{n...} = @samp{thread}, @var{r...} =
-thread process ID, this is a hex integer; @var{n...} = other string not
-starting with valid hex digit.  @value{GDBN} should ignore this
-@var{n...}, @var{r...} pair and go on to the next.  This way we can
-extend the protocol.
+thread process ID, this is a hex integer; @var{n...} = (@samp{watch} | 
+@samp{rwatch} | @samp{awatch}, @var{r...} = data address, this is a hex
+integer; @var{n...} = other string not starting with valid hex digit.
+@value{GDBN} should ignore this @var{n...}, @var{r...} pair and go on
+to the next.  This way we can extend the protocol.
 
-@item @code{W}@var{AA}
-@tab
+@item W@var{AA}
+
 The process exited, and @var{AA} is the exit status.  This is only
-applicable for certains sorts of targets.
+applicable to certain targets.
 
-@item @code{X}@var{AA}
-@tab
+@item X@var{AA}
+
 The process terminated with signal @var{AA}.
 
-@item @code{N}@var{AA}@code{;}@var{t...}@code{;}@var{d...}@code{;}@var{b...} @strong{(obsolete)}
-@tab
-@var{AA} = signal number; @var{t...} = address of symbol "_start";
-@var{d...} = base of data section; @var{b...} = base of bss section.
-@emph{Note: only used by Cisco Systems targets.  The difference between
-this reply and the "qOffsets" query is that the 'N' packet may arrive
-spontaneously whereas the 'qOffsets' is a query initiated by the host
-debugger.}
+@item N@var{AA};@var{t@dots{}};@var{d@dots{}};@var{b@dots{}} @strong{(obsolete)}
 
-@item @code{O}@var{XX...}
-@tab
-@var{XX...} is hex encoding of @sc{ascii} data.  This can happen at any time
-while the program is running and the debugger should continue to wait
-for 'W', 'T', etc.
+@var{AA} = signal number; @var{t@dots{}} = address of symbol
+@code{_start}; @var{d@dots{}} = base of data section; @var{b@dots{}} =
+base of bss section.  @emph{Note: only used by Cisco Systems targets.
+The difference between this reply and the @samp{qOffsets} query is that
+the @samp{N} packet may arrive spontaneously whereas the @samp{qOffsets}
+is a query initiated by the host debugger.}
 
-@end multitable
+@item O@var{XX@dots{}}
+
+@var{XX@dots{}} is hex encoding of @sc{ascii} data.  This can happen at
+any time while the program is running and the debugger should continue
+to wait for @samp{W}, @samp{T}, etc.
+
+@end table
+
+@node General Query Packets
+@section General Query Packets
 
 The following set and query packets have already been defined.
 
-@multitable @columnfractions .2 .2 .6
+@table @r
 
-@item current thread
-@tab @code{q}@code{C}
-@tab Return the current thread id.
-@item
-@tab reply @code{QC}@var{pid}
-@tab
+@item @code{q}@code{C} --- current thread
+
+Return the current thread id.
+
+Reply:
+@table @samp
+@item @code{QC}@var{pid}
 Where @var{pid} is a HEX encoded 16 bit process id.
-@item
-@tab reply *
-@tab Any other reply implies the old pid.
+@item *
+Any other reply implies the old pid.
+@end table
 
-@item all thread ids
-@tab @code{q}@code{fThreadInfo}
-@item
-@tab @code{q}@code{sThreadInfo}
-@tab
+@item @code{q}@code{fThreadInfo} -- all thread ids
+
+@code{q}@code{sThreadInfo}
+
 Obtain a list of active thread ids from the target (OS).  Since there
 may be too many active threads to fit into one reply packet, this query
 works iteratively: it may require more than one query/reply sequence to
 obtain the entire list of threads.  The first query of the sequence will
 be the @code{qf}@code{ThreadInfo} query; subsequent queries in the
 sequence will be the @code{qs}@code{ThreadInfo} query.
-@item
-@tab
-@tab NOTE: replaces the @code{qL} query (see below).
-@item
-@tab reply @code{m}@var{<id>}
-@tab A single thread id
-@item
-@tab reply @code{m}@var{<id>},@var{<id>...}
-@tab a comma-separated list of thread ids
-@item
-@tab reply @code{l}
-@tab (lower case 'el') denotes end of list.
-@item
-@tab
-@tab
-In response to each query, the target will reply with a list of one
-or more thread ids, in big-endian hex, separated by commas.  GDB will
-respond to each reply with a request for more thread ids (using the
+
+NOTE: replaces the @code{qL} query (see below).
+
+Reply:
+@table @samp
+@item @code{m}@var{id}
+A single thread id
+@item @code{m}@var{id},@var{id}@dots{}
+a comma-separated list of thread ids
+@item @code{l}
+(lower case 'el') denotes end of list.
+@end table
+
+In response to each query, the target will reply with a list of one or
+more thread ids, in big-endian hex, separated by commas.  @value{GDBN}
+will respond to each reply with a request for more thread ids (using the
 @code{qs} form of the query), until the target responds with @code{l}
 (lower-case el, for @code{'last'}).
 
-@item extra thread info
-@tab @code{q}@code{ThreadExtraInfo}@code{,}@var{id}
-@tab
-@item
-@tab
-@tab
-Where @var{<id>} is a thread-id in big-endian hex.
-Obtain a printable string description of a thread's attributes from
-the target OS.  This string may contain anything that the target OS
-thinks is interesting for @value{GDBN} to tell the user about the thread.
-The string is displayed in @value{GDBN}'s @samp{info threads} display.
-Some examples of possible thread extra info strings are "Runnable", or
-"Blocked on Mutex".
-@item
-@tab reply @var{XX...}
-@tab
-Where @var{XX...} is a hex encoding of @sc{ascii} data, comprising the
-printable string containing the extra information about the thread's
-attributes.
+@item @code{q}@code{ThreadExtraInfo}@code{,}@var{id} --- extra thread info
 
-@item query @var{LIST} or @var{threadLIST} @strong{(deprecated)}
-@tab @code{q}@code{L}@var{startflag}@var{threadcount}@var{nextthread}
-@tab
-@item
-@tab
-@tab
+Where @var{id} is a thread-id in big-endian hex.  Obtain a printable
+string description of a thread's attributes from the target OS.  This
+string may contain anything that the target OS thinks is interesting for
+@value{GDBN} to tell the user about the thread.  The string is displayed
+in @value{GDBN}'s @samp{info threads} display.  Some examples of
+possible thread extra info strings are ``Runnable'', or ``Blocked on
+Mutex''.
+
+Reply:
+@table @samp
+@item @var{XX@dots{}}
+Where @var{XX@dots{}} is a hex encoding of @sc{ascii} data, comprising
+the printable string containing the extra information about the thread's
+attributes.
+@end table
+
+@item @code{q}@code{L}@var{startflag}@var{threadcount}@var{nextthread} --- query @var{LIST} or @var{threadLIST} @strong{(deprecated)}
+
 Obtain thread information from RTOS.  Where: @var{startflag} (one hex
 digit) is one to indicate the first query and zero to indicate a
 subsequent query; @var{threadcount} (two hex digits) is the maximum
 number of threads the response packet can contain; and @var{nextthread}
 (eight hex digits), for subsequent queries (@var{startflag} is zero), is
 returned in the response as @var{argthread}.
-@item
-@tab
-@tab NOTE: this query is replaced by the @code{q}@code{fThreadInfo}
-query (see above).
-@item
-@tab reply @code{q}@code{M}@var{count}@var{done}@var{argthread}@var{thread...}
-@tab
-@item
-@tab
-@tab
+
+NOTE: this query is replaced by the @code{q}@code{fThreadInfo} query
+(see above).
+
+Reply:
+@table @samp
+@item @code{q}@code{M}@var{count}@var{done}@var{argthread}@var{thread@dots{}}
 Where: @var{count} (two hex digits) is the number of threads being
 returned; @var{done} (one hex digit) is zero to indicate more threads
 and one indicates no further threads; @var{argthreadid} (eight hex
-digits) is @var{nextthread} from the request packet; @var{thread...} is
-a sequence of thread IDs from the target.  @var{threadid} (eight hex
+digits) is @var{nextthread} from the request packet; @var{thread@dots{}}
+is a sequence of thread IDs from the target.  @var{threadid} (eight hex
 digits).  See @code{remote.c:parse_threadlist_response()}.
+@end table
 
-@item compute CRC of memory block
-@tab @code{q}@code{CRC:}@var{addr}@code{,}@var{length}
-@tab
-@item
-@tab reply @code{E}@var{NN}
-@tab An error (such as memory fault)
-@item
-@tab reply @code{C}@var{CRC32}
-@tab A 32 bit cyclic redundancy check of the specified memory region.
+@item @code{q}@code{CRC:}@var{addr}@code{,}@var{length} --- compute CRC of memory block
 
-@item query sect offs
-@tab @code{q}@code{Offsets}
-@tab
+Reply:
+@table @samp
+@item @code{E}@var{NN}
+An error (such as memory fault)
+@item @code{C}@var{CRC32}
+A 32 bit cyclic redundancy check of the specified memory region.
+@end table
+
+@item @code{q}@code{Offsets} --- query sect offs
+
 Get section offsets that the target used when re-locating the downloaded
 image.  @emph{Note: while a @code{Bss} offset is included in the
 response, @value{GDBN} ignores this and instead applies the @code{Data}
 offset to the @code{Bss} section.}
-@item
-@tab reply @code{Text=}@var{xxx}@code{;Data=}@var{yyy}@code{;Bss=}@var{zzz}
 
-@item thread info request
-@tab @code{q}@code{P}@var{mode}@var{threadid}
-@tab
-@item
-@tab
-@tab
+Reply:
+@table @samp
+@item @code{Text=}@var{xxx}@code{;Data=}@var{yyy}@code{;Bss=}@var{zzz}
+@end table
+
+@item @code{q}@code{P}@var{mode}@var{threadid} --- thread info request
+
 Returns information on @var{threadid}.  Where: @var{mode} is a hex
 encoded 32 bit mode; @var{threadid} is a hex encoded 64 bit thread ID.
-@item
-@tab reply *
-@tab
+
+Reply:
+@table @samp
+@item *
+@end table
+
 See @code{remote.c:remote_unpack_thread_info_response()}.
 
-@item remote command
-@tab @code{q}@code{Rcmd,}@var{COMMAND}
-@tab
-@item
-@tab
-@tab
-@var{COMMAND} (hex encoded) is passed to the local interpreter for
+@item @code{q}@code{Rcmd,}@var{command} --- remote command
+
+@var{command} (hex encoded) is passed to the local interpreter for
 execution.  Invalid commands should be reported using the output string.
 Before the final result packet, the target may also respond with a
-number of intermediate @code{O}@var{OUTPUT} console output
-packets.  @emph{Implementors should note that providing access to a
-stubs's interpreter may have security implications}.
-@item
-@tab reply @code{OK}
-@tab
+number of intermediate @code{O}@var{output} console output packets.
+@emph{Implementors should note that providing access to a stubs's
+interpreter may have security implications}.
+
+Reply:
+@table @samp
+@item OK
 A command response with no output.
-@item
-@tab reply @var{OUTPUT}
-@tab
+@item @var{OUTPUT}
 A command response with the hex encoded output string @var{OUTPUT}.
-@item
-@tab reply @code{E}@var{NN}
-@tab
+@item @code{E}@var{NN}
 Indicate a badly formed request.
-
-@item
-@tab reply @samp{}
-@tab
+@item @samp{}
 When @samp{q}@samp{Rcmd} is not recognized.
+@end table
 
-@item symbol lookup
-@tab @code{qSymbol::}
-@tab
+@item @code{qSymbol::} --- symbol lookup
+
 Notify the target that @value{GDBN} is prepared to serve symbol lookup
 requests.  Accept requests from the target for the values of symbols.
-@item
-@tab
-@tab
-@item
-@tab reply @code{OK}
-@tab
-The target does not need to look up any (more) symbols.
-@item
-@tab reply @code{qSymbol:}@var{sym_name}
-@tab
-@sp 2
-@noindent
-The target requests the value of symbol @var{sym_name} (hex encoded).  
-@value{GDBN} may provide the value by using the 
-@code{qSymbol:}@var{sym_value}:@var{sym_name}
-message, described below.
 
-@item symbol value
-@tab @code{qSymbol:}@var{sym_value}:@var{sym_name}
-@tab
-@sp 1
-@noindent
-Set the value of SYM_NAME to SYM_VALUE.
-@item
-@tab
-@tab
-@var{sym_name} (hex encoded) is the name of a symbol whose value
-the target has previously requested.
-@item
-@tab
-@tab
-@var{sym_value} (hex) is the value for symbol @var{sym_name}.
-If @value{GDBN} cannot supply a value for @var{sym_name}, then this
-field will be empty.
-@item
-@tab reply @code{OK}
-@tab
+Reply:
+@table @samp
+@item @code{OK}
 The target does not need to look up any (more) symbols.
-@item
-@tab reply @code{qSymbol:}@var{sym_name}
-@tab
-@sp 2
-@noindent
-The target requests the value of a new symbol @var{sym_name} (hex encoded).
-@value{GDBN} will continue to supply the values of symbols (if available),
-until the target ceases to request them.
+@item @code{qSymbol:}@var{sym_name}
+The target requests the value of symbol @var{sym_name} (hex encoded).
+@value{GDBN} may provide the value by using the
+@code{qSymbol:}@var{sym_value}:@var{sym_name} message, described below.
+@end table
 
-@end multitable
+@item @code{qSymbol:}@var{sym_value}:@var{sym_name} --- symbol value
+
+Set the value of @var{sym_name} to @var{sym_value}.
+
+@var{sym_name} (hex encoded) is the name of a symbol whose value the
+target has previously requested.
+
+@var{sym_value} (hex) is the value for symbol @var{sym_name}.  If
+@value{GDBN} cannot supply a value for @var{sym_name}, then this field
+will be empty.
+
+Reply:
+@table @samp
+@item @code{OK}
+The target does not need to look up any (more) symbols.
+@item @code{qSymbol:}@var{sym_name}
+The target requests the value of a new symbol @var{sym_name} (hex
+encoded).  @value{GDBN} will continue to supply the values of symbols
+(if available), until the target ceases to request them.
+@end table
+
+@end table
+
+@node Register Packet Format
+@section Register Packet Format
 
 The following @samp{g}/@samp{G} packets have previously been defined.
-In the below, some thirty-two bit registers are transferred as sixty-four
-bits.  Those registers should be zero/sign extended (which?) to fill the
-space allocated.  Register bytes are transfered in target byte order.
-The two nibbles within a register byte are transfered most-significant -
-least-significant.
+In the below, some thirty-two bit registers are transferred as
+sixty-four bits.  Those registers should be zero/sign extended (which?)
+to fill the space allocated.  Register bytes are transfered in target
+byte order.  The two nibbles within a register byte are transfered
+most-significant - least-significant.
 
-@multitable @columnfractions .5 .5
+@table @r
 
 @item MIPS32
-@tab
+
 All registers are transfered as thirty-two bit quantities in the order:
 32 general-purpose; sr; lo; hi; bad; cause; pc; 32 floating-point
 registers; fsr; fir; fp.
 
 @item MIPS64
-@tab
+
 All registers are transfered as sixty-four bit quantities (including
 thirty-two bit registers such as @code{sr}).  The ordering is the same
 as @code{MIPS32}.
 
-@end multitable
+@end table
+
+@node Examples
+@section Examples
 
 Example sequence of a target being re-started.  Notice how the restart
 does not get any direct output:
@@ -15012,7 +15094,7 @@ does not get any direct output:
 Example sequence of a target being stepped by a single instruction:
 
 @smallexample
-<- @code{G1445...}
+<- @code{G1445@dots{}}
 -> @code{+}
 <- @code{s}
 -> @code{+}
@@ -15021,7 +15103,7 @@ Example sequence of a target being stepped by a single instruction:
 <- @code{+}
 <- @code{g}
 -> @code{+}
--> @code{1455...}
+-> @code{1455@dots{}}
 <- @code{+}
 @end smallexample
 

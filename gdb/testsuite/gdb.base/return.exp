@@ -91,19 +91,6 @@ proc return_tests { } {
     setup_xfail "m6811-*-*"
     gdb_test "next" "printf.*" "next over call to func3"
 
-    # This test is going to fail on all i*86 systems using an i*87.
-    # When returning a floating point value from a function, all known
-    # compilers do this via a `fldl' instruction, which pushes the floating
-    # value on the i387 stack. This causes two problems:
-    # a) Most i*86 targets do not store (or cannot store, see comment in
-    #    in i386v-nat.c:i386_register_u_addr) the floating point registers
-    #    to the target.
-    # b) gdb would have to figure out if the `fldl' instruction (or variants
-    #    of it) has already been executed. If not, it would have to simulate
-    #    a push instruction, as it is not enough to write the register,
-    #    the floating point `stack pointer' has to be updated too.
-    #    Do not expect this to get fixed anytime soon.
-
     # This test also fails for sparc Solaris 2.3 & 2.4, but passes under 2.5
     # At the time the `next' is issued, the floating point unit for the
     # process is not yet initialized, and the storing of the floating
@@ -113,8 +100,8 @@ proc return_tests { } {
     # process start, making this test pass, it will be for a version that
     # is not xfailed.
 
-    setup_xfail "i*86-*-*" "sparc-*-solaris2.3*" "sparc-*-solaris2.4*" "m6811-*-*"
-    gdb_test "p tmp3" ".* = 5.*" "correct value returned double test (known problem with i*86 and sparc solaris"
+    setup_xfail "sparc-*-solaris2.3*" "sparc-*-solaris2.4*" "m6811-*-*"
+    gdb_test "p tmp3" ".* = 5.*" "correct value returned double test (known problem with sparc solaris)"
 }
 
 

@@ -22,6 +22,8 @@
 #ifndef PPC_TDEP_H
 #define PPC_TDEP_H
 
+#include "osabi.h"
+
 struct frame_info;
 struct value;
 
@@ -37,6 +39,8 @@ CORE_ADDR ppc_sysv_abi_push_arguments (int, struct value **, CORE_ADDR, int,
 				       CORE_ADDR);
 int ppc_linux_memory_remove_breakpoint (CORE_ADDR addr, char *contents_cache);
 struct link_map_offsets *ppc_linux_svr4_fetch_link_map_offsets (void);
+void ppc_linux_supply_gregset (char *buf);
+void ppc_linux_supply_fpregset (char *buf);
 
 
 /* From rs6000-tdep.c... */
@@ -52,7 +56,7 @@ int altivec_register_p (int regno);
 struct gdbarch_tdep
   {
     int wordsize;              /* size in bytes of fixed-point word */
-    int osabi;                 /* OS / ABI from ELF header */
+    enum gdb_osabi osabi;      /* OS / ABI from ELF header */
     int *regoff;               /* byte offsets in register arrays */
     const struct reg *regs;    /* from current variant */
     int ppc_gp0_regnum;		/* GPR register 0 */
@@ -68,6 +72,8 @@ struct gdbarch_tdep
     int ppc_mq_regnum;		/* Multiply/Divide extension register */
     int ppc_vr0_regnum;		/* First AltiVec register */
     int ppc_vrsave_regnum;	/* Last AltiVec register */
+    int ppc_ev0_regnum;         /* First ev register */
+    int ppc_ev31_regnum;        /* Last ev register */
     int lr_frame_offset;	/* Offset to ABI specific location where
                                    link register is saved.  */
 };

@@ -114,6 +114,14 @@ gdb_expect {
     default { }
 }
 
+set sizeof_long_double 8
+send_gdb "print sizeof(long double)\n"
+gdb_expect {
+    -re ".* = 4.*$gdb_prompt $" { set sizeof_long_double 4 }
+    -re ".*$gdb_prompt $" { }
+    default { }
+}
+
 gdb_test "n 4"   ".*38.*" "get to known place"
 
 # Check the hack for long long prints.
@@ -146,11 +154,10 @@ if { $sizeof_ptr == 2 } {
 }
 gdb_test "p/c oct" ".*'w'.*"
 
-if { $sizeof_double == 8 } {
-
-# ARM floating point numbers are not strictly little endian or big endian,
-# but a hybrid.  They are in little endian format with the two words
-# swapped in big endian format.
+if { $sizeof_double == 8 || $sizeof_long_double == 8 } {
+    # ARM floating point numbers are not strictly little endian or big endian,
+    # but a hybrid.  They are in little endian format with the two words
+    # swapped in big endian format.
 
     if { [istarget "arm*-*-*"] || \
 	    [istarget "xscale*-*-*"] || \
@@ -239,7 +246,7 @@ if { $target_bigendian_p } {
     gdb_test "x/c &oct" ".*-89 .*"
     # FIXME GDB's output is correct, but this longer match fails.
     # gdb_test "x/c &oct" ".*-89 '\\\\247'.*"
-    if { $sizeof_double == 8 } {
+    if { $sizeof_double == 8 || $sizeof_long_double == 8 } {
 	gdb_test "x/f &oct" ".*-5.9822653797615723e-120.*"
     } else {
 	gdb_test "x/f &oct" ".*-2.42716126e-15.*"

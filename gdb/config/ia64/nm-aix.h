@@ -21,7 +21,7 @@
 #ifndef NM_AIX_H
 #define NM_AIX_H
 
-#include "nm-sysv4.h"
+#include "config/nm-sysv4.h"
 
 #ifndef AIX5
 #define AIX5 1

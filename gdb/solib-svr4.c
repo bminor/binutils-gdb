@@ -1318,24 +1318,20 @@ set_solib_svr4_fetch_link_map_offsets (struct gdbarch *gdbarch,
   set_gdbarch_data (gdbarch, fetch_link_map_offsets_gdbarch_data, flmo);
 }
 
-/* Initialize the architecture specific link_map_offsets fetcher. 
-   This is called after <arch>_gdbarch_init() has set up its struct
-   gdbarch for the new architecture, so care must be taken to use the
-   value set by set_solib_svr4_fetch_link_map_offsets(), above.  We
-   do, however, attempt to provide a reasonable alternative (for
-   native targets anyway) if the <arch>_gdbarch_init() fails to call
+/* Initialize the architecture-specific link_map_offsets fetcher.
+   This is called after <arch>_gdbarch_init() has set up its `struct
+   gdbarch' for the new architecture, and is only called if the
+   link_map_offsets fetcher isn't already initialized (which is
+   usually done by calling set_solib_svr4_fetch_link_map_offsets()
+   above in <arch>_gdbarch_init()).  Therefore we attempt to provide a
+   reasonable alternative (for native targets anyway) if the
+   <arch>_gdbarch_init() fails to call
    set_solib_svr4_fetch_link_map_offsets().  */
 
 static void *
 init_fetch_link_map_offsets (struct gdbarch *gdbarch)
 {
-  struct link_map_offsets *(*flmo) =
-    gdbarch_data (gdbarch, fetch_link_map_offsets_gdbarch_data);
-
-  if (flmo == NULL)
-    return legacy_fetch_link_map_offsets;
-  else
-    return flmo;
+  return legacy_fetch_link_map_offsets;
 }
 
 static struct target_so_ops svr4_so_ops;

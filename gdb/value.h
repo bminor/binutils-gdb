@@ -23,6 +23,8 @@
 #if !defined (VALUE_H)
 #define VALUE_H 1
 
+struct regcache;
+
 #include "doublest.h"
 
 /*
@@ -240,8 +242,8 @@ do { COERCE_REF(arg);							\
   do { COERCE_ARRAY(arg);  COERCE_ENUM(arg); } while (0)
 
 #define COERCE_VARYING_ARRAY(arg, real_arg_type)	\
-{ if (chill_varying_type (real_arg_type))  \
-    arg = varying_to_slice (arg), real_arg_type = VALUE_TYPE (arg); }
+/* OBSOLETE { if (chill_varying_type (real_arg_type)) */  \
+/* OBSOLETE     arg = varying_to_slice (arg), real_arg_type = VALUE_TYPE (arg); } */ 
 
 /* If ARG is an enum, convert it to an integer.  */
 
@@ -406,7 +408,8 @@ extern struct value *value_repeat (struct value *arg1, int count);
 extern struct value *value_subscript (struct value *array, struct value *idx);
 
 extern struct value *value_being_returned (struct type *valtype,
-					   char *retbuf, int struct_return);
+					   struct regcache *retbuf,
+					   int struct_return);
 
 extern struct value *value_in (struct value *element, struct value *set);
 

@@ -1,6 +1,6 @@
 /* BFD back-end for MIPS Extended-Coff files.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001
+   2000, 2001, 2002
    Free Software Foundation, Inc.
    Original version by Per Bothner.
    Full support added by Ian Lance Taylor, ian@cygnus.com.
@@ -819,8 +819,7 @@ mips_gprel_reloc (abfd,
       output_bfd = symbol->section->output_section->owner;
     }
 
-  if (bfd_is_und_section (symbol->section)
-      && relocateable == false)
+  if (bfd_is_und_section (symbol->section) && ! relocateable)
     return bfd_reloc_undefined;
 
   /* We have to figure out the gp value, so that we can adjust the
@@ -830,10 +829,10 @@ mips_gprel_reloc (abfd,
      external symbol if we are producing relocateable output.  */
   gp = _bfd_get_gp_value (output_bfd);
   if (gp == 0
-      && (relocateable == false
+      && (! relocateable
 	  || (symbol->flags & BSF_SECTION_SYM) != 0))
     {
-      if (relocateable != false)
+      if (relocateable)
 	{
 	  /* Make up a value.  */
 	  gp = symbol->section->output_section->vma + 0x4000;
@@ -899,14 +898,14 @@ mips_gprel_reloc (abfd,
   /* Adjust val for the final section location and GP value.  If we
      are producing relocateable output, we don't want to do this for
      an external symbol.  */
-  if (relocateable == false
+  if (! relocateable
       || (symbol->flags & BSF_SECTION_SYM) != 0)
     val += relocation - gp;
 
   insn = (insn &~ (unsigned) 0xffff) | (val & 0xffff);
   bfd_put_32 (abfd, (bfd_vma) insn, (bfd_byte *) data + reloc_entry->address);
 
-  if (relocateable != false)
+  if (relocateable)
     reloc_entry->address += input_section->output_offset;
 
   /* Make sure it fit in 16 bits.  */
@@ -2116,10 +2115,9 @@ mips_relax_section (abfd, sec, info, again)
 	  bfd_size_type size;
 
 	  size = (bfd_size_type) sec->reloc_count * sizeof (long);
-	  offsets = (long *) bfd_alloc (abfd, size);
+	  offsets = (long *) bfd_zalloc (abfd, size);
 	  if (offsets == (long *) NULL)
 	    goto error_return;
-	  memset (offsets, 0, (size_t) size);
 	  section_tdata->offsets = offsets;
 	}
 
@@ -2601,6 +2599,8 @@ static const struct ecoff_backend_data mips_ecoff_backend_data =
 
 /* Merging of sections is not done.  */
 #define _bfd_ecoff_bfd_merge_sections bfd_generic_merge_sections
+
+#define _bfd_ecoff_bfd_discard_group bfd_generic_discard_group
 
 extern const bfd_target ecoff_big_vec;
 

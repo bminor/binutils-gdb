@@ -33,15 +33,12 @@
 
 /* GNU/Linux MIPS has __SIGRTMAX == 127.  */
 
+#ifndef REALTIME_LO
 #define REALTIME_LO 32
 #define REALTIME_HI 128
+#endif
 
-#include "tm-linux.h"
-
-/* There's an E_MIPS_ABI_O32 flag in e_flags, but we don't use it - in
-   fact, using it may violate the o32 ABI.  */
-
-#define MIPS_DEFAULT_ABI MIPS_ABI_O32
+#include "config/tm-linux.h"
 
 /* Use target_specific function to define link map offsets.  */
 
@@ -51,8 +48,8 @@ extern struct link_map_offsets *mips_linux_svr4_fetch_link_map_offsets (void);
 
 /* Details about jmp_buf.  */
 
-#define JB_ELEMENT_SIZE 4
-#define JB_PC 0
+#define MIPS_LINUX_JB_ELEMENT_SIZE 4
+#define MIPS_LINUX_JB_PC 0
 
 /* Figure out where the longjmp will land.  Slurp the arguments out of the
    stack.  We expect the first arg to be a pointer to the jmp_buf structure

@@ -28,7 +28,7 @@
 /* Include the common ARM target definitions.  */
 #include "arm/tm-arm.h"
 
-#include "tm-linux.h"
+#include "config/tm-linux.h"
 
 /* Use target-specific function to define link map offsets.  */
 extern struct link_map_offsets *arm_linux_svr4_fetch_link_map_offsets (void);

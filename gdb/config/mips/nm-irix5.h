@@ -19,12 +19,14 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#include "nm-sysv4.h"
+#include "config/nm-sysv4.h"
 #undef IN_SOLIB_DYNSYM_RESOLVE_CODE
 
 #define TARGET_HAS_HARDWARE_WATCHPOINTS
 
-#define TARGET_CAN_USE_HARDWARE_WATCHPOINT(type, cnt, ot) 1
+/* TARGET_CAN_USE_HARDWARE_WATCHPOINT is now defined to go through
+   the target vector.  For Irix5, procfs_can_use_hw_watchpoint()
+   should be invoked.  */
 
 /* When a hardware watchpoint fires off the PC will be left at the
    instruction which caused the watchpoint.  It will be necessary for

@@ -211,7 +211,8 @@ trace_result (int has_result, unsigned32 result)
     int i;
     for (i = 0; i < trace_num_values; i++)
       {
-	sprintf (chp, "%*s0x%.8lx", SIZE_VALUES - 10, "", trace_values[i]);
+	sprintf (chp, "%*s0x%.8lx", SIZE_VALUES - 10, "",
+		 (long) trace_values[i]);
 	chp = strchr (chp, '\0');
       }
     while (i++ < 3)

@@ -1,5 +1,5 @@
 /* Instruction printing code for the AMD 29000
-   Copyright 1990, 1993, 1994, 1995, 1998, 2000, 2001
+   Copyright 1990, 1993, 1994, 1995, 1998, 2000, 2001, 2002
    Free Software Foundation, Inc.
    Contributed by Cygnus Support.  Written by Jim Kingdon.
 
@@ -153,7 +153,7 @@ print_insn (memaddr, info)
 
   find_byte_func_type find_byte_func = (find_byte_func_type)info->private_data;
 
-  struct a29k_opcode CONST * opcode;
+  struct a29k_opcode const * opcode;
 
   {
     int status =

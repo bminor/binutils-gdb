@@ -18,6 +18,7 @@ d30v-dis.c
 d30v-opc.c
 dis-buf.c
 disassemble.c
+dlx-dis.c
 fr30-asm.c
 fr30-desc.c
 fr30-desc.h
@@ -25,6 +26,13 @@ fr30-dis.c
 fr30-ibld.c
 fr30-opc.c
 fr30-opc.h
+frv-asm.c
+frv-desc.c
+frv-desc.h
+frv-dis.c
+frv-ibld.c
+frv-opc.c
+frv-opc.h
 h8300-dis.c
 h8500-dis.c
 h8500-opc.h
@@ -46,6 +54,13 @@ ia64-opc-i.c
 ia64-opc-m.c
 ia64-opc.c
 ia64-opc.h
+ip2k-asm.c
+ip2k-desc.c
+ip2k-desc.h
+ip2k-dis.c
+ip2k-ibld.c
+ip2k-opc.c
+ip2k-opc.h
 m10200-dis.c
 m10200-opc.c
 m10300-dis.c

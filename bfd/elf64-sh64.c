@@ -127,7 +127,7 @@ static bfd_byte *sh_elf64_get_relocated_section_contents
 static boolean sh_elf64_set_mach_from_flags PARAMS ((bfd *));
 static boolean sh_elf64_set_private_flags PARAMS ((bfd *, flagword));
 static asection *sh_elf64_gc_mark_hook
-  PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Rela *,
+  PARAMS ((asection *, struct bfd_link_info *, Elf_Internal_Rela *,
 	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
 static boolean sh_elf64_gc_sweep_hook
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
@@ -139,7 +139,7 @@ static int sh64_elf64_get_symbol_type PARAMS ((Elf_Internal_Sym *, int));
 static boolean sh64_elf64_add_symbol_hook
   PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Sym *,
 	   const char **, flagword *, asection **, bfd_vma *));
-extern boolean sh64_elf64_link_output_symbol_hook
+static boolean sh64_elf64_link_output_symbol_hook
   PARAMS ((bfd *, struct bfd_link_info *, const char *, Elf_Internal_Sym *,
 	   asection *));
 static boolean sh64_elf64_fake_sections
@@ -1342,8 +1342,8 @@ sh_elf64_reloc (abfd, reloc_entry, symbol_in, data, input_section, output_bfd,
     return bfd_reloc_undefined;
 
   if (bfd_is_com_section (symbol_in->section))
-    sym_value = 0;                           
-  else 
+    sym_value = 0;
+  else
     sym_value = (symbol_in->value +
 		 symbol_in->section->output_section->vma +
 		 symbol_in->section->output_offset);
@@ -1614,7 +1614,7 @@ sh_elf64_relocate_section (output_bfd, info, input_bfd, input_section,
 	      sec = h->root.u.def.section;
 	      /* In these cases, we don't need the relocation value.
 		 We check specially because in some obscure cases
-		 sec->output_section will be NULL. */
+		 sec->output_section will be NULL.  */
 	      if (r_type == R_SH_GOTPC_LOW16
 		  || r_type == R_SH_GOTPC_MEDLOW16
 		  || r_type == R_SH_GOTPC_MEDHI16
@@ -1756,7 +1756,7 @@ sh_elf64_relocate_section (output_bfd, info, input_bfd, input_section,
 		skip = true;
 	      else if (outrel.r_offset == (bfd_vma) -2)
 		skip = true, relocate = true;
-	      
+
 	      outrel.r_offset += (input_section->output_section->vma
 				  + input_section->output_offset);
 
@@ -2144,15 +2144,11 @@ sh_elf64_get_relocated_section_contents (output_bfd, link_info, link_order,
      asymbol **symbols;
 {
   Elf_Internal_Shdr *symtab_hdr;
-  Elf_Internal_Shdr *shndx_hdr;
   asection *input_section = link_order->u.indirect.section;
   bfd *input_bfd = input_section->owner;
   asection **sections = NULL;
   Elf_Internal_Rela *internal_relocs = NULL;
-  Elf64_External_Sym *external_syms = NULL;
-  Elf_External_Sym_Shndx *shndx_buf = NULL;
-  Elf_External_Sym_Shndx *shndx;
-  Elf_Internal_Sym *internal_syms = NULL;
+  Elf_Internal_Sym *isymbuf = NULL;
 
   /* We only need to handle the case of relaxing, or of having a
      particular set of section contents, specially.  */
@@ -2164,7 +2160,6 @@ sh_elf64_get_relocated_section_contents (output_bfd, link_info, link_order,
 						       symbols);
 
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
-  shndx_hdr  = &elf_tdata (input_bfd)->symtab_shndx_hdr;
 
   memcpy (data, elf_section_data (input_section)->this_hdr.contents,
 	  input_section->_raw_size);
@@ -2173,37 +2168,18 @@ sh_elf64_get_relocated_section_contents (output_bfd, link_info, link_order,
       && input_section->reloc_count > 0)
     {
       Elf_Internal_Sym *isymp;
+      Elf_Internal_Sym *isymend;
       asection **secpp;
-      Elf64_External_Sym *esym, *esymend;
-      bfd_size_type amt;
 
-      if (symtab_hdr->contents != NULL)
-	external_syms = (Elf64_External_Sym *) symtab_hdr->contents;
-      else
+      /* Read this BFD's local symbols.  */
+      if (symtab_hdr->sh_info != 0)
 	{
-	  amt = symtab_hdr->sh_info;
-	  amt *= sizeof (Elf64_External_Sym);
-
-	  external_syms = (Elf64_External_Sym *) bfd_malloc (amt);
-	  if (external_syms == NULL && symtab_hdr->sh_info > 0)
-	    goto error_return;
-
-	  if (bfd_seek (input_bfd, symtab_hdr->sh_offset, SEEK_SET) != 0
-	      || (bfd_bread ((PTR) external_syms, amt, input_bfd) != amt))
-	    goto error_return;
-	}
-
-      if (symtab_hdr->sh_info != 0 && shndx_hdr->sh_size != 0)
-	{
-	  amt = symtab_hdr->sh_info;
-	  amt *= sizeof (Elf_External_Sym_Shndx);
-
-	  shndx_buf = (Elf_External_Sym_Shndx *) bfd_malloc (amt);
-	  if (shndx_buf == NULL)
-	    goto error_return;
-
-	  if (bfd_seek (input_bfd, shndx_hdr->sh_offset, SEEK_SET) != 0
-	      || bfd_bread ((PTR) shndx_buf, amt, input_bfd) != amt)
+	  isymbuf = (Elf_Internal_Sym *) symtab_hdr->contents;
+	  if (isymbuf == NULL)
+	    isymbuf = bfd_elf_get_elf_syms (input_bfd, symtab_hdr,
+					    symtab_hdr->sh_info, 0,
+					    NULL, NULL, NULL);
+	  if (isymbuf == NULL)
 	    goto error_return;
 	}
 
@@ -2213,28 +2189,16 @@ sh_elf64_get_relocated_section_contents (output_bfd, link_info, link_order,
       if (internal_relocs == NULL)
 	goto error_return;
 
-      internal_syms = ((Elf_Internal_Sym *)
-		       bfd_malloc (symtab_hdr->sh_info
-				   * sizeof (Elf_Internal_Sym)));
-      if (internal_syms == NULL && symtab_hdr->sh_info > 0)
-	goto error_return;
-
       sections = (asection **) bfd_malloc (symtab_hdr->sh_info
 					   * sizeof (asection *));
       if (sections == NULL && symtab_hdr->sh_info > 0)
 	goto error_return;
 
-      isymp = internal_syms;
       secpp = sections;
-      esym = external_syms;
-      esymend = esym + symtab_hdr->sh_info;
-      shndx = shndx_buf;
-      for (; esym < esymend;
-	   ++esym, ++isymp, ++secpp, shndx = (shndx ? shndx + 1 : NULL))
+      isymend = isymbuf + symtab_hdr->sh_info;
+      for (isymp = isymbuf; isymp < isymend; ++isymp, ++secpp)
 	{
 	  asection *isec;
-
-	  bfd_elf64_swap_symbol_in (input_bfd, esym, shndx, isymp);
 
 	  if (isymp->st_shndx == SHN_UNDEF)
 	    isec = bfd_und_section_ptr;
@@ -2255,35 +2219,29 @@ sh_elf64_get_relocated_section_contents (output_bfd, link_info, link_order,
 
       if (! sh_elf64_relocate_section (output_bfd, link_info, input_bfd,
 				       input_section, data, internal_relocs,
-				       internal_syms, sections))
+				       isymbuf, sections))
 	goto error_return;
 
       if (sections != NULL)
 	free (sections);
-      sections = NULL;
-      if (internal_syms != NULL)
-	free (internal_syms);
-      internal_syms = NULL;
-      if (external_syms != NULL && symtab_hdr->contents == NULL)
-	free (external_syms);
-      external_syms = NULL;
       if (internal_relocs != elf_section_data (input_section)->relocs)
 	free (internal_relocs);
-      internal_relocs = NULL;
+      if (isymbuf != NULL
+	  && (unsigned char *) isymbuf != symtab_hdr->contents)
+	free (isymbuf);
     }
 
   return data;
 
  error_return:
+  if (sections != NULL)
+    free (sections);
   if (internal_relocs != NULL
       && internal_relocs != elf_section_data (input_section)->relocs)
     free (internal_relocs);
-  if (external_syms != NULL && symtab_hdr->contents == NULL)
-    free (external_syms);
-  if (internal_syms != NULL)
-    free (internal_syms);
-  if (sections != NULL)
-    free (sections);
+  if (isymbuf != NULL
+      && (unsigned char *) isymbuf != symtab_hdr->contents)
+    free (isymbuf);
   return NULL;
 }
 
@@ -2390,7 +2348,7 @@ sh_elf64_merge_private_data (ibfd, obfd)
 {
   flagword old_flags, new_flags;
 
-  if (_bfd_generic_verify_endian_match (ibfd, obfd) == false)
+  if (! _bfd_generic_verify_endian_match (ibfd, obfd))
     return false;
 
   if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour
@@ -2449,12 +2407,12 @@ sh_elf64_merge_private_data (ibfd, obfd)
    relocation.  */
 
 static asection *
-sh_elf64_gc_mark_hook (abfd, info, rel, h, sym)
-       bfd *abfd;
-       struct bfd_link_info *info ATTRIBUTE_UNUSED;
-       Elf_Internal_Rela *rel;
-       struct elf_link_hash_entry *h;
-       Elf_Internal_Sym *sym;
+sh_elf64_gc_mark_hook (sec, info, rel, h, sym)
+     asection *sec;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
+     Elf_Internal_Rela *rel;
+     struct elf_link_hash_entry *h;
+     Elf_Internal_Sym *sym;
 {
   if (h != NULL)
     {
@@ -2465,6 +2423,9 @@ sh_elf64_gc_mark_hook (abfd, info, rel, h, sym)
 	  break;
 
 	default:
+	  while (h->root.type == bfd_link_hash_indirect
+		 && h->root.u.i.link)
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 	  switch (h->root.type)
 	    {
 	    case bfd_link_hash_defined:
@@ -2480,13 +2441,7 @@ sh_elf64_gc_mark_hook (abfd, info, rel, h, sym)
 	}
     }
   else
-    {
-      if (!(elf_bad_symtab (abfd)
-	    && ELF_ST_BIND (sym->st_info) != STB_LOCAL)
-	  && ! ((sym->st_shndx <= 0 || sym->st_shndx >= SHN_LORESERVE)
-		&& sym->st_shndx != SHN_COMMON))
-	return bfd_section_from_elf_index (abfd, sym->st_shndx);
-    }
+    return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
 
   return NULL;
 }
@@ -2507,7 +2462,7 @@ sh_elf64_gc_sweep_hook (abfd, info, sec, relocs)
 /* Look through the relocs for a section during the first phase.
    Since we don't do .gots or .plts, we just need to consider the
    virtual table relocs for gc.  */
- 
+
 static boolean
 sh_elf64_check_relocs (abfd, info, sec, relocs)
      bfd *abfd;
@@ -2537,7 +2492,7 @@ sh_elf64_check_relocs (abfd, info, sec, relocs)
   sym_hashes_end = sym_hashes + symtab_hdr->sh_size/sizeof(Elf64_External_Sym);
   if (!elf_bad_symtab (abfd))
     sym_hashes_end -= symtab_hdr->sh_info;
- 
+
   dynobj = elf_hash_table (info)->dynobj;
   local_got_offsets = elf_local_got_offsets (abfd);
 
@@ -2546,13 +2501,13 @@ sh_elf64_check_relocs (abfd, info, sec, relocs)
     {
       struct elf_link_hash_entry *h;
       unsigned long r_symndx;
- 
+
       r_symndx = ELF64_R_SYM (rel->r_info);
       if (r_symndx < symtab_hdr->sh_info)
         h = NULL;
       else
         h = sym_hashes[r_symndx - symtab_hdr->sh_info];
- 
+
       /* Some relocs require a global offset table.  */
       if (dynobj == NULL)
 	{
@@ -2596,7 +2551,7 @@ sh_elf64_check_relocs (abfd, info, sec, relocs)
           if (!_bfd_elf64_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
             return false;
           break;
- 
+
 	  /* This relocation describes which C++ vtable entries are actually
 	     used.  Record for later use during GC.  */
         case R_SH_GNU_VTENTRY:
@@ -2881,7 +2836,7 @@ sh_elf64_check_relocs (abfd, info, sec, relocs)
 	  break;
         }
     }
- 
+
   return true;
 }
 
@@ -3016,7 +2971,7 @@ sh64_elf64_add_symbol_hook (abfd, info, sym, namep, flagsp, secp, valp)
    we don't need to look up and make sure to emit the main symbol for each
    DataLabel symbol.  */
 
-boolean
+static boolean
 sh64_elf64_link_output_symbol_hook (abfd, info, cname, sym, input_sec)
      bfd *abfd ATTRIBUTE_UNUSED;
      struct bfd_link_info *info;
@@ -3064,7 +3019,7 @@ static const bfd_byte elf_sh64_plt0_entry_be[PLT_ENTRY_SIZE] =
   0xc8, 0x00, 0x01, 0x10, /* shori (.got.plt >> 16) & 65535, r17 */
   0xc8, 0x00, 0x01, 0x10, /* shori .got.plt & 65535, r17 */
   0x8d, 0x10, 0x09, 0x90, /* ld.q  r17, 16, r25 */
-  0x6b, 0xf1, 0x46, 0x00, /* ptabs r17, tr0 */
+  0x6b, 0xf1, 0x66, 0x00, /* ptabs r25, tr0 */
   0x8d, 0x10, 0x05, 0x10, /* ld.q  r17, 8, r17 */
   0x44, 0x01, 0xff, 0xf0, /* blink tr0, r63 */
   0x6f, 0xf0, 0xff, 0xf0, /* nop */
@@ -3084,7 +3039,7 @@ static const bfd_byte elf_sh64_plt0_entry_le[PLT_ENTRY_SIZE] =
   0x10, 0x01, 0x00, 0xc8, /* shori (.got.plt >> 16) & 65535, r17 */
   0x10, 0x01, 0x00, 0xc8, /* shori .got.plt & 65535, r17 */
   0x90, 0x09, 0x10, 0x8d, /* ld.q  r17, 16, r25 */
-  0x00, 0x46, 0xf1, 0x6b, /* ptabs r17, tr0 */
+  0x00, 0x66, 0xf1, 0x6b, /* ptabs r25, tr0 */
   0x10, 0x05, 0x10, 0x8d, /* ld.q  r17, 8, r17 */
   0xf0, 0xff, 0x01, 0x44, /* blink tr0, r63 */
   0xf0, 0xff, 0xf0, 0x6f, /* nop */
@@ -3110,9 +3065,9 @@ static const bfd_byte elf_sh64_plt_entry_be[PLT_ENTRY_SIZE] =
   0x6b, 0xf1, 0x66, 0x00, /* ptabs r25, tr0 */
   0x44, 0x01, 0xff, 0xf0, /* blink tr0, r63 */
   0x6f, 0xf0, 0xff, 0xf0, /* nop */
-  0xcc, 0x00, 0x01, 0x90, /* movi  .PLT0 >> 16, r25 */
-  0xc8, 0x00, 0x01, 0x90, /* shori .PLT0 & 65535, r25 */
-  0x6b, 0xf1, 0x66, 0x00, /* ptabs r25, tr0 */
+  0xcc, 0x00, 0x01, 0x90, /* movi  (.+8-.PLT0) >> 16, r25 */
+  0xc8, 0x00, 0x01, 0x90, /* shori (.+4-.PLT0) & 65535, r25 */
+  0x6b, 0xf5, 0x66, 0x00, /* ptrel r25, tr0 */
   0xcc, 0x00, 0x01, 0x50, /* movi  reloc-offset >> 16, r21 */
   0xc8, 0x00, 0x01, 0x50, /* shori reloc-offset & 65535, r21 */
   0x44, 0x01, 0xff, 0xf0, /* blink tr0, r63 */
@@ -3130,9 +3085,9 @@ static const bfd_byte elf_sh64_plt_entry_le[PLT_ENTRY_SIZE] =
   0x00, 0x66, 0xf1, 0x6b, /* ptabs r25, tr0 */
   0xf0, 0xff, 0x01, 0x44, /* blink tr0, r63 */
   0xf0, 0xff, 0xf0, 0x6f, /* nop */
-  0x90, 0x01, 0x00, 0xcc, /* movi  .PLT0 >> 16, r25 */
-  0x90, 0x01, 0x00, 0xc8, /* shori .PLT0 & 65535, r25 */
-  0x00, 0x66, 0xf1, 0x6b, /* ptabs r25, tr0 */
+  0x90, 0x01, 0x00, 0xcc, /* movi  (.+8-.PLT0) >> 16, r25 */
+  0x90, 0x01, 0x00, 0xc8, /* shori (.+4-.PLT0) & 65535, r25 */
+  0x00, 0x66, 0xf5, 0x6b, /* ptrel r25, tr0 */
   0x50, 0x01, 0x00, 0xcc, /* movi  reloc-offset >> 16, r21 */
   0x50, 0x01, 0x00, 0xc8, /* shori reloc-offset & 65535, r21 */
   0xf0, 0xff, 0x01, 0x44, /* blink tr0, r63 */
@@ -3762,7 +3717,7 @@ sh64_elf64_size_dynamic_sections (output_bfd, info)
 	}
 
       /* Allocate memory for the section contents.  */
-      s->contents = (bfd_byte *) bfd_alloc (dynobj, s->_raw_size);
+      s->contents = (bfd_byte *) bfd_zalloc (dynobj, s->_raw_size);
       if (s->contents == NULL && s->_raw_size != 0)
 	return false;
     }
@@ -3853,7 +3808,8 @@ sh64_elf64_finish_dynamic_symbol (output_bfd, info, h, sym)
 	 The first three are reserved.  */
       got_offset = (plt_index + 3) * 8;
 
-      got_offset -= GOT_BIAS;
+      if (info->shared)
+	got_offset -= GOT_BIAS;
 
       /* Fill in the entry in the procedure linkage table.  */
       if (! info->shared)
@@ -3872,8 +3828,11 @@ sh64_elf64_finish_dynamic_symbol (output_bfd, info, h, sym)
 			      (splt->contents + h->plt.offset
 			       + elf_sh64_plt_symbol_offset (info)));
 
+	  /* Set bottom bit because its for a branch to SHmedia */
 	  movi_shori_putval (output_bfd,
-			     (splt->output_section->vma + splt->output_offset),
+			     -(h->plt.offset
+			      + elf_sh64_plt_plt0_offset (info) + 8)
+			     | 1,
 			     (splt->contents + h->plt.offset
 			      + elf_sh64_plt_plt0_offset (info)));
 	}
@@ -3892,7 +3851,8 @@ sh64_elf64_finish_dynamic_symbol (output_bfd, info, h, sym)
 			      + elf_sh64_plt_symbol_offset (info)));
 	}
 
-      got_offset += GOT_BIAS;
+      if (info->shared)
+	got_offset += GOT_BIAS;
 
       movi_shori_putval (output_bfd,
 			 plt_index * sizeof (Elf64_External_Rela),
@@ -4035,12 +3995,32 @@ sh64_elf64_finish_dynamic_sections (output_bfd, info)
 	  Elf_Internal_Dyn dyn;
 	  const char *name;
 	  asection *s;
+	  struct elf_link_hash_entry *h;
 
 	  bfd_elf64_swap_dyn_in (dynobj, dyncon, &dyn);
 
 	  switch (dyn.d_tag)
 	    {
 	    default:
+	      break;
+
+	    case DT_INIT:
+	      name = info->init_function;
+	      goto get_sym;
+
+	    case DT_FINI:
+	      name = info->fini_function;
+	    get_sym:
+	      if (dyn.d_un.d_val != 0)
+		{
+		  h = elf_link_hash_lookup (elf_hash_table (info), name,
+					    false, false, true);
+		  if (h != NULL && (h->other & STO_SH5_ISA32))
+		    {
+		      dyn.d_un.d_val |= 1;
+		      bfd_elf64_swap_dyn_out (output_bfd, &dyn, dyncon);
+		    }
+		}
 	      break;
 
 	    case DT_PLTGOT:

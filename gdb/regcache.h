@@ -1,6 +1,7 @@
 /* Cache and manage the values of registers for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1994, 1995, 1996, 1998, 2000, 2001
-   Free Software Foundation, Inc.
+
+   Copyright 1986, 1987, 1989, 1991, 1994, 1995, 1996, 1998, 2000,
+   2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,17 +23,68 @@
 #ifndef REGCACHE_H
 #define REGCACHE_H
 
+struct regcache;
+struct gdbarch;
+
+extern struct regcache *current_regcache;
+
+void regcache_xfree (struct regcache *regcache);
+struct cleanup *make_cleanup_regcache_xfree (struct regcache *regcache);
+struct regcache *regcache_xmalloc (struct gdbarch *gdbarch);
+
 /* Transfer a raw register [0..NUM_REGS) between core-gdb and the
    regcache. */
 
-void regcache_read (int rawnum, char *buf);
-void regcache_write (int rawnum, char *buf);
+void regcache_raw_read (struct regcache *regcache, int rawnum, void *buf);
+void regcache_raw_write (struct regcache *regcache, int rawnum,
+			 const void *buf);
+extern void regcache_raw_read_signed (struct regcache *regcache,
+				      int regnum, LONGEST *val);
+extern void regcache_raw_read_unsigned (struct regcache *regcache,
+					int regnum, ULONGEST *val);
+
+/* Partial transfer of a raw registers.  These perform read, modify,
+   write style operations.  */
+
+void regcache_raw_read_part (struct regcache *regcache, int regnum,
+			     int offset, int len, void *buf);
+void regcache_raw_write_part (struct regcache *regcache, int regnum,
+			      int offset, int len, const void *buf);
+
+int regcache_valid_p (struct regcache *regcache, int regnum);
+
+/* Transfer a cooked register [0..NUM_REGS+NUM_PSEUDO_REGS).  */
+void regcache_cooked_read (struct regcache *regcache, int rawnum, void *buf);
+void regcache_cooked_write (struct regcache *regcache, int rawnum,
+			    const void *buf);
+
+/* NOTE: cagney/2002-08-13: At present GDB has no reliable mechanism
+   for indicating when a ``cooked'' register was constructed from
+   invalid or unavailable ``raw'' registers.  One fairly easy way of
+   adding such a mechanism would be for the cooked functions to return
+   a register valid indication.  Given the possibility of such a
+   change, the extract functions below use a reference parameter,
+   rather than a function result.  */
+
+/* Read a register as a signed/unsigned quantity.  */
+extern void regcache_cooked_read_signed (struct regcache *regcache,
+					 int regnum, LONGEST *val);
+extern void regcache_cooked_read_unsigned (struct regcache *regcache,
+					   int regnum, ULONGEST *val);
+
+/* Partial transfer of a cooked register.  These perform read, modify,
+   write style operations.  */
+
+void regcache_cooked_read_part (struct regcache *regcache, int regnum,
+				int offset, int len, void *buf);
+void regcache_cooked_write_part (struct regcache *regcache, int regnum,
+				 int offset, int len, const void *buf);
 
 /* Transfer a raw register [0..NUM_REGS) between the regcache and the
    target.  These functions are called by the target in response to a
    target_fetch_registers() or target_store_registers().  */
 
-extern void supply_register (int regnum, char *val);
+extern void supply_register (int regnum, const void *val);
 extern void regcache_collect (int regnum, void *buf);
 
 
@@ -46,6 +98,23 @@ extern char *registers;
    referenced thread. */
 
 extern signed char *register_valid;
+
+/* Copy/duplicate the contents of a register cache.  By default, the
+   operation is pass-through.  Writes to DST and reads from SRC will
+   go through to the target.
+
+   The ``cpy'' functions can not have overlapping SRC and DST buffers.
+
+   ``no passthrough'' versions do not go through to the target.  They
+   only transfer values already in the cache.  */
+
+extern struct regcache *regcache_dup (struct regcache *regcache);
+extern struct regcache *regcache_dup_no_passthrough (struct regcache *regcache);
+extern void regcache_cpy (struct regcache *dest, struct regcache *src);
+extern void regcache_cpy_no_passthrough (struct regcache *dest, struct regcache *src);
+
+extern char *deprecated_grub_regcache_for_registers (struct regcache *);
+extern char *deprecated_grub_regcache_for_register_valid (struct regcache *);
 
 extern int register_cached (int regnum);
 

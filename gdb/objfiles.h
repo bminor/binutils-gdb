@@ -1,6 +1,7 @@
 /* Definitions for symbol file management in GDB.
-   Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
-   Free Software Foundation, Inc.
+
+   Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
+   2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,6 +22,11 @@
 
 #if !defined (OBJFILES_H)
 #define OBJFILES_H
+
+#include "gdb_obstack.h"	/* For obstack internals.  */
+#include "symfile.h"		/* For struct psymbol_allocation_list */
+
+struct bcache;
 
 /* This structure maintains information on a per-objfile basis about the
    "entry point" of the objfile, and the scope within which the entry point
@@ -276,8 +282,8 @@ struct objfile
     /* A byte cache where we can stash arbitrary "chunks" of bytes that
        will not change. */
 
-    struct bcache psymbol_cache;	/* Byte cache for partial syms */
-    struct bcache macro_cache;          /* Byte cache for macros */
+    struct bcache *psymbol_cache;	/* Byte cache for partial syms */
+    struct bcache *macro_cache;          /* Byte cache for macros */
 
     /* Vectors of all partial symbols read in from file.  The actual data
        is stored in the psymbol_obstack. */
@@ -360,7 +366,7 @@ struct objfile
        so that it gets freed automatically when reading a new object
        file. */
 
-    PTR obj_private;
+    void *obj_private;
 
     /* Set of relocation offsets to apply to each section.
        Currently on the psymbol_obstack (which makes no sense, but I'm

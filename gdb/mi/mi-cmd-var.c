@@ -28,6 +28,7 @@
 #include "varobj.h"
 #include "value.h"
 #include <ctype.h>
+#include "gdb_string.h"
 
 extern int varobjdebug;		/* defined in varobj.c */
 

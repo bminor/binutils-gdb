@@ -207,7 +207,7 @@ static boolean
 MY(mkobject) (abfd)
      bfd *abfd;
 {
-  if (NAME(aout,mkobject) (abfd) == false)
+  if (! NAME(aout,mkobject) (abfd))
     return false;
 #if 0 /* Sizes get set in set_sizes callback, later, after we know
 	 the architecture and machine.  */
@@ -512,6 +512,9 @@ MY_bfd_final_link (abfd, info)
 #endif
 #ifndef MY_bfd_merge_sections
 #define MY_bfd_merge_sections bfd_generic_merge_sections
+#endif
+#ifndef MY_bfd_discard_group
+#define MY_bfd_discard_group bfd_generic_discard_group
 #endif
 #ifndef MY_bfd_reloc_type_lookup
 #define MY_bfd_reloc_type_lookup NAME(aout,reloc_type_lookup)

@@ -1,6 +1,6 @@
-
 /* generate instructions for Z8KSIM
-   Copyright (C) 1992, 1993 Free Software Foundation, Inc.
+
+   Copyright 1992, 1993, 2002 Free Software Foundation, Inc.
 
 This file is part of Z8KSIM
 
@@ -35,9 +35,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
    -b3   tc-genb3.h same as -3 but for long pointers
 
-   -m  regenerates list.c, which is an inverted list of opcodes to
-       pointers into the z8k dissassemble opcode table, it's just there
-       to makes things faster.
    */
 
 /* steve chamberlain
@@ -65,8 +62,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define NOPS 500
 
-#define DIRTY_HACK 0 /* Enable if your gcc can't cope with huge tables */
-extern short z8k_inv_list[];
 struct opcode_value
 {
   int n;
@@ -84,7 +79,6 @@ static char *reg_names[] =
 #define SIZE_ADDRESS (BIG ? 8 : 4)	/* number of nibbles in a ptr*/
 
 static int file;
-static int makelist;
 
 static int nibs = 0;
 
@@ -103,7 +97,16 @@ static opcode_entry_type *
 lookup_inst (what)
      int what;
 {
-  if (makelist)
+  static short *z8k_inv_list = NULL;
+  const nr_z8k_inv_list_elements = 1 << 16;
+  if (z8k_inv_list == NULL)
+    {
+      /* Initialize the list to 0xff == -1 */
+      z8k_inv_list = calloc (nr_z8k_inv_list_elements, sizeof (short));
+      memset (z8k_inv_list, 0xff, nr_z8k_inv_list_elements * sizeof (short));
+    }
+  /* Entry empty? Fill it in.  */
+  if (z8k_inv_list[what] == -1)
     {
 
       int nibl_index;
@@ -120,6 +123,9 @@ lookup_inst (what)
       instr_nibbles[2] = (what >> 4) & 0xf;
       instr_nibbles[1] = (what >> 8) & 0xf;
       instr_nibbles[0] = (what >> 12) & 0xf;
+
+      /* Assume it won't be found.  */
+      z8k_inv_list[what] = -2;
 
       while (ptr->name)
 	{
@@ -181,19 +187,15 @@ lookup_inst (what)
 	    }
 	  if (nibl_matched)
 	    {
-	      return ptr;
+	      z8k_inv_list[what] = ptr->idx;
+	      break; /* while */
 	    }
 	  ptr++;
 	}
-      return 0;
     }
-  else
-    {
-
-      if (z8k_inv_list[what] < 0)
-	return 0;
-      return z8k_table + z8k_inv_list[what];
-    }
+  if (z8k_inv_list[what] >= 0)
+    return z8k_table + z8k_inv_list[what];
+  return 0;
 }
 
 static char *
@@ -1677,12 +1679,8 @@ main (ac, av)
   int i;
   int needcomma = 0;
 
-  makelist = 0;
-
   for (i = 1; i < ac; i++)
     {
-      if (strcmp (av[i], "-m") == 0)
-	makelist = 1;
       if (strcmp (av[i], "-1") == 0)
 	file = 1;
       if (strcmp (av[i], "-2") == 0)
@@ -1695,52 +1693,6 @@ main (ac, av)
 	  BIG = 1;
 	}
 
-    }
-  if (makelist)
-    {
-
-      int i;
-      needcomma = 0;
-      printf ("short int z8k_inv_list[] = {\n");
-
-      for (i = 0; i < 1 << 16; i++)
-	{
-	  opcode_entry_type *p = lookup_inst (i);
-
-	  if(needcomma)
-	    printf(",");
-	  if ((i & 0xf) == 0)
-	    printf ("\n");
-
-#if 0
-	  printf ("\n		/*%04x %s */", i, p ? p->nicename : "");
-#endif
-
-	  if (!p)
-	    {
-	      printf ("-1");
-	    }
-	  else
-	    {
-	      printf ("%d", p->idx);
-	    }
-
-	  if ((i & 0x3f) == 0 && DIRTY_HACK)
-	    {
-	      printf ("\n#ifdef __GNUC__\n");
-	      printf ("};\n");
-	      printf("short int int_list%d[] = {\n", i);
-	      printf ("#else\n");
-	      printf (",\n");
-	      printf ("#endif\n");
-	      needcomma = 0;
-	    }
-	  else
-	    needcomma = 1;
-
-	}
-      printf ("};\n");
-      return 1;
     }
 
   /* First work out which opcodes use which bit patterns,
@@ -1776,9 +1728,7 @@ main (ac, av)
 	{
 	  int t = quick[i];
 
-	  mangle (z8k_table + z8k_inv_list[t],
-		  1,
-		  t);
+	  mangle (lookup_inst (t), 1, t);
 	}
     }
   if (file == 3)
@@ -1809,16 +1759,6 @@ main (ac, av)
 	    printf (",");
 	  emit ("<fop>_%d\n", i);
 	  needcomma = 1;
-	  if ((i & 0x3f) == 0 && DIRTY_HACK)
-	    {
-	      printf ("#ifdef __GNUC__\n");
-	      printf ("};\n");
-	      emit ("int (*(<fop>_table%d[]))() = {\n", i);
-	      printf ("#else\n");
-	      printf (",\n");
-	      printf ("#endif\n");
-	      needcomma = 0;
-	    }
 	}
       emit ("};\n");
     }
@@ -1854,8 +1794,7 @@ main (ac, av)
       printf ("struct op_info op_info_table[] = {\n");
       for (i = 0; i < 1 << 16; i++)
 	{
-	  int inv = z8k_inv_list[i];
-	  opcode_entry_type *p = z8k_table + inv;
+	  opcode_entry_type *p = lookup_inst (i);
 
 	  if (needcomma)
 	    printf (",");
@@ -1866,13 +1805,13 @@ main (ac, av)
 	    }
 	  else
 #endif
-	  if (inv >= 0)
+	  if (p != NULL)
 	    {
-	      printf ("%d", inv);
+	      printf ("%d", p->idx);
 	    }
 	  else
 	    printf ("400");
-	  if (inv >= 0)
+	  if (p != NULL)
 	    {
 	      printf ("		/* %04x %s */\n", i, p->nicename);
 	    }
@@ -1881,17 +1820,6 @@ main (ac, av)
 	      printf ("\n");
 	    }
 	  needcomma = 1;
-	  if ((i & 0x3f) == 0 && DIRTY_HACK)
-	    {
-	      printf ("#ifdef __GNUC__\n");
-	      printf ("}; \n");
-	      printf ("struct op_info op_info_table%d[] = {\n", i);
-	      printf ("#else\n");
-	      printf (",\n");
-
-	      printf ("#endif\n");
-	      needcomma = 0;
-	    }
 	}
       printf ("};\n");
 

@@ -21,7 +21,7 @@
 #ifndef TM_SPARCLYNX_H
 #define TM_SPARCLYNX_H
 
-#include "tm-lynx.h"
+#include "config/tm-lynx.h"
 
 /* Use generic Sparc definitions. */
 #include "sparc/tm-sparc.h"

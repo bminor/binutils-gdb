@@ -39,6 +39,8 @@
 #include <unistd.h>
 #endif
 
+#include "gdb_locale.h"
+
 /* For ``enum target_signal''.  */
 #include "gdb/signals.h"
 
@@ -207,7 +209,7 @@ enum language
     language_c,			/* C */
     language_cplus,		/* C++ */
     language_java,		/* Java */
-    language_chill,		/* Chill */
+    /* OBSOLETE language_chill,	*/	/* Chill */
     language_fortran,		/* Fortran */
     language_m2,		/* Modula-2 */
     language_asm,		/* Assembly language */
@@ -221,6 +223,14 @@ enum precision_type
     double_precision,
     unspecified_precision
   };
+
+/* A generic, not quite boolean, enumeration.  */
+enum auto_boolean
+{
+  AUTO_BOOLEAN_TRUE,
+  AUTO_BOOLEAN_FALSE,
+  AUTO_BOOLEAN_AUTO
+};
 
 /* the cleanup list records things that have to be undone
    if an error happens (descriptors to be closed, memory to be freed, etc.)
@@ -290,9 +300,9 @@ extern int inside_entry_file (CORE_ADDR addr);
 
 extern int inside_main_func (CORE_ADDR pc);
 
-/* From ch-lang.c, for the moment. (FIXME) */
+/* OBSOLETE From ch-lang.c, for the moment. (FIXME) */
 
-extern char *chill_demangle (const char *);
+/* OBSOLETE extern char *chill_demangle (const char *); */
 
 /* From utils.c */
 
@@ -524,6 +534,8 @@ typedef void initialize_file_ftype (void);
 extern char *skip_quoted (char *);
 
 extern char *gdb_readline (char *);
+
+extern char *gdb_readline_wrapper (char *);
 
 extern char *command_line_input (char *, int, char *);
 
@@ -836,10 +848,11 @@ extern void xmfree (void *md, void *ptr);
    "libiberty.h". */
 extern void xfree (void *);
 
-/* Utility macro to allocate typed memory.  Avoids errors like
+/* Utility macros to allocate typed memory.  Avoids errors like
    ``struct foo *foo = xmalloc (sizeof bar)'' and ``struct foo *foo =
    (struct foo *) xmalloc (sizeof bar)''.  */
 #define XMALLOC(TYPE) ((TYPE*) xmalloc (sizeof (TYPE)))
+#define XCALLOC(NMEMB, TYPE) ((TYPE*) xcalloc ((NMEMB), sizeof (TYPE)))
 
 /* Like asprintf/vasprintf but get an internal_error if the call
    fails. */
@@ -1058,9 +1071,9 @@ extern void *alloca ();
 
 /* In findvar.c.  */
 
-extern LONGEST extract_signed_integer (void *, int);
+extern LONGEST extract_signed_integer (const void *, int);
 
-extern ULONGEST extract_unsigned_integer (void *, int);
+extern ULONGEST extract_unsigned_integer (const void *, int);
 
 extern int extract_long_unsigned_integer (void *, int, LONGEST *);
 
@@ -1143,7 +1156,6 @@ extern void (*error_begin_hook) (void);
 
 extern int (*ui_load_progress_hook) (const char *section, unsigned long num);
 
-extern void (*selected_frame_level_changed_hook) (int level);
 
 /* Inhibit window interface if non-zero. */
 

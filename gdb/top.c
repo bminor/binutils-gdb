@@ -63,7 +63,6 @@
 #include <ctype.h>
 #include "ui-out.h"
 #include "cli-out.h"
-#include "interps.h"
 
 /* Default command line prompt.  This is overriden in some configs. */
 
@@ -387,7 +386,6 @@ catcher (catch_exceptions_ftype *func,
   char *saved_error_pre_print;
   char *saved_quit_pre_print;
   struct ui_out *saved_uiout;
-  struct gdb_interpreter *saved_interp;
 
   /* Return value from SIGSETJMP(): enum return_reason if error or
      quit caught, 0 otherwise. */
@@ -410,7 +408,6 @@ catcher (catch_exceptions_ftype *func,
   /* Override the global ``struct ui_out'' builder.  */
 
   saved_uiout = uiout;
-  saved_interp = gdb_current_interpreter ();
   uiout = func_uiout;
 
   /* Prevent error/quit during FUNC from calling cleanups established
@@ -441,24 +438,7 @@ catcher (catch_exceptions_ftype *func,
 
   restore_cleanups (saved_cleanup_chain);
 
-  /*
-    cases:
-    1. interp1 calls using uiout1
-    2. interp1 calls using uiout1 calls using uiout2
-    3. interp1 calls using uiout1 calls interp2 using uiout2
-    4. more?
-    is it enough to note that the interpreter has changed and
-    reset saved_uiout
-   */
-  if (gdb_current_interpreter () == saved_interp)
-    uiout = saved_uiout;
-  else
-    {
-      /* We've changed interpreters under this call.
-	 Reset uiout to the current interpreter's uiout
-	 and hope for the best. */
-      uiout = gdb_interpreter_ui_out (NULL);
-    }
+  uiout = saved_uiout;
 
   if (mask & RETURN_MASK_QUIT)
     quit_pre_print = saved_quit_pre_print;
@@ -723,12 +703,12 @@ execute_command (char *p, int from_tty)
 	execute_user_command (c, arg);
       else if (c->type == set_cmd || c->type == show_cmd)
 	do_setshow_command (arg, from_tty & caution, c);
-      else if (c->func == NULL)
+      else if (!cmd_func_p (c))
 	error ("That is not a command, just a help topic.");
       else if (call_command_hook)
 	call_command_hook (c, arg, from_tty & caution);
       else
-	(*c->func) (c, arg, from_tty & caution);
+	cmd_func (c, arg, from_tty & caution);
        
       /* If this command has been post-hooked, run the hook last. */
       execute_cmd_post_hook (c);
@@ -967,6 +947,29 @@ static int write_history_p;
 static int history_size;
 static char *history_filename;
 
+/* This is like readline(), but it has some gdb-specific behavior.
+   gdb can use readline in both the synchronous and async modes during
+   a single gdb invocation.  At the ordinary top-level prompt we might
+   be using the async readline.  That means we can't use
+   rl_pre_input_hook, since it doesn't work properly in async mode.
+   However, for a secondary prompt (" >", such as occurs during a
+   `define'), gdb just calls readline() directly, running it in
+   synchronous mode.  So for operate-and-get-next to work in this
+   situation, we have to switch the hooks around.  That is what
+   gdb_readline_wrapper is for.  */
+char *
+gdb_readline_wrapper (char *prompt)
+{
+  /* Set the hook that works in this case.  */
+  if (event_loop_p && after_char_processing_hook)
+    {
+      rl_pre_input_hook = (Function *) after_char_processing_hook;
+      after_char_processing_hook = NULL;
+    }
+
+  return readline (prompt);
+}
+
 
 #ifdef STOP_SIGNAL
 static void
@@ -1057,7 +1060,7 @@ static int operate_saved_history = -1;
 /* This is put on the appropriate hook and helps operate-and-get-next
    do its work.  */
 void
-gdb_rl_operate_and_get_next_completion ()
+gdb_rl_operate_and_get_next_completion (void)
 {
   int delta = where_history () - operate_saved_history;
   /* The `key' argument to rl_get_previous_history is ignored.  */
@@ -1079,6 +1082,8 @@ gdb_rl_operate_and_get_next_completion ()
 static int
 gdb_rl_operate_and_get_next (int count, int key)
 {
+  int where;
+
   if (event_loop_p)
     {
       /* Use the async hook.  */
@@ -1091,8 +1096,20 @@ gdb_rl_operate_and_get_next (int count, int key)
       rl_pre_input_hook = (Function *) gdb_rl_operate_and_get_next_completion;
     }
 
-  /* Add 1 because we eventually want the next line.  */
-  operate_saved_history = where_history () + 1;
+  /* Find the current line, and find the next line to use.  */
+  where = where_history();
+
+  /* FIXME: kettenis/20020817: max_input_history is renamed into
+     history_max_entries in readline-4.2.  When we do a new readline
+     import, we should probably change it here too, even though
+     readline maintains backwards compatibility for now by still
+     defining max_input_history.  */
+  if ((history_is_stifled () && (history_length >= max_input_history)) ||
+      (where >= history_length - 1))
+    operate_saved_history = where;
+  else
+    operate_saved_history = where + 1;
+
   return rl_newline (1, key);
 }
 
@@ -1194,7 +1211,7 @@ command_line_input (char *prompt_arg, int repeat, char *annotation_suffix)
 	}
       else if (command_editing_p && instream == stdin && ISATTY (instream))
 	{
-	  rl = readline (local_prompt);
+	  rl = gdb_readline_wrapper (local_prompt);
 	}
       else
 	{
@@ -2108,26 +2125,17 @@ gdb_init (char *argv0)
     init_ui_hook (argv0);
 
   /* Install the default UI */
-  /* All the interpreters should have had a look at things by now.
-     Initialize the selected interpreter. */
-  {
-    struct gdb_interpreter *interp;
-    if (interpreter_p == NULL)
-      interpreter_p = xstrdup (GDB_INTERPRETER_CONSOLE);
+  if (!init_ui_hook)
+    {
+      uiout = cli_out_new (gdb_stdout);
 
-    interp = gdb_lookup_interpreter (interpreter_p);
-
-    if (interp == NULL)
-      {
-        fprintf_unfiltered (gdb_stderr, "Interpreter `%s' unrecognized.\n",
-                            interpreter_p);
-        exit (1);
-      }
-    if (!gdb_set_interpreter (interp))
-      {
-        fprintf_unfiltered (gdb_stderr, "Interpreter `%s' failed to initialize.\n",
-                            interpreter_p);
-        exit (1);
-      }
-  }
+      /* All the interpreters should have had a look at things by now.
+	 Initialize the selected interpreter. */
+      if (interpreter_p)
+	{
+	  fprintf_unfiltered (gdb_stderr, "Interpreter `%s' unrecognized.\n",
+			      interpreter_p);
+	  exit (1);
+	}
+    }
 }

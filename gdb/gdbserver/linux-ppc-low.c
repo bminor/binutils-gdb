@@ -64,9 +64,53 @@ ppc_cannot_fetch_register (int regno)
   return 0;
 }
 
+static CORE_ADDR
+ppc_get_pc (void)
+{
+  unsigned long pc;
+
+  collect_register_by_name ("pc", &pc);
+  return (CORE_ADDR) pc;
+}
+
+static void
+ppc_set_pc (CORE_ADDR pc)
+{
+  unsigned long newpc = pc;
+
+  supply_register_by_name ("pc", &newpc);
+}
+
+/* Correct in either endianness.  Note that this file is
+   for PowerPC only, not PowerPC64.
+   This instruction is "twge r2, r2", which GDB uses as a software
+   breakpoint.  */
+static const unsigned long ppc_breakpoint = 0x7d821008;
+#define ppc_breakpoint_len 4
+
+static int
+ppc_breakpoint_at (CORE_ADDR where)
+{
+  unsigned long insn;
+
+  (*the_target->read_memory) (where, (char *) &insn, 4);
+  if (insn == ppc_breakpoint)
+    return 1;
+  /* If necessary, recognize more trap instructions here.  GDB only uses the
+     one.  */
+  return 0;
+}
+
 struct linux_target_ops the_low_target = {
   ppc_num_regs,
   ppc_regmap,
   ppc_cannot_fetch_register,
   ppc_cannot_store_register,
+  ppc_get_pc,
+  ppc_set_pc,
+  (const char *) &ppc_breakpoint,
+  ppc_breakpoint_len,
+  NULL,
+  0,
+  ppc_breakpoint_at,
 };

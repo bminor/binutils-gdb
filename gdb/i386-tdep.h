@@ -1,5 +1,5 @@
 /* Target-dependent code for GDB, the GNU debugger.
-   Copyright 2001
+   Copyright 2001, 2002
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -22,6 +22,8 @@
 #ifndef I386_TDEP_H
 #define I386_TDEP_H
 
+#include "osabi.h"
+
 /* GDB's i386 target supports both the 32-bit Intel Architecture
    (IA-32) and the 64-bit AMD x86-64 architecture.  Internally it uses
    a similar register layout for both.
@@ -40,30 +42,39 @@
    differs and is determined by the num_xmm_regs member of `struct
    gdbarch_tdep'.  */
 
-/* ABI variants that we know about.  */
-enum i386_abi
+/* Convention for returning structures.  */
+
+enum struct_return
 {
-  I386_ABI_UNKNOWN = 0,
-
-  /* ELF */
-  I386_ABI_SVR4,		/* This is the default.  */
-  I386_ABI_NETBSD,
-  I386_ABI_LINUX,
-  I386_ABI_HURD,
-  I386_ABI_SOLARIS,
-  I386_ABI_FREEBSD,
-
-  I386_ABI_INVALID = -1
+  pcc_struct_return,		/* Return "short" structures in memory.  */
+  reg_struct_return		/* Return "short" structures in registers.  */
 };
 
 /* i386 architecture specific information.  */
 struct gdbarch_tdep
 {
   /* ABI.  */
-  enum i386_abi abi;
+  enum gdb_osabi osabi;
 
   /* Number of SSE registers.  */
   int num_xmm_regs;
+
+  /* Offset of saved PC in jmp_buf.  */
+  int jb_pc_offset;
+
+  /* Convention for returning structures.  */
+  enum struct_return struct_return;
+
+  /* Address range where sigtramp lives.  */
+  CORE_ADDR sigtramp_start;
+  CORE_ADDR sigtramp_end;
+
+  /* Get address of sigcontext for sigtramp.  */
+  CORE_ADDR (*sigcontext_addr) (struct frame_info *);
+
+  /* Offset of saved PC and SP in `struct sigcontext'.  */
+  int sc_pc_offset;
+  int sc_sp_offset;
 };
 
 /* Floating-point registers.  */
@@ -103,7 +114,7 @@ struct gdbarch_tdep
 #define FOP_REGNUM	(FPC_REGNUM + 7)
 
 /* Return non-zero if N corresponds to a FPU data registers.  */
-#define FP_REGNUM_P(n)	(FP0_REGNUM <= (n) && (n) < FPC_REGNUM)
+#define FP_REGNUM_P(n)	(FP0_REGNUM && FP0_REGNUM <= (n) && (n) < FPC_REGNUM)
 
 /* Return non-zero if N corresponds to a FPU control register.  */
 #define FPC_REGNUM_P(n)	(FPC_REGNUM <= (n) && (n) < XMM0_REGNUM)
@@ -129,8 +140,40 @@ struct gdbarch_tdep
 #define IS_FPU_CTRL_REGNUM(n) FPC_REGNUM_P (n)
 #define IS_SSE_REGNUM(n) SSE_REGNUM_P (n)
 
-void i386_gdbarch_register_os_abi (enum i386_abi,
-				   void (*init_abi)(struct gdbarch_info,
-						    struct gdbarch *));
+#define I386_NUM_GREGS	16
+#define I386_NUM_FREGS	16
+#define I386_NUM_XREGS  9
+
+#define I386_SSE_NUM_REGS	(I386_NUM_GREGS + I386_NUM_FREGS \
+				 + I386_NUM_XREGS)
+
+/* Sizes of individual register sets.  These cover the entire register
+   file, so summing up the sizes of those portions actually present
+   yields REGISTER_BYTES.  */
+#define I386_SIZEOF_GREGS	(I386_NUM_GREGS * 4)
+#define I386_SIZEOF_FREGS	(8 * 10 + 8 * 4)
+#define I386_SIZEOF_XREGS	(8 * 16 + 4)
+
+#define I386_SSE_SIZEOF_REGS	(I386_SIZEOF_GREGS + I386_SIZEOF_FREGS \
+				 + I386_SIZEOF_XREGS)
+
+/* Size of the largest register.  */
+#define I386_MAX_REGISTER_SIZE	16
+
+/* Functions exported from i386-tdep.c.  */
+extern CORE_ADDR i386_pe_skip_trampoline_code (CORE_ADDR pc, char *name);
+
+/* Return the name of register REG.  */
+extern char const *i386_register_name (int reg);
+
+/* Initialize a basic ELF architecture variant.  */
+extern void i386_elf_init_abi (struct gdbarch_info, struct gdbarch *);
+
+/* Initialize a SVR4 architecture variant.  */
+extern void i386_svr4_init_abi (struct gdbarch_info, struct gdbarch *);
+
+/* Functions exported from i386bsd-tdep.c.  */
+
+extern CORE_ADDR i386bsd_sigcontext_addr (struct frame_info *frame);
 
 #endif /* i386-tdep.h */

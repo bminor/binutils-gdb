@@ -1,5 +1,5 @@
 /* D10V-specific support for 32-bit ELF
-   Copyright 1996, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1996, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
    Contributed by Martin Hunt (hunt@cygnus.com).
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -29,7 +29,7 @@ static reloc_howto_type *bfd_elf32_bfd_reloc_type_lookup
 static void d10v_info_to_howto_rel
   PARAMS ((bfd *, arelent *, Elf32_Internal_Rel *));
 static asection * elf32_d10v_gc_mark_hook
-  PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Rela *,
+  PARAMS ((asection *, struct bfd_link_info *, Elf_Internal_Rela *,
 	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
 static boolean elf32_d10v_gc_sweep_hook
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
@@ -67,10 +67,10 @@ static reloc_howto_type elf_d10v_howto_table[] =
     HOWTO (R_D10V_10_PCREL_R,	/* type */
 	   2,	                /* rightshift */
 	   2,	                /* size (0 = byte, 1 = short, 2 = long) */
-	   8,	                /* bitsize */
+	   7,	                /* bitsize */
 	   true,	        /* pc_relative */
 	   0,	                /* bitpos */
-	   complain_overflow_signed, /* complain_on_overflow */
+	   complain_overflow_bitfield, /* complain_on_overflow */
 	   bfd_elf_generic_reloc, /* special_function */
 	   "R_D10V_10_PCREL_R",	/* name */
 	   false,	        /* partial_inplace */
@@ -83,10 +83,10 @@ static reloc_howto_type elf_d10v_howto_table[] =
     HOWTO (R_D10V_10_PCREL_L,	/* type */
 	   2,	                /* rightshift */
 	   2,	                /* size (0 = byte, 1 = short, 2 = long) */
-	   8,	                /* bitsize */
+	   7,	                /* bitsize */
 	   true,	        /* pc_relative */
 	   15,	                /* bitpos */
-	   complain_overflow_signed, /* complain_on_overflow */
+	   complain_overflow_bitfield, /* complain_on_overflow */
 	   bfd_elf_generic_reloc, /* special_function */
 	   "R_D10V_10_PCREL_L",	/* name */
 	   false,	        /* partial_inplace */
@@ -128,10 +128,10 @@ static reloc_howto_type elf_d10v_howto_table[] =
     HOWTO (R_D10V_18_PCREL,	/* type */
 	   2,			/* rightshift */
 	   2,			/* size (0 = byte, 1 = short, 2 = long) */
-	   16,			/* bitsize */
+	   15,			/* bitsize */
 	   true,		/* pc_relative */
 	   0,			/* bitpos */
-	   complain_overflow_signed, /* complain_on_overflow */
+	   complain_overflow_bitfield, /* complain_on_overflow */
 	   bfd_elf_generic_reloc, /* special_function */
 	   "R_D10V_18_PCREL",	/* name */
 	   false,		/* partial_inplace */
@@ -240,12 +240,12 @@ d10v_info_to_howto_rel (abfd, cache_ptr, dst)
 }
 
 static asection *
-elf32_d10v_gc_mark_hook (abfd, info, rel, h, sym)
-       bfd *abfd;
-       struct bfd_link_info *info ATTRIBUTE_UNUSED;
-       Elf_Internal_Rela *rel;
-       struct elf_link_hash_entry *h;
-       Elf_Internal_Sym *sym;
+elf32_d10v_gc_mark_hook (sec, info, rel, h, sym)
+     asection *sec;
+     struct bfd_link_info *info ATTRIBUTE_UNUSED;
+     Elf_Internal_Rela *rel;
+     struct elf_link_hash_entry *h;
+     Elf_Internal_Sym *sym;
 {
   if (h != NULL)
     {
@@ -271,9 +271,8 @@ elf32_d10v_gc_mark_hook (abfd, info, rel, h, sym)
        }
      }
    else
-     {
-       return bfd_section_from_elf_index (abfd, sym->st_shndx);
-     }
+     return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
+
   return NULL;
 }
 

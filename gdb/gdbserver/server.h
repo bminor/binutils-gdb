@@ -54,8 +54,21 @@
    least the size of a (void *).  */
 typedef long long CORE_ADDR;
 
-/* Opaque inferior process information.  */
-struct inferior_info;
+/* Generic information for tracking a list of ``inferiors'' - threads,
+   processes, etc.  */
+struct inferior_list
+{
+  struct inferior_list_entry *head;
+  struct inferior_list_entry *tail;
+};
+struct inferior_list_entry
+{
+  int id;
+  struct inferior_list_entry *next;
+};
+
+/* Opaque type for user-visible threads.  */
+struct thread_info;
 
 #include "regcache.h"
 #include "gdb/signals.h"
@@ -67,27 +80,41 @@ struct inferior_info;
 
 void initialize_low ();
 
-/* Target-specific variables */
-
-extern char *registers;
-
 /* From inferiors.c.  */
 
-extern struct inferior_info *current_inferior;
-extern int signal_pid;
-void add_inferior (int pid);
+extern struct inferior_list all_threads;
+void add_inferior_to_list (struct inferior_list *list,
+			   struct inferior_list_entry *new_inferior);
+void for_each_inferior (struct inferior_list *list,
+			void (*action) (struct inferior_list_entry *));
+extern struct thread_info *current_inferior;
+void remove_inferior (struct inferior_list *list,
+		      struct inferior_list_entry *entry);
+void remove_thread (struct thread_info *thread);
+void add_thread (int thread_id, void *target_data);
 void clear_inferiors (void);
-void *inferior_target_data (struct inferior_info *);
-void set_inferior_target_data (struct inferior_info *, void *);
-void *inferior_regcache_data (struct inferior_info *);
-void set_inferior_regcache_data (struct inferior_info *, void *);
+struct inferior_list_entry *find_inferior
+     (struct inferior_list *,
+      int (*func) (struct inferior_list_entry *,
+		   void *),
+      void *arg);
+struct inferior_list_entry *find_inferior_id (struct inferior_list *list,
+					      int id);
+void *inferior_target_data (struct thread_info *);
+void set_inferior_target_data (struct thread_info *, void *);
+void *inferior_regcache_data (struct thread_info *);
+void set_inferior_regcache_data (struct thread_info *, void *);
+void change_inferior_id (struct inferior_list *list,
+			 int new_id);
 
 /* Public variables in server.c */
 
 extern int cont_thread;
 extern int general_thread;
+extern int step_thread;
 extern int thread_from_wait;
 extern int old_thread_from_wait;
+extern int server_waiting;
 
 extern jmp_buf toplevel;
 
@@ -103,6 +130,8 @@ void enable_async_io (void);
 void disable_async_io (void);
 void convert_ascii_to_int (char *from, char *to, int n);
 void convert_int_to_ascii (char *from, char *to, int n);
+void new_thread_notify (int id);
+void dead_thread_notify (int id);
 void prepare_resume_reply (char *buf, char status, unsigned char sig);
 
 void decode_m_packet (char *from, CORE_ADDR * mem_addr_ptr,

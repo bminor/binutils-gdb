@@ -811,7 +811,10 @@ elf_hppa_reloc_final_type (abfd, base_type, format, field)
 	      final_type = R_PARISC_PCREL14R;
 	      break;
 	    case e_fsel:
-	      final_type = R_PARISC_PCREL14F;
+	      if (bfd_get_mach (abfd) < 25)
+		final_type = R_PARISC_PCREL14F;
+	      else
+		final_type = R_PARISC_PCREL16F;
 	      break;
 	    default:
 	      return R_PARISC_NONE;
@@ -1296,22 +1299,22 @@ elf_hppa_final_link (abfd, info)
 	     address of the .plt + gp_offset.
 
 	     If no .plt is found, then look for .dlt, .opd and .data (in
-	     that order) and set __gp to the base address of whichever section
-	    is found first.  */
+	     that order) and set __gp to the base address of whichever
+	     section is found first.  */
 
 	  sec = hppa_info->plt_sec;
-	  if (sec)
+	  if (sec && ! (sec->flags & SEC_EXCLUDE))
 	    gp_val = (sec->output_offset
 		      + sec->output_section->vma
 		      + hppa_info->gp_offset);
 	  else
 	    {
 	      sec = hppa_info->dlt_sec;
-	      if (!sec)
+	      if (!sec || (sec->flags & SEC_EXCLUDE))
 		sec = hppa_info->opd_sec;
-	      if (!sec)
+	      if (!sec || (sec->flags & SEC_EXCLUDE))
 		sec = bfd_get_section_by_name (abfd, ".data");
-	      if (!sec)
+	      if (!sec || (sec->flags & SEC_EXCLUDE))
 		return false;
 
 	      gp_val = sec->output_offset + sec->output_section->vma;
@@ -1373,8 +1376,12 @@ elf_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Shdr *symtab_hdr;
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
-  struct elf64_hppa_link_hash_table *hppa_info = elf64_hppa_hash_table (info);
+  struct elf64_hppa_link_hash_table *hppa_info;
 
+  if (info->relocateable)
+    return true;
+
+  hppa_info = elf64_hppa_hash_table (info);
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
 
   rel = relocs;
@@ -1402,28 +1409,8 @@ elf_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
 	  return false;
 	}
 
-      r_symndx = ELF_R_SYM (rel->r_info);
-
-      if (info->relocateable)
-	{
-	  /* This is a relocateable link.  We don't have to change
-	     anything, unless the reloc is against a section symbol,
-	     in which case we have to adjust according to where the
-	     section symbol winds up in the output section.  */
-	  if (r_symndx < symtab_hdr->sh_info)
-	    {
-	      sym = local_syms + r_symndx;
-	      if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
-		{
-		  sym_sec = local_sections[r_symndx];
-		  rel->r_addend += sym_sec->output_offset;
-		}
-	    }
-
-	  continue;
-	}
-
       /* This is a final link.  */
+      r_symndx = ELF_R_SYM (rel->r_info);
       h = NULL;
       sym = NULL;
       sym_sec = NULL;
@@ -1609,8 +1596,7 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
     case R_PARISC_NONE:
       break;
 
-    /* Basic function call support.  I'm not entirely sure if PCREL14F is
-       actually needed or even handled correctly.
+    /* Basic function call support.
 
        Note for a call to a function defined in another dynamic library
        we want to redirect the call to a stub.  */
@@ -2074,11 +2060,14 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
 			hppa_info->opd_sec->contents + dyn_h->opd_offset + 24);
 	  }
 
-	/* We want the value of the OPD offset for this symbol, not
-	   the symbol's actual address.  */
-	value = (dyn_h->opd_offset
-		 + hppa_info->opd_sec->output_offset
-		 + hppa_info->opd_sec->output_section->vma);
+	if (dyn_h->want_opd)
+	  /* We want the value of the OPD offset for this symbol.  */
+	  value = (dyn_h->opd_offset
+		   + hppa_info->opd_sec->output_offset
+		   + hppa_info->opd_sec->output_section->vma);
+	else
+	  /* We want the address of the symbol.  */
+	  value += addend;
 
 	bfd_put_64 (input_bfd, value, hit_data);
 	return bfd_reloc_ok;
@@ -2179,24 +2168,27 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
     case R_PARISC_DLTIND14R:
     case R_PARISC_DLTIND14F:
     case R_PARISC_LTOFF_FPTR14R:
-    case R_PARISC_LTOFF_FPTR16F:
     case R_PARISC_PCREL14R:
     case R_PARISC_PCREL14F:
-    case R_PARISC_PCREL16F:
     case R_PARISC_LTOFF_TP14R:
     case R_PARISC_LTOFF_TP14F:
-    case R_PARISC_LTOFF_TP16F:
     case R_PARISC_DPREL14R:
     case R_PARISC_DPREL14F:
-    case R_PARISC_GPREL16F:
     case R_PARISC_PLTOFF14R:
     case R_PARISC_PLTOFF14F:
-    case R_PARISC_PLTOFF16F:
     case R_PARISC_DIR14R:
     case R_PARISC_DIR14F:
+      return (insn & ~0x3fff) | low_sign_unext (sym_value, 14);
+
+    /* PA2.0W LDO and integer loads/stores with 16 bit displacements.  */
+    case R_PARISC_LTOFF_FPTR16F:
+    case R_PARISC_PCREL16F:
+    case R_PARISC_LTOFF_TP16F:
+    case R_PARISC_GPREL16F:
+    case R_PARISC_PLTOFF16F:
     case R_PARISC_DIR16F:
     case R_PARISC_LTOFF16F:
-      return (insn & ~0x3fff) | low_sign_unext (sym_value, 14);
+      return (insn & ~0xffff) | re_assemble_16 (sym_value);
 
     /* Doubleword loads and stores with a 14 bit displacement.  */
     case R_PARISC_DLTREL14DR:

@@ -284,7 +284,7 @@ os9k_set_section_contents (abfd, section, location, offset, count)
      int count;
 {
 
-  if (abfd->output_has_begun == false)
+  if (! abfd->output_has_begun)
     {				/* set by bfd.c handler */
       if (! aout_32_make_sections (abfd))
 	return false;
@@ -329,6 +329,7 @@ os9k_sizeof_headers (ignore_abfd, ignore)
 #define os9k_bfd_relax_section bfd_generic_relax_section
 #define os9k_bfd_gc_sections bfd_generic_gc_sections
 #define os9k_bfd_merge_sections bfd_generic_merge_sections
+#define os9k_bfd_discard_group bfd_generic_discard_group
 #define os9k_bfd_link_hash_table_create _bfd_generic_link_hash_table_create
 #define os9k_bfd_link_hash_table_free _bfd_generic_link_hash_table_free
 #define os9k_bfd_link_add_symbols _bfd_generic_link_add_symbols

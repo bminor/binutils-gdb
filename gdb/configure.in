@@ -33,10 +33,11 @@ AM_PROG_CC_STDC
 AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/..)
 AC_CANONICAL_SYSTEM
 
-dnl gdb doesn't use gettext, but bfd does.  We call this to ensure we
-dnl link with the correct libraries.
+dnl Set up for gettext.  PACKAGE is used when we call bindtextdomain.
 ALL_LINGUAS=
 CY_GNU_GETTEXT
+AC_DEFINE(PACKAGE, "gdb", [Name of this package. ])
+
 
 dnl List of object files added by configure.
 
@@ -51,6 +52,7 @@ CONFIG_CLEAN=
 CONFIG_INSTALL=
 CONFIG_UNINSTALL=
 
+SUBDIRS="doc testsuite nlm"
 configdirs="doc testsuite"
 
 AC_ARG_ENABLE(multi-ice,
@@ -120,7 +122,7 @@ esac; esac
 
 AC_CHECK_HEADERS(ctype.h nlist.h link.h thread_db.h proc_service.h \
 	memory.h objlist.h ptrace.h sgtty.h stddef.h stdlib.h \
-	string.h sys/procfs.h sys/ptrace.h sys/reg.h stdint.h \
+	string.h sys/procfs.h sys/proc.h sys/ptrace.h sys/reg.h stdint.h \
 	term.h termio.h termios.h unistd.h wait.h sys/wait.h \
 	wchar.h wctype.h asm/debugreg.h sys/debugreg.h sys/select.h \
 	time.h sys/file.h sys/ioctl.h sys/user.h sys/fault.h sys/syscall.h \
@@ -1086,6 +1088,9 @@ if test "${enable_gdbtk}" = "yes"; then
 	   fi
 	fi
     fi
+
+    SUBDIRS="${SUBDIRS} gdbtk"
+    configdirs="${configdirs} gdbtk"
 fi
 
 AC_SUBST(X_CFLAGS)
@@ -1292,7 +1297,6 @@ case "${GDB_MULTI_ARCH}" in
     *)  AC_MSG_ERROR("GDB: Unknown GDB_MULTI_ARCH value ${GDB_MULTI_ARCH}");;
 esac
 
-SUBDIRS="doc testsuite nlm"
 if test "${enable_multi_ice}" = "yes"; then
   SUBDIRS="${SUBDIRS} multi-ice"
 fi

@@ -40,7 +40,7 @@
 #include "linespec.h"
 #include "filenames.h"		/* for FILENAME_CMP */
 
-#include "obstack.h"
+#include "gdb_obstack.h"
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -438,24 +438,26 @@ symbol_init_demangled_name (struct general_symbol_info *gsymbol,
           gsymbol->language_specific.cplus_specific.demangled_name = NULL;
         }
     }
-  if (demangled == NULL
-      && (gsymbol->language == language_chill
-          || gsymbol->language == language_auto))
-    {
-      demangled =
-        chill_demangle (gsymbol->name);
-      if (demangled != NULL)
-        {
-          gsymbol->language = language_chill;
-          gsymbol->language_specific.chill_specific.demangled_name =
-            obsavestring (demangled, strlen (demangled), obstack);
-          xfree (demangled);
-        }
-      else
-        {
-          gsymbol->language_specific.chill_specific.demangled_name = NULL;
-        }
-    }
+#if 0
+  /* OBSOLETE if (demangled == NULL */
+  /* OBSOLETE     && (gsymbol->language == language_chill */
+  /* OBSOLETE         || gsymbol->language == language_auto)) */
+  /* OBSOLETE   { */
+  /* OBSOLETE     demangled = */
+  /* OBSOLETE       chill_demangle (gsymbol->name); */
+  /* OBSOLETE     if (demangled != NULL) */
+  /* OBSOLETE       { */
+  /* OBSOLETE         gsymbol->language = language_chill; */
+  /* OBSOLETE         gsymbol->language_specific.chill_specific.demangled_name = */
+  /* OBSOLETE           obsavestring (demangled, strlen (demangled), obstack); */
+  /* OBSOLETE         xfree (demangled); */
+  /* OBSOLETE       } */
+  /* OBSOLETE     else */
+  /* OBSOLETE       { */
+  /* OBSOLETE         gsymbol->language_specific.chill_specific.demangled_name = NULL; */
+  /* OBSOLETE       } */
+  /* OBSOLETE   } */
+#endif
 }
 
 
@@ -679,11 +681,26 @@ lookup_symbol (const char *name, const struct block *block,
 	       const namespace_enum namespace, int *is_a_field_of_this,
 	       struct symtab **symtab)
 {
-  char *modified_name = NULL;
-  char *modified_name2 = NULL;
+  char *demangled_name = NULL;
+  const char *modified_name = NULL;
   const char *mangled_name = NULL;
   int needtofreename = 0;
   struct symbol *returnval;
+
+  modified_name = name;
+
+  /* If we are using C++ language, demangle the name before doing a lookup, so
+     we can always binary search. */
+  if (current_language->la_language == language_cplus)
+    {
+      demangled_name = cplus_demangle (name, DMGL_ANSI | DMGL_PARAMS);
+      if (demangled_name)
+	{
+	  mangled_name = name;
+	  modified_name = demangled_name;
+	  needtofreename = 1;
+	}
+    }
 
   if (case_sensitivity == case_sensitive_off)
     {
@@ -697,26 +714,11 @@ lookup_symbol (const char *name, const struct block *block,
       copy[len] = 0;
       modified_name = copy;
     }
-  else 
-      modified_name = (char *) name;
-
-  /* If we are using C++ language, demangle the name before doing a lookup, so
-     we can always binary search. */
-  if (current_language->la_language == language_cplus)
-    {
-      modified_name2 = cplus_demangle (modified_name, DMGL_ANSI | DMGL_PARAMS);
-      if (modified_name2)
-	{
-	  mangled_name = name;
-	  modified_name = modified_name2;
-	  needtofreename = 1;
-	}
-    }
 
   returnval = lookup_symbol_aux (modified_name, mangled_name, block,
 				 namespace, is_a_field_of_this, symtab);
   if (needtofreename)
-    xfree (modified_name2);
+    xfree (demangled_name);
 
   return returnval;	 
 }
@@ -1328,6 +1330,22 @@ lookup_block_symbol (register const struct block *block, const char *name,
   register struct symbol *sym_found = NULL;
   register int do_linear_search = 1;
 
+  if (BLOCK_HASHTABLE (block))
+    {
+      unsigned int hash_index;
+      hash_index = msymbol_hash_iw (name);
+      hash_index = hash_index % BLOCK_BUCKETS (block);
+      for (sym = BLOCK_BUCKET (block, hash_index); sym; sym = sym->hash_next)
+	{
+	  if (SYMBOL_NAMESPACE (sym) == namespace 
+	      && (mangled_name
+		  ? strcmp (SYMBOL_NAME (sym), mangled_name) == 0
+		  : SYMBOL_MATCHES_NAME (sym, name)))
+	    return sym;
+	}
+      return NULL;
+    }
+
   /* If the blocks's symbols were sorted, start with a binary search.  */
 
   if (BLOCK_SHOULD_SORT (block))
@@ -1582,14 +1600,15 @@ find_pc_sect_symtab (CORE_ADDR pc, asection *section)
 	if (section != 0)
 	  {
 	    int i;
+	    struct symbol *sym = NULL;
 
-	    for (i = 0; i < b->nsyms; i++)
+	    ALL_BLOCK_SYMBOLS (b, i, sym)
 	      {
-		fixup_symbol_section (b->sym[i], objfile);
-		if (section == SYMBOL_BFD_SECTION (b->sym[i]))
+		fixup_symbol_section (sym, objfile);
+		if (section == SYMBOL_BFD_SECTION (sym))
 		  break;
 	      }
-	    if (i >= b->nsyms)
+	    if ((i >= BLOCK_BUCKETS (b)) && (sym == NULL))
 	      continue;		/* no symbol in this symtab matches section */
 	  }
 	distance = BLOCK_END (b) - BLOCK_START (b);
@@ -1661,10 +1680,8 @@ find_addr_symbol (CORE_ADDR addr, struct symtab **symtabp, CORE_ADDR *symaddrp)
       {
 	QUIT;
 	block = BLOCKVECTOR_BLOCK (BLOCKVECTOR (symtab), blocknum);
-	top = BLOCK_NSYMS (block);
-	for (bot = 0; bot < top; bot++)
+	ALL_BLOCK_SYMBOLS (block, bot, sym)
 	  {
-	    sym = BLOCK_SYM (block, bot);
 	    switch (SYMBOL_CLASS (sym))
 	      {
 	      case LOC_STATIC:
@@ -2795,10 +2812,9 @@ search_symbols (char *regexp, namespace_enum kind, int nfiles, char *files[],
 	  struct symbol_search *prevtail = tail;
 	  int nfound = 0;
 	  b = BLOCKVECTOR_BLOCK (bv, i);
-	  for (j = 0; j < BLOCK_NSYMS (b); j++)
+	  ALL_BLOCK_SYMBOLS (b, j, sym)
 	    {
 	      QUIT;
-	      sym = BLOCK_SYM (b, j);
 	      if (file_matches (s->filename, files, nfiles)
 		  && ((regexp == NULL || SYMBOL_MATCHES_REGEXP (sym))
 		      && ((kind == VARIABLES_NAMESPACE && SYMBOL_CLASS (sym) != LOC_TYPEDEF
@@ -3719,6 +3735,49 @@ in_prologue (CORE_ADDR pc, CORE_ADDR func_start)
 
 
 /* Begin overload resolution functions */
+
+static char *
+remove_params (const char *demangled_name)
+{
+  const char *argp;
+  char *new_name;
+  int depth;
+
+  if (demangled_name == NULL)
+    return NULL;
+
+  /* First find the end of the arg list.  */
+  argp = strrchr (demangled_name, ')');
+  if (argp == NULL)
+    return NULL;
+
+  /* Back up to the beginning.  */
+  depth = 1;
+
+  while (argp-- > demangled_name)
+    {
+      if (*argp == ')')
+	depth ++;
+      else if (*argp == '(')
+	{
+	  depth --;
+
+	  if (depth == 0)
+	    break;
+	}
+    }
+  if (depth != 0)
+    internal_error (__FILE__, __LINE__,
+		    "bad demangled name %s\n", demangled_name);
+  while (argp[-1] == ' ' && argp > demangled_name)
+    argp --;
+
+  new_name = xmalloc (argp - demangled_name + 1);
+  memcpy (new_name, demangled_name, argp - demangled_name);
+  new_name[argp - demangled_name] = '\0';
+  return new_name;
+}
+
 /* Helper routine for make_symbol_completion_list.  */
 
 static int sym_return_val_size;
@@ -3734,21 +3793,7 @@ overload_list_add_symbol (struct symbol *sym, char *oload_name)
 {
   int newsize;
   int i;
-
-  /* Get the demangled name without parameters */
-  char *sym_name = cplus_demangle (SYMBOL_NAME (sym), DMGL_ARM | DMGL_ANSI);
-  if (!sym_name)
-    {
-      sym_name = (char *) xmalloc (strlen (SYMBOL_NAME (sym)) + 1);
-      strcpy (sym_name, SYMBOL_NAME (sym));
-    }
-
-  /* skip symbols that cannot match */
-  if (strcmp (sym_name, oload_name) != 0)
-    {
-      xfree (sym_name);
-      return;
-    }
+  char *sym_name;
 
   /* If there is no type information, we can't do anything, so skip */
   if (SYMBOL_TYPE (sym) == NULL)
@@ -3759,6 +3804,20 @@ overload_list_add_symbol (struct symbol *sym, char *oload_name)
     if (!strcmp (SYMBOL_NAME (sym), SYMBOL_NAME (sym_return_val[i])))
       return;
 
+  /* Get the demangled name without parameters */
+  sym_name = remove_params (SYMBOL_DEMANGLED_NAME (sym));
+  if (!sym_name)
+    return;
+
+  /* skip symbols that cannot match */
+  if (strcmp (sym_name, oload_name) != 0)
+    {
+      xfree (sym_name);
+      return;
+    }
+
+  xfree (sym_name);
+
   /* We have a match for an overload instance, so add SYM to the current list
    * of overload instances */
   if (sym_return_val_index + 3 > sym_return_val_size)
@@ -3768,8 +3827,6 @@ overload_list_add_symbol (struct symbol *sym, char *oload_name)
     }
   sym_return_val[sym_return_val_index++] = sym;
   sym_return_val[sym_return_val_index] = NULL;
-
-  xfree (sym_name);
 }
 
 /* Return a null-terminated list of pointers to function symbols that
@@ -3792,14 +3849,17 @@ make_symbol_overload_list (struct symbol *fsym)
   /* Length of name.  */
   int oload_name_len = 0;
 
-  /* Look for the symbol we are supposed to complete on.
-   * FIXME: This should be language-specific.  */
+  /* Look for the symbol we are supposed to complete on.  */
 
-  oload_name = cplus_demangle (SYMBOL_NAME (fsym), DMGL_ARM | DMGL_ANSI);
+  oload_name = remove_params (SYMBOL_DEMANGLED_NAME (fsym));
   if (!oload_name)
     {
-      oload_name = (char *) xmalloc (strlen (SYMBOL_NAME (fsym)) + 1);
-      strcpy (oload_name, SYMBOL_NAME (fsym));
+      sym_return_val_size = 1;
+      sym_return_val = (struct symbol **) xmalloc (2 * sizeof (struct symbol *));
+      sym_return_val[0] = fsym;
+      sym_return_val[1] = NULL;
+
+      return sym_return_val;
     }
   oload_name_len = strlen (oload_name);
 

@@ -23,4 +23,4 @@
 
 #define SEQUENT_PTX4
 
-#include "tm-ptx.h"
+#include "i386/tm-ptx.h"

@@ -1,5 +1,5 @@
 /* SPARC-specific support for 32-bit ELF
-   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
+   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
    Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -55,7 +55,7 @@ static void elf32_sparc_final_write_processing
 static enum elf_reloc_type_class elf32_sparc_reloc_type_class
   PARAMS ((const Elf_Internal_Rela *));
 static asection * elf32_sparc_gc_mark_hook
-  PARAMS ((bfd *, struct bfd_link_info *, Elf_Internal_Rela *,
+  PARAMS ((asection *, struct bfd_link_info *, Elf_Internal_Rela *,
 	   struct elf_link_hash_entry *, Elf_Internal_Sym *));
 static boolean elf32_sparc_gc_sweep_hook
   PARAMS ((bfd *, struct bfd_link_info *, asection *,
@@ -637,14 +637,13 @@ elf32_sparc_check_relocs (abfd, info, sec, relocs)
 }
 
 static asection *
-elf32_sparc_gc_mark_hook (abfd, info, rel, h, sym)
-       bfd *abfd;
+elf32_sparc_gc_mark_hook (sec, info, rel, h, sym)
+       asection *sec;
        struct bfd_link_info *info ATTRIBUTE_UNUSED;
        Elf_Internal_Rela *rel;
        struct elf_link_hash_entry *h;
        Elf_Internal_Sym *sym;
 {
-
   if (h != NULL)
     {
       switch (ELF32_R_TYPE (rel->r_info))
@@ -669,9 +668,7 @@ elf32_sparc_gc_mark_hook (abfd, info, rel, h, sym)
        }
      }
    else
-     {
-       return bfd_section_from_elf_index (abfd, sym->st_shndx);
-     }
+     return bfd_section_from_elf_index (sec->owner, sym->st_shndx);
 
   return NULL;
 }
@@ -1120,6 +1117,9 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
 
+  if (info->relocateable)
+    return true;
+
   dynobj = elf_hash_table (info)->dynobj;
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
@@ -1162,28 +1162,8 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 	}
       howto = _bfd_sparc_elf_howto_table + r_type;
 
-      r_symndx = ELF32_R_SYM (rel->r_info);
-
-      if (info->relocateable)
-	{
-	  /* This is a relocateable link.  We don't have to change
-	     anything, unless the reloc is against a section symbol,
-	     in which case we have to adjust according to where the
-	     section symbol winds up in the output section.  */
-	  if (r_symndx < symtab_hdr->sh_info)
-	    {
-	      sym = local_syms + r_symndx;
-	      if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
-		{
-		  sec = local_sections[r_symndx];
-		  rel->r_addend += sec->output_offset + sym->st_value;
-		}
-	    }
-
-	  continue;
-	}
-
       /* This is a final link.  */
+      r_symndx = ELF32_R_SYM (rel->r_info);
       h = NULL;
       sym = NULL;
       sec = NULL;
@@ -1564,10 +1544,11 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 	  break;
 	}
 
-      /* ??? Copied from elf32-i386.c, debugging section check and all.  */
+      /* Dynamic relocs are not propagated for SEC_DEBUGGING sections
+	 because such sections are not SEC_ALLOC and thus ld.so will
+	 not process them.  */
       if (unresolved_reloc
-	  && !(info->shared
-	       && (input_section->flags & SEC_DEBUGGING) != 0
+	  && !((input_section->flags & SEC_DEBUGGING) != 0
 	       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0))
 	(*_bfd_error_handler)
 	  (_("%s(%s+0x%lx): unresolvable relocation against symbol `%s'"),
@@ -2149,5 +2130,6 @@ elf32_sparc_reloc_type_class (rela)
 #define elf_backend_want_plt_sym 1
 #define elf_backend_got_header_size 4
 #define elf_backend_plt_header_size (4*PLT_ENTRY_SIZE)
+#define elf_backend_rela_normal 1
 
 #include "elf32-target.h"

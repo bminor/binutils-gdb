@@ -1603,7 +1603,7 @@ prompt_for_continue (void)
   /* Call readline, not gdb_readline, because GO32 readline handles control-C
      whereas control-C to gdb_readline will cause the user to get dumped
      out to DOS.  */
-  ignore = readline (cont_prompt);
+  ignore = gdb_readline_wrapper (cont_prompt);
 
   if (annotation_level > 1)
     printf_unfiltered ("\n\032\032post-prompt-for-continue\n");
@@ -2153,9 +2153,11 @@ fprintf_symbol_filtered (struct ui_file *stream, char *name, enum language lang,
 	    case language_java:
 	      demangled = cplus_demangle (name, arg_mode | DMGL_JAVA);
 	      break;
-	    case language_chill:
-	      demangled = chill_demangle (name);
-	      break;
+#if 0
+	      /* OBSOLETE case language_chill: */
+	      /* OBSOLETE   demangled = chill_demangle (name); */
+	      /* OBSOLETE   break; */
+#endif
 	    default:
 	      demangled = NULL;
 	      break;
@@ -2462,9 +2464,7 @@ phex_nz (ULONGEST l, int sizeof_l)
 CORE_ADDR
 host_pointer_to_address (void *ptr)
 {
-  if (sizeof (ptr) != TYPE_LENGTH (builtin_type_void_data_ptr))
-    internal_error (__FILE__, __LINE__,
-		    "core_addr_to_void_ptr: bad cast");
+  gdb_assert (sizeof (ptr) == TYPE_LENGTH (builtin_type_void_data_ptr));
   return POINTER_TO_ADDRESS (builtin_type_void_data_ptr, &ptr);
 }
 
@@ -2472,9 +2472,8 @@ void *
 address_to_host_pointer (CORE_ADDR addr)
 {
   void *ptr;
-  if (sizeof (ptr) != TYPE_LENGTH (builtin_type_void_data_ptr))
-    internal_error (__FILE__, __LINE__,
-		    "core_addr_to_void_ptr: bad cast");
+
+  gdb_assert (sizeof (ptr) == TYPE_LENGTH (builtin_type_void_data_ptr));
   ADDRESS_TO_POINTER (builtin_type_void_data_ptr, &ptr, addr);
   return ptr;
 }

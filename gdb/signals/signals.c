@@ -498,8 +498,11 @@ target_signal_from_host (int hostsig)
       if (33 <= hostsig && hostsig <= 63)
 	return (enum target_signal)
 	  (hostsig - 33 + (int) TARGET_SIGNAL_REALTIME_33);
-      else if (hostsig == 64)
-	return TARGET_SIGNAL_REALTIME_64;
+      else if (hostsig == 32)
+	return TARGET_SIGNAL_REALTIME_32;
+      else if (64 <= hostsig && hostsig <= 127)
+	return (enum target_signal)
+	  (hostsig - 64 + (int) TARGET_SIGNAL_REALTIME_64);
       else
 	error ("GDB bug: target.c (target_signal_from_host): unrecognized real-time signal");
     }
@@ -784,8 +787,21 @@ do_target_signal_to_host (enum target_signal oursig,
 	  if (retsig >= SIGRTMIN && retsig <= SIGRTMAX)
 	    return retsig;
 	}
-      else if (oursig == TARGET_SIGNAL_REALTIME_64)
-	return 64;
+      else if (oursig == TARGET_SIGNAL_REALTIME_32)
+	{
+	  /* TARGET_SIGNAL_REALTIME_32 isn't contiguous with
+             TARGET_SIGNAL_REALTIME_33.  It is 32 by definition.  */
+	  return 32;
+	}
+      else if (oursig >= TARGET_SIGNAL_REALTIME_64
+	  && oursig <= TARGET_SIGNAL_REALTIME_127)
+	{
+	  /* This block of signals is continuous, and
+             TARGET_SIGNAL_REALTIME_64 is 64 by definition.  */
+	  int retsig =
+	    (int) oursig - (int) TARGET_SIGNAL_REALTIME_64 + 64;
+	  return retsig;
+	}
 #endif
       *oursig_ok = 0;
       return 0;

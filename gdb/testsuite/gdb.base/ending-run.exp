@@ -229,7 +229,12 @@ gdb_expect {
     timeout { fail "step out of main (hang or timeout on step at end 1)" }
 }
 
-if {![target_info exists use_cygmon] || ![target_info use_cygmon]} {
+# When we're talking to a program running on a real stand-alone board,
+# every BSP's exit function behaves differently, so there's no single
+# way to tell whether we've exited gracefully or not.  So don't run
+# these tests when use_gdb_stub is set, or when we're running under Cygmon.
+if {! [target_info exists use_gdb_stub]
+    && (! [target_info exists use_cygmon] || ! [target_info use_cygmon])} {
     global program_exited;
     if {[eval expr $program_exited == 0]} {
 	send_gdb "n\n"

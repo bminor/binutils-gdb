@@ -102,6 +102,7 @@ INTERNAL_CFLAGS =  $(WARN_CFLAGS) ${CFLAGS} ${GLOBAL_CFLAGS} \
 
 # LDFLAGS is specifically reserved for setting from the command line
 # when running make.
+LDFLAGS = @LDFLAGS@
 
 # Perhaps should come from parent Makefile
 VERSION = gdbserver-4.12.3
@@ -126,6 +127,7 @@ OBS = inferiors.o regcache.o remote-utils.o server.o signals.o target.o \
 	utils.o \
 	mem-break.o \
 	$(DEPFILES)
+GDBSERVER_LIBS = @GDBSERVER_LIBS@
 
 # Prevent Sun make from putting in the machine type.  Setting
 # TARGET_ARCH to nothing works for SunOS 3, 4.0, but not for 4.1.
@@ -229,8 +231,9 @@ MAKEOVERRIDES=
 ## This is ugly, but I don't want GNU make to put these variables in
 ## the environment.  Older makes will see this as a set of targets
 ## with no dependencies and no actions.
-unexport CHILLFLAGS CHILL_LIB CHILL_FOR_TARGET :
+# OBSOLETE unexport CHILLFLAGS CHILL_LIB CHILL_FOR_TARGET :
 
+gdb_proc_service_h = $(srcdir)/../gdb_proc_service.h $(srcdir)/../gregset.h
 regdat_sh = $(srcdir)/../regformats/regdat.sh
 regdef_h = $(srcdir)/../regformats/regdef.h
 regcache_h = $(srcdir)/regcache.h
@@ -239,10 +242,12 @@ server_h = $(srcdir)/server.h $(regcache_h) config.h $(srcdir)/target.h \
 
 inferiors.o: inferiors.c $(server_h)
 mem-break.o: mem-break.c $(server_h)
+proc-service.o: proc-service.c $(server_h) $(gdb_proc_service_h)
 regcache.o: regcache.c $(server_h) $(regdef_h)
 remote-utils.o: remote-utils.c terminal.h $(server_h)
 server.o: server.c $(server_h)
 target.o: target.c $(server_h)
+thread-db.o: thread-db.c $(server_h) $(gdb_proc_service_h)
 utils.o: utils.c $(server_h)
 
 signals.o: ../signals/signals.c $(server_h)
@@ -253,6 +258,8 @@ i387-fp.o: i387-fp.c $(server_h)
 linux_low_h = $(srcdir)/linux-low.h
 
 linux-low.o: linux-low.c $(linux_low_h) $(server_h)
+	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< @USE_THREAD_DB@
+
 linux-arm-low.o: linux-arm-low.c $(linux_low_h) $(server_h)
 linux-i386-low.o: linux-i386-low.c $(linux_low_h) $(server_h)
 linux-ia64-low.o: linux-ia64-low.c $(linux_low_h) $(server_h)

@@ -40,6 +40,10 @@ static const char * const gdb_osabi_names[] =
   "NetBSD a.out",
   "NetBSD ELF",
   "Windows CE",
+  "DJGPP",
+  "NetWare",
+  "Irix",
+  "LynxOS",
 
   "ARM EABI v1",
   "ARM EABI v2",
@@ -228,13 +232,8 @@ gdbarch_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch,
 
   if (osabi == GDB_OSABI_UNKNOWN)
     {
-      /* Don't complain about not knowing the OS ABI if we don't
-	 have an inferior.  */
-      if (info.abfd)
-	fprintf_filtered
-	  (gdb_stderr, "GDB doesn't recognize the OS ABI of the inferior.  "
-	   "Attempting to continue with the default %s settings",
-	   bfd_printable_arch_mach (arch_info->arch, arch_info->mach));
+      /* Don't complain about an unknown OSABI.  Assume the user knows
+         what they are doing.  */
       return;
     }
 
@@ -403,6 +402,15 @@ generic_elf_osabi_sniffer (bfd *abfd)
     case ELFOSABI_SOLARIS:
       osabi = GDB_OSABI_SOLARIS;
       break;
+    }
+
+  if (osabi == GDB_OSABI_UNKNOWN)
+    {
+      /* The FreeBSD folks have been naughty; they stored the string
+         "FreeBSD" in the padding of the e_ident field of the ELF
+         header to "brand" their ELF binaries in FreeBSD 3.x.  */
+      if (strcmp (&elf_elfheader (abfd)->e_ident[8], "FreeBSD") == 0)
+	osabi = GDB_OSABI_FREEBSD_ELF;
     }
 
   return osabi;

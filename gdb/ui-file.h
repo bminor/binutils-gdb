@@ -90,4 +90,11 @@ extern struct ui_file *stdio_fileopen (FILE *file);
 /* Open NAME returning an STDIO based UI_FILE. */
 extern struct ui_file *gdb_fopen (char *name, char *mode);
 
+/* Create a file which writes to both ONE and TWO.  CLOSE_ONE
+   and CLOSE_TWO indicate whether the original files should be
+   closed when the new file is closed.  */
+struct ui_file *tee_file_new (struct ui_file *one,
+			      int close_one,
+			      struct ui_file *two,
+			      int close_two);
 #endif

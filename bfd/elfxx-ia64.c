@@ -2,21 +2,21 @@
    Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
-This file is part of BFD, the Binary File Descriptor library.
+   This file is part of BFD, the Binary File Descriptor library.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "bfd.h"
 #include "sysdep.h"
@@ -25,37 +25,33 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "opcode/ia64.h"
 #include "elf/ia64.h"
 
-/*
- * THE RULES for all the stuff the linker creates --
- *
- * GOT		Entries created in response to LTOFF or LTOFF_FPTR
- *		relocations.  Dynamic relocs created for dynamic
- *		symbols in an application; REL relocs for locals
- *		in a shared library.
- *
- * FPTR		The canonical function descriptor.  Created for local
- *		symbols in applications.  Descriptors for dynamic symbols
- *		and local symbols in shared libraries are created by
- *		ld.so.  Thus there are no dynamic relocs against these
- *		objects.  The FPTR relocs for such _are_ passed through
- *		to the dynamic relocation tables.
- *
- * FULL_PLT	Created for a PCREL21B relocation against a dynamic symbol.
- *		Requires the creation of a PLTOFF entry.  This does not
- *		require any dynamic relocations.
- *
- * PLTOFF	Created by PLTOFF relocations.  For local symbols, this
- *		is an alternate function descriptor, and in shared libraries
- *		requires two REL relocations.  Note that this cannot be
- *		transformed into an FPTR relocation, since it must be in
- *		range of the GP.  For dynamic symbols, this is a function
- *		descriptor for a MIN_PLT entry, and requires one IPLT reloc.
- *
- * MIN_PLT	Created by PLTOFF entries against dynamic symbols.  This
- *		does not reqire dynamic relocations.
- */
-
-#define USE_RELA		/* we want RELA relocs, not REL */
+/* THE RULES for all the stuff the linker creates --
+ 
+  GOT		Entries created in response to LTOFF or LTOFF_FPTR
+ 		relocations.  Dynamic relocs created for dynamic
+ 		symbols in an application; REL relocs for locals
+ 		in a shared library.
+ 
+  FPTR		The canonical function descriptor.  Created for local
+ 		symbols in applications.  Descriptors for dynamic symbols
+ 		and local symbols in shared libraries are created by
+ 		ld.so.  Thus there are no dynamic relocs against these
+ 		objects.  The FPTR relocs for such _are_ passed through
+ 		to the dynamic relocation tables.
+ 
+  FULL_PLT	Created for a PCREL21B relocation against a dynamic symbol.
+ 		Requires the creation of a PLTOFF entry.  This does not
+ 		require any dynamic relocations.
+ 
+  PLTOFF	Created by PLTOFF relocations.  For local symbols, this
+ 		is an alternate function descriptor, and in shared libraries
+ 		requires two REL relocations.  Note that this cannot be
+ 		transformed into an FPTR relocation, since it must be in
+ 		range of the GP.  For dynamic symbols, this is a function
+ 		descriptor for a MIN_PLT entry, and requires one IPLT reloc.
+ 
+  MIN_PLT	Created by PLTOFF entries against dynamic symbols.  This
+ 		does not reqire dynamic relocations.  */
 
 #define NELEMS(a)	((int) (sizeof (a) / sizeof ((a)[0])))
 
@@ -140,7 +136,7 @@ struct elfNN_ia64_link_hash_entry
 
 struct elfNN_ia64_link_hash_table
 {
-  /* The main hash table */
+  /* The main hash table.  */
   struct elf_link_hash_table root;
 
   asection *got_sec;		/* the linkage table section (or NULL) */
@@ -174,7 +170,7 @@ static boolean elfNN_ia64_relax_section
 static boolean is_unwind_section_name
   PARAMS ((bfd *abfd, const char *));
 static boolean elfNN_ia64_section_from_shdr
-  PARAMS ((bfd *, ElfNN_Internal_Shdr *, char *));
+  PARAMS ((bfd *, ElfNN_Internal_Shdr *, const char *));
 static boolean elfNN_ia64_section_flags
   PARAMS ((flagword *, ElfNN_Internal_Shdr *));
 static boolean elfNN_ia64_fake_sections
@@ -211,7 +207,8 @@ static struct bfd_hash_entry *elfNN_ia64_new_elf_hash_entry
   PARAMS ((struct bfd_hash_entry *entry, struct bfd_hash_table *table,
 	   const char *string));
 static void elfNN_ia64_hash_copy_indirect
-  PARAMS ((struct elf_link_hash_entry *, struct elf_link_hash_entry *));
+  PARAMS ((struct elf_backend_data *, struct elf_link_hash_entry *,
+	   struct elf_link_hash_entry *));
 static void elfNN_ia64_hash_hide_symbol
   PARAMS ((struct bfd_link_info *, struct elf_link_hash_entry *, boolean));
 static struct bfd_link_hash_table *elfNN_ia64_hash_table_create
@@ -327,7 +324,7 @@ static void elfNN_hpux_post_process_headers
 boolean elfNN_hpux_backend_section_from_bfd_section
   PARAMS ((bfd *abfd, asection *sec, int *retval));
 
-/* ia64-specific relocation */
+/* ia64-specific relocation.  */
 
 /* Perform a relocation.  Not much to do here as all the hard work is
    done in elfNN_ia64_final_link_relocate.  */
@@ -461,7 +458,7 @@ static unsigned char elf_code_to_howto_index[R_IA64_MAX_RELOC_CODE + 1];
 
 /* Given a BFD reloc type, return the matching HOWTO structure.  */
 
-static reloc_howto_type*
+static reloc_howto_type *
 lookup_howto (rtype)
      unsigned int rtype;
 {
@@ -691,15 +688,10 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
     };
 
   Elf_Internal_Shdr *symtab_hdr;
-  Elf_Internal_Shdr *shndx_hdr;
   Elf_Internal_Rela *internal_relocs;
-  Elf_Internal_Rela *free_relocs = NULL;
   Elf_Internal_Rela *irel, *irelend;
   bfd_byte *contents;
-  bfd_byte *free_contents = NULL;
-  ElfNN_External_Sym *extsyms;
-  ElfNN_External_Sym *free_extsyms = NULL;
-  Elf_External_Sym_Shndx *shndx_buf = NULL;
+  Elf_Internal_Sym *isymbuf = NULL;
   struct elfNN_ia64_link_hash_table *ia64_info;
   struct one_fixup *fixups = NULL;
   boolean changed_contents = false;
@@ -726,10 +718,7 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 		     (abfd, sec, (PTR) NULL, (Elf_Internal_Rela *) NULL,
 		      link_info->keep_memory));
   if (internal_relocs == NULL)
-    goto error_return;
-
-  if (! link_info->keep_memory)
-    free_relocs = internal_relocs;
+    return false;
 
   ia64_info = elfNN_ia64_hash_table (link_info);
   irelend = internal_relocs + sec->reloc_count;
@@ -741,8 +730,8 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
   /* No branch-type relocations.  */
   if (irel == irelend)
     {
-      if (free_relocs != NULL)
-	free (free_relocs);
+      if (elf_section_data (sec)->relocs != internal_relocs)
+	free (internal_relocs);
       return true;
     }
 
@@ -754,48 +743,15 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
       contents = (bfd_byte *) bfd_malloc (sec->_raw_size);
       if (contents == NULL)
 	goto error_return;
-      free_contents = contents;
 
       if (! bfd_get_section_contents (abfd, sec, contents,
 				      (file_ptr) 0, sec->_raw_size))
 	goto error_return;
     }
 
-  /* Read this BFD's local symbols.  */
-  if (symtab_hdr->contents != NULL)
-    extsyms = (ElfNN_External_Sym *) symtab_hdr->contents;
-  else
-    {
-      bfd_size_type amt;
-
-      amt = symtab_hdr->sh_info * sizeof (ElfNN_External_Sym);
-      extsyms = (ElfNN_External_Sym *) bfd_malloc (amt);
-      if (extsyms == NULL)
-	goto error_return;
-      free_extsyms = extsyms;
-      if (bfd_seek (abfd, symtab_hdr->sh_offset, SEEK_SET) != 0
-	  || bfd_bread (extsyms, amt, abfd) != amt)
-	goto error_return;
-    }
-
-  shndx_hdr = &elf_tdata (abfd)->symtab_shndx_hdr;
-  if (shndx_hdr->sh_size != 0)
-    {
-      bfd_size_type amt;
-
-      amt = symtab_hdr->sh_info * sizeof (Elf_External_Sym_Shndx);
-      shndx_buf = (Elf_External_Sym_Shndx *) bfd_malloc (amt);
-      if (shndx_buf == NULL)
-	goto error_return;
-      if (bfd_seek (abfd, shndx_hdr->sh_offset, SEEK_SET) != 0
-	  || bfd_bread (shndx_buf, amt, abfd) != amt)
-	goto error_return;
-    }
-
   for (; irel < irelend; irel++)
     {
       bfd_vma symaddr, reladdr, trampoff, toff, roff;
-      Elf_Internal_Sym isym;
       asection *tsec;
       struct one_fixup *f;
       bfd_size_type amt;
@@ -806,25 +762,34 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
       /* Get the value of the symbol referred to by the reloc.  */
       if (ELFNN_R_SYM (irel->r_info) < symtab_hdr->sh_info)
 	{
-	  ElfNN_External_Sym *esym;
-	  Elf_External_Sym_Shndx *shndx;
-
 	  /* A local symbol.  */
-	  esym = extsyms + ELFNN_R_SYM (irel->r_info);
-	  shndx = shndx_buf + (shndx_buf ? ELFNN_R_SYM (irel->r_info) : 0);
-	  bfd_elfNN_swap_symbol_in (abfd, esym, shndx, &isym);
-	  if (isym.st_shndx == SHN_UNDEF)
+	  Elf_Internal_Sym *isym;
+
+	  /* Read this BFD's local symbols.  */
+	  if (isymbuf == NULL)
+	    {
+	      isymbuf = (Elf_Internal_Sym *) symtab_hdr->contents;
+	      if (isymbuf == NULL)
+		isymbuf = bfd_elf_get_elf_syms (abfd, symtab_hdr,
+						symtab_hdr->sh_info, 0,
+						NULL, NULL, NULL);
+	      if (isymbuf == 0)
+		goto error_return;
+	    }
+
+	  isym = isymbuf + ELF64_R_SYM (irel->r_info);
+	  if (isym->st_shndx == SHN_UNDEF)
 	    continue;	/* We can't do anthing with undefined symbols.  */
-	  else if (isym.st_shndx == SHN_ABS)
+	  else if (isym->st_shndx == SHN_ABS)
 	    tsec = bfd_abs_section_ptr;
-	  else if (isym.st_shndx == SHN_COMMON)
+	  else if (isym->st_shndx == SHN_COMMON)
 	    tsec = bfd_com_section_ptr;
-	  else if (isym.st_shndx == SHN_IA_64_ANSI_COMMON)
+	  else if (isym->st_shndx == SHN_IA_64_ANSI_COMMON)
 	    tsec = bfd_com_section_ptr;
 	  else
-	    tsec = bfd_section_from_elf_index (abfd, isym.st_shndx);
+	    tsec = bfd_section_from_elf_index (abfd, isym->st_shndx);
 
-	  toff = isym.st_value;
+	  toff = isym->st_value;
 	}
       else
 	{
@@ -972,17 +937,23 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
       free (f);
     }
 
-  if (changed_relocs)
-    elf_section_data (sec)->relocs = internal_relocs;
-  else if (free_relocs != NULL)
-    free (free_relocs);
-
-  if (changed_contents)
-    elf_section_data (sec)->this_hdr.contents = contents;
-  else if (free_contents != NULL)
+  if (isymbuf != NULL
+      && symtab_hdr->contents != (unsigned char *) isymbuf)
     {
       if (! link_info->keep_memory)
-	free (free_contents);
+	free (isymbuf);
+      else
+	{
+	  /* Cache the symbols for elf_link_input_bfd.  */
+	  symtab_hdr->contents = (unsigned char *) isymbuf;
+	}
+    }
+
+  if (contents != NULL
+      && elf_section_data (sec)->this_hdr.contents != contents)
+    {
+      if (!changed_contents && !link_info->keep_memory)
+	free (contents);
       else
 	{
 	  /* Cache the section contents for elf_link_input_bfd.  */
@@ -990,32 +961,26 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 	}
     }
 
-  if (shndx_buf != NULL)
-    free (shndx_buf);
-
-  if (free_extsyms != NULL)
+  if (elf_section_data (sec)->relocs != internal_relocs)
     {
-      if (! link_info->keep_memory)
-	free (free_extsyms);
+      if (!changed_relocs)
+	free (internal_relocs);
       else
-	{
-	  /* Cache the symbols for elf_link_input_bfd.  */
-	  symtab_hdr->contents = (unsigned char *) extsyms;
-	}
+	elf_section_data (sec)->relocs = internal_relocs;
     }
 
   *again = changed_contents || changed_relocs;
   return true;
 
  error_return:
-  if (free_relocs != NULL)
-    free (free_relocs);
-  if (free_contents != NULL)
-    free (free_contents);
-  if (shndx_buf != NULL)
-    free (shndx_buf);
-  if (free_extsyms != NULL)
-    free (free_extsyms);
+  if (isymbuf != NULL && (unsigned char *) isymbuf != symtab_hdr->contents)
+    free (isymbuf);
+  if (contents != NULL
+      && elf_section_data (sec)->this_hdr.contents != contents)
+    free (contents);
+  if (internal_relocs != NULL
+      && elf_section_data (sec)->relocs != internal_relocs)
+    free (internal_relocs);
   return false;
 }
 
@@ -1047,7 +1012,7 @@ static boolean
 elfNN_ia64_section_from_shdr (abfd, hdr, name)
      bfd *abfd;
      ElfNN_Internal_Shdr *hdr;
-     char *name;
+     const char *name;
 {
   asection *newsect;
 
@@ -1119,24 +1084,22 @@ elfNN_ia64_fake_sections (abfd, hdr, sec)
   else if (strcmp (name, ".HP.opt_annot") == 0)
     hdr->sh_type = SHT_IA_64_HP_OPT_ANOT;
   else if (strcmp (name, ".reloc") == 0)
-    /*
-     * This is an ugly, but unfortunately necessary hack that is
-     * needed when producing EFI binaries on IA-64. It tells
-     * elf.c:elf_fake_sections() not to consider ".reloc" as a section
-     * containing ELF relocation info.  We need this hack in order to
-     * be able to generate ELF binaries that can be translated into
-     * EFI applications (which are essentially COFF objects).  Those
-     * files contain a COFF ".reloc" section inside an ELFNN object,
-     * which would normally cause BFD to segfault because it would
-     * attempt to interpret this section as containing relocation
-     * entries for section "oc".  With this hack enabled, ".reloc"
-     * will be treated as a normal data section, which will avoid the
-     * segfault.  However, you won't be able to create an ELFNN binary
-     * with a section named "oc" that needs relocations, but that's
-     * the kind of ugly side-effects you get when detecting section
-     * types based on their names...  In practice, this limitation is
-     * unlikely to bite.
-     */
+    /* This is an ugly, but unfortunately necessary hack that is
+       needed when producing EFI binaries on IA-64. It tells
+       elf.c:elf_fake_sections() not to consider ".reloc" as a section
+       containing ELF relocation info.  We need this hack in order to
+       be able to generate ELF binaries that can be translated into
+       EFI applications (which are essentially COFF objects).  Those
+       files contain a COFF ".reloc" section inside an ELFNN object,
+       which would normally cause BFD to segfault because it would
+       attempt to interpret this section as containing relocation
+       entries for section "oc".  With this hack enabled, ".reloc"
+       will be treated as a normal data section, which will avoid the
+       segfault.  However, you won't be able to create an ELFNN binary
+       with a section named "oc" that needs relocations, but that's
+       the kind of ugly side-effects you get when detecting section
+       types based on their names...  In practice, this limitation is
+       unlikely to bite.  */
     hdr->sh_type = SHT_PROGBITS;
 
   if (sec->flags & SEC_SMALL_DATA)
@@ -1224,6 +1187,19 @@ elfNN_ia64_final_write_processing (abfd, linker)
 	    }
 	  break;
 	}
+    }
+
+  if (! elf_flags_init (abfd))
+    {
+      unsigned long flags = 0;
+
+      if (abfd->xvec->byteorder == BFD_ENDIAN_BIG)
+	flags |= EF_IA_64_BE;
+      if (bfd_get_mach (abfd) == bfd_mach_ia64_elf64)
+	flags |= EF_IA_64_ABI64;
+
+      elf_elfheader(abfd)->e_flags = flags;
+      elf_flags_init (abfd) = true;
     }
 }
 
@@ -1401,8 +1377,6 @@ elfNN_ia64_modify_segment_map (abfd)
   struct elf_segment_map *m, **pm;
   Elf_Internal_Shdr *hdr;
   asection *s;
-  boolean unwind_found;
-  asection *unwind_sec;
 
   /* If we need a PT_IA_64_ARCHEXT segment, it must come before
      all PT_LOAD segments.  */
@@ -1447,20 +1421,16 @@ elfNN_ia64_modify_segment_map (abfd)
 	  for (m = elf_tdata (abfd)->segment_map; m != NULL; m = m->next)
 	    if (m->p_type == PT_IA_64_UNWIND)
 	      {
+		int i;
+
 		/* Look through all sections in the unwind segment
 		   for a match since there may be multiple sections
 		   to a segment.  */
+		for (i = m->count - 1; i >= 0; --i)
+		  if (m->sections[i] == s)
+		    break;
 
-		unwind_sec = m->sections[0];
-		unwind_found = false;
-		while (unwind_sec != NULL && !unwind_found)
-		  {
-		    if (unwind_sec == s)
-		      unwind_found = true;
-		    else
-		      unwind_sec = unwind_sec -> next;
-		  }
-		if (unwind_found)
+		if (i >= 0)
 		  break;
 	      }
 
@@ -1548,6 +1518,8 @@ elfNN_ia64_dynamic_symbol_p (h, info)
     case STV_INTERNAL:
     case STV_HIDDEN:
       return false;
+    default:
+      break;
     }
 
   if (h->root.type == bfd_link_hash_undefweak
@@ -1631,7 +1603,8 @@ elfNN_ia64_new_elf_hash_entry (entry, table, string)
 }
 
 static void
-elfNN_ia64_hash_copy_indirect (xdir, xind)
+elfNN_ia64_hash_copy_indirect (bed, xdir, xind)
+     struct elf_backend_data *bed ATTRIBUTE_UNUSED;
      struct elf_link_hash_entry *xdir, *xind;
 {
   struct elfNN_ia64_link_hash_entry *dir, *ind;
@@ -4834,6 +4807,9 @@ elfNN_hpux_backend_section_from_bfd_section (abfd, sec, retval)
 #undef  elf_backend_section_from_bfd_section
 #define elf_backend_section_from_bfd_section elfNN_hpux_backend_section_from_bfd_section
 
+#undef  elf_backend_want_p_paddr_set_to_zero
+#define elf_backend_want_p_paddr_set_to_zero 1
+
 #undef  ELF_MAXPAGESIZE
 #define ELF_MAXPAGESIZE                 0x1000  /* 1K */
 
@@ -4841,3 +4817,5 @@ elfNN_hpux_backend_section_from_bfd_section (abfd, sec, retval)
 #define elfNN_bed elfNN_ia64_hpux_bed
 
 #include "elfNN-target.h"
+
+#undef  elf_backend_want_p_paddr_set_to_zero

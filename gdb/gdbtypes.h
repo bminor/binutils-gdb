@@ -101,13 +101,14 @@ enum type_code
     TYPE_CODE_RANGE,		/* Range (integers within spec'd bounds) */
 
     /* A string type which is like an array of character but prints
-       differently (at least for CHILL).  It does not contain a length
-       field as Pascal strings (for many Pascals, anyway) do; if we want
-       to deal with such strings, we should use a new type code.  */
+       differently (at least for (OBSOLETE) CHILL (OBSOLETE)).  It
+       does not contain a length field as Pascal strings (for many
+       Pascals, anyway) do; if we want to deal with such strings, we
+       should use a new type code.  */
     TYPE_CODE_STRING,
 
-    /* String of bits; like TYPE_CODE_SET but prints differently (at least
-       for CHILL).  */
+    /* String of bits; like TYPE_CODE_SET but prints differently (at
+       least for (OBSOLETE) CHILL (OBSOLETE)).  */
     TYPE_CODE_BITSTRING,
 
     /* Unknown type.  The length field is valid if we were able to
@@ -240,10 +241,8 @@ enum type_code
 #define TYPE_FLAG_DATA_SPACE	(1 << 10)
 #define TYPE_DATA_SPACE(t)	(TYPE_INSTANCE_FLAGS (t) & TYPE_FLAG_DATA_SPACE)
 
-/* FIXME: Kludge to mark a varargs function type for C++ member
-   function argument processing.  Currently only used in dwarf2read.c,
-   but put it here so we won't accidentally overload the bit with
-   another flag.  */
+/* FIXME drow/2002-06-03:  Only used for methods, but applies as well
+   to functions.  */
 
 #define TYPE_FLAG_VARARGS	(1 << 11)
 #define TYPE_VARARGS(t)		(TYPE_FLAGS (t) & TYPE_FLAG_VARARGS)
@@ -354,7 +353,7 @@ struct main_type
      For range types, there are two "fields",
      the minimum and maximum values (both inclusive).
      For enum types, each possible value is described by one "field".
-     For a function type, a "field" for each parameter type.
+     For a function or method type, a "field" for each parameter.
      For C++ classes, there is one field for each base class (if it is
      a derived class) plus one field for each class data member.  Member
      functions are recorded elsewhere.
@@ -383,7 +382,7 @@ struct main_type
       CORE_ADDR physaddr;
       char *physname;
 
-      /* For a function type, this is 1 if the argument is marked
+      /* For a function or member type, this is 1 if the argument is marked
 	 artificial.  Artificial arguments should not be shown to the
 	 user.  */
       int artificial;
@@ -400,13 +399,14 @@ struct main_type
     int bitsize;
 
     /* In a struct or union type, type of this field.
-       In a function type, type of this argument.
+       In a function or member type, type of this argument.
        In an array type, the domain-type of the array.  */
 
     struct type *type;
 
     /* Name of field, value or argument.
-       NULL for range bounds and array domains.  */
+       NULL for range bounds, array domains, and member function
+       arguments.  */
 
     char *name;
 
@@ -438,14 +438,6 @@ struct main_type
 
   union type_specific
   {
-    /* ARG_TYPES is for TYPE_CODE_METHOD.
-       Contains the type of each argument, ending with a void type
-       after the last argument for normal member functions or a NULL
-       pointer after the last argument for functions with variable
-       arguments.  */
-
-    struct type **arg_types;
-
     /* CPLUS_STUFF is for TYPE_CODE_STRUCT.  It is initialized to point to
        cplus_struct_default, a default static instance of a struct
        cplus_struct_type. */
@@ -785,7 +777,6 @@ extern void allocate_cplus_struct_type (struct type *);
 #define TYPE_NINSTANTIATIONS(thistype) TYPE_CPLUS_SPECIFIC(thistype)->ninstantiations
 #define TYPE_DECLARED_TYPE(thistype) TYPE_CPLUS_SPECIFIC(thistype)->declared_type
 #define	TYPE_TYPE_SPECIFIC(thistype) TYPE_MAIN_TYPE(thistype)->type_specific
-#define TYPE_ARG_TYPES(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.arg_types
 #define TYPE_CPLUS_SPECIFIC(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.cplus_stuff
 #define TYPE_FLOATFORMAT(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.floatformat
 #define TYPE_BASECLASS(thistype,index) TYPE_MAIN_TYPE(thistype)->fields[index].type
@@ -863,7 +854,7 @@ extern void allocate_cplus_struct_type (struct type *);
 #define TYPE_FN_FIELD(thisfn, n) (thisfn)[n]
 #define TYPE_FN_FIELD_PHYSNAME(thisfn, n) (thisfn)[n].physname
 #define TYPE_FN_FIELD_TYPE(thisfn, n) (thisfn)[n].type
-#define TYPE_FN_FIELD_ARGS(thisfn, n) TYPE_ARG_TYPES ((thisfn)[n].type)
+#define TYPE_FN_FIELD_ARGS(thisfn, n) TYPE_FIELDS ((thisfn)[n].type)
 #define TYPE_FN_FIELD_CONST(thisfn, n) ((thisfn)[n].is_const)
 #define TYPE_FN_FIELD_VOLATILE(thisfn, n) ((thisfn)[n].is_volatile)
 #define TYPE_FN_FIELD_PRIVATE(thisfn, n) ((thisfn)[n].is_private)
@@ -961,6 +952,10 @@ extern struct type *builtin_type_v8hi;
 extern struct type *builtin_type_v4hi;
 extern struct type *builtin_type_v2si;
 
+/* Type for 64 bit vectors. */
+extern struct type *builtin_type_vec64;
+extern struct type *builtin_type_vec64i;
+
 /* Type for 128 bit vectors. */
 extern struct type *builtin_type_vec128;
 extern struct type *builtin_type_vec128i;
@@ -1004,13 +999,13 @@ extern struct type *builtin_type_m2_card;
 extern struct type *builtin_type_m2_real;
 extern struct type *builtin_type_m2_bool;
 
-/* Chill types */
+/* OBSOLETE Chill types */
 
-extern struct type *builtin_type_chill_bool;
-extern struct type *builtin_type_chill_char;
-extern struct type *builtin_type_chill_long;
-extern struct type *builtin_type_chill_ulong;
-extern struct type *builtin_type_chill_real;
+/* OBSOLETE extern struct type *builtin_type_chill_bool; */
+/* OBSOLETE extern struct type *builtin_type_chill_char; */
+/* OBSOLETE extern struct type *builtin_type_chill_long; */
+/* OBSOLETE extern struct type *builtin_type_chill_ulong; */
+/* OBSOLETE extern struct type *builtin_type_chill_real; */
 
 /* Fortran (F77) types */
 
@@ -1088,8 +1083,9 @@ extern struct type *make_type_with_address_space (struct type *type,
 extern struct type *lookup_member_type (struct type *, struct type *);
 
 extern void
-smash_to_method_type (struct type *, struct type *, struct type *,
-		      struct type **);
+smash_to_method_type (struct type *type, struct type *domain,
+		      struct type *to_type, struct field *args,
+		      int nargs, int varargs);
 
 extern void
 smash_to_member_type (struct type *, struct type *, struct type *);
@@ -1118,7 +1114,7 @@ extern struct type *create_string_type (struct type *, struct type *);
 
 extern struct type *create_set_type (struct type *, struct type *);
 
-extern int chill_varying_type (struct type *);
+/* OBSOLETE extern int chill_varying_type (struct type *); */
 
 extern struct type *lookup_unsigned_typename (char *);
 

@@ -104,6 +104,11 @@ struct target_ops
      symbols.  */
 
   void (*look_up_symbols) (void);
+
+  /* Return the PID we should send a signal to.  Used for asynchronous
+     interrupts (user hitting Control-C).  */
+
+  int (*signal_pid) (void);
 };
 
 extern struct target_ops *the_target;
@@ -125,17 +130,18 @@ void set_target_ops (struct target_ops *);
 #define myresume(step,signo) \
   (*the_target->resume) (step, signo)
 
-#define mywait(statusp) \
-  (*the_target->wait) (statusp)
-
 #define fetch_inferior_registers(regno) \
   (*the_target->fetch_registers) (regno)
 
 #define store_inferior_registers(regno) \
   (*the_target->store_registers) (regno)
 
+unsigned char mywait (char *statusp, int connected_wait);
+
 void read_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len);
 
-int write_inferior_memory (CORE_ADDR memaddr, char *myaddr, int len);
+int write_inferior_memory (CORE_ADDR memaddr, const char *myaddr, int len);
+
+void set_desired_inferior (int id);
 
 #endif /* TARGET_H */

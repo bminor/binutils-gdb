@@ -36,8 +36,8 @@ along with this program; if not, write to the Free Software Foundation, Inc.,
 #include "bfd.h"
 #include "sim-utils.h"
 
-#include "callback.h"
-#include "remote-sim.h"
+#include "gdb/callback.h"
+#include "gdb/remote-sim.h"
 
 static void eprintf PARAMS ((host_callback *, const char *, ...));
 static void xprintf PARAMS ((host_callback *, const char *, ...));

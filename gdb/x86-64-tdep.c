@@ -28,6 +28,7 @@
 #include "arch-utils.h"
 #include "regcache.h"
 #include "symfile.h"
+#include "objfiles.h"
 #include "x86-64-tdep.h"
 #include "dwarf2cfi.h"
 #include "gdb_assert.h"
@@ -376,14 +377,15 @@ classify_argument (struct type *type,
 		{
 		  int num = classify_argument (TYPE_FIELDS (type)[j].type,
 					       subclasses,
-					       (TYPE_FIELDS (type)[j].loc.bitpos
-						+ bit_offset) % 256);
+					       (TYPE_FIELDS (type)[j].loc.
+						bitpos + bit_offset) % 256);
 		  if (!num)
 		    return 0;
 		  for (i = 0; i < num; i++)
 		    {
 		      int pos =
-			(TYPE_FIELDS (type)[j].loc.bitpos + bit_offset) / 8 / 8;
+			(TYPE_FIELDS (type)[j].loc.bitpos +
+			 bit_offset) / 8 / 8;
 		      classes[i + pos] =
 			merge_classes (subclasses[i], classes[i + pos]);
 		    }
@@ -490,7 +492,7 @@ classify_argument (struct type *type,
 	}
     case TYPE_CODE_VOID:
       return 0;
-    default: /* Avoid warning.  */
+    default:			/* Avoid warning.  */
       break;
     }
   internal_error (__FILE__, __LINE__,
@@ -797,12 +799,23 @@ x86_64_store_return_value (struct type *type, char *valbuf)
 }
 
 
-static char *
+const char *
 x86_64_register_name (int reg_nr)
 {
   if (reg_nr < 0 || reg_nr >= X86_64_NUM_REGS)
     return NULL;
   return x86_64_register_info_table[reg_nr].name;
+}
+
+int
+x86_64_register_number (const char *name)
+{
+  int reg_nr;
+
+  for (reg_nr = 0; reg_nr < X86_64_NUM_REGS; reg_nr++)
+    if (strcmp (name, x86_64_register_info_table[reg_nr].name) == 0)
+      return reg_nr;
+  return -1;
 }
 
 
@@ -845,10 +858,10 @@ x86_64_frameless_function_invocation (struct frame_info *frame)
 CORE_ADDR
 x86_64_skip_prologue (CORE_ADDR pc)
 {
-  int i, firstline, currline;
+  int i;
   struct symtab_and_line v_sal;
   struct symbol *v_function;
-  CORE_ADDR salendaddr = 0, endaddr = 0;
+  CORE_ADDR endaddr;
 
   /* We will handle only functions beginning with:
      55          pushq %rbp
@@ -862,7 +875,7 @@ x86_64_skip_prologue (CORE_ADDR pc)
   /* First check, whether pc points to pushq %rbp, movq %rsp,%rbp.  */
   for (i = 0; i < PROLOG_BUFSIZE; i++)
     if (prolog_expect[i] != prolog_buf[i])
-      return pc;	/* ... no, it doesn't. Nothing to skip.  */
+      return pc;		/* ... no, it doesn't. Nothing to skip.  */
 
   /* OK, we have found the prologue and want PC of the first 
      non-prologue instruction.  */
@@ -876,18 +889,13 @@ x86_64_skip_prologue (CORE_ADDR pc)
   if (!v_function || !v_function->ginfo.value.block || !v_sal.symtab)
     return pc;
 
-  firstline = v_sal.line;
-  currline = firstline;
-  salendaddr = v_sal.end;
   endaddr = v_function->ginfo.value.block->endaddr;
 
   for (i = 0; i < v_sal.symtab->linetable->nitems; i++)
-    if (v_sal.symtab->linetable->item[i].line > firstline
-	&& v_sal.symtab->linetable->item[i].pc >= salendaddr
+    if (v_sal.symtab->linetable->item[i].pc >= pc
 	&& v_sal.symtab->linetable->item[i].pc < endaddr)
       {
 	pc = v_sal.symtab->linetable->item[i].pc;
-	currline = v_sal.symtab->linetable->item[i].line;
 	break;
       }
 
@@ -1069,7 +1077,7 @@ x86_64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 /* Return number of args passed to a frame, no way to tell.  */
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
 /* Don't use default structure extract routine */
-  set_gdbarch_extract_struct_value_address (gdbarch, 0);
+  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, 0);
 
 /* If USE_STRUCT_CONVENTION retruns 0, then gdb uses STORE_RETURN_VALUE
    and EXTRACT_RETURN_VALUE to store/fetch the functions return value.  It is
@@ -1083,12 +1091,12 @@ x86_64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF.  */
-  set_gdbarch_extract_return_value (gdbarch, x86_64_extract_return_value);
+  set_gdbarch_deprecated_extract_return_value (gdbarch, x86_64_extract_return_value);
 
 
 /* Write into the appropriate registers a function return value stored
    in VALBUF of type TYPE, given in virtual format.  */
-  set_gdbarch_store_return_value (gdbarch, x86_64_store_return_value);
+  set_gdbarch_deprecated_store_return_value (gdbarch, x86_64_store_return_value);
 
 
 /* Offset from address of function to start of its code.  */
@@ -1104,6 +1112,7 @@ x86_64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 				  (gdbarch_breakpoint_from_pc_ftype *)
 				  x86_64_breakpoint_from_pc);
 
+  set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
 
 /* Amount PC must be decremented by after a breakpoint.  This is often the
    number of bytes in BREAKPOINT but not always.  */

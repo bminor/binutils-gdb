@@ -40,6 +40,6 @@ extern LONGEST alpha_linux_sigtramp_offset (CORE_ADDR);
 #undef START_INFERIOR_TRAPS_EXPECTED
 #define START_INFERIOR_TRAPS_EXPECTED 2
 
-#include "tm-linux.h"
+#include "config/tm-linux.h"
 
 #endif /* TM_LINUXALPHA_H */
