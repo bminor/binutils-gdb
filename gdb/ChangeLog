@@ -1,3 +1,9 @@
+Tue Dec  3 17:24:57 1991  John Gilmore  (gnu at cygnus.com)
+
+	* sparc-xdep.c:  Force tm-file as tm-sparc.h, to make it compile
+	when configured for cross debugging.  FIXME, this needs a more
+	general solution.
+
 Mon Dec  2 11:04:05 1991  Per Bothner  (bothner at cygnus.com)
 
 	* mips-tdep.c (init_extra_frame_info):  Float register

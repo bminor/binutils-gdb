@@ -18,13 +18,17 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
+
+/* This code only compiles when we have the definitions in tm-sparc.h.  */
+
+#define	TM_FILE_OVERRIDE
 #include "defs.h"
+#include "tm-sparc.h"
+
 #include "inferior.h"
 #include "target.h"
 
 #include <sys/param.h>
-#include <sys/file.h>		/* For L_SET */
-
 #include <sys/ptrace.h>
 #include <machine/reg.h>
 
