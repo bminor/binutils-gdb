@@ -1,3 +1,8 @@
+Fri Apr 24 09:26:46 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-m32r.c (can_make_parallel): Add initernationalisation
+	macros to error strings.
+
 Thu Apr 23 19:23:23 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-ppc.c (ppc_fix_adjustable): Correct test of whether a

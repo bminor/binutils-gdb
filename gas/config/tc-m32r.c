@@ -200,7 +200,7 @@ md_show_usage (stream)
   FILE * stream;
 {
 /* start-sanitize-m32rx */
-  fprintf (stream, _("M32R/X options:\n"));
+  fprintf (stream, _("M32R/X specific command line options:\n"));
   fprintf (stream, _("\
 --m32rx			support the extended m32rx instruction set\n"));
 
@@ -534,7 +534,7 @@ can_make_parallel (a, b)
     abort();
 
   if (first_writes_to_seconds_operands (a, b, true))
-    return "Instructions write to the same destination register.";
+    return _("Instructions write to the same destination register.");
   
   a_pipe = CGEN_INSN_ATTR (a->insn, CGEN_INSN_PIPE);
   b_pipe = CGEN_INSN_ATTR (b->insn, CGEN_INSN_PIPE);
@@ -542,14 +542,14 @@ can_make_parallel (a, b)
   /* Make sure that the instructions use the correct execution pipelines.  */
   if (   a_pipe == PIPE_NONE
       || b_pipe == PIPE_NONE)
-    return "Instructions do not use parallel execution pipelines.";
+    return _("Instructions do not use parallel execution pipelines.");
 
   /* Leave this test for last, since it is the only test that can
      go away if the instructions are swapped, and we want to make
      sure that any other errors are detected before this happens.  */
   if (   a_pipe == PIPE_S
       || b_pipe == PIPE_O)
-    return "Instructions share the same execution pipeline";
+    return _("Instructions share the same execution pipeline");
   
   return NULL;
 }
