@@ -1,5 +1,9 @@
 Wed Feb 12 14:36:29 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-mips.c (mips_pseudo_table): Add "insn".
+	(s_insn): New static function.
+	* doc/c-mips.texi: Document .insn.
+
 	* config/tc-mips.c (md_begin): Add the general registers to the
 	symbol table.
 	(mips16_ip): First parse the expression, and then see whether it

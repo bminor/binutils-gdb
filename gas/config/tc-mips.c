@@ -548,6 +548,7 @@ static void s_cpload PARAMS ((int));
 static void s_cprestore PARAMS ((int));
 static void s_gpword PARAMS ((int));
 static void s_cpadd PARAMS ((int));
+static void s_insn PARAMS ((int));
 static void md_obj_begin PARAMS ((void));
 static void md_obj_end PARAMS ((void));
 static long get_number PARAMS ((void));
@@ -587,6 +588,7 @@ static const pseudo_typeS mips_pseudo_table[] =
   {"cprestore", s_cprestore, 0},
   {"gpword", s_gpword, 0},
   {"cpadd", s_cpadd, 0},
+  {"insn", s_insn, 0},
 
  /* Relatively generic pseudo-ops that happen to be used on MIPS
      chips.  */
@@ -9213,6 +9215,38 @@ s_cpadd (ignore)
 	       "d,v,t", reg, reg, GP);
 
   demand_empty_rest_of_line ();  
+}
+
+/* Handle the .insn pseudo-op.  This marks instruction labels in
+   mips16 mode.  This permits the linker to handle them specially,
+   such as generating jalx instructions when needed.  We also make
+   them odd for the duration of the assembly, in order to generate the
+   right sort of code.  We will make them even in the adjust_symtab
+   routine, while leaving them marked.  This is convenient for the
+   debugger and the disassembler.  The linker knows to make them odd
+   again.  */
+
+static void
+s_insn (ignore)
+     int ignore;
+{
+  if (mips16)
+    {
+      struct insn_label_list *l;
+
+      for (l = insn_labels; l != NULL; l = l->next)
+	{
+#ifdef S_SET_OTHER
+	  if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
+	    S_SET_OTHER (l->label, STO_MIPS16);
+#endif
+	  ++l->label->sy_value.X_add_number;
+	}
+
+      mips_clear_insn_labels ();
+    }
+
+  demand_empty_rest_of_line ();
 }
 
 /* Parse a register string into a number.  Called from the ECOFF code
