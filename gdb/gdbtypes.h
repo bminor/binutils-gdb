@@ -894,6 +894,24 @@ extern struct type *builtin_type_v8qi;
 extern struct type *builtin_type_v4hi;
 extern struct type *builtin_type_v2si;
 
+/* Explicit floating-point formats.  See "floatformat.h".  */
+extern struct type *builtin_type_ieee_single_big;
+extern struct type *builtin_type_ieee_single_little;
+extern struct type *builtin_type_ieee_double_big;
+extern struct type *builtin_type_ieee_double_little;
+extern struct type *builtin_type_ieee_double_littlebyte_bigword;
+extern struct type *builtin_type_i387_ext;
+extern struct type *builtin_type_m68881_ext;
+extern struct type *builtin_type_i960_ext;
+extern struct type *builtin_type_m88110_ext;
+extern struct type *builtin_type_m88110_harris_ext;
+extern struct type *builtin_type_arm_ext_big;
+extern struct type *builtin_type_arm_ext_littlebyte_bigword;
+extern struct type *builtin_type_ia64_spill_big;
+extern struct type *builtin_type_ia64_spill_little;
+extern struct type *builtin_type_ia64_quad_big;
+extern struct type *builtin_type_ia64_quad_little;
+
 /* We use this for the '/c' print format, because builtin_type_char is
    just a one-byte integral type, which languages less laid back than
    C will print as ... well, a one-byte integral type.  */

@@ -73,6 +73,22 @@ struct type *builtin_type_v4si;
 struct type *builtin_type_v8qi;
 struct type *builtin_type_v4hi;
 struct type *builtin_type_v2si;
+struct type *builtin_type_ieee_single_big;
+struct type *builtin_type_ieee_single_little;
+struct type *builtin_type_ieee_double_big;
+struct type *builtin_type_ieee_double_little;
+struct type *builtin_type_ieee_double_littlebyte_bigword;
+struct type *builtin_type_i387_ext;
+struct type *builtin_type_m68881_ext;
+struct type *builtin_type_i960_ext;
+struct type *builtin_type_m88110_ext;
+struct type *builtin_type_m88110_harris_ext;
+struct type *builtin_type_arm_ext_big;
+struct type *builtin_type_arm_ext_littlebyte_bigword;
+struct type *builtin_type_ia64_spill_big;
+struct type *builtin_type_ia64_spill_little;
+struct type *builtin_type_ia64_quad_big;
+struct type *builtin_type_ia64_quad_little;
 struct type *builtin_type_void_data_ptr;
 struct type *builtin_type_void_func_ptr;
 struct type *builtin_type_CORE_ADDR;
@@ -3029,6 +3045,58 @@ _initialize_gdbtypes (void)
   REGISTER_GDBARCH_SWAP (builtin_type_CORE_ADDR);
   REGISTER_GDBARCH_SWAP (builtin_type_bfd_vma);
   register_gdbarch_swap (NULL, 0, build_gdbtypes);
+
+  /* Note: These types do not need to be swapped - they are target
+     neutral.  */
+  builtin_type_ieee_single_big =
+    init_type (TYPE_CODE_FLT, floatformat_ieee_single_big.totalsize / 8,
+	       0, "builtin_type_ieee_single_big", NULL);
+  TYPE_FLOATFORMAT (builtin_type_ieee_single_big) = &floatformat_ieee_single_big;
+  builtin_type_ieee_single_little =
+    init_type (TYPE_CODE_FLT, floatformat_ieee_single_little.totalsize / 8,
+	       0, "builtin_type_ieee_single_little", NULL);
+  builtin_type_ieee_double_big =
+    init_type (TYPE_CODE_FLT, floatformat_ieee_double_big.totalsize / 8,
+	       0, "builtin_type_ieee_double_big", NULL);
+  builtin_type_ieee_double_little =
+    init_type (TYPE_CODE_FLT, floatformat_ieee_double_little.totalsize / 8,
+	       0, "builtin_type_ieee_double_little", NULL);
+  builtin_type_ieee_double_littlebyte_bigword =
+    init_type (TYPE_CODE_FLT, floatformat_ieee_double_littlebyte_bigword.totalsize / 8,
+	       0, "builtin_type_ieee_double_littlebyte_bigword", NULL);
+  builtin_type_i387_ext =
+    init_type (TYPE_CODE_FLT, floatformat_i387_ext.totalsize / 8,
+	       0, "builtin_type_i387_ext", NULL);
+  builtin_type_m68881_ext =
+    init_type (TYPE_CODE_FLT, floatformat_m68881_ext.totalsize / 8,
+	       0, "builtin_type_m68881_ext", NULL);
+  builtin_type_i960_ext =
+    init_type (TYPE_CODE_FLT, floatformat_i960_ext.totalsize / 8,
+	       0, "builtin_type_i960_ext", NULL);
+  builtin_type_m88110_ext =
+    init_type (TYPE_CODE_FLT, floatformat_m88110_ext.totalsize / 8,
+	       0, "builtin_type_m88110_ext", NULL);
+  builtin_type_m88110_harris_ext =
+    init_type (TYPE_CODE_FLT, floatformat_m88110_harris_ext.totalsize / 8,
+	       0, "builtin_type_m88110_harris_ext", NULL);
+  builtin_type_arm_ext_big =
+    init_type (TYPE_CODE_FLT, floatformat_arm_ext_big.totalsize / 8,
+	       0, "builtin_type_arm_ext_big", NULL);
+  builtin_type_arm_ext_littlebyte_bigword =
+    init_type (TYPE_CODE_FLT, floatformat_arm_ext_littlebyte_bigword.totalsize / 8,
+	       0, "builtin_type_arm_ext_littlebyte_bigword", NULL);
+  builtin_type_ia64_spill_big =
+    init_type (TYPE_CODE_FLT, floatformat_ia64_spill_big.totalsize / 8,
+	       0, "builtin_type_ia64_spill_big", NULL);
+  builtin_type_ia64_spill_little =
+    init_type (TYPE_CODE_FLT, floatformat_ia64_spill_little.totalsize / 8,
+	       0, "builtin_type_ia64_spill_little", NULL);
+  builtin_type_ia64_quad_big =
+    init_type (TYPE_CODE_FLT, floatformat_ia64_quad_big.totalsize / 8,
+	       0, "builtin_type_ia64_quad_big", NULL);
+  builtin_type_ia64_quad_little =
+    init_type (TYPE_CODE_FLT, floatformat_ia64_quad_little.totalsize / 8,
+	       0, "builtin_type_ia64_quad_little", NULL);
 
   add_show_from_set (
 		     add_set_cmd ("overload", no_class, var_zinteger, (char *) &overload_debug,

@@ -1,3 +1,29 @@
+2001-08-21  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbtypes.h (builtin_type_ieee_single_big)
+	(builtin_type_ieee_single_little, builtin_type_ieee_double_big)
+	(builtin_type_ieee_double_little)
+	(builtin_type_ieee_double_littlebyte_bigword)
+	(builtin_type_i387_ext, builtin_type_m68881_ext)
+	(builtin_type_i960_ext, builtin_type_m88110_ext)
+	(builtin_type_m88110_harris_ext, builtin_type_arm_ext_big)
+	(builtin_type_arm_ext_littlebyte_bigword)
+	(builtin_type_ia64_spill_big, builtin_type_ia64_spill_little)
+	(builtin_type_ia64_quad_big)
+	(builtin_type_ia64_quad_little): Declare.
+	* gdbtypes.c (builtin_type_ieee_single_big)
+	(builtin_type_ieee_single_little, builtin_type_ieee_double_big)
+	(builtin_type_ieee_double_little)
+	(builtin_type_ieee_double_littlebyte_bigword)
+	(builtin_type_i387_ext, builtin_type_m68881_ext)
+	(builtin_type_i960_ext, builtin_type_m88110_ext)
+	(builtin_type_m88110_harris_ext, builtin_type_arm_ext_big)
+	(builtin_type_arm_ext_littlebyte_bigword)
+	(builtin_type_ia64_spill_big, builtin_type_ia64_spill_little)
+	(builtin_type_ia64_quad_big)
+	(builtin_type_ia64_quad_little): Define.
+	(_initialize_gdbtypes): Initialize builtin floatformat types.
+	
 2001-08-23  Mark Kettenis  <kettenis@gnu.org>
 
 	* tracepoint.c (read_actions): Add FIXME for code depending on
