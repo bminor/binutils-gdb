@@ -1,3 +1,11 @@
+Tue Mar 30 12:22:55 1993  Jim Kingdon  (kingdon@cygnus.com)
+
+	* ansidecl.h: Use ANSI versions on AIX regardless of __STDC__.
+
+Fri Mar 19 14:49:49 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* dis-asm.h: Add h8500.
+
 Thu Mar 18 13:49:09 1993  Per Bothner  (bothner@rtl.cygnus.com)
 
 	* ieee-float.h:  Moved from ../gdb.
