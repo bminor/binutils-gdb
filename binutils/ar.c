@@ -236,7 +236,8 @@ main(argc, argv)
 	}
     }
 
-    if (operation == none && write_armap)
+    if ((operation == none || operation == print_table) 
+	&& write_armap == true)
 	ranlib_only(argv[2]);
 
     if (operation == none)
@@ -717,31 +718,20 @@ get_pos_bfd(contents, default_pos)
     bfd           **contents;
     enum pos        default_pos;
 {
-    bfd           **after_bfd;
-
+    bfd           **after_bfd = contents;
     enum pos        realpos = (postype == pos_default ? default_pos : postype);
-    switch (realpos) {
 
-    case pos_end:
-	after_bfd = contents;
-	while (*after_bfd) {
+    if (realpos == pos_end) {
+	while (*after_bfd)
 	    after_bfd = &((*after_bfd)->next);
-	}
-
-	break;
-#if 0
-    case pos_after:
-	for (after_bfd = contents; after_bfd; after_bfd = after_bfd->next)
-	    if (!strcpy(after_bfd->filename, posname))
-		break;
-	break;
-    case pos_before:
-	for (after_bfd = contents; after_bfd; after_bfd = after_bfd->next)
-	    if (after_bfd->next && (!strcpy(after_bfd->next->filename, posname)))
-		break;
-#endif
     }
-
+    else {
+	for ( ; *after_bfd; after_bfd = &(*after_bfd)->next)
+	    if (!strcmp((*after_bfd)->filename, posname)) {
+		if (realpos == pos_after)
+		    after_bfd = &(*after_bfd)->next;
+	}
+    }
     return after_bfd;
 }
 
