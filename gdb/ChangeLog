@@ -1,3 +1,15 @@
+2004-09-14  Joel Brobecker  <brobecker@gnat.com>
+
+	* mips-tdep.c (mips_insn32_frame_cache): Pass frame cache in
+	call to heuristic_proc_desc. Remove code that became redundant
+	as a consequence.
+	(read_next_frame_reg): Remove special case for SP_REGNUM.
+	(set_reg_offset): Fix small typo.
+	(reset_saved_regs): New procedure.
+	(mips32_heuristic_proc_desc): No longer compute a fake
+	procedure descriptor. Compute the full frame cache instead.
+	Some minor comment reformatting.
+
 2004-09-14  Andrew Cagney  <cagney@gnu.org>
 
 	* MAINTAINERS: Add Michael Chastain as the backup gdb.threads
