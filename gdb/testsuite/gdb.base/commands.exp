@@ -104,12 +104,30 @@ proc if_while_breakpoint_command_test {} {
     send "commands\n"
     expect {
 	-re "End with" { }
-        default "{ fail (timeout or eof) commands" }
+        default { fail "(timeout or eof) commands" }
     }
     # This test should alternate between 0xdeadbeef and 0xfeedface two times.
     gdb_test "while value > 0\\nset value -= 1\\nif \(value % 2\) == 1\\np/x 0xdeadbeef\\nelse\\np/x 0xfeedface\\nend\\nend\\nend\\n" ".*$prompt.*" "commands"
     gdb_test "continue" "\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface" "if_while_breakpoint_command_test #1"
    gdb_test "info break" "while.*set.*if.*p/x.*else.*p/x.*end.*" "info break"
+}
+
+# Test a simple user defined command (with arguments)
+proc user_defined_command_test {} {
+    global prompt
+
+    gdb_test "set \\\$foo = 4"
+    # For some stupid reason doing this with a gdb_test timed out.  Weird.
+    send "define mycommand\n"
+    expect {
+	-re "End with" { }
+        default { fail "(timeout or eof) enter user defined command" }
+    }
+    # This test should alternate between 0xdeadbeef and 0xfeedface two times.
+    gdb_test "while \\\$arg0 > 0\\nset \\\$arg0 -= 1\\nif \(\\\$arg0 % 2\) == 1\\np/x 0xdeadbeef\\nelse\\np/x 0xfeedface\\nend\\nend\\nend\\n" ".*$prompt.*" "enter user defined command"
+
+    gdb_test "mycommand \\\$foo" "\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface\[^\n\]*\n\\\$\[0-9\]* = 0xdeadbeef\[^\n\]*\n\\\$\[0-9\]* = 0xfeedface" "execute user defined command"
+   gdb_test "show user mycommand" "while.*set.*if.*p/x.*else.*p/x.*end.*" "display user command"
 }
 
 gdbvar_simple_if_test
@@ -119,3 +137,4 @@ progvar_simple_if_test
 progvar_simple_while_test
 progvar_complex_if_while_test
 if_while_breakpoint_command_test
+user_defined_command_test

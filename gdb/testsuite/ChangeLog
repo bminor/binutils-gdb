@@ -1,5 +1,9 @@
 Wed Jan 11 00:14:40 1995  Jeff Law  (law@snake.cs.utah.edu)
 
+	* gdb.base/commands.exp: Test a simple user defined command with
+	arguments and if/while statements; verify the full user command is
+	printed by "show user".
+
 	* gdb.base/commands.exp: Test if/while commands as part of a
 	breakpoint command list; verify they appear in breakpoint
 	information.
