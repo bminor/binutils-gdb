@@ -1,3 +1,7 @@
+2000-08-10  Jimmy Guo  <guo@cup.hp.com>
+
+	* MAINTAINERS: Change my contact email for hp tests maintainership.
+
 Thu Aug 10 15:28:17 2000  Andrew Cagney  <cagney@ryobi.cygnus.com>
 
 	* sparc-tdep.c (sparc_init_extra_frame_info): Fix number of
