@@ -1,3 +1,17 @@
+2004-12-24  Mark Kettenis  <kettenis@gnu.org>
+
+	* target.h (TARGET_DISABLE_HW_WATCHPOINTS)
+	(TARGET_ENABLE_HW_WATCHPOINTS): Remove macros.
+	* infrun.c (struct execution_control_state): Remove
+	enable_hw_watchpoints_after_wait member.
+	(number_of_threads_in_syscalls): Remove variable.
+	(init_wait_for_inferior): Don't initialize
+	number_of_threads_in_syscalls.
+	(init_execution_control_state): Don't initialize
+	ECS->enable_hw_watchpoints_after_wait.
+	(handle_inferior_event): Never invoke TARGET_ENABLE_HW_WATCHPOINTS
+	or TARGET_DISABLE_HW_WATCHPOINTS.
+
 2004-12-23  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-nto-tdep.c: Reorder include files.

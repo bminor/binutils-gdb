@@ -280,14 +280,6 @@ static int stop_print_frame;
 
 static struct breakpoint *step_resume_breakpoint = NULL;
 
-/* On some platforms (e.g., HP-UX), hardware watchpoints have bad
-   interactions with an inferior that is running a kernel function
-   (aka, a system call or "syscall").  wait_for_inferior therefore
-   may have a need to know when the inferior is in a syscall.  This
-   is a count of the number of inferior threads which are known to
-   currently be running in a syscall. */
-static int number_of_threads_in_syscalls;
-
 /* This is a cached copy of the pid/waitstatus of the last event
    returned by target_wait()/deprecated_target_wait_hook().  This
    information is returned by get_last_target_status().  */
@@ -854,9 +846,6 @@ init_wait_for_inferior (void)
   /* The first resume is not following a fork/vfork/exec. */
   pending_follow.kind = TARGET_WAITKIND_SPURIOUS;	/* I.e., none. */
 
-  /* See wait_for_inferior's handling of SYSCALL_ENTRY/RETURN events. */
-  number_of_threads_in_syscalls = 0;
-
   clear_proceed_status ();
 
   stepping_past_singlestep_breakpoint = 0;
@@ -913,7 +902,6 @@ struct execution_control_state
   int step_after_step_resume_breakpoint;
   int stepping_through_solib_after_catch;
   bpstat stepping_through_solib_catchpoints;
-  int enable_hw_watchpoints_after_wait;
   int new_thread_event;
   struct target_waitstatus tmpstatus;
   enum infwait_states infwait_state;
@@ -1066,7 +1054,6 @@ init_execution_control_state (struct execution_control_state *ecs)
   ecs->handling_longjmp = 0;	/* FIXME */
   ecs->stepping_through_solib_after_catch = 0;
   ecs->stepping_through_solib_catchpoints = NULL;
-  ecs->enable_hw_watchpoints_after_wait = 0;
   ecs->sal = find_pc_line (prev_pc, 0);
   ecs->current_line = ecs->sal.line;
   ecs->current_symtab = ecs->sal.symtab;
@@ -1239,26 +1226,11 @@ handle_inferior_event (struct execution_control_state *ecs)
         printf_unfiltered ("infrun: infwait_thread_hop_state\n");
       /* Cancel the waiton_ptid. */
       ecs->waiton_ptid = pid_to_ptid (-1);
-      /* See comments where a TARGET_WAITKIND_SYSCALL_RETURN event
-         is serviced in this loop, below. */
-      if (ecs->enable_hw_watchpoints_after_wait)
-	{
-	  TARGET_ENABLE_HW_WATCHPOINTS (PIDGET (inferior_ptid));
-	  ecs->enable_hw_watchpoints_after_wait = 0;
-	}
-      stepped_after_stopped_by_watchpoint = 0;
       break;
 
     case infwait_normal_state:
       if (debug_infrun)
         printf_unfiltered ("infrun: infwait_normal_state\n");
-      /* See comments where a TARGET_WAITKIND_SYSCALL_RETURN event
-         is serviced in this loop, below. */
-      if (ecs->enable_hw_watchpoints_after_wait)
-	{
-	  TARGET_ENABLE_HW_WATCHPOINTS (PIDGET (inferior_ptid));
-	  ecs->enable_hw_watchpoints_after_wait = 0;
-	}
       stepped_after_stopped_by_watchpoint = 0;
       break;
 
@@ -1467,31 +1439,11 @@ handle_inferior_event (struct execution_control_state *ecs)
 	}
       goto process_event_stop_test;
 
-      /* These syscall events are returned on HP-UX, as part of its
-         implementation of page-protection-based "hardware" watchpoints.
-         HP-UX has unfortunate interactions between page-protections and
-         some system calls.  Our solution is to disable hardware watches
-         when a system call is entered, and reenable them when the syscall
-         completes.  The downside of this is that we may miss the precise
-         point at which a watched piece of memory is modified.  "Oh well."
-
-         Note that we may have multiple threads running, which may each
-         enter syscalls at roughly the same time.  Since we don't have a
-         good notion currently of whether a watched piece of memory is
-         thread-private, we'd best not have any page-protections active
-         when any thread is in a syscall.  Thus, we only want to reenable
-         hardware watches when no threads are in a syscall.
-
-         Also, be careful not to try to gather much state about a thread
-         that's in a syscall.  It's frequently a losing proposition. */
+      /* Be careful not to try to gather much state about a thread
+         that's in a syscall.  It's frequently a losing proposition.  */
     case TARGET_WAITKIND_SYSCALL_ENTRY:
       if (debug_infrun)
         printf_unfiltered ("infrun: TARGET_WAITKIND_SYSCALL_ENTRY\n");
-      number_of_threads_in_syscalls++;
-      if (number_of_threads_in_syscalls == 1)
-	{
-	  TARGET_DISABLE_HW_WATCHPOINTS (PIDGET (inferior_ptid));
-	}
       resume (0, TARGET_SIGNAL_0);
       prepare_to_wait (ecs);
       return;
@@ -1500,27 +1452,11 @@ handle_inferior_event (struct execution_control_state *ecs)
          get it entirely out of the syscall.  (We get notice of the
          event when the thread is just on the verge of exiting a
          syscall.  Stepping one instruction seems to get it back
-         into user code.)
-
-         Note that although the logical place to reenable h/w watches
-         is here, we cannot.  We cannot reenable them before stepping
-         the thread (this causes the next wait on the thread to hang).
-
-         Nor can we enable them after stepping until we've done a wait.
-         Thus, we simply set the flag ecs->enable_hw_watchpoints_after_wait
-         here, which will be serviced immediately after the target
-         is waited on. */
+         into user code.)  */
     case TARGET_WAITKIND_SYSCALL_RETURN:
       if (debug_infrun)
         printf_unfiltered ("infrun: TARGET_WAITKIND_SYSCALL_RETURN\n");
       target_resume (ecs->ptid, 1, TARGET_SIGNAL_0);
-
-      if (number_of_threads_in_syscalls > 0)
-	{
-	  number_of_threads_in_syscalls--;
-	  ecs->enable_hw_watchpoints_after_wait =
-	    (number_of_threads_in_syscalls == 0);
-	}
       prepare_to_wait (ecs);
       return;
 

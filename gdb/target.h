@@ -1017,18 +1017,6 @@ extern void (*deprecated_target_new_objfile_hook) (struct objfile *);
    (current_target.to_have_continuable_watchpoint)
 #endif
 
-/* HP-UX supplies these operations, which respectively disable and enable
-   the memory page-protections that are used to implement hardware watchpoints
-   on that platform.  See wait_for_inferior's use of these.  */
-
-#if !defined(TARGET_DISABLE_HW_WATCHPOINTS)
-#define TARGET_DISABLE_HW_WATCHPOINTS(pid)
-#endif
-
-#if !defined(TARGET_ENABLE_HW_WATCHPOINTS)
-#define TARGET_ENABLE_HW_WATCHPOINTS(pid)
-#endif
-
 /* Provide defaults for hardware watchpoint functions.  */
 
 /* If the *_hw_beakpoint functions have not been defined
