@@ -304,10 +304,11 @@ memcpy(&insn,buffer, sizeof (insn));
 				   stream);
 		    break;
 
-		  case 'K':
+		  case 'G':
 		    print_address ((bfd_vma)
 				   (memaddr
-				    + (((int) insn.disp21 << 11) >> 11) * 4),
+				    /* We use only 19 of the 21 bits.  */
+				    + (((int) insn.disp21 << 13) >> 13) * 4),
 				   stream);
 		    break;
 
@@ -315,6 +316,20 @@ memcpy(&insn,buffer, sizeof (insn));
 		    fputs ("%amr", stream);
 		    break;
 
+		  case '6':
+		  case '7':
+		  case '8':
+		  case '9':
+		    fprintf (stream, "fcc%c", *s - '6' + '0');
+		    break;
+
+		  case 'z':
+		    fputs ("icc", stream);
+		    break;
+
+		  case 'Z':
+		    fputs ("xcc", stream);
+		    break;
 #endif				/* NO_V9 */
 
 		  case 'M':
