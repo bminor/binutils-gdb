@@ -1,3 +1,9 @@
+2002-03-18  David O'Brien  <obrien@FreeBSD.org>
+
+	* emultempl/elf32.em: Use lbasename vs. basename to fix problem where
+	the contents of the buffer returned from basename function will are
+	getting overwritten while still being used.
+
 Mon Mar 18 17:38:39 CET 2002  Jan Hubicka  <jh@suse.cz>
 			      Andreas Jaeger  <aj@suse.de>
 			      Andreas Schwab  <schwab@suse.de>
