@@ -1,5 +1,15 @@
 2003-06-14  Theodore A. Roth  <troth@openavr.org>
 
+	* avr-tdep.c (avr_remote_translate_xfer_address): Delete function.
+	(avr_gdbarch_init): Remove avr_call_dummy_words variable.
+	Don't set deprecated_call_dummy_words.
+	Remove commented out set_gdbarch_believe_pcc_promotion() call.
+	Don't set remote_translate_xfer_address.
+	(avr_io_reg_read_command): Remove commented out debug printf.
+	Wrap a long line.
+
+2003-06-14  Theodore A. Roth  <troth@openavr.org>
+
 	* avr-tdep.c (avr_scan_prologue): Fix to avoid a buffer over run which
 	causes gdb to seg fault.
 

@@ -387,30 +387,6 @@ avr_read_fp (void)
   return (avr_make_saddr (read_register (AVR_FP_REGNUM)));
 }
 
-/* Translate a GDB virtual ADDR/LEN into a format the remote target
-   understands.  Returns number of bytes that can be transfered
-   starting at TARG_ADDR.  Return ZERO if no bytes can be transfered
-   (segmentation fault).
-
-   TRoth/2002-04-08: Could this be used to check for dereferencing an invalid
-   pointer? */
-
-static void
-avr_remote_translate_xfer_address (struct gdbarch *gdbarch,
-				   struct regcache *regcache,
-				   CORE_ADDR memaddr, int nr_bytes,
-				   CORE_ADDR *targ_addr, int *targ_len)
-{
-  long out_addr;
-  long out_len;
-
-  /* FIXME: TRoth: Do nothing for now. Will need to examine memaddr at this
-     point and see if the high bit are set with the masks that we want. */
-
-  *targ_addr = memaddr;
-  *targ_len = nr_bytes;
-}
-
 /* avr_scan_prologue is also used as the
    deprecated_frame_init_saved_regs().
 
@@ -1099,12 +1075,6 @@ avr_breakpoint_from_pc (CORE_ADDR * pcptr, int *lenptr)
 static struct gdbarch *
 avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  /* FIXME: TRoth/2002-02-18: I have no idea if avr_call_dummy_words[] should
-     be bigger or not. Initial testing seems to show that `call my_func()`
-     works and backtrace from a breakpoint within the call looks correct.
-     Admittedly, I haven't tested with more than a very simple program. */
-  static LONGEST avr_call_dummy_words[] = { 0 };
-
   struct gdbarch *gdbarch;
   struct gdbarch_tdep *tdep;
 
@@ -1173,9 +1143,6 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_print_insn (gdbarch, print_insn_avr);
 
   set_gdbarch_call_dummy_address (gdbarch, avr_call_dummy_address);
-  set_gdbarch_deprecated_call_dummy_words (gdbarch, avr_call_dummy_words);
-
-/*    set_gdbarch_believe_pcc_promotion (gdbarch, 1); // TRoth: should this be set? */
 
   set_gdbarch_address_to_pointer (gdbarch, avr_address_to_pointer);
   set_gdbarch_pointer_to_address (gdbarch, avr_pointer_to_address);
@@ -1195,8 +1162,7 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_breakpoint_from_pc (gdbarch, avr_breakpoint_from_pc);
 
   set_gdbarch_function_start_offset (gdbarch, 0);
-  set_gdbarch_remote_translate_xfer_address (gdbarch,
-					     avr_remote_translate_xfer_address);
+
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frameless_function_invocation (gdbarch, frameless_look_for_prologue);	/* ??? */
   set_gdbarch_deprecated_frame_chain (gdbarch, avr_frame_chain);
@@ -1232,13 +1198,11 @@ avr_io_reg_read_command (char *args, int from_tty)
   unsigned int val;
   int i, j, k, step;
 
-/*    fprintf_unfiltered (gdb_stderr, "DEBUG: avr_io_reg_read_command (\"%s\", %d)\n", */
-/*             args, from_tty); */
-
   if (!current_target.to_query)
     {
       fprintf_unfiltered (gdb_stderr,
-			  "ERR: info io_registers NOT supported by current target\n");
+			  "ERR: info io_registers NOT supported by current "
+                          "target\n");
       return;
     }
 
