@@ -1,3 +1,9 @@
+Thu Jul 18 17:19:34 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Call AC_SUBST (INSTALL_SHLIB).
+	* configure: Rebuild.
+	* Makefile.in (install): Use @INSTALL_SHLIB@.
+
 start-sanitize-d10v
 	Wed Jul 17 14:39:05 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
