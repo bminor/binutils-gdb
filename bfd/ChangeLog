@@ -1,3 +1,7 @@
+Fri May 19 10:00:14 1995  Steve Chamberlain  <sac@rtl.cygnus.com>
+
+	* coffswap.h: (IMAGE_BASE): Define to 0 if not.
+
 Thu May 18 04:24:01 1995  Ken Raeburn  <raeburn@kr-laptop.cygnus.com>
 
 	Wed May 10 14:28:16 1995 Richard Earnshaw (rearnsha@armltd.co.uk)
