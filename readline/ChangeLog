@@ -1,3 +1,13 @@
+Thu Jun 30 15:21:54 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* rltty.c (control_meta_key_on): Don't compile if __GO32__ is
+	defined.
+	(rltty_set_default_bindings): Likewise.
+	* display.c (insert_some_chars, delete_chars): row_start should be
+	a short.
+	* parens.c (rl_insert_close): No FD_SET if using __GO32__.
+	* readline.c (rl_gather_tyi): Strip off spurious high bits.
+
 Sun Jun 12 03:51:52 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* history.c:  Swap inclusion of rldefs.h and chardefs.h to avoid
