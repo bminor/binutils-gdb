@@ -1,4 +1,12 @@
 start-sanitize-sky
+Tue Aug 4 11:02:50 1998  Ron Unrau  <runrau@cygnus.com>
+
+	* txvu-tdep.c (txvu_insert_breakpoint): make sure CPU context is
+	  set to correct VU memory space.
+	  (txvu_remove_breakpoint): use this instead of txvu_breakpoint_from_pc
+	* config/tm-txvu.h: use new track-table address
+	  Do note define BREAKPOINT_FROM_PC anymore
+
 Fri Jul 31 16:06:05 1998  Ron Unrau  <runrau@cygnus.com>
 
 	* config/tm-txvu.h: use NUM_CORE_REGS instead of NUM_R5900_REGS
