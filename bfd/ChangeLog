@@ -1,3 +1,13 @@
+Tue Jan 31 21:53:28 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* libelf.h (struct elf_obj_tdata): New member program_header_size.
+	* elfcode.h (get_program_header_size): New parameters sorted_hdrs,
+	count, and maxpagesize.  All callers updated.
+	If sorted_hdrs is non-NULL, use it to compute the number of segments.
+	Save result in case called again.
+	(assign_file_positions_except_relocs): Sort headers before calling
+	get_program_header_size.
+
 Tue Jan 31 15:27:53 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elfcode.h (map_program_segments): Add sorted_hdrs parameter.

@@ -480,6 +480,9 @@ struct elf_obj_tdata
      sh_info field in the symbol table header, and always read all the
      symbols.  */
   boolean bad_symtab;
+
+  /* Records the result of `get_program_header_size'.  */
+  bfd_size_type program_header_size;
 };
 
 #define elf_tdata(bfd)		((bfd) -> tdata.elf_obj_data)
