@@ -1,3 +1,7 @@
+Tue Sep  2 17:35:05 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* cpu-arc.c (arc_get_mach): Properly scan defined mach entries.
+
 Tue Sep  2 18:29:37 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* elf-m10200.c (mn10200_elf_final_link_relocate): PC relative
