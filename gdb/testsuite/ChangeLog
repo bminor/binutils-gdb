@@ -1,3 +1,7 @@
+2003-03-27  J. Brobecker  <brobecker@gnat.com>
+
+	* gdb.gdb/observer.exp: New regression test.
+
 2003-03-27  Michael Chastain  <mec@shout.net>
 
 	* gdb.base/list.exp: Remove setup_xfail_format for DWARF 1.
