@@ -105,22 +105,7 @@ extern bfd_boolean mcore_fix_adjustable PARAMS ((struct fix *));
 
 #include "write.h"        /* For definition of fixS */
 
-extern void      md_begin            PARAMS ((void));
-extern void      md_assemble         PARAMS ((char *));
-extern symbolS * md_undefined_symbol PARAMS ((char *));
 extern void      md_mcore_end        PARAMS ((void));
-extern char *    md_atof             PARAMS ((int, char *, int *));
-extern int       md_parse_option     PARAMS ((int, char *));
-extern void      md_show_usage       PARAMS ((FILE *));
-extern void      md_create_short_jump
-  PARAMS ((char *, addressT, addressT, fragS *, symbolS *));
-extern void      md_create_long_jump
-  PARAMS ((char *, addressT, addressT, fragS *, symbolS *));
-extern void      md_convert_frag               PARAMS ((bfd *, segT, fragS *));
-extern void      md_operand                    PARAMS ((expressionS *));
-extern int       md_estimate_size_before_relax PARAMS ((fragS *, segT));
-extern void      md_number_to_chars            PARAMS ((char *, valueT, int));
-extern valueT    md_section_align              PARAMS ((segT, valueT));
 extern long      md_pcrel_from_section         PARAMS ((fixS *, segT));
 extern arelent * tc_gen_reloc                  PARAMS ((asection *, fixS *));
 

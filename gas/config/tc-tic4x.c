@@ -194,8 +194,6 @@ static tic4x_inst_t *tic4x_inst_make
   PARAMS ((char *, unsigned long, char *));
 static int tic4x_inst_add
   PARAMS ((tic4x_inst_t *));
-void md_begin
-  PARAMS ((void));
 void tic4x_end
   PARAMS ((void));
 static int tic4x_indirect_parse
@@ -210,38 +208,12 @@ static void tic4x_insn_output
   PARAMS ((tic4x_insn_t *));
 static int tic4x_operands_parse
   PARAMS ((char *, tic4x_operand_t *, int ));
-void md_assemble
-  PARAMS ((char *));
 void tic4x_cleanup
   PARAMS ((void));
-char *md_atof
-  PARAMS ((int, char *, int *));
-void md_apply_fix3
-  PARAMS ((fixS *, valueT *, segT ));
-void md_convert_frag
-  PARAMS ((bfd *, segT, fragS *));
-void md_create_short_jump
-  PARAMS ((char *, addressT, addressT, fragS *, symbolS *));
-void md_create_long_jump
-  PARAMS ((char *, addressT, addressT, fragS *, symbolS *));
-int md_estimate_size_before_relax
-  PARAMS ((register fragS *, segT));
-int md_parse_option
-  PARAMS ((int, char *));
-void md_show_usage
-  PARAMS ((FILE *));
 int tic4x_unrecognized_line
   PARAMS ((int));
-symbolS *md_undefined_symbol
-  PARAMS ((char *));
-void md_operand
-  PARAMS ((expressionS *));
-valueT md_section_align
-  PARAMS ((segT, valueT));
 static int tic4x_pc_offset
   PARAMS ((unsigned int));
-long md_pcrel_from
-  PARAMS ((fixS *));
 int tic4x_do_align
   PARAMS ((int, const char *, int, int));
 void tic4x_start_line

@@ -1,5 +1,10 @@
 2003-11-19  Kazu Hirata  <kazu@cs.umass.edu>
 
+	* config/tc-mcore.h: Remove prototypes already in tc.h.
+	* config/tc-tic4x.c: Likewise.
+
+2003-11-19  Kazu Hirata  <kazu@cs.umass.edu>
+
 	* config/tc-arc.c: Remove a local prototype of atof_ieee.
 	* config/tc-ip2k.c: Likewise.
 	* config/tc-iq2000.c: Likewise.
