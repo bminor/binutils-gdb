@@ -19,34 +19,34 @@
 /* Make the basic types 64-bit quantities on the host */
 #define	HOST_64_BIT	long long
 
-extern int  EXFUN(abort,(void));
-extern int  EXFUN(close,(int));
-extern int  EXFUN(fcntl,(int des, int cmd, int e));
-extern int  EXFUN(fprintf,(FILE *,char *,...));
-extern int  EXFUN(printf,(char *,...));
-extern int  EXFUN(qsort,(void *data,int els, int siz, int func()));
-extern void EXFUN(exit,(int));
-extern int  EXFUN(fseek,(FILE*, int, int));
-extern int  EXFUN(fclose,(FILE*));
-extern void EXFUN(bcopy,(char*,char*,int));
-extern int  EXFUN(bcmp,(char *, char *, int));
-extern void EXFUN(bzero,(char *, int));
-extern PTR  EXFUN(memset,(PTR, int,unsigned int));
+extern int	abort	PARAMS ((void));
+extern int	close	PARAMS ((int));
+extern int	fcntl	PARAMS ((int des, int cmd, int e));
+extern int	fprintf	PARAMS ((FILE *,char *,...));
+extern int	printf	PARAMS ((char *,...));
+extern int	qsort	PARAMS ((void *data, int els, int siz, int func()));
+extern void	exit	PARAMS ((int));
+extern int	fseek	PARAMS ((FILE*, int, int));
+extern int	fclose	PARAMS ((FILE*));
+extern void	bcopy	PARAMS ((char*, char*, int));
+extern int	bcmp	PARAMS ((char *, char *, int));
+extern void	bzero	PARAMS ((char *, int));
+extern PTR	memset	PARAMS ((PTR, int, unsigned int));
 #ifndef DONTDECLARE_MALLOC
-extern PTR  EXFUN(malloc,(unsigned));
-extern PTR  EXFUN(realloc, (PTR, unsigned));
+extern PTR	malloc	PARAMS ((unsigned));
+extern PTR	realloc	PARAMS ((PTR, unsigned));
 #endif
 
 #ifndef __GNUC__
- PTR EXFUN(memcpy,(PTR,CONST PTR,unsigned int));
+ PTR		memcpy	PARAMS ((PTR, CONST PTR, unsigned int));
 #else
-/* char * EXFUN(memcpy,(char *,CONST char *,unsigned int)); */
+/* char *	memcpy	PARAMS ((char *, CONST char *, unsigned int)); */
 #endif
 
-extern int EXFUN(getuid,());
-extern int EXFUN(getgid,());
+extern int	getuid	PARAMS (());
+extern int	getgid	PARAMS (());
 extern char * strchr();
-extern void EXFUN(perror,(CONST char *));
+extern void	perror	PARAMS ((CONST char *));
 extern char *getenv();
 extern char *memchr();
 extern char *strrchr();
@@ -58,7 +58,7 @@ extern int sscanf();
 extern int stat();
 extern int strtol();
 
-extern int EXFUN(free,(PTR));
+extern int	free	PARAMS ((PTR));
 
 
 extern char *strrchr();

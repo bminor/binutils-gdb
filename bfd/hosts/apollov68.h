@@ -30,9 +30,9 @@
 #include <string.h>
 
 #ifndef DONTDECLARE_MALLOC
-extern PTR  EXFUN(malloc,(unsigned));
-extern PTR  EXFUN(realloc, (PTR, unsigned));
-extern void EXFUN( free,(PTR));
+extern PTR  malloc	PARAMS ((unsigned));
+extern PTR  realloc	PARAMS ((PTR, unsigned));
+extern void free	PARAMS ((PTR));
 #endif
 
 #include "fopen-same.h"

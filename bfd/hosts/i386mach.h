@@ -17,9 +17,9 @@ extern int errno;		/* <errno.h> forgets to do this... */
 #define SEEK_SET 0
 #define SEEK_CUR 1
 
-extern PTR  EXFUN(malloc, (unsigned));
-extern PTR  EXFUN(realloc, (PTR, unsigned));
-extern void EXFUN(free, (PTR));
+extern PTR  malloc	PARAMS ((unsigned));
+extern PTR  realloc	PARAMS ((PTR, unsigned));
+extern void free	PARAMS ((PTR));
 
 #define	HAVE_STRERROR
 

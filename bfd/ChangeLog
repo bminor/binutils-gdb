@@ -1,3 +1,12 @@
+Mon Aug  2 23:33:38 1993  John Gilmore  (gnu@cygnus.com)
+
+	* elf32-hppa.h, hosts/*:  Remove (one more time) all occurrances
+	of EXFUN in the BFD sources.  Heave ho!
+
+Mon Aug  2 16:45:57 1993  Stu Grossman  (grossman at cygnus.com)
+
+	* coffcode.h (coff_set_arch_mach_hook):  Add check for I386LYNXMAGIC.
+
 Mon Aug  2 12:18:03 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
 
 	* hosts/sun3.h: remove some more conflicting decls
