@@ -1,3 +1,15 @@
+Mon Apr  3 13:37:15 2000  Hans-Peter Nilsson  <hp@axis.com>
+
+	* aoutx.h (NAME(aout,reloc_type_lookup)): Add BFD_RELOC_8 and
+	BFD_RELOC_16 to switch for extended relocs.
+	(MY_swap_ext_reloc_in): New.
+	(MY_swap_ext_reloc_out): New.
+	(NAME(aout,slurp_reloc_table)): Use MY_swap_ext_reloc_in rather
+	than NAME(aout,swap_ext_reloc_in) for extended relocs.
+	(NAME(aout,squirt_out_relocs)): Similarly use
+	MY_swap_ext_reloc_out.
+	(aout_link_reloc_link_order): Use MY_put_ext_reloc if defined.
+
 2000-04-03  Kazu Hirata  <kazu@hxi.com>
 
 	* coff-h8300.c (h8300_reloc16_extra_cases): Add bsr:16 -> bsr:8 to

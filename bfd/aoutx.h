@@ -165,8 +165,16 @@ DESCRIPTION
 #define MY_swap_std_reloc_in NAME(aout,swap_std_reloc_in)
 #endif
 
+#ifndef MY_swap_ext_reloc_in
+#define MY_swap_ext_reloc_in NAME(aout,swap_ext_reloc_in)
+#endif
+
 #ifndef MY_swap_std_reloc_out
 #define MY_swap_std_reloc_out NAME(aout,swap_std_reloc_out)
+#endif
+
+#ifndef MY_swap_ext_reloc_out
+#define MY_swap_ext_reloc_out NAME(aout,swap_ext_reloc_out)
 #endif
 
 #ifndef MY_final_link_relocate
@@ -283,6 +291,8 @@ NAME(aout,reloc_type_lookup) (abfd,code)
   if (ext)
     switch (code)
       {
+	EXT (BFD_RELOC_8, 0);
+	EXT (BFD_RELOC_16, 1);
 	EXT (BFD_RELOC_32, 2);
 	EXT (BFD_RELOC_HI22, 8);
 	EXT (BFD_RELOC_LO10, 11);
@@ -2381,8 +2391,8 @@ NAME(aout,slurp_reloc_table) (abfd, asect, symbols)
 	(struct reloc_ext_external *) relocs;
 
       for (; counter < count; counter++, rptr++, cache_ptr++)
-	NAME(aout,swap_ext_reloc_in) (abfd, rptr, cache_ptr, symbols,
-				      bfd_get_symcount (abfd));
+	MY_swap_ext_reloc_in (abfd, rptr, cache_ptr, symbols,
+			      bfd_get_symcount (abfd));
     }
   else
     {
@@ -2432,7 +2442,8 @@ NAME(aout,squirt_out_relocs) (abfd, section)
       for (natptr = native;
 	   count != 0;
 	   --count, natptr += each_size, ++generic)
-	NAME(aout,swap_ext_reloc_out) (abfd, *generic, (struct reloc_ext_external *)natptr);
+	MY_swap_ext_reloc_out (abfd, *generic,
+			       (struct reloc_ext_external *) natptr);
     }
   else
     {
@@ -5671,6 +5682,10 @@ aout_link_reloc_link_order (finfo, o, p)
     }
   else
     {
+#ifdef MY_put_ext_reloc
+      MY_put_ext_reloc (finfo->output_bfd, r_extern, r_index, p->offset,
+			howto, &erel, pr->addend);
+#else
       PUT_WORD (finfo->output_bfd, p->offset, erel.r_address);
 
       if (bfd_header_big_endian (finfo->output_bfd))
@@ -5693,6 +5708,7 @@ aout_link_reloc_link_order (finfo, o, p)
 	}
 
       PUT_WORD (finfo->output_bfd, pr->addend, erel.r_addend);
+#endif /* MY_put_ext_reloc */
 
       rel_ptr = (PTR) &erel;
     }
