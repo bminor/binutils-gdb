@@ -1,3 +1,8 @@
+2003-12-08  Kevin Buettner  <kevinb@redhat.com>
+
+	* remote.c (remote_open_1, remote_cisco_open): Avoid closing
+	remote_desc more than once.
+
 2003-12-07  Andrew Cagney  <cagney@redhat.com>
 
 	* defs.h (DEPRECATED_STREQN, DEPRECATED_STREQ): Simplify by

@@ -2299,7 +2299,12 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
     {
       if (serial_setbaudrate (remote_desc, baud_rate))
 	{
+	  /* The requested speed could not be set.  Error out to
+	     top level after closing remote_desc.  Take care to
+	     set remote_desc to NULL to avoid closing remote_desc
+	     more than once.  */
 	  serial_close (remote_desc);
+	  remote_desc = NULL;
 	  perror_with_name (name);
 	}
     }
@@ -5566,7 +5571,12 @@ remote_cisco_open (char *name, int from_tty)
   baud_rate = (baud_rate > 0) ? baud_rate : 9600;
   if (serial_setbaudrate (remote_desc, baud_rate))
     {
+      /* The requested speed could not be set.  Error out to
+	 top level after closing remote_desc.  Take care to
+	 set remote_desc to NULL to avoid closing remote_desc
+	 more than once.  */
       serial_close (remote_desc);
+      remote_desc = NULL;
       perror_with_name (name);
     }
 
