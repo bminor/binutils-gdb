@@ -126,6 +126,14 @@ struct general_symbol_info
 
 extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, asection *);
 
+/* Note that all the following SYMBOL_* macros are used with the
+   SYMBOL argument being either a partial symbol, a minimal symbol or
+   a full symbol.  All three types have a ginfo field.  In particular
+   the SYMBOL_INIT_LANGUAGE_SPECIFIC, SYMBOL_INIT_DEMANGLED_NAME,
+   SYMBOL_DEMANGLED_NAME macros cannot be entirely substituted by
+   functions, unless the callers are changed to pass in the ginfo
+   field only, instead of the SYMBOL parameter.  */
+
 #define SYMBOL_NAME(symbol)		(symbol)->ginfo.name
 #define SYMBOL_VALUE(symbol)		(symbol)->ginfo.value.ivalue
 #define SYMBOL_VALUE_ADDRESS(symbol)	(symbol)->ginfo.value.address

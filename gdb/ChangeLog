@@ -1,3 +1,7 @@
+2002-10-23  Elena Zannoni  <ezannoni@redhat.com>
+
+	* symtab.h: Update comment.
+
 2002-10-23  Michael Snyder  <msnyder@redhat.com>
 
 	* printcmd.c (address_info): Restore quotes in output.
