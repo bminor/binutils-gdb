@@ -70,10 +70,11 @@ int md_long_jump_size = 4;
 /* handle of the OPCODE hash table */
 static struct hash_control *op_hash;
 
-/* sections we'll want to keep track of */
-static segT lita_sec, rdata, sdata;
+/* Sections and symbols we'll want to keep track of.  */
+static segT lita_sec, rdata, sdata, lit8_sec, lit4_sec;
+static symbolS *lit8_sym, *lit4_sym;
 
-/* setting for ".set [no]{at,macro}" */
+/* Setting for ".set [no]{at,macro}".  */
 static int at_ok = 1, macro_ok = 1;
 
 /* Keep track of global pointer.  */
@@ -431,17 +432,54 @@ s_gprel32 ()
 }
 
 static void
-create_lita_section ()
+create_literal_section (secp, name)
+     segT *secp;
+     const char *name;
 {
   segT current_section = now_seg;
   int current_subsec = now_subseg;
+  segT new_sec;
 
-  lita_sec = subseg_new (".lita", 0);
+  *secp = new_sec = subseg_new (name, 0);
   subseg_set (current_section, current_subsec);
-  bfd_set_section_flags (stdoutput, lita_sec,
+  bfd_set_section_alignment (stdoutput, new_sec, 3);
+  bfd_set_section_flags (stdoutput, new_sec,
 			 SEC_RELOC | SEC_ALLOC | SEC_LOAD | SEC_READONLY
 			 | SEC_DATA);
-  bfd_set_section_alignment (stdoutput, lita_sec, 3);
+}
+
+#define create_lita_section() create_literal_section (&lita_sec, ".lita")
+
+static valueT
+get_lit8_offset (val)
+     bfd_vma val;
+{
+  valueT retval;
+  if (lit8_sec == 0)
+    {
+      create_literal_section (&lit8_sec, ".lit8");
+      lit8_sym = section_symbol (lit8_sec);
+    }
+  retval = add_to_literal_pool ((symbolS *) 0, val, lit8_sec, 8);
+  if (retval >= 0xfff0)
+    as_fatal ("overflow in fp literal (.lit8) table");
+  return retval;
+}
+
+static valueT
+get_lit4_offset (val)
+     bfd_vma val;
+{
+  valueT retval;
+  if (lit4_sec == 0)
+    {
+      create_literal_section (&lit4_sec, ".lit4");
+      lit4_sym = section_symbol (lit4_sec);
+    }
+  retval = add_to_literal_pool ((symbolS *) 0, val, lit4_sec, 4);
+  if (retval >= 0xfff0)
+    as_fatal ("overflow in fp literal (.lit4) table");
+  return retval;
 }
 
 /* This function is called once, at assembler startup time.  It should
@@ -508,7 +546,6 @@ md_begin ()
 	     && (alpha_opcodes[i].name == name
 		 || !strcmp (alpha_opcodes[i].name, name)));
     }
-
 
 
   if (lose)
@@ -578,31 +615,34 @@ md_assemble (str)
     }
 }
 
+static inline void
+maybe_set_gp (sec)
+     asection *sec;
+{
+  bfd_vma vma;
+  if (!sec)
+    return;
+  vma = bfd_get_section_vma (foo, sec);
+  if (vma && vma < alpha_gp_value)
+    alpha_gp_value = vma;
+}
+
 static void
 select_gp_value ()
 {
-  bfd_vma lita_vma, sdata_vma;
-
   if (alpha_gp_value != 0)
     abort ();
 
-  if (lita_sec)
-    lita_vma = bfd_get_section_vma (abfd, lita_sec);
-  else
-    lita_vma = 0;
-#if 0
-  if (sdata)
-    sdata_vma = bfd_get_section_vma (abfd, sdata);
-  else
-#endif
-    sdata = 0;
+  /* Get minus-one in whatever width...  */
+  alpha_gp_value = 0; alpha_gp_value--;
 
-  if (lita_vma == 0
-      /* Who knows which order they'll get laid out in?  */
-      || (sdata_vma != 0 && sdata_vma < lita_vma))
-    alpha_gp_value = sdata_vma;
-  else
-    alpha_gp_value = lita_vma;
+  /* Select the smallest VMA of these existing sections.  */
+  maybe_set_gp (lita_sec);
+/* maybe_set_gp (sdata);   Was disabled before -- should we use it?  */
+#if 0
+  maybe_set_gp (lit8_sec);
+  maybe_set_gp (lit4_sec);
+#endif
 
   alpha_gp_value += GP_ADJUSTMENT;
 
@@ -747,8 +787,15 @@ load_expression (reg, insn)
   valueT addend;
   int num_insns = 1;
 
-  addend = insn->reloc[0].exp.X_add_number;
-  insn->reloc[0].exp.X_add_number = 0;
+  if (insn->reloc[0].exp.X_add_symbol->bsym->flags & BSF_SECTION_SYM)
+    {
+      addend = 0;
+    }
+  else
+    {
+      addend = insn->reloc[0].exp.X_add_number;
+      insn->reloc[0].exp.X_add_number = 0;
+    }
   load_symbol_address (reg, insn);
   if (addend)
     {
@@ -1165,6 +1212,60 @@ alpha_ip (str, insns)
 		}
 	      continue;
 
+	    case 'F':
+	      {
+		int format, length, mode, i, size;
+		char temp[20 /*MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT*/];
+		char *err;
+		static const char formats[4] = "FGfd";
+		bfd_vma bits, offset;
+		char *old_input_line_pointer = input_line_pointer;
+
+		input_line_pointer = s;
+		SKIP_WHITESPACE ();
+		memset (temp, 0, sizeof (temp));
+		mode = (opcode >> 26) & 3;
+		format = formats[mode];
+		err = md_atof (format, temp, &length);
+		if (err)
+		  {
+		    as_bad ("Bad floating literal: %s", err);
+		    bits = 0;
+		  }
+		else
+		  {
+		    /* Generate little-endian number from byte sequence.  */
+		    bits = 0;
+		    for (i = length - 1; i >= 0; i--)
+		      bits += ((bfd_vma)(temp[i] & 0xff)) << (i * 8);
+		  }
+		switch (length)
+		  {
+		  case 8:
+		    offset = get_lit8_offset (bits) - 0x8000;
+		    insns[0].reloc[0].exp.X_add_symbol = lit8_sym;
+		    insns[0].reloc[0].exp.X_add_number = 0x8000;
+		    break;
+		  case 4:
+		    offset = get_lit4_offset (bits) - 0x8000;
+		    insns[0].reloc[0].exp.X_add_symbol = lit4_sym;
+		    insns[0].reloc[0].exp.X_add_number = 0x8000;
+		    break;
+		  default:
+		    abort ();
+		  }
+		insns[0].reloc[0].exp.X_op = O_symbol;
+		offset &= 0xffff;
+		num_gen = load_expression (AT, &insns[0]);
+		insns[num_gen].reloc[0].code = BFD_RELOC_ALPHA_LITUSE;
+		insns[num_gen].reloc[0].exp = lituse_basereg;
+		insns[num_gen++].opcode = opcode | (AT << SB) | offset;
+		opcode = insns[0].opcode;
+		s = input_line_pointer;
+		input_line_pointer = old_input_line_pointer;
+	      }
+	      continue;
+
 	      /* The following two.. take advantage of the fact that
 	         opcode already contains most of what we need to know.
 	         We just prepend to the instr an "ldah
@@ -1246,8 +1347,10 @@ alpha_ip (str, insns)
 		    {
 		      struct alpha_it *i;
 		      i = &insns[num_gen++];
-		      i->reloc[0].code = BFD_RELOC_NONE;
 		      i->opcode = old_opcode | (tmp_reg << SB);
+
+		      i->reloc[0].code = BFD_RELOC_ALPHA_LITUSE;
+		      i->reloc[0].exp = lituse_basereg;
 		    }
 		}
 	      else
@@ -1271,7 +1374,7 @@ alpha_ip (str, insns)
 	      continue;
 
 	      /* Same failure modes as above, actually most of the
-	         same code shared.  */
+		 same code shared.  */
 	    case 'B':		/* Builtins */
 	      args++;
 	      switch (*args)

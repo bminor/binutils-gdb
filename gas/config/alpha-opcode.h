@@ -394,6 +394,10 @@ static const struct alpha_opcode alpha_opcodes[] =
 { "sts",        0x98000000, 1, "e,P" },		/* regbase macro */
 { "stt",        0x9c000000, 1, "e,l(2)" },
 { "stt",        0x9c000000, 1, "e,P" },		/* regbase macro */
+{ "ldif",	0x80000000, 1, "e,F" },
+{ "ldig",	0x84000000, 1, "e,F" },
+{ "ldis",	0x88000000, 1, "e,F" },
+{ "ldit",	0x8c000000, 1, "e,F" },
 
 { "fbeq",       0xc4000000, 1, "e,L" },		/* 6o+5a+21d */
 { "fbne",       0xd4000000, 1, "e,L" },
