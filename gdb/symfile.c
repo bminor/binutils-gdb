@@ -861,9 +861,6 @@ symbol_file_add (char *name, int from_tty, struct section_addr_info *addrs,
       syms_from_objfile (objfile, addrs, mainline, from_tty);
     }
 
-  if (objfile->sf == NULL)
-    return objfile;	/* No symbols. */
-
   /* We now have at least a partial symbol table.  Check to see if the
      user requested that all symbols be read on initial access via either
      the gdb startup command line or on a per symbol file basis.  Expand
@@ -896,6 +893,9 @@ symbol_file_add (char *name, int from_tty, struct section_addr_info *addrs,
 	  gdb_flush (gdb_stdout);
 	}
     }
+
+  if (objfile->sf == NULL)
+    return objfile;	/* No symbols. */
 
   new_symfile_objfile (objfile, mainline, from_tty);
 
