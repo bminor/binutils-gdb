@@ -201,10 +201,8 @@ extern char *mips_register_name PARAMS ((int regnr));
 #define FPA0_REGNUM (FP0_REGNUM+12)	/* First float argument register */
 #if MIPS_EABI			/* EABI uses F12 through F19 for args */
 #define MIPS_LAST_FP_ARG_REGNUM (FP0_REGNUM+19)
-#define MIPS_NUM_FP_ARG_REGS 8
 #else /* old ABI uses F12 through F15 for args */
 #define MIPS_LAST_FP_ARG_REGNUM (FP0_REGNUM+15)
-#define MIPS_NUM_FP_ARG_REGS 4
 #endif
 #define FCRCS_REGNUM 70		/* FP control/status */
 #define FCRIR_REGNUM 71		/* FP implementation/revision */
