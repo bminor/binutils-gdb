@@ -6,6 +6,7 @@ Tue Feb 17 16:00:56 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* cgen.h (cgen_insert_fn): Change type of result to const char *.
 	(cgen_parse_{signed,unsigned}_integer): Delete min,max arguments.
+	(CGEN_{INSN,KEYWORD,OPERAND}_NBOOL_ATTRS): Renamed from ..._MAX_ATTRS.
 
 Thu Feb 12 18:30:41 1998  Doug Evans  <devans@canuck.cygnus.com>
 
