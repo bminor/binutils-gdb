@@ -1,6 +1,6 @@
 # compilers and assemblers
 CC = m68k-coff-gcc
-CFLAGS = -g -D${target_os} -T
+CFLAGS = -g -D${target_os}
 C++ = ${CC}
 C++FLAGS = ${CFLAGS}
 CXX = ${CC}
@@ -10,7 +10,7 @@ ASFLAGS =
 FC =
 FCFLAGS = 
 LD = ld
-LDFLAGS = -lgcc -lc -lg -lmvme135
+LDFLAGS =
 LIBS = 
 
 # binutils
