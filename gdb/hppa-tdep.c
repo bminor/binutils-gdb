@@ -868,6 +868,11 @@ restore_pc_queue (fsr)
 
   for (insn_count = 0; insn_count < 3; insn_count++)
     {
+      /* FIXME: What if the inferior gets a signal right now?  Want to
+	 merge this into wait_for_inferior (as a special kind of
+	 watchpoint?  By setting a breakpoint at the end?  Is there
+	 any other choice?  Is there *any* way to do this stuff with
+	 ptrace() or some equivalent?).  */
       resume (1, 0);
       target_wait(inferior_pid, &w);
 
@@ -881,6 +886,7 @@ restore_pc_queue (fsr)
           return 0;
         }
     }
+  target_terminal_ours ();
   fetch_inferior_registers (-1);
   return 1;
 }

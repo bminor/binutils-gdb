@@ -1,5 +1,8 @@
 Mon Oct 18 10:28:08 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* hppa-tdep.c (restore_pc_queue): Call target_terminal_ours after
+	done stepping the inferior.
+
 	* c-exp.y: Remove never-used (because of shift/reduce conflicts)
 	rules for pointers to members.
 	* Makefile.in: Remove notice about expected shift/reduce conflicts.
