@@ -1,3 +1,11 @@
+1999-06-10  Jakub Jelinek  <jj@ultra.linux.cz>
+
+	* elf64_sparc.c (sparc64_elf_relocate_section): Use R_SPARC_max_std
+	instead of R_SPARC_max.
+	(sparc64_elf_info_to_howto): Likewise.
+	* elf32_sparc.c (elf32_sparc_relocate_section): Likewise.
+	(elf32_sparc_info_to_howto): Likewise; handle vtable relocations.
+
 1999-06-07  Richard Henderson  <rth@cygnus.com>
 
 	* section.c (_bfd_strip_section_from_output): Remove output

@@ -215,8 +215,20 @@ elf32_sparc_info_to_howto (abfd, cache_ptr, dst)
      arelent *cache_ptr;
      Elf_Internal_Rela *dst;
 {
-  BFD_ASSERT (ELF32_R_TYPE(dst->r_info) < (unsigned int) R_SPARC_max);
-  cache_ptr->howto = &_bfd_sparc_elf_howto_table[ELF32_R_TYPE(dst->r_info)];
+  switch (ELF32_R_TYPE(dst->r_info))
+    {
+    case R_SPARC_GNU_VTINHERIT:
+      cache_ptr->howto = &elf32_sparc_vtinherit_howto;
+      break;
+
+    case R_SPARC_GNU_VTENTRY:
+      cache_ptr->howto = &elf32_sparc_vtentry_howto;
+      break;
+
+    default:
+      BFD_ASSERT (ELF32_R_TYPE(dst->r_info) < (unsigned int) R_SPARC_max_std);
+      cache_ptr->howto = &_bfd_sparc_elf_howto_table[ELF32_R_TYPE(dst->r_info)];
+    }
 }
 
 /* For unsupported relocs.  */
@@ -1134,7 +1146,7 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
           || r_type == R_SPARC_GNU_VTENTRY)
         continue;
 
-      if (r_type < 0 || r_type >= (int) R_SPARC_max)
+      if (r_type < 0 || r_type >= (int) R_SPARC_max_std)
 	{
 	  bfd_set_error (bfd_error_bad_value);
 	  return false;

@@ -213,7 +213,7 @@ sparc64_elf_info_to_howto (abfd, cache_ptr, dst)
      arelent *cache_ptr;
      Elf64_Internal_Rela *dst;
 {
-  BFD_ASSERT (ELF64_R_TYPE (dst->r_info) < (unsigned int) R_SPARC_max);
+  BFD_ASSERT (ELF64_R_TYPE (dst->r_info) < (unsigned int) R_SPARC_max_std);
   cache_ptr->howto = &sparc64_elf_howto_table[ELF64_R_TYPE (dst->r_info)];
 }
 
@@ -1246,7 +1246,7 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       bfd_reloc_status_type r;
 
       r_type = ELF64_R_TYPE (rel->r_info);
-      if (r_type < 0 || r_type >= (int) R_SPARC_max)
+      if (r_type < 0 || r_type >= (int) R_SPARC_max_std)
 	{
 	  bfd_set_error (bfd_error_bad_value);
 	  return false;
