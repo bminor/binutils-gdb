@@ -1,3 +1,11 @@
+2005-01-31  Richard Sandiford  <rsandifo@redhat.com>
+
+	* ld-mips-elf/eh-frame1.s: Create a .gcc_compiled_long32 if using
+	32-bit pointers.
+	* ld-mips-elf/eh-frame1.d: Link in .gcc_compiled_long32 sections.
+	* ld-mips-elf/eh-frame[34].d: New tests.
+	* ld-mips-elf/mips-elf.exp: Run them.
+
 2005-01-28  Jan Beulich  <jbeulich@novell.com>
 
 	* ld/ia64/tlsbin.[rt]d: Widen expected offset/size ranges.

@@ -442,6 +442,9 @@
 #ifndef elf_backend_ignore_discarded_relocs
 #define elf_backend_ignore_discarded_relocs	NULL
 #endif
+#ifndef elf_backend_eh_frame_address_size
+#define elf_backend_eh_frame_address_size _bfd_elf_eh_frame_address_size
+#endif
 #ifndef elf_backend_can_make_relative_eh_frame
 #define elf_backend_can_make_relative_eh_frame	_bfd_elf_can_make_relative
 #endif
@@ -573,6 +576,7 @@ static const struct elf_backend_data elfNN_bed =
   elf_backend_reloc_type_class,
   elf_backend_discard_info,
   elf_backend_ignore_discarded_relocs,
+  elf_backend_eh_frame_address_size,
   elf_backend_can_make_relative_eh_frame,
   elf_backend_can_make_lsda_relative_eh_frame,
   elf_backend_encode_eh_address,

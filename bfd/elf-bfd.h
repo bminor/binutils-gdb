@@ -906,6 +906,12 @@ struct elf_backend_data
   bfd_boolean (*elf_backend_ignore_discarded_relocs)
     (asection *);
 
+  /* This function returns the width of FDE pointers in bytes, or 0 if
+     that can't be determined for some reason.  The default definition
+     goes by the bfd's EI_CLASS.  */
+  unsigned int (*elf_backend_eh_frame_address_size)
+    (bfd *, asection *);
+
   /* These functions tell elf-eh-frame whether to attempt to turn
      absolute or lsda encodings into pc-relative ones.  The default
      definition enables these transformations.  */
@@ -1381,6 +1387,8 @@ extern void _bfd_elf_sprintf_vma
 extern void _bfd_elf_fprintf_vma
   (bfd *, void *, bfd_vma);
 
+extern unsigned int _bfd_elf_eh_frame_address_size
+  (bfd *, asection *);
 extern bfd_byte _bfd_elf_encode_eh_address
   (bfd *abfd, struct bfd_link_info *info, asection *osec, bfd_vma offset,
    asection *loc_sec, bfd_vma loc_offset, bfd_vma *encoded);

@@ -418,8 +418,10 @@ _bfd_elf_discard_section_eh_frame
      it (it would need to use 64-bit .eh_frame format anyway).  */
   REQUIRE (sec->size == (unsigned int) sec->size);
 
-  ptr_size = (elf_elfheader (abfd)->e_ident[EI_CLASS]
-	      == ELFCLASS64) ? 8 : 4;
+  ptr_size = (get_elf_backend_data (abfd)
+	      ->elf_backend_eh_frame_address_size (abfd, sec));
+  REQUIRE (ptr_size != 0);
+
   buf = ehbuf;
   last_cie = NULL;
   last_cie_inf = NULL;
@@ -987,12 +989,14 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
   unsigned int ptr_size;
   struct eh_cie_fde *ent;
 
-  ptr_size = (elf_elfheader (sec->owner)->e_ident[EI_CLASS]
-	      == ELFCLASS64) ? 8 : 4;
-
   if (sec->sec_info_type != ELF_INFO_TYPE_EH_FRAME)
     return bfd_set_section_contents (abfd, sec->output_section, contents,
 				     sec->output_offset, sec->size);
+
+  ptr_size = (get_elf_backend_data (abfd)
+	      ->elf_backend_eh_frame_address_size (abfd, sec));
+  BFD_ASSERT (ptr_size != 0);
+
   sec_info = elf_section_data (sec)->sec_info;
   htab = elf_hash_table (info);
   hdr_info = &htab->eh_info;
@@ -1405,6 +1409,14 @@ _bfd_elf_write_section_eh_frame_hdr (bfd *abfd, struct bfd_link_info *info)
 				     sec->size);
   free (contents);
   return retval;
+}
+
+/* Return the width of FDE addresses.  This is the default implementation.  */
+
+unsigned int
+_bfd_elf_eh_frame_address_size (bfd *abfd, asection *sec ATTRIBUTE_UNUSED)
+{
+  return elf_elfheader (abfd)->e_ident[EI_CLASS] == ELFCLASS64 ? 8 : 4;
 }
 
 /* Decide whether we can use a PC-relative encoding within the given

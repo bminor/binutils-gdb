@@ -81,6 +81,10 @@ if {$has_newabi && $linux_gnu} {
     run_dump_test "eh-frame2-n32"
     run_dump_test "eh-frame2-n64"
 }
+if {$embedded_elf} {
+    run_dump_test "eh-frame3"
+    run_dump_test "eh-frame4"
+}
 
 run_dump_test "jaloverflow"
 run_dump_test "jaloverflow-2"

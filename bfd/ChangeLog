@@ -1,3 +1,17 @@
+2005-01-31  Richard Sandiford  <rsandifo@redhat.com>
+
+	* elf-bfd.h (elf_backend_data): Add elf_backend_eh_frame_address_size.
+	(_bfd_elf_eh_frame_address_size): Declare.
+	* elfxx-target.h (elf_backend_eh_frame_address_size): Define a default.
+	(elfNN_bed): Initialize elf_backend_eh_frame_address_size.
+	* elfxx-mips.h (_bfd_mips_elf_eh_frame_address_size): Declare.
+	(elf_backend_eh_frame_address_size): Define.
+	* elfxx-mips.c (_bfd_mips_elf_eh_frame_address_size): New function.
+	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Get the address
+	size from the new backend hook.
+	(_bfd_elf_write_section_eh_frame): Likewise.
+	(_bfd_elf_eh_frame_address_size): New function.
+
 2005-01-31  Andrew Cagney  <cagney@gnu.org>
 
 	* configure: Regenerate to track ../gettext.m4.

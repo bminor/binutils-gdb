@@ -146,3 +146,7 @@
 
 	cie_basic	basic5
 	fde_basic	basic5,.text,0x10
+
+	.if alignment == 2
+	.section	.gcc_compiled_long32
+	.endif
