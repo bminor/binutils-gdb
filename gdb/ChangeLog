@@ -1,10 +1,10 @@
-Fri Aug 23 00:44:57 1996  Fred Fish  <fnf@ninemoons.com>
+Fri Aug 23 00:44:57 1996  Fred Fish  <fnf@cygnus.com>
 
 	* gdbtk.c (gdbtk_init): Check for a DISPLAY env variable and
 	gracefully degrade to using command line interface if none is
 	found.
 
-Wed Aug 21 16:31:27 1996  Fred Fish  <fnf@rtl.cygnus.com>
+Wed Aug 21 16:31:27 1996  Fred Fish  <fnf@cygnus.com>
 
 	* valprint.c (print_longest): Test for CC_HAS_LONG_LONG as well as
 	PRINTF_HAS_LONG_LONG.
@@ -25,7 +25,7 @@ Tue Aug 20 17:59:42 1996  Ian Lance Taylor  <ian@cygnus.com>
 	rather than __STDC__.  Only declare malloc, realloc, and free if
 	NEED_DECLARATION_* is defined.
 
-Tue Aug 20 15:37:03 1996  Fred Fish  <fnf@taarna.cygnus.com>
+Tue Aug 20 15:37:03 1996  Fred Fish  <fnf@cygnus.com>
 
 	* solib.c (_initialize_solib): Add missing '\' chars at ends of
  	strings that continue on next line.
@@ -84,7 +84,7 @@ Wed Aug 14 17:54:19 1996  Stu Grossman  (grossman@critters.cygnus.com)
 	* config/i386/cygwin32.mh: Set NAT_FILE to nm-empty.h to make
 	native work.
 
-Wed Aug 14 02:03:42 1996  Fred Fish  <fnf@rtl.cygnus.com>
+Wed Aug 14 02:03:42 1996  Fred Fish  <fnf@cygnus.com>
 
 	From Blair MacIntyre <bm@cs.columbia.edu>:
 	* hppa-tdep.c (hppa_fix_call_dummy): Use MSYMBOL_TYPE rather
@@ -1177,7 +1177,7 @@ Fri Jul 12 19:04:32 1996  Fred Fish  <fnf@cygnus.com>
 	* hpread.c (hpread_lookup_type): Use xmmalloc/xmrealloc rather
 	than xmalloc/xrealloc.
 
-Fri Jul 12 17:59:47 1996  Fred Fish  <fnf@ninemoons.com>
+Fri Jul 12 17:59:47 1996  Fred Fish  <fnf@cygnus.com>
 
 	* objfiles.c (map_to_file): Error return from mmalloc_findbase is
 	a NULL pointer, not a -1.
@@ -1771,7 +1771,7 @@ Fri May 17 13:31:04 1996  Stan Shebs  <shebs@andros.cygnus.com>
 	* sh-stub.c: New file, was config/sh/stub.c.
 
 start-sanitize-gdbtk
-Thu May 16 19:20:29 1996  Fred Fish  <fnf@fishfood.ninemoons.com>
+Thu May 16 19:20:29 1996  Fred Fish  <fnf@cygnus.com>
 
 	* gdbtk.tcl (gdb_prompt): Set this early on.
 	(create_command_window): Use gdb_prompt rather than "(gdb) ".
