@@ -7,7 +7,7 @@
 
 # The headers in the directory hp-include override system headers
 # and tell GDB to use BSD executable file format (hence -Ihp-include)
-XDEPFILES= infptrace.o hp300ux-xdep.o
+XDEPFILES= infptrace.o inftarg.o fork-child.o hp300ux-xdep.o
 XM_FILE= xm-hp300hpux.h
 SYSV_DEFINE=-DSYSV
 REGEX=regex.o

@@ -5,4 +5,3 @@ XM_FILE= xm-hppahpux.h
 REGEX=regex.o
 REGEX1=regex.o
 ALLOCA=alloca.o
-ALLOCA1=alloca.o

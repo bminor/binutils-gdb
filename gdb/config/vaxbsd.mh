@@ -6,7 +6,7 @@
 #msg If this occurs, use gcc
 #msg  (but see comments in Makefile.dist about compiling with gcc).
 
-XDEPFILES= infptrace.o coredep.o
+XDEPFILES= infptrace.o inftarg.o fork-child.o coredep.o
 REGEX=regex.o
 REGEX1=regex.o
 XM_FILE= xm-vaxbsd.h

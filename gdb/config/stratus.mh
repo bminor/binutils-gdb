@@ -1,5 +1,5 @@
 # Host: Stratus FTX2
-XDEPFILES= procfs.o
+XDEPFILES= procfs.o fork-child.o
 XM_FILE= xm-stratus.h
 SYSV_DEFINE=-DSYSV
 REGEX=regex.o

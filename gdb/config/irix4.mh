@@ -1,5 +1,5 @@
 # Host: SGI Iris running irix 4.x
-XDEPFILES= procfs.o
+XDEPFILES= procfs.o fork-child.o
 XM_FILE= xm-irix4.h
 ALLOCA=alloca.o
 ALLOCA1=alloca.o

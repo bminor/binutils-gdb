@@ -1,3 +1,3 @@
 # Host: Sun 2, running SunOS 3
-XDEPFILES= infptrace.o sun3-xdep.o
+XDEPFILES= infptrace.o inftarg.o fork-child.o sun3-xdep.o
 XM_FILE= xm-sun2.h

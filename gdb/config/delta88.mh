@@ -1,5 +1,5 @@
 # Host: Motorola 88000 running DGUX
-XDEPFILES= infptrace.o m88k-xdep.o 
+XDEPFILES= infptrace.o inftarg.o fork-child.o m88k-xdep.o 
 XM_FILE= xm-delta88.h
 REGEX=regex.o
 REGEX1=regex.o

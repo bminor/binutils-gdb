@@ -1,5 +1,5 @@
 # Host: SGI Iris running irix 3.x
-XDEPFILES= infptrace.o coredep.o
+XDEPFILES= infptrace.o inftarg.o fork-child.o coredep.o
 XM_FILE= xm-irix3.h
 ALLOCA=alloca.o
 ALLOCA1=alloca.o

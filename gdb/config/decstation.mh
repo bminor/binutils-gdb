@@ -1,5 +1,5 @@
 # Host: Little-endian MIPS machine such as DECstation.
-XDEPFILES= infptrace.o mips-xdep.o coredep.o
+XDEPFILES= infptrace.o inftarg.o fork-child.o mips-xdep.o coredep.o
 XM_FILE= xm-mips.h
 
 # We can't use MMALLOC because the DECstation RPC library can't cope
