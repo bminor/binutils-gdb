@@ -1,3 +1,11 @@
+start-sanitize-gxsim
+1998-11-21  Frank Ch. Eigler  <fche@elastic.org>
+
+	* sim-gx.c (sim_gx_block_translate): Generate computed
+	goto for __GNUC__ instead of plain switch() for gx block
+	entry.  Lose "-g" compile option for gx block.
+
+end-sanitize-gxsim
 1998-11-18  Doug Evans  <devans@casey.cygnus.com>
 
 	* Make-common.in (cgen-utils.o): Depend on cgen-engine.h.

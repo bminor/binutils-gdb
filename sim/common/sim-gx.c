@@ -7,7 +7,6 @@
 #include "sim-gx.h"
 
 #include "config.h"
-/* #include "cconfig.h" */
 
 /* shared object functions */
 #ifdef HAVE_DLFCN_H
@@ -576,6 +575,29 @@ sim_gx_block_translate(sim_gx_block* gx, int optimized)
   if(! optimized)
     fprintf(block->source_file, "  unsigned int insn_count = 0;\n");
 
+  /* emit threaded goto vector for __GNUC__ */
+  fprintf(block->source_file, "#ifdef __GNUC__\n");
+  fprintf(block->source_file, "  static void* jump_table[] =\n");
+  fprintf(block->source_file, "    {\n");
+  gx_cia = gx->origin;
+  while(GX_PC_INCLUDES(gx,gx_cia))
+    { 
+      sim_cia next_gx_cia;
+      if((! optimized) ||
+	 (GX_PC_FLAGS(gx, gx_cia) & GX_PCF_JUMPTARGET))
+	{
+	  fprintf(block->source_file, "      && gx_label_%ld,\n",
+		  ((gx_cia - gx->origin) / gx->divisor));
+	}
+      else
+	{
+	  fprintf(block->source_file, "      && gx_label_default,\n");
+	}
+      gx_cia = gx_cia + gx->divisor;
+    }
+  fprintf(block->source_file, "    };\n");
+  fprintf(block->source_file, "#endif /*__GNUC__*/\n");
+
   /* pre-block gunk: register load */
   tgx_emit_load_block(gx, optimized);
 
@@ -605,13 +627,22 @@ sim_gx_block_translate(sim_gx_block* gx, int optimized)
 
   /* emit PC switch, use compressed case numbers */
   fprintf(block->source_file, "\n");
+  fprintf(block->source_file, "#ifdef __GNUC__\n");
+  fprintf(block->source_file, "  goto * jump_table[((pc - 0x%08x) / %u)];\n",
+	  (unsigned)gx->origin, gx->divisor); 
+  fprintf(block->source_file, "#else /* ! __GNUC__*/\n");
   fprintf(block->source_file, "  switch((pc - 0x%08x) / %u)\n",
 	  (unsigned)gx->origin, gx->divisor); 
+  fprintf(block->source_file, "#endif /*__GNUC__*/\n");
   fprintf(block->source_file, "    {\n"); 
 
   /* handle bad-PC event */
   fprintf(block->source_file, "    /* handle unknown jump target */\n");
+  fprintf(block->source_file, "#ifdef __GNUC__\n");
+  fprintf(block->source_file, "    gx_label_default:\n");
+  fprintf(block->source_file, "#else /* ! __GNUC__*/\n");
   fprintf(block->source_file, "    default:\n");
+  fprintf(block->source_file, "#endif /*__GNUC__*/\n");
   fprintf(block->source_file, "      rc = %d;\n", GX_F_NONPC);
   fprintf(block->source_file, "      npc = pc;\n");
   fprintf(block->source_file, "      goto save;\n");
@@ -653,8 +684,13 @@ sim_gx_block_translate(sim_gx_block* gx, int optimized)
       if((! optimized) ||
 	 (GX_PC_FLAGS(gx, gx_cia) & GX_PCF_JUMPTARGET))
 	{
+	  fprintf(block->source_file, "#ifdef __GNUC__\n");
+	  fprintf(block->source_file, "    gx_label_%ld:\n",
+		  ((gx_cia - gx->origin) / gx->divisor));
+	  fprintf(block->source_file, "#else /* ! __GNUC__*/\n");
 	  fprintf(block->source_file, "    case %ld:\n",
 		  ((gx_cia - gx->origin) / gx->divisor));
+	  fprintf(block->source_file, "#endif /*__GNUC__*/\n");
 	}
 
       /* translate breakpoint check & exit */
@@ -732,8 +768,8 @@ sim_gx_block_translate(sim_gx_block* gx, int optimized)
   /* compile source & produce shared object */
 
   sprintf(compile_command, 
-	  "gxtool --silent --mode=compile gcc -c -g %s %s",
-	  (optimized ? "-O3" : "-O"), block->source_name);
+	  "gxtool --silent --mode=compile gcc -c %s %s",
+	  (optimized ? "-O9 -fomit-frame-pointer" : "-O"), block->source_name);
 
   rc = system(compile_command);
   if(rc != 0)
@@ -745,7 +781,7 @@ sim_gx_block_translate(sim_gx_block* gx, int optimized)
   /* link source */
 
   sprintf(compile_command,
-	  "gxtool --silent --mode=link gcc -export-dynamic -rpath %s -g -o lib%s.la %s.lo",
+	  "gxtool --silent --mode=link gcc -export-dynamic -rpath %s -o lib%s.la %s.lo",
 	  dir_name, base_name, base_name);
 
   rc = system(compile_command);
