@@ -1,3 +1,11 @@
+Wed Feb 23 16:21:25 1994  Stu Grossman  (grossman at cygnus.com)
+
+	* sparclite/hello.c:  Add factorial function for testing.
+	* salib.c:  Use macros instead of constants for I/O addresses to
+	make 931 support easier.
+	* sparclite.h:  Change constraint for LOC to "rJ" to force use of
+	register in sta/lda instructions.
+
 Wed Feb 23 10:39:18 1994  Jim Kingdon  (kingdon@rtl.cygnus.com)
 
 	* dbxread.c (process_one_symbol): Set
