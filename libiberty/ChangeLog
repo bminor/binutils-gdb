@@ -1,3 +1,8 @@
+2000-07-07  Andrew Haley  <aph@cygnus.com>
+
+	* cplus-dem.c (main): fflush() after emitting last char before
+	waiting for input.
+
 2000-06-09  Zack Weinberg  <zack@wolery.cumb.org>
 
 	* cp-demangle.c (demangle_operator_name): Add spaces before
