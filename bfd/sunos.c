@@ -57,6 +57,22 @@ sunos4_object_p (abfd)
   return some_aout_object_p (abfd, sunos4_callback);
 }
 
+  /* Determine the size of a relocation entry, based on the architecture */
+static void
+DEFUN(choose_reloc_size,(abfd),
+bfd *abfd)
+  {
+    switch (abfd->obj_arch) {
+    case bfd_arch_sparc:
+    case bfd_arch_a29k:
+      obj_reloc_entry_size (abfd) = RELOC_EXT_SIZE;
+      break;
+    default:
+      obj_reloc_entry_size (abfd) = RELOC_STD_SIZE;
+      break;
+    }
+  }
+
 /* Set parameters about this a.out file that are machine-dependent.
    This routine is called from some_aout_object_p just before it returns.  */
 
@@ -72,7 +88,7 @@ sunos4_callback (abfd)
   obj_textsec (abfd)->vma = N_TXTADDR(*execp);
 
   /* The file offsets of the sections */
-  obj_textsec (abfd)->filepos = N_TXTOFF(*execp);
+  obj_textsec (abfd)->filepos = EXEC_BYTES_SIZE; /*N_TXTOFF(*execp);*/
   obj_datasec (abfd)->filepos = N_DATOFF(*execp);
 
   /* The file offsets of the relocation info */
@@ -82,6 +98,8 @@ sunos4_callback (abfd)
   /* The file offsets of the string table and symbol table.  */
   obj_str_filepos (abfd) = N_STROFF (*execp);
   obj_sym_filepos (abfd) = N_SYMOFF (*execp);
+
+
 
   /* Determine the architecture and machine type of the object file.  */
   switch (N_MACHTYPE (*exec_hdr (abfd))) {
@@ -122,14 +140,7 @@ sunos4_callback (abfd)
 	break;
   }
 
-  /* Determine the size of a relocation entry, based on the architecture */
-  switch (abfd->obj_arch) {
-  case bfd_arch_sparc:
-  case bfd_arch_a29k:
-    obj_reloc_entry_size (abfd) = RELOC_EXT_SIZE;
-  default:
-    obj_reloc_entry_size (abfd) = RELOC_STD_SIZE;
-  }
+  choose_reloc_size(abfd);
   return abfd->xvec;
 }
 
@@ -223,6 +234,8 @@ sunos4_write_object_contents (abfd)
   unsigned char exec_bytes[EXEC_BYTES_SIZE];
   struct exec *execp = exec_hdr (abfd);
 
+
+
   execp->a_text = obj_textsec (abfd)->size;
 
   /* Magic number, maestro, please!  */
@@ -251,11 +264,18 @@ sunos4_write_object_contents (abfd)
     N_SET_MACHTYPE(*execp, M_UNKNOWN);
   }
 
+  choose_reloc_size(abfd);
+
   N_SET_MAGIC (*execp, OMAGIC);
   if (abfd->flags & D_PAGED) {
     /* This is not strictly true, but will probably do for the default
-	case.  FIXME.  */
-    execp->a_text = obj_textsec (abfd)->size + sizeof(struct exec);
+	case.  FIXME.  
+	*/
+    /* Also the size has already had the sizeof the header taken into
+       account. It may be wrong for the application to have to do this
+       (though this is what sizeof_headers is for), but it's the way
+       it is, so that's the way it will stay for the moment.*/
+    execp->a_text = obj_textsec (abfd)->size ; /*+ sizeof(struct exec);*/
     N_SET_MAGIC (*execp, ZMAGIC);
   } else if (abfd->flags & WP_TEXT) {
     N_SET_MAGIC (*execp, NMAGIC);
@@ -281,6 +301,9 @@ sunos4_write_object_contents (abfd)
 
   execp->a_syms = bfd_get_symcount (abfd) * sizeof (struct nlist);
   execp->a_entry = bfd_get_start_address (abfd);
+
+
+
 
   execp->a_trsize = ((obj_textsec (abfd)->reloc_count) *
 		     obj_reloc_entry_size (abfd));

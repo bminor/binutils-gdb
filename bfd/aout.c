@@ -267,6 +267,7 @@ some_aout_object_p (abfd, callback_to_real_object_p)
      header, should cope with them in this callback as well.  */
 #endif /* DOCUMENTATION */
 
+
   return (*callback_to_real_object_p)(abfd);
 }
 
@@ -412,7 +413,7 @@ aout_set_section_contents (abfd, section, location, offset, count)
 	obj_textsec(abfd)->filepos = sizeof(struct exec);
 	obj_textsec(abfd)->size = align_power(obj_textsec(abfd)->size,
 					      obj_textsec(abfd)->alignment_power);
-	obj_datasec(abfd)->filepos = obj_textsec (abfd)->filepos  + obj_textsec (abfd)->size;
+	obj_datasec(abfd)->filepos =  obj_textsec (abfd)->size;
 	obj_datasec(abfd)->size = align_power(obj_datasec(abfd)->size,
 					      obj_datasec(abfd)->alignment_power);
 
@@ -1017,14 +1018,14 @@ swap_ext_reloc_out (abfd, g, natptr)
     natptr->r_index[2] = r_index;
     natptr->r_bits[0] =
       (r_extern? RELOC_EXT_BITS_EXTERN_BIG: 0)
-	|| (r_type << RELOC_EXT_BITS_TYPE_SH_BIG);
+	| (r_type << RELOC_EXT_BITS_TYPE_SH_BIG);
   } else {
     natptr->r_index[2] = r_index >> 16;
     natptr->r_index[1] = r_index >> 8;
     natptr->r_index[0] = r_index;
     natptr->r_bits[0] =
       (r_extern? RELOC_EXT_BITS_EXTERN_LITTLE: 0)
-	|| (r_type << RELOC_EXT_BITS_TYPE_SH_LITTLE);
+	| (r_type << RELOC_EXT_BITS_TYPE_SH_LITTLE);
   }
 
   bfd_h_putlong (abfd, r_addend, natptr->r_addend);
