@@ -28,6 +28,7 @@ alpha-opcode.h
 atof-ieee.c
 atof-tahoe.c
 atof-vax.c
+go32.cfg
 h8300.mt
 h8500.mt
 i386coff.mt
@@ -102,6 +103,7 @@ tc-z8k.h
 te-386bsd.h
 te-dpx2.h
 te-generic.h
+te-go32.h
 te-hp300.h
 te-hppa.h
 te-i386aix.h
@@ -112,6 +114,7 @@ te-mach.h
 te-nbsd.h
 te-nbsd532.h
 te-pc532mach.h
+te-ppcnw.h
 te-sco386.h
 te-sun3.h
 te-sysv32.h
