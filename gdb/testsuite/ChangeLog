@@ -1,5 +1,8 @@
 Tue Jul 25 01:03:52 1995  Jeff Law  (law@snake.cs.utah.edu)
 
+	* gdb.base/signals.exp: Disable whole file for lynx until
+	further notice.
+
 	* gdb.base/signals.exp: xfail test where "next" acts like
 	"continue" for lynx.
 

@@ -251,6 +251,15 @@ if {[ istarget "m68*-motorola-*" ] || [ istarget "hppa*-*-bsd*" ] ||
   return 0
 }
 
+# lynx2.2.2 doesn't lose signals, instead it screws up the stack pointer
+# in some of these tests leading to massive problems.  I've
+# reported this to lynx, hopefully it'll be fixed in lynx2.3.
+# Severe braindamage.
+if [ istarget "*-*-*lynx*" ] then {
+  setup_xfail "*-*-*"
+  fail "kernel scroggs stack pointer in signal tests on this target"
+}
+
 gdb_exit
 gdb_start
 
