@@ -1,3 +1,9 @@
+2003-04-03  Dimitrie O. Paun <dpaun@rogers.com>
+
+        * windres.c: Add -U for compatibility with wrc, rc, and cpp.
+        (main): Just pass the -U option down to the preprocessor.
+        * doc/binutils.texi: Added -U to the list of options.
+
 2003-04-01  Dimitrie O. Paun <dpaun@rogers.com>
 
 	* windres.c (usage): Report -r option.

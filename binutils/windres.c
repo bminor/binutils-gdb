@@ -1,5 +1,6 @@
 /* windres.c -- a program to manipulate Windows resources
-   Copyright 1997, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GNU Binutils.
@@ -31,9 +32,7 @@
    * The rcl program, written by Gunther Ebert
      <gunther.ebert@ixos-leipzig.de>.
 
-   * The res2coff program, written by Pedro A. Aranda <paag@tid.es>.
-
-   */
+   * The res2coff program, written by Pedro A. Aranda <paag@tid.es>.  */
 
 #include "bfd.h"
 #include "getopt.h"
@@ -42,11 +41,10 @@
 #include "safe-ctype.h"
 #include "obstack.h"
 #include "windres.h"
-
 #include <assert.h>
 #include <time.h>
 
-/* used by resrc.c at least */
+/* Used by resrc.c at least.  */
 
 int verbose = 0;
 
@@ -108,19 +106,18 @@ static struct include_dir *include_dirs;
 
 /* 150 isn't special; it's just an arbitrary non-ASCII char value.  */
 
-#define OPTION_DEFINE 150
-#define OPTION_HELP (OPTION_DEFINE + 1)
-#define OPTION_INCLUDE_DIR (OPTION_HELP + 1)
-#define OPTION_LANGUAGE (OPTION_INCLUDE_DIR + 1)
-#define OPTION_PREPROCESSOR (OPTION_LANGUAGE + 1)
-#define OPTION_USE_TEMP_FILE (OPTION_PREPROCESSOR + 1)
-#define OPTION_NO_USE_TEMP_FILE (OPTION_USE_TEMP_FILE + 1)
-#define OPTION_VERSION (OPTION_NO_USE_TEMP_FILE + 1)
-#define OPTION_YYDEBUG (OPTION_VERSION + 1)
+#define OPTION_HELP		150
+#define OPTION_INCLUDE_DIR	(OPTION_HELP + 1)
+#define OPTION_LANGUAGE		(OPTION_INCLUDE_DIR + 1)
+#define OPTION_PREPROCESSOR	(OPTION_LANGUAGE + 1)
+#define OPTION_USE_TEMP_FILE	(OPTION_PREPROCESSOR + 1)
+#define OPTION_NO_USE_TEMP_FILE	(OPTION_USE_TEMP_FILE + 1)
+#define OPTION_VERSION		(OPTION_NO_USE_TEMP_FILE + 1)
+#define OPTION_YYDEBUG		(OPTION_VERSION + 1)
 
 static const struct option long_options[] =
 {
-  {"define", required_argument, 0, OPTION_DEFINE},
+  {"define", required_argument, 0, 'D'},
   {"help", no_argument, 0, OPTION_HELP},
   {"include-dir", required_argument, 0, OPTION_INCLUDE_DIR},
   {"input-format", required_argument, 0, 'I'},
@@ -128,6 +125,7 @@ static const struct option long_options[] =
   {"output-format", required_argument, 0, 'O'},
   {"preprocessor", required_argument, 0, OPTION_PREPROCESSOR},
   {"target", required_argument, 0, 'F'},
+  {"undefine", required_argument, 0, 'U'},
   {"use-temp-file", no_argument, 0, OPTION_USE_TEMP_FILE},
   {"no-use-temp-file", no_argument, 0, OPTION_NO_USE_TEMP_FILE},
   {"verbose", no_argument, 0, 'v'},
@@ -710,6 +708,7 @@ usage (stream, status)
      --preprocessor=<program>  Program to use to preprocess rc file\n\
      --include-dir=<dir>       Include directory when preprocessing rc file\n\
   -D --define <sym>[=<val>]    Define SYM when preprocessing rc file\n\
+  -U --undefine <sym>          Undefine SYM when preprocessing rc file\n\
   -v --verbose                 Verbose - tells you what it's doing\n\
      --language=<val>          Set language when reading rc file\n\
      --use-temp-file           Use a temporary file instead of popen to read\n\
@@ -816,7 +815,7 @@ main (argc, argv)
   language = 0x409;   /* LANG_ENGLISH, SUBLANG_ENGLISH_US.  */
   use_temp_file = 0;
 
-  while ((c = getopt_long (argc, argv, "i:o:I:O:F:D:rhHvV", long_options,
+  while ((c = getopt_long (argc, argv, "i:o:I:O:F:D:U:rhHvV", long_options,
 			   (int *) 0)) != EOF)
     {
       switch (c)
@@ -846,12 +845,12 @@ main (argc, argv)
 	  break;
 
 	case 'D':
-	case OPTION_DEFINE:
+	case 'U':
 	  if (preprocargs == NULL)
 	    {
 	      quotedarg = quot (optarg);
 	      preprocargs = xmalloc (strlen (quotedarg) + 3);
-	      sprintf (preprocargs, "-D%s", quotedarg);
+	      sprintf (preprocargs, "-%c%s", c, quotedarg);
 	    }
 	  else
 	    {
@@ -859,14 +858,14 @@ main (argc, argv)
 
 	      quotedarg = quot (optarg);
 	      n = xmalloc (strlen (preprocargs) + strlen (quotedarg) + 4);
-	      sprintf (n, "%s -D%s", preprocargs, quotedarg);
+	      sprintf (n, "%s -%c%s", preprocargs, c, quotedarg);
 	      free (preprocargs);
 	      preprocargs = n;
 	    }
 	  break;
 
 	case 'r':
-	  /* Ignored for compatibility with rc */
+	  /* Ignored for compatibility with rc.  */
 	  break;
 
 	case 'v':
@@ -972,7 +971,6 @@ main (argc, argv)
     }
 
   /* Read the input file.  */
-
   switch (input_format)
     {
     default:
@@ -994,11 +992,9 @@ main (argc, argv)
 
   /* Sort the resources.  This is required for COFF, convenient for
      rc, and unimportant for res.  */
-
   resources = sort_resources (resources);
 
   /* Write the output file.  */
-
   reswr_init ();
 
   switch (output_format)

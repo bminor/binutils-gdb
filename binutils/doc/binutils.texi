@@ -2614,6 +2614,11 @@ files named in the @code{rc} file.
 Specify a @option{-D} option to pass to the preprocessor when reading an
 @code{rc} file.
 
+@item -U @var{target}
+@itemx --undefine @var{sym}
+Specify a @option{-U} option to pass to the preprocessor when reading an
+@code{rc} file.
+
 @item -r
 Ignored for compatibility with rc.
 
