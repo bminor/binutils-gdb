@@ -1,3 +1,8 @@
+2002-07-04  Mark Kettenis  <kettenis@gnu.org>
+
+	* dwarf2cfi.c (cfi_pop_frame): Use alloca() for regbuf.
+	Don't call get_current_frame().
+
 2002-07-04  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* i386-nat.c (child_post_startup_inferior): New function
