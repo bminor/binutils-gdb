@@ -1,5 +1,8 @@
 2003-03-20  Andrew Cagney  <cagney@redhat.com>
 
+	* Makefile.in (init.c): Don't add $(srcdir) prefix when a file
+	already has a full path.
+
 	* main.c (gdb_main): Return 1.
 	(captured_main): Call error to report an invalid interpreter.
 

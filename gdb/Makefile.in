@@ -966,6 +966,13 @@ uninstall: force $(CONFIG_UNINSTALL)
 # everything else.  The catch is that other modules still take the
 # address of these builtin types forcing them to be variables, sigh!
 
+# NOTE: cagney/2003-03-18: The sed pattern ``s|^\([^ /]...'' is
+# anchored on the first column and excludes the ``/'' character so
+# that it doesn't add the $(srcdir) prefix to any file that already
+# has an absolute path.  It turns out that $(DEC)'s True64 make
+# automatically adds the $(srcdir) prefixes when it encounters files
+# in sub-directories such as cli/ and mi/.
+
 INIT_FILES = $(OBS) $(TSOBS) $(CONFIG_OBS) $(CONFIG_INITS)
 init.c: $(INIT_FILES)
 	@echo Making init.c
@@ -985,7 +992,7 @@ init.c: $(INIT_FILES)
 	    -e '/[a-z0-9A-Z_]*-exp.tab.o/d' \
 	    -e 's/\.o/.c/' \
 	    -e 's,signals\.c,signals/signals\.c,' \
-	    -e 's|\([^  ][^     ]*\)|$(srcdir)/\1|g' | \
+	    -e 's|^\([^  /][^     ]*\)|$(srcdir)/\1|g' | \
 	while read f; do grep '^_initialize_[a-z_0-9A-Z]* *(' $$f 2>/dev/null; done | \
 	sed -e 's/^.*://' -e 's/^\([a-z_0-9A-Z]*\).*/\1/' | \
 	( echo _initialize_gdbtypes ; grep -v '^_initialize_gdbtypes$$' ) > init.l-tmp
