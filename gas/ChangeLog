@@ -1,4 +1,9 @@
 start-sanitize-v850
+Mon Aug 25 10:19:34 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* doc/c-v850.texi: Change the major node to v850 Machine
+	Dependencies. 
+
 Fri Aug 22 11:16:14 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* doc/as.texinfo: Add inclusion of c-v850.texi
