@@ -7,7 +7,7 @@ proc default_ld_version { ld } {
 	error "$ld does not exist"
 	exit 1
     }
- 
+    
     set tmp [exec $ld --version]
     regexp "version.*$" $tmp version
     
@@ -17,32 +17,150 @@ proc default_ld_version { ld } {
 }
 
 #
-# default_ld_start 
+# default_ld_relocate 
+#	link an object using relocation
+#
+proc default_ld_relocate { ld target objects } {
+    
+    global HOSTING_EMU
+    
+    if { [file exists $ld] == 0 } then {
+	error "$ld does not exist"
+	exit 1
+    }
+    
+    send_log "### EXEC \"$ld $HOSTING_EMU -o $target -r $objects\"\n"
+    verbose "### EXEC \"$ld $HOSTING_EMU -o $target -r $objects\""
+    
+    catch "exec $ld $HOSTING_EMU -o $target -r $objects" exec_output
+    if ![string match "" $exec_output] then {
+	send_log "$exec_output\n"
+	verbose "$exec_output"
+    }
+}
+
+
+#
+# default_ld_link 
 #	link a program using ld
 #
-proc default_ld_start { ld target } {
-
-    global OFILES
+proc default_ld_link { ld target objects } {
+    
     global BFDLIB
     global LIBIBERTY
     global HOSTING_EMU
     global HOSTING_CRT0
     global HOSTING_LIBS
-
-    set objects "$HOSTING_CRT0 $OFILES"
-    set library "$BFDLIB $LIBIBERTY $HOSTING_LIBS"
-       
+    
+    set objs "$HOSTING_CRT0 $objects"
+    set libs "$BFDLIB $LIBIBERTY $HOSTING_LIBS"
+    
     if { [file exists $ld] == 0 } then {
 	error "$ld does not exist"
 	exit 1
     }
-
-    send_log "### EXEC \"$ld $HOSTING_EMU -o $target $objects $library\"\n"
-    verbose "### EXEC \"$ld $HOSTING_EMU -o $target $objects $library\"" 1
     
-    catch "exec $ld $HOSTING_EMU -o $target $objects $library" ld_output
-    if ![string match "" $ld_output] then {
-	send_log "$ld_output\n"
-	verbose "$ld_output" 1
+    send_log "### EXEC \"$ld $HOSTING_EMU -o $target $objs $libs\"\n"
+    verbose "### EXEC \"$ld $HOSTING_EMU -o $target $objs $libs\""
+    
+    catch "exec $ld $HOSTING_EMU -o $target $objs $libs" exec_output
+    if ![string match "" $exec_output] then {
+	send_log "$exec_output\n"
+	verbose "$exec_output"
     }
 }
+
+#
+# default_ld_compile 
+#	compile an object using cc
+#
+proc default_ld_compile { cc source object } {
+    global CFLAGS
+    global srcdir
+    global subdir
+    
+    if {[which $cc] == 0} then {
+	error "$cc does not exist"
+	exit 1
+    }
+    
+    send_log "$cc $CFLAGS -I$srcdir/$subdir -c $source -o $object\n"
+    verbose "### EXEC \"$cc $CFLAGS -I$srcdir/$subdir -c $source -o $object\""
+    
+    catch "exec $cc $CFLAGS -I$srcdir/$subdir -c $source -o $object" exec_output
+    if ![string match "" $exec_output] then {
+	send_log "$exec_output\n"
+	verbose "$exec_output"
+    }
+}
+
+#
+# simple_diff
+#	compares two files line-by-line
+#	returns differences if exist
+#	returns null if file(s) cannot be opened
+#
+proc simple_diff { file_1 file_2 } {
+    global target
+	
+    set eof -1
+    set differences 0
+    
+    if [file exists $file_1] then {
+	set file_a [open $file_1 r]
+    } else {
+	warning "$file_1 doesn't exist"
+	return
+    }
+    
+    if [file exists $file_2] then {
+	set file_b [open $file_2 r]
+    } else {
+	fail "$file_2 doesn't exist"
+	return
+    }
+    
+    verbose "### Diff'ing: $file_1 $file_2\n" 2
+    
+    while { [gets $file_a line] != $eof } {
+	if [regexp "^#.*$" $line] then {
+	    continue
+	} else {
+	    lappend list_a $line
+	}
+    }
+    close $file_a
+    
+    while { [gets $file_b line] != $eof } {
+	if [regexp "^#.*$" $line] then {
+	    continue
+	} else {
+	    lappend list_b $line
+	}
+    }
+    close $file_b
+    
+    for { set i 0 } { $i < [llength $list_a] } { incr i } {
+	set line_a [lindex $list_a $i]
+	set line_b [lindex $list_b $i]
+	
+	verbose "\t$file_1: $i: $line_a\n" 3
+	verbose "\t$file_2: $i: $line_b\n" 3
+	if [string compare $line_a $line_b] then {
+	    fail "Test: $target"
+	    set differences 1	
+	    
+	    verbose "\t$file_1: $i: $line_a\n" 1
+	    verbose "\t$file_2: $i: $line_b\n" 1
+	    
+	    send_log "\t$file_1: $i: $line_a\n"
+	    send_log "\t$file_2: $i: $line_b\n"
+	}
+    }
+    
+    if $differences<1 then {
+	pass "Test: $target"
+    }
+}
+
+
