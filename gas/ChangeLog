@@ -1,5 +1,8 @@
 Sun Dec  1 21:46:05 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* config/tc-mn10300.c (tc_gen_reloc): Get the addend from
+	fx_offset, not fx_addnumber.
+
 	* config/tc-mn10300.h (tc_fix_adjustable): Don't do any
 	reloc adjustments.
 
