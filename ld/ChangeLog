@@ -1,3 +1,7 @@
+Fri Oct 11 10:29:27 1991  Steve Chamberlain  (steve at cygnus.com)
+
+	* ldtemplate: include bfd.h before sysdep.h.
+
 Fri Oct 11 04:24:45 1991  John Gilmore  (gnu at cygnus.com)
 
 	Restructure configuration scheme for bfd, binutils, ld.
