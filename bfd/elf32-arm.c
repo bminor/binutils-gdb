@@ -29,6 +29,14 @@ static reloc_howto_type *elf32_arm_reloc_type_lookup
   PARAMS ((bfd *abfd, bfd_reloc_code_real_type code));
 static void elf32_arm_info_to_howto
   PARAMS ((bfd *, arelent *, Elf32_Internal_Rela *));
+static boolean elf32_arm_set_private_flags
+  PARAMS ((bfd *, flagword));
+static boolean elf32_arm_copy_private_bfd_data
+  PARAMS ((bfd *, bfd *));
+static boolean elf32_arm_merge_private_bfd_data
+  PARAMS ((bfd *, bfd *));
+static boolean elf32_arm_print_private_bfd_data
+  PARAMS ((bfd *, PTR));
 
 #define USE_RELA
 #define TARGET_UNDERSCORE '_'
@@ -653,6 +661,211 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
   return true;
 }
 
+/* Function to keep ARM specific flags in the ELF header. */
+static boolean
+elf32_arm_set_private_flags (abfd, flags)
+     bfd *    abfd;
+     flagword flags;
+{
+  if (elf_flags_init (abfd)
+      && elf_elfheader (abfd)->e_flags != flags)
+    {
+      if (flags & EF_INTERWORK)
+	_bfd_error_handler (_("\
+Warning: Not setting interwork flag of %s since it has already been specified as non-interworking"),
+			    bfd_get_filename (abfd));
+      else
+	_bfd_error_handler (_("\
+Warning: Clearing the interwork flag of %s due to outside request"),
+			      bfd_get_filename (abfd));
+    }
+  else
+    {
+      elf_elfheader (abfd)->e_flags = flags;
+      elf_flags_init (abfd) = true;
+    }
+  
+  return true;
+}
+
+/* Copy backend specific data from one object module to another */
+static boolean
+elf32_arm_copy_private_bfd_data (ibfd, obfd)
+     bfd * ibfd;
+     bfd * obfd;
+{
+  flagword in_flags;
+  flagword out_flags;
+  
+  if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour
+      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
+    return true;
+
+  in_flags  = elf_elfheader (ibfd)->e_flags;
+  out_flags = elf_elfheader (obfd)->e_flags;
+  
+  if (elf_flags_init (obfd)  && in_flags != out_flags)
+    {
+      /* Cannot mix PIC and non-PIC code.  */
+      if ((in_flags & EF_PIC) != (out_flags & EF_PIC))
+	return false;
+      
+      /* Cannot mix APCS26 and APCS32 code.  */
+      if ((in_flags & EF_APCS_26) != (out_flags & EF_APCS_26))
+	return false;
+      
+      /* Cannot mix float APCS and non-float APCS code.  */
+      if ((in_flags & EF_APCS_FLOAT) != (out_flags & EF_APCS_FLOAT))
+	return false;
+
+      /* If the src and dest have different interworking flags
+	 then turn off the interworking bit.  */
+      if ((in_flags & EF_INTERWORK) != (out_flags & EF_INTERWORK))
+	{
+	  if (out_flags & EF_INTERWORK)
+	    _bfd_error_handler (_("\
+Warning: Clearing the interwork flag in %s because non-interworking code in %s has been linked with it"),
+				bfd_get_filename (obfd), bfd_get_filename (ibfd));
+	  
+	  in_flags &= ~ EF_INTERWORK;
+	}
+    }
+
+  elf_elfheader (obfd)->e_flags = in_flags;
+  elf_flags_init (obfd) = true;
+  
+  return true;
+}
+
+/* Merge backend specific data from an object file to the output
+   object file when linking.  */
+static boolean
+elf32_arm_merge_private_bfd_data (ibfd, obfd)
+     bfd * ibfd;
+     bfd * obfd;
+{
+  flagword out_flags;
+  flagword in_flags;
+
+  if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour
+      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
+    return true;
+
+  /* The input BFD must have had its flags initialised.  */
+  BFD_ASSERT (elf_flags_init (ibfd));
+  
+  in_flags  = elf_elfheader (ibfd)->e_flags;
+  out_flags = elf_elfheader (obfd)->e_flags;
+
+  if (! elf_flags_init (obfd))
+    {
+      /* If the input is the default architecture then do not
+	 bother setting the flags for the output architecture,
+	 instead allow future merges to do this.  If no future
+	 merges ever set these flags then they will retain their
+	 unitialised values, which surprise surprise, correspond
+	 to the default values.  */
+      if (bfd_get_arch_info (ibfd)->the_default)
+	return true;
+      
+      elf_flags_init (obfd) = true;
+      elf_elfheader (obfd)->e_flags = in_flags;
+
+      if (bfd_get_arch (obfd) == bfd_get_arch (ibfd)
+	  && bfd_get_arch_info (obfd)->the_default)
+	return bfd_set_arch_mach (obfd, bfd_get_arch (ibfd), bfd_get_mach (ibfd));
+
+      return true;
+    }
+
+  /* Check flag compatibility.  */
+  if (in_flags == out_flags)
+    return true;
+
+  /* Complain about various flag mismatches.  */
+  
+  if ((in_flags & EF_APCS_26) != (out_flags & EF_APCS_26))
+    _bfd_error_handler (_("\
+Error: %s compiled for APCS-%d, whereas %s is compiled for APCS-%d"),
+			bfd_get_filename (ibfd),
+			in_flags & EF_APCS_26 ? 26 : 32,
+			bfd_get_filename (obfd),
+			out_flags & EF_APCS_26 ? 26 : 32);
+  
+  if ((in_flags & EF_APCS_FLOAT) != (out_flags & EF_APCS_FLOAT))
+    _bfd_error_handler (_("\
+Error: %s passes floats in %s registers, whereas %s passes them in %s registers"),
+			bfd_get_filename (ibfd),
+			in_flags & EF_APCS_FLOAT ? _("float") : _("integer"),
+			bfd_get_filename (obfd),
+			out_flags & EF_APCS_26 ? _("float") : _("integer"));
+  
+  if ((in_flags & EF_PIC) != (out_flags & EF_PIC))
+    _bfd_error_handler (_("\
+Error: %s is compiled as position %s code, whereas %s is not"),
+			bfd_get_filename (ibfd),
+			in_flags & EF_PIC ? _("independent") : _("dependent"),
+			bfd_get_filename (obfd));
+
+  /* Interworking mismatch is only a warning. */
+  if ((in_flags & EF_INTERWORK) != (out_flags & EF_INTERWORK))
+    {
+      _bfd_error_handler (_("\
+Warning: %s %s interworking, whereas %s %s"),
+			  bfd_get_filename (ibfd),
+			  in_flags & EF_INTERWORK ? _("supports") : _("does not support"),
+			  bfd_get_filename (obfd),
+			  out_flags & EF_INTERWORK ? _("does not") : _("does"));
+      return true;
+    }
+
+  return false;
+}
+
+/* Display the flags field */
+static boolean
+elf32_arm_print_private_bfd_data (abfd, ptr)
+     bfd *   abfd;
+     PTR     ptr;
+{
+  FILE * file = (FILE *) ptr;
+  
+  BFD_ASSERT (abfd != NULL && ptr != NULL);
+
+  /* Print normal ELF private data.  */
+  _bfd_elf_print_private_bfd_data (abfd, ptr);
+
+  /* Ignore init flag - it may not be set, despite the flags field containing valid data.  */
+  
+  /* xgettext:c-format */
+  fprintf (file, _("private flags = %lx:"), elf_elfheader (abfd)->e_flags);
+
+  if (elf_elfheader (abfd)->e_flags & EF_INTERWORK)
+    fprintf (file, _(" [interworking enabled]"));
+  else
+    fprintf (file, _(" [interworking not enabled]"));
+    
+  if (elf_elfheader (abfd)->e_flags & EF_APCS_26)
+    fprintf (file, _(" [APCS-26]"));
+  else
+    fprintf (file, _(" [APCS-32]"));
+      
+  if (elf_elfheader (abfd)->e_flags & EF_APCS_FLOAT)
+    fprintf (file, _(" [floats passed in float registers]"));
+  else
+    fprintf (file, _(" [floats passed in intgere registers]"));
+      
+  if (elf_elfheader (abfd)->e_flags & EF_PIC)
+    fprintf (file, _(" [position independent]"));
+  else
+    fprintf (file, _(" [absolute position]"));
+      
+  fputc ('\n', file);
+  
+  return true;
+}
+
+
 #define TARGET_LITTLE_SYM		bfd_elf32_littlearm_vec
 #define TARGET_LITTLE_NAME		"elf32-littlearm"
 #define TARGET_BIG_SYM			bfd_elf32_bigarm_vec
@@ -660,10 +873,14 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 #define ELF_ARCH			bfd_arch_arm
 #define ELF_MACHINE_CODE		EM_ARM
 
-#define bfd_elf32_bfd_reloc_type_lookup elf32_arm_reloc_type_lookup
-#define elf_info_to_howto		elf32_arm_info_to_howto
-#define elf_info_to_howto_rel		0
-#define elf_backend_relocate_section    elf32_arm_relocate_section
+#define bfd_elf32_bfd_reloc_type_lookup 	elf32_arm_reloc_type_lookup
+#define elf_info_to_howto			elf32_arm_info_to_howto
+#define elf_info_to_howto_rel			0
+#define elf_backend_relocate_section    	elf32_arm_relocate_section
+#define bfd_elf32_bfd_copy_private_bfd_data 	elf32_arm_copy_private_bfd_data
+#define bfd_elf32_bfd_merge_private_bfd_data 	elf32_arm_merge_private_bfd_data
+#define bfd_elf32_bfd_set_private_flags		elf32_arm_set_private_flags
+#define bfd_elf32_bfd_print_private_bfd_data	elf32_arm_print_private_bfd_data
 
 #define elf_symbol_leading_char '_'
 
