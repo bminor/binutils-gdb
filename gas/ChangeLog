@@ -1,5 +1,10 @@
 2005-03-09  Richard Sandiford  <rsandifo@redhat.com>
 
+	* config/tc-mips.c (mips_move_labels): New function, taken from...
+	(append_insn, mips_emit_delays): ...here.
+
+2005-03-09  Richard Sandiford  <rsandifo@redhat.com>
+
 	* config/tc-mips.c (MAX_NOPS): New macro.
 	(history): Resize to 1 + MAX_NOPS.
 	(fix_vr4120_class): New enumeration.
