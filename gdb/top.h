@@ -56,7 +56,6 @@ extern char *get_prompt (void);
 extern void set_prompt (char *);
 
 /* From random places.  */
-extern int mapped_symbol_files;
 extern int readnow_symbol_files;
 
 /* Perform _initialize initialization */

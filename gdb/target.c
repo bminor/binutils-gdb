@@ -1,7 +1,7 @@
 /* Select target systems and architectures at runtime for GDB.
 
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.
 
@@ -70,8 +70,6 @@ static void target_command (char *, int);
 static struct target_ops *find_default_run_target (char *);
 
 static void nosupport_runtime (void);
-
-static void normal_target_post_startup_inferior (ptid_t ptid);
 
 static LONGEST default_xfer_partial (struct target_ops *ops,
 				     enum target_object object,
@@ -1362,7 +1360,7 @@ find_default_create_inferior (char *exec_file, char *allargs, char **env)
 static int
 default_region_size_ok_for_hw_watchpoint (int byte_count)
 {
-  return (byte_count <= DEPRECATED_REGISTER_SIZE);
+  return (byte_count <= TYPE_LENGTH (builtin_type_void_data_ptr));
 }
 
 static int
@@ -1601,24 +1599,6 @@ normal_pid_to_str (ptid_t ptid)
 
   sprintf (buf, "process %d", PIDGET (ptid));
   return buf;
-}
-
-/* Some targets (such as ttrace-based HPUX) don't allow us to request
-   notification of inferior events such as fork and vork immediately
-   after the inferior is created.  (This because of how gdb gets an
-   inferior created via invoking a shell to do it.  In such a scenario,
-   if the shell init file has commands in it, the shell will fork and
-   exec for each of those commands, and we will see each such fork
-   event.  Very bad.)
-
-   This function is used by all targets that allow us to request
-   notification of forks, etc at inferior creation time; e.g., in
-   target_acknowledge_forked_child.
- */
-static void
-normal_target_post_startup_inferior (ptid_t ptid)
-{
-  /* This space intentionally left blank. */
 }
 
 /* Error-catcher for target_find_memory_regions */

@@ -3,6 +3,11 @@
 
 *** Changes since GDB 6.0:
 
+* Removed --with-mmalloc
+
+Support for the mmalloc memory manager has been removed, as it
+conflicted with the internal gdb byte cache.
+
 * Changes in AMD64 configurations
 
 The AMD64 target now includes the %cs and %ss registers.  As a result
@@ -14,7 +19,9 @@ you should upgrade gdbserver on the remote side.
 
 The SPARC target has been completely revised, incorporating the
 FreeBSD/sparc64 support that was added for GDB 6.0.  As a result
-support for LynxOS and SunOS 4 has been dropped.
+support for LynxOS and SunOS 4 has been dropped.  Calling functions
+from within GDB on operating systems with a non-executable stack
+(Solaris, OpenBSD) now works.
 
 * New C++ demangler
 
@@ -32,6 +39,8 @@ encountered these.
 * New native configurations
 
 NetBSD/amd64					x86_64-*-netbsd*
+OpenBSD/sparc					sparc-*-openbsd*
+OpenBSD/sparc64					sparc64-*-openbsd*
 
 * New debugging protocols
 

@@ -1,5 +1,5 @@
 dnl Autoconf configure script for GDB, the GNU debugger.
-dnl Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+dnl Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
 dnl Free Software Foundation, Inc.
 dnl
 dnl This file is part of GDB.
@@ -623,7 +623,7 @@ if test "${target}" = "${host}"; then
   *-*-unixware* | *-*-sysv4.2* | *-*-sysv5* | *-*-interix* )
       AC_DEFINE(NEW_PROC_API)
       ;;
-  *-*-solaris2.[[678]])
+  *-*-solaris2.[[6789]])
       AC_DEFINE(NEW_PROC_API)
       ;;
   esac
@@ -1024,9 +1024,10 @@ AC_SUBST(TARGET_SYSTEM_ROOT_DEFINE)
 # NOTE: If you add to this list, remember to update
 # gdb/doc/gdbint.texinfo.
 build_warnings="-Wimplicit -Wreturn-type -Wcomment -Wtrigraphs \
--Wformat -Wparentheses -Wpointer-arith -Wuninitialized -Wformat-nonliteral"
+-Wformat -Wparentheses -Wpointer-arith -Wuninitialized -Wformat-nonliteral \
+-Wunused-label"
 # Up for debate: -Wswitch -Wcomment -trigraphs -Wtrigraphs
-# -Wunused-function -Wunused-label -Wunused-variable -Wunused-value
+# -Wunused-function -Wunused-variable -Wunused-value
 # -Wchar-subscripts -Wtraditional -Wshadow -Wcast-qual
 # -Wcast-align -Wwrite-strings -Wconversion -Wstrict-prototypes
 # -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls
@@ -1080,26 +1081,6 @@ then
 fi
 AC_SUBST(WARN_CFLAGS)
 AC_SUBST(WERROR_CFLAGS)
-
-MMALLOC_CFLAGS=
-MMALLOC=
-AC_SUBST(MMALLOC_CFLAGS)
-AC_SUBST(MMALLOC)
-
-AC_ARG_WITH(mmalloc,
-[  --with-mmalloc          Use memory mapped malloc package],
-[case "${withval}" in
-  yes)  want_mmalloc=true ;;
-  no)   want_mmalloc=false;;
-  *)    AC_MSG_ERROR(bad value ${withval} for GDB with-mmalloc option) ;;
-esac],[want_mmalloc=false])dnl
-
-if test x$want_mmalloc = xtrue; then
-   AC_DEFINE(USE_MMALLOC)
-   AC_DEFINE(MMCHECK_FORCE)
-   MMALLOC_CFLAGS="-I$srcdir/../mmalloc"
-   MMALLOC='../mmalloc/libmmalloc.a'
-fi
 
 # In the Cygwin environment, we need some additional flags.
 AC_CACHE_CHECK([for cygwin], gdb_cv_os_cygwin,

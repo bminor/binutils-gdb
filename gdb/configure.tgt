@@ -38,8 +38,7 @@ esac
 case "${target}" in
 
 x86_64-*-freebsd*)	gdb_target=fbsd64 ;;
-*-*-freebsd*)		gdb_target=fbsd
-			;;
+*-*-freebsd*)		gdb_target=fbsd	;;
 
 alpha*-*-osf*)		gdb_target=alpha-osf1 ;;
 alpha*-*-linux*)	gdb_target=alpha-linux ;;
@@ -78,7 +77,8 @@ hppa*-*-*)		gdb_target=hppa ;;
 
 i[34567]86-ncr-*)	gdb_target=ncr3000 ;;
 i[34567]86-*-bsd*)	gdb_target=i386bsd ;;
-i[34567]86-*-netbsd*)	gdb_target=nbsd ;;
+i[34567]86-*-netbsd* | i[34567]86-*-knetbsd*-gnu)
+			gdb_target=nbsd ;;
 i[34567]86-*-openbsd*)	gdb_target=obsd ;;
 i[34567]86-*-go32*)	gdb_target=i386aout ;;
 i[34567]86-*-msdosdjgpp*) gdb_target=go32 ;;
@@ -190,6 +190,10 @@ sparc-*-linux*)		gdb_target=linux ;;
 sparc64-*-linux*)	gdb_target=linux64 ;;
 sparc-*-netbsd*)	gdb_target=nbsd ;;
 sparc64-*-netbsd*)	gdb_target=nbsd64 ;;
+sparc-*-openbsd*)	gdb_target=obsd ;;
+sparc64-*-openbsd*)	gdb_target=obsd64
+			gdb_osabi=GDB_OSABI_OPENBSD_ELF
+			;;
 sparc-*-solaris2.[0-6] | sparc-*-solaris2.[0-6].*)
 			gdb_target=sol2
 			;;

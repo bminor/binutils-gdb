@@ -1247,9 +1247,9 @@ register_value_being_returned (struct type *valtype, struct regcache *retbuf)
   return val;
 }
 
-/* Should we use EXTRACT_STRUCT_VALUE_ADDRESS instead of
-   EXTRACT_RETURN_VALUE?  GCC_P is true if compiled with gcc
-   and TYPE is the type (which is known to be struct, union or array).
+/* Should we use DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS instead of
+   EXTRACT_RETURN_VALUE?  GCC_P is true if compiled with gcc and TYPE
+   is the type (which is known to be struct, union or array).
 
    On most machines, the struct convention is used unless we are
    using gcc and the type is of a special size.  */

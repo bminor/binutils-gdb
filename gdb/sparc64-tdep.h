@@ -22,9 +22,11 @@
 #ifndef SPARC64_TDEP_H
 #define SPARC64_TDEP_H 1
 
+struct frame_info;
 struct gdbarch;
-struct sparc_gregset;
 struct regcache;
+struct sparc_gregset;
+struct trad_frame_saved_reg;
 
 #include "sparc-tdep.h"
 
@@ -109,9 +111,13 @@ extern void sparc64_sol2_init_abi (struct gdbarch_info info,
 /* Register offsets for FreeBSD/sparc64.  */
 extern const struct sparc_gregset sparc64fbsd_gregset;
 
-/* Variables exported from sparc64nbsd-tdep.c.  */
+/* Functions and variables exported from sparc64nbsd-tdep.c.  */
 
 /* Register offsets for NetBSD/sparc64.  */
 extern const struct sparc_gregset sparc64nbsd_gregset;
+
+extern struct trad_frame_saved_reg *
+  sparc64nbsd_sigcontext_saved_regs (CORE_ADDR sigcontext_addr,
+				     struct frame_info *next_frame);
 
 #endif /* sparc64-tdep.h */

@@ -1838,7 +1838,7 @@ get_prev_frame (struct frame_info *this_frame)
       && backtrace_beyond_entry_func
 #endif
       && this_frame->type != DUMMY_FRAME && this_frame->level >= 0
-      && inside_entry_func (get_frame_pc (this_frame)))
+      && inside_entry_func (this_frame))
     {
       if (frame_debug)
 	{

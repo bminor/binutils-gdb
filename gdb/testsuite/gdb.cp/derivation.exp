@@ -111,14 +111,16 @@ gdb_test_multiple "ptype d_instance" "ptype d_instance" {
 	pass "ptype d_instance"
     }
     -re "type = $XX_class${ws}$re_fields${ws}$re_methods${ws}$re_synth_gcc_23$nl\}$nl$gdb_prompt $" {
-	# TODO: this is a gcc bug
-	# kfail "gdb/1498" "ptype d_instance"
-	pass "ptype d_instance"
+	# This is a gcc bug, gcc/13539, gdb/1498.
+	# Fixed in gcc HEAD 2004-01-13
+	setup_xfail "*-*-*" "gcc/13539"
+	fail "ptype d_instance"
     }
     -re "type = $XX_class${ws}$re_fields${ws}$re_all_methods$nl\}$nl$gdb_prompt $" {
-	# TODO: this is a gcc bug.
-	# kfail "gdb/1498" "ptype d_instance"
-	pass "ptype d_instance"
+	# This is a gcc bug, gcc/13539, gdb/1498.
+	# Fixed in gcc HEAD 2004-01-13
+	setup_xfail "*-*-*" "gcc/13539"
+	fail "ptype d_instance"
     }
 }
 
@@ -145,14 +147,16 @@ gdb_test_multiple "ptype e_instance" "ptype e_instance" {
 	pass "ptype e_instance"
     }
     -re "type = $XX_class${ws}$re_fields${ws}$re_methods${ws}$re_synth_gcc_23$nl\}$nl$gdb_prompt $" {
-	# TODO: this is a gcc bug.
-	# kfail "gdb/1498" "ptype e_instance"
-	pass "ptype e_instance"
+	# This is a gcc bug, gcc/13539, gdb/1498.
+	# Fixed in gcc HEAD 2004-01-13
+	setup_xfail "*-*-*" "gcc/13539"
+	fail "ptype e_instance"
     }
     -re "type = $XX_class${ws}$re_fields${ws}$re_all_methods$nl\}$nl$gdb_prompt $" {
-	# TODO: this is a gcc bug.
-	# kfail "gdb/1498" "ptype e_instance"
-	pass "ptype e_instance"
+	# This is a gcc bug, gcc/13539, gdb/1498.
+	# Fixed in gcc HEAD 2004-01-13
+	setup_xfail "*-*-*" "gcc/13539"
+	fail "ptype e_instance"
     }
 }
 

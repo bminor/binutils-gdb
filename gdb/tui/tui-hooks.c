@@ -1,6 +1,6 @@
 /* GDB hooks for TUI.
 
-   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -39,15 +39,15 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#include "tui.h"
-#include "tuiData.h"
-#include "tuiLayout.h"
-#include "tuiIO.h"
-#include "tuiRegs.h"
-#include "tuiWin.h"
-#include "tuiStack.h"
-#include "tuiDataWin.h"
-#include "tuiSourceWin.h"
+#include "tui/tui.h"
+#include "tui/tui-data.h"
+#include "tui/tui-layout.h"
+#include "tui/tui-io.h"
+#include "tui/tui-regs.h"
+#include "tui/tui-win.h"
+#include "tui/tui-stack.h"
+#include "tui/tui-windata.h"
+#include "tui/tui-winsource.h"
 
 #ifdef HAVE_NCURSES_H
 #include <ncurses.h>
@@ -156,7 +156,7 @@ tui_register_changed_hook (int regno)
   if (fi && tui_refreshing_registers == 0)
     {
       tui_refreshing_registers = 1;
-      tuiCheckDataValues (fi);
+      tui_check_data_values (fi);
       tui_refreshing_registers = 0;
     }
 }
@@ -250,13 +250,13 @@ tui_selected_frame_level_changed_hook (int level)
         select_source_symtab (s);
 
       /* Display the frame position (even if there is no symbols).  */
-      tuiShowFrameInfo (fi);
+      tui_show_frame_info (fi);
 
       /* Refresh the register window if it's visible.  */
       if (tui_is_window_visible (DATA_WIN))
         {
           tui_refreshing_registers = 1;
-          tuiCheckDataValues (fi);
+          tui_check_data_values (fi);
           tui_refreshing_registers = 0;
         }
     }
@@ -268,7 +268,7 @@ tui_print_frame_info_listing_hook (struct symtab *s, int line,
                                    int stopline, int noerror)
 {
   select_source_symtab (s);
-  tuiShowFrameInfo (deprecated_selected_frame);
+  tui_show_frame_info (deprecated_selected_frame);
 }
 
 /* Called when the target process died or is detached.
@@ -276,7 +276,7 @@ tui_print_frame_info_listing_hook (struct symtab *s, int line,
 static void
 tui_detach_hook (void)
 {
-  tuiShowFrameInfo (0);
+  tui_show_frame_info (0);
   tui_display_main ();
 }
 

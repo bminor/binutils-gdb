@@ -1,6 +1,6 @@
 /* Handle SunOS shared libraries for GDB, the GNU Debugger.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000,
-   2001
+   2001, 2004
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -145,11 +145,7 @@ allocate_rt_common_objfile (void)
   objfile->md = NULL;
   objfile->psymbol_cache = bcache_xmalloc ();
   objfile->macro_cache = bcache_xmalloc ();
-  obstack_specify_allocation (&objfile->psymbol_obstack, 0, 0, xmalloc,
-			      xfree);
-  obstack_specify_allocation (&objfile->symbol_obstack, 0, 0, xmalloc,
-			      xfree);
-  obstack_specify_allocation (&objfile->type_obstack, 0, 0, xmalloc,
+  obstack_specify_allocation (&objfile->objfile_obstack, 0, 0, xmalloc,
 			      xfree);
   objfile->name = mstrsave (objfile->md, "rt_common");
 
@@ -185,8 +181,8 @@ solib_add_common_symbols (CORE_ADDR rtc_symp)
 
   if (rt_common_objfile != NULL && rt_common_objfile->minimal_symbol_count)
     {
-      obstack_free (&rt_common_objfile->symbol_obstack, 0);
-      obstack_specify_allocation (&rt_common_objfile->symbol_obstack, 0, 0,
+      obstack_free (&rt_common_objfile->objfile_obstack, 0);
+      obstack_specify_allocation (&rt_common_objfile->objfile_obstack, 0, 0,
 				  xmalloc, xfree);
       rt_common_objfile->minimal_symbol_count = 0;
       rt_common_objfile->msymbols = NULL;

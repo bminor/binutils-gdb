@@ -64,8 +64,8 @@ tui_dispatch_ctrl_char (unsigned int ch)
     return ch;
   else
     {
-      unsigned int c = 0, ch_copy = ch;
-      int i;
+      unsigned int c = 0, chCopy = ch;
+      register int i;
       char *term;
 
       /* If this is an xterm, page next/prev keys aren't returned
@@ -77,32 +77,31 @@ tui_dispatch_ctrl_char (unsigned int ch)
 	term[i] = toupper (term[i]);
       if ((strcmp (term, "XTERM") == 0) && key_is_start_sequence (ch))
 	{
-	  unsigned int page_ch = 0;
-	  unsigned int tmp_char;
+	  unsigned int pageCh = 0, tmpChar;
 
-	  tmp_char = 0;
-	  while (!key_is_end_sequence (tmp_char))
+	  tmpChar = 0;
+	  while (!key_is_end_sequence (tmpChar))
 	    {
-	      tmp_char = (int) wgetch (w);
-	      if (tmp_char == ERR)
+	      tmpChar = (int) wgetch (w);
+	      if (tmpChar == ERR)
 		{
 		  return ch;
 		}
-	      if (!tmp_char)
+	      if (!tmpChar)
 		break;
-	      if (tmp_char == 53)
-		page_ch = KEY_PPAGE;
-	      else if (tmp_char == 54)
-		page_ch = KEY_NPAGE;
+	      if (tmpChar == 53)
+		pageCh = KEY_PPAGE;
+	      else if (tmpChar == 54)
+		pageCh = KEY_NPAGE;
 	      else
 		{
 		  return 0;
 		}
 	    }
-	  ch_copy = page_ch;
+	  chCopy = pageCh;
 	}
 
-      switch (ch_copy)
+      switch (chCopy)
 	{
 	case KEY_NPAGE:
 	  tui_scroll_forward (win_info, 0);
@@ -128,7 +127,7 @@ tui_dispatch_ctrl_char (unsigned int ch)
 	  tui_refresh_all_win ();
 	  break;
 	default:
-	  c = ch_copy;
+	  c = chCopy;
 	  break;
 	}
       return c;

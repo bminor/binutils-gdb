@@ -1,6 +1,6 @@
 /* GDB CLI commands.
 
-   Copyright 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,6 +20,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include <readline/readline.h>
 #include <readline/tilde.h>
 #include "completer.h"
 #include "target.h"	 /* For baud_rate, remote_debug and remote_timeout */
@@ -58,8 +59,6 @@ static void echo_command (char *, int);
 static void pwd_command (char *, int);
 
 static void show_version (char *, int);
-
-static void validate_comname (char *);
 
 static void help_command (char *, int);
 
@@ -224,7 +223,7 @@ complete_command (char *arg, int from_tty)
 {
   int i;
   int argpoint;
-  char **completions;
+  char **completions, *point, *arg_prefix;
 
   dont_repeat ();
 
@@ -232,7 +231,23 @@ complete_command (char *arg, int from_tty)
     arg = "";
   argpoint = strlen (arg);
 
-  completions = complete_line (arg, arg, argpoint);
+  /* complete_line assumes that its first argument is somewhere within,
+     and except for filenames at the beginning of, the word to be completed.
+     The following crude imitation of readline's word-breaking tries to
+     accomodate this.  */
+  point = arg + argpoint;
+  while (point > arg)
+    {
+      if (strchr (rl_completer_word_break_characters, point[-1]) != 0)
+        break;
+      point--;
+    }
+
+  arg_prefix = alloca (point - arg + 1);
+  memcpy (arg_prefix, arg, point - arg);
+  arg_prefix[point - arg] = 0;
+
+  completions = complete_line (point, arg, argpoint);
 
   if (completions)
     {
@@ -248,7 +263,7 @@ complete_command (char *arg, int from_tty)
       while (item < size)
 	{
 	  int next_item;
-	  printf_unfiltered ("%s\n", completions[item]);
+	  printf_unfiltered ("%s%s\n", arg_prefix, completions[item]);
 	  next_item = item + 1;
 	  while (next_item < size
 		 && ! strcmp (completions[item], completions[next_item]))
@@ -506,9 +521,9 @@ shell_escape (char *arg, int from_tty)
 	p++;			/* Get past '/' */
 
       if (!arg)
-	execl (user_shell, p, 0);
+	execl (user_shell, p, (char *) 0);
       else
-	execl (user_shell, p, "-c", arg, 0);
+	execl (user_shell, p, "-c", arg, (char *) 0);
 
       fprintf_unfiltered (gdb_stderr, "Cannot execute %s: %s\n", user_shell,
 			  safe_strerror (errno));
@@ -835,8 +850,9 @@ disassemble_command (char *arg, int from_tty)
 #if defined(TUI)
       /* NOTE: cagney/2003-02-13 The `tui_active' was previously
 	 `tui_version'.  */
-      else if (tui_active)
-	low = tuiGetLowDisassemblyAddress (low, pc);
+      if (tui_active)
+	/* FIXME: cagney/2004-02-07: This should be an observer.  */
+	low = tui_get_low_disassembly_address (low, pc);
 #endif
       low += FUNCTION_START_OFFSET;
     }
@@ -849,8 +865,9 @@ disassemble_command (char *arg, int from_tty)
 #if defined(TUI)
       /* NOTE: cagney/2003-02-13 The `tui_active' was previously
 	 `tui_version'.  */
-      else if (tui_active)
-	low = tuiGetLowDisassemblyAddress (low, pc);
+      if (tui_active)
+	/* FIXME: cagney/2004-02-07: This should be an observer.  */
+	low = tui_get_low_disassembly_address (low, pc);
 #endif
       low += FUNCTION_START_OFFSET;
     }

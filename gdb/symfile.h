@@ -1,7 +1,7 @@
 /* Definitions for reading symbol files into GDB.
 
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -224,7 +224,7 @@ extern struct partial_symtab *start_psymtab_common (struct objfile *,
 extern char *obsavestring (const char *, int, struct obstack *);
 
 /* Concatenate strings S1, S2 and S3; return the new string.  Space is
-   found in the symbol_obstack.  */
+   found in the OBSTACKP  */
 
 extern char *obconcat (struct obstack *obstackp, const char *, const char *,
 		       const char *);

@@ -1,4 +1,4 @@
-# Copyright 2000, 2002 Free Software Foundation, Inc.
+# Copyright 2000, 2002, 2004 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -149,6 +149,7 @@ proc test_stack_locals_listing {} {
     # Tests:
     # -stack-list-locals 0
     # -stack-list-locals 1
+    # -stack-list-locals 2
     # -stack-list-arguments 
 
     mi_gdb_test "232-stack-list-locals 0" \
@@ -167,6 +168,10 @@ gdb_expect {
     mi_gdb_test "232-stack-list-locals 1" \
 	    "232\\^done,locals=\\\[\{name=\"A\",value=\"1\"\},\{name=\"B\",value=\"2\"\},\{name=\"C\",value=\"3\"\}\\\]" \
                 "stack locals listing 1"
+
+    mi_gdb_test "232-stack-list-locals 2" \
+	    "232\\^done,locals=\\\[\{name=\"A\",type=\"int\",value=\"1\"\},\{name=\"B\",type=\"int\",value=\"2\"\},\{name=\"C\",type=\"int\",value=\"3\"\}\\\]" \
+                "stack locals listing 2"
 
     mi_gdb_test "234-stack-list-locals" \
 	    "234\\^error,msg=\"mi_cmd_stack_list_locals: Usage.*PRINT_VALUES.*\"" \

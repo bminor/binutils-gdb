@@ -1,3 +1,1567 @@
+2004-02-07  Elena Zannoni  <ezannoni@redhat.com>
+
+	* buildsym.c (free_pending_blocks, finish_block)
+	(record_pending_block, make_blockvector, end_symtab): Replace
+	symbol_obstack with objfile_obstack.
+	* coffread.c (process_coff_symbol, coff_read_struct_type) 
+	(coff_read_enum_type): Ditto.
+	* cp-namespace.c (initialize_namespace_symtab) 
+	(check_one_possible_namespace_symbol): Ditto.
+	* dwarf2read.c (new_symbol, dwarf2_const_value, macro_start_file) 
+	(dwarf2_symbol_mark_computed): Ditto.
+	* dwarfread.c (enum_type, new_symbol, synthesize_typedef): Ditto.
+	* elfread.c (elf_symtab_read): Ditto.
+	* hpread.c (hpread_symfile_init, hpread_symfile_init)
+	(hpread_read_enum_type, hpread_read_function_type)
+	(hpread_read_doc_function_type, hpread_process_one_debug_symbol):
+	Ditto.
+	* jv-lang.c (get_java_class_symtab, add_class_symbol) 
+	(java_link_class_type): Ditto.
+	* mdebugread.c (parse_symbol, psymtab_to_symtab_1, new_symtab) 
+	(new_symbol): Ditto.
+	* minsyms.c (install_minimal_symbols): Ditto.
+	* objfiles.c (allocate_objfile): Remove init of symbol_obstack.
+	(terminate_minimal_symbol_table): Replace symbol_obstack with
+	objfile_obstack.
+	(free_objfile): Remove freeing of symbol_obstack.
+	* objfiles.h: Remove symbol_obstack field.
+	* pa64solib.c (add_to_solist): Replace symbol_obstack with
+	objfile_obstack.
+	* solib-sunos.c (allocate_rt_common_objfile): Remove init of
+	symbol_obstack.
+	(solib_add_common_symbols): Replace symbol_obstack with
+	objfile_obstack.
+	* somsolib.c (som_solib_add): Ditto.
+	* stabsread.c (patch_block_stabs, define_symbol, read_enum_type)
+	(common_block_start, common_block_end): Ditto.
+	* symfile.c (reread_symbols): Remove freeing and init of
+	symbol_obstack.
+	(allocate_symtab): Rename symbol_obstack to objfile_obstack.
+	* symfile.h: Update comment.
+	* symmisc.c (print_objfile_statistics): Remove symbol_obstack
+	stats printing.
+	* symtab.c (symbol_set_names): Replace symbol_obstack with
+	objfile_obstack.
+	* symtab.h (struct general_symbol_info, struct minimal_symbol):
+	Update comments.
+	* xcoffread.c (read_xcoff_symtab, SYMBOL_DUP, SYMNAME_ALLOC)
+	(init_stringtab, xcoff_initial_scan): Replace symbol_obstack with
+	objfile_obstack.
+
+2004-02-07  Andrew Cagney  <cagney@redhat.com>
+
+	* tui/tui.h: Do not include <stdarg.h>, <string.h>, and
+	"ansidecl.h".  Do not undef "reg" and "chtype".  Fix case of
+	fields and variables.
+	* tui/tui-wingeneral.h (m_beVisible): Delete macro.
+	(m_beInvisible): Delete macro.
+	* tui/tui-data.h: Fix case case fields and variables.
+	(m_genWinPtrIsNull): Delete macro.
+	(tui_win_list): Rename winList.
+	(TUI_SRC_WIN): Rename srcWin.
+	(TUI_DISASM_WIN): Rename disassemWin.
+	(TUI_DATA_WIN): Rename dataWin.
+	(TUI_CMD_WIN): Rename cmdWin.
+	(m_genWinPtrNotNull): Delete macro.
+	(m_winPtrIsNull): Delete macro.
+	(m_winPtrNotNull): Delete macro.
+	(tui_win_is_source_type): Replace m_winIsSourceType
+	(tui_win_is_auxillary): Replace m_winIsAuzillary.
+	(tui_win_has_locator): Replace m_hasLocator.
+	(tui_set_win_highlight): Replace m_setWinHighlightOn and
+	m_setWinHighlightOff.
+	* tui/tui-data.c: Update references.
+	(tui_win_is_source_type, tui_set_win_highlight): New functions.
+	(tui_win_has_locator, tui_win_is_auxillary): New functions.
+	* tui/tui-command.c, tui/tui-disasm.c: Update references.
+	* tui/tui-io.c, tui/tui-layout.c, tui/tui-regs.c: Ditto.
+	* tui/tui-regs.h, tui/tui-source.c, tui/tui-stack.c: Ditto.
+	* tui/tui-win.c, tui/tui-windata.c, tui/tui-wingeneral.c: Ditto.
+	* tui/tui-winsource.c, tui/tui.c: Ditto.
+
+2004-02-07  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc-tdep.h (sparc_fetch_wcookie): New prototype.
+	* sparcnbsd-tdep.c (sparc32nbsd_sigcontext_saved_regs): Handle
+	StackGhost.
+
+	* sparc-tdep.c (sparc32_frame_prev_register): Rename local
+	variable `i6' to `i7'.
+	(sparc_supply_rwindow, sparc_collect_rwindow): Likewise.
+
+2004-02-07  Andrew Cagney  <cagney@redhat.com>
+
+	* tui/tui.h (Opaque, OpaquePtr OpaqueList): Delete definition.
+	(TuiPoint, TuiPointPtr): Ditto.
+	(TuiStatus, TuiStatusPtr): Ditto.
+	(TuiWinType, TuiWinTypePtr): Ditto.
+	(struct tui_point): Rename _TuiPoint.
+	(tui_get_low_disassembly_address): Rename
+	tuiGetLowDisassemblyAddress.
+	(tui_update_all_exec_infos): Rename tuiUpdateAllExecInfos.
+	(tuiFree): Delete declaration.
+	(OpaqueFuncPtr, TuiOpaqueFuncPtr): Delete definitions.
+	(TuiVoidFuncPtr, TuiIntFuncPtr): Delete definitions.
+	* tui/tui.c (tuiFree): Delete function.
+	* cli/cli-cmds.c (disassemble_command): Update references.
+	* tui/tui-data.c, tui/tui-data.h, tui/tui-disasm.c: Ditto.
+	* tui/tui-layout.c, tui/tui-regs.c, tui/tui-source.c: Ditto.
+	* tui/tui-stack.c, tui/tui-win.c, tui/tui-wingeneral.c: Ditto.
+	* tui/tui-winsource.c: Ditto.
+
+2004-02-07  Elena Zannoni  <ezannoni@redhat.com>
+
+	* dbxread.c (dbx_symfile_init, start_psymtab, end_psymtab,
+	coffstab_build_psymtabs, elfstab_build_psymtabs)
+	(stabsect_build_psymtabs): Replace psymbol_obstack with
+	objfile_obstack.
+	* dwarf2-frame.c (decode_frame_entry_1): Ditto.
+	* dwarf2read.c (dwarf2_build_psymtabs_hard, dwarf2_read_section):
+	Ditto.
+	* dwarfread.c (scan_compilation_units): Ditto.
+	* elfread.c (elfstab_offset_sections): Ditto.
+	* hppa-tdep.c (read_unwind_info): Ditto.
+	* hpread.c (hpread_build_psymtabs, hpread_start_psymtab)
+	(hpread_end_psymtab): Ditto.
+	* mdebugread.c (mdebug_build_psymtabs, add_pending)
+	(parse_partial_symbols, new_psymtab, elfmdebug_build_psymtabs):
+	Ditto.
+	* mips-tdep.c (non_heuristic_proc_desc): Ditto.
+	* objfiles.c (add_to_objfile_sections) 
+	(build_objfile_section_table): Ditto.
+	(allocate_objfile): Remove init of psymbol_obstack.
+	(free_objfile): Remove freeing of psymbol_obstack.
+	* objfiles.h (struct objfile): Remove field
+	psymbol_obstack. Update comments.
+	* pa64solib.c (pa64_solib_add_solib_objfile): Replace
+	psymbol_obstack with objfile_obstack.
+	* solib-sunos.c (allocate_rt_common_objfile): Remove init of
+        psymbol_obstack.
+	* somread.c (som_symfile_offsets, init_import_symbols)
+	(init_export_symbols): Replace psymbol_obstack with
+	objfile_obstack.
+	* somsolib.c (som_solib_add_solib_objfile): Ditto.
+	* symfile.c (default_symfile_offsets, syms_from_objfile)
+	(reread_symbols): Remove freeing and init of psymbol_obstack.
+	(cashier_psymtab): Update comment.
+	* symmisc.c (print_objfile_statistics): Don't report stats for
+	psymbol obstack.
+	* symtab.h (struct general_symbol_info, struct partial_symtab):
+	Update comments.
+	* xcoffread.c (xcoff_start_psymtab, xcoff_end_psymtab, swap_sym)
+	(xcoff_symfile_offsets): Replace psymbol_obstack with
+	objfile_obstack.
+
+2004-02-07  Elena Zannoni  <ezannoni@redhat.com>
+
+	* objfiles.h (struct objfile): Add objfile_obstack field.
+	Remove type_obstack field.
+
+	* dwarf2read.c (dwarf2_add_field,dwarf2_add_member_fn,
+	read_structure_scope read_enumeration, new_symbol): Replace
+	type_obstack with objfile_obstack.
+	* dwarfread.c (struct_type, enum_type): Ditto.
+	* gdbtypes.c (alloc_type, alloc_type_instance, init_type) 
+	(lookup_fundamental_type): Ditto.
+	* gdbtypes.h (TYPE_ALLOC): Ditto.
+	* hpread.c (hpread_read_enum_type, hpread_read_function_type) 
+	(hpread_read_doc_function_type, hpread_read_struct_type) 
+	(fix_static_member_physnames, hpread_read_array_type) 
+	(hpread_read_subrange_type, hpread_type_lookup): Ditto.
+	* jv-lang.c (java_lookup_class, type_from_class, type_from_class) 
+	(java_link_class_type): Ditto.
+	* mdebugread.c (parse_type): Ditto.
+	* objfiles.c (allocate_objfile, free_objfile): Ditto.
+	* solib-sunos.c (solib_add_common_symbols): Ditto.
+	* stabsread.c (define_symbol, read_type, read_member_functions,
+	read_cpp_abbrev, read_one_struct_field): Ditto.
+	* symfile.c (reread_symbols): Ditto.
+	* symmisc.c (print_objfile_statistics): Ditto.
+	
+2004-02-07  Andrew Cagney  <cagney@redhat.com>
+
+	* tui/tui-data.h (tui_win_element): Rename TuiWinElement.
+	(tui_exec_info_content): Rename TuiExecInfoContent.
+	(TuiGenWinInfo, TuiGenWinInfoPtr): Delete definitions.
+	(TuiWinInfo, TuiWinInfoPtr): Ditto.
+	(TuiScrollDirection, TuiScrollDirectionPtr): Ditto.
+	(TuiList, TuiListPtr): Ditto.
+	(TuiLayoutType, TuiLayoutTypePtr): Ditto.
+	(TuiDataType, TuiDataTypePtr): Ditto.
+	(TuiRegisterDisplayType, TuiRegisterDisplayTypePtr): Ditto.
+	(TuiLineOrAddress, TuiLineOrAddressPtr): Ditto.
+	(TuiLayoutDef, TuiLayoutDefPtr): Ditto.
+	(TuiSourceElement, TuiSourceElementPtr): Ditto.
+	(TuiDataElement, TuiDataElementPtr): Ditto.
+	(TuiWinElement, TuiWinElementPtr): Ditto.
+	(TuiDataInfo, TuiDataInfoPtr): Ditto.
+	(TuiCommandElement, TuiCommandElementPtr): Ditto.
+	(TuiLocatorElement, TuiLocatorElementPtr): Ditto.
+	(TuiWhichElement, TuiWhichElementPtr): Ditto.
+	(TuiSourceInfo, TuiSourceInfoPtr): Ditto.
+	(TuiCommandInfo, TuiCommandInfoPtr): Ditto.
+	* tui/tui-command.c, tui/tui-data.c: Update references.
+	* tui/tui-data.h, tui/tui-disasm.c, tui/tui-layout.c: Ditto.
+	* tui/tui-regs.c, tui/tui-source.c, tui/tui-stack.c: Ditto.
+	* tui/tui-win.c, tui/tui-windata.c, tui/tui-wingeneral.c: Ditto.
+	* tui/tui-winsource.c, tui/tui.c: Ditto.
+	
+2004-02-07  Mark Kettenis  <kettenis@gnu.org>
+
+	* dwarf2-frame.h: Update copyright.
+	(enum dwarf2_frame_reg_rule): New.
+	(struct dwarf2_frame_state_reg): New.
+	(dwarf2_frame_sniffer, dwarf2_frame_base_sniffer): Make extern.
+	* dwarf2-frame.c: Update copyright.
+	(enum dwarf2_reg_rule): Remove.
+	(struct dwarf2_frame_state): Remove defenition of `struct
+	dwarf2_frame_state_reg'.
+	(read_reg): Call get_frame_arch to get the architecture instead of
+	using CURRENT_GDBARCH.
+	(execute_cfa_program): Prefix old `enum dwarf2_reg_rule' tags with
+	DWARF2_FRAME_.
+	(dwarf2_frame_init_reg): New function.
+	(dwarf2_frame_cache): Call get_frame_arch to get the architecture
+	instead of using CURRENT_GDBARCH.  Call dwarf2_frame_init_reg to
+	initialize the register state.  Prefix old `enum dwarf2_reg_rule'
+	tags with DWARF2_FRAME_.
+	(dwarf2_frame_prev_register): Call get_frame_arch to get the
+	architecture instead of using CURRENT_GDBARCH.  Prefix old `enum
+	dwarf2_reg_rule' tags with DWARF2_FRAME_.
+
+2004-02-06  Andrew Cagney  <cagney@redhat.com>
+
+	* tui/tui-data.h (struct tui_list): Rename _TuiList.
+	(enum tui_data_type): Rename _TuiDataType.
+	(struct tui_layout_def): Rename _TuiLayoutDef.
+	(struct tui_source_element): Rename _TuiSourceElement.
+	(struct tui_data_element): Rename _TuiDataElement.
+	(struct tui_command_element): Rename _TuiCommandElement.
+	(struct tui_locator_element): Rename _TuiLocatorElement.
+	(union tui_which_element): Define.
+	(struct tui_win_element): Rename _TuiWinElement.
+	(struct tui_data_info): Rename _TuiDataInfo.
+	(struct tui_source_info): Rename _TuiSourceInfo.
+	(struct tui_command_info): Rename _TuiCommandInfo.
+	(tui_initialize_static_data): Rename initializeStaticData.
+	(tui_alloc_generic_win_info): Rename allocGenericWinInfo.
+	(tui_alloc_win_info): Rename allocWinInfo.
+	(tui_init_generic_part): Rename initGenericPart.
+	(tui_init_win_info): Rename initWinInfo.
+	(tui_alloc_content): Rename allocContent.
+	(tui_add_content_elements): Rename addContentElements.
+	(tui_init_content_element): Rename initContentElement.
+	(tui_free_window): Rename freeWindow.
+	(tui_free_win_content): Rename freeWinContent.
+	(tui_free_data_content): Rename freeDataContent.
+	(tui_free_all_source_wins_content): Rename
+	freeAllSourceWinsContent.
+	(tui_del_window): Rename tuiDelWindow.
+	(tui_del_data_windows): Rename tuiDelDataWindows.
+	(tui_partial_win_by_name): Rename partialWinByName.
+	(tui_win_name): Rename winName.
+	(tui_current_layout): Rename currentLayout.
+	(tui_set_current_layout_to): Rename setCurrentLayoutTo.
+	(tui_term_height): Rename termHeight.
+	(tui_set_term_height_to): Rename setTermHeightTo.
+	(tui_term_width): Rename termWidth.
+	(tui_set_term_width_to): Rename setTermWidthTo.
+	(tui_set_gen_win_origin): Rename setGenWinOrigin.
+	(tui_locator_win_info_ptr): Rename locatorWinInfoPtr.
+	(tui_source_exec_info_win_ptr): Rename tui_gen_win_info.
+	(tui_disassem_exec_info_win_ptr): Rename disassemExecInfoWinPtr.
+	(tui_source_windows): Rename sourceWindows.
+	(tui_clear_source_windows): Rename clearSourceWindows.
+	(tui_clear_source_windows_detail): Rename
+	clearSourceWindowsDetail.
+	(tui_clear_win_detail): Rename clearWinDetail.
+	(tui_add_to_source_windows): Rename tuiAddToSourceWindows.
+	(tui_default_tab_len): Rename tuiDefaultTabLen.
+	(tui_set_default_tab_len): Rename tuiSetDefaultTabLen.
+	(tui_win_with_focus): Rename tuiWinWithFocus.
+	(tui_set_win_with_focus): Rename tuiSetWinWithFocus.
+	(tui_layout_def): Rename tuiLayoutDef.
+	(tui_win_resized): Rename tuiWinResized.
+	(tui_set_win_resized_to): Rename tuiSetWinResizedTo.
+	(tui_next_win): Rename tuiNextWin.
+	(tui_prev_win): Rename tuiPrevWin.
+	(tui_add_to_source_windows): Rename addToSourceWindows.
+	* tui/tui-winsource.c, tui/tui-win.c: Update references.
+	* tui/tui-layout.c, tui/tui-source.c: Ditto.
+	* tui/tui-stack.c, tui/tui-io.c: Ditto.
+	* tui/tui.c, tui/tui-data.c: Ditto.
+	* tui/tui-interp.c, tui/tui-data.c: Ditto.
+	* tui/tui-disasm.c, tui/tui-command.c: Ditto.
+
+	* tui/tui-source.h: Update copyright.  Include "tui-data.h".
+	(struct symtab): Declare.
+	(tui_set_source_content): Rename tuiSetSourceContent.
+	(tui_show_symtab_source): Rename tuiShowSource.
+	(tui_source_is_displayed): Rename tuiSourceIsDisplayed.
+	(tui_vertical_source_scroll): Rename tuiVerticalSourceScroll.
+	* tui/tui-source.c: Update copyright.  Update references.
+	* tui/tui-win.c, tui/tui-winsource.c: Update references.
+	* tui/tui-stack.c: Update references.
+
+	* tui/tui-win.h: Update copyright.  Include "tui-data.h".
+	(struct tui_win_info): Declare.
+	(tui_scroll_forward): Rename tuiScrollForward.
+	(tui_scroll_backward): Rename tuiScrollBackward.
+	(tui_scroll_left): Rename tuiScrollLeft.
+	(tui_scroll_right): Rename tuiScrollRight.
+	(tui_set_win_focus_to): Rename tuiSetWinFocusTo.
+	(tui_resize_all): Rename tuiResizeAll.
+	(tui_refresh_all_win): Rename tuiRefreshAll.
+	(tui_sigwinch_handler): Rename tuiSigwinchHandler.
+	* tui/tui-layout.c, * tui/tui-io.c: Update references.
+	* tui/tui-wingeneral.h, * tui/tui.c: Update references.
+	* tui/tui-disasm.c, * tui/tui-command.c: Update references.
+
+	* tui/tui-windata.h: Update copyright.  Include "tui-data.h".
+	(tui_erase_data_content): Rename tuiEraseDataContent.
+	(tui_display_all_data): Rename tuiDisplayAllData.
+	(tui_check_data_values): Rename tuiCheckDataValues.
+	(tui_display_data_from_line): Rename tuiDisplayDataFromLine.
+	(tui_first_data_item_displayed): Rename tuiFirstDataItemDisplayed.
+	(tui_first_data_element_no_in_line): Rename
+	tuiFirstDataElementNoInLine.
+	(tui_delete_data_content_windows): Rename
+	tuiDeleteDataContentWindows.
+	(tui_refresh_data_win): Rename tuiRefreshDataWin.
+	(tui_display_data_from): Rename tuiDisplayDataFrom.
+	(tui_vertical_data_scroll): Rename tuiVerticalDataScroll.
+	* tui/tui-windata.c, tui/tui-hooks.c: Update references.
+	* tui/tui-win.c, tui/tui-regs.c: Update references.
+	* tui/tui-layout.c, tui/tui.c: Update references.
+
+	* tui/tui-wingeneral.h: Update copyright.
+	(m_allBeVisible): Delete macro.
+	(m_allBeInvisible): Delete macro.	
+	(struct tui_gen_win_info): Declare.
+	(struct tui_win_info): Declare.
+	(tui_unhighlight_win): Rename unhighlightWin.
+	(tui_make_visible, tui_make_invisible): Replace makeVisible.
+	(tui_make_all_visible, tui_make_all_invisible): Replace makeAllVisible.
+	(tui_make_window): Rename makeWindow.
+	(tui_copy_win): Rename copyWin.
+	(tui_box_win): Rename boxWin.
+	(tui_highlight_win): Rename highlightWin.
+	(tui_check_and_display_highlight_if_needed): Rename
+	checkAndDisplayHighlightIfNeeded.
+	(tui_refresh_all): Rename refreshAll.
+	(tui_delete_win): Rename tuiDelwin.
+	(tui_refresh_win): Rename tuiRefreshWin.
+	* tui/tui-wingeneral.c (make_visible): Rename makeVisible.
+	(tui_make_visible, tui_make_invisible): New functions.
+	(tui_make_all_visible, tui_make_all_invisible): New functions.
+	(make_all_visible): Rename makeAllVisible.
+	* tui/tui-winsource.c, tui/tui-windata.c: Update references.
+	* tui/tui-data.c, tui/tui-winsource.c: Update references.
+	* tui/tui-windata.c, tui/tui-win.c: Update references.
+	* tui/tui-regs.c, tui/tui-layout.c: Update references.
+	* tui/tui-data.h (struct tui_gen_win_info): Rename _TuiGenWinInfo.
+
+2004-02-06  Mark Kettenis  <kettenis@gnu.org>
+
+	* proc-api.c (write_with_trace): Initialize local variable to
+	silence compiler warning.
+
+2004-02-06  Andrew Cagney  <cagney@redhat.com>
+
+	* tui/tui-source.h: Do not include "defs.h".
+	(struct tui_win_info): Declare.
+	(tui_set_source_content_nil): Declare.
+	* tui/tui-data.h (struct tui_win_info): Rename _TuiWinInfo.
+	(union tui_line_or_address): Rename _TuiLineOrAddress.
+	* tui/tui-winsource.h: Update copyright.  Include "tui-data.h".
+	(tui_update_source_window): Rename tuiUpdateSourceWindow.
+	(tui_update_source_window_as_is): Rename
+	tuiUpdateSourceWindowAsIs.
+	(tui_update_source_windows_with_addr): Rename
+	tuiUpdateSourceWindowsWithAddr.
+	(tui_update_source_windows_with_line): Rename
+	tuiUpdateSourceWindowsWithLine.
+	(tui_clear_source_content): Rename tuiClearSourceContent.
+	(tui_erase_source_content): Rename tuiEraseSourceContent.
+	(tui_set_source_content_nil): Rename tuiSetSourceContentNil.
+	(tui_show_source_content): Rename tuiShowSourceContent.
+	(tui_horizontal_source_scroll): Rename tuiHorizontalSourceScroll.
+	(tui_set_exec_info_content): Rename tuiSetExecInfoContent.
+	(tui_show_exec_info_content): Rename tuiShowExecInfoContent.
+	(tui_erase_exec_info_content): Rename tuiEraseExecInfoContent.
+	(tui_clear_exec_info_content): Rename tuiClearExecInfoContent.
+	(tui_update_exec_info): Rename tuiUpdateExecInfo.
+	(tui_set_is_exec_point_at): Rename tuiSetIsExecPointAt.
+	(tui_alloc_source_buffer): Rename tuiAllocSourceBuffer.
+	(tui_line_is_displayed): Rename tuiLineIsDisplayed.
+	(tui_addr_is_displayed): Rename tuiAddrIsDisplayed.
+	(struct tui_win_info): Declare.
+	* tui/tui-stack.c: Update references.
+	* tui/tui-layout.c, tui/tui-winsource.c: Ditto.
+	* tui/tui-win.c, tui/tui-source.c: Ditto.
+	* tui/tui.c, tui/tui-disasm.c: Ditto.
+
+2004-02-06  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-linux-tdep.c (i386_linux_sigcontext_addr): Fix calculation
+	of UCONTEXT_ADDR.  Fixes PR backtrace/1545.
+
+2004-02-05  Mark Kettenis  <kettenis@gnu.org>
+
+	* infrun.c (handle_inferior_event): Allow for breakpoint
+	instructions to generate a SIGSEGV in addition to SIGTRAP, SIGILL
+	and SIGEMT.  Update comments.
+	* NEWS (Revised SPARC target): Mention support for non-executable
+	stack.
+
+2004-02-04  Mark Kettenis  <kettenis@gnu.org>
+
+	* target.h (target_object): Add TARGET_OBJECT_WCOOKIE.
+	* inftarg.c: Update copyright year.
+	(child_xfer_partial): Add support for TARGET_OBJECT_WCOOKIE.
+	* sparc-nat.c: Include "target.h" and "gdb_assert.h".
+	(sparc_xfer_wcookie): New function.
+	* sparc-tdep.c (sparc_fetch_wcookie): New function.
+	* Makefile.in (sparc-nat.o): Update dependencies.
+	* config/sparc/nm-nbsd.h: Include "target.h".
+	(NATIVE_XFER_WCOOKIE): New define.
+	(sparc_xfer_wcookie): New prototype.
+
+2004-02-04  Andrew Cagney  <cagney@redhat.com>
+
+	* m68k-tdep.c (m68k_saved_pc_after_call): Delete #ifdef
+	SYSCALL_TRAP function.
+	(m68k_gdbarch_init): Delete #ifdef SYSCALL_TRAP code.
+
+2004-02-04  Andrew Cagney  <cagney@redhat.com>
+	    Daniel Jacobowitz  <drow@mvista.com>
+
+	* objfiles.h: Delete comments refering to inside_entry_func and
+	DEPRECATED_FRAME_CHAIN_VALID.
+	* defs.h (inside_entry_func): Update prototype..
+	* blockframe.c (inside_entry_func): Rename to
+	legacy_inside_entry_func.  Add new inside_entry_func taking a frame.
+	* frame.c (get_prev_frame): Pass the frame to inside_entry_func.
+
+2004-02-03  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* breakpoint.c (struct captured_parse_breakpoint_args):  Move
+	outside of #ifdef SOLIB_ADD region.
+	(do_restore_lang_radix_cleanup): Ditto.
+	(resolve_pending_breakpoint): Ditto.
+
+2004-02-03  Andrew Cagney  <cagney@redhat.com>
+
+	* ia64-tdep.c (read_sigcontext_register): Delete unused function.
+	(process_note_abi_tag_sections): Delete unused function.
+	(ia64_read_fp): Delete unused function.
+	(gdbarch_extract_struct_value_address): Delete declaration.
+
+2004-02-02  Andrew Cagney  <cagney@redhat.com>
+
+	* vax-tdep.c (vax_frame_chain): Delete call to
+	deprecated_inside_entry_file.
+	* ns32k-tdep.c (ns32k_frame_chain): Ditto.
+
+2004-02-02  Mark Kettenis  <kettenis@gnu.org>
+
+	* dwarf2-frame.c (dwarf2_frame_cache): Deal with a return address
+	column that's "empty" or "same value" when eliminating REG_RA
+	rules.
+
+2004-02-02  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* NEWS: Add information about new pending breakpoint support.
+
+2004-02-02  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* breakpoint.h (struct breakpoint): Add new flag, from_tty,
+	and pending fields for pending breakpoint support.
+	* breakpoint.c (breakpoint_enabled): Add check for not pending.
+	(condition_command): Only parse condition if not a pending
+	breakpoint.
+	(print_one_breakpoint): Add support for pending breakpoints.
+	(describe_other_breakpoints): Add checks to verify we are not
+	dealing with pending breakpoints.
+	(check_duplicates): Don't check pending breakpoints.
+	(set_raw_breakpoint): Initialize pending flag.
+	(do_restore_lang_radix_cleanup): New cleanup routine.
+	(resolve_pending_breakpoint): New function.
+	(re_enable_breakpoints_in_shlibs): Try and resolve any
+	pending breakpoints via resolve_pending_breakpoint.
+	(mention): Add pending breakpoint support.
+	(parse_breakpoint_sals): Add new parameter to pass to
+	decode_line_1 to indicate silent errors when files or functions
+	are not found.  Change all callers.
+	(do_captured_parse_breakpoint): New function.
+	(break_command_1): Change prototype to return an rc value and to
+	take an optional pending breakpoint pointer.  Support creating
+	a pending breakpoint if a "not found" form of error occurs when
+	parsing the breakpoint.  Also support resolving an existing pending
+	breakpoint and be silent if the resolution fails.
+	(create_breakpoints): Change prototype to take pending breakpoint
+	pointer.  When resolving a pending breakpoint, use the new pointer
+	to provide a conditional or commands added by the end-user.
+	(delete_breakpoint): Add appropriate check for pending.
+	(breakpoint_re_set_one): Ditto.
+	(do_enable_breakpoint): Ditto.
+
+2004-02-02  David Carlton  <carlton@kealia.com>
+
+	* valops.c (enum oload_classification): New.
+	(find_overload_match): Break implementation into separate
+	functions; delete #if 0'd code; look for symbols within
+	namespaces.
+	(find_oload_champ_namespace,find_oload_champ_namespace_loop)
+	(find_oload_champ,oload_method_static,classify_oload_match): New.
+	* cp-support.h: Add declaration for cp_func_name; update
+	declaration for make_symbol_overload_list.
+	* cp-support.c (cp_func_name): New.
+	(overload_list_add_symbol): Fix comment, use
+	SYMBOL_LINKAGE_NAME and SYMBOL_NATURAL_NAME.
+	(make_symbol_overload_list): Take a function name and a namespace
+	instead of a symbol; change implementation.
+	(make_symbol_overload_list_using): New.
+	(make_symbol_overload_list_qualified, read_in_psymtabs): New.
+
+2004-02-02  Fred Fish  <fnf@redhat.com>
+
+	* main.c (gdb_stdtarg): Move definition to group with other
+	gdb_stdtarg definitions and update copyright years.
+	* remote-sim.c (gdb_os_write_stderr): Write output to
+	gdb_stdtargerr stream instead of gdb_stdtarg stream.
+	(gdb_os_flush_stderr): Flush gdb_stdtargerr steam instead of
+	gdb_stderr stream and update copyright years.
+
+2004-02-01  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.in (mips-linux-nat.o): Update dependencies.
+	* mips-linux-nat.c: Include mips-tdep.h.
+
+2004-02-01  Roland McGrath  <roland@redhat.com>
+
+	* sol-thread.c (sol_thread_xfer_partial): New function.
+	(init_sol_thread_ops): Use that for to_xfer_partial hook.
+	(init_sol_core_ops): Likewise.
+
+	* procfs.c (procfs_xfer_partial): New function.
+	(init_procfs_ops): Use that for procfs_ops.to_xfer_partial.
+	* Makefile.in (procfs.o): Add $(auxv_h) dep.
+
+	* config/nm-linux.h (NATIVE_XFER_AUXV): New macro, uses auxv.c's
+	procfs_xfer_auxv function.
+
+	* procfs.c (procfs_make_note_section): If we can read
+	TARGET_OBJECT_AUXV data, add an NT_AUXV note containing it.
+	* linux-proc.c (linux_make_note_section): Likewise.
+
+	* auxv.h: New file.
+	* auxv.c: New file.
+	* Makefile.in (auxv_h): New variable.
+	(COMMON_OBS): Add auxv.o here.
+	(auxv.o): New target.
+
+	* corelow.c (core_xfer_partial): New function.
+	(init_core_ops): Use it for core_ops.to_xfer_partial.
+
+	* target.h (enum target_object): Add TARGET_OBJECT_AUXV.
+	* inftarg.c (child_xfer_partial): Support it using NATIVE_XFER_AUXV
+	macro if that is defined.
+
+2004-02-01  Daniel Jacobowitz  <drow@mvista.com>
+
+	* breakpoint.c (bpstat_stop_status): Take a ptid_t argument,
+	and check the specified thread for each breakpoint.
+	* breakpoint.h (bpstat_stop_status): Update prototype.
+	* infrun.c (handle_inferior_event): Update calls to
+	bpstat_stop_status.
+
+2004-02-01  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.in (cli-cmds.o): Add $(readline_h).
+
+2004-02-01  Daniel Jacobowitz  <drow@mvista.com>
+
+	* cli/cli-cmds.c: Include readline.h.
+	(complete_command): Pass the start of the last word to
+	complete_line.
+
+2004-01-31  Daniel Jacobowitz  <drow@mvista.com>
+
+	* breakpoint.c (bpstat_stop_status): Remove not_a_sw_breakpoint
+	argument, and change first argument to a CORE_ADDR.
+	* breakpoint.h (bpstat_stop_status): Update prototype.
+	* infrun.c (adjust_pc_after_break): Add a new comment.
+	(handle_inferior_event): Update calls to bpstat_stop_status.
+
+2004-01-31  Daniel Jacobowitz  <drow@mvista.com>
+
+	* breakpoint.h: Update copyright years.
+
+2004-01-31  Daniel Jacobowitz  <drow@mvista.com>
+
+	* breakpoint.c (software_breakpoint_inserted_here_p): New function.
+	(bpstat_stop_status): Don't decrement PC.
+	* breakpoint.h (software_breakpoint_inserted_here_p): Add
+	prototype.
+	* infrun.c (adjust_pc_after_break): New function.
+	(handle_inferior_event): Call it, early.  Remove later references
+	to DECR_PC_AFTER_BREAK.
+	(normal_stop): Add commentary.
+
+2004-01-31  Daniel Jacobowitz  <drow@mvista.com>
+
+	* breakpoint.c (breakpoint_re_set_one): Add missing chunk of
+	2004-01-27 double-free fix.
+
+2004-01-31  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc-tdep.c (sparc_fetch_wcookie): New function.
+	(sparc32_frame_prev_register): Handle StackGhost.
+	(sparc_supply_rwindow, sparc_collect_rwindow): Likewise.
+
+2004-01-29  Roland McGrath  <roland@redhat.com>
+
+	* configure.in (NEW_PROC_API): Also match solaris2.9 for this test.
+	* configure: Regenerated.
+
+	* procfs.c: Include gdb_string.h for str* decls, otherwise warnings.
+	* Makefile.in (procfs.o): Add dep.
+
+2004-01-28  Andrew Cagney  <cagney@redhat.com>
+
+	* tui/tui-stack.h: Update copyright.
+	(struct frame_info): Add opaque declaration.
+	(tui_update_locator_filename): Rename tuiUpdateLocatorFilename.
+	(tui_show_locator_content): Rename tuiShowLocatorContent.
+	(tui_show_frame_info): Rename tuiShowFrameInfo.
+	* tui/tui-stack.c: Update copyright.  Update references.
+	* tui/tui-winsource.c: Update references.
+	* tui/tui-win.c: Update references.
+	* tui/tui-layout.c: Update references.
+	* tui/tui-hooks.c: Update copyright, update references.
+	* tui/tui.c: Update copyright, update references.
+	* tui/tui-disasm.c: Update references.
+
+2004-01-28  David Carlton  <carlton@kealia.com>
+
+	* dwarf2read.c (add_partial_structure): Use demangled name if
+	namespace equals "".
+
+2004-01-27  Jim Blandy  <jimb@redhat.com>
+
+	Clean up misapplied patch:
+	* dwarf2read.c (determine_prefix): Change one of the two forward
+	declarations for 'determine_prefix_aux' to a declaration for this.
+	(read_func_scope): Use cu->language, not cu_language.  Pass 'cu'
+	argument to 'die_specification'.
+
+	* dwarf2read.c (read_func_scope): Re-indent comment.
+
+2004-01-27  Paul N. Hilfinger  <hilfinger@gnat.com>
+
+	* breakpoint.c (breakpoint_re_set_one): Set b->cond, b->val, and
+	b->exp to NULL after freeing so that error during re-parsing or
+	evaluation of expressions associated with breakpoint don't
+	eventually lead to re-freeing of storage.
+	Committed by Andrew Cagney.
+
+2004-01-27  Andrew Cagney  <cagney@redhat.com>
+
+	* source.c (ambiguous_line_spec): Delete undefined declaration.
+	* m32r-rom.c (m32r_set_board_address): Delete unused function.
+	(m32r_set_server_address, m32r_set_download_path): Ditto.
+	* remote-fileio.c (remote_fileio_to_fio_int): Ditto.
+
+2004-01-27  Daniel Jacobowitz  <drow@mvista.com>
+
+	* dwarf2read.c: Update calls to changed and renamed functions, and
+	references to moved variables.
+
+	(struct dwarf2_cu): Add first_fn, last_fn, cached_fn,
+	language, language_defn, list_in_scope, and ftypes members.
+	(cu_first_fn, cu_last_fn, cu_cached_fn, cu_language)
+	(cu_language_defn, list_in_scope, ftypes, cu_header_offset)
+	(baseaddr): Remove globals.
+
+	(dwarf_attr): Renamed to dwarf2_attr.  Add CU argument.
+	(set_cu_language, die_is_declaration, die_specification)
+	(determine_prefix, determin_prefix_aux, class_name, namespace_name)
+	(dwarf2_linkage_name, dwarf2_name, dwarf2_extension)
+	(dwarf2_get_ref_die_offset, dwarf2_fundamental_type)
+	(initialize_cu_func_list, add_to_cu_func_list): Add CU argument.
+
+	(dwarf2_build_psymtabs_hard): Add local baseaddr.  Initialize
+	cu.list_in_scope.  Don't initialize cu_header_offset.
+	(add_partial_symbol): Add local baseaddr.
+	(psymtab_to_symtab_1): Add local baseaddr.  Use
+	objfile->section_offsets for consistency.  Don't initialize
+	cu_header_offset; do initialize cu.header.offset and
+	cu.list_in_scope.
+	(read_file_scope, read_func_scope, read_lexical_block_scope)
+	(dwarf_decode_lines, new_symbol): Add local baseaddr.
+
+2004-01-27  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* PROBLEMS: Add gdb/1516.
+
+2003-12-29  Robert Millan  <robertmh@gnu.org>
+
+	Patch committed by Andrw Cagney.
+	* configure.host: Match knetbsd*-gnu and kfreebsd*-gnu.
+	* configure.tgt: Match knetbsd*-gnu.
+
+2004-01-26  Andrew Cagney  <cagney@redhat.com>
+
+	* breakpoint.c (catch_command_1): Delete #ifdef code.
+	(catch_fork_command_1): Delete #ifdef wrapper.
+	(catch_exec_command_1): Ditto.
+	(catch_load_command_1): Ditto.
+	(catch_unload_command_1): Ditto.
+
+	* breakpoint.c (watchpoint_check): Delete #if0ed variable.
+	(catch_breakpoint): Delete #if0ed function.
+	(disable_catch_breakpoint): Ditto.
+	(delete_catch_breakpoint, enable_catch_breakpoint): Ditto.
+	(disable_catch, enable_catch, delete_catch): Ditto.
+
+2004-01-26  Andrew Cagney  <cagney@redhat.com>
+
+	* remote.c (echo_check, quit_flag): Delete variables.
+	(cisco_kernel_mode): Delete variable.
+	(minitelnet_return, tty_input, escape_count): Delete variables.
+	(remote_cisco_mode): Delete variable.
+	(remote_cisco_open, remote_cisco_close): Delete function.
+	(remote_cisco_mourn, remote_cisco_wait): Delete function.
+	(init_remote_cisco_ops): Delete function.
+	(_initialize_remote): Do not install "remote cisco" code.
+	(read_frame): Delete cisco specific code.
+	(remote_info_process): Delete function.
+	(remote_wait): Delete cisco specific code.
+	(remote_cisco_section_offsets): Delete function.
+	(remote_cisco_objfile_relocate): Delete function.
+	(remote_async_wait): Delete cisco specific code.
+	(minitelnet, readtty, readsocket): Delete function.
+
+2004-01-26  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (EXTRACT_STRUCT_VALUE_ADDRESS): Deprecate.  Add
+	comments mentioning extract_returned_value_address.
+	* infcmd.c (print_return_value): Update.  Add comments on
+	extract_returned_value_address.
+	* stack.c (return_command): Add comments on
+	extract_returned_value_address.
+	* values.c: Update comment.
+	* m32r-tdep.c: Update comment.
+	* sparc-tdep.c: Update comment.
+	* ia64-tdep.c (ia64_use_struct_convention): Update comment.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Update.
+	* sh64-tdep.c (sh64_gdbarch_init): Update.
+	* sh-tdep.c (sh_gdbarch_init): Update.
+	* s390-tdep.c (s390_gdbarch_init): Update.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Update.
+	* m68klinux-tdep.c (m68k_linux_init_abi): Update.
+	* m68k-tdep.c (m68k_gdbarch_init): Update.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Update.
+	* m32r-tdep.c (m32r_gdbarch_init): Update.
+	* ia64-tdep.c (ia64_gdbarch_init): Update.
+	* h8300-tdep.c (h8300_gdbarch_init): Update.
+	* frv-tdep.c (frv_gdbarch_init): Update.
+	* arm-tdep.c (arm_gdbarch_init): Update.
+	* alpha-tdep.c (alpha_gdbarch_init): Update.
+
+2004-01-26  Andrew Cagney  <cagney@redhat.com>
+
+	* dwarf2loc.c (dwarf_expr_frame_base): Use SYMBOL_OPS instead of
+	SYMBOL_LOCATION_FUNCS
+	(dwarf2_loclist_funcs, dwarf2_locexpr_funcs): Change type to
+	"struct symbol_ops".
+	* dwarf2loc.h (dwarf2_locexpr_funcs, dwarf2_loclist_funcs): Change
+	type to "struct symbol_ops".
+	* symtab.h (struct symbol_ops): Rename "struct location_funcs".
+	(struct symbol): Replace ".aux_value.loc.funcs" and
+	".aux_value.loc.baton" with ".ops" and ".aux_value.ptr".
+	(SYMBOL_OBJFILE): Delete macro.
+	(SYMBOL_LOCATION_FUNCS): Delete macro.
+	(SYMBOL_LOCATION_BATON): Update.
+	* dwarf2read.c (dwarf2_symbol_mark_computed): Set SYMBOL_OPS
+	intead of SYMBOL_LOCATION_FUNCS.
+	* ax-gdb.c (gen_var_ref): Ditto.
+	* printcmd.c (address_info): Ditto.
+	* findvar.c (read_var_value): Ditto.
+	(symbol_read_needs_frame): Ditto.
+
+2004-01-26  Andrew Cagney  <cagney@redhat.com>
+
+	* dwarf2read.c (read_func_scope): Document frame-base hack.
+
+2004-01-25  Mark Kettenis  <kettenis@gnu.org>
+
+	* infcmd.c (print_return_value): Plug memory leak; delete
+	ui_stream object.  Rename argument `structure_return' to
+	`struct_return'.
+
+2004-01-25  Mark Kettenis  <kettenis@gnu.org>
+
+	* infcmd.c (print_return_value): Wrap long lines.
+	(finish_command_continuation, finish_command): Remove unused
+	variable `funcaddr'.  Fix some coding-standards problems.
+
+	* sparc-tdep.c (sparc_regset_from_core_section): Check whether
+	SECT_SIZE is large enough, not wheter it's exactly the right size.
+	(sparc32_gdbarch_init): Initialize TDEP->sizeof_gregset and
+	TDEP->fpregset to zero.
+
+	* sparcnbsd-tdep.c (sparc32nbsd_supply_gregset): Also supply the
+	floating-point registers for traditional NetBSD core files.
+	(sparc32nbsd_init_abi): Initialize TDEP->sizeof_gregset and
+	TDEP->sizeof_fpregset here.
+
+2004-01-25  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc-tdep.h (sparc32nbsd_sigcontext_saved_regs): New prototype.
+	* sparcnbsd-tdep.c (sparc32nbsd_sigcontext_saved_regs): New
+	function with code split out from
+	sparc32nbsd_sigcontext_frame_cache.
+	(sparc32nbsd_sigcontext_frame_cache): Use
+	sparc32nbsd_sigcontext_saved_regs.
+	(_initialize_sparc32nbsd_tdep): Don't register OS ABI handler for
+	OpenBSD.
+	* sparcobsd-tdep.c: New file.
+	* Makefile.in (ALLDEPFILES): Add sparcobsd-tdep.c.
+	(sparcobsd-tdep.o): New dependency.
+	* configure.tgt (sparc-*-openbsd*): Set gdb_target to obsd.
+	* config/sparc/obsd.mt: New file.
+
+	* sparc-tdep.c (sparc32_gdbarch_init): Don't require
+	TDEP->fpregset to be initialized to enable core file register
+	sets.
+
+2004-01-24  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc64-tdep.h (struct frame_info, struct trad_frame_saved_reg):
+	Add opaque declarations.
+	(sparc64nbsd_sigcontext_saved_regs): New prototype.
+	* sparc64nbsd-tdep.c (sparc64nbsd_sigcontext_saved_regs): New
+	function with code split out from
+	sparc64nbsd_sigcontext_frame_cache.
+	(sparc64nbsd_sigcontext_frame_cache): Use
+	sparc64nbsd_sigcontext_saved_regs.
+	(_initialize_sparc64nbsd_tdep): Don't register OS ABI handler for
+	OpenBSD.
+	* sparc64obsd-tdep.c: New file.
+	* Makefile.in (ALLDEPFILES): Add sparc64obsd-tdep.c.
+	(sparc64obsd-tdep.o): New dependency.
+	* configure.tgt (sparc64-*-openbsd*): Set gdb_target to obsd64 and
+	gdb_osabi to GDB_OSABI_OPENBSD_ELF.
+	* config/sparc/obsd64.mt: New file.
+
+	* sparc-tdep.c (sparc_fetch_instruction): Return zero if we can't
+	read the instruction at PC.
+
+	* sparcnbsd-tdep.c (GDB_OSABI_NETBSD_CORE): Define, based on the
+	value of GDB_OSABI_DEFAULT.
+	(sparcnbsd_core_osabi_sniffer): Return GDB_OSABI_NETBSD_CORE
+	instead of GDB_OSABI_NETBSD_AOUT.
+
+2004-01-24  Nick Roberts  <nick@nick.uklinux.net>
+
+	* mi/mi-cmd-stack.c, mi/mi-cmd-var.c, mi/mi-cmds.h: Update
+	copyright.
+
+2004-01-23  Andrew Cagney  <cagney@redhat.com>
+
+	* printcmd.c (display_command): Replace tui_set_display call with
+	tui_set_layout_for_display_command.
+	* tui/tui.h (enum tui_win_type): Define.
+	(tui_set_layout): Delete declaration.
+	(tui_set_layout_for_display_command): Rename set_tui_layout.
+	* tui/tui-data.h (enum tui_layout_type): Define.
+	* tui/tui-layout.h: Update copyright.  Include "tui-data.h" and
+	"tui.h".
+	(tui_add_win_to_layout): Rename tuiAddWinToLayout.
+	(tui_default_win_height): Rename tuiDefaultWinHeight.
+	(tui_default_win_viewport_height): Rename
+	tuiDefaultWinViewportHeight.
+	(tui_set_layout): RenametuiSetLayout.
+	* tui/tui-layout.c: Update references.
+	* tui/tui.c: Update references.
+	* tui/tui-disasm.c: Update references.
+
+2004-01-23  David Carlton  <carlton@kealia.com>
+
+	Partial workaround for PR c++/1511:
+	* cp-namespace.c: Include frame.h.
+	(cp_lookup_transparent_type): New
+	(cp_lookup_transparent_type_loop): New.
+	* cp-support.h: Declare cp_lookup_transparent_type.
+	* symtab.c (basic_lookup_transparent_type): Renamed from
+	lookup_transparent_type.
+	(lookup_transparent_type): Replace old body by a call to
+	current_language->la_lookup_transparent_type.
+	* symtab.h: Update copyright.  Declare
+	basic_lookup_transparent_type.
+	* language.h: Update copyright.
+	(struct language_defn): Add la_lookup_transparent_type.
+	* language.c: Update copyright.
+	(unknown_language_defn): Add basic_lookup_transparent_type.
+	(auto_language_defn): Add basic_lookup_transparent_type.
+	(local_language_defn): Add basic_lookup_transparent_type.
+	* ada-lang.c: Update copyright.
+	(ada_language_defn): Add basic_lookup_transparent_type.
+	* c-lang.c: Update copyright.
+	(c_language_defn): Add basic_lookup_transparent_type.
+	(cplus_language_defn): Add basic_lookup_transparent_type.
+	(asm_language_defn): Add basic_lookup_transparent_type.
+	(minimal_language_defn): Add basic_lookup_transparent_type.
+	* f-lang.c: Update copyright.
+	(f_language_defn): Add basic_lookup_transparent_type.
+	* jv-lang.c: Update copyright.
+	(java_language_defn): Add basic_lookup_transparent_type.
+	* m2-lang.c: Update copyright.
+	(m2_language_defn): Add basic_lookup_transparent_type.
+	* objc-lang.c: Update copyright.
+	(objc_language_defn): Add basic_lookup_transparent_type.
+	* p-lang.c: Update copyright.
+	(p_language_defn): Add basic_lookup_transparent_type.
+	* scm-lang.c: Update copyright.
+	(scm_language_defn): Add basic_lookup_transparent_type.
+	* Makefile.in (cp-namespace.o): Depend on frame.h.
+
+2004-01-23  David Carlton  <carlton@kealia.com>
+
+	Patch for PR c++/1520:
+	* dwarf2read.c (read_func_scope): Set processing_current_prefix
+	properly if we have a specification die.
+	(determine_prefix_aux): Rename from determine_prefix.
+	(determine_prefix): Like the old determine_prefix, but never
+	returns NULL.
+
+2004-01-23  Theodore A. Roth  <troth@openavr.org>
+
+	* avr-tdep.c: Update copyright.
+	(avr_iaddr_p): Delete unused function.
+	(avr_saddr_p): Delete unused function.
+
+2004-01-23  David Carlton  <carlton@kealia.com>
+
+	* symfile.c (reread_symbols): Clear objfile->cp_namespace_symtab.
+	Fix for PR symtab/1534.
+
+2004-01-23  Mark Kettenis  <kettenis@gnu.org>
+
+	* NEWS (New native configurations): Mention OpenBSD/sparc and
+	OpenBSD/sparc64.
+	* configure.tgt: Add sparc-*-openbsd* and sparc64-*-openbsd*.
+	* configure.host: Likewise.
+	* sparcnbsd-tdep.c (_initialize_sparnbsd_tdep): Register OS ABI
+	handler for OpenBSD.
+	* sparc64nbsd-tdep.c (_initialize_sparc64nbsd_tdep): Likewise.
+
+2004-01-22  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparcnbsd-tdep.c (sparcnbsd_core_osabi_sniffer): New function.
+	(_initialize_sparnbsd_tdep): Register sparcnbsd_core_osabi_sniffer.
+
+	* ser-pipe.c (pipe_open): Use proper null pointer in execl call.
+	* cli/cli-cmds.c (shell_escape): Likewise.
+
+	* osabi.c (generic_elf_osabi_sniff_abi_tag_sections): Recognize
+	OpenBSD .note.openbsd.ident sections.
+
+2004-01-22  David Carlton  <carlton@kealia.com>
+
+	* dwarf2read.c (psymtab_to_symtab_1): Calculate lowpc, highpc via
+	get_scope_pc_bounds.
+	(read_file_scope): Ditto.
+	(get_scope_pc_bounds): New function, produced by extracting code
+	from the above two functions, consolidating it, and adding support
+	for DW_TAG_namespace.
+
+2004-01-22  Mark Kettenis  <kettenis@gnu.org>
+
+	* osabi.c (MAX_NOTESZ): New define.
+	(check_note): New function.
+	(generic_elf_osabi_sniff_abi_tag_sections): Reorganize code using
+	check_note.
+
+2004-01-21  Roland McGrath  <roland@redhat.com>
+
+	* MAINTAINERS (write after approval): Add myself.
+
+2004-01-21  Eli Zaretskii  <eliz@gnu.org>
+
+	* utils.c (init_page_info): Move declarations of `rows' and
+	`cols' before the __GO32__-specific code.  Move the closing brace
+	outside the #ifdef __GO32__..#endif block.
+	[__GO32__]: Use `rows' and `cols' to avoid compiler warnings.
+
+2004-01-21  Paul Brook  <paul@codesourcery.com>
+
+	* infrun.c (handle_inferior_event): Check stop_stack_dummy if handling
+	BPSTAT_WHAT_CHECK_SHLIBS.
+
+2004-01-21  Paul Brook  <paul@codesourcery.com>
+
+	* MAINTAINERS: Add myself to write-after-approval.
+
+2004-01-20  Andrew Cagney  <cagney@redhat.com>
+
+	* ax-gdb.c (print_axs_value): Delete unused function.
+	* jv-lang.c (java_lookup_type): Delete unused function.
+	* cli/cli-dump.c (dump_filetype): Delete unused function.
+	* remote-mips.c (remote_mips_insert_hw_breakpoint)
+	(remote_mips_remove_hw_breakpoint): Delete unused functions.
+	(mips_getstring): Delete unused function.
+	(pmon_insert_breakpoint): Delete #if0ed function.
+	(PMON_MAX_BP): Delete #if0ed MACRO.
+	(mips_pmon_bp_info): Delete #if0ed variable.
+	(pmon_remove_breakpoint): Delete #if0ed function.
+	* monitor.c (monitor_write_even_block): Delete unused function.
+	(monitor_write_memory_block): Delete #if0ed code.
+	* dink32-rom.c (dink32_load): Delete unused function.
+	(_initialize_dink32_rom): Delete #if0ed code.
+	* d10v-tdep.c (d10v_daddr_p): Delete unused function.
+
+	* tui/tui-command.c: Update references.
+	* tui/tui-io.c: Update references.
+	* tui/tui-command.h: Update copyright.
+	(tui_dispatch_ctrl_char): Rename tuiDispatchCtrlChar.
+
+	* source.c (ambiguous_line_spec): Delete never-defined function.
+	* remote-rdi.c (arm_rdi_mourn, arm_rdi_send): Ditto.
+	* gdbtypes.c (add_name, add_mangled_type): Ditto.
+	* cli/cli-cmds.c (validate_comname): Ditto.
+
+	* tui/tui-disasm.h: Update copyright.  Include "tui.h" and
+	"tui-data.h".
+	(tui_set_disassem_content): Rename tuiSetDisassemContent.
+	(tui_show_disassem): Rename tuiShowDisassem.
+	(tui_show_disassem_and_update_source): Rename
+	tuiVerticalDisassemScroll.
+	(tui_vertical_disassem_scroll): Rename tuiVerticalDisassemScroll.
+	(tui_get_begin_asm_address): Rename tuiGetBeginAsmAddress.
+	* tui/tui.h: Update copyright.
+	(enum tui_status): Define.
+	* tui/tui-data.h (enum tui_scroll_direction): Define.
+	* tui/tui-disasm.c: Update copyright.  Update references.
+	* tui/tui-winsource.c: 	Update copyright.  Update references.
+	* tui/tui-win.c: Update references.
+	* tui/tui-layout.c: Update references.
+
+2004-01-20  Andrew Cagney  <cagney@redhat.com>
+
+	* mi/mi-cmd-stack.c (list_args_or_locals): Move declaration of
+	sym2 to start of block.
+
+2004-01-19  Michael Chastain  <mec.gnu@mindspring.com>
+
+	* MAINTAINERS: Delete mmalloc.
+	* Makefile.in: Delete MMALLOC, MMALLOC_CFLAGS, -lmmalloc, mmalloc_h.
+	* NEWS: Mention removal of --with-malloc.
+	* acconfig.h: Delete USE_MMALLOC, MMCHECK_FORCE.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* configure.in: Delete MMALLOC_CFLAGS, MMALLOC, --with-mmalloc,
+	USE_MMALLOC, MMCHECK_FORCE.
+	* gdbinit.in: Remove mmalloc.
+	* utils.c: Delete USE_MMALLOC, NO_MMCHECK, MMCHECK_FORCE, malloc_botch.
+	* config/alpha/alpha-linux.mh: Delete MMALLOC, MMALLOC_CFLAGS.
+	* config/i386/go32.mh: Likewise.
+	* config/i386/interix.mh: Likewise.
+	* config/powerpc/xm-linux.h: Delete MMAP_BASE_ADDRESS, MMAP_INCREMENT.
+
+2004-01-19  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* linespec.c (decode_variable, symtab_from_filename):  Call
+	error_silent with error message instead of throwing an exception
+	directly.
+	* defs.h (error_silent, error_output_message): Add prototypes.
+	(catch_exceptions_with_msg): Ditto.
+	* utils.c (error_silent, error_output_message): New functions.
+	* top.c (catch_exceptions_with_msg): New function.
+
+2004-01-20  Nick Roberts  <nick@nick.uklinux.net>
+
+	* mi/mi-cmds.h (enum print_values): Add definition.
+
+	* mi/mi-cmd-stack.c (mi_cmd_stack_list_locals): Print the name,
+	type and value for simple data types and just the name and type
+	for complex ones, if required.
+
+	* mi/mi-cmd-var.c (mi_cmd_var_list_children): Print the values of the
+	children, if required.
+
+2004-01-19  Kevin Buettner  <kevinb@redhat.com>
+
+	* frv-tdep.c (frv_push_arguments, frv_saved_pc_after_call): Delete
+	unused declarations.
+
+2004-01-19  Andrew Cagney  <cagney@redhat.com>
+
+	* top.h (mapped_symbol_files): Delete declaration.
+	* main.c (captured_main): Delete option "m" and "mapped".
+	* objfiles.c (mapped_symbol_files): Delete variable.
+	* symfile.c (symbol_file_command): Delete mmap code.
+	(symbol_file_add_with_addrs_or_offsets): Ditto.
+	(add_symbol_file_command, reread_separate_symbols): Ditto.
+	* objfiles.h (OBJF_MAPPED): Delete.
+	* objfiles.c (allocate_objfile) [USE_MMALLOC]: Delete.
+	(free_objfile) [USE_MMALLOC]: Ditto.
+	(open_existing_mapped_file): Delete function.
+	(open_mapped_file): Delete function.
+	(map_to_file): Delete function.
+
+2004-01-19  Kevin Buettner  <kevinb@redhat.com>
+
+	* infrun.c (step_into_function): Account for possible breakpoint
+	adjustment when computing ``stop_func_start''.
+
+2004-01-19  Kevin Buettner  <kevinb@redhat.com>
+
+	* target.c (default_region_size_ok_for_hw_watchpoint): Compare
+	the region size against the size of a pointer, not the size of
+	a register as given by DEPRECATED_REGISTER_SIZE.
+
+2004-01-19  Andrew Cagney  <cagney@redhat.com>
+
+	* tui/tui-regs.h: Include "tui-data.h".
+	(tuiFirstRegElementNoInLine): Delete declaration.
+	(tui_display_registers_from): Rename tuiDisplayRegistersFrom.
+	(tui_last_regs_line_no): Rename tuiLastRegsLineNo.
+	(tui_line_from_reg_element_no): Rename tuiLineFromRegElementNo.
+	(tui_calculate_regs_column_count): Rename
+	tuiCalculateRegsColumnCount.
+	(tui_check_register_values): Rename tuiCheckRegisterValues.
+	(tui_show_registers): Rename tuiShowRegisters.
+	(tui_display_registers_from_line): Rename
+	tuiDisplayRegistersFromLine.
+	(tui_first_reg_element_inline): Rename tuiFirstRegElementInLine.
+	(tui_toggle_float_regs): Rename tuiToggleFloatRegs.
+	(tui_first_reg_element_no_inline): Rename
+	tuiFirstRegElementNoInLine.
+	* tui/tui-data.h: Update copyright.
+	(enum tui_register_display_type): Rename _TuiRegisterDisplayType.
+	* tui/tui-windata.c: Update copyright, update references.
+	* tui/tui-regs.c: Update copyright, update references.
+	* tui/tui-win.c: Update copyright, update references.
+	* tui/tui-layout.c: Update copyright, update references.
+
+2004-01-18  Andrew Cagney  <cagney@redhat.com>
+
+	* tui/tui-io.c: Update copyright.
+	(key_is_end_sequence, key_is_backspace): New functions.
+	(key_is_command_char, key_is_start_sequence): New function.
+	(tui_getc): Update references.
+	* tui/tui-io.h: Update copyright.
+	(m_tuiStartNewLine): Delete macro.
+	(m_isBackspace, m_isDeleteChar): Delete macros.
+	(m_isDeleteLine, m_isDeleteToEol): Delete macros.
+	(m_isNextPage, m_isPrevPage): Delete macros.
+	(m_isLeftArrow, m_isRightArrow): Delete macros.
+	(m_isXdbStyleCommandChar): Delete macro.
+	(key_is_start_sequence): Declare, replace m_isStartSequence.
+	(key_is_end_sequence): Declare, replace m_isEndSequence.
+	(key_is_backspace): Declare ,replace m_isBackspace.
+	(key_is_command_char): Declare, replace m_isCommandChar.
+	* tui/tui-command.c: Update copyright.
+	(tuiDispatchCtrlChar): Update references.
+
+	* config/djgpp/fnchange.lst: Delete tui/tuiSourceWin.c and
+	tuiSourceWin.h.
+
+	* tui/tui-command.c: Rename tui/tuiCommand.c.
+	* tui/tui-command.h: Rename tui/tuiCommand.h.
+	* tui/tui-data.c: Rename tui/tuiData.c.
+	* tui/tui-data.h: Rename tui/tuiData.h.
+	* tui/tui-disasm.c: Rename tui/tuiDisassem.c.
+	* tui/tui-disasm.h: Rename tui/tuiDisassem.h.
+	* tui/tui-io.c: Rename tui/tuiIO.c.
+	* tui/tui-io.h: Rename tui/tuiIO.h.
+	* tui/tui-layout.c: Rename tui/tuiLayout.c.
+	* tui/tui-layout.h: Rename tui/tuiLayout.h.
+	* tui/tui-regs.c: Rename tui/tuiRegs.c.
+	* tui/tui-regs.h: Rename tui/tuiRegs.h.
+	* tui/tui-source.c: Rename tui/tuiSource.c.
+	* tui/tui-source.h: Rename tui/tuiSource.h.
+	* tui/tui-stack.c: Rename tui/tuiStack.c.
+	* tui/tui-stack.h: Rename tui/tuiStack.h.
+	* tui/tui-win.c: Rename tui/tuiWin.c.
+	* tui/tui-win.h: Rename tui/tuiWin.h.
+	* tui/tui-windata.c: Rename tui/tuiDataWin.c.
+	* tui/tui-windata.h: Rename tui/tuiDataWin.h.
+	* tui/tui-wingeneral.c: Rename tui/tuiGeneralWin.c.
+	* tui/tui-wingeneral.h: Rename tui/tuiGeneralWin.h.
+	* tui/tui-winsource.c: Rename tui/tuiSourceWin.c.
+	* tui/tui-winsource.h: Rename tui/tuiSourceWin.h.
+	* tui/tui-file.c: Update includes.
+	* tui/tui-hooks.c: Update includes.
+	* tui/tui-interp.c: Update includes.
+	* tui/tui.c: Update includes.
+	* Makefile.in: Update all tui/ dependencies.
+	(SUBDIR_TUI_OBS, SUBDIR_TUI_SRCS): Update file names.
+
+	* Makefile.in: Update copyright.  Update dependencies.
+
+	* tui/tuiSourceWin.c (tui_update_breakpoint_info): Fix compile
+	problem.
+
+2004-01-18  Andrew Cagney  <cagney@redhat.com>
+
+	* mn10300-tdep.c (_initialize_mn10300_tdep): Call gdbarch_register
+	instead of register_gdbarch_init.
+
+	* remote-sds.c (tohex): Delete unused function.  Update copyright.
+	* xstormy16-tdep.c (xstormy16_register_virtual_size): Ditto.
+	* v850-tdep.c (v850_register_virtual_size): Ditto.
+	* target.c (normal_target_post_startup_inferior): Ditto.
+	* source.c (ambiguous_line_spec): Ditto.
+	* remote.c (adapt_remote_get_threadinfo): Ditto.
+	* mi/mi-out.c (out_field_fmt): Ditto.
+	* mi/mi-interp.c (mi_interp_read_one_line_hook): Ditto.
+	(output_control_change_notification): Ditto.
+	* m68k-tdep.c (m68k_register_byte): Ditto.
+	(m68k_remote_breakpoint_from_pc): Ditto.
+	* ui-out.c (init_ui_out_state): Delete unused declaration.
+	* stabsread.c (search_value): Ditto.
+	* mi/mi-cmd-env.c (env_cli_command): Ditto.
+	* maint.c (print_section_table): Ditto.
+	* infrun.c (set_follow_fork_mode_command): Ditto.
+
+2004-01-18  Mark Kettenis  <kettenis@gnu.org>
+
+	* dwarf2-frame.c (execute_cfa_program): Move DWA_CFA_nop before
+	DW_CFA_def_cfa_exporession.  Add support for
+	DW_CFA_offset_extendend_sf, DW_CFA_def_cfa_sf and
+	DW_CFA_def_cfa_offset_sf.  This should fix PR backtrace/1391.
+
+2004-01-18  Andrew Cagney  <cagney@redhat.com>
+
+	* ocd.c: Update copyright.
+	(bdm_read_register_command): Delete unused function.
+	(_initialize_remote_ocd): Delete commented out reference.
+	(get_quoted_char, reset_packet): Delete #if0ed function.
+	(output_packet, put_quoted_char): Delete #if0ed function.
+	(stu_put_packet, stu_get_packet): Delete #if0ed function.
+	(ocd_start_remote): Delete #if0ed code, remove #if1 wrapper.
+	(BDM_BREAKPOINT): Delete #if0ed macro.
+	(remote_timeout): Delete #if0ed variable.
+
+2004-01-18  Mark Kettenis  <kettenis@gnu.org>
+
+	* Makefile.in (ALLDEPFILES): Remove core-sol2.c.
+	(core-sol2.o): Remove dependency.
+	* core-sol2.c: Remove file.
+
+2004-01-17  Andrew Cagney  <cagney@redhat.com>
+
+	* mdebugread.c (compare_blocks): Make addr_diff a LONGEST.
+	* block.h: Make GLOBAL_BLOCK, STATIC_BLOCK, FIRST_LOCAL_BLOOCK
+	enums.
+
+2004-01-17  Daniel Jacobowitz  <drow@mvista.com>
+
+	* remote.c: Update copyright years.
+
+2004-01-17  Daniel Jacobowitz  <drow@mvista.com>
+
+	* remote.c (remote_vcont_resume): Use xstrprintf instead of sprintf.
+
+2004-01-17  Andrew Cagney  <cagney@redhat.com>
+
+	* mdebugread.c: Update copyright.
+	(parse_symbol): Replace DEPRECATED_STREQ with strcmp.
+	(parse_type, parse_procedure): Ditto.
+	(parse_partial_symbols, psymtab_to_symtab_1): Ditto.
+
+	* cris-tdep.c (cris_store_struct_return): Put back accidently
+	deleted function.
+
+	* gdbarch.sh: Update copyright year.
+	* gdbarch.h, gdbarch.c: Re-generate.
+
+2004-01-17  Daniel Jacobowitz  <drow@mvista.com>
+
+	Suggested by George Anzinger.
+	* dwarf2expr.c (execute_stack_op): Fetch the second item from the
+	correct stack offset.  Include unknown opcode numbers in the error
+	message.
+
+2004-01-17  Andrew Cagney  <cagney@redhat.com>
+
+	* x86-64-tdep.c (x86_64_init_abi): No need to clear
+	extract_struct_value_address, i386 does not set it.
+	* sparc64-tdep.c (sparc64_init_abi): Do not set
+	extract_struct_value_address, never called.
+	(sparc64_extract_struct_value_address): Delete function.
+	* m68hc11-tdep.c: Update copyright.
+	(m68hc11_gdbarch_init): Delete redundant assignment of
+	extract_struct_value_address.
+	* i386-tdep.c: Update copyright.
+	(i386_gdbarch_init): Do not set extract_struct_value_address,
+	never called.
+	(i386_extract_struct_value_address): Delete function.
+	* sparc-tdep.c (sparc32_gdbarch_init): Do not set
+	extract_struct_value_address, never called.
+	(sparc32_extract_struct_value_address): #if 0 function.  Add
+	comments explaining its future.
+
+2004-01-17  Daniel Jacobowitz  <drow@mvista.com>
+
+	* arm-tdep.c (arm_write_pc): New function.
+	(arm_gdbarch_init): Call set_gdbarch_write_pc.
+
+2004-01-17  Daniel Jacobowitz  <drow@mvista.com>
+
+	* breakpoint.c (must_shift_inst_regs): Delete.
+	(bpstat_stop_status): Delete references to DECR_PC_AFTER_HW_BREAK
+	and SHIFT_INST_REGS.
+	* infcmd.c (step_1, step_1_continuation): Delete references to
+	SHIFT_INST_REGS.
+	* infrun.c (keep_going): Likewise.
+	* target.h (DECR_PC_AFTER_HW_BREAK): Don't define.
+	* config/i386/nm-i386.h (DECR_PC_AFTER_HW_BREAK): Likewise.
+
+2004-01-17  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS): Delete.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* infcmd.c (print_return_value): Delete reference to
+	DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS.
+
+	* cris-tdep.c (cris_gdbarch_init): Do not set
+	deprecated_extract_struct_value_address.
+
+	* xstormy16-tdep.c: Update copyright.
+	(xstormy16_extract_struct_value_address): Update to current
+	extract struct value address interface.
+	(xstormy16_gdbarch_init): Set extract_struct_value_address.
+	* sh64-tdep.c (sh64_extract_struct_value_address): Update to
+	current extract struct value address interface.
+	(sh64_gdbarch_init): Set extract_struct_value_address.
+
+	* cris-tdep.c: Update copyright.
+	(cris_extract_struct_value_address): Delete function.
+	(struct_return_address): Delete variable.
+	(cris_store_struct_return): Do not set struct_return_address.
+
+	* mcore-tdep.c: Update copyright.
+	(mcore_extract_struct_value_address): Delete function.  Update
+	comments.
+	(mcore_gdbarch_init): Update.
+	* mn10300-tdep.c: Update copyright.
+	(mn10300_extract_struct_value_address): Delete function.
+	(mn10300_gdbarch_init): Update.
+	* v850-tdep.c: Update copyright.
+	(v850_extract_struct_value_address): Delete.
+	(v850_gdbarch_init): Update.
+	* ns32k-tdep.c: Update copyright.
+	(ns32k_extract_struct_value_address): Delete.
+	(ns32k_gdbarch_init): Update.
+	* hppa-tdep.c (hppa_extract_struct_value_address): Delete.
+	(hppa_gdbarch_init): Update.
+	* vax-tdep.c: Update copyright.
+	(vax_extract_struct_value_address): Delete.
+	(vax_gdbarch_init): Update.
+
+	* gdbarch.sh (DEPRECATED_NPC_REGNUM): Delete.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* procfs.c (procfs_fetch_registers): Delete reference to
+	DEPRECATED_NPC_REGNUM.
+	(procfs_store_registers): Ditto.
+	* regcache.c (generic_target_write_pc): Simplify.
+	* lynx-nat.c: Delete #ifdef SPARC code.  Not used.
+
+	* core-sol2.c (fetch_core_registers): Replace
+	DEPRECATED_NPC_REGNUM with equivalent tdep value.
+
+	* hppa-tdep.c: Update copyright year.
+	(hppa_target_write_pc): Use PCOQ_TAIL_REGNUM instead of
+	NPC_REGNUM.
+	(hppa_gdbarch_init): Do not set deprecated_npc_regnum.
+
+	* mips-tdep.c (mips_write_pc): New function.
+	(mips_gdbarch_init): Set "write_pc" to "mips_write_pc".
+	(mips_read_pc): Use mips_regnum instead of PC_REGNUM.
+	(mips_find_saved_regs, mips_software_single_step: Ditto.
+	(mips_frame_saved_pc, mips_frame_saved_pc): Ditto.
+	mips_init_extra_frame_info, mips_pop_frame): Ditto.
+
+2004-01-17  Andrew Cagney  <cagney@redhat.com>
+
+	* mips-tdep.c: Re-indent.  Group functions by ABI.
+
+2004-01-17  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (DECR_PC_AFTER_BREAK): Make zero the default.
+	* gdbarch.c: Re-generate.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Do not set
+	DECR_PC_AFTER_BREAK to zero.
+	* vax-tdep.c (vax_gdbarch_init): Ditto.
+	* v850-tdep.c (v850_gdbarch_init): Ditto.
+	* sparc-tdep.c (sparc32_gdbarch_init): Ditto.
+	* sh64-tdep.c (sh64_gdbarch_init): Ditto.
+	* sh-tdep.c (sh_gdbarch_init): Ditto.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Ditto.
+	* ns32k-tdep.c (ns32k_gdbarch_init): Ditto.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Ditto.
+	* mips-tdep.c (mips_gdbarch_init): Ditto.
+	* mcore-tdep.c (mcore_gdbarch_init): Ditto.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Ditto.
+	* m32r-tdep.c (m32r_gdbarch_init): Ditto.
+	* ia64-tdep.c (ia64_gdbarch_init): Ditto.
+	* i386-interix-tdep.c (i386_interix_init_abi): Ditto.
+	* hppa-tdep.c (hppa_gdbarch_init): Ditto.
+	* h8300-tdep.c (h8300_gdbarch_init): Ditto.
+	* frv-tdep.c (frv_gdbarch_init): Ditto.
+	* cris-tdep.c (cris_gdbarch_init): Ditto.
+	* avr-tdep.c (avr_gdbarch_init): Ditto.
+	* arm-tdep.c (arm_gdbarch_init): Ditto.
+	* i386-nto-tdep.c (i386nto_init_abi): Add comment.
+
+2004-01-17  J. Brobecker  <brobecker@gnat.com>
+
+	* dwarf2read.c (dwarf2_non_const_array_bound_ignored_complaint):
+	Delete, no longer used.
+	(read_subrange_type): New function, mostly extracted from
+	read_array_type().
+	(read_array_type): Replace extracted code by call to
+	read_subrange_type().
+	(dwarf2_get_attr_constant_value): New function.
+	(scan_partial_symbols): Add handling for DW_TAG_subrange_type.
+	(add_partial_symbol): Likewise.
+	(process_die): Likewise.
+	(new_symbol): Likewise.
+	(read_type_die): Likewise.
+
+2004-01-16  Andrew Cagney  <cagney@redhat.com>
+
+	* symfile.c: Update copyright year.
+	(compare_symbols): Delete unused function.
+	* stabsread.c: Update copyright year.
+	(lrs_general_complaint): Delete unused function.
+	(ref_search_value): Ditto.
+	(get_substring): Delete declaration.
+	* sh64-tdep.c: Update copyright year.
+	(sh64_get_gdb_regnum): Delete unused function.
+	* dwarf2read.c (dwarf2_unsupported_at_frame_base_complaint):
+	Delete unused function.
+
+2004-01-17  Mark Kettenis  <kettenis@gnu.org>
+
+	* defs.h (gdb_osabi): Add GDB_OSABI_OPENBSD_ELF.
+	* osabi.c (gdb_osabi_names): Add "OpenBSD ELF".
+
+2004-01-16  Andrew Cagney  <cagney@redhat.com>
+
+	Changes from Peter Schauer.
+	* rs6000-tdep.c: Update copyright year.
+	(rs6000_push_dummy_call): Update the stack pointer before
+	accessing the corresponding stack region.
+	* rs6000-nat.c: Update copyright year.
+	(set_host_arch): Set "info.abfd" to "exec_bfd".
+
+2004-01-15  Mark Kettenis  <kettenis@gnu.org>
+
+	* blockframe.c: Update copyright year.
+	(inside_entry_func): Don't treat a zero PC specially.
+
+2004-01-14  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gcore.c (gcore_copy_callback): Use paddr_d to print size
+	variable.
+	(gcore_create_callback): Ditto.  Skip any memory segment that has
+	no permissions set.
+
+2004-01-14  David Carlton  <carlton@kealia.com>
+
+	Change symbols for C++ nested types to contain the fully qualified
+	name, if possible.  (At least in the DWARF-2 case.)  Partial fix
+	for PR's c++/57, c++/488, c++/539, c++/573, c++/609, c++/832,
+	c++/895.
+	* c-exp.y (qualified_type): Handle types nested within classes.
+	* cp-namespace.c: Update comments.
+	(cp_set_block_scope): Delete #if 0.
+	(cp_lookup_nested_type): Handle types nested within classes.
+	* dwarf2read.c: (scan_partial_symbols): Call add_partial_structure
+	when appropriate.
+	(add_partial_symbol): Add the name of the enclosing namespace to
+	types.
+	(pdi_needs_namespace): New.
+	(add_partial_namespace): Tweak comment.
+	(add_partial_structure): New.
+	(psymtab_to_symtab_1): Initialize processing_current_prefix
+	here...
+	(process_die): instead of here.
+	(read_structure_scope): Try to figure out the name of the class or
+	namespace that the structure might be defined within.
+	(read_enumeration): Generate fully-qualified names, if possible.
+	(read_namespace): Don't set name to NULL.
+	(die_specification): New.
+	(new_symbol): Generate fully-qualified names for types.
+	(read_type_die): Determine appropriate prefix.
+	(determine_prefix): New.
+	(typename_concat): New.
+	(class_name): New.
+	* valops.c (value_aggregate_elt): Pass NOSIDE to
+	value_struct_elt_for_reference.
+	(value_struct_elt_for_reference): Make static, add NOSIDE
+	parameter, call value_maybe_namespace_elt as a last resort.
+	(value_namespace_elt): Break out code into
+	value_maybe_namespace_elt.
+	(value_maybe_namespace_elt): New.
+
+2004-01-12  Andrew Cagney  <cagney@redhat.com>
+
+	* mips-tdep.c (mips_convert_register_p): Handle both raw and
+	cooked floating-point registers.
+	(mips_gdbarch_init): Set convert_register_p, register_to_value,
+	and value_to_register.
+
+2004-01-13  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (FUNCTION_START_OFFSET): Make zero the default.
+	* gdbarch.c: Re-generate.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Do not set
+	FUNCTION_START_OFFSET.
+	* v850-tdep.c (v850_gdbarch_init): Ditto.
+	* sparc-tdep.c (sparc32_gdbarch_init): Ditto.
+	* sh64-tdep.c (sh64_gdbarch_init): Ditto.
+	* sh-tdep.c (sh_gdbarch_init): Ditto.
+	* s390-tdep.c (s390_gdbarch_init): Ditto.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Ditto.
+	* ns32k-tdep.c (ns32k_gdbarch_init): Ditto.
+	* mn10300-tdep.c (mn10300_gdbarch_init): Ditto.
+	* mips-tdep.c (mips_gdbarch_init): Ditto.
+	* mcore-tdep.c (mcore_gdbarch_init): Ditto.
+	* m68k-tdep.c (m68k_gdbarch_init): Ditto.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Ditto.
+	* m32r-tdep.c (m32r_gdbarch_init): Ditto.
+	* ia64-tdep.c (ia64_gdbarch_init): Ditto.
+	* i386-tdep.c (i386_gdbarch_init): Ditto.
+	* hppa-tdep.c (hppa_gdbarch_init): Ditto.
+	* h8300-tdep.c (h8300_gdbarch_init): Ditto.
+	* frv-tdep.c (frv_gdbarch_init): Ditto.
+	* d10v-tdep.c (d10v_gdbarch_init): Ditto.
+	* cris-tdep.c (cris_gdbarch_init): Ditto.
+	* avr-tdep.c (avr_gdbarch_init): Ditto.
+	* arm-tdep.c (arm_gdbarch_init): Ditto.
+	* alpha-tdep.c (alpha_gdbarch_init): Ditto.
+
+2004-01-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* infrun.c (follow_fork_mode_ask): Remove.
+	(follow_fork_mode_kind_names): Remove follow_fork_mode_ask.
+	(follow_fork): Simplify and remove internal error for
+	follow_fork_mode_ask.
+	(_initialize_infrun): Update "set follow-fork-mode" help text.
+
+2004-01-13  Andrew Cagney  <cagney@redhat.com>
+
+	* configure.in: Update copyright year.
+	(build_warnings): Add -Wunused-label.
+	* configure: Re-generate.
+
 2004-01-12  Andrew Cagney  <cagney@redhat.com>
 
 	* exec.h (exec_ops): Make "extern".
@@ -21,7 +1585,7 @@
 	* mi/ChangeLog-1999-2003: New file.
 	* tui/ChangeLog: Delete file.  Renamed to ...
 	* tui/ChangeLog-1998-2003: New file.
-	
+
 2004-01-11  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparc64nbsd-tdep.c: Include "regset.h".
@@ -132,7 +1696,7 @@
 	* cp-namespace.c: Rename processing_current_namespace to
 	processing_current_prefix.
         Update copyright year.
-	
+
 2004-01-09  Andrew Cagney  <cagney@redhat.com>
 
 	* jv-valprint.c, ser-unix.c: Add missing copyright years.
@@ -225,9 +1789,9 @@
 	* disasm.c: Update copyright to include 2004.
 	(do_mixed_source_and_assembly): For uiout asm list
 	and tuple cleanups, initialize to null_cleanup instead of
-	NULL and do so prior to loop.  Only reset when we close off 
+	NULL and do so prior to loop.  Only reset when we close off
 	the tuple/list.  Move check for whether to close off the
-	asm tuple/list to after dump_insns call where it will be run 
+	asm tuple/list to after dump_insns call where it will be run
 	on each loop iteration.
 
 2004-01-05  Andrew Cagney  <cagney@redhat.com>
@@ -421,7 +1985,7 @@
 	tm-vxsparc.h.
 	* config/sparc/vxworks.mt: New file, based on recently removed
 	vxworks.mt.
-	
+
 2004-01-03  J. Brobecker  <brobecker@gnat.com>
 
 	* infrun.c (handle_step_into_function): New function.
@@ -513,7 +2077,7 @@
 	(_initialize_sparc64fbsd_nat): Remove initialization of
 	sparcbsd_supply_reg, sparcbsd_fill_reg, sparcbsd_supply_fpreg,
 	sparcbsd_fill_fpreg, sparcbsd_reg_supplies_p,
-	sparcbsd_fpreg_supplies_p.  Initialize sparc_gregset.	
+	sparcbsd_fpreg_supplies_p.  Initialize sparc_gregset.
 	* sparc64fbsd-tdep.c: Update copyright year.  Include "frame.h",
 	"frame-unwind.h", "trad-frame.h" and "gdb_assert.h".
 	(sparc64fbsd_r_global_offset, sparc64fbsd_r_out_offset)

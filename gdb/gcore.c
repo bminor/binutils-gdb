@@ -1,6 +1,6 @@
 /* Generate a core file for the inferior process.
 
-   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -314,6 +314,20 @@ gcore_create_callback (CORE_ADDR vaddr, unsigned long size,
   asection *osec;
   flagword flags = SEC_ALLOC | SEC_HAS_CONTENTS | SEC_LOAD;
 
+  /* If the memory segment has no permissions set, ignore it, otherwise
+     when we later try to access it for read/write, we'll get an error
+     or jam the kernel.  */
+  if (read == 0 && write == 0 && exec == 0)
+    {
+      if (info_verbose)
+        {
+          fprintf_filtered (gdb_stdout, "Ignore segment, %s bytes at 0x%s\n",
+                           paddr_d (size), paddr_nz (vaddr));
+        }
+
+      return 0;
+    }
+
   if (write == 0)
     {
       /* See if this region of memory lies inside a known file on disk.
@@ -364,8 +378,8 @@ gcore_create_callback (CORE_ADDR vaddr, unsigned long size,
 
   if (info_verbose)
     {
-      fprintf_filtered (gdb_stdout, "Save segment, %lld bytes at 0x%s\n",
-			(long long) size, paddr_nz (vaddr));
+      fprintf_filtered (gdb_stdout, "Save segment, %s bytes at 0x%s\n",
+			paddr_d (size), paddr_nz (vaddr));
     }
 
   bfd_set_section_size (obfd, osec, size);
@@ -450,8 +464,8 @@ gcore_copy_callback (bfd *obfd, asection *osec, void *ignored)
 
   if (target_read_memory (bfd_section_vma (obfd, osec),
 			  memhunk, size) != 0)
-    warning ("Memory read failed for corefile section, %ld bytes at 0x%s\n",
-	     (long) size, paddr (bfd_section_vma (obfd, osec)));
+    warning ("Memory read failed for corefile section, %s bytes at 0x%s\n",
+	     paddr_d (size), paddr (bfd_section_vma (obfd, osec)));
   if (!bfd_set_section_contents (obfd, osec, memhunk, 0, size))
     warning ("Failed to write corefile contents (%s).",
 	     bfd_errmsg (bfd_get_error ()));

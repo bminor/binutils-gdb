@@ -77,3 +77,6 @@ extern void lin_thread_get_thread_signals (sigset_t *mask);
 #define CHILD_POST_ATTACH
 #define CHILD_FOLLOW_FORK
 #define KILL_INFERIOR
+
+#define NATIVE_XFER_AUXV	procfs_xfer_auxv
+#include "auxv.h"		/* Declares it. */

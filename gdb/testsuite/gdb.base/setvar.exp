@@ -1,4 +1,5 @@
-#   Copyright 1997, 1999, 2000 Free Software Foundation, Inc.
+# Copyright 1993, 1994, 1995, 1996, 1997, 1999, 2000, 2001, 2004
+# Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -329,12 +330,8 @@ gdb_test "print *(v_signed_short_pointer+1)" ".\[0-9\]*.*=.*-456"
 gdb_test "set v_unsigned_short_pointer=v_unsigned_short_array" ""
 gdb_test "set variable *(v_unsigned_short_pointer)=123" ""
 gdb_test "set variable *(v_unsigned_short_pointer+1)=-456" ""
-# DTS 10060CLLbs - bad type info from cc
-if {$hp_cc_compiler} {setup_xfail hppa*-*-*11* 10060CLLbs}
 gdb_test "print v_unsigned_short_array" ".\[0-9\]* =.*\\{123,.*65080\\}" \
     "set variable unsigned short pointer"
-# DTS 10060CLLbs - bad type info from cc
-if {$hp_cc_compiler} {setup_xfail hppa*-*-*11* 10060CLLbs}
 gdb_test "print *(v_unsigned_short_pointer+1)" ".\[0-9\]* = 65080"
 #
 # test "set variable" for type "int *"

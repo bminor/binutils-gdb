@@ -1,6 +1,6 @@
 /* Common target dependent code for GDB on ARM systems.
    Copyright 1988, 1989, 1991, 1992, 1993, 1995, 1996, 1998, 1999, 2000,
-   2001, 2002, 2003 Free Software Foundation, Inc.
+   2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -2689,6 +2689,21 @@ arm_coff_make_msymbol_special(int val, struct minimal_symbol *msym)
     MSYMBOL_SET_SPECIAL (msym);
 }
 
+static void
+arm_write_pc (CORE_ADDR pc, ptid_t ptid)
+{
+  write_register_pid (ARM_PC_REGNUM, pc, ptid);
+
+  /* If necessary, set the T bit.  */
+  if (arm_apcs_32)
+    {
+      CORE_ADDR val = read_register_pid (ARM_PS_REGNUM, ptid);
+      if (arm_pc_is_thumb (pc))
+	write_register_pid (ARM_PS_REGNUM, val | 0x20, ptid);
+      else
+	write_register_pid (ARM_PS_REGNUM, val & ~(CORE_ADDR) 0x20, ptid);
+    }
+}
 
 static enum gdb_osabi
 arm_elf_osabi_sniffer (bfd *abfd)
@@ -2851,6 +2866,8 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_push_dummy_call (gdbarch, arm_push_dummy_call);
 
+  set_gdbarch_write_pc (gdbarch, arm_write_pc);
+
   /* Frame handling.  */
   set_gdbarch_unwind_dummy_id (gdbarch, arm_unwind_dummy_id);
   set_gdbarch_unwind_pc (gdbarch, arm_unwind_pc);
@@ -2866,9 +2883,6 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_smash_text_address (gdbarch, arm_smash_text_address);
   set_gdbarch_addr_bits_remove (gdbarch, arm_addr_bits_remove);
 
-  /* Offset from address of function to start of its code.  */
-  set_gdbarch_function_start_offset (gdbarch, 0);
-
   /* Advance PC across function entry code.  */
   set_gdbarch_skip_prologue (gdbarch, arm_skip_prologue);
 
@@ -2880,7 +2894,6 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Breakpoint manipulation.  */
   set_gdbarch_breakpoint_from_pc (gdbarch, arm_breakpoint_from_pc);
-  set_gdbarch_decr_pc_after_break (gdbarch, 0);
 
   /* Information about registers, etc.  */
   set_gdbarch_print_float_info (gdbarch, arm_print_float_info);
@@ -2910,8 +2923,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_extract_return_value (gdbarch, arm_extract_return_value);
   set_gdbarch_store_return_value (gdbarch, arm_store_return_value);
   set_gdbarch_use_struct_convention (gdbarch, arm_use_struct_convention);
-  set_gdbarch_extract_struct_value_address (gdbarch,
-					    arm_extract_struct_value_address);
+  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, arm_extract_struct_value_address);
 
   /* Single stepping.  */
   /* XXX For an RDI target we should ask the target if it can single-step.  */

@@ -1,4 +1,4 @@
-# Copyright 2002, 2003 Free Software Foundation, Inc.
+# Copyright 2002, 2003, 2004 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ set bug_id 0
 # Single-threaded test case
 set testfile "pthreads"
 set srcfile  ${testfile}.c
-set binfile  ${objdir}/${subdir}/${testfile}
+set binfile  ${objdir}/${subdir}/gcore-${testfile}
 
 if [istarget "*-*-linux"] then {
     set target_cflags "-D_MIT_POSIX_THREADS"
@@ -78,7 +78,7 @@ gdb_expect {
     }
 }
 
-if { ! [ runto main ] } then {
+if { ! [ runto_main ] } then {
     gdb_suppress_entire_file "Run to main failed, so all tests in this file will automatically fail."
 }
 

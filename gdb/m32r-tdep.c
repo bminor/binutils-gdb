@@ -75,9 +75,9 @@ m32r_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
   return sp & ~3;
 }
 
-/* Should we use EXTRACT_STRUCT_VALUE_ADDRESS instead of
-   EXTRACT_RETURN_VALUE?  GCC_P is true if compiled with gcc
-   and TYPE is the type (which is known to be struct, union or array).
+/* Should we use DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS instead of
+   EXTRACT_RETURN_VALUE?  GCC_P is true if compiled with gcc and TYPE
+   is the type (which is known to be struct, union or array).
 
    The m32r returns anything less than 8 bytes in size in
    registers. */
@@ -939,14 +939,11 @@ m32r_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_extract_return_value (gdbarch, m32r_extract_return_value);
   set_gdbarch_push_dummy_call (gdbarch, m32r_push_dummy_call);
   set_gdbarch_store_return_value (gdbarch, m32r_store_return_value);
-  set_gdbarch_extract_struct_value_address (gdbarch,
-					    m32r_extract_struct_value_address);
+  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, m32r_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, m32r_use_struct_convention);
 
   set_gdbarch_skip_prologue (gdbarch, m32r_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
-  set_gdbarch_decr_pc_after_break (gdbarch, 0);
-  set_gdbarch_function_start_offset (gdbarch, 0);
   set_gdbarch_breakpoint_from_pc (gdbarch, m32r_breakpoint_from_pc);
   set_gdbarch_memory_insert_breakpoint (gdbarch,
 					m32r_memory_insert_breakpoint);

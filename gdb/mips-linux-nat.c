@@ -20,6 +20,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include "mips-tdep.h"
 
 /* Pseudo registers can not be read.  ptrace does not provide a way to
    read (or set) PS_REGNUM, and there's no point in reading or setting

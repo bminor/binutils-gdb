@@ -477,7 +477,7 @@ get_core_register_section (char *name,
     }
 
   gdb_assert (core_vec);
-  core_vec->core_read_registers (contents, size, which, 
+  core_vec->core_read_registers (contents, size, which,
 				 ((CORE_ADDR)
 				  bfd_section_vma (core_bfd, section)));
 }
@@ -515,6 +515,63 @@ core_files_info (struct target_ops *t)
   print_section_info (t, core_bfd);
 }
 
+static LONGEST
+core_xfer_partial (struct target_ops *ops, enum target_object object,
+		   const char *annex, void *readbuf,
+		   const void *writebuf, ULONGEST offset, LONGEST len)
+{
+  switch (object)
+    {
+    case TARGET_OBJECT_MEMORY:
+      if (readbuf)
+	return (*ops->to_xfer_memory) (offset, readbuf, len, 0/*write*/,
+				       NULL, ops);
+      if (writebuf)
+	return (*ops->to_xfer_memory) (offset, readbuf, len, 1/*write*/,
+				       NULL, ops);
+      return -1;
+
+    case TARGET_OBJECT_AUXV:
+      if (readbuf)
+	{
+	  /* When the aux vector is stored in core file, BFD
+	     represents this with a fake section called ".auxv".  */
+
+	  sec_ptr section;
+	  bfd_size_type size;
+	  char *contents;
+
+	  section = bfd_get_section_by_name (core_bfd, ".auxv");
+	  if (section == NULL)
+	    return -1;
+
+	  size = bfd_section_size (core_bfd, section);
+	  if (offset >= size)
+	    return 0;
+	  size -= offset;
+	  if (size > len)
+	    size = len;
+	  if (size > 0 &&
+	      ! bfd_get_section_contents (core_bfd, section, readbuf,
+					  (file_ptr) offset, size))
+	    {
+	      warning ("Couldn't read NT_AUXV note in core file.");
+	      return -1;
+	    }
+
+	  return size;
+	}
+      return -1;
+
+    default:
+      if (ops->beneath != NULL)
+	return ops->beneath->to_xfer_partial (ops->beneath, object, annex,
+					      readbuf, writebuf, offset, len);
+      return -1;
+    }
+}
+
+
 /* If mourn is being called in all the right places, this could be say
    `gdb internal error' (since generic_mourn calls breakpoint_init_inferior).  */
 
@@ -551,6 +608,7 @@ init_core_ops (void)
   core_ops.to_attach = find_default_attach;
   core_ops.to_detach = core_detach;
   core_ops.to_fetch_registers = get_core_registers;
+  core_ops.to_xfer_partial = core_xfer_partial;
   core_ops.to_xfer_memory = xfer_memory;
   core_ops.to_files_info = core_files_info;
   core_ops.to_insert_breakpoint = ignore;

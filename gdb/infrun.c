@@ -2,8 +2,8 @@
    process.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
-   Foundation, Inc.
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free
+   Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -60,9 +60,6 @@ static void resume_cleanups (void *);
 static int hook_stop_stub (void *);
 
 static void delete_breakpoint_current_contents (void *);
-
-static void set_follow_fork_mode_command (char *arg, int from_tty,
-					  struct cmd_list_element *c);
 
 static int restore_selected_frame (void *);
 
@@ -340,12 +337,10 @@ static struct
 }
 pending_follow;
 
-static const char follow_fork_mode_ask[] = "ask";
 static const char follow_fork_mode_child[] = "child";
 static const char follow_fork_mode_parent[] = "parent";
 
 static const char *follow_fork_mode_kind_names[] = {
-  follow_fork_mode_ask,
   follow_fork_mode_child,
   follow_fork_mode_parent,
   NULL
@@ -357,16 +352,7 @@ static const char *follow_fork_mode_string = follow_fork_mode_parent;
 static int
 follow_fork (void)
 {
-  const char *follow_mode = follow_fork_mode_string;
-  int follow_child = (follow_mode == follow_fork_mode_child);
-
-  /* Or, did the user not know, and want us to ask? */
-  if (follow_fork_mode_string == follow_fork_mode_ask)
-    {
-      internal_error (__FILE__, __LINE__,
-		      "follow_inferior_fork: \"ask\" mode not implemented");
-      /* follow_mode = follow_fork_mode_...; */
-    }
+  int follow_child = (follow_fork_mode_string == follow_fork_mode_child);
 
   return target_follow_fork (follow_child);
 }
@@ -1327,6 +1313,79 @@ handle_step_into_function (struct execution_control_state *ecs)
   return;
 }
 
+static void
+adjust_pc_after_break (struct execution_control_state *ecs)
+{
+  CORE_ADDR stop_pc;
+
+  /* If this target does not decrement the PC after breakpoints, then
+     we have nothing to do.  */
+  if (DECR_PC_AFTER_BREAK == 0)
+    return;
+
+  /* If we've hit a breakpoint, we'll normally be stopped with SIGTRAP.  If
+     we aren't, just return.
+
+     We assume that waitkinds other than TARGET_WAITKIND_STOPPED are not
+     affected by DECR_PC_AFTER_BREAK.  Other waitkinds which are implemented
+     by software breakpoints should be handled through the normal breakpoint
+     layer.
+     
+     NOTE drow/2004-01-31: On some targets, breakpoints may generate
+     different signals (SIGILL or SIGEMT for instance), but it is less
+     clear where the PC is pointing afterwards.  It may not match
+     DECR_PC_AFTER_BREAK.  I don't know any specific target that generates
+     these signals at breakpoints (the code has been in GDB since at least
+     1992) so I can not guess how to handle them here.
+     
+     In earlier versions of GDB, a target with HAVE_NONSTEPPABLE_WATCHPOINTS
+     would have the PC after hitting a watchpoint affected by
+     DECR_PC_AFTER_BREAK.  I haven't found any target with both of these set
+     in GDB history, and it seems unlikely to be correct, so
+     HAVE_NONSTEPPABLE_WATCHPOINTS is not checked here.  */
+
+  if (ecs->ws.kind != TARGET_WAITKIND_STOPPED)
+    return;
+
+  if (ecs->ws.value.sig != TARGET_SIGNAL_TRAP)
+    return;
+
+  /* Find the location where (if we've hit a breakpoint) the breakpoint would
+     be.  */
+  stop_pc = read_pc_pid (ecs->ptid) - DECR_PC_AFTER_BREAK;
+
+  /* If we're software-single-stepping, then assume this is a breakpoint.
+     NOTE drow/2004-01-17: This doesn't check that the PC matches, or that
+     we're even in the right thread.  The software-single-step code needs
+     some modernization.
+
+     If we're not software-single-stepping, then we first check that there
+     is an enabled software breakpoint at this address.  If there is, and
+     we weren't using hardware-single-step, then we've hit the breakpoint.
+
+     If we were using hardware-single-step, we check prev_pc; if we just
+     stepped over an inserted software breakpoint, then we should decrement
+     the PC and eventually report hitting the breakpoint.  The prev_pc check
+     prevents us from decrementing the PC if we just stepped over a jump
+     instruction and landed on the instruction after a breakpoint.
+
+     The last bit checks that we didn't hit a breakpoint in a signal handler
+     without an intervening stop in sigtramp, which is detected by a new
+     stack pointer value below any usual function calling stack adjustments.
+
+     NOTE drow/2004-01-17: I'm not sure that this is necessary.  The check
+     predates checking for software single step at the same time.  Also,
+     if we've moved into a signal handler we should have seen the
+     signal.  */
+
+  if ((SOFTWARE_SINGLE_STEP_P () && singlestep_breakpoints_inserted_p)
+      || (software_breakpoint_inserted_here_p (stop_pc)
+	  && !(currently_stepping (ecs)
+	       && prev_pc != stop_pc
+	       && !(step_range_end && INNER_THAN (read_sp (), (step_sp - 16))))))
+    write_pc_pid (stop_pc, ecs->ptid);
+}
+
 /* Given an execution control state that has been freshly filled in
    by an event from the inferior, figure out what it means and take
    appropriate action.  */
@@ -1345,6 +1404,8 @@ handle_inferior_event (struct execution_control_state *ecs)
   /* Cache the last pid/waitstatus. */
   target_last_wait_ptid = ecs->ptid;
   target_last_waitstatus = *ecs->wp;
+
+  adjust_pc_after_break (ecs);
 
   switch (ecs->infwait_state)
     {
@@ -1528,13 +1589,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 
       stop_pc = read_pc ();
 
-      /* Assume that catchpoints are not really software breakpoints.  If
-	 some future target implements them using software breakpoints then
-	 that target is responsible for fudging DECR_PC_AFTER_BREAK.  Thus
-	 we pass 1 for the NOT_A_SW_BREAKPOINT argument, so that
-	 bpstat_stop_status will not decrement the PC.  */
-
-      stop_bpstat = bpstat_stop_status (&stop_pc, 1);
+      stop_bpstat = bpstat_stop_status (stop_pc, ecs->ptid);
 
       ecs->random_signal = !bpstat_explains_signal (stop_bpstat);
 
@@ -1583,13 +1638,7 @@ handle_inferior_event (struct execution_control_state *ecs)
       ecs->saved_inferior_ptid = inferior_ptid;
       inferior_ptid = ecs->ptid;
 
-      /* Assume that catchpoints are not really software breakpoints.  If
-	 some future target implements them using software breakpoints then
-	 that target is responsible for fudging DECR_PC_AFTER_BREAK.  Thus
-	 we pass 1 for the NOT_A_SW_BREAKPOINT argument, so that
-	 bpstat_stop_status will not decrement the PC.  */
-
-      stop_bpstat = bpstat_stop_status (&stop_pc, 1);
+      stop_bpstat = bpstat_stop_status (stop_pc, ecs->ptid);
 
       ecs->random_signal = !bpstat_explains_signal (stop_bpstat);
       inferior_ptid = ecs->saved_inferior_ptid;
@@ -1699,19 +1748,15 @@ handle_inferior_event (struct execution_control_state *ecs)
       /* Check if a regular breakpoint has been hit before checking
          for a potential single step breakpoint. Otherwise, GDB will
          not see this breakpoint hit when stepping onto breakpoints.  */
-      if (breakpoints_inserted
-          && breakpoint_here_p (stop_pc - DECR_PC_AFTER_BREAK))
+      if (breakpoints_inserted && breakpoint_here_p (stop_pc))
 	{
 	  ecs->random_signal = 0;
-	  if (!breakpoint_thread_match (stop_pc - DECR_PC_AFTER_BREAK,
-					ecs->ptid))
+	  if (!breakpoint_thread_match (stop_pc, ecs->ptid))
 	    {
 	      int remove_status;
 
 	      /* Saw a breakpoint, but it was hit by the wrong thread.
 	         Just continue. */
-	      if (DECR_PC_AFTER_BREAK)
-		write_pc_pid (stop_pc - DECR_PC_AFTER_BREAK, ecs->ptid);
 
 	      remove_status = remove_breakpoints ();
 	      /* Did we fail to remove breakpoints?  If so, try
@@ -1724,7 +1769,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	      if (remove_status != 0)
 		{
 		  /* FIXME!  This is obviously non-portable! */
-		  write_pc_pid (stop_pc - DECR_PC_AFTER_BREAK + 4, ecs->ptid);
+		  write_pc_pid (stop_pc + 4, ecs->ptid);
 		  /* We need to restart all the threads now,
 		   * unles we're running in scheduler-locked mode. 
 		   * Use currently_stepping to determine whether to 
@@ -1758,17 +1803,6 @@ handle_inferior_event (struct execution_control_state *ecs)
 	}
       else if (SOFTWARE_SINGLE_STEP_P () && singlestep_breakpoints_inserted_p)
         {
-          /* Readjust the stop_pc as it is off by DECR_PC_AFTER_BREAK
-             compared to the value it would have if the system stepping
-             capability was used. This allows the rest of the code in
-             this function to use this address without having to worry
-             whether software single step is in use or not.  */
-          if (DECR_PC_AFTER_BREAK)
-            {
-              stop_pc -= DECR_PC_AFTER_BREAK;
-              write_pc_pid (stop_pc, ecs->ptid);
-            }
-
           sw_single_step_trap_p = 1;
           ecs->random_signal = 0;
         }
@@ -1900,9 +1934,6 @@ handle_inferior_event (struct execution_control_state *ecs)
          includes evaluating watchpoints, things will come to a
          stop in the correct manner.  */
 
-      if (DECR_PC_AFTER_BREAK)
-	write_pc (stop_pc - DECR_PC_AFTER_BREAK);
-
       remove_breakpoints ();
       registers_changed ();
       target_resume (ecs->ptid, 1, TARGET_SIGNAL_0);	/* Single step */
@@ -1944,15 +1975,20 @@ handle_inferior_event (struct execution_control_state *ecs)
      will be made according to the signal handling tables.  */
 
   /* First, distinguish signals caused by the debugger from signals
-     that have to do with the program's own actions.
-     Note that breakpoint insns may cause SIGTRAP or SIGILL
-     or SIGEMT, depending on the operating system version.
-     Here we detect when a SIGILL or SIGEMT is really a breakpoint
-     and change it to SIGTRAP.  */
+     that have to do with the program's own actions.  Note that
+     breakpoint insns may cause SIGTRAP or SIGILL or SIGEMT, depending
+     on the operating system version.  Here we detect when a SIGILL or
+     SIGEMT is really a breakpoint and change it to SIGTRAP.  We do
+     something similar for SIGSEGV, since a SIGSEGV will be generated
+     when we're trying to execute a breakpoint instruction on a
+     non-executable stack.  This happens for call dummy breakpoints
+     for architectures like SPARC that place call dummies on the
+     stack.  */
 
   if (stop_signal == TARGET_SIGNAL_TRAP
       || (breakpoints_inserted &&
 	  (stop_signal == TARGET_SIGNAL_ILL
+	   || stop_signal == TARGET_SIGNAL_SEGV
 	   || stop_signal == TARGET_SIGNAL_EMT))
       || stop_soon == STOP_QUIETLY
       || stop_soon == STOP_QUIETLY_NO_SIGSTOP)
@@ -1997,29 +2033,8 @@ handle_inferior_event (struct execution_control_state *ecs)
       else
 	{
 	  /* See if there is a breakpoint at the current PC.  */
+	  stop_bpstat = bpstat_stop_status (stop_pc, ecs->ptid);
 
-	  /* The second argument of bpstat_stop_status is meant to help
-	     distinguish between a breakpoint trap and a singlestep trap.
-	     This is only important on targets where DECR_PC_AFTER_BREAK
-	     is non-zero.  The prev_pc test is meant to distinguish between
-	     singlestepping a trap instruction, and singlestepping thru a
-	     jump to the instruction following a trap instruction.
-
-             Therefore, pass TRUE if our reason for stopping is
-             something other than hitting a breakpoint.  We do this by
-             checking that either: we detected earlier a software single
-             step trap or, 1) stepping is going on and 2) we didn't hit
-             a breakpoint in a signal handler without an intervening stop
-             in sigtramp, which is detected by a new stack pointer value
-             below any usual function calling stack adjustments.  */
-	  stop_bpstat =
-            bpstat_stop_status
-              (&stop_pc,
-               sw_single_step_trap_p
-               || (currently_stepping (ecs)
-                   && prev_pc != stop_pc - DECR_PC_AFTER_BREAK
-                   && !(step_range_end
-                        && INNER_THAN (read_sp (), (step_sp - 16)))));
 	  /* Following in case break condition called a
 	     function.  */
 	  stop_print_frame = 1;
@@ -2036,10 +2051,14 @@ handle_inferior_event (struct execution_control_state *ecs)
 
          If someone ever tries to get get call dummys on a
          non-executable stack to work (where the target would stop
-         with something like a SIGSEG), then those tests might need to
-         be re-instated.  Given, however, that the tests were only
+         with something like a SIGSEGV), then those tests might need
+         to be re-instated.  Given, however, that the tests were only
          enabled when momentary breakpoints were not being used, I
-         suspect that it won't be the case.  */
+         suspect that it won't be the case.
+
+	 NOTE: kettenis/2004-02-05: Indeed such checks don't seem to
+	 be necessary for call dummies on a non-executable stack on
+	 SPARC.  */
 
       if (stop_signal == TARGET_SIGNAL_TRAP)
 	ecs->random_signal
@@ -2315,7 +2334,7 @@ process_event_stop_test:
 	     gdb of events.  This allows the user to get control
 	     and place breakpoints in initializer routines for
 	     dynamically loaded objects (among other things).  */
-	  if (stop_on_solib_events)
+	  if (stop_on_solib_events || stop_stack_dummy)
 	    {
 	      stop_stepping (ecs);
 	      return;
@@ -2771,6 +2790,29 @@ step_into_function (struct execution_control_state *ecs)
       && ecs->sal.end < ecs->stop_func_end)
     ecs->stop_func_start = ecs->sal.end;
 
+  /* Architectures which require breakpoint adjustment might not be able
+     to place a breakpoint at the computed address.  If so, the test
+     ``ecs->stop_func_start == stop_pc'' will never succeed.  Adjust
+     ecs->stop_func_start to an address at which a breakpoint may be
+     legitimately placed.
+     
+     Note:  kevinb/2004-01-19:  On FR-V, if this adjustment is not
+     made, GDB will enter an infinite loop when stepping through
+     optimized code consisting of VLIW instructions which contain
+     subinstructions corresponding to different source lines.  On
+     FR-V, it's not permitted to place a breakpoint on any but the
+     first subinstruction of a VLIW instruction.  When a breakpoint is
+     set, GDB will adjust the breakpoint address to the beginning of
+     the VLIW instruction.  Thus, we need to make the corresponding
+     adjustment here when computing the stop address.  */
+     
+  if (gdbarch_adjust_breakpoint_address_p (current_gdbarch))
+    {
+      ecs->stop_func_start
+	= gdbarch_adjust_breakpoint_address (current_gdbarch,
+	                                     ecs->stop_func_start);
+    }
+
   if (ecs->stop_func_start == stop_pc)
     {
       /* We are already there: stop now.  */
@@ -2954,17 +2996,6 @@ keep_going (struct execution_control_state *ecs)
       if (stop_signal == TARGET_SIGNAL_TRAP && !signal_program[stop_signal])
 	stop_signal = TARGET_SIGNAL_0;
 
-#ifdef SHIFT_INST_REGS
-      /* I'm not sure when this following segment applies.  I do know,
-         now, that we shouldn't rewrite the regs when we were stopped
-         by a random signal from the inferior process.  */
-      /* FIXME: Shouldn't this be based on the valid bit of the SXIP?
-         (this is only used on the 88k).  */
-
-      if (!bpstat_explains_signal (stop_bpstat)
-	  && (stop_signal != TARGET_SIGNAL_CHLD) && !stopped_by_random_signal)
-	SHIFT_INST_REGS ();
-#endif /* SHIFT_INST_REGS */
 
       resume (currently_stepping (ecs), stop_signal);
     }
@@ -3123,6 +3154,7 @@ normal_stop (void)
       previous_inferior_ptid = inferior_ptid;
     }
 
+  /* NOTE drow/2004-01-17: Is this still necessary?  */
   /* Make sure that the current_frame's pc is correct.  This
      is a correction for setting up the frame info before doing
      DECR_PC_AFTER_BREAK */
@@ -4075,31 +4107,12 @@ to the user would be loading/unloading of a new library.\n", &setlist), &showlis
   c = add_set_enum_cmd ("follow-fork-mode",
 			class_run,
 			follow_fork_mode_kind_names, &follow_fork_mode_string,
-/* ??rehrauer:  The "both" option is broken, by what may be a 10.20
-   kernel problem.  It's also not terribly useful without a GUI to
-   help the user drive two debuggers.  So for now, I'm disabling
-   the "both" option.  */
-/*                      "Set debugger response to a program call of fork \
-   or vfork.\n\
-   A fork or vfork creates a new process.  follow-fork-mode can be:\n\
-   parent  - the original process is debugged after a fork\n\
-   child   - the new process is debugged after a fork\n\
-   both    - both the parent and child are debugged after a fork\n\
-   ask     - the debugger will ask for one of the above choices\n\
-   For \"both\", another copy of the debugger will be started to follow\n\
-   the new child process.  The original debugger will continue to follow\n\
-   the original parent process.  To distinguish their prompts, the\n\
-   debugger copy's prompt will be changed.\n\
-   For \"parent\" or \"child\", the unfollowed process will run free.\n\
-   By default, the debugger will follow the parent process.",
- */
 			"Set debugger response to a program call of fork \
 or vfork.\n\
 A fork or vfork creates a new process.  follow-fork-mode can be:\n\
   parent  - the original process is debugged after a fork\n\
   child   - the new process is debugged after a fork\n\
-  ask     - the debugger will ask for one of the above choices\n\
-For \"parent\" or \"child\", the unfollowed process will run free.\n\
+The unfollowed process will continue to run.\n\
 By default, the debugger will follow the parent process.", &setlist);
   add_show_from_set (c, &showlist);
 

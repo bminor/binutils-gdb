@@ -70,7 +70,7 @@ switch -glob -- [istarget] {
     }
     "m32r*-*" {
         set asm-arch m32r
-        append link-flags " -Wl,--whole-archive -lgloss -Wl,--no-whole-archive"
+        append link-flags "--whole-archive -lgloss --no-whole-archive"
     }
     "m6811-*-*" {
         set asm-arch m68hc11
@@ -118,24 +118,17 @@ if { "${asm-arch}" == "" } {
     gdb_suppress_entire_file "Assembly source test -- not implemented for this target."
 }
 
-# On FreeBSD and NetBSD, the final link will fail because of
-# unresolved symbols.  It turns out that libc.so references symbols
-# that are normally provided by crt1.o, which isn't linked in since we
-# specify -nostartfiles.  Using -nostdlib doesn't help since
-# target_compile automatically adds -lm.  Linking statically avoids
-# this mess.
-#
-# On Solaris, linking dynamically results in a binary that dumps core.
-#
-if {[istarget "*-*-freebsd*"] || [istarget "*-*-netbsd*"]
-    || [istarget "*-*-solaris2*"]} then {
-    append link-flags " -static"
-}
-
 # On NetBSD/ELF we need a special NetBSD-identifying note section.
 if { [istarget "*-*-netbsdelf*"]
      || [istarget "x86_64-*-netbsd*"] } then {
     set asm-note "netbsd"
+}
+
+# On OpenBSD/ELF we need a similar note section.  We make no attempt
+# of handing a.out here since most OpenBSD/a.out systems use a rather
+# outdated assembler that doesn't assemble this test's code anyway.
+if { [istarget "*-*-openbsd*"] } then {
+    set asm-note "openbsd"
 }
 
 # Watch out, we are invoking the assembler, but the testsuite sets multilib
@@ -164,7 +157,6 @@ remote_exec build "rm -f ${subdir}/note.inc"
 remote_download host ${srcdir}/${subdir}/${asm-note}.inc ${subdir}/note.inc
 
 if { "${asm-flags}" == "" } {
-    #set asm-flags "-Wa,-gstabs,-I${srcdir}/${subdir},-I${objdir}/${subdir}"
     set asm-flags "-gstabs -I${srcdir}/${subdir} -I${objdir}/${subdir}"
 }
 
@@ -175,11 +167,13 @@ if {[target_assemble ${srcdir}/${subdir}/${srcfile2} asmsrc2.o "${asm-flags}"] !
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 
-set opts "debug ldflags=-nostartfiles"
-foreach i ${link-flags} {
-    append opts " ldflags=$i"
-}
-if { [gdb_compile "asmsrc1.o asmsrc2.o" "${binfile}" executable $opts] != "" } {
+# We deliberately don't use gdb_compile here to link together the
+# assembled object files.  Using gdb_compile, and therefore the C
+# compiler, is conceptually wrong, since we're testing raw assembler
+# code here that provides its own startup code.  Using target_link
+# also avoids a lot of problems on many systems, most notably on
+# *-*-*bsd* and *-*-solaris2*.
+if {[target_link "asmsrc1.o asmsrc2.o" "${binfile}" ${link-flags}] != "" } then {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 

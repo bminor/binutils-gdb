@@ -1,7 +1,7 @@
 /* General utility routines for GDB, the GNU debugger.
 
    Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
+   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
    Foundation, Inc.
 
    This file is part of GDB.
@@ -61,10 +61,6 @@
 
 #include <readline/readline.h>
 
-#ifdef USE_MMALLOC
-#include "mmalloc.h"
-#endif
-
 #ifdef NEED_DECLARATION_MALLOC
 extern PTR malloc ();		/* OK: PTR */
 #endif
@@ -97,10 +93,6 @@ static void vfprintf_maybe_filtered (struct ui_file *, const char *,
 static void fputs_maybe_filtered (const char *, struct ui_file *, int);
 
 static void do_my_cleanups (struct cleanup **, struct cleanup *);
-
-#if defined (USE_MMALLOC) && !defined (NO_MMCHECK)
-static void malloc_botch (void);
-#endif
 
 static void prompt_for_continue (void);
 
@@ -628,6 +620,38 @@ do_write (void *data, const char *buffer, long length_buffer)
   ui_file_write (data, buffer, length_buffer);
 }
 
+/* Cause a silent error to occur.  Any error message is recorded
+   though it is not issued.  */
+NORETURN void
+error_silent (const char *string, ...)
+{
+  va_list args;
+  struct ui_file *tmp_stream = mem_fileopen ();
+  va_start (args, string);
+  make_cleanup_ui_file_delete (tmp_stream);
+  vfprintf_unfiltered (tmp_stream, string, args);
+  /* Copy the stream into the GDB_LASTERR buffer.  */
+  ui_file_rewind (gdb_lasterr);
+  ui_file_put (tmp_stream, do_write, gdb_lasterr);
+  va_end (args);
+
+  throw_exception (RETURN_ERROR);
+}
+
+/* Output an error message including any pre-print text to gdb_stderr.  */
+void
+error_output_message (char *pre_print, char *msg)
+{
+  target_terminal_ours ();
+  wrap_here ("");		/* Force out any buffered output */
+  gdb_flush (gdb_stdout);
+  annotate_error_begin ();
+  if (pre_print)
+    fputs_filtered (pre_print, gdb_stderr);
+  fputs_filtered (msg, gdb_stderr);
+  fprintf_filtered (gdb_stderr, "\n");
+}
+
 NORETURN void
 error_stream (struct ui_file *stream)
 {
@@ -961,8 +985,6 @@ request_quit (int signo)
 
 /* Memory management stuff (malloc friends).  */
 
-#if !defined (USE_MMALLOC)
-
 static void *
 mmalloc (void *md, size_t size)
 {
@@ -990,62 +1012,12 @@ mfree (void *md, void *ptr)
   free (ptr);			/* NOTE: GDB's only call to free() */
 }
 
-#endif /* USE_MMALLOC */
-
-#if !defined (USE_MMALLOC) || defined (NO_MMCHECK)
-
+/* This used to do something interesting with USE_MMALLOC.
+ * It can be retired any time.  -- chastain 2004-01-19.  */
 void
 init_malloc (void *md)
 {
 }
-
-#else /* Have mmalloc and want corruption checking */
-
-static void
-malloc_botch (void)
-{
-  fprintf_unfiltered (gdb_stderr, "Memory corruption\n");
-  internal_error (__FILE__, __LINE__, "failed internal consistency check");
-}
-
-/* Attempt to install hooks in mmalloc/mrealloc/mfree for the heap specified
-   by MD, to detect memory corruption.  Note that MD may be NULL to specify
-   the default heap that grows via sbrk.
-
-   Note that for freshly created regions, we must call mmcheckf prior to any
-   mallocs in the region.  Otherwise, any region which was allocated prior to
-   installing the checking hooks, which is later reallocated or freed, will
-   fail the checks!  The mmcheck function only allows initial hooks to be
-   installed before the first mmalloc.  However, anytime after we have called
-   mmcheck the first time to install the checking hooks, we can call it again
-   to update the function pointer to the memory corruption handler.
-
-   Returns zero on failure, non-zero on success. */
-
-#ifndef MMCHECK_FORCE
-#define MMCHECK_FORCE 0
-#endif
-
-void
-init_malloc (void *md)
-{
-  if (!mmcheckf (md, malloc_botch, MMCHECK_FORCE))
-    {
-      /* Don't use warning(), which relies on current_target being set
-         to something other than dummy_target, until after
-         initialize_all_files(). */
-
-      fprintf_unfiltered
-	(gdb_stderr,
-	 "warning: failed to install memory consistency checks; ");
-      fprintf_unfiltered (gdb_stderr,
-			  "configuration should define NO_MMCHECK or MMCHECK_FORCE\n");
-    }
-
-  mmtrace ();
-}
-
-#endif /* Have mmalloc and want corruption checking  */
 
 /* Called when a memory allocation fails, with the number of bytes of
    memory requested in SIZE. */
@@ -1610,12 +1582,14 @@ init_page_info (void)
   if (!tui_get_command_dimension (&chars_per_line, &lines_per_page))
 #endif
     {
-#if defined(__GO32__)
-      lines_per_page = ScreenRows ();
-      chars_per_line = ScreenCols ();
-#else
       int rows, cols;
 
+#if defined(__GO32__)
+      rows = ScreenRows ();
+      cols = ScreenCols ();
+      lines_per_page = rows;
+      chars_per_line = cols;
+#else
       /* Make sure Readline has initialized its terminal settings.  */
       rl_reset_terminal (NULL);
 
@@ -1641,8 +1615,8 @@ init_page_info (void)
       /* If the output is not a terminal, don't paginate it.  */
       if (!ui_file_isatty (gdb_stdout))
 	lines_per_page = UINT_MAX;
-    }
 #endif
+    }
 
   set_screen_size ();
   set_width ();

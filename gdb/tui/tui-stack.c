@@ -244,6 +244,7 @@ tui_get_function_from_frame (struct frame_info *fi)
   return name;
 }
 
+/* tuiShowLocatorContent().   */
 void
 tui_show_locator_content (void)
 {
@@ -326,19 +327,19 @@ void
 tui_show_frame_info (struct frame_info *fi)
 {
   struct tui_win_info * win_info;
-  int i;
+  register int i;
 
   if (fi)
     {
-      int start_line, i;
+      register int start_line, i;
       CORE_ADDR low;
       struct tui_gen_win_info * locator = tui_locator_win_info_ptr ();
-      int source_already_displayed;
+      int sourceAlreadyDisplayed;
       struct symtab_and_line sal;
 
       find_frame_sal (fi, &sal);
 
-      source_already_displayed = sal.symtab != 0
+      sourceAlreadyDisplayed = sal.symtab != 0
         && tui_source_is_displayed (sal.symtab->filename);
       tui_set_locator_info (sal.symtab == 0 ? "??" : sal.symtab->filename,
                             tui_get_function_from_frame (fi),
@@ -372,7 +373,7 @@ tui_show_frame_info (struct frame_info *fi)
 	    {
 	      union tui_line_or_address l;
 	      l.line_no = start_line;
-	      if (!(source_already_displayed
+	      if (!(sourceAlreadyDisplayed
 		    && tui_line_is_displayed (item->locator.line_no, win_info, TRUE)))
 		tui_update_source_window (win_info, sal.symtab, l, TRUE);
 	      else
@@ -412,10 +413,9 @@ tui_show_frame_info (struct frame_info *fi)
     }
 }
 
-/* Function to initialize gdb commands, for tui window stack
-   manipulation.  */
+/* Function to initialize gdb commands, for tui window stack manipulation.  */
 void
-_initialize_tui_stack (void)
+_initialize_tuiStack (void)
 {
   add_com ("update", class_tui, tui_update_command,
            "Update the source window and locator to display the current "

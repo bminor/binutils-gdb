@@ -1,3 +1,36 @@
+2004-01-27  Michael Snyder  <msnyder@redhat.com>
+
+	* sh-opc.h (sh_table): "fsrra", not "fssra".
+
+2004-01-23  Andrew Over <andrew.over@cs.anu.edu.au>
+
+	* sparc-opc.c (fdtox, fstox, fqtox, fxtod, fxtos, fxtoq): Tighten
+	contraints.
+
+2004-01-19  Andrew Over  <andrew.over@cs.anu.edu.au>
+
+	* sparc-opc.c (sparc_opcodes) <f[dsq]tox, fxto[dsq]>: Fix args.
+
+2004-01-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* i386-dis.c (OP_E): Print scale factor on intel mode sib when not
+	1.  Don't print scale factor on AT&T mode when index missing.
+
+2004-01-16  Alexandre Oliva  <aoliva@redhat.com>
+
+	* m10300-opc.c (mov): 8- and 24-bit immediates are zero-extended
+	when loaded into XR registers.
+
+2004-01-14  Richard Sandiford  <rsandifo@redhat.com>
+
+	* frv-desc.h: Regenerate.
+	* frv-desc.c: Regenerate.
+	* frv-opc.c: Regenerate.
+
+2004-01-13  Michael Snyder  <msnyder@redhat.com>
+
+	* sh-dis.c (print_insn_sh): Allocate 4 bytes for insn.
+
 2004-01-09  Paul Brook  <paul@codesourcery.com>
 
 	* arm-opc.h (arm_opcodes): Move generic mcrr after known

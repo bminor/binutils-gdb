@@ -1,5 +1,5 @@
 /* Java language support routines for GDB, the GNU debugger.
-   Copyright 1997, 1998, 1999, 2000, 2003 Free Software Foundation, Inc.
+   Copyright 1997, 1998, 1999, 2000, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -58,7 +58,6 @@ static void java_demangled_signature_copy (char *, char *);
 static struct symtab *get_java_class_symtab (void);
 static char *get_java_utf8_name (struct obstack *obstack, struct value *name);
 static int java_class_is_primitive (struct value *clas);
-static struct type *java_lookup_type (char *signature);
 static struct value *java_value_string (char *ptr, int len);
 
 static void java_emit_char (int c, struct ui_file * stream, int quoter);
@@ -105,19 +104,19 @@ get_java_class_symtab (void)
       class_symtab = allocate_symtab ("<java-classes>", objfile);
       class_symtab->language = language_java;
       bv = (struct blockvector *)
-	obstack_alloc (&objfile->symbol_obstack,
+	obstack_alloc (&objfile->objfile_obstack,
 		       sizeof (struct blockvector) + sizeof (struct block *));
       BLOCKVECTOR_NBLOCKS (bv) = 1;
       BLOCKVECTOR (class_symtab) = bv;
 
       /* Allocate dummy STATIC_BLOCK. */
-      bl = allocate_block (&objfile->symbol_obstack);
-      BLOCK_DICT (bl) = dict_create_linear (&objfile->symbol_obstack,
+      bl = allocate_block (&objfile->objfile_obstack);
+      BLOCK_DICT (bl) = dict_create_linear (&objfile->objfile_obstack,
 					    NULL);
       BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK) = bl;
 
       /* Allocate GLOBAL_BLOCK.  */
-      bl = allocate_block (&objfile->symbol_obstack);
+      bl = allocate_block (&objfile->objfile_obstack);
       BLOCK_DICT (bl) = dict_create_hashed_expandable ();
       BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK) = bl;
       class_symtab->free_func = free_class_block;
@@ -140,7 +139,7 @@ add_class_symbol (struct type *type, CORE_ADDR addr)
 {
   struct symbol *sym;
   sym = (struct symbol *)
-    obstack_alloc (&dynamics_objfile->symbol_obstack, sizeof (struct symbol));
+    obstack_alloc (&dynamics_objfile->objfile_obstack, sizeof (struct symbol));
   memset (sym, 0, sizeof (struct symbol));
   SYMBOL_LANGUAGE (sym) = language_java;
   DEPRECATED_SYMBOL_NAME (sym) = TYPE_TAG_NAME (type);
@@ -187,7 +186,7 @@ java_lookup_class (char *name)
   type = alloc_type (objfile);
   TYPE_CODE (type) = TYPE_CODE_STRUCT;
   INIT_CPLUS_SPECIFIC (type);
-  TYPE_TAG_NAME (type) = obsavestring (name, strlen (name), &objfile->type_obstack);
+  TYPE_TAG_NAME (type) = obsavestring (name, strlen (name), &objfile->objfile_obstack);
   TYPE_FLAGS (type) |= TYPE_FLAG_STUB;
   TYPE ? = addr;
   return type;
@@ -290,7 +289,7 @@ type_from_class (struct value *clas)
   /* if clasloader non-null, prepend loader address. FIXME */
   temp = clas;
   utf8_name = value_struct_elt (&temp, NULL, "name", NULL, "structure");
-  name = get_java_utf8_name (&objfile->type_obstack, utf8_name);
+  name = get_java_utf8_name (&objfile->objfile_obstack, utf8_name);
   for (nptr = name; *nptr != 0; nptr++)
     {
       if (*nptr == '/')
@@ -310,7 +309,7 @@ type_from_class (struct value *clas)
       char *signature = name;
       int namelen = java_demangled_signature_length (signature);
       if (namelen > strlen (name))
-	name = obstack_alloc (&objfile->type_obstack, namelen + 1);
+	name = obstack_alloc (&objfile->objfile_obstack, namelen + 1);
       java_demangled_signature_copy (name, signature);
       name[namelen] = '\0';
       is_array = 1;
@@ -443,7 +442,7 @@ java_link_class_type (struct type *type, struct value *clas)
       temp = field;
       temp = value_struct_elt (&temp, NULL, "name", NULL, "structure");
       TYPE_FIELD_NAME (type, i) =
-	get_java_utf8_name (&objfile->type_obstack, temp);
+	get_java_utf8_name (&objfile->objfile_obstack, temp);
       temp = field;
       accflags = value_as_long (value_struct_elt (&temp, NULL, "accflags",
 						  NULL, "structure"));
@@ -489,7 +488,7 @@ java_link_class_type (struct type *type, struct value *clas)
   TYPE_NFN_FIELDS_TOTAL (type) = nmethods;
   j = nmethods * sizeof (struct fn_field);
   fn_fields = (struct fn_field *)
-    obstack_alloc (&dynamics_objfile->symbol_obstack, j);
+    obstack_alloc (&dynamics_objfile->objfile_obstack, j);
   memset (fn_fields, 0, j);
   fn_fieldlists = (struct fn_fieldlist *)
     alloca (nmethods * sizeof (struct fn_fieldlist));
@@ -514,7 +513,7 @@ java_link_class_type (struct type *type, struct value *clas)
       /* Get method name. */
       temp = method;
       temp = value_struct_elt (&temp, NULL, "name", NULL, "structure");
-      mname = get_java_utf8_name (&objfile->type_obstack, temp);
+      mname = get_java_utf8_name (&objfile->objfile_obstack, temp);
       if (strcmp (mname, "<init>") == 0)
 	mname = unqualified_name;
 
@@ -539,7 +538,7 @@ java_link_class_type (struct type *type, struct value *clas)
 	    {			/* Found an existing method with the same name. */
 	      int l;
 	      if (mname != unqualified_name)
-		obstack_free (&objfile->type_obstack, mname);
+		obstack_free (&objfile->objfile_obstack, mname);
 	      mname = fn_fieldlists[j].name;
 	      fn_fieldlists[j].length++;
 	      k = i - k;	/* Index of new slot. */
@@ -560,7 +559,7 @@ java_link_class_type (struct type *type, struct value *clas)
 
   j = TYPE_NFN_FIELDS (type) * sizeof (struct fn_fieldlist);
   TYPE_FN_FIELDLISTS (type) = (struct fn_fieldlist *)
-    obstack_alloc (&dynamics_objfile->symbol_obstack, j);
+    obstack_alloc (&dynamics_objfile->objfile_obstack, j);
   memcpy (TYPE_FN_FIELDLISTS (type), fn_fieldlists, j);
 
   return type;
@@ -762,19 +761,6 @@ java_demangle_type_signature (char *signature)
   java_demangled_signature_copy (result, signature);
   result[length] = '\0';
   return result;
-}
-
-struct type *
-java_lookup_type (char *signature)
-{
-  switch (signature[0])
-    {
-    case 'L':
-    case '[':
-      error ("java_lookup_type not fully implemented");
-    default:
-      return java_primitive_type (signature[0]);
-    }
 }
 
 /* Return the type of TYPE followed by DIMS pairs of [ ].
@@ -1060,6 +1046,7 @@ const struct language_defn java_language_defn =
   NULL,				/* Language specific skip_trampoline */
   value_of_this,		/* value_of_this */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
+  basic_lookup_transparent_type,/* lookup_transparent_type */
   java_demangle,		/* Language specific symbol demangler */
   {"", "", "", ""},		/* Binary format info */
   {"0%lo", "0", "o", ""},	/* Octal format info */

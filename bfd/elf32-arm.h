@@ -1317,9 +1317,12 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 	 branches in this object should go to it.  */
       if ((r_type != R_ARM_ABS32 && r_type != R_ARM_REL32)
 	  && h != NULL
+	  && splt != NULL
 	  && h->plt.offset != (bfd_vma) -1)
 	{
-	  BFD_ASSERT (splt != NULL);
+	  /* If we've created a .plt section, and assigned a PLT entry to
+	     this function, it should not be known to bind locally.  If
+	     it were, we would have cleared the PLT entry.  */
 	  BFD_ASSERT (!SYMBOL_CALLS_LOCAL (info, h));
 
 	  value = (splt->output_section->vma
@@ -2937,11 +2940,15 @@ elf32_arm_check_relocs (abfd, info, sec, relocs)
 		  h->elf_link_hash_flags |= ELF_LINK_NON_GOT_REF;
 
 		/* We may need a .plt entry if the function this reloc
-		   refers to is in a different object.  */
+		   refers to is in a different object.  We can't tell for
+		   sure yet, because something later might force the
+		   symbol local.  */
 		if (ELF32_R_TYPE (rel->r_info) == R_ARM_PC24
 		    || ELF32_R_TYPE (rel->r_info) == R_ARM_PLT32)
 		  h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
 
+		/* If we create a PLT entry, this relocation will reference
+		   it, even if it's an ABS32 relocation.  */
 		h->plt.refcount += 1;
 	      }
 

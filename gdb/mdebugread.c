@@ -1,7 +1,9 @@
 /* Read a symbol table in ECOFF format (Third-Eye).
-   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001, 2002, 2003
-   Free Software Foundation, Inc.
+
+   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
+   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
+   Foundation, Inc.
+
    Original version contributed by Alessandro Forin (af@cs.cmu.edu) at
    CMU.  Major work by Per Bothner, John Gilmore and Ian Lance Taylor
    at Cygnus Support.
@@ -426,7 +428,7 @@ mdebug_build_psymtabs (struct objfile *objfile,
       char *fdr_end;
       FDR *fdr_ptr;
 
-      info->fdr = (FDR *) obstack_alloc (&objfile->psymbol_obstack,
+      info->fdr = (FDR *) obstack_alloc (&objfile->objfile_obstack,
 					 (info->symbolic_header.ifdMax
 					  * sizeof (FDR)));
       fdr_src = info->external_fdr;
@@ -579,7 +581,7 @@ add_pending (FDR *fh, char *sh, struct type *t)
   if (!p)
     {
       p = ((struct mdebug_pending *)
-	   obstack_alloc (&current_objfile->psymbol_obstack,
+	   obstack_alloc (&current_objfile->objfile_obstack,
 			  sizeof (struct mdebug_pending)));
       p->s = sh;
       p->t = t;
@@ -793,7 +795,8 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       else
 	{
 	  t = parse_type (cur_fd, ax, sh->index + 1, 0, bigend, name);
-	  if (DEPRECATED_STREQ (name, "malloc") && TYPE_CODE (t) == TYPE_CODE_VOID)
+	  if (strcmp (name, "malloc") == 0
+	      && TYPE_CODE (t) == TYPE_CODE_VOID)
 	    {
 	      /* I don't know why, but, at least under Alpha GNU/Linux,
 	         when linking against a malloc without debugging
@@ -1057,7 +1060,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	if (sh->iss == 0 || name[0] == '.' || name[0] == '\0')
 	  TYPE_TAG_NAME (t) = NULL;
 	else
-	  TYPE_TAG_NAME (t) = obconcat (&current_objfile->symbol_obstack,
+	  TYPE_TAG_NAME (t) = obconcat (&current_objfile->objfile_obstack,
 					"", "", name);
 
 	TYPE_CODE (t) = type_code;
@@ -1103,12 +1106,12 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 		FIELD_STATIC_KIND (*f) = 0;
 
 		enum_sym = ((struct symbol *)
-			    obstack_alloc (&current_objfile->symbol_obstack,
+			    obstack_alloc (&current_objfile->objfile_obstack,
 					   sizeof (struct symbol)));
 		memset (enum_sym, 0, sizeof (struct symbol));
 		DEPRECATED_SYMBOL_NAME (enum_sym) =
 		  obsavestring (f->name, strlen (f->name),
-				&current_objfile->symbol_obstack);
+				&current_objfile->objfile_obstack);
 		SYMBOL_CLASS (enum_sym) = LOC_CONST;
 		SYMBOL_TYPE (enum_sym) = t;
 		SYMBOL_DOMAIN (enum_sym) = VAR_DOMAIN;
@@ -1201,7 +1204,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	  SYMBOL_CLASS (s) = LOC_CONST;
 	  SYMBOL_TYPE (s) = mdebug_type_void;
 	  e = ((struct mips_extra_func_info *)
-	       obstack_alloc (&current_objfile->symbol_obstack,
+	       obstack_alloc (&current_objfile->objfile_obstack,
 			      sizeof (struct mips_extra_func_info)));
 	  memset (e, 0, sizeof (struct mips_extra_func_info));
 	  SYMBOL_VALUE (s) = (long) e;
@@ -1634,7 +1637,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 	  else if (TYPE_TAG_NAME (tp) == NULL
 		   || strcmp (TYPE_TAG_NAME (tp), name) != 0)
 	    TYPE_TAG_NAME (tp) = obsavestring (name, strlen (name),
-					    &current_objfile->type_obstack);
+					    &current_objfile->objfile_obstack);
 	}
     }
 
@@ -1667,9 +1670,10 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 	      bad_tag_guess_complaint (sym_name);
 	      TYPE_CODE (tp) = type_code;
 	    }
-	  if (TYPE_NAME (tp) == NULL || !DEPRECATED_STREQ (TYPE_NAME (tp), name))
+	  if (TYPE_NAME (tp) == NULL
+	      || strcmp (TYPE_NAME (tp), name) != 0)
 	    TYPE_NAME (tp) = obsavestring (name, strlen (name),
-					   &current_objfile->type_obstack);
+					   &current_objfile->objfile_obstack);
 	}
     }
   if (t->bt == btTypedef)
@@ -1693,11 +1697,11 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
       TYPE_FIELDS (tp) = ((struct field *)
 			  TYPE_ALLOC (tp, 2 * sizeof (struct field)));
       TYPE_FIELD_NAME (tp, 0) = obsavestring ("Low", strlen ("Low"),
-					    &current_objfile->type_obstack);
+					    &current_objfile->objfile_obstack);
       TYPE_FIELD_BITPOS (tp, 0) = AUX_GET_DNLOW (bigend, ax);
       ax++;
       TYPE_FIELD_NAME (tp, 1) = obsavestring ("High", strlen ("High"),
-					    &current_objfile->type_obstack);
+					    &current_objfile->objfile_obstack);
       TYPE_FIELD_BITPOS (tp, 1) = AUX_GET_DNHIGH (bigend, ax);
       ax++;
     }
@@ -1987,7 +1991,8 @@ parse_procedure (PDR *pr, struct symtab *search_symtab,
 
       /* Correct incorrect setjmp procedure descriptor from the library
          to make backtrace through setjmp work.  */
-      if (e->pdr.pcreg == 0 && DEPRECATED_STREQ (sh_name, "setjmp"))
+      if (e->pdr.pcreg == 0
+	  && strcmp (sh_name, "setjmp") == 0)
 	{
 	  complaint (&symfile_complaints, "fixing bad setjmp PDR from libc");
 	  e->pdr.pcreg = RA_REGNUM;
@@ -2257,7 +2262,7 @@ parse_partial_symbols (struct objfile *objfile)
       && (bfd_get_section_flags (cur_bfd, text_sect) & SEC_RELOC))
     relocatable = 1;
 
-  extern_tab = (EXTR *) obstack_alloc (&objfile->psymbol_obstack,
+  extern_tab = (EXTR *) obstack_alloc (&objfile->objfile_obstack,
 				       sizeof (EXTR) * hdr->iextMax);
 
   includes_allocated = 30;
@@ -2301,7 +2306,7 @@ parse_partial_symbols (struct objfile *objfile)
   /* Allocate the global pending list.  */
   pending_list =
     ((struct mdebug_pending **)
-     obstack_alloc (&objfile->psymbol_obstack,
+     obstack_alloc (&objfile->objfile_obstack,
 		    hdr->ifdMax * sizeof (struct mdebug_pending *)));
   memset (pending_list, 0,
 	  hdr->ifdMax * sizeof (struct mdebug_pending *));
@@ -2553,7 +2558,7 @@ parse_partial_symbols (struct objfile *objfile)
 				  objfile->global_psymbols.next,
 				  objfile->static_psymbols.next);
       pst->read_symtab_private = ((char *)
-				  obstack_alloc (&objfile->psymbol_obstack,
+				  obstack_alloc (&objfile->objfile_obstack,
 						 sizeof (struct symloc)));
       memset (pst->read_symtab_private, 0, sizeof (struct symloc));
 
@@ -2608,7 +2613,8 @@ parse_partial_symbols (struct objfile *objfile)
 			  ((char *) debug_info->external_sym
 			   + (fh->isymBase + 1) * external_sym_size),
 			  &sh);
-	  if (DEPRECATED_STREQ (debug_info->ss + fh->issBase + sh.iss, stabs_symbol))
+	  if (strcmp (debug_info->ss + fh->issBase + sh.iss,
+		      stabs_symbol) == 0)
 	    processing_gcc_compilation = 2;
 	}
 
@@ -2929,12 +2935,13 @@ parse_partial_symbols (struct objfile *objfile)
 			 things like "break c-exp.y:435" need to work (I
 			 suppose the psymtab_include_list could be hashed or put
 			 in a binary tree, if profiling shows this is a major hog).  */
-		      if (pst && DEPRECATED_STREQ (namestring, pst->filename))
+		      if (pst && strcmp (namestring, pst->filename) == 0)
 			continue;
 		      {
 			int i;
 			for (i = 0; i < includes_used; i++)
-			  if (DEPRECATED_STREQ (namestring, psymtab_include_list[i]))
+			  if (strcmp (namestring,
+				      psymtab_include_list[i]) == 0)
 			    {
 			      i = -1;
 			      break;
@@ -3654,7 +3661,7 @@ parse_partial_symbols (struct objfile *objfile)
       pst->number_of_dependencies = 0;
       pst->dependencies =
 	((struct partial_symtab **)
-	 obstack_alloc (&objfile->psymbol_obstack,
+	 obstack_alloc (&objfile->objfile_obstack,
 			((fh->crfd - 1)
 			 * sizeof (struct partial_symtab *))));
       for (s_idx = 1; s_idx < fh->crfd; s_idx++)
@@ -3861,8 +3868,8 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, char *filename)
 		      ((char *) debug_info->external_sym
 		       + (fh->isymBase + 1) * external_sym_size),
 		      &sh);
-      if (DEPRECATED_STREQ (debug_info->ss + fh->issBase + sh.iss,
-		 stabs_symbol))
+      if (strcmp (debug_info->ss + fh->issBase + sh.iss,
+		  stabs_symbol) == 0)
 	{
 	  /* We indicate that this is a GCC compilation so that certain
 	     features will be enabled in stabsread/dbxread.  */
@@ -3941,7 +3948,7 @@ psymtab_to_symtab_1 (struct partial_symtab *pst, char *filename)
 		     procedure specific info */
 		  struct mips_extra_func_info *e =
 		  ((struct mips_extra_func_info *)
-		   obstack_alloc (&current_objfile->symbol_obstack,
+		   obstack_alloc (&current_objfile->objfile_obstack,
 				  sizeof (struct mips_extra_func_info)));
 		  struct symbol *s = new_symbol (MIPS_EFI_SYMBOL_NAME);
 
@@ -4502,7 +4509,7 @@ add_line (struct linetable *lt, int lineno, CORE_ADDR adr, int last)
 static int
 compare_blocks (const void *arg1, const void *arg2)
 {
-  int addr_diff;
+  LONGEST addr_diff;
   struct block **b1 = (struct block **) arg1;
   struct block **b2 = (struct block **) arg2;
 
@@ -4585,7 +4592,7 @@ new_symtab (char *name, int maxlines, struct objfile *objfile)
 
   s->free_code = free_linetable;
   s->debugformat = obsavestring ("ECOFF", 5,
-				 &objfile->symbol_obstack);
+				 &objfile->objfile_obstack);
   return (s);
 }
 
@@ -4602,7 +4609,7 @@ new_psymtab (char *name, struct objfile *objfile)
   /* Keep a backpointer to the file's symbols */
 
   psymtab->read_symtab_private = ((char *)
-				  obstack_alloc (&objfile->psymbol_obstack,
+				  obstack_alloc (&objfile->objfile_obstack,
 						 sizeof (struct symloc)));
   memset (psymtab->read_symtab_private, 0, sizeof (struct symloc));
   CUR_BFD (psymtab) = cur_bfd;
@@ -4690,7 +4697,7 @@ static struct symbol *
 new_symbol (char *name)
 {
   struct symbol *s = ((struct symbol *)
-		      obstack_alloc (&current_objfile->symbol_obstack,
+		      obstack_alloc (&current_objfile->objfile_obstack,
 				     sizeof (struct symbol)));
 
   memset (s, 0, sizeof (*s));
@@ -4733,7 +4740,7 @@ elfmdebug_build_psymtabs (struct objfile *objfile,
   back_to = make_cleanup_discard_minimal_symbols ();
 
   info = ((struct ecoff_debug_info *)
-	  obstack_alloc (&objfile->psymbol_obstack,
+	  obstack_alloc (&objfile->objfile_obstack,
 			 sizeof (struct ecoff_debug_info)));
 
   if (!(*swap->read_debug_info) (abfd, sec, info))

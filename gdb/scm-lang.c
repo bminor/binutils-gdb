@@ -1,6 +1,6 @@
 /* Scheme/Guile language support routines for GDB, the GNU debugger.
 
-   Copyright 1995, 1996, 1998, 2000, 2001, 2002, 2003 Free Software
+   Copyright 1995, 1996, 1998, 2000, 2001, 2002, 2003, 2004 Free Software
    Foundation, Inc.
 
    This file is part of GDB.
@@ -263,6 +263,7 @@ const struct language_defn scm_language_defn =
   NULL,				/* Language specific skip_trampoline */
   value_of_this,		/* value_of_this */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
+  basic_lookup_transparent_type,/* lookup_transparent_type */
   NULL,				/* Language specific symbol demangler */
   {"", "", "", ""},		/* Binary format info */
   {"#o%lo", "#o", "o", ""},	/* Octal format info */

@@ -50,13 +50,13 @@ tui_refresh_win (struct tui_gen_win_info * win_info)
 
       for (i = 0; (i < win_info->content_size); i++)
 	{
-	  struct tui_gen_win_info * data_item_win_ptr;
+	  struct tui_gen_win_info * dataItemWinPtr;
 
-	  data_item_win_ptr = &((tui_win_content)
+	  dataItemWinPtr = &((tui_win_content)
 			     win_info->content)[i]->which_element.data_window;
-	  if (data_item_win_ptr != NULL
-	      && data_item_win_ptr->handle != (WINDOW *) NULL)
-	    wrefresh (data_item_win_ptr->handle);
+	  if (dataItemWinPtr != NULL
+	      && dataItemWinPtr->handle != (WINDOW *) NULL)
+	    wrefresh (dataItemWinPtr->handle);
 	}
     }
   else if (win_info->type == CMD_WIN)
@@ -86,7 +86,7 @@ tui_delete_win (WINDOW * window)
 
 /* Draw a border arround the window.  */
 void
-box_win (struct tui_gen_win_info * win_info, int highlight_flag)
+boxWin (struct tui_gen_win_info * win_info, int highlightFlag)
 {
   if (win_info && win_info->handle)
     {
@@ -94,7 +94,7 @@ box_win (struct tui_gen_win_info * win_info, int highlight_flag)
       int attrs;
 
       win = win_info->handle;
-      if (highlight_flag == HILITE)
+      if (highlightFlag == HILITE)
         attrs = tui_active_border_attrs;
       else
         attrs = tui_border_attrs;
@@ -116,7 +116,7 @@ tui_unhighlight_win (struct tui_win_info * win_info)
 {
   if (win_info != NULL && win_info->generic.handle != (WINDOW *) NULL)
     {
-      box_win ((struct tui_gen_win_info *) win_info, NO_HILITE);
+      boxWin ((struct tui_gen_win_info *) win_info, NO_HILITE);
       wrefresh (win_info->generic.handle);
       tui_set_win_highlight (win_info, 0);
     }
@@ -130,7 +130,7 @@ tui_highlight_win (struct tui_win_info * win_info)
       && win_info->can_highlight
       && win_info->generic.handle != (WINDOW *) NULL)
     {
-      box_win ((struct tui_gen_win_info *) win_info, HILITE);
+      boxWin ((struct tui_gen_win_info *) win_info, HILITE);
       wrefresh (win_info->generic.handle);
       tui_set_win_highlight (win_info, 1);
     }
@@ -152,7 +152,7 @@ tui_check_and_display_highlight_if_needed (struct tui_win_info * win_info)
 
 
 void
-tui_make_window (struct tui_gen_win_info * win_info, int box_it)
+tui_make_window (struct tui_gen_win_info * win_info, int boxIt)
 {
   WINDOW *handle;
 
@@ -163,8 +163,8 @@ tui_make_window (struct tui_gen_win_info * win_info, int box_it)
   win_info->handle = handle;
   if (handle != (WINDOW *) NULL)
     {
-      if (box_it == BOX_WINDOW)
-	box_win (win_info, NO_HILITE);
+      if (boxIt == BOX_WINDOW)
+	boxWin (win_info, NO_HILITE);
       win_info->is_visible = TRUE;
       scrollok (handle, TRUE);
     }
@@ -274,7 +274,9 @@ tui_refresh_all (struct tui_win_info * * list)
       touchwin (locator->handle);
       tui_refresh_win (locator);
     }
-}
+
+  return;
+}				/* refreshAll */
 
 
 /*********************************

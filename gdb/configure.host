@@ -51,9 +51,11 @@ hppa*-*-hpux*)		gdb_host=hppahpux ;;
 i[34567]86-ncr-*)	gdb_host=ncr3000 ;;
 i[34567]86-*-bsd*)	gdb_host=i386bsd ;;
 i[34567]86-*-dgux*)	gdb_host=i386v4 ;;
+i[34567]86-*-freebsd* | i[34567]86-*-kfreebsd*-gnu)
+			gdb_host=fbsd ;;
+i[34567]86-*-netbsdelf* | i[34567]86-*-knetbsd*-gnu)
+			gdb_host=nbsdelf ;;
 i[34567]86-*-freebsd*)	gdb_host=fbsd ;;
-i[34567]86-*-netbsdelf*)	gdb_host=nbsdelf ;;
-i[34567]86-*-netbsdaout*) gdb_host=nbsdaout ;;
 i[34567]86-*-netbsd*)	gdb_host=nbsdaout ;;
 i[34567]86-*-go32*)	gdb_host=go32 ;;
 i[34567]86-*-msdosdjgpp*) gdb_host=go32 ;;
@@ -132,6 +134,8 @@ sparc-*-netbsdelf*)	gdb_host=nbsdelf ;;
 sparc-*-netbsdaout*)	gdb_host=nbsdaout ;;
 sparc-*-netbsd*)	gdb_host=nbsdaout ;;
 sparc64-*-netbsd*)	gdb_host=nbsd64 ;;
+sparc-*-openbsd*)	gdb_host=nbsdelf ;;
+sparc64-*-openbsd*)	gdb_host=nbsd64 ;;
 sparc-*-solaris2* | sparcv9-*-solaris2* | sparc64-*-solaris2*)
 			gdb_host=sol2
 			;;

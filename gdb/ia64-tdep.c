@@ -102,7 +102,6 @@ static gdbarch_register_type_ftype ia64_register_type;
 static gdbarch_breakpoint_from_pc_ftype ia64_breakpoint_from_pc;
 static gdbarch_skip_prologue_ftype ia64_skip_prologue;
 static gdbarch_extract_return_value_ftype ia64_extract_return_value;
-static gdbarch_extract_struct_value_address_ftype ia64_extract_struct_value_address;
 static gdbarch_use_struct_convention_ftype ia64_use_struct_convention;
 static struct type *is_float_or_hfa_type (struct type *t);
 
@@ -333,32 +332,6 @@ const struct floatformat floatformat_ia64_ext =
   floatformat_intbit_yes, "floatformat_ia64_ext", floatformat_valid
 };
 
-
-/* Read the given register from a sigcontext structure in the
-   specified frame.  */
-
-static CORE_ADDR
-read_sigcontext_register (struct frame_info *frame, int regnum)
-{
-  CORE_ADDR regaddr;
-
-  if (frame == NULL)
-    internal_error (__FILE__, __LINE__,
-		    "read_sigcontext_register: NULL frame");
-  if (!(get_frame_type (frame) == SIGTRAMP_FRAME))
-    internal_error (__FILE__, __LINE__,
-		    "read_sigcontext_register: frame not a signal trampoline");
-  if (SIGCONTEXT_REGISTER_ADDRESS == 0)
-    internal_error (__FILE__, __LINE__,
-		    "read_sigcontext_register: SIGCONTEXT_REGISTER_ADDRESS is 0");
-
-  regaddr = SIGCONTEXT_REGISTER_ADDRESS (get_frame_base (frame), regnum);
-  if (regaddr)
-    return read_memory_integer (regaddr, register_size (current_gdbarch, regnum));
-  else
-    internal_error (__FILE__, __LINE__,
-		    "read_sigcontext_register: Register %d not in struct sigcontext", regnum);
-}
 
 /* Extract ``len'' bits from an instruction bundle starting at
    bit ``from''.  */
@@ -647,18 +620,6 @@ ia64_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
   *pcptr &= ~0x0f;
 #endif
   return breakpoint;
-}
-
-static CORE_ADDR
-ia64_read_fp (void)
-{
-  /* We won't necessarily have a frame pointer and even if we do, it
-     winds up being extraordinarly messy when attempting to find the
-     frame chain.  So for the purposes of creating frames (which is
-     all deprecated_read_fp() is used for), simply use the stack
-     pointer value instead.  */
-  gdb_assert (SP_REGNUM >= 0);
-  return read_register (SP_REGNUM);
 }
 
 static CORE_ADDR
@@ -2709,9 +2670,9 @@ static struct libunwind_descr ia64_libunwind_descr =
 
 #endif /* HAVE_LIBUNWIND_IA64_H  */
 
-/* Should we use EXTRACT_STRUCT_VALUE_ADDRESS instead of
-   EXTRACT_RETURN_VALUE?  GCC_P is true if compiled with gcc
-   and TYPE is the type (which is known to be struct, union or array).  */
+/* Should we use DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS instead of
+   EXTRACT_RETURN_VALUE?  GCC_P is true if compiled with gcc and TYPE
+   is the type (which is known to be struct, union or array).  */
 int
 ia64_use_struct_convention (int gcc_p, struct type *type)
 {
@@ -3256,53 +3217,6 @@ ia64_remote_translate_xfer_address (struct gdbarch *gdbarch,
   *targ_len  = nr_bytes;
 }
 
-static void
-process_note_abi_tag_sections (bfd *abfd, asection *sect, void *obj)
-{
-  int *os_ident_ptr = obj;
-  const char *name;
-  unsigned int sectsize;
-
-  name = bfd_get_section_name (abfd, sect);
-  sectsize = bfd_section_size (abfd, sect);
-  if (strcmp (name, ".note.ABI-tag") == 0 && sectsize > 0)
-    {
-      unsigned int name_length, data_length, note_type;
-      char *note = alloca (sectsize);
-
-      bfd_get_section_contents (abfd, sect, note,
-                                (file_ptr) 0, (bfd_size_type) sectsize);
-
-      name_length = bfd_h_get_32 (abfd, note);
-      data_length = bfd_h_get_32 (abfd, note + 4);
-      note_type   = bfd_h_get_32 (abfd, note + 8);
-
-      if (name_length == 4 && data_length == 16 && note_type == 1
-          && strcmp (note + 12, "GNU") == 0)
-	{
-	  int os_number = bfd_h_get_32 (abfd, note + 16);
-
-	  /* The case numbers are from abi-tags in glibc.  */
-	  switch (os_number)
-	    {
-	    case 0 :
-	      *os_ident_ptr = ELFOSABI_LINUX;
-	      break;
-	    case 1 :
-	      *os_ident_ptr = ELFOSABI_HURD;
-	      break;
-	    case 2 :
-	      *os_ident_ptr = ELFOSABI_SOLARIS;
-	      break;
-	    default :
-	      internal_error (__FILE__, __LINE__,
-			      "process_note_abi_sections: unknown OS number %d", os_number);
-	      break;
-	    }
-	}
-    }
-}
-
 static int
 ia64_print_insn (bfd_vma memaddr, struct disassemble_info *info)
 {
@@ -3400,7 +3314,7 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_extract_return_value (gdbarch, ia64_extract_return_value);
 
   set_gdbarch_store_return_value (gdbarch, ia64_store_return_value);
-  set_gdbarch_extract_struct_value_address (gdbarch, ia64_extract_struct_value_address);
+  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, ia64_extract_struct_value_address);
 
   set_gdbarch_memory_insert_breakpoint (gdbarch, ia64_memory_insert_breakpoint);
   set_gdbarch_memory_remove_breakpoint (gdbarch, ia64_memory_remove_breakpoint);
@@ -3425,8 +3339,6 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Settings that should be unnecessary.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
-  set_gdbarch_decr_pc_after_break (gdbarch, 0);
-  set_gdbarch_function_start_offset (gdbarch, 0);
   set_gdbarch_frame_args_skip (gdbarch, 0);
 
   set_gdbarch_remote_translate_xfer_address (

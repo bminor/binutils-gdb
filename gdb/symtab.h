@@ -1,7 +1,7 @@
 /* Symbol table definitions for GDB.
 
    Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
+   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
    Foundation, Inc.
 
    This file is part of GDB.
@@ -88,10 +88,10 @@ struct agent_expr;
 struct general_symbol_info
 {
   /* Name of the symbol.  This is a required field.  Storage for the
-     name is allocated on the psymbol_obstack or symbol_obstack for
-     the associated objfile.  For languages like C++ that make a
-     distinction between the mangled name and demangled name, this is
-     the mangled name.  */
+     name is allocated on the objfile_obstack for the associated
+     objfile.  For languages like C++ that make a distinction between
+     the mangled name and demangled name, this is the mangled
+     name.  */
 
   char *name;
 
@@ -311,12 +311,13 @@ struct minimal_symbol
 
   struct general_symbol_info ginfo;
 
-  /* The info field is available for caching machine-specific information
-     so it doesn't have to rederive the info constantly (over a serial line).
-     It is initialized to zero and stays that way until target-dependent code
-     sets it.  Storage for any data pointed to by this field should be allo-
-     cated on the symbol_obstack for the associated objfile.  
-     The type would be "void *" except for reasons of compatibility with older
+  /* The info field is available for caching machine-specific
+     information so it doesn't have to rederive the info constantly
+     (over a serial line).  It is initialized to zero and stays that
+     way until target-dependent code sets it.  Storage for any data
+     pointed to by this field should be allocated on the
+     objfile_obstack for the associated objfile.  The type would be
+     "void *" except for reasons of compatibility with older
      compilers.  This field is optional.
 
      Currently, the AMD 29000 tdep.c uses it to remember things it has decoded
@@ -546,21 +547,12 @@ enum address_class
   LOC_COMPUTED_ARG
 };
 
-/* A structure of function pointers describing the location of a
-   variable, structure member, or structure base class.
+/* The methods needed to implement a symbol class.  These methods can
+   use the symbol's .aux_value for additional per-symbol information.
 
-   These functions' BATON arguments are generic data pointers, holding
-   whatever data the functions need --- the code which provides this
-   structure also provides the actual contents of the baton, and
-   decides its form.  However, there may be other rules about where
-   the baton data must be allocated; whoever is pointing to this
-   `struct location_funcs' object will know the rules.  For example,
-   when a symbol S's location is LOC_COMPUTED, then
-   SYMBOL_LOCATION_FUNCS(S) is pointing to a location_funcs structure,
-   and SYMBOL_LOCATION_BATON(S) is the baton, which must be allocated
-   on the same obstack as the symbol itself.  */
+   At present this is only used to implement location expressions.  */
 
-struct location_funcs
+struct symbol_ops
 {
 
   /* Return the value of the variable SYMBOL, relative to the stack
@@ -608,6 +600,12 @@ struct symbol
   ENUM_BITFIELD(domain_enum_tag) domain : 6;
 
   /* Address class */
+  /* NOTE: cagney/2003-11-02: The fields "aclass" and "ops" contain
+     overlapping information.  By creating a per-aclass ops vector, or
+     using the aclass as an index into an ops table, the aclass and
+     ops fields can be merged.  The latter, for instance, would shave
+     32-bits from each symbol (relative to a symbol lookup, any table
+     index overhead would be in the noise).  */
 
   ENUM_BITFIELD(address_class) aclass : 6;
 
@@ -617,28 +615,30 @@ struct symbol
 
   unsigned short line;
 
-  /* Some symbols require an additional value to be recorded on a per-
-     symbol basis.  Stash those values here. */
+  /* Method's for symbol's of this class.  */
+  /* NOTE: cagney/2003-11-02: See comment above attached to "aclass".  */
+
+  const struct symbol_ops *ops;
+
+  /* Some symbols require additional information to be recorded on a
+     per- symbol basis.  Stash those values here. */
 
   union
   {
     /* Used by LOC_BASEREG and LOC_BASEREG_ARG.  */
     short basereg;
-
-    /* For a LOC_COMPUTED or LOC_COMPUTED_ARG symbol, this is the
-       baton and location_funcs structure to find its location.  For a
-       LOC_BLOCK symbol for a function in a compilation unit compiled
-       with DWARF 2 information, this is information used internally
-       by the DWARF 2 code --- specifically, the location expression
-       for the frame base for this function.  */
+    /* An arbitrary data pointer.  Note that this data must be
+       allocated using the same obstack as the symbol itself.  */
+    /* So far it is only used by LOC_COMPUTED and LOC_COMPUTED_ARG to
+       find the location location information.  For a LOC_BLOCK symbol
+       for a function in a compilation unit compiled with DWARF 2
+       information, this is information used internally by the DWARF 2
+       code --- specifically, the location expression for the frame
+       base for this function.  */
     /* FIXME drow/2003-02-21: For the LOC_BLOCK case, it might be better
        to add a magic symbol to the block containing this information,
        or to have a generic debug info annotation slot for symbols.  */
-    struct
-    {
-      void *baton;
-      struct location_funcs *funcs;
-    } loc;
+    void *ptr;
   }
   aux_value;
 
@@ -652,8 +652,8 @@ struct symbol
 #define SYMBOL_LINE(symbol)		(symbol)->line
 #define SYMBOL_BASEREG(symbol)		(symbol)->aux_value.basereg
 #define SYMBOL_OBJFILE(symbol)          (symbol)->aux_value.objfile
-#define SYMBOL_LOCATION_BATON(symbol)   (symbol)->aux_value.loc.baton
-#define SYMBOL_LOCATION_FUNCS(symbol)   (symbol)->aux_value.loc.funcs
+#define SYMBOL_OPS(symbol)              (symbol)->ops
+#define SYMBOL_LOCATION_BATON(symbol)   (symbol)->aux_value.ptr
 
 /* A partial_symbol records the name, domain, and address class of
    symbols whose types we have not parsed yet.  For functions, it also
@@ -859,7 +859,7 @@ struct symtab
 
    Even after the source file has been read into a symtab, the
    partial_symtab remains around.  They are allocated on an obstack,
-   psymbol_obstack.  FIXME, this is bad for dynamic linking or VxWorks-
+   objfile_obstack.  FIXME, this is bad for dynamic linking or VxWorks-
    style execution of a bunch of .o's.  */
 
 struct partial_symtab
@@ -1107,6 +1107,7 @@ extern int find_pc_line_pc_range (CORE_ADDR, CORE_ADDR *, CORE_ADDR *);
 extern void reread_symbols (void);
 
 extern struct type *lookup_transparent_type (const char *);
+extern struct type *basic_lookup_transparent_type (const char *);
 
 
 /* Macro for name of symbol to indicate a file compiled with gcc. */

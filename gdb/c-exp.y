@@ -1,6 +1,6 @@
 /* YACC parser for C expressions, for GDB.
    Copyright 1986, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000, 2003
+   1998, 1999, 2000, 2003, 2004
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -939,11 +939,6 @@ typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
    decode_line_1), but I'm not holding my breath waiting for somebody
    to get around to cleaning this up...  */
 
-/* FIXME: carlton/2003-09-25: Currently, the only qualified type
-   symbols that we generate are nested namespaces.  Next on my TODO
-   list is to generate all nested type names properly (or at least as
-   well as possible, assuming that we're using DWARF-2).  */
-
 qualified_type: typebase COLONCOLON name
 		{
 		  struct type *type = $1;
@@ -953,14 +948,16 @@ qualified_type: typebase COLONCOLON name
 		  memcpy (ncopy, $3.ptr, $3.length);
 		  ncopy[$3.length] = '\0';
 
-		  if (TYPE_CODE (type) != TYPE_CODE_NAMESPACE)
-		    error ("`%s' is not defined as a namespace.",
+		  if (TYPE_CODE (type) != TYPE_CODE_STRUCT
+		      && TYPE_CODE (type) != TYPE_CODE_UNION
+		      && TYPE_CODE (type) != TYPE_CODE_NAMESPACE)
+		    error ("`%s' is not defined as an aggregate type.",
 			   TYPE_NAME (type));
 
 		  new_type = cp_lookup_nested_type (type, ncopy,
 						    expression_context_block);
 		  if (new_type == NULL)
-		    error ("No type \"%s\" in namespace \"%s\".",
+		    error ("No type \"%s\" within class or namespace \"%s\".",
 			   ncopy, TYPE_NAME (type));
 		  
 		  $$ = new_type;

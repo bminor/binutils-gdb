@@ -1,3 +1,11 @@
+2004-01-27  Michael Snyder  <msnyder@redhat.com>
+
+	* gencode.c: (op tab): Some refs and defs fixes.
+	"fsrra" -> "fsrra <FREG_N>".
+	"sleep": replace array ref with array addr.
+	"trapa": ditto.	
+	Comment and whitespace clean-ups.
+
 2004-01-07  Michael Snyder  <msnyder@redhat.com>
 
 	* gencode.c: Whitespace cleanup.

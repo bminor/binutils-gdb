@@ -96,7 +96,9 @@ sparc_fetch_instruction (CORE_ADDR pc)
   unsigned long insn;
   int i;
 
-  read_memory (pc, buf, sizeof (buf));
+  /* If we can't read the instruction at PC, return zero.  */
+  if (target_read_memory (pc, buf, sizeof (buf)))
+    return 0;
 
   insn = 0;
   for (i = 0; i < sizeof (buf); i++)
@@ -104,6 +106,56 @@ sparc_fetch_instruction (CORE_ADDR pc)
   return insn;
 }
 
+
+/* OpenBSD/sparc includes StackGhost, which according to the author's
+   website http://stackghost.cerias.purdue.edu "... transparently and
+   automatically protects applications' stack frames; more
+   specifically, it guards the return pointers.  The protection
+   mechanisms require no application source or binary modification and
+   imposes only a negligible performance penalty."
+
+   The same website provides the following description of how
+   StackGhost works:
+
+   "StackGhost interfaces with the kernel trap handler that would
+   normally write out registers to the stack and the handler that
+   would read them back in.  By XORing a cookie into the
+   return-address saved in the user stack when it is actually written
+   to the stack, and then XOR it out when the return-address is pulled
+   from the stack, StackGhost can cause attacker corrupted return
+   pointers to behave in a manner the attacker cannot predict.
+   StackGhost can also use several unused bits in the return pointer
+   to detect a smashed return pointer and abort the process."
+
+   For GDB this means that whenever we're reading %i7 from a stack
+   frame's window save area, we'll have to XOR the cookie.
+
+   More information on StackGuard can be found on in:
+
+   Mike Frantzen and Mike Shuey. "StackGhost: Hardware Facilitated
+   Stack Protection."  2001.  Published in USENIX Security Symposium
+   '01.  */
+
+/* Fetch StackGhost Per-Process XOR cookie.  */
+
+ULONGEST
+sparc_fetch_wcookie (void)
+{
+  struct target_ops *ops = &current_target;
+  char buf[8];
+  int len;
+
+  len = target_read_partial (ops, TARGET_OBJECT_WCOOKIE, NULL, buf, 0, 8);
+  if (len == -1)
+    return 0;
+
+  /* We should have either an 32-bit or an 64-bit cookie.  */
+  gdb_assert (len == 4 || len == 8);
+
+  return extract_unsigned_integer (buf, len);
+}
+
+
 /* Return the contents if register REGNUM as an address.  */
 
 static CORE_ADDR
@@ -664,6 +716,29 @@ sparc32_frame_prev_register (struct frame_info *next_frame, void **this_cache,
       return;
     }
 
+  /* Handle StackGhost.  */
+  {
+    ULONGEST wcookie = sparc_fetch_wcookie ();
+
+    if (wcookie != 0 && !cache->frameless_p && regnum == SPARC_I7_REGNUM)
+      {
+	*optimizedp = 0;
+	*lvalp = not_lval;
+	*addrp = 0;
+	*realnump = -1;
+	if (valuep)
+	  {
+	    CORE_ADDR addr = cache->base + (regnum - SPARC_L0_REGNUM) * 4;
+	    ULONGEST i7;
+
+	    /* Read the value in from memory.  */
+	    i7 = get_frame_memory_unsigned (next_frame, addr, 4);
+	    store_unsigned_integer (valuep, 4, i7 ^ wcookie);
+	  }
+	return;
+      }
+  }
+
   /* The previous frame's `local' and `in' registers have been saved
      in the register save area.  */
   if (!cache->frameless_p
@@ -834,6 +909,18 @@ sparc32_return_value (struct gdbarch *gdbarch, struct type *type,
   return RETURN_VALUE_REGISTER_CONVENTION;
 }
 
+#if 0
+/* NOTE: cagney/2004-01-17: For the moment disable this method.  The
+   architecture and CORE-gdb will need new code (and a replacement for
+   DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS) before this can be made to
+   work robustly.  Here is a possible function signature: */
+/* NOTE: cagney/2004-01-17: So far only the 32-bit SPARC ABI has been
+   identifed as having a way to robustly recover the address of a
+   struct-convention return-value (after the function has returned).
+   For all other ABIs so far examined, the calling convention makes no
+   guarenteed that the register containing the return-value will be
+   preserved and hence that the return-value's address can be
+   recovered.  */
 /* Extract from REGCACHE, which contains the (raw) register state, the
    address in which a function should return its structure value, as a
    CORE_ADDR.  */
@@ -846,6 +933,7 @@ sparc32_extract_struct_value_address (struct regcache *regcache)
   regcache_cooked_read_unsigned (regcache, SPARC_SP_REGNUM, &sp);
   return read_memory_unsigned_integer (sp + 64, 4);
 }
+#endif
 
 static int
 sparc32_stabs_argument_has_addr (struct gdbarch *gdbarch, struct type *type)
@@ -1015,10 +1103,10 @@ sparc_regset_from_core_section (struct gdbarch *gdbarch,
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  if (strcmp (sect_name, ".reg") == 0 && sect_size == tdep->sizeof_gregset)
+  if (strcmp (sect_name, ".reg") == 0 && sect_size >= tdep->sizeof_gregset)
     return tdep->gregset;
 
-  if (strcmp (sect_name, ".reg2") == 0 && sect_size == tdep->sizeof_fpregset)
+  if (strcmp (sect_name, ".reg2") == 0 && sect_size >= tdep->sizeof_fpregset)
     return tdep->fpregset;
 
   return NULL;
@@ -1043,9 +1131,9 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->pc_regnum = SPARC32_PC_REGNUM;
   tdep->npc_regnum = SPARC32_NPC_REGNUM;
   tdep->gregset = NULL;
-  tdep->sizeof_gregset = 20 * 4;
+  tdep->sizeof_gregset = 0;
   tdep->fpregset = NULL;
-  tdep->sizeof_fpregset = 33 * 4;
+  tdep->sizeof_fpregset = 0;
   tdep->plt_entry_size = 0;
 
   set_gdbarch_long_double_bit (gdbarch, 128);
@@ -1069,8 +1157,6 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_push_dummy_call (gdbarch, sparc32_push_dummy_call);
 
   set_gdbarch_return_value (gdbarch, sparc32_return_value);
-  set_gdbarch_extract_struct_value_address
-    (gdbarch, sparc32_extract_struct_value_address);
   set_gdbarch_stabs_argument_has_addr
     (gdbarch, sparc32_stabs_argument_has_addr);
 
@@ -1080,8 +1166,6 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
   set_gdbarch_breakpoint_from_pc (gdbarch, sparc_breakpoint_from_pc);
-  set_gdbarch_decr_pc_after_break (gdbarch, 0);
-  set_gdbarch_function_start_offset (gdbarch, 0);
 
   set_gdbarch_frame_args_skip (gdbarch, 8);
 
@@ -1102,7 +1186,7 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   frame_unwind_append_sniffer (gdbarch, sparc32_frame_sniffer);
 
   /* If we have register sets, enable the generic core file support.  */
-  if (tdep->gregset && tdep->fpregset)
+  if (tdep->gregset)
     set_gdbarch_regset_from_core_section (gdbarch,
 					  sparc_regset_from_core_section);
 
@@ -1152,6 +1236,16 @@ sparc_supply_rwindow (struct regcache *regcache, CORE_ADDR sp, int regnum)
 	    {
 	      target_read_memory (sp + ((i - SPARC_L0_REGNUM) * 4),
 				  buf + offset, 4);
+
+	      /* Handle StackGhost.  */
+	      if (i == SPARC_I7_REGNUM)
+		{
+		  ULONGEST wcookie = sparc_fetch_wcookie ();
+		  ULONGEST i7 = extract_unsigned_integer (buf + offset, 4);
+
+		  store_unsigned_integer (buf + offset, 4, i7 ^ wcookie);
+		}
+
 	      regcache_raw_supply (regcache, i, buf);
 	    }
 	}
@@ -1195,6 +1289,16 @@ sparc_collect_rwindow (const struct regcache *regcache,
 	  if (regnum == -1 || regnum == SPARC_SP_REGNUM || regnum == i)
 	    {
 	      regcache_raw_collect (regcache, i, buf);
+
+	      /* Handle StackGhost.  */
+	      if (i == SPARC_I7_REGNUM)
+		{
+		  ULONGEST wcookie = sparc_fetch_wcookie ();
+		  ULONGEST i7 = extract_unsigned_integer (buf + offset, 4);
+
+		  store_unsigned_integer (buf + offset, 4, i7 ^ wcookie);
+		}
+
 	      target_write_memory (sp + ((i - SPARC_L0_REGNUM) * 4),
 				   buf + offset, 4);
 	    }

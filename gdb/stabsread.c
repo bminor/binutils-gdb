@@ -1,7 +1,8 @@
 /* Support routines for decoding "stabs" debugging information format.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
-   Free Software Foundation, Inc.
+
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free
+   Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -89,8 +90,6 @@ static void
 read_one_struct_field (struct field_info *, char **, char *,
 		       struct type *, struct objfile *);
 
-static char *get_substring (char **, int);
-
 static struct type *dbx_alloc_type (int[2], struct objfile *);
 
 static long read_huge_number (char **, int, int *);
@@ -158,8 +157,6 @@ static char *find_name_end (char *name);
 
 static int process_reference (char **string);
 
-static CORE_ADDR ref_search_value (int refnum);
-
 void stabsread_clear_cache (void);
 
 static const char vptr_name[] = "_vptr$";
@@ -190,12 +187,6 @@ reg_value_complaint (int arg1, int arg2, const char *arg3)
 
 static void
 stabs_general_complaint (const char *arg1)
-{
-  complaint (&symfile_complaints, "%s", arg1);
-}
-
-static void
-lrs_general_complaint (const char *arg1)
 {
   complaint (&symfile_complaints, "%s", arg1);
 }
@@ -388,14 +379,14 @@ patch_block_stabs (struct pending *symbols, struct pending_stabs *stabs,
 	         ld will remove it from the executable.  There is then
 	         a N_GSYM stab for it, but no regular (C_EXT) symbol.  */
 	      sym = (struct symbol *)
-		obstack_alloc (&objfile->symbol_obstack,
+		obstack_alloc (&objfile->objfile_obstack,
 			       sizeof (struct symbol));
 
 	      memset (sym, 0, sizeof (struct symbol));
 	      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 	      SYMBOL_CLASS (sym) = LOC_OPTIMIZED_OUT;
 	      DEPRECATED_SYMBOL_NAME (sym) =
-		obsavestring (name, pp - name, &objfile->symbol_obstack);
+		obsavestring (name, pp - name, &objfile->objfile_obstack);
 	      pp += 2;
 	      if (*(pp - 1) == 'F' || *(pp - 1) == 'f')
 		{
@@ -533,16 +524,6 @@ ref_search (int refnum)
   return ref_map[refnum].sym;
 }
 
-/* Return value for the reference REFNUM.  */
-
-static CORE_ADDR
-ref_search_value (int refnum)
-{
-  if (refnum < 0 || refnum > ref_count)
-    return 0;
-  return ref_map[refnum].value;
-}
-
 /* Parse a reference id in STRING and return the resulting
    reference number.  Move STRING beyond the reference id.  */
 
@@ -631,7 +612,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
   nameless = (p == string || ((string[0] == ' ') && (string[1] == ':')));
 
   current_symbol = sym = (struct symbol *)
-    obstack_alloc (&objfile->symbol_obstack, sizeof (struct symbol));
+    obstack_alloc (&objfile->objfile_obstack, sizeof (struct symbol));
   memset (sym, 0, sizeof (struct symbol));
 
   switch (type & N_TYPE)
@@ -665,7 +646,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	{
 	case 't':
 	  DEPRECATED_SYMBOL_NAME (sym) = obsavestring ("this", strlen ("this"),
-					    &objfile->symbol_obstack);
+					    &objfile->objfile_obstack);
 	  break;
 
 	case 'v':		/* $vtbl_ptr_type */
@@ -674,7 +655,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 
 	case 'e':
 	  DEPRECATED_SYMBOL_NAME (sym) = obsavestring ("eh_throw", strlen ("eh_throw"),
-					    &objfile->symbol_obstack);
+					    &objfile->objfile_obstack);
 	  break;
 
 	case '_':
@@ -757,7 +738,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	    SYMBOL_TYPE (sym) = lookup_fundamental_type (objfile,
 							 FT_DBL_PREC_FLOAT);
 	    dbl_valu = (char *)
-	      obstack_alloc (&objfile->symbol_obstack,
+	      obstack_alloc (&objfile->objfile_obstack,
 			     TYPE_LENGTH (SYMBOL_TYPE (sym)));
 	    store_typed_floating (dbl_valu, SYMBOL_TYPE (sym), d);
 	    SYMBOL_VALUE_BYTES (sym) = dbl_valu;
@@ -1270,21 +1251,21 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       SYMBOL_DOMAIN (sym) = STRUCT_DOMAIN;
       if (TYPE_TAG_NAME (SYMBOL_TYPE (sym)) == 0)
 	TYPE_TAG_NAME (SYMBOL_TYPE (sym))
-	  = obconcat (&objfile->type_obstack, "", "", DEPRECATED_SYMBOL_NAME (sym));
+	  = obconcat (&objfile->objfile_obstack, "", "", DEPRECATED_SYMBOL_NAME (sym));
       add_symbol_to_list (sym, &file_symbols);
 
       if (synonym)
 	{
 	  /* Clone the sym and then modify it. */
 	  struct symbol *typedef_sym = (struct symbol *)
-	  obstack_alloc (&objfile->symbol_obstack, sizeof (struct symbol));
+	  obstack_alloc (&objfile->objfile_obstack, sizeof (struct symbol));
 	  *typedef_sym = *sym;
 	  SYMBOL_CLASS (typedef_sym) = LOC_TYPEDEF;
 	  SYMBOL_VALUE (typedef_sym) = valu;
 	  SYMBOL_DOMAIN (typedef_sym) = VAR_DOMAIN;
 	  if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
 	    TYPE_NAME (SYMBOL_TYPE (sym))
-	      = obconcat (&objfile->type_obstack, "", "", DEPRECATED_SYMBOL_NAME (sym));
+	      = obconcat (&objfile->objfile_obstack, "", "", DEPRECATED_SYMBOL_NAME (sym));
 	  add_symbol_to_list (typedef_sym, &file_symbols);
 	}
       break;
@@ -1546,7 +1527,7 @@ again:
 		return error_type (pp, objfile);
 	    }
 	  to = type_name =
-	    (char *) obstack_alloc (&objfile->type_obstack, p - *pp + 1);
+	    (char *) obstack_alloc (&objfile->objfile_obstack, p - *pp + 1);
 
 	  /* Copy the name.  */
 	  from = *pp + 1;
@@ -1573,7 +1554,7 @@ again:
 		  && (TYPE_CODE (SYMBOL_TYPE (sym)) == code)
 		  && strcmp (DEPRECATED_SYMBOL_NAME (sym), type_name) == 0)
 		{
-		  obstack_free (&objfile->type_obstack, type_name);
+		  obstack_free (&objfile->objfile_obstack, type_name);
 		  type = SYMBOL_TYPE (sym);
 	          if (typenums[0] != -1)
 	            *dbx_lookup_type (typenums) = type;
@@ -2314,8 +2295,9 @@ read_member_functions (struct field_info *fip, char **pp, struct type *type,
 	      /* G++ anonymous structures have names starting with '.' or
 		 '$'.  */
 	      if (is_cplus_marker (class_name[0]))
-		TYPE_NAME (type) = obconcat (&objfile->type_obstack, "",
-					     "", class_name);
+		TYPE_NAME (type) = obsavestring (&objfile->objfile_obstack,
+						 class_name,
+						 strlen (class_name));
 	    }
 
 	  /* Set this member function's visibility fields.  */
@@ -2561,11 +2543,11 @@ read_member_functions (struct field_info *fip, char **pp, struct type *type,
 	      make_cleanup (xfree, destr_fnlist);
 	      memset (destr_fnlist, 0, sizeof (struct next_fnfieldlist));
 	      destr_fnlist->fn_fieldlist.name
-		= obconcat (&objfile->type_obstack, "", "~",
+		= obconcat (&objfile->objfile_obstack, "", "~",
 			    new_fnlist->fn_fieldlist.name);
 
 	      destr_fnlist->fn_fieldlist.fn_fields = (struct fn_field *)
-		obstack_alloc (&objfile->type_obstack,
+		obstack_alloc (&objfile->objfile_obstack,
 			       sizeof (struct fn_field) * has_destructor);
 	      memset (destr_fnlist->fn_fieldlist.fn_fields, 0,
 		  sizeof (struct fn_field) * has_destructor);
@@ -2626,11 +2608,11 @@ read_member_functions (struct field_info *fip, char **pp, struct type *type,
 	      if (ret)
 		new_fnlist->fn_fieldlist.name
 		  = obsavestring (dem_opname, strlen (dem_opname),
-				  &objfile->type_obstack);
+				  &objfile->objfile_obstack);
 	    }
 
 	  new_fnlist->fn_fieldlist.fn_fields = (struct fn_field *)
-	    obstack_alloc (&objfile->type_obstack,
+	    obstack_alloc (&objfile->objfile_obstack,
 			   sizeof (struct fn_field) * length);
 	  memset (new_fnlist->fn_fieldlist.fn_fields, 0,
 		  sizeof (struct fn_field) * length);
@@ -2699,7 +2681,7 @@ read_cpp_abbrev (struct field_info *fip, char **pp, struct type *type,
 		  name = "";
 	  }
 	  fip->list->field.name =
-	    obconcat (&objfile->type_obstack, vptr_name, name, "");
+	    obconcat (&objfile->objfile_obstack, vptr_name, name, "");
 	  break;
 
 	case 'b':		/* $vb -- a virtual bsomethingorother */
@@ -2712,13 +2694,13 @@ read_cpp_abbrev (struct field_info *fip, char **pp, struct type *type,
 	      name = "FOO";
 	    }
 	  fip->list->field.name =
-	    obconcat (&objfile->type_obstack, vb_name, name, "");
+	    obconcat (&objfile->objfile_obstack, vb_name, name, "");
 	  break;
 
 	default:
 	  invalid_cpp_abbrev_complaint (*pp);
 	  fip->list->field.name =
-	    obconcat (&objfile->type_obstack,
+	    obconcat (&objfile->objfile_obstack,
 		      "INVALID_CPLUSPLUS_ABBREV", "", "");
 	  break;
 	}
@@ -2764,7 +2746,7 @@ read_one_struct_field (struct field_info *fip, char **pp, char *p,
 		       struct type *type, struct objfile *objfile)
 {
   fip->list->field.name =
-    obsavestring (*pp, p - *pp, &objfile->type_obstack);
+    obsavestring (*pp, p - *pp, &objfile->objfile_obstack);
   *pp = p + 1;
 
   /* This means we have a visibility for a field coming. */
@@ -3534,14 +3516,14 @@ read_enum_type (char **pp, struct type *type,
       p = *pp;
       while (*p != ':')
 	p++;
-      name = obsavestring (*pp, p - *pp, &objfile->symbol_obstack);
+      name = obsavestring (*pp, p - *pp, &objfile->objfile_obstack);
       *pp = p + 1;
       n = read_huge_number (pp, ',', &nbits);
       if (nbits != 0)
 	return error_type (pp, objfile);
 
       sym = (struct symbol *)
-	obstack_alloc (&objfile->symbol_obstack, sizeof (struct symbol));
+	obstack_alloc (&objfile->objfile_obstack, sizeof (struct symbol));
       memset (sym, 0, sizeof (struct symbol));
       DEPRECATED_SYMBOL_NAME (sym) = name;
       SYMBOL_LANGUAGE (sym) = current_subfile->language;
@@ -4089,7 +4071,7 @@ common_block_start (char *name, struct objfile *objfile)
   common_block = local_symbols;
   common_block_i = local_symbols ? local_symbols->nsyms : 0;
   common_block_name = obsavestring (name, strlen (name),
-				    &objfile->symbol_obstack);
+				    &objfile->objfile_obstack);
 }
 
 /* Process a N_ECOMM symbol.  */
@@ -4115,9 +4097,9 @@ common_block_end (struct objfile *objfile)
     }
 
   sym = (struct symbol *)
-    obstack_alloc (&objfile->symbol_obstack, sizeof (struct symbol));
+    obstack_alloc (&objfile->objfile_obstack, sizeof (struct symbol));
   memset (sym, 0, sizeof (struct symbol));
-  /* Note: common_block_name already saved on symbol_obstack */
+  /* Note: common_block_name already saved on objfile_obstack */
   DEPRECATED_SYMBOL_NAME (sym) = common_block_name;
   SYMBOL_CLASS (sym) = LOC_BLOCK;
 

@@ -1,6 +1,6 @@
 /* Remote target communications for serial-line targets using SDS' protocol.
 
-   Copyright 1997, 1998, 1999, 2000, 2001, 2002 Free Software
+   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2004 Free Software
    Foundation, Inc.
 
    This file is part of GDB.
@@ -91,8 +91,6 @@ static int readchar (int);
 static ptid_t sds_wait (ptid_t, struct target_waitstatus *);
 
 static void sds_kill (void);
-
-static int tohex (int);
 
 static int fromhex (int);
 
@@ -276,17 +274,6 @@ fromhex (int a)
     return a - 'a' + 10;
   else
     error ("Reply contains invalid hex digit %d", a);
-}
-
-/* Convert number NIB to a hex digit.  */
-
-static int
-tohex (int nib)
-{
-  if (nib < 10)
-    return '0' + nib;
-  else
-    return 'a' + nib - 10;
 }
 
 static int

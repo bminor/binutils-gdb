@@ -52,13 +52,13 @@ tui_set_source_content (struct symtab *s, int line_no, int noerror)
 
   if (s != (struct symtab *) NULL && s->filename != (char *) NULL)
     {
-      FILE *stream;
-      int i, desc, c, line_width, nlines;
-      char *src_line = 0;
+      register FILE *stream;
+      register int i, desc, c, lineWidth, nlines;
+      register char *srcLine = 0;
 
       if ((ret = tui_alloc_source_buffer (TUI_SRC_WIN)) == TUI_SUCCESS)
 	{
-	  line_width = TUI_SRC_WIN->generic.width - 1;
+	  lineWidth = TUI_SRC_WIN->generic.width - 1;
 	  /* Take hilite (window border) into account, when calculating
 	     the number of lines  */
 	  nlines = (line_no + (TUI_SRC_WIN->generic.height - 2)) - line_no;
@@ -92,7 +92,7 @@ tui_set_source_content (struct symtab *s, int line_no, int noerror)
 		}
 	      else
 		{
-		  int offset, cur_line_no, cur_line, cur_len, threshold;
+		  register int offset, curLineNo, curLine, curLen, threshold;
 		  struct tui_gen_win_info * locator = tui_locator_win_info_ptr ();
                   struct tui_source_info * src = &TUI_SRC_WIN->detail.source_info;
 
@@ -107,52 +107,52 @@ tui_set_source_content (struct symtab *s, int line_no, int noerror)
 		  /* Determine the threshold for the length of the line
                      and the offset to start the display.  */
 		  offset = src->horizontal_offset;
-		  threshold = (line_width - 1) + offset;
+		  threshold = (lineWidth - 1) + offset;
 		  stream = fdopen (desc, FOPEN_RT);
 		  clearerr (stream);
-		  cur_line = 0;
-		  cur_line_no = src->start_line_or_addr.line_no = line_no;
+		  curLine = 0;
+		  curLineNo = src->start_line_or_addr.line_no = line_no;
 		  if (offset > 0)
-		    src_line = (char *) xmalloc (
+		    srcLine = (char *) xmalloc (
 					   (threshold + 1) * sizeof (char));
-		  while (cur_line < nlines)
+		  while (curLine < nlines)
 		    {
 		      struct tui_win_element * element = (struct tui_win_element *)
-		      TUI_SRC_WIN->generic.content[cur_line];
+		      TUI_SRC_WIN->generic.content[curLine];
 
 		      /* get the first character in the line */
 		      c = fgetc (stream);
 
 		      if (offset == 0)
-			src_line = ((struct tui_win_element *)
+			srcLine = ((struct tui_win_element *)
 				   TUI_SRC_WIN->generic.content[
-					cur_line])->which_element.source.line;
+					curLine])->which_element.source.line;
 		      /* Init the line with the line number */
-		      sprintf (src_line, "%-6d", cur_line_no);
-		      cur_len = strlen (src_line);
-		      i = cur_len -
-			((cur_len / tui_default_tab_len ()) * tui_default_tab_len ());
+		      sprintf (srcLine, "%-6d", curLineNo);
+		      curLen = strlen (srcLine);
+		      i = curLen -
+			((curLen / tui_default_tab_len ()) * tui_default_tab_len ());
 		      while (i < tui_default_tab_len ())
 			{
-			  src_line[cur_len] = ' ';
+			  srcLine[curLen] = ' ';
 			  i++;
-			  cur_len++;
+			  curLen++;
 			}
-		      src_line[cur_len] = (char) 0;
+		      srcLine[curLen] = (char) 0;
 
 		      /* Set whether element is the execution point and
 		         whether there is a break point on it.  */
 		      element->which_element.source.line_or_addr.line_no =
-			cur_line_no;
+			curLineNo;
 		      element->which_element.source.is_exec_point =
 			(strcmp (((struct tui_win_element *)
 			locator->content[0])->which_element.locator.file_name,
 				 s->filename) == 0
-			 && cur_line_no == ((struct tui_win_element *)
+			 && curLineNo == ((struct tui_win_element *)
 			 locator->content[0])->which_element.locator.line_no);
 		      if (c != EOF)
 			{
-			  i = strlen (src_line) - 1;
+			  i = strlen (srcLine) - 1;
 			  do
 			    {
 			      if ((c != '\n') &&
@@ -160,13 +160,13 @@ tui_set_source_content (struct symtab *s, int line_no, int noerror)
 				{
 				  if (c < 040 && c != '\t')
 				    {
-				      src_line[i++] = '^';
-				      src_line[i] = c + 0100;
+				      srcLine[i++] = '^';
+				      srcLine[i] = c + 0100;
 				    }
 				  else if (c == 0177)
 				    {
-				      src_line[i++] = '^';
-				      src_line[i] = '?';
+				      srcLine[i++] = '^';
+				      srcLine[i] = '?';
 				    }
 				  else
 				    {	/* Store the charcter in the line
@@ -176,20 +176,20 @@ tui_set_source_content (struct symtab *s, int line_no, int noerror)
 					   buffer.  */
 				      if (c == '\t')
 					{
-					  int j, max_tab_len = tui_default_tab_len ();
+					  int j, maxTabLen = tui_default_tab_len ();
 
 					  for (j = i - (
-					       (i / max_tab_len) * max_tab_len);
-					       ((j < max_tab_len) &&
+					       (i / maxTabLen) * maxTabLen);
+					       ((j < maxTabLen) &&
 						i < threshold);
 					       i++, j++)
-					    src_line[i] = ' ';
+					    srcLine[i] = ' ';
 					  i--;
 					}
 				      else
-					src_line[i] = c;
+					srcLine[i] = c;
 				    }
-				  src_line[i + 1] = 0;
+				  srcLine[i + 1] = 0;
 				}
 			      else
 				{	/* If we have not reached EOL, then eat
@@ -202,19 +202,19 @@ tui_set_source_content (struct symtab *s, int line_no, int noerror)
 				 i < threshold && (c = fgetc (stream)));
 			}
 		      /* Now copy the line taking the offset into account */
-		      if (strlen (src_line) > offset)
+		      if (strlen (srcLine) > offset)
 			strcpy (((struct tui_win_element *) TUI_SRC_WIN->generic.content[
-					cur_line])->which_element.source.line,
-				&src_line[offset]);
+					curLine])->which_element.source.line,
+				&srcLine[offset]);
 		      else
 			((struct tui_win_element *)
 			 TUI_SRC_WIN->generic.content[
-			  cur_line])->which_element.source.line[0] = (char) 0;
-		      cur_line++;
-		      cur_line_no++;
+			  curLine])->which_element.source.line[0] = (char) 0;
+		      curLine++;
+		      curLineNo++;
 		    }
 		  if (offset > 0)
-		    xfree (src_line);
+		    xfree (srcLine);
 		  fclose (stream);
 		  TUI_SRC_WIN->generic.content_size = nlines;
 		  ret = TUI_SUCCESS;
@@ -229,29 +229,29 @@ tui_set_source_content (struct symtab *s, int line_no, int noerror)
 /* elz: this function sets the contents of the source window to empty
    except for a line in the middle with a warning message about the
    source not being available. This function is called by
-   tui_erase_source_contents(), which in turn is invoked when the
-   source files cannot be accessed.  */
+   tuiEraseSourceContents, which in turn is invoked when the source
+   files cannot be accessed.  */
 
 void
-tui_set_source_content_nil (struct tui_win_info * win_info, char *warning_string)
+tui_set_source_content_nil (struct tui_win_info * winInfo, char *warning_string)
 {
-  int line_width;
-  int n_lines;
+  int lineWidth;
+  int nLines;
   int curr_line = 0;
 
-  line_width = win_info->generic.width - 1;
-  n_lines = win_info->generic.height - 2;
+  lineWidth = winInfo->generic.width - 1;
+  nLines = winInfo->generic.height - 2;
 
   /* set to empty each line in the window, except for the one
      which contains the message */
-  while (curr_line < win_info->generic.content_size)
+  while (curr_line < winInfo->generic.content_size)
     {
       /* set the information related to each displayed line
          to null: i.e. the line number is 0, there is no bp,
          it is not where the program is stopped */
 
       struct tui_win_element * element =
-      (struct tui_win_element *) win_info->generic.content[curr_line];
+      (struct tui_win_element *) winInfo->generic.content[curr_line];
       element->which_element.source.line_or_addr.line_no = 0;
       element->which_element.source.is_exec_point = FALSE;
       element->which_element.source.has_break = FALSE;
@@ -259,35 +259,35 @@ tui_set_source_content_nil (struct tui_win_info * win_info, char *warning_string
       /* set the contents of the line to blank */
       element->which_element.source.line[0] = (char) 0;
 
-      /* if the current line is in the middle of the screen, then we
-         want to display the 'no source available' message in it.
-         Note: the 'weird' arithmetic with the line width and height
-         comes from the function tui_erase_source_content(). We need
-         to keep the screen and the window's actual contents in synch.  */
+      /* if the current line is in the middle of the screen, then we want to
+         display the 'no source available' message in it.
+         Note: the 'weird' arithmetic with the line width and height comes from
+         the function tuiEraseSourceContent. We need to keep the screen and the
+         window's actual contents in synch */
 
-      if (curr_line == (n_lines / 2 + 1))
+      if (curr_line == (nLines / 2 + 1))
 	{
 	  int i;
 	  int xpos;
 	  int warning_length = strlen (warning_string);
-	  char *src_line;
+	  char *srcLine;
 
-	  src_line = element->which_element.source.line;
+	  srcLine = element->which_element.source.line;
 
-	  if (warning_length >= ((line_width - 1) / 2))
+	  if (warning_length >= ((lineWidth - 1) / 2))
 	    xpos = 1;
 	  else
-	    xpos = (line_width - 1) / 2 - warning_length;
+	    xpos = (lineWidth - 1) / 2 - warning_length;
 
 	  for (i = 0; i < xpos; i++)
-	    src_line[i] = ' ';
+	    srcLine[i] = ' ';
 
-	  sprintf (src_line + i, "%s", warning_string);
+	  sprintf (srcLine + i, "%s", warning_string);
 
-	  for (i = xpos + warning_length; i < line_width; i++)
-	    src_line[i] = ' ';
+	  for (i = xpos + warning_length; i < lineWidth; i++)
+	    srcLine[i] = ' ';
 
-	  src_line[i] = '\n';
+	  srcLine[i] = '\n';
 
 	}			/* end if */
 
@@ -320,8 +320,8 @@ tui_source_is_displayed (char *fname)
 
 /* Scroll the source forward or backward vertically.  */
 void
-tui_vertical_source_scroll (enum tui_scroll_direction scroll_direction,
-			    int num_to_scroll)
+tui_vertical_source_scroll (enum tui_scroll_direction scrollDirection,
+			    int numToScroll)
 {
   if (TUI_SRC_WIN->generic.content != NULL)
     {
@@ -335,19 +335,19 @@ tui_vertical_source_scroll (enum tui_scroll_direction scroll_direction,
       else
 	s = cursal.symtab;
 
-      if (scroll_direction == FORWARD_SCROLL)
+      if (scrollDirection == FORWARD_SCROLL)
 	{
 	  l.line_no = content[0]->which_element.source.line_or_addr.line_no +
-	    num_to_scroll;
+	    numToScroll;
 	  if (l.line_no > s->nlines)
-	    /*line = s->nlines - win_info->generic.content_size + 1; */
+	    /*line = s->nlines - winInfo->generic.content_size + 1; */
 	    /*elz: fix for dts 23398 */
 	    l.line_no = content[0]->which_element.source.line_or_addr.line_no;
 	}
       else
 	{
 	  l.line_no = content[0]->which_element.source.line_or_addr.line_no -
-	    num_to_scroll;
+	    numToScroll;
 	  if (l.line_no <= 0)
 	    l.line_no = 1;
 	}

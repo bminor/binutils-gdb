@@ -176,7 +176,7 @@ proc test_ptype_of_classes {} {
 	"" "int a;" \
 	"public:" "virtual int f\\((void|)\\);" \
 	"A & operator=\\(A const ?&\\);${ws}A\\(int, A const ?&\\);${ws}A\\(int\\);" \
-	"A & operator=\\(A const ?&\\);${ws}A\\(A const ?&\\);${ws}A\\(\\);" \
+	"A & operator=\\(A const ?&\\);${ws}A\\(A const ?&\\);${ws}A\\((void|)\\);" \
 	""
 
     # class B
@@ -187,7 +187,7 @@ proc test_ptype_of_classes {} {
 	"" "int b;" \
 	"public:" "virtual int f\\((void|)\\);" \
 	"B & operator=\\(B const ?&\\);${ws}B\\(int, B const ?&\\);${ws}B\\(int\\);" \
-	"B & operator=\\(B const ?&\\);${ws}B\\(B const ?&\\);${ws}B\\(\\);" \
+	"B & operator=\\(B const ?&\\);${ws}B\\(B const ?&\\);${ws}B\\((void|)\\);" \
 	""
 
     # class C
@@ -198,7 +198,7 @@ proc test_ptype_of_classes {} {
 	"public:" "int c;" \
 	"" "" \
 	"C & operator=\\(C const ?&\\);${ws}C\\(int, C const ?&\\);${ws}C\\(int\\);" \
-	"C & operator=\\(C const ?&\\);${ws}C\\(C const ?&\\);${ws}C\\(\\);" \
+	"C & operator=\\(C const ?&\\);${ws}C\\(C const ?&\\);${ws}C\\((void|)\\);" \
 	""
 
     # class AD
@@ -220,7 +220,7 @@ proc test_ptype_of_classes {} {
     	"public:" "int d;" \
 	"" "static void s\\((void|)\\);${ws}virtual int vg\\((void|)\\);${ws}virtual int vd\\((void|)\\);${ws}int fd\\((void|)\\);" \
 	"D & operator=\\(D const ?&\\);${ws}D\\(int, D const ?&\\);${ws}D\\(int\\);" \
-	"D & operator=\\(D const ?&\\);${ws}D\\(D const ?&\\);${ws}D\\(\\);" \
+	"D & operator=\\(D const ?&\\);${ws}D\\(D const ?&\\);${ws}D\\((void|)\\);" \
 	""
 
     # class E
@@ -232,7 +232,7 @@ proc test_ptype_of_classes {} {
 	"public:" "int e;" \
 	"" "virtual int f\\((void|)\\);${ws}virtual int vg\\((void|)\\);${ws}virtual int vv\\((void|)\\);" \
 	"E & operator=\\(E const ?&\\);${ws}E\\(int, E const ?&\\);${ws}E\\(int\\);" \
-	"E & operator=\\(E const ?&\\);${ws}E\\(E const ?&\\);${ws}E\\(\\);" \
+	"E & operator=\\(E const ?&\\);${ws}E\\(E const ?&\\);${ws}E\\((void|)\\);" \
 	""
 
     # An instance of D
@@ -243,7 +243,7 @@ proc test_ptype_of_classes {} {
     	"public:" "int d;" \
 	"" "static void s\\((void|)\\);${ws}virtual int vg\\((void|)\\);${ws}virtual int vd\\((void|)\\);${ws}int fd\\((void|)\\);" \
 	"D & operator=\\(D const ?&\\);${ws}D\\(int, D const ?&\\);${ws}D\\(int\\);" \
-	"D & operator=\\(D const ?&\\);${ws}D\\(D const ?&\\);${ws}D\\(\\);" \
+	"D & operator=\\(D const ?&\\);${ws}D\\(D const ?&\\);${ws}D\\((void|)\\);" \
 	""
 
     # An instance of D *
@@ -254,7 +254,7 @@ proc test_ptype_of_classes {} {
     	"public:" "int d;" \
 	"" "static void s\\((void|)\\);${ws}virtual int vg\\((void|)\\);${ws}virtual int vd\\((void|)\\);${ws}int fd\\((void|)\\);" \
 	"D & operator=\\(D const ?&\\);${ws}D\\(int, D const ?&\\);${ws}D\\(int\\);" \
-	"D & operator=\\(D const ?&\\);${ws}D\\(D const ?&\\);${ws}D\\(\\);" \
+	"D & operator=\\(D const ?&\\);${ws}D\\(D const ?&\\);${ws}D\\((void|)\\);" \
 	" ?\\*"
 
     # An instance of AD *
@@ -277,7 +277,7 @@ proc test_ptype_of_classes {} {
 	"" "int a;" \
 	"public:" "virtual int f\\((void|)\\);" \
 	"A & operator=\\(A const ?&\\);${ws}A\\(int, A const ?&\\);${ws}A\\(int\\);" \
-	"A & operator=\\(A const ?&\\);${ws}A\\(A const ?&\\);${ws}A\\(\\);" \
+	"A & operator=\\(A const ?&\\);${ws}A\\(A const ?&\\);${ws}A\\((void|)\\);" \
 	""
 
     # An instance of B
@@ -288,7 +288,7 @@ proc test_ptype_of_classes {} {
 	"" "int b;" \
 	"public:" "virtual int f\\((void|)\\);" \
 	"B & operator=\\(B const ?&\\);${ws}B\\(int, B const ?&\\);${ws}B\\(int\\);" \
-	"B & operator=\\(B const ?&\\);${ws}B\\(B const ?&\\);${ws}B\\(\\);" \
+	"B & operator=\\(B const ?&\\);${ws}B\\(B const ?&\\);${ws}B\\((void|)\\);" \
 	""
 
     # An instance of C
@@ -299,7 +299,7 @@ proc test_ptype_of_classes {} {
 	"public:" "int c;" \
 	"" "" \
 	"C & operator=\\(C const ?&\\);${ws}C\\(int, C const ?&\\);${ws}C\\(int\\);" \
-	"C & operator=\\(C const ?&\\);${ws}C\\(C const ?&\\);${ws}C\\(\\);" \
+	"C & operator=\\(C const ?&\\);${ws}C\\(C const ?&\\);${ws}C\\((void|)\\);" \
 	""
 
     # An instance of D
@@ -310,7 +310,7 @@ proc test_ptype_of_classes {} {
     	"public:" "int d;" \
 	"" "static void s\\((void|)\\);${ws}virtual int vg\\((void|)\\);${ws}virtual int vd\\((void|)\\);${ws}int fd\\((void|)\\);" \
 	"D & operator=\\(D const ?&\\);${ws}D\\(int, D const ?&\\);${ws}D\\(int\\);" \
-	"D & operator=\\(D const ?&\\);${ws}D\\(D const ?&\\);${ws}D\\(\\);" \
+	"D & operator=\\(D const ?&\\);${ws}D\\(D const ?&\\);${ws}D\\((void|)\\);" \
 	""
 
     # An instance of E
@@ -321,7 +321,7 @@ proc test_ptype_of_classes {} {
 	"public:" "int e;" \
 	"" "virtual int f\\((void|)\\);${ws}virtual int vg\\((void|)\\);${ws}virtual int vv\\((void|)\\);" \
 	"E & operator=\\(E const ?&\\);${ws}E\\(int, E const ?&\\);${ws}E\\(int\\);" \
-	"E & operator=\\(E const ?&\\);${ws}E\\(E const ?&\\);${ws}E\\(\\);" \
+	"E & operator=\\(E const ?&\\);${ws}E\\(E const ?&\\);${ws}E\\((void|)\\);" \
 	""
 
     # An instance of V
@@ -354,7 +354,7 @@ proc test_ptype_of_classes {} {
 	"" "int a;" \
 	"public:" "virtual int f\\((void|)\\);" \
 	"A & operator=\\(A const ?&\\);${ws}A\\(int, A const ?&\\);${ws}A\\(int\\);" \
-	"A & operator=\\(A const ?&\\);${ws}A\\(A const ?&\\);${ws}A\\(\\);" \
+	"A & operator=\\(A const ?&\\);${ws}A\\(A const ?&\\);${ws}A\\((void|)\\);" \
 	" ?\\*"
 
     # An instance of A *
@@ -365,7 +365,7 @@ proc test_ptype_of_classes {} {
 	"" "int a;" \
 	"public:" "virtual int f\\((void|)\\);" \
 	"A & operator=\\(A const ?&\\);${ws}A\\(int, A const ?&\\);${ws}A\\(int\\);" \
-	"A & operator=\\(A const ?&\\);${ws}A\\(A const ?&\\);${ws}A\\(\\);" \
+	"A & operator=\\(A const ?&\\);${ws}A\\(A const ?&\\);${ws}A\\((void|)\\);" \
 	" ?\\*"
 
     # An instance of B *
@@ -376,7 +376,7 @@ proc test_ptype_of_classes {} {
 	"" "int b;" \
 	"public:" "virtual int f\\((void|)\\);" \
 	"B & operator=\\(B const ?&\\);${ws}B\\(int, B const ?&\\);${ws}B\\(int\\);" \
-	"B & operator=\\(B const ?&\\);${ws}B\\(B const ?&\\);${ws}B\\(\\);" \
+	"B & operator=\\(B const ?&\\);${ws}B\\(B const ?&\\);${ws}B\\((void|)\\);" \
 	" ?\\*"
 
     # An instance of D *
@@ -387,7 +387,7 @@ proc test_ptype_of_classes {} {
     	"public:" "int d;" \
 	"" "static void s\\((void|)\\);${ws}virtual int vg\\((void|)\\);${ws}virtual int vd\\((void|)\\);${ws}int fd\\((void|)\\);" \
 	"D & operator=\\(D const ?&\\);${ws}D\\(int, D const ?&\\);${ws}D\\(int\\);" \
-	"D & operator=\\(D const ?&\\);${ws}D\\(D const ?&\\);${ws}D\\(\\);" \
+	"D & operator=\\(D const ?&\\);${ws}D\\(D const ?&\\);${ws}D\\((void|)\\);" \
 	" ?\\*"
 
     # An instance of D *
@@ -398,7 +398,7 @@ proc test_ptype_of_classes {} {
     	"public:" "int d;" \
 	"" "static void s\\((void|)\\);${ws}virtual int vg\\((void|)\\);${ws}virtual int vd\\((void|)\\);${ws}int fd\\((void|)\\);" \
 	"D & operator=\\(D const ?&\\);${ws}D\\(int, D const ?&\\);${ws}D\\(int\\);" \
-	"D & operator=\\(D const ?&\\);${ws}D\\(D const ?&\\);${ws}D\\(\\);" \
+	"D & operator=\\(D const ?&\\);${ws}D\\(D const ?&\\);${ws}D\\((void|)\\);" \
 	" ?\\*"
 
     # An instance of V *
@@ -464,7 +464,7 @@ proc test_ptype_of_classes {} {
 	"public:" "int e;" \
 	"" "virtual int f\\((void|)\\);${ws}virtual int vg\\((void|)\\);${ws}virtual int vv\\((void|)\\);" \
 	"E & operator=\\(E const ?&\\);${ws}E\\(int, E const ?&\\);${ws}E\\(int\\);" \
-	"E & operator=\\(E const ?&\\);${ws}E\\(E const ?&\\);${ws}E\\(\\);" \
+	"E & operator=\\(E const ?&\\);${ws}E\\(E const ?&\\);${ws}E\\((void|)\\);" \
 	" ?\\*"
 
     # An instance of VB *

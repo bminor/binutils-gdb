@@ -1,6 +1,6 @@
 /* Support routines for manipulating internal types for GDB.
-   Copyright 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2003
-   Free Software Foundation, Inc.
+   Copyright 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001, 2002, 2003,
+   2004 Free Software Foundation, Inc.
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
    This file is part of GDB.
@@ -127,8 +127,6 @@ struct extra
     int len;
   };				/* maximum extension is 128! FIXME */
 
-static void add_name (struct extra *, char *);
-static void add_mangled_type (struct extra *, struct type *);
 static void print_bit_vector (B_TYPE *, int);
 static void print_arg_types (struct field *, int, int);
 static void dump_fn_fieldlists (struct type *, int);
@@ -138,7 +136,7 @@ static void virtual_base_list_aux (struct type *dclass);
 
 /* Alloc a new type structure and fill it with some defaults.  If
    OBJFILE is non-NULL, then allocate the space for the type structure
-   in that objfile's type_obstack.  Otherwise allocate the new type structure
+   in that objfile's objfile_obstack.  Otherwise allocate the new type structure
    by xmalloc () (for permanent types).  */
 
 struct type *
@@ -156,10 +154,10 @@ alloc_type (struct objfile *objfile)
     }
   else
     {
-      type = obstack_alloc (&objfile->type_obstack,
+      type = obstack_alloc (&objfile->objfile_obstack,
 			    sizeof (struct type));
       memset (type, 0, sizeof (struct type));
-      TYPE_MAIN_TYPE (type) = obstack_alloc (&objfile->type_obstack,
+      TYPE_MAIN_TYPE (type) = obstack_alloc (&objfile->objfile_obstack,
 					     sizeof (struct main_type));
       OBJSTAT (objfile, n_types++);
     }
@@ -193,7 +191,7 @@ alloc_type_instance (struct type *oldtype)
     }
   else
     {
-      type = obstack_alloc (&TYPE_OBJFILE (oldtype)->type_obstack,
+      type = obstack_alloc (&TYPE_OBJFILE (oldtype)->objfile_obstack,
 			    sizeof (struct type));
       memset (type, 0, sizeof (struct type));
     }
@@ -1684,7 +1682,7 @@ allocate_cplus_struct_type (struct type *type)
 /* Helper function to initialize the standard scalar types.
 
    If NAME is non-NULL and OBJFILE is non-NULL, then we make a copy
-   of the string pointed to by name in the type_obstack for that objfile,
+   of the string pointed to by name in the objfile_obstack for that objfile,
    and initialize the type name to that copy.  There are places (mipsread.c
    in particular, where init_type is called with a NULL value for NAME). */
 
@@ -1701,7 +1699,7 @@ init_type (enum type_code code, int length, int flags, char *name,
   if ((name != NULL) && (objfile != NULL))
     {
       TYPE_NAME (type) =
-	obsavestring (name, strlen (name), &objfile->type_obstack);
+	obsavestring (name, strlen (name), &objfile->objfile_obstack);
     }
   else
     {
@@ -1802,7 +1800,7 @@ lookup_fundamental_type (struct objfile *objfile, int typeid)
     {
       nbytes = FT_NUM_MEMBERS * sizeof (struct type *);
       objfile->fundamental_types = (struct type **)
-	obstack_alloc (&objfile->type_obstack, nbytes);
+	obstack_alloc (&objfile->objfile_obstack, nbytes);
       memset ((char *) objfile->fundamental_types, 0, nbytes);
       OBJSTAT (objfile, n_types += FT_NUM_MEMBERS);
     }

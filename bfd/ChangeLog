@@ -1,11 +1,84 @@
+2004-01-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfxx-ia64.c (elfNN_ia64_relax_brl): New function.
+	(elfNN_ia64_relax_section): Optimize brl to br during the relax
+	finalize pass.
+
+2004-01-30  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elf32-frv.c (elf32_frv_always_size_sections): Initialize pointer
+	to bfd_link_hash_entry passed by reference to
+	_bfd_generic_link_add_one_symbol.
+
+2004-01-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfxx-ia64.c (elfNN_ia64_relocate_section): Disallow imm
+	relocations against dynamic symbols.
+
+2004-01-23  Daniel Jacobowitz  <drow@mvista.com>
+
+	* elf32-arm.h (elf32_arm_check_relocs): Revert part of 2004-01-13
+	change.
+
+2004-01-21  Tom Rix  <tcrix@worldnet.att.net>
+
+	* reloc.c: New 5 bit reloc, BFD_RELOC_M68HC12_5B, for m68hc12 movb/movw.
+	* bfd-in2.h, libbfd.h: Rebuilt.
+
+2004-01-20  Danny Smith  <dannysmith@users.sourceforge.net>
+
+	* peXXigen.c (_bfd_XXi_swap_scnhdr_out): Don't remove
+	IMAGE_SCN_MEM_WRITE flag from .text section if WP_TEXT
+	flag has been cleared.
+
+2004-01-19  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* coff-h8300.c: Add and adjust comments about relaxation.
+	* elf32-h8300.c: Likewise.
+
+2004-01-16  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* coff-h8300.c: Fix comment typos.
+	* elf32-h8300.c: Likewise.
+
+2004-01-16  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* coff-h8300.c: Add comments about relaxation.
+	* elf32-h8300.c: Likewise.
+
+2004-01-14  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
+
+	* acinclude.m4: Quote names of macros to be defined by AC_DEFUN
+	throughout.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2004-01-13  Ian Lance Taylor  <ian@wasabisystems.com>
+
+	* elf64-mips.c (mips_elf64_slurp_one_reloc_table): Call
+	mips_elf64_rtype_to_howto instead of using howto_table.
+
+2004-01-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* elf32-arm.h (elf32_arm_final_link_relocate): Check that we created
+	the .plt section.
+	(elf32_arm_check_relocs): Don't increment the PLT refcount for
+	relocs which would not use the PLT.
+
+2004-01-13  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc64_elf_check_relocs): Ignore !SEC_ALLOC relocs.
+	(ppc64_elf_gc_sweep_hook): Likewise.
+	(ppc64_elf_size_dynamic_sections): Test for .plt directly.
+
 2004-01-12  Anil Paranjpe  <anilp1@KPITCummins.com>
 
 	Adds linker relaxation support for bit manipulation insns like
-	band, bclr, biand, bild, bior, bist, bixor, bld, bnot, bor, bset, 
+	band, bclr, biand, bild, bior, bist, bixor, bld, bnot, bor, bset,
 	bst, btst, bxor.
-	* elf32-h8300.c : Opcode for bit manipulation insn is checked in 
+	* elf32-h8300.c: Opcode for bit manipulation insn is checked in
 	elf32_h8_relax_section function while relxation for aa:16 and aa:32.
-	* coff-h8300.c  : Opcode for bit manipulation insn is checked in 
+	* coff-h8300.c: Opcode for bit manipulation insn is checked in
 	h8300_reloc16_extra_cases function while relxation for aa:16 and aa:32.
 
 2004-01-12  Alan Modra  <amodra@bigpond.net.au>

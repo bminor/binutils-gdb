@@ -1,6 +1,6 @@
 /* Parser for linespec for the GNU debugger, GDB.
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
-   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -1469,7 +1469,14 @@ symtab_from_filename (char **argptr, char *p, int is_quote_enclosed,
       if (not_found_ptr)
 	{
 	  *not_found_ptr = 1;
-	  throw_exception (RETURN_ERROR);
+	  /* The caller has indicated that it wishes quiet notification of any
+	     error where the function or file is not found.  A call to 
+	     error_silent causes an error to occur, but it does not issue 
+	     the supplied message.  The message can be manually output by
+	     the caller, if desired.  This is used, for example, when 
+	     attempting to set breakpoints for functions in shared libraries 
+	     that have not yet been loaded.  */
+	  error_silent ("No source file named %s.", copy);
 	}
       error ("No source file named %s.", copy);
     }
@@ -1684,7 +1691,14 @@ decode_variable (char *copy, int funfirstline, char ***canonical,
   if (not_found_ptr)
     {
       *not_found_ptr = 1;
-      throw_exception (RETURN_ERROR);
+      /* The caller has indicated that it wishes quiet notification of any
+	 error where the function or file is not found.  A call to 
+	 error_silent causes an error to occur, but it does not issue 
+	 the supplied message.  The message can be manually output by
+	 the caller, if desired.  This is used, for example, when 
+	 attempting to set breakpoints for functions in shared libraries 
+	 that have not yet been loaded.  */
+      error_silent ("Function \"%s\" not defined.", copy);
     }
   
   error ("Function \"%s\" not defined.", copy);

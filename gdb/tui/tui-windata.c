@@ -48,66 +48,77 @@
 ******************************************/
 
 
-/* Answer the index first element displayed.  If none are displayed,
-   then return (-1).  */
+/*
+   ** tuiFirstDataItemDisplayed()
+   **    Answer the index first element displayed.
+   **    If none are displayed, then return (-1).
+ */
 int
-tui_first_data_item_displayed (void)
+tuiFirstDataItemDisplayed (void)
 {
-  int element_no = (-1);
+  int elementNo = (-1);
   int i;
 
-  for (i = 0; (i < TUI_DATA_WIN->generic.content_size && element_no < 0); i++)
+  for (i = 0; (i < TUI_DATA_WIN->generic.content_size && elementNo < 0); i++)
     {
-      struct tui_gen_win_info * data_item_win;
+      struct tui_gen_win_info * dataItemWin;
 
-      data_item_win = &((tui_win_content)
+      dataItemWin = &((tui_win_content)
 		      TUI_DATA_WIN->generic.content)[i]->which_element.data_window;
-      if (data_item_win->handle != (WINDOW *) NULL && data_item_win->is_visible)
-	element_no = i;
+      if (dataItemWin->handle != (WINDOW *) NULL && dataItemWin->is_visible)
+	elementNo = i;
     }
 
-  return element_no;
-}
+  return elementNo;
+}				/* tuiFirstDataItemDisplayed */
 
 
-/* Answer the index of the first element in line_no.  If line_no is
-   past the data area (-1) is returned.  */
+/*
+   ** tuiFirstDataElementNoInLine()
+   **        Answer the index of the first element in lineNo.  If lineNo is
+   **        past the data area (-1) is returned.
+ */
 int
-tui_first_data_element_no_in_line (int line_no)
+tuiFirstDataElementNoInLine (int lineNo)
 {
-  int first_element_no = (-1);
+  int firstElementNo = (-1);
 
   /*
-     ** First see if there is a register on line_no, and if so, set the
+     ** First see if there is a register on lineNo, and if so, set the
      ** first element number
    */
-  if ((first_element_no = tui_first_reg_element_no_inline (line_no)) == -1)
+  if ((firstElementNo = tui_first_reg_element_no_inline (lineNo)) == -1)
     {				/*
-				   ** Looking at the general data, the 1st element on line_no
+				   ** Looking at the general data, the 1st element on lineNo
 				 */
     }
 
-  return first_element_no;
-}
+  return firstElementNo;
+}				/* tuiFirstDataElementNoInLine */
 
 
-/* Function to delete all the item windows in the data window.  This
-   is usually done when the data window is scrolled.  */
+/*
+   ** tuiDeleteDataContentWindows()
+   **        Function to delete all the item windows in the data window.
+   **        This is usually done when the data window is scrolled.
+ */
 void
-tui_delete_data_content_windows (void)
+tuiDeleteDataContentWindows (void)
 {
   int i;
-  struct tui_gen_win_info * data_item_win_ptr;
+  struct tui_gen_win_info * dataItemWinPtr;
 
   for (i = 0; (i < TUI_DATA_WIN->generic.content_size); i++)
     {
-      data_item_win_ptr = &((tui_win_content)
+      dataItemWinPtr = &((tui_win_content)
 		      TUI_DATA_WIN->generic.content)[i]->which_element.data_window;
-      tui_delete_win (data_item_win_ptr->handle);
-      data_item_win_ptr->handle = (WINDOW *) NULL;
-      data_item_win_ptr->is_visible = FALSE;
+      tui_delete_win (dataItemWinPtr->handle);
+      dataItemWinPtr->handle = (WINDOW *) NULL;
+      dataItemWinPtr->is_visible = FALSE;
     }
-}
+
+  return;
+}				/* tuiDeleteDataContentWindows */
 
 
 void
@@ -117,16 +128,16 @@ tui_erase_data_content (char *prompt)
   tui_check_and_display_highlight_if_needed (TUI_DATA_WIN);
   if (prompt != (char *) NULL)
     {
-      int half_width = (TUI_DATA_WIN->generic.width - 2) / 2;
-      int x_pos;
+      int halfWidth = (TUI_DATA_WIN->generic.width - 2) / 2;
+      int xPos;
 
-      if (strlen (prompt) >= half_width)
-	x_pos = 1;
+      if (strlen (prompt) >= halfWidth)
+	xPos = 1;
       else
-	x_pos = half_width - strlen (prompt);
+	xPos = halfWidth - strlen (prompt);
       mvwaddstr (TUI_DATA_WIN->generic.handle,
 		 (TUI_DATA_WIN->generic.height / 2),
-		 x_pos,
+		 xPos,
 		 prompt);
     }
   wrefresh (TUI_DATA_WIN->generic.handle);
@@ -143,7 +154,7 @@ tui_display_all_data (void)
   else
     {
       tui_erase_data_content ((char *) NULL);
-      tui_delete_data_content_windows ();
+      tuiDeleteDataContentWindows ();
       tui_check_and_display_highlight_if_needed (TUI_DATA_WIN);
       tui_display_registers_from (0);
       /*
@@ -158,70 +169,80 @@ tui_display_all_data (void)
 }
 
 
-/* Function to display the data starting at line, line_no, in the data
-   window.  */
+/*
+   ** tuiDisplayDataFromLine()
+   **        Function to display the data starting at line, lineNo, in the
+   **        data window.
+ */
 void
-tui_display_data_from_line (int line_no)
+tuiDisplayDataFromLine (int lineNo)
 {
-  int _line_no = line_no;
+  int _lineNo = lineNo;
 
-  if (line_no < 0)
-    _line_no = 0;
+  if (lineNo < 0)
+    _lineNo = 0;
 
   tui_check_and_display_highlight_if_needed (TUI_DATA_WIN);
 
   /* there is no general data, force regs to display (if there are any) */
   if (TUI_DATA_WIN->detail.data_display_info.data_content_count <= 0)
-    tui_display_registers_from_line (_line_no, TRUE);
+    tui_display_registers_from_line (_lineNo, TRUE);
   else
     {
-      int element_no, start_line_no;
-      int regs_last_line = tui_last_regs_line_no ();
+      int elementNo, startLineNo;
+      int regsLastLine = tui_last_regs_line_no ();
 
 
       /* display regs if we can */
-      if (tui_display_registers_from_line (_line_no, FALSE) < 0)
+      if (tui_display_registers_from_line (_lineNo, FALSE) < 0)
 	{			/*
-				   ** _line_no is past the regs display, so calc where the
+				   ** _lineNo is past the regs display, so calc where the
 				   ** start data element is
 				 */
-	  if (regs_last_line < _line_no)
+	  if (regsLastLine < _lineNo)
 	    {			/* figure out how many lines each element is to obtain
-				   the start element_no */
+				   the start elementNo */
 	    }
 	}
       else
 	{			/*
 				   ** calculate the starting element of the data display, given
-				   ** regs_last_line and how many lines each element is, up to
-				   ** _line_no
+				   ** regsLastLine and how many lines each element is, up to
+				   ** _lineNo
 				 */
 	}
-      /* Now display the data , starting at element_no */
+      /* Now display the data , starting at elementNo */
     }
-}
+
+  return;
+}				/* tuiDisplayDataFromLine */
 
 
-/* Display data starting at element element_no.   */
+/*
+   ** tuiDisplayDataFrom()
+   **        Display data starting at element elementNo
+ */
 void
-tui_display_data_from (int element_no, int reuse_windows)
+tuiDisplayDataFrom (int elementNo, int reuseWindows)
 {
-  int first_line = (-1);
+  int firstLine = (-1);
 
-  if (element_no < TUI_DATA_WIN->detail.data_display_info.regs_content_count)
-    first_line = tui_line_from_reg_element_no (element_no);
+  if (elementNo < TUI_DATA_WIN->detail.data_display_info.regs_content_count)
+    firstLine = tui_line_from_reg_element_no (elementNo);
   else
-    {				/* calculate the first_line from the element number */
+    {				/* calculate the firstLine from the element number */
     }
 
-  if (first_line >= 0)
+  if (firstLine >= 0)
     {
       tui_erase_data_content ((char *) NULL);
-      if (!reuse_windows)
-	tui_delete_data_content_windows ();
-      tui_display_data_from_line (first_line);
+      if (!reuseWindows)
+	tuiDeleteDataContentWindows ();
+      tuiDisplayDataFromLine (firstLine);
     }
-}
+
+  return;
+}				/* tuiDisplayDataFrom */
 
 
 /* Function to redisplay the contents of the data window.  */
@@ -231,10 +252,10 @@ tui_refresh_data_win (void)
   tui_erase_data_content ((char *) NULL);
   if (TUI_DATA_WIN->generic.content_size > 0)
     {
-      int first_element = tui_first_data_item_displayed ();
+      int firstElement = tuiFirstDataItemDisplayed ();
 
-      if (first_element >= 0)	/* re-use existing windows */
-	tui_display_data_from (first_element, TRUE);
+      if (firstElement >= 0)	/* re-use existing windows */
+	tuiDisplayDataFrom (firstElement, TRUE);
     }
 }
 
@@ -253,18 +274,18 @@ tui_check_data_values (struct frame_info *frame)
       for (i = 0; TUI_DATA_WIN->detail.data_display_info.data_content_count; i++)
 	{
 #ifdef LATER
-	  tui_data_element_ptr data_element_ptr;
-	  struct tui_gen_win_info * data_item_win_ptr;
-	  Opaque new_value;
+	  TuiDataElementPtr dataElementPtr;
+	  struct tui_gen_win_info * dataItemWinPtr;
+	  Opaque newValue;
 
-	  data_item_ptr = &TUI_DATA_WIN->detail.data_display_info.
+	  dataItemPtr = &TUI_DATA_WIN->detail.data_display_info.
 	    data_content[i]->which_element.data_window;
-	  data_element_ptr = &((tui_win_content)
-			     data_item_win_ptr->content)[0]->which_element.data;
+	  dataElementPtr = &((tui_win_content)
+			     dataItemWinPtr->content)[0]->which_element.data;
 	  if value
-	    has changed (data_element_ptr, frame, &new_value)
+	    has changed (dataElementPtr, frame, &newValue)
 	    {
-	      data_element_ptr->value = new_value;
+	      dataElementPtr->value = newValue;
 	      update the display with the new value, hiliting it.
 	    }
 #endif
@@ -275,33 +296,35 @@ tui_check_data_values (struct frame_info *frame)
 
 /* Scroll the data window vertically forward or backward.   */
 void
-tui_vertical_data_scroll (enum tui_scroll_direction scroll_direction, int num_to_scroll)
+tui_vertical_data_scroll (enum tui_scroll_direction scrollDirection, int numToScroll)
 {
-  int first_element_no;
-  int first_line = (-1);
+  int firstElementNo;
+  int firstLine = (-1);
 
-  first_element_no = tui_first_data_item_displayed ();
-  if (first_element_no < TUI_DATA_WIN->detail.data_display_info.regs_content_count)
-    first_line = tui_line_from_reg_element_no (first_element_no);
+  firstElementNo = tuiFirstDataItemDisplayed ();
+  if (firstElementNo < TUI_DATA_WIN->detail.data_display_info.regs_content_count)
+    firstLine = tui_line_from_reg_element_no (firstElementNo);
   else
     {				/* calculate the first line from the element number which is in
 				   ** the general data content
 				 */
     }
 
-  if (first_line >= 0)
+  if (firstLine >= 0)
     {
-      int last_element_no, last_line;
+      int lastElementNo, lastLine;
 
-      if (scroll_direction == FORWARD_SCROLL)
-	first_line += num_to_scroll;
+      if (scrollDirection == FORWARD_SCROLL)
+	firstLine += numToScroll;
       else
-	first_line -= num_to_scroll;
+	firstLine -= numToScroll;
       tui_erase_data_content ((char *) NULL);
-      tui_delete_data_content_windows ();
-      tui_display_data_from_line (first_line);
+      tuiDeleteDataContentWindows ();
+      tuiDisplayDataFromLine (firstLine);
     }
-}
+
+  return;
+}				/* tuiVerticalDataScroll */
 
 
 /*****************************************

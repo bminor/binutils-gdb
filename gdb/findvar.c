@@ -346,11 +346,12 @@ symbol_read_needs_frame (struct symbol *sym)
          we failed to consider one.  */
     case LOC_COMPUTED:
     case LOC_COMPUTED_ARG:
-      {
-	struct location_funcs *symfuncs = SYMBOL_LOCATION_FUNCS (sym);
-	return (symfuncs->read_needs_frame) (sym);
-      }
-      break;
+      /* FIXME: cagney/2004-01-26: It should be possible to
+	 unconditionally call the SYMBOL_OPS method when available.
+	 Unfortunately DWARF 2 stores the frame-base (instead of the
+	 function) location in a function's symbol.  Oops!  For the
+	 moment enable this when/where applicable.  */
+      return SYMBOL_OPS (sym)->read_needs_frame (sym);
 
     case LOC_REGISTER:
     case LOC_ARG:
@@ -564,15 +565,14 @@ addresses have not been bound by the dynamic loader. Try again when executable i
 
     case LOC_COMPUTED:
     case LOC_COMPUTED_ARG:
-      {
-	struct location_funcs *funcs = SYMBOL_LOCATION_FUNCS (var);
-
-	if (frame == 0 && (funcs->read_needs_frame) (var))
-	  return 0;
-	return (funcs->read_variable) (var, frame);
-
-      }
-      break;
+      /* FIXME: cagney/2004-01-26: It should be possible to
+	 unconditionally call the SYMBOL_OPS method when available.
+	 Unfortunately DWARF 2 stores the frame-base (instead of the
+	 function) location in a function's symbol.  Oops!  For the
+	 moment enable this when/where applicable.  */
+      if (frame == 0 && SYMBOL_OPS (var)->read_needs_frame (var))
+	return 0;
+      return SYMBOL_OPS (var)->read_variable (var, frame);
 
     case LOC_UNRESOLVED:
       {

@@ -84,6 +84,7 @@ static const CGEN_ATTR_ENTRY UNIT_attr[] =
   { "B01", UNIT_B01 },
   { "C", UNIT_C },
   { "MULT_DIV", UNIT_MULT_DIV },
+  { "IACC", UNIT_IACC },
   { "LOAD", UNIT_LOAD },
   { "STORE", UNIT_STORE },
   { "SCAN", UNIT_SCAN },
@@ -2397,17 +2398,17 @@ static const CGEN_IBASE frv_cgen_insn_table[MAX_INSNS] =
 /* smu$pack $GRi,$GRj */
   {
     FRV_INSN_SMU, "smu", "smu", 32,
-    { 0, { (1<<MACH_FR400), UNIT_MULT_DIV, FR400_MAJOR_I_1, FR500_MAJOR_NONE, FR550_MAJOR_NONE } }
+    { 0, { (1<<MACH_FR400), UNIT_IACC, FR400_MAJOR_I_1, FR500_MAJOR_NONE, FR550_MAJOR_NONE } }
   },
 /* smass$pack $GRi,$GRj */
   {
     FRV_INSN_SMASS, "smass", "smass", 32,
-    { 0, { (1<<MACH_FR400), UNIT_MULT_DIV, FR400_MAJOR_I_1, FR500_MAJOR_NONE, FR550_MAJOR_NONE } }
+    { 0, { (1<<MACH_FR400), UNIT_IACC, FR400_MAJOR_I_1, FR500_MAJOR_NONE, FR550_MAJOR_NONE } }
   },
 /* smsss$pack $GRi,$GRj */
   {
     FRV_INSN_SMSSS, "smsss", "smsss", 32,
-    { 0, { (1<<MACH_FR400), UNIT_MULT_DIV, FR400_MAJOR_I_1, FR500_MAJOR_NONE, FR550_MAJOR_NONE } }
+    { 0, { (1<<MACH_FR400), UNIT_IACC, FR400_MAJOR_I_1, FR500_MAJOR_NONE, FR550_MAJOR_NONE } }
   },
 /* sll$pack $GRi,$GRj,$GRk */
   {

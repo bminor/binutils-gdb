@@ -1,6 +1,6 @@
 /* MI Command Set - output generating routines.
 
-   Copyright 2000, 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2000, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions (a Red Hat company).
 
@@ -97,9 +97,6 @@ static void field_separator (struct ui_out *uiout);
 static void mi_open (struct ui_out *uiout, const char *name,
 		     enum ui_out_type type);
 static void mi_close (struct ui_out *uiout, enum ui_out_type type);
-
-static void out_field_fmt (struct ui_out *uiout, int fldno, char *fldname,
-			   char *format,...);
 
 /* Mark beginning of a table */
 
@@ -289,31 +286,6 @@ mi_flush (struct ui_out *uiout)
 }
 
 /* local functions */
-
-/* Like mi_field_fmt, but takes a variable number of args
-   and makes a va_list and does not insert a separator */
-
-/* VARARGS */
-static void
-out_field_fmt (struct ui_out *uiout, int fldno, char *fldname,
-	       char *format,...)
-{
-  mi_out_data *data = ui_out_data (uiout);
-  va_list args;
-
-  field_separator (uiout);
-  if (fldname)
-    fprintf_unfiltered (data->buffer, "%s=\"", fldname);
-  else
-    fputs_unfiltered ("\"", data->buffer);
-
-  va_start (args, format);
-  vfprintf_unfiltered (data->buffer, format, args);
-
-  fputs_unfiltered ("\"", data->buffer);
-
-  va_end (args);
-}
 
 /* access to ui_out format private members */
 

@@ -1,6 +1,6 @@
 /* Read coff symbol tables and convert to internal format, for GDB.
    Copyright 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001, 2002, 2003
+   1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
    Contributed by David D. Johnson, Brown University (ddj@cs.brown.edu).
 
@@ -1468,7 +1468,7 @@ process_coff_symbol (struct coff_symbol *cs,
 		     struct objfile *objfile)
 {
   struct symbol *sym
-  = (struct symbol *) obstack_alloc (&objfile->symbol_obstack,
+  = (struct symbol *) obstack_alloc (&objfile->objfile_obstack,
 				     sizeof (struct symbol));
   char *name;
 
@@ -1963,7 +1963,7 @@ coff_read_struct_type (int index, int length, int lastsym)
 	  list->field.name =
 	    obsavestring (name,
 			  strlen (name),
-			  &current_objfile->symbol_obstack);
+			  &current_objfile->objfile_obstack);
 	  FIELD_TYPE (list->field) = decode_type (ms, ms->c_type, &sub_aux);
 	  FIELD_BITPOS (list->field) = 8 * ms->c_value;
 	  FIELD_BITSIZE (list->field) = 0;
@@ -1982,7 +1982,7 @@ coff_read_struct_type (int index, int length, int lastsym)
 	  list->field.name =
 	    obsavestring (name,
 			  strlen (name),
-			  &current_objfile->symbol_obstack);
+			  &current_objfile->objfile_obstack);
 	  FIELD_TYPE (list->field) = decode_type (ms, ms->c_type, &sub_aux);
 	  FIELD_BITPOS (list->field) = ms->c_value;
 	  FIELD_BITSIZE (list->field) = sub_aux.x_sym.x_misc.x_lnsz.x_size;
@@ -2049,13 +2049,13 @@ coff_read_enum_type (int index, int length, int lastsym)
 	{
 	case C_MOE:
 	  sym = (struct symbol *) obstack_alloc
-	    (&current_objfile->symbol_obstack,
+	    (&current_objfile->objfile_obstack,
 	     sizeof (struct symbol));
 	  memset (sym, 0, sizeof (struct symbol));
 
 	  DEPRECATED_SYMBOL_NAME (sym) =
 	    obsavestring (name, strlen (name),
-			  &current_objfile->symbol_obstack);
+			  &current_objfile->objfile_obstack);
 	  SYMBOL_CLASS (sym) = LOC_CONST;
 	  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 	  SYMBOL_VALUE (sym) = ms->c_value;

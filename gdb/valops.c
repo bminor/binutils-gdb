@@ -1,6 +1,6 @@
 /* Perform non-arithmetic operations on values, for GDB.
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -62,18 +62,54 @@ static struct value *search_struct_method (char *, struct value **,
 				       struct value **,
 				       int, int *, struct type *);
 
-static int check_field_in (struct type *, const char *);
+static int find_oload_champ_namespace (struct type **arg_types, int nargs,
+				       const char *func_name,
+				       const char *qualified_name,
+				       struct symbol ***oload_syms,
+				       struct badness_vector **oload_champ_bv);
 
+static
+int find_oload_champ_namespace_loop (struct type **arg_types, int nargs,
+				     const char *func_name,
+				     const char *qualified_name,
+				     int namespace_len,
+				     struct symbol ***oload_syms,
+				     struct badness_vector **oload_champ_bv,
+				     int *oload_champ);
+
+static int find_oload_champ (struct type **arg_types, int nargs, int method,
+			     int num_fns,
+			     struct fn_field *fns_ptr,
+			     struct symbol **oload_syms,
+			     struct badness_vector **oload_champ_bv);
+
+static int oload_method_static (int method, struct fn_field *fns_ptr,
+				int index);
+
+enum oload_classification { STANDARD, NON_STANDARD, INCOMPATIBLE };
+
+static enum
+oload_classification classify_oload_match (struct badness_vector
+					   * oload_champ_bv,
+					   int nargs,
+					   int static_offset);
+
+static int check_field_in (struct type *, const char *);
 
 static struct value *value_struct_elt_for_reference (struct type *domain,
 						     int offset,
 						     struct type *curtype,
 						     char *name,
-						     struct type *intype);
+						     struct type *intype,
+						     enum noside noside);
 
 static struct value *value_namespace_elt (const struct type *curtype,
-					  const char *name,
+					  char *name,
 					  enum noside noside);
+
+static struct value *value_maybe_namespace_elt (const struct type *curtype,
+						char *name,
+						enum noside noside);
 
 static CORE_ADDR allocate_space_in_inferior (int);
 
@@ -1889,19 +1925,10 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
 		     int lax, struct value **objp, struct symbol *fsym,
 		     struct value **valp, struct symbol **symp, int *staticp)
 {
-  int nparms;
-  struct type **parm_types;
-  int champ_nparms = 0;
   struct value *obj = (objp ? *objp : NULL);
 
-  short oload_champ = -1;	/* Index of best overloaded function */
-  short oload_ambiguous = 0;	/* Current ambiguity state for overload resolution */
-  /* 0 => no ambiguity, 1 => two good funcs, 2 => incomparable funcs */
-  short oload_ambig_champ = -1;	/* 2nd contender for best match */
-  short oload_non_standard = 0;	/* did we have to use non-standard conversions? */
-  short oload_incompatible = 0;	/* are args supplied incompatible with any function? */
+  int oload_champ;		/* Index of best overloaded function */
 
-  struct badness_vector *bv;	/* A measure of how good an overloaded instance is */
   struct badness_vector *oload_champ_bv = NULL;		/* The measure for the current best match */
 
   struct value *temp = obj;
@@ -1910,13 +1937,13 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
   int num_fns = 0;		/* Number of overloaded instances being considered */
   struct type *basetype = NULL;
   int boffset;
-  int jj;
   int ix;
   int static_offset;
-  struct cleanup *cleanups = NULL;
+  struct cleanup *old_cleanups = NULL;
 
-  char *obj_type_name = NULL;
+  const char *obj_type_name = NULL;
   char *func_name = NULL;
+  enum oload_classification match_quality;
 
   /* Get the list of overloaded methods or functions */
   if (method)
@@ -1940,38 +1967,269 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
 	 been resolved by find_method_list via value_find_oload_method_list
 	 above.  */
       gdb_assert (TYPE_DOMAIN_TYPE (fns_ptr[0].type) != NULL);
+      oload_champ = find_oload_champ (arg_types, nargs, method, num_fns,
+				      fns_ptr, oload_syms, &oload_champ_bv);
     }
   else
     {
-      int i = -1;
-      func_name = cplus_demangle (DEPRECATED_SYMBOL_NAME (fsym), DMGL_NO_OPTS);
+      const char *qualified_name = SYMBOL_CPLUS_DEMANGLED_NAME (fsym);
+      func_name	= cp_func_name (qualified_name);
 
       /* If the name is NULL this must be a C-style function.
          Just return the same symbol. */
-      if (!func_name)
+      if (func_name == NULL)
         {
 	  *symp = fsym;
           return 0;
         }
 
-      oload_syms = make_symbol_overload_list (fsym);
-      cleanups = make_cleanup (xfree, oload_syms);
-      while (oload_syms[++i])
-	num_fns++;
-      if (!num_fns)
-	error ("Couldn't find function %s", func_name);
+      old_cleanups = make_cleanup (xfree, func_name);
+      make_cleanup (xfree, oload_syms);
+      make_cleanup (xfree, oload_champ_bv);
+
+      oload_champ = find_oload_champ_namespace (arg_types, nargs,
+						func_name,
+						qualified_name,
+						&oload_syms,
+						&oload_champ_bv);
     }
 
-  oload_champ_bv = NULL;
+  /* Check how bad the best match is.  */
+
+  match_quality
+    = classify_oload_match (oload_champ_bv, nargs,
+			    oload_method_static (method, fns_ptr,
+						 oload_champ));
+
+  if (match_quality == INCOMPATIBLE)
+    {
+      if (method)
+	error ("Cannot resolve method %s%s%s to any overloaded instance",
+	       obj_type_name,
+	       (obj_type_name && *obj_type_name) ? "::" : "",
+	       name);
+      else
+	error ("Cannot resolve function %s to any overloaded instance",
+	       func_name);
+    }
+  else if (match_quality == NON_STANDARD)
+    {
+      if (method)
+	warning ("Using non-standard conversion to match method %s%s%s to supplied arguments",
+		 obj_type_name,
+		 (obj_type_name && *obj_type_name) ? "::" : "",
+		 name);
+      else
+	warning ("Using non-standard conversion to match function %s to supplied arguments",
+		 func_name);
+    }
+
+  if (method)
+    {
+      if (staticp != NULL)
+	*staticp = oload_method_static (method, fns_ptr, oload_champ);
+      if (TYPE_FN_FIELD_VIRTUAL_P (fns_ptr, oload_champ))
+	*valp = value_virtual_fn_field (&temp, fns_ptr, oload_champ, basetype, boffset);
+      else
+	*valp = value_fn_field (&temp, fns_ptr, oload_champ, basetype, boffset);
+    }
+  else
+    {
+      *symp = oload_syms[oload_champ];
+    }
+
+  if (objp)
+    {
+      if (TYPE_CODE (VALUE_TYPE (temp)) != TYPE_CODE_PTR
+	  && TYPE_CODE (VALUE_TYPE (*objp)) == TYPE_CODE_PTR)
+	{
+	  temp = value_addr (temp);
+	}
+      *objp = temp;
+    }
+  if (old_cleanups != NULL)
+    do_cleanups (old_cleanups);
+
+  switch (match_quality)
+    {
+    case INCOMPATIBLE:
+      return 100;
+    case NON_STANDARD:
+      return 10;
+    default:				/* STANDARD */
+      return 0;
+    }
+}
+
+/* Find the best overload match, searching for FUNC_NAME in namespaces
+   contained in QUALIFIED_NAME until it either finds a good match or
+   runs out of namespaces.  It stores the overloaded functions in
+   *OLOAD_SYMS, and the badness vector in *OLOAD_CHAMP_BV.  The
+   calling function is responsible for freeing *OLOAD_SYMS and
+   *OLOAD_CHAMP_BV.  */
+
+static int
+find_oload_champ_namespace (struct type **arg_types, int nargs,
+			    const char *func_name,
+			    const char *qualified_name,
+			    struct symbol ***oload_syms,
+			    struct badness_vector **oload_champ_bv)
+{
+  int oload_champ;
+
+  find_oload_champ_namespace_loop (arg_types, nargs,
+				   func_name,
+				   qualified_name, 0,
+				   oload_syms, oload_champ_bv,
+				   &oload_champ);
+
+  return oload_champ;
+}
+
+/* Helper function for find_oload_champ_namespace; NAMESPACE_LEN is
+   how deep we've looked for namespaces, and the champ is stored in
+   OLOAD_CHAMP.  The return value is 1 if the champ is a good one, 0
+   if it isn't.
+
+   It is the caller's responsibility to free *OLOAD_SYMS and
+   *OLOAD_CHAMP_BV.  */
+
+static int
+find_oload_champ_namespace_loop (struct type **arg_types, int nargs,
+				 const char *func_name,
+				 const char *qualified_name,
+				 int namespace_len,
+				 struct symbol ***oload_syms,
+				 struct badness_vector **oload_champ_bv,
+				 int *oload_champ)
+{
+  int next_namespace_len = namespace_len;
+  int searched_deeper = 0;
+  int num_fns = 0;
+  struct cleanup *old_cleanups;
+  int new_oload_champ;
+  struct symbol **new_oload_syms;
+  struct badness_vector *new_oload_champ_bv;
+  char *new_namespace;
+
+  if (next_namespace_len != 0)
+    {
+      gdb_assert (qualified_name[next_namespace_len] == ':');
+      next_namespace_len +=  2;
+    }
+  next_namespace_len
+    += cp_find_first_component (qualified_name + next_namespace_len);
+
+  /* Initialize these to values that can safely be xfree'd.  */
+  *oload_syms = NULL;
+  *oload_champ_bv = NULL;
+
+  /* First, see if we have a deeper namespace we can search in.  If we
+     get a good match there, use it.  */
+
+  if (qualified_name[next_namespace_len] == ':')
+    {
+      searched_deeper = 1;
+
+      if (find_oload_champ_namespace_loop (arg_types, nargs,
+					   func_name, qualified_name,
+					   next_namespace_len,
+					   oload_syms, oload_champ_bv,
+					   oload_champ))
+	{
+	  return 1;
+	}
+    };
+
+  /* If we reach here, either we're in the deepest namespace or we
+     didn't find a good match in a deeper namespace.  But, in the
+     latter case, we still have a bad match in a deeper namespace;
+     note that we might not find any match at all in the current
+     namespace.  (There's always a match in the deepest namespace,
+     because this overload mechanism only gets called if there's a
+     function symbol to start off with.)  */
+
+  old_cleanups = make_cleanup (xfree, *oload_syms);
+  old_cleanups = make_cleanup (xfree, *oload_champ_bv);
+  new_namespace = alloca (namespace_len + 1);
+  strncpy (new_namespace, qualified_name, namespace_len);
+  new_namespace[namespace_len] = '\0';
+  new_oload_syms = make_symbol_overload_list (func_name,
+					      new_namespace);
+  while (new_oload_syms[num_fns])
+    ++num_fns;
+
+  new_oload_champ = find_oload_champ (arg_types, nargs, 0, num_fns,
+				      NULL, new_oload_syms,
+				      &new_oload_champ_bv);
+
+  /* Case 1: We found a good match.  Free earlier matches (if any),
+     and return it.  Case 2: We didn't find a good match, but we're
+     not the deepest function.  Then go with the bad match that the
+     deeper function found.  Case 3: We found a bad match, and we're
+     the deepest function.  Then return what we found, even though
+     it's a bad match.  */
+
+  if (new_oload_champ != -1
+      && classify_oload_match (new_oload_champ_bv, nargs, 0) == STANDARD)
+    {
+      *oload_syms = new_oload_syms;
+      *oload_champ = new_oload_champ;
+      *oload_champ_bv = new_oload_champ_bv;
+      do_cleanups (old_cleanups);
+      return 1;
+    }
+  else if (searched_deeper)
+    {
+      xfree (new_oload_syms);
+      xfree (new_oload_champ_bv);
+      discard_cleanups (old_cleanups);
+      return 0;
+    }
+  else
+    {
+      gdb_assert (new_oload_champ != -1);
+      *oload_syms = new_oload_syms;
+      *oload_champ = new_oload_champ;
+      *oload_champ_bv = new_oload_champ_bv;
+      discard_cleanups (old_cleanups);
+      return 0;
+    }
+}
+
+/* Look for a function to take NARGS args of types ARG_TYPES.  Find
+   the best match from among the overloaded methods or functions
+   (depending on METHOD) given by FNS_PTR or OLOAD_SYMS, respectively.
+   The number of methods/functions in the list is given by NUM_FNS.
+   Return the index of the best match; store an indication of the
+   quality of the match in OLOAD_CHAMP_BV.
+
+   It is the caller's responsibility to free *OLOAD_CHAMP_BV.  */
+
+static int
+find_oload_champ (struct type **arg_types, int nargs, int method,
+		  int num_fns, struct fn_field *fns_ptr,
+		  struct symbol **oload_syms,
+		  struct badness_vector **oload_champ_bv)
+{
+  int ix;
+  struct badness_vector *bv;	/* A measure of how good an overloaded instance is */
+  int oload_champ = -1;		/* Index of best overloaded function */
+  int oload_ambiguous = 0;	/* Current ambiguity state for overload resolution */
+  /* 0 => no ambiguity, 1 => two good funcs, 2 => incomparable funcs */
+
+  *oload_champ_bv = NULL;
 
   /* Consider each candidate in turn */
   for (ix = 0; ix < num_fns; ix++)
     {
-      static_offset = 0;
+      int jj;
+      int static_offset = oload_method_static (method, fns_ptr, ix);
+      int nparms;
+      struct type **parm_types;
+
       if (method)
 	{
-	  if (TYPE_FN_FIELD_STATIC_P (fns_ptr, ix))
-	    static_offset = 1;
 	  nparms = TYPE_NFIELDS (TYPE_FN_FIELD_TYPE (fns_ptr, ix));
 	}
       else
@@ -1992,30 +2250,25 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
       bv = rank_function (parm_types, nparms, arg_types + static_offset,
 			  nargs - static_offset);
 
-      if (!oload_champ_bv)
+      if (!*oload_champ_bv)
 	{
-	  oload_champ_bv = bv;
+	  *oload_champ_bv = bv;
 	  oload_champ = 0;
-	  champ_nparms = nparms;
 	}
       else
 	/* See whether current candidate is better or worse than previous best */
-	switch (compare_badness (bv, oload_champ_bv))
+	switch (compare_badness (bv, *oload_champ_bv))
 	  {
 	  case 0:
 	    oload_ambiguous = 1;	/* top two contenders are equally good */
-	    oload_ambig_champ = ix;
 	    break;
 	  case 1:
 	    oload_ambiguous = 2;	/* incomparable top contenders */
-	    oload_ambig_champ = ix;
 	    break;
 	  case 2:
-	    oload_champ_bv = bv;	/* new champion, record details */
+	    *oload_champ_bv = bv;	/* new champion, record details */
 	    oload_ambiguous = 0;
 	    oload_champ = ix;
-	    oload_ambig_champ = -1;
-	    champ_nparms = nparms;
 	    break;
 	  case 3:
 	  default:
@@ -2032,90 +2285,41 @@ find_overload_match (struct type **arg_types, int nargs, char *name, int method,
 	    fprintf_filtered (gdb_stderr,"...Badness @ %d : %d\n", jj, bv->rank[jj]);
 	  fprintf_filtered (gdb_stderr,"Overload resolution champion is %d, ambiguous? %d\n", oload_champ, oload_ambiguous);
 	}
-    }				/* end loop over all candidates */
-  /* NOTE: dan/2000-03-10: Seems to be a better idea to just pick one
-     if they have the exact same goodness. This is because there is no
-     way to differentiate based on return type, which we need to in
-     cases like overloads of .begin() <It's both const and non-const> */
-#if 0
-  if (oload_ambiguous)
-    {
-      if (method)
-	error ("Cannot resolve overloaded method %s%s%s to unique instance; disambiguate by specifying function signature",
-	       obj_type_name,
-	       (obj_type_name && *obj_type_name) ? "::" : "",
-	       name);
-      else
-	error ("Cannot resolve overloaded function %s to unique instance; disambiguate by specifying function signature",
-	       func_name);
     }
-#endif
 
-  /* Check how bad the best match is.  */
-  static_offset = 0;
-  if (method && TYPE_FN_FIELD_STATIC_P (fns_ptr, oload_champ))
-    static_offset = 1;
+  return oload_champ;
+}
+
+/* Return 1 if we're looking at a static method, 0 if we're looking at
+   a non-static method or a function that isn't a method.  */
+
+static int
+oload_method_static (int method, struct fn_field *fns_ptr, int index)
+{
+  if (method && TYPE_FN_FIELD_STATIC_P (fns_ptr, index))
+    return 1;
+  else
+    return 0;
+}
+
+/* Check how good an overload match OLOAD_CHAMP_BV represents.  */
+
+static enum oload_classification
+classify_oload_match (struct badness_vector *oload_champ_bv,
+		      int nargs,
+		      int static_offset)
+{
+  int ix;
+
   for (ix = 1; ix <= nargs - static_offset; ix++)
     {
       if (oload_champ_bv->rank[ix] >= 100)
-	oload_incompatible = 1;	/* truly mismatched types */
-
+	return INCOMPATIBLE;	/* truly mismatched types */
       else if (oload_champ_bv->rank[ix] >= 10)
-	oload_non_standard = 1;	/* non-standard type conversions needed */
-    }
-  if (oload_incompatible)
-    {
-      if (method)
-	error ("Cannot resolve method %s%s%s to any overloaded instance",
-	       obj_type_name,
-	       (obj_type_name && *obj_type_name) ? "::" : "",
-	       name);
-      else
-	error ("Cannot resolve function %s to any overloaded instance",
-	       func_name);
-    }
-  else if (oload_non_standard)
-    {
-      if (method)
-	warning ("Using non-standard conversion to match method %s%s%s to supplied arguments",
-		 obj_type_name,
-		 (obj_type_name && *obj_type_name) ? "::" : "",
-		 name);
-      else
-	warning ("Using non-standard conversion to match function %s to supplied arguments",
-		 func_name);
+	return NON_STANDARD;	/* non-standard type conversions needed */
     }
 
-  if (method)
-    {
-      if (staticp && TYPE_FN_FIELD_STATIC_P (fns_ptr, oload_champ))
-	*staticp = 1;
-      else if (staticp)
-	*staticp = 0;
-      if (TYPE_FN_FIELD_VIRTUAL_P (fns_ptr, oload_champ))
-	*valp = value_virtual_fn_field (&temp, fns_ptr, oload_champ, basetype, boffset);
-      else
-	*valp = value_fn_field (&temp, fns_ptr, oload_champ, basetype, boffset);
-    }
-  else
-    {
-      *symp = oload_syms[oload_champ];
-      xfree (func_name);
-    }
-
-  if (objp)
-    {
-      if (TYPE_CODE (VALUE_TYPE (temp)) != TYPE_CODE_PTR
-	  && TYPE_CODE (VALUE_TYPE (*objp)) == TYPE_CODE_PTR)
-	{
-	  temp = value_addr (temp);
-	}
-      *objp = temp;
-    }
-  if (cleanups != NULL)
-    do_cleanups (cleanups);
-
-  return oload_incompatible ? 100 : (oload_non_standard ? 10 : 0);
+  return STANDARD;		/* Only standard conversions needed.  */
 }
 
 /* C++: return 1 is NAME is a legitimate name for the destructor
@@ -2234,7 +2438,8 @@ value_aggregate_elt (struct type *curtype,
     {
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
-      return value_struct_elt_for_reference (curtype, 0, curtype, name, NULL);
+      return value_struct_elt_for_reference (curtype, 0, curtype, name, NULL,
+					     noside);
     case TYPE_CODE_NAMESPACE:
       return value_namespace_elt (curtype, name, noside);
     default:
@@ -2250,10 +2455,11 @@ value_aggregate_elt (struct type *curtype,
    "pointers to member functions".  This function is used
    to resolve user expressions of the form "DOMAIN::NAME".  */
 
-struct value *
+static struct value *
 value_struct_elt_for_reference (struct type *domain, int offset,
 				struct type *curtype, char *name,
-				struct type *intype)
+				struct type *intype,
+				enum noside noside)
 {
   struct type *t = curtype;
   int i;
@@ -2376,11 +2582,17 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 					  offset + base_offset,
 					  TYPE_BASECLASS (t, i),
 					  name,
-					  intype);
+					  intype,
+					  noside);
       if (v)
 	return v;
     }
-  return 0;
+
+  /* As a last chance, pretend that CURTYPE is a namespace, and look
+     it up that way; this (frequently) works for types nested inside
+     classes.  */
+
+  return value_maybe_namespace_elt (curtype, name, noside);
 }
 
 /* C++: Return the member NAME of the namespace given by the type
@@ -2388,24 +2600,11 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 
 static struct value *
 value_namespace_elt (const struct type *curtype,
-		     const char *name,
+		     char *name,
 		     enum noside noside)
 {
-  const char *namespace_name = TYPE_TAG_NAME (curtype);
-  struct symbol *sym;
-  struct value *retval;
-
-  sym = cp_lookup_symbol_namespace (namespace_name, name, NULL,
-				    get_selected_block (0), VAR_DOMAIN,
-				    NULL);
-
-  if (sym == NULL)
-    retval = NULL;
-  else if ((noside == EVAL_AVOID_SIDE_EFFECTS)
-	   && (SYMBOL_CLASS (sym) == LOC_TYPEDEF))
-    retval = allocate_value (SYMBOL_TYPE (sym));
-  else
-    retval = value_of_variable (sym, get_selected_block (0));
+  struct value *retval = value_maybe_namespace_elt (curtype, name,
+						    noside);
 
   if (retval == NULL)
     error ("No symbol \"%s\" in namespace \"%s\".", name,
@@ -2414,6 +2613,32 @@ value_namespace_elt (const struct type *curtype,
   return retval;
 }
 
+/* A helper function used by value_namespace_elt and
+   value_struct_elt_for_reference.  It looks up NAME inside the
+   context CURTYPE; this works if CURTYPE is a namespace or if CURTYPE
+   is a class and NAME refers to a type in CURTYPE itself (as opposed
+   to, say, some base class of CURTYPE).  */
+
+static struct value *
+value_maybe_namespace_elt (const struct type *curtype,
+			   char *name,
+			   enum noside noside)
+{
+  const char *namespace_name = TYPE_TAG_NAME (curtype);
+  struct symbol *sym;
+
+  sym = cp_lookup_symbol_namespace (namespace_name, name, NULL,
+				    get_selected_block (0), VAR_DOMAIN,
+				    NULL);
+
+  if (sym == NULL)
+    return NULL;
+  else if ((noside == EVAL_AVOID_SIDE_EFFECTS)
+	   && (SYMBOL_CLASS (sym) == LOC_TYPEDEF))
+    return allocate_value (SYMBOL_TYPE (sym));
+  else
+    return value_of_variable (sym, get_selected_block (0));
+}
 
 /* Given a pointer value V, find the real (RTTI) type
    of the object it points to.

@@ -1,7 +1,7 @@
 /* General functions for the WDB TUI.
 
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation,
-   Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
+   Foundation, Inc.
 
    Contributed by Hewlett-Packard Company.
 
@@ -37,15 +37,15 @@
 #include <setjmp.h>
 #include "defs.h"
 #include "gdbcmd.h"
-#include "tui.h"
-#include "tuiData.h"
-#include "tuiLayout.h"
-#include "tuiIO.h"
-#include "tuiRegs.h"
-#include "tuiStack.h"
-#include "tuiWin.h"
-#include "tuiSourceWin.h"
-#include "tuiDataWin.h"
+#include "tui/tui.h"
+#include "tui/tui-data.h"
+#include "tui/tui-layout.h"
+#include "tui/tui-io.h"
+#include "tui/tui-regs.h"
+#include "tui/tui-stack.h"
+#include "tui/tui-win.h"
+#include "tui/tui-winsource.h"
+#include "tui/tui-windata.h"
 #include "readline/readline.h"
 #include "target.h"
 #include "frame.h"
@@ -66,7 +66,7 @@
 int tui_active = 0;
 static int tui_finish_init = 1;
 
-enum tui_key_mode tui_current_key_mode = tui_command_mode;
+enum tui_key_mode tui_current_key_mode = TUI_COMMAND_MODE;
 
 struct tui_char_command
 {
@@ -137,10 +137,10 @@ tui_rl_change_windows (int notused1, int notused2)
 
   if (tui_active)
     {
-      TuiLayoutType new_layout;
-      TuiRegisterDisplayType regs_type = TUI_UNDEFINED_REGS;
+      enum tui_layout_type new_layout;
+      enum tui_register_display_type regs_type = TUI_UNDEFINED_REGS;
 
-      new_layout = currentLayout ();
+      new_layout = tui_current_layout ();
 
       /* Select a new layout to have a rolling layout behavior
 	 with always two windows (except when undefined).  */
@@ -170,7 +170,7 @@ tui_rl_change_windows (int notused1, int notused2)
 	  new_layout = SRC_COMMAND;
 	  break;
 	}
-      tuiSetLayout (new_layout, regs_type);
+      tui_set_layout (new_layout, regs_type);
     }
   return 0;
 }
@@ -185,10 +185,10 @@ tui_rl_delete_other_windows (int notused1, int notused2)
 
   if (tui_active)
     {
-      TuiLayoutType new_layout;
-      TuiRegisterDisplayType regs_type = TUI_UNDEFINED_REGS;
+      enum tui_layout_type new_layout;
+      enum tui_register_display_type regs_type = TUI_UNDEFINED_REGS;
 
-      new_layout = currentLayout ();
+      new_layout = tui_current_layout ();
 
       /* Kill one window.  */
       switch (new_layout)
@@ -205,7 +205,7 @@ tui_rl_delete_other_windows (int notused1, int notused2)
 	  new_layout = DISASSEM_COMMAND;
 	  break;
 	}
-      tuiSetLayout (new_layout, regs_type);
+      tui_set_layout (new_layout, regs_type);
     }
   return 0;
 }
@@ -215,18 +215,18 @@ tui_rl_delete_other_windows (int notused1, int notused2)
 static int
 tui_rl_other_window (int count, int key)
 {
-  TuiWinInfoPtr winInfo;
+  struct tui_win_info * winInfo;
 
   if (!tui_active)
     tui_rl_switch_mode (0/*notused*/, 0/*notused*/);
 
-  winInfo = tuiNextWin (tuiWinWithFocus ());
+  winInfo = tui_next_win (tui_win_with_focus ());
   if (winInfo)
     {
-      tuiSetWinFocusTo (winInfo);
-      if (dataWin && dataWin->generic.isVisible)
-        tuiRefreshDataWin ();
-      keypad (cmdWin->generic.handle, (winInfo != cmdWin));
+      tui_set_win_focus_to (winInfo);
+      if (TUI_DATA_WIN && TUI_DATA_WIN->generic.is_visible)
+        tui_refresh_data_win ();
+      keypad (TUI_CMD_WIN->generic.handle, (winInfo != TUI_CMD_WIN));
     }
   return 0;
 }
@@ -261,7 +261,7 @@ tui_rl_command_key (int count, int key)
 static int
 tui_rl_command_mode (int count, int key)
 {
-  tui_set_key_mode (tui_one_command_mode);
+  tui_set_key_mode (TUI_ONE_COMMAND_MODE);
   return rl_insert (count, key);
 }
 
@@ -273,8 +273,8 @@ tui_rl_next_keymap (int notused1, int notused2)
   if (!tui_active)
     tui_rl_switch_mode (0/*notused*/, 0/*notused*/);
 
-  tui_set_key_mode (tui_current_key_mode == tui_command_mode
-                    ? tui_single_key_mode : tui_command_mode);
+  tui_set_key_mode (tui_current_key_mode == TUI_COMMAND_MODE
+                    ? TUI_SINGLE_KEY_MODE : TUI_COMMAND_MODE);
   return 0;
 }
 
@@ -286,8 +286,8 @@ static int
 tui_rl_startup_hook ()
 {
   rl_already_prompted = 1;
-  if (tui_current_key_mode != tui_command_mode)
-    tui_set_key_mode (tui_single_key_mode);
+  if (tui_current_key_mode != TUI_COMMAND_MODE)
+    tui_set_key_mode (TUI_SINGLE_KEY_MODE);
   tui_redisplay_readline ();
   return 0;
 }
@@ -297,9 +297,9 @@ void
 tui_set_key_mode (enum tui_key_mode mode)
 {
   tui_current_key_mode = mode;
-  rl_set_keymap (mode == tui_single_key_mode
+  rl_set_keymap (mode == TUI_SINGLE_KEY_MODE
                  ? tui_keymap : tui_readline_standard_keymap);
-  tuiShowLocatorContent ();
+  tui_show_locator_content ();
 }
 
 /* Initialize readline and configure the keymap for the switching
@@ -384,15 +384,15 @@ tui_enable (void)
       nl();
       keypad (w, TRUE);
       rl_initialize ();
-      setTermHeightTo (LINES);
-      setTermWidthTo (COLS);
+      tui_set_term_height_to (LINES);
+      tui_set_term_width_to (COLS);
       def_prog_mode ();
 
-      tuiShowFrameInfo (0);
-      tuiSetLayout (SRC_COMMAND, TUI_UNDEFINED_REGS);
-      tuiSetWinFocusTo (srcWin);
-      keypad (cmdWin->generic.handle, TRUE);
-      wrefresh (cmdWin->generic.handle);
+      tui_show_frame_info (0);
+      tui_set_layout (SRC_COMMAND, TUI_UNDEFINED_REGS);
+      tui_set_win_focus_to (TUI_SRC_WIN);
+      keypad (TUI_CMD_WIN->generic.handle, TRUE);
+      wrefresh (TUI_CMD_WIN->generic.handle);
       tui_finish_init = 0;
     }
   else
@@ -413,11 +413,11 @@ tui_enable (void)
 
   tui_active = 1;
   if (deprecated_selected_frame)
-     tuiShowFrameInfo (deprecated_selected_frame);
+     tui_show_frame_info (deprecated_selected_frame);
 
   /* Restore TUI keymap.  */
   tui_set_key_mode (tui_current_key_mode);
-  tuiRefreshAll ();
+  tui_refresh_all_win ();
 
   /* Update gdb's knowledge of its terminal.  */
   target_terminal_save_ours ();
@@ -454,17 +454,6 @@ tui_disable (void)
 
   tui_active = 0;
   tui_update_gdb_sizes ();
-}
-
-/* Wrapper on top of free() to ensure that input address
-   is greater than 0x0.  */
-void
-tuiFree (char *ptr)
-{
-  if (ptr != (char *) NULL)
-    {
-      xfree (ptr);
-    }
 }
 
 void
@@ -563,40 +552,40 @@ tui_show_source (const char *file, int line)
 {
   struct symtab_and_line cursal = get_current_source_symtab_and_line ();
   /* make sure that the source window is displayed */
-  tuiAddWinToLayout (SRC_WIN);
+  tui_add_win_to_layout (SRC_WIN);
 
-  tuiUpdateSourceWindowsWithLine (cursal.symtab, line);
-  tuiUpdateLocatorFilename (file);
+  tui_update_source_windows_with_line (cursal.symtab, line);
+  tui_update_locator_filename (file);
 }
 
 void
 tui_show_assembly (CORE_ADDR addr)
 {
-  tuiAddWinToLayout (DISASSEM_WIN);
-  tuiUpdateSourceWindowsWithAddr (addr);
+  tui_add_win_to_layout (DISASSEM_WIN);
+  tui_update_source_windows_with_addr (addr);
 }
 
 int
-tui_is_window_visible (TuiWinType type)
+tui_is_window_visible (enum tui_win_type type)
 {
   if (tui_active == 0)
     return 0;
 
-  if (winList[type] == 0)
+  if (tui_win_list[type] == 0)
     return 0;
   
-  return winList[type]->generic.isVisible;
+  return tui_win_list[type]->generic.is_visible;
 }
 
 int
 tui_get_command_dimension (int *width, int *height)
 {
-  if (!tui_active || !m_winPtrNotNull (cmdWin))
+  if (!tui_active || (TUI_CMD_WIN == NULL))
     {
       return 0;
     }
   
-  *width = cmdWin->generic.width;
-  *height = cmdWin->generic.height;
+  *width = TUI_CMD_WIN->generic.width;
+  *height = TUI_CMD_WIN->generic.height;
   return 1;
 }

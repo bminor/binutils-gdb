@@ -1,6 +1,7 @@
 /* Target dependent code for the NS32000, for GDB.
-   Copyright 1986, 1988, 1991, 1992, 1994, 1995, 1998, 1999, 2000, 2001,
-   2002, 2003 Free Software Foundation, Inc.
+
+   Copyright 1986, 1988, 1991, 1992, 1994, 1995, 1998, 1999, 2000,
+   2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -308,10 +309,6 @@ ns32k_frame_chain (struct frame_info *frame)
   /* In the case of the NS32000 series, the frame's nominal address is the
      FP value, and that address is saved at the previous FP value as a
      4-byte word.  */
-
-  if (deprecated_inside_entry_file (get_frame_pc (frame)))
-    return 0;
-
   return (read_memory_integer (get_frame_base (frame), 4));
 }
 
@@ -495,12 +492,6 @@ ns32k_store_return_value (struct type *valtype, char *valbuf)
 				   TYPE_LENGTH (valtype));
 }
 
-static CORE_ADDR
-ns32k_extract_struct_value_address (char *regbuf)
-{
-  return (extract_unsigned_integer (regbuf + DEPRECATED_REGISTER_BYTE (0), DEPRECATED_REGISTER_RAW_SIZE (0)));
-}
-
 void
 ns32k_gdbarch_init_32082 (struct gdbarch *gdbarch)
 {
@@ -582,8 +573,6 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_store_struct_return (gdbarch, ns32k_store_struct_return);
   set_gdbarch_deprecated_extract_return_value (gdbarch, ns32k_extract_return_value);
   set_gdbarch_deprecated_store_return_value (gdbarch, ns32k_store_return_value);
-  set_gdbarch_deprecated_extract_struct_value_address (gdbarch,
-                                            ns32k_extract_struct_value_address);
 
   /* Call dummy info */
   set_gdbarch_deprecated_push_dummy_frame (gdbarch, ns32k_push_dummy_frame);
@@ -598,11 +587,7 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_on_stack);
 
   /* Breakpoint info */
-  set_gdbarch_decr_pc_after_break (gdbarch, 0);
   set_gdbarch_breakpoint_from_pc (gdbarch, ns32k_breakpoint_from_pc);
-
-  /* Misc info */
-  set_gdbarch_function_start_offset (gdbarch, 0);
 
   /* Should be using push_dummy_call.  */
   set_gdbarch_deprecated_dummy_write_sp (gdbarch, deprecated_write_sp);

@@ -25,5 +25,17 @@
 
 /* Get generic NetBSD native definitions.  */
 #include "config/nm-nbsd.h"
+
+
+/* Support for StackGhost cookies.  */
+
+#include "target.h"
+
+#define NATIVE_XFER_WCOOKIE sparc_xfer_wcookie
+extern LONGEST sparc_xfer_wcookie (struct target_ops *ops,
+				   enum target_object object,
+				   const char *annex,
+				   void *readbuf, const void *writebuf,
+				   ULONGEST offset, LONGEST len);
 
 #endif /* nm-nbsd.h */

@@ -1,7 +1,7 @@
 /* *INDENT-OFF* */ /* ATTR_FORMAT confuses indent, avoid running it for now */
 /* Basic, host-specific, and target-specific definitions for GDB.
    Copyright 1986, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001, 2002, 2003
+   1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -324,10 +324,11 @@ struct cleanup
 
 struct symtab;
 struct breakpoint;
+struct frame_info;
 
 /* From blockframe.c */
 
-extern int inside_entry_func (CORE_ADDR);
+extern int inside_entry_func (struct frame_info *this_frame);
 
 extern int deprecated_inside_entry_file (CORE_ADDR addr);
 
@@ -444,12 +445,12 @@ extern struct ui_file *gdb_stdin;
 /* Serious error notifications */
 extern struct ui_file *gdb_stderr;
 /* Log/debug/trace messages that should bypass normal stdout/stderr
-   filtering.  For momement, always call this stream using
+   filtering.  For moment, always call this stream using
    *_unfiltered. In the very near future that restriction shall be
    removed - either call shall be unfiltered. (cagney 1999-06-13). */
 extern struct ui_file *gdb_stdlog;
 /* Target output that should bypass normal stdout/stderr filtering.
-   For momement, always call this stream using *_unfiltered. In the
+   For moment, always call this stream using *_unfiltered. In the
    very near future that restriction shall be removed - either call
    shall be unfiltered. (cagney 1999-07-02). */
 extern struct ui_file *gdb_stdtarg;
@@ -655,8 +656,6 @@ enum lval_type
        lval_register or lval_memory).  */
     lval_reg_frame_relative
   };
-
-struct frame_info;
 
 /* Control types for commands */
 
@@ -911,6 +910,8 @@ extern NORETURN void verror (const char *fmt, va_list ap) ATTR_NORETURN;
 
 extern NORETURN void error (const char *fmt, ...) ATTR_NORETURN ATTR_FORMAT (printf, 1, 2);
 
+extern NORETURN void error_silent (const char *fmt, ...) ATTR_NORETURN ATTR_FORMAT (printf, 1, 2);
+
 extern NORETURN void error_stream (struct ui_file *) ATTR_NORETURN;
 
 /* Initialize the error buffer.  */
@@ -919,6 +920,9 @@ extern void error_init (void);
 /* Returns a freshly allocate buffer containing the last error
    message.  */
 extern char *error_last_message (void);
+
+/* Output arbitrary error message.  */
+extern void error_output_message (char *pre_print, char *msg);
 
 extern NORETURN void internal_verror (const char *file, int line,
 				      const char *, va_list ap) ATTR_NORETURN;
@@ -982,6 +986,11 @@ extern NORETURN void throw_exception (enum return_reason) ATTR_NORETURN;
    new cleanup_chain is established.  The old values are restored
    before catch_exceptions() returns.
 
+   The variant catch_exceptions_with_msg() is the same as
+   catch_exceptions() but adds the ability to return an allocated
+   copy of the gdb error message.  This is used when a silent error is 
+   issued and the caller wants to manually issue the error message.
+
    FIXME; cagney/2001-08-13: The need to override the global UIOUT
    builder variable should just go away.
 
@@ -994,6 +1003,11 @@ typedef int (catch_exceptions_ftype) (struct ui_out *ui_out, void *args);
 extern int catch_exceptions (struct ui_out *uiout,
 			     catch_exceptions_ftype *func, void *func_args,
 			     char *errstring, return_mask mask);
+extern int catch_exceptions_with_msg (struct ui_out *uiout,
+			     	      catch_exceptions_ftype *func, 
+			     	      void *func_args,
+			     	      char *errstring, char **gdberrmsg,
+				      return_mask mask);
 
 /* If CATCH_ERRORS_FTYPE throws an error, catch_errors() returns zero
    otherwize the result from CATCH_ERRORS_FTYPE is returned. It is
@@ -1034,6 +1048,7 @@ enum gdb_osabi
   GDB_OSABI_FREEBSD_ELF,
   GDB_OSABI_NETBSD_AOUT,
   GDB_OSABI_NETBSD_ELF,
+  GDB_OSABI_OPENBSD_ELF,
   GDB_OSABI_WINCE,
   GDB_OSABI_GO32,
   GDB_OSABI_NETWARE,

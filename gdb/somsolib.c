@@ -1,7 +1,7 @@
 /* Handle HP SOM shared libraries for GDB, the GNU Debugger.
 
    Copyright 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001, 2002,
-   2003 Free Software Foundation, Inc.
+   2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -310,7 +310,7 @@ som_solib_add_solib_objfile (struct so_list *so, char *name, int from_tty,
   if (so->objfile->obj_private == NULL)
     {
       obj_private = (obj_private_data_t *)
-	obstack_alloc (&so->objfile->psymbol_obstack,
+	obstack_alloc (&so->objfile->objfile_obstack,
 		       sizeof (obj_private_data_t));
       obj_private->unwind_info = NULL;
       obj_private->so_info = NULL;
@@ -643,7 +643,7 @@ som_solib_add (char *arg_string, int from_tty, struct target_ops *target, int re
 	}
 
       name = obsavestring (name, name_len - 1,
-			   &symfile_objfile->symbol_obstack);
+			   &symfile_objfile->objfile_obstack);
 
       status = target_read_memory (addr + 8, buf, 4);
       if (status != 0)

@@ -1,3 +1,19 @@
+2004-01-31  Daniel Jacobowitz  <drow@mvista.com>
+
+	* linux-low.c: Update copyright year.
+	(check_removed_breakpoint): Clear pending_is_breakpoint.
+	(linux_set_resume_request, linux_queue_one_thread)
+	(resume_status_pending_p): New functions.
+	(linux_continue_one_thread): Use process->resume.
+	(linux_resume): Only resume threads if there are no pending events.
+	* linux-low.h (struct process_info): Add resume request
+	pointer.
+
+2004-01-30  Daniel Jacobowitz  <drow@mvista.com>
+
+	* regcache.c (new_register_cache): Clear the allocated register
+	buffer.  Suggested by Atsushi Nemoto <anemo@mba.ocn.ne.jp>.
+
 2003-10-13  Daniel Jacobowitz  <drow@mvista.com>
 
 	* linux-low.c (linux_resume): Take a struct thread_resume *

@@ -2,8 +2,8 @@
    functions and pc values.
 
    Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994,
-   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
-   Foundation, Inc.
+   1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -156,16 +156,19 @@ inside_main_func (CORE_ADDR pc)
 	  && symfile_objfile->ei.main_func_highpc > pc);
 }
 
-/* Test whether PC is inside the range of addresses that corresponds
-   to the process entry point function.
-
-   A PC of zero is always considered to be the bottom of the stack.  */
+/* Test whether THIS_FRAME is inside the process entry point function.  */
 
 int
-inside_entry_func (CORE_ADDR pc)
+inside_entry_func (struct frame_info *this_frame)
 {
-  if (pc == 0)
-    return 1;
+  return (get_frame_func (this_frame) == entry_point_address ());
+}
+
+/* Similar to inside_entry_func, but accomodating legacy frame code.  */
+
+static int
+legacy_inside_entry_func (CORE_ADDR pc)
+{
   if (symfile_objfile == 0)
     return 0;
 
@@ -608,7 +611,7 @@ legacy_frame_chain_valid (CORE_ADDR fp, struct frame_info *fi)
 
   /* If we're already inside the entry function for the main objfile, then it
      isn't valid.  */
-  if (inside_entry_func (get_frame_pc (fi)))
+  if (legacy_inside_entry_func (get_frame_pc (fi)))
     return 0;
 
   /* If we're inside the entry file, it isn't valid.  */

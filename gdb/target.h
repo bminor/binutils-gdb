@@ -1,7 +1,7 @@
 /* Interface between GDB and target environments, including files and processes
 
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+   1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.  Written by John Gilmore.
 
@@ -35,8 +35,8 @@ struct target_ops;
    specific to the communications interface between us and the
    target.
 
-   A TARGET is an interface between the debugger and a particular 
-   kind of file or process.  Targets can be STACKED in STRATA, 
+   A TARGET is an interface between the debugger and a particular
+   kind of file or process.  Targets can be STACKED in STRATA,
    so that more than one target can potentially respond to a request.
    In particular, memory accesses will walk down the stack of targets
    until they find a target that is interested in handling that particular
@@ -155,7 +155,7 @@ enum inferior_event_type
     INF_QUIT_REQ,
     /* Process a normal inferior event which will result in target_wait
        being called.  */
-    INF_REG_EVENT, 
+    INF_REG_EVENT,
     /* Deal with an error on the inferior.  */
     INF_ERROR,
     /* We are called because a timer went off.  */
@@ -186,7 +186,7 @@ enum target_signal target_signal_from_name (char *);
    Return the number of bytes actually transfered, zero when no
    further transfer is possible, and -1 when the transfer is not
    supported.
-   
+
    NOTE: cagney/2003-10-17: The current interface does not support a
    "retry" mechanism.  Instead it assumes that at least one byte will
    be transfered on each call.
@@ -226,8 +226,12 @@ enum target_object
   TARGET_OBJECT_MEMORY,
   /* Kernel Unwind Table.  See "ia64-tdep.c".  */
   TARGET_OBJECT_UNWIND_TABLE,
-  /* Possible future objects: TARGET_OBJECT_FILE, TARGET_OBJECT_PROC,
-     TARGET_OBJECT_AUXV, ...  */
+  /* Transfer auxilliary vector.  */
+  TARGET_OBJECT_AUXV,
+  /* StackGhost cookie.  See "sparc-tdep.c".  */
+  TARGET_OBJECT_WCOOKIE
+
+  /* Possible future objects: TARGET_OBJECT_FILE, TARGET_OBJECT_PROC, ... */
 };
 
 extern LONGEST target_read_partial (struct target_ops *ops,
@@ -324,7 +328,7 @@ struct target_ops
        something at MEMADDR + N.  */
 
     int (*to_xfer_memory) (CORE_ADDR memaddr, char *myaddr,
-			   int len, int write, 
+			   int len, int write,
 			   struct mem_attrib *attrib,
 			   struct target_ops *target);
 
@@ -392,10 +396,10 @@ struct target_ops
     void (*to_async) (void (*cb) (enum inferior_event_type, void *context),
 		      void *context);
     int to_async_mask_value;
-    int (*to_find_memory_regions) (int (*) (CORE_ADDR, 
-					    unsigned long, 
-					    int, int, int, 
-					    void *), 
+    int (*to_find_memory_regions) (int (*) (CORE_ADDR,
+					    unsigned long,
+					    int, int, int,
+					    void *),
 				   void *);
     char * (*to_make_corefile_notes) (bfd *, int *);
 
@@ -413,7 +417,7 @@ struct target_ops
        only one, of readbuf or writebuf must be non-NULL.  */
     LONGEST (*to_xfer_partial) (struct target_ops *ops,
 				enum target_object object, const char *annex,
-				void *readbuf, const void *writebuf, 
+				void *readbuf, const void *writebuf,
 				ULONGEST offset, LONGEST len);
 
     int to_magic;
@@ -451,9 +455,9 @@ void target_close (struct target_ops *targ, int quitting);
 /* Attaches to a process on the target side.  Arguments are as passed
    to the `attach' command by the user.  This routine can be called
    when the target is not on the target-stack, if the target_can_run
-   routine returns 1; in that case, it must push itself onto the stack.  
+   routine returns 1; in that case, it must push itself onto the stack.
    Upon exit, the target should be ready for normal operations, and
-   should be ready to deliver the status of the process immediately 
+   should be ready to deliver the status of the process immediately
    (without waiting) to an upcoming target_wait call.  */
 
 #define	target_attach(args, from_tty)	\
@@ -548,10 +552,10 @@ extern int target_read_memory (CORE_ADDR memaddr, char *myaddr, int len);
 
 extern int target_write_memory (CORE_ADDR memaddr, char *myaddr, int len);
 
-extern int xfer_memory (CORE_ADDR, char *, int, int, 
+extern int xfer_memory (CORE_ADDR, char *, int, int,
 			struct mem_attrib *, struct target_ops *);
 
-extern int child_xfer_memory (CORE_ADDR, char *, int, int, 
+extern int child_xfer_memory (CORE_ADDR, char *, int, int,
 			      struct mem_attrib *, struct target_ops *);
 
 /* Make a single attempt at transfering LEN bytes.  On a successful
@@ -629,8 +633,8 @@ extern void print_section_info (struct target_ops *, bfd *);
      (*current_target.to_insert_breakpoint) (addr, save)
 
 /* Remove a breakpoint at address ADDR in the target machine.
-   SAVE is a pointer to the same save area 
-   that was previously passed to target_insert_breakpoint.  
+   SAVE is a pointer to the same save area
+   that was previously passed to target_insert_breakpoint.
    Result is 0 for success, or an errno value.  */
 
 #define	target_remove_breakpoint(addr, save)	\
@@ -782,7 +786,7 @@ extern void target_load (char *arg, int from_tty);
      (*current_target.to_has_exited) (pid,wait_status,exit_status)
 
 /* The debugger has completed a blocking wait() call.  There is now
-   some process event that must be processed.  This function should 
+   some process event that must be processed.  This function should
    be defined by those targets that require the debugger to perform
    cleanup or internal state changes in response to the process event.  */
 
@@ -826,7 +830,7 @@ extern void target_load (char *arg, int from_tty);
 
 
 /* Get the symbol information for a breakpointable routine called when
-   an exception event occurs. 
+   an exception event occurs.
    Intended mainly for C++, and for those
    platforms/implementations where such a callback mechanism is available,
    e.g. HP-UX with ANSI C++ (aCC).  Some compilers (e.g. g++) support
@@ -910,7 +914,7 @@ extern void target_load (char *arg, int from_tty);
 #define	target_async_mask_value	\
      (current_target.to_async_mask_value)
 
-extern int target_async_mask (int mask);     
+extern int target_async_mask (int mask);
 
 extern void target_link (char *, CORE_ADDR *);
 
@@ -938,7 +942,7 @@ extern char *normal_pid_to_str (ptid_t ptid);
  * New Objfile Event Hook:
  *
  * Sometimes a GDB component wants to get notified whenever a new
- * objfile is loaded.  Mainly this is used by thread-debugging 
+ * objfile is loaded.  Mainly this is used by thread-debugging
  * implementations that need to know when symbols for the target
  * thread implemenation are available.
  *
@@ -983,7 +987,7 @@ extern void (*target_new_objfile_hook) (struct objfile *);
  * Iterator function for target memory regions.
  * Calls a callback function once for each memory region 'mapped'
  * in the child process.  Defined as a simple macro rather than
- * as a function macro so that it can be tested for nullity.  
+ * as a function macro so that it can be tested for nullity.
  */
 
 #define target_find_memory_regions(FUNC, DATA) \
@@ -1040,7 +1044,7 @@ extern void (*target_new_objfile_hook) (struct objfile *);
 
 /* Provide defaults for hardware watchpoint functions.  */
 
-/* If the *_hw_beakpoint functions have not been defined 
+/* If the *_hw_beakpoint functions have not been defined
    elsewhere use the definitions in the target vector.  */
 
 /* Returns non-zero if we can set a hardware watchpoint of type TYPE.  TYPE is
@@ -1082,13 +1086,6 @@ extern void (*target_new_objfile_hook) (struct objfile *);
 #ifndef target_stopped_data_address
 #define target_stopped_data_address() \
     (*current_target.to_stopped_data_address) ()
-#endif
-
-/* If defined, then we need to decr pc by this much after a hardware break-
-   point.  Presumably this overrides DECR_PC_AFTER_BREAK...  */
-
-#ifndef DECR_PC_AFTER_HW_BREAK
-#define DECR_PC_AFTER_HW_BREAK 0
 #endif
 
 /* Sometimes gdb may pick up what appears to be a valid target address

@@ -1,6 +1,6 @@
 /* Read HP PA/Risc object files for GDB.
-   Copyright 1991, 1992, 1994, 1995, 1996, 1998, 1999, 2000, 2001, 2002
-   Free Software Foundation, Inc.
+   Copyright 1991, 1992, 1994, 1995, 1996, 1998, 1999, 2000, 2001, 2002,
+   2004 Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support.
 
    This file is part of GDB.
@@ -432,7 +432,7 @@ som_symfile_offsets (struct objfile *objfile, struct section_addr_info *addrs)
 
   objfile->num_sections = bfd_count_sections (objfile->obfd);
   objfile->section_offsets = (struct section_offsets *)
-    obstack_alloc (&objfile->psymbol_obstack, 
+    obstack_alloc (&objfile->objfile_obstack, 
 		   SIZEOF_N_SECTION_OFFSETS (objfile->num_sections));
 
   /* FIXME: ezannoni 2000-04-20 The section names in SOM are not
@@ -534,7 +534,7 @@ init_import_symbols (struct objfile *objfile)
      to do with psymbols, just a matter of convenience.  We want the
      import list to be freed when the objfile is deallocated */
   objfile->import_list
-    = (ImportEntry *) obstack_alloc (&objfile->psymbol_obstack,
+    = (ImportEntry *) obstack_alloc (&objfile->objfile_obstack,
 				   import_list_size * sizeof (ImportEntry));
 
   /* Read in the import entries, a bunch at a time */
@@ -550,7 +550,7 @@ init_import_symbols (struct objfile *objfile)
 	  if (buffer[i].type != (unsigned char) 0)
 	    {
 	      objfile->import_list[k]
-		= (char *) obstack_alloc (&objfile->psymbol_obstack, strlen (string_buffer + buffer[i].name) + 1);
+		= (char *) obstack_alloc (&objfile->objfile_obstack, strlen (string_buffer + buffer[i].name) + 1);
 	      strcpy (objfile->import_list[k], string_buffer + buffer[i].name);
 	      /* Some day we might want to record the type and other information too */
 	    }
@@ -570,7 +570,7 @@ init_import_symbols (struct objfile *objfile)
       if (buffer[i].type != (unsigned char) 0)
 	{
 	  objfile->import_list[k]
-	    = (char *) obstack_alloc (&objfile->psymbol_obstack, strlen (string_buffer + buffer[i].name) + 1);
+	    = (char *) obstack_alloc (&objfile->objfile_obstack, strlen (string_buffer + buffer[i].name) + 1);
 	  strcpy (objfile->import_list[k], string_buffer + buffer[i].name);
 	  /* Some day we might want to record the type and other information too */
 	}
@@ -657,7 +657,7 @@ init_export_symbols (struct objfile *objfile)
      to do with psymbols, just a matter of convenience.  We want the
      export list to be freed when the objfile is deallocated */
   objfile->export_list
-    = (ExportEntry *) obstack_alloc (&objfile->psymbol_obstack,
+    = (ExportEntry *) obstack_alloc (&objfile->objfile_obstack,
 				   export_list_size * sizeof (ExportEntry));
 
   /* Read in the export entries, a bunch at a time */
@@ -673,7 +673,7 @@ init_export_symbols (struct objfile *objfile)
 	  if (buffer[i].type != (unsigned char) 0)
 	    {
 	      objfile->export_list[k].name
-		= (char *) obstack_alloc (&objfile->psymbol_obstack, strlen (string_buffer + buffer[i].name) + 1);
+		= (char *) obstack_alloc (&objfile->objfile_obstack, strlen (string_buffer + buffer[i].name) + 1);
 	      strcpy (objfile->export_list[k].name, string_buffer + buffer[i].name);
 	      objfile->export_list[k].address = buffer[i].value;
 	      /* Some day we might want to record the type and other information too */
@@ -697,7 +697,7 @@ init_export_symbols (struct objfile *objfile)
       if (buffer[i].type != (unsigned char) 0)
 	{
 	  objfile->export_list[k].name
-	    = (char *) obstack_alloc (&objfile->psymbol_obstack, strlen (string_buffer + buffer[i].name) + 1);
+	    = (char *) obstack_alloc (&objfile->objfile_obstack, strlen (string_buffer + buffer[i].name) + 1);
 	  strcpy (objfile->export_list[k].name, string_buffer + buffer[i].name);
 	  /* Some day we might want to record the type and other information too */
 	  objfile->export_list[k].address = buffer[i].value;

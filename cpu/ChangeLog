@@ -1,3 +1,10 @@
+2004-01-14  Richard Sandiford  <rsandifo@redhat.com>
+
+	* frv.cpu (UNIT): Add IACC.
+	(iacc-multiply-r-r): Use it.
+	* frv.opc (fr400_unit_mapping): Add entry for IACC.
+	(fr500_unit_mapping, fr550_unit_mapping): Likewise.
+
 2004-01-06  Alexandre Oliva  <aoliva@redhat.com>
 
 	2003-12-19  Alexandre Oliva  <aoliva@redhat.com>

@@ -1,7 +1,7 @@
 /* Target dependent code for the Motorola 68000 series.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2000, 2001,
-   2002, 2003
-   Free Software Foundation, Inc.
+
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2000,
+   2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -69,17 +69,6 @@
 #endif
 
 
-/* gdbarch_breakpoint_from_pc is set to m68k_local_breakpoint_from_pc
-   so m68k_remote_breakpoint_from_pc is currently not used.  */
-
-static const unsigned char *
-m68k_remote_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
-{
-  static unsigned char break_insn[] = {0x4e, (0x40 | REMOTE_BPT_VECTOR)};
-  *lenptr = sizeof (break_insn);
-  return break_insn;
-}
-
 static const unsigned char *
 m68k_local_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
@@ -143,20 +132,6 @@ m68k_register_name (int regnum)
 		    "m68k_register_name: illegal register number %d", regnum);
   else
     return register_names[regnum];
-}
-
-/* Index within `registers' of the first byte of the space for
-   register regnum.  */
-
-static int
-m68k_register_byte (int regnum)
-{
-  if (regnum >= M68K_FPC_REGNUM)
-    return (((regnum - M68K_FPC_REGNUM) * 4) + 168);
-  else if (regnum >= FP0_REGNUM)
-    return (((regnum - FP0_REGNUM) * 12) + 72);
-  else
-    return (regnum * 4);
 }
 
 /* Extract from an array REGBUF containing the (raw) register state, a
@@ -1062,26 +1037,6 @@ m68k_get_longjmp_target (CORE_ADDR *pc)
   return 1;
 }
 
-#ifdef SYSCALL_TRAP
-/* Immediately after a function call, return the saved pc before the frame
-   is setup.  For sun3's, we check for the common case of being inside of a
-   system call, and if so, we know that Sun pushes the call # on the stack
-   prior to doing the trap. */
-
-static CORE_ADDR
-m68k_saved_pc_after_call (struct frame_info *frame)
-{
-  int op;
-
-  op = read_memory_unsigned_integer (frame->pc - SYSCALL_TRAP_OFFSET, 2);
-
-  if (op == SYSCALL_TRAP)
-    return read_memory_unsigned_integer (read_register (SP_REGNUM) + 4, 4);
-  else
-    return read_memory_unsigned_integer (read_register (SP_REGNUM), 4);
-}
-#endif /* SYSCALL_TRAP */
-
 /* Function: m68k_gdbarch_init
    Initializer function for the m68k gdbarch vector.
    Called by gdbarch.  Sets up the gdbarch vector(s) for this target. */
@@ -1103,12 +1058,7 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_long_double_format (gdbarch, &floatformat_m68881_ext);
   set_gdbarch_long_double_bit (gdbarch, 96);
 
-  set_gdbarch_function_start_offset (gdbarch, 0);
-
   set_gdbarch_skip_prologue (gdbarch, m68k_skip_prologue);
-#ifdef SYSCALL_TRAP
-  set_gdbarch_deprecated_saved_pc_after_call (gdbarch, m68k_saved_pc_after_call);
-#endif
   set_gdbarch_breakpoint_from_pc (gdbarch, m68k_local_breakpoint_from_pc);
 
   /* Stack grows down. */
@@ -1120,8 +1070,7 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_extract_return_value (gdbarch, m68k_extract_return_value);
   set_gdbarch_store_return_value (gdbarch, m68k_store_return_value);
-  set_gdbarch_extract_struct_value_address (gdbarch,
-					    m68k_extract_struct_value_address);
+  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, m68k_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, m68k_use_struct_convention);
 
   set_gdbarch_frameless_function_invocation (gdbarch,

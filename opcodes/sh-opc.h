@@ -935,7 +935,7 @@ const sh_opcode_info sh_table[] =
 /* 1111nnnn01101101 fsqrt <F_REG_N>    */{"fsqrt",{F_REG_N},{HEX_F,REG_N,HEX_6,HEX_D}, arch_sh3e_up},
 /* 1111nnnn01101101 fsqrt <D_REG_N>    */{"fsqrt",{D_REG_N},{HEX_F,REG_N,HEX_6,HEX_D}, arch_sh4_up},
 
-/* 1111nnnn01111101 fssra <F_REG_N>    */{"fssra",{F_REG_N},{HEX_F,REG_N,HEX_7,HEX_D}, arch_sh4a_up},
+/* 1111nnnn01111101 fsrra <F_REG_N>    */{"fsrra",{F_REG_N},{HEX_F,REG_N,HEX_7,HEX_D}, arch_sh4a_up},
 
 /* 1111nnnn00001101 fsts FPUL,<F_REG_N>*/{"fsts",{FPUL_M,F_REG_N},{HEX_F,REG_N,HEX_0,HEX_D}, arch_sh2e_up},
 

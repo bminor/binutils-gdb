@@ -1,6 +1,6 @@
 /* MI Interpreter Definitions and Commands for GDB, the GNU debugger.
 
-   Copyright 2002, 2003 Free Software Foundation, Inc.
+   Copyright 2002, 2003, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -57,8 +57,6 @@ static char *mi_input (char *);
    so we can report interesting things that happened "behind the mi's
    back" in this command */
 static int mi_interp_query_hook (const char *ctlstr, va_list ap);
-static char *mi_interp_read_one_line_hook (char *prompt, int repeat,
-					   char *anno);
 
 static void mi3_command_loop (void);
 static void mi2_command_loop (void);
@@ -297,25 +295,6 @@ static int
 mi_interp_query_hook (const char *ctlstr, va_list ap)
 {
   return 1;
-}
-
-static char *
-mi_interp_read_one_line_hook (char *prompt, int repeat, char *anno)
-{
-  static char buff[256];
-  printf_unfiltered ("=read-one-line,prompt=\"%s\"\n", prompt);
-  gdb_flush (gdb_stdout);
-  (void) fgets (buff, sizeof (buff), stdin);
-  buff[(strlen (buff) - 1)] = 0;
-  return buff;
-}
-
-static void
-output_control_change_notification (char *notification)
-{
-  printf_unfiltered ("^");
-  printf_unfiltered ("%s\n", notification);
-  gdb_flush (gdb_stdout);
 }
 
 static void

@@ -80,8 +80,6 @@ static void forward_search_command (char *, int);
 
 static void line_info (char *, int);
 
-static void ambiguous_line_spec (struct symtabs_and_lines *);
-
 static void source_info (char *, int);
 
 static void show_directories (char *, int);
@@ -1230,22 +1228,6 @@ void
 print_source_lines (struct symtab *s, int line, int stopline, int noerror)
 {
   print_source_lines_base (s, line, stopline, noerror);
-}
-
-/* Print a list of files and line numbers which a user may choose from
-   in order to list a function which was specified ambiguously (as with
-   `list classname::overloadedfuncname', or 'list objectiveCSelector:).
-   The vector in SALS provides the filenames and line numbers.
-   NOTE: some of the SALS may have no filename or line information! */
-
-static void
-ambiguous_line_spec (struct symtabs_and_lines *sals)
-{
-  int i;
-
-  for (i = 0; i < sals->nelts; ++i)
-    printf_filtered ("file: \"%s\", line number: %d\n",
-		     sals->sals[i].symtab->filename, sals->sals[i].line);
 }
 
 /* Print info on range of pc's in a specified line.  */

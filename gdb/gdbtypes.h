@@ -1,7 +1,7 @@
 /* Internal type definitions for GDB.
 
    Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003 Free Software Foundation, Inc.
+   2001, 2002, 2003, 2004 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
@@ -320,7 +320,7 @@ struct main_type
   char *tag_name;
 
   /* Every type is now associated with a particular objfile, and the
-     type is allocated on the type_obstack for that objfile.  One problem
+     type is allocated on the objfile_obstack for that objfile.  One problem
      however, is that there are times when gdb allocates new types while
      it is not in the process of reading symbols from a particular objfile.
      Fortunately, these happen when the type being created is a derived
@@ -1069,15 +1069,15 @@ extern struct type *builtin_type_f_void;
 /* Allocate space for storing data associated with a particular type.
    We ensure that the space is allocated using the same mechanism that
    was used to allocate the space for the type structure itself.  I.E.
-   if the type is on an objfile's type_obstack, then the space for data
-   associated with that type will also be allocated on the type_obstack.
+   if the type is on an objfile's objfile_obstack, then the space for data
+   associated with that type will also be allocated on the objfile_obstack.
    If the type is not associated with any particular objfile (such as
    builtin types), then the data space will be allocated with xmalloc,
    the same as for the type structure. */
 
 #define TYPE_ALLOC(t,size)  \
    (TYPE_OBJFILE (t) != NULL  \
-    ? obstack_alloc (&TYPE_OBJFILE (t) -> type_obstack, size) \
+    ? obstack_alloc (&TYPE_OBJFILE (t) -> objfile_obstack, size) \
     : xmalloc (size))
 
 extern struct type *alloc_type (struct objfile *);

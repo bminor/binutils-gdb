@@ -134,7 +134,6 @@ static void gen_sizeof (union exp_element **pc,
 static void gen_expr (union exp_element **pc,
 		      struct agent_expr *ax, struct axs_value *value);
 
-static void print_axs_value (struct ui_file *f, struct axs_value * value);
 static void agent_command (char *exp, int from_tty);
 
 
@@ -621,7 +620,12 @@ gen_var_ref (struct agent_expr *ax, struct axs_value *value, struct symbol *var)
 
     case LOC_COMPUTED:
     case LOC_COMPUTED_ARG:
-      (*SYMBOL_LOCATION_FUNCS (var)->tracepoint_var_ref) (var, ax, value);
+      /* FIXME: cagney/2004-01-26: It should be possible to
+	 unconditionally call the SYMBOL_OPS method when available.
+	 Unfortunately DWARF 2 stores the frame-base (instead of the
+	 function) location in a function's symbol.  Oops!  For the
+	 moment enable this when/where applicable.  */
+      SYMBOL_OPS (var)->tracepoint_var_ref (var, ax, value);
       break;
 
     case LOC_OPTIMIZED_OUT:
@@ -1797,33 +1801,6 @@ gen_trace_for_expr (CORE_ADDR scope, struct expression *expr)
   discard_cleanups (old_chain);
   return ax;
 }
-
-
-
-/* The "agent" command, for testing: compile and disassemble an expression.  */
-
-static void
-print_axs_value (struct ui_file *f, struct axs_value *value)
-{
-  switch (value->kind)
-    {
-    case axs_rvalue:
-      fputs_filtered ("rvalue", f);
-      break;
-
-    case axs_lvalue_memory:
-      fputs_filtered ("memory lvalue", f);
-      break;
-
-    case axs_lvalue_register:
-      fprintf_filtered (f, "register %d lvalue", value->u.reg);
-      break;
-    }
-
-  fputs_filtered (" : ", f);
-  type_print (value->type, "", f, -1);
-}
-
 
 static void
 agent_command (char *exp, int from_tty)

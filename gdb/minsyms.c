@@ -1,6 +1,6 @@
 /* GDB routines for manipulating the minimal symbol tables.
    Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003
+   2002, 2003, 2004
    Free Software Foundation, Inc.
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
@@ -714,7 +714,7 @@ make_cleanup_discard_minimal_symbols (void)
 
    Note that we are not concerned here about recovering the space that
    is potentially freed up, because the strings themselves are allocated
-   on the symbol_obstack, and will get automatically freed when the symbol
+   on the objfile_obstack, and will get automatically freed when the symbol
    table is freed.  The caller can free up the unused minimal symbols at
    the end of the compacted region if their allocation strategy allows it.
 
@@ -832,10 +832,10 @@ install_minimal_symbols (struct objfile *objfile)
          we will give back the excess space.  */
 
       alloc_count = msym_count + objfile->minimal_symbol_count + 1;
-      obstack_blank (&objfile->symbol_obstack,
+      obstack_blank (&objfile->objfile_obstack,
 		     alloc_count * sizeof (struct minimal_symbol));
       msymbols = (struct minimal_symbol *)
-	obstack_base (&objfile->symbol_obstack);
+	obstack_base (&objfile->objfile_obstack);
 
       /* Copy in the existing minimal symbols, if there are any.  */
 
@@ -875,10 +875,10 @@ install_minimal_symbols (struct objfile *objfile)
 
       mcount = compact_minimal_symbols (msymbols, mcount, objfile);
 
-      obstack_blank (&objfile->symbol_obstack,
+      obstack_blank (&objfile->objfile_obstack,
 	       (mcount + 1 - alloc_count) * sizeof (struct minimal_symbol));
       msymbols = (struct minimal_symbol *)
-	obstack_finish (&objfile->symbol_obstack);
+	obstack_finish (&objfile->objfile_obstack);
 
       /* We also terminate the minimal symbol table with a "null symbol",
          which is *not* included in the size of the table.  This makes it
@@ -896,7 +896,7 @@ install_minimal_symbols (struct objfile *objfile)
       SYMBOL_INIT_LANGUAGE_SPECIFIC (&msymbols[mcount], language_unknown);
 
       /* Attach the minimal symbol table to the specified objfile.
-         The strings themselves are also located in the symbol_obstack
+         The strings themselves are also located in the objfile_obstack
          of this objfile.  */
 
       objfile->minimal_symbol_count = mcount;
