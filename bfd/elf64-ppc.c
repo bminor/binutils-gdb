@@ -6608,7 +6608,8 @@ ppc64_elf_next_input_section (struct bfd_link_info *info, asection *isec)
 
   /* If a code section has a function that uses the TOC then we need
      to use the right TOC (obviously).  Also, make sure that .opd gets
-     the correct TOC value.  */
+     the correct TOC value for R_PPC64_TOC relocs that don't have or
+     can't find their function symbol (shouldn't ever happen now).  */
   if (isec->has_gp_reloc || (isec->flags & SEC_CODE) == 0)
     {
       if (elf_gp (isec->owner) != 0)
@@ -7327,6 +7328,16 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 
       r_type = ELF64_R_TYPE (rel->r_info);
       r_symndx = ELF64_R_SYM (rel->r_info);
+
+      /* For old style R_PPC64_TOC relocs with a zero symbol, use the
+	 symbol of the previous ADDR64 reloc.  The symbol gives us the
+	 proper TOC base to use.  */
+      if (rel->r_info == ELF64_R_INFO (0, R_PPC64_TOC)
+	  && rel != relocs
+	  && ELF64_R_TYPE (rel[-1].r_info) == R_PPC64_ADDR64
+	  && is_opd)
+	r_symndx = ELF64_R_SYM (rel[-1].r_info);
+
       sym = NULL;
       sec = NULL;
       h = NULL;
