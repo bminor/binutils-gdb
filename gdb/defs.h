@@ -1,5 +1,5 @@
 /* Basic, host-specific, and target-specific definitions for GDB.
-   Copyright (C) 1986, 89, 91, 92, 93, 94, 95, 1996, 1998
+   Copyright (C) 1986, 89, 91, 92, 93, 94, 95, 96, 1998
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -220,8 +220,6 @@ extern int inside_entry_file PARAMS ((CORE_ADDR addr));
 
 extern int inside_main_func PARAMS ((CORE_ADDR pc));
 
-extern void _initialize_blockframe PARAMS ((void));
-
 /* From ch-lang.c, for the moment. (FIXME) */
 
 extern char *chill_demangle PARAMS ((const char *));
@@ -243,6 +241,7 @@ extern void request_quit PARAMS ((int));
 extern void do_cleanups PARAMS ((struct cleanup *));
 extern void do_final_cleanups PARAMS ((struct cleanup *));
 extern void do_my_cleanups PARAMS ((struct cleanup **, struct cleanup *));
+extern void do_run_cleanups PARAMS ((struct cleanup *));
 
 extern void discard_cleanups PARAMS ((struct cleanup *));
 extern void discard_final_cleanups PARAMS ((struct cleanup *));
@@ -250,17 +249,14 @@ extern void discard_my_cleanups PARAMS ((struct cleanup **, struct cleanup *));
 
 typedef void (*make_cleanup_func) (void *);
 
-extern struct cleanup *
-make_cleanup PARAMS ((make_cleanup_func, void *));
+extern struct cleanup *make_cleanup PARAMS ((make_cleanup_func, void *));
 
-extern struct cleanup *
-make_final_cleanup PARAMS ((void (*function) (void *), void *));
+extern struct cleanup *make_final_cleanup PARAMS ((make_cleanup_func, void *));
 
-extern struct cleanup *
-make_my_cleanup PARAMS ((struct cleanup **, void (*function) (void *), void *));
+extern struct cleanup *make_my_cleanup PARAMS ((struct cleanup **, 
+                                                make_cleanup_func, void *));
 
-extern struct cleanup *
-make_run_cleanup PARAMS ((void (*function) (void *), void *));
+extern struct cleanup *make_run_cleanup PARAMS ((make_cleanup_func, void *));
 
 extern struct cleanup *save_cleanups PARAMS ((void));
 extern struct cleanup *save_final_cleanups PARAMS ((void));
@@ -381,8 +377,6 @@ extern NORETURN void perror_with_name PARAMS ((char *)) ATTR_NORETURN;
 
 extern void print_sys_errmsg PARAMS ((char *, int));
 
-extern void _initialize_stack PARAMS ((void));
-
 /* From regex.c or libc.  BSD 4.4 declares this with the argument type as
    "const char *" in unistd.h, so we can't declare the argument
    as "char *".  */
@@ -417,8 +411,6 @@ extern void print_address_symbolic PARAMS ((CORE_ADDR, GDB_FILE *, int,
 extern void print_address_numeric PARAMS ((CORE_ADDR, int, GDB_FILE *));
 
 extern void print_address PARAMS ((CORE_ADDR, GDB_FILE *));
-
-extern void _initialize_printcmd PARAMS ((void));
 
 /* From source.c */
 
@@ -1117,6 +1109,14 @@ extern int use_windows;
 
 #ifndef PIDGET
 #define PIDGET(pid) (pid)
+#endif
+
+/* If under Cygwin, provide backwards compatibility with older
+   Cygwin compilers that don't define the current cpp define. */
+#ifdef __CYGWIN32__
+#ifndef __CYGWIN__
+#define __CYGWIN__
+#endif
 #endif
 
 #endif /* #ifndef DEFS_H */
