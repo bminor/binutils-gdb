@@ -248,8 +248,6 @@ extern void select_frame (struct frame_info *);
 
 extern void record_selected_frame (CORE_ADDR *, int *);
 
-extern void select_and_print_frame (struct frame_info *, int);
-
 extern void print_frame_info (struct frame_info *, int, int, int);
 
 extern void show_frame_info (struct frame_info *, int, int, int);

@@ -1,5 +1,13 @@
 2002-05-04  Andrew Cagney  <ac131313@redhat.com>
 
+	* stack.c (select_and_print_frame): Make static.  Delete the
+	parameter `level'.
+	(func_command): Update call.
+	(select_frame_command): Delete code computing the frame level.
+	* frame.h (select_and_print_frame): Delete declaration.
+
+2002-05-04  Andrew Cagney  <ac131313@redhat.com>
+
 	* sparc-tdep.c (sparc_get_saved_register): Comment why
 	get_prev_frame call is safe.
 

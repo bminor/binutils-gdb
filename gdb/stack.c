@@ -1490,13 +1490,13 @@ select_frame (struct frame_info *fi)
 
 /* Select frame FI.  Also print the stack frame and show the source if
    this is the tui version.  */
-void
-select_and_print_frame (struct frame_info *fi, int level)
+static void
+select_and_print_frame (struct frame_info *fi)
 {
   select_frame (fi);
   if (fi)
     {
-      print_stack_frame (fi, level, 1);
+      print_stack_frame (fi, frame_relative_level (fi), 1);
     }
 }
 
@@ -1593,20 +1593,6 @@ select_frame_command (char *level_exp, int from_tty)
     error ("No stack.");
 
   frame = parse_frame_specification (level_exp);
-
-  /* Try to figure out what level this frame is.  But if there is
-     no current stack, don't error out -- let the user set one.  */
-  frame1 = 0;
-  if (get_current_frame ())
-    {
-      for (frame1 = get_prev_frame (0);
-	   frame1 && frame1 != frame;
-	   frame1 = get_prev_frame (frame1))
-	level++;
-    }
-
-  if (!frame1)
-    level = 0;
 
   select_frame (frame);
 }
@@ -1865,7 +1851,7 @@ func_command (char *arg, int from_tty)
   if (!found)
     printf_filtered ("'%s' not within current stack frame.\n", arg);
   else if (fp != selected_frame)
-    select_and_print_frame (fp, level);
+    select_and_print_frame (fp);
 }
 
 /* Gets the language of the current frame.  */
