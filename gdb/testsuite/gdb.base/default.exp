@@ -1,3 +1,23 @@
+#   Copyright (C) 1988, 1990, 1991, 1992, 1994, 1997, 1998
+#   Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
+
+# Please email any bugs, comments, and/or additions to this file to:
+# bug-gdb@prep.ai.mit.edu
+
 # Start with a fresh gdb
 
 gdb_exit
@@ -180,7 +200,7 @@ gdb_test "enable" "" "enable"
 #test exec-file
 send_gdb "exec-file\n"
 gdb_expect {
-    -re "No exec file now..*$gdb_prompt $" {
+    -re "No executable file now..*$gdb_prompt $" {
 	pass "exec-file"
     }
     -re "exec-file.*A program is being debugged already.  Kill it. .y or n.*$" {
@@ -208,7 +228,7 @@ gdb_test "fg" "The program is not being run." "fg"
 #test file
 send_gdb "file\n"
 gdb_expect {
-    -re "No exec file now..*$gdb_prompt $"\
+    -re "No executable file now..*$gdb_prompt $"\
 	    { pass "file" }
     -re ".*A program is being debugged already.  Kill it. .y or n.*$" {
 	send_gdb "n\n"
@@ -677,7 +697,7 @@ gdb_expect {
 #test target exec
 send_gdb "target exec\n"
 gdb_expect {
-	-re "No exec file now..*$gdb_prompt $"\
+	-re "No executable file now..*$gdb_prompt $"\
 			{ pass "target exec" }
 	-re ".*A program is being debugged already.  Kill it. .y or n.*$" {
 	    send_gdb "n\n"
