@@ -23,16 +23,8 @@ Do-first:
 
 Things-to-keep:
 
-ChangeLog
-config
-lib
-ld-bootstrap
-ld-cdtest
-ld-empic
-ld-scripts
-ld-shared
-ld-undefined
-ld-versados
+undefined.c
+undefined.exp
 
 Things-to-lose:
 

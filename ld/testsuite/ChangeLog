@@ -1,8 +1,18 @@
+Fri Jul 14 13:07:48 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-undefined/undefined.exp: New test, to check reporting of
+	undefined symbols.
+	* ld-undefined/undefined.c: New file.
+
 Mon Jul 10 11:13:39 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld-versados/versados.exp: If a test fails, report it correctly:
 	don't try to run the next test, and don't report a pass as well as
 	a fail.
+
+Mon Jul  3 14:26:37 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* ld/testsuite/versados/(t1,t2).ld: End in newlines.
 
 Mon May 22 20:19:38 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
