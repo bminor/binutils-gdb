@@ -54,4 +54,9 @@ extern int legacy_sizeof_call_dummy_words;
 /* Typical remote_translate_xfer_address */
 extern gdbarch_remote_translate_xfer_address_ftype generic_remote_translate_xfer_address;
 
+/* Generic implementation of prologue_frameless_p.  Just calls
+   SKIP_PROLOG and checks the return value to see if it actually
+   changed. */
+extern gdbarch_prologue_frameless_p_ftype generic_prologue_frameless_p;
+
 #endif

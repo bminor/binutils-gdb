@@ -300,15 +300,9 @@ frameless_look_for_prologue (frame)
   if (func_start)
     {
       func_start += FUNCTION_START_OFFSET;
-      after_prologue = func_start;
-#ifdef SKIP_PROLOGUE_FRAMELESS_P
       /* This is faster, since only care whether there *is* a
          prologue, not how long it is.  */
-      after_prologue = SKIP_PROLOGUE_FRAMELESS_P (after_prologue);
-#else
-      after_prologue = SKIP_PROLOGUE (after_prologue);
-#endif
-      return after_prologue == func_start;
+      return PROLOGUE_FRAMELESS_P (func_start);
     }
   else if (frame->pc == 0)
     /* A frame with a zero PC is usually created by dereferencing a

@@ -197,6 +197,7 @@ struct gdbarch
   gdbarch_frame_init_saved_regs_ftype *frame_init_saved_regs;
   gdbarch_init_extra_frame_info_ftype *init_extra_frame_info;
   gdbarch_skip_prologue_ftype *skip_prologue;
+  gdbarch_prologue_frameless_p_ftype *prologue_frameless_p;
   gdbarch_inner_than_ftype *inner_than;
   gdbarch_breakpoint_from_pc_ftype *breakpoint_from_pc;
   gdbarch_memory_insert_breakpoint_ftype *memory_insert_breakpoint;
@@ -321,6 +322,7 @@ struct gdbarch startup_gdbarch = {
   0,
   0,
   0,
+  0,
   /* startup_gdbarch() */
 };
 struct gdbarch *current_gdbarch = &startup_gdbarch;
@@ -366,6 +368,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->pointer_to_address = generic_pointer_to_address;
   gdbarch->address_to_pointer = generic_address_to_pointer;
   gdbarch->return_value_on_stack = generic_return_value_on_stack_not;
+  gdbarch->prologue_frameless_p = generic_prologue_frameless_p;
   gdbarch->breakpoint_from_pc = legacy_breakpoint_from_pc;
   gdbarch->memory_insert_breakpoint = default_memory_insert_breakpoint;
   gdbarch->memory_remove_breakpoint = default_memory_remove_breakpoint;
@@ -578,6 +581,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->skip_prologue == 0))
     internal_error ("gdbarch: verify_gdbarch: skip_prologue invalid");
+  /* Skip verify of prologue_frameless_p, invalid_p == 0 */
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->inner_than == 0))
     internal_error ("gdbarch: verify_gdbarch: inner_than invalid");
@@ -892,6 +896,10 @@ gdbarch_dump (void)
                       "gdbarch_update: SKIP_PROLOGUE = 0x%08lx\n",
                       (long) current_gdbarch->skip_prologue
                       /*SKIP_PROLOGUE ()*/);
+  fprintf_unfiltered (gdb_stdlog,
+                      "gdbarch_update: PROLOGUE_FRAMELESS_P = 0x%08lx\n",
+                      (long) current_gdbarch->prologue_frameless_p
+                      /*PROLOGUE_FRAMELESS_P ()*/);
   fprintf_unfiltered (gdb_stdlog,
                       "gdbarch_update: INNER_THAN = 0x%08lx\n",
                       (long) current_gdbarch->inner_than
@@ -2206,6 +2214,25 @@ set_gdbarch_skip_prologue (struct gdbarch *gdbarch,
                            gdbarch_skip_prologue_ftype skip_prologue)
 {
   gdbarch->skip_prologue = skip_prologue;
+}
+
+int
+gdbarch_prologue_frameless_p (struct gdbarch *gdbarch, CORE_ADDR ip)
+{
+  if (GDB_MULTI_ARCH == 0)
+    return generic_prologue_frameless_p (ip);
+  if (gdbarch->prologue_frameless_p == 0)
+    internal_error ("gdbarch: gdbarch_prologue_frameless_p invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_prologue_frameless_p called\n");
+  return gdbarch->prologue_frameless_p (ip);
+}
+
+void
+set_gdbarch_prologue_frameless_p (struct gdbarch *gdbarch,
+                                  gdbarch_prologue_frameless_p_ftype prologue_frameless_p)
+{
+  gdbarch->prologue_frameless_p = prologue_frameless_p;
 }
 
 int
