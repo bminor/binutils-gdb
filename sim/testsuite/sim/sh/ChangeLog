@@ -1,0 +1,33 @@
+2003-08-11  Michael Snyder  <msnyder@redhat.com>
+
+	* macl.s: New file.
+	* macw.s: New file.
+	* allinsn.exp: Add new tests for mac.w and mac.l.
+
+2003-07-25  Michael Snyder  <msnyder@redhat.com>
+
+	* pshai.s, pshar.s, pshli.s, pshlr.s: New files.
+	* allinsn.exp: Add psha, pshl tests.
+	* pdec.s, pinc.s, padd.s, paddc.s: New files.
+	* allinsn.exp: Add pdec, pinc, padd, paddc tests.
+	* pand.s, pdmsb.s: New files.
+	* allinsn.exp: Add pand, pdmsb tests.
+
+2003-07-23  Michael Snyder  <msnyder@redhat.com>
+
+	* pmuls.s: New file.
+
+2003-07-08  Michael Snyder  <msnyder@redhat.com>
+
+	* allinsn.exp, testutils.inc, add.s, fabs.s, fadd.s, fcmpeq.s,
+	fcmpgt.s, fcnvds.s, fcnvsd.s, fdiv.s, fldi0.s, fldi1.s, flds.s,
+	float.s, fmac.s, fmov.s, fmul.s, fneg.s, frchg.s, fschg.s, 
+	fsqrt.s, fsub.s, ftrc.s, shll16.s, shll2.s, shll8.s, shll.s, 
+	shlr16.s, shlr2.s, shlr8.s, shlr.s, swap.s: New files.
+
+Local Variables:
+mode: change-log
+left-margin: 8
+fill-column: 74
+version-control: never
+End:
