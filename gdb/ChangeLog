@@ -1,3 +1,9 @@
+2000-06-12  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* symfile.c (add_symbol_file_command): Properly reformat "else if"
+ 	code.
+	* coffread.c (coff_symtab_read): Ditto.
+	
 Mon Jun 12 15:24:04 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* Makefile.in (SER_HARDWIRE): Set using autoconf.
