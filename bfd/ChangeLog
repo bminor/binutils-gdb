@@ -1,3 +1,38 @@
+2002-07-25  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* elf64-mips.c: Update TODO comment.
+	(mips_elf64_higher_reloc,mips_elf64_highest_reloc,
+	mips_elf64_gprel16_reloca): Remove prototypes.
+	(mips16_jump_reloc,mips16_gprel_reloc): Add functions.
+	(UNUSED_RELOC): Replace by EMPTY_RELOC.
+	(mips_elf64_howto_table_rel): Use special R_MIPS_HI16 handling. Remove
+	wrong comments. Remove disfunctional support of R_MIPS_HIGHER and
+	R_MIPS_HIGHEST.
+	(mips_elf64_howto_table_rela): Fix handling of R_MIPS_GPREL16 and
+	R_MIPS_GOT16. Remove wrong comments.
+	(elf_mips16_jump_howto,elf_mips16_gprel_howto,
+	elf_mips_gnu_vtinherit_howto,elf_mips_gnu_vtentry_howto): New, code
+	from elf32-mips.c.
+	(mips_elf64_hi16_reloc): Fix formatting.
+	(mips_elf64_higher_reloc,mips_elf64_highest_reloc): Remove.
+	(mips_elf64_got16_reloc): Fix formatting. Remove superfluous code.
+	Better comment. Fall back to R_MIPS_GOT_DISP instead of abort().
+	(mips_elf64_gprel16_reloc): Make static. Add check for
+	partial_inplace.
+	(mips_elf64_gprel16_reloca): Remove.
+	(mips_elf64_literal_reloc): New function.
+	(mips_elf64_gprel32_reloc): Fix formatting.
+	(mips_elf64_shift6_reloc): Fix comment. Make static.
+	(mips16_jump_reloc,mips16_gprel_reloc): New functions, code from
+	elf32-mips.c.
+	(elf_reloc_map,mips_reloc_map): New mapping table, similiar as in
+	elf32-mips.c
+	(bfd_elf64_bfd_reloc_type_lookup): Use the mapping table. Enable GNU
+	specific relocations.
+	(mips_elf64_rtype_to_howto): Enable GNU specific relocations.
+	(mips_elf64_object_p): Invert logic to check for SGI-ish ABI.
+	(ELF_MAXPAGESIZE): Add comment.
+
 2002-07-25  Nick Clifton  <nickc@redhat.com>
 
 	* po/sv.po: Updated Swedish translation.
