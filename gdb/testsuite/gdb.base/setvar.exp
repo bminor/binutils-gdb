@@ -89,12 +89,15 @@ proc test_set { args } {
     for {set x 0;} {$x < $length} {incr x;} {
 	if { "[lindex $args $x]" != "" } {
 	    verbose "doing [lindex $args $x]"
-	    gdb_test "[lindex $args $x]" "" "$message (setting variable)"
+	    if [gdb_test "[lindex $args $x]" "" ""] {
+		fail "$message [lindex $args $x]";
+		return 1;
+	    }
 	}
     }
     verbose "expecting $print_result from '$print_cmd'"
     # Now run the test.
-    gdb_test "$print_cmd" "$print_result" "$message";
+    return [gdb_test "$print_cmd" "$print_result" "$message"];
 }
 
 #
@@ -352,6 +355,11 @@ v_long_member = 3,.*v_float_member = 4,.*v_double_member = 5.*\}" \
 # the type of the structure to be specified, as in
 # v_struct1 = (struct t_struct) {32, 33, 34, 35, 36, 37}
 # GDB should do the same if it wants to provide this feature.
+if [target_info exists gdb,cannot_call_functions] {
+    setup_xfail "*-*-*" 2416
+    fail "set variable v_struct1 = {32, 33, 34, 35, 36, 37}"
+    continue
+}
 gdb_test "set variable v_struct1 = {32, 33, 34, 35, 36, 37}" "Invalid.*"
 
 # And after the error the structure should be unchanged.

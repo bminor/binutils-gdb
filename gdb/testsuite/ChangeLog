@@ -1,5 +1,7 @@
 Thu Feb 20 13:57:01 1997  Bob Manson  <manson@charmed.cygnus.com>
 
+	* lib/gdb.exp(gdb_init): New function.
+
 	* gdb.base/setvar.exp(test_set): Don't bother printing a PASS/FAIL
  	for each individual variable set.
 
