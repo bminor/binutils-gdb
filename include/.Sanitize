@@ -35,7 +35,6 @@ a.out.host.h
 a.out.sun4.h
 a29k-opcode.h
 h8300-opcode.h
-amdcoff.h
 ansidecl.h
 aout64.h
 ar.h
@@ -43,23 +42,25 @@ arm-opcode.h
 bcs88kcoff.h
 bfd.h
 bout.h
+coff-a29k.h
+coff-i386.h
+coff-i960.h
+coff-mips.h
+coff-m68k.h
+coff-m88k.h
+coff-rs6000.h
 convx-opcode.h
 dwarf.h
-ecoff.h
 elf-common.h
 elf-external.h
 elf-internal.h
 gdbm.h
 getopt.h
 i386-opcode.h
-i386coff.h
 i860-opcode.h
 i960-opcode.h
 ieee.h
-intel-coff.h
 m68k-opcode.h
-m68kcoff.h
-m88k-bcs.h
 internalcoff.h
 m88k-opcode.h
 mips-opcode.h
@@ -70,7 +71,6 @@ obstack.h
 pn-opcode.h
 pyr-opcode.h
 ranlib.h
-rs6000coff.h
 reloc.h
 sparc-opcode.h
 stab.def
@@ -104,7 +104,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.19  1991/10/25 07:59:50  gnu
+# Revision 1.20  1991/10/25 10:21:10  gnu
+# Rename coff-related files.
+#
+# Revision 1.19  1991/10/25  07:59:50  gnu
 # rs6000
 #
 # Revision 1.18  1991/10/24  18:12:14  fnf
