@@ -342,7 +342,7 @@ extern ARMword isize;
 #define STORESMULT(instr,address,wb) StoreSMult(state,instr,address,wb)
 
 #define POSBRANCH ((instr & 0x7fffff) << 2)
-#define NEGBRANCH (0xff000000 | ((instr & 0xffffff) << 2))
+#define NEGBRANCH (0xfc000000 | ((instr & 0xffffff) << 2))
 
 /***************************************************************************\
 *                          Values for Emulate                               *

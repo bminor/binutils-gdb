@@ -1,3 +1,8 @@
+2000-06-20  Alexandre Oliva  <aoliva@cygnus.com>
+
+	* armemu.h (NEGBRANCH): Do not overwrite the two most significant
+	bits of the offset.
+
 2000-05-25  Nick Clifton  <nickc@cygnus.com>
 
 	* armcopro.c (MMUMCR): Only indicate mode change if a singal has
