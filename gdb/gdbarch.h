@@ -1388,40 +1388,40 @@ extern void set_gdbarch_believe_pcc_promotion_type (struct gdbarch *gdbarch, int
 #define BELIEVE_PCC_PROMOTION_TYPE (gdbarch_believe_pcc_promotion_type (current_gdbarch))
 #endif
 
-#if defined (GET_SAVED_REGISTER)
-/* Legacy for systems yet to multi-arch GET_SAVED_REGISTER */
-#if !defined (GET_SAVED_REGISTER_P)
-#define GET_SAVED_REGISTER_P() (1)
+#if defined (DEPRECATED_GET_SAVED_REGISTER)
+/* Legacy for systems yet to multi-arch DEPRECATED_GET_SAVED_REGISTER */
+#if !defined (DEPRECATED_GET_SAVED_REGISTER_P)
+#define DEPRECATED_GET_SAVED_REGISTER_P() (1)
 #endif
 #endif
 
 /* Default predicate for non- multi-arch targets. */
-#if (!GDB_MULTI_ARCH) && !defined (GET_SAVED_REGISTER_P)
-#define GET_SAVED_REGISTER_P() (0)
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_GET_SAVED_REGISTER_P)
+#define DEPRECATED_GET_SAVED_REGISTER_P() (0)
 #endif
 
-extern int gdbarch_get_saved_register_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (GET_SAVED_REGISTER_P)
-#error "Non multi-arch definition of GET_SAVED_REGISTER"
+extern int gdbarch_deprecated_get_saved_register_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_GET_SAVED_REGISTER_P)
+#error "Non multi-arch definition of DEPRECATED_GET_SAVED_REGISTER"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (GET_SAVED_REGISTER_P)
-#define GET_SAVED_REGISTER_P() (gdbarch_get_saved_register_p (current_gdbarch))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_GET_SAVED_REGISTER_P)
+#define DEPRECATED_GET_SAVED_REGISTER_P() (gdbarch_deprecated_get_saved_register_p (current_gdbarch))
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (GET_SAVED_REGISTER)
-#define GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) (internal_error (__FILE__, __LINE__, "GET_SAVED_REGISTER"), 0)
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_GET_SAVED_REGISTER)
+#define DEPRECATED_GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) (internal_error (__FILE__, __LINE__, "DEPRECATED_GET_SAVED_REGISTER"), 0)
 #endif
 
-typedef void (gdbarch_get_saved_register_ftype) (char *raw_buffer, int *optimized, CORE_ADDR *addrp, struct frame_info *frame, int regnum, enum lval_type *lval);
-extern void gdbarch_get_saved_register (struct gdbarch *gdbarch, char *raw_buffer, int *optimized, CORE_ADDR *addrp, struct frame_info *frame, int regnum, enum lval_type *lval);
-extern void set_gdbarch_get_saved_register (struct gdbarch *gdbarch, gdbarch_get_saved_register_ftype *get_saved_register);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (GET_SAVED_REGISTER)
-#error "Non multi-arch definition of GET_SAVED_REGISTER"
+typedef void (gdbarch_deprecated_get_saved_register_ftype) (char *raw_buffer, int *optimized, CORE_ADDR *addrp, struct frame_info *frame, int regnum, enum lval_type *lval);
+extern void gdbarch_deprecated_get_saved_register (struct gdbarch *gdbarch, char *raw_buffer, int *optimized, CORE_ADDR *addrp, struct frame_info *frame, int regnum, enum lval_type *lval);
+extern void set_gdbarch_deprecated_get_saved_register (struct gdbarch *gdbarch, gdbarch_deprecated_get_saved_register_ftype *deprecated_get_saved_register);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_GET_SAVED_REGISTER)
+#error "Non multi-arch definition of DEPRECATED_GET_SAVED_REGISTER"
 #endif
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (GET_SAVED_REGISTER)
-#define GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) (gdbarch_get_saved_register (current_gdbarch, raw_buffer, optimized, addrp, frame, regnum, lval))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_GET_SAVED_REGISTER)
+#define DEPRECATED_GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval) (gdbarch_deprecated_get_saved_register (current_gdbarch, raw_buffer, optimized, addrp, frame, regnum, lval))
 #endif
 #endif
 

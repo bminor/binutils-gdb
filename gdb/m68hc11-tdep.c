@@ -1390,7 +1390,7 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
                                        sizeof (m68hc11_call_dummy_words));
   set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 0);
-  set_gdbarch_get_saved_register (gdbarch, deprecated_generic_get_saved_register);
+  set_gdbarch_deprecated_get_saved_register (gdbarch, deprecated_generic_get_saved_register);
   set_gdbarch_fix_call_dummy (gdbarch, generic_fix_call_dummy);
   set_gdbarch_deprecated_extract_return_value (gdbarch, m68hc11_extract_return_value);
   set_gdbarch_push_arguments (gdbarch, m68hc11_push_arguments);
@@ -1410,7 +1410,7 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_saved_pc_after_call (gdbarch, m68hc11_saved_pc_after_call);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
 
-  set_gdbarch_get_saved_register (gdbarch, deprecated_generic_get_saved_register);
+  set_gdbarch_deprecated_get_saved_register (gdbarch, deprecated_generic_get_saved_register);
 
   set_gdbarch_store_struct_return (gdbarch, m68hc11_store_struct_return);
   set_gdbarch_deprecated_store_return_value (gdbarch, m68hc11_store_return_value);

@@ -1006,7 +1006,7 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 				       x86_64_register_convert_to_raw);
 
   /* Getting saved registers is handled by unwind information.  */
-  set_gdbarch_get_saved_register (gdbarch, cfi_get_saved_register);
+  set_gdbarch_deprecated_get_saved_register (gdbarch, cfi_get_saved_register);
 
   /* FIXME: kettenis/20021026: Should we set parm_boundary to 64 here?  */
   set_gdbarch_read_fp (gdbarch, cfi_read_fp);

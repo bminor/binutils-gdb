@@ -453,8 +453,8 @@ extern CORE_ADDR sparc_pc_adjust (CORE_ADDR);
   /* time of the register saves.  */ \
   int sp_offset;
 
-/* We need to override GET_SAVED_REGISTER so that we can deal with the
-   way outs change into ins in different frames.  */
+/* We need to override DEPRECATED_GET_SAVED_REGISTER so that we can
+   deal with the way outs change into ins in different frames.  */
 
 void sparc_get_saved_register (char *raw_buffer,
 			       int *optimized,
@@ -462,7 +462,7 @@ void sparc_get_saved_register (char *raw_buffer,
 			       struct frame_info *frame,
 			       int regnum, enum lval_type *lvalp);
 
-#define GET_SAVED_REGISTER(RAW_BUFFER, OPTIMIZED, ADDRP, FRAME, REGNUM, LVAL) \
+#define DEPRECATED_GET_SAVED_REGISTER(RAW_BUFFER, OPTIMIZED, ADDRP, FRAME, REGNUM, LVAL) \
      sparc_get_saved_register (RAW_BUFFER, OPTIMIZED, ADDRP, \
 			       FRAME, REGNUM, LVAL)
 

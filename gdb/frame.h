@@ -554,10 +554,11 @@ void generic_unwind_get_saved_register (char *raw_buffer,
 				        enum lval_type *lvalp);
 
 /* The function generic_get_saved_register() has been made obsolete.
-   GET_SAVED_REGISTER now defaults to the recursive equivalent -
-   generic_unwind_get_saved_register() - so there is no need to even
-   set GET_SAVED_REGISTER.  Architectures that need to override the
-   register unwind mechanism should modify frame->unwind().  */
+   DEPRECATED_GET_SAVED_REGISTER now defaults to the recursive
+   equivalent - generic_unwind_get_saved_register() - so there is no
+   need to even set DEPRECATED_GET_SAVED_REGISTER.  Architectures that
+   need to override the register unwind mechanism should modify
+   frame->unwind().  */
 extern void deprecated_generic_get_saved_register (char *, int *, CORE_ADDR *,
 						   struct frame_info *, int,
 						   enum lval_type *);

@@ -268,9 +268,10 @@ frame_register (struct frame_info *frame, int regnum,
   /* Ulgh!  Old code that, for lval_register, sets ADDRP to the offset
      of the register in the register cache.  It should instead return
      the REGNUM corresponding to that register.  Translate the .  */
-  if (GET_SAVED_REGISTER_P ())
+  if (DEPRECATED_GET_SAVED_REGISTER_P ())
     {
-      GET_SAVED_REGISTER (bufferp, optimizedp, addrp, frame, regnum, lvalp);
+      DEPRECATED_GET_SAVED_REGISTER (bufferp, optimizedp, addrp, frame,
+				     regnum, lvalp);
       /* Compute the REALNUM if the caller wants it.  */
       if (*lvalp == lval_register)
 	{
@@ -406,9 +407,10 @@ get_saved_register (char *raw_buffer,
 		    int regnum,
 		    enum lval_type *lval)
 {
-  if (GET_SAVED_REGISTER_P ())
+  if (DEPRECATED_GET_SAVED_REGISTER_P ())
     {
-      GET_SAVED_REGISTER (raw_buffer, optimized, addrp, frame, regnum, lval);
+      DEPRECATED_GET_SAVED_REGISTER (raw_buffer, optimized, addrp, frame,
+				     regnum, lval);
       return;
     }
   generic_unwind_get_saved_register (raw_buffer, optimized, addrp, frame,

@@ -93,7 +93,6 @@ static gdbarch_register_byte_ftype ia64_register_byte;
 static gdbarch_breakpoint_from_pc_ftype ia64_breakpoint_from_pc;
 static gdbarch_frame_chain_ftype ia64_frame_chain;
 static gdbarch_skip_prologue_ftype ia64_skip_prologue;
-static gdbarch_get_saved_register_ftype ia64_get_saved_register;
 static gdbarch_deprecated_extract_return_value_ftype ia64_extract_return_value;
 static gdbarch_deprecated_extract_struct_value_address_ftype ia64_extract_struct_value_address;
 static gdbarch_use_struct_convention_ftype ia64_use_struct_convention;
@@ -2198,7 +2197,7 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, ia64_frame_saved_pc);
 
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, ia64_frame_init_saved_regs);
-  set_gdbarch_get_saved_register (gdbarch, ia64_get_saved_register);
+  set_gdbarch_deprecated_get_saved_register (gdbarch, ia64_get_saved_register);
 
   set_gdbarch_register_convertible (gdbarch, ia64_register_convertible);
   set_gdbarch_register_convert_to_virtual (gdbarch, ia64_register_convert_to_virtual);

@@ -1,3 +1,21 @@
+2003-03-14  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh (DEPRECATED_GET_SAVED_REGISTER): Replace
+	GET_SAVED_REGISTER.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* frame.h: Update comments.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Update.
+	* x86-64-tdep.c (x86_64_init_abi): Update.
+	* sparc-tdep.c (sparc_gdbarch_init): Update.
+	* sh-tdep.c (sh_gdbarch_init): Update.
+	* mips-tdep.c (mips_gdbarch_init): Update.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Update.
+	* cris-tdep.c (cris_gdbarch_init): Update.
+	* ia64-tdep.c (ia64_gdbarch_init): Update.
+	* frame.c (frame_register): Update.
+	(get_saved_register): Update.
+	* config/sparc/tm-sparc.h (DEPRECATED_GET_SAVED_REGISTER): Update.
+	
 2003-03-13  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh (DEPRECATED_POP_FRAME): Replace POP_FRAME.
