@@ -1,3 +1,8 @@
+2003-06-05  Daniel Jacobowitz  <drow@mvista.com>
+
+	* elfcode.h (elf_slurp_reloc_table_from_section): Don't dereference
+	NULL function pointers.
+
 2003-06-04  Svein E. Seldal  <Svein.Seldal@solidas.com>
 
 	* coff-tic4x.c (ticoff0_swap_table, ticoff1_swap_table): Fixed
