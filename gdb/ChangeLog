@@ -1,5 +1,9 @@
 Mon Apr 12 10:53:50 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* config/rs6000/tm-rs6000.h, rs6000-tdep.c: Move FRAME_CHAIN
+	to rs6000_frame_chain and deal with it if we're in a signal handler.
+	(FRAME_SAVED_PC): Use rs6000_frame_chain.
+
 	* breakpoint.c (within_scope): New function.
 	(enable_breakpoint, watchpoint_check): Use it.
 

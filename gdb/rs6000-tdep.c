@@ -1091,6 +1091,33 @@ frame_initial_stack_address (fi)
   return fi->initial_sp = read_register (fdata.alloca_reg);     
 }
 
+FRAME_ADDR
+rs6000_frame_chain (thisframe)
+     struct frame_info *thisframe;
+{
+  FRAME_ADDR fp;
+  if (inside_entry_file ((thisframe)->pc))
+    return 0;
+  fp = read_memory_integer ((thisframe)->frame, 4);
+  if (fp == 0 && thisframe->pc < TEXT_SEGMENT_BASE)
+    {
+      /* If we are doing a backtrace from a signal handler, fp will be 0
+	 and thisframe->pc will be something like 0x3f88 or 0x2790.  */
+
+      /* This was determined by experimentation on AIX 3.2.  Perhaps
+	 it corresponds to some offset in /usr/include/sys/user.h or
+	 something like that.  Using some system include file would
+	 have the advantage of probably being more robust in the face
+	 of OS upgrades, but the disadvantage of being wrong for
+	 cross-debugging.  */
+
+#define SIG_FRAME_FP_OFFSET 284
+      fp = read_memory_integer (thisframe->frame + SIG_FRAME_FP_OFFSET, 4);
+    }
+  return fp;
+}
+
+
 /* xcoff_relocate_symtab -	hook for symbol table relocation.
    also reads shared libraries.. */
 
