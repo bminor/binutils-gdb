@@ -42,6 +42,4 @@ stabs.texinfo
 
 Do-last:
 
-echo Done in `pwd`.
-
 # End of file.
