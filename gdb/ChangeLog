@@ -1,3 +1,9 @@
+2004-08-11  Joel Brobecker  <brobecker@gnat.com>
+
+	* config/xm-aix4.h (FIVE_ARG_PTRACE): Remove, no longer used.
+	* config/pa/nm-hppah.h (FIVE_ARG_PTRACE): Likewise.
+	* config/rs6000/xm-rs6000.h (FIVE_ARG_PTRACE): Likewise.
+
 2004-08-11  Mark Kettenis  <kettenis@gnu.org>
 
 	* infptrace.c (call_ptrace): Select code based on PTRACE_TYPE_ARG5

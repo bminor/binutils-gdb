@@ -41,10 +41,6 @@ struct target_ops;
    So I don't feel the least bit guilty about this.  */
 #define PTRACE_ARG3_TYPE CORE_ADDR
 
-/* HPUX 8.0, in its infinite wisdom, has chosen to prototype ptrace
-   with five arguments, so programs written for normal ptrace lose.  */
-#define FIVE_ARG_PTRACE
-
 /* We need to figure out where the text region is so that we use the
    appropriate ptrace operator to manipulate text.  Simply
    reading/writing user space will crap out HPUX.  */
