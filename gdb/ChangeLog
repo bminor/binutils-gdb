@@ -1,3 +1,15 @@
+Mon Nov 23 11:38:40 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* symfile.c (deduce_language_from_filename): rewrite so as to 
+	work from a table of filename extensions, modifiable by the user.
+	(filename_language_table): new data structure.
+	(set_ext_lang_command): new function for new command, "set
+	extension-language".  (info_extension_language_command): new
+	function for new command "info extension-languages".
+	(add_filename_language, init_filename_language_table): new
+	support functions for the above.
+	* language.c (language_enum): new function.  Support for above.
+
 Mon Nov 23 10:47:54 1998  Andrew Cagney  <cagney@chook.cygnus.com>
 
 	* config/sh/tm-sh.h, config/mn10200/tm-mn10200.h,

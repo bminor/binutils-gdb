@@ -166,9 +166,9 @@ show_language_command (ignore, from_tty)
 
    flang = get_frame_language();
    if (flang != language_unknown &&
-      language_mode == language_mode_manual &&
-      current_language->la_language != flang)
-      printf_filtered("%s\n",lang_frame_mismatch_warn);
+       language_mode == language_mode_manual &&
+       current_language->la_language != flang)
+     printf_filtered("%s\n",lang_frame_mismatch_warn);
 }
 
 /* Set command.  Change the current working language. */
@@ -1122,6 +1122,21 @@ range_error (va_alist)
 
 
 /* This page contains miscellaneous functions */
+
+/* Return the language enum for a given language string. */
+
+enum language
+language_enum (str)
+     char *str;
+{
+  int i;
+
+  for (i = 0; i < languages_size; i++) 
+    if (STREQ (languages[i]->la_name, str))
+      return languages[i]->la_language;
+
+  return language_unknown;
+}
 
 /* Return the language struct for a given language enum. */
 
