@@ -1,3 +1,15 @@
+Mon Jun 20 13:51:55 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* mdebugread.c (parse_symbol): Don't call ecoff_swap_tir_in or
+	ecoff_swap_rndx_in directly; use the debug_swap pointer instead.
+	(upgrade_type, handle_psymbol_enumerators): Likewise.
+	(has_opaque_xref, cross_ref): Likewise.
+	(elfmdebug_build_psymtabs): Call swap->read_debug_info to read
+	debugging information, rather than doing it here.
+	* mipsread.c (mipscoff_symfile_read): Call read_debug_info entry
+	point in ecoff_debug_swap backend structure, rather than calling
+	ecoff_slurp_symbolic_info directly.
+
 Fri Jun 17 20:58:58 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* breakpoint.c: Include annotate.h.  Call annotate_field rather

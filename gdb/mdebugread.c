@@ -923,9 +923,9 @@ parse_symbol (sh, ax, ext_sh, bigend, section_offsets)
 		    type_code = TYPE_CODE_ENUM;
 		  else
 		    {
-		      ecoff_swap_tir_in (bigend,
-					 &ax[tsym.index].a_ti,
-					 &tir);
+		      (*debug_swap->swap_tir_in) (bigend,
+						  &ax[tsym.index].a_ti,
+						  &tir);
 		      if ((tir.bt == btNil || tir.bt == btVoid)
 			  && tir.tq0 == tqNil)
 			type_code = TYPE_CODE_ENUM;
@@ -1396,7 +1396,7 @@ parse_type (fd, ax, aux_index, bs, bigend, sym_name)
   ax += aux_index;
 
   /* Use aux as a type information record, map its basic type.  */
-  ecoff_swap_tir_in (bigend, &ax->a_ti, t);
+  (*debug_swap->swap_tir_in) (bigend, &ax->a_ti, t);
   if (t->bt >= (sizeof (map_bt) / sizeof (*map_bt)))
     {
       complain (&basic_type_complaint, t->bt, sym_name);
@@ -1609,7 +1609,7 @@ parse_type (fd, ax, aux_index, bs, bigend, sym_name)
       if (!t->continued)
 	break;
 
-      ecoff_swap_tir_in (bigend, &ax->a_ti, t);
+      (*debug_swap->swap_tir_in) (bigend, &ax->a_ti, t);
       ax++;
     }
 
@@ -1663,7 +1663,7 @@ upgrade_type (fd, tpp, tq, ax, bigend, sym_name)
       off = 0;
 
       /* Determine and record the domain type (type of index) */
-      ecoff_swap_rndx_in (bigend, &ax->a_rndx, &rndx);
+      (*debug_swap->swap_rndx_in) (bigend, &ax->a_rndx, &rndx);
       id = rndx.index;
       rf = rndx.rfd;
       if (rf == 0xfff)
@@ -2872,10 +2872,10 @@ handle_psymbol_enumerators (objfile, fh, stype)
 
       if (sh.index == indexNil)
 	break;
-      ecoff_swap_tir_in (fh->fBigendian,
-			 &(debug_info->external_aux
-			   + fh->iauxBase + sh.index)->a_ti,
-			 &tir);
+      (*debug_swap->swap_tir_in) (fh->fBigendian,
+				  &(debug_info->external_aux
+				    + fh->iauxBase + sh.index)->a_ti,
+				  &tir);
       if ((tir.bt != btNil && tir.bt != btVoid) || tir.tq0 != tqNil)
 	return;
       break;
@@ -3289,12 +3289,12 @@ has_opaque_xref (fh, sh)
     return 0;
 
   ax = debug_info->external_aux + fh->iauxBase + sh->index;
-  ecoff_swap_tir_in (fh->fBigendian, &ax->a_ti, &tir);
+  (*debug_swap->swap_tir_in) (fh->fBigendian, &ax->a_ti, &tir);
   if (tir.bt != btStruct && tir.bt != btUnion && tir.bt != btEnum)
     return 0;
 
   ax++;
-  ecoff_swap_rndx_in (fh->fBigendian, &ax->a_rndx, rn);
+  (*debug_swap->swap_rndx_in) (fh->fBigendian, &ax->a_rndx, rn);
   if (rn->rfd == 0xfff)
     rf = AUX_GET_ISYM (fh->fBigendian, ax + 1);
   else
@@ -3330,7 +3330,7 @@ cross_ref (fd, ax, tpp, type_code, pname, bigend, sym_name)
 
   *tpp = (struct type *)NULL;
 
-  ecoff_swap_rndx_in (bigend, &ax->a_rndx, rn);
+  (*debug_swap->swap_rndx_in) (bigend, &ax->a_rndx, rn);
 
   /* Escape index means 'the next one' */
   if (rn->rfd == 0xfff)
@@ -3428,10 +3428,10 @@ cross_ref (fd, ax, tpp, type_code, pname, bigend, sym_name)
 	     The forward references are not entered in the pending list and
 	     in the symbol table.  */
 
-	  ecoff_swap_tir_in (bigend,
-			     &(debug_info->external_aux
-			       + fh->iauxBase + sh.index)->a_ti,
-			     &tir);
+	  (*debug_swap->swap_tir_in) (bigend,
+				      &(debug_info->external_aux
+					+ fh->iauxBase + sh.index)->a_ti,
+				      &tir);
 	  if (tir.tq0 != tqNil)
 	    complain (&illegal_forward_tq0_complaint, sym_name);
 	  switch (tir.bt)
@@ -3884,62 +3884,15 @@ elfmdebug_build_psymtabs (objfile, swap, sec, section_offsets)
      struct section_offsets *section_offsets;
 {
   bfd *abfd = objfile->obfd;
-  char *buf;
   struct ecoff_debug_info *info;
-
-  buf = alloca (swap->external_hdr_size);
-  if (!bfd_get_section_contents (abfd, sec, buf, (file_ptr) 0,
-				 swap->external_hdr_size))
-    perror_with_name (bfd_get_filename (abfd));
 
   info = ((struct ecoff_debug_info *)
 	  obstack_alloc (&objfile->psymbol_obstack,
 			 sizeof (struct ecoff_debug_info)));
 
-  (*swap->swap_hdr_in) (abfd, buf, &info->symbolic_header);
-
-  /* The offsets in symbolic_header are file offsets, not section
-     offsets.  Strangely, on Irix 5 the information is not entirely
-     within the .mdebug section.  There are parts of an executable
-     file which are not within any ELF section at all.  This means
-     that we must read the information using bfd_read. */
-
-#define READ(ptr, count, off, size, type)				\
-  do									\
-    {									\
-      if (info->symbolic_header.count == 0)				\
-	info->ptr = (type) NULL;					\
-      else								\
-	{								\
-	  info->ptr = ((type)						\
-		       obstack_alloc (&objfile->psymbol_obstack,	\
-				      (info->symbolic_header.count	\
-				       * size)));			\
-	  if (bfd_seek (abfd, info->symbolic_header.off, SEEK_SET) < 0	\
-	      || (bfd_read ((PTR) info->ptr, size,			\
-			    info->symbolic_header.count, abfd)		\
-		  != info->symbolic_header.count * size))		\
-	    perror_with_name (bfd_get_filename (abfd));			\
-	}								\
-    }									\
-  while (0)
-
-  READ (line, cbLine, cbLineOffset, sizeof (unsigned char), unsigned char *);
-  READ (external_dnr, idnMax, cbDnOffset, swap->external_dnr_size, PTR);
-  READ (external_pdr, ipdMax, cbPdOffset, swap->external_pdr_size, PTR);
-  READ (external_sym, isymMax, cbSymOffset, swap->external_sym_size, PTR);
-  READ (external_opt, ioptMax, cbOptOffset, swap->external_opt_size, PTR);
-  READ (external_aux, iauxMax, cbAuxOffset, sizeof (union aux_ext),
-	union aux_ext *);
-  READ (ss, issMax, cbSsOffset, sizeof (char), char *);
-  READ (ssext, issExtMax, cbSsExtOffset, sizeof (char), char *);
-  READ (external_fdr, ifdMax, cbFdOffset, swap->external_fdr_size, PTR);
-  READ (external_rfd, crfd, cbRfdOffset, swap->external_rfd_size, PTR);
-  READ (external_ext, iextMax, cbExtOffset, swap->external_ext_size, PTR);
-
-#undef READ
-
-  info->fdr = NULL;
+  if (!(*swap->read_debug_info) (abfd, sec, info))
+    error ("Error reading ECOFF debugging information: %s",
+	   bfd_errmsg (bfd_get_error ()));
 
   mdebug_build_psymtabs (objfile, swap, info, section_offsets);
 }
