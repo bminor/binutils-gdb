@@ -1,3 +1,14 @@
+Wed Aug  6 13:37:58 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Define TARGET in header file.
+	* acconfig.h (TARGET): Add #undef.
+	* Makefile.am (version.o, bucomm.o): Remove special targets.
+	* bucomm.c (target): Remove.
+	* nm.c (program_name): Don't declare.
+	(target): Make static.
+	* size.c (target): Make static.
+	* configure, config.in, Makefile.in: Rebuild.
+
 Tue Aug  5 00:01:41 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am (check-DEJAGNU): Export r.
