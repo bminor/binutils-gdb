@@ -1,3 +1,19 @@
+2002-06-16  Andrew Cagney  <ac131313@redhat.com>
+
+	* NEWS: Mention below.
+
+	Merge from mainline:
+	2002-04-22 J. Brobecker <brobecker@gnat.com>:
+	* symfile.h (get_section_index): Define.
+	* symfile.c (get_section_index): New function.
+	* mdebugread.c (SC_IS_SBSS): New macro.
+	(SC_IS_BSS): Return true for the scBss storage class only, as
+	the scSBss storage class refers to the .sbss section.
+	(parse_partial_symbols): Discard the symbols which associated
+	section does not exist.
+	Make sure to use the .sbss section index for symbols which
+	storage class is scBss, rather than using the .bss section index.
+
 2002-05-28  Theodore A. Roth  <troth@verinet.com>
 
 	* MAINTAINERS: Add myself as AVR maintainer.

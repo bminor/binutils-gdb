@@ -7,6 +7,12 @@
 
 Atmel AVR					avr*-*-*
 
+* Bug fixes
+
+gdb/182: gdb/323: gdb/237: On alpha, gdb was reporting:
+mdebugread.c:2443: gdb-internal-error: sect_index_data not initialized
+Fix, by Joel Brobecker imported from mainline.
+
 *** Changes in GDB 5.2:
 
 * New command "set trust-readonly-sections on[off]".

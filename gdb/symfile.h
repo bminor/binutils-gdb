@@ -252,6 +252,8 @@ extern void find_lowest_section (bfd *, asection *, PTR);
 
 extern bfd *symfile_bfd_open (char *);
 
+extern int get_section_index (struct objfile *, char *);
+
 /* Utility functions for overlay sections: */
 extern enum overlay_debugging_state {
   ovly_off, 
