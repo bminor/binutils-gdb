@@ -212,6 +212,11 @@ store_inferior_registers (regno)
 }
 
 
+#if 0
+
+/* This function is no longer used.  The version in coredep.c is used
+   instead.  */
+
 /* Take the register values out of a core file and store
    them where `read_register' will find them.  */
 
@@ -255,6 +260,8 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
       }
   }
 }
+
+#endif /* 0 */
 
 int
 getpagesize ()

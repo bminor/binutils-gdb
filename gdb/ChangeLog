@@ -1,3 +1,17 @@
+Thu Jul 22 12:43:25 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* coredep.c: If NEED_SYS_CORE_H defined, include <sys/core.h>
+	(can't include it in nm-*.h file because it causes conflicts with
+	a.out symbol definitions).
+	* hp300ux-nat.c (fetch_core_registers): Commented out; obsolete.
+	* config/m68k/hp300hpux.mh (NATDEPFILES): Added coredep.o and
+	corelow.o.
+	* config/m68k/nm-hp300hpux.h (NEED_SYS_CORE_H): Defined.
+	(REGISTER_U_ADDR): Defined.
+	* config/m68k/xm-hp300hpux.h (HAVE_TERMIOS): Define instead of
+	HAVE_TERMIO.
+	* config/pa/xm-hppah.h: Likewise.
+
 Wed Jul 21 11:37:30 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* mipsread.c (parse_symbol): when stTypedef and friends occur within

@@ -24,3 +24,21 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* fetch_inferior_registers is in nat-hp300hpux.c.  */
 #define FETCH_INFERIOR_REGISTERS
 
+/* Get registers from a core file.  The floating point stuff is just
+   guesses.  */
+#define NEED_SYS_CORE_H
+#define REGISTER_U_ADDR(addr, blockend, regno)				\
+{									\
+  if (regno < PS_REGNUM)						\
+    addr = (int) (&((struct proc_regs *)(blockend))->d0 + regno);	\
+  else if (regno == PS_REGNUM)						\
+    addr = (int) ((char *) (&((struct proc_regs *)(blockend))->ps) - 2); \
+  else if (regno == PC_REGNUM)						\
+    addr = (int) &((struct proc_regs *)(blockend))->pc;			\
+  else if (regno < FPC_REGNUM)						\
+    addr = (int) (((struct proc_regs *)(blockend))->mc68881		\
+		  + ((regno) - FP0_REGNUM) / 2);			\
+  else									\
+    addr = (int) (((struct proc_regs *)(blockend))->p_float		\
+		  + (regno) - FPC_REGNUM);				\
+}

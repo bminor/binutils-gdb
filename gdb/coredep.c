@@ -40,6 +40,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif /* NO_PTRACE_H */
 #endif
 
+#ifdef NEED_SYS_CORE_H
+#include <sys/core.h>
+#endif
+
 /* Extract the register values out of the core file and store
    them where `read_register' will find them.
 

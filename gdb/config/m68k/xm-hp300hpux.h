@@ -50,7 +50,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #undef MEM_FNS_DECLARED
 #define MEM_FNS_DECLARED 1
 
-#define HAVE_TERMIO
+#define HAVE_TERMIOS
 
 /* Get rid of any system-imposed stack limit if possible.  */
 /* The hp9k320.h doesn't seem to have this feature.  */
