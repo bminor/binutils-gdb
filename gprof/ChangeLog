@@ -1,3 +1,7 @@
+2005-03-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* po/fr.po: Commit new French translation.
+
 2005-03-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* gmon_io.c (gmon_write_raw_arc): Return 1 for invalid size.

@@ -1,3 +1,7 @@
+2005-03-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* po/fr.po: Commit new French translation.
+
 2005-03-09  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
 
 	* vax-dis.c (entry_mask_bit): New array.
