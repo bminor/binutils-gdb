@@ -1,3 +1,7 @@
+Tue Aug 24 11:04:06 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t12/gdbme0.c (localscopes, autovars): Modify to foil gcc -O.
+
 Thu Aug 19 22:08:41 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* gdb.t15/funcargs.exp:  Allow arguments for main in backtraces
