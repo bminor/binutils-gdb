@@ -1,3 +1,10 @@
+Wed Mar 25 13:10:42 1998  Bruno Haible  <bruno@linuix.mathematik.uni-karlsruhe.de>
+
+        * gasp.c (IS*): Cast argument to unsigned char, not unsigned int.
+        * macro.c (macro_expand_body): Increase buffer size.
+        * messages.c (as_warn): Likewise.
+	(as_warn_where, as_bad, as_bad_where): Likewise.
+
 Wed Mar 25 12:59:07 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	Based on patch from H.J. Lu  <hjl@gnu.org>:

@@ -105,12 +105,12 @@ FILE *outfile;
 #define WHITEBIT 8
 #define COMMENTBIT 16
 #define BASEBIT  32
-#define ISCOMMENTCHAR(x) (chartype[(unsigned)(x)] & COMMENTBIT)
-#define ISFIRSTCHAR(x)  (chartype[(unsigned)(x)] & FIRSTBIT)
-#define ISNEXTCHAR(x)   (chartype[(unsigned)(x)] & NEXTBIT)
-#define ISSEP(x)        (chartype[(unsigned)(x)] & SEPBIT)
-#define ISWHITE(x)      (chartype[(unsigned)(x)] & WHITEBIT)
-#define ISBASE(x)       (chartype[(unsigned)(x)] & BASEBIT)
+#define ISCOMMENTCHAR(x) (chartype[(unsigned char)(x)] & COMMENTBIT)
+#define ISFIRSTCHAR(x)  (chartype[(unsigned char)(x)] & FIRSTBIT)
+#define ISNEXTCHAR(x)   (chartype[(unsigned char)(x)] & NEXTBIT)
+#define ISSEP(x)        (chartype[(unsigned char)(x)] & SEPBIT)
+#define ISWHITE(x)      (chartype[(unsigned char)(x)] & WHITEBIT)
+#define ISBASE(x)       (chartype[(unsigned char)(x)] & BASEBIT)
 static char chartype[256];
 
 
