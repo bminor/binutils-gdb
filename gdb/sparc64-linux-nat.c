@@ -1,4 +1,4 @@
-/* Native-dependent code for SPARC BSD's.
+/* Native-dependent code for GNU/Linux UltraSPARC.
 
    Copyright 2003 Free Software Foundation, Inc.
 
@@ -19,19 +19,30 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#ifndef SPARCBSD_NAT_H
-#define SPARCBSD_NAT_H
+#include "defs.h"
 
-/* Functions translating between `struct reg' and `struct fpreg' and
-   GDB's register cache.  */
-extern void (*sparcbsd_supply_reg)(const char *, int);
-extern void (*sparcbsd_fill_reg)(char *, int);
-extern void (*sparcbsd_supply_fpreg)(const char *, int);
-extern void (*sparcbsd_fill_fpreg)(char *, int);
+#include "sparc64-tdep.h"
+#include "sparc-nat.h"
 
-/* Functions indication whether `struct reg' or `struct fpreg' provides
-   a certain register.  */
-extern int (*sparcbsd_reg_supplies_p)(int);
-extern int (*sparcbsd_fpreg_supplies_p)(int);
+static const struct sparc_gregset sparc64_linux_ptrace_gregset =
+{
+  16 * 8,			/* "tstate" */
+  17 * 8,			/* %pc */
+  18 * 8,			/* %npc */
+  19 * 8,			/* %y */
+  -1,				/* %wim */
+  -1,				/* %tbr */
+  0 * 8,			/* %g1 */
+  -1,				/* %l0 */
+  4				/* sizeof (%y) */
+};
+
 
-#endif /* sparcbsd-nat.h */
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+void _initialize_sparc64_linux_nat (void);
+
+void
+_initialize_sparc64_linux_nat (void)
+{
+  sparc_gregset = &sparc64_linux_ptrace_gregset;
+}

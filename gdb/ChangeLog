@@ -1,3 +1,197 @@
+2004-01-02  Mark Kettenis  <kettenis@gnu.org>
+
+	* Makefile.in (ALLDEPFILES): Remove sparc-linux-nat.c and
+	sparcl-tdep.c.  Add sparc-linux-tdep.c, sparc-sol2-nat.c,
+	sparc-sol2-tdep.c, sparc-sol2-nat.c, sparc-sol2-tdep.c,
+	sparc64-linux-nat.c, sparc64-linux-tdep.c, sparc64-nat.c,
+	sparc64-sol2-tdep.c, sparc64-tdep.c, sparc64fbsd-nat.c,
+	sparc64fbsd-tdep.c, sparcnbsd-nat.c, sparcnbsd-tdep.c.
+	(sparc_nat_h): New variable.
+	(sparcbsd_nat_h, sparcnbsd_tdep_h): Remove variables.
+	(tm-sun4os4.h): Remove dependency.
+	(sparcbsd-nat.o, sparc-linux-nat.o): Remove dependencies.
+	(sparc64fbsd-nat.o, sparc64fbsd-tdep.o, sparc64nbsd-nat.o,
+	sparc64-tdep.o, sparc-nat.o, sparcnbsd-nat.o, sparcnbsd-tdep.o,
+	sparc-tdep.o): Update dependencies.
+	(sparc-linux-tdep.o, sparc-sol2-nat.o, sparc-sol2-tdep.o,
+	sparc64-linux-nat.o, sparc64-linux-tdep.o, sparc64-nat.o,
+	sparc64-sol2-tdep.o, sparc64-tdep.o, sparc64nbsd-tdep.o): New
+	dependencies.
+	* configure.host: Remove existing sparc-*-lynxos*,
+	sparc-*-solaris*, sparc-*-sunos4*, sparc-*-sunos5*, sparc-*-*,
+	ultrasparc-*-freebsd, sparcv9-*-freebsd, sparc64-*-linux*,
+	sparcv9-*-* and sparc64-*-* triplets.  Add new sparc64-*-linux*,
+	sparc-*-solaris2*, sparcv9-*-solaris2* and sparc64-*-solaris2*
+	triplets.
+	* configure.tgt: Remove exitsing sparc-*-aout*, sparc-*-coff*,
+	sparc-*-elf*, sparc*-lynxos*, sparc-*-solars2*, sparc-*-sunos4*,
+	sparc-*-sunos5*, sparc-*-vxworks*, sparc64-*linux*, sparc64-*-*,
+	sparcv9-*-* and commented out sparc64-*-solars2* triplets.  Add
+	new sparc-*-solaris2.[0-6], sparc-*-solaris2.[0-6].*,
+	sparc64-*-linux, sparc-*-solaris2*, sparcv9-*-solaris*,
+	sparc64-*-solaris2* and sparc64-*-* triplets.
+	* sparc64-tdep.c: Update copyright year.  Include "inferior.h",
+	"symtab.h" and "objfiles.h".
+	(BIAS): Remove define.
+	(X_OP, X_RD, X_A, X_COND, X_OP2, X_IMM22, X_OP3, X_I, X_DISP22)
+	(X_DISP19): Remove macros.
+	(sparc_fetch_instruction): Remove function.
+	(struct gdbarch_tdep): Remove definition.
+	(SPARC64_NUM_REGS, SPARC64_NUM_PSEUDO_REGS): Use ARRAY_SIZE.
+	(sparc_breakpoint_from_pc): Remove function.
+	(struct sparc64_frame_cache): Remove definition.
+	(sparc64_alloc_frame_cache, sparc64_analyze_prologue,
+	sparc64_unwind_pc): Remove functions.
+	(sparc64_skip_prologue): Use `struct sparc_frame_cache' instead of
+	`struct sparc64_frame_cache.  Call sparc_analyze_prologue instead
+	of sparc64_analyze_prologue.  Mark constant as ULL instead of UL.
+	(sparc64_frame_cache): Change return type to `struct
+	sparc_frame_cache *'.  Simply call sparc_frame_cache.
+	(sparc64_frame_this_id, sparc64_frame_prev_register,
+	sparc64_frame_base_address): Use `struct sparc_frame_cache'
+	instead of `struct sparc64_frame_cache.
+	(sparc_unwind_dummy_id, sparc_extract_struct_value_address,
+	sparc_analyze_control_transfer, sparc_software_single_step,
+	sparc64_gdbarch_init, sparc_supply_rwindow, sparc_fill_rwindow,
+	_initialize_sparc64_tdep): Remove functions.
+	(TSTATE_CWP, TSTATE_ICC, TSTATE_XCC): New macros.
+	(PSR_S, PSR_ICC, PSR_VERS, PSR_IMPL, PSR_V8PLUS, PSR_XCC): New
+	macros.
+	(sparc64_supply_gregset, sparc64_collect_gregset,
+	sparc64_supply_fpregset, sparc64_collect_fpregset): New functions.
+	(sparc64_init_abi): New function.
+	* sparc64-tdep.h: Update copyright year.  Fix typo in multiple
+	inclusion guard.  Include "sparc-tdep.h".
+	(BIAS): Define.
+	(r_tstate_offset, r_fprs_offset): New defines.
+	(enum sparc_regnum): Remove defenition.
+	(enum sparc64_regnum): Reformat.
+	(sparc_supply_rwindow, sparc_fill_rwindow): Remove prototypes.
+	(sparc64_init_abi, sparc64_supply_gregset,
+	sparc64_collect_gregset, sparc64_supply_fpregset,
+	sparc64_collect_fpregset): New prototypes.
+	(sparc64_sol2_gregset, sparc64nbsd_gregset, sparc64fbsd_gregset):
+	Add extern declarations.
+	(sparc64_sol2_init_abi): New prototype.
+	(sparc64fbsd_supply_reg, sparc64fbsd_fill_reg)
+	(sparc64fbsd_supply_fpreg, sparc64fbsd_fill_fpreg): Remove
+	prototypes.
+	* sparc64fbsd-nat.c: Include "sparc-nat.h", don't include
+	"sparnbsd-nat.h".
+	(sparc64fbsd_reg_supplies_p, sparc64fbsd_fpreg_supplies_p): Remove
+	functions.
+	(_initialize_sparc64fbsd_nat): Remove initialization of
+	sparcbsd_supply_reg, sparcbsd_fill_reg, sparcbsd_supply_fpreg,
+	sparcbsd_fill_fpreg, sparcbsd_reg_supplies_p,
+	sparcbsd_fpreg_supplies_p.  Initialize sparc_gregset.	
+	* sparc64fbsd-tdep.c: Update copyright year.  Include "frame.h",
+	"frame-unwind.h", "trad-frame.h" and "gdb_assert.h".
+	(sparc64fbsd_r_global_offset, sparc64fbsd_r_out_offset)
+	(sparc64fbsd_r_fprs_offset, sparc64fbsd_r_tnpc_offset)
+	(sparc64fbsd_r_tpc_offset, sparc64fbsd_r_tstate_offset)
+	(sparc64fbsd_r_y_offset): Remove variables.
+	(sparc64fbsd_sizeof_struct_reg, sparc64fbsd_sizeof_struct_fpreg):
+	Make static and const.
+	(sparc64fbsd_supply_reg, sparc64fbsd_fill_reg)
+	(sparc64fbsd_supply_fpreg, sparc64fbsd_fill_fpreg): Remove
+	functions.
+	(sparc64fbsd_gregset): New variable.
+	(fetch_core_registers): Replace calls to sparc64fbsd_supply_reg
+	and sparc64fbsd_supply_fpreg with calls to sparc64_supply_gregset
+	and sparc64_supply_fpregset.
+	(sparc64fbsd_pc_in_sigtramp, sparc64fbsd_sigtramp_frame_cache)
+	(sparc64fbsd_sigtramp_frame_this_id)
+	(sparc64fbsd_sigtramp_frame_prev_register): New functions.
+	(sparc64fbsd_sigtramp_frame_unwind): New variable.
+	(sparc64fbsd_sigtramp_frame_sniffer): New function.
+	(sparc64fbsd_init_abi): Set pc_in_sigtramp, append
+	sparc64fbsd_sigtramp_frame_sniffer.  Call sparc64_init_abi.
+	* sparcnbsd-tdep.c: Update copyright year.  Include
+	"floatformat.h", "frame.h", "frame-unwind.h", "symtab.h",
+	"trad-frame.h" and "gdb_assert.h", don't include "target.h",
+	"value.h" and "sparcnbsd-tdep.h".
+	(REG32_OFFSET_PSR, REG32_OFFSET_PC, REG32_OFFSET_NPC)
+	(REG32_OFFSET_Y, REG32_OFFSET_GLOBAL, REG32_OFFSET_OUT)
+	(REG64_OFFSET_TSTATE, REG64_OFFSET_PC, REG64_OFFSET_NPC)
+	(REG64_OFFSET_Y, REG64_OFFSET_GLOBAL, REG64_OFFSET_OUT): Remove
+	defines.
+	(sparcnbsd_gregset): New variable.
+	(sparcnbsd_supply_reg32, sparcnbsd_supply_reg64)
+	(sparcnbsd_fill_reg32, sparcnbsd_fill_reg64)
+	(sparcnbsd_supply_fpreg32, sparcnbsd_supply_fpreg64)
+	(sparcnbsd_fill_reg32, sparcnbsd_fill_reg64): Remove functions.
+	(sparc32nbsd_sigtramp_start, sparc32nbsd_sigtramp_end): New
+	variables.
+	(sparc32nbsd_pc_in_sigtramp, sparc32nbsd_sigcontext_frame_cache)
+	(sparc32nbsd_sigcontext_frame_this_id)
+	(sparc32nbsd_sigcontext_frame_prev_register): New functions.
+	(sparc32nbsd_sigcontext_frame_unwind): New variable.
+	(sparc32nbsd_sigtramp_frame_sniffer): New function.
+	(sparcnbsd_get_longjmp_target_32,
+	sparcnbsd_get_longjmp_target_64): Remove functions.
+	(sparcnbsd_aout_in_solib_call_trampoline): Rewrite.
+	(sparcnbsd_init_abi_common, sparcnbsd_init_aout,
+	sparcnbsd_init_elf): Remove.
+	(sparcnbsd_init_abi, sparcnbsd_aout_init_abi)
+	(sparcnbsd_elf_init_abi): New functions.
+	(_initialize_sparcnbsd_tdep): New prototype.
+	(_initialize_sparnbsd_tdep): Update.
+	* config/sparc/fbsd.mh (NATDEPFILES): Remove sparcbsd-nat.o and
+	corelow.o.  Add sparc64-nat.o and sparc-nat.o.
+	* config/sparc/fbsd.mt (TDEPFILES): Add sparc-tdep.o and corelow.o.
+	* config/sparc/linux.mh: Update comment.
+	(XM_FILE, HOST_IPC): Remove variables.
+	(NATDEPFILES): Add sparc-sol2-nat.o and core-regset.o.  Remove
+	sparc-linux-nat.o.
+	* config/sparc/linux.mt: Update comment.
+	(TDEPFILES): Add sparc-sol2-tdep.o and sparc-linux-tdep.o.
+	* config/sparc/nbsd.mt: Reformat.
+	* config/sparc/nbsd64.mh: Update comment.
+	(NATDEPFILES): Add sparc-nat.o.
+	* config/sparc/nbsd64.mt: Update comment.
+	(TDEPFILES): Add sparc64-tdep.o and sparc64nbsd-tdep.o.
+	(TM_FILE): Set to tm-nbsd.h.
+	* config/sparc/nbsdelf.mh: Update comment.
+	(NATDEPFILES): Add sparc-nat.o.
+	(XM_FILE): Delete.
+	* config/sparc/nbsdaout.mh: Update comment.
+	(NATDEPFILES): Add sparc-nat.o
+	(XM_FILE): Delete.
+	* config/sparc/nm-linux.h: Update copyright year.  Don't include
+	"config/nm-svr4.h" and "solib.h".  Add protection against multiple
+	inclusion.
+	(KERNEL_U_SIZE): Remove define.
+	(kernel_u_size): Remove prototype.
+	(PTRACE_ARG3_TYPE, PTRACE_XFER_TYPE): Define.
+	* config/sparc/nm-nbsd.h: Update copyright.  Don't include
+	"regcache.h".
+	(CHILD_PREPARE_TO_STORE): Remove define.
+	* config/sparc/nm-nbsdaout.h: Tweak some comments.
+	* sparc-nat.c, sparc-tdep.c, sparc-tdep.h, sparc64nbsd-nat.c,
+	sparcnbsd-nat.c: Rewrite files.
+	* config/sparc/tm-linux.h, config/sparc/tm-nbsd.h: Rewrite files.
+	* sparc-linux-nat.c, sparcbsd-nat.c, sparcbsd-nat.h,
+	sparcnbsd-tdep.h: Remove files.
+	* config/sparc/nm-sparclynx.h, config/sparc/nm-sun4os4.h,
+	config/sparc/nm-sun4sol2.h, config/sparc/sp64.mt,
+	config/sparc/sp64linux.mt, config/sparc/sp64sol2.mt,
+	config/sparc/sparc-em.mt, config/sparc/sparclynx.mh,
+	config/sparc/sparclynx.mt, config/sparc/sun4os4.mh,
+	config/sparc/sun4os4.mt, config/sparc/sun4sol2.mh,
+	config/sparc/sun4sol2.mt, config/sparc/tm-sp64.h,
+	config/sparc/tm-sp64linux.h, config/sparc/tm-sparc.h,
+	config/sparc/tm-sparclynx.h, config/sparc/tm-spc-em.h,
+	config/sparc/tm-sun4os4.h, config/sparc/tm-sun4sol2.h,
+	config/sparc/tm-vxsparc.h, config/sparc/vxsparc.mt,
+	config/sparc/xm-linux.h, config/sparc/xm-sun4sol2.h: Remove files.
+	* sparc-linux-tdep.c, sparc-nat.h, sparc-sol2-nat.c,
+	sparc-sol2-tdep.c, sparc64-linux-nat.c, sparc64-linux-t dep.c,
+	sparc64-nat.c, sparc64-sol2-tdep.c, sparc64nbsd-tdep.c: New files.
+	* config/sparc/linux64.mh, config/sparc/linux64.mt,
+	config/sparc/nm-sol2.h, config/sparc/sol2-64.mt,
+	config/sparc/sol2.mh, config/sparc/sol2.mt, config/sparc/sparc.mt,
+	config/sparc/sparc64.mt, config/sparc/tm-sol2.h: New files.
+
 2004-01-02  Andrew Cagney  <cagney@redhat.com>
 
 	From 2003-12-18 Kazuhiro Inaoka:

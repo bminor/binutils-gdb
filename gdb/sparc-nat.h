@@ -1,4 +1,4 @@
-/* Native-dependent code for FreeBSD/sparc64.
+/* Native-dependent code for SPARC.
 
    Copyright 2003 Free Software Foundation, Inc.
 
@@ -19,16 +19,22 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-#include "defs.h"
+#ifndef SPARC_NAT_H
+#define SPARC_NAT_H 1
 
-#include "sparc64-tdep.h"
-#include "sparc-nat.h"
+struct sparc_gregset;
 
-/* Provide a prototype to silence -Wmissing-prototypes.  */
-void _initialize_sparc64fbsd_nat (void);
+extern const struct sparc_gregset *sparc_gregset;
+extern void (*sparc_supply_gregset) (const struct sparc_gregset *,
+				     struct regcache *, int , const void *);
+extern void (*sparc_collect_gregset) (const struct sparc_gregset *,
+				      const struct regcache *, int, void *);
+extern void (*sparc_supply_fpregset) (struct regcache *, int , const void *);
+extern void (*sparc_collect_fpregset) (const struct regcache *, int , void *);
+extern int (*sparc_gregset_supplies_p) (int);
+extern int (*sparc_fpregset_supplies_p) (int);
 
-void
-_initialize_sparc64fbsd_nat (void)
-{
-  sparc_gregset = &sparc64fbsd_gregset;
-}
+extern int sparc32_gregset_supplies_p (int regnum);
+extern int sparc32_fpregset_supplies_p (int regnum);
+
+#endif /* sparc-nat.h */
