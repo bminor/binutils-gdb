@@ -1,3 +1,9 @@
+Wed Jan 31 17:30:19 1996  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* configure.tgt (i[345]86-*-cygwin32, powerpcle-*-cygwin32): New.
+	* emultempl/pe.em (definfo init): Make the default stack reserve
+	of a PPC larger.
+	
 Wed Jan 31 14:34:23 1996  Richard Henderson  <rth@tamu.edu>
 
 	* configure.tgt (m68*-apple-aux*): New target.
