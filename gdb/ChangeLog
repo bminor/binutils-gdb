@@ -1,3 +1,8 @@
+Mon Sep 26 02:59:00 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* defs.h (misc_command_type):  Remove trailing comma from
+	enumerator list.
+
 Sun Sep 25 23:19:58 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* hppa-tdep.c (frame_saved_pc): Fix thinko in code to dig saved pc

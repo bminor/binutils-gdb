@@ -327,6 +327,26 @@ extern int read_relative_register_raw_bytes PARAMS ((int, char *));
 
 extern char *tilde_expand PARAMS ((char *));
 
+/* Control types for commands */
+
+enum misc_command_type
+{
+  ok_command,
+  end_command,
+  else_command,
+  nop_command
+};
+
+enum command_control_type
+{
+  simple_control,
+  break_control,
+  continue_control,
+  while_control,
+  if_control,
+  invalid_control
+};
+
 /* Structure for saved commands lines
    (for breakpoints, defined commands, etc).  */
 
@@ -334,6 +354,9 @@ struct command_line
 {
   struct command_line *next;
   char *line;
+  enum command_control_type control_type;
+  int body_count;
+  struct command_line **body_list;
 };
 
 extern struct command_line *read_command_lines PARAMS ((void));
