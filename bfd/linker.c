@@ -1247,6 +1247,9 @@ enum link_row
   SET_ROW		/* Member of set.  */
 };
 
+/* apparently needed for Hitachi 3050R(HI-UX/WE2)? */
+#undef FAIL
+
 /* The actions to take in the state table.  */
 
 enum link_action
