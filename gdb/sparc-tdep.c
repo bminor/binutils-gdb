@@ -168,7 +168,7 @@ typedef enum
    Beihl (beihl@mcc.com).  */
 
 /* npc4 and next_pc describe the situation at the time that the
-   step-breakpoint was set, not necessary the current value of NPC_REGNUM.  */
+   step-breakpoint was set, not necessary the current value of DEPRECATED_NPC_REGNUM.  */
 static CORE_ADDR next_pc, npc4, target;
 static int brknpc4, brktrg;
 typedef char binsn_quantum[BREAKPOINT_MAX];
@@ -195,7 +195,7 @@ sparc_software_single_step (enum target_signal ignore,	/* pid, but we don't need
   if (insert_breakpoints_p)
     {
       /* Always set breakpoint for NPC.  */
-      next_pc = read_register (NPC_REGNUM);
+      next_pc = read_register (DEPRECATED_NPC_REGNUM);
       npc4 = next_pc + 4;	/* branch not taken */
 
       target_insert_breakpoint (next_pc, break_mem[0]);
@@ -1320,10 +1320,10 @@ sparc_pop_frame (void)
       write_register (PC_REGNUM, 
 		      read_memory_integer (fsr[PC_REGNUM],
 					   REGISTER_RAW_SIZE (PC_REGNUM)));
-      if (fsr[NPC_REGNUM])
-	write_register (NPC_REGNUM,
-			read_memory_integer (fsr[NPC_REGNUM],
-					     REGISTER_RAW_SIZE (NPC_REGNUM)));
+      if (fsr[DEPRECATED_NPC_REGNUM])
+	write_register (DEPRECATED_NPC_REGNUM,
+			read_memory_integer (fsr[DEPRECATED_NPC_REGNUM],
+					     REGISTER_RAW_SIZE (DEPRECATED_NPC_REGNUM)));
     }
   else if (get_frame_extra_info (frame)->flat)
     {
@@ -1342,7 +1342,7 @@ sparc_pop_frame (void)
 	}
 
       write_register (PC_REGNUM, pc);
-      write_register (NPC_REGNUM, pc + 4);
+      write_register (DEPRECATED_NPC_REGNUM, pc + 4);
     }
   else if (fsr[I7_REGNUM])
     {
@@ -1350,7 +1350,7 @@ sparc_pop_frame (void)
       pc = PC_ADJUST ((CORE_ADDR) read_memory_integer (fsr[I7_REGNUM],
 						       SPARC_INTREG_SIZE));
       write_register (PC_REGNUM, pc);
-      write_register (NPC_REGNUM, pc + 4);
+      write_register (DEPRECATED_NPC_REGNUM, pc + 4);
     }
   flush_cached_frames ();
 }
@@ -1479,7 +1479,7 @@ supply_gregset (gdb_gregset_t *gregsetp)
 
   /* These require a bit more care.  */
   supply_register (PC_REGNUM, ((char *) (regp + R_PC)) + offset);
-  supply_register (NPC_REGNUM, ((char *) (regp + R_nPC)) + offset);
+  supply_register (DEPRECATED_NPC_REGNUM, ((char *) (regp + R_nPC)) + offset);
   supply_register (Y_REGNUM, ((char *) (regp + R_Y)) + offset);
 
   if (GDB_TARGET_IS_SPARC64)
@@ -1598,8 +1598,8 @@ fill_gregset (gdb_gregset_t *gregsetp, int regno)
   if ((regno == -1) || (regno == PC_REGNUM))
     deprecated_read_register_gen (PC_REGNUM, (char *) (regp + R_PC) + offset);
 
-  if ((regno == -1) || (regno == NPC_REGNUM))
-    deprecated_read_register_gen (NPC_REGNUM, (char *) (regp + R_nPC) + offset);
+  if ((regno == -1) || (regno == DEPRECATED_NPC_REGNUM))
+    deprecated_read_register_gen (DEPRECATED_NPC_REGNUM, (char *) (regp + R_nPC) + offset);
 
   if ((regno == -1) || (regno == Y_REGNUM))
     deprecated_read_register_gen (Y_REGNUM, (char *) (regp + R_Y) + offset);
@@ -3384,7 +3384,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_frame_args_skip (gdbarch, 68);
       set_gdbarch_function_start_offset (gdbarch, 0);
       set_gdbarch_long_bit (gdbarch, 4 * TARGET_CHAR_BIT);
-      set_gdbarch_npc_regnum (gdbarch, SPARC32_NPC_REGNUM);
+      set_gdbarch_deprecated_npc_regnum (gdbarch, SPARC32_NPC_REGNUM);
       set_gdbarch_pc_regnum (gdbarch, SPARC32_PC_REGNUM);
       set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
       set_gdbarch_deprecated_push_arguments (gdbarch, sparc32_push_arguments);
@@ -3433,7 +3433,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_frame_args_skip (gdbarch, 136);
       set_gdbarch_function_start_offset (gdbarch, 0);
       set_gdbarch_long_bit (gdbarch, 8 * TARGET_CHAR_BIT);
-      set_gdbarch_npc_regnum (gdbarch, SPARC64_NPC_REGNUM);
+      set_gdbarch_deprecated_npc_regnum (gdbarch, SPARC64_NPC_REGNUM);
       set_gdbarch_pc_regnum (gdbarch, SPARC64_PC_REGNUM);
       set_gdbarch_ptr_bit (gdbarch, 8 * TARGET_CHAR_BIT);
       set_gdbarch_deprecated_push_arguments (gdbarch, sparc64_push_arguments);

@@ -305,7 +305,7 @@ fetch_inferior_registers (int regno)
       supply_register (PS_REGNUM, (char *) &ec.psr);
       supply_register (Y_REGNUM, (char *) &ec.y);
       supply_register (PC_REGNUM, (char *) &ec.pc);
-      supply_register (NPC_REGNUM, (char *) &ec.npc);
+      supply_register (DEPRECATED_NPC_REGNUM, (char *) &ec.npc);
       supply_register (WIM_REGNUM, (char *) &ec.wim);
 
       memcpy (&deprecated_registers[DEPRECATED_REGISTER_BYTE (O0_REGNUM)], ec.o,
@@ -390,7 +390,7 @@ store_inferior_registers (int regno)
       ec.psr = read_register (PS_REGNUM);
       ec.y = read_register (Y_REGNUM);
       ec.pc = read_register (PC_REGNUM);
-      ec.npc = read_register (NPC_REGNUM);
+      ec.npc = read_register (DEPRECATED_NPC_REGNUM);
       ec.wim = read_register (WIM_REGNUM);
 
       memcpy (ec.o, &deprecated_registers[DEPRECATED_REGISTER_BYTE (O0_REGNUM)],

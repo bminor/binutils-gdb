@@ -108,7 +108,7 @@ fetch_inferior_registers (int regno)
 	= inferior_registers.r_ps;
       *(int *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (PC_REGNUM)]
 	= inferior_registers.r_pc;
-      *(int *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (NPC_REGNUM)]
+      *(int *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (DEPRECATED_NPC_REGNUM)]
 	= inferior_registers.r_npc;
       *(int *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (Y_REGNUM)] = inferior_registers.r_y;
 
@@ -117,7 +117,7 @@ fetch_inferior_registers (int regno)
       deprecated_register_valid[Y_REGNUM] = 1;
       deprecated_register_valid[PS_REGNUM] = 1;
       deprecated_register_valid[PC_REGNUM] = 1;
-      deprecated_register_valid[NPC_REGNUM] = 1;
+      deprecated_register_valid[DEPRECATED_NPC_REGNUM] = 1;
       /* If we don't set these valid, read_register_bytes() rereads
          all the regs every time it is called!  FIXME.  */
       deprecated_register_valid[WIM_REGNUM] = 1;	/* Not true yet, FIXME */
@@ -261,7 +261,7 @@ store_inferior_registers (int regno)
       inferior_registers.r_pc =
 	*(int *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (PC_REGNUM)];
       inferior_registers.r_npc =
-	*(int *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (NPC_REGNUM)];
+	*(int *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (DEPRECATED_NPC_REGNUM)];
       inferior_registers.r_y =
 	*(int *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (Y_REGNUM)];
 
@@ -318,7 +318,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
 	      15 * REGISTER_RAW_SIZE (G1_REGNUM));
       *(int *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (PS_REGNUM)] = gregs->r_ps;
       *(int *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (PC_REGNUM)] = gregs->r_pc;
-      *(int *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (NPC_REGNUM)] = gregs->r_npc;
+      *(int *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (DEPRECATED_NPC_REGNUM)] = gregs->r_npc;
       *(int *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (Y_REGNUM)] = gregs->r_y;
 
       /* My best guess at where to get the locals and input

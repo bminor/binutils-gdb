@@ -2630,7 +2630,7 @@ hppa_target_write_pc (CORE_ADDR v, ptid_t ptid)
     write_register_pid (31, v | 0x3, ptid);
 
   write_register_pid (PC_REGNUM, v, ptid);
-  write_register_pid (NPC_REGNUM, v + 4, ptid);
+  write_register_pid (DEPRECATED_NPC_REGNUM, v + 4, ptid);
 }
 
 /* return the alignment of a type in bytes. Structures have the maximum
@@ -5178,7 +5178,7 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_sp_regnum (gdbarch, 30);
   set_gdbarch_fp0_regnum (gdbarch, 64);
   set_gdbarch_pc_regnum (gdbarch, PCOQ_HEAD_REGNUM);
-  set_gdbarch_npc_regnum (gdbarch, PCOQ_TAIL_REGNUM);
+  set_gdbarch_deprecated_npc_regnum (gdbarch, PCOQ_TAIL_REGNUM);
   set_gdbarch_deprecated_register_raw_size (gdbarch, hppa_register_raw_size);
   set_gdbarch_deprecated_register_byte (gdbarch, hppa_register_byte);
   set_gdbarch_deprecated_register_virtual_size (gdbarch, hppa_register_raw_size);

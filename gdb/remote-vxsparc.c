@@ -157,7 +157,7 @@ vx_write_register (int regno)
   if (regno >= 0)
     {
       if ((G0_REGNUM <= regno && regno <= I7_REGNUM)
-	  || (Y_REGNUM <= regno && regno <= NPC_REGNUM))
+	  || (Y_REGNUM <= regno && regno <= DEPRECATED_NPC_REGNUM))
 	in_fp_regs = 0;
       else
 	in_gp_regs = 0;

@@ -1,5 +1,14 @@
 2003-09-17  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh (DEPRECATED_NPC_REGNUM): Deprecate NPC_REGNUM.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* core-sol2.c, hppa-tdep.c, lynx-nat.c, procfs.c: Update.
+	* regcache.c, remote-vxsparc.c, sparc-linux-nat.c: Update.
+	* sparc-nat.c, sparc-tdep.c, sparc64-tdep.c: Update.
+	* sparcnbsd-tdep.c: Update.
+	
+2003-09-17  Andrew Cagney  <cagney@redhat.com>
+
 	* gdbarch.sh (DEPRECATED_REGISTER_BYTE): Rename REGISTER_BYTE.
 	* gdbarch.h, gdbarch.c: Regenerate.
 	* arm-linux-tdep.c, core-sol2.c, cris-tdep.c: Update.

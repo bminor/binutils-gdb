@@ -142,7 +142,7 @@ struct gdbarch
   int pc_regnum;
   int ps_regnum;
   int fp0_regnum;
-  int npc_regnum;
+  int deprecated_npc_regnum;
   gdbarch_stab_reg_to_regnum_ftype *stab_reg_to_regnum;
   gdbarch_ecoff_reg_to_regnum_ftype *ecoff_reg_to_regnum;
   gdbarch_dwarf_reg_to_regnum_ftype *dwarf_reg_to_regnum;
@@ -310,7 +310,7 @@ struct gdbarch startup_gdbarch =
   -1,  /* pc_regnum */
   -1,  /* ps_regnum */
   0,  /* fp0_regnum */
-  0,  /* npc_regnum */
+  0,  /* deprecated_npc_regnum */
   0,  /* stab_reg_to_regnum */
   0,  /* ecoff_reg_to_regnum */
   0,  /* dwarf_reg_to_regnum */
@@ -501,7 +501,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   current_gdbarch->pc_regnum = -1;
   current_gdbarch->ps_regnum = -1;
   current_gdbarch->fp0_regnum = -1;
-  current_gdbarch->npc_regnum = -1;
+  current_gdbarch->deprecated_npc_regnum = -1;
   current_gdbarch->stab_reg_to_regnum = no_op_reg_to_regnum;
   current_gdbarch->ecoff_reg_to_regnum = no_op_reg_to_regnum;
   current_gdbarch->dwarf_reg_to_regnum = no_op_reg_to_regnum;
@@ -632,7 +632,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of pc_regnum, invalid_p == 0 */
   /* Skip verify of ps_regnum, invalid_p == 0 */
   /* Skip verify of fp0_regnum, invalid_p == 0 */
-  /* Skip verify of npc_regnum, invalid_p == 0 */
+  /* Skip verify of deprecated_npc_regnum, invalid_p == 0 */
   /* Skip verify of stab_reg_to_regnum, invalid_p == 0 */
   /* Skip verify of ecoff_reg_to_regnum, invalid_p == 0 */
   /* Skip verify of dwarf_reg_to_regnum, invalid_p == 0 */
@@ -1357,6 +1357,14 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE = %d\n",
                       DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE);
 #endif
+#ifdef DEPRECATED_NPC_REGNUM
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_NPC_REGNUM # %s\n",
+                      XSTRING (DEPRECATED_NPC_REGNUM));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_NPC_REGNUM = %d\n",
+                      DEPRECATED_NPC_REGNUM);
+#endif
 #ifdef DEPRECATED_PC_IN_CALL_DUMMY_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -1909,14 +1917,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: NAME_OF_MALLOC = %s\n",
                       NAME_OF_MALLOC);
-#endif
-#ifdef NPC_REGNUM
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: NPC_REGNUM # %s\n",
-                      XSTRING (NPC_REGNUM));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: NPC_REGNUM = %d\n",
-                      NPC_REGNUM);
 #endif
 #ifdef NUM_PSEUDO_REGS
   fprintf_unfiltered (file,
@@ -2971,20 +2971,20 @@ set_gdbarch_fp0_regnum (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_npc_regnum (struct gdbarch *gdbarch)
+gdbarch_deprecated_npc_regnum (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  /* Skip verify of npc_regnum, invalid_p == 0 */
+  /* Skip verify of deprecated_npc_regnum, invalid_p == 0 */
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_npc_regnum called\n");
-  return gdbarch->npc_regnum;
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_npc_regnum called\n");
+  return gdbarch->deprecated_npc_regnum;
 }
 
 void
-set_gdbarch_npc_regnum (struct gdbarch *gdbarch,
-                        int npc_regnum)
+set_gdbarch_deprecated_npc_regnum (struct gdbarch *gdbarch,
+                                   int deprecated_npc_regnum)
 {
-  gdbarch->npc_regnum = npc_regnum;
+  gdbarch->deprecated_npc_regnum = deprecated_npc_regnum;
 }
 
 int

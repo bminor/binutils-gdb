@@ -59,8 +59,8 @@ sparcnbsd_supply_reg32 (char *regs, int regno)
   if (regno == PC_REGNUM || regno == -1)
     supply_register (PC_REGNUM, regs + REG32_OFFSET_PC);
 
-  if (regno == NPC_REGNUM || regno == -1)
-    supply_register (NPC_REGNUM, regs + REG32_OFFSET_NPC);
+  if (regno == DEPRECATED_NPC_REGNUM || regno == -1)
+    supply_register (DEPRECATED_NPC_REGNUM, regs + REG32_OFFSET_NPC);
 
   if (regno == Y_REGNUM || regno == -1)
     supply_register (Y_REGNUM, regs + REG32_OFFSET_Y);
@@ -126,8 +126,8 @@ sparcnbsd_supply_reg64 (char *regs, int regno)
   if (regno == PC_REGNUM || regno == -1)
     supply_register (PC_REGNUM, regs + REG64_OFFSET_PC);
 
-  if (regno == NPC_REGNUM || regno == -1)
-    supply_register (NPC_REGNUM, regs + REG64_OFFSET_NPC);
+  if (regno == DEPRECATED_NPC_REGNUM || regno == -1)
+    supply_register (DEPRECATED_NPC_REGNUM, regs + REG64_OFFSET_NPC);
 
   if (regno == Y_REGNUM || regno == -1)
     {
@@ -220,8 +220,8 @@ sparcnbsd_fill_reg32 (char *regs, int regno)
   if (regno == PC_REGNUM || regno == -1)
     regcache_collect (PC_REGNUM, regs + REG32_OFFSET_PC);
 
-  if (regno == NPC_REGNUM || regno == -1)
-    regcache_collect (NPC_REGNUM, regs + REG32_OFFSET_NPC);
+  if (regno == DEPRECATED_NPC_REGNUM || regno == -1)
+    regcache_collect (DEPRECATED_NPC_REGNUM, regs + REG32_OFFSET_NPC);
 
   if (regno == Y_REGNUM || regno == -1)
     regcache_collect (Y_REGNUM, regs + REG32_OFFSET_Y);
@@ -261,8 +261,8 @@ sparcnbsd_fill_reg64 (char *regs, int regno)
   if (regno == PC_REGNUM || regno == -1)
     regcache_collect (PC_REGNUM, regs + REG64_OFFSET_PC);
 
-  if (regno == NPC_REGNUM || regno == -1)
-    regcache_collect (NPC_REGNUM, regs + REG64_OFFSET_NPC);
+  if (regno == DEPRECATED_NPC_REGNUM || regno == -1)
+    regcache_collect (DEPRECATED_NPC_REGNUM, regs + REG64_OFFSET_NPC);
 
   if (regno == Y_REGNUM || regno == -1)
     regcache_collect (Y_REGNUM, regs + REG64_OFFSET_Y);
