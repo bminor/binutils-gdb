@@ -794,6 +794,11 @@ adjust_o_magic (abfd, execp)
 
   /* Text.  */
   obj_textsec(abfd)->filepos = pos;
+  if (!obj_textsec(abfd)->user_set_vma)
+    obj_textsec(abfd)->vma = vma;
+  else
+    vma = obj_textsec(abfd)->vma;
+
   pos += obj_textsec(abfd)->_raw_size;
   vma += obj_textsec(abfd)->_raw_size;
 
@@ -1664,7 +1669,7 @@ NAME(aout,translate_symbol_table) (abfd, in, ext, count, str, strsize, dynamic)
       in->desc = bfd_h_get_16 (abfd, ext->e_desc);
       in->other = bfd_h_get_8 (abfd, ext->e_other);
       in->type = bfd_h_get_8 (abfd,  ext->e_type);
-      in->symbol.udata = 0;
+      in->symbol.udata.p = NULL;
 
       if (! translate_from_native_sym_flags (abfd, in))
 	return false;
@@ -1697,21 +1702,16 @@ NAME(aout,slurp_symbol_table) (abfd)
   if (! aout_get_external_symbols (abfd))
     return false;
 
-  if (obj_aout_external_sym_count (abfd) == 0)
-    {
-      bfd_set_error (bfd_error_no_symbols);
-      return false;
-    }
-
   cached_size = (obj_aout_external_sym_count (abfd)
 		 * sizeof (aout_symbol_type));
   cached = (aout_symbol_type *) malloc (cached_size);
-  if (cached == NULL)
+  if (cached == NULL && cached_size != 0)
     {
       bfd_set_error (bfd_error_no_memory);
       return false;
     }
-  memset (cached, 0, cached_size);
+  if (cached_size != 0)
+    memset (cached, 0, cached_size);
 
   /* Convert from external symbol information to internal.  */
   if (! (NAME(aout,translate_symbol_table)
@@ -3980,10 +3980,12 @@ aout_link_write_other_symbol (h, data)
 
   h->written = true;
 
-  if (finfo->info->strip == strip_all
-      || (finfo->info->strip == strip_some
-	  && bfd_hash_lookup (finfo->info->keep_hash, h->root.root.string,
-			      false, false) == NULL))
+  /* An indx of -2 means the symbol must be written.  */
+  if (h->indx != -2
+      && (finfo->info->strip == strip_all
+	  || (finfo->info->strip == strip_some
+	      && bfd_hash_lookup (finfo->info->keep_hash, h->root.root.string,
+				  false, false) == NULL)))
     return true;
 
   switch (h->root.type)
@@ -4308,15 +4310,35 @@ aout_link_input_section_std (finfo, input_bfd, input_section, relocs,
 
 		  if (r_index == -1)
 		    {
-		      const char *name;
+		      if (h != NULL)
+			{
+			  /* We decided to strip this symbol, but it
+                             turns out that we can't.  Note that we
+                             lose the other and desc information here.
+                             I don't think that will ever matter for a
+                             global symbol.  */
+			  if (h->indx < 0)
+			    {
+			      h->indx = -2;
+			      h->written = false;
+			      if (! aout_link_write_other_symbol (h,
+								  (PTR) finfo))
+				return false;
+			    }
+			  r_index = h->indx;
+			}
+		      else
+			{
+			  const char *name;
 
-		      name = strings + GET_WORD (input_bfd,
-						 syms[r_index].e_strx);
-		      if (! ((*finfo->info->callbacks->unattached_reloc)
-			     (finfo->info, name, input_bfd, input_section,
-			      r_addr)))
-			return false;
-		      r_index = 0;
+			  name = strings + GET_WORD (input_bfd,
+						     syms[r_index].e_strx);
+			  if (! ((*finfo->info->callbacks->unattached_reloc)
+				 (finfo->info, name, input_bfd, input_section,
+				  r_addr)))
+			    return false;
+			  r_index = 0;
+			}
 		    }
 
 		  relocation = 0;
@@ -4597,15 +4619,35 @@ aout_link_input_section_ext (finfo, input_bfd, input_section, relocs,
 
 		  if (r_index == -1)
 		    {
-		      const char *name;
+		      if (h != NULL)
+			{
+			  /* We decided to strip this symbol, but it
+                             turns out that we can't.  Note that we
+                             lose the other and desc information here.
+                             I don't think that will ever matter for a
+                             global symbol.  */
+			  if (h->indx < 0)
+			    {
+			      h->indx = -2;
+			      h->written = false;
+			      if (! aout_link_write_other_symbol (h,
+								  (PTR) finfo))
+				return false;
+			    }
+			  r_index = h->indx;
+			}
+		      else
+			{
+			  const char *name;
 
-		      name = (strings
-			      + GET_WORD (input_bfd, syms[r_index].e_strx));
-		      if (! ((*finfo->info->callbacks->unattached_reloc)
-			     (finfo->info, name, input_bfd, input_section,
-			      r_addr)))
-			return false;
-		      r_index = 0;
+			  name = strings + GET_WORD (input_bfd,
+						     syms[r_index].e_strx);
+			  if (! ((*finfo->info->callbacks->unattached_reloc)
+				 (finfo->info, name, input_bfd, input_section,
+				  r_addr)))
+			    return false;
+			  r_index = 0;
+			}
 		    }
 
 		  relocation = 0;
@@ -4827,8 +4869,20 @@ aout_link_reloc_link_order (finfo, o, p)
       h = aout_link_hash_lookup (aout_hash_table (finfo->info),
 				 pr->u.name, false, false, true);
       if (h != (struct aout_link_hash_entry *) NULL
-	  && h->indx == -1)
+	  && h->indx >= 0)
 	r_index = h->indx;
+      else if (h != NULL)
+	{
+	  /* We decided to strip this symbol, but it turns out that we
+	     can't.  Note that we lose the other and desc information
+	     here.  I don't think that will ever matter for a global
+	     symbol.  */
+	  h->indx = -2;
+	  h->written = false;
+	  if (! aout_link_write_other_symbol (h, (PTR) finfo))
+	    return false;
+	  r_index = h->indx;
+	}
       else
 	{
 	  if (! ((*finfo->info->callbacks->unattached_reloc)

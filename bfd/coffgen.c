@@ -305,35 +305,24 @@ bfd            *abfd;
 
 long
 coff_get_symtab (abfd, alocation)
-     bfd            *abfd;
-     asymbol       **alocation;
+     bfd *abfd;
+     asymbol **alocation;
 {
-    unsigned int    counter = 0;
-    coff_symbol_type *symbase;
-    coff_symbol_type **location = (coff_symbol_type **) (alocation);
-    if (!bfd_coff_slurp_symbol_table(abfd))
-     return -1;
+  unsigned int counter;
+  coff_symbol_type *symbase;
+  coff_symbol_type **location = (coff_symbol_type **) alocation;
 
-    symbase = obj_symbols(abfd);
-    while (counter <  bfd_get_symcount(abfd))
-    {
-	/* This nasty code looks at the symbol to decide whether or
-	   not it is descibes a constructor/destructor entry point. It
-	   is structured this way to (hopefully) speed non matches */
-#if 0	
-	if (0 && symbase->symbol.name[9] == '$') 
-	{
-	    bfd_constructor_entry(abfd, 
-				 (asymbol **)location,
-				  symbase->symbol.name[10] == 'I' ?
-				  "CTOR" : "DTOR");
-	}
-#endif
-	*(location++) = symbase++;
-	counter++;
-    }
-    *location++ = 0;
-    return bfd_get_symcount(abfd);
+  if (! bfd_coff_slurp_symbol_table (abfd))
+    return -1;
+
+  symbase = obj_symbols (abfd);
+  counter = bfd_get_symcount (abfd);
+  while (counter-- > 0)
+    *location++ = symbase++;
+
+  *location = NULL;
+
+  return bfd_get_symcount (abfd);
 }
 
 /* Set lineno_count for the output sections of a COFF file.  */
@@ -676,7 +665,7 @@ coff_fix_symbol_name (abfd, symbol, native)
    the relocs we can get the index for a symbol.  This method is a
    hack.  FIXME.  */
 
-#define set_index(symbol, idx)	((symbol)->udata = (PTR) (idx))
+#define set_index(symbol, idx)	((symbol)->udata.i = (idx))
 
 /* Write a symbol out to a COFF file.  */
 
@@ -927,6 +916,8 @@ coff_write_symbols (abfd)
 	    return false;
 	}
     }
+
+  obj_raw_syment_count (abfd) = written;
 
   /* Now write out strings */
 
@@ -1280,20 +1271,14 @@ coff_get_normalized_symtab (abfd)
   char           *string_table = NULL;
   char		 *debug_section = NULL;
   unsigned long   size;
-
   unsigned int raw_size;
-  if (obj_raw_syments(abfd) != (combined_entry_type *)NULL) {
-      return obj_raw_syments(abfd);
-    }
-  size = obj_raw_syment_count (abfd) * sizeof (combined_entry_type);
-  if (size == 0)
-    {
-      bfd_set_error (bfd_error_no_symbols);
-      return (NULL);
-    }
 
-  internal = (combined_entry_type *)bfd_alloc(abfd, size);
-  if (!internal)
+  if (obj_raw_syments (abfd) != NULL)
+    return obj_raw_syments (abfd);
+
+  size = obj_raw_syment_count (abfd) * sizeof (combined_entry_type);
+  internal = (combined_entry_type *) bfd_alloc (abfd, size);
+  if (internal == NULL && size != 0)
     {
       bfd_set_error (bfd_error_no_memory);
       return NULL;
@@ -1301,19 +1286,21 @@ coff_get_normalized_symtab (abfd)
   internal_end = internal + obj_raw_syment_count (abfd);
 
   symesz = bfd_coff_symesz (abfd);
-  raw_size =      obj_raw_syment_count (abfd) * symesz;
-  raw = bfd_alloc(abfd,raw_size);
-  if (!raw)
+  raw_size = obj_raw_syment_count (abfd) * symesz;
+  raw = bfd_alloc (abfd, raw_size);
+  if (raw == NULL && raw_size != 0)
     {
       bfd_set_error (bfd_error_no_memory);
       return NULL;
     }
 
-  if (bfd_seek(abfd, obj_sym_filepos(abfd), SEEK_SET) == -1
-      || bfd_read(raw, raw_size, 1, abfd) != raw_size)
-      return (NULL);
+  if (bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) == -1
+      || bfd_read (raw, raw_size, 1, abfd) != raw_size)
+    return NULL;
+
   /* mark the end of the symbols */
   raw_end = (char *) raw + obj_raw_syment_count (abfd) * symesz;
+
   /*
     FIXME SOMEDAY.  A string table size of zero is very weird, but
     probably possible.  If one shows up, it will probably kill us.
@@ -1363,7 +1350,8 @@ coff_get_normalized_symtab (abfd)
     }
 
   /* Free all the raw stuff */
-  bfd_release(abfd, raw);
+  if (raw != NULL)
+    bfd_release (abfd, raw);
 
   for (internal_ptr = internal; internal_ptr < internal_end;
        internal_ptr ++)
