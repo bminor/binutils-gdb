@@ -1,5 +1,9 @@
 2001-04-06  Fernando Nasser  <fnasser@redhat.com>
 
+	* buildsym.c (record_line): Turn off unused addr bits.
+
+2001-04-06  Fernando Nasser  <fnasser@redhat.com>
+
 	From David Deephanphongs <deephan@telocity.com>
 	* inferior.h:   Fix declarations of get_inferior_args and 
 	set_inferior_args, which were missing the trailing 's'.
