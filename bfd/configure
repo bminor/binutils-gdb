@@ -60,6 +60,7 @@ srcdir=
 srctrigger=
 target=
 targets=
+commontargets=
 targetsubdir=
 template=
 verbose=
@@ -69,6 +70,7 @@ do
 	case ${arg} in
 	-ansi | +a*)
 		ansi=true
+		clib=clib
 		;;
 	-destdir=* | +destdir=* | +destdi=* | +destd=* | +dest=* | +des=* | +de=* | +d=*)
 		destdir=`echo ${arg} | sed 's/[+-]d[a-z]*=//'`
@@ -110,13 +112,13 @@ do
 	-template=* | +template=* | +templat=* | +templa=* | +templ=* | +temp=* | +tem=* | +te=*)
 		template=`echo ${arg} | sed 's/[+-]template=//'`
 		;;
-	-verbose | +v*)
+	-v | -verbose | +v*)
 		verbose=${arg}
 		;;
 	-* | +*)
 		(echo ;
 		echo "Unrecognized option: \"${arg}\"". ;
-		echo) 1>&2
+		echo) 2>&1
 		fatal=true
 		;;
 	*)
@@ -164,7 +166,7 @@ if [ -n "${fatal}" -o "${hosts}" = "help" ] ; then
 	echo ;
 	echo "Where HOST and TARGET are something like \"vax\", \"sun3\", \"encore\", etc." ;
 	echo "Asking for more than one \"+target\" implies \"+subdirs\".  Any other" ;
-	echo "options given will apply to all targets.") 1>&2
+	echo "options given will apply to all targets.") 2>&1
 
 	if [ -r config.status ] ; then
 		cat config.status
@@ -188,7 +190,7 @@ commontargets=true
 # are we rebuilding config itself?
 if [ -n "${template}" ] ; then
 	if [ ! -r ${template} ] ; then
-		echo "Can't find template ${template}."
+		echo '***' "Can't find template ${template}." 2>&1
 		exit 1
 	fi
 
@@ -209,12 +211,12 @@ if [ -n "${template}" ] ; then
 
 	if [ -r configure.in ] ; then
 		if [ -z "`grep '^# per\-host:' configure.in`" ] ; then
-			echo `pwd`/configure.in has no "per-host:" line.
+			echo '***' `pwd`/configure.in has no "per-host:" line. 2>&1
 			exit 1
 		fi
 
 		if [ -z "`grep '^# per\-target:' configure.in`" ] ; then
-			echo `pwd`/configure.in has no "per-target:" line.
+			echo '***' `pwd`/configure.in has no "per-target:" line. 2>&1
 			exit 1
 		fi
 
@@ -247,7 +249,10 @@ if [ -n "${template}" ] ; then
 	rm template.new
 #	mv configure configure.old
 	mv configure.new configure
-	echo Rebuilt configure in `pwd`
+
+	if [ -n "${verbose}" ] ; then
+		echo Rebuilt configure in `pwd`
+	fi
 
 	if [ -z "${norecurse}" ] ; then
 		# If template is relative path, make it absolute for recursing.
@@ -273,7 +278,7 @@ if [ -n "${template}" ] ; then
 						(cd $i ;
 							./configure +template=${template} ${verbose})
 					else
-						echo No configure script in `pwd`/$i
+						echo Warning: No configure script in `pwd`/$i
 					fi
 				else
 					echo Warning: directory $i is missing.
@@ -287,7 +292,7 @@ fi
 
 # some sanity checks on configure.in
 if [ -z "${srctrigger}" ] ; then
-	echo srctrigger not set in configure.in. `pwd` not configured.
+	echo Warning: srctrigger not set in configure.in. `pwd` not configured.
 	exit 1
 fi
 
@@ -308,7 +313,6 @@ if [ ! -f config/hmake-${host} ] ; then
 fi
 
 ## end of per-host part.
-
 
 	for target in ${targets} ; do
 
@@ -338,7 +342,7 @@ links=
 				if [ -d "${hostsubdir}" ] ; then
 					rm -rf ${hostsubdir}/${targetsubdir}
 
-					if [ -z "`(ls ${hostsubdir}) 2>&1 | grep Target-`" ] ; then
+					if [ -z "`(ls ${hostsubdir}) 2>&1 | grep Target- | grep -v Target-independent`" ] ; then
 						rm -rf ${hostsubdir}
 					fi
 				else
@@ -351,21 +355,32 @@ links=
 			if [ -n "${subdirs}" ] ; then
 				# check for existing status before allowing forced subdirs.
 				if [ -f ${Makefile} ] ; then
-					echo "${Makefile} already exists in source directory.  `pwd` not configured."
+					echo '***' "${Makefile} already exists in source directory.  `pwd` not configured." 2>&1
 					exit 1
 				fi
 
 				if [ ! -d ${hostsubdir} ] ; then mkdir ${hostsubdir} ; fi
 				cd ${hostsubdir}
 
-				if [ ! -d ${targetsubdir} ] ; then mkdir ${targetsubdir} ; fi
+				if [ ! -d ${targetsubdir} ] ; then
+					if [ -z "${commontargets}" ] ; then
+						mkdir ${targetsubdir}
+					else
+						if [ ! -d Target-independent ] ; then
+							mkdir Target-independent
+						fi
+
+						${symbolic_link} Target-independent ${targetsubdir}
+					fi # if target independent
+				fi # if no target dir yet
+
 				cd ${targetsubdir}
 
 				srcdir=../..
 			else
 				# if not subdir builds, then make sure none exist.
 				if [ -n "`(ls .) 2>&1 | grep Host-`" ] ; then
-					echo "Configured subdirs exist.  `pwd` not configured."
+					echo '***' "Configured subdirs exist.  `pwd` not configured." 2>&1
 					exit 1
 				fi
 			fi
@@ -381,12 +396,12 @@ links=
 
 			if [ -n "${srctrigger}" -a ! -r ${srcdir}/${srctrigger} ] ; then
 				if [ -z "${srcdirdefaulted}" ] ; then
-					echo "${progname}: Can't find ${srcname} sources in `pwd`/${srcdir}" 1>&2
+					echo '***' "${progname}: Can't find ${srcname} sources in `pwd`/${srcdir}" 2>&1
 				else
-					echo "${progname}: Can't find ${srcname} sources in `pwd`/. or `pwd`/.." 1>&2
+					echo '***' "${progname}: Can't find ${srcname} sources in `pwd`/. or `pwd`/.." 2>&1
 				fi
 
-				echo \(At least ${srctrigger} is missing.\) 1>&2
+				echo '***' \(At least ${srctrigger} is missing.\) 2>&1
 				exit 1
 			fi
 
@@ -400,8 +415,8 @@ links=
 				set ${links}; link=$1; shift; links=$*
 
 				if [ ! -r ${srcdir}/${file} ] ; then
-					echo "${progname}: cannot create a link \"${link}\"," 1>&2
-					echo "since the file \"${file}\" does not exist." 1>&2
+					echo '***' "${progname}: cannot create a link \"${link}\"," 2>&1
+					echo '***' "since the file \"${file}\" does not exist." 2>&1
 					exit 1
 				fi
 
@@ -411,10 +426,13 @@ links=
 				${symbolic_link} ${srcdir}/${file} ${link} 2>/dev/null || ${hard_link} ${srcdir}/${file} ${link}
 
 				if [ ! -r ${link} ] ; then
-					echo "${progname}: unable to link \"${link}\" to \"${srcdir}/${file}\"." 1>&2
+					echo '***' "${progname}: unable to link \"${link}\" to \"${srcdir}/${file}\"." 2>&1
 					exit 1
 				fi
-				echo "Linked \"${link}\" to \"${srcdir}/${file}\"."
+
+				if [ -n "${verbose}" ] ; then
+					echo "Linked \"${link}\" to \"${srcdir}/${file}\"."
+				fi
 			done
 
 			# Create a .gdbinit file which runs the one in srcdir
@@ -507,7 +525,9 @@ links=
 				andusing=${using}
 			fi
 
-			echo "Created \"${Makefile}\"" in `pwd`${andusing}.
+			if [ -n "${verbose}" ] ; then
+				echo "Created \"${Makefile}\"" in `pwd`${andusing}.
+			fi
 
 #### configure.in post-target parts come in here.
 
@@ -551,7 +571,10 @@ if [ -n "${norecurse}" -o -z "${configdirs}" ] ; then exit 0 ; fi
 
 # configdirs is not null
 for configdir in ${configdirs} ; do
-	echo Configuring ${configdir}...
+	if [ -n "${verbose}" ] ; then
+		echo Configuring ${configdir}...
+	fi
+
 	specifics=
 	commons=
 
@@ -578,7 +601,10 @@ for configdir in ${configdirs} ; do
 
 		if [ -n "${specifics}" ] ; then
 			for host in ${specifics} ; do
-				echo Configuring target specific directory ${configdir}.${host}...
+				if [ -n "${verbose} ] ; then
+					echo Configuring target specific directory ${configdir}.${host}...
+				fi
+
 				(cd ${configdir}.${host} ;
 					./configure ${host} ${verbose} ${subdirs} ${removing} +destdir=${destdir}) \
 					| sed 's/^/	/'
@@ -615,7 +641,10 @@ for configdir in ${configdirs} ; do
 
 		if [ -n "${specifics}" ] ; then
 			for target in ${specifics} ; do
-				echo Configuring target specific directory ${configdir}.${target}...
+				if [ -n "${verbose} ] ; then
+					echo Configuring target specific directory ${configdir}.${target}...
+				fi
+
 				(cd ${configdir}.${target} ;
 					./configure ${hosts} ${verbose} ${subdirs} ${removing} \
 						"+target=${target}" +destdir=${destdir}) \
@@ -629,10 +658,14 @@ exit 0
 
 #
 # $Log$
-# Revision 1.19  1991/08/14 22:10:10  rich
-# Added fatal checks for missing host and target makefile fragments.
+# Revision 1.20  1991/08/20 04:56:40  rich
+# revisiting error messages
 #
-# Revision 1.18  1991/08/08  01:11:33  rich
+# Revision 1.28  1991/08/16  19:22:17  rich
+# This is the commontargets change and should be considered
+# experimental.
+#
+# Revision 1.27  1991/08/08  01:14:13  rich
 # allow +f to stand in for +subdirs
 #
 # Revision 1.26  1991/08/07  19:21:32  rich
