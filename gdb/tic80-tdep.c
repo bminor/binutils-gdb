@@ -306,7 +306,7 @@ tic80_frame_saved_pc (fi)
      struct frame_info *fi;
 {
   if (PC_IN_CALL_DUMMY(fi->pc, fi->frame, fi->frame))
-    return generic_read_register_dummy(fi->pc, fi->frame, PC_REGNUM);
+    return generic_read_register_dummy (fi->pc, fi->frame, PC_REGNUM);
   else
     return tic80_find_callers_reg (fi, LR_REGNUM);
 }
@@ -380,6 +380,7 @@ tic80_push_arguments (nargs, args, sp, struct_return, struct_addr)
   char valbuf[4];
   int len;
   int odd_sized_struct;
+  int is_struct;
 
   /* first force sp to a 4-byte alignment */
   sp = sp & ~3;
@@ -405,30 +406,41 @@ tic80_push_arguments (nargs, args, sp, struct_return, struct_addr)
     {
       type = VALUE_TYPE (args[argnum]);
       len  = TYPE_LENGTH (type);
-      memset(valbuf, 0, sizeof(valbuf));
+      memset (valbuf, 0, sizeof (valbuf));
       val = (char *) VALUE_CONTENTS (args[argnum]);
-      if (len < 4)
-        { /* value gets right-justified in the register or stack word */
-          memcpy(valbuf + (4 - len), val, len);
-          val = valbuf;
-        }
  
 /* FIXME -- tic80 can take doubleword arguments in register pairs */
-      if (len > 4 && (len & 3) != 0)
-        odd_sized_struct = 1;           /* such structs go entirely on stack */
+      is_struct = (type->code == TYPE_CODE_STRUCT);
+      odd_sized_struct = 0;
+
+      if (! is_struct)
+	{
+	  if (len < 4)
+	    { /* value gets right-justified in the register or stack word */
+	      memcpy (valbuf + (4 - len), val, len);
+	      val = valbuf;
+	    }
+	  if (len > 4 && (len & 3) != 0)
+	    odd_sized_struct = 1;     /* such structs go entirely on stack */
+	}
       else
-        odd_sized_struct = 0;
+	{
+	  /* Structs are always passed by reference. */
+	  write_register (argreg, sp + stack_offset);
+	  argreg ++;
+	}
+
       while (len > 0)
         {
-          if (argreg > ARGLAST_REGNUM || odd_sized_struct)
+          if (is_struct || argreg > ARGLAST_REGNUM || odd_sized_struct)
             {				/* must go on the stack */
               write_memory (sp + stack_offset, val, 4);
               stack_offset += 4;
             }
           /* NOTE WELL!!!!!  This is not an "else if" clause!!!
-             That's because some *&^%$ things get passed on the stack
+             That's because some things get passed on the stack
              AND in the registers!   */
-          if (argreg <= ARGLAST_REGNUM)
+          if (!is_struct && argreg <= ARGLAST_REGNUM)
             {				/* there's room in a register */
               regval = extract_address (val, REGISTER_RAW_SIZE(argreg));
               write_register (argreg, regval);
