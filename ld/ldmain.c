@@ -133,10 +133,10 @@ main (argc, argv)
   int i;
  
   check_v960( argc, argv );
-  emulation = GLD960_EMULATION_NAME;
+  emulation = "gld960";
   for ( i = 1; i < argc; i++ ){
       if ( !strcmp(argv[i],"-Fcoff") ){
-	  emulation = LNK960_EMULATION_NAME;
+	  emulation = "lnk960";
 	  output_flavor = BFD_COFF_FORMAT;
 	  break;
 	}
@@ -193,7 +193,7 @@ main (argc, argv)
 
   if (config.map_filename) 
   {
-    if (strcmp(config.map_filename[0],"-") == 0) 
+    if (strcmp(config.map_filename, "-") == 0) 
     {
       config.map_file = stdout;
     }
@@ -239,10 +239,10 @@ main (argc, argv)
 	  unlink(output_filename);
 	}
       else {    bfd_close(output_bfd); };
-      return (!config.make_executable);
+      exit (!config.make_executable);
     }
 
-  return(0);
+  exit(0);
 }				/* main() */
 
 
@@ -430,37 +430,40 @@ lang_input_statement_type *entry;
   asymbol **q ;
 
   entry->common_section =
-    bfd_make_section_old_way(entry->the_bfd, "COMMON");
+   bfd_make_section_old_way(entry->the_bfd, "COMMON");
   
   ldlang_add_file(entry);
 
 
   if (trace_files || option_v) {
-    info("%I\n", entry);
-  }
+      info("%I\n", entry);
+    }
 
   total_symbols_seen += entry->symbol_count;
   total_files_seen ++;
   for (q = entry->asymbols; *q; q++)
+  {
+    asymbol *p = *q;
+
+    if (p->flags & BSF_INDIRECT) 
     {
-      asymbol *p = *q;
-
-      if (p->section == &bfd_und_section
-	  || (p->flags & BSF_GLOBAL) 
-	  || p->section == &bfd_com_section
-	  || (p->flags & BSF_CONSTRUCTOR))
-	{
-	  Q_enter_global_ref(q);
-	}
-      if (p->flags & BSF_INDIRECT) {
-	add_indirect(q);
-      }
-
-      if (p->flags & BSF_WARNING) {
-	add_warning(p);
-      }
-
+      add_indirect(q);
     }
+    else if (p->flags & BSF_WARNING) 
+    {
+      add_warning(p);
+    }
+
+    else   if (p->section == &bfd_und_section
+	       || (p->flags & BSF_GLOBAL) 
+	       || p->section == &bfd_com_section
+	       || (p->flags & BSF_CONSTRUCTOR))
+    {
+      Q_enter_global_ref(q);
+    }
+
+
+  }
 }
 
 

@@ -1,5 +1,21 @@
-Thu Feb 27 09:20:41 1992  Steve Chamberlain  (sac at thepub.cygnus.com)
+Fri Mar  6 06:59:04 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
+	* ldmain.c (Q_enter_file_symbols): now aliases work again
+
+Thu Mar  5 16:55:56 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* ldexp.c (exp_print_tree): don't try and follow null pointers
+	around.
+	* ldgram.y: remove 11 shift reduce errors
+
+Fri Feb 28 08:17:45 1992  Steve Chamberlain  (sac at thepub.cygnus.com)
+
+	* ldlang.c (size_input_section): don't move absolute sections
+	around!
+
+
+Thu Feb 27 09:20:41 1992  Steve Chamberlain  (sac at thepub.cygnus.com)
+    
 	* cplus-dem.c: yet another copy of this - maybe it should go into
 	libiberty ?
 	* ldgram.y: now -V and -v have different actions
