@@ -1,3 +1,11 @@
+Sun Oct  4 22:35:47 1998  Martin M. Hunt  <hunt@cygnus.com>
+
+	* gdbtk-cmds.c (gdb_set_bp): Add an optional thread number.
+	(gdb_find_bp_at_line): New function. Returns a list of bpnums 
+	at the specified line number.
+	(gdb_find_bp_at_addr): New function. Returns a list of bpnums 
+	at an address..
+
 1998-10-02  Keith Seitz  <keiths@cygnus.com>
 
 	* gdbtk-hooks.c (gdbtk_exec_file_changed): New function which handles

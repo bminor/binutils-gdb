@@ -199,6 +199,8 @@ static int gdb_regnames PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST [
 static int gdb_search PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST
 			       objv[]));
 static int gdb_set_bp PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
+static int gdb_find_bp_at_line PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
+static int gdb_find_bp_at_addr PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
 static int gdb_stop PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST []));
 static int gdb_target_has_execution_command PARAMS ((ClientData, Tcl_Interp *,
 						     int,
@@ -300,6 +302,8 @@ Gdbtk_Init (interp)
   Tcl_CreateObjCommand (gdbtk_interp, "gdb_search", call_wrapper,
 			gdb_search,  NULL);
   Tcl_CreateObjCommand (interp, "gdb_set_bp", call_wrapper, gdb_set_bp,  NULL);
+  Tcl_CreateObjCommand (interp, "gdb_find_bp_at_line", call_wrapper, gdb_find_bp_at_line,  NULL);
+  Tcl_CreateObjCommand (interp, "gdb_find_bp_at_addr", call_wrapper, gdb_find_bp_at_addr,  NULL);
   Tcl_CreateObjCommand (interp, "gdb_get_trace_frame_num",
                         call_wrapper, gdb_get_trace_frame_num,  NULL);  
   Tcl_CreateObjCommand (interp, "gdb_stack", call_wrapper, gdb_stack, NULL);
@@ -2770,6 +2774,7 @@ enum bpdisp {
  *    filename: the file in which to set the breakpoint
  *    line:     the line number for the breakpoint
  *    type:     the type of the breakpoint
+ *    thread:	optional thread number
  * Tcl Result:
  *    The return value of the call to gdbtk_tcl_breakpoint.
  */
@@ -2783,14 +2788,14 @@ gdb_set_bp (clientData, interp, objc, objv)
 
 {
   struct symtab_and_line sal;
-  int line, flags, ret;
+  int line, flags, ret, thread = -1;
   struct breakpoint *b;
   char buf[64];
   Tcl_DString cmd;
 
-  if (objc != 4)
+  if (objc != 4 && objc != 5)
     {
-      Tcl_WrongNumArgs(interp, 1, objv, "filename line type");
+      Tcl_WrongNumArgs(interp, 1, objv, "filename line type [thread]");
       return TCL_ERROR; 
     }
   
@@ -2810,6 +2815,15 @@ gdb_set_bp (clientData, interp, objc, objv)
       return TCL_ERROR;
     }
 
+  if (objc == 5)
+    {
+      if (Tcl_GetIntFromObj( interp, objv[4], &thread) == TCL_ERROR)
+	{
+	  result_ptr->flags = GDBTK_IN_TCL_RESULT;
+	  return TCL_ERROR;
+	}
+    }
+
   sal.line = line;
   if (!find_line_pc (sal.symtab, sal.line, &sal.pc))
     return TCL_ERROR;
@@ -2820,6 +2834,7 @@ gdb_set_bp (clientData, interp, objc, objv)
   b->number = breakpoint_count;
   b->type = flags >> 2;
   b->disposition = flags & 3;
+  b->thread = thread;
 
   /* FIXME: this won't work for duplicate basenames! */
   sprintf (buf, "%s:%d", basename (Tcl_GetStringFromObj ( objv[1], NULL)), line);
@@ -2840,6 +2855,95 @@ gdb_set_bp (clientData, interp, objc, objv)
   ret = Tcl_Eval (interp, Tcl_DStringValue (&cmd));
   Tcl_DStringFree (&cmd);
   return ret;
+}
+
+/* This implements the tcl command "gdb_find_bp_at_line"
+ *
+ * Tcl Arguments:
+ *    filename: the file in which to find the breakpoint
+ *    line:     the line number for the breakpoint
+ * Tcl Result:
+ *    It returns a list of breakpoint numbers
+ */
+
+static int
+gdb_find_bp_at_line(clientData, interp, objc, objv)
+  ClientData clientData;
+  Tcl_Interp *interp;
+  int objc;
+  Tcl_Obj *CONST objv[];
+
+{
+  struct symtab *s;
+  int line;
+  struct breakpoint *b;
+  extern struct breakpoint *breakpoint_chain;
+
+  if (objc != 3)
+    {
+      Tcl_WrongNumArgs(interp, 1, objv, "filename line");
+      return TCL_ERROR; 
+    }
+  
+  s = full_lookup_symtab (Tcl_GetStringFromObj( objv[1], NULL));
+  if (s == NULL)
+    return TCL_ERROR;
+  
+  if (Tcl_GetIntFromObj( interp, objv[2], &line) == TCL_ERROR)
+    {
+      result_ptr->flags = GDBTK_IN_TCL_RESULT;
+      return TCL_ERROR;
+    }
+
+  Tcl_SetListObj (result_ptr->obj_ptr ,0 ,NULL);
+  for (b = breakpoint_chain; b; b = b->next)
+    if (b->line_number == line && !strcmp(b->source_file, s->filename))
+      Tcl_ListObjAppendElement (NULL, result_ptr->obj_ptr,
+				Tcl_NewIntObj (b->number));
+  
+  return TCL_OK;
+}
+
+
+/* This implements the tcl command "gdb_find_bp_at_addr"
+ *
+ * Tcl Arguments:
+ *    addr:     address
+ * Tcl Result:
+ *    It returns a list of breakpoint numbers
+ */
+
+static int
+gdb_find_bp_at_addr(clientData, interp, objc, objv)
+  ClientData clientData;
+  Tcl_Interp *interp;
+  int objc;
+  Tcl_Obj *CONST objv[];
+
+{
+  long addr;
+  struct breakpoint *b;
+  extern struct breakpoint *breakpoint_chain;
+
+  if (objc != 2)
+    {
+      Tcl_WrongNumArgs(interp, 1, objv, "address");
+      return TCL_ERROR; 
+    }
+  
+  if (Tcl_GetLongFromObj( interp, objv[1], &addr) == TCL_ERROR)
+    {
+      result_ptr->flags = GDBTK_IN_TCL_RESULT;
+      return TCL_ERROR;
+    }
+
+  Tcl_SetListObj (result_ptr->obj_ptr ,0 ,NULL);
+  for (b = breakpoint_chain; b; b = b->next)
+    if (b->address == (CORE_ADDR)addr)
+      Tcl_ListObjAppendElement (NULL, result_ptr->obj_ptr,
+				Tcl_NewIntObj (b->number));
+
+  return TCL_OK;
 }
 
 /* This implements the tcl command gdb_get_breakpoint_info
