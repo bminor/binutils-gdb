@@ -1,3 +1,10 @@
+Wed Dec 28 19:27:22 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hppa-tdep.c (hppa_fix_call_dummy): Prefer import stubs over
+	export stubs and actual shared library functions so that lazy
+	binding works correctly.  Try both __d_plt_call and __gcc_plt_call
+	trampolines for calling import stubs.
+
 Wed Dec 28 15:29:02 1994  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* a29k-tdep.c (pop_frame): Fix a variable name.

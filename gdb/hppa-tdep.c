@@ -1419,16 +1419,48 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
   else
     {
 
-      /* FUN could be either an export stub, or the real address of a
-	 function in a shared library.
-
-	 To call this function we need to get the GOT/DP value for the target
-	 function.  Do this by calling shared library support routines in
-	 somsolib.c.  Once the GOT value is in %r19 we can call the procedure
-	 in the normal fashion.  */
-
 #ifndef GDB_TARGET_IS_PA_ELF
-	 write_register (19, som_solib_get_got_by_pc (fun));
+      /* FUN could be either an export stub, or the real address of a
+	 function in a shared library.  We must call an import stub
+	 rather than the export stub or real function for lazy binding
+	 to work correctly.  */
+      if (som_solib_get_got_by_pc (fun))
+	{
+	  struct objfile *objfile;
+	  struct minimal_symbol *funsymbol, *stub_symbol;
+	  CORE_ADDR newfun = 0;
+
+	  funsymbol = lookup_minimal_symbol_by_pc (fun);
+	  if (!funsymbol)
+	    error ("Unable to find minimal symbol for target fucntion.\n");
+
+	  /* Search all the object files for an import symbol with the
+	     right name. */
+	  ALL_OBJFILES (objfile)
+	    {
+	      stub_symbol = lookup_minimal_symbol (SYMBOL_NAME (funsymbol),
+						   objfile);
+	      /* Found a symbol with the right name.  */
+	      if (stub_symbol)
+		{
+		  struct unwind_table_entry *u;
+		  /* It must be a shared library trampoline.  */
+		  if (SYMBOL_TYPE (stub_symbol) != mst_solib_trampoline)
+		    continue;
+
+		  /* It must also be an import stub.  */
+		  u = find_unwind_entry (SYMBOL_VALUE (stub_symbol));
+		  if (!u || u->stub_type != IMPORT)
+		    continue;
+
+		  /* OK.  Looks like the correct import stub.  */
+		  newfun = SYMBOL_VALUE (stub_symbol);
+		  fun = newfun;
+		}
+	    }
+	  if (newfun == 0)
+	    write_register (19, som_solib_get_got_by_pc (fun));
+	}
 #endif
     }
 
@@ -1444,20 +1476,27 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
       CORE_ADDR new_fun;
       msymbol = lookup_minimal_symbol ("__d_plt_call", (struct objfile *) NULL);
       if (msymbol == NULL)
-	error ("Can't find an address for __d_plt_call trampoline");
+	msymbol = lookup_minimal_symbol ("__gcc_plt_call", NULL);
+
+      if (msymbol == NULL)
+	error ("Can't find an address for __d_plt_call or __gcc_plt_call trampoline");
 
       /* This is where sr4export will jump to.  */
       new_fun = SYMBOL_VALUE_ADDRESS (msymbol);
 
-      /* We have to store the address of the stub in __shlib_funcptr.  */
-      msymbol = lookup_minimal_symbol ("__shlib_funcptr",
-				       (struct objfile *)NULL);
-      if (msymbol == NULL)
-	error ("Can't find an address for __shlib_funcptr");
+      if (strcmp (SYMBOL_NAME (msymbol), "__d_plt_call"))
+	write_register (22, fun);
+      else
+	{
+	  /* We have to store the address of the stub in __shlib_funcptr.  */
+	  msymbol = lookup_minimal_symbol ("__shlib_funcptr",
+					   (struct objfile *)NULL);
+	  if (msymbol == NULL)
+	    error ("Can't find an address for __shlib_funcptr");
 
-      target_write_memory (SYMBOL_VALUE_ADDRESS (msymbol), (char *)&fun, 4);
+	  target_write_memory (SYMBOL_VALUE_ADDRESS (msymbol), (char *)&fun, 4);
+	}
       fun = new_fun;
-
     }
 
   /* We still need sr4export's address too.  */
