@@ -1,3 +1,8 @@
+Mon Apr 15 14:59:13 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* Makefile.in: Add support for clean-{module} and
+	clean-target-{module} rules.
+
 Wed Apr 10 21:37:41 PDT 1996  Marilyn E. Sander <msander@cygnus.com>
 
 	* configure.in (*-*-ose) do not build libgloss.

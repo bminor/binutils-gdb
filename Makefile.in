@@ -645,6 +645,78 @@ INSTALL_TARGET_MODULES = \
 	install-target-libgloss \
 	install-target-libiberty
 
+# This is a list of the targets for which we can do a clean-{target}.
+CLEAN_MODULES = \
+	clean-autoconf \
+	clean-bfd \
+	clean-binutils \
+	clean-byacc \
+	clean-cvs \
+	clean-dejagnu \
+	clean-diff \
+	clean-dosutils \
+	clean-etc \
+	clean-fileutils \
+	clean-find \
+	clean-flex \
+	clean-gas \
+	clean-gawk \
+	clean-gprof \
+	clean-grep \
+	clean-grez \
+	clean-gzip \
+	clean-hello \
+	clean-indent \
+	clean-ispell \
+	clean-ld \
+	clean-libiberty \
+	clean-m4 \
+	clean-make \
+	clean-mmalloc \
+	clean-opcodes \
+	clean-patch \
+	clean-perl \
+	clean-prms \
+	clean-rcs \
+	clean-readline \
+	clean-release \
+	clean-recode \
+	clean-sed \
+	clean-send-pr \
+	clean-shellutils \
+	clean-sim \
+	clean-tar \
+	clean-tcl \
+	clean-texinfo \
+	clean-textutils \
+	clean-tgas \
+	clean-time \
+	clean-uudecode \
+	clean-wdiff
+
+# All of the target modules that can be cleaned
+CLEAN_TARGET_MODULES = \
+	clean-target-libio \
+	clean-target-libstdc++ \
+	clean-target-librx \
+	clean-target-libg++ \
+	clean-target-newlib \
+	clean-target-winsup \
+	clean-target-libgloss \
+	clean-target-libiberty \
+	clean-target-examples
+
+# All of the x11 modules that can be cleaned
+CLEAN_X11_MODULES = \
+	clean-emacs \
+	clean-emacs19 \
+	clean-gdb \
+	clean-expect \
+	clean-gash \
+	clean-guile \
+	clean-tclX \
+	clean-tk
+
 # The first rule in the file had better be this one.  Don't put any above it.
 all: all.normal
 .PHONY: all
@@ -758,6 +830,33 @@ distclean: do-distclean local-clean local-distclean
 maintainer-clean: local-maintainer-clean do-maintainer-clean local-clean 
 maintainer-clean: local-distclean
 realclean: maintainer-clean
+
+# This rule is used to clean specific modules.
+.PHONY: $(CLEAN_MODULES) $(CLEAN_X11_MODULES) clean-gcc
+$(CLEAN_MODULES) $(CLEAN_X11_MODULES) clean-gcc:
+	@dir=`echo $@ | sed -e 's/clean-//'`; \
+	if [ -f ./$${dir}/Makefile ] ; then \
+	  r=`pwd`; export r; \
+	  srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	  $(SET_LIB_PATH) \
+	  (cd $${dir}; $(MAKE) $(FLAGS_TO_PASS) clean); \
+	else \
+	  true; \
+	fi
+
+.PHONY: $(CLEAN_TARGET_MODULES)
+$(CLEAN_TARGET_MODULES):
+	@dir=`echo $@ | sed -e 's/clean-target-//'`; \
+	if [ -f $(TARGET_SUBDIR)/$${dir}/Makefile ] ; then \
+	  r=`pwd`; export r; \
+	  srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	  $(SET_LIB_PATH) \
+	  (cd $(TARGET_SUBDIR)/$${dir}; $(MAKE) $(TARGET_FLAGS_TO_PASS) clean); \
+	else \
+	  true; \
+	fi
+
+clean-target: $(CLEAN_TARGET_MODULES)
 
 # Check target.
 
