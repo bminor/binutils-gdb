@@ -1,3 +1,11 @@
+Fri Feb  4 10:35:42 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t24/demangle.exp: Remove a bunch more tests which differ
+	only in the names (I probably got most of them).  I was even
+	generous with some which differed in underscores in names, and
+	probably missed a few, and I *still* was able to remove almost a
+	third of the file with almost no impact on testsuite coverage.
+
 Thu Feb  3 12:04:49 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.t00/default.exp: Match udi_attach error message as well as
