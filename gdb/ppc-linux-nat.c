@@ -63,7 +63,7 @@ void
 supply_gregset (gdb_gregset_t *gregsetp)
 {
   int regi;
-  register greg_t *regp = (greg_t *) gregsetp;
+  register elf_greg_t *regp = (elf_greg_t *) gregsetp;
 
   for (regi = 0; regi < 32; regi++)
     supply_register (regi, (char *) (regp + regi));
@@ -76,7 +76,7 @@ void
 fill_gregset (gdb_gregset_t *gregsetp, int regno)
 {
   int regi;
-  greg_t *regp = (greg_t *) gregsetp;
+  elf_greg_t *regp = (elf_greg_t *) gregsetp;
 
 #define COPY_REG(_idx_,_regi_) \
   if ((regno == -1) || regno == _regi_) \
