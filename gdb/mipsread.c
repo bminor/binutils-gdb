@@ -218,7 +218,8 @@ static void
 parse_partial_symbols PARAMS ((int, struct objfile *));
 
 static int
-cross_ref PARAMS ((union aux_ext *, struct type **, int, char **, int));
+cross_ref PARAMS ((union aux_ext *, struct type **, enum type_code, char **,
+		   int));
 
 static void
 fixup_sigtramp PARAMS ((void));
@@ -843,7 +844,7 @@ free_pending(f_idx)
 static char *
 prepend_tag_kind(tag_name, type_code)
      char *tag_name;
-     int type_code;
+     enum type_code type_code;
 {
     char *prefix;
     char *result;
@@ -1054,7 +1055,7 @@ data:		/* Common code for symbols describing data */
 		push_parse_stack();
 		top_stack->blocktype = stBlock;
 		if (sh->sc == scInfo) {	/* structure/union/enum def */
-		    int type_code =
+		    enum type_code type_code =
 		        sh->st == stStruct ? TYPE_CODE_STRUCT
 		      : sh->st == stUnion ? TYPE_CODE_UNION
 		      : sh->st == stEnum ? TYPE_CODE_ENUM
@@ -1332,7 +1333,7 @@ parse_type(ax, bs, bigend)
 	struct type    *tp = 0;
 	char           *fmt;
 	union aux_ext *tax;
-	int type_code;
+	enum type_code type_code;
 
 	/* Use aux as a type information record, map its basic type.  */
 	tax = ax;
@@ -1966,7 +1967,7 @@ parse_partial_symbols(end_of_text_seg, objfile)
 		register struct partial_symbol *psym;
 		for (cur_sdx = 0; cur_sdx < fh->csym; ) {
 		    char *name;
-		    int class;
+		    enum address_class class;
 		    sh = cur_sdx + (SYMR *) fh->isymBase;
 		    
 		    if (MIPS_IS_STAB(sh)) {
@@ -2416,7 +2417,7 @@ static int
 cross_ref(ax, tpp, type_code, pname, bigend)
      union aux_ext *ax;
      struct type **tpp;
-     int type_code; /* Use to alloc new type if none is found. */
+     enum type_code type_code; /* Use to alloc new type if none is found. */
      char **pname;
      int bigend;
 {

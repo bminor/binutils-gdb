@@ -1,6 +1,7 @@
 Mon Apr  6 15:25:03 1992  Stu Grossman  (grossman at cygnus.com)
 
-	* mipsread.c:  Fix many invocations of complain.
+	* mipsread.c:  Fix many invocations of complain.  Use enum
+	type_code where appropriate.
 
 	* xm-vaxult.h:  Add decl for strdup().
 
