@@ -1,3 +1,8 @@
+Mon Sep  8 14:21:23 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* gas/m32r/high-1.[ds]: New testcase.
+	* gas/m32r/m32r.exp: Run it.
+
 Mon Aug 25 11:04:24 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* gas/m32r/relax-1.[ds]: New testcase.

@@ -26,6 +26,8 @@ Things-to-keep:
 allinsn.exp
 allinsn.d
 allinsn.s
+high-1.d
+high-1.s
 m32r.exp
 relax-1.d
 relax-1.s
