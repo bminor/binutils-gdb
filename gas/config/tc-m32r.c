@@ -1,5 +1,5 @@
 /* tc-m32r.c -- Assembler for the Mitsubishi M32R/X.
-   Copyright (C) 1996, 1997 Free Software Foundation.
+   Copyright (C) 1996, 1997, 1998 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -23,9 +23,6 @@
 #include "as.h"
 #include "subsegs.h"     
 #include "cgen-opc.h"
-
-#include "../../opcodes/m32r-asm.c"
-#include "../../opcodes/m32r-asm.in"
 
 /* Non-null if last insn was a 16 bit insn on a 32 bit boundary
    (i.e. was the first of two 16 bit insns).  */
@@ -419,6 +416,7 @@ md_assemble (str)
 	  return;
 	}
 
+/* start-sanitize-m32rx */
       /* Check to see if this is an allowable parallel insn.  */
       if (CGEN_INSN_ATTR (prev_insn, CGEN_INSN_PIPE) == PIPE_NONE)
 	{
@@ -426,7 +424,6 @@ md_assemble (str)
 	  return;
 	}
 	
-/* start-sanitize-m32rx */
       if (! enable_m32rx && 
 	  CGEN_INSN_ATTR (prev_insn, CGEN_INSN_MACH) == MACH_M32RX)
 	{
@@ -473,8 +470,6 @@ md_assemble (str)
 	      return;
 	    }
 	}
-/* end-sanitize-m32rx */
-      
       /* Check to see if this is an allowable parallel insn.  */
       if (CGEN_INSN_ATTR (insn, CGEN_INSN_PIPE) == PIPE_NONE)
 	{
@@ -489,6 +484,8 @@ md_assemble (str)
 	  as_bad ("'%s': both instructions use the same execution pipeline", str2);
 	  return;
 	}
+/* end-sanitize-m32rx */
+
 #if 0
       /* Check that the instructions do not write to the same destination register.  */
       if (writes_to_dest_reg (insn)
