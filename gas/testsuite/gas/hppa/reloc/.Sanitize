@@ -35,6 +35,7 @@ labelopbug.s
 plabelbug.s
 reloc.exp
 relocreduce.s
+relocreduce2.s
 roundmode.s
 selectorbug.s
 
