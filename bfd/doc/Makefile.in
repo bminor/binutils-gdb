@@ -61,7 +61,6 @@ BFD_HOST_64_BIT = @BFD_HOST_64_BIT@
 BFD_HOST_64_BIT_DEFINED = @BFD_HOST_64_BIT_DEFINED@
 BFD_HOST_U_64_BIT = @BFD_HOST_U_64_BIT@
 CC = @CC@
-CC_FOR_BUILD = @CC_FOR_BUILD@
 COREFILE = @COREFILE@
 COREFLAG = @COREFLAG@
 EXEEXT = @EXEEXT@
@@ -80,6 +79,8 @@ bfd_backends = @bfd_backends@
 bfd_machines = @bfd_machines@
 tdefaults = @tdefaults@
 wordsize = @wordsize@
+
+CC_FOR_BUILD = @CC_FOR_BUILD@
 
 DOCFILES = aoutx.texi  archive.texi archures.texi \
 	bfdt.texi  cache.texi coffcode.texi \

@@ -67,6 +67,7 @@ TODO
 acconfig.h
 acinclude.m4
 aclocal.m4
+acmacros.m4
 aix386-core.c
 aout-adobe.c
 aout-arm.c

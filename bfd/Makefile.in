@@ -61,7 +61,6 @@ BFD_HOST_64_BIT = @BFD_HOST_64_BIT@
 BFD_HOST_64_BIT_DEFINED = @BFD_HOST_64_BIT_DEFINED@
 BFD_HOST_U_64_BIT = @BFD_HOST_U_64_BIT@
 CC = @CC@
-CC_FOR_BUILD = @CC_FOR_BUILD@
 COREFILE = @COREFILE@
 COREFLAG = @COREFLAG@
 EXEEXT = @EXEEXT@
@@ -489,6 +488,7 @@ libbfd_la_LIBADD = `cat ofiles`
 # directory so that we don't have to convert all the programs that use
 # libbfd.a simultaneously.  This is a hack which should be removed if
 # everything else starts using libtool.  FIXME.
+
 noinst_LIBRARIES = libbfd.a
 
 BFD_H_DEPS= $(INCDIR)/ansidecl.h
@@ -497,7 +497,7 @@ LOCAL_H_DEPS= libbfd.h sysdep.h config.h
 MOSTLYCLEANFILES = elf32-target.h elf64-target.h ofiles stamp-ofiles \
 	targmatch.h
 
-CLEANFILES = bfd.h dep.sed stmp-bfd.h .dep .dep1
+CLEANFILES = bfd.h dep.sed stmp-bfd.h .dep .dep1 libbfd.a stamp-lib
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/../mkinstalldirs
 CONFIG_HEADER = config.h
@@ -865,9 +865,13 @@ stamp-ofiles: Makefile
 	touch stamp-ofiles
 
 ofiles: stamp-ofiles ; @true
-libbfd.a: libbfd.la
-	rm -f libbfd.a
-	$(LN_S) .libs/libbfd.a libbfd.a
+
+stamp-lib: libbfd.la
+	cp .libs/libbfd.a libbfd.tmp
+	$(SHELL) $(srcdir)/../move-if-change libbfd.tmp libbfd.a
+	touch stamp-lib
+
+libbfd.a: stamp-lib ; @true
 
 # This file holds an array associating configuration triplets and
 # vector names.  It is built from config.bfd.  It is not compiled by

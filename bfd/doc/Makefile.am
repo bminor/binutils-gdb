@@ -1,5 +1,9 @@
 ## Process this file with automake to generate Makefile.in
 
+## We need to do this here because it is defined in acmacros.m4, which
+## automake won't read.
+CC_FOR_BUILD = @CC_FOR_BUILD@
+
 DOCFILES = aoutx.texi  archive.texi archures.texi \
 	bfdt.texi  cache.texi coffcode.texi \
 	core.texi elf.texi elfcode.texi  format.texi  libbfd.texi  \
