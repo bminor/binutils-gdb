@@ -1,5 +1,8 @@
 2004-08-07  Andrew Cagney  <cagney@gnu.org>
 
+	* gdbtypes.c (build_flt, build_complex): New functions.
+	(gdbtypes_post_init): Use.
+
 	* doublest.c (floatformat_from_length): Fix tipo, "*" not "&".
 
 	* gdbtypes.c (_initialize_gdbtypes): Do not swap builtin_type_int8

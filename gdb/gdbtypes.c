@@ -3312,6 +3312,37 @@ builtin_type (struct gdbarch *gdbarch)
   return gdbarch_data (gdbarch, gdbtypes_data);
 }
 
+
+static struct type *
+build_flt (int bit, char *name, const struct floatformat *floatformat)
+{
+  struct type *t;
+  if (bit <= 0 || floatformat == NULL)
+    {
+      gdb_assert (builtin_type_error != NULL);
+      return builtin_type_error;
+    }
+  t = init_type (TYPE_CODE_FLT, bit / TARGET_CHAR_BIT,
+		 0, name, (struct objfile *) NULL);
+  TYPE_FLOATFORMAT (t) = floatformat;
+  return t;
+}
+
+static struct type *
+build_complex (int bit, char *name, struct type *target_type)
+{
+  struct type *t;
+  if (bit <= 0 || target_type == builtin_type_error)
+    {
+      gdb_assert (builtin_type_error != NULL);
+      return builtin_type_error;
+    }
+  t = init_type (TYPE_CODE_COMPLEX, 2 * bit / TARGET_CHAR_BIT,
+		 0, name, (struct objfile *) NULL);
+  TYPE_TARGET_TYPE (t) = target_type;
+  return t;
+}
+
 static void *
 gdbtypes_post_init (struct gdbarch *gdbarch)
 {
@@ -3371,31 +3402,21 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
     init_type (TYPE_CODE_INT, TARGET_LONG_LONG_BIT / TARGET_CHAR_BIT,
 	       TYPE_FLAG_UNSIGNED,
 	       "unsigned long long", (struct objfile *) NULL);
-  builtin_type->builtin_float =
-    init_type (TYPE_CODE_FLT, TARGET_FLOAT_BIT / TARGET_CHAR_BIT,
-	       0,
-	       "float", (struct objfile *) NULL);
-  TYPE_FLOATFORMAT (builtin_type->builtin_float) = TARGET_FLOAT_FORMAT;
-  builtin_type->builtin_double =
-    init_type (TYPE_CODE_FLT, TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
-	       0,
-	       "double", (struct objfile *) NULL);
-  TYPE_FLOATFORMAT (builtin_type->builtin_double) = TARGET_DOUBLE_FORMAT;
-  builtin_type->builtin_long_double =
-    init_type (TYPE_CODE_FLT, TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT,
-	       0,
-	       "long double", (struct objfile *) NULL);
-  TYPE_FLOATFORMAT (builtin_type->builtin_long_double) = TARGET_LONG_DOUBLE_FORMAT;
-  builtin_type->builtin_complex =
-    init_type (TYPE_CODE_COMPLEX, 2 * TARGET_FLOAT_BIT / TARGET_CHAR_BIT,
-	       0,
-	       "complex", (struct objfile *) NULL);
-  TYPE_TARGET_TYPE (builtin_type->builtin_complex) = builtin_type->builtin_float;
-  builtin_type->builtin_double_complex =
-    init_type (TYPE_CODE_COMPLEX, 2 * TARGET_DOUBLE_BIT / TARGET_CHAR_BIT,
-	       0,
-	       "double complex", (struct objfile *) NULL);
-  TYPE_TARGET_TYPE (builtin_type->builtin_double_complex) = builtin_type->builtin_double;
+  builtin_type->builtin_float
+    = build_flt (gdbarch_float_bit (gdbarch), "float",
+		 gdbarch_float_format (gdbarch));
+  builtin_type->builtin_double
+    = build_flt (gdbarch_double_bit (gdbarch), "double",
+		 gdbarch_double_format (gdbarch));
+  builtin_type->builtin_long_double
+    = build_flt (gdbarch_long_double_bit (gdbarch), "long double",
+		 gdbarch_long_double_format (gdbarch));
+  builtin_type->builtin_complex
+    = build_complex (gdbarch_float_bit (gdbarch), "complex",
+		     builtin_type->builtin_float);
+  builtin_type->builtin_double_complex
+    = build_complex (gdbarch_double_bit (gdbarch), "double complex",
+		     builtin_type->builtin_double);
   builtin_type->builtin_string =
     init_type (TYPE_CODE_STRING, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
 	       0,
