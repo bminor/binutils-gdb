@@ -1,3 +1,10 @@
+Mon Jul 20 12:51:16 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* addr2line.c (find_address_in_section): Only consider a section
+	if the pc value is completely contained within it.
+	(translate_addresses): Don't crash if functionname or filename are
+	null.
+
 1998-07-20 07:45  Ulrich Drepper  <drepper@cygnus.com>
 
 	* readelf.c (process_symbol_table): Fix little alignment problem
