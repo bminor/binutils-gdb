@@ -1161,11 +1161,6 @@ md_estimate_size_before_relax (fragP, segment_type)
 const relax_typeS md_relax_table[] =
 {0};
 
-void
-md_end ()
-{
-}
-
 #if 0
 
 /* As far as I can tell, this routine is never called.  What is it

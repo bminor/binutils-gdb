@@ -370,11 +370,6 @@ md_begin ()
   if (errorval)
     as_fatal (errorval);
 }
-
-void
-md_end ()
-{
-}
 
 int
 md_parse_option (argP, cntP, vecP)

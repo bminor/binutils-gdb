@@ -575,18 +575,7 @@ adjust_reloc_syms (abfd, sec, xxx)
 	fixp->fx_offset += S_GET_VALUE (sym);
 	if (sym->sy_frag)
 	  fixp->fx_offset += sym->sy_frag->fr_address;
-	if (symseginfo->sym)
-	  fixp->fx_addsy = symseginfo->sym;
-	else
-	  {
-	    fixp->fx_addsy = symbol_find (symsec->name);
-	    if (!fixp->fx_addsy)
-	      {
-		fixp->fx_addsy = symbol_make (symsec->name);
-		fixp->fx_addsy->bsym = symsec->symbol;
-	      }
-	    symseginfo->sym = fixp->fx_addsy;
-	  }
+	fixp->fx_addsy = section_symbol (symsec);
 	fixp->fx_addsy->sy_used_in_reloc = 1;
       }
 
@@ -1284,8 +1273,6 @@ write_object_file ()
     /* Write the data to the file */
     output_file_append (the_object_file, object_file_size, out_file_name);
 #endif
-
-    output_file_close (out_file_name);
   }				/* non vms output */
 #else /* VMS */
   /*
@@ -1437,8 +1424,6 @@ write_object_file ()
   bfd_map_over_sections (stdoutput, write_relocs, (char *) 0);
 
   bfd_map_over_sections (stdoutput, write_contents, (char *) 0);
-
-  output_file_close (out_file_name);
 #endif /* BFD_ASSEMBLER */
 }
 #endif /* ! BFD */

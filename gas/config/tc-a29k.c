@@ -344,11 +344,6 @@ md_begin ()
   define_some_regs ();
 }
 
-void
-md_end ()
-{
-}
-
 /* Assemble a single instruction.  Its label has already been handled
    by the generic front end.  We just parse opcode and operands, and
    produce the bytes of data and relocation.  */

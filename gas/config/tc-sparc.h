@@ -21,8 +21,6 @@
 
 #define LOCAL_LABELS_FB
 
-#ifdef BFD_ASSEMBLER
-
 #define TARGET_ARCH bfd_arch_sparc
 #ifdef OBJ_AOUT
 #define TARGET_FORMAT "a.out-sunos-big"
@@ -37,36 +35,15 @@
 #define TARGET_FORMAT "elf64-sparc" /* v9 */
 #define ENV64			/* v9 */
 #endif	/* sparcv9 */
-#define LOCAL_LABEL(name)	((name)[0] == '.')
+#define LOCAL_LABEL(name)	((name)[0] == '.' || !strncmp ((name), "_.L_", 4))
 #endif
+#define WORKING_DOT_WORD
 
-#else
-
-#ifdef OBJ_BOUT
-#define DEFAULT_MAGIC_NUMBER_FOR_OBJECT_FILE ((0x103 << 16) | BMAGIC)	/* Magic number for header */
-#else
-#ifdef OBJ_AOUT
-#define DEFAULT_MAGIC_NUMBER_FOR_OBJECT_FILE ((0x103 << 16) | OMAGIC)	/* Magic number for header */
-#endif /* OBJ_AOUT */
-#endif /* OBJ_BOUT */
-
-#define AOUT_MACHTYPE 3
-
-#define NEED_FX_R_TYPE
-
-#define tc_headers_hook(a)		{;}	/* don't need it. */
-#define tc_crawl_symbol_chain(a)	{;}	/* don't need it. */
-
-#define TC_CONS_RELOC RELOC_32
-
-#endif /* BFD_ASSEMBLER */
-
-#ifndef BFD_ASSEMBLER
-#define md_convert_frag(h,f)		{as_fatal ("sparc convert_frag\n");}
-#else
 #define md_convert_frag(b,s,f)		{as_fatal ("sparc convert_frag\n");}
-#endif
-
+#define md_create_long_jump(p,f,t,fr,s)	as_fatal("sparc_create_long_jump")
+#define md_create_short_jump(p,f,t,fr,s) as_fatal("sparc_create_short_jump")
+#define md_estimate_size_before_relax(f,s) \
+			(as_fatal("estimate_size_before_relax called"),1)
 void tc_aout_pre_write_hook ();
 
 #define LISTING_HEADER "SPARC GAS "

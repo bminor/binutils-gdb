@@ -1165,11 +1165,6 @@ DEFUN (tc_headers_hook, (headers),
   printf ("call to tc_headers_hook \n");
 }
 
-void
-DEFUN_VOID (md_end)
-{
-}
-
 /* Various routines to kill one day */
 /* Equal to MAX_PRECISION in atof-ieee.c */
 #define MAX_LITTLENUMS 6

@@ -723,6 +723,9 @@ static label_symbol_struct *label_symbols_rootp = NULL;
 /* Holds the last field selector.  */
 static int hppa_field_selector;
 
+/* A dummy bfd symbol so that all relocations have symbols of some kind.  */
+static asymbol *dummy_symbol;
+
 /* Nonzero if errors are to be printed.  */
 static int print_errors = 1;
 
@@ -1352,14 +1355,9 @@ md_begin ()
   /* SOM will change text_section.  To make sure we never put
      anything into the old one switch to the new one now.  */
   subseg_set (text_section, 0);
-}
 
-/* Called at the end of assembling a source file.  Nothing to do
-   at this point on the PA.  */
-
-void
-md_end ()
-{
+  dummy_symbol = symbol_find_or_make ("L$dummy");
+  dummy_symbol->section = text_section;
 }
 
 /* Assemble a single instruction storing it into a frag.  */
@@ -2744,8 +2742,12 @@ tc_gen_reloc (section, fixp)
 	case R_S_MODE:
 	case R_D_MODE:
 	case R_R_MODE:
+	case R_EXIT:
+	case R_FSEL:
+	case R_LSEL:
+	case R_RSEL:
 	  /* There is no symbol or addend associated with these fixups.  */
-	  relocs[i]->sym_ptr_ptr = 0;
+	  relocs[i]->sym_ptr_ptr = dummy_symbol;
 	  relocs[i]->addend = 0;
 	  break;
 
