@@ -2166,11 +2166,7 @@ normal_pid_to_str (int pid)
 {
   static char buf[30];
 
-  if (STREQ (current_target.to_shortname, "remote"))
-    sprintf (buf, "thread %d", pid);
-  else
-    sprintf (buf, "process %d", pid);
-
+  sprintf (buf, "process %d", pid);
   return buf;
 }
 

@@ -5103,6 +5103,18 @@ init_remote_threadtests (void)
 
 #endif /* 0 */
 
+/* Convert a thread ID to a string.  Returns the string in a static
+   buffer.  */
+
+static char *
+remote_pid_to_str (int pid)
+{
+  static char buf[30];
+
+  sprintf (buf, "Thread %d", pid);
+  return buf;
+}
+
 static void
 init_remote_ops (void)
 {
@@ -5130,6 +5142,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_thread_alive = remote_thread_alive;
   remote_ops.to_find_new_threads = remote_threads_info;
   remote_ops.to_extra_thread_info = remote_threads_extra_info;
+  remote_ops.to_pid_to_str = remote_pid_to_str;
   remote_ops.to_stop = remote_stop;
   remote_ops.to_query = remote_query;
   remote_ops.to_rcmd = remote_rcmd;

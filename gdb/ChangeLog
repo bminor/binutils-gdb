@@ -1,3 +1,8 @@
+2001-04-26  Michael Snyder  <msnyder@redhat.com>
+
+	* target.c (normal_pid_to_str): Get rid of an ancient hack.
+	* remote.c (remote_pid_to_str): New function for remote target.
+
 2001-04-24  Jim Blandy  <jimb@redhat.com>
 
 	* c-typeprint.c (c_type_print_cv_qualifier): Don't print `const'
