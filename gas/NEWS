@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Added support for MIPS64 Release 2.
+
 * Added support for v850e1.
 
 * Added -n switch for x86 assembler.  By default, x86 GAS replaces

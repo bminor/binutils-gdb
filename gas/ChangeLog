@@ -1,5 +1,9 @@
 2003-09-30  Chris Demetriou  <cgd@broadcom.com>
 
+	* NEWS: Mention support for MIPS64 Release 2.
+
+2003-09-30  Chris Demetriou  <cgd@broadcom.com>
+
 	* NEWS: Add an indication of the cutoff for 2.14.
 
 2003-09-30  Chris Demetriou  <cgd@broadcom.com>
