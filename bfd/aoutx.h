@@ -1081,10 +1081,10 @@ DEFUN (translate_from_native_sym_flags, (sym_pointer, cache_ptr, abfd),
   cache_ptr->symbol.section = 0;
   switch (cache_ptr->type & N_TYPE)
     {
-    case N_SETA:
-    case N_SETT:
-    case N_SETD:
-    case N_SETB:
+    case N_SETA: case N_SETA | N_EXT:
+    case N_SETT: case N_SETT | N_EXT:
+    case N_SETD: case N_SETD | N_EXT:
+    case N_SETB: case N_SETB | N_EXT:
       {
 	char *copy = bfd_alloc (abfd, strlen (cache_ptr->symbol.name) + 1);
 	asection *section;
@@ -1102,19 +1102,19 @@ DEFUN (translate_from_native_sym_flags, (sym_pointer, cache_ptr, abfd),
 	/* Build a relocation entry for the constructor */
 	switch ((cache_ptr->type & N_TYPE))
 	  {
-	  case N_SETA:
+	  case N_SETA: case N_SETA | N_EXT:
 	    into_section = &bfd_abs_section;
 	    cache_ptr->type = N_ABS;
 	    break;
-	  case N_SETT:
+	  case N_SETT: case N_SETT | N_EXT:
 	    into_section = (asection *) obj_textsec (abfd);
 	    cache_ptr->type = N_TEXT;
 	    break;
-	  case N_SETD:
+	  case N_SETD: case N_SETD | N_EXT:
 	    into_section = (asection *) obj_datasec (abfd);
 	    cache_ptr->type = N_DATA;
 	    break;
-	  case N_SETB:
+	  case N_SETB: case N_SETB | N_EXT:
 	    into_section = (asection *) obj_bsssec (abfd);
 	    cache_ptr->type = N_BSS;
 	    break;
@@ -3085,21 +3085,21 @@ aout_link_add_symbols (abfd, info)
 	case N_COMM | N_EXT:
 	  section = &bfd_com_section;
 	  break;
-	case N_SETA:
+	case N_SETA: case N_SETA | N_EXT:
 	  section = &bfd_abs_section;
 	  flags |= BSF_CONSTRUCTOR;
 	  break;
-	case N_SETT:
+	case N_SETT: case N_SETT | N_EXT:
 	  section = obj_textsec (abfd);
 	  flags |= BSF_CONSTRUCTOR;
 	  value -= bfd_get_section_vma (abfd, section);
 	  break;
-	case N_SETD:
+	case N_SETD: case N_SETD | N_EXT:
 	  section = obj_datasec (abfd);
 	  flags |= BSF_CONSTRUCTOR;
 	  value -= bfd_get_section_vma (abfd, section);
 	  break;
-	case N_SETB:
+	case N_SETB: case N_SETB | N_EXT:
 	  section = obj_bsssec (abfd);
 	  flags |= BSF_CONSTRUCTOR;
 	  value -= bfd_get_section_vma (abfd, section);
@@ -3217,6 +3217,8 @@ NAME(aout,final_link) (abfd, info, callback)
       exec_hdr (abfd)->a_trsize = trsize;
       exec_hdr (abfd)->a_drsize = drsize;
     }
+
+  exec_hdr (abfd)->a_entry = bfd_get_start_address (abfd);
 
   /* Adjust the section sizes and vmas according to the magic number.
      This sets a_text, a_data and a_bss in the exec_hdr and sets the
