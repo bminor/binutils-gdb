@@ -62,7 +62,7 @@ static void ppc_toc PARAMS ((int));
 #ifdef OBJ_ELF
 static bfd_reloc_code_real_type ppc_elf_suffix PARAMS ((char **));
 static void ppc_elf_cons PARAMS ((int));
-static void ppc_elf_validate_fix (fixS *, segT);
+static void ppc_elf_validate_fix PARAMS ((fixS *, segT));
 #endif
 
 /* Generic assembler global variables which must be defined by all
@@ -137,9 +137,6 @@ static int ppc_cpu = 0;
 /* The size of the processor we are assembling for.  This is either
    PPC_OPCODE_32 or PPC_OPCODE_64.  */
 static int ppc_size = PPC_OPCODE_32;
-
-/* The endianness we are using.  */
-static int ppc_big_endian = PPC_BIG_ENDIAN;
 
 /* Opcode hash table.  */
 static struct hash_control *ppc_hash;
@@ -266,14 +263,22 @@ md_parse_option (c, arg)
       /* -many means to assemble for any architecture (PWR/PWRX/PPC).  */
       else if (strcmp (arg, "any") == 0)
 	ppc_cpu = PPC_OPCODE_POWER | PPC_OPCODE_POWER2 | PPC_OPCODE_PPC;
+
 #ifdef OBJ_ELF
       /* -mrelocatable -- warn about initializations that require relocation */
       else if (strcmp (arg, "relocatable") == 0)
 	mrelocatable = true;
+
+      /* -mlittle/-mbig set the endianess */
+      else if (strcmp (arg, "little") == 0 || strcmp (arg, "little-endian") == 0)
+	target_big_endian = 0;
+
+      else if (strcmp (arg, "big") == 0 || strcmp (arg, "big-endian") == 0)
+	target_big_endian = 1;
 #endif
       else
 	{
-	  as_bad ("invalid architecture -m%s", arg);
+	  as_bad ("invalid switch -m%s", arg);
 	  return 0;
 	}
       break;
@@ -304,15 +309,19 @@ md_show_usage (stream)
   fprintf(stream, "\
 PowerPC options:\n\
 -u			ignored\n\
--mpwrx			generate code for IBM POWER/2 (RIOS2)\n\
+-mpwrx, -mpwr2		generate code for IBM POWER/2 (RIOS2)\n\
 -mpwr			generate code for IBM POWER (RIOS1)\n\
 -m601			generate code for Motorola PowerPC 601\n\
 -mppc, -mppc32, -m403, -m603, -m604\n\
 			generate code for Motorola PowerPC 603/604\n\
+-mppc64, -m620		generate code for Motorola PowerPC 620\n\
 -many			generate code for any architecture (PWR/PWRX/PPC)\n");
 #ifdef OBJ_ELF
   fprintf(stream, "\
--mrelocatable		warn incompatible with GCC's -mrelocatble option\n\
+-mrelocatable		support for GCC's -mrelocatble option\n\
+-mlittle, -mlittle-endian\n\
+			generate code for a little endian machine\n
+-mbig, -mbig-endian	generate code for a big endian machine\n
 -V			print assembler version number\n\
 -Qy, -Qn		ignored\n");
 #endif
@@ -329,10 +338,11 @@ ppc_set_cpu ()
     {
       if (strcmp (default_cpu, "rs6000") == 0)
 	ppc_cpu = PPC_OPCODE_POWER;
-      else if (strcmp (default_cpu, "powerpc") == 0)
+      else if (strcmp (default_cpu, "powerpc") == 0
+	       || strcmp (default_cpu, "powerpcle") == 0)
 	ppc_cpu = PPC_OPCODE_PPC;
       else
-	abort ();
+	as_fatal ("Unknown default cpu = %s", default_cpu);
     }
 }
 
@@ -348,7 +358,7 @@ ppc_arch ()
   else if ((ppc_cpu & PPC_OPCODE_POWER) != 0)
     return bfd_arch_rs6000;
   else
-    abort ();
+    as_fatal ("Neither Power nor PowerPC opcodes were selected.");
 }
 
 /* This function is called when the assembler starts up.  It is called
@@ -427,7 +437,7 @@ md_begin ()
     }
 
   /* Tell the main code what the endianness is.  */
-  target_big_endian = ppc_big_endian;
+  target_big_endian = PPC_BIG_ENDIAN;
 
 #ifdef OBJ_COFF
   ppc_coff_debug_section = coff_section_from_bfd_index (stdoutput, N_DEBUG);
@@ -586,7 +596,9 @@ ppc_elf_cons (nbytes)
 
 /* Validate any relocations emitted for -mrelocatable */
 static void
-ppc_elf_validate_fix (fixS *fixp, segT seg)
+ppc_elf_validate_fix (fixp, seg)
+     fixS *fixp;
+     segT seg;
 {
   if (mrelocatable
       && !fixp->fx_done
@@ -831,10 +843,11 @@ md_assemble (str)
   md_number_to_chars (f, insn, 4);
 
   /* Create any fixups.  At this point we do not use a
-     bfd_reloc_code_real_type, but instead just use the operand index.
-     This lets us easily handle fixups for any operand type, although
-     that is admittedly not a very exciting feature.  We pick a BFD
-     reloc type in md_apply_fix.  */
+     bfd_reloc_code_real_type, but instead just use the
+     BFD_RELOC_UNUSED plus the operand index.  This lets us easily
+     handle fixups for any operand type, although that is admittedly
+     not a very exciting feature.  We pick a BFD reloc type in
+     md_apply_fix.  */
   for (i = 0; i < fc; i++)
     {
       const struct powerpc_operand *operand;
@@ -843,12 +856,13 @@ md_assemble (str)
       if (fixups[i].reloc != BFD_RELOC_UNUSED)
 	{
 	  reloc_howto_type *reloc_howto = bfd_reloc_type_lookup (stdoutput, fixups[i].reloc);
-	  int offset = (!reloc_howto) ? 0 : (4 - bfd_get_reloc_size (reloc_howto));
+	  int size = (!reloc_howto) ? 0 : bfd_get_reloc_size (reloc_howto);
+	  int offset = target_big_endian ? (4 - size) : 0;
 
-	  if (offset < 0)
-	    offset = 0;
+	  if (size > 4)
+	    abort();
 
-	  fix_new_exp (frag_now, f - frag_now->fr_literal + offset, 4 - offset,
+	  fix_new_exp (frag_now, f - frag_now->fr_literal + offset, size,
 		       &fixups[i].exp, (reloc_howto && reloc_howto->pc_relative),
 		       fixups[i].reloc);
 	}
@@ -2317,7 +2331,7 @@ md_atof (type, litp, sizep)
 
   *sizep = prec * 2;
 
-  if (ppc_big_endian)
+  if (target_big_endian)
     {
       for (i = 0; i < prec; i++)
 	{
@@ -2346,7 +2360,7 @@ md_number_to_chars (buf, val, n)
      valueT val;
      int n;
 {
-  if (ppc_big_endian)
+  if (target_big_endian)
     number_to_chars_bigendian (buf, val, n);
   else
     number_to_chars_littleendian (buf, val, n);
@@ -2609,13 +2623,13 @@ md_apply_fix3 (fixp, valuep, seg)
       /* Fetch the instruction, insert the fully resolved operand
 	 value, and stuff the instruction back again.  */
       where = fixp->fx_frag->fr_literal + fixp->fx_where;
-      if (ppc_big_endian)
+      if (target_big_endian)
 	insn = bfd_getb32 ((unsigned char *) where);
       else
 	insn = bfd_getl32 ((unsigned char *) where);
       insn = ppc_insert_operand (insn, operand, (offsetT) value,
 				 fixp->fx_file, fixp->fx_line);
-      if (ppc_big_endian)
+      if (target_big_endian)
 	bfd_putb32 ((bfd_vma) insn, (unsigned char *) where);
       else
 	bfd_putl32 ((bfd_vma) insn, (unsigned char *) where);
@@ -2649,7 +2663,7 @@ md_apply_fix3 (fixp, valuep, seg)
 	       && ppc_is_toc_sym (fixp->fx_addsy))
 	{
 	  fixp->fx_size = 2;
-	  if (ppc_big_endian)
+	  if (target_big_endian)
 	    fixp->fx_where += 2;
 	  fixp->fx_r_type = BFD_RELOC_PPC_TOC16;
 	}

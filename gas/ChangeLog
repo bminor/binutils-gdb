@@ -1,3 +1,9 @@
+Wed May 17 00:59:12 1995  Andrew Cagney - aka Noid  <cagney@highland.com.au>
+
+	* config/tc-ppc.c (md_begin): Was assuming that an instruction was
+	bigendian and hence 16bit relocs withing instructions would
+        ALWAYS be at addresses i+2-i+3.  In LE mode it is i+0-i+1.
+
 Tue May 16 16:29:58 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* config/obj-multi.h (obj_frob_symbol, obj_frob_file, S_GET_SIZE,
