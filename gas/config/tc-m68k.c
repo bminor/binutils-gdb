@@ -432,10 +432,10 @@ static const int n_archs = sizeof (archs) / sizeof (archs[0]);
    BYTE and SHORT forms, punting if that isn't enough.  This gives us four
    different relaxation modes for branches:  */
 
-#define BRANCHBWL	1	/* branch byte, word, or long */
-#define BRABSJUNC	2	/* absolute jump for LONG, unconditional */
-#define BRABSJCOND	3	/* absolute jump for LONG, conditional */
-#define BRANCHBW	4	/* branch byte or word */
+#define BRANCHBWL	0	/* branch byte, word, or long */
+#define BRABSJUNC	1	/* absolute jump for LONG, unconditional */
+#define BRABSJCOND	2	/* absolute jump for LONG, conditional */
+#define BRANCHBW	3	/* branch byte or word */
 
 /* We also relax coprocessor branches and DBcc's.  All CPUs that support
    coprocessor branches support them in word and long forms, so we have only
@@ -445,9 +445,9 @@ static const int n_archs = sizeof (archs) / sizeof (archs[0]);
    This gives us two relaxation modes.  If long branches are not available and
    absolute jumps are not acceptable, we don't relax DBcc's.  */
 
-#define FBRANCH		5	/* coprocessor branch */
-#define DBCCLBR		6	/* DBcc relaxable with a long branch */
-#define DBCCABSJ	7	/* DBcc relaxable with an absolute jump */
+#define FBRANCH		4	/* coprocessor branch */
+#define DBCCLBR		5	/* DBcc relaxable with a long branch */
+#define DBCCABSJ	6	/* DBcc relaxable with an absolute jump */
 
 /* That's all for instruction relaxation.  However, we also relax PC-relative
    operands.  Specifically, we have three operand relaxation modes.  On the
@@ -460,9 +460,9 @@ static const int n_archs = sizeof (archs) / sizeof (archs[0]);
    form of the PC+displacement+index operand.  Finally, some absolute operands
    can be relaxed down to 16-bit PC-relative.  */
 
-#define PCREL1632	8	/* 16-bit or 32-bit PC-relative */
-#define PCINDEX		9	/* PC+displacement+index */
-#define ABSTOPCREL	10	/* absolute relax down to 16-bit PC-relative */
+#define PCREL1632	7	/* 16-bit or 32-bit PC-relative */
+#define PCINDEX		8	/* PC+displacement+index */
+#define ABSTOPCREL	9	/* absolute relax down to 16-bit PC-relative */
 
 /* Note that calls to frag_var need to specify the maximum expansion
    needed; this is currently 10 bytes for DBCC.  */
@@ -475,60 +475,55 @@ static const int n_archs = sizeof (archs) / sizeof (archs[0]);
    */
 relax_typeS md_relax_table[] =
 {
-  {1, 1, 0, 0},			/* First entries aren't used */
-  {1, 1, 0, 0},			/* For no good reason except */
-  {1, 1, 0, 0},			/* that the VAX doesn't either */
-  {1, 1, 0, 0},
+  {   127,   -128,  0, TAB (BRANCHBWL, SHORT) },
+  { 32767, -32768,  2, TAB (BRANCHBWL, LONG) },
+  {     0,	0,  4, 0 },
+  {     1,	1,  0, 0 },
 
-  {(127), (-128), 0, TAB (BRANCHBWL, SHORT)},
-  {(32767), (-32768), 2, TAB (BRANCHBWL, LONG)},
-  {0, 0, 4, 0},
-  {1, 1, 0, 0},
+  {   127,   -128,  0, TAB (BRABSJUNC, SHORT) },
+  { 32767, -32768,  2, TAB (BRABSJUNC, LONG) },
+  {	0,	0,  4, 0 },
+  {	1,	1,  0, 0 },
 
-  {(127), (-128), 0, TAB (BRABSJUNC, SHORT)},
-  {(32767), (-32768), 2, TAB (BRABSJUNC, LONG)},
-  {0, 0, 4, 0},
-  {1, 1, 0, 0},
+  {   127,   -128,  0, TAB (BRABSJCOND, SHORT) },
+  { 32767, -32768,  2, TAB (BRABSJCOND, LONG) },
+  {	0,	0,  6, 0 },
+  {	1,	1,  0, 0 },
 
-  {(127), (-128), 0, TAB (BRABSJCOND, SHORT)},
-  {(32767), (-32768), 2, TAB (BRABSJCOND, LONG)},
-  {0, 0, 6, 0},
-  {1, 1, 0, 0},
+  {   127,   -128,  0, TAB (BRANCHBW, SHORT) },
+  {	0,	0,  2, 0 },
+  {	1,	1,  0, 0 },
+  {	1,	1,  0, 0 },
 
-  {(127), (-128), 0, TAB (BRANCHBW, SHORT)},
-  {0, 0, 2, 0},
-  {1, 1, 0, 0},
-  {1, 1, 0, 0},
+  {	1, 	1,  0, 0 },		/* FBRANCH doesn't come BYTE */
+  { 32767, -32768,  2, TAB (FBRANCH, LONG) },
+  {	0,	0,  4, 0 },
+  {	1, 	1,  0, 0 },
 
-  {1, 1, 0, 0},			/* FBRANCH doesn't come BYTE */
-  {(32767), (-32768), 2, TAB (FBRANCH, LONG)},
-  {0, 0, 4, 0},
-  {1, 1, 0, 0},
+  {	1,	1,  0, 0 },		/* DBCC doesn't come BYTE */
+  { 32767, -32768,  2, TAB (DBCCLBR, LONG) },
+  {	0,	0, 10, 0 },
+  {	1,	1,  0, 0 },
 
-  {1, 1, 0, 0},			/* DBCC doesn't come BYTE */
-  {(32767), (-32768), 2, TAB (DBCCLBR, LONG)},
-  {0, 0, 10, 0},
-  {1, 1, 0, 0},
+  {	1,	1,  0, 0 },		/* DBCC doesn't come BYTE */
+  { 32767, -32768,  2, TAB (DBCCABSJ, LONG) },
+  {	0,	0, 10, 0 },
+  {	1,	1,  0, 0 },
 
-  {1, 1, 0, 0},			/* DBCC doesn't come BYTE */
-  {(32767), (-32768), 2, TAB (DBCCABSJ, LONG)},
-  {0, 0, 10, 0},
-  {1, 1, 0, 0},
+  {	1, 	1,  0, 0 },		/* PCREL1632 doesn't come BYTE */
+  { 32767, -32768,  2, TAB (PCREL1632, LONG) },
+  {	0,	0,  6, 0 },
+  {	1,	1,  0, 0 },
 
-  {1, 1, 0, 0},			/* PCREL1632 doesn't come BYTE */
-  {32767, -32768, 2, TAB (PCREL1632, LONG)},
-  {0, 0, 6, 0},
-  {1, 1, 0, 0},
+  {   125,   -130,  0, TAB (PCINDEX, SHORT) },
+  { 32765, -32770,  2, TAB (PCINDEX, LONG) },
+  {	0,	0,  4, 0 },
+  {	1,	1,  0, 0 },
 
-  {125, -130, 0, TAB (PCINDEX, SHORT)},
-  {32765, -32770, 2, TAB (PCINDEX, LONG)},
-  {0, 0, 4, 0},
-  {1, 1, 0, 0},
-
-  {1, 1, 0, 0},			/* ABSTOPCREL doesn't come BYTE */
-  {(32767), (-32768), 2, TAB (ABSTOPCREL, LONG)},
-  {0, 0, 4, 0},
-  {1, 1, 0, 0},
+  {	1,	1,  0, 0 },		/* ABSTOPCREL doesn't come BYTE */
+  { 32767, -32768,  2, TAB (ABSTOPCREL, LONG) },
+  {	0,	0,  4, 0 },
+  {	1,	1,  0, 0 },
 };
 
 /* These are the machine dependent pseudo-ops.  These are included so
@@ -4375,10 +4370,6 @@ md_convert_frag_1 (fragP)
   disp = fragP->fr_symbol ? S_GET_VALUE (fragP->fr_symbol) : 0;
   disp = (disp + fragP->fr_offset) - object_address;
 
-#ifdef BFD_ASSEMBLER
-  disp += symbol_get_frag (fragP->fr_symbol)->fr_address;
-#endif
-
   switch (fragP->fr_subtype)
     {
     case TAB (BRANCHBWL, BYTE):
@@ -4594,10 +4585,6 @@ md_estimate_size_before_relax (fragP, segment)
      register fragS *fragP;
      segT segment;
 {
-  int old_fix;
-
-  old_fix = fragP->fr_fix;
-
   /* Handle SZ_UNDEF first, it can be changed to BYTE or SHORT.  */
   switch (fragP->fr_subtype)
     {
@@ -4694,44 +4681,31 @@ md_estimate_size_before_relax (fragP, segment)
     case TAB (BRABSJCOND, BYTE):
     case TAB (BRANCHBW, BYTE):
       /* We can't do a short jump to the next instruction, so in that
-	 case we force word mode.  At this point S_GET_VALUE should
-	 return the offset of the symbol within its frag.  If the
-	 symbol is at the start of a frag, and it is the next frag
-	 with any data in it (usually this is just the next frag, but
-	 assembler listings may introduce empty frags), we must use
-	 word mode.  */
-      if (fragP->fr_symbol && S_GET_VALUE (fragP->fr_symbol) == 0)
+	 case we force word mode.  If the symbol is at the start of a
+	 frag, and it is the next frag with any data in it (usually
+	 this is just the next frag, but assembler listings may
+	 introduce empty frags), we must use word mode.  */
+      if (fragP->fr_symbol)
 	{
-	  fragS *stop;
-	  fragS *l;
+	  fragS *sym_frag;
 
-	  stop = symbol_get_frag (fragP->fr_symbol);
-
-	  for (l = fragP->fr_next; l != stop; l = l->fr_next)
+	  sym_frag = symbol_get_frag (fragP->fr_symbol);
+	  if (S_GET_VALUE (fragP->fr_symbol) == sym_frag->fr_address)
 	    {
-	      /* Catch empty alignment frags whoes fr_offset field
-		 is an alignment requirement of 2 bytes.  The check
-		 below will misinterpret this as evidence that real
-		 code exists between the symbol and the instruction
-		 and so will not convert the short jump into a word
-		 jump.  */
-	      if (l->fr_fix == 0
-		  && l->fr_var == 1
-		  && (l->fr_type == rs_align || l->fr_type == rs_align_code))
-		continue;
-    
-	      if (l->fr_fix + l->fr_var != 0)
-		break;
+	      fragS *l;
+
+	      for (l = fragP->fr_next; l != sym_frag; l = l->fr_next)
+		if (l->fr_fix != 0)
+		  break;
+	      if (l == sym_frag)
+		fragP->fr_subtype = TAB (TABTYPE (fragP->fr_subtype), SHORT);
 	    }
-	  if (l == stop)
-	    fragP->fr_subtype = TAB (TABTYPE (fragP->fr_subtype), SHORT);
 	}
       break;
     default:
       break;
     }
-  fragP->fr_var = md_relax_table[fragP->fr_subtype].rlx_length;
-  return fragP->fr_var + fragP->fr_fix - old_fix;
+  return md_relax_table[fragP->fr_subtype].rlx_length;
 }
 
 #if defined(OBJ_AOUT) | defined(OBJ_BOUT)

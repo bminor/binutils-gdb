@@ -1,5 +1,28 @@
 2001-07-23  Alan Modra  <amodra@bigpond.net.au>
 
+	* symbols.c (S_GET_VALUE): Don't treat O_constant and local
+	symbols specially.  Always resolve, adding fr_address to value.
+	* write.c (write_object_file): Don't add fr_address to sym values.
+	(relax_frag): Likewise.
+	(relax_segment): Likewise.
+	* config/obj-ieee.c (do_symbols): Likewise.
+	* config/tc-cris.c (md_convert_frag): Likewise.
+	* config/tc-fr30.c (md_convert_frag): Likewise.
+	* config/tc-i386.c (md_convert_frag): Likewise.
+	* config/tc-m32r.c (md_convert_frag): Likewise.
+	* config/tc-m68hc11.c (md_convert_frag): Likewise.
+	* config/tc-mcore.c (md_convert_frag): Likewise.
+	* config/tc-mips.c (mips16_extended_frag): Likewise.
+	* config/tc-ns32k.c (md_convert_frag): Likewise.
+	* config/tc-m68k.c (md_convert_frag_1): Likewise.
+	(BRANCHBWL, BRABSJUNC, BRABSJCOND, BRANCHBW, FBRANCH, DBCCLBR,
+	DBCCABSJ, PCREL1632, PCINDEX, ABSTOPCREL): Decrement.
+	(md_relax_table): Remove first four entries.  Format.
+	(md_estimate_size_before_relax): Remove old_fix.  Don't bother
+	setting fr_var.  Simplify byte branch checks.
+
+2001-07-23  Alan Modra  <amodra@bigpond.net.au>
+
 	* config/tc-hppa.c (pa_parse_nonneg_cmpsub_cmpltr): Remove
 	"isbranch" param as all calls have it set.
 	(pa_parse_neg_cmpsub_cmpltr): Likewise.
@@ -165,11 +188,11 @@
 	fscan->fx_frag.
 
 	* write.c (TC_FINALIZE_SYMS_BEFORE_SIZE_SEG): Default to 1.
-        (write_object_file): Set finalize_syms to
-        TC_FINALIZE_SYMS_BEFORE_SIZE_SEG just before size_segs is
-        called.
+	(write_object_file): Set finalize_syms to
+	TC_FINALIZE_SYMS_BEFORE_SIZE_SEG just before size_segs is
+	called.
 
-        * doc/internals.texi; Document
+	* doc/internals.texi; Document
 	TC_FINALIZE_SYMS_BEFORE_SIZE_SEG.
 
 2001-07-02  Alan Modra  <amodra@bigpond.net.au>
@@ -294,11 +317,11 @@
 
 2001-06-18  H.J. Lu <hjl@gnu.org>
 
-        * doc/Makefile.am (info): Depend on $(MANS).
-        (as.1): Remove the prefix `$(srcdir)/'.
-        * doc/Makefile.in: Regenerated.
+	* doc/Makefile.am (info): Depend on $(MANS).
+	(as.1): Remove the prefix `$(srcdir)/'.
+	* doc/Makefile.in: Regenerated.
 
-        * as.1: Removed.
+	* as.1: Removed.
 
 2001-06-18  Philip Blundell  <philb@gnu.org>
 
@@ -331,21 +354,21 @@
 2001-06-12  Peter Jakubek <pjak@snafu.de>
 
 	* gas/config/tc-m68k.c (parse_mri_control_operand): Fix handling
-        of AND/OR.
-        (swap_mri_condition): Add HS (alias fo CC) and LO (alias for CS).
-        (reverse_mri_condition): Likewise.
-        (swap_mri_condition): Issue warning for conditions that can not be
-        swapped.
-        (build_mri_control_operand): Fix order of operands (swapped).
-        (build_mri_control_operand): Allow upper case extension in structured
-        control directives.
-        (s_mri_else): Likewise.
-        (s_mri_next): Likewise.
-        (s_mri_for): Likewise.
-        (s_mri_if): Fix handling comment ('*') in mri mode.
-        (s_mri_while): Likewise.
-        * gas/macro.c (macro_expand): Allow macro invocation with empty
-        extension.
+	of AND/OR.
+	(swap_mri_condition): Add HS (alias fo CC) and LO (alias for CS).
+	(reverse_mri_condition): Likewise.
+	(swap_mri_condition): Issue warning for conditions that can not be
+	swapped.
+	(build_mri_control_operand): Fix order of operands (swapped).
+	(build_mri_control_operand): Allow upper case extension in structured
+	control directives.
+	(s_mri_else): Likewise.
+	(s_mri_next): Likewise.
+	(s_mri_for): Likewise.
+	(s_mri_if): Fix handling comment ('*') in mri mode.
+	(s_mri_while): Likewise.
+	* gas/macro.c (macro_expand): Allow macro invocation with empty
+	extension.
 
 2001-06-12  Nick Clifton  <nickc@cambridge.redhat.com>
 

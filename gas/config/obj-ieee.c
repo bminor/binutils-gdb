@@ -292,7 +292,7 @@ do_symbols (abfd)
 	{
 	  ptr->sy_symbol.sy.section =
 	    (asection *) (segment_info[ptr->sy_symbol.seg].user_stuff);
-	  S_SET_VALUE (ptr, S_GET_VALUE (ptr) + ptr->sy_frag->fr_address);
+	  S_SET_VALUE (ptr, S_GET_VALUE (ptr));
 	  if (ptr->sy_symbol.sy.flags == 0)
 	    ptr->sy_symbol.sy.flags = BSF_LOCAL;
 	}

@@ -2441,9 +2441,8 @@ md_convert_frag (abfd, sec, fragP)
   buffer_address += fragP->fr_fix;
 
   /* The displacement of the address, from current location.  */
-  value = fragP->fr_symbol ? S_GET_VALUE (fragP->fr_symbol) : 0;
+  value = S_GET_VALUE (fragP->fr_symbol);
   disp = (value + fragP->fr_offset) - object_address;
-  disp += symbol_get_frag (fragP->fr_symbol)->fr_address;
 
   switch (fragP->fr_subtype)
     {

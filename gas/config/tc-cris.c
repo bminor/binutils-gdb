@@ -495,10 +495,7 @@ md_convert_frag (abfd, sec, fragP)
   opcodep = fragP->fr_opcode;
 
   symbolP = fragP->fr_symbol;
-  target_address
-    = (symbolP
-       ? S_GET_VALUE (symbolP) + symbol_get_frag(fragP->fr_symbol)->fr_address
-       : 0 ) + fragP->fr_offset;
+  target_address = (symbolP ? S_GET_VALUE (symbolP) : 0) + fragP->fr_offset;
   address_of_var_part = fragP->fr_address + var_part_offset;
 
   switch (fragP->fr_subtype)

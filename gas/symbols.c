@@ -1574,10 +1574,10 @@ S_GET_VALUE (s)
 {
 #ifdef BFD_ASSEMBLER
   if (LOCAL_SYMBOL_CHECK (s))
-    return ((struct local_symbol *) s)->lsy_value;
+    return resolve_symbol_value (s);
 #endif
 
-  if (!s->sy_resolved && s->sy_value.X_op != O_constant)
+  if (!s->sy_resolved)
     {
       valueT val = resolve_symbol_value (s);
       if (!finalize_syms)

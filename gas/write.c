@@ -1750,9 +1750,6 @@ write_object_file ()
 	    /* Patch the jump table.  */
 	    /* This is the offset from ??? to table_ptr+0.  */
 	    to_addr = table_addr - S_GET_VALUE (lie->sub);
-#ifdef BFD_ASSEMBLER
-	    to_addr -= symbol_get_frag (lie->sub)->fr_address;
-#endif
 #ifdef TC_CHECK_ADJUSTED_BROKEN_DOT_WORD
 	    TC_CHECK_ADJUSTED_BROKEN_DOT_WORD (to_addr, lie);
 #endif
@@ -1769,9 +1766,6 @@ write_object_file ()
 	    /* This is a long jump from table_ptr+0 to the final target.  */
 	    from_addr = table_addr;
 	    to_addr = S_GET_VALUE (lie->add) + lie->addnum;
-#ifdef BFD_ASSEMBLER
-	    to_addr += symbol_get_frag (lie->add)->fr_address;
-#endif
 	    md_create_long_jump (table_ptr, from_addr, to_addr, lie->dispfrag,
 				 lie->add);
 	    table_ptr += md_long_jump_size;
@@ -2115,7 +2109,7 @@ relax_frag (segment, fragP, stretch)
 #endif
       know (!(S_GET_SEGMENT (symbolP) == absolute_section)
 	    || sym_frag == &zero_address_frag);
-      target += S_GET_VALUE (symbolP) + sym_frag->fr_address;
+      target += S_GET_VALUE (symbolP);
 
       /* If frag has yet to be reached on this pass,
 	 assume it will move by STRETCH just as we did.
@@ -2356,11 +2350,9 @@ relax_segment (segment_frag_root, segment)
 		      if (lie->added)
 			continue;
 
-		      offset = (symbol_get_frag (lie->add)->fr_address
-				+ S_GET_VALUE (lie->add)
+		      offset = (S_GET_VALUE (lie->add)
 				+ lie->addnum
-				- (symbol_get_frag (lie->sub)->fr_address
-				   + S_GET_VALUE (lie->sub)));
+				- S_GET_VALUE (lie->sub));
 		      if (offset <= -32768 || offset >= 32767)
 			{
 			  if (flag_warn_displacement)
@@ -2436,9 +2428,8 @@ relax_segment (segment_frag_root, segment)
 		      know (!(S_GET_SEGMENT (symbolP) == SEG_ABSOLUTE)
 			    || (symbolP->sy_frag == &zero_address_frag));
 #endif
-		      target += (S_GET_VALUE (symbolP)
-				 + symbol_get_frag (symbolP)->fr_address);
-		    }		/* if we have a symbol  */
+		      target += S_GET_VALUE (symbolP);
+		    }
 
 		  know (fragP->fr_next);
 		  after = fragP->fr_next->fr_address;

@@ -2051,9 +2051,6 @@ md_convert_frag (abfd, sec, fragP)
 
   /* The displacement of the address, from current location.  */
   disp = (S_GET_VALUE (fragP->fr_symbol) + fragP->fr_offset) - object_address;
-#ifdef BFD_ASSEMBLER
-  disp += symbol_get_frag (fragP->fr_symbol)->fr_address;
-#endif
   disp += md_pcrel_adjust (fragP);
 
   md_number_to_disp (buffer_address, (long) disp, (int) ext);

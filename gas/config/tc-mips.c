@@ -10895,7 +10895,7 @@ mips16_extended_frag (fragp, sec, stretch)
     }
 
   sym_frag = symbol_get_frag (fragp->fr_symbol);
-  val = S_GET_VALUE (fragp->fr_symbol) + sym_frag->fr_address;
+  val = S_GET_VALUE (fragp->fr_symbol);
   symsec = S_GET_SEGMENT (fragp->fr_symbol);
 
   if (op->pcrel)

@@ -387,7 +387,6 @@ md_convert_frag (abfd, sec, fragP)
     {
       /* Address we want to reach in file space.  */
       target_address = S_GET_VALUE (fragP->fr_symbol) + fragP->fr_offset;
-      target_address += symbol_get_frag (fragP->fr_symbol)->fr_address;
       addend = (target_address - (opcode_address & -4)) >> 2;
     }
 
