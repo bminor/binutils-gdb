@@ -50,8 +50,7 @@ struct modebyte
 /*
  * A symbol to be the child of indirect calls:
  */
-Sym indirectchild;
-
+static Sym indirectchild;
 
 static operandenum vax_operandmode PARAMS ((struct modebyte *));
 static char *vax_operandname PARAMS ((operandenum));
