@@ -1,3 +1,8 @@
+Thu Sep 19 15:34:17 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gencode.c (process_instructions): Correct handling of nor
+	instruction.
+
 Mon Sep 16 11:38:16 1996  James G. Smith  <jsmith@cygnus.co.uk>
 
 	* interp.c (sim_monitor): Improved monitor printf

@@ -1240,7 +1240,7 @@ process_instructions(doarch,features)
   	break ;
 
        case OR:
-        printf("   GPR[destreg] = (%sop1 | op2);\n",((MIPS_DECODE[loop].flags & NOT) ? "~" : ""));
+        printf("   GPR[destreg] = %s(op1 | op2);\n",((MIPS_DECODE[loop].flags & NOT) ? "~" : ""));
 	break ;
 
        case XOR:
