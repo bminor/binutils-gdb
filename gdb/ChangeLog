@@ -1,5 +1,8 @@
 Mon Dec 27 11:07:05 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdbtypes.h: Expand on comments for TYPE_CODE_BITSTRING and
+	TYPE_CODE_STRING a bit.
+
 	* m68k-tdep.c (m68k_skip_prologue, m68k_find_saved_regs):
 	Allow pea %fp; move.l %sp, %fp instead of link instruction to
 	set up the new frame.

@@ -91,8 +91,16 @@ enum type_code
 
   TYPE_CODE_SET,		/* Pascal sets */
   TYPE_CODE_RANGE,		/* Range (integers within spec'd bounds) */
-  TYPE_CODE_STRING,		/* String types, distinct from array of char */
-  TYPE_CODE_BITSTRING,		/* String of bits, distinct from bool array */
+
+  /* A string type which is like an array of character but prints
+     differently (at least for CHILL).  It does not contain a length
+     field as Pascal strings (for many Pascals, anyway) do; if we want
+     to deal with such strings, we should use a new type code.  */
+  TYPE_CODE_STRING,
+
+  /* String of bits; like TYPE_CODE_SET but prints differently (at least
+     for CHILL).  */
+  TYPE_CODE_BITSTRING,
 
   /* Unknown type.  The length field is valid if we were able to
      deduce that much about the type, or 0 if we don't even know that.  */
