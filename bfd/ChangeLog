@@ -1,3 +1,7 @@
+2002-01-21  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* config.bfd (ia64*-*-netbsd*): New target.
+
 2002-01-21  Thomas Klausner <wiz@danbala.ifoer.tuwien.ac.at>
 
 	* som.c (som_write_space_strings): Comment typo fix.
