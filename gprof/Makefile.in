@@ -103,7 +103,7 @@ install: all
 	$(INSTALL_XFORM1) $(srcdir)/gprof.1 $(man1dir)/gprof.1
 
 gprof:	$(OBJS) $(LIBDEPS)
-	$(CC) -o $(PROG) $(HLDFLAGS) $(LDFLAGS) $(OBJS) $(LIBS)
+	$(CC) -o $(PROG) $(CFLAGS) $(HLDFLAGS) $(LDFLAGS) $(OBJS) $(LIBS)
 
 mostlyclean:
 	-rm -f *.o core gprof nohup.out \
