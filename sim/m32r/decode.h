@@ -2,7 +2,7 @@
 
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
 This file is part of the GNU simulators.
 
@@ -60,7 +60,7 @@ typedef enum m32rbf_insn_type {
  , M32RBF_INSN_ST, M32RBF_INSN_ST_D, M32RBF_INSN_STB, M32RBF_INSN_STB_D
  , M32RBF_INSN_STH, M32RBF_INSN_STH_D, M32RBF_INSN_ST_PLUS, M32RBF_INSN_ST_MINUS
  , M32RBF_INSN_SUB, M32RBF_INSN_SUBV, M32RBF_INSN_SUBX, M32RBF_INSN_TRAP
- , M32RBF_INSN_UNLOCK, M32RBF_INSN_MAX
+ , M32RBF_INSN_UNLOCK, M32RBF_INSN__MAX
 } M32RBF_INSN_TYPE;
 
 /* Enum declaration for semantic formats in cpu family m32rbf.  */
