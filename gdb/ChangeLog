@@ -1,3 +1,9 @@
+Fri Jul 29 23:20:30 1994  Stu Grossman  (grossman@cygnus.com)
+
+	* findvar.c (write_pc write_pc_pid):  Remove casts to long when
+	calling write_register_pid.
+	* (write_register_pid):  Add prototype.
+
 Fri Jul 29 21:56:23 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 	* remote.c (read_frame):  Split readchar/checksum calculation into
