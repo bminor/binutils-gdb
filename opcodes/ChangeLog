@@ -1,3 +1,20 @@
+Tue Aug 17 12:23:52 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* m88k-dis.c (m88kdis): Make class unsigned.
+
+Thu Aug 12 15:08:18 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* alpha-dis.c (print_insn_alpha): One branch format case was
+	missing the instruction name.
+
+Wed Aug 11 19:29:39 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* Makefile.in (ALL_MACHINES): Renamed from DIS_LIBS.
+	Add the arch-specific auxiliary files.
+	(OFILES): Remove the arch-specific auxiliary files
+	and use BFD_MACHINES instead of DIS_LIBS.
+	* configure.in: Set BFD_MACHINES based on --with-targets option.
+
 Thu Aug 12 12:04:53 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* mips-opc.c: Added lwc1 E,A(b) to go with lwc1 T,A(b).  Similarly
