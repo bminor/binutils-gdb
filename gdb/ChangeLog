@@ -1,3 +1,14 @@
+2002-08-19  Daniel Jacobowitz  <drow@mvista.com>
+
+	* config/mips/tm-linux.h (REALTIME_LO, REALTIME_HI): Define
+	conditionally.
+	(JB_PC, JB_ELEMENT_SIZE): Rename to MIPS_LINUX_JB_PC and
+	MIPS_LINUX_JB_ELEMENT_SIZE.
+	* mips-linux-tdep.c (supply_gregset, fill_gregset): Use alloca
+	for MAX_REGISTER_RAW_SIZE arrays.
+	(mips_linux_get_longjmp_target): Use MIPS_LINUX_JB_PC and
+	MIPS_LINUX_JB_ELEMENT_SIZE.
+
 2002-08-19  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* i387-tdep.c (i387_print_float_info): Fix typo in comment.
