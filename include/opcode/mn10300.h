@@ -87,4 +87,6 @@ extern const struct mn10300_operand mn10300_operands[];
 #define MN10300_OPERAND_SIGNED 0x20
 
 #define MN10300_OPERAND_PROMOTE 0x40
+
+#define MN10300_OPERAND_PAREN 0x80
 #endif /* MN10300_H */

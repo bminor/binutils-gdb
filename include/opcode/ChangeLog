@@ -1,3 +1,7 @@
+Tue Oct  8 14:48:07 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300.h (MN10300_OPERAND_PAREN): Define.
+
 Mon Oct  7 16:52:11 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* mn10300.h (mn10300_opcode): Add "format" field.
