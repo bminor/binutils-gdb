@@ -948,6 +948,7 @@ extern void *gdbarch_data (struct gdbarch_data*);
 
 typedef void (gdbarch_swap_ftype) (void);
 extern void register_gdbarch_swap (void *data, unsigned long size, gdbarch_swap_ftype *init);
+#define REGISTER_GDBARCH_SWAP(VAR) register_gdbarch_swap (&(VAR), sizeof ((VAR)), NULL)
 
 
 
@@ -1096,6 +1097,11 @@ extern void set_gdbarch_from_file (bfd *);
 
 extern void set_architecture_from_arch_mach (enum bfd_architecture, unsigned long);
 
+
+/* Initialize the current architecture to the "first" one we find on
+   our list.  */
+
+extern void initialize_current_architecture (void);
 
 /* Helper function for targets that don't know how my arguments are
    being passed */

@@ -1,3 +1,18 @@
+1999-10-22  Dave Brolley  <brolley@cygnus.com>
+
+	* cgen-par.h (insn_address): New field in CGEN_WRITE_QUEUE_ELEMENT.
+	(CGEN_WRITE_QUEUE_ELEMENT_IADDR): New macro.
+	* cgen-par.c: Set insn_address for each queued write. Get pc from
+	cpu when executing queued writes.
+
+1999-10-19  Dave Brolley  <brolley@cygnus.com>
+
+	* cgen-par.h (sim_queue_fn_pc_write): New function.
+	(CGEN_FN_PC_WRITE): New enumerator.
+	(fn_pc_write): New union member.
+	* cgen-par.c (sim_queue_fn_pc_write): New function.
+	(cgen_write_queue_element_execute): Handle CGEN_FN_PC_WRITE.
+
 1999-10-18  Dave Brolley  <brolley@cygnus.com>
 
 	* cgen-par.h (CGEN_MEM_DI_WRITE): New enumerator.

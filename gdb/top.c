@@ -686,6 +686,7 @@ gdb_init (argv0)
   initialize_targets ();	/* Setup target_terminal macros for utils.c */
   initialize_utils ();		/* Make errors and warnings possible */
   initialize_all_files ();
+  initialize_current_architecture ();
   init_main ();			/* But that omits this file!  Do it now */
 
   /* The signal handling mechanism is different depending whether or

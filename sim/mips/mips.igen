@@ -702,9 +702,6 @@
 
 
 
-
-
-
 000000,5.RS,5.RT,5.RD,00000,101100:SPECIAL:64::DADD
 "dadd r<RD>, r<RS>, r<RT>"
 *mipsIII:
@@ -3108,6 +3105,7 @@
 
 110101,5.BASE,5.FT,16.OFFSET:COP1:64::LDC1
 "ldc1 f<FT>, <OFFSET>(r<BASE>)"
+*mipsI:
 *mipsII:
 *mipsIII:
 *mipsIV:
@@ -3465,8 +3463,8 @@
 }
 
 010001,10,3.FMT,00000,5.FS,5.FD,010101:COP1:32::RECIP.fmt
-*mipsIV:
 "recip.%s<FMT> f<FD>, f<FS>"
+*mipsIV:
 *vr5000:
 {
   unsigned32 instruction = instruction_0;
@@ -3545,6 +3543,7 @@
 
 111101,5.BASE,5.FT,16.OFFSET:COP1:64::SDC1
 "sdc1 f<FT>, <OFFSET>(r<BASE>)"
+*mipsI:
 *mipsII:
 *mipsIII:
 *mipsIV:

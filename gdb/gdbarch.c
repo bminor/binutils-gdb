@@ -3161,6 +3161,35 @@ int sizeof_call_dummy_words = sizeof (call_dummy_words);
 #endif
 
 
+/* Initialize the current architecture.  */
+void
+initialize_current_architecture ()
+{
+  if (GDB_MULTI_ARCH)
+    {
+      struct gdbarch_init_registration *rego;
+      const struct bfd_arch_info *chosen = NULL;
+      for (rego = gdbarch_init_registrary; rego != NULL; rego = rego->next)
+	{
+	  const struct bfd_arch_info *ap
+	    = bfd_lookup_arch (rego->bfd_architecture, 0);
+
+	  /* Choose the first architecture alphabetically.  */
+	  if (chosen == NULL
+	      || strcmp (ap->printable_name, chosen->printable_name) < 0)
+	    chosen = ap;
+	}
+
+      if (chosen != NULL)
+	{
+	  struct gdbarch_info info;
+	  memset (&info, 0, sizeof info);
+	  info.bfd_arch_info = chosen;
+	  gdbarch_update (info);
+	}
+    }
+}
+
 extern void _initialize_gdbarch (void);
 void
 _initialize_gdbarch ()

@@ -22,6 +22,7 @@
 #include "defs.h"
 #include "top.h"
 #include "inferior.h"
+#include "target.h"
 #include "terminal.h"		/* for job_control */
 #include "signals.h"
 #include "event-loop.h"

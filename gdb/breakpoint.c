@@ -157,7 +157,9 @@ insertion_state_t;
 static int
 remove_breakpoint PARAMS ((struct breakpoint *, insertion_state_t));
 
-static enum print_stop_action print_it_normal PARAMS ((bpstat));
+static enum print_stop_action print_it_typical PARAMS ((bpstat));
+
+static enum print_stop_action print_bp_stop_message (bpstat bs);
 
 typedef struct
   {
@@ -169,10 +171,6 @@ args_for_catchpoint_enable;
 static int watchpoint_check PARAMS ((PTR));
 
 static int cover_target_enable_exception_callback PARAMS ((PTR));
-
-static enum print_stop_action print_it_done PARAMS ((bpstat));
-
-static enum print_stop_action print_it_noop PARAMS ((bpstat));
 
 static void maintenance_info_breakpoints PARAMS ((char *, int));
 
@@ -226,8 +224,10 @@ static char *ep_parse_optional_if_clause PARAMS ((char **arg));
 
 static char *ep_parse_optional_filename PARAMS ((char **arg));
 
+#if defined(CHILD_INSERT_EXEC_CATCHPOINT)
 static void catch_exec_command_1 PARAMS ((char *arg, int tempflag, 
 					  int from_tty));
+#endif
 
 static void create_exception_catchpoint 
   PARAMS ((int tempflag, char *cond_string,
@@ -1740,91 +1740,98 @@ top:
   discard_cleanups (old_chain);
 }
 
-/* This is the normal print_it function for a bpstat.  In the future,
+/* This is the normal print function for a bpstat.  In the future,
    much of this logic could (should?) be moved to bpstat_stop_status,
-   by having it set different print_it functions.
+   by having it set different print_it values.
 
-   Current scheme: When we stop, bpstat_print() is called.
-   It loops through the bpstat list of things causing this stop,
-   calling the print_it function for each one. The default
-   print_it function, used for breakpoints, is print_it_normal().
-   (Also see print_it_noop() and print_it_done()).
+   Current scheme: When we stop, bpstat_print() is called.  It loops
+   through the bpstat list of things causing this stop, calling the
+   print_bp_stop_message function on each one. The behavior of the
+   print_bp_stop_message function depends on the print_it field of
+   bpstat. If such field so indicates, call this function here.
 
-   Return values from this routine (used by bpstat_print() to
-   decide what to do):
-   PRINT_NOTHING: Means we already printed all we needed to print, don't 
-   print anything else.
-   PRINT_SRC_ONLY: Means we printed something, and we do *not* desire that
-   something to be followed by a location.
-   PRINT_SCR_AND_LOC: Means we printed something, and we *do*  desire that
-   something to be followed by a location.
-   PRINT_UNKNOWN: Means we printed nothing or we need to do some more analysis.  */
+   Return values from this routine (ultimately used by bpstat_print()
+   and normal_stop() to decide what to do): 
+   PRINT_NOTHING: Means we already printed all we needed to print,
+   don't print anything else.
+   PRINT_SRC_ONLY: Means we printed something, and we do *not* desire
+   that something to be followed by a location.
+   PRINT_SCR_AND_LOC: Means we printed something, and we *do* desire
+   that something to be followed by a location.
+   PRINT_UNKNOWN: Means we printed nothing or we need to do some more
+   analysis.  */
 
 static enum print_stop_action
-print_it_normal (bs)
+print_it_typical (bs)
      bpstat bs;
 {
   /* bs->breakpoint_at can be NULL if it was a momentary breakpoint
      which has since been deleted.  */
-  if (bs->breakpoint_at == NULL
-      || (bs->breakpoint_at->type != bp_breakpoint
-	  && bs->breakpoint_at->type != bp_shlib_event
-	  && bs->breakpoint_at->type != bp_catch_load
-	  && bs->breakpoint_at->type != bp_catch_unload
-	  && bs->breakpoint_at->type != bp_catch_fork
-	  && bs->breakpoint_at->type != bp_catch_vfork
-	  && bs->breakpoint_at->type != bp_catch_exec
-	  && bs->breakpoint_at->type != bp_catch_catch
-	  && bs->breakpoint_at->type != bp_catch_throw
-	  && bs->breakpoint_at->type != bp_hardware_breakpoint
-	  && bs->breakpoint_at->type != bp_watchpoint
-	  && bs->breakpoint_at->type != bp_read_watchpoint
-	  && bs->breakpoint_at->type != bp_access_watchpoint
-	  && bs->breakpoint_at->type != bp_hardware_watchpoint))
+  if (bs->breakpoint_at == NULL)
     return PRINT_UNKNOWN;
 
-  if (ep_is_shlib_catchpoint (bs->breakpoint_at))
+  switch (bs->breakpoint_at->type)
     {
-      annotate_catchpoint (bs->breakpoint_at->number);
-      printf_filtered ("\nCatchpoint %d (", bs->breakpoint_at->number);
-      if (bs->breakpoint_at->type == bp_catch_load)
-	printf_filtered ("loaded");
-      else if (bs->breakpoint_at->type == bp_catch_unload)
-	printf_filtered ("unloaded");
-      printf_filtered (" %s), ", bs->breakpoint_at->triggered_dll_pathname);
+    case bp_breakpoint:
+    case bp_hardware_breakpoint:
+      /* I think the user probably only wants to see one breakpoint
+         number, not all of them.  */
+      annotate_breakpoint (bs->breakpoint_at->number);
+      printf_filtered ("\nBreakpoint %d, ", bs->breakpoint_at->number);
       return PRINT_SRC_AND_LOC;
-    }
-  else if (bs->breakpoint_at->type == bp_shlib_event)
-    {
+      break;
+
+    case bp_shlib_event:
       /* Did we stop because the user set the stop_on_solib_events
 	 variable?  (If so, we report this as a generic, "Stopped due
 	 to shlib event" message.) */
-       printf_filtered ("Stopped due to shared library event\n");
-       return PRINT_NOTHING;
-    }
-  else if (bs->breakpoint_at->type == bp_catch_fork ||
-	   bs->breakpoint_at->type == bp_catch_vfork)
-    {
+      printf_filtered ("Stopped due to shared library event\n");
+      return PRINT_NOTHING;
+      break;
+
+    case bp_catch_load:
       annotate_catchpoint (bs->breakpoint_at->number);
       printf_filtered ("\nCatchpoint %d (", bs->breakpoint_at->number);
-      if (bs->breakpoint_at->type == bp_catch_fork)
-	printf_filtered ("forked");
-      else if (bs->breakpoint_at->type == bp_catch_vfork)
-	printf_filtered ("vforked");
+      printf_filtered ("loaded");
+      printf_filtered (" %s), ", bs->breakpoint_at->triggered_dll_pathname);
+      return PRINT_SRC_AND_LOC;
+      break;
+
+    case bp_catch_unload:
+      annotate_catchpoint (bs->breakpoint_at->number);
+      printf_filtered ("\nCatchpoint %d (", bs->breakpoint_at->number);
+      printf_filtered ("unloaded");
+      printf_filtered (" %s), ", bs->breakpoint_at->triggered_dll_pathname);
+      return PRINT_SRC_AND_LOC;
+      break;
+
+    case bp_catch_fork:
+      annotate_catchpoint (bs->breakpoint_at->number);
+      printf_filtered ("\nCatchpoint %d (", bs->breakpoint_at->number);
+      printf_filtered ("forked");
       printf_filtered (" process %d), ", 
 		       bs->breakpoint_at->forked_inferior_pid);
       return PRINT_SRC_AND_LOC;
-    }
-  else if (bs->breakpoint_at->type == bp_catch_exec)
-    {
+      break;
+
+    case bp_catch_vfork:
+      annotate_catchpoint (bs->breakpoint_at->number);
+      printf_filtered ("\nCatchpoint %d (", bs->breakpoint_at->number);
+      printf_filtered ("vforked");
+      printf_filtered (" process %d), ", 
+		       bs->breakpoint_at->forked_inferior_pid);
+      return PRINT_SRC_AND_LOC;
+      break;
+
+    case bp_catch_exec:
       annotate_catchpoint (bs->breakpoint_at->number);
       printf_filtered ("\nCatchpoint %d (exec'd %s), ",
 		       bs->breakpoint_at->number,
 		       bs->breakpoint_at->exec_pathname);
       return PRINT_SRC_AND_LOC;
-    }
-  else if (bs->breakpoint_at->type == bp_catch_catch)
-    {
+      break;
+
+    case bp_catch_catch:
       if (current_exception_event && 
 	  (CURRENT_EXCEPTION_KIND == EX_EVENT_CATCH))
 	{
@@ -1848,15 +1855,17 @@ print_it_normal (bs)
 	    printf_filtered ("unknown");
 
 	  printf_filtered ("\n");
-	  return PRINT_SRC_ONLY;  /* don't bother to print location frame info */
+	  /* don't bother to print location frame info */
+	  return PRINT_SRC_ONLY;
 	}
       else
 	{
-	  return PRINT_UNKNOWN;	/* really throw, some other bpstat will handle it */
+	  /* really throw, some other bpstat will handle it */
+	  return PRINT_UNKNOWN;	
 	}
-    }
-  else if (bs->breakpoint_at->type == bp_catch_throw)
-    {
+      break;
+
+    case bp_catch_throw:
       if (current_exception_event && 
 	  (CURRENT_EXCEPTION_KIND == EX_EVENT_THROW))
 	{
@@ -1880,64 +1889,122 @@ print_it_normal (bs)
 	    printf_filtered ("unknown");
 
 	  printf_filtered ("\n");
-	  return PRINT_SRC_ONLY; /* don't bother to print location frame info */
+	  /* don't bother to print location frame info */
+	  return PRINT_SRC_ONLY; 
 	}
       else
 	{
-	  return PRINT_UNKNOWN;	/* really catch, some other bpstat willhandle it */
+	  /* really catch, some other bpstat will handle it */
+	  return PRINT_UNKNOWN;	
 	}
-    }
+      break;
 
-  else if (bs->breakpoint_at->type == bp_breakpoint ||
-	   bs->breakpoint_at->type == bp_hardware_breakpoint)
-    {
-      /* I think the user probably only wants to see one breakpoint
-         number, not all of them.  */
-      annotate_breakpoint (bs->breakpoint_at->number);
-      printf_filtered ("\nBreakpoint %d, ", bs->breakpoint_at->number);
-      return PRINT_SRC_AND_LOC;
-    }
-  else if ((bs->old_val != NULL) &&
-	   (bs->breakpoint_at->type == bp_watchpoint ||
-	    bs->breakpoint_at->type == bp_access_watchpoint ||
-	    bs->breakpoint_at->type == bp_hardware_watchpoint))
-    {
-      annotate_watchpoint (bs->breakpoint_at->number);
-      mention (bs->breakpoint_at);
-      printf_filtered ("\nOld value = ");
-      value_print (bs->old_val, gdb_stdout, 0, Val_pretty_default);
-      printf_filtered ("\nNew value = ");
-      value_print (bs->breakpoint_at->val, gdb_stdout, 0,
-		   Val_pretty_default);
-      printf_filtered ("\n");
-      value_free (bs->old_val);
-      bs->old_val = NULL;
+    case bp_watchpoint:
+    case bp_hardware_watchpoint:
+      if (bs->old_val != NULL)
+	{
+	  annotate_watchpoint (bs->breakpoint_at->number);
+	  mention (bs->breakpoint_at);
+	  printf_filtered ("\nOld value = ");
+	  value_print (bs->old_val, gdb_stdout, 0, Val_pretty_default);
+	  printf_filtered ("\nNew value = ");
+	  value_print (bs->breakpoint_at->val, gdb_stdout, 0,
+		       Val_pretty_default);
+	  printf_filtered ("\n");
+	  value_free (bs->old_val);
+	  bs->old_val = NULL;
+	}
       /* More than one watchpoint may have been triggered.  */
       return PRINT_UNKNOWN;
-    }
-  else if (bs->breakpoint_at->type == bp_access_watchpoint ||
-	   bs->breakpoint_at->type == bp_read_watchpoint)
-    {
+      break;
+
+    case bp_read_watchpoint:
       mention (bs->breakpoint_at);
       printf_filtered ("\nValue = ");
       value_print (bs->breakpoint_at->val, gdb_stdout, 0,
 		   Val_pretty_default);
       printf_filtered ("\n");
       return PRINT_UNKNOWN;
+      break;
+
+    case bp_access_watchpoint:
+      if (bs->old_val != NULL)     
+	{
+	  annotate_watchpoint (bs->breakpoint_at->number);
+	  mention (bs->breakpoint_at);
+	  printf_filtered ("\nOld value = ");
+	  value_print (bs->old_val, gdb_stdout, 0, Val_pretty_default);
+	  value_free (bs->old_val);
+	  bs->old_val = NULL;
+	  printf_filtered ("\nNew value = ");
+	}
+      else 
+	{
+	  mention (bs->breakpoint_at);
+	  printf_filtered ("\nValue = ");
+	}
+      value_print (bs->breakpoint_at->val, gdb_stdout, 0,
+		   Val_pretty_default);
+      printf_filtered ("\n");
+      return PRINT_UNKNOWN;
+      break;
+    /* Fall through, we don't deal with these types of breakpoints
+       here. */
+
+    case bp_none:
+    case bp_until:
+    case bp_finish:
+    case bp_longjmp:
+    case bp_longjmp_resume:
+    case bp_step_resume:
+    case bp_through_sigtramp:
+    case bp_watchpoint_scope:
+    case bp_call_dummy:
+    default:
+      return PRINT_UNKNOWN;
     }
-  /* We can't deal with it.  
-     Maybe another member of the bpstat chain can.  */
-  return PRINT_UNKNOWN;
 }
 
-/* Print a message indicating what happened.
-   This is called from normal_stop().
-   The input to this routine is the head of the bpstat list - a list
-   of the eventpoints that caused this stop.
-   This routine calls the "print_it" routine(s) associated
-   with these eventpoints. This will print (for example)
-   the "Breakpoint n," part of the output.
-   The return value of this routine is one of:
+/* Generic routine for printing messages indicating why we
+   stopped. The behavior of this function depends on the value
+   'print_it' in the bpstat structure.  Under some circumstances we
+   may decide not to print anything here and delegate the task to
+   normal_stop(). */
+
+static enum print_stop_action
+print_bp_stop_message (bpstat bs)
+{
+  switch (bs->print_it)
+    {
+    case print_it_noop:
+      /* Nothing should be printed for this bpstat entry. */
+      return PRINT_UNKNOWN;
+      break;
+
+    case print_it_done:
+      /* We still want to print the frame, but we already printed the
+         relevant messages. */
+      return PRINT_SRC_AND_LOC;
+      break;
+
+    case print_it_normal:
+      /* Normal case, we handle everything in print_it_typical. */
+      return print_it_typical (bs);
+      break;
+    default:
+      internal_error ("print_bp_stop_message: unrecognized enum value");
+      break;
+    }
+}
+
+
+/* Print a message indicating what happened.  This is called from
+   normal_stop().  The input to this routine is the head of the bpstat
+   list - a list of the eventpoints that caused this stop.  This
+   routine calls the generic print routine for printing a message
+   about reasons for stopping.  This will print (for example) the
+   "Breakpoint n," part of the output.  The return value of this
+   routine is one of:
 
    PRINT_UNKNOWN: Means we printed nothing
    PRINT_SRC_AND_LOC: Means we printed something, and expect subsequent
@@ -1957,21 +2024,21 @@ bpstat_print (bs)
 {
   int val;
 
-  if (bs == NULL)
-    return PRINT_UNKNOWN;
-
-  val = (*bs->print_it) (bs);
-  if (val == PRINT_SRC_ONLY || val == PRINT_SRC_AND_LOC || val == PRINT_NOTHING)
-    return val;
-
   /* Maybe another breakpoint in the chain caused us to stop.
      (Currently all watchpoints go on the bpstat whether hit or not.
      That probably could (should) be changed, provided care is taken
      with respect to bpstat_explains_signal).  */
-  if (bs->next)
-    return bpstat_print (bs->next);
+  for (; bs; bs = bs->next)
+    {
+      val = print_bp_stop_message (bs);
+      if (val == PRINT_SRC_ONLY 
+	  || val == PRINT_SRC_AND_LOC 
+	  || val == PRINT_NOTHING)
+	return val;
+    }
 
-  /* We reached the end of the chain without printing anything.  */
+  /* We reached the end of the chain, or we got a null BS to start
+     with and nothing was printed. */
   return PRINT_UNKNOWN;
 }
 
@@ -2096,40 +2163,6 @@ which its expression is valid.\n", bs->breakpoint_at->number);
 
       return WP_DELETED;
     }
-}
-
-/* This is used when everything which needs to be printed has
-   already been printed.  But we still want to print the frame.  */
-
-/* Background: When we stop, bpstat_print() is called.
-   It loops through the bpstat list of things causing this stop,
-   calling the print_it function for each one. The default
-   print_it function, used for breakpoints, is print_it_normal().
-   Also see print_it_noop() and print_it_done() are the other 
-   two possibilities. See comments in bpstat_print() and
-   in header of print_it_normal() for more detail.  */
-
-static enum print_stop_action
-print_it_done (bs)
-     bpstat bs;
-{
-  return PRINT_SRC_AND_LOC;
-}
-
-/* This is used when nothing should be printed for this bpstat entry.  */
-/* Background: When we stop, bpstat_print() is called.
-   It loops through the bpstat list of things causing this stop,
-   calling the print_it function for each one. The default
-   print_it function, used for breakpoints, is print_it_normal().
-   Also see print_it_noop() and print_it_done() are the other 
-   two possibilities. See comments in bpstat_print() and
-   in header of print_it_normal() for more detail.  */
-
-static enum print_stop_action
-print_it_noop (bs)
-     bpstat bs;
-{
-  return PRINT_UNKNOWN;
 }
 
 /* Get a bpstat associated with having just stopped at address *PC
@@ -5139,6 +5172,7 @@ typedef enum
 }
 catch_fork_kind;
 
+#if defined(CHILD_INSERT_FORK_CATCHPOINT) || defined(CHILD_INSERT_VFORK_CATCHPOINT)
 static void catch_fork_command_1 PARAMS ((catch_fork_kind fork_kind, 
 					  char *arg, 
 					  int tempflag, 
@@ -5180,7 +5214,9 @@ catch_fork_command_1 (fork_kind, arg, tempflag, from_tty)
       break;
     }
 }
+#endif
 
+#if defined(CHILD_INSERT_EXEC_CATCHPOINT)
 static void
 catch_exec_command_1 (arg, tempflag, from_tty)
      char *arg;
@@ -5205,6 +5241,7 @@ catch_exec_command_1 (arg, tempflag, from_tty)
      and enable reporting of such events. */
   create_exec_event_catchpoint (tempflag, cond_string);
 }
+#endif
 
 #if defined(SOLIB_ADD)
 static void

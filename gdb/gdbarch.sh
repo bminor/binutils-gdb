@@ -564,6 +564,7 @@ extern void *gdbarch_data (struct gdbarch_data*);
 
 typedef void (gdbarch_swap_ftype) (void);
 extern void register_gdbarch_swap (void *data, unsigned long size, gdbarch_swap_ftype *init);
+#define REGISTER_GDBARCH_SWAP(VAR) register_gdbarch_swap (&(VAR), sizeof ((VAR)), NULL)
 
 
 
@@ -712,6 +713,11 @@ extern void set_gdbarch_from_file (bfd *);
 
 extern void set_architecture_from_arch_mach (enum bfd_architecture, unsigned long);
 
+
+/* Initialize the current architecture to the "first" one we find on
+   our list.  */
+
+extern void initialize_current_architecture (void);
 
 /* Helper function for targets that don't know how my arguments are
    being passed */
@@ -1888,6 +1894,35 @@ LONGEST call_dummy_words[] = CALL_DUMMY;
 int sizeof_call_dummy_words = sizeof (call_dummy_words);
 #endif
 
+
+/* Initialize the current architecture.  */
+void
+initialize_current_architecture ()
+{
+  if (GDB_MULTI_ARCH)
+    {
+      struct gdbarch_init_registration *rego;
+      const struct bfd_arch_info *chosen = NULL;
+      for (rego = gdbarch_init_registrary; rego != NULL; rego = rego->next)
+	{
+	  const struct bfd_arch_info *ap
+	    = bfd_lookup_arch (rego->bfd_architecture, 0);
+
+	  /* Choose the first architecture alphabetically.  */
+	  if (chosen == NULL
+	      || strcmp (ap->printable_name, chosen->printable_name) < 0)
+	    chosen = ap;
+	}
+
+      if (chosen != NULL)
+	{
+	  struct gdbarch_info info;
+	  memset (&info, 0, sizeof info);
+	  info.bfd_arch_info = chosen;
+	  gdbarch_update (info);
+	}
+    }
+}
 
 extern void _initialize_gdbarch (void);
 void

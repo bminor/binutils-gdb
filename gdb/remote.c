@@ -3977,7 +3977,8 @@ remote_insert_breakpoint (addr, contents_cache)
   if ((remote_protocol_Z.support == PACKET_ENABLE)
       || (remote_protocol_Z.support == PACKET_SUPPORT_UNKNOWN)) 
     {
-      char buf[PBUFSIZ], *p = buf;
+      char *buf = alloca (PBUFSIZ);
+      char *p = buf;
       
       addr = remote_address_masked (addr);
       *(p++) = 'Z';
@@ -4040,7 +4041,8 @@ remote_remove_breakpoint (addr, contents_cache)
   if ((remote_protocol_Z.support == PACKET_ENABLE)
       || (remote_protocol_Z.support == PACKET_SUPPORT_UNKNOWN))
     {
-      char buf[PBUFSIZ], *p = buf;
+      char *buf = alloca (PBUFSIZ);
+      char *p = buf;
       
       *(p++) = 'z';
       *(p++) = '0';
@@ -4071,7 +4073,8 @@ remote_insert_watchpoint (addr, len, type)
      int len;
      int type;
 {
-  char buf[PBUFSIZ], *p;
+  char *buf = alloca (PBUFSIZ);
+  char *p;
 
   if (remote_protocol_Z.support == PACKET_DISABLE)
     error ("Can't set hardware watchpoints without the 'Z' packet\n");
@@ -4097,7 +4100,8 @@ remote_remove_watchpoint (addr, len, type)
      int len;
      int type;
 {
-  char buf[PBUFSIZ], *p;
+  char *buf = alloca (PBUFSIZ);
+  char *p;
   
   sprintf (buf, "z%x,", type + 2 );
   p = strchr (buf, '\0');
@@ -4118,7 +4122,8 @@ remote_insert_hw_breakpoint (addr, len)
      CORE_ADDR addr;
      int len;
 {
-  char buf[PBUFSIZ], *p = buf;
+  char *buf = alloca (PBUFSIZ);
+  char *p = buf;
       
   if (remote_protocol_Z.support == PACKET_DISABLE)
     error ("Can't set hardware breakpoints without the 'Z' packet\n");
@@ -4145,7 +4150,8 @@ remote_remove_hw_breakpoint (addr, len)
      CORE_ADDR addr;
      int len;
 {
-  char buf[PBUFSIZ], *p = buf;
+  char *buf = alloca (PBUFSIZ);
+  char *p = buf;
   
   *(p++) = 'z';
   *(p++) = '1';
@@ -4238,6 +4244,11 @@ crc32 (buf, len, crc)
    with the same memory range on the target, and reports mismatches.
    Useful for verifying the image on the target against the exec file.
    Depends on the target understanding the new "qCRC:" request.  */
+
+/* FIXME: cagney/1999-10-26: This command should be broken down into a
+   target method (target verify memory) and generic version of the
+   actual command.  This will allow other high-level code (especially
+   generic_load()) to make use of this target functionality. */
 
 static void
 compare_sections_command (args, from_tty)

@@ -123,8 +123,8 @@ extern int i386_skip_prologue PARAMS ((int));
 			 "ds",    "es",     "fs",    "gs",	\
 			 "st0",   "st1",    "st2",   "st3",	\
 			 "st4",   "st5",    "st6",   "st7",	\
-			 "fctrl", "fstat",  "ftag",  "fcs",	\
-                         "fcoff", "fds",    "fdoff", "fop",	\
+			 "fctrl", "fstat",  "ftag",  "fiseg",	\
+                         "fioff", "foseg",  "fooff", "fop",	\
 			 "xmm0",  "xmm1",   "xmm2",  "xmm3",	\
 			 "xmm4",  "xmm5",   "xmm6",  "xmm7",	\
                          "mxcsr"				\

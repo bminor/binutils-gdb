@@ -1,3 +1,74 @@
+Mon Oct 25 18:22:06 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote.c: Document future of compare_sections_command.
+	(remote_insert_breakpoint, remote_remove_breakpoint,
+ 	remote_insert_watchpoint, remote_insert_watchpoint,
+ 	remote_remove_watchpoint, remote_insert_hw_breakpoint,
+ 	remote_remove_hw_breakpoint): Use alloca instead of GCC's dynamic
+ 	array feature.
+
+Mon Oct 25 18:08:31 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.h (REGISTER_GDBARCH_SWAP): Define.
+	* gdbarch.sh: Update.
+
+Sat Oct 23 16:39:34 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.c (initialize_current_architecture): Make ``choice''
+ 	const.
+
+1999-10-22  Tom Tromey  <tromey@cygnus.com>
+
+	* gdbarch.sh: Updated for gdbarch.[ch] changes.
+	* top.c (gdb_init): Call initialize_current_architecture.
+	* gdbarch.h (initialize_current_architecture): Declare.
+	* gdbarch.c (initialize_current_architecture): New function.
+
+1999-10-21  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* utils.c (chars_per_line): fix typo in comment.
+
+1999-10-21  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* breakpoint.h (bp_print_how): New enum, used for deciding how to
+ 	print bpstat information when we stop, instead of having 3
+ 	different functions.
+	(struct bpstat): Change print_it field to be an enum instead of a
+ 	function pointer.
+
+	* breakpoint.c (print_it_typical): New name for print_it_normal().
+	(print_bp_stop_message): New function. High level routine for
+ 	printing of why we stopped.
+	(bpstat_print): Call print_bp_stop_message instead of using the
+ 	print_it function pointer.
+	(print_it_done, print_it_noop): Delete these functions.
+	
+1999-10-21  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* breakpoint.c (print_it_normal): Reorganize into a switch
+ 	statement.
+
+1999-10-21  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* Makefile.in (event-top.o): Add dependency on target.h.
+	* event-top.c: Make dependency on target.h explicit.
+
+	* breakpoint.c (bpstat_print): Clean up logic. Remove recursion.
+	(catch_exec_command_1): Surround with appropriate ifdef's,
+	to avoid compiler warnings.
+	(catch_fork_command_1): Ditto.
+
+1999-10-20  Jim Blandy  <jimb@cris.red-bean.com>
+
+	* Makefile.in (dwarf2read.o): Note that this depends on bfd/elf-bfd.h.
+	(elf_bfd_h): New variable.
+
+1999-10-19  Jim Blandy  <jimb@zenia.red-bean.com>
+
+	* config/i386/tm-i386.h (REGISTER_NAMES): Change names of FPU
+	instruction and operand pointer registers to improve consistency,
+	following J. T. Conklin's suggestions.
+
 1999-10-18  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* breakpoint.h: Change return type of field print_it of struct

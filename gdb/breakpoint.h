@@ -434,6 +434,22 @@ extern void bpstat_clear_actions PARAMS ((bpstat));
 extern void bpstat_get_triggered_catchpoints PARAMS ((bpstat, bpstat *));
 
 /* Implementation:  */
+
+/* Values used to tell the printing routine how to behave for this bpstat. */
+enum bp_print_how
+  {
+    /* This is used when we want to do a normal printing of the reason
+       for stopping. The output will depend on the type of eventpoint
+       we are dealing with. This is the default value, most commonly
+       used. */
+    print_it_normal,
+    /* This is used when nothing should be printed for this bpstat entry.  */
+    print_it_noop,
+    /* This is used when everything which needs to be printed has
+       already been printed.  But we still want to print the frame.  */
+    print_it_done
+  };
+
 struct bpstats
   {
     /* Linked list because there can be two breakpoints at the same
@@ -452,10 +468,9 @@ struct bpstats
     /* Nonzero if this breakpoint tells us to stop.  */
     char stop;
 
-    /* Function called by bpstat_print to print stuff associated with
-       this element of the bpstat chain.  Returns 0 or 1 just like
-       bpstat_print, or -1 if it can't deal with it.  */
-    enum print_stop_action (*print_it) PARAMS ((bpstat bs));
+    /* Tell bpstat_print and print_bp_stop_message how to print stuff
+       associated with this element of the bpstat chain.  */
+    enum bp_print_how print_it;
   };
 
 enum inf_context

@@ -575,6 +575,7 @@ print_frame_info_base (fi, level, source, args)
 	}
       current_source_line = max (sal.line - lines_to_list / 2, 1);
     }
+
   if (source != 0)
     set_default_breakpoint (1, fi->pc, sal.symtab, sal.line);
 

@@ -229,7 +229,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 19991018
+VERSION = 19991025
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -414,6 +414,7 @@ LINTFILES = $(SFILES) $(YYFILES) @CONFIG_SRCS@ init.c
 getopt_h =	$(INCLUDE_DIR)/getopt.h
 floatformat_h =	$(INCLUDE_DIR)/floatformat.h
 bfd_h =		$(BFD_DIR)/bfd.h
+elf_bfd_h =     $(BFD_DIR)/elf-bfd.h
 wait_h =	$(INCLUDE_DIR)/wait.h
 dis-asm_h =	$(INCLUDE_DIR)/dis-asm.h 
 remote-sim_h =	$(INCLUDE_DIR)/remote-sim.h
@@ -1121,7 +1122,7 @@ dwarfread.o: dwarfread.c $(bfd_h) buildsym.h complaints.h $(defs_h) \
 	$(expression_h) $(gdbtypes_h) language.h objfiles.h symfile.h \
 	$(symtab_h) gdb_string.h
 
-dwarf2read.o: dwarf2read.c $(bfd_h) buildsym.h $(defs_h) \
+dwarf2read.o: dwarf2read.c $(bfd_h) $(elf_bfd_h) buildsym.h $(defs_h) \
 	$(expression_h) $(gdbtypes_h) language.h objfiles.h symfile.h \
 	$(symtab_h) gdb_string.h
 
@@ -1139,7 +1140,7 @@ event-loop.o: event-loop.c $(defs_h) $(top_h) $(event_loop_h) $(event_top_h)
 
 event-top.o: event-top.c top.h $(readline_headers) \
       $(defs_h) $(inferior_h) $(event_loop_h) $(event_top_h) terminal.h \
-	$(gdbcmd_h)
+	$(gdbcmd_h) target.h
 
 inf-loop.o: inf-loop.c $(defs_h) $(inferior_h) $(inf_loop_h) $(event_loop_h) \
 	 $(event_top_h)
