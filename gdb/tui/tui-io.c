@@ -147,7 +147,7 @@ static int tui_readline_pipe[2];
    This may be the main gdb prompt or a secondary prompt.  */
 static char *tui_rl_saved_prompt;
 
-static unsigned int _tuiHandleResizeDuringIO (unsigned int);
+static unsigned int tui_handle_resize_during_io (unsigned int);
 
 static void
 tui_putc (char c)
@@ -659,7 +659,7 @@ tui_getc (FILE *fp)
 #endif
 
   ch = wgetch (w);
-  ch = _tuiHandleResizeDuringIO (ch);
+  ch = tui_handle_resize_during_io (ch);
 
   /* The \n must be echoed because it will not be printed by readline.  */
   if (ch == '\n')
@@ -694,10 +694,6 @@ tui_getc (FILE *fp)
   
   if (ch == '\n' || ch == '\r' || ch == '\f')
     TUI_CMD_WIN->detail.command_info.curch = 0;
-#if 0
-  else
-    tuiIncrCommandCharCountBy (1);
-#endif
   if (ch == KEY_BACKSPACE)
     return '\b';
   
@@ -708,7 +704,7 @@ tui_getc (FILE *fp)
 /* Cleanup when a resize has occured.
    Returns the character that must be processed.  */
 static unsigned int
-_tuiHandleResizeDuringIO (unsigned int originalCh)
+tui_handle_resize_during_io (unsigned int original_ch)
 {
   if (tui_win_resized ())
     {
@@ -718,5 +714,5 @@ _tuiHandleResizeDuringIO (unsigned int originalCh)
       return '\n';
     }
   else
-    return originalCh;
+    return original_ch;
 }

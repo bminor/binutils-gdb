@@ -141,7 +141,7 @@ tui_registers_changed_hook (void)
     {
       tui_refreshing_registers = 1;
 #if 0
-      tuiCheckDataValues (fi);
+      tui_check_data_values (fi);
 #endif
       tui_refreshing_registers = 0;
     }

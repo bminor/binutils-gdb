@@ -215,18 +215,18 @@ tui_rl_delete_other_windows (int notused1, int notused2)
 static int
 tui_rl_other_window (int count, int key)
 {
-  struct tui_win_info * winInfo;
+  struct tui_win_info * win_info;
 
   if (!tui_active)
     tui_rl_switch_mode (0/*notused*/, 0/*notused*/);
 
-  winInfo = tui_next_win (tui_win_with_focus ());
-  if (winInfo)
+  win_info = tui_next_win (tui_win_with_focus ());
+  if (win_info)
     {
-      tui_set_win_focus_to (winInfo);
+      tui_set_win_focus_to (win_info);
       if (TUI_DATA_WIN && TUI_DATA_WIN->generic.is_visible)
         tui_refresh_data_win ();
-      keypad (TUI_CMD_WIN->generic.handle, (winInfo != TUI_CMD_WIN));
+      keypad (TUI_CMD_WIN->generic.handle, (win_info != TUI_CMD_WIN));
     }
   return 0;
 }
@@ -457,14 +457,14 @@ tui_disable (void)
 }
 
 void
-strcat_to_buf (char *buf, int buflen, const char *itemToAdd)
+strcat_to_buf (char *buf, int buflen, const char *item_to_add)
 {
-  if (itemToAdd != (char *) NULL && buf != (char *) NULL)
+  if (item_to_add != (char *) NULL && buf != (char *) NULL)
     {
-      if ((strlen (buf) + strlen (itemToAdd)) <= buflen)
-	strcat (buf, itemToAdd);
+      if ((strlen (buf) + strlen (item_to_add)) <= buflen)
+	strcat (buf, item_to_add);
       else
-	strncat (buf, itemToAdd, (buflen - strlen (buf)));
+	strncat (buf, item_to_add, (buflen - strlen (buf)));
     }
 }
 
@@ -478,7 +478,7 @@ strcat_to_buf (char *buf, int buflen, const char *itemToAdd)
 #define CHK(val, dft)   (val<=0 ? dft : val)
 
 static void
-_tuiReset (void)
+tui_reset (void)
 {
   struct termio mode;
 
@@ -544,7 +544,7 @@ _tuiReset (void)
 #endif /* USG */
 
   return;
-}				/* _tuiReset */
+}
 #endif
 
 void

@@ -1,3 +1,13 @@
+2004-02-07  Andrew Cagney  <cagney@redhat.com>
+
+	* tui/tui-command.c: Change variable and function names to lower
+	case.
+	* tui/tui-data.c, tui/tui-disasm.c: Ditto.
+	* tui/tui-hooks.c, tui/tui-io.c, tui/tui-layout.c: Ditto.
+	* tui/tui-regs.c, tui/tui-source.c, tui/tui-stack.c: Ditto.
+	* tui/tui-win.c, tui/tui-windata.c, tui/tui-wingeneral.c: Ditto.
+	* tui/tui-winsource.c, tui/tui.c: Ditto.
+
 2004-02-07  Elena Zannoni  <ezannoni@redhat.com>
 
 	* buildsym.c (free_pending_blocks, finish_block)

@@ -76,10 +76,10 @@ tui_display_main (void)
    initializes the horizontal scroll to 0.  */
 void
 tui_update_source_window (struct tui_win_info * win_info, struct symtab *s,
-			  union tui_line_or_address lineOrAddr, int noerror)
+			  union tui_line_or_address line_or_addr, int noerror)
 {
   win_info->detail.source_info.horizontal_offset = 0;
-  tui_update_source_window_as_is (win_info, s, lineOrAddr, noerror);
+  tui_update_source_window_as_is (win_info, s, line_or_addr, noerror);
 
   return;
 }
@@ -89,14 +89,14 @@ tui_update_source_window (struct tui_win_info * win_info, struct symtab *s,
    shows the source as specified by the horizontal offset.  */
 void
 tui_update_source_window_as_is (struct tui_win_info * win_info, struct symtab *s,
-				union tui_line_or_address lineOrAddr, int noerror)
+				union tui_line_or_address line_or_addr, int noerror)
 {
   enum tui_status ret;
 
   if (win_info->generic.type == SRC_WIN)
-    ret = tui_set_source_content (s, lineOrAddr.line_no, noerror);
+    ret = tui_set_source_content (s, line_or_addr.line_no, noerror);
   else
-    ret = tui_set_disassem_content (lineOrAddr.addr);
+    ret = tui_set_disassem_content (line_or_addr.addr);
 
   if (ret == TUI_FAILURE)
     {
@@ -112,7 +112,7 @@ tui_update_source_window_as_is (struct tui_win_info * win_info, struct symtab *s
 	{
 	  struct symtab_and_line sal;
 	  
-	  sal.line = lineOrAddr.line_no +
+	  sal.line = line_or_addr.line_no +
 	    (win_info->generic.content_size - 2);
 	  sal.symtab = s;
 	  set_current_source_symtab_and_line (&sal);
@@ -169,9 +169,7 @@ tui_update_source_windows_with_addr (CORE_ADDR addr)
 	  tui_clear_exec_info_content (win_info);
 	}
     }
-
-  return;
-}				/* tuiUpdateSourceWindowsWithAddr */
+}
 
 /* Function to ensure that the source and/or disassemly windows
    reflect the input address.  */
@@ -203,14 +201,14 @@ tui_update_source_windows_with_line (struct symtab *s, int line)
 }
 
 void
-tui_clear_source_content (struct tui_win_info * win_info, int displayPrompt)
+tui_clear_source_content (struct tui_win_info * win_info, int display_prompt)
 {
   if (win_info != NULL)
     {
       register int i;
 
       win_info->generic.content_in_use = FALSE;
-      tui_erase_source_content (win_info, displayPrompt);
+      tui_erase_source_content (win_info, display_prompt);
       for (i = 0; i < win_info->generic.content_size; i++)
 	{
 	  struct tui_win_element * element =
@@ -219,49 +217,46 @@ tui_clear_source_content (struct tui_win_info * win_info, int displayPrompt)
 	  element->which_element.source.is_exec_point = FALSE;
 	}
     }
-
-  return;
-}				/* tuiClearSourceContent */
+}
 
 
 void
-tui_erase_source_content (struct tui_win_info * win_info, int displayPrompt)
+tui_erase_source_content (struct tui_win_info * win_info, int display_prompt)
 {
-  int xPos;
-  int halfWidth = (win_info->generic.width - 2) / 2;
+  int x_pos;
+  int half_width = (win_info->generic.width - 2) / 2;
 
   if (win_info->generic.handle != (WINDOW *) NULL)
     {
       werase (win_info->generic.handle);
       tui_check_and_display_highlight_if_needed (win_info);
-      if (displayPrompt == EMPTY_SOURCE_PROMPT)
+      if (display_prompt == EMPTY_SOURCE_PROMPT)
 	{
-	  char *noSrcStr;
+	  char *no_src_str;
 
 	  if (win_info->generic.type == SRC_WIN)
-	    noSrcStr = NO_SRC_STRING;
+	    no_src_str = NO_SRC_STRING;
 	  else
-	    noSrcStr = NO_DISASSEM_STRING;
-	  if (strlen (noSrcStr) >= halfWidth)
-	    xPos = 1;
+	    no_src_str = NO_DISASSEM_STRING;
+	  if (strlen (no_src_str) >= half_width)
+	    x_pos = 1;
 	  else
-	    xPos = halfWidth - strlen (noSrcStr);
+	    x_pos = half_width - strlen (no_src_str);
 	  mvwaddstr (win_info->generic.handle,
 		     (win_info->generic.height / 2),
-		     xPos,
-		     noSrcStr);
+		     x_pos,
+		     no_src_str);
 
 	  /* elz: added this function call to set the real contents of
 	     the window to what is on the  screen, so that later calls
 	     to refresh, do display
 	     the correct stuff, and not the old image */
 
-	  tui_set_source_content_nil (win_info, noSrcStr);
+	  tui_set_source_content_nil (win_info, no_src_str);
 	}
       tui_refresh_win (&win_info->generic);
     }
-  return;
-}				/* tuiEraseSourceContent */
+}
 
 
 /* Redraw the complete line of a source or disassembly window.  */
@@ -312,7 +307,7 @@ tui_show_source_content (struct tui_win_info * win_info)
 void
 tui_horizontal_source_scroll (struct tui_win_info * win_info,
 			      enum tui_scroll_direction direction,
-			      int numToScroll)
+			      int num_to_scroll)
 {
   if (win_info->generic.content != NULL)
     {
@@ -326,11 +321,11 @@ tui_horizontal_source_scroll (struct tui_win_info * win_info,
 	s = cursal.symtab;
 
       if (direction == LEFT_SCROLL)
-	offset = win_info->detail.source_info.horizontal_offset + numToScroll;
+	offset = win_info->detail.source_info.horizontal_offset + num_to_scroll;
       else
 	{
 	  if ((offset =
-	     win_info->detail.source_info.horizontal_offset - numToScroll) < 0)
+	     win_info->detail.source_info.horizontal_offset - num_to_scroll) < 0)
 	    offset = 0;
 	}
       win_info->detail.source_info.horizontal_offset = offset;
@@ -341,7 +336,7 @@ tui_horizontal_source_scroll (struct tui_win_info * win_info,
     }
 
   return;
-}				/* tuiHorizontalSourceScroll */
+}
 
 
 /* Set or clear the has_break flag in the line whose line is line_no.  */
@@ -355,16 +350,16 @@ tui_set_is_exec_point_at (union tui_line_or_address l, struct tui_win_info * win
   i = 0;
   while (i < win_info->generic.content_size)
     {
-      int newState;
+      int new_state;
 
       if (content[i]->which_element.source.line_or_addr.addr == l.addr)
-        newState = TRUE;
+        new_state = TRUE;
       else
-	newState = FALSE;
-      if (newState != content[i]->which_element.source.is_exec_point)
+	new_state = FALSE;
+      if (new_state != content[i]->which_element.source.is_exec_point)
         {
           changed++;
-          content[i]->which_element.source.is_exec_point = newState;
+          content[i]->which_element.source.is_exec_point = new_state;
           tui_show_source_line (win_info, i + 1);
         }
       i++;
@@ -453,26 +448,23 @@ tui_update_breakpoint_info (struct tui_win_info * win, int current_only)
 }
 
 
-/*
-   ** tuiSetExecInfoContent().
-   **      Function to initialize the content of the execution info window,
-   **      based upon the input window which is either the source or
-   **      disassembly window.
- */
+/* Function to initialize the content of the execution info window,
+   based upon the input window which is either the source or
+   disassembly window.  */
 enum tui_status
-tuiSetExecInfoContent (struct tui_win_info * win_info)
+tui_set_exec_info_content (struct tui_win_info * win_info)
 {
   enum tui_status ret = TUI_SUCCESS;
 
   if (win_info->detail.source_info.execution_info != (struct tui_gen_win_info *) NULL)
     {
-      struct tui_gen_win_info * execInfoPtr = win_info->detail.source_info.execution_info;
+      struct tui_gen_win_info * exec_info_ptr = win_info->detail.source_info.execution_info;
 
-      if (execInfoPtr->content == NULL)
-	execInfoPtr->content =
+      if (exec_info_ptr->content == NULL)
+	exec_info_ptr->content =
 	  (void **) tui_alloc_content (win_info->generic.height,
-					 execInfoPtr->type);
-      if (execInfoPtr->content != NULL)
+					 exec_info_ptr->type);
+      if (exec_info_ptr->content != NULL)
 	{
 	  int i;
 
@@ -480,11 +472,11 @@ tuiSetExecInfoContent (struct tui_win_info * win_info)
 	  for (i = 0; i < win_info->generic.content_size; i++)
 	    {
 	      struct tui_win_element * element;
-	      struct tui_win_element * srcElement;
+	      struct tui_win_element * src_element;
               int mode;
 
-	      element = (struct tui_win_element *) execInfoPtr->content[i];
-	      srcElement = (struct tui_win_element *) win_info->generic.content[i];
+	      element = (struct tui_win_element *) exec_info_ptr->content[i];
+	      src_element = (struct tui_win_element *) win_info->generic.content[i];
 
               memset(element->which_element.simple_string, ' ',
                      sizeof(element->which_element.simple_string));
@@ -492,7 +484,7 @@ tuiSetExecInfoContent (struct tui_win_info * win_info)
 
 	      /* Now update the exec info content based upon the state
                  of each line as indicated by the source content.  */
-              mode = srcElement->which_element.source.has_break;
+              mode = src_element->which_element.source.has_break;
               if (mode & TUI_BP_HIT)
                 element->which_element.simple_string[TUI_BP_HIT_POS] =
                   (mode & TUI_BP_HARDWARE) ? 'H' : 'B';
@@ -505,10 +497,10 @@ tuiSetExecInfoContent (struct tui_win_info * win_info)
               else if (mode & TUI_BP_DISABLED)
                 element->which_element.simple_string[TUI_BP_BREAK_POS] = '-';
 
-              if (srcElement->which_element.source.is_exec_point)
+              if (src_element->which_element.source.is_exec_point)
                 element->which_element.simple_string[TUI_EXEC_POS] = '>';
 	    }
-	  execInfoPtr->content_size = win_info->generic.content_size;
+	  exec_info_ptr->content_size = win_info->generic.content_size;
 	}
       else
 	ret = TUI_FAILURE;
@@ -518,39 +510,32 @@ tuiSetExecInfoContent (struct tui_win_info * win_info)
 }
 
 
-/*
-   ** tuiShowExecInfoContent().
- */
 void
-tuiShowExecInfoContent (struct tui_win_info * win_info)
+tui_show_exec_info_content (struct tui_win_info * win_info)
 {
-  struct tui_gen_win_info * execInfo = win_info->detail.source_info.execution_info;
-  int curLine;
+  struct tui_gen_win_info * exec_info = win_info->detail.source_info.execution_info;
+  int cur_line;
 
-  werase (execInfo->handle);
-  tui_refresh_win (execInfo);
-  for (curLine = 1; (curLine <= execInfo->content_size); curLine++)
-    mvwaddstr (execInfo->handle,
-	       curLine,
+  werase (exec_info->handle);
+  tui_refresh_win (exec_info);
+  for (cur_line = 1; (cur_line <= exec_info->content_size); cur_line++)
+    mvwaddstr (exec_info->handle,
+	       cur_line,
 	       0,
 	       ((struct tui_win_element *)
-		execInfo->content[curLine - 1])->which_element.simple_string);
-  tui_refresh_win (execInfo);
-  execInfo->content_in_use = TRUE;
-
-  return;
+		exec_info->content[cur_line - 1])->which_element.simple_string);
+  tui_refresh_win (exec_info);
+  exec_info->content_in_use = TRUE;
 }
 
 
 void
 tui_erase_exec_info_content (struct tui_win_info * win_info)
 {
-  struct tui_gen_win_info * execInfo = win_info->detail.source_info.execution_info;
+  struct tui_gen_win_info * exec_info = win_info->detail.source_info.execution_info;
 
-  werase (execInfo->handle);
-  tui_refresh_win (execInfo);
-
-  return;
+  werase (exec_info->handle);
+  tui_refresh_win (exec_info);
 }
 
 void
@@ -566,19 +551,19 @@ tui_clear_exec_info_content (struct tui_win_info * win_info)
 void
 tui_update_exec_info (struct tui_win_info * win_info)
 {
-  tuiSetExecInfoContent (win_info);
-  tuiShowExecInfoContent (win_info);
-}				/* tuiUpdateExecInfo */
+  tui_set_exec_info_content (win_info);
+  tui_show_exec_info_content (win_info);
+}
 
 enum tui_status
 tui_alloc_source_buffer (struct tui_win_info *win_info)
 {
-  register char *srcLineBuf;
-  register int i, lineWidth, maxLines;
+  register char *src_line_buf;
+  register int i, line_width, max_lines;
   enum tui_status ret = TUI_FAILURE;
 
-  maxLines = win_info->generic.height;	/* less the highlight box */
-  lineWidth = win_info->generic.width - 1;
+  max_lines = win_info->generic.height;	/* less the highlight box */
+  line_width = win_info->generic.width - 1;
   /*
      ** Allocate the buffer for the source lines.  Do this only once since they
      ** will be re-used for all source displays.  The only other time this will
@@ -586,8 +571,8 @@ tui_alloc_source_buffer (struct tui_win_info *win_info)
    */
   if (win_info->generic.content == NULL)
     {
-      srcLineBuf = (char *) xmalloc ((maxLines * lineWidth) * sizeof (char));
-      if (srcLineBuf == (char *) NULL)
+      src_line_buf = (char *) xmalloc ((max_lines * line_width) * sizeof (char));
+      if (src_line_buf == (char *) NULL)
 	fputs_unfiltered (
 	   "Unable to Allocate Memory for Source or Disassembly Display.\n",
 			   gdb_stderr);
@@ -595,51 +580,51 @@ tui_alloc_source_buffer (struct tui_win_info *win_info)
 	{
 	  /* allocate the content list */
 	  if ((win_info->generic.content =
-	  (void **) tui_alloc_content (maxLines, SRC_WIN)) == NULL)
+	  (void **) tui_alloc_content (max_lines, SRC_WIN)) == NULL)
 	    {
-	      xfree (srcLineBuf);
-	      srcLineBuf = (char *) NULL;
+	      xfree (src_line_buf);
+	      src_line_buf = (char *) NULL;
 	      fputs_unfiltered (
 				 "Unable to Allocate Memory for Source or Disassembly Display.\n",
 				 gdb_stderr);
 	    }
 	}
-      for (i = 0; i < maxLines; i++)
+      for (i = 0; i < max_lines; i++)
 	((struct tui_win_element *)
 	 win_info->generic.content[i])->which_element.source.line =
-	  srcLineBuf + (lineWidth * i);
+	  src_line_buf + (line_width * i);
       ret = TUI_SUCCESS;
     }
   else
     ret = TUI_SUCCESS;
 
   return ret;
-}				/* tuiAllocSourceBuffer */
+}
 
 
 /* Answer whether the a particular line number or address is displayed
    in the current source window.  */
 int
 tui_line_is_displayed (int line, struct tui_win_info * win_info,
-		       int checkThreshold)
+		       int check_threshold)
 {
-  int isDisplayed = FALSE;
+  int is_displayed = FALSE;
   int i, threshold;
 
-  if (checkThreshold)
+  if (check_threshold)
     threshold = SCROLL_THRESHOLD;
   else
     threshold = 0;
   i = 0;
-  while (i < win_info->generic.content_size - threshold && !isDisplayed)
+  while (i < win_info->generic.content_size - threshold && !is_displayed)
     {
-      isDisplayed = (((struct tui_win_element *)
+      is_displayed = (((struct tui_win_element *)
 		      win_info->generic.content[i])->which_element.source.line_or_addr.line_no
 		     == (int) line);
       i++;
     }
 
-  return isDisplayed;
+  return is_displayed;
 }
 
 
@@ -647,25 +632,25 @@ tui_line_is_displayed (int line, struct tui_win_info * win_info,
    in the current source window.  */
 int
 tui_addr_is_displayed (CORE_ADDR addr, struct tui_win_info * win_info,
-		    int checkThreshold)
+		    int check_threshold)
 {
-  int isDisplayed = FALSE;
+  int is_displayed = FALSE;
   int i, threshold;
 
-  if (checkThreshold)
+  if (check_threshold)
     threshold = SCROLL_THRESHOLD;
   else
     threshold = 0;
   i = 0;
-  while (i < win_info->generic.content_size - threshold && !isDisplayed)
+  while (i < win_info->generic.content_size - threshold && !is_displayed)
     {
-      isDisplayed = (((struct tui_win_element *)
+      is_displayed = (((struct tui_win_element *)
 		      win_info->generic.content[i])->which_element.source.line_or_addr.addr
 		     == addr);
       i++;
     }
 
-  return isDisplayed;
+  return is_displayed;
 }
 
 
