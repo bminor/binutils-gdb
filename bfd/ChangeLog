@@ -1,3 +1,7 @@
+2001-10-29  Kazu Hirata  <kazu@hxi.com>
+
+	* README: Fix a typo.
+
 2001-10-24  Richard Henderson  <rth@redhat.com>
 
 	* peXXigen.c (_bfd_XX_print_private_bfd_data_common): Copy
