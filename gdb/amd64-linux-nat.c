@@ -48,7 +48,6 @@
 #include "gregset.h"
 
 #include "amd64-tdep.h"
-#include "amd64-linux-tdep.h"
 #include "i386-linux-tdep.h"
 #include "amd64-nat.h"
 

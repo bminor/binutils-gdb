@@ -614,7 +614,6 @@ nm_h =		@nm_h@
 ada_lang_h = ada-lang.h $(value_h) $(gdbtypes_h)
 alphabsd_tdep_h = alphabsd-tdep.h
 alpha_tdep_h = alpha-tdep.h
-amd64_linux_tdep_h = amd64-linux-tdep.h
 amd64_nat_h = amd64-nat.h
 amd64_tdep_h = amd64-tdep.h $(i386_tdep_h)
 annotate_h = annotate.h $(symtab_h) $(gdbtypes_h)
@@ -1529,10 +1528,10 @@ amd64fbsd-tdep.o: amd64fbsd-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) \
 amd64-linux-nat.o: amd64-linux-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
 	$(regcache_h) $(linux_nat_h) $(gdb_assert_h) $(gdb_string_h) \
 	$(gdb_proc_service_h) $(gregset_h) $(amd64_tdep_h) \
-	$(amd64_linux_tdep_h) $(i386_linux_tdep_h) $(amd64_nat_h)
-amd64-linux-tdep.o: amd64-linux-tdep.c $(defs_h) $(inferior_h) $(gdbcore_h) \
+	$(i386_linux_tdep_h) $(amd64_nat_h)
+amd64-linux-tdep.o: amd64-linux-tdep.c $(defs_h) $(frame_h) $(gdbcore_h) \
 	$(regcache_h) $(osabi_h) $(gdb_string_h) $(amd64_tdep_h) \
-	$(amd64_linux_tdep_h)
+	$(solib_svr4_h)
 amd64-nat.o: amd64-nat.c $(defs_h) $(gdbarch_h) $(regcache_h) \
 	$(gdb_assert_h) $(i386_tdep_h) $(amd64_tdep_h)
 amd64nbsd-nat.o: amd64nbsd-nat.c $(defs_h) $(gdb_assert_h) $(amd64_tdep_h) \

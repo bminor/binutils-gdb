@@ -1,5 +1,25 @@
 2004-03-14  Mark Kettenis  <kettenis@gnu.org>
 
+	* amd64-linux-tdep.h: Remove file.
+	* amd64-linux-tdep.c: Don't include "inferior.h" and
+	"amd64-linux-tdep.h".  Include "frame.h" and "solib-svr4.h".
+	(USER_R15, USER_R14, USER_R13, USER_R12, USER_RBP, USER_RBX)
+	(USER_R11, USER_R10, USER_R9, USER_R8, USER_RAX, USER_RCX)
+	(USER_RDX, USER_RSI, USER_RDI, USER_RIP, USER_CS, USER_EFLAGS)
+	(USER_RSP, USER_SS, USER_DS, USER_ES, USER_FS, USER_GS): Remove
+	macros.
+	(user_to_gdb_regmap): Remove variable.
+	(amd64_linux_gregset_reg_offset): New variable.
+	(amd64_core_fns): Remove variable.
+	(fetch_core_registers): Remove function.
+	(amd64_linux_supply_gregset, amd64_linux_fill_gregset): Remove
+	functions.
+	(_initialize_amd64_linux_tdep): Don't set add_core_fns.
+	* amd64-linux-nat.c: Don't include "amd64-linux-tdep.h".
+	* Makefile.in (amd64_linux_tdep_h): Remove.
+	(amd64-linux-nat.o): Update dependencies.
+	(amd64-linux-tdep.o): Update dependencies.
+
 	* amd64-linux-nat.c (GETFPREGS_SUPPLIES): Remove macro.
 	(fetch_regs, fetch_fpregs, store_regs, store_fpregs): Remove
 	functions.
