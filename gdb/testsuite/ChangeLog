@@ -1,9 +1,3 @@
-2005-03-25  Daniel Jacobowitz  <dan@codesourcery.com>
-
-	* lib/mi-support.exp (mi_gdb_load): Use /tmp for gdbserver
-	downloads.
-	* config/gdbserver.exp (gdb_load): Likewise.
-
 2005-03-14  Paul Brook  <paul@codesourcery.com>
 
 	* lib/mi-support.exp: Use mi_gdb_target_cmd to connect to remote

@@ -203,6 +203,12 @@ elf_symtab_read (struct objfile *objfile, int dynamic)
 	      continue;
 	    }
 
+	  /* Skip "special" symbols, e.g. ARM mapping symbols.  These are
+	     symbols which do not correspond to objects in the symbol table,
+	     but have some other target-specific meaning.  */
+	  if (bfd_is_target_special_symbol (objfile->obfd, sym))
+	    continue;
+
           offset = ANOFFSET (objfile->section_offsets, sym->section->index);
 	  if (dynamic
 	      && sym->section == &bfd_und_section
