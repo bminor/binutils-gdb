@@ -1,3 +1,8 @@
+2003-01-29  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-i386.c (line_comment_chars): Add '#'.  This makes the
+	assembler's handling of # <linenum> "<filename>" directives work.
+
 2003-01-28  Jakub Jelinek  <jakub@redhat.com>
 
 	* dwarf2dbg.c: Include filenames.h.

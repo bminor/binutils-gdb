@@ -207,7 +207,7 @@ const char comment_chars[] = "#/";
    #NO_APP at the beginning of its output.
    Also note that comments started like this one will always work if
    '/' isn't otherwise defined.  */
-const char line_comment_chars[] = "";
+const char line_comment_chars[] = "#";
 
 #else
 /* Putting '/' here makes it impossible to use the divide operator.
@@ -215,7 +215,7 @@ const char line_comment_chars[] = "";
 const char comment_chars[] = "#";
 #define PREFIX_SEPARATOR '/'
 
-const char line_comment_chars[] = "/";
+const char line_comment_chars[] = "/#";
 #endif
 
 const char line_separator_chars[] = ";";
