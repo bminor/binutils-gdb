@@ -845,7 +845,7 @@ CGEN_SYM (get_insn_operands) PARAMS ((const CGEN_INSN *, cgen_insn_t,
 				      int, int *));
 const CGEN_INSN *
 CGEN_SYM (lookup_insn) PARAMS ((const CGEN_INSN *, cgen_insn_t,
-				int, CGEN_FIELDS *));
+				int, CGEN_FIELDS *, int));
 
 CGEN_INLINE void
 CGEN_SYM (put_operand) PARAMS ((int, const long *,

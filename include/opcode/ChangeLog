@@ -1,3 +1,11 @@
+Thu Feb 12 18:30:41 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* cgen.h (lookup_insn): New argument alias_p.
+
+start-sanitize-sky
+	* dvp.h (VU_FLAG_[IEMDT]): New macros.
+
+end-sanitize-sky
 Thu Feb 12 03:41:00 1998  J"orn Rennecke  <amylaar@cygnus.co.uk>
 
 Fix rac to accept only a0:
