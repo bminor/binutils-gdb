@@ -1,3 +1,8 @@
+2001-05-08  Alan Modra  <amodra@one.net.au>
+
+	* config/tc-m68k.c (md_estimate_size_before_relax): Set fr_var
+	from md_relax_table, and combine some switch cases.
+
 2001-05-06  Alexandre Oliva  <aoliva@redhat.com>
 
 	* config/tc-mn10300.c (md_assemble): Subtract operand->shift

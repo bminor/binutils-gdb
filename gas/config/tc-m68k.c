@@ -4587,27 +4587,6 @@ md_estimate_size_before_relax (fragP, segment)
     {
     case TAB (BRANCHBWL, SZ_UNDEF):
     case TAB (BRABSJUNC, SZ_UNDEF):
-      {
-	if (S_GET_SEGMENT (fragP->fr_symbol) == segment
-	    && relaxable_symbol (fragP->fr_symbol))
-	  {
-	    fragP->fr_subtype = TAB (TABTYPE (fragP->fr_subtype), BYTE);
-	  }
-	else if (flag_short_refs)
-	  {
-	    /* Symbol is undefined and we want short ref.  */
-	    fragP->fr_subtype = TAB (TABTYPE (fragP->fr_subtype), SHORT);
-	    fragP->fr_var += 2;
-	  }
-	else
-	  {
-	    /* Symbol is still undefined.  Make it LONG.  */
-	    fragP->fr_subtype = TAB (TABTYPE (fragP->fr_subtype), LONG);
-	    fragP->fr_var += 4;
-	  }
-	break;
-      }
-
     case TAB (BRABSJCOND, SZ_UNDEF):
       {
 	if (S_GET_SEGMENT (fragP->fr_symbol) == segment
@@ -4619,13 +4598,11 @@ md_estimate_size_before_relax (fragP, segment)
 	  {
 	    /* Symbol is undefined and we want short ref.  */
 	    fragP->fr_subtype = TAB (TABTYPE (fragP->fr_subtype), SHORT);
-	    fragP->fr_var += 2;
 	  }
 	else
 	  {
 	    /* Symbol is still undefined.  Make it LONG.  */
 	    fragP->fr_subtype = TAB (TABTYPE (fragP->fr_subtype), LONG);
-	    fragP->fr_var += 6;
 	  }
 	break;
       }
@@ -4641,59 +4618,24 @@ md_estimate_size_before_relax (fragP, segment)
 	  {
 	    /* Symbol is undefined and we don't have long branches.  */
 	    fragP->fr_subtype = TAB (TABTYPE (fragP->fr_subtype), SHORT);
-	    fragP->fr_var += 2;
 	  }
 	break;
       }
 
     case TAB (FBRANCH, SZ_UNDEF):
-      {
-	if ((S_GET_SEGMENT (fragP->fr_symbol) == segment
-	     && relaxable_symbol (fragP->fr_symbol))
-	    || flag_short_refs)
-	  {
-	    fragP->fr_subtype = TAB (FBRANCH, SHORT);
-	    fragP->fr_var += 2;
-	  }
-	else
-	  {
-	    fragP->fr_subtype = TAB (FBRANCH, LONG);
-	    fragP->fr_var += 4;
-	  }
-	break;
-      }
-
     case TAB (DBCCLBR, SZ_UNDEF):
     case TAB (DBCCABSJ, SZ_UNDEF):
+    case TAB (PCREL1632, SZ_UNDEF):
       {
 	if ((S_GET_SEGMENT (fragP->fr_symbol) == segment
 	     && relaxable_symbol (fragP->fr_symbol))
 	    || flag_short_refs)
 	  {
 	    fragP->fr_subtype = TAB (TABTYPE (fragP->fr_subtype), SHORT);
-	    fragP->fr_var += 2;
 	  }
 	else
 	  {
 	    fragP->fr_subtype = TAB (TABTYPE (fragP->fr_subtype), LONG);
-	    fragP->fr_var += 10;
-	  }
-	break;
-      }
-
-    case TAB (PCREL1632, SZ_UNDEF):
-      {
-	if (((S_GET_SEGMENT (fragP->fr_symbol)) == segment
-	     && relaxable_symbol (fragP->fr_symbol))
-	    || flag_short_refs)
-	  {
-	    fragP->fr_subtype = TAB (PCREL1632, SHORT);
-	    fragP->fr_var += 2;
-	  }
-	else
-	  {
-	    fragP->fr_subtype = TAB (PCREL1632, LONG);
-	    fragP->fr_var += 6;
 	  }
 	break;
       }
@@ -4707,7 +4649,6 @@ md_estimate_size_before_relax (fragP, segment)
       else
 	{
 	  fragP->fr_subtype = TAB (PCINDEX, LONG);
-	  fragP->fr_var += 4;
 	}
       break;
 
@@ -4717,12 +4658,10 @@ md_estimate_size_before_relax (fragP, segment)
 	     && relaxable_symbol (fragP->fr_symbol)))
 	  {
 	    fragP->fr_subtype = TAB (ABSTOPCREL, SHORT);
-	    fragP->fr_var += 2;
 	  }
 	else
 	  {
 	    fragP->fr_subtype = TAB (ABSTOPCREL, LONG);
-	    fragP->fr_var += 4;
 	  }
 	break;
       }
@@ -4757,13 +4696,13 @@ md_estimate_size_before_relax (fragP, segment)
 	  if (l == stop)
 	    {
 	      fragP->fr_subtype = TAB (TABTYPE (fragP->fr_subtype), SHORT);
-	      fragP->fr_var += 2;
 	    }
 	}
       break;
     default:
       break;
     }
+  fragP->fr_var = md_relax_table[fragP->fr_subtype].rlx_length;
   return fragP->fr_var + fragP->fr_fix - old_fix;
 }
 
