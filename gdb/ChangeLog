@@ -1,3 +1,8 @@
+Wed Nov 18 15:05:45 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* remote-vx.c (vx_kill): just warn if we can't contact the board,
+	and assume the process has been killed.
+
 Wed Nov 18 14:39:57 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* infcmd.c (set_environment_command):  Make set env FOO x=y work.
