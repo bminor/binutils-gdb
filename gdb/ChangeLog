@@ -1,3 +1,10 @@
+Tue Aug 31 10:33:13 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* c-typeprint.c (c_print_type_base): Treat show = 0 just like
+	show < 0.  The only case where we had been distinguishing is that
+	show = 0 used to print "struct  " or "enum  " instead of
+	"struct {...}" or "enum {...}" which seems clearly wrong.
+
 Mon Aug 30 17:51:32 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	* configure.in: recognize m88110 as an m88k.

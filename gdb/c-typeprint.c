@@ -439,13 +439,16 @@ c_type_print_varspec_suffix (type, stream, show, passed_a_ptr, demangled_args)
    function value or array element), or the description of a
    structure or union.
 
-   SHOW nonzero means don't print this type as just its name;
-   show its real definition even if it has a name.
-   SHOW zero means print just typename or struct tag if there is one
-   SHOW negative means abbreviate structure elements.
-   SHOW is decremented for printing of structure elements.
+   SHOW positive means print details about the type (e.g. enum values),
+   and print structure elements passing SHOW - 1 for show.
+   SHOW zero means just print the type name or struct tag if there is one.
+   If there is no name, print something sensible but concise like
+   "struct {...}".
+   SHOW negative means the same things as SHOW zero.  The difference is that
+   zero is used for printing structure elements and -1 is used for the
+   "whatis" command.  But I don't see any need to distinguish.
 
-   LEVEL is the depth to indent by.
+   LEVEL is the number of spaces to indent by.
    We increase it for some recursive calls.  */
 
 void
@@ -516,7 +519,7 @@ c_type_print_base (type, stream, show, level)
 	    fputs_filtered (" ", stream);
 	}
       wrap_here ("    ");
-      if (show < 0)
+      if (show <= 0)
 	{
 	  /* If we just printed a tag name, no need to print anything else.  */
 	  if (TYPE_TAG_NAME (type) == NULL)
@@ -716,7 +719,7 @@ c_type_print_base (type, stream, show, level)
 	}
 
       wrap_here ("    ");
-      if (show < 0)
+      if (show <= 0)
 	{
 	  /* If we just printed a tag name, no need to print anything else.  */
 	  if (TYPE_TAG_NAME (type) == NULL)
