@@ -86,7 +86,7 @@ static void remote_resume (ptid_t ptid, int step,
                            enum target_signal siggnal);
 static void remote_async_resume (ptid_t ptid, int step,
 				 enum target_signal siggnal);
-static int remote_start_remote (void *);
+static int remote_start_remote (struct ui_out *uiout, void *dummy);
 
 static void remote_open (char *name, int from_tty);
 static void remote_async_open (char *name, int from_tty);
@@ -2107,14 +2107,16 @@ remote_cisco_objfile_relocate (bfd_signed_vma text_off, bfd_signed_vma data_off,
 /* Stub for catch_errors.  */
 
 static int
-remote_start_remote_dummy (void *dummy)
+remote_start_remote_dummy (struct ui_out *uiout, void *dummy)
 {
   start_remote ();		/* Initialize gdb process mechanisms */
+  /* NOTE: Return something >=0.  A -ve value is reserved for
+     catch_exceptions.  */
   return 1;
 }
 
 static int
-remote_start_remote (void *dummy)
+remote_start_remote (struct ui_out *uiout, void *dummy)
 {
   immediate_quit++;		/* Allow user to interrupt it */
 
@@ -2131,7 +2133,9 @@ remote_start_remote (void *dummy)
   putpkt ("?");			/* initiate a query from remote machine */
   immediate_quit--;
 
-  return remote_start_remote_dummy (dummy);
+  /* NOTE: See comment above in remote_start_remote_dummy().  This
+     function returns something >=0.  */
+  return remote_start_remote_dummy (uiout, dummy);
 }
 
 /* Open a connection to a remote debugger.
@@ -2246,6 +2250,7 @@ static void
 remote_open_1 (char *name, int from_tty, struct target_ops *target,
 	       int extended_p)
 {
+  int ex;
   struct remote_state *rs = get_remote_state ();
   if (name == 0)
     error ("To open a remote debug connection, you need to specify what\n"
@@ -2308,12 +2313,23 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
   no_shared_libraries (NULL, 0);
 #endif
 
-  /* Start the remote connection; if error (0), discard this target.
-     In particular, if the user quits, be sure to discard it
-     (we'd be in an inconsistent state otherwise).  */
-  if (!catch_errors (remote_start_remote, NULL,
-		     "Couldn't establish connection to remote target\n",
-		     RETURN_MASK_ALL))
+  /* Start the remote connection.  If error() or QUIT, discard this
+     target (we'd otherwise be in an inconsistent state).
+
+     FIXME: cagney/2002-05-19: Instead of re-throwing the exception,
+     this function should return an error indication letting the
+     caller restore the previous state.  Unfortunatly the command
+     ``target remote'' is directly wired to this function making that
+     impossible.  On a positive note, the CLI side of this problem has
+     been fixed - the function set_cmd_context() makes it possible for
+     all the ``target ....'' commands to share a common callback
+     function.  See cli-dump.c.  */
+  ex = catch_exceptions (uiout,
+			 remote_start_remote, NULL,
+			 "Couldn't establish connection to remote"
+			 " target\n",
+			 RETURN_MASK_ALL);
+  if (ex < 0)
     {
       pop_target ();
       return;
@@ -2347,6 +2363,7 @@ static void
 remote_async_open_1 (char *name, int from_tty, struct target_ops *target,
 		     int extended_p)
 {
+  int ex;
   struct remote_state *rs = get_remote_state ();
   if (name == 0)
     error ("To open a remote debug connection, you need to specify what\n"
@@ -2419,12 +2436,14 @@ remote_async_open_1 (char *name, int from_tty, struct target_ops *target,
   no_shared_libraries (NULL, 0);
 #endif
 
-  /* Start the remote connection; if error (0), discard this target.
-     In particular, if the user quits, be sure to discard it
-     (we'd be in an inconsistent state otherwise).  */
-  if (!catch_errors (remote_start_remote, NULL,
-		     "Couldn't establish connection to remote target\n",
-		     RETURN_MASK_ALL))
+  /* Start the remote connection; if error, discard this target.  See
+     the comments in remote_open_1() for further details.  */
+  ex = catch_exceptions (uiout,
+			 remote_start_remote, NULL,
+			 "Couldn't establish connection to remote"
+			 " target\n",
+			 RETURN_MASK_ALL);
+  if (ex < 0)
     {
       pop_target ();
       wait_forever_enabled_p = 1;
@@ -5472,6 +5491,7 @@ remote_info_process (char *args, int from_tty)
 static void
 remote_cisco_open (char *name, int from_tty)
 {
+  int ex;
   if (name == 0)
     error ("To open a remote debug connection, you need to specify what \n"
 	   "device is attached to the remote system (e.g. host:port).");
@@ -5534,11 +5554,14 @@ remote_cisco_open (char *name, int from_tty)
      someday have a notion of debugging several processes.  */
   inferior_ptid = pid_to_ptid (MAGIC_NULL_PID);
 
-  /* Start the remote connection; if error (0), discard this target. */
-
-  if (!catch_errors (remote_start_remote_dummy, (char *) 0,
-		     "Couldn't establish connection to remote target\n",
-		     RETURN_MASK_ALL))
+  /* Start the remote connection; if error, discard this target.  See
+     the comments in remote_open_1() for further details.  */
+  ex = catch_exceptions (uiout,
+			 remote_start_remote_dummy, NULL,
+			 "Couldn't establish connection to remote"
+			 " target\n",
+			 RETURN_MASK_ALL);
+  if (ex < 0)
     {
       pop_target ();
       return;

@@ -1,5 +1,14 @@
 2002-05-19  Andrew Cagney  <ac131313@redhat.com>
 
+	* remote.c (remote_start_remote_dummy): Add uiout parameter.
+	(remote_start_remote): Add uiout parameter.  Pass through to
+	remote_start_remote_dummy.
+	(remote_open_1): Use catch_exception instead of catch_errors.
+	(remote_async_open_1): Ditto.
+	(remote_cisco_open): Ditto.
+
+2002-05-19  Andrew Cagney  <ac131313@redhat.com>
+
 	* remote.c (remote_start_remote): Replace PTR with void pointer.
 	(sigint_remote_twice_token, sigint_remote_token): Ditto.  Make
 	static.
