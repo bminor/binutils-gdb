@@ -1,3 +1,9 @@
+Thu Nov 21 18:26:11 1991  Fred Fish  (fnf at cygnus.com)
+
+	* dwarfread.c (struct_type):  Must initialize the c++ specific
+	portion of union types as well as struct types, since gdb attempts
+	to reference the c++ specific info for both types.
+
 Thu Nov 21 10:23:52 1991  John Gilmore  (gnu at cygnus.com)
 
 	* defs.h:  Incorporate param.h.  All users changed.

@@ -901,24 +901,28 @@ DEFUN(struct_type, (dip, thisdie, enddie),
     {
       type = alloc_utype (dip -> dieref, NULL);
     }
-  switch (dip -> dietag)
+  if (dip -> dietag == TAG_structure_type || dip -> dietag == TAG_union_type)
     {
-    case TAG_structure_type:
-      TYPE_CODE (type) = TYPE_CODE_STRUCT;
-      TYPE_CPLUS_SPECIFIC (type)
-	= (struct cplus_struct_type *) obstack_alloc (symbol_obstack, sizeof (struct cplus_struct_type));
-      bzero (TYPE_CPLUS_SPECIFIC (type), sizeof (struct cplus_struct_type));
-      tpart1 = "struct ";
-      break;
-    case TAG_union_type:
-      TYPE_CODE (type) = TYPE_CODE_UNION;
-      tpart1 = "union ";
-      break;
-    default:
+      TYPE_CPLUS_SPECIFIC (type) = (struct cplus_struct_type *)
+	obstack_alloc (symbol_obstack, sizeof (struct cplus_struct_type));
+      (void) memset (TYPE_CPLUS_SPECIFIC (type), 0,
+		     sizeof (struct cplus_struct_type));
+      if (dip -> dietag == TAG_structure_type)
+	{
+	  TYPE_CODE (type) = TYPE_CODE_STRUCT;
+	  tpart1 = "struct ";
+	}
+      else
+	{
+	  TYPE_CODE (type) = TYPE_CODE_UNION;
+	  tpart1 = "union ";
+	}
+    }
+  else
+    {
       tpart1 = "";
       SQUAWK (("missing structure or union tag"));
       TYPE_CODE (type) = TYPE_CODE_UNDEF;
-      break;
     }
   /* Some compilers try to be helpful by inventing "fake" names for anonymous
      enums, structures, and unions, like "~0fake".  Thanks, but no thanks. */
