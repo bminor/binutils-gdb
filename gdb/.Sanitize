@@ -160,7 +160,6 @@ regex.h
 rem-multi.shar
 remote-adapt.c
 remote-eb.c
-remote-es1800.c
 remote-hms.c
 remote-mm.c
 remote-nindy.c
@@ -206,7 +205,6 @@ tm-arm.h
 tm-bigmips.h
 tm-convex.h
 tm-delta88.h
-tm-es1800.h
 tm-h8300.h
 tm-hp300bsd.h
 tm-hp300hpux.h
