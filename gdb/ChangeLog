@@ -1,3 +1,14 @@
+Thu Oct  5 15:14:36 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* parse.c (write_dollar_variable):  New function.
+	* c-exp.y (yylex):  Replace code for recognizing '$' pseudo-variables
+	with a call to write_dollar_variable.
+	Simplify grammar correspondingly.
+	* f-exp.y:  Likewise.
+	* m2-exp.y:  Likewise.
+	* ch-exp.y:  Likewise.  (Remove function match_dollar_tokens.)
+	* scm-exp.c (scm_lreadr):  Call write_dollar_variable to handle '$'.
+
 Thu Oct  5 13:27:30 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* win32.c: New file; support for debugging on windows NT.

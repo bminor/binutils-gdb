@@ -373,6 +373,11 @@ scm_lreadr (skipping)
       if (!skipping)
 	{
 	  str.length = lexptr - str.ptr;
+	  if (str.ptr[0] == '$')
+	    {
+	      write_dollar_variable (str);
+	      return;
+	    }
 	  write_exp_elt_opcode (OP_NAME);
 	  write_exp_string (str);
 	  write_exp_elt_opcode (OP_NAME);

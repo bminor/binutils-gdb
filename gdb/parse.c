@@ -399,6 +399,97 @@ write_exp_msymbol (msymbol, text_symbol_type, data_symbol_type)
   write_exp_elt_opcode (UNOP_MEMVAL);
 }
 
+/* Recognize tokens that start with '$'.  These include:
+
+	$regname	A native register name or a "standard
+			register name".
+
+	$variable	A convenience variable with a name chosen
+			by the user.
+
+	$digits		Value history with index <digits>, starting
+			from the first value which has index 1.
+
+	$$digits	Value history with index <digits> relative
+			to the last value.  I.E. $$0 is the last
+			value, $$1 is the one previous to that, $$2
+			is the one previous to $$1, etc.
+
+	$ | $0 | $$0	The last value in the value history.
+
+	$$		An abbreviation for the second to the last
+			value in the value history, I.E. $$1
+
+   */
+
+void
+write_dollar_variable (str)
+     struct stoken str;
+{
+  /* Handle the tokens $digits; also $ (short for $0) and $$ (short for $$1)
+     and $$digits (equivalent to $<-digits> if you could type that). */
+
+  int negate = 0;
+  int i = 1;
+  /* Double dollar means negate the number and add -1 as well.
+     Thus $$ alone means -1.  */
+  if (str.length >= 2 && str.ptr[1] == '$')
+    {
+      negate = 1;
+      i = 2;
+    }
+  if (i == str.length)
+    {
+      /* Just dollars (one or two) */
+      i = - negate;
+      goto handle_last;
+    }
+  /* Is the rest of the token digits?  */
+  for (; i < str.length; i++)
+    if (!(str.ptr[i] >= '0' && str.ptr[i] <= '9'))
+      break;
+  if (i == str.length)
+    {
+      i = atoi (str.ptr + 1 + negate);
+      if (negate)
+	i = - i;
+      goto handle_last;
+    }
+  
+  /* Handle tokens that refer to machine registers:
+     $ followed by a register name.  */
+  for (i = 0; i < NUM_REGS; i++)
+    if (str.length - 1 == strlen (reg_names[i])
+	&& STREQN (str.ptr + 1, reg_names[i], str.length - 1))
+      {
+	goto handle_register;
+      }
+  for (i = 0; i < num_std_regs; i++)
+    if (str.length - 1 == strlen (std_regs[i].name)
+	&& STREQN (str.ptr + 1, std_regs[i].name, str.length - 1))
+      {
+	i = std_regs[i].regnum;
+	goto handle_register;
+      }
+
+  /* Any other names starting in $ are debugger internal variables.  */
+
+  write_exp_elt_opcode (OP_INTERNALVAR);
+  write_exp_elt_intern (lookup_internalvar (copy_name (str) + 1));
+  write_exp_elt_opcode (OP_INTERNALVAR); 
+  return;
+ handle_last:
+  write_exp_elt_opcode (OP_LAST);
+  write_exp_elt_longcst ((LONGEST) i);
+  write_exp_elt_opcode (OP_LAST);
+  return;
+ handle_register:
+  write_exp_elt_opcode (OP_REGISTER);
+  write_exp_elt_longcst (i);
+  write_exp_elt_opcode (OP_REGISTER); 
+  return;
+}
+
 /* Return a null-terminated temporary copy of the name
    of a string token.  */
 

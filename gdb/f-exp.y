@@ -186,9 +186,9 @@ static int parse_number PARAMS ((char *, int, int, YYSTYPE *));
 %token LOGICAL_KEYWORD REAL_KEYWORD REAL_S8_KEYWORD REAL_S16_KEYWORD 
 %token COMPLEX_S8_KEYWORD COMPLEX_S16_KEYWORD COMPLEX_S32_KEYWORD 
 %token BOOL_AND BOOL_OR BOOL_NOT   
-%token <lval> LAST REGNAME CHARACTER 
+%token <lval> CHARACTER 
 
-%token <ivar> VARIABLE
+%token <voidval> VARIABLE
 
 %token <opcode> ASSIGN_MODIFY
 
@@ -412,22 +412,7 @@ exp	:	FLOAT
 exp	:	variable
 	;
 
-exp	:	LAST
-			{ write_exp_elt_opcode (OP_LAST);
-			  write_exp_elt_longcst ((LONGEST) $1);
-			  write_exp_elt_opcode (OP_LAST); }
-	;
-
-exp	:	REGNAME
-			{ write_exp_elt_opcode (OP_REGISTER);
-			  write_exp_elt_longcst ((LONGEST) $1);
-			  write_exp_elt_opcode (OP_REGISTER); }
-	;
-
 exp	:	VARIABLE
-			{ write_exp_elt_opcode (OP_INTERNALVAR);
-			  write_exp_elt_intern ($1);
-			  write_exp_elt_opcode (OP_INTERNALVAR); }
 	;
 
 exp	:	SIZEOF '(' type ')'	%prec UNARY
@@ -1110,60 +1095,6 @@ yylex ()
   
   lexptr += namelen;
   
-  /* Handle the tokens $digits; also $ (short for $0) and $$ (short for $$1)
-     and $$digits (equivalent to $<-digits> if you could type that).
-     Make token type LAST, and put the number (the digits) in yylval.  */
-  
-  if (*tokstart == '$')
-    {
-      register int negate = 0;
-
-      c = 1;
-      /* Double dollar means negate the number and add -1 as well.
-	 Thus $$ alone means -1.  */
-      if (namelen >= 2 && tokstart[1] == '$')
-	{
-	  negate = 1;
-	  c = 2;
-	}
-      if (c == namelen)
-	{
-	  /* Just dollars (one or two) */
-	  yylval.lval = - negate;
-	  return LAST;
-	}
-      /* Is the rest of the token digits?  */
-      for (; c < namelen; c++)
-	if (!(tokstart[c] >= '0' && tokstart[c] <= '9'))
-	  break;
-      if (c == namelen)
-	{
-	  yylval.lval = atoi (tokstart + 1 + negate);
-	  if (negate)
-	    yylval.lval = - yylval.lval;
-	  return LAST;
-	}
-    }
-  
-  /* Handle tokens that refer to machine registers:
-     $ followed by a register name.  */
-  
-  if (*tokstart == '$') {
-    for (c = 0; c < NUM_REGS; c++)
-      if (namelen - 1 == strlen (reg_names[c])
-	  && STREQN (tokstart + 1, reg_names[c], namelen - 1))
-	{
-	  yylval.lval = c;
-	  return REGNAME;
-	}
-    for (c = 0; c < num_std_regs; c++)
-      if (namelen - 1 == strlen (std_regs[c].name)
-	  && STREQN (tokstart + 1, std_regs[c].name, namelen - 1))
-	{
-	  yylval.lval = std_regs[c].regnum;
-	  return REGNAME;
-	}
-  }
   /* Catch specific keywords.  */
   
   for (i = 0; f77_keywords[i].operator != NULL; i++)
@@ -1178,11 +1109,9 @@ yylex ()
   yylval.sval.ptr = tokstart;
   yylval.sval.length = namelen;
   
-  /* Any other names starting in $ are debugger internal variables.  */
-  
   if (*tokstart == '$')
     {
-      yylval.ivar =  lookup_internalvar (copy_name (yylval.sval) + 1);
+      write_dollar_variable (yylval.sval);
       return VARIABLE;
     }
   

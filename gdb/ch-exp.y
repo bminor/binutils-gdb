@@ -225,9 +225,7 @@ yyerror PARAMS ((char *));
    specific things that we recognize in the same context as Chill tokens
    (register names for example). */
 
-%token <lval>		GDB_REGNAME	/* Machine register name */
-%token <lval>		GDB_LAST	/* Value history */
-%token <ivar>		GDB_VARIABLE	/* Convenience variable */
+%token <voidval>	GDB_VARIABLE	/* Convenience variable */
 %token <voidval>	GDB_ASSIGNMENT	/* Assign value to somewhere */
 
 %type <voidval>		access_name
@@ -291,24 +289,7 @@ access_name	:	LOCATION_NAME
 			  write_exp_elt_sym ($1.sym);
 			  write_exp_elt_opcode (OP_VAR_VALUE);
 			}
-		|	GDB_LAST		/* gdb specific */
-			{
-			  write_exp_elt_opcode (OP_LAST);
-			  write_exp_elt_longcst ($1);
-			  write_exp_elt_opcode (OP_LAST); 
-			}
-		|	GDB_REGNAME		/* gdb specific */
-			{
-			  write_exp_elt_opcode (OP_REGISTER);
-			  write_exp_elt_longcst ($1);
-			  write_exp_elt_opcode (OP_REGISTER); 
-			}
 		|	GDB_VARIABLE	/* gdb specific */
-			{
-			  write_exp_elt_opcode (OP_INTERNALVAR);
-			  write_exp_elt_intern ($1);
-			  write_exp_elt_opcode (OP_INTERNALVAR); 
-			}
 		;
 
 /* Z.200, 4.2.8 */
@@ -1382,131 +1363,6 @@ match_bitstring_literal ()
     }
 }
 
-/* Recognize tokens that start with '$'.  These include:
-
-	$regname	A native register name or a "standard
-			register name".
-			Return token GDB_REGNAME.
-
-	$variable	A convenience variable with a name chosen
-			by the user.
-			Return token GDB_VARIABLE.
-
-	$digits		Value history with index <digits>, starting
-			from the first value which has index 1.
-			Return GDB_LAST.
-
-	$$digits	Value history with index <digits> relative
-			to the last value.  I.E. $$0 is the last
-			value, $$1 is the one previous to that, $$2
-			is the one previous to $$1, etc.
-			Return token GDB_LAST.
-
-	$ | $0 | $$0	The last value in the value history.
-			Return token GDB_LAST.
-
-	$$		An abbreviation for the second to the last
-			value in the value history, I.E. $$1
-			Return token GDB_LAST.
-
-    Note that we currently assume that register names and convenience
-    variables follow the convention of starting with a letter or '_'.
-
-   */
-
-static int
-match_dollar_tokens ()
-{
-  char *tokptr;
-  int regno;
-  int namelength;
-  int negate;
-  int ival;
-
-  /* We will always have a successful match, even if it is just for
-     a single '$', the abbreviation for $$0.  So advance lexptr. */
-
-  tokptr = ++lexptr;
-
-  if (*tokptr == '_' || isalpha (*tokptr))
-    {
-      /* Look for a match with a native register name, usually something
-	 like "r0" for example. */
-
-      for (regno = 0; regno < NUM_REGS; regno++)
-	{
-	  namelength = strlen (reg_names[regno]);
-	  if (STREQN (tokptr, reg_names[regno], namelength)
-	      && !isalnum (tokptr[namelength]))
-	    {
-	      yylval.lval = regno;
-	      lexptr += namelength;
-	      return (GDB_REGNAME);
-	    }
-	}
-
-      /* Look for a match with a standard register name, usually something
-	 like "pc", which gdb always recognizes as the program counter
-	 regardless of what the native register name is. */
-
-      for (regno = 0; regno < num_std_regs; regno++)
-	{
-	  namelength = strlen (std_regs[regno].name);
-	  if (STREQN (tokptr, std_regs[regno].name, namelength)
-	      && !isalnum (tokptr[namelength]))
-	    {
-	      yylval.lval = std_regs[regno].regnum;
-	      lexptr += namelength;
-	      return (GDB_REGNAME);
-	    }
-	}
-
-      /* Attempt to match against a convenience variable.  Note that
-	 this will always succeed, because if no variable of that name
-	 already exists, the lookup_internalvar will create one for us.
-	 Also note that both lexptr and tokptr currently point to the
-	 start of the input string we are trying to match, and that we
-	 have already tested the first character for non-numeric, so we
-	 don't have to treat it specially. */
-
-      while (*tokptr == '_' || isalnum (*tokptr))
-	{
-	  tokptr++;
-	}
-      yylval.sval.ptr = lexptr;
-      yylval.sval.length = tokptr - lexptr;
-      yylval.ivar = lookup_internalvar (copy_name (yylval.sval));
-      lexptr = tokptr;
-      return (GDB_VARIABLE);
-    }
-
-  /* Since we didn't match against a register name or convenience
-     variable, our only choice left is a history value. */
-
-  if (*tokptr == '$')
-    {
-      negate = 1;
-      ival = 1;
-      tokptr++;
-    }
-  else
-    {
-      negate = 0;
-      ival = 0;
-    }
-
-  /* Attempt to decode more characters as an integer value giving
-     the index in the history list.  If successful, the value will
-     overwrite ival (currently 0 or 1), and if not, ival will be
-     left alone, which is good since it is currently correct for
-     the '$' or '$$' case. */
-
-  decode_integer_literal (&ival, &tokptr);
-  yylval.lval = negate ? -ival : ival;
-  lexptr = tokptr;
-  return (GDB_LAST);
-}
-
 struct token
 {
   char *operator;
@@ -1620,11 +1476,13 @@ yylex ()
 	    }
 	  break;
 	case '$':
-	  token = match_dollar_tokens ();
-	  if (token != 0)
-	    {
-	      return (token);
-	    }
+	  yylval.sval.ptr = lexptr;
+	  do {
+	    lexptr++;
+	  } while (isalnum (*lexptr) || (lexptr == '_'));
+	  yylval.sval.length = lexptr - yylval.sval.ptr;
+	  write_dollar_variable (yylval.sval);
+	  return GDB_VARIABLE;
 	  break;
       }
     /* See if it is a special token of length 2.  */
