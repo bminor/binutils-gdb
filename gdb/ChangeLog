@@ -1,3 +1,8 @@
+Wed Jul 28 13:19:34 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* dbxread.c (record_minimal_symbol): Don't put gcc_compiled or
+	__gnu_compiled* symbols into the minimal symbols.
+
 Wed Jul 28 08:26:58 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* remote-mips.c (_initialize_remote_mips): Added "timeout" and
