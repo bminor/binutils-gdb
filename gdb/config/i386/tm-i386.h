@@ -179,7 +179,7 @@ extern void i386_store_struct_return (CORE_ADDR addr, CORE_ADDR sp);
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF.  */
 
-#define EXTRACT_RETURN_VALUE(type, regbuf, valbuf) \
+#define DEPRECATED_EXTRACT_RETURN_VALUE(type, regbuf, valbuf) \
   i386_extract_return_value ((type), (regbuf), (valbuf))
 extern void i386_extract_return_value (struct type *type, char *regbuf,
 				       char *valbuf);
@@ -195,7 +195,7 @@ extern void i386_store_return_value (struct type *type, char *valbuf);
    the address in which a function should return its structure value,
    as a CORE_ADDR.  */
 
-#define EXTRACT_STRUCT_VALUE_ADDRESS(regbuf) \
+#define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS(regbuf) \
   i386_extract_struct_value_address ((regbuf))
 extern CORE_ADDR i386_extract_struct_value_address (char *regbuf);
 

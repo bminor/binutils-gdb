@@ -2619,7 +2619,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_convert_to_raw (gdbarch, rs6000_register_convert_to_raw);
   set_gdbarch_stab_reg_to_regnum (gdbarch, rs6000_stab_reg_to_regnum);
 
-  set_gdbarch_extract_return_value (gdbarch, rs6000_extract_return_value);
+  set_gdbarch_deprecated_extract_return_value (gdbarch, rs6000_extract_return_value);
   
   /* Note: kevinb/2002-04-12: I'm not convinced that rs6000_push_arguments()
      is correct for the SysV ABI when the wordsize is 8, but I'm also
@@ -2635,7 +2635,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_store_struct_return (gdbarch, rs6000_store_struct_return);
   set_gdbarch_store_return_value (gdbarch, rs6000_store_return_value);
-  set_gdbarch_extract_struct_value_address (gdbarch, rs6000_extract_struct_value_address);
+  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, rs6000_extract_struct_value_address);
   set_gdbarch_pop_frame (gdbarch, rs6000_pop_frame);
 
   set_gdbarch_skip_prologue (gdbarch, rs6000_skip_prologue);

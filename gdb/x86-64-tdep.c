@@ -1076,7 +1076,7 @@ x86_64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 /* Return number of args passed to a frame, no way to tell.  */
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
 /* Don't use default structure extract routine */
-  set_gdbarch_extract_struct_value_address (gdbarch, 0);
+  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, 0);
 
 /* If USE_STRUCT_CONVENTION retruns 0, then gdb uses STORE_RETURN_VALUE
    and EXTRACT_RETURN_VALUE to store/fetch the functions return value.  It is
@@ -1090,7 +1090,7 @@ x86_64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF.  */
-  set_gdbarch_extract_return_value (gdbarch, x86_64_extract_return_value);
+  set_gdbarch_deprecated_extract_return_value (gdbarch, x86_64_extract_return_value);
 
 
 /* Write into the appropriate registers a function return value stored

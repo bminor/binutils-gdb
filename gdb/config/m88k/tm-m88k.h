@@ -385,10 +385,10 @@ struct type *m88k_register_type (int regnum);
 /* The 88k call/return conventions call for "small" values to be returned
    into consecutive registers starting from r2.  */
 
-#define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
+#define DEPRECATED_EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
   memcpy ((VALBUF), &(((char *)REGBUF)[REGISTER_BYTE(RV_REGNUM)]), TYPE_LENGTH (TYPE))
 
-#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) (*(int *)(REGBUF))
+#define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) (*(int *)(REGBUF))
 
 /* Write into appropriate registers a function return value
    of type TYPE, given in virtual format.  */

@@ -308,8 +308,8 @@ switch (regno) { \
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF.  */
 
-#undef  EXTRACT_RETURN_VALUE
-#define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
+#undef  DEPRECATED_EXTRACT_RETURN_VALUE
+#define DEPRECATED_EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
   symmetry_extract_return_value(TYPE, REGBUF, VALBUF)
 
 /* The following redefines make backtracing through sigtramp work.

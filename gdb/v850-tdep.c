@@ -1270,12 +1270,12 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_use_generic_dummy_frames (gdbarch, 1);
   set_gdbarch_push_dummy_frame (gdbarch, generic_push_dummy_frame);
   set_gdbarch_push_return_address (gdbarch, v850_push_return_address);
-  set_gdbarch_extract_return_value (gdbarch, v850_extract_return_value);
+  set_gdbarch_deprecated_extract_return_value (gdbarch, v850_extract_return_value);
   set_gdbarch_push_arguments (gdbarch, v850_push_arguments);
   set_gdbarch_pop_frame (gdbarch, v850_pop_frame);
   set_gdbarch_store_struct_return (gdbarch, v850_store_struct_return);
   set_gdbarch_store_return_value (gdbarch, v850_store_return_value);
-  set_gdbarch_extract_struct_value_address (gdbarch, v850_extract_struct_value_address);
+  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, v850_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, v850_use_struct_convention);
   set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
   set_gdbarch_call_dummy_address (gdbarch, entry_point_address);

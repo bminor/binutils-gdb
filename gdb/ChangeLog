@@ -1,5 +1,59 @@
 2002-06-14  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh (DEPRECATED_EXTRACT_RETURN_VALUE): Rename
+	EXTRACT_RETURN_VALUE.
+	(DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS): Rename
+	EXTRACT_STRUCT_VALUE_ADDRESS.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	
+	* values.c (value_being_returned): Handle
+	DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS.
+	(EXTRACT_RETURN_VALUE): Define as DEPRECATED_EXTRACT_RETURN_VALUE.
+
+	* arm-linux-tdep.c (arm_linux_init_abi): Update. 
+	* arm-tdep.c (arm_gdbarch_init): Update.
+	* avr-tdep.c (avr_gdbarch_init): Update.
+	* cris-tdep.c (cris_gdbarch_init): Update.
+	* d10v-tdep.c (d10v_gdbarch_init): Update.
+	* ia64-tdep.c (ia64_gdbarch_init): Update.
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Update.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Update.
+	* s390-tdep.c (s390_gdbarch_init): Update.
+	* sh-tdep.c (sh_gdbarch_init): Update.
+	* s390-tdep.c (s390_gdbarch_init): Update.
+	* sparc-tdep.c (sparc_gdbarch_init): Update.
+	* ns32k-tdep.c (ns32k_gdbarch_init): Update.
+	* v850-tdep.c (v850_gdbarch_init): Update.
+	* vax-tdep.c (vax_gdbarch_init): Update.
+	* x86-64-tdep.c (x86_64_gdbarch_init): Update.
+	* xstormy16-tdep.c (xstormy16_gdbarch_init): Update.
+
+	* config/arc/tm-arc.h: Update.
+	* config/d30v/tm-d30v.h: Update.
+	* config/fr30/tm-fr30.h: Update.
+	* config/h8300/tm-h8300.h: Update.
+	* config/h8500/tm-h8500.h: Update.
+	* config/i386/tm-i386.h: Update.
+	* config/i386/tm-ptx.h: Update.
+	* config/i386/tm-symmetry.h: Update.
+	* config/i960/tm-i960.h: Update.
+	* config/m32r/tm-m32r.h: Update.
+	* config/m68k/tm-delta68.h: Update.
+	* config/m68k/tm-linux.h: Update.
+	* config/m68k/tm-m68k.h: Update.
+	* config/m88k/tm-m88k.h: Update.
+	* config/mcore/tm-mcore.h: Update.
+	* config/mips/tm-mips.h: Update.
+	* config/mn10200/tm-mn10200.h: Update.
+	* config/pa/tm-hppa.h: Update.
+	* config/pa/tm-hppa64.h: Update.
+	* config/sparc/tm-sp64.h: Update.
+	* config/sparc/tm-sparc.h: Update.
+	* config/sparc/tm-sparclet.h: Update.
+	* config/z8k/tm-z8k.h: Update.
+
+2002-06-14  Andrew Cagney  <cagney@redhat.com>
+
 	* Makefile.in (i386_linux_tdep_h): Define.
 	(i386_tdep_h, i387_tdep_h): Define.
 	(i386-linux-nat.o): Add $(i386_linux_tdep_h),

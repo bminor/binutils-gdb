@@ -1773,7 +1773,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* We can't do this */
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
   set_gdbarch_store_struct_return (gdbarch, s390_store_struct_return);
-  set_gdbarch_extract_return_value (gdbarch, s390_extract_return_value);
+  set_gdbarch_deprecated_extract_return_value (gdbarch, s390_extract_return_value);
   set_gdbarch_store_return_value (gdbarch, s390_store_return_value);
   /* Amount PC must be decremented by after a breakpoint.
      This is often the number of bytes in BREAKPOINT
@@ -1818,7 +1818,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_stab_reg_to_regnum (gdbarch, s390_stab_reg_to_regnum);
   set_gdbarch_dwarf_reg_to_regnum (gdbarch, s390_stab_reg_to_regnum);
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, s390_stab_reg_to_regnum);
-  set_gdbarch_extract_struct_value_address
+  set_gdbarch_deprecated_extract_struct_value_address
     (gdbarch, generic_cannot_extract_struct_value_address);
 
   /* Parameters for inferior function calls.  */

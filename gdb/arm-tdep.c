@@ -2925,11 +2925,11 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_name (gdbarch, arm_register_name);
 
   /* Returning results.  */
-  set_gdbarch_extract_return_value (gdbarch, arm_extract_return_value);
+  set_gdbarch_deprecated_extract_return_value (gdbarch, arm_extract_return_value);
   set_gdbarch_store_return_value (gdbarch, arm_store_return_value);
   set_gdbarch_store_struct_return (gdbarch, arm_store_struct_return);
   set_gdbarch_use_struct_convention (gdbarch, arm_use_struct_convention);
-  set_gdbarch_extract_struct_value_address (gdbarch,
+  set_gdbarch_deprecated_extract_struct_value_address (gdbarch,
 					    arm_extract_struct_value_address);
 
   /* Single stepping.  */

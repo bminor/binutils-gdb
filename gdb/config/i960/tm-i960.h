@@ -182,7 +182,7 @@ extern use_struct_convention_fn i960_use_struct_convention;
 
    On the i960 we just take as many bytes as we need from G0 through G3.  */
 
-#define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
+#define DEPRECATED_EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
 	memcpy(VALBUF, REGBUF+REGISTER_BYTE(G0_REGNUM), TYPE_LENGTH (TYPE))
 
 /* If USE_STRUCT_CONVENTION produces a 1, 
@@ -195,7 +195,7 @@ extern use_struct_convention_fn i960_use_struct_convention;
    (..., 0) below is to make it appear to return a value, though
    actually all it does is call error().  */
 
-#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
+#define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
    (error("Don't know where large structure is returned on i960"), 0)
 
 /* Write into appropriate registers a function return value

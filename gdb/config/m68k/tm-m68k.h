@@ -201,8 +201,8 @@ extern void m68k_find_saved_regs (struct frame_info *,
    into VALBUF.  This is assuming that floating point values are returned
    as doubles in d0/d1.  */
 
-#if !defined (EXTRACT_RETURN_VALUE)
-#define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
+#if !defined (DEPRECATED_EXTRACT_RETURN_VALUE)
+#define DEPRECATED_EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
   memcpy ((VALBUF),							\
 	  (char *)(REGBUF) +						\
 	         (TYPE_LENGTH(TYPE) >= 4 ? 0 : 4 - TYPE_LENGTH(TYPE)),	\
@@ -222,7 +222,7 @@ extern void m68k_find_saved_regs (struct frame_info *,
    the address in which a function should return its structure value,
    as a CORE_ADDR (or an expression that can be used as one).  */
 
-#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) (*(CORE_ADDR *)(REGBUF))
+#define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) (*(CORE_ADDR *)(REGBUF))
 
 /* Describe the pointer in each stack frame to the previous stack frame
    (its caller).  */

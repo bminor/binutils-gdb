@@ -242,7 +242,7 @@ void mips_register_convert_to_raw (struct type *virtual_type, int reg_nr,
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF.  XXX floats */
 
-#define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
+#define DEPRECATED_EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
   mips_extract_return_value(TYPE, REGBUF, VALBUF)
 extern void mips_extract_return_value (struct type *, char[], char *);
 
@@ -261,7 +261,7 @@ extern void mips_store_return_value (struct type *, char *);
    convention is specified by the System V ABI, so I think we can rely
    on it.  */
 
-#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
+#define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
   (extract_address (REGBUF + REGISTER_BYTE (V0_REGNUM), \
 		    REGISTER_RAW_SIZE (V0_REGNUM)))
 

@@ -117,14 +117,14 @@ extern void fr30_pop_frame (void);
 /* Extract from an array REGBUF containing the (raw) register state
    a function return value of type TYPE, and copy that, in virtual format,
    into VALBUF.  */
-#define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
+#define DEPRECATED_EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
     memcpy (VALBUF, REGBUF + REGISTER_BYTE(RETVAL_REG) +  \
 	(TYPE_LENGTH(TYPE) < 4 ? 4 - TYPE_LENGTH(TYPE) : 0), TYPE_LENGTH (TYPE))
 
 /* Extract from an array REGBUF containing the (raw) register state
    the address in which a function should return its structure value,
    as a CORE_ADDR (or an expression that can be used as one).  */
-#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
+#define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
   extract_address (REGBUF + REGISTER_BYTE (RETVAL_REG), \
 		   REGISTER_RAW_SIZE (RETVAL_REG))
 

@@ -3002,8 +3002,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_stack_adjust_p (gdbarch, 1);
   set_gdbarch_decr_pc_after_break (gdbarch, 0);
   set_gdbarch_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
-  set_gdbarch_extract_struct_value_address (gdbarch, 
-					    sparc_extract_struct_value_address);
+  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, sparc_extract_struct_value_address);
   set_gdbarch_fix_call_dummy (gdbarch, sparc_gdbarch_fix_call_dummy);
   set_gdbarch_float_bit (gdbarch, 4 * TARGET_CHAR_BIT);
   set_gdbarch_fp_regnum (gdbarch, SPARC_FP_REGNUM);
@@ -3217,7 +3216,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   switch (info.bfd_arch_info->mach)
     {
     case bfd_mach_sparc:
-      set_gdbarch_extract_return_value (gdbarch, sparc32_extract_return_value);
+      set_gdbarch_deprecated_extract_return_value (gdbarch, sparc32_extract_return_value);
       set_gdbarch_frame_chain_valid (gdbarch, file_frame_chain_valid);
       set_gdbarch_num_regs (gdbarch, 72);
       set_gdbarch_register_bytes (gdbarch, 32*4 + 32*4 + 8*4);
@@ -3228,8 +3227,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       tdep->print_insn_mach = bfd_mach_sparc;
       break;
     case bfd_mach_sparc_sparclet:
-      set_gdbarch_extract_return_value (gdbarch, 
-					sparclet_extract_return_value);
+      set_gdbarch_deprecated_extract_return_value (gdbarch, sparclet_extract_return_value);
       set_gdbarch_frame_chain_valid (gdbarch, file_frame_chain_valid);
       set_gdbarch_num_regs (gdbarch, 32 + 32 + 8 + 8 + 8);
       set_gdbarch_register_bytes (gdbarch, 32*4 + 32*4 + 8*4 + 8*4 + 8*4);
@@ -3240,7 +3238,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       tdep->print_insn_mach = bfd_mach_sparc_sparclet;
       break;
     case bfd_mach_sparc_sparclite:
-      set_gdbarch_extract_return_value (gdbarch, sparc32_extract_return_value);
+      set_gdbarch_deprecated_extract_return_value (gdbarch, sparc32_extract_return_value);
       set_gdbarch_frame_chain_valid (gdbarch, func_frame_chain_valid);
       set_gdbarch_num_regs (gdbarch, 80);
       set_gdbarch_register_bytes (gdbarch, 32*4 + 32*4 + 8*4 + 8*4);
@@ -3251,7 +3249,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       tdep->print_insn_mach = bfd_mach_sparc_sparclite;
       break;
     case bfd_mach_sparc_v8plus:
-      set_gdbarch_extract_return_value (gdbarch, sparc32_extract_return_value);
+      set_gdbarch_deprecated_extract_return_value (gdbarch, sparc32_extract_return_value);
       set_gdbarch_frame_chain_valid (gdbarch, file_frame_chain_valid);
       set_gdbarch_num_regs (gdbarch, 72);
       set_gdbarch_register_bytes (gdbarch, 32*4 + 32*4 + 8*4);
@@ -3262,7 +3260,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       tdep->has_fpu = 1;	/* (all but sparclet and sparclite) */
       break;
     case bfd_mach_sparc_v8plusa:
-      set_gdbarch_extract_return_value (gdbarch, sparc32_extract_return_value);
+      set_gdbarch_deprecated_extract_return_value (gdbarch, sparc32_extract_return_value);
       set_gdbarch_frame_chain_valid (gdbarch, file_frame_chain_valid);
       set_gdbarch_num_regs (gdbarch, 72);
       set_gdbarch_register_bytes (gdbarch, 32*4 + 32*4 + 8*4);
@@ -3273,7 +3271,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       tdep->print_insn_mach = bfd_mach_sparc;
       break;
     case bfd_mach_sparc_sparclite_le:
-      set_gdbarch_extract_return_value (gdbarch, sparc32_extract_return_value);
+      set_gdbarch_deprecated_extract_return_value (gdbarch, sparc32_extract_return_value);
       set_gdbarch_frame_chain_valid (gdbarch, func_frame_chain_valid);
       set_gdbarch_num_regs (gdbarch, 80);
       set_gdbarch_register_bytes (gdbarch, 32*4 + 32*4 + 8*4 + 8*4);
@@ -3284,7 +3282,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       tdep->print_insn_mach = bfd_mach_sparc_sparclite;
       break;
     case bfd_mach_sparc_v9:
-      set_gdbarch_extract_return_value (gdbarch, sparc64_extract_return_value);
+      set_gdbarch_deprecated_extract_return_value (gdbarch, sparc64_extract_return_value);
       set_gdbarch_frame_chain_valid (gdbarch, file_frame_chain_valid);
       set_gdbarch_num_regs (gdbarch, 125);
       set_gdbarch_register_bytes (gdbarch, 32*8 + 32*8 + 45*8);
@@ -3295,7 +3293,7 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       tdep->print_insn_mach = bfd_mach_sparc_v9a;
       break;
     case bfd_mach_sparc_v9a:
-      set_gdbarch_extract_return_value (gdbarch, sparc64_extract_return_value);
+      set_gdbarch_deprecated_extract_return_value (gdbarch, sparc64_extract_return_value);
       set_gdbarch_frame_chain_valid (gdbarch, file_frame_chain_valid);
       set_gdbarch_num_regs (gdbarch, 125);
       set_gdbarch_register_bytes (gdbarch, 32*8 + 32*8 + 45*8);
