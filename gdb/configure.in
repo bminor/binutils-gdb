@@ -37,7 +37,7 @@ AC_CANONICAL_SYSTEM
 AC_ARG_PROGRAM
 
 AC_HEADER_STDC
-AC_CHECK_HEADERS(limits.h memory.h string.h strings.h unistd.h termios.h termio.h sgtty.h stddef.h sys/procfs.h)
+AC_CHECK_HEADERS(limits.h memory.h string.h strings.h unistd.h termios.h termio.h sgtty.h stddef.h sys/procfs.h link.h)
 AC_HEADER_STAT
 
 AC_MSG_CHECKING([for gregset_t type])
@@ -713,6 +713,11 @@ case ${srcdir} in
 *)
 grep "source ${srcdir}/.gdbinit" .gdbinit >/dev/null 2>/dev/null || \
 echo "source ${srcdir}/.gdbinit" >> .gdbinit
+esac
+
+case x$CONFIG_HEADERS in
+xconfig.h:config.h.in)
+echo > stamp-h ;;
 esac
 ],
 [

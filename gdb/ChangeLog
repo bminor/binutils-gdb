@@ -1,3 +1,17 @@
+Sat Mar 16 19:47:36 1996  Fred Fish  <fnf@cygnus.com>
+
+	* configure.in: Add fragment to create stamp-h.
+	
+	From Peter Schauer <Peter.Schauer@Regent.E-Technik.TU-Muenchen.DE>
+	* configure.in (AC_CHECK_HEADERS):  Check for link.h.
+	* configure:  Regenerate with autoconf.
+	* config.h.in:  Regenerate with autoheader.
+	* config/i386/nm-linux.h:  Include solib.h only if HAVE_LINK_H
+	is defined.
+	* solib.c:  Exclude most of the code if HAVE_LINK_H is not defined.
+	* config/i386/linux.mh:  Reinstate XM_CLIBS, it is needed for
+	older a.out based systems.
+
 Sat Mar 16 16:45:43 1996  Fred Fish  <fnf@cygnus.com>
 
 	* config.h.in: New file.

@@ -1189,7 +1189,7 @@ EOF
 
 fi
 
-for ac_hdr in limits.h memory.h string.h strings.h unistd.h termios.h termio.h sgtty.h stddef.h sys/procfs.h
+for ac_hdr in limits.h memory.h string.h strings.h unistd.h termios.h termio.h sgtty.h stddef.h sys/procfs.h link.h
 do
 ac_safe=`echo "$ac_hdr" | tr './\055' '___'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
@@ -3754,6 +3754,11 @@ case ${srcdir} in
 *)
 grep "source ${srcdir}/.gdbinit" .gdbinit >/dev/null 2>/dev/null || \
 echo "source ${srcdir}/.gdbinit" >> .gdbinit
+esac
+
+case x$CONFIG_HEADERS in
+xconfig.h:config.h.in)
+echo > stamp-h ;;
 esac
 
 exit 0
