@@ -1,5 +1,11 @@
 2004-05-04  Mark Kettenis  <kettenis@gnu.org>
 
+	* sun3-nat.c: Remove file.
+	* Makefile.in (tm-sun3.h tm-altos.h tm-sun2.h tm-3b1.h): Remove
+	dependencies.
+	(ALLDEPFILES): Remove sun3-nat.c.
+	(sun3-nat.o): Remove dependencies.
+
 	* i386-interix-nat.c, i386-interix-tdep.c,
 	config/i386/nm-interix.h, config/i386/interix.mh,
 	config/i386/interix.mt: Remove files.

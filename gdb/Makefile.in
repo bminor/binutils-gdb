@@ -1157,8 +1157,6 @@ gdb1$(EXEEXT): gdb$(EXEEXT)
 # for some machines.
 # But these rules don't do what we want; we want to hack the foo.o: tm.h
 # dependency to do the right thing.
-tm-sun3.h tm-altos.h: tm-m68k.h
-tm-sun2.h tm-3b1.h: tm-m68k.h
 xm-vaxult.h: xm-vax.h
 xm-vaxbsd.h: xm-vax.h
 
@@ -1373,7 +1371,6 @@ ALLDEPFILES = \
 	sparc64-tdep.c sparc64fbsd-nat.c sparc64fbsd-tdep.c \
 	sparc64nbsd-nat.c sparc64nbsd-tdep.c sparc64obsd-tdep.c \
 	sparcnbsd-nat.c sparcnbsd-tdep.c sparcobsd-tdep.c \
-	sun3-nat.c \
 	symm-tdep.c symm-nat.c \
 	vax-tdep.c \
 	vx-share/xdr_ld.c vx-share/xdr_ptrace.c vx-share/xdr_rdb.c \
@@ -2424,7 +2421,6 @@ standalone.o: standalone.c $(gdb_stat_h) $(defs_h) $(symtab_h) $(frame_h) \
 std-regs.o: std-regs.c $(defs_h) $(user_regs_h) $(frame_h) $(gdbtypes_h) \
 	$(value_h) $(gdb_string_h)
 stop-gdb.o: stop-gdb.c $(defs_h)
-sun3-nat.o: sun3-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) $(regcache_h)
 symfile.o: symfile.c $(defs_h) $(bfdlink_h) $(symtab_h) $(gdbtypes_h) \
 	$(gdbcore_h) $(frame_h) $(target_h) $(value_h) $(symfile_h) \
 	$(objfiles_h) $(source_h) $(gdbcmd_h) $(breakpoint_h) $(language_h) \
