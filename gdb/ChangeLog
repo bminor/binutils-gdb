@@ -1,3 +1,8 @@
+2005-03-07  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* findvar.c (read_var_value): Don't allocate V when it will not
+	be used.  Add missing break for LOC_INDIRECT.
+
 2005-03-06  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparc64fbsd-tdep.c: Include "solib-svr4.h".

@@ -385,11 +385,19 @@ read_var_value (struct symbol *var, struct frame_info *frame)
   CORE_ADDR addr;
   int len;
 
-  v = allocate_value (type);
-  VALUE_LVAL (v) = lval_memory;	/* The most likely possibility.  */
+  if (SYMBOL_CLASS (var) == LOC_COMPUTED
+      || SYMBOL_CLASS (var) == LOC_COMPUTED_ARG
+      || SYMBOL_CLASS (var) == LOC_REGISTER
+      || SYMBOL_CLASS (var) == LOC_REGPARM)
+    /* These cases do not use V.  */
+    v = NULL;
+  else
+    {
+      v = allocate_value (type);
+      VALUE_LVAL (v) = lval_memory;	/* The most likely possibility.  */
+    }
 
   len = TYPE_LENGTH (type);
-
 
   /* FIXME drow/2003-09-06: this call to the selected frame should be
      pushed upwards to the callers.  */
@@ -452,6 +460,7 @@ addresses have not been bound by the dynamic loader. Try again when executable i
 	locaddr = SYMBOL_VALUE_ADDRESS (var);
 	loc = value_at (lookup_pointer_type (type), locaddr);
 	addr = value_as_address (loc);
+	break;
       }
 
     case LOC_ARG:
