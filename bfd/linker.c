@@ -469,7 +469,6 @@ _bfd_link_hash_newfunc (entry, table, string)
     {
       /* Initialize the local fields.  */
       ret->type = bfd_link_hash_new;
-      ret->written = false;
       ret->next = NULL;
     }
 
@@ -583,6 +582,7 @@ generic_link_hash_newfunc (entry, table, string)
   if (ret)
     {
       /* Set local fields.  */
+      ret->written = false;
       ret->sym = NULL;
     }
 
@@ -1930,7 +1930,7 @@ _bfd_generic_link_output_symbols (output_bfd, input_bfd, info, psymalloc)
 	  if (! generic_add_output_symbol (output_bfd, psymalloc, sym))
 	    return false;
 	  if (h != (struct generic_link_hash_entry *) NULL)
-	    h->root.written = true;
+	    h->written = true;
 	}
     }
 
@@ -1949,10 +1949,10 @@ _bfd_generic_link_write_global_symbol (h, data)
     (struct generic_write_global_symbol_info *) data;
   asymbol *sym;
 
-  if (h->root.written)
+  if (h->written)
     return true;
 
-  h->root.written = true;
+  h->written = true;
 
   if (wginfo->info->strip == strip_all
       || (wginfo->info->strip == strip_some
@@ -2061,7 +2061,7 @@ _bfd_generic_reloc_link_order (abfd, info, sec, link_order)
 					 link_order->u.reloc.p->u.name,
 					 false, false, true);
       if (h == (struct generic_link_hash_entry *) NULL
-	  || ! h->root.written)
+	  || ! h->written)
 	{
 	  if (! ((*info->callbacks->unattached_reloc)
 		 (info, link_order->u.reloc.p->u.name,

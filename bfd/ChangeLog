@@ -1,5 +1,20 @@
 Mon Jun  6 10:57:28 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* libaout.h (struct aout_link_hash_entry): New field written.
+	* aoutx.h (NAME(aout,link_hash_newfunc)): Initialize written.
+	(aout_link_write_symbols): Use written, not root.written.
+	(aout_link_write_other_symbol): Likewise.
+	* sunos.c (sunos_scan_dynamic_symbol): Likewise.
+	* libecoff.h (struct ecoff_link_hash_entry): New field written.
+	* ecoff.c (ecoff_link_hash_newfunc): Initialize written.
+	(ecoff_link_write_external): use written, not root.written.
+	* genlink.h (struct generic_link_hash_entry): New field written.
+	* linker.c (_bfd_link_hash_newfunc): Don't initialize written.
+	(generic_link_hash_newfunc): Initialize written.
+	(_bfd_generic_link_output_symbols): Use written, not root.written.
+	(_bfd_generic_link_write_global_symbol): Likewise.
+	(_bfd_generic_reloc_link_order): Likewise.
+
 	* libecoff.h (ecoff_data_type): Add linker field.
 	* ecoff.c (ecoff_write_object_contents): Check new tdata linker
 	field, rather than outsymbols being non-NULL, to decide whether to

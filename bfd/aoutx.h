@@ -2854,8 +2854,11 @@ NAME(aout,link_hash_newfunc) (entry, table, string)
 	 _bfd_link_hash_newfunc ((struct bfd_hash_entry *) ret,
 				 table, string));
   if (ret)
-    /* Set local fields.  */
-    ret->indx = -1;
+    {
+      /* Set local fields.  */
+      ret->written = false;
+      ret->indx = -1;
+    }
 
   return (struct bfd_hash_entry *) ret;
 }
@@ -3726,7 +3729,7 @@ aout_link_write_symbols (finfo, input_bfd, symbol_map)
 	  /* If the symbol has already been written out, skip it.  */
 	  if (h != (struct aout_link_hash_entry *) NULL
 	      && h->root.type != bfd_link_hash_warning
-	      && h->root.written)
+	      && h->written)
 	    {
 	      if ((type & N_TYPE) == N_INDR)
 		skip_indirect = true;
@@ -3756,7 +3759,7 @@ aout_link_write_symbols (finfo, input_bfd, symbol_map)
 	  if (skip)
 	    {
 	      if (h != (struct aout_link_hash_entry *) NULL)
-		h->root.written = true;
+		h->written = true;
 	      continue;
 	    }
 
@@ -3855,7 +3858,7 @@ aout_link_write_symbols (finfo, input_bfd, symbol_map)
 	     it is a local symbol see if we should discard it.  */
 	  if (h != (struct aout_link_hash_entry *) NULL)
 	    {
-	      h->root.written = true;
+	      h->written = true;
 	      h->indx = obj_aout_external_sym_count (output_bfd);
 	    }
 	  else
@@ -3965,10 +3968,10 @@ aout_link_write_other_symbol (h, data)
 	}
     }
 
-  if (h->root.written)
+  if (h->written)
     return true;
 
-  h->root.written = true;
+  h->written = true;
 
   if (finfo->info->strip == strip_all
       || (finfo->info->strip == strip_some
