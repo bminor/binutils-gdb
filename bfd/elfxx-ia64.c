@@ -163,7 +163,7 @@ static boolean elfNN_ia64_relax_section
   PARAMS((bfd *abfd, asection *sec, struct bfd_link_info *link_info,
 	  boolean *again));
 static boolean is_unwind_section_name
-  PARAMS ((const char *));
+  PARAMS ((bfd *abfd, const char *));
 static boolean elfNN_ia64_section_from_shdr
   PARAMS ((bfd *, ElfNN_Internal_Shdr *, char *));
 static boolean elfNN_ia64_section_flags
@@ -307,8 +307,12 @@ static boolean elfNN_ia64_print_private_bfd_data
   PARAMS ((bfd *abfd, PTR ptr));
 static enum elf_reloc_type_class elfNN_ia64_reloc_type_class
   PARAMS ((const Elf_Internal_Rela *));
+static boolean elfNN_ia64_hpux_vec
+  PARAMS ((const bfd_target *vec));
 static void elfNN_hpux_post_process_headers
   PARAMS ((bfd *abfd, struct bfd_link_info *info));
+boolean elfNN_hpux_backend_section_from_bfd_section
+  PARAMS ((bfd *abfd, ElfNN_Internal_Shdr *hdr, asection *sec, int *retval));
 
 /* ia64-specific relocation */
 
@@ -772,6 +776,8 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 	    tsec = bfd_abs_section_ptr;
 	  else if (isym.st_shndx == SHN_COMMON)
 	    tsec = bfd_com_section_ptr;
+	  else if (isym.st_shndx == SHN_IA_64_ANSI_COMMON)
+	    tsec = bfd_com_section_ptr;
 	  else
 	    tsec = bfd_section_from_elf_index (abfd, isym.st_shndx);
 
@@ -973,10 +979,15 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
 /* Return true if NAME is an unwind table section name.  */
 
 static inline boolean
-is_unwind_section_name (name)
+is_unwind_section_name (abfd, name)
+	bfd *abfd;
 	const char *name;
 {
   size_t len1, len2, len3;
+
+  if (elfNN_ia64_hpux_vec (abfd->xvec)
+      && !strcmp (name, ELF_STRING_ia64_unwind_hdr))
+    return false;
 
   len1 = sizeof (ELF_STRING_ia64_unwind) - 1;
   len2 = sizeof (ELF_STRING_ia64_unwind_info) - 1;
@@ -1005,6 +1016,10 @@ elfNN_ia64_section_from_shdr (abfd, hdr, name)
   switch (hdr->sh_type)
     {
     case SHT_IA_64_UNWIND:
+    case SHT_INIT_ARRAY:
+    case SHT_FINI_ARRAY:
+    case SHT_PREINIT_ARRAY:
+    case SHT_IA_64_HP_OPT_ANOT:
       break;
 
     case SHT_IA_64_EXT:
@@ -1052,7 +1067,7 @@ elfNN_ia64_fake_sections (abfd, hdr, sec)
 
   name = bfd_get_section_name (abfd, sec);
 
-  if (is_unwind_section_name (name))
+  if (is_unwind_section_name (abfd, name))
     {
       /* We don't have the sections numbered at this point, so sh_info
 	 is set later, in elfNN_ia64_final_write_processing.  */
@@ -1061,6 +1076,14 @@ elfNN_ia64_fake_sections (abfd, hdr, sec)
     }
   else if (strcmp (name, ELF_STRING_ia64_archext) == 0)
     hdr->sh_type = SHT_IA_64_EXT;
+  else if (strcmp (name, ".init_array") == 0)
+    hdr->sh_type = SHT_INIT_ARRAY;
+  else if (strcmp (name, ".fini_array") == 0)
+    hdr->sh_type = SHT_FINI_ARRAY;
+  else if (strcmp (name, ".preinit_array") == 0)
+    hdr->sh_type = SHT_PREINIT_ARRAY;
+  else if (strcmp (name, ".HP.opt_annot") == 0)
+    hdr->sh_type = SHT_IA_64_HP_OPT_ANOT;
   else if (strcmp (name, ".reloc") == 0)
     /*
      * This is an ugly, but unfortunately necessary hack that is
@@ -1331,7 +1354,7 @@ elfNN_ia64_additional_program_headers (abfd)
 
   /* Count how many PT_IA_64_UNWIND segments we need.  */
   for (s = abfd->sections; s; s = s->next)
-    if (is_unwind_section_name(s->name) && (s->flags & SEC_LOAD))
+    if (is_unwind_section_name (abfd, s->name) && (s->flags & SEC_LOAD))
       ++ret;
 
   return ret;
@@ -1344,6 +1367,8 @@ elfNN_ia64_modify_segment_map (abfd)
   struct elf_segment_map *m, **pm;
   Elf_Internal_Shdr *hdr;
   asection *s;
+  boolean unwind_found;
+  asection *unwind_sec;
 
   /* If we need a PT_IA_64_ARCHEXT segment, it must come before
      all PT_LOAD segments.  */
@@ -1386,8 +1411,24 @@ elfNN_ia64_modify_segment_map (abfd)
       if (s && (s->flags & SEC_LOAD))
 	{
 	  for (m = elf_tdata (abfd)->segment_map; m != NULL; m = m->next)
-	    if (m->p_type == PT_IA_64_UNWIND && m->sections[0] == s)
-	      break;
+	    if (m->p_type == PT_IA_64_UNWIND)
+	      {
+		/* Look through all sections in the unwind segment
+		   for a match since there may be multiple sections
+		   to a segment.  */
+
+		unwind_sec = m->sections[0];
+		unwind_found = false;
+		while (unwind_sec != NULL && !unwind_found)
+		  {
+		    if (unwind_sec == s)
+		      unwind_found = true;
+		    else
+		      unwind_sec = unwind_sec -> next;
+		  }
+		if (unwind_found)
+		  break;
+	      }
 
 	  if (m == NULL)
 	    {
@@ -4421,6 +4462,13 @@ elfNN_ia64_reloc_type_class (rela)
     }
 }
 
+static boolean
+elfNN_ia64_hpux_vec (const bfd_target *vec)
+{
+  extern const bfd_target bfd_elfNN_ia64_hpux_big_vec;
+  return (vec == & bfd_elfNN_ia64_hpux_big_vec);
+}
+
 static void
 elfNN_hpux_post_process_headers (abfd, info)
 	bfd *abfd;
@@ -4430,6 +4478,21 @@ elfNN_hpux_post_process_headers (abfd, info)
 
   i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_HPUX;
   i_ehdrp->e_ident[EI_ABIVERSION] = 1;
+}
+
+boolean
+elfNN_hpux_backend_section_from_bfd_section (abfd, hdr, sec, retval)
+	bfd *abfd ATTRIBUTE_UNUSED;
+	Elf32_Internal_Shdr *hdr ATTRIBUTE_UNUSED;
+	asection *sec;
+	int *retval;
+{
+  if (bfd_is_com_section (sec))
+    {
+      *retval = SHN_IA_64_ANSI_COMMON;
+      return true;
+    }
+  return false;
 }
 
 #define TARGET_LITTLE_SYM		bfd_elfNN_ia64_little_vec
@@ -4541,6 +4604,9 @@ elfNN_hpux_post_process_headers (abfd, info)
 
 #undef  elf_backend_post_process_headers
 #define elf_backend_post_process_headers elfNN_hpux_post_process_headers
+
+#undef  elf_backend_section_from_bfd_section
+#define elf_backend_section_from_bfd_section elfNN_hpux_backend_section_from_bfd_section
 
 #undef  ELF_MAXPAGESIZE
 #define ELF_MAXPAGESIZE                 0x1000  /* 1K */

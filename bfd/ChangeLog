@@ -1,3 +1,20 @@
+2002-01-06  Steve Ellcey  <sje@cup.hp.com>
+
+	* elfxx-ia64.c (is_unwind_section_name): Add target vector as
+	argument so we can handle HP-UX specially.
+	(elfNN_ia64_hpux_vec): New for use in is_unwind_section_name.
+	(elfNN_hpux_backend_section_from_bfd_section): New for support
+	of SHN_IA_64_ANSI_COMMON.
+	(elfNN_ia64_relax_section): Add support for SHN_IA_64_ANSI_COMMON.
+	(is_unwind_section_name): Add special HP-UX support.
+	(elfNN_ia64_section_from_shdr): Add support for more sections.
+	(elfNN_ia64_fake_sections): Modify is_unwind_section_name call and
+	add support for more sections.
+	(elfNN_ia64_additional_program_headers): Modify
+	is_unwind_section_name call.
+	(elfNN_ia64_modify_segment_map): Remove assumption that there is
+	only one unwind section in segment.
+
 2002-01-06  Alan Modra  <amodra@bigpond.net.au>
 
 	* syms.c (_bfd_generic_make_empty_symbol): New function.
