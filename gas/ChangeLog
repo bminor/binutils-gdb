@@ -49,7 +49,7 @@ Mon Feb  1 12:24:58 1999  Catherine Moore  <clm@cygnus.com>
 
 1999-01-28  Nick Clifton  <nickc@cygnus.com>
 
-	* write.c (write_relocs): Handle out or range error.
+	* write.c (write_relocs): Handle out of range error.
 
 	* config/tc-fr30.c (fr30_fix_adjustable): New function.
 	(fr30_force_relocation): Default to 0.
