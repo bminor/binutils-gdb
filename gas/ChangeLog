@@ -10,6 +10,9 @@
 
 1999-09-11  Donn Terry  <donn@interix.com>
 
+	* config/tc-i386.c (tc_i386_fix_adjustable): Don't adjust
+	BFD_RELOC_RVA relocations.
+
 	* config/tc-i386.c (md_undefined_symbol): Compare the name against
 	the macro GLOBAL_OFFSET_TABLE_NAME, rather than assuming that it
 	starts with "_G".
