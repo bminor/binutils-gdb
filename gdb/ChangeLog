@@ -1,3 +1,42 @@
+Wed Sep  4 17:28:40 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* Makefile.in:  Add mswin to SUBDIRS.  Add rules for
+	mswin/libwingdb.a and remote-wiggler.o.
+	* breakpoint.c (breakpoint_here_p):  Clean up bp enabled test.
+	* (breakpoint_inserted_here_p):  New func, just like
+	breakpoint_here_p, except it's honest.  Honestly.
+	* breakpoint.h:  Proto for above.
+start-sanitize-gdbtk
+	* configure configure.in:  Add host *windows* to list of hosts
+	that don't support GDBtk.
+end-sanitize-gdbtk
+	* configure configure.in:  Add mswin to configdirs if host is
+	i[3456]86-*-windows.
+	* core-aout.c (fetch_core_registers register_addr) gdbcore.h:
+	Change all vars that can contain addresses to type CORE_ADDR.
+	* findvar.c (supply_register):  Allow val to be NULL.  This means
+	that regno is unsupported.
+	* (read_pc read_pc_pid write_pc write_pc_pid):  Make non-pid forms
+	just call pid forms with inferior_pid so that there's only once
+	place to hack PC's and such.
+	* infrun.c (proceed):  Don't skip breakpoints if user changed PC.
+	* remote-wiggler.c:  New file.  Support for BDM interface from
+	Macraigor Systems.
+	* serial.c:  Enhance serial logging capability.  Add hex and octal
+	output modes (set remotelogbase {hex|octal|ascii}.  Also log
+	breaks, timeouts, errors, and eofs.
+	* serial.h:  Redefine SERIAL_SEND_BREAK to go through a wrapper
+	function so that we can log breaks.  Don't export serial_logfile
+	or serial_logfp.
+	* top.c (execute_command):  Don't test for serial_logfp here.
+	Just call serial_log_comand, and let serial.c sort it out.
+	* valops.c (value_of_variable):  Don't attempt to establish frames
+	for static and global variables.  This makes things work a bit
+	better if the stack or frame pointer is trashed.
+	* config/m68k/monitor.mt (TDEPFILES):  Add remote-wiggler.o.
+	* config/m68k/tm-m68k.h:  Define STACK_ALIGN.  CPU32 can't hack
+	misaligned stacks during function calls.
+
 Wed Sep  4 13:06:26 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* terminal.h: Don't use #elif.
