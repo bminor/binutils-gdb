@@ -1,10 +1,33 @@
-start-sanitize-m32r
+Fri Aug 15 05:10:09 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* arc.h (enum reloc): Move here from elf32-arc.c.
+
+Fri Aug  8 17:05:29 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* arc.h: New file.
+	* common.h (EM_CYGNUS_ARC): Define.
+
+Mon Jun 16 14:46:12 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* internal.h (Elf_Internal_Ehdr): Change e_phoff and e_shoff from
+	bfd_signed_vma to bfd_size_type, as they are not signed.
+
+Wed Mar  5 15:35:26 1997  Doug Evans  <dje@seba.cygnus.com>
+
+	* m32r.h (SHF_M32R_CAN_RELAX): Define.
+
+Mon Feb 24 17:49:01 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* external.h: Dump the 32/64 bit specific forms of the version
+	structures, and just define them as size independent.
+
+	* common.h (VERSYM_HIDDEN, VERSYM_VERSION): Define.
+
 Fri Feb 21 13:00:34 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* m32r.h (enum reloc_type): Add R_M32R_SDA16.
 	(SHN_M32R_SCOMMON): Define.
 
-end-sanitize-m32r
 Wed Feb 19 15:35:31 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	From Eric Youngdale <eric@andante.jic.com>:
@@ -17,12 +40,10 @@ Tue Feb 18 17:40:36 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
 	* common.h (EM_CYGNUS_D30V): Define.
 
 end-sanitize-d30v
-start-sanitize-m32r
 Mon Jan 27 11:54:44 1997  Doug Evans  <dje@seba.cygnus.com>
 
 	* m32r.h (enum reloc_type): Add R_M32R_HI16_[SU]LO,R_M32R_LO16.
 
-end-sanitize-m32r
 start-sanitize-v850 
 Fri Jan  3 11:32:51 1997  Michael Meissner  <meissner@tiktok.cygnus.com>
 
@@ -67,12 +88,10 @@ Wed Oct  2 21:26:43 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* common.h (EM_CYGNUS_MN10x00): Define.
 
-start-sanitize-m32r
 Mon Sep 23 09:18:04 1996  Doug Evans  <dje@seba.cygnus.com>
 
 	* m32r.h: New file.
 
-end-sanitize-m32r
 Fri Aug 30 17:06:21 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* common.h (EM_SH): Define.
@@ -83,12 +102,10 @@ Tue Aug 20 14:47:54 1996  J.T. Conklin  <jtc@hippo.cygnus.com>
 	* common.h (EM_CYGNUS_V850): Define.
 
 end-sanitize-v850
-start-sanitize-m32r
 Mon Aug 19 10:59:10 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* common.h (EM_CYGNUS_M32R): Define.
 	
-end-sanitize-m32r
 Mon Jul 22 18:59:55 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* mips.h (SHT_MIPS_IFACE, SHT_MIPS_CONTENT): Define.
@@ -109,9 +126,6 @@ Fri Jun 21 12:33:24 1996  Richard Henderson  <rth@tamu.edu>
 
 	* alpha.h: New file.
 	* common.h (EM_ALPHA): Define.
-start-sanitize-arc
-	(EM_CYGNUS_ARC): Change to not conflict with EM_ALPHA.
-end-sanitize-arc
 
 Fri May 31 17:28:05 1996  Ian Lance Taylor  <ian@cygnus.com>
 
@@ -192,16 +206,6 @@ Tue Feb 14 13:59:13 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 	* common.h (EM_PPC): Use offical value of 20, not 17.
 	(EM_PPC_OLD): Define this to be the old value of EM_PPC.
 
-start-sanitize-arc
-Thu Feb  9 18:41:04 1995  Doug Evans  <dje@canuck.cygnus.com>
-
-	* arc.h: Rename ARCH to MACH for consistency with rest of BFD.
-
-Sat Jan 28 23:56:06 1995  Doug Evans  <dje@canuck.cygnus.com>
-
-	* arc.h: New file.
-end-sanitize-arc
-
 Tue Jan 24 09:40:59 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* common.h (EM_PPC): New macro, PowerPC machine id.
@@ -209,12 +213,6 @@ Tue Jan 24 09:40:59 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 Tue Jan 17 10:51:38 1995  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* mips.h (SHT_MIPS_MSYM, SHT_MIPS_DWARF, SHT_MIPS_EVENTS): Define.
-
-start-sanitize-arc
-Wed Nov 30 01:42:39 1994  Doug Evans  <dje@canuck.cygnus.com>
-
-	* common.h (EM_CYGNUS_ARC): Define.
-end-sanitize-arc
 
 Mon Oct 17 13:43:59 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
