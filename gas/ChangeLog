@@ -1,11 +1,17 @@
+Tue Aug 26 12:23:25 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-i386.c (md_assemble): In JumpByte case, when looking
+	for a WORD_PREFIX_OPCODE, change it to ADDR_PREFIX_OPCODE if this
+	is jcxz.
+
 start-sanitize-v850
 Mon Aug 25 16:04:14 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* config/tc-v850.c (pre_defined_registers): Add 'hp' as alias for
 	r2.
 	(md_begin): Set up machine architecture and type.
-end-sanitize-v850
 
+end-sanitize-v850
 Mon Aug 25 14:25:48 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* symbols.c (resolve_symbol_value): Store the value back into the

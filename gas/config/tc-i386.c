@@ -433,7 +433,7 @@ const pseudo_typeS md_pseudo_table[] =
 #ifndef I386COFF
   {"bss", s_bss, 0},
 #endif
-#ifndef OBJ_AOUT
+#if !defined(OBJ_AOUT) && !defined(USE_ALIGN_PTWO)
   {"align", s_align_bytes, 0},
 #else
   {"align", s_align_ptwo, 0},
@@ -1728,7 +1728,23 @@ md_assemble (line)
 	  {
 	    if (*q == WORD_PREFIX_OPCODE)
 	      {
-	        FRAG_APPEND_1_CHAR (WORD_PREFIX_OPCODE);
+		/* The jcxz/jecxz instructions are marked with Data16
+		   and Data32, which means that they may get
+		   WORD_PREFIX_OPCODE added to the list of prefixes.
+		   However, the are correctly distinguished using
+		   ADDR_PREFIX_OPCODE.  Here we look for
+		   WORD_PREFIX_OPCODE, and actually emit
+		   ADDR_PREFIX_OPCODE.  This is a hack, but, then, so
+		   is the instruction itself.
+
+		   I don't know if there is any valid case in which we
+		   want to emit WORD_PREFIX_OPCODE, but I am keeping
+		   the old behaviour for safety.  */
+
+		if (IS_JUMP_ON_CX_ZERO (t->base_opcode))
+		  FRAG_APPEND_1_CHAR (ADDR_PREFIX_OPCODE);
+		else
+		  FRAG_APPEND_1_CHAR (WORD_PREFIX_OPCODE);
 	        insn_size += 1;
 		break;
 	      }
