@@ -39,11 +39,6 @@
 
 #include "config/tm-linux.h"
 
-/* We do single stepping in software.  */
-
-#define SOFTWARE_SINGLE_STEP_P() 1
-#define SOFTWARE_SINGLE_STEP(sig,bp_p) mips_software_single_step (sig, bp_p)
-
 #undef IN_SOLIB_DYNSYM_RESOLVE_CODE
 #define IN_SOLIB_DYNSYM_RESOLVE_CODE(PC) mips_linux_in_dynsym_resolve_code (PC)
 int mips_linux_in_dynsym_resolve_code (CORE_ADDR pc);

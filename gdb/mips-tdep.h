@@ -74,5 +74,7 @@ enum {
 /* Defined in mips-tdep.c and used in remote-mips.c */
 extern void deprecated_mips_set_processor_regs_hack (void);
 
+/* Single step based on where the current instruction will take us.  */
+extern void mips_software_single_step (enum target_signal, int);
 
 #endif /* MIPS_TDEP_H */

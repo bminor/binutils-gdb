@@ -1,3 +1,11 @@
+2004-10-26  Andrew Cagney  <cagney@gnu.org>
+
+	* mips-tdep.h (mips_software_single_step): Move to here ...
+	* config/mips/tm-mips.h: ... from here.
+	* config/mips/tm-linux.h (SOFTWARE_SINGLE_STEP_P) 
+	(SOFTWARE_SINGLE_STEP): Delete.
+	* mips-linux-tdep.c (mips_linux_init_abi): Set software_single_step.
+
 2004-10-25  Andrew Cagney  <cagney@gnu.org>
 
 	* NEWS: Add Changes since GDB 6.3 section.

@@ -1167,6 +1167,8 @@ mips_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_gdbarch_skip_solib_resolver (gdbarch, mips_linux_skip_resolver);
 
+  set_gdbarch_software_single_step (gdbarch, mips_software_single_step);
+
   /* This overrides the MIPS16 stub support from mips-tdep.  But no
      one uses MIPS16 on GNU/Linux yet, so this isn't much of a loss.  */
   set_gdbarch_in_solib_call_trampoline (gdbarch, mips_linux_in_dynsym_stub);

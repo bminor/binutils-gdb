@@ -107,6 +107,3 @@ extern int mips_ignore_helper (CORE_ADDR pc);
 typedef unsigned long t_inst;	/* Integer big enough to hold an instruction */
 
 #endif /* TM_MIPS_H */
-
-/* Single step based on where the current instruction will take us.  */
-extern void mips_software_single_step (enum target_signal, int);
