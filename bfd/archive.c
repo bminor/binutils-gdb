@@ -2190,7 +2190,8 @@ coff_write_armap (arch, elength, map, symbol_count, stridx)
       != sizeof (struct ar_hdr))
     return false;
 
-  bfd_write_bigendian_4byte_int (arch, symbol_count);
+  if (!bfd_write_bigendian_4byte_int (arch, symbol_count))
+    return false;
 
   /* Two passes, first write the file offsets for each symbol -
      remembering that each offset is on a two byte boundary.  */
@@ -2207,7 +2208,8 @@ coff_write_armap (arch, elength, map, symbol_count, stridx)
 
       while (count < symbol_count && map[count].u.abfd == current)
 	{
-	  bfd_write_bigendian_4byte_int (arch, archive_member_file_ptr);
+	  if (!bfd_write_bigendian_4byte_int (arch, archive_member_file_ptr))
+	    return false;
 	  count++;
 	}
       /* Add size of this archive entry.  */

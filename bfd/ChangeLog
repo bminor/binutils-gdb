@@ -1,3 +1,10 @@
+2002-03-18  Alan Modra  <amodra@bigpond.net.au>
+
+	* libbfd.c (bfd_write_bigendian_4byte_int): Return true iff success.
+	* libbfd.h: Regenerate.
+	* archive.c (coff_write_armap): Pass on failures from
+	bfd_write_bigendian_4byte_int.
+
 2002-03-14  H.J. Lu <hjl@gnu.org>
 
 	* elflink.h (NAME(bfd_elf,size_dynamic_sections)): Set the BFD
