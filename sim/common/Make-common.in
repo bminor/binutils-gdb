@@ -336,6 +336,7 @@ sim-basics_h = $(srccom)/sim-basics.h \
 		../common/cconfig.h \
 		tconfig.h \
 		$(sim-config_h) \
+		$(callback_h) \
 		$(sim-inline_h) \
 		$(sim-types_h) \
 		$(sim-bits_h) \

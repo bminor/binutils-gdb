@@ -1,3 +1,7 @@
+2004-12-07  Hans-Peter Nilsson  <hp@axis.com>
+
+	* Make-common.in (sim-basics_h): Add $(callback_h).
+
 2004-12-03  Hans-Peter Nilsson  <hp@axis.com>
 
 	* configure.in (SIM_CHECK_MEMBERS): Call for struct stat members
