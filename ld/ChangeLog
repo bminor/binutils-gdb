@@ -1,3 +1,8 @@
+2003-12-07  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* ldemul.c: Convert to ISO-C.
+	* ldver.c: Likewise.
+
 2003-12-06  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* lexsup.c (is_num): Remove.
