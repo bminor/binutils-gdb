@@ -1,3 +1,13 @@
+Fri Jul 15 16:43:33 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	Stop printing at null char option, from Oliver Meyer
+	(omeyer@i3.informatik.rwth-aachen.de).
+	* valprint.h, valprint.c (stop_print_at_null): New global.
+	* valprint.c (_initialize_valprint): New print set subcommand
+	"null-stop".
+	* c-valprint.c (c_val_print): If stop_print_at_null is on, and
+	printing a char	array, adjust the number of chars to print.
+
 Fri Jul 15 14:33:40 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
         From Kevin A. Buettner (kev@cujo.geg.mot.com).

@@ -1,6 +1,6 @@
 /* Support for printing C values for GDB, the GNU debugger.
    Copyright 1986, 1988, 1989, 1991, 1992, 1993, 1994
-   Free Software Foundation, Inc.
+             Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -109,9 +109,26 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	      print_spaces_filtered (2 + 2 * recurse, stream);
 	    }
 	  /* For an array of chars, print with string syntax.  */
-	  if (eltlen == 1 && TYPE_CODE (elttype) == TYPE_CODE_INT
+	  if (eltlen == 1 &&
+	      ((TYPE_CODE (elttype) == TYPE_CODE_INT)
+	       || ((current_language->la_language == language_m2)
+		   && (TYPE_CODE (elttype) == TYPE_CODE_CHAR)))
 	      && (format == 0 || format == 's'))
 	    {
+	      /* If requested, look for the first null char and only print
+		 elements up to it.  */
+	      if (stop_print_at_null)
+		{
+		  int temp_len;
+		  
+		  /* Look for a NULL char. */
+		  for (temp_len = 0;
+		       valaddr[temp_len]
+		       && temp_len < len && temp_len < print_max;
+		       temp_len++);
+		  len = temp_len;
+		}
+	      
 	      LA_PRINT_STRING (stream, valaddr, len, 0);
 	      i = len;
 	    }
