@@ -1,5 +1,15 @@
 Sun Feb  6 15:36:13 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdb.t02/whatis.exp: Remove xfails for PRs 1838 and 2417; they
+	are fixed.
+
+	* gdb.t02/whatis.exp: Remove xfails for v_char_array and
+	v_signed_char_array; the test is looser than when the xfails were
+	added.
+
+	* gdb.t00/{help.exp,default.exp}: Don't test "target remote" on UDI.
+	* gdb.t00/help.exp: Don't expect remote to be in "help target" output.
+
 	* gdb.t01/run.exp: Only run shell test if isnative.
 
 	* config/udi-gdb.exp (gdb_load): Use "file", not "load" command,
