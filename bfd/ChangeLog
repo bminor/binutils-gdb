@@ -1,3 +1,8 @@
+Wed Nov 26 14:13:34 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* coffcode.h (coff_slurp_symbol_table): Add ARM and Thumb symbol
+	classes. 
+
 Sun Nov 23 16:02:58 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* freebsd.h (SWAP_MAGIC): Read magic number little and not big

@@ -3415,6 +3415,10 @@ coff_slurp_symbol_table (abfd)
 #endif
 
 	    case C_EXT:
+#ifdef ARM
+            case C_THUMBEXT:
+            case C_THUMBEXTFUNC:
+#endif
 #ifdef RS6000COFF_C
 	    case C_HIDEXT:
 #endif
@@ -3483,6 +3487,11 @@ coff_slurp_symbol_table (abfd)
 	    case C_STAT:	/* static			 */
 #ifdef I960
 	    case C_LEAFSTAT:	/* static leaf procedure        */
+#endif
+#ifdef ARM
+            case C_THUMBSTAT:   /* Thumb static                  */
+            case C_THUMBLABEL:  /* Thumb label                   */
+            case C_THUMBSTATFUNC:/* Thumb static function        */
 #endif
 	    case C_LABEL:	/* label			 */
 	      if (src->u.syment.n_scnum == -2)
@@ -3687,8 +3696,16 @@ coff_slurp_symbol_table (abfd)
 #define OTHER_GLOBAL_CLASS C_LEAFEXT
 #endif
 
+#ifdef COFFARM
+#ifdef COFF_WITH_PE
+#define OTHER_GLOBAL_CLASS C_SECTION || syment->n_sclass == C_THUMBEXT
+#else
+#define OTHER_GLOBAL_CLASS C_THUMBEXT || syment->n_sclass == C_THUMBEXTFUNC
+#endif
+#else
 #ifdef COFF_WITH_PE
 #define OTHER_GLOBAL_CLASS C_SECTION
+#endif
 #endif
 
 #ifdef OTHER_GLOBAL_CLASS
