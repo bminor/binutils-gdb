@@ -1,5 +1,10 @@
 2003-07-23  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* tui.c (tui_enable): Call tuiRefreshAll to make sure the window
+	is accurate.
+
+2003-07-23  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* tui-interp.c (tui_resume): Enable tui when we expected it.
 	(tui_suspend): Remember in which TUI mode we are.
 	(_initialize_tui_interp): Use the tui interpreter even when no
