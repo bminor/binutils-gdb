@@ -1668,7 +1668,7 @@ strip_main (argc, argv)
   struct section_list *p;
   char *output_file = NULL;
 
-  while ((c = getopt_long (argc, argv, "I:O:F:K:N:R:o:sSpgxXVv",
+  while ((c = getopt_long (argc, argv, "I:O:F:K:N:R:o:sSpdgxXVv",
 			   strip_options, (int *) 0)) != EOF)
     {
       switch (c)
@@ -1692,6 +1692,7 @@ strip_main (argc, argv)
 	  break;
 	case 'S':
 	case 'g':
+	case 'd':	/* Historic BSD alias for -g.  Used by early NetBSD.  */
 	  strip_symbols = STRIP_DEBUG;
 	  break;
 	case OPTION_STRIP_UNNEEDED:

@@ -1,3 +1,8 @@
+2000-08-14  Todd Vierling <tv@wasabisystems.com>
+
+	* objcopy.c (strip_main): Silently accept -d as an alias for -g
+	for compatability with old BSD systems.
+
 2000-08-14  Jason Eckhardt  <jle@cygnus.com>
 
 	* NEWS: Mention i860 support.
