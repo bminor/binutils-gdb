@@ -1346,7 +1346,8 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 
 	  obstack_init (&cu.partial_die_obstack);
 	  cu.partial_dies
-	    = htab_create_alloc_ex (29, partial_die_hash,
+	    = htab_create_alloc_ex (cu.header.length / 12,
+				    partial_die_hash,
 				    partial_die_eq,
 				    NULL,
 				    &cu.partial_die_obstack,

@@ -1,5 +1,10 @@
 2004-02-21  Daniel Jacobowitz  <drow@mvista.com>
 
+	* dwarf2read.c (dwarf2_build_psymtabs_hard): Estimate the initial
+	size of the hash table.
+
+2004-02-21  Daniel Jacobowitz  <drow@mvista.com>
+
 	* dwarf2read.c (struct dwarf2_cu): Add abbrev_obstack.
 	(struct abbrev_info): Shorten two int flags.
 	(dwarf_alloc_abbrev): Take a CU argument.
