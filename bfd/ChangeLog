@@ -1,3 +1,9 @@
+2002-09-10  Michael Snyder  <msnyder@redhat.com>
+
+	* irix-core.c (do_sections, do_sections64): New functions.
+	(irix_core_core_file_p): Call new functions do_sections, 
+	do_sections64, depending on corefile (32-bit or 64-bit).
+
 2002-09-09  Richard Henderson  <rth@redhat.com>
 
 	* elfxx-ia64.c (elfNN_ia64_relax_section): Handle PCREL21M
