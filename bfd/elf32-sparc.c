@@ -3303,6 +3303,7 @@ elf32_sparc_merge_private_bfd_data (ibfd, obfd)
      bfd *obfd;
 {
   bfd_boolean error;
+  unsigned long ibfd_mach;
   /* FIXME: This should not be static.  */
   static unsigned long previous_ibfd_e_flags = (unsigned long) -1;
 
@@ -3312,7 +3313,8 @@ elf32_sparc_merge_private_bfd_data (ibfd, obfd)
 
   error = FALSE;
 
-  if (bfd_get_mach (ibfd) >= bfd_mach_sparc_v9)
+  ibfd_mach = bfd_get_mach (ibfd);
+  if (bfd_mach_sparc_64bit_p (ibfd_mach))
     {
       error = TRUE;
       (*_bfd_error_handler)
@@ -3321,8 +3323,8 @@ elf32_sparc_merge_private_bfd_data (ibfd, obfd)
     }
   else if ((ibfd->flags & DYNAMIC) == 0)
     {
-      if (bfd_get_mach (obfd) < bfd_get_mach (ibfd))
-	bfd_set_arch_mach (obfd, bfd_arch_sparc, bfd_get_mach (ibfd));
+      if (bfd_get_mach (obfd) < ibfd_mach)
+	bfd_set_arch_mach (obfd, bfd_arch_sparc, ibfd_mach);
     }
 
   if (((elf_elfheader (ibfd)->e_flags & EF_SPARC_LEDATA)

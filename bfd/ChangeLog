@@ -1,3 +1,9 @@
+2004-07-30  Jakub Jelinek  <jakub@redhat.com>
+
+	* archures.c (bfd_mach_sparc_64bit_p): Define.
+	* elf32-sparc.c (elf32_sparc_merge_private_bfd_data): Use it.
+	* bfd-in2.h: Rebuilt.
+
 2004-07-29  Alexandre Oliva  <aoliva@redhat.com>
 
 	Introduce SH2a support.

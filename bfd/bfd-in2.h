@@ -1576,6 +1576,9 @@ enum bfd_architecture
 #define bfd_mach_sparc_v9_p(mach) \
   ((mach) >= bfd_mach_sparc_v8plus && (mach) <= bfd_mach_sparc_v9b \
    && (mach) != bfd_mach_sparc_sparclite_le)
+/* Nonzero if MACH is a 64 bit sparc architecture.  */
+#define bfd_mach_sparc_64bit_p(mach) \
+  ((mach) >= bfd_mach_sparc_v9 && (mach) != bfd_mach_sparc_v8plusb)
   bfd_arch_mips,      /* MIPS Rxxxx */
 #define bfd_mach_mips3000              3000
 #define bfd_mach_mips3900              3900
