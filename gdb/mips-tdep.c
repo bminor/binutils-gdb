@@ -341,8 +341,13 @@ mips_frame_chain(frame)
       return 0;
 
     cached_proc_desc = proc_desc;
-    return read_next_frame_reg(frame, PROC_FRAME_REG(proc_desc))
-      + PROC_FRAME_OFFSET(proc_desc);
+    /* If frame size is zero, we must be at end of stack (or otherwise hosed).
+       If we don't check frame size, we loop forever if we see it == 0.  */
+    if (PROC_FRAME_OFFSET (proc_desc) == 0)
+      return 0;
+    else
+      return read_next_frame_reg(frame, PROC_FRAME_REG(proc_desc))
+	+ PROC_FRAME_OFFSET(proc_desc);
 }
 
 void
@@ -943,7 +948,10 @@ Turn off to avoid using floating point instructions when calling functions\n\
 or dealing with return values.", &setlist),
      &showlist);
 
-  c = add_set_cmd ("heuristic-fence-post", class_support, var_uinteger,
+  /* We really would like to have both "0" and "unlimited" work, but
+     command.c doesn't deal with that.  So make it a var_zinteger
+     because the user can always use "999999" or some such for unlimited.  */
+  c = add_set_cmd ("heuristic-fence-post", class_support, var_zinteger,
 		   (char *) &heuristic_fence_post,
 		   "\
 Set the distance searched for the start of a function.\n\
