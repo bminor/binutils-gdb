@@ -1,3 +1,28 @@
+Thu Oct  8 08:40:42 1998  Mark Alexander  <marka@cygnus.com>
+
+	* rs6000-tdep.c (get_saved_register): Define only if
+	USE_GENERIC_DUMMY_FRAMES is defined.
+
+start-sanitize-carp
+Tue Oct  6 21:35:10 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (--enable-targets): New config option.  Code taken
+ 	from ../opcode/configure.in.
+start-sanitize-cygnus
+	(--enable-carp): New config option. Overrides configure.tgt and
+ 	sets gdb_target + gdb_target_cpu to carp. XXX - this is tempoary.
+end-sanitize-cygnus
+	* configure: Re-generate.
+	
+	* Makefile.in (DEPFILES): Add TARGET_OBS.
+	(TARGET_OBS): Defined by configure.
+	
+start-sanitize-cygnus
+	* config/carp/carp.mt, config/carp/tm-carp.h: Pseudo configuration
+ 	for carp target. XXX - this is tempoary.
+end-sanitize-cygnus
+
+end-sanitize-carp
 1998-10-06  Jason Molenda  (jsm@bugshack.cygnus.com)
 
  	Eliminate a few warnings from the compiler.

@@ -1310,6 +1310,7 @@ gdb_print_insn_powerpc (memaddr, info)
 /* Function: get_saved_register
    Just call the generic_get_saved_register function.  */
 
+#ifdef USE_GENERIC_DUMMY_FRAMES
 void
 get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
      char *raw_buffer;
@@ -1322,6 +1323,7 @@ get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval)
   generic_get_saved_register (raw_buffer, optimized, addrp, 
 			      frame, regnum, lval);
 }
+#endif
 
 
 void
