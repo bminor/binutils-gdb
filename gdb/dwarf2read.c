@@ -1304,7 +1304,7 @@ psymtab_to_symtab_1 (pst)
   back_to = make_cleanup (dwarf2_free_tmp_obstack, NULL);
 
   buildsym_init ();
-  make_cleanup (really_free_pendings, NULL);
+  make_cleanup ((make_cleanup_func) really_free_pendings, NULL);
 
   /* read in the comp_unit header  */
   cu_header.length = read_4_bytes (abfd, info_ptr);
@@ -1322,7 +1322,7 @@ psymtab_to_symtab_1 (pst)
 
   dies = read_comp_unit (info_ptr, abfd);
 
-  make_cleanup (free_die_list, dies);
+  make_cleanup ((make_cleanup_func) free_die_list, dies);
 
   /* Do line number decoding in read_file_scope () */
   process_die (dies, objfile);
@@ -2070,7 +2070,8 @@ dwarf2_add_member_fn (fip, die, type, objfile)
 		      (fip->nfnfields + DW_FIELD_ALLOC_CHUNK)
 		        * sizeof (struct fnfieldlist));
 	  if (fip->nfnfields == 0)
-	    make_cleanup (free_current_contents, &fip->fnfieldlists);
+	    make_cleanup ((make_cleanup_func) free_current_contents, 
+                          &fip->fnfieldlists);
 	}
       flp = &fip->fnfieldlists[fip->nfnfields];
       flp->name = fieldname;
@@ -2576,7 +2577,8 @@ read_array_type (die, objfile)
 		xrealloc (range_types, (ndim + DW_FIELD_ALLOC_CHUNK)
 				         * sizeof (struct type *));
 	      if (ndim == 0)
-		make_cleanup (free_current_contents, &range_types);
+		make_cleanup ((make_cleanup_func) free_current_contents, 
+                              &range_types);
 	    }
 	  range_types[ndim++] = create_range_type (NULL, index_type, low, high);
 	}
@@ -3828,7 +3830,8 @@ dwarf_decode_lines (offset, comp_dir, abfd)
   line_ptr += 1;
   lh.standard_opcode_lengths = (unsigned char *)
     xmalloc (lh.opcode_base * sizeof (unsigned char));
-  back_to = make_cleanup (free_current_contents, &lh.standard_opcode_lengths);
+  back_to = make_cleanup ((make_cleanup_func) free_current_contents, 
+                          &lh.standard_opcode_lengths);
 
   lh.standard_opcode_lengths[0] = 1;
   for (i = 1; i < lh.opcode_base; ++i)
@@ -3847,7 +3850,7 @@ dwarf_decode_lines (offset, comp_dir, abfd)
 	    xrealloc (dirs.dirs,
 		      (dirs.num_dirs + DIR_ALLOC_CHUNK) * sizeof (char *));
 	  if (dirs.num_dirs == 0)
-	    make_cleanup (free_current_contents, &dirs.dirs);
+	    make_cleanup ((make_cleanup_func) free_current_contents, &dirs.dirs);
 	}
       dirs.dirs[dirs.num_dirs++] = cur_dir;
     }
@@ -3864,7 +3867,8 @@ dwarf_decode_lines (offset, comp_dir, abfd)
 		      (files.num_files + FILE_ALLOC_CHUNK)
 			* sizeof (struct fileinfo));
 	  if (files.num_files == 0)
-	    make_cleanup (free_current_contents, &files.files);
+	    make_cleanup ((make_cleanup_func) free_current_contents, 
+                          &files.files);
 	}
       files.files[files.num_files].name = cur_file;
       files.files[files.num_files].dir =
@@ -3934,7 +3938,8 @@ dwarf_decode_lines (offset, comp_dir, abfd)
 				  (files.num_files + FILE_ALLOC_CHUNK)
 				    * sizeof (struct fileinfo));
 		      if (files.num_files == 0)
-			make_cleanup (free_current_contents, &files.files);
+			make_cleanup ((make_cleanup_func) free_current_contents, 
+                                      &files.files);
 		    }
 		  files.files[files.num_files].name = cur_file;
 		  files.files[files.num_files].dir =

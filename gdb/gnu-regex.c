@@ -142,8 +142,10 @@ char *realloc ();
 /* How many characters in the character set.  */
 # define CHAR_SET_SIZE 256
 
-/* CYGNUS LOCAL: define _REGEX_RE_COMP to get BSD style re_comp and re_exec */
+/* GDB LOCAL: define _REGEX_RE_COMP to get BSD style re_comp and re_exec */
+#ifndef _REGEX_RE_COMP
 #define _REGEX_RE_COMP
+#endif
 
 # ifdef SYNTAX_TABLE
 

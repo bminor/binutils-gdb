@@ -1,3 +1,31 @@
+1998-10-13  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* blockframe.c (find_pc_sect_partial_function): Add braces to avoid
+	possible nested-if confusion.
+	* breakpoint.c (breakpoint_here_p): Ditto.
+	(breakpoint_inserted_here_p): Ditto.
+	(breakpoint_thread_match): Ditto.
+
+	* gnu-regex.c: Define _REGEX_RE_COMP only if it isn't already defined.
+	* gnu-regex.h: Define _REGEX_RE_COMP to pick up old compatability 
+	prototypes.
+	
+	* symtab.h: Add prototype for _initialize_source.
+	* value.h: Add prototype for _initialize_value.
+
+	* defs.h: Include sys/types.h or stddef.h to get size_t.
+	(make_cleanup): Add make_cleanup_func typedef and switch to using 
+        a prototype for this function.
+	(mfree): Add prototypes for mmalloc, mrealloc, mfree if we aren't
+	using mmalloc.
+	
+	* ax-gdb.c breakpoint.c coffread.c corelow.c dbxread.c dwarf2read.c 
+        dwarfread.c elfread.c eval.c exec.c gdbtk-cmds.c gdbtk.c infcmd.c 
+        infrun.c mipsread.c nlmread.c os9kread.c parse.c printcmd.c symfile.c 
+        symmisc.c symtab.c thread.c top.c tracepoint.c typeprint.c valops.c:   
+        Cast parameters passed to make_cleanup to use the new 
+        make_cleanup_func typedef.
+
 Tue Oct 13 00:51:48 1998  Felix Lee  <flee@cygnus.com>
 
 	* sol-thread.c (ps_pstop, etc): different solaris versions have

@@ -616,7 +616,7 @@ gdb_eval (clientData, interp, objc, objv)
 
   expr = parse_expression (Tcl_GetStringFromObj (objv[1], NULL));
 
-  old_chain = make_cleanup (free_current_contents, &expr);
+  old_chain = make_cleanup ((make_cleanup_func) free_current_contents, &expr);
 
   val = evaluate_expression (expr);
 
@@ -816,7 +816,7 @@ gdb_load_info (clientData, interp, objc, objv)
        Tcl_SetStringObj (result_ptr->obj_ptr, "Open failed", -1);
        return TCL_ERROR;
      }
-   old_cleanups = make_cleanup (bfd_close, loadfile_bfd);
+   old_cleanups = make_cleanup ((make_cleanup_func) bfd_close, loadfile_bfd);
    
    if (!bfd_check_format (loadfile_bfd, bfd_object)) 
      {
@@ -1370,7 +1370,7 @@ gdb_search (clientData, interp, objc, objv)
 
   search_symbols (regexp, space, nfiles, files, &ss);
   if (ss != NULL)
-    old_chain = make_cleanup (free_search_symbols, ss);
+    old_chain = make_cleanup ((make_cleanup_func) free_search_symbols, ss);
 
   Tcl_SetListObj(result_ptr->obj_ptr, 0, NULL);  
 

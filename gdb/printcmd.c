@@ -1,5 +1,5 @@
 /* Print values for GNU debugger GDB.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1993, 1994, 1995
+   Copyright 1986, 87, 88, 89, 90, 91, 93, 94, 95, 1998
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -174,6 +174,8 @@ static void print_formatted PARAMS ((value_ptr, int, int));
 static struct format_data decode_format PARAMS ((char **, int, int));
 
 static int print_insn PARAMS ((CORE_ADDR, GDB_FILE *));
+
+static void sym_info PARAMS ((char *, int));
 
 
 /* Decode a format specification.  *STRING_PTR should point to it.
@@ -830,7 +832,8 @@ print_command_1 (exp, inspect, voidprint)
       extern int objectprint;
       struct type *type;
       expr = parse_expression (exp);
-      old_chain = make_cleanup (free_current_contents, &expr);
+      old_chain = make_cleanup ((make_cleanup_func) free_current_contents, 
+                                &expr);
       cleanup = 1;
       val = evaluate_expression (expr);
 
@@ -943,7 +946,7 @@ output_command (exp, from_tty)
     }
 
   expr = parse_expression (exp);
-  old_chain = make_cleanup (free_current_contents, &expr);
+  old_chain = make_cleanup ((make_cleanup_func) free_current_contents, &expr);
 
   val = evaluate_expression (expr);
 
@@ -964,7 +967,7 @@ set_command (exp, from_tty)
 {
   struct expression *expr = parse_expression (exp);
   register struct cleanup *old_chain
-    = make_cleanup (free_current_contents, &expr);
+    = make_cleanup ((make_cleanup_func) free_current_contents, &expr);
   evaluate_expression (expr);
   do_cleanups (old_chain);
 }
@@ -1241,7 +1244,8 @@ x_command (exp, from_tty)
 	 But don't clobber a user-defined command's definition.  */
       if (from_tty)
 	*exp = 0;
-      old_chain = make_cleanup (free_current_contents, &expr);
+      old_chain = make_cleanup ((make_cleanup_func) free_current_contents, 
+                                &expr);
       val = evaluate_expression (expr);
       if (TYPE_CODE (VALUE_TYPE (val)) == TYPE_CODE_REF)
 	val = value_ind (val);
@@ -1928,7 +1932,8 @@ printf_command (arg, from_tty)
   struct cleanup *old_cleanups;
 
   val_args = (value_ptr *) xmalloc (allocated_args * sizeof (value_ptr));
-  old_cleanups = make_cleanup (free_current_contents, &val_args);
+  old_cleanups = make_cleanup ((make_cleanup_func) free_current_contents, 
+                               &val_args);
 
   if (s == 0)
     error_no_arg ("format-control string and values to print");
@@ -2198,7 +2203,6 @@ disassemble_command (arg, from_tty)
   char *name;
   CORE_ADDR pc, pc_masked;
   char *space_index;
-  asection *section;
 
   name = NULL;
   if (!arg)

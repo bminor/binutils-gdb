@@ -641,7 +641,7 @@ read_command_file (stream)
 {
   struct cleanup *cleanups;
 
-  cleanups = make_cleanup (source_cleanup, instream);
+  cleanups = make_cleanup ((make_cleanup_func) source_cleanup, instream);
   instream = stream;
   command_loop ();
   do_cleanups (cleanups);
@@ -722,7 +722,7 @@ get_command_line (type, arg)
   /* Allocate and build a new command line structure.  */
   cmd = build_command_line (type, arg);
 
-  old_chain = make_cleanup (free_command_lines, &cmd);
+  old_chain = make_cleanup ((make_cleanup_func) free_command_lines, &cmd);
 
   /* Read in the body of this command.  */
   if (recurse_read_control_structure (cmd) == invalid_control)
@@ -839,7 +839,8 @@ execute_control_command (cmd)
       new_line = insert_args (cmd->line);
       if (!new_line)
 	return invalid_control;
-      old_chain = make_cleanup (free_current_contents, &new_line);
+      old_chain = make_cleanup ((make_cleanup_func) free_current_contents, 
+                                &new_line);
       execute_command (new_line, 0);
       ret = cmd->control_type;
       break;
@@ -857,9 +858,10 @@ execute_control_command (cmd)
 	new_line = insert_args (cmd->line);
 	if (!new_line)
 	  return invalid_control;
-	old_chain = make_cleanup (free_current_contents, &new_line);
+	old_chain = make_cleanup ((make_cleanup_func) free_current_contents, 
+                                  &new_line);
 	expr = parse_expression (new_line);
-	make_cleanup (free_current_contents, &expr);
+	make_cleanup ((make_cleanup_func) free_current_contents, &expr);
 	
 	ret = simple_control;
 	loop = 1;
@@ -917,10 +919,11 @@ execute_control_command (cmd)
 	new_line = insert_args (cmd->line);
 	if (!new_line)
 	  return invalid_control;
-	old_chain = make_cleanup (free_current_contents, &new_line);
+	old_chain = make_cleanup ((make_cleanup_func) free_current_contents, 
+                                  &new_line);
 	/* Parse the conditional for the if statement.  */
 	expr = parse_expression (new_line);
-	make_cleanup (free_current_contents, &expr);
+	make_cleanup ((make_cleanup_func) free_current_contents, &expr);
 
 	current = NULL;
 	ret = simple_control;
@@ -1033,7 +1036,7 @@ setup_user_args (p)
   args->next = user_args;
   user_args = args;
 
-  old_chain = make_cleanup (arg_cleanup, 0);
+  old_chain = make_cleanup ((make_cleanup_func) arg_cleanup, 0);
 
   if (p == NULL)
     return old_chain;
@@ -1197,7 +1200,7 @@ execute_user_command (c, args)
 
   /* Set the instream to 0, indicating execution of a
      user-defined function.  */
-  old_chain = make_cleanup (source_cleanup, instream);
+  old_chain = make_cleanup ((make_cleanup_func) source_cleanup, instream);
   instream = (FILE *) 0;
   while (cmdlines)
     {
@@ -1331,7 +1334,7 @@ command_loop ()
       quit_flag = 0;
       if (instream == stdin && stdin_is_tty)
 	reinitialize_more_filter ();
-      old_chain = make_cleanup (command_loop_marker, 0);
+      old_chain = make_cleanup ((make_cleanup_func) command_loop_marker, 0);
       command = command_line_input (instream == stdin ? prompt : (char *) NULL,
 				    instream == stdin, "prompt");
       if (command == 0)
@@ -2502,7 +2505,8 @@ int from_tty;
       else
 	{
 	  head = next;
-	  old_chain = make_cleanup (free_command_lines, &head);
+	  old_chain = make_cleanup ((make_cleanup_func) free_command_lines, 
+                                    &head);
 	}
       tail = next;
     }
@@ -3110,7 +3114,7 @@ source_command (args, from_tty)
     else
       return;
 
-  make_cleanup (fclose, stream);
+  make_cleanup ((make_cleanup_func) fclose, stream);
 
   old_lines.old_line = source_line_number;
   old_lines.old_file = source_file_name;

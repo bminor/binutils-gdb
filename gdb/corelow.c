@@ -1,5 +1,5 @@
 /* Core dump and executable file functions below target vector, for GDB.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997
+   Copyright 1986, 87, 89, 91, 92, 93, 94, 95, 96, 97, 1998
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -189,7 +189,7 @@ core_open (filename, from_tty)
       /* FIXME: should be checking for errors from bfd_close (for one thing,
 	 on error it does not free all the storage associated with the
 	 bfd).  */
-      make_cleanup (bfd_close, temp_bfd);
+      make_cleanup ((make_cleanup_func) bfd_close, temp_bfd);
       error ("\"%s\" is not a core dump: %s",
 	     filename, bfd_errmsg (bfd_get_error ()));
     }
@@ -199,7 +199,7 @@ core_open (filename, from_tty)
   discard_cleanups (old_chain);		/* Don't free filename any more */
   unpush_target (&core_ops);
   core_bfd = temp_bfd;
-  old_chain = make_cleanup (core_close, core_bfd);
+  old_chain = make_cleanup ((make_cleanup_func) core_close, core_bfd);
 
   validate_files ();
 

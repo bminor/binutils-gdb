@@ -1,5 +1,6 @@
 /* Symbol table definitions for GDB.
-   Copyright 1986, 1989, 1991, 1992, 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
+   Copyright 1986, 89, 91, 92, 93, 94, 95, 96, 1998
+             Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -26,6 +27,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define obstack_chunk_alloc xmalloc
 #define obstack_chunk_free free
 #include "bcache.h"
+
+#include "gnu-regex.h"
 
 /* Don't do this; it means that if some .o's are compiled with GNU C
    and some are not (easy to do accidentally the way we configure
@@ -84,7 +87,10 @@ struct general_symbol_info
 
   union
     {
-      struct cplus_specific      /* For C++ and Java */
+      struct cplus_specific      /* For C++ */
+				/* start-sanitize-java */
+				/*  and Java */
+				/* end-sanitize-java */
 	{
 	  char *demangled_name;
 	} cplus_specific;
@@ -136,7 +142,10 @@ extern CORE_ADDR symbol_overlayed_address PARAMS((CORE_ADDR, asection *));
   do {									\
     SYMBOL_LANGUAGE (symbol) = language;				\
     if (SYMBOL_LANGUAGE (symbol) == language_cplus			\
-	|| SYMBOL_LANGUAGE (symbol) == language_java)			\
+	/* start-sanitize-java */					\
+	|| SYMBOL_LANGUAGE (symbol) == language_java			\
+	/* end-sanitize-java */						\
+	)								\
       {									\
 	SYMBOL_CPLUS_DEMANGLED_NAME (symbol) = NULL;			\
       }									\
@@ -180,6 +189,7 @@ extern CORE_ADDR symbol_overlayed_address PARAMS((CORE_ADDR, asection *));
 	    SYMBOL_CPLUS_DEMANGLED_NAME (symbol) = NULL;		\
 	  }								\
       }									\
+  /* start-sanitize-java */						\
     if (SYMBOL_LANGUAGE (symbol) == language_java)			\
       {									\
 	demangled =							\
@@ -197,6 +207,7 @@ extern CORE_ADDR symbol_overlayed_address PARAMS((CORE_ADDR, asection *));
 	    SYMBOL_CPLUS_DEMANGLED_NAME (symbol) = NULL;		\
 	  }								\
       }									\
+  /* end-sanitize-java */						\
     if (demangled == NULL						\
 	&& (SYMBOL_LANGUAGE (symbol) == language_chill			\
 	    || SYMBOL_LANGUAGE (symbol) == language_auto))		\
@@ -226,7 +237,9 @@ extern CORE_ADDR symbol_overlayed_address PARAMS((CORE_ADDR, asection *));
 
 #define SYMBOL_DEMANGLED_NAME(symbol)					\
   (SYMBOL_LANGUAGE (symbol) == language_cplus				\
+   /* start-sanitize-java */						\
    || SYMBOL_LANGUAGE (symbol) == language_java				\
+   /* end-sanitize-java */						\
    ? SYMBOL_CPLUS_DEMANGLED_NAME (symbol)				\
    : (SYMBOL_LANGUAGE (symbol) == language_chill			\
       ? SYMBOL_CHILL_DEMANGLED_NAME (symbol)				\
@@ -300,14 +313,17 @@ struct minimal_symbol
 
   struct general_symbol_info ginfo;
 
-  /* The info field is available for caching machine-specific information that
-     The AMD 29000 tdep.c uses it to remember things it has decoded from the
-     instructions in the function header, so it doesn't have to rederive the
-     info constantly (over a serial line).  It is initialized to zero and
-     stays that way until target-dependent code sets it.  Storage for any data
-     pointed to by this field should be allocated on the symbol_obstack for
-     the associated objfile.  The type would be "void *" except for reasons
-     of compatibility with older compilers.  This field is optional. */
+  /* The info field is available for caching machine-specific information
+     so it doesn't have to rederive the info constantly (over a serial line).
+     It is initialized to zero and stays that way until target-dependent code
+     sets it.  Storage for any data pointed to by this field should be allo-
+     cated on the symbol_obstack for the associated objfile.  
+     The type would be "void *" except for reasons of compatibility with older
+     compilers.  This field is optional.
+
+     Currently, the AMD 29000 tdep.c uses it to remember things it has decoded
+     from the instructions in the function header, and the MIPS-16 code uses
+     it to identify 16-bit procedures.  */
 
   char *info;
 
@@ -481,7 +497,24 @@ typedef enum
   /* LABEL_NAMESPACE may be used for names of labels (for gotos);
      currently it is not used and labels are not recorded at all.  */
 
-  LABEL_NAMESPACE
+  LABEL_NAMESPACE,
+
+  /* Searching namespaces. These overlap with VAR_NAMESPACE, providing
+     some granularity with the search_symbols function. */
+
+  /* Everything in VAR_NAMESPACE minus FUNCTIONS_-, TYPES_-, and
+     METHODS_NAMESPACE */
+  VARIABLES_NAMESPACE,
+
+  /* All functions -- for some reason not methods, though. */
+  FUNCTIONS_NAMESPACE,
+
+  /* All defined types */
+  TYPES_NAMESPACE,
+
+  /* All class methods -- why is this separated out? */
+  METHODS_NAMESPACE
+
 } namespace_enum;
 
 /* An address-class says where to find the value of a symbol.  */
@@ -605,12 +638,19 @@ enum address_class
 
 /* Linked list of symbol's live ranges. */
 
-struct live_range		
+struct range_list		
 {
   CORE_ADDR start;
   CORE_ADDR end;
-  struct live_range *next;	
+  struct range_list *next;	
 };
+
+/* Linked list of aliases for a particular main/primary symbol.  */
+struct alias_list
+  {
+    struct symbol *sym;
+    struct alias_list *next;
+  };
 
 struct symbol
 {
@@ -652,34 +692,24 @@ struct symbol
     }
   aux_value;
 
-  /* Live range information (if present) for debugging of optimized code.  
-     Gcc extensions were added to stabs to encode live range information.
-     The syntax for referencing (defining) symbol aliases is "#n" ("#n=")
-     where n is a number.  The syntax for specifying a range is "l(#<m>,#<n>)",
-     where m and n are numbers. 
-     aliases - list of other symbols which are lexically the same symbol, 
-         but were optimized into different storage classes (eg. for the
-         local symbol "x", one symbol contains range information where x 
-         is on the stack, while an alias contains the live ranges where x 
-         is in a register).
-     range - list of instruction ranges where the symbol is live. */
-  struct live_range_info 		
-    {
-      struct symbol *aliases;	/* Link to other aliases for this symbol. */
-      struct live_range	*range; /* Linked list of live ranges. */
-    } live;
+
+  /* Link to a list of aliases for this symbol.
+     Only a "primary/main symbol may have aliases.  */
+  struct alias_list *aliases;
+
+  /* List of ranges where this symbol is active.  This is only
+     used by alias symbols at the current time.  */
+  struct range_list *ranges;
 };
+
 
 #define SYMBOL_NAMESPACE(symbol)	(symbol)->namespace
 #define SYMBOL_CLASS(symbol)		(symbol)->aclass
 #define SYMBOL_TYPE(symbol)		(symbol)->type
 #define SYMBOL_LINE(symbol)		(symbol)->line
 #define SYMBOL_BASEREG(symbol)		(symbol)->aux_value.basereg
-#define SYMBOL_ALIASES(symbol)		(symbol)->live.aliases
-#define SYMBOL_RANGE(symbol)		(symbol)->live.range 
-#define SYMBOL_RANGE_START(symbol)	(symbol)->live.range->start
-#define SYMBOL_RANGE_END(symbol)	(symbol)->live.range->end
-#define SYMBOL_RANGE_NEXT(symbol)	(symbol)->live.range->next
+#define SYMBOL_ALIASES(symbol)		(symbol)->aliases
+#define SYMBOL_RANGES(symbol)		(symbol)->ranges
 
 /* A partial_symbol records the name, namespace, and address class of
    symbols whose types we have not parsed yet.  For functions, it also
@@ -876,14 +906,6 @@ struct symtab
     /* Object file from which this symbol information was read.  */
 
     struct objfile *objfile;
-
-    /* Anything extra for this symtab.  This is for target machines
-       with special debugging info of some sort (which cannot just
-       be represented in a normal symtab).  */
-
-#if defined (EXTRA_SYMTAB_INFO)
-    EXTRA_SYMTAB_INFO
-#endif
 
   };
 
@@ -1098,11 +1120,16 @@ find_pc_sect_function PARAMS ((CORE_ADDR, asection *));
   
 /* lookup function from address, return name, start addr and end addr */
 
-extern int find_pc_partial_function PARAMS ((CORE_ADDR, char **, 
+extern int 
+find_pc_partial_function PARAMS ((CORE_ADDR, char **,
 					     CORE_ADDR *, CORE_ADDR *));
 
 extern void
 clear_pc_function_cache PARAMS ((void));
+
+extern int 
+find_pc_sect_partial_function PARAMS ((CORE_ADDR, asection *, 
+                                       char **, CORE_ADDR *, CORE_ADDR *));
 
 /* from symtab.c: */
 
@@ -1263,8 +1290,8 @@ find_addr_symbol PARAMS ((CORE_ADDR, struct symtab **, CORE_ADDR *));
 
 /* Given a symtab and line number, return the pc there.  */
 
-extern CORE_ADDR
-find_line_pc PARAMS ((struct symtab *, int));
+extern int
+find_line_pc PARAMS ((struct symtab *, int, CORE_ADDR *));
 
 extern int 
 find_line_pc_range PARAMS ((struct symtab_and_line,
@@ -1341,6 +1368,8 @@ select_source_symtab PARAMS ((struct symtab *));
 
 extern char **make_symbol_completion_list PARAMS ((char *, char *));
 
+extern void _initialize_source PARAMS ((void));
+
 /* symtab.c */
 
 extern struct partial_symtab *
@@ -1351,10 +1380,10 @@ find_main_psymtab PARAMS ((void));
 extern struct blockvector *
 blockvector_for_pc PARAMS ((CORE_ADDR, int *));
 
-
 extern struct blockvector *
 blockvector_for_pc_sect PARAMS ((CORE_ADDR, asection *, int *, 
 				 struct symtab *));
+
 /* symfile.c */
 
 extern void
@@ -1370,5 +1399,33 @@ in_prologue PARAMS ((CORE_ADDR pc, CORE_ADDR func_start));
 
 extern struct symbol *
 fixup_symbol_section PARAMS ((struct symbol  *, struct objfile *));
+
+/* Symbol searching */
+
+/* When using search_symbols, a list of the following structs is returned.
+   Callers must free the search list using free_symbol_search! */
+struct symbol_search
+{
+  /* The block in which the match was found. Could be, for example,
+     STATIC_BLOCK or GLOBAL_BLOCK. */
+  int block;
+
+  /* Information describing what was found.
+
+     If symtab abd symbol are NOT NULL, then information was found
+     for this match. */
+  struct symtab *symtab;
+  struct symbol *symbol;
+
+  /* If msymbol is non-null, then a match was made on something for
+     which only minimal_symbols exist. */
+  struct minimal_symbol *msymbol;
+
+  /* A link to the next match, or NULL for the end. */
+  struct symbol_search *next;
+};
+
+extern void search_symbols PARAMS ((char *, namespace_enum, int, char **, struct symbol_search **));
+extern void free_search_symbols PARAMS ((struct symbol_search *));
 
 #endif /* !defined(SYMTAB_H) */

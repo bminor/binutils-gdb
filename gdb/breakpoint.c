@@ -850,12 +850,14 @@ breakpoint_here_p (pc)
   ALL_BREAKPOINTS (b)
     if (b->enable == enabled
 	&& b->address == pc)	/* bp is enabled and matches pc */
-      if (overlay_debugging &&
-	  section_is_overlay (b->section) &&
-	  !section_is_mapped (b->section))
-	continue;		/* unmapped overlay -- can't be a match */
-      else
-	return 1;
+      {
+        if (overlay_debugging &&
+	    section_is_overlay (b->section) &&
+	    !section_is_mapped (b->section))
+	  continue;		/* unmapped overlay -- can't be a match */
+        else
+	  return 1;
+      }
 
   return 0;
 }
@@ -872,12 +874,14 @@ breakpoint_inserted_here_p (pc)
   ALL_BREAKPOINTS (b)
     if (b->inserted
 	&& b->address == pc)	/* bp is inserted and matches pc */
-      if (overlay_debugging &&
-	  section_is_overlay (b->section) &&
-	  !section_is_mapped (b->section))
-	continue;		/* unmapped overlay -- can't be a match */
-      else
-	return 1;
+      {
+        if (overlay_debugging &&
+	    section_is_overlay (b->section) &&
+	    !section_is_mapped (b->section))
+	  continue;		/* unmapped overlay -- can't be a match */
+        else
+	  return 1;
+      }
 
   return 0;
 }
@@ -935,12 +939,14 @@ breakpoint_thread_match (pc, pid)
 	&& b->enable != shlib_disabled
 	&& b->address == pc
 	&& (b->thread == -1 || b->thread == thread))
-      if (overlay_debugging &&
-	  section_is_overlay (b->section) &&
-	  !section_is_mapped (b->section))
-	continue;		/* unmapped overlay -- can't be a match */
-      else
-	return 1;
+      {
+        if (overlay_debugging &&
+	    section_is_overlay (b->section) &&
+	    !section_is_mapped (b->section))
+	  continue;		/* unmapped overlay -- can't be a match */
+        else
+	  return 1;
+      }
 
   return 0;
 }
@@ -2937,7 +2943,7 @@ until_break_command (arg, from_tty)
   
   breakpoint = set_momentary_breakpoint (sal, selected_frame, bp_until);
   
-  old_chain = make_cleanup(delete_breakpoint, breakpoint);
+  old_chain = make_cleanup ((make_cleanup_func) delete_breakpoint, breakpoint);
 
   /* Keep within the current frame */
   
@@ -2946,7 +2952,7 @@ until_break_command (arg, from_tty)
       sal = find_pc_line (prev_frame->pc, 0);
       sal.pc = prev_frame->pc;
       breakpoint = set_momentary_breakpoint (sal, prev_frame, bp_until);
-      make_cleanup(delete_breakpoint, breakpoint);
+      make_cleanup ((make_cleanup_func) delete_breakpoint, breakpoint);
     }
   
   proceed (-1, TARGET_SIGNAL_DEFAULT, 0);
@@ -3929,6 +3935,8 @@ is valid is not currently in scope.\n", bpt->number);
         int i = hw_watchpoint_used_count (bpt->type, &other_type_used);
         int mem_cnt = can_use_hardware_watchpoint (bpt->val);
 
+        /* Hack around 'unused var' error for some targets here */
+        (void) mem_cnt, i;
         target_resources_ok = TARGET_CAN_USE_HARDWARE_WATCHPOINT(
                 bpt->type, i + mem_cnt, other_type_used);
         /* we can consider of type is bp_hardware_watchpoint, convert to 

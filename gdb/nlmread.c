@@ -1,5 +1,5 @@
 /* Read NLM (NetWare Loadable Module) format executable files for GDB.
-   Copyright 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1993, 1994, 1998 Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support (fnf@cygnus.com).
 
 This file is part of GDB.
@@ -190,7 +190,7 @@ nlm_symfile_read (objfile, section_offsets, mainline)
   struct symbol *mainsym;
 
   init_minimal_symbol_collection ();
-  back_to = make_cleanup (discard_minimal_symbols, 0);
+  back_to = make_cleanup ((make_cleanup_func) discard_minimal_symbols, 0);
 
   /* FIXME, should take a section_offsets param, not just an offset.  */
 

@@ -1,5 +1,5 @@
 /* Read ELF (Executable and Linking Format) object files for GDB.
-   Copyright 1991, 1992, 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
+   Copyright 1991, 92, 93, 94, 95, 96, 1998 Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support.
 
 This file is part of GDB.
@@ -591,7 +591,7 @@ elf_symfile_read (objfile, section_offsets, mainline)
   CORE_ADDR offset;
 
   init_minimal_symbol_collection ();
-  back_to = make_cleanup (discard_minimal_symbols, 0);
+  back_to = make_cleanup ((make_cleanup_func) discard_minimal_symbols, 0);
 
   memset ((char *) &ei, 0, sizeof (ei));
 

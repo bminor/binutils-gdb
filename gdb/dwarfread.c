@@ -1,5 +1,5 @@
 /* DWARF debugging format support for GDB.
-   Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996
+   Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1998
    Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support.  Portions based on dbxread.c,
    mipsread.c, coffread.c, and dwarfread.c from a Data General SVR4 gdb port.
@@ -2452,7 +2452,8 @@ psymtab_to_symtab_1 (pst)
 	  if (DBLENGTH (pst))		/* Otherwise it's a dummy */
 	    {
 	      buildsym_init ();
-	      old_chain = make_cleanup (really_free_pendings, 0);
+	      old_chain = make_cleanup ((make_cleanup_func) 
+                                        really_free_pendings, 0);
 	      read_ofile_symtab (pst);
 	      if (info_verbose)
 		{

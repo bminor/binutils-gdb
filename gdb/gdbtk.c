@@ -339,7 +339,7 @@ gdbtk_init ( argv0 )
     return;
 #endif
 
-  old_chain = make_cleanup (cleanup_init, 0);
+  old_chain = make_cleanup ((make_cleanup_func) cleanup_init, 0);
 
   /* First init tcl and tk. */
   Tcl_FindExecutable (argv0); 

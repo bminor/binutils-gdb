@@ -1,6 +1,6 @@
 /* Get info from stack frames;
    convert between frames, blocks, functions and pc values.
-   Copyright 1986, 1987, 1988, 1989, 1991, 1994, 1995, 1996, 1997
+   Copyright 1986, 87, 88, 89, 91, 94, 95, 96, 97, 1998
              Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -807,14 +807,19 @@ find_pc_sect_partial_function (pc, section, name, address, endaddr)
   cache_pc_function_name    = SYMBOL_NAME (msymbol);
   cache_pc_function_section = section;
 
-  /* Use the lesser of the next minimal symbol in the same section, or the end
-     of the section, as the end of the function. Step over other symbols at 
-     this same address to find the next one.  */
+  /* Use the lesser of the next minimal symbol in the same section, or
+     the end of the section, as the end of the function.  */
+  
+  /* Step over other symbols at this same address, and symbols in
+     other sections, to find the next symbol in this section with
+     a different address.  */
 
-  for (i=1; SYMBOL_NAME (msymbol+i) != NULL 
-	 && (SYMBOL_VALUE_ADDRESS(msymbol+i) == SYMBOL_VALUE_ADDRESS (msymbol)
-	 || SYMBOL_BFD_SECTION(msymbol+i) != section);
-       i++) /* empty */;
+  for (i=1; SYMBOL_NAME (msymbol+i) != NULL; i++)
+    {
+      if (SYMBOL_VALUE_ADDRESS (msymbol+i) != SYMBOL_VALUE_ADDRESS (msymbol) 
+	  && SYMBOL_BFD_SECTION (msymbol+i) == SYMBOL_BFD_SECTION (msymbol))
+	break;
+    }
 
   if (SYMBOL_NAME (msymbol + i) != NULL
       && SYMBOL_VALUE_ADDRESS (msymbol + i) < osect->endaddr)
@@ -827,27 +832,31 @@ find_pc_sect_partial_function (pc, section, name, address, endaddr)
  return_cached_value:
 
   if (address)
-    if (pc_in_unmapped_range (pc, section))
-      *address = overlay_unmapped_address (cache_pc_function_low, section);
-    else
-      *address = cache_pc_function_low;
+    {
+      if (pc_in_unmapped_range (pc, section))
+        *address = overlay_unmapped_address (cache_pc_function_low, section);
+      else
+        *address = cache_pc_function_low;
+    }
     
   if (name)
     *name = cache_pc_function_name;
 
   if (endaddr)
-    if (pc_in_unmapped_range (pc, section))
-      {
-	/* Because the high address is actually beyond the end of
-	   the function (and therefore possibly beyond the end of
-	   the overlay), we must actually convert (high - 1)
-	   and then add one to that. */
+    {
+      if (pc_in_unmapped_range (pc, section))
+        {
+	  /* Because the high address is actually beyond the end of
+	     the function (and therefore possibly beyond the end of
+	     the overlay), we must actually convert (high - 1)
+	     and then add one to that. */
 
-	*endaddr = 1 + overlay_unmapped_address (cache_pc_function_high - 1, 
-						 section);
-      }
-    else
-      *endaddr = cache_pc_function_high;
+	  *endaddr = 1 + overlay_unmapped_address (cache_pc_function_high - 1, 
+						   section);
+        }
+      else
+        *endaddr = cache_pc_function_high;
+    }
 
   return 1;
 }

@@ -1,5 +1,5 @@
 /* Tracing functionality for remote targets in custom GDB protocol
-   Copyright 1997 Free Software Foundation, Inc.
+   Copyright 1997, 1998 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -847,7 +847,7 @@ read_actions (t)
   if (job_control)
     signal (STOP_SIGNAL, stop_sig);
 #endif
-  old_chain = make_cleanup (free_actions, (void *) t);
+  old_chain = make_cleanup ((make_cleanup_func) free_actions, (void *) t);
   while (1)
     {
       /* Make sure that all output has been output.  Some machines may let
@@ -969,7 +969,8 @@ validate_actionline (line, t)
 	    /* else fall thru, treat p as an expression and parse it! */
 	  }
 	exp   = parse_exp_1 (&p, block_for_pc (t->address), 1);
-	old_chain = make_cleanup (free_current_contents, &exp);
+	old_chain = make_cleanup ((make_cleanup_func) free_current_contents, 
+                                  &exp);
 
 	if (exp->elts[0].opcode == OP_VAR_VALUE)
 	  if (SYMBOL_CLASS (exp->elts[2].symbol) == LOC_CONST)
@@ -989,7 +990,7 @@ validate_actionline (line, t)
 	/* we have something to collect, make sure that the expr to
 	   bytecode translator can handle it and that it's not too long */
 	aexpr = gen_trace_for_expr(exp);
-	(void) make_cleanup (free_agent_expr, aexpr);
+	(void) make_cleanup ((make_cleanup_func) free_agent_expr, aexpr);
 
 	if (aexpr->len > MAX_AGENT_EXPR_LEN)
 	  error ("expression too complicated, try simplifying");
@@ -1522,7 +1523,8 @@ encode_actions (t, tdp_actions, stepping_actions)
 		struct agent_reqs areqs;
 
 		exp = parse_exp_1 (&action_exp, block_for_pc (t->address), 1);
-		old_chain = make_cleanup (free_current_contents, &exp);
+		old_chain = make_cleanup ((make_cleanup_func) 
+                                          free_current_contents, &exp);
 
 		switch (exp->elts[0].opcode) {
 		case OP_REGISTER:
@@ -1547,7 +1549,8 @@ encode_actions (t, tdp_actions, stepping_actions)
 		default:	/* full-fledged expression */
 		  aexpr = gen_trace_for_expr (exp);
 
-		  old_chain1 = make_cleanup (free_agent_expr, aexpr);
+		  old_chain1 = make_cleanup ((make_cleanup_func) 
+                                             free_agent_expr, aexpr);
 
 		  ax_reqs (aexpr, &areqs);
 		  if (areqs.flaw != agent_flaw_none)
