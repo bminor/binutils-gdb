@@ -1,3 +1,50 @@
+Thu Nov 21 11:50:49 1991  John Gilmore  (gnu at cygnus.com)
+
+	* libaout.h (WORK_OUT_FILE_POSITIONS):  One more try at this
+	rather complicated seeming problem.  Eliminate LOGICAL_ versions,
+	just make N_XXX work by excluding the header from the text segment.
+	* aoutx.h:  Fix comments to match.
+
+Tue Nov 19 18:49:01 1991  Per Bothner  (bothner at cygnus.com)
+
+	* libaout.h (WORK_OUT_FILE_POSITIONS):  Use new LOGICAL_TXTADDR,
+	LOGICAL_TXTOFF, LOGICAL_TXTSIZE macros to figure out numbers
+	for the "logical" text segment (i.e. never consider the exec
+	header to be part of the text segment).  This change is
+	needed for consistency with various other parts of bfd and ld.
+	* aoutx.h (NAME(aout,soe_aout_object_p)):  Fix comment,
+	and move calculation of obj_textsec(abfd)->size to libaout.h.
+	* bfd-in.h:  Removed bogus ';'.
+
+	* Makefile.in:  Add MINIMIZE flag to select lean
+	or bloated target_vector.
+	* targets.c:  Use new MINIMIZE macro, and add trad_core if needed.
+	* newsos3.c:  Fixes to ../include/aout64.h remove need
+	for special N_TXTOFF macro, but require N_HEADER_IN_TEXT.
+
+Mon Nov 18 12:00:59 1991  Per Bothner  (bothner at cygnus.com)
+
+	* aout-target.h, aoutf1.h, newsos3.c:  Make aout-target.h
+	handle both little and big-endian targets, with little
+	the default unless TARGET_IS_BIG_ENDIAN_P is defined.
+	* host-aout.c:  Add FIXME note.
+
+Sun Nov 17 13:29:39 1991  Per Bothner  (bothner at cygnus.com)
+
+	* targets.c:  Make the default target_vector contain
+	just &DEFAULT_VECTOR.  This makes executables a lot smaller.
+	Old behavior can be gotten by defining ALL_TARGETS.
+	* aoutf1.h, demo64.c, i386aout.c, newsos3.c, sunos.c:
+	Factored out common code into new file aout-target.h.
+	Saves a lot of duplicate code for a.out variants.
+
+Fri Nov 15 13:00:43 1991  Per Bothner  (bothner at cygnus.com)
+
+	Get 'make headers' to work when configured with +subdirs.
+	* Makefile.in: Add $(subdir) to docdir path.
+	* doc/Makefile.in (protos): Add $(srcdir) prefix
+	to name of sed scripts.
+
 Thu Nov 14 19:49:10 1991  Per Bothner  (bothner at cygnus.com)
 
 	* aoutx.h (NAME(aout,print_symbol)):  Fix thinko.

@@ -325,7 +325,6 @@ DEFUN(NAME(aout,some_aout_object_p),(abfd, execp, callback_to_real_object_p),
 
   obj_datasec (abfd)->size = execp->a_data;
   obj_bsssec (abfd)->size = execp->a_bss;
-  obj_textsec (abfd)->size = execp->a_text;
 
   obj_textsec (abfd)->flags = (execp->a_trsize != 0 ?
 		       (SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_HAS_CONTENTS) :
@@ -336,16 +335,25 @@ DEFUN(NAME(aout,some_aout_object_p),(abfd, execp, callback_to_real_object_p),
   obj_bsssec (abfd)->flags = SEC_ALLOC;
 
 #ifdef THIS_IS_ONLY_DOCUMENTATION
+  /* The common code can't fill in these things because they depend
+     on either the start address of the text segment, the rounding
+     up of virtual addersses between segments, or the starting file 
+     position of the text segment -- all of which varies among different
+     versions of a.out.  */
+
   /* Call back to the format-dependent code to fill in the rest of the 
      fields and do any further cleanup.  Things that should be filled
      in by the callback:  */
 
   struct exec *execp = exec_hdr (abfd);
 
+  obj_textsec (abfd)->size = N_TXTSIZE(*execp);
+  /* data and bss are already filled in since they're so standard */
+
   /* The virtual memory addresses of the sections */
-  obj_datasec (abfd)->vma = N_DATADDR(*execp);
-  obj_bsssec (abfd)->vma = N_BSSADDR(*execp);
   obj_textsec (abfd)->vma = N_TXTADDR(*execp);
+  obj_datasec (abfd)->vma = N_DATADDR(*execp);
+  obj_bsssec  (abfd)->vma = N_BSSADDR(*execp);
 
   /* The file offsets of the sections */
   obj_textsec (abfd)->filepos = N_TXTOFF(*execp);
@@ -358,12 +366,6 @@ DEFUN(NAME(aout,some_aout_object_p),(abfd, execp, callback_to_real_object_p),
   /* The file offsets of the string table and symbol table.  */
   obj_str_filepos (abfd) = N_STROFF (*execp);
   obj_sym_filepos (abfd) = N_SYMOFF (*execp);
-
-  /* This common code can't fill in those things because they depend
-     on either the start address of the text segment, the rounding
-     up of virtual addersses between segments, or the starting file 
-     position of the text segment -- all of which varies among different
-     versions of a.out.  */
 
   /* Determine the architecture and machine type of the object file.  */
   switch (N_MACHTYPE (*exec_hdr (abfd))) {
@@ -396,7 +398,6 @@ DEFUN(NAME(aout,some_aout_object_p),(abfd, execp, callback_to_real_object_p),
      Formats such as b.out, which have additional fields in the a.out
      header, should cope with them in this callback as well.  */
 #endif				/* DOCUMENTATION */
-
 
   return (*callback_to_real_object_p)(abfd);
 }
@@ -945,7 +946,7 @@ DEFUN(NAME(aout,slurp_symbol_table),(abfd),
 
   /* malloc this, so we can free it if simply. The symbol caching
      might want to allocate onto the bfd's obstack  */
-  syms = (struct external_nlist *) malloc(symbol_size);
+  syms = (struct external_nlist *) bfd_xmalloc(symbol_size);
   bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET);
   if (bfd_read ((PTR)syms, 1, symbol_size, abfd) != symbol_size) {
   bailout:
@@ -1617,6 +1618,37 @@ DEFUN(NAME(aout,print_symbol),(ignore_abfd, afile, symbol, how),
         fprintf(file," %s", symbol->name);
     }
     break;
+  case bfd_print_symbol_nm:
+    {
+      int section_code = bfd_decode_symclass  (symbol);
+
+      if (section_code == 'U')
+	fprintf(file, "        ");
+      else if (symbol->section != (asection *)NULL)
+	fprintf_vma(file, symbol->value+symbol->section->vma);
+      else 
+	fprintf_vma(file, symbol->value);
+      if (section_code == '?')
+	{
+	  int type_code = aout_symbol(symbol)->type  & 0xff;
+	  char *stab_name = bfd_stab_name(type_code);
+	  char buf[10];
+	  if (stab_name == NULL)
+	    {
+	      sprintf(buf, "(%d)", type_code);
+	      stab_name = buf;
+	    }
+	  fprintf(file," - %02x %04x %5s",
+		  (unsigned)(aout_symbol(symbol)->other & 0xff),
+		  (unsigned)(aout_symbol(symbol)->desc & 0xffff),
+		  stab_name);
+        }
+      else
+	fprintf(file," %c", section_code);
+      if (symbol->name)
+        fprintf(file," %s", symbol->name);
+    }
+    break;
   }
 }
 
@@ -1645,6 +1677,7 @@ DEFUN(NAME(aout,find_nearest_line),(abfd,
   /* Run down the file looking for the filename, function and linenumber */
   asymbol **p;
   static  char buffer[100];
+  static  char filename_buffer[200];
   bfd_vma high_line_vma = ~0;
   bfd_vma low_func_vma = 0;
   asymbol *func = 0;
@@ -1654,9 +1687,28 @@ DEFUN(NAME(aout,find_nearest_line),(abfd,
   if (symbols != (asymbol **)NULL) {
     for (p = symbols; *p; p++) {
       aout_symbol_type  *q = (aout_symbol_type *)(*p);
+    next:
       switch (q->type){
       case N_SO:
 	*filename_ptr = q->symbol.name;
+	/* Look ahead to next symbol to check if that too is an N_SO. */
+	p++;
+	if (*p == NULL)
+	  break;
+	q = (aout_symbol_type *)(*p);
+	if (q->type != N_SO)
+	  goto next;
+
+	/* Found a second N_SO  First is directory; second is filename. */
+	if (q->symbol.name[0] == '/')
+	  *filename_ptr = q->symbol.name;
+	else
+	  {
+	    sprintf(filename_buffer, "%.140s%.50s",
+		    *filename_ptr, q->symbol.name);
+	    *filename_ptr = filename_buffer;
+	  }
+	
 	if (obj_textsec(abfd) != section) {
 	  return true;
 	}

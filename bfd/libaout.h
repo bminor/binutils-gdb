@@ -207,7 +207,7 @@ PROTO (boolean,	NAME(aout,close_and_cleanup), (bfd *abfd));
 PROTO (boolean,	NAME(aout,find_nearest_line), (bfd *abfd, asection *section,
       asymbol **symbols, bfd_vma offset, CONST char **filename_ptr,
       CONST char **functionname_ptr, unsigned int *line_ptr));
-PROTO (int,	NAME(aout,sizeof_headers), (bfd *ignore_abfd, boolean exec));
+PROTO (int,	NAME(aout,sizeof_headers), (bfd *abfd, boolean exec));
 
 
 PROTO (void,	NAME(aout,swap_exec_header_in), (bfd *abfd,
@@ -226,10 +226,12 @@ PROTO (void,	NAME(aout,swap_exec_header_out),(bfd *abfd, struct internal_exec *e
 
 /* Calculate the file positions of the parts of a newly read aout header */
 #define WORK_OUT_FILE_POSITIONS(abfd, execp)				\
+  obj_textsec (abfd)->size = N_TXTSIZE(*execp);				\
+  									\
   /* The virtual memory addresses of the sections */			\
-  obj_datasec (abfd)->vma = N_DATADDR(*execp);			 	\
-  obj_bsssec (abfd)->vma = N_BSSADDR(*execp);				\
   obj_textsec (abfd)->vma = N_TXTADDR(*execp);				\
+  obj_datasec (abfd)->vma = N_DATADDR(*execp);			 	\
+  obj_bsssec  (abfd)->vma = N_BSSADDR(*execp);				\
   									\
   /* The file offsets of the sections */				\
   obj_textsec (abfd)->filepos = N_TXTOFF (*execp);			\
