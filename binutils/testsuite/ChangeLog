@@ -1,3 +1,8 @@
+Tue Mar 21 10:48:45 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* binutils-hppa/addendbug.s: New testcase.
+	* binutils-hppa/objdump.exp: Run it.
+
 Mon Mar 20 11:31:05 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* lib/utils-lib.exp (default_binutils_run): Quote any dollar signs
