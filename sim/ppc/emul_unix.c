@@ -141,8 +141,44 @@ struct _os_emul_data {
   emul_syscall *syscalls;
 };
 
-
+
 /* Emulation of simple UNIX system calls that are common on all systems.  */
+
+/* Structures that are common agmonst the UNIX varients */
+struct unix_timeval {
+  signed32 tv_sec;		/* seconds */
+  signed32 tv_usec;		/* microseconds */
+};
+
+struct unix_timezone {
+  signed32 tz_minuteswest;	/* minutes west of Greenwich */
+  signed32 tz_dsttime;		/* type of dst correction */
+};
+
+#define	UNIX_RUSAGE_SELF	0
+#define	UNIX_RUSAGE_CHILDREN	(-1)
+#define UNIX_RUSAGE_BOTH	(-2)	/* sys_wait4() uses this */
+
+struct	unix_rusage {
+	struct unix_timeval ru_utime;	/* user time used */
+	struct unix_timeval ru_stime;	/* system time used */
+	signed32 ru_maxrss;		/* maximum resident set size */
+	signed32 ru_ixrss;		/* integral shared memory size */
+	signed32 ru_idrss;		/* integral unshared data size */
+	signed32 ru_isrss;		/* integral unshared stack size */
+	signed32 ru_minflt;		/* any page faults not requiring I/O */
+	signed32 ru_majflt;		/* any page faults requiring I/O */
+	signed32 ru_nswap;		/* swaps */
+	signed32 ru_inblock;		/* block input operations */
+	signed32 ru_oublock;		/* block output operations */
+	signed32 ru_msgsnd;		/* messages sent */
+	signed32 ru_msgrcv;		/* messages received */
+	signed32 ru_nsignals;		/* signals received */
+	signed32 ru_nvcsw;		/* voluntary context switches */
+	signed32 ru_nivcsw;		/* involuntary " */
+};
+
+
 static void
 do_unix_exit(os_emul_data *emul,
 	     unsigned call,
@@ -305,8 +341,8 @@ do_unix_getpid(os_emul_data *emul,
 	       cpu *processor,
 	       unsigned_word cia)
 {
-  int status = (int)getpid();
-  emul_write_status(processor, status, errno);
+  pid_t status = getpid();
+  emul_write_status(processor, (int)status, errno);
 }
 #endif
 
@@ -320,8 +356,8 @@ do_unix_getppid(os_emul_data *emul,
 		cpu *processor,
 		unsigned_word cia)
 {
-  int status = (int)getppid();
-  emul_write_status(processor, status, errno);
+  pid_t status = getppid();
+  emul_write_status(processor, (int)status, errno);
 }
 #endif
 
@@ -351,9 +387,9 @@ do_unix_getuid2(os_emul_data *emul,
 		cpu *processor,
 		unsigned_word cia)
 {
-  int uid  = (int)getuid();
-  int euid = (int)geteuid();
-  emul_write2_status(processor, uid, euid, errno);
+  uid_t uid  = getuid();
+  uid_t euid = geteuid();
+  emul_write2_status(processor, (int)uid, (int)euid, errno);
 }
 #endif
 
@@ -367,8 +403,8 @@ do_unix_getuid(os_emul_data *emul,
 	       cpu *processor,
 	       unsigned_word cia)
 {
-  int status = (int)getuid();
-  emul_write_status(processor, status, errno);
+  uid_t status = getuid();
+  emul_write_status(processor, (int)status, errno);
 }
 #endif
 
@@ -382,8 +418,8 @@ do_unix_geteuid(os_emul_data *emul,
 		cpu *processor,
 		unsigned_word cia)
 {
-  int status = (int)geteuid();
-  emul_write_status(processor, status, errno);
+  uid_t status = geteuid();
+  emul_write_status(processor, (int)status, errno);
 }
 #endif
 
@@ -465,21 +501,16 @@ do_unix_lseek(os_emul_data *emul,
 	      cpu *processor,
 	      unsigned_word cia)
 {
-  int fildes = cpu_registers(processor)->gpr[arg0];
-  off_t offset = emul_read_gpr64(processor, arg0+2);
-  int whence = cpu_registers(processor)->gpr[arg0+4];
+  int fildes   = (int)cpu_registers(processor)->gpr[arg0];
+  off_t offset = (off_t)cpu_registers(processor)->gpr[arg0+1];
+  int whence   = (int)cpu_registers(processor)->gpr[arg0+2];
   off_t status;
 
   if (WITH_TRACE && ppc_trace[trace_os_emul])
     printf_filtered ("%d %ld %d", fildes, (long)offset, whence);
 
   status = lseek(fildes, offset, whence);
-  if (status == -1)
-    emul_write_status(processor, -1, errno);
-  else {
-    emul_write_status(processor, 0, 0); /* success */
-    emul_write_gpr64(processor, 3, status);
-  }
+  emul_write_status(processor, (int)status, errno);
 }
 #endif
 
@@ -494,9 +525,9 @@ do_unix_getgid2(os_emul_data *emul,
 		cpu *processor,
 		unsigned_word cia)
 {
-  int gid  = (int)getgid();
-  int egid = (int)getegid();
-  emul_write2_status(processor, gid, egid, errno);
+  gid_t gid  = getgid();
+  gid_t egid = getegid();
+  emul_write2_status(processor, (int)gid, (int)egid, errno);
 }
 #endif
 
@@ -510,8 +541,8 @@ do_unix_getgid(os_emul_data *emul,
 	       cpu *processor,
 	       unsigned_word cia)
 {
-  int status = (int)getgid();
-  emul_write_status(processor, status, 0);
+  gid_t status = getgid();
+  emul_write_status(processor, (int)status, errno);
 }
 #endif
 
@@ -525,8 +556,8 @@ do_unix_getegid(os_emul_data *emul,
 		cpu *processor,
 		unsigned_word cia)
 {
-  int status = (int)getegid();
-  emul_write_status(processor, status, errno);
+  gid_t status = getegid();
+  emul_write_status(processor, (int)status, errno);
 }
 #endif
 
@@ -540,7 +571,7 @@ do_unix_umask(os_emul_data *emul,
 	      cpu *processor,
 	      unsigned_word cia)
 {
-  int mask = cpu_registers(processor)->gpr[arg0];
+  mode_t mask = (mode_t)cpu_registers(processor)->gpr[arg0];
   int status = umask(mask);
 
   if (WITH_TRACE && ppc_trace[trace_os_emul])
@@ -695,6 +726,161 @@ do_unix_rmdir(os_emul_data *emul,
 }
 #endif
 
+#ifndef HAVE_TIME
+#define do_unix_time 0
+#else
+static void
+do_unix_time(os_emul_data *emul,
+	     unsigned call,
+	     const int arg0,
+	     cpu *processor,
+	     unsigned_word cia)
+{
+  unsigned_word tp = cpu_registers(processor)->gpr[arg0];
+  time_t now = time ((time_t *)0);
+  unsigned_word status = H2T_4(now);
+
+  if (WITH_TRACE && ppc_trace[trace_os_emul])
+    printf_filtered ("0x%lx", (long)tp);
+
+  emul_write_status(processor, (int)status, errno);
+
+  if (tp)
+    emul_write_buffer(&status, tp, sizeof(status), processor, cia);
+}
+#endif
+
+#if !defined(HAVE_GETTIMEOFDAY) || !defined(HAVE_SYS_TIME_H)
+#define do_unix_gettimeofday 0
+#else
+static void
+do_unix_gettimeofday(os_emul_data *emul,
+		     unsigned call,
+		     const int arg0,
+		     cpu *processor,
+		     unsigned_word cia)
+{
+  unsigned_word tv = cpu_registers(processor)->gpr[arg0];
+  unsigned_word tz = cpu_registers(processor)->gpr[arg0+1];
+  struct unix_timeval target_timeval;
+  struct timeval host_timeval;
+  struct unix_timezone target_timezone;
+  struct timezone host_timezone;
+  int status;
+
+  if (WITH_TRACE && ppc_trace[trace_os_emul])
+    printf_filtered ("0x%lx, 0x%lx", (long)tv, (long)tz);
+
+  /* Just in case the system doesn't set the timezone structure */
+  host_timezone.tz_minuteswest = 0;
+  host_timezone.tz_dsttime = 0;
+
+  status = gettimeofday(&host_timeval, &host_timezone);
+  if (status >= 0) {
+    if (tv) {
+      target_timeval.tv_sec = H2T_4(host_timeval.tv_sec);
+      target_timeval.tv_usec = H2T_4(host_timeval.tv_usec);
+      emul_write_buffer((void *) &target_timeval, tv, sizeof(target_timeval), processor, cia);
+    }
+
+    if (tz) {
+      target_timezone.tz_minuteswest = H2T_4(host_timezone.tz_minuteswest);
+      target_timezone.tz_dsttime = H2T_4(host_timezone.tz_dsttime);
+      emul_write_buffer((void *) &target_timezone, tv, sizeof(target_timezone), processor, cia);
+    }
+  }
+    
+  emul_write_status(processor, (int)status, errno);
+}
+#endif
+
+
+#ifndef HAVE_GETRUSAGE
+#define do_unix_getrusage 0
+#else
+static void
+do_unix_getrusage(os_emul_data *emul,
+		  unsigned call,
+		  const int arg0,
+		  cpu *processor,
+		  unsigned_word cia)
+{
+  signed_word who = (signed_word)cpu_registers(processor)->gpr[arg0];
+  unsigned_word usage = cpu_registers(processor)->gpr[arg0+1];
+  struct rusage host_rusage, host_rusage2;
+  struct unix_rusage target_rusage;
+  int status;
+
+  if (WITH_TRACE && ppc_trace[trace_os_emul])
+    printf_filtered ("%ld, 0x%lx", (long)who, (long)usage);
+
+  switch (who) {
+  default:
+    status = -1;
+    errno = EINVAL;
+    break;
+
+  case UNIX_RUSAGE_SELF:
+    status = getrusage(RUSAGE_SELF, &host_rusage);
+    break;
+
+  case UNIX_RUSAGE_CHILDREN:
+    status = getrusage(RUSAGE_CHILDREN, &host_rusage);
+    break;
+
+  case UNIX_RUSAGE_BOTH:
+    status = getrusage(RUSAGE_SELF, &host_rusage);
+    if (status >= 0) {
+      status = getrusage(RUSAGE_CHILDREN, &host_rusage2);
+      if (status >= 0) {
+	host_rusage.ru_utime.tv_sec += host_rusage2.ru_utime.tv_sec;
+	host_rusage.ru_utime.tv_usec += host_rusage2.ru_utime.tv_usec;
+	host_rusage.ru_stime.tv_sec += host_rusage2.ru_stime.tv_sec;
+	host_rusage.ru_stime.tv_usec += host_rusage2.ru_stime.tv_usec;
+	host_rusage.ru_maxrss += host_rusage2.ru_maxrss;
+	host_rusage.ru_ixrss += host_rusage2.ru_ixrss;
+	host_rusage.ru_idrss += host_rusage2.ru_idrss;
+	host_rusage.ru_isrss += host_rusage2.ru_isrss;
+	host_rusage.ru_minflt += host_rusage2.ru_minflt;
+	host_rusage.ru_majflt += host_rusage2.ru_majflt;
+	host_rusage.ru_nswap += host_rusage2.ru_nswap;
+	host_rusage.ru_inblock += host_rusage2.ru_inblock;
+	host_rusage.ru_oublock += host_rusage2.ru_oublock;
+	host_rusage.ru_msgsnd += host_rusage2.ru_msgsnd;
+	host_rusage.ru_msgrcv += host_rusage2.ru_msgrcv;
+	host_rusage.ru_nsignals += host_rusage2.ru_nsignals;
+	host_rusage.ru_nvcsw += host_rusage2.ru_nvcsw;
+	host_rusage.ru_nivcsw += host_rusage2.ru_nivcsw;
+      }
+    }
+  }
+
+  if (status >= 0) {
+    target_rusage.ru_utime.tv_sec = H2T_4(host_rusage2.ru_utime.tv_sec);
+    target_rusage.ru_utime.tv_usec = H2T_4(host_rusage2.ru_utime.tv_usec);
+    target_rusage.ru_stime.tv_sec = H2T_4(host_rusage2.ru_stime.tv_sec);
+    target_rusage.ru_stime.tv_usec = H2T_4(host_rusage2.ru_stime.tv_usec);
+    target_rusage.ru_maxrss = H2T_4(host_rusage2.ru_maxrss);
+    target_rusage.ru_ixrss = H2T_4(host_rusage2.ru_ixrss);
+    target_rusage.ru_idrss = H2T_4(host_rusage2.ru_idrss);
+    target_rusage.ru_isrss = H2T_4(host_rusage2.ru_isrss);
+    target_rusage.ru_minflt = H2T_4(host_rusage2.ru_minflt);
+    target_rusage.ru_majflt = H2T_4(host_rusage2.ru_majflt);
+    target_rusage.ru_nswap = H2T_4(host_rusage2.ru_nswap);
+    target_rusage.ru_inblock = H2T_4(host_rusage2.ru_inblock);
+    target_rusage.ru_oublock = H2T_4(host_rusage2.ru_oublock);
+    target_rusage.ru_msgsnd = H2T_4(host_rusage2.ru_msgsnd);
+    target_rusage.ru_msgrcv = H2T_4(host_rusage2.ru_msgrcv);
+    target_rusage.ru_nsignals = H2T_4(host_rusage2.ru_nsignals);
+    target_rusage.ru_nvcsw = H2T_4(host_rusage2.ru_nvcsw);
+    target_rusage.ru_nivcsw = H2T_4(host_rusage2.ru_nivcsw);
+    emul_write_buffer((void *) &target_rusage, usage, sizeof(target_rusage), processor, cia);
+  }
+    
+  emul_write_status(processor, status, errno);
+}
+#endif
+
 
 /* Common code for initializing the system call stuff */
 
@@ -772,11 +958,6 @@ typedef	unsigned32	solaris_nlink_t;
 #ifdef HAVE_SYS_STAT_H
 #define	SOLARIS_ST_FSTYPSZ 16		/* array size for file system type name */
 
-typedef struct {
-  solaris_time_t	tv_sec;
-  signed32		tv_usec;
-} solaris_timestruc_t;
-
 struct solaris_stat {
   solaris_dev_t		st_dev;
   signed32		st_pad1[3];	/* reserved for network id */
@@ -789,9 +970,9 @@ struct solaris_stat {
   signed32		st_pad2[2];
   solaris_off_t		st_size;
   signed32		st_pad3;	/* future off_t expansion */
-  solaris_timestruc_t	st_atim;
-  solaris_timestruc_t	st_mtim;
-  solaris_timestruc_t	st_ctim;
+  struct unix_timeval	st_atim;
+  struct unix_timeval	st_mtim;
+  struct unix_timeval	st_ctim;
   signed32		st_blksize;
   signed32		st_blocks;
   char			st_fstype[SOLARIS_ST_FSTYPSZ];
@@ -1222,7 +1403,7 @@ static emul_syscall_descriptor solaris_descriptors[] = {
   /*  10 */ { do_unix_unlink, "unlink" },
   /*  11 */ { 0, "exec" },
   /*  12 */ { do_unix_chdir, "chdir" },
-  /*  13 */ { 0, "time" },
+  /*  13 */ { do_unix_time, "time" },
   /*  14 */ { 0, "mknod" },
   /*  15 */ { 0, "chmod" },
   /*  16 */ { 0, "chown" },
@@ -1366,7 +1547,7 @@ static emul_syscall_descriptor solaris_descriptors[] = {
   /* 153 */ { 0, "fchroot" },
   /* 154 */ { 0, "utimes" },
   /* 155 */ { 0, "vhangup" },
-  /* 156 */ { 0, "gettimeofday" },
+  /* 156 */ { do_unix_gettimeofday, "gettimeofday" },
   /* 157 */ { 0, "getitimer" },
   /* 158 */ { 0, "setitimer" },
   /* 159 */ { 0, "lwp_create" },
@@ -2152,7 +2333,7 @@ static emul_syscall_descriptor linux_descriptors[] = {
   /*  10 */ { do_unix_unlink, "unlink" },
   /*  11 */ { 0, "execve" },
   /*  12 */ { do_unix_chdir, "chdir" },
-  /*  13 */ { 0, "time" },
+  /*  13 */ { do_unix_time, "time" },
   /*  14 */ { 0, "mknod" },
   /*  15 */ { 0, "chmod" },
   /*  16 */ { 0, "chown" },
@@ -2216,8 +2397,8 @@ static emul_syscall_descriptor linux_descriptors[] = {
   /*  74 */ { 0, "sethostname" },
   /*  75 */ { 0, "setrlimit" },
   /*  76 */ { 0, "getrlimit" },
-  /*  77 */ { 0, "getrusage" },
-  /*  78 */ { 0, "gettimeofday" },
+  /*  77 */ { do_unix_getrusage, "getrusage" },
+  /*  78 */ { do_unix_gettimeofday, "gettimeofday" },
   /*  79 */ { 0, "settimeofday" },
   /*  80 */ { 0, "getgroups" },
   /*  81 */ { 0, "setgroups" },
