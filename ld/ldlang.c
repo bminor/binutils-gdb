@@ -603,10 +603,13 @@ static void
 init_os (s)
      lang_output_section_statement_type * s;
 {
-/*  asection *section = bfd_get_section_by_name(output_bfd, s->name);*/
-  section_userdata_type *new =
-  (section_userdata_type *)
-  stat_alloc (sizeof (section_userdata_type));
+  section_userdata_type *new;
+
+  if (strcmp (s->name, DISCARD_SECTION_NAME) == 0)
+    einfo ("%P%F: Illegal use of `%s' section", DISCARD_SECTION_NAME);
+
+  new = ((section_userdata_type *)
+	 stat_alloc (sizeof (section_userdata_type)));
 
   s->bfd_section = bfd_get_section_by_name (output_bfd, s->name);
   if (s->bfd_section == (asection *) NULL)
@@ -622,7 +625,6 @@ init_os (s)
   /* vma to allow us to output a section through itself */
   s->bfd_section->output_offset = 0;
   get_userdata (s->bfd_section) = (PTR) new;
-
 }
 
 /* The wild routines.
@@ -642,6 +644,18 @@ wild_doit (ptr, section, output, file)
      lang_output_section_statement_type *output;
      lang_input_statement_type *file;
 {
+  /* Input sections which are assigned to a section named
+     DISCARD_SECTION_NAME are discarded.  */
+  if (strcmp (output->name, DISCARD_SECTION_NAME) == 0)
+    {
+      if (section != NULL && section->output_section == NULL)
+	{
+	  /* This prevents future calls from assigning this section.  */
+	  section->output_section = bfd_abs_section_ptr;
+	}
+      return;
+    }
+
   if (output->bfd_section == NULL)
     init_os (output);
 
@@ -673,7 +687,7 @@ wild_doit (ptr, section, output, file)
       if (section->alignment_power > output->bfd_section->alignment_power)
 	output->bfd_section->alignment_power = section->alignment_power;
 
-      /* If supplied an aligment, then force it */
+      /* If supplied an aligment, then force it.  */
       if (output->section_alignment != -1)
 	output->bfd_section->alignment_power = output->section_alignment;
     }

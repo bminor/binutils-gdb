@@ -1,5 +1,12 @@
 Wed Mar 27 12:33:24 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ld.h (DISCARD_SECTION_NAME): Define to "/DISCARD/".
+	* ldlang.c (init_os): Fail on an attempt to initialize any section
+	named DISCARD_SECTION_NAME.
+	(wild_doit): Discard input sections assigned to an output section
+	named DISCARD_SECTION_NAME.
+	* ld.texinfo: Document use of /DISCARD/.
+
 	* ldlang.c: Fix some indentation and comments.
 
 Tue Mar 26 18:14:49 1996  Ian Lance Taylor  <ian@cygnus.com>

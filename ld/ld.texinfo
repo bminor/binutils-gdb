@@ -781,7 +781,6 @@ exist, @code{ld} looks for it in the directories specified by any
 preceding @samp{-L} options.  Multiple @samp{-T} options accumulate.
 
 @kindex -t
-@cindex verbose
 @cindex input files, displaying
 @item -t 
 Print the names of the input files as @code{ld} processes them.
@@ -824,10 +823,11 @@ be added to.  Use @samp{-Ur} only for the last partial link, and
 @samp{-r} for the others.
 
 @kindex --verbose
-@cindex version
+@cindex verbose
 @item --verbose
 Display the version number for @code{ld} and list the linker emulations
-supported.  Display which input files can and cannot be opened.
+supported.  Display which input files can and cannot be opened.  Display
+the linker script if using a default builtin script.
 
 @kindex -v
 @kindex -V
@@ -1758,6 +1758,10 @@ supplied as a quoted numeric string.  A section name may consist of any
 sequence of characters, but any name which does not conform to the standard
 @code{ld} symbol name syntax must be quoted.
 @xref{Symbols, , Symbol Names}.
+
+The special @var{secname} @samp{/DISCARD/} may be used to discard input
+sections.  Any sections which are assigned to an output section named
+@samp{/DISCARD/} are not included in the final link output.
 
 The linker will not create output sections which do not have any
 contents.  This is for convenience when referring to input sections that
