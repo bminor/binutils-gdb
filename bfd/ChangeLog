@@ -1,3 +1,37 @@
+Tue Oct  5 10:44:32 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* coff-rs6000.c, cpu-rs6000.c, rs6000-core.c: Change non-ASCII
+	characters in comment to octal escapes.
+
+Sun Oct  3 12:35:15 1993  Stan Shebs  (shebs@rtl.cygnus.com)
+
+	* coff-i386lynx.c: Removed, name too long.
+	* i386lynx-cf.c: New file, was coff-i386lynx.c.
+	* configure.in: Reflect file name changes.
+	* Makefile.in: Mention Lynx-related files.
+
+	* i386lynx.c (lynx_32_swap_ext_reloc_in): get reloc bits in i386
+	Lynx-specific way.
+
+	* m68klynx-cf.c: New file, defines coff format for M68K LynxOS.
+	* m68klynx.c: Remove coff vector definition, now in m68klynx-cf.c.
+
+	* coffcode.h (sec_to_styp_flags): Set section flag to STYP_INFO
+	for .stab, .stabstr and .debug sections, and set SEC_DEBUGGING for
+	sections of type STYP_INFO.  (from Minh Tran-Le)
+	(coff_compute_section_file_positions): Add discarded_sections_count
+	to abfd->section_count, which helps `strip' keep the size
+	of the executable header constant.
+	* coff-i386.c (discarded_sections_count): New variable, initialized
+	to zero.  For use by `strip'.  Currently being used only in aix386
+	coff, but may be useful for other coff systems.  (from Minh Tran-Le)
+
+	* coffswap.h (coff_swap_filehdr_out): Added a missing cast.
+
+	* archive.c: Cosmetic improvements.
+	* opncls.c: Cosmetic improvements.
+	(new_bfd): Removed redundant structure slot init.
+
 Sat Oct  2 18:48:17 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config/news-mips.mh, hosts/news-mips.h: New files.
