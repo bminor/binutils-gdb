@@ -1,3 +1,8 @@
+Fri Apr 19 15:03:49 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* remote-mips.c (encoding): Don't specify size, to avoid bug in
+	SunOS native compiler.
+
 Thu Apr 18 18:46:57 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* monitor.c: Use int rather than LONGEST for values, since

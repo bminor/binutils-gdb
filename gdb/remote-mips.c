@@ -2531,7 +2531,7 @@ mips_make_srec (buf, type, memaddr, myaddr, len)
    The encoding of numbers is done in 6bit fields.  The 6bit value is
    used to index into this string to get the specific character
    encoding for the value: */
-static char encoding[64] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789,.";
+static char encoding[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789,.";
 
 /* Convert the number of bits required into an encoded number, 6bits
    at a time (range 0..63).  Keep a checksum if required (passed
