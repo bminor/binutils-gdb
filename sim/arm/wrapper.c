@@ -47,7 +47,7 @@ static SIM_OPEN_KIND sim_kind;
 static char *myname;
 
 /* Memory size in bytes.  */
-static int mem_size = (1 << 21);
+static int mem_size = (1 << 23);
 
 /* Non-zero to display start up banner, and maybe other things.  */
 static int verbosity;
