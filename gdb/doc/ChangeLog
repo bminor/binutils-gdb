@@ -1,3 +1,9 @@
+Thu Oct  7 16:15:37 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.texinfo (Signaling): Update for symbolic symbol names
+	and add a section explaining the difference between the GDB
+	signal command and the shell kill utility.
+
 Wed Oct  6 13:23:01 1993  Tom Lord  (lord@rtl.cygnus.com)
 
 	* libgdb.texinfo: added `@' to braces that were unescaped.
