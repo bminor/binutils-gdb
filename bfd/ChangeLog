@@ -1,3 +1,8 @@
+2001-01-21  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
+
+	* Makefile.am (install-data-local): Make use of $(DESTDIR).
+	* Makefile.in: Regenerate.
+
 2001-01-21  Kazu Hirata  <kazu@hxi.com>
 
 	* coff-a29k.c: Fix formatting.
