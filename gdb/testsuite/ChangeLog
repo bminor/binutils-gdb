@@ -1,3 +1,11 @@
+Thu Apr 21 12:48:07 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t00/default.exp (set write): Allow any number of \r and/or
+	\n, not just one of each.
+
+	* gdb.t07/gdbme.c (main): Don't take address of an array; SunOS4
+	/bin/cc gives a warning if you do.
+
 Thu Apr 21 11:54:04 1994  Kung Hsu  (kung@mexican.cygnus.com)
 
 	* gdb.t24/demangle.exp: change expect pattern of 
