@@ -294,8 +294,9 @@ static int g_switch_seen = 0;
    better.
 
    This function can only provide a guess, but it seems to work for
-   gcc output.  If it guesses wrong, the only loss should be in
-   efficiency; it shouldn't introduce any bugs.
+   gcc output.  It needs to guess right for gcc, otherwise gcc
+   will put what it thinks is a GP-relative instruction in a branch
+   delay slot.
 
    I don't know if a fix is needed for the SVR4_PIC mode.  I've only
    fixed it for the non-PIC mode.  KR 95/04/07  */
@@ -10625,7 +10626,9 @@ nopic_need_relax (sym, before_relaxing)
 	  assert (strcmp (segname, ".lit8") != 0
 		  && strcmp (segname, ".lit4") != 0);
 	  change = (strcmp (segname, ".sdata") != 0
-		    && strcmp (segname, ".sbss") != 0);
+		    && strcmp (segname, ".sbss") != 0
+		    && strncmp (segname, ".sdata.", 7) != 0
+		    && strncmp (segname, ".gnu.linkonce.s.", 16) != 0);
 	}
       return change;
     }
