@@ -1,3 +1,7 @@
+2003-08-19  Shrinivas Atre <shrinivasa@kpitcummins.com>
+
+	* MAINTAINERS (write after approval): Add myself.
+	
 2003-08-18  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh (FRAME_RED_ZONE_SIZE): New architecture method.
