@@ -31,7 +31,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Local function prototypes. */
 
-static value_ptr value_headof PARAMS ((value, struct type *, struct type *));
+static value_ptr value_headof PARAMS ((value_ptr, struct type *,
+				       struct type *));
 
 static void show_values PARAMS ((char *, int));
 
