@@ -2014,7 +2014,7 @@
   State.regs[dstreg] = load_word (State.regs[REG_SP] + IMM8);
 }
 
-// 1111 1011 1001 1010 Rm 0000 IMM8; mov Rm,(d8,Rn)
+// 1111 1011 1001 1010 Rm 0000 IMM8; mov Rm,(d8,sp)
 8.0xfb+8.0x9a+4.RM2,4.0x0+8.IMM8:D2o:::mov
 "mov"
 *am33
@@ -2023,7 +2023,7 @@
 
   PC = cia;
   srcreg = translate_rreg (SD_, RM2);
-  store_word (State.regs[REG_SP] + EXTEND8 (IMM8), State.regs[srcreg]);
+  store_word (State.regs[REG_SP] + IMM8, State.regs[srcreg]);
 }
 
 // 1111 1011 1010 1010 Rn Rm IMM8; movbu (d8,sp),Rn
@@ -2038,7 +2038,7 @@
   State.regs[dstreg] = load_byte (State.regs[REG_SP] + IMM8);
 }
 
-// 1111 1011 1011 1010 Rn Rm IMM8; movbu Rm,(sp,Rn)
+// 1111 1011 1011 1010 Rn Rm IMM8; movbu Rm,(d8,sp)
 8.0xfb+8.0xba+4.RM2,4.0x0+8.IMM8:D2o:::movbu
 "movbu"
 *am33
@@ -2047,7 +2047,7 @@
 
   PC = cia;
   srcreg = translate_rreg (SD_, RM2);
-  store_byte (State.regs[REG_SP] + EXTEND8 (IMM8), State.regs[srcreg]);
+  store_byte (State.regs[REG_SP] + IMM8, State.regs[srcreg]);
 }
 
 // 1111 1011 1100 1010 Rn Rm IMM8; movhu (d8,sp),Rn
@@ -3624,7 +3624,7 @@
 	      State.regs[srcreg]);
 }
 
-// 1111 1101 1010 1010 Rn 0000 IMM24; movbu (d24,Rm),Rn
+// 1111 1101 1010 1010 Rn 0000 IMM24; movbu (d24,sp),Rn
 8.0xfd+8.0xaa+4.RN2,4.0x0+8.IMM24A+8.IMM24B+8.IMM24C:D4r:::movbu
 "movbu"
 *am33
@@ -3634,8 +3634,7 @@
   PC = cia;
   dstreg = translate_rreg (SD_, RN2);
   State.regs[dstreg] = load_byte (State.regs[REG_SP]
-				  + EXTEND24 (FETCH24 (IMM24A,
-						       IMM24B, IMM24C)));
+				  + FETCH24 (IMM24A, IMM24B, IMM24C));
 }
 
 // 1111 1101 1011 1010 Rm 0000 IMM24; movbu Rm,(d24,sp)

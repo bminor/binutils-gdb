@@ -1,3 +1,8 @@
+2000-05-22  Alexandre Oliva  <aoliva@cygnus.com>
+
+	* am33.igen: Fix leading comments of SP-relative offset insns that
+	referred to other registers.  Make their offsets unsigned.
+
 2000-05-18  Alexandre Oliva  <aoliva@cygnus.com>
 
 	* mn10300_sim.h (genericAdd, genericSub, genericCmp, genericOr,
