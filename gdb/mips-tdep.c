@@ -564,13 +564,23 @@ show_mask_address (char *cmd, int from_tty, struct cmd_list_element *c)
 }
 
 /* Should call_function allocate stack space for a struct return?  */
+
 int
-mips_use_struct_convention (int gcc_p, struct type *type)
+mips_eabi_use_struct_convention (int gcc_p, struct type *type)
 {
-  if (MIPS_EABI)
-    return (TYPE_LENGTH (type) > 2 * MIPS_SAVED_REGSIZE);
-  else
-    return 1;			/* Structures are returned by ref in extra arg0 */
+  return (TYPE_LENGTH (type) > 2 * MIPS_SAVED_REGSIZE);
+}
+
+int
+mips_n32n64_use_struct_convention (int gcc_p, struct type *type)
+{
+  return 1;	/* Structures are returned by ref in extra arg0.  */
+}
+
+int
+mips_o32_use_struct_convention (int gcc_p, struct type *type)
+{
+  return 1;	/* Structures are returned by ref in extra arg0.  */
 }
 
 /* Should call_function pass struct by reference? 
@@ -4519,6 +4529,8 @@ mips_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_long_long_bit (gdbarch, 64);
       set_gdbarch_reg_struct_has_addr (gdbarch, 
 				       mips_o32_reg_struct_has_addr);
+      set_gdbarch_use_struct_convention (gdbarch, 
+					 mips_o32_use_struct_convention);
       break;
     case MIPS_ABI_O64:
       tdep->mips_default_saved_regsize = 8;
@@ -4534,6 +4546,8 @@ mips_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_long_long_bit (gdbarch, 64);
       set_gdbarch_reg_struct_has_addr (gdbarch, 
 				       mips_o32_reg_struct_has_addr);
+      set_gdbarch_use_struct_convention (gdbarch, 
+					 mips_o32_use_struct_convention);
       break;
     case MIPS_ABI_EABI32:
       tdep->mips_default_saved_regsize = 4;
@@ -4549,6 +4563,8 @@ mips_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_long_long_bit (gdbarch, 64);
       set_gdbarch_reg_struct_has_addr (gdbarch, 
 				       mips_eabi_reg_struct_has_addr);
+      set_gdbarch_use_struct_convention (gdbarch, 
+					 mips_eabi_use_struct_convention);
       break;
     case MIPS_ABI_EABI64:
       tdep->mips_default_saved_regsize = 8;
@@ -4564,6 +4580,8 @@ mips_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_long_long_bit (gdbarch, 64);
       set_gdbarch_reg_struct_has_addr (gdbarch, 
 				       mips_eabi_reg_struct_has_addr);
+      set_gdbarch_use_struct_convention (gdbarch, 
+					 mips_eabi_use_struct_convention);
       break;
     case MIPS_ABI_N32:
       tdep->mips_default_saved_regsize = 8;
@@ -4588,6 +4606,9 @@ mips_gdbarch_init (struct gdbarch_info info,
 	tm_print_insn_info.mach = info.bfd_arch_info->mach;
       else
 	tm_print_insn_info.mach = bfd_mach_mips8000;
+
+      set_gdbarch_use_struct_convention (gdbarch, 
+					 mips_n32n64_use_struct_convention);
       set_gdbarch_reg_struct_has_addr (gdbarch, 
 				       mips_n32n64_reg_struct_has_addr);
       break;
@@ -4614,6 +4635,9 @@ mips_gdbarch_init (struct gdbarch_info info,
 	tm_print_insn_info.mach = info.bfd_arch_info->mach;
       else
 	tm_print_insn_info.mach = bfd_mach_mips8000;
+
+      set_gdbarch_use_struct_convention (gdbarch, 
+					 mips_n32n64_use_struct_convention);
       set_gdbarch_reg_struct_has_addr (gdbarch, 
 				       mips_n32n64_reg_struct_has_addr);
       break;

@@ -1,5 +1,13 @@
 2002-08-06  Michael Snyder  <msnyder@redhat.com>
 
+	* config/mips/tm-mips.h: Remove #define USE_STRUCT_CONVENTION.
+	* mips-tdep.c (mips_EABI_use_struct_convention, 
+	mips_OABI_use_struct_convention, mips_NABI_use_struct_convention):
+	New functions.  (mips_use_struct_convention): Delete.
+	(mips_gdbarch_init): set use_gdbarch_convention.
+
+2002-08-06  Michael Snyder  <msnyder@redhat.com>
+
 	*  mips-tdep.c: gdbarch-ify reg_struct_has_addr.
 	(mips_eabi_reg_struct_has_addr, mips_n32n64_reg_struct_has_addr, 
 	mips_o32_reg_struct_has_addr): New functions.
