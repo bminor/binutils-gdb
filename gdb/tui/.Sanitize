@@ -23,6 +23,7 @@ Do-first:
 
 Things-to-keep:
 
+ChangeLog
 Makefile.in
 tui.c
 tui.h
