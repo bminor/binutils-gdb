@@ -1,3 +1,18 @@
+2004-02-15  Mark Kettenis  <kettenis@gnu.org>
+
+	* dwarf2-frame.h (dwarf2_frame_set_init_reg): New prototype.
+	* dwarf2-frame.c (dwarf2_frame_data): New variable.
+	(struct dwarf2_frame_ops): New.
+	(dwarf2_frame_default_init_reg): New function, based on
+	dwarf2_frame_init_reg.
+	(dwarf2_frame_init, dwarf2_frame_set_init_reg): New function.
+	(dwarf2_frame_init_reg): Call architecture-specific function.
+	(dwarf2_frame_objfile_data): Renamed from dwarf2_frame_data.
+	(dwarf2_frame_find_fde, add_fde): Use dwarf2_frame_objfile_data
+	instead of dwarf2_frame_data.
+	(_initialize_dwarf2_frame): Initailize new dwarf2_frame_data.
+	Initialize dwarf2_frame_objfile instead of old dwarf2_frame_data.
+
 2004-02-15  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh (deprecated_register_gdbarch_swap): Rename
