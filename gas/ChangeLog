@@ -1,3 +1,10 @@
+2000-04-02  Richard Henderson  <rth@cygnus.com>
+
+	* config/tc-d30v.c (check_range): Allow signed or unsigned 32-bit
+	quantities.  Correct right shift sign extension.
+	(build_insn): Make `number' unsigned long.  Mask top 6 bits of
+	32-bit value when shifting into place.
+
 2000-04-01  Ian Lance Taylor  <ian@zembu.com>
 
 	* app.c: Add ATTRIBUTE_UNUSED as needed.

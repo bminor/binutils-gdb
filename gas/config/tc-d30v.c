@@ -241,11 +241,19 @@ check_range (num, bits, flags)
      int flags;
 {
   long min, max;
-  int retval=0;
 
-  /* don't bother checking 32-bit values */
-  if (bits == 32 && sizeof(unsigned long) * CHAR_BIT == 32)
-    return 0;
+  /* Don't bother checking 32-bit values.  */
+  if (bits == 32)
+    {
+      if (sizeof(unsigned long) * CHAR_BIT == 32)
+        return 0;
+
+      /* We don't record signed or unsigned for 32-bit quantities.
+	 Allow either.  */
+      min = -((unsigned long)1 << (bits - 1));
+      max = ((unsigned long)1 << bits) - 1;
+      return (long)num < min || (long)num > max;
+    }
 
   if (flags & OPERAND_SHIFT)
     {
@@ -254,7 +262,7 @@ check_range (num, bits, flags)
       if (flags & OPERAND_SIGNED)
 	num = (unsigned long) ( (long) num >= 0) 
 		? ( ((long) num) >> 3 )
-		: ( (num >> 3) | ((unsigned long)-1 << (32 - 3)) );
+		: ( (num >> 3) | ~(~(unsigned long)0 >> 3) );
       else
 	num >>= 3;
     }
@@ -263,18 +271,14 @@ check_range (num, bits, flags)
     {
       max = ((unsigned long)1 << (bits - 1)) - 1; 
       min = - ((unsigned long)1 << (bits - 1));
-      if (((long)num > max) || ((long)num < min))
-	retval = 1;
+      return (long)num > max || (long)num < min;
     }
   else
     {
       max = ((unsigned long)1 << bits) - 1;
       min = 0;
-      if ((num > max) || (num < min))
-	retval = 1;
+      return num > max || num < min;
     }
-  
-  return retval;
 }
 
 
@@ -578,7 +582,7 @@ build_insn (opcode, opers)
      expressionS *opers;
 {
   int i, length, bits, shift, flags;
-  unsigned int number, id=0;
+  unsigned long number, id=0;
   long long insn;
   struct d30v_opcode *op = opcode->op;
   struct d30v_format *form = opcode->form;
@@ -653,10 +657,10 @@ build_insn (opcode, opers)
       if (bits == 32)
 	{
 	  /* it's a LONG instruction */
-	  insn |= (number >> 26);	/* top 6 bits */
+	  insn |= ((number & 0xffffffff) >> 26);	/* top 6 bits */
 	  insn <<= 32;			/* shift the first word over */
-	  insn |= ((number & 0x03FC0000) << 2);  /* next 8 bits */ 
-	  insn |= number & 0x0003FFFF;		/* bottom 18 bits */
+	  insn |= ((number & 0x03FC0000) << 2);		/* next 8 bits */ 
+	  insn |= number & 0x0003FFFF;			/* bottom 18 bits */
 	}
       else
 	insn |= number << shift;
