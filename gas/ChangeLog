@@ -1,5 +1,14 @@
 Tue Feb  8 16:00:25 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
+	* config/obj-coff.c (coff_frob_symbol): For abs_symbol, set *punt
+	and do nothing else.
+
+	* symbols.c (symbol_begin): Initialize value of abs_symbol
+	properly.
+
+	* write.c (adjust_reloc_syms): Use abs_symbol instead of calling
+	section_symbol.
+
 	* ecoff.c (ecoff_build_debug): Fix "/*" in comment to silence
 	complaint from "gcc -Wall".
 
