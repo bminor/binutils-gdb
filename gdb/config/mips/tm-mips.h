@@ -114,11 +114,8 @@ extern int in_sigtramp PARAMS ((CORE_ADDR, char *));
 #define INNER_THAN <
 
 #define BIG_ENDIAN 4321
-#if TARGET_BYTE_ORDER == BIG_ENDIAN
-#define BREAKPOINT {0, 0x5, 0, 0xd}
-#else
-#define BREAKPOINT {0xd, 0, 0x5, 0}
-#endif
+#define BIG_BREAKPOINT {0, 0x5, 0, 0xd}
+#define LITTLE_BREAKPOINT {0xd, 0, 0x5, 0}
 
 /* Amount PC must be decremented by after a breakpoint.
    This is often the number of bytes in BREAKPOINT
