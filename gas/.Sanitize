@@ -55,6 +55,8 @@ debug.c
 doc
 ecoff.c
 ecoff.h
+emul-target.h
+emul.h
 expr.c
 expr.h
 flonum-copy.c

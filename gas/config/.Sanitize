@@ -45,6 +45,8 @@ atof-ieee.c
 atof-tahoe.c
 atof-vax.c
 go32.cfg
+e-mipsecoff.c
+e-mipself.c
 i386coff.mt
 m68kcoff.mt
 m88k-opcode.h
@@ -67,6 +69,8 @@ obj-hp300.c
 obj-hp300.h
 obj-ieee.c
 obj-ieee.h
+obj-multi.c
+obj-multi.h
 obj-som.c
 obj-som.h
 obj-vms.c
@@ -128,6 +132,7 @@ te-ic960.h
 te-linux.h
 te-lynx.h
 te-mach.h
+te-multi.h
 te-nbsd.h
 te-nbsd532.h
 te-pc532mach.h
