@@ -63,6 +63,7 @@ static int mips_output_flavor () { return OUTPUT_FLAVOR; }
 #endif
 
 #ifndef ECOFF_DEBUGGING
+#define NO_ECOFF_DEBUGGING
 #define ECOFF_DEBUGGING 0
 #endif
 
@@ -128,6 +129,9 @@ static int mips_4650 = -1;
 
 /* Whether the 4010 instructions are permitted.  */
 static int mips_4010 = -1;
+
+/* Whether the 4100 MADD16 and DMADD16 are permitted. */
+static int mips_4100 = -1;
 
 /* Whether the processor uses hardware interlocks, and thus does not
    require nops to be inserted.  */
@@ -377,9 +381,13 @@ static void append_insn PARAMS ((char *place,
 				 bfd_reloc_code_real_type r));
 static void mips_no_prev_insn PARAMS ((void));
 static void mips_emit_delays PARAMS ((void));
+#ifdef USE_STDARG
 static void macro_build PARAMS ((char *place, int *counter, expressionS * ep,
 				 const char *name, const char *fmt,
 				 ...));
+#else
+static void macro_build ();
+#endif
 static void macro_build_lui PARAMS ((char *place, int *counter,
 				     expressionS * ep, int regnum));
 static void set_at PARAMS ((int *counter, int reg, int unsignedp));
@@ -496,15 +504,6 @@ static const pseudo_typeS mips_nonecoff_pseudo_table[] = {
   { 0 },
 };
 
-static const pseudo_typeS mips_elf_pseudo_table[] = {
-  /* Redirect additional ELF data allocation pseudo-ops.  */
-  {"2byte", s_cons, 2},
-  {"4byte", s_cons, 4},
-  {"8byte", s_cons, 8},
-  /* Sentinel.  */
-  {NULL}
-};
-
 extern void pop_insert PARAMS ((const pseudo_typeS *));
 
 void
@@ -513,8 +512,6 @@ mips_pop_insert ()
   pop_insert (mips_pseudo_table);
   if (! ECOFF_DEBUGGING)
     pop_insert (mips_nonecoff_pseudo_table);
-  if (OUTPUT_FLAVOR == bfd_target_elf_flavour)
-    pop_insert (mips_elf_pseudo_table);
 }
 
 static char *expr_end;
@@ -591,6 +588,20 @@ md_begin ()
 	  if (mips_4650 == -1)
 	    mips_4650 = 1;
 	}
+      else if (strcmp (cpu, "mips64vr4300") == 0)
+	{
+	  mips_isa = 3;
+	  if (mips_cpu == -1)
+	    mips_cpu = 4300;
+	}
+      else if (strcmp (cpu, "mips64vr4100") == 0)
+        {
+          mips_isa = 3;
+          if (mips_cpu == -1)
+            mips_cpu = 4100;
+          if (mips_4100 == -1)
+            mips_4100 = 1;
+        }
       else if (strcmp (cpu, "r4010") == 0)
 	{
 	  mips_isa = 2;
@@ -629,7 +640,10 @@ md_begin ()
   if (mips_4010 < 0)
     mips_4010 = 0;
 
-  if (mips_4650 || mips_4010)
+  if (mips_4100 < 0)
+    mips_4100 = 0;
+
+  if (mips_4650 || mips_4010 || mips_4100)
     interlocks = 1;
   else
     interlocks = 0;
@@ -958,7 +972,7 @@ append_insn (place, ip, address_expr, reloc_type)
 	{
 	  /* The previous instruction reads the LO register; if the
 	     current instruction writes to the LO register, we must
-	     insert two NOPS.  The R4650 has interlocks.  */
+	     insert two NOPS.  The R4650 and VR4100 have interlocks.  */
 	  if (! interlocks
 	      && (mips_optimize == 0
 		  || (pinfo & INSN_WRITE_LO)))
@@ -968,7 +982,7 @@ append_insn (place, ip, address_expr, reloc_type)
 	{
 	  /* The previous instruction reads the HI register; if the
 	     current instruction writes to the HI register, we must
-	     insert a NOP.  The R4650 has interlocks.  */
+	     insert a NOP.  The R4650 and VR4100 have interlocks.  */
 	  if (! interlocks
 	      && (mips_optimize == 0
 		  || (pinfo & INSN_WRITE_HI)))
@@ -980,9 +994,10 @@ append_insn (place, ip, address_expr, reloc_type)
 	 coprocessor instruction which requires a general coprocessor
 	 delay and then reading the condition codes 2) reading the HI
 	 or LO register and then writing to it (except on the R4650,
-	 which has interlocks).  If we are not already emitting a NOP
-	 instruction, we must check for these cases compared to the
-	 instruction previous to the previous instruction.  */
+	 and VR4100 which have interlocks).  If we are not already
+	 emitting a NOP instruction, we must check for these cases
+	 compared to the instruction previous to the previous
+	 instruction.  */
       if (nops == 0
 	  && ((mips_isa < 4
 	       && (prev_prev_insn.insn_mo->pinfo & INSN_COPROC_MOVE_DELAY)
@@ -1445,7 +1460,19 @@ macro_build (place, counter, ep, name, fmt, va_alist)
   assert (strcmp (name, insn.insn_mo->name) == 0);
 
   while (strcmp (fmt, insn.insn_mo->args) != 0
-	 || insn.insn_mo->pinfo == INSN_MACRO)
+	 || insn.insn_mo->pinfo == INSN_MACRO
+	 || ((insn.insn_mo->pinfo & INSN_ISA) == INSN_ISA2
+	     && mips_isa < 2)
+	 || ((insn.insn_mo->pinfo & INSN_ISA) == INSN_ISA3
+	     && mips_isa < 3)
+	 || ((insn.insn_mo->pinfo & INSN_ISA) == INSN_ISA4
+	     && mips_isa < 4)
+	 || ((insn.insn_mo->pinfo & INSN_ISA) == INSN_4650
+	     && ! mips_4650)
+	 || ((insn.insn_mo->pinfo & INSN_ISA) == INSN_4010
+	     && ! mips_4010)
+	 || ((insn.insn_mo->pinfo & INSN_ISA) == INSN_4100
+	     && ! mips_4100))
     {
       ++insn.insn_mo;
       assert (insn.insn_mo->name);
@@ -4186,6 +4213,10 @@ macro2 (ip)
       off = 3;
     ulwa:
       load_address (&icnt, AT, &offset_expr);
+      if (breg != 0)
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
+		     mips_isa < 3 ? "addu" : "daddu",
+		     "d,v,t", AT, AT, breg);
       if (byte_order == LITTLE_ENDIAN)
 	expr1.X_add_number = off;
       else
@@ -4203,6 +4234,10 @@ macro2 (ip)
     case M_ULH_A:
     case M_ULHU_A:
       load_address (&icnt, AT, &offset_expr);
+      if (breg != 0)
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
+		     mips_isa < 3 ? "addu" : "daddu",
+		     "d,v,t", AT, AT, breg);
       if (byte_order == BIG_ENDIAN)
 	expr1.X_add_number = 0;
       macro_build ((char *) NULL, &icnt, &expr1,
@@ -4271,6 +4306,10 @@ macro2 (ip)
       off = 3;
     uswa:
       load_address (&icnt, AT, &offset_expr);
+      if (breg != 0)
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
+		     mips_isa < 3 ? "addu" : "daddu",
+		     "d,v,t", AT, AT, breg);
       if (byte_order == LITTLE_ENDIAN)
 	expr1.X_add_number = off;
       else
@@ -4287,6 +4326,10 @@ macro2 (ip)
 
     case M_USH_A:
       load_address (&icnt, AT, &offset_expr);
+      if (breg != 0)
+	macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
+		     mips_isa < 3 ? "addu" : "daddu",
+		     "d,v,t", AT, AT, breg);
       if (byte_order == LITTLE_ENDIAN)
 	expr1.X_add_number = 0;
       macro_build ((char *) NULL, &icnt, &expr1, "sb", "t,o(b)", treg,
@@ -4341,7 +4384,7 @@ mips_ip (str, ip)
 
   insn_error = NULL;
 
-  for (s = str; islower (*s) || (*s >= '0' && *s <= '3') || *s == '.'; ++s)
+  for (s = str; islower (*s) || (*s >= '0' && *s <= '3') || *s == '6' || *s == '.'; ++s)
     continue;
   switch (*s)
     {
@@ -4383,7 +4426,9 @@ mips_ip (str, ip)
 	  || ((insn->pinfo & INSN_ISA) == INSN_4650
 	      && ! mips_4650)
 	  || ((insn->pinfo & INSN_ISA) == INSN_4010
-	      && ! mips_4010))
+	      && ! mips_4010)
+	  || ((insn->pinfo & INSN_ISA) == INSN_4100
+	      && ! mips_4100))
 	{
 	  if (insn + 1 < &mips_opcodes[NUMOPCODES]
 	      && strcmp (insn->name, insn[1].name) == 0)
@@ -5270,6 +5315,10 @@ struct option md_longopts[] = {
   {"m4010", no_argument, NULL, OPTION_M4010},
 #define OPTION_NO_M4010 (OPTION_MD_BASE + 16)
   {"no-m4010", no_argument, NULL, OPTION_NO_M4010},
+#define OPTION_M4100 (OPTION_MD_BASE + 17)
+  {"m4100", no_argument, NULL, OPTION_M4100},
+#define OPTION_NO_M4100 (OPTION_MD_BASE + 18)
+  {"no-m4100", no_argument, NULL, OPTION_NO_M4100},
 
 #define OPTION_CALL_SHARED (OPTION_MD_BASE + 7)
 #define OPTION_NON_SHARED (OPTION_MD_BASE + 8)
@@ -5360,6 +5409,16 @@ md_parse_option (c, arg)
 	  mips_cpu = -1;
 	else
 	  {
+	    int sv = 0;
+
+	    /* We need to cope with the various "vr" prefixes for the 4300
+	       processor.  */
+	    if (*p == 'v' || *p == 'V')
+	      {
+		sv = 1;
+		p++;
+	      }
+
 	    if (*p == 'r' || *p == 'R')
 	      p++;
 
@@ -5392,6 +5451,14 @@ md_parse_option (c, arg)
 		    || strcmp (p, "4k") == 0
 		    || strcmp (p, "4K") == 0)
 		  mips_cpu = 4000;
+		else if (strcmp (p, "4100") == 0)
+                  {
+                    mips_cpu = 4100;
+                    if (mips_4100 < 0)
+                      mips_4100 = 1;
+                  }
+		else if (strcmp (p, "4300") == 0)
+		  mips_cpu = 4300;
 		else if (strcmp (p, "4400") == 0)
 		  mips_cpu = 4400;
 		else if (strcmp (p, "4600") == 0)
@@ -5430,6 +5497,12 @@ md_parse_option (c, arg)
 		break;
 	      }
 
+	    if (sv && mips_cpu != 4300 && mips_cpu != 4100)
+	      {
+		as_bad ("ignoring invalid leading 'v' in -mcpu=%s switch", arg);
+		return 0;
+	      }
+
 	    if (mips_cpu == -1)
 	      {
 		as_bad ("invalid architecture -mcpu=%s", arg);
@@ -5453,6 +5526,14 @@ md_parse_option (c, arg)
 
     case OPTION_NO_M4010:
       mips_4010 = 0;
+      break;
+
+    case OPTION_M4100:
+      mips_4100 = 1;
+      break;
+
+    case OPTION_NO_M4100:
+      mips_4100 = 0;
       break;
 
     case OPTION_MEMBEDDED_PIC:
@@ -5532,10 +5613,14 @@ MIPS options:\n\
 -mips2, -mcpu=r6000	generate code for r6000\n\
 -mips3, -mcpu=r4000	generate code for r4000\n\
 -mips4, -mcpu=r8000	generate code for r8000\n\
+-mcpu=vr4300		generate code for vr4300\n\
 -m4650			permit R4650 instructions\n\
 -no-m4650		do not permit R4650 instructions\n\
 -m4010			permit R4010 instructions\n\
 -no-m4010		do not permit R4010 instructions\n\
+-m4100                  permit VR4100 instructions\n\
+-no-m4100		do not permit VR4100 instructions\n");
+  fprintf(stream, "\
 -O0			remove unneeded NOPs, do not swap branches\n\
 -O			remove unneeded NOPs and swap branches\n\
 --trap, --no-break	trap exception on div by 0 and mult overflow\n\
@@ -6105,8 +6190,10 @@ s_extern (x)
   size = get_absolute_expression ();
   S_SET_EXTERNAL (symbolP);
 
+#ifndef NO_ECOFF_DEBUGGING
   if (ECOFF_DEBUGGING)
     symbolP->ecoff_extern_size = size;
+#endif
 }
 
 static void
@@ -6543,8 +6630,11 @@ nopic_need_relax (sym)
 	      || strcmp (symname, "_gp_disp") == 0))
 	change = 1;
       else if (! S_IS_DEFINED (sym)
-	       && ((sym->ecoff_extern_size != 0
-		    && sym->ecoff_extern_size <= g_switch_value)
+	       && (0
+#ifndef NO_ECOFF_DEBUGGING
+		   || (sym->ecoff_extern_size != 0
+		       && sym->ecoff_extern_size <= g_switch_value)
+#endif
 		   || (S_GET_VALUE (sym) != 0
 		       && S_GET_VALUE (sym) <= g_switch_value)))
 	change = 0;
@@ -6801,6 +6891,7 @@ int
 mips_local_label (name)
      const char *name;
 {
+#ifndef NO_ECOFF_DEBUGGING
   if (ECOFF_DEBUGGING
       && mips_debug != 0
       && ! ecoff_debugging_seen)
@@ -6811,6 +6902,7 @@ mips_local_label (name)
          generate all local labels.  */
       return 0;
     }
+#endif
 
   /* Here it's OK to discard local labels.  */
 

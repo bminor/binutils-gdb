@@ -1,4 +1,14 @@
+Mon Oct 23 11:15:44 1995  James G. Smith  <jsmith@pasanda.cygnus.co.uk>
+
+	* config/tc-mips.c: Added mips_4100 control, and support for
+ 	accepting the 4100 as a MIPS architecture variant (md_begin,
+ 	macro_build, mips_ip, md_parse_option). Adding suitable
+ 	command-line OPTIONs, and updating the help text (md_show_usage).
+	
 Wed Oct 18 13:20:32 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* subsegs.c (subseg_begin): Only set absolute_frchain.fix_* when
+	BFD_ASSEMBLER is defined.
 
 	* Use one active frag and one obstack per frag chain:
 	* frags.c (frags): Variable deleted.
@@ -25,6 +35,7 @@ Wed Oct 18 13:20:32 1995  Ken Raeburn  <raeburn@cygnus.com>
 	frch_last and frag_now match on entry and exit.  Initialize
 	per-chain obstack, and under gcc, set required alignment to that
 	needed by fragS structure.
+
 	* write.c (chain_frchains_together_1): Verify fr_type is nonzero.
 
 	* stabs.c (get_stab_string_offset): Only copy input string if a
