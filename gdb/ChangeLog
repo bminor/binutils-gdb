@@ -1,3 +1,7 @@
+Fri Mar 18 19:11:15 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* utils.c (prompt_for_continue): Call readline, not gdb_readline.
+
 Fri Mar 18 10:25:55 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* dstread.c (record_minimal_symbol): New arg objfile.  Pass it to

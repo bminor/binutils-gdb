@@ -379,7 +379,7 @@ perror_with_name (string)
   /* I understand setting these is a matter of taste.  Still, some people
      may clear errno but not know about bfd_error.  Doing this here is not
      unreasonable. */
-  bfd_error = no_error;
+  bfd_set_error (bfd_error_no_error);
   errno = 0;
 
   error ("%s.", combined);
@@ -764,6 +764,21 @@ print_spaces (n, file)
     fputc (' ', file);
 }
 
+/* Print a host address.  */
+
+void
+gdb_print_address (addr, stream)
+     PTR addr;
+     GDB_FILE *stream;
+{
+
+  /* We could use the %p conversion specifier to fprintf if we had any
+     way of knowing whether this host supports it.  But the following
+     should work on the Alpha and on 32 bit machines.  */
+
+  fprintf_filtered (stream, "0x%lx", (unsigned long)addr);
+}
+
 /* Ask user a y-or-n question and return 1 iff answer is yes.
    Takes three args which are given to printf to print the question.
    The first, a control string, should end in "? ".
@@ -1018,7 +1033,7 @@ prompt_for_continue ()
      the prompt is more user-friendly than expecting them to think of
      SIGINT.  */
   ignore =
-    gdb_readline ("---Type <return> to continue, or q <return> to quit---");
+    readline ("---Type <return> to continue, or q <return> to quit---");
   if (ignore)
     {
       char *p = ignore;
