@@ -1,4 +1,4 @@
-#as: -32
+#as: -32 -mips1
 #objdump: -dr
 
 .*: +file format .*mips

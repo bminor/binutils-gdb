@@ -1,3 +1,7 @@
+2005-03-03  Richard Sandiford  <rsandifo@redhat.com>
+
+	* gas/mips/noat-1.d: Add -mips1 to assembler options.
+
 2005-03-03  Ramana Radhakrishnan  <ramana.radhakrishnan@codito.com>
 
 	* gas/arc/ld.s:Add checks for short immediates with ld
