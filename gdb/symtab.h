@@ -170,6 +170,8 @@ extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, asection *);
 #define SYMBOL_INIT_DEMANGLED_NAME(symbol,obstack)			\
   do {									\
     char *demangled = NULL;						\
+    if (SYMBOL_LANGUAGE (symbol) == language_unknown)                 \
+          SYMBOL_LANGUAGE (symbol) = language_auto;                    \
     if (SYMBOL_LANGUAGE (symbol) == language_cplus			\
 	|| SYMBOL_LANGUAGE (symbol) == language_auto)			\
       {									\
@@ -221,10 +223,6 @@ extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, asection *);
 	  {								\
 	    SYMBOL_CHILL_DEMANGLED_NAME (symbol) = NULL;		\
 	  }								\
-      }									\
-    if (SYMBOL_LANGUAGE (symbol) == language_auto)			\
-      {									\
-	SYMBOL_LANGUAGE (symbol) = language_unknown;			\
       }									\
   } while (0)
 
@@ -1047,13 +1045,9 @@ struct partial_symtab
 #define VTBL_FNADDR_OFFSET 2
 
 /* Macro that yields non-zero value iff NAME is the prefix for C++ operator
-   names.  If you leave out the parenthesis here you will lose!
-   Currently 'o' 'p' CPLUS_MARKER is used for both the symbol in the
-   symbol-file and the names in gdb's symbol table.
-   Note that this macro is g++ specific (FIXME). */
-
+   names.  If you leave out the parenthesis here you will lose!  */
 #define OPNAME_PREFIX_P(NAME) \
-  ((NAME)[0] == 'o' && (NAME)[1] == 'p' && is_cplus_marker ((NAME)[2]))
+  (!strncmp (NAME, "operator", 8))
 
 /* Macro that yields non-zero value iff NAME is the prefix for C++ vtbl
    names.  Note that this macro is g++ specific (FIXME).

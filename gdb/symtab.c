@@ -303,6 +303,9 @@ gdb_mangle_name (struct type *type, int method_id, int signature_id)
   char buf[20];
   int len = (newname == NULL ? 0 : strlen (newname));
 
+  if (OPNAME_PREFIX_P (field_name))
+    return xstrdup (physname);
+
   is_full_physname_constructor =
     ((physname[0] == '_' && physname[1] == '_' &&
       (isdigit (physname[2]) || physname[2] == 'Q' || physname[2] == 't'))
@@ -338,25 +341,8 @@ gdb_mangle_name (struct type *type, int method_id, int signature_id)
       sprintf (buf, "__%s%s%d", const_prefix, volatile_prefix, len);
     }
   mangled_name_len = ((is_constructor ? 0 : strlen (field_name))
-		      + strlen (buf) + len
-		      + strlen (physname)
-		      + 1);
+		      + strlen (buf) + len + strlen (physname) + 1);
 
-  /* Only needed for GNU-mangled names.  ANSI-mangled names
-     work with the normal mechanisms.  */
-  if (OPNAME_PREFIX_P (field_name))
-    {
-      const char *opname = cplus_mangle_opname (field_name + 3, 0);
-      if (opname == NULL)
-	error ("No mangling for \"%s\"", field_name);
-      mangled_name_len += strlen (opname);
-      mangled_name = (char *) xmalloc (mangled_name_len);
-
-      strncpy (mangled_name, field_name, 3);
-      mangled_name[3] = '\0';
-      strcat (mangled_name, opname);
-    }
-  else
     {
       mangled_name = (char *) xmalloc (mangled_name_len);
       if (is_constructor)

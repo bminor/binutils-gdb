@@ -2,6 +2,16 @@
 
 	From Daniel Berlin <dberlin@redhat.com> :
 
+	* symtab.h (SYMBOL_INIT_DEMANGLED_NAME): Initialize the symbol
+ 	language to auto instead of unknown, so it will try to demangle
+ 	the symbol.
+	* symtab.h (OPNAME_PREFIX_P): Change operator prefix to correct value.
+	* symtab.c (gdb_mangle_name): Properly handle C++ operators.
+	
+2000-10-12  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	From Daniel Berlin <dberlin@redhat.com> :
+
 	* symtab.c (lookup_symbol_aux): New function. Renamed from
  	lookup_symbol. Move code to do demangling/case sensitivity to
  	lookup_symbol().
