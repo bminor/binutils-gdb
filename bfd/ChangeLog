@@ -1,3 +1,13 @@
+2004-01-12  Anil Paranjpe  <anilp1@KPITCummins.com>
+
+	Adds linker relaxation support for bit manipulation insns like
+	band, bclr, biand, bild, bior, bist, bixor, bld, bnot, bor, bset, 
+	bst, btst, bxor.
+	* elf32-h8300.c : Opcode for bit manipulation insn is checked in 
+	elf32_h8_relax_section function while relxation for aa:16 and aa:32.
+	* coff-h8300.c  : Opcode for bit manipulation insn is checked in 
+	h8300_reloc16_extra_cases function while relxation for aa:16 and aa:32.
+
 2004-01-12  Alan Modra  <amodra@bigpond.net.au>
 
 	* dwarf2.c: Convert to C90, remove unneeded casts and prototypes.
