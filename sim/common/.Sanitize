@@ -38,6 +38,7 @@ run.c
 run.1
 sim-assert.h
 sim-alu.h
+sim-base.h
 sim-basics.h
 sim-bits.c
 sim-bits.h
@@ -56,6 +57,7 @@ sim-n-bits.h
 sim-n-core.h
 sim-n-endian.h
 sim-types.h
+sim-utils.c
 sim-xcat.h
 tconfig.in
 
