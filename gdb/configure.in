@@ -728,6 +728,8 @@ tahoe-*-*)		gdb_target=tahoe ;;
 
 vax-*-*)		gdb_target=vax ;;
 
+v850-*-*)		gdb_target=v850 ;;
+
 w65-*-*)		gdb_target=w65 ;;
 
 z8k-*-coff*)		gdb_target=z8k ;;
