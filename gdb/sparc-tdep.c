@@ -834,7 +834,7 @@ sparc_pop_frame ()
 	write_register (O0_REGNUM + 7,
 			read_memory_integer (fsr.regs[O0_REGNUM + 7], 4));
 
-      write_register (SP_REGNUM, frame->frame, 4);
+      write_register (SP_REGNUM, frame->frame);
     }
   else if (fsr.regs[I0_REGNUM])
     {

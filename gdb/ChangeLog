@@ -1,3 +1,8 @@
+Sun Dec 18 11:52:58 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* sparc-tdep.c (sparc_pop_frame):  Remove erroneous extra argument
+	to write_register.
+
 Sat Dec 17 13:23:21 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* tm-sparc.c (EXTRA_FRAME_INFO): New field sp_offset.
