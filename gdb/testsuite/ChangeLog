@@ -1,3 +1,12 @@
+Mon Oct 18 21:50:08 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.disasm/hppa.exp: Use $objdir/$subdir/$binfile not just $binfile.
+
+Fri Oct 15 15:39:54 1993  Kung Hsu  (kung@cirdan.cygnus.com)
+
+	* gdb.t20/classes.exp: 'const xxx &' becomes 'xxx const &'.
+	* gdb.t20/inherit.exp: remove three dumplicate entries.
+
 Fri Oct 15 13:45:25 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* gdb.t06/break.exp: For "next over recursive call", fail on any
@@ -305,7 +314,7 @@ Wed Aug 11 12:09:32 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 Tue Aug 10 15:49:35 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
-	* gdb.t24/demangle.exp: Add lucid test for __vtbl__3foo__vt_cc_main_.
+	* gdb.t24/demangle.exp: Add lucid test for _vtbl__3foo__vt_cc_main_.
 
 Tue Aug 10 15:45:25 1993  Fred Fish  (fnf@deneb.cygnus.com)
 
