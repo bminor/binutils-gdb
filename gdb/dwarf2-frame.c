@@ -102,7 +102,7 @@ enum dwarf2_reg_rule
   /* Make certain that 0 maps onto the correct enum value; the
      corresponding structure is being initialized using memset zero.
      This indicates that CFI didn't provide any information at all
-     about a register, leaving how to obtain it's value totally
+     about a register, leaving how to obtain its value totally
      unspecified.  */
   REG_UNSPECIFIED = 0,
   /* The term "undefined" comes from the DWARF2 CFI spec which this

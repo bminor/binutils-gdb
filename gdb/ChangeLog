@@ -1,5 +1,7 @@
 2003-11-27  Mark Kettenis  <kettenis@gnu.org>
 
+	* dwarf2-frame.c: Fix another comment.
+
 	* x86-64-tdep.c (RET_INT_REGS, RET_SSE_REGS): Remove defines.
 	(x86_64_use_struct_convention, x86_64_extract_return_value,
 	x86_64_store_return_value): Remove.
