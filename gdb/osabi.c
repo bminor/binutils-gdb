@@ -593,8 +593,6 @@ _initialize_gdb_osabi (void)
 				  bfd_target_elf_flavour,
 				  generic_elf_osabi_sniffer);
 
-  return;
-
   /* Register the "set osabi" command.  */
   c = add_set_enum_cmd ("osabi", class_support, gdb_osabi_available_names,
 			&set_osabi_string, "Set OS ABI of target.", &setlist);

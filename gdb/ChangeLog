@@ -1,3 +1,8 @@
+2003-11-20  Jim Blandy  <jimb@redhat.com>
+
+	* osabi.c (_initialize_gdb_osabi): Don't return before registering
+	the 'set osabi' and 'show osabi' commands.
+
 2003-11-19  Mark Kettenis  <kettenis@gnu.org>
 
 	* frame.c (get_prev_frame): Use result from
