@@ -1,5 +1,17 @@
 2002-05-27  Nick Clifton  <nickc@cambridge.redhat.com>
 
+	* arsup.c: Fix formatting.
+	* debug.c (debug_record_label): Add missing colon to error
+	message.
+	* ieee.c (parse_ieee_ty): Fix spelling typo.
+	* readelf.c (process_program_headers): Remove English assumption
+	about making a plural word.
+	(process_section_headers): Likewise.
+	(process_relocs): Allow quotes to be translated.
+	(process_unwind): Likewise,
+	(process_mips_specific): Improve error message.
+	(get_note_type): Fix spelling typo.
+
 	* configure.in (ALL_LINGUAS): Add sv
 	* po/sv.po: New file.
 

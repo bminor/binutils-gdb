@@ -1,5 +1,5 @@
 /* debug.c -- Handle generic debugging information.
-   Copyright 1995, 1996, 1997, 1998, 2000 Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1997, 1998, 2000, 2002 Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>.
 
    This file is part of GNU Binutils.
@@ -1149,7 +1149,7 @@ debug_record_label (handle, name, type, addr)
      bfd_vma addr ATTRIBUTE_UNUSED;
 {
   /* FIXME.  */
-  debug_error (_("debug_record_label not implemented"));
+  debug_error (_("debug_record_label: not implemented"));
   return false;
 }
 

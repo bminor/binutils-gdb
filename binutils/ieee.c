@@ -1,5 +1,5 @@
 /* ieee.c -- Read and write IEEE-695 debugging information.
-   Copyright 1996, 1998, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1996, 1998, 2000, 2001, 2002 Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>.
 
    This file is part of GNU Binutils.
@@ -1916,7 +1916,7 @@ parse_ieee_ty (info, pp)
 	switch (kind)
 	  {
 	  default:
-	    ieee_error (info, ty_start, _("unsupported qualifer"));
+	    ieee_error (info, ty_start, _("unsupported qualifier"));
 	    return false;
 
 	  case 1:

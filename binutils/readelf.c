@@ -2764,8 +2764,10 @@ process_program_headers (file)
 
   if (do_segments)
     {
-      printf
-	(_("\nProgram Header%s:\n"), elf_header.e_phnum > 1 ? "s" : "");
+      if (elf_header.e_phnum > 1)
+	printf (_("\nProgram Headers:\n"));
+      else
+	printf (_("\nProgram Headers:\n"));
 
       if (is_32bit_elf)
 	printf
@@ -3342,7 +3344,10 @@ process_section_headers (file)
   if (! do_sections)
     return 1;
 
-  printf (_("\nSection Header%s:\n"), elf_header.e_shnum > 1 ? "s" : "");
+  if (elf_header.e_shnum > 1)
+    printf (_("\nSection Headers:\n"));
+  else
+    printf (_("\nSection Header:\n"));
 
   if (is_32bit_elf)
     printf
@@ -3548,7 +3553,7 @@ process_relocs (file)
 	      if (string_table == NULL)
 		printf ("%d", section->sh_name);
 	      else
-		printf ("'%s'", SECTION_NAME (section));
+		printf (_("'%s'"), SECTION_NAME (section));
 
 	      printf (_(" at offset 0x%lx contains %lu entries:\n"),
 		 rel_offset, (unsigned long) (rel_size / section->sh_entsize));
@@ -3981,7 +3986,7 @@ process_unwind (file)
 	  if (string_table == NULL)
 	    printf ("%d", unwsec->sh_name);
 	  else
-	    printf ("'%s'", SECTION_NAME (unwsec));
+	    printf (_("'%s'"), SECTION_NAME (unwsec));
 	}
       else
 	{
@@ -3995,7 +4000,7 @@ process_unwind (file)
 	  if (string_table == NULL)
 	    printf ("%d", unwsec->sh_name);
 	  else
-	    printf ("'%s'", SECTION_NAME (unwsec));
+	    printf (_("'%s'"), SECTION_NAME (unwsec));
 
 	  printf (_(" at offset 0x%lx contains %lu entries:\n"),
 		  (unsigned long) unwsec->sh_offset,
@@ -9227,7 +9232,7 @@ process_mips_specific (file)
 
       if (dynamic_symbols == NULL)
 	{
-	  error (_("conflict list with without table"));
+	  error (_("conflict list found without a dynamic symbol table"));
 	  return 0;
 	}
 
@@ -9310,7 +9315,7 @@ get_note_type (e_type)
     case NT_PSINFO:	return _("NT_PSINFO (psinfo structure)");
     case NT_LWPSTATUS:	return _("NT_LWPSTATUS (lwpstatus_t structure)");
     case NT_LWPSINFO:	return _("NT_LWPSINFO (lwpsinfo_t structure)");
-    case NT_WIN32PSTATUS: return _("NT_WIN32PSTATUS (win32_pstatus strcuture)");
+    case NT_WIN32PSTATUS: return _("NT_WIN32PSTATUS (win32_pstatus structure)");
     default:
       sprintf (buff, _("Unknown note type: (0x%08x)"), e_type);
       return buff;
