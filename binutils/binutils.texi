@@ -11,7 +11,7 @@ END-INFO-DIR-ENTRY
 @end ifinfo
 
 @ifinfo
-Copyright @copyright{} 1991 Free Software Foundation, Inc.
+Copyright @copyright{} 1991, 1992, 1993 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -39,7 +39,7 @@ into another language, under the above conditions for modified versions.
 @c This file documents the GNU binary utilities "ar", "ld", "objcopy",
 @c  "objdump", "nm", "size", "strip", and "ranlib".
 @c
-@c Copyright (C) 1991 Free Software Foundation, Inc.
+@c Copyright (C) 1991, 1992, 1993 Free Software Foundation, Inc.
 @c 
 @c This text may be freely distributed under the terms of the GNU
 @c General Public License.
@@ -54,7 +54,7 @@ into another language, under the above conditions for modified versions.
 @title The GNU Binary Utilities
 @subtitle Version 2.2
 @sp 1
-@subtitle April 1993
+@subtitle May 1993
 @author Roland H. Pesch
 @author Cygnus Support
 @page
@@ -67,7 +67,7 @@ into another language, under the above conditions for modified versions.
 @end tex
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1991 Free Software Foundation, Inc.
+Copyright @copyright{} 1991, 1992, 1993 Free Software Foundation, Inc.
 
 Permission is granted to make and distribute verbatim copies of
 this manual provided the copyright notice and this permission notice
@@ -1043,14 +1043,14 @@ archives, @samp{strip -v} lists all members of the archive.
 @cindex demangling C++ symbols
 
 The C++ language provides function overloading, which means that
-the user can write many function with the same name (but taking
+you can write many function with the same name (but taking
 different kinds of parameters).  So that the linker can keep these
 overloaded functions from clashing, all C++ function names are
-encoded ("mangled") into a funny-looking low-level assembly label.
+encoded (``mangled'') into a funny-looking low-level assembly label.
 The @code{c++filt} program does the inverse mapping:  It decodes
-("demangles") low-level names into user-level names.
+(``demangles'') low-level names into user-level names.
 
-When @code{c++filt} is used as a filter (which is usually the case),
+When you use @code{c++filt} as a filter (which is usually the case),
 it reads from standard input.  Every alphanumeric word (consisting
 of letters, digits, underscores, dollars, or periods) seen in the
 input is a potential label.  If the label decodes into a C++ name.
@@ -1059,10 +1059,10 @@ the C++ name will replace the low-level name in the output.
 A typical use of @code{c++filt} is to pipe the output of @code{nm}
 though it.
 
-Note that on some systems, both the C and C++ compilers prepend
-an underscore in front of every name.  (I.e. the C name @code{foo}
-gets the low-level name @code{_foo}.)  On such systems, @code{c++filt}
-will remove any initial underscore of a potential label.
+Note that on some systems, both the C and C++ compilers put an
+underscore in front of every name.  (I.e. the C name @code{foo} gets the
+low-level name @code{_foo}.)  On such systems, @code{c++filt} removes
+any initial underscore of a potential label.
 
 @node Index,  , c++filt, Top
 @unnumbered Index
