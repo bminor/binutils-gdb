@@ -1793,7 +1793,7 @@ check_stub_method_group (struct type *type, int method_id)
 {
   int len = TYPE_FN_FIELDLIST_LENGTH (type, method_id);
   struct fn_field *f = TYPE_FN_FIELDLIST1 (type, method_id);
-  int j, found_stub;
+  int j, found_stub = 0;
 
   for (j = 0; j < len; j++)
     if (TYPE_FN_FIELD_STUB (f, j))

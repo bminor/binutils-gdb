@@ -1,3 +1,8 @@
+2002-09-14  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdbtypes.c (check_stub_method_group): Initialize found_stub to
+	zero.
+
 2002-09-14  Corinna Vinschen  <vinschen@redhat.com>
 
 	* arch-utils.c (legacy_pc_in_sigtramp): Move preprocessor expression
