@@ -1,3 +1,16 @@
+Wed Jan  6 11:43:32 1999  David Taylor  <taylor@texas.cygnus.com>
+
+	The following changes were made by Elena Zannoni
+ 	<ezannoni@cygnus.com> and Edith Epstein <eepstein@cygnus.com> as
+ 	part of a project to merge in changes made by HP.
+
+	* c-exp.y: use external flag hp_som_som_object_present to decide
+ 	whether code was compiled by HP's compilers.  Add two new C++
+ 	tokens for true and false.
+        (yylex): check for template name is done differently for the
+ 	HP/aCC compiler case.  Change some of the template processing code
+ 	for handling HP aCC templates.  Handle true and false tokens.
+	
 Tue Jan  5 11:13:36 1999  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* remote.c (record_curthread): Must not modify inferior_pid when

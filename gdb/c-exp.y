@@ -49,6 +49,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "symfile.h" /* Required by objfiles.h.  */
 #include "objfiles.h" /* For have_full_symbols and have_partial_symbols */
 
+/* Flag indicating we're dealing with HP-compiled objects */ 
+extern int hp_som_som_object_present;
+
 /* Remap normal yacc parser interface names (yyparse, yylex, yyerror, etc),
    as well as gratuitiously global symbol names, so we can have multiple
    yacc generated parsers in gdb.  Note that these are only the variables
@@ -195,6 +198,9 @@ parse_number PARAMS ((char *, int, int, YYSTYPE *));
 
 /* C++ */
 %token THIS
+%token TRUEKEYWORD
+%token FALSEKEYWORD
+
 
 %left ','
 %left ABOVE_COMMA
@@ -289,6 +295,7 @@ exp	:	exp ARROW qualified_name
 			  write_exp_elt_opcode (UNOP_ADDR);
 			  write_exp_elt_opcode (STRUCTOP_MPTR); }
 	;
+
 exp	:	exp ARROW '*' exp
 			{ write_exp_elt_opcode (STRUCTOP_MPTR); }
 	;
@@ -526,6 +533,20 @@ exp	:	STRING
 exp	:	THIS
 			{ write_exp_elt_opcode (OP_THIS);
 			  write_exp_elt_opcode (OP_THIS); }
+	;
+
+exp     :       TRUEKEYWORD    
+                        { write_exp_elt_opcode (OP_LONG);
+                          write_exp_elt_type (builtin_type_bool);
+                          write_exp_elt_longcst ((LONGEST) 1);
+                          write_exp_elt_opcode (OP_LONG); }
+	;
+
+exp     :       FALSEKEYWORD   
+                        { write_exp_elt_opcode (OP_LONG);
+                          write_exp_elt_type (builtin_type_bool);
+                          write_exp_elt_longcst ((LONGEST) 0);
+                          write_exp_elt_opcode (OP_LONG); }
 	;
 
 /* end of C++.  */
@@ -822,6 +843,9 @@ typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
 			{ $$ = lookup_signed_typename (TYPE_NAME($2.type)); }
 	|	SIGNED_KEYWORD
 			{ $$ = builtin_type_int; }
+                /* It appears that this rule for templates is never
+                   reduced; template recognition happens by lookahead
+                   in the token processing code in yylex. */         
 	|	TEMPLATE name '<' type '>'
 			{ $$ = lookup_template_type(copy_name($2), $4,
 						    expression_context_block);
@@ -1163,8 +1187,14 @@ yylex ()
   int tempbufindex;
   static char *tempbuf;
   static int tempbufsize;
-  
+  struct symbol * sym_class = NULL;
+  char * token_string = NULL;
+  int class_prefix = 0;
+  int unquoted_expr;
+   
  retry:
+
+  unquoted_expr = 1;
 
   tokstart = lexptr;
   /* See if it is a special token of length 3.  */
@@ -1217,6 +1247,7 @@ yylex ()
 	  if (namelen > 2)
 	    {
 	      lexptr = tokstart + namelen;
+              unquoted_expr = 0;
 	      if (lexptr[-1] != '\'')
 		error ("Unmatched single quote.");
 	      namelen -= 2;
@@ -1405,23 +1436,38 @@ yylex ()
 	 FIXME: This mishandles `print $a<4&&$a>3'.  */
 
       if (c == '<')
-	{
-	  int i = namelen;
-	  int nesting_level = 1;
-	  while (tokstart[++i])
-	    {
-	      if (tokstart[i] == '<')
-		nesting_level++;
-	      else if (tokstart[i] == '>')
-		{
-		  if (--nesting_level == 0)
-		    break;
-		}
-	    }
-	  if (tokstart[i] == '>')
-	    namelen = i;
-	  else
-	    break;
+	{ 
+           if (hp_som_som_object_present)
+             {
+               /* Scan ahead to get rest of the template specification.  Note
+                  that we look ahead only when the '<' adjoins non-whitespace
+                  characters; for comparison expressions, e.g. "a < b > c",
+                  there must be spaces before the '<', etc. */
+               
+               char * p = find_template_name_end (tokstart + namelen);
+               if (p)
+                 namelen = p - tokstart;
+               break;
+             }
+           else
+             { 
+	       int i = namelen;
+	       int nesting_level = 1;
+	       while (tokstart[++i])
+		 {
+		   if (tokstart[i] == '<')
+		     nesting_level++;
+		   else if (tokstart[i] == '>')
+		     {
+		       if (--nesting_level == 0)
+			 break;
+		     }
+		 }
+	       if (tokstart[i] == '>')
+		 namelen = i;
+	       else
+		 break;
+	     }
 	}
       c = tokstart[++namelen];
     }
@@ -1460,9 +1506,13 @@ yylex ()
 	return DOUBLE_KEYWORD;
       break;
     case 5:
-      if (current_language->la_language == language_cplus
-	  && STREQN (tokstart, "class", 5))
-	return CLASS;
+      if (current_language->la_language == language_cplus)
+        {
+          if (STREQN (tokstart, "false", 5))
+            return FALSEKEYWORD;
+          if (STREQN (tokstart, "class", 5))
+            return CLASS;
+        }
       if (STREQN (tokstart, "union", 5))
 	return UNION;
       if (STREQN (tokstart, "short", 5))
@@ -1475,17 +1525,22 @@ yylex ()
 	return ENUM;
       if (STREQN (tokstart, "long", 4))
 	return LONG;
-      if (current_language->la_language == language_cplus
-	  && STREQN (tokstart, "this", 4))
-	{
-	  static const char this_name[] =
-				 { CPLUS_MARKER, 't', 'h', 'i', 's', '\0' };
+      if (current_language->la_language == language_cplus)
+          {
+            if (STREQN (tokstart, "true", 4))
+              return TRUEKEYWORD;
 
-	  if (lookup_symbol (this_name, expression_context_block,
-			     VAR_NAMESPACE, (int *) NULL,
-			     (struct symtab **) NULL))
-	    return THIS;
-	}
+            if (STREQN (tokstart, "this", 4))
+              {
+                static const char this_name[] =
+                { CPLUS_MARKER, 't', 'h', 'i', 's', '\0' };
+                
+                if (lookup_symbol (this_name, expression_context_block,
+                                   VAR_NAMESPACE, (int *) NULL,
+                                   (struct symtab **) NULL))
+                  return THIS;
+              }
+          }
       break;
     case 3:
       if (STREQN (tokstart, "int", 3))
@@ -1503,7 +1558,25 @@ yylex ()
       write_dollar_variable (yylval.sval);
       return VARIABLE;
     }
-
+  
+  /* Look ahead and see if we can consume more of the input
+     string to get a reasonable class/namespace spec or a
+     fully-qualified name.  This is a kludge to get around the
+     HP aCC compiler's generation of symbol names with embedded
+     colons for namespace and nested classes. */ 
+  if (unquoted_expr)
+    {
+      /* Only do it if not inside single quotes */ 
+      sym_class = parse_nested_classes_for_hpacc (yylval.sval.ptr, yylval.sval.length,
+                                                  &token_string, &class_prefix, &lexptr);
+      if (sym_class)
+        {
+          /* Replace the current token with the bigger one we found */ 
+          yylval.sval.ptr = token_string;
+          yylval.sval.length = strlen (token_string);
+        }
+    }
+  
   /* Use token-type BLOCKNAME for symbols that happen to be defined as
      functions or symtabs.  If this is not so, then ...
      Use token-type TYPENAME for symbols that happen to be defined
