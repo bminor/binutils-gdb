@@ -1,3 +1,8 @@
+Thu Jun 25 22:38:32 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* mips-tdep.c (mips_push_arguments): Use 128-bit stack frame
+	alignment for inferior calls.
+
 Wed Jun 24 23:17:12 1998  Mark Alexander  <marka@cygnus.com>
 
 	* mn10200-tdep.c (mn10200_analyze_prologue): Fix calculation
