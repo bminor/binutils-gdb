@@ -1,3 +1,29 @@
+Wed Nov 24 02:31:38 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ecoff.c (ecoff_setup_ext): Renamed from ecoff_build_ext.
+	Changed to not actually build the external symbol information, as
+	that is now done by the ECOFF back end.
+	(ecoff_build_debug): Changed accordingly.
+	* ecoff.h (obj_ecoff_set_ext): Declare.   obj-format.c function
+	called by ecoff_setup_ext.
+	* config/obj-ecoff.c (ecoff_frob_file): If debug_info count is 0,
+	set corresponding pointer to NULL.  Don't set raw_size and
+	raw_syments.
+	(obj_ecoff_set_sym_index): Removed.
+	(obj_ecoff_set_ext): New function.
+	* config/obj-ecoff.h (obj_set_sym_index): Don't define.
+	(obj_ecoff_set_sym_index): Don't declare.
+	* config/obj-elf.c (obj_ecoff_set_ext, elf_get_extr,
+	elf_set_index): New functions used for ECOFF_DEBUGGING.
+	(elf_frob_file): Reworked ECOFF debug generation to use
+	new functions in bfd/ecofflink.c.
+
+Sun Nov 21 23:54:52 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* config/tc-hppa.c (pa_def_subspaces): Only create the unwind
+	subspace for ELF.  In the SOM world, the linker is responsible
+	for creating the unwind subspaces.
+
 Fri Nov 19 16:25:09 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/obj-coffbfd.c: Use PARAMS rather than EXFUN.
