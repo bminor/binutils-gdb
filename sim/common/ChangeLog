@@ -1,3 +1,7 @@
+Tue Mar 18 12:44:55 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+	* sim-bits.h (LSMASK): New macro. Create mask of LS bits.
+
 Mon Mar 17 18:10:05 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
 
 	* sim-inline.h: Add definitions for sim-types.
