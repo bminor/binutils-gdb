@@ -1,3 +1,8 @@
+Tue Aug 10 16:57:49 1993  Stan Shebs  (shebs@rtl.cygnus.com)
+
+	* gdbint.texinfo: Removed many nonsensical machine-collected
+	host and target conditionals, described some of the remainder.
+
 Tue Aug 10 13:28:30 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdbint.texinfo (Getting Started): Use @itemize, not @table.
