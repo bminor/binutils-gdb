@@ -1,3 +1,11 @@
+2002-12-12  Daniel Jacobowitz  <drow@mvista.com>
+
+	* infrun.c (pending_follow): Remove saw_parent_fork, saw_child_fork,
+	and saw_child_exec.
+	(follow_fork, init_wait_for_inferior, handle_inferior_event): Remove
+	references to saw_parent_fork, saw_child_fork, and saw_child_exec.
+	(stop_stepping): Remove outdated check for child vfork events.
+
 2002-12-12  Andrew Cagney  <ac131313@redhat.com>
 
 	* GDB 5.3 released from gdb_5_3-branch.

@@ -355,10 +355,7 @@ static struct
   struct
   {
     int parent_pid;
-    int saw_parent_fork;
     int child_pid;
-    int saw_child_fork;
-    int saw_child_exec;
   }
   fork_event;
   char *execd_pathname;
@@ -392,9 +389,6 @@ follow_fork ()
 		      "follow_inferior_fork: \"ask\" mode not implemented");
       /* follow_mode = follow_fork_mode_...; */
     }
-
-  pending_follow.fork_event.saw_parent_fork = 0;
-  pending_follow.fork_event.saw_child_fork = 0;
 
   return target_follow_fork (follow_child);
 }
@@ -870,9 +864,6 @@ init_wait_for_inferior (void)
 
   /* The first resume is not following a fork/vfork/exec. */
   pending_follow.kind = TARGET_WAITKIND_SPURIOUS;	/* I.e., none. */
-  pending_follow.fork_event.saw_parent_fork = 0;
-  pending_follow.fork_event.saw_child_fork = 0;
-  pending_follow.fork_event.saw_child_exec = 0;
 
   /* See wait_for_inferior's handling of SYSCALL_ENTRY/RETURN events. */
   number_of_threads_in_syscalls = 0;
@@ -1338,7 +1329,6 @@ handle_inferior_event (struct execution_control_state *ecs)
       stop_signal = TARGET_SIGNAL_TRAP;
       pending_follow.kind = ecs->ws.kind;
 
-      pending_follow.fork_event.saw_child_fork = 1;
       pending_follow.fork_event.parent_pid = PIDGET (ecs->ptid);
       pending_follow.fork_event.child_pid = ecs->ws.value.related_pid;
 
@@ -1379,7 +1369,6 @@ handle_inferior_event (struct execution_control_state *ecs)
          triggers...) */
       if (ptid_equal (ecs->ptid, inferior_ptid))
 	{
-	  pending_follow.fork_event.saw_parent_fork = 1;
 	  pending_follow.fork_event.parent_pid = PIDGET (ecs->ptid);
 	  pending_follow.fork_event.child_pid = ecs->ws.value.related_pid;
 	}
@@ -1389,7 +1378,6 @@ handle_inferior_event (struct execution_control_state *ecs)
          Else, give any vfork catchpoints a chance to trigger now. */
       else
 	{
-	  pending_follow.fork_event.saw_child_fork = 1;
 	  pending_follow.fork_event.child_pid = PIDGET (ecs->ptid);
 	  pending_follow.fork_event.parent_pid = ecs->ws.value.related_pid;
 	  target_post_startup_inferior (pid_to_ptid
@@ -2820,30 +2808,6 @@ stop_stepping (struct execution_control_state *ecs)
 {
   if (target_has_execution)
     {
-      /* Are we stopping for a vfork event?  We only stop when we see
-         the child's event.  However, we may not yet have seen the
-         parent's event.  And, inferior_ptid is still set to the
-         parent's pid, until we resume again and follow either the
-         parent or child.
-
-         To ensure that we can really touch inferior_ptid (aka, the
-         parent process) -- which calls to functions like read_pc
-         implicitly do -- wait on the parent if necessary. */
-      if ((pending_follow.kind == TARGET_WAITKIND_VFORKED)
-	  && !pending_follow.fork_event.saw_parent_fork)
-	{
-	  ptid_t parent_ptid;
-
-	  do
-	    {
-	      if (target_wait_hook)
-		parent_ptid = target_wait_hook (pid_to_ptid (-1), &(ecs->ws));
-	      else
-		parent_ptid = target_wait (pid_to_ptid (-1), &(ecs->ws));
-	    }
-	  while (!ptid_equal (parent_ptid, inferior_ptid));
-	}
-
       /* Assuming the inferior still exists, set these up for next
          time, just like we did above if we didn't break out of the
          loop.  */
