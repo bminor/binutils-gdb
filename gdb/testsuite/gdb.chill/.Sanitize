@@ -46,6 +46,10 @@ gch981.ch
 gch981.exp
 gch1041.ch
 gch1041.exp
+gch1272.ch
+gch1272.exp
+gch1280.ch
+gch1280.exp
 misc.ch
 misc.exp
 powerset.ch
@@ -81,6 +85,8 @@ pr-8894-grt.ch
 pr-8894.exp
 pr-9095.ch
 pr-9095.exp
+pr-9946.ch
+pr-9946.exp
 result.ch
 result.exp
 string.ch

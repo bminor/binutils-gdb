@@ -1,3 +1,8 @@
+Wed Sep  4 07:30:44 1996  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
+
+	* gch1272.{ch,exp}, gch1280.{ch,exp}, pr-9946.{ch,exp}: 
+	New test cases.
+
 Sun Aug 18 13:29:48 1996  Fred Fish  <fnf@cygnus.com>
 
 	* tests2.exp: Remove mips-sgi-irix* setup_xfail for
