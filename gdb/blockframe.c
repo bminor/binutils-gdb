@@ -43,14 +43,6 @@
 
 void _initialize_blockframe (void);
 
-/* Test whether THIS_FRAME is inside the process entry point function.  */
-
-int
-inside_entry_func (struct frame_info *this_frame)
-{
-  return (get_frame_func (this_frame) == entry_point_address ());
-}
-
 /* Return the innermost lexical block in execution
    in a specified stack frame.  The frame address is assumed valid.
 

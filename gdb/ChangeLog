@@ -1,3 +1,13 @@
+2004-11-10  Randolph Chung  <tausq@debian.org>
+
+	* blockframe.c (inside_entry_func): Move to .....
+	* frame.c (inside_entry_func): ... here, and make static.
+	(backtrace_past_entry): New flag.
+	(get_prev_frame): Stop backtrace at the entry function if enabled
+	by flag.  Update comments.
+	(_initialize_frame): Add command to set backtrace_past_entry flag.
+	* defs.h (inside_entry_func): Remove prototype.
+
 2004-11-10  Mark Kettenis  <kettenis@gnu.org>
 
 	* dwarf2read.c: Fix formatting.

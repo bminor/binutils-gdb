@@ -4120,6 +4120,19 @@ default.
 @kindex show backtrace
 Display the current user entry point backtrace policy.
 
+@item set backtrace past-entry
+@itemx set backtrace past-entry on
+Backtraces will continue past the internal entry point of an application. 
+This entry point is encoded by the linker when the application is built,
+and is likely before the user entry point @code{main} (or equivalent) is called.
+
+@item set backtrace past-entry off
+Backtraces will stop when they encouter the internal entry point of an
+application.  This is the default.
+
+@item show backtrace past-entry
+Display the current internal entry point backtrace policy.
+
 @item set backtrace limit @var{n}
 @itemx set backtrace limit 0
 @cindex backtrace limit

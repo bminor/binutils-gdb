@@ -314,10 +314,6 @@ struct symtab;
 struct breakpoint;
 struct frame_info;
 
-/* From blockframe.c */
-
-extern int inside_entry_func (struct frame_info *this_frame);
-
 /* From utils.c */
 
 extern void initialize_utils (void);

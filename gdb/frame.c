@@ -115,6 +115,7 @@ static int frame_debug;
 /* Flag to indicate whether backtraces should stop at main et.al.  */
 
 static int backtrace_past_main;
+static int backtrace_past_entry;
 static unsigned int backtrace_limit = UINT_MAX;
 
 static void
@@ -1135,6 +1136,14 @@ inside_main_func (struct frame_info *this_frame)
   return maddr == get_frame_func (this_frame);
 }
 
+/* Test whether THIS_FRAME is inside the process entry point function.  */
+
+static int
+inside_entry_func (struct frame_info *this_frame)
+{
+  return (get_frame_func (this_frame) == entry_point_address ());
+}
+
 /* Return a structure containing various interesting information about
    the frame that called THIS_FRAME.  Returns NULL if there is entier
    no such frame or the frame fails any of a set of target-independent
@@ -1212,8 +1221,6 @@ get_prev_frame (struct frame_info *this_frame)
      dummy frame PCs typically land in the entry func.  Don't apply
      this test to the sentinel frame.  Sentinel frames should always
      be allowed to unwind.  */
-  /* NOTE: cagney/2003-02-25: Don't enable until someone has found
-     hard evidence that this is needed.  */
   /* NOTE: cagney/2003-07-07: Fixed a bug in inside_main_func() -
      wasn't checking for "main" in the minimal symbols.  With that
      fixed asm-source tests now stop in "main" instead of halting the
@@ -1226,13 +1233,12 @@ get_prev_frame (struct frame_info *this_frame)
      I guess) to determine the address range of the start function.
      That should provide a far better stopper than the current
      heuristics.  */
-  /* NOTE: cagney/2003-07-15: Need to add a "set backtrace
-     beyond-entry-func" command so that this can be selectively
-     disabled.  */
-  if (0
-#if 0
-      && backtrace_beyond_entry_func
-#endif
+  /* NOTE: tausq/2004-10-09: this is needed if, for example, the compiler
+     applied tail-call optimizations to main so that a function called 
+     from main returns directly to the caller of main.  Since we don't
+     stop at main, we should at least stop at the entry point of the
+     application.  */
+  if (!backtrace_past_entry
       && this_frame->unwind->type != DUMMY_FRAME && this_frame->level >= 0
       && inside_entry_func (this_frame))
     {
@@ -1527,6 +1533,17 @@ Normally the caller of \"main\" is not of interest, so GDB will terminate\n\
 the backtrace at \"main\".  Set this variable if you need to see the rest\n\
 of the stack trace.", "\
 Whether backtraces should continue past \"main\" is %s.",
+			   NULL, NULL, &set_backtrace_cmdlist,
+			   &show_backtrace_cmdlist);
+
+  add_setshow_boolean_cmd ("past-entry", class_obscure,
+			   &backtrace_past_entry, "\
+Set whether backtraces should continue past the entry point of a program.", "\
+Show whether backtraces should continue past the entry point of a program.", "\
+Normally there are no callers beyond the entry point of a program, so GDB\n\
+will terminate the backtrace there.  Set this variable if you need to see \n\
+the rest of the stack trace.", "\
+Whether backtraces should continue past the entry point is %s.",
 			   NULL, NULL, &set_backtrace_cmdlist,
 			   &show_backtrace_cmdlist);
 

@@ -1,3 +1,8 @@
+2004-11-10  Randolph Chung  <tausq@debian.org>
+
+	* gdb.texinfo: Document set/show backtrace past-entry commands.
+	Rearrange index entries for set/show backtrace past-main.
+
 2004-11-10  Jon Beniston <jon@beniston.com>
 
 	Committed by Andrew Cagney  <cagney@gnu.org>.
