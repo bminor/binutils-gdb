@@ -917,21 +917,24 @@ varobj_update (struct varobj *var, struct varobj ***changelist)
   /* Initialize a stack for temporary results */
   vpush (&result, NULL);
 
-  if (type_changed || !my_value_equal (var->value, new, &error2))
+  /* If this is a "use_selected_frame" varobj, and its type has changed,
+     them note that it's changed. */
+  if (type_changed)
     {
-      /* Note that it's changed   There a couple of exceptions here,
-         though. We don't want some types to be reported as 
-	 "changed". The exception to this is if this is a 
-	 "use_selected_frame" varobj, and its type has changed. */
-      if (type_changed || type_changeable (var))
-	{
-	  vpush (&result, var);
-	  changed++;
-	}
+      vpush (&result, var);
+      changed++;
     }
-  /* error2 replaces var->error since this new value
-     WILL replace the old one. */
-  var->error = error2;
+  /* If values are not equal, note that it's changed.
+     There a couple of exceptions here, though.
+     We don't want some types to be reported as "changed". */
+  else if (type_changeable (var) && !my_value_equal (var->value, new, &error2))
+    {
+      vpush (&result, var);
+      changed++;
+      /* error2 replaces var->error since this new value
+         WILL replace the old one. */
+      var->error = error2;
+    }
 
   /* We must always keep around the new value for this root
      variable expression, or we lose the updated children! */

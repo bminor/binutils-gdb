@@ -1,3 +1,9 @@
+2000-10-13  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* varobj.c (varobj_update): Prevent uninitialized error code to be
+	returned on type_changed.  Also, prevent value_equal() to be called
+	for the types we do not want to test for updates.
+
 2000-10-11  Fernando Nasser  <fnasser@totem.to.cygnus.com>
 
 	From Grant Edwards <grante@visi.com>
