@@ -1,3 +1,8 @@
+2002-04-25  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* MAINTAINERS: Reflect that multi-arch is enabled for VAX.
+	* NEWS: Ditto.
+
 2002-04-24  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* alpha-linux-tdep.c (alpha_linux_pc_in_sigtramp): New function.

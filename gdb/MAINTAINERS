@@ -165,7 +165,6 @@ maintainer works with the native maintainer when resolving API issues.
 
 	vax		--target=vax-dec-vms5.5 ,-Werror
 			Maintenance only
-			OBSOLETE candidate, not multi-arch
 
 	w65		Deleted.
 
