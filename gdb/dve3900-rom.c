@@ -23,8 +23,71 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "target.h"
 #include "monitor.h"
 #include "serial.h"
+#include "inferior.h"
+#include "command.h"
+#include "gdb_string.h"
+#include <time.h>
+
+/* Packet escape character used by Densan monitor.  */
+
+#define PESC 0xdc
+
+/* Maximum packet size.  This is actually smaller than necessary
+   just to be safe.  */
+
+#define MAXPSIZE 1024
+
+/* External functions.  */
+
+extern void report_transfer_performance PARAMS ((unsigned long,
+						 time_t, time_t));
+
+/* Certain registers are "bitmapped", in that the monitor can only display
+   them or let the user modify them as a series of named bitfields.
+   This structure describes a field in a bitmapped register.  */
+
+struct bit_field
+{
+  char *prefix;		/* string appearing before the value */
+  char *suffix;		/* string appearing after the value */
+  char *user_name;	/* name used by human when entering field value */
+  int  length;		/* number of bits in the field */
+  int  start;		/* starting (least significant) bit number of field */
+};
+        
+/* Local functions for register manipulation.  */
+
+static void r3900_supply_register PARAMS ((char *regname, int regnamelen,
+					   char *val, int vallen));
+static void fetch_bad_vaddr PARAMS ((void));
+static unsigned long fetch_fields PARAMS ((struct bit_field *bf));
+static void fetch_bitmapped_register PARAMS ((int regno,
+						   struct bit_field *bf));
+static void r3900_fetch_registers PARAMS ((int regno));
+static void store_bitmapped_register PARAMS ((int regno,
+						    struct bit_field *bf));
+static void r3900_store_registers PARAMS ((int regno));
+
+/* Local functions for fast binary loading.  */
+
+static void write_long PARAMS ((char *buf, long n));
+static void write_long_le PARAMS ((char *buf, long n));
+static int  debug_readchar PARAMS ((int hex));
+static void debug_write PARAMS ((unsigned char *buf, int buflen));
+static void ignore_packet PARAMS ((void));
+static void send_packet PARAMS ((char type, unsigned char *buf, int buflen,
+				 int seq));
+static void process_read_request PARAMS ((unsigned char *buf, int buflen));
+static void count_section PARAMS ((bfd *abfd, asection *s,
+				   unsigned int *section_count));
+static void load_section PARAMS ((bfd *abfd, asection *s,
+				  unsigned int *data_count));
+static void r3900_load PARAMS ((char *filename, int from_tty));
+
+/* Miscellaneous local functions.  */
 
 static void r3900_open PARAMS ((char *args, int from_tty));
+
 
 /* Pointers to static functions in monitor.c for fetching and storing
    registers.  We can't use these function in certain cases where the Densan
@@ -35,6 +98,14 @@ static void r3900_open PARAMS ((char *args, int from_tty));
 static void (*orig_monitor_fetch_registers) PARAMS ((int regno));
 static void (*orig_monitor_store_registers) PARAMS ((int regno));
 
+/* Pointer to static function in monitor. for loading programs.
+   We use this function for loading S-records via the serial link.  */
+
+static void (*orig_monitor_load) PARAMS ((char *file, int from_tty));
+
+/* This flag is set if a fast ethernet download should be used.  */
+
+static int ethernet = 0;
 
 /* This array of registers needs to match the indexes used by GDB. The
    whole reason this exists is because the various ROM monitors use
@@ -81,81 +152,6 @@ static struct reg_entry
 };
 
 
-/* The monitor prints register values in the form
-
-	regname = xxxx xxxx
-
-   We look up the register name in a table, and remove the embedded space in
-   the hex value before passing it to monitor_supply_register.  */
-
-static void
-r3900_supply_register (regname, regnamelen, val, vallen)
-     char *regname;
-     int regnamelen;
-     char *val;
-     int vallen;
-{
-  int regno = -1;
-  int i;
-  char valbuf[10];
-  char *p;
-
-  /* Perform some sanity checks on the register name and value.  */
-  if (regnamelen < 2 || regnamelen > 7 || vallen != 9)
-    return;
-
-  /* Look up the register name.  */
-  for (i = 0; reg_table[i].name != NULL; i++)
-    {
-      int rlen = strlen (reg_table[i].name);
-      if (rlen == regnamelen && strncmp (regname, reg_table[i].name, rlen) == 0)
-	{
-	  regno = reg_table[i].regno;
-	  break;
-	}
-    }
-  if (regno == -1)
-    return;
-
-  /* Copy the hex value to a buffer and eliminate the embedded space. */
-  for (i = 0, p = valbuf; i < vallen; i++)
-    if (val[i] != ' ')
-      *p++ = val[i];
-  *p = '\0';
-
-  monitor_supply_register (regno, valbuf);
-}
-
-/* Fetch the BadVaddr register.  Unlike the other registers, this
-   one can't be modified, and the monitor won't even prompt to let
-   you modify it.  */
-
-static void
-r3900_fetch_badvaddr()
-{
-  char buf[20];
-  int c;
-
-  monitor_printf ("xB\r");
-  monitor_expect ("BadV=", NULL, 0);
-  monitor_expect_prompt (buf, sizeof(buf));
-  monitor_supply_register (BADVADDR_REGNUM, buf);
-}
-
-    
-/* Certain registers are "bitmapped", in that the monitor can only display
-   them or let the user modify them as a series of named bitfields.
-   This structure describes a field in a bitmapped register.  */
-
-struct bit_field
-{
-  char *prefix;		/* string appearing before the value */
-  char *suffix;		/* string appearing after the value */
-  char *user_name;	/* name used by human when entering field value */
-  int  length;		/* number of bits in the field */
-  int  start;		/* starting (least significant) bit number of field */
-};
-        
 /* The monitor displays the cache register along with the status register,
    as if they were a single register.  So when we want to fetch the
    status register, parse but otherwise ignore the fields of the
@@ -231,15 +227,75 @@ static struct bit_field cause_fields[] =
 };
 
 
+/* The monitor prints register values in the form
+
+	regname = xxxx xxxx
+
+   We look up the register name in a table, and remove the embedded space in
+   the hex value before passing it to monitor_supply_register.  */
+
+static void
+r3900_supply_register (regname, regnamelen, val, vallen)
+     char *regname;
+     int regnamelen;
+     char *val;
+     int vallen;
+{
+  int regno = -1;
+  int i;
+  char valbuf[10];
+  char *p;
+
+  /* Perform some sanity checks on the register name and value.  */
+  if (regnamelen < 2 || regnamelen > 7 || vallen != 9)
+    return;
+
+  /* Look up the register name.  */
+  for (i = 0; reg_table[i].name != NULL; i++)
+    {
+      int rlen = strlen (reg_table[i].name);
+      if (rlen == regnamelen && strncmp (regname, reg_table[i].name, rlen) == 0)
+	{
+	  regno = reg_table[i].regno;
+	  break;
+	}
+    }
+  if (regno == -1)
+    return;
+
+  /* Copy the hex value to a buffer and eliminate the embedded space. */
+  for (i = 0, p = valbuf; i < vallen; i++)
+    if (val[i] != ' ')
+      *p++ = val[i];
+  *p = '\0';
+
+  monitor_supply_register (regno, valbuf);
+}
+
+/* Fetch the BadVaddr register.  Unlike the other registers, this
+   one can't be modified, and the monitor won't even prompt to let
+   you modify it.  */
+
+static void
+fetch_bad_vaddr()
+{
+  char buf[20];
+
+  monitor_printf ("xB\r");
+  monitor_expect ("BadV=", NULL, 0);
+  monitor_expect_prompt (buf, sizeof(buf));
+  monitor_supply_register (BADVADDR_REGNUM, buf);
+}
+
+    
 /* Read a series of bit fields from the monitor, and return their
    combined binary value.  */
 
 static unsigned long
-r3900_fetch_fields (bf)
+fetch_fields (bf)
      struct bit_field *bf;
 {
   char buf[20];
-  int c;
   unsigned long val = 0;
   unsigned long bits;
 
@@ -260,18 +316,15 @@ r3900_fetch_fields (bf)
 }
 
 static void
-r3900_fetch_bitmapped_register (regno, bf)
+fetch_bitmapped_register (regno, bf)
      int regno;
      struct bit_field *bf;
 {
-  char buf[20];
-  int c;
   unsigned long val;
-  unsigned long bits;
   unsigned char regbuf[MAX_REGISTER_RAW_SIZE];
 
   monitor_printf ("x%s\r", r3900_regnames[regno]);
-  val = r3900_fetch_fields (bf);
+  val = fetch_fields (bf);
   monitor_printf (".\r");
   monitor_expect_prompt (NULL, 0);
 
@@ -294,13 +347,13 @@ r3900_fetch_registers (regno)
   switch (regno)
     {
     case BADVADDR_REGNUM:
-      r3900_fetch_badvaddr ();
+      fetch_bad_vaddr ();
       return;
     case PS_REGNUM:
-      r3900_fetch_bitmapped_register (PS_REGNUM, status_fields);
+      fetch_bitmapped_register (PS_REGNUM, status_fields);
       return;
     case CAUSE_REGNUM:
-      r3900_fetch_bitmapped_register (CAUSE_REGNUM, cause_fields);
+      fetch_bitmapped_register (CAUSE_REGNUM, cause_fields);
       return;
     default:
       orig_monitor_fetch_registers (regno);
@@ -311,7 +364,7 @@ r3900_fetch_registers (regno)
 /* Write the new value of the bitmapped register to the monitor.  */
 
 static void
-r3900_store_bitmapped_register (regno, bf)
+store_bitmapped_register (regno, bf)
      int regno;
      struct bit_field *bf;
 {
@@ -319,7 +372,7 @@ r3900_store_bitmapped_register (regno, bf)
 
   /* Fetch the current value of the register.  */
   monitor_printf ("x%s\r", r3900_regnames[regno]);
-  oldval = r3900_fetch_fields (bf);
+  oldval = fetch_fields (bf);
   newval = read_register (regno);
 
   /* To save time, write just the fields that have changed.  */
@@ -348,31 +401,413 @@ r3900_store_registers (regno)
   switch (regno)
     {
     case PS_REGNUM:
-      r3900_store_bitmapped_register (PS_REGNUM, status_fields);
+      store_bitmapped_register (PS_REGNUM, status_fields);
       return;
     case CAUSE_REGNUM:
-      r3900_store_bitmapped_register (CAUSE_REGNUM, cause_fields);
+      store_bitmapped_register (CAUSE_REGNUM, cause_fields);
       return;
     default:
       orig_monitor_store_registers (regno);
     }
 }
 
-static void
-r3900_load (monops, filename, from_tty)
-     struct monitor_ops *monops;
-     char *filename;
-     int from_tty;
-{
-  extern int inferior_pid;
 
-  generic_load (filename, from_tty);
+/* Write a 4-byte integer to the buffer in big-endian order.  */
+
+static void
+write_long (buf, n)
+     char *buf;
+     long n;
+{
+  buf[0] = (n >> 24) & 0xff;
+  buf[1] = (n >> 16) & 0xff;
+  buf[2] = (n >> 8) & 0xff;
+  buf[3] = n & 0xff;
+}
+
+
+/* Write a 4-byte integer to the buffer in little-endian order.  */
+
+static void
+write_long_le (buf, n)
+     char *buf;
+     long n;
+{
+  buf[0] = n & 0xff;
+  buf[1] = (n >> 8) & 0xff;
+  buf[2] = (n >> 16) & 0xff;
+  buf[3] = (n >> 24) & 0xff;
+}
+
+
+/* Read a character from the monitor.  If remote debugging is on,
+   print the received character.  If HEX is non-zero, print the
+   character in hexadecimal; otherwise, print it in ascii.  */
+
+static int
+debug_readchar (hex)
+     int hex;
+{
+  char buf [10];
+  int c = monitor_readchar ();
+
+  if (remote_debug > 0)
+    {
+      if (hex)
+	sprintf (buf, "[%02x]", c & 0xff);
+      else if (c == '\0')
+	strcpy (buf, "\\0");
+      else 
+	{
+	  buf[0] = c;
+	  buf[1] = '\0';
+	}
+      puts_debug ("Read -->", buf, "<--");
+    }
+  return c;
+}
+
+
+/* Send a buffer of characters to the monitor.  If remote debugging is on,
+   print the sent buffer in hex.  */
+
+static void
+debug_write (buf, buflen)
+     unsigned char *buf;
+     int buflen;
+{
+  char s[10];
+
+  monitor_write (buf, buflen);
+
+  if (remote_debug > 0)
+    {
+      while (buflen-- > 0)
+	{
+	  sprintf (s, "[%02x]", *buf & 0xff);
+	  puts_debug ("Sent -->", s, "<--");
+	  buf++;
+	}
+    }
+}
+
+
+/* Ignore a packet sent to us by the monitor.  It send packets
+   when its console is in "communications interface" mode.   A packet
+   is of this form:
+
+      start of packet flag (one byte: 0xdc)
+      packet type (one byte)
+      length (low byte)
+      length (high byte)
+      data (length bytes)
+*/
+
+static void
+ignore_packet ()
+{
+  int c;
+  int len;  
+
+  /* Ignore lots of trash (messages about section addresses, for example)
+     until we see the start of a packet.  */
+  for (len = 0; len < 256; len++)
+    {
+      c = debug_readchar (0);
+      if (c == PESC)
+	break;
+    }
+  if (len == 8)
+    error ("Packet header byte not found; %02x seen instead.", c);
+
+  /* Read the packet type and length.  */
+  c = debug_readchar (1);			/* type */
+
+  c = debug_readchar (1);			/* low byte of length */
+  len = c & 0xff;
+
+  c = debug_readchar (1);			/* high byte of length */
+  len += (c & 0xff) << 8;
+
+  /* Ignore the rest of the packet.  */
+  while (len-- > 0)
+    c = debug_readchar (1);
+}
+
+
+/* Send a packet to the monitor.  */
+
+static void
+send_packet (type, buf, buflen, seq)
+     char type;
+     unsigned char *buf;
+     int buflen, seq;
+{
+  unsigned char hdr[4];
+  int len = buflen;
+  int sum, i;
+
+  /* If this is a 'p' packet, add one byte for a sequence number.  */
+  if (type == 'p')
+    len++;
+
+  /* If the buffer has a non-zero length, add two bytes for a checksum.  */
+  if (len > 0)
+    len += 2;
+
+  /* Write the packet header.  */
+  hdr[0] = PESC;
+  hdr[1] = type;
+  hdr[2] = len & 0xff;
+  hdr[3] = (len >> 8) & 0xff;
+  debug_write (hdr, sizeof (hdr));
+
+  if (len)
+    {
+      /* Write the packet data.  */
+      debug_write (buf, buflen);
+
+      /* Write the sequence number if this is a 'p' packet.  */
+      if (type == 'p')
+	{
+	  hdr[0] = seq;
+	  debug_write (hdr, 1);
+	}
+
+      /* Write the checksum.  */
+      sum = 0;
+      for (i = 0; i < buflen; i++)
+	{
+	  int tmp = (buf[i] & 0xff);
+	  if (i & 1)
+	    sum += tmp;
+	  else
+	    sum += tmp << 8;
+	}
+      if (type == 'p')
+        {
+	  if (buflen & 1)
+	    sum += (seq & 0xff);
+	  else
+	    sum += (seq & 0xff) << 8;
+	}
+      sum = (sum & 0xffff) + ((sum >> 16) & 0xffff);
+      sum += (sum >> 16) & 1;
+      sum = ~sum;  
+
+      hdr[0] = (sum >> 8) & 0xff;
+      hdr[1] = sum & 0xff;
+      debug_write (hdr, 2);
+    }
+}
+
+
+/* Respond to an expected read request from the monitor by sending
+   data in chunks.  Handle all acknowledgements and handshaking packets.  */
+
+static void
+process_read_request (buf, buflen)
+     unsigned char *buf;
+     int buflen;
+{
+  unsigned char len[4];
+  int i, chunk;
+  unsigned char seq;
+
+  /* Discard the read request.  We have to hope it's for
+     the exact number of bytes we want to send.  */
+  ignore_packet ();
+
+  for (i = chunk = 0, seq = 0; i < buflen; i += chunk, seq++)
+    {
+      /* Don't send more than 256 bytes at a time.  */
+      chunk = buflen - i;
+      if (chunk > MAXPSIZE)
+	chunk = MAXPSIZE;
+
+      /* Write a packet containing the number of bytes we are sending.  */
+      write_long_le (len, chunk);
+      send_packet ('p', len, sizeof (len), seq);
+
+      /* Write the data in raw form following the packet.  */
+      debug_write (&buf[i], chunk);
+
+      /* Discard the ACK packet.  */
+      ignore_packet ();
+    }
+
+  /* Send an "end of data" packet.  */
+  send_packet ('e', "", 0, 0);
+}
+
+
+/* Count loadable sections (helper function for r3900_load).  */
+
+static void
+count_section (abfd, s, section_count)
+     bfd      *abfd;
+     asection *s;
+     unsigned int *section_count;
+{
+  if (s->flags & SEC_LOAD && bfd_section_size (abfd, s) != 0)
+    (*section_count)++;
+}
+
+
+/* Load a single BFD section (helper function for r3900_load).
+
+   WARNING: this code is filled with assumptions about how
+   the Densan monitor loads programs.  The monitor issues
+   packets containing read requests, but rather than respond
+   to them in an general way, we expect them to following
+   a certain pattern.
+   
+   For example, we know that the monitor will start loading by
+   issuing an 8-byte read request for the binary file header.
+   We know this is coming and ignore the actual contents
+   of the read request packet.
+*/
+
+static void
+load_section (abfd, s, data_count)
+     bfd      *abfd;
+     asection *s;
+     unsigned int *data_count;
+{
+  if (s->flags & SEC_LOAD)
+    {
+      bfd_size_type section_size = bfd_section_size (abfd, s);
+      bfd_vma       section_base = bfd_section_lma  (abfd, s);
+      unsigned char *buffer;
+      unsigned char header[8];
+
+      /* Don't output zero-length sections.  */
+      if (section_size == 0)
+        return;
+      if (data_count)
+	*data_count += section_size;
+
+      /* Print some fluff about the section being loaded.  */
+      printf_filtered ("Loading section %s, size 0x%lx lma ",
+		       bfd_section_name (abfd, s), (long)section_size);
+      print_address_numeric (section_base, 1, gdb_stdout);
+      printf_filtered ("\n");
+      gdb_flush (gdb_stdout);
+
+      /* Write the section header (location and size).  */
+      write_long (&header[0], (long)section_base);
+      write_long (&header[4], (long)section_size);
+      process_read_request (header, sizeof (header));
+
+      /* Read the section contents into a buffer, write it out,
+         then free the buffer.  */
+      buffer = (unsigned char *) xmalloc (section_size);
+      bfd_get_section_contents (abfd, s, buffer, 0, section_size);
+      process_read_request (buffer, section_size);
+      free (buffer);
+  }
+}
+
+
+/* When the ethernet is used as the console port on the Densan board,
+   we can use the "Rm" command to do a fast binary load.  The format
+   of the download data is:
+
+	number of sections (4 bytes)
+	starting address (4 bytes)
+	repeat for each section:
+	    location address (4 bytes)
+	    section size (4 bytes)
+	    binary data
+
+   The 4-byte fields are all in big-endian order.
+
+   Using this command is tricky because we have to put the monitor
+   into a special funky "communications interface" mode, in which
+   it sends and receives packets of data along with the normal prompt.
+ */
+
+static void
+r3900_load (filename, from_tty) 
+    char *filename;
+    int from_tty;
+{
+  bfd *abfd;
+  unsigned int data_count = 0;
+  time_t start_time, end_time;	/* for timing of download */
+  int section_count = 0;
+  unsigned char buffer[8];
+
+  /* If we are not using the ethernet, use the normal monitor load,
+     which sends S-records over the serial link.  */
+  if (!ethernet)
+    {
+      orig_monitor_load (filename, from_tty);
+      return;
+    }
+
+  /* Open the file.  */
+  if (filename == NULL || filename[0] == 0)
+    filename = get_exec_file (1);
+  abfd = bfd_openr (filename, 0);
+  if (!abfd)
+    error ("Unable to open file %s\n", filename);
+  if (bfd_check_format (abfd, bfd_object) == 0)
+    error ("File is not an object file\n");
+
+  /* Output the "vconsi" command to get the monitor in the communication
+     state where it will accept a load command.  This will cause
+     the monitor to emit a packet before each prompt, so ignore the packet.  */
+  monitor_printf ("vconsi\r");
+  ignore_packet ();
+  monitor_expect_prompt (NULL, 0);
+
+  /* Output the "Rm" (load) command and respond to the subsequent "open"
+     packet by sending an ACK packet.  */
+  monitor_printf ("Rm\r");
+  ignore_packet ();
+  send_packet ('a', "", 0, 0);
+  
+  /* Output the fast load header (number of sections and starting address).  */
+  bfd_map_over_sections ((bfd *) abfd, count_section, &section_count);
+  write_long (&buffer[0], (long)section_count);
+  if (exec_bfd)
+    write_long (&buffer[4], (long)bfd_get_start_address (exec_bfd));
+  else
+    write_long (&buffer[4], 0);
+  process_read_request (buffer, sizeof (buffer));
+
+  /* Output the section data.  */
+  start_time = time (NULL);
+  bfd_map_over_sections (abfd, load_section, &data_count);
+  end_time = time (NULL);
+
+  /* Acknowledge the close packet and put the monitor back into
+     "normal" mode so it won't send packets any more.  */
+  ignore_packet ();
+  send_packet ('a', "", 0, 0);
+  monitor_expect_prompt (NULL, 0);
+  monitor_printf ("vconsx\r");
+  monitor_expect_prompt (NULL, 0);
+
+  /* Print download performance information.  */
+  printf_filtered ("Start address 0x%lx\n", (long)bfd_get_start_address (abfd));
+  report_transfer_performance (data_count, start_time, end_time);
 
   /* Finally, make the PC point at the start address */
   if (exec_bfd)
     write_pc (bfd_get_start_address (exec_bfd));
 
   inferior_pid = 0;             /* No process now */
+
+  /* This is necessary because many things were based on the PC at the
+     time that we attached to the monitor, which is no longer valid
+     now that we have loaded new code (and just changed the PC).
+     Another way to do this might be to call normal_stop, except that
+     the stack may not be valid, and things would get horribly
+     confused... */
+
+  clear_symtab_users ();
 }
 
 
@@ -381,6 +816,8 @@ static struct target_ops r3900_ops;
 /* Commands to send to the monitor when first connecting:
     * The bare carriage return forces a prompt from the monitor
       (monitor doesn't prompt after a reset).
+    * The "vconsx" switches the monitor back to interactive mode
+      in case an aborted download had left it in packet mode.
     * The "Xtr" command causes subsequent "t" (trace) commands to display
       the general registers only.
     * The "Xxr" command does the same thing for the "x" (examine
@@ -388,7 +825,8 @@ static struct target_ops r3900_ops;
     * The "bx" command clears all breakpoints.
 */
 
-static char *r3900_inits[] = {"\r", "Xtr\r", "Xxr\r", "bx\r", NULL};
+static char *r3900_inits[] = {"\r", "vconsx\r", "Xtr\r", "Xxr\r", "bx\r", NULL};
+static char *dummy_inits[] = { NULL };
 
 static struct monitor_ops r3900_cmds;
 
@@ -397,7 +835,32 @@ r3900_open (args, from_tty)
      char *args;
      int from_tty;
 {
+  char buf[64];
+  int i;
+
   monitor_open (args, &r3900_cmds, from_tty);
+
+  /* We have to handle sending the init strings ourselves, because
+     the first two strings we send (carriage returns) may not be echoed
+     by the monitor, but the rest will be.  */
+  monitor_printf_noecho ("\r\r");
+  for (i = 0; r3900_inits[i] != NULL; i++)
+    {
+      monitor_printf (r3900_inits[i]);
+      monitor_expect_prompt (NULL, 0);
+    }
+
+  /* Attempt to determine whether the console device is ethernet or serial.
+     This will tell us which kind of load to use (S-records over a serial
+     link, or the Densan fast binary multi-section format over the net).  */
+
+  ethernet = 0;
+  monitor_printf ("v\r");
+  if (monitor_expect ("console device :", NULL, 0) != -1)
+      if (monitor_expect ("\n", buf, sizeof (buf)) != -1)
+	if (strstr (buf, "ethernet") != NULL)
+	  ethernet = 1;
+  monitor_expect_prompt (NULL, 0);
 }
 
 void
@@ -408,7 +871,7 @@ _initialize_r3900_rom ()
 		     MO_CLR_BREAK_USES_ADDR |
 		     MO_PRINT_PROGRAM_OUTPUT;
 
-  r3900_cmds.init = r3900_inits;
+  r3900_cmds.init = dummy_inits;
   r3900_cmds.cont = "g\r";
   r3900_cmds.step = "t\r";
   r3900_cmds.set_break = "b %Lx\r";		/* COREADDR */
@@ -435,9 +898,6 @@ _initialize_r3900_rom ()
   r3900_cmds.supply_register = r3900_supply_register;
   /* S-record download, via "keyboard port".  */
   r3900_cmds.load = "r0\r";
-#if 0 /* FIXME - figure out how to get fast load to work */
-  r3900_cmds.load_routine = r3900_load;
-#endif
   r3900_cmds.prompt = "#";
   r3900_cmds.line_term = "\r";
   r3900_cmds.target = &r3900_ops;
@@ -461,6 +921,11 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   orig_monitor_store_registers = r3900_ops.to_store_registers;
   r3900_ops.to_fetch_registers = r3900_fetch_registers;
   r3900_ops.to_store_registers = r3900_store_registers;
+
+  /* Override the load function, but save the address of the default
+     function to use when loading S-records over a serial link.  */
+  orig_monitor_load = r3900_ops.to_load;
+  r3900_ops.to_load = r3900_load;
 
   add_target (&r3900_ops);
 }

@@ -217,5 +217,7 @@ extern void monitor_printf PARAMS ((char *, ...))
      ATTR_FORMAT(printf, 1, 2);
 extern void monitor_printf_noecho PARAMS ((char *, ...))
      ATTR_FORMAT(printf, 1, 2);
+extern void monitor_write PARAMS ((char *buf, int buflen));
+extern int monitor_readchar PARAMS ((void));
 extern char *monitor_get_dev_name PARAMS ((void));
 extern void init_monitor_ops PARAMS ((struct target_ops *));

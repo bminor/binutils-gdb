@@ -178,8 +178,7 @@ monitor_printf_noecho (va_alist)
   if (len + 1 > sizeof sndbuf)
     abort ();
 
-  if (SERIAL_WRITE(monitor_desc, sndbuf, len))
-    fprintf_unfiltered (stderr, "SERIAL_WRITE failed: %s\n", safe_strerror (errno));
+  monitor_write (sndbuf, len);
 }
 
 /* monitor_printf -- Send data to monitor and check the echo.  Works just like
@@ -215,8 +214,7 @@ monitor_printf (va_alist)
   if (len + 1 > sizeof sndbuf)
     abort ();
 
-  if (SERIAL_WRITE(monitor_desc, sndbuf, len))
-    fprintf_unfiltered (stderr, "SERIAL_WRITE failed: %s\n", safe_strerror (errno));
+  monitor_write (sndbuf, len);
 
   /* We used to expect that the next immediate output was the characters we
      just output, but sometimes some extra junk appeared before the characters
@@ -224,6 +222,49 @@ monitor_printf (va_alist)
      So, just start searching for what we sent, and skip anything unknown.  */
   monitor_expect (sndbuf, (char *)0, 0);
 }
+
+
+/* Write characters to the remote system.  */
+
+void
+monitor_write (buf, buflen)
+     char *buf;
+     int buflen;
+{
+  if (SERIAL_WRITE(monitor_desc, buf, buflen))
+    fprintf_unfiltered (stderr, "SERIAL_WRITE failed: %s\n", safe_strerror (errno));
+}
+
+
+/* Read a binary character from the remote system, doing all the fancy
+   timeout stuff, but without interpreting the character in any way,
+   and without printing remote debug information.  */
+
+int
+monitor_readchar ()
+{
+  int c;
+  int looping;
+
+  do
+    {
+      looping = 0;
+      c = SERIAL_READCHAR (monitor_desc, timeout);
+
+      if (c >= 0)
+	c &= 0xff;			/* don't lose bit 7 */
+    }
+  while (looping);
+
+  if (c >= 0)
+    return c;
+
+  if (c == SERIAL_TIMEOUT)
+      error ("Timeout reading from remote system.");
+
+  perror_with_name ("remote-monitor");
+}
+
 
 /* Read a character from the remote system, doing all the fancy
    timeout stuff.  */
