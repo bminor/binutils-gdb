@@ -1,3 +1,9 @@
+Wed Mar 20 18:08:19 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* objdump.c (disassemble_data): Make sure sym_name is always set.
+	(dump_section_header): Always put a space after the section name.
+	(dump_bfd_header): Terminate output with newline.
+
 Wed Mar 20 16:35:20 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* wrstabs.c: New file.
