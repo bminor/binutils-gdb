@@ -3421,6 +3421,40 @@ ecoff_stab (what, string, type, other, desc)
   cur_file_ptr = save_file_ptr;
 }
 
+/* Frob an ECOFF symbol.  A .extern symbol will have a value, but is
+   not common.  Small common symbols go into a special .scommon
+   section rather than bfd_com_section.  */
+
+void
+ecoff_frob_symbol (sym)
+     symbolS *sym;
+{
+  if (sym->ecoff_undefined)
+    S_SET_SEGMENT (sym, undefined_section);
+  else if (S_IS_COMMON (sym)
+	   && S_GET_VALUE (sym) > 0
+	   && S_GET_VALUE (sym) < bfd_get_gp_size (stdoutput))
+    {
+      static asection scom_section;
+      static asymbol scom_symbol;
+
+      /* We must construct a fake section similar to bfd_com_section
+	 but with the name .scommon.  */
+      if (scom_section.name == NULL)
+	{
+	  scom_section = bfd_com_section;
+	  scom_section.name = ".scommon";
+	  scom_section.output_section = &scom_section;
+	  scom_section.symbol = &scom_symbol;
+	  scom_section.symbol_ptr_ptr = &scom_section.symbol;
+	  scom_symbol = *bfd_com_section.symbol;
+	  scom_symbol.name = ".scommon";
+	  scom_symbol.section = &scom_section;
+	}
+      S_SET_SEGMENT (sym, &scom_section);
+    }
+}
+
 /* Add bytes to the symbolic information buffer.  */
 
 static char *

@@ -29,8 +29,6 @@
 #include "elf/mips.h"
 #endif
 
-static int obj_elf_write_symbol_p PARAMS ((symbolS *sym));
-
 #ifdef ECOFF_DEBUGGING
 static boolean elf_get_extr PARAMS ((asymbol *, EXTR *));
 static void elf_set_index PARAMS ((asymbol *, bfd_size_type));
@@ -639,76 +637,6 @@ obj_elf_previous (ignore)
     }
   subseg_set (previous_section, previous_subsection);
   previous_section = 0;
-}
-
-static int
-obj_elf_write_symbol_p (sym)
-     symbolS *sym;
-{
-  /* If this is a local symbol, are there any relocations for which
-     need this symbol? */
-
-  /* To find this out, we examine all relocations in all bfd sections
-     that have relocations.  If there is one that references this
-     symbol, we need to keep this symbol.  In this case, we return a
-     true status.  In all other cases, we return a false status. */
-
-  if (S_IS_LOCAL (sym))
-    {
-      asymbol *bsym = sym->bsym;
-      bfd *abfd = bsym->the_bfd;
-      asection *bsec;
-
-      for (bsec = abfd->sections; bsec; bsec = bsec->next)
-	{
-	  struct reloc_cache_entry **rlocs = bsec->orelocation;
-	  int rcnt = bsec->reloc_count;
-
-	  if (rlocs)
-	    {
-	      int i;
-
-	      for (i = 0; i < rcnt; i++)
-		if (rlocs[i]->sym_ptr_ptr
-		    && rlocs[i]->sym_ptr_ptr[0] == bsym)
-		  return 1;
-	    }
-	  else
-	    {
-	      /* No relocations for this section.  Check the seg_info
-	         structure to see if there are any fixups for this
-	         section. */
-	      segment_info_type *seginfo = seg_info (bsec);
-	      fixS *fixp;
-
-	      for (fixp = seginfo->fix_root; fixp; fixp = fixp->fx_next)
-		if ((fixp->fx_addsy && fixp->fx_addsy->bsym == bsym)
-		    || (fixp->fx_subsy && fixp->fx_subsy->bsym == bsym))
-		  return 1;
-	    }
-	}
-    }
-  return 0;
-}
-
-int
-obj_elf_write_symbol (sym)
-     symbolS *sym;
-{
-  return /* obj_elf_write_symbol_p (sym) || */ !S_IS_LOCAL (sym);
-}
-
-int
-obj_elf_frob_symbol (sym, punt)
-     symbolS *sym;
-     int *punt;
-{
-#if 0 /* ?? The return value is ignored.  Only the value of *punt is
-	 relevant.  */
-  return obj_elf_write_symbol_p (sym);
-#endif
- /* FIXME: Just return 0 until is fixed.  */
- return 0;
 }
 
 static void
