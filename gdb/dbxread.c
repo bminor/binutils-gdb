@@ -1281,8 +1281,11 @@ dbx_symfile_read (sf, addr, mainline)
   if (mainline) {
     symfile_string_table = info->stringtab;
     symfile_string_table_size = info->stringtab_size;
-    init_psymbol_list (info->symcount);
   }
+
+  /* If we are reinitializing, or if we have never loaded syms yet, init */
+  if (mainline || global_psymbols.size == 0 || static_psymbols.size == 0)
+    init_psymbol_list (info->symcount);
 
   symfile_bfd = sym_bfd;		/* Kludge for SWAP_SYMBOL */
 
@@ -2618,7 +2621,7 @@ dbx_psymtab_to_symtab (pst)
 
       /* We keep the string table for symfile resident in memory, but
 	 not the string table for any other symbol files.  */
-      if (0 != strcmp(pst->symfile_name, symfile))
+      if ((symfile == 0) || 0 != strcmp(pst->symfile_name, symfile))
 	{
 	  /* Read in the string table */
 
