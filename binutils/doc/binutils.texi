@@ -1592,7 +1592,7 @@ intel syntax mode and AT&T syntax mode.  @option{addr32},
 address size and operand size.  These four options will be overridden if
 @option{x86-64}, @option{i386} or @option{i8086} appear later in the
 option string.  Lastly, @option{suffix}, when in AT&T mode,
-instructs the dissassembler to print a mnemonic suffix even when the
+instructs the disassembler to print a mnemonic suffix even when the
 suffix could be inferred by the operands.
 
 For PPC, @option{booke}, @option{booke32} and @option{booke64} select
@@ -2894,7 +2894,7 @@ files.  The options control what particular information to display.
 
 @var{elffile}@dots{} are the object files to be examined.  At the
 moment, @command{readelf} does not support examining archives, nor does it
-support examing 64 bit ELF files.
+support examining 64 bit ELF files.
 
 @c man end
 

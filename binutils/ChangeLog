@@ -1,3 +1,7 @@
+2002-12-19  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* doc/binutils.texi: Fix typos.
+
 2002-12-14  John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
 	* doc/binutils.texi: Add missing parenthesis.
