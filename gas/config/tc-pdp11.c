@@ -73,7 +73,7 @@ int asm_option[ASM_OPT_NUM];
    another comment */
 CONST char comment_chars[] = "#/";
 
-/* These chars only start a comment at the beginning of a line. */
+/* These chars only start a comment at the beginning of a line.  */
 CONST char line_comment_chars[] = "#/";
 
 CONST char line_separator_chars[] = ";";
@@ -95,7 +95,6 @@ CONST pseudo_typeS md_pseudo_table[] =
   { "even", pseudo_even, 0 },
   { 0, 0, 0 },
 };
-
 
 static void
 init_defaults ()
@@ -122,7 +121,7 @@ md_begin ()
   insn_hash = hash_new ();
   if (insn_hash == NULL)
     as_fatal ("Virtual memory exhausted");
-    
+
   for (i = 0; i < pdp11_num_opcodes; i++)
     hash_insert (insn_hash, pdp11_opcodes[i].name, (PTR)(pdp11_opcodes + i));
   for (i = 0; i < pdp11_num_aliases; i++)
@@ -159,13 +158,13 @@ md_number_to_chars (con, value, nbytes)
       break;
     default:
       BAD_CASE (nbytes);
-    }		  
+    }
 }
 
 /* Fix up some data or instructions after we find out the value of a symbol
    that they reference.  */
 
-int				/* Knows about order of bytes in address. */
+int				/* Knows about order of bytes in address.  */
 md_apply_fix (fixP, value)
      fixS *fixP;
      valueT *value;
@@ -211,8 +210,8 @@ md_apply_fix (fixP, value)
 
 long
 md_chars_to_number (con, nbytes)
-     unsigned char con[];	/* Low order byte 1st. */
-     int nbytes;		/* Number of bytes in the input. */
+     unsigned char con[];	/* Low order byte 1st.  */
+     int nbytes;		/* Number of bytes in the input.  */
 {
   /* On a PDP-11, 0x1234 is stored as "\x12\x34", and
    * 0x12345678 is stored as "\x56\x78\x12\x34". It's
@@ -234,7 +233,7 @@ md_chars_to_number (con, nbytes)
     default:
       BAD_CASE (nbytes);
       return 0;
-    }		  
+    }
 }
 
 static char *
@@ -400,7 +399,7 @@ parse_op_no_deferred (char *str, struct pdp11_code *operand)
       break;
 
     case '#':				/* immediate */
-    case '$': 
+    case '$':
       str = parse_expression (str + 1, operand);
       if (operand->error)
 	return str;
@@ -807,7 +806,7 @@ md_assemble (instruction_string)
 	insn.reloc = op1.reloc;
       }
       break;
-      
+
     default:
       BAD_CASE (op->type);
     }
@@ -825,7 +824,7 @@ md_assemble (instruction_string)
 
   {
     char *to = NULL;
-    
+
     if (err)
       {
 	as_bad (err);
@@ -952,7 +951,7 @@ set_option (arg)
     pdp11_extension[PDP11_MFPT] = yes;
   else if (strncmp (arg, "mproc", 5) == 0 ||	/* multiprocessor insns: */
 	   strncmp (arg, "multiproc", 9) == 0 )	/* TSTSET, WRTLCK */
-    pdp11_extension[PDP11_MPROC] = yes;	
+    pdp11_extension[PDP11_MPROC] = yes;
   else if (strcmp (arg, "mxps") == 0)		/* move from/to proc status */
     pdp11_extension[PDP11_MXPS] = yes;
   else if (strcmp (arg, "pic") == 0)		/* position-independent code */
@@ -1140,7 +1139,7 @@ set_machine_model (arg)
 	   strcmp (arg, "94") == 0)
     return set_cpu_model ("j11") &&		/* J11 */
            set_option ("fpp");			/* All J11 machines come */
-						/* with FPP installed. */
+						/* with FPP installed.  */
   else
     return 0;
 }
@@ -1223,7 +1222,7 @@ struct
   CONST char *pattern;
   int opt;
   CONST char *description;
-} options;  
+} options;
 
 static struct options extension_opts[] =
 {
@@ -1297,10 +1296,10 @@ struct
   { "PDP-11 instruction set extentions",
     extension_opts,
     sizeof extension_opts / sizeof extension_opts[0] },
-  { "PDP-11 CPU model options", 
+  { "PDP-11 CPU model options",
     cpu_opts,
     sizeof cpu_opts / sizeof cpu_opts[0] },
-  { "PDP-11 machine model options", 
+  { "PDP-11 machine model options",
     model_opts,
     sizeof model_opts / sizeof model_opts[0] },
 };
