@@ -1,3 +1,9 @@
+2002-06-28  David O'Brien  <obrien@FreeBSD.org>
+
+	Merge from mainline:
+	* config/i386/nm-fbsd.h: Include <sys/param.h>.
+	* config/i386/tm-fbsd.h: Likewise.
+
 2002-06-22  Andrew Cagney  <ac131313@redhat.com>
 
 	* NEWS: Mention below.
