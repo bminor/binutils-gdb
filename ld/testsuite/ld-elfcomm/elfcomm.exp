@@ -21,16 +21,7 @@
 # Make sure that ld correctly handles common symbols in ELF.
 
 # This test can only be run on ELF platforms.
-# Square bracket expressions seem to confuse istarget.
-if { ![istarget hppa*64*-*-hpux*] \
-     && ![istarget *-*-gnu] \
-     && ![istarget *-*-linux*] \
-     && ![istarget *-*-elf] } {
-    return
-}
-
-if { [istarget *-*-linux*aout*] \
-     || [istarget *-*-linux*oldld*] } {
+if ![is_elf_format] {
     return
 }
 

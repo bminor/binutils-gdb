@@ -1,3 +1,10 @@
+2003-05-27  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* ld-elf/elf.exp: Use if_elf_format.
+	* ld-elf/sec64k.exp: Likewise.
+	* ld-elfcomm/elfcomm.exp: Likewise.
+	* lib/ld-lib.exp (is_elf_format): Match hppa*64*-*-hpux*.
+
 2003-05-25  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* ld-mips-elf/mips-elf.exp: Make all NetBSD targets match as elf.
