@@ -3349,10 +3349,11 @@ elf_adjust_dynamic_symbol (h, data)
 	{
 	  /* There is an implicit reference by a regular object file
 	     via the weak symbol.  */
-	  weakdef->elf_link_hash_flags |= ELF_LINK_HASH_REF_REGULAR;
-	  if (h->weakdef->elf_link_hash_flags
-	      & ELF_LINK_HASH_REF_REGULAR_NONWEAK)
-	    weakdef->elf_link_hash_flags |= ELF_LINK_HASH_REF_REGULAR_NONWEAK;
+	  weakdef->elf_link_hash_flags |=
+	    (ELF_LINK_HASH_REF_REGULAR
+	     | (h->elf_link_hash_flags
+		& (ELF_LINK_HASH_REF_REGULAR_NONWEAK
+		   | ELF_LINK_NON_GOT_REF)));
 	  if (! elf_adjust_dynamic_symbol (weakdef, (PTR) eif))
 	    return false;
 	}

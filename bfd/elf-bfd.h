@@ -189,6 +189,9 @@ struct elf_link_hash_entry
 #define ELF_LINK_FORCED_LOCAL 02000
   /* Symbol was marked during garbage collection.  */
 #define ELF_LINK_HASH_MARK 04000
+  /* Symbol is referenced by a non-GOT/non-PLT relocation.  This is
+     not currently set by all the backends.  */
+#define ELF_LINK_NON_GOT_REF 010000
 };
 
 /* Records local symbols to be emitted in the dynamic symbol table.  */

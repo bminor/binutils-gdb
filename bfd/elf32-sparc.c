@@ -510,6 +510,9 @@ elf32_sparc_check_relocs (abfd, info, sec, relocs)
 
 	case R_SPARC_PC10:
 	case R_SPARC_PC22:
+	  if (h != NULL)
+	    h->elf_link_hash_flags |= ELF_LINK_NON_GOT_REF;
+
 	  if (h != NULL
 	      && strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0)
 	    break;
@@ -521,6 +524,9 @@ elf32_sparc_check_relocs (abfd, info, sec, relocs)
 	case R_SPARC_WDISP22:
 	case R_SPARC_WDISP19:
 	case R_SPARC_WDISP16:
+	  if (h != NULL)
+	    h->elf_link_hash_flags |= ELF_LINK_NON_GOT_REF;
+
 	  /* If we are linking with -Bsymbolic, we do not need to copy
              a PC relative reloc against a global symbol which is
              defined in an object we are including in the link (i.e.,
@@ -543,6 +549,9 @@ elf32_sparc_check_relocs (abfd, info, sec, relocs)
 	case R_SPARC_13:
 	case R_SPARC_LO10:
 	case R_SPARC_UA32:
+	  if (h != NULL)
+	    h->elf_link_hash_flags |= ELF_LINK_NON_GOT_REF;
+
 	  if (info->shared)
 	    {
 	      /* When creating a shared object, we must copy these
@@ -832,6 +841,11 @@ elf32_sparc_adjust_dynamic_symbol (info, h)
      For such cases we need not do anything here; the relocations will
      be handled correctly by relocate_section.  */
   if (info->shared)
+    return true;
+
+  /* If there are no references to this symbol that do not use the
+     GOT, we don't need to generate a copy reloc.  */
+  if ((h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0)
     return true;
 
   /* We must allocate the symbol in our .dynbss section, which will

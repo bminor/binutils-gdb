@@ -591,6 +591,9 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 
 	case R_386_32:
 	case R_386_PC32:
+	  if (h != NULL)
+	    h->elf_link_hash_flags |= ELF_LINK_NON_GOT_REF;
+
 	  /* If we are creating a shared library, and this is a reloc
              against a global symbol, or a non PC relative reloc
              against a local symbol, then we need to copy the reloc
@@ -887,6 +890,11 @@ elf_i386_adjust_dynamic_symbol (info, h)
      For such cases we need not do anything here; the relocations will
      be handled correctly by relocate_section.  */
   if (info->shared)
+    return true;
+
+  /* If there are no references to this symbol that do not use the
+     GOT, we don't need to generate a copy reloc.  */
+  if ((h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0)
     return true;
 
   /* We must allocate the symbol in our .dynbss section, which will

@@ -1,3 +1,15 @@
+1999-09-04  Ian Lance Taylor  <ian@zembu.com>
+
+	* elf-bfd.h (ELF_LINK_NON_GOT_REF): Define.
+	* elflink.h (elf_adjust_dynamic_symbol): Copy REF_REGULAR_NONWEAK
+	and NON_GOT_REF from weak defined symbol to real symbol.
+	* elf32-i386.c (elf_i386_check_relocs): Set NON_GOT_REF.
+	(elf_i386_adjust_dynamic_symbol): If NON_GOT_REF is not set, don't
+	create a COPY reloc.
+	* elf32-sparc.c (elf32_sparc_check_relocs): Set NON_GOT_REF.
+	(elf32_sparc_adjust_dynamic_symbol): If NON_GOT_REF is not set,
+	don't create a COPY reloc.
+
 1999-09-03  Ian Lance Taylor  <ian@zembu.com>
 
 	* elflink.h (elf_bfd_final_link): When counting relocations, don't
