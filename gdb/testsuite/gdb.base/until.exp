@@ -23,19 +23,32 @@ if $tracelevel then {
     strace $tracelevel
 }
 
-set testfile break
+set testfile "break"
 set srcfile ${testfile}.c
+set srcfile1 ${testfile}1.c
 set binfile ${objdir}/${subdir}/${testfile}
 
-remote_exec build "rm -f ${binfile}"
-if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-    gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}0.o" object {debug additional_flags=-w}] != "" } {
+     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+}
+
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile1}" "${binfile}1.o" object {debug additional_flags=-w}] != "" } {
+     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+}
+
+if  { [gdb_compile "${binfile}0.o ${binfile}1.o" "${binfile}" executable {debug additional_flags=-w}] != "" } {
+     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 
 gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
+
+set bp_location1 [gdb_get_line_number "set breakpoint 1 here"]
+set bp_location19 [gdb_get_line_number "set breakpoint 19 here"]
+set bp_location20 [gdb_get_line_number "set breakpoint 20 here"]
+set bp_location21 [gdb_get_line_number "set breakpoint 21 here"]
 
 if ![runto_main] then {
     fail "Can't run to main"
@@ -45,8 +58,8 @@ if ![runto_main] then {
 # Verify that "until <location>" works.  (This is really just syntactic
 # sugar for "tbreak <location>; continue".)
 #
-gdb_test "until 79" \
-	"main .* at .*:79.*" \
+gdb_test "until $bp_location1" \
+	"main .* at .*:$bp_location1.*" \
 	"until line number"
 
 # Verify that a malformed "advance" is gracefully caught.
@@ -62,8 +75,8 @@ delete_breakpoints
 # inner invocations of factorial() are completed and we are back at this
 # frame.
 #
-gdb_test "until 99" \
-	"factorial.*value=720.*at.*${srcfile}:99.*return \\(value\\)." \
+gdb_test "until $bp_location19" \
+	"factorial.*value=720.*at.*${srcfile}:$bp_location19.*return \\(value\\).*" \
 	"until factorial, recursive function"
 
 # Run to a function called by main
@@ -76,6 +89,6 @@ delete_breakpoints
 # stop at main, the caller, where we put the 'guard' breakpoint.
 #
 gdb_test "until marker3" \
-	"($hex in |)main.*argc.*argv.*envp.*at.*${srcfile}:(82.*marker2 \\(43\\)|83.*marker3 \\(.stack., .trace.\\))." \
+	"($hex in |)main.*argc.*argv.*envp.*at.*${srcfile}:($bp_location20.*marker2 \\(43\\)|$bp_location21.*marker3 \\(.stack., .trace.\\)).*" \
 	"until func, not called by current frame"
 

@@ -38,8 +38,8 @@
 #   "info ajksdlfk " no completions
 #   "info" " "
 #   "info " ambiguous (all info commands)
-#   "p \"break" unambiguous (completes to filename "break.c")
-#   "p \"break." unambiguous (should complete to "break.c" but does not,
+#   "p \"break1" unambiguous (completes to filename "break1.c")
+#   "p \"break1." unambiguous (should complete to "break1.c" but does not,
 #	due to readline limitations)
 #   "p 'a" ambiguous (all symbols starting with a)
 #   "p b-a" ambiguous (all symbols starting with a)
@@ -64,9 +64,19 @@ set bug_id 0
 
 set testfile "break"
 set srcfile ${testfile}.c
+set srcfile1 ${testfile}1.c
 set binfile ${objdir}/${subdir}/${testfile}
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug additional_flags=-w}] != "" } {
-    gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}0.o" object {debug additional_flags=-w}] != "" } {
+     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+}
+
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile1}" "${binfile}1.o" object {debug additional_flags=-w}] != "" } {
+     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+}
+
+if  { [gdb_compile "${binfile}0.o ${binfile}1.o" "${binfile}" executable {debug additional_flags=-w}] != "" } {
+     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 
 if [get_compiler_info ${binfile}] {
@@ -351,61 +361,61 @@ gdb_expect  {
         }
 
 
-send_gdb "p \"break\t"
+send_gdb "p \"break1\t"
 sleep 1
 gdb_expect  {
-        -re "^p \"break\\\x07$"\
+        -re "^p \"break1\\\x07$"\
             { send_gdb "\n"
               gdb_expect {
-                      -re ".*$gdb_prompt $" { fail "complete 'p \"break'"}
-                      timeout           {fail "(timeout) complete 'p \"break'"}
+                      -re ".*$gdb_prompt $" { fail "complete 'p \"break1'"}
+                      timeout           {fail "(timeout) complete 'p \"break1'"}
                      }
             }
-	-re "^p \"break\\.c\"$"\
+	-re "^p \"break1\\.c\"$"\
 	    {	send_gdb "\n"
 		gdb_expect {
-		    -re ".*$gdb_prompt $" { pass "complete 'p \"break'"}
-		    timeout           {fail "(timeout) complete 'p \"break'"}
+		    -re ".*$gdb_prompt $" { pass "complete 'p \"break1'"}
+		    timeout           {fail "(timeout) complete 'p \"break1'"}
 		}
 	    }
-	-re "^p \"break.*$"
+	-re "^p \"break1.*$"
 	    {	send_gdb "\n"
 		gdb_expect {
-		    -re ".*$gdb_prompt $" { fail "complete 'p \"break'"}
-		    timeout           {fail "(timeout) complete 'p \"break'"}
+		    -re ".*$gdb_prompt $" { fail "complete 'p \"break1'"}
+		    timeout           {fail "(timeout) complete 'p \"break1'"}
 		}
 	    }
-        -re ".*$gdb_prompt $"       { fail "complete 'p \"break'" }
-        timeout         { fail "(timeout) complete 'p \"break'" }
+        -re ".*$gdb_prompt $"       { fail "complete 'p \"break1'" }
+        timeout         { fail "(timeout) complete 'p \"break1'" }
         }
 
 setup_xfail "*-*-*"
-send_gdb "p \"break.\t"
+send_gdb "p \"break1.\t"
 sleep 1
 gdb_expect  {
-        -re "^p \"break\\.\\\x07$"\
+        -re "^p \"break1\\.\\\x07$"\
             { send_gdb "\n"
               gdb_expect {
-                      -re ".*$gdb_prompt $" { fail "complete 'p \"break.'"}
-                      timeout           {fail "(timeout) complete 'p \"break.'"}
+                      -re ".*$gdb_prompt $" { fail "complete 'p \"break1.'"}
+                      timeout           {fail "(timeout) complete 'p \"break1.'"}
                      }
             }
-	-re "^p \"break\\.c\"$"\
+	-re "^p \"break1\\.c\"$"\
 	    {	send_gdb "\n"
 		gdb_expect {
-		    -re ".*$gdb_prompt $" { pass "complete 'p \"break.'"}
-		    timeout           {fail "(timeout) complete 'p \"break.'"}
+		    -re ".*$gdb_prompt $" { pass "complete 'p \"break1.'"}
+		    timeout           {fail "(timeout) complete 'p \"break1.'"}
 		}
 	    }
-	-re "^p \"break\\..*$"
+	-re "^p \"break1\\..*$"
 	    {	send_gdb "\n"
 		gdb_expect {
-		    -re ".*$gdb_prompt $" { fail "complete 'p \"break.'"}
-		    timeout           {fail "(timeout) complete 'p \"break.'"}
+		    -re ".*$gdb_prompt $" { fail "complete 'p \"break1.'"}
+		    timeout           {fail "(timeout) complete 'p \"break1.'"}
 		}
 	    }
-        -re ".*$gdb_prompt $"       { fail "complete 'p \"break.'" }
-        timeout         { fail "(timeout) complete 'p \"break.'" }
+        -re ".*$gdb_prompt $"       { fail "complete 'p \"break1.'" }
+        timeout         { fail "(timeout) complete 'p \"break1.'" }
         }
 
 send_gdb "p 'a\t"
@@ -682,7 +692,7 @@ gdb_expect  {
                       -re "marker1.*$gdb_prompt info func marker$"\
                       { send_gdb "\n"
                         gdb_expect {
-                                -re "All functions matching regular expression \"marker\":.*File.*break.c:\r\nint marker1\\((void|)\\);\r\nint marker2\\(int\\).*marker3\\(char.*char.*\\).*marker4\\(long int\\);.*$gdb_prompt $"\
+                                -re "All functions matching regular expression \"marker\":.*File.*break1.c:\r\nint marker1\\((void|)\\);\r\nint marker2\\(int\\).*marker3\\(char.*char.*\\).*marker4\\(long int\\);.*$gdb_prompt $"\
                                                   { pass "complete 'info func marke'"}
                                 -re ".*$gdb_prompt $" { fail "complete 'info func marke'"}
                                 timeout           {fail "(timeout) complete 'info func marke'"}

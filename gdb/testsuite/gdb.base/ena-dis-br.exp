@@ -1,5 +1,4 @@
-#   Copyright 1997, 1998, 1999 Free Software Foundation, Inc.
-
+# Copyright 1997, 1998, 1999, 2003 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,7 +12,7 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 # Please email any bugs, comments, and/or additions to this file to:
 # bug-gdb@prep.ai.mit.edu
@@ -32,9 +31,18 @@ set bug_id 0
 
 set testfile "break"
 set srcfile ${testfile}.c
+set srcfile1 ${testfile}1.c
 set binfile ${objdir}/${subdir}/${testfile}
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}0.o" object {debug additional_flags=-w}] != "" } {
+     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+}
+
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile1}" "${binfile}1.o" object {debug additional_flags=-w}] != "" } {
+     gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
+}
+
+if  { [gdb_compile "${binfile}0.o ${binfile}1.o" "${binfile}" executable {debug additional_flags=-w}] != "" } {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 
@@ -43,6 +51,17 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
+set bp_location1 [gdb_get_line_number "set breakpoint 1 here"]
+set bp_location8 [gdb_get_line_number "set breakpoint 8 here" $srcfile1]
+set bp_location9 [gdb_get_line_number "set breakpoint 9 here" $srcfile1]
+set bp_location11 [gdb_get_line_number "set breakpoint 11 here"]
+set bp_location13 [gdb_get_line_number "set breakpoint 13 here" $srcfile1]
+set bp_location14 [gdb_get_line_number "set breakpoint 14 here" $srcfile1]
+set bp_location15 [gdb_get_line_number "set breakpoint 15 here" $srcfile1]
+set bp_location16 [gdb_get_line_number "set breakpoint 16 here" $srcfile1]
+set bp_location17 [gdb_get_line_number "set breakpoint 17 here" $srcfile1]
+set bp_location18 [gdb_get_line_number "set breakpoint 18 here" $srcfile1]
+
 if ![runto_main] then { fail "enable/disable break tests suppressed" }
 
 # Verify that we can set a breakpoint (the location is irrelevant),
@@ -50,7 +69,7 @@ if ![runto_main] then { fail "enable/disable break tests suppressed" }
 #
 send_gdb "break marker1\n"
 gdb_expect {
-  -re "Breakpoint (\[0-9\]*) at .*, line 4\[38\].*$gdb_prompt $"\
+  -re "Breakpoint (\[0-9\]*) at .*, line ($bp_location15|$bp_location16).*$gdb_prompt $"\
           {pass "break marker1"}
   -re "$gdb_prompt $"\
           {fail "break marker1"}
@@ -98,7 +117,7 @@ gdb_expect {
 #
 send_gdb "break marker2\n"
 gdb_expect {
-  -re "Breakpoint (\[0-9\]*) at .*, line 4\[49\].*$gdb_prompt $"\
+  -re "Breakpoint (\[0-9\]*) at .*, line ($bp_location8|$bp_location9).*$gdb_prompt $"\
           {pass "break marker2"}
   -re "$gdb_prompt $"\
           {fail "break marker2"}
@@ -156,7 +175,7 @@ if ![runto_main] then { fail "enable/disable break tests suppressed" }
 
 send_gdb "break marker3\n"
 gdb_expect {
-  -re "Breakpoint (\[0-9\]*) at .*, line (45|50).*$gdb_prompt $"\
+  -re "Breakpoint (\[0-9\]*) at .*, line ($bp_location17|$bp_location18).*$gdb_prompt $"\
           {pass "break marker3"}
   -re "$gdb_prompt $"\
           {fail "break marker3"}
@@ -181,7 +200,7 @@ gdb_expect {
 
 send_gdb "continue\n"
 gdb_expect {
-  -re ".*marker3 .*:(45|50).*$gdb_prompt $"\
+  -re ".*marker3 .*:($bp_location17|$bp_location18).*$gdb_prompt $"\
           {pass "continue to auto-deleted break marker3"}
   -re "Breakpoint \[0-9\]*, marker3.*$gdb_prompt $"\
           {fail "continue to auto-deleted break marker3"}
@@ -206,7 +225,7 @@ gdb_expect {
 #
 send_gdb "break marker4\n"
 gdb_expect {
-  -re "Breakpoint (\[0-9\]*) at .*, line (46|51).*$gdb_prompt $"\
+  -re "Breakpoint (\[0-9\]*) at .*, line ($bp_location14|$bp_location13).*$gdb_prompt $"\
           {pass "break marker4"}
   -re "$gdb_prompt $"\
           {fail "break marker4"}
@@ -237,7 +256,7 @@ if ![runto_main] then { fail "enable/disable break tests suppressed" }
 
 send_gdb "break marker1\n"
 gdb_expect {
-  -re "Breakpoint (\[0-9\]*) at .*, line 4\[38\].*$gdb_prompt $"\
+  -re "Breakpoint (\[0-9\]*) at .*, line ($bp_location15|$bp_location16).*$gdb_prompt $"\
           {pass "break marker1"}
   -re "$gdb_prompt $"\
           {fail "break marker1"}
@@ -328,7 +347,7 @@ if ![runto_main] then { fail "enable/disable break tests suppressed" }
 
 send_gdb "break marker1\n"
 gdb_expect {
-  -re "Breakpoint (\[0-9\]*) at .*, line 4\[38\].*$gdb_prompt $"\
+  -re "Breakpoint (\[0-9\]*) at .*, line ($bp_location15|$bp_location16).*$gdb_prompt $"\
           {pass "break marker1"}
   -re "$gdb_prompt $"\
           {fail "break marker1"}
@@ -365,7 +384,7 @@ rerun_to_main
 
 send_gdb "continue\n"
 gdb_expect {
-  -re ".*marker1 .*:4\[38\].*$gdb_prompt $"\
+  -re ".*marker1 .*:($bp_location15|$bp_location16).*$gdb_prompt $"\
           {pass "continue to ignored & auto-deleted break marker1"}
   -re "Breakpoint \[0-9\]*, marker1.*$gdb_prompt $"\
           {fail "continue to ignored & auto-deleted break marker1"}
@@ -381,7 +400,7 @@ if ![runto_main] then { fail "enable/disable break tests suppressed" }
 
 send_gdb "break marker1\n"
 gdb_expect {
-  -re "Breakpoint (\[0-9\]*) at .*, line 4\[38\].*$gdb_prompt $"\
+  -re "Breakpoint (\[0-9\]*) at .*, line ($bp_location15|$bp_location16).*$gdb_prompt $"\
           {pass "break marker1"}
   -re "$gdb_prompt $"\
           {fail "break marker1"}
@@ -423,9 +442,9 @@ gdb_expect {
 #
 if ![runto_main] then { fail "enable/disable break tests suppressed" }
 
-send_gdb "break 79\n"
+send_gdb "break $bp_location1\n"
 gdb_expect {
-  -re "Breakpoint \[0-9\]*.*, line 79.*$gdb_prompt $"\
+  -re "Breakpoint \[0-9\]*.*, line $bp_location1.*$gdb_prompt $"\
           {pass "prepare to continue with ignore count"}
   -re "$gdb_prompt $"\
           {fail "prepare to continue with ignore count"}
@@ -442,7 +461,7 @@ gdb_expect {
 
 send_gdb "next\n"
 gdb_expect {
-  -re ".*81\[ \t\]*marker1.*$gdb_prompt $"\
+  -re ".*$bp_location11\[ \t\]*marker1.*$gdb_prompt $"\
           {pass "step after continue with ignore count"}
   -re "$gdb_prompt $"\
           {fail "step after continue with ignore count"}

@@ -1,3 +1,30 @@
+2003-12-09  Fred Fish  <fnf@redhat.com>
+
+	* gdb.base/break.c (marker1, marker2, marker3, marker4): Move
+	functions to break1.c and leave prototypes behind.  Add more
+	"set breakpoint NN here" comments.
+	* gdb.base/break1.c: New file.
+
+	* gdb.base/break.exp: Handle compiling test case from multiple
+	source files and change source file references as needed.
+	* gdb.base/completion.exp: Ditto.
+	* gdb.base/condbreak.exp: Ditto.
+	* gdb.base/define.exp: Ditto.
+	* gdb.base/ena-dis-br.exp: Ditto.
+	* gdb.base/info-proc.exp: Ditto.
+	* gdb.base/maint.exp: Ditto.
+	* gdb.base/until.exp: Ditto.
+
+	* gdb.base/condbreak.exp: Use bp_locationNN variables instead of
+	hardcoded line numbers.
+	* gdb.base/define.exp: Ditto.
+	* gdb.base/ena-dis-br.exp: Ditto.
+	* gdb.base/maint.exp: Ditto.
+	* gdb.base/until.exp: Ditto.
+
+	* gdb.base/completion.exp: Use "break1" for completion tests since
+	"break" is no longer a unique prefix.
+
 2003-12-06  Andrew Cagney  <cagney@redhat.com>
 
 	* gdb.base/structs.exp (test_struct_returns): When applicable, set
