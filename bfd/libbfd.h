@@ -1,6 +1,6 @@
 /* libbfd.h -- Declarations used by bfd library *implementation*.
    (This include file is not for users of the library.)
-   Copyright 1990, 91, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
+   Copyright 1990, 91, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 ** NOTE: libbfd.h is a GENERATED file.  Don't change it; instead,
@@ -548,6 +548,7 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_64",
   "BFD_RELOC_32",
   "BFD_RELOC_26",
+  "BFD_RELOC_24",
   "BFD_RELOC_16",
   "BFD_RELOC_14",
   "BFD_RELOC_8",
@@ -636,6 +637,7 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_ALPHA_HINT",
   "BFD_RELOC_ALPHA_LINKAGE",
   "BFD_RELOC_MIPS_JMP",
+  "BFD_RELOC_MIPS16_JMP",
   "BFD_RELOC_HI16",
   "BFD_RELOC_HI16_S",
   "BFD_RELOC_LO16",
@@ -747,10 +749,10 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
 /* end-sanitize-d10v */
 
 /* start-sanitize-m32r */
-  "BFD_RELOC_M32R_UIMM24",
-  "BFD_RELOC_M32R_DISP8",
-  "BFD_RELOC_M32R_DISP16",
-  "BFD_RELOC_M32R_DISP24",
+  "BFD_RELOC_M32R_24",
+  "BFD_RELOC_M32R_10_PCREL",
+  "BFD_RELOC_M32R_18_PCREL",
+  "BFD_RELOC_M32R_26_PCREL",
 /* end-sanitize-m32r */
 
 /* start-sanitize-v850 */
@@ -761,6 +763,8 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_V850_TDA_OFFSET",
 /* end-sanitize-v850 */
 
+  "BFD_RELOC_MN10300_32_PCREL",
+  "BFD_RELOC_MN10300_16_PCREL",
  "@@overflow: BFD_RELOC_UNUSED@@",
 };
 #endif
