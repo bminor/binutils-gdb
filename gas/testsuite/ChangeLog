@@ -1,3 +1,8 @@
+2002-02-18  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gas/sh/basic.exp: Don't run PIC tests for targets that don't
+	support it.
+
 2002-02-18  John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
 	* gas/hppa/reloc/reloc.exp (labelopbug.s): Change test to suit
