@@ -76,8 +76,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	yyval	m2_val
 #define	yylloc	m2_lloc
 
+#if 0
 static char *
 make_qualname PARAMS ((char *, char *));
+#endif
 
 static int
 parse_number PARAMS ((int));
@@ -87,9 +89,6 @@ yylex PARAMS ((void));
 
 static void
 yyerror PARAMS ((char *));
-
-static void
-__yy_bcopy PARAMS ((char *, char *, int));
 
 int
 yyparse PARAMS ((void));
@@ -1141,6 +1140,7 @@ yylex ()
  }
 }
 
+#if 0		/* Unused */
 static char *
 make_qualname(mod,ident)
    char *mod, *ident;
@@ -1152,7 +1152,7 @@ make_qualname(mod,ident)
    strcat(new,ident);
    return new;
 }
-
+#endif  /* 0 */
 
 static void
 yyerror(msg)

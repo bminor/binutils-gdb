@@ -75,10 +75,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	yyval	c_val
 #define	yylloc	c_lloc
 
-static void
-__yy_bcopy PARAMS ((char *, char *, int));
-
-int
 yyparse PARAMS ((void));
 
 int
@@ -807,7 +803,7 @@ array_mod:	'[' ']'
 func_mod:	'(' ')'
 			{ $$ = 0; }
 	|	'(' nonempty_typelist ')'
-			{ free ($2); $$ = 0; }
+			{ free ((PTR)$2); $$ = 0; }
 	;
 
 type	:	ptype
@@ -821,7 +817,7 @@ type	:	ptype
 	|	type '(' typebase COLONCOLON '*' ')' '(' nonempty_typelist ')'
 			{ $$ = lookup_member_type
 			    (lookup_function_type ($1), $3);
-			  free ($8); }
+			  free ((PTR)$8); }
 	;
 
 typebase

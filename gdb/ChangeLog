@@ -1,3 +1,84 @@
+Sat Mar 28 22:22:06 1992  John Gilmore  (gnu at cygnus.com)
+
+	Create and use macros for iterating on symtabs, psymtabs, msymbols.
+
+	* minsyms.c (iterate_over_msymbols):  Remove; clunky and slow.
+	* symfile.h, symtab.h (iterate_over_msymbols):  Remove prototype
+	* coffread.c (coff_symfile_read):  iterate_over_symtabs => ALL_SYMTABS.
+	(patch_opaque_types):  Avoid dummy args and result.
+	* objfiles.c (have_partial_symbols, have_full_symbols,
+	have_minimal_symbols):  explicit iteration => ALL_OBJFILES; simplify.
+	(iterate_over_objfiles, iterate_over_symtabs,
+	iterate_over_psymtabs):  Remove, clunky and slow.
+	* objfiles.h:  Replace iterate_over_* prototypes with ALL_SYMTABS,
+	ALL_PSYMTABS, and ALL_MSYMBOLS macros.
+	* symmisc.c (dump_symtab, dump_psymtab, dump_msymbols,
+	dump_objfile):  Remove dummy args and results.  Move filename
+	comparisons to callers.
+	(printsyms_command, printpsyms_command, printmsyms_command,
+	printobjfiles_command):  iterate_over_* => ALL_*.  Compare filenames.
+	* symtab.c (lookup_symtab_1, lookup_symtab, lookup_partial_symtab,
+	lookup_symbol, find_main_psymtab, find_pc_symtab, sources_info,
+	list_symbols, make_symbol_completion_list):  Replace explicit
+	iteration with ALL_SYMTABS, ALL_PSYMTABS, or ALL_MSYMBOLS.
+	Eliminate Dijkstra flag crap, break out of loops with gotos.
+	(lookup_symtab_1):  Protect '/' tests from short filenames.
+	(cplus_mangled_symbol):  Move inline into lookup_symbol.
+	* xcoffexec.c (relocate_objfile_msymbols):  Remove poor hack.
+	(relocate_minimal_symbol):  Move inline to vmap_symtab.
+	(vmap_symtab):  Replace iteration with ALL_OBJFILES,
+	iterate_over_msymbols with ALL_MSYMBOLS.
+
+	Misc cleanup prior to release.
+
+	* Makefile.in (VERSION):  Roll to 4.4.7.
+	(HFILES):  Add call-cmds.h.
+	* call-cmds.h:  New header for command fns called by other files.
+	* breakpoint.c (watchpoints_info):  Remove, same as breakpoints_info.
+	(breakpoint_1):  Remove unused type arg.  Change callers.
+
+	* dwarfread.c (dwarf_build_psymtabs):  Remove mainline test.
+	* mipsread.c (compare_symtabs, compare_psymtabs):  Remove, unused.
+	* mipsread.c:  Add prototypes for all static functions.
+
+	* symmisc.c (dump_symtab_lines, dump_symtabs, dump_last_symtab,
+	dump_blockvector, dump_block, dump_addrchass, dump_namespace,
+	dump_symbol, dump_type, dump_linetable, dump_strtbl):  Remove, unused.
+	* xcoffread.c (dump_symtab_lines, dump_symtabs, dump_last_symtab,
+	dump_blockvector, dump_block, dump_addrchass, dump_namespace,
+	dump_symbol, dump_type, dump_linetable, dump_strtbl):  Remove 2nd
+	unused copy!
+
+	* buildsym.c (define_symbol):  Handle global register variables
+	(from Pierre Willard).  Complain if register numbers are too large.
+	* target.c (nomemory):  Now that higher levels examine errno, give EIO.
+	* tm-sparc.h:  Don't #include <sun4/reg.h>.
+	* sparc-tdep.c (sparc_frame_chain, frame_saved_pc):  Remove
+	dependency on <sun4/reg.h>.  Start to handle cross-byte-order.
+
+	* language.h:  Avoid forward enum declaration.
+	* configure.in, tm-sun4os5.h, xm-sun4os5.h, config/sun4os5.mh,
+	config/sun4os5.mt:  New host and target.
+	* defs.h (errno): #include <errno.h> rather than assuming int.
+	From Pierre Willard.
+
+	* breakpoint.c, breakpoint.h, buildsym.c, coffread.c, cplus-dem.c,
+	dbxread.c, dwarfread.c, elfread.c, infcmd.c, infrun.c, inftarg.c,
+	language.c, main.c, mem-break.c, mips-tdep.c, mipsread.c,
+	partial-stab.h, remote.c, saber.suppress, symfile.c, symtab.c,
+	valops.c, valprint.c, xcoffread.c, c-exp.y, m2-exp.y, blockframe.c,
+	command.c, core.c, exec.c, gdbtypes.h, parse.c, printcmd.c, solib.c,
+	sparc-xdep.c, utils.c, value.h, values.c:  Lint.
+
+Sat Mar 28 02:43:26 1992  John Gilmore  (gnu at cygnus.com)
+
+	* buildsym.c (read_range_type):  Avoid int overflow by using unsigned.
+	* dbxread.c (dbx_symfile_init):  Remove bogus `lvalue cast'.
+	* language.h (enum exp_opcode):  Avoid forward enum def.
+	* main.c (define_command, user_defined_command):  Lint.
+	* mem-break.c, xcoffread.c:  Lint.
+	* solib.c:  Only #include <a.out.h> on SunOS, not SVR4.
+
 Sun Mar 29 14:16:22 1992  Per Bothner  (bothner@cygnus.com)
 
 	* Merged in latest RS6000 diffs from Metin G. Ozisik.

@@ -83,7 +83,7 @@ core_close (quitting)
     CLEAR_SOLIB ();
 #endif
     if (core_ops.to_sections) {
-      free (core_ops.to_sections);
+      free ((PTR)core_ops.to_sections);
       core_ops.to_sections = NULL;
       core_ops.to_sections_end = NULL;
     }

@@ -262,7 +262,7 @@ delete_cmd (name, list)
   while (*list && !strcmp ((*list)->name, name))
     {
       p = (*list)->next;
-      free (*list);
+      free ((PTR)*list);
       *list = p;
     }
 
@@ -272,7 +272,7 @@ delete_cmd (name, list)
 	if (!strcmp (c->next->name, name))
 	  {
 	    p = c->next->next;
-	    free (c->next);
+	    free ((PTR)c->next);
 	    c->next = p;
 	  }
 	else
@@ -415,7 +415,7 @@ print_doc_line (stream, str)
   if (p - str > line_size - 1)
     {
       line_size = p - str + 1;
-      free (line_buffer);
+      free ((PTR)line_buffer);
       line_buffer = (char *) xmalloc (line_size);
     }
   strncpy (line_buffer, str, p - str);
@@ -921,7 +921,7 @@ complete_on_cmdlist (list, text)
 
   if (matches == 0)
     {
-      free (matchlist);
+      free ((PTR)matchlist);
       matchlist = 0;
     }
   else

@@ -312,9 +312,9 @@ clear_value_history ()
     {
       for (i = 0; i < VALUE_HISTORY_CHUNK; i++)
 	if (val = value_history_chain->values[i])
-	  free (val);
+	  free ((PTR)val);
       next = value_history_chain->next;
-      free (value_history_chain);
+      free ((PTR)value_history_chain);
       value_history_chain = next;
     }
   value_history_count = 0;
@@ -450,7 +450,7 @@ set_internalvar (var, val)
     SET_TRAPPED_INTERNALVAR (var, val, 0, 0, 0);
 #endif
 
-  free (var->value);
+  free ((PTR)var->value);
   var->value = value_copy (val);
   release_value (var->value);
 }
@@ -474,9 +474,9 @@ clear_internalvars ()
     {
       var = internalvars;
       internalvars = var->next;
-      free (var->name);
-      free (var->value);
-      free (var);
+      free ((PTR)var->name);
+      free ((PTR)var->value);
+      free ((PTR)var);
     }
 }
 

@@ -40,6 +40,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symtab.h"
 #include "symfile.h"
 #include "objfiles.h"
+#include "buildsym.h"
 
 #define STREQ(a,b) (strcmp((a),(b))==0)
 
@@ -63,7 +64,7 @@ static void
 elf_symfile_finish PARAMS ((struct objfile *));
 
 static void
-elf_symtab_read PARAMS ((bfd *,  CORE_ADDR, int, struct objfile *));
+elf_symtab_read PARAMS ((bfd *,  CORE_ADDR, struct objfile *));
 
 static void
 record_minimal_symbol PARAMS ((char *, CORE_ADDR, enum minimal_symbol_type,
@@ -86,8 +87,8 @@ elf_locate_sections PARAMS ((bfd *, asection *, PTR));
    FIXME:  The section names should not be hardwired strings. */
 
 static void
-elf_locate_sections (abfd, sectp, eip)
-     bfd *abfd;
+elf_locate_sections (ignore_abfd, sectp, eip)
+     bfd *ignore_abfd;
      asection *sectp;
      PTR eip;
 {
@@ -173,7 +174,7 @@ LOCAL FUNCTION
 
 SYNOPSIS
 
-	void elf_symtab_read (bfd *abfd, CORE_ADDR addr, int mainline,
+	void elf_symtab_read (bfd *abfd, CORE_ADDR addr,
 			      struct objfile *objfile)
 
 DESCRIPTION
@@ -186,10 +187,9 @@ DESCRIPTION
 */
 
 static void
-elf_symtab_read (abfd, addr, mainline, objfile)
+elf_symtab_read (abfd, addr, objfile)
      bfd *abfd;
      CORE_ADDR addr;
-     int mainline;
      struct objfile *objfile;
 {
   unsigned int storage_needed;
@@ -287,7 +287,7 @@ elf_symfile_read (objfile, addr, mainline)
 
   /* Process the normal ELF symbol table first. */
 
-  elf_symtab_read (abfd, addr, mainline, objfile);
+  elf_symtab_read (abfd, addr, objfile);
 
   /* Now process the DWARF debugging information, which is contained in
      special ELF sections.  We first have to find them... */
@@ -326,8 +326,8 @@ elf_symfile_read (objfile, addr, mainline)
    just a stub. */
 
 static void
-elf_new_init (objfile)
-     struct objfile *objfile;
+elf_new_init (ignore)
+     struct objfile *ignore;
 {
   buildsym_new_init ();
 }
@@ -357,8 +357,8 @@ elf_symfile_finish (objfile)
    just a stub. */
 
 static void
-elf_symfile_init (objfile)
-     struct objfile *objfile;
+elf_symfile_init (ignore)
+     struct objfile *ignore;
 {
 }
 

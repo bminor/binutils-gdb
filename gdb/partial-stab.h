@@ -234,8 +234,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	      psymtab_include_list = (char **)
 		alloca ((includes_allocated *= 2) *
 			sizeof (char *));
-	      bcopy (orig, psymtab_include_list,
-		     includes_used * sizeof (char *));
+	      memcpy ((PTR)psymtab_include_list, (PTR)orig,
+		      includes_used * sizeof (char *));
 	    }
 
 #endif /* DBXREAD_ONLY */
@@ -278,8 +278,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	      psymtab_include_list = (char **)
 		alloca ((includes_allocated *= 2) *
 			sizeof (char *));
-	      bcopy (orig, psymtab_include_list,
-		     includes_used * sizeof (char *));
+	      memcpy ((PTR)psymtab_include_list, (PTR)orig,
+		      includes_used * sizeof (char *));
 	    }
 	  continue;
 
@@ -525,7 +525,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 		      (struct partial_symtab **)
 			alloca ((dependencies_allocated *= 2)
 				* sizeof (struct partial_symtab *));
-		    bcopy (orig, dependency_list,
+		    memcpy ((PTR)dependency_list, (PTR)orig,
 			   (dependencies_used
 			    * sizeof (struct partial_symtab *)));
 #ifdef DEBUG_INFO

@@ -443,7 +443,6 @@ cplus_demangle (type, arg_mode)
       p += 1;
       {
 	int r, i;
-	int non_empty = 0;
 	string tname;
 	string trawname;
 	

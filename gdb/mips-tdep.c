@@ -247,7 +247,7 @@ find_proc_desc(pc, next_frame)
 	/* IF this is the topmost frame AND
 	 * (this proc does not have debugging information OR
 	 * the PC is in the procedure prologue)
-	 * THEN create a "hueristic" proc_desc (by analyzing
+	 * THEN create a "heuristic" proc_desc (by analyzing
 	 * the actual code) to replace the "official" proc_desc.
 	 */
 	proc_desc = (struct mips_extra_func_info *)sym->value.value;
@@ -289,7 +289,8 @@ FRAME_ADDR mips_frame_chain(frame)
 {
     mips_extra_func_info_t proc_desc;
     CORE_ADDR saved_pc = FRAME_SAVED_PC(frame);
-    if (current_objfile->ei.entry_file_lowpc)
+
+    if (symfile_objfile->ei.entry_file_lowpc)
       { /* has at least the __start symbol */
 	if (saved_pc == 0 || inside_entry_file (saved_pc)) return 0;
       }
@@ -767,7 +768,8 @@ fill_fpregset (fpregsetp, regno)
    itself if the code at PC does not look like a function prologue,
    PC+4 if it does (our caller does not need anything more fancy). */
 
-CORE_ADDR mips_skip_prologue(pc)
+CORE_ADDR
+mips_skip_prologue(pc)
      CORE_ADDR pc;
 {
     struct symbol *f;

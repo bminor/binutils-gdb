@@ -190,6 +190,8 @@ suppress 70 on fatal
 /* Passing illegal enumeration value */
 suppress 70 on error 
 /* Passing illegal enumeration value */
+suppress 80 on first_link_map_member 
+/* Returning invalid pointer */
 suppress 110 in printf_filtered 
 /* Signed/unsigned memory retrieval */
 suppress 110 in fprintf_filtered 
@@ -246,6 +248,8 @@ suppress 529 in do_registers_info
 /* Statement not reached */
 suppress 529 in value_from_register 
 /* Statement not reached */
+suppress 529 in solib_create_inferior_hook 
+/* Constant in conditional */
 suppress 530 
 /* Empty body of statement */
 suppress 546 in net_quit 
@@ -262,6 +266,8 @@ suppress 546 in value_equal
 /* Function exits through bottom */
 suppress 546 in unpack_long 
 /* Function exits through bottom */
+suppress 558 in solib_create_inferior_hook 
+/* Constant in conditional */
 suppress 558 in read_range_type 
 /* Constant in conditional */
 suppress 558 in process_one_symbol 
@@ -279,6 +285,16 @@ suppress 558 in wait_for_inferior
 suppress 558 in do_registers_info 
 /* Constant in conditional */
 suppress 558 in value_from_register 
+/* Constant in conditional */
+suppress 558 in add_enum_psymbol 
+/* Constant in conditional */
+suppress 558 in add_partial_symbol 
+/* Constant in conditional */
+suppress 558 mfree.c
+/* Constant in conditional */
+suppress 558 mmalloc.c
+/* Constant in conditional */
+suppress 558 mrealloc.c
 /* Constant in conditional */
 suppress 560 in solib_address 
 /* Assignment within conditional */
@@ -396,7 +412,7 @@ suppress 590 on ignore_symbols
 /* Formal param not used */
 suppress 590 on signo
 /* Formal param not used */
-suppress 652 in ../bfd/libaout.h
+suppress 652
 /* The declaration has no effect */
 suppress 442 in ../bfd/archive.c
 /* Escape sequence in string literal has null value */

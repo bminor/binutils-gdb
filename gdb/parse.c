@@ -92,7 +92,7 @@ end_arglist ()
   register struct funcall *call = funcall_chain;
   funcall_chain = call->next;
   arglist_len = call->arglist_len;
-  free (call);
+  free ((PTR)call);
   return val;
 }
 
@@ -107,7 +107,7 @@ free_funcalls ()
   for (call = funcall_chain; call; call = next)
     {
       next = call->next;
-      free (call);
+      free ((PTR)call);
     }
 }
 

@@ -54,6 +54,7 @@ breakpoint.h
 buildsym.c
 buildsym.h
 c-exp.y
+call-cmds.h
 coffread.c
 command.c
 command.h

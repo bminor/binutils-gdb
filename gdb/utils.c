@@ -144,7 +144,7 @@ discard_cleanups (old_chain)
   while ((ptr = cleanup_chain) != old_chain)
     {
       cleanup_chain = ptr->next;
-      free (ptr);
+      free ((PTR)ptr);
     }
 }
 

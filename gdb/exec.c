@@ -1,5 +1,5 @@
 /* Work with executable files, for GDB. 
-   Copyright 1988, 1989, 1991 Free Software Foundation, Inc.
+   Copyright 1988, 1989, 1991, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -17,7 +17,6 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#include <stdio.h>
 #include "defs.h"
 #include "frame.h"
 #include "inferior.h"
@@ -37,9 +36,24 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <ctype.h>
 #include <sys/stat.h>
 
-extern char *getenv();
-extern void child_create_inferior (), child_attach ();
-extern void symbol_file_command ();
+/* Prototypes for local functions */
+
+static void
+add_to_section_table PARAMS ((bfd *, sec_ptr, PTR));
+
+static void
+exec_close PARAMS ((int));
+
+static void
+file_command PARAMS ((char *, int));
+
+static void
+set_section_command PARAMS ((char *, int));
+
+static void
+exec_files_info PARAMS ((struct target_ops *));
+
+extern int info_verbose;
 
 /* The Binary File Descriptor handle for the executable file.  */
 
@@ -61,7 +75,7 @@ CORE_ADDR text_end   = 0;
 extern struct target_ops exec_ops;
 
 /* ARGSUSED */
-void
+static void
 exec_close (quitting)
      int quitting;
 {
@@ -69,18 +83,27 @@ exec_close (quitting)
     bfd_close (exec_bfd);
     exec_bfd = NULL;
   }
-  if (exec_ops.sections) {
-    free (exec_ops.sections);
-    exec_ops.sections = NULL;
-    exec_ops.sections_end = NULL;
+  if (exec_ops.to_sections) {
+    free ((PTR)exec_ops.to_sections);
+    exec_ops.to_sections = NULL;
+    exec_ops.to_sections_end = NULL;
   }
 }
 
+/*  Process the first arg in ARGS as the new exec file.
+
+    Note that we have to explicitly ignore additional args, since we can
+    be called from file_command(), which also calls symbol_file_command()
+    which can take multiple args. */
+
 void
-exec_file_command (filename, from_tty)
-     char *filename;
+exec_file_command (args, from_tty)
+     char *args;
      int from_tty;
 {
+  char **argv;
+  char *filename;
+
   target_preopen (from_tty);
 
   /* Remove any previous exec file.  */
@@ -88,12 +111,27 @@ exec_file_command (filename, from_tty)
 
   /* Now open and digest the file the user requested, if any.  */
 
-  if (filename)
+  if (args)
     {
       char *scratch_pathname;
       int scratch_chan;
       
-      filename = tilde_expand (filename);
+      /* Scan through the args and pick up the first non option arg
+	 as the filename. */
+
+      if ((argv = buildargv (args)) == NULL)
+	{
+	  nomem (0);
+	}
+      make_cleanup (freeargv, (char *) argv);
+
+      for (; (*argv != NULL) && (**argv == '-'); argv++) {;}
+      if (*argv == NULL)
+	{
+	  error ("no exec file name was specified");
+	}
+
+      filename = tilde_expand (*argv);
       make_cleanup (free, filename);
       
       scratch_chan = openp (getenv ("PATH"), 1, filename, 
@@ -110,8 +148,8 @@ exec_file_command (filename, from_tty)
 	error ("\"%s\": not in executable format: %s.",
 	       scratch_pathname, bfd_errmsg (bfd_error));
 
-      if (build_section_table (exec_bfd, &exec_ops.sections,
-				&exec_ops.sections_end))
+      if (build_section_table (exec_bfd, &exec_ops.to_sections,
+				&exec_ops.to_sections_end))
 	error ("Can't find the file sections in `%s': %s", 
 		exec_bfd->filename, bfd_errmsg (bfd_error));
 
@@ -120,7 +158,7 @@ exec_file_command (filename, from_tty)
 	 (29K springs to mind) need this info for now.  */
       {
 	struct section_table *p;
-	for (p = exec_ops.sections; p < exec_ops.sections_end; p++)
+	for (p = exec_ops.to_sections; p < exec_ops.to_sections_end; p++)
 	  if (!strcmp (".text", bfd_section_name (p->bfd, p->sec_ptr)))
 	    {
 	      text_start = p->addr;
@@ -146,7 +184,7 @@ exec_file_command (filename, from_tty)
    What a novelty.  Why did GDB go through four major releases before this
    command was added?  */
 
-void
+static void
 file_command (arg, from_tty)
      char *arg;
      int from_tty;
@@ -162,11 +200,11 @@ file_command (arg, from_tty)
    table_pp_char is a char * to get it through bfd_map_over_sections;
    we cast it back to its proper type.  */
 
-void
+static void
 add_to_section_table (abfd, asect, table_pp_char)
      bfd *abfd;
      sec_ptr asect;
-     char *table_pp_char;
+     PTR table_pp_char;
 {
   struct section_table **table_pp = (struct section_table **)table_pp_char;
   flagword aflag;
@@ -184,6 +222,9 @@ add_to_section_table (abfd, asect, table_pp_char)
   (*table_pp)++;
 }
 
+/* Builds a section table, given args BFD, SECTABLE_PTR, SECEND_PTR.
+   Returns 0 if OK, 1 on error.  */
+
 int
 build_section_table (some_bfd, start, end)
      bfd *some_bfd;
@@ -195,7 +236,7 @@ build_section_table (some_bfd, start, end)
   if (count == 0)
     abort();	/* return 1? */
   if (*start)
-    free (*start);
+    free ((PTR)*start);
   *start = (struct section_table *) xmalloc (count * sizeof (**start));
   *end = *start;
   bfd_map_over_sections (some_bfd, add_to_section_table, (char *)end);
@@ -234,7 +275,7 @@ xfer_memory (memaddr, myaddr, len, write, target)
   boolean res;
   struct section_table *p;
   CORE_ADDR nextsectaddr, memend;
-  boolean (*xfer_fn) ();
+  boolean (*xfer_fn) PARAMS ((bfd *, sec_ptr, PTR, file_ptr, bfd_size_type));
 
   if (len <= 0)
     abort();
@@ -243,7 +284,7 @@ xfer_memory (memaddr, myaddr, len, write, target)
   xfer_fn = write? bfd_set_section_contents: bfd_get_section_contents;
   nextsectaddr = memend;
 
-  for (p = target->sections; p < target->sections_end; p++)
+  for (p = target->to_sections; p < target->to_sections_end; p++)
     {
       if (p->addr <= memaddr)
 	if (p->endaddr >= memend)
@@ -289,21 +330,36 @@ xfer_memory (memaddr, myaddr, len, write, target)
 #endif				/* REG_STACK_SEGMENT */
 #endif FIXME
 
-static void
-exec_files_info ()
+void
+print_section_info (t, abfd)
+  struct target_ops *t;
+  bfd *abfd;
 {
   struct section_table *p;
 
-  printf_filtered ("\t`%s', ", bfd_get_filename(exec_bfd));
+  printf_filtered ("\t`%s', ", bfd_get_filename(abfd));
   wrap_here ("        ");
-  printf_filtered ("file type %s.\n", bfd_get_target(exec_bfd));
+  printf_filtered ("file type %s.\n", bfd_get_target(abfd));
 
-  for (p = exec_ops.sections; p < exec_ops.sections_end; p++) {
+  for (p = t->to_sections; p < t->to_sections_end; p++) {
     printf_filtered ("\t%s", local_hex_string_custom (p->addr, "08"));
-    printf_filtered (" - %s is %s\n",
-	local_hex_string_custom (p->endaddr, "08"),
-	bfd_section_name (exec_bfd, p->sec_ptr));
+    printf_filtered (" - %s", local_hex_string_custom (p->endaddr, "08"));
+    if (info_verbose)
+      printf_filtered (" @ %s",
+		       local_hex_string_custom (p->sec_ptr->filepos, "08"));
+    printf_filtered (" is %s", bfd_section_name (p->bfd, p->sec_ptr));
+    if (p->bfd != abfd) {
+      printf_filtered (" in %s", bfd_get_filename (p->bfd));
+    }
+    printf_filtered ("\n");
   }
+}
+
+static void
+exec_files_info (t)
+  struct target_ops *t;
+{
+  print_section_info (t, exec_bfd);
 }
 
 static void
@@ -328,13 +384,14 @@ set_section_command (args, from_tty)
   /* Parse out new virtual address */
   secaddr = parse_and_eval_address (args);
 
-  for (p = exec_ops.sections; p < exec_ops.sections_end; p++) {
+  for (p = exec_ops.to_sections; p < exec_ops.to_sections_end; p++) {
     if (!strncmp (secname, bfd_section_name (exec_bfd, p->sec_ptr), seclen)
 	&& bfd_section_name (exec_bfd, p->sec_ptr)[seclen] == '\0') {
       offset = secaddr - p->addr;
       p->addr += offset;
       p->endaddr += offset;
-      exec_files_info();
+      if (from_tty)
+	exec_files_info(&exec_ops);
       return;
     }
   } 
@@ -357,7 +414,7 @@ Specify the filename of the executable file.",
 	0, 0, /* insert_breakpoint, remove_breakpoint, */
 	0, 0, 0, 0, 0, /* terminal stuff */
 	0, 0, /* kill, load */
-	0, 0, /* call fn, lookup sym */
+	0, /* lookup sym */
 	child_create_inferior,
 	0, /* mourn_inferior */
 	file_stratum, 0, /* next */

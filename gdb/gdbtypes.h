@@ -540,6 +540,9 @@ lookup_template_type PARAMS ((char *, struct type *, struct block *));
 extern struct type *
 lookup_fundamental_type PARAMS ((struct objfile *, int));
 
+extern void
+fill_in_vptr_fieldno PARAMS ((struct type *));
+
 /* printcmd.c */
 
 extern void

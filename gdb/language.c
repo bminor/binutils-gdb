@@ -992,8 +992,8 @@ set_check (ignore, from_tty)
 }
 
 static void
-show_check (arg, from_tty)
-   char *arg;
+show_check (ignore, from_tty)
+   char *ignore;
    int from_tty;
 {
    cmd_show_list(showchecklist, from_tty, "");

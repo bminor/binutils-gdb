@@ -26,11 +26,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <link.h>
 #include <sys/param.h>
 #include <fcntl.h>
-#include <a.out.h>
+
+#ifndef SVR4_SHARED_LIBS
+ /* SunOS shared libs need the nlist structure.  */
+#include <a.out.h> 
+#endif
 
 #include "symtab.h"
 #include "bfd.h"
 #include "symfile.h"
+#include "objfiles.h"
 #include "gdbcore.h"
 #include "command.h"
 #include "target.h"
@@ -124,16 +129,18 @@ first_link_map_member PARAMS ((void));
 static CORE_ADDR
 locate_base PARAMS ((void));
 
+static void
+solib_map_sections PARAMS ((struct so_list *));
+
+#ifdef SVR4_SHARED_LIBS
+
 static int
 look_for_base PARAMS ((int, CORE_ADDR));
 
 static CORE_ADDR
 bfd_lookup_symbol PARAMS ((bfd *, char *));
 
-static void
-solib_map_sections PARAMS ((struct so_list *));
-
-#ifndef SVR4_SHARED_LIBS
+#else
 
 static void
 solib_add_common_symbols PARAMS ((struct rtc_symb *, struct objfile *));
@@ -287,6 +294,8 @@ solib_add_common_symbols (rtc_symp, objfile)
 
 #endif	/* SVR4_SHARED_LIBS */
 
+#ifdef SVR4_SHARED_LIBS
+
 /*
 
 LOCAL FUNCTION
@@ -329,8 +338,8 @@ bfd_lookup_symbol (abfd, symname)
 
   if (storage_needed > 0)
     {
-      symbol_table = (asymbol **) bfd_xmalloc (storage_needed);
-      back_to = make_cleanup (free, symbol_table);
+      symbol_table = (asymbol **) xmalloc (storage_needed);
+      back_to = make_cleanup (free, (PTR)symbol_table);
       number_of_symbols = bfd_canonicalize_symtab (abfd, symbol_table); 
   
       for (i = 0; i < number_of_symbols; i++)
@@ -429,6 +438,8 @@ look_for_base (fd, baseaddr)
   bfd_close (interp_bfd);
   return (1);
 }
+
+#endif
 
 /*
 
@@ -867,14 +878,14 @@ clear_solib()
     {
       if (so_list_head -> sections)
 	{
-	  free (so_list_head -> sections);
+	  free ((PTR)so_list_head -> sections);
 	}
       if (so_list_head -> so_bfd)
 	{
 	  bfd_close (so_list_head -> so_bfd);
 	}
       next = so_list_head -> next;
-      free(so_list_head);
+      free((PTR)so_list_head);
       so_list_head = next;
     }
   debug_base = 0;
@@ -1106,11 +1117,6 @@ FIXME
 void 
 solib_create_inferior_hook()
 {
-  CORE_ADDR debug_addr;
-  int in_debugger;
-  CORE_ADDR in_debugger_addr;
-  CORE_ADDR breakpoint_addr;
-  int i, j;
   
   if ((debug_base = locate_base ()) == 0)
     {

@@ -242,11 +242,11 @@ store_inferior_registers (regno)
 }
 
 void
-fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
+fetch_core_registers (core_reg_sect, core_reg_size, which, ignore)
   char *core_reg_sect;
   unsigned core_reg_size;
   int which;
-  unsigned int reg_addr;	/* Unused in this version */
+  unsigned int ignore;	/* reg addr, unused in this version */
 {
 
   if (which == 0) {
