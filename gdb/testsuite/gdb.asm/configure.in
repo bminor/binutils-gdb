@@ -18,6 +18,7 @@ case ${target} in
 d10v-*-*) archinc=d10v.inc ;;
 i[[3456]]86*) archinc=i386.inc ;;
 m32r*-*) archinc=m32r.inc ;;
+sparc-*-*) archinc=sparc.inc ;;
 esac
 AC_LINK_FILES($archinc,arch.inc)
 

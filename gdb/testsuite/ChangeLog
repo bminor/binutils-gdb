@@ -13,6 +13,13 @@
 
 2001-11-21  Michael Snyder  <msnyder@redhat.com>
 
+	* gdb.asm/sparc.inc: New file.
+	* gdb.asm/asm-source.exp: Recognize sparc target.
+	* gdb.asm/configure.in: Recognize sparc target.
+	* gdb.asm/configure: Regenerate.
+	
+2001-11-21  Michael Snyder  <msnyder@redhat.com>
+
 	* gdb.asm/m32r.inc: New file.
 	* gdb.asm/asm-source.exp: Recognize m32r target.
 	* gdb.asm/configure.in: Recognize m32r target.
