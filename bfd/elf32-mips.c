@@ -7724,8 +7724,15 @@ _bfd_mips_elf_check_relocs (abfd, info, sec, relocs)
 	h = NULL;
       else if (r_symndx >= extsymoff + NUM_SHDR_ENTRIES (symtab_hdr))
 	{
-	  (*_bfd_error_handler)
-	    (_("Malformed reloc detected for section %s"), name);
+	  if (abfd->my_archive)
+	    (*_bfd_error_handler)
+	      (_("%s(%s) Malformed reloc detected for section %s"),
+	       bfd_get_filename (abfd->my_archive),
+	       bfd_get_filename (abfd), name);
+	  else
+	    (*_bfd_error_handler)
+	      (_("%s: Malformed reloc detected for section %s"),
+	       bfd_get_filename (abfd), name);
 	  bfd_set_error (bfd_error_bad_value);
 	  return false;
 	}
