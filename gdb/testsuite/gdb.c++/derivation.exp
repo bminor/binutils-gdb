@@ -60,21 +60,6 @@ gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
-remote_file build delete ${binfile}.ci
- if {![istarget "hppa*-*-hpux*"]} {
-     if  { [gdb_compile "${srcdir}/${subdir}/compiler.cc" "${binfile}.ci" preprocess ""] != ""
-} {
-         gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will auto
-matically fail."
-     }
- } else {
-     if { [gdb_preprocess "${srcdir}/${subdir}/compiler.cc" "${binfile}.ci" "c++"] != "" } {
-         perror "Couldn't make ${binfile}.ci file"
-         return 1;
-     }
- }
- 
-source ${binfile}.ci
 
 #
 # set it up at a breakpoint so we can play with the variable values

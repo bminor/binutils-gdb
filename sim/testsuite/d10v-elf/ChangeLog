@@ -1,3 +1,12 @@
+Fri Oct 29 18:36:34 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* t-mvtc.s: Check that the user can not modify the DM bit in the
+ 	BPSW or DPSW.
+
+Thu Oct 28 01:47:26 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* t-mvtc.s: Update. Check that user can not modify DM bit.
+
 Wed Sep  8 19:34:55 MDT 1999	Diego Novillo <dnovillo@cygnus.com>
 
 	* t-ld-st.s: New file.

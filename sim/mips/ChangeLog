@@ -1,3 +1,8 @@
+1999-11-11  Andrew Haley  <aph@cygnus.com>
+
+	* interp.c (decode_coproc): Correctly handle DMFC0 and DMTC0
+	instructions.
+
 Thu Sep  9 15:12:08 1999  Geoffrey Keating  <geoffk@cygnus.com>
 
 	* mips.igen (MULT): Correct previous mis-applied patch.

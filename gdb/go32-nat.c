@@ -345,7 +345,7 @@ sig_map[] =
     4, TARGET_SIGNAL_FPE,
     5, TARGET_SIGNAL_SEGV,
     6, TARGET_SIGNAL_ILL,
-    7, TARGET_SIGNAL_FPE,
+    7, TARGET_SIGNAL_EMT,	/* no-coprocessor exception */
     8, TARGET_SIGNAL_SEGV,
     9, TARGET_SIGNAL_SEGV,
     10, TARGET_SIGNAL_BUS,
@@ -570,7 +570,8 @@ go32_fetch_registers (int regno)
 	supply_register (regno,
 			 (char *) &npx + regno_mapping[regno].tss_ofs);
       else
-	fatal ("Invalid register no. %d in go32_fetch_register.", regno);
+	internal_error ("Invalid register no. %d in go32_fetch_register.",
+			regno);
     }
 }
 
@@ -587,7 +588,7 @@ store_register (int regno)
   else if (regno < 31)
     rp = (char *) &npx + regno_mapping[regno].tss_ofs;
   else
-    fatal ("Invalid register no. %d in store_register.", regno);
+    internal_error ("Invalid register no. %d in store_register.", regno);
   memcpy (rp, v, regno_mapping[regno].size);
 }
 
@@ -680,7 +681,7 @@ go32_create_inferior (char *exec_file, char *args, char **env)
   resume_is_step = 0;
   /* Init command line storage.  */
   if (redir_debug_init (&child_cmd) == -1)
-    fatal ("Cannot allocate redirection storage: not enough memory.\n");
+    internal_error ("Cannot allocate redirection storage: not enough memory.\n");
 
   /* Parse the command line and create redirections.  */
   if (strpbrk (args, "<>"))
@@ -1311,7 +1312,7 @@ init_go32_ops (void)
 
   /* Initialize child's command line storage.  */
   if (redir_debug_init (&child_cmd) == -1)
-    fatal ("Cannot allocate redirection storage: not enough memory.\n");
+    internal_error ("Cannot allocate redirection storage: not enough memory.\n");
 }
 
 void

@@ -148,11 +148,11 @@ extern int i386_skip_prologue PARAMS ((int));
 #define FP0_REGNUM   16		/* first FPU floating-point register */
 #define FP7_REGNUM   23		/* last  FPU floating-point register */
 
-/* All of these control registers are sixteen bits long (at most) in
-   the FPU, but are zero-extended to thirty-two bits in GDB's register
-   file.  This makes it easier to compute the size of the control
-   register file, and somewhat easier to convert to and from the FSAVE
-   instruction's 32-bit format.  */
+/* All of these control registers (except for FCOFF and FDOFF) are
+   sixteen bits long (at most) in the FPU, but are zero-extended to
+   thirty-two bits in GDB's register file.  This makes it easier to
+   compute the size of the control register file, and somewhat easier
+   to convert to and from the FSAVE instruction's 32-bit format.  */
 #define FIRST_FPU_CTRL_REGNUM 24
 #define FCTRL_REGNUM 24	        /* FPU control word */
 #define FPC_REGNUM   24		/* old name for FCTRL_REGNUM */

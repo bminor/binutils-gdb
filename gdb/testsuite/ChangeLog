@@ -1,3 +1,25 @@
+1999-11-12  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdb.base/dollar.exp: Remove, now in gdb.hp.
+
+1999-11-10  Jimmy Guo  <guo@cup.hp.com>
+
+	* gdb.exp (get_compiler_info): pick up compiler.c and compiler.cc
+ 	from $srcdir/lib/.
+	* lib/compiler.c, lib/compiler.cc: New files, moved from gdb.base/
+ 	and gdb.c++/.
+
+	* gdb.c++/derivation.exp: remove redundant get compiler info code.
+
+	* gdb.base/commands.exp: add '$gdb_prompt $' anchor to 
+	'continue with watch' test point.
+
+1999-11-08  Jim Blandy  <jimb@zenia.red-bean.com>
+
+	Merged from p2linux-990323-branch:
+	
+	* lib/gdb.exp (gdb_continue_to_breakpoint): New function.
+
 Mon Nov  8 23:07:09 1999  Andrew Cagney  <cagney@amy.cygnus.com>
 
 	* gdb.base/remote.exp: Test ``set remote memory-write-packet-sized

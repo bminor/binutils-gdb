@@ -1,7 +1,88 @@
+Fri Oct 29 18:34:28 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* simops.c (move_to_cr): Don't allow user to set PSW.DM in either
+ 	DPSW and BPSW.
+
+Thu Oct 28 01:26:18 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* simops.c (OP_5F20): Use SET_HW_PSW when updating PSW.
+	(PSW_HW_MASK): Declare.
+
+	* d10v_sim.h (move_to_cr): Add ``psw_hw_p'' parameter.
+	(SET_CREG, SET_PSW_BIT): Update.
+	(SET_HW_CREG, SET_HW_PSW): Define.
+
+Sun Oct 24 21:38:04 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (sim_d10v_translate_dmap_addr): Fix extraction of IOSP
+ 	for DMAP3.
+
+Sun Oct 24 16:04:16 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (sim_d10v_translate_addr): New function.
+	(xfer_mem): Rewrite.  Use sim_d10v_translate_addr.
+	(map_memory): Make INLINE.
+
+Sun Oct 24 13:45:19 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (sim_d10v_translate_dmap_addr): New function.
+	(dmem_addr): Rewrite. Use sim_d10v_translate_dmap_addr.  Change
+ 	offset parameter to type uint16.
+	* d10v_sim.h (dmem_addr): Update declaration.
+
+Sun Oct 24 13:07:31 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (imap_register, set_imap_register, dmap_register,
+ 	set_imap_register): Use map_memory.
+	(DMAP): Update.
+	(sim_create_inferior): Initialize all DMAP registers.  NOTE that
+ 	DMAP2, in internal memory mode, is set to 0x0000 and NOT
+ 	0x2000. This is consistent with the older d10v boards.
+
+Sun Oct 24 11:22:12 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (sim_d10v_translate_imap_addr): New function.
+	(imem_addr): Rewrite.  Use sim_d10v_translate_imap_addr.
+	(last_from, last_to): Declare.
+
+Sun Oct 24 01:21:56 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* d10v_sim.h (struct d10v_memory): Define.  Support very long
+ 	memories.
+	(struct _state): Replace imem, dmem and umem by mem.
+	(IMAP_BLOCK_SIZE, DMAP_BLOCK_SIZE, SEGMENT_SIZE, IMEM_SEGMENTS,
+ 	DMEM_SEGMENTS, UMEM_SEGMENTS): Define.
+
+	* interp.c (map_memory): New function.
+	(sim_size, xfer_memory, imem_addr, dmem_addr): Update.
+	(UMEM_SEGMENTS): Moveed to "d10v_sim.h".
+	(IMEM_SIZEDMEM_SIZE): Delete.
+
+Sat Oct 23 20:06:58 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c: Include "sim-d10v.h".
+ 	(imap_register, set_imap_register, dmap_register,
+ 	set_dmap_register, spi_register, spu_register, set_spi_register,
+ 	set_spu_register): New functions.
+	(sim_create_inferior): Update.
+	(sim_fetch_register, sim_store_register): Rewrite.  Use enums
+ 	defined in sim-d10v.h.
+
+	* d10v_sim.h (DEBUG_MEMORY): Define.
+	(IMAP0, IMAP1, DMAP, SET_IMAP0, SET_IMAP1, SET_DMAP): Delete.
+	
+Sat Oct 23 18:41:18 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* interp.c (sim_open): Allow a debug value to be passed to the -t
+ 	option.
+	(lookup_hash): Don't exit on an illegal instruction.
+	(do_long, do_2_short, do_parallel): Check for failed instruction
+ 	lookup.
+
 Mon Oct 18 18:03:24 MDT 1999	Diego Novillo <dnovillo@cygnus.com>
 
 	* simops.c (OP_3220): Fix trace output for illegal accumulator
-	message.
+ 	message.
 
 1999-09-14  Nick Clifton  <nickc@cygnus.com>
 

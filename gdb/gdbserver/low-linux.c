@@ -451,6 +451,15 @@ static int u_offsets[] =
     PT_F125,
     PT_F126,
     PT_F127,
+    /* predicate registers - we don't fetch these individually */
+    -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1,
     /* branch registers */
     PT_B0,
     PT_B1,
@@ -460,6 +469,8 @@ static int u_offsets[] =
     PT_B5,
     PT_B6,
     PT_B7,
+    /* virtual frame pointer and virtual return address pointer */
+    -1, -1,
     /* other registers */
     PT_PR,
     PT_CR_IIP,
@@ -735,14 +746,7 @@ write_inferior_memory (memaddr, myaddr, len)
 }
 
 void
-initialize ()
+initialize_low ()
 {
-  inferior_pid = 0;
   initialize_arch();
-}
-
-int
-have_inferior_p ()
-{
-  return inferior_pid != 0;
 }

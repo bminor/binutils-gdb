@@ -912,6 +912,7 @@ monitor_supply_register (regno, valstr)
   unsigned char regbuf[MAX_REGISTER_RAW_SIZE];
   char *p;
 
+  val = 0;
   p = valstr;
   while (p && *p != '\0')
     {

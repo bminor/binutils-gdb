@@ -335,6 +335,31 @@ proc runto_main { } {
 }
 
 
+### Continue, and expect to hit a breakpoint.
+### Report a pass or fail, depending on whether it seems to have
+### worked.  Use NAME as part of the test name; each call to
+### continue_to_breakpoint should use a NAME which is unique within
+### that test file.
+proc gdb_continue_to_breakpoint {name} {
+    global gdb_prompt
+    set full_name "continue to breakpoint: $name"
+
+    send_gdb "continue\n"
+    gdb_expect {
+	-re "Breakpoint .* at .*\r\n$gdb_prompt $" {
+	    pass $full_name
+	}
+	-re ".*$gdb_prompt $" {
+	    fail $full_name
+	}
+	timeout { 
+	    fail "$full_name (timeout)"
+	}
+    }
+}
+
+
+
 # gdb_test COMMAND PATTERN MESSAGE -- send a command to gdb; test the result.
 #
 # COMMAND is the command to execute, send to GDB with send_gdb.  If
@@ -901,13 +926,13 @@ proc get_compiler_info {binfile args} {
     if {![istarget "hppa*-*-hpux*"]} {
 	if { [llength $args] > 0 } {
 	    if {$args == "c++"} {
-		if { [gdb_compile "${srcdir}/${subdir}/compiler.cc" "${binfile}.ci" preprocess {}] != "" } {
+		if { [gdb_compile "${srcdir}/lib/compiler.cc" "${binfile}.ci" preprocess {}] != "" } {
 		    perror "Couldn't make ${binfile}.ci file"
 		    return 1;
 		}
 	    }
 	} else {
-	    if { [gdb_compile "${srcdir}/${subdir}/compiler.c" "${binfile}.ci" preprocess {}] != "" } {
+	    if { [gdb_compile "${srcdir}/lib/compiler.c" "${binfile}.ci" preprocess {}] != "" } {
 		perror "Couldn't make ${binfile}.ci file"
 		return 1;
 	    }
@@ -916,7 +941,7 @@ proc get_compiler_info {binfile args} {
 	if { [llength $args] > 0 } {
 	    if {$args == "c++"} {
 		if { [eval gdb_preprocess \
-			[list "${srcdir}/${subdir}/compiler.cc" "${binfile}.ci"] \
+			[list "${srcdir}/lib/compiler.cc" "${binfile}.ci"] \
 			$args] != "" } {
 		    perror "Couldn't make ${binfile}.ci file"
 		    return 1;
@@ -924,7 +949,7 @@ proc get_compiler_info {binfile args} {
 	    }
 	} elseif { $args != "f77" } {
 	    if { [eval gdb_preprocess \
-		    [list "${srcdir}/${subdir}/compiler.c" "${binfile}.ci"] \
+		    [list "${srcdir}/lib/compiler.c" "${binfile}.ci"] \
 		    $args] != "" } {
 		perror "Couldn't make ${binfile}.ci file"
 		return 1;

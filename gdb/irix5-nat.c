@@ -983,7 +983,7 @@ info_sharedlibrary_command (ignore, from_tty)
 
   if (exec_bfd == NULL)
     {
-      printf_unfiltered ("No exec file.\n");
+      printf_unfiltered ("No executable file.\n");
       return;
     }
   while ((so = find_solib (so)) != NULL)

@@ -2230,7 +2230,7 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
 
 	  funsymbol = lookup_minimal_symbol_by_pc (fun);
 	  if (!funsymbol)
-	    error ("Unable to find minimal symbol for target fucntion.\n");
+	    error ("Unable to find minimal symbol for target function.\n");
 
 	  /* Search all the object files for an import symbol with the
 	     right name. */

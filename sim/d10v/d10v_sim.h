@@ -13,6 +13,7 @@
 #define DEBUG_MEMSIZE		0x00000008
 #define DEBUG_INSTRUCTION	0x00000010
 #define DEBUG_TRAP		0x00000020
+#define DEBUG_MEMORY		0x00000040
 
 #ifndef	DEBUG
 #define	DEBUG (DEBUG_TRACE | DEBUG_VALUES | DEBUG_LINE_NUMBER)
@@ -197,6 +198,37 @@ enum {
     } \
   while (0)
 
+/* d10v memory: There are three separate d10v memory regions IMEM,
+   UMEM and DMEM.  The IMEM and DMEM are further broken down into
+   blocks (very like VM pages). */
+
+enum
+{
+  IMAP_BLOCK_SIZE = 0x20000,
+  DMAP_BLOCK_SIZE = 0x4000,
+};
+
+/* Implement the three memory regions using sparse arrays.  Allocate
+   memory using ``segments''.  A segment must be at least as large as
+   a BLOCK - ensures that an access that doesn't cross a block
+   boundary can't cross a segment boundary */
+
+enum
+{
+  SEGMENT_SIZE = 0x20000, /* 128KB - MAX(IMAP_BLOCK_SIZE,DMAP_BLOCK_SIZE) */
+  IMEM_SEGMENTS = 8, /* 1MB */
+  DMEM_SEGMENTS = 8, /* 1MB */
+  UMEM_SEGMENTS = 128 /* 16MB */
+};
+
+struct d10v_memory
+{
+  uint8 *insn[IMEM_SEGMENTS];
+  uint8 *data[DMEM_SEGMENTS];
+  uint8 *unif[UMEM_SEGMENTS];
+  uint8 fault[16];
+};
+
 struct _state
 {
   reg_t regs[16];		/* general-purpose registers */
@@ -209,7 +241,8 @@ struct _state
 
   reg_t cregs[16];		/* control registers */
 #define CREG(N) (State.cregs[(N)] + 0)
-#define SET_CREG(N,VAL) move_to_cr ((N), 0, (VAL))
+#define SET_CREG(N,VAL) move_to_cr ((N), 0, (VAL), 0)
+#define SET_HW_CREG(N,VAL) move_to_cr ((N), 0, (VAL), 1)
 
   reg_t sp[2];                  /* holding area for SPI(0)/SPU(1) */
 #define HELD_SP(N) (State.sp[(N)] + 0)
@@ -232,10 +265,11 @@ struct _state
   int	exception;
   int	pc_changed;
 
-  /* NOTE: everything below this line is not reset by sim_create_inferior() */
-  uint8 *imem;
-  uint8 *dmem;
-  uint8 *umem[128];
+  /* NOTE: everything below this line is not reset by
+     sim_create_inferior() */
+
+  struct d10v_memory mem;
+
   enum _ins_type ins_type;
 
 } State;
@@ -283,7 +317,8 @@ enum
 
 #define PSW CREG (PSW_CR)
 #define SET_PSW(VAL) SET_CREG (PSW_CR, (VAL))
-#define SET_PSW_BIT(MASK,VAL) move_to_cr (PSW_CR, ~(MASK), (VAL) ? (MASK) : 0)
+#define SET_HW_PSW(VAL) SET_HW_CREG (PSW_CR, (VAL))
+#define SET_PSW_BIT(MASK,VAL) move_to_cr (PSW_CR, ~(MASK), (VAL) ? (MASK) : 0, 1)
 
 #define PSW_SM ((PSW & PSW_SM_BIT) != 0)
 #define SET_PSW_SM(VAL) SET_PSW_BIT (PSW_SM_BIT, (VAL))
@@ -404,7 +439,7 @@ do \
   } \
 while (0)
 
-extern uint8 *dmem_addr PARAMS ((uint32));
+extern uint8 *dmem_addr (uint16 offset);
 extern uint8 *imem_addr PARAMS ((uint32));
 extern bfd_vma decode_pc PARAMS ((void));
 
@@ -434,13 +469,6 @@ extern void write_longlong PARAMS ((uint8 *addr, int64 data));
 #define READ_64(x)		get_longlong(x)
 #define WRITE_64(addr,data)	write_longlong(addr,data)
 
-#define IMAP0			RW(0xff00)
-#define IMAP1			RW(0xff02)
-#define DMAP			RW(0xff04)
-#define SET_IMAP0(x)		SW(0xff00,x)
-#define SET_IMAP1(x)		SW(0xff02,x)
-#define SET_DMAP(x)		SW(0xff04,x)
-
 #define JMP(x)			do { SET_PC (x); State.pc_changed = 1; } while (0)
 
 #define RIE_VECTOR_START 0xffc2
@@ -449,4 +477,9 @@ extern void write_longlong PARAMS ((uint8 *addr, int64 data));
 #define DBT_VECTOR_START 0xffd4
 #define SDBT_VECTOR_START 0xffd5
 
-extern reg_t move_to_cr PARAMS ((int cr, reg_t mask, reg_t val));
+/* Scedule a store of VAL into cr[CR].  MASK indicates the bits in
+   cr[CR] that should not be modified (i.e. cr[CR] = (cr[CR] & MASK) |
+   (VAL & ~MASK)).  In addition, unless PSW_HW_P, a VAL intended for
+   PSW is masked for zero bits. */
+
+extern reg_t move_to_cr (int cr, reg_t mask, reg_t val, int psw_hw_p);

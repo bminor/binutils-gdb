@@ -108,13 +108,13 @@ static int max_load_size;
 static int execute_status;
 
 /* Send heatbeat packets? */
-static int   rdi_heartbeat = 0;
+static int rdi_heartbeat = 0;
 
 /* Target has ROM at address 0. */
 static int rom_at_zero = 0;
 
 /* Enable logging? */
-static int   log_enable = 0;
+static int log_enable = 0;
 
 /* Name of the log file. Default is "rdi.log". */
 static char *log_filename;
@@ -236,8 +236,8 @@ device is attached to the remote system (e.g. /dev/ttya).");
 
   /* split name after whitespace, pass tail as arg to open command */
 
-  devName = strdup(name);
-  p = strchr(devName,' ');
+  devName = strdup (name);
+  p = strchr (devName, ' ');
   if (p)
     {
       *p = '\0';
@@ -280,7 +280,7 @@ device is attached to the remote system (e.g. /dev/ttya).");
     {
       printf_filtered ("RDI_open: %s\n", rdi_error_message (rslt));
       Adp_CloseDevice ();
-      error("RID_open failed\n");
+      error ("RID_open failed\n");
     }
 
   rslt = angel_RDI_info (RDIInfo_Target, &arg1, &arg2);
@@ -999,47 +999,49 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   arm_rdi_ops.to_magic = OPS_MAGIC;
 }
 
-static void rdilogfile_command (char *arg, int from_tty)
+static void 
+rdilogfile_command (char *arg, int from_tty)
 {
   if (!arg || strlen (arg) == 0)
     {
       printf_filtered ("rdi log file is '%s'\n", log_filename);
       return;
     }
-  
+
   if (log_filename)
     free (log_filename);
-  
+
   log_filename = strdup (arg);
 
   Adp_SetLogfile (log_filename);
 }
 
-static void rdilogenable_command (char *args, int from_tty)
+static void 
+rdilogenable_command (char *args, int from_tty)
 {
   if (!args || strlen (args) == 0)
     {
       printf_filtered ("rdi log is %s\n", log_enable ? "enabled" : "disabled");
       return;
     }
-  
-  if (!strcasecmp (args,"1") || 
-      !strcasecmp (args,"y") ||
-      !strcasecmp (args,"yes") ||
-      !strcasecmp (args,"on") ||
-      !strcasecmp (args,"t") ||
-      !strcasecmp (args,"true"))
-    Adp_SetLogEnable (log_enable=1);
-  else if (!strcasecmp (args,"0") || 
-      !strcasecmp (args,"n") ||
-      !strcasecmp (args,"no") ||
-      !strcasecmp (args,"off") ||
-      !strcasecmp (args,"f") ||
-      !strcasecmp (args,"false"))
-    Adp_SetLogEnable (log_enable=0);
+
+  if (!strcasecmp (args, "1") ||
+      !strcasecmp (args, "y") ||
+      !strcasecmp (args, "yes") ||
+      !strcasecmp (args, "on") ||
+      !strcasecmp (args, "t") ||
+      !strcasecmp (args, "true"))
+    Adp_SetLogEnable (log_enable = 1);
+  else if (!strcasecmp (args, "0") ||
+	   !strcasecmp (args, "n") ||
+	   !strcasecmp (args, "no") ||
+	   !strcasecmp (args, "off") ||
+	   !strcasecmp (args, "f") ||
+	   !strcasecmp (args, "false"))
+    Adp_SetLogEnable (log_enable = 0);
   else
     printf_filtered ("rdilogenable: unrecognized argument '%s'\n"
-                     "              try y or n\n",args);
+		     "              try y or n\n", args);
 }
 
 void
@@ -1048,9 +1050,9 @@ _initialize_remote_rdi ()
   init_rdi_ops ();
   add_target (&arm_rdi_ops);
 
-  log_filename = strdup("rdi.log");
-  Adp_SetLogfile(log_filename);
-  Adp_SetLogEnable(log_enable);
+  log_filename = strdup ("rdi.log");
+  Adp_SetLogfile (log_filename);
+  Adp_SetLogEnable (log_enable);
 
   add_cmd ("rdilogfile", class_maintenance,
 	   rdilogfile_command,
@@ -1061,7 +1063,7 @@ Without an argument, shows the current logfile name.\n\
 See also: rdilogenable\n",
 	   &maintenancelist);
 
-  add_cmd("rdilogenable", class_maintenance,
+  add_cmd ("rdilogenable", class_maintenance,
 	   rdilogenable_command,
 	   "Set enable logging of ADP packets.\n\
 This will log ADP packets exchanged between gdb and the\n\
@@ -1078,7 +1080,7 @@ Withough an argument, it will display current state.\n",
 A true value disables vector catching, false enables vector catching.\n\
 This is evaluated at the time the 'target rdi' command is executed\n",
 		  &setlist),
-    &showlist);
+     &showlist);
 
   add_show_from_set
     (add_set_cmd ("rdiheartbeat", no_class,
@@ -1088,7 +1090,7 @@ I don't know why you would want this. If you enable them,\n\
 it will confuse ARM and EPI JTAG interface boxes as well\n\
 as the Angel Monitor.\n",
 		  &setlist),
-    &showlist);
+     &showlist);
 }
 
 /* A little dummy to make linking with the library succeed. */

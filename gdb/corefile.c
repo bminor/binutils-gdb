@@ -236,10 +236,8 @@ memory_error (status, memaddr)
      int status;
      CORE_ADDR memaddr;
 {
-  GDB_FILE *tmp_stream = tui_sfileopen (130);
+  struct gdb_file *tmp_stream = mem_fileopen ();
   make_cleanup_gdb_file_delete (tmp_stream);
-
-  error_begin ();
 
   if (status == EIO)
     {

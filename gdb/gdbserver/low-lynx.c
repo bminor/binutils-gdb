@@ -746,3 +746,8 @@ ptrace (PTRACE_POKETEXT): errno=%d, pid=0x%x, addr=0x%x, buffer[i] = 0x%x\n",
 
   return 0;
 }
+
+void
+initialize_low ()
+{
+}

@@ -1445,7 +1445,7 @@ som_sharedlibrary_info_command (ignore, from_tty)
 
   if (exec_bfd == NULL)
     {
-      printf_unfiltered ("no exec file.\n");
+      printf_unfiltered ("No executable file.\n");
       return;
     }
 

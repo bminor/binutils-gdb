@@ -409,7 +409,8 @@ extern void set_gdb_file_isatty (struct gdb_file *stream, gdb_file_isatty_ftype 
 typedef void (gdb_file_rewind_ftype) (struct gdb_file * stream);
 extern void set_gdb_file_rewind (struct gdb_file *stream, gdb_file_rewind_ftype * rewind);
 
-typedef void (gdb_file_put_ftype) (struct gdb_file * stream, struct gdb_file * dest);
+typedef void (gdb_file_put_method_ftype) (void *object, const char *buffer, long length_buffer);
+typedef void (gdb_file_put_ftype) (struct gdb_file *stream, gdb_file_put_method_ftype * method, void *context);
 extern void set_gdb_file_put (struct gdb_file *stream, gdb_file_put_ftype * put);
 
 typedef void (gdb_file_delete_ftype) (struct gdb_file * stream);
@@ -439,7 +440,13 @@ extern int gdb_file_isatty (GDB_FILE *);
 extern void gdb_file_write (struct gdb_file *file, const char *buf, long length_buf);
 
 /* NOTE: copies left to right */
-extern void gdb_file_put (struct gdb_file *src, struct gdb_file *dest);
+extern void gdb_file_put (struct gdb_file *src, gdb_file_put_method_ftype *write, void *dest);
+
+/* Returns a freshly allocated buffer containing the entire contents
+   of FILE (as determined by gdb_file_put()) with a NUL character
+   appended.  LENGTH is set to the size of the buffer minus that
+   appended NUL. */
+extern char *gdb_file_xstrdup (struct gdb_file *file, long *length);
 
 /* More generic printf like operations */
 
@@ -782,6 +789,14 @@ enum val_prettyprint
 #define	LONG_MAX ((long)(ULONG_MAX >> 1))	/* 0x7FFFFFFF for 32-bits */
 #endif
 
+#if !defined (ULONGEST_MAX)
+#define	ULONGEST_MAX (~(ULONGEST)0)        /* 0xFFFFFFFFFFFFFFFF for 32-bits */
+#endif
+
+#if !defined (LONGEST_MAX)                 /* 0x7FFFFFFFFFFFFFFF for 32-bits */
+#define	LONGEST_MAX ((LONGEST)(ULONGEST_MAX >> 1))
+#endif
+
 /* Convert a LONGEST to an int.  This is used in contexts (e.g. number of
    arguments to a function, number in a value history, register number, etc.)
    where the value must not be larger than can fit in an int.  */
@@ -823,15 +838,22 @@ extern char *quit_pre_print;
 
 extern char *warning_pre_print;
 
-extern NORETURN void error (const char *, ...) ATTR_NORETURN;
+extern NORETURN void verror (const char *fmt, va_list ap) ATTR_NORETURN;
 
-extern void error_begin (void);
+extern NORETURN void error (const char *fmt, ...) ATTR_NORETURN;
 
-extern NORETURN void internal_error (char *, ...) ATTR_NORETURN;
+/* DEPRECATED: Use error(), verror() or error_stream(). */
+extern NORETURN void error_begin (void);
 
 extern NORETURN void error_stream (GDB_FILE *) ATTR_NORETURN;
 
+/* Returns a freshly allocate buffer containing the last error
+   message.  */
 extern char *error_last_message (void);
+
+extern NORETURN void internal_verror (const char *, va_list ap) ATTR_NORETURN;
+
+extern NORETURN void internal_error (char *, ...) ATTR_NORETURN;
 
 extern NORETURN void nomem (long) ATTR_NORETURN;
 

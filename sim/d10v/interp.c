@@ -5,11 +5,7 @@
 #include "remote-sim.h"
 
 #include "d10v_sim.h"
-
-#define IMEM_SIZE 18		/* D10V instruction memory size is 18 bits */
-#define DMEM_SIZE 16		/* Data memory is 64K (but only 32K internal RAM) */
-#define UMEM_SIZE 17		/* Each unified memory segment is 17 bits */
-#define UMEM_SEGMENTS 128	/* Number of segments in unified memory region */
+#include "sim-d10v.h"
 
 enum _leftright { LEFT_FIRST, RIGHT_FIRST };
 
@@ -43,6 +39,7 @@ static void do_parallel PARAMS ((uint16 ins1, uint16 ins2));
 static char *add_commas PARAMS ((char *buf, int sizeof_buf, unsigned long value));
 extern void sim_set_profile PARAMS ((int n));
 extern void sim_set_profile_size PARAMS ((int n));
+static INLINE uint8 *map_memory (unsigned phys_addr);
 
 #ifdef NEED_UI_LOOP_HOOK
 /* How often to run the ui_loop update, when in use */
@@ -102,8 +99,10 @@ lookup_hash (ins, size)
     {
       if (h->next == NULL)
 	{
-	  (*d10v_callback->printf_filtered) (d10v_callback, "ERROR looking up hash for %x at PC %x\n",ins, PC);
-	  exit (1);
+	  (*d10v_callback->printf_filtered)
+	    (d10v_callback, "ERROR: Illegal instruction %x at PC %x\n", ins, PC);
+	  State.exception = SIGILL;
+	  return NULL;
 	}
       h = h->next;
     }
@@ -158,6 +157,8 @@ do_long (ins)
     (*d10v_callback->printf_filtered) (d10v_callback, "do_long 0x%x\n", ins);
 #endif
   h = lookup_hash (ins, 1);
+  if (h == NULL)
+    return;
   get_operands (h->ops, ins);
   State.ins_type = INS_LONG;
   ins_type_counters[ (int)State.ins_type ]++;
@@ -193,6 +194,8 @@ do_2_short (ins1, ins2, leftright)
 
   /* Issue the first instruction */
   h = lookup_hash (ins1, 0);
+  if (h == NULL)
+    return;
   get_operands (h->ops, ins1);
   State.ins_type = first;
   ins_type_counters[ (int)State.ins_type ]++;
@@ -204,6 +207,8 @@ do_2_short (ins1, ins2, leftright)
       /* finish any existing instructions */
       SLOT_FLUSH ();
       h = lookup_hash (ins2, 0);
+      if (h == NULL)
+	return;
       get_operands (h->ops, ins2);
       State.ins_type = second;
       ins_type_counters[ (int)State.ins_type ]++;
@@ -225,7 +230,11 @@ do_parallel (ins1, ins2)
 #endif
   ins_type_counters[ (int)INS_PARALLEL ]++;
   h1 = lookup_hash (ins1, 0);
+  if (h1 == NULL)
+    return;
   h2 = lookup_hash (ins2, 0);
+  if (h2 == NULL)
+    return;
 
   if (h1->ops->exec_type == PARONLY)
     {
@@ -306,49 +315,392 @@ sim_size (power)
 
 {
   int i;
-
-  if (State.imem)
+  for (i = 0; i < IMEM_SEGMENTS; i++)
     {
-      for (i=0;i<UMEM_SEGMENTS;i++)
-	{
-	  if (State.umem[i])
-	    {
-	      free (State.umem[i]);
-	      State.umem[i] = NULL;
-	    }
-	}
-      free (State.imem);
-      free (State.dmem);
+      if (State.mem.insn[i])
+	free (State.mem.insn[i]);
     }
-
-  State.imem = (uint8 *)calloc(1,1<<IMEM_SIZE);
-  State.dmem = (uint8 *)calloc(1,1<<DMEM_SIZE);
-  for (i=1;i<(UMEM_SEGMENTS-1);i++)
-    State.umem[i] = NULL;
-  State.umem[0] = (uint8 *)calloc(1,1<<UMEM_SIZE);
-  State.umem[1] = (uint8 *)calloc(1,1<<UMEM_SIZE);
-  State.umem[2] = (uint8 *)calloc(1,1<<UMEM_SIZE);
-  State.umem[UMEM_SEGMENTS-1] = (uint8 *)calloc(1,1<<UMEM_SIZE);
-  if (!State.imem || !State.dmem || !State.umem[0] || !State.umem[1] || !State.umem[2] || !State.umem[UMEM_SEGMENTS-1] )
+  for (i = 0; i < DMEM_SEGMENTS; i++)
     {
-      (*d10v_callback->printf_filtered) (d10v_callback, "Memory allocation failed.\n");
-      exit(1);
+      if (State.mem.data[i])
+	free (State.mem.data[i]);
     }
-  
+  for (i = 0; i < UMEM_SEGMENTS; i++)
+    {
+      if (State.mem.unif[i])
+	free (State.mem.unif[i]);
+    }
+  /* Always allocate dmem segment 0.  This contains the IMAP and DMAP
+     registers. */
+  State.mem.data[0] = calloc (1, SEGMENT_SIZE);
+}
+
+/* For tracing - leave info on last access around. */
+static char *last_segname = "invalid";
+static char *last_from = "invalid";
+static char *last_to = "invalid";
+
+enum
+  {
+    IMAP0_OFFSET = 0xff00,
+    DMAP0_OFFSET = 0xff08,
+    DMAP2_SHADDOW = 0xff04,
+    DMAP2_OFFSET = 0xff0c
+  };
+
+static void
+set_dmap_register (int reg_nr, unsigned long value)
+{
+  uint8 *raw = map_memory (SIM_D10V_MEMORY_DATA
+			   + DMAP0_OFFSET + 2 * reg_nr);
+  WRITE_16 (raw, value);
 #ifdef DEBUG
-  if ((d10v_debug & DEBUG_MEMSIZE) != 0)
+  if ((d10v_debug & DEBUG_MEMORY))
     {
-      char buffer[20];
-      (*d10v_callback->printf_filtered) (d10v_callback,
-					 "Allocated %s bytes instruction memory and\n",
-					 add_commas (buffer, sizeof (buffer), (1UL<<IMEM_SIZE)));
-
-      (*d10v_callback->printf_filtered) (d10v_callback, "          %s bytes data memory.\n",
-					 add_commas (buffer, sizeof (buffer), (1UL<<IMEM_SIZE)));
+      (*d10v_callback->printf_filtered)
+	(d10v_callback, "mem: dmap%d=0x%04lx\n", reg_nr, value);
     }
 #endif
 }
 
+static unsigned long
+dmap_register (int reg_nr)
+{
+  uint8 *raw = map_memory (SIM_D10V_MEMORY_DATA
+			   + DMAP0_OFFSET + 2 * reg_nr);
+  return READ_16 (raw);
+}
+
+static void
+set_imap_register (int reg_nr, unsigned long value)
+{
+  uint8 *raw = map_memory (SIM_D10V_MEMORY_DATA
+			   + IMAP0_OFFSET + 2 * reg_nr);
+  WRITE_16 (raw, value);
+#ifdef DEBUG
+  if ((d10v_debug & DEBUG_MEMORY))
+    {
+      (*d10v_callback->printf_filtered)
+	(d10v_callback, "mem: imap%d=0x%04lx\n", reg_nr, value);
+    }
+#endif
+}
+
+static unsigned long
+imap_register (int reg_nr)
+{
+  uint8 *raw = map_memory (SIM_D10V_MEMORY_DATA
+			   + IMAP0_OFFSET + 2 * reg_nr);
+  return READ_16 (raw);
+}
+
+enum
+  {
+    HELD_SPI_IDX = 0,
+    HELD_SPU_IDX = 1
+  };
+
+static unsigned long
+spu_register (void)
+{
+  if (PSW_SM)
+    return GPR (SP_IDX);
+  else
+    return HELD_SP (HELD_SPU_IDX);
+}
+
+static unsigned long
+spi_register (void)
+{
+  if (!PSW_SM)
+    return GPR (SP_IDX);
+  else
+    return HELD_SP (HELD_SPI_IDX);
+}
+
+static void
+set_spi_register (unsigned long value)
+{
+  if (!PSW_SM)
+    SET_GPR (SP_IDX, value);
+  SET_HELD_SP (HELD_SPI_IDX, value);
+}
+
+static void
+set_spu_register  (unsigned long value)
+{
+  if (PSW_SM)
+    SET_GPR (SP_IDX, value);
+  SET_HELD_SP (HELD_SPU_IDX, value);
+}
+
+/* Given a virtual address in the DMAP address space, translate it
+   into a physical address. */
+
+unsigned long
+sim_d10v_translate_dmap_addr (unsigned long offset,
+			      int nr_bytes,
+			      unsigned long *phys,
+			      unsigned long (*dmap_register) (int reg_nr))
+{
+  short map;
+  int regno;
+  last_from = "logical-data";
+  if (offset >= DMAP_BLOCK_SIZE * SIM_D10V_NR_DMAP_REGS)
+    {
+      /* Logical address out side of data segments, not supported */
+      return 0;
+    }
+  regno = (offset / DMAP_BLOCK_SIZE);
+  offset = (offset % DMAP_BLOCK_SIZE);
+  if ((offset % DMAP_BLOCK_SIZE) + nr_bytes > DMAP_BLOCK_SIZE)
+    {
+      /* Don't cross a BLOCK boundary */
+      nr_bytes = DMAP_BLOCK_SIZE - (offset % DMAP_BLOCK_SIZE);
+    }
+  map = dmap_register (regno);
+  if (regno == 3)
+    {
+      /* Always maps to data memory */
+      int iospi = (offset / 0x1000) % 4;
+      int iosp = (map >> (4 * (3 - iospi))) % 0x10;
+      last_to = "io-space";
+      *phys = (SIM_D10V_MEMORY_DATA + (iosp * 0x10000) + 0xc000 + offset);
+    }
+  else
+    {
+      int sp = ((map & 0x3000) >> 12);
+      int segno = (map & 0x3ff);
+      switch (sp)
+	{
+	case 0: /* 00: Unified memory */
+	  *phys = SIM_D10V_MEMORY_UNIFIED + (segno * DMAP_BLOCK_SIZE) + offset;
+	  last_to = "unified";
+	  break;
+	case 1: /* 01: Instruction Memory */
+	  *phys = SIM_D10V_MEMORY_INSN + (segno * DMAP_BLOCK_SIZE) + offset;
+	  last_to = "chip-insn";
+	  break;
+	case 2: /* 10: Internal data memory */
+	  *phys = SIM_D10V_MEMORY_DATA + (segno << 16) + (regno * DMAP_BLOCK_SIZE) + offset;
+	  last_to = "chip-data";
+	  break;
+	case 3: /* 11: Reserved */
+	  return 0;
+	}
+    }
+  return nr_bytes;
+}
+
+/* Given a virtual address in the IMAP address space, translate it
+   into a physical address. */
+
+unsigned long
+sim_d10v_translate_imap_addr (unsigned long offset,
+			      int nr_bytes,
+			      unsigned long *phys,
+			      unsigned long (*imap_register) (int reg_nr))
+{
+  short map;
+  int regno;
+  int sp;
+  int segno;
+  last_from = "logical-insn";
+  if (offset >= (IMAP_BLOCK_SIZE * SIM_D10V_NR_IMAP_REGS))
+    {
+      /* Logical address outside of IMAP segments, not supported */
+      return 0;
+    }
+  regno = (offset / IMAP_BLOCK_SIZE);
+  offset = (offset % IMAP_BLOCK_SIZE);
+  if (offset + nr_bytes > IMAP_BLOCK_SIZE)
+    {
+      /* Don't cross a BLOCK boundary */
+      nr_bytes = IMAP_BLOCK_SIZE - offset;
+    }
+  map = imap_register (regno);
+  sp = (map & 0x3000) >> 12;
+  segno = (map & 0x007f);
+  switch (sp)
+    {
+    case 0: /* 00: unified memory */
+      *phys = SIM_D10V_MEMORY_UNIFIED + (segno << 17) + offset;
+      last_to = "unified";
+      break;
+    case 1: /* 01: instruction memory */
+      *phys = SIM_D10V_MEMORY_INSN + (IMAP_BLOCK_SIZE * regno) + offset;
+      last_to = "chip-insn";
+      break;
+    case 2: /*10*/
+      /* Reserved. */
+      return 0;
+    case 3: /* 11: for testing  - instruction memory */
+      offset = (offset % 0x800);
+      *phys = SIM_D10V_MEMORY_INSN + offset;
+      if (offset + nr_bytes > 0x800)
+	/* don't cross VM boundary */
+	nr_bytes = 0x800 - offset;
+      last_to = "test-insn";
+      break;
+    }
+  return nr_bytes;
+}
+
+unsigned long
+sim_d10v_translate_addr (unsigned long memaddr,
+			 int nr_bytes,
+			 unsigned long *targ_addr,
+			 unsigned long (*dmap_register) (int reg_nr),
+			 unsigned long (*imap_register) (int reg_nr))
+{
+  unsigned long phys;
+  unsigned long seg;
+  unsigned long off;
+
+  last_from = "unknown";
+  last_to = "unknown";
+
+  seg = (memaddr >> 24);
+  off = (memaddr & 0xffffffL);
+
+  /* However, if we've asked to use the previous generation of segment
+     mapping, rearrange the segments as follows. */
+
+  if (old_segment_mapping)
+    {
+      switch (seg)
+	{
+	case 0x00: /* DMAP translated memory */
+	  seg = 0x10;
+	  break;
+	case 0x01: /* IMAP translated memory */
+	  seg = 0x11;
+	  break;
+	case 0x10: /* On-chip data memory */
+	  seg = 0x02;
+	  break;
+	case 0x11: /* On-chip insn memory */
+	  seg = 0x01;
+	  break;
+	case 0x12: /* Unified memory */
+	  seg = 0x00;
+	  break;
+	}
+    }
+
+  switch (seg)
+    {
+    case 0x00:			/* Physical unified memory */
+      last_from = "phys-unified";
+      last_to = "unified";
+      phys = SIM_D10V_MEMORY_UNIFIED + off;
+      if ((off % SEGMENT_SIZE) + nr_bytes > SEGMENT_SIZE)
+	nr_bytes = SEGMENT_SIZE - (off % SEGMENT_SIZE);
+      break;
+
+    case 0x01:			/* Physical instruction memory */
+      last_from = "phys-insn";
+      last_to = "chip-insn";
+      phys = SIM_D10V_MEMORY_INSN + off;
+      if ((off % SEGMENT_SIZE) + nr_bytes > SEGMENT_SIZE)
+	nr_bytes = SEGMENT_SIZE - (off % SEGMENT_SIZE);
+      break;
+
+    case 0x02:			/* Physical data memory segment */
+      last_from = "phys-data";
+      last_to = "chip-data";
+      phys = SIM_D10V_MEMORY_DATA + off;
+      if ((off % SEGMENT_SIZE) + nr_bytes > SEGMENT_SIZE)
+	nr_bytes = SEGMENT_SIZE - (off % SEGMENT_SIZE);
+      break;
+
+    case 0x10:			/* in logical data address segment */
+      nr_bytes = sim_d10v_translate_dmap_addr (off, nr_bytes, &phys,
+					       dmap_register);
+      break;
+
+    case 0x11:			/* in logical instruction address segment */
+      nr_bytes = sim_d10v_translate_imap_addr (off, nr_bytes, &phys,
+					       imap_register);
+      break;
+
+    default:
+      return 0;
+    }
+
+  *targ_addr = phys;
+  return nr_bytes;
+}
+
+/* Return a pointer into the raw buffer designated by phys_addr.  It
+   is assumed that the client has already ensured that the access
+   isn't going to cross a segment boundary. */
+
+uint8 *
+map_memory (unsigned phys_addr)
+{
+  uint8 **memory;
+  uint8 *raw;
+  unsigned offset;
+  int segment = ((phys_addr >> 24) & 0xff);
+  
+  switch (segment)
+    {
+      
+    case 0x00: /* Unified memory */
+      {
+	memory = &State.mem.unif[(phys_addr / SEGMENT_SIZE) % UMEM_SEGMENTS];
+	last_segname = "umem";
+	break;
+      }
+    
+    case 0x01: /* On-chip insn memory */
+      {
+	memory = &State.mem.insn[(phys_addr / SEGMENT_SIZE) % IMEM_SEGMENTS];
+	last_segname = "imem";
+	break;
+      }
+    
+    case 0x02: /* On-chip data memory */
+      {
+	if ((phys_addr & 0xff00) == 0xff00)
+	  {
+	    phys_addr = (phys_addr & 0xffff);
+	    if (phys_addr == DMAP2_SHADDOW)
+	      {
+		phys_addr = DMAP2_OFFSET;
+		last_segname = "dmap";
+	      }
+	    else
+	      last_segname = "reg";
+	  }
+	else
+	  last_segname = "dmem";
+	memory = &State.mem.data[(phys_addr / SEGMENT_SIZE) % DMEM_SEGMENTS];
+	break;
+      }
+    
+    default:
+      /* OOPS! */
+      last_segname = "scrap";
+      return State.mem.fault;
+    }
+  
+  if (*memory == NULL)
+    {
+      *memory = calloc (1, SEGMENT_SIZE);
+      if (*memory == NULL)
+	{
+	  (*d10v_callback->printf_filtered) (d10v_callback, "Malloc failed.\n");
+	  return State.mem.fault;
+	}
+    }
+  
+  offset = (phys_addr % SEGMENT_SIZE);
+  raw = *memory + offset;
+  return raw;
+}
+  
 /* Transfer data to/from simulated memory.  Since a bug in either the
    simulated program or in gdb or the simulator itself may cause a
    bogus address to be passed in, we need to do some sanity checking
@@ -357,201 +709,52 @@ sim_size (power)
    than aborting the entire run. */
 
 static int
-xfer_mem (SIM_ADDR addr,
+xfer_mem (SIM_ADDR virt,
 	  unsigned char *buffer,
 	  int size,
 	  int write_p)
 {
-  unsigned char *memory;
-  int segment = ((addr >> 24) & 0xff);
-  addr = (addr & 0x00ffffff);
+  int xfered = 0;
+
+  while (xfered < size)
+    {
+      uint8 *memory;
+      unsigned long phys;
+      int phys_size;
+      phys_size = sim_d10v_translate_addr (virt, size,
+					   &phys,
+					   dmap_register,
+					   imap_register);
+      if (phys_size == 0)
+	return xfered;
+
+      memory = map_memory (phys);
 
 #ifdef DEBUG
-  if ((d10v_debug & DEBUG_INSTRUCTION) != 0)
-    {
+      if ((d10v_debug & DEBUG_INSTRUCTION) != 0)
+	{
+	  (*d10v_callback->printf_filtered)
+	    (d10v_callback,
+	     "sim_%s %d bytes: 0x%08lx (%s) -> 0x%08lx (%s) -> 0x%08lx (%s)\n",
+	     (write_p ? "write" : "read"),
+	     phys_size, virt, last_from,
+	     phys, last_to,
+	     (long) memory, last_segname);
+	}
+#endif
+
       if (write_p)
 	{
-	  (*d10v_callback->printf_filtered) (d10v_callback, "sim_write %d bytes to 0x%02x:%06x\n", size, segment, addr);
+	  memcpy (memory, buffer, phys_size);
 	}
       else
 	{
-	  (*d10v_callback->printf_filtered) (d10v_callback, "sim_read %d bytes from 0x%2x:%6x\n", size, segment, addr);
+	  memcpy (buffer, memory, phys_size);
 	}
-    }
-#endif
 
-  /* To access data, we use the following mappings:
-
-     0x00xxxxxx: Physical unified memory segment     (Unified memory)
-     0x01xxxxxx: Physical instruction memory segment (On-chip insn memory)
-     0x02xxxxxx: Physical data memory segment        (On-chip data memory)
-     0x10xxxxxx: Logical data address segment        (DMAP translated memory)
-     0x11xxxxxx: Logical instruction address segment (IMAP translated memory)
-
-     Alternatively, the "old segment mapping" is still available by setting
-     old_segment_mapping to 1.  It looks like this:
-
-     0x00xxxxxx: Logical data address segment        (DMAP translated memory)
-     0x01xxxxxx: Logical instruction address segment (IMAP translated memory)
-     0x10xxxxxx: Physical data memory segment        (On-chip data memory)
-     0x11xxxxxx: Physical instruction memory segment (On-chip insn memory)
-     0x12xxxxxx: Physical unified memory segment     (Unified memory)
-
-   */
-
-  /* However, if we've asked to use the previous generation of segment
-     mapping, rearrange the segments as follows. */
-
-  if (old_segment_mapping)
-    {
-      switch (segment)
-	{
-	case 0x00: /* DMAP translated memory */
-	  segment = 0x10;
-	  break;
-	case 0x01: /* IMAP translated memory */
-	  segment = 0x11;
-	  break;
-	case 0x10: /* On-chip data memory */
-	  segment = 0x02;
-	  break;
-	case 0x11: /* On-chip insn memory */
-	  segment = 0x01;
-	  break;
-	case 0x12: /* Unified memory */
-	  segment = 0x00;
-	  break;
-	}
-    }
-
-  switch (segment)
-    {
-    case 0x10: /* DMAP translated memory */
-      {
-	int byte;
-	for (byte = 0; byte < size; byte++)
-	  {
-	    uint8 *mem = dmem_addr (addr + byte);
-	    if (mem == NULL)
-	      return byte;
-	    else if (write_p)
-	      *mem = buffer[byte];
-	    else
-	      buffer[byte] = *mem;
-	  }
-	return byte;
-      }
-
-    case 0x11: /* IMAP translated memory */
-      {
-	int byte;
-	for (byte = 0; byte < size; byte++)
-	  {
-	    uint8 *mem = imem_addr (addr + byte);
-	    if (mem == NULL)
-	      return byte;
-	    else if (write_p)
-	      *mem = buffer[byte];
-	    else
-	      buffer[byte] = *mem;
-	  }
-	return byte;
-      }
-
-    case 0x02: /* On-chip data memory */
-      {
-	addr &= ((1 << DMEM_SIZE) - 1);
-	if ((addr + size) > (1 << DMEM_SIZE))
-	  {
-	    (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: data address 0x%x is outside range 0-0x%x.\n",
-					       addr + size - 1, (1 << DMEM_SIZE) - 1);
-	    return (0);
-	  }
-	memory = State.dmem + addr;
-	break;
-      }
-
-    case 0x01: /* On-chip insn memory */
-      {
-	addr &= ((1 << IMEM_SIZE) - 1);
-	if ((addr + size) > (1 << IMEM_SIZE))
-	  {
-	    (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: instruction address 0x%x is outside range 0-0x%x.\n",
-					       addr + size - 1, (1 << IMEM_SIZE) - 1);
-	    return (0);
-	  }
-	memory = State.imem + addr;
-	break;
-      }
-
-    case 0x00: /* Unified memory */
-      {
-	int startsegment, startoffset;	/* Segment and offset within segment where xfer starts */
-	int endsegment, endoffset;	/* Segment and offset within segment where xfer ends */
-	
-	startsegment = addr >> UMEM_SIZE;
-	startoffset = addr & ((1 << UMEM_SIZE) - 1);
-	endsegment = (addr + size) >> UMEM_SIZE;
-	endoffset = (addr + size) & ((1 << UMEM_SIZE) - 1);
-	
-	/* FIXME: We do not currently implement xfers across segments,
-           so detect this case and fail gracefully. */
-	
-	if ((startsegment != endsegment) && !((endsegment == (startsegment + 1)) && endoffset == 0))
-	  {
-	    (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: Unimplemented support for transfers across unified memory segment boundaries\n");
-	    return (0);
-	  }
-	if (!State.umem[startsegment])
-	  {
-#ifdef DEBUG
-	    if ((d10v_debug & DEBUG_MEMSIZE) != 0)
-	      {
-		(*d10v_callback->printf_filtered) (d10v_callback,"Allocating %s bytes unified memory to region %d\n",
-						   add_commas (buffer, sizeof (buffer), (1UL<<IMEM_SIZE)), startsegment);
-	      }
-#endif
-	    State.umem[startsegment] = (uint8 *)calloc(1,1<<UMEM_SIZE);
-	  }
-	if (!State.umem[startsegment])
-	  {
-	    (*d10v_callback->printf_filtered) (d10v_callback, "ERROR: Memory allocation of 0x%x bytes failed.\n", 1<<UMEM_SIZE);
-	    return (0);
-	  }
-	memory = State.umem[startsegment] + startoffset;
-	break;
-      }
-
-    default:
-      {
-	(*d10v_callback->printf_filtered) (d10v_callback, "ERROR: address 0x%lx is not in valid range\n", (long) addr);
-	if (old_segment_mapping)
-	  {
-	    (*d10v_callback->printf_filtered) (d10v_callback, "0x00xxxxxx:  Logical data address segment            (DMAP translated memory)\n");
-	    (*d10v_callback->printf_filtered) (d10v_callback, "0x01xxxxxx:  Logical instruction address segment     (IMAP translated memory)\n");
-	    (*d10v_callback->printf_filtered) (d10v_callback, "0x10xxxxxx:  Physical data memory segment            (On-chip data memory)\n");
-	    (*d10v_callback->printf_filtered) (d10v_callback, "0x11xxxxxx:  Physical instruction memory segment     (On-chip insn memory)\n");
-	    (*d10v_callback->printf_filtered) (d10v_callback, "0x12xxxxxx:  Phisical unified memory segment         (Unified memory)\n");
-	  }
-	else
-	  {
-	    (*d10v_callback->printf_filtered) (d10v_callback, "0x00xxxxxx:  Physical unified memory segment		(Unified memory)\n");
-	    (*d10v_callback->printf_filtered) (d10v_callback, "0x01xxxxxx:  Physical instruction memory segment	(On-chip insn memory)\n");
-	    (*d10v_callback->printf_filtered) (d10v_callback, "0x02xxxxxx:  Physical data memory segment		(On-chip data memory)\n");
-	    (*d10v_callback->printf_filtered) (d10v_callback, "0x10xxxxxx:  Logical data address segment		(DMAP translated memory)\n");
-	    (*d10v_callback->printf_filtered) (d10v_callback, "0x11xxxxxx:  Logical instruction address segment	(IMAP translated memory)\n");
-	  }
- 	return (0);
-      }
-    }
-
-  if (write_p)
-    {
-      memcpy (memory, buffer, size);
-    }
-  else
-    {
-      memcpy (buffer, memory, size);
+      virt += phys_size;
+      buffer += phys_size;
+      xfered += phys_size;
     }
 
   return size;
@@ -598,6 +801,9 @@ sim_open (kind, callback, abfd, argv)
   myname = argv[0];
   old_segment_mapping = 0;
 
+  /* NOTE: This argument parsing is only effective when this function
+     is called by GDB. Standalone argument parsing is handled by
+     sim/common/run.c. */
   for (p = argv + 1; *p; ++p)
     {
       if (strcmp (*p, "-oldseg") == 0)
@@ -605,6 +811,8 @@ sim_open (kind, callback, abfd, argv)
 #ifdef DEBUG
       else if (strcmp (*p, "-t") == 0)
 	d10v_debug = DEBUG;
+      else if (strncmp (*p, "-t", 2) == 0)
+	d10v_debug = atoi (*p + 2);
 #endif
       else
 	(*d10v_callback->printf_filtered) (d10v_callback, "ERROR: unsupported option(s): %s\n",*p);
@@ -637,8 +845,8 @@ sim_open (kind, callback, abfd, argv)
     }
 
   /* reset the processor state */
-  if (!State.imem)
-    sim_size(1);
+  if (!State.mem.data[0])
+    sim_size (1);
   sim_create_inferior ((SIM_DESC) 1, NULL, NULL, NULL);
 
   /* Fudge our descriptor.  */
@@ -673,83 +881,63 @@ sim_set_profile_size (n)
   (*d10v_callback->printf_filtered) (d10v_callback, "sim_set_profile_size %d\n",n);
 }
 
-
 uint8 *
-dmem_addr( addr )
-     uint32 addr;
+dmem_addr (uint16 offset)
 {
-  int seg;
+  unsigned long phys;
+  uint8 *mem;
+  int phys_size;
 
-  addr &= 0xffff;
+  /* Note: DMEM address range is 0..0x10000. Calling code can compute
+     things like ``0xfffe + 0x0e60 == 0x10e5d''.  Since offset's type
+     is uint16 this is modulo'ed onto 0x0e5d. */
 
-  if (addr > 0xbfff)
+  phys_size = sim_d10v_translate_dmap_addr (offset, 1, &phys,
+					    dmap_register);
+  if (phys_size == 0)
     {
-      if ( (addr & 0xfff0) != 0xff00)
-	{
-	  (*d10v_callback->printf_filtered) (d10v_callback, "Data address 0x%lx is in I/O space, pc = 0x%lx.\n",
-					     (long)addr, (long)decode_pc ());
-	  State.exception = SIGBUS;
-	}
-
-      return State.dmem + addr;
+      mem = State.mem.fault;
     }
-  
-  if (addr > 0x7fff)
-    {
-      if (DMAP & 0x1000)
-	{
-	  /* instruction memory */
- 	  return (DMAP & 0xf) * 0x4000 + State.imem + (addr - 0x8000);
-	}
-      else 
-	{
-	  /* unified memory */
-	  /* this is ugly because we allocate unified memory in 128K segments and */
-	  /* dmap addresses 16k segments */
-	  seg = (DMAP & 0x3ff) >> 3;
-	  if (State.umem[seg] == NULL)
-	    {
-#ifdef DEBUG
-	      (*d10v_callback->printf_filtered) (d10v_callback,"Allocating %d bytes unified memory to region %d\n", 1<<UMEM_SIZE, seg);
-#endif
-	      State.umem[seg] = (uint8 *)calloc(1,1<<UMEM_SIZE);
-	      if (!State.umem[seg])
-		{
-		  (*d10v_callback->printf_filtered) (d10v_callback, 
-		      "ERROR:  alloc failed. unified memory region %d unmapped, pc = 0x%lx\n", 
-		      seg, (long)decode_pc ());
-		  State.exception = SIGBUS;
-		}
-	    }
-	  return State.umem[seg] + (DMAP & 7) * 0x4000 + (addr - 0x8000);
-	}
-    }
-  return State.dmem + addr;
-}
-
-
-uint8 *
-imem_addr (uint32 pc)
-{
-  uint16 imap;
-
-  if (pc & 0x20000)
-    imap = IMAP1;
   else
-    imap = IMAP0;
-  
-  if (imap & 0x1000)
-    return State.imem + pc;
-
-  if (State.umem[imap & 0xff] == NULL)
-    return 0;
-
-  /* Discard upper bit(s) of PC in case IMAP1 selects unified memory. */
-  pc &= (1 << UMEM_SIZE) - 1;
-
-  return State.umem[imap & 0xff] + pc;
+    mem = map_memory (phys);
+#ifdef DEBUG
+  if ((d10v_debug & DEBUG_MEMORY))
+    {
+      (*d10v_callback->printf_filtered)
+	(d10v_callback,
+	 "mem: 0x%08x (%s) -> 0x%08lx %d (%s) -> 0x%08lx (%s)\n",
+	 offset, last_from,
+	 phys, phys_size, last_to,
+	 (long) mem, last_segname);
+    }
+#endif
+  return mem;
 }
 
+uint8 *
+imem_addr (uint32 offset)
+{
+  unsigned long phys;
+  uint8 *mem;
+  int phys_size = sim_d10v_translate_imap_addr (offset, 1, &phys, imap_register);
+  if (phys_size == 0)
+    {
+      return State.mem.fault;
+    }
+  mem = map_memory (phys); 
+#ifdef DEBUG
+  if ((d10v_debug & DEBUG_MEMORY))
+    {
+      (*d10v_callback->printf_filtered)
+	(d10v_callback,
+	 "mem: 0x%08x (%s) -> 0x%08lx %d (%s) -> 0x%08lx (%s)\n",
+	 offset, last_from,
+	 phys, phys_size, last_to,
+	 (long) mem, last_segname);
+    }
+#endif
+  return mem;
+}
 
 static int stop_simulator = 0;
 
@@ -779,7 +967,7 @@ sim_resume (sd, step, siggnal)
   do
     {
       iaddr = imem_addr ((uint32)PC << 2);
-      if (iaddr == NULL)
+      if (iaddr == State.mem.fault)
  	{
  	  State.exception = SIGBUS;
  	  break;
@@ -990,7 +1178,7 @@ sim_create_inferior (sd, abfd, argv, env)
   bfd_vma start_address;
 
   /* reset all state information */
-  memset (&State.regs, 0, (int)&State.imem - (int)&State.regs[0]);
+  memset (&State.regs, 0, (int)&State.mem - (int)&State.regs);
 
   if (argv)
     {
@@ -1022,19 +1210,28 @@ sim_create_inferior (sd, abfd, argv, env)
 #endif
   SET_CREG (PC_CR, start_address >> 2);
 
-  /* cpu resets imap0 to 0 and imap1 to 0x7f, but D10V-EVA board */
-  /* resets imap0 and imap1 to 0x1000. */
+  /* cpu resets imap0 to 0 and imap1 to 0x7f, but D10V-EVA board
+     initializes imap0 and imap1 to 0x1000 as part of its ROM
+     initialization. */
   if (old_segment_mapping)
     {
-      SET_IMAP0 (0x0000);
-      SET_IMAP1 (0x007f);
-      SET_DMAP (0x0000);
+      /* External memory startup.  This is the HARD reset state. */
+      set_imap_register (0, 0x0000);
+      set_imap_register (1, 0x007f);
+      set_dmap_register (0, 0x2000);
+      set_dmap_register (1, 0x2000);
+      set_dmap_register (2, 0x0000); /* Old DMAP */
+      set_dmap_register (3, 0x0000);
     }
   else
     {
-      SET_IMAP0 (0x1000);
-      SET_IMAP1 (0x1000);
-      SET_DMAP(0);
+      /* Internal memory startup. This is the ROM intialized state. */
+      set_imap_register (0, 0x1000);
+      set_imap_register (1, 0x1000);
+      set_dmap_register (0, 0x2000);
+      set_dmap_register (1, 0x2000);
+      set_dmap_register (2, 0x0000); /* Old DMAP, Value is not 0x2000 */
+      set_dmap_register (3, 0x0000);
     }
 
   SLOT_FLUSH ();
@@ -1088,19 +1285,56 @@ sim_fetch_register (sd, rn, memory, length)
      unsigned char *memory;
      int length;
 {
-  if (rn > 34)
-    WRITE_64 (memory, ACC (rn-35));
-  else if (rn == 32)
-    WRITE_16 (memory, IMAP0);
-  else if (rn == 33)
-    WRITE_16 (memory, IMAP1);
-  else if (rn == 34)
-    WRITE_16 (memory, DMAP);
-  else if (rn >= 16)
-    WRITE_16 (memory, CREG (rn - 16));
+  int size;
+  if (rn < 0)
+    size = 0;
+  else if (rn >= SIM_D10V_R0_REGNUM
+	   && rn < SIM_D10V_R0_REGNUM + SIM_D10V_NR_R_REGS)
+    {
+      WRITE_16 (memory, GPR (rn - SIM_D10V_R0_REGNUM));
+      size = 2;
+    }
+  else if (rn >= SIM_D10V_CR0_REGNUM
+	   && rn < SIM_D10V_CR0_REGNUM + SIM_D10V_NR_CR_REGS)
+    {
+      WRITE_16 (memory, CREG (rn - SIM_D10V_CR0_REGNUM));
+      size = 2;
+    }
+  else if (rn >= SIM_D10V_A0_REGNUM
+	   && rn < SIM_D10V_A0_REGNUM + SIM_D10V_NR_A_REGS)
+    {
+      WRITE_64 (memory, ACC (rn - SIM_D10V_A0_REGNUM));
+      size = 8;
+    }
+  else if (rn == SIM_D10V_SPI_REGNUM)
+    {
+      /* PSW_SM indicates that the current SP is the USER
+         stack-pointer. */
+      WRITE_16 (memory, spi_register ());
+      size = 2;
+    }
+  else if (rn == SIM_D10V_SPU_REGNUM)
+    {
+      /* PSW_SM indicates that the current SP is the USER
+         stack-pointer. */
+      WRITE_16 (memory, spu_register ());
+      size = 2;
+    }
+  else if (rn >= SIM_D10V_IMAP0_REGNUM
+	   && rn < SIM_D10V_IMAP0_REGNUM + SIM_D10V_NR_IMAP_REGS)
+    {
+      WRITE_16 (memory, imap_register (rn - SIM_D10V_IMAP0_REGNUM));
+      size = 2;
+    }
+  else if (rn >= SIM_D10V_DMAP0_REGNUM
+	   && rn < SIM_D10V_DMAP0_REGNUM + SIM_D10V_NR_DMAP_REGS)
+    {
+      WRITE_16 (memory, dmap_register (rn - SIM_D10V_DMAP0_REGNUM));
+      size = 2;
+    }
   else
-    WRITE_16 (memory, GPR (rn));
-  return -1;
+    size = 0;
+  return size;
 }
  
 int
@@ -1110,20 +1344,55 @@ sim_store_register (sd, rn, memory, length)
      unsigned char *memory;
      int length;
 {
-  if (rn > 34)
-    SET_ACC (rn-35, READ_64 (memory) & MASK40);
-  else if (rn == 34)
-    SET_DMAP( READ_16(memory) );
-  else if (rn == 33)
-    SET_IMAP1( READ_16(memory) );
-  else if (rn == 32)
-    SET_IMAP0( READ_16(memory) );
-  else if (rn >= 16)
-    SET_CREG (rn - 16, READ_16 (memory));
+  int size;
+  if (rn < 0)
+    size = 0;
+  else if (rn >= SIM_D10V_R0_REGNUM
+	   && rn < SIM_D10V_R0_REGNUM + SIM_D10V_NR_R_REGS)
+    {
+      SET_GPR (rn - SIM_D10V_R0_REGNUM, READ_16 (memory));
+      size = 2;
+    }
+  else if (rn >= SIM_D10V_CR0_REGNUM
+	   && rn < SIM_D10V_CR0_REGNUM + SIM_D10V_NR_CR_REGS)
+    {
+      SET_CREG (rn - SIM_D10V_CR0_REGNUM, READ_16 (memory));
+      size = 2;
+    }
+  else if (rn >= SIM_D10V_A0_REGNUM
+	   && rn < SIM_D10V_A0_REGNUM + SIM_D10V_NR_A_REGS)
+    {
+      SET_ACC (rn - SIM_D10V_A0_REGNUM, READ_64 (memory) & MASK40);
+      size = 8;
+    }
+  else if (rn == SIM_D10V_SPI_REGNUM)
+    {
+      /* PSW_SM indicates that the current SP is the USER
+         stack-pointer. */
+      set_spi_register (READ_16 (memory));
+      size = 2;
+    }
+  else if (rn == SIM_D10V_SPU_REGNUM)
+    {
+      set_spu_register (READ_16 (memory));
+      size = 2;
+    }
+  else if (rn >= SIM_D10V_IMAP0_REGNUM
+	   && rn < SIM_D10V_IMAP0_REGNUM + SIM_D10V_NR_IMAP_REGS)
+    {
+      set_imap_register (rn - SIM_D10V_IMAP0_REGNUM, READ_16(memory));
+      size = 2;
+    }
+  else if (rn >= SIM_D10V_DMAP0_REGNUM
+	   && rn < SIM_D10V_DMAP0_REGNUM + SIM_D10V_NR_DMAP_REGS)
+    {
+      set_dmap_register (rn - SIM_D10V_DMAP0_REGNUM, READ_16(memory));
+      size = 2;
+    }
   else
-    SET_GPR (rn, READ_16 (memory));
+    size = 0;
   SLOT_FLUSH ();
-  return -1;
+  return size;
 }
 
 

@@ -33,6 +33,7 @@ unsigned char mywait PARAMS ((char *status));
 void read_inferior_memory PARAMS ((CORE_ADDR memaddr, char *myaddr, int len));
 int write_inferior_memory PARAMS ((CORE_ADDR memaddr, char *myaddr, int len));
 int create_inferior ();
+void initialize_low ();
 
 /* Target-specific variables */
 

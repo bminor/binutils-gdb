@@ -2066,6 +2066,7 @@ print_it_typical (bs)
       printf_filtered ("\n");
       return PRINT_UNKNOWN;
       break;
+
     /* Fall through, we don't deal with these types of breakpoints
        here. */
 
@@ -2271,9 +2272,14 @@ watchpoint_check (p)
          So we can't even detect the first assignment to it and
          watch after that (since the garbage may or may not equal
          the first value assigned).  */
+      /* We print all the stop information in print_it_typical(), but
+	 in this case, by the time we call print_it_typical() this bp
+	 will be deleted already. So we have no choice but print the
+	 information here. */
       printf_filtered ("\
 Watchpoint %d deleted because the program has left the block in\n\
 which its expression is valid.\n", bs->breakpoint_at->number);
+
       if (b->related_breakpoint)
 	b->related_breakpoint->disposition = del_at_next_stop;
       b->disposition = del_at_next_stop;
@@ -2408,6 +2414,9 @@ bpstat_stop_status (pc, not_a_breakpoint)
 	  {
 	  case WP_DELETED:
 	    /* We've already printed what needs to be printed.  */
+	    /* Actually this is superfluous, because by the time we
+               call print_it_typical() the wp will be already deleted,
+               and the function will return immediately. */
 	    bs->print_it = print_it_done;
 	    /* Stop.  */
 	    break;

@@ -62,6 +62,8 @@ main (argc, argv)
   if (argc < 3)
     error ("Usage: gdbserver tty prog [args ...]");
 
+  initialize_low ();
+
   /* Wait till we are at first instruction in program.  */
   signal = start_inferior (&argv[2], &status);
 

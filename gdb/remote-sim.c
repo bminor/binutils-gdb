@@ -194,12 +194,7 @@ gdb_os_write_stdout (p, buf, len)
   int i;
   char b[2];
 
-  for (i = 0; i < len; i++)
-    {
-      b[0] = buf[i];
-      b[1] = 0;
-      fputs_unfiltered (b, gdb_stdtarg);
-    }
+  gdb_file_write (gdb_stdtarg, buf, len);
   return len;
 }
 
@@ -209,7 +204,7 @@ static void
 gdb_os_flush_stdout (p)
      host_callback *p;
 {
-  gdb_flush (gdb_stdout);
+  gdb_flush (gdb_stdtarg);
 }
 
 /* GDB version of os_write_stderr callback.  */
@@ -281,12 +276,8 @@ gdb_os_error (host_callback * p, const char *format,...)
     {
       va_list args;
       va_start (args, format);
-
-      error_begin ();
-      vfprintf_filtered (gdb_stderr, format, args);
-      fprintf_filtered (gdb_stderr, "\n");
+      verror (format, args);
       va_end (args);
-      return_to_top_level (RETURN_ERROR);
     }
 }
 

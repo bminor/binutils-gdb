@@ -17,7 +17,7 @@
 	checkpsw2 4 PSW_DB
 
 	loadpsw2 PSW_DM
-	checkpsw2 5 PSW_DM
+	checkpsw2 5 0 ;; PSW_DM
 
 	loadpsw2 PSW_IE
 	checkpsw2 6 PSW_IE
@@ -65,17 +65,65 @@
 	mvfc	r7, cr11
 	check 18 r7 0xbeee
 
-;;; Check that certain bits of the DPSW and BPSW are hardwired to zero
+;;; Check that certain bits of the PSW, DPSW and BPSW are hardwired to zero
 
+psw_ffff:
+	ldi	r6, 0xffff
+	mvtc	r6, psw
+	mvfc	r7, psw
+	check 18 r7 0xb7cd
+
+bpsw_ffff:
 	ldi	r6, 0xffff
 	mvtc	r6, bpsw
 	mvfc	r7, bpsw
-	check 18 r7 0xbfcd
+	check 18 r7 0xb7cd
 
+dpsw_ffff:
 	ldi	r6, 0xffff
 	mvtc	r6, dpsw
 	mvfc	r7, dpsw
-	check 18 r7 0xbfcd
+	check 18 r7 0xb7cd
+
+;;; Another check. Very similar
+
+psw_dfff:
+	ldi	r6, 0xdfff
+	mvtc	r6, psw
+	mvfc	r7, psw
+	check 18 r7 0x97cd
+
+bpsw_dfff:
+	ldi	r6, 0xdfff
+	mvtc	r6, bpsw
+	mvfc	r7, bpsw
+	check 18 r7 0x97cd
+
+dpsw_dfff:
+	ldi	r6, 0xdfff
+	mvtc	r6, dpsw
+	mvfc	r7, dpsw
+	check 18 r7 0x97cd
+
+;;; And again.
+
+psw_8005:
+	ldi	r6, 0x8005
+	mvtc	r6, psw
+	mvfc	r7, psw
+	check 18 r7 0x8005
+
+bpsw_8005:
+	ldi	r6, 0x8005
+	mvtc	r6, bpsw
+	mvfc	r7, bpsw
+	check 18 r7 0x8005
+
+dpsw_8005:
+	ldi	r6, 0x8005
+	mvtc	r6, dpsw
+	mvfc	r7, dpsw
+	check 18 r7 0x8005
 
 
 	exit0

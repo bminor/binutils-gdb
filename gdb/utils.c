@@ -523,31 +523,38 @@ error_begin ()
    and the remaining args are passed as arguments to it.  */
 
 NORETURN void
+verror (const char *string, va_list args)
+{
+  /* FIXME: cagney/1999-11-10: All error calls should come here.
+     Unfortunatly some code uses the sequence: error_begin(); print
+     error message; return_to_top_level.  That code should be
+     flushed. */
+  error_begin ();
+  vfprintf_filtered (gdb_stderr, string, args);
+  fprintf_filtered (gdb_stderr, "\n");
+  /* Save it as the last error as well (no newline) */
+  gdb_file_rewind (gdb_lasterr);
+  vfprintf_filtered (gdb_lasterr, string, args);
+  va_end (args);
+  return_to_top_level (RETURN_ERROR);
+}
+
+NORETURN void
 error (const char *string,...)
 {
   va_list args;
   va_start (args, string);
-  if (error_hook)
-    (*error_hook) ();
-  else
-    {
-      error_begin ();
-      vfprintf_filtered (gdb_stderr, string, args);
-      fprintf_filtered (gdb_stderr, "\n");
-      /* Save it as the last error as well (no newline) */
-      gdb_file_rewind (gdb_lasterr);
-      vfprintf_filtered (gdb_lasterr, string, args);
-      va_end (args);
-      return_to_top_level (RETURN_ERROR);
-    }
+  verror (string, args);
+  va_end (args);
 }
-
-/* Allows the error message to be passed on a stream buffer */
 
 NORETURN void
 error_stream (GDB_FILE *stream)
 {
-  error (tui_file_get_strbuf (stream));
+  long size;
+  char *msg = gdb_file_xstrdup (stream, &size);
+  make_cleanup (free, msg);
+  error ("%s", msg);
 }
 
 /* Get the last error message issued by gdb */
@@ -555,26 +562,26 @@ error_stream (GDB_FILE *stream)
 char *
 error_last_message (void)
 {
-  return (tui_file_get_strbuf (gdb_lasterr));
+  long len;
+  return gdb_file_xstrdup (gdb_lasterr, &len);
 }
-
+  
 /* This is to be called by main() at the very beginning */
 
 void
 error_init (void)
 {
-  gdb_lasterr = tui_sfileopen (132);
+  gdb_lasterr = mem_fileopen ();
 }
 
 /* Print a message reporting an internal error. Ask the user if they
    want to continue, dump core, or just exit. */
 
 NORETURN void
-internal_error (char *string, ...)
+internal_verror (const char *fmt, va_list ap)
 {
   static char msg[] = "Internal GDB error: recursive internal error.\n";
   static int dejavu = 0;
-  va_list args;
   int continue_p;
   int dump_core_p;
 
@@ -596,9 +603,7 @@ internal_error (char *string, ...)
 
   /* Try to get the message out */
   fputs_unfiltered ("gdb-internal-error: ", gdb_stderr);
-  va_start (args, string);
-  vfprintf_unfiltered (gdb_stderr, string, args);
-  va_end (args);
+  vfprintf_unfiltered (gdb_stderr, fmt, ap);
   fputs_unfiltered ("\n", gdb_stderr);
 
   /* Default (no case) is to quit GDB.  When in batch mode this
@@ -630,6 +635,15 @@ Create a core file containing the current state of GDB? ");
 
   dejavu = 0;
   return_to_top_level (RETURN_ERROR);
+}
+
+NORETURN void
+internal_error (char *string, ...)
+{
+  va_list ap;
+  va_start (ap, string);
+  internal_verror (string, ap);
+  va_end (ap);
 }
 
 /* The strerror() function can return NULL for errno values that are
@@ -787,7 +801,7 @@ notice_quit ()
     immediate_quit = 1;
 }
 
-#else /* !defined(__GO32__) && !defined(_MSC_VER) */
+#else /* !defined(_MSC_VER) */
 
 void
 notice_quit ()
@@ -795,7 +809,7 @@ notice_quit ()
   /* Done by signals */
 }
 
-#endif /* !defined(__GO32__) && !defined(_MSC_VER) */
+#endif /* !defined(_MSC_VER) */
 
 /* Control C comes here */
 void
@@ -1754,19 +1768,20 @@ stdio_fileopen (file)
 
 
 /* A pure memory based ``struct gdb_file'' that can be used an output
-   collector. It's input is available through gdb_file_put(). */
+   buffer. The buffers accumulated contents are available via
+   gdb_file_put(). */
 
 struct mem_file
   {
     int *magic;
     char *buffer;
     int sizeof_buffer;
-    int strlen_buffer;
+    int length_buffer;
   };
 
-extern gdb_file_fputs_ftype mem_file_fputs;
 static gdb_file_rewind_ftype mem_file_rewind;
 static gdb_file_put_ftype mem_file_put;
+static gdb_file_write_ftype mem_file_write;
 static gdb_file_delete_ftype mem_file_delete;
 static struct gdb_file *mem_file_new PARAMS ((void));
 static int mem_file_magic;
@@ -1777,12 +1792,13 @@ mem_file_new (void)
   struct mem_file *stream = XMALLOC (struct mem_file);
   struct gdb_file *file = gdb_file_new ();
   set_gdb_file_data (file, stream, mem_file_delete);
-  set_gdb_file_fputs (file, mem_file_fputs);
   set_gdb_file_rewind (file, mem_file_rewind);
   set_gdb_file_put (file, mem_file_put);
+  set_gdb_file_write (file, mem_file_write);
   stream->magic = &mem_file_magic;
   stream->buffer = NULL;
   stream->sizeof_buffer = 0;
+  stream->length_buffer = 0;
   return file;
 }
 
@@ -1809,51 +1825,48 @@ mem_file_rewind (struct gdb_file *file)
   struct mem_file *stream = gdb_file_data (file);
   if (stream->magic != &mem_file_magic)
     internal_error ("mem_file_rewind: bad magic number");
-  if (stream->buffer != NULL)
-    {
-      stream->buffer[0] = '\0';
-      stream->strlen_buffer = 0;
-    }
+  stream->length_buffer = 0;
 }
 
 static void
-mem_file_put (struct gdb_file *file, struct gdb_file *dest)
+mem_file_put (struct gdb_file *file,
+	      gdb_file_put_method_ftype *write,
+	      void *dest)
 {
   struct mem_file *stream = gdb_file_data (file);
   if (stream->magic != &mem_file_magic)
     internal_error ("mem_file_put: bad magic number");
-  if (stream->buffer != NULL)
-    fputs_unfiltered (stream->buffer, dest);
+  if (stream->length_buffer > 0)
+    write (dest, stream->buffer, stream->length_buffer);
 }
 
 void
-mem_file_fputs (const char *linebuffer, struct gdb_file *file)
+mem_file_write (struct gdb_file *file,
+		const char *buffer,
+		long length_buffer)
 {
   struct mem_file *stream = gdb_file_data (file);
   if (stream->magic != &mem_file_magic)
-    internal_error ("mem_file_fputs: bad magic number");
+    internal_error ("mem_file_write: bad magic number");
   if (stream->buffer == NULL)
     {
-      stream->strlen_buffer = strlen (linebuffer);
-      stream->sizeof_buffer = stream->strlen_buffer + 1;
+      stream->length_buffer = length_buffer;
+      stream->sizeof_buffer = length_buffer;
       stream->buffer = xmalloc (stream->sizeof_buffer);
-      strcpy (stream->buffer, linebuffer);
+      memcpy (stream->buffer, buffer, length_buffer);
     }
   else
     {
-      int len = strlen (linebuffer);
-      int new_strlen = stream->strlen_buffer + len;
-      int new_sizeof = new_strlen + 1;
-      if (new_sizeof >= stream->sizeof_buffer)
+      int new_length = stream->length_buffer + length_buffer;
+      if (new_length >= stream->sizeof_buffer)
 	{
-	  stream->sizeof_buffer = new_sizeof;
+	  stream->sizeof_buffer = new_length;
 	  stream->buffer = xrealloc (stream->buffer, stream->sizeof_buffer);
 	}
-      strcpy (stream->buffer + stream->strlen_buffer, linebuffer);
-      stream->strlen_buffer = new_strlen;
+      memcpy (stream->buffer + stream->length_buffer, buffer, length_buffer);
+      stream->length_buffer = new_length;
     }
 }
-
 
 /* A ``struct gdb_file'' that is compatible with all the legacy
    code. */
@@ -1972,17 +1985,15 @@ tui_file_rewind (file)
 }
 
 static void
-tui_file_put (file, dest)
-     struct gdb_file *file;
-     struct gdb_file *dest;
+tui_file_put (struct gdb_file *file,
+	      gdb_file_put_method_ftype *write,
+	      void *dest)
 {
   struct tui_stream *stream = gdb_file_data (file);
   if (stream->ts_magic != &tui_file_magic)
     internal_error ("tui_file_put: bad magic number");
   if (stream->ts_streamtype == astring)
-    {
-      fputs_unfiltered (stream->ts_strbuf, dest);
-    }
+    write (dest, stream->ts_strbuf, strlen (stream->ts_strbuf));
 }
 
 /* All TUI I/O sent to the *_filtered and *_unfiltered functions
@@ -2149,6 +2160,7 @@ static gdb_file_put_ftype null_file_put;
 
 struct gdb_file
   {
+    int *magic;
     gdb_file_flush_ftype *to_flush;
     gdb_file_write_ftype *to_write;
     gdb_file_fputs_ftype *to_fputs;
@@ -2158,11 +2170,13 @@ struct gdb_file
     gdb_file_put_ftype *to_put;
     void *to_data;
   };
+int gdb_file_magic;
 
 struct gdb_file *
 gdb_file_new ()
 {
   struct gdb_file *file = xmalloc (sizeof (struct gdb_file));
+  file->magic = &gdb_file_magic;
   set_gdb_file_data (file, NULL, null_file_delete);
   set_gdb_file_flush (file, null_file_flush);
   set_gdb_file_write (file, null_file_write);
@@ -2196,9 +2210,9 @@ null_file_rewind (file)
 }
 
 static void
-null_file_put (file, src)
-     struct gdb_file *file;
-     struct gdb_file *src;
+null_file_put (struct gdb_file *file,
+	       gdb_file_put_method_ftype *write,
+	       void *dest)
 {
   return;
 }
@@ -2265,6 +2279,8 @@ void *
 gdb_file_data (file)
      struct gdb_file *file;
 {
+  if (file->magic != &gdb_file_magic)
+    internal_error ("gdb_file_data: bad magic number");
   return file->to_data;
 }
 
@@ -2290,11 +2306,11 @@ gdb_file_rewind (file)
 }
 
 void
-gdb_file_put (file, dest)
-     struct gdb_file *file;
-     struct gdb_file *dest;
+gdb_file_put (struct gdb_file *file,
+	      gdb_file_put_method_ftype *write,
+	      void *dest)
 {
-  file->to_put (file, dest);
+  file->to_put (file, write, dest);
 }
 
 void
@@ -2369,6 +2385,43 @@ set_gdb_file_data (file, data, delete)
   file->to_data = data;
   file->to_delete = delete;
 }
+
+/* gdb_file utility function for converting a ``struct gdb_file'' into
+   a memory buffer''. */
+
+struct accumulated_gdb_file
+{
+  char *buffer;
+  long length;
+};
+
+static void
+do_gdb_file_xstrdup (void *context, const char *buffer, long length)
+{
+  struct accumulated_gdb_file *acc = context;
+  if (acc->buffer == NULL)
+    acc->buffer = xmalloc (length + 1);
+  else
+    acc->buffer = xrealloc (acc->buffer, acc->length + length + 1);
+  memcpy (acc->buffer + acc->length, buffer, length);
+  acc->length += length;
+  acc->buffer[acc->length] = '\0';
+}
+
+char *
+gdb_file_xstrdup (struct gdb_file *file,
+		  long *length)
+{
+  struct accumulated_gdb_file acc;
+  acc.buffer = NULL;
+  acc.length = 0;
+  gdb_file_put (file, do_gdb_file_xstrdup, &acc);
+  if (acc.buffer == NULL)
+    acc.buffer = xstrdup ("");
+  *length = acc.length;
+  return acc.buffer;
+}
+
 
 /* Like fputs but if FILTER is true, pause after every screenful.
 

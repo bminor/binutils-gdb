@@ -1493,7 +1493,6 @@ info_cb (th, s)
 {
   td_err_e ret;
   td_thrinfo_t ti;
-  struct minimal_symbol *msym;
 
   if ((ret = p_td_thr_get_info (th, &ti)) == TD_OK)
     {
@@ -1527,17 +1526,25 @@ info_cb (th, s)
 	}
       /* Print thr_create start function: */
       if (ti.ti_startfunc != 0)
-	if (msym = lookup_minimal_symbol_by_pc (ti.ti_startfunc))
-	  printf_filtered ("   startfunc: %s\n", SYMBOL_NAME (msym));
-	else
-	  printf_filtered ("   startfunc: 0x%08x\n", ti.ti_startfunc);
+	{
+	  struct minimal_symbol *msym;
+	  msym = lookup_minimal_symbol_by_pc (ti.ti_startfunc);
+	  if (msym)
+	    printf_filtered ("   startfunc: %s\n", SYMBOL_NAME (msym));
+	  else
+	    printf_filtered ("   startfunc: 0x%s\n", paddr (ti.ti_startfunc));
+	}
 
       /* If thread is asleep, print function that went to sleep: */
       if (ti.ti_state == TD_THR_SLEEP)
-	if (msym = lookup_minimal_symbol_by_pc (ti.ti_pc))
-	  printf_filtered (" - Sleep func: %s\n", SYMBOL_NAME (msym));
-	else
-	  printf_filtered (" - Sleep func: 0x%08x\n", ti.ti_startfunc);
+	{
+	  struct minimal_symbol *msym;
+	  msym = lookup_minimal_symbol_by_pc (ti.ti_pc);
+	  if (msym)
+	    printf_filtered (" - Sleep func: %s\n", SYMBOL_NAME (msym));
+	  else
+	    printf_filtered (" - Sleep func: 0x%s\n", paddr (ti.ti_startfunc));
+	}
 
       /* Wrap up line, if necessary */
       if (ti.ti_state != TD_THR_SLEEP && ti.ti_startfunc == 0)

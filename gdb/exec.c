@@ -198,7 +198,7 @@ exec_file_attach (args, from_tty)
 	{;
 	}
       if (*argv == NULL)
-	error ("no exec file name was specified");
+	error ("No executable file name was specified");
 
       filename = tilde_expand (*argv);
       make_cleanup (free, filename);

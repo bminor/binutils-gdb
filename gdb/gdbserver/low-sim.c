@@ -276,16 +276,7 @@ write_inferior_memory (memaddr, myaddr, len)
   return 0;
 }
 
-#if 0
 void
-initialize ()
+initialize_low ()
 {
-  inferior_pid = 0;
 }
-
-int
-have_inferior_p ()
-{
-  return inferior_pid != 0;
-}
-#endif

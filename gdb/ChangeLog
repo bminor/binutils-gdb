@@ -1,3 +1,199 @@
+1999-11-16  Mark Salter  <msalter@cygnus.com>
+
+	* monitor.c (monitor_supply_register): Initialize value to zero.
+
+1999-11-15  Eli Zaretskii  <eliz@is.elta.co.il>
+
+	(Patches applied by Jim Blandy <jimb@zwingli.cygnus.com>)
+	
+	Change DJGPP target use the common register layout in
+	config/i386/tm-i386.h.
+	* config/i386/tm-go32.h: #include "i386/tm-i386.h", not 
+	"i386/tm-i386v.h".
+	(HAVE_I387_REGS): Define.
+	(HAVE_SSE_REGS): Undefine.
+	(NUM_FREGS, NUM_REGS, REGISTER_NAMES, FP_REGNUM, SP_REGNUM,
+	PS_REGNUM, PC_REGNUM, FP0_REGNUM, FPC_REGNUM, FPCWD_REGNUM,
+	FPSWD_REGNUM, FPTWD_REGNUM, FPIPO_REGNUM, FPIPS_REGNUM,
+	FPOOS_REGNUM, FPOPS_REGNUM, REGISTER_BYTES, REGISTER_BYTE,
+	REGBYTE_0, REGBYTE_10 REGBYTE_16, REGBYTE_24, REGBYTE_29,
+	REGISTER_RAW_SIZE, REGISTER_VIRTUAL_SIZE, MAX_REGISTER_RAW_SIZE,
+	MAX_REGISTER_VIRTUAL_SIZE, REGISTER_CONVERTIBLE): Definitions
+	deleted.
+	(i387_to_double, double_to_i387): Declarations deleted.
+	(REGISTER_CONVERT_TO_VIRTUAL, REGISTER_CONVERT_TO_RAW,
+	REGISTER_VIRTUAL_TYPE): Use definitions from
+	config/i386/tm-i386.h, unless LD_I387 is #defined.
+	
+	* go32-nat.c (go32_fetch_registers, store_register)
+	(go32_create_inferior, init_go32_ops): Replace fatal with
+	internal_error.
+	(sig_map): Map exception 7 to TARGET_SIGNAL_EMT.
+
+	* utils.c (notice_quit): Doc fixes.
+
+1999-11-15  Kevin Buettner  <kevinb@cygnus.com>
+
+	* gdbserver/server.h (initialize_low): Declare this target
+	specific function.
+	* gdbserver/server.c (main): Call initialize_low.
+	* gdbserver/low-hppabsd.c, gdbserver/low-linux.c,
+	gdbserver/low-sim.c, gdbserver/low-sparc.c, gdbserver/low-sun3.c
+	(initialize_low): Renamed from initialize.  Also removed
+	initialization of inferior_pid.
+	(have_inferior_p): Removed.
+	* gdbserver/low-lynx.c (initialize_low): New function.
+
+1999-11-12  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* remote-rdi.c: Fix indentation accordingly to GNU standards.
+
+Thu Oct 28 00:28:51 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* d10v-tdep.c (d10v_gdbarch_init): Make the d10v:ts3 the default.
+
+Tue Oct 26 09:57:29 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.sh: Re-sync with Cagney's earlier const change.
+
+Sun Oct 24 20:07:31 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* d10v-tdep.c (struct gdbarch_tdep): Replace nr_a_regs,
+ 	imap0_regnum, nr_imap_regs, dmap0_regnum, with dmap_register and
+ 	imap_register.
+	(R0_REGNUM, LR_REGNUM, PSW_REGNUM, NR_IMAP_REGS, NR_A_REGS):
+ 	Convert to enums.
+	(TS2_NR_A_REGS, TS2_NR_IMAP_REGS, TS3_NR_IMAP_REGS,
+ 	TS3_NR_A_REGS): Delete.
+	(d10v_ts2_dmap_register, d10v_ts3_dmap_register,
+ 	d10v_ts2_imap_register, d10v_ts3_imap_register): New functions.
+	(d10v_dmap_register, d10v_imap_register,
+ 	d10v_ts2_register_sim_regno, d10v_ts3_register_sim_regno,
+ 	show_regs): Update.
+	(remote_d10v_translate_xfer_address): Rewrite.  Use
+ 	sim_d10v_translate_addr to translate addresses.
+	(d10v_gdbarch_init): Initialize tdep members dmap_register and
+ 	imap_register.
+
+Sun Oct 24 00:12:44 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* d10v-tdep.c (struct gdbarch_tdep): Declare.
+	(NR_IMAP_REGS, NR_DMAP_REGS, A0_REGNUM, NR_A_REGS): Redefine using
+ 	value in gdbarch_tdep.
+	(d10v_dmap_register, d10v_imap_register): Ditto.
+	(d10v_ts2_register_name, d10v_ts2_register_sim_regno): Rename
+ 	d10v_register_name and d10v_register_sim_regno
+	(enum ts3_regnums, d10v_ts3_register_name,
+ 	d10v_ts3_register_sim_regno, d10v_register_sim_regno): New.
+	(d10v_gdbarch_init): Configure registers and G packet according to
+ 	d10v/ts2 and d10v/ts3.
+
+Sat Oct 23 21:28:02 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/d10v/tm-d10v.h (IMAP0_REGNUM, IMAP1_REGNUM, DMAP_REGNUM):
+ 	Delete macro.
+	(R0_REGNUM, LR_REGNUM, PSW_REGNUM, A0_REGNUM): Move from here.
+	* d10v-tdep.c: To here.
+
+	* d10v-tdep.c: (NR_DMAP_REGS, NR_IMAP_REGS, NR_A_REGS): Define.
+	(d10v_dmap_register, d10v_imap_register): New functions.
+	(remote_d10v_translate_xfer_address): Make static.
+	(d10v_register_virtual_size): Use TYPE_LENGTH of
+ 	REGISTER_VIRTUAL_TYPE.
+	(d10v_register_byte, do_d10v_pop_frame,
+ 	remote_d10v_translate_xfer_address, show_regs,
+ 	d10v_register_raw_size): Ditto.
+	(d10v_register_virtual_type): Ditto. Use explicitly sized builtin
+ 	types.
+
+Sat Oct 23 19:08:39 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* d10v-tdep.c: Include "sim-d10v.h".
+	(enum ts2_regnums): Declare.
+	(d10v_register_sim_regno): New function.
+
+	* config/d10v/tm-d10v.h: Delete pre multi-arch code.
+  	(REGISTER_SIM_REGNO): Define.
+	(d10v_register_sim_regno): Declare.
+	
+Sat Oct 23 16:39:34 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.c (initialize_current_architecture): Make ``choice''
+ 	const.
+
+Wed Nov 10 16:10:22 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* hppa-tdep.c (hppa_fix_call_dummy): Fix typo in error message.
+
+Wed Nov 10 16:47:06 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* utils.c (error_last_message): Use gdb_file_xstrdup.
+
+	* defs.h (verror, internal_verror): Declare.
+
+	* utils.c (verror, internal_error): New functions.
+	(error, internal_error): Use verror / internal_verror.
+	(error_stream): Use gdb_file_xstrdup.  Correctly handle %s in
+ 	error message body.
+	(error_init): Use mem_fileopen.
+
+	* corefile.c (memory_error): Use mem_fileopen instead of
+ 	tui_sfileopen.  Don't call error_begin.
+	* remote-sim.c (gdb_os_error): Rewrite using verror. Don't call
+ 	error_begin.
+
+Wed Nov 10 14:21:43 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* defs.h (gdb_file_xstrdup): New function.
+	* utils.c (gdb_file_xstrdup, do_gdb_file_xstrdup): Implement.
+
+1999-11-09  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* exec.c (exec_file_attach), irix5-nat.c, osfsolib.c, solib.c
+ 	(info_sharedlibrary_command), pa64solib.c
+ 	(pa64_sharedlibrary_info_command), somsolib.c
+ 	(som_sharedlibrary_info_command): Replace "exec file" with
+	"executable file" in messages.
+
+1999-11-09  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	Finish the job attempted by the previous change.
+	* stabsread.c (read_range_type): Make n2 and n3 LONGEST.  Adjust
+	the various tests that check for maximum values, bit counts, etc.
+	In the long run, it might have been simpler just to give GDB bignums.
+	
+Tue Nov  9 18:34:13 1999  Andrew Cagney  <cagney@amy.cygnus.com>
+
+	* defs.h (gdb_file_put): Add parameter write.
+	(gdb_file_put_method_ftype): New typedef.
+	* utils.c (gdb_file_put, mem_file_put, tui_file_put,
+ 	null_file_put): Update.
+	
+	* utils.c (struct gdb_file): Add field magic.
+	(gdb_file_new): Initialize.
+	(gdb_file_data): Verify.
+
+	* utils.c (mem_file_fputs): Delete.  Replaced by.
+	(mem_file_write): New function. Rewrite mem_file.
+	(mem_file_new): Update.
+	
+Tue Nov  9 17:51:12 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote-sim.c (gdb_os_write_stdout): Use gdb_file_write.
+	(gdb_os_flush_stdout): Flush gdb_stdtarg instead of gdb_stdout.
+
+Tue Nov  9 15:33:43 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (procfs.o): Don't compile with -Werror for moment.
+	* sol-thread.c (info_cb): Move assignments to outside of if
+ 	statement.
+	(info_cb): Use paddr when printing addresses.
+
+1999-11-08  Jim Blandy  <jimb@zenia.red-bean.com>
+
+	* defs.h (ULONGEST_MAX, LONGEST_MAX): New definitions.
+	* stabsread.c (read_huge_number): Parse and return LONGEST values.
+
 1999-11-08  Mark Salter  <msalter@cygnus.com>
 
 	* utils.c (floatformat_to_doublest): Fix conversion of denormals.
@@ -423,7 +619,10 @@ Thu Nov  4 17:36:27 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	* gdbtypes.c (init_simd_type): The upper bound to
 	create_range_type is inclusive, not exclusive.
 
-	* configure.in: Check for PTRACE_GETXFPREGS, and #define
+	Add preliminary support for the Pentium-III's Streaming SIMD
+	Extensions --- specifically, the ability to read the XMM
+	registers.
+	* Configure.in: Check for PTRACE_GETXFPREGS, and #define
 	HAVE_PTRACE_GETXFPREGS if we have it.
 	* acconfig.h: Add entry for HAVE_PTRACE_GETXFPREGS.
 	* configure, config.in: Regenerated.

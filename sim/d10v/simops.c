@@ -56,10 +56,13 @@ enum {
 	      | PSW_F0_BIT
 	      | PSW_F1_BIT
 	      | PSW_C_BIT),
+  /* The following bits in the PSW _can't_ be set by instructions such
+     as mvtc. */
+  PSW_HW_MASK = (PSW_MASK | PSW_DM_BIT)
 };
 
 reg_t
-move_to_cr (int cr, reg_t mask, reg_t val)
+move_to_cr (int cr, reg_t mask, reg_t val, int psw_hw_p)
 {
   /* A MASK bit is set when the corresponding bit in the CR should
      be left alone */
@@ -67,13 +70,18 @@ move_to_cr (int cr, reg_t mask, reg_t val)
   switch (cr)
     {
     case PSW_CR:
-      val &= PSW_MASK;
+      if (psw_hw_p)
+	val &= PSW_HW_MASK;
+      else
+	val &= PSW_MASK;
       if ((mask & PSW_SM_BIT) == 0)
 	{
-	  int new_sm = (val & PSW_SM_BIT) != 0;
-	  SET_HELD_SP (PSW_SM, GPR (SP_IDX)); /* save old SP */
-	  if (PSW_SM != new_sm)
-	    SET_GPR (SP_IDX, HELD_SP (new_sm)); /* restore new SP */
+	  int new_psw_sm = (val & PSW_SM_BIT) != 0;
+	  /* save old SP */
+	  SET_HELD_SP (PSW_SM, GPR (SP_IDX));
+	  if (PSW_SM != new_psw_sm)
+	    /* restore new SP */
+	    SET_GPR (SP_IDX, HELD_SP (new_psw_sm));
 	}
       if ((mask & (PSW_ST_BIT | PSW_FX_BIT)) == 0)
 	{
@@ -91,7 +99,11 @@ move_to_cr (int cr, reg_t mask, reg_t val)
       break;
     case BPSW_CR:
     case DPSW_CR:
-      val &= PSW_MASK;
+      /* Just like PSW, mask things like DM out. */
+      if (psw_hw_p)
+	val &= PSW_HW_MASK;
+      else
+	val &= PSW_MASK;
       break;
     case MOD_S_CR:
     case MOD_E_CR:
@@ -1096,7 +1108,7 @@ OP_5F20 ()
       trace_input ("dbt", OP_VOID, OP_VOID, OP_VOID);
       SET_DPC (PC + 1);
       SET_DPSW (PSW);
-      SET_PSW (PSW & (PSW_F0_BIT | PSW_F1_BIT | PSW_C_BIT));
+      SET_HW_PSW (PSW_DM_BIT | (PSW & (PSW_F0_BIT | PSW_F1_BIT | PSW_C_BIT)));
       JMP (DBT_VECTOR_START);
       trace_output_void ();
     }
