@@ -902,6 +902,11 @@ print_insn_hppa (memaddr, info)
 					   float_format_names[GET_FIELD
 							      (insn, 20, 20)]);
 		  break;
+		case 'X':
+		  (*info->print_address_func) ((memaddr + 8 
+						+ extract_22 (insn)),
+					       info);
+		  break;
 		case 'B':
 		  fputs_filtered (",pop", info);
 		  break;
