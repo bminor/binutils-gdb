@@ -82,6 +82,12 @@ main (int argc, char **argv)
       abort ();
     }
 
+  /* We can't set the endianness in the callback structure until
+     sim_config is called, which happens in sim_open.  */
+  default_callback.target_endian
+    = (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN
+       ? BFD_ENDIAN_BIG : BFD_ENDIAN_LITTLE);
+
   /* Was there a program to run?  */
   prog_argv = STATE_PROG_ARGV (sd);
   prog_bfd = STATE_PROG_BFD (sd);

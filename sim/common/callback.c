@@ -626,6 +626,9 @@ host_callback default_callback =
   0, /* signal_map */
   0, /* stat_map */
 	
+  /* Defaults expected to be overridden at initialization, where needed.  */
+  BFD_ENDIAN_UNKNOWN, /* target_endian */
+
   HOST_CALLBACK_MAGIC,
 };
 
@@ -757,17 +760,17 @@ cb_target_to_host_open (cb, target_val)
   return host_val;
 }
 
-/* Utility for cb_host_to_target_stat to store values in the target's
+/* Utility for e.g. cb_host_to_target_stat to store values in the target's
    stat struct.  */
 
-static void
-store (p, size, val, big_p)
+void
+cb_store_target_endian (cb, p, size, val)
+     host_callback *cb;
      char *p;
      int size;
      long val; /* ??? must be as big as target word size */
-     int big_p;
 {
-  if (big_p)
+  if (cb->target_endian == BFD_ENDIAN_BIG)
     {
       p += size;
       while (size-- > 0)
@@ -801,7 +804,6 @@ cb_host_to_target_stat (cb, hs, ts)
 {
   const char *m = cb->stat_map;
   char *p;
-  int big_p = 0;
 
   if (hs == NULL)
     ts = NULL;
@@ -833,7 +835,7 @@ cb_host_to_target_stat (cb, hs, ts)
 #undef ST_x
 #define ST_x(FLD)					\
 	  else if (strncmp (m, #FLD, q - m) == 0)	\
-	    store (p, size, hs->FLD, big_p)
+	    cb_store_target_endian (cb, p, size, hs->FLD)
 
 #ifdef HAVE_STRUCT_STAT_ST_DEV
 	  ST_x (st_dev);
@@ -877,7 +879,8 @@ cb_host_to_target_stat (cb, hs, ts)
 #undef ST_x
 	  /* FIXME:wip */
 	  else
-	    store (p, size, 0, big_p); /* unsupported field, store 0 */
+	    /* Unsupported field, store 0.  */
+	    cb_store_target_endian (cb, p, size, 0);
 	}
 
       p += size;

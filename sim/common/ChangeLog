@@ -1,3 +1,13 @@
+2005-01-28  Hans-Peter Nilsson  <hp@axis.com>
+
+	* callback.c (default_callback): Initialize target_endian.
+	(cb_store_target_endian): Renamed from store, new first parameter
+	host_callback *cb, drop last parameter big_p.  Take endianness
+	from cb.
+	(cb_host_to_target_stat): Change to use cb_store_target_endian.
+	Remove variable big_p.
+	* nrun.c (main): Initialize default_callback.target_endian.
+
 2005-01-14  Andrew Cagney  <cagney@gnu.org>
 
 	* configure.ac: Replace SIM_AC_COMMON with sinclude of common.m4.
