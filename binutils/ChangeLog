@@ -1,3 +1,15 @@
+Wed Apr 20 14:34:51 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+start-sanitize-powerpc-netware
+
+	* nlmconv.c (powerpc_build_stubs): Take new outbfd argument.
+	Change caller.  Create custom header for new PowerPC NetWare
+	format.
+end-sanitize-powerpc-netware
+
+	* Makefile.in (nlmheader.o, nlmconv.o): Update dependencies.
+	* nlmconv.c: Include bfd.h and libiberty.h with "", not <>.
+	* nlmheader.y: Include bfd.h with "", not <>.
+
 Wed Apr 13 10:52:50 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* objdump.c: Do an ifdef on __GO32__, not unix.
