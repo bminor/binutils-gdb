@@ -1,3 +1,10 @@
+Fri Jul 14 11:58:34 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* elf32-ppc.c (ppc_elf_addr16_ha_inner): Rewrite to take just one
+	argument, the final relocated address.
+	(ppc_elf_addr16_ha_inner): Adjust ppc_elf_addr16_ha_inner caller.
+	(ppc_elf_relocate_section): Ditto.
+
 Thu Jul 13 17:22:03 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* som.c (hppa_som_gen_reloc_type): Choose a reasonable field
