@@ -1,3 +1,8 @@
+2003-10-27  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* config/tc-m68hc11.c: Convert to ISO C90.
+	* config/tc-m68hc11.h: Likewise.
+
 2003-10-26  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* doc/c-sh64.texi: Fix a typo.
