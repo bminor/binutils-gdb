@@ -290,6 +290,11 @@ struct reloc_ext_external {
 
 enum reloc_type
 {
+
+
+
+
+
   /* simple relocations */
   RELOC_8,			/* data[0:7] = addend + sv 		*/
   RELOC_16,			/* data[0:15] = addend + sv 		*/
@@ -333,13 +338,13 @@ enum reloc_type
   RELOC_CONST,
   RELOC_CONSTH,
   
-  /* All the new ones I can think of */
+  /* All the new ones I can think of *//*v9*/
 
-  RELOC_64,			/* data[0:63] = addend + sv 		*/
-  RELOC_DISP64,			/* data[0:63] = addend - pc + sv 	*/
-  RELOC_WDISP21,		/* data[0:20] = (addend + sv - pc)>>2 	*/
-  RELOC_DISP21,			/* data[0:20] = addend - pc + sv        */
-  RELOC_DISP14,			/* data[0:13] = addend - pc + sv 	*/
+  RELOC_64,			/* data[0:63] = addend + sv 		*//*v9*/
+  RELOC_DISP64,			/* data[0:63] = addend - pc + sv 	*//*v9*/
+  RELOC_WDISP21,		/* data[0:20] = (addend + sv - pc)>>2 	*//*v9*/
+  RELOC_DISP21,			/* data[0:20] = addend - pc + sv        *//*v9*/
+  RELOC_DISP14,			/* data[0:13] = addend - pc + sv 	*//*v9*/
   /* Q .
      What are the other ones,
      Since this is a clean slate, can we throw away the ones we dont
