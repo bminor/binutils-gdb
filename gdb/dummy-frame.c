@@ -374,7 +374,7 @@ dummy_frame_this_id (struct frame_info *next_frame,
 	 same sequence as is found a traditional unwinder.  Once all
 	 architectures supply the unwind_dummy_id method, this code
 	 can go away.  */
-      (*this_id) = frame_id_build (read_fp (), read_pc ());
+      (*this_id) = frame_id_build (deprecated_read_fp (), read_pc ());
     }
   else if (legacy_frame_p (current_gdbarch)
 	   && get_prev_frame (next_frame))

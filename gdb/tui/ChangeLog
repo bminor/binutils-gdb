@@ -1,3 +1,9 @@
+2003-04-30  Andrew Cagney  <cagney@redhat.com>
+
+	* tuiDisassem.c (tui_disassemble): Use
+	"deprecated_tm_print_insn_info" instead of TARGET_PRINT_INSN_INFO,
+	add comment.
+
 2003-03-14  Andrew Cagney  <cagney@redhat.com>
 
 	* tuiRegs.c (_tuiGetRegisterRawValue): Use frame_read_register,

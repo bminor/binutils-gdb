@@ -394,7 +394,7 @@ fetch_inferior_registers (int regno)
   RF (R0_REGNUM + 7, inferior_registers.r_r7);
 
   RF (SP_REGNUM, inferior_registers.r_sp);
-  RF (FP_REGNUM, inferior_registers.r_fp);
+  RF (DEPRECATED_FP_REGNUM, inferior_registers.r_fp);
   RF (PC_REGNUM, inferior_registers.r_pc);
   RF (PS_REGNUM, inferior_registers.r_psr);
 
@@ -429,7 +429,7 @@ store_inferior_registers (int regno)
   RS (R0_REGNUM + 7, inferior_registers.r_r7);
   
   RS (SP_REGNUM, inferior_registers.r_sp);
-  RS (FP_REGNUM, inferior_registers.r_fp);
+  RS (DEPRECATED_FP_REGNUM, inferior_registers.r_fp);
   RS (PC_REGNUM, inferior_registers.r_pc);
   RS (PS_REGNUM, inferior_registers.r_psr);
   

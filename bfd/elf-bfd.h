@@ -204,6 +204,10 @@ struct elf_link_hash_entry
   /* Symbol is referenced by a non-GOT/non-PLT relocation.  This is
      not currently set by all the backends.  */
 #define ELF_LINK_NON_GOT_REF 010000
+  /* Symbol has a definition in a shared object.  */
+#define ELF_LINK_DYNAMIC_DEF 020000
+  /* Symbol is weak in all shared objects.  */
+#define ELF_LINK_DYNAMIC_WEAK 040000
 };
 
 /* Records local symbols to be emitted in the dynamic symbol table.  */

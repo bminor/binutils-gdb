@@ -1291,8 +1291,10 @@ typedef struct sec
   /* Bits used by various backends.  */
   unsigned int has_tls_reloc:1;
 
+  /* Nonzero if this section needs the relax finalize pass.  */
+  unsigned int need_finalize_relax:1;
+
   /* Usused bits.  */
-  unsigned int flag11:1;
   unsigned int flag12:1;
   unsigned int flag13:1;
   unsigned int flag14:1;
@@ -1630,9 +1632,11 @@ enum bfd_architecture
   bfd_arch_m98k,      /* Motorola 98xxx */
   bfd_arch_pyramid,   /* Pyramid Technology */
   bfd_arch_h8300,     /* Renesas H8/300 (formerly Hitachi H8/300) */
-#define bfd_mach_h8300   1
-#define bfd_mach_h8300h  2
-#define bfd_mach_h8300s  3
+#define bfd_mach_h8300    1
+#define bfd_mach_h8300h   2
+#define bfd_mach_h8300s   3
+#define bfd_mach_h8300hn  4
+#define bfd_mach_h8300sn  5
   bfd_arch_pdp11,     /* DEC PDP-11 */
   bfd_arch_powerpc,   /* PowerPC */
 #define bfd_mach_ppc           32
@@ -1675,7 +1679,7 @@ enum bfd_architecture
 #define bfd_mach_z8001         1
 #define bfd_mach_z8002         2
   bfd_arch_h8500,     /* Renesas H8/500 (formerly Hitachi H8/500) */
-  bfd_arch_sh,        /* Renesas SH (formerly Hitachi SH) */
+  bfd_arch_sh,        /* Renesas / SuperH SH (formerly Hitachi SH) */
 #define bfd_mach_sh            1
 #define bfd_mach_sh2        0x20
 #define bfd_mach_sh_dsp     0x2d
@@ -1719,7 +1723,7 @@ enum bfd_architecture
 #define bfd_mach_arc_6         6
 #define bfd_mach_arc_7         7
 #define bfd_mach_arc_8         8
-  bfd_arch_m32r,      /* Mitsubishi M32R/D */
+  bfd_arch_m32r,      /* Renesas M32R (formerly Mitsubishi M32R/D) */
 #define bfd_mach_m32r          1 /* For backwards compatibility.  */
 #define bfd_mach_m32rx         'x'
   bfd_arch_mn10200,   /* Matsushita MN10200 */
@@ -2598,7 +2602,7 @@ field in the instruction.  */
   BFD_RELOC_ARM_GOTOFF,
   BFD_RELOC_ARM_GOTPC,
 
-/* Renesas SH relocs.  Not all of these appear in object files.  */
+/* Renesas / SuperH SH relocs.  Not all of these appear in object files.  */
   BFD_RELOC_SH_PCDISP8BY2,
   BFD_RELOC_SH_PCDISP12BY2,
   BFD_RELOC_SH_IMM4,
@@ -2776,7 +2780,7 @@ of the container.  */
 /* DLX relocs  */
   BFD_RELOC_DLX_JMP26,
 
-/* Mitsubishi M32R relocs.
+/* Renesas M32R (formerly Mitsubishi M32R) relocs.
 This is a 24 bit absolute address.  */
   BFD_RELOC_M32R_24,
 

@@ -2243,21 +2243,25 @@ printf_command (char *arg, int from_tty)
 /* Print the instruction at address MEMADDR in debugged memory,
    on STREAM.  Returns length of the instruction, in bytes.  */
 
+/* FIXME: cagney/2003-04-28: Should instead be using the generic
+   disassembler but first need to clean that up and stop it trying to
+   access the exec file.  */
+
 static int
 print_insn (CORE_ADDR memaddr, struct ui_file *stream)
 {
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-    TARGET_PRINT_INSN_INFO->endian = BFD_ENDIAN_BIG;
+    deprecated_tm_print_insn_info.endian = BFD_ENDIAN_BIG;
   else
-    TARGET_PRINT_INSN_INFO->endian = BFD_ENDIAN_LITTLE;
+    deprecated_tm_print_insn_info.endian = BFD_ENDIAN_LITTLE;
 
   if (TARGET_ARCHITECTURE != NULL)
-    TARGET_PRINT_INSN_INFO->mach = TARGET_ARCHITECTURE->mach;
+    deprecated_tm_print_insn_info.mach = TARGET_ARCHITECTURE->mach;
   /* else: should set .mach=0 but some disassemblers don't grok this */
 
-  TARGET_PRINT_INSN_INFO->stream = stream;
+  deprecated_tm_print_insn_info.stream = stream;
 
-  return TARGET_PRINT_INSN (memaddr, TARGET_PRINT_INSN_INFO);
+  return TARGET_PRINT_INSN (memaddr, &deprecated_tm_print_insn_info);
 }
 
 

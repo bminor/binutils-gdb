@@ -2797,7 +2797,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_pc_regnum (gdbarch, 64);
   set_gdbarch_sp_regnum (gdbarch, 1);
-  set_gdbarch_fp_regnum (gdbarch, 1);
+  set_gdbarch_deprecated_fp_regnum (gdbarch, 1);
   set_gdbarch_deprecated_extract_return_value (gdbarch,
 					       rs6000_extract_return_value);
   set_gdbarch_deprecated_store_return_value (gdbarch, rs6000_store_return_value);
@@ -2830,7 +2830,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	tdep->ppc_ev31_regnum = 38;
         set_gdbarch_pc_regnum (gdbarch, 0);
         set_gdbarch_sp_regnum (gdbarch, tdep->ppc_gp0_regnum + 1);
-        set_gdbarch_fp_regnum (gdbarch, tdep->ppc_gp0_regnum + 1);
+        set_gdbarch_deprecated_fp_regnum (gdbarch, tdep->ppc_gp0_regnum + 1);
         set_gdbarch_dwarf2_reg_to_regnum (gdbarch, e500_dwarf2_reg_to_regnum);
         set_gdbarch_pseudo_register_read (gdbarch, e500_pseudo_register_read);
         set_gdbarch_pseudo_register_write (gdbarch, e500_pseudo_register_write);
@@ -2872,7 +2872,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_read_pc (gdbarch, generic_target_read_pc);
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
-  set_gdbarch_read_fp (gdbarch, generic_target_read_fp);
   set_gdbarch_read_sp (gdbarch, generic_target_read_sp);
   set_gdbarch_deprecated_dummy_write_sp (gdbarch, generic_target_write_sp);
 

@@ -1,3 +1,193 @@
+2003-04-30  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-h8300.c (elf32_h8_relax_section): Do not crash when
+	encountering relocs against the *ABS* section.
+
+2003-04-28  H.J. Lu <hjl@gnu.org>
+
+	* elfxx-ia64.c (elfNN_ia64_relax_section): Relax ldxmov during
+	the relax finalize pass.
+
+	* section.c (struct sec): Add need_finalize_relax and remove
+	flag11.
+	(STD_SECTION): Update struct sec initializer.
+	* bfd-in2.h: Regenerated.
+
+2003-04-28  H.J. Lu <hjl@gnu.org>
+
+	* elflink.h (elf_merge_symbol): Call elf_backend_copy_indirect_symbol
+	to copy any information related to dynamic linking when we flip
+	the indirection.
+
+2003-04-27  H.J. Lu <hjl@gnu.org>
+
+	* elf-bfd.h (ELF_LINK_DYNAMIC_DEF): New.
+	(ELF_LINK_DYNAMIC_WEAK): New.
+
+	* elflink.h (elf_merge_symbol): Add one argument to indicate if
+	a symbol should be skipped. Ignore definitions in dynamic
+	objects for symbols with non-default visibility.
+	(elf_add_default_symbol): Adjusted.
+	(elf_link_add_object_symbols): Check if a symbol should be
+	skipped. Don't merge the visibility field with the one from
+	a dynamic object.
+	(elf_link_check_versioned_symbol): Use undef_bfd.
+	(elf_link_output_extsym): Warn if a forced local symbol is
+	referenced from dynamic objects. Make non-weak undefined symbol
+	with non-default visibility a fatal error.
+
+2003-04-27  Daniel Jacobowitz  <drow@mvista.com>
+
+	* configure.in: Bump version on HEAD to 2.14.90.
+	* configure: Regenerated.
+
+2003-04-26  Stephane Carrez  <stcarrez@nerim.fr>
+
+	PR savannah/3331:
+	* elf32-m68hc11.c (m68hc11_elf_relax_section): Clear prev_insn_group
+	when we couldn't relax something.
+
+2003-04-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.h (elf_merge_symbol): When we find a regular definition
+	for an indirect symbol, flip the indirection so that the old
+	direct symbol now points to the new definition.
+
+2003-04-24  Roland McGrath  <roland@redhat.com>
+
+	* elf.c (bfd_section_from_phdr): Map PT_GNU_EH_FRAME to "eh_frame_hdr".
+
+2003-04-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c: Formatting and comment fixes.
+	(ELIMINATE_COPY_RELOCS): Move before ppc_elf_copy_indirect_symbol.
+	(ppc_elf_copy_indirect_symbol): Copy flags here for weakdefs.
+
+2003-04-24 Dhananjay Deshpande <dhananjayd@kpitcummins.com>
+
+	* archures.c (bfd_mach_h8300hn, bfd_mach_h8300sn): Added.
+	* bfd-in2.h: Rebuilt.
+	* coff-h8300.c (BADMAG): Add check for H8300HNBADMAG & H8300SNBADMAG.
+	* coffcode.h (coff_set_arch_mach_hook): Add case for H8300HNMAGIC
+	& H8300SNMAGIC.
+	(coff_set_flags): Add case for bfd_mach_h8300hn & bfd_mach_h8300sn.
+	* cpu-h8300.c (h8300_scan): Handle h8300hn, h8300sn.
+	(h8300sn_info_struct, h8300hn_info_struct): New.
+	* elf32-h8300.c (elf32_h8_mach): Handle case for h8300hn & h8300sn
+	(elf32_h8_final_write_processing): Likewise.
+
+2003-04-23  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* elf32-sh.c (tpoff): New.
+	(struct elf_sh_dyn_relocs): Remove tls_tpoff32.
+	(WILL_CALL_FINISH_DYNAMIC_SYMBOL): Pass SHARED instead of INFO.
+	(allocate_dynrelocs): Don't make unnecessary dynamic TLS
+	relocations.  Adjust WILL_CALL_FINISH_DYNAMIC_SYMBOL uses.
+	(sh_elf_relocate_section): Likewise. Remove unnecessary tests.
+	(dtpoff_base): Fix wrong indentation.
+	(sh_elf_check_relocs): Don't set DF_STATIC_TLS flag with non-TLS
+	relocations.  Don't set tls_tpoff32 flag.  Don't make unnecessary
+	R_SH_TLS_TPOFF32 relocations.
+
+2003-04-23  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* archures.c (enum bfd_architecture): Amend comment to refer to SuperH.
+	* cpu-sh.c: Likewise.
+	* elf32-sh.c: Likewise.
+	* reloc.c (bfd_reloc_code_real): Likewise.
+	* elf32-sh64-com.c: Change comment to refer to SuperH.
+	* elf32-sh64.c: Likewise.
+	* elf64-sh64.c: Likewise.
+	* bfd-in2.h (enum bfd_architecture): Regenerate.
+
+2003-04-23  Alan Modra  <amodra@bigpond.net.au>
+
+	From Julien LEMOINE <speedblue@debian.org>
+	* elf32-i386.c (elf_i386_info_to_howto): Delete.
+	(elf_info_to_howto): Define as elf_i386_info_to_howto_rel.
+
+2003-04-22  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
+
+	* archures.c: Replace references to Mitsubishi M32R with references
+	to Renesas M32R.
+	* relocs.c: Likewise.
+	* bfd-in2.h: Regenerate.
+
+2003-04-21  Richard Henderson  <rth@redhat.com>
+
+	* elf64-alpha.c (alpha_elf_dynamic_symbol_p): Return false for an
+	executable when a symbol is defined both regular and dynamic.
+
+2003-04-21  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* Makefile.am (BFD32_BACKENDS): Add elf32-m68hc1x.lo.
+	(elf32-m68hc1x.lo): Update dependencies
+	* configure.in: Add elf32-m68hc1x.lo.
+	* configure: Rebuild.
+	* Makefile.in: Rebuild.
+
+2003-04-21  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* elf32-m68hc1x.c: New file (from elf32-m68hc11.c and elf32-m68hc12.c)
+	(m68hc11_elf_hash_table_create): New function.
+	(elf32_m68hc11_link_hash_table_free): New function.
+	(stub_hash_newfunc): New function.
+	(m68hc11_add_stub): New function.
+	(elf32_m68hc11_add_symbol_hook): New function.
+	(elf32_m68hc11_setup_section_lists): New function.
+	(elf32_m68hc11_next_input_section): New function.
+	(elf32_m68hc11_size_stubs): New function.
+	(elf32_m68hc11_build_stubs): New function.
+	(m68hc11_get_relocation_value): New function.
+	(elf32_m68hc11_relocate_section): Call the above to redirect
+	some relocations to the trampoline code.
+	(m68hc11_elf_export_one_stub): New function.
+	(m68hc11_elf_set_symbol): New function.
+	(elf32_m68hc11_build_stubs): Call it via bfd_hash_traverse.
+	(m68hc11_elf_get_bank_parameters): Get parameters only when the info
+	is not yet initialized.
+
+	* elf32-m68hc1x.h: New file (from elf32-m68hc11.c and elf32-m68hc12.c)
+	(elf32_m68hc11_stub_hash_entry): New struct.
+	(m68hc11_page_info): Add trampoline handler address.
+	(m68hc11_elf_link_hash_table): Add stubs generation members.
+	(elf32_m68hc11_add_symbol_hook): Declare.
+	(elf32_m68hc11_setup_section_lists): Declare.
+	(elf32_m68hc11_size_stubs): Declare.
+	(elf32_m68hc11_build_stubs): Declare.
+
+	* elf32-m68hc11.c (m68hc11_elf_ignore_reloc): Move to elf32-m68hc1x.c.
+	(elf32_m68hc11_gc_mark_hook, elf32_m68hc11_gc_sweep_hook): Likewise.
+	(elf32_m68hc11_check_relocs, elf32_m68hc11_relocate_section): Ditto.
+	(_bfd_m68hc11_elf_set_private_flags): Ditto.
+	(_bfd_m68hc11_elf_merge_private_bfd_data): Ditto.
+	(_bfd_m68hc11_elf_print_private_bfd_data): Ditto.
+	(bfd_elf32_bfd_link_hash_table_create): Define.
+	(elf_backend_add_symbol_hook): Define.
+	(m68hc11_elf_bfd_link_hash_table_create): New function.
+	(m68hc11_elf_build_one_stub): New function.
+	(m68hc11_elf_size_one_stub): New function.
+	(m68hc11_elf_bfd_link_hash_table_create): Install the above.
+	(bfd_elf32_bfd_link_hash_table_create): Define.
+
+	* elf32-m68hc12.c (m68hc11_elf_ignore_reloc): Remove.
+	(m68hc12_addr_is_banked): Remove, use m68hc11_addr_is_banked.
+	(m68hc12_phys_addr): Ditto.
+	(m68hc12_phys_page): Ditto.
+	(m68hc12_elf_special_reloc): Move to elf32-m68hc1x.c.
+	(elf32_m68hc11_gc_mark_hook): Likewise.
+	(elf32_m68hc11_gc_sweep_hook): Likewise.
+	(elf32_m68hc11_check_relocs): Likewise.
+	(elf32_m68hc11_relocate_section): Likewise.
+	(_bfd_m68hc12_elf_set_private_flags): Likewise.
+	(_bfd_m68hc12_elf_merge_private_bfd_data): Likewise.
+	(_bfd_m68hc12_elf_print_private_bfd_data): Likewise.
+	(m68hc12_elf_build_one_stub): New function.
+	(m68hc12_elf_size_one_stub): New function.
+	(m68hc12_elf_bfd_link_hash_table_create): New function, use the above.
+	(elf_backend_add_symbol_hook): Define.
+	(elf_m68hc11_howto_table): Use TRUE for pcrel relocs; fix masks.
+
 2003-04-18  Nick Clifton  <nickc@redhat.com>
 
 	* format.c (bfd_check_format_matches): Only check associated
@@ -147,33 +337,33 @@
 
 2003-04-01  Bob Wilson  <bob.wilson@acm.org>
 
-        * Makefile.am (ALL_MACHINES): Add cpu-xtensa.lo.
-        (ALL_MACHINES_CFILES): Add cpu-xtensa.c.
-        (BFD32_BACKENDS): Add elf32-xtensa.lo, xtensa-isa.lo, and
-        xtensa-modules.lo.
-        (BFD32_BACKENDS_CFILES): Add elf32-xtensa.c, xtensa-isa.c, and
-        xtensa-modules.c.
-        (cpu-xtensa.lo): New target.
-        (elf32-xtensa.lo): Likewise.
-        (xtensa-isa.lo): Likewise.
-        (xtensa-modules.lo): Likewise.
-        * Makefile.in: Regenerate.
-        * archures.c (bfd_architecture): Add bfd_{arch,mach}_xtensa.
-        (bfd_archures_list): Add bfd_xtensa_arch.
-        * config.bfd: Handle xtensa-*-*.
-        * configure.in: Handle bfd_elf32_xtensa_{le,be}_vec.
-        * configure: Regenerate.
-        * reloc.c: Add BFD_RELOC_XTENSA_{RTLD,GLOB_DAT,JMP_SLOT,RELATIVE,
-        PLT,OP0,OP1,OP2,ASM_EXPAND,ASM_SIMPLIFY}.
-        * targets.c (bfd_elf32_xtensa_be_vec): Declare.
-        (bfd_elf32_xtensa_le_vec): Likewise.
-        (bfd_target_vector): Add bfd_elf32_xtensa_{be,le}_vec.
-        * cpu-xtensa.c: New file.
-        * elf32-xtensa.c: Likewise.
-        * xtensa-isa.c: Likewise.
-        * xtensa-modules.c: Likewise.
-        * libbfd.h: Regenerate.
-        * bfd-in2.h: Likewise.
+	* Makefile.am (ALL_MACHINES): Add cpu-xtensa.lo.
+	(ALL_MACHINES_CFILES): Add cpu-xtensa.c.
+	(BFD32_BACKENDS): Add elf32-xtensa.lo, xtensa-isa.lo, and
+	xtensa-modules.lo.
+	(BFD32_BACKENDS_CFILES): Add elf32-xtensa.c, xtensa-isa.c, and
+	xtensa-modules.c.
+	(cpu-xtensa.lo): New target.
+	(elf32-xtensa.lo): Likewise.
+	(xtensa-isa.lo): Likewise.
+	(xtensa-modules.lo): Likewise.
+	* Makefile.in: Regenerate.
+	* archures.c (bfd_architecture): Add bfd_{arch,mach}_xtensa.
+	(bfd_archures_list): Add bfd_xtensa_arch.
+	* config.bfd: Handle xtensa-*-*.
+	* configure.in: Handle bfd_elf32_xtensa_{le,be}_vec.
+	* configure: Regenerate.
+	* reloc.c: Add BFD_RELOC_XTENSA_{RTLD,GLOB_DAT,JMP_SLOT,RELATIVE,
+	PLT,OP0,OP1,OP2,ASM_EXPAND,ASM_SIMPLIFY}.
+	* targets.c (bfd_elf32_xtensa_be_vec): Declare.
+	(bfd_elf32_xtensa_le_vec): Likewise.
+	(bfd_target_vector): Add bfd_elf32_xtensa_{be,le}_vec.
+	* cpu-xtensa.c: New file.
+	* elf32-xtensa.c: Likewise.
+	* xtensa-isa.c: Likewise.
+	* xtensa-modules.c: Likewise.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Likewise.
 
 2003-04-01  Nick Clifton  <nickc@redhat.com>
 
@@ -198,7 +388,7 @@
 	bfd_arm_get_mach_from_notes.
 	(elf32_arm_merge_private_bfd_data): Use bfd_arm_merge_machines.
 	(elf32_arm_final_write_processing): Use bfd_arm_update_notes.
-	
+
 2003-04-01  Ben Elliston  <bje@wasabisystems.com>
 
 	* dwarf2.c (read_attribute_value): Correct typo in comment.
@@ -250,7 +440,7 @@
 	* linker.c (bfd_generic_final_link): Likewise.
 	* opncls.c (find_separate_debug_info): Likewise.
 	* simple.c (bfd_simple_get_relocated_section_contents): Likewise.
-	
+
 2003-03-28  H.J. Lu <hjl@gnu.org>
 
 	* elflink.h (elf_link_add_object_symbols): Correctly combine
@@ -277,7 +467,7 @@
 
 2003-03-25  Stan Cox   <scox@redhat.com>
 	    Nick Clifton  <nickc@redhat.com>
-	    
+
 	Contribute support for Intel's iWMMXt chip - an	ARM variant:
 
 	* archures.c: Add bfd_mach_arm_iWMMXt.
@@ -332,8 +522,8 @@
 
 2003-03-18  Richard Henderson  <rth@redhat.com>
 
-        * elfxx-ia64.c (get_dyn_sym_info): Return NULL gracefully for
-        local symbols that have no dyninfo.
+	* elfxx-ia64.c (get_dyn_sym_info): Return NULL gracefully for
+	local symbols that have no dyninfo.
 
 2003-03-14  Gene Smith  <gene.smith@siemens.com>
 
@@ -509,7 +699,7 @@
 	(elfNN_ia64_relax_section): Handle LTOFF22X, LDXMOV.
 	(elfNN_ia64_choose_gp): Split out from ...
 	(elfNN_ia64_final_link): ... here.
-	
+
 2003-02-27  Andrew Cagney  <cagney@redhat.com>
 
 	* bfd.c (struct bfd): Rename "struct _bfd".

@@ -396,8 +396,10 @@ CODE_FRAGMENT
 .  {* Bits used by various backends.  *}
 .  unsigned int has_tls_reloc:1;
 .
+.  {* Nonzero if this section needs the relax finalize pass.  *}
+.  unsigned int need_finalize_relax:1;
+.
 .  {* Usused bits.  *}
-.  unsigned int flag11:1;
 .  unsigned int flag12:1;
 .  unsigned int flag13:1;
 .  unsigned int flag14:1;
@@ -615,8 +617,8 @@ static const asymbol global_syms[] =
     /* linker_mark, linker_has_input, gc_mark, segment_mark,         */	\
        0,           0,                1,       0,			\
 									\
-    /* sec_info_type, use_rela_p, has_tls_reloc, flag11, flag12,     */ \
-       0,	      0,	  0,		 0,	 0,		\
+    /* sec_info_type, use_rela_p, has_tls_reloc, need_finalize_relax, flag12,     */ \
+       0,	      0,	  0,		 0,		      0,		\
 									\
     /* flag13, flag14, flag15, flag16, flag20, flag24,               */ \
        0,      0,      0,      0,      0,      0,			\

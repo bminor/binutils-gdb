@@ -40,6 +40,7 @@
 #include "linespec.h"
 #include "source.h"
 #include "filenames.h"		/* for FILENAME_CMP */
+#include "objc-lang.h"
 
 #include "hashtab.h"
 
@@ -459,6 +460,18 @@ symbol_find_demangled_name (struct general_symbol_info *gsymbol,
 
   if (gsymbol->language == language_unknown)
     gsymbol->language = language_auto;
+
+  if (gsymbol->language == language_objc
+      || gsymbol->language == language_auto)
+    {
+      demangled =
+	objc_demangle (mangled, 0);
+      if (demangled != NULL)
+	{
+	  gsymbol->language = language_objc;
+	  return demangled;
+	}
+    }
   if (gsymbol->language == language_cplus
       || gsymbol->language == language_auto)
     {
@@ -607,7 +620,8 @@ symbol_init_demangled_name (struct general_symbol_info *gsymbol,
 
   demangled = symbol_find_demangled_name (gsymbol, mangled);
   if (gsymbol->language == language_cplus
-      || gsymbol->language == language_java)
+      || gsymbol->language == language_java
+      || gsymbol->language == language_objc)
     {
       if (demangled)
 	{
@@ -993,7 +1007,7 @@ lookup_symbol_aux (const char *name, const char *mangled_name,
     }
 #endif /* 0 */
 
-  /* C++: If requested to do so by the caller, 
+  /* C++/Java/Objective-C: If requested to do so by the caller, 
      check to see if NAME is a field of `this'. */
   if (is_a_field_of_this)
     {
@@ -1653,9 +1667,9 @@ find_main_psymtab (void)
    for now we don't worry about the slight inefficiency of looking for
    a match we'll never find, since it will go pretty quick.  Once the
    binary search terminates, we drop through and do a straight linear
-   search on the symbols.  Each symbol which is marked as being a C++
-   symbol (language_cplus set) has both the encoded and non-encoded names
-   tested for a match.
+   search on the symbols.  Each symbol which is marked as being a ObjC/C++
+   symbol (language_cplus or language_objc set) has both the encoded and 
+   non-encoded names tested for a match.
 
    If MANGLED_NAME is non-NULL, verify that any symbol we find has this
    particular mangled name.

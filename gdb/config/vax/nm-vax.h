@@ -24,6 +24,6 @@
 { addr = blockend - 0110 + regno * 4;			\
   if (regno == PC_REGNUM) addr = blockend - 8;		\
   if (regno == PS_REGNUM) addr = blockend - 4;		\
-  if (regno == FP_REGNUM) addr = blockend - 0120;	\
+  if (regno == DEPRECATED_FP_REGNUM) addr = blockend - 0120;	\
   if (regno == AP_REGNUM) addr = blockend - 0124;	\
   if (regno == SP_REGNUM) addr = blockend - 20; }

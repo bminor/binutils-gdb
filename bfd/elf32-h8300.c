@@ -573,6 +573,12 @@ elf32_h8_mach (flags)
 
     case E_H8_MACH_H8300S:
       return bfd_mach_h8300s;
+
+    case E_H8_MACH_H8300HN:
+      return bfd_mach_h8300hn;
+
+    case E_H8_MACH_H8300SN:
+      return bfd_mach_h8300sn;
     }
 }
 
@@ -600,6 +606,14 @@ elf32_h8_final_write_processing (abfd, linker)
 
     case bfd_mach_h8300s:
       val = E_H8_MACH_H8300S;
+      break;
+
+    case bfd_mach_h8300hn:
+      val = E_H8_MACH_H8300HN;
+      break;
+
+    case bfd_mach_h8300sn:
+      val = E_H8_MACH_H8300SN;
       break;
     }
 
@@ -764,9 +778,12 @@ elf32_h8_relax_section (abfd, sec, link_info, again)
 
 	  isym = isymbuf + ELF32_R_SYM (irel->r_info);
 	  sym_sec = bfd_section_from_elf_index (abfd, isym->st_shndx);
-	  symval = (isym->st_value
-		    + sym_sec->output_section->vma
-		    + sym_sec->output_offset);
+	  symval = isym->st_value;
+	  /* If the reloc is absolute, it will not have
+	     a symbol or section associated with it.  */
+	  if (sym_sec)
+	    symval += sym_sec->output_section->vma
+	      + sym_sec->output_offset;
 	}
       else
 	{
@@ -1068,6 +1085,7 @@ elf32_h8_relax_section (abfd, sec, link_info, again)
 		    && value >= 0xffff00
 		    && value <= 0xffffff))
 	      {
+		bfd_boolean skip = FALSE;
 		unsigned char code;
 
 		/* Note that we've changed the relocs, section contents,
@@ -1085,16 +1103,27 @@ elf32_h8_relax_section (abfd, sec, link_info, again)
 
 		code = bfd_get_8 (abfd, contents + irel->r_offset - 1);
 
-		if ((code & 0xf0) == 0x00)
-		  bfd_put_8 (abfd,
-			     (code & 0xf) | 0x20,
-			     contents + irel->r_offset - 2);
-		else if ((code & 0xf0) == 0x80)
-		  bfd_put_8 (abfd,
-			     (code & 0xf) | 0x30,
-			     contents + irel->r_offset - 2);
-		else
-		  abort ();
+		switch (code & 0xf0)
+		  {
+		  case 0x00:
+		    bfd_put_8 (abfd, (code & 0xf) | 0x20,
+			       contents + irel->r_offset - 2);
+		    break;
+		  case 0x80:
+		    bfd_put_8 (abfd, (code & 0xf) | 0x30,
+			       contents + irel->r_offset - 2);
+		    break;
+		  case 0x20:
+		  case 0xa0:
+		    /* Skip 32bit versions.  */
+		    skip = TRUE;
+		    break;
+		  default:
+		    abort ();
+		  }
+
+		if (skip)
+		  break;
 
 		/* Fix the relocation's type.  */
 		irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),

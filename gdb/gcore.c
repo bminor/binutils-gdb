@@ -26,6 +26,7 @@
 #include "elf-bfd.h"
 #include "symfile.h"
 #include "objfiles.h"
+#include "infcall.h"
 
 static char                  *default_gcore_target (void);
 static enum bfd_architecture  default_gcore_arch (void);

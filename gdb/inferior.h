@@ -164,8 +164,6 @@ extern void terminal_save_ours (void);
 
 extern void terminal_ours (void);
 
-extern int run_stack_dummy (CORE_ADDR , struct regcache *);
-
 extern CORE_ADDR read_pc (void);
 
 extern CORE_ADDR read_pc_pid (ptid_t);
@@ -184,9 +182,7 @@ extern CORE_ADDR generic_target_read_sp (void);
 
 extern void generic_target_write_sp (CORE_ADDR);
 
-extern CORE_ADDR read_fp (void);
-
-extern CORE_ADDR generic_target_read_fp (void);
+extern CORE_ADDR deprecated_read_fp (void);
 
 extern CORE_ADDR unsigned_pointer_to_address (struct type *type, const void *buf);
 

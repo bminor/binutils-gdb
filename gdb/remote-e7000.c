@@ -856,9 +856,9 @@ fetch_regs_from_dump (int (*nextchar) (), char *want)
 	      want++;
 	      break;
 #endif
-#ifdef FP_REGNUM
+#ifdef DEPRECATED_FP_REGNUM
 	    case 'f':
-	      regno = FP_REGNUM;
+	      regno = DEPRECATED_FP_REGNUM;
 	      want++;
 	      break;
 #endif
