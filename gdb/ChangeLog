@@ -1,5 +1,10 @@
 2001-03-22  Andrew Cagney  <ac131313@redhat.com>
 
+	* exec.c (xfer_memory): Always initialize section.
+	* infrun.c (normal_stop): Always initialize source_flag.
+
+2001-03-22  Andrew Cagney  <ac131313@redhat.com>
+
 	* TODO (Remote Protocol Support): Review.  Add notes about ``!'',
 	non-use of a continue address and typical use of ``q'' packet.
 

@@ -3521,6 +3521,7 @@ and/or watchpoints.\n");
 	      source_flag = SRC_LINE;
 	      break;
 	    case PRINT_NOTHING:
+	      source_flag = SRC_LINE; /* something bogus */
 	      do_frame_printing = 0;
 	      break;
 	    default:

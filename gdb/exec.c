@@ -486,7 +486,7 @@ xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
   struct section_table *p;
   CORE_ADDR nextsectaddr, memend;
   boolean (*xfer_fn) (bfd *, sec_ptr, PTR, file_ptr, bfd_size_type);
-  asection *section;
+  asection *section = NULL;
 
   if (len <= 0)
     internal_error (__FILE__, __LINE__, "failed internal consistency check");
