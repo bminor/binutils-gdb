@@ -1,5 +1,11 @@
 Fri Dec 20 11:36:38 1991  Fred Fish  (fnf at cygnus.com)
 
+	* config/mh-i386v4:  Change XM_CLIBS to "-lc /usr/ucblib/libucb.a"
+	so compiles with native compilers (without builtin alloca) can
+	pick up the version from the bsd emulation library.  However, we
+	search the standard C library first so we don't pick up lots of
+	other broken stuff from libucb.a, that we *don't* want.
+
 	* configure.in, tm-amix.h, tm-i386v4.h, xm-amix.h, xm-i386v4.h:
 	Change svr4 references to sysv4.
 
