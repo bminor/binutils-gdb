@@ -133,17 +133,38 @@ ldemul_place_orphan (file, s)
   return FALSE;
 }
 
-int
+void
+ldemul_add_options (ns, shortopts, nl, longopts, nrl, really_longopts)
+     int ns;
+     char **shortopts;
+     int nl;
+     struct option **longopts;
+     int nrl;
+     struct option **really_longopts;
+{
+  if (ld_emulation->add_options)
+    (*ld_emulation->add_options) (ns, shortopts, nl, longopts,
+				  nrl, really_longopts);
+}
+
+bfd_boolean
+ldemul_handle_option (optc)
+     int optc;
+{
+  if (ld_emulation->handle_option)
+    return (*ld_emulation->handle_option) (optc);
+  return FALSE;
+}
+
+bfd_boolean
 ldemul_parse_args (argc, argv)
      int argc;
      char **argv;
 {
   /* Try and use the emulation parser if there is one.  */
   if (ld_emulation->parse_args)
-    {
-      return ld_emulation->parse_args (argc, argv);
-    }
-  return 0;
+    return (*ld_emulation->parse_args) (argc, argv);
+  return TRUE;
 }
 
 /* Let the emulation code handle an unrecognized file.  */

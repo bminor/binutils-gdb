@@ -1,3 +1,41 @@
+2003-02-28  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldemul.c (ldemul_add_options, ldemul_handle_option): New functions.
+	(ldemul_parse_args): Return bfd_boolean.  Formatting.
+	* ldemul.h (ldemul_add_options, ldemul_handle_option): Declare.
+	(ldemul_parse_args): Adjust.
+	(struct ld_emulation_xfer_struct): Add add_options and handle_option.
+	Return bfd_boolean from parse_args.
+	* lexsup.c (parse_args): Malloc shortopts, longopts and
+	really_longopts.  Call ldemul_add_options and ldemul_handle_option.
+	* emultempl/aix.em (gld${EMULATION_NAME}_add_options): Split out from
+	gld${EMULATION_NAME}_parse_args.
+	(gld${EMULATION_NAME}_handle_option): Likewise.
+	(ld_${EMULATION_NAME}_emulation): Adjust initializer.
+	* emultempl/armcoff.em: As for aix.em, but remove parse_args.
+	* emultempl/beos.em: Likewise.
+	* emultempl/pe.em: Likewise.
+	* emultempl/ticoff.em: Likewise.
+	* emultempl/elf32.em: Likewise.  Don't duplicate long options either.
+	(gld${EMULATION_NAME}_add_sysroot): Prototype.	
+	* emultempl/armelf.em (PARSE_AND_LIST_LONGOPTS): Don't duplicate
+	options.
+	* emultempl/hppaelf.em (PARSE_AND_LIST_LONGOPTS): Likewise.
+	* emultempl/ppc32elf.em (PARSE_AND_LIST_LONGOPTS): Likewise.
+	* emultempl/ppc64elf.em (PARSE_AND_LIST_LONGOPTS): Likewise.
+	* emultempl/armelf_oabi.em (ld_${EMULATION_NAME}_emulation): Adjust
+	initializer.
+	* emultempl/generic.em: Likewise.
+	* emultempl/gld960.em: Likewise.
+	* emultempl/gld960c.em: Likewise.
+	* emultempl/linux.em: Likewise.
+	* emultempl/lnk960.em: Likewise.
+	* emultempl/m68kcoff.em: Likewise.
+	* emultempl/mipsecoff.em: Likewise.
+	* emultempl/sunos.em: Likewise.
+	* emultempl/vanilla.em: Likewise.
+	* emultempl/netbsd.em (gldnetbsd_before_parse): Prototype.
+
 2003-02-25  Alexandre Oliva  <aoliva@redhat.com>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_add_sysroot): Fix

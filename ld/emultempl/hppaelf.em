@@ -360,12 +360,8 @@ PARSE_AND_LIST_PROLOGUE='
 #define OPTION_STUBGROUP_SIZE		(OPTION_MULTI_SUBSPACE + 1)
 '
 
-# The options are repeated below so that no abbreviations are allowed.
-# Otherwise -s matches stub-group-size
 PARSE_AND_LIST_LONGOPTS='
   { "multi-subspace", no_argument, NULL, OPTION_MULTI_SUBSPACE },
-  { "multi-subspace", no_argument, NULL, OPTION_MULTI_SUBSPACE },
-  { "stub-group-size", required_argument, NULL, OPTION_STUBGROUP_SIZE },
   { "stub-group-size", required_argument, NULL, OPTION_STUBGROUP_SIZE },
 '
 

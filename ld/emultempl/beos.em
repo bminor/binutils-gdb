@@ -7,7 +7,7 @@ else
 fi
 cat >e${EMULATION_NAME}.c <<EOF
 /* This file is part of GLD, the Gnu Linker.
-   Copyright 1995, 1996, 1997, 1998, 2000, 2001, 2002
+   Copyright 1995, 1996, 1997, 1998, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
@@ -58,7 +58,6 @@ static void gld_${EMULATION_NAME}_before_allocation PARAMS ((void));
 static bfd_boolean gld${EMULATION_NAME}_place_orphan
   PARAMS ((lang_input_statement_type *, asection *));
 static char *gld_${EMULATION_NAME}_get_script PARAMS ((int *));
-static int gld_${EMULATION_NAME}_parse_args PARAMS ((int, char **));
 
 static int sort_by_file_name PARAMS ((const PTR, const PTR));
 static int sort_by_section_name PARAMS ((const PTR, const PTR));
@@ -110,8 +109,20 @@ gld_${EMULATION_NAME}_before_parse()
 #define OPTION_SUBSYSTEM                (OPTION_STACK + 1)
 #define OPTION_HEAP			(OPTION_SUBSYSTEM + 1)
 
-static struct option longopts[] = {
-  /* PE options */
+static void gld${EMULATION_NAME}_add_options
+  PARAMS ((int, char **, int, struct option **, int, struct option **));
+
+static void
+gld${EMULATION_NAME}_add_options (ns, shortopts, nl, longopts, nrl, really_longopts)
+     int ns ATTRIBUTE_UNUSED;
+     char **shortopts ATTRIBUTE_UNUSED;
+     int nl;
+     struct option **longopts;
+     int nrl ATTRIBUTE_UNUSED;
+     struct option **really_longopts ATTRIBUTE_UNUSED;
+{
+  static const struct option xtra_long[] = {
+    /* PE options */
     {"base-file", required_argument, NULL, OPTION_BASE_FILE},
     {"dll", no_argument, NULL, OPTION_DLL},
     {"file-alignment", required_argument, NULL, OPTION_FILE_ALIGNMENT},
@@ -126,8 +137,13 @@ static struct option longopts[] = {
     {"section-alignment", required_argument, NULL, OPTION_SECTION_ALIGNMENT},
     {"stack", required_argument, NULL, OPTION_STACK},
     {"subsystem", required_argument, NULL, OPTION_SUBSYSTEM},
-   {NULL, no_argument, NULL, 0}
+    {NULL, no_argument, NULL, 0}
   };
+
+  *longopts = (struct option *)
+    xrealloc (*longopts, nl * sizeof (struct option) + sizeof (xtra_long));
+  memcpy (*longopts + nl, &xtra_long, sizeof (xtra_long));
+}
 
 
 /* PE/WIN32; added routines to get the subsystem type, heap and/or stack
@@ -299,35 +315,17 @@ set_pe_stack_heap (resname, comname)
 }
 
 
+static bfd_boolean gld${EMULATION_NAME}_handle_option
+  PARAMS ((int));
 
-static int
-gld_${EMULATION_NAME}_parse_args(argc, argv)
-     int argc;
-     char **argv;
+static bfd_boolean
+gld${EMULATION_NAME}_handle_option (optc)
+     int optc;
 {
-  int longind;
-  int optc;
-  int prevoptind = optind;
-  int prevopterr = opterr;
-  int wanterror;
-  static int lastoptind = -1;
-
-  if (lastoptind != optind)
-    opterr = 0;
-  wanterror = opterr;
-
-  lastoptind = optind;
-
-  optc = getopt_long_only (argc, argv, "-", longopts, &longind);
-  opterr = prevopterr;
-
   switch (optc)
     {
     default:
-      if (wanterror)
-	xexit (1);
-      optind =  prevoptind;
-      return 0;
+      return FALSE;
 
     case OPTION_BASE_FILE:
       link_info.base_file = (PTR) fopen (optarg, FOPEN_WB);
@@ -380,7 +378,7 @@ gld_${EMULATION_NAME}_parse_args(argc, argv)
       set_pe_value ("__image_base__");
       break;
     }
-  return 1;
+  return TRUE;
 }
 
 /* Assign values to the special symbols before the linker script is
@@ -870,7 +868,9 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   NULL, /* open dynamic archive */
   gld${EMULATION_NAME}_place_orphan,
   gld_${EMULATION_NAME}_set_symbols,
-  gld_${EMULATION_NAME}_parse_args,
+  NULL, /* parse_args */
+  gld${EMULATION_NAME}_add_options,
+  gld${EMULATION_NAME}_handle_option,
   NULL,	/* unrecognized file */
   NULL,	/* list options */
   NULL,	/* recognized file */

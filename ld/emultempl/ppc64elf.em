@@ -476,16 +476,10 @@ PARSE_AND_LIST_PROLOGUE='
 #define OPTION_NO_TLS_OPT		(OPTION_NO_DOTSYMS + 1)
 '
 
-# The options are repeated below so that no abbreviations are allowed.
-# Otherwise -s matches stub-group-size
 PARSE_AND_LIST_LONGOPTS='
   { "stub-group-size", required_argument, NULL, OPTION_STUBGROUP_SIZE },
-  { "stub-group-size", required_argument, NULL, OPTION_STUBGROUP_SIZE },
-  { "dotsyms", no_argument, NULL, OPTION_DOTSYMS },
   { "dotsyms", no_argument, NULL, OPTION_DOTSYMS },
   { "no-dotsyms", no_argument, NULL, OPTION_NO_DOTSYMS },
-  { "no-dotsyms", no_argument, NULL, OPTION_NO_DOTSYMS },
-  { "no-tls-optimize", no_argument, NULL, OPTION_NO_TLS_OPT },
   { "no-tls-optimize", no_argument, NULL, OPTION_NO_TLS_OPT },
 '
 

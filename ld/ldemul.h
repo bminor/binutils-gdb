@@ -51,8 +51,12 @@ extern void ldemul_create_output_section_statements
   PARAMS ((void));
 extern bfd_boolean ldemul_place_orphan
   PARAMS ((struct lang_input_statement_struct *, asection *));
-extern int ldemul_parse_args
+extern bfd_boolean ldemul_parse_args
   PARAMS ((int, char **));
+extern void ldemul_add_options
+  PARAMS ((int, char **, int, struct option **, int, struct option **));
+extern bfd_boolean ldemul_handle_option
+  PARAMS ((int));
 extern bfd_boolean ldemul_unrecognized_file
   PARAMS ((struct lang_input_statement_struct *));
 extern bfd_boolean ldemul_recognized_file
@@ -142,9 +146,18 @@ typedef struct ld_emulation_xfer_struct {
      reading the script.  Used to initialize symbols used in the script.  */
   void	(*set_symbols) PARAMS ((void));
 
-  /* Run to parse args which the base linker doesn't
-     understand. Return non zero on sucess.  */
-  int (*parse_args) PARAMS ((int, char **));
+  /* Parse args which the base linker doesn't understand.
+     Return TRUE on success.  */
+  bfd_boolean (*parse_args) PARAMS ((int, char **));
+
+  /* Hook to add options to parameters passed by the base linker to
+     getopt_long and getopt_long_only calls.  */
+  void (*add_options)
+    PARAMS ((int, char **, int, struct option **, int, struct option **));
+
+  /* Companion to the above to handle an option.  Returns TRUE if it is
+     one of our options.  */
+  bfd_boolean (*handle_option) PARAMS ((int));
 
   /* Run to handle files which are not recognized as object files or
      archives.  Return TRUE if the file was handled.  */

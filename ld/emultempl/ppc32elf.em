@@ -61,9 +61,7 @@ PARSE_AND_LIST_PROLOGUE='
 #define OPTION_NO_TLS_OPT		301
 '
 
-# The options are repeated below so that no abbreviations are allowed.
 PARSE_AND_LIST_LONGOPTS='
-  { "no-tls-optimize", no_argument, NULL, OPTION_NO_TLS_OPT },
   { "no-tls-optimize", no_argument, NULL, OPTION_NO_TLS_OPT },
 '
 

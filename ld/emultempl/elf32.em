@@ -51,6 +51,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "ldemul.h"
 #include <ldgram.h>
 #include "elf/common.h"
+#include "getopt.h"
 
 static void gld${EMULATION_NAME}_before_parse
   PARAMS ((void));
@@ -443,6 +444,8 @@ if [ "x${USE_LIBPATH}" = xyes ] ; then
   cat >>e${EMULATION_NAME}.c <<EOF
 
 /* Add the sysroot to every entry in a colon-separated path.  */
+
+static char * gld${EMULATION_NAME}_add_sysroot PARAMS ((const char *));
 
 static char *
 gld${EMULATION_NAME}_add_sysroot (path)
@@ -1514,8 +1517,6 @@ fi
 
 if test -n "$PARSE_AND_LIST_ARGS_CASES" -o x"$GENERATE_SHLIB_SCRIPT" = xyes; then
 
-if test x"$LDEMUL_PARSE_ARGS" != xgld"$EMULATION_NAME"_parse_args; then
-
 if test -n "$PARSE_AND_LIST_PROLOGUE" ; then
 cat >>e${EMULATION_NAME}.c <<EOF
  $PARSE_AND_LIST_PROLOGUE
@@ -1524,73 +1525,64 @@ fi
 
 cat >>e${EMULATION_NAME}.c <<EOF
 
-#include "getopt.h"
-
 #define OPTION_DISABLE_NEW_DTAGS	(400)
 #define OPTION_ENABLE_NEW_DTAGS		(OPTION_DISABLE_NEW_DTAGS + 1)
 #define OPTION_GROUP			(OPTION_ENABLE_NEW_DTAGS + 1)
 #define OPTION_EH_FRAME_HDR		(OPTION_GROUP + 1)
 
-static struct option longopts[] =
+static void gld${EMULATION_NAME}_add_options
+  PARAMS ((int, char **, int, struct option **, int, struct option **));
+
+static void
+gld${EMULATION_NAME}_add_options (ns, shortopts, nl, longopts, nrl, really_longopts)
+     int ns;
+     char **shortopts;
+     int nl;
+     struct option **longopts;
+     int nrl ATTRIBUTE_UNUSED;
+     struct option **really_longopts ATTRIBUTE_UNUSED;
 {
+  static const char xtra_short[] = "${PARSE_AND_LIST_SHORTOPTS}z:";
+  static const struct option xtra_long[] = {
 EOF
 
 if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then
 cat >>e${EMULATION_NAME}.c <<EOF
-  /* getopt allows abbreviations, so we do this to stop it from
-     treating -d/-e as abbreviations for these options. */
-  {"disable-new-dtags", no_argument, NULL, OPTION_DISABLE_NEW_DTAGS},
-  {"disable-new-dtags", no_argument, NULL, OPTION_DISABLE_NEW_DTAGS},
-  {"enable-new-dtags", no_argument, NULL, OPTION_ENABLE_NEW_DTAGS},
-  {"enable-new-dtags", no_argument, NULL, OPTION_ENABLE_NEW_DTAGS},
-  {"eh-frame-hdr", no_argument, NULL, OPTION_EH_FRAME_HDR},
-  {"Bgroup", no_argument, NULL, OPTION_GROUP},
-  {"Bgroup", no_argument, NULL, OPTION_GROUP},
+    {"disable-new-dtags", no_argument, NULL, OPTION_DISABLE_NEW_DTAGS},
+    {"enable-new-dtags", no_argument, NULL, OPTION_ENABLE_NEW_DTAGS},
+    {"eh-frame-hdr", no_argument, NULL, OPTION_EH_FRAME_HDR},
+    {"Bgroup", no_argument, NULL, OPTION_GROUP},
 EOF
 fi
 
 if test -n "$PARSE_AND_LIST_LONGOPTS" ; then
 cat >>e${EMULATION_NAME}.c <<EOF
- $PARSE_AND_LIST_LONGOPTS
+    $PARSE_AND_LIST_LONGOPTS
 EOF
 fi
 
 cat >>e${EMULATION_NAME}.c <<EOF
-  {NULL, no_argument, NULL, 0}
-};
+    {NULL, no_argument, NULL, 0}
+  };
 
+  *shortopts = (char *) xrealloc (*shortopts, ns + sizeof (xtra_short));
+  memcpy (*shortopts + ns, &xtra_short, sizeof (xtra_short));
+  *longopts = (struct option *)
+    xrealloc (*longopts, nl * sizeof (struct option) + sizeof (xtra_long));
+  memcpy (*longopts + nl, &xtra_long, sizeof (xtra_long));
+}
 
-static int gld${EMULATION_NAME}_parse_args PARAMS ((int, char **));
+static bfd_boolean gld${EMULATION_NAME}_handle_option
+  PARAMS ((int));
 
-static int
-gld${EMULATION_NAME}_parse_args (argc, argv)
-     int argc;
-     char ** argv;
+static bfd_boolean
+gld${EMULATION_NAME}_handle_option (optc)
+     int optc;
 {
-  int longind;
-  int optc;
-  static int prevoptind = -1;
-  int prevopterr = opterr;
-  int wanterror;
-
-  if (prevoptind != optind)
-    opterr = 0;
-
-  wanterror = opterr;
-  prevoptind = optind;
-
-  optc = getopt_long_only (argc, argv,
-			   "-${PARSE_AND_LIST_SHORTOPTS}z:", longopts,
-			   &longind);
-  opterr = prevopterr;
-
   switch (optc)
     {
     default:
-      if (wanterror)
-	xexit (1);
-      optind = prevoptind;
-      return 0;
+      return FALSE;
 
 EOF
 
@@ -1663,11 +1655,10 @@ fi
 cat >>e${EMULATION_NAME}.c <<EOF
     }
 
-  return 1;
+  return TRUE;
 }
 
 EOF
-fi
 
 if test x"$LDEMUL_LIST_OPTIONS" != xgld"$EMULATION_NAME"_list_options; then
 cat >>e${EMULATION_NAME}.c <<EOF
@@ -1721,11 +1712,10 @@ EOF
 fi
 fi
 else
-if test x"$LDEMUL_PARSE_ARGS" != xgld"$EMULATION_NAME"_parse_args; then
 cat >>e${EMULATION_NAME}.c <<EOF
-#define gld${EMULATION_NAME}_parse_args   NULL
+#define gld${EMULATION_NAME}_add_options NULL
+#define gld${EMULATION_NAME}_handle_option NULL
 EOF
-fi
 if test x"$LDEMUL_LIST_OPTIONS" != xgld"$EMULATION_NAME"_list_options; then
 cat >>e${EMULATION_NAME}.c <<EOF
 #define gld${EMULATION_NAME}_list_options NULL
@@ -1754,7 +1744,9 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   ${LDEMUL_OPEN_DYNAMIC_ARCHIVE-gld${EMULATION_NAME}_open_dynamic_archive},
   ${LDEMUL_PLACE_ORPHAN-gld${EMULATION_NAME}_place_orphan},
   ${LDEMUL_SET_SYMBOLS-NULL},
-  ${LDEMUL_PARSE_ARGS-gld${EMULATION_NAME}_parse_args},
+  ${LDEMUL_PARSE_ARGS-NULL},
+  gld${EMULATION_NAME}_add_options,
+  gld${EMULATION_NAME}_handle_option,
   ${LDEMUL_UNRECOGNIZED_FILE-NULL},
   ${LDEMUL_LIST_OPTIONS-gld${EMULATION_NAME}_list_options},
   ${LDEMUL_RECOGNIZED_FILE-NULL},

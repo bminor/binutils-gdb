@@ -3,7 +3,7 @@
 (echo;echo;echo;echo)>e${EMULATION_NAME}.c # there, now line numbers match ;-)
 cat >>e${EMULATION_NAME}.c <<EOF
 /* This file is part of GLD, the Gnu Linker.
-   Copyright 1999, 2000, 2002 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2002, 2003 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -43,18 +43,33 @@ static int coff_version;
 
 static void gld_${EMULATION_NAME}_before_parse PARAMS ((void));
 static char *gld_${EMULATION_NAME}_get_script PARAMS ((int *));
-static int gld_${EMULATION_NAME}_parse_args PARAMS ((int, char **));
+static void gld${EMULATION_NAME}_add_options
+  PARAMS ((int, char **, int, struct option **, int, struct option **));
+static bfd_boolean gld${EMULATION_NAME}_handle_option PARAMS ((int));
 static void gld_${EMULATION_NAME}_list_options PARAMS ((FILE *));
 
 /* TI COFF extra command line options */
 #define OPTION_COFF_FORMAT		(300 + 1)
 
-static struct option longopts[] = 
+static void
+gld${EMULATION_NAME}_add_options (ns, shortopts, nl, longopts, nrl, really_longopts)
+     int ns ATTRIBUTE_UNUSED;
+     char **shortopts ATTRIBUTE_UNUSED;
+     int nl;
+     struct option **longopts;
+     int nrl ATTRIBUTE_UNUSED;
+     struct option **really_longopts ATTRIBUTE_UNUSED;
 {
-  /* TI COFF options */
-  {"format", required_argument, NULL, OPTION_COFF_FORMAT },
-  {NULL, no_argument, NULL, 0}
-};
+  static const struct option xtra_long[] = {
+    /* TI COFF options */
+    {"format", required_argument, NULL, OPTION_COFF_FORMAT },
+    {NULL, no_argument, NULL, 0}
+  };
+
+  *longopts = (struct option *)
+    xrealloc (*longopts, nl * sizeof (struct option) + sizeof (xtra_long));
+  memcpy (*longopts + nl, &xtra_long, sizeof (xtra_long));
+}
 
 static void
 gld_${EMULATION_NAME}_list_options (file)
@@ -63,34 +78,14 @@ gld_${EMULATION_NAME}_list_options (file)
   fprintf (file, _("  --format 0|1|2         Specify which COFF version to use"));
 }				  
 
-static int
-gld_${EMULATION_NAME}_parse_args(argc, argv)
-     int argc;
-     char **argv;
+static bfd_boolean
+gld${EMULATION_NAME}_handle_option (optc)
+     int optc;
 {
-  int longind;
-  int optc;
-  int prevoptind = optind;
-  int prevopterr = opterr;
-  int wanterror;
-  static int lastoptind = -1;
-
-  if (lastoptind != optind)
-    opterr = 0;
-  wanterror = opterr;
-
-  lastoptind = optind;
-
-  optc = getopt_long_only (argc, argv, "-", longopts, &longind);
-  opterr = prevopterr;
-
   switch (optc)
     {
     default:
-      if (wanterror)
-	xexit (1);
-      optind =  prevoptind;
-      return 0;
+      return FALSE;
 
     case OPTION_COFF_FORMAT:
       if ((*optarg == '0' || *optarg == '1' || *optarg == '2')
@@ -106,11 +101,10 @@ gld_${EMULATION_NAME}_parse_args(argc, argv)
       else
         {
 	  einfo (_("%P%F: invalid COFF format version %s\n"), optarg);
-
         }
       break;
     }
-  return 1;
+  return FALSE;
 }
 
 static void
@@ -193,7 +187,9 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   NULL, /* open dynamic archive */
   NULL, /* place orphan */
   NULL, /* set_symbols */
-  gld_${EMULATION_NAME}_parse_args,
+  NULL, /* parse_args */
+  gld${EMULATION_NAME}_add_options,
+  gld${EMULATION_NAME}_handle_option,
   NULL, /* unrecognized_file */
   gld_${EMULATION_NAME}_list_options,
   NULL, /* recognized file */

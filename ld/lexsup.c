@@ -467,10 +467,16 @@ parse_args (argc, argv)
   int is, il, irl;
   int ingroup = 0;
   char *default_dirlist = NULL;
-  char shortopts[OPTION_COUNT * 3 + 2];
-  struct option longopts[OPTION_COUNT + 1];
-  struct option really_longopts[OPTION_COUNT + 1];
+  char *shortopts;
+  struct option *longopts;
+  struct option *really_longopts;
   int last_optind;
+
+  shortopts = (char *) xmalloc (OPTION_COUNT * 3 + 2);
+  longopts = (struct option *) xmalloc (sizeof (*longopts)
+					* (OPTION_COUNT + 1));
+  really_longopts = (struct option *) xmalloc (sizeof (*really_longopts)
+					       * (OPTION_COUNT + 1));
 
   /* Starting the short option string with '-' is for programs that
      expect options and other ARGV-elements in any order and that care about
@@ -515,6 +521,8 @@ parse_args (argc, argv)
   shortopts[is] = '\0';
   longopts[il].name = NULL;
   really_longopts[irl].name = NULL;
+
+  ldemul_add_options (is, &shortopts, il, &longopts, irl, &really_longopts);
 
   /* The -G option is ambiguous on different platforms.  Sometimes it
      specifies the largest data size to put into the small data
@@ -585,6 +593,9 @@ parse_args (argc, argv)
 	  optind = last_optind;
 	  optc = getopt_long (argc, argv, "-", really_longopts, &longind);
 	}
+
+      if (ldemul_handle_option (optc))
+	continue;
 
       if (optc == -1)
 	break;

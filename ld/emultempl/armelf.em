@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright 1991, 1993, 1996, 1997, 1998, 1999, 2000, 2002
+#   Copyright 1991, 1993, 1996, 1997, 1998, 1999, 2000, 2002, 2003
 #   Free Software Foundation, Inc.
 #
 # This file is part of GLD, the Gnu Linker.
@@ -195,11 +195,7 @@ PARSE_AND_LIST_PROLOGUE='
 
 PARSE_AND_LIST_SHORTOPTS=p
 
-# Note we have duplicate entries for no-pipeline-knowledge in order
-# to prevent getopt_long_only from thinking that -n is a unique
-# abbreviation for --no-pipeline-knowledge.
 PARSE_AND_LIST_LONGOPTS='
-  { "no-pipeline-knowledge", no_argument, NULL, '\'p\''},
   { "no-pipeline-knowledge", no_argument, NULL, '\'p\''},
   { "thumb-entry", required_argument, NULL, OPTION_THUMB_ENTRY},
 '

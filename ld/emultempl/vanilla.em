@@ -2,7 +2,8 @@
 # It does some substitutions.
 cat >e${EMULATION_NAME}.c <<EOF
 /* A vanilla emulation with no defaults
-   Copyright 1991, 1992, 1994, 2000, 2001 Free Software Foundation, Inc.
+   Copyright 1991, 1992, 1994, 2000, 2001, 2002, 2003
+   Free Software Foundation, Inc.
    Written by Steve Chamberlain steve@cygnus.com
 
 This file is part of GLD, the Gnu Linker.
@@ -79,6 +80,8 @@ struct ld_emulation_xfer_struct ld_vanilla_emulation =
   NULL,	/* place orphan */
   NULL,	/* set symbols */
   NULL,	/* parse args */
+  NULL,	/* add_options */
+  NULL,	/* handle_option */
   NULL,	/* unrecognized file */
   NULL,	/* list options */
   NULL,	/* recognized file */

@@ -114,10 +114,12 @@ static asection *output_prev_sec_find
 static bfd_boolean gld_${EMULATION_NAME}_place_orphan
   PARAMS ((lang_input_statement_type *, asection *));
 static char *gld_${EMULATION_NAME}_get_script PARAMS ((int *));
-static int gld_${EMULATION_NAME}_parse_args PARAMS ((int, char **));
 static void gld_${EMULATION_NAME}_finish PARAMS ((void));
 static bfd_boolean gld_${EMULATION_NAME}_open_dynamic_archive
   PARAMS ((const char *, search_dirs_type *, lang_input_statement_type *));
+static void gld${EMULATION_NAME}_add_options
+  PARAMS ((int, char **, int, struct option **, int, struct option **));
+static bfd_boolean gld${EMULATION_NAME}_handle_option PARAMS ((int));
 static void gld_${EMULATION_NAME}_list_options PARAMS ((FILE *));
 static void set_pe_name PARAMS ((char *, long));
 static void set_pe_subsystem PARAMS ((void));
@@ -228,55 +230,68 @@ gld_${EMULATION_NAME}_before_parse()
 #define OPTION_DLL_DISABLE_RUNTIME_PSEUDO_RELOC	\
 					(OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC + 1)
 
-static struct option longopts[] = {
-  /* PE options */
-  {"base-file", required_argument, NULL, OPTION_BASE_FILE},
-  {"dll", no_argument, NULL, OPTION_DLL},
-  {"file-alignment", required_argument, NULL, OPTION_FILE_ALIGNMENT},
-  {"heap", required_argument, NULL, OPTION_HEAP},
-  {"image-base", required_argument, NULL, OPTION_IMAGE_BASE},
-  {"major-image-version", required_argument, NULL, OPTION_MAJOR_IMAGE_VERSION},
-  {"major-os-version", required_argument, NULL, OPTION_MAJOR_OS_VERSION},
-  {"major-subsystem-version", required_argument, NULL, OPTION_MAJOR_SUBSYSTEM_VERSION},
-  {"minor-image-version", required_argument, NULL, OPTION_MINOR_IMAGE_VERSION},
-  {"minor-os-version", required_argument, NULL, OPTION_MINOR_OS_VERSION},
-  {"minor-subsystem-version", required_argument, NULL, OPTION_MINOR_SUBSYSTEM_VERSION},
-  {"section-alignment", required_argument, NULL, OPTION_SECTION_ALIGNMENT},
-  {"stack", required_argument, NULL, OPTION_STACK},
-  {"subsystem", required_argument, NULL, OPTION_SUBSYSTEM},
-  {"support-old-code", no_argument, NULL, OPTION_SUPPORT_OLD_CODE},
-  {"thumb-entry", required_argument, NULL, OPTION_THUMB_ENTRY},
+static void
+gld${EMULATION_NAME}_add_options (ns, shortopts, nl, longopts, nrl, really_longopts)
+     int ns ATTRIBUTE_UNUSED;
+     char **shortopts ATTRIBUTE_UNUSED;
+     int nl;
+     struct option **longopts;
+     int nrl ATTRIBUTE_UNUSED;
+     struct option **really_longopts ATTRIBUTE_UNUSED;
+{
+  static const struct option xtra_long[] = {
+    /* PE options */
+    {"base-file", required_argument, NULL, OPTION_BASE_FILE},
+    {"dll", no_argument, NULL, OPTION_DLL},
+    {"file-alignment", required_argument, NULL, OPTION_FILE_ALIGNMENT},
+    {"heap", required_argument, NULL, OPTION_HEAP},
+    {"image-base", required_argument, NULL, OPTION_IMAGE_BASE},
+    {"major-image-version", required_argument, NULL, OPTION_MAJOR_IMAGE_VERSION},
+    {"major-os-version", required_argument, NULL, OPTION_MAJOR_OS_VERSION},
+    {"major-subsystem-version", required_argument, NULL, OPTION_MAJOR_SUBSYSTEM_VERSION},
+    {"minor-image-version", required_argument, NULL, OPTION_MINOR_IMAGE_VERSION},
+    {"minor-os-version", required_argument, NULL, OPTION_MINOR_OS_VERSION},
+    {"minor-subsystem-version", required_argument, NULL, OPTION_MINOR_SUBSYSTEM_VERSION},
+    {"section-alignment", required_argument, NULL, OPTION_SECTION_ALIGNMENT},
+    {"stack", required_argument, NULL, OPTION_STACK},
+    {"subsystem", required_argument, NULL, OPTION_SUBSYSTEM},
+    {"support-old-code", no_argument, NULL, OPTION_SUPPORT_OLD_CODE},
+    {"thumb-entry", required_argument, NULL, OPTION_THUMB_ENTRY},
 #ifdef DLL_SUPPORT
-  /* getopt allows abbreviations, so we do this to stop it from treating -o
-     as an abbreviation for this option */
-  {"output-def", required_argument, NULL, OPTION_OUT_DEF},
-  {"output-def", required_argument, NULL, OPTION_OUT_DEF},
-  {"export-all-symbols", no_argument, NULL, OPTION_EXPORT_ALL},
-  {"exclude-symbols", required_argument, NULL, OPTION_EXCLUDE_SYMBOLS},
-  {"exclude-libs", required_argument, NULL, OPTION_EXCLUDE_LIBS},
-  {"kill-at", no_argument, NULL, OPTION_KILL_ATS},
-  {"add-stdcall-alias", no_argument, NULL, OPTION_STDCALL_ALIASES},
-  {"enable-stdcall-fixup", no_argument, NULL, OPTION_ENABLE_STDCALL_FIXUP},
-  {"disable-stdcall-fixup", no_argument, NULL, OPTION_DISABLE_STDCALL_FIXUP},
-  {"out-implib", required_argument, NULL, OPTION_IMPLIB_FILENAME},
-  {"warn-duplicate-exports", no_argument, NULL, OPTION_WARN_DUPLICATE_EXPORTS},
-  /* getopt() allows abbreviations, so we do this to stop it from
-     treating -c as an abbreviation for these --compat-implib.  */
-  {"compat-implib", no_argument, NULL, OPTION_IMP_COMPAT},
-  {"compat-implib", no_argument, NULL, OPTION_IMP_COMPAT},
-  {"enable-auto-image-base", no_argument, NULL, OPTION_ENABLE_AUTO_IMAGE_BASE},
-  {"disable-auto-image-base", no_argument, NULL, OPTION_DISABLE_AUTO_IMAGE_BASE},
-  {"dll-search-prefix", required_argument, NULL, OPTION_DLL_SEARCH_PREFIX},
-  {"no-default-excludes", no_argument, NULL, OPTION_NO_DEFAULT_EXCLUDES},
-  {"enable-auto-import", no_argument, NULL, OPTION_DLL_ENABLE_AUTO_IMPORT},
-  {"disable-auto-import", no_argument, NULL, OPTION_DLL_DISABLE_AUTO_IMPORT},
-  {"enable-extra-pe-debug", no_argument, NULL, OPTION_ENABLE_EXTRA_PE_DEBUG},
-  {"enable-runtime-pseudo-reloc", no_argument, NULL, OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC},
-  {"disable-runtime-pseudo-reloc", no_argument, NULL, OPTION_DLL_DISABLE_RUNTIME_PSEUDO_RELOC},
+    /* getopt allows abbreviations, so we do this to stop it from treating -o
+       as an abbreviation for this option */
+    {"output-def", required_argument, NULL, OPTION_OUT_DEF},
+    {"output-def", required_argument, NULL, OPTION_OUT_DEF},
+    {"export-all-symbols", no_argument, NULL, OPTION_EXPORT_ALL},
+    {"exclude-symbols", required_argument, NULL, OPTION_EXCLUDE_SYMBOLS},
+    {"exclude-libs", required_argument, NULL, OPTION_EXCLUDE_LIBS},
+    {"kill-at", no_argument, NULL, OPTION_KILL_ATS},
+    {"add-stdcall-alias", no_argument, NULL, OPTION_STDCALL_ALIASES},
+    {"enable-stdcall-fixup", no_argument, NULL, OPTION_ENABLE_STDCALL_FIXUP},
+    {"disable-stdcall-fixup", no_argument, NULL, OPTION_DISABLE_STDCALL_FIXUP},
+    {"out-implib", required_argument, NULL, OPTION_IMPLIB_FILENAME},
+    {"warn-duplicate-exports", no_argument, NULL, OPTION_WARN_DUPLICATE_EXPORTS},
+    /* getopt() allows abbreviations, so we do this to stop it from
+       treating -c as an abbreviation for these --compat-implib.  */
+    {"compat-implib", no_argument, NULL, OPTION_IMP_COMPAT},
+    {"compat-implib", no_argument, NULL, OPTION_IMP_COMPAT},
+    {"enable-auto-image-base", no_argument, NULL, OPTION_ENABLE_AUTO_IMAGE_BASE},
+    {"disable-auto-image-base", no_argument, NULL, OPTION_DISABLE_AUTO_IMAGE_BASE},
+    {"dll-search-prefix", required_argument, NULL, OPTION_DLL_SEARCH_PREFIX},
+    {"no-default-excludes", no_argument, NULL, OPTION_NO_DEFAULT_EXCLUDES},
+    {"enable-auto-import", no_argument, NULL, OPTION_DLL_ENABLE_AUTO_IMPORT},
+    {"disable-auto-import", no_argument, NULL, OPTION_DLL_DISABLE_AUTO_IMPORT},
+    {"enable-extra-pe-debug", no_argument, NULL, OPTION_ENABLE_EXTRA_PE_DEBUG},
+    {"enable-runtime-pseudo-reloc", no_argument, NULL, OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC},
+    {"disable-runtime-pseudo-reloc", no_argument, NULL, OPTION_DLL_DISABLE_RUNTIME_PSEUDO_RELOC},
 #endif
-  {NULL, no_argument, NULL, 0}
-};
+    {NULL, no_argument, NULL, 0}
+  };
 
+  *longopts = (struct option *)
+    xrealloc (*longopts, nl * sizeof (struct option) + sizeof (xtra_long));
+  memcpy (*longopts + nl, &xtra_long, sizeof (xtra_long));
+}
 
 /* PE/WIN32; added routines to get the subsystem type, heap and/or stack
    parameters which may be input from the command line.  */
@@ -512,34 +527,14 @@ set_pe_stack_heap (resname, comname)
 }
 
 
-static int
-gld_${EMULATION_NAME}_parse_args (argc, argv)
-     int argc;
-     char **argv;
+static bfd_boolean
+gld${EMULATION_NAME}_handle_option (optc)
+     int optc;
 {
-  int longind;
-  int optc;
-  int prevoptind = optind;
-  int prevopterr = opterr;
-  int wanterror;
-  static int lastoptind = -1;
-
-  if (lastoptind != optind)
-    opterr = 0;
-  wanterror = opterr;
-
-  lastoptind = optind;
-
-  optc = getopt_long_only (argc, argv, "-", longopts, &longind);
-  opterr = prevopterr;
-
   switch (optc)
     {
     default:
-      if (wanterror)
-	xexit (1);
-      optind =  prevoptind;
-      return 0;
+      return FALSE;
 
     case OPTION_BASE_FILE:
       link_info.base_file = (PTR) fopen (optarg, FOPEN_WB);
@@ -661,7 +656,7 @@ gld_${EMULATION_NAME}_parse_args (argc, argv)
       break;
 #endif
     }
-  return 1;
+  return TRUE;
 }
 
 
@@ -1968,7 +1963,9 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   gld_${EMULATION_NAME}_open_dynamic_archive,
   gld_${EMULATION_NAME}_place_orphan,
   gld_${EMULATION_NAME}_set_symbols,
-  gld_${EMULATION_NAME}_parse_args,
+  NULL, /* parse_args */
+  gld${EMULATION_NAME}_add_options,
+  gld${EMULATION_NAME}_handle_option,
   gld_${EMULATION_NAME}_unrecognized_file,
   gld_${EMULATION_NAME}_list_options,
   gld_${EMULATION_NAME}_recognized_file,
