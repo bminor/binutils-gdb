@@ -270,6 +270,19 @@ amd64_merge_classes (enum amd64_reg_class class1, enum amd64_reg_class class2)
 
 static void amd64_classify (struct type *type, enum amd64_reg_class class[2]);
 
+/* Return non-zero if TYPE is a non-POD structure or union type.  */
+
+static int
+amd64_non_pod_p (struct type *type)
+{
+  /* ??? A class with a base class certainly isn't POD, but does this
+     catch all non-POD structure types?  */
+  if (TYPE_CODE (type) == TYPE_CODE_STRUCT && TYPE_N_BASECLASSES (type) > 0)
+    return 1;
+
+  return 0;
+}
+
 /* Classify TYPE according to the rules for aggregate (structures and
    arrays) and union types, and store the result in CLASS.  */
 
@@ -281,7 +294,7 @@ amd64_classify_aggregate (struct type *type, enum amd64_reg_class class[2])
   /* 1. If the size of an object is larger than two eightbytes, or in
         C++, is a non-POD structure or union type, or contains
         unaligned fields, it has class memory.  */
-  if (len > 16)
+  if (len > 16 || amd64_non_pod_p (type))
     {
       class[0] = class[1] = AMD64_MEMORY;
       return;

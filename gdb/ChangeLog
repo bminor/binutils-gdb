@@ -1,5 +1,9 @@
 2004-01-10  Mark Kettenis  <kettenis@gnu.org>
 
+	* x86-64-tdep.c (amd64_non_pod_p): New function.
+	(amd64_classify_aggregate): Return class memory for non-POD
+	C++ structure types.
+
 	* x86-64-tdep.c (amd64_push_arguments): Add struct_return
 	argument.  Use it to reserve a register if necessary.
 	(amd64_push_dummy_call): Pass STRUCT_RETURN in call to
