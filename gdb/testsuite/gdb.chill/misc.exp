@@ -83,6 +83,13 @@ if ![set_lang_chill] then {
     # Linux thinks this is at line 6, but is otherwise ok.
     setup_xfail "i*86-*-linux*"
     gdb_test "info line" \
-	{Line 5 of .*misc.ch.* at address H'[0-9a-fA-F]+.*}\
+	{Line 7 of .*misc.ch.* at address H'[0-9a-fA-F]+.*}\
 	"info about current line"
+
+    # check array () type (expr)
+    gdb_test "print array () ubyte (foo)" { = \[\(0:11\): 0\]}
+	
+    send "set var \$i := foo\n"
+    expect -re ".*$prompt $"
+    gdb_test "print/x array () byte (\$i)" { = \[\(0:11\): H'0\]}
 }
