@@ -565,7 +565,11 @@ child_create_inferior (exec_file, allargs, env)
 	 initialize_signals for how we get the right signal handlers
 	 for the inferior.  */
 
+#ifdef USE_PROC_FS
+      proc_set_exec_trap ();		/* Use SVR4 /proc interface */
+#else
       call_ptrace (0, 0, 0, 0);		/* "Trace me, Dr. Memory!" */
+#endif
 
       /* There is no execlpe call, so we have to set the environment
 	 for our child in the global variable.  If we've vforked, this
