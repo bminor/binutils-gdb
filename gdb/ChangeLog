@@ -1,5 +1,11 @@
 2002-01-31  Michael Snyder  <msnyder@redhat.com>
 
+	* symfile.h (enum overlay_debugging_state): 
+	Define enum constant values for overlay mode.
+	* symfile.c (overlay_debugging): Use enums instead of literals.
+	(overlay_is_mapped, overlay_auto_command, 
+	overlay_manual_command): Ditto.	
+
 	* breakpoint.c (insert_breakpoints, remove_breakpoint, 
 	breakpoint_here_p, breakpoint_inserted_here_p, 
 	breakpoint_thread_match, bpstat_stop_status, 

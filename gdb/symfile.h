@@ -253,7 +253,11 @@ extern void find_lowest_section (bfd *, asection *, PTR);
 extern bfd *symfile_bfd_open (char *);
 
 /* Utility functions for overlay sections: */
-extern int overlay_debugging;
+extern enum overlay_debugging_state {
+  ovly_off, 
+  ovly_on, 
+  ovly_auto
+} overlay_debugging;
 extern int overlay_cache_invalid;
 
 /* return the "mapped" overlay section  containing the PC */

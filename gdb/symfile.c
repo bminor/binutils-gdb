@@ -2509,7 +2509,7 @@ init_psymbol_list (struct objfile *objfile, int total_symbols)
 
 /* Overlay debugging state: */
 
-int overlay_debugging = 0;	/* 0 == off, 1 == manual, -1 == auto */
+enum overlay_debugging_state overlay_debugging = ovly_off;
 int overlay_cache_invalid = 0;	/* True if need to refresh mapped state */
 
 /* Target vector for refreshing overlay mapped state */
@@ -2566,9 +2566,9 @@ overlay_is_mapped (struct obj_section *osect)
   switch (overlay_debugging)
     {
     default:
-    case 0:
+    case ovly_off:
       return 0;			/* overlay debugging off */
-    case -1:			/* overlay debugging automatic */
+    case ovly_auto:		/* overlay debugging automatic */
       /* Unles there is a target_overlay_update function, 
          there's really nothing useful to do here (can't really go auto)  */
       if (target_overlay_update)
@@ -2582,7 +2582,7 @@ overlay_is_mapped (struct obj_section *osect)
 	    (*target_overlay_update) (osect);
 	}
       /* fall thru to manual case */
-    case 1:			/* overlay debugging manual */
+    case ovly_on:		/* overlay debugging manual */
       return osect->ovly_mapped == 1;
     }
 }
@@ -2897,7 +2897,7 @@ the 'overlay manual' command.");
 static void
 overlay_auto_command (char *args, int from_tty)
 {
-  overlay_debugging = -1;
+  overlay_debugging = ovly_auto;
   if (info_verbose)
     printf_filtered ("Automatic overlay debugging enabled.");
 }
@@ -2909,7 +2909,7 @@ overlay_auto_command (char *args, int from_tty)
 static void
 overlay_manual_command (char *args, int from_tty)
 {
-  overlay_debugging = 1;
+  overlay_debugging = ovly_on;
   if (info_verbose)
     printf_filtered ("Overlay debugging enabled.");
 }
@@ -2921,7 +2921,7 @@ overlay_manual_command (char *args, int from_tty)
 static void
 overlay_off_command (char *args, int from_tty)
 {
-  overlay_debugging = 0;
+  overlay_debugging = ovly_off;
   if (info_verbose)
     printf_filtered ("Overlay debugging disabled.");
 }
