@@ -247,17 +247,17 @@ or a repeated element
 @smallexample
 @samp{,} @var{whitespace}         ; @r{omitted for the first element}
 @var{the-value}
-^Z^Zelt-rep @var{number-of-repititions}
+^Z^Zelt-rep @var{number-of-repetitions}
 @var{repetition-string}
 ^Z^Zelt-rep-end
 @end smallexample
 
 In both cases, @var{the-value} is the output for the value of the
 element and @var{whitespace} can contain spaces, tabs, and newlines.  In
-the repeated case, @var{number-of-repititons} is the number of
+the repeated case, @var{number-of-repetitions} is the number of
 consecutive array elements which contain that value, and
 @var{repetition-string} is a string which is designed to convey to the
-user that repitition is being depicted.
+user that repetition is being depicted.
 
 @findex array-section-end
 Once all the array elements have been output, the array annotation is

@@ -397,7 +397,7 @@ Thus, an offset of zero denotes the beginning of the expression.
 
 The @var{offset} is stored as a sixteen-bit unsigned value, stored
 immediately following the @code{if_goto} bytecode.  It is always stored
-most signficant byte first, regardless of the target's normal
+most significant byte first, regardless of the target's normal
 endianness.  The offset is not guaranteed to fall at any particular
 alignment within the bytecode stream; thus, on machines where fetching a
 16-bit on an unaligned address raises an exception, you should fetch the
@@ -431,7 +431,7 @@ registers are numbered following GDB's conventions.
 
 The register number @var{n} is encoded as a 16-bit unsigned integer
 immediately following the @code{reg} bytecode.  It is always stored most
-signficant byte first, regardless of the target's normal endianness.
+significant byte first, regardless of the target's normal endianness.
 The register number is not guaranteed to fall at any particular
 alignment within the bytecode stream; thus, on machines where fetching a
 16-bit on an unaligned address raises an exception, you should fetch the
