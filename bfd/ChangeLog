@@ -1,3 +1,9 @@
+2004-05-08  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elf32-frv.c (_frvfdpic_add_dyn_reloc): Don't warn when we get
+	a zero symndx for which we hadn't accounted a dynamic relocation.
+	(_frvfdpic_add_rofixup): Likewise.
+
 2004-05-07  Brian Ford  <ford@vss.fsi.com>
             DJ Delorie  <dj@redhat.com>
 

@@ -939,8 +939,18 @@ _frvfdpic_add_dyn_reloc (bfd *output_bfd, asection *sreloc, bfd_vma offset,
 			    sreloc->contents + reloc_offset);
   sreloc->reloc_count++;
 
-  BFD_ASSERT (entry->dynrelocs > 0);
-  entry->dynrelocs--;
+  /* If the entry's index is zero, this relocation was probably to a
+     linkonce section that got discarded.  We reserved a dynamic
+     relocation, but it was for another entry than the one we got at
+     the time of emitting the relocation.  Unfortunately there's no
+     simple way for us to catch this situation, since the relocation
+     is cleared right before calling relocate_section, at which point
+     we no longer know what the relocation used to point to.  */
+  if (entry->symndx)
+    {
+      BFD_ASSERT (entry->dynrelocs > 0);
+      entry->dynrelocs--;
+    }
 
   return reloc_offset;
 }
@@ -964,8 +974,10 @@ _frvfdpic_add_rofixup (bfd *output_bfd, asection *rofixup, bfd_vma offset,
     }
   rofixup->reloc_count++;
 
-  if (entry)
+  if (entry && entry->symndx)
     {
+      /* See discussion about symndx == 0 in _frvfdpic_add_dyn_reloc
+	 above.  */
       BFD_ASSERT (entry->fixups > 0);
       entry->fixups--;
     }
