@@ -1205,7 +1205,7 @@ fix_new_hppa (frag, where, size, add_symbol, offset, exp, pcrel,
     new_fix = fix_new_exp (frag, where, size, exp, pcrel, r_type);
   else
     new_fix = fix_new (frag, where, size, add_symbol, offset, pcrel, r_type);
-  new_fix->tc_fix_data = hppa_fix;
+  new_fix->tc_fix_data = (void *) hppa_fix;
   hppa_fix->fx_r_type = r_type;
   hppa_fix->fx_r_field = r_field;
   hppa_fix->fx_r_format = r_format;
@@ -2580,7 +2580,7 @@ tc_gen_reloc (section, fixp)
      fixS *fixp;
 {
   arelent *reloc;
-  struct hppa_fix_struct *hppa_fixp = fixp->tc_fix_data;
+  struct hppa_fix_struct *hppa_fixp;
   bfd_reloc_code_real_type code;
   static int unwind_reloc_fixp_cnt = 0;
   static arelent *unwind_reloc_entryP = NULL;
@@ -2590,6 +2590,7 @@ tc_gen_reloc (section, fixp)
   int n_relocs;
   int i;
 
+  hppa_fixp = (struct hppa_fix_struct *) fixp->tc_fix_data;
   if (fixp->fx_addsy == 0)
     return &no_relocs;
   assert (hppa_fixp != 0);
@@ -2951,11 +2952,12 @@ md_apply_fix (fixP, valp)
      valueT *valp;
 {
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
-  struct hppa_fix_struct *hppa_fixP = fixP->tc_fix_data;
+  struct hppa_fix_struct *hppa_fixP;
   long new_val, result;
   unsigned int w1, w2, w;
   valueT val = *valp;
 
+  hppa_fixP = (struct hppa_fix_struct *) fixP->tc_fix_data;
   /* SOM uses R_HPPA_ENTRY and R_HPPA_EXIT relocations which can 
      never be "applied" (they are just markers).  */
 #ifdef OBJ_SOM
@@ -6161,7 +6163,7 @@ hppa_fix_adjustable (fixp)
 {
   struct hppa_fix_struct *hppa_fix;
 
-  hppa_fix = fixp->tc_fix_data;
+  hppa_fix = (struct hppa_fix_struct *) fixp->tc_fix_data;
 
   if (fixp->fx_r_type == R_HPPA && hppa_fix->fx_r_format == 32)
     return 0;
@@ -6181,8 +6183,9 @@ int
 hppa_force_relocation (fixp)
      fixS *fixp;
 {
-  struct hppa_fix_struct *hppa_fixp = fixp->tc_fix_data;
+  struct hppa_fix_struct *hppa_fixp;
 
+  hppa_fixp = (struct hppa_fix_struct *) fixp->tc_fix_data;
 #ifdef OBJ_SOM
   if (fixp->fx_r_type == R_HPPA_ENTRY || fixp->fx_r_type == R_HPPA_EXIT)
     return 1;

@@ -1,5 +1,11 @@
 Wed Mar  2 10:31:01 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+        * config/tc-hppa.c: Add a few casts to make HP C compiler happy.
+
+        * config/obj-som.c (obj_som_version, obj_som_copyright): Be
+	prepared
+        to handle an error from bfd_som_attach_aux_hdr.
+
 	* config/tc-hppa.h: Wrap ELF specific decls inside an ifdef.
 
 Mon Feb 28 15:03:26 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
