@@ -2,9 +2,9 @@
 # Unusual variables checked by this code:
 #	NOP - two byte opcode for no-op (defaults to 0)
 #	DATA_ADDR - if end-of-text-plus-one-page isn't right for data start
-#	OTHER_READONLY_SECTIONS - other than .text .init .ctors .rodata ...
+#	OTHER_READONLY_SECTIONS - other than .text .init .rodata ...
 #		(e.g., .PARISC.milli)
-#	OTHER_READWRITE_SECTIONS - other than .data .bss .sdata ...
+#	OTHER_READWRITE_SECTIONS - other than .data .bss .ctors .sdata ...
 #		(e.g., .PARISC.global)
 #	OTHER_SECTIONS - at the end
 #	EXECUTABLE_SYMBOLS - symbols that must be defined for an
@@ -61,7 +61,11 @@ SECTIONS
   .rela.fini	${RELOCATING-0} : { *(.rela.fini)	}
   .rela.bss	${RELOCATING-0} : { *(.rela.bss)	}
   .rela.plt	${RELOCATING-0} : { *(.rela.plt)	}
-  .init		${RELOCATING-0} : { *(.init)	} =${NOP-0}
+  .rela.sdata	${RELOCATING-0} : { *(.rela.sdata2)	}
+  .rela.sbss	${RELOCATING-0} : { *(.rela.sbss2)	}
+  .rela.sdata2	${RELOCATING-0} : { *(.rela.sdata2)	}
+  .rela.sbss2	${RELOCATING-0} : { *(.rela.sbss2)	}
+  .init		${RELOCATING-0} : { *(.init)		} =${NOP-0}
   ${DATA_PLT-${PLT}}
   .text    ${RELOCATING-0} :
   {
@@ -72,13 +76,30 @@ SECTIONS
   } =${NOP-0}
   ${RELOCATING+_etext = .;}
   ${RELOCATING+PROVIDE (etext = .);}
-  .fini    ${RELOCATING-0} : { *(.fini)    } =${NOP-0}
-  .rodata  ${RELOCATING-0} : { *(.rodata)  }
-  .rodata1 ${RELOCATING-0} : { *(.rodata1) }
+  .fini		${RELOCATING-0} : { *(.fini)    } =${NOP-0}
+  .rodata	${RELOCATING-0} : { *(.rodata)  }
+  .rodata1	${RELOCATING-0} : { *(.rodata1) }
+  ${CREATE_SHLIB-
+    .sdata2	${RELOCATING-0} : { *(.sdata2) }
+    .sbss2	${RELOCATING-0} : { *(.sbss2) } }
   ${RELOCATING+${OTHER_READONLY_SECTIONS}}
 
-  /* Read-write section, merged into data segment: */
+  /* Adjust the address for the data segment.  We want to adjust up to
+     the same address within the page on the next page up.  It would
+     be more correct to do this:
+       ${RELOCATING+. = ${DATA_ADDR-ALIGN(${MAXPAGESIZE}) + (ALIGN(8) & (${MAXPAGESIZE} - 1))};}
+     The current expression does not correctly handle the case of a
+     text segment ending precisely at the end of a page; it causes the
+     data segment to skip a page.  The above expression does not have
+     this problem, but it will currently (2/95) cause BFD to allocate
+     a single segment, combining both text and data, for this case.
+     This will prevent the text segment from being shared among
+     multiple executions of the program; I think that is more
+     important than losing a page of the virtual address space (note
+     that no actual memory is lost; the page which is skipped can not
+     be referenced).  */
   ${RELOCATING+. = ${DATA_ADDR- ALIGN(8) + ${MAXPAGESIZE}};}
+
   .data  ${RELOCATING-0} :
   {
     ${RELOCATING+${DATA_START_SYMBOLS}}
@@ -88,8 +109,6 @@ SECTIONS
   .data1 ${RELOCATING-0} : { *(.data1) }
   ${RELOCATING+${OTHER_READWRITE_SECTIONS}}
 
-  .sdata2	${RELOCATING-0} : { *(.sdata2) }
-  .sbss2	${RELOCATING-0} : { *(.sbss2) }
   .got1		${RELOCATING-0} : { *(.got1) }
   .dynamic	${RELOCATING-0} : { *(.dynamic) }
 
@@ -117,10 +136,12 @@ SECTIONS
 		${RELOCATING+PROVIDE (_GLOBAL_OFFSET_TABLE_ = .);}
   .got		${RELOCATING-0} : { *(.got) }
   .got.plt	${RELOCATING-0} : { *(.got.plt) }
+  ${CREATE_SHLIB+
+    .sdata2	${RELOCATING-0} : { *(.sdata2) }
+    .sbss2	${RELOCATING-0} : { *(.sbss2) } }
 		${RELOCATING+PROVIDE (_GOT_END_ = .);}
 
   ${DATA_PLT+${PLT}}
-
   /* We want the small data sections together, so single-instruction offsets
      can access them all, and initialized data all before uninitialized, so
      we can shorten the on-disk segment size.  */
@@ -149,6 +170,17 @@ SECTIONS
      converted to the new style linker.  */
   .stab 0 : { *(.stab) }
   .stabstr 0 : { *(.stabstr) }
+
+  /* DWARF debug sections.
+     Symbols in the .debug DWARF section are relative to the beginning of the
+     section so we begin .debug at 0.  It's not clear yet what needs to happen
+     for the others.   */
+  .debug          0 : { *(.debug) }
+  .debug_srcinfo  0 : { *(.debug_srcinfo) }
+  .debug_aranges  0 : { *(.debug_aranges) }
+  .debug_pubnames 0 : { *(.debug_pubnames) }
+  .debug_sfnames  0 : { *(.debug_sfnames) }
+  .line           0 : { *(.line) }
 
   /* These must appear regardless of ${RELOCATING}.  */
   ${OTHER_SECTIONS}
