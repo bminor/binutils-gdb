@@ -52,6 +52,7 @@ coff-m88k.c
 coff-mips.c
 coff-msym.c
 coff-rs6000.c
+coff-we32k.c
 coff-z8k.c
 coffcode.h
 config
@@ -81,6 +82,7 @@ cpu-hppa.c
 cpu-i960.c
 cpu-m88k.c
 cpu-rs6000.c
+cpu-we32k.c
 cpu-z8k.c
 hp300bsd.c
 init.c
