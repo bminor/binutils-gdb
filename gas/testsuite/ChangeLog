@@ -1,3 +1,14 @@
+Wed Aug 16 12:24:12 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/mri/for.s: Add nop to round out to four byte boundary.
+	* gas/mri/repeat.s: Likewise.
+	* gas/mri/while.s: Likewise.
+	* gas/mri/for.d: Expected added nop.
+	* gas/mri/repeat.d: Likewise.
+	* gas/mri/while.d: Likewise.
+
+	* gas/mips/*.d: Change all test names to say MIPS.
+
 Tue Aug 15 15:42:33 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/mri/for.d, gas/mri/for.s: New test.
