@@ -834,10 +834,9 @@ dump_stabs_1 (abfd, name1, name2)
 }
 
 static void
-list_matching_formats()
+list_matching_formats(p)
+     char **p;
 {
-  char **p = bfd_matching_formats ();
-
   fprintf(stderr, "%s: Matching formats:", program_name);
   while (*p)
     fprintf(stderr, " %s", *p++);
@@ -848,12 +847,17 @@ static void
 display_bfd (abfd)
      bfd *abfd;
 {
-  if (!bfd_check_format (abfd, bfd_object))
+  char **matching;
+
+  if (!bfd_check_format_matches (abfd, bfd_object, &matching))
     {
       fprintf (stderr, "%s: %s: %s\n", program_name, abfd->filename,
 	       bfd_errmsg (bfd_error));
       if (bfd_error == file_ambiguously_recognized)
-	list_matching_formats();
+	{
+	  list_matching_formats (matching);
+	  free (matching);
+	}
       return;
     }
   printf ("\n%s:     file format %s\n", abfd->filename, abfd->xvec->name);
@@ -917,8 +921,6 @@ display_file (filename, target)
     {
       fprintf (stderr, "%s: ", program_name);
       bfd_perror (filename);
-      if (bfd_error == file_ambiguously_recognized)
-	list_matching_formats();
       return;
     }
 

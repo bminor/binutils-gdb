@@ -1,5 +1,12 @@
 Mon Jan 24 13:29:02 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
+	* objdump.c (display_file): Remove call to list_matching_formats.
+	It would never be called.
+	(list_matching_formats): Take an arg giving the list of matching
+	formats.
+	(display_bfd): Pass the arg, and get it filled in by calling
+	bfd_check_format_matches instead of bfd_check_format.
+
 	* binutils.texi (objdump): Note some limitations of -h section
 	address printing.
 
