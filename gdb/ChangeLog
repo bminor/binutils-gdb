@@ -1,3 +1,9 @@
+1998-07-27  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* config/d10v/tm-d10v.h (REGISTER_NAMES): sp -> r15.  The
+	stack pointer et al are synthesized from the SP_REGNUM (etc)
+	defines and should not be mentioned in REGISTER_NAMES.
+
 start-sanitize-am33
 Mon Jul 27 08:54:41 1998  Jeffrey A Law  (law@cygnus.com)
 

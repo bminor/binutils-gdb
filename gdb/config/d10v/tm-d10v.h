@@ -64,7 +64,7 @@ extern CORE_ADDR d10v_skip_prologue ();
 
 #define REGISTER_NAMES \
 { "r0", "r1", "r2", "r3", "r4", "r5",  "r6", "r7", \
-    "r8", "r9", "r10","r11","r12", "r13", "r14","sp",\
+    "r8", "r9", "r10","r11","r12", "r13", "r14","r15",\
     "psw","bpsw","pc","bpc", "cr4", "cr5", "cr6", "rpt_c",\
     "rpt_s","rpt_e", "mod_s", "mod_e", "cr12", "cr13", "iba", "cr15",\
     "imap0","imap1","dmap","a0", "a1"\
