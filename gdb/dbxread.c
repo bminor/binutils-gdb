@@ -2648,17 +2648,6 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 		    struct section_offsets *section_offsets,
 		    struct objfile *objfile)
 {
-#ifdef SUN_FIXED_LBRAC_BUG
-  /* If SUN_FIXED_LBRAC_BUG is defined, then it tells us whether we need
-     to correct the address of N_LBRAC's.  If it is not defined, then
-     we never need to correct the addresses.  */
-
-  /* This records the last pc address we've seen.  We depend on there being
-     an SLINE or FUN or SO before the first LBRAC, since the variable does
-     not get reset in between reads of different symbol files.  */
-  static CORE_ADDR last_pc_address;
-#endif
-
   struct context_stack *new;
   /* This remembers the address of the start of a function.  It is used
      because in Solaris 2, N_LBRAC, N_RBRAC, and N_SLINE entries are
@@ -2766,14 +2755,6 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 	   N_SO, the linker did not relocate them (sigh).  */
 	valu += last_source_start_addr;
 
-#ifdef SUN_FIXED_LBRAC_BUG
-      if (!SUN_FIXED_LBRAC_BUG && valu < last_pc_address)
-	{
-	  /* Patch current LBRAC pc value to match last handy pc value */
-	  complaint (&symfile_complaints, "bad block start address patched");
-	  valu = last_pc_address;
-	}
-#endif
       new = push_context (desc, valu);
       break;
 
@@ -2887,10 +2868,6 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 
       n_opt_found = 0;
 
-#ifdef SUN_FIXED_LBRAC_BUG
-      last_pc_address = valu;	/* Save for SunOS bug circumcision */
-#endif
-
 #ifdef PCC_SOL_BROKEN
       /* pcc bug, occasionally puts out SO for SOL.  */
       if (context_stack_depth > 0)
@@ -2959,9 +2936,6 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
       /* Relocate for dynamic loading and for ELF acc fn-relative syms.  */
       valu += function_start_offset;
 
-#ifdef SUN_FIXED_LBRAC_BUG
-      last_pc_address = valu;	/* Save for SunOS bug circumcision */
-#endif
       /* If this is the first SLINE note in the function, record it at
 	 the start of the function instead of at the listed location.  */
       if (within_function && sline_found_in_function == 0)
@@ -3119,56 +3093,6 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 		  if (minsym_valu != 0)
 		    valu = minsym_valu;
 		}
-#endif
-
-#ifdef SUN_FIXED_LBRAC_BUG
-	      /* The Sun acc compiler, under SunOS4, puts out
-	         functions with N_GSYM or N_STSYM.  The problem is
-	         that the address of the symbol is no good (for N_GSYM
-	         it doesn't even attept an address; for N_STSYM it
-	         puts out an address but then it gets relocated
-	         relative to the data segment, not the text segment).
-	         Currently we can't fix this up later as we do for
-	         some types of symbol in scan_file_globals.
-	         Fortunately we do have a way of finding the address -
-	         we know that the value in last_pc_address is either
-	         the one we want (if we're dealing with the first
-	         function in an object file), or somewhere in the
-	         previous function. This means that we can use the
-	         minimal symbol table to get the address.  */
-
-	      /* Starting with release 3.0, the Sun acc compiler,
-	         under SunOS4, puts out functions with N_FUN and a value
-	         of zero. This gets relocated to the start of the text
-	         segment of the module, which is no good either.
-	         Under SunOS4 we can deal with this as N_SLINE and N_SO
-	         entries contain valid absolute addresses.
-	         Release 3.0 acc also puts out N_OPT entries, which makes
-	         it possible to discern acc from cc or gcc.  */
-
-	      if (type == N_GSYM || type == N_STSYM
-		  || (type == N_FUN
-		      && n_opt_found && !block_address_function_relative))
-		{
-		  struct minimal_symbol *m;
-		  int l = colon_pos - name;
-
-		  m = lookup_minimal_symbol_by_pc (last_pc_address);
-		  if (m && strncmp (DEPRECATED_SYMBOL_NAME (m), name, l) == 0
-		      && DEPRECATED_SYMBOL_NAME (m)[l] == '\0')
-		    /* last_pc_address was in this function */
-		    valu = SYMBOL_VALUE (m);
-		  else if (m && DEPRECATED_SYMBOL_NAME (m + 1)
-			   && strncmp (DEPRECATED_SYMBOL_NAME (m + 1), name, l) == 0
-			   && DEPRECATED_SYMBOL_NAME (m + 1)[l] == '\0')
-		    /* last_pc_address was in last function */
-		    valu = SYMBOL_VALUE (m + 1);
-		  else
-		    /* Not found - use last_pc_address (for finish_block) */
-		    valu = last_pc_address;
-		}
-
-	      last_pc_address = valu;	/* Save for SunOS bug circumcision */
 #endif
 
 	      if (block_address_function_relative)

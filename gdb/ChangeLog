@@ -1,5 +1,10 @@
 2004-06-30  Mark Kettenis  <kettenis@gnu.org>
 
+	* dbxread.c (process_one_symbol) [SUN_FIXED_LBRAC_BUG]: Remove
+	dead code.
+
+2004-06-30  Mark Kettenis  <kettenis@gnu.org>
+
 	* alphabsd-nat.c: Update copyright year.
 	(getregs_supplies): Use ALPHA_PC_REGNUM instead of PC_REGNUM.
 
