@@ -906,6 +906,11 @@ coff_new_section_hook (abfd, section)
 	  || strcmp (section->name, ".dtors") == 0))
     section->alignment_power = 2;
 
+  /* Similarly, the .stabstr section must be aligned to 2**0 at most.  */
+  if (COFF_DEFAULT_SECTION_ALIGNMENT_POWER > 0
+      && strncmp (section->name, ".stabstr", 8) == 0)
+    section->alignment_power = 0;
+
   return true;
 }
 
