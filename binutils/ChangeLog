@@ -1,3 +1,11 @@
+2001-06-23  Andreas Jaeger  <aj@suse.de>
+
+	* unwind-ia64.c (unw_decode_x1): Add unused attribute for
+	parameter 'code'.
+	(unw_decode_x2): Likewise.
+	(unw_decode_x3): Likewise.
+	(unw_decode_x4): Likewise.
+
 2001-06-23  Ben Elliston  <bje@redhat.com>
 
 	* MAINTAINERS: Add myself as M88k maintainer.
@@ -104,9 +112,9 @@
         * NEWS: Announce support for OpenRISC.
 
 2001-04-17  Danny Smith  <dannysmith@users.sourceforge.net>
- 
-	* dlltool.c (do_default_excludes): Initialise to true. 
- 
+
+	* dlltool.c (do_default_excludes): Initialise to true.
+
 2001-04-10  Alan Modra  <amodra@one.net.au>
 
 	* MAINTAINERS: Update my email address

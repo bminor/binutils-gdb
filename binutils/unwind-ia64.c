@@ -577,7 +577,7 @@ unw_decode_uleb128 (dpp)
 static const unsigned char *
 unw_decode_x1 (dp, code, arg)
      const unsigned char * dp;
-     unsigned char         code;
+     unsigned char         code ATTRIBUTE_UNUSED;
      void *                arg ATTRIBUTE_UNUSED;
 {
   unsigned char byte1, abreg;
@@ -597,7 +597,7 @@ unw_decode_x1 (dp, code, arg)
 static const unsigned char *
 unw_decode_x2 (dp, code, arg)
      const unsigned char * dp;
-     unsigned char         code;
+     unsigned char         code ATTRIBUTE_UNUSED;
      void *                arg ATTRIBUTE_UNUSED;
 {
   unsigned char byte1, byte2, abreg, x, ytreg;
@@ -619,7 +619,7 @@ unw_decode_x2 (dp, code, arg)
 static const unsigned char *
 unw_decode_x3 (dp, code, arg)
      const unsigned char * dp;
-     unsigned char         code;
+     unsigned char         code ATTRIBUTE_UNUSED;
      void *                arg ATTRIBUTE_UNUSED;
 {
   unsigned char byte1, byte2, abreg, qp;
@@ -643,7 +643,7 @@ unw_decode_x3 (dp, code, arg)
 static const unsigned char *
 unw_decode_x4 (dp, code, arg)
      const unsigned char * dp;
-     unsigned char         code;
+     unsigned char         code ATTRIBUTE_UNUSED;
      void *                arg ATTRIBUTE_UNUSED;
 {
   unsigned char byte1, byte2, byte3, qp, abreg, x, ytreg;
