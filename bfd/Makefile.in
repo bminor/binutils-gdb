@@ -1,5 +1,3 @@
- #
-CC=gcc -Wall -ansi
 # Copyright (C) 1990, 1991 Free Software Foundation, Inc.
 #
 # This file is part of BFD, the Binary File Diddler.
@@ -42,7 +40,7 @@ BFD_LIBS = libbfd.o opncls.o bfd.o archive.o targets.o cache.o \
 
 BFD_BACKENDS = oasys.o ieee.o srec.o aout64.o aout32.o sunos.o icoff.o \
 demo64.o amdcoff.o \
-m68kcoff.o i386coff.o m88k-bcs.o  ecoff.o newsos3.o # trad-core.o bout.o
+m68kcoff.o i386coff.o m88k-bcs.o  ecoff.o newsos3.o bout.o # trad-core.o 
 
 BFD_H=$(INCDIR)/bfd.h
 SYSDEP_H=$(INCDIR)/sysdep.h
@@ -52,7 +50,7 @@ CFILES = libbfd.c opncls.c bfd.c archive.c targets.c cache.c archures.c \
 	 i386coff.c aout64.c aout32.c sunos.c demo64.c icoff.c srec.c \
 oasys.c ieee.c m68kcoff.c amdcoff.c \
 format.c section.c core.c syms.c reloc.c \
-	 m88k-bcs.c ecoff.c trad-core.c newsos3.c #bout.c
+	 m88k-bcs.c ecoff.c trad-core.c newsos3.c bout.c
 
 STAGESTUFF = $(TARGETLIB) $(OFILES)
 

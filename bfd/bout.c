@@ -37,12 +37,6 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define	i960_align(addr, align)	\
 	( ((addr) + ((1<<(align))-1)) & (-1 << (align)))
 
-extern uint64_type _do_getl64 (), _do_getb64 ();
-extern uint32_type _do_getl32 (), _do_getb32 ();
-extern uint16_type _do_getl16 (), _do_getb16 ();
-extern void _do_putl64 (), _do_putb64 ();
-extern void _do_putl32 (), _do_putb32 ();
-extern void _do_putl16 (), _do_putb16 ();
 
 
 PROTO (static boolean, b_out_squirt_out_relocs,(bfd *abfd, asection *section));
@@ -51,14 +45,15 @@ PROTO (static bfd_target *, b_out_callback, (bfd *));
 PROTO (boolean, aout_slurp_symbol_table, (bfd *abfd));
 PROTO (void , aout_write_syms, ());
 
-PROTO (static void, swap_exec_header, (bfd *abfd, struct exec *execp));
+PROTO (static void, swap_exec_header, (bfd *abfd, struct internal_exec *execp));
+
 
 static bfd_target *
 b_out_little_object_p (abfd)
      bfd *abfd;
 {
   unsigned char magicbytes[LONG_SIZE];
-  struct exec anexec;
+  struct internal_exec anexec;
   
   if (bfd_read ((PTR)magicbytes, 1, LONG_SIZE, abfd) != LONG_SIZE) {
     bfd_error = system_call_error;
@@ -70,7 +65,7 @@ b_out_little_object_p (abfd)
     bfd_error = wrong_format;
     return 0;
   }
-  return some_aout_object_p (abfd, b_out_callback);
+  return aout_32_some_aout_object_p (abfd, b_out_callback);
 }
 
 static bfd_target *
@@ -78,7 +73,7 @@ b_out_big_object_p (abfd)
      bfd *abfd;
 {
   unsigned char magicbytes[LONG_SIZE];
-  struct exec anexec;
+  struct internal_exec anexec;
 
   if (bfd_read ((PTR)magicbytes, 1, LONG_SIZE, abfd) != LONG_SIZE) {
     bfd_error = system_call_error;
@@ -91,7 +86,7 @@ b_out_big_object_p (abfd)
     bfd_error = wrong_format;
     return 0;
   }
-  return some_aout_object_p (abfd, b_out_callback);
+  return aout_32_some_aout_object_p (abfd, b_out_callback);
 }
 
 /* Finish up the opening of a b.out file for reading.  Fill in all the
@@ -101,8 +96,8 @@ static bfd_target *
 b_out_callback (abfd)
      bfd *abfd;
 {
-  struct exec anexec;
-  struct exec *execp = &anexec;
+  struct internal_exec anexec;
+  struct internal_exec *execp = &anexec;
   unsigned long bss_start;
 
   /* Reread the exec header, because the common code didn't get all of
@@ -114,8 +109,8 @@ b_out_callback (abfd)
   }
 
   /* FIXME, needs to be hacked for character array read-in ala sunos.c.  */
-  if (bfd_read ((PTR) execp, 1, sizeof (struct exec), abfd)
-      != sizeof (struct exec)) {
+  if (bfd_read ((PTR) execp, 1, sizeof (struct internal_exec), abfd)
+      != sizeof (struct internal_exec)) {
     bfd_error = wrong_format;
     return 0;
   }
@@ -163,7 +158,7 @@ b_out_mkobject (abfd)
   bfd_error = system_call_error;
 
   /* Use an intermediate variable for clarity */
-  rawptr = (PTR) zalloc (sizeof (struct aoutdata) + sizeof (struct exec));
+  rawptr = (PTR) zalloc (sizeof (struct aoutdata) + sizeof (struct internal_exec));
 
   if (rawptr == (PTR)NULL) {
     bfd_error = no_memory;
@@ -171,7 +166,7 @@ b_out_mkobject (abfd)
   }
 
   set_tdata(abfd, (struct aoutdata *) rawptr);
-  exec_hdr (abfd) = (struct exec *) ( (char*)rawptr + sizeof (struct aoutdata));
+  exec_hdr (abfd) = (struct internal_exec *) ( (char*)rawptr + sizeof (struct aoutdata));
 
   /* For simplicity's sake we just make all the sections right here. */
   obj_textsec (abfd) = (asection *)NULL;
@@ -189,7 +184,7 @@ static boolean
 b_out_write_object_contents (abfd)
      bfd *abfd;
 {
-  struct exec swapped_hdr;
+  struct internal_exec swapped_hdr;
 
   exec_hdr (abfd)->a_magic = BMAGIC;
 
@@ -216,7 +211,7 @@ b_out_write_object_contents (abfd)
   swap_exec_header (abfd, &swapped_hdr);
 
   bfd_seek (abfd, 0L, SEEK_SET);
-  bfd_write ((PTR) &swapped_hdr, 1, sizeof (struct exec), abfd);
+  bfd_write ((PTR) &swapped_hdr, 1, sizeof (struct internal_exec), abfd);
 
   /* Now write out reloc info, followed by syms and strings */
   if (bfd_get_symcount (abfd) != 0) 
@@ -239,7 +234,7 @@ b_out_write_object_contents (abfd)
 static void
 swap_exec_header (abfd, execp)
      bfd *abfd;
-     struct exec *execp;
+     struct internal_exec *execp;
 {
 #define swapme(field)	field = bfd_h_get_32 (abfd, (unsigned char *)&field);
   swapme (execp->a_magic);
@@ -530,16 +525,18 @@ b_out_squirt_out_relocs (abfd, section)
 	}
 	else  if(g->section->output_section == obj_textsec(abfd)) {
 	  symnum = N_TEXT;
-	  BFD_ASSERT(g->addend == 0);
+ 	  BFD_ASSERT(g->addend + obj_textsec(abfd)->vma == 0);
+
 	}
 	else if (g->section->output_section == obj_datasec(abfd)) {
 	  symnum  = N_DATA;
-	  BFD_ASSERT(g->addend + obj_textsec(abfd)->size == 0);
+ 	  BFD_ASSERT(g->addend + obj_datasec(abfd)->vma == 0);
+
 	}
 	else if (g->section->output_section == obj_bsssec(abfd)) {
 	  symnum = N_BSS;
-	  BFD_ASSERT(g->addend + obj_textsec(abfd)->size 
-	    + obj_datasec(abfd)->size == 0);
+ 	  BFD_ASSERT(g->addend + obj_bsssec(abfd)->vma == 0);
+
 
 	}
 	else {
@@ -628,7 +625,7 @@ b_out_set_section_contents (abfd, section, location, offset, count)
       return false;
     }
 
-    obj_textsec (abfd)->filepos = sizeof(struct exec);
+    obj_textsec (abfd)->filepos = sizeof(struct internal_exec);
     obj_datasec(abfd)->filepos = obj_textsec(abfd)->filepos 
                                 +  obj_textsec (abfd)->size;
 
@@ -673,31 +670,41 @@ DEFUN(b_out_sizeof_headers,(abfd, exec),
       bfd *abfd AND
       boolean execable)
 {
-return sizeof(struct exec);
+return sizeof(struct internal_exec);
 }
+
+
 
+
+
+
+
 /* Build the transfer vectors for Big and Little-Endian B.OUT files.  */
 
 /* We don't have core files.  */
-#define	aout_core_file_failing_command	_bfd_dummy_core_file_failing_command
-#define	aout_core_file_failing_signal	_bfd_dummy_core_file_failing_signal
-#define	aout_core_file_matches_executable_p	\
+#define	aout_32_core_file_failing_command	_bfd_dummy_core_file_failing_command
+#define	aout_32_core_file_failing_signal	_bfd_dummy_core_file_failing_signal
+#define	aout_32_core_file_matches_executable_p	\
 				_bfd_dummy_core_file_matches_executable_p
 
 /* We use BSD-Unix generic archive files.  */
-#define	aout_openr_next_archived_file	bfd_generic_openr_next_archived_file
-#define	aout_generic_stat_arch_elt	bfd_generic_stat_arch_elt
-#define	aout_slurp_armap		bfd_slurp_bsd_armap
-#define	aout_slurp_extended_name_table	bfd_true
-#define	aout_write_armap		bsd_write_armap
-#define	aout_truncate_arname		bfd_bsd_truncate_arname
+#define	aout_32_openr_next_archived_file	bfd_generic_openr_next_archived_file
+#define	aout_32_generic_stat_arch_elt	bfd_generic_stat_arch_elt
+#define	aout_32_slurp_armap		bfd_slurp_bsd_armap
+#define	aout_32_slurp_extended_name_table	bfd_true
+#define	aout_32_write_armap		bsd_write_armap
+#define	aout_32_truncate_arname		bfd_bsd_truncate_arname
 
 /* We override these routines from the usual a.out file routines.  */
-#define	aout_canonicalize_reloc		b_out_canonicalize_reloc
-#define	aout_get_reloc_upper_bound	b_out_get_reloc_upper_bound
-#define	aout_set_section_contents	b_out_set_section_contents
-#define	aout_set_arch_mach		b_out_set_arch_mach
-#define	aout_sizeof_headers		b_out_sizeof_headers
+#define	aout_32_canonicalize_reloc		b_out_canonicalize_reloc
+#define	aout_32_get_reloc_upper_bound	b_out_get_reloc_upper_bound
+#define	aout_32_set_section_contents	b_out_set_section_contents
+#define	aout_32_set_arch_mach		b_out_set_arch_mach
+#define	aout_32_sizeof_headers		b_out_sizeof_headers
+
+#define aout_32_bfd_debug_info_start		bfd_void
+#define aout_32_bfd_debug_info_end		bfd_void
+#define aout_32_bfd_debug_info_accumulate	(PROTO(void,(*),(bfd*, struct sec *))) bfd_void
 
 
 bfd_target b_out_vec_big_host =
@@ -712,7 +719,7 @@ bfd_target b_out_vec_big_host =
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
   ' ',				/* ar_pad_char */
   16,				/* ar_max_namelen */
-
+     2,				/* minumum alignment power */
 
 _do_getl64, _do_putl64,  _do_getl32, _do_putl32, _do_getl16, _do_putl16, /* data */
 _do_getb64, _do_putb64,  _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs */
@@ -723,7 +730,7 @@ _do_getb64, _do_putb64,  _do_getb32, _do_putb32, _do_getb16, _do_putb16, /* hdrs
     {bfd_false, b_out_write_object_contents,	/* bfd_write_contents */
        _bfd_write_archive_contents, bfd_false},
 
-  JUMP_TABLE(aout)
+  JUMP_TABLE(aout_32)
 };
 
 
@@ -739,7 +746,7 @@ bfd_target b_out_vec_little_host =
   (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC), /* section flags */
   ' ',				/* ar_pad_char */
   16,				/* ar_max_namelen */
-	 
+     2,				/* minum align */
 _do_getl64, _do_putl64, _do_getl32, _do_putl32, _do_getl16, _do_putl16, /* data */
 _do_getl64, _do_putl64, _do_getl32, _do_putl32, _do_getl16, _do_putl16, /* hdrs */
 	 
@@ -749,6 +756,6 @@ _do_getl64, _do_putl64, _do_getl32, _do_putl32, _do_getl16, _do_putl16, /* hdrs 
        _bfd_generic_mkarchive, bfd_false},
     {bfd_false, b_out_write_object_contents,	/* bfd_write_contents */
        _bfd_write_archive_contents, bfd_false},
-  JUMP_TABLE(aout)
+  JUMP_TABLE(aout_32)
 };
 

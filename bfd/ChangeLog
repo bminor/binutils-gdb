@@ -1,3 +1,21 @@
+Fri Jul 26 18:11:34 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
+
+	* Makefile.in, bfd.c: Made it compile again.
+
+Fri Jul 19 08:17:09 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
+
+	* newsos3.c, targets.c, coffcode.h: new patches from David Wood
+
+
+Mon Jul 15 16:27:42 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
+
+	* aoutf1.h archive.c bfd.c coffcode.h core.c ecoff.c ieee.c
+	bfd.texinfo oasys.c opncls.c reloc.c srec.c: More documentation on
+	lint fixes.
+
+	* amdcoff.c bfd.texinfo Makefile.in : Folded in changes for amd
+	29k coff by David Wood (wood@lab.ultra.nyu.edu).
+
 Thu Jul  4 09:53:16 1991  Steve Chamberlain  (steve at cygint.cygnus.com)
 
 	* Everything: created some new files, core.c format.c, reloc.c,
