@@ -3024,8 +3024,7 @@ _initialize_arm_tdep (void)
   int numregs, i, j;
   static char *helptext;
 
-  if (GDB_MULTI_ARCH)
-    gdbarch_register (bfd_arch_arm, arm_gdbarch_init, arm_dump_tdep);
+  gdbarch_register (bfd_arch_arm, arm_gdbarch_init, arm_dump_tdep);
 
   /* Register an ELF OS ABI sniffer for ARM binaries.  */
   gdbarch_register_osabi_sniffer (bfd_arch_arm,

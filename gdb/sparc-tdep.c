@@ -51,8 +51,6 @@
  * Some local macros that have multi-arch and non-multi-arch versions:
  */
 
-#if (GDB_MULTI_ARCH > 0)
-
 #if 0
 // OBSOLETE /* Does the target have Floating Point registers?  */
 // OBSOLETE #define SPARC_HAS_FPU     (gdbarch_tdep (current_gdbarch)->has_fpu)
@@ -66,49 +64,6 @@
 #define SPARC_INTREG_SIZE (gdbarch_tdep (current_gdbarch)->intreg_size)
 /* Offset within the call dummy stack of the saved registers.  */
 #define DUMMY_REG_SAVE_OFFSET (gdbarch_tdep (current_gdbarch)->reg_save_offset)
-
-#else /* non-multi-arch */
-
-
-/* Does the target have Floating Point registers?  */
-#if 0
-// OBSOLETE #if defined(TARGET_SPARCLET) || defined(TARGET_SPARCLITE)
-// OBSOLETE #define SPARC_HAS_FPU 0
-// OBSOLETE #else
-// OBSOLETE #define SPARC_HAS_FPU 1
-// OBSOLETE #endif
-#endif
-#define SPARC_HAS_FPU 1
-
-/* Number of bytes devoted to Floating Point registers: */
-#if (GDB_TARGET_IS_SPARC64)
-#define FP_REGISTER_BYTES (64 * 4)
-#else
-#if (SPARC_HAS_FPU)
-#define FP_REGISTER_BYTES (32 * 4)
-#else
-#define FP_REGISTER_BYTES 0
-#endif
-#endif
-
-/* Highest numbered Floating Point register.  */
-#if (GDB_TARGET_IS_SPARC64)
-#define FP_MAX_REGNUM (FP0_REGNUM + 48)
-#else
-#define FP_MAX_REGNUM (FP0_REGNUM + 32)
-#endif
-
-/* Size of a general (integer) register: */
-#define SPARC_INTREG_SIZE (REGISTER_RAW_SIZE (G0_REGNUM))
-
-/* Offset within the call dummy stack of the saved registers.  */
-#if (GDB_TARGET_IS_SPARC64)
-#define DUMMY_REG_SAVE_OFFSET (128 + 16)
-#else
-#define DUMMY_REG_SAVE_OFFSET 0x60
-#endif
-
-#endif /* GDB_MULTI_ARCH */
 
 struct gdbarch_tdep
   {
