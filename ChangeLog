@@ -1,3 +1,14 @@
+Tue Feb  2 22:40:36 1999  Jim Wilson  <wilson@cygnus.com>
+
+	* Makefile.in (EXTRA_GCC_FLAGS):  Set AR to $AR instead of
+	$AR_FOR_TARGET.  Likewise for RANLIB.
+
+Tue Feb  2 20:05:05 1999  Catherine Moore  <clm@cygnus.com>
+ 
+        * config.sub (oabi):  Recognize.
+        * configure.in (arm-*-oabi):  Handle.
+        (thumb-*-oabi):  Handle.
+
 Mon Jan 18 13:59:20 1999  Christopher Faylor <cgf@cygnus.com>
 
 	* Makefile.in: Remove unneeded all-target-libio from
