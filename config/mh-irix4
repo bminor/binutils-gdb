@@ -3,6 +3,6 @@
 # environment.  Also bump switch table size so that cp-parse will
 # compile.
 
-CC = cc -cckr -Wf,-XNg1500 -Wf,-XNk1000 -Wf,-XNh1500
+CC = cc -cckr -Wf,-XNg1500 -Wf,-XNk1000 -Wf,-XNh2000
 SYSV = -DSYSV
 RANLIB = true
