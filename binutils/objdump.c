@@ -176,6 +176,7 @@ dump_section_header (abfd, section, ignored)
   PF (SEC_DATA, "DATA");
   PF (SEC_ROM, "ROM");
   PF (SEC_DEBUGGING, "DEBUGGING");
+  PF (SEC_NEVER_LOAD, "NEVER_LOAD");
   printf ("\n");
 #undef PF
 }
@@ -226,16 +227,18 @@ slurp_dynamic_symtab (abfd)
   asymbol **sy = (asymbol **) NULL;
   long storage;
 
-  if (!(bfd_get_file_flags (abfd) & DYNAMIC))
-    {
-      fprintf (stderr, "%s: %s: not a dynamic object\n",
-	       program_name, bfd_get_filename (abfd));
-      return NULL;
-    }
-
   storage = bfd_get_dynamic_symtab_upper_bound (abfd);
   if (storage < 0)
-    bfd_fatal (bfd_get_filename (abfd));
+    {
+      if (!(bfd_get_file_flags (abfd) & DYNAMIC))
+	{
+	  fprintf (stderr, "%s: %s: not a dynamic object\n",
+		   program_name, bfd_get_filename (abfd));
+	  return NULL;
+	}
+
+      bfd_fatal (bfd_get_filename (abfd));
+    }
 
   if (storage)
     {
@@ -269,7 +272,7 @@ remove_useless_symbols (symbols, count)
 	continue;
       if (sym->flags & (BSF_DEBUGGING))
 	continue;
-      if (sym->section == &bfd_und_section
+      if (bfd_is_und_section (sym->section)
 	  || bfd_is_com_section (sym->section))
 	continue;
 
@@ -405,11 +408,9 @@ objdump_print_address (vma, info)
 	for (i = thisplace + 1; i < symcount; i++)
 	  {
 	    if (syms[i]->value != syms[thisplace]->value)
-	      {
-		i--;
-		break;
-	      }
+	      break;
 	  }
+	--i;
 	for (; i >= 0; i--)
 	  {
 	    if (syms[i]->section == aux->sec)
@@ -1043,9 +1044,9 @@ dump_relocs (abfd)
     {
       long relsize;
 
-      if (a == &bfd_abs_section)
+      if (bfd_is_abs_section (a))
 	continue;
-      if (a == &bfd_und_section)
+      if (bfd_is_und_section (a))
 	continue;
       if (bfd_is_com_section (a))
 	continue;
