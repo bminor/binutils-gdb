@@ -1,3 +1,10 @@
+Wed Mar 29 17:09:29 1995  Stu Grossman  (grossman@cygnus.com)
+
+	* testsuite/config/rom68k.exp (gdb_target_rom68k):  Use
+	$targetname, $serialport and $baud instead of hardwired variables.
+	* testsuite/gdb.base/{sigall.exp signals.exp}:  Skip these if the
+	target doesn't support signals.
+
 Wed Mar 29 12:29:34 1995  Kung Hsu  <kung@mexican.cygnus.com>
 
 	* lib/gdb.exp (runto_main): Fix regular expression bug, add return 1.
