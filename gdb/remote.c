@@ -2583,7 +2583,7 @@ remote_vcont_resume (ptid_t ptid, int step, enum target_signal siggnal)
 {
   struct remote_state *rs = get_remote_state ();
   int pid = PIDGET (ptid);
-  char *buf = NULL;
+  char *buf = NULL, *outbuf;
   struct cleanup *old_cleanup;
 
   buf = xmalloc (rs->remote_packet_size);
@@ -2608,40 +2608,45 @@ remote_vcont_resume (ptid_t ptid, int step, enum target_signal siggnal)
 	 don't have any PID numbers the inferior will understand.  Make sure
 	 to only send forms that do not specify a PID.  */
       if (step && siggnal != TARGET_SIGNAL_0)
-	sprintf (buf, "vCont;S%02x", siggnal);
+	outbuf = xstrprintf ("vCont;S%02x", siggnal);
       else if (step)
-	sprintf (buf, "vCont;s");
+	outbuf = xstrprintf ("vCont;s");
       else if (siggnal != TARGET_SIGNAL_0)
-	sprintf (buf, "vCont;C%02x", siggnal);
+	outbuf = xstrprintf ("vCont;C%02x", siggnal);
       else
-	sprintf (buf, "vCont;c");
+	outbuf = xstrprintf ("vCont;c");
     }
   else if (pid == -1)
     {
       /* Resume all threads, with preference for INFERIOR_PTID.  */
       if (step && siggnal != TARGET_SIGNAL_0)
-	sprintf (buf, "vCont;S%02x:%x;c", siggnal, PIDGET (inferior_ptid));
+	outbuf = xstrprintf ("vCont;S%02x:%x;c", siggnal,
+			     PIDGET (inferior_ptid));
       else if (step)
-	sprintf (buf, "vCont;s:%x;c", PIDGET (inferior_ptid));
+	outbuf = xstrprintf ("vCont;s:%x;c", PIDGET (inferior_ptid));
       else if (siggnal != TARGET_SIGNAL_0)
-	sprintf (buf, "vCont;C%02x:%x;c", siggnal, PIDGET (inferior_ptid));
+	outbuf = xstrprintf ("vCont;C%02x:%x;c", siggnal,
+			     PIDGET (inferior_ptid));
       else
-	sprintf (buf, "vCont;c");
+	outbuf = xstrprintf ("vCont;c");
     }
   else
     {
       /* Scheduler locking; resume only PTID.  */
       if (step && siggnal != TARGET_SIGNAL_0)
-	sprintf (buf, "vCont;S%02x:%x", siggnal, pid);
+	outbuf = xstrprintf ("vCont;S%02x:%x", siggnal, pid);
       else if (step)
-	sprintf (buf, "vCont;s:%x", pid);
+	outbuf = xstrprintf ("vCont;s:%x", pid);
       else if (siggnal != TARGET_SIGNAL_0)
-	sprintf (buf, "vCont;C%02x:%x", siggnal, pid);
+	outbuf = xstrprintf ("vCont;C%02x:%x", siggnal, pid);
       else
-	sprintf (buf, "vCont;c:%x", pid);
+	outbuf = xstrprintf ("vCont;c:%x", pid);
     }
 
-  putpkt (buf);
+  gdb_assert (outbuf && strlen (outbuf) < rs->remote_packet_size);
+  make_cleanup (xfree, outbuf);
+
+  putpkt (outbuf);
 
   do_cleanups (old_cleanup);
 
