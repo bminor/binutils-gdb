@@ -383,7 +383,7 @@ struct _sim_cpu {
 #define NR_COP0_GPR	32
   unsigned_word cop0_gpr[NR_COP0_GPR];
 #define COP0_GPR	((CPU)->cop0_gpr)
-#define COP0_BADVADDR ((unsigned32)(COP0_GPR[8]))
+#define COP0_BADVADDR	(COP0_GPR[8])
 
   /* While space is allocated for the floating point registers in the
      main registers array, they are stored separatly.  This is because
