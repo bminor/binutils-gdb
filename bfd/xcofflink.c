@@ -579,6 +579,11 @@ _bfd_xcoff_bfd_link_hash_table_create (abfd)
   ret->textro = false;
   ret->gc = false;
 
+  /* The linker will always generate a full a.out header.  We need to
+     record that fact now, before the sizeof_headers routine could be
+     called.  */
+  xcoff_data (abfd)->full_aouthdr = true;
+
   return &ret->root;
 }
 
@@ -2887,7 +2892,6 @@ _bfd_xcoff_bfd_final_link (abfd, info)
 		  + xcoff_hash_table (info)->ldhdr.l_nsyms * LDSYMSZ));
 
   xcoff_data (abfd)->coff.link_info = info;
-  xcoff_data (abfd)->full_aouthdr = true;
 
   finfo.strtab = _bfd_stringtab_init ();
   if (finfo.strtab == NULL)

@@ -1,3 +1,11 @@
+Wed Nov  1 11:45:07 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coff-rs6000.c (_bfd_xcoff_sizeof_headers): Change from macro to
+	static function.
+	* xcofflink.c (_bfd_xcoff_bfd_link_hash_table_create): Set
+	full_aouthdr flag here...
+	(_bfd_xcoff_bfd_final_link): ...not here.
+
 Tue Oct 31 12:52:02 1995  Fred Fish  <fnf@cygnus.com>
 
 	* libelf.h:  Rename to elf-bfd.h to avoid conflict with
