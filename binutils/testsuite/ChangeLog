@@ -1,3 +1,13 @@
+Mon Oct  2 12:41:48 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* lib/utils-lib.exp (default_binutils_assemble): Call
+	prune_system_crud on assembler output.
+
+Tue Sep 26 14:07:05 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* binutils-all/objcopy.exp: Add setup_xfails for simple copy test
+	for i386 COFF targets.
+
 Wed Sep 13 13:20:21 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* lib/utils-lib.exp (prune_system_crud): Define if not defined.
