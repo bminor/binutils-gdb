@@ -1,3 +1,9 @@
+Fri Feb 25 09:41:11 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* coffread.c (read_coff_symtab): Pass mst_file_* to
+	record_minimal_symbol for C_STAT symbols.  Put C_EXT and C_STAT
+	symbols in the minimal symbols regardless of SDB_TYPE.
+
 Thu Feb 24 08:30:33 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* breakpoint.h (enum bptype): New type bp_through_sigtramp.
