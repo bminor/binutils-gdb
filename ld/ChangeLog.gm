@@ -1,3 +1,7 @@
+Sun Jun 12 16:56:45 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* mpw-xconfig.in: Only do if target is mips-idt-ecoff.
+
 Mon Feb 28 11:09:48 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* mpw-xconfig.in (emulname): Define.
