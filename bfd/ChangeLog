@@ -1,3 +1,8 @@
+Tue Jul  6 10:23:39 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* elf-hppa.h (_bfd_elf_hppa_gen_reloc_type): T mode selectors
+	need to generate DLTIND relocations, not DLTREL relocations.
+
 1999-07-05  Nick Clifton  <nickc@cygnus.com>
 
 	* coffcode.h (coff_set_arch_mach_hook): Recognise arm 5
