@@ -1,3 +1,7 @@
+1999-11-11  Nick Clifton  <nickc@cygnus.com>
+
+	* mips-opc.c: Add ssnop pattern.
+
 1999-11-01  Gavin Romig-Koch  <gavin@cygnus.com>
 
 	* mips-dis.c (_print_insn_mips): Use OPCODE_IS_MEMBER.
