@@ -1,3 +1,10 @@
+2004-10-08  Daniel Jacobowitz  <dan@debian.org>
+
+	* config/tc-i386.c: Include "elf/x86-64.h".
+	(i386_elf_section_type): New function.
+	* config/tc-i386.h (md_elf_section_type): Define.
+	(i386_elf_section_type): New prototype.
+
 2004-10-08  Linus Nielsen Feltzing  <linus@haxx.se>
 
 	* config/m68k-parse.h (enum m68k_register): New control register,

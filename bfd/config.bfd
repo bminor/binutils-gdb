@@ -424,11 +424,17 @@ case "${targ}" in
     targ_defvec=i386coff_vec
     targ_selvecs=bfd_elf32_i386_vec
     ;;
-  i[3-7]86-*-sysv4* | i[3-7]86-*-unixware* | i[3-7]86-*-solaris2* | \
+  i[3-7]86-*-sysv4* | i[3-7]86-*-unixware* | \
   i[3-7]86-*-elf | i[3-7]86-*-sco3.2v5* | \
   i[3-7]86-*-dgux* | i[3-7]86-*-sysv5*)
     targ_defvec=bfd_elf32_i386_vec
     targ_selvecs=i386coff_vec
+    ;;
+  i[3-7]86-*-solaris2*)
+    targ_defvec=bfd_elf32_i386_vec
+    targ_selvecs=i386coff_vec
+    targ64_selvecs=bfd_elf64_x86_64_vec
+    want64=true
     ;;
   i[3-7]86-*-kaos*)
     targ_defvec=bfd_elf32_i386_vec

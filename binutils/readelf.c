@@ -2405,6 +2405,18 @@ get_ia64_section_type_name (unsigned int sh_type)
 }
 
 static const char *
+get_x86_64_section_type_name (unsigned int sh_type)
+{
+  switch (sh_type)
+    {
+    case SHT_X86_64_UNWIND:	return "X86_64_UNWIND";
+    default:
+      break;
+    }
+  return NULL;
+}
+
+static const char *
 get_arm_section_type_name (unsigned int sh_type)
 {
   switch (sh_type)
@@ -2466,6 +2478,9 @@ get_section_type_name (unsigned int sh_type)
 	      break;
 	    case EM_IA_64:
 	      result = get_ia64_section_type_name (sh_type);
+	      break;
+	    case EM_X86_64:
+	      result = get_x86_64_section_type_name (sh_type);
 	      break;
 	    case EM_ARM:
 	      result = get_arm_section_type_name (sh_type);

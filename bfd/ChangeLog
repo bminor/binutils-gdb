@@ -1,3 +1,9 @@
+2004-10-08  Daniel Jacobowitz  <dan@debian.org>
+
+	* config.bfd: Include 64-bit support for i[3-7]86-*-solaris2*.
+	* elf64-x86-64.c (elf64_x86_64_section_from_shdr): New function.
+	(elf_backend_section_from_shdr): Define.
+
 2004-10-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* syms.c (bfd_is_local_label): Return false for file symbols.

@@ -502,4 +502,7 @@ extern int tc_x86_regname_to_dw2regnum PARAMS ((const char *regname));
 #define tc_cfi_frame_initial_instructions tc_x86_frame_initial_instructions
 extern void tc_x86_frame_initial_instructions PARAMS ((void));
 
+#define md_elf_section_type(str,len) i386_elf_section_type (str, len)
+extern int i386_elf_section_type PARAMS ((const char *, size_t len));
+
 #endif /* TC_I386 */

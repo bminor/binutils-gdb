@@ -1,3 +1,8 @@
+2004-10-08  Daniel Jacobowitz  <dan@debian.org>
+
+	* readelf.c (get_x86_64_section_type_name): New function.
+	(get_section_type_name): Use it.
+
 2004-10-08  Aaron W. LaFramboise  <aaron98wiridge9@aaronwl.com>
 
 	* dlltool.c (make_one_lib_file): Revert 2004-09-02 and 2004-09-04

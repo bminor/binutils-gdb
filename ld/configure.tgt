@@ -169,7 +169,7 @@ x86_64-*-linux-gnu*)	targ_emul=elf_x86_64
 			;;
 i[3-7]86-*-sysv[45]*)	targ_emul=elf_i386 ;;
 i[3-7]86-*-solaris2*)	targ_emul=elf_i386_ldso
-                        targ_extra_emuls="elf_i386"
+                        targ_extra_emuls="elf_i386 elf_x86_64"
                         ;;
 i[3-7]86-*-unixware)	targ_emul=elf_i386 ;;
 i[3-7]86-*-solaris*)	targ_emul=elf_i386_ldso

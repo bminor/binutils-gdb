@@ -55,7 +55,17 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
     run_dump_test "sse2"
     run_dump_test "sub"
     run_dump_test "prescott"
-    run_dump_test "divide"
+
+    if {![istarget "*-*-aix*"]
+	&& (![is_elf_format] || [istarget "*-*-linux*"]
+	    || [istarget "*-*-netbsd*"]
+	    || [istarget "*-*-freebsd*"]
+	    || [istarget "*-*-netware*"])} {
+	# Don't run this test on targets where '/' starts comments.
+	run_dump_test "divide"
+    }
+
+
     run_dump_test "padlock"
 
     # These tests require support for 8 and 16 bit relocs,
@@ -106,6 +116,14 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
     run_dump_test "x86-64-opcode"
     run_dump_test "x86-64-rip"
     run_list_test "x86-64-inval" "-al"
+
+    # For ELF targets verify that @unwind works.
+    if { ([istarget "*-*-elf*"] || [istarget "*-*-linux*"]
+	  || [istarget "*-*-solaris2.*"])
+	 && ![istarget *-*-linux*aout*]
+	 && ![istarget *-*-linux*oldld*] } then {
+	run_dump_test "x86-64-unwind"
+    }
 
     set ASFLAGS "$old_ASFLAGS"
 }

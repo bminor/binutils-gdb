@@ -1,3 +1,7 @@
+2004-10-08  Daniel Jacobowitz  <dan@debian.org>
+
+	* configure.tgt: Include elf_x86_64 for i[3-7]86-*-solaris2*.
+
 2004-10-07  Bob Wilson  <bob.wilson@acm.org>
 
 	* ld.texinfo (Xtensa): Describe new linker relaxation to optimize

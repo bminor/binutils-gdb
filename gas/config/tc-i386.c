@@ -33,6 +33,7 @@
 #include "dwarf2dbg.h"
 #include "dw2gencfi.h"
 #include "opcode/i386.h"
+#include "elf/x86-64.h"
 
 #ifndef REGISTER_WARNINGS
 #define REGISTER_WARNINGS 1
@@ -6347,4 +6348,15 @@ tc_x86_frame_initial_instructions (void)
 
   cfi_add_CFA_def_cfa (sp_regno, -x86_cie_data_alignment);
   cfi_add_CFA_offset (x86_dwarf2_return_column, x86_cie_data_alignment);
+}
+
+int
+i386_elf_section_type (const char *str, size_t len)
+{
+  if (flag_code == CODE_64BIT
+      && len == sizeof ("unwind") - 1
+      && strncmp (str, "unwind", 6) == 0)
+    return SHT_X86_64_UNWIND;
+
+  return -1;
 }

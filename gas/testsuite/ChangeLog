@@ -1,3 +1,9 @@
+2004-10-08  Daniel Jacobowitz  <dan@debian.org>
+
+	* gas/i386/i386.exp: Don't run divide test for targets where '/'
+	is a comment.  Run x86-64-unwind for 64-bit ELF targets.
+	* gas/i386/x86-64-unwind.d, gas/i386/x86-64-unwind.s: New.
+
 2004-10-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* gas/cfi/cfi-common-4.d: Correct for 64 bit targets.
