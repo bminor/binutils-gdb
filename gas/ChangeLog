@@ -1,5 +1,8 @@
 2002-06-08  Alan Modra  <amodra@bigpond.net.au>
 
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
 	* as.c: Replace CONST with const.
 	* write.c: Likewise.
 	* config/obj-coff.c: Likewise.

@@ -1,5 +1,8 @@
 2002-06-08  Alan Modra  <amodra@bigpond.net.au>
 
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
 	* armnetbsd.c: Replace CONST with const.
 	* corefile.c: Likewise.
 	* elf32-dlx.c: Likewise.
