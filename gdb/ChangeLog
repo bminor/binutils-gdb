@@ -1,3 +1,12 @@
+Thu Sep 19 17:04:12 1991  Per Bothner  (bothner at cygnus.com)
+
+	Patches from Peter Schauer <pes@regent.e-technik.tu-muenchen.de>:
+	* mipsread.c (parse_partial_symbols): Enter the name of all
+	structs/unions... into the psymtab so we can access them if the
+	symtab is not read in.
+	* mips-tdep.c:  Remove some unneded (?) #includes.
+	* xconfig/dec3100: Add HAVE_STRSTR.
+
 Thu Sep 19 15:14:23 1991  John Gilmore  (gnu at cygnus.com)
 
 	* Makefile.in:  Circumvent Sun Make bug on *-exp.tab.o.
