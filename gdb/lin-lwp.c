@@ -969,7 +969,7 @@ child_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
       clear_sigio_trap ();
       clear_sigint_trap ();
     }
-  while (pid == -1 && errno == EINTR);
+  while (pid == -1 && save_errno == EINTR);
 
   if (pid == -1)
     {
