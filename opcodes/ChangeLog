@@ -1,4 +1,9 @@
 start-sanitize-v850
+Fri Aug 30 18:01:02 1996  J.T. Conklin  <jtc@hippo.cygnus.com>
+
+	* v850-opc.c (v850_operands): Add V850_OPERAND_SIGNED flag
+	and set bits field to D9 and D22 operands.
+
 Thu Aug 29 11:10:46 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* v850-opc.c (v850_operands): Define SR2 operand.

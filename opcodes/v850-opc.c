@@ -50,7 +50,7 @@ const struct v850_operand v850_operands[] = {
 
 /* The DISP9 field in a format 3 insn. */
 #define D9	(D7S+1)
-  { 0, 0, insert_d9, extract_d9, V850_OPERAND_SIGNED },
+  { 9, 0, insert_d9, extract_d9, V850_OPERAND_SIGNED },
 
 /* The DISP16 field in a format 6 insn. */
 #define D16	(D9+1)
@@ -58,7 +58,7 @@ const struct v850_operand v850_operands[] = {
 
 /* The DISP22 field in a format 4 insn. */
 #define D22	(D16+1)
-  { 16, 0, 0, 0, 0 },
+  { 22, 0, 0, 0, V850_OPERAND_SIGNED },
 
 #define B3	(D22+1)
 /* The 3 bit immediate field in format 8 insn.  */
