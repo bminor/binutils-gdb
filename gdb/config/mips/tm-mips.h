@@ -218,11 +218,7 @@ extern void fixup_sigtramp (void);
 extern char *mips_read_processor_type (void);
 
 /* Functions for dealing with MIPS16 call and return stubs.  */
-#define IN_SOLIB_RETURN_TRAMPOLINE(pc, name)	mips_in_return_stub (pc, name)
 #define IGNORE_HELPER_CALL(pc)			mips_ignore_helper (pc)
-extern int mips_in_call_stub (CORE_ADDR pc, char *name);
-extern int mips_in_return_stub (CORE_ADDR pc, char *name);
-extern CORE_ADDR mips_skip_stub (CORE_ADDR pc);
 extern int mips_ignore_helper (CORE_ADDR pc);
 
 #ifndef TARGET_MIPS

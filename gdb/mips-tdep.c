@@ -3773,21 +3773,13 @@ mips_pop_frame (void)
   if (frame->saved_regs == NULL)
     FRAME_INIT_SAVED_REGS (frame);
   for (regnum = 0; regnum < NUM_REGS; regnum++)
-    if (regnum != SP_REGNUM && regnum != PC_REGNUM
-	&& frame->saved_regs[regnum])
-      {
-	/* Floating point registers must not be sign extended, 
-	   in case MIPS_SAVED_REGSIZE = 4 but sizeof (FP0_REGNUM) == 8.  */
-
-	if (FP0_REGNUM <= regnum && regnum < FP0_REGNUM + 32)
-	  write_register (regnum,
-			  read_memory_unsigned_integer (frame->saved_regs[regnum],
-							MIPS_SAVED_REGSIZE));
-	else
-	  write_register (regnum,
-			  read_memory_integer (frame->saved_regs[regnum],
-					       MIPS_SAVED_REGSIZE));
-      }
+    {
+      if (regnum != SP_REGNUM && regnum != PC_REGNUM
+	  && frame->saved_regs[regnum])
+	write_register (regnum,
+			read_memory_integer (frame->saved_regs[regnum],
+					     MIPS_SAVED_REGSIZE));
+    }
 
   write_register (SP_REGNUM, new_sp);
   flush_cached_frames ();
@@ -5338,7 +5330,7 @@ mips_in_call_stub (CORE_ADDR pc, char *name)
 /* Return non-zero if the PC is inside a return thunk (aka stub or trampoline).
    This implements the IN_SOLIB_RETURN_TRAMPOLINE macro.  */
 
-int
+static int
 mips_in_return_stub (CORE_ADDR pc, char *name)
 {
   CORE_ADDR start_addr;
@@ -6011,7 +6003,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_skip_trampoline_code (gdbarch, mips_skip_stub);
 
   set_gdbarch_in_solib_call_trampoline (gdbarch, mips_in_call_stub);
-  /* set_gdbarch_in_solib_return_trampoline (gdbarch, mips_in_return_stub); */
+  set_gdbarch_in_solib_return_trampoline (gdbarch, mips_in_return_stub);
 
   return gdbarch;
 }

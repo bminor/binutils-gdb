@@ -1,5 +1,11 @@
 2002-08-20  Michael Snyder  <msnyder@redhat.com>
 
+	* mips-tdep.c (mips_in_return_stub): Make static.
+	(mips_gdbarch_init): Set in_solib_return_trampoline.
+	* config/mips/tm-mips.h (IN_SOLIB_RETURN_TRAMPOLINE): Delete.
+
+2002-08-20  Michael Snyder  <msnyder@redhat.com>
+
 	* gdbarch.sh (IN_SOLIB_RETURN_TRAMPOLINE): Add.
 	* gdbarch.c, gdbarch.h: Regenerate.
 	* arch-utils.c, arch-utils.h (generic_in_solib_return_trampoline):
