@@ -1,3 +1,7 @@
+Wed Jul  7 17:52:28 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t2*: Set CXXFLAGS, not CFLAGS, since that's what we use.
+
 Tue Jul  6 13:54:49 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* gdb.t00/help.exp: Replace most of docstring for "continue" with .*.
