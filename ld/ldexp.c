@@ -600,7 +600,7 @@ fold_name (etree_type *tree,
 	    {
 	      h->type = bfd_link_hash_undefined;
 	      h->u.undef.abfd = NULL;
-	      if (h->u.undef.next == NULL)
+	      if (h->u.undef.next == NULL && h != link_info.hash->undefs_tail)
 		bfd_link_add_undef (link_info.hash, h);
 	    }
 	}
