@@ -90,7 +90,9 @@ const struct d10v_operand d10v_operands[] =
   { 4, 1, OPERAND_NUM|OPERAND_SIGNED },
 #define UNUM4	(NUM4 + 1)
   { 4, 1, OPERAND_NUM },
-#define UNUM8	(UNUM4 + 1)			/* repi */
+#define UNUM4S	(UNUM4 + 1)			/* slli, srai, srli */
+  { 4, 1, OPERAND_NUM|OPERAND_SHIFT },
+#define UNUM8	(UNUM4S + 1)			/* repi */
   { 8, 16, OPERAND_NUM },
 #define UNUM16	(UNUM8 + 1)			/* cmpui */
   { 16, 0, OPERAND_NUM },
@@ -254,16 +256,16 @@ const struct d10v_opcode d10v_opcodes[] = {
   { "sll", SHORT_2, 1, IU, PAR, 0x2200, 0x7e01, { RDST, RSRC } },
   { "sll", SHORT_2, 1, IU, PAR, 0x3200, 0x7ee1, { ADST, RSRC } },
   { "slli", SHORT_2, 1, IU, PAR, 0x2201, 0x7e01, { RDST, UNUM4 } },
-  { "slli", SHORT_2, 1, IU, PAR, 0x3201, 0x7ee1, { ADST, UNUM4 } },
+  { "slli", SHORT_2, 1, IU, PAR, 0x3201, 0x7ee1, { ADST, UNUM4S } },
   { "slx", SHORT_2, 1, IU, PAR, 0x460b, 0x7e1f, { RDST } },
   { "sra", SHORT_2, 1, IU, PAR, 0x2400, 0x7e01, { RDST, RSRC } },
   { "sra", SHORT_2, 1, IU, PAR, 0x3400, 0x7ee1, { ADST, RSRC } },
   { "srai", SHORT_2, 1, IU, PAR, 0x2401, 0x7e01, { RDST, UNUM4 } },
-  { "srai", SHORT_2, 1, IU, PAR, 0x3401, 0x7ee1, { ADST, UNUM4 } },
+  { "srai", SHORT_2, 1, IU, PAR, 0x3401, 0x7ee1, { ADST, UNUM4S } },
   { "srl", SHORT_2, 1, IU, PAR, 0x2000, 0x7e01, { RDST, RSRC } },
   { "srl", SHORT_2, 1, IU, PAR, 0x3000, 0x7ee1, { ADST, RSRC } },
   { "srli", SHORT_2, 1, IU, PAR, 0x2001, 0x7e01, { RDST, UNUM4 } },
-  { "srli", SHORT_2, 1, IU, PAR, 0x3001, 0x7ee1, { ADST, UNUM4 } },
+  { "srli", SHORT_2, 1, IU, PAR, 0x3001, 0x7ee1, { ADST, UNUM4S } },
   { "srx", SHORT_2, 1, IU, PAR, 0x4609, 0x7e1f, { RDST } },
   { "st", LONG_L, 1, MU, SEQ, 0x34000000, 0x3f000000, { RSRC2, ATPAR, NUM16, RSRC } },
   { "st", SHORT_2, 1, MU, PAR, 0x6800, 0x7e01, { RSRC2, ATSIGN, RSRC } },
