@@ -49,7 +49,7 @@ If memory-mapped files are available on your system through the 'mmap'
 system call, you can use the -mapped option on the `file' or
 `symbol-file' commands to cause GDB to write the symbols from your
 program into a reusable file.  If the program you are debugging is
-called `/tmp/fred', the mapped symbol file will be `/tmp/fred.syms'.
+called `/path/fred', the mapped symbol file will be `./fred.syms'.
 Future GDB debugging sessions will notice the presence of this file,
 and will quickly map in symbol information from it, rather than reading
 the symbol table from the executable program.  Using the '-mapped'
