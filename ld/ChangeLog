@@ -1,3 +1,10 @@
+1999-11-26  Andreas Schwab  <schwab@suse.de>
+
+	* configure.in: Put AC_MSG_CHECKING/AC_MSG_RESULT around check for
+	STRINGIFY.  Use yes/no instead of true/false as value for cache
+	variable.
+	* configure: Regenerate.
+
 1999-11-24  Nick Clifton  <nickc@cygnus.com>
 
 	* ldlang.c (IGNORE_SECTION): Section must have both ALLOC and LOAD

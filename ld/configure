@@ -3979,7 +3979,7 @@ else
   if { (eval echo configure:3980: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
     for file in conftest.*; do
       case $file in
-      *.c | *.o | *.obj | *.ilk | *.pdb) ;;
+      *.c | *.o | *.obj) ;;
       *) ac_cv_exeext=`echo $file | sed -e s/conftest//` ;;
       esac
     done
@@ -4712,30 +4712,33 @@ fi
 # broken Microsoft MSVC compiler, which limits the length of string
 # constants, while still supporting pre-ANSI compilers which do not
 # support string concatenation.
+echo $ac_n "checking whether ANSI C string concatenation works""... $ac_c" 1>&6
+echo "configure:4717: checking whether ANSI C string concatenation works" >&5
 if eval "test \"`echo '$''{'ld_cv_string_concatenation'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 4720 "configure"
+#line 4722 "configure"
 #include "confdefs.h"
 
 int main() {
 char *a = "a" "a";
 ; return 0; }
 EOF
-if { (eval echo configure:4727: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:4729: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
-  ld_cv_string_concatenation=true
+  ld_cv_string_concatenation=yes
 else
   echo "configure: failed program was:" >&5
   cat conftest.$ac_ext >&5
   rm -rf conftest*
-  ld_cv_string_concatenation=false
+  ld_cv_string_concatenation=no
 fi
 rm -f conftest*
 fi
 
-if test "$ld_cv_string_concatenation" = "true"; then
+echo "$ac_t""$ld_cv_string_concatenation" 1>&6
+if test "$ld_cv_string_concatenation" = "yes"; then
   STRINGIFY=astring.sed
 else
   STRINGIFY=ostring.sed
