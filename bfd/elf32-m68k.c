@@ -387,27 +387,6 @@ elf32_m68k_copy_private_bfd_data (ibfd, obfd)
   return true;
 }
 
-/* Copy backend specific data from one object module to another */
-static boolean
-elf32_m68k_copy_private_bfd_data (ibfd, obfd)
-     bfd *ibfd;
-     bfd *obfd;
-{
-  flagword in_flags;
-  flagword out_flags;
-
-  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
-      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
-    return true;
-
-  in_flags = elf_elfheader (ibfd)->e_flags;
-  out_flags = elf_elfheader (obfd)->e_flags;
-
-  elf_elfheader (obfd)->e_flags = in_flags;
-  elf_flags_init (obfd) = true;
-
-  return true;
-}
 /* Merge backend specific data from an object file to the output
    object file when linking.  */
 static boolean
