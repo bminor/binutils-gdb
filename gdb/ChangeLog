@@ -1,3 +1,7 @@
+Thu Oct 21 15:58:48 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
+
+	* remote-mips.c (mips_wait): add pid argument.
+
 Thu Oct 21 12:23:12 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* Makefile.in (c-exp.tab.o): Remove notice about shift/reduce conflicts

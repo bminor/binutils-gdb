@@ -971,7 +971,8 @@ mips_resume (pid, step, siggnal)
 /* Wait until the remote stops, and return a wait status.  */
 
 static int
-mips_wait (status)
+mips_wait (pid, status)
+     int pid;
      WAITTYPE *status;
 {
   int rstatus;
