@@ -1,5 +1,8 @@
 Mon Jul 10 13:38:28 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* emultempl/elf32.em (gld${EMULATION_NAME}_check_needed): Don't
+	get confused by directory names if we searched for the file.
+
 	Based on patches from H.J. Lu <hjl@nynexst.com>:
 	* ldlang.h (lang_input_statement_type): Add new field dynamic.
 	* ldlang.c (new_afile): Set dynamic from config.dynamic_link.
