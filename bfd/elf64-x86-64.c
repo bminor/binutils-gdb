@@ -1,5 +1,6 @@
 /* X86-64 specific support for 64-bit ELF
-   Copyright 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003, 2004, 2005
+   Free Software Foundation, Inc.
    Contributed by Jan Hubicka <jh@suse.cz>.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1043,6 +1044,9 @@ elf64_x86_64_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
 	  struct elf64_x86_64_dyn_relocs *p;
 
 	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	  while (h->root.type == bfd_link_hash_indirect
+		 || h->root.type == bfd_link_hash_warning)
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 	  eh = (struct elf64_x86_64_link_hash_entry *) h;
 
 	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)

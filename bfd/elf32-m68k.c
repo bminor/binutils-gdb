@@ -1,6 +1,6 @@
 /* Motorola 68k series support for 32-bit ELF
    Copyright 1993, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004 Free Software Foundation, Inc.
+   2004, 2005 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -835,7 +835,16 @@ elf_m68k_gc_sweep_hook (abfd, info, sec, relocs)
   for (rel = relocs; rel < relend; rel++)
     {
       unsigned long r_symndx;
-      struct elf_link_hash_entry *h;
+      struct elf_link_hash_entry *h = NULL;
+
+      r_symndx = ELF32_R_SYM (rel->r_info);
+      if (r_symndx >= symtab_hdr->sh_info)
+	{
+	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	  while (h->root.type == bfd_link_hash_indirect
+		 || h->root.type == bfd_link_hash_warning)
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	}
 
       switch (ELF32_R_TYPE (rel->r_info))
 	{
@@ -845,10 +854,8 @@ elf_m68k_gc_sweep_hook (abfd, info, sec, relocs)
 	case R_68K_GOT8O:
 	case R_68K_GOT16O:
 	case R_68K_GOT32O:
-	  r_symndx = ELF32_R_SYM (rel->r_info);
-	  if (r_symndx >= symtab_hdr->sh_info)
+	  if (h != NULL)
 	    {
-	      h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 	      if (h->got.refcount > 0)
 		{
 		  --h->got.refcount;
@@ -888,10 +895,8 @@ elf_m68k_gc_sweep_hook (abfd, info, sec, relocs)
 	case R_68K_8:
 	case R_68K_16:
 	case R_68K_32:
-	  r_symndx = ELF32_R_SYM (rel->r_info);
-	  if (r_symndx >= symtab_hdr->sh_info)
+	  if (h != NULL)
 	    {
-	      h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 	      if (h->plt.refcount > 0)
 		--h->plt.refcount;
 	    }

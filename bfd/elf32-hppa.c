@@ -1,6 +1,6 @@
 /* BFD back-end for HP PA-RISC ELF files.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2000, 2001,
-   2002, 2003, 2004 Free Software Foundation, Inc.
+   2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
    Original code by
 	Center for Software Science
@@ -1537,6 +1537,9 @@ elf32_hppa_gc_sweep_hook (bfd *abfd,
 	  struct elf32_hppa_dyn_reloc_entry *p;
 
 	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	  while (h->root.type == bfd_link_hash_indirect
+		 || h->root.type == bfd_link_hash_warning)
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 	  eh = (struct elf32_hppa_link_hash_entry *) h;
 
 	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)

@@ -1,5 +1,6 @@
 /* CRIS-specific support for 32-bit ELF.
-   Copyright 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003, 2004, 2005
+   Free Software Foundation, Inc.
    Contributed by Axis Communications AB.
    Written by Hans-Peter Nilsson, based on elf32-fr30.c
    PIC and shlib bits based primarily on elf32-m68k.c and elf32-i386.c.
@@ -1984,16 +1985,23 @@ cris_elf_gc_sweep_hook (abfd, info, sec, relocs)
   for (rel = relocs; rel < relend; rel++)
     {
       unsigned long r_symndx;
-      struct elf_link_hash_entry *h;
+      struct elf_link_hash_entry *h = NULL;
+
+      r_symndx = ELF32_R_SYM (rel->r_info);
+      if (r_symndx >= symtab_hdr->sh_info)
+	{
+	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	  while (h->root.type == bfd_link_hash_indirect
+		 || h->root.type == bfd_link_hash_warning)
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	}
 
       switch (ELF32_R_TYPE (rel->r_info))
 	{
 	case R_CRIS_16_GOT:
 	case R_CRIS_32_GOT:
-	  r_symndx = ELF32_R_SYM (rel->r_info);
-	  if (r_symndx >= symtab_hdr->sh_info)
+	  if (h != NULL)
 	    {
-	      h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 	      if (h->got.refcount > 0)
 		{
 		  --h->got.refcount;
@@ -2027,23 +2035,22 @@ cris_elf_gc_sweep_hook (abfd, info, sec, relocs)
 	case R_CRIS_16_GOTPLT:
 	case R_CRIS_32_GOTPLT:
 	  /* For local symbols, treat these like GOT relocs.  */
-	  r_symndx = ELF32_R_SYM (rel->r_info);
-	  if (r_symndx < symtab_hdr->sh_info)
+	  if (h == NULL)
 	    goto local_got_reloc;
 	  /* Fall through.  */
+
 	case R_CRIS_32_PLT_GOTREL:
 	  /* FIXME: We don't garbage-collect away the .got section.  */
 	  if (local_got_refcounts != NULL)
 	    local_got_refcounts[-1]--;
 	  /* Fall through.  */
+
 	case R_CRIS_8_PCREL:
 	case R_CRIS_16_PCREL:
 	case R_CRIS_32_PCREL:
 	case R_CRIS_32_PLT_PCREL:
-	  r_symndx = ELF32_R_SYM (rel->r_info);
-	  if (r_symndx >= symtab_hdr->sh_info)
+	  if (h != NULL)
 	    {
-	      h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 	      if (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 		  && h->plt.refcount > 0)
 		--h->plt.refcount;

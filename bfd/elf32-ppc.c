@@ -4075,6 +4075,9 @@ ppc_elf_gc_sweep_hook (bfd *abfd,
 	  struct ppc_elf_link_hash_entry *eh;
 
 	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	  while (h->root.type == bfd_link_hash_indirect
+		 || h->root.type == bfd_link_hash_warning)
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 	  eh = (struct ppc_elf_link_hash_entry *) h;
 
 	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)

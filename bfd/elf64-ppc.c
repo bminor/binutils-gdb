@@ -1,5 +1,5 @@
 /* PowerPC64-specific support for 64-bit ELF.
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
    Written by Linus Nordberg, Swox AB <info@swox.com>,
    based on elf32-ppc.c by Ian Lance Taylor.
@@ -4989,6 +4989,9 @@ ppc64_elf_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
 	  struct ppc_dyn_relocs *p;
 
 	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	  while (h->root.type == bfd_link_hash_indirect
+		 || h->root.type == bfd_link_hash_warning)
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 	  eh = (struct ppc_link_hash_entry *) h;
 
 	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)

@@ -1,5 +1,6 @@
 /* IBM S/390-specific support for 32-bit ELF
-   Copyright 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2003, 2004, 2005
+   Free Software Foundation, Inc.
    Contributed by Carl B. Pedersen and Martin Schwidefsky.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1437,6 +1438,9 @@ elf_s390_gc_sweep_hook (abfd, info, sec, relocs)
 	  struct elf_s390_dyn_relocs *p;
 
 	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	  while (h->root.type == bfd_link_hash_indirect
+		 || h->root.type == bfd_link_hash_warning)
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 	  eh = (struct elf_s390_link_hash_entry *) h;
 
 	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)

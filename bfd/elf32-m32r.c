@@ -1,5 +1,5 @@
 /* M32R-specific support for 32-bit ELF.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -4341,8 +4341,6 @@ m32r_elf_gc_sweep_hook (abfd, info, sec, relocs)
   struct elf_link_hash_entry **sym_hashes;
   bfd_signed_vma *local_got_refcounts;
   const Elf_Internal_Rela *rel, *relend;
-  unsigned long r_symndx;
-  struct elf_link_hash_entry *h;
 
   elf_section_data (sec)->local_dynrel = NULL;
 
@@ -4352,84 +4350,91 @@ m32r_elf_gc_sweep_hook (abfd, info, sec, relocs)
 
   relend = relocs + sec->reloc_count;
   for (rel = relocs; rel < relend; rel++)
-    switch (ELF32_R_TYPE (rel->r_info))
-      {
-      case R_M32R_GOT16_HI_ULO:
-      case R_M32R_GOT16_HI_SLO:
-      case R_M32R_GOT16_LO:
-      case R_M32R_GOTOFF:
-      case R_M32R_GOTOFF_HI_ULO:
-      case R_M32R_GOTOFF_HI_SLO:
-      case R_M32R_GOTOFF_LO:
-      case R_M32R_GOT24:
-      case R_M32R_GOTPC_HI_ULO:
-      case R_M32R_GOTPC_HI_SLO:
-      case R_M32R_GOTPC_LO:
-      case R_M32R_GOTPC24:
-	r_symndx = ELF32_R_SYM (rel->r_info);
-	if (r_symndx >= symtab_hdr->sh_info)
-	  {
-	    h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	    if (h->got.refcount > 0)
-	      h->got.refcount--;
-	  }
-	else
-	  {
-	    if (local_got_refcounts && local_got_refcounts[r_symndx] > 0)
-	      local_got_refcounts[r_symndx]--;
-	  }
-        break;
+    {
+      unsigned long r_symndx;
+      struct elf_link_hash_entry *h = NULL;
 
-      case R_M32R_16_RELA:
-      case R_M32R_24_RELA:
-      case R_M32R_32_RELA:
-      case R_M32R_HI16_ULO_RELA:
-      case R_M32R_HI16_SLO_RELA:
-      case R_M32R_LO16_RELA:
-      case R_M32R_SDA16_RELA:
-      case R_M32R_18_PCREL_RELA:
-      case R_M32R_26_PCREL_RELA:
-        r_symndx = ELF32_R_SYM (rel->r_info);
-        if (r_symndx >= symtab_hdr->sh_info)
-          {
-            struct elf_m32r_link_hash_entry *eh;
-            struct elf_m32r_dyn_relocs **pp;
-            struct elf_m32r_dyn_relocs *p;
+      r_symndx = ELF32_R_SYM (rel->r_info);
+      if (r_symndx >= symtab_hdr->sh_info)
+	{
+	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	  while (h->root.type == bfd_link_hash_indirect
+		 || h->root.type == bfd_link_hash_warning)
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	}
 
-            h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+      switch (ELF32_R_TYPE (rel->r_info))
+	{
+	case R_M32R_GOT16_HI_ULO:
+	case R_M32R_GOT16_HI_SLO:
+	case R_M32R_GOT16_LO:
+	case R_M32R_GOTOFF:
+	case R_M32R_GOTOFF_HI_ULO:
+	case R_M32R_GOTOFF_HI_SLO:
+	case R_M32R_GOTOFF_LO:
+	case R_M32R_GOT24:
+	case R_M32R_GOTPC_HI_ULO:
+	case R_M32R_GOTPC_HI_SLO:
+	case R_M32R_GOTPC_LO:
+	case R_M32R_GOTPC24:
+	  if (h != NULL)
+	    {
+	      if (h->got.refcount > 0)
+		h->got.refcount--;
+	    }
+	  else
+	    {
+	      if (local_got_refcounts && local_got_refcounts[r_symndx] > 0)
+		local_got_refcounts[r_symndx]--;
+	    }
+	  break;
 
-            if (!info->shared && h->plt.refcount > 0)
-              h->plt.refcount -= 1;
+	case R_M32R_16_RELA:
+	case R_M32R_24_RELA:
+	case R_M32R_32_RELA:
+	case R_M32R_HI16_ULO_RELA:
+	case R_M32R_HI16_SLO_RELA:
+	case R_M32R_LO16_RELA:
+	case R_M32R_SDA16_RELA:
+	case R_M32R_18_PCREL_RELA:
+	case R_M32R_26_PCREL_RELA:
+	  if (h != NULL)
+	    {
+	      struct elf_m32r_link_hash_entry *eh;
+	      struct elf_m32r_dyn_relocs **pp;
+	      struct elf_m32r_dyn_relocs *p;
 
-            eh = (struct elf_m32r_link_hash_entry *) h;
+	      if (!info->shared && h->plt.refcount > 0)
+		h->plt.refcount -= 1;
 
-            for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
-              if (p->sec == sec)
-                {
-                  if (ELF32_R_TYPE (rel->r_info) == R_M32R_26_PCREL_RELA
-                      || ELF32_R_TYPE (rel->r_info) == R_M32R_26_PCREL_RELA)
-                    p->pc_count -= 1;
-                  p->count -= 1;
-                  if (p->count == 0)
-                    *pp = p->next;
-                  break;
-                }
-          }
-        break;
+	      eh = (struct elf_m32r_link_hash_entry *) h;
 
-      case R_M32R_26_PLTREL:
-	r_symndx = ELF32_R_SYM (rel->r_info);
-	if (r_symndx >= symtab_hdr->sh_info)
-	  {
-	    h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	    if (h->plt.refcount > 0)
-	      h->plt.refcount--;
-	  }
-	break;
+	      for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
+		if (p->sec == sec)
+		  {
+		    if (ELF32_R_TYPE (rel->r_info) == R_M32R_26_PCREL_RELA
+			|| ELF32_R_TYPE (rel->r_info) == R_M32R_26_PCREL_RELA)
+		      p->pc_count -= 1;
+		    p->count -= 1;
+		    if (p->count == 0)
+		      *pp = p->next;
+		    break;
+		  }
+	    }
+	  break;
 
-      default:
-	break;
-      }
+	case R_M32R_26_PLTREL:
+	  if (h != NULL)
+	    {
+	      if (h->plt.refcount > 0)
+		h->plt.refcount--;
+	    }
+	  break;
+
+	default:
+	  break;
+	}
+    }
 
   return TRUE;
 }

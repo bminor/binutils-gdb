@@ -1,5 +1,5 @@
 /* Xtensa-specific support for 32-bit ELF.
-   Copyright 2003, 2004 Free Software Foundation, Inc.
+   Copyright 2003, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -1039,7 +1039,12 @@ elf_xtensa_gc_sweep_hook (bfd *abfd,
 
       r_symndx = ELF32_R_SYM (rel->r_info);
       if (r_symndx >= symtab_hdr->sh_info)
-	h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	{
+	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	  while (h->root.type == bfd_link_hash_indirect
+		 || h->root.type == bfd_link_hash_warning)
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	}
 
       r_type = ELF32_R_TYPE (rel->r_info);
       switch (r_type)

@@ -1,5 +1,5 @@
 /* Renesas / SuperH SH specific support for 32-bit ELF
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
    Contributed by Ian Lance Taylor, Cygnus Support.
 
@@ -6082,14 +6082,14 @@ sh_elf_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
 	  struct elf_sh_dyn_relocs *p;
 
 	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-#ifdef INCLUDE_SHMEDIA
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)
 	    {
+#ifdef INCLUDE_SHMEDIA
 	      seen_stt_datalabel |= h->type == STT_DATALABEL;
+#endif
 	      h = (struct elf_link_hash_entry *) h->root.u.i.link;
 	    }
-#endif
 	  eh = (struct elf_sh_link_hash_entry *) h;
 	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
 	    if (p->sec == sec)

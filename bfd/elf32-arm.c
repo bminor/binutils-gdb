@@ -3843,8 +3843,6 @@ elf32_arm_gc_sweep_hook (bfd *                     abfd ATTRIBUTE_UNUSED,
   struct elf_link_hash_entry **sym_hashes;
   bfd_signed_vma *local_got_refcounts;
   const Elf_Internal_Rela *rel, *relend;
-  unsigned long r_symndx;
-  struct elf_link_hash_entry *h;
   struct elf32_arm_link_hash_table * globals;
 
   globals = elf32_arm_hash_table (info);
@@ -3858,7 +3856,18 @@ elf32_arm_gc_sweep_hook (bfd *                     abfd ATTRIBUTE_UNUSED,
   relend = relocs + sec->reloc_count;
   for (rel = relocs; rel < relend; rel++)
     {
+      unsigned long r_symndx;
+      struct elf_link_hash_entry *h = NULL;
       int r_type;
+
+      r_symndx = ELF32_R_SYM (rel->r_info);
+      if (r_symndx >= symtab_hdr->sh_info)
+	{
+	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	  while (h->root.type == bfd_link_hash_indirect
+		 || h->root.type == bfd_link_hash_warning)
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	}
 
       r_type = ELF32_R_TYPE (rel->r_info);
 #ifndef OLD_ARM_ABI
@@ -3870,10 +3879,8 @@ elf32_arm_gc_sweep_hook (bfd *                     abfd ATTRIBUTE_UNUSED,
 #ifndef OLD_ARM_ABI
 	case R_ARM_GOT_PREL:
 #endif
-	  r_symndx = ELF32_R_SYM (rel->r_info);
-	  if (r_symndx >= symtab_hdr->sh_info)
+	  if (h != NULL)
 	    {
-	      h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 	      if (h->got.refcount > 0)
 		h->got.refcount -= 1;
 	    }
@@ -3896,14 +3903,12 @@ elf32_arm_gc_sweep_hook (bfd *                     abfd ATTRIBUTE_UNUSED,
 	case R_ARM_THM_PC22:
 	  /* Should the interworking branches be here also?  */
 
-	  r_symndx = ELF32_R_SYM (rel->r_info);
-	  if (r_symndx >= symtab_hdr->sh_info)
+	  if (h != NULL)
 	    {
 	      struct elf32_arm_link_hash_entry *eh;
 	      struct elf32_arm_relocs_copied **pp;
 	      struct elf32_arm_relocs_copied *p;
 
-	      h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 	      eh = (struct elf32_arm_link_hash_entry *) h;
 
 	      if (h->plt.refcount > 0)

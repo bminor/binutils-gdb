@@ -1,6 +1,6 @@
 /* Intel 80386/80486-specific support for 32-bit ELF
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004 Free Software Foundation, Inc.
+   2003, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -1248,6 +1248,9 @@ elf_i386_gc_sweep_hook (bfd *abfd,
 	  struct elf_i386_dyn_relocs *p;
 
 	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	  while (h->root.type == bfd_link_hash_indirect
+		 || h->root.type == bfd_link_hash_warning)
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 	  eh = (struct elf_i386_link_hash_entry *) h;
 
 	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
