@@ -1,3 +1,15 @@
+2001-06-13  Michael Snyder  <msnyder@redhat.com>
+
+	* gdbthread.h (struct thread_info): Add new fields: 
+	current_line, current_symtab, step_sp, for saved infrun state.
+	* thread.c (save_infrun_state, load_infrun_state): Save and
+	restore current_line, current_symtab, and step_sp.
+	(add_thread): Rather than adding assignments to initialize
+	the new fields, just use memset (tp, 0, sizeof (*tp).
+	This way future new fields will not be overlooked.
+	* infrun.c (handle_inferior_event): Save and restore save_sp,
+	current_line, and current_symtab when switching threads.
+
 2001-06-13  Elena Zannoni  <ezannoni@redhat.com>
 
 	* MAINTAINERS: Add Andrew Cagney as co-maintainer of

@@ -2001,7 +2001,9 @@ handle_inferior_event (struct execution_control_state *ecs)
 			       ecs->another_trap,
 			       ecs->stepping_through_solib_after_catch,
 			       ecs->stepping_through_solib_catchpoints,
-			       ecs->stepping_through_sigtramp);
+			       ecs->stepping_through_sigtramp,
+			       ecs->current_line, ecs->current_symtab, 
+			       step_sp);
 
 	    /* Load infrun state for the new thread.  */
 	    load_infrun_state (ecs->ptid, &prev_pc,
@@ -2013,7 +2015,9 @@ handle_inferior_event (struct execution_control_state *ecs)
 			       &ecs->another_trap,
 			       &ecs->stepping_through_solib_after_catch,
 			       &ecs->stepping_through_solib_catchpoints,
-			       &ecs->stepping_through_sigtramp);
+			       &ecs->stepping_through_sigtramp, 
+			       &ecs->current_line, &ecs->current_symtab,
+			       &step_sp);
 	  }
 
 	inferior_ptid = ecs->ptid;
