@@ -189,7 +189,7 @@ i[34]86-*-bsd*)		gdb_target=i386bsd ;;
 i[34]86-*-netbsd*)	gdb_target=i386bsd ;;
 i[34]86-*-go32)		gdb_target=i386aout ;;
 i[34]86-*-lynx*)	gdb_target=i386lynx
-			configdirs="${configdirs} gdbserver"
+			configdirs="${configdirs} gdbserver" 
 			;;
 i[34]86-*-solaris*)	gdb_target=i386sol2 ;;
 i[34]86-*-sunos*)	gdb_target=sun386 ;;
@@ -294,8 +294,16 @@ fi
 #  We really shouldn't depend on there being a space after TM_FILE= ...
 targetfile=`awk '$1 == "TM_FILE=" { print $2 }' <${srcdir}/config/${gdb_target_cpu}/${gdb_target}.mt`
 
+
+# these really aren't orthogonal true/false values of the same condition,
+# but shells are slow enough that I like to reuse the test conditions
+# whenever possible
+#
 if [ "${target}" = "${host}" ] ; then
 	nativefile=`awk '$1 == "NAT_FILE=" { print $2 }' <${srcdir}/config/${gdb_host_cpu}/${gdb_host}.mh`
+else
+	# GDBserver is only useful in a "native" enviroment
+	configdirs=`echo $configdirs | sed 's/gdbserver//'`
 fi
 
 host_makefile_frag=config/${gdb_host_cpu}/${gdb_host}.mh

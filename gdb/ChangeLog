@@ -1,3 +1,7 @@
+Tue Oct 12 12:01:29 1993  david d `zoo' zuhn  (zoo@rtl.cygnus.com)
+
+	* configure.in: only configure gdbserver for native environments
+
 Tue Oct 12 08:59:15 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabsread.c (read_type): Treat a negative type number at the start
