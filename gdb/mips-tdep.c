@@ -2142,7 +2142,7 @@ heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
     return NULL;
   memset (&temp_proc_desc, '\0', sizeof (temp_proc_desc));
   temp_saved_regs = xrealloc (temp_saved_regs, SIZEOF_FRAME_SAVED_REGS);
-  memset (&temp_saved_regs, '\0', SIZEOF_FRAME_SAVED_REGS);
+  memset (temp_saved_regs, '\0', SIZEOF_FRAME_SAVED_REGS);
   PROC_LOW_ADDR (&temp_proc_desc) = start_pc;
   PROC_FRAME_REG (&temp_proc_desc) = SP_REGNUM;
   PROC_PC_REG (&temp_proc_desc) = RA_REGNUM;

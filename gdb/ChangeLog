@@ -1,5 +1,11 @@
 2002-12-20  Kevin Buettner  <kevinb@redhat.com>
 
+	* mips-tdep.c (heuristic_proc_desc): Clear memory associated with
+	``temp_saved_regs'', not the pointer or other storage contiguous
+	to this pointer.
+
+2002-12-20  Kevin Buettner  <kevinb@redhat.com>
+
 	* Makefile.in (mips-linux-tdep.o): Add $(osabi_h) and $(gdb_string_h).
 	* config/mips/tm-linux.h (mips_linux_svr4_fetch_link_map_offsets)
 	(mips_linux_get_longjmp_target): Delete declarations.
