@@ -46,7 +46,7 @@
                  " = increment (" previous  ");")
 	 (if first-end 
 	   (progn
-             (insert "  /" "* " first-end " *" "/")
+             (insert "  /" "* " first-end " prologue *" "/")
              (setq first-end nil)))
 	 (insert "\n")
 	 (setq previous (local j))
@@ -129,7 +129,7 @@ callee0 (int n)
 int
 callee1 (int n)
 {
-  register int l1 = increment (n);  /* callee1 */
+  register int l1 = increment (n);  /* callee1 prologue */
   return l1;
 }
 
@@ -137,7 +137,7 @@ callee1 (int n)
 int
 callee2 (int n)
 {
-  register int l1 = increment (n);  /* callee2 */
+  register int l1 = increment (n);  /* callee2 prologue */
   register int l2 = increment (l1);
   return l1+l2;
 }
@@ -146,7 +146,7 @@ callee2 (int n)
 int
 callee3 (int n)
 {
-  register int l1 = increment (n);  /* callee3 */
+  register int l1 = increment (n);  /* callee3 prologue */
   register int l2 = increment (l1);
   register int l3 = increment (l2);
   return l1+l2+l3;
@@ -156,7 +156,7 @@ callee3 (int n)
 int
 callee4 (int n)
 {
-  register int l1 = increment (n);  /* callee4 */
+  register int l1 = increment (n);  /* callee4 prologue */
   register int l2 = increment (l1);
   register int l3 = increment (l2);
   register int l4 = increment (l3);
@@ -167,7 +167,7 @@ callee4 (int n)
 int
 callee5 (int n)
 {
-  register int l1 = increment (n);  /* callee5 */
+  register int l1 = increment (n);  /* callee5 prologue */
   register int l2 = increment (l1);
   register int l3 = increment (l2);
   register int l4 = increment (l3);
@@ -178,7 +178,7 @@ callee5 (int n)
 int
 caller1 (void)
 {
-  register int l1 = increment (0x7eeb);  /* caller1 */
+  register int l1 = increment (0x7eeb);  /* caller1 prologue */
   register int n;
   n = callee0 (l1);
   n = callee1 (n + l1);
@@ -192,7 +192,7 @@ caller1 (void)
 int
 caller2 (void)
 {
-  register int l1 = increment (0x7eeb);  /* caller2 */
+  register int l1 = increment (0x7eeb);  /* caller2 prologue */
   register int l2 = increment (l1);
   register int n;
   n = callee0 (l2);
@@ -207,7 +207,7 @@ caller2 (void)
 int
 caller3 (void)
 {
-  register int l1 = increment (0x7eeb);  /* caller3 */
+  register int l1 = increment (0x7eeb);  /* caller3 prologue */
   register int l2 = increment (l1);
   register int l3 = increment (l2);
   register int n;
@@ -223,7 +223,7 @@ caller3 (void)
 int
 caller4 (void)
 {
-  register int l1 = increment (0x7eeb);  /* caller4 */
+  register int l1 = increment (0x7eeb);  /* caller4 prologue */
   register int l2 = increment (l1);
   register int l3 = increment (l2);
   register int l4 = increment (l3);
@@ -240,7 +240,7 @@ caller4 (void)
 int
 caller5 (void)
 {
-  register int l1 = increment (0x7eeb);  /* caller5 */
+  register int l1 = increment (0x7eeb);  /* caller5 prologue */
   register int l2 = increment (l1);
   register int l3 = increment (l2);
   register int l4 = increment (l3);

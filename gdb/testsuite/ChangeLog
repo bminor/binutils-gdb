@@ -1,3 +1,12 @@
+2004-07-16  Andrew Cagney  <cagney@gnu.org>
+
+	* gdb.base/restore.c: Append "prologue" to comments marking the a
+	function's prologue.
+	* gdb.base/restore.exp: Update copyright, re-indent.
+	(restore_tests): Use gdb_test_multiple.  Add "calleeN calls
+	callerN" prefix where needed.  Update patterns that match a
+	function's prologue.
+
 2004-07-16  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* gdb.base/restore.c: Add copyright notice.
