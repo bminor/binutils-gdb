@@ -909,9 +909,6 @@ rs6000_fix_call_dummy (char *dummyname, CORE_ADDR pc, CORE_ADDR fun,
 		       int nargs, struct value **args, struct type *type,
 		       int gcc_p)
 {
-#define	TOC_ADDR_OFFSET		20
-#define	TARGET_ADDR_OFFSET	28
-
   int ii;
   CORE_ADDR target_addr;
 
