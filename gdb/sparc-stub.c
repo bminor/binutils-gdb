@@ -298,7 +298,7 @@ getpacket(buffer)
   do
     {
       /* wait around for the start character, ignore all other characters */
-      while ((ch = getDebugChar()) != '$') ;
+      while ((ch = (getDebugChar() & 0x7f)) != '$') ;
 
       checksum = 0;
       xmitcsum = -1;
@@ -308,7 +308,7 @@ getpacket(buffer)
       /* now, read until a # or end of buffer is found */
       while (count < BUFMAX)
 	{
-	  ch = getDebugChar();
+	  ch = getDebugChar() & 0x7f;
 	  if (ch == '#')
 	    break;
 	  checksum = checksum + ch;
@@ -323,8 +323,8 @@ getpacket(buffer)
 
       if (ch == '#')
 	{
-	  xmitcsum = hex(getDebugChar()) << 4;
-	  xmitcsum |= hex(getDebugChar());
+	  xmitcsum = hex(getDebugChar() & 0x7f) << 4;
+	  xmitcsum |= hex(getDebugChar() & 0x7f);
 #if 0
 	  /* Humans shouldn't have to figure out checksums to type to it. */
 	  putDebugChar ('+');
@@ -381,7 +381,7 @@ putpacket(buffer)
       putDebugChar(hexchars[checksum & 0xf]);
 
     }
-  while (getDebugChar() != '+');
+  while ((getDebugChar() & 0x7f) != '+');
 }
 
 static char remcomInBuffer[BUFMAX];
