@@ -35,13 +35,13 @@
 
 :function:::unsigned64:Low32Bits:unsigned64 value
 {
-  unsigned64 result = VL4_8 (value);
+  unsigned64 result = (signed64) (signed32) VL4_8 (value);
   return result;
 }
 
 :function:::unsigned64:High32Bits:unsigned64 value
 {
-  unsigned64 result = VH4_8 (value);
+  unsigned64 result = (signed64) (signed32) VH4_8 (value);
   return result;
 }
 
