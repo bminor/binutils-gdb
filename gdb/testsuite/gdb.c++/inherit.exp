@@ -962,8 +962,6 @@ proc do_tests {} {
 
     if { ![ runto_main] } {
 	gdb_suppress_tests;
-    } else {
-	get_debug_format
     }
 
     test_ptype_si

@@ -1,3 +1,7 @@
+2003-02-13  Michael Chastain  <mec@shout.net>
+
+	* gdb.c++/inherit.exp: Remove call to get_debug_format.
+
 2003-02-12  Michael Chastain  <mec@shout.net>
 
 	* gdb.c++/classes.exp: Remove setup_xfail_format for DWARF 1.
