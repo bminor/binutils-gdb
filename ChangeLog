@@ -4,6 +4,10 @@ Tue Jun 18 14:24:12 1996  Klaus Kaempf  (kkaempf@progis.de)
 	* configure.in (alpha*-*-*vms*): Set noconfigdirs.
 	* make-all.com, setup.com: New files.
 
+Mon Jun 17 16:34:46 1996  Jason Merrill  <jason@yorick.cygnus.com>
+
+	* Makefile.in (taz): texinfo/tex3patch no longer exists.
+
 Sat Jun 15 17:13:25 1996  Geoffrey Noer <noer@cygnus.com>
 
 	* configure: enable_gdbtk=no for cygwin32-hosted toolchains

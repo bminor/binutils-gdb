@@ -911,7 +911,7 @@ install.all: install-no-fixedincludes
 # inet-install is used because the I*Net wants DejaGNU installed but
 # not built.
 inet-install:
-	$(MAKE) INSTALL_MODULES=`echo $(INSTALL_MODULES) | sed -e 's/install-dejagnu//'` install
+	$(MAKE) INSTALL_MODULES="`echo $(INSTALL_MODULES) | sed -e 's/install-dejagnu//'`" install
 
 # install-no-fixedincludes is used because Cygnus can not distribute
 # the fixed header files.
@@ -1317,9 +1317,7 @@ install-target: $(INSTALL_TARGET_MODULES)
 
 MAKEDIRS= \
 	$(prefix) \
-	$(exec_prefix) \
-	$(tooldir)
-
+	$(exec_prefix)
 .PHONY: install-dirs
 install-dirs:
 	@for i in $(MAKEDIRS) ; do \
@@ -1450,7 +1448,6 @@ taz: $(DEVO_SUPPORT) $(SUPPORT_FILES) \
 	ln -s ../../texinfo/texinfo.tex proto-toplev/texinfo/
 	ln -s ../../texinfo/gpl.texinfo proto-toplev/texinfo/
 	ln -s ../../texinfo/lgpl.texinfo proto-toplev/texinfo/
-	ln -s ../../texinfo/tex3patch   proto-toplev/texinfo/
 	chmod og=u `find . -print`
 	(VER=`sed <$(TOOL)/Makefile.in -n 's/^VERSION *= *//p'`; \
 		echo "==> Making $(TOOL)-$$VER.tar.gz"; \
