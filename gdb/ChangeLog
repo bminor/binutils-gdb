@@ -1,5 +1,20 @@
 Tue Aug 17 15:10:04 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
+	* config/m88k/tm-m88k.h: Fix typo in comment.
+	  (FP_REGNUM): define in terms of SP_REGNUM
+	  rather than by absolute number.  Also clearly comment that this
+	  is a convenient lie in order to decrease future confusion.
+	  (ACTUAL_FP_REGNUM): new macro for FP.
+	  (FRAME_CHAIN_VALID): removed.  Standard default works fine.
+	* m88k-tdep.c (frame_chain_valid): redundant, so removed.
+	  (NEXT_PROLOGUE_INSN): removed unused fourth arg, fixed all
+	  callers.
+	  (read_next_frame_reg): declare static.
+	  (examine_prologue): removed unused variabel insn2, rename insn1
+	  to insn, rewrote comment about finding fp, sp, etc. set frame_fp
+	  based on ACTUAL_FP_REGNUM rather than FP_REGNUM which is
+	  actually a scammed alias for SP_REGNUM on m88k. 
+
 	* frame.h: fixed typo in comment.
 
 Tue Aug 17 11:14:25 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)

@@ -88,15 +88,6 @@ frameless_function_invocation (frame)
     return 1;			/* Frameless -- no saved return address */
 }
 
-int
-frame_chain_valid (chain, thisframe)
-     CORE_ADDR chain;
-     struct frame_info *thisframe;
-{
-  return (chain != 0
-       && !inside_entry_file (FRAME_SAVED_PC (thisframe)));
-}
-
 void
 init_extra_frame_info (fromleaf, fi)
      int fromleaf;
@@ -166,7 +157,7 @@ static struct pic_prologue_code pic_prologue_code [] = {
    of the instruction.  PWORD2 is ignored -- a remnant of the original
    i960 version.  */
 
-#define NEXT_PROLOGUE_INSN(addr, lim, pword1, pword2) \
+#define NEXT_PROLOGUE_INSN(addr, lim, pword1) \
   (((addr) < (lim)) ? next_insn (addr, pword1) : 0)
 
 /* Read the m88k instruction at 'memaddr' and return the address of 
@@ -187,7 +178,7 @@ next_insn (memaddr, pword1)
 
 /* Read a register from frames called by us (or from the hardware regs).  */
 
-int
+static int
 read_next_frame_reg(fi, regno)
      FRAME fi;
      int regno;
@@ -220,7 +211,7 @@ examine_prologue (ip, limit, frame_sp, fsr, fi)
   register CORE_ADDR next_ip;
   register int src;
   register struct pic_prologue_code *pcode;
-  unsigned int insn1, insn2;
+  unsigned int insn;
   int size, offset;
   char must_adjust[32];		/* If set, must adjust offsets in fsr */
   int sp_offset = -1;		/* -1 means not set (valid must be mult of 8) */
@@ -228,7 +219,7 @@ examine_prologue (ip, limit, frame_sp, fsr, fi)
   CORE_ADDR frame_fp;
 
   bzero (must_adjust, sizeof (must_adjust));
-  next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn1, &insn2);
+  next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn);
 
   /* Accept move of incoming registers to other registers, using
      "or rd,rs,0" or "or.u rd,rs,0" or "or rd,r0,rs" or "or rd,rs,r0".
@@ -243,9 +234,9 @@ examine_prologue (ip, limit, frame_sp, fsr, fi)
 #define	OR_REG_MOVE2_INSN	0xF4005800	/* or rd,rs,r0 */
 #define	OR_REG_MOVE2_MASK	0xFC00FFFF
   while (next_ip && 
-	 ((insn1 & OR_MOVE_MASK) == OR_MOVE_INSN ||
-	  (insn1 & OR_REG_MOVE1_MASK) == OR_REG_MOVE1_INSN ||
-	  (insn1 & OR_REG_MOVE2_MASK) == OR_REG_MOVE2_INSN
+	 ((insn & OR_MOVE_MASK) == OR_MOVE_INSN ||
+	  (insn & OR_REG_MOVE1_MASK) == OR_REG_MOVE1_INSN ||
+	  (insn & OR_REG_MOVE2_MASK) == OR_REG_MOVE2_INSN
 	 )
 	)
     {
@@ -253,7 +244,7 @@ examine_prologue (ip, limit, frame_sp, fsr, fi)
  	 has already been reflected in what the compiler tells us is the
 	 location of these parameters.  */
       ip = next_ip;
-      next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn1, &insn2);
+      next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn);
     }
 
   /* Accept an optional "subu sp,sp,n" to set up the stack pointer.  */
@@ -262,11 +253,11 @@ examine_prologue (ip, limit, frame_sp, fsr, fi)
 #define	SUBU_SP_MASK	0xffff0007	/* Note offset must be mult. of 8 */
 #define	SUBU_OFFSET(x)	((unsigned)(x & 0xFFFF))
   if (next_ip &&
-      ((insn1 & SUBU_SP_MASK) == SUBU_SP_INSN))	/* subu r31, r31, N */
+      ((insn & SUBU_SP_MASK) == SUBU_SP_INSN))	/* subu r31, r31, N */
     {
-      sp_offset = -SUBU_OFFSET (insn1);
+      sp_offset = -SUBU_OFFSET (insn);
       ip = next_ip;
-      next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn1, &insn2);
+      next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn);
     }
 
   /* The function must start with a stack-pointer adjustment, or
@@ -291,15 +282,15 @@ examine_prologue (ip, limit, frame_sp, fsr, fi)
 
   while (next_ip)
     {
-           if ((insn1 & ST_STACK_MASK)  == ST_STACK_INSN)
+           if ((insn & ST_STACK_MASK)  == ST_STACK_INSN)
  	size = 1;
-      else if ((insn1 & STD_STACK_MASK) == STD_STACK_INSN)
+      else if ((insn & STD_STACK_MASK) == STD_STACK_INSN)
 	size = 2;
       else
 	break;
 
-      src = ST_SRC (insn1);
-      offset = ST_OFFSET (insn1);
+      src = ST_SRC (insn);
+      offset = ST_OFFSET (insn);
       while (size--)
 	{
 	  must_adjust[src] = 1;
@@ -307,7 +298,7 @@ examine_prologue (ip, limit, frame_sp, fsr, fi)
 	  offset += 4;
 	}
       ip = next_ip;
-      next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn1, &insn2);
+      next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn);
     }
 
   /* Accept an optional "addu r30,r31,n" to set up the frame pointer.  */
@@ -316,11 +307,11 @@ examine_prologue (ip, limit, frame_sp, fsr, fi)
 #define	ADDU_FP_MASK	0xffff0000
 #define	ADDU_OFFSET(x)	((unsigned)(x & 0xFFFF))
   if (next_ip &&
-      ((insn1 & ADDU_FP_MASK) == ADDU_FP_INSN))	/* addu r30, r31, N */
+      ((insn & ADDU_FP_MASK) == ADDU_FP_INSN))	/* addu r30, r31, N */
     {
-      fp_offset = ADDU_OFFSET (insn1);
+      fp_offset = ADDU_OFFSET (insn);
       ip = next_ip;
-      next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn1, &insn2);
+      next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn);
     }
 
   /* Accept the PIC prologue code if present.  */
@@ -333,11 +324,11 @@ examine_prologue (ip, limit, frame_sp, fsr, fi)
     size-=2;
   }
 
-  while (size-- && next_ip && (pcode->insn == (pcode->mask & insn1)))
+  while (size-- && next_ip && (pcode->insn == (pcode->mask & insn)))
     {
       pcode++;
       ip = next_ip;
-      next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn1, &insn2);
+      next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn);
     }
 
   /* Accept moves of parameter registers to other registers, using
@@ -353,9 +344,9 @@ examine_prologue (ip, limit, frame_sp, fsr, fi)
 #define	OR_REG_MOVE2_INSN	0xF4005800	/* or rd,rs,r0 */
 #define	OR_REG_MOVE2_MASK	0xFC00FFFF
   while (next_ip && 
-	 ((insn1 & OR_MOVE_MASK) == OR_MOVE_INSN ||
-	  (insn1 & OR_REG_MOVE1_MASK) == OR_REG_MOVE1_INSN ||
-	  (insn1 & OR_REG_MOVE2_MASK) == OR_REG_MOVE2_INSN
+	 ((insn & OR_MOVE_MASK) == OR_MOVE_INSN ||
+	  (insn & OR_REG_MOVE1_MASK) == OR_REG_MOVE1_INSN ||
+	  (insn & OR_REG_MOVE2_MASK) == OR_REG_MOVE2_INSN
 	 )
 	)
     {
@@ -363,7 +354,7 @@ examine_prologue (ip, limit, frame_sp, fsr, fi)
  	 has already been reflected in what the compiler tells us is the
 	 location of these parameters.  */
       ip = next_ip;
-      next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn1, &insn2);
+      next_ip = NEXT_PROLOGUE_INSN (ip, limit, &insn);
     }
 
   /* We're done with the prologue.  If we don't care about the stack
@@ -373,24 +364,32 @@ examine_prologue (ip, limit, frame_sp, fsr, fi)
   if (fi == 0)
     return ip;
 
-  /* OK, now we have:
-	sp_offset	original negative displacement of SP
-	fp_offset	positive displacement between new SP and new FP, or -1
-	fsr->regs[0..31]	offset from original SP where reg is stored
-	must_adjust[0..31]	set if corresp. offset was set
+  /*
+     OK, now we have:
 
-     The current SP (frame_sp) might not be the original new SP as set
-     by the function prologue, if alloca has been called.  This can
-     only occur if fp_offset is set, though (the compiler allocates an
-     FP when it sees alloca).  In that case, we have the FP,
-     and can calculate the original new SP from the FP.
+     	sp_offset	original (before any alloca calls) displacement of SP
+			(will be negative).
 
-     Then, we figure out where the arguments and locals are, and
-     relocate the offsets in fsr->regs to absolute addresses.  */
+	fp_offset	displacement from original SP to the FP for this frame
+			or -1.
+
+	fsr->regs[0..31]	displacement from original SP to the stack
+				location where reg[0..31] is stored.
+
+	must_adjust[0..31]	set if corresponding offset was set.
+
+     If alloca has been called between the function prologue and the current
+     IP, then the current SP (frame_sp) will not be the original SP as set by
+     the function prologue.  If the current SP is not the original SP, then the
+     compiler will have allocated an FP for this frame, fp_offset will be set,
+     and we can use it to calculate the original SP.
+
+     Then, we figure out where the arguments and locals are, and relocate the
+     offsets in fsr->regs to absolute addresses.  */
 
   if (fp_offset != -1) {
     /* We have a frame pointer, so get it, and base our calc's on it.  */
-    frame_fp = (CORE_ADDR) read_next_frame_reg (fi->next, FP_REGNUM);
+    frame_fp = (CORE_ADDR) read_next_frame_reg (fi->next, ACTUAL_FP_REGNUM);
     frame_sp = frame_fp - fp_offset;
   } else {
     /* We have no frame pointer, therefore frame_sp is still the same value

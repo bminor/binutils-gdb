@@ -188,7 +188,6 @@ extern CORE_ADDR skip_prologue ();
 #define SRP_REGNUM 1		/* Contains subroutine return pointer */
 #define RV_REGNUM 2		/* Contains simple return values */
 #define SRA_REGNUM 12		/* Contains address of struct return values */
-#define FP_REGNUM 31		/* Reg fetched to locate frame when pgm stops */
 #define SP_REGNUM 31		/* Contains address of top of stack */
 #define SXIP_REGNUM 35		/* Contains Shadow Execute Instruction Pointer */
 #define SNIP_REGNUM 36		/* Contains Shadow Next Instruction Pointer */
@@ -199,6 +198,15 @@ extern CORE_ADDR skip_prologue ();
 #define FPCR_REGNUM 34		/* Floating Point Control Register */
 #define SFIP_REGNUM 37		/* Contains Shadow Fetched Intruction pointer */
 #define NNPC_REGNUM SFIP_REGNUM /* Next Next Program Counter */
+
+/* This is rather a confusing lie.  Our m88k port using a stack pointer value
+   for the frame address.  Hence, the frame address and the frame pointer are
+   only indirectly related.  The value of this macro is the register number
+   fetched by the machine "independent" portions of gdb when they want to know
+   about a frame address.  Thus, we lie here and claim that FP_REGNUM is
+   SP_REGNUM.  */
+#define FP_REGNUM SP_REGNUM	/* Reg fetched to locate frame when pgm stops */
+#define ACTUAL_FP_REGNUM 30
 
 /* PSR status bit definitions.  */
 
@@ -317,9 +325,6 @@ extern int frameless_function_invocation ();
 #define FRAME_CHAIN(thisframe) \
 	frame_chain (thisframe)
 
-#define FRAME_CHAIN_VALID(chain, thisframe)	\
-	frame_chain_valid (chain, thisframe)
-
 #define	FRAMELESS_FUNCTION_INVOCATION(frame, fromleaf)	\
 	fromleaf = frameless_function_invocation (frame)
 
@@ -373,7 +378,7 @@ extern CORE_ADDR frame_locals_address ();
 
    We could manage to locate values for all of the so called "preserved"
    registers (some of which may get saved within any particular frame) but
-   that would require decoding all of the tdesc information.  Tht would be
+   that would require decoding all of the tdesc information.  That would be
    nice information for GDB to have, but it is not strictly manditory if we
    can live without the ability to look at values within (or backup to)
    previous frames.
