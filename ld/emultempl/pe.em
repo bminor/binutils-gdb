@@ -52,6 +52,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "deffile.h"
 #include "pe-dll.h"
 
+#include <ctype.h>
+
 #define TARGET_IS_${EMULATION_NAME}
 
 /* Permit the emulation parameters to override the default section
