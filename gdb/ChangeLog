@@ -1,5 +1,13 @@
 Wed Jun  9 12:56:58 1993  K. Richard Pixley  (rich@cygnus.com)
 
+	* udi/udiids.h, udi/udip2soc.c, udi/udiphcfg.h, udi/udiphunix.h,
+	  udi/udiproc.h, udi/udipt29k.h, udi/udiptcfg.h, udi/udisoc.h,
+	  udi/udr.c: Change AMD copyrights to FSF copyleft '93.
+
+	* remote-eb.c (get_hex_regs, eb_fetch_registers), remote-adapt.c
+	  (get_hex_regs, adapt_fetch_registers): cast args to
+	  supply_register to avoid gcc warning.
+
 	* config/a29k/a29k.mt (TDEPFILES): drop minimon support.  It
 	  doesn't compile on solaris and is now obsolete.
 
