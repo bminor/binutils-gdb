@@ -1,5 +1,8 @@
 Sat Sep  5 19:00:38 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ehopt.c (check_eh_frame): Check the size of the FDE, and don't
+	optimize across FDE boundaries.
+
 	* config/obj-coff.c (obj_coff_section): Preserve any link once
 	flags when setting the section flags.
 
