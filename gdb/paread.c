@@ -188,7 +188,8 @@ pa_symtab_read (abfd, addr, objfile)
 		 cause problems if these special symbols have the
 		 same value as real symbols.  So ignore them.  Also "LC$".  */
 	      if (*symname == 'L'
-		  && (symname[2] == '$' || symname[3] == '$'))
+		  && (symname[1] == '$' || symname[2] == '$' 
+		      || symname[3] == '$'))
 		continue;
 	      break;
 
