@@ -73,6 +73,7 @@ cpu_type=${target_cpu}
 # check for architecture variants
 case ${target_cpu} in
   sparclite)    cpu_type=sparc ;;
+  sparc64)	cpu_type=sparc obj_format=aout ;;
   m680[01234]0) cpu_type=m68k ;;
   m683?2)       cpu_type=m68k ;;
 esac
@@ -129,6 +130,9 @@ case ${target} in
     obj_format=coffbfd
     need_bfd="./../bfd/libbfd.a"
     gas_target=m68kcoff
+    ;;
+  sparclite-fujitsu-none)
+    obj_format=aout
     ;;
   *-*-aout | *-*-scout)
     obj_format=aout
