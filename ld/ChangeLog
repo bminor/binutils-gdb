@@ -1,5 +1,14 @@
 Wed Jan 21 22:26:46 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* emultempl/pe.em (gld_${EMULATION_NAME}_set_symbols): When doing
+	a relocateable link, set the image base to 0, and don't define the
+	various symbols.
+	* emulparams/i386pe.sh (RELOCATEABLE_OUTPUT_FORMAT): Define.
+	* scripttempl/pe.sc: Swap the .data and .bss sections so that
+	.data comes first.  If doing a relocateable link, use
+	RELOCATEABLE_OUTPUT_FORMAT if it is defined, and start the
+	sections at 0, and don't define any symbols.
+
 	* ldlang.c (lang_memory_default): Correct parenthisization of
 	expression.
 
