@@ -1,5 +1,11 @@
 2002-10-26  Mark Kettenis  <kettenis@gnu.org>
 
+	* x86-64-tdep.c: Fix some formatting problems, mostly in comments.
+	(x86_64_push_return_address): Add comment.
+	(x86_64_pop_frame): Make static.
+	(examine_argument): Clarify comment.
+	(x86_64_skip_prologue): Make prolog_expact variable static.
+
 	* dwarf2cfi.c: Fix some formatting problems.
 	(context_cpy, read_encoded_pointer): Clarify comments.
 

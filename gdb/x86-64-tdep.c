@@ -1,7 +1,6 @@
 /* Target-dependent code for the x86-64 for GDB, the GNU debugger.
 
    Copyright 2001, 2002 Free Software Foundation, Inc.
-
    Contributed by Jiri Smid, SuSE Labs.
 
    This file is part of GDB.
@@ -251,18 +250,20 @@ static const char *valid_flavours[] = {
 };
 static const char *disassembly_flavour = att_flavour;
 
+/* Push the return address (pointing to the call dummy) onto the stack
+   and return the new value for the stack pointer.  */
+
 static CORE_ADDR
 x86_64_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
 {
   char buf[8];
 
   store_unsigned_integer (buf, 8, CALL_DUMMY_ADDRESS ());
-
   write_memory (sp - 8, buf, 8);
   return sp - 8;
 }
 
-void
+static void
 x86_64_pop_frame (void)
 {
   generic_pop_current_frame (cfi_pop_frame);
@@ -300,8 +301,8 @@ merge_classes (enum x86_64_reg_class class1, enum x86_64_reg_class class2)
   if (class1 == class2)
     return class1;
 
-  /* Rule #2: If one of the classes is NO_CLASS, the resulting class is
-     the other class.  */
+  /* Rule #2: If one of the classes is NO_CLASS, the resulting class
+     is the other class.  */
   if (class1 == X86_64_NO_CLASS)
     return class2;
   if (class2 == X86_64_NO_CLASS)
@@ -328,15 +329,13 @@ merge_classes (enum x86_64_reg_class class1, enum x86_64_reg_class class2)
   return X86_64_SSE_CLASS;
 }
 
+/* Classify the argument type.  CLASSES will be filled by the register
+   class used to pass each word of the operand.  The number of words
+   is returned.  In case the parameter should be passed in memory, 0
+   is returned.  As a special case for zero sized containers,
+   classes[0] will be NO_CLASS and 1 is returned.
 
-/* Classify the argument type.
-   CLASSES will be filled by the register class used to pass each word
-   of the operand.  The number of words is returned.  In case the parameter
-   should be passed in memory, 0 is returned. As a special case for zero
-   sized containers, classes[0] will be NO_CLASS and 1 is returned.
-
-   See the x86-64 PS ABI for details.
-*/
+   See the x86-64 psABI for details.  */
 
 static int
 classify_argument (struct type *type,
@@ -361,8 +360,8 @@ classify_argument (struct type *type,
 	for (i = 0; i < words; i++)
 	  classes[i] = X86_64_NO_CLASS;
 
-	/* Zero sized arrays or structures are NO_CLASS.  We return 0 to
-	   signalize memory class, so handle it as special case.  */
+	/* Zero sized arrays or structures are NO_CLASS.  We return 0
+	   to signalize memory class, so handle it as special case.  */
 	if (!words)
 	  {
 	    classes[0] = X86_64_NO_CLASS;
@@ -445,7 +444,7 @@ classify_argument (struct type *type,
 		&& (i == 0 || classes[i - 1] != X86_64_SSE_CLASS))
 	      classes[i] = X86_64_SSE_CLASS;
 
-	    /*  X86_64_X87UP_CLASS should be preceeded by X86_64_X87_CLASS.  */
+	    /* X86_64_X87UP_CLASS should be preceeded by X86_64_X87_CLASS.  */
 	    if (classes[i] == X86_64_X87UP_CLASS
 		&& (i == 0 || classes[i - 1] != X86_64_X87_CLASS))
 	      classes[i] = X86_64_SSE_CLASS;
@@ -499,8 +498,9 @@ classify_argument (struct type *type,
 		  "classify_argument: unknown argument type");
 }
 
-/* Examine the argument and return set number of register required in each
-   class.  Return 0 ifif parameter should be passed in memory.  */
+/* Examine the argument and set *INT_NREGS and *SSE_NREGS to the
+   number of registers required based on the information passed in
+   CLASSES.  Return 0 if parameter should be passed in memory.  */
 
 static int
 examine_argument (enum x86_64_reg_class classes[MAX_CLASSES],
@@ -538,9 +538,9 @@ examine_argument (enum x86_64_reg_class classes[MAX_CLASSES],
 #define RET_SSE_REGS 2
 
 /* Check if the structure in value_type is returned in registers or in
-   memory. If this function returns 1, gdb will call STORE_STRUCT_RETURN and
-   EXTRACT_STRUCT_VALUE_ADDRESS else STORE_RETURN_VALUE and EXTRACT_RETURN_VALUE
-   will be used.  */
+   memory. If this function returns 1, GDB will call
+   STORE_STRUCT_RETURN and EXTRACT_STRUCT_VALUE_ADDRESS else
+   STORE_RETURN_VALUE and EXTRACT_RETURN_VALUE will be used.  */
 int
 x86_64_use_struct_convention (int gcc_p, struct type *value_type)
 {
@@ -553,7 +553,6 @@ x86_64_use_struct_convention (int gcc_p, struct type *value_type)
 	  !examine_argument (class, n, &needed_intregs, &needed_sseregs) ||
 	  needed_intregs > RET_INT_REGS || needed_sseregs > RET_SSE_REGS);
 }
-
 
 /* Extract from an array REGBUF containing the (raw) register state, a
    function return value of TYPE, and copy that, in virtual format,
@@ -637,10 +636,10 @@ x86_64_extract_return_value (struct type *type, char *regbuf, char *valbuf)
     }
 }
 
-/* Handled by unwind informations.  */
 static void
 x86_64_frame_init_saved_regs (struct frame_info *fi)
 {
+  /* Do nothing.  Everything is handled by the stack unwinding code.  */
 }
 
 #define INT_REGS 6
@@ -862,30 +861,31 @@ x86_64_skip_prologue (CORE_ADDR pc)
   struct symtab_and_line v_sal;
   struct symbol *v_function;
   CORE_ADDR endaddr;
+  unsigned char prolog_buf[PROLOG_BUFSIZE];
 
-  /* We will handle only functions beginning with:
-     55          pushq %rbp
-     48 89 e5    movq %rsp,%rbp 
-   */
-  unsigned char prolog_expect[PROLOG_BUFSIZE] = { 0x55, 0x48, 0x89, 0xe5 },
-    prolog_buf[PROLOG_BUFSIZE];
+  /* We will handle only functions starting with: */
+  static unsigned char prolog_expect[PROLOG_BUFSIZE] =
+  {
+    0x55,			/* pushq %rbp */
+    0x48, 0x89, 0xe5		/* movq %rsp, %rbp */
+  };
 
   read_memory (pc, (char *) prolog_buf, PROLOG_BUFSIZE);
 
-  /* First check, whether pc points to pushq %rbp, movq %rsp,%rbp.  */
+  /* First check, whether pc points to pushq %rbp, movq %rsp, %rbp.  */
   for (i = 0; i < PROLOG_BUFSIZE; i++)
     if (prolog_expect[i] != prolog_buf[i])
-      return pc;		/* ... no, it doesn't. Nothing to skip.  */
+      return pc;		/* ... no, it doesn't.  Nothing to skip.  */
 
-  /* OK, we have found the prologue and want PC of the first 
+  /* OK, we have found the prologue and want PC of the first
      non-prologue instruction.  */
   pc += PROLOG_BUFSIZE;
 
   v_function = find_pc_function (pc);
   v_sal = find_pc_line (pc, 0);
 
-  /* If pc doesn't point to a function with debuginfo, 
-     some of the following may be NULL.  */
+  /* If pc doesn't point to a function with debuginfo, some of the
+     following may be NULL.  */
   if (!v_function || !v_function->ginfo.value.block || !v_sal.symtab)
     return pc;
 
