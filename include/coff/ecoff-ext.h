@@ -280,19 +280,36 @@ union aux_ext {
 /* FIXME!  These are copied from ../bfd/libbfd.h */
 extern bfd_vma _do_getb32 PARAMS ((unsigned char *addr));
 extern bfd_vma _do_getl32 PARAMS ((unsigned char *addr));
+extern void _do_putb32 PARAMS ((bfd_vma data, unsigned char *addr));
+extern void _do_putl32 PARAMS ((bfd_vma data, unsigned char *addr));
 
-#define	AUX_GET_DNLOW(bigend, ax)	(bigend? _do_getb32 ((ax)->a_dnLow): \
-						 _do_getl32 ((ax)->a_dnLow))
-#define	AUX_GET_DNHIGH(bigend, ax)	(bigend? _do_getb32 ((ax)->a_dnHigh): \
-						 _do_getl32 ((ax)->a_dnHigh))
-#define	AUX_GET_ISYM(bigend, ax)	(bigend? _do_getb32 ((ax)->a_isym): \
-						 _do_getl32 ((ax)->a_isym))
-#define	AUX_GET_ISS(bigend, ax)		(bigend? _do_getb32 ((ax)->a_iss): \
-						 _do_getl32 ((ax)->a_iss))
-#define	AUX_GET_WIDTH(bigend, ax)	(bigend? _do_getb32 ((ax)->a_width): \
-						 _do_getl32 ((ax)->a_width))
-#define	AUX_GET_COUNT(bigend, ax)	(bigend? _do_getb32 ((ax)->a_count): \
-						 _do_getl32 ((ax)->a_count))
+#define AUX_GET_ANY(bigend, ax, field) \
+  ((bigend) ? _do_getb32 ((ax)->field) : _do_getl32 ((ax)->field))
+
+#define	AUX_GET_DNLOW(bigend, ax)	AUX_GET_ANY ((bigend), (ax), a_dnLow)
+#define	AUX_GET_DNHIGH(bigend, ax)	AUX_GET_ANY ((bigend), (ax), a_dnHigh)
+#define	AUX_GET_ISYM(bigend, ax)	AUX_GET_ANY ((bigend), (ax), a_isym)
+#define AUX_GET_ISS(bigend, ax)		AUX_GET_ANY ((bigend), (ax), a_iss)
+#define AUX_GET_WIDTH(bigend, ax)	AUX_GET_ANY ((bigend), (ax), a_width)
+#define AUX_GET_COUNT(bigend, ax)	AUX_GET_ANY ((bigend), (ax), a_count)
+
+#define AUX_PUT_ANY(bigend, val, ax, field) \
+  ((bigend) \
+   ? _do_putb32 ((val), (ax)->field) \
+   : _do_putl32 ((val), (ax)->field))
+
+#define AUX_PUT_DNLOW(bigend, val, ax) \
+  AUX_PUT_ANY ((bigend), (val), (ax), a_dnLow)
+#define AUX_PUT_DNHIGH(bigend, val, ax) \
+  AUX_PUT_ANY ((bigend), (val), (ax), a_dnHigh)
+#define AUX_PUT_ISYM(bigend, val, ax) \
+  AUX_PUT_ANY ((bigend), (val), (ax), a_isym)
+#define AUX_PUT_ISS(bigend, val, ax) \
+  AUX_PUT_ANY ((bigend), (val), (ax), a_iss)
+#define AUX_PUT_WIDTH(bigend, val, ax) \
+  AUX_PUT_ANY ((bigend), (val), (ax), a_width)
+#define AUX_PUT_COUNT(bigend, val, ax) \
+  AUX_PUT_ANY ((bigend), (val), (ax), a_count)
 
 /* Relative file descriptor */
 
@@ -335,6 +352,7 @@ extern void ecoff_swap_ext_out PARAMS ((bfd *, EXTR *, struct ext_ext *));
 extern void ecoff_swap_dnr_in PARAMS ((bfd *, struct dnr_ext *, DNR *));
 extern void ecoff_swap_dnr_out PARAMS ((bfd *, DNR *, struct dnr_ext *));
 extern void ecoff_swap_tir_in PARAMS ((int bigend, struct tir_ext *, TIR *));
+extern void ecoff_swap_tir_out PARAMS ((int bigend, TIR *, struct tir_ext *));
 extern void ecoff_swap_rndx_in PARAMS ((int bigend, struct rndx_ext *,
 					RNDXR *));
 extern void ecoff_swap_rndx_out PARAMS ((int bigend, RNDXR *,
