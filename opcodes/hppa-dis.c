@@ -701,7 +701,7 @@ print_insn_hppa (memaddr, info)
 			  (*info->fprintf_func) (info->stream, " ");
 			break;
 		      case 'X':
-			(*info->fprintf_func) (info->stream, "%s",
+			(*info->fprintf_func) (info->stream, "%s ",
 					       shift_cond_64_names[GET_FIELD (insn, 16, 18)]);
 			break;
 		      case 'B':
