@@ -1,3 +1,10 @@
+2003-09-19  Daniel Jacobowitz  <drow@mvista.com>
+
+	Merge from mainline:
+	2003-09-15  Daniel Jacobowitz  <drow@mvista.com>
+
+	* values.c (unpack_double): Call floatformat_is_valid.
+
 2003-09-19  Jim Blandy  <jimb@redhat.com>
 
 	Merge from mainline:
