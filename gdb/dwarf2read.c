@@ -2211,6 +2211,15 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
      it.  */
   attr = dwarf_attr (die, DW_AT_frame_base);
   if (attr)
+    /* FIXME: cagney/2004-01-26: The DW_AT_frame_base's location
+       expression is being recorded directly in the function's symbol
+       and not in a separate frame-base object.  I guess this hack is
+       to avoid adding some sort of frame-base adjunct/annex to the
+       function's symbol :-(.  The problem with doing this is that it
+       results in a function symbol with a location expression that
+       has nothing to do with the location of the function, ouch!  The
+       relationship should be: a function's symbol has-a frame base; a
+       frame-base has-a location expression.  */
     dwarf2_symbol_mark_computed (attr, new->name, cu);
 
   list_in_scope = &local_symbols;

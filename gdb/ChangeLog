@@ -1,3 +1,7 @@
+2004-01-26  Andrew Cagney  <cagney@redhat.com>
+
+	* dwarf2read.c (read_func_scope): Document frame-base hack.
+
 2004-01-25  Mark Kettenis  <kettenis@gnu.org>
 
 	* infcmd.c (print_return_value): Plug memory leak; delete
