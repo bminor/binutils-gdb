@@ -87,6 +87,8 @@ blt.d
 blt.s
 bltu.d
 bltu.s
+break20.d
+break20.s
 delay.d
 delay.s
 div-ilocks.d
@@ -150,6 +152,8 @@ rol.d
 rol.s
 sb.d
 sb.s
+trap20.d
+trap20.s
 trunc.d
 trunc.s
 uld.d
