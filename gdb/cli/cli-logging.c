@@ -43,7 +43,7 @@ int logging_overwrite, logging_redirect;
 
 /* If we've pushed output files, close them and pop them.  */
 static void
-pop_output_files ()
+pop_output_files (void)
 {
   /* Only delete one of the files -- they are all set to the same
      value.  */
