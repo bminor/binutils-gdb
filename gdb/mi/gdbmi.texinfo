@@ -3799,7 +3799,21 @@ before the value of a child variable can be evaluated.
 @end example
 
 Assigns the value of @var{expression} to the variable object specified
-by @var{name}.  The object must be @samp{editable}.
+by @var{name}.  The object must be @samp{editable}.  If the variable's
+value is altered by the assign, the variable will show up in any 
+subsequent @code{-var-update} list.
+
+@subsubheading Example
+
+@example
+(@value{GDBP})
+-var-assign var1 3
+^done,value="3"
+(@value{GDBP})
+-var-update *
+^done,changelist=[@{name="var1",in_scope="true",type_changed="false"@}]
+(@value{GDBP})
+@end example
 
 @subheading The @code{-var-update} Command
 @findex -var-update
