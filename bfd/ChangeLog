@@ -1,3 +1,11 @@
+2003-10-30  Alan Modra  <amodra@bigpond.net.au>
+
+	* dwarf2.c (struct attribute): Delete "unsnd", "snd" and "addr".
+	Add "val" and "sval" fields.
+	(DW_STRING, DW_UNSND, DW_BLOCK, DW_SND, DW_ADDR): Delete.
+	(read_attribute_value): Expand and adjust DW_* occurrences.
+	(scan_unit_for_functions, parse_comp_unit): Likewise.
+
 2003-10-30  Phil Edwards  <phil@codesourcery.com>
 
 	* config.bfd (arm-*-vxworks):  Remove separate stanza; merge with

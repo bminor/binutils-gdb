@@ -61,20 +61,11 @@ struct attribute
   {
     char *str;
     struct dwarf_block *blk;
-    unsigned int unsnd;
-    int snd;
-    bfd_vma addr;
+    bfd_vma val;
+    bfd_signed_vma sval;
   }
   u;
 };
-
-/* Get at parts of an attribute structure.  */
-
-#define DW_STRING(attr)    ((attr)->u.str)
-#define DW_UNSND(attr)     ((attr)->u.unsnd)
-#define DW_BLOCK(attr)     ((attr)->u.blk)
-#define DW_SND(attr)       ((attr)->u.snd)
-#define DW_ADDR(attr)	   ((attr)->u.addr)
 
 /* Blocks are a bunch of untyped bytes.  */
 struct dwarf_block
@@ -652,7 +643,7 @@ read_attribute_value (attr, form, unit, info_ptr)
     case DW_FORM_addr:
       /* FIXME: DWARF3 draft says DW_FORM_ref_addr is offset_size.  */
     case DW_FORM_ref_addr:
-      DW_ADDR (attr) = read_address (unit, info_ptr);
+      attr->u.val = read_address (unit, info_ptr);
       info_ptr += unit->addr_size;
       break;
     case DW_FORM_block2:
@@ -662,7 +653,7 @@ read_attribute_value (attr, form, unit, info_ptr)
       info_ptr += 2;
       blk->data = read_n_bytes (abfd, info_ptr, blk->size);
       info_ptr += blk->size;
-      DW_BLOCK (attr) = blk;
+      attr->u.blk = blk;
       break;
     case DW_FORM_block4:
       amt = sizeof (struct dwarf_block);
@@ -671,26 +662,26 @@ read_attribute_value (attr, form, unit, info_ptr)
       info_ptr += 4;
       blk->data = read_n_bytes (abfd, info_ptr, blk->size);
       info_ptr += blk->size;
-      DW_BLOCK (attr) = blk;
+      attr->u.blk = blk;
       break;
     case DW_FORM_data2:
-      DW_UNSND (attr) = read_2_bytes (abfd, info_ptr);
+      attr->u.val = read_2_bytes (abfd, info_ptr);
       info_ptr += 2;
       break;
     case DW_FORM_data4:
-      DW_UNSND (attr) = read_4_bytes (abfd, info_ptr);
+      attr->u.val = read_4_bytes (abfd, info_ptr);
       info_ptr += 4;
       break;
     case DW_FORM_data8:
-      DW_UNSND (attr) = read_8_bytes (abfd, info_ptr);
+      attr->u.val = read_8_bytes (abfd, info_ptr);
       info_ptr += 8;
       break;
     case DW_FORM_string:
-      DW_STRING (attr) = read_string (abfd, info_ptr, &bytes_read);
+      attr->u.str = read_string (abfd, info_ptr, &bytes_read);
       info_ptr += bytes_read;
       break;
     case DW_FORM_strp:
-      DW_STRING (attr) = read_indirect_string (unit, info_ptr, &bytes_read);
+      attr->u.str = read_indirect_string (unit, info_ptr, &bytes_read);
       info_ptr += bytes_read;
       break;
     case DW_FORM_block:
@@ -700,7 +691,7 @@ read_attribute_value (attr, form, unit, info_ptr)
       info_ptr += bytes_read;
       blk->data = read_n_bytes (abfd, info_ptr, blk->size);
       info_ptr += blk->size;
-      DW_BLOCK (attr) = blk;
+      attr->u.blk = blk;
       break;
     case DW_FORM_block1:
       amt = sizeof (struct dwarf_block);
@@ -709,42 +700,42 @@ read_attribute_value (attr, form, unit, info_ptr)
       info_ptr += 1;
       blk->data = read_n_bytes (abfd, info_ptr, blk->size);
       info_ptr += blk->size;
-      DW_BLOCK (attr) = blk;
+      attr->u.blk = blk;
       break;
     case DW_FORM_data1:
-      DW_UNSND (attr) = read_1_byte (abfd, info_ptr);
+      attr->u.val = read_1_byte (abfd, info_ptr);
       info_ptr += 1;
       break;
     case DW_FORM_flag:
-      DW_UNSND (attr) = read_1_byte (abfd, info_ptr);
+      attr->u.val = read_1_byte (abfd, info_ptr);
       info_ptr += 1;
       break;
     case DW_FORM_sdata:
-      DW_SND (attr) = read_signed_leb128 (abfd, info_ptr, &bytes_read);
+      attr->u.sval = read_signed_leb128 (abfd, info_ptr, &bytes_read);
       info_ptr += bytes_read;
       break;
     case DW_FORM_udata:
-      DW_UNSND (attr) = read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
+      attr->u.val = read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
       info_ptr += bytes_read;
       break;
     case DW_FORM_ref1:
-      DW_UNSND (attr) = read_1_byte (abfd, info_ptr);
+      attr->u.val = read_1_byte (abfd, info_ptr);
       info_ptr += 1;
       break;
     case DW_FORM_ref2:
-      DW_UNSND (attr) = read_2_bytes (abfd, info_ptr);
+      attr->u.val = read_2_bytes (abfd, info_ptr);
       info_ptr += 2;
       break;
     case DW_FORM_ref4:
-      DW_UNSND (attr) = read_4_bytes (abfd, info_ptr);
+      attr->u.val = read_4_bytes (abfd, info_ptr);
       info_ptr += 4;
       break;
     case DW_FORM_ref8:
-      DW_UNSND (attr) = read_8_bytes (abfd, info_ptr);
+      attr->u.val = read_8_bytes (abfd, info_ptr);
       info_ptr += 8;
       break;
     case DW_FORM_ref_udata:
-      DW_UNSND (attr) = read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
+      attr->u.val = read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
       info_ptr += bytes_read;
       break;
     case DW_FORM_indirect:
@@ -1493,23 +1484,23 @@ scan_unit_for_functions (unit)
 		{
 		case DW_AT_name:
 
-		  name = DW_STRING (&attr);
+		  name = attr.u.str;
 
 		  /* Prefer DW_AT_MIPS_linkage_name over DW_AT_name.  */
 		  if (func->name == NULL)
-		    func->name = DW_STRING (&attr);
+		    func->name = attr.u.str;
 		  break;
 
 		case DW_AT_MIPS_linkage_name:
-		  func->name = DW_STRING (&attr);
+		  func->name = attr.u.str;
 		  break;
 
 		case DW_AT_low_pc:
-		  func->low = DW_ADDR (&attr);
+		  func->low = attr.u.val;
 		  break;
 
 		case DW_AT_high_pc:
-		  func->high = DW_ADDR (&attr);
+		  func->high = attr.u.val;
 		  break;
 
 		default:
@@ -1521,7 +1512,7 @@ scan_unit_for_functions (unit)
 	      switch (attr.name)
 		{
 		case DW_AT_name:
-		  name = DW_STRING (&attr);
+		  name = attr.u.str;
 		  break;
 
 		default:
@@ -1642,24 +1633,24 @@ parse_comp_unit (abfd, stash, unit_length, offset_size)
 	{
 	case DW_AT_stmt_list:
 	  unit->stmtlist = 1;
-	  unit->line_offset = DW_UNSND (&attr);
+	  unit->line_offset = attr.u.val;
 	  break;
 
 	case DW_AT_name:
-	  unit->name = DW_STRING (&attr);
+	  unit->name = attr.u.str;
 	  break;
 
 	case DW_AT_low_pc:
-	  unit->arange.low = DW_ADDR (&attr);
+	  unit->arange.low = attr.u.val;
 	  break;
 
 	case DW_AT_high_pc:
-	  unit->arange.high = DW_ADDR (&attr);
+	  unit->arange.high = attr.u.val;
 	  break;
 
 	case DW_AT_comp_dir:
 	  {
-	    char* comp_dir = DW_STRING (&attr);
+	    char* comp_dir = attr.u.str;
 	    if (comp_dir)
 	      {
 		/* Irix 6.2 native cc prepends <machine>.: to the compilation
