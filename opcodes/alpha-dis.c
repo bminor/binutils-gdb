@@ -48,7 +48,7 @@ print_insn_alpha_osf (memaddr, info)
     "$f24", "$f25", "$f26", "$f27", "$f28", "$f29", "$f30", "$f31"
   };
 
-  return print_insn_alpha (memaddr, info, osf_regnames, -1);
+  return print_insn_alpha (memaddr, info, osf_regnames, AXP_OPCODE_ALL);
 }
 
 /* Disassemble Alpha instructions using VMS register names.  */
@@ -69,7 +69,7 @@ print_insn_alpha_vms (memaddr, info)
     "F24", "F25", "F26", "F27", "F28", "F29", "F30", "FZ"
   };
 
-  return print_insn_alpha (memaddr, info, vms_regnames, -1);
+  return print_insn_alpha (memaddr, info, vms_regnames, AXP_OPCODE_ALL);
 }
 
 /* Disassemble Alpha instructions.  */
