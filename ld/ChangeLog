@@ -1,3 +1,13 @@
+Thu Oct 30 12:25:55 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld.h (args_type): Add warn_mismatch field.
+	* ldmain.c (main): Initialize warn_mismatch field.
+	* lexsup.c (parse_args): Handle --no-warn-mismatch option.
+	* ldlang.c (ignore_bfd_error): New static function.
+	(lang_check): If warn_mismatch is false, don't warn about
+	mismatched input files.
+	* ld.texinfo, ld.1: Document new option.
+
 start-sanitize-tx49
 Wed Oct 29 17:50:26 1997  Gavin Koch  <gavin@cygnus.com>
 
