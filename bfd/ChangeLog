@@ -6,8 +6,11 @@ Wed Nov  8 11:31:11 1995  Ian Lance Taylor  <ian@cygnus.com>
 	(xcoff_swap_ldsym_in): New static function.
 	(xcoff_link_add_symbols): If we just created a descriptor, pass it
 	to _bfd_generic_link_add_one_symbol, to save a hash lookup.
+	Handle XTY_ER/XMC_XO symbols correctly.
 	(xcoff_link_add_dynamic_symbols): Rewrite to read .loader symbols
 	rather than normal symbol table.
+	(bfd_xcoff_import_symbol): It's not an error if the symbol is
+	already defined with the same absolute value.
 	(xcoff_mark): When considering called symbols, check whether the
 	descriptor is from a dynamic object, rather than the symbol
 	itself.

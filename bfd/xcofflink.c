@@ -1263,7 +1263,16 @@ xcoff_link_add_symbols (abfd, info)
 	      bfd_set_error (bfd_error_bad_value);
 	      goto error_return;
 	    }
-	  section = bfd_und_section_ptr;
+
+	  /* An XMC_XO external reference is actually a reference to
+             an absolute location.  */
+	  if (aux.x_csect.x_smclas != XMC_XO)
+	    section = bfd_und_section_ptr;
+	  else
+	    {
+	      section = bfd_abs_section_ptr;
+	      value = sym.n_value;
+	    }
 	  break;
 
 	case XTY_SD:
@@ -1931,12 +1940,6 @@ xcoff_link_add_dynamic_symbols (abfd, info)
       if ((ldsym.l_smtype & L_EXPORT) == 0)
 	continue;
 
-      /* All we have to do is look up the symbol in the hash table.
-	 If it's not there, we just won't import it.  Normally we
-	 could not xcoff_link_hash_lookup in an add symbols routine,
-	 since we might not be using an XCOFF hash table.  However, we
-	 verified above that we are using an XCOFF hash table.  */
-
       if (ldsym._l._l_l._l_zeroes == 0)
 	name = strings + ldsym._l._l_l._l_offset;
       else
@@ -1946,25 +1949,52 @@ xcoff_link_add_dynamic_symbols (abfd, info)
 	  name = nambuf;
 	}
 
-      h = xcoff_link_hash_lookup (xcoff_hash_table (info), name, false,
-				  false, true);
-      if (h != NULL)
+      /* Normally we could not xcoff_link_hash_lookup in an add
+	 symbols routine, since we might not be using an XCOFF hash
+	 table.  However, we verified above that we are using an XCOFF
+	 hash table.  */
+
+      h = xcoff_link_hash_lookup (xcoff_hash_table (info), name, true,
+				  true, true);
+      if (h == NULL)
+	goto error_return;
+
+      h->flags |= XCOFF_DEF_DYNAMIC;
+
+      /* If the symbol is undefined, and the BFD it was found in is
+	 not a dynamic object, change the BFD to this dynamic object,
+	 so that we can get the correct import file ID.  */
+      if ((h->root.type == bfd_link_hash_undefined
+	   || h->root.type == bfd_link_hash_undefweak)
+	  && (h->root.u.undef.abfd == NULL
+	      || (h->root.u.undef.abfd->flags & DYNAMIC) == 0))
+	h->root.u.undef.abfd = abfd;
+
+      if (h->root.type == bfd_link_hash_new)
 	{
-	  h->flags |= XCOFF_DEF_DYNAMIC;
+	  h->root.type = bfd_link_hash_undefined;
+	  h->root.u.undef.abfd = abfd;
+	  /* We do not want to add this to the undefined symbol list.  */
+	}
 
-	  /* If the symbol is undefined, and the BFD it was found in
-	     is not a dynamic object, change the BFD to this dynamic
-	     object, so that we can get the correct import file ID.  */
-	  if ((h->root.type == bfd_link_hash_undefined
-	       || h->root.type == bfd_link_hash_undefweak)
-	      && (h->root.u.undef.abfd == NULL
-		  || (h->root.u.undef.abfd->flags & DYNAMIC) == 0))
-	    h->root.u.undef.abfd = abfd;
+      if (h->smclas == XMC_UA
+	  || h->root.type == bfd_link_hash_undefined
+	  || h->root.type == bfd_link_hash_undefweak)
+	h->smclas = ldsym.l_smclas;
 
-	  if (h->smclas == XMC_UA
-	      || h->root.type == bfd_link_hash_undefined
-	      || h->root.type == bfd_link_hash_undefweak)
-	    h->smclas = ldsym.l_smclas;
+      /* Unless this is an XMC_XO symbol, we don't bother to actually
+         define it, since we don't have a section to put it in anyhow.
+         Instead, the relocation routines handle the DEF_DYNAMIC flag
+         correctly.  */
+
+      if (h->smclas == XMC_XO
+	  && (h->root.type == bfd_link_hash_undefined
+	      || h->root.type == bfd_link_hash_undefweak))
+	{
+	  /* This symbol has an absolute value.  */
+	  h->root.type = bfd_link_hash_defined;
+	  h->root.u.def.section = bfd_abs_section_ptr;
+	  h->root.u.def.value = ldsym.l_value;
 	}
     }
 
@@ -2287,7 +2317,9 @@ bfd_xcoff_import_symbol (output_bfd, info, harg, val, imppath, impfile,
 
   if (val != (bfd_vma) -1)
     {
-      if (h->root.type == bfd_link_hash_defined)
+      if (h->root.type == bfd_link_hash_defined
+	  && (! bfd_is_abs_section (h->root.u.def.section)
+	      || h->root.u.def.value != val))
 	{
 	  if (! ((*info->callbacks->multiple_definition)
 		 (info, h->root.root.string, h->root.u.def.section->owner,
