@@ -808,6 +808,9 @@ in sequential order.  The order makes a difference when the
 @ifset H8
 * Hitachi Remote::              @value{GDBN} and Hitachi Microprocessors
 @end ifset
+@ifset MIPS
+* MIPS Remote::			@value{GDBN} and MIPS boards
+@end ifset
 @ifset SIMS
 * Simulator::                   Simulated CPU target
 @end ifset
@@ -1525,8 +1528,9 @@ breakpoints.
 The arguments to your program can be specified by the arguments of the
 @code{run} command.  They are passed to a shell, which expands wildcard
 characters and performs redirection of I/O, and thence to your program.
-@value{GDBN} uses the shell indicated by your @code{SHELL} environment
-variable if it exists; otherwise, @value{GDBN} uses @code{/bin/sh}.
+Your @code{SHELL} environment variable (if it exists) specifies what
+shell @value{GDBN} if you do not define @code{SHELL}, @value{GDBN} uses
+@code{/bin/sh}.
 
 @code{run} with no arguments uses the same arguments used by the previous
 @code{run}, or those set by the @code{set args} command.
@@ -1616,12 +1620,14 @@ program.  This is different from @samp{set env @var{varname} =};
 rather than assigning it an empty value.
 @end table
 
-One thing to be aware of is that your program is run via the shell
-indicated by your @code{SHELL} environment variable if it exists; or
-@code{/bin/sh} if not.  This means that if you change any environment
-variables in a @file{.cshrc} or @file{.bashrc} file, the changes will
-affect your program.  You may wish to move setting of environment
-variables to @file{.login} or @file{.profile}.
+@emph{Warning:} @value{GDBN} runs your program using the shell indicated
+by your @code{SHELL} environment variable if it exists (or
+@code{/bin/sh} if not).  If your @code{SHELL} variable names a shell
+that runs an initialization file---such as @file{.cshrc} for C-shell, or
+@file{.bashrc} for BASH---any variables you set in that file will affect
+your program.  You may wish to move setting of environment variables to
+files that are only run when you sign on, such as @file{.login} or
+@file{.profile}.
 
 @node Working Directory
 @section Your program's working directory
@@ -6444,7 +6450,7 @@ it when you debug @var{myprog}; no special options or commands are
 needed.
 
 The @file{.syms} file is specific to the host machine where you run
-@value{GDBN}.  It holds an exact image of the internal @value{GDB}
+@value{GDBN}.  It holds an exact image of the internal @value{GDBN}
 symbol table.  It cannot be shared across multiple host platforms.
 
 @c FIXME: for now no mention of directories, since this seems to be in
@@ -6938,6 +6944,9 @@ configuration of GDB; use @code{help targets} to list them.
 @ifset H8
 * Hitachi Remote::              @value{GDBN} and Hitachi Microprocessors
 @end ifset
+@ifset MIPS
+* MIPS Remote::			@value{GDBN} and MIPS boards
+@end ifset
 @ifset SIMS
 * Simulator::                   Simulated CPU target
 @end ifset
@@ -7117,9 +7126,9 @@ Certain commands to @value{GDBN} may produce large amounts of
 information output to the screen.  To help you read all of it,
 @value{GDBN} pauses and asks you for input at the end of each page of
 output.  Type @key{RET} when you want to continue the output, or @kbd{q}
-to discard the remaining output.  @value{GDBN} also uses the screen
-width setting to determine when to wrap lines of output.  Depending on
-what is being printed, it tries to break the line at a readable place,
+to discard the remaining output.  Also, the screen width setting
+determines when to wrap lines of output.  Depending on what is being
+printed, @value{GDBN} tries to break the line at a readable place,
 rather than simply letting it overflow onto the following line.
 
 Normally @value{GDBN} knows the size of the screen from the termcap data base

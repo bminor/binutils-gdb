@@ -411,8 +411,8 @@ target architecture.
 @quotation
 @emph{Warning:} if you specify @samp{-O}, but are actually trying to
 connect to a target system that expects the newer protocol, the connection
-will fail, appearing to be a speed mismatch.  @value{GDBN} will repeatedly
-attempt to reconnect at several different line speeds.  You can abort
+fails, appearing to be a speed mismatch.  @value{GDBN} repeatedly
+attempts to reconnect at several different line speeds.  You can abort
 this process with an interrupt.
 @end quotation
 
@@ -972,6 +972,43 @@ to detect program completion.
 In either case, @value{GDBN} will see the effect of a @sc{reset} on the
 development board as a ``normal exit'' of your program.
 @end ifset
+@end ifset
+
+@ifset MIPS
+@node MIPS Remote
+@subsection @value{GDBN} and remote MIPS boards
+
+@cindex MIPS boards
+@value{GDBN} can use the MIPS remote debugging protocol to talk to a
+MIPS board attached to a serial line.  This is available when
+you configure @value{GDBN} with @samp{--target=mips-idt-ecoff}.
+
+@kindex target mips @var{port}
+To run a program on the board, start up @code{@value{GDBP}} with the
+name of your program as the argument.  To connect to the board, use the
+command @samp{target mips @var{port}}, where @var{port} is the name of
+the serial port connected to the board.  If the program has not already
+been downloaded to the board, you may use the @code{load} command to
+download it.  You can then use all the usual @value{GDBN} commands.
+
+@cindex @code{remotedebug}, MIPS protocol
+@c FIXME! For this to be useful, you must know something about the MIPS
+@c FIXME...protocol.  Where is it described?
+You can see some debugging information about communications with the board
+by setting the @code{remotedebug} variable.  If you set it to 1 using
+@samp{set remotedebug 1} every packet will be displayed.  If you set it
+to 2 every character will be displayed.  You can check the current value
+at any time with the command @samp{show remotedebug}.
+
+@kindex set mipsfpu off
+@cindex MIPS remote floating point
+@cindex floating point, MIPS remote
+If your target board does not support the MIPS floating point
+coprocessor, you should use the command @samp{set mipsfpu off} (you may
+wish to put this in your @value{GDBINIT} file).  This will tell
+@value{GDBN} how to find the return value of functions which return
+floating point values, and tell it to call functions on the board
+without saving the floating point registers.
 @end ifset
 
 @ifset SIMS

@@ -1,3 +1,15 @@
+Thu May  6 16:39:50 1993  Roland H. Pesch  (pesch@fowanton.cygnus.com)
+
+	* all-config.texi (MIPS) new switch.
+
+	* gdbinv-s.texi (Nindy Options) Remove two instances of future
+	tense; (MIPS Remote) new node.
+
+	* gdb.texinfo (passim) rephrases to work around makeinfo @value
+	bug; (Environment) less passive, other small cleanups in text about
+	.cshrc/.bashrc; (Invoking GDB) new MIPS Remote menu entry;
+	(Remote) new MIPS Remote menu entry.
+
 Thu May  6 08:51:35 1993  Fred Fish  (fnf@cygnus.com)
 
 	* snapshots.readme:  Add notes for UNIX make and GNU make.

@@ -23,6 +23,9 @@
 @c Hitachi H8/300 target ONLY:
 @clear H8EXCLUSIVE
 @c
+@c remote MIPS target:
+@set MIPS
+@c
 @c SPARC target:
 @set SPARC
 @c
