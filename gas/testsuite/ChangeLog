@@ -1,3 +1,10 @@
+2002-10-11  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* gas/sh/tlsd.s, gas/sh/tlsd.d: New.
+	* gas/sh/tlsnopic.s, gas/sh/tlsnopic.d: New.
+	* gas/sh/tlspic.s, gas/sh/tlspic.d: New.
+	* gas/sh/basic.exp: Add new tests.
+
 2002-10-09  Stephen Clarke <stephen.clarke@superh.com>
 
 	* gas/elf.exp: Don't run for sh64*-*-linux*, because it sets the

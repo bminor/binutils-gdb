@@ -141,6 +141,13 @@ if [istarget sh*-*-*] then {
 
     if {[istarget sh*-*elf] || [istarget sh*-linux*]} then {
 	run_dump_test "pic"
+
+	# Test TLS.
+	run_dump_test "tlsd"
+
+	run_dump_test "tlspic"
+
+	run_dump_test "tlsnopic"
     }
 }
 
