@@ -1576,10 +1576,10 @@ pa_ip (str)
 	    /* Handle a 5 bit register or control register field at 10.  */
 	    case 'b':
 	    case '^':
-	      num = pa_parse_number (&s, 0);
 	      /* This should be more strict.  Small steps.  */
 	      if (strict && *s != '%')
 		break;
+	      num = pa_parse_number (&s, 0);
 	      CHECK_FIELD (num, 31, 0, 0);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 21);
 
@@ -1604,28 +1604,28 @@ pa_ip (str)
 
 	    /* Handle a 5 bit register field at 15.  */
 	    case 'x':
-	      num = pa_parse_number (&s, 0);
 	      /* This should be more strict.  Small steps.  */
 	      if (strict && *s != '%')
 		break;
+	      num = pa_parse_number (&s, 0);
 	      CHECK_FIELD (num, 31, 0, 0);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 16);
 
 	    /* Handle a 5 bit register field at 31.  */
 	    case 't':
-	      num = pa_parse_number (&s, 0);
 	      /* This should be more strict.  Small steps.  */
 	      if (strict && *s != '%')
 		break;
+	      num = pa_parse_number (&s, 0);
 	      CHECK_FIELD (num, 31, 0, 0);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 0);
 
 	    /* Handle a 5 bit register field at 10 and 15.  */
 	    case 'a':
-	      num = pa_parse_number (&s, 0);
 	      /* This should be more strict.  Small steps.  */
 	      if (strict && *s != '%')
 		break;
+	      num = pa_parse_number (&s, 0);
 	      CHECK_FIELD (num, 31, 0, 0);
 	      opcode |= num << 16;
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 21);
@@ -1692,19 +1692,19 @@ pa_ip (str)
 
 	    /* Handle a 2 bit space identifier at 17.  */
 	    case 's':
-	      num = pa_parse_number (&s, 0);
 	      /* This should be more strict.  Small steps.  */
 	      if (strict && *s != '%')
 		break;
+	      num = pa_parse_number (&s, 0);
 	      CHECK_FIELD (num, 3, 0, 1);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 14);
 
 	    /* Handle a 3 bit space identifier at 18.  */
 	    case 'S':
-	      num = pa_parse_number (&s, 0);
 	      /* This should be more strict.  Small steps.  */
 	      if (strict && *s != '%')
 		break;
+	      num = pa_parse_number (&s, 0);
 	      CHECK_FIELD (num, 7, 0, 1);
 	      dis_assemble_3 (num, &num);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 13);
@@ -3067,10 +3067,10 @@ pa_ip (str)
 	        {
 		/* Float target register.  */
 		case 't':
-		  num = pa_parse_number (&s, 0);
 		  /* This should be more strict.  Small steps.  */
 		  if (strict && *s != '%')
 		    break;
+		  num = pa_parse_number (&s, 0);
 		  CHECK_FIELD (num, 31, 0, 0);
 		  INSERT_FIELD_AND_CONTINUE (opcode, num, 0);
 
@@ -3079,10 +3079,10 @@ pa_ip (str)
 		  {
 		    struct pa_11_fp_reg_struct result;
 
-		    pa_parse_number (&s, &result);
 		    /* This should be more strict.  Small steps.  */
 		    if (strict && *s != '%')
 		      break;
+		    pa_parse_number (&s, &result);
 		    CHECK_FIELD (result.number_part, 31, 0, 0);
 		    opcode |= result.number_part;
 
@@ -3101,10 +3101,10 @@ pa_ip (str)
 		  {
 		    struct pa_11_fp_reg_struct result;
 
-		    pa_parse_number (&s, &result);
 		    /* This should be more strict.  Small steps.  */
 		    if (strict && *s != '%')
 		      break;
+		    pa_parse_number (&s, &result);
 		    CHECK_FIELD (result.number_part, 31, 0, 0);
 		    opcode |= result.number_part << 21;
 		    if (need_pa11_opcode (&the_insn, &result))
@@ -3120,10 +3120,10 @@ pa_ip (str)
 		  {
 		    struct pa_11_fp_reg_struct result;
 
-		    pa_parse_number (&s, &result);
 		    /* This should be more strict.  Small steps.  */
 		    if (strict && *s != '%')
 		      break;
+		    pa_parse_number (&s, &result);
 		    CHECK_FIELD (result.number_part, 31, 0, 0);
 		    opcode |= result.number_part << 21;
 		    opcode |= (result.l_r_select & 1) << 7;
@@ -3135,10 +3135,10 @@ pa_ip (str)
 		  {
 		    struct pa_11_fp_reg_struct result;
 
-		    pa_parse_number (&s, &result);
 		    /* This should be more strict.  Small steps.  */
 		    if (strict && *s != '%')
 		      break;
+		    pa_parse_number (&s, &result);
 		    CHECK_FIELD (result.number_part, 31, 0, 0);
 		    opcode |= (result.number_part & 0x1f) << 16;
 		    if (need_pa11_opcode (&the_insn, &result))
@@ -3154,10 +3154,10 @@ pa_ip (str)
 		  {
 		    struct pa_11_fp_reg_struct result;
 
-		    pa_parse_number (&s, &result);
 		    /* This should be more strict.  Small steps.  */
 		    if (strict && *s != '%')
 		      break;
+		    pa_parse_number (&s, &result);
 		    CHECK_FIELD (result.number_part, 31, 0, 0);
 		    opcode |= (result.number_part & 0x1f) << 16;
 		    opcode |= (result.l_r_select & 1) << 12;
@@ -3170,10 +3170,10 @@ pa_ip (str)
 		    struct pa_11_fp_reg_struct result;
 		    int regnum;
 
-		    pa_parse_number (&s, &result);
 		    /* This should be more strict.  Small steps.  */
 		    if (strict && *s != '%')
 		      break;
+		    pa_parse_number (&s, &result);
 		    CHECK_FIELD (result.number_part, 31, 0, 0);
 		    opcode |= (result.number_part & 0x1c) << 11;
 		    opcode |= (result.number_part & 0x3) << 9;
@@ -3186,10 +3186,10 @@ pa_ip (str)
 		  {
 		    struct pa_11_fp_reg_struct result;
 
-		    pa_parse_number (&s, &result);
 		    /* This should be more strict.  Small steps.  */
 		    if (strict && *s != '%')
 		      break;
+		    pa_parse_number (&s, &result);
 		    CHECK_FIELD (result.number_part, 31, 0, 0);
 		    if (the_insn.fpof1 == SGL)
 		      {
@@ -3210,10 +3210,10 @@ pa_ip (str)
 		  {
 		    struct pa_11_fp_reg_struct result;
 		  
-		    pa_parse_number (&s, &result);
 		    /* This should be more strict.  Small steps.  */
 		    if (strict && *s != '%')
 		      break;
+		    pa_parse_number (&s, &result);
 		    CHECK_FIELD (result.number_part, 31, 0, 0);
 		    if (the_insn.fpof1 == SGL)
 		      {
@@ -3233,10 +3233,10 @@ pa_ip (str)
 		  {
 		    struct pa_11_fp_reg_struct result;
 		  
-		    pa_parse_number (&s, &result);
 		    /* This should be more strict.  Small steps.  */
 		    if (strict && *s != '%')
 		      break;
+		    pa_parse_number (&s, &result);
 		    CHECK_FIELD (result.number_part, 31, 0, 0);
 		    if (the_insn.fpof1 == SGL)
 		      {
@@ -3256,10 +3256,10 @@ pa_ip (str)
 		  {
 		    struct pa_11_fp_reg_struct result;
 		  
-		    pa_parse_number (&s, &result);
 		    /* This should be more strict.  Small steps.  */
 		    if (strict && *s != '%')
 		      break;
+		    pa_parse_number (&s, &result);
 		    CHECK_FIELD (result.number_part, 31, 0, 0);
 		    if (the_insn.fpof1 == SGL)
 		      {
@@ -3279,10 +3279,10 @@ pa_ip (str)
 		  {
 		    struct pa_11_fp_reg_struct result;
 		  
-		    pa_parse_number (&s, &result);
 		    /* This should be more strict.  Small steps.  */
 		    if (strict && *s != '%')
 		      break;
+		    pa_parse_number (&s, &result);
 		    CHECK_FIELD (result.number_part, 31, 0, 0);
 		    if (the_insn.fpof1 == SGL)
 		      {
@@ -3307,10 +3307,10 @@ pa_ip (str)
 	      {
 		struct pa_11_fp_reg_struct result;
 
-		pa_parse_number (&s, &result);
 		/* This should be more strict.  Small steps.  */
 		if (strict && *s != '%')
 		  break;
+		pa_parse_number (&s, &result);
 		CHECK_FIELD (result.number_part, 31, 0, 0);
 		opcode |= (result.number_part & 0x1f) << 16;
 		if (need_pa11_opcode (&the_insn, &result))
