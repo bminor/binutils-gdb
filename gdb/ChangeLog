@@ -1,5 +1,10 @@
 Fri Apr 19 09:36:50 1991  Jim Kingdon  (kingdon at cygint.cygnus.com)
 
+	* utils.c: Use CPLUS_MARKER not '$'.
+
+	* cplus-dem.c: Use CPLUS_MARKER not '$'.  If CPLUS_MARKER isn't
+	defined, define it to '$'.
+
 	* arm-opcode.h: New file (same contents as before; it had
 	just been left out of the distribution for a long time).
 

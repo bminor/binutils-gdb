@@ -894,7 +894,8 @@ fputs_demangled (linebuffer, stream, arg_mode)
 #endif
 #define SYMBOL_MAX 1024
 
-#define SYMBOL_CHAR(c) (isascii(c) && (isalnum(c) || (c) == '_' || (c) == '$'))
+#define SYMBOL_CHAR(c) (isascii(c) \
+  && (isalnum(c) || (c) == '_' || (c) == CPLUS_MARKER))
 
   char buf[SYMBOL_MAX+1];
 # define SLOP 5		/* How much room to leave in buf */

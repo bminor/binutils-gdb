@@ -52,6 +52,13 @@
 /* define this if names don't start with _ */
 /* #define nounderscore 1 */
 
+/* This is '$' on systems where the assembler can deal with that.
+   Where the assembler can't, it's '.' (but on many systems '.' is
+   used for other things).  */
+#if !defined (CPLUS_MARKER)
+#define CPLUS_MARKER '$'
+#endif
+
 #include <stdio.h>
 #include <ctype.h>
 
@@ -212,7 +219,7 @@ cplus_demangle (type, arg_mode)
   if (*p == '\0')
     {
       /* destructor */
-      if (type[0] == '_' && type[1] == '$' && type[2] == '_')
+      if (type[0] == '_' && type[1] == CPLUS_MARKER && type[2] == '_')
 	{
 	  int n = (strlen (type) - 3)*2 + 3 + 2 + 1;
 	  char *tem = (char *) xmalloc (n);
@@ -223,7 +230,7 @@ cplus_demangle (type, arg_mode)
 	  return tem;
 	}
       /* static data member */
-      if (*type != '_' && (p = strchr (type, '$')) != NULL)
+      if (*type != '_' && (p = strchr (type, CPLUS_MARKER)) != NULL)
 	{
 	  int n = strlen (type) + 2;
 	  char *tem = (char *) xmalloc (n);
@@ -233,7 +240,7 @@ cplus_demangle (type, arg_mode)
 	  return tem;
 	}
       /* virtual table "_vt$" */
-      if (type[0] == '_' && type[1] == 'v' && type[2] == 't' && type[3] == '$')
+      if (type[0] == '_' && type[1] == 'v' && type[2] == 't' && type[3] == CPLUS_MARKER)
 	{
 	  int n = strlen (type + 4) + 14 + 1;
 	  char *tem = (char *) xmalloc (n);
@@ -810,7 +817,7 @@ munge_function_name (name, arg_mode)
      int arg_mode;
 {
   if (!string_empty (name) && name->p - name->b >= 3 
-      && name->b[0] == 'o' && name->b[1] == 'p' && name->b[2] == '$')
+      && name->b[0] == 'o' && name->b[1] == 'p' && name->b[2] == CPLUS_MARKER)
     {
       int i;
       /* see if it's an assignment expression */
