@@ -164,6 +164,23 @@ int do_arch;
 int do_notes;
 int is_32bit_elf;
 
+struct group_list
+{
+  struct group_list *next;
+  unsigned int section_index;
+};
+
+struct group
+{
+  struct group_list *root;
+  unsigned int group_index;
+};
+
+struct group *section_groups;
+size_t group_count = 0;
+
+struct group **section_headers_groups;
+
 /* A dynamic array of flags indicating which sections require dumping.  */
 char *dump_sects = NULL;
 unsigned int num_dump_sects = 0;
@@ -3732,9 +3749,7 @@ process_section_groups (FILE *file)
 {
   Elf_Internal_Shdr *section;
   unsigned int i;
-
-  if (!do_section_groups)
-    return 1;
+  struct group *group;
 
   if (elf_header.e_shnum == 0)
     {
@@ -3750,8 +3765,31 @@ process_section_groups (FILE *file)
       abort ();
     }
 
+  section_headers_groups = calloc (elf_header.e_shnum,
+				   sizeof (struct group *));
+
+  if (section_headers_groups == NULL)
+    {
+      error (_("Out of memory\n"));
+      return 0;
+    }
+
   /* Scan the sections for the group section.  */
   for (i = 0, section = section_headers;
+       i < elf_header.e_shnum;
+       i++, section++)
+    if (section->sh_type == SHT_GROUP)
+      group_count++;
+
+  section_groups = calloc (group_count, sizeof (struct group));
+
+  if (section_groups == NULL)
+    {
+      error (_("Out of memory\n"));
+      return 0;
+    }
+
+  for (i = 0, section = section_headers, group = section_groups;
        i < elf_header.e_shnum;
        i++, section++)
     {
@@ -3805,24 +3843,54 @@ process_section_groups (FILE *file)
 	  size = (section->sh_size / section->sh_entsize) - 1;
 	  entry = byte_get (indices, 4);
 	  indices += 4;
-	  printf ("\n%s group section `%s' [%s] contains %u sections:\n",
-		  get_group_flags (entry), name, group_name, size);
-	  
-	  printf (_("   [Index]    Name\n"));
+
+	  if (do_section_groups)
+	    {
+	      printf ("\n%s group section `%s' [%s] contains %u sections:\n",
+		      get_group_flags (entry), name, group_name, size); 
+	      
+	      printf (_("   [Index]    Name\n"));
+	    }
+
+	  group->group_index = i;
+
 	  for (j = 0; j < size; j++)
 	    {
+	      struct group_list *g;
+
 	      entry = byte_get (indices, 4);
 	      indices += 4;
 
-	      sec = SECTION_HEADER (entry);
-	      printf ("   [%5u]   %s\n",
-		      entry, SECTION_NAME (sec));
+	      if (section_headers_groups [SECTION_HEADER_INDEX (entry)]
+		  != NULL)
+		{
+		  error (_("section [%5u] already in group section [%5u]\n"),
+			 entry, section_headers_groups [SECTION_HEADER_INDEX (entry)]->group_index);
+		  continue;
+		}
+
+	      section_headers_groups [SECTION_HEADER_INDEX (entry)]
+		= group;
+
+	      if (do_section_groups)
+		{
+		  sec = SECTION_HEADER (entry);
+		  printf ("   [%5u]   %s\n",
+			  entry, SECTION_NAME (sec));
+		} 
+	      
+	      g = xmalloc (sizeof (struct group_list));
+	      g->section_index = entry;
+	      g->next = group->root;
+	      group->root = g;
 	    }
 
 	  if (strtab)
 	    free (strtab);
 	  if (start)
 	    free (start);
+
+	  group++;
 	}
     }
 
@@ -4302,8 +4370,24 @@ process_unwind (FILE *file)
       unwstart = i + 1;
       len = sizeof (ELF_STRING_ia64_unwind_once) - 1;
 
-      if (strncmp (SECTION_NAME (unwsec), ELF_STRING_ia64_unwind_once,
-		   len) == 0)
+      if ((unwsec->sh_flags & SHF_GROUP) != 0)
+	{
+	  /* We need to find which section group it is in.  */
+	  struct group_list *g = section_headers_groups [i]->root;
+
+	  for (; g != NULL; g = g->next)
+	    {
+	      sec = SECTION_HEADER (g->section_index);
+	      if (strcmp (SECTION_NAME (sec),
+			  ELF_STRING_ia64_unwind_info) == 0)
+		  break;
+	    }
+
+	  if (g == NULL)
+	    i = elf_header.e_shnum;
+	}
+      else if (strncmp (SECTION_NAME (unwsec),
+			ELF_STRING_ia64_unwind_once, len) == 0)
 	{
 	  /* .gnu.linkonce.ia64unw.FOO -> .gnu.linkonce.ia64unwi.FOO */
 	  len2 = sizeof (ELF_STRING_ia64_unwind_info_once) - 1;
@@ -10432,9 +10516,10 @@ process_object (char *file_name, FILE *file)
   if (! process_file_header ())
     return 1;
 
-  if (! process_section_headers (file))
+  if (! process_section_headers (file)
+      || ! process_section_groups (file))
     {
-      /* Without loaded section headers we
+      /* Without loaded section headers and section groups we
 	 cannot process lots of things.  */
       do_unwind = do_version = do_dump = do_arch = 0;
 
@@ -10456,8 +10541,6 @@ process_object (char *file_name, FILE *file)
   process_version_sections (file);
 
   process_section_contents (file);
-
-  process_section_groups (file);
 
   process_corefile_contents (file);
 
@@ -10501,6 +10584,29 @@ process_object (char *file_name, FILE *file)
     {
       free (dynamic_syminfo);
       dynamic_syminfo = NULL;
+    }
+
+  if (section_headers_groups)
+    {
+      free (section_headers_groups);
+      section_headers_groups = NULL;
+    }
+
+  if (section_groups)
+    {
+      struct group_list *g, *next;
+
+      for (i = 0; i < group_count; i++)
+	{
+	  for (g = section_groups [i].root; g != NULL; g = next)
+	    {
+	      next = g->next;
+	      free (g);
+	    }
+	}
+
+      free (section_groups);
+      section_groups = NULL;
     }
 
   return 0;

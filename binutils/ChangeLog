@@ -1,3 +1,14 @@
+2004-05-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (section_groups): New.
+	(group_count): New.
+	(section_headers_groups): New.
+	(process_section_groups): Populate group_count, section_groups
+	and section_headers_groups.
+	(process_unwind): Support section group.
+	(process_object): Always call process_section_groups. Free
+	section_groups and section_headers_groups.
+
 2004-04-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* readelf.c (process_section_headers): Use %3lu on sh_info.
