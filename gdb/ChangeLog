@@ -1,5 +1,9 @@
 2002-10-11  Adam Fedor  <fedor@gnu.org>
 
+	* printcmd.c (address_info): Print 'self' for ObjC.
+
+2002-10-11  Adam Fedor  <fedor@gnu.org>
+
 	* expression.h: New ops OP_NSSTRING, OP_SELECTOR, OP_MSGCALL, and
 	OP_SELF.
 
