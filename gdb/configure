@@ -5404,6 +5404,9 @@ else
 #line 5405 "configure"
 #include "confdefs.h"
 #include <sys/types.h>
+#ifdef HAVE_NLIST_H
+#include <nlist.h>
+#endif
 #include <link.h>
 int main() {
 struct so_map lm; (void) lm.som_addr;
