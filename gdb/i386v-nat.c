@@ -101,13 +101,28 @@ static int debug_control_mirror;
 static CORE_ADDR address_lookup[DR_LASTADDR - DR_FIRSTADDR + 1];
 
 static int
-i386_insert_nonaligned_watchpoint PARAMS ((int, CORE_ADDR, int, int));
+i386_insert_nonaligned_watchpoint PARAMS ((int, CORE_ADDR, CORE_ADDR, int,
+					   int));
+
+static int
+i386_insert_aligned_watchpoint PARAMS ((pid, addr, len, rw));
 
 /* Insert a watchpoint.  */
 
 int
 i386_insert_watchpoint (pid, addr, len, rw)
      int pid;
+     CORE_ADDR addr;
+     int len;
+     int rw;
+{
+  return i386_insert_aligned_watchpoint (pid, addr, addr, len, rw);
+}
+
+static int
+i386_insert_aligned_watchpoint (pid, waddr, addr, len, rw)
+     int pid;
+     CORE_ADDR waddr;
      CORE_ADDR addr;
      int len;
      int rw;
@@ -135,18 +150,18 @@ i386_insert_watchpoint (pid, addr, len, rw)
   else if (len == 2)
     {
       if (addr % 2)
-	return i386_insert_nonaligned_watchpoint (pid, addr, len, rw);
+	return i386_insert_nonaligned_watchpoint (pid, waddr, addr, len, rw);
       len_bits = DR_LEN_2;
     }
 
   else if (len == 4)
     {
       if (addr % 4)
-	return i386_insert_nonaligned_watchpoint (pid, addr, len, rw);
+	return i386_insert_nonaligned_watchpoint (pid, waddr, addr, len, rw);
       len_bits = DR_LEN_4;
     }
   else
-    return i386_insert_nonaligned_watchpoint (pid, addr, len, rw);
+    return i386_insert_nonaligned_watchpoint (pid, waddr, addr, len, rw);
   
   free_debug_register = i;
   register_number = free_debug_register - DR_FIRSTADDR;
@@ -169,11 +184,12 @@ i386_insert_watchpoint (pid, addr, len, rw)
 }
 
 static int
-i386_insert_nonaligned_watchpoint (pid, addr, len, rw)
-     int		pid;
-     CORE_ADDR		addr;
-     int		len;
-     int		rw;
+i386_insert_nonaligned_watchpoint (pid, waddr, addr, len, rw)
+     int pid;
+     CORE_ADDR waddr;
+     CORE_ADDR addr;
+     int len;
+     int rw;
 {
   int align;
   int size;
@@ -194,10 +210,10 @@ i386_insert_nonaligned_watchpoint (pid, addr, len, rw)
       size = (len > 4) ? 3 : len - 1;
       size = size_try_array[size * 4 + align];
 
-      rv = i386_insert_watchpoint (pid, addr, size, rw);
+      rv = i386_insert_watchpoint (pid, waddr, addr, size, rw);
       if (rv)
 	{
-	  i386_remove_watchpoint (pid, addr, size);
+	  i386_remove_watchpoint (pid, waddr, size);
 	  return rv;
 	}
       addr += size;

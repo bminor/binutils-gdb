@@ -1,3 +1,11 @@
+Wed Aug 10 13:23:47 1994  Rick Sladkey  (jrs@world.std.com)
+
+	* i386v-nat.c (i386_insert_nonaligned_watchpoint):
+	add additional argument specifying raw address to permit
+	proper release of debug registers.
+	(i386_insert_watchpoint, i386_insert_aligned_watchpoint):
+	change all callers.
+
 Wed Aug 10 16:13:45 1994  Stu Grossman  (grossman@cygnus.com)
 
 	* defs.h, top.c:  Use `extern' in declarations of GUI hooks, and
