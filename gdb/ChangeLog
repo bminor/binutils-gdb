@@ -1,3 +1,9 @@
+2000-03-27  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/i386/tm-i386.h: Fix typo.  It is TARGET_LONG_DOUBLE_BIT
+	instead of TARGET_LONG_DOUBLE_BITS.
+	* config/i386/tm-i386mk.h: Likewise.
+
 2000-03-26  Mark Kettenis  <kettenis@gnu.org>
 
 	Provide `long double' support for most i386 targets.

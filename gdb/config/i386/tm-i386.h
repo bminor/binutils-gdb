@@ -39,7 +39,7 @@ struct type;
    bits, a `long double' actually takes up 96, probably to enforce
    alignment.  */
 
-#define TARGET_LONG_DOUBLE_BITS 96
+#define TARGET_LONG_DOUBLE_BIT 96
 
 /* Used for example in valprint.c:print_floating() to enable checking
    for NaN's */

@@ -29,10 +29,10 @@
    to `double'.  However, I'm not sure what is the consequence of:
 
    #define TARGET_LONG_DOUBLE_FORMAT TARGET_DOUBLE_FORMAT
-   #define TARGET_LONG_DOUBLE_BITS TARGET_DOUBLE_BITS
+   #define TARGET_LONG_DOUBLE_BIT TARGET_DOUBLE_BIT
 
    So I'll go with the current status quo instead.  It looks like this
    target won't compile anyway.  Perhaps it should be obsoleted?  */
    
 #undef TARGET_LONG_DOUBLE_FORMAT
-#undef TARGET_LONG_DOUBLE_BITS
+#undef TARGET_LONG_DOUBLE_BIT
