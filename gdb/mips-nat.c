@@ -89,12 +89,12 @@ fetch_inferior_registers (int regno)
 				     (PTRACE_ARG3_TYPE) regaddr, 0);
 	  regaddr += sizeof (int);
 	}
-      supply_register (regno, buf);
+      regcache_raw_supply (current_regcache, regno, buf);
     }
 
-  supply_register (ZERO_REGNUM, zerobuf);
+  regcache_raw_supply (current_regcache, ZERO_REGNUM, zerobuf);
   /* Frame ptr reg must appear to be 0; it is faked by stack handling code. */
-  supply_register (DEPRECATED_FP_REGNUM, zerobuf);
+  regcache_raw_supply (current_regcache, DEPRECATED_FP_REGNUM, zerobuf);
 }
 
 /* Store our register values back into the inferior.
@@ -206,16 +206,16 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
 	}
       else
 	{
-	  supply_register (regno, core_reg_sect + addr);
+	  regcache_raw_supply (current_regcache, regno, core_reg_sect + addr);
 	}
     }
   if (bad_reg >= 0)
     {
       error ("Register %s not found in core file.", REGISTER_NAME (bad_reg));
     }
-  supply_register (ZERO_REGNUM, zerobuf);
+  regcache_raw_supply (current_regcache, ZERO_REGNUM, zerobuf);
   /* Frame ptr reg must appear to be 0; it is faked by stack handling code. */
-  supply_register (DEPRECATED_FP_REGNUM, zerobuf);
+  regcache_raw_supply (current_regcache, DEPRECATED_FP_REGNUM, zerobuf);
 }
 
 /* Return the address in the core dump or inferior of register REGNO.

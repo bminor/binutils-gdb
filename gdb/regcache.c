@@ -611,12 +611,9 @@ registers_changed (void)
 
    Indicate that all registers have been fetched, so mark them all valid.  */
 
-/* NOTE: cagney/2001-12-04: This function does not set valid on the
-   pseudo-register range since pseudo registers are always supplied
-   using supply_register().  */
 /* FIXME: cagney/2001-12-04: This function is DEPRECATED.  The target
    code was blatting the registers[] array and then calling this.
-   Since targets should only be using supply_register() the need for
+   Since targets should only be using regcache_raw_supply() the need for
    this function/hack is eliminated.  */
 
 void
@@ -1219,26 +1216,6 @@ write_register_pid (int regnum, CORE_ADDR val, ptid_t ptid)
   write_register (regnum, val);
 
   inferior_ptid = save_ptid;
-}
-
-/* FIXME: kettenis/20030828: We should get rid of supply_register and
-   regcache_collect in favour of regcache_raw_supply and
-   regcache_raw_collect.  */
-
-/* SUPPLY_REGISTER()
-
-   Record that register REGNUM contains VAL.  This is used when the
-   value is obtained from the inferior or core dump, so there is no
-   need to store the value there.
-
-   If VAL is a NULL pointer, then it's probably an unsupported register.
-   We just set its value to all zeros.  We might want to record this
-   fact, and report it to the users of read_register and friends.  */
-
-void
-supply_register (int regnum, const void *val)
-{
-  regcache_raw_supply (current_regcache, regnum, val);
 }
 
 void

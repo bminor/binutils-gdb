@@ -358,15 +358,15 @@ do_child_fetch_inferior_registers (int r)
   if (r == I387_FISEG_REGNUM)
     {
       l = *((long *) context_offset) & 0xffff;
-      supply_register (r, (char *) &l);
+      regcache_raw_supply (current_regcache, r, (char *) &l);
     }
   else if (r == I387_FOP_REGNUM)
     {
       l = (*((long *) context_offset) >> 16) & ((1 << 11) - 1);
-      supply_register (r, (char *) &l);
+      regcache_raw_supply (current_regcache, r, (char *) &l);
     }
   else if (r >= 0)
-    supply_register (r, context_offset);
+    regcache_raw_supply (current_regcache, r, context_offset);
   else
     {
       for (r = 0; r < NUM_REGS; r++)
@@ -2441,7 +2441,7 @@ fetch_elf_core_registers (char *core_reg_sect,
       return;
     }
   for (r = 0; r < NUM_REGS; r++)
-    supply_register (r, core_reg_sect + mappings[r]);
+    regcache_raw_supply (current_regcache, r, core_reg_sect + mappings[r]);
 }
 
 static struct core_fns win32_elf_core_fns =

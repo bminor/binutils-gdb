@@ -221,7 +221,7 @@ fetch_register (int regno)
 
   if (CANNOT_FETCH_REGISTER (regno))
     {
-      supply_register (regno, NULL);
+      regcache_raw_supply (current_regcache, regno, NULL);
       return;
     }
 
@@ -311,7 +311,7 @@ supply_gregset (gdb_gregset_t *gregsetp)
   for (i = 0; i < sizeof (greg_map) / sizeof (greg_map[0]); i++, regp++)
     {
       int regno = greg_map[i];
-      supply_register (regno, regp);
+      regcache_raw_supply (current_regcache, regno, regp);
     }
 }
 
@@ -348,8 +348,9 @@ supply_fpregset (gdb_fpregset_t *fpregsetp)
   for (regi = 0; regi <= 31; regi++)
     {
       from = (char *) &((*fpregsetp)[regi]);
-      supply_register (2*regi + HPPA_FP0_REGNUM, from);
-      supply_register (2*regi + HPPA_FP0_REGNUM + 1, from + 4);
+      regcache_raw_supply (current_regcache, 2*regi + HPPA_FP0_REGNUM, from);
+      regcache_raw_supply (current_regcache, 2*regi + HPPA_FP0_REGNUM + 1,
+			   from + 4);
     }
 }
 

@@ -466,7 +466,8 @@ static void
 fetch_register (int regno)
 {
   if (regno < FP0_REGNUM)
-    supply_register (regno, (char *) &a_tss + regno_mapping[regno].tss_ofs);
+    regcache_raw_supply (current_regcache, regno,
+			 (char *) &a_tss + regno_mapping[regno].tss_ofs);
   else if (i386_fp_regnum_p (regno) || i386_fpc_regnum_p (regno))
     i387_supply_fsave (current_regcache, regno, &npx);
   else

@@ -102,7 +102,7 @@ rom68k_supply_one_register (int regno, unsigned char *hex)
     hex++;
 
   store_unsigned_integer (regbuf, DEPRECATED_REGISTER_RAW_SIZE (regno), value);
-  supply_register (regno, regbuf);
+  regcache_raw_supply (current_regcache, regno, regbuf);
 
   return hex;
 }

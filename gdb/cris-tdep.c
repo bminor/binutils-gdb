@@ -3336,7 +3336,7 @@ supply_gregset (elf_gregset_t *gregsetp)
      knows about the actual size of each register so that's no problem.  */
   for (i = 0; i < NUM_GENREGS + NUM_SPECREGS; i++)
     {
-      supply_register (i, (char *)&regp[i]);
+      regcache_raw_supply (current_regcache, i, (char *)&regp[i]);
     }
 }
 

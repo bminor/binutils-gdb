@@ -1,5 +1,81 @@
 2004-07-21  Andrew Cagney  <cagney@gnu.org>
 
+	Use regcache_raw_supply instead of supply_register.
+	* regcache.h (supply_register): Delete declaration.
+	* regcache.c (supply_register): Delete function.
+	* wince.c (do_child_fetch_inferior_registers): Update.
+	* win32-nat.c (do_child_fetch_inferior_registers) 
+	(fetch_elf_core_registers): Update.
+	* v850ice.c (v850ice_fetch_registers): Update.
+	* thread-db.c (thread_db_store_registers): Update.
+	* sol-thread.c (sol_thread_store_registers): Update.
+	* shnbsd-tdep.c (shnbsd_supply_reg): Update.
+	* rs6000-nat.c (fetch_register): Update.
+	* rom68k-rom.c (rom68k_supply_one_register): Update.
+	* remote.c (remote_wait, remote_async_wait): Update.
+	* remote-st.c (get_hex_regs): Update.
+	* remote-sim.c (gdbsim_fetch_register): Update.
+	* remote-sds.c (sds_fetch_registers): Update.
+	* remote-rdp.c (remote_rdp_fetch_register): Update.
+	* remote-rdi.c (arm_rdi_fetch_registers): Update.
+	* remote-mips.c (mips_wait, mips_fetch_registers): Update.
+	* remote-m32r-sdi.c (m32r_fetch_register): Update.
+	* remote-hms.c (init_hms_cmds): Update.
+	* remote-est.c (init_est_cmds): Update.
+	* remote-e7000.c (get_hex_regs, fetch_regs_from_dump) 
+	(e7000_fetch_registers, sub2_from_pc, e7000_wait): Update.
+	* ppcnbsd-tdep.c (ppcnbsd_supply_reg, ppcnbsd_supply_fpreg): Update.
+	* ppc-linux-nat.c (fetch_altivec_register, fetch_spe_register) 
+	(fetch_register, supply_vrregset, supply_vrregset)
+	(fetch_spe_registers): Update.
+	* ppc-bdm.c (bdm_ppc_fetch_registers): Update.
+	* monitor.c (monitor_supply_register): Update.
+	* mipsv4-nat.c (supply_gregset, supply_fpregset): Update.
+	* mipsnbsd-tdep.c (mipsnbsd_supply_reg)
+	(mipsnbsd_supply_fpreg): Update.
+	* mips-nat.c (fetch_inferior_registers)
+	(fetch_core_registers): Update.
+	* mips-linux-tdep.c (supply_32bit_reg, supply_gregset) 
+	(supply_fpregset, mips64_supply_gregset)
+	(mips64_supply_fpregset): Update.
+	* m68klinux-nat.c (fetch_register, supply_gregset)
+	(supply_fpregset): Update.
+	* m68k-tdep.c (supply_gregset, supply_fpregset): Update.
+	* m32r-rom.c (init_m32r_cmds, init_mon2000_cmds): Update.
+	* lynx-nat.c (fetch_inferior_registers, fetch_core_registers): Update.
+	* irix5-nat.c (supply_gregset, supply_fpregset): Update.
+	* infptrace.c (fetch_register): Update.
+	* ia64-linux-nat.c (supply_gregset, supply_fpregset): Update.
+	* ia64-aix-nat.c (supply_gregset, supply_fpregset): Update.
+	* i386gnu-nat.c (fetch_fpregs, supply_gregset) 
+	(gnu_fetch_registers, gnu_store_registers): Update.
+	* i386-nto-tdep.c (i386nto_supply_gregset): Update.
+	* i386-linux-nat.c (fetch_register, supply_gregset)
+	(dummy_sse_values): Update.
+	* hpux-thread.c (hpux_thread_fetch_registers): Update.
+	* hppah-nat.c (fetch_register): Update.
+	* hppa-linux-nat.c (fetch_register, supply_gregset) 
+	(supply_fpregset): Update.
+	* go32-nat.c (fetch_register): Update.
+	* dve3900-rom.c (fetch_bitmapped_register)
+	(_initialize_r3900_rom): Update.
+	* cris-tdep.c (supply_gregset): Update.
+	* abug-rom.c (init_abug_cmds): Update.
+	* core-aout.c (fetch_core_registers): Update.
+	* armnbsd-nat.c (supply_gregset, supply_fparegset)
+	(fetch_register, fetch_fp_register): Update.
+	* arm-linux-nat.c (fetch_nwfpe_single, fetch_nwfpe_none)
+	(fetch_nwfpe_extended, fetch_fpregister, fetch_fpregs)
+	(fetch_register, fetch_regs, supply_gregset, supply_fpregset): Update.
+	* alphanbsd-tdep.c (fetch_core_registers): Update.
+	* alpha-tdep.c (alpha_supply_int_regs, alpha_supply_fp_regs): Update.
+	* alpha-nat.c (fetch_osf_core_registers) 
+	(fetch_osf_core_registers, fetch_osf_core_registers): Update.
+	* aix-thread.c (supply_gprs64, supply_reg32, supply_fprs) 
+	(supply_sprs64, supply_sprs32, fetch_regs_kernel_thread): Update.
+
+2004-07-21  Andrew Cagney  <cagney@gnu.org>
+
 	* PROBLEMS: Mention breakpoints/1702.
 	* NEWS: For signal trampolines, cite s390 GNU/Linux as a system
 	that is known to work.

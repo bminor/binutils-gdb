@@ -89,8 +89,8 @@ mips_linux_get_longjmp_target (CORE_ADDR *pc)
 }
 
 /* Transform the bits comprising a 32-bit register to the right size
-   for supply_register().  This is needed when mips_isa_regsize() is
-   8.  */
+   for regcache_raw_supply().  This is needed when mips_isa_regsize()
+   is 8.  */
 
 static void
 supply_32bit_reg (int regnum, const void *addr)
@@ -98,7 +98,7 @@ supply_32bit_reg (int regnum, const void *addr)
   char buf[MAX_REGISTER_SIZE];
   store_signed_integer (buf, DEPRECATED_REGISTER_RAW_SIZE (regnum),
                         extract_signed_integer (addr, 4));
-  supply_register (regnum, buf);
+  regcache_raw_supply (current_regcache, regnum, buf);
 }
 
 /* Unpack an elf_gregset_t into GDB's register cache.  */
@@ -129,9 +129,9 @@ supply_gregset (elf_gregset_t *gregsetp)
 		    (char *)(regp + EF_CP0_CAUSE));
 
   /* Fill inaccessible registers with zero.  */
-  supply_register (UNUSED_REGNUM, zerobuf);
+  regcache_raw_supply (current_regcache, UNUSED_REGNUM, zerobuf);
   for (regi = FIRST_EMBED_REGNUM; regi < LAST_EMBED_REGNUM; regi++)
-    supply_register (regi, zerobuf);
+    regcache_raw_supply (current_regcache, regi, zerobuf);
 }
 
 /* Pack our registers (or one register) into an elf_gregset_t.  */
@@ -198,15 +198,17 @@ supply_fpregset (elf_fpregset_t *fpregsetp)
   memset (zerobuf, 0, MAX_REGISTER_SIZE);
 
   for (regi = 0; regi < 32; regi++)
-    supply_register (FP0_REGNUM + regi,
-		     (char *)(*fpregsetp + regi));
+    regcache_raw_supply (current_regcache, FP0_REGNUM + regi,
+			 (char *)(*fpregsetp + regi));
 
-  supply_register (mips_regnum (current_gdbarch)->fp_control_status,
-		   (char *)(*fpregsetp + 32));
+  regcache_raw_supply (current_regcache,
+		       mips_regnum (current_gdbarch)->fp_control_status,
+		       (char *)(*fpregsetp + 32));
 
   /* FIXME: how can we supply FCRIR?  The ABI doesn't tell us. */
-  supply_register (mips_regnum (current_gdbarch)->fp_implementation_revision,
-		   zerobuf);
+  regcache_raw_supply (current_regcache,
+		       mips_regnum (current_gdbarch)->fp_implementation_revision,
+		       zerobuf);
 }
 
 /* Likewise, pack one or all floating point registers into an
@@ -388,25 +390,27 @@ mips64_supply_gregset (mips64_elf_gregset_t *gregsetp)
   memset (zerobuf, 0, MAX_REGISTER_SIZE);
 
   for (regi = MIPS64_EF_REG0; regi <= MIPS64_EF_REG31; regi++)
-    supply_register ((regi - MIPS64_EF_REG0), (char *)(regp + regi));
+    regcache_raw_supply (current_regcache, (regi - MIPS64_EF_REG0),
+			 (char *)(regp + regi));
 
-  supply_register (mips_regnum (current_gdbarch)->lo,
-		   (char *)(regp + MIPS64_EF_LO));
-  supply_register (mips_regnum (current_gdbarch)->hi,
-		   (char *)(regp + MIPS64_EF_HI));
+  regcache_raw_supply (current_regcache, mips_regnum (current_gdbarch)->lo,
+		       (char *)(regp + MIPS64_EF_LO));
+  regcache_raw_supply (current_regcache, mips_regnum (current_gdbarch)->hi,
+		       (char *)(regp + MIPS64_EF_HI));
 
-  supply_register (mips_regnum (current_gdbarch)->pc,
-		   (char *)(regp + MIPS64_EF_CP0_EPC));
-  supply_register (mips_regnum (current_gdbarch)->badvaddr,
-		   (char *)(regp + MIPS64_EF_CP0_BADVADDR));
-  supply_register (PS_REGNUM, (char *)(regp + MIPS64_EF_CP0_STATUS));
-  supply_register (mips_regnum (current_gdbarch)->cause,
-		   (char *)(regp + MIPS64_EF_CP0_CAUSE));
+  regcache_raw_supply (current_regcache, mips_regnum (current_gdbarch)->pc,
+		       (char *)(regp + MIPS64_EF_CP0_EPC));
+  regcache_raw_supply (current_regcache, mips_regnum (current_gdbarch)->badvaddr,
+		       (char *)(regp + MIPS64_EF_CP0_BADVADDR));
+  regcache_raw_supply (current_regcache, PS_REGNUM,
+		       (char *)(regp + MIPS64_EF_CP0_STATUS));
+  regcache_raw_supply (current_regcache, mips_regnum (current_gdbarch)->cause,
+		       (char *)(regp + MIPS64_EF_CP0_CAUSE));
 
   /* Fill inaccessible registers with zero.  */
-  supply_register (UNUSED_REGNUM, zerobuf);
+  regcache_raw_supply (current_regcache, UNUSED_REGNUM, zerobuf);
   for (regi = FIRST_EMBED_REGNUM; regi < LAST_EMBED_REGNUM; regi++)
-    supply_register (regi, zerobuf);
+    regcache_raw_supply (current_regcache, regi, zerobuf);
 }
 
 /* Pack our registers (or one register) into an elf_gregset_t.  */
@@ -473,15 +477,17 @@ mips64_supply_fpregset (mips64_elf_fpregset_t *fpregsetp)
   memset (zerobuf, 0, MAX_REGISTER_SIZE);
 
   for (regi = 0; regi < 32; regi++)
-    supply_register (FP0_REGNUM + regi,
-		     (char *)(*fpregsetp + regi));
+    regcache_raw_supply (current_regcache, FP0_REGNUM + regi,
+			 (char *)(*fpregsetp + regi));
 
-  supply_register (mips_regnum (current_gdbarch)->fp_control_status,
-		   (char *)(*fpregsetp + 32));
+  regcache_raw_supply (current_regcache,
+		       mips_regnum (current_gdbarch)->fp_control_status,
+		       (char *)(*fpregsetp + 32));
 
   /* FIXME: how can we supply FCRIR?  The ABI doesn't tell us. */
-  supply_register (mips_regnum (current_gdbarch)->fp_implementation_revision,
-		   zerobuf);
+  regcache_raw_supply (current_regcache,
+		       mips_regnum (current_gdbarch)->fp_implementation_revision,
+		       zerobuf);
 }
 
 /* Likewise, pack one or all floating point registers into an

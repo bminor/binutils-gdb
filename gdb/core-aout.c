@@ -37,7 +37,7 @@
 #include <sys/types.h>
 #include <sys/param.h>
 #include "gdbcore.h"
-#include "value.h"		/* For supply_register.  */
+#include "value.h"
 #include "regcache.h"
 
 /* These are needed on various systems to expand REGISTER_U_ADDR.  */
@@ -99,7 +99,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
 	  && bad_reg < 0)
 	bad_reg = regno;
       else
-	supply_register (regno, core_reg_sect + addr);
+	regcache_raw_supply (current_regcache, regno, core_reg_sect + addr);
     }
 
   if (bad_reg >= 0)

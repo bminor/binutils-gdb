@@ -1758,16 +1758,16 @@ mips_wait (ptid_t ptid, struct target_waitstatus *status)
       char buf[MAX_REGISTER_SIZE];
 
       store_unsigned_integer (buf, DEPRECATED_REGISTER_RAW_SIZE (PC_REGNUM), rpc);
-      supply_register (PC_REGNUM, buf);
+      regcache_raw_supply (current_regcache, PC_REGNUM, buf);
 
       store_unsigned_integer (buf, DEPRECATED_REGISTER_RAW_SIZE (PC_REGNUM), rfp);
-      supply_register (30, buf);	/* This register they are avoiding and so it is unnamed */
+      regcache_raw_supply (current_regcache, 30, buf);	/* This register they are avoiding and so it is unnamed */
 
       store_unsigned_integer (buf, DEPRECATED_REGISTER_RAW_SIZE (SP_REGNUM), rsp);
-      supply_register (SP_REGNUM, buf);
+      regcache_raw_supply (current_regcache, SP_REGNUM, buf);
 
       store_unsigned_integer (buf, DEPRECATED_REGISTER_RAW_SIZE (DEPRECATED_FP_REGNUM), 0);
-      supply_register (DEPRECATED_FP_REGNUM, buf);
+      regcache_raw_supply (current_regcache, DEPRECATED_FP_REGNUM, buf);
 
       if (nfields == 9)
 	{
@@ -1939,7 +1939,7 @@ mips_fetch_registers (int regno)
     /* We got the number the register holds, but gdb expects to see a
        value in the target byte ordering.  */
     store_unsigned_integer (buf, DEPRECATED_REGISTER_RAW_SIZE (regno), val);
-    supply_register (regno, buf);
+    regcache_raw_supply (current_regcache, regno, buf);
   }
 }
 

@@ -325,7 +325,7 @@ fetch_inferior_registers (int regno)
 	    
 	    *(int *) &buf[i] = reg;
 	  }
-	supply_register (regno, buf);
+	regcache_raw_supply (current_regcache, regno, buf);
       }
   }
 }
@@ -593,8 +593,8 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
 
   for (regno = 0; regno < NUM_REGS; regno++)
     if (regmap[regno] != -1)
-      supply_register (regno, core_reg_sect + offsetof (st_t, ec)
-		       + regmap[regno]);
+      regcache_raw_supply (current_regcache, regno,
+			   core_reg_sect + offsetof (st_t, ec) + regmap[regno]);
 
 #ifdef SPARC
 /* Fetching this register causes all of the I & L regs to be read from the

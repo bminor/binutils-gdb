@@ -842,8 +842,7 @@ right_supply_register (struct regcache *regcache, int wordsize, int regnum,
 		       const bfd_byte *buf)
 {
   regcache_raw_supply (regcache, regnum,
-		       (buf + wordsize
-			- register_size (current_gdbarch, regnum)));
+		       (buf + wordsize - register_size (current_gdbarch, regnum)));
 }
 
 /* Extract the register values found in the WORDSIZED ABI GREGSET,

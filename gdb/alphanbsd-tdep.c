@@ -70,9 +70,9 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
 
   /* Integer registers.  */
   for (regno = 0; regno < ALPHA_ZERO_REGNUM; regno++)
-    supply_register (regno, regs + (regmap[regno] * 8));
-  supply_register (ALPHA_ZERO_REGNUM, NULL);
-  supply_register (PC_REGNUM, regs + (28 * 8));
+    regcache_raw_supply (current_regcache, regno, regs + (regmap[regno] * 8));
+  regcache_raw_supply (current_regcache, ALPHA_ZERO_REGNUM, NULL);
+  regcache_raw_supply (current_regcache, PC_REGNUM, regs + (28 * 8));
 
   /* Floating point registers.  */
   alphabsd_supply_fpreg (fpregs, -1);

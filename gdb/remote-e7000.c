@@ -362,7 +362,7 @@ get_hex_regs (int n, int regno)
       val = 0;
       for (j = 0; j < 8; j++)
 	val = (val << 4) + get_hex_digit (j == 0);
-      supply_register (regno++, (char *) &val);
+      regcache_raw_supply (current_regcache, regno++, (char *) &val);
     }
 }
 #endif
@@ -881,7 +881,7 @@ fetch_regs_from_dump (int (*nextchar) (), char *want)
 	  store_signed_integer (buf,
 				DEPRECATED_REGISTER_RAW_SIZE (regno),
 				(LONGEST) get_hex (&thischar));
-	  supply_register (regno, buf);
+	  regcache_raw_supply (current_regcache, regno, buf);
 	  break;
 	}
     }
@@ -926,7 +926,7 @@ e7000_fetch_registers (void)
     {
       int buf = 0;
 
-      supply_register (regno, (char *) (&buf));
+      regcache_raw_supply (current_regcache, regno, (char *) (&buf));
     }
 }
 
@@ -1966,7 +1966,7 @@ sub2_from_pc (void)
   store_signed_integer (buf,
 			DEPRECATED_REGISTER_RAW_SIZE (PC_REGNUM),
 			read_register (PC_REGNUM) - 2);
-  supply_register (PC_REGNUM, buf);
+  regcache_raw_supply (current_regcache, PC_REGNUM, buf);
   sprintf (buf2, ".PC %s\r", phex_nz (read_register (PC_REGNUM), 0));
   puts_e7000debug (buf2);
 }
@@ -2064,7 +2064,7 @@ e7000_wait (ptid_t ptid, struct target_waitstatus *status)
   for (regno = NUM_REALREGS; regno < NUM_REGS; regno++)
     {
       int buf = 0;
-      supply_register (regno, (char *) &buf);
+      regcache_raw_supply (current_regcache, regno, (char *) &buf);
     }
 
   stop_reason = why_stop ();

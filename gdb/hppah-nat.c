@@ -282,7 +282,7 @@ fetch_register (int regno)
   if (regno == HPPA_PCOQ_HEAD_REGNUM || regno == HPPA_PCOQ_TAIL_REGNUM)
     buf[len - 1] &= ~0x3;
 
-  supply_register (regno, buf);
+  regcache_raw_supply (current_regcache, regno, buf);
 }
 
 

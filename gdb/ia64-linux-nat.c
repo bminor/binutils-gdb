@@ -367,32 +367,47 @@ supply_gregset (gregset_t *gregsetp)
 
   for (regi = IA64_GR0_REGNUM; regi <= IA64_GR31_REGNUM; regi++)
     {
-      supply_register (regi, (char *) (regp + (regi - IA64_GR0_REGNUM)));
+      regcache_raw_supply (current_regcache, regi,
+			   (char *) (regp + (regi - IA64_GR0_REGNUM)));
     }
 
   /* FIXME: NAT collection bits are at index 32; gotta deal with these
      somehow... */
 
-  supply_register (IA64_PR_REGNUM, (char *) (regp + 33));
+  regcache_raw_supply (current_regcache, IA64_PR_REGNUM, (char *) (regp + 33));
 
   for (regi = IA64_BR0_REGNUM; regi <= IA64_BR7_REGNUM; regi++)
     {
-      supply_register (regi, (char *) (regp + 34 + (regi - IA64_BR0_REGNUM)));
+      regcache_raw_supply (current_regcache, regi,
+			   (char *) (regp + 34 + (regi - IA64_BR0_REGNUM)));
     }
 
-  supply_register (IA64_IP_REGNUM, (char *) (regp + 42));
-  supply_register (IA64_CFM_REGNUM, (char *) (regp + 43));
-  supply_register (IA64_PSR_REGNUM, (char *) (regp + 44));
-  supply_register (IA64_RSC_REGNUM, (char *) (regp + 45));
-  supply_register (IA64_BSP_REGNUM, (char *) (regp + 46));
-  supply_register (IA64_BSPSTORE_REGNUM, (char *) (regp + 47));
-  supply_register (IA64_RNAT_REGNUM, (char *) (regp + 48));
-  supply_register (IA64_CCV_REGNUM, (char *) (regp + 49));
-  supply_register (IA64_UNAT_REGNUM, (char *) (regp + 50));
-  supply_register (IA64_FPSR_REGNUM, (char *) (regp + 51));
-  supply_register (IA64_PFS_REGNUM, (char *) (regp + 52));
-  supply_register (IA64_LC_REGNUM, (char *) (regp + 53));
-  supply_register (IA64_EC_REGNUM, (char *) (regp + 54));
+  regcache_raw_supply (current_regcache, IA64_IP_REGNUM,
+		       (char *) (regp + 42));
+  regcache_raw_supply (current_regcache, IA64_CFM_REGNUM,
+		       (char *) (regp + 43));
+  regcache_raw_supply (current_regcache, IA64_PSR_REGNUM,
+		       (char *) (regp + 44));
+  regcache_raw_supply (current_regcache, IA64_RSC_REGNUM,
+		       (char *) (regp + 45));
+  regcache_raw_supply (current_regcache, IA64_BSP_REGNUM,
+		       (char *) (regp + 46));
+  regcache_raw_supply (current_regcache, IA64_BSPSTORE_REGNUM,
+		       (char *) (regp + 47));
+  regcache_raw_supply (current_regcache, IA64_RNAT_REGNUM,
+		       (char *) (regp + 48));
+  regcache_raw_supply (current_regcache, IA64_CCV_REGNUM,
+		       (char *) (regp + 49));
+  regcache_raw_supply (current_regcache, IA64_UNAT_REGNUM,
+		       (char *) (regp + 50));
+  regcache_raw_supply (current_regcache, IA64_FPSR_REGNUM,
+		       (char *) (regp + 51));
+  regcache_raw_supply (current_regcache, IA64_PFS_REGNUM,
+		       (char *) (regp + 52));
+  regcache_raw_supply (current_regcache, IA64_LC_REGNUM,
+		       (char *) (regp + 53));
+  regcache_raw_supply (current_regcache, IA64_EC_REGNUM,
+		       (char *) (regp + 54));
 }
 
 void
@@ -448,7 +463,7 @@ supply_fpregset (fpregset_t *fpregsetp)
   for (regi = IA64_FR0_REGNUM; regi <= IA64_FR127_REGNUM; regi++)
     {
       from = (char *) &((*fpregsetp)[regi - IA64_FR0_REGNUM]);
-      supply_register (regi, from);
+      regcache_raw_supply (current_regcache, regi, from);
     }
 }
 

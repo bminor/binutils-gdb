@@ -45,9 +45,10 @@ mipsnbsd_supply_reg (char *regs, int regno)
       if (regno == i || regno == -1)
 	{
 	  if (CANNOT_FETCH_REGISTER (i))
-	    supply_register (i, NULL);
+	    regcache_raw_supply (current_regcache, i, NULL);
 	  else
-            supply_register (i, regs + (i * mips_isa_regsize (current_gdbarch)));
+            regcache_raw_supply (current_regcache, i,
+				 regs + (i * mips_isa_regsize (current_gdbarch)));
         }
     }
 }
@@ -74,9 +75,10 @@ mipsnbsd_supply_fpreg (char *fpregs, int regno)
       if (regno == i || regno == -1)
 	{
 	  if (CANNOT_FETCH_REGISTER (i))
-	    supply_register (i, NULL);
+	    regcache_raw_supply (current_regcache, i, NULL);
 	  else
-            supply_register (i, fpregs + ((i - FP0_REGNUM) * mips_isa_regsize (current_gdbarch)));
+            regcache_raw_supply (current_regcache, i,
+				 fpregs + ((i - FP0_REGNUM) * mips_isa_regsize (current_gdbarch)));
 	}
     }
 }

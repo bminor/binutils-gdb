@@ -963,10 +963,10 @@ supply_gregset (gregset_t *gregsetp)
 
   for (regi = 0; regi < R_PC; regi++)
     {
-      supply_register (regi, (char *) (regp + regi));
+      regcache_raw_supply (current_regcache, regi, (char *) (regp + regi));
     }
-  supply_register (PS_REGNUM, (char *) (regp + R_PS));
-  supply_register (PC_REGNUM, (char *) (regp + R_PC));
+  regcache_raw_supply (current_regcache, PS_REGNUM, (char *) (regp + R_PS));
+  regcache_raw_supply (current_regcache, PC_REGNUM, (char *) (regp + R_PC));
 }
 
 void
@@ -1001,11 +1001,14 @@ supply_fpregset (fpregset_t *fpregsetp)
   for (regi = FP0_REGNUM; regi < M68K_FPC_REGNUM; regi++)
     {
       from = (char *) &(fpregsetp->f_fpregs[regi - FP0_REGNUM][0]);
-      supply_register (regi, from);
+      regcache_raw_supply (current_regcache, regi, from);
     }
-  supply_register (M68K_FPC_REGNUM, (char *) &(fpregsetp->f_pcr));
-  supply_register (M68K_FPS_REGNUM, (char *) &(fpregsetp->f_psr));
-  supply_register (M68K_FPI_REGNUM, (char *) &(fpregsetp->f_fpiaddr));
+  regcache_raw_supply (current_regcache, M68K_FPC_REGNUM,
+		       (char *) &(fpregsetp->f_pcr));
+  regcache_raw_supply (current_regcache, M68K_FPS_REGNUM,
+		       (char *) &(fpregsetp->f_psr));
+  regcache_raw_supply (current_regcache, M68K_FPI_REGNUM,
+		       (char *) &(fpregsetp->f_fpiaddr));
 }
 
 /*  Given a pointer to a floating point register set in /proc format

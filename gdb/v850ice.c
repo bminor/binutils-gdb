@@ -533,7 +533,7 @@ v850ice_fetch_registers (int regno)
 	   regno, val);
 
   store_unsigned_integer (val, DEPRECATED_REGISTER_RAW_SIZE (regno), regval);
-  supply_register (regno, val);
+  regcache_raw_supply (current_regcache, regno, val);
 }
 
 /* Store register REGNO, or all registers if REGNO == -1, from the contents

@@ -375,7 +375,7 @@ fetch_register (int regno)
   if (CANNOT_FETCH_REGISTER (regno))
     {
       memset (buf, '\0', DEPRECATED_REGISTER_RAW_SIZE (regno));	/* Supply zeroes */
-      supply_register (regno, buf);
+      regcache_raw_supply (current_regcache, regno, buf);
       return;
     }
 
@@ -399,7 +399,7 @@ fetch_register (int regno)
 	  perror_with_name (mess);
 	}
     }
-  supply_register (regno, buf);
+  regcache_raw_supply (current_regcache, regno, buf);
 }
 
 

@@ -1119,7 +1119,8 @@ do_child_fetch_inferior_registers (int r)
 {
   if (r >= 0)
     {
-      supply_register (r, (char *) regptr (&current_thread->context, r));
+      regcache_raw_supply (current_regcache, r,
+			   (char *) regptr (&current_thread->context, r));
     }
   else
     {

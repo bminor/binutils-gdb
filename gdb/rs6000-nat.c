@@ -263,7 +263,7 @@ fetch_register (int regno)
     }
 
   if (!errno)
-    supply_register (regno, (char *) addr);
+    regcache_raw_supply (current_regcache, regno, (char *) addr);
   else
     {
 #if 0
@@ -587,44 +587,59 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
   if (ARCH64 ())
     {
       for (regi = 0; regi < ppc_num_gprs; regi++)
-        supply_register (tdep->ppc_gp0_regnum + regi,
-                         (char *) &regs->r64.gpr[regi]);
+        regcache_raw_supply (current_regcache, tdep->ppc_gp0_regnum + regi,
+			     (char *) &regs->r64.gpr[regi]);
 
       if (tdep->ppc_fp0_regnum >= 0)
         for (regi = 0; regi < ppc_num_fprs; regi++)
-          supply_register (tdep->ppc_fp0_regnum + regi,
-                           (char *) &regs->r64.fpr[regi]);
+          regcache_raw_supply (current_regcache, tdep->ppc_fp0_regnum + regi,
+			       (char *) &regs->r64.fpr[regi]);
 
-      supply_register (PC_REGNUM, (char *) &regs->r64.iar);
-      supply_register (tdep->ppc_ps_regnum, (char *) &regs->r64.msr);
-      supply_register (tdep->ppc_cr_regnum, (char *) &regs->r64.cr);
-      supply_register (tdep->ppc_lr_regnum, (char *) &regs->r64.lr);
-      supply_register (tdep->ppc_ctr_regnum, (char *) &regs->r64.ctr);
-      supply_register (tdep->ppc_xer_regnum, (char *) &regs->r64.xer);
+      regcache_raw_supply (current_regcache, PC_REGNUM,
+			   (char *) &regs->r64.iar);
+      regcache_raw_supply (current_regcache, tdep->ppc_ps_regnum,
+			   (char *) &regs->r64.msr);
+      regcache_raw_supply (current_regcache, tdep->ppc_cr_regnum,
+			   (char *) &regs->r64.cr);
+      regcache_raw_supply (current_regcache, tdep->ppc_lr_regnum,
+			   (char *) &regs->r64.lr);
+      regcache_raw_supply (current_regcache, tdep->ppc_ctr_regnum,
+			   (char *) &regs->r64.ctr);
+      regcache_raw_supply (current_regcache, tdep->ppc_xer_regnum,
+			   (char *) &regs->r64.xer);
       if (tdep->ppc_fpscr_regnum >= 0)
-        supply_register (tdep->ppc_fpscr_regnum, (char *) &regs->r64.fpscr);
+        regcache_raw_supply (current_regcache, tdep->ppc_fpscr_regnum,
+			     (char *) &regs->r64.fpscr);
     }
   else
     {
       for (regi = 0; regi < ppc_num_gprs; regi++)
-        supply_register (tdep->ppc_gp0_regnum + regi,
-                         (char *) &regs->r32.gpr[regi]);
+        regcache_raw_supply (current_regcache, tdep->ppc_gp0_regnum + regi,
+			     (char *) &regs->r32.gpr[regi]);
 
       if (tdep->ppc_fp0_regnum >= 0)
         for (regi = 0; regi < ppc_num_fprs; regi++)
-          supply_register (tdep->ppc_fp0_regnum + regi,
-                           (char *) &regs->r32.fpr[regi]);
+          regcache_raw_supply (current_regcache, tdep->ppc_fp0_regnum + regi,
+			       (char *) &regs->r32.fpr[regi]);
 
-      supply_register (PC_REGNUM, (char *) &regs->r32.iar);
-      supply_register (tdep->ppc_ps_regnum, (char *) &regs->r32.msr);
-      supply_register (tdep->ppc_cr_regnum, (char *) &regs->r32.cr);
-      supply_register (tdep->ppc_lr_regnum, (char *) &regs->r32.lr);
-      supply_register (tdep->ppc_ctr_regnum, (char *) &regs->r32.ctr);
-      supply_register (tdep->ppc_xer_regnum, (char *) &regs->r32.xer);
+      regcache_raw_supply (current_regcache, PC_REGNUM,
+			   (char *) &regs->r32.iar);
+      regcache_raw_supply (current_regcache, tdep->ppc_ps_regnum,
+			   (char *) &regs->r32.msr);
+      regcache_raw_supply (current_regcache, tdep->ppc_cr_regnum,
+			   (char *) &regs->r32.cr);
+      regcache_raw_supply (current_regcache, tdep->ppc_lr_regnum,
+			   (char *) &regs->r32.lr);
+      regcache_raw_supply (current_regcache, tdep->ppc_ctr_regnum,
+			   (char *) &regs->r32.ctr);
+      regcache_raw_supply (current_regcache, tdep->ppc_xer_regnum,
+			   (char *) &regs->r32.xer);
       if (tdep->ppc_fpscr_regnum >= 0)
-        supply_register (tdep->ppc_fpscr_regnum, (char *) &regs->r32.fpscr);
+        regcache_raw_supply (current_regcache, tdep->ppc_fpscr_regnum,
+			     (char *) &regs->r32.fpscr);
       if (tdep->ppc_mq_regnum >= 0)
-	supply_register (tdep->ppc_mq_regnum, (char *) &regs->r32.mq);
+	regcache_raw_supply (current_regcache, tdep->ppc_mq_regnum,
+			     (char *) &regs->r32.mq);
     }
 }
 

@@ -965,7 +965,7 @@ m32r_fetch_register (int regno)
       /* We got the number the register holds, but gdb expects to see a
          value in the target byte ordering.  */
       store_unsigned_integer (buffer, 4, val);
-      supply_register (regno, buffer);
+      regcache_raw_supply (current_regcache, regno, buffer);
     }
   return;
 }

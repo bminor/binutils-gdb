@@ -249,8 +249,8 @@ fetch_altivec_register (int tid, int regno)
   if (regno == (tdep->ppc_vrsave_regnum - 1))
     offset = vrregsize - DEPRECATED_REGISTER_RAW_SIZE (tdep->ppc_vrsave_regnum);
   
-  supply_register (regno,
-                   regs + (regno - tdep->ppc_vr0_regnum) * vrregsize + offset);
+  regcache_raw_supply (current_regcache, regno,
+		       regs + (regno - tdep->ppc_vr0_regnum) * vrregsize + offset);
 }
 
 /* Fetch the top 32 bits of TID's general-purpose registers and the
@@ -366,19 +366,19 @@ fetch_spe_register (int tid, int regno)
     {
       char buf[MAX_REGISTER_SIZE];
       read_spliced_spe_reg (tid, regno, &evrregs, buf);
-      supply_register (regno, buf);
+      regcache_raw_supply (current_regcache, regno, buf);
     }
   else if (regno == tdep->ppc_acc_regnum)
     {
       gdb_assert (sizeof (evrregs.acc)
                   == register_size (current_gdbarch, regno));
-      supply_register (regno, &evrregs.acc);
+      regcache_raw_supply (current_regcache, regno, &evrregs.acc);
     }
   else if (regno == tdep->ppc_spefscr_regnum)
     {
       gdb_assert (sizeof (evrregs.spefscr)
                   == register_size (current_gdbarch, regno));
-      supply_register (regno, &evrregs.spefscr);
+      regcache_raw_supply (current_regcache, regno, &evrregs.spefscr);
     }
   else
     gdb_assert (0);
@@ -424,7 +424,7 @@ fetch_register (int tid, int regno)
   if (regaddr == -1)
     {
       memset (buf, '\0', DEPRECATED_REGISTER_RAW_SIZE (regno));   /* Supply zeroes */
-      supply_register (regno, buf);
+      regcache_raw_supply (current_regcache, regno, buf);
       return;
     }
 
@@ -485,10 +485,11 @@ supply_vrregset (gdb_vrregset_t *vrregsetp)
          occupies a whole vector, while VRSAVE occupies a full 4 bytes
          slot.  */
       if (i == (num_of_vrregs - 2))
-        supply_register (tdep->ppc_vr0_regnum + i,
-                         *vrregsetp + i * vrregsize + offset);
+        regcache_raw_supply (current_regcache, tdep->ppc_vr0_regnum + i,
+			     *vrregsetp + i * vrregsize + offset);
       else
-        supply_register (tdep->ppc_vr0_regnum + i, *vrregsetp + i * vrregsize);
+        regcache_raw_supply (current_regcache, tdep->ppc_vr0_regnum + i,
+			     *vrregsetp + i * vrregsize);
     }
 }
 
@@ -529,12 +530,13 @@ fetch_spe_registers (int tid)
       char buf[MAX_REGISTER_SIZE];
 
       read_spliced_spe_reg (tid, tdep->ppc_ev0_regnum + i, &evrregs, buf);
-      supply_register (tdep->ppc_ev0_regnum + i, buf);
+      regcache_raw_supply (current_regcache, tdep->ppc_ev0_regnum + i, buf);
     }
 
   /* Supply the SPE-specific registers.  */
-  supply_register (tdep->ppc_acc_regnum, &evrregs.acc);
-  supply_register (tdep->ppc_spefscr_regnum, &evrregs.spefscr);
+  regcache_raw_supply (current_regcache, tdep->ppc_acc_regnum, &evrregs.acc);
+  regcache_raw_supply (current_regcache, tdep->ppc_spefscr_regnum,
+		       &evrregs.spefscr);
 }
 
 static void 

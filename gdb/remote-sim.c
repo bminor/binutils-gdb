@@ -304,7 +304,7 @@ gdbsim_fetch_register (int regno)
 	char buf[MAX_REGISTER_SIZE];
 	int nr_bytes;
 	memset (buf, 0, MAX_REGISTER_SIZE);
-	supply_register (regno, buf);
+	regcache_raw_supply (current_regcache, regno, buf);
 	set_register_cached (regno, -1);
 	break;
       }
@@ -332,7 +332,7 @@ gdbsim_fetch_register (int regno)
 	   which registers are fetchable.  */
 	/* Else if (nr_bytes < 0): an old simulator, that doesn't
 	   think to return the register size.  Just assume all is ok.  */
-	supply_register (regno, buf);
+	regcache_raw_supply (current_regcache, regno, buf);
 	if (sr_get_debug ())
 	  {
 	    printf_filtered ("gdbsim_fetch_register: %d", regno);

@@ -179,7 +179,7 @@ fetch_register (int regno)
   gdb_assert (!have_ptrace_getregs);
   if (cannot_fetch_register (regno))
     {
-      supply_register (regno, NULL);
+      regcache_raw_supply (current_regcache, regno, NULL);
       return;
     }
 
@@ -194,7 +194,7 @@ fetch_register (int regno)
     error ("Couldn't read register %s (#%d): %s.", REGISTER_NAME (regno),
 	   regno, safe_strerror (errno));
 
-  supply_register (regno, &val);
+  regcache_raw_supply (current_regcache, regno, &val);
 }
 
 /* Store one register. */
@@ -236,10 +236,11 @@ supply_gregset (elf_gregset_t *gregsetp)
   int i;
 
   for (i = 0; i < I386_NUM_GREGS; i++)
-    supply_register (i, regp + regmap[i]);
+    regcache_raw_supply (current_regcache, i, regp + regmap[i]);
 
   if (I386_LINUX_ORIG_EAX_REGNUM < NUM_REGS)
-    supply_register (I386_LINUX_ORIG_EAX_REGNUM, regp + ORIG_EAX);
+    regcache_raw_supply (current_regcache, I386_LINUX_ORIG_EAX_REGNUM,
+			 regp + ORIG_EAX);
 }
 
 /* Fill register REGNO (if it is a general-purpose register) in
@@ -472,9 +473,9 @@ dummy_sse_values (void)
   int reg;
 
   for (reg = 0; reg < tdep->num_xmm_regs; reg++)
-    supply_register (XMM0_REGNUM + reg, (char *) dummy);
+    regcache_raw_supply (current_regcache, XMM0_REGNUM + reg, (char *) dummy);
   if (tdep->num_xmm_regs > 0)
-    supply_register (MXCSR_REGNUM, (char *) &mxcsr);
+    regcache_raw_supply (current_regcache, MXCSR_REGNUM, (char *) &mxcsr);
 }
 
 #else

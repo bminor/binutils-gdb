@@ -496,10 +496,10 @@ arm_rdi_fetch_registers (int regno)
       for (regno = 0; regno < 15; regno++)
 	{
 	  store_unsigned_integer (cookedreg, 4, rawregs[regno]);
-	  supply_register (regno, (char *) cookedreg);
+	  regcache_raw_supply (current_regcache, regno, (char *) cookedreg);
 	}
       store_unsigned_integer (cookedreg, 4, rawregs[15]);
-      supply_register (ARM_PS_REGNUM, (char *) cookedreg);
+      regcache_raw_supply (current_regcache, ARM_PS_REGNUM, (char *) cookedreg);
       arm_rdi_fetch_registers (ARM_PC_REGNUM);
     }
   else
@@ -511,7 +511,7 @@ arm_rdi_fetch_registers (int regno)
       else if (regno < 0 || regno > 15)
 	{
 	  rawreg = 0;
-	  supply_register (regno, (char *) &rawreg);
+	  regcache_raw_supply (current_regcache, regno, (char *) &rawreg);
 	  return;
 	}
       else
@@ -523,7 +523,7 @@ arm_rdi_fetch_registers (int regno)
 	  printf_filtered ("RDI_CPUread: %s\n", rdi_error_message (rslt));
 	}
       store_unsigned_integer (cookedreg, 4, rawreg);
-      supply_register (regno, (char *) cookedreg);
+      regcache_raw_supply (current_regcache, regno, (char *) cookedreg);
     }
 }
 

@@ -1303,16 +1303,16 @@ alpha_supply_int_regs (int regno, const void *r0_r30,
 
   for (i = 0; i < 31; ++i)
     if (regno == i || regno == -1)
-      supply_register (i, (const char *)r0_r30 + i*8);
+      regcache_raw_supply (current_regcache, i, (const char *)r0_r30 + i*8);
 
   if (regno == ALPHA_ZERO_REGNUM || regno == -1)
-    supply_register (ALPHA_ZERO_REGNUM, NULL);
+    regcache_raw_supply (current_regcache, ALPHA_ZERO_REGNUM, NULL);
 
   if (regno == ALPHA_PC_REGNUM || regno == -1)
-    supply_register (ALPHA_PC_REGNUM, pc);
+    regcache_raw_supply (current_regcache, ALPHA_PC_REGNUM, pc);
 
   if (regno == ALPHA_UNIQUE_REGNUM || regno == -1)
-    supply_register (ALPHA_UNIQUE_REGNUM, unique);
+    regcache_raw_supply (current_regcache, ALPHA_UNIQUE_REGNUM, unique);
 }
 
 void
@@ -1338,10 +1338,11 @@ alpha_supply_fp_regs (int regno, const void *f0_f30, const void *fpcr)
 
   for (i = ALPHA_FP0_REGNUM; i < ALPHA_FP0_REGNUM + 31; ++i)
     if (regno == i || regno == -1)
-      supply_register (i, (const char *)f0_f30 + (i - ALPHA_FP0_REGNUM) * 8);
+      regcache_raw_supply (current_regcache, i,
+			   (const char *)f0_f30 + (i - ALPHA_FP0_REGNUM) * 8);
 
   if (regno == ALPHA_FPCR_REGNUM || regno == -1)
-    supply_register (ALPHA_FPCR_REGNUM, fpcr);
+    regcache_raw_supply (current_regcache, ALPHA_FPCR_REGNUM, fpcr);
 }
 
 void

@@ -923,7 +923,7 @@ monitor_supply_register (int regno, char *valstr)
 
   store_unsigned_integer (regbuf, DEPRECATED_REGISTER_RAW_SIZE (regno), val);
 
-  supply_register (regno, regbuf);
+  regcache_raw_supply (current_regcache, regno, regbuf);
 
   return p;
 }
@@ -1184,7 +1184,7 @@ monitor_fetch_register (int regno)
   if (!name || (*name == '\0'))
     {
       monitor_debug ("No register known for %d\n", regno);
-      supply_register (regno, zerobuf);
+      regcache_raw_supply (current_regcache, regno, zerobuf);
       return;
     }
 

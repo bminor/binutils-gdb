@@ -102,7 +102,7 @@ fetch_nwfpe_single (unsigned int fn, FPA11 * fpa11)
   mem[0] = fpa11->fpreg[fn].fSingle;
   mem[1] = 0;
   mem[2] = 0;
-  supply_register (ARM_F0_REGNUM + fn, (char *) &mem[0]);
+  regcache_raw_supply (current_regcache, ARM_F0_REGNUM + fn, (char *) &mem[0]);
 }
 
 static void
@@ -113,7 +113,7 @@ fetch_nwfpe_double (unsigned int fn, FPA11 * fpa11)
   mem[0] = fpa11->fpreg[fn].fDouble[1];
   mem[1] = fpa11->fpreg[fn].fDouble[0];
   mem[2] = 0;
-  supply_register (ARM_F0_REGNUM + fn, (char *) &mem[0]);
+  regcache_raw_supply (current_regcache, ARM_F0_REGNUM + fn, (char *) &mem[0]);
 }
 
 static void
@@ -122,7 +122,7 @@ fetch_nwfpe_none (unsigned int fn)
   unsigned int mem[3] =
   {0, 0, 0};
 
-  supply_register (ARM_F0_REGNUM + fn, (char *) &mem[0]);
+  regcache_raw_supply (current_regcache, ARM_F0_REGNUM + fn, (char *) &mem[0]);
 }
 
 static void
@@ -133,7 +133,7 @@ fetch_nwfpe_extended (unsigned int fn, FPA11 * fpa11)
   mem[0] = fpa11->fpreg[fn].fExtended[0];	/* sign & exponent */
   mem[1] = fpa11->fpreg[fn].fExtended[2];	/* ls bits */
   mem[2] = fpa11->fpreg[fn].fExtended[1];	/* ms bits */
-  supply_register (ARM_F0_REGNUM + fn, (char *) &mem[0]);
+  regcache_raw_supply (current_regcache, ARM_F0_REGNUM + fn, (char *) &mem[0]);
 }
 
 static void
@@ -239,7 +239,7 @@ fetch_fpregister (int regno)
 
   /* Fetch fpsr.  */
   if (ARM_FPS_REGNUM == regno)
-    supply_register (ARM_FPS_REGNUM, (char *) &fp.fpsr);
+    regcache_raw_supply (current_regcache, ARM_FPS_REGNUM, (char *) &fp.fpsr);
 
   /* Fetch the floating point register.  */
   if (regno >= ARM_F0_REGNUM && regno <= ARM_F7_REGNUM)
@@ -287,7 +287,7 @@ fetch_fpregs (void)
     }
 
   /* Fetch fpsr.  */
-  supply_register (ARM_FPS_REGNUM, (char *) &fp.fpsr);
+  regcache_raw_supply (current_regcache, ARM_FPS_REGNUM, (char *) &fp.fpsr);
 
   /* Fetch the floating point registers.  */
   for (regno = ARM_F0_REGNUM; regno <= ARM_F7_REGNUM; regno++)
@@ -410,20 +410,23 @@ fetch_register (int regno)
     }
 
   if (regno >= ARM_A1_REGNUM && regno < ARM_PC_REGNUM)
-    supply_register (regno, (char *) &regs[regno]);
+    regcache_raw_supply (current_regcache, regno, (char *) &regs[regno]);
 
   if (ARM_PS_REGNUM == regno)
     {
       if (arm_apcs_32)
-        supply_register (ARM_PS_REGNUM, (char *) &regs[ARM_CPSR_REGNUM]);
+        regcache_raw_supply (current_regcache, ARM_PS_REGNUM,
+			     (char *) &regs[ARM_CPSR_REGNUM]);
       else
-        supply_register (ARM_PS_REGNUM, (char *) &regs[ARM_PC_REGNUM]);
+        regcache_raw_supply (current_regcache, ARM_PS_REGNUM,
+			     (char *) &regs[ARM_PC_REGNUM]);
     }
     
   if (ARM_PC_REGNUM == regno)
     { 
       regs[ARM_PC_REGNUM] = ADDR_BITS_REMOVE (regs[ARM_PC_REGNUM]);
-      supply_register (ARM_PC_REGNUM, (char *) &regs[ARM_PC_REGNUM]);
+      regcache_raw_supply (current_regcache, ARM_PC_REGNUM,
+			   (char *) &regs[ARM_PC_REGNUM]);
     }
 }
 
@@ -447,15 +450,18 @@ fetch_regs (void)
     }
 
   for (regno = ARM_A1_REGNUM; regno < ARM_PC_REGNUM; regno++)
-    supply_register (regno, (char *) &regs[regno]);
+    regcache_raw_supply (current_regcache, regno, (char *) &regs[regno]);
 
   if (arm_apcs_32)
-    supply_register (ARM_PS_REGNUM, (char *) &regs[ARM_CPSR_REGNUM]);
+    regcache_raw_supply (current_regcache, ARM_PS_REGNUM,
+			 (char *) &regs[ARM_CPSR_REGNUM]);
   else
-    supply_register (ARM_PS_REGNUM, (char *) &regs[ARM_PC_REGNUM]);
+    regcache_raw_supply (current_regcache, ARM_PS_REGNUM,
+			 (char *) &regs[ARM_PC_REGNUM]);
 
   regs[ARM_PC_REGNUM] = ADDR_BITS_REMOVE (regs[ARM_PC_REGNUM]);
-  supply_register (ARM_PC_REGNUM, (char *) &regs[ARM_PC_REGNUM]);
+  regcache_raw_supply (current_regcache, ARM_PC_REGNUM,
+		       (char *) &regs[ARM_PC_REGNUM]);
 }
 
 /* Store all general registers of the process from the values in
@@ -604,15 +610,18 @@ supply_gregset (gdb_gregset_t *gregsetp)
   int regno, reg_pc;
 
   for (regno = ARM_A1_REGNUM; regno < ARM_PC_REGNUM; regno++)
-    supply_register (regno, (char *) &(*gregsetp)[regno]);
+    regcache_raw_supply (current_regcache, regno,
+			 (char *) &(*gregsetp)[regno]);
 
   if (arm_apcs_32)
-    supply_register (ARM_PS_REGNUM, (char *) &(*gregsetp)[ARM_CPSR_REGNUM]);
+    regcache_raw_supply (current_regcache, ARM_PS_REGNUM,
+			 (char *) &(*gregsetp)[ARM_CPSR_REGNUM]);
   else
-    supply_register (ARM_PS_REGNUM, (char *) &(*gregsetp)[ARM_PC_REGNUM]);
+    regcache_raw_supply (current_regcache, ARM_PS_REGNUM,
+			 (char *) &(*gregsetp)[ARM_PC_REGNUM]);
 
   reg_pc = ADDR_BITS_REMOVE ((CORE_ADDR)(*gregsetp)[ARM_PC_REGNUM]);
-  supply_register (ARM_PC_REGNUM, (char *) &reg_pc);
+  regcache_raw_supply (current_regcache, ARM_PC_REGNUM, (char *) &reg_pc);
 }
 
 /* Fill register regno (if it is a floating-point register) in
@@ -651,7 +660,7 @@ supply_fpregset (gdb_fpregset_t *fpregsetp)
   FPA11 *fp = (FPA11 *) fpregsetp;
 
   /* Fetch fpsr.  */
-  supply_register (ARM_FPS_REGNUM, (char *) &fp->fpsr);
+  regcache_raw_supply (current_regcache, ARM_FPS_REGNUM, (char *) &fp->fpsr);
 
   /* Fetch the floating point registers.  */
   for (regno = ARM_F0_REGNUM; regno <= ARM_F7_REGNUM; regno++)

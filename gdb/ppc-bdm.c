@@ -180,7 +180,7 @@ bdm_ppc_fetch_registers (int regno)
 
   if (first_bdm_regno == -1)
     {
-      supply_register (first_regno, NULL);
+      regcache_raw_supply (current_regcache, first_regno, NULL);
       return;			/* Unsupported register */
     }
 
@@ -204,7 +204,7 @@ bdm_ppc_fetch_registers (int regno)
               && (first_regno < tdep->ppc_fp0_regnum + ppc_num_fprs)))
 	{
 /*          printf("invalid reg request!\n"); */
-	  supply_register (first_regno, NULL);
+	  regcache_raw_supply (current_regcache, first_regno, NULL);
 	  return;		/* Unsupported register */
 	}
       else
@@ -235,10 +235,10 @@ bdm_ppc_fetch_registers (int regno)
 	  if (regoffset >= reglen / 4)
 	    continue;
 
-	  supply_register (i, regs + 4 * regoffset);
+	  regcache_raw_supply (current_regcache, i, regs + 4 * regoffset);
 	}
       else
-	supply_register (i, NULL);	/* Unsupported register */
+	regcache_raw_supply (current_regcache, i, NULL);	/* Unsupported register */
     }
 }
 

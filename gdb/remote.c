@@ -2883,7 +2883,7 @@ Packet: '%s'\n",
 		    p += 2 * fieldsize;
 		    if (fieldsize < DEPRECATED_REGISTER_RAW_SIZE (reg->regnum))
 		      warning ("Remote reply is too short: %s", buf);
-		    supply_register (reg->regnum, regs);
+		    regcache_raw_supply (current_regcache, reg->regnum, regs);
 		  }
 
 		if (*p++ != ';')
@@ -3071,7 +3071,7 @@ remote_async_wait (ptid_t ptid, struct target_waitstatus *status)
 		    p += 2 * fieldsize;
 		    if (fieldsize < DEPRECATED_REGISTER_RAW_SIZE (reg->regnum))
 		      warning ("Remote reply is too short: %s", buf);
-		    supply_register (reg->regnum, regs);
+		    regcache_raw_supply (current_regcache, reg->regnum, regs);
 		  }
 
 		if (*p++ != ';')

@@ -141,7 +141,7 @@ fetch_register (int regno)
   if (CANNOT_FETCH_REGISTER (regno))
     {
       memset (buf, '\0', register_size (current_gdbarch, regno));	/* Supply zeroes */
-      supply_register (regno, buf);
+      regcache_raw_supply (current_regcache, regno, buf);
       return;
     }
 
@@ -167,7 +167,7 @@ fetch_register (int regno)
 	  perror_with_name (mess);
 	}
     }
-  supply_register (regno, buf);
+  regcache_raw_supply (current_regcache, regno, buf);
 }
 
 /* Fetch register values from the inferior.
@@ -282,9 +282,9 @@ supply_gregset (elf_gregset_t *gregsetp)
   int regi;
 
   for (regi = M68K_D0_REGNUM; regi <= SP_REGNUM; regi++)
-    supply_register (regi, (char *) &regp[regmap[regi]]);
-  supply_register (PS_REGNUM, (char *) &regp[PT_SR]);
-  supply_register (PC_REGNUM, (char *) &regp[PT_PC]);
+    regcache_raw_supply (current_regcache, regi, (char *) &regp[regmap[regi]]);
+  regcache_raw_supply (current_regcache, PS_REGNUM, (char *) &regp[PT_SR]);
+  regcache_raw_supply (current_regcache, PC_REGNUM, (char *) &regp[PT_PC]);
 }
 
 /* Fill register REGNO (if it is a general-purpose register) in
@@ -366,10 +366,14 @@ supply_fpregset (elf_fpregset_t *fpregsetp)
   int regi;
 
   for (regi = FP0_REGNUM; regi < FP0_REGNUM + 8; regi++)
-    supply_register (regi, FPREG_ADDR (fpregsetp, regi - FP0_REGNUM));
-  supply_register (M68K_FPC_REGNUM, (char *) &fpregsetp->fpcntl[0]);
-  supply_register (M68K_FPS_REGNUM, (char *) &fpregsetp->fpcntl[1]);
-  supply_register (M68K_FPI_REGNUM, (char *) &fpregsetp->fpcntl[2]);
+    regcache_raw_supply (current_regcache, regi,
+			 FPREG_ADDR (fpregsetp, regi - FP0_REGNUM));
+  regcache_raw_supply (current_regcache, M68K_FPC_REGNUM,
+		       (char *) &fpregsetp->fpcntl[0]);
+  regcache_raw_supply (current_regcache, M68K_FPS_REGNUM,
+		       (char *) &fpregsetp->fpcntl[1]);
+  regcache_raw_supply (current_regcache, M68K_FPI_REGNUM,
+		       (char *) &fpregsetp->fpcntl[2]);
 }
 
 /* Fill register REGNO (if it is a floating-point register) in

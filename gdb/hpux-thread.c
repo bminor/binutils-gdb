@@ -299,7 +299,7 @@ hpux_thread_fetch_registers (int regno)
 	  else
 	    read_memory (sp + regmap[regno], buf, DEPRECATED_REGISTER_RAW_SIZE (regno));
 
-	  supply_register (regno, buf);
+	  regcache_raw_supply (current_regcache, regno, buf);
 	}
     }
 

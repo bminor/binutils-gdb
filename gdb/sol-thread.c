@@ -597,7 +597,7 @@ sol_thread_store_registers (int regnum)
 	       td_err_string (val));
 
       /* Restore new register value.  */
-      supply_register (regnum, old_value);
+      regcache_raw_supply (current_regcache, regnum, old_value);
 
 #if 0
       /* FIXME: libthread_db doesn't seem to handle this right.  */

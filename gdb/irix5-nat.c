@@ -62,19 +62,20 @@ supply_gregset (gregset_t *gregsetp)
   static char zerobuf[32] = {0};
 
   for (regi = 0; regi <= CTX_RA; regi++)
-    supply_register (regi, (char *) (regp + regi) + gregoff);
+    regcache_raw_supply (current_regcache, regi,
+			 (char *) (regp + regi) + gregoff);
 
-  supply_register (mips_regnum (current_gdbarch)->pc,
-		   (char *) (regp + CTX_EPC) + gregoff);
-  supply_register (mips_regnum (current_gdbarch)->hi,
-		   (char *) (regp + CTX_MDHI) + gregoff);
-  supply_register (mips_regnum (current_gdbarch)->lo,
-		   (char *) (regp + CTX_MDLO) + gregoff);
-  supply_register (mips_regnum (current_gdbarch)->cause,
-		   (char *) (regp + CTX_CAUSE) + gregoff);
+  regcache_raw_supply (current_regcache, mips_regnum (current_gdbarch)->pc,
+		       (char *) (regp + CTX_EPC) + gregoff);
+  regcache_raw_supply (current_regcache, mips_regnum (current_gdbarch)->hi,
+		       (char *) (regp + CTX_MDHI) + gregoff);
+  regcache_raw_supply (current_regcache, mips_regnum (current_gdbarch)->lo,
+		       (char *) (regp + CTX_MDLO) + gregoff);
+  regcache_raw_supply (current_regcache, mips_regnum (current_gdbarch)->cause,
+		       (char *) (regp + CTX_CAUSE) + gregoff);
 
   /* Fill inaccessible registers with zero.  */
-  supply_register (mips_regnum (current_gdbarch)->badvaddr, zerobuf);
+  regcache_raw_supply (current_regcache, mips_regnum (current_gdbarch)->badvaddr, zerobuf);
 }
 
 void
@@ -132,15 +133,17 @@ supply_fpregset (fpregset_t *fpregsetp)
   /* FIXME, this is wrong for the N32 ABI which has 64 bit FP regs. */
 
   for (regi = 0; regi < 32; regi++)
-    supply_register (FP0_REGNUM + regi,
-		     (char *) &fpregsetp->fp_r.fp_regs[regi]);
+    regcache_raw_supply (current_regcache, FP0_REGNUM + regi,
+			 (char *) &fpregsetp->fp_r.fp_regs[regi]);
 
-  supply_register (mips_regnum (current_gdbarch)->fp_control_status,
-		   (char *) &fpregsetp->fp_csr);
+  regcache_raw_supply (current_regcache,
+		       mips_regnum (current_gdbarch)->fp_control_status,
+		       (char *) &fpregsetp->fp_csr);
 
   /* FIXME: how can we supply FCRIR?  SGI doesn't tell us. */
-  supply_register (mips_regnum (current_gdbarch)->fp_implementation_revision,
-		   zerobuf);
+  regcache_raw_supply (current_regcache,
+		       mips_regnum (current_gdbarch)->fp_implementation_revision,
+		       zerobuf);
 }
 
 void

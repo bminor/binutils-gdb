@@ -1077,7 +1077,7 @@ thread_db_store_registers (int regno)
 
       deprecated_read_register_gen (regno, raw);
       thread_db_fetch_registers (-1);
-      supply_register (regno, raw);
+      regcache_raw_supply (current_regcache, regno, raw);
     }
 
   fill_gregset ((gdb_gregset_t *) gregset, -1);

@@ -83,7 +83,7 @@ fetch_fpregs (struct proc *thread)
       int i;
 
       for (i = FP0_REGNUM; i <= FOP_REGNUM; i++)
-	supply_register (i, NULL);
+	regcache_raw_supply (current_regcache, i, NULL);
 
       return;
     }
@@ -100,7 +100,7 @@ supply_gregset (gdb_gregset_t *gregs)
 {
   int i;
   for (i = 0; i < I386_NUM_GREGS; i++)
-    supply_register (i, REG_ADDR (gregs, i));
+    regcache_raw_supply (current_regcache, i, REG_ADDR (gregs, i));
 }
 
 void
@@ -144,14 +144,15 @@ gnu_fetch_registers (int regno)
 	  proc_debug (thread, "fetching all register");
 
 	  for (i = 0; i < I386_NUM_GREGS; i++)
-	    supply_register (i, REG_ADDR (state, i));
+	    regcache_raw_supply (current_regcache, i, REG_ADDR (state, i));
 	  thread->fetched_regs = ~0;
 	}
       else
 	{
 	  proc_debug (thread, "fetching register %s", REGISTER_NAME (regno));
 
-	  supply_register (regno, REG_ADDR (state, regno));
+	  regcache_raw_supply (current_regcache, regno,
+			       REG_ADDR (state, regno));
 	  thread->fetched_regs |= (1 << regno);
 	}
     }
@@ -249,7 +250,8 @@ gnu_store_registers (int regno)
 			 REGISTER_NAME (check_regno));
 		if (regno >= 0 && regno != check_regno)
 		  /* Update GDB's copy of the register.  */
-		  supply_register (check_regno, REG_ADDR (state, check_regno));
+		  regcache_raw_supply (current_regcache, check_regno,
+				       REG_ADDR (state, check_regno));
 		else
 		  warning ("... also writing this register!  Suspicious...");
 	      }

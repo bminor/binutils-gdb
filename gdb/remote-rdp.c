@@ -645,7 +645,7 @@ remote_rdp_fetch_register (int regno)
 	{
 	  printf ("Help me with fetch reg %d\n", regno);
 	}
-      supply_register (regno, buf);
+      regcache_raw_supply (current_regcache, regno, buf);
     }
 }
 

@@ -319,7 +319,7 @@ init_m32r_cmds (void)
   m32r_cmds.getreg.term_cmd = NULL;	/* getreg.term_cmd */
   m32r_cmds.dump_registers = ".reg\r";	/* dump_registers */
   m32r_cmds.register_pattern = "\\(\\w+\\) += \\([0-9a-fA-F]+\\b\\)";	/* register_pattern */
-  m32r_cmds.supply_register = m32r_supply_register;	/* supply_register */
+  m32r_cmds.supply_register = m32r_supply_register;
   m32r_cmds.load_routine = NULL;	/* load_routine (defaults to SRECs) */
   m32r_cmds.load = NULL;	/* download command */
   m32r_cmds.loadresp = NULL;	/* load response */
@@ -379,7 +379,7 @@ init_mon2000_cmds (void)
   mon2000_cmds.getreg.term_cmd = NULL;	/* getreg.term_cmd */
   mon2000_cmds.dump_registers = ".reg\r";	/* dump_registers */
   mon2000_cmds.register_pattern = "\\(\\w+\\) += \\([0-9a-fA-F]+\\b\\)";	/* register_pattern */
-  mon2000_cmds.supply_register = m32r_supply_register;	/* supply_register */
+  mon2000_cmds.supply_register = m32r_supply_register;
   mon2000_cmds.load_routine = NULL;	/* load_routine (defaults to SRECs) */
   mon2000_cmds.load = NULL;	/* download command */
   mon2000_cmds.loadresp = NULL;	/* load response */

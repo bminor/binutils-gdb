@@ -96,7 +96,6 @@ void regcache_cooked_write_part (struct regcache *regcache, int regnum,
    target.  These functions are called by the target in response to a
    target_fetch_registers() or target_store_registers().  */
 
-extern void supply_register (int regnum, const void *val);
 extern void regcache_collect (int regnum, void *buf);
 extern void regcache_raw_supply (struct regcache *regcache,
 				 int regnum, const void *buf);
@@ -216,7 +215,7 @@ extern void deprecated_write_register_bytes (int regbyte, char *myaddr,
    referenced thread.  This global is often found in close proximity
    to code that is directly manipulating the deprecated_registers[]
    array.  In such cases, it should be possible to replace the lot
-   with a call to supply_register().  If you find yourself in dire
+   with a call to regcache_raw_supply().  If you find yourself in dire
    straits, still needing access to the cache status bit, the
    regcache_valid_p() and set_register_cached() functions are
    available.  */
@@ -226,13 +225,14 @@ extern signed char *deprecated_register_valid;
    registers for the most recently referenced thread.
 
    NOTE: cagney/2002-11-14: Target side code should be using
-   supply_register() and/or regcache_collect() while architecture side
-   code should use the more generic regcache methods.  */
+   regcache_raw_supply() and/or regcache_collect() while architecture
+   side code should use the more generic regcache methods.  */
 
 extern char *deprecated_registers;
 
 /* NOTE: cagney/2002-11-05: This function, and its co-conspirator
-   deprecated_registers[], have been superseeded by supply_register().  */
+   deprecated_registers[], have been superseeded by
+   regcache_raw_supply().  */
 extern void deprecated_registers_fetched (void);
 
 extern int register_cached (int regnum);

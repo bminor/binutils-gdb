@@ -77,9 +77,9 @@ i386nto_supply_gregset (char *gpregs)
     {
       int offset = nto_reg_offset (regno);
       if (offset == -1)
-	supply_register (regno, (char *) &empty);
+	regcache_raw_supply (current_regcache, regno, (char *) &empty);
       else
-	supply_register (regno, gpregs + offset);
+	regcache_raw_supply (current_regcache, regno, gpregs + offset);
     }
 }
 
