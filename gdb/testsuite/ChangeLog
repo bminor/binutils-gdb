@@ -1,3 +1,9 @@
+2001-10-01  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.mi/mi-var-display.exp (continue to incr_a):  Recognize
+	some incorrect output instead of timing out.
+	* gdb.mi/mi-var-display.exp (continue to incr_a):  Likewise.
+
 2001-09-28  Corinna Vinschen  <vinschen@redhat.com>
 
 	* gdb.base/volatile.exp (local_compiler_xfail_check): Change qux2
