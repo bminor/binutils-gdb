@@ -1,6 +1,16 @@
 Fri Aug  2 00:13:06 1991  John Gilmore  (gnu at cygint.cygnus.com)
 
+	* infrun.c:  Move DO_DEFERRED_STORES from proceed() to resume().
+	The child can be proceeded from inside wait_for_inferior in
+	evaluating breakpoint conditions, and DO_DEFERRED_STORES was
+	getting skipped in that case.
+
+	* expprint.c (print_subexp):  Use filtered output, since the
+	subroutines we call use it, otherwise the output is horribly
+	mangled, since output of wrappable stuff comes out late.
+
 	* Makefile.in:  Bump VERSION to 3.98.1
+
 	* infrun.c (child_create_process):  Use execlp to find the
 	shell to exec our target program.  This requires some fiddling
 	with `environ' since there is no execlpe().

@@ -3,19 +3,19 @@
 
 This file is part of GDB.
 
-GDB is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-GDB is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with GDB; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <stdio.h>
 #include "defs.h"
@@ -126,12 +126,13 @@ print_subexp (exp, pos, stream, prec)
       myprec = PREC_PREFIX;
       assoc = 0;
       (*pos) += 2;
-      print_subexp (exp, pos, stream, (int) myprec + assoc);
-      fprintf (stream, " :: ");
+      print_subexp (exp, pos, stream,
+		    (enum precedence) ((int) myprec + assoc));
+      fputs_filtered (" :: ", stream);
       nargs = strlen (&exp->elts[pc + 2].string);
       (*pos) += 1 + (nargs + sizeof (union exp_element)) / sizeof (union exp_element);
 
-      fprintf (stream, &exp->elts[pc + 2].string);
+      fputs_filtered (&exp->elts[pc + 2].string, stream);
       return;
 
     case OP_LONG:
@@ -150,117 +151,121 @@ print_subexp (exp, pos, stream, prec)
 
     case OP_VAR_VALUE:
       (*pos) += 2;
-      fprintf (stream, "%s", SYMBOL_NAME (exp->elts[pc + 1].symbol));
+      fputs_filtered (SYMBOL_NAME (exp->elts[pc + 1].symbol), stream);
       return;
 
     case OP_LAST:
       (*pos) += 2;
-      fprintf (stream, "$%d", (int) exp->elts[pc + 1].longconst);
+      fprintf_filtered (stream, "$%d",
+			longest_to_int (exp->elts[pc + 1].longconst));
       return;
 
     case OP_REGISTER:
       (*pos) += 2;
-      fprintf (stream, "$%s", reg_names[exp->elts[pc + 1].longconst]);
+      fprintf_filtered (stream, "$%s",
+	       longest_to_int (reg_names[exp->elts[pc + 1].longconst]));
       return;
 
     case OP_INTERNALVAR:
       (*pos) += 2;
-      fprintf (stream, "$%s",
+      fprintf_filtered (stream, "$%s",
 	       internalvar_name (exp->elts[pc + 1].internalvar));
       return;
 
     case OP_FUNCALL:
       (*pos) += 2;
-      nargs = exp->elts[pc + 1].longconst;
+      nargs = longest_to_int (exp->elts[pc + 1].longconst);
       print_subexp (exp, pos, stream, PREC_SUFFIX);
-      fprintf (stream, " (");
+      fputs_filtered (" (", stream);
       for (tem = 0; tem < nargs; tem++)
 	{
 	  if (tem != 0)
-	    fprintf (stream, ", ");
+	    fputs_filtered (", ", stream);
 	  print_subexp (exp, pos, stream, PREC_ABOVE_COMMA);
 	}
-      fprintf (stream, ")");
+      fputs_filtered (")", stream);
       return;
 
     case OP_STRING:
       nargs = strlen (&exp->elts[pc + 1].string);
       (*pos) += 2 + (nargs + sizeof (union exp_element)) / sizeof (union exp_element);
-      fprintf (stream, "\"");
+      fputs_filtered ("\"", stream);
       for (tem = 0; tem < nargs; tem++)
 	printchar ((&exp->elts[pc + 1].string)[tem], stream, '"');
-      fprintf (stream, "\"");
+      fputs_filtered ("\"", stream);
       return;
 
     case TERNOP_COND:
       if ((int) prec > (int) PREC_COMMA)
-	fprintf (stream, "(");
+	fputs_filtered ("(", stream);
       /* Print the subexpressions, forcing parentheses
 	 around any binary operations within them.
 	 This is more parentheses than are strictly necessary,
 	 but it looks clearer.  */
       print_subexp (exp, pos, stream, PREC_HYPER);
-      fprintf (stream, " ? ");
+      fputs_filtered (" ? ", stream);
       print_subexp (exp, pos, stream, PREC_HYPER);
-      fprintf (stream, " : ");
+      fputs_filtered (" : ", stream);
       print_subexp (exp, pos, stream, PREC_HYPER);
       if ((int) prec > (int) PREC_COMMA)
-	fprintf (stream, ")");
+	fputs_filtered (")", stream);
       return;
 
     case STRUCTOP_STRUCT:
       tem = strlen (&exp->elts[pc + 1].string);
       (*pos) += 2 + (tem + sizeof (union exp_element)) / sizeof (union exp_element);
       print_subexp (exp, pos, stream, PREC_SUFFIX);
-      fprintf (stream, ".%s", &exp->elts[pc + 1].string);
+      fputs_filtered (".", stream);
+      fputs_filtered (&exp->elts[pc + 1].string, stream);
       return;
 
     case STRUCTOP_PTR:
       tem = strlen (&exp->elts[pc + 1].string);
       (*pos) += 2 + (tem + sizeof (union exp_element)) / sizeof (union exp_element);
       print_subexp (exp, pos, stream, PREC_SUFFIX);
-      fprintf (stream, "->%s", &exp->elts[pc + 1].string);
+      fputs_filtered ("->", stream);
+      fputs_filtered (&exp->elts[pc + 1].string, stream);
       return;
 
     case BINOP_SUBSCRIPT:
       print_subexp (exp, pos, stream, PREC_SUFFIX);
-      fprintf (stream, "[");
+      fputs_filtered ("[", stream);
       print_subexp (exp, pos, stream, PREC_ABOVE_COMMA);
-      fprintf (stream, "]");
+      fputs_filtered ("]", stream);
       return;
 
     case UNOP_POSTINCREMENT:
       print_subexp (exp, pos, stream, PREC_SUFFIX);
-      fprintf (stream, "++");
+      fputs_filtered ("++", stream);
       return;
 
     case UNOP_POSTDECREMENT:
       print_subexp (exp, pos, stream, PREC_SUFFIX);
-      fprintf (stream, "--");
+      fputs_filtered ("--", stream);
       return;
 
     case UNOP_CAST:
       (*pos) += 2;
       if ((int) prec > (int) PREC_PREFIX)
-	fprintf (stream, "(");
-      fprintf (stream, "(");
+        fputs_filtered ("(", stream);
+      fputs_filtered ("(", stream);
       type_print (exp->elts[pc + 1].type, "", stream, 0);
-      fprintf (stream, ") ");
+      fputs_filtered (") ", stream);
       print_subexp (exp, pos, stream, PREC_PREFIX);
       if ((int) prec > (int) PREC_PREFIX)
-	fprintf (stream, ")");
+        fputs_filtered (")", stream);
       return;
 
     case UNOP_MEMVAL:
       (*pos) += 2;
       if ((int) prec > (int) PREC_PREFIX)
-	fprintf (stream, "(");
-      fprintf (stream, "{");
+        fputs_filtered ("(", stream);
+      fputs_filtered ("{", stream);
       type_print (exp->elts[pc + 1].type, "", stream, 0);
-      fprintf (stream, "} ");
+      fputs_filtered ("} ", stream);
       print_subexp (exp, pos, stream, PREC_PREFIX);
       if ((int) prec > (int) PREC_PREFIX)
-	fprintf (stream, ")");
+        fputs_filtered (")", stream);
       return;
 
     case BINOP_ASSIGN_MODIFY:
@@ -279,7 +284,7 @@ print_subexp (exp, pos, stream, prec)
 
     case OP_THIS:
       ++(*pos);
-      fprintf (stream, "this");
+      fputs_filtered ("this", stream);
       return;
 
     default:
@@ -294,11 +299,11 @@ print_subexp (exp, pos, stream, prec)
     }
 
   if ((int) myprec < (int) prec)
-    fprintf (stream, "(");
+    fputs_filtered ("(", stream);
   if ((int) opcode > (int) BINOP_END)
     {
       /* Unary prefix operator.  */
-      fprintf (stream, "%s", op_str);
+      fputs_filtered (op_str, stream);
       print_subexp (exp, pos, stream, PREC_PREFIX);
     }
   else
@@ -307,19 +312,21 @@ print_subexp (exp, pos, stream, prec)
       /* Print left operand.
 	 If operator is right-associative,
 	 increment precedence for this operand.  */
-      print_subexp (exp, pos, stream, (int) myprec + assoc);
+      print_subexp (exp, pos, stream,
+		    (enum precedence) ((int) myprec + assoc));
       /* Print the operator itself.  */
       if (assign_modify)
-	fprintf (stream, " %s= ", op_str);
+	fprintf_filtered (stream, " %s= ", op_str);
       else if (op_str[0] == ',')
-	fprintf (stream, "%s ", op_str);
+	fprintf_filtered (stream, "%s ", op_str);
       else
-	fprintf (stream, " %s ", op_str);
+	fprintf_filtered (stream, " %s ", op_str);
       /* Print right operand.
 	 If operator is left-associative,
 	 increment precedence for this operand.  */
-      print_subexp (exp, pos, stream, (int) myprec + !assoc);
+      print_subexp (exp, pos, stream,
+		    (enum precedence) ((int) myprec + !assoc));
     }
   if ((int) myprec < (int) prec)
-    fprintf (stream, ")");
+    fputs_filtered (")", stream);
 }
