@@ -292,6 +292,12 @@ skip_prologue (pc, fdata)
 	continue;
 
       } else if ((op & 0xfc000000) == 0x48000000) {	/* bl foo, to save fprs??? */
+
+	/* Don't skip over the subroutine call if it is not within the first
+	   three instructions of the prologue.  */
+	if ((pc - orig_pc) > 8)
+	  break;
+
 	op = read_memory_integer (pc+4, 4);
 
 	/* At this point, make sure this is not a trampoline function
@@ -300,7 +306,7 @@ skip_prologue (pc, fdata)
 	   prologue. */
 
 	if (op == 0x4def7b82 || op == 0)		/* crorc 15, 15, 15 */
-	  return pc;					/* don't skip over this branch */
+	  break;					/* don't skip over this branch */
 
 	continue;
 
@@ -335,6 +341,7 @@ skip_prologue (pc, fdata)
       } else if (op == 0x603f0000			/* oril r31, r1, 0x0 */
 		 || op == 0x7c3f0b78) {			/* mr r31, r1 */
 	framep = 1;
+	fdata->alloca_reg = 31;
 	continue;
 
       } else {
@@ -927,6 +934,9 @@ frame_saved_pc (fi)
   struct rs6000_framedata fdata;
   int frameless;
 
+  if (fi->signal_handler_caller)
+    return read_memory_integer (fi->frame + SIG_FRAME_PC_OFFSET, 4);
+
   func_start = get_pc_function_start (fi->pc) + FUNCTION_START_OFFSET;
 
   /* If we failed to find the start of the function, it is a mistake
@@ -935,9 +945,6 @@ frame_saved_pc (fi)
     return 0;
 
   (void) skip_prologue (func_start, &fdata);
-
-  if (fi->signal_handler_caller)
-    return read_memory_integer (fi->frame + SIG_FRAME_PC_OFFSET, 4);
 
   if (fdata.lr_offset == 0 && fi->next != NULL)
     return read_memory_integer (rs6000_frame_chain (fi) + DEFAULT_LR_SAVE, 4);
@@ -979,22 +986,36 @@ frame_get_cache_fsr (fi, fdatap)
     frame_addr = read_memory_integer (fi->frame, 4);
   
   /* if != -1, fdatap->saved_fpr is the smallest number of saved_fpr.
-     All fpr's from saved_fpr to fp31 are saved right underneath caller
-     stack pointer, starting from fp31 first. */
+     All fpr's from saved_fpr to fp31 are saved.  */
 
   if (fdatap->saved_fpr >= 0) {
-    for (ii=31; ii >= fdatap->saved_fpr; --ii)
-      fi->cache_fsr->regs [FP0_REGNUM + ii] = frame_addr - ((32 - ii) * 8);
-    frame_addr -= (32 - fdatap->saved_fpr) * 8;
+    int fpr_offset = frame_addr + fdatap->fpr_offset;
+    for (ii = fdatap->saved_fpr; ii < 32; ii++) {
+      fi->cache_fsr->regs [FP0_REGNUM + ii] = fpr_offset;
+      fpr_offset += 8;
+    }
   }
 
   /* if != -1, fdatap->saved_gpr is the smallest number of saved_gpr.
-     All gpr's from saved_gpr to gpr31 are saved right under saved fprs,
-     starting from r31 first. */
+     All gpr's from saved_gpr to gpr31 are saved.  */
   
-  if (fdatap->saved_gpr >= 0)
-    for (ii=31; ii >= fdatap->saved_gpr; --ii)
-      fi->cache_fsr->regs [ii] = frame_addr - ((32 - ii) * 4);
+  if (fdatap->saved_gpr >= 0) {
+    int gpr_offset = frame_addr + fdatap->gpr_offset;
+    for (ii = fdatap->saved_gpr; ii < 32; ii++) {
+      fi->cache_fsr->regs [ii] = gpr_offset;
+      gpr_offset += 4;
+    }
+  }
+
+  /* If != 0, fdatap->cr_offset is the offset from the frame that holds
+     the CR.  */
+  if (fdatap->cr_offset != 0)
+    fi->cache_fsr->regs [CR_REGNUM] = frame_addr + fdatap->cr_offset;
+
+  /* If != 0, fdatap->lr_offset is the offset from the frame that holds
+     the LR.  */
+  if (fdatap->lr_offset != 0)
+    fi->cache_fsr->regs [LR_REGNUM] = frame_addr + fdatap->lr_offset;
 }
 
 /* Return the address of a frame. This is the inital %sp value when the frame
