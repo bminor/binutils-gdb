@@ -6,7 +6,7 @@ Wed Nov  1 14:26:02 1995  Manfred Hollstein KS/EF4A 60/1F/110 #40283  <manfred@l
 	* coffcode.h (coff_write_object_contents): set internal_a.magic
 	to PAGEMAGICPEXECPAGED #if defined (M68) && !defined (LYNXOS).
 
-	* configure.in: m68*-motorola-sysv3* does not use ptrace-core.o;
+	* configure.in: m68*-motorola-sysv* does not use ptrace-core.o;
 	define TRAD_HEADER to new file hosts/delta68.h.
 	m88*-motorola-sysv*, however, does use ptrace-core.o.
 	* hosts/delta68.h: New file.

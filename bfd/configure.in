@@ -200,11 +200,10 @@ changequote([,])dnl
 	COREFILE=trad-core.o
 	AC_DEFINE(TRAD_HEADER,"hosts/hp300bsd.h")
 	;;
-  m68*-motorola-sysv3*)
+  m68*-motorola-sysv*)
 	COREFILE=trad-core.o
 	AC_DEFINE(TRAD_HEADER, "hosts/delta68.h")
 	;;
-  m68*-motorola-sysv*)	COREFILE=ptrace-core.o ;;
   m68*-sony-*)
 	COREFILE=trad-core.o
 	AC_DEFINE(TRAD_HEADER,"hosts/news.h")
