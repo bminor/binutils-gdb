@@ -56,14 +56,6 @@ CORE_ADDR skip_prologue ();
 				    ? read_register (TPC_REGNUM) \
 				    : read_register (LR0_REGNUM))
 
-/* I'm not sure about the exact value of this, but based on looking
-   at the stack pointer when we get to main this seems to be right.
-
-   This is the register stack; We call it "CONTROL" in GDB for consistency
-   with Pyramid.  */
-/* I suspect this is obsolete, just like STACK_END_ADDR.  */
-#define CONTROL_END_ADDR 0x80200000
-
 /* Stack grows downward.  */
 
 #define INNER_THAN <
