@@ -1,3 +1,13 @@
+1999-05-13  DJ Delorie  <dj@cygnus.com>
+
+	* rclex.l: add code to suppress certain output from cpp, replace
+	all returns with MAYBE_RETURN
+	(MAYBE_RETURN): new, implement the suppression by returning
+	IGNORED_TOKEN as needed.
+	(cpp_line): remember which file we're in, mark data from included
+	*.h files for suppression.
+	* rcparse.y (input): allow IGNORED_TOKEN outside of known constructs
+
 1999-05-10  DJ Delorie  <dj@cygnus.com>
 
 	* windres.c (quot): Quote shell metacharacters in a string
