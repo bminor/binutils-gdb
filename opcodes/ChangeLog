@@ -1,3 +1,9 @@
+2003-07-09  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips-dis.c (set_default_mips_dis_options): Get BFD from
+	the disassembler_info's section, rather than from the
+	disassembler_info's symbols pointer.
+
 2003-07-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* ppc-opc.c: Remove NULL pointer checks.  Formatting.  Remove
