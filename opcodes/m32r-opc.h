@@ -27,15 +27,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define CGEN_ARCH m32r
 
-/* Given symbol S, return m32r_cgen_<s>.  */
+/* Given symbol S, return m32r_cgen_<S>.  */
 #define CGEN_SYM(s) CONCAT3 (m32r,_cgen_,s)
 
 /* Selected cpu families.  */
-#define HAVE_CPU_M32R
+#define HAVE_CPU_M32RBF
 /* start-sanitize-m32rx */
-#define HAVE_CPU_M32RX
+#define HAVE_CPU_M32RXF
 /* end-sanitize-m32rx */
 
+#define CGEN_INSN_LSB0_P 0
 #define CGEN_WORD_BITSIZE 32
 #define CGEN_DEFAULT_INSN_BITSIZE 32
 #define CGEN_BASE_INSN_BITSIZE 32
@@ -45,7 +46,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define CGEN_BASE_INSN_SIZE (CGEN_BASE_INSN_BITSIZE / 8)
 #define CGEN_MIN_INSN_SIZE (CGEN_MIN_INSN_BITSIZE / 8)
 #define CGEN_MAX_INSN_SIZE (CGEN_MAX_INSN_BITSIZE / 8)
-#define CGEN_INT_INSN
+#define CGEN_INT_INSN_P 1
 
 /* FIXME: Need to compute CGEN_MAX_SYNTAX_BYTES.  */
 
@@ -55,6 +56,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define CGEN_MNEMONIC_OPERANDS
 /* Maximum number of operands any insn or macro-insn has.  */
 #define CGEN_MAX_INSN_OPERANDS 16
+
+/* Maximum number of fields in an instruction.  */
+#define CGEN_MAX_IFMT_OPERANDS 7
 
 /* Enums.  */
 
@@ -86,11 +90,11 @@ typedef enum h_gr {
 /* Enum declaration for control registers.  */
 typedef enum h_cr {
   H_CR_PSW = 0, H_CR_CBR = 1, H_CR_SPI = 2, H_CR_SPU = 3
- , H_CR_BPC = 6, H_CR_CR0 = 0, H_CR_CR1 = 1, H_CR_CR2 = 2
- , H_CR_CR3 = 3, H_CR_CR4 = 4, H_CR_CR5 = 5, H_CR_CR6 = 6
- , H_CR_CR7 = 7, H_CR_CR8 = 8, H_CR_CR9 = 9, H_CR_CR10 = 10
- , H_CR_CR11 = 11, H_CR_CR12 = 12, H_CR_CR13 = 13, H_CR_CR14 = 14
- , H_CR_CR15 = 15
+ , H_CR_BPC = 6, H_CR_BBPSW = 8, H_CR_BBPC = 14, H_CR_CR0 = 0
+ , H_CR_CR1 = 1, H_CR_CR2 = 2, H_CR_CR3 = 3, H_CR_CR4 = 4
+ , H_CR_CR5 = 5, H_CR_CR6 = 6, H_CR_CR7 = 7, H_CR_CR8 = 8
+ , H_CR_CR9 = 9, H_CR_CR10 = 10, H_CR_CR11 = 11, H_CR_CR12 = 12
+ , H_CR_CR13 = 13, H_CR_CR14 = 14, H_CR_CR15 = 15
 } H_CR;
 
 /* start-sanitize-m32rx */
@@ -100,6 +104,111 @@ typedef enum h_accums {
 } H_ACCUMS;
 
 /* end-sanitize-m32rx */
+/* Attributes.  */
+
+/* Enum declaration for machine type selection.  */
+typedef enum mach_attr {
+  MACH_BASE, MACH_M32R
+/* start-sanitize-m32rx */
+ , MACH_M32RX
+/* end-sanitize-m32rx */
+ , MACH_MAX
+} MACH_ATTR;
+
+/* start-sanitize-m32rx */
+/* Enum declaration for parallel execution pipeline selection.  */
+typedef enum pipe_attr {
+  PIPE_NONE, PIPE_O, PIPE_S, PIPE_OS
+} PIPE_ATTR;
+
+/* end-sanitize-m32rx */
+/* Number of architecture variants.  */
+#define MAX_MACHS ((int) MACH_MAX)
+
+/* Ifield attribute indices.  */
+
+/* Enum declaration for cgen_ifld attrs.  */
+typedef enum cgen_ifld_attr {
+  CGEN_IFLD_MACH, CGEN_IFLD_VIRTUAL, CGEN_IFLD_UNSIGNED, CGEN_IFLD_PCREL_ADDR
+ , CGEN_IFLD_ABS_ADDR, CGEN_IFLD_RESERVED, CGEN_IFLD_SIGN_OPT, CGEN_IFLD_RELOC
+} CGEN_IFLD_ATTR;
+
+/* Number of non-boolean elements in cgen_ifld.  */
+#define CGEN_IFLD_NBOOL_ATTRS ((int) CGEN_IFLD_VIRTUAL)
+
+/* Enum declaration for m32r ifield types.  */
+typedef enum ifield_type {
+  M32R_F_NIL, M32R_F_OP1, M32R_F_OP2, M32R_F_COND
+ , M32R_F_R1, M32R_F_R2, M32R_F_SIMM8, M32R_F_SIMM16
+ , M32R_F_SHIFT_OP2, M32R_F_UIMM4, M32R_F_UIMM5, M32R_F_UIMM16
+ , M32R_F_UIMM24, M32R_F_HI16, M32R_F_DISP8, M32R_F_DISP16
+ , M32R_F_DISP24
+/* start-sanitize-m32rx */
+ , M32R_F_OP23
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+ , M32R_F_OP3
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+ , M32R_F_ACC
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+ , M32R_F_ACCS
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+ , M32R_F_ACCD
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+ , M32R_F_BITS67
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+ , M32R_F_BIT14
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+ , M32R_F_IMM1
+/* end-sanitize-m32rx */
+ , M32R_F_MAX
+} IFIELD_TYPE;
+
+#define MAX_IFLD ((int) M32R_F_MAX)
+
+/* Hardware attribute indices.  */
+
+/* Enum declaration for cgen_hw attrs.  */
+typedef enum cgen_hw_attr {
+  CGEN_HW_MACH, CGEN_HW_VIRTUAL, CGEN_HW_UNSIGNED, CGEN_HW_SIGNED
+ , CGEN_HW_CACHE_ADDR, CGEN_HW_FUN_ACCESS, CGEN_HW_PC, CGEN_HW_PROFILE
+} CGEN_HW_ATTR;
+
+/* Number of non-boolean elements in cgen_hw.  */
+#define CGEN_HW_NBOOL_ATTRS ((int) CGEN_HW_VIRTUAL)
+
+/* Enum declaration for m32r hardware types.  */
+typedef enum hw_type {
+  HW_H_PC, HW_H_MEMORY, HW_H_SINT, HW_H_UINT
+ , HW_H_ADDR, HW_H_IADDR, HW_H_HI16, HW_H_SLO16
+ , HW_H_ULO16, HW_H_GR, HW_H_CR, HW_H_ACCUM
+/* start-sanitize-m32rx */
+ , HW_H_ACCUMS
+/* end-sanitize-m32rx */
+ , HW_H_COND, HW_H_PSW, HW_H_BPSW, HW_H_BBPSW
+ , HW_H_LOCK, HW_MAX
+} HW_TYPE;
+
+#define MAX_HW ((int) HW_MAX)
+
+/* Operand attribute indices.  */
+
+/* Enum declaration for cgen_operand attrs.  */
+typedef enum cgen_operand_attr {
+  CGEN_OPERAND_MACH, CGEN_OPERAND_VIRTUAL, CGEN_OPERAND_UNSIGNED, CGEN_OPERAND_PCREL_ADDR
+ , CGEN_OPERAND_ABS_ADDR, CGEN_OPERAND_SIGN_OPT, CGEN_OPERAND_NEGATIVE, CGEN_OPERAND_RELAX
+ , CGEN_OPERAND_SEM_ONLY, CGEN_OPERAND_RELOC, CGEN_OPERAND_HASH_PREFIX
+} CGEN_OPERAND_ATTR;
+
+/* Number of non-boolean elements in cgen_operand.  */
+#define CGEN_OPERAND_NBOOL_ATTRS ((int) CGEN_OPERAND_VIRTUAL)
+
 /* Enum declaration for m32r operand types.  */
 typedef enum cgen_operand_type {
   M32R_OPERAND_PC, M32R_OPERAND_SR, M32R_OPERAND_DR, M32R_OPERAND_SRC1
@@ -122,44 +231,13 @@ typedef enum cgen_operand_type {
  , M32R_OPERAND_CONDBIT, M32R_OPERAND_ACCUM, M32R_OPERAND_MAX
 } CGEN_OPERAND_TYPE;
 
-/* Non-boolean attributes.  */
-
-/* Enum declaration for machine type selection.  */
-typedef enum mach_attr {
-  MACH_M32R
-/* start-sanitize-m32rx */
- , MACH_M32RX
-/* end-sanitize-m32rx */
- , MACH_MAX
-} MACH_ATTR;
-
-/* start-sanitize-m32rx */
-/* Enum declaration for parallel execution pipeline selection.  */
-typedef enum pipe_attr {
-  PIPE_NONE, PIPE_O, PIPE_S, PIPE_OS
-} PIPE_ATTR;
-
-/* end-sanitize-m32rx */
-/* Number of architecture variants.  */
-#define MAX_MACHS ((int) MACH_MAX)
-
 /* Number of operands types.  */
 #define MAX_OPERANDS ((int) M32R_OPERAND_MAX)
 
 /* Maximum number of operands referenced by any insn.  */
-#define MAX_OPERAND_INSTANCES 8
+#define MAX_OPERAND_INSTANCES 11
 
-/* Operand and instruction attribute indices.  */
-
-/* Enum declaration for cgen_operand attrs.  */
-typedef enum cgen_operand_attr {
-  CGEN_OPERAND_ABS_ADDR, CGEN_OPERAND_FAKE, CGEN_OPERAND_HASH_PREFIX, CGEN_OPERAND_NEGATIVE
- , CGEN_OPERAND_PCREL_ADDR, CGEN_OPERAND_RELAX, CGEN_OPERAND_RELOC, CGEN_OPERAND_SIGN_OPT
- , CGEN_OPERAND_UNSIGNED
-} CGEN_OPERAND_ATTR;
-
-/* Number of non-boolean elements in cgen_operand.  */
-#define CGEN_OPERAND_NBOOL_ATTRS ((int) CGEN_OPERAND_ABS_ADDR)
+/* Insn attribute indices.  */
 
 /* Enum declaration for cgen_insn attrs.  */
 typedef enum cgen_insn_attr {
@@ -167,17 +245,20 @@ typedef enum cgen_insn_attr {
 /* start-sanitize-m32rx */
  , CGEN_INSN_PIPE
 /* end-sanitize-m32rx */
- , CGEN_INSN_ALIAS, CGEN_INSN_COND_CTI, CGEN_INSN_FILL_SLOT, CGEN_INSN_NO_DIS
- , CGEN_INSN_PARALLEL, CGEN_INSN_RELAX, CGEN_INSN_RELAXABLE, CGEN_INSN_SPECIAL
- , CGEN_INSN_UNCOND_CTI
+ , CGEN_INSN_VIRTUAL, CGEN_INSN_UNCOND_CTI, CGEN_INSN_COND_CTI, CGEN_INSN_SKIP_CTI
+ , CGEN_INSN_DELAY_SLOT, CGEN_INSN_RELAXABLE, CGEN_INSN_RELAX, CGEN_INSN_ALIAS
+ , CGEN_INSN_NO_DIS, CGEN_INSN_PBB, CGEN_INSN_FILL_SLOT
+/* start-sanitize-m32rx */
+ , CGEN_INSN_SPECIAL
+/* end-sanitize-m32rx */
 } CGEN_INSN_ATTR;
 
 /* Number of non-boolean elements in cgen_insn.  */
-#define CGEN_INSN_NBOOL_ATTRS ((int) CGEN_INSN_ALIAS)
+#define CGEN_INSN_NBOOL_ATTRS ((int) CGEN_INSN_VIRTUAL)
 
 /* Enum declaration for m32r instruction types.  */
 typedef enum cgen_insn_type {
-  M32R_INSN_ILLEGAL, M32R_INSN_ADD, M32R_INSN_ADD3, M32R_INSN_AND
+  M32R_INSN_INVALID, M32R_INSN_ADD, M32R_INSN_ADD3, M32R_INSN_AND
  , M32R_INSN_AND3, M32R_INSN_OR, M32R_INSN_OR3, M32R_INSN_XOR
  , M32R_INSN_XOR3, M32R_INSN_ADDI, M32R_INSN_ADDV, M32R_INSN_ADDV3
  , M32R_INSN_ADDX, M32R_INSN_BC8, M32R_INSN_BC24, M32R_INSN_BEQ
@@ -321,8 +402,8 @@ typedef enum cgen_insn_type {
  , M32R_INSN_MAX
 } CGEN_INSN_TYPE;
 
-/* Index of `illegal' insn place holder.  */
-#define CGEN_INSN_ILLEGAL M32R_INSN_ILLEGAL
+/* Index of `invalid' insn place holder.  */
+#define CGEN_INSN_INVALID M32R_INSN_INVALID
 /* Total number of insns in table.  */
 #define MAX_INSNS ((int) M32R_INSN_MAX)
 
@@ -377,23 +458,9 @@ struct cgen_fields
 };
 
 /* Attributes.  */
+extern const CGEN_ATTR_TABLE m32r_cgen_hw_attr_table[];
 extern const CGEN_ATTR_TABLE m32r_cgen_operand_attr_table[];
 extern const CGEN_ATTR_TABLE m32r_cgen_insn_attr_table[];
-
-/* Enum declaration for m32r hardware types.  */
-typedef enum hw_type {
-  HW_H_PC, HW_H_MEMORY, HW_H_SINT, HW_H_UINT
- , HW_H_ADDR, HW_H_IADDR, HW_H_HI16, HW_H_SLO16
- , HW_H_ULO16, HW_H_GR, HW_H_CR, HW_H_ACCUM
-/* start-sanitize-m32rx */
- , HW_H_ACCUMS
-/* end-sanitize-m32rx */
- , HW_H_COND, HW_H_SM, HW_H_BSM, HW_H_IE
- , HW_H_BIE, HW_H_BCOND, HW_H_BPC, HW_H_LOCK
- , HW_MAX
-} HW_TYPE;
-
-#define MAX_HW ((int) HW_MAX)
 
 /* Hardware decls.  */
 

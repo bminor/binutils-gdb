@@ -211,16 +211,7 @@ typedef enum h_cc {
   H_CC_CC
 } H_CC;
 
-/* Enum declaration for i960 operand types.  */
-typedef enum cgen_operand_type {
-  I960_OPERAND_PC, I960_OPERAND_SRC1, I960_OPERAND_SRC2, I960_OPERAND_DST
- , I960_OPERAND_LIT1, I960_OPERAND_LIT2, I960_OPERAND_ST_SRC, I960_OPERAND_ABASE
- , I960_OPERAND_OFFSET, I960_OPERAND_SCALE, I960_OPERAND_INDEX, I960_OPERAND_OPTDISP
- , I960_OPERAND_BR_SRC1, I960_OPERAND_BR_SRC2, I960_OPERAND_BR_DISP, I960_OPERAND_BR_LIT1
- , I960_OPERAND_CTRL_DISP, I960_OPERAND_MAX
-} CGEN_OPERAND_TYPE;
-
-/* Non-boolean attributes.  */
+/* Attributes.  */
 
 /* Enum declaration for machine type selection.  */
 typedef enum mach_attr {
@@ -230,32 +221,16 @@ typedef enum mach_attr {
 /* Number of architecture variants.  */
 #define MAX_MACHS ((int) MACH_MAX)
 
-/* Number of operands types.  */
-#define MAX_OPERANDS ((int) I960_OPERAND_MAX)
-
-/* Maximum number of operands referenced by any insn.  */
-#define MAX_OPERAND_INSTANCES 54
-
-/* Hardware, operand and instruction attribute indices.  */
-
-/* Enum declaration for cgen_hw attrs.  */
-typedef enum cgen_hw_attr {
-  CGEN_HW_CACHE_ADDR, CGEN_HW_PC, CGEN_HW_PROFILE
-} CGEN_HW_ATTR;
-
-/* Number of non-boolean elements in cgen_hw.  */
-#define CGEN_HW_NBOOL_ATTRS ((int) CGEN_HW_CACHE_ADDR)
-
-/* Hardware, operand and instruction attribute indices.  */
+/* Ifield attribute indices.  */
 
 /* Enum declaration for cgen_ifld attrs.  */
 typedef enum cgen_ifld_attr {
-  CGEN_IFLD_ABS_ADDR, CGEN_IFLD_PCREL_ADDR, CGEN_IFLD_RELOC, CGEN_IFLD_RESERVED
- , CGEN_IFLD_UNSIGNED, CGEN_IFLD_VIRTUAL
+  CGEN_IFLD_MACH, CGEN_IFLD_VIRTUAL, CGEN_IFLD_UNSIGNED, CGEN_IFLD_PCREL_ADDR
+ , CGEN_IFLD_ABS_ADDR, CGEN_IFLD_RESERVED, CGEN_IFLD_SIGN_OPT
 } CGEN_IFLD_ATTR;
 
 /* Number of non-boolean elements in cgen_ifld.  */
-#define CGEN_IFLD_NBOOL_ATTRS ((int) CGEN_IFLD_ABS_ADDR)
+#define CGEN_IFLD_NBOOL_ATTRS ((int) CGEN_IFLD_VIRTUAL)
 
 /* Enum declaration for i960 ifield types.  */
 typedef enum ifield_type {
@@ -270,24 +245,64 @@ typedef enum ifield_type {
 
 #define MAX_IFLD ((int) I960_F_MAX)
 
+/* Hardware attribute indices.  */
+
+/* Enum declaration for cgen_hw attrs.  */
+typedef enum cgen_hw_attr {
+  CGEN_HW_MACH, CGEN_HW_VIRTUAL, CGEN_HW_UNSIGNED, CGEN_HW_SIGNED
+ , CGEN_HW_CACHE_ADDR, CGEN_HW_FUN_ACCESS, CGEN_HW_PC, CGEN_HW_PROFILE
+} CGEN_HW_ATTR;
+
+/* Number of non-boolean elements in cgen_hw.  */
+#define CGEN_HW_NBOOL_ATTRS ((int) CGEN_HW_VIRTUAL)
+
+/* Enum declaration for i960 hardware types.  */
+typedef enum hw_type {
+  HW_H_PC, HW_H_MEMORY, HW_H_SINT, HW_H_UINT
+ , HW_H_ADDR, HW_H_IADDR, HW_H_GR, HW_H_CC
+ , HW_MAX
+} HW_TYPE;
+
+#define MAX_HW ((int) HW_MAX)
+
+/* Operand attribute indices.  */
+
 /* Enum declaration for cgen_operand attrs.  */
 typedef enum cgen_operand_attr {
-  CGEN_OPERAND_ABS_ADDR, CGEN_OPERAND_NEGATIVE, CGEN_OPERAND_PCREL_ADDR, CGEN_OPERAND_RELAX
- , CGEN_OPERAND_RELOC, CGEN_OPERAND_SEM_ONLY, CGEN_OPERAND_SIGN_OPT, CGEN_OPERAND_UNSIGNED
+  CGEN_OPERAND_MACH, CGEN_OPERAND_VIRTUAL, CGEN_OPERAND_UNSIGNED, CGEN_OPERAND_PCREL_ADDR
+ , CGEN_OPERAND_ABS_ADDR, CGEN_OPERAND_SIGN_OPT, CGEN_OPERAND_NEGATIVE, CGEN_OPERAND_RELAX
+ , CGEN_OPERAND_SEM_ONLY
 } CGEN_OPERAND_ATTR;
 
 /* Number of non-boolean elements in cgen_operand.  */
-#define CGEN_OPERAND_NBOOL_ATTRS ((int) CGEN_OPERAND_ABS_ADDR)
+#define CGEN_OPERAND_NBOOL_ATTRS ((int) CGEN_OPERAND_VIRTUAL)
+
+/* Enum declaration for i960 operand types.  */
+typedef enum cgen_operand_type {
+  I960_OPERAND_PC, I960_OPERAND_SRC1, I960_OPERAND_SRC2, I960_OPERAND_DST
+ , I960_OPERAND_LIT1, I960_OPERAND_LIT2, I960_OPERAND_ST_SRC, I960_OPERAND_ABASE
+ , I960_OPERAND_OFFSET, I960_OPERAND_SCALE, I960_OPERAND_INDEX, I960_OPERAND_OPTDISP
+ , I960_OPERAND_BR_SRC1, I960_OPERAND_BR_SRC2, I960_OPERAND_BR_DISP, I960_OPERAND_BR_LIT1
+ , I960_OPERAND_CTRL_DISP, I960_OPERAND_MAX
+} CGEN_OPERAND_TYPE;
+
+/* Number of operands types.  */
+#define MAX_OPERANDS ((int) I960_OPERAND_MAX)
+
+/* Maximum number of operands referenced by any insn.  */
+#define MAX_OPERAND_INSTANCES 54
+
+/* Insn attribute indices.  */
 
 /* Enum declaration for cgen_insn attrs.  */
 typedef enum cgen_insn_attr {
-  CGEN_INSN_ALIAS, CGEN_INSN_COND_CTI, CGEN_INSN_DELAY_SLOT, CGEN_INSN_NO_DIS
- , CGEN_INSN_RELAX, CGEN_INSN_RELAXABLE, CGEN_INSN_SKIP_CTI, CGEN_INSN_UNCOND_CTI
- , CGEN_INSN_VIRTUAL
+  CGEN_INSN_MACH, CGEN_INSN_VIRTUAL, CGEN_INSN_UNCOND_CTI, CGEN_INSN_COND_CTI
+ , CGEN_INSN_SKIP_CTI, CGEN_INSN_DELAY_SLOT, CGEN_INSN_RELAXABLE, CGEN_INSN_RELAX
+ , CGEN_INSN_ALIAS, CGEN_INSN_NO_DIS, CGEN_INSN_PBB
 } CGEN_INSN_ATTR;
 
 /* Number of non-boolean elements in cgen_insn.  */
-#define CGEN_INSN_NBOOL_ATTRS ((int) CGEN_INSN_ALIAS)
+#define CGEN_INSN_NBOOL_ATTRS ((int) CGEN_INSN_VIRTUAL)
 
 /* Enum declaration for i960 instruction types.  */
 typedef enum cgen_insn_type {
@@ -409,15 +424,6 @@ struct cgen_fields
 extern const CGEN_ATTR_TABLE i960_cgen_hw_attr_table[];
 extern const CGEN_ATTR_TABLE i960_cgen_operand_attr_table[];
 extern const CGEN_ATTR_TABLE i960_cgen_insn_attr_table[];
-
-/* Enum declaration for i960 hardware types.  */
-typedef enum hw_type {
-  HW_H_PC, HW_H_MEMORY, HW_H_SINT, HW_H_UINT
- , HW_H_ADDR, HW_H_IADDR, HW_H_GR, HW_H_CC
- , HW_MAX
-} HW_TYPE;
-
-#define MAX_HW ((int) HW_MAX)
 
 /* Hardware decls.  */
 

@@ -219,7 +219,7 @@ i960_cgen_insert_operand (od, opindex, fields, buffer, pc)
       {
         long value = fields->f_br_disp;
         value = ((int) (((value) - (pc))) >> (2));
-        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR), 0, 19, 11, 32, total_length, buffer);
+        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_PCREL_ADDR), 0, 19, 11, 32, total_length, buffer);
       }
       break;
     case I960_OPERAND_BR_LIT1 :
@@ -229,7 +229,7 @@ i960_cgen_insert_operand (od, opindex, fields, buffer, pc)
       {
         long value = fields->f_ctrl_disp;
         value = ((int) (((value) - (pc))) >> (2));
-        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR), 0, 8, 22, 32, total_length, buffer);
+        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_PCREL_ADDR), 0, 8, 22, 32, total_length, buffer);
       }
       break;
 
@@ -401,7 +401,7 @@ insert_normal (od, value, attrs, word_offset, start, length, word_length,
 #endif
 
   /* Ensure VALUE will fit.  */
-  if ((attrs & CGEN_ATTR_MASK (CGEN_OPERAND_UNSIGNED)) != 0)
+  if (CGEN_BOOL_ATTR (attrs, CGEN_OPERAND_UNSIGNED))
     {
       unsigned long maxval = mask;
       if ((unsigned long) value > maxval)

@@ -68,28 +68,45 @@ static int default_print_insn
 /* -- dis.c */
 
 static void
-print_register_list (dis_info, value, offset)
+print_register_list (dis_info, value, offset, load_store)
      PTR dis_info;
      long value;
      long offset;
+     int load_store; /* 0 == load, 1 == store */
 {
   disassemble_info *info = dis_info;
-  int mask  = 1;
+  int mask;
   int index = 0;
+  char* comma = "";
+
+  if (load_store)
+    mask = 0x80;
+  else
+    mask = 1;
 
   if (value & mask)
-    (*info->fprintf_func) (info->stream, "r%i", index + offset);
-
+    {
+      (*info->fprintf_func) (info->stream, "r%i", index + offset);
+      comma = ",";
+    }
+    
   for (index = 1; index <= 7; ++index)
     {
-      mask <<= 1;
+      if (load_store)
+	mask >>= 1;
+      else
+	mask <<= 1;
+
       if (value & mask)
-	(*info->fprintf_func) (info->stream, ",r%i", index + offset);
+	{
+	  (*info->fprintf_func) (info->stream, "%sr%i", comma, index + offset);
+	  comma = ",";
+	}
     }
 }
 
 static void
-print_hi_register_list (od, dis_info, value, attrs, pc, length)
+print_hi_register_list_ld (od, dis_info, value, attrs, pc, length)
      CGEN_OPCODE_DESC od;
      PTR dis_info;
      long value;
@@ -97,11 +114,11 @@ print_hi_register_list (od, dis_info, value, attrs, pc, length)
      bfd_vma pc;
      int length;
 {
-  print_register_list (dis_info, value, 8);
+  print_register_list (dis_info, value, 8, 0/*load*/);
 }
 
 static void
-print_low_register_list (od, dis_info, value, attrs, pc, length)
+print_low_register_list_ld (od, dis_info, value, attrs, pc, length)
      CGEN_OPCODE_DESC od;
      PTR dis_info;
      long value;
@@ -109,7 +126,31 @@ print_low_register_list (od, dis_info, value, attrs, pc, length)
      bfd_vma pc;
      int length;
 {
-  print_register_list (dis_info, value, 0);
+  print_register_list (dis_info, value, 0, 0/*load*/);
+}
+
+static void
+print_hi_register_list_st (od, dis_info, value, attrs, pc, length)
+     CGEN_OPCODE_DESC od;
+     PTR dis_info;
+     long value;
+     unsigned int attrs;
+     bfd_vma pc;
+     int length;
+{
+  print_register_list (dis_info, value, 8, 1/*store*/);
+}
+
+static void
+print_low_register_list_st (od, dis_info, value, attrs, pc, length)
+     CGEN_OPCODE_DESC od;
+     PTR dis_info;
+     long value;
+     unsigned int attrs;
+     bfd_vma pc;
+     int length;
+{
+  print_register_list (dis_info, value, 0, 1/*store*/);
 }
 
 static void
@@ -211,12 +252,12 @@ fr30_cgen_extract_operand (od, opindex, ex_info, insn_value, fields, pc)
       }
       break;
     case FR30_OPERAND_DISP8 :
-      length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGNED), 0, 4, 8, 16, total_length, pc, & fields->f_disp8);
+      length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX), 0, 4, 8, 16, total_length, pc, & fields->f_disp8);
       break;
     case FR30_OPERAND_DISP9 :
       {
         long value;
-        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGNED), 0, 4, 8, 16, total_length, pc, & value);
+        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX), 0, 4, 8, 16, total_length, pc, & value);
         value = ((value) << (1));
         fields->f_disp9 = value;
       }
@@ -224,7 +265,7 @@ fr30_cgen_extract_operand (od, opindex, ex_info, insn_value, fields, pc)
     case FR30_OPERAND_DISP10 :
       {
         long value;
-        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGNED), 0, 4, 8, 16, total_length, pc, & value);
+        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX), 0, 4, 8, 16, total_length, pc, & value);
         value = ((value) << (2));
         fields->f_disp10 = value;
       }
@@ -232,7 +273,7 @@ fr30_cgen_extract_operand (od, opindex, ex_info, insn_value, fields, pc)
     case FR30_OPERAND_S10 :
       {
         long value;
-        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGNED), 0, 8, 8, 16, total_length, pc, & value);
+        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_HASH_PREFIX), 0, 8, 8, 16, total_length, pc, & value);
         value = ((value) << (2));
         fields->f_s10 = value;
       }
@@ -287,7 +328,7 @@ do {
     case FR30_OPERAND_LABEL9 :
       {
         long value;
-        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_PCREL_ADDR)|(1<<CGEN_OPERAND_SIGNED), 0, 8, 8, 16, total_length, pc, & value);
+        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_PCREL_ADDR), 0, 8, 8, 16, total_length, pc, & value);
         value = ((((value) << (1))) + (((pc) + (2))));
         fields->f_rel9 = value;
       }
@@ -295,16 +336,22 @@ do {
     case FR30_OPERAND_LABEL12 :
       {
         long value;
-        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_PCREL_ADDR)|(1<<CGEN_OPERAND_SIGNED), 0, 5, 11, 16, total_length, pc, & value);
+        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_PCREL_ADDR), 0, 5, 11, 16, total_length, pc, & value);
         value = ((((value) << (1))) + (((pc) + (2))));
         fields->f_rel12 = value;
       }
       break;
-    case FR30_OPERAND_REGLIST_LOW :
-      length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 0, 8, 8, 16, total_length, pc, & fields->f_reglist_low);
+    case FR30_OPERAND_REGLIST_LOW_LD :
+      length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 0, 8, 8, 16, total_length, pc, & fields->f_reglist_low_ld);
       break;
-    case FR30_OPERAND_REGLIST_HI :
-      length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 0, 8, 8, 16, total_length, pc, & fields->f_reglist_hi);
+    case FR30_OPERAND_REGLIST_HI_LD :
+      length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 0, 8, 8, 16, total_length, pc, & fields->f_reglist_hi_ld);
+      break;
+    case FR30_OPERAND_REGLIST_LOW_ST :
+      length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 0, 8, 8, 16, total_length, pc, & fields->f_reglist_low_st);
+      break;
+    case FR30_OPERAND_REGLIST_HI_ST :
+      length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 0, 8, 8, 16, total_length, pc, & fields->f_reglist_hi_st);
       break;
     case FR30_OPERAND_CC :
       length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_UNSIGNED), 0, 4, 4, 16, total_length, pc, & fields->f_cc);
@@ -401,16 +448,16 @@ fr30_cgen_print_operand (od, opindex, info, fields, attrs, pc, length)
       print_normal (od, info, fields->f_udisp6, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
       break;
     case FR30_OPERAND_DISP8 :
-      print_normal (od, info, fields->f_disp8, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGNED), pc, length);
+      print_normal (od, info, fields->f_disp8, 0|(1<<CGEN_OPERAND_HASH_PREFIX), pc, length);
       break;
     case FR30_OPERAND_DISP9 :
-      print_normal (od, info, fields->f_disp9, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGNED), pc, length);
+      print_normal (od, info, fields->f_disp9, 0|(1<<CGEN_OPERAND_HASH_PREFIX), pc, length);
       break;
     case FR30_OPERAND_DISP10 :
-      print_normal (od, info, fields->f_disp10, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGNED), pc, length);
+      print_normal (od, info, fields->f_disp10, 0|(1<<CGEN_OPERAND_HASH_PREFIX), pc, length);
       break;
     case FR30_OPERAND_S10 :
-      print_normal (od, info, fields->f_s10, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGNED), pc, length);
+      print_normal (od, info, fields->f_s10, 0|(1<<CGEN_OPERAND_HASH_PREFIX), pc, length);
       break;
     case FR30_OPERAND_U10 :
       print_normal (od, info, fields->f_u10, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
@@ -434,16 +481,22 @@ fr30_cgen_print_operand (od, opindex, info, fields, attrs, pc, length)
       print_normal (od, info, fields->f_dir10, 0|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
       break;
     case FR30_OPERAND_LABEL9 :
-      print_address (od, info, fields->f_rel9, 0|(1<<CGEN_OPERAND_PCREL_ADDR)|(1<<CGEN_OPERAND_SIGNED), pc, length);
+      print_address (od, info, fields->f_rel9, 0|(1<<CGEN_OPERAND_PCREL_ADDR), pc, length);
       break;
     case FR30_OPERAND_LABEL12 :
-      print_address (od, info, fields->f_rel12, 0|(1<<CGEN_OPERAND_PCREL_ADDR)|(1<<CGEN_OPERAND_SIGNED), pc, length);
+      print_address (od, info, fields->f_rel12, 0|(1<<CGEN_OPERAND_PCREL_ADDR), pc, length);
       break;
-    case FR30_OPERAND_REGLIST_LOW :
-      print_low_register_list (od, info, fields->f_reglist_low, 0|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
+    case FR30_OPERAND_REGLIST_LOW_LD :
+      print_low_register_list_ld (od, info, fields->f_reglist_low_ld, 0|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
       break;
-    case FR30_OPERAND_REGLIST_HI :
-      print_hi_register_list (od, info, fields->f_reglist_hi, 0|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
+    case FR30_OPERAND_REGLIST_HI_LD :
+      print_hi_register_list_ld (od, info, fields->f_reglist_hi_ld, 0|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
+      break;
+    case FR30_OPERAND_REGLIST_LOW_ST :
+      print_low_register_list_st (od, info, fields->f_reglist_low_st, 0|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
+      break;
+    case FR30_OPERAND_REGLIST_HI_ST :
+      print_hi_register_list_st (od, info, fields->f_reglist_hi_st, 0|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
       break;
     case FR30_OPERAND_CC :
       print_normal (od, info, fields->f_cc, 0|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
@@ -653,7 +706,7 @@ extract_normal (od, ex_info, insn_value, attrs, word_offset, start, length,
 	value = insn_value >> (word_length - (start + length));
       value &= mask;
       /* sign extend? */
-      if (! (attrs & CGEN_ATTR_MASK (CGEN_OPERAND_UNSIGNED))
+      if (! CGEN_BOOL_ATTR (attrs, CGEN_OPERAND_UNSIGNED)
 	  && (value & (1L << (length - 1))))
 	value |= ~mask;
     }

@@ -40,9 +40,13 @@ along with this program; if not, write to the Free Software Foundation, Inc.,
 /* Default text to print if an instruction isn't recognized.  */
 #define UNKNOWN_INSN_MSG _("*unknown*")
 
+/* Used by the ifield rtx function.  */
+#define FLD(f) (fields->f)
+
 static int extract_normal
-     PARAMS ((CGEN_OPCODE_DESC, CGEN_EXTRACT_INFO *, CGEN_INSN_BYTES,
-	      unsigned int, int, int, int, long *));
+     PARAMS ((CGEN_OPCODE_DESC, CGEN_EXTRACT_INFO *, CGEN_INSN_INT,
+	      unsigned int, unsigned int, unsigned int, unsigned int,
+	      unsigned int, unsigned int, bfd_vma, long *));
 static void print_normal
      PARAMS ((CGEN_OPCODE_DESC, PTR, long, unsigned int, bfd_vma, int));
 static void print_address
@@ -51,7 +55,7 @@ static void print_keyword
      PARAMS ((CGEN_OPCODE_DESC, PTR, CGEN_KEYWORD *, long, unsigned int));
 static int extract_insn_normal
      PARAMS ((CGEN_OPCODE_DESC, const CGEN_INSN *, CGEN_EXTRACT_INFO *,
-	      unsigned long, CGEN_FIELDS *, bfd_vma));
+	      CGEN_INSN_INT, CGEN_FIELDS *, bfd_vma));
 static void print_insn_normal
      PARAMS ((CGEN_OPCODE_DESC, PTR, const CGEN_INSN *, CGEN_FIELDS *,
 	      bfd_vma, int));
@@ -64,20 +68,67 @@ static int default_print_insn
 
 #if ! CGEN_INT_INSN_P
 
+/* Subroutine of extract_normal.
+   Ensure sufficient bytes are cached in EX_INFO.
+   OFFSET is the offset in bytes from the start of the insn of the value.
+   BYTES is the length of the needed value.
+   Returns 1 for success, 0 for failure.  */
+
+static INLINE int
+fill_cache (od, ex_info, offset, bytes, pc)
+     CGEN_OPCODE_DESC od;
+     CGEN_EXTRACT_INFO *ex_info;
+     int offset, bytes;
+     bfd_vma pc;
+{
+  /* It's doubtful that the middle part has already been fetched so
+     we don't optimize that case.  kiss.  */
+  int mask;
+  disassemble_info *info = (disassemble_info *) ex_info->dis_info;
+
+  /* First do a quick check.  */
+  mask = (1 << bytes) - 1;
+  if (((ex_info->valid >> offset) & mask) == mask)
+    return 1;
+
+  /* Search for the first byte we need to read.  */
+  for (mask = 1 << offset; bytes > 0; --bytes, ++offset, mask <<= 1)
+    if (! (mask & ex_info->valid))
+      break;
+
+  if (bytes)
+    {
+      int status;
+
+      pc += offset;
+      status = (*info->read_memory_func)
+	(pc, ex_info->insn_bytes + offset, bytes, info);
+
+      if (status != 0)
+	{
+	  (*info->memory_error_func) (status, pc, info);
+	  return 0;
+	}
+
+      ex_info->valid |= ((1 << bytes) - 1) << offset;
+    }
+
+  return 1;
+}
+
 /* Subroutine of extract_normal.  */
 
 static INLINE long
-extract_1 (od, ex_info, start, length, word_length, bufp)
+extract_1 (od, ex_info, start, length, word_length, bufp, pc)
      CGEN_OPCODE_DESC od;
-     CGEN_EXTRACT_INFO *info;
+     CGEN_EXTRACT_INFO *ex_info;
      int start,length,word_length;
      unsigned char *bufp;
+     bfd_vma pc;
 {
   unsigned long x,mask;
   int shift;
   int big_p = CGEN_OPCODE_INSN_ENDIAN (od) == CGEN_ENDIAN_BIG;
-
-  /* FIXME: Need to use ex_info to ensure bytes have been fetched.  */
 
   switch (word_length)
     {
@@ -94,9 +145,9 @@ extract_1 (od, ex_info, start, length, word_length, bufp)
       /* ??? This may need reworking as these cases don't necessarily
 	 want the first byte and the last two bytes handled like this.  */
       if (big_p)
-	x = (bfd_getb8 (bufp) << 16) | bfd_getb16 (bufp + 1);
+	x = (bufp[0] << 16) | bfd_getb16 (bufp + 1);
       else
-	x = bfd_getl16 (bufp) | (bfd_getb8 (bufp + 2) << 16);
+	x = bfd_getl16 (bufp) | (bufp[2] << 16);
       break;
     case 32:
       if (big_p)
@@ -111,7 +162,7 @@ extract_1 (od, ex_info, start, length, word_length, bufp)
   /* Written this way to avoid undefined behaviour.  */
   mask = (((1L << (length - 1)) - 1) << 1) | 1;
   if (CGEN_INSN_LSB0_P)
-    shift = start;
+    shift = (start + 1) - length;
   else
     shift = (word_length - (start + length));
   return (x >> shift) & mask;
@@ -121,22 +172,36 @@ extract_1 (od, ex_info, start, length, word_length, bufp)
 
 /* Default extraction routine.
 
-   ATTRS is a mask of the boolean attributes.  We only need `unsigned',
-   but for generality we take a bitmask of all of them.  */
+   INSN_VALUE is the first CGEN_BASE_INSN_SIZE bits of the insn in host order,
+   or sometimes less for cases like the m32r where the base insn size is 32
+   but some insns are 16 bits.
+   ATTRS is a mask of the boolean attributes.  We only need `UNSIGNED',
+   but for generality we take a bitmask of all of them.
+   WORD_OFFSET is the offset in bits from the start of the insn of the value.
+   WORD_LENGTH is the length of the word in bits in which the value resides.
+   START is the starting bit number in the word, architecture origin.
+   LENGTH is the length of VALUE in bits.
+   TOTAL_LENGTH is the total length of the insn in bits.
+
+   Returns 1 for success, 0 for failure.  */
+
+/* ??? The return code isn't properly used.  wip.  */
 
 /* ??? This doesn't handle bfd_vma's.  Create another function when
    necessary.  */
 
 static int
-extract_normal (od, ex_info, insn_value, attrs, start, length, total_length, valuep)
+extract_normal (od, ex_info, insn_value, attrs, word_offset, start, length,
+		word_length, total_length, pc, valuep)
      CGEN_OPCODE_DESC od;
      CGEN_EXTRACT_INFO *ex_info;
-     CGEN_INSN_BYTES insn_value;
+     CGEN_INSN_INT insn_value;
      unsigned int attrs;
-     int start, length, total_length;
+     unsigned int word_offset, start, length, word_length, total_length;
+     bfd_vma pc;
      long *valuep;
 {
-  unsigned long value;
+  CGEN_INSN_INT value;
 
   /* If LENGTH is zero, this operand doesn't contribute to the value
      so give it a standard value of zero.  */
@@ -146,100 +211,58 @@ extract_normal (od, ex_info, insn_value, attrs, start, length, total_length, val
       return 1;
     }
 
-#if CGEN_INT_INSN_P
+  if (CGEN_INT_INSN_P
+      && word_offset != 0)
+    abort ();
 
-  {
-    /* Written this way to avoid undefined behaviour.  */
-    unsigned long mask = (((1L << (length - 1)) - 1) << 1) | 1;
+  if (word_length > 32)
+    abort ();
 
-    if (CGEN_INSN_LSB0_P)
-      value = insn_value >> start;
-    else
-      value = insn_value >> (total_length - (start + length));
-    value &= mask;
-    /* sign extend? */
-    if (! (attrs & CGEN_ATTR_MASK (CGEN_OPERAND_UNSIGNED))
-	&& (value & (1L << (length - 1))))
-      value |= ~mask;
-  }
-
-#else
-
-  /* The hard case is probably too slow for the normal cases.
-     It's certainly more difficult to understand than the normal case.
-     Thus this is split into two.  Keep it that way.  The hard case is defined
-     to be when a field straddles a (loosely defined) word boundary
-     (??? which may require target specific help to determine).  */
-
-#if 0 /*wip*/
-
-#define HARD_CASE_P 0 /* FIXME:wip */
-
-  if (HARD_CASE_P)
-    {
-    }
+  /* For architectures with insns smaller than the insn-base-bitsize,
+     word_length may be too big.  */
+#if CGEN_MIN_INSN_BITSIZE < CGEN_BASE_INSN_BITSIZE
+  if (word_offset == 0
+      && word_length > total_length)
+    word_length = total_length;
 #endif
+
+  /* Does the value reside in INSN_VALUE?  */
+
+  if (word_offset == 0)
+    {
+      /* Written this way to avoid undefined behaviour.  */
+      CGEN_INSN_INT mask = (((1L << (length - 1)) - 1) << 1) | 1;
+
+      if (CGEN_INSN_LSB0_P)
+	value = insn_value >> ((start + 1) - length);
+      else
+	value = insn_value >> (word_length - (start + length));
+      value &= mask;
+      /* sign extend? */
+      if (! CGEN_BOOL_ATTR (attrs, CGEN_OPERAND_UNSIGNED)
+	  && (value & (1L << (length - 1))))
+	value |= ~mask;
+    }
+
+#if ! CGEN_INT_INSN_P
+
   else
     {
-      unsigned char *bufp = (unsigned char *) insn_value;
+      unsigned char *bufp = ex_info->insn_bytes + word_offset / 8;
 
-      if (length > 32)
+      if (word_length > 32)
 	abort ();
 
-      /* Adjust start,total_length,bufp to point to the pseudo-word that holds
-	 the value.  For example in a 48 bit insn where the value to insert
-	 (say an immediate value) is the last 16 bits then word_length here
-	 would be 16.  To handle a 24 bit insn with an 18 bit immediate,
-	 extract_1 handles 24 bits (using a combination of bfd_get8,16).  */
+      if (fill_cache (od, ex_info, word_offset / 8, word_length / 8, pc) == 0)
+	return 0;
 
-      if (total_length > 32)
-	{
-	  int needed_width = start % 8 + length;
-	  int fetch_length = (needed_width <= 8 ? 8
-			      : needed_width <= 16 ? 16
-			      : 32);
-
-	  if (CGEN_INSN_LSB0_P)
-	    {
-	      if (CGEN_INSN_WORD_ENDIAN (od) == CGEN_ENDIAN_BIG)
-		{
-		  abort (); /* wip */
-		}
-	      else
-		{
-		  int offset = start & ~7;
-
-		  bufp += offset / 8;
-		  start -= offset;
-		  total_length -= offset;
-		}
-	    }
-	  else
-	    {
-	      if (CGEN_INSN_WORD_ENDIAN (od) == CGEN_ENDIAN_BIG)
-		{
-		  int offset = start & ~7;
-
-		  bufp += offset / 8;
-		  start -= offset;
-		  total_length -= offset;
-		}
-	      else
-		{
-		  abort (); /* wip */
-		}
-	    }
-	}
-
-      /* FIXME: which bytes are being extracted have been lost.  */
-      value = extract_1 (od, ex_info, start, length, total_length, bufp);
+      value = extract_1 (od, ex_info, start, length, word_length, bufp, pc);
     }
 
 #endif /* ! CGEN_INT_INSN_P */
 
   *valuep = value;
 
-  /* FIXME: for now */
   return 1;
 }
 
@@ -333,7 +356,7 @@ extract_insn_normal (od, insn, ex_info, insn_value, fields, pc)
      CGEN_OPCODE_DESC od;
      const CGEN_INSN *insn;
      CGEN_EXTRACT_INFO *ex_info;
-     unsigned long insn_value;
+     CGEN_INSN_INT insn_value;
      CGEN_FIELDS *fields;
      bfd_vma pc;
 {
@@ -420,7 +443,7 @@ print_insn (od, pc, info, buf, buflen)
 
   ex_info.dis_info = info;
   ex_info.valid = (1 << CGEN_BASE_INSN_SIZE) - 1;
-  ex_info.bytes = buf;
+  ex_info.insn_bytes = buf;
 
   switch (buflen)
     {
@@ -456,7 +479,8 @@ print_insn (od, pc, info, buf, buflen)
       /* Basic bit mask must be correct.  */
       /* ??? May wish to allow target to defer this check until the extract
 	 handler.  */
-      if ((insn_value & CGEN_INSN_MASK (insn)) == CGEN_INSN_VALUE (insn))
+      if ((insn_value & CGEN_INSN_BASE_MASK (insn))
+	  == CGEN_INSN_BASE_VALUE (insn))
 	{
 	  /* Printing is handled in two passes.  The first pass parses the
 	     machine insn and extracts the fields.  The second pass prints

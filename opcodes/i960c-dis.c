@@ -136,7 +136,7 @@ i960_cgen_extract_operand (od, opindex, ex_info, insn_value, fields, pc)
     case I960_OPERAND_BR_DISP :
       {
         long value;
-        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR), 0, 19, 11, 32, total_length, pc, & value);
+        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_PCREL_ADDR), 0, 19, 11, 32, total_length, pc, & value);
         value = ((((value) << (2))) + (pc));
         fields->f_br_disp = value;
       }
@@ -147,7 +147,7 @@ i960_cgen_extract_operand (od, opindex, ex_info, insn_value, fields, pc)
     case I960_OPERAND_CTRL_DISP :
       {
         long value;
-        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR), 0, 8, 22, 32, total_length, pc, & value);
+        length = extract_normal (od, ex_info, insn_value, 0|(1<<CGEN_OPERAND_PCREL_ADDR), 0, 8, 22, 32, total_length, pc, & value);
         value = ((((value) << (2))) + (pc));
         fields->f_ctrl_disp = value;
       }
@@ -229,13 +229,13 @@ i960_cgen_print_operand (od, opindex, info, fields, attrs, pc, length)
       print_keyword (od, info, & i960_cgen_opval_h_gr, fields->f_br_src2, 0|(1<<CGEN_OPERAND_UNSIGNED));
       break;
     case I960_OPERAND_BR_DISP :
-      print_address (od, info, fields->f_br_disp, 0|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR), pc, length);
+      print_address (od, info, fields->f_br_disp, 0|(1<<CGEN_OPERAND_PCREL_ADDR), pc, length);
       break;
     case I960_OPERAND_BR_LIT1 :
       print_normal (od, info, fields->f_br_src1, 0|(1<<CGEN_OPERAND_UNSIGNED), pc, length);
       break;
     case I960_OPERAND_CTRL_DISP :
-      print_address (od, info, fields->f_ctrl_disp, 0|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR), pc, length);
+      print_address (od, info, fields->f_ctrl_disp, 0|(1<<CGEN_OPERAND_PCREL_ADDR), pc, length);
       break;
 
     default :
@@ -439,7 +439,7 @@ extract_normal (od, ex_info, insn_value, attrs, word_offset, start, length,
 	value = insn_value >> (word_length - (start + length));
       value &= mask;
       /* sign extend? */
-      if (! (attrs & CGEN_ATTR_MASK (CGEN_OPERAND_UNSIGNED))
+      if (! CGEN_BOOL_ATTR (attrs, CGEN_OPERAND_UNSIGNED)
 	  && (value & (1L << (length - 1))))
 	value |= ~mask;
     }

@@ -30,127 +30,219 @@ along with this program; if not, write to the Free Software Foundation, Inc.,
 #include "@prefix@-opc.h"
 #include "opintl.h"
 
-/* ??? The layout of this stuff is still work in progress.
-   For speed in assembly/disassembly, we use inline functions.  That of course
-   will only work for GCC.  When this stuff is finished, we can decide whether
-   to keep the inline functions (and only get the performance increase when
-   compiled with GCC), or switch to macros, or use something else.
-*/
+#undef min
+#define min(a,b) ((a) < (b) ? (a) : (b))
+#undef max
+#define max(a,b) ((a) > (b) ? (a) : (b))
+
+#undef INLINE
+#ifdef __GNUC__
+#define INLINE __inline__
+#else
+#define INLINE
+#endif
+
+/* Used by the ifield rtx function.  */
+#define FLD(f) (fields->f)
 
 static const char * insert_normal
-     PARAMS ((long, unsigned int, int, int, int, char *));
+     PARAMS ((CGEN_OPCODE_DESC, long, unsigned int, unsigned int, unsigned int,
+	      unsigned int, unsigned int, unsigned int, CGEN_INSN_BYTES_PTR));
 static const char * parse_insn_normal
-     PARAMS ((const CGEN_INSN *, const char **, CGEN_FIELDS *));
+     PARAMS ((CGEN_OPCODE_DESC, const CGEN_INSN *,
+	      const char **, CGEN_FIELDS *));
 static const char * insert_insn_normal
-     PARAMS ((const CGEN_INSN *, CGEN_FIELDS *, cgen_insn_t *, bfd_vma));
+     PARAMS ((CGEN_OPCODE_DESC, const CGEN_INSN *,
+	      CGEN_FIELDS *, CGEN_INSN_BYTES_PTR, bfd_vma));
 
 /* -- assembler routines inserted here */
 
+#if ! CGEN_INT_INSN_P
+
+/* Subroutine of insert_normal.  */
+
+static INLINE void
+insert_1 (od, value, start, length, word_length, bufp)
+     CGEN_OPCODE_DESC od;
+     unsigned long value;
+     int start,length,word_length;
+     unsigned char *bufp;
+{
+  unsigned long x,mask;
+  int shift;
+  int big_p = CGEN_OPCODE_INSN_ENDIAN (od) == CGEN_ENDIAN_BIG;
+
+  switch (word_length)
+    {
+    case 8:
+      x = *bufp;
+      break;
+    case 16:
+      if (big_p)
+	x = bfd_getb16 (bufp);
+      else
+	x = bfd_getl16 (bufp);
+      break;
+    case 24:
+      /* ??? This may need reworking as these cases don't necessarily
+	 want the first byte and the last two bytes handled like this.  */
+      if (big_p)
+	x = (bufp[0] << 16) | bfd_getb16 (bufp + 1);
+      else
+	x = bfd_getl16 (bufp) | (bufp[2] << 16);
+      break;
+    case 32:
+      if (big_p)
+	x = bfd_getb32 (bufp);
+      else
+	x = bfd_getl32 (bufp);
+      break;
+    default :
+      abort ();
+    }
+
+  /* Written this way to avoid undefined behaviour.  */
+  mask = (((1L << (length - 1)) - 1) << 1) | 1;
+  if (CGEN_INSN_LSB0_P)
+    shift = (start + 1) - length;
+  else
+    shift = (word_length - (start + length));
+  x = (x & ~(mask << shift)) | ((value & mask) << shift);
+
+  switch (word_length)
+    {
+    case 8:
+      *bufp = x;
+      break;
+    case 16:
+      if (big_p)
+	bfd_putb16 (x, bufp);
+      else
+	bfd_putl16 (x, bufp);
+      break;
+    case 24:
+      /* ??? This may need reworking as these cases don't necessarily
+	 want the first byte and the last two bytes handled like this.  */
+      if (big_p)
+	{
+	  bufp[0] = x >> 16;
+	  bfd_putb16 (x, bufp + 1);
+	}
+      else
+	{
+	  bfd_putl16 (x, bufp);
+	  bufp[2] = x >> 16;
+	}
+      break;
+    case 32:
+      if (big_p)
+	bfd_putb32 (x, bufp);
+      else
+	bfd_putl32 (x, bufp);
+      break;
+    default :
+      abort ();
+    }
+}
+
+#endif /* ! CGEN_INT_INSN_P */
+
 /* Default insertion routine.
 
    ATTRS is a mask of the boolean attributes.
+   WORD_OFFSET is the offset in bits from the start of the insn of the value.
+   WORD_LENGTH is the length of the word in bits in which the value resides.
+   START is the starting bit number in the word, architecture origin.
    LENGTH is the length of VALUE in bits.
-   TOTAL_LENGTH is the total length of the insn (currently 8,16,32).
+   TOTAL_LENGTH is the total length of the insn in bits.
 
    The result is an error message or NULL if success.  */
 
 /* ??? This duplicates functionality with bfd's howto table and
    bfd_install_relocation.  */
-/* ??? For architectures where insns can be representable as ints,
-   store insn in `field' struct and add registers, etc. while parsing?  */
+/* ??? This doesn't handle bfd_vma's.  Create another function when
+   necessary.  */
 
 static const char *
-insert_normal (value, attrs, start, length, total_length, buffer)
+insert_normal (od, value, attrs, word_offset, start, length, word_length,
+	       total_length, buffer)
+     CGEN_OPCODE_DESC od;
      long value;
      unsigned int attrs;
-     int start;
-     int length;
-     int total_length;
-     char * buffer;
+     unsigned int word_offset, start, length, word_length, total_length;
+     CGEN_INSN_BYTES_PTR buffer;
 {
-  bfd_vma x;
-  static char buf[100];
-  /* Written this way to avoid undefined behaviour.
-     Yes, `long' will be bfd_vma but not yet.  */
-  long mask = (((1L << (length - 1)) - 1) << 1) | 1;
+  static char errbuf[100];
+  /* Written this way to avoid undefined behaviour.  */
+  unsigned long mask = (((1L << (length - 1)) - 1) << 1) | 1;
 
   /* If LENGTH is zero, this operand doesn't contribute to the value.  */
   if (length == 0)
     return NULL;
 
+  if (CGEN_INT_INSN_P
+      && word_offset != 0)
+    abort ();
+
+  if (word_length > 32)
+    abort ();
+
+  /* For architectures with insns smaller than the insn-base-bitsize,
+     word_length may be too big.  */
+#if CGEN_MIN_INSN_BITSIZE < CGEN_BASE_INSN_BITSIZE
+  if (word_offset == 0
+      && word_length > total_length)
+    word_length = total_length;
+#endif
+
   /* Ensure VALUE will fit.  */
-  if ((attrs & CGEN_ATTR_MASK (CGEN_OPERAND_UNSIGNED)) != 0)
+  if (CGEN_BOOL_ATTR (attrs, CGEN_OPERAND_UNSIGNED))
     {
-      unsigned long max = mask;
-      if ((unsigned long) value > max)
+      unsigned long maxval = mask;
+      if ((unsigned long) value > maxval)
 	{
 	  /* xgettext:c-format */
-	  sprintf (buf, _("operand out of range (%lu not between 0 and %lu)"),
-		   value, max);
-	  return buf;
+	  sprintf (errbuf,
+		   _("operand out of range (%lu not between 0 and %lu)"),
+		   value, maxval);
+	  return errbuf;
 	}
     }
   else
     {
-      long min = - (1L << (length - 1));
-      long max = (1L << (length - 1)) - 1;
-      if (value < min || value > max)
+      long minval = - (1L << (length - 1));
+      long maxval = (1L << (length - 1)) - 1;
+      if (value < minval || value > maxval)
 	{
 	  sprintf
 	    /* xgettext:c-format */
-	    (buf, _("operand out of range (%ld not between %ld and %ld)"),
-	     value, min, max);
-	  return buf;
+	    (errbuf, _("operand out of range (%ld not between %ld and %ld)"),
+	     value, minval, maxval);
+	  return errbuf;
 	}
     }
 
-#if 0 /*def CGEN_INT_INSN*/
-  *buffer |= (value & mask) << (total_length - (start + length));
-#else
-  switch (total_length)
-    {
-    case 8:
-      x = * (unsigned char *) buffer;
-      break;
-    case 16:
-      if (CGEN_CURRENT_ENDIAN == CGEN_ENDIAN_BIG)
-	x = bfd_getb16 (buffer);
-      else
-	x = bfd_getl16 (buffer);
-      break;
-    case 32:
-      if (CGEN_CURRENT_ENDIAN == CGEN_ENDIAN_BIG)
-	x = bfd_getb32 (buffer);
-      else
-	x = bfd_getl32 (buffer);
-      break;
-    default :
-      abort ();
-    }
+#if CGEN_INT_INSN_P
 
-  x |= (value & mask) << (total_length - (start + length));
+  {
+    int shift;
 
-  switch (total_length)
-    {
-    case 8:
-      * buffer = value;
-      break;
-    case 16:
-      if (CGEN_CURRENT_ENDIAN == CGEN_ENDIAN_BIG)
-	bfd_putb16 (x, buffer);
-      else
-	bfd_putl16 (x, buffer);
-      break;
-    case 32:
-      if (CGEN_CURRENT_ENDIAN == CGEN_ENDIAN_BIG)
-	bfd_putb32 (x, buffer);
-      else
-	bfd_putl32 (x, buffer);
-      break;
-    default :
-      abort ();
-    }
-#endif
+    if (CGEN_INSN_LSB0_P)
+      shift = (start + 1) - length;
+    else
+      shift = word_length - (start + length);
+    *buffer = (*buffer & ~(mask << shift)) | ((value & mask) << shift);
+  }
+
+#else /* ! CGEN_INT_INSN_P */
+
+  {
+    unsigned char *bufp = (unsigned char *) buffer + word_offset / 8;
+
+    insert_1 (od, value, start, length, word_length, bufp);
+  }
+
+#endif /* ! CGEN_INT_INSN_P */
 
   return NULL;
 }
@@ -170,7 +262,8 @@ insert_normal (value, attrs, start, length, total_length, buffer)
 */
 
 static const char *
-parse_insn_normal (insn, strp, fields)
+parse_insn_normal (od, insn, strp, fields)
+     CGEN_OPCODE_DESC od;
      const CGEN_INSN * insn;
      const char ** strp;
      CGEN_FIELDS * fields;
@@ -186,23 +279,25 @@ parse_insn_normal (insn, strp, fields)
 #endif
 
   /* For now we assume the mnemonic is first (there are no leading operands).
-     We can parse it without needing to set up operand parsing.  */
+     We can parse it without needing to set up operand parsing.
+     GAS's input scrubber will ensure mnemonics are lowercase, but we may
+     not be called from GAS.  */
   p = CGEN_INSN_MNEMONIC (insn);
-  while (* p && * p == * str)
-    ++ p, ++ str;
+  while (*p && tolower (*p) == tolower (*str))
+    ++p, ++str;
   
   if (* p || (* str && !isspace (* str)))
     return _("unrecognized instruction");
 
-  CGEN_INIT_PARSE ();
-  cgen_init_parse_operand ();
+  CGEN_INIT_PARSE (od);
+  cgen_init_parse_operand (od);
 #ifdef CGEN_MNEMONIC_OPERANDS
   past_opcode_p = 0;
 #endif
 
   /* We don't check for (*str != '\0') here because we want to parse
      any trailing fake arguments in the syntax string.  */
-  syn = CGEN_SYNTAX_STRING (CGEN_INSN_SYNTAX (insn));
+  syn = CGEN_SYNTAX_STRING (syntax);
 
   /* Mnemonics come first for now, ensure valid string.  */
   if (! CGEN_SYNTAX_MNEMONIC_P (* syn))
@@ -235,8 +330,8 @@ parse_insn_normal (insn, strp, fields)
 	}
 
       /* We have an operand of some sort.  */
-      errmsg = @arch@_cgen_parse_operand (CGEN_SYNTAX_FIELD (*syn),
-					 &str, fields);
+      errmsg = @arch@_cgen_parse_operand (od, CGEN_SYNTAX_FIELD (*syn),
+					  &str, fields);
       if (errmsg)
 	return errmsg;
 
@@ -261,59 +356,50 @@ parse_insn_normal (insn, strp, fields)
     }
 
   /* We couldn't parse it.  */
-  return "unrecognized instruction";
+  return _("unrecognized instruction");
 }
 
 /* Default insn builder (insert handler).
-   The instruction is recorded in target byte order.
+   The instruction is recorded in CGEN_INT_INSN_P byte order
+   (meaning that if CGEN_INT_INSN_P BUFFER is an int * and thus the value is
+   recorded in host byte order, otherwise BUFFER is an array of bytes and the
+   value is recorded in target byte order).
    The result is an error message or NULL if success.  */
-/* FIXME: change buffer to char *?  */
 
 static const char *
-insert_insn_normal (insn, fields, buffer, pc)
+insert_insn_normal (od, insn, fields, buffer, pc)
+     CGEN_OPCODE_DESC od;
      const CGEN_INSN * insn;
      CGEN_FIELDS * fields;
-     cgen_insn_t * buffer;
+     CGEN_INSN_BYTES_PTR buffer;
      bfd_vma pc;
 {
   const CGEN_SYNTAX * syntax = CGEN_INSN_SYNTAX (insn);
-  bfd_vma value;
+  unsigned long value;
   const unsigned char * syn;
 
-  CGEN_INIT_INSERT ();
-  value = CGEN_INSN_VALUE (insn);
+  CGEN_INIT_INSERT (od);
+  value = CGEN_INSN_BASE_VALUE (insn);
 
   /* If we're recording insns as numbers (rather than a string of bytes),
      target byte order handling is deferred until later.  */
-#undef min
-#define min(a,b) ((a) < (b) ? (a) : (b))
-#if 0 /*def CGEN_INT_INSN*/
-  *buffer = value;
-#else
-  switch (min (CGEN_BASE_INSN_BITSIZE, CGEN_FIELDS_BITSIZE (fields)))
-    {
-    case 8:
-      * buffer = value;
-      break;
-    case 16:
-      if (CGEN_CURRENT_ENDIAN == CGEN_ENDIAN_BIG)
-	bfd_putb16 (value, (char *) buffer);
-      else
-	bfd_putl16 (value, (char *) buffer);
-      break;
-    case 32:
-      if (CGEN_CURRENT_ENDIAN == CGEN_ENDIAN_BIG)
-	bfd_putb32 (value, (char *) buffer);
-      else
-	bfd_putl32 (value, (char *) buffer);
-      break;
-    default:
-      abort ();
-    }
-#endif
 
-  /* ??? Rather than scanning the syntax string again, we could store
-     in `fields' a null terminated list of the fields that are present.  */
+#if CGEN_INT_INSN_P
+
+  *buffer = value;
+
+#else
+
+  cgen_put_insn_value (od, buffer, min (CGEN_BASE_INSN_BITSIZE,
+					CGEN_FIELDS_BITSIZE (fields)),
+		       value);
+
+#endif /* ! CGEN_INT_INSN_P */
+
+  /* ??? It would be better to scan the format's fields.
+     Still need to be able to insert a value based on the operand though;
+     e.g. storing a branch displacement that got resolved later.
+     Needs more thought first.  */
 
   for (syn = CGEN_SYNTAX_STRING (syntax); * syn != '\0'; ++ syn)
     {
@@ -322,8 +408,8 @@ insert_insn_normal (insn, fields, buffer, pc)
       if (CGEN_SYNTAX_CHAR_P (* syn))
 	continue;
 
-      errmsg = @arch@_cgen_insert_operand (CGEN_SYNTAX_FIELD (*syn), fields,
-					   (char *) buffer, pc);
+      errmsg = @arch@_cgen_insert_operand (od, CGEN_SYNTAX_FIELD (*syn),
+					   fields, buffer, pc);
       if (errmsg)
 	return errmsg;
     }
@@ -335,8 +421,10 @@ insert_insn_normal (insn, fields, buffer, pc)
    This routine is called for each instruction to be assembled.
    STR points to the insn to be assembled.
    We assume all necessary tables have been initialized.
-   The assembled instruction, less any fixups, is stored in buf.
-   [??? What byte order?]
+   The assembled instruction, less any fixups, is stored in BUF.
+   Remember that if CGEN_INT_INSN_P then BUF is an int and thus the value
+   still needs to be converted to target byte order, otherwise BUF is an array
+   of bytes in target byte order.
    The result is a pointer to the insn's entry in the opcode table,
    or NULL if an error occured (an error message will have already been
    printed).
@@ -345,10 +433,11 @@ insert_insn_normal (insn, fields, buffer, pc)
    this function recurses.  */
 
 const CGEN_INSN *
-@arch@_cgen_assemble_insn (str, fields, buf, errmsg)
+@arch@_cgen_assemble_insn (od, str, fields, buf, errmsg)
+     CGEN_OPCODE_DESC od;
      const char * str;
      CGEN_FIELDS * fields;
-     cgen_insn_t * buf;
+     CGEN_INSN_BYTES_PTR buf;
      char ** errmsg;
 {
   const char * start;
@@ -360,7 +449,7 @@ const CGEN_INSN *
 
   /* The instructions are stored in hashed lists.
      Get the first in the list.  */
-  ilist = CGEN_ASM_LOOKUP_INSN (str);
+  ilist = CGEN_ASM_LOOKUP_INSN (od, str);
 
   /* Keep looking until we find a match.  */
 
@@ -371,7 +460,7 @@ const CGEN_INSN *
 
 #if 0 /* not needed as unsupported opcodes shouldn't be in the hash lists */
       /* Is this insn supported by the selected cpu?  */
-      if (! @arch@_cgen_insn_supported (insn))
+      if (! @arch@_cgen_insn_supported (od, insn))
 	continue;
 #endif
 
@@ -383,15 +472,13 @@ const CGEN_INSN *
 
       str = start;
 
-      /* Record a default length for the insn.  This will get set to the
-	 correct value while parsing.  */
-      /* FIXME: wip */
+      /* Allow parse/insert handlers to obtain length of insn.  */
       CGEN_FIELDS_BITSIZE (fields) = CGEN_INSN_BITSIZE (insn);
 
-      if (! CGEN_PARSE_FN (insn) (insn, & str, fields))
+      if (! CGEN_PARSE_FN (insn) (od, insn, & str, fields))
 	{
 	  /* ??? 0 is passed for `pc' */
-	  if (CGEN_INSERT_FN (insn) (insn, fields, buf, (bfd_vma) 0) != NULL)
+	  if (CGEN_INSERT_FN (insn) (od, insn, fields, buf, (bfd_vma) 0) != NULL)
 	    continue;
 	  /* It is up to the caller to actually output the insn and any
 	     queued relocs.  */
@@ -427,7 +514,8 @@ const CGEN_INSN *
    FIXME: Not currently used.  */
 
 void
-@arch@_cgen_asm_hash_keywords (opvals)
+@arch@_cgen_asm_hash_keywords (od, opvals)
+     CGEN_OPCODE_DESC od;
      CGEN_KEYWORD * opvals;
 {
   CGEN_KEYWORD_SEARCH search = cgen_keyword_search_init (opvals, NULL);
@@ -439,7 +527,7 @@ void
       if (! @arch@_cgen_opval_supported (ke))
 	continue;
 #endif
-      cgen_asm_record_register (ke->name, ke->value);
+      cgen_asm_record_register (od, ke->name, ke->value);
     }
 }
 

@@ -1,3 +1,15 @@
+1999-01-05  Doug Evans  <devans@casey.cygnus.com>
+
+start-sanitize-cygnus
+	* cgen-asm.in (insert_normal): Use CGEN_BOOL_ATTR.
+	* cgen-asm.in (extract_normal): Ditto.
+end-sanitize-cygnus
+start-sanitize-fr30
+	* fr30-asm.c,fr30-dis.c,fr30-opc.h,fr30-opc.c: Regenerate.
+end-sanitize-fr30
+	* i960c-asm.c,i960c-dis.c,i960c-opc.h,i960c-opc.c: Regenerate.
+	* m32r-asm.c,m32r-dis.c,m32r-opc.h,m32r-opc.c: Regenerate.
+
 1999-01-04  Jason Molenda  (jsm@bugshack.cygnus.com)
 
 	* configure.in: Require autoconf 2.12.1 or higher.

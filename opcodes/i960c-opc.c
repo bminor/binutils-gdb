@@ -202,6 +202,13 @@ i960_cgen_lookup_get_insn_operands (od, insn, insn_value, length, indices)
 }
 /* Attributes.  */
 
+static const CGEN_ATTR_ENTRY bool_attr[] =
+{
+  { "#f", 0 },
+  { "#t", 1 },
+  { 0, 0 }
+};
+
 static const CGEN_ATTR_ENTRY MACH_attr[] =
 {
   { "base", MACH_BASE },
@@ -211,39 +218,59 @@ static const CGEN_ATTR_ENTRY MACH_attr[] =
   { 0, 0 }
 };
 
+const CGEN_ATTR_TABLE i960_cgen_ifield_attr_table[] =
+{
+  { "MACH", & MACH_attr[0] },
+  { "VIRTUAL", &bool_attr[0], &bool_attr[0] },
+  { "UNSIGNED", &bool_attr[0], &bool_attr[0] },
+  { "PCREL-ADDR", &bool_attr[0], &bool_attr[0] },
+  { "ABS-ADDR", &bool_attr[0], &bool_attr[0] },
+  { "RESERVED", &bool_attr[0], &bool_attr[0] },
+  { "SIGN-OPT", &bool_attr[0], &bool_attr[0] },
+  { 0, 0, 0 }
+};
+
 const CGEN_ATTR_TABLE i960_cgen_hardware_attr_table[] =
 {
-  { "CACHE-ADDR", NULL },
-  { "PC", NULL },
-  { "PROFILE", NULL },
-  { 0, 0 }
+  { "MACH", & MACH_attr[0] },
+  { "VIRTUAL", &bool_attr[0], &bool_attr[0] },
+  { "UNSIGNED", &bool_attr[0], &bool_attr[0] },
+  { "SIGNED", &bool_attr[0], &bool_attr[0] },
+  { "CACHE-ADDR", &bool_attr[0], &bool_attr[0] },
+  { "FUN-ACCESS", &bool_attr[0], &bool_attr[0] },
+  { "PC", &bool_attr[0], &bool_attr[0] },
+  { "PROFILE", &bool_attr[0], &bool_attr[0] },
+  { 0, 0, 0 }
 };
 
 const CGEN_ATTR_TABLE i960_cgen_operand_attr_table[] =
 {
-  { "ABS-ADDR", NULL },
-  { "NEGATIVE", NULL },
-  { "PCREL-ADDR", NULL },
-  { "RELAX", NULL },
-  { "RELOC", NULL },
-  { "SEM-ONLY", NULL },
-  { "SIGN-OPT", NULL },
-  { "UNSIGNED", NULL },
-  { 0, 0 }
+  { "MACH", & MACH_attr[0] },
+  { "VIRTUAL", &bool_attr[0], &bool_attr[0] },
+  { "UNSIGNED", &bool_attr[0], &bool_attr[0] },
+  { "PCREL-ADDR", &bool_attr[0], &bool_attr[0] },
+  { "ABS-ADDR", &bool_attr[0], &bool_attr[0] },
+  { "SIGN-OPT", &bool_attr[0], &bool_attr[0] },
+  { "NEGATIVE", &bool_attr[0], &bool_attr[0] },
+  { "RELAX", &bool_attr[0], &bool_attr[0] },
+  { "SEM-ONLY", &bool_attr[0], &bool_attr[0] },
+  { 0, 0, 0 }
 };
 
 const CGEN_ATTR_TABLE i960_cgen_insn_attr_table[] =
 {
-  { "ALIAS", NULL },
-  { "COND-CTI", NULL },
-  { "DELAY-SLOT", NULL },
-  { "NO-DIS", NULL },
-  { "RELAX", NULL },
-  { "RELAXABLE", NULL },
-  { "SKIP-CTI", NULL },
-  { "UNCOND-CTI", NULL },
-  { "VIRTUAL", NULL },
-  { 0, 0 }
+  { "MACH", & MACH_attr[0] },
+  { "VIRTUAL", &bool_attr[0], &bool_attr[0] },
+  { "UNCOND-CTI", &bool_attr[0], &bool_attr[0] },
+  { "COND-CTI", &bool_attr[0], &bool_attr[0] },
+  { "SKIP-CTI", &bool_attr[0], &bool_attr[0] },
+  { "DELAY-SLOT", &bool_attr[0], &bool_attr[0] },
+  { "RELAXABLE", &bool_attr[0], &bool_attr[0] },
+  { "RELAX", &bool_attr[0], &bool_attr[0] },
+  { "ALIAS", &bool_attr[0], &bool_attr[0] },
+  { "NO-DIS", &bool_attr[0], &bool_attr[0] },
+  { "PBB", &bool_attr[0], &bool_attr[0] },
+  { 0, 0, 0 }
 };
 
 CGEN_KEYWORD_ENTRY i960_cgen_opval_h_gr_entries[] = 
@@ -307,14 +334,14 @@ CGEN_KEYWORD i960_cgen_opval_h_cc =
 #define HW_ENT(n) i960_cgen_hw_entries[n]
 static const CGEN_HW_ENTRY i960_cgen_hw_entries[] =
 {
-  { HW_H_PC, & HW_ENT (HW_H_PC + 1), "h-pc", CGEN_ASM_KEYWORD, (PTR) 0, { 0, 0|(1<<CGEN_HW_PROFILE)|(1<<CGEN_HW_PC), { 0 } } },
-  { HW_H_MEMORY, & HW_ENT (HW_H_MEMORY + 1), "h-memory", CGEN_ASM_KEYWORD, (PTR) 0, { 0, 0, { 0 } } },
-  { HW_H_SINT, & HW_ENT (HW_H_SINT + 1), "h-sint", CGEN_ASM_KEYWORD, (PTR) 0, { 0, 0, { 0 } } },
-  { HW_H_UINT, & HW_ENT (HW_H_UINT + 1), "h-uint", CGEN_ASM_KEYWORD, (PTR) 0, { 0, 0, { 0 } } },
-  { HW_H_ADDR, & HW_ENT (HW_H_ADDR + 1), "h-addr", CGEN_ASM_KEYWORD, (PTR) 0, { 0, 0, { 0 } } },
-  { HW_H_IADDR, & HW_ENT (HW_H_IADDR + 1), "h-iaddr", CGEN_ASM_KEYWORD, (PTR) 0, { 0, 0, { 0 } } },
-  { HW_H_GR, & HW_ENT (HW_H_GR + 1), "h-gr", CGEN_ASM_KEYWORD, (PTR) & i960_cgen_opval_h_gr, { 0, 0|(1<<CGEN_HW_CACHE_ADDR)|(1<<CGEN_HW_PROFILE), { 0 } } },
-  { HW_H_CC, & HW_ENT (HW_H_CC + 1), "h-cc", CGEN_ASM_KEYWORD, (PTR) & i960_cgen_opval_h_cc, { 0, 0|(1<<CGEN_HW_CACHE_ADDR)|(1<<CGEN_HW_PROFILE), { 0 } } },
+  { HW_H_PC, & HW_ENT (HW_H_PC + 1), "h-pc", CGEN_ASM_KEYWORD, (PTR) 0, { CGEN_HW_NBOOL_ATTRS, 0|(1<<CGEN_HW_PROFILE)|(1<<CGEN_HW_PC), { (1<<MACH_BASE) } } },
+  { HW_H_MEMORY, & HW_ENT (HW_H_MEMORY + 1), "h-memory", CGEN_ASM_KEYWORD, (PTR) 0, { CGEN_HW_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } } },
+  { HW_H_SINT, & HW_ENT (HW_H_SINT + 1), "h-sint", CGEN_ASM_KEYWORD, (PTR) 0, { CGEN_HW_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } } },
+  { HW_H_UINT, & HW_ENT (HW_H_UINT + 1), "h-uint", CGEN_ASM_KEYWORD, (PTR) 0, { CGEN_HW_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } } },
+  { HW_H_ADDR, & HW_ENT (HW_H_ADDR + 1), "h-addr", CGEN_ASM_KEYWORD, (PTR) 0, { CGEN_HW_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } } },
+  { HW_H_IADDR, & HW_ENT (HW_H_IADDR + 1), "h-iaddr", CGEN_ASM_KEYWORD, (PTR) 0, { CGEN_HW_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } } },
+  { HW_H_GR, & HW_ENT (HW_H_GR + 1), "h-gr", CGEN_ASM_KEYWORD, (PTR) & i960_cgen_opval_h_gr, { CGEN_HW_NBOOL_ATTRS, 0|(1<<CGEN_HW_CACHE_ADDR)|(1<<CGEN_HW_PROFILE), { (1<<MACH_BASE) } } },
+  { HW_H_CC, & HW_ENT (HW_H_CC + 1), "h-cc", CGEN_ASM_KEYWORD, (PTR) & i960_cgen_opval_h_cc, { CGEN_HW_NBOOL_ATTRS, 0|(1<<CGEN_HW_CACHE_ADDR)|(1<<CGEN_HW_PROFILE), { (1<<MACH_BASE) } } },
   { 0 }
 };
 
@@ -322,32 +349,32 @@ static const CGEN_HW_ENTRY i960_cgen_hw_entries[] =
 
 static const CGEN_IFLD i960_cgen_ifld_table[] =
 {
-  { I960_F_NIL, "f-nil", 0, 0, 0, 0, { 0, 0, { 0 } }  },
-  { I960_F_OPCODE, "f-opcode", 0, 32, 0, 8, { 0, 0|(1<<CGEN_IFLD_UNSIGNED), { 0 } }  },
-  { I960_F_SRCDST, "f-srcdst", 0, 32, 8, 5, { 0, 0|(1<<CGEN_IFLD_UNSIGNED), { 0 } }  },
-  { I960_F_SRC2, "f-src2", 0, 32, 13, 5, { 0, 0|(1<<CGEN_IFLD_UNSIGNED), { 0 } }  },
-  { I960_F_M3, "f-m3", 0, 32, 18, 1, { 0, 0|(1<<CGEN_IFLD_UNSIGNED), { 0 } }  },
-  { I960_F_M2, "f-m2", 0, 32, 19, 1, { 0, 0|(1<<CGEN_IFLD_UNSIGNED), { 0 } }  },
-  { I960_F_M1, "f-m1", 0, 32, 20, 1, { 0, 0|(1<<CGEN_IFLD_UNSIGNED), { 0 } }  },
-  { I960_F_OPCODE2, "f-opcode2", 0, 32, 21, 4, { 0, 0|(1<<CGEN_IFLD_UNSIGNED), { 0 } }  },
-  { I960_F_ZERO, "f-zero", 0, 32, 25, 2, { 0, 0|(1<<CGEN_IFLD_UNSIGNED), { 0 } }  },
-  { I960_F_SRC1, "f-src1", 0, 32, 27, 5, { 0, 0|(1<<CGEN_IFLD_UNSIGNED), { 0 } }  },
-  { I960_F_ABASE, "f-abase", 0, 32, 13, 5, { 0, 0|(1<<CGEN_IFLD_UNSIGNED), { 0 } }  },
-  { I960_F_MODEA, "f-modea", 0, 32, 18, 1, { 0, 0|(1<<CGEN_IFLD_UNSIGNED), { 0 } }  },
-  { I960_F_ZEROA, "f-zeroa", 0, 32, 19, 1, { 0, 0|(1<<CGEN_IFLD_UNSIGNED), { 0 } }  },
-  { I960_F_OFFSET, "f-offset", 0, 32, 20, 12, { 0, 0|(1<<CGEN_IFLD_UNSIGNED), { 0 } }  },
-  { I960_F_MODEB, "f-modeb", 0, 32, 18, 4, { 0, 0|(1<<CGEN_IFLD_UNSIGNED), { 0 } }  },
-  { I960_F_SCALE, "f-scale", 0, 32, 22, 3, { 0, 0|(1<<CGEN_IFLD_UNSIGNED), { 0 } }  },
-  { I960_F_ZEROB, "f-zerob", 0, 32, 25, 2, { 0, 0|(1<<CGEN_IFLD_UNSIGNED), { 0 } }  },
-  { I960_F_INDEX, "f-index", 0, 32, 27, 5, { 0, 0|(1<<CGEN_IFLD_UNSIGNED), { 0 } }  },
-  { I960_F_OPTDISP, "f-optdisp", 32, 32, 0, 32, { 0, 0|(1<<CGEN_IFLD_UNSIGNED), { 0 } }  },
-  { I960_F_BR_SRC1, "f-br-src1", 0, 32, 8, 5, { 0, 0|(1<<CGEN_IFLD_UNSIGNED), { 0 } }  },
-  { I960_F_BR_SRC2, "f-br-src2", 0, 32, 13, 5, { 0, 0|(1<<CGEN_IFLD_UNSIGNED), { 0 } }  },
-  { I960_F_BR_M1, "f-br-m1", 0, 32, 18, 1, { 0, 0|(1<<CGEN_IFLD_UNSIGNED), { 0 } }  },
-  { I960_F_BR_DISP, "f-br-disp", 0, 32, 19, 11, { 0, 0|(1<<CGEN_IFLD_RELOC)|(1<<CGEN_IFLD_PCREL_ADDR), { 0 } }  },
-  { I960_F_BR_ZERO, "f-br-zero", 0, 32, 30, 2, { 0, 0|(1<<CGEN_IFLD_UNSIGNED), { 0 } }  },
-  { I960_F_CTRL_DISP, "f-ctrl-disp", 0, 32, 8, 22, { 0, 0|(1<<CGEN_IFLD_RELOC)|(1<<CGEN_IFLD_PCREL_ADDR), { 0 } }  },
-  { I960_F_CTRL_ZERO, "f-ctrl-zero", 0, 32, 30, 2, { 0, 0|(1<<CGEN_IFLD_UNSIGNED), { 0 } }  },
+  { I960_F_NIL, "f-nil", 0, 0, 0, 0, { CGEN_IFLD_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }  },
+  { I960_F_OPCODE, "f-opcode", 0, 32, 0, 8, { CGEN_IFLD_NBOOL_ATTRS, 0|(1<<CGEN_IFLD_UNSIGNED), { (1<<MACH_BASE) } }  },
+  { I960_F_SRCDST, "f-srcdst", 0, 32, 8, 5, { CGEN_IFLD_NBOOL_ATTRS, 0|(1<<CGEN_IFLD_UNSIGNED), { (1<<MACH_BASE) } }  },
+  { I960_F_SRC2, "f-src2", 0, 32, 13, 5, { CGEN_IFLD_NBOOL_ATTRS, 0|(1<<CGEN_IFLD_UNSIGNED), { (1<<MACH_BASE) } }  },
+  { I960_F_M3, "f-m3", 0, 32, 18, 1, { CGEN_IFLD_NBOOL_ATTRS, 0|(1<<CGEN_IFLD_UNSIGNED), { (1<<MACH_BASE) } }  },
+  { I960_F_M2, "f-m2", 0, 32, 19, 1, { CGEN_IFLD_NBOOL_ATTRS, 0|(1<<CGEN_IFLD_UNSIGNED), { (1<<MACH_BASE) } }  },
+  { I960_F_M1, "f-m1", 0, 32, 20, 1, { CGEN_IFLD_NBOOL_ATTRS, 0|(1<<CGEN_IFLD_UNSIGNED), { (1<<MACH_BASE) } }  },
+  { I960_F_OPCODE2, "f-opcode2", 0, 32, 21, 4, { CGEN_IFLD_NBOOL_ATTRS, 0|(1<<CGEN_IFLD_UNSIGNED), { (1<<MACH_BASE) } }  },
+  { I960_F_ZERO, "f-zero", 0, 32, 25, 2, { CGEN_IFLD_NBOOL_ATTRS, 0|(1<<CGEN_IFLD_UNSIGNED), { (1<<MACH_BASE) } }  },
+  { I960_F_SRC1, "f-src1", 0, 32, 27, 5, { CGEN_IFLD_NBOOL_ATTRS, 0|(1<<CGEN_IFLD_UNSIGNED), { (1<<MACH_BASE) } }  },
+  { I960_F_ABASE, "f-abase", 0, 32, 13, 5, { CGEN_IFLD_NBOOL_ATTRS, 0|(1<<CGEN_IFLD_UNSIGNED), { (1<<MACH_BASE) } }  },
+  { I960_F_MODEA, "f-modea", 0, 32, 18, 1, { CGEN_IFLD_NBOOL_ATTRS, 0|(1<<CGEN_IFLD_UNSIGNED), { (1<<MACH_BASE) } }  },
+  { I960_F_ZEROA, "f-zeroa", 0, 32, 19, 1, { CGEN_IFLD_NBOOL_ATTRS, 0|(1<<CGEN_IFLD_UNSIGNED), { (1<<MACH_BASE) } }  },
+  { I960_F_OFFSET, "f-offset", 0, 32, 20, 12, { CGEN_IFLD_NBOOL_ATTRS, 0|(1<<CGEN_IFLD_UNSIGNED), { (1<<MACH_BASE) } }  },
+  { I960_F_MODEB, "f-modeb", 0, 32, 18, 4, { CGEN_IFLD_NBOOL_ATTRS, 0|(1<<CGEN_IFLD_UNSIGNED), { (1<<MACH_BASE) } }  },
+  { I960_F_SCALE, "f-scale", 0, 32, 22, 3, { CGEN_IFLD_NBOOL_ATTRS, 0|(1<<CGEN_IFLD_UNSIGNED), { (1<<MACH_BASE) } }  },
+  { I960_F_ZEROB, "f-zerob", 0, 32, 25, 2, { CGEN_IFLD_NBOOL_ATTRS, 0|(1<<CGEN_IFLD_UNSIGNED), { (1<<MACH_BASE) } }  },
+  { I960_F_INDEX, "f-index", 0, 32, 27, 5, { CGEN_IFLD_NBOOL_ATTRS, 0|(1<<CGEN_IFLD_UNSIGNED), { (1<<MACH_BASE) } }  },
+  { I960_F_OPTDISP, "f-optdisp", 32, 32, 0, 32, { CGEN_IFLD_NBOOL_ATTRS, 0|(1<<CGEN_IFLD_UNSIGNED), { (1<<MACH_BASE) } }  },
+  { I960_F_BR_SRC1, "f-br-src1", 0, 32, 8, 5, { CGEN_IFLD_NBOOL_ATTRS, 0|(1<<CGEN_IFLD_UNSIGNED), { (1<<MACH_BASE) } }  },
+  { I960_F_BR_SRC2, "f-br-src2", 0, 32, 13, 5, { CGEN_IFLD_NBOOL_ATTRS, 0|(1<<CGEN_IFLD_UNSIGNED), { (1<<MACH_BASE) } }  },
+  { I960_F_BR_M1, "f-br-m1", 0, 32, 18, 1, { CGEN_IFLD_NBOOL_ATTRS, 0|(1<<CGEN_IFLD_UNSIGNED), { (1<<MACH_BASE) } }  },
+  { I960_F_BR_DISP, "f-br-disp", 0, 32, 19, 11, { CGEN_IFLD_NBOOL_ATTRS, 0|(1<<CGEN_IFLD_PCREL_ADDR), { (1<<MACH_BASE) } }  },
+  { I960_F_BR_ZERO, "f-br-zero", 0, 32, 30, 2, { CGEN_IFLD_NBOOL_ATTRS, 0|(1<<CGEN_IFLD_UNSIGNED), { (1<<MACH_BASE) } }  },
+  { I960_F_CTRL_DISP, "f-ctrl-disp", 0, 32, 8, 22, { CGEN_IFLD_NBOOL_ATTRS, 0|(1<<CGEN_IFLD_PCREL_ADDR), { (1<<MACH_BASE) } }  },
+  { I960_F_CTRL_ZERO, "f-ctrl-zero", 0, 32, 30, 2, { CGEN_IFLD_NBOOL_ATTRS, 0|(1<<CGEN_IFLD_UNSIGNED), { (1<<MACH_BASE) } }  },
   { 0 }
 };
 
@@ -360,55 +387,55 @@ const CGEN_OPERAND i960_cgen_operand_table[MAX_OPERANDS] =
 {
 /* pc: program counter */
   { "pc", & HW_ENT (HW_H_PC), 0, 0,
-    { 0, 0|(1<<CGEN_OPERAND_SEM_ONLY), { 0 } }  },
+    { CGEN_OPERAND_NBOOL_ATTRS, 0|(1<<CGEN_OPERAND_SEM_ONLY), { (1<<MACH_BASE) } }  },
 /* src1: source register 1 */
   { "src1", & HW_ENT (HW_H_GR), 27, 5,
-    { 0, 0|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
+    { CGEN_OPERAND_NBOOL_ATTRS, 0|(1<<CGEN_OPERAND_UNSIGNED), { (1<<MACH_BASE) } }  },
 /* src2: source register 2 */
   { "src2", & HW_ENT (HW_H_GR), 13, 5,
-    { 0, 0|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
+    { CGEN_OPERAND_NBOOL_ATTRS, 0|(1<<CGEN_OPERAND_UNSIGNED), { (1<<MACH_BASE) } }  },
 /* dst: source/dest register */
   { "dst", & HW_ENT (HW_H_GR), 8, 5,
-    { 0, 0|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
+    { CGEN_OPERAND_NBOOL_ATTRS, 0|(1<<CGEN_OPERAND_UNSIGNED), { (1<<MACH_BASE) } }  },
 /* lit1: literal 1 */
   { "lit1", & HW_ENT (HW_H_UINT), 27, 5,
-    { 0, 0|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
+    { CGEN_OPERAND_NBOOL_ATTRS, 0|(1<<CGEN_OPERAND_UNSIGNED), { (1<<MACH_BASE) } }  },
 /* lit2: literal 2 */
   { "lit2", & HW_ENT (HW_H_UINT), 13, 5,
-    { 0, 0|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
+    { CGEN_OPERAND_NBOOL_ATTRS, 0|(1<<CGEN_OPERAND_UNSIGNED), { (1<<MACH_BASE) } }  },
 /* st_src: store src */
   { "st_src", & HW_ENT (HW_H_GR), 8, 5,
-    { 0, 0|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
+    { CGEN_OPERAND_NBOOL_ATTRS, 0|(1<<CGEN_OPERAND_UNSIGNED), { (1<<MACH_BASE) } }  },
 /* abase: abase */
   { "abase", & HW_ENT (HW_H_GR), 13, 5,
-    { 0, 0|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
+    { CGEN_OPERAND_NBOOL_ATTRS, 0|(1<<CGEN_OPERAND_UNSIGNED), { (1<<MACH_BASE) } }  },
 /* offset: offset */
   { "offset", & HW_ENT (HW_H_UINT), 20, 12,
-    { 0, 0|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
+    { CGEN_OPERAND_NBOOL_ATTRS, 0|(1<<CGEN_OPERAND_UNSIGNED), { (1<<MACH_BASE) } }  },
 /* scale: scale */
   { "scale", & HW_ENT (HW_H_UINT), 22, 3,
-    { 0, 0|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
+    { CGEN_OPERAND_NBOOL_ATTRS, 0|(1<<CGEN_OPERAND_UNSIGNED), { (1<<MACH_BASE) } }  },
 /* index: index */
   { "index", & HW_ENT (HW_H_GR), 27, 5,
-    { 0, 0|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
+    { CGEN_OPERAND_NBOOL_ATTRS, 0|(1<<CGEN_OPERAND_UNSIGNED), { (1<<MACH_BASE) } }  },
 /* optdisp: optional displacement */
   { "optdisp", & HW_ENT (HW_H_UINT), 0, 32,
-    { 0, 0|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
+    { CGEN_OPERAND_NBOOL_ATTRS, 0|(1<<CGEN_OPERAND_UNSIGNED), { (1<<MACH_BASE) } }  },
 /* br_src1: branch src1 */
   { "br_src1", & HW_ENT (HW_H_GR), 8, 5,
-    { 0, 0|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
+    { CGEN_OPERAND_NBOOL_ATTRS, 0|(1<<CGEN_OPERAND_UNSIGNED), { (1<<MACH_BASE) } }  },
 /* br_src2: branch src2 */
   { "br_src2", & HW_ENT (HW_H_GR), 13, 5,
-    { 0, 0|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
+    { CGEN_OPERAND_NBOOL_ATTRS, 0|(1<<CGEN_OPERAND_UNSIGNED), { (1<<MACH_BASE) } }  },
 /* br_disp: branch displacement */
   { "br_disp", & HW_ENT (HW_H_IADDR), 19, 11,
-    { 0, 0|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR), { 0 } }  },
+    { CGEN_OPERAND_NBOOL_ATTRS, 0|(1<<CGEN_OPERAND_PCREL_ADDR), { (1<<MACH_BASE) } }  },
 /* br_lit1: branch literal 1 */
   { "br_lit1", & HW_ENT (HW_H_UINT), 8, 5,
-    { 0, 0|(1<<CGEN_OPERAND_UNSIGNED), { 0 } }  },
+    { CGEN_OPERAND_NBOOL_ATTRS, 0|(1<<CGEN_OPERAND_UNSIGNED), { (1<<MACH_BASE) } }  },
 /* ctrl_disp: ctrl branch disp */
   { "ctrl_disp", & HW_ENT (HW_H_IADDR), 8, 22,
-    { 0, 0|(1<<CGEN_OPERAND_RELOC)|(1<<CGEN_OPERAND_PCREL_ADDR), { 0 } }  },
+    { CGEN_OPERAND_NBOOL_ATTRS, 0|(1<<CGEN_OPERAND_PCREL_ADDR), { (1<<MACH_BASE) } }  },
 };
 
 /* Operand references.  */
@@ -2156,12 +2183,6 @@ static const CGEN_OPERAND_INSTANCE fmt_fmark_ops[] = {
   { 0 }
 };
 
-static const CGEN_OPERAND_INSTANCE fmt_flushreg_ops[] = {
-  { INPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { OUTPUT, "dst", & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DST), 0, 0 },
-  { 0 }
-};
-
 #undef INPUT
 #undef OUTPUT
 #undef COND_REF
@@ -2169,6 +2190,10 @@ static const CGEN_OPERAND_INSTANCE fmt_flushreg_ops[] = {
 /* Instruction formats.  */
 
 #define F(f) & i960_cgen_ifld_table[CONCAT2 (I960_,f)]
+
+static const CGEN_IFMT fmt_empty = {
+  0, 0, 0x0, { 0 }
+};
 
 static const CGEN_IFMT fmt_mulo = {
   32, 32, 0xff003fe0, { F (F_OPCODE), F (F_SRCDST), F (F_SRC2), F (F_M3), F (F_M2), F (F_M1), F (F_OPCODE2), F (F_ZERO), F (F_SRC1), 0 }
@@ -2861,7 +2886,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo, { 0x70000080 },
     (PTR) & fmt_mulo_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* mulo $lit1, $src2, $dst */
   {
@@ -2870,7 +2895,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo1, { 0x70000880 },
     (PTR) & fmt_mulo1_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* mulo $src1, $lit2, $dst */
   {
@@ -2879,7 +2904,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo2, { 0x70001080 },
     (PTR) & fmt_mulo2_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* mulo $lit1, $lit2, $dst */
   {
@@ -2888,7 +2913,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo3, { 0x70001880 },
     (PTR) & fmt_mulo3_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* remo $src1, $src2, $dst */
   {
@@ -2897,7 +2922,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo, { 0x70000400 },
     (PTR) & fmt_remo_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* remo $lit1, $src2, $dst */
   {
@@ -2906,7 +2931,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo1, { 0x70000c00 },
     (PTR) & fmt_remo1_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* remo $src1, $lit2, $dst */
   {
@@ -2915,7 +2940,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo2, { 0x70001400 },
     (PTR) & fmt_remo2_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* remo $lit1, $lit2, $dst */
   {
@@ -2924,7 +2949,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo3, { 0x70001c00 },
     (PTR) & fmt_remo3_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* divo $src1, $src2, $dst */
   {
@@ -2933,7 +2958,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo, { 0x70000580 },
     (PTR) & fmt_remo_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* divo $lit1, $src2, $dst */
   {
@@ -2942,7 +2967,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo1, { 0x70000d80 },
     (PTR) & fmt_remo1_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* divo $src1, $lit2, $dst */
   {
@@ -2951,7 +2976,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo2, { 0x70001580 },
     (PTR) & fmt_remo2_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* divo $lit1, $lit2, $dst */
   {
@@ -2960,7 +2985,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo3, { 0x70001d80 },
     (PTR) & fmt_remo3_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* remi $src1, $src2, $dst */
   {
@@ -2969,7 +2994,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo, { 0x74000400 },
     (PTR) & fmt_remo_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* remi $lit1, $src2, $dst */
   {
@@ -2978,7 +3003,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo1, { 0x74000c00 },
     (PTR) & fmt_remo1_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* remi $src1, $lit2, $dst */
   {
@@ -2987,7 +3012,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo2, { 0x74001400 },
     (PTR) & fmt_remo2_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* remi $lit1, $lit2, $dst */
   {
@@ -2996,7 +3021,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo3, { 0x74001c00 },
     (PTR) & fmt_remo3_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* divi $src1, $src2, $dst */
   {
@@ -3005,7 +3030,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo, { 0x74000580 },
     (PTR) & fmt_remo_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* divi $lit1, $src2, $dst */
   {
@@ -3014,7 +3039,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo1, { 0x74000d80 },
     (PTR) & fmt_remo1_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* divi $src1, $lit2, $dst */
   {
@@ -3023,7 +3048,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo2, { 0x74001580 },
     (PTR) & fmt_remo2_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* divi $lit1, $lit2, $dst */
   {
@@ -3032,7 +3057,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo3, { 0x74001d80 },
     (PTR) & fmt_remo3_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* addo $src1, $src2, $dst */
   {
@@ -3041,7 +3066,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo, { 0x59000000 },
     (PTR) & fmt_mulo_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* addo $lit1, $src2, $dst */
   {
@@ -3050,7 +3075,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo1, { 0x59000800 },
     (PTR) & fmt_mulo1_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* addo $src1, $lit2, $dst */
   {
@@ -3059,7 +3084,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo2, { 0x59001000 },
     (PTR) & fmt_mulo2_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* addo $lit1, $lit2, $dst */
   {
@@ -3068,7 +3093,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo3, { 0x59001800 },
     (PTR) & fmt_mulo3_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* subo $src1, $src2, $dst */
   {
@@ -3077,7 +3102,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo, { 0x59000100 },
     (PTR) & fmt_remo_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* subo $lit1, $src2, $dst */
   {
@@ -3086,7 +3111,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo1, { 0x59000900 },
     (PTR) & fmt_remo1_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* subo $src1, $lit2, $dst */
   {
@@ -3095,7 +3120,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo2, { 0x59001100 },
     (PTR) & fmt_remo2_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* subo $lit1, $lit2, $dst */
   {
@@ -3104,7 +3129,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo3, { 0x59001900 },
     (PTR) & fmt_remo3_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* notbit $src1, $src2, $dst */
   {
@@ -3113,7 +3138,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo, { 0x58000000 },
     (PTR) & fmt_mulo_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* notbit $lit1, $src2, $dst */
   {
@@ -3122,7 +3147,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo1, { 0x58000800 },
     (PTR) & fmt_mulo1_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* notbit $src1, $lit2, $dst */
   {
@@ -3131,7 +3156,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo2, { 0x58001000 },
     (PTR) & fmt_mulo2_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* notbit $lit1, $lit2, $dst */
   {
@@ -3140,7 +3165,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo3, { 0x58001800 },
     (PTR) & fmt_mulo3_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* and $src1, $src2, $dst */
   {
@@ -3149,7 +3174,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo, { 0x58000080 },
     (PTR) & fmt_mulo_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* and $lit1, $src2, $dst */
   {
@@ -3158,7 +3183,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo1, { 0x58000880 },
     (PTR) & fmt_mulo1_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* and $src1, $lit2, $dst */
   {
@@ -3167,7 +3192,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo2, { 0x58001080 },
     (PTR) & fmt_mulo2_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* and $lit1, $lit2, $dst */
   {
@@ -3176,7 +3201,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo3, { 0x58001880 },
     (PTR) & fmt_mulo3_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* andnot $src1, $src2, $dst */
   {
@@ -3185,7 +3210,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo, { 0x58000100 },
     (PTR) & fmt_remo_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* andnot $lit1, $src2, $dst */
   {
@@ -3194,7 +3219,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo1, { 0x58000900 },
     (PTR) & fmt_remo1_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* andnot $src1, $lit2, $dst */
   {
@@ -3203,7 +3228,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo2, { 0x58001100 },
     (PTR) & fmt_remo2_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* andnot $lit1, $lit2, $dst */
   {
@@ -3212,7 +3237,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo3, { 0x58001900 },
     (PTR) & fmt_remo3_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* setbit $src1, $src2, $dst */
   {
@@ -3221,7 +3246,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo, { 0x58000180 },
     (PTR) & fmt_mulo_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* setbit $lit1, $src2, $dst */
   {
@@ -3230,7 +3255,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo1, { 0x58000980 },
     (PTR) & fmt_mulo1_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* setbit $src1, $lit2, $dst */
   {
@@ -3239,7 +3264,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo2, { 0x58001180 },
     (PTR) & fmt_mulo2_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* setbit $lit1, $lit2, $dst */
   {
@@ -3248,7 +3273,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo3, { 0x58001980 },
     (PTR) & fmt_mulo3_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* notand $src1, $src2, $dst */
   {
@@ -3257,7 +3282,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo, { 0x58000200 },
     (PTR) & fmt_remo_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* notand $lit1, $src2, $dst */
   {
@@ -3266,7 +3291,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo1, { 0x58000a00 },
     (PTR) & fmt_remo1_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* notand $src1, $lit2, $dst */
   {
@@ -3275,7 +3300,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo2, { 0x58001200 },
     (PTR) & fmt_remo2_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* notand $lit1, $lit2, $dst */
   {
@@ -3284,7 +3309,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo3, { 0x58001a00 },
     (PTR) & fmt_remo3_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* xor $src1, $src2, $dst */
   {
@@ -3293,7 +3318,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo, { 0x58000300 },
     (PTR) & fmt_mulo_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* xor $lit1, $src2, $dst */
   {
@@ -3302,7 +3327,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo1, { 0x58000b00 },
     (PTR) & fmt_mulo1_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* xor $src1, $lit2, $dst */
   {
@@ -3311,7 +3336,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo2, { 0x58001300 },
     (PTR) & fmt_mulo2_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* xor $lit1, $lit2, $dst */
   {
@@ -3320,7 +3345,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo3, { 0x58001b00 },
     (PTR) & fmt_mulo3_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* or $src1, $src2, $dst */
   {
@@ -3329,7 +3354,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo, { 0x58000380 },
     (PTR) & fmt_mulo_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* or $lit1, $src2, $dst */
   {
@@ -3338,7 +3363,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo1, { 0x58000b80 },
     (PTR) & fmt_mulo1_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* or $src1, $lit2, $dst */
   {
@@ -3347,7 +3372,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo2, { 0x58001380 },
     (PTR) & fmt_mulo2_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* or $lit1, $lit2, $dst */
   {
@@ -3356,7 +3381,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo3, { 0x58001b80 },
     (PTR) & fmt_mulo3_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* nor $src1, $src2, $dst */
   {
@@ -3365,7 +3390,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo, { 0x58000400 },
     (PTR) & fmt_remo_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* nor $lit1, $src2, $dst */
   {
@@ -3374,7 +3399,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo1, { 0x58000c00 },
     (PTR) & fmt_remo1_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* nor $src1, $lit2, $dst */
   {
@@ -3383,7 +3408,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo2, { 0x58001400 },
     (PTR) & fmt_remo2_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* nor $lit1, $lit2, $dst */
   {
@@ -3392,7 +3417,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo3, { 0x58001c00 },
     (PTR) & fmt_remo3_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* not $src1, $src2, $dst */
   {
@@ -3401,7 +3426,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_not, { 0x58000500 },
     (PTR) & fmt_not_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* not $lit1, $src2, $dst */
   {
@@ -3410,7 +3435,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_not1, { 0x58000d00 },
     (PTR) & fmt_not1_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* not $src1, $lit2, $dst */
   {
@@ -3419,7 +3444,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_not2, { 0x58001500 },
     (PTR) & fmt_not2_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* not $lit1, $lit2, $dst */
   {
@@ -3428,7 +3453,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_not3, { 0x58001d00 },
     (PTR) & fmt_not3_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* clrbit $src1, $src2, $dst */
   {
@@ -3437,7 +3462,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo, { 0x58000600 },
     (PTR) & fmt_mulo_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* clrbit $lit1, $src2, $dst */
   {
@@ -3446,7 +3471,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo1, { 0x58000e00 },
     (PTR) & fmt_mulo1_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* clrbit $src1, $lit2, $dst */
   {
@@ -3455,7 +3480,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo2, { 0x58001600 },
     (PTR) & fmt_mulo2_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* clrbit $lit1, $lit2, $dst */
   {
@@ -3464,7 +3489,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_mulo3, { 0x58001e00 },
     (PTR) & fmt_mulo3_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* shlo $src1, $src2, $dst */
   {
@@ -3473,7 +3498,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo, { 0x59000600 },
     (PTR) & fmt_remo_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* shlo $lit1, $src2, $dst */
   {
@@ -3482,7 +3507,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo1, { 0x59000e00 },
     (PTR) & fmt_remo1_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* shlo $src1, $lit2, $dst */
   {
@@ -3491,7 +3516,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo2, { 0x59001600 },
     (PTR) & fmt_remo2_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* shlo $lit1, $lit2, $dst */
   {
@@ -3500,7 +3525,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo3, { 0x59001e00 },
     (PTR) & fmt_remo3_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* shro $src1, $src2, $dst */
   {
@@ -3509,7 +3534,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo, { 0x59000400 },
     (PTR) & fmt_remo_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* shro $lit1, $src2, $dst */
   {
@@ -3518,7 +3543,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo1, { 0x59000c00 },
     (PTR) & fmt_remo1_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* shro $src1, $lit2, $dst */
   {
@@ -3527,7 +3552,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo2, { 0x59001400 },
     (PTR) & fmt_remo2_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* shro $lit1, $lit2, $dst */
   {
@@ -3536,7 +3561,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo3, { 0x59001c00 },
     (PTR) & fmt_remo3_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* shli $src1, $src2, $dst */
   {
@@ -3545,7 +3570,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo, { 0x59000700 },
     (PTR) & fmt_remo_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* shli $lit1, $src2, $dst */
   {
@@ -3554,7 +3579,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo1, { 0x59000f00 },
     (PTR) & fmt_remo1_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* shli $src1, $lit2, $dst */
   {
@@ -3563,7 +3588,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo2, { 0x59001700 },
     (PTR) & fmt_remo2_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* shli $lit1, $lit2, $dst */
   {
@@ -3572,7 +3597,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo3, { 0x59001f00 },
     (PTR) & fmt_remo3_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* shri $src1, $src2, $dst */
   {
@@ -3581,7 +3606,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo, { 0x59000580 },
     (PTR) & fmt_remo_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* shri $lit1, $src2, $dst */
   {
@@ -3590,7 +3615,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_remo1, { 0x59000d80 },
     (PTR) & fmt_remo1_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* shri $src1, $lit2, $dst */
   {
@@ -3599,7 +3624,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo2, { 0x59001580 },
     (PTR) & fmt_remo2_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* shri $lit1, $lit2, $dst */
   {
@@ -3608,7 +3633,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_remo3, { 0x59001d80 },
     (PTR) & fmt_remo3_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* emul $src1, $src2, $dst */
   {
@@ -3617,7 +3642,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_emul, { 0x67000000 },
     (PTR) & fmt_emul_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* emul $lit1, $src2, $dst */
   {
@@ -3626,7 +3651,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_emul1, { 0x67000800 },
     (PTR) & fmt_emul1_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* emul $src1, $lit2, $dst */
   {
@@ -3635,7 +3660,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_emul2, { 0x67001000 },
     (PTR) & fmt_emul2_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* emul $lit1, $lit2, $dst */
   {
@@ -3644,7 +3669,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), ',', ' ', OP (DST), 0 } },
     & fmt_emul3, { 0x67001800 },
     (PTR) & fmt_emul3_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* mov $src1, $dst */
   {
@@ -3653,7 +3678,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (DST), 0 } },
     & fmt_not2, { 0x5c001600 },
     (PTR) & fmt_not2_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* mov $lit1, $dst */
   {
@@ -3662,7 +3687,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (DST), 0 } },
     & fmt_not3, { 0x5c001e00 },
     (PTR) & fmt_not3_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* movl $src1, $dst */
   {
@@ -3671,7 +3696,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (DST), 0 } },
     & fmt_movl, { 0x5d001600 },
     (PTR) & fmt_movl_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* movl $lit1, $dst */
   {
@@ -3680,7 +3705,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (DST), 0 } },
     & fmt_movl1, { 0x5d001e00 },
     (PTR) & fmt_movl1_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* movt $src1, $dst */
   {
@@ -3689,7 +3714,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (DST), 0 } },
     & fmt_movt, { 0x5e001600 },
     (PTR) & fmt_movt_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* movt $lit1, $dst */
   {
@@ -3698,7 +3723,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (DST), 0 } },
     & fmt_movt1, { 0x5e001e00 },
     (PTR) & fmt_movt1_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* movq $src1, $dst */
   {
@@ -3707,7 +3732,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (DST), 0 } },
     & fmt_movq, { 0x5f001600 },
     (PTR) & fmt_movq_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* movq $lit1, $dst */
   {
@@ -3716,7 +3741,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (DST), 0 } },
     & fmt_movq1, { 0x5f001e00 },
     (PTR) & fmt_movq1_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* modpc $src1, $src2, $dst */
   {
@@ -3725,7 +3750,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_modpc, { 0x65000280 },
     (PTR) & fmt_modpc_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* modac $src1, $src2, $dst */
   {
@@ -3734,7 +3759,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), ',', ' ', OP (DST), 0 } },
     & fmt_modpc, { 0x64000280 },
     (PTR) & fmt_modpc_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* lda $offset, $dst */
   {
@@ -3743,7 +3768,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OFFSET), ',', ' ', OP (DST), 0 } },
     & fmt_lda_offset, { 0x8c000000 },
     (PTR) & fmt_lda_offset_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* lda $offset($abase), $dst */
   {
@@ -3752,7 +3777,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OFFSET), '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_lda_indirect_offset, { 0x8c002000 },
     (PTR) & fmt_lda_indirect_offset_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* lda ($abase), $dst */
   {
@@ -3761,7 +3786,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_lda_indirect, { 0x8c001000 },
     (PTR) & fmt_lda_indirect_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* lda ($abase)[$index*S$scale], $dst */
   {
@@ -3770,7 +3795,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_lda_indirect_index, { 0x8c001c00 },
     (PTR) & fmt_lda_indirect_index_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* lda $optdisp, $dst */
   {
@@ -3779,7 +3804,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OPTDISP), ',', ' ', OP (DST), 0 } },
     & fmt_lda_disp, { 0x8c003000 },
     (PTR) & fmt_lda_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* lda $optdisp($abase), $dst */
   {
@@ -3788,7 +3813,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OPTDISP), '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_lda_indirect_disp, { 0x8c003400 },
     (PTR) & fmt_lda_indirect_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* lda $optdisp[$index*S$scale], $dst */
   {
@@ -3797,7 +3822,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OPTDISP), '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_lda_index_disp, { 0x8c003800 },
     (PTR) & fmt_lda_index_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* lda $optdisp($abase)[$index*S$scale], $dst */
   {
@@ -3806,7 +3831,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OPTDISP), '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_lda_indirect_index_disp, { 0x8c003c00 },
     (PTR) & fmt_lda_indirect_index_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ld $offset, $dst */
   {
@@ -3815,7 +3840,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OFFSET), ',', ' ', OP (DST), 0 } },
     & fmt_ld_offset, { 0x90000000 },
     (PTR) & fmt_ld_offset_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ld $offset($abase), $dst */
   {
@@ -3824,7 +3849,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OFFSET), '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ld_indirect_offset, { 0x90002000 },
     (PTR) & fmt_ld_indirect_offset_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ld ($abase), $dst */
   {
@@ -3833,7 +3858,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ld_indirect, { 0x90001000 },
     (PTR) & fmt_ld_indirect_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ld ($abase)[$index*S$scale], $dst */
   {
@@ -3842,7 +3867,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ld_indirect_index, { 0x90001c00 },
     (PTR) & fmt_ld_indirect_index_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ld $optdisp, $dst */
   {
@@ -3851,7 +3876,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OPTDISP), ',', ' ', OP (DST), 0 } },
     & fmt_ld_disp, { 0x90003000 },
     (PTR) & fmt_ld_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ld $optdisp($abase), $dst */
   {
@@ -3860,7 +3885,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OPTDISP), '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ld_indirect_disp, { 0x90003400 },
     (PTR) & fmt_ld_indirect_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ld $optdisp[$index*S$scale], $dst */
   {
@@ -3869,7 +3894,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OPTDISP), '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ld_index_disp, { 0x90003800 },
     (PTR) & fmt_ld_index_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ld $optdisp($abase)[$index*S$scale], $dst */
   {
@@ -3878,7 +3903,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OPTDISP), '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ld_indirect_index_disp, { 0x90003c00 },
     (PTR) & fmt_ld_indirect_index_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldob $offset, $dst */
   {
@@ -3887,7 +3912,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OFFSET), ',', ' ', OP (DST), 0 } },
     & fmt_ldob_offset, { 0x80000000 },
     (PTR) & fmt_ldob_offset_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldob $offset($abase), $dst */
   {
@@ -3896,7 +3921,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OFFSET), '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldob_indirect_offset, { 0x80002000 },
     (PTR) & fmt_ldob_indirect_offset_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldob ($abase), $dst */
   {
@@ -3905,7 +3930,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldob_indirect, { 0x80001000 },
     (PTR) & fmt_ldob_indirect_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldob ($abase)[$index*S$scale], $dst */
   {
@@ -3914,7 +3939,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldob_indirect_index, { 0x80001c00 },
     (PTR) & fmt_ldob_indirect_index_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldob $optdisp, $dst */
   {
@@ -3923,7 +3948,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OPTDISP), ',', ' ', OP (DST), 0 } },
     & fmt_ldob_disp, { 0x80003000 },
     (PTR) & fmt_ldob_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldob $optdisp($abase), $dst */
   {
@@ -3932,7 +3957,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OPTDISP), '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldob_indirect_disp, { 0x80003400 },
     (PTR) & fmt_ldob_indirect_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldob $optdisp[$index*S$scale], $dst */
   {
@@ -3941,7 +3966,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OPTDISP), '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldob_index_disp, { 0x80003800 },
     (PTR) & fmt_ldob_index_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldob $optdisp($abase)[$index*S$scale], $dst */
   {
@@ -3950,7 +3975,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OPTDISP), '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldob_indirect_index_disp, { 0x80003c00 },
     (PTR) & fmt_ldob_indirect_index_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldos $offset, $dst */
   {
@@ -3959,7 +3984,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OFFSET), ',', ' ', OP (DST), 0 } },
     & fmt_ldos_offset, { 0x88000000 },
     (PTR) & fmt_ldos_offset_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldos $offset($abase), $dst */
   {
@@ -3968,7 +3993,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OFFSET), '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldos_indirect_offset, { 0x88002000 },
     (PTR) & fmt_ldos_indirect_offset_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldos ($abase), $dst */
   {
@@ -3977,7 +4002,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldos_indirect, { 0x88001000 },
     (PTR) & fmt_ldos_indirect_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldos ($abase)[$index*S$scale], $dst */
   {
@@ -3986,7 +4011,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldos_indirect_index, { 0x88001c00 },
     (PTR) & fmt_ldos_indirect_index_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldos $optdisp, $dst */
   {
@@ -3995,7 +4020,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OPTDISP), ',', ' ', OP (DST), 0 } },
     & fmt_ldos_disp, { 0x88003000 },
     (PTR) & fmt_ldos_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldos $optdisp($abase), $dst */
   {
@@ -4004,7 +4029,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OPTDISP), '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldos_indirect_disp, { 0x88003400 },
     (PTR) & fmt_ldos_indirect_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldos $optdisp[$index*S$scale], $dst */
   {
@@ -4013,7 +4038,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OPTDISP), '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldos_index_disp, { 0x88003800 },
     (PTR) & fmt_ldos_index_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldos $optdisp($abase)[$index*S$scale], $dst */
   {
@@ -4022,7 +4047,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OPTDISP), '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldos_indirect_index_disp, { 0x88003c00 },
     (PTR) & fmt_ldos_indirect_index_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldib $offset, $dst */
   {
@@ -4031,7 +4056,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OFFSET), ',', ' ', OP (DST), 0 } },
     & fmt_ldib_offset, { 0xc0000000 },
     (PTR) & fmt_ldib_offset_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldib $offset($abase), $dst */
   {
@@ -4040,7 +4065,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OFFSET), '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldib_indirect_offset, { 0xc0002000 },
     (PTR) & fmt_ldib_indirect_offset_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldib ($abase), $dst */
   {
@@ -4049,7 +4074,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldib_indirect, { 0xc0001000 },
     (PTR) & fmt_ldib_indirect_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldib ($abase)[$index*S$scale], $dst */
   {
@@ -4058,7 +4083,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldib_indirect_index, { 0xc0001c00 },
     (PTR) & fmt_ldib_indirect_index_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldib $optdisp, $dst */
   {
@@ -4067,7 +4092,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OPTDISP), ',', ' ', OP (DST), 0 } },
     & fmt_ldib_disp, { 0xc0003000 },
     (PTR) & fmt_ldib_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldib $optdisp($abase), $dst */
   {
@@ -4076,7 +4101,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OPTDISP), '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldib_indirect_disp, { 0xc0003400 },
     (PTR) & fmt_ldib_indirect_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldib $optdisp[$index*S$scale], $dst */
   {
@@ -4085,7 +4110,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OPTDISP), '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldib_index_disp, { 0xc0003800 },
     (PTR) & fmt_ldib_index_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldib $optdisp($abase)[$index*S$scale], $dst */
   {
@@ -4094,7 +4119,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OPTDISP), '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldib_indirect_index_disp, { 0xc0003c00 },
     (PTR) & fmt_ldib_indirect_index_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldis $offset, $dst */
   {
@@ -4103,7 +4128,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OFFSET), ',', ' ', OP (DST), 0 } },
     & fmt_ldis_offset, { 0xc8000000 },
     (PTR) & fmt_ldis_offset_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldis $offset($abase), $dst */
   {
@@ -4112,7 +4137,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OFFSET), '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldis_indirect_offset, { 0xc8002000 },
     (PTR) & fmt_ldis_indirect_offset_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldis ($abase), $dst */
   {
@@ -4121,7 +4146,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldis_indirect, { 0xc8001000 },
     (PTR) & fmt_ldis_indirect_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldis ($abase)[$index*S$scale], $dst */
   {
@@ -4130,7 +4155,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldis_indirect_index, { 0xc8001c00 },
     (PTR) & fmt_ldis_indirect_index_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldis $optdisp, $dst */
   {
@@ -4139,7 +4164,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OPTDISP), ',', ' ', OP (DST), 0 } },
     & fmt_ldis_disp, { 0xc8003000 },
     (PTR) & fmt_ldis_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldis $optdisp($abase), $dst */
   {
@@ -4148,7 +4173,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OPTDISP), '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldis_indirect_disp, { 0xc8003400 },
     (PTR) & fmt_ldis_indirect_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldis $optdisp[$index*S$scale], $dst */
   {
@@ -4157,7 +4182,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OPTDISP), '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldis_index_disp, { 0xc8003800 },
     (PTR) & fmt_ldis_index_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldis $optdisp($abase)[$index*S$scale], $dst */
   {
@@ -4166,7 +4191,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OPTDISP), '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldis_indirect_index_disp, { 0xc8003c00 },
     (PTR) & fmt_ldis_indirect_index_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldl $offset, $dst */
   {
@@ -4175,7 +4200,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OFFSET), ',', ' ', OP (DST), 0 } },
     & fmt_ldl_offset, { 0x98000000 },
     (PTR) & fmt_ldl_offset_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldl $offset($abase), $dst */
   {
@@ -4184,7 +4209,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OFFSET), '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldl_indirect_offset, { 0x98002000 },
     (PTR) & fmt_ldl_indirect_offset_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldl ($abase), $dst */
   {
@@ -4193,7 +4218,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldl_indirect, { 0x98001000 },
     (PTR) & fmt_ldl_indirect_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldl ($abase)[$index*S$scale], $dst */
   {
@@ -4202,7 +4227,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldl_indirect_index, { 0x98001c00 },
     (PTR) & fmt_ldl_indirect_index_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldl $optdisp, $dst */
   {
@@ -4211,7 +4236,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OPTDISP), ',', ' ', OP (DST), 0 } },
     & fmt_ldl_disp, { 0x98003000 },
     (PTR) & fmt_ldl_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldl $optdisp($abase), $dst */
   {
@@ -4220,7 +4245,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OPTDISP), '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldl_indirect_disp, { 0x98003400 },
     (PTR) & fmt_ldl_indirect_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldl $optdisp[$index*S$scale], $dst */
   {
@@ -4229,7 +4254,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OPTDISP), '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldl_index_disp, { 0x98003800 },
     (PTR) & fmt_ldl_index_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldl $optdisp($abase)[$index*S$scale], $dst */
   {
@@ -4238,7 +4263,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OPTDISP), '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldl_indirect_index_disp, { 0x98003c00 },
     (PTR) & fmt_ldl_indirect_index_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldt $offset, $dst */
   {
@@ -4247,7 +4272,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OFFSET), ',', ' ', OP (DST), 0 } },
     & fmt_ldt_offset, { 0xa0000000 },
     (PTR) & fmt_ldt_offset_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldt $offset($abase), $dst */
   {
@@ -4256,7 +4281,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OFFSET), '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldt_indirect_offset, { 0xa0002000 },
     (PTR) & fmt_ldt_indirect_offset_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldt ($abase), $dst */
   {
@@ -4265,7 +4290,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldt_indirect, { 0xa0001000 },
     (PTR) & fmt_ldt_indirect_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldt ($abase)[$index*S$scale], $dst */
   {
@@ -4274,7 +4299,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldt_indirect_index, { 0xa0001c00 },
     (PTR) & fmt_ldt_indirect_index_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldt $optdisp, $dst */
   {
@@ -4283,7 +4308,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OPTDISP), ',', ' ', OP (DST), 0 } },
     & fmt_ldt_disp, { 0xa0003000 },
     (PTR) & fmt_ldt_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldt $optdisp($abase), $dst */
   {
@@ -4292,7 +4317,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OPTDISP), '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldt_indirect_disp, { 0xa0003400 },
     (PTR) & fmt_ldt_indirect_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldt $optdisp[$index*S$scale], $dst */
   {
@@ -4301,7 +4326,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OPTDISP), '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldt_index_disp, { 0xa0003800 },
     (PTR) & fmt_ldt_index_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldt $optdisp($abase)[$index*S$scale], $dst */
   {
@@ -4310,7 +4335,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OPTDISP), '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldt_indirect_index_disp, { 0xa0003c00 },
     (PTR) & fmt_ldt_indirect_index_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldq $offset, $dst */
   {
@@ -4319,7 +4344,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OFFSET), ',', ' ', OP (DST), 0 } },
     & fmt_ldq_offset, { 0xb0000000 },
     (PTR) & fmt_ldq_offset_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldq $offset($abase), $dst */
   {
@@ -4328,7 +4353,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OFFSET), '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldq_indirect_offset, { 0xb0002000 },
     (PTR) & fmt_ldq_indirect_offset_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldq ($abase), $dst */
   {
@@ -4337,7 +4362,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldq_indirect, { 0xb0001000 },
     (PTR) & fmt_ldq_indirect_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldq ($abase)[$index*S$scale], $dst */
   {
@@ -4346,7 +4371,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldq_indirect_index, { 0xb0001c00 },
     (PTR) & fmt_ldq_indirect_index_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldq $optdisp, $dst */
   {
@@ -4355,7 +4380,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OPTDISP), ',', ' ', OP (DST), 0 } },
     & fmt_ldq_disp, { 0xb0003000 },
     (PTR) & fmt_ldq_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldq $optdisp($abase), $dst */
   {
@@ -4364,7 +4389,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OPTDISP), '(', OP (ABASE), ')', ',', ' ', OP (DST), 0 } },
     & fmt_ldq_indirect_disp, { 0xb0003400 },
     (PTR) & fmt_ldq_indirect_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldq $optdisp[$index*S$scale], $dst */
   {
@@ -4373,7 +4398,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OPTDISP), '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldq_index_disp, { 0xb0003800 },
     (PTR) & fmt_ldq_index_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* ldq $optdisp($abase)[$index*S$scale], $dst */
   {
@@ -4382,7 +4407,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OPTDISP), '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', ',', ' ', OP (DST), 0 } },
     & fmt_ldq_indirect_index_disp, { 0xb0003c00 },
     (PTR) & fmt_ldq_indirect_index_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* st $st_src, $offset */
   {
@@ -4391,7 +4416,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OFFSET), 0 } },
     & fmt_st_offset, { 0x92000000 },
     (PTR) & fmt_st_offset_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* st $st_src, $offset($abase) */
   {
@@ -4400,7 +4425,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OFFSET), '(', OP (ABASE), ')', 0 } },
     & fmt_st_indirect_offset, { 0x92002000 },
     (PTR) & fmt_st_indirect_offset_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* st $st_src, ($abase) */
   {
@@ -4409,7 +4434,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', '(', OP (ABASE), ')', 0 } },
     & fmt_st_indirect, { 0x92001000 },
     (PTR) & fmt_st_indirect_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* st $st_src, ($abase)[$index*S$scale] */
   {
@@ -4418,7 +4443,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', 0 } },
     & fmt_st_indirect_index, { 0x92001c00 },
     (PTR) & fmt_st_indirect_index_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* st $st_src, $optdisp */
   {
@@ -4427,7 +4452,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), 0 } },
     & fmt_st_disp, { 0x92003000 },
     (PTR) & fmt_st_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* st $st_src, $optdisp($abase) */
   {
@@ -4436,7 +4461,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), '(', OP (ABASE), ')', 0 } },
     & fmt_st_indirect_disp, { 0x92003400 },
     (PTR) & fmt_st_indirect_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* st $st_src, $optdisp[$index*S$scale */
   {
@@ -4445,7 +4470,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), '[', OP (INDEX), '*', 'S', OP (SCALE), 0 } },
     & fmt_st_index_disp, { 0x92003800 },
     (PTR) & fmt_st_index_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* st $st_src, $optdisp($abase)[$index*S$scale] */
   {
@@ -4454,7 +4479,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', 0 } },
     & fmt_st_indirect_index_disp, { 0x92003c00 },
     (PTR) & fmt_st_indirect_index_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stob $st_src, $offset */
   {
@@ -4463,7 +4488,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OFFSET), 0 } },
     & fmt_stob_offset, { 0x82000000 },
     (PTR) & fmt_stob_offset_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stob $st_src, $offset($abase) */
   {
@@ -4472,7 +4497,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OFFSET), '(', OP (ABASE), ')', 0 } },
     & fmt_stob_indirect_offset, { 0x82002000 },
     (PTR) & fmt_stob_indirect_offset_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stob $st_src, ($abase) */
   {
@@ -4481,7 +4506,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', '(', OP (ABASE), ')', 0 } },
     & fmt_stob_indirect, { 0x82001000 },
     (PTR) & fmt_stob_indirect_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stob $st_src, ($abase)[$index*S$scale] */
   {
@@ -4490,7 +4515,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', 0 } },
     & fmt_stob_indirect_index, { 0x82001c00 },
     (PTR) & fmt_stob_indirect_index_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stob $st_src, $optdisp */
   {
@@ -4499,7 +4524,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), 0 } },
     & fmt_stob_disp, { 0x82003000 },
     (PTR) & fmt_stob_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stob $st_src, $optdisp($abase) */
   {
@@ -4508,7 +4533,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), '(', OP (ABASE), ')', 0 } },
     & fmt_stob_indirect_disp, { 0x82003400 },
     (PTR) & fmt_stob_indirect_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stob $st_src, $optdisp[$index*S$scale */
   {
@@ -4517,7 +4542,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), '[', OP (INDEX), '*', 'S', OP (SCALE), 0 } },
     & fmt_stob_index_disp, { 0x82003800 },
     (PTR) & fmt_stob_index_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stob $st_src, $optdisp($abase)[$index*S$scale] */
   {
@@ -4526,7 +4551,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', 0 } },
     & fmt_stob_indirect_index_disp, { 0x82003c00 },
     (PTR) & fmt_stob_indirect_index_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stos $st_src, $offset */
   {
@@ -4535,7 +4560,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OFFSET), 0 } },
     & fmt_stos_offset, { 0x8a000000 },
     (PTR) & fmt_stos_offset_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stos $st_src, $offset($abase) */
   {
@@ -4544,7 +4569,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OFFSET), '(', OP (ABASE), ')', 0 } },
     & fmt_stos_indirect_offset, { 0x8a002000 },
     (PTR) & fmt_stos_indirect_offset_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stos $st_src, ($abase) */
   {
@@ -4553,7 +4578,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', '(', OP (ABASE), ')', 0 } },
     & fmt_stos_indirect, { 0x8a001000 },
     (PTR) & fmt_stos_indirect_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stos $st_src, ($abase)[$index*S$scale] */
   {
@@ -4562,7 +4587,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', 0 } },
     & fmt_stos_indirect_index, { 0x8a001c00 },
     (PTR) & fmt_stos_indirect_index_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stos $st_src, $optdisp */
   {
@@ -4571,7 +4596,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), 0 } },
     & fmt_stos_disp, { 0x8a003000 },
     (PTR) & fmt_stos_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stos $st_src, $optdisp($abase) */
   {
@@ -4580,7 +4605,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), '(', OP (ABASE), ')', 0 } },
     & fmt_stos_indirect_disp, { 0x8a003400 },
     (PTR) & fmt_stos_indirect_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stos $st_src, $optdisp[$index*S$scale */
   {
@@ -4589,7 +4614,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), '[', OP (INDEX), '*', 'S', OP (SCALE), 0 } },
     & fmt_stos_index_disp, { 0x8a003800 },
     (PTR) & fmt_stos_index_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stos $st_src, $optdisp($abase)[$index*S$scale] */
   {
@@ -4598,7 +4623,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', 0 } },
     & fmt_stos_indirect_index_disp, { 0x8a003c00 },
     (PTR) & fmt_stos_indirect_index_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stl $st_src, $offset */
   {
@@ -4607,7 +4632,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OFFSET), 0 } },
     & fmt_stl_offset, { 0x9a000000 },
     (PTR) & fmt_stl_offset_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stl $st_src, $offset($abase) */
   {
@@ -4616,7 +4641,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OFFSET), '(', OP (ABASE), ')', 0 } },
     & fmt_stl_indirect_offset, { 0x9a002000 },
     (PTR) & fmt_stl_indirect_offset_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stl $st_src, ($abase) */
   {
@@ -4625,7 +4650,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', '(', OP (ABASE), ')', 0 } },
     & fmt_stl_indirect, { 0x9a001000 },
     (PTR) & fmt_stl_indirect_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stl $st_src, ($abase)[$index*S$scale] */
   {
@@ -4634,7 +4659,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', 0 } },
     & fmt_stl_indirect_index, { 0x9a001c00 },
     (PTR) & fmt_stl_indirect_index_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stl $st_src, $optdisp */
   {
@@ -4643,7 +4668,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), 0 } },
     & fmt_stl_disp, { 0x9a003000 },
     (PTR) & fmt_stl_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stl $st_src, $optdisp($abase) */
   {
@@ -4652,7 +4677,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), '(', OP (ABASE), ')', 0 } },
     & fmt_stl_indirect_disp, { 0x9a003400 },
     (PTR) & fmt_stl_indirect_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stl $st_src, $optdisp[$index*S$scale */
   {
@@ -4661,7 +4686,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), '[', OP (INDEX), '*', 'S', OP (SCALE), 0 } },
     & fmt_stl_index_disp, { 0x9a003800 },
     (PTR) & fmt_stl_index_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stl $st_src, $optdisp($abase)[$index*S$scale] */
   {
@@ -4670,7 +4695,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', 0 } },
     & fmt_stl_indirect_index_disp, { 0x9a003c00 },
     (PTR) & fmt_stl_indirect_index_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stt $st_src, $offset */
   {
@@ -4679,7 +4704,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OFFSET), 0 } },
     & fmt_stt_offset, { 0xa2000000 },
     (PTR) & fmt_stt_offset_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stt $st_src, $offset($abase) */
   {
@@ -4688,7 +4713,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OFFSET), '(', OP (ABASE), ')', 0 } },
     & fmt_stt_indirect_offset, { 0xa2002000 },
     (PTR) & fmt_stt_indirect_offset_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stt $st_src, ($abase) */
   {
@@ -4697,7 +4722,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', '(', OP (ABASE), ')', 0 } },
     & fmt_stt_indirect, { 0xa2001000 },
     (PTR) & fmt_stt_indirect_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stt $st_src, ($abase)[$index*S$scale] */
   {
@@ -4706,7 +4731,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', 0 } },
     & fmt_stt_indirect_index, { 0xa2001c00 },
     (PTR) & fmt_stt_indirect_index_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stt $st_src, $optdisp */
   {
@@ -4715,7 +4740,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), 0 } },
     & fmt_stt_disp, { 0xa2003000 },
     (PTR) & fmt_stt_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stt $st_src, $optdisp($abase) */
   {
@@ -4724,7 +4749,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), '(', OP (ABASE), ')', 0 } },
     & fmt_stt_indirect_disp, { 0xa2003400 },
     (PTR) & fmt_stt_indirect_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stt $st_src, $optdisp[$index*S$scale */
   {
@@ -4733,7 +4758,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), '[', OP (INDEX), '*', 'S', OP (SCALE), 0 } },
     & fmt_stt_index_disp, { 0xa2003800 },
     (PTR) & fmt_stt_index_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stt $st_src, $optdisp($abase)[$index*S$scale] */
   {
@@ -4742,7 +4767,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', 0 } },
     & fmt_stt_indirect_index_disp, { 0xa2003c00 },
     (PTR) & fmt_stt_indirect_index_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stq $st_src, $offset */
   {
@@ -4751,7 +4776,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OFFSET), 0 } },
     & fmt_stq_offset, { 0xb2000000 },
     (PTR) & fmt_stq_offset_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stq $st_src, $offset($abase) */
   {
@@ -4760,7 +4785,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OFFSET), '(', OP (ABASE), ')', 0 } },
     & fmt_stq_indirect_offset, { 0xb2002000 },
     (PTR) & fmt_stq_indirect_offset_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stq $st_src, ($abase) */
   {
@@ -4769,7 +4794,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', '(', OP (ABASE), ')', 0 } },
     & fmt_stq_indirect, { 0xb2001000 },
     (PTR) & fmt_stq_indirect_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stq $st_src, ($abase)[$index*S$scale] */
   {
@@ -4778,7 +4803,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', 0 } },
     & fmt_stq_indirect_index, { 0xb2001c00 },
     (PTR) & fmt_stq_indirect_index_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stq $st_src, $optdisp */
   {
@@ -4787,7 +4812,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), 0 } },
     & fmt_stq_disp, { 0xb2003000 },
     (PTR) & fmt_stq_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stq $st_src, $optdisp($abase) */
   {
@@ -4796,7 +4821,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), '(', OP (ABASE), ')', 0 } },
     & fmt_stq_indirect_disp, { 0xb2003400 },
     (PTR) & fmt_stq_indirect_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stq $st_src, $optdisp[$index*S$scale */
   {
@@ -4805,7 +4830,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), '[', OP (INDEX), '*', 'S', OP (SCALE), 0 } },
     & fmt_stq_index_disp, { 0xb2003800 },
     (PTR) & fmt_stq_index_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* stq $st_src, $optdisp($abase)[$index*S$scale] */
   {
@@ -4814,7 +4839,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (ST_SRC), ',', ' ', OP (OPTDISP), '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', 0 } },
     & fmt_stq_indirect_index_disp, { 0xb2003c00 },
     (PTR) & fmt_stq_indirect_index_disp_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* cmpobe $br_src1, $br_src2, $br_disp */
   {
@@ -4823,7 +4848,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (BR_SRC1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobe_reg, { 0x32000000 },
     (PTR) & fmt_cmpobe_reg_ops[0],
-    { 0, 0|A(COND_CTI)|A(COND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpobe $br_lit1, $br_src2, $br_disp */
   {
@@ -4832,7 +4857,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (BR_LIT1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobe_lit, { 0x32002000 },
     (PTR) & fmt_cmpobe_lit_ops[0],
-    { 0, 0|A(COND_CTI)|A(COND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpobne $br_src1, $br_src2, $br_disp */
   {
@@ -4841,7 +4866,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (BR_SRC1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobe_reg, { 0x35000000 },
     (PTR) & fmt_cmpobe_reg_ops[0],
-    { 0, 0|A(COND_CTI)|A(COND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpobne $br_lit1, $br_src2, $br_disp */
   {
@@ -4850,7 +4875,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (BR_LIT1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobe_lit, { 0x35002000 },
     (PTR) & fmt_cmpobe_lit_ops[0],
-    { 0, 0|A(COND_CTI)|A(COND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpobl $br_src1, $br_src2, $br_disp */
   {
@@ -4859,7 +4884,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (BR_SRC1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobl_reg, { 0x34000000 },
     (PTR) & fmt_cmpobl_reg_ops[0],
-    { 0, 0|A(COND_CTI)|A(COND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpobl $br_lit1, $br_src2, $br_disp */
   {
@@ -4868,7 +4893,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (BR_LIT1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobl_lit, { 0x34002000 },
     (PTR) & fmt_cmpobl_lit_ops[0],
-    { 0, 0|A(COND_CTI)|A(COND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpoble $br_src1, $br_src2, $br_disp */
   {
@@ -4877,7 +4902,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (BR_SRC1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobl_reg, { 0x36000000 },
     (PTR) & fmt_cmpobl_reg_ops[0],
-    { 0, 0|A(COND_CTI)|A(COND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpoble $br_lit1, $br_src2, $br_disp */
   {
@@ -4886,7 +4911,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (BR_LIT1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobl_lit, { 0x36002000 },
     (PTR) & fmt_cmpobl_lit_ops[0],
-    { 0, 0|A(COND_CTI)|A(COND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpobg $br_src1, $br_src2, $br_disp */
   {
@@ -4895,7 +4920,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (BR_SRC1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobl_reg, { 0x31000000 },
     (PTR) & fmt_cmpobl_reg_ops[0],
-    { 0, 0|A(COND_CTI)|A(COND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpobg $br_lit1, $br_src2, $br_disp */
   {
@@ -4904,7 +4929,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (BR_LIT1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobl_lit, { 0x31002000 },
     (PTR) & fmt_cmpobl_lit_ops[0],
-    { 0, 0|A(COND_CTI)|A(COND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpobge $br_src1, $br_src2, $br_disp */
   {
@@ -4913,7 +4938,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (BR_SRC1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobl_reg, { 0x33000000 },
     (PTR) & fmt_cmpobl_reg_ops[0],
-    { 0, 0|A(COND_CTI)|A(COND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpobge $br_lit1, $br_src2, $br_disp */
   {
@@ -4922,7 +4947,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (BR_LIT1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobl_lit, { 0x33002000 },
     (PTR) & fmt_cmpobl_lit_ops[0],
-    { 0, 0|A(COND_CTI)|A(COND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpibe $br_src1, $br_src2, $br_disp */
   {
@@ -4931,7 +4956,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (BR_SRC1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobe_reg, { 0x3a000000 },
     (PTR) & fmt_cmpobe_reg_ops[0],
-    { 0, 0|A(COND_CTI)|A(COND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpibe $br_lit1, $br_src2, $br_disp */
   {
@@ -4940,7 +4965,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (BR_LIT1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobe_lit, { 0x3a002000 },
     (PTR) & fmt_cmpobe_lit_ops[0],
-    { 0, 0|A(COND_CTI)|A(COND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpibne $br_src1, $br_src2, $br_disp */
   {
@@ -4949,7 +4974,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (BR_SRC1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobe_reg, { 0x3d000000 },
     (PTR) & fmt_cmpobe_reg_ops[0],
-    { 0, 0|A(COND_CTI)|A(COND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpibne $br_lit1, $br_src2, $br_disp */
   {
@@ -4958,7 +4983,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (BR_LIT1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobe_lit, { 0x3d002000 },
     (PTR) & fmt_cmpobe_lit_ops[0],
-    { 0, 0|A(COND_CTI)|A(COND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpibl $br_src1, $br_src2, $br_disp */
   {
@@ -4967,7 +4992,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (BR_SRC1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobe_reg, { 0x3c000000 },
     (PTR) & fmt_cmpobe_reg_ops[0],
-    { 0, 0|A(COND_CTI)|A(COND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpibl $br_lit1, $br_src2, $br_disp */
   {
@@ -4976,7 +5001,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (BR_LIT1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobe_lit, { 0x3c002000 },
     (PTR) & fmt_cmpobe_lit_ops[0],
-    { 0, 0|A(COND_CTI)|A(COND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpible $br_src1, $br_src2, $br_disp */
   {
@@ -4985,7 +5010,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (BR_SRC1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobe_reg, { 0x3e000000 },
     (PTR) & fmt_cmpobe_reg_ops[0],
-    { 0, 0|A(COND_CTI)|A(COND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpible $br_lit1, $br_src2, $br_disp */
   {
@@ -4994,7 +5019,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (BR_LIT1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobe_lit, { 0x3e002000 },
     (PTR) & fmt_cmpobe_lit_ops[0],
-    { 0, 0|A(COND_CTI)|A(COND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpibg $br_src1, $br_src2, $br_disp */
   {
@@ -5003,7 +5028,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (BR_SRC1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobe_reg, { 0x39000000 },
     (PTR) & fmt_cmpobe_reg_ops[0],
-    { 0, 0|A(COND_CTI)|A(COND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpibg $br_lit1, $br_src2, $br_disp */
   {
@@ -5012,7 +5037,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (BR_LIT1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobe_lit, { 0x39002000 },
     (PTR) & fmt_cmpobe_lit_ops[0],
-    { 0, 0|A(COND_CTI)|A(COND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpibge $br_src1, $br_src2, $br_disp */
   {
@@ -5021,7 +5046,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (BR_SRC1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobe_reg, { 0x3b000000 },
     (PTR) & fmt_cmpobe_reg_ops[0],
-    { 0, 0|A(COND_CTI)|A(COND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpibge $br_lit1, $br_src2, $br_disp */
   {
@@ -5030,7 +5055,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (BR_LIT1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobe_lit, { 0x3b002000 },
     (PTR) & fmt_cmpobe_lit_ops[0],
-    { 0, 0|A(COND_CTI)|A(COND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* bbc $br_src1, $br_src2, $br_disp */
   {
@@ -5039,7 +5064,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (BR_SRC1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobe_reg, { 0x30000000 },
     (PTR) & fmt_cmpobe_reg_ops[0],
-    { 0, 0|A(COND_CTI)|A(COND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* bbc $br_lit1, $br_src2, $br_disp */
   {
@@ -5048,7 +5073,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (BR_LIT1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_bbc_lit, { 0x30002000 },
     (PTR) & fmt_bbc_lit_ops[0],
-    { 0, 0|A(COND_CTI)|A(COND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* bbs $br_src1, $br_src2, $br_disp */
   {
@@ -5057,7 +5082,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (BR_SRC1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_cmpobe_reg, { 0x37000000 },
     (PTR) & fmt_cmpobe_reg_ops[0],
-    { 0, 0|A(COND_CTI)|A(COND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* bbs $br_lit1, $br_src2, $br_disp */
   {
@@ -5066,7 +5091,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (BR_LIT1), ',', ' ', OP (BR_SRC2), ',', ' ', OP (BR_DISP), 0 } },
     & fmt_bbc_lit, { 0x37002000 },
     (PTR) & fmt_bbc_lit_ops[0],
-    { 0, 0|A(COND_CTI)|A(COND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* cmpi $src1, $src2 */
   {
@@ -5075,7 +5100,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), 0 } },
     & fmt_cmpi, { 0x5a002080 },
     (PTR) & fmt_cmpi_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* cmpi $lit1, $src2 */
   {
@@ -5084,7 +5109,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), 0 } },
     & fmt_cmpi1, { 0x5a002880 },
     (PTR) & fmt_cmpi1_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* cmpi $src1, $lit2 */
   {
@@ -5093,7 +5118,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), 0 } },
     & fmt_cmpi2, { 0x5a003080 },
     (PTR) & fmt_cmpi2_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* cmpi $lit1, $lit2 */
   {
@@ -5102,7 +5127,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), 0 } },
     & fmt_cmpi3, { 0x5a003880 },
     (PTR) & fmt_cmpi3_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* cmpo $src1, $src2 */
   {
@@ -5111,7 +5136,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (SRC2), 0 } },
     & fmt_cmpi, { 0x5a002000 },
     (PTR) & fmt_cmpi_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* cmpo $lit1, $src2 */
   {
@@ -5120,7 +5145,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (SRC2), 0 } },
     & fmt_cmpi1, { 0x5a002800 },
     (PTR) & fmt_cmpi1_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* cmpo $src1, $lit2 */
   {
@@ -5129,7 +5154,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), ',', ' ', OP (LIT2), 0 } },
     & fmt_cmpi2, { 0x5a003000 },
     (PTR) & fmt_cmpi2_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* cmpo $lit1, $lit2 */
   {
@@ -5138,7 +5163,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (LIT1), ',', ' ', OP (LIT2), 0 } },
     & fmt_cmpi3, { 0x5a003800 },
     (PTR) & fmt_cmpi3_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* testno $br_src1 */
   {
@@ -5147,7 +5172,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (BR_SRC1), 0 } },
     & fmt_testno_reg, { 0x20000000 },
     (PTR) & fmt_testno_reg_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* testg $br_src1 */
   {
@@ -5156,7 +5181,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (BR_SRC1), 0 } },
     & fmt_testno_reg, { 0x21000000 },
     (PTR) & fmt_testno_reg_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* teste $br_src1 */
   {
@@ -5165,7 +5190,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (BR_SRC1), 0 } },
     & fmt_testno_reg, { 0x22000000 },
     (PTR) & fmt_testno_reg_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* testge $br_src1 */
   {
@@ -5174,7 +5199,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (BR_SRC1), 0 } },
     & fmt_testno_reg, { 0x23000000 },
     (PTR) & fmt_testno_reg_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* testl $br_src1 */
   {
@@ -5183,7 +5208,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (BR_SRC1), 0 } },
     & fmt_testno_reg, { 0x24000000 },
     (PTR) & fmt_testno_reg_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* testne $br_src1 */
   {
@@ -5192,7 +5217,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (BR_SRC1), 0 } },
     & fmt_testno_reg, { 0x25000000 },
     (PTR) & fmt_testno_reg_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* testle $br_src1 */
   {
@@ -5201,7 +5226,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (BR_SRC1), 0 } },
     & fmt_testno_reg, { 0x26000000 },
     (PTR) & fmt_testno_reg_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* testo $br_src1 */
   {
@@ -5210,7 +5235,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (BR_SRC1), 0 } },
     & fmt_testno_reg, { 0x27000000 },
     (PTR) & fmt_testno_reg_ops[0],
-    { 0, 0, { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 /* bno $ctrl_disp */
   {
@@ -5219,7 +5244,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (CTRL_DISP), 0 } },
     & fmt_bno, { 0x10000000 },
     (PTR) & fmt_bno_ops[0],
-    { 0, 0|A(COND_CTI)|A(COND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* bg $ctrl_disp */
   {
@@ -5228,7 +5253,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (CTRL_DISP), 0 } },
     & fmt_bno, { 0x11000000 },
     (PTR) & fmt_bno_ops[0],
-    { 0, 0|A(COND_CTI)|A(COND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* be $ctrl_disp */
   {
@@ -5237,7 +5262,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (CTRL_DISP), 0 } },
     & fmt_bno, { 0x12000000 },
     (PTR) & fmt_bno_ops[0],
-    { 0, 0|A(COND_CTI)|A(COND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* bge $ctrl_disp */
   {
@@ -5246,7 +5271,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (CTRL_DISP), 0 } },
     & fmt_bno, { 0x13000000 },
     (PTR) & fmt_bno_ops[0],
-    { 0, 0|A(COND_CTI)|A(COND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* bl $ctrl_disp */
   {
@@ -5255,7 +5280,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (CTRL_DISP), 0 } },
     & fmt_bno, { 0x14000000 },
     (PTR) & fmt_bno_ops[0],
-    { 0, 0|A(COND_CTI)|A(COND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* bne $ctrl_disp */
   {
@@ -5264,7 +5289,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (CTRL_DISP), 0 } },
     & fmt_bno, { 0x15000000 },
     (PTR) & fmt_bno_ops[0],
-    { 0, 0|A(COND_CTI)|A(COND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* ble $ctrl_disp */
   {
@@ -5273,7 +5298,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (CTRL_DISP), 0 } },
     & fmt_bno, { 0x16000000 },
     (PTR) & fmt_bno_ops[0],
-    { 0, 0|A(COND_CTI)|A(COND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* bo $ctrl_disp */
   {
@@ -5282,7 +5307,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (CTRL_DISP), 0 } },
     & fmt_bno, { 0x17000000 },
     (PTR) & fmt_bno_ops[0],
-    { 0, 0|A(COND_CTI)|A(COND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(COND_CTI), { (1<<MACH_BASE) } }
   },
 /* b $ctrl_disp */
   {
@@ -5291,7 +5316,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (CTRL_DISP), 0 } },
     & fmt_b, { 0x8000000 },
     (PTR) & fmt_b_ops[0],
-    { 0, 0|A(UNCOND_CTI)|A(UNCOND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(UNCOND_CTI), { (1<<MACH_BASE) } }
   },
 /* bx $offset($abase) */
   {
@@ -5300,7 +5325,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OFFSET), '(', OP (ABASE), ')', 0 } },
     & fmt_bx_indirect_offset, { 0x84002000 },
     (PTR) & fmt_bx_indirect_offset_ops[0],
-    { 0, 0|A(UNCOND_CTI)|A(UNCOND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(UNCOND_CTI), { (1<<MACH_BASE) } }
   },
 /* bx ($abase) */
   {
@@ -5309,7 +5334,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', '(', OP (ABASE), ')', 0 } },
     & fmt_bx_indirect, { 0x84001000 },
     (PTR) & fmt_bx_indirect_ops[0],
-    { 0, 0|A(UNCOND_CTI)|A(UNCOND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(UNCOND_CTI), { (1<<MACH_BASE) } }
   },
 /* bx ($abase)[$index*S$scale] */
   {
@@ -5318,7 +5343,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', '(', OP (ABASE), ')', '[', OP (INDEX), '*', 'S', OP (SCALE), ']', 0 } },
     & fmt_bx_indirect_index, { 0x84001c00 },
     (PTR) & fmt_bx_indirect_index_ops[0],
-    { 0, 0|A(UNCOND_CTI)|A(UNCOND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(UNCOND_CTI), { (1<<MACH_BASE) } }
   },
 /* bx $optdisp */
   {
@@ -5327,7 +5352,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OPTDISP), 0 } },
     & fmt_bx_disp, { 0x84003000 },
     (PTR) & fmt_bx_disp_ops[0],
-    { 0, 0|A(UNCOND_CTI)|A(UNCOND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(UNCOND_CTI), { (1<<MACH_BASE) } }
   },
 /* bx $optdisp($abase) */
   {
@@ -5336,7 +5361,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OPTDISP), '(', OP (ABASE), ')', 0 } },
     & fmt_bx_indirect_disp, { 0x84003400 },
     (PTR) & fmt_bx_indirect_disp_ops[0],
-    { 0, 0|A(UNCOND_CTI)|A(UNCOND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(UNCOND_CTI), { (1<<MACH_BASE) } }
   },
 /* callx $optdisp */
   {
@@ -5345,7 +5370,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OPTDISP), 0 } },
     & fmt_callx_disp, { 0x86003000 },
     (PTR) & fmt_callx_disp_ops[0],
-    { 0, 0|A(UNCOND_CTI)|A(UNCOND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(UNCOND_CTI), { (1<<MACH_BASE) } }
   },
 /* callx ($abase) */
   {
@@ -5354,7 +5379,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', '(', OP (ABASE), ')', 0 } },
     & fmt_callx_indirect, { 0x86001000 },
     (PTR) & fmt_callx_indirect_ops[0],
-    { 0, 0|A(UNCOND_CTI)|A(UNCOND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(UNCOND_CTI), { (1<<MACH_BASE) } }
   },
 /* callx $offset($abase) */
   {
@@ -5363,7 +5388,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (OFFSET), '(', OP (ABASE), ')', 0 } },
     & fmt_callx_indirect_offset, { 0x86002000 },
     (PTR) & fmt_callx_indirect_offset_ops[0],
-    { 0, 0|A(UNCOND_CTI)|A(UNCOND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(UNCOND_CTI), { (1<<MACH_BASE) } }
   },
 /* ret */
   {
@@ -5372,7 +5397,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, 0 } },
     & fmt_ret, { 0xa000000 },
     (PTR) & fmt_ret_ops[0],
-    { 0, 0|A(UNCOND_CTI)|A(UNCOND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(UNCOND_CTI), { (1<<MACH_BASE) } }
   },
 /* calls $src1 */
   {
@@ -5381,7 +5406,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, ' ', OP (SRC1), 0 } },
     & fmt_calls, { 0x66003000 },
     (PTR) & fmt_calls_ops[0],
-    { 0, 0|A(UNCOND_CTI)|A(UNCOND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(UNCOND_CTI), { (1<<MACH_BASE) } }
   },
 /* fmark */
   {
@@ -5390,7 +5415,7 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     { { MNEM, 0 } },
     & fmt_fmark, { 0x66003e00 },
     (PTR) & fmt_fmark_ops[0],
-    { 0, 0|A(UNCOND_CTI)|A(UNCOND_CTI), { 0 } }
+    { CGEN_INSN_NBOOL_ATTRS, 0|A(UNCOND_CTI), { (1<<MACH_BASE) } }
   },
 /* flushreg */
   {
@@ -5398,8 +5423,8 @@ const CGEN_INSN i960_cgen_insn_table_entries[MAX_INSNS] =
     I960_INSN_FLUSHREG, "flushreg", "flushreg",
     { { MNEM, 0 } },
     & fmt_flushreg, { 0x66003e80 },
-    (PTR) & fmt_flushreg_ops[0],
-    { 0, 0, { 0 } }
+    (PTR) 0,
+    { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_BASE) } }
   },
 };
 

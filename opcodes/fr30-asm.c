@@ -79,12 +79,13 @@ parse_register_number (strp)
 }
 
 static const char *
-parse_register_list (od, strp, opindex, valuep, high_low)
+parse_register_list (od, strp, opindex, valuep, high_low, load_store)
      CGEN_OPCODE_DESC od;
      const char **strp;
      int opindex;
      unsigned long *valuep;
-     int high_low;
+     int high_low;   /* 0 == high, 1 == low */
+     int load_store; /* 0 == load, 1 == store */
 {
   int regno;
   *valuep = 0;
@@ -105,7 +106,10 @@ parse_register_list (od, strp, opindex, valuep, high_low)
       if (high_low)
 	regno -= 8;
 
-      *valuep |= 1 << regno;
+      if (load_store) /* mask is reversed for store */
+	*valuep |= 0x80 >> regno;
+      else
+	*valuep |= 1 << regno;
 
       if (**strp == ',')
 	{
@@ -122,23 +126,43 @@ parse_register_list (od, strp, opindex, valuep, high_low)
 }
 
 static const char *
-parse_low_register_list (od, strp, opindex, valuep)
+parse_low_register_list_ld (od, strp, opindex, valuep)
      CGEN_OPCODE_DESC od;
      const char **strp;
      int opindex;
      unsigned long *valuep;
 {
-  return parse_register_list (od, strp, opindex, valuep, 0/*low*/);
+  return parse_register_list (od, strp, opindex, valuep, 0/*low*/, 0/*load*/);
 }
 
 static const char *
-parse_hi_register_list (od, strp, opindex, valuep)
+parse_hi_register_list_ld (od, strp, opindex, valuep)
      CGEN_OPCODE_DESC od;
      const char **strp;
      int opindex;
      unsigned long *valuep;
 {
-  return parse_register_list (od, strp, opindex, valuep, 1/*high*/);
+  return parse_register_list (od, strp, opindex, valuep, 1/*high*/, 0/*load*/);
+}
+
+static const char *
+parse_low_register_list_st (od, strp, opindex, valuep)
+     CGEN_OPCODE_DESC od;
+     const char **strp;
+     int opindex;
+     unsigned long *valuep;
+{
+  return parse_register_list (od, strp, opindex, valuep, 0/*low*/, 1/*store*/);
+}
+
+static const char *
+parse_hi_register_list_st (od, strp, opindex, valuep)
+     CGEN_OPCODE_DESC od;
+     const char **strp;
+     int opindex;
+     unsigned long *valuep;
+{
+  return parse_register_list (od, strp, opindex, valuep, 1/*high*/, 1/*store*/);
 }
 
 /* -- */
@@ -266,11 +290,17 @@ fr30_cgen_parse_operand (od, opindex, strp, fields)
         fields->f_rel12 = value;
       }
       break;
-    case FR30_OPERAND_REGLIST_LOW :
-      errmsg = parse_low_register_list (od, strp, FR30_OPERAND_REGLIST_LOW, &fields->f_reglist_low);
+    case FR30_OPERAND_REGLIST_LOW_LD :
+      errmsg = parse_low_register_list_ld (od, strp, FR30_OPERAND_REGLIST_LOW_LD, &fields->f_reglist_low_ld);
       break;
-    case FR30_OPERAND_REGLIST_HI :
-      errmsg = parse_hi_register_list (od, strp, FR30_OPERAND_REGLIST_HI, &fields->f_reglist_hi);
+    case FR30_OPERAND_REGLIST_HI_LD :
+      errmsg = parse_hi_register_list_ld (od, strp, FR30_OPERAND_REGLIST_HI_LD, &fields->f_reglist_hi_ld);
+      break;
+    case FR30_OPERAND_REGLIST_LOW_ST :
+      errmsg = parse_low_register_list_st (od, strp, FR30_OPERAND_REGLIST_LOW_ST, &fields->f_reglist_low_st);
+      break;
+    case FR30_OPERAND_REGLIST_HI_ST :
+      errmsg = parse_hi_register_list_st (od, strp, FR30_OPERAND_REGLIST_HI_ST, &fields->f_reglist_hi_st);
       break;
     case FR30_OPERAND_CC :
       errmsg = cgen_parse_unsigned_integer (od, strp, FR30_OPERAND_CC, &fields->f_cc);
@@ -372,27 +402,27 @@ fr30_cgen_insert_operand (od, opindex, fields, buffer, pc)
       }
       break;
     case FR30_OPERAND_DISP8 :
-      errmsg = insert_normal (od, fields->f_disp8, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGNED), 0, 4, 8, 16, total_length, buffer);
+      errmsg = insert_normal (od, fields->f_disp8, 0|(1<<CGEN_OPERAND_HASH_PREFIX), 0, 4, 8, 16, total_length, buffer);
       break;
     case FR30_OPERAND_DISP9 :
       {
         long value = fields->f_disp9;
         value = ((int) (value) >> (1));
-        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGNED), 0, 4, 8, 16, total_length, buffer);
+        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_HASH_PREFIX), 0, 4, 8, 16, total_length, buffer);
       }
       break;
     case FR30_OPERAND_DISP10 :
       {
         long value = fields->f_disp10;
         value = ((int) (value) >> (2));
-        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGNED), 0, 4, 8, 16, total_length, buffer);
+        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_HASH_PREFIX), 0, 4, 8, 16, total_length, buffer);
       }
       break;
     case FR30_OPERAND_S10 :
       {
         long value = fields->f_s10;
         value = ((int) (value) >> (2));
-        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_HASH_PREFIX)|(1<<CGEN_OPERAND_SIGNED), 0, 8, 8, 16, total_length, buffer);
+        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_HASH_PREFIX), 0, 8, 8, 16, total_length, buffer);
       }
       break;
     case FR30_OPERAND_U10 :
@@ -447,21 +477,27 @@ do {
       {
         long value = fields->f_rel9;
         value = ((int) (((value) - (((pc) + (2))))) >> (1));
-        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_PCREL_ADDR)|(1<<CGEN_OPERAND_SIGNED), 0, 8, 8, 16, total_length, buffer);
+        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_PCREL_ADDR), 0, 8, 8, 16, total_length, buffer);
       }
       break;
     case FR30_OPERAND_LABEL12 :
       {
         long value = fields->f_rel12;
         value = ((int) (((value) - (((pc) + (2))))) >> (1));
-        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_PCREL_ADDR)|(1<<CGEN_OPERAND_SIGNED), 0, 5, 11, 16, total_length, buffer);
+        errmsg = insert_normal (od, value, 0|(1<<CGEN_OPERAND_PCREL_ADDR), 0, 5, 11, 16, total_length, buffer);
       }
       break;
-    case FR30_OPERAND_REGLIST_LOW :
-      errmsg = insert_normal (od, fields->f_reglist_low, 0|(1<<CGEN_OPERAND_UNSIGNED), 0, 8, 8, 16, total_length, buffer);
+    case FR30_OPERAND_REGLIST_LOW_LD :
+      errmsg = insert_normal (od, fields->f_reglist_low_ld, 0|(1<<CGEN_OPERAND_UNSIGNED), 0, 8, 8, 16, total_length, buffer);
       break;
-    case FR30_OPERAND_REGLIST_HI :
-      errmsg = insert_normal (od, fields->f_reglist_hi, 0|(1<<CGEN_OPERAND_UNSIGNED), 0, 8, 8, 16, total_length, buffer);
+    case FR30_OPERAND_REGLIST_HI_LD :
+      errmsg = insert_normal (od, fields->f_reglist_hi_ld, 0|(1<<CGEN_OPERAND_UNSIGNED), 0, 8, 8, 16, total_length, buffer);
+      break;
+    case FR30_OPERAND_REGLIST_LOW_ST :
+      errmsg = insert_normal (od, fields->f_reglist_low_st, 0|(1<<CGEN_OPERAND_UNSIGNED), 0, 8, 8, 16, total_length, buffer);
+      break;
+    case FR30_OPERAND_REGLIST_HI_ST :
+      errmsg = insert_normal (od, fields->f_reglist_hi_st, 0|(1<<CGEN_OPERAND_UNSIGNED), 0, 8, 8, 16, total_length, buffer);
       break;
     case FR30_OPERAND_CC :
       errmsg = insert_normal (od, fields->f_cc, 0|(1<<CGEN_OPERAND_UNSIGNED), 0, 4, 4, 16, total_length, buffer);
@@ -638,7 +674,7 @@ insert_normal (od, value, attrs, word_offset, start, length, word_length,
 #endif
 
   /* Ensure VALUE will fit.  */
-  if ((attrs & CGEN_ATTR_MASK (CGEN_OPERAND_UNSIGNED)) != 0)
+  if (CGEN_BOOL_ATTR (attrs, CGEN_OPERAND_UNSIGNED))
     {
       unsigned long maxval = mask;
       if ((unsigned long) value > maxval)
