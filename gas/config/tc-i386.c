@@ -1268,9 +1268,7 @@ md_assemble (line)
     /* All intel opcodes have reversed operands except for BOUND and ENTER */
     if (intel_syntax && i.operands > 1
 	&& (strcmp (mnemonic, "enter") != 0)
-	&& (strcmp (mnemonic, "bound") != 0)
-	&& (strncmp (mnemonic, "fsub", 4) !=0)
-	&& (strncmp (mnemonic, "fdiv", 4) !=0))
+	&& (strcmp (mnemonic, "bound") != 0))
       {
 	union i386_op temp_op;
 	unsigned int temp_type;
@@ -1318,16 +1316,12 @@ md_assemble (line)
 	if (i.operands != t->operands)
 	  continue;
 
-	/* For some opcodes, don't check the suffix */
-	if (intel_syntax)
-	  {
-	    if (strcmp (t->name, "fnstcw")
-		&& strcmp (t->name, "fldcw")
-		&& (t->opcode_modifier & suffix_check))
-	      continue;
-	  }
-	/* Must not have disallowed suffix. */
-	else if ((t->opcode_modifier & suffix_check))
+	/* Check the suffix, except for some instructions in intel mode.  */
+	if ((t->opcode_modifier & suffix_check)
+	    && !(intel_syntax
+		 && t->base_opcode == 0xd9
+		 && (t->extension_opcode == 5	/* 0xd9,5 "fldcw"  */
+		     || t->extension_opcode == 7))) /* 0xd9,7 "f{n}stcw"  */
 	  continue;
 
 	else if (!t->operands)
@@ -1418,10 +1412,21 @@ md_assemble (line)
     i.tm = *t;
     if (found_reverse_match)
       {
+	/* If we found a reverse match we must alter the opcode
+	   direction bit.  found_reverse_match holds bits to change
+	   (different for int & float insns).  */
+
+	i.tm.base_opcode ^= found_reverse_match;
+
 	i.tm.operand_types[0] = t->operand_types[1];
 	i.tm.operand_types[1] = t->operand_types[0];
       }
 
+    /* Undo UNIXWARE_COMPAT brokenness when in Intel mode.  See i386.h  */
+     if (UNIXWARE_COMPAT
+	 && intel_syntax
+	 && (i.tm.base_opcode & 0xfffffde0) == 0xdce0)
+       i.tm.base_opcode ^= FloatR;
 
     if (i.tm.opcode_modifier & FWait)
       if (! add_prefix (FWAIT_OPCODE))
@@ -1737,12 +1742,6 @@ md_assemble (line)
 	   for memory accesses.  0 means unknown.
 	   This is only for optimizing out unnecessary segment overrides.  */
 	const seg_entry *default_seg = 0;
-
-	/* If we found a reverse match we must alter the opcode
-	   direction bit.  found_reverse_match holds bits to change
-	   (different for int & float insns).  */
-
-	i.tm.base_opcode ^= found_reverse_match;
 
 	/* The imul $imm, %reg instruction is converted into
 	   imul $imm, %reg, %reg, and the clr %reg instruction

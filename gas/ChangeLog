@@ -8,6 +8,16 @@
 	fake_zero_displacement code.  Test i.types[n] when outputting
 	displacements and immediates.  Combine output of Disp16 with
 	Disp32.
+	(md_assemble): Don't try to fix broken UNIXWARE_COMPAT opcodes
+	when in intel mode by (not) reversing fsub and fdiv operands
+	before the template search.  This fails for single operand
+	shorthand forms of the instruction, and if UNIXWARE_COMPAT is
+	undefined.  Instead fix the base_opcode after we've found the
+	template.  Move base_opcode xor with found_reverse_match from
+	opcode output code to before this fix so we test for the correct
+	opcodes.
+	(md_assemble): Don't use strcmp when deciding to ignore the suffix
+	check in intel mode.  Instead compare opcodes.
 
 	* config/tc-i386.h (TC_RELOC): Delete.
 	* config/tc-i386.c (TC_RELOC): Delete.  Replace usage of TC_RELOC
