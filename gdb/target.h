@@ -426,7 +426,11 @@ target_detach PARAMS ((char *, int));
 extern int target_read_string PARAMS ((CORE_ADDR, char **, int, int *));
 
 extern int
-target_read_memory PARAMS ((CORE_ADDR, char *, int));
+target_read_memory PARAMS ((CORE_ADDR memaddr, char *myaddr, int len));
+
+extern int
+target_read_memory_section PARAMS ((CORE_ADDR memaddr, char *myaddr, int len,
+				    asection *bfd_section));
 
 extern int
 target_read_memory_partial PARAMS ((CORE_ADDR, char *, int, int *));
@@ -439,14 +443,6 @@ xfer_memory PARAMS ((CORE_ADDR, char *, int, int, struct target_ops *));
 
 extern int
 child_xfer_memory PARAMS ((CORE_ADDR, char *, int, int, struct target_ops *));
-
-/* Transfer LEN bytes between target address MEMADDR and GDB address MYADDR.
-   Returns 0 for success, errno code for failure (which includes partial
-   transfers--if you want a more useful response to partial transfers, try
-   target_read_memory_partial).  */
-
-extern int target_xfer_memory PARAMS ((CORE_ADDR memaddr, char *myaddr,
-				       int len, int write));
 
 /* From exec.c */
 
@@ -656,9 +652,9 @@ extern char *normal_pid_to_str PARAMS ((int pid));
 
 #define TARGET_CAN_USE_HARDWARE_WATCHPOINT(TYPE,CNT,OTHERTYPE) 0
 
-/* Set/clear a hardware watchpoint starting at ADDR, for LEN bytes.  TYPE is 1
-   for read and 2 for read/write accesses.  Returns 0 for success, non-zero for
-   failure.  */
+/* Set/clear a hardware watchpoint starting at ADDR, for LEN bytes.  TYPE is 0
+   for write, 1 for read, and 2 for read/write accesses.  Returns 0 for
+   success, non-zero for failure.  */
 
 #define target_remove_watchpoint(ADDR,LEN,TYPE) -1
 #define target_insert_watchpoint(ADDR,LEN,TYPE) -1
@@ -739,18 +735,24 @@ memory_remove_breakpoint PARAMS ((CORE_ADDR, char *));
 extern int
 memory_insert_breakpoint PARAMS ((CORE_ADDR, char *));
 
+unsigned char *
+memory_breakpoint_from_pc PARAMS ((CORE_ADDR *pcptr, int *lenptr));
+
 /* From target.c */
 
-void
+extern void
+initialize_targets PARAMS ((void));
+
+extern void
 noprocess PARAMS ((void));
 
-void
+extern void
 find_default_attach PARAMS ((char *, int));
 
-void
+extern void
 find_default_create_inferior PARAMS ((char *, char *, char **));
 
-struct target_ops *
+extern struct target_ops *
 find_core_target PARAMS ((void));
 
 /* Stuff that should be shared among the various remote targets.  */
@@ -763,6 +765,8 @@ extern int remote_debug;
 extern int baud_rate;
 /* Timeout limit for response from target. */
 extern int remote_timeout;
+
+extern asection *target_memory_bfd_section;
 
 /* Functions for helping to write a native target.  */
 
@@ -775,5 +779,15 @@ extern int target_signal_to_host PARAMS ((enum target_signal));
 
 /* Convert from a number used in a GDB command to an enum target_signal.  */
 extern enum target_signal target_signal_from_command PARAMS ((int));
+
+/* Any target can call this to switch to remote protocol (in remote.c). */
+extern void push_remote_target PARAMS ((char *name, int from_tty));
+
+/* Imported from machine dependent code */
+
+#ifdef NO_SINGLE_STEP
+extern int one_stepped;
+extern void  single_step PARAMS ((enum target_signal));
+#endif /* NO_SINGLE_STEP */
 
 #endif	/* !defined (TARGET_H) */

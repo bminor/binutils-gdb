@@ -1,3 +1,9 @@
+Mon Apr 28 09:01:59 1997  Mark Alexander  <marka@cygnus.com>
+
+	* breakpoint.c (remove_breakpoint): Pass correct type to
+	target_remove_watchpoint.
+	* target.h: Improve comment for target_{remove,insert}_breakpoint.
+
 Sat Apr 26 03:38:02 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* alpha-tdep.c (heuristic_proc_desc):  Increase search limit
