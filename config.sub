@@ -644,7 +644,7 @@ case $os in
 	      | -riscos* | -linux* | -uniplus* | -iris* | -rtu* | -xenix* \
 	      | -go32 | -sim | -es1800* | -udi | -hms* | -xray \
 	      | -os68k* | -none* | -v88r* | -aout | -coff | -elf | -bosx* \
-	      | -ecoff | -lynx )
+	      | -ecoff* | -lynx )
 				# The last three lines above are CYGNUS LOCAL
 	;;
 # start-sanitize-v9

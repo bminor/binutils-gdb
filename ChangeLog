@@ -1,3 +1,7 @@
+Fri Jun  4 10:59:56 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* config.sub: Accept -ecoff*, not just -ecoff.
+
 Thu Jun  3 17:38:54 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* Makefile.in (taz): Use .gz suffix instead of .z.
