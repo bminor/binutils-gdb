@@ -7,6 +7,10 @@ MAXPAGESIZE=0x8000
 TEMPLATE_NAME=armelf
 GENERATE_SHLIB_SCRIPT=yes
 
+DATA_START_SYMBOLS='__data_start = . ;';
+OTHER_BSS_SYMBOLS='__bss_start__ = .;'
+OTHER_BSS_END_SYMBOLS='_bss_end__ = . ; __bss_end__ = . ;'
+
 # This needs to be high enough so that we can load ld.so below it,
 # yet low enough to stay away from the mmap area at 0x01100000.
 # Also, it is small enough so that relocs which are pointing

@@ -1,3 +1,12 @@
+1999-07-22  Philip Blundell  <pb@nexus.co.uk>
+
+	* emulparams/armelf_linux26.sh (DATA_START_SYMBOLS): Define.
+	(OTHER_BSS_SYMBOLS, OTHER_BSS_END_SYMBOLS): Likewise.
+	* emulparams/armelf_linux.sh (DATA_START_SYMBOLS): Define.
+
+	* configure.tgt (arm*-*-uclinux*, thumb-*-uclinux*,
+	thumb-*-linux-gnu*): New targets.
+
 1999-07-21  Mark Elbrecht  <snowball3@bigfoot.com>
 
 	* scripttempl/i386go32.sc: Add handling of linkonce sections.
