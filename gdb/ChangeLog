@@ -1,5 +1,16 @@
 2004-07-03  Mark Kettenis  <kettenis@gnu.org>
 
+	* m68kbsd-nat.c: Include "gdbcore.h", <sys/types.h>,
+	<machine/pcb.h> and "bsd-kvm.h".
+	(PCB_REGS_FP, PCB_REGS_SP): Define if not already defined.
+	(m68kbsd_supply_pcb): New function.
+	(_initialize_m68kbsd_nat): New prototype and function.
+	* Makefile.in (m68kbsd-nat.o): Update dependencies.
+	* config/m68k/nbsdelf.mh (NATDEPFILES): Add bsd-kvm.o.
+	(LOADLIBES): New variable.
+	* config/m68k/obsd.mh (NATDEPFILES): Add bsd-kvm.o.
+	(LOADLIBES): New variable.
+
 	* bsd-kvm.c (bsd_kvm_cmdlist): Remove unecessary initialization.
 
 2004-07-03  Mark Kettenis  <kettenis@gnu.org>

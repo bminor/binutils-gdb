@@ -1,3 +1,5 @@
 # Host: NetBSD/m68k ELF
-NATDEPFILES= m68kbsd-nat.o fork-child.o infptrace.o inftarg.o
+NATDEPFILES= m68kbsd-nat.o bsd-kvm.o fork-child.o infptrace.o inftarg.o
 NAT_FILE= nm-nbsd.h
+
+LOADLIBES= -lkvm

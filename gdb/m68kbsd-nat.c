@@ -20,6 +20,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include "gdbcore.h"
 #include "inferior.h"
 #include "regcache.h"
 
@@ -166,4 +167,62 @@ store_inferior_registers (int regnum)
 		  (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
 	perror_with_name ("Couldn't write floating point status");
     }
+}
+
+
+/* Support for debugging kernel virtual memory images.  */
+
+#include <sys/types.h>
+#include <machine/pcb.h>
+
+#include "bsd-kvm.h"
+
+/* OpenBSD doesn't have these.  */
+#ifndef PCB_REGS_FP
+#define PCB_REGS_FP 10
+#endif
+#ifndef PCB_REGS_SP
+#define PCB_REGS_SP 11
+#endif
+
+static int
+m68kbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
+{
+  int regnum, tmp;
+  int i = 0;
+
+  /* The following is true for NetBSD 1.6.2:
+
+     The pcb contains %d2...%d7, %a2...%a7 and %ps.  This accounts for
+     all callee-saved registers.  From this information we reconstruct
+     the register state as it would look when we just returned from
+     cpu_switch().  */
+
+  /* The stack pointer shouldn't be zero.  */
+  if (pcb->pcb_regs[PCB_REGS_SP] == 0)
+    return 0;
+
+  for (regnum = M68K_D2_REGNUM; regnum <= M68K_D7_REGNUM; regnum++)
+    regcache_raw_supply (regcache, regnum, &pcb->pcb_regs[i++]);
+  for (regnum = M68K_A2_REGNUM; regnum <= M68K_SP_REGNUM; regnum++)
+    regcache_raw_supply (regcache, regnum, &pcb->pcb_regs[i++]);
+
+  tmp = pcb->pcb_ps & 0xffff;
+  regcache_raw_supply (regcache, M68K_PS_REGNUM, &tmp);
+
+  read_memory (pcb->pcb_regs[PCB_REGS_FP] + 4, (char *) &tmp, sizeof tmp);
+  regcache_raw_supply (regcache, M68K_PC_REGNUM, &tmp);
+
+  return 1;
+}
+
+
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+void _initialize_m68kbsd_nat (void);
+
+void
+_initialize_m68kbsd_nat (void)
+{
+  /* Support debugging kernel virtual memory images.  */
+  bsd_kvm_add_target (m68kbsd_supply_pcb);
 }
