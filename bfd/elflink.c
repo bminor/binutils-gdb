@@ -6316,6 +6316,9 @@ elf_section_complain_discarded (asection *sec)
   if (strcmp (".gcc_except_table", sec->name) == 0)
     return FALSE;
 
+  if (strcmp (".PARISC.unwind", sec->name) == 0)
+    return FALSE;
+
   return TRUE;
 }
 
