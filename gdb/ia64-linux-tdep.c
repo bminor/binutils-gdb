@@ -31,7 +31,7 @@
 #define GATE_AREA_END   0xa000000000010000LL
 
 /* Offset to sigcontext structure from frame of handler */
-#define IA64_LINUX_SIGCONTEXT_OFFSET 160
+#define IA64_LINUX_SIGCONTEXT_OFFSET 192
 
 int
 ia64_linux_in_sigtramp (CORE_ADDR pc, char *func_name)

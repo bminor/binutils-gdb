@@ -1,3 +1,9 @@
+2001-05-31  Kevin Buettner  <kevinb@redhat.com>
+
+	* ia64-linux-tdep.c (IA64_LINUX_SIGCONTEXT_OFFSET):  Revise to
+	match the location at which the kernel is placing the sigcontext
+	struct.
+
 2001-05-29  Christopher Faylor  <cgf@redhat.com>
 
 	* partial-stab.h: Revert previous patch.
