@@ -129,9 +129,7 @@ Configuration Time Options:
     default location is /usr/local.  We refer to this location as
     $(destdir).  All user visible programs will be installed in
     $(destdir)/bin.  All other programs and files will be installed in
-    a subdirectory of $(destdir)/lib.  For the tools in this
-    directory, the files not normally user visible will be installed
-    in $(destdir)/lib/gcc.
+    a subdirectory of $(destdir)/lib.
 
     You can elect to change $(destdir) only as a configuration time
     option.
