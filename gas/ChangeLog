@@ -1,3 +1,17 @@
+Tue Jul 12 12:06:42 1994  Kung Hsu  (kung@x1.cygnus.com)
+
+	* config/obj-ecoff.h: change calling interface of
+	OBJ_GENERATE_ASM_LINE_STAB.
+	* config/obj-elf.h: ditto.
+	* read.c (read_a_source_file): ditto.
+	* ecoff.h: change calling interface of
+	ecoff_generate_asm_line_stab.
+	* ecoff.c (add_file): record of filename to handle case of include
+	files, also change default built-in type from int to void for
+	asm file.
+	* ecoff.c (ecoff_generate_asm_line_stab): handle case of include
+	files.
+
 Mon Jul 11 17:20:23 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* config/tc-mips.c (macro): In case M_LA_AB, SVR4_PIC, large
