@@ -55,7 +55,7 @@ RANLIB = ranlib
 
 INCDIR = $(srcdir)/../include 
 BFDDIR = $(srcdir)/../bfd
-CSEARCH = -I. -I$(srcdir) -I$(INCDIR) -I$(BFDDIR)
+CSEARCH = -I. -I$(srcdir) -I../bfd -I$(INCDIR) -I$(BFDDIR)
 DEP = mkdep
 
 
@@ -64,7 +64,7 @@ TARGETLIB = libopcodes.a
 # To circumvent a Sun make VPATH bug, each file listed here
 # should also have a foo.o: foo.c line further along in this file.
 DIS_LIBS = i386-dis.o z8k-dis.o m68k-dis.o mips-dis.o h8500-dis.o dis-buf.o \
-	sparc-dis.o
+	sparc-dis.o a29k-dis.o i960-dis.o alpha-dis.o sh-dis.o hppa-dis.o
 
 OFILES = $(DIS_LIBS) sparc-opc.o m68881-ext.o
 #### host and target dependent Makefile fragments come in here.
@@ -113,15 +113,20 @@ $(TARGETLIB): $(OFILES)
 	 $(RANLIB) $(TARGETLIB)
 
 # Circumvent Sun Make bug with VPATH.
+a29k-dis.o: a29k-dis.c
 dis-buf.o: dis-buf.c
 h8500-dis.o: h8500-dis.c
 i386-dis.o: i386-dis.c
+i960-dis.o: i960-dis.c
 m68881-ext.o: m68881-ext.c
 m68k-dis.o: m68k-dis.c
 mips-dis.o: mips-dis.c
 sparc-dis.o: sparc-dis.c
 sparc-opc.o: sparc-opc.c
 z8k-dis.o: z8k-dis.c
+sh-dis.o: sh-dis.c
+alpha-dis.o: alpha-dis.c
+hppa-dis.o: hppa-dis.c $(srcdir)/../include/opcode/hppa.h
 
 tags etags: TAGS
 

@@ -1,3 +1,43 @@
+Mon Jun  7 12:58:49 1993  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* Makefile.in (CSEARCH): Add -I../bfd for sysdep.h and bfd.h.
+	* configure.in:  No longer need to configure to get sysdep.h.
+
+Thu Jun  3 15:56:49 1993  Stu Grossman  (grossman@cygnus.com)
+
+	* Patches from Jeffrey Law <law@cs.utah.edu>.
+	* hppa-dis.c: Support 'I', 'J', and 'K' in output
+	templates for 1.1 FP computational instructions.
+
+Tue May 25 13:05:48 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* h8500-dis.c (print_insn_h8500): Address argument is type
+	bfd_vma.
+	* z8k-dis.c (print_insn_z8k, print_insn_z8001, print_insn_z8002):
+	Ditto.
+
+	* h8500-opc.h (addr_class_type): No comma at end of enumerator.
+	* sh-opc.h (sh_nibble_type, sh_arg_type): Ditto.
+
+	* sparc-dis.c (compare_opcodes): Move static declaration to
+	top-level.
+
+Fri May 21 14:17:37 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* sparc-dis.c (print_insn_sparc): Implement 'n' argument for unimp
+	instruction, remove unimp hack from 'l' argument.
+
+Wed May 19 15:35:54 1993  Stu Grossman  (grossman@cygnus.com)
+
+	* z8k-dis.c (fetch_data):  Use unsigned char to make ancient gcc's
+	happy.
+
+Fri May 14 15:22:46 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* Based on patches from davidj@ICSI.Berkeley.EDU (David Johnson):
+	* mips-dis.c (print_insn_arg): Handle 'C' for general coprocessor
+	instructions.
+
 Fri May 14 00:09:14 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* hppa-dis.c: Include dis-asm.h before sysdep.h.  Changed some
