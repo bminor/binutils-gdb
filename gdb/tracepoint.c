@@ -1517,48 +1517,70 @@ encode_actions (t, tdp_actions, stepping_actions)
 		struct agent_reqs areqs;
 
 		exp = parse_exp_1 (&action_exp, block_for_pc (t->address), 1);
-
 		old_chain = make_cleanup (free_current_contents, &exp);
 
-		aexpr = gen_trace_for_expr (exp);
+		switch (exp->elts[0].opcode) {
+		case OP_REGISTER:
+		  i = exp->elts[1].longconst;
+		  if (info_verbose)
+		    printf_filtered ("OP_REGISTER: ");
+		  add_register (collect, i);
+		  break;
 
-		old_chain1 = make_cleanup (free_agent_expr, aexpr);
+		case UNOP_MEMVAL:
+		  /* safe because we know it's a simple expression */
+		  tempval = evaluate_expression (exp);
+		  addr = VALUE_ADDRESS (tempval) + VALUE_OFFSET (tempval);
+		  len = TYPE_LENGTH (check_typedef (exp->elts[1].type));
+		  add_memrange (collect, -1, addr, len);
+		  break;
 
-		ax_reqs (aexpr, &areqs);
-		if (areqs.flaw != agent_flaw_none)
-		  error ("malformed expression");
+		case OP_VAR_VALUE:
+		  collect_symbol (collect, exp->elts[2].symbol);
+		  break;
 
-		if (areqs.min_height < 0)
-		  error ("gdb: Internal error: expression has min height < 0");
-		if (areqs.max_height > 20)
-		  error ("expression too complicated, try simplifying");
+		default:	/* full-fledged expression */
+		  aexpr = gen_trace_for_expr (exp);
 
-		discard_cleanups (old_chain1);
-		add_aexpr (collect, aexpr);
+		  old_chain1 = make_cleanup (free_agent_expr, aexpr);
 
-		/* take care of the registers */
-		if (areqs.reg_mask_len > 0)
-		  {
-		    int ndx1;
-		    int ndx2;
+		  ax_reqs (aexpr, &areqs);
+		  if (areqs.flaw != agent_flaw_none)
+		    error ("malformed expression");
 
-		    for (ndx1 = 0; ndx1 < areqs.reg_mask_len; ndx1++)
-		      {
-			QUIT;		/* allow user to bail out with ^C */
-			if (areqs.reg_mask[ndx1] != 0)
-			  {
-			    /* assume chars have 8 bits */
-			    for (ndx2 = 0; ndx2 < 8; ndx2++)
-			      if (areqs.reg_mask[ndx1] & (1 << ndx2))
-				/* it's used -- record it */
-				add_register (collect, ndx1 * 8 + ndx2);
-			  }
-		      }
-		  }
+		  if (areqs.min_height < 0)
+		    error ("gdb: Internal error: expression has min height < 0");
+		  if (areqs.max_height > 20)
+		    error ("expression too complicated, try simplifying");
+
+		  discard_cleanups (old_chain1);
+		  add_aexpr (collect, aexpr);
+
+		  /* take care of the registers */
+		  if (areqs.reg_mask_len > 0)
+		    {
+		      int ndx1;
+		      int ndx2;
+
+		      for (ndx1 = 0; ndx1 < areqs.reg_mask_len; ndx1++)
+			{
+			  QUIT;		/* allow user to bail out with ^C */
+			  if (areqs.reg_mask[ndx1] != 0)
+			    {
+			      /* assume chars have 8 bits */
+			      for (ndx2 = 0; ndx2 < 8; ndx2++)
+				if (areqs.reg_mask[ndx1] & (1 << ndx2))
+				  /* it's used -- record it */
+				  add_register (collect, ndx1 * 8 + ndx2);
+			    }
+			}
+		    }
+		  break;
+		}	/* switch */
 		do_cleanups (old_chain);
-	      }
+	      }		/* do */
 	  } while (action_exp && *action_exp++ == ',');
-	}
+	}		/* if */
       else if (cmd->function.cfunc == while_stepping_pseudocommand)
 	{
 	  collect = &stepping_list;
@@ -1570,7 +1592,7 @@ encode_actions (t, tdp_actions, stepping_actions)
 	  else
 	    break;			/* end tracepoint actions */
 	}
-    }
+    }			/* for */
   memrange_sortmerge (&tracepoint_list); 
   memrange_sortmerge (&stepping_list); 
 

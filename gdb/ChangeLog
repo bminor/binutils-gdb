@@ -1,3 +1,10 @@
+Fri Jul 24 14:41:19 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* tracepoint.c (encode_actions): Treat register names and simple
+	variable names as special cases and don't convert them to byte-
+	codes: these things can be collected far more efficiently 
+	without invoking the bytecode interpreter.
+
 Fri Jul 24 13:32:46 1998  Mark Alexander  <marka@cygnus.com>
 
 	* config/i386/tm-i386.h (STORE_STRUCT_RETURN): Make it
