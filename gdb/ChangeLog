@@ -1,3 +1,20 @@
+2000-03-21  Kevin Buettner  <kevinb@redhat.com>
+
+	* symtab.h (MAX_SECTIONS, struct section_addr_info,
+	symbol_file_add):  Move declarations from here...
+	* symfile.h: ...to here.
+
+	* solib.c (symbol_add_stub): Make symbol_file_add () aware of
+	all section addresses, not just .text.
+	* symfile.h, symfile.c (free_section_addr_info,
+	build_section_addr_info_from_section_table): New functions.
+
+	* symfile.h (MAX_SECTIONS): Increase value to 40.
+	* symfile.c (syms_from_objfile): Add bounds check prior to
+	accessing ``other'' array in a section_addr_info_struct.
+	Remove unused variable section_offsets.
+	(add_symbol_file_command): Remove unused variable text_addr.
+
 2000-03-21  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* breakpoint.c (bpstat_stop_status): Don't stop if a read

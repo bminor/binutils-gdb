@@ -1155,6 +1155,7 @@ symbol_add_stub (arg)
 {
   register struct so_list *so = (struct so_list *) arg;  /* catch_errs bogon */
   CORE_ADDR text_addr = 0;
+  struct section_addr_info *sap;
 
   /* Have we already loaded this shared object?  */
   ALL_OBJFILES (so->objfile)
@@ -1181,15 +1182,12 @@ symbol_add_stub (arg)
 	  + LM_ADDR (so);
     }
 
-  {
-    struct section_addr_info section_addrs;
-
-    memset (&section_addrs, 0, sizeof (section_addrs));
-    section_addrs.text_addr = text_addr;
-
-    so->objfile = symbol_file_add (so->so_name, so->from_tty,
-				   &section_addrs, 0, OBJF_SHARED);
-  }
+  sap = build_section_addr_info_from_section_table (so->sections,
+                                                    so->sections_end);
+  sap->text_addr = text_addr;
+  so->objfile = symbol_file_add (so->so_name, so->from_tty,
+				 sap, 0, OBJF_SHARED);
+  free_section_addr_info (sap);
 
   return (1);
 }

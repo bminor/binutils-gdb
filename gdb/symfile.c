@@ -461,6 +461,58 @@ find_lowest_section (abfd, sect, obj)
     *lowest = sect;
 }
 
+
+/* Build (allocate and populate) a section_addr_info struct from
+   an existing section table. */
+
+extern struct section_addr_info *
+build_section_addr_info_from_section_table (const struct section_table *start,
+                                            const struct section_table *end)
+{
+  struct section_addr_info *sap;
+  const struct section_table *stp;
+  int oidx;
+
+  sap = xmalloc (sizeof (struct section_addr_info));
+  memset (sap, 0, sizeof (struct section_addr_info));
+
+  for (stp = start, oidx = 0; stp != end; stp++)
+    {
+      if (strcmp (stp->the_bfd_section->name, ".text") == 0)
+	sap->text_addr = stp->addr;
+      else if (strcmp (stp->the_bfd_section->name, ".data") == 0)
+	sap->data_addr = stp->addr;
+      else if (strcmp (stp->the_bfd_section->name, ".bss") == 0)
+	sap->bss_addr = stp->addr;
+
+      if (stp->the_bfd_section->flags & (SEC_ALLOC | SEC_LOAD)
+	  && oidx < MAX_SECTIONS)
+	{
+	  sap->other[oidx].addr = stp->addr;
+	  sap->other[oidx].name = xstrdup (stp->the_bfd_section->name);
+	  sap->other[oidx].sectindex = stp->the_bfd_section->index;
+	  oidx++;
+	}
+    }
+
+  return sap;
+}
+
+
+/* Free all memory allocated by build_section_addr_info_from_section_table. */
+
+extern void
+free_section_addr_info (struct section_addr_info *sap)
+{
+  int idx;
+
+  for (idx = 0; idx < MAX_SECTIONS; idx++)
+    if (sap->other[idx].name)
+      free (sap->other[idx].name);
+  free (sap);
+}
+
+
 /* Parse the user's idea of an offset for dynamic linking, into our idea
    of how to represent it for fast symbol reading.  This is the default 
    version of the sym_fns.sym_offsets function for symbol readers that
@@ -531,7 +583,6 @@ syms_from_objfile (objfile, addrs, mainline, verbo)
      int mainline;
      int verbo;
 {
-  struct section_offsets *section_offsets;
   asection *lower_sect;
   asection *sect;
   CORE_ADDR lower_offset;
@@ -738,7 +789,9 @@ syms_from_objfile (objfile, addrs, mainline, verbo)
  	  else if (strcmp (s->the_bfd_section->name, ".bss") == 0)
  	    s_addr = addrs->bss_addr;
  	  else 
- 	    for (i = 0; !s_addr && addrs->other[i].name; i++)
+ 	    for (i = 0; 
+	         !s_addr && i < MAX_SECTIONS && addrs->other[i].name;
+		 i++)
  	      if (strcmp (s->the_bfd_section->name, addrs->other[i].name) == 0)
  	        s_addr = addrs->other[i].addr; /* end added for gdb/13815 */
  
@@ -1460,7 +1513,6 @@ add_symbol_file_command (args, from_tty)
      int from_tty;
 {
   char *name = NULL;
-  CORE_ADDR text_addr;
   int flags = OBJF_USERLOADED;
   char *arg;
   int expecting_option = 0;
