@@ -1,3 +1,7 @@
+2003-04-26  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* config/tc-mips.h (TC_FORCE_RELOCATION_SUB_SAME): Define again.
+
 2003-04-25  Chris Demetriou  <cgd@broadcom.com>
 
 	* NEWS: Belatedly mention support for MIPS32 Release 2.

@@ -140,6 +140,9 @@ extern int mips_fix_adjustable PARAMS ((struct fix *));
 #define TC_FORCE_RELOCATION(FIX) mips_force_relocation (FIX)
 extern int mips_force_relocation PARAMS ((struct fix *));
 
+#define TC_FORCE_RELOCATION_SUB_SAME(FIX, SEG) \
+  (! SEG_NORMAL (SEG) || mips_force_relocation (FIX))
+
 /* We use this to turn branches to global symbols into branches to
    local symbols, so that they can be simplified.  */
 #define TC_VALIDATE_FIX(fixp, this_segment, skip_label) \
