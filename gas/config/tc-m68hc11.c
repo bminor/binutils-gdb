@@ -26,8 +26,6 @@
 #include "opcode/m68hc11.h"
 #include "dwarf2dbg.h"
 
-struct dwarf2_line_info debug_line;
-
 const char comment_chars[] = ";!";
 const char line_comment_chars[] = "#*";
 const char line_separator_chars[] = "";
@@ -1375,13 +1373,8 @@ m68hc11_new_insn (size)
 
   /* Emit line number information in dwarf2 debug sections.  */
   if (debug_type == DEBUG_DWARF2)
-    {
-      bfd_vma addr;
+    dwarf2_generate_asm_lineno (size);
 
-      dwarf2_where (&debug_line);
-      addr = frag_now->fr_address + frag_now_fix () - size;
-      dwarf2_gen_line_info (addr, &debug_line);
-    }
   return f;
 }
 

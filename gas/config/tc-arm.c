@@ -3095,7 +3095,7 @@ ldst_extend (str, hwse)
 
 static void
 do_ldst (str, flags)
-     char *str;
+     char *        str;
      unsigned long flags;
 {
   int halfword = 0;
@@ -6380,7 +6380,10 @@ output_inst PARAMS ((void))
     fix_new_arm (frag_now, to - frag_now->fr_literal,
 		 inst.size, & inst.reloc.exp, inst.reloc.pc_rel,
 		 inst.reloc.type);
-
+#ifdef OBJ_ELF
+  if (debug_type == DEBUG_DWARF2)
+    dwarf2_generate_asm_lineno (inst.size);
+#endif
   return;
 }
 
@@ -7256,14 +7259,14 @@ arm_adjust_symtab ()
     }
 #endif
 #ifdef OBJ_ELF
-  symbolS *sym;
-  char bind;
+  symbolS * sym;
+  char      bind;
 
   for (sym = symbol_rootP; sym != NULL; sym = symbol_next (sym))
     {
       if (ARM_IS_THUMB (sym))
 	{
-	  elf_symbol_type *elf_sym;
+	  elf_symbol_type * elf_sym;
 
 	  elf_sym = elf_symbol (symbol_get_bfdsym (sym));
 	  bind = ELF_ST_BIND (elf_sym);
@@ -7297,7 +7300,7 @@ arm_data_in_code ()
 
 char *
 arm_canonicalize_symbol_name (name)
-     char *name;
+     char * name;
 {
   int len;
 
@@ -7310,7 +7313,7 @@ arm_canonicalize_symbol_name (name)
 
 boolean
 arm_validate_fix (fixP)
-     fixS *fixP;
+     fixS * fixP;
 {
   /* If the destination of the branch is a defined symbol which does not have
      the THUMB_FUNC attribute, then we must be calling a function which has
@@ -7344,7 +7347,7 @@ arm_validate_fix (fixP)
 
 boolean
 arm_fix_adjustable (fixP)
-   fixS *fixP;
+   fixS * fixP;
 {
   if (fixP->fx_addsy == NULL)
     return 1;
@@ -7475,7 +7478,7 @@ s_arm_elf_cons (nbytes)
       expression (& exp);
 
       if (exp.X_op == O_symbol
-	  && *input_line_pointer == '('
+	  && * input_line_pointer == '('
 	  && (reloc = arm_parse_reloc ()) != BFD_RELOC_UNUSED)
 	{
 	  reloc_howto_type *howto = bfd_reloc_type_lookup (stdoutput, reloc);
@@ -7501,6 +7504,15 @@ s_arm_elf_cons (nbytes)
   /* Put terminator back into stream.  */
   input_line_pointer --;
   demand_empty_rest_of_line ();
+}
+
+/* Stuff to do after assembling all of the source file.  */
+
+void
+arm_end_of_source ()
+{
+  if (debug_type == DEBUG_DWARF2)
+    dwarf2_finish ();
 }
 
 #endif /* OBJ_ELF */

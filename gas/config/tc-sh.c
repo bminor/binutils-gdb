@@ -34,7 +34,6 @@
 #endif
 
 #include "dwarf2dbg.h"
-struct dwarf2_line_info debug_line;
 
 const char comment_chars[] = "!";
 const char line_separator_chars[] = ";";
@@ -1931,19 +1930,7 @@ md_assemble (str)
     }
 
   if (debug_type == DEBUG_DWARF2)
-    {
-      bfd_vma addr;
-
-      /* First update the notion of the current source line.  */
-      dwarf2_where (&debug_line);
-
-      /* We want the offset of the start of this instruction within the
-	 the current frag.  may be used later */
-      addr = frag_now->fr_address + frag_now_fix () - size;
-
-      /* And record the information.  */
-      dwarf2_gen_line_info (addr, &debug_line);
-    }
+    dwarf2_generate_asm_lineno (size);
 }
 
 /* This routine is called each time a label definition is seen.  It

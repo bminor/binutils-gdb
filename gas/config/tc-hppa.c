@@ -42,7 +42,6 @@ error only one of OBJ_ELF and OBJ_SOM can be defined
    then we want to use the assembler support for compact line numbers.  */
 #ifdef OBJ_ELF
 #include "dwarf2dbg.h"
-struct dwarf2_line_info debug_line;
 
 /* A "convient" place to put object file dependencies which do
    not need to be seen outside of tc-hppa.c.  */
@@ -1493,19 +1492,7 @@ md_assemble (str)
 
 #ifdef OBJ_ELF
   if (debug_type == DEBUG_DWARF2)
-    {
-      bfd_vma addr;
-
-      /* First update the notion of the current source line.  */
-      dwarf2_where (&debug_line);
-
-      /* We want the offset of the start of this instruction within the
-	 the current frag.  */
-      addr = frag_now->fr_address + frag_now_fix () - 4;
-
-      /* And record the information.  */
-      dwarf2_gen_line_info (addr, &debug_line);
-    }
+    dwarf2_generate_asm_lineno (4);
 #endif
 }
 

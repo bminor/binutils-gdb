@@ -338,7 +338,8 @@ may help debugging assembler code, if the debugger can handle it.
 
 @item --gdwarf2
 Generate DWARF2 debugging information for each assembler line.  This
-may help debugging assembler code, if the debugger can handle it.
+may help debugging assembler code, if the debugger can handle it.  Note - this
+option is only supported by some targets, not all of them.
 
 @item --help
 Print a summary of the command line options and exit.

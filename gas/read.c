@@ -5002,7 +5002,14 @@ generate_lineno_debug ()
       break;
     case DEBUG_DWARF:
     case DEBUG_DWARF2:
-      /* FIXME.  */
+      /* This cannot safely be done in a generic manner.  A single
+	 binary instruction word may span mutliple lines of assembler
+	 source and may occupy a variable number of bytes.  Instead,
+	 if a port wishes to support DWARF2 line number generation by
+	 the assembler, it should add a call to dwarf2_generate_asm_lineno
+	 inside md_assemble() at whatever point is appropriate.  Note,
+	 such a port should also define md_end and make sure that
+	 dwarf2_finish is called, to emit the accumulated line information.  */
       break;
     }
 }
