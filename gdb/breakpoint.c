@@ -6902,7 +6902,12 @@ breakpoint_re_set_one (void *bint)
 	    {
 	      s = b->cond_string;
 	      if (b->cond)
-		xfree (b->cond);
+		{
+		  xfree (b->cond);
+		  /* Avoid re-freeing b->exp if an error during the call
+		     to parse_exp_1.  */
+		  b->cond = NULL;
+		}
 	      b->cond = parse_exp_1 (&s, block_for_pc (sals.sals[i].pc), 0);
 	    }
 
