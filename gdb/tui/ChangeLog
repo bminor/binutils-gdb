@@ -1,5 +1,18 @@
 2002-09-01  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* tuiData.h (FILE_PREFIX): Don't define.
+	(blankStr, locationStr, breakStr): Don't declare.
+	(breakLocationStr, nullStr, historyLimit, setHistoryLimitTo): Likewise.
+	(displayableWinContentOf, displayableWinContentAt): Likewise.
+	(winElementHeight, winByName, freeAllWindows): Likewise.
+
+	* tuiData.c (blankStr, locationStr, breakStr): Remove.
+	(breakLocationStr, nullStr, historyLimit, setHistoryLimitTo): Remove.
+	(displayableWinContentOf, displayableWinContentAt): Remove.
+	(winElementHeight, winByName, freeAllWindows): Remove.
+
+2002-09-01  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* tuiStack.c (tui_make_status_line): New function to create the
 	status line.
 	(tuiShowLocatorContent): Use it instead of displayableWinContentAt.

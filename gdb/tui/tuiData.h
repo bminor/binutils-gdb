@@ -72,7 +72,6 @@ TuiGenWinInfo, *TuiGenWinInfoPtr;
 #define MIN_CMD_WIN_HEIGHT             3
 
 /* Strings to display in the TUI status line.  */
-#define FILE_PREFIX                    "File: "
 #define PROC_PREFIX                    "In: "
 #define LINE_PREFIX                    "Line: "
 #define PC_PREFIX                      "PC: "
@@ -347,35 +346,23 @@ extern TuiWinContent allocContent (int, TuiWinType);
 extern int addContentElements (TuiGenWinInfoPtr, int);
 extern void initContentElement (TuiWinElementPtr, TuiWinType);
 extern void freeWindow (TuiWinInfoPtr);
-extern void freeAllWindows (void);
 extern void freeWinContent (TuiGenWinInfoPtr);
 extern void freeDataContent (TuiWinContent, int);
 extern void freeAllSourceWinsContent (void);
 extern void tuiDelWindow (TuiWinInfoPtr);
 extern void tuiDelDataWindows (TuiWinContent, int);
-extern TuiWinInfoPtr winByName (char *);
 extern TuiWinInfoPtr partialWinByName (char *);
 extern char *winName (TuiGenWinInfoPtr);
-extern char *displayableWinContentOf (TuiGenWinInfoPtr, TuiWinElementPtr);
-extern char *displayableWinContentAt (TuiGenWinInfoPtr, int);
-extern int winElementHeight (TuiGenWinInfoPtr, TuiWinElementPtr);
 extern TuiLayoutType currentLayout (void);
 extern void setCurrentLayoutTo (TuiLayoutType);
 extern int termHeight (void);
 extern void setTermHeightTo (int);
 extern int termWidth (void);
 extern void setTermWidthTo (int);
-extern int historyLimit (void);
-extern void setHistoryLimit (int);
 extern void setGenWinOrigin (TuiGenWinInfoPtr, int, int);
 extern TuiGenWinInfoPtr locatorWinInfoPtr (void);
 extern TuiGenWinInfoPtr sourceExecInfoWinPtr (void);
 extern TuiGenWinInfoPtr disassemExecInfoWinPtr (void);
-extern char *nullStr (void);
-extern char *blankStr (void);
-extern char *locationStr (void);
-extern char *breakStr (void);
-extern char *breakLocationStr (void);
 extern TuiListPtr sourceWindows (void);
 extern void clearSourceWindows (void);
 extern void clearSourceWindowsDetail (void);
