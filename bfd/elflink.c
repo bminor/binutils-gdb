@@ -7172,6 +7172,115 @@ elf_reloc_link_order (bfd *output_bfd,
   return TRUE;
 }
 
+
+/* Get the output vma of the section pointed to by the sh_link field.  */
+
+static bfd_vma
+elf_get_linked_section_vma (struct bfd_link_order *p)
+{
+  Elf_Internal_Shdr **elf_shdrp;
+  asection *s;
+  int elfsec;
+
+  s = p->u.indirect.section;
+  elf_shdrp = elf_elfsections (s->owner);
+  elfsec = _bfd_elf_section_from_bfd_section (s->owner, s);
+  elfsec = elf_shdrp[elfsec]->sh_link;
+  s = elf_shdrp[elfsec]->bfd_section;
+  return s->output_section->vma + s->output_offset;
+}
+
+
+/* Compare two sections based on the locations of the sections they are
+   linked to.  Used by elf_fixup_link_order.  */
+
+static int
+compare_link_order (const void * a, const void * b)
+{
+  bfd_vma apos;
+  bfd_vma bpos;
+
+  apos = elf_get_linked_section_vma (*(struct bfd_link_order **)a);
+  bpos = elf_get_linked_section_vma (*(struct bfd_link_order **)b);
+  if (apos < bpos)
+    return -1;
+  return apos > bpos;
+}
+
+
+/* Looks for sections with SHF_LINK_ORDER set.  Rearranges them into the same
+   order as their linked sections.  Returns false if this could not be done
+   because an output section includes both ordered and unordered
+   sections.  Ideally we'd do this in the linker proper.  */
+
+static bfd_boolean
+elf_fixup_link_order (bfd *abfd, asection *o)
+{
+  int seen_linkorder;
+  int seen_other;
+  int n;
+  struct bfd_link_order *p;
+  bfd *sub;
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  int elfsec;
+  struct bfd_link_order **sections;
+  asection *s;
+  bfd_vma offset;
+  
+  seen_other = 0;
+  seen_linkorder = 0;
+  for (p = o->link_order_head; p != NULL; p = p->next)
+    {
+      if (p->type == bfd_indirect_link_order
+	  && (bfd_get_flavour ((sub = p->u.indirect.section->owner))
+	      == bfd_target_elf_flavour)
+	  && elf_elfheader (sub)->e_ident[EI_CLASS] == bed->s->elfclass)
+	{
+	  s = p->u.indirect.section;
+	  elfsec = _bfd_elf_section_from_bfd_section (sub, s);
+	  if (elfsec != -1
+	      && elf_elfsections (sub)[elfsec]->sh_flags & SHF_LINK_ORDER)
+	    seen_linkorder++;
+	  else
+	    seen_other++;
+	}
+      else
+	seen_other++;
+    }
+
+  if (!seen_linkorder)
+    return TRUE;
+
+  if (seen_other && seen_linkorder)
+    return FALSE;
+  
+  sections = (struct bfd_link_order **)
+    xmalloc (seen_linkorder * sizeof (struct bfd_link_order *));
+  seen_linkorder = 0;
+  
+  for (p = o->link_order_head; p != NULL; p = p->next)
+    {
+      sections[seen_linkorder++] = p;
+    }
+  /* Sort the input sections in the order of their linked section.  */
+  qsort (sections, seen_linkorder, sizeof (struct bfd_link_order *),
+	 compare_link_order);
+
+  /* Change the offsets of the sections.  */
+  offset = 0;
+  for (n = 0; n < seen_linkorder; n++)
+    {
+      s = sections[n]->u.indirect.section;
+      offset &= ~(bfd_vma)((1 << s->alignment_power) - 1);
+      s->output_offset = offset;
+      sections[n]->offset = offset;
+      offset += sections[n]->size;
+    }
+
+  return TRUE;
+}
+
+
 /* Do the final step of an ELF link.  */
 
 bfd_boolean
@@ -7629,6 +7738,13 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
       base = elf_hash_table (info)->tls_sec->vma;
       end = align_power (end, elf_hash_table (info)->tls_sec->alignment_power);
       elf_hash_table (info)->tls_size = end - base;
+    }
+
+  /* Reorder SHF_LINK_ORDER sections.  */
+  for (o = abfd->sections; o != NULL; o = o->next)
+    {
+      if (!elf_fixup_link_order (abfd, o))
+	return FALSE;
     }
 
   /* Since ELF permits relocations to be against local symbols, we

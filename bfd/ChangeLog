@@ -1,3 +1,9 @@
+2003-07-21  Paul Brook  <paul@codesourcery.com>
+
+	* elflink.c (elf_get_linked_section_vma, compare_link_order,
+	elf_fixup_link_order): New functions.
+	(bfd_elf_final_link): Call elf_fixup_link_order.
+
 2004-07-21  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elf-bfd.h (ELF_COMMON_DEF_P): New.
