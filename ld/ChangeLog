@@ -1,3 +1,7 @@
+2002-01-15  DJ Delorie  <dj@redhat.com>
+
+	* scripttempl/pe.sc: Add support for constructor priorities.
+
 2002-01-07  Marek Michalkiewicz  <marekm@amelek.gda.pl>
 
 	* emulparams/avr1200.sh (DATA_START): Define as 0x60.
