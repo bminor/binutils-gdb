@@ -52,11 +52,15 @@ Most of this hacked by  Steve Chamberlain,
    wasting too much time.
 */
 
-#ifdef  coff_bfd_print_private_bfd_data
-static  boolean (* pe_saved_coff_bfd_print_private_bfd_data) (bfd *, PTR) = coff_bfd_print_private_bfd_data;
-#undef  coff_bfd_print_private_bfd_data
+#ifdef coff_bfd_print_private_bfd_data
+static boolean (*pe_saved_coff_bfd_print_private_bfd_data)
+     PARAMS ((bfd *, PTR))
+     = coff_bfd_print_private_bfd_data;
+#undef coff_bfd_print_private_bfd_data
 #else
-static  boolean (* pe_saved_coff_bfd_print_private_bfd_data) (bfd *, PTR) = NULL;
+static boolean (*pe_saved_coff_bfd_print_private_bfd_data)
+     PARAMS ((bfd *, PTR))
+     = NULL;
 #endif
 #define coff_bfd_print_private_bfd_data pe_print_private_bfd_data
 
@@ -853,7 +857,9 @@ static void add_data_entry (abfd, aout, idx, name, base)
   asection *sec = bfd_get_section_by_name (abfd, name);
 
   /* add import directory information if it exists */
-  if (sec != NULL)
+  if (sec != NULL
+      && coff_section_data (abfd, sec) != NULL
+      && pei_section_data (abfd, sec) != NULL)
     {
       aout->DataDirectory[idx].VirtualAddress = (sec->vma - base) & 0xffffffff;
       aout->DataDirectory[idx].Size = pei_section_data (abfd, sec)->virt_size;
@@ -2054,11 +2060,15 @@ pe_mkobject_hook (abfd, filehdr, aouthdr)
 /* Copy any private info we understand from the input bfd
    to the output bfd.  */
 
-#ifdef  coff_bfd_copy_private_bfd_data
-static  boolean (* pe_saved_coff_bfd_copy_private_bfd_data)(bfd *, bfd *) = coff_bfd_copy_private_bfd_data;
-#undef  coff_bfd_copy_private_bfd_data
+#ifdef coff_bfd_copy_private_bfd_data
+static boolean (*pe_saved_coff_bfd_copy_private_bfd_data)
+     PARAMS ((bfd *, bfd *))
+     = coff_bfd_copy_private_bfd_data;
+#undef coff_bfd_copy_private_bfd_data
 #else
-static  boolean (* pe_saved_coff_bfd_copy_private_bfd_data)(bfd *, bfd *) = NULL;
+static boolean (*pe_saved_coff_bfd_copy_private_bfd_data)
+     PARAMS ((bfd *, bfd *))
+     = NULL;
 #endif
 #define coff_bfd_copy_private_bfd_data pe_bfd_copy_private_bfd_data
 

@@ -1,3 +1,8 @@
+Mon May 18 14:44:15 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* peicode.h (add_data_entry): If the section has no private data
+	then do not create a Data Dictionary entry for it.
+
 Mon May 18 00:09:28 1998  Richard Henderson  <rth@cygnus.com>
 
 	* elf64-alpha.c (elf64_alpha_relax_section): Set again on changes.
