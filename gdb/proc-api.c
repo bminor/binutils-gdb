@@ -36,7 +36,9 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <sys/types.h>
 #include <sys/procfs.h>
 #include <sys/proc.h>	/* for struct proc */
+#ifdef HAVE_SYS_USER_H
 #include <sys/user.h>	/* for struct user */
+#endif
 #include <fcntl.h>	/* for O_RDWR etc. */
 #include <sys/wait.h>
 
@@ -118,8 +120,12 @@ static struct trans ioctl_table[] = {
   { PIOCGETPTIMER,   "PIOCGETPTIMER",   "get process timers" },
 #endif	/* irix event counters */
   { PIOCGENTRY,    "PIOCGENTRY",   "get traced syscall entry set" },
+#if defined (PIOCGETPR)
   { PIOCGETPR,     "PIOCGETPR",    "read struct proc" },
+#endif
+#if defined (PIOCGETU)
   { PIOCGETU,      "PIOCGETU",     "read user area" },
+#endif
 #if defined (PIOCGETUTK) && (defined(KERNEL) || defined(SHOW_UTT)) /* osf */
   { PIOCGETUTK,  "PIOCGETUTK", "get the utask struct" },
 #endif
