@@ -1,3 +1,7 @@
+2003-01-215  Stephen P. Smith <ischis2@cox.net>
+
+	* MAINTAINERS (Stephen P. Smith): Updated email address
+
 2003-01-14  Elena Zannoni  <ezannoni@redhat.com>
 
 	* breakpoint.c (until_break_command): Add new argument.  Use it to
