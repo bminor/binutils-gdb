@@ -115,7 +115,9 @@ struct txvu_operand {
 #define TXVU_OPERAND_NEGATIVE 0x40
 
 /* This operand doesn't really exist.  The program uses these operands
-   in special ways.  */
+   in special ways by creating insertion or extraction functions to have
+   arbitrary processing performed during assembly/disassemble.
+   Parse and print routines are ignored for FAKE operands.  */
 #define TXVU_OPERAND_FAKE 0x80
 
 /* Modifier values.  */
