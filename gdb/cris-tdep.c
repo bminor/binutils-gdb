@@ -3678,6 +3678,7 @@ _initialize_cris_tdep (void)
 			   set_cris_dwarf2_cfi, NULL,
 			   &setlist, &showlist);
 
+  deprecated_add_core_fns (&cris_elf_core_fns);
 }
 
 /* Prints out all target specific values.  */

@@ -1,3 +1,8 @@
+2004-10-14  Orjan Friberg  <orjanf@axis.com>
+
+	* cris-tdep.c (_initialize_cris_tdep): Re-add call to
+	deprecated_add_core_fns which was removed by mistake.
+
 2004-10-13  Kevin Buettner  <kevinb@redhat.com>
 
 	* ia64-linux-nat.c (fill_gregset, fill_fpregset): Replace
