@@ -1,3 +1,9 @@
+Tue Mar  3 10:53:05 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-types.h (SIGNED32, SIGNED64): Pacify GCC.
+
+	* sim-alu.h (ALU64_BEGIN): Make alu64_r unsigned.
+
 Mon Mar  2 10:20:06 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* Make-common.in (TAGS): Make smarter.
