@@ -1,3 +1,13 @@
+2002-11-27  Andrew Cagney  <cagney@redhat.com>
+
+	* config/z8k/tm-z8k.h (PC_IN_CALL_DUMMY): Update definition to use
+	deprecated pc_in_call_dummy function.
+	* config/sparc/tm-sparc.h (PC_IN_CALL_DUMMY): Ditto.
+	* config/sparc/tm-sp64.h (PC_IN_CALL_DUMMY): Ditto.
+	* config/pa/tm-hppa.h (PC_IN_CALL_DUMMY): Ditto.
+	* config/mn10200/tm-mn10200.h (PC_IN_CALL_DUMMY): Ditto.
+	* config/h8500/tm-h8500.h (PC_IN_CALL_DUMMY): Ditto.
+
 2002-11-26  Martin M. Hunt  <hunt@redhat.com>
 
 	* Makefile.in: Remove Tix dependencies.
