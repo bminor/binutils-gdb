@@ -218,7 +218,7 @@ check_stub_type(type)
       sym = lookup_symbol (name, 0, STRUCT_NAMESPACE, 0, 
 			   (struct symtab **)NULL);
       if (sym)
-	bcopy (SYMBOL_TYPE(sym), type, sizeof (struct type));
+	memcpy (type, SYMBOL_TYPE(sym), sizeof (struct type));
     }
 }
 
@@ -636,6 +636,7 @@ check_stub_method (type, i, j)
   TYPE_DOMAIN_TYPE (mtype) = type;
   TYPE_ARG_TYPES (mtype) = argtypes;
   TYPE_FLAGS (mtype) &= ~TYPE_FLAG_STUB;
+  TYPE_FN_FIELD_STUB (f, j) = 0;
 }
 
 /* Given a type TYPE, return a type of functions that return that type.
@@ -1704,7 +1705,7 @@ operator_chars (p, end)
  */
 
 int
-find_methods(t, name, physnames, sym_arr)
+find_methods (t, name, physnames, sym_arr)
      struct type *t;
      char *name;
      char **physnames;
@@ -1756,7 +1757,7 @@ find_methods(t, name, physnames, sym_arr)
 		 --field_counter)
 	      {
 		char *phys_name;
-		if (TYPE_FLAGS (TYPE_FN_FIELD_TYPE (f, field_counter)) & TYPE_FLAG_STUB)
+		if (TYPE_FN_FIELD_STUB (f, field_counter))
 		  check_stub_method (t, method_counter, field_counter);
 		phys_name = TYPE_FN_FIELD_PHYSNAME (f, field_counter);
 		physnames[i1] = (char*) alloca (strlen (phys_name) + 1);
@@ -2685,12 +2686,7 @@ init_type (code, length, uns, name)
 
   /* C++ fancies.  */
   if (code == TYPE_CODE_STRUCT || code == TYPE_CODE_UNION)
-    {
-      TYPE_CPLUS_SPECIFIC (type)
-	= (struct cplus_struct_type *) xmalloc (sizeof (struct cplus_struct_type));
-      TYPE_NFN_FIELDS (type) = 0;
-      TYPE_N_BASECLASSES (type) = 0;
-    }
+    TYPE_CPLUS_SPECIFIC(type) = &cplus_struct_default;
   return type;
 }
 

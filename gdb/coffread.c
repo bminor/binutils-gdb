@@ -1,6 +1,6 @@
 /* Read coff symbol tables and convert to internal format, for GDB.
    Contributed by David D. Johnson, Brown University (ddj@cs.brown.edu).
-   Copyright (C) 1987-1991 Free Software Foundation, Inc.
+   Copyright 1987, 1988, 1989, 1990, 1991 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -217,12 +217,20 @@ extern CORE_ADDR startup_file_end;	/* From blockframe.c */
 struct complaint ef_complaint = 
   {"Unmatched .ef symbol(s) ignored starting at symnum %d", 0, 0};
 
-struct complaint no_aux_complaint =
-  {"symbol %d without one aux entry", 0, 0};
+struct complaint bf_no_aux_complaint =
+  {"`.bf' symbol %d has no aux entry", 0, 0};
+
+struct complaint ef_no_aux_complaint =
+  {"`.ef' symbol %d has no aux entry", 0, 0};
 
 struct complaint lineno_complaint =
   {"Line number pointer %d lower than start of line numbers", 0, 0};
 
+struct complaint unexpected_type_complaint =
+  {"Unexpected type for symbol %s", 0, 0};
+
+struct complaint bad_sclass_complaint =
+  {"Bad n_sclass for symbol %s", 0, 0};
 
 /* Look up a coff type-number index.  Return the address of the slot
    where the type for that index is stored.
@@ -885,7 +893,7 @@ read_coff_symtab (desc, nsyms, objfile)
 	  case C_LINE:
 	  case C_ALIAS:
 	  case C_HIDDEN:
-	    printf ("Bad n_sclass = %d\n", cs->c_sclass);
+	    complain (&bad_sclass_complaint, cs->c_name);
 	    break;
 
 	  case C_FILE:
@@ -969,7 +977,7 @@ read_coff_symtab (desc, nsyms, objfile)
 		/* main_aux.x_sym.x_misc.x_lnsz.x_lnno
 			    contains line number of '{' } */
 		if (cs->c_naux != 1)
-		  complain (no_aux_complaint, cs->c_symnum);
+		  complain (&bf_no_aux_complaint, cs->c_symnum);
 		fcn_first_line = main_aux.x_sym.x_misc.x_lnsz.x_lnno;
 
 		new = (struct context_stack *)
@@ -999,7 +1007,7 @@ read_coff_symtab (desc, nsyms, objfile)
 		    break;
 		  }
 		if (cs->c_naux != 1) {
-		  complain (no_aux_complaint, cs->c_symnum);
+		  complain (&ef_no_aux_complaint, cs->c_symnum);
 		  fcn_last_line = 0x7FFFFFFF;
 		} else {
 		  fcn_last_line = main_aux.x_sym.x_misc.x_lnsz.x_lnno;
@@ -1408,7 +1416,7 @@ patch_type (type, real_type)
     }
 }
 
-/* Patch up all appropriate typdef symbols in the opaque_type_chains
+/* Patch up all appropriate typedef symbols in the opaque_type_chains
    so that they can be used to print out opaque data structures properly */
 
 static void
@@ -1471,10 +1479,6 @@ patch_opaque_types ()
     }
 }
 
-#if defined (clipper)
-#define BELIEVE_PCC_PROMOTION 1
-#endif
-
 static struct symbol *
 process_coff_symbol (cs, aux)
      register struct coff_symbol *cs;
@@ -1570,7 +1574,7 @@ process_coff_symbol (cs, aux)
 	  case C_ARG:
 	    SYMBOL_CLASS (sym) = LOC_ARG;
 #if 0
-	    /* FIXME:  This has not bee tested. */
+	    /* FIXME:  This has not been tested. */
 	    /* Add parameter to function.  */
 	    add_param_to_type(&in_function_type,sym);
 #endif
@@ -1578,12 +1582,12 @@ process_coff_symbol (cs, aux)
 #if !defined (BELIEVE_PCC_PROMOTION)
 	    /* If PCC says a parameter is a short or a char,
 	       it is really an int.  */
-	    if (SYMBOL_TYPE (sym) == builtin_type_char
-		|| SYMBOL_TYPE (sym) == builtin_type_short)
-	      SYMBOL_TYPE (sym) = builtin_type_int;
-	    else if (SYMBOL_TYPE (sym) == builtin_type_unsigned_char
-		     || SYMBOL_TYPE (sym) == builtin_type_unsigned_short)
-	      SYMBOL_TYPE (sym) = builtin_type_unsigned_int;
+	    if (TYPE_LENGTH (SYMBOL_TYPE (sym)) < TYPE_LENGTH (builtin_type_int)
+	     && TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_INT) {
+	      SYMBOL_TYPE (sym) = TYPE_UNSIGNED (SYMBOL_TYPE (sym))?
+				      builtin_type_unsigned_int:
+				      builtin_type_int;
+	    }
 #endif
 	    break;
 
@@ -1594,12 +1598,12 @@ process_coff_symbol (cs, aux)
 #if !defined (BELIEVE_PCC_PROMOTION)
 	    /* If PCC says a parameter is a short or a char,
 	       it is really an int.  */
-	    if (SYMBOL_TYPE (sym) == builtin_type_char
-		|| SYMBOL_TYPE (sym) == builtin_type_short)
-	      SYMBOL_TYPE (sym) = builtin_type_int;
-	    else if (SYMBOL_TYPE (sym) == builtin_type_unsigned_char
-		     || SYMBOL_TYPE (sym) == builtin_type_unsigned_short)
-	      SYMBOL_TYPE (sym) = builtin_type_unsigned_int;
+	    if (TYPE_LENGTH (SYMBOL_TYPE (sym)) < TYPE_LENGTH (builtin_type_int)
+	     && TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_INT) {
+	      SYMBOL_TYPE (sym) = TYPE_UNSIGNED (SYMBOL_TYPE (sym))?
+				      builtin_type_unsigned_int:
+				      builtin_type_int;
+	    }
 #endif
 	    break;
 	    
@@ -1791,9 +1795,7 @@ decode_base_type (cs, c_type, aux)
 	    type = coff_alloc_type (cs->c_symnum);
 	    TYPE_CODE (type) = TYPE_CODE_STRUCT;
 	    TYPE_NAME (type) = concat ("struct ", "<opaque>", NULL);
-	    TYPE_CPLUS_SPECIFIC (type)
-	      = (struct cplus_struct_type *) obstack_alloc (symbol_obstack, sizeof (struct cplus_struct_type));
-	    bzero (TYPE_CPLUS_SPECIFIC (type), sizeof (struct cplus_struct_type));
+	    TYPE_CPLUS_SPECIFIC(type) = &cplus_struct_default;
 	    TYPE_LENGTH (type) = 0;
 	    TYPE_FIELDS (type) = 0;
 	    TYPE_NFIELDS (type) = 0;
@@ -1812,9 +1814,7 @@ decode_base_type (cs, c_type, aux)
 	    /* anonymous union type */
 	    type = coff_alloc_type (cs->c_symnum);
 	    TYPE_NAME (type) = concat ("union ", "<opaque>", NULL);
-	    TYPE_CPLUS_SPECIFIC (type) = (struct cplus_struct_type *)
-	      obstack_alloc (symbol_obstack, sizeof (struct cplus_struct_type));
-	    bzero (TYPE_CPLUS_SPECIFIC (type), sizeof (struct cplus_struct_type));
+	    TYPE_CPLUS_SPECIFIC(type) = &cplus_struct_default;
 	    TYPE_LENGTH (type) = 0;
 	    TYPE_LENGTH (type) = 0;
 	    TYPE_FIELDS (type) = 0;
@@ -1850,7 +1850,7 @@ decode_base_type (cs, c_type, aux)
       case T_ULONG:
 	return builtin_type_unsigned_long;
     }
-  printf ("unexpected type %d at symnum %d\n", c_type, cs->c_symnum);
+  complain (&unexpected_type_complaint, cs->c_name);
   return builtin_type_void;
 }
 
@@ -1890,9 +1890,7 @@ read_struct_type (index, length, lastsym)
 
   type = coff_alloc_type (index);
   TYPE_CODE (type) = TYPE_CODE_STRUCT;
-  TYPE_CPLUS_SPECIFIC (type)
-    = (struct cplus_struct_type *) obstack_alloc (symbol_obstack, sizeof (struct cplus_struct_type));
-  bzero (TYPE_CPLUS_SPECIFIC (type), sizeof (struct cplus_struct_type));
+  TYPE_CPLUS_SPECIFIC(type) = &cplus_struct_default;
   TYPE_LENGTH (type) = length;
 
   while (!done && symnum < lastsym && symnum < nlist_nsyms_global)

@@ -1,5 +1,5 @@
 /* Definitions for reading symbol files into GDB.
-   Copyright (C) 1990  Free Software Foundation, Inc.
+   Copyright (C) 1990, 1991  Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -19,8 +19,36 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* This file requires that you first include "bfd.h".  */
 
-/* Data structures and function definitions for dealing with
-   symbol table reading from files.  */
+
+/* Structure for keeping track of object files.
+
+   One of these is allocated for each object file we access, e.g. the
+   exec_file, symbol_file, and any shared library object files.  */
+
+struct objfile {
+  /* All struct objfile's are chained together by their next pointers.  */
+  struct objfile *next;
+
+  /* Each objfile points to a chain of struct symtabs derived from this
+     object file.  They are chained by their objfile_chain pointers, and
+     each one points back to this struct objfile.  */
+  struct symtab *symtabs;
+
+  /* Ditto for psymtabs.  */
+  struct partial_symtab *psymtabs;
+
+  /* The object file's name.  Malloc'd; free it if you free this struct.  */
+  char *name;
+
+  /* The object file's BFD.  Can be null, in which case bfd_open (name) and
+     put the result here.  */
+  bfd *obfd;
+
+  /* The modification timestamp of the object file, as of the last time
+     we read its symbols.  */
+  long mtime;
+};
+
 
 /* Structure to keep track of symbol reading functions for various
    object file types.  */
@@ -83,14 +111,41 @@ struct sym_fns {
      in whatever module implements the functions pointed to; an 
      initializer calls add_symtab_fns to add them to the global chain.  */
   struct sym_fns *next;
+
+  /* objfile
+     is the "struct objfile" for the object file being read.  */
+  struct objfile *objfile;
 };
+
+extern void extend_psymbol_list();
+
+/* Add any kind of symbol to a psymbol_allocation_list. */
+
+#define	ADD_PSYMBOL_VT_TO_LIST(NAME, NAMELENGTH, NAMESPACE, CLASS, LIST, VALUE, VT)\
+  do {		        						\
+    register struct partial_symbol *psym;				\
+    if ((LIST).next >= (LIST).list + (LIST).size)			\
+	   extend_psymbol_list(&(LIST));				\
+    psym = (LIST).next++;						\
+									\
+    SYMBOL_NAME (psym) = (char *) obstack_alloc (psymbol_obstack,	\
+						 (NAMELENGTH) + 1);	\
+    strncpy (SYMBOL_NAME (psym), (NAME), (NAMELENGTH));			\
+    SYMBOL_NAME (psym)[(NAMELENGTH)] = '\0';				\
+    SYMBOL_NAMESPACE (psym) = (NAMESPACE);				\
+    SYMBOL_CLASS (psym) = (CLASS);					\
+    VT (psym) = (VALUE); 						\
+  } while (0);
 
 			/*   Functions   */
 
 extern struct symtab *allocate_symtab ();
+extern struct objfile *allocate_objfile ();
+extern void free_objfile ();
 extern int  free_named_symtabs ();
 extern void fill_in_vptr_fieldno ();
 extern void add_symtab_fns ();
+extern void syms_from_objfile ();
 
 /* Functions for dealing with the misc "function" vector, really a misc
    address<->symbol mapping vector for things we don't have debug symbols
@@ -121,13 +176,18 @@ extern char *obconcat ();
 
 			/*   Variables   */
 
-/* File name symbols were loaded from.  */
+/* The object file that the main symbol table was loaded from (e.g. the
+   argument to the "symbol-file" or "file" command).  */
 
-extern char *symfile;
+extern struct objfile *symfile_objfile;
 
-/* The modification date of the file when they were loaded.  */
+/* Where execution starts in symfile */
 
-extern long /* really time_t */ symfile_mtime;
+CORE_ADDR entry_point;
+
+/* Root of object file struct chain.  */
+
+struct objfile *object_files;
 
 /* Vectors of all partial symbols read in from file.  */
 
@@ -156,5 +216,5 @@ extern struct complaint complaint_root[1];
 
 /* Functions that handle complaints.  (in symfile.c)  */
 
-int complain();
+void complain();
 void clear_complaints();

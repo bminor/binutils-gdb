@@ -331,11 +331,24 @@ EXFUN(start_psymtab, (struct objfile *objfile AND CORE_ADDR addr
 static void
 EXFUN(add_partial_symbol, (struct dieinfo *dip));
 
+#ifdef DEBUG
 static void
-EXFUN(add_psymbol_to_list,
-      (struct psymbol_allocation_list *listp AND char *name
-      AND enum namespace space AND enum address_class class
-      AND CORE_ADDR value));
+DEFUN(add_psymbol_to_list,
+      (listp, name, space, class, value),
+      struct psymbol_allocation_list *listp AND
+      char *name AND
+      enum namespace space AND
+      enum address_class class AND
+      CORE_ADDR value)
+{
+    ADD_PSYMBOL_VT_TO_LIST(name, strlen(name), space, class,
+			   listp, value, SYMBOL_VALUE);
+}
+#else
+#define add_psymbol_to_list(listp, name, space, class, value) \
+    ADD_PSYMBOL_VT_TO_LIST(name, strlen(name), space, class, \
+			   *(listp), value, SYMBOL_VALUE)
+#endif
 
 static void
 EXFUN(init_psymbol_list, (int total_symbols));
@@ -913,10 +926,7 @@ DEFUN(struct_type, (dip, thisdie, enddie, objfile),
       /* No forward references created an empty type, so install one now */
       type = alloc_utype (dip -> dieref, NULL);
     }
-  TYPE_CPLUS_SPECIFIC (type) = (struct cplus_struct_type *)
-    obstack_alloc (symbol_obstack, sizeof (struct cplus_struct_type));
-  (void) memset (TYPE_CPLUS_SPECIFIC (type), 0,
-		 sizeof (struct cplus_struct_type));
+  TYPE_CPLUS_SPECIFIC(type) = &cplus_struct_default;
   switch (dip -> dietag)
     {
       case TAG_structure_type:
@@ -2655,6 +2665,7 @@ DEFUN(start_psymtab,
   return result;
 }
 
+#if 0
 /*
 
 LOCAL FUNCTION
@@ -2696,6 +2707,7 @@ DEFUN(add_psymbol_to_list,
   SYMBOL_CLASS (psym) = class;
   SYMBOL_VALUE (psym) = value;
 }
+#endif
 
 /*
 

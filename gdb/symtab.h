@@ -197,7 +197,7 @@ struct type
   /* Slot to point to additional language-specific fields of this type.  */
   union type_specific
     {
-      /* ARG_TYPES is for TYPE_CODE_METHOD and TYPE_CODE_FUNCTION.  */
+      /* ARG_TYPES is for TYPE_CODE_METHOD and TYPE_CODE_FUNC.  */
       struct type **arg_types;
       /* CPLUS_STUFF is for TYPE_CODE_STRUCT.  */
       struct cplus_struct_type *cplus_stuff;
@@ -262,6 +262,16 @@ struct cplus_struct_type
   unsigned char via_protected;
   unsigned char via_public;
 };
+/* The default value of TYPE_CPLUS_SPECIFIC(T) points to the
+   this shared static structure. */
+
+extern struct cplus_struct_type cplus_struct_default;
+
+extern void allocate_cplus_struct_type ();
+#define ALLOCATE_CPLUS_STRUCT_TYPE(type) allocate_cplus_struct_type (type)
+#define HAVE_CPLUS_STRUCT(type) \
+  (TYPE_CPLUS_SPECIFIC(type) != &cplus_struct_default)
+
 
 /* All of the name-scope contours of the program
    are represented by `struct block' objects.
@@ -710,9 +720,11 @@ int current_source_line;
 #define SET_TYPE_FIELD_VIRTUAL(thistype, n) \
   B_SET (TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits, (n))
 #define TYPE_FIELD_PRIVATE(thistype, n) \
-  B_TST(TYPE_CPLUS_SPECIFIC(thistype)->private_field_bits, (n))
+  (TYPE_CPLUS_SPECIFIC(thistype)->private_field_bits == NULL ? 0 \
+    : B_TST(TYPE_CPLUS_SPECIFIC(thistype)->private_field_bits, (n)))
 #define TYPE_FIELD_PROTECTED(thistype, n) \
-B_TST(TYPE_CPLUS_SPECIFIC(thistype)->protected_field_bits, (n))
+  (TYPE_CPLUS_SPECIFIC(thistype)->protected_field_bits == NULL ? 0 \
+    : B_TST(TYPE_CPLUS_SPECIFIC(thistype)->protected_field_bits, (n)))
 #define TYPE_FIELD_VIRTUAL(thistype, n) \
        B_TST(TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits, (n))
 

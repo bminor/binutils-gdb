@@ -31,6 +31,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /*#define NAMES_HAVE_UNDERSCORE*/
 
+/* Address of blocks in N_LBRAC and N_RBRAC symbols are absolute addresses,
+   not relative to start of source address.  */
+#define BLOCK_ADDRESS_ABSOLUTE
+
 /* Debugger information will be in mips' format */
 
 #define READ_MIPS_FORMAT

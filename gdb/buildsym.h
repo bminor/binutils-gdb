@@ -59,6 +59,9 @@ extern struct context_stack *push_context ();
 extern void record_line ();
 extern void start_symtab ();
 extern struct symbol *define_symbol ();
+extern struct partial_symtab *start_psymtab ();
+extern void end_psymtab();
+
 
 /* Convert stab register number (from `r' declaration) to a gdb REGNUM.  */
 
@@ -217,6 +220,11 @@ extern CORE_ADDR startup_file_end;	/* From blockframe.c */
    .o file compiled with gcc */
 
 EXTERN unsigned char processing_gcc_compilation;
+
+/* The type code that process_one_symbol saw on its previous invocation.
+   Used to detect pairs of N_SO symbols. */
+
+EXTERN int previous_stab_code;
 
 /* Setup a define to deal cleanly with the underscore problem */
 

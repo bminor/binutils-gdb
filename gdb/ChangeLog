@@ -1,3 +1,55 @@
+Mon Dec 23 13:54:35 1991  Per Bothner  (bothner at cygnus.com)
+
+	* m68k-opcode.h, mips-opcode.h, sparc-opcode.h:  Deleted.
+	* m68k-pinsn.c, mips-pinsn.c, sparc-pinsn.c:
+	Include <opcode/FOO.h> instead of <FOO-opcode.h>.
+
+	* symtab.h, symtab.c, coffread.c, dwarfread.c, symmisc.c,
+	dbxread.c:  The TYPE_CPLUS_SPECIFIC structure is now only
+	allocated when it is needed.  Until it is needed, it points
+	to a shared statically allocated structure.
+
+	* buildsym.h, buildsym.c, dbxread.c: Remove the kludgy code
+	in read_ofile_symtab to recognize two initial N_SO stabs,
+	and let process_on_symbol handle it.  This is cleaner, more
+	efficient, and lets mipsread.c share the same code.
+
+	* symfile.h, partial-stab.h:  Move ADD_PSYMBOL_VT_TO_LIST
+	and related macros to here ...
+	* dbxread.c: ... from here.
+	* symmisc.c:  Move the "overflow" handling from
+	ADD_PSYMBOL_VT_TO_LIST macro into new function extend_psymbol_list.
+	* dwarfread.c:  Re-write add_psymbol_to_list to use
+	ADD_PSYMBOL_VT_TO_LIST macro.
+
+	* mipsread.c: Extend mipsread.c to handle stabs-style symbols
+	encapsulated in ecoff symbols.  This enable full g++ debugging.  
+	* partial-stab.h:  Move the code for pre-scanning symbols
+	and building psymtabs to an include file, out from dbxread.c.
+	This way, the same code can also be used by mipsread.c.
+	* dbxread.c, buildsym.h:  Various changes to allow some functions
+	to be used by mipsread.c (also some arguable stylistic changes).
+
+	* tm-mips.h:  Define BLOCK_ADDRESS_ABSOLUTE, at least for now,
+	since mips-tfile puts relocatable addresses into LBRAC/RBRAC
+	stabs.
+
+	* mipsread.c:  Replace code to handle ambiguous tag blocks.
+	Instead of allocating a TYPE_CODE_UNDEF, guess (by looking
+	at types and offsets) if a tag is a struct, union, or enum.
+	Still patch it later if we find out for sure.
+	* mipsread.c:  In various ways, replace Forin's
+	ideo-syncratic code by code that fits better with the
+	rest of gdb, for both stabs-based and ecoff-based symtabs.
+	E.g.  use end_psymtab; don't do extra passes over FDR table to
+	pre-partition global data; don't use external symbols to
+	create static/global symbols (just put them in the
+	misc_vector); use ADD_PSYMBOL_TO_LIST macro; don't
+	sort psymtabs or symtabs; use obstacks more.
+
+	* symtab.c, mipsread.c, dbxread.c, buildsym.c:
+	ANSIfy: Replace bcopy by memcpy, bzero by memset.
+
 Sun Dec 22 19:31:04 1991  Fred Fish  (fnf at cygnus.com)
 
 	* solib.c (locate_base):  Fix uninitialized variable that was 

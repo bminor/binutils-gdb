@@ -22,7 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include "symtab.h"
-#include "mips-opcode.h"
+#include "opcode/mips.h"
 
 /* Mips instructions are never longer than this many bytes.  */
 #define MAXLEN 4

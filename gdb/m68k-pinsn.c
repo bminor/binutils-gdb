@@ -21,7 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include "symtab.h"
-#include "m68k-opcode.h"
+#include "opcode/m68k.h"
 #include "gdbcore.h"
 
 /* 68k instructions are never longer than this many bytes.  */
