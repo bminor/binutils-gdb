@@ -1,3 +1,13 @@
+2003-12-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* ecoff.c (ecoff_link_add_archive_symbols): Update for renamed
+	bfd_link_hash_entry field "next" -> "und_next".
+	* linker.c (_bfd_link_hash_newfunc): Likewise.
+	(bfd_link_add_undef): Likewise.
+	(_bfd_generic_link_add_archive_symbols): Likewise.
+	(_bfd_generic_link_add_one_symbol): Likewise.
+	* xcofflink.c (xcoff_link_add_symbols): Likewise.
+
 2003-12-02  Nick Clifton  <nickc@redhat.com>
 
 	* configure.in (ALL_LINGUAS): Add ro.

@@ -767,7 +767,7 @@ pe_fixup_stdcalls (void)
   if (pe_dll_extra_pe_debug)
     printf ("%s\n", __FUNCTION__);
 
-  for (undef = link_info.hash->undefs; undef; undef=undef->next)
+  for (undef = link_info.hash->undefs; undef; undef=undef->und_next)
     if (undef->type == bfd_link_hash_undefined)
       {
 	char* at = strchr (undef->root.string, '@');
@@ -859,7 +859,7 @@ pe_find_data_imports (void)
   if (link_info.pei386_auto_import == 0)
     return;
 
-  for (undef = link_info.hash->undefs; undef; undef=undef->next)
+  for (undef = link_info.hash->undefs; undef; undef=undef->und_next)
     {
       if (undef->type == bfd_link_hash_undefined)
         {
@@ -939,7 +939,7 @@ gld_${EMULATION_NAME}_after_open (void)
 
       printf ("%s()\n", __FUNCTION__);
 
-      for (sym = link_info.hash->undefs; sym; sym=sym->next)
+      for (sym = link_info.hash->undefs; sym; sym=sym->und_next)
         printf ("-%s\n", sym->root.string);
       bfd_hash_traverse (&link_info.hash->table, pr_sym, NULL);
 

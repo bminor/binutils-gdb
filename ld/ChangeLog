@@ -1,3 +1,11 @@
+2003-12-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/pe.em (pe_fixup_stdcalls): Update for renamed
+	bfd_link_hash_entry field "next" -> "und_next".
+	(pe_find_data_imports): Likewise.
+	(gld_${EMULATION_NAME}_after_open): Likewise.
+	* emultempl/sunos.em (before_allocation): Likewise.
+
 2003-12-02  Nick Clifton  <nickc@redhat.com>
 
 	* ld.texinfo (Options): --ignore-all is no longer the default

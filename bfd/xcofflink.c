@@ -1827,7 +1827,7 @@ xcoff_link_add_symbols (abfd, info)
 		      section = bfd_und_section_ptr;
 		      value = 0;
 		    }
-		  else if ((*sym_hash)->root.next != NULL
+		  else if ((*sym_hash)->root.und_next != NULL
 			   || info->hash->undefs_tail == &(*sym_hash)->root)
 		    {
 		      /* This symbol has been referenced.  In this

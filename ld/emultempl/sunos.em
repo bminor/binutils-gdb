@@ -679,7 +679,7 @@ gld${EMULATION_NAME}_before_allocation (void)
     {
       struct bfd_link_hash_entry *h;
 
-      for (h = link_info.hash->undefs; h != NULL; h = h->next)
+      for (h = link_info.hash->undefs; h != NULL; h = h->und_next)
 	{
 	  if (h->type == bfd_link_hash_undefined
 	      && h->u.undef.abfd != NULL
