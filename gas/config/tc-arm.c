@@ -6522,6 +6522,7 @@ md_parse_option (c, arg)
 		case 70:
 		case 700:
 		case 710:
+		case 720:
 		case 7100:
 		case 7500:
 		  break;
