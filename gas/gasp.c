@@ -3537,6 +3537,8 @@ show_help ()
   show_usage (stdout, 0);
 }
 
+int main PARAMS ((int, char **));
+
 int
 main (argc, argv)
      int argc;

@@ -150,6 +150,8 @@ static void usage PARAMS ((FILE *stream, int status));
 static long get_char PARAMS ((FILE *stream, file_off *address,
 			      int *magiccount, char **magic));
 
+int main PARAMS ((int, char **));
+
 int
 main (argc, argv)
      int argc;

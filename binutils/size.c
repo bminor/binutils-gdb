@@ -102,6 +102,8 @@ struct option long_options[] =
   {0, no_argument, 0, 0}
 };
 
+int main PARAMS ((int, char **));
+
 int
 main (argc, argv)
      int argc;

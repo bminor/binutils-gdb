@@ -2738,6 +2738,8 @@ display_info ()
   display_target_tables ();
 }
 
+int main PARAMS ((int, char **));
+
 int
 main (argc, argv)
      int argc;

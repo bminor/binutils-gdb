@@ -2602,6 +2602,8 @@ copy_main (argc, argv)
   return 0;
 }
 
+int main PARAMS ((int, char **));
+
 int
 main (argc, argv)
      int argc;

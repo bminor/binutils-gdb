@@ -358,6 +358,8 @@ remove_output ()
 /* The option parsing should be in its own function.
    It will be when I have getopt working.  */
 
+int main PARAMS ((int, char **));
+
 int
 main (argc, argv)
      int argc;

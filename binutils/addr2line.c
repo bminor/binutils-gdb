@@ -263,6 +263,8 @@ process_file (filename, target)
   bfd_close (abfd);
 }
 
+int main PARAMS ((int, char **));
+
 int
 main (argc, argv)
      int argc;

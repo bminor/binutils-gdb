@@ -1,3 +1,13 @@
+2001-12-18  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* addr2line.c (main): Protoype.
+	* ar.c (main): Protoype.
+	* nm.c (main): Protoype.
+	* objcopy.c (main): Protoype.
+	* objdump.c (main): Protoype.
+	* size.c (main): Protoype.
+	* strings.c (main): Protoype.
+
 2001-12-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* readelf.c (symtab_shndx_hdr): New global.

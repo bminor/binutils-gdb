@@ -394,6 +394,8 @@ set_output_format (f)
   format = &formats[i];
 }
 
+int main PARAMS ((int, char **));
+
 int
 main (argc, argv)
      int argc;
