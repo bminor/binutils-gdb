@@ -1,6 +1,6 @@
-Thu Apr 22 16:37:33 1993  K. Richard Pixley  (rich@rtl.cygnus.com)
+Fri Apr 23 07:30:01 1993  Jim Kingdon  (kingdon@cygnus.com)
 
-	* gdbint.texinfo: document FRAME_SAVED_PC and FRAME_CHAIN.
+	* stabs.texinfo (Parameters): Keep trying to get this right.
 
 Wed Apr 21 15:18:47 1993  Jim Kingdon  (kingdon@cygnus.com)
 

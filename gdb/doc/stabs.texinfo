@@ -1006,6 +1006,10 @@ same thing, the difference is that @samp{P} is a GNU invention and
 handle either one.  Symbol type @samp{C_RPSYM} is used with @samp{R} and
 @samp{N_RSYM} is used with @samp{P}.
 
+There is at least one case where GCC uses a @samp{p}/@samp{r} pair
+rather than @samp{P}; this is where the argument is passed in the
+argument list and then loaded into a register.
+
 There is another case similar to an argument in a register, which is an
 argument which is actually stored as a local variable.  Sometimes this
 happens when the argument was passed in a register and then the compiler
@@ -1022,6 +1026,23 @@ descriptor for an argument which is stored as a local variable but uses
 symbol is an offset relative to the local variables for that function,
 not relative to the arguments (on some machines those are the same
 thing, but not on all).
+
+The following are said to go with N_PSYM:
+
+@example
+"name" -> "param_name:#type"
+                     # -> p  (value parameter)
+                       -> i  (value parameter by reference, indirect access)
+                       -> v  (variable parameter by reference)
+                       -> C  (read-only parameter, conformant array bound)
+                       -> x  (conformant array value parameter)
+                       -> pP (<<??>>)
+                       -> pF (<<??>>)
+                       -> X  (function result variable)
+                       -> b  (based variable)
+
+value -> offset from the argument pointer (positive).  
+@end example
 
 As a simple example, the code
 
@@ -1041,8 +1062,8 @@ produces the stabs
 @end example
 
 The type definition of argv is interesting because it contains several
-type definitions.  Type 21 is ptr to type 2 (char) and argv (type 20) is
-ptr to type 21.
+type definitions.  Type 21 is pointer to type 2 (char) and argv (type 20) is
+pointer to type 21.
  
 @node Aggregate Types
 @chapter Aggregate Types 
@@ -2869,29 +2890,7 @@ of the compilation.
 @node N_PSYM
 @section 160 - 0xa0 - N_PSYM    
    
-Parameter variable
-
-@display
-stabs. "name", N_PSYM, NIL, NIL, value
-@end display
-
-@example
-"name" -> "param_name:#type"
-                     # -> p  (value parameter)
-                       -> i  (value parameter by reference, indirect access)
-                       -> v  (variable parameter by reference)
-                       -> C  (read-only parameter, conformant array bound)
-                       -> x  (conformant array value parameter)
-                       -> pP (<<??>>)
-                       -> pF (<<??>>)
-                       -> X  (function result variable)
-                       -> b  (based variable)
-
-value -> offset from the argument pointer (positive).  
-@end example
-
-On most machines the argument pointer is the same as the frame
-pointer.
+Parameter variable.  @xref{Parameters}.
 
 @node N_EINCL
 @section 162 - 0xa2 - N_EINCL  
