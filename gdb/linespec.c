@@ -202,6 +202,39 @@ find_methods (struct type *t, char *name, struct symbol **sym_arr)
 		     */
 		  }
 	      }
+	  else if (strcmp_iw (class_name, name) == 0)
+	    {
+	      /* For GCC 3.x and stabs, constructors and destructors have names
+		 like __base_ctor and __complete_dtor.  Check the physname for now
+		 if we're looking for a constructor.  */
+	      for (field_counter
+		     = TYPE_FN_FIELDLIST_LENGTH (t, method_counter) - 1;
+		   field_counter >= 0;
+		   --field_counter)
+		{
+		  struct fn_field *f;
+		  char *phys_name;
+		  
+		  f = TYPE_FN_FIELDLIST1 (t, method_counter);
+
+		  /* GCC 3.x will never produce stabs stub methods, so we don't need
+		     to handle this case.  */
+		  if (TYPE_FN_FIELD_STUB (f, field_counter))
+		    continue;
+		  phys_name = TYPE_FN_FIELD_PHYSNAME (f, field_counter);
+		  if (! is_constructor_name (phys_name))
+		    continue;
+
+		  /* If this method is actually defined, include it in the
+		     list.  */
+		  sym_arr[i1] = lookup_symbol (phys_name,
+					       NULL, VAR_NAMESPACE,
+					       (int *) NULL,
+					       (struct symtab **) NULL);
+		  if (sym_arr[i1])
+		    i1++;
+		}
+	    }
 	}
     }
 
@@ -1180,7 +1213,7 @@ symbol_found:			/* We also jump here from inside the C++ class/namespace
 	    {
 	      struct blockvector *bv = BLOCKVECTOR (sym_symtab);
 	      struct block *b = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-	      if (lookup_block_symbol (b, copy, VAR_NAMESPACE) != NULL)
+	      if (lookup_block_symbol (b, copy, NULL, VAR_NAMESPACE) != NULL)
 		build_canonical_line_spec (values.sals, copy, canonical);
 	    }
 	  return values;
