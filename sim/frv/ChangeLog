@@ -1,5 +1,9 @@
 2004-03-01  Richard Sandiford  <rsandifo@redhat.com>
 
+	* frv.c (frvbf_iacc_cut): Rework, taking rounding into account.
+
+2004-03-01  Richard Sandiford  <rsandifo@redhat.com>
+
 	* decode.c, decode.h, model.c, sem.c: Regenerate.
 
 2003-11-24  Kevin Buettner  <kevinb@redhat.com>

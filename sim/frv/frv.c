@@ -1,5 +1,6 @@
 /* frv simulator support code
-   Copyright (C) 1998, 1999, 2000, 2001, 2003 Free Software Foundation, Inc.
+   Copyright (C) 1998, 1999, 2000, 2001, 2003, 2004 Free Software
+   Foundation, Inc.
    Contributed by Red Hat.
 
 This file is part of the GNU simulators.
@@ -1100,25 +1101,53 @@ frvbf_media_cut_ss (SIM_CPU *current_cpu, DI acc, SI cut_point)
 SI
 frvbf_iacc_cut (SIM_CPU *current_cpu, DI acc, SI cut_point)
 {
-  /* The cut point is the lower 6 bits (signed) of what we are passed.  */
+  DI lower, upper;
+
+  /* The cut point is the lower 7 bits (signed) of what we are passed.  */
   cut_point = cut_point << 25 >> 25;
 
-  if (cut_point <= -32)
-    cut_point = -31;	/* Special case for full shiftout.  */
+  /* Conceptually, the operation is on a 128-bit sign-extension of ACC.
+     The top bit of the return value corresponds to bit (63 - CUT_POINT)
+     of this 128-bit value.
 
-  /* Negative cuts (cannot saturate).  */
+     Since we can't deal with 128-bit values very easily, convert the
+     operation into an equivalent 64-bit one.  */
   if (cut_point < 0)
-    return acc >> (32 + -cut_point);
+    {
+      /* Avoid an undefined shift operation.  */
+      if (cut_point == -64)
+	acc >>= 63;
+      else
+	acc >>= -cut_point;
+      cut_point = 0;
+    }
 
-  /* Positive cuts will saturate if significant bits are shifted out.  */
-  if (acc != ((acc << cut_point) >> cut_point))
-    if (acc >= 0)
-      return 0x7fffffff;
-    else
-      return 0x80000000;
+  /* Get the shifted but unsaturated result.  Set LOWER to the lowest
+     32 bits of the result and UPPER to the result >> 31.  */
+  if (cut_point < 32)
+    {
+      /* The cut loses the (32 - CUT_POINT) least significant bits.
+	 Round the result up if the most significant of these lost bits
+	 is 1.  */
+      lower = acc >> (32 - cut_point);
+      if (lower < 0x7fffffff)
+	if (acc & LSBIT64 (32 - cut_point - 1))
+	  lower++;
+      upper = lower >> 31;
+    }
+  else
+    {
+      lower = acc << (cut_point - 32);
+      upper = acc >> (63 - cut_point);
+    }
 
-  /* No saturate, just cut.  */
-  return ((acc << cut_point) >> 32);
+  /* Saturate the result.  */
+  if (upper < -1)
+    return ~0x7fffffff;
+  else if (upper > 0)
+    return 0x7fffffff;
+  else
+    return lower;
 }
 
 /* Compute the result of shift-left-arithmetic-with-saturation (SLASS).  */
