@@ -1,4 +1,61 @@
 start-sanitize-sky
+1998-12-30  Felix Lee  <flee@cygnus.com>
+ 
+	* sim/sky/sky-defs.tcl: various changes for remote host testing.
+	* sim/sky/mload.exp: ditto.
+	* sim/sky/sky_sce.exp: ditto.
+	* sim/sky/sky_sce_accurate.exp: ditto.
+	* sim/sky/sky_sce_fast.exp: ditto.
+
+	* sim/sky/mload.exp: mark as unresolved on error.
+
+end-sanitize-sky
+Fri Dec 18 17:19:34 1998  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/fr30/ldres.cgs: New testcase.
+	* sim/fr30/copld.cgs: New testcase.
+	* sim/fr30/copst.cgs: New testcase.
+	* sim/fr30/copsv.cgs: New testcase.
+	* sim/fr30/nop.cgs: New testcase.
+	* sim/fr30/andccr.cgs: New testcase.
+	* sim/fr30/orccr.cgs: New testcase.
+	* sim/fr30/addsp.cgs: New testcase.
+	* sim/fr30/stilm.cgs: New testcase.
+	* sim/fr30/extsb.cgs: New testcase.
+	* sim/fr30/extub.cgs: New testcase.
+	* sim/fr30/extsh.cgs: New testcase.
+	* sim/fr30/extuh.cgs: New testcase.
+	* sim/fr30/enter.cgs: New testcase.
+	* sim/fr30/leave.cgs: New testcase.
+	* sim/fr30/xchb.cgs: New testcase.
+	* sim/fr30/dmovb.cgs: New testcase.
+	* sim/fr30/dmov.cgs: New testcase.
+	* sim/fr30/dmovh.cgs: New testcase.
+
+Thu Dec 17 17:18:43 1998  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/fr30/testutils.inc (take_branch{_d},no_branch{_d}): New macros.
+	* sim/fr30/ret.cgs: Add tests fir ret:d.
+	* sim/fr30/inte.cgs: New testcase.
+	* sim/fr30/reti.cgs: New testcase.
+	* sim/fr30/bra.cgs: New testcase.
+	* sim/fr30/bno.cgs: New testcase.
+	* sim/fr30/beq.cgs: New testcase.
+	* sim/fr30/bne.cgs: New testcase.
+	* sim/fr30/bc.cgs: New testcase.
+	* sim/fr30/bnc.cgs: New testcase.
+	* sim/fr30/bn.cgs: New testcase.
+	* sim/fr30/bp.cgs: New testcase.
+	* sim/fr30/bv.cgs: New testcase.
+	* sim/fr30/bnv.cgs: New testcase.
+	* sim/fr30/blt.cgs: New testcase.
+	* sim/fr30/bge.cgs: New testcase.
+	* sim/fr30/ble.cgs: New testcase.
+	* sim/fr30/bgt.cgs: New testcase.
+	* sim/fr30/bls.cgs: New testcase.
+	* sim/fr30/bhi.cgs: New testcase.
+
+start-sanitize-sky
 Thu Dec 17 13:28:06 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* sim/sky/sce_test12.vuasm: Update syntax of MTIR insn.
