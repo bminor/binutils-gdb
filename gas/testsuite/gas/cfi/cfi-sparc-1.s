@@ -9,7 +9,7 @@ foo:
 	.cfi_startproc
         save    %sp, -104, %sp
 	.cfi_def_cfa_register	%fp
-	.cfi_gnu_window_save
+	.cfi_window_save
 	.cfi_register	%o7, %i7
 	add	%i0, 1, %o0
 	call	bar, 0

@@ -374,7 +374,7 @@ const pseudo_typeS cfi_pseudo_table[] =
     { "cfi_same_value", dot_cfi, DW_CFA_same_value },
     { "cfi_remember_state", dot_cfi, DW_CFA_remember_state },
     { "cfi_restore_state", dot_cfi, DW_CFA_restore_state },
-    { "cfi_gnu_window_save", dot_cfi, DW_CFA_GNU_window_save },
+    { "cfi_window_save", dot_cfi, DW_CFA_GNU_window_save },
     { "cfi_escape", dot_cfi_escape, 0 },
     { NULL, NULL, 0 }
   };
