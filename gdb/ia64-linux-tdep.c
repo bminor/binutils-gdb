@@ -1,6 +1,6 @@
 /* Target-dependent code for the IA-64 for GDB, the GNU debugger.
 
-   Copyright 2000, 2004 Free Software Foundation, Inc.
+   Copyright 2000, 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -24,6 +24,7 @@
 #include "arch-utils.h"
 #include "gdbcore.h"
 #include "regcache.h"
+#include "osabi.h"
 
 /* The sigtramp code is in a non-readable (executable-only) region
    of memory called the ``gate page''.  The addresses in question
@@ -47,7 +48,7 @@ ia64_linux_in_sigtramp (CORE_ADDR pc, char *func_name)
    found.  0 is returned for registers which aren't stored in the the
    sigcontext structure. */
 
-CORE_ADDR
+static CORE_ADDR
 ia64_linux_sigcontext_register_address (CORE_ADDR sp, int regno)
 {
   char buf[8];
@@ -96,7 +97,7 @@ ia64_linux_sigcontext_register_address (CORE_ADDR sp, int regno)
       }
 }
 
-void
+static void
 ia64_linux_write_pc (CORE_ADDR pc, ptid_t ptid)
 {
   ia64_write_pc (pc, ptid);
@@ -111,4 +112,23 @@ ia64_linux_write_pc (CORE_ADDR pc, ptid_t ptid)
      The clearing of r10 is safe as long as ia64_write_pc() is only
      called as part of setting up an inferior call.  */
   write_register_pid (IA64_GR10_REGNUM, 0, ptid);
+}
+
+static void
+ia64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  /* Set the method of obtaining the sigcontext addresses at which
+     registers are saved.  */
+  tdep->sigcontext_register_address = ia64_linux_sigcontext_register_address;
+
+  set_gdbarch_write_pc (gdbarch, ia64_linux_write_pc);
+}
+
+void
+_initialize_ia64_linux_tdep (void)
+{
+  gdbarch_register_osabi (bfd_arch_ia64, 0, GDB_OSABI_LINUX,
+			  ia64_linux_init_abi);
 }

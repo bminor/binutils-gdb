@@ -1,6 +1,6 @@
 /* Target-dependent code for the ia64.
 
-   Copyright 2004 Free Software Foundation, Inc.
+   Copyright 2004, 2005 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,9 +22,11 @@
 #ifndef IA64_TDEP_H
 #define IA64_TDEP_H
 
-extern CORE_ADDR ia64_linux_sigcontext_register_address (CORE_ADDR, int);
-extern unsigned long ia64_linux_getunwind_table (void *, size_t);
+struct gdbarch_tdep
+{
+  CORE_ADDR (*sigcontext_register_address) (CORE_ADDR, int);
+};
+
 extern void ia64_write_pc (CORE_ADDR, ptid_t);
-extern void ia64_linux_write_pc (CORE_ADDR, ptid_t);
 
 #endif /* IA64_TDEP_H */

@@ -38,6 +38,7 @@
 #include "elf-bfd.h"
 #include "dis-asm.h"
 #include "infcall.h"
+#include "osabi.h"
 #include "ia64-tdep.h"
 
 #ifdef HAVE_LIBUNWIND_IA64_H
@@ -45,17 +46,6 @@
 #include "libunwind-frame.h"
 #include "libunwind-ia64.h"
 #endif
-
-/* Hook for determining the global pointer when calling functions in
-   the inferior under AIX.  The initialization code in ia64-aix-nat.c
-   sets this hook to the address of a function which will find the
-   global pointer for a given address.  
-   
-   The generic code which uses the dynamic section in the inferior for
-   finding the global pointer is not of much use on AIX since the
-   values obtained from the inferior have not been relocated.  */
-
-CORE_ADDR (*native_find_global_pointer) (CORE_ADDR) = 0;
 
 /* An enumeration of the different IA-64 instruction types.  */
 
@@ -100,6 +90,7 @@ static gdbarch_breakpoint_from_pc_ftype ia64_breakpoint_from_pc;
 static gdbarch_skip_prologue_ftype ia64_skip_prologue;
 static gdbarch_extract_return_value_ftype ia64_extract_return_value;
 static struct type *is_float_or_hfa_type (struct type *t);
+static CORE_ADDR ia64_find_global_pointer (CORE_ADDR faddr);
 
 static struct type *builtin_type_ia64_ext;
 
@@ -256,19 +247,8 @@ struct ia64_frame_cache
 
 };
 
-struct gdbarch_tdep
-  {
-    CORE_ADDR (*sigcontext_register_address) (CORE_ADDR, int);
-    			/* OS specific function which, given a frame address
-			   and register number, returns the offset to the
-			   given register from the start of the frame. */
-    CORE_ADDR (*find_global_pointer) (CORE_ADDR);
-  };
-
 #define SIGCONTEXT_REGISTER_ADDRESS \
   (gdbarch_tdep (current_gdbarch)->sigcontext_register_address)
-#define FIND_GLOBAL_POINTER \
-  (gdbarch_tdep (current_gdbarch)->find_global_pointer)
 
 int
 ia64_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
@@ -2421,7 +2401,7 @@ ia64_find_unwind_table (struct objfile *objfile, unw_word_t ip,
 
   dip->start_ip = segbase;
   dip->end_ip = dip->start_ip + p_text->p_memsz;
-  dip->gp = FIND_GLOBAL_POINTER (ip);
+  dip->gp = ia64_find_global_pointer (ip);
   dip->format = UNW_INFO_FORMAT_REMOTE_TABLE;
   dip->u.rti.name_ptr = (unw_word_t) bfd_get_filename (bfd);
   dip->u.rti.segbase = segbase;
@@ -2863,7 +2843,7 @@ slot_alignment_is_next_even (struct type *t)
    d_un.d_ptr value is the global pointer.  */
 
 static CORE_ADDR
-generic_elf_find_global_pointer (CORE_ADDR faddr)
+ia64_find_global_pointer (CORE_ADDR faddr)
 {
   struct obj_section *faddr_sect;
      
@@ -2984,7 +2964,7 @@ find_func_descr (CORE_ADDR faddr, CORE_ADDR *fdaptr)
       fdesc = *fdaptr;
       *fdaptr += 16;
 
-      global_pointer = FIND_GLOBAL_POINTER (faddr);
+      global_pointer = ia64_find_global_pointer (faddr);
 
       if (global_pointer == 0)
 	global_pointer = read_register (IA64_GR1_REGNUM);
@@ -3168,7 +3148,7 @@ ia64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       regcache_cooked_write_unsigned (regcache, IA64_GR8_REGNUM, (ULONGEST)struct_addr);
     }
 
-  global_pointer = FIND_GLOBAL_POINTER (func_addr);
+  global_pointer = ia64_find_global_pointer (func_addr);
 
   if (global_pointer != 0)
     write_register (IA64_GR1_REGNUM, global_pointer);
@@ -3261,29 +3241,7 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep = xmalloc (sizeof (struct gdbarch_tdep));
   gdbarch = gdbarch_alloc (&info, tdep);
 
-  /* Set the method of obtaining the sigcontext addresses at which
-     registers are saved.  The method of checking to see if
-     native_find_global_pointer is nonzero to indicate that we're
-     on AIX is kind of hokey, but I can't think of a better way
-     to do it.  */
-  if (info.osabi == GDB_OSABI_LINUX)
-    tdep->sigcontext_register_address = ia64_linux_sigcontext_register_address;
-  else
-    tdep->sigcontext_register_address = 0;
-
-  /* We know that GNU/Linux won't have to resort to the
-     native_find_global_pointer hackery.  But that's the only one we
-     know about so far, so if native_find_global_pointer is set to
-     something non-zero, then use it.  Otherwise fall back to using
-     generic_elf_find_global_pointer.  This arrangement should (in
-     theory) allow us to cross debug GNU/Linux binaries from an AIX
-     machine.  */
-  if (info.osabi == GDB_OSABI_LINUX)
-    tdep->find_global_pointer = generic_elf_find_global_pointer;
-  else if (native_find_global_pointer != 0)
-    tdep->find_global_pointer = native_find_global_pointer;
-  else
-    tdep->find_global_pointer = generic_elf_find_global_pointer;
+  tdep->sigcontext_register_address = 0;
 
   /* Define the ia64 floating-point format to gdb.  */
   builtin_type_ia64_ext =
@@ -3341,10 +3299,7 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_memory_remove_breakpoint (gdbarch, ia64_memory_remove_breakpoint);
   set_gdbarch_breakpoint_from_pc (gdbarch, ia64_breakpoint_from_pc);
   set_gdbarch_read_pc (gdbarch, ia64_read_pc);
-  if (info.osabi == GDB_OSABI_LINUX)
-    set_gdbarch_write_pc (gdbarch, ia64_linux_write_pc);
-  else
-    set_gdbarch_write_pc (gdbarch, ia64_write_pc);
+  set_gdbarch_write_pc (gdbarch, ia64_write_pc);
 
   /* Settings for calling functions in the inferior.  */
   set_gdbarch_push_dummy_call (gdbarch, ia64_push_dummy_call);
@@ -3369,6 +3324,9 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_print_insn (gdbarch, ia64_print_insn);
   set_gdbarch_convert_from_func_ptr_addr (gdbarch, ia64_convert_from_func_ptr_addr);
 
+  /* Hook in ABI-specific overrides, if they have been registered.  */
+  gdbarch_init_osabi (info, gdbarch);
+
   return gdbarch;
 }
 
@@ -3377,5 +3335,5 @@ extern initialize_file_ftype _initialize_ia64_tdep; /* -Wmissing-prototypes */
 void
 _initialize_ia64_tdep (void)
 {
-  register_gdbarch_init (bfd_arch_ia64, ia64_gdbarch_init);
+  gdbarch_register (bfd_arch_ia64, ia64_gdbarch_init, NULL);
 }
