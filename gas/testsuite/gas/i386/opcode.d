@@ -526,7 +526,7 @@ Disassembly of section .text:
  879:	66 d3 90 90 90 90 90 [ 	]*rclw   %cl,0x90909090\(%eax\)
  880:	66 e5 90 [ 	]*in     \$0x90,%ax
  883:	66 e7 90 [ 	]*out    %ax,\$0x90
- 886:	66 e8 8f 90 [ 	]*callw  (0x)?ffff9919.*
+ 886:	66 e8 8f 90 [ 	]*callw  (0x)?9919.*
  88a:	66 ea 90 90 90 90 [ 	]*ljmpw  \$0x9090,\$0x9090
  890:	66 ed [ 	]*in     \(%dx\),%ax
  892:	66 ef [ 	]*out    %ax,\(%dx\)

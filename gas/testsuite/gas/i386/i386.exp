@@ -24,6 +24,7 @@ if [istarget "i*86-*-*"] then {
     run_dump_test "opcode"
     run_dump_test "prefix"
     run_dump_test "amd"
+    run_dump_test "katmai"
 
     # The reloc and white tests require support for 8 and 16 bit
     # relocs, so we only run them for ELF targets.

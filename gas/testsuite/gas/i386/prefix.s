@@ -7,5 +7,5 @@ foo:
  addr16 fstsw %ax
  addr16 rep cmpsw %es:(%di),%ss:(%si)
 
- # Get a good alignment.
- .byte 0
+# Get a good alignment.
+ nop
