@@ -1,3 +1,9 @@
+start-sanitize-d10v
+Tue Nov 19 16:35:14 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure.in (d10v-*): Do not build librx.
+
+end-sanitize-d10v
 Mon Nov 18 13:28:41 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* configure.in (mn10300): Build everything except gdb & libgloss.
