@@ -1,3 +1,8 @@
+2001-11-07  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.asm/asm-source.exp (bt ALL in foo2): Accept a backtrace that
+	includes a stack frame for "start".
+
 2001-11-05  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.stabs/weird.exp: Delete "p v_comb" test.  It assumes that
