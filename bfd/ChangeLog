@@ -1,3 +1,18 @@
+Thu Jun  3 13:07:42 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* elfcode.h (elf_map_symbols): Don't crash if no symbols have been
+	allocated yet.
+
+	From Peter Hoogenboom (hoogen@schafer.cs.utah.edu):
+	* libhppa.h (MAXCOMLEN): Define unconditionally.
+	(_PA_RISC_ID): Only define if not already defined.
+	* elf32-hppa.c: Include libhppa.h.
+
+	From Ralph Campbell:
+	* hosts/mipsbsd.h (HOST_DATA_START_ADDR): Delete definition.
+
+	* elf32-hppa.h (symext_rootP, symext_lastP): Delete decls.
+
 Thu Jun  3 00:23:53 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* config/go32.mh: define EXTRALIBES to -lm (for binutils), also
@@ -63,11 +78,17 @@ Tue Jun  1 04:15:57 1993  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
 
 	* elfcode.h (bfd_elf_locate_sh): New function to locate ELF
 	section header.
-	(bfd_add_to_strtab):
-	(elf_idx_of_sym):
-	(elf_compute_section_file_positions):
-	(elf_write_object_contents): 
-	(elf_get_sect_thunk): 
+
+	* elfcode.h (bfd_add_to_strtab): Made non-static due to a call
+	from elf32-hppa.c.
+
+	* elfcode.h (elf_idx_of_sym): Return STN_UNDEF instead of 0 when
+	the symbol is not found.
+
+	* elfcode.h (elf_compute_section_file_positions): Not all section
+	file positions were computed.
+
+	* elfcode.h (elf_get_sect_thunk): New function.
 
 	* hppa.c (sign_ext): Reimplement.
 
