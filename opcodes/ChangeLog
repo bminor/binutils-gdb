@@ -1,3 +1,11 @@
+Wed Feb  5 11:12:44 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* mips16-opc.c: Add new cases of exit instruction for
+	disassembler.
+	* mips-dis.c (print_mips16_insn_arg): Display floating point
+	registers in operands of exit instruction.  Print `$' before
+	register names in operands of entry and exit instructions.
+
 start-sanitize-tic80
 Thu Jan 30 14:09:03 1997  Fred Fish  <fnf@cygnus.com>
 

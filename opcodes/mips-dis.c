@@ -1,5 +1,5 @@
 /* Print mips instructions for GDB, the GNU debugger, or for objdump.
-   Copyright 1989, 91, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
+   Copyright 1989, 91, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
    Contributed by Nobuyuki Hikichi(hikichi@sra.co.jp).
 
 This file is part of GDB, GAS, and the GNU binutils.
@@ -842,16 +842,12 @@ print_mips16_insn_arg (type, op, l, use_extend, extend, memaddr, info)
 	l = (l >> MIPS16OP_SH_IMM6) & MIPS16OP_MASK_IMM6;
 
 	amask = (l >> 3) & 7;
-	if (amask == 5 || amask == 6)
+
+	if (amask > 0 && amask < 5)
 	  {
-	    (*info->fprintf_func) (info->stream, "??");
-	    need_comma = 1;
-	  }
-	else if (amask > 0 && amask < 7)
-	  {
-	    (*info->fprintf_func) (info->stream, "%s", reg_names[4]);
+	    (*info->fprintf_func) (info->stream, "$%s", reg_names[4]);
 	    if (amask > 1)
-	      (*info->fprintf_func) (info->stream, "-%s",
+	      (*info->fprintf_func) (info->stream, "-$%s",
 				     reg_names[amask + 3]);
 	    need_comma = 1;
 	  }
@@ -865,19 +861,30 @@ print_mips16_insn_arg (type, op, l, use_extend, extend, memaddr, info)
 	  }
 	else if (smask > 0)
 	  {
-	    (*info->fprintf_func) (info->stream, "%s%s",
+	    (*info->fprintf_func) (info->stream, "%s$%s",
 				   need_comma ? "," : "",
 				   reg_names[16]);
 	    if (smask > 1)
-	      (*info->fprintf_func) (info->stream, "-%s",
+	      (*info->fprintf_func) (info->stream, "-$%s",
 				     reg_names[smask + 15]);
 	    need_comma = 1;
 	  }
 
 	if (l & 1)
-	  (*info->fprintf_func) (info->stream, "%s%s",
-				 need_comma ? "," : "",
-				 reg_names[31]);
+	  {
+	    (*info->fprintf_func) (info->stream, "%s$%s",
+				   need_comma ? "," : "",
+				   reg_names[31]);
+	    need_comma = 1;
+	  }
+
+	if (amask == 5 || amask == 6)
+	  {
+	    (*info->fprintf_func) (info->stream, "%s$f0",
+				   need_comma ? "," : "");
+	    if (amask == 6)
+	      (*info->fprintf_func) (info->stream, "-$f1");
+	  }
       }
       break;
 
