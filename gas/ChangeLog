@@ -1,3 +1,10 @@
+Thu Jan 25 20:26:23 1996  Doug Evans  <dje@charmed.cygnus.com>
+
+	* config/tc-sparc.c (default_compatible): New static local.
+	(md_begin): Initialize it.  Rewrite warn_on_bump handling.
+	(sparc_ip): If no architecture or -bump specified, don't mark as
+	mismatched those in default_compatible.
+
 Thu Jan 25 12:21:53 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	SCO ELF support from Robert Lipe <robertl@arnet.com>:
