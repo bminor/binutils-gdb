@@ -1,5 +1,11 @@
 Sun Oct 19 13:50:50 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* write.c (subsegs_finish): New function, broken out of
+	write_object_file.
+	(write_object_file): Some code moves into subsegs_finish.
+	* write.c (subsegs_finish): Declare.
+	* as.c (main): Call subsegs_finish.
+
 	* read.c (s_include): Check for error return from
 	demand_copy_string.
 
