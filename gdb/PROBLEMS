@@ -3,9 +3,9 @@
 See also the bug database http://www.gnu.org/software/gdb/bugs/
 
 
-Contrary to the GDB 5.1 announcement, the update did not contain fixes
-to a i386 floating point problem.  The latest sources do contain the
-fix and it will be included in GDB 5.2.
+Contrary to the GDB 5.1.1 announcement, the update did not contain
+fixes to a i386 floating point problem.  The latest sources do contain
+the fix and it will be included in GDB 5.2.
 
 
 		Known problems in GDB 5.1

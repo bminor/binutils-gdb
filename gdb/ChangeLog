@@ -1,3 +1,7 @@
+2002-01-31  Andrew Cagney  <ac131313@redhat.com>
+
+	* PROBLEMS: Fix tipo, 5.1->5.1.1.
+
 2002-01-30  Andrew Cagney  <ac131313@redhat.com>
 
 	* PROBLEMS: Note that the i386 fix was missing from 5.1.1.
