@@ -1,3 +1,12 @@
+Mon Apr 29 10:29:07 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* configure.host (m68*-*-linux*): Add -dynamic-linker to
+ 	HOSTING_CRT0.  Search -lgcc both before and after -lc in
+ 	HOSTING_LIBS.  Look for crt{begin,end}.o in the compiler directory
+ 	at first.
+	(i[345]86-*-linux*): Look for crt{begin,end}.o in the compiler
+	directory at first.
+
 Fri Apr 26 14:42:27 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldmisc.h (demangle): Declare.
