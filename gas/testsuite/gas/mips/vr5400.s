@@ -48,28 +48,28 @@ stuff:
 	.macro	nsel2 op
 	/* Test each form of each vector opcode.  */
 	\op	$f0,$f2
-	\op	$f3,$f6[2]
+	\op	$f4,$f6[2]
 	\op	$f6,15
 	.if 0	/* Which is right?? */
 	/* Test negative numbers in immediate-value slot.  */
 	\op	$f4,-3
 	.else
 	/* Test that it's recognized as an unsigned field.  */
-	\op	$f3,31
+	\op	$f4,31
 	.endif
 	.endm
 
 	.macro	nsel3 op
 	/* Test each form of each vector opcode.  */
-	\op	$f0,$f1,$f2
-	\op	$f3,$f4,$f6[2]
-	\op	$f6,$f5,15
+	\op	$f0,$f2,$f4
+	\op	$f2,$f4,$f6[2]
+	\op	$f6,$f4,15
 	.if 0	/* Which is right?? */
 	/* Test negative numbers in immediate-value slot.  */
 	\op	$f4,$f6,-3
 	.else
 	/* Test that it's recognized as an unsigned field.  */
-	\op	$f3,$f7,31
+	\op	$f4,$f6,31
 	.endif
 	.endm
 
@@ -93,17 +93,17 @@ stuff:
 	nsel3	xor.ob
 
 	/* ALNI, SHFL: Vector only.  */
-	alni.ob		$f1,$f2,$f3,5
-	shfl.mixh.ob	$f1,$f2,$f3
-	shfl.mixl.ob	$f1,$f2,$f3
-	shfl.pach.ob	$f1,$f2,$f3
-	shfl.pacl.ob	$f1,$f2,$f3
+	alni.ob		$f0,$f2,$f4,5
+	shfl.mixh.ob	$f0,$f2,$f4
+	shfl.mixl.ob	$f0,$f2,$f4
+	shfl.pach.ob	$f0,$f2,$f4
+	shfl.pacl.ob	$f0,$f2,$f4
 
 	/* SLL,SRL: Scalar or immediate.  */
-	sll.ob	$f2,$f4,$f5[3]
-	sll.ob	$f3,$f6,14
-	srl.ob	$f2,$f4,$f5[3]
-	srl.ob	$f3,$f6,14
+	sll.ob	$f2,$f4,$f6[3]
+	sll.ob	$f4,$f6,14
+	srl.ob	$f2,$f4,$f6[3]
+	srl.ob	$f4,$f6,14
 
 	/* RZU: Immediate, must be 0, 8, or 16.  */
 	rzu.ob	$f2,13
@@ -113,7 +113,7 @@ stuff:
 	racl.ob	$f2
 	racm.ob	$f2
 	wach.ob	$f2
-	wacl.ob	$f2,$f3
+	wacl.ob	$f2,$f4
 
 	ror	$4,$5,$6
 	rol	$4,$5,15

@@ -67,8 +67,8 @@ stuff:
 	clz	$3,$4
 	dclz    $3,$4
 
-	luxc1	$f1,$4($2)
-	suxc1   $f1,$4($2)
+	luxc1	$f0,$4($2)
+	suxc1   $f2,$4($2)
 
 	tlbp
 	tlbr
