@@ -125,6 +125,31 @@ add_thread (pid)
   thread_list = tp;
 }
 
+void
+delete_thread (pid)
+     int pid;
+{
+  struct thread_info *tp, *tpprev;
+
+  tpprev = NULL;
+
+  for (tp = thread_list; tp; tpprev = tp, tp = tp->next)
+    if (tp->pid == pid)
+      break;
+
+  if (!tp)
+    return;
+
+  if (tpprev)
+    tpprev->next = tp->next;
+  else
+    thread_list = tp->next;
+
+  free (tp);
+
+  return;
+}
+
 static struct thread_info *
 find_thread_id (num)
     int num;
@@ -332,7 +357,10 @@ info_threads_command (arg, from_tty)
       printf_filtered ("%d %s  ", tp->num, target_pid_to_str (tp->pid));
 
       switch_to_thread (tp->pid);
-      print_stack_frame (selected_frame, -1, 0);
+      if (selected_frame)
+	print_stack_frame (selected_frame, -1, 0);
+      else
+	printf_filtered ("[No stack.]\n");
     }
 
   switch_to_thread (current_pid);

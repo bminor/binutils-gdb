@@ -1,3 +1,43 @@
+Wed May 21 16:03:25 1997  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* procfs.c (init_procinfo): new function, abstracts some code
+	shared by create_procinfo and do_attach; 
+	(procfs_set_inferior_syscall_traps): new function, abstracts
+	some code needed by procfs_init_inferior, do_attach, and 
+	procfs_lwp_creation_handler; (procfs_first_available): new
+	function, find any LWP that's runnable; (procfs_thread_alive):
+	replace stub function with real implementation; 
+	(procfs_lwp_creation_handler): fix bug starting new child 
+	threads; (info_proc): bug fixes and enhancements for the 
+	"INFO PROCESSES" command; (close_procinfo_file): call new
+	function "delete_thread" to cleanup GDB's thread database;
+	(proc_init_failed): add new argument "kill", to control whether
+	process is killed (so this function can be shared by 
+	create_procinfo and do_attach); (procfs_exit_handler): handle
+	exit from an attached process, and cleanup procinfo handles
+	when the process exits; (procfs_resume, procfs_wait): cleanup
+	after a thread when it exits; (do_attach, do_detach): handle
+	attached processes with multiple threads; plus some general 
+	improvements in the diagnostic output.
+	* sol-thread.c (sol_thread_alive): replace stub with real
+	implementation; (thread_to_lwp, lwp_to_thread): enhance to 
+	handle threads that may have exited; (sol_thread_attach): add
+	startup setup stuff; (sol_thread_detach): add unpush_target
+	call; (sol_thread_mourn_inferior): add unpush_target call;
+	(sol_thread_wait, sol_thread_resume): enhance to deal with
+	thread exit cleanly; (sol_thread_new_objfile, 
+	sol_thread_pid_to_str): detect unsuccessful startup and 
+	don't crash; plus some general cleanup.
+	* thread.c (delete_thread): new function, allows targets to 
+	notify gdb when a thread is no longer valid.
+	* infrun.c (wait_for_inferior): don't try to detect a new
+	thread on receiving a TARGET_EXITED event.
+	
+Tue May 20 09:32:02 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote-sim.c (gdbsim_open): Pass callback struct.
+	(init_callbacks): Remove call to sim_set_callbacks.
+
 Thu May 15 07:56:50 1997  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* config/rs6000/tm-rs6000.h (SIG_FRAME_LR_OFFSET):  Define.

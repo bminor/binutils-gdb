@@ -181,14 +181,15 @@ struct procinfo {
   struct sig_ctl saved_trace;   /* Saved traced signal set */
   struct sys_ctl saved_exitset; /* Saved traced system call exit set */
   struct sys_ctl saved_entryset;/* Saved traced system call entry set */
-  int num_syscall_handlers;	/* Number of syscall handlers currently installed */
-  struct procfs_syscall_handler *syscall_handlers; /* Pointer to list of syscall trap handlers */
+  int num_syscall_handlers;	/* Number of syscall trap handlers
+				   currently installed */
+				/* Pointer to list of syscall trap handlers */
+  struct procfs_syscall_handler *syscall_handlers; 
   int new_child;		/* Non-zero if it's a new thread */
 };
 
 /* List of inferior process information */
 static struct procinfo *procinfo_list = NULL;
-
 static struct pollfd *poll_list; /* pollfds used for waiting on /proc */
 
 static int num_poll_list = 0;	/* Number of entries in poll_list */
@@ -248,6 +249,15 @@ static struct trans pr_flag_table[] =
 #if defined (PR_PCOMPAT)
   { PR_PCOMPAT, "PR_PCOMPAT", "Ptrace compatibility mode in effect" },
 #endif
+#if defined (PR_MSACCT)
+  { PR_MSACCT, "PR_MSACCT", "Microstate accounting enabled" },
+#endif
+#if defined (PR_BPTADJ)
+  { PR_BPTADJ, "PR_BPTADJ", "Breakpoint PC adjustment in effect" },
+#endif
+#if defined (PR_ASLWP)
+  { PR_ASLWP, "PR_ASLWP", "Asynchronus signal LWP" },
+#endif
   { 0, NULL, NULL }
 };
 
@@ -261,9 +271,6 @@ static struct trans pr_why_table[] =
 #if defined (PR_SIGNALLED)
   { PR_SIGNALLED, "PR_SIGNALLED", "Receipt of a traced signal" },
 #endif
-#if defined (PR_FAULTED)
-  { PR_FAULTED, "PR_FAULTED", "Incurred a traced hardware fault" },
-#endif
 #if defined (PR_SYSENTRY)
   { PR_SYSENTRY, "PR_SYSENTRY", "Entry to a traced system call" },
 #endif
@@ -273,8 +280,14 @@ static struct trans pr_why_table[] =
 #if defined (PR_JOBCONTROL)
   { PR_JOBCONTROL, "PR_JOBCONTROL", "Default job control stop signal action" },
 #endif
+#if defined (PR_FAULTED)
+  { PR_FAULTED, "PR_FAULTED", "Incurred a traced hardware fault" },
+#endif
 #if defined (PR_SUSPENDED)
   { PR_SUSPENDED, "PR_SUSPENDED", "Process suspended" },
+#endif
+#if defined (PR_CHECKPOINT)
+  { PR_CHECKPOINT, "PR_CHECKPOINT", "(???)" },
 #endif
   { 0, NULL, NULL }
 };
@@ -502,7 +515,7 @@ static void close_proc_file PARAMS ((struct procinfo *));
 
 static void unconditionally_kill_inferior PARAMS ((struct procinfo *));
 
-static NORETURN void proc_init_failed PARAMS ((struct procinfo *, char *)) ATTR_NORETURN;
+static NORETURN void proc_init_failed PARAMS ((struct procinfo *, char *, int)) ATTR_NORETURN;
 
 static void info_proc PARAMS ((char *, int));
 
@@ -538,8 +551,8 @@ static void notice_signals PARAMS ((struct procinfo *, struct sig_ctl *));
 
 static struct procinfo *find_procinfo PARAMS ((pid_t pid, int okfail));
 
-static int procfs_read_status PARAMS ((struct procinfo *));
 static int procfs_write_pcwstop PARAMS ((struct procinfo *));
+static int procfs_read_status PARAMS ((struct procinfo *));
 static void procfs_write_pckill PARAMS ((struct procinfo *));
 
 typedef int syscall_func_t PARAMS ((struct procinfo *pi, int syscall_num,
@@ -683,6 +696,22 @@ add_fd (pi)
 
   num_poll_list++;
 }
+
+/*
+
+LOCAL FUNCTION
+
+	remove_fd -- Remove the fd from the poll/select list
+
+SYNOPSIS
+
+	static void remove_fd (struct procinfo *);
+
+DESCRIPTION
+	
+	Remove the fd of the supplied procinfo from the list of fds used 
+	for poll/select operations.
+ */
 
 static void
 remove_fd (pi)
@@ -859,7 +888,8 @@ wait_fd ()
 
   for (i = 0; i < num_poll_list && num_fds > 0; i++)
     {
-      if ((poll_list[i].revents & (POLLWRNORM|POLLPRI|POLLERR|POLLHUP|POLLNVAL)) == 0)
+      if (0 == (poll_list[i].revents & 
+		(POLLWRNORM | POLLPRI | POLLERR | POLLHUP | POLLNVAL)))
 	continue;
       for (pi = procinfo_list; pi; pi = pi->next)
 	{
@@ -867,8 +897,11 @@ wait_fd ()
 	    {
 	      if (!procfs_read_status(pi))
 		{
-		  print_sys_errmsg (pi->pathname, errno);
-		  error ("procfs_read_status failed");
+		  /* The LWP has apparently terminated.  */
+		  if (info_verbose)
+		    printf_filtered ("LWP %d doesn't respond.\n", 
+				     (pi->pid >> 16) & 0xffff);
+		  /* could call close_proc_file here, but I'm afraid to... */
 		}
 
 	      num_fds--;
@@ -1549,23 +1582,23 @@ init_syscall_table ()
 #if defined (SYS_settimeofday)
   syscall_table[SYS_settimeofday] = "settimeofday";
 #endif
-#if defined (SYS_lwpcreate)
-  syscall_table[SYS_lwpcreate] = "lwpcreate";
+#if defined (SYS_lwp_create)
+  syscall_table[SYS_lwp_create] = "_lwp_create";
 #endif
-#if defined (SYS_lwpexit)
-  syscall_table[SYS_lwpexit] = "lwpexit";
+#if defined (SYS_lwp_exit)
+  syscall_table[SYS_lwp_exit] = "_lwp_exit";
 #endif
-#if defined (SYS_lwpwait)
-  syscall_table[SYS_lwpwait] = "lwpwait";
+#if defined (SYS_lwp_wait)
+  syscall_table[SYS_lwp_wait] = "_lwp_wait";
 #endif
-#if defined (SYS_lwpself)
-  syscall_table[SYS_lwpself] = "lwpself";
+#if defined (SYS_lwp_self)
+  syscall_table[SYS_lwp_self] = "_lwp_self";
 #endif
-#if defined (SYS_lwpinfo)
-  syscall_table[SYS_lwpinfo] = "lwpinfo";
+#if defined (SYS_lwp_info)
+  syscall_table[SYS_lwp_info] = "_lwp_info";
 #endif
-#if defined (SYS_lwpprivate)
-  syscall_table[SYS_lwpprivate] = "lwpprivate";
+#if defined (SYS_lwp_private)
+  syscall_table[SYS_lwp_private] = "_lwp_private";
 #endif
 #if defined (SYS_processor_bind)
   syscall_table[SYS_processor_bind] = "processor_bind";
@@ -1600,8 +1633,8 @@ init_syscall_table ()
 #if defined (SYS_ftruncate)
   syscall_table[SYS_ftruncate] = "ftruncate";
 #endif
-#if defined (SYS_lwpkill)
-  syscall_table[SYS_lwpkill] = "lwpkill";
+#if defined (SYS_lwp_kill)
+  syscall_table[SYS_lwp_kill] = "_lwp_kill";
 #endif
 #if defined (SYS_sigwait)
   syscall_table[SYS_sigwait] = "sigwait";
@@ -1630,11 +1663,11 @@ init_syscall_table ()
 #if defined (SYS_getksym)
   syscall_table[SYS_getksym] = "getksym";
 #endif
-#if defined (SYS_lwpsuspend)
-  syscall_table[SYS_lwpsuspend] = "lwpsuspend";
+#if defined (SYS_lwp_suspend)
+  syscall_table[SYS_lwp_suspend] = "_lwp_suspend";
 #endif
-#if defined (SYS_lwpcontinue)
-  syscall_table[SYS_lwpcontinue] = "lwpcontinue";
+#if defined (SYS_lwp_continue)
+  syscall_table[SYS_lwp_continue] = "_lwp_continue";
 #endif
 #if defined (SYS_priocntllst)
   syscall_table[SYS_priocntllst] = "priocntllst";
@@ -1643,10 +1676,10 @@ init_syscall_table ()
   syscall_table[SYS_sleep] = "sleep";
 #endif
 #if defined (SYS_lwp_sema_wait)
-  syscall_table[SYS_lwp_sema_wait] = "lwp_sema_wait";
+  syscall_table[SYS_lwp_sema_wait] = "_lwp_sema_wait";
 #endif
 #if defined (SYS_lwp_sema_post)
-  syscall_table[SYS_lwp_sema_post] = "lwp_sema_post";
+  syscall_table[SYS_lwp_sema_post] = "_lwp_sema_post";
 #endif
 #if defined (SYS_lwp_sema_trywait)
   syscall_table[SYS_lwp_sema_trywait] = "lwp_sema_trywait";
@@ -1928,6 +1961,96 @@ procfs_store_registers (regno)
 
 LOCAL FUNCTION
 
+	init_procinfo - setup a procinfo struct and connect it to a process
+
+SYNOPSIS
+
+	struct procinfo * init_procinfo (int pid)
+
+DESCRIPTION
+
+	Allocate a procinfo structure, open the /proc file and then set up the
+	set of signals and faults that are to be traced.  Returns a pointer to
+	the new procinfo structure.  
+
+NOTES
+
+	If proc_init_failed ever gets called, control returns to the command
+	processing loop via the standard error handling code.
+
+ */
+
+static struct procinfo *
+init_procinfo (pid, kill)
+     int pid;
+     int kill;
+{
+  struct procinfo *pi = (struct procinfo *) 
+    xmalloc (sizeof (struct procinfo));
+
+  memset ((char *) pi, 0, sizeof (*pi));
+  if (!open_proc_file (pid, pi, O_RDWR, 1))
+    proc_init_failed (pi, "can't open process file", kill);
+
+  /* open_proc_file may modify pid.  */
+
+  pid = pi -> pid;
+
+  /* Add new process to process info list */
+
+  pi->next = procinfo_list;
+  procinfo_list = pi;
+
+  add_fd (pi);			/* Add to list for poll/select */
+
+  /*  Remember some things about the inferior that we will, or might, change
+      so that we can restore them when we detach. */
+#ifdef UNIXWARE
+  memcpy ((char *) &pi->saved_trace.sigset,
+	  (char *) &pi->prstatus.pr_sigtrace, sizeof (sigset_t));
+  memcpy ((char *) &pi->saved_fltset.fltset,
+	  (char *) &pi->prstatus.pr_flttrace, sizeof (fltset_t));
+  memcpy ((char *) &pi->saved_entryset.sysset,
+	  (char *) &pi->prstatus.pr_sysentry, sizeof (sysset_t));
+  memcpy ((char *) &pi->saved_exitset.sysset,
+	  (char *) &pi->prstatus.pr_sysexit, sizeof (sysset_t));
+
+  /* Set up trace and fault sets, as gdb expects them. */
+
+  prfillset (&sctl.sigset);
+  notice_signals (pi, &sctl);
+  prfillset (&fctl.fltset);
+  prdelset (&fctl.fltset, FLTPAGE);
+
+#else /* ! UNIXWARE */
+  ioctl (pi->ctl_fd, PIOCGTRACE, &pi->saved_trace.sigset);
+  ioctl (pi->ctl_fd, PIOCGHOLD, &pi->saved_sighold.sigset);
+  ioctl (pi->ctl_fd, PIOCGFAULT, &pi->saved_fltset.fltset);
+  ioctl (pi->ctl_fd, PIOCGENTRY, &pi->saved_entryset.sysset);
+  ioctl (pi->ctl_fd, PIOCGEXIT, &pi->saved_exitset.sysset);
+  
+  /* Set up trace and fault sets, as gdb expects them. */
+  
+  memset ((char *) &pi->prrun, 0, sizeof (pi->prrun));
+  prfillset (&pi->prrun.pr_trace);
+  procfs_notice_signals (pid);
+  prfillset (&pi->prrun.pr_fault);
+  prdelset (&pi->prrun.pr_fault, FLTPAGE);
+#ifdef PROCFS_DONT_TRACE_FAULTS
+  premptyset (&pi->prrun.pr_fault);
+#endif
+#endif /* UNIXWARE */
+
+  if (!procfs_read_status (pi))
+    proc_init_failed (pi, "procfs_read_status failed", kill);
+
+  return pi;
+}
+
+/*
+
+LOCAL FUNCTION
+
 	create_procinfo - initialize access to a /proc entry
 
 SYNOPSIS
@@ -1959,59 +2082,23 @@ create_procinfo (pid)
   if (pi != NULL)
     return pi;			/* All done!  It already exists */
 
-  pi = (struct procinfo *) xmalloc (sizeof (struct procinfo));
-
-  if (!open_proc_file (pid, pi, O_RDWR, 1))
-    proc_init_failed (pi, "can't open process file");
-
-  /* open_proc_file may modify pid.  */
-
-  pid = pi -> pid;
-
-  /* Add new process to process info list */
-
-  pi->next = procinfo_list;
-  procinfo_list = pi;
-
-  add_fd (pi);			/* Add to list for poll/select */
-
-  pi->num_syscall_handlers = 0;
-  pi->syscall_handlers = NULL;
-#ifdef UNIXWARE
-  prfillset (&sctl.sigset);
-  notice_signals (pi, &sctl); 
-  prfillset (&fctl.fltset);
-  prdelset (&fctl.fltset, FLTPAGE);
-#else /* UNIXWARE */
-  memset ((char *) &pi->prrun, 0, sizeof (pi->prrun));
-  prfillset (&pi->prrun.pr_trace);
-  procfs_notice_signals (pid);
-  prfillset (&pi->prrun.pr_fault);
-  prdelset (&pi->prrun.pr_fault, FLTPAGE);
-#ifdef PROCFS_DONT_TRACE_FAULTS
-  premptyset (&pi->prrun.pr_fault);
-#endif
-#endif /* UNIXWARE */
-
-  if (!procfs_read_status (pi))
-    proc_init_failed (pi, "procfs_read_status failed");
-
-/* A bug in Solaris (2.5 at least) causes PIOCWSTOP to hang on LWPs that are
-   already stopped, even if they all have PR_ASYNC set.  */
+  pi = init_procinfo (pid, 1);
 
 #ifndef UNIXWARE
+/* A bug in Solaris (2.5 at least) causes PIOCWSTOP to hang on LWPs that are
+   already stopped, even if they all have PR_ASYNC set.  */
   if (!(pi->prstatus.pr_flags & PR_STOPPED))
 #endif
     if (!procfs_write_pcwstop (pi))
-      proc_init_failed (pi, "procfs_write_pcwstop failed");
+      proc_init_failed (pi, "procfs_write_pcwstop failed", 1);
 
 #ifdef PROCFS_USE_READ_WRITE
   fctl.cmd = PCSFAULT;
   if (write (pi->ctl_fd, (char *) &fctl, sizeof (struct flt_ctl)) < 0)
-    proc_init_failed (pi, "PCSFAULT failed");
+    proc_init_failed (pi, "PCSFAULT failed", 1);
 #else
   if (ioctl (pi->ctl_fd, PIOCSFAULT, &pi->prrun.pr_fault) < 0)
-    proc_init_failed (pi, "PIOCSFAULT failed");
+    proc_init_failed (pi, "PIOCSFAULT failed", 1);
 #endif
 
   return pi;
@@ -2047,15 +2134,37 @@ procfs_exit_handler (pi, syscall_num, why, rtnvalp, statvalp)
      int *rtnvalp;
      int *statvalp;
 {
+  struct procinfo *temp_pi, *next_pi;
+
   pi->prrun.pr_flags = PRCFAULT;
 
   if (ioctl (pi->ctl_fd, PIOCRUN, &pi->prrun) != 0)
     perror_with_name (pi->pathname);
 
-  *rtnvalp = wait (statvalp);
-  if (*rtnvalp >= 0)
-    *rtnvalp = pi->pid;
+  if (attach_flag)
+    {
+      /* Claim it exited (don't call wait). */
+      if (info_verbose)
+	printf_filtered ("(attached process has exited)\n");
+      *statvalp = 0;
+      *rtnvalp  = inferior_pid;
+    }
+  else
+    {
+      *rtnvalp = wait (statvalp);
+      if (*rtnvalp >= 0)
+	*rtnvalp = pi->pid;
+    }
 
+  /* Close ALL open proc file handles,
+     except the one that called SYS_exit. */
+  for (temp_pi = procinfo_list; temp_pi; temp_pi = next_pi)
+    {
+      next_pi = temp_pi->next;
+      if (temp_pi == pi)
+	continue;		/* Handled below */
+      close_proc_file (temp_pi);
+    }
   return 1;
 }
 
@@ -2223,39 +2332,24 @@ procfs_fork_handler (pi, syscall_num, why, rtnvalp, statvalp)
 
 LOCAL FUNCTION
 
-	procfs_init_inferior - initialize target vector and access to a
-	/proc entry
+	procfs_set_inferior_syscall_traps - setup the syscall traps 
 
 SYNOPSIS
 
-	int procfs_init_inferior (int pid)
+	void procfs_set_inferior_syscall_traps (struct procinfo *pip)
 
 DESCRIPTION
 
-	When gdb starts an inferior, this function is called in the parent
-	process immediately after the fork.  It waits for the child to stop
-	on the return from the exec system call (the child itself takes care
-	of ensuring that this is set up), then sets up the set of signals
-	and faults that are to be traced.  Returns the pid, which may have had
-	the thread-id added to it.
-
-NOTES
-
-	If proc_init_failed ever gets called, control returns to the command
-	processing loop via the standard error handling code.
+	Called for each "procinfo" (process, thread, or LWP) in the
+	inferior, to register for notification of and handlers for
+	syscall traps in the inferior.
 
  */
 
-static int
-procfs_init_inferior (pid)
-     int pid;
+static void
+procfs_set_inferior_syscall_traps (pip)
+     struct procinfo *pip;
 {
-  struct procinfo *pip;
-
-  push_target (&procfs_ops);
-
-  pip = create_procinfo (pid);
-
 #ifndef PIOCSSPCACT
   procfs_set_syscall_trap (pip, SYS_exit, PROCFS_SYSCALL_ENTRY,
 			   procfs_exit_handler);
@@ -2297,6 +2391,46 @@ procfs_init_inferior (pid)
   procfs_set_syscall_trap (pip, SYS_lwp_create, PROCFS_SYSCALL_EXIT,
 			   procfs_lwp_creation_handler);
 #endif
+}
+
+/*
+
+LOCAL FUNCTION
+
+	procfs_init_inferior - initialize target vector and access to a
+	/proc entry
+
+SYNOPSIS
+
+	int procfs_init_inferior (int pid)
+
+DESCRIPTION
+
+	When gdb starts an inferior, this function is called in the parent
+	process immediately after the fork.  It waits for the child to stop
+	on the return from the exec system call (the child itself takes care
+	of ensuring that this is set up), then sets up the set of signals
+	and faults that are to be traced.  Returns the pid, which may have had
+	the thread-id added to it.
+
+NOTES
+
+	If proc_init_failed ever gets called, control returns to the command
+	processing loop via the standard error handling code.
+
+ */
+
+static int
+procfs_init_inferior (pid)
+     int pid;
+{
+  struct procinfo *pip;
+
+  push_target (&procfs_ops);
+
+  pip = create_procinfo (pid);
+
+  procfs_set_inferior_syscall_traps (pip);
 
   /* create_procinfo may change the pid, so we have to update inferior_pid
      here before calling other gdb routines that need the right pid.  */
@@ -2863,131 +2997,93 @@ do_attach (pid)
   struct procinfo *pi;
   struct sig_ctl sctl;
   struct flt_ctl fctl;
+  int nlwp, *lwps;
 
-  pi = (struct procinfo *) xmalloc (sizeof (struct procinfo));
+  pi  = init_procinfo (pid, 0);
 
-  if (!open_proc_file (pid, pi, O_RDWR, 1))
+#ifdef PIOCLWPIDS
+  nlwp = pi->prstatus.pr_nlwp;
+  lwps = alloca ((2 * nlwp + 2) * sizeof (id_t));
+
+  if (ioctl (pi->ctl_fd, PIOCLWPIDS, lwps))
     {
-      free (pi);
-      perror_with_name (pi->pathname);
-      /* NOTREACHED */
+      print_sys_errmsg (pi -> pathname, errno);
+      error ("PIOCLWPIDS failed");
     }
-  
-  pid = pi -> pid;
-
-  /* Add new process to process info list */
-
-  pi->next = procinfo_list;
-  procinfo_list = pi;
-
-  add_fd (pi);			/* Add to list for poll/select */
-
-  /*  Get current status of process and if it is not already stopped,
-      then stop it.  Remember whether or not it was stopped when we first
-      examined it. */
-  if (!procfs_read_status (pi))
-    {
-      print_sys_errmsg (pi->pathname, errno);
-      close_proc_file (pi);
-      error ("procfs_read_status failed");
-    }
-#ifdef UNIXWARE
-  if (pi->prstatus.pr_lwp.pr_flags & (PR_STOPPED | PR_ISTOP))
-#else
-  if (pi->prstatus.pr_flags & (PR_STOPPED | PR_ISTOP))
+#else /* PIOCLWPIDS */
+  nlwp = 1;
+  lwps = alloca ((2 * nlwp + 2) * sizeof *lwps);
+  lwps[0] = 0;
 #endif
+  for (; nlwp > 0; nlwp--, lwps++)
     {
-      pi->was_stopped = 1;
-    }
-  else
-    {
-      pi->was_stopped = 0;
-      if (1 || query ("Process is currently running, stop it? "))
+      /* First one has already been created above.  */
+      if ((pi = find_procinfo ((*lwps << 16) | pid, 1)) == 0)
+	pi = init_procinfo ((*lwps << 16) | pid, 0);
+
+#ifdef UNIXWARE
+      if (pi->prstatus.pr_lwp.pr_flags & (PR_STOPPED | PR_ISTOP))
+#else
+      if (pi->prstatus.pr_flags & (PR_STOPPED | PR_ISTOP))
+#endif
 	{
-	  long cmd;
-	  /* Make it run again when we close it.  */
-
-	  modify_run_on_last_close_flag (pi->ctl_fd, 1);
-
-#ifdef PROCFS_USE_READ_WRITE
-          cmd = PCSTOP;
-          if (write (pi->ctl_fd, (char *) &cmd, sizeof (long)) < 0)
-#else
-	  if (ioctl (pi->ctl_fd, PIOCSTOP, &pi->prstatus) < 0)
-#endif
-	    {
-	      print_sys_errmsg (pi->pathname, errno);
-	      close_proc_file (pi);
-	      error ("PIOCSTOP failed");
-	    }
-#ifdef UNIXWARE
-          if (!procfs_read_status (pi))
-            {
-              print_sys_errmsg (pi->pathname, errno);
-              close_proc_file (pi);
-              error ("procfs_read_status failed");
-            } 
-#endif
-	  pi->nopass_next_sigstop = 1;
+	  pi->was_stopped = 1;
 	}
       else
 	{
-	  printf_unfiltered ("Ok, gdb will wait for %s to stop.\n", target_pid_to_str (pid));
-	}
-    }
-
-  /*  Remember some things about the inferior that we will, or might, change
-      so that we can restore them when we detach. */
+	  pi->was_stopped = 0;
+	  if (1 || query ("Process is currently running, stop it? "))
+	    {
+	      long cmd;
+	      /* Make it run again when we close it.  */
+	      modify_run_on_last_close_flag (pi->ctl_fd, 1);
 #ifdef PROCFS_USE_READ_WRITE
-  memcpy ((char *) &pi->saved_trace.sigset,
-		(char *) &pi->prstatus.pr_sigtrace, sizeof (sigset_t));
-  memcpy ((char *) &pi->saved_fltset.fltset,
-                (char *) &pi->prstatus.pr_flttrace, sizeof (fltset_t));
-  memcpy ((char *) &pi->saved_entryset.sysset,
-                (char *) &pi->prstatus.pr_sysentry, sizeof (sysset_t));
-  memcpy ((char *) &pi->saved_exitset.sysset,
-                (char *) &pi->prstatus.pr_sysexit, sizeof (sysset_t));
-
-  /* Set up trace and fault sets, as gdb expects them. */
-
-  prfillset (&sctl.sigset);
-  notice_signals (pi, &sctl);
-  prfillset (&fctl.fltset);
-  prdelset (&fctl.fltset, FLTPAGE);
-
-  fctl.cmd = PCSFAULT;
-  if (write (pi->ctl_fd, (char *) &fctl, sizeof (struct flt_ctl)) < 0)
-    print_sys_errmsg ("PCSFAULT failed", errno);
-#else /* PROCFS_USE_READ_WRITE */
-  ioctl (pi->ctl_fd, PIOCGTRACE, &pi->saved_trace.sigset);
-  ioctl (pi->ctl_fd, PIOCGHOLD, &pi->saved_sighold.sigset);
-  ioctl (pi->ctl_fd, PIOCGFAULT, &pi->saved_fltset.fltset);
-  ioctl (pi->ctl_fd, PIOCGENTRY, &pi->saved_entryset.sysset);
-  ioctl (pi->ctl_fd, PIOCGEXIT, &pi->saved_exitset.sysset);
-  
-  /* Set up trace and fault sets, as gdb expects them. */
-  
-  memset (&pi->prrun, 0, sizeof (pi->prrun));
-  prfillset (&pi->prrun.pr_trace);
-  procfs_notice_signals (pid);
-  prfillset (&pi->prrun.pr_fault);
-  prdelset (&pi->prrun.pr_fault, FLTPAGE);
-
-#ifdef PROCFS_DONT_TRACE_FAULTS
-  premptyset (&pi->prrun.pr_fault);
+	      cmd = PCSTOP;
+	      if (write (pi->ctl_fd, (char *) &cmd, sizeof (long)) < 0)
+#else
+	      if (ioctl (pi->ctl_fd, PIOCSTOP, &pi->prstatus) < 0)
 #endif
+		{
+		  print_sys_errmsg (pi->pathname, errno);
+		  close_proc_file (pi);
+		  error ("PIOCSTOP failed");
+		}
+#ifdef UNIXWARE
+	      if (!procfs_read_status (pi))
+		{
+		  print_sys_errmsg (pi->pathname, errno);
+		  close_proc_file (pi);
+		  error ("procfs_read_status failed");
+		} 
+#endif
+	      pi->nopass_next_sigstop = 1;
+	    }
+	  else
+	    {
+	      printf_unfiltered ("Ok, gdb will wait for %s to stop.\n", 
+				 target_pid_to_str (pi->pid));
+	    }
+	}
 
-  if (ioctl (pi->ctl_fd, PIOCSFAULT, &pi->prrun.pr_fault))
-    {
-      print_sys_errmsg ("PIOCSFAULT failed", errno);
-    }
-  if (ioctl (pi->ctl_fd, PIOCSTRACE, &pi->prrun.pr_trace))
-    {
-      print_sys_errmsg ("PIOCSTRACE failed", errno);
+#ifdef PROCFS_USE_READ_WRITE
+      fctl.cmd = PCSFAULT;
+      if (write (pi->ctl_fd, (char *) &fctl, sizeof (struct flt_ctl)) < 0)
+	print_sys_errmsg ("PCSFAULT failed", errno);
+#else /* PROCFS_USE_READ_WRITE */
+      if (ioctl (pi->ctl_fd, PIOCSFAULT, &pi->prrun.pr_fault))
+	{
+	  print_sys_errmsg ("PIOCSFAULT failed", errno);
+	}
+      if (ioctl (pi->ctl_fd, PIOCSTRACE, &pi->prrun.pr_trace))
+	{
+	  print_sys_errmsg ("PIOCSTRACE failed", errno);
+	}
+      add_thread (pi->pid);
+      procfs_set_inferior_syscall_traps (pi);
     }
 #endif /* PROCFS_USE_READ_WRITE */
   attach_flag = 1;
-  return (pid);
+  return (pi->pid);
 }
 
 /*
@@ -3025,106 +3121,107 @@ do_detach (signal)
 {
   struct procinfo *pi;
 
-  pi = current_procinfo;
-
-  if (signal)
+  for (pi = procinfo_list; pi; pi = pi->next)
     {
-      set_proc_siginfo (pi, signal);
-    }
+      if (signal)
+	{
+	  set_proc_siginfo (pi, signal);
+	}
 #ifdef PROCFS_USE_READ_WRITE
-  pi->saved_exitset.cmd = PCSEXIT;
-  if (write (pi->ctl_fd, (char *) &pi->saved_exitset,
-	sizeof (struct sys_ctl)) < 0)
+      pi->saved_exitset.cmd = PCSEXIT;
+      if (write (pi->ctl_fd, (char *) &pi->saved_exitset,
+		 sizeof (struct sys_ctl)) < 0)
 #else
-  if (ioctl (pi->ctl_fd, PIOCSEXIT, &pi->saved_exitset.sysset) < 0)
+	if (ioctl (pi->ctl_fd, PIOCSEXIT, &pi->saved_exitset.sysset) < 0)
 #endif
-    {
-      print_sys_errmsg (pi->pathname, errno);
-      printf_unfiltered ("PIOCSEXIT failed.\n");
-    }
+	  {
+	    print_sys_errmsg (pi->pathname, errno);
+	    printf_unfiltered ("PIOCSEXIT failed.\n");
+	  }
 #ifdef PROCFS_USE_READ_WRITE
-  pi->saved_entryset.cmd = PCSENTRY;
-  if (write (pi->ctl_fd, (char *) &pi->saved_entryset,
-        sizeof (struct sys_ctl)) < 0)
+      pi->saved_entryset.cmd = PCSENTRY;
+      if (write (pi->ctl_fd, (char *) &pi->saved_entryset,
+		 sizeof (struct sys_ctl)) < 0)
 #else
-  if (ioctl (pi->ctl_fd, PIOCSENTRY, &pi->saved_entryset.sysset) < 0)
+	if (ioctl (pi->ctl_fd, PIOCSENTRY, &pi->saved_entryset.sysset) < 0)
 #endif
-    {
-      print_sys_errmsg (pi->pathname, errno);
-      printf_unfiltered ("PIOCSENTRY failed.\n");
-    }
+	  {
+	    print_sys_errmsg (pi->pathname, errno);
+	    printf_unfiltered ("PIOCSENTRY failed.\n");
+	  }
 #ifdef PROCFS_USE_READ_WRITE
-  pi->saved_trace.cmd = PCSTRACE;
-  if (write (pi->ctl_fd, (char *) &pi->saved_trace,
-        sizeof (struct sig_ctl)) < 0)
+      pi->saved_trace.cmd = PCSTRACE;
+      if (write (pi->ctl_fd, (char *) &pi->saved_trace,
+		 sizeof (struct sig_ctl)) < 0)
 #else
-  if (ioctl (pi->ctl_fd, PIOCSTRACE, &pi->saved_trace.sigset) < 0)
+	if (ioctl (pi->ctl_fd, PIOCSTRACE, &pi->saved_trace.sigset) < 0)
 #endif
-    {
-      print_sys_errmsg (pi->pathname, errno);
-      printf_unfiltered ("PIOCSTRACE failed.\n");
-    }
+	  {
+	    print_sys_errmsg (pi->pathname, errno);
+	    printf_unfiltered ("PIOCSTRACE failed.\n");
+	  }
 #ifndef UNIXWARE
-  if (ioctl (pi->ctl_fd, PIOCSHOLD, &pi->saved_sighold.sigset) < 0)
-    {
-      print_sys_errmsg (pi->pathname, errno);
-      printf_unfiltered ("PIOSCHOLD failed.\n");
-    }
+      if (ioctl (pi->ctl_fd, PIOCSHOLD, &pi->saved_sighold.sigset) < 0)
+	{
+	  print_sys_errmsg (pi->pathname, errno);
+	  printf_unfiltered ("PIOSCHOLD failed.\n");
+	}
 #endif
 #ifdef PROCFS_USE_READ_WRITE
-    pi->saved_fltset.cmd = PCSFAULT;
-  if (write (pi->ctl_fd, (char *) &pi->saved_fltset,
-        sizeof (struct flt_ctl)) < 0)
+      pi->saved_fltset.cmd = PCSFAULT;
+      if (write (pi->ctl_fd, (char *) &pi->saved_fltset,
+		 sizeof (struct flt_ctl)) < 0)
 #else
-  if (ioctl (pi->ctl_fd, PIOCSFAULT, &pi->saved_fltset.fltset) < 0)
-#endif
-    {
-      print_sys_errmsg (pi->pathname, errno);
-      printf_unfiltered ("PIOCSFAULT failed.\n");
-    }
-  if (!procfs_read_status (pi))
-    {
-      print_sys_errmsg (pi->pathname, errno);
-      printf_unfiltered ("procfs_read_status failed.\n");
-    }
-  else
-    {
-#ifdef UNIXWARE
-      if (signal || (pi->prstatus.pr_lwp.pr_flags & (PR_STOPPED | PR_ISTOP)))
-#else
-      if (signal || (pi->prstatus.pr_flags & (PR_STOPPED | PR_ISTOP)))
+      if (ioctl (pi->ctl_fd, PIOCSFAULT, &pi->saved_fltset.fltset) < 0)
 #endif
 	{
-          long cmd;
-          struct proc_ctl pctl;
-
-	  if (signal || !pi->was_stopped ||
-	      query ("Was stopped when attached, make it runnable again? "))
-	    {
-	      /* Clear any pending signal if we want to detach without
-		 a signal.  */
-	      if (signal == 0)
-		set_proc_siginfo (pi, signal);
-
-	      /* Clear any fault that might have stopped it.  */
-#ifdef PROCFS_USE_READ_WRITE
-              cmd = PCCFAULT;
-              if (write (pi->ctl_fd, (char *) &cmd, sizeof (long)) < 0)
+	  print_sys_errmsg (pi->pathname, errno);
+	  printf_unfiltered ("PIOCSFAULT failed.\n");
+	}
+      if (!procfs_read_status (pi))
+	{
+	  print_sys_errmsg (pi->pathname, errno);
+	  printf_unfiltered ("procfs_read_status failed.\n");
+	}
+      else
+	{
+#ifdef UNIXWARE
+	  if (signal || (pi->prstatus.pr_lwp.pr_flags & (PR_STOPPED | PR_ISTOP)))
 #else
-	      if (ioctl (pi->ctl_fd, PIOCCFAULT, 0))
+	  if (signal || (pi->prstatus.pr_flags & (PR_STOPPED | PR_ISTOP)))
 #endif
+	    {
+	      long cmd;
+	      struct proc_ctl pctl;
+
+	      if (signal || !pi->was_stopped ||
+		  query ("Was stopped when attached, make it runnable again? "))
 		{
-		  print_sys_errmsg (pi->pathname, errno);
-		  printf_unfiltered ("PIOCCFAULT failed.\n");
+		  /* Clear any pending signal if we want to detach without
+		     a signal.  */
+		  if (signal == 0)
+		    set_proc_siginfo (pi, signal);
+
+		  /* Clear any fault that might have stopped it.  */
+#ifdef PROCFS_USE_READ_WRITE
+		  cmd = PCCFAULT;
+		  if (write (pi->ctl_fd, (char *) &cmd, sizeof (long)) < 0)
+#else
+		  if (ioctl (pi->ctl_fd, PIOCCFAULT, 0))
+#endif
+		    {
+		      print_sys_errmsg (pi->pathname, errno);
+		      printf_unfiltered ("PIOCCFAULT failed.\n");
+		    }
+
+		  /* Make it run again when we close it.  */
+
+		  modify_run_on_last_close_flag (pi->ctl_fd, 1);
 		}
-
-	      /* Make it run again when we close it.  */
-
-	      modify_run_on_last_close_flag (pi->ctl_fd, 1);
 	    }
 	}
+      close_proc_file (pi);
     }
-  close_proc_file (pi);
   attach_flag = 0;
 }
 
@@ -3152,7 +3249,6 @@ do_detach (signal)
 
     FIXME:  Investigate why wait() seems to have problems with programs
     being control by /proc routines.  */
-
 static int
 procfs_wait (pid, ourstatus)
      int pid;
@@ -3203,16 +3299,17 @@ procfs_wait (pid, ourstatus)
 	{
 	  checkerr++;
 	}
-    }    
+    }
   if (checkerr)
     {
       if (errno == ENOENT)
 	{
+	  /* XXX Fixme -- what to do if attached?  Can't call wait... */
 	  rtnval = wait (&statval);
-	  if (rtnval != inferior_pid)
+	  if ((rtnval) != (inferior_pid))
 	    {
 	      print_sys_errmsg (pi->pathname, errno);
-	      error ("procfs_write_pcwstop, wait failed, returned %d", rtnval);
+	      error ("procfs_wait: wait failed, returned %d", rtnval);
 	      /* NOTREACHED */
 	    }
 	}
@@ -3319,7 +3416,7 @@ procfs_wait (pid, ourstatus)
 	    case FLTBPT:
 	    case FLTTRACE:
 	      statval = (SIGTRAP << 8) | 0177;
-	      break;	      
+	      break;
 	    case FLTSTACK:
 	    case FLTACCESS:
 	    case FLTBOUNDS:
@@ -3350,10 +3447,11 @@ procfs_wait (pid, ourstatus)
 /* Stop all the other threads when any of them stops.  */
 
       {
-	struct procinfo *procinfo;
+	struct procinfo *procinfo, *next_pi;
 
-	for (procinfo = procinfo_list; procinfo; procinfo = procinfo->next)
+	for (procinfo = procinfo_list; procinfo; procinfo = next_pi)
 	  {
+	    next_pi = procinfo->next;
 	    if (!procinfo->had_event)
 	      {
 #ifdef PROCFS_USE_READ_WRITE
@@ -3369,15 +3467,20 @@ procfs_wait (pid, ourstatus)
 		   order to avoid the hang. */
 		if (!procfs_read_status (procinfo))
 		  {
-		    print_sys_errmsg (procinfo->pathname, errno);
-		    error ("procfs_read_status failed");
+		    /* The LWP has apparently terminated.  */
+		    if (info_verbose)
+		      printf_filtered ("LWP %d doesn't respond.\n", 
+				       (procinfo->pid >> 16) & 0xffff);
+		    close_proc_file (procinfo);
+		    continue;
 		  }
 
 		if (!(procinfo->prstatus.pr_flags & PR_STOPPED))
-		  if (ioctl (procinfo->ctl_fd, PIOCSTOP, &procinfo->prstatus) < 0)
+		  if (ioctl (procinfo->ctl_fd, PIOCSTOP, &procinfo->prstatus)
+		      < 0)
 		    {
 		      print_sys_errmsg (procinfo->pathname, errno);
-		      error ("PIOCSTOP failed");
+		      warning ("PIOCSTOP failed");
 		    }
 #endif
 	      }
@@ -3394,7 +3497,7 @@ procfs_wait (pid, ourstatus)
 
   if (rtnval == -1)		/* No more children to wait for */
     {
-      fprintf_unfiltered (gdb_stderr, "Child process unexpectedly missing.\n");
+      warning ("Child process unexpectedly missing");
       /* Claim it exited with unknown signal.  */
       ourstatus->kind = TARGET_WAITKIND_SIGNALLED;
       ourstatus->value.sig = TARGET_SIGNAL_UNKNOWN;
@@ -3514,7 +3617,7 @@ procfs_resume (pid, step, signo)
      enum target_signal signo;
 {
   int signal_to_pass;
-  struct procinfo *pi, *procinfo;
+  struct procinfo *pi, *procinfo, *next_pi;
   struct proc_ctl pctl;
 
   pi = find_procinfo (pid == -1 ? inferior_pid : pid, 0);
@@ -3562,11 +3665,12 @@ procfs_resume (pid, step, signo)
   else if (signo == TARGET_SIGNAL_TSTP
 #ifdef UNIXWARE
 	   && pi->prstatus.pr_lwp.pr_cursig == SIGTSTP
-	   && pi->prstatus.pr_lwp.pr_action.sa_handler == SIG_DFL)
+	   && pi->prstatus.pr_lwp.pr_action.sa_handler == SIG_DFL
 #else
 	   && pi->prstatus.pr_cursig == SIGTSTP
-	   && pi->prstatus.pr_action.sa_handler == SIG_DFL)
+	   && pi->prstatus.pr_action.sa_handler == SIG_DFL
 #endif
+	   )
 
     /* We are about to pass the inferior a SIGTSTP whose action is
        SIG_DFL.  The SIG_DFL action for a SIGTSTP is to stop
@@ -3607,65 +3711,91 @@ procfs_resume (pid, step, signo)
       pi->prrun.pr_flags |= PRSTEP;
 #endif
     }
-
+  pi->had_event = 0;
   /* Don't try to start a process unless it's stopped on an
      `event of interest'.  Doing so will cause errors.  */
 
-#ifdef PROCFS_USE_READ_WRITE
-  if (write (pi->ctl_fd, (char *) &pctl, sizeof (struct proc_ctl)) < 0)
-#else
-  if ((pi->prstatus.pr_flags & PR_ISTOP)
-       && ioctl (pi->ctl_fd, PIOCRUN, &pi->prrun) != 0)
-#endif
+  if (!procfs_read_status (pi))
     {
-      perror_with_name (pi->pathname);
-      /* NOTREACHED */
+      /* The LWP has apparently terminated.  */
+      if (info_verbose)
+	printf_filtered ("LWP %d doesn't respond.\n", 
+			 (pi->pid >> 16) & 0xffff);
+      close_proc_file (pi);
+    }
+  else
+    {
+#ifdef PROCFS_USE_READ_WRITE
+      if (write (pi->ctl_fd, (char *) &pctl, sizeof (struct proc_ctl)) < 0)
+#else
+      if ((pi->prstatus.pr_flags & PR_ISTOP)
+	  && ioctl (pi->ctl_fd, PIOCRUN, &pi->prrun) != 0)
+#endif
+	{
+	  /* The LWP has apparently terminated.  */
+	  if (info_verbose)
+	    printf_filtered ("LWP %d doesn't respond.\n", 
+			     (pi->pid >> 16) & 0xffff);
+	  close_proc_file (pi);
+	}
     }
 
-  pi->had_event = 0;
-
-  /* Continue all the other threads that haven't had an event of
-     interest.  */
+  /* Continue all the other threads that haven't had an event of interest.
+     Also continue them if they have NOPASS_NEXT_SIGSTOP set; this is only
+     set by do_attach, and means this is the first resume after an attach.  
+     All threads were CSTOP'd by do_attach, and should be resumed now.  */
 
   if (pid == -1)
-    for (procinfo = procinfo_list; procinfo; procinfo = procinfo->next)
+    for (procinfo = procinfo_list; procinfo; procinfo = next_pi)
       {
-	if (pi != procinfo && !procinfo->had_event)
-	  {
+	next_pi = procinfo->next;
+	if (pi != procinfo)
+	  if (!procinfo->had_event || 
+	      (procinfo->nopass_next_sigstop && signo == TARGET_SIGNAL_STOP))
+	    {
+	      procinfo->had_event = procinfo->nopass_next_sigstop = 0;
 #ifdef PROCFS_USE_READ_WRITE
-	    pctl.data = PRCFAULT | PRCSIG;
-	    if (write (procinfo->ctl_fd, (char *) &pctl,
-		sizeof (struct proc_ctl)) < 0)
-	      {
-		if (!procfs_read_status (procinfo))
-		  {
-		    fprintf_unfiltered(gdb_stderr, "procfs_read_status failed, errno=%d\n", errno);
-		  }
-		print_sys_errmsg (procinfo->pathname, errno);
-		error ("PCRUN failed");
-	      }
-	    procfs_read_status (procinfo);
+	      pctl.data = PRCFAULT | PRCSIG;
+	      if (write (procinfo->ctl_fd, (char *) &pctl,
+			 sizeof (struct proc_ctl)) < 0)
+		{
+		  if (!procfs_read_status (procinfo))
+		    fprintf_unfiltered(gdb_stderr, 
+				       "procfs_read_status failed, errno=%d\n",
+				       errno);
+		  print_sys_errmsg (procinfo->pathname, errno);
+		  error ("PCRUN failed");
+		}
+	      procfs_read_status (procinfo);
 #else
-	    procinfo->prrun.pr_flags &= PRSTEP;
-	    procinfo->prrun.pr_flags |= PRCFAULT | PRCSIG;
-	    procfs_read_status (procinfo);
+	      procinfo->prrun.pr_flags &= PRSTEP;
+	      procinfo->prrun.pr_flags |= PRCFAULT | PRCSIG;
+	      if (!procfs_read_status (procinfo))
+		{
+		  /* The LWP has apparently terminated.  */
+		  if (info_verbose)
+		    printf_filtered ("LWP %d doesn't respond.\n", 
+				     (procinfo->pid >> 16) & 0xffff);
+		  close_proc_file (procinfo);
+		  continue;
+		}
 
-	    /* Don't try to start a process unless it's stopped on an
-	       `event of interest'.  Doing so will cause errors.  */
+	      /* Don't try to start a process unless it's stopped on an
+		 `event of interest'.  Doing so will cause errors.  */
 
-	    if ((procinfo->prstatus.pr_flags & PR_ISTOP)
-		&& ioctl (procinfo->ctl_fd, PIOCRUN, &procinfo->prrun) < 0)
-	      {
-		if (!procfs_read_status (procinfo))
-		  {
-		    fprintf_unfiltered(gdb_stderr, "procfs_read_status failed, errno=%d\n", errno);
-		  }
-		print_sys_errmsg (procinfo->pathname, errno);
-		error ("PIOCRUN failed");
-	      }
-	    procfs_read_status (procinfo);
+	      if ((procinfo->prstatus.pr_flags & PR_ISTOP)
+		  && ioctl (procinfo->ctl_fd, PIOCRUN, &procinfo->prrun) < 0)
+		{
+		  if (!procfs_read_status (procinfo))
+		    fprintf_unfiltered(gdb_stderr, 
+				       "procfs_read_status failed, errno=%d\n",
+				       errno);
+		  print_sys_errmsg (procinfo->pathname, errno);
+		  warning ("PIOCRUN failed");
+		}
+	    }
+	procfs_read_status (procinfo);
 #endif
-	  }
       }
 }
 
@@ -3721,28 +3851,31 @@ procfs_fetch_registers (regno)
 
 LOCAL FUNCTION
 
-	proc_init_failed - called whenever /proc access initialization
+	proc_init_failed - called when /proc access initialization fails
 fails
 
 SYNOPSIS
 
-	static void proc_init_failed (struct procinfo *pi, char *why)
+	static void proc_init_failed (struct procinfo *pi, 
+				      char *why, int kill_p)
 
 DESCRIPTION
 
 	This function is called whenever initialization of access to a /proc
 	entry fails.  It prints a suitable error message, does some cleanup,
 	and then invokes the standard error processing routine which dumps
-	us back into the command loop.
+	us back into the command loop.  If KILL_P is true, sends SIGKILL.
  */
 
 static void
-proc_init_failed (pi, why)
+proc_init_failed (pi, why, kill_p)
      struct procinfo *pi;
      char *why;
+     int  kill_p;
 {
   print_sys_errmsg (pi->pathname, errno);
-  kill (pi->pid, SIGKILL);
+  if (kill_p)
+    kill (pi->pid, SIGKILL);
   close_proc_file (pi);
   error (why);
   /* NOTREACHED */
@@ -3773,6 +3906,7 @@ close_proc_file (pip)
 {
   struct procinfo *procinfo;
 
+  delete_thread (pip->pid);	/* remove thread from GDB's thread list */
   remove_fd (pip);		/* Remove fd from poll/select list */
 
   close (pip->ctl_fd);
@@ -3890,7 +4024,7 @@ open_proc_file (pid, pip, mode, control)
           close (pip->as_fd);
           close (pip->map_fd);
           return 0;
-        }      
+        }
     }
 
 #else /* HAVE_MULTIPLE_PROC_FDS */
@@ -4531,7 +4665,7 @@ info_proc (args, from_tty)
      char *args;
      int from_tty;
 {
-  int pid = inferior_pid;
+  int pid;
   struct procinfo *pip;
   struct cleanup *old_chain;
   char **argv;
@@ -4554,7 +4688,10 @@ info_proc (args, from_tty)
   /* Default to using the current inferior if no pid specified.  Note
      that inferior_pid may be 0, hence we set okerr.  */
 
-  pip = find_procinfo (inferior_pid, 1);
+  pid = inferior_pid & 0x7fffffff;		/* strip off sol-thread bit */
+  if (!(pip = find_procinfo (pid, 1)))		/* inferior_pid no good?  */
+    pip = procinfo_list;			/* take first available */
+  pid = pid & 0xffff;				/* extract "real" pid */
 
   if (args != NULL)
     {
@@ -4652,12 +4789,12 @@ No process.  Start debugging a program or specify an explicit process ID.");
 #ifndef PROCFS_USE_READ_WRITE
 #ifdef PIOCLWPIDS
   nlwp = pip->prstatus.pr_nlwp;
-  lwps = alloca ((2 * nlwp + 2) * sizeof (id_t));
+  lwps = alloca ((2 * nlwp + 2) * sizeof (*lwps));
 
   if (ioctl (pip->ctl_fd, PIOCLWPIDS, lwps))
     {
       print_sys_errmsg (pip -> pathname, errno);
-      error ("PIOCLWPIDS failed");      
+      error ("PIOCLWPIDS failed");
     }
 #else /* PIOCLWPIDS */
   nlwp = 1;
@@ -4698,6 +4835,10 @@ No process.  Start debugging a program or specify an explicit process ID.");
       if (summary || all)
 	{
 	  info_proc_stop (pip, summary);
+	  supply_gregset (&pip->prstatus.pr_reg);
+	  printf_filtered ("PC: ");
+	  print_address (read_pc (), gdb_stdout);
+	  printf_filtered ("\n");
 	}
       if (summary || all || signals || faults)
 	{
@@ -5005,7 +5146,7 @@ procfs_set_syscall_trap (pi, syscall_num, flags, func)
      syscall_func_t *func;
 {
   sysset_t sysset;
-  
+
   if (flags & PROCFS_SYSCALL_ENTRY)
     {
       if (ioctl (pi->ctl_fd, PIOCGENTRY, &sysset) < 0)
@@ -5148,7 +5289,7 @@ procfs_lwp_creation_handler (pi, syscall_num, why, rtnvalp, statvalp)
 
   /* We're the proud parent of a new thread.  Setup an exit trap for lwp_create
      in the child and continue the parent.  */
-  
+
   /* Third arg is pointer to new thread id. */
   lwp_id = read_memory_integer (pi->prstatus.pr_sysarg[2], sizeof (int));
 
@@ -5157,18 +5298,36 @@ procfs_lwp_creation_handler (pi, syscall_num, why, rtnvalp, statvalp)
   childpi = create_procinfo (lwp_id);
 
   /* The new process has actually inherited the lwp_create syscall trap from
-     it's parent, but we still have to call this to register a handler for
+     it's parent, but we still have to call this to register handlers for
      that child.  */
 
-  procfs_set_syscall_trap (childpi, SYS_lwp_create, PROCFS_SYSCALL_EXIT,
-			   procfs_lwp_creation_handler);
+  procfs_set_inferior_syscall_traps (childpi);
+  add_thread (lwp_id);
+  printf_filtered ("[New %s]\n", target_pid_to_str (lwp_id));
 
-  childpi->new_child = 1;	/* Flag this as an unseen child process */
+  /* Continue the parent */
 
-  *rtnvalp = lwp_id;	/* the new arrival. */
-  *statvalp = (SIGTRAP << 8) | 0177;
+  pi->prrun.pr_flags &= PRSTEP;
+  pi->prrun.pr_flags |= PRCFAULT;
+  if (ioctl (pi->ctl_fd, PIOCRUN, &pi->prrun) != 0)
+    perror_with_name (pi->pathname);
 
-  return 1;
+  /* The new child may have been created in one of two states: 
+     SUSPENDED or RUNNABLE.  If runnable, we will simply signal it to run.
+     If suspended, we flag it to be continued later, when it has an event.  */
+
+  if (childpi->prstatus.pr_why == PR_SUSPENDED)
+    childpi->new_child = 1;	/* Flag this as an unseen child process */
+  else
+    {
+      /* Continue the child */
+      childpi->prrun.pr_flags &= PRSTEP;
+      childpi->prrun.pr_flags |= PRCFAULT;
+
+      if (ioctl (childpi->ctl_fd, PIOCRUN, &childpi->prrun) != 0)
+	perror_with_name (childpi->pathname);
+    }
+  return 0;
 }
 #endif /* SYS_lwp_create */
 
@@ -5356,7 +5515,34 @@ static int
 procfs_thread_alive (pid)
      int pid;
 {
-  return 1;
+  struct procinfo *pi, *next_pi;
+
+  for (pi = procinfo_list; pi; pi = next_pi)
+    {
+      next_pi = pi->next;
+      if (pi -> pid == pid)
+	if (procfs_read_status (pi))	/* alive */
+	  return 1;
+	else				/* defunct (exited) */
+	  {
+	    close_proc_file (pi);
+	    return 0;
+	  }
+    }
+  return 0;
+}
+
+int
+procfs_first_available ()
+{
+  struct procinfo *pi;
+
+  for (pi = procinfo_list; pi; pi = pi->next)
+    {
+      if (procfs_read_status (pi))
+	return pi->pid;
+    }
+  return -1;
 }
 
 /* Send a SIGINT to the process group.  This acts just like the user typed a
@@ -5449,7 +5635,7 @@ _initialize_procfs ()
 
   add_target (&procfs_ops);
 
-  add_info ("proc", info_proc, 
+  add_info ("processes", info_proc, 
 "Show process status information using /proc entry.\n\
 Specify process id or use current inferior by default.\n\
 Specify keywords for detailed information; default is summary.\n\
