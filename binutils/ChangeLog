@@ -1,3 +1,27 @@
+Sat Mar 28 17:39:27 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	Fix some gcc -Wall warnings:
+	* nlmconv.c (main): Add casts to avoid warnings.
+	(alpha_mangle_relocs): Likewise.
+	* objdump.c (dump_section_stabs): Likewise.
+	* size.c (print_sysv_format): Likewise.
+	* srcconv.c (wr_ob): Likewise.
+	* wrstabs.c (stab_modify_type): Likewise.
+	(stab_variable): Likewise.
+	* nlmconv.c (main): Initialize variables to avoid warnings.
+	* nm.c (sort_symbols_by_size): Likewise.
+	* objdump.c (disassemble_bytes): Likewise.
+	* wrstabs.c (stab_end_class_type): Likewise.
+	* coffgrok.c (do_sections_p2): Change j to unsigned int.
+	(do_lines): Change l to unsigned int.
+	* nlmheader.y (yylex): Change i to unsigned int.
+	* nm.c (print_symbol): Change j to long.
+	* size.c (lprint_number): Comment out.
+	* srconv.c (wr_ob): Change i to bfd_size_type.
+	* sysdump.c (unit_info_list): Comment out.
+	(object_body_list, program_structure, debug_list): Likewise.
+	* sysinfo.y (yyerror): Return value.
+
 Thu Mar 26 17:06:51 1998  Richard Henderson  <rth@cygnus.com>
 
 	* defparse.y (explist): Allow epsilon.

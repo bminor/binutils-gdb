@@ -166,7 +166,8 @@ do_sections_p2 (head)
   asection *section;
   for (section = abfd->sections; section; section = section->next)
     {
-      int j;
+      unsigned int j;
+
       for (j = 0; j < section->reloc_count; j++)
 	{
 	  int idx;
@@ -248,7 +249,8 @@ do_lines (i, name)
 {
   struct coff_line *res = (struct coff_line *) xcalloc (sizeof (struct coff_line), 1);
   asection *s;
-  int l;
+  unsigned int l;
+
   /* Find out if this function has any line numbers in the table */
   for (s = abfd->sections; s; s = s->next)
     {
