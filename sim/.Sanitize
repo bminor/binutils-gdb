@@ -29,6 +29,7 @@ configure.in
 h8300
 h8500
 sh
+w65
 z8k
 
 Things-to-lose:
