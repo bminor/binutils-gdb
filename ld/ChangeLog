@@ -1,3 +1,8 @@
+2000-01-18  H.J. Lu  <hjl@gnu.org>
+
+	* ldlang.c (lang_size_sections): Also update the current
+	address of a region if the SEC_NEVER_LOAD bit is not set.
+
 2000-01-10  Philip Blundell  <pb@futuretv.com>
 
 	* configure.tgt (arm*-*-conix*): New target.

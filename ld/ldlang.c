@@ -2823,10 +2823,15 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 	    /* Update dot in the region ?
 	       We only do this if the section is going to be allocated,
 	       since unallocated sections do not contribute to the region's
-	       overall size in memory.  */
+	       
+	       If the SEC_NEVER_LOAD bit is not set, it will affect the
+	       addresses of sections after it. We have to update
+	       dot.  */
 	    if (os->region != (lang_memory_region_type *) NULL
-		&& (bfd_get_section_flags (output_bfd, os->bfd_section)
-		    & (SEC_ALLOC | SEC_LOAD)))
+		&& ((bfd_get_section_flags (output_bfd, os->bfd_section)
+		     & SEC_NEVER_LOAD) == 0
+		    || (bfd_get_section_flags (output_bfd, os->bfd_section)
+			& (SEC_ALLOC | SEC_LOAD))))
 	      {
 		os->region->current = dot;
 		
