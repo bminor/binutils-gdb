@@ -2335,7 +2335,7 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       XSTRING (TARGET_DOUBLE_FORMAT));
   fprintf_unfiltered (file,
                       "gdbarch_dump: TARGET_DOUBLE_FORMAT = %s\n",
-                      gdbarch->float_format->name);
+                      (TARGET_DOUBLE_FORMAT)->name);
 #endif
 #ifdef TARGET_FLOAT_BIT
   fprintf_unfiltered (file,
@@ -2351,7 +2351,7 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       XSTRING (TARGET_FLOAT_FORMAT));
   fprintf_unfiltered (file,
                       "gdbarch_dump: TARGET_FLOAT_FORMAT = %s\n",
-                      gdbarch->float_format->name);
+                      (TARGET_FLOAT_FORMAT)->name);
 #endif
 #ifdef TARGET_INT_BIT
   fprintf_unfiltered (file,
@@ -2383,7 +2383,7 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       XSTRING (TARGET_LONG_DOUBLE_FORMAT));
   fprintf_unfiltered (file,
                       "gdbarch_dump: TARGET_LONG_DOUBLE_FORMAT = %s\n",
-                      gdbarch->float_format->name);
+                      (TARGET_LONG_DOUBLE_FORMAT)->name);
 #endif
 #ifdef TARGET_LONG_LONG_BIT
   fprintf_unfiltered (file,

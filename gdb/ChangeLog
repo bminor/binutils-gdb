@@ -1,3 +1,10 @@
+2002-12-07  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbarch.sh (TARGET_FLOAT_FORMAT): Use the macro when printing
+	the format name.
+	(TARGET_DOUBLE_FORMAT, TARGET_LONG_DOUBLE_FORMAT): Ditto.
+	* gdbarch.c: Regenerate.
+	
 2002-12-06  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbarch.sh (DEPRECATED_INIT_FRAME_PC_FIRST): Rename
