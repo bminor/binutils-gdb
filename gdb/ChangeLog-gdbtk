@@ -1,3 +1,9 @@
+1998-09-02  Keith Seitz  <keiths@cygnus.com>
+
+	* gdbtk-cmds.c (gdb_cmd): Do not run the timer when downloading --
+	the ui_progress_hook that has been installed will actually
+	update the gui for us.
+
 Mon Aug 31 15:42:10 1998  Tom Tromey  <tromey@cygnus.com>
 
 	* gdbtk-hooks.c (context_hook): Don't define.

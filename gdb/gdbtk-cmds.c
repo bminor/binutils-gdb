@@ -666,19 +666,16 @@ gdb_cmd (clientData, interp, objc, objv)
      set turn off the GDBTK_TO_RESULT flag bit so gdbtk_fputs() 
      will not buffer all the data until the command is finished. */
 
-  if ((strncmp ("load ", Tcl_GetStringFromObj (objv[1], NULL), 5) == 0)
-      || (strncmp ("while ", Tcl_GetStringFromObj (objv[1], NULL), 6) == 0))
+  if ((strncmp ("load ", Tcl_GetStringFromObj (objv[1], NULL), 5) == 0))
     {
       result_ptr->flags &= ~GDBTK_TO_RESULT;
       load_in_progress = 1;
-      gdbtk_start_timer ();
     }
 
   execute_command (Tcl_GetStringFromObj (objv[1], NULL), 1);
 
   if (load_in_progress)
     {
-      gdbtk_stop_timer ();
       load_in_progress = 0;
       result_ptr->flags |= GDBTK_TO_RESULT;
     }
