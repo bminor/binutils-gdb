@@ -24,11 +24,19 @@
 #define TARGET_FORMAT "a.out-sunos-big"
 #endif
 
+#ifdef TE_APOLLO
+#define COFF_MAGIC		APOLLOM68KMAGIC
+#define COFF_AOUTHDR_MAGIC	APOLLO_COFF_VERSION_NUMBER
+#undef OBJ_COFF_OMIT_OPTIONAL_HEADER
+#endif
+
 #ifdef TE_LYNX
 #define TARGET_FORMAT		"coff-m68k-lynx"
 #endif
 
+#ifndef COFF_MAGIC
 #define COFF_MAGIC MC68MAGIC
+#endif
 #define BFD_ARCH bfd_arch_m68k
 #define COFF_FLAGS F_AR32W
 #define TC_COUNT_RELOC(x) ((x)->fx_addsy||(x)->fx_subsy)
@@ -64,11 +72,26 @@ extern int m68k_aout_machtype;
 					aim=this_type->rlx_forward+1; /* Force relaxation into word mode */ \
 				    }
 
-#ifdef M68KCOFF
-#define DOT_LABEL_PREFIX
+#ifndef REGISTER_PREFIX
 #define REGISTER_PREFIX '%'
+#endif
+
+#if !defined (REGISTER_PREFIX_OPTIONAL)
+#ifdef M68KCOFF
+#define LOCAL_LABEL(name) (name[0] == '.' \
+			   && (name[1] == 'L' || name[1] == '.'))
+#define FAKE_LABEL_NAME ".L0\001"
+#define REGISTER_PREFIX_OPTIONAL 0
 #else
-#define OPTIONAL_REGISTER_PREFIX '%'
+#define REGISTER_PREFIX_OPTIONAL 1
+#endif
+#endif /* not def REGISTER_PREFIX and not def OPTIONAL_REGISTER_PREFIX */
+
+#ifdef TE_DELTA
+/* On the Delta, `%' can occur within a label name.  I'm assuming it
+   can't be used as the initial character.  If that's not true, more
+   work will be needed to fix this up.  */
+#define LEX_PCT 1
 #endif
 
 #ifdef BFD_ASSEMBLER
@@ -77,5 +100,11 @@ extern int m68k_aout_machtype;
 #endif
 
 #define DIFF_EXPR_OK
+
+extern void m68k_init_after_args PARAMS ((void));
+#define tc_init_after_args m68k_init_after_args
+
+extern int m68k_parse_long_option PARAMS ((char *));
+#define md_parse_long_option m68k_parse_long_option
 
 /* end of tc-m68k.h */
