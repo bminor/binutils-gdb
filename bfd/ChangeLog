@@ -1,3 +1,11 @@
+Fri Aug 13 16:33:33 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* nlmcode.h (nlm_write_object_contents): procedure offsets are
+	from start of code segment, not start of file.
+	* config/i386-nlm.mt (DEFAULT_VECTOR): It's nlm32_i386_vec, not
+	bfd_nlm32_i386_vec.
+	* configure.in (SELECT_VECS switch): Likewise.
+
 Thu Aug 12 10:32:47 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* format.c (bfd_check_format): If the target matches the default
