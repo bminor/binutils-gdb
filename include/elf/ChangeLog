@@ -1,3 +1,7 @@
+Fri Jul 24 11:22:06 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300.h: Add R_MN10300_24 relocation.
+
 1998-07-24  Ulrich Drepper  <drepper@cygnus.com>
 
 	* mips.h: Add MIPS64 relocation names and values.
