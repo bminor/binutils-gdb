@@ -1,5 +1,11 @@
 Thu Jul 22 12:09:41 1993  Ian Lance Taylor  (ian@cygnus.com)
 
+	* read.c (read_a_source_file): In NO_PSEUDO_DOT case, if we find a
+	pseudo-op with a poc_handler field of NULL, ignore it and treat it
+	as an instruction instead.
+	* config/tc-m88k.c (md_pseudo_table): Add "set" with a NULL
+	poc_handler field.
+
 	* config/tc-h8500.c (md_begin): Use a local variable when
 	initializing md_relax_table to avoid warnings about modifying a
 	supposedly const data structure.

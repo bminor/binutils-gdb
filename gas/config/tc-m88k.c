@@ -168,6 +168,8 @@ const pseudo_typeS md_pseudo_table[] =
   {"string", stringer, 0},
   {"word", cons, 4},
   {"zero", s_space, 0},
+  /* Force set to be treated as an instruction.  */
+  {"set", NULL, 0},
   {0}
 };
 

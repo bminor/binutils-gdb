@@ -451,6 +451,8 @@ read_a_source_file (name)
 #ifdef NO_PSEUDO_DOT
 		  /* The m88k uses pseudo-ops without a period.  */
 		  pop = (pseudo_typeS *) hash_find (po_hash, s);
+		  if (pop != NULL && pop->poc_handler == NULL)
+		    pop = NULL;
 #endif
 
 		  if (pop != NULL || *s == '.')
