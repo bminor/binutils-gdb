@@ -1,5 +1,9 @@
 2002-02-18  Richard Earnshaw  <rearnsha@arm.com>
 
+	* config/arm/nbsd.mt (TDEPFILES): Add solib-sunos.o.
+
+2002-02-18  Richard Earnshaw  <rearnsha@arm.com>
+
 	* arm-tdep.c (arm_set_call_dummy_breakpoint_offset): New function.
 	(arm_fix_call_dummy): Call it.
 	(arm_call_dummy_breakpoint_offset): Delete.
