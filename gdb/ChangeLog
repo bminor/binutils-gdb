@@ -1,5 +1,8 @@
 2005-03-28  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc64nbsd-tdep.c (sparc64nbsd_sigcontext_saved_regs): Handle
+	StackGhost.
+
 	* sparc-tdep.c (sparc_supply_rwindow, sparc_collect_rwindow):
 	Handle StackGhost in 64-bit code.
 	* sparc64-tdep.c (sparc64_frame_prev_register): Handle StackGhost.
