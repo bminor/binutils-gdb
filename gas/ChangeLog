@@ -1,3 +1,13 @@
+2003-05-29  Richard Henderson  <rth@redhat.com>
+
+	* config/tc-alpha.c (alpha_cur_ent_sym): Remove.
+	(all_frame_data, plast_frame_data, cur_frame_data): New.
+	(s_alpha_ent): Record data for dwarf2 cfi.
+	(s_alpha_end, s_alpha_mask, s_alpha_frame, s_alpha_prologue): Likewise.[	(alpha_elf_md_end): Emit dwarf2 cfi for ecoff unwind directives.
+	* config/tc-alpha.h (md_end): New.
+	(DWARF2_DEFAULT_RETURN_COLUMN): New.
+	(DWARF2_CIE_DATA_ALIGNMENT): New.
+
 2003-05-29  Nick Clifton  <nickc@redhat.com>
 
 	* configure.in: Add i386-*-freebsd* entry.

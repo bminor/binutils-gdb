@@ -5,3 +5,15 @@ if [istarget "x86_64-*"] then {
 if [istarget "i?86-*"] then {
     run_dump_test "cfi-i386"
 }
+
+if { [istarget alpha*-*-*] } then {
+
+    set elf [expr [istarget *-*-elf*] \
+                  || [istarget *-*-linux*] \
+                  || [istarget *-*-freebsd*] \
+                  || [istarget *-*-netbsd*] ]
+
+    if $elf {
+	run_dump_test "cfi-alpha-1"
+    }
+}

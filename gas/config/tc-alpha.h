@@ -128,6 +128,11 @@ extern flagword alpha_elf_section_flags PARAMS ((flagword, int, int));
 #define tc_frob_file_before_fix() alpha_before_fix ()
 extern void alpha_before_fix PARAMS ((void));
 
+#ifdef OBJ_ELF
+#define md_end  alpha_elf_md_end
+extern void alpha_elf_md_end PARAMS ((void));
+#endif
+
 /* New fields for supporting explicit relocations (such as !literal to mark
    where a pointer is loaded from the global table, and !lituse_base to track
    all of the normal uses of that pointer).  */
@@ -156,4 +161,6 @@ do {									\
 	     (long) FIX->tc_fix_data.next_reloc);			\
 } while (0)
 
-#define DWARF2_LINE_MIN_INSN_LENGTH 4
+#define DWARF2_LINE_MIN_INSN_LENGTH	4
+#define DWARF2_DEFAULT_RETURN_COLUMN	26
+#define DWARF2_CIE_DATA_ALIGNMENT	-8
