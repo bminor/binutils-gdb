@@ -4696,7 +4696,9 @@ opd_entry_value (asection *opd_sec,
 		 bfd_vma *code_off)
 {
   bfd *opd_bfd = opd_sec->owner;
+  Elf_Internal_Rela *relocs, *save_relocs = NULL;
   Elf_Internal_Rela *lo, *hi, *look;
+  bfd_vma val;
 
   /* No relocs implies we are linking a --just-symbols object.  */
   if (opd_sec->reloc_count == 0)
@@ -4724,11 +4726,20 @@ opd_entry_value (asection *opd_sec,
       return val;
     }
 
+  /* If the .opd relocs have been adjusted for output, then we need to
+     re-read the original relocs rather than use the cached ones.  */
+  if (opd_sec->reloc_done)
+    {
+      save_relocs = elf_section_data (opd_sec)->relocs;
+      elf_section_data (opd_sec)->relocs = NULL;
+    }
+
   /* Go find the opd reloc at the sym address.  */
-  lo = _bfd_elf_link_read_relocs (opd_bfd, opd_sec, NULL, NULL, TRUE);
+  lo = relocs = _bfd_elf_link_read_relocs (opd_bfd, opd_sec, NULL, NULL,
+					   !opd_sec->reloc_done);
   BFD_ASSERT (lo != NULL);
   hi = lo + opd_sec->reloc_count - 1; /* ignore last reloc */
-
+  val = (bfd_vma) -1;
   while (lo < hi)
     {
       look = lo + (hi - lo) / 2;
@@ -4743,7 +4754,6 @@ opd_entry_value (asection *opd_sec,
 	      && ELF64_R_TYPE ((look + 1)->r_info) == R_PPC64_TOC)
 	    {
 	      unsigned long symndx = ELF64_R_SYM (look->r_info);
-	      bfd_vma val;
 	      asection *sec;
 
 	      if (symndx < symtab_hdr->sh_info)
@@ -4757,7 +4767,7 @@ opd_entry_value (asection *opd_sec,
 						  symtab_hdr->sh_info,
 						  0, NULL, NULL, NULL);
 		      if (sym == NULL)
-			return (bfd_vma) -1;
+			break;
 		      symtab_hdr->contents = (bfd_byte *) sym;
 		    }
 
@@ -4792,12 +4802,17 @@ opd_entry_value (asection *opd_sec,
 		*code_sec = sec;
 	      if (sec != NULL && sec->output_section != NULL)
 		val += sec->output_section->vma + sec->output_offset;
-	      return val;
 	    }
 	  break;
 	}
     }
-  return (bfd_vma) -1;
+
+  if (opd_sec->reloc_done)
+    {
+      elf_section_data (opd_sec)->relocs = save_relocs;
+      free (relocs);
+    }
+  return val;
 }
 
 /* Return the section that should be marked against GC for a given
@@ -10422,6 +10437,11 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	}
     }
 
+  /* If we're emitting relocations, then shortly after this function
+     returns, reloc offsets and addends for this section will be
+     adjusted.  Worse, reloc symbol indices will be for the output
+     file rather than the input.  Let opd_entry_value know.  */
+  input_section->reloc_done = info->emitrelocations;
   return ret;
 }
 

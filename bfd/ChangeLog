@@ -1,3 +1,9 @@
+2004-12-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (opd_entry_value): Don't use cached relocs if they
+	have been adjusted for output.
+	(ppc64_elf_relocate_section): Mark sections with reloc_done.
+
 2004-12-10  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c (bfd_elf_sym_name): Rename from bfd_elf_local_sym_name and
