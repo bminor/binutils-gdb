@@ -1,3 +1,11 @@
+Mon Aug 21 23:39:56 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hppa-tdep.c (frame_chain_valid): Handle systems where "$START$"
+	calls "main" directly.
+	(skip_prologue): Always assume arguments were saved into the stack
+	since GCC will do so without setting the magic Args_Saved bit in
+	the unwind descriptor.
+
 Mon Aug 21 11:49:17 1995  Kung Hsu  <kung@mexican.cygnus.com>
 
 	* remote-udi.c (udi_wait): Mask off high bits of stop reason.

@@ -1132,6 +1132,14 @@ frame_chain_valid (chain, thisframe)
       && SYMBOL_VALUE_ADDRESS (msym_us) == SYMBOL_VALUE_ADDRESS (msym_start))
     return 0;
 
+  /* Grrrr.  Some new idiot decided that they don't want _start for the
+     PRO configurations; $START$ calls main directly....  Deal with it.  */
+  msym_start = lookup_minimal_symbol ("$START$", NULL, NULL);
+  if (msym_us
+      && msym_start
+      && SYMBOL_VALUE_ADDRESS (msym_us) == SYMBOL_VALUE_ADDRESS (msym_start))
+    return 0;
+
   next = get_next_frame (thisframe);
   if (next)
     next_u = find_unwind_entry (next->pc);
@@ -2302,7 +2310,7 @@ skip_prologue (pc)
   /* An indication that args may be stored into the stack.  Unfortunately
      the HPUX compilers tend to set this in cases where no args were
      stored too!.  */
-  args_stored = u->Args_stored;
+  args_stored = 1;
 
   /* Turn the Entry_GR field into a bitmask.  */
   save_gr = 0;
