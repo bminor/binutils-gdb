@@ -1,3 +1,11 @@
+Fri Feb 13 17:11:22 1998  Michael Meissner  <meissner@cygnus.com>
+
+	* misc.c (tic80_trace_fpu*): Pass address of sim_fpu structure,
+	not the structure itself.  Use %g consistantly to print floating
+	point.
+
+	* cpu.h: (tic80_trace_fpu*): Update prototypes.
+
 Tue Feb  3 16:25:47 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* alu.h (IMEM32, IMEM32_IMMED): Rename IMEM and IMEM_IMMED so that

@@ -314,9 +314,9 @@ tic80_trace_fpu3 (SIM_DESC sd,
 		  sim_cpu *cpu,
 		  sim_cia cia,
 		  int indx,
-		  sim_fpu result,
-		  sim_fpu input1,
-		  sim_fpu input2)
+		  sim_fpu *result,
+		  sim_fpu *input1,
+		  sim_fpu *input2)
 {
   if (!tic80_size_name)
     tic80_init_trace ();
@@ -325,9 +325,9 @@ tic80_trace_fpu3 (SIM_DESC sd,
 		  itable[indx].file, itable[indx].line_nr, "fpu",
 		  "%-*s %*g %*g => %*g",
 		  tic80_size_name, itable[indx].name,
-		  SIZE_HEX + SIZE_DECIMAL + 3, sim_fpu_2d (&input1),
-		  SIZE_HEX + SIZE_DECIMAL + 3, sim_fpu_2d (&input2),
-		  SIZE_HEX + SIZE_DECIMAL + 3, sim_fpu_2d (&result));
+		  SIZE_HEX + SIZE_DECIMAL + 3, sim_fpu_2d (input1),
+		  SIZE_HEX + SIZE_DECIMAL + 3, sim_fpu_2d (input2),
+		  SIZE_HEX + SIZE_DECIMAL + 3, sim_fpu_2d (result));
 }
 
 /* Trace the result of an FPU operation with 1 floating point input and a floating point output */
@@ -336,8 +336,8 @@ tic80_trace_fpu2 (SIM_DESC sd,
 		  sim_cpu *cpu,
 		  sim_cia cia,
 		  int indx,
-		  sim_fpu result,
-		  sim_fpu input)
+		  sim_fpu *result,
+		  sim_fpu *input)
 {
   if (!tic80_size_name)
     tic80_init_trace ();
@@ -346,9 +346,9 @@ tic80_trace_fpu2 (SIM_DESC sd,
 		  itable[indx].file, itable[indx].line_nr, "fpu",
 		  "%-*s %*g %-*s => %*g",
 		  tic80_size_name, itable[indx].name,
-		  SIZE_HEX + SIZE_DECIMAL + 3, sim_fpu_2d (&input),
+		  SIZE_HEX + SIZE_DECIMAL + 3, sim_fpu_2d (input),
 		  SIZE_HEX + SIZE_DECIMAL + 3, "",
-		  SIZE_HEX + SIZE_DECIMAL, sim_fpu_2d (&result));
+		  SIZE_HEX + SIZE_DECIMAL, sim_fpu_2d (result));
 }
 
 /* Trace the result of an FPU operation with 1 floating point input and a floating point output */
@@ -357,7 +357,7 @@ tic80_trace_fpu1 (SIM_DESC sd,
 		  sim_cpu *cpu,
 		  sim_cia cia,
 		  int indx,
-		  sim_fpu result)
+		  sim_fpu *result)
 {
   if (!tic80_size_name)
     tic80_init_trace ();
@@ -368,7 +368,7 @@ tic80_trace_fpu1 (SIM_DESC sd,
 		  tic80_size_name, itable[indx].name,
 		  SIZE_HEX + SIZE_DECIMAL + 3, "",
 		  SIZE_HEX + SIZE_DECIMAL + 3, "",
-		  SIZE_HEX + SIZE_DECIMAL, sim_fpu_2d (&result));
+		  SIZE_HEX + SIZE_DECIMAL, sim_fpu_2d (result));
 }
 
 /* Trace the result of an FPU operation with 2 floating point inputs and an integer output */
@@ -378,18 +378,18 @@ tic80_trace_fpu2i (SIM_DESC sd,
 		   sim_cia cia,
 		   int indx,
 		   unsigned32 result,
-		   sim_fpu input1,
-		   sim_fpu input2)
+		   sim_fpu *input1,
+		   sim_fpu *input2)
 {
   if (!tic80_size_name)
     tic80_init_trace ();
 
   trace_one_insn (sd, cpu, cia.ip, 1,
 		  itable[indx].file, itable[indx].line_nr, "fpu",
-		  "%-*s %*f %*f => 0x%.*lx %-*ld",
+		  "%-*s %*g %*g => 0x%.*lx %-*ld",
 		  tic80_size_name, itable[indx].name,
-		  SIZE_HEX + SIZE_DECIMAL + 3, sim_fpu_2d (&input1),
-		  SIZE_HEX + SIZE_DECIMAL + 3, sim_fpu_2d (&input2),
+		  SIZE_HEX + SIZE_DECIMAL + 3, sim_fpu_2d (input1),
+		  SIZE_HEX + SIZE_DECIMAL + 3, sim_fpu_2d (input2),
 		  SIZE_HEX, result, SIZE_DECIMAL, (long)(signed32)result);
 }
 
@@ -401,18 +401,18 @@ tic80_trace_fpu2cmp (SIM_DESC sd,
 		     sim_cia cia,
 		     int indx,
 		     unsigned32 result,
-		     sim_fpu input1,
-		     sim_fpu input2)
+		     sim_fpu *input1,
+		     sim_fpu *input2)
 {
   if (!tic80_size_name)
     tic80_init_trace ();
 
   trace_one_insn (sd, cpu, cia.ip, 1,
 		  itable[indx].file, itable[indx].line_nr, "fpu",
-		  "%-*s %*f %*f => 0x%.*lx %s",
+		  "%-*s %*g %*g => 0x%.*lx %s",
 		  tic80_size_name, itable[indx].name,
-		  SIZE_HEX + SIZE_DECIMAL + 3, sim_fpu_2d (&input1),
-		  SIZE_HEX + SIZE_DECIMAL + 3, sim_fpu_2d (&input2),
+		  SIZE_HEX + SIZE_DECIMAL + 3, sim_fpu_2d (input1),
+		  SIZE_HEX + SIZE_DECIMAL + 3, sim_fpu_2d (input2),
 		  SIZE_HEX, result, tic80_trace_cmp_internal (result));
 }
 

@@ -166,11 +166,11 @@ extern char *tic80_trace_alu3	  PARAMS ((int, unsigned32, unsigned32, unsigned32
 extern char *tic80_trace_cmp	  PARAMS ((int, unsigned32, unsigned32, unsigned32));
 extern char *tic80_trace_alu2	  PARAMS ((int, unsigned32, unsigned32));
 extern char *tic80_trace_shift	  PARAMS ((int, unsigned32, unsigned32, int, int, int, int, int));
-extern void tic80_trace_fpu3	  PARAMS ((SIM_DESC, sim_cpu *, sim_cia, int, sim_fpu, sim_fpu, sim_fpu));
-extern void tic80_trace_fpu2	  PARAMS ((SIM_DESC, sim_cpu *, sim_cia, int, sim_fpu, sim_fpu));
-extern void tic80_trace_fpu1	  PARAMS ((SIM_DESC, sim_cpu *, sim_cia, int, sim_fpu));
-extern void tic80_trace_fpu2i	  PARAMS ((SIM_DESC, sim_cpu *, sim_cia, int, unsigned32, sim_fpu, sim_fpu));
-extern void tic80_trace_fpu2cmp	  PARAMS ((SIM_DESC, sim_cpu *, sim_cia, int, unsigned32, sim_fpu, sim_fpu));
+extern void tic80_trace_fpu3	  PARAMS ((SIM_DESC, sim_cpu *, sim_cia, int, sim_fpu *, sim_fpu *, sim_fpu *));
+extern void tic80_trace_fpu2	  PARAMS ((SIM_DESC, sim_cpu *, sim_cia, int, sim_fpu *, sim_fpu *));
+extern void tic80_trace_fpu1	  PARAMS ((SIM_DESC, sim_cpu *, sim_cia, int, sim_fpu *));
+extern void tic80_trace_fpu2i	  PARAMS ((SIM_DESC, sim_cpu *, sim_cia, int, unsigned32, sim_fpu *, sim_fpu *));
+extern void tic80_trace_fpu2cmp	  PARAMS ((SIM_DESC, sim_cpu *, sim_cia, int, unsigned32, sim_fpu *, sim_fpu *));
 extern char *tic80_trace_nop	  PARAMS ((int));
 extern char *tic80_trace_sink1	  PARAMS ((int, unsigned32));
 extern char *tic80_trace_sink2	  PARAMS ((int, unsigned32, unsigned32));
@@ -220,7 +220,7 @@ do {									\
 do {									\
   if (TRACE_FPU_P (CPU)) {						\
     tic80_trace_fpu3 (SD, CPU, cia, MY_INDEX, 				\
-		      result, input1, input2);				\
+		      &result, &input1, &input2);			\
   }									\
 } while (0)
 
@@ -228,7 +228,7 @@ do {									\
 do {									\
   if (TRACE_FPU_P (CPU)) {						\
     tic80_trace_fpu2 (SD, CPU, cia, MY_INDEX, 				\
-		      result, input);					\
+		      &result, &input);					\
   }									\
 } while (0)
 
@@ -236,7 +236,7 @@ do {									\
 do {									\
   if (TRACE_FPU_P (CPU)) {						\
     tic80_trace_fpu1 (SD, CPU, cia, MY_INDEX, 				\
-		      result);						\
+		      &result);						\
   }									\
 } while (0)
 
@@ -244,7 +244,7 @@ do {									\
 do {									\
   if (TRACE_FPU_P (CPU)) {						\
     tic80_trace_fpu2i (SD, CPU, cia, MY_INDEX, 				\
-		      result, input1, input2);				\
+		       result, &input1, &input2);			\
   }									\
 } while (0)
 
@@ -252,7 +252,7 @@ do {									\
 do {									\
   if (TRACE_FPU_P (CPU)) {						\
     tic80_trace_fpu2cmp (SD, CPU, cia, MY_INDEX,			\
-			 result, input1, input2);			\
+			 result, &input1, &input2);			\
   }									\
 } while (0)
 
