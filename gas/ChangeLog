@@ -1,3 +1,7 @@
+Tue Apr  1 18:29:47 1997  Jim Wilson  <wilson@cygnus.com>
+
+	* config/tc-mips.c (md_begin): Don't set interlocks for 4100.
+
 Tue Apr  1 16:24:28 1997  Klaus Kaempf  <kkaempf@progis.de>
 
 	* config-gas.com: Update to handle both vax and alpha.
