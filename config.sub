@@ -1,6 +1,6 @@
 #! /bin/sh
 # Configuration validation subroutine script, version 1.1.
-#   Copyright (C) 1991, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
+#   Copyright (C) 1991, 92, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
 # This file is (in principle) common to ALL GNU software.
 # The presence of a machine in this file suggests that SOME GNU software
 # can handle that machine.  It does not imply ALL GNU software can.
@@ -108,9 +108,6 @@ case $os in
 		os=vxworks
 		basic_machine=$1
 		;;
-        -hiuxmpp)
-                os=-hiuxmpp
-                ;;
 	-hiux*)
 		os=-hiuxwe2
 		;;
@@ -162,23 +159,19 @@ esac
 case $basic_machine in
 	# Recognize the basic CPU types without company name.
 	# Some are omitted here because they have special meanings below.
-	tahoe | i860 | m32r | m68k | m68000 | m88k | ns32k | arm \
+	tahoe | i860 | m32r | m68k | m68000 | m88k | ns32k | arc | arm \
 		| arme[lb] | pyramid | mn10200 | mn10300 \
 		| tron | a29k | 580 | i960 | h8300 | hppa | hppa1.0 | hppa1.1 \
-		| alpha | we32k | ns16k | clipper | i370 | sh \
-		| powerpc | powerpcle | 1750a | dsp16xx | mips64 | mipsel \
-		| pdp11 | mips64el | mips64orion | mips64orionel \
+		| alpha | alphaev5 | alphaev56 | we32k | ns16k | clipper \
+		| i370 | sh | powerpc | powerpcle | 1750a | dsp16xx | pdp11 \
+		| mips64 | mipsel | mips64el | mips64orion | mips64orionel \
+		| mipstx39 | mipstx39el \
 		| sparc | sparclet | sparclite | sparc64)
 		basic_machine=$basic_machine-unknown
 		;;
 	m88110 | m680[01234]0 | m683?2 | m68360 | z8k | v70 | h8500 | w65) # CYGNUS LOCAL
 		basic_machine=$basic_machine-unknown
 		;;
-# CYGNUS LOCAL r3900
-        mipsr3900 | mipsr3900el)
-                basic_machine=$basic_machine-unknown
-                ;;
-# END CYGNUS LOCAL r3900
 	mips64vr4300 | mips64vr4300el) # CYGNUS LOCAL jsmith/vr4300
 		basic_machine=$basic_machine-unknown
 		;;
@@ -227,13 +220,17 @@ case $basic_machine in
 		;;
 	# Recognize the basic CPU types with company name.
 	vax-* | tahoe-* | i[3456]86-* | i860-* | m32r-* | m68k-* | m68000-* \
-	      | m88k-* | sparc-* | ns32k-* | fx80-* | arm-* | c[123]* \
-	      | mips-* | pyramid-* | tron-* | a29k-* | romp-* | rs6000-* | power-* \
-	      | none-* | 580-* | cray2-* | h8300-* | i960-* | xmp-* | ymp-* \
-	      | hppa-* | hppa1.0-* | hppa1.1-* | alpha-* | we32k-* | cydra-* | ns16k-* \
-	      | pn-* | np1-* | xps100-* | clipper-* | orion-* | sparclite-* \
-	      | pdp11-* | sh-* | powerpc-* | powerpcle-* | sparc64-* | mips64-* | mipsel-* \
-	      | mips64el-* | mips64orion-* | mips64orionel-* | f301-*)
+	      | m88k-* | sparc-* | ns32k-* | fx80-* | arc-* | arm-* | c[123]* \
+	      | mips-* | pyramid-* | tron-* | a29k-* | romp-* | rs6000-* \
+	      | power-* | none-* | 580-* | cray2-* | h8300-* | i960-* \
+	      | xmp-* | ymp-* | hppa-* | hppa1.0-* | hppa1.1-* \
+	      | alpha-* | alphaev5-* | alphaev56-* | we32k-* | cydra-* \
+	      | ns16k-* | pn-* | np1-* | xps100-* | clipper-* | orion-* \
+	      | sparclite-* | pdp11-* | sh-* | powerpc-* | powerpcle-* \
+	      | sparc64-* | mips64-* | mipsel-* \
+	      | mips64el-* | mips64orion-* | mips64orionel-* \
+	      | mipstx39-* | mipstx39el-* \
+	      | f301-*)
 		;;
 	m88110-* | m680[01234]0-* | m683?2-* | m68360-* | z8k-* | h8500-* | d10v-*) # CYGNUS LOCAL
 		;;
@@ -255,10 +252,6 @@ case $basic_machine in
 # end-sanitize-r5900
 	mips16-*) # CYGNUS LOCAL krk/mips16
 		;;
-# CYGNUS LOCAL r3900
-        mipsr3900-* | mipsr3900el-*)
-                ;;
-# END CYGNUS LOCAL r3900
 # start-sanitize-tic80
 	tic80-*)						# CYGNUS LOCAL fnf/TIc80
 		;;
@@ -316,13 +309,6 @@ case $basic_machine in
 		basic_machine=m68k-apollo
 		os=-bsd
 		;;
-# start-sanitize-arc
-	arc)						# CYGNUS LOCAL
-		basic_machine=arc-unknown
-		;;
-	arc-*)						# CYGNUS LOCAL
-		;;
-# end-sanitize-arc
 	aux)
 		basic_machine=m68k-apple
 		os=-aux
@@ -413,10 +399,6 @@ case $basic_machine in
 		basic_machine=tron-gmicro
 		os=-sysv
 		;;
-        hiuxmpp)
-                basic_machine=hppa1.1-hitachi
-                os=-hiuxmpp
-                ;;
 	h3050r* | hiux*)
 		basic_machine=hppa1.1-hitachi
 		os=-hiuxwe2
@@ -546,11 +528,11 @@ case $basic_machine in
 		;;
 	mipsel*-linux*)
 		basic_machine=mipsel-unknown
-		os=-linux
+		os=-linux-gnu
 		;;
 	mips*-linux*)
 		basic_machine=mips-unknown
-		os=-linux
+		os=-linux-gnu
 		;;
 	mips3*-*)
 		basic_machine=`echo $basic_machine | sed -e 's/mips3/mips64/'`
@@ -685,14 +667,6 @@ case $basic_machine in
 	ps2)
 		basic_machine=i386-ibm
 		;;
-# CYGNUS LOCAL r3900
-        r3900)                                          # CYGNUS LOCAL
-                basic_machine=mipsr3900-unknown
-                ;;
-        r3900el)                                        # CYGNUS LOCAL
-                basic_machine=mipsr3900el-unknown
-                ;;
-# END CYGNUS LOCAL r3900
 # start-sanitize-r5900
         r5900)                                          # CYGNUS LOCAL
                 basic_machine=mips64vr5900el-unknown
@@ -781,6 +755,12 @@ case $basic_machine in
 		basic_machine=i386-sequent
 		os=-dynix
 		;;
+	tx39)
+		basic_machine=mipstx39-unknown
+		;;
+	tx39el)
+		basic_machine=mipstx39el-unknown
+		;;
 	tower | tower-32)
 		basic_machine=m68k-ncr
 		;;
@@ -804,7 +784,7 @@ case $basic_machine in
 		basic_machine=vax-dec
 		os=-vms
 		;;
-       vpp*|vx|vx-*)
+	vpp*|vx|vx-*)
                basic_machine=f301-fujitsu
                ;;
 	vxworks960)
@@ -851,7 +831,7 @@ case $basic_machine in
 		basic_machine=hppa1.1-oki
 		;;
 	mips)
-		if [ x$os = x-linux ]; then
+		if [ x$os = x-linux-gnu ]; then
 			basic_machine=mips-unknown
 		else
 			basic_machine=mips-mips
@@ -943,7 +923,7 @@ case $os in
 	      | -ptx* | -coff* | -ecoff* | -winnt* | -domain* | -vsta* \
 	      | -udi* | -eabi* | -lites* | -ieee* | -go32* | -aux* \
 	      | -cygwin32* | -pe* | -psos* | -moss* | -proelf* | -rtems* \
-	      | -linux-gnu* | -uxpv*)
+	      | -mingw32* | -linux-gnu* | -uxpv*)
 	# Remember, each alternative MUST END IN *, to match a version number.
 		;;
 	# CYGNUS LOCAL
