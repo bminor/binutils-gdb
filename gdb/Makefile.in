@@ -164,7 +164,7 @@ CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${NAT_CDEPS} \
 ADD_FILES = ${REGEX} ${ALLOCA}  ${XM_ADD_FILES} ${TM_ADD_FILES} ${NAT_ADD_FILES}
 ADD_DEPS = ${REGEX1} ${ALLOCA1} ${XM_ADD_FILES} ${TM_ADD_FILES} ${NAT_ADD_FILES}
 
-VERSION = 4.8.3
+VERSION = 4.8.4
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -753,7 +753,7 @@ version.c: Makefile
 c-exp.tab.o: c-exp.tab.c
 c-exp.tab.c: $(srcdir)/c-exp.y $(srcdir)/Makefile.in
 	@echo 'Expect 4 shift/reduce conflicts.'
-	${YACC} $(srcdir)/c-exp.y
+	${YACC} ${YFLAGS} $(srcdir)/c-exp.y
 	-sed -e '/extern.*malloc/d' \
 	     -e '/extern.*realloc/d' \
 	     -e '/extern.*free/d' \
@@ -769,8 +769,7 @@ c-exp.tab.c: $(srcdir)/c-exp.y $(srcdir)/Makefile.in
 # else.
 ch-exp.tab.o: ch-exp.tab.c
 ch-exp.tab.c: $(srcdir)/ch-exp.y $(srcdir)/Makefile.in
-	@echo 'Expect rules never reduced and {shift,reduce}/reduce conflicts.'
-	${YACC} $(srcdir)/ch-exp.y
+	${YACC} ${YFLAGS} $(srcdir)/ch-exp.y
 	-sed -e '/extern.*malloc/d' \
 	     -e '/extern.*realloc/d' \
 	     -e '/extern.*free/d' \
@@ -786,7 +785,7 @@ ch-exp.tab.c: $(srcdir)/ch-exp.y $(srcdir)/Makefile.in
 # else.
 m2-exp.tab.o: m2-exp.tab.c
 m2-exp.tab.c: $(srcdir)/m2-exp.y $(srcdir)/Makefile.in
-	${YACC} $(srcdir)/m2-exp.y
+	${YACC} ${YFLAGS} $(srcdir)/m2-exp.y
 	-sed -e '/extern.*malloc/d' \
 	     -e '/extern.*realloc/d' \
 	     -e '/extern.*free/d' \
