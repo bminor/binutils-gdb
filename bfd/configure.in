@@ -88,156 +88,161 @@ case ${with_64_bit_bfd} in
     ;;
 esac
 
+# This processing still needs to be done if we're to decide properly whether
+# 64-bit support needs to be compiled in.  Currently, it will be included if
+# the default or any other explicitly requested target requires it; it
+# will not be included on a 32-bit host if no 64-bit target is requested, and
+# no "--with-64-bit-bfd" option is given, even if "--with-targets=all" is
+# used.
+
 # The default vector in the primary target.
 DEFAULT_VECTOR=`sed -n '
 s/DEFAULT_VECTOR[ 	]*=[ 	]*\([^ 	]*\)/\1/p
 ' $target_makefile_frag`
 
-if [ x${all_targets} = xfalse ]; then
+allfrags="$target_makefile_frag $target_extra_frags"
 
-    allfrags="$target_makefile_frag $target_extra_frags"
+# The default and selected vectors in all the configured targets.
+SELECT_VECS=`sed -n '
+s/DEFAULT_VECTOR[ 	]*=[ 	]*\([^ 	]*\)/\1/p
+s/SELECT_VECS[ 	]*=[ 	]*\([^ 	]*\)/\1/p
+' $allfrags`
+# uniq the list.
+f=""
+for i in $SELECT_VECS ; do
+    case " $f " in
+    *" $i "*) ;;
+    *) f="$f $i" ;;
+    esac
+done
+SELECT_VECS="$f"
 
-    # The default and selected vectors in all the configured targets.
-    SELECT_VECS=`sed -n '
-    s/DEFAULT_VECTOR[ 	]*=[ 	]*\([^ 	]*\)/\1/p
-    s/SELECT_VECS[ 	]*=[ 	]*\([^ 	]*\)/\1/p
-    ' $allfrags`
-    # uniq the list.
-    f=""
-    for i in $SELECT_VECS ; do
-	case " $f " in
-	*" $i "*) ;;
-	*) f="$f $i" ;;
-	esac
-    done
-    SELECT_VECS="$f"
+# The architectures in all the configured targets.
+SELECT_ARCHITECTURES=`sed -n '
+s/SELECT_ARCHITECTURES[ 	]*=[ 	]*//p
+' $allfrags`
+# uniq the list.
+f=""
+for i in $SELECT_ARCHITECTURES ; do
+    case " $f " in
+    *" $i "*) ;;
+    *) f="$f $i" ;;
+    esac
+done
+SELECT_ARCHITECTURES="$f"
 
-    # The architectures in all the configured targets.
-    SELECT_ARCHITECTURES=`sed -n '
-    s/SELECT_ARCHITECTURES[ 	]*=[ 	]*//p
-    ' $allfrags`
-    # uniq the list.
-    f=""
-    for i in $SELECT_ARCHITECTURES ; do
-	case " $f " in
-	*" $i "*) ;;
-	*) f="$f $i" ;;
-	esac
-    done
-    SELECT_ARCHITECTURES="$f"
+# Target backend .o files.
+tb=
 
-    # Target backend .o files.
-    tb=
-
-    for vec in $SELECT_VECS
-    do
-	case "$vec" in
-	# This list is alphabetized to make it easy to compare
-	# with the two vector lists in targets.c.
-	a29kcoff_big_vec)	tb="$tb coff-a29k.o" ;;
-	a_out_adobe_vec)	tb="$tb aout-adobe.o aout32.o stab-syms.o" ;;
-	aout_mips_big_vec)	tb="$tb mipsbsd.o aout32.o stab-syms.o" ;;
-	aout_mips_little_vec)	tb="$tb mipsbsd.o aout32.o stab-syms.o" ;;
-	b_out_vec_big_host)	tb="$tb bout.o aout32.o stab-syms.o" ;;
-	b_out_vec_little_host)	tb="$tb bout.o aout32.o stab-syms.o" ;;
-	bfd_elf32_big_generic_vec) tb="$tb elf32-gen.o elf32.o elf.o" ;;
-	bfd_elf32_bigmips_vec) tb="$tb elf32-mips.o elf32.o elf.o" ;;
-	bfd_elf32_hppa_vec)	tb="$tb elf32-hppa.o elf32.o elf.o" ;;
-	bfd_elf32_i386_vec)	tb="$tb elf32-i386.o elf32.o elf.o" ;;
-	bfd_elf32_i860_vec)	tb="$tb elf32-i860.o elf32.o elf.o" ;;
-	bfd_elf32_little_generic_vec) tb="$tb elf32-gen.o elf32.o elf.o" ;;
-	bfd_elf32_littlemips_vec) tb="$tb elf32-mips.o elf32.o elf.o" ;;
-	bfd_elf32_m68k_vec)	tb="$tb elf32-m68k.o elf32.o elf.o" ;;
-	bfd_elf32_m88k_vec)	tb="$tb elf32-m88k.o elf32.o elf.o" ;;
-	bfd_elf32_sparc_vec)	tb="$tb elf32-sparc.o elf32.o elf.o" ;;
-	bfd_elf64_big_generic_vec) tb="$tb elf64-gen.o elf64.o elf.o"
+for vec in $SELECT_VECS
+do
+    case "$vec" in
+    # This list is alphabetized to make it easy to compare
+    # with the two vector lists in targets.c.
+    a29kcoff_big_vec)		tb="$tb coff-a29k.o" ;;
+    a_out_adobe_vec)		tb="$tb aout-adobe.o aout32.o stab-syms.o" ;;
+    aout_mips_big_vec)		tb="$tb mipsbsd.o aout32.o stab-syms.o" ;;
+    aout_mips_little_vec)	tb="$tb mipsbsd.o aout32.o stab-syms.o" ;;
+    b_out_vec_big_host)		tb="$tb bout.o aout32.o stab-syms.o" ;;
+    b_out_vec_little_host)	tb="$tb bout.o aout32.o stab-syms.o" ;;
+    bfd_elf32_big_generic_vec) 	tb="$tb elf32-gen.o elf32.o elf.o" ;;
+    bfd_elf32_bigmips_vec) 	tb="$tb elf32-mips.o elf32.o elf.o" ;;
+    bfd_elf32_hppa_vec)		tb="$tb elf32-hppa.o elf32.o elf.o" ;;
+    bfd_elf32_i386_vec)		tb="$tb elf32-i386.o elf32.o elf.o" ;;
+    bfd_elf32_i860_vec)		tb="$tb elf32-i860.o elf32.o elf.o" ;;
+    bfd_elf32_little_generic_vec) tb="$tb elf32-gen.o elf32.o elf.o" ;;
+    bfd_elf32_littlemips_vec) 	tb="$tb elf32-mips.o elf32.o elf.o" ;;
+    bfd_elf32_m68k_vec)		tb="$tb elf32-m68k.o elf32.o elf.o" ;;
+    bfd_elf32_m88k_vec)		tb="$tb elf32-m88k.o elf32.o elf.o" ;;
+    bfd_elf32_sparc_vec)	tb="$tb elf32-sparc.o elf32.o elf.o" ;;
+    bfd_elf64_big_generic_vec) 	tb="$tb elf64-gen.o elf64.o elf.o"
 				target64=true ;;
-	bfd_elf64_little_generic_vec) tb="$tb elf64-gen.o elf64.o elf.o"
+    bfd_elf64_little_generic_vec) tb="$tb elf64-gen.o elf64.o elf.o"
 				target64=true ;;
-#	start-sanitize-v9
-	bfd_elf64_sparc_vec)	tb="$tb elf64-sparc.o elf64.o elf.o"
+#   start-sanitize-v9
+    bfd_elf64_sparc_vec)	tb="$tb elf64-sparc.o elf64.o elf.o"
 				target64=true ;;
-#	end-sanitize-v9
-	demo_64_vec)		tb="$tb demo64.o aout64.o stab-syms.o"
+#   end-sanitize-v9
+    demo_64_vec)		tb="$tb demo64.o aout64.o stab-syms.o"
 				target64=true ;;
-	ecoff_big_vec)		tb="$tb coff-mips.o" ;;
-	ecoff_little_vec)	tb="$tb coff-mips.o" ;;
-	ecoffalpha_little_vec)	tb="$tb coff-alpha.o" ;;
-	h8300coff_vec)		tb="$tb coff-h8300.o reloc16.o" ;;
-	h8500coff_vec)		tb="$tb coff-h8500.o reloc16.o" ;;
-	host_aout_vec)		tb="$tb host-aout.o aout32.o stab-syms.o" ;;
-	hp300bsd_vec)		tb="$tb hp300bsd.o aout32.o stab-syms.o" ;;
-	hp300hpux_vec)		tb="$tb hp300hpux.o aout32.o stab-syms.o" ;;
-	hppa_vec)		tb="$tb som.o" ;;
-	i386aout_vec)		tb="$tb i386aout.o aout32.o stab-syms.o" ;;
-	i386bsd_vec)		tb="$tb i386bsd.o aout32.o stab-syms.o" ;;
-	netbsd386_vec)		tb="$tb netbsd386.o aout32.o stab-syms.o" ;;
-	i386coff_vec)		tb="$tb coff-i386.o" ;;
-	i386linux_vec)		tb="$tb i386linux.o aout32.o stab-syms.o" ;;
-	i386lynx_vec)		tb="$tb i386lynx.o aout32.o stab-syms.o" ;;
-	icoff_big_vec)		tb="$tb coff-i960.o" ;;
-	icoff_little_vec)	tb="$tb coff-i960.o" ;;
-	ieee_vec)		tb="$tb ieee.o" ;;
-	m68kcoff_vec)		tb="$tb coff-m68k.o" ;;
-	m68kcoffun_vec)		tb="$tb coff-u68k.o coff-m68k.o" ;;
-	m88kbcs_vec)		tb="$tb coff-m88k.o" ;;
-	newsos3_vec)		tb="$tb newsos3.o aout32.o stab-syms.o" ;;
-	nlm32_big_generic_vec)	tb="$tb nlm32-gen.o nlm32.o nlm.o" ;;
-	nlm32_i386_vec)		tb="$tb nlm32-i386.o nlm32.o nlm.o" ;;
-	nlm32_little_generic_vec) tb="$tb nlm32-gen.o nlm32.o nlm.o" ;;
-	nlm64_big_generic_vec)	tb="$tb nlm64-gen.o nlm64.o nlm.o"
+    ecoff_big_vec)		tb="$tb coff-mips.o" ;;
+    ecoff_little_vec)		tb="$tb coff-mips.o" ;;
+    ecoffalpha_little_vec)	tb="$tb coff-alpha.o" ;;
+    h8300coff_vec)		tb="$tb coff-h8300.o reloc16.o" ;;
+    h8500coff_vec)		tb="$tb coff-h8500.o reloc16.o" ;;
+    host_aout_vec)		tb="$tb host-aout.o aout32.o stab-syms.o" ;;
+    hp300bsd_vec)		tb="$tb hp300bsd.o aout32.o stab-syms.o" ;;
+    hp300hpux_vec)		tb="$tb hp300hpux.o aout32.o stab-syms.o" ;;
+    hppa_vec)			tb="$tb som.o" ;;
+    i386aout_vec)		tb="$tb i386aout.o aout32.o stab-syms.o" ;;
+    i386bsd_vec)		tb="$tb i386bsd.o aout32.o stab-syms.o" ;;
+    netbsd386_vec)		tb="$tb netbsd386.o aout32.o stab-syms.o" ;;
+    i386coff_vec)		tb="$tb coff-i386.o" ;;
+    i386linux_vec)		tb="$tb i386linux.o aout32.o stab-syms.o" ;;
+    i386lynx_vec)		tb="$tb i386lynx.o aout32.o stab-syms.o" ;;
+    icoff_big_vec)		tb="$tb coff-i960.o" ;;
+    icoff_little_vec)		tb="$tb coff-i960.o" ;;
+    ieee_vec)			tb="$tb ieee.o" ;;
+    m68kcoff_vec)		tb="$tb coff-m68k.o" ;;
+    m68kcoffun_vec)		tb="$tb coff-u68k.o coff-m68k.o" ;;
+    m88kbcs_vec)		tb="$tb coff-m88k.o" ;;
+    newsos3_vec)		tb="$tb newsos3.o aout32.o stab-syms.o" ;;
+    nlm32_big_generic_vec)	tb="$tb nlm32-gen.o nlm32.o nlm.o" ;;
+    nlm32_i386_vec)		tb="$tb nlm32-i386.o nlm32.o nlm.o" ;;
+    nlm32_little_generic_vec) 	tb="$tb nlm32-gen.o nlm32.o nlm.o" ;;
+    nlm64_big_generic_vec)	tb="$tb nlm64-gen.o nlm64.o nlm.o"
 				target64=true ;;
-	nlm64_little_generic_vec) tb="$tb nlm64-gen.o nlm64.o nlm.o"
+    nlm64_little_generic_vec) 	tb="$tb nlm64-gen.o nlm64.o nlm.o"
 				target64=true ;;
-	rs6000coff_vec)		tb="$tb coff-rs6000.o" ;;
-	shcoff_vec)		tb="$tb coff-sh.o reloc16.o" ;;
-	sunos_big_vec)		tb="$tb sunos.o aout32.o stab-syms.o" ;;
-	tekhex_vec)		tb="$tb tekhex.o" ;;
-	we32kcoff_vec)		tb="$tb coff-we32k.o" ;;
-	z8kcoff_vec)		tb="$tb coff-z8k.o reloc16.o" ;;
+    rs6000coff_vec)		tb="$tb coff-rs6000.o" ;;
+    shcoff_vec)			tb="$tb coff-sh.o reloc16.o" ;;
+    sunos_big_vec)		tb="$tb sunos.o aout32.o stab-syms.o" ;;
+    tekhex_vec)			tb="$tb tekhex.o" ;;
+    we32kcoff_vec)		tb="$tb coff-we32k.o" ;;
+    z8kcoff_vec)		tb="$tb coff-z8k.o reloc16.o" ;;
 
-	srec_vec)		tb="$tb srec.o" ;;
-	symbolsrec_vec)		tb="$tb srec.o" ;;
+    srec_vec)			tb="$tb srec.o" ;;
+    symbolsrec_vec)		tb="$tb srec.o" ;;
 
-	"")			;;
-	*) echo "*** unknown target vector $vec" 1>&2; exit 1 ;;
-	esac
-    done
+    "")			;;
+    *) echo "*** unknown target vector $vec" 1>&2; exit 1 ;;
+    esac
+done
 
-    # Target architecture .o files.
-    ta=`echo $SELECT_ARCHITECTURES | sed -e s/bfd_/cpu-/g -e s/_arch/.o/g`
+# Target architecture .o files.
+ta=`echo $SELECT_ARCHITECTURES | sed -e s/bfd_/cpu-/g -e s/_arch/.o/g`
 
-    # Weed out duplicate .o files.
-    f=""
-    for i in $tb ; do
-	case " $f " in
-	*" $i "*) ;;
-	*) f="$f $i" ;;
-	esac
-    done
-    tb="$f"
+# Weed out duplicate .o files.
+f=""
+for i in $tb ; do
+    case " $f " in
+    *" $i "*) ;;
+    *) f="$f $i" ;;
+    esac
+done
+tb="$f"
 
-    f=""
-    for i in $ta ; do
-	case " $f " in
-	*" $i "*) ;;
-	*) f="$f $i" ;;
-	esac
-    done
-    ta="$f"
+f=""
+for i in $ta ; do
+    case " $f " in
+    *" $i "*) ;;
+    *) f="$f $i" ;;
+    esac
+done
+ta="$f"
 
-    bfd_backends="$tb"
-    bfd_machines="$ta"
+bfd_backends="$tb"
+bfd_machines="$ta"
 
-    # Only set these if they will be nonempty, for the clever echo.
-    test -n "$SELECT_VECS" &&
-      selvecs=`echo $SELECT_VECS | sed -e 's/^/\&/' -e 's/ \(.\)/,\&\1/g'`
-    test -n "SELECT_ARCHITECTURES" &&
-      selarchs=`echo $SELECT_ARCHITECTURES | sed -e 's/ \(.\)/,\1/g'`
+# Only set these if they will be nonempty, for the clever echo.
+test -n "$SELECT_VECS" &&
+  selvecs=`echo $SELECT_VECS | sed -e 's/^/\&/' -e 's/ \(.\)/,\&\1/g'`
+test -n "SELECT_ARCHITECTURES" &&
+  selarchs=`echo $SELECT_ARCHITECTURES | sed -e 's/ \(.\)/,\1/g'`
 
-else	# all_targets is true
-    bfd_backends='$(ALL_BACKENDS)'
-    bfd_machines='$(ALL_MACHINES)'
+if [ x${all_targets} = xtrue ]; then
+  bfd_backends="${bfd_backends}"' $(ALL_BACKENDS)'
+  bfd_machines="${bfd_machines}"' $(ALL_MACHINES)'
 fi	# all_targets is true
 
 case ${host64}-${target64}-${want64} in

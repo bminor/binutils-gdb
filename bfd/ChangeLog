@@ -1,3 +1,7 @@
+Thu Sep  9 16:57:46 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* configure.in: Make 64-bit stuff work with "--with-targets=all".
+
 Tue Sep  7 14:17:02 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* libbfd-in.h: Removed swapping routines declarations.
