@@ -1,3 +1,7 @@
+Wed Aug 27 17:33:07 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* archures.c (bfd_archures_list): Always NULL terminate the list.
+
 Tue Aug 26 17:26:51 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am: Rebuild dependencies.

@@ -271,8 +271,8 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
 /* start-sanitize-v850*/
   &bfd_v850_arch,
 /* end-sanitize-v850 */
-  0
 #endif
+  0
 };
 
 /*
