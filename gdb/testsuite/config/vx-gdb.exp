@@ -70,7 +70,7 @@ proc gdb_start { } {
 
     # get a connection to the board
     set shell_id [ eval $connectmode "$targetname" ]
-    if $shell_id<0 then {
+    if { $shell_id < 0 } then {
 	perror "Couldn't connect to $targetname."
 	return -1
     }

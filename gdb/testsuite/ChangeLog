@@ -1,3 +1,7 @@
+Fri Aug  2 17:37:26 1996  Brendan Kehoe  <brendan@lisa.cygnus.com>
+
+	* config/vx-gdb.exp (gdb_start): Fix syntax of `$shell_id < 0'.
+
 Thu Jun 27 20:41:40 1996  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.base/signals.exp (test_handle_all_print): Temporarily increase
