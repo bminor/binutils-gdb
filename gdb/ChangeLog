@@ -1,3 +1,8 @@
+Tue Jan 21 18:32:23 1997  Stu Grossman  (grossman@lisa.cygnus.com)
+
+	* configure.in configure:  Check if host has libdl if doing
+	Solaris threads.
+
 Tue Jan 21 17:03:26 1997  Geoffrey Noer  <noer@cygnus.com>
 
 	* mn10300-tdep.c: wrote/fixed implementations of

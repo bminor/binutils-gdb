@@ -178,6 +178,7 @@ if test ${build} = ${host} -a ${host} = ${target} ; then
 			AC_MSG_RESULT(yes)
 			AC_DEFINE(HAVE_THREAD_DB_LIB)
 			CONFIG_OBS="${CONFIG_OBS} sol-thread.o"
+			AC_CHECK_LIB(dl, dlopen)
 			if test "$GCC" = "yes" ; then
 				CONFIG_LDFLAGS="${CONFIG_LDFLAGS} -Xlinker -export-dynamic"
 			fi
