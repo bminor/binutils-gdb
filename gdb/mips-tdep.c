@@ -142,6 +142,8 @@ struct gdbarch_tdep
        different values.  This contains the "public" fields.  Don't
        add any that do not need to be public.  */
     const struct mips_regnum *regnum;
+    /* Register names table for the current register set.  */
+    const char **mips_processor_reg_names;
   };
 
 const struct mips_regnum *
@@ -393,10 +395,6 @@ static CORE_ADDR heuristic_proc_start (CORE_ADDR);
 
 static CORE_ADDR read_next_frame_reg (struct frame_info *, int);
 
-static int mips_set_processor_type (char *);
-
-static void mips_show_processor_type_command (char *, int);
-
 static void reinit_frame_cache_sfunc (char *, int, struct cmd_list_element *);
 
 static mips_extra_func_info_t find_proc_desc (CORE_ADDR pc,
@@ -409,32 +407,71 @@ static CORE_ADDR after_prologue (CORE_ADDR pc,
 static struct type *mips_float_register_type (void);
 static struct type *mips_double_register_type (void);
 
-/* This value is the model of MIPS in use.  It is derived from the value
-   of the PrID register.  */
-
-char *mips_processor_type;
-
-char *tmp_mips_processor_type;
-
 /* The list of available "set mips " and "show mips " commands */
 
 static struct cmd_list_element *setmipscmdlist = NULL;
 static struct cmd_list_element *showmipscmdlist = NULL;
 
-/* A set of original names, to be used when restoring back to generic
-   registers from a specific set.  */
-static char *mips_generic_reg_names[] = MIPS_REGISTER_NAMES;
-
 /* Integer registers 0 thru 31 are handled explicitly by
    mips_register_name().  Processor specific registers 32 and above
-   are listed in the sets of register names assigned to
-   mips_processor_reg_names.  */
-static char **mips_processor_reg_names = mips_generic_reg_names;
+   are listed in the followign tables.  */
+
+enum { NUM_MIPS_PROCESSOR_REGS = (90 - 32) };
+
+/* Generic MIPS.  */
+
+static const char *mips_generic_reg_names[NUM_MIPS_PROCESSOR_REGS] = {
+  "sr",	"lo",	"hi",	"bad",	"cause","pc",
+  "f0",   "f1",   "f2",   "f3",   "f4",   "f5",   "f6",   "f7",
+  "f8",   "f9",   "f10",  "f11",  "f12",  "f13",  "f14",  "f15",
+  "f16",  "f17",  "f18",  "f19",  "f20",  "f21",  "f22",  "f23",
+  "f24",  "f25",  "f26",  "f27",  "f28",  "f29",  "f30",  "f31",
+  "fsr",  "fir",  ""/*"fp"*/,	"",
+  "",	"",	"",	"",	"",	"",	"",	"",
+  "",	"",	"",	"",	"",	"",	"",	"",
+};
+
+/* Names of IDT R3041 registers.  */
+
+static const char *mips_r3041_reg_names[] = {
+  "sr",	"lo",	"hi",	"bad",	"cause","pc",
+  "f0",   "f1",   "f2",   "f3",   "f4",   "f5",   "f6",   "f7",
+  "f8",   "f9",   "f10",  "f11",  "f12",  "f13",  "f14",  "f15",
+  "f16",  "f17",  "f18",  "f19",  "f20",  "f21",  "f22",  "f23",
+  "f24",  "f25",  "f26",  "f27",  "f28",  "f29",  "f30",  "f31",
+  "fsr",  "fir",  "",/*"fp"*/	"",
+  "",	"",	"bus",	"ccfg",	"",	"",	"",	"",
+  "",	"",	"port",	"cmp",	"",	"",	"epc",	"prid",
+};
+
+/* Names of tx39 registers.  */
+
+static const char *mips_tx39_reg_names[NUM_MIPS_PROCESSOR_REGS] = {
+  "sr",	"lo",	"hi",	"bad",	"cause","pc",
+  "",   "",   	"",   	"",   	"",   	"",   	"",   	"",
+  "",   "",   	"",  	"",  	"",  	"",  	"",  	"",
+  "",  	"",  	"",  	"",  	"",  	"",  	"",  	"",
+  "",  	"",  	"",  	"",  	"",  	"",  	"",  	"",
+  "",  	"",  	"",	"",
+  "",	"",	"",	"",	"",	"",	"",	"",
+  "",	"", "config", "cache", "debug", "depc", "epc",	""
+};
+
+/* Names of IRIX registers.  */
+static const char *mips_irix_reg_names[NUM_MIPS_PROCESSOR_REGS] = {
+  "f0",   "f1",   "f2",   "f3",   "f4",   "f5",   "f6",   "f7",
+  "f8",   "f9",   "f10",  "f11",  "f12",  "f13",  "f14",  "f15",
+  "f16",  "f17",  "f18",  "f19",  "f20",  "f21",  "f22",  "f23",
+  "f24",  "f25",  "f26",  "f27",  "f28",  "f29",  "f30",  "f31",
+  "pc",	"cause", "bad",	"hi",	"lo",	"fsr",  "fir"
+};
+
 
 /* Return the name of the register corresponding to REGNO.  */
 static const char *
 mips_register_name (int regno)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   /* GPR names for all ABIs other than n32/n64.  */
   static char *mips_gpr_names[] = {
     "zero", "at",   "v0",   "v1",   "a0",   "a1",   "a2",   "a3",
@@ -470,78 +507,14 @@ mips_register_name (int regno)
 	return mips_gpr_names[rawnum];
     }
   else if (32 <= rawnum && rawnum < NUM_REGS)
-    return mips_processor_reg_names[rawnum - 32];
+    {
+      gdb_assert (rawnum - 32 < NUM_MIPS_PROCESSOR_REGS);
+      return tdep->mips_processor_reg_names[rawnum - 32];
+    }
   else
     internal_error (__FILE__, __LINE__,
 		    "mips_register_name: bad register number %d", rawnum);
 }
-
-/* *INDENT-OFF* */
-/* Names of IDT R3041 registers.  */
-
-char *mips_r3041_reg_names[] = {
-	"sr",	"lo",	"hi",	"bad",	"cause","pc",
-	"f0",   "f1",   "f2",   "f3",   "f4",   "f5",   "f6",   "f7",
-	"f8",   "f9",   "f10",  "f11",  "f12",  "f13",  "f14",  "f15",
-	"f16",  "f17",  "f18",  "f19",  "f20",  "f21",  "f22",  "f23",
-	"f24",  "f25",  "f26",  "f27",  "f28",  "f29",  "f30",  "f31",
-	"fsr",  "fir",  "",/*"fp"*/	"",
-	"",	"",	"bus",	"ccfg",	"",	"",	"",	"",
-	"",	"",	"port",	"cmp",	"",	"",	"epc",	"prid",
-};
-
-/* Names of IDT R3051 registers.  */
-
-char *mips_r3051_reg_names[] = {
-	"sr",	"lo",	"hi",	"bad",	"cause","pc",
-	"f0",   "f1",   "f2",   "f3",   "f4",   "f5",   "f6",   "f7",
-	"f8",   "f9",   "f10",  "f11",  "f12",  "f13",  "f14",  "f15",
-	"f16",  "f17",  "f18",  "f19",  "f20",  "f21",  "f22",  "f23",
-	"f24",  "f25",  "f26",  "f27",  "f28",  "f29",  "f30",  "f31",
-	"fsr",  "fir",  ""/*"fp"*/,	"",
-	"inx",	"rand",	"elo",	"",	"ctxt",	"",	"",	"",
-	"",	"",	"ehi",	"",	"",	"",	"epc",	"prid",
-};
-
-/* Names of IDT R3081 registers.  */
-
-char *mips_r3081_reg_names[] = {
-	"sr",	"lo",	"hi",	"bad",	"cause","pc",
-	"f0",   "f1",   "f2",   "f3",   "f4",   "f5",   "f6",   "f7",
-	"f8",   "f9",   "f10",  "f11",  "f12",  "f13",  "f14",  "f15",
-	"f16",  "f17",  "f18",  "f19",  "f20",  "f21",  "f22",  "f23",
-	"f24",  "f25",  "f26",  "f27",  "f28",  "f29",  "f30",  "f31",
-	"fsr",  "fir",  ""/*"fp"*/,	"",
-	"inx",	"rand",	"elo",	"cfg",	"ctxt",	"",	"",	"",
-	"",	"",	"ehi",	"",	"",	"",	"epc",	"prid",
-};
-
-/* Names of LSI 33k registers.  */
-
-char *mips_lsi33k_reg_names[] = {
-	"epc",	"hi",	"lo",	"sr",	"cause","badvaddr",
-	"dcic", "bpc",  "bda",  "",     "",     "",     "",      "",
-	"",     "",     "",     "",     "",     "",     "",      "",
-	"",     "",     "",     "",     "",     "",     "",      "",
-	"",     "",     "",     "",     "",     "",     "",      "",
-	"",     "",     "",	"",
-	"",	"",	"",	"",	"",	"",	"",	 "",
-	"",	"",	"",	"",	"",	"",	"",	 "",
-};
-
-struct {
-  char *name;
-  char **regnames;
-} mips_processor_type_table[] = {
-  { "generic", mips_generic_reg_names },
-  { "r3041", mips_r3041_reg_names },
-  { "r3051", mips_r3051_reg_names },
-  { "r3071", mips_r3081_reg_names },
-  { "r3081", mips_r3081_reg_names },
-  { "lsi33k", mips_lsi33k_reg_names },
-  { NULL, NULL }
-};
-/* *INDENT-ON* */
 
 /* Return the groups that a MIPS register can be categorised into.  */
 
@@ -5119,76 +5092,22 @@ set_mipsfpu_auto_command (char *args, int from_tty)
   mips_fpu_type_auto = 1;
 }
 
-/* Command to set the processor type.  */
+/* Attempt to identify the particular processor model by reading the
+   processor id.  NOTE: cagney/2003-11-15: Firstly it isn't clear that
+   the relevant processor still exists (it dates back to '94) and
+   secondly this is not the way to do this.  The processor type should
+   be set by forcing an architecture change.  */
 
 void
-mips_set_processor_type_command (char *args, int from_tty)
+deprecated_mips_set_processor_regs_hack (void)
 {
-  int i;
-
-  if (tmp_mips_processor_type == NULL || *tmp_mips_processor_type == '\0')
-    {
-      printf_unfiltered ("The known MIPS processor types are as follows:\n\n");
-      for (i = 0; mips_processor_type_table[i].name != NULL; ++i)
-	printf_unfiltered ("%s\n", mips_processor_type_table[i].name);
-
-      /* Restore the value.  */
-      tmp_mips_processor_type = xstrdup (mips_processor_type);
-
-      return;
-    }
-
-  if (!mips_set_processor_type (tmp_mips_processor_type))
-    {
-      error ("Unknown processor type `%s'.", tmp_mips_processor_type);
-      /* Restore its value.  */
-      tmp_mips_processor_type = xstrdup (mips_processor_type);
-    }
-}
-
-static void
-mips_show_processor_type_command (char *args, int from_tty)
-{
-}
-
-/* Modify the actual processor type. */
-
-static int
-mips_set_processor_type (char *str)
-{
-  int i;
-
-  if (str == NULL)
-    return 0;
-
-  for (i = 0; mips_processor_type_table[i].name != NULL; ++i)
-    {
-      if (strcasecmp (str, mips_processor_type_table[i].name) == 0)
-	{
-	  mips_processor_type = str;
-	  mips_processor_reg_names = mips_processor_type_table[i].regnames;
-	  return 1;
-	  /* FIXME tweak fpu flag too */
-	}
-    }
-
-  return 0;
-}
-
-/* Attempt to identify the particular processor model by reading the
-   processor id.  */
-
-char *
-mips_read_processor_type (void)
-{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   CORE_ADDR prid;
 
   prid = read_register (PRID_REGNUM);
 
   if ((prid & ~0xf) == 0x700)
-    return savestring ("r3041", strlen ("r3041"));
-
-  return NULL;
+    tdep->mips_processor_reg_names = mips_r3041_reg_names;
 }
 
 /* Just like reinit_frame_cache, but with the right arguments to be
@@ -6019,11 +5938,14 @@ mips_gdbarch_init (struct gdbarch_info info,
   else
     tdep->mips_fpu_type = MIPS_FPU_DOUBLE;
 
-  /* MIPS version of register names.  NOTE: At present the MIPS
-     register name management is part way between the old -
-     #undef/#define MIPS_REGISTER_NAMES and the new REGISTER_NAME(nr).
-     Further work on it is required.  */
+  /* MIPS version of register names.  */
   set_gdbarch_register_name (gdbarch, mips_register_name);
+  if (info.osabi == GDB_OSABI_IRIX)
+    tdep->mips_processor_reg_names = mips_irix_reg_names;
+  else if (info.bfd_arch_info != NULL && info.bfd_arch_info->mach == bfd_mach_mips3900)
+    tdep->mips_processor_reg_names = mips_tx39_reg_names;
+  else
+    tdep->mips_processor_reg_names = mips_generic_reg_names;
   set_gdbarch_read_pc (gdbarch, mips_read_pc);
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
   set_gdbarch_deprecated_target_read_fp (gdbarch, mips_read_sp); /* Draft FRAME base.  */
@@ -6296,8 +6218,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: MIPS_NUMREGS = %d\n",
 		      MIPS_NUMREGS);
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: MIPS_REGISTER_NAMES = delete?\n");
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: MIPS_SAVED_REGSIZE = %d\n",
 		      MIPS_SAVED_REGSIZE);

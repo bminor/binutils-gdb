@@ -18,15 +18,3 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "mips/tm-mips.h"
-
-#undef  MIPS_REGISTER_NAMES
-#define MIPS_REGISTER_NAMES 	\
-    {	"sr",	"lo",	"hi",	"bad",	"cause","pc", \
-	"",   	"",   	"",   	"",   	"",   	"",   	"",   	"", \
-	"",   	"",   	"",  	"",  	"",  	"",  	"",  	"", \
-	"",  	"",  	"",  	"",  	"",  	"",  	"",  	"", \
-	"",  	"",  	"",  	"",  	"",  	"",  	"",  	"", \
-	"",  	"",  	"",	"", \
-	"",	"",	"",	"",	"",	"",	"",	"", \
-	"",	"", "config", "cache", "debug", "depc", "epc",	"" \
-    }

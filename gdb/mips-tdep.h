@@ -70,4 +70,8 @@ enum {
   MIPS_EMBED_FP0_REGNUM = 38
 };
 
+/* Defined in mips-tdep.c and used in remote-mips.c */
+extern void deprecated_mips_set_processor_regs_hack (void);
+
+
 #endif /* MIPS_TDEP_H */

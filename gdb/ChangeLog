@@ -1,5 +1,38 @@
 2003-11-16  Andrew Cagney  <cagney@redhat.com>
 
+	* mips-tdep.h (deprecated_mips_set_processor_regs_hack): Declare.
+	* remote-mips.c (common_open): Instead of
+	"mips_read_register_type" and "mips_set_processor_type_command"
+	call "deprecated_mips_set_processor_regs_hack".
+	* config/mips/tm-mips.h (mips_read_processor_type): Delete
+	declaration.
+	(mips_set_processor_type_command): Delete declaration.
+	* mips-tdep.c (mips_gdbarch_init): Update comment.
+	(mips_dump_tdep): Do not print MIPS_REGISTER_NAMES.
+	(mips_set_processor_type): Delete function.
+	(NUM_MIPS_PROCESSOR_REGS): Define.
+	(mips_show_processor_type_command): Delete function.
+	(mips_set_processor_type_command): Delete function.
+	(tmp_mips_processor_type): Delete.
+	(mips_processor_type): Delete.
+	(mips_processor_type_table): Delete.
+	(mips_r3051_reg_names): Delete.
+	(mips_r3081_reg_names): Delete.
+	(mips_lsi33k_reg_names): Delete.
+	(mips_processor_reg_names): Delete.
+	(mips_read_processor_type): Delete function.
+	(deprecated_mips_set_processor_regs_hack): New function.
+	(struct gdbarch_tdep): Add member "mips_processor_reg_names".
+	(mips_register_name): Get the processor names from the tdep.
+	(mips_tx39_reg_names): New array.
+	(mips_generic_reg_names): Wire to a standard set of names.
+	(mips_gdbarch_init): Set "mips_processor_reg_names".	
+	* config/mips/tm-irix5.h (MIPS_REGISTER_NAMES): Delete macro.
+	* config/mips/tm-mips.h (MIPS_REGISTER_NAMES): Delete macro.
+	* config/mips/tm-tx39.h (MIPS_REGISTER_NAMES): Delete macro.
+
+2003-11-16  Andrew Cagney  <cagney@redhat.com>
+
 	* mips-tdep.c (struct gdbarch_tdep): Add field "regnum".
 	(mips_fpa0_regnum, mips_regnum): New function.
 	(mips_gdbarch_init): Fill in the "regnum" fields.

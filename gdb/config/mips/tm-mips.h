@@ -45,22 +45,6 @@ extern int mips_step_skips_delay (CORE_ADDR);
 #define STEP_SKIPS_DELAY_P (1)
 #define STEP_SKIPS_DELAY(pc) (mips_step_skips_delay (pc))
 
-/* Initializer for an array of names for registers 32 and above.
-   There should be NUM_REGS-32 strings in this initializer.  */
-
-#ifndef MIPS_REGISTER_NAMES
-#define MIPS_REGISTER_NAMES 	\
-    {	"sr",	"lo",	"hi",	"bad",	"cause","pc",    \
-	"f0",   "f1",   "f2",   "f3",   "f4",   "f5",   "f6",   "f7", \
-	"f8",   "f9",   "f10",  "f11",  "f12",  "f13",  "f14",  "f15", \
-	"f16",  "f17",  "f18",  "f19",  "f20",  "f21",  "f22",  "f23",\
-	"f24",  "f25",  "f26",  "f27",  "f28",  "f29",  "f30",  "f31",\
-	"fsr",  "fir",  ""/*"fp"*/,	"", \
-	"",	"",	"",	"",	"",	"",	"",	"", \
-	"",	"",	"",	"",	"",	"",	"",	"", \
-    }
-#endif
-
 /* Register numbers of various important registers.
    Note that some of these values are "real" register numbers,
    and correspond to the general registers of the machine,
@@ -119,9 +103,6 @@ extern struct frame_info *setup_arbitrary_frame (int, CORE_ADDR *);
 extern CORE_ADDR sigtramp_address, sigtramp_end;
 extern void fixup_sigtramp (void);
 
-/* Defined in mips-tdep.c and used in remote-mips.c */
-extern char *mips_read_processor_type (void);
-
 /* Functions for dealing with MIPS16 call and return stubs.  */
 #define IGNORE_HELPER_CALL(pc)			mips_ignore_helper (pc)
 extern int mips_ignore_helper (CORE_ADDR pc);
@@ -133,9 +114,6 @@ extern int mips_ignore_helper (CORE_ADDR pc);
 typedef unsigned long t_inst;	/* Integer big enough to hold an instruction */
 
 #endif /* TM_MIPS_H */
-
-/* Command to set the processor type. */
-extern void mips_set_processor_type_command (char *, int);
 
 /* Single step based on where the current instruction will take us.  */
 extern void mips_software_single_step (enum target_signal, int);

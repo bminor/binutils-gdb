@@ -1607,9 +1607,7 @@ device is attached to the target board (e.g., /dev/ttya).\n"
   /* FIXME: Should we call start_remote here?  */
 
   /* Try to figure out the processor model if possible.  */
-  ptype = mips_read_processor_type ();
-  if (ptype)
-    mips_set_processor_type_command (xstrdup (ptype), 0);
+  deprecated_mips_set_processor_regs_hack ();
 
   /* This is really the job of start_remote however, that makes an
      assumption that the target is about to print out a status message
