@@ -21,6 +21,7 @@ Do-first:
 
 Things-to-keep:
 
+mh-decstation
 mh-delta88
 mh-dgux
 mh-sco
@@ -28,7 +29,6 @@ mh-svr4
 mh-sysv
 mt-a29k
 mt-ebmon29k
-mh-rs6000
 mt-vxworks960
 mt-vxworks68
 Do-last:
