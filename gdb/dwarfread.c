@@ -39,7 +39,6 @@ other things to work on, if you get bored. :-)
 */
 
 #include "defs.h"
-#include "bfd.h"
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "symfile.h"
