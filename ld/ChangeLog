@@ -1,3 +1,11 @@
+Thu Jun 18 09:38:56 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* h8300hms.em, h8300hms.sc-sh:  do the right thing for -r
+	* ldexp.c:  lint
+	* ldlang.c(open_output): set the target arch and machine as soon
+	as we can. (lang_size_sections): use new macros for setting vma
+	* ldwrite.c: lint
+
 Mon Jun 15 08:47:43 1992  Michael Tiemann  (tiemann@rtl.cygnus.com)
 
 	* configure.in (my_target): Accept m680?0 for wrs as vxworks68.

@@ -53,10 +53,10 @@ static char *h8300hms_script =
 #include "h8300hms.x"
 ;
 static char *h8300hms_script_option_Ur  =  
-#include "h8300hms.xu"
+#include "h8300hms.x"
 ;
 static char *h8300hms_script_option_r  =  
-#include "h8300hms.xr"
+#include "h8300hms.x"
 ;
 
 static char *h8300hms_get_script()

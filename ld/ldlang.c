@@ -714,30 +714,37 @@ static bfd *
 DEFUN (open_output, (name),
        CONST char *CONST name)
 {
+  extern unsigned long ldfile_output_machine;
+  extern enum bfd_architecture ldfile_output_architecture;
+
   extern CONST char *output_filename;
   bfd *output;
 
   if (output_target == (char *) NULL)
-    {
-      if (current_target != (char *) NULL)
-	output_target = current_target;
-      else
-	output_target = default_target;
-    }
+  {
+    if (current_target != (char *) NULL)
+     output_target = current_target;
+    else
+     output_target = default_target;
+  }
   output = bfd_openw (name, output_target);
   output_filename = name;
 
   if (output == (bfd *) NULL)
+  {
+    if (bfd_error == invalid_target)
     {
-      if (bfd_error == invalid_target)
-	{
-	  einfo ("%P%F target %s not found\n", output_target);
-	}
-      einfo ("%P%F problem opening output file %s, %E", name);
+      einfo ("%P%F target %s not found\n", output_target);
     }
+    einfo ("%P%F problem opening output file %s, %E", name);
+  }
 
-/*  output->flags |= D_PAGED;*/
+  /*  output->flags |= D_PAGED;*/
+
   bfd_set_format (output, bfd_object);
+  bfd_set_arch_mach(output,
+		    ldfile_output_architecture,
+		    ldfile_output_machine);
   return output;
 }
 
@@ -1446,7 +1453,7 @@ DEFUN (lang_size_sections, (s, output_section_statement, prev, fill,
 	    if (os->bfd_section == &bfd_abs_section)
 	      {
 		/* No matter what happens, an abs section starts at zero */
-		os->bfd_section->vma = 0;
+		bfd_set_section_vma (0, os->bfd_section, 0);
 	      }
 	    else
 	      {
@@ -1481,7 +1488,7 @@ DEFUN (lang_size_sections, (s, output_section_statement, prev, fill,
 
 
 		dot = align_power (dot, os->bfd_section->alignment_power);
-		os->bfd_section->vma = dot;
+		bfd_set_section_vma (0, os->bfd_section, dot);
 	      }
 
 
