@@ -52,7 +52,7 @@ here.  */
 #	endif
 #endif
 
-#define BFD_VERSION "1.97"
+#define BFD_VERSION "2.0"
 
 /* forward declaration */
 typedef struct _bfd bfd;
@@ -637,7 +637,7 @@ enum bfd_architecture
   bfd_arch_sparc,      /* SPARC */
   bfd_arch_mips,       /* MIPS Rxxxx */
   bfd_arch_i386,       /* Intel 386 */
-  bfd_arch_ns32k,      /* National Semiconductor 32xxx */
+  bfd_arch_we32k,      /* AT&T WE32xxx */
   bfd_arch_tahoe,      /* CCI/Harris Tahoe */
   bfd_arch_i860,       /* Intel 860 */
   bfd_arch_romp,       /* IBM ROMP PC/RT */
@@ -649,7 +649,6 @@ enum bfd_architecture
   bfd_arch_rs6000,     /* IBM RS/6000 */
   bfd_arch_hppa,       /* HP PA RISC */
   bfd_arch_z8k,        /* Zilog Z8000 */
-  bfd_arch_we32k,      /* AT&T we32000 family (3b2) */
 #define bfd_mach_z8001		1
 #define bfd_mach_z8002		2
   bfd_arch_last
