@@ -268,11 +268,11 @@ set_traceframe_context (trace_pc)
       traceframe_sal.pc = traceframe_sal.line = 0;
       traceframe_sal.symtab = NULL;
       set_internalvar (lookup_internalvar ("trace_func"),
-		       value_from_longest (charstar, (LONGEST) 0));
+		       value_from_pointer (charstar, (LONGEST) 0));
       set_internalvar (lookup_internalvar ("trace_file"),
-		       value_from_longest (charstar, (LONGEST) 0));
+		       value_from_pointer (charstar, (LONGEST) 0));
       set_internalvar (lookup_internalvar ("trace_line"),
-		       value_from_longest (builtin_type_int, (LONGEST) - 1));
+		       value_from_pointer (builtin_type_int, (LONGEST) - 1));
       return;
     }
 
@@ -289,7 +289,7 @@ set_traceframe_context (trace_pc)
   if (traceframe_fun == NULL ||
       SYMBOL_NAME (traceframe_fun) == NULL)
     set_internalvar (lookup_internalvar ("trace_func"),
-		     value_from_longest (charstar, (LONGEST) 0));
+		     value_from_pointer (charstar, (LONGEST) 0));
   else
     {
       len = strlen (SYMBOL_NAME (traceframe_fun));
@@ -310,7 +310,7 @@ set_traceframe_context (trace_pc)
   if (traceframe_sal.symtab == NULL ||
       traceframe_sal.symtab->filename == NULL)
     set_internalvar (lookup_internalvar ("trace_file"),
-		     value_from_longest (charstar, (LONGEST) 0));
+		     value_from_pointer (charstar, (LONGEST) 0));
   else
     {
       len = strlen (traceframe_sal.symtab->filename);

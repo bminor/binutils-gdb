@@ -108,12 +108,12 @@ find_function_in_inferior (name)
       if (msymbol != NULL)
 	{
 	  struct type *type;
-	  LONGEST maddr;
+	  CORE_ADDR maddr;
 	  type = lookup_pointer_type (builtin_type_char);
 	  type = lookup_function_type (type);
 	  type = lookup_pointer_type (type);
-	  maddr = (LONGEST) SYMBOL_VALUE_ADDRESS (msymbol);
-	  return value_from_longest (type, maddr);
+	  maddr = SYMBOL_VALUE_ADDRESS (msymbol);
+	  return value_from_pointer (type, maddr);
 	}
       else
 	{
@@ -901,8 +901,8 @@ value_coerce_array (arg1)
   if (VALUE_LVAL (arg1) != lval_memory)
     error ("Attempt to take address of value not located in memory.");
 
-  return value_from_longest (lookup_pointer_type (TYPE_TARGET_TYPE (type)),
-		    (LONGEST) (VALUE_ADDRESS (arg1) + VALUE_OFFSET (arg1)));
+  return value_from_pointer (lookup_pointer_type (TYPE_TARGET_TYPE (type)),
+			     (VALUE_ADDRESS (arg1) + VALUE_OFFSET (arg1)));
 }
 
 /* Given a value which is a function, return a value which is a pointer
@@ -917,8 +917,8 @@ value_coerce_function (arg1)
   if (VALUE_LVAL (arg1) != lval_memory)
     error ("Attempt to take address of value not located in memory.");
 
-  retval = value_from_longest (lookup_pointer_type (VALUE_TYPE (arg1)),
-		    (LONGEST) (VALUE_ADDRESS (arg1) + VALUE_OFFSET (arg1)));
+  retval = value_from_pointer (lookup_pointer_type (VALUE_TYPE (arg1)),
+			       (VALUE_ADDRESS (arg1) + VALUE_OFFSET (arg1)));
   VALUE_BFD_SECTION (retval) = VALUE_BFD_SECTION (arg1);
   return retval;
 }
@@ -948,10 +948,10 @@ value_addr (arg1)
     error ("Attempt to take address of value not located in memory.");
 
   /* Get target memory address */
-  arg2 = value_from_longest (lookup_pointer_type (VALUE_TYPE (arg1)),
-			     (LONGEST) (VALUE_ADDRESS (arg1)
-					+ VALUE_OFFSET (arg1)
-					+ VALUE_EMBEDDED_OFFSET (arg1)));
+  arg2 = value_from_pointer (lookup_pointer_type (VALUE_TYPE (arg1)),
+			     (VALUE_ADDRESS (arg1)
+			      + VALUE_OFFSET (arg1)
+			      + VALUE_EMBEDDED_OFFSET (arg1)));
 
   /* This may be a pointer to a base subobject; so remember the
      full derived object's type ... */
@@ -1582,8 +1582,8 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
 	       we just pushed.  */
 	    /*args[i] = value_from_longest (lookup_pointer_type (value_type),
 	       (LONGEST) addr); */
-	    args[i] = value_from_longest (lookup_pointer_type (arg_type),
-					  (LONGEST) addr);
+	    args[i] = value_from_pointer (lookup_pointer_type (arg_type),
+					  addr);
 	  }
       }
   }

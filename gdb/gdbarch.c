@@ -175,6 +175,8 @@ struct gdbarch
   gdbarch_register_convertible_ftype *register_convertible;
   gdbarch_register_convert_to_virtual_ftype *register_convert_to_virtual;
   gdbarch_register_convert_to_raw_ftype *register_convert_to_raw;
+  gdbarch_pointer_to_address_ftype *pointer_to_address;
+  gdbarch_address_to_pointer_ftype *address_to_pointer;
   gdbarch_extract_return_value_ftype *extract_return_value;
   gdbarch_push_arguments_ftype *push_arguments;
   gdbarch_push_dummy_frame_ftype *push_dummy_frame;
@@ -309,6 +311,8 @@ struct gdbarch startup_gdbarch = {
   0,
   0,
   0,
+  0,
+  0,
   /* startup_gdbarch() */
 };
 struct gdbarch *current_gdbarch = &startup_gdbarch;
@@ -351,6 +355,8 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->call_dummy_stack_adjust_p = -1;
   gdbarch->coerce_float_to_double = default_coerce_float_to_double;
   gdbarch->register_convertible = generic_register_convertible_not;
+  gdbarch->pointer_to_address = generic_pointer_to_address;
+  gdbarch->address_to_pointer = generic_address_to_pointer;
   gdbarch->breakpoint_from_pc = legacy_breakpoint_from_pc;
   gdbarch->memory_insert_breakpoint = default_memory_insert_breakpoint;
   gdbarch->memory_remove_breakpoint = default_memory_remove_breakpoint;
@@ -517,6 +523,8 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of register_convertible, invalid_p == 0 */
   /* Skip verify of register_convert_to_virtual, invalid_p == 0 */
   /* Skip verify of register_convert_to_raw, invalid_p == 0 */
+  /* Skip verify of pointer_to_address, invalid_p == 0 */
+  /* Skip verify of address_to_pointer, invalid_p == 0 */
   if ((GDB_MULTI_ARCH >= 2)
       && (gdbarch->extract_return_value == 0))
     internal_error ("gdbarch: verify_gdbarch: extract_return_value invalid");
@@ -792,6 +800,14 @@ gdbarch_dump (void)
                       "gdbarch_update: REGISTER_CONVERT_TO_RAW = 0x%08lx\n",
                       (long) current_gdbarch->register_convert_to_raw
                       /*REGISTER_CONVERT_TO_RAW ()*/);
+  fprintf_unfiltered (gdb_stdlog,
+                      "gdbarch_update: POINTER_TO_ADDRESS = 0x%08lx\n",
+                      (long) current_gdbarch->pointer_to_address
+                      /*POINTER_TO_ADDRESS ()*/);
+  fprintf_unfiltered (gdb_stdlog,
+                      "gdbarch_update: ADDRESS_TO_POINTER = 0x%08lx\n",
+                      (long) current_gdbarch->address_to_pointer
+                      /*ADDRESS_TO_POINTER ()*/);
   fprintf_unfiltered (gdb_stdlog,
                       "gdbarch_update: EXTRACT_RETURN_VALUE = 0x%08lx\n",
                       (long) current_gdbarch->extract_return_value
@@ -1776,6 +1792,40 @@ set_gdbarch_register_convert_to_raw (struct gdbarch *gdbarch,
                                      gdbarch_register_convert_to_raw_ftype register_convert_to_raw)
 {
   gdbarch->register_convert_to_raw = register_convert_to_raw;
+}
+
+CORE_ADDR
+gdbarch_pointer_to_address (struct gdbarch *gdbarch, struct type *type, char *buf)
+{
+  if (gdbarch->pointer_to_address == 0)
+    internal_error ("gdbarch: gdbarch_pointer_to_address invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_pointer_to_address called\n");
+  return gdbarch->pointer_to_address (type, buf);
+}
+
+void
+set_gdbarch_pointer_to_address (struct gdbarch *gdbarch,
+                                gdbarch_pointer_to_address_ftype pointer_to_address)
+{
+  gdbarch->pointer_to_address = pointer_to_address;
+}
+
+void
+gdbarch_address_to_pointer (struct gdbarch *gdbarch, struct type *type, char *buf, CORE_ADDR addr)
+{
+  if (gdbarch->address_to_pointer == 0)
+    internal_error ("gdbarch: gdbarch_address_to_pointer invalid");
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_address_to_pointer called\n");
+  gdbarch->address_to_pointer (type, buf, addr);
+}
+
+void
+set_gdbarch_address_to_pointer (struct gdbarch *gdbarch,
+                                gdbarch_address_to_pointer_ftype address_to_pointer)
+{
+  gdbarch->address_to_pointer = address_to_pointer;
 }
 
 void
@@ -3093,6 +3143,7 @@ generic_register_convertible_not (num)
   return 0;
 }
   
+
 /* Disassembler */
 
 /* Pointer to the target-dependent disassembly function.  */

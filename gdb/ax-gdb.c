@@ -185,7 +185,7 @@ const_var_ref (var)
       return value_from_longest (type, (LONGEST) SYMBOL_VALUE (var));
 
     case LOC_LABEL:
-      return value_from_longest (type, (LONGEST) SYMBOL_VALUE_ADDRESS (var));
+      return value_from_pointer (type, (CORE_ADDR) SYMBOL_VALUE_ADDRESS (var));
 
     default:
       return 0;

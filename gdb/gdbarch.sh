@@ -239,6 +239,9 @@ f:1:REGISTER_CONVERTIBLE:int:register_convertible:int nr:nr:::generic_register_c
 f:2:REGISTER_CONVERT_TO_VIRTUAL:void:register_convert_to_virtual:int regnum, struct type *type, char *from, char *to:regnum, type, from, to:::0:0
 f:2:REGISTER_CONVERT_TO_RAW:void:register_convert_to_raw:struct type *type, int regnum, char *from, char *to:type, regnum, from, to:::0:0
 #
+f:2:POINTER_TO_ADDRESS:CORE_ADDR:pointer_to_address:struct type *type, char *buf:type, buf:::generic_pointer_to_address:0
+f:2:ADDRESS_TO_POINTER:void:address_to_pointer:struct type *type, char *buf, CORE_ADDR addr:type, buf, addr:::generic_address_to_pointer:0
+#
 f:2:EXTRACT_RETURN_VALUE:void:extract_return_value:struct type *type, char *regbuf, char *valbuf:type, regbuf, valbuf::0:0
 f:1:PUSH_ARGUMENTS:CORE_ADDR:push_arguments:int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr:nargs, args, sp, struct_return, struct_addr::0:0
 f:2:PUSH_DUMMY_FRAME:void:push_dummy_frame:void:-:::0
@@ -1953,6 +1956,7 @@ generic_register_convertible_not (num)
   return 0;
 }
   
+
 /* Disassembler */
 
 /* Pointer to the target-dependent disassembly function.  */

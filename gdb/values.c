@@ -580,8 +580,9 @@ value_as_double (val)
     error ("Invalid floating value found in program.");
   return foo;
 }
-/* Extract a value as a C pointer.
-   Does not deallocate the value.  */
+/* Extract a value as a C pointer. Does not deallocate the value.  
+   Note that val's type may not actually be a pointer; value_as_long
+   handles all the cases.  */
 CORE_ADDR
 value_as_pointer (val)
      value_ptr val;
@@ -649,7 +650,7 @@ unpack_long (type, valaddr)
       if (GDB_TARGET_IS_D10V
 	  && len == 2)
 	return D10V_MAKE_DADDR (extract_address (valaddr, len));
-      return extract_address (valaddr, len);
+      return extract_typed_address (valaddr, type);
 
     case TYPE_CODE_MEMBER:
       error ("not implemented: member types in unpack_long");
@@ -731,6 +732,7 @@ unpack_pointer (type, valaddr)
      whether we want this to be true eventually.  */
   return unpack_long (type, valaddr);
 }
+
 
 /* Get the value of the FIELDN'th field (which must be static) of TYPE. */
 
@@ -1420,9 +1422,7 @@ retry:
 
     case TYPE_CODE_REF:
     case TYPE_CODE_PTR:
-      /* This assumes that all pointers of a given length
-         have the same form.  */
-      store_address (VALUE_CONTENTS_RAW (val), len, (CORE_ADDR) num);
+      store_typed_address (VALUE_CONTENTS_RAW (val), type, (CORE_ADDR) num);
       break;
 
     default:
@@ -1430,6 +1430,18 @@ retry:
     }
   return val;
 }
+
+
+/* Create a value representing a pointer of type TYPE to the address
+   ADDR.  */
+value_ptr
+value_from_pointer (struct type *type, CORE_ADDR addr)
+{
+  value_ptr val = allocate_value (type);
+  store_typed_address (VALUE_CONTENTS_RAW (val), type, addr);
+  return val;
+}
+
 
 /* Create a value for a string constant to be stored locally
    (not in the inferior's memory space, but in GDB memory).

@@ -156,6 +156,11 @@ extern void write_fp PARAMS ((CORE_ADDR));
 
 extern void generic_target_write_fp PARAMS ((CORE_ADDR));
 
+extern CORE_ADDR generic_pointer_to_address (struct type *type, char *buf);
+
+extern void generic_address_to_pointer (struct type *type, char *buf,
+					CORE_ADDR addr);
+
 extern void wait_for_inferior PARAMS ((void));
 
 extern void fetch_inferior_event PARAMS ((void *));

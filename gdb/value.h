@@ -186,8 +186,8 @@ extern int value_fetch_lazy PARAMS ((value_ptr val));
 do { struct type *value_type_arg_tmp = check_typedef (VALUE_TYPE (arg));\
      if (TYPE_CODE (value_type_arg_tmp) == TYPE_CODE_REF)		\
 	 arg = value_at_lazy (TYPE_TARGET_TYPE (value_type_arg_tmp),	\
-			      unpack_long (VALUE_TYPE (arg),		\
-					   VALUE_CONTENTS (arg)),       \
+			      unpack_pointer (VALUE_TYPE (arg),		\
+					      VALUE_CONTENTS (arg)),    \
 			      VALUE_BFD_SECTION (arg));			\
     } while (0)
 
@@ -263,6 +263,8 @@ extern LONGEST unpack_field_as_long PARAMS ((struct type * type, char *valaddr,
 					     int fieldno));
 
 extern value_ptr value_from_longest PARAMS ((struct type * type, LONGEST num));
+
+extern value_ptr value_from_pointer (struct type *type, CORE_ADDR addr);
 
 extern value_ptr value_from_double PARAMS ((struct type * type, DOUBLEST num));
 

@@ -510,6 +510,24 @@ extern void set_gdbarch_register_convert_to_raw (struct gdbarch *gdbarch, gdbarc
 #endif
 #endif
 
+typedef CORE_ADDR (gdbarch_pointer_to_address_ftype) (struct type *type, char *buf);
+extern CORE_ADDR gdbarch_pointer_to_address (struct gdbarch *gdbarch, struct type *type, char *buf);
+extern void set_gdbarch_pointer_to_address (struct gdbarch *gdbarch, gdbarch_pointer_to_address_ftype *pointer_to_address);
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > 1) || !defined (POINTER_TO_ADDRESS)
+#define POINTER_TO_ADDRESS(type, buf) (gdbarch_pointer_to_address (current_gdbarch, type, buf))
+#endif
+#endif
+
+typedef void (gdbarch_address_to_pointer_ftype) (struct type *type, char *buf, CORE_ADDR addr);
+extern void gdbarch_address_to_pointer (struct gdbarch *gdbarch, struct type *type, char *buf, CORE_ADDR addr);
+extern void set_gdbarch_address_to_pointer (struct gdbarch *gdbarch, gdbarch_address_to_pointer_ftype *address_to_pointer);
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > 1) || !defined (ADDRESS_TO_POINTER)
+#define ADDRESS_TO_POINTER(type, buf, addr) (gdbarch_address_to_pointer (current_gdbarch, type, buf, addr))
+#endif
+#endif
+
 typedef void (gdbarch_extract_return_value_ftype) (struct type *type, char *regbuf, char *valbuf);
 extern void gdbarch_extract_return_value (struct gdbarch *gdbarch, struct type *type, char *regbuf, char *valbuf);
 extern void set_gdbarch_extract_return_value (struct gdbarch *gdbarch, gdbarch_extract_return_value_ftype *extract_return_value);

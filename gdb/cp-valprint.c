@@ -429,7 +429,7 @@ cp_print_value_fields (type, real_type, valaddr, offset, address, stream, format
       /* pai: FIXME 32x64 problem? */
       /* Not sure what the best notation is in the case where there is no
          baseclass name.  */
-      v = value_from_longest (lookup_pointer_type (builtin_type_unsigned_long),
+      v = value_from_pointer (lookup_pointer_type (builtin_type_unsigned_long),
 			      *(unsigned long *) (valaddr + offset));
 
       val_print (VALUE_TYPE (v), VALUE_CONTENTS (v), 0, 0,

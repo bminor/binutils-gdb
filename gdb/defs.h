@@ -1067,11 +1067,15 @@ extern int extract_long_unsigned_integer (void *, int, LONGEST *);
 
 extern CORE_ADDR extract_address (void *, int);
 
+extern CORE_ADDR extract_typed_address (void *buf, struct type *type);
+
 extern void store_signed_integer (void *, int, LONGEST);
 
 extern void store_unsigned_integer (void *, int, ULONGEST);
 
 extern void store_address (void *, int, LONGEST);
+
+extern void store_typed_address (void *buf, struct type *type, CORE_ADDR addr);
 
 /* Setup definitions for host and target floating point formats.  We need to
    consider the format for `float', `double', and `long double' for both target

@@ -1213,8 +1213,8 @@ generic_push_dummy_frame ()
   dummy_frame = xmalloc (sizeof (struct dummy_frame));
   dummy_frame->registers = xmalloc (REGISTER_BYTES);
 
-  dummy_frame->pc = read_register (PC_REGNUM);
-  dummy_frame->sp = read_register (SP_REGNUM);
+  dummy_frame->pc = read_pc ();
+  dummy_frame->sp = read_sp ();
   dummy_frame->top = dummy_frame->sp;
   dummy_frame->fp = fp;
   read_register_bytes (0, dummy_frame->registers, REGISTER_BYTES);

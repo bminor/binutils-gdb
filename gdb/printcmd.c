@@ -537,8 +537,8 @@ set_next_address (addr)
 
   /* Make address available to the user as $_.  */
   set_internalvar (lookup_internalvar ("_"),
-		value_from_longest (lookup_pointer_type (builtin_type_void),
-				    (LONGEST) addr));
+		   value_from_pointer (lookup_pointer_type (builtin_type_void),
+				       addr));
 }
 
 /* Optionally print address ADDR symbolically as <SYMBOL+OFFSET> on STREAM,
@@ -1396,10 +1396,11 @@ x_command (exp, from_tty)
     {
       /* Make last address examined available to the user as $_.  Use
          the correct pointer type.  */
+      struct type *pointer_type
+	= lookup_pointer_type (VALUE_TYPE (last_examine_value));
       set_internalvar (lookup_internalvar ("_"),
-		       value_from_longest (
-		      lookup_pointer_type (VALUE_TYPE (last_examine_value)),
-					    (LONGEST) last_examine_address));
+		       value_from_pointer (pointer_type,
+					   last_examine_address));
 
       /* Make contents of last address examined available to the user as $__. */
       /* If the last value has not been fetched from memory then don't

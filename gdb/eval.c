@@ -832,8 +832,9 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
 	  /* Method invocation : stuff "this" as first parameter */
 	  /* pai: this used to have lookup_pointer_type for some reason,
 	   * but temp is already a pointer to the object */
-	  argvec[1] = value_from_longest (VALUE_TYPE (temp),
-				VALUE_ADDRESS (temp) + VALUE_OFFSET (temp));
+	  argvec[1]
+	    = value_from_pointer (VALUE_TYPE (temp),
+				  VALUE_ADDRESS (temp) + VALUE_OFFSET (temp));
 	  /* Name of method from expression */
 	  strcpy (tstr, &exp->elts[pc2 + 2].string);
 
@@ -1122,7 +1123,7 @@ evaluate_subexp_standard (expect_type, exp, pos, noside)
       /* Now, convert these values to an address.  */
       arg1 = value_cast (lookup_pointer_type (TYPE_DOMAIN_TYPE (type)),
 			 arg1);
-      arg3 = value_from_longest (lookup_pointer_type (TYPE_TARGET_TYPE (type)),
+      arg3 = value_from_pointer (lookup_pointer_type (TYPE_TARGET_TYPE (type)),
 				 value_as_long (arg1) + mem_offset);
       return value_ind (arg3);
     bad_pointer_to_member:
