@@ -1989,6 +1989,7 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
   size_t impsize, impcount;
   struct xcoff_import_file *fl;
   struct internal_ldhdr *ldhdr;
+  bfd_size_type stoff;
   register char *out;
   asection *sec;
   bfd *sub;
@@ -2072,12 +2073,16 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
 		     + ldhdr->l_nsyms * LDSYMSZ
 		     + ldhdr->l_nreloc * LDRELSZ);
   ldhdr->l_stlen = ldinfo.string_size;
-  ldhdr->l_stoff = ldhdr->l_impoff + impsize;
+  stoff = ldhdr->l_impoff + impsize;
+  if (ldinfo.string_size == 0)
+    ldhdr->l_stoff = 0;
+  else
+    ldhdr->l_stoff = stoff;
 
   /* We now know the final size of the .loader section.  Allocate
      space for it.  */
   lsec = xcoff_hash_table (info)->loader_section;
-  lsec->_raw_size = ldhdr->l_stoff + ldhdr->l_stlen;
+  lsec->_raw_size = stoff + ldhdr->l_stlen;
   lsec->contents = (bfd_byte *) bfd_zalloc (output_bfd, lsec->_raw_size);
   if (lsec->contents == NULL)
     {
@@ -2110,8 +2115,7 @@ bfd_xcoff_size_dynamic_sections (output_bfd, info, libpath, entry,
 	;
     }
 
-  BFD_ASSERT ((bfd_size_type) ((bfd_byte *) out - lsec->contents)
-	      == ldhdr->l_stoff);
+  BFD_ASSERT ((bfd_size_type) ((bfd_byte *) out - lsec->contents) == stoff);
 
   /* Set up the symbol string table.  */
   if (ldinfo.string_size > 0)
