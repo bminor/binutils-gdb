@@ -87,6 +87,12 @@ unsigned long alpha_gprmask, alpha_fprmask;
 /* Used for LITUSE relocations.  */
 static expressionS lituse_basereg, lituse_byteoff, lituse_jsr;
 
+/* Address size: In OSF/1 1.3, an undocumented "-32addr" option will
+   cause all addresses to be treated as 32-bit values in memory.  (The
+   in-register versions are all sign-extended to 64 bits, of course.)
+   Some other systems may want this option too.  */
+static int addr32;
+
 /* Imported functions -- they should be defined in header files somewhere.  */
 extern segT subseg_get ();
 extern PTR bfd_alloc_by_size_t ();
@@ -713,10 +719,16 @@ load_symbol_address (reg, insn)
     /* Overflow? */
     as_fatal ("overflow in literal (.lita) table");
   x = retval;
-  insn->opcode = (0xa4000000	/* ldq */
-		  | (reg << SA)
-		  | (base_register << SB)
-		  | (x & 0xffff));
+  if (addr32)
+    insn->opcode = (0xa0000000	/* ldl */
+		    | (reg << SA)
+		    | (base_register << SB)
+		    | (x & 0xffff));
+  else
+    insn->opcode = (0xa4000000	/* ldq */
+		    | (reg << SA)
+		    | (base_register << SB)
+		    | (x & 0xffff));
   note_gpreg (base_register);
 }
 
@@ -748,7 +760,7 @@ load_expression (reg, insn)
       num_insns++;
       {
 	valueT x = addend;
-	if (x & ~0x7fff != 0
+	if ((x & ~0x7fff) != 0
 	    && (x & ~0x7fff) + 0x8000 != 0)
 	  {
 	    as_bad ("assembler not prepared to handle constants >16 bits yet");
@@ -1612,6 +1624,12 @@ md_parse_option (argP, cntP, vecP)
       return 1;
     }
 #endif
+  if (!strcmp (*argP, "32addr"))
+    {
+      addr32 = 1;
+      *argP += 6;
+      return 1;
+    }
   if (!strcmp (*argP, "nocpp"))
     {
       *argP += 5;
