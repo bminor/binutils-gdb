@@ -53,10 +53,18 @@ if ![runto_main] then {
     gdb_suppress_tests
 }
 
-# Testcase from gdb/1253.
+# Testcase from symtab/1253.
 
 gdb_test "continue" "Program received signal SIGTRAP.*" "continue to gdb1253"
 
 gdb_test "backtrace 10" \
 	"#0\[ \t\]*$hex in gdb1253.*\r\n#1\[ \t\]*$hex in main.*" \
 	"backtrace in gdb1253"
+
+# Testcase from backtrace/1338.
+
+gdb_test "continue" "Program received signal SIGTRAP.*" "continue to gdb1338"
+
+gdb_test "backtrace 10" \
+	"#0\[ \t\]*$hex in gdb1338.*\r\n#1\[ \t\]*$hex in main.*" \
+	"backtrace in gdb1338"

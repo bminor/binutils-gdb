@@ -1,3 +1,8 @@
+2003-08-18  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.arch/i386-prologue.exp: Add testcase for PR backtrace/1338.
+	* gdb.arch/i386-prologue.c (gdb1338): Add function.
+
 2003-08-17  Daniel Jacobowitz  <drow@mvista.com>
 
 	* mi-var-display.exp (-var-list-children weird): Accept function
