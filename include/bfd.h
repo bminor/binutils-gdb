@@ -358,7 +358,8 @@ typedef struct sec *sec_ptr;
 #define bfd_set_section_vma(bfd, ptr, val) (((ptr)->vma = (val)), true)
 #define bfd_set_section_alignment(bfd, ptr, val) (((ptr)->alignment_power = (val)),true)
 #define bfd_set_section_userdata(bfd, ptr, val) (((ptr)->userdata = (val)),true)
-struct stat; 
+
+typedef struct stat stat_type; 
 
 /** Error handling */
 
@@ -789,10 +790,15 @@ BFD_SEND (abfd, _bfd_find_nearest_line, (abfd, section,symbols, offset, filename
 
 /* General purpose one fits all.  The do { } while (0) makes a single 
    statement out of it, for use in things like nested if-statements.
-
-   USE OF THESE MACROS IS DISCOURAGED.  THEY ASSUME THAT THE HOST AND
-   TARGET FIELD ALIGNMENT AND SIZES ARE THE SAME.  TARGET STRUCTS SHOULD
-   BE MODELED AS BYTE ARRAYS INSTEAD, TO AVOID THESE ASSUMPTIONS.  */
+   
+   The idea is to create your external ref as a byte array of the
+   right size eg:
+   char foo[4];
+   char bar[2];
+   then you may do things like:
+   bfd_h_put_x(abfd, 1, &foo);
+   and bfd_h_get_x(abfd,& bar);
+*/
 
 #define bfd_h_put_x(abfd, val, ptr) \
   do {  \
