@@ -57,6 +57,7 @@ sem.c
 sim-if.c
 sim-main.h
 tconfig.in
+traps.c
 
 Things-to-lose:
 

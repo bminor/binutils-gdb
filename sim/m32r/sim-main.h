@@ -10,12 +10,13 @@ typedef struct _sim_cpu SIM_CPU;
 #include "config.h"
 
 #include "ansidecl.h"
+#include "symcat.h"
 #include "cgen-types.h"
 #include "arch.h"
 #include "sim-basics.h"
 
 /* These must be defined before sim-base.h.  */
-typedef SI sim_cia;
+typedef USI sim_cia;
 #define CIA_GET(cpu)     0 /* FIXME:(CPU_CGEN_HW (cpu)->h_pc) */
 #define CIA_SET(cpu,val) 0 /* FIXME:(CPU_CGEN_HW (cpu)->h_pc = (val)) */
 
@@ -23,11 +24,19 @@ typedef SI sim_cia;
 #define SIM_ENGINE_HALT_HOOK(SD, LAST_CPU, CIA)
 #define SIM_ENGINE_RESTART_HOOK(SD, LAST_CPU, CIA)
 
+/* Catch address exceptions.  */
+#define SIM_CORE_SIGNAL(SD,CPU,CIA,MAP,NR_BYTES,ADDR,TRANSFER,ERROR) \
+m32r_core_signal ((SD), (CPU), (CIA), (MAP), (NR_BYTES), (ADDR), \
+		  (TRANSFER), (ERROR))
+
 #include "sim-base.h"
 #include "cgen-sim.h"
 /*#include "cgen-mem.h"*/
 #include "cgen-trace.h"
 #include "cpu-sim.h"
+
+/* Function to catch address exceptions.  */
+extern SIM_CORE_SIGNAL_FN m32r_core_signal;
 
 #ifdef WANT_CPU_M32R
 #include "cpu.h"
@@ -40,12 +49,8 @@ typedef SI sim_cia;
 #endif
 /* end-sanitize-m32rx */
 #include "cpuall.h"
-
-/* Misc. profile data.  */
-typedef struct {
-  /* nop insn slot filler count */
-  unsigned int fillnop_count;
-} M32R_MISC_PROFILE;
+
+/* The _sim_cpu struct.  */
 
 struct _sim_cpu {
   sim_cpu_base base;
@@ -53,11 +58,15 @@ struct _sim_cpu {
   /* Static parts of cgen.  */
   CGEN_CPU cgen_cpu;
 
+  M32R_MISC_PROFILE m32r_misc_profile;
+#define CPU_M32R_MISC_PROFILE(cpu) ((cpu)->m32r_misc_profile)
+
   /* CPU specific parts go here.
      Note that in files that don't need to access these pieces WANT_CPU_FOO
      won't be defined and thus these parts won't appear.  This is ok.
      One has to of course be careful to not take the size of this
-     struct, etc.  */
+     struct and no structure members accessed in non-cpu specific files can
+     go after here.  */
 #if defined (WANT_CPU_M32R)
   M32R_CPU_DATA cpu_data;
 /* start-sanitize-m32rx */
@@ -65,10 +74,9 @@ struct _sim_cpu {
   M32RX_CPU_DATA cpu_data;
 /* end-sanitize-m32rx */
 #endif
-
-  M32R_MISC_PROFILE m32r_misc_profile;
-#define CPU_M32R_MISC_PROFILE(cpu) ((cpu)->m32r_misc_profile)
 };
+
+/* The sim_state struct.  */
 
 struct sim_state {
   sim_cpu *cpu;
@@ -78,6 +86,13 @@ struct sim_state {
 
   sim_state_base base;
 };
+
+/* Misc.  */
 
 /* Default memory size.  */
 #define M32R_DEFAULT_MEM_SIZE 0x800000 /* 8M */
+
+/* Register access fns.  These look up the current mach and call the
+   appropriate handler.  */
+SI h_gr_get (SIM_CPU *, UINT);
+void h_gr_set (SIM_CPU *, UINT, SI);

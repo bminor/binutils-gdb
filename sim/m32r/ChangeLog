@@ -1,3 +1,24 @@
+Wed Jun 10 17:39:29 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* traps.c: New file.  Trap support moved here from sim-if.c.
+	* Makefile.in (SIM_OBJS): Add traps.o
+	* sim-if.c: Don't include targ-vals.h.
+	(sim_engine_illegal_insn): Moved to traps.c
+	* sim-main.h (SIM_CORE_SIGNAL): Define.
+	(m32r_core_signal): Declare.
+
+	* devices.c (device_io_read_buffer): Handle cache purging via MCCR
+	register.
+
+	* m32r-sim.h (M32R_MISC_PROFILE): Move here from sim-main.h.
+	(PROFILE_COUNT_SHORTINSNS,PROFILE_COUNT_LONGINSNS): New macros.
+	(TRAP_SYSCALL,TRAP_BREAKPOINT): New macros.
+
+	* extract.c,sem-switch.c,sem.c: Regenerate.
+start-sanitize-m32rx
+	* cpux.h,readx.c,semx.c: Regenerate.
+end-sanitize-m32rx
+
 Wed May 20 00:10:40 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* m32r-sim.h (PROFILE_COUNT_PARINSNS): New macro.
@@ -32,6 +53,7 @@ start-sanitize-m32rx
 	* cpux.c,cpux.h,modelx.c,semx.c: Regenerate.
 	* m32rx.c (m32rx_model_mark_{busy,unbusy}_reg): New functions.
 	* mloopx.in (execute): Update calls to TRACE_INSN_{INIT,FINI}.
+	Fix pc value passed to TRACE_INSN for second parallel insn.
 end-sanitize-m32rx
 
 Thu May  7 02:51:35 1998  Doug Evans  <devans@seba.cygnus.com>
