@@ -924,6 +924,26 @@ x86_64_breakpoint_from_pc (CORE_ADDR *pc, int *lenptr)
   return breakpoint;
 }
 
+static void
+x86_64_save_dummy_frame_tos (CORE_ADDR sp)
+{
+  /* We must add the size of the return address that is already 
+     put on the stack.  */
+  generic_save_dummy_frame_tos (sp + 
+				TYPE_LENGTH (builtin_type_void_func_ptr));
+}
+
+static struct frame_id
+x86_64_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *frame)
+{
+  struct frame_id id;
+  
+  id.pc = frame_pc_unwind (frame);
+  frame_unwind_unsigned_register (frame, SP_REGNUM, &id.base);
+
+  return id;
+}
+
 void
 x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -1034,6 +1054,10 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
      since all supported x86-64 targets are ELF, but that might change
      in the future.  */
   set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
+  
+  /* Dummy frame helper functions.  */
+  set_gdbarch_save_dummy_frame_tos (gdbarch, x86_64_save_dummy_frame_tos);
+  set_gdbarch_unwind_dummy_id (gdbarch, x86_64_unwind_dummy_id);
 }
 
 void
