@@ -85,6 +85,7 @@ libgui (w/foundry, sn)	Jim Ingham		jingham@cygnus.com
 J.T. Conklin					jtc@redback.com
 Jim Kingdon					kingdon@redhat.com
 Jason Molenda					jsm@cygnus.com
+H.J. Lu						hjl@lucon.org
 
 * Indicates folks we need to get Kerberos/ssh accounts ready so they
 can write in the source tree
