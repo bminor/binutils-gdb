@@ -77,6 +77,7 @@ struct procinfo {
   int fd;			/* File descriptor for /proc entry */
   char *pathname;		/* Pathname to /proc entry */
   int was_stopped;		/* Nonzero if was stopped prior to attach */
+  int nopass_next_sigstop;	/* Don't pass a sigstop on next resume */
   prrun_t prrun;		/* Control state when it is run */
   prstatus_t prstatus;		/* Current process status info */
   gregset_t gregset;		/* General register set */
@@ -2012,6 +2013,11 @@ attach (pid)
 	      close_proc_file (&pi);
 	      error ("PIOCSTOP failed");
 	    }
+	  pi.nopass_next_sigstop = 1;
+	}
+      else
+	{
+	  printf ("Ok, gdb will wait for process %u to stop.\n", pid);
 	}
     }
   
@@ -2386,6 +2392,17 @@ NOTE
 	to be current.  One case where this might be necessary is if the
 	user explicitly changes the PC value that gdb considers to be
 	current.  FIXME:  Investigate if this is necessary or not.
+
+	When attaching to a child process, if we forced it to stop with
+	a PIOCSTOP, then we will have set the nopass_next_sigstop flag.
+	Upon resuming the first time after such a stop, we explicitly
+	inhibit sending it another SIGSTOP, which would be the normal
+	result of default signal handling.  One potential drawback to
+	this is that we will also ignore any attempt to by the user
+	to explicitly continue after the attach with a SIGSTOP.  Ultimately
+	this problem should be dealt with by making the routines that
+	deal with the inferior a little smarter, and possibly even allow
+	an inferior to continue running at the same time as gdb.  (FIXME?)
  */
 
 void
@@ -2396,7 +2413,7 @@ child_resume (step, signo)
   errno = 0;
   pi.prrun.pr_flags = PRSVADDR | PRSTRACE | PRSFAULT | PRCFAULT;
   pi.prrun.pr_vaddr = (caddr_t) *(int *) &registers[REGISTER_BYTE (PC_REGNUM)];
-  if (signo)
+  if (signo && !(signo == SIGSTOP && pi.nopass_next_sigstop))
     {
       set_proc_siginfo (&pi, signo);
     }
@@ -2404,6 +2421,7 @@ child_resume (step, signo)
     {
       pi.prrun.pr_flags |= PRCSIG;
     }
+  pi.nopass_next_sigstop = 0;
   if (step)
     {
       pi.prrun.pr_flags |= PRSTEP;

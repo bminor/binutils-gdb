@@ -1,3 +1,11 @@
+Fri Apr  3 11:23:03 1992  Fred Fish  (fnf@cygnus.com)
+
+	* procfs.c (procinfo struct):  Add nopass_next_sigstop member.
+	* procfs.c (attach):  Set nopass_next_sigstop if attached 
+	process is forcibly stopped.
+	* procfs.c (child_resume):  Use nopass_next_sigstop to suppress
+	resending SIGSTOP to attached process on first resume.
+
 Fri Apr  3 01:37:26 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* Makefile.in (SFILES_MAINDIR):  add mipsread.c
