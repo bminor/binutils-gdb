@@ -1,3 +1,7 @@
+Mon Jun 23 10:51:53 1997  Jeffrey A Law  (law@cygnus.com)
+ 
+	* config.sub (mn10200): Recognize new basic machine.
+
 Thu Jun 19 14:16:42 1997  Brendan Kehoe  <brendan@lisa.cygnus.com>
 
 	* configure.in: Don't set ENABLE_MULTILIB, so we'll be passing

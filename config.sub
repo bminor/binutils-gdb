@@ -163,7 +163,7 @@ case $basic_machine in
 	# Recognize the basic CPU types without company name.
 	# Some are omitted here because they have special meanings below.
 	tahoe | i860 | m32r | m68k | m68000 | m88k | ns32k | arm \
-		| arme[lb] | pyramid \
+		| arme[lb] | pyramid | mn10200 | mn10300 \
 		| tron | a29k | 580 | i960 | h8300 | hppa | hppa1.0 | hppa1.1 \
 		| alpha | we32k | ns16k | clipper | i370 | sh \
 		| powerpc | powerpcle | 1750a | dsp16xx | mips64 | mipsel \
@@ -174,6 +174,11 @@ case $basic_machine in
 	m88110 | m680[01234]0 | m683?2 | m68360 | z8k | v70 | h8500 | w65) # CYGNUS LOCAL
 		basic_machine=$basic_machine-unknown
 		;;
+# CYGNUS LOCAL r3900
+        mipsr3900 | mipsr3900el)
+                basic_machine=$basic_machine-unknown
+                ;;
+# END CYGNUS LOCAL r3900
 	mips64vr4300 | mips64vr4300el) # CYGNUS LOCAL jsmith/vr4300
 		basic_machine=$basic_machine-unknown
 		;;
@@ -191,14 +196,6 @@ case $basic_machine in
 	mips16) # CYGNUS LOCAL krk/mips16
 		basic_machine=$basic_machine-unknown
 		;;
-	mn10300)
-		basic_machine=$basic_machine-unknown
-		;;
-# CYGNUS LOCAL law
-	mn10200)
-		basic_machine=$basic_machine-unknown
-		;;
-# END CYGNUS LOCAL
 # start-sanitize-tic80
 	tic80)				# CYGNUS LOCAL fnf/TIc80
 		basic_machine=$basic_machine-unknown
@@ -217,12 +214,6 @@ case $basic_machine in
 		basic_machine=$basic_machine-unknown
 		;;
 # end-sanitize-d30v
-	mn10200)			# CYGNUS LOCAL
-		basic_machine=$basic_machine-unknown
-		;;
-	mn10300)			# CYGNUS LOCAL
-		basic_machine=$basic_machine-unknown
-		;;
 	# We use `pc' rather than `unknown'
 	# because (1) that's what they normally are, and
 	# (2) the word "unknown" tends to confuse beginning users.
@@ -244,8 +235,16 @@ case $basic_machine in
 	      | pdp11-* | sh-* | powerpc-* | powerpcle-* | sparc64-* | mips64-* | mipsel-* \
 	      | mips64el-* | mips64orion-* | mips64orionel-* | f301-*)
 		;;
-	m88110-* | m680[01234]0-* | m683?2-* | m68360-* | z8k-* | h8500-* | v850-* | d10v-* | d30v-*) # CYGNUS LOCAL
+	m88110-* | m680[01234]0-* | m683?2-* | m68360-* | z8k-* | h8500-* | d10v-*) # CYGNUS LOCAL
 		;;
+# start-sanitize-v850
+	v850-*) # CYGNUS LOCAL
+	        ;;
+# end-sanitize-v850
+# start-sanitize-d30v
+	d30v-*) # CYGNUS LOCAL
+	        ;;
+# end-sanitize-d30v
 	mips64vr4300-* | mips64vr4300el-*) # CYGNUS LOCAL jsmith/vr4300
 		;;
 	mips64vr4100-* | mips64vr4100el-*) # CYGNUS LOCAL jsmith/vr4100
@@ -256,6 +255,10 @@ case $basic_machine in
 # end-sanitize-r5900
 	mips16-*) # CYGNUS LOCAL krk/mips16
 		;;
+# CYGNUS LOCAL r3900
+        mipsr3900-* | mipsr3900el-*)
+                ;;
+# END CYGNUS LOCAL r3900
 # start-sanitize-tic80
 	tic80-*)						# CYGNUS LOCAL fnf/TIc80
 		;;
@@ -682,6 +685,14 @@ case $basic_machine in
 	ps2)
 		basic_machine=i386-ibm
 		;;
+# CYGNUS LOCAL r3900
+        r3900)                                          # CYGNUS LOCAL
+                basic_machine=mipsr3900-unknown
+                ;;
+        r3900el)                                        # CYGNUS LOCAL
+                basic_machine=mipsr3900el-unknown
+                ;;
+# END CYGNUS LOCAL r3900
 # start-sanitize-r5900
         r5900)                                          # CYGNUS LOCAL
                 basic_machine=mips64vr5900el-unknown
