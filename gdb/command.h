@@ -284,6 +284,8 @@ extern void help_list (struct cmd_list_element *, char *,
 extern void help_cmd_list (struct cmd_list_element *, enum command_class,
 			   char *, int, struct ui_file *);
 
+extern void help_all (struct ui_file *);
+
 extern struct cmd_list_element *
   add_set_cmd PARAMS ((char *, enum command_class, var_types, char *, char *,
 		       struct cmd_list_element **));

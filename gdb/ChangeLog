@@ -1,3 +1,8 @@
+Fri Mar 24 12:10:38 2000  glen mccready  <gkm@pobox.com>
+
+        * command.c, command.h (help_all): Add functionality to display
+        a complete listing of available commands.
+
 2000-04-20  Scott Bambrough <scottb@netwinder.org>
 
 	* arm-linux-nat.c (PIDGET, TIDGET): New.

@@ -510,6 +510,12 @@ help_cmd (command, stream)
       return;
     }
 
+  if (strcmp (command, "all") == 0)
+    {
+      help_all (stream);
+      return;
+    }
+
   c = lookup_cmd (&command, cmdlist, "", 0, 0);
 
   if (c == 0)
@@ -600,6 +606,27 @@ Type \"help%s\" followed by a class name for a list of commands in that class.",
 Type \"help%s\" followed by %scommand name for full documentation.\n\
 Command name abbreviations are allowed if unambiguous.\n",
 		    cmdtype1, cmdtype2);
+}
+
+static void
+help_all (stream)
+     struct ui_file *stream;
+{
+  struct cmd_list_element *c;
+  extern struct cmd_list_element *cmdlist;
+
+  for (c = cmdlist; c; c = c->next)
+    {
+      if (c->abbrev_flag)
+        continue;
+      /* If this is a prefix command, print it's subcommands */
+      if (c->prefixlist)
+        help_cmd_list (*c->prefixlist, all_commands, c->prefixname, 0, stream);
+    
+      /* If this is a class name, print all of the commands in the class */
+      else if (c->function.cfunc == NULL)
+        help_cmd_list (cmdlist, c->class, "", 0, stream);
+    }
 }
 
 /* Print only the first line of STR on STREAM.  */
