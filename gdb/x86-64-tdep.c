@@ -754,9 +754,10 @@ x86_64_store_return_value (struct type *type, struct regcache *regcache,
 
 
 static CORE_ADDR
-x86_64_push_dummy_call (struct gdbarch *gdbarch, struct regcache *regcache,
-			CORE_ADDR dummy_addr, int nargs, struct value **args,
-			CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr)
+x86_64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
+			struct regcache *regcache, CORE_ADDR bp_addr,
+			int nargs, struct value **args,	CORE_ADDR sp,
+			int struct_return, CORE_ADDR struct_addr)
 {
   char buf[8];
 
@@ -772,7 +773,7 @@ x86_64_push_dummy_call (struct gdbarch *gdbarch, struct regcache *regcache,
 
   /* Store return address.  */
   sp -= 8;
-  store_unsigned_integer (buf, 8, dummy_addr);
+  store_unsigned_integer (buf, 8, bp_addr);
   write_memory (sp, buf, 8);
 
   /* Finally, update the stack pointer...  */
