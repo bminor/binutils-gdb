@@ -220,6 +220,10 @@ sim_create_inferior (sd, abfd, argv, env)
       /* We wouldn't set the machine type with earlier toolchains, so we
 	 explicitly select a processor capable of supporting all ARMs in
 	 32bit mode.  */
+    case bfd_mach_arm_XScale:
+      ARMul_SelectProcessor (state, ARM_v5_Prop | ARM_v5e_Prop | ARM_XScale_Prop);
+      break;
+
     case bfd_mach_arm_5:
     case bfd_mach_arm_5T:
       ARMul_SelectProcessor (state, ARM_v5_Prop);
@@ -227,10 +231,6 @@ sim_create_inferior (sd, abfd, argv, env)
 
     case bfd_mach_arm_5TE:
       ARMul_SelectProcessor (state, ARM_v5_Prop | ARM_v5e_Prop);
-      break;
-
-    case bfd_mach_arm_XScale:
-      ARMul_SelectProcessor (state, ARM_v5_Prop | ARM_v5e_Prop | ARM_XScale_Prop);
       break;
 
     case bfd_mach_arm_4:
@@ -395,7 +395,16 @@ sim_fetch_register (sd, rn, memory, length)
     regval = ARMul_GetCPSR (state);
   else
     regval = 0;			/* FIXME: should report an error */
-  tomem (state, memory, regval);
+
+  while (length)
+    {
+      tomem (state, memory, regval);
+
+      length -= 4;
+      memory += 4;
+      regval = 0;
+    }  
+
   return -1;
 }
 

@@ -1,3 +1,8 @@
+2002-01-09  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* wrapper.c (sim_fetch_register): If fetching more than 4 bytes
+	return zeroes in the other words.
+
 2001-11-16  Ben Harris  <bjh21@netbsd.org>
 
 	* Makefile.in (armemu32.o): Replace $< with autoconf recommended
