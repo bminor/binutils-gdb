@@ -32,6 +32,9 @@ if { [skip_cplus_tests] } { continue }
 set prms_id 0
 set bug_id 0
 
+# No test program available.
+continue
+
 set testfile "pr-1553"
 set srcfile ${testfile}.cc
 set binfile ${objdir}/${subdir}/${testfile}
