@@ -1,5 +1,10 @@
 2004-08-01  Andrew Cagney  <cagney@gnu.org>
 
+	* config/mips/tm-irix6.h: Delete file.
+	* config/mips/tm-irix5.h: Delete file.
+	* config/mips/irix5.mt (TM_FILE): Set to tm-mips.h
+	* config/mips/irix6.mt (TM_FILE): Set to tm-mips.h
+
 	* config/ia64/tm-linux.h (IA64_GNULINUX_TARGET): Delete.
 	* config/alpha/nm-osf2.h (PROCFS_SIGPEND_OFFSET): Delete.
 	* config/nm-gnu.h (NO_CORE_OPS): Delete.
