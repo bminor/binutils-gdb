@@ -61,10 +61,10 @@ DEP = mkdep
 TARGETLIB = libsim.a
 
 run:	code.o run.o
-	$(CC) -o run code.o run.o ../bfd/libbfd.a ../libiberty/libiberty.a
+	cc -o run code.o run.o ../bfd/libbfd.a ../libiberty/libiberty.a
  
 code.c:p1.c p2.c p3.c
-	cat p1.c p2.c p3.c | cb >code.c
+	cat $(VPATH)/p1.c p2.c $(VPATH)/p3.c | cb >code.c
 	indent code.c
 
 p2.c:writecode
@@ -74,7 +74,7 @@ p2.c:writecode
 writecode:writecode.o
 
 writecode.o:writecode.c
-	$(CC) -g $(CSEARCH) -c writecode.c 
+	cc -g $(CSEARCH) -c $(VPATH)/writecode.c 
 
 
 
