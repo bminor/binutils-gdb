@@ -2666,11 +2666,15 @@ static char **return_val;
 
 #define COMPLETION_LIST_ADD_SYMBOL(symbol, sym_text, len, text, word) \
   do { \
-    completion_list_add_name (SYMBOL_NAME (symbol), (sym_text), (len), \
-			      (text), (word)); \
     if (SYMBOL_DEMANGLED_NAME (symbol) != NULL) \
+      /* Put only the mangled name on the list.  */ \
+      /* Advantage:  "b foo<TAB>" completes to "b foo(int, int)" */ \
+      /* Disadvantage:  "b foo__i<TAB>" doesn't complete.  */ \
       completion_list_add_name \
 	(SYMBOL_DEMANGLED_NAME (symbol), (sym_text), (len), (text), (word)); \
+    else \
+      completion_list_add_name \
+	(SYMBOL_NAME (symbol), (sym_text), (len), (text), (word)); \
   } while (0)
 
 /*  Test to see if the symbol specified by SYMNAME (which is already
