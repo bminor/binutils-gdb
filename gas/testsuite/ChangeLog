@@ -1,3 +1,7 @@
+2000-11-11  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* gas/macros/macros.exp: Mark strings test xfail for sh.
+
 2000-10-24  Diego Novillo  <dnovillo@cygnus.com>
 
 	* intel.s, intel.d: Add new tests for intel syntax.
