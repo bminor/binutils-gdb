@@ -241,8 +241,9 @@ build_section_table (some_bfd, start, end)
 }
 
 void
-sex_to_vmap(bfd *bf, sec_ptr sex, struct vmap_and_bfd *vmap_bfd) 
+sex_to_vmap(bfd *bf, sec_ptr sex, PTR arg3) 
 {
+  struct vmap_and_bfd *vmap_bfd = (struct vmap_and_bfd *)arg3;
   register struct vmap *vp, **vpp;
   register struct symtab *syms;
   bfd *arch = vmap_bfd->pbfd;
@@ -571,9 +572,10 @@ retry:
 	  /* found a corresponding VMAP. remap! */
 	  ostart = vp->tstart;
 
-	  vp->tstart = ldi->ldinfo_textorg;
+	  /* We can assume pointer == CORE_ADDR, this code is native only.  */
+	  vp->tstart = (CORE_ADDR) ldi->ldinfo_textorg;
 	  vp->tend   = vp->tstart + ldi->ldinfo_textsize;
-	  vp->dstart = ldi->ldinfo_dataorg;
+	  vp->dstart = (CORE_ADDR) ldi->ldinfo_dataorg;
 	  vp->dend   = vp->dstart + ldi->ldinfo_datasize;
 
 	  if (vp->tadj) {
@@ -920,9 +922,10 @@ bfd_err:
 
       offset += ldip->ldinfo_next;
 
-      vp->tstart = ldip->ldinfo_textorg;
+      /* We can assume pointer == CORE_ADDR, this code is native only.  */
+      vp->tstart = (CORE_ADDR) ldip->ldinfo_textorg;
       vp->tend = vp->tstart + ldip->ldinfo_textsize;
-      vp->dstart = ldip->ldinfo_dataorg;
+      vp->dstart = (CORE_ADDR) ldip->ldinfo_dataorg;
       vp->dend = vp->dstart + ldip->ldinfo_datasize;
 
       if (vp->tadj != 0) {
@@ -965,7 +968,8 @@ bfd_err:
 
       vmap_symtab (vp);
 
-      add_text_to_loadinfo (ldip->ldinfo_textorg, ldip->ldinfo_dataorg);
+      add_text_to_loadinfo ((CORE_ADDR)ldip->ldinfo_textorg,
+			    (CORE_ADDR)ldip->ldinfo_dataorg);
     } while (ldip->ldinfo_next != 0);
   vmap_exec ();
   do_cleanups (old);

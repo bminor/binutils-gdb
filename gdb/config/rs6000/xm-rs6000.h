@@ -85,6 +85,9 @@ extern char *strdup PARAMS ((char *));
 #define	SIGWINCH_HANDLER  aix_resizewindow
 extern	void	aix_resizewindow ();
 
+/* This doesn't seem to be declared in any header file I can find.  */
+char *termdef PARAMS ((int, int));
+
 /* `lines_per_page' and `chars_per_line' are local to utils.c. Rectify this. */
 
 #define	SIGWINCH_HANDLER_BODY	\

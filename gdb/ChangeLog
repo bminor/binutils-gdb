@@ -1,5 +1,13 @@
 Tue Mar 30 08:06:24 1993  Jim Kingdon  (kingdon@cygnus.com)
 
+	* command.c (do_setshow_command): Use %u with var_{u,z}integer.
+
+	* command.{c,h}: New var_type var_integer.
+	main.c: Use it for history_size.
+
+	* rs6000-tdep.c, xcoffexec.c, config/rs6000/xm-rs6000.h, breakpoint.c:
+	Lint and byte-order fixups.
+
 	* breakpoint.c (print_it_normal): Return 0 after hitting watchpoint.
 
 	* breakpoint.h (bpstat): New field print_it.

@@ -1058,6 +1058,20 @@ do_setshow_command (arg, from_tty, c)
 	  if (*(unsigned int *) c->var == 0)
 	    *(unsigned int *) c->var = UINT_MAX;
 	  break;
+	case var_integer:
+	  {
+	    unsigned int val;
+	    if (arg == NULL)
+	      error_no_arg ("integer to set it to.");
+	    val = parse_and_eval_address (arg);
+	    if (val == 0)
+	      *(int *) c->var = INT_MAX;
+	    else if (val >= INT_MAX)
+	      error ("integer %u out of range", val);
+	    else
+	      *(int *) c->var = val;
+	    break;
+	  }
 	case var_zinteger:
 	  if (arg == NULL)
 	    error_no_arg ("integer to set it to.");
@@ -1101,8 +1115,17 @@ do_setshow_command (arg, from_tty, c)
 	}
 	/* else fall through */
       case var_zinteger:
-	fprintf_filtered (stdout, "%d", *(unsigned int *) c->var);
+	fprintf_filtered (stdout, "%u", *(unsigned int *) c->var);
 	break;
+      case var_integer:
+	if (*(int *) c->var == INT_MAX)
+	  {
+	    fputs_filtered ("unlimited", stdout);
+	  }
+	else
+	  fprintf_filtered (stdout, "%d", *(int *) c->var);
+	break;
+	    
       default:
 	error ("gdb internal error: bad var_type in do_setshow_command");
       }

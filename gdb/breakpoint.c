@@ -942,7 +942,7 @@ bpstat_stop_status (pc, frame_address)
 	    "Error evaluating expression for watchpoint %d\n";
 	  char message[sizeof (message1) + 30 /* slop */];
 	  sprintf (message, message1, b->number);
-	  switch (catch_errors (watchpoint_check, bs, message))
+	  switch (catch_errors (watchpoint_check, (char *) bs, message))
 	    {
 	    case WP_DISABLED:
 	      /* We've already printed what needs to be printed.  */

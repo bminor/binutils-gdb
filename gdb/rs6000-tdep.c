@@ -135,7 +135,7 @@ single_step (signal)
   if (!one_stepped) {
     loc = read_pc ();
 
-    read_memory (loc, &insn, 4);
+    read_memory (loc, (char *) &insn, 4);
 
     breaks[0] = loc + INSNLEN(insn);
     opcode = insn >> 26;
@@ -322,7 +322,14 @@ extern int stop_stack_dummy;
 void
 push_dummy_frame ()
 {
-  int sp, pc;				/* stack pointer and link register */
+  /* stack pointer.  */
+  CORE_ADDR sp;
+
+  /* link register.  */
+  CORE_ADDR pc;
+  /* Same thing, target byte order.  */
+  char pc_targ[4];
+  
   int ii;
 
   target_fetch_registers (-1);
@@ -338,7 +345,8 @@ push_dummy_frame ()
   }
   
   sp = read_register(SP_REGNUM);
-  pc = read_register(PC_REGNUM);  
+  pc = read_register(PC_REGNUM);
+  memcpy (pc_targ, (char *) &pc, 4);
 
   dummy_frame_addr [dummy_frame_count++] = sp;
 
@@ -357,7 +365,7 @@ push_dummy_frame ()
   set_current_frame (create_new_frame (sp-DUMMY_FRAME_SIZE, pc));
 
   /* save program counter in link register's space. */
-  write_memory (sp+8, &pc, 4);
+  write_memory (sp+8, pc_targ, 4);
 
   /* save all floating point and general purpose registers here. */
 
@@ -382,7 +390,7 @@ push_dummy_frame ()
   sp -= DUMMY_FRAME_SIZE;
 
   /* And finally, this is the back chain. */
-  write_memory (sp+8, &pc, 4);
+  write_memory (sp+8, pc_targ, 4);
 }
 
 
@@ -449,7 +457,7 @@ pop_dummy_frame ()
 void
 pop_frame ()
 {
-  int pc, lr, sp, prev_sp;		/* %pc, %lr, %sp */
+  CORE_ADDR pc, lr, sp, prev_sp;		/* %pc, %lr, %sp */
   struct aix_framedata fdata;
   FRAME fr = get_current_frame ();
   int addr, ii;
@@ -469,11 +477,11 @@ pop_frame ()
   addr = get_pc_function_start (fr->pc) + FUNCTION_START_OFFSET;
   function_frame_info (addr, &fdata);
 
-  read_memory (sp, &prev_sp, 4);
+  prev_sp = read_memory_integer (sp, 4);
   if (fdata.frameless)
     lr = read_register (LR_REGNUM);
   else
-    read_memory (prev_sp+8, &lr, 4);
+    lr = read_memory_integer (prev_sp+8, 4);
 
   /* reset %pc value. */
   write_register (PC_REGNUM, lr);
@@ -826,7 +834,7 @@ ran_out_of_registers_for_arguments:
         ++f_argno;
       }
 
-      write_memory (sp+24+(ii*4), VALUE_CONTENTS (arg), len);
+      write_memory (sp+24+(ii*4), (char *) VALUE_CONTENTS (arg), len);
       ii += ((len + 3) & -4) / 4;
     }
   }
@@ -927,7 +935,7 @@ CORE_ADDR pc;
   for (ii=0; trampoline_code[ii]; ++ii) {
     op  = read_memory_integer (pc + (ii*4), 4);
     if (op != trampoline_code [ii])
-      return NULL;
+      return 0;
   }
   ii = read_register (11);		/* r11 holds destination addr	*/
   pc = read_memory_integer (ii, 4);	/* (r11) value			*/
@@ -1110,7 +1118,10 @@ unsigned int pid;
     vmap_ldinfo(ldi);
 
    do {
-     add_text_to_loadinfo (ldi->ldinfo_textorg, ldi->ldinfo_dataorg);
+     /* We are allowed to assume CORE_ADDR == pointer.  This code is
+	native only.  */
+     add_text_to_loadinfo ((CORE_ADDR) ldi->ldinfo_textorg,
+			   (CORE_ADDR) ldi->ldinfo_dataorg);
     } while (ldi->ldinfo_next
 	     && (ldi = (void *) (ldi->ldinfo_next + (char *) ldi)));
 
