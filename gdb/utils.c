@@ -104,6 +104,9 @@ static void prompt_for_continue (void);
 static void set_screen_size (void);
 static void set_width (void);
 
+static NORETURN void error_stream_1 (struct ui_file *stream, 
+				     enum return_reason reason) ATTR_NORETURN;
+
 /* Chain of cleanup actions established with make_cleanup,
    to be executed if an error happens.  */
 
@@ -620,7 +623,7 @@ verror (const char *string, va_list args)
   struct ui_file *tmp_stream = mem_fileopen ();
   make_cleanup_ui_file_delete (tmp_stream);
   vfprintf_unfiltered (tmp_stream, string, args);
-  error_stream (tmp_stream);
+  error_stream_1 (tmp_stream, RETURN_ERROR);
 }
 
 NORETURN void
@@ -629,6 +632,28 @@ error (const char *string, ...)
   va_list args;
   va_start (args, string);
   verror (string, args);
+  va_end (args);
+}
+
+/* Print an error message and quit.
+   The first argument STRING is the error message, used as a fprintf string,
+   and the remaining args are passed as arguments to it.  */
+
+NORETURN void
+vfatal (const char *string, va_list args)
+{
+  struct ui_file *tmp_stream = mem_fileopen ();
+  make_cleanup_ui_file_delete (tmp_stream);
+  vfprintf_unfiltered (tmp_stream, string, args);
+  error_stream_1 (tmp_stream, RETURN_QUIT);
+}
+
+NORETURN void
+fatal (const char *string, ...)
+{
+  va_list args;
+  va_start (args, string);
+  vfatal (string, args);
   va_end (args);
 }
 
@@ -670,8 +695,8 @@ error_output_message (char *pre_print, char *msg)
   fprintf_filtered (gdb_stderr, "\n");
 }
 
-NORETURN void
-error_stream (struct ui_file *stream)
+static NORETURN void
+error_stream_1 (struct ui_file *stream, enum return_reason reason)
 {
   if (deprecated_error_begin_hook)
     deprecated_error_begin_hook ();
@@ -690,7 +715,13 @@ error_stream (struct ui_file *stream)
   ui_file_put (stream, do_write, gdb_stderr);
   fprintf_filtered (gdb_stderr, "\n");
 
-  throw_exception (RETURN_ERROR);
+  throw_exception (reason);
+}
+
+NORETURN void
+error_stream (struct ui_file *stream)
+{
+  error_stream_1 (stream, RETURN_ERROR);
 }
 
 /* Get the last error message issued by gdb */

@@ -1,3 +1,16 @@
+2004-11-05  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* defs.h (fatal, vfatal): New function prototypes.
+	* stack.c (backtrace_command_stub): Stub to call backtrace_command_1
+	via catch_errors.
+	(backtrace_command): Change to call backtrace_command_stub via
+	catch_errors instead of calling backtrace_command_1 directly.
+	(backtrace_full_command): Ditto.
+	* utils.c (error_stream_1): New static function.
+	(verror): Change to call error_stream_1 instead of error_stream.
+	(error_stream): Call error_stream_1 with RETURN_ERROR argument.
+	(vfatal, fatal): New functions.
+
 2004-11-05  Andrew Cagney  <cagney@gnu.org>
 
 	* stack.c (parse_frame_specification_1): Clear selected_frame_p

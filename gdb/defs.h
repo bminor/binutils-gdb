@@ -911,6 +911,10 @@ extern char *error_last_message (void);
 /* Output arbitrary error message.  */
 extern void error_output_message (char *pre_print, char *msg);
 
+extern NORETURN void vfatal (const char *fmt, va_list ap) ATTR_NORETURN;
+
+extern NORETURN void fatal (const char *fmt, ...) ATTR_NORETURN ATTR_FORMAT (printf, 1, 2);
+
 extern NORETURN void internal_verror (const char *file, int line,
 				      const char *, va_list ap) ATTR_NORETURN;
 
