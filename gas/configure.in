@@ -182,9 +182,9 @@ changequote([,])dnl
 			    fmt=aout em=mach bfd_gas=yes ;;
       i386-*-msdos*)        fmt=aout ;;
       i386-*-moss*)	    fmt=elf ;;
-      i386-*-pe)            fmt=coff targ=i386coff em=pe ;;
-      i386-*-win32)         fmt=coff targ=i386coff em=pe ;;
-      i386-*-*nt)           fmt=coff targ=i386coff em=pe ;;
+      i386-*-pe)            fmt=coff targ=i386coff em=pe bfd_gas=yes;;
+      i386-*-cygwin32)      fmt=coff targ=i386coff em=pe bfd_gas=yes;;
+      i386-*-*nt)           fmt=coff targ=i386coff em=pe bfd_gas=yes;;
       i960-*-bout)          fmt=bout ;;
       i960-*-coff)          fmt=coff em=ic960 targ=ic960coff ;;
       i960-*-nindy*)        fmt=bout ;;
@@ -240,13 +240,8 @@ changequote([,])dnl
 			    *)   targ=mips-lit ;;
 			    esac
 			    ;;
-      ppc-*-pe)             fmt=coff em=pe 
-			    case "$endian" in
-			    big) targ=ppc-big ;;
-			    *)   targ=ppc-lit ;;
-			    esac
-                            ;;
-      ppc-*-winnt*)         fmt=coff em=pe 
+      ppc-*-pe | ppc-*-cygwin32 | ppc-*-winnt*)
+		            fmt=coff em=pe 
 			    case "$endian" in
 			    big) targ=ppc-big ;;
 			    *)   targ=ppc-lit ;;

@@ -1,3 +1,8 @@
+Wed Jan 31 18:31:46 1996  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* configure.in (i386-*-cygwin32, ppc-*-cygwin32): New.
+	* configure: Rebuild.
+
 Wed Jan 31 14:03:17 1996  Richard Henderson  <rth@tamu.edu>
 
 	* config/tc-m68k.c (md_pseudo_table): Add "extend" and "ldouble".
@@ -246,6 +251,7 @@ Mon Dec 11 16:23:51 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mac-as.r: Fix copyright and version strings.
 	(cfrg): Use PROG_NAME instead of literal name.
+
 
 Mon Dec 11 14:14:08 1995  Ian Lance Taylor  <ian@cygnus.com>
 
