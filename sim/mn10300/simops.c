@@ -2367,9 +2367,9 @@ void OP_CD000000 ()
   sp = State.regs[REG_SP];
   next_pc = State.pc + 2;
   State.mem[sp] = next_pc & 0xff;
-  State.mem[sp+1] = next_pc & 0xff00;
-  State.mem[sp+2] = next_pc & 0xff0000;
-  State.mem[sp+3] = next_pc & 0xff000000;
+  State.mem[sp+1] = (next_pc & 0xff00) >> 8;
+  State.mem[sp+2] = (next_pc & 0xff0000) >> 16;
+  State.mem[sp+3] = (next_pc & 0xff000000) >> 24;
 
   mask = insn & 0xff;
 
@@ -2432,9 +2432,9 @@ void OP_DD000000 ()
   sp = State.regs[REG_SP];
   next_pc = State.pc + 2;
   State.mem[sp] = next_pc & 0xff;
-  State.mem[sp+1] = next_pc & 0xff00;
-  State.mem[sp+2] = next_pc & 0xff0000;
-  State.mem[sp+3] = next_pc & 0xff000000;
+  State.mem[sp+1] = (next_pc & 0xff00) >> 8;
+  State.mem[sp+2] = (next_pc & 0xff0000) >> 16;
+  State.mem[sp+3] = (next_pc & 0xff000000) >> 24;
 
   mask = (extension & 0xff00) >> 8;
 
@@ -2496,9 +2496,9 @@ void OP_F0F0 ()
   sp = State.regs[REG_SP];
   next_pc = State.pc + 2;
   State.mem[sp] = next_pc & 0xff;
-  State.mem[sp+1] = next_pc & 0xff00;
-  State.mem[sp+2] = next_pc & 0xff0000;
-  State.mem[sp+3] = next_pc & 0xff000000;
+  State.mem[sp+1] = (next_pc & 0xff00) >> 8;
+  State.mem[sp+2] = (next_pc & 0xff0000) >> 16;
+  State.mem[sp+3] = (next_pc & 0xff000000) >> 24;
   State.regs[REG_MDR] = next_pc;
   State.pc = State.regs[REG_A0 + (insn & 0x3)] - 2;
 }
@@ -2511,9 +2511,9 @@ void OP_FAFF0000 ()
   sp = State.regs[REG_SP];
   next_pc = State.pc + 4;
   State.mem[sp] = next_pc & 0xff;
-  State.mem[sp+1] = next_pc & 0xff00;
-  State.mem[sp+2] = next_pc & 0xff0000;
-  State.mem[sp+3] = next_pc & 0xff000000;
+  State.mem[sp+1] = (next_pc & 0xff00) >> 8;
+  State.mem[sp+2] = (next_pc & 0xff0000) >> 16;
+  State.mem[sp+3] = (next_pc & 0xff000000) >> 24;
   State.regs[REG_MDR] = next_pc;
   State.pc += SEXT16 (insn & 0xffff) - 4;
 }
@@ -2526,9 +2526,9 @@ void OP_FCFF0000 ()
   sp = State.regs[REG_SP];
   next_pc = State.pc + 6;
   State.mem[sp] = next_pc & 0xff;
-  State.mem[sp+1] = next_pc & 0xff00;
-  State.mem[sp+2] = next_pc & 0xff0000;
-  State.mem[sp+3] = next_pc & 0xff000000;
+  State.mem[sp+1] = (next_pc & 0xff00) >> 8;
+  State.mem[sp+2] = (next_pc & 0xff0000) >> 16;
+  State.mem[sp+3] = (next_pc & 0xff000000) >> 24;
   State.regs[REG_MDR] = next_pc;
   State.pc += (((insn & 0xffff) << 16) | extension) - 6;
 }
@@ -2668,7 +2668,141 @@ void OP_F0FD ()
 /* trap */
 void OP_F0FE ()
 {
- abort ();
+  /* We use this for simulated system calls; we may need to change
+     it to a reserved instruction if we conflict with uses at
+     Matsushita.  */
+  int save_errno = errno;	
+  errno = 0;
+
+/* Registers passed to trap 0 */
+
+/* Function number.  */
+#define FUNC   (load_mem (State.regs[REG_SP] + 4, 4))
+
+/* Parameters.  */
+#define PARM1   (load_mem (State.regs[REG_SP] + 8, 4))
+#define PARM2   (load_mem (State.regs[REG_SP] + 12, 4))
+#define PARM3   (load_mem (State.regs[REG_SP] + 16, 4))
+
+/* Registers set by trap 0 */
+
+#define RETVAL State.regs[0]	/* return value */
+#define RETERR State.regs[1]	/* return error code */
+
+/* Turn a pointer in a register into a pointer into real memory. */
+
+#define MEMPTR(x) (State.mem + x)
+
+  switch (FUNC)
+    {
+#if !defined(__GO32__) && !defined(_WIN32)
+      case SYS_fork:
+      RETVAL = fork ();
+      break;
+    case SYS_execve:
+      RETVAL = execve (MEMPTR (PARM1), (char **) MEMPTR (PARM2),
+		       (char **)MEMPTR (PARM3));
+      break;
+    case SYS_execv:
+      RETVAL = execve (MEMPTR (PARM1), (char **) MEMPTR (PARM2), NULL);
+      break;
+#endif
+
+    case SYS_read:
+      RETVAL = mn10300_callback->read (mn10300_callback, PARM1,
+				    MEMPTR (PARM2), PARM3);
+      break;
+    case SYS_write:
+      if (PARM1 == 1)
+	RETVAL = (int)mn10300_callback->write_stdout (mn10300_callback,
+						   MEMPTR (PARM2), PARM3);
+      else
+	RETVAL = (int)mn10300_callback->write (mn10300_callback, PARM1,
+					    MEMPTR (PARM2), PARM3);
+      break;
+    case SYS_lseek:
+      RETVAL = mn10300_callback->lseek (mn10300_callback, PARM1, PARM2, PARM3);
+      break;
+    case SYS_close:
+      RETVAL = mn10300_callback->close (mn10300_callback, PARM1);
+      break;
+    case SYS_open:
+      RETVAL = mn10300_callback->open (mn10300_callback, MEMPTR (PARM1), PARM2);
+      break;
+    case SYS_exit:
+      /* EXIT - caller can look in PARM1 to work out the 
+	 reason */
+      if (PARM1 == 0xdead || PARM1 == 0x1)
+	State.exception = SIGABRT;
+      else
+	State.exception = SIGQUIT;
+      break;
+
+    case SYS_stat:	/* added at hmsi */
+      /* stat system call */
+      {
+	struct stat host_stat;
+	reg_t buf;
+
+	RETVAL = stat (MEMPTR (PARM1), &host_stat);
+	
+	buf = PARM2;
+
+	/* Just wild-assed guesses.  */
+	store_mem (buf, 2, host_stat.st_dev);
+	store_mem (buf + 2, 2, host_stat.st_ino);
+	store_mem (buf + 4, 4, host_stat.st_mode);
+	store_mem (buf + 8, 2, host_stat.st_nlink);
+	store_mem (buf + 10, 2, host_stat.st_uid);
+	store_mem (buf + 12, 2, host_stat.st_gid);
+	store_mem (buf + 14, 2, host_stat.st_rdev);
+	store_mem (buf + 16, 4, host_stat.st_size);
+	store_mem (buf + 20, 4, host_stat.st_atime);
+	store_mem (buf + 28, 4, host_stat.st_mtime);
+	store_mem (buf + 36, 4, host_stat.st_ctime);
+      }
+      break;
+
+    case SYS_chown:
+      RETVAL = chown (MEMPTR (PARM1), PARM2, PARM3);
+      break;
+    case SYS_chmod:
+      RETVAL = chmod (MEMPTR (PARM1), PARM2);
+      break;
+    case SYS_time:
+      RETVAL = time (MEMPTR (PARM1));
+      break;
+    case SYS_times:
+      {
+	struct tms tms;
+	RETVAL = times (&tms);
+	store_mem (PARM1, 4, tms.tms_utime);
+	store_mem (PARM1 + 4, 4, tms.tms_stime);
+	store_mem (PARM1 + 8, 4, tms.tms_cutime);
+	store_mem (PARM1 + 12, 4, tms.tms_cstime);
+	break;
+      }
+    case SYS_gettimeofday:
+      {
+	struct timeval t;
+	struct timezone tz;
+	RETVAL = gettimeofday (&t, &tz);
+	store_mem (PARM1, 4, t.tv_sec);
+	store_mem (PARM1 + 4, 4, t.tv_usec);
+	store_mem (PARM2, 4, tz.tz_minuteswest);
+	store_mem (PARM2 + 4, 4, tz.tz_dsttime);
+	break;
+      }
+    case SYS_utime:
+      /* Cast the second argument to void *, to avoid type mismatch
+	 if a prototype is present.  */
+      RETVAL = utime (MEMPTR (PARM1), (void *) MEMPTR (PARM2));
+      break;
+    default:
+      abort ();
+    }
+  RETERR = errno;
+  errno = save_errno;
 }
 
 /* rtm */
