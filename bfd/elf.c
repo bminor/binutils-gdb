@@ -3233,7 +3233,7 @@ _bfd_elf_compute_section_file_positions (bfd *abfd,
 {
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   bfd_boolean failed;
-  struct bfd_strtab_hash *strtab;
+  struct bfd_strtab_hash *strtab = NULL;
   Elf_Internal_Shdr *shstrtab_hdr;
 
   if (abfd->output_has_begun)
@@ -4223,6 +4223,12 @@ assign_file_positions_for_segments (bfd *abfd, struct bfd_link_info *link_info)
 		  p->p_filesz += sec->size;
 		  p->p_memsz += sec->size;
 		}
+	      /* PR ld/594:  Sections in note segments which are not loaded
+		 contribute to the file size but not the in-memory size.  */
+	      else if (p->p_type == PT_NOTE
+		  && (flags & SEC_HAS_CONTENTS) != 0)
+		p->p_filesz += sec->size;
+
 	      /* .tbss is special.  It doesn't contribute to p_memsz of
 		 normal segments.  */
 	      else if ((flags & SEC_THREAD_LOCAL) == 0

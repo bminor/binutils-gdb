@@ -1,3 +1,8 @@
+2005-02-23  Nick Clifton  <nickc@redhat.com>
+
+	* elf.c (_bfd_elf_compute_section_file_positions): Initialise
+	strtab to avoid compile time warning.
+
 2005-02-23  Ben Elliston  <bje@au.ibm.com>
 
 	* opncls.c (bfd_zalloc): Document this function.
