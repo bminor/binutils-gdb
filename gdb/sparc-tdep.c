@@ -839,10 +839,10 @@ sparc32_return_value (struct gdbarch *gdbarch, struct type *type,
 static CORE_ADDR
 sparc_extract_struct_value_address (struct regcache *regcache)
 {
-  ULONGEST addr;
+  ULONGEST sp;
 
-  regcache_cooked_read_unsigned (regcache, SPARC_O0_REGNUM, &addr);
-  return addr;
+  regcache_cooked_read_unsigned (regcache, SPARC_SP_REGNUM, &sp);
+  return read_memory_unsigned_integer (sp + 64, 4);
 }
 
 static int

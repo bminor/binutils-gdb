@@ -1,5 +1,8 @@
 2004-01-05  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc-tdep.c (sparc_extract_struct_value_address): Get the
+	address from [sp + 64] instead of %o2.
+
 	* frame.c (get_prev_frame): Don't try to unwind the PC.  This
 	fixes PR backtrace/1476.
 
