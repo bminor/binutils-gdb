@@ -368,7 +368,7 @@ case "${target}" in
   *-*-netware)
     noconfigdirs="$noconfigdirs target-libg++ target-libstdc++ target-librx target-newlib target-libiberty"
     ;;
-  *-*-vxworks5.1)
+  *-*-vxworks*)
     noconfigdirs="$noconfigdirs target-newlib"
     ;;
   alpha-dec-osf*)

@@ -1,3 +1,8 @@
+Sat Dec  9 14:58:28 1995  Jim Wilson  <wilson@chestnut.cygnus.com>
+
+	* configure.in (noconfigdirs): Exclude target-newlib for all versions
+	of vxworks, not just vxworks5.1.
+
 Mon Dec  4 12:05:40 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-configure: Add support for exec-prefix.
