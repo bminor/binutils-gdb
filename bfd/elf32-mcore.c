@@ -196,6 +196,20 @@ static reloc_howto_type mcore_elf_howto_raw[] =
          0,                     /* src_mask */
          0,                     /* dst_mask */
          false),                /* pcrel_offset */
+  
+  HOWTO (R_MCORE_RELATIVE,      /* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 NULL,                  /* special_function */
+	 "R_MCORE_RELATIVE",    /* name */
+	 true,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 true)			/* pcrel_offset */
 };
 
 #ifndef NUM_ELEM
@@ -239,6 +253,7 @@ mcore_elf_reloc_type_lookup (abfd, code)
     case BFD_RELOC_MCORE_PCREL_JSR_IMM11BY2: mcore_reloc = R_MCORE_PCRELJSR_IMM11BY2; break;
     case BFD_RELOC_VTABLE_INHERIT:           mcore_reloc = R_MCORE_GNU_VTINHERIT; break;
     case BFD_RELOC_VTABLE_ENTRY:             mcore_reloc = R_MCORE_GNU_VTENTRY; break;
+    case BFD_RELOC_RVA:                      mcore_reloc = R_MCORE_RELATIVE; break;
     default:
       return (reloc_howto_type *)NULL;
     }
@@ -532,9 +547,6 @@ mcore_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       switch (r_type)
 	{
 	default:
-	case R_MCORE_PCRELIMM8BY4:	
-	case R_MCORE_PCRELIMM11BY2:
-	case R_MCORE_PCRELIMM4BY2:
 	  break;
 
 	case R_MCORE_PCRELJSR_IMM11BY2:

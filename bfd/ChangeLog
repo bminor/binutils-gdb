@@ -1,3 +1,20 @@
+1999-05-15  Nick Clifton  <nickc@cygnus.com>
+
+	* reloc.c (BFD_RELOC_MCORE_RVA): Define.
+	* bfd-in2.h: Regenerate.
+	* coff-mcore.c (in_reloc_p): Remove defintion.
+	(mcore_coff_howto): Add IMAGE_REL_MCORE_RVA.
+	(mcore_coff_reloc_type_lookup): Map BFD_RELOC_RVA to
+	IMAGE_REL_MCORE_RVA.
+	(coff_mcore_rtype_to_howto): Add special processing for
+	IMAGE_REL_MCORE_RVA.
+	(coff_mcore_relocate_section): Add support for
+	IMAGE_REL_MCORE_RVA. 
+	* elf32-mcore (mcore_elf_howto_): Add R_MCORE_RELATIVE.
+	(mcore_elf_reloc_type_lookup): Map BFD_RELOC_RVA to
+	R_MCORE_RELATIVE.
+	(mcore_elf_relocate_section): Delete redundant case labels. 
+	
 Fri May 14 10:59:55 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
 
 	* elf32-arm.h (elf32_arm_relocate_section): Fix operator

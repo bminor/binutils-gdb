@@ -45,8 +45,6 @@ static struct bfd_link_hash_table * coff_mcore_link_hash_table_create
   PARAMS ((bfd *));
 static bfd_reloc_status_type        mcore_coff_unsupported_reloc 
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
-static boolean                      in_reloc_p
-  PARAMS ((bfd *, reloc_howto_type *));
 static boolean                      coff_mcore_relocate_section
   PARAMS ((bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
 	   struct internal_reloc *, struct internal_syment *, asection **));
@@ -84,7 +82,7 @@ static reloc_howto_type mcore_coff_howto_table[] =
 	 false,	                 /* pc_relative */                          
 	 0,	                 /* bitpos */                               
 	 complain_overflow_dont, /* dont complain_on_overflow */
-	 0,		         /* special_function */                     
+	 NULL,		         /* special_function */                     
 	 "ABSOLUTE",             /* name */
 	 false,	                 /* partial_inplace */                      
 	 0x00,	 	         /* src_mask */                             
@@ -98,7 +96,7 @@ static reloc_howto_type mcore_coff_howto_table[] =
 	 false,	                /* pc_relative */                          
 	 0,	                /* bitpos */                               
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 0,		        /* special_function */                     
+	 NULL,		        /* special_function */                     
 	 "ADDR32",              /* name */
 	 true,	                /* partial_inplace */                      
 	 0xffffffff,            /* src_mask */                             
@@ -114,7 +112,7 @@ static reloc_howto_type mcore_coff_howto_table[] =
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 mcore_coff_unsupported_reloc,	/* special_function */
+	 mcore_coff_unsupported_reloc, /* special_function */
 	 "IMM8BY4",             /* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -146,7 +144,7 @@ static reloc_howto_type mcore_coff_howto_table[] =
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 mcore_coff_unsupported_reloc,/* special_function */
+	 mcore_coff_unsupported_reloc, /* special_function */
 	 "IMM4BY2",              /* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
@@ -187,6 +185,20 @@ static reloc_howto_type mcore_coff_howto_table[] =
 	 false,			/* partial_inplace */
 	 0x0,			/* src_mask */
 	 0x7ff,			/* dst_mask */
+	 true),			/* pcrel_offset */
+  
+  HOWTO (IMAGE_REL_MCORE_RVA,   /* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 NULL,                  /* special_function */
+	 "MCORE_RVA",           /* name */
+	 true,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
 	 true)			/* pcrel_offset */
 };
 
@@ -277,6 +289,7 @@ mcore_coff_reloc_type_lookup (abfd, code)
       HOW2MAP (BFD_RELOC_MCORE_PCREL_IMM4BY2,      IMAGE_REL_MCORE_PCREL_IMM4BY2);
       HOW2MAP (BFD_RELOC_32_PCREL,                 IMAGE_REL_MCORE_PCREL_32);
       HOW2MAP (BFD_RELOC_MCORE_PCREL_JSR_IMM11BY2, IMAGE_REL_MCORE_PCREL_JSR_IMM11BY2);
+      HOW2MAP (BFD_RELOC_RVA,                      IMAGE_REL_MCORE_RVA);
    default: 
       return NULL;
     }
@@ -304,6 +317,9 @@ coff_mcore_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
     return NULL;
   
   howto = mcore_coff_howto_table + rel->r_type;
+
+  if (rel->r_type == IMAGE_REL_MCORE_RVA)
+    * addendp -= pe_data (sec->output_section->owner)->pe_opthdr.ImageBase;
   
   if (howto->pc_relative)
     {
@@ -324,15 +340,6 @@ coff_mcore_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
   return howto;
 }
 
-/* Return true if this relocation should
-   appear in the output .reloc section. */
-static boolean in_reloc_p (abfd, howto)
-     bfd * abfd;
-     reloc_howto_type * howto;
-{
-  return ! howto->pc_relative;
-}     
-
 /* The reloc processing routine for the optimized COFF linker.  */
 static boolean
 coff_mcore_relocate_section (output_bfd, info, input_bfd, input_section,
@@ -492,6 +499,7 @@ coff_mcore_relocate_section (output_bfd, info, input_bfd, input_section,
 	case IMAGE_REL_MCORE_PCREL_32:
 	case IMAGE_REL_MCORE_PCREL_JSR_IMM11BY2:
 	case IMAGE_REL_MCORE_ADDR32:
+	case IMAGE_REL_MCORE_RVA:
 	  rstat = _bfd_relocate_contents (howto, input_bfd, val, loc);
 	  break;
 	}

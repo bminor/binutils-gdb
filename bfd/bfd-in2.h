@@ -2171,6 +2171,7 @@ short offset into 11 bits. */
   BFD_RELOC_MCORE_PCREL_IMM4BY2,
   BFD_RELOC_MCORE_PCREL_32,
   BFD_RELOC_MCORE_PCREL_JSR_IMM11BY2,
+  BFD_RELOC_MCORE_RVA,
 
 /* These two relocations are used by the linker to determine which of 
 the entries in a C++ virtual function table are actually used.  When
