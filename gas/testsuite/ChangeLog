@@ -1,3 +1,7 @@
+2003-01-07  DJ Delorie  <dj@redhat.com>
+
+	* gas/xstormy16/reloc-2.d: Adjust for fixed REL12 relocs.
+
 2003-01-02  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* gas/iq2000: New testsuite.
