@@ -65,6 +65,31 @@ static char *mips_regmask_frag;
 #define GPOPT
 #endif
 
+/* The default target format to use.  */
+#ifdef OBJ_AOUT
+#ifdef TARGET_BYTES_BIG_ENDIAN
+#define DEFAULT_TARGET_FORMAT "a.out-mips-big"
+#else
+#define DEFAULT_TARGET_FORMAT "a.out-mips-little"
+#endif
+#endif /* OBJ_AOUT */
+#ifdef OBJ_ECOFF
+#ifdef TARGET_BYTES_BIG_ENDIAN
+#define DEFAULT_TARGET_FORMAT "ecoff-bigmips"
+#else
+#define DEFAULT_TARGET_FORMAT "ecoff-littlemips"
+#endif
+#endif /* OBJ_ECOFF */
+#ifdef OBJ_ELF
+#ifdef TARGET_BYTES_BIG_ENDIAN
+#define DEFAULT_TARGET_FORMAT "elf32-bigmips"
+#else
+#define DEFAULT_TARGET_FORMAT "elf32-littlemips"
+#endif
+#endif /* OBJ_ELF */
+
+const char *mips_target_format = DEFAULT_TARGET_FORMAT;
+
 /* These variables are filled in with the masks of registers used.
    The object format code reads them and puts them in the appropriate
    place.  */
@@ -405,7 +430,6 @@ const relax_typeS md_relax_table[] =
   { 0 }
 };
 
-
 static char *expr_end;
 
 static expressionS imm_expr;
@@ -520,8 +544,8 @@ md_begin ()
     subseg = now_subseg;
     sec = subseg_new (".reginfo", (subsegT) 0);
 
-    /* I don't know why this section should be loaded, but the ABI
-       says that SHF_ALLOC should be set.  */
+    /* The ABI says this section should be loaded so that the running
+       program can access it.  */
     (void) bfd_set_section_flags (stdoutput, sec,
 				  (SEC_ALLOC | SEC_LOAD
 				   | SEC_READONLY | SEC_DATA));
@@ -1280,7 +1304,7 @@ macro_build (place, counter, ep, name, fmt, va_alist)
 		  || r == BFD_RELOC_MIPS_LITERAL
 		  || r == BFD_RELOC_LO16
 		  || r == BFD_RELOC_MIPS_GOT16
-		  || r== BFD_RELOC_MIPS_CALL16);
+		  || r == BFD_RELOC_MIPS_CALL16);
 	  continue;
 
 	case 'u':
@@ -1518,7 +1542,7 @@ load_address (counter, reg, ep)
       /* If this is a reference to a GP relative symbol, we want
 	   addiu	$reg,$gp,<sym>		(BFD_RELOC_MIPS_GPREL)
 	 Otherwise we want
-	   lui		$reg,$gp,<sym>		(BFD_RELOC_HI16_S)
+	   lui		$reg,<sym>		(BFD_RELOC_HI16_S)
 	   addiu	$reg,$reg,<sym>		(BFD_RELOC_LO16)
 	 If we have an addend, we always use the latter form.  */
       if (ep->X_add_number != 0)
@@ -4521,6 +4545,30 @@ md_parse_option (argP, cntP, vecP)
   if (strcmp (*argP, "EL") == 0
       || strcmp (*argP, "EB") == 0)
     {
+      if ((*argP)[1] == 'B')
+	byte_order = BIG_ENDIAN;
+      else
+	byte_order = LITTLE_ENDIAN;
+
+#ifdef OBJ_AOUT
+      if ((*argP)[1] == 'B')
+	mips_target_format = "a.out-mips-big";
+      else
+	mips_target_format = "a.out-mips-little";
+#endif
+#ifdef OBJ_ECOFF
+      if ((*argP)[1] == 'B')
+	mips_target_format = "ecoff-bigmips";
+      else
+	mips_target_format = "ecoff-littlemips";
+#endif
+#ifdef OBJ_ELF
+      if ((*argP)[1] == 'B')
+	mips_target_format = "elf32-bigmips";
+      else
+	mips_target_format = "elf32-littlemips";
+#endif
+
       /* FIXME: This breaks -L -EL.  */
       flagseen['L'] = 0;
       *argP = "";
