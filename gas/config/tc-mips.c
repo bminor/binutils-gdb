@@ -7098,19 +7098,25 @@ mips_ip (str, ip)
 	    }
 	  else
 	    {
-	      static char buf[100];
-	      sprintf (buf,
-		       _("opcode not supported on this processor: %s (%s)"),
-		       mips_cpu_to_str (mips_cpu),
-		       mips_isa_to_str (mips_opts.isa));
+	      if (!insn_error)
+		{
+		  static char buf[100];
+		  sprintf (buf,
+			   _("opcode not supported on this processor: %s (%s)"),
+			   mips_cpu_to_str (mips_cpu),
+			   mips_isa_to_str (mips_opts.isa));
 
-	      insn_error = buf;
+		  insn_error = buf;
+		}
+	      if (save_c)
+		*(--s) = save_c;
 	      return;
 	    }
 	}
 
       ip->insn_mo = insn;
       ip->insn_opcode = insn->match;
+      insn_error = NULL;
       for (args = insn->args;; ++args)
 	{
 	  if (*s == ' ')
@@ -7951,8 +7957,11 @@ mips_ip (str, ip)
 	{
 	  ++insn;
 	  s = argsStart;
+	  insn_error = _("illegal operands");
 	  continue;
 	}
+      if (save_c)
+	*(--s) = save_c;
       insn_error = _("illegal operands");
       return;
     }

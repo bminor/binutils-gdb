@@ -1,5 +1,9 @@
 2001-06-08  H.J. Lu  <hjl@gnu.org>
 
+	* config/tc-mips.c (mips_ip): Properly handle illegal operands.
+
+2001-06-08  H.J. Lu  <hjl@gnu.org>
+
 	* config/tc-mips.c (md_apply_fix): Don't adjust common
 	extern/weak symbols for ELF.
 	(md_estimate_size_before_relax): Treat weak like extern for
