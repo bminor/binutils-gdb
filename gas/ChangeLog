@@ -1,3 +1,9 @@
+Mon Sep  5 07:09:00 1994  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
+
+	* doc/Makefile.in (VPATH): Define using @srcdir@.
+	(prefix, program_transform_name, exec_prefix): Use autoconf style
+	@-substitutions.
+
 Sun Sep 04 17:58:10 1994	Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 
 	* config/ho-riscix.h, config/tc-arm.c, config/tc-arm.h: New files
