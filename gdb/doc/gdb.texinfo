@@ -126,6 +126,7 @@ Copyright (C) 1988-2001 Free Software Foundation, Inc.
 * Stack::                       Examining the stack
 * Source::                      Examining source files
 * Data::                        Examining data
+* Tracepoints::                 Debugging remote targets non-intrusively
 
 * Languages::                   Using @value{GDBN} with different languages
 
@@ -160,7 +161,7 @@ Copyright (C) 1988-2001 Free Software Foundation, Inc.
 
 This file describes @value{GDBN}, the @sc{gnu} symbolic debugger.
 
-This is the @value{EDITION} Edition, @value{DATE}, for @value{GDBN} Version 
+This is the @value{EDITION} Edition, @value{DATE}, for @value{GDBN} Version
 @value{GDBVN}.
 
 Copyright (C) 1988-2000 Free Software Foundation, Inc.
@@ -293,7 +294,7 @@ omitted from this list, we would like to add your names!
 So that they may not regard their many labors as thankless, we
 particularly thank those who shepherded @value{GDBN} through major
 releases:
-Andrew Cagney (release 5.0);
+Andrew Cagney (releases 5.0 and 5.1);
 Jim Blandy (release 4.18);
 Jason Molenda (release 4.17);
 Stan Shebs (release 4.14);
@@ -306,13 +307,13 @@ and Randy Smith (releases 3.2, 3.1, and 3.0).
 Richard Stallman, assisted at various times by Peter TerMaat, Chris
 Hanson, and Richard Mlynarik, handled releases through 2.8.
 
-Michael Tiemann is the author of most of the @sc{gnu} C++ support in
-@value{GDBN}, with significant additional contributions from Per
-Bothner.  James Clark wrote the @sc{gnu} C++ demangler.  Early work on
-C++ was by Peter TerMaat (who also did much general update work leading
-to release 3.0).
+Michael Tiemann is the author of most of the @sc{gnu} C@t{++} support
+in @value{GDBN}, with significant additional contributions from Per
+Bothner and Daniel Berlin.  James Clark wrote the @sc{gnu} C@t{++}
+demangler.  Early work on C@t{++} was by Peter TerMaat (who also did
+much general update work leading to release 3.0).
 
-@value{GDBN} 4 uses the BFD subroutine library to examine multiple
+@value{GDBN} uses the BFD subroutine library to examine multiple
 object-file formats; BFD was a joint project of David V.
 Henkel-Wallace, Rich Pixley, Steve Chamberlain, and John Gilmore.
 
@@ -360,7 +361,7 @@ Andrew Beers of SUNY Buffalo wrote the language-switching code, the
 Modula-2 support, and contributed the Languages chapter of this manual.
 
 Fred Fish wrote most of the support for Unix System Vr4.
-He also enhanced the command-completion support to cover C++ overloaded
+He also enhanced the command-completion support to cover C@t{++} overloaded
 symbols.
 
 Hitachi America, Ltd. sponsored the support for H8/300, H8/500, and
@@ -388,11 +389,14 @@ nearly innumerable bug fixes and cleanups throughout @value{GDBN}.
 
 The following people at the Hewlett-Packard Company contributed
 support for the PA-RISC 2.0 architecture, HP-UX 10.20, 10.30, and 11.0
-(narrow mode), HP's implementation of kernel threads, HP's aC++
+(narrow mode), HP's implementation of kernel threads, HP's aC@t{++}
 compiler, and the terminal user interface: Ben Krepp, Richard Title,
 John Bishop, Susan Macchia, Kathy Mann, Satish Pai, India Paul, Steve
 Rehrauer, and Elena Zannoni.  Kim Haase provided HP-specific
 information in this manual.
+
+DJ Delorie ported @value{GDBN} to MS-DOS, for the DJGPP project.
+Robert Hoehne made significant contributions to the DJGPP port.
 
 Cygnus Solutions has sponsored @value{GDBN} maintenance and much of its
 development since 1991.  Cygnus engineers who have worked on @value{GDBN}
@@ -993,7 +997,7 @@ run@footnote{@value{GDBN} built with @sc{djgpp} tools for
 MS-DOS/MS-Windows supports this mode of operation, but the event loop is
 suspended when the debuggee runs.}, so you don't need to wait for
 control to return to @value{GDBN} before you type the next command.
-(@emph{Note:} as of version 5.0, the target side of the asynchronous
+(@emph{Note:} as of version 5.1, the target side of the asynchronous
 operation is not yet in place, so @samp{-async} does not work fully
 yet.)
 @c FIXME: when the target side of the event loop is done, the above NOTE
@@ -1244,7 +1248,7 @@ partial input (@samp{b make_} in the example) so you can finish the
 command.
 
 If you just want to see the list of alternatives in the first place, you
-can press @kbd{M-?} rather than pressing @key{TAB} twice. @kbd{M-?}
+can press @kbd{M-?} rather than pressing @key{TAB} twice.  @kbd{M-?}
 means @kbd{@key{META} ?}.  You can type this either by holding down a
 key designated as the @key{META} shift on your keyboard (if there is
 one) while typing @kbd{?}, or as @key{ESC} followed by @kbd{?}.
@@ -1258,16 +1262,16 @@ situation, you may enclose words in @code{'} (single quote marks) in
 @value{GDBN} commands.
 
 The most likely situation where you might need this is in typing the
-name of a C++ function.  This is because C++ allows function overloading
-(multiple definitions of the same function, distinguished by argument
-type).  For example, when you want to set a breakpoint you may need to
-distinguish whether you mean the version of @code{name} that takes an
-@code{int} parameter, @code{name(int)}, or the version that takes a
-@code{float} parameter, @code{name(float)}.  To use the word-completion
-facilities in this situation, type a single quote @code{'} at the
-beginning of the function name.  This alerts @value{GDBN} that it may need to
-consider more information than usual when you press @key{TAB} or
-@kbd{M-?} to request word completion:
+name of a C@t{++} function.  This is because C@t{++} allows function
+overloading (multiple definitions of the same function, distinguished
+by argument type).  For example, when you want to set a breakpoint you
+may need to distinguish whether you mean the version of @code{name}
+that takes an @code{int} parameter, @code{name(int)}, or the version
+that takes a @code{float} parameter, @code{name(float)}.  To use the
+word-completion facilities in this situation, type a single quote
+@code{'} at the beginning of the function name.  This alerts
+@value{GDBN} that it may need to consider more information than usual
+when you press @key{TAB} or @kbd{M-?} to request word completion:
 
 @example
 (@value{GDBP}) b 'bubble( @kbd{M-?}
@@ -1292,9 +1296,9 @@ you have not yet started typing the argument list when you ask for
 completion on an overloaded symbol.
 
 For more information about overloaded functions, see @ref{C plus plus
-expressions, ,C++ expressions}.  You can use the command @code{set
+expressions, ,C@t{++} expressions}.  You can use the command @code{set
 overload-resolution off} to disable overload resolution;
-see @ref{Debugging C plus plus, ,@value{GDBN} features for C++}.
+see @ref{Debugging C plus plus, ,@value{GDBN} features for C@t{++}}.
 
 
 @node Help
@@ -1377,7 +1381,8 @@ commands, and their documentation, for the regular expression specified in
 apropos reload
 @end smallexample
 
-@noindent results in:
+@noindent
+results in:
 
 @smallexample
 @c @group
@@ -2268,7 +2273,7 @@ Automatic display}.
 @cindex catchpoints
 @cindex breakpoint on events
 A @dfn{catchpoint} is another special breakpoint that stops your program
-when a certain kind of event occurs, such as the throwing of a C++
+when a certain kind of event occurs, such as the throwing of a C@t{++}
 exception or the loading of a library.  As with watchpoints, you use a
 different command to set a catchpoint (@pxref{Set Catchpoints, ,Setting
 catchpoints}), but aside from that, you can manage a catchpoint like any
@@ -2329,7 +2334,7 @@ You have several ways to say where the breakpoint should go.
 @item break @var{function}
 Set a breakpoint at entry to function @var{function}.
 When using source languages that permit overloading of symbols, such as
-C++, @var{function} may refer to more than one possible place to break.
+C@t{++}, @var{function} may refer to more than one possible place to break.
 @xref{Breakpoint Menus,,Breakpoint menus}, for a discussion of that situation.
 
 @item break +@var{offset}
@@ -2436,7 +2441,7 @@ an @code{fo} followed by zero or more @code{o}s.  There is an implicit
 @code{.*} leading and trailing the regular expression you supply, so to
 match only functions that begin with @code{foo}, use @code{^foo}.
 
-When debugging C++ programs, @code{rbreak} is useful for setting
+When debugging C@t{++} programs, @code{rbreak} is useful for setting
 breakpoints on overloaded functions that are not members of any special
 classes.
 
@@ -2687,7 +2692,7 @@ watchpoints, in contrast, watch an expression in all threads.)
 @cindex event handling
 
 You can use @dfn{catchpoints} to cause the debugger to stop for certain
-kinds of program events, such as C++ exceptions or the loading of a
+kinds of program events, such as C@t{++} exceptions or the loading of a
 shared library.  Use the @code{catch} command to set a catchpoint.
 
 @table @code
@@ -2697,11 +2702,11 @@ Stop when @var{event} occurs.  @var{event} can be any of the following:
 @table @code
 @item throw
 @kindex catch throw
-The throwing of a C++ exception.
+The throwing of a C@t{++} exception.
 
 @item catch
 @kindex catch catch
-The catching of a C++ exception.
+The catching of a C@t{++} exception.
 
 @item exec
 @kindex catch exec
@@ -2736,7 +2741,7 @@ automatically deleted after the first time the event is caught.
 
 Use the @code{info break} command to list the current catchpoints.
 
-There are currently some limitations to C++ exception handling
+There are currently some limitations to C@t{++} exception handling
 (@code{catch throw} and @code{catch catch}) in @value{GDBN}:
 
 @itemize @bullet
@@ -2766,7 +2771,7 @@ breakpoint in an exception handler instead, it may not be easy to find
 out where the exception was raised.
 
 To stop just before an exception handler is called, you need some
-knowledge of the implementation.  In the case of @sc{gnu} C++, exceptions are
+knowledge of the implementation.  In the case of @sc{gnu} C@t{++}, exceptions are
 raised by calling a library function named @code{__raise_exception}
 which has the following ANSI C interface:
 
@@ -3109,7 +3114,7 @@ end
 @cindex overloading
 @cindex symbol overloading
 
-Some programming languages (notably C++) permit a single function name
+Some programming languages (notably C@t{++}) permit a single function name
 to be defined several times, for application in different contexts.
 This is called @dfn{overloading}.  When a function name is overloaded,
 @samp{break @var{function}} is not enough to tell @value{GDBN} where you want
@@ -4474,9 +4479,9 @@ to print a global value of @code{x} defined in @file{f2.c}:
 (@value{GDBP}) p 'f2.c'::x
 @end example
 
-@cindex C++ scope resolution
+@cindex C@t{++} scope resolution
 This use of @samp{::} is very rarely in conflict with the very similar
-use of the same notation in C++.  @value{GDBN} also supports use of the C++
+use of the same notation in C@t{++}.  @value{GDBN} also supports use of the C@t{++}
 scope resolution operator in @value{GDBN} expressions.
 @c FIXME: Um, so what happens in one of those rare cases where it's in
 @c conflict??  --mew
@@ -4515,7 +4520,7 @@ No symbol "foo" in current context.
 
 To solve such problems, either recompile without optimizations, or use a
 different debug info format, if the compiler supports several such
-formats.  For example, @value{NGCC}, the @sc{gnu} C/C++ compiler usually
+formats.  For example, @value{NGCC}, the @sc{gnu} C/C@t{++} compiler usually
 supports the @samp{-gstabs} option.  @samp{-gstabs} produces debug info
 in a format that is superior to formats such as COFF.  You may be able
 to use DWARF2 (@samp{-gdwarf-2}), which is also an effective form for
@@ -5128,56 +5133,56 @@ $1 = @{it = Tree, form = @{...@}@}
 
 @need 1000
 @noindent
-These settings are of interest when debugging C++ programs:
+These settings are of interest when debugging C@t{++} programs:
 
 @table @code
 @cindex demangling
 @kindex set print demangle
 @item set print demangle
 @itemx set print demangle on
-Print C++ names in their source form rather than in the encoded
+Print C@t{++} names in their source form rather than in the encoded
 (``mangled'') form passed to the assembler and linker for type-safe
 linkage.  The default is on.
 
 @kindex show print demangle
 @item show print demangle
-Show whether C++ names are printed in mangled or demangled form.
+Show whether C@t{++} names are printed in mangled or demangled form.
 
 @kindex set print asm-demangle
 @item set print asm-demangle
 @itemx set print asm-demangle on
-Print C++ names in their source form rather than their mangled form, even
+Print C@t{++} names in their source form rather than their mangled form, even
 in assembler code printouts such as instruction disassemblies.
 The default is off.
 
 @kindex show print asm-demangle
 @item show print asm-demangle
-Show whether C++ names in assembly listings are printed in mangled
+Show whether C@t{++} names in assembly listings are printed in mangled
 or demangled form.
 
 @kindex set demangle-style
-@cindex C++ symbol decoding style
-@cindex symbol decoding style, C++
+@cindex C@t{++} symbol decoding style
+@cindex symbol decoding style, C@t{++}
 @item set demangle-style @var{style}
 Choose among several encoding schemes used by different compilers to
-represent C++ names.  The choices for @var{style} are currently:
+represent C@t{++} names.  The choices for @var{style} are currently:
 
 @table @code
 @item auto
 Allow @value{GDBN} to choose a decoding style by inspecting your program.
 
 @item gnu
-Decode based on the @sc{gnu} C++ compiler (@code{g++}) encoding algorithm.
+Decode based on the @sc{gnu} C@t{++} compiler (@code{g++}) encoding algorithm.
 This is the default.
 
 @item hp
-Decode based on the HP ANSI C++ (@code{aCC}) encoding algorithm.
+Decode based on the HP ANSI C@t{++} (@code{aCC}) encoding algorithm.
 
 @item lucid
-Decode based on the Lucid C++ compiler (@code{lcc}) encoding algorithm.
+Decode based on the Lucid C@t{++} compiler (@code{lcc}) encoding algorithm.
 
 @item arm
-Decode using the algorithm in the @cite{C++ Annotated Reference Manual}.
+Decode using the algorithm in the @cite{C@t{++} Annotated Reference Manual}.
 @strong{Warning:} this setting alone is not sufficient to allow
 debugging @code{cfront}-generated executables.  @value{GDBN} would
 require further enhancement to permit that.
@@ -5187,7 +5192,7 @@ If you omit @var{style}, you will see a list of possible formats.
 
 @kindex show demangle-style
 @item show demangle-style
-Display the encoding style currently in use for decoding C++ symbols.
+Display the encoding style currently in use for decoding C@t{++} symbols.
 
 @kindex set print object
 @item set print object
@@ -5207,29 +5212,29 @@ Show whether actual, or declared, object types are displayed.
 @kindex set print static-members
 @item set print static-members
 @itemx set print static-members on
-Print static members when displaying a C++ object.  The default is on.
+Print static members when displaying a C@t{++} object.  The default is on.
 
 @item set print static-members off
-Do not print static members when displaying a C++ object.
+Do not print static members when displaying a C@t{++} object.
 
 @kindex show print static-members
 @item show print static-members
-Show whether C++ static members are printed, or not.
+Show whether C@t{++} static members are printed, or not.
 
 @c These don't work with HP ANSI C++ yet.
 @kindex set print vtbl
 @item set print vtbl
 @itemx set print vtbl on
-Pretty print C++ virtual function tables.  The default is off.
+Pretty print C@t{++} virtual function tables.  The default is off.
 (The @code{vtbl} commands do not work on programs compiled with the HP
-ANSI C++ compiler (@code{aCC}).)
+ANSI C@t{++} compiler (@code{aCC}).)
 
 @item set print vtbl off
-Do not pretty print C++ virtual function tables.
+Do not pretty print C@t{++} virtual function tables.
 
 @kindex show print vtbl
 @item show print vtbl
-Show whether C++ virtual function tables are pretty printed, or not.
+Show whether C@t{++} virtual function tables are pretty printed, or not.
 @end table
 
 @node Value History
@@ -5641,6 +5646,623 @@ Disable @value{GDBN} from caching target memory.
 @c @item noverify (default)
 @c @end table
 
+@node Tracepoints
+@chapter Tracepoints
+@c This chapter is based on the documentation written by Michael
+@c Snyder, David Taylor, Jim Blandy, and Elena Zannoni.
+
+@cindex tracepoints
+In some applications, it is not feasible for the debugger to interrupt
+the program's execution long enough for the developer to learn
+anything helpful about its behavior.  If the program's correctness
+depends on its real-time behavior, delays introduced by a debugger
+might cause the program to change its behavior drastically, or perhaps
+fail, even when the code itself is correct.  It is useful to be able
+to observe the program's behavior without interrupting it.
+
+Using @value{GDBN}'s @code{trace} and @code{collect} commands, you can
+specify locations in the program, called @dfn{tracepoints}, and
+arbitrary expressions to evaluate when those tracepoints are reached.
+Later, using the @code{tfind} command, you can examine the values
+those expressions had when the program hit the tracepoints.  The
+expressions may also denote objects in memory---structures or arrays,
+for example---whose values @value{GDBN} should record; while visiting
+a particular tracepoint, you may inspect those objects as if they were
+in memory at that moment.  However, because @value{GDBN} records these
+values without interacting with you, it can do so quickly and
+unobtrusively, hopefully not disturbing the program's behavior.
+
+The tracepoint facility is currently available only for remote
+targets.  @xref{Targets}.
+
+This chapter describes the tracepoint commands and features.
+
+@menu
+* Set Tracepoints::         
+* Analyze Collected Data::      
+* Tracepoint Variables::        
+@end menu
+
+@node Set Tracepoints
+@section Commands to Set Tracepoints
+
+Before running such a @dfn{trace experiment}, an arbitrary number of
+tracepoints can be set.  Like a breakpoint (@pxref{Set Breaks}), a
+tracepoint has a number assigned to it by @value{GDBN}.  Like with
+breakpoints, tracepoint numbers are successive integers starting from
+one.  Many of the commands associated with tracepoints take the
+tracepoint number as their argument, to identify which tracepoint to
+work on.
+
+For each tracepoint, you can specify, in advance, some arbitrary set
+of data that you want the target to collect in the trace buffer when
+it hits that tracepoint.  The collected data can include registers,
+local variables, or global data.  Later, you can use @value{GDBN}
+commands to examine the values these data had at the time the
+tracepoint was hit.
+
+This section describes commands to set tracepoints and associated
+conditions and actions.
+
+@menu
+* Create and Delete Tracepoints::  
+* Enable and Disable Tracepoints::  
+* Tracepoint Passcounts::       
+* Tracepoint Actions::          
+* Listing Tracepoints::         
+* Starting and Stopping Trace Experiment::  
+@end menu
+
+@node Create and Delete Tracepoints
+@subsection Create and Delete Tracepoints
+
+@table @code
+@cindex set tracepoint
+@kindex trace
+@item trace
+The @code{trace} command is very similar to the @code{break} command.
+Its argument can be a source line, a function name, or an address in
+the target program.  @xref{Set Breaks}.  The @code{trace} command
+defines a tracepoint, which is a point in the target program where the
+debugger will briefly stop, collect some data, and then allow the
+program to continue.  Setting a tracepoint or changing its commands
+doesn't take effect until the next @code{tstart} command; thus, you
+cannot change the tracepoint attributes once a trace experiment is
+running.
+
+Here are some examples of using the @code{trace} command:
+
+@smallexample
+(@value{GDBP}) @b{trace foo.c:121}    // a source file and line number
+
+(@value{GDBP}) @b{trace +2}           // 2 lines forward
+
+(@value{GDBP}) @b{trace my_function}  // first source line of function
+
+(@value{GDBP}) @b{trace *my_function} // EXACT start address of function
+
+(@value{GDBP}) @b{trace *0x2117c4}    // an address
+@end smallexample
+
+@noindent
+You can abbreviate @code{trace} as @code{tr}.
+
+@vindex $tpnum
+@cindex last tracepoint number
+@cindex recent tracepoint number
+@cindex tracepoint number
+The convenience variable @code{$tpnum} records the tracepoint number
+of the most recently set tracepoint.
+
+@kindex delete tracepoint
+@cindex tracepoint deletion
+@item delete tracepoint @r{[}@var{num}@r{]}
+Permanently delete one or more tracepoints.  With no argument, the
+default is to delete all tracepoints.
+
+Examples:
+
+@smallexample
+(@value{GDBP}) @b{delete trace 1 2 3} // remove three tracepoints
+
+(@value{GDBP}) @b{delete trace}       // remove all tracepoints
+@end smallexample
+
+@noindent
+You can abbreviate this command as @code{del tr}.
+@end table
+
+@node Enable and Disable Tracepoints
+@subsection Enable and Disable Tracepoints
+
+@table @code
+@kindex disable tracepoint
+@item disable tracepoint @r{[}@var{num}@r{]}
+Disable tracepoint @var{num}, or all tracepoints if no argument
+@var{num} is given.  A disabled tracepoint will have no effect during
+the next trace experiment, but it is not forgotten.  You can re-enable
+a disabled tracepoint using the @code{enable tracepoint} command.
+
+@kindex enable tracepoint
+@item enable tracepoint @r{[}@var{num}@r{]}
+Enable tracepoint @var{num}, or all tracepoints.  The enabled
+tracepoints will become effective the next time a trace experiment is
+run.
+@end table
+
+@node Tracepoint Passcounts
+@subsection Tracepoint Passcounts
+
+@table @code
+@kindex passcount
+@cindex tracepoint pass count
+@item passcount @r{[}@var{n} @r{[}@var{num}@r{]]}
+Set the @dfn{passcount} of a tracepoint.  The passcount is a way to
+automatically stop a trace experiment.  If a tracepoint's passcount is
+@var{n}, then the trace experiment will be automatically stopped on
+the @var{n}'th time that tracepoint is hit.  If the tracepoint number
+@var{num} is not specified, the @code{passcount} command sets the
+passcount of the most recently defined tracepoint.  If no passcount is
+given, the trace experiment will run until stopped explicitly by the
+user.
+
+Examples:
+
+@smallexample
+(@value{GDBP}) @b{passcount 5 2} // Stop on the 5th execution of tracepoint 2
+
+(@value{GDBP}) @b{passcount 12}  // Stop on the 12th execution of the
+                                // most recently defined tracepoint.
+(@value{GDBP}) @b{trace foo}
+(@value{GDBP}) @b{pass 3}
+(@value{GDBP}) @b{trace bar}
+(@value{GDBP}) @b{pass 2}
+(@value{GDBP}) @b{trace baz}
+(@value{GDBP}) @b{pass 1}        // Stop tracing when foo has been
+                                 // executed 3 times OR when bar has
+                                 // been executed 2 times
+                                 // OR when baz has been executed 1 time.
+@end smallexample
+@end table
+
+@node Tracepoint Actions
+@subsection Tracepoint Action Lists
+
+@table @code
+@kindex actions
+@cindex tracepoint actions
+@item actions @r{[}@var{num}@r{]}
+This command will prompt for a list of actions to be taken when the
+tracepoint is hit.  If the tracepoint number @var{num} is not
+specified, this command sets the actions for the one that was most
+recently defined (so that you can define a tracepoint and then say
+@code{actions} without bothering about its number).  You specify the
+actions themselves on the following lines, one action at a time, and
+terminate the actions list with a line containing just @code{end}.  So
+far, the only defined actions are @code{collect} and
+@code{while-stepping}.
+
+@cindex remove actions from a tracepoint
+To remove all actions from a tracepoint, type @samp{actions @var{num}}
+and follow it immediately with @samp{end}.
+
+@smallexample
+(@value{GDBP}) @b{collect @var{data}} // collect some data
+
+(@value{GDBP}) @b{while-stepping 5}   // single-step 5 times and collect data
+
+(@value{GDBP}) @b{end}                // signals the end of actions.
+@end smallexample
+
+In the following example, the action list begins with @code{collect}
+commands indicating the things to be collected when the tracepoint is
+hit.  Then, in order to single-step and collect additional data
+following the tracepoint, a @code{while-stepping} command is used,
+followed by the list of things to be collected while stepping.  The
+@code{while-stepping} command is terminated by its own separate
+@code{end} command.  Lastly, the action list is terminated by an
+@code{end} command.
+
+@smallexample
+(@value{GDBP}) @b{trace foo}
+(@value{GDBP}) @b{actions}
+Enter actions for tracepoint 1, one per line:
+> collect bar,baz
+> collect $regs
+> while-stepping 12
+  > collect $fp, $sp
+  > end
+end
+@end smallexample
+
+@kindex collect @r{(tracepoints)}
+@item collect @var{expr1}, @var{expr2}, @dots{}
+Collect values of the given expressions when the tracepoint is hit.
+This command accepts a comma-separated list of any valid expressions.
+In addition to global, static, or local variables, the following
+special arguments are supported:
+
+@table @code
+@item $regs
+collect all registers
+
+@item $args
+collect all function arguments
+
+@item $locals
+collect all local variables.
+@end table
+
+You can give several consecutive @code{collect} commands, each one
+with a single argument, or one @code{collect} command with several
+arguments separated by commas: the effect is the same.
+
+@kindex while-stepping @r{(tracepoints)}
+@item while-stepping @var{n}
+Perform @var{n} single-step traces after the tracepoint, collecting
+new data at each step.  The @code{while-stepping} command is
+followed by the list of what to collect while stepping (followed by
+its own @code{end} command):
+
+@smallexample
+> while-stepping 12
+  > collect $regs, myglobal
+  > end
+>
+@end smallexample
+
+@noindent
+You may abbreviate @code{while-stepping} as @code{ws} or
+@code{stepping}.
+@end table
+
+@node Listing Tracepoints
+@subsection Listing Tracepoints
+
+@table @code
+@kindex info tracepoints
+@cindex information about tracepoints
+@item info tracepoints @r{[}@var{num}@r{]}
+Display information the tracepoint @var{num}.  If you don't specify a
+tracepoint number displays information about all the tracepoints
+defined so far.  For each tracepoint, the following information is
+shown:
+
+@itemize @bullet
+@item
+its number
+@item
+whether it is enabled or disabled
+@item
+its address
+@item
+its passcount as given by the @code{passcount @var{n}} command
+@item
+its step count as given by the @code{while-stepping @var{n}} command
+@item
+where in the source files is the tracepoint set
+@item
+its action list as given by the @code{actions} command
+@end itemize
+
+@smallexample
+(@value{GDBP}) @b{info trace}
+Num Enb Address    PassC StepC What
+1   y   0x002117c4 0     0     <gdb_asm>
+2   y   0x0020dc64 0     0     in gdb_test at gdb_test.c:375
+3   y   0x0020b1f4 0     0     in collect_data at ../foo.c:1741
+(@value{GDBP})
+@end smallexample
+
+@noindent
+This command can be abbreviated @code{info tp}.
+@end table
+
+@node Starting and Stopping Trace Experiment
+@subsection Starting and Stopping Trace Experiment
+
+@table @code
+@kindex tstart
+@cindex start a new trace experiment
+@cindex collected data discarded
+@item tstart
+This command takes no arguments.  It starts the trace experiment, and
+begins collecting data.  This has the side effect of discarding all
+the data collected in the trace buffer during the previous trace
+experiment.
+
+@kindex tstop
+@cindex stop a running trace experiment
+@item tstop
+This command takes no arguments.  It ends the trace experiment, and
+stops collecting data.
+
+@strong{Note:} a trace experiment and data collection may stop
+automatically if any tracepoint's passcount is reached
+(@pxref{Tracepoint Passcounts}), or if the trace buffer becomes full.
+
+@kindex tstatus
+@cindex status of trace data collection
+@cindex trace experiment, status of
+@item tstatus
+This command displays the status of the current trace data
+collection.
+@end table
+
+Here is an example of the commands we described so far:
+
+@smallexample
+(@value{GDBP}) @b{trace gdb_c_test}
+(@value{GDBP}) @b{actions}
+Enter actions for tracepoint #1, one per line.
+> collect $regs,$locals,$args
+> while-stepping 11
+  > collect $regs
+  > end
+> end
+(@value{GDBP}) @b{tstart}
+	[time passes @dots{}]
+(@value{GDBP}) @b{tstop}
+@end smallexample
+
+
+@node Analyze Collected Data
+@section Using the collected data
+
+After the tracepoint experiment ends, you use @value{GDBN} commands
+for examining the trace data.  The basic idea is that each tracepoint
+collects a trace @dfn{snapshot} every time it is hit and another
+snapshot every time it single-steps.  All these snapshots are
+consecutively numbered from zero and go into a buffer, and you can
+examine them later.  The way you examine them is to @dfn{focus} on a
+specific trace snapshot.  When the remote stub is focused on a trace
+snapshot, it will respond to all @value{GDBN} requests for memory and
+registers by reading from the buffer which belongs to that snapshot,
+rather than from @emph{real} memory or registers of the program being
+debugged.  This means that @strong{all} @value{GDBN} commands
+(@code{print}, @code{info registers}, @code{backtrace}, etc.) will
+behave as if we were currently debugging the program state as it was
+when the tracepoint occurred.  Any requests for data that are not in
+the buffer will fail.
+
+@menu
+* tfind::                       How to select a trace snapshot
+* tdump::                       How to display all data for a snapshot
+* save-tracepoints::            How to save tracepoints for a future run
+@end menu
+
+@node tfind
+@subsection @code{tfind @var{n}}
+
+@kindex tfind
+@cindex select trace snapshot
+@cindex find trace snapshot
+The basic command for selecting a trace snapshot from the buffer is
+@code{tfind @var{n}}, which finds trace snapshot number @var{n},
+counting from zero.  If no argument @var{n} is given, the next
+snapshot is selected.
+
+Here are the various forms of using the @code{tfind} command.
+
+@table @code
+@item tfind start
+Find the first snapshot in the buffer.  This is a synonym for
+@code{tfind 0} (since 0 is the number of the first snapshot).
+
+@item tfind none
+Stop debugging trace snapshots, resume @emph{live} debugging.
+
+@item tfind end
+Same as @samp{tfind none}.
+
+@item tfind
+No argument means find the next trace snapshot.
+
+@item tfind -
+Find the previous trace snapshot before the current one.  This permits
+retracing earlier steps.
+
+@item tfind tracepoint @var{num}
+Find the next snapshot associated with tracepoint @var{num}.  Search
+proceeds forward from the last examined trace snapshot.  If no
+argument @var{num} is given, it means find the next snapshot collected
+for the same tracepoint as the current snapshot.
+
+@item tfind pc @var{addr}
+Find the next snapshot associated with the value @var{addr} of the
+program counter.  Search proceeds forward from the last examined trace
+snapshot.  If no argument @var{addr} is given, it means find the next
+snapshot with the same value of PC as the current snapshot.
+
+@item tfind outside @var{addr1}, @var{addr2}
+Find the next snapshot whose PC is outside the given range of
+addresses.
+
+@item tfind range @var{addr1}, @var{addr2}
+Find the next snapshot whose PC is between @var{addr1} and
+@var{addr2}.  @c FIXME: Is the range inclusive or exclusive?
+
+@item tfind line @r{[}@var{file}:@r{]}@var{n}
+Find the next snapshot associated with the source line @var{n}.  If
+the optional argument @var{file} is given, refer to line @var{n} in
+that source file.  Search proceeds forward from the last examined
+trace snapshot.  If no argument @var{n} is given, it means find the
+next line other than the one currently being examined; thus saying
+@code{tfind line} repeatedly can appear to have the same effect as
+stepping from line to line in a @emph{live} debugging session.
+@end table
+
+The default arguments for the @code{tfind} commands are specifically
+designed to make it easy to scan through the trace buffer.  For
+instance, @code{tfind} with no argument selects the next trace
+snapshot, and @code{tfind -} with no argument selects the previous
+trace snapshot.  So, by giving one @code{tfind} command, and then
+simply hitting @key{RET} repeatedly you can examine all the trace
+snapshots in order.  Or, by saying @code{tfind -} and then hitting
+@key{RET} repeatedly you can examine the snapshots in reverse order.
+The @code{tfind line} command with no argument selects the snapshot
+for the next source line executed.  The @code{tfind pc} command with
+no argument selects the next snapshot with the same program counter
+(PC) as the current frame.  The @code{tfind tracepoint} command with
+no argument selects the next trace snapshot collected by the same
+tracepoint as the current one.
+
+In addition to letting you scan through the trace buffer manually,
+these commands make it easy to construct @value{GDBN} scripts that
+scan through the trace buffer and print out whatever collected data
+you are interested in.  Thus, if we want to examine the PC, FP, and SP
+registers from each trace frame in the buffer, we can say this:
+
+@smallexample
+(@value{GDBP}) @b{tfind start}
+(@value{GDBP}) @b{while ($trace_frame != -1)}
+> printf "Frame %d, PC = %08X, SP = %08X, FP = %08X\n", \
+          $trace_frame, $pc, $sp, $fp
+> tfind
+> end
+
+Frame 0, PC = 0020DC64, SP = 0030BF3C, FP = 0030BF44
+Frame 1, PC = 0020DC6C, SP = 0030BF38, FP = 0030BF44
+Frame 2, PC = 0020DC70, SP = 0030BF34, FP = 0030BF44
+Frame 3, PC = 0020DC74, SP = 0030BF30, FP = 0030BF44
+Frame 4, PC = 0020DC78, SP = 0030BF2C, FP = 0030BF44
+Frame 5, PC = 0020DC7C, SP = 0030BF28, FP = 0030BF44
+Frame 6, PC = 0020DC80, SP = 0030BF24, FP = 0030BF44
+Frame 7, PC = 0020DC84, SP = 0030BF20, FP = 0030BF44
+Frame 8, PC = 0020DC88, SP = 0030BF1C, FP = 0030BF44
+Frame 9, PC = 0020DC8E, SP = 0030BF18, FP = 0030BF44
+Frame 10, PC = 00203F6C, SP = 0030BE3C, FP = 0030BF14
+@end smallexample
+
+Or, if we want to examine the variable @code{X} at each source line in
+the buffer:
+
+@smallexample
+(@value{GDBP}) @b{tfind start}
+(@value{GDBP}) @b{while ($trace_frame != -1)}
+> printf "Frame %d, X == %d\n", $trace_frame, X
+> tfind line
+> end
+
+Frame 0, X = 1
+Frame 7, X = 2
+Frame 13, X = 255
+@end smallexample
+
+@node tdump
+@subsection @code{tdump}
+@kindex tdump
+@cindex dump all data collected at tracepoint
+@cindex tracepoint data, display
+
+This command takes no arguments.  It prints all the data collected at
+the current trace snapshot.
+
+@smallexample
+(@value{GDBP}) @b{trace 444}
+(@value{GDBP}) @b{actions}
+Enter actions for tracepoint #2, one per line:
+> collect $regs, $locals, $args, gdb_long_test
+> end
+
+(@value{GDBP}) @b{tstart}
+
+(@value{GDBP}) @b{tfind line 444}
+#0  gdb_test (p1=0x11, p2=0x22, p3=0x33, p4=0x44, p5=0x55, p6=0x66)
+at gdb_test.c:444
+444        printp( "%s: arguments = 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X\n", )
+
+(@value{GDBP}) @b{tdump}
+Data collected at tracepoint 2, trace frame 1:
+d0             0xc4aa0085       -995491707
+d1             0x18     24
+d2             0x80     128
+d3             0x33     51
+d4             0x71aea3d        119204413
+d5             0x22     34
+d6             0xe0     224
+d7             0x380035 3670069
+a0             0x19e24a 1696330
+a1             0x3000668        50333288
+a2             0x100    256
+a3             0x322000 3284992
+a4             0x3000698        50333336
+a5             0x1ad3cc 1758156
+fp             0x30bf3c 0x30bf3c
+sp             0x30bf34 0x30bf34
+ps             0x0      0
+pc             0x20b2c8 0x20b2c8
+fpcontrol      0x0      0
+fpstatus       0x0      0
+fpiaddr        0x0      0
+p = 0x20e5b4 "gdb-test"
+p1 = (void *) 0x11
+p2 = (void *) 0x22
+p3 = (void *) 0x33
+p4 = (void *) 0x44
+p5 = (void *) 0x55
+p6 = (void *) 0x66
+gdb_long_test = 17 '\021'
+
+(@value{GDBP})
+@end smallexample
+
+@node save-tracepoints
+@subsection @code{save-tracepoints @var{filename}}
+@kindex save-tracepoints
+@cindex save tracepoints for future sessions
+
+This command saves all current tracepoint definitions together with
+their actions and passcounts, into a file @file{@var{filename}}
+suitable for use in a later debugging session.  To read the saved
+tracepoint definitions, use the @code{source} command (@pxref{Command
+Files}).
+
+@node Tracepoint Variables
+@section Convenience Variables for Tracepoints
+@cindex tracepoint variables
+@cindex convenience variables for tracepoints
+
+@table @code
+@vindex $trace_frame
+@item (int) $trace_frame
+The current trace snapshot (a.k.a.@: @dfn{frame}) number, or -1 if no
+snapshot is selected.
+
+@vindex $tracepoint
+@item (int) $tracepoint
+The tracepoint for the current trace snapshot.
+
+@vindex $trace_line
+@item (int) $trace_line
+The line number for the current trace snapshot.
+
+@vindex $trace_file
+@item (char []) $trace_file
+The source file for the current trace snapshot.
+
+@vindex $trace_func
+@item (char []) $trace_func
+The name of the function containing @code{$tracepoint}.
+@end table
+
+Note: @code{$trace_file} is not suitable for use in @code{printf},
+use @code{output} instead.
+
+Here's a simple example of using these convenience variables for
+stepping through all the trace snapshots and printing some of their
+data.
+
+@smallexample
+(@value{GDBP}) @b{tfind start}
+
+(@value{GDBP}) @b{while $trace_frame != -1}
+> output $trace_file
+> printf ", line %d (tracepoint #%d)\n", $trace_line, $tracepoint
+> tfind
+> end
+@end smallexample
+
 @node Languages
 @chapter Using @value{GDBN} with Different Languages
 @cindex languages
@@ -5682,7 +6304,7 @@ In addition to the working language, every source file that
 file formats, the compiler might indicate which language a particular
 source file is in.  However, most of the time @value{GDBN} infers the
 language from the name of the file.  The language of a source file
-controls whether C++ names are demangled---this way @code{backtrace} can
+controls whether C@t{++} names are demangled---this way @code{backtrace} can
 show each frame appropriately for its own language.  There is no way to
 set the language of a source file from within @value{GDBN}, but you can
 set the language associated with a filename extension.  @xref{Show, ,
@@ -5718,7 +6340,7 @@ C source file
 @itemx .cpp
 @itemx .cxx
 @itemx .c++
-C++ source file
+C@t{++} source file
 
 @item .f
 @itemx .F
@@ -6000,7 +6622,7 @@ being set automatically by @value{GDBN}.
 @node Support
 @section Supported languages
 
-@value{GDBN} supports C, C++, Fortran, Java, Chill, assembly, and Modula-2.
+@value{GDBN} supports C, C@t{++}, Fortran, Java, Chill, assembly, and Modula-2.
 @c This is false ...
 Some @value{GDBN} features may be used in expressions regardless of the
 language you use: the @value{GDBN} @code{@@} and @code{::} operators,
@@ -6017,62 +6639,62 @@ books written on each of these languages; please look to these for a
 language reference or tutorial.
 
 @menu
-* C::           C and C++
+* C::           C and C@t{++}
 * Modula-2::    Modula-2
 * Chill::        Chill
 @end menu
 
 @node C
-@subsection C and C++
+@subsection C and C@t{++}
 
-@cindex C and C++
-@cindex expressions in C or C++
+@cindex C and C@t{++}
+@cindex expressions in C or C@t{++}
 
-Since C and C++ are so closely related, many features of @value{GDBN} apply
+Since C and C@t{++} are so closely related, many features of @value{GDBN} apply
 to both languages.  Whenever this is the case, we discuss those languages
 together.
 
 @cindex C@t{++}
 @cindex @code{g++}, @sc{gnu} C@t{++} compiler
-@cindex @sc{gnu} C++
-The C++ debugging facilities are jointly implemented by the C++
-compiler and @value{GDBN}.  Therefore, to debug your C++ code
-effectively, you must compile your C++ programs with a supported
-C++ compiler, such as @sc{gnu} @code{g++}, or the HP ANSI C++
+@cindex @sc{gnu} C@t{++}
+The C@t{++} debugging facilities are jointly implemented by the C@t{++}
+compiler and @value{GDBN}.  Therefore, to debug your C@t{++} code
+effectively, you must compile your C@t{++} programs with a supported
+C@t{++} compiler, such as @sc{gnu} @code{g++}, or the HP ANSI C@t{++}
 compiler (@code{aCC}).
 
-For best results when using @sc{gnu} C++, use the stabs debugging
+For best results when using @sc{gnu} C@t{++}, use the stabs debugging
 format.  You can select that format explicitly with the @code{g++}
 command-line options @samp{-gstabs} or @samp{-gstabs+}.  See
 @ref{Debugging Options,,Options for Debugging Your Program or @sc{gnu}
 CC, gcc.info, Using @sc{gnu} CC}, for more information.
 
 @menu
-* C Operators::                 C and C++ operators
-* C Constants::                 C and C++ constants
-* C plus plus expressions::     C++ expressions
-* C Defaults::                  Default settings for C and C++
-* C Checks::                    C and C++ type and range checks
+* C Operators::                 C and C@t{++} operators
+* C Constants::                 C and C@t{++} constants
+* C plus plus expressions::     C@t{++} expressions
+* C Defaults::                  Default settings for C and C@t{++}
+* C Checks::                    C and C@t{++} type and range checks
 * Debugging C::                 @value{GDBN} and C
-* Debugging C plus plus::       @value{GDBN} features for C++
+* Debugging C plus plus::       @value{GDBN} features for C@t{++}
 @end menu
 
 @node C Operators
-@subsubsection C and C++ operators
+@subsubsection C and C@t{++} operators
 
-@cindex C and C++ operators
+@cindex C and C@t{++} operators
 
 Operators must be defined on values of specific types.  For instance,
 @code{+} is defined on numbers, but not on structures.  Operators are
 often defined on groups of types.
 
-For the purposes of C and C++, the following definitions hold:
+For the purposes of C and C@t{++}, the following definitions hold:
 
 @itemize @bullet
 
 @item
 @emph{Integral types} include @code{int} with any of its storage-class
-specifiers; @code{char}; @code{enum}; and, for C++, @code{bool}.
+specifiers; @code{char}; @code{enum}; and, for C@t{++}, @code{bool}.
 
 @item
 @emph{Floating-point types} include @code{float}, @code{double}, and
@@ -6164,10 +6786,10 @@ Pointer dereferencing.  Defined on pointer types.  Same precedence as
 @item &
 Address operator.  Defined on variables.  Same precedence as @code{++}.
 
-For debugging C++, @value{GDBN} implements a use of @samp{&} beyond what is
-allowed in the C++ language itself: you can use @samp{&(&@var{ref})}
+For debugging C@t{++}, @value{GDBN} implements a use of @samp{&} beyond what is
+allowed in the C@t{++} language itself: you can use @samp{&(&@var{ref})}
 (or, if you prefer, simply @samp{&&@var{ref}}) to examine the address
-where a C++ reference variable (declared with @samp{&@var{ref}}) is
+where a C@t{++} reference variable (declared with @samp{&@var{ref}}) is
 stored.
 
 @item -
@@ -6200,7 +6822,7 @@ Array indexing.  @code{@var{a}[@var{i}]} is defined as
 Function parameter list.  Same precedence as @code{->}.
 
 @item ::
-C++ scope resolution operator.  Defined on @code{struct}, @code{union},
+C@t{++} scope resolution operator.  Defined on @code{struct}, @code{union},
 and @code{class} types.
 
 @item ::
@@ -6218,11 +6840,11 @@ predefined meaning.
 @end menu
 
 @node C Constants
-@subsubsection C and C++ constants
+@subsubsection C and C@t{++} constants
 
-@cindex C and C++ constants
+@cindex C and C@t{++} constants
 
-@value{GDBN} allows you to express the constants of C and C++ in the
+@value{GDBN} allows you to express the constants of C and C@t{++} in the
 following ways:
 
 @itemize @bullet
@@ -6286,32 +6908,32 @@ and @samp{@{&"hi", &"there", &"fred"@}} is a three-element array of pointers.
 @end menu
 
 @node C plus plus expressions
-@subsubsection C++ expressions
+@subsubsection C@t{++} expressions
 
-@cindex expressions in C++
-@value{GDBN} expression handling can interpret most C++ expressions.
+@cindex expressions in C@t{++}
+@value{GDBN} expression handling can interpret most C@t{++} expressions.
 
-@cindex C++ support, not in @sc{coff}
-@cindex @sc{coff} versus C++
-@cindex C++ and object formats
-@cindex object formats and C++
-@cindex a.out and C++
-@cindex @sc{ecoff} and C++
-@cindex @sc{xcoff} and C++
-@cindex @sc{elf}/stabs and C++
-@cindex @sc{elf}/@sc{dwarf} and C++
+@cindex C@t{++} support, not in @sc{coff}
+@cindex @sc{coff} versus C@t{++}
+@cindex C@t{++} and object formats
+@cindex object formats and C@t{++}
+@cindex a.out and C@t{++}
+@cindex @sc{ecoff} and C@t{++}
+@cindex @sc{xcoff} and C@t{++}
+@cindex @sc{elf}/stabs and C@t{++}
+@cindex @sc{elf}/@sc{dwarf} and C@t{++}
 @c FIXME!! GDB may eventually be able to debug C++ using DWARF; check
 @c periodically whether this has happened...
 @quotation
-@emph{Warning:} @value{GDBN} can only debug C++ code if you use the
-proper compiler.  Typically, C++ debugging depends on the use of
+@emph{Warning:} @value{GDBN} can only debug C@t{++} code if you use the
+proper compiler.  Typically, C@t{++} debugging depends on the use of
 additional debugging information in the symbol table, and thus requires
 special support.  In particular, if your compiler generates a.out, MIPS
 @sc{ecoff}, RS/6000 @sc{xcoff}, or @sc{elf} with stabs extensions to the
 symbol table, these facilities are all available.  (With @sc{gnu} CC,
 you can use the @samp{-gstabs} option to request stabs debugging
 extensions explicitly.)  Where the object code format is standard
-@sc{coff} or @sc{dwarf} in @sc{elf}, on the other hand, most of the C++
+@sc{coff} or @sc{dwarf} in @sc{elf}, on the other hand, most of the C@t{++}
 support in @value{GDBN} does @emph{not} work.
 @end quotation
 
@@ -6326,16 +6948,16 @@ count = aml->GetOriginal(x, y)
 @end example
 
 @vindex this@r{, inside C@t{++} member functions}
-@cindex namespace in C++
+@cindex namespace in C@t{++}
 @item
 While a member function is active (in the selected stack frame), your
 expressions have the same namespace available as the member function;
 that is, @value{GDBN} allows implicit references to the class instance
-pointer @code{this} following the same rules as C++.
+pointer @code{this} following the same rules as C@t{++}.
 
 @cindex call overloaded functions
 @cindex overloaded functions, calling
-@cindex type conversions in C++
+@cindex type conversions in C@t{++}
 @item
 You can call overloaded functions; @value{GDBN} resolves the function
 call to the right definition, with some restrictions.  @value{GDBN} does not
@@ -6352,7 +6974,7 @@ number of function arguments.
 
 Overload resolution is always performed, unless you have specified
 @code{set overload-resolution off}.  @xref{Debugging C plus plus,
-,@value{GDBN} features for C++}.
+,@value{GDBN} features for C@t{++}}.
 
 You must specify @code{set overload-resolution off} in order to use an
 explicit function signature to call an overloaded function, as in
@@ -6365,8 +6987,8 @@ see @ref{Completion, ,Command completion}.
 
 @cindex reference declarations
 @item
-@value{GDBN} understands variables declared as C++ references; you can use
-them in expressions just as you do in C++ source---they are automatically
+@value{GDBN} understands variables declared as C@t{++} references; you can use
+them in expressions just as you do in C@t{++} source---they are automatically
 dereferenced.
 
 In the parameter list shown when @value{GDBN} displays a frame, the values of
@@ -6376,34 +6998,34 @@ The @emph{address} of a reference variable is always shown, unless
 you have specified @samp{set print address off}.
 
 @item
-@value{GDBN} supports the C++ name resolution operator @code{::}---your
+@value{GDBN} supports the C@t{++} name resolution operator @code{::}---your
 expressions can use it just as expressions in your program do.  Since
 one scope may be defined in another, you can use @code{::} repeatedly if
 necessary, for example in an expression like
 @samp{@var{scope1}::@var{scope2}::@var{name}}.  @value{GDBN} also allows
-resolving name scope by reference to source files, in both C and C++
+resolving name scope by reference to source files, in both C and C@t{++}
 debugging (@pxref{Variables, ,Program variables}).
 @end enumerate
 
-In addition, when used with HP's C++ compiler, @value{GDBN} supports
+In addition, when used with HP's C@t{++} compiler, @value{GDBN} supports
 calling virtual functions correctly, printing out virtual bases of
 objects, calling functions in a base subobject, casting objects, and
 invoking user-defined operators.
 
 @node C Defaults
-@subsubsection C and C++ defaults
+@subsubsection C and C@t{++} defaults
 
-@cindex C and C++ defaults
+@cindex C and C@t{++} defaults
 
 If you allow @value{GDBN} to set type and range checking automatically, they
 both default to @code{off} whenever the working language changes to
-C or C++.  This happens regardless of whether you or @value{GDBN}
+C or C@t{++}.  This happens regardless of whether you or @value{GDBN}
 selects the working language.
 
 If you allow @value{GDBN} to set the language automatically, it
 recognizes source files whose names end with @file{.c}, @file{.C}, or
 @file{.cc}, etc, and when @value{GDBN} enters code compiled from one of
-these files, it sets the working language to C or C++.
+these files, it sets the working language to C or C@t{++}.
 @xref{Automatically, ,Having @value{GDBN} infer the source language},
 for further details.
 
@@ -6412,11 +7034,11 @@ for further details.
 @c appear even if Mod-2 does not, but meanwhile ignore it. roland 16jul93.
 
 @node C Checks
-@subsubsection C and C++ type and range checks
+@subsubsection C and C@t{++} type and range checks
 
-@cindex C and C++ checks
+@cindex C and C@t{++} checks
 
-By default, when @value{GDBN} parses C or C++ expressions, type checking
+By default, when @value{GDBN} parses C or C@t{++} expressions, type checking
 is not used.  However, if you turn type checking on, @value{GDBN}
 considers two variables type equivalent if:
 
@@ -6460,12 +7082,12 @@ with pointers and a memory allocation function.  @xref{Expressions,
 @end menu
 
 @node Debugging C plus plus
-@subsubsection @value{GDBN} features for C++
+@subsubsection @value{GDBN} features for C@t{++}
 
-@cindex commands for C++
+@cindex commands for C@t{++}
 
-Some @value{GDBN} commands are particularly useful with C++, and some are
-designed specifically for use with C++.  Here is a summary:
+Some @value{GDBN} commands are particularly useful with C@t{++}, and some are
+designed specifically for use with C@t{++}.  Here is a summary:
 
 @table @code
 @cindex break in overloaded functions
@@ -6474,17 +7096,17 @@ When you want a breakpoint in a function whose name is overloaded,
 @value{GDBN} breakpoint menus help you specify which function definition
 you want.  @xref{Breakpoint Menus,,Breakpoint menus}.
 
-@cindex overloading in C++
+@cindex overloading in C@t{++}
 @item rbreak @var{regex}
 Setting breakpoints using regular expressions is helpful for setting
 breakpoints on overloaded functions that are not members of any special
 classes.
 @xref{Set Breaks, ,Setting breakpoints}.
 
-@cindex C++ exception handling
+@cindex C@t{++} exception handling
 @item catch throw
 @itemx catch catch
-Debug C++ exception handling using these commands.  @xref{Set
+Debug C@t{++} exception handling using these commands.  @xref{Set
 Catchpoints, , Setting catchpoints}.
 
 @cindex inheritance
@@ -6493,13 +7115,13 @@ Print inheritance relationships as well as other information for type
 @var{typename}.
 @xref{Symbols, ,Examining the Symbol Table}.
 
-@cindex C++ symbol display
+@cindex C@t{++} symbol display
 @item set print demangle
 @itemx show print demangle
 @itemx set print asm-demangle
 @itemx show print asm-demangle
-Control whether C++ symbols display in their source form, both when
-displaying code as C++ source and when displaying disassemblies.
+Control whether C@t{++} symbols display in their source form, both when
+displaying code as C@t{++} source and when displaying disassemblies.
 @xref{Print Settings, ,Print settings}.
 
 @item set print object
@@ -6512,20 +7134,20 @@ Choose whether to print derived (actual) or declared types of objects.
 Control the format for printing virtual function tables.
 @xref{Print Settings, ,Print settings}.
 (The @code{vtbl} commands do not work on programs compiled with the HP
-ANSI C++ compiler (@code{aCC}).)
+ANSI C@t{++} compiler (@code{aCC}).)
 
 @kindex set overload-resolution
 @cindex overloaded functions, overload resolution
 @item set overload-resolution on
-Enable overload resolution for C++ expression evaluation.  The default
+Enable overload resolution for C@t{++} expression evaluation.  The default
 is on.  For overloaded functions, @value{GDBN} evaluates the arguments
 and searches for a function whose signature matches the argument types,
-using the standard C++ conversion rules (see @ref{C plus plus expressions, ,C++
+using the standard C@t{++} conversion rules (see @ref{C plus plus expressions, ,C@t{++}
 expressions}, for details).  If it cannot find a match, it emits a
 message.
 
 @item set overload-resolution off
-Disable overload resolution for C++ expression evaluation.  For
+Disable overload resolution for C@t{++} expression evaluation.  For
 overloaded functions that are not class member functions, @value{GDBN}
 chooses the first function of the specified name that it finds in the
 symbol table, whether or not its arguments are of the correct type.  For
@@ -6535,7 +7157,7 @@ argument types.
 
 @item @r{Overloaded symbol names}
 You can specify a particular definition of an overloaded symbol, using
-the same notation that is used to declare such symbols in C++: type
+the same notation that is used to declare such symbols in C@t{++}: type
 @code{@var{symbol}(@var{types})} rather than just @var{symbol}.  You can
 also use the @value{GDBN} command-line word completion facilities to list the
 available choices, or to finish the type list for you.
@@ -6834,7 +7456,7 @@ followed by a @samp{C}.
 String constants consist of a sequence of characters enclosed by a
 pair of like quotes, either single (@code{'}) or double (@code{"}).
 Escape sequences in the style of C are also allowed.  @xref{C
-Constants, ,C and C++ constants}, for a brief explanation of escape
+Constants, ,C and C@t{++} constants}, for a brief explanation of escape
 sequences.
 
 @item
@@ -6968,15 +7590,15 @@ module @var{module}, or if @var{id} is not an identifier in
 
 Some @value{GDBN} commands have little use when debugging Modula-2 programs.
 Five subcommands of @code{set print} and @code{show print} apply
-specifically to C and C++: @samp{vtbl}, @samp{demangle},
+specifically to C and C@t{++}: @samp{vtbl}, @samp{demangle},
 @samp{asm-demangle}, @samp{object}, and @samp{union}.  The first four
-apply to C++, and the last to the C @code{union} type, which has no direct
+apply to C@t{++}, and the last to the C @code{union} type, which has no direct
 analogue in Modula-2.
 
 The @code{@@} operator (@pxref{Expressions, ,Expressions}), while available
 with any language, is not useful with Modula-2.  Its
 intent is to aid the debugging of @dfn{dynamic arrays}, which cannot be
-created in Modula-2 as they can in C or C++.  However, because an
+created in Modula-2 as they can in C or C@t{++}.  However, because an
 address can be specified by an integral constant, the construct
 @samp{@{@var{type}@}@var{adrexp}} is still useful.
 
@@ -7270,7 +7892,7 @@ programs (refer to the Chill Standard z200/88 chpt 5.2.4.2)
 @item
 @emph{Set Literals} are defined by a name which was specified in a set
 mode.  The value delivered by a Set Literal is the set value.  This is
-comparable to an enumeration in C/C++ language.
+comparable to an enumeration in C/C@t{++} language.
 @item
 @emph{Emptiness Literal} is predefined by @code{NULL}.  The value of the
 emptiness literal delivers either the empty reference value, the empty
@@ -7515,6 +8137,7 @@ looks up the value of @code{x} in the scope of the file @file{foo.c}.
 
 @table @code
 @kindex info address
+@cindex address of a symbol
 @item info address @var{symbol}
 Describe where the data for @var{symbol} is stored.  For a register
 variable, this says which register it is kept in.  For a non-register
@@ -7526,6 +8149,7 @@ at all for a register variable, and for a stack local variable prints
 the exact address of the current instantiation of the variable.
 
 @kindex info symbol
+@cindex symbol from address
 @item info symbol @var{addr}
 Print the name of a symbol which is stored at the address @var{addr}.
 If no symbol is stored exactly at @var{addr}, @value{GDBN} prints the
@@ -7602,6 +8226,26 @@ This command differs from @code{ptype} in two ways: first, like
 @code{whatis}, it does not print a detailed description; second, it
 lists all source files where a type is defined.
 
+@kindex info scope
+@cindex local variables
+@item info scope @var{addr}
+List all the variables local to a particular scope.  This command
+accepts a location---a function name, a source line, or an address
+preceded by a @samp{*}, and prints all the variables local to the
+scope defined by that location.  For example:
+
+@smallexample
+(@value{GDBP}) @b{info scope command_line_handler}
+Scope for command_line_handler:
+Symbol rl is an argument at stack/frame offset 8, length 4.
+Symbol linebuffer is in static storage at address 0x150a18, length 4.
+Symbol linelength is in static storage at address 0x150a1c, length 4.
+Symbol p is a local variable in register $esi, length 4.
+Symbol p1 is a local variable in register $ebx, length 4.
+Symbol nline is a local variable in register $edx, length 4.
+Symbol repeat is a local variable at frame offset -8, length 4.
+@end smallexample
+
 @kindex info source
 @item info source
 Show the name of the current source file---that is, the source file for
@@ -7641,9 +8285,9 @@ This was never implemented.
 @item info methods
 @itemx info methods @var{regexp}
 The @code{info methods} command permits the user to examine all defined
-methods within C++ program, or (with the @var{regexp} argument) a
-specific set of methods found in the various C++ classes.  Many
-C++ classes provide a large number of methods.  Thus, the output
+methods within C@t{++} program, or (with the @var{regexp} argument) a
+specific set of methods found in the various C@t{++} classes.  Many
+C@t{++} classes provide a large number of methods.  Thus, the output
 from the @code{ptype} command can be overwhelming and hard to use.  The
 @code{info-methods} command filters the methods, printing only those
 which match the regular-expression @var{regexp}.
@@ -8389,7 +9033,7 @@ and examine @code{*bufp} to see the symbol.
 @value{GDBN} could not find the full definition for a struct or class.
 
 @item const/volatile indicator missing (ok if using g++ v1.x), got@dots{}
-The symbol information for a C++ member function is missing some
+The symbol information for a C@t{++} member function is missing some
 information that recent versions of the compiler should have output for
 it.
 
@@ -11872,12 +12516,12 @@ Displays the current state of displaying @value{GDBN} expression
 debugging info.
 @kindex set debug overload
 @item set debug overload
-Turns on or off display of @value{GDBN} C++ overload debugging
+Turns on or off display of @value{GDBN} C@t{++} overload debugging
 info. This includes info such as ranking of functions, etc. The default
 is off.
 @kindex show debug overload
 @item show debug overload
-Displays the current state of displaying @value{GDBN} C++ overload
+Displays the current state of displaying @value{GDBN} C@t{++} overload
 debugging info.
 @kindex set debug remote
 @cindex packets, reporting on stdout

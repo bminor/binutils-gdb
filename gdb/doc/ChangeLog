@@ -1,5 +1,10 @@
 2001-04-01  Eli Zaretskii  <eliz@is.elta.co.il>
 
+	* gdb.texinfo (Symbols): Document "info scope".
+	(Tracepoints): New chapter.
+	(Contributors): Update for v5.1.
+	<All nodes>: Change "C++" to "C@t{++}".
+
 	* gdbint.texinfo (User Interface): A new section about ui_out
 	functions, based on text written by Fernando Nasser.
 
