@@ -91,8 +91,8 @@ extern char *procfs_pid_to_str PARAMS ((int pid));
 
 extern void supply_gregset PARAMS ((const prgregset_t));
 extern void fill_gregset PARAMS ((prgregset_t, int));
-extern void supply_fpregset PARAMS ((const prfpregset_t));
-extern void fill_fpregset PARAMS ((prfpregset_t, int));
+extern void supply_fpregset PARAMS ((const prfpregset_t *));
+extern void fill_fpregset PARAMS ((prfpregset_t *, int));
 
 /* This struct is defined by us, but mainly used for the proc_service interface.
    We don't have much use for it, except as a handy place to get a real pid
@@ -653,7 +653,7 @@ sol_thread_fetch_registers (regno)
    registers array.  */
 
   supply_gregset (gregset);
-  supply_fpregset (fpregset);
+  supply_fpregset (&fpregset);
 
 #if 0
 /* thread_db doesn't seem to handle this right */
@@ -739,7 +739,7 @@ sol_thread_store_registers (regno)
     }
 
   fill_gregset (regset, regno);
-  fill_fpregset (fpregset, regno);
+  fill_fpregset (&fpregset, regno);
 
   val = p_td_thr_setgregs (&thandle, regset);
   if (val != TD_OK)
@@ -1215,7 +1215,7 @@ ps_lgetfpregs (const struct ps_prochandle *ph, lwpid_t lwpid,
     procfs_ops.to_fetch_registers (-1);
   else
     orig_core_ops.to_fetch_registers (-1);
-  fill_fpregset (*fpregset, -1);
+  fill_fpregset (fpregset, -1);
 
   do_cleanups (old_chain);
 
@@ -1234,7 +1234,7 @@ ps_lsetfpregs (const struct ps_prochandle *ph, lwpid_t lwpid,
 
   inferior_pid = BUILD_LWP (lwpid, PIDGET (inferior_pid));
   
-  supply_fpregset (*fpregset);
+  supply_fpregset (fpregset);
   if (target_has_execution)
     procfs_ops.to_store_registers (-1);
   else

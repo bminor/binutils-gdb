@@ -1,3 +1,8 @@
+Fri Oct  2 18:52:20 1998  Fernando Nasser  <fnasser@cygnus.com>
+
+	* sol-thread.c: Fixed prototypes and calls to supply_fpregset and
+ 	fill_fpregset
+
 1998-10-02  Keith Seitz  <keiths@cygnus.com>
 
 	* remote.c (remote_interrupt): Rewrite to use remote_stop.
