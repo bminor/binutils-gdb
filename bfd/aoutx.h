@@ -2743,7 +2743,7 @@ NAME(aout,find_nearest_line)
 	    CONST char *function = func->name;
 	    char *p;
 
-	    /* The caller expects a symbol name.  We actually a
+	    /* The caller expects a symbol name.  We actually have a
 	       function name, without the leading underscore.  Put the
 	       underscore back in, so that the caller gets a symbol
 	       name.  */
