@@ -1,5 +1,7 @@
 Tue Jun  9 12:20:05 1998  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
+	* doc/c-i386.texi: Update 16 bit documentation.
+
 	* config/tc-i386.h: Change Data16 to Size16, Data32 to Size32,
 	IgnoreDataSize to IgnoreSize as they are used for address size as
 	well as data size.
