@@ -45,6 +45,7 @@ i386-coff.mt
 i386-elf.mt
 i386-linux.mt
 i386-lynx.mt
+i386-mach.mt
 i386sco.mh
 i386v.mh
 i386v.mt
