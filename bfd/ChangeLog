@@ -1,3 +1,10 @@
+Sat Jul  1 00:11:08 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* elfxx-target.h: New file.
+	* elf32-target.h, elf64-target.h: Deleted.
+	* Makefile.in (elf32-target.h, elf64-target.h): Build them from
+	elfxx-target.h.
+
 Fri Jun 30 16:07:18 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* cofflink.c (_bfd_coff_generic_relocate_section): Compare

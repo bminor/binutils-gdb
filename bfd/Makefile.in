@@ -343,6 +343,16 @@ targets.o: targets.c Makefile
 archures.o: archures.c Makefile
 	$(CC) -c $(ALL_CFLAGS) $(TDEFAULTS) $<
 
+elf32-target.h : elfxx-target.h
+	rm -f elf32-target.h
+	sed -e s/NN/32/g < $(srcdir)/elfxx-target.h > elf32-target.new
+	mv -f elf32-target.new elf32-target.h
+
+elf64-target.h : elfxx-target.h
+	rm -f elf64-target.h
+	sed -e s/NN/64/g < $(srcdir)/elfxx-target.h > elf64-target.new
+	mv -f elf64-target.new elf64-target.h
+
 subdir_do: force
 	@for i in $(DODIRS); do \
 		if [ -d ./$$i ] ; then \
@@ -360,7 +370,8 @@ TAGS: force
 do_mostlyclean:
 	rm -f *.o *~ core *.E *.p *.ip aout-params.h gen-aout
 do_clean: do_mostlyclean
-	rm -f libbfd.a TAGS bfd.h stmp-bfd.h ofiles
+	rm -f libbfd.a TAGS bfd.h stmp-bfd.h ofiles \
+		elf32-target.h elf64-target.h
 do_distclean: do_clean
 	rm -f Makefile config.status sysdep.h
 
