@@ -1,3 +1,10 @@
+start-sanitize-cygnus
+Mon Nov 30 11:52:44 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* Makefile.am (CGENFILES): Add rtx-funcs.scm.
+	* Makefile.in: Rebuild.
+
+end-sanitize-cygnus
 start-sanitize-fr30
 Thu Nov 26 11:26:32 1998  Dave Brolley  <brolley@cygnus.com>
 
