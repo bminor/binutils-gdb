@@ -1,3 +1,10 @@
+2002-08-22  Jim Blandy  <jimb@redhat.com>
+
+	* coffread.c (coff_symfile_read): Don't try to read the line
+	number table from disk if the image file doesn't have a symbol
+	table; we'll never actually look at the info anyway, and Windows
+	ships DLL's with bogus file offsets for the line number data.
+
 2002-08-21  Elena Zannoni  <ezannoni@redhat.com>
 
         * rs6000-tdep.c (rs6000_gdbarch_init): Figure out whether we have
