@@ -80,11 +80,12 @@ static struct partial_symbol *lookup_partial_symbol (struct partial_symtab *,
 						     const char *, int,
 						     namespace_enum);
 
-static struct symbol *lookup_symbol_aux (const char *name, const
-					 struct block *block, const
-					 namespace_enum namespace, int
-					 *is_a_field_of_this, struct
-					 symtab **symtab);
+static struct symbol *lookup_symbol_aux (const char *name,
+					 const char *mangled_name,
+					 const struct block *block,
+					 const namespace_enum namespace,
+					 int *is_a_field_of_this,
+					 struct symtab **symtab);
 
 
 static struct symbol *find_active_alias (struct symbol *sym, CORE_ADDR addr);
@@ -570,6 +571,7 @@ lookup_symbol (const char *name, const struct block *block,
 {
   char *modified_name = NULL;
   char *modified_name2 = NULL;
+  const char *mangled_name = NULL;
   int needtofreename = 0;
   struct symbol *returnval;
 
@@ -595,13 +597,14 @@ lookup_symbol (const char *name, const struct block *block,
       modified_name2 = cplus_demangle (modified_name, DMGL_ANSI | DMGL_PARAMS);
       if (modified_name2)
 	{
+	  mangled_name = name;
 	  modified_name = modified_name2;
 	  needtofreename = 1;
 	}
     }
 
-  returnval = lookup_symbol_aux (modified_name, block, namespace,
-				 is_a_field_of_this, symtab);
+  returnval = lookup_symbol_aux (modified_name, mangled_name, block,
+				 namespace, is_a_field_of_this, symtab);
   if (needtofreename)
     xfree (modified_name2);
 
@@ -609,9 +612,9 @@ lookup_symbol (const char *name, const struct block *block,
 }
 
 static struct symbol *
-lookup_symbol_aux (const char *name, const struct block *block,
-	       const namespace_enum namespace, int *is_a_field_of_this,
-	       struct symtab **symtab)
+lookup_symbol_aux (const char *name, const char *mangled_name,
+		   const struct block *block, const namespace_enum namespace,
+		   int *is_a_field_of_this, struct symtab **symtab)
 {
   register struct symbol *sym;
   register struct symtab *s = NULL;
@@ -626,7 +629,7 @@ lookup_symbol_aux (const char *name, const struct block *block,
 
   while (block != 0)
     {
-      sym = lookup_block_symbol (block, name, namespace);
+      sym = lookup_block_symbol (block, name, mangled_name, namespace);
       if (sym)
 	{
 	  block_found = block;
@@ -679,7 +682,7 @@ lookup_symbol_aux (const char *name, const struct block *block,
 	if (BLOCK_START (b) <= BLOCK_START (block)
 	    && BLOCK_END (b) > BLOCK_START (block))
 	  {
-	    sym = lookup_block_symbol (b, name, VAR_NAMESPACE);
+	    sym = lookup_block_symbol (b, name, mangled_name, VAR_NAMESPACE);
 	    if (sym)
 	      {
 		block_found = b;
@@ -717,7 +720,7 @@ lookup_symbol_aux (const char *name, const struct block *block,
   {
     bv = BLOCKVECTOR (s);
     block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-    sym = lookup_block_symbol (block, name, namespace);
+    sym = lookup_block_symbol (block, name, mangled_name, namespace);
     if (sym)
       {
 	block_found = block;
@@ -746,14 +749,14 @@ lookup_symbol_aux (const char *name, const struct block *block,
 	      bv = BLOCKVECTOR (s);
 	      block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
 	      sym = lookup_block_symbol (block, SYMBOL_NAME (msymbol),
-					 namespace);
+					 mangled_name, namespace);
 	      /* We kept static functions in minimal symbol table as well as
 	         in static scope. We want to find them in the symbol table. */
 	      if (!sym)
 		{
 		  block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
 		  sym = lookup_block_symbol (block, SYMBOL_NAME (msymbol),
-					     namespace);
+					     mangled_name, namespace);
 		}
 
 	      /* sym == 0 if symbol was found in the minimal symbol table
@@ -779,7 +782,7 @@ lookup_symbol_aux (const char *name, const struct block *block,
 	    {
 	      /* This is a mangled variable, look it up by its
 	         mangled name.  */
-	      return lookup_symbol_aux (SYMBOL_NAME (msymbol), block,
+	      return lookup_symbol_aux (SYMBOL_NAME (msymbol), mangled_name, block,
 					namespace, is_a_field_of_this, symtab);
 	    }
 	  /* There are no debug symbols for this file, or we are looking
@@ -797,7 +800,7 @@ lookup_symbol_aux (const char *name, const struct block *block,
 	s = PSYMTAB_TO_SYMTAB (ps);
 	bv = BLOCKVECTOR (s);
 	block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-	sym = lookup_block_symbol (block, name, namespace);
+	sym = lookup_block_symbol (block, name, mangled_name, namespace);
 	if (!sym)
 	  {
 	    /* This shouldn't be necessary, but as a last resort
@@ -806,7 +809,7 @@ lookup_symbol_aux (const char *name, const struct block *block,
 	     * the psymtab gets it wrong in some cases.
 	     */
 	    block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-	    sym = lookup_block_symbol (block, name, namespace);
+	    sym = lookup_block_symbol (block, name, mangled_name, namespace);
 	    if (!sym)
 	      error ("Internal: global symbol `%s' found in %s psymtab but not in symtab.\n\
 %s may be an inlined function, or may be a template function\n\
@@ -830,7 +833,7 @@ lookup_symbol_aux (const char *name, const struct block *block,
   {
     bv = BLOCKVECTOR (s);
     block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-    sym = lookup_block_symbol (block, name, namespace);
+    sym = lookup_block_symbol (block, name, mangled_name, namespace);
     if (sym)
       {
 	block_found = block;
@@ -847,7 +850,7 @@ lookup_symbol_aux (const char *name, const struct block *block,
 	s = PSYMTAB_TO_SYMTAB (ps);
 	bv = BLOCKVECTOR (s);
 	block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-	sym = lookup_block_symbol (block, name, namespace);
+	sym = lookup_block_symbol (block, name, mangled_name, namespace);
 	if (!sym)
 	  {
 	    /* This shouldn't be necessary, but as a last resort
@@ -856,7 +859,7 @@ lookup_symbol_aux (const char *name, const struct block *block,
 	     * the psymtab gets it wrong in some cases.
 	     */
 	    block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-	    sym = lookup_block_symbol (block, name, namespace);
+	    sym = lookup_block_symbol (block, name, mangled_name, namespace);
 	    if (!sym)
 	      error ("Internal: static symbol `%s' found in %s psymtab but not in symtab.\n\
 %s may be an inlined function, or may be a template function\n\
@@ -913,14 +916,14 @@ lookup_symbol_aux (const char *name, const struct block *block,
 	      bv = BLOCKVECTOR (s);
 	      block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
 	      sym = lookup_block_symbol (block, SYMBOL_NAME (msymbol),
-					 namespace);
+					 mangled_name, namespace);
 	      /* We kept static functions in minimal symbol table as well as
 	         in static scope. We want to find them in the symbol table. */
 	      if (!sym)
 		{
 		  block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
 		  sym = lookup_block_symbol (block, SYMBOL_NAME (msymbol),
-					     namespace);
+					     mangled_name, namespace);
 		}
 	      /* If we found one, return it */
 	      if (sym)
@@ -957,8 +960,9 @@ lookup_symbol_aux (const char *name, const struct block *block,
 		   && MSYMBOL_TYPE (msymbol) != mst_file_text
 		   && !STREQ (name, SYMBOL_NAME (msymbol)))
 	    {
-	      return lookup_symbol_aux (SYMBOL_NAME (msymbol), block,
-					namespace, is_a_field_of_this, symtab);
+	      return lookup_symbol_aux (SYMBOL_NAME (msymbol), mangled_name,
+					block, namespace, is_a_field_of_this,
+					symtab);
 	    }
 	}
     }
@@ -1084,7 +1088,7 @@ lookup_transparent_type (const char *name)
   {
     bv = BLOCKVECTOR (s);
     block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-    sym = lookup_block_symbol (block, name, STRUCT_NAMESPACE);
+    sym = lookup_block_symbol (block, name, NULL, STRUCT_NAMESPACE);
     if (sym && !TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)))
       {
 	return SYMBOL_TYPE (sym);
@@ -1098,7 +1102,7 @@ lookup_transparent_type (const char *name)
 	s = PSYMTAB_TO_SYMTAB (ps);
 	bv = BLOCKVECTOR (s);
 	block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-	sym = lookup_block_symbol (block, name, STRUCT_NAMESPACE);
+	sym = lookup_block_symbol (block, name, NULL, STRUCT_NAMESPACE);
 	if (!sym)
 	  {
 	    /* This shouldn't be necessary, but as a last resort
@@ -1107,7 +1111,7 @@ lookup_transparent_type (const char *name)
 	     * the psymtab gets it wrong in some cases.
 	     */
 	    block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-	    sym = lookup_block_symbol (block, name, STRUCT_NAMESPACE);
+	    sym = lookup_block_symbol (block, name, NULL, STRUCT_NAMESPACE);
 	    if (!sym)
 	      error ("Internal: global symbol `%s' found in %s psymtab but not in symtab.\n\
 %s may be an inlined function, or may be a template function\n\
@@ -1131,7 +1135,7 @@ lookup_transparent_type (const char *name)
   {
     bv = BLOCKVECTOR (s);
     block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-    sym = lookup_block_symbol (block, name, STRUCT_NAMESPACE);
+    sym = lookup_block_symbol (block, name, NULL, STRUCT_NAMESPACE);
     if (sym && !TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)))
       {
 	return SYMBOL_TYPE (sym);
@@ -1145,7 +1149,7 @@ lookup_transparent_type (const char *name)
 	s = PSYMTAB_TO_SYMTAB (ps);
 	bv = BLOCKVECTOR (s);
 	block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-	sym = lookup_block_symbol (block, name, STRUCT_NAMESPACE);
+	sym = lookup_block_symbol (block, name, NULL, STRUCT_NAMESPACE);
 	if (!sym)
 	  {
 	    /* This shouldn't be necessary, but as a last resort
@@ -1154,7 +1158,7 @@ lookup_transparent_type (const char *name)
 	     * the psymtab gets it wrong in some cases.
 	     */
 	    block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-	    sym = lookup_block_symbol (block, name, STRUCT_NAMESPACE);
+	    sym = lookup_block_symbol (block, name, NULL, STRUCT_NAMESPACE);
 	    if (!sym)
 	      error ("Internal: static symbol `%s' found in %s psymtab but not in symtab.\n\
 %s may be an inlined function, or may be a template function\n\
@@ -1198,10 +1202,15 @@ find_main_psymtab (void)
    binary search terminates, we drop through and do a straight linear
    search on the symbols.  Each symbol which is marked as being a C++
    symbol (language_cplus set) has both the encoded and non-encoded names
-   tested for a match. */
+   tested for a match.
+
+   If MANGLED_NAME is non-NULL, verify that any symbol we find has this
+   particular mangled name.
+*/
 
 struct symbol *
 lookup_block_symbol (register const struct block *block, const char *name,
+		     const char *mangled_name,
 		     const namespace_enum namespace)
 {
   register int bot, top, inc;
@@ -1261,14 +1270,19 @@ lookup_block_symbol (register const struct block *block, const char *name,
          return the first one; I believe it is now impossible for us
          to encounter two symbols with the same name and namespace
          here, because blocks containing argument symbols are no
-         longer sorted.  */
+         longer sorted.  The exception is for C++, where multiple functions
+	 (cloned constructors / destructors, in particular) can have
+	 the same demangled name.  So if we have a particular
+	 mangled name to match, try to do so.  */
 
       top = BLOCK_NSYMS (block);
       while (bot < top)
 	{
 	  sym = BLOCK_SYM (block, bot);
-	  if (SYMBOL_NAMESPACE (sym) == namespace &&
-	      SYMBOL_MATCHES_NAME (sym, name))
+	  if (SYMBOL_NAMESPACE (sym) == namespace
+	      && (mangled_name
+		  ? strcmp (SYMBOL_NAME (sym), mangled_name) == 0
+		  : SYMBOL_MATCHES_NAME (sym, name)))
 	    {
 	      return sym;
 	    }
@@ -1300,8 +1314,10 @@ lookup_block_symbol (register const struct block *block, const char *name,
       while (bot < top)
 	{
 	  sym = BLOCK_SYM (block, bot);
-	  if (SYMBOL_NAMESPACE (sym) == namespace &&
-	      SYMBOL_MATCHES_NAME (sym, name))
+	  if (SYMBOL_NAMESPACE (sym) == namespace
+	      && (mangled_name
+		  ? strcmp (SYMBOL_NAME (sym), mangled_name) == 0
+		  : SYMBOL_MATCHES_NAME (sym, name)))
 	    {
 	      /* If SYM has aliases, then use any alias that is active
 	         at the current PC.  If no alias is active at the current

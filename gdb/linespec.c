@@ -1213,7 +1213,7 @@ symbol_found:			/* We also jump here from inside the C++ class/namespace
 	    {
 	      struct blockvector *bv = BLOCKVECTOR (sym_symtab);
 	      struct block *b = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-	      if (lookup_block_symbol (b, copy, VAR_NAMESPACE) != NULL)
+	      if (lookup_block_symbol (b, copy, NULL, VAR_NAMESPACE) != NULL)
 		build_canonical_line_spec (values.sals, copy, canonical);
 	    }
 	  return values;

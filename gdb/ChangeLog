@@ -1,3 +1,19 @@
+2002-03-22  Daniel Jacobowitz  <drow@mvista.com>
+
+	* symtab.h (lookup_block_symbol): Add mangled_name argument
+	to prototype.
+
+	* symmisc.c (maintenance_check_symtabs): Call lookup_block_symbol
+	with new mangled_name argument.
+	* linespec.c (decode_line_1): Likewise.
+	* valops (value_of_this): Likewise.
+	* symtab.c (lookup_transparent_type): Likewise.
+	(lookup_symbol_aux): Likewise.  Accept new mangled_name argument.
+	(lookup_symbol): If we are given a mangled name, pass it down
+	to lookup_symbol_aux.
+	(lookup_block_symbol): If we are given a mangled name to check
+	against, only return symbols which match it.
+
 2002-03-22  Christopher Faylor  <cgf@redhat.com>
 
 	* win32-nat.c (child_create_inferior): Check for proper shell to use

@@ -1098,6 +1098,7 @@ extern struct symbol *lookup_symbol (const char *, const struct block *,
 /* lookup a symbol by name, within a specified block */
 
 extern struct symbol *lookup_block_symbol (const struct block *, const char *,
+					   const char *,
 					   const namespace_enum);
 
 /* lookup a [struct, union, enum] by name, within a specified block */

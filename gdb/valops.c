@@ -3250,7 +3250,7 @@ value_of_this (int complain)
 
   /* Calling lookup_block_symbol is necessary to get the LOC_REGISTER
      symbol instead of the LOC_ARG one (if both exist).  */
-  sym = lookup_block_symbol (b, funny_this, VAR_NAMESPACE);
+  sym = lookup_block_symbol (b, funny_this, NULL, VAR_NAMESPACE);
   if (sym == NULL)
     {
       if (complain)
