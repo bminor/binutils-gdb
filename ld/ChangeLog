@@ -1,3 +1,8 @@
+Mon Aug  2 12:04:36 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* scripttempl/elf.sc: Add hooks for .sdata, .sbss, and
+	target-specific sections, and for changing data section vma.
+
 Mon Jul 26 14:00:02 1993  Ken Raeburn  (raeburn@deneb.cygnus.com)
 
 	* ldgram.y (OPTION_Qy, OPTION_Y, OPTION_dn, OPTION_YP): New
@@ -9,6 +14,9 @@ Mon Jul 26 14:00:02 1993  Ken Raeburn  (raeburn@deneb.cygnus.com)
 	"-YP,...".
 
 	* config/sun4sol2.mt: Pass emulation name without ".sh".
+
+	* emulparams/elf32_sparc.c: Renamed from elf32-sparc.c.
+	* config/sun4sol2.mt (em_elf32_sparc.c): Adjusted accordingly.
 
 Fri Jul 23 13:51:09 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
