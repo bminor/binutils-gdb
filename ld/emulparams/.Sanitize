@@ -15,14 +15,6 @@
 
 Do-first:
 
-arc_files="arcelf.sh"
-
-if ( echo $* | grep keep\-arc > /dev/null ) ; then
-	keep_these_too="${arc_files} ${keep_these_too}"
-else
-	lose_these_too="${arc_files} ${lose_these_too}"
-fi
-
 d30v_files="d30velf.sh"
 
 if ( echo $* | grep keep\-d30v > /dev/null ) ; then
@@ -60,6 +52,7 @@ a29k.sh
 aixppc.sh
 aixrs6.sh
 alpha.sh
+arcelf.sh
 armaoutb.sh
 armaoutl.sh
 armcoff.sh
