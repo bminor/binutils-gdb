@@ -52,7 +52,6 @@
 
 /* Static function declarations */
 
-static void verify_gdbarch (struct gdbarch *gdbarch);
 static void alloc_gdbarch_data (struct gdbarch *);
 static void init_gdbarch_swap (struct gdbarch *);
 static void clear_gdbarch_swap (struct gdbarch *);
@@ -600,10 +599,16 @@ gdbarch_free (struct gdbarch *arch)
 }
 
 
-/* Ensure that all values in a GDBARCH are reasonable. */
+/* Ensure that all values in a GDBARCH are reasonable.  */
+
+/* NOTE/WARNING: The parameter is called ``current_gdbarch'' so that it
+   just happens to match the global variable ``current_gdbarch''.  That
+   way macros refering to that variable get the local and not the global
+   version - ulgh.  Once everything is parameterised with gdbarch, this
+   will go away. */
 
 static void
-verify_gdbarch (struct gdbarch *gdbarch)
+verify_gdbarch (struct gdbarch *current_gdbarch)
 {
   struct ui_file *log;
   struct cleanup *cleanups;
@@ -612,9 +617,9 @@ verify_gdbarch (struct gdbarch *gdbarch)
   log = mem_fileopen ();
   cleanups = make_cleanup_ui_file_delete (log);
   /* fundamental */
-  if (gdbarch->byte_order == BFD_ENDIAN_UNKNOWN)
+  if (current_gdbarch->byte_order == BFD_ENDIAN_UNKNOWN)
     fprintf_unfiltered (log, "\n\tbyte-order");
-  if (gdbarch->bfd_arch_info == NULL)
+  if (current_gdbarch->bfd_arch_info == NULL)
     fprintf_unfiltered (log, "\n\tbfd_arch_info");
   /* Check those that need to be defined for the given multi-arch level. */
   /* Skip verify of short_bit, invalid_p == 0 */
@@ -625,11 +630,11 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of double_bit, invalid_p == 0 */
   /* Skip verify of long_double_bit, invalid_p == 0 */
   /* Skip verify of ptr_bit, invalid_p == 0 */
-  if (gdbarch->addr_bit == 0)
-    gdbarch->addr_bit = TARGET_PTR_BIT;
+  if (current_gdbarch->addr_bit == 0)
+    current_gdbarch->addr_bit = TARGET_PTR_BIT;
   /* Skip verify of bfd_vma_bit, invalid_p == 0 */
-  if (gdbarch->char_signed == -1)
-    gdbarch->char_signed = 1;
+  if (current_gdbarch->char_signed == -1)
+    current_gdbarch->char_signed = 1;
   /* Skip verify of read_pc, has predicate */
   /* Skip verify of write_pc, invalid_p == 0 */
   /* Skip verify of read_sp, has predicate */
@@ -637,7 +642,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of pseudo_register_read, has predicate */
   /* Skip verify of pseudo_register_write, has predicate */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->num_regs == -1))
+      && (current_gdbarch->num_regs == -1))
     fprintf_unfiltered (log, "\n\tnum_regs");
   /* Skip verify of num_pseudo_regs, invalid_p == 0 */
   /* Skip verify of sp_regnum, invalid_p == 0 */
@@ -709,27 +714,27 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of deprecated_frame_init_saved_regs, has predicate */
   /* Skip verify of deprecated_init_extra_frame_info, has predicate */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->skip_prologue == 0))
+      && (current_gdbarch->skip_prologue == 0))
     fprintf_unfiltered (log, "\n\tskip_prologue");
   /* Skip verify of prologue_frameless_p, invalid_p == 0 */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->inner_than == 0))
+      && (current_gdbarch->inner_than == 0))
     fprintf_unfiltered (log, "\n\tinner_than");
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->breakpoint_from_pc == 0))
+      && (current_gdbarch->breakpoint_from_pc == 0))
     fprintf_unfiltered (log, "\n\tbreakpoint_from_pc");
   /* Skip verify of adjust_breakpoint_address, has predicate */
   /* Skip verify of memory_insert_breakpoint, invalid_p == 0 */
   /* Skip verify of memory_remove_breakpoint, invalid_p == 0 */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->decr_pc_after_break == -1))
+      && (current_gdbarch->decr_pc_after_break == -1))
     fprintf_unfiltered (log, "\n\tdecr_pc_after_break");
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->function_start_offset == -1))
+      && (current_gdbarch->function_start_offset == -1))
     fprintf_unfiltered (log, "\n\tfunction_start_offset");
   /* Skip verify of remote_translate_xfer_address, invalid_p == 0 */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->frame_args_skip == -1))
+      && (current_gdbarch->frame_args_skip == -1))
     fprintf_unfiltered (log, "\n\tframe_args_skip");
   /* Skip verify of frameless_function_invocation, invalid_p == 0 */
   /* Skip verify of deprecated_frame_chain, has predicate */
@@ -745,18 +750,18 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of frame_align, has predicate */
   /* Skip verify of deprecated_reg_struct_has_addr, has predicate */
   /* Skip verify of stabs_argument_has_addr, invalid_p == 0 */
-  if (gdbarch->float_format == 0)
-    gdbarch->float_format = default_float_format (gdbarch);
-  if (gdbarch->double_format == 0)
-    gdbarch->double_format = default_double_format (gdbarch);
-  if (gdbarch->long_double_format == 0)
-    gdbarch->long_double_format = default_double_format (gdbarch);
+  if (current_gdbarch->float_format == 0)
+    current_gdbarch->float_format = default_float_format (current_gdbarch);
+  if (current_gdbarch->double_format == 0)
+    current_gdbarch->double_format = default_double_format (current_gdbarch);
+  if (current_gdbarch->long_double_format == 0)
+    current_gdbarch->long_double_format = default_double_format (current_gdbarch);
   /* Skip verify of convert_from_func_ptr_addr, invalid_p == 0 */
   /* Skip verify of addr_bits_remove, invalid_p == 0 */
   /* Skip verify of smash_text_address, invalid_p == 0 */
   /* Skip verify of software_single_step, has predicate */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
-      && (gdbarch->print_insn == 0))
+      && (current_gdbarch->print_insn == 0))
     fprintf_unfiltered (log, "\n\tprint_insn");
   /* Skip verify of skip_trampoline_code, invalid_p == 0 */
   /* Skip verify of skip_solib_resolver, invalid_p == 0 */
@@ -797,7 +802,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
    will go away. */
 
 void
-gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
+gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
 {
   fprintf_unfiltered (file,
                       "gdbarch_dump: GDB_MULTI_ARCH = %d\n",

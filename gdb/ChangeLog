@@ -1,5 +1,11 @@
 2003-11-09  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh (verify_gdbarch, gdbarch_dump): Rename "gdbarch"
+	parameter to "current_gdbarch".  Add comment explaining why.
+	(TARGET_FLOAT_FORMAT: Pass "current_gdbarch" to default_double_format.
+	(TARGET_DOUBLE_FORMAT,TARGET_LONG_DOUBLE_FORMAT): Ditto.
+	* gdbarch.c: Re-generate.
+	
 	* config/s390/s390.mh (XM_FILE, XM_CLIBS): Delete macros.
 	* config/s390/nm-linux.h (KERNEL_U_ADDR): Define.
 	* config/s390/xm-linux.h: Delete file.
