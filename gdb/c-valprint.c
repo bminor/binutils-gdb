@@ -200,8 +200,25 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	      if (vtblprint)
 	        {
 		  value vt_val;
+	          struct symbol *wsym = (struct symbol *)NULL;
+	          struct type *wtype;
+		  struct symtab *s;
+		  struct block *block = (struct block *)NULL;
+		  int is_this_fld;
 
-		  vt_val = value_at (TYPE_TARGET_TYPE (type), vt_address);
+
+              	  wsym = lookup_symbol (SYMBOL_NAME(msymbol), block, 
+				VAR_NAMESPACE, &is_this_fld, &s);
+ 
+		  if (wsym)
+		    {
+	              wtype = SYMBOL_TYPE(wsym);
+		    }
+		  else
+		    {
+		      wtype = TYPE_TARGET_TYPE(type);
+		    }
+		  vt_val = value_at (wtype, vt_address);
 		  val_print (VALUE_TYPE (vt_val), VALUE_CONTENTS (vt_val),
 			     VALUE_ADDRESS (vt_val), stream, format,
 			     deref_ref, recurse + 1, pretty);
