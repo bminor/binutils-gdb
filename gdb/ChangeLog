@@ -1,3 +1,12 @@
+Sat Jun 17 10:17:16 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* somsolib.c (som_solib_add): Validate regexp argument.
+	Don't assume the first entry on dld's library list is the main
+	program.  Don't load the same library more than once and don't
+	consider the main program a shared library.
+	(som_solib_sharedlibrary_command): New function
+	(_initialize_som_solib): Add "sharedlibrary" command.
+
 Thu Jun 15 14:54:58 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* array-rom.c: Remove, no longer used.

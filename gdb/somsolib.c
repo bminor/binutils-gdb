@@ -113,7 +113,13 @@ som_solib_add (arg_string, from_tty, target)
   asection *shlib_info;
   int status;
   unsigned int dld_flags;
-  char buf[4];
+  char buf[4], *re_err;
+
+  /* First validate our arguments.  */
+  if ((re_err = re_comp (arg_string ? arg_string : ".")) != NULL)
+    {
+      error ("Invalid regexp: %s", re_err);
+    }
 
   /* If we're debugging a core file, or have attached to a running
      process, then som_solib_create_inferior_hook will not have been
@@ -212,14 +218,7 @@ som_solib_add (arg_string, from_tty, target)
   addr = extract_unsigned_integer (buf, 4);
 
   /* Now that we have a pointer to the dynamic library list, walk
-     through it and add the symbols for each library.
-
-     Skip the first entry since it's our executable.  */
-  status = target_read_memory (addr + 36, buf, 4);
-  if (status != 0)
-    goto err;
-
-  addr = extract_unsigned_integer (buf, 4);
+     through it and add the symbols for each library.  */
 
   so_list_tail = so_list_head;
   /* Find the end of the list of shared objects.  */
@@ -232,6 +231,7 @@ som_solib_add (arg_string, from_tty, target)
       unsigned int name_len;
       char *name;
       struct so_list *new_so;
+      struct so_list *so_list = so_list_head;
       struct section_table *p;
 
       if (addr == 0)
@@ -258,6 +258,25 @@ som_solib_add (arg_string, from_tty, target)
       status = target_read_memory (name_addr, name, name_len);
       if (status != 0)
 	goto err;
+
+      /* See if we've already loaded something with this name.  */
+      while (so_list)
+	{
+	  if (!strcmp (so_list->som_solib.name, name))
+	    break;
+	  so_list = so_list->next;
+	}
+
+      /* We've already loaded this one or it's the main program, skip it.  */
+      if (so_list || !strcmp (name, symfile_objfile->name))
+	{
+	  status = target_read_memory (addr + 36, buf, 4);
+	  if (status != 0)
+	    goto err;
+
+	  addr = (CORE_ADDR) extract_unsigned_integer (buf, 4);
+	  continue;
+	}
 
       name = obsavestring (name, name_len - 1,
 			   &symfile_objfile->symbol_obstack);
@@ -657,9 +676,20 @@ som_sharedlibrary_info_command (ignore, from_tty)
     }
 }
 
+static void
+som_solib_sharedlibrary_command (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  dont_repeat ();
+  som_solib_add (args, from_tty, (struct target_ops *) 0);
+}
+
 void
 _initialize_som_solib ()
 {
+  add_com ("sharedlibrary", class_files, som_solib_sharedlibrary_command,
+           "Load shared object library symbols for files matching REGEXP.");
   add_info ("sharedlibrary", som_sharedlibrary_info_command,
 	    "Status of loaded shared object libraries.");
 }
