@@ -45,6 +45,7 @@ static void ppc_macro PARAMS ((char *str, const struct powerpc_macro *macro));
 static void ppc_byte PARAMS ((int));
 static int ppc_is_toc_sym PARAMS ((symbolS *sym));
 static void ppc_tc PARAMS ((int));
+
 #ifdef OBJ_COFF
 static void ppc_comm PARAMS ((int));
 static void ppc_bb PARAMS ((int));
@@ -62,11 +63,30 @@ static void ppc_stabx PARAMS ((int));
 static void ppc_rename PARAMS ((int));
 static void ppc_toc PARAMS ((int));
 #endif
+
 #ifdef OBJ_ELF
 static bfd_reloc_code_real_type ppc_elf_suffix PARAMS ((char **));
 static void ppc_elf_cons PARAMS ((int));
 static void ppc_elf_validate_fix PARAMS ((fixS *, segT));
 #endif
+
+#ifdef TE_PE
+static void ppc_previous PARAMS ((int));
+static void ppc_pdata PARAMS ((int));
+static void ppc_ydata PARAMS ((int));
+static void ppc_reldata PARAMS ((int));
+static void ppc_rdata PARAMS ((int));
+static void ppc_ualong PARAMS ((int));
+static void ppc_znop PARAMS ((int));
+static void ppc_pe_comm PARAMS ((int));
+static void ppc_pe_section PARAMS ((int));
+static void ppc_pe_section PARAMS ((int));
+static void ppc_pe_function PARAMS ((int));
+
+segT ydata_section, pdata_section, reldata_section, rdata_section;
+
+#endif
+
 
 /* Generic assembler global variables which must be defined by all
    targets.  */
@@ -101,28 +121,51 @@ const pseudo_typeS md_pseudo_table[] =
      legitimately belong in the obj-*.c file.  However, XCOFF is based
      on COFF, and is only implemented for the RS/6000.  We just use
      obj-coff.c, and add what we need here.  */
+#ifndef TE_PE
   { "comm",	ppc_comm,	0 },
   { "lcomm",	ppc_comm,	1 },
+  { "function",	ppc_function,	0 },
+#endif
+
   { "bb",	ppc_bb,		0 },
   { "bf",	ppc_bf,		0 },
   { "bi",	ppc_biei,	0 },
   { "bs",	ppc_bs,		0 },
+
+#ifndef TE_PE
   { "csect",	ppc_csect,	0 },
+#endif
+
   { "eb",	ppc_eb,		0 },
   { "ef",	ppc_ef,		0 },
   { "ei",	ppc_biei,	1 },
   { "es",	ppc_es,		0 },
   { "extern",	ppc_extern,	0 },
-  { "function",	ppc_function,	0 },
   { "lglobl",	ppc_lglobl,	0 },
   { "rename",	ppc_rename,	0 },
   { "stabx",	ppc_stabx,	0 },
   { "toc",	ppc_toc,	0 },
 #endif
+
 #ifdef OBJ_ELF
   { "long",	ppc_elf_cons,	4 },
   { "word",	ppc_elf_cons,	2 },
   { "short",	ppc_elf_cons,	2 },
+#endif
+
+#ifdef TE_PE
+  /* Pseudo-ops specific to the Windows NT PowerPC PE (coff) format */
+  { "previous", ppc_previous,   0 },
+  { "pdata",    ppc_pdata,      0 },
+  { "ydata",    ppc_ydata,      0 },
+  { "reldata",  ppc_reldata,    0 },
+  { "rdata",    ppc_rdata,      0 },
+  { "ualong",   ppc_ualong,     0 },
+  { "znop",     ppc_znop,       0 },
+  { "comm",	ppc_pe_comm,	0 },
+  { "lcomm",	ppc_pe_comm,	1 },
+  { "section",  ppc_pe_section, 0 },
+  { "function",	ppc_pe_function,0 },
 #endif
 
   /* This pseudo-op is used even when not generating XCOFF output.  */
@@ -130,6 +173,207 @@ const pseudo_typeS md_pseudo_table[] =
 
   { NULL,	NULL,		0 }
 };
+
+
+#ifdef TE_PE
+/* The Windows NT PowerPC assembler used predefined names.    */
+/* Structure to hold information about predefined registers.  */
+
+struct pd_reg
+  {
+    char *name;
+    int value;
+  };
+
+/* List of registers that are pre-defined:
+
+   Each general register has one predefined name of the form
+   r<REGNUM> which has the value <REGNUM>.
+
+   Each floating point register has one predefined name of the form
+   f<REGNUM> which has the value <REGNUM>.
+
+   Each condition register has one predefined name of the form
+   cr<REGNUM> which has the value <REGNUM>.
+
+   There are individual registers as well:
+   sp    has the value 1
+   rtoc  has the value 2
+   fpscr has the value 0
+   xer   has the value 1
+   lr    has the value 8
+   ctr   has the value 9
+
+   The table is sorted. Suitable for searching by a binary search. */
+
+static const struct pd_reg pre_defined_registers[] =
+{
+  { "cr0", 0 },
+  { "cr1", 1 },
+  { "cr2", 2 },
+  { "cr3", 3 },
+  { "cr4", 4 },
+  { "cr5", 5 },
+  { "cr6", 6 },
+  { "cr7", 7 },
+
+  { "ctr", 9 },
+
+  { "f0", 0 }, 
+  { "f1", 1 }, 
+  { "f10", 10 }, 
+  { "f11", 11 }, 
+  { "f12", 12 }, 
+  { "f13", 13 }, 
+  { "f14", 14 }, 
+  { "f15", 15 }, 
+  { "f16", 16 }, 
+  { "f17", 17 }, 
+  { "f18", 18 }, 
+  { "f19", 19 }, 
+  { "f2", 2 }, 
+  { "f20", 20 }, 
+  { "f21", 21 }, 
+  { "f22", 22 }, 
+  { "f23", 23 }, 
+  { "f24", 24 }, 
+  { "f25", 25 }, 
+  { "f26", 26 }, 
+  { "f27", 27 }, 
+  { "f28", 28 }, 
+  { "f29", 29 }, 
+  { "f3", 3 }, 
+  { "f30", 30 },
+  { "f31", 31 },
+  { "f4", 4 }, 
+  { "f5", 5 }, 
+  { "f6", 6 }, 
+  { "f7", 7 }, 
+  { "f8", 8 }, 
+  { "f9", 9 }, 
+
+  { "fpscr", 0 },
+
+  { "lr", 8 },
+
+  { "r0", 0 },
+  { "r1", 1 },
+  { "r10", 10 },
+  { "r11", 11 },
+  { "r12", 12 },
+  { "r13", 13 },
+  { "r14", 14 },
+  { "r15", 15 },
+  { "r16", 16 },
+  { "r17", 17 },
+  { "r18", 18 },
+  { "r19", 19 },
+  { "r2", 2 },
+  { "r20", 20 },
+  { "r21", 21 },
+  { "r22", 22 },
+  { "r23", 23 },
+  { "r24", 24 },
+  { "r25", 25 },
+  { "r26", 26 },
+  { "r27", 27 },
+  { "r28", 28 },
+  { "r29", 29 },
+  { "r3", 3 },
+  { "r30", 30 },
+  { "r31", 31 },
+  { "r4", 4 },
+  { "r5", 5 },
+  { "r6", 6 },
+  { "r7", 7 },
+  { "r8", 8 },
+  { "r9", 9 },
+
+  { "rtoc", 2 },
+
+  { "sp", 1 },
+
+  { "xer", 1 },
+
+};
+
+#define REG_NAME_CNT	(sizeof(pre_defined_registers) / sizeof(struct pd_reg))
+
+/* Given NAME, find the register number associated with that name, return
+   the integer value associated with the given name or -1 on failure.  */
+
+static int reg_name_search PARAMS ( (char * name) );
+
+static int
+reg_name_search (name)
+     char *name;
+{
+  int middle, low, high;
+  int cmp;
+
+  low = 0;
+  high = REG_NAME_CNT - 1;
+
+  do
+    {
+      middle = (low + high) / 2;
+      cmp = strcasecmp (name, pre_defined_registers[middle].name);
+      if (cmp < 0)
+	high = middle - 1;
+      else if (cmp > 0)
+	low = middle + 1;
+      else
+	return pre_defined_registers[middle].value;
+    }
+  while (low <= high);
+
+  return -1;
+}
+
+static void insert_reg PARAMS ( (char *regname, int regnum) );
+
+static void
+insert_reg (regname, regnum)
+     char *regname;
+     int regnum;
+{
+  char buf[100];
+  int i;
+
+  symbol_table_insert (
+		       symbol_new (regname, 
+				   reg_section, 
+				   regnum,
+				   &zero_address_frag)
+		       );
+
+  for (i = 0; regname[i]; i++)
+    {
+      buf[i] = islower (regname[i]) ? toupper (regname[i]) : regname[i];
+    }
+
+  buf[i] = '\0';
+
+  symbol_table_insert (
+		       symbol_new (buf, 
+				   reg_section, 
+				   regnum,
+				   &zero_address_frag)
+		       );
+}
+
+static void
+init_regtable ()
+{
+  int i;
+  for (i = 0; i < REG_NAME_CNT && pre_defined_registers[i].name ; ++i)
+    {
+      insert_reg (pre_defined_registers[i].name, 
+		  pre_defined_registers[i].value);
+    }
+}
+#endif
+
 
 /* Local variables.  */
 
@@ -178,6 +422,18 @@ static symbolS *ppc_data_csects;
 
 /* The current csect.  */
 static symbolS *ppc_current_csect;
+
+/* The current csect.  */
+static segT ppc_previous_section;
+static segT ppc_current_section;
+
+void setCurrentSection(new)
+     segT new;
+{
+  ppc_previous_section = ppc_current_section;
+  ppc_current_section = new;
+}
+
 
 /* The RS/6000 assembler uses a TOC which holds addresses of functions
    and variables.  Symbols are put in the TOC with the .tc pseudo-op.
@@ -480,6 +736,20 @@ md_begin ()
   ppc_text_csects->sy_tc.within = ppc_text_csects;
   ppc_data_csects = symbol_make ("dummy\001");
   ppc_data_csects->sy_tc.within = ppc_data_csects;
+#endif
+
+#ifdef TE_PE
+
+#ifndef NO_SYMBOL_NAMES
+  /* FIXME: currently, if you enable the names, you cannot have variables
+            with the same names as the symbolic register names.
+  */
+  init_regtable ();
+#endif
+
+  ppc_current_section = text_section;
+  ppc_previous_section = 0;  
+
 #endif
 }
 
@@ -851,9 +1121,81 @@ md_assemble (str)
       /* Gather the operand.  */
       hold = input_line_pointer;
       input_line_pointer = str;
+
+#ifdef TE_PE
+      if (*input_line_pointer == '[') 
+	{
+	  /* Expecting something like the second argument here:
+
+	        lwz r4,[toc].GS.0.static_int(rtoc)
+
+	     The only legal thing between the '[]' sequence is
+	     'toc'. The second arg must be a symbol name, and the
+	     register must be the toc register: 'rtoc' or '2'
+
+	     The effect is to 0 as the displacement field
+	     in the instruction, and issue an IMAGE_REL_PPC_TOCREL16
+	     reloc against it based on the symbol. The linker will 
+	     build the toc, and insert the resolved toc offset.
+
+	     FIXME:
+	     To support "data in toc", we need to allow for the following:
+
+	     # open up the toc section, and put "gorp" in it
+
+	            .toc
+	     gorp:  .long
+	            ....
+	            li r4,[tocv]gorp
+
+	     In this case, r4 is loaded with the displacement of gorp in
+	     the toc.
+
+	     Note:
+	     o The size of the toc entry is currently assumed to be
+	       32 bits. This should not be assumed to be a hard coded
+	       number.
+	     o In an effort to cope with a change from 32 to 64 bits,
+	       there are also toc entries that are specified to be
+	       either 32 or 64 bits:
+                 lwz r4,[toc32].GS.0.static_int(rtoc)
+	         lwz r4,[toc64].GS.0.static_int(rtoc)
+	       These demand toc entries of the specified size, and the
+	       instruction probably requires it.
+
+          */
+
+	  input_line_pointer += 5; /* FIXME: parse and semantics needed */
+	  expression(&ex);
+
+	  /* We need to generate a fixup for this expression.  */
+	  if (fc >= MAX_INSN_FIXUPS)
+	    as_fatal ("too many fixups");
+	  fixups[fc].exp = ex;
+	  fixups[fc].opindex = *opindex_ptr;
+	  fixups[fc].reloc = BFD_RELOC_PPC_TOC16;
+	  ++fc;
+
+          /* Ok. We've set up the fixup for the instruction. Now make it
+	     look like the constant 0 was found here */
+	  ex.X_unsigned = 1;
+	  ex.X_op = O_constant;
+	  ex.X_add_number = 0;
+	  ex.X_add_symbol = NULL;
+	  ex.X_op_symbol = NULL;
+	}
+      else
+	{
+	  expression (&ex);
+	}
+
+      str = input_line_pointer;
+      input_line_pointer = hold;
+#else
       expression (&ex);
       str = input_line_pointer;
       input_line_pointer = hold;
+#endif
 
       if (ex.X_op == O_illegal)
 	as_bad ("illegal operand");
@@ -888,7 +1230,13 @@ md_assemble (str)
 	  insn = ppc_insert_operand (insn, operand, ex.X_add_number,
 				     (char *) NULL, 0);
 	}
-
+#ifdef TE_PE
+      else if (ex.X_op == O_register)
+	{
+	  insn = ppc_insert_operand (insn, operand, ex.X_add_number,
+				     (char *) NULL, 0);
+	}
+#endif
 #ifdef OBJ_ELF
       else if ((reloc = ppc_elf_suffix (&str)) != BFD_RELOC_UNUSED)
 	{
@@ -1405,8 +1753,6 @@ ppc_csect (ignore)
       sym->sy_tc.align = get_absolute_expression ();
     }
 
-  ppc_current_csect = sym;
-
   demand_empty_rest_of_line ();
 }
 
@@ -1921,8 +2267,6 @@ ppc_toc (ignore)
       symbol_append (sym, list->sy_tc.within, &symbol_rootP, &symbol_lastP);
     }
 
-  ppc_current_csect = ppc_toc_csect;
-
   demand_empty_rest_of_line ();
 }
 
@@ -2022,6 +2366,620 @@ ppc_tc (ignore)
       cons (4);
     }
 }
+
+
+#ifdef TE_PE
+/* Pseudo-ops specific to the Windows NT PowerPC PE (coff) format */
+
+/*
+ * Section characteristics
+ */
+
+#define IMAGE_SCN_TYPE_NO_PAD                0x00000008  /* Reserved. */
+
+#define IMAGE_SCN_CNT_CODE                   0x00000020  /* Section contains code. */
+#define IMAGE_SCN_CNT_INITIALIZED_DATA       0x00000040  /* Section contains initialized data. */
+#define IMAGE_SCN_CNT_UNINITIALIZED_DATA     0x00000080  /* Section contains uninitialized data. */
+
+#define IMAGE_SCN_LNK_OTHER                  0x00000100  /* Reserved.
+#define IMAGE_SCN_LNK_INFO                   0x00000200  /* Section contains comments or some other type of information. */
+#define IMAGE_SCN_LNK_REMOVE                 0x00000800  /* Section contents will not become part of image. */
+#define IMAGE_SCN_LNK_COMDAT                 0x00001000  /* Section contents comdat. */
+
+#define IMAGE_SCN_MEM_FARDATA                0x00008000
+
+#define IMAGE_SCN_MEM_PURGEABLE              0x00020000
+#define IMAGE_SCN_MEM_16BIT                  0x00020000
+#define IMAGE_SCN_MEM_LOCKED                 0x00040000
+#define IMAGE_SCN_MEM_PRELOAD                0x00080000
+
+#define IMAGE_SCN_ALIGN_1BYTES               0x00100000
+#define IMAGE_SCN_ALIGN_2BYTES               0x00200000
+#define IMAGE_SCN_ALIGN_4BYTES               0x00300000
+#define IMAGE_SCN_ALIGN_8BYTES               0x00400000
+#define IMAGE_SCN_ALIGN_16BYTES              0x00500000  /* Default alignment if no others are specified. */
+#define IMAGE_SCN_ALIGN_32BYTES              0x00600000
+#define IMAGE_SCN_ALIGN_64BYTES              0x00700000
+
+
+#define IMAGE_SCN_LNK_NRELOC_OVFL            0x01000000  /* Section contains extended relocations. */
+#define IMAGE_SCN_MEM_DISCARDABLE            0x02000000  /* Section can be discarded.              */
+#define IMAGE_SCN_MEM_NOT_CACHED             0x04000000  /* Section is not cachable.               */
+#define IMAGE_SCN_MEM_NOT_PAGED              0x08000000  /* Section is not pageable.               */
+#define IMAGE_SCN_MEM_SHARED                 0x10000000  /* Section is shareable.                  */
+#define IMAGE_SCN_MEM_EXECUTE                0x20000000  /* Section is executable.                 */
+#define IMAGE_SCN_MEM_READ                   0x40000000  /* Section is readable.                   */
+#define IMAGE_SCN_MEM_WRITE                  0x80000000  /* Section is writeable.                  */
+
+
+/* pseudo-op: .previous
+   behaviour: toggles the current section with the previous section.
+   errors:    None
+   warnings:  "No previous section"
+*/
+static void
+ppc_previous(ignore)
+     int ignore;
+{
+  symbolS *tmp;
+
+  if (ppc_previous_section == NULL) 
+    {
+      as_warn("No previous section to return to. Directive ignored.");
+      return;
+    }
+
+  subseg_set(ppc_previous_section, 0);
+
+  setCurrentSection(ppc_previous_section);
+}
+
+/* pseudo-op: .pdata
+   behaviour: predefined read only data section
+              double word aligned
+   errors:    None
+   warnings:  None
+   initial:   .section .pdata "adr3"
+              a - don't know -- maybe a misprint
+	      d - initialized data
+	      r - readable
+	      3 - double word aligned (that would be 4 byte boundary)
+
+   commentary:
+   Tag index tables (also known as the function table) for exception
+   handling, debugging, etc.
+
+*/
+static void
+ppc_pdata(ignore)
+     int ignore;
+{
+  if (pdata_section == 0) 
+    {
+      pdata_section = subseg_new (".pdata", 0);
+      
+      bfd_set_section_flags (stdoutput, pdata_section,
+			     (SEC_ALLOC | SEC_LOAD | SEC_RELOC
+			      | SEC_READONLY | SEC_DATA ));
+      
+      bfd_set_section_alignment (stdoutput, pdata_section, 3);
+    }
+  else
+    {
+      pdata_section = subseg_new(".pdata", 0);
+    }
+  setCurrentSection(pdata_section);
+}
+
+/* pseudo-op: .ydata
+   behaviour: predefined read only data section
+              double word aligned
+   errors:    None
+   warnings:  None
+   initial:   .section .ydata "drw3"
+              a - don't know -- maybe a misprint
+	      d - initialized data
+	      r - readable
+	      3 - double word aligned (that would be 4 byte boundary)
+   commentary:
+   Tag tables (also known as the scope table) for exception handling,
+   debugging, etc.
+*/
+static void
+ppc_ydata(ignore)
+     int ignore;
+{
+  if (ydata_section == 0) 
+    {
+      ydata_section = subseg_new (".ydata", 0);
+      bfd_set_section_flags (stdoutput, ydata_section,
+			 (SEC_ALLOC | SEC_LOAD | SEC_RELOC
+				       | SEC_READONLY | SEC_DATA ));
+
+      bfd_set_section_alignment (stdoutput, ydata_section, 3);
+    }
+  else
+    {
+      ydata_section = subseg_new (".ydata", 0);
+    }
+  setCurrentSection(ydata_section);
+}
+
+/* pseudo-op: .reldata
+   behaviour: predefined read write data section
+              double word aligned (4-byte)
+	      FIXME: relocation is applied to it
+	      FIXME: what's the difference between this and .data?
+   errors:    None
+   warnings:  None
+   initial:   .section .reldata "drw3"
+	      d - initialized data
+	      r - readable
+	      w - writeable
+	      3 - double word aligned (that would be 8 byte boundary)
+
+   commentary:
+   Like .data, but intended to hold data subject to relocation, such as
+   function descriptors, etc.
+*/
+static void
+ppc_reldata(ignore)
+     int ignore;
+{
+  if (reldata_section == 0)
+    {
+      reldata_section = subseg_new (".reldata", 0);
+
+      bfd_set_section_flags (stdoutput, reldata_section,
+			     ( SEC_ALLOC | SEC_LOAD | SEC_RELOC 
+			      | SEC_DATA ));
+
+      bfd_set_section_alignment (stdoutput, reldata_section, 3);
+    }
+  else
+    {
+      reldata_section = subseg_new (".reldata", 0);
+    }
+  setCurrentSection(reldata_section);
+}
+
+/* pseudo-op: .rdata
+   behaviour: predefined read only data section
+              double word aligned
+   errors:    None
+   warnings:  None
+   initial:   .section .rdata "dr3"
+	      d - initialized data
+	      r - readable
+	      3 - double word aligned (that would be 4 byte boundary)
+*/
+static void
+ppc_rdata(ignore)
+     int ignore;
+{
+  if (rdata_section == 0)
+    {
+      rdata_section = subseg_new (".rdata", 0);
+      bfd_set_section_flags (stdoutput, rdata_section,
+			     (SEC_ALLOC | SEC_LOAD | SEC_RELOC
+			      | SEC_READONLY | SEC_DATA ));
+
+      bfd_set_section_alignment (stdoutput, rdata_section, 2);
+    }
+  else
+    {
+      rdata_section = subseg_new (".rdata", 0);
+    }
+  setCurrentSection(rdata_section);
+}
+
+/* pseudo-op: .ualong
+   behaviour: much like .int, with the exception that no alignment is 
+              performed.
+	      FIXME: test the alignment statement
+   errors:    None
+   warnings:  None
+*/
+static void
+ppc_ualong(ignore)
+     int ignore;
+{
+  /* try for long */
+  cons ( 4 );
+}
+
+/* pseudo-op: .znop  <symbol name>
+   behaviour: Issue a nop instruction
+              Issue a IMAGE_REL_PPC_IFGLUE relocation against it, using
+	      the supplied symbol name.
+   errors:    None
+   warnings:  Missing symbol name
+*/
+static void
+ppc_znop(ignore)
+     int ignore;
+{
+  unsigned long insn;
+  const struct powerpc_opcode *opcode;
+  expressionS ex;
+  char *f;
+
+  symbolS *sym;
+
+  /* Strip out the symbol name */
+  char *symbol_name;
+  char c;
+  char *name;
+  unsigned int exp;
+  flagword flags;
+  asection *sec;
+
+  symbol_name = input_line_pointer;
+  c = get_symbol_end ();
+
+  name = xmalloc (input_line_pointer - symbol_name + 1);
+  strcpy (name, symbol_name);
+
+  sym = symbol_find_or_make (name);
+
+  *input_line_pointer = c;
+
+  SKIP_WHITESPACE ();
+
+  /* Look up the opcode in the hash table.  */
+  opcode = (const struct powerpc_opcode *) hash_find (ppc_hash, "nop");
+
+  /* stick in the nop */
+  insn = opcode->opcode;
+
+  /* Write out the instruction.  */
+  f = frag_more (4);
+  md_number_to_chars (f, insn, 4);
+  fix_new (frag_now,
+	   f - frag_now->fr_literal,
+	   4,
+	   sym,
+	   0,
+	   0,
+	   BFD_RELOC_16_GOT_PCREL);
+
+}
+/* pseudo-op: 
+   behaviour: 
+   errors:    
+   warnings:  
+*/
+static void
+ppc_pe_comm(lcomm)
+     int lcomm;
+{
+  register char *name;
+  register char c;
+  register char *p;
+  offsetT temp;
+  register symbolS *symbolP;
+  offsetT align;
+
+  name = input_line_pointer;
+  c = get_symbol_end ();
+
+  /* just after name is now '\0' */
+  p = input_line_pointer;
+  *p = c;
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer != ',')
+    {
+      as_bad ("Expected comma after symbol-name: rest of line ignored.");
+      ignore_rest_of_line ();
+      return;
+    }
+
+  input_line_pointer++;		/* skip ',' */
+  if ((temp = get_absolute_expression ()) < 0)
+    {
+      as_warn (".COMMon length (%ld.) <0! Ignored.", (long) temp);
+      ignore_rest_of_line ();
+      return;
+    }
+
+  if (! lcomm)
+    {
+      /* The third argument to .comm is the alignment.  */
+      if (*input_line_pointer != ',')
+	align = 3;
+      else
+	{
+	  ++input_line_pointer;
+	  align = get_absolute_expression ();
+	  if (align <= 0)
+	    {
+	      as_warn ("ignoring bad alignment");
+	      align = 3;
+	    }
+	}
+    }
+
+  *p = 0;
+  symbolP = symbol_find_or_make (name);
+
+  *p = c;
+  if (S_IS_DEFINED (symbolP))
+    {
+      as_bad ("Ignoring attempt to re-define symbol `%s'.",
+	      S_GET_NAME (symbolP));
+      ignore_rest_of_line ();
+      return;
+    }
+
+  if (S_GET_VALUE (symbolP))
+    {
+      if (S_GET_VALUE (symbolP) != (valueT) temp)
+	as_bad ("Length of .comm \"%s\" is already %ld. Not changed to %ld.",
+		S_GET_NAME (symbolP),
+		(long) S_GET_VALUE (symbolP),
+		(long) temp);
+    }
+  else
+    {
+      S_SET_VALUE (symbolP, (valueT) temp);
+      S_SET_EXTERNAL (symbolP);
+    }
+
+  demand_empty_rest_of_line ();
+}
+
+/*
+ * implement the .section pseudo op:
+ *	.section name {, "flags"}
+ *                ^         ^
+ *                |         +--- optional flags: 'b' for bss
+ *                |                              'i' for info
+ *                +-- section name               'l' for lib
+ *                                               'n' for noload
+ *                                               'o' for over
+ *                                               'w' for data
+ *						 'd' (apparently m88k for data)
+ *                                               'x' for text
+ * But if the argument is not a quoted string, treat it as a
+ * subsegment number.
+ *
+ * FIXME: this is a copy of the section processing from obj-coff.c, with
+ * additions/changes for the moto-pas assembler support. There are three
+ * categories:
+ *
+ * Section Contents:
+ * 'a' - unknown - referred to in documentation, but no definition supplied
+ * 'c' - section has code
+ * 'd' - section has initialized data
+ * 'u' - section has uninitialized data
+ * 'i' - section contains directives (info)
+ * 'n' - section can be discarded
+ * 'R' - remove section at link time
+ *
+ * Section Protection:
+ * 'r' - section is readable
+ * 'w' - section is writeable
+ * 'x' - section is executable
+ * 's' - section is sharable
+ *
+ * Section Alignment:
+ * '0' - align to byte boundary
+ * '1' - align to halfword undary
+ * '2' - align to word boundary
+ * '3' - align to doubleword boundary
+ * '4' - align to quadword boundary
+ * '5' - align to 32 byte boundary
+ * '6' - align to 64 byte boundary
+ *
+ */
+
+void
+ppc_pe_section (ignore)
+     int ignore;
+{
+  /* Strip out the section name */
+  char *section_name;
+  char c;
+  char *name;
+  unsigned int exp;
+  flagword flags;
+  segT sec;
+  int align;
+
+  align = 4; /* default alignment to 16 byte boundary */
+
+  section_name = input_line_pointer;
+  c = get_symbol_end ();
+
+  name = xmalloc (input_line_pointer - section_name + 1);
+  strcpy (name, section_name);
+
+  *input_line_pointer = c;
+
+  SKIP_WHITESPACE ();
+
+  exp = 0;
+  flags = SEC_NO_FLAGS;
+
+  if (*input_line_pointer == ',')
+    {
+      ++input_line_pointer;
+      SKIP_WHITESPACE ();
+      if (*input_line_pointer != '"')
+	exp = get_absolute_expression ();
+      else
+	{
+	  ++input_line_pointer;
+	  while (*input_line_pointer != '"'
+		 && ! is_end_of_line[(unsigned char) *input_line_pointer])
+	    {
+	      switch (*input_line_pointer)
+		{
+		  /* Section Contents */
+		case 'a': /* unknown */
+		  as_warn ("Unsupported section attribute -- 'a'");
+		  break;
+		case 'c': /* code section */
+		  flags |= SEC_CODE; 
+		  break;
+		case 'd': /* section has initialized data */
+		  flags |= SEC_DATA;
+		  break;
+		case 'u': /* section has uninitialized data */
+		  /* FIXME: This is IMAGE_SCN_CNT_UNINITIALIZED_DATA
+		     in winnt.h */
+		  flags |= SEC_ROM;
+		  break;
+		case 'i': /* section contains directives (info) */
+		  /* FIXME: This is IMAGE_SCN_LNK_INFO
+		     in winnt.h */
+		  flags |= SEC_HAS_CONTENTS;
+		  break;
+		case 'n': /* section can be discarded */
+		  flags &=~ SEC_LOAD; 
+		  break;
+		case 'R': /* Remove section at link time */
+		  flags |= SEC_NEVER_LOAD;
+		  break;
+		  /* Section Protection */
+
+#if 0
+#define IMAGE_SCN_MEM_SHARED                 0x10000000  /* Section is shareable. */
+#define IMAGE_SCN_MEM_EXECUTE                0x20000000  /* Section is executable. */
+#define IMAGE_SCN_MEM_READ                   0x40000000  /* Section is readable. */
+#define IMAGE_SCN_MEM_WRITE                  0x80000000  /* Section is writeable. */
+#endif
+
+		case 'r': /* section is readable */
+		  flags |= IMAGE_SCN_MEM_READ;
+		  break;
+		case 'w': /* section is writeable */
+		  flags |= IMAGE_SCN_MEM_WRITE;
+		  break;
+		case 'x': /* section is executable */
+		  flags |= IMAGE_SCN_MEM_EXECUTE;
+		  break;
+		case 's': /* section is sharable */
+		  flags |= IMAGE_SCN_MEM_SHARED;
+		  break;
+
+		  /* Section Alignment */
+#if 0
+#define IMAGE_SCN_ALIGN_1BYTES               0x00100000
+#define IMAGE_SCN_ALIGN_2BYTES               0x00200000
+#define IMAGE_SCN_ALIGN_4BYTES               0x00300000
+#define IMAGE_SCN_ALIGN_8BYTES               0x00400000
+#define IMAGE_SCN_ALIGN_16BYTES              0x00500000  /* Default alignment if no others are specified. */
+#define IMAGE_SCN_ALIGN_32BYTES              0x00600000
+#define IMAGE_SCN_ALIGN_64BYTES              0x00700000
+#endif
+
+		case '0': /* align to byte boundary */
+		  flags |= IMAGE_SCN_ALIGN_1BYTES;
+		  align = 0;
+		  break;
+		case '1':  /* align to halfword boundary */
+		  flags |= IMAGE_SCN_ALIGN_2BYTES;
+		  align = 1;
+		  break;
+		case '2':  /* align to word boundary */
+		  flags |= IMAGE_SCN_ALIGN_4BYTES;
+		  align = 2;
+		  break;
+		case '3':  /* align to doubleword boundary */
+		  flags |= IMAGE_SCN_ALIGN_8BYTES;
+		  align = 3;
+		  break;
+		case '4':  /* align to quadword boundary */
+		  flags |= IMAGE_SCN_ALIGN_16BYTES;
+		  align = 4;
+		  break;
+		case '5':  /* align to 32 byte boundary */
+		  flags |= IMAGE_SCN_ALIGN_32BYTES;
+		  align = 5;
+		  break;
+		case '6':  /* align to 64 byte boundary */
+		  flags |= IMAGE_SCN_ALIGN_64BYTES;
+		  align = 6;
+		  break;
+
+		default:
+		  as_warn("unknown section attribute '%c'",
+			  *input_line_pointer);
+		  break;
+		}
+	      ++input_line_pointer;
+	    }
+	  if (*input_line_pointer == '"')
+	    ++input_line_pointer;
+	}
+    }
+
+  sec = subseg_new (name, (subsegT) exp);
+
+  setCurrentSection(sec);
+
+  if (flags != SEC_NO_FLAGS)
+    {
+      if (! bfd_set_section_flags (stdoutput, sec, flags))
+	as_warn ("error setting flags for \"%s\": %s",
+		 bfd_section_name (stdoutput, sec),
+		 bfd_errmsg (bfd_get_error ()));
+    }
+
+
+  /* FIXME: Make sure the winnt alignment bits get set */
+#if 0
+#define IMAGE_SCN_ALIGN_1BYTES               0x00100000
+#define IMAGE_SCN_ALIGN_2BYTES               0x00200000
+#define IMAGE_SCN_ALIGN_4BYTES               0x00300000
+#define IMAGE_SCN_ALIGN_8BYTES               0x00400000
+#define IMAGE_SCN_ALIGN_16BYTES              0x00500000  /* Default alignment if no others are specified. */
+#define IMAGE_SCN_ALIGN_32BYTES              0x00600000
+#define IMAGE_SCN_ALIGN_64BYTES              0x00700000
+#endif
+
+  bfd_set_section_alignment(stdoutput, sec, align);
+
+}
+
+static void
+ppc_pe_function (ignore)
+     int ignore;
+{
+  char *name;
+  char endc;
+  char *s;
+  symbolS *ext_sym;
+  symbolS *lab_sym;
+
+  name = input_line_pointer;
+  endc = get_symbol_end ();
+
+  /* Ignore any [PR] suffix.  */
+  name = ppc_canonicalize_symbol_name (name);
+  s = strchr (name, '[');
+  if (s != (char *) NULL
+      && strcmp (s + 1, "PR]") == 0)
+    *s = '\0';
+
+  ext_sym = symbol_find_or_make (name);
+
+  *input_line_pointer = endc;
+
+  S_SET_DATA_TYPE (ext_sym, DT_FCN << N_BTSHFT);
+  SF_SET_FUNCTION (ext_sym);
+  SF_SET_PROCESS (ext_sym);
+  coff_add_linesym (ext_sym);
+
+  demand_empty_rest_of_line ();
+}
+
+
+#endif
+
+
+
 
 #ifdef OBJ_COFF
 
@@ -2154,6 +3112,7 @@ void
 ppc_frob_label (sym)
      symbolS *sym;
 {
+#ifndef TE_PE
   if (ppc_current_csect != (symbolS *) NULL)
     {
       if (sym->sy_tc.class == -1)
@@ -2164,6 +3123,7 @@ ppc_frob_label (sym)
 		     &symbol_lastP);
       ppc_current_csect->sy_tc.within = sym;
     }
+#endif
 }
 
 /* Change the name of a symbol just before writing it out.  Set the
@@ -2243,6 +3203,7 @@ ppc_frob_symbol (sym)
 	}
     }
 
+#ifndef TE_PE 
   if (! S_IS_EXTERNAL (sym)
       && (sym->bsym->flags & BSF_SECTION_SYM) == 0
       && S_GET_STORAGE_CLASS (sym) != C_FILE
@@ -2251,6 +3212,7 @@ ppc_frob_symbol (sym)
       && S_GET_STORAGE_CLASS (sym) != C_ESTAT
       && S_GET_SEGMENT (sym) != ppc_coff_debug_section)
     S_SET_STORAGE_CLASS (sym, C_HIDEXT);
+#endif
 
   if (S_GET_STORAGE_CLASS (sym) == C_EXT
       || S_GET_STORAGE_CLASS (sym) == C_HIDEXT)
@@ -2329,8 +3291,30 @@ ppc_frob_symbol (sym)
 	    }
 	  a->x_csect.x_smtyp = (2 << 3) | XTY_SD;
 	}
+
+#ifdef TE_PE
+      else if (S_GET_SEGMENT (sym) == pdata_section) 
+	{
+	  a->x_csect.x_scnlen.l = (bfd_section_size (stdoutput,
+						     S_GET_SEGMENT (sym))
+				   - S_GET_VALUE (sym));
+	}
+      else if (S_GET_SEGMENT (sym) == rdata_section)
+	{
+	  a->x_csect.x_scnlen.l = (bfd_section_size (stdoutput,
+						     S_GET_SEGMENT (sym))
+				   - S_GET_VALUE (sym));
+	}
+      else if (S_GET_SEGMENT (sym) == reldata_section)
+	{
+	  a->x_csect.x_scnlen.l = (bfd_section_size (stdoutput,
+						     S_GET_SEGMENT (sym))
+				   - S_GET_VALUE (sym));
+	}
+#endif
       else
 	{
+#ifndef TE_PE
 	  symbolS *csect;
 
 	  /* This is a normal symbol definition.  x_scnlen is the
@@ -2361,6 +3345,7 @@ ppc_frob_symbol (sym)
 	      coffsymbol (sym->bsym)->native[i + 1].fix_scnlen = 1;
 	    }
 	  a->x_csect.x_smtyp = XTY_LD;
+#endif
 	}
 	
       a->x_csect.x_parmhash = 0;
@@ -2403,10 +3388,12 @@ void
 ppc_frob_section (sec)
      asection *sec;
 {
+#ifndef TE_PE
   static bfd_size_type vma = 0;
 
   bfd_set_section_vma (stdoutput, sec, vma);
   vma += bfd_section_size (stdoutput, sec);
+#endif
 }
 
 /* Adjust the file by adding a .debug section if needed.  */
@@ -2576,6 +3563,12 @@ ppc_fix_adjustable (fix)
      fixS *fix;
 {
   valueT val;
+
+#ifdef TE_PE
+  /* FIXME: Certainly the toc stuff gets us into trouble, and should
+            not be executed. Not sure about the reloc adjustments. */
+  return 0;
+#endif
 
   resolve_symbol_value (fix->fx_addsy);
   val = S_GET_VALUE (fix->fx_addsy);
@@ -2843,10 +3836,14 @@ md_apply_fix3 (fixp, valuep, seg)
     fixp->fx_addnumber = 0;
   else
     {
+#ifdef TE_PE
+      fixp->fx_addnumber = 0;
+#else
       /* We want to use the offset within the data segment of the
 	 symbol, not the actual VMA of the symbol.  */
       fixp->fx_addnumber =
 	- bfd_get_section_vma (stdoutput, S_GET_SEGMENT (fixp->fx_addsy));
+#endif
     }
 #endif
 
