@@ -111,6 +111,7 @@
 #include "gdbcore.h"
 #include "serial.h"
 #include "regcache.h"
+#include "value.h"
 
 /* Prototypes for local functions */
 

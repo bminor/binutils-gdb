@@ -38,6 +38,7 @@
 #include <signal.h>
 #include "inf-loop.h"
 #include "regcache.h"
+#include "value.h"
 
 /* Prototypes for local functions */
 

@@ -55,6 +55,7 @@
 #include "gdbthread.h"
 #include "annotate.h"
 #include "symfile.h"		/* for overlay functions */
+#include "value.h"		/* For old tm.h/nm.h macros.  */
 #endif
 #include "symcat.h"
 

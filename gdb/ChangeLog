@@ -1,3 +1,15 @@
+2001-10-21  Andrew Cagney  <ac131313@redhat.com>
+
+	* config/a29k/tm-vx29k.h, i386-tdep.c: Include "value.h".
+	* arm-tdep.c, exec.c, ia64-tdep.c, infrun.c: Ditto.
+	* ppc-linux-tdep.c, remote-es.c, remote.c: Ditto.
+	* rs6000-tdep.c, s390-tdep.c, x86-64-tdep.c: Ditto.
+	* Makefile.in (arm-tdep.o, exec.o, i386-tdep.o, ia64-tdep.o)
+	(infrun.o, ppc-linux-tdep.o, remote.o, rs6000-tdep.o)
+	(x86-64-tdep.o): Update dependencies.
+	* gdbarch.sh [!GDB_MULTI_ARCH]: Include "value.h".
+	* gdbarch.h, gdbarch.c: Re-generate.
+
 2001-10-21  Mark Kettenis  <kettenis@gnu.org>
 
 	* infptrace.c (child_xfer_memory): Fix a few coding standards

@@ -23,6 +23,7 @@
 #include "symtab.h"
 #include "breakpoint.h"
 #include "frame.h"
+#include "value.h"
 
 #include "tui.h"
 #include "tuiData.h"

@@ -24,6 +24,7 @@
 #include "symtab.h"
 #include "frame.h"
 #include "breakpoint.h"
+#include "value.h"
 
 #include "tui.h"
 #include "tuiData.h"

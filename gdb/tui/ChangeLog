@@ -1,3 +1,8 @@
+2001-10-20  Andrew Cagney  <ac131313@redhat.com>
+
+	* tuiDisassem.c: Include "value.h".
+	* tuiSourceWin.c: Ditto.
+
 2001-09-28  Tom Tromey  <tromey@redhat.com>
 
 	* tuiLayout.h (tui_set_layout): Don't declare.

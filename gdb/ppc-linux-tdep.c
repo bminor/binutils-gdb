@@ -30,6 +30,7 @@
 #include "symfile.h"
 #include "objfiles.h"
 #include "regcache.h"
+#include "value.h"
 
 #include "ppc-tdep.h"
 

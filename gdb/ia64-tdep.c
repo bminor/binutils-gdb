@@ -27,6 +27,7 @@
 #include "floatformat.h"
 #include "regcache.h"
 #include "doublest.h"
+#include "value.h"
 
 #include "objfiles.h"
 #include "elf/common.h"		/* for DT_PLTGOT value */

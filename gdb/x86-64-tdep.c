@@ -29,6 +29,7 @@
 #include "symfile.h"
 #include "x86-64-tdep.h"
 #include "dwarf2cfi.h"
+#include "value.h"
 
 
 /* Register numbers of various important registers.  */

@@ -20,6 +20,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "regcache.h"
+#include "value.h"
 #include "a29k/tm-a29k.h"
 #include "tm-vxworks.h"
 

@@ -31,6 +31,7 @@
 #include <ctype.h>		/* for isupper () */
 #include "regcache.h"
 #include "doublest.h"
+#include "value.h"
 
 /* Each OS has a different mechanism for accessing the various
    registers stored in the sigcontext structure.

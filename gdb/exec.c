@@ -29,6 +29,7 @@
 #include "symfile.h"
 #include "objfiles.h"
 #include "completer.h"
+#include "value.h"
 
 #ifdef USG
 #include <sys/types.h>

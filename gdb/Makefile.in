@@ -1220,7 +1220,7 @@ arm-linux-tdep.o: arm-linux-tdep.c $(defs_h) $(target_h) $(value_h) \
 	$(gdbtypes_h) $(floatformat_h) $(regcache_h) $(doublest_h)
 
 arm-tdep.o: arm-tdep.c $(gdbcmd_h) $(gdbcore_h) $(inferior_h) $(defs_h) \
-	$(gdbcore_h) $(regcache_h) $(doublest_h)
+	$(gdbcore_h) $(regcache_h) $(doublest_h) $(value_h)
 
 bcache.o: bcache.c bcache.h $(defs_h)
 
@@ -1352,7 +1352,7 @@ inf-loop.o: inf-loop.c $(defs_h) $(inferior_h) $(inf_loop_h) $(event_loop_h) \
 	 $(event_top_h)
 
 exec.o: exec.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) $(inferior_h) \
-	$(target_h) language.h $(gdb_string_h) $(completer_h)
+	$(target_h) language.h $(gdb_string_h) $(completer_h) $(value_h)
 
 expprint.o: expprint.c $(defs_h) $(expression_h) $(gdbtypes_h) \
 	language.h $(parser_defs_h) $(symtab_h) $(value_h)
@@ -1513,7 +1513,7 @@ i386gnu-nat.o: gnu-nat.h
 i386-tdep.o: i386-tdep.c $(defs_h) $(gdb_string_h) $(frame_h)	\
 	$(inferior_h) $(gdbcore_h) $(target_h) $(floatformat_h)	\
 	$(symtab_h) $(gdbcmd_h) $(command_h) $(arch_utils_h) $(regcache_h) \
-	$(doublest_h)
+	$(doublest_h) $(value_h)
 
 i386-nat.o: i386-nat.c $(defs_h) $(breakpoint_h) $(command_h) $(gdbcmd_h)
 
@@ -1564,7 +1564,7 @@ ia64-linux-nat.o: ia64-linux-nat.c  $(defs_h) $(inferior_h) $(target_h) \
 ia64-linux-tdep.o: ia64-linux-tdep.c $(defs_h) $(arch_utils_h)
 
 ia64-tdep.o: ia64-tdep.c $(defs_h) $(inferior_h) $(symfile_h) $(gdbcore_h) \
-	$(arch_utils_h) $(floatformat_h) objfiles.h \
+	$(arch_utils_h) $(floatformat_h) objfiles.h $(value_h) \
 	$(INCLUDE_DIR)/elf/common.h $(regcache_h) $(doublest_h)
 
 infcmd.o: infcmd.c $(defs_h) environ.h $(gdbcmd_h) $(gdbcore_h) \
@@ -1578,7 +1578,7 @@ infptrace.o: infptrace.c $(defs_h) $(gdbcore_h) $(inferior_h) $(target_h) \
 	$(gdb_string_h) gdb_wait.h $(command_h) $(regcache_h)
 
 infrun.o: infrun.c gdb_wait.h $(defs_h) $(gdbcmd_h) $(cli_script_h) \
-	$(gdbcore_h) \
+	$(gdbcore_h) $(value_h) \
 	$(inferior_h) $(target_h) $(gdbthread_h) $(gdb_string_h) $(event_loop_h) \
 	$(event_top_h) $(regcache_h)
 
@@ -1772,7 +1772,7 @@ ppc-linux-nat.o: ppc-linux-nat.c $(defs_h) $(gdbcore_h) $(frame_h) \
 	$(inferior_h) $(target_h) $(regcache_h)
 
 ppc-linux-tdep.o: ppc-linux-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) \
-	$(target_h) ppc-tdep.h $(regcache_h)
+	$(target_h) ppc-tdep.h $(regcache_h) $(value_h)
 
 ppcbug-rom.o: ppcbug-rom.c monitor.h $(bfd_h) gdb_wait.h $(defs_h) \
 	$(gdbcmd_h) $(inferior_h) $(target_h) serial.h terminal.h $(regcache_h)
@@ -1848,7 +1848,7 @@ remote-eb.o: remote-eb.c $(srcdir)/config/a29k/tm-a29k.h \
 
 remote-es.o: remote-es.c $(bfd_h) $(command_h) $(defs_h) \
 	$(inferior_h) $(remote_utils_h) terminal.h $(gdb_string_h) \
-	$(symfile_h) $(regcache_h)
+	$(symfile_h) $(regcache_h) $(value_h)
 
 remote-est.o: remote-est.c $(defs_h) $(gdbcore_h) \
 	$(inferior_h) serial.h $(target_h) terminal.h $(regcache_h)
@@ -1906,7 +1906,7 @@ remote-utils.o: remote-utils.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 
 remote.o: remote.c $(bfd_h) gdb_wait.h $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) $(remote_utils_h) $(symfile_h) terminal.h $(gdb_string_h) \
-	$(event_loop_h) $(event_top_h) $(remote_h) $(inf_loop_h)
+	$(event_loop_h) $(event_top_h) $(remote_h) $(inf_loop_h) $(value_h)
 
 remote-nrom.o: remote-nrom.c $(bfd_h) gdb_wait.h $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) $(remote_utils_h) $(symfile_h) terminal.h
@@ -1920,7 +1920,7 @@ rs6000-nat.o: rs6000-nat.c $(bfd_h) $(defs_h) $(inferior_h) $(target_h) \
 	$(regcache_h)
 
 rs6000-tdep.o: rs6000-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) \
-	$(target_h) ppc-tdep.h $(regcache_h)
+	$(target_h) ppc-tdep.h $(regcache_h) $(value_h)
 
 scm-exp.o: $(defs_h) $(value_h) $(parser_defs_h) language.h c-lang.h \
 	scm-lang.h scm-tags.h
@@ -2083,7 +2083,8 @@ x86-64-linux-tdep.o : x86-64-linux-tdep.c $(defs_h) $(inferior_h) $(gdbcore_h) \
 	$(regcache_h) x86-64-tdep.h i386-tdep.h
 
 x86-64-tdep.o : x86-64-tdep.c $(defs_h) $(inferior_h) $(gdbcore_h) $(gdbcmd_h) \
-	$(arch_utils_h) $(regcache_h) $(symfile_h) x86-64-tdep.h i386-tdep.h
+	$(arch_utils_h) $(regcache_h) $(symfile_h) x86-64-tdep.h i386-tdep.h \
+	$(value_h)
 
 x86-64-linux-tdep.o : x86-64-linux-tdep.c $(defs_h) $(inferior_h) $(gdbcore_h) \
 	$(regcache_h) i387-nat.h x86-64-tdep.h i386-tdep.h

@@ -36,6 +36,7 @@
 #include "gdbthread.h"
 #include "remote.h"
 #include "regcache.h"
+#include "value.h"
 
 #include <ctype.h>
 #include <sys/time.h>

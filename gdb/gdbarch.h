@@ -36,6 +36,9 @@
 #define GDBARCH_H
 
 #include "dis-asm.h" /* Get defs for disassemble_info, which unfortunately is a typedef. */
+#if !GDB_MULTI_ARCH
+#include "value.h" /* For default_coerce_float_to_double which is referenced by a macro.  */
+#endif
 
 struct frame_info;
 struct value;

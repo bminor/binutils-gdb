@@ -33,6 +33,7 @@
 #include "arch-utils.h"
 #include "regcache.h"
 #include "doublest.h"
+#include "value.h"
 
 #include "gdb_assert.h"
 
