@@ -221,15 +221,18 @@ gld${EMULATION_NAME}_find_so (inp)
       sa->the_bfd = NULL;
       sa->asymbols = NULL;
       sa->symbol_count = 0;
-      sa->next = inp->next;
+      sa->next = NULL;
       sa->next_real_file = inp->next_real_file;
       sa->is_archive = false;
       sa->search_dirs_flag = false;
       sa->just_syms_flag = false;
       sa->loaded = false;
+      sa->real = true;
+      sa->complained = false;
 
+      /* Put the new statement next on the list of statements and next
+	 on the list of input files.  */
       inp->header.next = (lang_statement_union_type *) sa;
-      inp->next = (lang_statement_union_type *) sa;
       inp->next_real_file = (lang_statement_union_type *) sa;
     }
 }
