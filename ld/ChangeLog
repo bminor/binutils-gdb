@@ -1,3 +1,31 @@
+Fri Jan 24 14:23:46 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
+
+	* Makefile.in: added relax, also made three stage go through a
+	partial link stage.
+	* relax.c : added
+	* config.h: if GNU960 defined, then default emulation mode is
+	GLD960
+	* ldexp.h, ldexp.c: map to file hooks
+	* ldlang.c: map to file hooks
+	* ldgram.y: added -Map -relax
+	* ldlex.l: added -relax, -Map
+	* ldmain.c: open map file
+	* ldmisc.c: support for map file
+	* ldwrite.c: new relax magic
+
+Thu Dec 19 18:49:51 1991  John Gilmore  (gnu at cygnus.com)
+
+	* Makefile.in, config/tm-*.h:  Clean up make output, only
+	pass DEFAULT_EMULATION to ldmain.c.
+
+Wed Dec 18 15:02:47 1991  Per Bothner  (bothner at cygnus.com)
+
+	* ldver.c:  Bump to version 1.94.
+
+Tue Dec 10 04:07:23 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
+
+	* Makefile.in: infodir belongs in datadir.
+
 Mon Dec  9 16:26:43 1991  Per Bothner  (bothner at cygnus.com)
 
 	* Makefile.in:  Pass -y to bison.  (Again;

@@ -17,9 +17,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-#
-# $Id$
-#
 
 srcdir = .
 
@@ -166,7 +163,9 @@ LIBIBERTY=$(unsubdir)/../libiberty$(subdir)/libiberty.a
 OFILES= ldgram.o ldlex.o ldlang.o ldctor.o ldmain.o ldindr.o \
 	ldwarn.o ldwrite.o ldexp.o ldlnk960.o ld__gld68k.o ld__i386aout.o \
 	ld__m88k.o ld__glda29k.o ld__news.o h8300hds.o ld__ebmon29k.o \
-	ld__gld.o ldgld960.o ldemul.o ldver.o ldmisc.o ldsym.o ldvanilla.o ldfile.o
+	ld__gld.o ldgld960.o ldemul.o ldver.o ldmisc.o ldsym.o \
+	ldvanilla.o ldfile.o \
+	relax.o  lderror.o
 
 HEADERS=config.h ldmain.h ldmain.h ldwarn.h ldmisc.h ldindr.h \
 	ldsym.h ldctor.h ldlang.h ldexp.h \
@@ -176,7 +175,8 @@ MANSOURCES=ld.tex
 
 LDCSOURCES=ldlang.c ldctor.c ldindr.c ldmain.c ldwrite.c ldwarn.c ldlnk960.c \
 	ld__gld.c ld__gld68k.c ld__m88k.c ld__ebmon29k.c \
-	ldgld960.c ldemul.c ldver.c ldmisc.c ldexp.c ldsym.c ldfile.c ldvanilla.c
+	ldgld960.c ldemul.c ldver.c ldmisc.c ldexp.c ldsym.c ldfile.c \
+	ldvanilla.c relax.c  lderror.c
 
 GENERATED_SOURCES=ldgram.c ldlex.c ldgram.h ld__*.c
 GENERATED_HEADERS=ldgram.h
@@ -201,10 +201,6 @@ ldgram.h ldgram.c: ldgram.y
 
 ldlex.c: ldlex.l
 	lex -t $(VPATH)/ldlex.l >ldlex.c 
-
-# Main needs to know the default emulation type, too.
-ldmain.o: ldmain.c
-	$(CC) $(CFLAGS) -DDEFAULT_EMULATION=$(EMUL) -c $<
 
 # These all start with ld__ so 'make clean' can find them.
 
@@ -269,7 +265,9 @@ ld1: ld.new
 	$(HOSTING_EMU); ./ld.new -o ld1 $(HOSTING_CRT0) $(OFILES) $(BFDLIB) $(LIBIBERTY) $(HOSTING_LIBS)
 
 ld2: ld1
-	$(HOSTING_EMU); ./ld1 -o ld2 $(HOSTING_CRT0) $(OFILES) $(BFDLIB) $(LIBIBERTY) $(HOSTING_LIBS)
+	#try and make life a bit harder
+	$(HOSTING_EMU); ./ld1 -o foo.o -r $(OFILES)
+	$(HOSTING_EMU); ./ld1 -o ld2 $(HOSTING_CRT0) foo.o $(BFDLIB) $(LIBIBERTY) $(HOSTING_LIBS)
 
 ld3: ld2
 	$(HOSTING_EMU); ./ld2 -o ld3 $(HOSTING_CRT0) $(OFILES) $(BFDLIB) $(LIBIBERTY) $(HOSTING_LIBS)

@@ -55,8 +55,7 @@ extern bfd_vma print_dot;
 
 
 static void
-DEFUN(exp_print_token,(outfile, code),
-      FILE *outfile AND
+DEFUN(exp_print_token,( code),
       token_code_type code)
 {
   static struct  {
@@ -110,12 +109,12 @@ DEFUN(exp_print_token,(outfile, code),
   unsigned int idx;
   for (idx = 0; table[idx].name != (char*)NULL; idx++) {
     if (table[idx].code == code) {
-      fprintf(outfile, "%s", table[idx].name);
+      fprintf(config.map_file, "%s", table[idx].name);
       return;
     }
   }
   /* Not in table, just print it alone */
-  fprintf(outfile, "%c",code);
+  fprintf(config.map_file, "%c",code);
 }
 
 static void 
@@ -710,8 +709,7 @@ DEFUN(exp_assop,(code, dst, src),
 }
 
 void 
-DEFUN(exp_print_tree,(outfile, tree),
-      FILE *outfile AND
+DEFUN(exp_print_tree,(tree),
       etree_type *tree)
 {
   switch (tree->type.node_class) {
@@ -722,45 +720,45 @@ DEFUN(exp_print_tree,(outfile, tree),
   case etree_assign:
 #if 0
     if (tree->assign.dst->sdefs != (asymbol *)NULL){
-      fprintf(outfile,"%s (%x) ",tree->assign.dst->name,
+      fprintf(config.map_file,"%s (%x) ",tree->assign.dst->name,
 	      tree->assign.dst->sdefs->value);
     }
     else {
-      fprintf(outfile,"%s (UNDEFINED)",tree->assign.dst->name);
+      fprintf(config.map_file,"%s (UNDEFINED)",tree->assign.dst->name);
     }
 #endif
-    fprintf(outfile,"%s ",tree->assign.dst);
-    exp_print_token(outfile,tree->type.node_code);
-    exp_print_tree(outfile,tree->assign.src);
+    fprintf(config.map_file,"%s ",tree->assign.dst);
+    exp_print_token(tree->type.node_code);
+    exp_print_tree(tree->assign.src);
     break;
   case etree_binary:
-    exp_print_tree(outfile,tree->binary.lhs);
-    exp_print_token(outfile,tree->type.node_code);
-    exp_print_tree(outfile,tree->binary.rhs);
+    exp_print_tree(tree->binary.lhs);
+    exp_print_token(tree->type.node_code);
+    exp_print_tree(tree->binary.rhs);
     break;
   case etree_trinary:
-    exp_print_tree(outfile,tree->trinary.cond);
-    fprintf(outfile,"?");
-    exp_print_tree(outfile,tree->trinary.lhs);
-    fprintf(outfile,":");
-    exp_print_tree(outfile,tree->trinary.rhs);
+    exp_print_tree(tree->trinary.cond);
+    fprintf(config.map_file,"?");
+    exp_print_tree(tree->trinary.lhs);
+    fprintf(config.map_file,":");
+    exp_print_tree(tree->trinary.rhs);
     break;
   case etree_unary:
-    exp_print_token(outfile,tree->unary.type.node_code);
-    fprintf(outfile,"(");
-    exp_print_tree(outfile,tree->unary.child);
-    fprintf(outfile,")");
+    exp_print_token(tree->unary.type.node_code);
+    fprintf(config.map_file,"(");
+    exp_print_tree(tree->unary.child);
+    fprintf(config.map_file,")");
     break;
   case etree_undef:
-    fprintf(outfile,"????????");
+    fprintf(config.map_file,"????????");
     break;
   case etree_name:
     if (tree->type.node_code == NAME) {
-      fprintf(outfile,"%s", tree->name.name);
+      fprintf(config.map_file,"%s", tree->name.name);
     }
     else {
-      exp_print_token(outfile,tree->type.node_code);
-      fprintf(outfile,"(%s)", tree->name.name);
+      exp_print_token(tree->type.node_code);
+      fprintf(config.map_file,"(%s)", tree->name.name);
     }
     break;
   default:

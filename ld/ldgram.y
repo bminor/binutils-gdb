@@ -20,7 +20,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 %{
 /*
- * $Id$
+
  */
 
 #define DONTDECLARE_MALLOC
@@ -136,7 +136,8 @@ boolean ldgram_had_equals = false;
 %token OPTION_format  OPTION_F OPTION_u OPTION_Bstatic OPTION_N
 %token <integer> SIZEOF NEXT ADDR 
 %token OPTION_d OPTION_dc OPTION_dp OPTION_x OPTION_X OPTION_defsym
-%token OPTION_v OPTION_V OPTION_M OPTION_t STARTUP HLL SYSLIB FLOAT NOFLOAT 
+%token OPTION_v OPTION_V OPTION_M OPTION_t STARTUP HLL SYSLIB FLOAT  NOFLOAT 
+%token OPTION_Map
 %token OPTION_n OPTION_r OPTION_o OPTION_b  OPTION_R OPTION_relax
 %token <name> OPTION_l OPTION_L  OPTION_T OPTION_Aarch OPTION_Tfile  OPTION_Texp
 %token OPTION_Ur 
@@ -185,6 +186,12 @@ command_line_option:
 	|	OPTION_t {
 			trace_files = true;
 			}
+	|     OPTION_Map  NAME
+		{
+		write_map = true;
+		config.map_filename = $2;
+		}
+
 	|	OPTION_M {
 			if (write_map) {
 			    option_longmap = true;

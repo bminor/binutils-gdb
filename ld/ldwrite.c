@@ -2,19 +2,19 @@
    
 This file is part of GLD, the Gnu Linker.
 
-GLD is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-GLD is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with GLD; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /*
  * $Id$ 
@@ -40,19 +40,19 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 */
 
 
-#include "sysdep.h"
 #include "bfd.h"
+#include "sysdep.h"
 
 #include "ldlang.h"
 #include "ld.h"
 #include "ldwrite.h"
 #include "ldmisc.h"
 #include "ldsym.h"
-#include "ldgram.tab.h"
+#include "ldgram.h"
 
 
 
-char *ldmalloc();
+
 /* Static vars for do_warnings and subroutines of it */
 int list_unresolved_refs;	/* List unresolved refs */
 int list_warning_symbols;	/* List warning syms */
@@ -74,26 +74,27 @@ void lang_for_each_statement(void (*func)());
 void lang_for_each_statement();
 #endif /* __STDC__ */
 
-extern size_t largest_section;
+extern bfd_size_type largest_section;
 ld_config_type config;
 
 extern unsigned int global_symbol_count;
 
 boolean trace_files;
 
-static void perform_relocation(input_bfd,
-			       input_section,
-			       data,
-			       symbols)
-bfd *input_bfd;
-asection *input_section;
-PTR data;
-asymbol **symbols;
+static void 
+DEFUN(perform_relocation,(input_bfd,
+			  input_section,
+			  data,
+			  symbols),
+      bfd *input_bfd AND
+      asection *input_section AND
+      PTR data AND
+      asymbol **symbols)
 {
   static asymbol *error_symbol = (asymbol *)NULL;
   static unsigned int error_count = 0;
 #define MAX_ERRORS_IN_A_ROW 5
-  size_t reloc_size = get_reloc_upper_bound(input_bfd, input_section);
+  bfd_size_type reloc_size = bfd_get_reloc_upper_bound(input_bfd, input_section);
 
   arelent **reloc_vector = (arelent **)ldmalloc(reloc_size);
   arelent **parent;
@@ -101,6 +102,9 @@ asymbol **symbols;
   asection *os = input_section->output_section;
   if (config.relocateable_output == false) ob = (bfd *)NULL;
 
+  input_section->_cooked_size = input_section->_raw_size;
+  input_section->reloc_done = 1;
+  
   if (bfd_canonicalize_reloc(input_bfd, 
 			     input_section,
 			     reloc_vector,
@@ -109,7 +113,7 @@ asymbol **symbols;
       for (parent = reloc_vector; *parent; parent++) 
 	{
 
-	  bfd_reloc_status_enum_type r=
+	  bfd_reloc_status_type r=
 	    bfd_perform_relocation(input_bfd,
 				   *parent,
 				   data,
@@ -119,6 +123,11 @@ asymbol **symbols;
 	  if (r == bfd_reloc_ok) {
 	    if (ob != (bfd *)NULL) {
 	      /* A parital link, so keep the relocs */
+
+	      /* Add to each relocation the offset of where it lives
+		 in the output section */
+/*	      (*parent)->address += input_section->output_offset;*/
+
 	      os->orelocation[os->reloc_count] = *parent;
 	      os->reloc_count++;
 	    }
@@ -153,49 +162,35 @@ asymbol **symbols;
 		    error_symbol = s;
 		  }
 		  if (error_count < MAX_ERRORS_IN_A_ROW) {
-		    info("%C: undefined reference to `%T'\n",
-			 input_bfd,
-			 input_section,
-			 symbols,
-			 (*parent)->address,
-			 s);
+		    einfo("%C: undefined reference to `%T'\n",
+			  input_bfd, input_section, symbols,
+			  (*parent)->address, s);
 		    config.make_executable = false;
 		  }
 		  else if (error_count == MAX_ERRORS_IN_A_ROW) {
-		    info("%C: more undefined references to `%T' follow\n",
-			 input_bfd,
-			 input_section,
-			 symbols,
-			 (*parent)->address,
-			 s);
+		    einfo("%C: more undefined references to `%T' follow\n",
+			  input_bfd, input_section,
+			  symbols, (*parent)->address, s);
 		  }		    
 		  else {
 		    /* Don't print any more */
 		  }
 		  break;
 		case bfd_reloc_dangerous: 
-		  info("%B: relocation may be wrong `%T'\n",
-		       input_bfd,
-		       s);
+		  einfo("%B: relocation may be wrong `%T'\n",
+			input_bfd, s);
 		  break;
 		case bfd_reloc_outofrange:
-		  info("%B:%s relocation address out of range %T (%V)\n",
-		       input_bfd,
-		       input_section->name,
-		       s,
-		       p->address); 
+		  einfo("%B:%s relocation address out of range %T (%V)\n",
+			input_bfd, input_section->name, s, p->address); 
 		  break;
 		case bfd_reloc_overflow:
-		  info("%B:%s relocation overflow in %T reloc type %d\n",
-		       input_bfd,
-		       input_section->name,
-		       s,
-		       p->howto->type);
+		  einfo("%B:%s relocation overflow in %T reloc type %d\n",
+			input_bfd, input_section->name, s, p->howto->type);
 		  break;
 		default:
-		  info("%F%B: relocation error, symbol `%T'\n",
-		       input_bfd,
-		       s);
+		  einfo("%F%B: relocation error, symbol `%T'\n",
+			input_bfd, s);
 		  break;
 		}
 	    }
@@ -212,8 +207,8 @@ asymbol **symbols;
 PTR data_area;
 
 static void
-copy_and_relocate(statement)
-lang_statement_union_type *statement;
+DEFUN(copy_and_relocate,(statement),
+      lang_statement_union_type *statement)
 {
   switch (statement->header.type) {
   case lang_fill_statement_enum: 
@@ -252,18 +247,18 @@ lang_statement_union_type *statement;
     {
       bfd_vma value = statement->data_statement.value;
       bfd_byte play_area[LONG_SIZE];
-      unsigned int size;
+      unsigned int size = 0;
       switch (statement->data_statement.type) {
       case LONG:
-	bfd_putlong(output_bfd, value,  play_area);
+	bfd_put_32(output_bfd, value,  play_area);
 	size = LONG_SIZE;
 	break;
       case SHORT:
-	bfd_putshort(output_bfd, value,  play_area);
+	bfd_put_16(output_bfd, value,  play_area);
 	size = SHORT_SIZE;
 	break;
       case BYTE:
-	bfd_putchar(output_bfd, value,  play_area);
+	bfd_put_8(output_bfd, value,  play_area);
 	size = BYTE_SIZE;
 	break;
       }
@@ -289,17 +284,19 @@ lang_statement_union_type *statement;
 	if (ifile->just_syms_flag == false) {
 	  bfd *inbfd = ifile->the_bfd;
 
-	  if (output_section->flags & SEC_LOAD && i->size != 0) 
+	  if (output_section->flags & SEC_LOAD &&
+	      output_section->flags & SEC_ALLOC
+	      && bfd_get_section_size_before_reloc(i) != 0) 
 	      {
 		if(bfd_get_section_contents(inbfd,
 					    i,
 					    data_area,
-					    0L,
-					    i->size) == false) 
+					    (file_ptr)0,
+					    bfd_get_section_size_before_reloc(i)) == false) 
 		    {
-		      info("%F%B error reading section contents %E\n",
-			   inbfd);
+		      einfo("%F%B error reading section contents %E\n", inbfd);
 		    }
+		/* Set the reloc bit */
 		perform_relocation (inbfd,  i,  data_area, ifile->asymbols);
 
 
@@ -307,10 +304,10 @@ lang_statement_union_type *statement;
 					    output_section,
 					    data_area,
 					    (file_ptr)i->output_offset,
-					    i->size) == false) 
+					    bfd_get_section_size_after_reloc(i)) == false) 
 		    {
-		      info("%F%B error writing section contents of %E\n",
-			   output_bfd);
+		      einfo("%F%B error writing section contents of %E\n",
+			    output_bfd);
 		    }
 
 	      }
@@ -327,22 +324,23 @@ lang_statement_union_type *statement;
 }
 
 void
-write_norel()
+DEFUN_VOID(write_norel)
 {
   /* Output the text and data segments, relocating as we go.  */
   lang_for_each_statement(copy_and_relocate);
 }
 
 
-static void read_relocs(abfd, section, symbols)
-bfd *abfd;
-asection *section;
-asymbol **symbols;
+static void 
+DEFUN(read_relocs,(abfd, section, symbols),
+      bfd *abfd AND
+      asection *section AND
+      asymbol **symbols)
 {
   /* Work out the output section ascociated with this input section */
   asection *output_section = section->output_section;
 
-  size_t reloc_size = get_reloc_upper_bound(abfd, section);
+  bfd_size_type reloc_size = bfd_get_reloc_upper_bound(abfd, section);
   arelent **reloc_vector = (arelent **)ldmalloc(reloc_size);
 
   if (bfd_canonicalize_reloc(abfd, 
@@ -354,8 +352,8 @@ asymbol **symbols;
 }
 
 
-static void
-write_rel()
+static  void
+DEFUN_VOID(write_rel)
 {
   /*
      Run through each section of each file and work work out the total
@@ -376,7 +374,7 @@ write_rel()
   LANG_FOR_EACH_OUTPUT_SECTION
     (section, 
      (section->orelocation =
-      (arelent **)ldmalloc((size_t)(sizeof(arelent **)*
+      (arelent **)ldmalloc((bfd_size_type)(sizeof(arelent **)*
 				    section->reloc_count)),
       section->reloc_count = 0,
      section->flags |= SEC_HAS_CONTENTS));
@@ -389,19 +387,28 @@ write_rel()
 }
 
 void
-ldwrite ()
+DEFUN(ldwrite, (write_map),
+      boolean write_map)
 {
   data_area = (PTR) ldmalloc(largest_section);
   if (config.relocateable_output == true)
-    {
-      write_rel();
-    }
+      {
+	write_rel();
+      }
   else 
-    {
-    write_norel();
-  }
+      {
+	write_relaxnorel(output_bfd);
+      }
   free(data_area);
   /* Output the symbol table (both globals and locals).  */
+
+  /* Print a map, if requested.  */
+
+  if (write_map) {
+    ldsym_print_symbol_table ();
+    lang_map(stdout);
+  }
+
   ldsym_write ();
 
 }

@@ -5,7 +5,7 @@ This file is part of GLD, the Gnu Linker.
 
 GLD is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
+the Free Software Foundation; either version 2, or (at your option)
 any later version.
 
 GLD is distributed in the hope that it will be useful,
@@ -28,22 +28,23 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /*SUPPRESS 529*/
 /*SUPPRESS 26*/
 /*SUPPRESS 29*/
-#define LEXDEBUG 0
-#include "sysdep.h"
+/*#define LEXDEBUG 0*/
 #include "bfd.h"
+#include "sysdep.h"
 
 #include <ctype.h>
 #include "ldlex.h"
 
 #include "ld.h"
 #include "ldexp.h"
-#include "ldgramtb.h"
+#include "ldgram.h"
 #include "ldmisc.h"
 
 #undef input
 #undef unput
 #define input lex_input
 #define unput lex_unput
+
 int debug;
 
 
@@ -81,6 +82,7 @@ keyword_type keywords[] =
 "INPUT",INPUT,
 "DEFINED",DEFINED,
 "CREATE_OBJECT_SYMBOLS",CREATE_OBJECT_SYMBOLS,
+"CONSTRUCTORS", CONSTRUCTORS,
 "FORCE_COMMON_ALLOCATION",FORCE_COMMON_ALLOCATION,
 "SECTIONS",SECTIONS,
 "FILL",FILL,
@@ -94,6 +96,13 @@ keyword_type keywords[] =
 "SHORT", SHORT,
 "BYTE", BYTE,
 "NOFLOAT",NOFLOAT,
+
+"NOLOAD",NOLOAD,
+"DSECT",DSECT,
+"COPY",COPY,
+"INFO",INFO,
+"OVERLAY",OVERLAY,
+
 "o",ORIGIN,
 "org",ORIGIN,
 "l", LENGTH,
@@ -275,7 +284,9 @@ WHITE		[ \t]+
 "\ -sort_common\ " { return OPTION_sort_common;}
 "\ -format\ " { return OPTION_format; }
 "\ -n\ "		{ return OPTION_n; }
+"\ -N\ "		{ return OPTION_N; }
 "\ -r\ "		{ return OPTION_r; }
+"\ -relax\ "		{ return OPTION_relax; }
 "\ -i\ "		{ return OPTION_r; }
 "\ -Ur\ "		{ return OPTION_Ur; }
 "\ -o\ "		{ return OPTION_o; }
@@ -286,7 +297,9 @@ WHITE		[ \t]+
 "\ -dp\ "		{ return OPTION_dp; }
 "\ -d\ "		{ return OPTION_d; }
 "\ -v\ "		{ return OPTION_v; }
+"\ -V\ "		{ return OPTION_V; }
 "\ -M\ "		{ return OPTION_M; }
+"\ -Map\ "              { return OPTION_Map;}
 "\ -t\ "		{ return OPTION_t; }
 "\ -X\ "		{ return OPTION_X; }
 "\ -x\ "		{ return OPTION_x; }
@@ -295,6 +308,7 @@ WHITE		[ \t]+
 "\ -u\ "		{ return OPTION_u; }
 "\ -s\ "            { return OPTION_s; }
 "\ -S\ "            { return OPTION_S; }
+"\ -Bstatic"  { return OPTION_Bstatic; }
 "\ -B{FILENAME}\ "    { /* Ignored */ }
 "\ -l"{FILENAME} {
 	 	yylval.name = buystring(yytext+3);
@@ -382,7 +396,7 @@ WHITE		[ \t]+
 "]"		{ RTOKEN(']');}
 "["		{ RTOKEN('[');}
 ":"		{ RTOKEN(':'); }
-";"		{ RTOKEN('\;');}
+";"		{ RTOKEN(';');}
 "-"		{ RTOKEN('-');}
 
 

@@ -190,6 +190,17 @@ main (argc, argv)
   }
 
   ldemul_after_parse();
+      if (config.map_filename) 
+      {
+	config.map_file = fopen(config.map_filename, FOPEN_WT);
+	if (config.map_file == (FILE *)NULL) 
+	{
+	  einfo("%P%F: can't open map file %s\n",
+		config.map_filename);
+	}
+      }
+      else config.map_file = stdout;	
+
   lang_process();
 
   /* Print error messages for any missing symbols, for any warning
