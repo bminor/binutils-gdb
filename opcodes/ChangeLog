@@ -1,4 +1,9 @@
 start-sanitize-v850
+Thu Aug 22 16:57:27 1996  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* v850-opc.c (v850_operands): Added insert and extract fields,
+ 	pointers to functions that handle unusual operand encodings.
+
 Thu Aug 22 01:05:24 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* v850-opc.c (v850_opcodes): Enable "trap".
@@ -18,8 +23,8 @@ Wed Aug 21 18:46:26 1996  Jeffrey A Law  (law@cygnus.com)
 
 Wed Aug 21 17:31:26 1996  J.T. Conklin  <jtc@hippo.cygnus.com>
 
-	* v850-opc.c: Add flags field to struct v850_operands, add move
- 	opcodes to opcode table.
+	* v850-opc.c (v850_operands): Add flags field.
+ 	(v850_opcodes): add move opcodes.
 
 Tue Aug 20 14:41:03 1996  J.T. Conklin  <jtc@hippo.cygnus.com>
 

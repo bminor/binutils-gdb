@@ -19,43 +19,47 @@
 
 const struct v850_operand v850_operands[] = {
 #define UNUSED	0
-  { 0, 0, 0 }, 
+  { 0, 0, 0, 0, 0 }, 
 
 /* The R1 field in a format 1, 6, 7, or 9 insn. */
 #define R1	(UNUSED+1)
-  { 5, 0, OPERAND_REG }, 
+  { 5, 0, 0, 0, V850_OPERAND_REG }, 
 
 /* The R2 field in a format 1, 2, 4, 5, 6, 7, 9 insn. */
 #define R2	(R1+1)
-  { 5, 11, OPERAND_REG },
+  { 5, 11, 0, 0, V850_OPERAND_REG },
 
 /* The IMM5 field in a format 2 insn. */
 #define I5	(R2+1)
-  { 5, 0, OPERAND_NUM }, 
+  { 5, 0, 0, 0, 0 }, 
 
 #define IMM16 field in a format 6 insn. */
 #define I16	(I5+1)
-  { 16, 0, OPERAND_NUM }, 
+  { 16, 0, 0, 0, 0 }, 
 
 /* The DISP6 field in a format 4 insn. */
 #define D6	(I16+1)
-  { 6, 1, OPERAND_NUM },
+  { 6, 1, 0, 0, 0 },
 
 /* The DISP8 field in a format 3 insn. */
 #define D8	(D6+1)
-  { 9, 0, OPERAND_NUM },
+  { 9, 0, 0, 0, 0 },
 
 /* The DISP16 field in a format 6 insn. */
 #define D16	(D8+1)
-  { 16, 0, OPERAND_NUM }, 
+  { 16, 0, 0, 0, 0 }, 
 
 /* The DISP22 field in a format 4 insn. */
 #define D22	(D16+1)
-  { 16, 0, OPERAND_NUM },
+  { 16, 0, 0, 0, 0 },
 
 #define B3	(D22+1)
 /* The 3 bit immediate field in format 8 insn.  */
-  { 3, 11, OPERAND_NUM }
+  { 3, 11, 0, 0, 0 },
+
+#define CCCC	(B3+1)
+/* The 4 bit condition code in a setf instruction */
+  { 4, 0, 0, 0, V850_OPERAND_CC }
 } ; 
 
 
@@ -135,9 +139,7 @@ const struct v850_opcode v850_opcodes[] = {
 { "divh",	OP(0x02),		OP_MASK,	IF1 },
 { "cmp",	OP(0x0f),		OP_MASK,	IF1 },
 { "cmp",	OP(0x13),		OP_MASK,	IF2 },
-
-{ "setf",	two(0x0000,0x0000),	two(0x0000,0xffff), {I5,R2} },
-				/* XXX - really I4 */
+{ "setf",	two(0x0000,0x0000),	two(0x0000,0xffff), {CCCC,R2} },
 
 /* saturated operation instructions */
 { "satadd",	OP(0x06),		OP_MASK,	IF1 },
