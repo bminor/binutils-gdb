@@ -60,6 +60,7 @@ ChangeLog
 a29k.h
 alpha.h
 arm.h
+cgen.h
 convex.h
 d10v.h
 h8300.h

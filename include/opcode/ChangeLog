@@ -1,3 +1,7 @@
+Fri Apr  4 11:46:11 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* cgen.h: New file.
+
 Fri Apr  4 14:02:32 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* i386.h: Correct opcode values for fsubp, fsubrp, fdivp, and
