@@ -127,7 +127,7 @@ cp_print_class_method (char *valaddr,
 	  f = TYPE_FN_FIELDLIST1 (domain, i);
 	  len2 = TYPE_FN_FIELDLIST_LENGTH (domain, i);
 
-	  check_stub_method_group (f, j);
+	  check_stub_method_group (domain, i);
 	  for (j = 0; j < len2; j++)
 	    {
 	      if (STREQ (SYMBOL_NAME (sym), TYPE_FN_FIELD_PHYSNAME (f, j)))

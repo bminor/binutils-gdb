@@ -1,3 +1,8 @@
+2002-09-16  David Carlton  <carlton@math.stanford.edu>
+
+	* cp-valprint.c (cp_print_class_method): Correct args to
+	check_stub_method_group.
+
 2002-09-16  Corinna Vinschen  <vinschen@redhat.com>
 
 	* h8300-tdep.c: Multiarch.  Drop `set machine' command in favor of
