@@ -310,7 +310,12 @@ process_def_file (abfd, info)
 		  if (*sn == '_')
 		    sn++;
 		  if (auto_export (pe_def_file, sn))
-		    def_file_add_export (pe_def_file, sn, 0, -1);
+                    {
+                      def_file_export *p;
+                      p=def_file_add_export (pe_def_file, sn, 0, -1);
+                      /* Fill data flag properly, from dlltool.c */
+                      p->flag_data = !(symbols[j]->flags & BSF_FUNCTION);
+                    }
 		}
 	    }
 	}
@@ -1405,7 +1410,7 @@ make_one (exp, parent)
      bfd *parent;
 {
   asection *tx, *id7, *id5, *id4, *id6;
-  unsigned char *td, *d7, *d5, *d4, *d6 = NULL;
+  unsigned char *td = NULL, *d7, *d5, *d4, *d6 = NULL;
   int len;
   char *oname;
   bfd *abfd;
@@ -1454,25 +1459,28 @@ make_one (exp, parent)
     quick_symbol (abfd, U ("__imp_"), exp->internal_name, "",
 		  id5, BSF_GLOBAL, 0);
 
-  bfd_set_section_size (abfd, tx, jmp_byte_count);
-  td = (unsigned char *) xmalloc (jmp_byte_count);
-  tx->contents = td;
-  memcpy (td, jmp_bytes, jmp_byte_count);
-  switch (pe_details->pe_arch)
-    {
-    case PE_ARCH_i386:
-      quick_reloc (abfd, 2, BFD_RELOC_32, 2);
-      break;
-    case PE_ARCH_sh:
-      quick_reloc (abfd, 8, BFD_RELOC_32, 2);
-      break;
-    case PE_ARCH_mips:
-      quick_reloc (abfd, 0, BFD_RELOC_HI16_S, 2);
-      quick_reloc (abfd, 0, BFD_RELOC_LO16, 0); /* MIPS_R_PAIR */
-      quick_reloc (abfd, 4, BFD_RELOC_LO16, 2);
-      break;
-    }
-  save_relocs (tx);
+  if (! exp->flag_data)
+  {
+    bfd_set_section_size (abfd, tx, jmp_byte_count);
+    td = (unsigned char *) xmalloc (jmp_byte_count);
+    tx->contents = td;
+    memcpy (td, jmp_bytes, jmp_byte_count);
+    switch (pe_details->pe_arch)
+      {
+      case PE_ARCH_i386:
+        quick_reloc (abfd, 2, BFD_RELOC_32, 2);
+        break;
+      case PE_ARCH_sh:
+        quick_reloc (abfd, 8, BFD_RELOC_32, 2);
+        break;
+      case PE_ARCH_mips:
+        quick_reloc (abfd, 0, BFD_RELOC_HI16_S, 2);
+        quick_reloc (abfd, 0, BFD_RELOC_LO16, 0); /* MIPS_R_PAIR */
+        quick_reloc (abfd, 4, BFD_RELOC_LO16, 2);
+        break;
+      }
+    save_relocs (tx);
+  }
 
   bfd_set_section_size (abfd, id7, 4);
   d7 = (unsigned char *) xmalloc (4);

@@ -1,3 +1,9 @@
+2000-10-09  Paul Sokolovsky  <Paul.Sokolovsky@technologist.com>
+
+	* pe-dll.c (make_one): Do not generate code thunk for DATA
+	exports.
+	(process_def_file): deduce DATA flag for auto-export sumbols.
+
 2000-10-09  Kazu Hirata  <kazu@hxi.com>
 
 	* ld.h: Fix formatting.
