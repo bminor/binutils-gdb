@@ -1064,13 +1064,13 @@ _initialize_language()
 
    add_prefix_cmd ("check", no_class, show_check,
 		   "Show the status of the type/range checker",
-		   &showchecklist, "set check ", 0, &showlist);
+		   &showchecklist, "show check ", 0, &showlist);
    add_alias_cmd ("c", "check", no_class, 1, &showlist);
    add_alias_cmd ("ch", "check", no_class, 1, &showlist);
 
    set = add_set_cmd ("type", class_support, var_string_noescape,
 		      (char *)&type,
-		      "Set type checking on/warn/off/auto.",
+		      "Set type checking.  (on/warn/off/auto)",
 		      &setchecklist);
    show = add_show_from_set (set, &showchecklist);
    set->function = set_type_command;
@@ -1078,7 +1078,7 @@ _initialize_language()
 
    set = add_set_cmd ("range", class_support, var_string_noescape,
 		      (char *)&range,
-		      "Set range checking on/warn/off/auto.",
+		      "Set range checking.  (on/warn/off/auto)",
 		      &setchecklist);
    show = add_show_from_set (set, &showchecklist);
    set->function = set_range_command;
