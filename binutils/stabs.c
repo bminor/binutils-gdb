@@ -4321,7 +4321,8 @@ stab_demangle_template (struct stab_demangle_info *minfo, const char **pp,
 	    {
 	      unsigned int len;
 
-	      if (! stab_demangle_get_count (pp, &len))
+	      len = stab_demangle_count (pp);
+	      if (len == 0)
 		{
 		  stab_bad_demangle (orig);
 		  return FALSE;

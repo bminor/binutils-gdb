@@ -1,3 +1,10 @@
+2004-11-10  Ian Lance Taylor  <ian@wasabisystems.com>
+
+	PR binutils/536
+	* stabs.c (stab_demangle_template): Call stab_demangle_count
+	rather than stab_demangle_get_count to get the length of a pointer
+	target.
+
 2004-11-10  Danny Smith  <dannysmith@users.sourceforge.net>
 
 	* defparse.y: Remove unnecessary commas from token list.
