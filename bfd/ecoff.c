@@ -2140,9 +2140,10 @@ ecoff_sizeof_headers (abfd, reloc)
     if (strcmp (current->name, REGINFO) != 0)
       ++c;
 
-  return (bfd_coff_filhsz (abfd)
-	  + bfd_coff_aoutsz (abfd)
-	  + c * bfd_coff_scnhsz (abfd));
+  ret = (bfd_coff_filhsz (abfd)
+	 + bfd_coff_aoutsz (abfd)
+	 + c * bfd_coff_scnhsz (abfd));
+  return BFD_ALIGN (ret, 16);
 }
 
 /* Get the contents of a section.  This is where we handle reading the
@@ -2831,24 +2832,28 @@ ecoff_write_object_contents (abfd)
 	      == false)
 	    return false;
 	}
-      else if ((abfd->flags & EXEC_P) != 0
-	       && (abfd->flags & D_PAGED) != 0)
-	{
-	  char c;
+    }
 
-	  /* A demand paged executable must occupy an even number of
-	     pages.  */
-	  if (bfd_seek (abfd, (file_ptr) ecoff_data (abfd)->sym_filepos - 1,
-			SEEK_SET) != 0)
-	    return false;
-	  if (bfd_read (&c, 1, 1, abfd) == 0)
-	    c = 0;
-	  if (bfd_seek (abfd, (file_ptr) ecoff_data (abfd)->sym_filepos - 1,
-			SEEK_SET) != 0)
-	    return false;
-	  if (bfd_write (&c, 1, 1, abfd) != 1)
-	    return false;      
-	}
+  /* The .bss section of a demand paged executable must receive an
+     entire page.  If there are symbols, the symbols will start on the
+     next page.  If there are no symbols, we must fill out the page by
+     hand.  */
+  if (bfd_get_symcount (abfd) == 0
+      && (abfd->flags & EXEC_P) != 0
+      && (abfd->flags & D_PAGED) != 0)
+    {
+      char c;
+
+      if (bfd_seek (abfd, (file_ptr) ecoff_data (abfd)->sym_filepos - 1,
+		    SEEK_SET) != 0)
+	return false;
+      if (bfd_read (&c, 1, 1, abfd) == 0)
+	c = 0;
+      if (bfd_seek (abfd, (file_ptr) ecoff_data (abfd)->sym_filepos - 1,
+		    SEEK_SET) != 0)
+	return false;
+      if (bfd_write (&c, 1, 1, abfd) != 1)
+	return false;      
     }
 
   return true;
@@ -3932,7 +3937,6 @@ ecoff_bfd_final_link (abfd, info)
   /* We accumulate the debugging information counts in the symbolic
      header.  */
   symhdr = &debug->symbolic_header;
-  symhdr->magic = backend->debug_swap.sym_magic;
   symhdr->vstamp = 0;
   symhdr->ilineMax = 0;
   symhdr->cbLine = 0;

@@ -1,3 +1,14 @@
+Fri Feb 25 11:41:57 1994  Ian Lance Taylor  (ian@cygnus.com)
+
+	* ecoff.c (ecoff_sizeof_headers): Align result to 16 byte
+	boundary.
+
+Thu Feb 24 07:13:22 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* som.c (som_bfd_derive_misc_symbol_info): Derive symbol_info
+	field for absolute symbols in the same manner as undefined
+	and common symbols.
+
 Thu Feb 24 04:29:19 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* elfcode.h (elf_core_file_p):  Check for core file e_machine match
