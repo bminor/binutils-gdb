@@ -192,6 +192,9 @@ case "${host}" in
   i[3456]86-*-sco*)
     host_makefile_frag="${host_makefile_frag} config/mh-sco"
     ;;
+  i[3456]86-*-udk*)
+    host_makefile_frag="${host_makefile_frag} config/mh-sysv5"
+    ;;
   i[3456]86-*-isc*)
     host_makefile_frag="${host_makefile_frag} config/mh-sysv"
     ;;
@@ -213,11 +216,9 @@ case "${host}" in
   *-mingw32*)
     host_makefile_frag="${host_makefile_frag} config/mh-mingw32"
     ;;
-# start-sanitize-mswin
   *-windows*)
     host_makefile_frag="${host_makefile_frag} config/mh-windows"
     ;;
-# end-sanitize-mswin
   vax-*-ultrix2*)
     host_makefile_frag="${host_makefile_frag} config/mh-vaxult2"
     ;;
@@ -241,6 +242,9 @@ case "${host}" in
     ;;
   *-*-lynxos*)
     host_makefile_frag="${host_makefile_frag} config/mh-lynxos"
+    ;;
+  *-*-aix4.[3456789]* | *-*-aix[56789].*)
+    host_makefile_frag="${host_makefile_frag} config/mh-aix43"
     ;;
   *-*-sysv4*)
     host_makefile_frag="${host_makefile_frag} config/mh-sysv4"
@@ -361,6 +365,7 @@ case "${enable_target_optspace}:${target}" in
   yes:*)
     target_makefile_frag="${target_makefile_frag} config/mt-ospace"
     ;;
+  # CYGNUS LOCAL d10v, d30v
   :m32r-* | :d10v-* | :d30v-*)
     target_makefile_frag="${target_makefile_frag} config/mt-ospace"
     ;;
@@ -405,19 +410,16 @@ if [ x"${host}" = x"${target}" ] ; then
 	# that are in the 'cross only' list
 	skipdirs="${skipdirs} ${cross_only}"
 	is_cross_compiler=no
-	# Default to --enable-multilib.  See similar code below.
-	if [ x${enable_multilib} = xno ]; then
-	  target_subdir=.
-	else
-	  target_subdir=${target_alias}
-	fi
 else
 	# similarly, don't build the targets in the 'native only' 
 	# list when building a cross compiler
 	skipdirs="${skipdirs} ${native_only}"
 	is_cross_compiler=yes
-	target_subdir=${target_alias}
 fi	
+
+# We always want to use the same name for this directory, so that dejagnu
+# can reliably find it.
+target_subdir=${target_alias}
 
 if [ ! -d ${target_subdir} ] ; then
   if mkdir ${target_subdir} ; then true
@@ -481,7 +483,7 @@ if [ x${with_stabs} = x ]; then
   case "${target}" in
   mips*-*-irix6*)
     ;;
-  mips*-*-* | alpha*-*-osf* | i[3456]86*-*-sysv4* | i[3456]86*-*-unixware*)
+  mips*-*-* | alpha*-*-osf*)
     with_stabs=yes;
     withoptions="${withoptions} --with-stabs"
     ;;
@@ -631,6 +633,9 @@ case "${target}" in
     noconfigdirs="$noconfigdirs target-libgloss"
     ;;
 # END CYGNUS LOCAL 
+  c4x-*-*)
+    noconfigdirs="$noconfigdirs target-libg++ target-libstdc++ target-libio target-librx target-libgloss"
+    ;;
   thumb-*-coff)
     noconfigdirs="$noconfigdirs target-libgloss"
     ;;
@@ -648,6 +653,7 @@ case "${target}" in
   d10v-*-*)
     noconfigdirs="$noconfigdirs target-librx target-libg++ target-libstdc++ target-libio target-libgloss"
     ;;
+  # CYGNUS LOCAL d30v
   d30v-*-*)
     ;;
   h8300*-*-* | \
@@ -671,6 +677,10 @@ case "${target}" in
   i[3456]86-*-go32* | i[3456]-*-msdosdjgpp*)
     # but don't build gdb
     noconfigdirs="$noconfigdirs gdb target-libg++ target-libstdc++ target-libio target-librx"
+    ;;
+  *-*-linux*)
+    # linux has rx in libc
+    skipdirs="$skipdirs target-librx"
     ;;
   i[3456]86-*-mingw32*)
     target_configdirs="$target_configdirs target-mingw"

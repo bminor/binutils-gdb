@@ -181,6 +181,7 @@ ChangeLog
 Makefile.in
 README
 config.guess
+config.if
 config.sub
 configure
 configure.in
