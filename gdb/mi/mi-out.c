@@ -440,6 +440,7 @@ mi_out_new (int mi_version)
   int flags = 0;
   struct ui_out_data *data = XMALLOC (struct ui_out_data);
   data->suppress_field_separator = 0;
+  data->suppress_output = 0;
   data->mi_version = mi_version;
   /* FIXME: This code should be using a ``string_file'' and not the
      TUI buffer hack. */

@@ -1,3 +1,8 @@
+2001-07-10  Mark Kettenis  <kettenis@gnu.org>
+
+	* mi-out.c (mi_out_new): Initialize suppress_ouput field of newly
+	created `struct ui_out_data'.
+
 2001-07-09  Kevin Buettner  <kevinb@redhat.com>
 
 	* mi-main.c (register_changed_p, get_register): Use alloca()
