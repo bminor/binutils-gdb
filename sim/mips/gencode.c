@@ -1204,11 +1204,11 @@ process_instructions(doarch,features)
         break ;
 
        case SYSCALL:
-        printf("   SignalException(SystemCall);\n");
+        printf("   SignalException(SystemCall,instruction);\n");
         break ;
 
        case BREAK:
-        printf("   SignalException(BreakPoint);\n");
+        printf("   SignalException(BreakPoint,instruction);\n");
         break ;
 
        case TRAP:
@@ -1232,7 +1232,7 @@ process_instructions(doarch,features)
          printf("  if ((%sword64)op1 ",(boolU ? "u" : ""));
          printf("%c%s",(boolNOT ? '!' : (boolLT ? '<' : (boolGT ? '>' : '='))),(boolEQ ? "=" : ""));
          printf(" (%sword64)op2)\n",(boolU ? "u" : ""));
-         printf("   SignalException(Trap);\n");
+         printf("   SignalException(Trap,instruction);\n");
         }
         break ;
 
