@@ -35,6 +35,7 @@
 #include "complaints.h"
 #include "gdbcmd.h"
 #include "wrapper.h"
+#include "cp-abi.h"
 
 /* These variables point to the objects
    representing the predefined C data types.  */
@@ -1027,7 +1028,7 @@ get_destructor_fn_field (struct type *t, int *method_indexp, int *field_indexp)
 
       for (j = 0; j < TYPE_FN_FIELDLIST_LENGTH (t, i); j++)
 	{
-	  if (DESTRUCTOR_PREFIX_P (TYPE_FN_FIELD_PHYSNAME (f, j)))
+	  if (is_destructor_name (TYPE_FN_FIELD_PHYSNAME (f, j)) != 0)
 	    {
 	      *method_indexp = i;
 	      *field_indexp = j;
@@ -1902,12 +1903,12 @@ virtual_base_index (struct type *base, struct type *dclass)
     return -1;
 
   i = 0;
-  vbase = TYPE_VIRTUAL_BASE_LIST (dclass)[0];
+  vbase = virtual_base_list (dclass)[0];
   while (vbase)
     {
       if (vbase == base)
 	break;
-      vbase = TYPE_VIRTUAL_BASE_LIST (dclass)[++i];
+      vbase = virtual_base_list (dclass)[++i];
     }
 
   return vbase ? i : -1;
@@ -1936,14 +1937,14 @@ virtual_base_index_skip_primaries (struct type *base, struct type *dclass)
 
   j = -1;
   i = 0;
-  vbase = TYPE_VIRTUAL_BASE_LIST (dclass)[0];
+  vbase = virtual_base_list (dclass)[0];
   while (vbase)
     {
       if (!primary || (virtual_base_index_skip_primaries (vbase, primary) < 0))
 	j++;
       if (vbase == base)
 	break;
-      vbase = TYPE_VIRTUAL_BASE_LIST (dclass)[++i];
+      vbase = virtual_base_list (dclass)[++i];
     }
 
   return vbase ? j : -1;

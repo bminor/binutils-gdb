@@ -28,6 +28,7 @@
 #include "valprint.h"
 #include "language.h"
 #include "c-lang.h"
+#include "cp-abi.h"
 
 
 /* Print function pointer with inferior address ADDRESS onto stdio
@@ -303,6 +304,7 @@ c_val_print (struct type *type, char *valaddr, int embedded_offset,
 	}
       /* Fall through.  */
     case TYPE_CODE_STRUCT:
+      /*FIXME: Abstract this away */
       if (vtblprint && cp_is_vtbl_ptr_type (type))
 	{
 	  /* Print the unmangled name if desired.  */

@@ -45,6 +45,7 @@
 #include "gdb_string.h"
 #include "gdb_stat.h"
 #include <ctype.h>
+#include "cp-abi.h"
 
 /* Prototype for one function in parser-defs.h,
    instead of including that entire file. */
@@ -288,20 +289,17 @@ gdb_mangle_name (struct type *type, int method_id, int signature_id)
   int is_full_physname_constructor;
 
   int is_constructor;
-  int is_destructor = DESTRUCTOR_PREFIX_P (physname);
+  int is_destructor = is_destructor_name (physname);
   /* Need a new type prefix.  */
   char *const_prefix = method->is_const ? "C" : "";
   char *volatile_prefix = method->is_volatile ? "V" : "";
   char buf[20];
   int len = (newname == NULL ? 0 : strlen (newname));
 
-  if (OPNAME_PREFIX_P (field_name))
+  if (is_operator_name (field_name))
     return xstrdup (physname);
 
-  is_full_physname_constructor =
-    ((physname[0] == '_' && physname[1] == '_' &&
-      (isdigit (physname[2]) || physname[2] == 'Q' || physname[2] == 't'))
-     || (strncmp (physname, "__ct", 4) == 0));
+  is_full_physname_constructor = is_constructor_name (physname);
 
   is_constructor =
     is_full_physname_constructor || (newname && STREQ (field_name, newname));

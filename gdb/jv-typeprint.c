@@ -28,6 +28,7 @@
 #include "gdb_string.h"
 #include "typeprint.h"
 #include "c-lang.h"
+#include "cp-abi.h"
 
 /* Local functions */
 
@@ -224,12 +225,9 @@ java_type_print_base (struct type *type, struct ui_file *stream, int show,
 
 		  physname = TYPE_FN_FIELD_PHYSNAME (f, j);
 
-		  is_full_physname_constructor =
-		    ((physname[0] == '_' && physname[1] == '_'
-		      && strchr ("0123456789Qt", physname[2]))
-		     || STREQN (physname, "__ct__", 6)
-		     || DESTRUCTOR_PREFIX_P (physname)
-		     || STREQN (physname, "__dt__", 6));
+		  is_full_physname_constructor
+                    = (is_constructor_name (physname)
+                       || is_destructor_name (physname));
 
 		  QUIT;
 

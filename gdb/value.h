@@ -367,7 +367,6 @@ extern value_ptr value_field (value_ptr arg1, int fieldno);
 extern value_ptr value_primitive_field (value_ptr arg1, int offset,
 					int fieldno, struct type *arg_type);
 
-extern struct type *value_rtti_type (value_ptr, int *, int *, int *);
 
 extern struct type *value_rtti_target_type (value_ptr, int *, int *, int *);
 
@@ -446,10 +445,6 @@ extern value_ptr value_x_unop (value_ptr arg1, enum exp_opcode op,
 
 extern value_ptr value_fn_field (value_ptr * arg1p, struct fn_field *f,
 				 int j, struct type *type, int offset);
-
-extern value_ptr value_virtual_fn_field (value_ptr * arg1p,
-					 struct fn_field *f, int j,
-					 struct type *type, int offset);
 
 extern int binop_user_defined_p (enum exp_opcode op,
 				 value_ptr arg1, value_ptr arg2);

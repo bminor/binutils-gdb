@@ -1046,30 +1046,6 @@ struct partial_symtab
 
 #define VTBL_FNADDR_OFFSET 2
 
-/* Macro that yields non-zero value iff NAME is the prefix for C++ operator
-   names.  If you leave out the parenthesis here you will lose!  */
-#define OPNAME_PREFIX_P(NAME) \
-  (!strncmp (NAME, "operator", 8))
-
-/* Macro that yields non-zero value iff NAME is the prefix for C++ vtbl
-   names.  Note that this macro is g++ specific (FIXME).
-   '_vt$' is the old cfront-style vtables; '_VT$' is the new
-   style, using thunks (where '$' is really CPLUS_MARKER). */
-
-#define VTBL_PREFIX_P(NAME) \
-  (((NAME)[0] == '_' \
-   && (((NAME)[1] == 'V' && (NAME)[2] == 'T') \
-       || ((NAME)[1] == 'v' && (NAME)[2] == 't')) \
-   && is_cplus_marker ((NAME)[3])) || ((NAME)[0]=='_' && (NAME)[1]=='_' \
-   && (NAME)[2]=='v' && (NAME)[3]=='t' && (NAME)[4]=='_'))
-
-/* Macro that yields non-zero value iff NAME is the prefix for C++ destructor
-   names.  Note that this macro is g++ specific (FIXME).  */
-
-#define DESTRUCTOR_PREFIX_P(NAME) \
-  ((NAME)[0] == '_' && is_cplus_marker ((NAME)[1]) && (NAME)[2] == '_')
-
-
 /* External variables and functions for the objects described above. */
 
 /* This symtab variable specifies the current file for printing source lines */

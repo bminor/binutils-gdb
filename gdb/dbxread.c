@@ -57,6 +57,7 @@
 #include "demangle.h"
 #include "language.h"		/* Needed inside partial-stab.h */
 #include "complaints.h"
+#include "cp-abi.h"
 
 #include "aout/aout64.h"
 #include "aout/stab_gnu.h"	/* We always use GNU stabs, not native, now */
@@ -514,7 +515,7 @@ record_minimal_symbol (char *name, CORE_ADDR address, int type,
 	char *tempstring = name;
 	if (tempstring[0] == bfd_get_symbol_leading_char (objfile->obfd))
 	  ++tempstring;
-	if (VTBL_PREFIX_P ((tempstring)))
+	if (is_vtable_name (tempstring))
 	  ms_type = mst_data;
       }
       section = SECT_OFF_DATA (objfile);

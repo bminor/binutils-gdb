@@ -539,7 +539,8 @@ SFILES = ax-general.c ax-gdb.c bcache.c blockframe.c breakpoint.c \
 	tui/tuiStack.c tui/tuiStack.h tui/tuiWin.c tui/tuiWin.h \
 	tui/tui-file.h tui/tui-file.c \
 	ui-file.h ui-file.c \
-	frame.c
+	frame.c \
+	gnu-v2-abi.c hpacc-abi.c cp-abi.c
 
 LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
 
@@ -612,6 +613,8 @@ cli_cmds_h =	$(srcdir)/cli/cli-cmds.h
 cli_script_h =	$(srcdir)/cli/cli-script.h
 cli_setshow_h =	$(srcdir)/cli/cli-setshow.h
 cli_utils_h =	$(srcdir)/cli/cli-utils.h
+
+cp_abi_h = cp-abi.h
 
 # Header files that need to have srcdir added.  Note that in the cases
 # where we use a macro like $(gdbcmd_h), things are carefully arranged
@@ -686,7 +689,8 @@ COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o regcache.o \
 	c-valprint.o cp-valprint.o ch-valprint.o f-valprint.o m2-valprint.o \
 	nlmread.o serial.o mdebugread.o os9kread.o top.o utils.o \
 	ui-file.o tui-file.o \
-	frame.o
+	frame.o \
+	gnu-v2-abi.o hpacc-abi.o cp-abi.o
 
 OBS = $(COMMON_OBS) $(ANNOTATE_OBS)
 
@@ -1222,10 +1226,10 @@ c-lang.o: c-lang.c c-lang.h $(defs_h) $(expression_h) $(gdbtypes_h) \
 
 c-typeprint.o: c-typeprint.c c-lang.h $(defs_h) $(expression_h) \
 	$(gdbcmd_h) $(gdbcore_h) $(gdbtypes_h) language.h $(symtab_h) \
-	target.h typeprint.h $(value_h) gdb_string.h
+	target.h typeprint.h $(value_h) gdb_string.h $(cp_abi_h)
 
 c-valprint.o: c-valprint.c $(defs_h) $(expression_h) $(gdbtypes_h) \
-	language.h $(symtab_h) valprint.h $(value_h)
+	language.h $(symtab_h) valprint.h $(value_h) $(cp_abi_h)
 
 f-lang.o: f-lang.c f-lang.h $(defs_h) $(expression_h) $(gdbtypes_h) \
 	language.h parser-defs.h $(symtab_h) gdb_string.h
@@ -1278,6 +1282,8 @@ corefile.o: corefile.c $(dis-asm_h) $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 corelow.o: corelow.c $(command_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
 	target.h gdbthread.h gdb_string.h $(regcache_h)
 
+cp-abi.o: cp-abi.c $(defs_h) $(value_h) $(cp_abi_h)
+
 cp-valprint.o: cp-valprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
 	$(gdbtypes_h) $(symtab_h) $(value_h) gdb_string.h
 
@@ -1287,7 +1293,7 @@ dcache.o: dcache.c $(dcache_h) $(defs_h) $(gdbcmd_h) gdb_string.h \
 dbxread.o: dbxread.c $(breakpoint_h) buildsym.h $(command_h) \
 	complaints.h $(defs_h) $(expression_h) gdb-stabs.h $(gdbcore_h) \
 	$(gdbtypes_h) language.h objfiles.h partial-stab.h stabsread.h \
-	symfile.h $(symtab_h) target.h gdb_string.h
+	symfile.h $(symtab_h) target.h gdb_string.h $(cp_abi_h)
 
 delta68-nat.o: delta68-nat.c $(defs_h)
 
@@ -1317,7 +1323,7 @@ environ.o: environ.c $(defs_h) environ.h $(gdbcore_h) gdb_string.h
 
 eval.o: eval.c $(bfd_h) $(defs_h) $(expression_h) $(frame_h) \
 	$(gdbtypes_h) language.h $(symtab_h) target.h $(value_h) \
-	gdb_string.h
+	gdb_string.h $(cp_abi_h)
 
 event-loop.o: event-loop.c $(defs_h) $(top_h) $(event_loop_h) $(event_top_h)
 
@@ -1446,13 +1452,16 @@ arch-utils.o: arch-utils.c $(defs_h) $(bfd_h) $(gdbcmd_h) \
 
 gdbtypes.o: gdbtypes.c $(bfd_h) complaints.h $(defs_h) $(expression_h) \
 	$(gdbtypes_h) language.h objfiles.h symfile.h $(symtab_h) target.h \
-	$(value_h) gdb_string.h wrapper.h
+	$(value_h) gdb_string.h wrapper.h $(cp_abi_h)
 
 go32-nat.o: go32-nat.c $(defs_h) $(inferior_h) gdb_wait.h $(gdbcore_h) \
 	$(command_h) $(floatformat_h) target.h i387-nat.h $(regcache_h)
 
 gnu-nat.o: process_reply_S.h exc_request_S.h notify_S.h msg_reply_S.h \
 	exc_request_U.h msg_U.h gnu-nat.h
+
+gnu-v2-abi.o: gnu-v2-abi.c $(defs_h) $(cp_abi_h) gdb_string.h $(symtab_h) \
+	$(gdbtypes_h) $(value_h)
 
 h8300-tdep.o: h8300-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(regcache_h)
 
@@ -1461,6 +1470,9 @@ h8500-tdep.o: h8500-tdep.c $(bfd_h) $(dis-asm_h) $(defs_h) \
 	$(value_h) $(regcache_h)
 
 hp300ux-nat.o: hp300ux-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) $(regcache_h)
+
+hpacc-abi.o: hpacc-abi.c $(defs_h) $(cp_abi_h) gdb_string.h $(gdbtypes_h) \
+	$(value_h) $(gdbcore_h)
 
 hppa-tdep.o: hppa-tdep.c gdb_wait.h $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) objfiles.h symfile.h target.h $(regcache_h)
@@ -1551,7 +1563,7 @@ jv-lang.o: jv-lang.c $(bfd_h) $(defs_h) $(symtab_h) $(gdbtypes_h) \
 
 jv-typeprint.o: jv-typeprint.c $(bfd_h) $(defs_h) $(symtab_h) $(gdbtypes_h) \
 	$(value_h) $(demangle_h) jv-lang.h gdb_string.h \
-	typeprint.h c-lang.h
+	typeprint.h c-lang.h $(cp_abi_h)
 
 jv-valprint.o: jv-valprint.c $(bfd_h) $(defs_h) $(symtab_h) $(gdbtypes_h) \
 	$(expression_h) $(value_h) $(demangle_h) valprint.h \
@@ -1958,11 +1970,11 @@ symmisc.o: symmisc.c $(bfd_h) $(breakpoint_h) $(command_h) $(defs_h) \
 symtab.o: symtab.c call-cmds.h $(defs_h) $(expression_h) $(frame_h) \
 	$(gdbcmd_h) $(gdbcore_h) $(gdbtypes_h) language.h objfiles.h \
 	gnu-regex.h symfile.h $(symtab_h) target.h $(value_h) \
-	gdb_string.h linespec.h
+	gdb_string.h linespec.h $(cp_abi_h)
 
 linespec.o: linespec.c linespec.h $(defs_h) $(frame_h) $(value_h) \
 	objfiles.h symfile.h completer.h $(symtab_h) \
-	$(demangle_h) command.h
+	$(demangle_h) command.h $(cp_abi_h)
 
 tic80-tdep.o: tic80-tdep.c $(defs_h) $(regcache_h)
 
@@ -1981,7 +1993,7 @@ top.o: top.c top.h $(bfd_h) $(getopt_h) $(readline_headers) call-cmds.h \
 
 typeprint.o: typeprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(gdbtypes_h) language.h $(symtab_h) target.h \
-	$(value_h) gdb_string.h
+	$(value_h) gdb_string.h $(cp_abi.h)
 
 # OBSOLETE ultra3-nat.o: ultra3-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) $(regcache_h)
 
@@ -1998,7 +2010,7 @@ valarith.o: valarith.c $(bfd_h) $(defs_h) $(expression_h) \
 	gdb_string.h
 
 valops.o: valops.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h \
-	gdb_string.h $(regcache_h)
+	gdb_string.h $(regcache_h) $(cp_abi_h)
 
 valprint.o: valprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(gdbtypes_h) language.h $(symtab_h) target.h \

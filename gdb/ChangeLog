@@ -1,3 +1,39 @@
+2001-04-26  Jim Blandy  <jimb@redhat.com>
+
+	(Changes from Daniel Berlin, with revisions by Jim Blandy.)
+	
+	Abstract out operations specific to particular C++ ABI's, and
+	invoke them through a function table.  This removes the C++ ABI
+	dependencies scattered throughout the code, and allows us to
+	cleanly add support for new C++ ABI's.
+	* cp-abi.h, cp-abi.h, gnu-v2-abi.c, hpacc-abi.c: New files.
+	* c-typeprint.c, c-valprint.c, dbxread.c, eval.c, gdbtypes.c,
+	jv-typeprint.c, linespec.c, symtab.c, typeprint.c, valops.c:
+	#include "cp-abi.h".  These files all use functions now declared
+	there.
+	* symtab.h (OPNAME_PREFIX_P, VTBL_PREFIX_P, DESTRUCTOR_PREFIX_P):
+	Deleted.  These services are now provided by functions declared in
+	cp-abi.h.
+	* value.h (value_rtti_type, value_virtual_fn_field): Same.
+	* values.c (value_virtual_fn_field): Same, for this definition.
+	* valops.c (value_rtti_type): Same.	
+	* c-typeprint.c (c_type_print_base): Use the functions from
+	"cp-abi.h", instead of the old macros, or hard-coded ABI-specific
+	tests.
+	* dbxread.c (record_minimal_symbol): Same.
+	* gdbtypes.c (get_destructor_fn_field, virtual_base_index,
+	virtual_base_index_skip_primaries): Same.
+	* jv-typeprint.c (java_type_print_base): Same.
+	* linespec.c (find_methods, decode_line_1): Same.
+	* symtab.c (gdb_mangle_name): Same.
+	* Makefile.in (SFILES): Add the new .c files mentioned above.
+	(cp_abi_h): New variable.
+	(COMMON_OBS): Add gnu-v2-abi.o, hpacc-abi.o, and cp-abi.o.
+	(cp-abi.o, gnu-v2-abi.o, hpacc-abi.o): New targets.
+	(c-typeprint.o, c-valprint.o, dbxread.o, eval.o, gdbtypes.o,
+	jv-typeprint.o, symtab.o, linespec.o, typeprint.o, valops.o): Add
+	dependency on $(cp_abi_h).
+
 2001-04-26  Michael Snyder  <msnyder@redhat.com>
 
 	* thread-db.c (_initialize_thread_db): Add set/show command

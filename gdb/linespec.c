@@ -29,6 +29,7 @@
 #include "demangle.h"
 #include "value.h"
 #include "completer.h"
+#include "cp-abi.h"
 
 /* Prototype for one function in parser-defs.h,
    instead of including that entire file. */
@@ -166,7 +167,7 @@ find_methods (struct type *t, char *name, struct symbol **sym_arr)
 		  phys_name = TYPE_FN_FIELD_PHYSNAME (f, field_counter);
 		
 		/* Destructor is handled by caller, dont add it to the list */
-		if (DESTRUCTOR_PREFIX_P (phys_name))
+		if (is_destructor_name (phys_name) != 0)
 		  continue;
 
 		sym_arr[i1] = lookup_symbol (phys_name,
@@ -801,7 +802,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 		    {
 		      char *tmp;
 
-		      if (OPNAME_PREFIX_P (copy))
+		      if (is_operator_name (copy))
 			{
 			  tmp = (char *) alloca (strlen (copy + 3) + 9);
 			  strcpy (tmp, "operator ");
