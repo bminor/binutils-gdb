@@ -1756,7 +1756,14 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 	              	  (!info->symbolic && h->dynindx != -1)
 	                  || (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0
 			  )
-	              && ((input_section->flags & SEC_ALLOC) != 0)
+	              && ((input_section->flags & SEC_ALLOC) != 0
+			  /* DWARF will emit R_ARM_ABS32 relocations in its
+			     sections against symbols defined externally
+			     in shared libraries.  We can't do anything
+			     with them here.  */
+			  || ((input_section->flags & SEC_DEBUGGING) != 0
+			      && (h->elf_link_hash_flags
+				  & ELF_LINK_HASH_DEF_DYNAMIC) != 0))
 		      )
 	            relocation_needed = 0;
 		  break;
@@ -1994,13 +2001,14 @@ elf32_arm_merge_private_bfd_data (ibfd, obfd)
 
   if (!elf_flags_init (obfd))
     {
-      /* If the input is the default architecture then do not
-         bother setting the flags for the output architecture,
-         instead allow future merges to do this.  If no future
-         merges ever set these flags then they will retain their
-         unitialised values, which surprise surprise, correspond
+      /* If the input is the default architecture and had the default
+	 flags then do not bother setting the flags for the output
+	 architecture, instead allow future merges to do this.  If no
+	 future merges ever set these flags then they will retain their
+         uninitialised values, which surprise surprise, correspond
          to the default values.  */
-      if (bfd_get_arch_info (ibfd)->the_default)
+      if (bfd_get_arch_info (ibfd)->the_default
+	  && elf_elfheader (ibfd)->e_flags == 0)
 	return true;
 
       elf_flags_init (obfd) = true;

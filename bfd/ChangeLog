@@ -1,3 +1,34 @@
+2000-10-15  Philip Blundell  <philb@gnu.org>
+
+	From 2000-09-08  Nick Clifton  <nickc@redhat.com>
+	* elf32-arm.h (elf32_arm_merge_private_bfd_data): Do not
+	initialise flags in output bfd if the input bfd is the default
+	architecture with the default flags.
+
+	From 2000-09-03  Philip Blundell  <philb@gnu.org>
+	* elf32-arm.h (elf32_arm_relocate_section): Don't try to relocate
+	references to undefined symbols in debugging sections.
+
+	From 2000-05-30  H.J. Lu  <hjl@gnu.org>
+	* elflink.c (_bfd_elf_link_record_dynamic_symbol): Clear the
+	visibility bits if the symbol is undefined. Correctly handle
+	weak undefined symbols with hidden and internal attributes.
+	* elflink.h (elf_link_add_object_symbols): Always turn the
+	symbol into local if it has the hidden or internal attribute.
+
+	From 2000-05-22  H.J. Lu  <hjl@gnu.org>
+	* elflink.h (elf_link_output_extsym): Clear the visibility
+	field for symbols not defined locally.
+
+	From 2000-05-03  Martin v. Löwis  <loewis@informatik.hu-berlin.de>
+	* elflink.h (elf_link_add_object_symbols): Reset dynindx for
+	hidden and internal symbols.
+	(elf_fix_symbol_flags): Clear NEEDS_PLT for symbols with
+	visibility.
+	* elflink.c (_bfd_elf_link_record_dynamic_symbol): Do not
+	assign a PLT or GOT entry to symbols with hidden and
+	internal visibility.
+
 2000-10-16  Philip Blundell  <pb@futuretv.com>
 
 	* configure.in: Set version to 2.10.1.
