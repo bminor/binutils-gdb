@@ -1,5 +1,8 @@
 2003-06-18  Hans-Peter Nilsson  <hp@axis.com>
 
+	* ld-cris/locref1.d, ld-cris/locref1.s, ld-cris/locref2.d,
+	ld-cris/locref2.s: New tests.
+
 	* ld-elfcomm/elfcomm.exp (dump_common1): Use $READELF, not plain
 	readelf as found using default path.
 
