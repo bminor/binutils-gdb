@@ -1,3 +1,13 @@
+Wed Apr 16 19:30:44 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* simops.c (OP_F020): SYS_execv, SYS_time, SYS_times, SYS_utime
+ 	only include if implemented by host.
+	(OP_F020): Typecast arg passed to time function;
+
+Mon Apr  7 23:57:49 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* simops.c (syscall): Handle new mn10300 calling conventions.
+
 Mon Apr  7 15:45:02 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

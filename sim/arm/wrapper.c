@@ -1,7 +1,7 @@
 /* run front end support for arm
-   Copyright (C) 1995 Free Software Foundation, Inc.
+   Copyright (C) 1995, 1996 Free Software Foundation, Inc.
 
-This file is part of ARM SIM
+This file is part of ARM SIM.
 
 GNU CC is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -14,40 +14,84 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with GNU CC; see the file COPYING.  If not, write to
-Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111, USA.  */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+
+/* This file provides the interface between the simulator and run.c and gdb
+   (when the simulator is linked with gdb).
+   All simulator interaction should go through this file.  */
 
 #include <stdio.h>
 #include <stdarg.h>
-#include <armdefs.h>
 #include <bfd.h>
 #include <signal.h>
 #include "callback.h"
 #include "remote-sim.h"
+#include "armdefs.h"
+#include "armemu.h"
+#include "dbg_rdi.h"
+
+host_callback *sim_callback;
+
 static struct ARMul_State *state;
+
+/* Memory size in bytes.  */
+static int mem_size = (1 << 21);
+
+/* Non-zero to display start up banner, and maybe other things.  */
+static int verbosity;
 
 static void 
 init ()
 {
   static int done;
+
   if (!done)
     {
       ARMul_EmulateInit();
       state = ARMul_NewState ();
-      ARMul_MemoryInit(state, 1<<21);
+      ARMul_MemoryInit(state, mem_size);
       ARMul_OSInit(state);
       ARMul_CoProInit(state); 
+      state->verbose = verbosity;
       done = 1;
     }
-
 }
+
+/* Set verbosity level of simulator.
+   This is not intended to produce detailed tracing or debugging information.
+   Just summaries.  */
+/* FIXME: common/run.c doesn't do this yet.  */
+
+void
+sim_set_verbose (v)
+     int v;
+{
+  verbosity = v;
+}
+
+/* Set the memory size to SIZE bytes.
+   Must be called before initializing simulator.  */   
+/* FIXME: Rename to sim_set_mem_size.  */
+
+void 
+sim_size (size)
+     int size;
+{
+  mem_size = size;
+}
+
 void 
 ARMul_ConsolePrint (ARMul_State * state, const char *format,...)
 {
   va_list ap;
-  va_start (ap, format);
-  vprintf (format, ap);
-  va_end (ap);
+
+  if (state->verbose)
+    {
+      va_start (ap, format);
+      vprintf (format, ap);
+      va_end (ap);
+    }
 }
 
 ARMword 
@@ -56,26 +100,9 @@ ARMul_Debug (ARMul_State * state, ARMword pc, ARMword instr)
 
 }
 
-void 
-sim_size (size)
-     int size;
-{
-  init ();
-  ARMul_MemoryInit (state, 1 << size);
-}
-
-
-void 
-sim_set_profile ()
-{
-}
-void 
-sim_set_profile_size ()
-{
-}
-
 int
-sim_write (addr, buffer, size)
+sim_write (sd, addr, buffer, size)
+     SIM_DESC sd;
      SIM_ADDR addr;
      unsigned char *buffer;
      int size;
@@ -90,7 +117,8 @@ sim_write (addr, buffer, size)
 }
 
 int
-sim_read (addr, buffer, size)
+sim_read (sd, addr, buffer, size)
+     SIM_DESC sd;
      SIM_ADDR addr;
      unsigned char *buffer;
      int size;
@@ -104,29 +132,38 @@ sim_read (addr, buffer, size)
   return size;
 }
 
-void 
-sim_trace ()
+int
+sim_trace (sd)
+     SIM_DESC sd;
 {
+  (*sim_callback->printf_filtered) (sim_callback, "This simulator does not support tracing\n");
+  return 1;
 }
 
-static int rc;
 void
-sim_resume (step, siggnal)
+sim_resume (sd, step, siggnal)
+     SIM_DESC sd;
      int step, siggnal;
 {
+  state->EndCondition = 0;
+
   if (step)
     {
-      rc = SIGTRAP;
-      state->Reg[15] =       ARMul_DoInstr (state);
+      state->Reg[15] = ARMul_DoInstr (state);
+      if (state->EndCondition == 0)
+	state->EndCondition = RDIError_BreakpointReached;
     }
   else
     {
-      state->Reg[15] =       ARMul_DoProg (state);
+      state->Reg[15] = ARMul_DoProg (state);
     }
+
+  FLUSHPIPE;
 }
 
 void
-sim_create_inferior (start_address, argv, env)
+sim_create_inferior (sd, start_address, argv, env)
+     SIM_DESC sd;
      SIM_ADDR start_address;
      char **argv;
      char **env;
@@ -135,13 +172,14 @@ sim_create_inferior (start_address, argv, env)
 }
 
 void
-sim_info (verbose)
+sim_info (sd, verbose)
+     SIM_DESC sd;
      int verbose;
 {
 }
 
 
-int 
+static int 
 frommem (state, memory)
      struct ARMul_State *state;
      unsigned char *memory;
@@ -163,7 +201,7 @@ frommem (state, memory)
 }
 
 
-void 
+static void
 tomem (state, memory,  val)
      struct ARMul_State *state;
      unsigned char *memory;
@@ -186,7 +224,8 @@ tomem (state, memory,  val)
 }
 
 void
-sim_store_register (rn, memory)
+sim_store_register (sd, rn, memory)
+     SIM_DESC sd;
      int rn;
      unsigned char *memory;
 {
@@ -195,7 +234,8 @@ sim_store_register (rn, memory)
 }
 
 void
-sim_fetch_register (rn, memory)
+sim_fetch_register (sd, rn, memory)
+     SIM_DESC sd;
      int rn;
      unsigned char *memory;
 {
@@ -206,22 +246,27 @@ sim_fetch_register (rn, memory)
 
 
 
-void
-sim_open (name)
-     char *name;
+SIM_DESC
+sim_open (kind, argv)
+     SIM_OPEN_KIND kind;
+     char **argv;
 {
-  /* nothing to do */
+  /*  (*sim_callback->error) (sim_callback, "testing 1 2 3\n");*/
+  /* nothing to do, fudge our descriptor */
+  return (SIM_DESC) 1;
 }
 
 void
-sim_close (quitting)
+sim_close (sd, quitting)
+     SIM_DESC sd;
      int quitting;
 {
   /* nothing to do */
 }
 
 int
-sim_load (prog, from_tty)
+sim_load (sd, prog, from_tty)
+     SIM_DESC sd;
      char *prog;
      int from_tty;
 {
@@ -230,30 +275,46 @@ sim_load (prog, from_tty)
 }
 
 void
-sim_stop_reason (reason, sigrc)
+sim_stop_reason (sd, reason, sigrc)
+     SIM_DESC sd;
      enum sim_stop *reason;
      int *sigrc;
 {
-  *reason = sim_stopped;
-  *sigrc = rc;
+  if (state->EndCondition == 0)
+    {
+      *reason = sim_exited;
+      *sigrc = state->Reg[0] & 255;
+    }
+  else
+    {
+      *reason = sim_stopped;
+      if (state->EndCondition == RDIError_BreakpointReached)
+	*sigrc = SIGTRAP;
+      else
+	*sigrc = 0;
+    }
 }
+
 void
-sim_kill ()
+sim_kill (sd)
+     SIM_DESC sd;
 {
   /* nothing to do */
 }
 
 void
-sim_do_command (cmd)
+sim_do_command (sd, cmd)
+     SIM_DESC sd;
      char *cmd;
 {
-  printf_filtered ("This simulator does not accept any commands.\n");
+  (*sim_callback->printf_filtered) (sim_callback, "This simulator does not accept any commands.\n");
 }
 
 
 void
-sim_set_callbacks (ptr)
-struct host_callback_struct *ptr;
+sim_set_callbacks (sd, ptr)
+     SIM_DESC sd;
+     host_callback *ptr;
 {
-
+  sim_callback = ptr;
 }

@@ -1,17 +1,14 @@
-#include "config.h"
-
 #include <signal.h>
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 #include "v850_sim.h"
 #include "simops.h"
 #include "sys/syscall.h"
 #include "bfd.h"
 #include <errno.h>
+#if !defined(__GO32__) && !defined(_WIN32)
 #include <sys/stat.h>
 #include <sys/times.h>
 #include <sys/time.h>
+#endif
 
 enum op_types {
   OP_UNKNOWN,
@@ -1077,8 +1074,8 @@ void
 OP_E0 ()
 {
   trace_input ("mulh", OP_REG_REG, 0);
-  State.regs[OP[1]] = ((State.regs[OP[1]] & 0xffff)
-		       * (State.regs[OP[0]] & 0xffff));
+  State.regs[OP[1]] = (SEXT16 (State.regs[OP[1]])
+		       * SEXT16 (State.regs[OP[0]]));
   trace_output (OP_REG_REG);
 }
 
@@ -1091,7 +1088,7 @@ OP_2E0 ()
   int value = SEXT5 (OP[0]);
  
   trace_input ("mulh", OP_IMM_REG, 0);
-  State.regs[OP[1]] = (State.regs[OP[1]] & 0xffff) * value;
+  State.regs[OP[1]] = SEXT16 (State.regs[OP[1]]) * value;
   trace_output (OP_IMM_REG);
 }
 
@@ -1099,10 +1096,10 @@ OP_2E0 ()
 void
 OP_6E0 ()
 {
-  int value = OP[0] & 0xffff;
+  int value = SEXT16 (OP[0]);
 
   trace_input ("mulhi", OP_IMM_REG_REG, 0);
-  State.regs[OP[2]] = (State.regs[OP[1]] & 0xffff) * value;
+  State.regs[OP[2]] = SEXT16 (State.regs[OP[1]]) * value;
   trace_output (OP_IMM_REG_REG);
 }
 
@@ -2003,9 +2000,11 @@ OP_10007E0 ()
 	  RETVAL = execve (MEMPTR (PARM1), (char **) MEMPTR (PARM2),
 			   (char **)MEMPTR (PARM3));
 	  break;
+#ifdef SYS_execv
 	case SYS_execv:
 	  RETVAL = execve (MEMPTR (PARM1), (char **) MEMPTR (PARM2), NULL);
 	  break;
+#endif
 #if 0
 	case SYS_pipe:
 	  {
@@ -2061,6 +2060,7 @@ OP_10007E0 ()
 	    State.exception = SIG_V850_EXIT;	/* PARM1 has exit status encoded */
 	  break;
 
+#if !defined(__GO32__) && !defined(_WIN32)
 	case SYS_stat:	/* added at hmsi */
 	  /* stat system call */
 	  {
@@ -2092,6 +2092,7 @@ OP_10007E0 ()
 	case SYS_chmod:
 	  RETVAL = chmod (MEMPTR (PARM1), PARM2);
 	  break;
+#ifdef SYS_time
 	case SYS_time:
 	  {
 	    time_t now;
@@ -2099,6 +2100,8 @@ OP_10007E0 ()
 	    store_mem (PARM1, 4, now);
 	  }
 	  break;
+#endif
+#ifdef SYS_times
 	case SYS_times:
 	  {
 	    struct tms tms;
@@ -2109,6 +2112,7 @@ OP_10007E0 ()
 	    store_mem (PARM1 + 12, 4, tms.tms_cstime);
 	    break;
 	  }
+#endif
 	case SYS_gettimeofday:
 	  {
 	    struct timeval t;
@@ -2120,11 +2124,14 @@ OP_10007E0 ()
 	    store_mem (PARM2 + 4, 4, tz.tz_dsttime);
 	    break;
 	  }
+#ifdef SYS_utime
 	case SYS_utime:
 	  /* Cast the second argument to void *, to avoid type mismatch
 	     if a prototype is present.  */
 	  RETVAL = utime (MEMPTR (PARM1), (void *) MEMPTR (PARM2));
 	  break;
+#endif
+#endif
 	default:
 	  abort ();
 	}

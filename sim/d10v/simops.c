@@ -2628,24 +2628,26 @@ OP_5F00 ()
 	    (*d10v_callback->printf_filtered) (d10v_callback, "         a0         a1 f0 f1 c\n");
 	  }
 
-      (*d10v_callback->printf_filtered) (d10v_callback, "Trap %2d 0x%.4x:", (int)OP[0], (int)PC);
+	(*d10v_callback->printf_filtered) (d10v_callback, "Trap %2d 0x%.4x:", (int)OP[0], (int)PC);
 
-      for (i = 0; i < 16; i++)
-	(*d10v_callback->printf_filtered) (d10v_callback, " %.4x", (int) State.regs[i]);
+	for (i = 0; i < 16; i++)
+	  (*d10v_callback->printf_filtered) (d10v_callback, " %.4x", (int) State.regs[i]);
 
-      for (i = 0; i < 2; i++)
-	(*d10v_callback->printf_filtered) (d10v_callback, " %.2x%.8lx",
-					   ((int)(State.a[i] >> 32) & 0xff),
-					   ((unsigned long)State.a[i]) & 0xffffffff);
+	for (i = 0; i < 2; i++)
+	  (*d10v_callback->printf_filtered) (d10v_callback, " %.2x%.8lx",
+					     ((int)(State.a[i] >> 32) & 0xff),
+					     ((unsigned long)State.a[i]) & 0xffffffff);
 
-      (*d10v_callback->printf_filtered) (d10v_callback, "  %d  %d %d\n",
-					 State.F0 != 0, State.F1 != 0, State.C != 0);
-      (*d10v_callback->flush_stdout) (d10v_callback);
-      break;
+	(*d10v_callback->printf_filtered) (d10v_callback, "  %d  %d %d\n",
+					   State.F0 != 0, State.F1 != 0, State.C != 0);
+	(*d10v_callback->flush_stdout) (d10v_callback);
+	break;
+      }
 #endif
 
-    case 0:
-      /* Trap 0 is used for simulating low-level I/O */
+    case 0:			/* old system call trap, to be deleted */
+    case 15:			/* new system call trap */
+      /* Trap 15 is used for simulating low-level I/O */
       {
 	errno = 0;
 
@@ -2818,11 +2820,13 @@ OP_5F00 ()
 	    trace_output (OP_R2);
 	    break;
 
+#ifdef SYS_execv
 	  case SYS_execv:
 	    RETVAL = execve (MEMPTR (PARM1), (char **) MEMPTR (PARM2), NULL);
 	    trace_input ("<execv>", OP_R2, OP_R3, OP_VOID);
 	    trace_output (OP_R2);
 	    break;
+#endif
 
 	  case SYS_pipe:
 	    {
@@ -2839,6 +2843,7 @@ OP_5F00 ()
 	    }
 	  break;
 
+#ifdef SYS_wait
 	  case SYS_wait:
 	    {
 	      int status;
@@ -2850,6 +2855,7 @@ OP_5F00 ()
 	      trace_output (OP_R2);
 	    }
 	  break;
+#endif
 #else
 	  case SYS_getpid:
 	    trace_input ("<getpid>", OP_VOID, OP_VOID, OP_VOID);
@@ -2955,6 +2961,7 @@ OP_5F00 ()
 	    trace_output (OP_R2);
 	    break;
 
+#ifdef SYS_utime
 	  case SYS_utime:
 	    /* Cast the second argument to void *, to avoid type mismatch
 	       if a prototype is present.  */
@@ -2962,7 +2969,9 @@ OP_5F00 ()
 	    trace_input ("<utime>", OP_R2, OP_R3, OP_R4);
 	    trace_output (OP_R2);
 	    break;
+#endif
 
+#ifdef SYS_time
 	  case SYS_time:
 	    {
 	      unsigned long ret = time (PARM1 ? MEMPTR (PARM1) : NULL);
@@ -2972,38 +2981,13 @@ OP_5F00 ()
 	    trace_input ("<time>", OP_R2, OP_R3, OP_R4);
 	    trace_output (OP_R2R3);
 	    break;
+#endif
 	    
 	  default:
 	    abort ();
 	  }
-	RETERR = d10v_callback->get_errno(d10v_callback);
+	RETERR = (RETVAL == (uint16) -1) ? d10v_callback->get_errno(d10v_callback) : 0;
 	break;
-      }
-
-    case 1:
-      /* Trap 1 prints a string */
-      {
-	char *fstr = dmem_addr(State.regs[2]);
-	fputs (fstr, stdout);
-	break;
-      }
-
-    case 2:
-      /* Trap 2 calls printf */
-      {
-	char *fstr = dmem_addr(State.regs[2]);
-	(*d10v_callback->printf_filtered) (d10v_callback, fstr,
-					   (int16)State.regs[3],
-					   (int16)State.regs[4],
-					   (int16)State.regs[5]);
-	(*d10v_callback->flush_stdout) (d10v_callback);
-	break;
-      }
-
-    case 3:
-      /* Trap 3 writes a character */
-      putchar (State.regs[2]);
-      break;
       }
     }
 }

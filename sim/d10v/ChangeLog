@@ -1,3 +1,13 @@
+Wed Apr 16 16:12:03 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* simops.c (OP_5F00): Only provide system calls SYS_execv,
+ 	SYS_wait, SYS_wait, SYS_utime, SYS_time if defined by the host.
+	
+Mon Apr  7 15:45:02 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* config.in: Ditto.
+
 Wed Apr  2 15:06:28 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* interp.c (sim_open): New arg `kind'.

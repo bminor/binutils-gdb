@@ -1,3 +1,12 @@
+Thu Apr 17 11:48:25 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* wrapper.c (sim_trace): Update so that it matches prototype.
+
+Mon Apr  7 15:45:02 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	* config.in: Ditto.
+
 Mon Apr  7 12:01:17 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
 
 	* Makefile.in (armemu32.o): Replace $< with autoconf recommended

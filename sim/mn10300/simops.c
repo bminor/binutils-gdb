@@ -2920,9 +2920,11 @@ void OP_F020 (insn, extension)
       RETVAL = execve (MEMPTR (PARM1), (char **) MEMPTR (PARM2),
 		       (char **)MEMPTR (PARM3));
       break;
+#ifdef SYS_execv
     case SYS_execv:
       RETVAL = execve (MEMPTR (PARM1), (char **) MEMPTR (PARM2), NULL);
       break;
+#endif
 #endif
 
     case SYS_read:
@@ -2986,9 +2988,12 @@ void OP_F020 (insn, extension)
     case SYS_chmod:
       RETVAL = chmod (MEMPTR (PARM1), PARM2);
       break;
+#ifdef SYS_time
     case SYS_time:
-      RETVAL = time (MEMPTR (PARM1));
+      RETVAL = time ((void*) MEMPTR (PARM1));
       break;
+#endif
+#ifdef SYS_times
     case SYS_times:
       {
 	struct tms tms;
@@ -2999,6 +3004,7 @@ void OP_F020 (insn, extension)
 	store_mem (PARM1 + 12, 4, tms.tms_cstime);
 	break;
       }
+#endif
     case SYS_gettimeofday:
       {
 	struct timeval t;
@@ -3010,11 +3016,13 @@ void OP_F020 (insn, extension)
 	store_mem (PARM2 + 4, 4, tz.tz_dsttime);
 	break;
       }
+#ifdef SYS_utime
     case SYS_utime:
       /* Cast the second argument to void *, to avoid type mismatch
 	 if a prototype is present.  */
       RETVAL = utime (MEMPTR (PARM1), (void *) MEMPTR (PARM2));
       break;
+#endif
     default:
       abort ();
     }

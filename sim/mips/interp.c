@@ -75,6 +75,7 @@ code on the hardware.
 #endif
 
 char* pr_addr PARAMS ((SIM_ADDR addr));
+char* pr_uword64 PARAMS ((uword64 addr));
 
 #ifndef SIGBUS
 #define SIGBUS SIGSEGV
@@ -460,7 +461,6 @@ static void LoadMemory PARAMS((uword64*memvalp,uword64*memval1p,int CCA,int Acce
 static void SignalException PARAMS((int exception,...));
 static void simulate PARAMS((void));
 static long getnum PARAMS((char *value));
-extern void sim_size PARAMS((unsigned int newsize));
 extern void sim_set_profile PARAMS((int frequency));
 static unsigned int power2 PARAMS((unsigned int value));
 
@@ -653,7 +653,8 @@ static fnptr_swap_long host_swap_long;
 /*---------------------------------------------------------------------------*/
 
 SIM_DESC
-sim_open (argv)
+sim_open (kind,argv)
+     SIM_OPEN_KIND kind;
      char **argv;
 {
   if (callback == NULL) {
@@ -744,6 +745,9 @@ sim_open (argv)
     };
 
     for (argc = 0; argv[argc]; argc++);
+
+    /* Ensure getopt is reset [don't know whether caller used it].  */
+    optind = 0;
 
     while (1) {
       int option_index = 0;
@@ -1657,7 +1661,7 @@ sim_set_profile_size (n)
 
 void
 sim_size(newsize)
-     unsigned int newsize;
+     int newsize;
 {
   char *new;
   /* Used by "run", and internally, to set the simulated memory size */
@@ -2682,7 +2686,7 @@ LoadMemory(memvalp,memval1p,CCA,AccessLength,pAddr,vAddr,IorD,raw)
 
 #ifdef DEBUG
       printf("DBG: LoadMemory() : (offset %d) : value = 0x%s%s\n",
-             (int)(pAddr & LOADDRMASK),pr_addr(value1),pr_addr(value));
+             (int)(pAddr & LOADDRMASK),pr_uword64(value1),pr_uword64(value));
 #endif /* DEBUG */
 
       /* TODO: We could try and avoid the shifts when dealing with raw
@@ -2700,7 +2704,7 @@ LoadMemory(memvalp,memval1p,CCA,AccessLength,pAddr,vAddr,IorD,raw)
 
 #ifdef DEBUG
       printf("DBG: LoadMemory() : shifted value = 0x%s%s\n",
-             pr_addr(value1),pr_addr(value));
+             pr_uword64(value1),pr_uword64(value));
 #endif /* DEBUG */
     }
   }
@@ -2733,7 +2737,7 @@ StoreMemory(CCA,AccessLength,MemElem,MemElem1,pAddr,vAddr,raw)
      int raw;
 {
 #ifdef DEBUG
-  callback->printf_filtered(callback,"DBG: StoreMemory(%d,%d,0x%s,0x%s,0x%s,0x%s,%s)\n",CCA,AccessLength,pr_addr(MemElem),pr_addr(MemElem1),pr_addr(pAddr),pr_addr(vAddr),(raw ? "isRAW" : "isREAL"));
+  callback->printf_filtered(callback,"DBG: StoreMemory(%d,%d,0x%s,0x%s,0x%s,0x%s,%s)\n",CCA,AccessLength,pr_uword64(MemElem),pr_uword64(MemElem1),pr_addr(pAddr),pr_addr(vAddr),(raw ? "isRAW" : "isREAL"));
 #endif /* DEBUG */
 
 #if defined(WARN_MEM)
@@ -2772,7 +2776,7 @@ StoreMemory(CCA,AccessLength,MemElem,MemElem1,pAddr,vAddr,raw)
       int shift = 0;
 
 #ifdef DEBUG
-      printf("DBG: StoreMemory: offset = %d MemElem = 0x%s%s\n",(unsigned int)(pAddr & LOADDRMASK),pr_addr(MemElem1),pr_addr(MemElem));
+      printf("DBG: StoreMemory: offset = %d MemElem = 0x%s%s\n",(unsigned int)(pAddr & LOADDRMASK),pr_uword64(MemElem1),pr_uword64(MemElem));
 #endif /* DEBUG */
 
       if (AccessLength <= AccessLength_DOUBLEWORD) {
@@ -2790,7 +2794,7 @@ StoreMemory(CCA,AccessLength,MemElem,MemElem1,pAddr,vAddr,raw)
       }
 
 #ifdef DEBUG
-      printf("DBG: StoreMemory: shift = %d MemElem = 0x%s%s\n",shift,pr_addr(MemElem1),pr_addr(MemElem));
+      printf("DBG: StoreMemory: shift = %d MemElem = 0x%s%s\n",shift,pr_uword64(MemElem1),pr_uword64(MemElem));
 #endif /* DEBUG */
 
       if (BigEndianMem) {
@@ -4527,6 +4531,17 @@ pr_addr(addr)
     }
   return paddr_str;
 }
+
+char* 
+pr_uword64(addr)
+  uword64 addr;
+{
+  char *paddr_str=get_cell();
+  sprintf(paddr_str,"%08x%08x",
+          (unsigned long)(addr>>thirty_two),(unsigned long)(addr&0xffffffff));
+  return paddr_str;
+}
+
 
 /*---------------------------------------------------------------------------*/
 /*> EOF interp.c <*/
