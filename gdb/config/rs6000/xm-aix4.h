@@ -1,6 +1,6 @@
-/* Parameters for hosting on an PowerPC, for GDB, the GNU debugger.
-   Copyright 1995 Free Software Foundation, Inc.
-   Contributed by Cygnus Corporation.
+/* Parameters for hosting on an RS6000, for GDB, the GNU debugger.
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Contributed by IBM Corporation.
 
 This file is part of GDB.
 
@@ -16,9 +16,11 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "xm-aix4.h"
 
-/* This doesn't seem to be declared in any header file I can find.  */
-char *termdef PARAMS ((int, int));
+/* AIX 4.x uses nonstandard "int *" as type of third argument to ptrace() */
+
+#define PTRACE_ARG3_TYPE int*
+

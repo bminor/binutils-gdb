@@ -1,3 +1,11 @@
+Wed Jan 10 16:08:49 1996  Brendan Kehoe  <brendan@lisa.cygnus.com>
+
+	* configure.in, configure: Recognize rs6000-*-aix4*.
+	* config/powerpc/xm-aix.h: Reduce to include "xm-aix4.h".
+	* config/rs6000/aix4.mh (XM_FILE): Point to xm-aix4.h.
+	* config/rs6000/xm-aix4.h: New file.
+	* config/xm-aix4.h: New file.
+
 Wed Jan 10 11:25:37 1996  Fred Fish  <fnf@fishpond.amigalib.com>
 
 	From Wilfried Moser <wilfried.moser@aut.alcatel.at>:
