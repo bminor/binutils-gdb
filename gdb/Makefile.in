@@ -1,4 +1,5 @@
-# Copyright 1989, 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+# Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995
+# Free Software Foundation, Inc.
 
 # This file is part of GDB.
 
@@ -906,8 +907,8 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 
 ALLCONFIG = config/a29k/a29k-kern.mt config/a29k/a29k-udi.mt \
 	config/a29k/a29k.mt config/a29k/ultra3.mh config/a29k/ultra3.mt \
-	config/alpha/alpha-osf1.mh config/alpha/alpha-osf1.mt \
-	config/alpha/alpha-nw.mt \
+	config/alpha/alpha-osf1.mh config/alpha/alpha-osf2.mh \
+	config/alpha/alpha-osf1.mt config/alpha/alpha-nw.mt \
 	config/arm/arm.mh config/arm/arm.mt config/convex/convex.mh \
 	config/convex/convex.mt config/gould/np1.mh config/gould/np1.mt \
 	config/gould/pn.mh config/gould/pn.mt config/h8300/h8300hms.mt \

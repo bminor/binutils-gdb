@@ -1,5 +1,5 @@
 /* Machine independent support for SVR4 /proc (process file system) for GDB.
-   Copyright 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support.
 
 This file is part of GDB.
@@ -36,6 +36,8 @@ regardless of whether or not the actual target has floating point hardware.
 
 #include <sys/types.h>
 #include <time.h>
+#include <sys/fault.h>
+#include <sys/syscall.h>
 #include <sys/procfs.h>
 #include <fcntl.h>
 #include <errno.h>
@@ -1278,6 +1280,26 @@ unconditionally_kill_inferior (pi)
 
   signo = SIGKILL;
   ioctl (pi->fd, PIOCKILL, &signo);
+
+#ifdef PROCFS_NEED_PIOCSSIG_FOR_KILL
+  /* Alpha OSF/1 procfs needs an additional PIOCSSIG call with
+     a SIGKILL signal to kill the inferior, otherwise it might remain
+     stopped with a pending SIGKILL.
+     We do not check the result of the PIOCSSIG, the inferior might have
+     died already.  */
+  {
+    struct siginfo newsiginfo;
+
+    memset ((char *) &newsiginfo, 0, sizeof (newsiginfo));
+    newsiginfo.si_signo = signo;
+    newsiginfo.si_code = 0;
+    newsiginfo.si_errno = 0;
+    newsiginfo.si_pid = getpid ();
+    newsiginfo.si_uid = getuid ();
+    ioctl (pi->fd, PIOCSSIG, &newsiginfo);
+  }
+#endif
+
   close_proc_file (pi);
 
 /* Only wait() for our direct children.  Our grandchildren zombies are killed
@@ -1444,8 +1466,9 @@ create_procinfo (pid)
 {
   struct procinfo *pi;
 
-  if (find_procinfo (pid, 1))
-    return;			/* All done!  It already exists */
+  pi = find_procinfo (pid, 1);
+  if (pi != NULL)
+    return pi;			/* All done!  It already exists */
 
   pi = (struct procinfo *) xmalloc (sizeof (struct procinfo));
 
@@ -1464,6 +1487,14 @@ create_procinfo (pid)
   procfs_notice_signals (pid);
   prfillset (&pi->prrun.pr_fault);
   prdelset (&pi->prrun.pr_fault, FLTPAGE);
+
+#ifdef PROCFS_DONT_TRACE_IFAULT
+  /* Tracing T_IFAULT under Alpha OSF/1 causes a `floating point enable'
+     fault from which we cannot continue (except by disabling the
+     tracing). We rely on the delivery of a SIGTRAP signal (which is traced)
+     for the other T_IFAULT faults if tracing them is disabled.  */
+  prdelset (&pi->prrun.pr_fault, T_IFAULT);
+#endif
 
   if (ioctl (pi->fd, PIOCWSTOP, &pi->prstatus) < 0)
     proc_init_failed (pi, "PIOCWSTOP failed");
@@ -1509,8 +1540,12 @@ procfs_init_inferior (pid)
   create_procinfo (pid);
   add_thread (pid);		/* Setup initial thread */
 
+#ifdef START_INFERIOR_TRAPS_EXPECTED
+  startup_inferior (START_INFERIOR_TRAPS_EXPECTED);
+#else
   /* One trap to exec the shell, one to exec the program being debugged.  */
   startup_inferior (2);
+#endif
 }
 
 /*
@@ -1615,6 +1650,27 @@ proc_set_exec_trap ()
   premptyset (&exitset);
   premptyset (&entryset);
 
+#ifdef PIOCSSPCACT
+  /* Under Alpha OSF/1 we have to use a PIOCSSPCACT ioctl to trace
+     exits from exec system calls because of the user level loader.  */
+  {
+    int prfs_flags;
+
+    if (ioctl (fd, PIOCGSPCACT, &prfs_flags) < 0)
+      {
+	perror (procname);
+	gdb_flush (gdb_stderr);
+	_exit (127);
+      }
+    prfs_flags |= PRFS_STOPEXEC;
+    if (ioctl (fd, PIOCSSPCACT, &prfs_flags) < 0)
+      {
+	perror (procname);
+	gdb_flush (gdb_stderr);
+	_exit (127);
+      }
+  }
+#else
   /* GW: Rationale...
      Not all systems with /proc have all the exec* syscalls with the same
      names.  On the SGI, for example, there is no SYS_exec, but there
@@ -1636,6 +1692,7 @@ proc_set_exec_trap ()
       gdb_flush (gdb_stderr);
       _exit (127);
     }
+#endif
 
   praddset (&entryset, SYS_exit);
 
@@ -2037,6 +2094,15 @@ do_attach (pid)
   procfs_notice_signals (pid);
   prfillset (&pi->prrun.pr_fault);
   prdelset (&pi->prrun.pr_fault, FLTPAGE);
+
+#ifdef PROCFS_DONT_TRACE_IFAULT
+  /* Tracing T_IFAULT under Alpha OSF/1 causes a `floating point enable'
+     fault from which we cannot continue (except by disabling the
+     tracing). We rely on the delivery of a SIGTRAP signal (which is traced)
+     for the other T_IFAULT faults if tracing them is disabled.  */
+  prdelset (&pi->prrun.pr_fault, T_IFAULT);
+#endif
+
   if (ioctl (pi->fd, PIOCSFAULT, &pi->prrun.pr_fault))
     {
       print_sys_errmsg ("PIOCSFAULT failed", errno);
@@ -2128,6 +2194,11 @@ do_detach (signal)
 	  if (signal || !pi->was_stopped ||
 	      query ("Was stopped when attached, make it runnable again? "))
 	    {
+	      /* Clear any pending signal if we want to detach without
+		 a signal.  */
+	      if (signal == 0)
+		set_proc_siginfo (pi, signal);
+
 	      /* Clear any fault that might have stopped it.  */
 	      if (ioctl (pi->fd, PIOCCFAULT, 0))
 		{
@@ -2474,6 +2545,14 @@ set_proc_siginfo (pip, signo)
 {
   struct siginfo newsiginfo;
   struct siginfo *sip;
+
+#ifdef PROCFS_DONT_PIOCSSIG_CURSIG
+  /* With Alpha OSF/1 procfs, the kernel gets really confused if it
+     receives a PIOCSSSIG with a signal identical to the current signal,
+     it messes up the current signal. Work around the kernel bug.  */
+  if (signo == pip -> prstatus.pr_cursig)
+    return;
+#endif
 
   if (signo == pip -> prstatus.pr_info.si_signo)
     {
@@ -3142,9 +3221,19 @@ info_proc_signals (pip, summary)
 	  printf_filtered ("%-8s ",
 			   prismember (&pip -> prstatus.pr_sighold, signo)
 			   ? "on" : "off");
+
+#ifdef PROCFS_SIGPEND_OFFSET
+	  /* Alpha OSF/1 numbers the pending signals from 1.  */
+	  printf_filtered ("%-8s ",
+			   (signo ? prismember (&pip -> prstatus.pr_sigpend,
+						signo - 1)
+				  : 0)
+			   ? "yes" : "no");
+#else
 	  printf_filtered ("%-8s ",
 			   prismember (&pip -> prstatus.pr_sigpend, signo)
 			   ? "yes" : "no");
+#endif
 	  printf_filtered (" %s\n", safe_strsignal (signo));
 	}
       printf_filtered ("\n");
@@ -3193,7 +3282,11 @@ info_proc_mappings (pip, summary)
   if (!summary)
     {
       printf_filtered ("Mapped address spaces:\n\n");
+#ifdef BFD_HOST_64_BIT
+      printf_filtered ("  %18s %18s %10s %10s %7s\n",
+#else
       printf_filtered ("\t%10s %10s %10s %10s %7s\n",
+#endif
 		       "Start Addr",
 		       "  End Addr",
 		       "      Size",
@@ -3206,9 +3299,14 @@ info_proc_mappings (pip, summary)
 	    {
 	      for (prmap = prmaps; prmap -> pr_size; ++prmap)
 		{
-		  printf_filtered ("\t%#10x %#10x %#10x %#10x %7s\n",
-				   prmap -> pr_vaddr,
-				   prmap -> pr_vaddr + prmap -> pr_size - 1,
+#ifdef BFD_HOST_64_BIT
+		  printf_filtered ("  %#18lx %#18lx %#10x %#10x %7s\n",
+#else
+		  printf_filtered ("\t%#10lx %#10lx %#10x %#10x %7s\n",
+#endif
+				   (unsigned long)prmap -> pr_vaddr,
+				   (unsigned long)prmap -> pr_vaddr
+				     + prmap -> pr_size - 1,
 				   prmap -> pr_size,
 				   prmap -> pr_off,
 				   mappingflags (prmap -> pr_mflags));
@@ -3663,7 +3761,7 @@ procfs_stopped_by_watchpoint(pid)
    killpg() instead of kill (-pgrp). */
 
 void
-child_stop ()
+procfs_stop ()
 {
   extern pid_t inferior_process_group;
 
@@ -3700,7 +3798,7 @@ struct target_ops procfs_ops = {
   procfs_mourn_inferior,	/* to_mourn_inferior */
   procfs_can_run,		/* to_can_run */
   procfs_notice_signals,	/* to_notice_signals */
-  child_stop,			/* to_stop */
+  procfs_stop,			/* to_stop */
   process_stratum,		/* to_stratum */
   0,				/* to_next */
   1,				/* to_has_all_memory */
@@ -3716,6 +3814,19 @@ struct target_ops procfs_ops = {
 void
 _initialize_procfs ()
 {
+#ifdef HAVE_OPTIONAL_PROC_FS
+  char procname[32];
+  int fd;
+
+  /* If we have an optional /proc filesystem (e.g. under OSF/1),
+     don't add procfs support if we cannot access the running
+     GDB via /proc.  */
+  sprintf (procname, PROC_NAME_FMT, getpid ());
+  if ((fd = open (procname, O_RDONLY)) < 0)
+    return;
+  close (fd);
+#endif
+
   add_target (&procfs_ops);
 
   add_info ("proc", info_proc, 

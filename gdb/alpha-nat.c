@@ -1,5 +1,5 @@
 /* Low level Alpha interface, for GDB when running native.
-   Copyright 1993 Free Software Foundation, Inc.
+   Copyright 1993, 1995 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -142,3 +142,74 @@ register_addr (regno, blockend)
 {
   return REGISTER_PTRACE_ADDR (regno);
 }
+
+#ifdef USE_PROC_FS
+#include <sys/procfs.h>
+
+/*
+ * See the comment in m68k-tdep.c regarding the utility of these functions.
+ */
+
+void 
+supply_gregset (gregsetp)
+     gregset_t *gregsetp;
+{
+  register int regi;
+  register long *regp = gregsetp->regs;
+
+  for (regi = 0; regi < 31; regi++)
+    supply_register (regi, (char *)(regp + regi));
+
+  supply_register (PC_REGNUM, (char *)(regp + 31));
+}
+
+void
+fill_gregset (gregsetp, regno)
+     gregset_t *gregsetp;
+     int regno;
+{
+  int regi;
+  register long *regp = gregsetp->regs;
+
+  for (regi = 0; regi < 31; regi++)
+    if ((regno == -1) || (regno == regi))
+      *(regp + regi) = *(long *) &registers[REGISTER_BYTE (regi)];
+
+  if ((regno == -1) || (regno == PC_REGNUM))
+    *(regp + 31) = *(long *) &registers[REGISTER_BYTE (PC_REGNUM)];
+}
+
+/*
+ * Now we do the same thing for floating-point registers.
+ * Again, see the comments in m68k-tdep.c.
+ */
+
+void
+supply_fpregset (fpregsetp)
+     fpregset_t *fpregsetp;
+{
+  register int regi;
+  register long *regp = fpregsetp->regs;
+
+  for (regi = 0; regi < 32; regi++)
+    supply_register (regi + FP0_REGNUM, (char *)(regp + regi));
+}
+
+void
+fill_fpregset (fpregsetp, regno)
+     fpregset_t *fpregsetp;
+     int regno;
+{
+  int regi;
+  register long *regp = fpregsetp->regs;
+
+  for (regi = FP0_REGNUM; regi < FP0_REGNUM + 32; regi++)
+    {
+      if ((regno == -1) || (regno == regi))
+	{
+	  *(regp + regi - FP0_REGNUM) =
+	    *(long *) &registers[REGISTER_BYTE (regi)];
+	}
+    }
+}
+#endif

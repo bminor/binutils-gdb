@@ -1,6 +1,14 @@
 		What has changed since GDB-3.5?
 		(Organized release by release)
 
+* Alpha OSF/1 support for procfs
+
+GDB now supports procfs under OSF/1-2.x and higher, which makes it
+possible to attach to running processes.  As the mounting of the /proc
+filesystem is optional on the Alpha, GDB automatically determines
+the availability of /proc during startup.  This can lead to problems
+if /proc is unmounted after GDB has been started.
+
 * User commands may accept up to 10 arguments separated by whitespace.
 Arguments are accessed within the user command via $arg0..$arg0.
 A trivial example:
