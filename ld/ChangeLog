@@ -1,3 +1,8 @@
+Thu Feb  8 19:25:54 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldlang.c (lang_size_sections): Increment the section size when a
+	padding statement is encountered.
+
 Wed Feb  7 14:01:33 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Look for --enable-shared.  Change the value of

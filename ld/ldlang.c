@@ -34,9 +34,6 @@ the Free Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307
 #include "ldfile.h"
 
 /* FORWARDS */
-static void print_statements PARAMS ((void));
-static void print_statement PARAMS ((lang_statement_union_type *,
-				      lang_output_section_statement_type *));
 static lang_statement_union_type *new_statement PARAMS ((enum statement_enum,
 							 size_t,
 							 lang_statement_list_type*));
@@ -112,6 +109,8 @@ static void print_group
   PARAMS ((lang_group_statement_type *, lang_output_section_statement_type *));
 static void print_statement PARAMS ((lang_statement_union_type *s,
 				     lang_output_section_statement_type *os));
+static void print_statement_list PARAMS ((lang_statement_union_type *s,
+					  lang_output_section_statement_type *os));
 static void print_statements PARAMS ((void));
 static bfd_vma insert_pad PARAMS ((lang_statement_union_type **this_ptr,
 				   fill_type fill, unsigned int power,
@@ -1266,8 +1265,8 @@ print_output_section_statement (output_section_statement)
   
     print_nl ();
   }
-  print_statement (output_section_statement->children.head,
-		   output_section_statement);
+  print_statement_list (output_section_statement->children.head,
+			output_section_statement);
 
 }
 
@@ -1425,7 +1424,11 @@ print_data_statement (data)
   print_space ();
 /*  ASSERT(print_dot == data->output_vma);*/
 
-  print_address (data->output_vma + data->output_section->vma);
+  /* data->output_section may be NULL if called from gdb.  */
+  if (data->output_section)
+    print_address (data->output_vma + data->output_section->vma);
+  else
+    print_address (data->output_vma);
   print_space ();
   print_address (data->value);
   print_space ();
@@ -1467,7 +1470,11 @@ print_reloc_statement (reloc)
 
 /*  ASSERT(print_dot == data->output_vma);*/
 
-  print_address (reloc->output_vma + reloc->output_section->vma);
+  /* reloc->output_section may be NULL if called from gdb.  */
+  if (reloc->output_section)
+    print_address (reloc->output_vma + reloc->output_section->vma);
+  else
+    print_address (reloc->output_vma);
   print_space ();
   print_address (reloc->addend_value);
   print_space ();
@@ -1489,15 +1496,21 @@ print_padding_statement (s)
   print_space ();
   print_section ("*fill*");
   print_space ();
-  print_address (s->output_offset + s->output_section->vma);
+  /* s->output_section may be NULL if called from gdb.  */
+  if (s->output_section)
+    print_address (s->output_offset + s->output_section->vma);
+  else
+    print_address (s->output_offset);
   print_space ();
   print_size (s->size);
   print_space ();
   print_fill (s->fill);
   print_nl ();
 
-  print_dot = s->output_offset + s->output_section->vma + s->size;
-
+  print_dot = s->output_offset + s->size;
+  /* s->output_section may be NULL if called from gdb.  */
+  if (s->output_section)
+    print_dot += s->output_section->vma;
 }
 
 static void
@@ -1523,7 +1536,7 @@ print_wild_statement (w, os)
       fprintf (config.map_file, "(*)");
     }
   print_nl ();
-  print_statement (w->children.head, os);
+  print_statement_list (w->children.head, os);
 
 }
 
@@ -1535,77 +1548,91 @@ print_group (s, os)
      lang_output_section_statement_type *os;
 {
   fprintf (config.map_file, "START GROUP\n");
-  print_statement (s->children.head, os);
+  print_statement_list (s->children.head, os);
   fprintf (config.map_file, "END GROUP\n");
 }
+
+/* Print the list of statements in S.
+   This can be called for any statement type.  */
+
+static void
+print_statement_list (s, os)
+     lang_statement_union_type * s;
+     lang_output_section_statement_type * os;
+{
+  while (s)
+    {
+      print_statement (s, os);
+      s = s->next;
+    }
+}
+
+/* Print the first statement in statement list S.
+   This can be called for any statement type.  */
 
 static void
 print_statement (s, os)
      lang_statement_union_type * s;
      lang_output_section_statement_type * os;
 {
-  while (s)
+  switch (s->header.type)
     {
-      switch (s->header.type)
-	{
-	  case lang_constructors_statement_enum:
-	  fprintf (config.map_file, "constructors:\n");
-	  print_statement (constructor_list.head, os);
-	  break;
-	case lang_wild_statement_enum:
-	  print_wild_statement (&s->wild_statement, os);
-	  break;
-	default:
-	  fprintf (config.map_file, "Fail with %d\n", s->header.type);
-	  FAIL ();
-	  break;
-	case lang_address_statement_enum:
-	  fprintf (config.map_file, "address\n");
-	  break;
-	case lang_object_symbols_statement_enum:
-	  fprintf (config.map_file, "object symbols\n");
-	  break;
-	case lang_fill_statement_enum:
-	  print_fill_statement (&s->fill_statement);
-	  break;
-	case lang_data_statement_enum:
-	  print_data_statement (&s->data_statement);
-	  break;
-	case lang_reloc_statement_enum:
-	  print_reloc_statement (&s->reloc_statement);
-	  break;
-	case lang_input_section_enum:
-	  print_input_section (&s->input_section);
-	  break;
-	case lang_padding_statement_enum:
-	  print_padding_statement (&s->padding_statement);
-	  break;
-	case lang_output_section_statement_enum:
-	  print_output_section_statement (&s->output_section_statement);
-	  break;
-	case lang_assignment_statement_enum:
-	  print_assignment (&s->assignment_statement,
-			    os);
-	  break;
-	case lang_target_statement_enum:
-	  fprintf (config.map_file, "TARGET(%s)\n", s->target_statement.target);
-	  break;
-	case lang_output_statement_enum:
-	  fprintf (config.map_file, "OUTPUT(%s %s)\n",
-		   s->output_statement.name,
-		   output_target ? output_target : "");
-	  break;
-	case lang_input_statement_enum:
-	  print_input_statement (&s->input_statement);
-	  break;
-	case lang_group_statement_enum:
-	  print_group (&s->group_statement, os);
-	  break;
-	case lang_afile_asection_pair_statement_enum:
-	  FAIL ();
-	  break;
-	}
-      s = s->next;
+    case lang_constructors_statement_enum:
+      fprintf (config.map_file, "constructors:\n");
+      print_statement_list (constructor_list.head, os);
+      break;
+    case lang_wild_statement_enum:
+      print_wild_statement (&s->wild_statement, os);
+      break;
+    default:
+      fprintf (config.map_file, "Fail with %d\n", s->header.type);
+      FAIL ();
+      break;
+    case lang_address_statement_enum:
+      fprintf (config.map_file, "address\n");
+      break;
+    case lang_object_symbols_statement_enum:
+      fprintf (config.map_file, "object symbols\n");
+      break;
+    case lang_fill_statement_enum:
+      print_fill_statement (&s->fill_statement);
+      break;
+    case lang_data_statement_enum:
+      print_data_statement (&s->data_statement);
+      break;
+    case lang_reloc_statement_enum:
+      print_reloc_statement (&s->reloc_statement);
+      break;
+    case lang_input_section_enum:
+      print_input_section (&s->input_section);
+      break;
+    case lang_padding_statement_enum:
+      print_padding_statement (&s->padding_statement);
+      break;
+    case lang_output_section_statement_enum:
+      print_output_section_statement (&s->output_section_statement);
+      break;
+    case lang_assignment_statement_enum:
+      print_assignment (&s->assignment_statement,
+			os);
+      break;
+    case lang_target_statement_enum:
+      fprintf (config.map_file, "TARGET(%s)\n", s->target_statement.target);
+      break;
+    case lang_output_statement_enum:
+      fprintf (config.map_file, "OUTPUT(%s %s)\n",
+	       s->output_statement.name,
+	       output_target ? output_target : "");
+      break;
+    case lang_input_statement_enum:
+      print_input_statement (&s->input_statement);
+      break;
+    case lang_group_statement_enum:
+      print_group (&s->group_statement, os);
+      break;
+    case lang_afile_asection_pair_statement_enum:
+      FAIL ();
+      break;
     }
 }
 
@@ -1613,9 +1640,37 @@ print_statement (s, os)
 static void
 print_statements ()
 {
-  print_statement (statement_list.head,
+  print_statement_list (statement_list.head,
 		   abs_output_section);
 
+}
+
+/* Print the first N statements in statement list S to STDERR.
+   If N == 0, nothing is printed.
+   If N < 0, the entire list is printed.
+   Intended to be called from GDB.  */
+
+void
+dprint_statement (s, n)
+     lang_statement_union_type * s;
+     int n;
+{
+  FILE *map_save = config.map_file;
+
+  config.map_file = stderr;
+
+  if (n < 0)
+    print_statement_list (s, abs_output_section);
+  else
+    {
+      while (--n >= 0)
+	{
+	  print_statement (s, abs_output_section);
+	  s = s->next;
+	}
+    }
+
+  config.map_file = map_save;
 }
 
 static bfd_vma
@@ -2010,6 +2065,8 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
      s->padding_statement.output_offset =
        dot - output_section_statement->bfd_section->vma;
      dot += s->padding_statement.size;
+     output_section_statement->bfd_section->_raw_size +=
+       s->padding_statement.size;
      break;
 
      case lang_group_statement_enum:
@@ -3127,11 +3184,13 @@ lang_leave_group ()
    command in a linker script.  */
 
 void
-lang_new_phdr (name, type, hdrs, at)
+lang_new_phdr (name, type, filehdr, phdrs, at, flags)
      const char *name;
      etree_type *type;
-     unsigned int hdrs;
+     boolean filehdr;
+     boolean phdrs;
      etree_type *at;
+     etree_type *flags;
 {
   struct lang_phdr *n, **pp;
 
@@ -3140,8 +3199,10 @@ lang_new_phdr (name, type, hdrs, at)
   n->name = name;
   n->type = exp_get_value_int (type, 0, "program header type",
 			       lang_final_phase_enum);
-  n->hdrs = hdrs;
+  n->filehdr = filehdr;
+  n->phdrs = phdrs;
   n->at = at;
+  n->flags = flags;
 
   for (pp = &lang_phdr_list; *pp != NULL; pp = &(*pp)->next)
     ;
@@ -3182,6 +3243,7 @@ lang_record_phdrs ()
   for (l = lang_phdr_list; l != NULL; l = l->next)
     {
       unsigned int c;
+      flagword flags;
       bfd_vma at;
 
       c = 0;
@@ -3194,7 +3256,7 @@ lang_record_phdrs ()
 
 	  os = &u->output_section_statement;
 
-	  pl =  os->phdrs;
+	  pl = os->phdrs;
 	  if (pl != NULL)
 	    last = pl;
 	  else
@@ -3225,17 +3287,23 @@ lang_record_phdrs ()
 	    }
 	}
 
+      if (l->flags == NULL)
+	flags = 0;
+      else
+	flags = exp_get_vma (l->flags, 0, "phdr flags",
+			     lang_final_phase_enum);
+
       if (l->at == NULL)
 	at = 0;
       else
 	at = exp_get_vma (l->at, 0, "phdr load address",
 			  lang_final_phase_enum);
-      if (! bfd_record_phdr (output_bfd, l->type, false, 0,
+
+      if (! bfd_record_phdr (output_bfd, l->type,
+			     l->flags == NULL ? false : true,
+			     flags,
 			     l->at == NULL ? false : true,
-			     at,
-			     (l->hdrs & LANG_PHDR_FILEHDR) ? true : false,
-			     (l->hdrs & LANG_PHDR_PHDRS) ? true : false,
-			     c, secs))
+			     at, l->filehdr, l->phdrs, c, secs))
 	einfo ("%F%P: bfd_record_phdr failed: %E\n");
     }
 
