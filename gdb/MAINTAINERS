@@ -5,6 +5,7 @@
 			   (alphabetic)
 
 Jim Blandy			jimb@redhat.com
+Kevin Buettner			kevinb@redhat.com
 Andrew Cagney			ac131313@redhat.com
 J.T. Conklin			jtc@redback.com
 Fred Fish			fnf@ninemoons.com
@@ -12,6 +13,8 @@ Mark Kettenis           	kettenis@gnu.org
 Peter Schauer			Peter.Schauer@regent.e-technik.tu-muenchen.de
 Stan Shebs			shebs@apple.com
 Michael Snyder			msnyder@redhat.com
+Elena Zannoni			ezannoni@redhat.com
+Eli Zaretskii			eliz@gnu.org
 
 
 			Various Maintainers
