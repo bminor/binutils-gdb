@@ -1,3 +1,8 @@
+Wed Apr 24 14:22:21 2002  Andrew Cagney  <cagney@redhat.com>
+
+	* arm-tdep.c (arm_gdbarch_init): Add comment that NUM_REGS nor
+ 	NUM_PSEUDO_REGS can be used.
+
 2002-04-24  Andrew Cagney  <ac131313@redhat.com>
 
 	* arch-utils.h: Update copyright.
