@@ -1,3 +1,15 @@
+Fri Oct 20 18:02:10 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* cfg-ml-com.in (powerpc*-eabi*): Add mcall-aixdesc varients.
+
+Thu Oct 19 10:40:57 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* configure.in (i[345]86-*-win32): Always build newlib.
+	Don't configure cvs, autoconf or texinfo.
+	* Makefile.in (LD_FOR_TARGET): New.
+	(BASE_FLAGS_TO_PASS, EXTRA_TARGET_FLAGS, CONFIGURE_TARGET_MODULES):
+	Pass down LD_FOR_TARGET.
+
 Wed Oct 18 15:53:56 1995  steve chamberlain  <sac@slash.cygnus.com>
 
 	* winsup. New directory.
