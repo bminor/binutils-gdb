@@ -1438,7 +1438,6 @@ bfd_preserve_save (abfd, preserve)
   preserve->tdata = abfd->tdata.any;
   preserve->arch_info = abfd->arch_info;
   preserve->flags = abfd->flags;
-
   preserve->sections = abfd->sections;
   preserve->section_tail = abfd->section_tail;
   preserve->section_count = abfd->section_count;
@@ -1449,8 +1448,7 @@ bfd_preserve_save (abfd, preserve)
 
   abfd->tdata.any = NULL;
   abfd->arch_info = &bfd_default_arch_struct;
-  abfd->flags = 0;
-
+  abfd->flags &= BFD_IN_MEMORY;
   abfd->sections = NULL;
   abfd->section_tail = &abfd->sections;
   abfd->section_count = 0;
@@ -1482,7 +1480,6 @@ bfd_preserve_restore (abfd, preserve)
   abfd->tdata.any = preserve->tdata;
   abfd->arch_info = preserve->arch_info;
   abfd->flags = preserve->flags;
-
   abfd->section_htab = preserve->section_htab;
   abfd->sections = preserve->sections;
   abfd->section_tail = preserve->section_tail;
