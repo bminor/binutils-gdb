@@ -102,12 +102,10 @@ Thu Apr 21 12:12:26 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 	each section in the sections header.
 
 Wed Apr 20 14:34:51 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
-start-sanitize-powerpc-netware
 
 	* nlmconv.c (powerpc_build_stubs): Take new outbfd argument.
 	Change caller.  Create custom header for new PowerPC NetWare
 	format.
-end-sanitize-powerpc-netware
 
 	* Makefile.in (nlmheader.o, nlmconv.o): Update dependencies.
 	* nlmconv.c: Include bfd.h and libiberty.h with "", not <>.
@@ -249,7 +247,6 @@ Thu Mar 17 16:20:28 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 	(NM_PROG): Change from nm to nm.new.
 	(install): Remove the .new when installing.
 
-start-sanitize-powerpc-netware
 Wed Mar 16 16:27:05 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* nlmconv.c (powerpc_build_stubs): Set BSF_DYNAMIC flag for each
@@ -257,7 +254,6 @@ Wed Mar 16 16:27:05 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 	(powerpc_mangle_relocs): Only reset TOC pointer for a call to a
 	symbol with BSF_DYNAMIC flag set.
 
-end-sanitize-powerpc-netware
 Tue Mar 15 23:04:13 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* objcopy.c (filter_symbols): Use bfd_is_local_label to determine
@@ -277,7 +273,6 @@ Mon Mar 14 12:11:01 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ar.c (write_archive): Close inarch before unlinking it.
 
-start-sanitize-powerpc-netware
 Fri Mar 11 22:20:48 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* nlmconv.c (main): For PowerPC, call powerpc_build_stubs and
@@ -292,7 +287,6 @@ Fri Mar 11 22:20:48 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 	Rearrange reloc handling to handle ELF relocs that are not
 	partial_inplace.  Resolve PC relative relocs.
 
-end-sanitize-powerpc-netware
 Wed Mar  9 13:48:11 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 	* ar.c (move_members): Fix it so that the abi positional modifiers
@@ -322,14 +316,13 @@ Tue Feb 22 18:25:52 1994  Ian Lance Taylor  (ian@cygnus.com)
 Sun Feb 20 18:47:42 1994  Ian Lance Taylor  (ian@lisa.cygnus.com)
 
 	* nlmconv.c: Include libiberty.h.
-start-sanitize-powerpc-netware
+
 	Support for PowerPC NetWare.
 	* nlmconv.c (main): For PowerPC NetWare, automatically define the
 	special symbols __toc_start.
 	(select_output_format): Handle bfd_arch_powerpc.
 	(mangle_relocs): Likewise.
 	(powerpc_mangle_relocs): New function.
-end-sanitize-powerpc-netware
 
 Thu Feb 17 09:28:23 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 

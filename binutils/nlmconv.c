@@ -138,13 +138,11 @@ static void i386_mangle_relocs PARAMS ((bfd *, asection *, arelent ***,
 static void alpha_mangle_relocs PARAMS ((bfd *, asection *, arelent ***,
 					 long *, char *,
 					 bfd_size_type));
-/* start-sanitize-powerpc-netware */
 static void powerpc_build_stubs PARAMS ((bfd *, bfd *, asymbol ***, long *));
 static void powerpc_resolve_stubs PARAMS ((bfd *, bfd *));
 static void powerpc_mangle_relocs PARAMS ((bfd *, asection *, arelent ***,
 					   long *, char *,
 					   bfd_size_type));
-/* end-sanitize-powerpc-netware */
 static void default_mangle_relocs PARAMS ((bfd *, asection *, arelent ***,
 					   long *, char *,
 					   bfd_size_type));
@@ -400,7 +398,6 @@ main (argc, argv)
     bfd_fatal ("make .nlmsections section");
   if (! bfd_set_section_flags (outbfd, secsec, SEC_HAS_CONTENTS))
     bfd_fatal ("set .nlmsections flags");
-/* start-sanitize-powerpc-netware */
 
   /* For PowerPC NetWare we need to build stubs for calls to undefined
      symbols.  Because each stub requires an entry in the TOC section
@@ -409,7 +406,6 @@ main (argc, argv)
      goes in setup_sections.  */
   if (bfd_get_arch (inbfd) == bfd_arch_powerpc)
     powerpc_build_stubs (inbfd, outbfd, &symbols, &symcount);
-/* end-sanitize-powerpc-netware */
 
   /* Set up the sections.  */
   bfd_map_over_sections (inbfd, setup_sections, (PTR) outbfd);
@@ -526,7 +522,7 @@ main (argc, argv)
 	      sym->section = bss_sec;
 	      endsym = sym;
 	    }
-/* start-sanitize-powerpc-netware */
+
 	  /* For PowerPC NetWare, we define __GOT0.  This is the start
 	     of the .got section.  */
 	  if (bfd_get_arch (inbfd) == bfd_arch_powerpc
@@ -539,7 +535,6 @@ main (argc, argv)
 	      sym->value = got_sec->output_offset;
 	      sym->section = got_sec->output_section;
 	    }
-/* end-sanitize-powerpc-netware */
  	}
 
       /* If this is a global symbol, check the export list.  */
@@ -881,12 +876,10 @@ main (argc, argv)
       nlm_version_header (outbfd)->year = ptm->tm_year + 1900;
       strncpy (version_hdr->stamp, "VeRsIoN#", 8);
     }
-/* start-sanitize-powerpc-netware */
 
   /* Resolve the stubs we build for PowerPC NetWare.  */
   if (bfd_get_arch (inbfd) == bfd_arch_powerpc)
     powerpc_resolve_stubs (inbfd, outbfd);
-/* end-sanitize-powerpc-netware */
 
   /* Copy over the sections.  */
   bfd_map_over_sections (inbfd, copy_sections, (PTR) outbfd);
@@ -1136,10 +1129,8 @@ select_output_format (arch, mach, bigendian)
       return "nlm32-sparc";
     case bfd_arch_alpha:
       return "nlm32-alpha";
-/* start-sanitize-powerpc-netware */
     case bfd_arch_powerpc:
       return "nlm32-powerpc";
-/* end-sanitize-powerpc-netware */
     default:
       fprintf (stderr, "%s: no default NLM format for %s\n",
 	       program_name, bfd_printable_arch_mach (arch, mach));
@@ -1282,11 +1273,11 @@ copy_sections (inbfd, insec, data_ptr)
 	  arelent **combined;
 
 	  total_count = reloc_count + outsec->reloc_count;
-	  combined = (arelent **) xmalloc (total_count * sizeof (arelent));
+	  combined = (arelent **) xmalloc (total_count * sizeof (arelent *));
 	  memcpy (combined, outsec->orelocation,
-		  outsec->reloc_count * sizeof (arelent));
+		  outsec->reloc_count * sizeof (arelent *));
 	  memcpy (combined + outsec->reloc_count, relocs,
-		  (size_t) (reloc_count * sizeof (arelent)));
+		  (size_t) (reloc_count * sizeof (arelent *)));
 	  free (outsec->orelocation);
 	  reloc_count = total_count;
 	  relocs = combined;
@@ -1355,12 +1346,10 @@ mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
       alpha_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr,
 			   contents, contents_size);
       break;
-/* start-sanitize-powerpc-netware */
     case bfd_arch_powerpc:
       powerpc_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr,
 			     contents, contents_size);
       break;
-/* end-sanitize-powerpc-netware */
     default:
       default_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr,
 			     contents, contents_size);
@@ -1646,7 +1635,6 @@ alpha_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
 	(*relocs)->address += insec->output_offset;
     }
 }
-/* start-sanitize-powerpc-netware */
 
 /* We keep a linked list of stubs which we must build.  Because BFD
    requires us to know the sizes of all sections before we can set the
@@ -1823,20 +1811,25 @@ powerpc_build_stubs (inbfd, outbfd, symbols_ptr, symcount_ptr)
 
   /* PowerPC NetWare requires a custom header.  We create it here.
      The first word is the header version number, currently 1.  The
-     second word is the timestamp of the input file.  */
+     second word is the timestamp of the input file.  Unfortunately,
+     they do not conform to the emergent standard for custom headers.
+     We must fake the version number and timestamp in the offset and
+     length fields.  */
   memcpy (nlm_custom_header (outbfd)->stamp, "CuStHeAd", 8);
-  nlm_custom_header (outbfd)->dataLength = 8;
-  nlm_custom_header (outbfd)->data = xmalloc (8);
-  bfd_h_put_32 (outbfd, (bfd_vma) 1,
-		(bfd_byte *) nlm_custom_header (outbfd)->data);
+  nlm_custom_header (outbfd)->hdrLength = 0;
+  /* Put version number in dataOffset field.  */
+  nlm_custom_header (outbfd)->dataOffset = 1;
+  /* Put timestamp in length field.  */
   {
     struct stat s;
 
     if (stat (bfd_get_filename (inbfd), &s) < 0)
       s.st_mtime = 0;
-    bfd_h_put_32 (outbfd, (bfd_vma) s.st_mtime,
-		  (bfd_byte *) nlm_custom_header (outbfd)->data + 4);
+    nlm_custom_header (outbfd)->dataLength = s.st_mtime;
   }
+  /* No data stamp.  */
+  memset (nlm_custom_header (outbfd)->dataStamp, 0,
+	  sizeof (nlm_custom_header (outbfd)->dataStamp));
 }
 
 /* Resolve all the stubs for PowerPC NetWare.  We fill in the contents
@@ -2058,7 +2051,6 @@ powerpc_mangle_relocs (outbfd, insec, relocs_ptr, reloc_count_ptr, contents,
       rel->address += insec->output_offset;
     }
 }
-/* end-sanitize-powerpc-netware */
 
 /* Name of linker.  */
 #ifndef LD_NAME
