@@ -3441,7 +3441,7 @@ pa_ip (str)
 	      if (strict && the_insn.exp.X_op != O_constant)
 		break;
 	      s = expr_end;
-	      CHECK_FIELD (num, 671108864, 0, strict);
+	      CHECK_FIELD (num, 67108863, 0, strict);
 	      INSERT_FIELD_AND_CONTINUE (opcode, num, 0);
 
 	    /* Handle a 3 bit SFU identifier at 25.  */
@@ -4461,7 +4461,7 @@ md_apply_fix (fixP, valp)
 
       /* Handle all the opcodes with the 'i' operand type.  */
     case 11:
-      CHECK_FIELD (new_val, 1023, -1023, 0);
+      CHECK_FIELD (new_val, 1023, -1024, 0);
       val = new_val;
 
       insn = (insn & ~ 0x7ff) | low_sign_unext (val, 11);
