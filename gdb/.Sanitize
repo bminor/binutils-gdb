@@ -263,6 +263,10 @@ inftarg.c
 irix4-nat.c
 irix5-nat.c
 isi-xdep.c
+java-exp.y
+java-lang.c
+java-lang.h
+java-valprint.c
 kdb-start.c
 language.c
 language.h
