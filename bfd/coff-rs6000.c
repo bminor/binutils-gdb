@@ -113,9 +113,6 @@ extern int rs6000coff_core_file_failing_signal PARAMS ((bfd *abfd));
 static const char *normalize_filename PARAMS ((bfd *));
 static boolean xcoff_write_armap_old
   PARAMS ((bfd *, unsigned int, struct orl *, unsigned int, int));
-static boolean xcoff_write_one_armap_big
-  PARAMS ((bfd *, struct orl *, unsigned int, unsigned int, unsigned int,
-	   int, const char *, char *));
 static boolean xcoff_write_armap_big
   PARAMS ((bfd *, unsigned int, struct orl *, unsigned int, int));
 static boolean xcoff_write_archive_contents_old PARAMS ((bfd *));
@@ -146,6 +143,9 @@ static bfd_vma xcoff_loader_symbol_offset
   PARAMS ((bfd *, struct internal_ldhdr *));
 static bfd_vma xcoff_loader_reloc_offset
   PARAMS ((bfd *, struct internal_ldhdr *));
+static boolean xcoff_generate_rtinit 
+  PARAMS((bfd *, const char *, const char *));
+
 
 /* We use our own tdata type.  Its first field is the COFF tdata type,
    so the COFF routines are compatible.  */
@@ -1462,7 +1462,7 @@ xcoff_write_armap_old (abfd, elength, map, orl_count, stridx)
   memset (&hdr, 0, sizeof hdr);
   sprintf (hdr.size, "%ld", (long) (4 + orl_count * 4 + stridx));
   sprintf (hdr.nextoff, "%d", 0);
-  memcpy (hdr.prevoff, xcoff_ardata (abfd)->memoff, 12);
+  memcpy (hdr.prevoff, xcoff_ardata (abfd)->memoff, XCOFFARMAG_ELEMENT_SIZE);
   sprintf (hdr.date, "%d", 0);
   sprintf (hdr.uid, "%d", 0);
   sprintf (hdr.gid, "%d", 0);
@@ -1531,127 +1531,31 @@ xcoff_write_armap_old (abfd, elength, map, orl_count, stridx)
   return true;
 }
 
-/* Write a single armap in the big format.  */
+static char buff20[XCOFFARMAGBIG_ELEMENT_SIZE + 1];
+#define FMT20  "%-20lld"
+#define FMT12  "%-12d"
+#define FMT12_OCTAL  "%-12o"
+#define FMT4  "%-4d"
+#define PRINT20(d, v) \
+  sprintf (buff20, FMT20, (long long)(v)), \
+  memcpy ((void *) (d), buff20, 20)
 
-static boolean
-xcoff_write_one_armap_big (abfd, map, orl_count, orl_ccount, stridx, bits64,
-			   prevoff, nextoff)
-     bfd *abfd;
-     struct orl *map;
-     unsigned int orl_count;
-     unsigned int orl_ccount;
-     unsigned int stridx;
-     int bits64;
-     const char *prevoff;
-     char *nextoff;
-{
-  struct xcoff_ar_hdr_big hdr;
-  char *p;
-  unsigned char buf[4];
-  bfd *sub;
-  file_ptr fileoff;
-  const bfd_arch_info_type *arch_info = NULL;
-  bfd *object_bfd;
-  unsigned int i;
+#define PRINT12(d, v) \
+  sprintf (buff20, FMT12, (int)(v)), \
+  memcpy ((void *) (d), buff20, 12) 
 
-  memset (&hdr, 0, sizeof hdr);
-  /* XXX This call actually should use %lld (at least on 32-bit
-     machines) since the fields's width is 20 and there numbers with
-     more than 32 bits can be represented.  */
-  sprintf (hdr.size, "%ld", (long) (4 + orl_ccount * 4 + stridx));
-  if (bits64)
-    {
-      sprintf (hdr.nextoff, "%d", 0);
-    }
-  else
-    {
-      /* Do explict cast to long to remove compiler warning.  */
-      sprintf (hdr.nextoff, "%ld", (strtol (prevoff, (char **) NULL, 10)
-				    + (long) (4 + orl_ccount * 4 + stridx)));
-    }
+#define PRINT12_OCTAL(d, v) \
+  sprintf (buff20, FMT12_OCTAL, (unsigned int)(v)), \
+  memcpy ((void *) (d), buff20, 12)
 
-  memcpy (hdr.prevoff, prevoff, sizeof (hdr.prevoff));
-  sprintf (hdr.date, "%d", 0);
-  sprintf (hdr.uid, "%d", 0);
-  sprintf (hdr.gid, "%d", 0);
-  sprintf (hdr.mode, "%d", 0);
-  sprintf (hdr.namlen, "%d", 0);
+#define PRINT4(d, v) \
+  sprintf (buff20, FMT4, (int)(v)), \
+  memcpy ((void *) (d), buff20, 4) 
 
-  /* We need spaces, not null bytes, in the header.  */
-  for (p = (char *) &hdr; p < (char *) &hdr + SIZEOF_AR_HDR_BIG; p++)
-    if (*p == '\0')
-      *p = ' ';
-
-  memcpy (nextoff, hdr.nextoff, sizeof (hdr.nextoff));
-
-  if ((bfd_bwrite ((PTR) &hdr, (bfd_size_type) SIZEOF_AR_HDR_BIG, abfd)
-       != SIZEOF_AR_HDR_BIG)
-      || (bfd_bwrite (XCOFFARFMAG, (bfd_size_type) SXCOFFARFMAG, abfd)
-	  != SXCOFFARFMAG))
-    return false;
-
-  H_PUT_32 (abfd, orl_ccount, buf);
-  if (bfd_bwrite (buf, (bfd_size_type) 4, abfd) != 4)
-    return false;
-
-  sub = abfd->archive_head;
-  fileoff = SIZEOF_AR_FILE_HDR_BIG;
-  i = 0;
-  while (sub != NULL && i < orl_count)
-    {
-      size_t namlen;
-
-      if ((bfd_arch_bits_per_address (map[i].u.abfd) == 64) == bits64)
-	while (map[i].u.abfd == sub)
-	  {
-	    H_PUT_32 (abfd, fileoff, buf);
-	    if (bfd_bwrite (buf, (bfd_size_type) 4, abfd) != 4)
-	      return false;
-	    i++;
-	  }
-      else
-	while (map[i].u.abfd == sub)
-	  i++;
-
-      namlen = strlen (normalize_filename (sub));
-      namlen = (namlen + 1) &~ (size_t) 1;
-      fileoff += (SIZEOF_AR_HDR_BIG
-		  + namlen
-		  + SXCOFFARFMAG
-		  + arelt_size (sub));
-      fileoff = (fileoff + 1) &~ 1;
-      sub = sub->next;
-    }
-
-  object_bfd = NULL;
-  for (i = 0; i < orl_count; i++)
-    {
-      const char *name;
-      size_t namlen;
-      bfd *ob = map[i].u.abfd;
-
-      if (ob != object_bfd)
-	arch_info = bfd_get_arch_info (ob);
-      if ((arch_info->bits_per_address == 64) != bits64)
-	continue;
-
-      name = *map[i].name;
-      namlen = strlen (name);
-      if (bfd_bwrite (name, (bfd_size_type) (namlen + 1), abfd) != namlen + 1)
-	return false;
-    }
-
-  if ((stridx & 1) != 0)
-    {
-      char b;
-
-      b = '\0';
-      if (bfd_bwrite (&b, (bfd_size_type) 1, abfd) != 1)
-	return false;
-    }
-
-  return true;
-}
+#define READ20(d, v) \
+  buff20[20] = 0, \
+  memcpy (buff20, (d), 20), \
+  (v) = strtoull (buff20, (char **) NULL, 10)
 
 static boolean
 xcoff_write_armap_big (abfd, elength, map, orl_count, stridx)
@@ -1661,55 +1565,280 @@ xcoff_write_armap_big (abfd, elength, map, orl_count, stridx)
      unsigned int orl_count;
      int stridx;
 {
-  unsigned int i;
-  unsigned int orl_count_32, orl_count_64;
-  unsigned int stridx_32, stridx_64;
+  struct xcoff_ar_file_hdr_big *fhdr;
+  bfd_vma i, sym_32, sym_64, str_32, str_64;
   const bfd_arch_info_type *arch_info = NULL;
-  bfd *object_bfd;
-
+  bfd *current_bfd;
+  size_t string_length;
+  ufile_ptr nextoff, prevoff;
+  
   /* First, we look through the symbols and work out which are
      from 32-bit objects and which from 64-bit ones.  */
-  orl_count_32 = 0;
-  orl_count_64 = 0;
-  stridx_32 = 0;
-  stridx_64 = 0;
-  object_bfd = NULL;
-  for (i = 0; i < orl_count; i++)
+  sym_32 = sym_64 = str_32 = str_64 = 0;
+
+  current_bfd = abfd->archive_head;
+  if (current_bfd != NULL)
+    arch_info = bfd_get_arch_info (current_bfd);
+    i = 0;
+    while (current_bfd != NULL && i < orl_count)
     {
-      bfd *ob = map[i].u.abfd;
-      unsigned int len;
-      if (ob != object_bfd)
-	arch_info = bfd_get_arch_info (ob);
-      len = strlen (*map[i].name) + 1;
-      if (arch_info->bits_per_address == 64)
+      while (map[i].u.abfd == current_bfd)
 	{
-	  orl_count_64++;
-	  stridx_64 += len;
+	  string_length = strlen (*map[i].name) + 1;
+
+	  if (arch_info->bits_per_address == 64)
+	    {
+	      sym_64++;
+	      str_64 += string_length;
+	    }
+	  else
+	    {
+	      sym_32++;
+	      str_32 += string_length;
+	    }
+	  i++;
 	}
-      else
-	{
-	  orl_count_32++;
-	  stridx_32 += len;
-	}
-      object_bfd = ob;
+      current_bfd = current_bfd->next;
+      if (current_bfd != NULL)
+	arch_info = bfd_get_arch_info (current_bfd);
     }
+
   /* A quick sanity check... */
-  BFD_ASSERT (orl_count_64 + orl_count_32 == orl_count);
+  BFD_ASSERT (sym_64 + sym_32 == orl_count);
   /* Explicit cast to int for compiler.  */
-  BFD_ASSERT ((int)(stridx_64 + stridx_32) == stridx);
+  BFD_ASSERT ((int)(str_64 + str_32) == stridx);
 
-  /* Now write out each map.  */
-  if (! xcoff_write_one_armap_big (abfd, map, orl_count, orl_count_32,
-				   stridx_32, false,
-				   xcoff_ardata_big (abfd)->memoff,
-				   xcoff_ardata_big (abfd)->symoff))
-    return false;
-  if (! xcoff_write_one_armap_big (abfd, map, orl_count, orl_count_64,
-				   stridx_64, true,
-				   xcoff_ardata_big (abfd)->symoff,
-				   xcoff_ardata_big (abfd)->symoff64))
-    return false;
+  fhdr = xcoff_ardata_big (abfd);
 
+  /* xcoff_write_archive_contents_big passes nextoff in symoff. */
+  READ20 (fhdr->memoff, prevoff);
+  READ20 (fhdr->symoff, nextoff);
+
+  BFD_ASSERT (nextoff == bfd_tell (abfd));
+
+  /* Write out the symbol table.  
+     Layout : 
+     
+     standard big archive header
+     0x0000                   ar_size   [0x14]
+     0x0014                   ar_nxtmem [0x14]
+     0x0028                   ar_prvmem [0x14]
+     0x003C                   ar_date   [0x0C]
+     0x0048                   ar_uid    [0x0C]
+     0x0054                   ar_gid    [0x0C]
+     0x0060                   ar_mod    [0x0C]
+     0x006C                   ar_namelen[0x04]
+     0x0070                   ar_fmag   [SXCOFFARFMAG]
+     
+     Symbol table 
+     0x0072                   num_syms  [0x08], binary
+     0x0078                   offsets   [0x08 * num_syms], binary
+     0x0086 + 0x08 * num_syms names     [??]
+     ??                       pad to even bytes.
+  */
+
+  if (sym_32) 
+    {
+      struct xcoff_ar_hdr_big *hdr;
+      bfd_byte *symbol_table;
+      bfd_byte *st;
+      file_ptr fileoff;
+
+      bfd_vma symbol_table_size = 
+	SIZEOF_AR_HDR_BIG
+	+ SXCOFFARFMAG
+	+ 8 
+	+ 8 * sym_32 
+	+ str_32 + (str_32 & 1);
+
+      symbol_table = NULL;
+      symbol_table = (bfd_byte *) bfd_malloc (symbol_table_size);
+      if (symbol_table == NULL)
+	return false;
+      memset (symbol_table, 0, symbol_table_size);
+
+      hdr = (struct xcoff_ar_hdr_big *) symbol_table;
+	
+      PRINT20 (hdr->size, 8 + 8 * sym_32 + str_32 + (str_32 & 1));
+	
+      if (sym_64)
+	PRINT20 (hdr->nextoff, nextoff + symbol_table_size);
+      else
+	PRINT20 (hdr->nextoff, 0);
+
+      PRINT20 (hdr->prevoff, prevoff);
+      PRINT12 (hdr->date, 0);
+      PRINT12 (hdr->uid, 0);
+      PRINT12 (hdr->gid, 0);
+      PRINT12 (hdr->mode, 0);
+      PRINT4 (hdr->namlen, 0) ;
+
+      st = symbol_table + SIZEOF_AR_HDR_BIG;
+      memcpy (st, XCOFFARFMAG, SXCOFFARFMAG);
+      st += SXCOFFARFMAG;
+
+      bfd_h_put_64 (abfd, sym_32, st);
+      st += 8;
+      
+      /* loop over the 32 bit offsets */
+      current_bfd = abfd->archive_head;
+      if (current_bfd != NULL)
+	arch_info = bfd_get_arch_info (current_bfd);
+      fileoff = SIZEOF_AR_FILE_HDR_BIG;
+      i = 0;
+      while (current_bfd != NULL && i < orl_count)
+	{
+	  while (map[i].u.abfd == current_bfd)
+	    {
+	      if (arch_info->bits_per_address == 32)
+		{
+		  bfd_h_put_64 (abfd, fileoff, st);
+		  st += 8;
+		}
+	      i++;
+	    }
+	  string_length = strlen (normalize_filename (current_bfd));
+	  string_length += string_length & 1;
+	  fileoff += (SIZEOF_AR_HDR_BIG
+		      + string_length
+		      + SXCOFFARFMAG
+		      + arelt_size (current_bfd));
+	  fileoff += fileoff & 1;
+	  current_bfd = current_bfd->next;
+	  if (current_bfd != NULL)
+	    arch_info = bfd_get_arch_info (current_bfd);
+	}
+
+      /* loop over the 32 bit symbol names */
+      current_bfd = abfd->archive_head;
+      if (current_bfd != NULL)
+	arch_info = bfd_get_arch_info (current_bfd);
+      i = 0;
+      while (current_bfd != NULL && i < orl_count)
+	{
+	  while (map[i].u.abfd == current_bfd)
+	    {
+	      if (arch_info->bits_per_address == 32)
+		{
+		  string_length = sprintf (st, "%s", *map[i].name);
+		  st += string_length + 1;
+		}
+	      i++;
+	    }
+	  current_bfd = current_bfd->next;
+	  if (current_bfd != NULL)
+	    arch_info = bfd_get_arch_info (current_bfd);
+	}
+
+      bfd_bwrite (symbol_table, symbol_table_size, abfd);
+
+      free (symbol_table);
+      symbol_table = NULL;
+
+      prevoff = nextoff;
+      nextoff = nextoff + symbol_table_size;
+    }
+  else 
+    PRINT20 (fhdr->symoff, 0);
+  
+  if (sym_64) 
+    {
+      struct xcoff_ar_hdr_big *hdr;
+      bfd_byte *symbol_table;
+      bfd_byte *st;
+      file_ptr fileoff;
+
+      bfd_vma symbol_table_size = 
+	SIZEOF_AR_HDR_BIG
+	+ SXCOFFARFMAG
+	+ 8 
+	+ 8 * sym_64 
+	+ str_64 + (str_64 & 1);
+
+      symbol_table = NULL;
+      symbol_table = (bfd_byte *) bfd_malloc (symbol_table_size);
+      if (symbol_table == NULL)
+	return false;
+      memset (symbol_table, 0, symbol_table_size);
+
+      hdr = (struct xcoff_ar_hdr_big *) symbol_table;
+
+      PRINT20 (hdr->size, 8 + 8 * sym_64 + str_64 + (str_64 & 1));
+      PRINT20 (hdr->nextoff, 0);
+      PRINT20 (hdr->prevoff, prevoff);
+      PRINT12 (hdr->date, 0);
+      PRINT12 (hdr->uid, 0);
+      PRINT12 (hdr->gid, 0);
+      PRINT12 (hdr->mode, 0);
+      PRINT4 (hdr->namlen, 0);
+
+      st = symbol_table + SIZEOF_AR_HDR_BIG;
+      memcpy (st, XCOFFARFMAG, SXCOFFARFMAG);
+      st += SXCOFFARFMAG;
+
+      bfd_h_put_64 (abfd, sym_64, st);
+      st += 8;
+      
+      /* loop over the 64 bit offsets */
+      current_bfd = abfd->archive_head;
+      if (current_bfd != NULL)
+	arch_info = bfd_get_arch_info (current_bfd);
+      fileoff = SIZEOF_AR_FILE_HDR_BIG;
+      i = 0;
+      while (current_bfd != NULL && i < orl_count)
+	{
+	  while (map[i].u.abfd == current_bfd)
+	    {
+	      if (arch_info->bits_per_address == 64)
+		{
+		  bfd_h_put_64 (abfd, fileoff, st);
+		  st += 8;
+		}
+	      i++;
+	    }
+	  string_length = strlen (normalize_filename (current_bfd));
+	  string_length += string_length & 1;
+	  fileoff += (SIZEOF_AR_HDR_BIG
+		      + string_length
+		      + SXCOFFARFMAG
+		      + arelt_size (current_bfd));
+	  fileoff += fileoff & 1;
+	  current_bfd = current_bfd->next;
+	  if (current_bfd != NULL)
+	    arch_info = bfd_get_arch_info (current_bfd);
+	}
+
+      /* loop over the 64 bit symbol names */
+      current_bfd = abfd->archive_head;
+      if (current_bfd != NULL)
+	arch_info = bfd_get_arch_info (current_bfd);
+      i = 0;
+      while (current_bfd != NULL && i < orl_count)
+	{
+	  while (map[i].u.abfd == current_bfd)
+	    {
+	      if (arch_info->bits_per_address == 64)
+		{
+		  string_length = sprintf (st, "%s", *map[i].name);
+		  st += string_length + 1;
+		}
+	      i++;
+	    }
+	  current_bfd = current_bfd->next;
+	  if (current_bfd != NULL)
+	    arch_info = bfd_get_arch_info (current_bfd);
+	}
+
+      bfd_bwrite (symbol_table, symbol_table_size, abfd);
+
+      free (symbol_table);
+      symbol_table = NULL;
+
+      PRINT20 (fhdr->symoff64, nextoff);
+    }
+  else 
+    PRINT20 (fhdr->symoff64, 0);
+  
   return true;
 }
 
@@ -1746,7 +1875,7 @@ xcoff_write_archive_contents_old (abfd)
   struct xcoff_ar_hdr ahdr;
   bfd_size_type size;
   char *p;
-  char decbuf[13];
+  char decbuf[XCOFFARMAG_ELEMENT_SIZE + 1];
 
   memset (&fhdr, 0, sizeof fhdr);
   strncpy (fhdr.magic, XCOFFARMAG, SXCOFFARMAG);
@@ -1889,7 +2018,9 @@ xcoff_write_archive_contents_old (abfd)
   sprintf (fhdr.memoff, "%ld", (long) nextoff);
 
   memset (&ahdr, 0, sizeof ahdr);
-  sprintf (ahdr.size, "%ld", (long) (12 + count * 12 + total_namlen));
+  sprintf (ahdr.size, "%ld", (long) (XCOFFARMAG_ELEMENT_SIZE + 
+				     count * XCOFFARMAG_ELEMENT_SIZE + 
+				     total_namlen));
   sprintf (ahdr.prevoff, "%ld", (long) prevoff);
   sprintf (ahdr.date, "%d", 0);
   sprintf (ahdr.uid, "%d", 0);
@@ -1898,8 +2029,8 @@ xcoff_write_archive_contents_old (abfd)
   sprintf (ahdr.namlen, "%d", 0);
 
   size = (SIZEOF_AR_HDR
-	  + 12
-	  + count * 12
+	  + XCOFFARMAG_ELEMENT_SIZE
+	  + count * XCOFFARMAG_ELEMENT_SIZE
 	  + total_namlen
 	  + SXCOFFARFMAG);
 
@@ -1923,12 +2054,14 @@ xcoff_write_archive_contents_old (abfd)
     return false;
 
   sprintf (decbuf, "%-12ld", (long) count);
-  if (bfd_bwrite ((PTR) decbuf, (bfd_size_type) 12, abfd) != 12)
+  if (bfd_bwrite ((PTR) decbuf, (bfd_size_type) XCOFFARMAG_ELEMENT_SIZE, abfd)
+      != XCOFFARMAG_ELEMENT_SIZE)
     return false;
   for (i = 0; i < (size_t) count; i++)
     {
       sprintf (decbuf, "%-12ld", (long) offsets[i]);
-      if (bfd_bwrite ((PTR) decbuf, (bfd_size_type) 12, abfd) != 12)
+      if (bfd_bwrite ((PTR) decbuf, (bfd_size_type) XCOFFARMAG_ELEMENT_SIZE, 
+		      abfd) != XCOFFARMAG_ELEMENT_SIZE)
 	return false;
     }
   for (sub = abfd->archive_head; sub != NULL; sub = sub->next)
@@ -1951,7 +2084,6 @@ xcoff_write_archive_contents_old (abfd)
     }
 
   /* Write out the armap, if appropriate.  */
-
   if (! makemap || ! hasobjects)
     sprintf (fhdr.symoff, "%d", 0);
   else
@@ -1989,29 +2121,30 @@ xcoff_write_archive_contents_big (abfd)
   boolean makemap;
   boolean hasobjects;
   ufile_ptr prevoff, nextoff;
-  bfd *sub;
+  bfd *current_bfd;
   size_t i;
-  struct xcoff_ar_hdr_big ahdr;
+  struct xcoff_ar_hdr_big *hdr, ahdr;
   bfd_size_type size;
-  char *p;
-  char decbuf[13];
+  bfd_byte *member_table, *mt;
+  bfd_vma member_table_size;
 
-  memset (&fhdr, 0, sizeof fhdr);
-  strncpy (fhdr.magic, XCOFFARMAGBIG, SXCOFFARMAG);
-  sprintf (fhdr.firstmemoff, "%d", SIZEOF_AR_FILE_HDR_BIG);
-  sprintf (fhdr.freeoff, "%d", 0);
+  memcpy (fhdr.magic, XCOFFARMAGBIG, SXCOFFARMAG);
+  PRINT20 (fhdr.firstmemoff, SIZEOF_AR_FILE_HDR_BIG);
+  PRINT20 (fhdr.freeoff, 0);
 
-  count = 0;
-  total_namlen = 0;
-  for (sub = abfd->archive_head; sub != NULL; sub = sub->next)
+  /* Calculate count and total_namlen */
+  for (current_bfd = abfd->archive_head, count = 0, total_namlen = 0; 
+       current_bfd != NULL; 
+       current_bfd = current_bfd->next, count++)
+    total_namlen += strlen (normalize_filename (current_bfd)) + 1;
+
+  offsets = NULL;
+  if (count)
     {
-      ++count;
-      total_namlen += strlen (normalize_filename (sub)) + 1;
+      offsets = (file_ptr *) bfd_malloc (count * sizeof (file_ptr));
+      if (offsets == NULL)
+	return false;
     }
-  offsets = (file_ptr *) bfd_alloc (abfd, count * sizeof (file_ptr));
-  if (offsets == NULL)
-    return false;
-
   if (bfd_seek (abfd, (file_ptr) SIZEOF_AR_FILE_HDR_BIG, SEEK_SET) != 0)
     return false;
 
@@ -2019,7 +2152,9 @@ xcoff_write_archive_contents_big (abfd)
   hasobjects = false;
   prevoff = 0;
   nextoff = SIZEOF_AR_FILE_HDR_BIG;
-  for (sub = abfd->archive_head, i = 0; sub != NULL; sub = sub->next, i++)
+  for (current_bfd = abfd->archive_head, i = 0; 
+       current_bfd != NULL; 
+       current_bfd = current_bfd->next, i++)
     {
       const char *name;
       bfd_size_type namlen;
@@ -2028,15 +2163,15 @@ xcoff_write_archive_contents_big (abfd)
 
       if (makemap && ! hasobjects)
 	{
-	  if (bfd_check_format (sub, bfd_object))
+	  if (bfd_check_format (current_bfd, bfd_object))
 	    hasobjects = true;
 	}
 
-      name = normalize_filename (sub);
+      name = normalize_filename (current_bfd);
       namlen = strlen (name);
 
-      if (sub->arelt_data != NULL)
-	ahdrp = arch_xhdr_big (sub);
+      if (current_bfd->arelt_data != NULL)
+	ahdrp = arch_xhdr_big (current_bfd);
       else
 	ahdrp = NULL;
 
@@ -2044,47 +2179,41 @@ xcoff_write_archive_contents_big (abfd)
 	{
 	  struct stat s;
 
-	  memset (&ahdr, 0, sizeof ahdr);
 	  ahdrp = &ahdr;
 	  /* XXX This should actually be a call to stat64 (at least on
-	     32-bit machines).  */
-	  if (stat (bfd_get_filename (sub), &s) != 0)
+	     32-bit machines).  
+	     XXX This call will fail if the original object is not found.  */
+	  if (stat (bfd_get_filename (current_bfd), &s) != 0)
 	    {
 	      bfd_set_error (bfd_error_system_call);
 	      return false;
 	    }
 
-	  /* XXX This call actually should use %lld (at least on 32-bit
-	     machines) since the fields's width is 20 and there numbers with
-	     more than 32 bits can be represented.  */
-	  sprintf (ahdrp->size, "%ld", (long) s.st_size);
-	  sprintf (ahdrp->date, "%ld", (long) s.st_mtime);
-	  sprintf (ahdrp->uid, "%ld", (long) s.st_uid);
-	  sprintf (ahdrp->gid, "%ld", (long) s.st_gid);
-	  sprintf (ahdrp->mode, "%o", (unsigned int) s.st_mode);
+	  PRINT20 (ahdrp->size, s.st_size);
+	  PRINT12 (ahdrp->date, s.st_mtime);
+	  PRINT12 (ahdrp->uid,  s.st_uid);
+	  PRINT12 (ahdrp->gid,  s.st_gid);
+	  PRINT12_OCTAL (ahdrp->mode, s.st_mode);
 
-	  if (sub->arelt_data == NULL)
+	  if (current_bfd->arelt_data == NULL)
 	    {
 	      size = sizeof (struct areltdata);
-	      sub->arelt_data = bfd_alloc (sub, size);
-	      if (sub->arelt_data == NULL)
+	      current_bfd->arelt_data = bfd_alloc (current_bfd, size);
+	      if (current_bfd->arelt_data == NULL)
 		return false;
 	    }
 
-	  arch_eltdata (sub)->parsed_size = s.st_size;
+	  arch_eltdata (current_bfd)->parsed_size = s.st_size;
 	}
 
-      /* XXX These calls actually should use %lld (at least on 32-bit
-	 machines) since the fields's width is 20 and there numbers with
-	 more than 32 bits can be represented.  */
-      sprintf (ahdrp->prevoff, "%ld", (long) prevoff);
-      sprintf (ahdrp->namlen, "%ld", (long) namlen);
+      PRINT20 (ahdrp->prevoff, prevoff);
+      PRINT4 (ahdrp->namlen, namlen);
 
       /* If the length of the name is odd, we write out the null byte
          after the name as well.  */
       namlen = (namlen + 1) &~ (bfd_size_type) 1;
 
-      remaining = arelt_size (sub);
+      remaining = arelt_size (current_bfd);
       size = (SIZEOF_AR_HDR_BIG
 	      + namlen
 	      + SXCOFFARFMAG
@@ -2097,21 +2226,16 @@ xcoff_write_archive_contents_big (abfd)
       prevoff = nextoff;
       nextoff += size + (size & 1);
 
-      sprintf (ahdrp->nextoff, "%ld", (long) nextoff);
-
-      /* We need spaces, not null bytes, in the header.  */
-      for (p = (char *) ahdrp; p < (char *) ahdrp + SIZEOF_AR_HDR_BIG; p++)
-	if (*p == '\0')
-	  *p = ' ';
+      PRINT20 (ahdrp->nextoff, nextoff);
 
       if ((bfd_bwrite ((PTR) ahdrp, (bfd_size_type) SIZEOF_AR_HDR_BIG, abfd)
 	   != SIZEOF_AR_HDR_BIG)
 	  || bfd_bwrite ((PTR) name, (bfd_size_type) namlen, abfd) != namlen
-	  || (bfd_bwrite ((PTR) XCOFFARFMAG, (bfd_size_type) SXCOFFARFMAG, abfd)
-	      != SXCOFFARFMAG))
+	  || (bfd_bwrite ((PTR) XCOFFARFMAG, (bfd_size_type) SXCOFFARFMAG, 
+			  abfd) != SXCOFFARFMAG))
 	return false;
 
-      if (bfd_seek (sub, (file_ptr) 0, SEEK_SET) != 0)
+      if (bfd_seek (current_bfd, (file_ptr) 0, SEEK_SET) != 0)
 	return false;
       while (remaining != 0)
 	{
@@ -2121,7 +2245,7 @@ xcoff_write_archive_contents_big (abfd)
 	  amt = sizeof buffer;
 	  if (amt > remaining)
 	    amt = remaining;
-	  if (bfd_bread (buffer, amt, sub) != amt
+	  if (bfd_bread (buffer, amt, current_bfd) != amt
 	      || bfd_bwrite (buffer, amt, abfd) != amt)
 	    return false;
 	  remaining -= amt;
@@ -2137,98 +2261,111 @@ xcoff_write_archive_contents_big (abfd)
 	}
     }
 
-  /* XXX This call actually should use %lld (at least on 32-bit
-     machines) since the fields's width is 20 and there numbers with
-     more than 32 bits can be represented.  */
-  sprintf (fhdr.lastmemoff, "%ld", (long) prevoff);
+  PRINT20 (fhdr.lastmemoff, prevoff);
 
-  /* Write out the member table.  */
+  /* Write out the member table.  
+     Layout : 
+
+     standard big archive header
+     0x0000                   ar_size   [0x14]
+     0x0014                   ar_nxtmem [0x14]
+     0x0028                   ar_prvmem [0x14]
+     0x003C                   ar_date   [0x0C]
+     0x0048                   ar_uid    [0x0C]
+     0x0054                   ar_gid    [0x0C]
+     0x0060                   ar_mod    [0x0C]
+     0x006C                   ar_namelen[0x04]
+     0x0070                   ar_fmag   [0x02]
+
+     Member table 
+     0x0072                   count     [0x14]
+     0x0086                   offsets   [0x14 * counts]
+     0x0086 + 0x14 * counts   names     [??]
+     ??                       pad to even bytes.
+   */
 
   BFD_ASSERT (nextoff == bfd_tell (abfd));
-  /* XXX This call actually should use %lld (at least on 32-bit
-     machines) since the fields's width is 20 and there numbers with
-     more than 32 bits can be represented.  */
-  sprintf (fhdr.memoff, "%ld", (long) nextoff);
 
-  memset (&ahdr, 0, sizeof ahdr);
-  /* XXX The next two calls actually should use %lld (at least on 32-bit
-     machines) since the fields's width is 20 and there numbers with
-     more than 32 bits can be represented.  */
-  sprintf (ahdr.size, "%ld", (long) (12 + count * 12 + total_namlen));
-  sprintf (ahdr.prevoff, "%ld", (long) prevoff);
-  sprintf (ahdr.date, "%d", 0);
-  sprintf (ahdr.uid, "%d", 0);
-  sprintf (ahdr.gid, "%d", 0);
-  sprintf (ahdr.mode, "%d", 0);
-  sprintf (ahdr.namlen, "%d", 0);
+  member_table_size = (SIZEOF_AR_HDR_BIG
+		       + SXCOFFARFMAG
+		       + XCOFFARMAGBIG_ELEMENT_SIZE
+		       + count * XCOFFARMAGBIG_ELEMENT_SIZE
+		       + total_namlen);
 
-  size = (SIZEOF_AR_HDR_BIG
-	  + 12
-	  + count * 12
-	  + total_namlen
-	  + SXCOFFARFMAG);
+  member_table_size += member_table_size & 1;
+  member_table = NULL;
+  member_table = (bfd_byte *) bfd_malloc (member_table_size);
+  if (member_table == NULL)
+    return false;
+  memset (member_table, 0, member_table_size);
 
-  prevoff = nextoff;
-  nextoff += size + (size & 1);
+  hdr = (struct xcoff_ar_hdr_big *) member_table;
 
-  if (makemap && hasobjects)
-    /* XXX This call actually should use %lld (at least on 32-bit
-       machines) since the fields's width is 20 and there numbers with
-       more than 32 bits can be represented.  */
-    sprintf (ahdr.nextoff, "%ld", (long) nextoff);
+  PRINT20 (hdr->size, (XCOFFARMAGBIG_ELEMENT_SIZE + 
+		       count * XCOFFARMAGBIG_ELEMENT_SIZE + 
+		       total_namlen + (total_namlen & 1)));
+  if (makemap && hasobjects) 
+    PRINT20 (hdr->nextoff, nextoff + member_table_size);
   else
-    sprintf (ahdr.nextoff, "%d", 0);
+    PRINT20 (hdr->nextoff, 0);
+  PRINT20 (hdr->prevoff, prevoff);
+  PRINT12 (hdr->date, 0);
+  PRINT12 (hdr->uid, 0);
+  PRINT12 (hdr->gid, 0);
+  PRINT12 (hdr->mode, 0);
+  PRINT4 (hdr->namlen, 0);
+  
+  mt = member_table + SIZEOF_AR_HDR_BIG;
+  memcpy (mt, XCOFFARFMAG, SXCOFFARFMAG);
+  mt += SXCOFFARFMAG;
 
-  /* We need spaces, not null bytes, in the header.  */
-  for (p = (char *) &ahdr; p < (char *) &ahdr + SIZEOF_AR_HDR_BIG; p++)
-    if (*p == '\0')
-      *p = ' ';
-
-  if ((bfd_bwrite ((PTR) &ahdr, (bfd_size_type) SIZEOF_AR_HDR_BIG, abfd)
-       != SIZEOF_AR_HDR_BIG)
-      || (bfd_bwrite ((PTR) XCOFFARFMAG, (bfd_size_type) SXCOFFARFMAG, abfd)
-	  != SXCOFFARFMAG))
-    return false;
-
-  sprintf (decbuf, "%-12ld", (long) count);
-  if (bfd_bwrite ((PTR) decbuf, (bfd_size_type) 12, abfd) != 12)
-    return false;
+  PRINT20 (mt, count);
+  mt += XCOFFARMAGBIG_ELEMENT_SIZE;
   for (i = 0; i < (size_t) count; i++)
     {
-      sprintf (decbuf, "%-12ld", (long) offsets[i]);
-      if (bfd_bwrite ((PTR) decbuf, (bfd_size_type) 12, abfd) != 12)
-	return false;
+      PRINT20 (mt, offsets[i]);
+      mt += XCOFFARMAGBIG_ELEMENT_SIZE;
     }
-  for (sub = abfd->archive_head; sub != NULL; sub = sub->next)
+
+  if (count) 
+    {
+      free (offsets);
+      offsets = NULL;
+    }
+
+  for (current_bfd = abfd->archive_head; current_bfd != NULL; 
+       current_bfd = current_bfd->next)
     {
       const char *name;
       size_t namlen;
 
-      name = normalize_filename (sub);
-      namlen = strlen (name);
-      if (bfd_bwrite ((PTR) name, (bfd_size_type) (namlen + 1), abfd)
-	  != namlen + 1)
-	return false;
+      name = normalize_filename (current_bfd);
+      namlen = sprintf(mt, "%s", name);
+      mt += namlen + 1;
     }
-  if ((size & 1) != 0)
-    {
-      bfd_byte b;
+  
+  if (bfd_bwrite (member_table, member_table_size, abfd) != member_table_size)
+    return false;
 
-      b = '\0';
-      if (bfd_bwrite ((PTR) &b, (bfd_size_type) 1, abfd) != 1)
-	return false;
-    }
+  free (member_table);
+  member_table = NULL;
+
+  PRINT20 (fhdr.memoff, nextoff);
+
+  prevoff = nextoff;
+  nextoff += member_table_size;
 
   /* Write out the armap, if appropriate.  */
 
-  if (! makemap || ! hasobjects)
-    sprintf (fhdr.symoff, "%d", 0);
+  if (! makemap || ! hasobjects) 
+    PRINT20 (fhdr.symoff, 0);
   else
     {
       BFD_ASSERT (nextoff == bfd_tell (abfd));
-      /* XXX This call actually should use %lld (at least on 32-bit
-	 machines) since the fields's width is 20 and there numbers with
-	 more than 32 bits can be represented.  */
+
+      /* Save nextoff in fhdr.symoff so the armap routine can use it.  */
+      PRINT20 (fhdr.symoff, nextoff);
+      
       bfd_ardata (abfd)->tdata = (PTR) &fhdr;
       if (! _bfd_compute_and_write_armap (abfd, 0))
 	return false;
@@ -2236,16 +2373,11 @@ xcoff_write_archive_contents_big (abfd)
 
   /* Write out the archive file header.  */
 
-  /* We need spaces, not null bytes, in the header.  */
-  for (p = (char *) &fhdr; p < (char *) &fhdr + SIZEOF_AR_FILE_HDR_BIG; p++)
-    if (*p == '\0')
-      *p = ' ';
-
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0
-      || (bfd_bwrite ((PTR) &fhdr, (bfd_size_type) SIZEOF_AR_FILE_HDR_BIG, abfd)
-	  != SIZEOF_AR_FILE_HDR_BIG))
+      || (bfd_bwrite ((PTR) &fhdr, (bfd_size_type) SIZEOF_AR_FILE_HDR_BIG, 
+		      abfd) != SIZEOF_AR_FILE_HDR_BIG))
     return false;
-
+  
   return true;
 }
 
@@ -2997,7 +3129,11 @@ xcoff_generate_rtinit  (abfd, init, fini)
 
   data_buffer_size = 0x0040 + initsz + finisz;
   data_buffer_size += (data_buffer_size & 7) ? 8 - (data_buffer_size & 7) : 0;
-  data_buffer = (bfd_byte *)bfd_malloc (data_buffer_size);
+  data_buffer = NULL;
+  data_buffer = (bfd_byte *) bfd_malloc (data_buffer_size);
+  if (data_buffer == NULL)
+    return false;
+  
   memset (data_buffer, 0, data_buffer_size);
 
   if (initsz) 
@@ -3162,6 +3298,9 @@ xcoff_generate_rtinit  (abfd, init, fini)
   bfd_bwrite (reloc_ext, scnhdr.s_nreloc * RELSZ, abfd);
   bfd_bwrite (syment_ext, filehdr.f_nsyms * SYMESZ, abfd);
   bfd_bwrite (string_table, string_table_size, abfd);
+
+  free (data_buffer);
+  data_buffer = NULL;
 
   return true;
 }

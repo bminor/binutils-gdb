@@ -1,3 +1,12 @@
+2001-12-27  Tom Rix  <trix@redhat.com>
+	
+	* coff-rs6000.c (xcoff_generate_rtinit): Clean data_buffer alloc/free.
+	* coff64-rs6000.c (xcoff64_generate_rtinit): Same.
+	(xcoff_write_archive_contents_big): Rewrite.
+	(xcoff_write_armap_big): Rewrite.
+	(xcoff_write_one_armap_big): Delete.
+	* libxcoff.h : Clean up. 
+
 2001-12-21  Tom Rix  <trix@redhat.com>
  
         * xcofflink.c (bfd_xcoff_link_generate_rtinit): New function.  

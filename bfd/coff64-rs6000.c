@@ -143,6 +143,9 @@ static bfd_vma xcoff64_loader_symbol_offset
   PARAMS ((bfd *, struct internal_ldhdr *));
 static bfd_vma xcoff64_loader_reloc_offset
   PARAMS ((bfd *, struct internal_ldhdr *));
+static boolean xcoff64_generate_rtinit 
+  PARAMS((bfd *, const char *, const char *));
+
 
 /* coffcode.h needs these to be defined */
 /* Internalcoff.h and coffcode.h modify themselves based on these flags.  */
@@ -2179,7 +2182,11 @@ xcoff64_generate_rtinit  (abfd, init, fini)
 
   data_buffer_size = 0x0058 + initsz + finisz;
   data_buffer_size += (data_buffer_size & 7) ? 8 - (data_buffer_size & 7) : 0;
+  data_buffer = NULL;
   data_buffer = (bfd_byte *)bfd_malloc (data_buffer_size);
+  if (data_buffer == NULL)
+    return false;
+  
   memset (data_buffer, 0, data_buffer_size);
 
   if (initsz) 
@@ -2336,6 +2343,9 @@ xcoff64_generate_rtinit  (abfd, init, fini)
   bfd_bwrite (reloc_ext, scnhdr.s_nreloc * RELSZ, abfd);
   bfd_bwrite (syment_ext, filehdr.f_nsyms * SYMESZ, abfd);
   bfd_bwrite (string_table, string_table_size, abfd);
+
+  free (data_buffer);
+  data_buffer = NULL;
 
   return true;
 }
