@@ -1026,8 +1026,8 @@ make-gdb.tar.Z: $(DEVO_SUPPORT) $(GDB_SUPPORT_DIRS) gdb texinfo/texinfo.tex
 		ln -s proto-toplev gdb-$$VER; \
 		echo "==> Making gdb-$$VER.tar.Z"; \
 		tar cfh - gdb-$$VER | $(COMPRESS) -v >gdb-$$VER.tar.Z; \
-		echo "==> Making gdb-$$VER.tar.z"; \
-		tar cfh - gdb-$$VER | $(GZIP) -v -9 >gdb-$$VER.tar.z)
+		echo "==> Making gdb-$$VER.tar.gz"; \
+		tar cfh - gdb-$$VER | $(GZIP) -v -9 >gdb-$$VER.tar.gz)
 
 	# Make the testsuite archive separately.
 	ln -s ../../gdb/proto-testsuite.dir/testsuite proto-toplev/gdb/testsuite
@@ -1044,11 +1044,11 @@ make-gdb.tar.Z: $(DEVO_SUPPORT) $(GDB_SUPPORT_DIRS) gdb texinfo/texinfo.tex
 			gdb-$$VER/config.sub gdb-$$VER/move-if-change \
 			gdb-$$VER/gdb/testsuite | \
 			$(COMPRESS) -v >gdb-$$VER-testsuite.tar.Z; \
-		echo "==> Making gdb-$$VER-testsuite.tar.z"; \
+		echo "==> Making gdb-$$VER-testsuite.tar.gz"; \
 		tar cfh - gdb-$$VER/configure gdb-$$VER/config.guess \
 			gdb-$$VER/config.sub gdb-$$VER/move-if-change \
 			gdb-$$VER/gdb/testsuite | \
-			$(GZIP) -v -9 >gdb-$$VER-testsuite.tar.z)
+			$(GZIP) -v -9 >gdb-$$VER-testsuite.tar.gz)
 
 # When you use `make setup-dirs' or `make taz' you should always redefine
 # this macro.
@@ -1110,7 +1110,7 @@ taz: $(DEVO_SUPPORT) $(SUPPORT_FILES) texinfo/texinfo.tex texinfo/gpl.texinfo
 	ln -s ../../texinfo/tex3patch   proto-toplev/texinfo/
 	chmod og=u `find proto-toplev -print`
 	(VER=`sed <$(TOOL)/Makefile.in -n 's/^VERSION *= *//p'`; \
-		echo "==> Making $(TOOL)-$$VER.tar.z"; \
+		echo "==> Making $(TOOL)-$$VER.tar.gz"; \
 		ln -s proto-toplev $(TOOL)-$$VER; \
 		tar cfh - $(TOOL)-$$VER \
 		| $(GZIP) -v -9 >$(TOOL)-$$VER.tar.gz)
