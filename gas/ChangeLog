@@ -1,3 +1,8 @@
+Thu Nov 20 15:06:08 1997  Richard Earnshaw <rearnsha@arm.com>
+
+	* config/tc-arm.h (TARGET_FORMAT for generic a.out targets): Allow
+	run-time endian selection.
+
 start-sanitize-sh4
 Wed Nov 19 17:44:42 1997  Richard Henderson  <rth@cygnus.com>
 
