@@ -26,6 +26,7 @@ powerpc*)		gdb_target_cpu=powerpc ;;
 sparc*)			gdb_target_cpu=sparc ;;
 thumb*)			gdb_target_cpu=arm ;;
 strongarm*)		gdb_target_cpu=arm ;;
+xscale*)		gdb_target_cpu=arm ;;
 v850*)			gdb_target_cpu=v850 ;;
 *)			gdb_target_cpu=$target_cpu ;;
 
@@ -57,6 +58,9 @@ arm*-*-linux*)		gdb_target=linux
 			;;
 arm*-*-* | thumb*-*-* | strongarm*-*-*)
 			gdb_target=embed
+                        configdirs="$configdirs rdi-share"
+                        ;;
+xscale-*-*)		gdb_target=embed
                         configdirs="$configdirs rdi-share"
                         ;;
 # OBSOLETE c1-*-*)		gdb_target=convex ;;

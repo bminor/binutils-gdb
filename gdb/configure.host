@@ -162,6 +162,7 @@ sparc-*-*)		gdb_host=sun4os4 ;;
 sparc64-*-*)		gdb_host=sun4sol2 ;;
 
 strongarm-*-*)		gdb_host=arm ;;
+xscale-*-*)		gdb_host=arm ;;
 
 # OBSOLETE tahoe-*-*)		gdb_host=tahoe ;;
 
