@@ -29,4 +29,4 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* 386BSD cannot handle the segment registers. */
 #undef NUM_REGS
-#define NUM_REGS 12
+#define NUM_REGS 11
