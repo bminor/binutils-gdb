@@ -462,20 +462,20 @@ sim_open (kind, cb, abfd, argv)
     {
       /* Allocate core managed memory */
       
+/* start-sanitize-sky */
 #ifndef TARGET_SKY
+/* end-sanitize-sky */
       /* the monitor  */
       sim_do_commandf (sd, "memory region 0x%lx,0x%lx", MONITOR_BASE, MONITOR_SIZE);
       /* For compatibility with the old code - under this (at level one)
 	 are the kernel spaces K0 & K1.  Both of these map to a single
 	 smaller sub region */
       sim_do_command(sd," memory region 0x7fff8000,0x8000") ; /* MTZ- 32 k stack */
-      /* start-sanitize-sky */
-      /* end-sanitize-sky */
       sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx%%0x%lx,0x%0x",
 		       K1BASE, K0SIZE,
 		       MEM_SIZE, /* actual size */
 		       K0BASE);
-      /* start-sanitize-sky */
+/* start-sanitize-sky */
 #else
       /* the monitor  */
       sim_do_commandf (sd, "memory region 0x%lx,0x%lx", MONITOR_BASE - K1BASE, MONITOR_SIZE);
@@ -484,7 +484,7 @@ sim_open (kind, cb, abfd, argv)
          address_translation() */
       sim_do_commandf (sd, "memory size 0x%lx", MEM_SIZE);
 #endif
-      /* end-sanitize-sky */
+/* end-sanitize-sky */
       
       device_init(sd);
     }
