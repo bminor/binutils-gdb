@@ -93,40 +93,33 @@ static int line_base;
 
 symbolS *c_section_symbol ();
 bfd *abfd;
-void EXFUN (bfd_as_write_hook, (struct internal_filehdr *,
-				bfd * abfd));
 
-static void EXFUN (fixup_segment, (segment_info_type *segP,
+static void fixup_segment PARAMS ((segment_info_type *segP,
 				   segT this_segment_type));
 
 
-static void EXFUN (fixup_mdeps, (fragS *,
+static void fixup_mdeps PARAMS ((fragS *,
 				 object_headers *,
 				 segT));
 
 
-static void EXFUN (fill_section, (bfd * abfd,
+static void fill_section PARAMS ((bfd * abfd,
 				  object_headers *,
 				  unsigned long *));
 
 
-char *EXFUN (s_get_name, (symbolS * s));
-static symbolS *EXFUN (tag_find_or_make, (char *name));
-static symbolS *EXFUN (tag_find, (char *name));
+char *s_get_name PARAMS ((symbolS * s));
+static symbolS *tag_find_or_make PARAMS ((char *name));
+static symbolS *tag_find PARAMS ((char *name));
 
 
-static int
-  EXFUN (c_line_new, (
-		       symbolS * symbol,
-		       long paddr,
-		       unsigned short line_number,
-		       fragS * frag));
+static int c_line_new PARAMS ((symbolS * symbol, long paddr,
+			       unsigned short line_number,
+			       fragS * frag));
 
 
-static void EXFUN (w_symbols,
-		     (bfd * abfd,
-		      char *where,
-		      symbolS * symbol_rootP));
+static void w_symbols PARAMS ((bfd * abfd, char *where,
+			       symbolS * symbol_rootP));
 
 static char *stack_pop PARAMS ((stack * st));
 static char *stack_push PARAMS ((stack * st, char *element));
@@ -139,6 +132,7 @@ static stack *stack_init PARAMS ((unsigned long chunk_size,
 
 static void tag_init PARAMS ((void));
 static void tag_insert PARAMS ((char *name, symbolS * symbolP));
+static void adjust_stab_section PARAMS ((bfd *abfd, segT seg));
 
 static struct hash_control *tag_hash;
 
@@ -1430,13 +1424,13 @@ DEFUN_VOID (yank_symbols)
 
 	  resolve_symbol_value (symbolP);
 
-	  if (!S_IS_DEFINED (symbolP) && !SF_GET_LOCAL (symbolP))
+	  if (S_GET_STORAGE_CLASS (symbolP) == C_NULL)
 	    {
-	      S_SET_EXTERNAL (symbolP);
-	    }
-	  else if (S_GET_STORAGE_CLASS (symbolP) == C_NULL)
-	    {
-	      if (S_GET_SEGMENT (symbolP) == SEG_E0)
+	      if (!S_IS_DEFINED (symbolP) && !SF_GET_LOCAL (symbolP))
+		{
+		  S_SET_EXTERNAL (symbolP);
+		}
+	      else if (S_GET_SEGMENT (symbolP) == SEG_E0)
 		{
 		  S_SET_STORAGE_CLASS (symbolP, C_LABEL);
 		}
@@ -2680,13 +2674,13 @@ obj_coff_init_stab_section (seg)
 
 /* Fill in the counts in the first entry in a .stab section.  */
 
+static void
 adjust_stab_section(abfd, seg)
      bfd *abfd;
      segT seg;
 {
   segT stabstrseg = -1;
   char *secname, *name, *name2;
-  asection *stabsec, *stabstrsec;
   char *p = NULL;
   int i, strsz = 0, nsyms;
   fragS *frag = segment_info[seg].frchainP->frch_root;

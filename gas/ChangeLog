@@ -1,3 +1,14 @@
+Fri Nov 19 16:25:09 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/obj-coffbfd.c: Use PARAMS rather than EXFUN.
+	(yank_symbols): Don't call S_SET_EXTERNAL if the storage class is
+	already set.  Fixes .def var; .val external_var; .scl 3; .endef.
+	(adjust_stab_section): Make static.  Declare return type.  Remove
+	unused variables.
+
+	* config/tc-i386.h: Declare tc_coff_fix2rtype and
+	tc_coff_sizemachdep.
+
 Fri Nov 19 04:33:59 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* write.c (write_object_file): Disable obj_check_file_symbols
