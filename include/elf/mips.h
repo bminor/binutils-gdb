@@ -19,10 +19,13 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* This file holds definitions specific to the MIPS ELF ABI.  Note
    that most of this is not actually implemented by BFD.  */
+
+#ifndef _ELF_MIPS_H
+#define _ELF_MIPS_H
 
 /* Processor specific flags for the ELF header e_flags field.  */
 
@@ -56,6 +59,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    relocated, alignment must be preserved.  */
 #define SHN_MIPS_ACOMMON	0xff00
 
+/* Defined and allocated text symbol.  Value is virtual address.
+   Occur in the dynamic symbol table of Alpha OSF/1 and Irix 5 executables.  */
+#define SHN_MIPS_TEXT		0xff01
+
+/* Defined and allocated data symbol.  Value is virtual address.
+   Occur in the dynamic symbol table of Alpha OSF/1 and Irix 5 executables.  */
+#define SHN_MIPS_DATA		0xff02
+
 /* Small common symbol.  */
 #define SHN_MIPS_SCOMMON	0xff03
 
@@ -67,6 +78,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Section contains the set of dynamic shared objects used when
    statically linking.  */
 #define SHT_MIPS_LIBLIST	0x70000000
+
+/* I'm not sure what this is, but it's used on Irix 5.  */
+#define SHT_MIPS_MSYM		0x70000001
 
 /* Section contains list of symbols whose definitions conflict with
    symbols defined in shared objects.  */
@@ -88,6 +102,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Section contains miscellaneous options (used on Irix).  */
 #define SHT_MIPS_OPTIONS	0x7000000d
+
+/* DWARF debugging section (used on Irix 6).  */
+#define SHT_MIPS_DWARF		0x7000001e
+
+/* Events section.  This appears on Irix 6.  I don't know what it
+   means.  */
+#define SHT_MIPS_EVENTS		0x70000021
 
 /* A section of type SHT_MIPS_LIBLIST contains an array of the
    following structure.  The sh_link field is the section index of the
@@ -146,6 +167,22 @@ typedef union
     } gt_entry;
 } Elf32_gptab;
 
+/* The external version of Elf32_gptab.  */
+
+typedef union
+{
+  struct
+    {
+      unsigned char gt_current_g_value[4];
+      unsigned char gt_unused[4];
+    } gt_header;
+  struct
+    {
+      unsigned char gt_g_value[4];
+      unsigned char gt_bytes[4];
+    } gt_entry;
+} Elf32_External_gptab;
+
 /* A section of type SHT_MIPS_REGINFO contains the following
    structure.  */
 typedef struct
@@ -181,6 +218,9 @@ extern void bfd_mips_elf32_swap_reginfo_out
 
 /* Register usage information.  Identifies one .reginfo section.  */
 #define PT_MIPS_REGINFO		0x70000000
+
+/* Runtime procedure table.  */
+#define PT_MIPS_RTPROC		0x70000001
 
 /* Processor specific dynamic array tags.  */
 
@@ -231,3 +271,122 @@ extern void bfd_mips_elf32_swap_reginfo_out
 
 /* Address of run time loader map, used for debugging.  */
 #define DT_MIPS_RLD_MAP		0x70000016
+
+/* Flags which may appear in a DT_MIPS_FLAGS entry.  */
+
+/* No flags.  */
+#define RHF_NONE		0x00000000
+
+/* Uses shortcut pointers.  */
+#define RHF_QUICKSTART		0x00000001
+
+/* Hash size is not a power of two.  */
+#define RHF_NOTPOT		0x00000002
+
+/* Ignore LD_LIBRARY_PATH.  */
+#define RHS_NO_LIBRARY_REPLACEMENT \
+				0x00000004
+
+/* Special values for the st_other field in the symbol table.  These
+   are used in an Irix 5 dynamic symbol table.  */
+
+#define STO_DEFAULT		0x00
+#define STO_INTERNAL		0x01
+#define STO_HIDDEN		0x02
+#define STO_PROTECTED		0x03
+
+/* The 64-bit MIPS ELF ABI uses an usual reloc format.  Each
+   relocation entry specifies up to three actual relocations, all at
+   the same address.  The first relocation which required a symbol
+   uses the symbol in the r_sym field.  The second relocation which
+   requires a symbol uses the symbol in the r_ssym field.  If all
+   three relocations require a symbol, the third one uses a zero
+   value.  */
+
+/* An entry in a 64 bit SHT_REL section.  */
+
+typedef struct
+{
+  /* Address of relocation.  */
+  unsigned char r_offset[8];
+  /* Symbol index.  */
+  unsigned char r_sym[4];
+  /* Special symbol.  */
+  unsigned char r_ssym[1];
+  /* Third relocation.  */
+  unsigned char r_type3[1];
+  /* Second relocation.  */
+  unsigned char r_type2[1];
+  /* First relocation.  */
+  unsigned char r_type[1];
+} Elf64_Mips_External_Rel;
+
+typedef struct
+{
+  /* Address of relocation.  */
+  bfd_vma r_offset;
+  /* Symbol index.  */
+  unsigned long r_sym;
+  /* Special symbol.  */
+  unsigned char r_ssym;
+  /* Third relocation.  */
+  unsigned char r_type3;
+  /* Second relocation.  */
+  unsigned char r_type2;
+  /* First relocation.  */
+  unsigned char r_type;
+} Elf64_Mips_Internal_Rel;
+
+/* An entry in a 64 bit SHT_RELA section.  */
+
+typedef struct
+{
+  /* Address of relocation.  */
+  unsigned char r_offset[8];
+  /* Symbol index.  */
+  unsigned char r_sym[4];
+  /* Special symbol.  */
+  unsigned char r_ssym[1];
+  /* Third relocation.  */
+  unsigned char r_type3[1];
+  /* Second relocation.  */
+  unsigned char r_type2[1];
+  /* First relocation.  */
+  unsigned char r_type[1];
+  /* Addend.  */
+  unsigned char r_addend[8];
+} Elf64_Mips_External_Rela;
+
+typedef struct
+{
+  /* Address of relocation.  */
+  bfd_vma r_offset;
+  /* Symbol index.  */
+  unsigned long r_sym;
+  /* Special symbol.  */
+  unsigned char r_ssym;
+  /* Third relocation.  */
+  unsigned char r_type3;
+  /* Second relocation.  */
+  unsigned char r_type2;
+  /* First relocation.  */
+  unsigned char r_type;
+  /* Addend.  */
+  bfd_signed_vma r_addend;
+} Elf64_Mips_Internal_Rela;
+
+/* Values found in the r_ssym field of a relocation entry.  */
+
+/* No relocation.  */
+#define RSS_UNDEF	0
+
+/* Value of GP.  */
+#define RSS_GP		1
+
+/* Value of GP in object being relocated.  */
+#define RSS_GP0		2
+
+/* Address of location being relocated.  */
+#define RSS_LOC		3
+
+#endif /* _ELF_MIPS_H */
