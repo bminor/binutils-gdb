@@ -1,3 +1,13 @@
+Thu Dec 16 13:08:01 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* config/m68k/nm-hp300bsd.h: Correctly identify 4.3BSD vs 4.4BSD.
+
+	* config/m68k/tm-hp300bsd.h (REMOTE_BPT_VECTOR): Define.
+
+	* config/m68k/tm-m68k.h (REMOTE_BPT_VECTOR): Allow targets to
+	override.
+	(REMOTE_BREAKPOINT): Likewise.
+
 Mon Dec 13 20:17:39 1993  Per Bothner  (bothner@kalessin.cygnus.com)
 
 	Implement support for Chill POWERSETs.

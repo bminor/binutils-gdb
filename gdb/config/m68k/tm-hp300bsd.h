@@ -30,6 +30,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    This is the vector number used by traps to indicate a breakpoint. */
 
 #define BPT_VECTOR 0x2
+#define REMOTE_BPT_VECTOR 0xf
 
 #define TARGET_NBPG 4096
 

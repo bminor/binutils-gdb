@@ -68,10 +68,15 @@ extern CORE_ADDR m68k_saved_pc_after_call PARAMS ((struct frame_info *));
 #define BREAKPOINT {0x4e, (0x40 | BPT_VECTOR)}
 #endif
 
-/* We always use vector 1 for the "remote" target.  This is hardcoded in
-   m68k-stub.c.  */
+/* We default to vector 1 for the "remote" target, but allow targets
+   to override.  */
+#if !defined (REMOTE_BPT_VECTOR)
 #define REMOTE_BPT_VECTOR 1
+#endif
+
+#if !defined (REMOTE_BREAKPOINT)
 #define REMOTE_BREAKPOINT {0x4e, (0x40 | REMOTE_BPT_VECTOR)}
+#endif
 
 /* If your kernel resets the pc after the trap happens you may need to
    define this before including this file.  */

@@ -20,7 +20,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Detect whether this is 4.3 or 4.4.  */
 
 #include <errno.h>
-#ifdef	EPROCUNAVAIL
+#include <sys/param.h>
+#ifdef	BSD4_4
 
 /* BSD 4.4 alpha or better */
 
