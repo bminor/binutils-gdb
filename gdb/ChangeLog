@@ -1,3 +1,9 @@
+2001-08-23  Martin M. Hunt  <hunt@redhat.com>
+
+	* remote-mips.c (pmon_load_fast): Add ui_load_progress_hook
+	to download loop.
+	(mips_load_srec): Ditto.
+
 2001-08-22  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbtypes.c (build_gdbtypes): Initialize TYPE_FLOATFORMAT field
