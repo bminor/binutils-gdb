@@ -1,3 +1,13 @@
+2001-05-10  Michael Snyder  <msnyder@redhat.com>
+
+	* remote.c (bin2hex, hex2bin): New functions.  Factor out these
+	two conversions which are coded for repeatedly in this module.
+	(remote_threads_extra_info, remote_wait, remote_async_wait, 
+	store_register_using_P, remote_store_registers, remote_write_bytes,
+	remote_read_bytes, remote_rcmd): Use bin2hex and hex2bin instead
+	of coding the conversions inline.
+	(fromhex): Not exported, change from extern to static.
+
 2001-05-10  Andrew Cagney  <ac131313@redhat.com>
 
 	* arch-utils.c (initialize_current_architecture): Delete obsolete
@@ -12,7 +22,7 @@
 
 	* MAINTAINERS: Jim Ingham is no longer maintaining Arm related
 	stuff.
-	
+
 2001-05-10  Keith Seitz  <keiths@cygnus.com>
 
 	* Makefile.in (SUBDIR_GDBTK_OBS): Add gdbtk-bp.o, gdbtk-register.o

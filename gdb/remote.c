@@ -186,9 +186,9 @@ static void remote_find_new_threads (void);
 
 static void record_currthread (int currthread);
 
-/* exported functions */
+static int fromhex (int a);
 
-extern int fromhex (int a);
+static int hex2bin (const char *hex, char *bin, int);
 
 static int putpkt_binary (char *buf, int cnt);
 
@@ -1735,17 +1735,9 @@ remote_threads_extra_info (struct thread_info *tp)
       getpkt (bufp, PBUFSIZ, 0);
       if (bufp[0] != 0)
 	{
-	  char *p;
-
-	  for (p = display_buf; 
-	       p < display_buf + sizeof(display_buf) - 1 &&
-		 bufp[0] != 0 &&
-		 bufp[1] != 0;
-	       p++, bufp+=2)
-	    {
-	      *p = fromhex (bufp[0]) * 16 + fromhex (bufp[1]);
-	    }
-	  *p = 0;
+	  n = min (strlen (bufp) / 2, sizeof (display_buf));
+	  result = hex2bin (bufp, display_buf, n);
+	  display_buf [result] = '\0';
 	  return display_buf;
 	}
     }
@@ -2322,7 +2314,7 @@ remote_async_detach (char *args, int from_tty)
 
 /* Convert hex digit A to a number.  */
 
-int
+static int
 fromhex (int a)
 {
   if (a >= '0' && a <= '9')
@@ -2335,6 +2327,29 @@ fromhex (int a)
     error ("Reply contains invalid hex digit %d", a);
 }
 
+static int
+hex2bin (const char *hex, char *bin, int count)
+{
+  int i;
+
+  /* May use a length, or a nul-terminated string as input. */
+  if (count == 0)
+    count = strlen (hex) / 2;
+
+  for (i = 0; i < count; i++)
+    {
+      if (hex[0] == 0 || hex[1] == 0)
+	{
+	  /* Hex string is short, or of uneven length.
+	     Return the count that has been converted so far. */
+	  return i;
+	}
+      *bin++ = fromhex (hex[0]) * 16 + fromhex (hex[1]);
+      hex += 2;
+    }
+  return i;
+}
+
 /* Convert number NIB to a hex digit.  */
 
 static int
@@ -2344,6 +2359,23 @@ tohex (int nib)
     return '0' + nib;
   else
     return 'a' + nib - 10;
+}
+
+static int
+bin2hex (char *bin, char *hex, int count)
+{
+  int i;
+  /* May use a length, or a nul-terminated string as input. */
+  if (count == 0)
+    count = strlen (bin);
+
+  for (i = 0; i < count; i++)
+    {
+      *hex++ = tohex ((*bin >> 4) & 0xf);
+      *hex++ = tohex (*bin++ & 0xf);
+    }
+  *hex = 0;
+  return i;
 }
 
 /* Tell the remote machine to resume.  */
@@ -2830,13 +2862,9 @@ Packet: '%s'\n",
 Packet: '%s'\n",
 			       regno, p, buf);
 
-		    for (i = 0; i < REGISTER_RAW_SIZE (regno); i++)
-		      {
-			if (p[0] == 0 || p[1] == 0)
-			  warning ("Remote reply is too short: %s", buf);
-			regs[i] = fromhex (p[0]) * 16 + fromhex (p[1]);
-			p += 2;
-		      }
+		    if (hex2bin (p, regs, REGISTER_RAW_SIZE (regno))
+			< REGISTER_RAW_SIZE (regno))
+		      warning ("Remote reply is too short: %s", buf);
 		    supply_register (regno, regs);
 		  }
 
@@ -3051,13 +3079,9 @@ Packet: '%s'\n",
 Packet: '%s'\n",
 			       regno, p, buf);
 
-		    for (i = 0; i < REGISTER_RAW_SIZE (regno); i++)
-		      {
-			if (p[0] == 0 || p[1] == 0)
-			  warning ("Remote reply is too short: %s", buf);
-			regs[i] = fromhex (p[0]) * 16 + fromhex (p[1]);
-			p += 2;
-		      }
+		    if (hex2bin (p, regs, REGISTER_RAW_SIZE (regno)) 
+			< REGISTER_RAW_SIZE (regno))
+		      warning ("Remote reply is too short: %s", buf);
 		    supply_register (regno, regs);
 		  }
 
@@ -3307,12 +3331,7 @@ store_register_using_P (int regno)
   sprintf (buf, "P%x=", regno);
   p = buf + strlen (buf);
   regp = register_buffer (regno);
-  for (i = 0; i < REGISTER_RAW_SIZE (regno); ++i)
-    {
-      *p++ = tohex ((regp[i] >> 4) & 0xf);
-      *p++ = tohex (regp[i] & 0xf);
-    }
-  *p = '\0';
+  bin2hex (regp, p, REGISTER_RAW_SIZE (regno));
   remote_send (buf, PBUFSIZ);
 
   return buf[0] != '\0';
@@ -3369,13 +3388,7 @@ remote_store_registers (int regno)
   regs = register_buffer (-1);
   p = buf + 1;
   /* remote_prepare_to_store insures that register_bytes_found gets set.  */
-  for (i = 0; i < register_bytes_found; i++)
-    {
-      *p++ = tohex ((regs[i] >> 4) & 0xf);
-      *p++ = tohex (regs[i] & 0xf);
-    }
-  *p = '\0';
-
+  bin2hex (regs, p, register_bytes_found);
   remote_send (buf, PBUFSIZ);
 }
 
@@ -3602,12 +3615,7 @@ remote_write_bytes (CORE_ADDR memaddr, char *myaddr, int len)
       /* Normal mode: Send target system values byte by byte, in
 	 increasing byte addresses.  Each byte is encoded as a two hex
 	 value.  */
-      for (nr_bytes = 0; nr_bytes < todo; nr_bytes++)
-	{
-	  *p++ = tohex ((myaddr[nr_bytes] >> 4) & 0xf);
-	  *p++ = tohex (myaddr[nr_bytes] & 0xf);
-	}
-      *p = '\0';
+      bin2hex (myaddr, p, todo);
       break;
     case PACKET_SUPPORT_UNKNOWN:
       internal_error (__FILE__, __LINE__,
@@ -3698,14 +3706,11 @@ remote_read_bytes (CORE_ADDR memaddr, char *myaddr, int len)
          each byte encoded as two hex characters.  */
 
       p = buf;
-      for (i = 0; i < todo; i++)
+      if ((i = hex2bin (p, myaddr, todo)) < todo)
 	{
-	  if (p[0] == 0 || p[1] == 0)
-	    /* Reply is short.  This means that we were able to read
-	       only part of what we wanted to.  */
-	    return i + (origlen - len);
-	  myaddr[i] = fromhex (p[0]) * 16 + fromhex (p[1]);
-	  p += 2;
+	  /* Reply is short.  This means that we were able to read
+	     only part of what we wanted to. */
+	  return i + (origlen - len);
 	}
       myaddr += todo;
       memaddr += todo;
@@ -4905,12 +4910,7 @@ remote_rcmd (char *command,
     error ("\"monitor\" command ``%s'' is too long\n", command);
 
   /* Encode the actual command */
-  for (i = 0; command[i]; i++)
-    {
-      *p++ = tohex ((command[i] >> 4) & 0xf);
-      *p++ = tohex (command[i] & 0xf);
-    }
-  *p = '\0';
+  bin2hex (command, p, 0);
 
   if (putpkt (buf) < 0)
     error ("Communication problem with target\n");
