@@ -1,12 +1,12 @@
 # Danish messages for bfd.
 # Copyright (C) 2001, 2002 Free Software Foundation, Inc.
-# Keld Simonsen <keld@dkuug.dk>, 2002
+# Keld Simonsen <keld@dkuug.dk>, 2002-2003
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: bfd 2.12.91\n"
 "POT-Creation-Date: 2002-07-23 15:55-0400\n"
-"PO-Revision-Date: 2002-11-09 23:25+0100\n"
+"PO-Revision-Date: 2003-03-01 23:25+0100\n"
 "Last-Translator: Keld Simonsen <keld@dkuug.dk>\n"
 "Language-Team: Danish <dansk@klid.dk>\n"
 "MIME-Version: 1.0\n"
@@ -1179,14 +1179,14 @@ msgid "%s: error: unaligned relocation type %d at %08x reloc %08x\n"
 msgstr "%s: fejl: ujusteret relokeringstype %d på %08x relokering %08x\n"
 
 #: elf32-sh64.c:677
-#, fuzzy, c-format
+#, c-format
 msgid "%s: could not write out added .cranges entries"
-msgstr "%s: kunne ikke udskrive tilføjede .crangives-poster"
+msgstr "%s: kunne ikke udskrive tilføjede .cranges-poster"
 
 #: elf32-sh64.c:739
-#, fuzzy, c-format
+#, c-format
 msgid "%s: could not write out sorted .cranges entries"
-msgstr "%s: kunne ikke udskrive sorterede crangives-poster"
+msgstr "%s: kunne ikke udskrive sorterede cranges-poster"
 
 #: elf32-sparc.c:1535 elf64-sparc.c:2224
 #, c-format
@@ -1204,22 +1204,22 @@ msgid "%s: linking little endian files with big endian files"
 msgstr "%s: lænker little endian-filer med big endian-filer"
 
 #: elf32-v850.c:682
-#, fuzzy, c-format
+#, c-format
 msgid "Variable `%s' cannot occupy in multiple small data regions"
 msgstr "Variabel \"%s\" kan ikke befinde sig i flere små dataområder"
 
 #: elf32-v850.c:685
-#, fuzzy, c-format
+#, c-format
 msgid "Variable `%s' can only be in one of the small, zero, and tiny data regions"
-msgstr "Variabel \"%s\" kan kun være i et af de små, tomme og bittesmå dataområder"
+msgstr "Variabel \"%s\" kan kun være i ét af de små, tomme og bittesmå dataområder"
 
 #: elf32-v850.c:688
-#, fuzzy, c-format
+#, c-format
 msgid "Variable `%s' cannot be in both small and zero data regions simultaneously"
 msgstr "Variabel \"%s\" kan ikke være i både små og tomme dataområder samtidigt"
 
 #: elf32-v850.c:691
-#, fuzzy, c-format
+#, c-format
 msgid "Variable `%s' cannot be in both small and tiny data regions simultaneously"
 msgstr "Variabel \"%s\" kan ikke være i både små og bittesmå dataområder samtidigt"
 

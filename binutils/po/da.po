@@ -1,12 +1,12 @@
 # Danish messages for binutils.
 # Copyright (C) 2001, 2002 Free Software Foundation, Inc.
-# Keld Simonsen <keld@dkuug.dk>, 2002.
+# Keld Simonsen <keld@dkuug.dk>, 2002-2003.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: binutils 2.12.91\n"
 "POT-Creation-Date: 2002-07-23 15:55-0400\n"
-"PO-Revision-Date: 2002-11-09 19:55+0100\n"
+"PO-Revision-Date: 2003-03-01 19:55+0100\n"
 "Last-Translator: Keld Simonsen <keld@dkuug.dk>\n"
 "Language-Team: Danish <dansk@klid.dk>\n"
 "MIME-Version: 1.0\n"
@@ -64,9 +64,9 @@ msgid "no entry %s in archive\n"
 msgstr "ingen post %s i arkivet\n"
 
 #: ar.c:255
-#, fuzzy, c-format
+#, c-format
 msgid "Usage: %s [emulation options] [-]{dmpqrstx}[abcfilNoPsSuvV] [member-name] [count] archive-file file...\n"
-msgstr "Brug: %s [-X32_64] [-]{dmpqrstx}[abcfilNoPsSuvV] [medlemsnavn] [nummer] arkivfil fil...\n"
+msgstr ""
 
 #: ar.c:258
 #, c-format
@@ -162,23 +162,23 @@ msgid "  [V]          - display the version number\n"
 msgstr "  [V]          - vis versionsinformation\n"
 
 #: ar.c:287
-#, fuzzy, c-format
+#, c-format
 msgid "Usage: %s [options] archive\n"
-msgstr "Brug: %s [-vV] arkiv\n"
+msgstr ""
 
 #: ar.c:288
 msgid " Generate an index to speed access to archives\n"
 msgstr ""
 
 #: ar.c:289
-#, fuzzy
 msgid ""
 " The options are:\n"
 "  -h --help                    Print this help message\n"
 "  -V --version                 Print version information\n"
 msgstr ""
-"  --help                      Vis denne hjælp\n"
-"  --version                   Vis versionsinformation\n"
+" Valgmulighederne er:\n"
+"  -h --help                    Vis denne hjælpebesked\n"
+"  -V --version                 Vis versionsinformation\n"
 
 #: ar.c:512
 msgid "two different operation options specified"
@@ -315,20 +315,20 @@ msgstr "Det aktuelle åbne arkiv er %s\n"
 
 #  BUGG: dubbelt blanksteg
 #: arsup.c:464
-#, fuzzy, c-format
+#, c-format
 msgid "%s: no open archive\n"
 msgstr "%s: intet åbent arkiv\n"
 
 #: binemul.c:39
-#, fuzzy, c-format
+#, c-format
 msgid "  No emulation specific options\n"
-msgstr "  Generelle flag:\n"
+msgstr ""
 
 #. Macros for common output.
 #: binemul.h:42
-#, fuzzy, c-format
+#, c-format
 msgid " emulation options: \n"
-msgstr "  Generelle flag:\n"
+msgstr ""
 
 #: bucomm.c:106
 #, c-format
@@ -369,14 +369,13 @@ msgid "#lines %d "
 msgstr "#linjer %d "
 
 #: coffdump.c:471 sysdump.c:767
-#, fuzzy, c-format
+#, c-format
 msgid "Usage: %s [option(s)] in-file\n"
-msgstr "Brug: %s <flag> inddatafil(er)\n"
+msgstr "Brug: %s [flag] inddatafil\n"
 
 #: coffdump.c:472
-#, fuzzy
 msgid " Print a human readable interpretation of a SYSROFF object file\n"
-msgstr "%s: Skriv en menneskeligt læsbar tolkning af en SYSROFF-objektfil\n"
+msgstr " Skriv en menneskeligt læsbar tolkning af en SYSROFF-objektfil\n"
 
 #: coffdump.c:473
 msgid ""
@@ -443,7 +442,6 @@ msgstr "debug_end_common_block: ikke implementeret"
 #  BUGG: Kolon mangler antagligen
 #. FIXME.
 #: debug.c:1152
-#, fuzzy
 msgid "debug_record_label: not implemented"
 msgstr "debug_record_label: ikke implementeret"
 
@@ -665,7 +663,7 @@ msgstr "Definitionerne er behandlede"
 #  BUGG: Kolon fattas
 #. xgetext:c-format
 #: dlltool.c:3130 dllwrap.c:495
-#, fuzzy, c-format
+#, c-format
 msgid "Usage %s <option(s)> <object-file(s)>\n"
 msgstr "Brug: %s <flag> <objektfiler>\n"
 
@@ -1024,19 +1022,17 @@ msgid "DRIVER options  : %s\n"
 msgstr "ENHED flag     : %s\n"
 
 #: emul_aix.c:52
-#, fuzzy, c-format
+#, c-format
 msgid "  [-g]         - 32 bit small archive\n"
-msgstr "  x[o]         - hente fil(er) fra arkivet\n"
+msgstr ""
 
 #: emul_aix.c:53
-#, fuzzy
 msgid "  [-X32]       - ignores 64 bit objects\n"
-msgstr "  [-X32_64]    - (ignoreret)\n"
+msgstr ""
 
 #: emul_aix.c:54
-#, fuzzy
 msgid "  [-X64]       - ignores 32 bit objects\n"
-msgstr "  [-X32_64]    - (ignoreret)\n"
+msgstr ""
 
 #: emul_aix.c:55
 msgid "  [-X32_64]    - accepts 32 and 64 bit objects\n"
@@ -1129,7 +1125,6 @@ msgstr "Pascal-filnavn understøttes ikke"
 
 #  BUGG: qualif>i<er
 #: ieee.c:1919
-#, fuzzy
 msgid "unsupported qualifier"
 msgstr "bestemmelsen understøttes ikke"
 
@@ -1389,13 +1384,13 @@ msgid "warning: MAP and FULLMAP are not supported; try ld -M"
 msgstr "advarsel: MAP og FULLMAP understøttes ikke; forsøg med ld -M"
 
 #: nlmconv.c:1107
-#, fuzzy, c-format
+#, c-format
 msgid "Usage: %s [option(s)] [in-file [out-file]]\n"
-msgstr "Brug: %s <flag> inddatafil [uddatafil]\n"
+msgstr "Brug: %s [flag] [inddatafil [uddatafil]]\n"
 
 #: nlmconv.c:1108
 msgid " Convert an object file into a NetWare Loadable Module\n"
-msgstr "Konvertér en objektfil til et indlæsningsbart NetWare-modul\n"
+msgstr " Konvertér en objektfil til et indlæsningsbart NetWare-modul\n"
 
 #: nlmconv.c:1109
 msgid ""
@@ -1467,14 +1462,13 @@ msgid "Execution of %s failed"
 msgstr "Eksekvering af %s mislykkedes"
 
 #: nm.c:246 size.c:85 strings.c:650
-#, fuzzy, c-format
+#, c-format
 msgid "Usage: %s [option(s)] [file(s)]\n"
-msgstr "Brug: %s <flag> inddatafil(er)\n"
+msgstr "Brug: %s [flag] [inddatafiler]\n"
 
 #: nm.c:247
-#, fuzzy
 msgid " List symbols in [file(s)] (a.out by default).\n"
-msgstr "List symboler i FILerne (eller a.out).\n"
+msgstr " List symboler i FILerne (eller a.out).\n"
 
 #: nm.c:248
 #, fuzzy
@@ -1660,9 +1654,9 @@ msgstr ""
 "Arkivindeks:\n"
 
 #: objcopy.c:363 srconv.c:1952
-#, fuzzy, c-format
+#, c-format
 msgid "Usage: %s [option(s)] in-file [out-file]\n"
-msgstr "Brug: %s <flag> inddatafil [uddatafil]\n"
+msgstr "Brug: %s [flag] inddatafil [uddatafil]\n"
 
 #: objcopy.c:364
 msgid " Copies a binary file, possibly transforming it in the process\n"
@@ -1786,9 +1780,9 @@ msgstr ""
 "  -h --help                       Vis denne hjælp\n"
 
 #: objcopy.c:433
-#, fuzzy, c-format
+#, c-format
 msgid "Usage: %s <option(s)> in-file(s)\n"
-msgstr "Brug: %s <flag> inddatafil(er)\n"
+msgstr "Brug: %s <flag> inddatafiler\n"
 
 #: objcopy.c:434
 msgid " Removes symbols and sections from files\n"
@@ -2025,18 +2019,17 @@ msgid "%s %s%c0x%s never used"
 msgstr "%s %s%c0x%s bruges aldrig"
 
 #: objdump.c:165
-#, fuzzy, c-format
+#, c-format
 msgid "Usage: %s <option(s)> <file(s)>\n"
-msgstr "Brug: %s <flag> inddatafil(er)\n"
+msgstr "Brug: %s <flag> <inddatafiler>\n"
 
 #: objdump.c:166
-#, fuzzy
 msgid " Display information from object <file(s)>.\n"
-msgstr "Vis information fra en objektFIL.\n"
+msgstr " Vis information fra <objektfiler>.\n"
 
 #: objdump.c:167
 msgid " At least one of the following switches must be given:\n"
-msgstr "Mindst et af følgende flag skal angives:\n"
+msgstr " Mindst et af følgende flag skal angives:\n"
 
 #: objdump.c:168
 #, fuzzy
@@ -2438,9 +2431,8 @@ msgid "None"
 msgstr "Ingen"
 
 #: readelf.c:2278
-#, fuzzy
 msgid "Usage: readelf <option(s)> elf-file(s)\n"
-msgstr "Brug: readelf {flag} elf-fil(er)\n"
+msgstr "Brug: readelf <flag> elf-filer\n"
 
 #: readelf.c:2279
 msgid " Display information about the contents of ELF format files\n"
@@ -2471,11 +2463,12 @@ msgid ""
 msgstr ""
 
 #: readelf.c:2301
-#, fuzzy
 msgid ""
 "  -i --instruction-dump=<number>\n"
 "                         Disassemble the contents of section <number>\n"
-msgstr "                            Disassemblere indeholdet i sektion <nr>\n"
+msgstr ""
+"  -i --instruction-dump=<nr>\n"
+"                            Disassemblér indeholdet i sektion <nr>\n"
 
 #: readelf.c:2305
 msgid ""
@@ -3684,26 +3677,23 @@ msgid "(Unknown location op)"
 msgstr "(Ukendt plads-op)"
 
 #: readelf.c:7305
-#, fuzzy
 msgid "debug_loc section data"
-msgstr "fejlsøgningssektionsdata"
+msgstr "debug_loc sektionsdata"
 
 #: readelf.c:7336
-#, fuzzy
 msgid ""
 "\n"
 "The .debug_loc section is empty.\n"
 msgstr ""
 "\n"
-".debug_str-sektionen er tom.\n"
+".debug_loc-sektionen er tom.\n"
 
 #: readelf.c:7339
-#, fuzzy
 msgid ""
 "Contents of the .debug_loc section:\n"
 "\n"
 msgstr ""
-"Indhold i .debug_str-sektionen:\n"
+"Indhold i .debug_loc-sektionen:\n"
 "\n"
 
 #: readelf.c:7340
@@ -3832,12 +3822,10 @@ msgid " <%d><%lx>: Abbrev Number: %lu (%s)\n"
 msgstr " <%d><%lx>: Fork.-nummer: %lu (%s)\n"
 
 #: readelf.c:8050
-#, fuzzy
 msgid "64-bit DWARF aranges are not supported yet.\n"
 msgstr "64-bit DWARF-a-intervaller understøttes ikke endnu.\n"
 
 #: readelf.c:8056
-#, fuzzy
 msgid "Only DWARF 2 aranges are currently supported.\n"
 msgstr "Kun DWARF2's a-intervaller understøttes i øjeblikket.\n"
 

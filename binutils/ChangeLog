@@ -1,3 +1,7 @@
+2003-03-03  Nick Clifton  <nickc@redhat.com>
+
+	* po/da.po: Installed latest translation.
+
 2003-02-24  Nick Clifton  <nickc@redhat.com>
 
 	* README: Update binutils references to 2.13.
