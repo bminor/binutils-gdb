@@ -1,5 +1,10 @@
 2004-09-04  Joel Brobecker  <brobecker@gnat.com>
 
+	* config/rs6000/xm-aix4.h: Remove this file.
+	* config/rs6000/aix4.mh (XM_FILE): Delete.
+
+2004-09-04  Joel Brobecker  <brobecker@gnat.com>
+
 	* config/rs6000/xm-rs6000.h: Remove this file.
 	* config/rs6000/rs6000.mh (XM_FILE): Remove.
 
