@@ -19,6 +19,7 @@
  *	@(#)gprof.h	5.9 (Berkeley) 6/1/90
  */
 
+#include <ansidecl.h>
 #include "sysdep.h"
 #include "bfd.h"
 #include "gmon.h"

@@ -1,3 +1,7 @@
+Mon Apr 26 12:37:46 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* gprof.h: Include ansidecl.h before sysdep.h.
+
 Tue Apr 13 16:14:03 1993  Per Bothner  (bothner@cygnus.com)
 
 	* M Makefile.in:  Add -g to CFLAGS.
