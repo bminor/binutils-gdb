@@ -1,3 +1,13 @@
+Wed Nov 17 18:43:28 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* libecoff.h: Include coff/ecoff.h.
+	(struct ecoff_backend_data): Move external debugging information
+	fields into a single field pointing to an ecoff_debug_swap
+	structure.
+	(ecoff_data_type): Move debugging information fields into a single
+	field pointing to an ecoff_debug_info structure.
+	* coff-alpha.c, coff-mips.c, ecoff.c: Corresponding changes.
+
 Wed Nov 17 13:56:10 1993  Stan Shebs  (shebs@rtl.cygnus.com)
 
 	* i386lynx.c (swap_std_reloc_in, swap_ext_reloc_in): Ignore
