@@ -23,7 +23,7 @@ SYMBOL TABLE:
 0+ g     O \.text	0+ _start\.
 
 Contents of section \.text:
- 0000 e3fd0001                             \.\.\.\.
+ 0000 e3fd0001                             .*
 Contents of section \.data:
- 0008 20000000 00000008                     \.\.\.\.\.\.\.
+ 0008 20000000 00000008                    .*
 Contents of section \.sbss:

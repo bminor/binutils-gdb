@@ -1,5 +1,6 @@
 2001-10-31  Hans-Peter Nilsson  <hp@bitrange.com>
 
+	* ld-mmix/locdo-1.d: Prune character dump part.
 	* ld-mmix/local7m.d, ld-mmix/loc4.d, ld-mmix/loc4m.d,
  	ld-mmix/loc1.d, ld-mmix/bspec1m.d, ld-mmix/bspec2m.d,
  	ld-mmix/b-nosym.d, ld-mmix/b-fixo2.d, ld-mmix/b-loc64k.d,
