@@ -1,5 +1,5 @@
 /* macro.c - macro support for gas
-   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
    Free Software Foundation, Inc.
 
    Written by Steve and Judy Chamberlain of Cygnus Support,
@@ -54,6 +54,7 @@ extern void *alloca ();
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
+#include "as.h"
 #include "libiberty.h"
 #include "safe-ctype.h"
 #include "sb.h"
@@ -756,7 +757,7 @@ macro_expand_body (sb *in, sb *out, formal_entry *formals,
 
 		  src = get_token (src, in, &f->name);
 		  ++loccnt;
-		  sprintf (buf, "LL%04x", loccnt);
+		  sprintf (buf, IS_ELF ? ".LL%04x" : "LL%04x", loccnt);
 		  sb_add_string (&f->actual, buf);
 
 		  err = hash_jam (formal_hash, sb_terminate (&f->name), f);
