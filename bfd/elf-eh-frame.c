@@ -482,6 +482,7 @@ _bfd_elf_discard_section_eh_frame
 	 on whether to output or discard last encountered CIE (if any).  */
       if ((bfd_size_type) (buf - ehbuf) == sec->size)
 	{
+	  hdr.length = 0;
 	  hdr.id = (unsigned int) -1;
 	  end = buf;
 	}

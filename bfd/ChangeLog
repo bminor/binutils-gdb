@@ -1,3 +1,7 @@
+2005-02-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Fix warning.
+
 2005-02-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* coff-arm.c (coff_arm_is_local_label_name): Warning fix.
