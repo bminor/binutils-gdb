@@ -593,7 +593,7 @@ done
 # function typedef's
 echo ""
 echo ""
-echo "/* The following are initialized by the target dependant code. */"
+echo "/* The following are initialized by the target dependent code. */"
 function_list | while do_read
 do
     if [ "${comment}" ]
@@ -699,7 +699,7 @@ extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 
    The mechanisms below ensures that there is only a loose connection
    between the set-architecture command and the various GDB
-   components.  Each component can independantly register their need
+   components.  Each component can independently register their need
    to maintain architecture specific data with gdbarch.
 
    Pragmatics:
@@ -709,7 +709,7 @@ extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 
    The more traditional mega-struct containing architecture specific
    data for all the various GDB components was also considered.  Since
-   GDB is built from a variable number of (fairly independant)
+   GDB is built from a variable number of (fairly independent)
    components it was determined that the global aproach was not
    applicable. */
 
@@ -869,7 +869,7 @@ extern void register_gdbarch_swap (void *data, unsigned long size, gdbarch_swap_
 
 
 
-/* The target-system-dependant byte order is dynamic */
+/* The target-system-dependent byte order is dynamic */
 
 /* TARGET_BYTE_ORDER_SELECTABLE_P determines if the target endianness
    is selectable at runtime.  The user can use the \`\`set endian''
@@ -909,7 +909,7 @@ extern int target_byte_order_auto;
 
 
 
-/* The target-system-dependant BFD architecture is dynamic */
+/* The target-system-dependent BFD architecture is dynamic */
 
 extern int target_architecture_auto;
 #ifndef TARGET_ARCHITECTURE_AUTO
@@ -922,7 +922,7 @@ extern const struct bfd_arch_info *target_architecture;
 #endif
 
 
-/* The target-system-dependant disassembler is semi-dynamic */
+/* The target-system-dependent disassembler is semi-dynamic */
 
 #include "dis-asm.h"		/* Get defs for disassemble_info */
 
@@ -963,7 +963,7 @@ extern disassemble_info tm_print_insn_info;
 #endif
 
 
-/* Set the dynamic target-system-dependant parameters (architecture,
+/* Set the dynamic target-system-dependent parameters (architecture,
    byte-order, ...) using information found in the BFD */
 
 extern void set_gdbarch_from_file (bfd *);
@@ -1529,7 +1529,7 @@ gdbarch_data (struct gdbarch_data *data)
 
 
 
-/* Keep a registrary of swaped data required by GDB modules. */
+/* Keep a registrary of swapped data required by GDB modules. */
 
 struct gdbarch_swap
 {
