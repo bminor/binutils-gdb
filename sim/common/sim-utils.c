@@ -78,11 +78,27 @@ sim_state_alloc (SIM_OPEN_KIND kind,
 {
   int cpu_nr;
   SIM_DESC sd = ZALLOC (struct sim_state);
+
   STATE_MAGIC (sd) = SIM_MAGIC_NUMBER;
   STATE_CALLBACK (sd) = callback;
   STATE_OPEN_KIND (sd) = kind;
+
+#if 0
+  /* Initialize the back link from the cpu struct to the state struct.  */
+  /* ??? I can envision a design where the state struct contains an array
+     of pointers to cpu structs, rather than an array of structs themselves.
+     Implementing this is trickier as one may not know what to allocate until
+     one has parsed the args.  Parsing the args twice wouldn't be unreasonable,
+     IMHO.  If the state struct ever does contain an array of pointers then we
+     can't do this here.  */
   for (cpu_nr = 0; cpu_nr < MAX_NR_PROCESSORS; cpu_nr++)
     CPU_STATE (STATE_CPU (sd, cpu_nr)) = sd;
+#endif
+
+#ifdef SIM_STATE_INIT
+  SIM_STATE_INIT (sd);
+#endif
+
   return sd;
 }
 
@@ -92,6 +108,11 @@ void
 sim_state_free (SIM_DESC sd)
 {
   ASSERT (sd->base.magic == SIM_MAGIC_NUMBER);
+
+#ifdef SIM_STATE_FREE
+  SIM_STATE_FREE (sd);
+#endif
+
   zfree (sd);
 }
 
@@ -164,6 +185,14 @@ sim_analyze_program (sd, prog_name, prog_bfd)
     }
   if (STATE_ARCHITECTURE (sd) != NULL)
     bfd_set_arch_info (prog_bfd, STATE_ARCHITECTURE (sd));
+  else
+    {
+      if (bfd_get_arch (prog_bfd) != bfd_arch_unknown
+	  && bfd_get_arch (prog_bfd) != bfd_arch_obscure)
+	{
+	  STATE_ARCHITECTURE (sd) = bfd_get_arch_info (prog_bfd);
+	}
+    }
 
   /* update the sim structure */
   if (STATE_PROG_BFD (sd) != NULL)
