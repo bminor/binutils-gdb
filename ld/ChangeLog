@@ -1,3 +1,11 @@
+2000-02-29  H.J. Lu  <hjl@gnu.org>
+
+	* Makefile.am (check-DEJAGNU): Also pass LIBS="$(LIBS)". 
+	Set LC_COLLATE and LC_ALL to null and export them. It is for
+	sort which expects the C locale.
+	Add $(LIBS) to all $(HOSTING_LIBS).
+	* Makefile.in: Rebuild.
+
 2000-02-29  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* emultempl/{aix.em, armcoff.em, armelf.em, armelf_oabi.em,

@@ -1355,6 +1355,7 @@ $(EMULATION_OFILES): ../bfd/bfd.h sysdep.h config.h $(INCDIR)/bfdlink.h \
 check-DEJAGNU: site.exp
 	srcroot=`cd $(srcdir) && pwd`; export srcroot; \
 	r=`pwd`; export r; \
+	LC_COLLATE=; LC_ALL=; export LC_COLLATE LC_ALL; \
 	EXPECT=$(EXPECT); export EXPECT; \
 	if [ -f $(top_builddir)/../expect/expect ]; then \
 	  TCL_LIBRARY=`cd $(top_srcdir)/../tcl/library && pwd`; \
@@ -1367,7 +1368,7 @@ check-DEJAGNU: site.exp
 		CXX="$(CXX_FOR_TARGET)" CXXFLAGS="$(CXXFLAGS)" \
 		CC_FOR_HOST="$(CC)" CFLAGS_FOR_HOST="$(CFLAGS)" \
 		OFILES="$(OFILES)" BFDLIB="$(TESTBFDLIB)" \
-		LIBIBERTY="$(LIBIBERTY) $(INTLLIBS)" \
+		LIBIBERTY="$(LIBIBERTY) $(INTLLIBS)" LIBS="$(LIBS)" \
 		$(RUNTESTFLAGS); \
 	else echo "WARNING: could not find \`runtest'" 1>&2; :;\
 	fi
@@ -1379,16 +1380,16 @@ check-DEJAGNU: site.exp
 ld-partial.o: ld-new$(EXEEXT)
 	./ld-new$(EXEEXT) $(HOSTING_EMU) -o ld-partial.o -r $(OFILES)
 ld1$(EXEEXT): ld-partial.o
-	./ld-new$(EXEEXT) $(HOSTING_EMU) -o ld1$(EXEEXT) $(HOSTING_CRT0) ld-partial.o $(TESTBFDLIB) $(LIBIBERTY) $(HOSTING_LIBS)
+	./ld-new$(EXEEXT) $(HOSTING_EMU) -o ld1$(EXEEXT) $(HOSTING_CRT0) ld-partial.o $(TESTBFDLIB) $(LIBIBERTY) $(HOSTING_LIBS) $(LIBS)
 
 ld1-full$(EXEEXT): ld-new
-	./ld-new$(EXEEXT) $(HOSTING_EMU) -o ld1-full$(EXEEXT) $(HOSTING_CRT0) $(OFILES) $(TESTBFDLIB) $(LIBIBERTY) $(HOSTING_LIBS)
+	./ld-new$(EXEEXT) $(HOSTING_EMU) -o ld1-full$(EXEEXT) $(HOSTING_CRT0) $(OFILES) $(TESTBFDLIB) $(LIBIBERTY) $(HOSTING_LIBS) $(LIBS)
 
 ld2$(EXEEXT): ld1$(EXEEXT)
-	./ld1$(EXEEXT) $(HOSTING_EMU) -o ld2$(EXEEXT) $(HOSTING_CRT0) $(OFILES) $(TESTBFDLIB) $(LIBIBERTY) $(HOSTING_LIBS)
+	./ld1$(EXEEXT) $(HOSTING_EMU) -o ld2$(EXEEXT) $(HOSTING_CRT0) $(OFILES) $(TESTBFDLIB) $(LIBIBERTY) $(HOSTING_LIBS) $(LIBS)
 
 ld3$(EXEEXT): ld2$(EXEEXT)
-	./ld2$(EXEEXT) $(HOSTING_EMU) -o ld3$(EXEEXT) $(HOSTING_CRT0) $(OFILES) $(TESTBFDLIB) $(LIBIBERTY) $(HOSTING_LIBS)
+	./ld2$(EXEEXT) $(HOSTING_EMU) -o ld3$(EXEEXT) $(HOSTING_CRT0) $(OFILES) $(TESTBFDLIB) $(LIBIBERTY) $(HOSTING_LIBS) $(LIBS)
 
 bootstrap: ld3$(EXEEXT)
 	cmp ld2$(EXEEXT) ld3$(EXEEXT)
