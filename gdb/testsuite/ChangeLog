@@ -1,3 +1,9 @@
+2002-09-03  Keith Seitz  <keiths@redhat.com>
+
+	* lib/gdb.exp (gdb_compile_pthreads): Fix "build_bin" typo.
+	Use integer comparison instead of string comparison for testing
+	whether binary was built.
+
 2002-09-03  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.threads/killed.exp, gdb.threads/killed.c: New test.
