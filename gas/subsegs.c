@@ -19,9 +19,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*
- * Segments & sub-segments.
- */
+/* Segments & sub-segments.  */
 
 #include "as.h"
 
@@ -41,8 +39,7 @@ segment_info_type segment_info[SEG_MAXIMUM_ORDINAL];
 frchainS *data0_frchainP, *bss0_frchainP;
 
 #endif /* MANY_SEGMENTS */
-char const *const seg_name[] =
-{
+char const *const seg_name[] = {
   "absolute",
 #ifdef MANY_SEGMENTS
   "e0", "e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8", "e9",
@@ -567,8 +564,7 @@ section_symbol (sec)
 /* Return whether the specified segment is thought to hold text.  */
 
 #ifndef BFD_ASSEMBLER
-const char * const nontext_section_names[] =
-{
+const char * const nontext_section_names[] = {
   ".eh_frame",
   ".gcc_except_table",
 #ifdef OBJ_COFF

@@ -55,7 +55,7 @@
 #ifndef TC_FIX_ADJUSTABLE
 #define TC_FIX_ADJUSTABLE(fix) 1
 #endif
-		  
+
 #ifndef	MD_PCREL_FROM_SECTION
 #define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from(FIXP)
 #endif

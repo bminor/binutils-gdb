@@ -119,20 +119,17 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 #endif
 
 /* This structure remembers which .s were used.  */
-typedef struct file_info_struct
-{
+typedef struct file_info_struct {
   struct file_info_struct * next;
   char *                    filename;
   long                      pos;
   unsigned int              linenum;
   int                       at_end;
-}
-file_info_type;
+} file_info_type;
 
 /* This structure rememebrs which line from which file goes into which
    frag.  */
-struct list_info_struct
-{
+struct list_info_struct {
   /* Frag which this line of source is nearest to.  */
   fragS *frag;
 
@@ -157,16 +154,15 @@ struct list_info_struct
   /* Pointer to any error message associated with this line.  */
   char *message;
 
-  enum
-    {
-      EDICT_NONE,
-      EDICT_SBTTL,
-      EDICT_TITLE,
-      EDICT_NOLIST,
-      EDICT_LIST,
-      EDICT_NOLIST_NEXT,
-      EDICT_EJECT
-    } edict;
+  enum {
+    EDICT_NONE,
+    EDICT_SBTTL,
+    EDICT_TITLE,
+    EDICT_NOLIST,
+    EDICT_LIST,
+    EDICT_NOLIST_NEXT,
+    EDICT_EJECT
+  } edict;
   char *edict_arg;
 
   /* Nonzero if this line is to be omitted because it contains
@@ -194,7 +190,7 @@ static int                       paper_height = 60;
 extern int                       listing;
 
 /* File to output listings to.  */
-static FILE * list_file;
+static FILE *list_file;
 
 /* This static array is used to keep the text of data to be printed
    before the start of the line.  */
@@ -209,7 +205,7 @@ static char *data_buffer;
 
 /* Prototypes.  */
 static void listing_message PARAMS ((const char *name, const char *message));
-static file_info_type * file_info PARAMS ((const char *file_name));
+static file_info_type *file_info PARAMS ((const char *file_name));
 static void new_frag PARAMS ((void));
 static char *buffer_line PARAMS ((file_info_type *file,
 				  char *line, unsigned int size));

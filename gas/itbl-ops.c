@@ -114,43 +114,39 @@ int itbl_have_entries = 0;
 /*======================================================================*/
 /* structures for keeping itbl format entries */
 
-struct itbl_range
-  {
-    int sbit;			/* mask starting bit position */
-    int ebit;			/* mask ending bit position */
-  };
+struct itbl_range {
+  int sbit;			/* mask starting bit position */
+  int ebit;			/* mask ending bit position */
+};
 
-struct itbl_field
-  {
-    e_type type;		/* dreg/creg/greg/immed/symb */
-    struct itbl_range range;	/* field's bitfield range within instruction */
-    unsigned long flags;	/* field flags */
-    struct itbl_field *next;	/* next field in list */
-  };
+struct itbl_field {
+  e_type type;			/* dreg/creg/greg/immed/symb */
+  struct itbl_range range;	/* field's bitfield range within instruction */
+  unsigned long flags;		/* field flags */
+  struct itbl_field *next;	/* next field in list */
+};
 
 /* These structures define the instructions and registers for a processor.
  * If the type is an instruction, the structure defines the format of an
  * instruction where the fields are the list of operands.
  * The flags field below uses the same values as those defined in the
  * gnu assembler and are machine specific.  */
-struct itbl_entry
-  {
-    e_processor processor;	/* processor number */
-    e_type type;		/* dreg/creg/greg/insn */
-    char *name;			/* mnemionic name for insn/register */
-    unsigned long value;	/* opcode/instruction mask/register number */
-    unsigned long flags;	/* effects of the instruction */
-    struct itbl_range range;	/* bit range within instruction for value */
-    struct itbl_field *fields;	/* list of operand definitions (if any) */
-    struct itbl_entry *next;	/* next entry */
-  };
+struct itbl_entry {
+  e_processor processor;	/* processor number */
+  e_type type;			/* dreg/creg/greg/insn */
+  char *name;			/* mnemionic name for insn/register */
+  unsigned long value;		/* opcode/instruction mask/register number */
+  unsigned long flags;		/* effects of the instruction */
+  struct itbl_range range;	/* bit range within instruction for value */
+  struct itbl_field *fields;	/* list of operand definitions (if any) */
+  struct itbl_entry *next;	/* next entry */
+};
 
 /* local data and structures */
 
 static int itbl_num_opcodes = 0;
 /* Array of entries for each processor and entry type */
-static struct itbl_entry *entries[e_nprocs][e_ntypes] =
-{
+static struct itbl_entry *entries[e_nprocs][e_ntypes] = {
   {0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0},
@@ -273,7 +269,8 @@ itbl_add_operand (struct itbl_entry *e, int yytype, int sbit,
 #include "symbols.h"
 static void append_insns_as_macros (void);
 
-/* initialize for gas */
+/* Initialize for gas.  */
+
 void
 itbl_init (void)
 {
@@ -282,7 +279,7 @@ itbl_init (void)
   e_type type;
 
   if (!itbl_have_entries)
-	return;
+    return;
 
   /* Since register names don't have a prefix, put them in the symbol table so
      they can't be used as symbols.  This simplifies argument parsing as
@@ -297,7 +294,7 @@ itbl_init (void)
 	for (e = *es; e; e = e->next)
 	  {
 	    symbol_table_insert (symbol_create (e->name, reg_section,
-					     e->value, &zero_address_frag));
+						e->value, &zero_address_frag));
 	  }
       }
   append_insns_as_macros ();
@@ -327,7 +324,7 @@ append_insns_as_macros (void)
   int n, id, size, new_size, new_num_opcodes;
 
   if (!itbl_have_entries)
-	return;
+    return;
 
   if (!itbl_num_opcodes)	/* no new instructions to add! */
     {
@@ -603,7 +600,7 @@ itbl_disassemble (char *s, unsigned long insn)
   struct itbl_field *f;
 
   if (!ITBL_IS_INSN (insn))
-    return 0;			/* error*/
+    return 0;			/* error */
   processor = get_processor (ITBL_DECODE_PNUM (insn));
 
   /* find entry in list */
@@ -612,15 +609,15 @@ itbl_disassemble (char *s, unsigned long insn)
     return 0;			/* opcode not in table; invalid instrustion */
   strcpy (s, e->name);
 
-  /* parse insn's args (if any) */
+  /* Parse insn's args (if any).  */
   for (f = e->fields; f; f = f->next)	/* for each arg, ...  */
     {
       struct itbl_entry *r;
       unsigned long value;
 
-      if (f == e->fields)	/* first operand is preceeded by tab */
+      if (f == e->fields)	/* First operand is preceeded by tab.  */
 	strcat (s, "\t");
-      else			/* ','s separate following operands */
+      else			/* ','s separate following operands.  */
 	strcat (s, ",");
       value = extract_range (insn, f->range);
       /* n should be in form $n or 0xhhh (are symbol names valid?? */
@@ -630,7 +627,7 @@ itbl_disassemble (char *s, unsigned long insn)
 	case e_creg:
 	case e_greg:
 	  /* Accept either a string name
-			 * or '$' followed by the register number */
+	     or '$' followed by the register number.  */
 	  r = find_entry_byval (e->processor, f->type, value, &f->range);
 	  if (r)
 	    strcat (s, r->name);
@@ -638,11 +635,9 @@ itbl_disassemble (char *s, unsigned long insn)
 	    sprintf (s, "%s$%lu", s, value);
 	  break;
 	case e_addr:
-	  /* use assembler's symbol table to find symbol */
-	  /* FIXME!! Do we need this?
-			 *   if so, what about relocs??
-			*/
-	  /* If not a symbol, fall thru to IMMED */
+	  /* Use assembler's symbol table to find symbol.  */
+	  /* FIXME!! Do we need this?  If so, what about relocs??  */
+	  /* If not a symbol, fall through to IMMED.  */
 	case e_immed:
 	  sprintf (s, "%s0x%lx", s, value);
 	  break;
@@ -650,7 +645,7 @@ itbl_disassemble (char *s, unsigned long insn)
 	  return 0;		/* error; invalid field spec */
 	}
     }
-  return 1;			/* done! */
+  return 1;			/* Done!  */
 }
 
 /*======================================================================*/

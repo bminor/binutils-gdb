@@ -38,15 +38,13 @@
 
 /* describe the formal arguments to a macro */
 
-typedef struct formal_struct
-  {
-    struct formal_struct *next;	/* next formal in list */
-    sb name;			/* name of the formal */
-    sb def;			/* the default value */
-    sb actual;			/* the actual argument (changed on each expansion) */
-    int index;			/* the index of the formal 0..formal_count-1 */
-  }
-formal_entry;
+typedef struct formal_struct {
+  struct formal_struct *next;	/* next formal in list */
+  sb name;			/* name of the formal */
+  sb def;			/* the default value */
+  sb actual;			/* the actual argument (changed on each expansion) */
+  int index;			/* the index of the formal 0..formal_count-1 */
+} formal_entry;
 
 /* Other values found in the index field of a formal_entry.  */
 #define QUAL_INDEX (-1)
@@ -55,14 +53,12 @@ formal_entry;
 
 /* describe the macro.  */
 
-typedef struct macro_struct
-  {
-    sb sub;			/* substitution text.  */
-    int formal_count;		/* number of formal args.  */
-    formal_entry *formals;	/* pointer to list of formal_structs */
-    struct hash_control *formal_hash; /* hash table of formals.  */
-  }
-macro_entry;
+typedef struct macro_struct {
+  sb sub;			/* substitution text.  */
+  int formal_count;		/* number of formal args.  */
+  formal_entry *formals;	/* pointer to list of formal_structs */
+  struct hash_control *formal_hash; /* hash table of formals.  */
+} macro_entry;
 
 /* Whether any macros have been defined.  */
 

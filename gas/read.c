@@ -119,8 +119,7 @@ die horribly;
 #endif
 
 /* Used by is_... macros. our ctype[].  */
-char lex_type[256] =
-{
+char lex_type[256] = {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* @ABCDEFGHIJKLMNO */
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* PQRSTUVWXYZ[\]^_ */
   0, 0, 0, LEX_HASH, LEX_DOLLAR, LEX_PCT, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, /* _!"#$%&'()*+,-./ */
@@ -141,8 +140,7 @@ char lex_type[256] =
 
 /* In: a character.
    Out: 1 if this character ends a line.  */
-char is_end_of_line[256] =
-{
+char is_end_of_line[256] = {
 #ifdef CR_EOL
   1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0,	/* @abcdefghijklmno */
 #else
@@ -275,8 +273,7 @@ read_begin ()
 
 static struct hash_control *po_hash;
 
-static const pseudo_typeS potable[] =
-{
+static const pseudo_typeS potable[] = {
   {"abort", s_abort, 0},
   {"align", s_align_ptwo, 0},
   {"ascii", stringer, 0},
@@ -610,10 +607,10 @@ read_a_source_file (name)
                          symbol in the symbol table.  */
 		      if (!mri_line_macro
 #ifdef TC_START_LABEL_WITHOUT_COLON
-                          && TC_START_LABEL_WITHOUT_COLON(c,
-                                                          input_line_pointer)
+			  && TC_START_LABEL_WITHOUT_COLON(c,
+							  input_line_pointer)
 #endif
-                          )
+			  )
 			line_label = colon (line_start);
 		      else
 			line_label = symbol_create (line_start,
@@ -659,13 +656,13 @@ read_a_source_file (name)
 		  int len;
 
 		  /* Find the end of the current expanded macro line.  */
-		  for (s = input_line_pointer - 1; *s ; ++s)
+		  for (s = input_line_pointer - 1; *s; ++s)
 		    if (is_end_of_line[(unsigned char) *s])
 		      break;
 
 		  /* Copy it for safe keeping.  Also give an indication of
 		     how much macro nesting is involved at this point.  */
-		  len = s - (input_line_pointer-1);
+		  len = s - (input_line_pointer - 1);
 		  copy = (char *) xmalloc (len + macro_nest + 2);
 		  memset (copy, '>', macro_nest);
 		  copy[macro_nest] = ' ';
@@ -745,7 +742,7 @@ read_a_source_file (name)
 
 		    strncpy (original_case_string, s2, sizeof (original_case_string));
 		    original_case_string[sizeof (original_case_string) - 1] = 0;
-		    
+
 		    while (*s2)
 		      {
 			if (isupper ((unsigned char) *s2))
@@ -2094,7 +2091,7 @@ s_lcomm_internal (needs_align, bytes_p)
       if (align)
 	frag_align (align, 0, 0);
 
-      /* Detach from old frag.	*/
+      /* Detach from old frag.  */
       if (S_GET_SEGMENT (symbolP) == bss_seg)
 	symbol_get_frag (symbolP)->fr_symbol = NULL;
 
@@ -3819,7 +3816,8 @@ parse_bitfield_cons (exp, nbytes)
 	      break;
 	    }			/* Won't fit.  */
 
-	  hold = ++input_line_pointer; /* skip ':' */
+	  /* Skip ':'.  */
+	  hold = ++input_line_pointer;
 
 	  (void) expression (exp);
 	  if (exp->X_op != O_constant)

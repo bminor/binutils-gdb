@@ -64,8 +64,7 @@ extern frchainS *frchain_root;
    frag chain, even if it contains no (complete) frags.  */
 extern frchainS *frchain_now;
 
-typedef struct segment_info_struct
-{
+typedef struct segment_info_struct {
   frchainS *frchainP;
   unsigned int hadone : 1;
 
@@ -103,13 +102,12 @@ typedef struct segment_info_struct
   symbolS *sym;
 #endif
 
-  union
-    {
-      /* Current size of section holding stabs strings.  */
-      unsigned long stab_string_size;
-      /* Initial frag for ELF.  */
-      char *p;
-    }
+  union {
+    /* Current size of section holding stabs strings.  */
+    unsigned long stab_string_size;
+    /* Initial frag for ELF.  */
+    char *p;
+  }
   stabu;
 
 #ifdef NEED_LITERAL_POOL

@@ -1,8 +1,18 @@
 2000-11-06  Kazu Hirata  <kazu@hxi.com>
 
-	* input-file.c: Fix formatting.
+	* as.c: Fix formatting.
+	* dwarf2dbg.c: Likewise.
+	* input-file.c: Likewise.
 	* input-file.h: Likewise.
 	* input-scrub.c: Likewise.
+	* itbl-ops.c: Likewise.
+	* listing.c: Likewise.
+	* macro.h: Likewise.
+	* messages.c: Likewise.
+	* read.c: Likewise.
+	* subsegs.c: Likewise.
+	* subsegs.h: Likewise.
+	* write.c: Likewise.
 
 2000-11-06  Nick Clifton  <nickc@redhat.com>
 

@@ -497,7 +497,7 @@ parse_args (pargc, pargv)
 	  new_argv[new_argc++] = optarg;
 	  new_argv[new_argc] = NULL;
 	  break;
-	
+
 	case OPTION_TARGET_HELP:
           md_show_usage (stdout);
           exit (EXIT_SUCCESS);

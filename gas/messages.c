@@ -1,5 +1,5 @@
 /* messages.c - error reporter -
-   Copyright (C) 1987, 91, 92, 93, 94, 95, 96, 97, 1998
+   Copyright (C) 1987, 91, 92, 93, 94, 95, 96, 97, 98, 2000
    Free Software Foundation, Inc.
    This file is part of GAS, the GNU Assembler.
 
@@ -47,8 +47,7 @@ static void as_show_where PARAMS ((void));
 static void as_warn_internal PARAMS ((char *, unsigned int, char *));
 static void as_bad_internal PARAMS ((char *, unsigned int, char *));
 
-/*
- * Despite the rest of the comments in this file, (FIXME-SOON),
+/* Despite the rest of the comments in this file, (FIXME-SOON),
  * here is the current scheme for error messages etc:
  *
  * as_fatal() is used when gas is quite confused and
@@ -105,7 +104,8 @@ identify (file)
   fprintf (stderr, _("Assembler messages:\n"));
 }
 
-static int warning_count;	/* Count of number of warnings issued */
+/* The number of warnings issued.  */
+static int warning_count;
 
 int
 had_warnings ()
@@ -114,7 +114,7 @@ had_warnings ()
 }
 
 /* Nonzero if we've hit a 'bad error', and should not write an obj file,
-   and exit with a nonzero error code */
+   and exit with a nonzero error code.  */
 
 static int error_count;
 
@@ -138,11 +138,7 @@ as_show_where ()
     fprintf (stderr, "%s:%u: ", file, line);
 }
 
-/*
- *			a s _ p e r r o r
- *
- * Like perror(3), but with more info.
- */
+/* Like perror(3), but with more info.  */
 
 void
 as_perror (gripe, filename)
@@ -165,18 +161,15 @@ as_perror (gripe, filename)
 #endif
 }
 
-/*
- *			a s _ t s k t s k ()
- *
- * Send to stderr a string as a warning, and locate warning
- * in input file(s).
- * Please only use this for when we have some recovery action.
- * Please explain in string (which may have '\n's) what recovery was done.
- */
+/* Send to stderr a string as a warning, and locate warning
+   in input file(s).
+   Please only use this for when we have some recovery action.
+   Please explain in string (which may have '\n's) what recovery was
+   done.  */
 
 #ifdef USE_STDARG
 void
-as_tsktsk (const char *format,...)
+as_tsktsk (const char *format, ...)
 {
   va_list args;
 
@@ -185,7 +178,7 @@ as_tsktsk (const char *format,...)
   vfprintf (stderr, format, args);
   va_end (args);
   (void) putc ('\n', stderr);
-}				/* as_tsktsk() */
+}
 #else
 void
 as_tsktsk (format, va_alist)
@@ -199,7 +192,7 @@ as_tsktsk (format, va_alist)
   vfprintf (stderr, format, args);
   va_end (args);
   (void) putc ('\n', stderr);
-}				/* as_tsktsk() */
+}
 #endif /* not NO_STDARG */
 
 /* The common portion of as_warn and as_warn_where.  */
@@ -226,18 +219,15 @@ as_warn_internal (file, line, buffer)
 #endif
 }
 
-/*
- *			a s _ w a r n ()
- *
- * Send to stderr a string as a warning, and locate warning
- * in input file(s).
- * Please only use this for when we have some recovery action.
- * Please explain in string (which may have '\n's) what recovery was done.
- */
+/* Send to stderr a string as a warning, and locate warning
+   in input file(s).
+   Please only use this for when we have some recovery action.
+   Please explain in string (which may have '\n's) what recovery was
+   done.  */
 
 #ifdef USE_STDARG
 void
-as_warn (const char *format,...)
+as_warn (const char *format, ...)
 {
   va_list args;
   char buffer[2000];
@@ -249,9 +239,8 @@ as_warn (const char *format,...)
       va_end (args);
       as_warn_internal ((char *) NULL, 0, buffer);
     }
-}				/* as_warn() */
+}
 #else
-/*VARARGS1 */
 void
 as_warn (format, va_alist)
      const char *format;
@@ -267,16 +256,16 @@ as_warn (format, va_alist)
       va_end (args);
       as_warn_internal ((char *) NULL, 0, buffer);
     }
-}				/* as_warn() */
+}
 #endif /* not NO_STDARG */
 
-/* as_warn_where, like as_bad but the file name and line number are
-   passed in.  Unfortunately, we have to repeat the function in order
-   to handle the varargs correctly and portably.  */
+/* Like as_bad but the file name and line number are passed in.
+   Unfortunately, we have to repeat the function in order to handle
+   the varargs correctly and portably.  */
 
 #ifdef USE_STDARG
 void
-as_warn_where (char *file, unsigned int line, const char *format,...)
+as_warn_where (char *file, unsigned int line, const char *format, ...)
 {
   va_list args;
   char buffer[2000];
@@ -288,9 +277,8 @@ as_warn_where (char *file, unsigned int line, const char *format,...)
       va_end (args);
       as_warn_internal (file, line, buffer);
     }
-}				/* as_warn() */
+}
 #else
-/*VARARGS1 */
 void
 as_warn_where (file, line, format, va_alist)
      char *file;
@@ -308,7 +296,7 @@ as_warn_where (file, line, format, va_alist)
       va_end (args);
       as_warn_internal (file, line, buffer);
     }
-}				/* as_warn() */
+}
 #endif /* not NO_STDARG */
 
 /* The common portion of as_bad and as_bad_where.  */
@@ -335,18 +323,15 @@ as_bad_internal (file, line, buffer)
 #endif
 }
 
-/*
- *			a s _ b a d ()
- *
- * Send to stderr a string as a warning, and locate warning in input file(s).
- * Please us when there is no recovery, but we want to continue processing
- * but not produce an object file.
- * Please explain in string (which may have '\n's) what recovery was done.
- */
+/* Send to stderr a string as a warning, and locate warning in input
+   file(s).  Please us when there is no recovery, but we want to
+   continue processing but not produce an object file.
+   Please explain in string (which may have '\n's) what recovery was
+   done. */
 
 #ifdef USE_STDARG
 void
-as_bad (const char *format,...)
+as_bad (const char *format, ...)
 {
   va_list args;
   char buffer[2000];
@@ -359,7 +344,6 @@ as_bad (const char *format,...)
 }
 
 #else
-/*VARARGS1 */
 void
 as_bad (format, va_alist)
      const char *format;
@@ -376,13 +360,13 @@ as_bad (format, va_alist)
 }
 #endif /* not NO_STDARG */
 
-/* as_bad_where, like as_bad but the file name and line number are
-   passed in.  Unfortunately, we have to repeat the function in order
-   to handle the varargs correctly and portably.  */
+/* Like as_bad but the file name and line number are passed in.
+   Unfortunately, we have to repeat the function in order to handle
+   the varargs correctly and portably.  */
 
 #ifdef USE_STDARG
 void
-as_bad_where (char *file, unsigned int line, const char *format,...)
+as_bad_where (char *file, unsigned int line, const char *format, ...)
 {
   va_list args;
   char buffer[2000];
@@ -395,7 +379,6 @@ as_bad_where (char *file, unsigned int line, const char *format,...)
 }
 
 #else
-/*VARARGS1 */
 void
 as_bad_where (file, line, format, va_alist)
      char *file;
@@ -414,18 +397,14 @@ as_bad_where (file, line, format, va_alist)
 }
 #endif /* not NO_STDARG */
 
-/*
- *			a s _ f a t a l ()
- *
- * Send to stderr a string as a fatal message, and print location of error in
- * input file(s).
- * Please only use this for when we DON'T have some recovery action.
- * It xexit()s with a warning status.
- */
+/* Send to stderr a string as a fatal message, and print location of
+   error in input file(s).
+   Please only use this for when we DON'T have some recovery action.
+   It xexit()s with a warning status.  */
 
 #ifdef USE_STDARG
 void
-as_fatal (const char *format,...)
+as_fatal (const char *format, ...)
 {
   va_list args;
 
@@ -436,9 +415,8 @@ as_fatal (const char *format,...)
   (void) putc ('\n', stderr);
   va_end (args);
   xexit (EXIT_FAILURE);
-}				/* as_fatal() */
+}
 #else
-/*VARARGS1*/
 void
 as_fatal (format, va_alist)
      char *format;
@@ -453,13 +431,11 @@ as_fatal (format, va_alist)
   (void) putc ('\n', stderr);
   va_end (args);
   xexit (EXIT_FAILURE);
-}				/* as_fatal() */
+}
 #endif /* not NO_STDARG */
 
-/*
- * as_assert: Indicate assertion failure.
- * Arguments: Filename, line number, optional function name.
- */
+/* Indicate assertion failure.
+   Arguments: Filename, line number, optional function name.  */
 
 void
 as_assert (file, line, fn)
@@ -479,6 +455,7 @@ as_assert (file, line, fn)
 
 /* as_abort: Print a friendly message saying how totally hosed we are,
    and exit without producing a core file.  */
+
 void
 as_abort (file, line, fn)
      const char *file, *fn;
@@ -536,5 +513,3 @@ sprint_value (buf, val)
 #endif
   abort ();
 }
-
-/* end of messages.c */
