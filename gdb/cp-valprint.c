@@ -87,7 +87,7 @@ cp_print_class_method (char *valaddr,
       fprintf_filtered (stream, "<unknown>");
       return;
     }
-  addr = unpack_pointer (lookup_pointer_type (builtin_type_void), valaddr);
+  addr = unpack_pointer (type, valaddr);
   if (METHOD_PTR_IS_VIRTUAL (addr))
     {
       offset = METHOD_PTR_TO_VOFFSET (addr);

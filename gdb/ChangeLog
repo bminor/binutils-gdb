@@ -1,3 +1,8 @@
+2003-04-14  Corinna Vinschen  <vinschen@redhat.com>
+
+	* cp-valprint.c (cp_print_class_method): Call unpack_pointer() with
+	actually incoming type.
+
 2003-04-13  Andrew Cagney  <cagney@redhat.com>
 
 	* ppc-linux-tdep.c: Use get_frame_base, get_frame_pc,
