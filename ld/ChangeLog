@@ -1,5 +1,7 @@
 2002-07-02  Alan Modra  <amodra@bigpond.net.au>
 
+	* ldfile.c (ldfile_try_open_bfd): Formatting.
+
 	* ldmisc.c (demangle): Move so that it doesn't intrude between
 	vfinfo comment and body.  Add comment.
 
