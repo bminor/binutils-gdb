@@ -15,6 +15,8 @@ Wed Aug  7 14:11:44 1996  Philippe De Muyter  <phdm@info.ucl.ac.be>
 
 Wed Aug  7 12:12:03 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* cpu-i386.c (i8086_arch): Architecture info for the i8086.
+
 	Based on patches from Eric Valette <valette@crf.canon.fr>:
 	* elf32-i386.c (enum reloc_type): Add FIRST_INVALID_RELOC,
 	LAST_INVALID_RELOC, R_386_16, R_386_PC16, R_386_8, R_386_PC8.
