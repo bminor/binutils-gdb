@@ -1,3 +1,8 @@
+Fri Nov 13 13:15:01 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/fr30/allinsn.s Fixed typos and added some tests of upper
+	case vs lower case.
+
 Tue Nov 10 14:54:47 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* gas/fr30/allinsn.s: New file.

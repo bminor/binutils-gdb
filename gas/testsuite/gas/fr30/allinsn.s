@@ -87,7 +87,7 @@ eorb:
 	.text
 	.global bandl
 bandl:
-	bandl #16, @ r6
+	bandl #15, @r6
 	.text
 	.global bandh
 nadh:
@@ -111,11 +111,11 @@ beorh:
 	.text
 	.global btstl
 btstl:
-	btstl #0, r12
+	btstl #0, @r12
 	.text
 	.global btsth
 btsth:
-	btsth #8, r13
+	btsth #8, @r13
 	.text
 	.global mul
 mul:
@@ -199,19 +199,19 @@ ldi_8:
 	.global ld
 ld:
 	ld @r3, r4
-	ld @(r13, r5), r6
-	ld @(r14, #0x1fc), r7
-	ld @(r15, #0x3c), r8
+	ld @(R13, r5), r6
+	ld @(R14, 0x1fc), r7
+	ld @(R15, 0x3c), r8
 	ld @r15+, r9
-	ld @r15+, pc
+	ld @R15+, pc
 	ld @r15+, ps
-	ld @r15+, tbr
+	ld @R15+, tbr
 	ld @r15+, rp
-	ld @r15+, ssp
+	ld @R15+, ssp
 	.text
 	.global lduh
 lduh:
-	lduh $r10, r11
+	lduh @r10, r11
 	lduh @(r13, r12), r13
 	lduh @(r14, -256), r15
 	.text
@@ -228,8 +228,8 @@ st:
 	st r6, @(r14, -512)
 	st r7, @(r15, 0x3c)
 	st r8, @ - r15
-	st mdh, @-r15
-	st ps, @ - r15
+	st MDH, @-r15
+	st PS, @ - r15
 	.text
 	.global lsth
 sth:
@@ -239,14 +239,14 @@ sth:
 	.text
 	.global stb
 stb:
-	stb r14, @r15
+	STB r14, @r15
 	stb r0, @(r13, r1)
-	stb r2, @(r14, -128)
+	STB r2, @(r14, -128)
 	.text
 	.global mov
 mov:
 	mov r3, r4
-	mov mdl, r5
+	MOV mdl, r5
 	mov ps, r6
 	mov r7, usp
 	mov r8, ps
@@ -347,7 +347,7 @@ jmp_d:
 	.text
 	.global call_d
 call_d:
-	call:d footext
+	call:D footext
 	nop
 	call:d @r12
 	nop
@@ -359,7 +359,7 @@ ret_d:
 	.text
 	.global bra_d
 bra_d:
-	bra:d footext
+	bra:D footext
 	.text
 	.global bno_d
 bno_d:
@@ -367,7 +367,7 @@ bno_d:
 	.text
 	.global beq_d
 beq_d:
-	beq:d footext
+	beq:D footext
 	.text
 	.global bne_d
 bne_d:
@@ -426,7 +426,7 @@ dmov:
 	dmov @88H, r13
 	dmov r13, @54H
 	dmov @0x44, r13+
-	dmov @r13+, @2
+	dmov @R13+, @2
 	dmov @2cH, @-r15
 	dmov @r15+, @38
 	.text
