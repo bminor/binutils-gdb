@@ -1,3 +1,11 @@
+2000-04-08  Jim Blandy  <jimb@redhat.com>
+
+	* gdbint.texinfo (Using Different Register and Memory Data
+	Representations): New section.
+	(REGISTER_CONVERTIBLE, REGISTER_RAW_SIZE, REGISTER_VIRTUAL_SIZE,
+ 	REGISTER_VIRTUAL_TYPE, REGISTER_CONVERT_TO_VIRTUAL,
+ 	REGISTER_CONVERT_TO_RAW): Document.
+
 Mon Apr  3 19:16:32 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdb.texinfo (Protocol): Deprecate the sequence-id.  Add cindex
