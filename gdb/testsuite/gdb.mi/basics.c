@@ -1,4 +1,4 @@
-/* Copyright 1999, 2000
+/* Copyright 1999, 2000, 2004
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -22,6 +22,8 @@
  *	This simple program that passes different types of arguments
  *      on function calls.  Useful to test printing frames, stepping, etc.
  */
+
+#include <stdio.h>
 
 int callee4 (void)
 {

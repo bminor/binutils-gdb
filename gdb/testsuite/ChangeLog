@@ -1,5 +1,11 @@
 2004-08-26  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* gdb.mi/basics.c: Include <stdio.h>.
+	* gdb.mi/pthreads.c: Include <stdlib.h>.
+	* gdb.mi/var-cmd.c: Include <stdlib.h>.
+
+2004-08-26  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* gdb.threads/schedlock.c: Add copyright notice.
 
 2004-08-25  Andrew Cagney  <cagney@gnu.org>
