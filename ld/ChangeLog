@@ -3,7 +3,7 @@ Wed Oct 16 12:27:08 1991  Per Bothner  (bothner at cygnus.com)
 	* Makefile.in, config.h, ld.h, ldemul.c, ldexp.c, ldexp.h,
 	ldgram.y, ldlex.l, ldlnk960.c, ldmain.c, ldmisc.c, ldmisc.h,
 	ldsym.c, ldsym.h, ldtemplate, ldvanilla.c, ldver.c, ldver.h,
-	ldwarn.c, ldwarn.h, ldwrite.c, ldwrite.h:
+	ldwarn.c, ldwarn.h, ldwrite.c, ldwrite.h, mkscript.c:
 	Add or update copyright notices.	
 
 Mon Oct 14 23:55:27 1991  Per Bothner  (bothner at cygnus.com)
