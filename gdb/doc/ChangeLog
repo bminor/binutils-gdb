@@ -1,5 +1,16 @@
 2003-03-12  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	references to get_saved_register.  Rename GET_SAVED_REGISTER to
+	DEPRECATED_GET_SAVED_REGISTER.
+
+2003-03-13  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Replace
+	POP_FRAME with DEPRECATED_POP_FRAME.  Update description.
+
+2003-03-12  Andrew Cagney  <cagney@redhat.com>
+
 	* gdbint.texinfo (Target Architecture Definition): Rename
 	FRAME_SAVED_PC to DEPRECATED_FRAME_SAVED_PC.
 	

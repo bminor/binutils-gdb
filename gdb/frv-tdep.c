@@ -45,7 +45,6 @@ static gdbarch_init_extra_frame_info_ftype stupid_useless_init_extra_frame_info;
 static gdbarch_store_struct_return_ftype frv_store_struct_return;
 static gdbarch_push_arguments_ftype frv_push_arguments;
 static gdbarch_push_return_address_ftype frv_push_return_address;
-static gdbarch_pop_frame_ftype frv_pop_frame;
 static gdbarch_saved_pc_after_call_ftype frv_saved_pc_after_call;
 
 static void frv_pop_frame_regular (struct frame_info *frame);
@@ -1095,7 +1094,7 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_length (gdbarch, 0);
   set_gdbarch_push_arguments (gdbarch, frv_push_arguments);
   set_gdbarch_push_return_address (gdbarch, frv_push_return_address);
-  set_gdbarch_pop_frame (gdbarch, frv_pop_frame);
+  set_gdbarch_deprecated_pop_frame (gdbarch, frv_pop_frame);
 
   set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_words (gdbarch, frv_call_dummy_words);

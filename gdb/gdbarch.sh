@@ -541,7 +541,7 @@ F:2:DEPRECATED_INIT_FRAME_PC:CORE_ADDR:deprecated_init_frame_pc:int fromleaf, st
 #
 v:2:BELIEVE_PCC_PROMOTION:int:believe_pcc_promotion:::::::
 v::BELIEVE_PCC_PROMOTION_TYPE:int:believe_pcc_promotion_type:::::::
-F:2:GET_SAVED_REGISTER:void:get_saved_register:char *raw_buffer, int *optimized, CORE_ADDR *addrp, struct frame_info *frame, int regnum, enum lval_type *lval:raw_buffer, optimized, addrp, frame, regnum, lval
+F:2:DEPRECATED_GET_SAVED_REGISTER:void:deprecated_get_saved_register:char *raw_buffer, int *optimized, CORE_ADDR *addrp, struct frame_info *frame, int regnum, enum lval_type *lval:raw_buffer, optimized, addrp, frame, regnum, lval
 #
 f:2:REGISTER_CONVERTIBLE:int:register_convertible:int nr:nr:::generic_register_convertible_not::0
 f:2:REGISTER_CONVERT_TO_VIRTUAL:void:register_convert_to_virtual:int regnum, struct type *type, char *from, char *to:regnum, type, from, to:::0::0
@@ -559,7 +559,7 @@ f:2:RETURN_VALUE_ON_STACK:int:return_value_on_stack:struct type *type:type:::gen
 f:2:PUSH_ARGUMENTS:CORE_ADDR:push_arguments:int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr:nargs, args, sp, struct_return, struct_addr:::default_push_arguments::0
 F:2:DEPRECATED_PUSH_DUMMY_FRAME:void:deprecated_push_dummy_frame:void:-:::0
 F:2:PUSH_RETURN_ADDRESS:CORE_ADDR:push_return_address:CORE_ADDR pc, CORE_ADDR sp:pc, sp:::0
-F:2:POP_FRAME:void:pop_frame:void:-:::0
+F:2:DEPRECATED_POP_FRAME:void:deprecated_pop_frame:void:-:::0
 #
 f:2:STORE_STRUCT_RETURN:void:store_struct_return:CORE_ADDR addr, CORE_ADDR sp:addr, sp:::0
 #

@@ -1177,7 +1177,7 @@ mn10300_gdbarch_init (struct gdbarch_info info,
     (gdbarch, mn10300_extract_struct_value_address);
   set_gdbarch_deprecated_store_return_value (gdbarch, mn10300_store_return_value);
   set_gdbarch_store_struct_return (gdbarch, mn10300_store_struct_return);
-  set_gdbarch_pop_frame (gdbarch, mn10300_pop_frame);
+  set_gdbarch_deprecated_pop_frame (gdbarch, mn10300_pop_frame);
   set_gdbarch_skip_prologue (gdbarch, mn10300_skip_prologue);
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);

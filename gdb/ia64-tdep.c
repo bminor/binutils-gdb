@@ -93,7 +93,6 @@ static gdbarch_register_byte_ftype ia64_register_byte;
 static gdbarch_breakpoint_from_pc_ftype ia64_breakpoint_from_pc;
 static gdbarch_frame_chain_ftype ia64_frame_chain;
 static gdbarch_skip_prologue_ftype ia64_skip_prologue;
-static gdbarch_get_saved_register_ftype ia64_get_saved_register;
 static gdbarch_deprecated_extract_return_value_ftype ia64_extract_return_value;
 static gdbarch_deprecated_extract_struct_value_address_ftype ia64_extract_struct_value_address;
 static gdbarch_use_struct_convention_ftype ia64_use_struct_convention;
@@ -101,7 +100,6 @@ static gdbarch_frameless_function_invocation_ftype ia64_frameless_function_invoc
 static gdbarch_store_struct_return_ftype ia64_store_struct_return;
 static gdbarch_push_arguments_ftype ia64_push_arguments;
 static gdbarch_push_return_address_ftype ia64_push_return_address;
-static gdbarch_pop_frame_ftype ia64_pop_frame;
 static gdbarch_saved_pc_after_call_ftype ia64_saved_pc_after_call;
 static void ia64_pop_frame_regular (struct frame_info *frame);
 static struct type *is_float_or_hfa_type (struct type *t);
@@ -2199,7 +2197,7 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, ia64_frame_saved_pc);
 
   set_gdbarch_deprecated_frame_init_saved_regs (gdbarch, ia64_frame_init_saved_regs);
-  set_gdbarch_get_saved_register (gdbarch, ia64_get_saved_register);
+  set_gdbarch_deprecated_get_saved_register (gdbarch, ia64_get_saved_register);
 
   set_gdbarch_register_convertible (gdbarch, ia64_register_convertible);
   set_gdbarch_register_convert_to_virtual (gdbarch, ia64_register_convert_to_virtual);
@@ -2222,7 +2220,7 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_length (gdbarch, 0);
   set_gdbarch_push_arguments (gdbarch, ia64_push_arguments);
   set_gdbarch_push_return_address (gdbarch, ia64_push_return_address);
-  set_gdbarch_pop_frame (gdbarch, ia64_pop_frame);
+  set_gdbarch_deprecated_pop_frame (gdbarch, ia64_pop_frame);
 
   set_gdbarch_call_dummy_p (gdbarch, 1);
   set_gdbarch_call_dummy_words (gdbarch, ia64_call_dummy_words);

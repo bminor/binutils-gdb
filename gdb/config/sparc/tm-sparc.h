@@ -199,10 +199,10 @@ extern int sparc_intreg_size (void);
    stack rather than with the other registers, and this causes hair
    and confusion in places like pop_frame.  It might be better to
    remove the ins and locals from `registers', make sure that
-   get_saved_register can get them from the stack (even in the
-   innermost frame), and make this the way to access them.  For the
-   frame pointer we would do that via TARGET_READ_FP.  On the other
-   hand, that is likely to be confusing or worse for flat frames.  */
+   frame_register() can get them from the stack (even in the innermost
+   frame), and make this the way to access them.  For the frame
+   pointer we would do that via TARGET_READ_FP.  On the other hand,
+   that is likely to be confusing or worse for flat frames.  */
 
 #define REGISTER_BYTES (32*4+32*4+8*4)
 
@@ -453,8 +453,8 @@ extern CORE_ADDR sparc_pc_adjust (CORE_ADDR);
   /* time of the register saves.  */ \
   int sp_offset;
 
-/* We need to override GET_SAVED_REGISTER so that we can deal with the
-   way outs change into ins in different frames.  */
+/* We need to override DEPRECATED_GET_SAVED_REGISTER so that we can
+   deal with the way outs change into ins in different frames.  */
 
 void sparc_get_saved_register (char *raw_buffer,
 			       int *optimized,
@@ -462,7 +462,7 @@ void sparc_get_saved_register (char *raw_buffer,
 			       struct frame_info *frame,
 			       int regnum, enum lval_type *lvalp);
 
-#define GET_SAVED_REGISTER(RAW_BUFFER, OPTIMIZED, ADDRP, FRAME, REGNUM, LVAL) \
+#define DEPRECATED_GET_SAVED_REGISTER(RAW_BUFFER, OPTIMIZED, ADDRP, FRAME, REGNUM, LVAL) \
      sparc_get_saved_register (RAW_BUFFER, OPTIMIZED, ADDRP, \
 			       FRAME, REGNUM, LVAL)
 
@@ -683,7 +683,7 @@ void sparc_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun,
 /* Push an empty stack frame, to record the current PC, etc.  */
 
 #define DEPRECATED_PUSH_DUMMY_FRAME	sparc_push_dummy_frame ()
-#define POP_FRAME		sparc_pop_frame ()
+#define DEPRECATED_POP_FRAME		sparc_pop_frame ()
 
 void sparc_push_dummy_frame (void);
 void sparc_pop_frame (void);

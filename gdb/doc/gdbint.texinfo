@@ -3352,11 +3352,10 @@ assuming that we have just stopped at a @code{longjmp} breakpoint.  It takes a
 @code{CORE_ADDR *} as argument, and stores the target PC value through this
 pointer.  It examines the current state of the machine as needed.
 
-@item GET_SAVED_REGISTER
-@findex GET_SAVED_REGISTER
-@findex get_saved_register
+@item DEPRECATED_GET_SAVED_REGISTER
+@findex DEPRECATED_GET_SAVED_REGISTER
 Define this if you need to supply your own definition for the function
-@code{get_saved_register}.
+@code{DEPRECATED_GET_SAVED_REGISTER}.
 
 @item IBM6000_TARGET
 @findex IBM6000_TARGET
@@ -3680,12 +3679,11 @@ A hook defined for XCOFF reading.
 If defined, this is the number of the processor status register.  (This
 definition is only used in generic code when parsing "$ps".)
 
-@item POP_FRAME
-@findex POP_FRAME
-@findex call_function_by_hand
-@findex return_command
-Used in @samp{call_function_by_hand} to remove an artificial stack
-frame and in @samp{return_command} to remove a real stack frame.
+@item DEPRECATED_POP_FRAME
+@findex DEPRECATED_POP_FRAME
+@findex frame_pop
+If defined, used by @code{frame_pop} to remove a stack frame.  This
+method has been superseeded by generic code.
 
 @item PUSH_ARGUMENTS (@var{nargs}, @var{args}, @var{sp}, @var{struct_return}, @var{struct_addr})
 @findex PUSH_ARGUMENTS

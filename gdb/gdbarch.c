@@ -202,7 +202,7 @@ struct gdbarch
   gdbarch_deprecated_init_frame_pc_ftype *deprecated_init_frame_pc;
   int believe_pcc_promotion;
   int believe_pcc_promotion_type;
-  gdbarch_get_saved_register_ftype *get_saved_register;
+  gdbarch_deprecated_get_saved_register_ftype *deprecated_get_saved_register;
   gdbarch_register_convertible_ftype *register_convertible;
   gdbarch_register_convert_to_virtual_ftype *register_convert_to_virtual;
   gdbarch_register_convert_to_raw_ftype *register_convert_to_raw;
@@ -216,7 +216,7 @@ struct gdbarch
   gdbarch_push_arguments_ftype *push_arguments;
   gdbarch_deprecated_push_dummy_frame_ftype *deprecated_push_dummy_frame;
   gdbarch_push_return_address_ftype *push_return_address;
-  gdbarch_pop_frame_ftype *pop_frame;
+  gdbarch_deprecated_pop_frame_ftype *deprecated_pop_frame;
   gdbarch_store_struct_return_ftype *store_struct_return;
   gdbarch_extract_return_value_ftype *extract_return_value;
   gdbarch_store_return_value_ftype *store_return_value;
@@ -711,7 +711,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
     fprintf_unfiltered (log, "\n\tfix_call_dummy");
   /* Skip verify of deprecated_init_frame_pc_first, has predicate */
   /* Skip verify of deprecated_init_frame_pc, has predicate */
-  /* Skip verify of get_saved_register, has predicate */
+  /* Skip verify of deprecated_get_saved_register, has predicate */
   /* Skip verify of register_convertible, invalid_p == 0 */
   /* Skip verify of register_convert_to_virtual, invalid_p == 0 */
   /* Skip verify of register_convert_to_raw, invalid_p == 0 */
@@ -725,7 +725,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of push_arguments, invalid_p == 0 */
   /* Skip verify of deprecated_push_dummy_frame, has predicate */
   /* Skip verify of push_return_address, has predicate */
-  /* Skip verify of pop_frame, has predicate */
+  /* Skip verify of deprecated_pop_frame, has predicate */
   if ((GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL)
       && (gdbarch->store_struct_return == 0))
     fprintf_unfiltered (log, "\n\tstore_struct_return");
@@ -1213,6 +1213,29 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->deprecated_frame_saved_pc
                         /*DEPRECATED_FRAME_SAVED_PC ()*/);
 #endif
+#ifdef DEPRECATED_GET_SAVED_REGISTER_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_GET_SAVED_REGISTER_P()",
+                      XSTRING (DEPRECATED_GET_SAVED_REGISTER_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_GET_SAVED_REGISTER_P() = %d\n",
+                      DEPRECATED_GET_SAVED_REGISTER_P ());
+#endif
+#ifdef DEPRECATED_GET_SAVED_REGISTER
+#if GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval)",
+                      XSTRING (DEPRECATED_GET_SAVED_REGISTER (raw_buffer, optimized, addrp, frame, regnum, lval)));
+#endif
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: DEPRECATED_GET_SAVED_REGISTER = <0x%08lx>\n",
+                        (long) current_gdbarch->deprecated_get_saved_register
+                        /*DEPRECATED_GET_SAVED_REGISTER ()*/);
+#endif
 #ifdef DEPRECATED_INIT_EXTRA_FRAME_INFO_P
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
@@ -1329,6 +1352,29 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: DEPRECATED_PC_IN_CALL_DUMMY = <0x%08lx>\n",
                         (long) current_gdbarch->deprecated_pc_in_call_dummy
                         /*DEPRECATED_PC_IN_CALL_DUMMY ()*/);
+#endif
+#ifdef DEPRECATED_POP_FRAME_P
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_POP_FRAME_P()",
+                      XSTRING (DEPRECATED_POP_FRAME_P ()));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: DEPRECATED_POP_FRAME_P() = %d\n",
+                      DEPRECATED_POP_FRAME_P ());
+#endif
+#ifdef DEPRECATED_POP_FRAME
+#if GDB_MULTI_ARCH
+  /* Macro might contain `[{}]' when not multi-arch */
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: %s # %s\n",
+                      "DEPRECATED_POP_FRAME(-)",
+                      XSTRING (DEPRECATED_POP_FRAME (-)));
+#endif
+  if (GDB_MULTI_ARCH)
+    fprintf_unfiltered (file,
+                        "gdbarch_dump: DEPRECATED_POP_FRAME = <0x%08lx>\n",
+                        (long) current_gdbarch->deprecated_pop_frame
+                        /*DEPRECATED_POP_FRAME ()*/);
 #endif
 #ifdef DEPRECATED_PUSH_DUMMY_FRAME_P
   fprintf_unfiltered (file,
@@ -1637,29 +1683,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         (long) current_gdbarch->get_longjmp_target
                         /*GET_LONGJMP_TARGET ()*/);
 #endif
-#ifdef GET_SAVED_REGISTER_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "GET_SAVED_REGISTER_P()",
-                      XSTRING (GET_SAVED_REGISTER_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: GET_SAVED_REGISTER_P() = %d\n",
-                      GET_SAVED_REGISTER_P ());
-#endif
-#ifdef GET_SAVED_REGISTER
-#if GDB_MULTI_ARCH
-  /* Macro might contain `[{}]' when not multi-arch */
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "GET_SAVED_REGISTER(raw_buffer, optimized, addrp, frame, regnum, lval)",
-                      XSTRING (GET_SAVED_REGISTER (raw_buffer, optimized, addrp, frame, regnum, lval)));
-#endif
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: GET_SAVED_REGISTER = <0x%08lx>\n",
-                        (long) current_gdbarch->get_saved_register
-                        /*GET_SAVED_REGISTER ()*/);
-#endif
 #ifdef HAVE_NONSTEPPABLE_WATCHPOINT
   fprintf_unfiltered (file,
                       "gdbarch_dump: HAVE_NONSTEPPABLE_WATCHPOINT # %s\n",
@@ -1812,29 +1835,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                         "gdbarch_dump: POINTER_TO_ADDRESS = <0x%08lx>\n",
                         (long) current_gdbarch->pointer_to_address
                         /*POINTER_TO_ADDRESS ()*/);
-#endif
-#ifdef POP_FRAME_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "POP_FRAME_P()",
-                      XSTRING (POP_FRAME_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: POP_FRAME_P() = %d\n",
-                      POP_FRAME_P ());
-#endif
-#ifdef POP_FRAME
-#if GDB_MULTI_ARCH
-  /* Macro might contain `[{}]' when not multi-arch */
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "POP_FRAME(-)",
-                      XSTRING (POP_FRAME (-)));
-#endif
-  if (GDB_MULTI_ARCH)
-    fprintf_unfiltered (file,
-                        "gdbarch_dump: POP_FRAME = <0x%08lx>\n",
-                        (long) current_gdbarch->pop_frame
-                        /*POP_FRAME ()*/);
 #endif
 #ifdef PREPARE_TO_PROCEED
   fprintf_unfiltered (file,
@@ -4013,29 +4013,29 @@ set_gdbarch_believe_pcc_promotion_type (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_get_saved_register_p (struct gdbarch *gdbarch)
+gdbarch_deprecated_get_saved_register_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  return gdbarch->get_saved_register != 0;
+  return gdbarch->deprecated_get_saved_register != 0;
 }
 
 void
-gdbarch_get_saved_register (struct gdbarch *gdbarch, char *raw_buffer, int *optimized, CORE_ADDR *addrp, struct frame_info *frame, int regnum, enum lval_type *lval)
+gdbarch_deprecated_get_saved_register (struct gdbarch *gdbarch, char *raw_buffer, int *optimized, CORE_ADDR *addrp, struct frame_info *frame, int regnum, enum lval_type *lval)
 {
   gdb_assert (gdbarch != NULL);
-  if (gdbarch->get_saved_register == 0)
+  if (gdbarch->deprecated_get_saved_register == 0)
     internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_get_saved_register invalid");
+                    "gdbarch: gdbarch_deprecated_get_saved_register invalid");
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_get_saved_register called\n");
-  gdbarch->get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval);
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_get_saved_register called\n");
+  gdbarch->deprecated_get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lval);
 }
 
 void
-set_gdbarch_get_saved_register (struct gdbarch *gdbarch,
-                                gdbarch_get_saved_register_ftype get_saved_register)
+set_gdbarch_deprecated_get_saved_register (struct gdbarch *gdbarch,
+                                           gdbarch_deprecated_get_saved_register_ftype deprecated_get_saved_register)
 {
-  gdbarch->get_saved_register = get_saved_register;
+  gdbarch->deprecated_get_saved_register = deprecated_get_saved_register;
 }
 
 int
@@ -4307,29 +4307,29 @@ set_gdbarch_push_return_address (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_pop_frame_p (struct gdbarch *gdbarch)
+gdbarch_deprecated_pop_frame_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  return gdbarch->pop_frame != 0;
+  return gdbarch->deprecated_pop_frame != 0;
 }
 
 void
-gdbarch_pop_frame (struct gdbarch *gdbarch)
+gdbarch_deprecated_pop_frame (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  if (gdbarch->pop_frame == 0)
+  if (gdbarch->deprecated_pop_frame == 0)
     internal_error (__FILE__, __LINE__,
-                    "gdbarch: gdbarch_pop_frame invalid");
+                    "gdbarch: gdbarch_deprecated_pop_frame invalid");
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_pop_frame called\n");
-  gdbarch->pop_frame ();
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_pop_frame called\n");
+  gdbarch->deprecated_pop_frame ();
 }
 
 void
-set_gdbarch_pop_frame (struct gdbarch *gdbarch,
-                       gdbarch_pop_frame_ftype pop_frame)
+set_gdbarch_deprecated_pop_frame (struct gdbarch *gdbarch,
+                                  gdbarch_deprecated_pop_frame_ftype deprecated_pop_frame)
 {
-  gdbarch->pop_frame = pop_frame;
+  gdbarch->deprecated_pop_frame = deprecated_pop_frame;
 }
 
 void

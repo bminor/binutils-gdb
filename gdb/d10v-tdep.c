@@ -705,8 +705,8 @@ prologue_find_regs (struct d10v_unwind_cache *info, unsigned short op,
    for it IS the sp for the next frame. */
 
 struct d10v_unwind_cache *
-d10v_frame_unwind_cache (struct frame_info *fi,
-			 void **cache)
+d10v_frame_unwind_cache (struct frame_info *next_frame,
+			 void **this_prologue_cache)
 {
   CORE_ADDR pc;
   ULONGEST prev_sp;
@@ -716,18 +716,18 @@ d10v_frame_unwind_cache (struct frame_info *fi,
   int i;
   struct d10v_unwind_cache *info;
 
-  if ((*cache))
-    return (*cache);
+  if ((*this_prologue_cache))
+    return (*this_prologue_cache);
 
   info = FRAME_OBSTACK_ZALLOC (struct d10v_unwind_cache);
-  (*cache) = info;
+  (*this_prologue_cache) = info;
   info->saved_regs = frame_obstack_zalloc (SIZEOF_FRAME_SAVED_REGS);
 
   info->size = 0;
   info->return_pc = 0;
   info->sp_offset = 0;
 
-  pc = get_pc_function_start (get_frame_pc (fi));
+  pc = get_pc_function_start (frame_pc_unwind (next_frame));
 
   info->uses_frame = 0;
   while (1)
@@ -788,7 +788,7 @@ d10v_frame_unwind_cache (struct frame_info *fi,
       /* The SP was moved to the FP.  This indicates that a new frame
          was created.  Get THIS frame's FP value by unwinding it from
          the next frame.  */
-      frame_read_unsigned_register (fi, FP_REGNUM, &this_base);
+      frame_unwind_unsigned_register (next_frame, FP_REGNUM, &this_base);
       /* The FP points at the last saved register.  Adjust the FP back
          to before the first saved register giving the SP.  */
       prev_sp = this_base + info->size;
@@ -806,7 +806,7 @@ d10v_frame_unwind_cache (struct frame_info *fi,
     {
       /* Assume that the FP is this frame's SP but with that pushed
          stack space added back.  */
-      frame_read_unsigned_register (fi, SP_REGNUM, &this_base);
+      frame_unwind_unsigned_register (next_frame, SP_REGNUM, &this_base);
       prev_sp = this_base + info->size;
     }
 
@@ -831,7 +831,7 @@ d10v_frame_unwind_cache (struct frame_info *fi,
   else
     {
       ULONGEST return_pc;
-      frame_read_unsigned_register (fi, LR_REGNUM, &return_pc);
+      frame_unwind_unsigned_register (next_frame, LR_REGNUM, &return_pc);
       info->return_pc = d10v_make_iaddr (return_pc);
     }
 
@@ -1457,58 +1457,55 @@ d10v_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
    frame.  This will be used to create a new GDB frame struct.  */
 
 static void
-d10v_frame_id_unwind (struct frame_info *frame,
-		      void **cache,
-		      struct frame_id *id)
+d10v_frame_this_id (struct frame_info *next_frame,
+		    void **this_prologue_cache,
+		    struct frame_id *this_id)
 {
-  struct d10v_unwind_cache *info = d10v_frame_unwind_cache (frame, cache);
-  CORE_ADDR addr;
+  struct d10v_unwind_cache *info
+    = d10v_frame_unwind_cache (next_frame, this_prologue_cache);
+  CORE_ADDR base;
+  CORE_ADDR pc;
 
   /* Start with a NULL frame ID.  */
-  (*id) = null_frame_id;
+  (*this_id) = null_frame_id;
 
-  if (info->return_pc == IMEM_START
-      || info->return_pc <= IMEM_START
-      || inside_entry_file (info->return_pc))
-    {
-      /* This is meant to halt the backtrace at "_start".
-	 Make sure we don't halt it at a generic dummy frame. */
-      return;
-    }
+  /* The PC is easy.  */
+  pc = frame_pc_unwind (next_frame);
 
-  if (!info->saved_regs[FP_REGNUM])
-    {
-      if (!info->saved_regs[SP_REGNUM]
-	  || info->saved_regs[SP_REGNUM] == STACK_START)
-	return;
-
-      id->base = info->saved_regs[SP_REGNUM];
-      id->pc = info->return_pc;
-    }
-
-  addr = read_memory_unsigned_integer (info->saved_regs[FP_REGNUM],
-				       register_size (current_gdbarch, FP_REGNUM));
-  if (addr == 0)
+  /* This is meant to halt the backtrace at "_start".  Make sure we
+     don't halt it at a generic dummy frame. */
+  if (pc == IMEM_START || pc <= IMEM_START || inside_entry_file (pc))
     return;
 
-  id->base = d10v_make_daddr (addr);
-  id->pc = info->return_pc;
+  /* Hopefully the prologue analysis either correctly determined the
+     frame's base (which is the SP from the previous frame), or set
+     that base to "NULL".  */
+  base = info->base;
+  if (base == STACK_START || base == 0)
+    return;
+
+  /* Check that we're not going round in circles with the same frame
+     ID (but avoid applying the test to sentinel frames which do go
+     round in circles).  Can't use frame_id_eq() as that doesn't yet
+     compare the frame's PC value.  */
+  if (frame_relative_level (next_frame) >= 0
+      && get_frame_type (next_frame) != DUMMY_FRAME
+      && get_frame_id (next_frame).pc == pc
+      && get_frame_id (next_frame).base == base)
+    return;
+
+  this_id->base = base;
+  this_id->pc = pc;
 }
 
 static void
-saved_regs_unwinder (struct frame_info *frame,
-		     CORE_ADDR *saved_regs,
+saved_regs_unwinder (struct frame_info *next_frame,
+		     CORE_ADDR *this_saved_regs,
 		     int regnum, int *optimizedp,
 		     enum lval_type *lvalp, CORE_ADDR *addrp,
 		     int *realnump, void *bufferp)
 {
-  /* If we're using generic dummy frames, we'd better not be in a call
-     dummy.  (generic_call_dummy_register_unwind ought to have been called
-     instead.)  */
-  gdb_assert (!(DEPRECATED_USE_GENERIC_DUMMY_FRAMES
-		&& (get_frame_type (frame) == DUMMY_FRAME)));
-
-  if (saved_regs[regnum] != 0)
+  if (this_saved_regs[regnum] != 0)
     {
       if (regnum == SP_REGNUM)
 	{
@@ -1519,7 +1516,7 @@ saved_regs_unwinder (struct frame_info *frame,
 	  *realnump = -1;
 	  if (bufferp != NULL)
 	    store_address (bufferp, register_size (current_gdbarch, regnum),
-			   saved_regs[regnum]);
+			   this_saved_regs[regnum]);
 	}
       else
 	{
@@ -1527,12 +1524,12 @@ saved_regs_unwinder (struct frame_info *frame,
 	     a local copy of its value.  */
 	  *optimizedp = 0;
 	  *lvalp = lval_memory;
-	  *addrp = saved_regs[regnum];
+	  *addrp = this_saved_regs[regnum];
 	  *realnump = -1;
 	  if (bufferp != NULL)
 	    {
 	      /* Read the value in from memory.  */
-	      read_memory (saved_regs[regnum], bufferp,
+	      read_memory (this_saved_regs[regnum], bufferp,
 			   register_size (current_gdbarch, regnum));
 	    }
 	}
@@ -1543,38 +1540,39 @@ saved_regs_unwinder (struct frame_info *frame,
      value.  If a value is needed, pass the request on down the chain;
      otherwise just return an indication that the value is in the same
      register as the next frame.  */
-  frame_register (frame, regnum, optimizedp, lvalp, addrp,
-		  realnump, bufferp);
+  frame_register_unwind (next_frame, regnum, optimizedp, lvalp, addrp,
+			 realnump, bufferp);
 }
 
 
 static void
-d10v_frame_register_unwind (struct frame_info *frame,
-			    void **cache,
-			    int regnum, int *optimizedp,
-			    enum lval_type *lvalp, CORE_ADDR *addrp,
-			    int *realnump, void *bufferp)
+d10v_frame_prev_register (struct frame_info *next_frame,
+			  void **this_prologue_cache,
+			  int regnum, int *optimizedp,
+			  enum lval_type *lvalp, CORE_ADDR *addrp,
+			  int *realnump, void *bufferp)
 {
-  struct d10v_unwind_cache *info = d10v_frame_unwind_cache (frame, cache);
+  struct d10v_unwind_cache *info
+    = d10v_frame_unwind_cache (next_frame, this_prologue_cache);
   if (regnum == PC_REGNUM)
     {
       /* The call instruction saves the caller's PC in LR.  The
 	 function prologue of the callee may then save the LR on the
 	 stack.  Find that possibly saved LR value and return it.  */
-      saved_regs_unwinder (frame, info->saved_regs, LR_REGNUM, optimizedp,
+      saved_regs_unwinder (next_frame, info->saved_regs, LR_REGNUM, optimizedp,
 			   lvalp, addrp, realnump, bufferp);
     }
   else
     {
-      saved_regs_unwinder (frame, info->saved_regs, regnum, optimizedp,
+      saved_regs_unwinder (next_frame, info->saved_regs, regnum, optimizedp,
 			   lvalp, addrp, realnump, bufferp);
     }
 }
 
 
 static struct frame_unwind d10v_frame_unwind = {
-  d10v_frame_id_unwind,
-  d10v_frame_register_unwind
+  d10v_frame_this_id,
+  d10v_frame_prev_register
 };
 
 const struct frame_unwind *

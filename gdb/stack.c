@@ -1639,9 +1639,13 @@ return_command (char *retval_exp, int from_tty)
      that.  */
 
   /* Do the real work.  Pop until the specified frame is current.  We
-     use this method because the deprecated_selected_frame is not valid after
-     a POP_FRAME.  The pc comparison makes this work even if the
-     selected frame shares its fp with another frame.  */
+     use this method because the deprecated_selected_frame is not
+     valid after a frame_pop().  The pc comparison makes this work
+     even if the selected frame shares its fp with another frame.  */
+
+  /* FIXME: cagney/32003-03-12: This code should use frame_id_eq().
+     Unfortunatly, that function doesn't yet include the PC in any
+     frame ID comparison.  */
 
   while (selected_frame_addr != get_frame_base (frame = get_current_frame ())
 	 || selected_frame_pc != get_frame_pc (frame))
