@@ -125,10 +125,6 @@ default_memory_remove_breakpoint (addr, contents_cache)
 }
 
 
-#if !defined(MEMORY_INSERT_BREAKPOINT)
-#define MEMORY_INSERT_BREAKPOINT(addr, contents_cache) \
-  default_memory_insert_breakpoint(addr, contents_cache)
-#endif
 int
 memory_insert_breakpoint (addr, contents_cache)
      CORE_ADDR addr;
@@ -137,10 +133,6 @@ memory_insert_breakpoint (addr, contents_cache)
   return MEMORY_INSERT_BREAKPOINT(addr, contents_cache);
 }
 
-#if !defined(MEMORY_REMOVE_BREAKPOINT)
-#define MEMORY_REMOVE_BREAKPOINT(addr, contents_cache) \
-  default_memory_remove_breakpoint(addr, contents_cache)
-#endif
 int
 memory_remove_breakpoint (addr, contents_cache)
      CORE_ADDR addr;

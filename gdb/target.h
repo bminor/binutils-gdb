@@ -1337,10 +1337,6 @@ extern int default_memory_remove_breakpoint PARAMS ((CORE_ADDR, char *));
 extern int default_memory_insert_breakpoint PARAMS ((CORE_ADDR, char *));
 
 extern breakpoint_from_pc_fn memory_breakpoint_from_pc;
-#ifndef BREAKPOINT_FROM_PC
-#define BREAKPOINT_FROM_PC(pcptr, lenptr) \
-     memory_breakpoint_from_pc (pcptr, lenptr)
-#endif
 
 
 /* From target.c */

@@ -1,3 +1,26 @@
+Mon Apr 17 11:26:01 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote.c (REMOTE_TRANSLATE_XFER_ADDRESS), mem-break.c
+ 	(MEMORY_INSERT_BREAKPOINT, MEMORY_REMOVE_BREAKPOINT), target.h
+ 	(BREAKPOINT_FROM_PC), valops.c (COERCE_FLOAT_TO_DOUBLE),
+ 	gdbarch.sh (D10V_MAKE_DADDR, D10V_MAKE_IADDR,
+ 	FRAMELESS_FUNCTION_INVOCATION, REGISTER_CONVERTIBLE,
+ 	REGISTER_CONVERT_TO_VIRTUAL, REGISTER_CONVERT_TO_RAW,
+ 	REGISTER_NAME), findvar.c (POINTER_TO_ADDRESS,
+ 	ADDRESS_TO_POINTER): Delete default definition.  Handled by
+ 	gdbarch.
+
+	* gdbarch.sh: Make multi-arch defaults, defaults for non-
+ 	multi-arch targets.
+	(REGISTER_NAME, COERCE_FLOAT_TO_DOUBLE, REGISTER_CONVERTIBLE,
+ 	REGISTER_CONVERT_TO_VIRTUAL, REGISTER_CONVERT_TO_RAW,
+ 	D10V_MAKE_DADDR, D10V_MAKE_IADDR, BREAKPOINT_FROM_PC,
+ 	MEMORY_INSERT_BREAKPOINT, MEMORY_REMOVE_BREAKPOINT,
+ 	REMOTE_TRANSLATE_XFER_ADDRESS, FRAMELESS_FUNCTION_INVOCATION):
+ 	Provide default/legacy implementation.
+	(REGISTER_NAMES, CALL_DUMMY): Allow legacy definition.
+	* gdbarch.h, gdbarch.c: Re-generate.
+
 2000-04-16  Jim Blandy  <jimb@redhat.com>
 
 	* findvar.c (store_typed_address, extract_typed_address): Fix

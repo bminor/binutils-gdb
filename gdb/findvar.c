@@ -192,10 +192,6 @@ extract_address (void *addr, int len)
 }
 
 
-#ifndef POINTER_TO_ADDRESS
-#define POINTER_TO_ADDRESS generic_pointer_to_address
-#endif
-
 /* Treat the bytes at BUF as a pointer of type TYPE, and return the
    address it represents.  */
 CORE_ADDR
@@ -281,10 +277,6 @@ store_address (void *addr, int len, LONGEST val)
   store_unsigned_integer (addr, len, val);
 }
 
-
-#ifndef ADDRESS_TO_POINTER
-#define ADDRESS_TO_POINTER generic_address_to_pointer
-#endif
 
 /* Store the address ADDR as a pointer of type TYPE at BUF, in target
    form.  */

@@ -1128,18 +1128,6 @@ default_push_arguments (nargs, args, sp, struct_return, struct_addr)
 }
 
 
-/* If we're calling a function declared without a prototype, should we
-   promote floats to doubles?  FORMAL and ACTUAL are the types of the
-   arguments; FORMAL may be NULL.
-
-   If we have no definition for this macro, either from the target or
-   from gdbarch, provide a default.  */
-#ifndef COERCE_FLOAT_TO_DOUBLE
-#define COERCE_FLOAT_TO_DOUBLE(formal, actual) \
-  (default_coerce_float_to_double ((formal), (actual)))
-#endif
-
-
 /* A default function for COERCE_FLOAT_TO_DOUBLE: do the coercion only
    when we don't have any type for the argument at hand.  This occurs
    when we have no debug info, or when passing varargs.

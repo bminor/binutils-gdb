@@ -3596,11 +3596,6 @@ remote_read_bytes (memaddr, myaddr, len)
    SHOULD_WRITE is nonzero.  Returns length of data written or read; 0
    for error.  */
 
-#ifndef REMOTE_TRANSLATE_XFER_ADDRESS
-#define REMOTE_TRANSLATE_XFER_ADDRESS(MEM_ADDR, MEM_LEN, TARG_ADDR, TARG_LEN) \
-   (*(TARG_ADDR) = (MEM_ADDR), *(TARG_LEN) = (MEM_LEN))
-#endif
-
 /* ARGSUSED */
 static int
 remote_xfer_memory (mem_addr, buffer, mem_len, should_write, target)

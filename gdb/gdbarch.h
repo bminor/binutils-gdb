@@ -54,18 +54,6 @@ extern struct gdbarch *current_gdbarch;
    converted. */
 
 #if GDB_MULTI_ARCH
-#if defined (CALL_DUMMY)
-#error "CALL_DUMMY: replaced by CALL_DUMMY_WORDS/SIZEOF_CALL_DUMMY_WORDS"
-#endif
-#endif
-
-#if GDB_MULTI_ARCH
-#if defined (REGISTER_NAMES)
-#error "REGISTER_NAMES: replaced by REGISTER_NAME"
-#endif
-#endif
-
-#if GDB_MULTI_ARCH
 #if defined (EXTRA_FRAME_INFO)
 #error "EXTRA_FRAME_INFO: replaced by struct frame_extra_info"
 #endif
@@ -268,10 +256,8 @@ extern void set_gdbarch_pc_regnum (struct gdbarch *gdbarch, int pc_regnum);
 typedef char * (gdbarch_register_name_ftype) (int regnr);
 extern char * gdbarch_register_name (struct gdbarch *gdbarch, int regnr);
 extern void set_gdbarch_register_name (struct gdbarch *gdbarch, gdbarch_register_name_ftype *register_name);
-#if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > 1) || !defined (REGISTER_NAME)
 #define REGISTER_NAME(regnr) (gdbarch_register_name (current_gdbarch, regnr))
-#endif
 #endif
 
 extern int gdbarch_register_size (struct gdbarch *gdbarch);
@@ -476,10 +462,8 @@ extern void set_gdbarch_believe_pcc_promotion_type (struct gdbarch *gdbarch, int
 typedef int (gdbarch_coerce_float_to_double_ftype) (struct type *formal, struct type *actual);
 extern int gdbarch_coerce_float_to_double (struct gdbarch *gdbarch, struct type *formal, struct type *actual);
 extern void set_gdbarch_coerce_float_to_double (struct gdbarch *gdbarch, gdbarch_coerce_float_to_double_ftype *coerce_float_to_double);
-#if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > 1) || !defined (COERCE_FLOAT_TO_DOUBLE)
 #define COERCE_FLOAT_TO_DOUBLE(formal, actual) (gdbarch_coerce_float_to_double (current_gdbarch, formal, actual))
-#endif
 #endif
 
 typedef void (gdbarch_get_saved_register_ftype) (char *raw_buffer, int *optimized, CORE_ADDR *addrp, struct frame_info *frame, int regnum, enum lval_type *lval);
@@ -494,46 +478,36 @@ extern void set_gdbarch_get_saved_register (struct gdbarch *gdbarch, gdbarch_get
 typedef int (gdbarch_register_convertible_ftype) (int nr);
 extern int gdbarch_register_convertible (struct gdbarch *gdbarch, int nr);
 extern void set_gdbarch_register_convertible (struct gdbarch *gdbarch, gdbarch_register_convertible_ftype *register_convertible);
-#if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > 1) || !defined (REGISTER_CONVERTIBLE)
 #define REGISTER_CONVERTIBLE(nr) (gdbarch_register_convertible (current_gdbarch, nr))
-#endif
 #endif
 
 typedef void (gdbarch_register_convert_to_virtual_ftype) (int regnum, struct type *type, char *from, char *to);
 extern void gdbarch_register_convert_to_virtual (struct gdbarch *gdbarch, int regnum, struct type *type, char *from, char *to);
 extern void set_gdbarch_register_convert_to_virtual (struct gdbarch *gdbarch, gdbarch_register_convert_to_virtual_ftype *register_convert_to_virtual);
-#if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > 1) || !defined (REGISTER_CONVERT_TO_VIRTUAL)
 #define REGISTER_CONVERT_TO_VIRTUAL(regnum, type, from, to) (gdbarch_register_convert_to_virtual (current_gdbarch, regnum, type, from, to))
-#endif
 #endif
 
 typedef void (gdbarch_register_convert_to_raw_ftype) (struct type *type, int regnum, char *from, char *to);
 extern void gdbarch_register_convert_to_raw (struct gdbarch *gdbarch, struct type *type, int regnum, char *from, char *to);
 extern void set_gdbarch_register_convert_to_raw (struct gdbarch *gdbarch, gdbarch_register_convert_to_raw_ftype *register_convert_to_raw);
-#if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > 1) || !defined (REGISTER_CONVERT_TO_RAW)
 #define REGISTER_CONVERT_TO_RAW(type, regnum, from, to) (gdbarch_register_convert_to_raw (current_gdbarch, type, regnum, from, to))
-#endif
 #endif
 
 typedef CORE_ADDR (gdbarch_pointer_to_address_ftype) (struct type *type, char *buf);
 extern CORE_ADDR gdbarch_pointer_to_address (struct gdbarch *gdbarch, struct type *type, char *buf);
 extern void set_gdbarch_pointer_to_address (struct gdbarch *gdbarch, gdbarch_pointer_to_address_ftype *pointer_to_address);
-#if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > 1) || !defined (POINTER_TO_ADDRESS)
 #define POINTER_TO_ADDRESS(type, buf) (gdbarch_pointer_to_address (current_gdbarch, type, buf))
-#endif
 #endif
 
 typedef void (gdbarch_address_to_pointer_ftype) (struct type *type, char *buf, CORE_ADDR addr);
 extern void gdbarch_address_to_pointer (struct gdbarch *gdbarch, struct type *type, char *buf, CORE_ADDR addr);
 extern void set_gdbarch_address_to_pointer (struct gdbarch *gdbarch, gdbarch_address_to_pointer_ftype *address_to_pointer);
-#if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > 1) || !defined (ADDRESS_TO_POINTER)
 #define ADDRESS_TO_POINTER(type, buf, addr) (gdbarch_address_to_pointer (current_gdbarch, type, buf, addr))
-#endif
 #endif
 
 typedef void (gdbarch_extract_return_value_ftype) (struct type *type, char *regbuf, char *valbuf);
@@ -584,19 +558,15 @@ extern void set_gdbarch_pop_frame (struct gdbarch *gdbarch, gdbarch_pop_frame_ft
 typedef CORE_ADDR (gdbarch_d10v_make_daddr_ftype) (CORE_ADDR x);
 extern CORE_ADDR gdbarch_d10v_make_daddr (struct gdbarch *gdbarch, CORE_ADDR x);
 extern void set_gdbarch_d10v_make_daddr (struct gdbarch *gdbarch, gdbarch_d10v_make_daddr_ftype *d10v_make_daddr);
-#if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > 1) || !defined (D10V_MAKE_DADDR)
 #define D10V_MAKE_DADDR(x) (gdbarch_d10v_make_daddr (current_gdbarch, x))
-#endif
 #endif
 
 typedef CORE_ADDR (gdbarch_d10v_make_iaddr_ftype) (CORE_ADDR x);
 extern CORE_ADDR gdbarch_d10v_make_iaddr (struct gdbarch *gdbarch, CORE_ADDR x);
 extern void set_gdbarch_d10v_make_iaddr (struct gdbarch *gdbarch, gdbarch_d10v_make_iaddr_ftype *d10v_make_iaddr);
-#if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > 1) || !defined (D10V_MAKE_IADDR)
 #define D10V_MAKE_IADDR(x) (gdbarch_d10v_make_iaddr (current_gdbarch, x))
-#endif
 #endif
 
 typedef int (gdbarch_d10v_daddr_p_ftype) (CORE_ADDR x);
@@ -710,28 +680,22 @@ extern void set_gdbarch_inner_than (struct gdbarch *gdbarch, gdbarch_inner_than_
 typedef unsigned char * (gdbarch_breakpoint_from_pc_ftype) (CORE_ADDR *pcptr, int *lenptr);
 extern unsigned char * gdbarch_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr);
 extern void set_gdbarch_breakpoint_from_pc (struct gdbarch *gdbarch, gdbarch_breakpoint_from_pc_ftype *breakpoint_from_pc);
-#if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > 1) || !defined (BREAKPOINT_FROM_PC)
 #define BREAKPOINT_FROM_PC(pcptr, lenptr) (gdbarch_breakpoint_from_pc (current_gdbarch, pcptr, lenptr))
-#endif
 #endif
 
 typedef int (gdbarch_memory_insert_breakpoint_ftype) (CORE_ADDR addr, char *contents_cache);
 extern int gdbarch_memory_insert_breakpoint (struct gdbarch *gdbarch, CORE_ADDR addr, char *contents_cache);
 extern void set_gdbarch_memory_insert_breakpoint (struct gdbarch *gdbarch, gdbarch_memory_insert_breakpoint_ftype *memory_insert_breakpoint);
-#if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > 1) || !defined (MEMORY_INSERT_BREAKPOINT)
 #define MEMORY_INSERT_BREAKPOINT(addr, contents_cache) (gdbarch_memory_insert_breakpoint (current_gdbarch, addr, contents_cache))
-#endif
 #endif
 
 typedef int (gdbarch_memory_remove_breakpoint_ftype) (CORE_ADDR addr, char *contents_cache);
 extern int gdbarch_memory_remove_breakpoint (struct gdbarch *gdbarch, CORE_ADDR addr, char *contents_cache);
 extern void set_gdbarch_memory_remove_breakpoint (struct gdbarch *gdbarch, gdbarch_memory_remove_breakpoint_ftype *memory_remove_breakpoint);
-#if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > 1) || !defined (MEMORY_REMOVE_BREAKPOINT)
 #define MEMORY_REMOVE_BREAKPOINT(addr, contents_cache) (gdbarch_memory_remove_breakpoint (current_gdbarch, addr, contents_cache))
-#endif
 #endif
 
 extern CORE_ADDR gdbarch_decr_pc_after_break (struct gdbarch *gdbarch);
@@ -753,10 +717,8 @@ extern void set_gdbarch_function_start_offset (struct gdbarch *gdbarch, CORE_ADD
 typedef void (gdbarch_remote_translate_xfer_address_ftype) (CORE_ADDR gdb_addr, int gdb_len, CORE_ADDR *rem_addr, int *rem_len);
 extern void gdbarch_remote_translate_xfer_address (struct gdbarch *gdbarch, CORE_ADDR gdb_addr, int gdb_len, CORE_ADDR *rem_addr, int *rem_len);
 extern void set_gdbarch_remote_translate_xfer_address (struct gdbarch *gdbarch, gdbarch_remote_translate_xfer_address_ftype *remote_translate_xfer_address);
-#if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > 1) || !defined (REMOTE_TRANSLATE_XFER_ADDRESS)
 #define REMOTE_TRANSLATE_XFER_ADDRESS(gdb_addr, gdb_len, rem_addr, rem_len) (gdbarch_remote_translate_xfer_address (current_gdbarch, gdb_addr, gdb_len, rem_addr, rem_len))
-#endif
 #endif
 
 extern CORE_ADDR gdbarch_frame_args_skip (struct gdbarch *gdbarch);
@@ -770,10 +732,8 @@ extern void set_gdbarch_frame_args_skip (struct gdbarch *gdbarch, CORE_ADDR fram
 typedef int (gdbarch_frameless_function_invocation_ftype) (struct frame_info *fi);
 extern int gdbarch_frameless_function_invocation (struct gdbarch *gdbarch, struct frame_info *fi);
 extern void set_gdbarch_frameless_function_invocation (struct gdbarch *gdbarch, gdbarch_frameless_function_invocation_ftype *frameless_function_invocation);
-#if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > 1) || !defined (FRAMELESS_FUNCTION_INVOCATION)
 #define FRAMELESS_FUNCTION_INVOCATION(fi) (gdbarch_frameless_function_invocation (current_gdbarch, fi))
-#endif
 #endif
 
 typedef CORE_ADDR (gdbarch_frame_chain_ftype) (struct frame_info *frame);
@@ -1087,31 +1047,6 @@ extern disassemble_info tm_print_insn_info;
    USE of these macro's is *STRONGLY* discouraged. */
 
 #define GDB_TARGET_IS_D10V (TARGET_ARCHITECTURE->arch == bfd_arch_d10v)
-#ifndef D10V_MAKE_DADDR
-#define D10V_MAKE_DADDR(X) (internal_error ("gdbarch: D10V_MAKE_DADDR"), 0)
-#endif
-#ifndef D10V_MAKE_IADDR
-#define D10V_MAKE_IADDR(X) (internal_error ("gdbarch: D10V_MAKE_IADDR"), 0)
-#endif
-
-
-/* Fallback definition of FRAMELESS_FUNCTION_INVOCATION */
-#ifndef FRAMELESS_FUNCTION_INVOCATION
-#define FRAMELESS_FUNCTION_INVOCATION(FI) (0)
-#endif
-
-
-/* Fallback definition of REGISTER_CONVERTIBLE etc */
-extern int generic_register_convertible_not (int reg_nr);
-#ifndef REGISTER_CONVERTIBLE
-#define REGISTER_CONVERTIBLE(x) (0)
-#endif
-#ifndef REGISTER_CONVERT_TO_VIRTUAL
-#define REGISTER_CONVERT_TO_VIRTUAL(x, y, z, a)
-#endif
-#ifndef REGISTER_CONVERT_TO_RAW
-#define REGISTER_CONVERT_TO_RAW(x, y, z, a)
-#endif
 
 
 /* Fallback definition for EXTRACT_STRUCT_VALUE_ADDRESS */
@@ -1122,14 +1057,6 @@ extern int generic_register_convertible_not (int reg_nr);
 #ifndef EXTRACT_STRUCT_VALUE_ADDRESS_P
 #define EXTRACT_STRUCT_VALUE_ADDRESS_P (1)
 #endif
-#endif
-
-
-/* Fallback definition for REGISTER_NAME for systems still defining
-   REGISTER_NAMES. */
-#ifndef REGISTER_NAME
-extern char *gdb_register_names[];
-#define REGISTER_NAME(i) gdb_register_names[i]
 #endif
 
 

@@ -39,8 +39,6 @@ compare_new ()
 default_is_fallback_p ()
 {
     [ "${default}" != "" -a "${invalid_p}" = "0" ]
-    # FIXME: cagney - not until after 5.0
-    false
 }
 
 # Format of the input table
@@ -381,18 +379,6 @@ extern struct gdbarch *current_gdbarch;
    converted. */
 
 #if GDB_MULTI_ARCH
-#if defined (CALL_DUMMY)
-#error "CALL_DUMMY: replaced by CALL_DUMMY_WORDS/SIZEOF_CALL_DUMMY_WORDS"
-#endif
-#endif
-
-#if GDB_MULTI_ARCH
-#if defined (REGISTER_NAMES)
-#error "REGISTER_NAMES: replaced by REGISTER_NAME"
-#endif
-#endif
-
-#if GDB_MULTI_ARCH
 #if defined (EXTRA_FRAME_INFO)
 #error "EXTRA_FRAME_INFO: replaced by struct frame_extra_info"
 #endif
@@ -726,31 +712,6 @@ extern disassemble_info tm_print_insn_info;
    USE of these macro's is *STRONGLY* discouraged. */
 
 #define GDB_TARGET_IS_D10V (TARGET_ARCHITECTURE->arch == bfd_arch_d10v)
-#ifndef D10V_MAKE_DADDR
-#define D10V_MAKE_DADDR(X) (internal_error ("gdbarch: D10V_MAKE_DADDR"), 0)
-#endif
-#ifndef D10V_MAKE_IADDR
-#define D10V_MAKE_IADDR(X) (internal_error ("gdbarch: D10V_MAKE_IADDR"), 0)
-#endif
-
-
-/* Fallback definition of FRAMELESS_FUNCTION_INVOCATION */
-#ifndef FRAMELESS_FUNCTION_INVOCATION
-#define FRAMELESS_FUNCTION_INVOCATION(FI) (0)
-#endif
-
-
-/* Fallback definition of REGISTER_CONVERTIBLE etc */
-extern int generic_register_convertible_not (int reg_nr);
-#ifndef REGISTER_CONVERTIBLE
-#define REGISTER_CONVERTIBLE(x) (0)
-#endif
-#ifndef REGISTER_CONVERT_TO_VIRTUAL
-#define REGISTER_CONVERT_TO_VIRTUAL(x, y, z, a)
-#endif
-#ifndef REGISTER_CONVERT_TO_RAW
-#define REGISTER_CONVERT_TO_RAW(x, y, z, a)
-#endif
 
 
 /* Fallback definition for EXTRACT_STRUCT_VALUE_ADDRESS */
@@ -761,14 +722,6 @@ extern int generic_register_convertible_not (int reg_nr);
 #ifndef EXTRACT_STRUCT_VALUE_ADDRESS_P
 #define EXTRACT_STRUCT_VALUE_ADDRESS_P (1)
 #endif
-#endif
-
-
-/* Fallback definition for REGISTER_NAME for systems still defining
-   REGISTER_NAMES. */
-#ifndef REGISTER_NAME
-extern char *gdb_register_names[];
-#define REGISTER_NAME(i) gdb_register_names[i]
 #endif
 
 
