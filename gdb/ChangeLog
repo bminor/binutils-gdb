@@ -1,3 +1,7 @@
+Mon Feb 28 13:34:54 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* wince.c: Include "gdb_wait.h" and not "wait.h".
+
 Mon Feb 28 10:58:45 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* MAINTAINERS: Mention mmalloc.  Expand Host/Native and
