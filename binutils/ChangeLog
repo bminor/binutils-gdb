@@ -1,3 +1,7 @@
+2002-05-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* MAINTAINERS: Sort port maintainers by CPU.
+
 2002-05-04  Bob Byrnes  <byrnes@curl.com>
 
 	* size.c (display_archive): Add last_arfile and code to close archives.
