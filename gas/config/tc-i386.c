@@ -4235,10 +4235,8 @@ md_estimate_size_before_relax (fragP, segment)
 	  break;
 
 	case COND_JUMP86:
-	  if (no_cond_jump_promotion)
-	    goto relax_guess;
-
-	  if (size == 2)
+	  if (size == 2
+	      && (!no_cond_jump_promotion || fragP->fr_var != NO_RELOC))
 	    {
 	      /* Negate the condition, and branch past an
 		 unconditional jump.  */
@@ -4258,8 +4256,15 @@ md_estimate_size_before_relax (fragP, segment)
 	  /* Fall through.  */
 
 	case COND_JUMP:
-	  if (no_cond_jump_promotion)
-	    goto relax_guess;
+	  if (no_cond_jump_promotion && fragP->fr_var == NO_RELOC)
+	    {
+	      fragP->fr_fix += 1;
+	      fix_new (fragP, old_fr_fix, 1,
+		       fragP->fr_symbol,
+		       fragP->fr_offset, 1,
+		       BFD_RELOC_8_PCREL);
+	      break;
+	    }
 
 	  /* This changes the byte-displacement jump 0x7N
 	     to the (d)word-displacement jump 0x0f,0x8N.  */
@@ -4281,7 +4286,6 @@ md_estimate_size_before_relax (fragP, segment)
       return fragP->fr_fix - old_fr_fix;
     }
 
- relax_guess:
   /* Guess size depending on current relax state.  Initially the relax
      state will correspond to a short jump and we return 1, because
      the variable part of the frag (the branch offset) is one byte

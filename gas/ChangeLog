@@ -1,3 +1,8 @@
+2002-05-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-i386.c (md_estimate_size_before_relax) Don't lose
+	reloc when no_cond_jump_promotion.
+
 2002-05-08  Jim Wilson  <wilson@redhat.com>
 
 	* config/tc-i960.c (md_estimate_size_before_relax): Return size of
