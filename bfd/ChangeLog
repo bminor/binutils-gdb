@@ -1,3 +1,9 @@
+Fri Dec 16 12:28:46 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* elfcode.h (elf_section_from_bfd_section): Check
+	bfd_is_abs_section, etc., only after checking for the section in
+	the BFD and after calling the backend routine.
+
 Wed Dec 14 20:21:58 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* elfcode.h (elf_map_symbols): Only use section symbols whose
