@@ -1,3 +1,10 @@
+start-sanitize-v850
+Tue Dec 31 12:20:38 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* v850-opc.c (v850_opcodes): Put curly-braces around operands
+	for "breakpoint" instruction.
+
+end-sanitize-v850
 Tue Dec 31 15:38:13 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (ALL_CFLAGS): Add -D_GNU_SOURCE.
