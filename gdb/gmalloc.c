@@ -1093,6 +1093,10 @@ DEFUN(__default_morecore, (size), ptrdiff_t size)
 #include <stdlib.h>
 #endif /* __ONEFILE */
 
+#if 0
+/* On SunOS 4.1.1, <sys/param.h> typedefs size_t, which is bad since
+   we typedef it above.  Maybe it's better just to have people compile
+   -Dgetpagesize()=4096.  */
 /* Deal with page size.  */
 #ifdef BSD
 #ifndef BSD4_1
@@ -1125,6 +1129,7 @@ DEFUN_VOID(__getpagesize)
   return PAGESIZE;
 }
 #endif /* not HAVE_GETPAGESIZE */
+#endif /* 0 */
 
 extern size_t EXFUN(__getpagesize, (NOARGS));
 
