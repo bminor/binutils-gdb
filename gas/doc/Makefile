@@ -15,15 +15,15 @@ srcdir=..
 # Where to find texinfo.tex to format docn with TeX
 TEXIDIR = $(srcdir)/../texinfo/fsf
 
+as.info: as-${CONFIG}.texinfo
+	makeinfo as-${CONFIG}.texinfo
+
 # There's no index yet; when there is, add texindex call before tex 2nd pass
 as.dvi:	as-${CONFIG}.texinfo
 	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex as-${CONFIG}.texinfo
 	TEXINPUTS=${TEXIDIR}:.:$$TEXINPUTS tex as-${CONFIG}.texinfo
 	mv as-${CONFIG}.dvi as.dvi
 	rm as-${CONFIG}.?? as-${CONFIG}.???
-
-as.info: as-${CONFIG}.texinfo
-	makeinfo as-${CONFIG}.texinfo
 
 # roff output (-ms)
 #edit instances of "ms" to "me" or "mm" to suit your preferences.
