@@ -130,7 +130,7 @@ all:
 		if [ "$$dir" = "." ]; then \
 			true; \
 		elif [ -d $$dir ]; then \
-			(cd $$dir; $(MAKE) $(FLAGS_TO_PASS)); \
+			(cd $$dir; $(MAKE) $(FLAGS_TO_PASS)) || exit 1; \
 		else true; fi; \
 	done
 
@@ -140,7 +140,7 @@ clean mostlyclean:
 		if [ "$$dir" = "." ]; then \
 			true; \
 		elif [ -d $$dir ]; then \
-			(cd $$dir; $(MAKE) $(FLAGS_TO_PASS) $@); \
+			(cd $$dir; $(MAKE) $(FLAGS_TO_PASS) $@) || exit 1; \
 		else true; fi; \
 	done
 
@@ -150,7 +150,7 @@ distclean maintainer-clean realclean:
 		if [ "$$dir" = "." ]; then \
 			true; \
 		elif [ -d $$dir ]; then \
-			(cd $$dir; $(MAKE) $(FLAGS_TO_PASS) $@); \
+			(cd $$dir; $(MAKE) $(FLAGS_TO_PASS) $@) || exit 1; \
 		else true; fi; \
 	done
 	rm -f Makefile config.cache config.log config.status
@@ -161,7 +161,7 @@ install:
 		if [ "$$dir" = "." ]; then \
 			true; \
 		elif [ -d $$dir ]; then \
-			(cd $$dir; $(MAKE) $(FLAGS_TO_PASS) install); \
+			(cd $$dir; $(MAKE) $(FLAGS_TO_PASS) install) || exit 1; \
 		else true; fi; \
 	done
 
