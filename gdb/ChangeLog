@@ -1,3 +1,8 @@
+2002-06-18  Andrew Cagney  <ac131313@redhat.com>
+
+	* config/romp/xm-rtbsd.h: Delete file.
+	* config/romp/rtbsd.mh: Delete file.
+
 2002-06-18  Keith Seitz  <keiths@redhat.com>
 
 	* breakpoint.c (condition_command): Post breakpoint_modify
