@@ -542,7 +542,7 @@ gdb_test "help info bogus-gdb-command" "Undefined info command: \"bogus-gdb-comm
 # test help gotcha
 gdb_test "help gotcha" "Undefined command: \"gotcha\".  Try \"help\"."  "help gotcha"
 # test apropos regex
-gdb_test "apropos \\\(print\[\^ bsiedf\\\".\]\\\)" "handle -- Specify how to handle a signal"
+gdb_test "apropos \\\(print\[\^ bsiedf\\\".-\]\\\)" "handle -- Specify how to handle a signal"
 # test apropos >1 word string
 gdb_test "apropos handle a signal" "handle -- Specify how to handle a signal"
 # test apropos apropos

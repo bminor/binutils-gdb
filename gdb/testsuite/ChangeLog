@@ -1,3 +1,8 @@
+2001-06-04  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.base/help.exp: Update pattern to exclude `print-load-map'
+	command.
+
 2001-05-31  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdb.base/annota1.exp (info break): Match four or more spaces
