@@ -251,7 +251,7 @@ register_name (expressionP)
   char *start;
   char c;
 
-  /* Find the spelling of the operand */
+  /* Find the spelling of the operand.  */
   start = name = input_line_pointer;
   if (name[0] == '%' && isalpha (name[1]))
     name = ++input_line_pointer;
@@ -261,25 +261,24 @@ register_name (expressionP)
   c = get_symbol_end ();
   reg_number = reg_name_search (pre_defined_registers, REG_NAME_CNT, name);
 
-  /* look to see if it's in the register table */
+  /* Put back the delimiting char.  */
+  *input_line_pointer = c;
+
+  /* Look to see if it's in the register table.  */
   if (reg_number >= 0) 
     {
       expressionP->X_op = O_register;
       expressionP->X_add_number = reg_number;
       
-      /* make the rest nice */
+      /* Make the rest nice.  */
       expressionP->X_add_symbol = NULL;
       expressionP->X_op_symbol = NULL;
-      *input_line_pointer = c;   /* put back the delimiting char */
       return true;
     }
-  else
-    {
-      /* reset the line as if we had not done anything */
-      *input_line_pointer = c;   /* put back the delimiting char */
-      input_line_pointer = start; /* reset input_line pointer */
-      return false;
-    }
+
+  /* Reset the line as if we had not done anything.  */
+  input_line_pointer = start;
+  return false;
 }
 
 /* Local variables.  */

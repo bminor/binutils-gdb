@@ -332,7 +332,7 @@ register_name (expressionP)
   char *start;
   char c;
 
-  /* Find the spelling of the operand */
+  /* Find the spelling of the operand.  */
   start = name = input_line_pointer;
   if (name[0] == '%' && isalpha (name[1]))
     name = ++input_line_pointer;
@@ -343,36 +343,36 @@ register_name (expressionP)
   while (' ' == *name)
     name = ++input_line_pointer;
 
-  /* if its a number, treat it as a number */
-  /* if its alpha, look to see if it's in the register table */
+  /* If it's a number, treat it as a number.  If it's alpha, look to
+     see if it's in the register table.  */
   if (!isalpha (name[0]))
     {
       reg_number = get_single_number ();
-      c = get_symbol_end ();
     }
   else
     {
       c = get_symbol_end ();
       reg_number = reg_name_search (pre_defined_registers, REG_NAME_CNT, name);
+
+      /* Put back the delimiting char.  */
+      *input_line_pointer = c;
     }
 
-  /* if numeric, make sure its not out of bounds */
+  /* If numeric, make sure its not out of bounds.  */
   if ((0 <= reg_number) && (16 >= reg_number))
     {
       expressionP->X_op = O_register;
       expressionP->X_add_number = reg_number;
 
-      /* make the rest nice */
+      /* Make the rest nice.  */
       expressionP->X_add_symbol = NULL;
       expressionP->X_op_symbol = NULL;
-      *input_line_pointer = c;   /* put back the delimiting char */
       return true;
     }
 
-    /* reset the line as if we had not done anything */
-    *input_line_pointer = c;   /* put back the delimiting char */
-    input_line_pointer = start; /* reset input_line pointer */
-    return false;
+  /* Reset the line as if we had not done anything.  */
+  input_line_pointer = start;
+  return false;
 }
 
 /* Local variables.  */

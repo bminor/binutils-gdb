@@ -197,6 +197,9 @@ data_register_name (expressionP)
   c = get_symbol_end ();
   reg_number = reg_name_search (data_registers, DATA_REG_NAME_CNT, name);
 
+  /* Put back the delimiting char.  */
+  *input_line_pointer = c;
+
   /* Look to see if it's in the register table.  */
   if (reg_number >= 0)
     {
@@ -207,20 +210,12 @@ data_register_name (expressionP)
       expressionP->X_add_symbol = NULL;
       expressionP->X_op_symbol = NULL;
 
-      /* Put back the delimiting char.  */
-      *input_line_pointer = c;
       return true;
     }
-  else
-    {
-      /* Reset the line as if we had not done anything.  */
-      /* Put back the delimiting char.  */
-      *input_line_pointer = c;
 
-      /* Reset input_line pointer.  */
-      input_line_pointer = start;
-      return false;
-    }
+  /* Reset the line as if we had not done anything.  */
+  input_line_pointer = start;
+  return false;
 }
 
 /* Summary of register_name().
@@ -249,6 +244,9 @@ address_register_name (expressionP)
   c = get_symbol_end ();
   reg_number = reg_name_search (address_registers, ADDRESS_REG_NAME_CNT, name);
 
+  /* Put back the delimiting char.  */
+  *input_line_pointer = c;
+
   /* Look to see if it's in the register table.  */
   if (reg_number >= 0)
     {
@@ -259,20 +257,12 @@ address_register_name (expressionP)
       expressionP->X_add_symbol = NULL;
       expressionP->X_op_symbol = NULL;
 
-      /* Put back the delimiting char.  */
-      *input_line_pointer = c;
       return true;
     }
-  else
-    {
-      /* Reset the line as if we had not done anything.  */
-      /* Put back the delimiting char.  */
-      *input_line_pointer = c;
 
-      /* Reset input_line pointer.  */
-      input_line_pointer = start;
-      return false;
-    }
+  /* Reset the line as if we had not done anything.  */
+  input_line_pointer = start;
+  return false;
 }
 
 /* Summary of register_name().
@@ -301,6 +291,9 @@ other_register_name (expressionP)
   c = get_symbol_end ();
   reg_number = reg_name_search (other_registers, OTHER_REG_NAME_CNT, name);
 
+  /* Put back the delimiting char.  */
+  *input_line_pointer = c;
+
   /* Look to see if it's in the register table.  */
   if (reg_number >= 0)
     {
@@ -311,20 +304,12 @@ other_register_name (expressionP)
       expressionP->X_add_symbol = NULL;
       expressionP->X_op_symbol = NULL;
 
-      /* Put back the delimiting char.  */
-      *input_line_pointer = c;
       return true;
     }
-  else
-    {
-      /* Reset the line as if we had not done anything.  */
-      /* Put back the delimiting char.  */
-      *input_line_pointer = c;
 
-      /* Reset input_line pointer.  */
-      input_line_pointer = start;
-      return false;
-    }
+  /* Reset the line as if we had not done anything.  */
+  input_line_pointer = start;
+  return false;
 }
 
 void

@@ -1132,6 +1132,7 @@ obj_elf_symver (ignore)
 {
   char *name;
   char c;
+  char old_lexat;
   symbolS *sym;
 
   name = input_line_pointer;
@@ -1151,13 +1152,12 @@ obj_elf_symver (ignore)
 
   ++input_line_pointer;
   name = input_line_pointer;
-  while (1)
-    {
-      c = get_symbol_end ();
-      if (c != ELF_VER_CHR)
-	break;
-      *input_line_pointer++ = c;
-    }
+
+  /* Temporarily include '@' in symbol names.  */
+  old_lexat = lex_type[(unsigned char) '@'];
+  lex_type[(unsigned char) '@'] |= LEX_NAME;
+  c = get_symbol_end ();
+  lex_type[(unsigned char) '@'] = old_lexat;
 
   if (symbol_get_obj (sym)->versioned_name == NULL)
     {

@@ -1,3 +1,22 @@
+2001-07-30  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/obj-elf.c (obj_elf_symver): Temporarily modify lex_type
+	to include '@' in symbol names when parsing versioned symbols
+	rather than calling get_symbol_end multiple times.
+	* config/tc-i370.c (register_name): Format fixes.  Don't call
+	get_symbol_end after parsing number.
+	* config/tc-mn10200.c (data_register_name): Format fixes.  Hoist
+	code out of conditional.
+	(address_register_name): Likewise.
+	(other_register_name): Likewise.
+	* config/tc-mn10300.c (r_register_name): Likewise.
+	(xr_register_name): Likewise.
+	(data_register_name): Likewise.
+	(address_register_name): Likewise.
+	(other_register_name): Likewise.
+	* config/tc-ppc.c (register_name): Likewise.
+	* config/tc-s390.c (register_name): Likewise.
+
 2001-07-27  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* config/tc-m68hc11.c (md_estimate_size_before_relax): Fix bsr

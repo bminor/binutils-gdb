@@ -586,6 +586,9 @@ register_name (expressionP)
   c = get_symbol_end ();
   reg_number = reg_name_search (pre_defined_registers, REG_NAME_CNT, name);
 
+  /* Put back the delimiting char.  */
+  *input_line_pointer = c;
+
   /* Look to see if it's in the register table.  */
   if (reg_number >= 0)
     {
@@ -595,17 +598,12 @@ register_name (expressionP)
       /* Make the rest nice.  */
       expressionP->X_add_symbol = NULL;
       expressionP->X_op_symbol = NULL;
-      /* Put back the delimiting char.  */
-      *input_line_pointer = c;
       return true;
     }
-  else
-    {
-      /* Reset the line as if we had not done anything.  */
-      *input_line_pointer = c;
-      input_line_pointer = start;
-      return false;
-    }
+
+  /* Reset the line as if we had not done anything.  */
+  input_line_pointer = start;
+  return false;
 }
 
 /* This function is called for each symbol seen in an expression.  It
