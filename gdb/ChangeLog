@@ -1,3 +1,8 @@
+2000-11-07  Daniel Berlin  <dberlin@redhat.com>
+
+	* dwarf2read.c: Revert June 5th change for caching of types,
+	as per Jim Blandy's request.
+
 2000-11-06  Fernando Nasser  <fnasser@totem.toronto.redhat.com>
 
 	* wrapper.c (gdb_value_assign): New function.  Longjump-free

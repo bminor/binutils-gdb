@@ -275,11 +275,6 @@ static struct abbrev_info *dwarf2_abbrevs[ABBREV_HASH_SIZE];
 
 static struct die_info *die_ref_table[REF_HASH_SIZE];
 
-#ifndef TYPE_HASH_SIZE
-#define TYPE_HASH_SIZE 4096
-#endif
-static struct type *dwarf2_cached_types[TYPE_HASH_SIZE];
-
 /* Obstack for allocating temporary storage used during symbol reading.  */
 static struct obstack dwarf2_tmp_obstack;
 
@@ -2901,7 +2896,7 @@ read_comp_unit (char *info_ptr, bfd *abfd,
   char *cur_ptr;
   int nesting_level;
 
-  /* Reset die reference table and cached types table; we are
+  /* Reset die reference table; we are
      building new ones now.  */
   dwarf2_empty_hash_tables ();
 
@@ -4528,38 +4523,7 @@ tag_type_to_type (struct die_info *die, struct objfile *objfile,
     }
   else
     {
-      struct attribute *attr;
-      attr = dwarf_attr (die, DW_AT_name);
-      if (attr && DW_STRING (attr))
-	{
-	  char *attrname=DW_STRING (attr);
-	  unsigned long hashval=hash(attrname, strlen(attrname)) % TYPE_HASH_SIZE;
-
-	  if (dwarf2_cached_types[hashval] != NULL)
-	    {
-	      const char *nameoftype;
-	      nameoftype = TYPE_NAME(dwarf2_cached_types[hashval]) == NULL ? TYPE_TAG_NAME(dwarf2_cached_types[hashval]) : TYPE_NAME(dwarf2_cached_types[hashval]);
-	      if (strcmp(attrname, nameoftype) == 0)
-		{
-		  die->type=dwarf2_cached_types[hashval];
-		}
-	      else
-		{
-		  read_type_die (die, objfile, cu_header);
-		  dwarf2_cached_types[hashval] = die->type;
-		}
-	    }
-	  else
-	    {
-	      read_type_die (die, objfile, cu_header);
-	      dwarf2_cached_types[hashval] = die->type;
-	    }
-	}
-      else
-	{
-	  read_type_die (die, objfile, cu_header);
-	}
-
+      read_type_die (die, objfile, cu_header);
       if (!die->type)
 	{
 	  dump_die (die);
@@ -5606,7 +5570,6 @@ static void
 dwarf2_empty_hash_tables (void)
 {
   memset (die_ref_table, 0, sizeof (die_ref_table));
-  memset (dwarf2_cached_types, 0, sizeof(dwarf2_cached_types));
 }
 
 static unsigned int
