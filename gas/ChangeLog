@@ -1,3 +1,11 @@
+start-sanitize-m32rx
+Mon Feb  9 16:23:11 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-m32r.c (get_src_reg): Use m32r_cgen_get_operand()
+	rather than parsing syntax string manually.
+	(assemble_parallel_insn): Check for both forms of parallel
+	conflict. 
+end-sanitize-m32rx
 Mon Feb  9 14:16:11 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am: Update dependencies.
