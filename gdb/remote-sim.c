@@ -138,70 +138,14 @@ gdbsim_load (prog, fromtty)
      char *prog;
      int fromtty;
 {
-  bfd	*abfd;
-
   if (sr_get_debug ())
     printf_filtered ("gdbsim_load: prog \"%s\"\n", prog);
 
   inferior_pid = 0;  
-  program_loaded = 0;
-  abfd = bfd_openr (prog, gnutarget);
-
-  if (!abfd) 
-    error ("Unable to open file %s.", prog);
-
-  if (bfd_check_format (abfd, bfd_object) == 0)
-    error ("File is not an object file.");
-
-  if (sim_load (abfd, prog) != 0)
-    return;
-
   program_loaded = 1;
-
-  sim_set_pc (abfd->start_address);
+  gr_load_image (prog, fromtty);
 }
 
-/*
- * This is a utility routine that sim_load() can call to do the work.
- * The result is 0 for success, non-zero for failure.
- *
- * Eg: int sim_load (bfd *abfd, char *prog) { return sim_load_standard (abfd); }
- */
-
-sim_load_standard (abfd)
-     bfd *abfd;
-{
-  asection *s;
-
-  s = abfd->sections;
-  while (s != (asection *)NULL) 
-  {
-    if (s->flags & SEC_LOAD) 
-    {
-      int i;
-      int delta = 4096;
-      char *buffer = xmalloc (delta);
-      printf_filtered ("%s\t: 0x%4x .. 0x%4x  ",
-		      s->name, s->vma, s->vma + s->_raw_size);
-      for (i = 0; i < s->_raw_size; i+= delta) 
-      {
-	int sub_delta = delta;
-	if (sub_delta > s->_raw_size - i)
-	  sub_delta = s->_raw_size - i ;
-
-	bfd_get_section_contents (abfd, s, buffer, i, sub_delta);
-	sim_write (s->vma + i, buffer, sub_delta);
-	printf_filtered ("*");
-	gdb_flush (gdb_stdout);
-      }
-      printf_filtered ("\n");
-      free (buffer);
-    }
-    s = s->next;
-  }
-
-  return 0;
-}
 
 /* Start an inferior process and set inferior_pid to its pid.
    EXEC_FILE is the file to run.
