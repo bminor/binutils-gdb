@@ -200,12 +200,6 @@ static void
 ppcnbsd_init_abi (struct gdbarch_info info,
                   struct gdbarch *gdbarch)
 {
-  /* Until November 2001, gcc was not complying to the SYSV ABI for
-     returning structures less than or equal to 8 bytes in size. It was
-     returning everything in memory. When this was corrected, it wasn't
-     fixed for native platforms.  */
-  set_gdbarch_use_struct_convention (gdbarch,
-                                   ppc_sysv_abi_broken_use_struct_convention);
 
   set_solib_svr4_fetch_link_map_offsets (gdbarch,
                                 nbsd_ilp32_solib_svr4_fetch_link_map_offsets);
