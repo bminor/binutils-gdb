@@ -1,3 +1,10 @@
+2000-12-12  Nick Clifton  <nickc@redhat.com>
+
+	* gas/vtable/vtable.exp: Fix formatting.
+
+	* gas/arm/elsegundo.s: New Test (currently disabled).
+	* gas/arm/elsegundo.d: Expected test results.
+
 2000-12-11  H.J. Lu  <hjl@gnu.org>
 
 	* gas/i386/intel.d: Adjusted for the a.out assembler.
