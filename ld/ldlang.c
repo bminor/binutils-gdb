@@ -3786,14 +3786,17 @@ lang_gc_sections ()
 
   /* Keep all sections containing symbols undefined on the command-line.
      Handle the entry symbol at the same time.  */
-
-  fake_list_start.next = ldlang_undef_chain_list_head;
-  if (entry_symbol == NULL)
-    fake_list_start.name = "start";
+  
+  if (entry_symbol != NULL)
+    {
+      fake_list_start.next = ldlang_undef_chain_list_head;
+      fake_list_start.name = (char *) entry_symbol;
+      ulist = &fake_list_start;
+    }
   else
-    fake_list_start.name = (char *) entry_symbol;
+    ulist = ldlang_undef_chain_list_head;
 
-  for (ulist = &fake_list_start; ulist; ulist = ulist->next)
+  for (; ulist; ulist = ulist->next)
     {
       h = bfd_link_hash_lookup (link_info.hash, ulist->name, 
 				false, false, false);

@@ -1,3 +1,8 @@
+Tue Jul 20 15:18:46 1999  Bob Manson  <manson@charmed.cygnus.com>
+
+	* ldlang.c (lang_gc_sections): Only handle the start symbol
+	specially if there is one.
+
 Mon Jul 19 14:19:14 1999  Mark P. Mitchell  <mark@codesourcery.com>
 
 	* emulparams/elf32bmipn32.sh (OTHER_RELOCATING_SECTIONS): Add
