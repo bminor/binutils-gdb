@@ -486,7 +486,7 @@ frame_saved_pc (frame)
       if (rp_offset == 0)
 	return read_register (RP_REGNUM) & ~0x3;
       else
-	return read_memory_integer (frame->frame - rp_offset, 4) & ~0x3;
+	return read_memory_integer (frame->frame + rp_offset, 4) & ~0x3;
     }
 }
 
