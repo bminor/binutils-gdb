@@ -79,7 +79,7 @@ target=
 targets=
 targetsubdir=
 verbose=
-
+version_path="yes"
 for arg in $*;
 do
 	# handle things that might have args following as separate words
@@ -107,6 +107,9 @@ do
 		-ansi | +a*)
 			ansi=true
 			clib=clib
+			;;
+		-noversion | +noversion)
+			version_path="no"
 			;;
 		-ddestdir=* | +ddestdir=* | +ddestdi=* | +ddestd=* | +ddest=* | +ddes=* | +dde=* | +dd=*)
 			ddestdir=`echo ${arg} | sed 's/[+-]dd[a-z]*=//'`
@@ -717,7 +720,13 @@ exit 0
 #
 #
 # $Log$
-# Revision 1.69  1991/11/12 04:41:21  rich
+# Revision 1.70  1991/11/13 19:49:17  sac
+# The +noversion flag will make an installation happen to the machine/..
+# directory rather than the machine/version/.. directory.
+#
+# Steve
+#
+# Revision 1.69  1991/11/12  04:41:21  rich
 # allow +foo bar options.  stolen from texinfo configure
 #
 # Revision 1.68  1991/11/09  11:34:52  rich
