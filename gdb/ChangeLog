@@ -1,3 +1,8 @@
+Fri Aug 18 06:26:56 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* sparc-tdep.c (isbranch):  Fix typo which caused wrong
+	target addresses for annulled branches.
+
 Wed Aug 16 21:54:39 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* config/pa/tm-hppa.h (PROLOGUE_FIRSTLINE_OVERLAP): Define.

@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* ??? Support for calling functions from gdb in sparc64 is unfinished.  */
 
@@ -537,7 +537,7 @@ isbranch (instruction, addr, target)
 	val = X_A (instruction) ? baa : ba;
       else
 	val = X_A (instruction) ? bicca : bicc;
-      switch (X_OP (instruction))
+      switch (X_OP2 (instruction))
 	{
 	case 2:
 	case 6:
