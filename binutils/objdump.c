@@ -103,10 +103,19 @@ static asymbol **dynsyms;
 /* Number of symbols in `dynsyms'.  */
 static long dynsymcount = 0;
 
-/* Forward declarations.  */
+/* Static declarations.  */
+
+static void
+usage PARAMS ((FILE *, int));
 
 static void
 display_file PARAMS ((char *filename, char *target));
+
+static void
+dump_section_header PARAMS ((bfd *, asection *, PTR));
+
+static void
+dump_headers PARAMS ((bfd *));
 
 static void
 dump_data PARAMS ((bfd *abfd));
@@ -124,7 +133,25 @@ static void
 dump_symbols PARAMS ((bfd *abfd, boolean dynamic));
 
 static void
+dump_bfd_header PARAMS ((bfd *));
+
+static void
+dump_bfd_private_header PARAMS ((bfd *));
+
+static void
 display_bfd PARAMS ((bfd *abfd));
+
+static void
+display_target_list PARAMS ((void));
+
+static void
+display_info_table PARAMS ((int, int));
+
+static void
+display_target_tables PARAMS ((void));
+
+static void
+display_info PARAMS ((void));
 
 static void
 objdump_print_value PARAMS ((bfd_vma, struct disassemble_info *, boolean));
@@ -158,6 +185,30 @@ disassemble_data PARAMS ((bfd *));
 
 static const char *
 endian_string PARAMS ((enum bfd_endian));
+
+static asymbol **
+slurp_symtab PARAMS ((bfd *));
+
+static asymbol **
+slurp_dynamic_symtab PARAMS ((bfd *));
+
+static long
+remove_useless_symbols PARAMS ((asymbol **, long));
+
+static int
+compare_symbols PARAMS ((const PTR, const PTR));
+
+static int
+compare_relocs PARAMS ((const PTR, const PTR));
+
+static void
+dump_stabs PARAMS ((bfd *));
+
+static boolean
+read_section_stabs PARAMS ((bfd *, const char *, const char *));
+
+static void
+print_section_stabs PARAMS ((bfd *, const char *, const char *));
 
 static void
 usage (stream, status)
@@ -752,12 +803,12 @@ objdump_print_addr_with_sym (abfd, sec, sym, vma, info, skip_zeroes)
       secaddr = bfd_get_section_vma (abfd, sec);
       if (vma < secaddr)
 	{
-	  (*info->fprintf_func) (info->stream, "-");
+	  (*info->fprintf_func) (info->stream, "-0x");
 	  objdump_print_value (secaddr - vma, info, true);
 	}
       else if (vma > secaddr)
 	{
-	  (*info->fprintf_func) (info->stream, "+");
+	  (*info->fprintf_func) (info->stream, "+0x");
 	  objdump_print_value (vma - secaddr, info, true);
 	}
       (*info->fprintf_func) (info->stream, ">");
@@ -768,12 +819,12 @@ objdump_print_addr_with_sym (abfd, sec, sym, vma, info, skip_zeroes)
       objdump_print_symname (abfd, info, sym);
       if (bfd_asymbol_value (sym) > vma)
 	{
-	  (*info->fprintf_func) (info->stream, "-");
+	  (*info->fprintf_func) (info->stream, "-0x");
 	  objdump_print_value (bfd_asymbol_value (sym) - vma, info, true);
 	}
       else if (vma > bfd_asymbol_value (sym))
 	{
-	  (*info->fprintf_func) (info->stream, "+");
+	  (*info->fprintf_func) (info->stream, "+0x");
 	  objdump_print_value (vma - bfd_asymbol_value (sym), info, true);
 	}
       (*info->fprintf_func) (info->stream, ">");
@@ -794,6 +845,7 @@ objdump_print_addr (vma, info, skip_zeroes)
 
   if (sorted_symcount < 1)
     {
+      printf ("0x");
       objdump_print_value (vma, info, skip_zeroes);
       return;
     }
@@ -1436,7 +1488,7 @@ disassemble_data (abfd)
       fprintf (stderr, "%s: Can't disassemble for architecture %s\n",
 	       program_name,
 	       bfd_printable_arch_mach (bfd_get_arch (abfd), 0));
-      exit (1);
+      return;
     }
 
   disasm_info.flavour = bfd_get_flavour (abfd);
@@ -1527,10 +1579,7 @@ disassemble_data (abfd)
 	    stop = disasm_info.buffer_length;
 	}
 
-      if (prefix_addresses)
-	disassemble_bytes (&disasm_info, disassemble_fn, true, data, i, stop,
-			   &relpp, relppend);
-      else
+      if(1) /* with or without prefix_addresses */
 	{
 	  asymbol *sym;
 	  long place;
@@ -1549,12 +1598,15 @@ disassemble_data (abfd)
 	      else
 		disasm_info.symbol = NULL;
 
-	      printf ("\n");
-	      objdump_print_addr_with_sym (abfd, section, sym,
-					   section->vma + i,
-					   &disasm_info,
-					   false);
-	      printf (":\n");
+	      if (! prefix_addresses)
+		{
+		  printf ("\n");
+		  objdump_print_addr_with_sym (abfd, section, sym,
+					       section->vma + i,
+					       &disasm_info,
+					       false);
+		  printf (":\n");
+		}
 
 	      if (sym != NULL && bfd_asymbol_value (sym) > section->vma + i)
 		nextsym = sym;
@@ -1654,8 +1706,8 @@ static bfd_size_type stabstr_size;
 static boolean
 read_section_stabs (abfd, stabsect_name, strsect_name)
      bfd *abfd;
-     char *stabsect_name;
-     char *strsect_name;
+     const char *stabsect_name;
+     const char *strsect_name;
 {
   asection *stabsect, *stabstrsect;
 
@@ -1725,8 +1777,8 @@ read_section_stabs (abfd, stabsect_name, strsect_name)
 static void
 print_section_stabs (abfd, stabsect_name, strsect_name)
      bfd *abfd;
-     char *stabsect_name;
-     char *strsect_name;
+     const char *stabsect_name;
+     const char *strsect_name;
 {
   int i;
   unsigned file_string_table_offset = 0, next_file_string_table_offset = 0;
@@ -2492,7 +2544,6 @@ display_target_tables ()
   int t, columns;
   extern bfd_target *bfd_target_vector[];
   char *colum;
-  extern char *getenv ();
 
   columns = 0;
   colum = getenv ("COLUMNS");

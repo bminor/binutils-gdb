@@ -1,3 +1,9 @@
+Sun Oct  5 09:05:44 1997  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* objdump.c (disassemble_data): Add "0x" prefix for 
+	symbol-offsets in disassembly.  Make "--prefix-addresses"
+	disassembly adjust to mixed-length instructions.
+
 Fri Oct  3 12:04:25 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* objcopy.c (set_times): New static function, replacing
