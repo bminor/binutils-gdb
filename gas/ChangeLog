@@ -1,3 +1,13 @@
+Tue Dec 12 12:19:37 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (DISTCLEAN_HERE): New variable.
+	(distclean): Use it.
+	(maintainer-clean): Depend upon clean-here rather than clean,
+	distclean, and clean-info.  Run make maintainer-clean in doc.
+	Remove files listed in DISTCLEAN_HERE.
+	* doc/Makefile.in (maintainer-clean realclean): Split out from
+	distclean.  Depend upon clean-info and distclean.
+
 Mon Dec 11 16:23:51 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mac-as.r: Fix copyright and version strings.
