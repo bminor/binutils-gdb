@@ -1,5 +1,8 @@
 1999-07-15  Ian Lance Taylor  <ian@zembu.com>
 
+	* configure.in: Bump version number to 2.9.5.
+	* configure: Rebuild.
+
 	* dwarf2dbg.c (dwarf2_gen_line_info): Don't assume that long long
 	or %llx work.
 
