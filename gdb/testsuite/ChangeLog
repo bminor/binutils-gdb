@@ -1,3 +1,14 @@
+Thu Feb 13 16:09:36 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* gdb.disasm/*.mt: Deleted, no longer used.
+	* gdb.disasm/configure.in: Remove references to target makefile
+	frags.  Use "sh3.s" as the unique filename for this directory.
+	* gdb.disasm/configure: Rebuilt.
+
+	* gdb.disasm/mn10200.s: New test file for mn10200 disassembler.
+	* gdb.disasm/mn10200.exp: Run mn10200 disassembler tests.
+	* gdb.disasm/Makefile.in: Remove "mn10200" when cleaning.
+
 Tue Feb 11 16:57:58 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* config/udi.exp: Use mondfe,name instead of remote_host.

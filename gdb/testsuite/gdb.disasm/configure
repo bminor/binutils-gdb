@@ -450,7 +450,7 @@ echo > confdefs.h
 
 # A filename unique to this package, relative to the directory that
 # configure is in, which we can look for to find out if srcdir is correct.
-ac_unique_file=sh3.mt
+ac_unique_file=sh3.s
 
 # Find the source files, if location was not specified.
 if test -z "$srcdir"; then
@@ -630,16 +630,6 @@ test "$host_alias" != "$target_alias" &&
   program_prefix=${target_alias}-
 
 
-case "${target}" in
-  hppa*-*-*)              target_makefile_frag=hppa.mt ;;
-  sh*-*-*)                target_makefile_frag=sh3.mt ;;
-  *-*-*)		  target_makefile_frag=default.mt ;;
-esac
-
-# We also need to use a makefile fragment for the embedded targets
-# to get the flags right to build the test cases
-
-	
 trap '' 1 2 15
 cat > confcache <<\EOF
 # This file is a shell script that caches the results of configure
@@ -798,8 +788,6 @@ s%@build_alias@%$build_alias%g
 s%@build_cpu@%$build_cpu%g
 s%@build_vendor@%$build_vendor%g
 s%@build_os@%$build_os%g
-/@target_makefile_frag@/r $target_makefile_frag
-s%@target_makefile_frag@%%g
 
 CEOF
 EOF
