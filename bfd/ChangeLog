@@ -1,3 +1,7 @@
+Thu Feb  9 18:36:52 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* Makefile.in (BFD32_BACKENDS): Add i386msdos.o.
+
 Thu Feb  9 12:02:35 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* i386linux.c (NEEDS_SHRLIB): Define.
