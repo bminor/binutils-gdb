@@ -1,3 +1,8 @@
+2002-07-31  Momchil Velikov  <velco@fadata.bg>
+
+	* config/tc-v850.c (md_assemble): Fix range check for immediate
+	operand.
+
 2002-07-30  Chris Demetriou  <cgd@broadcom.com>
 
 	* config/tc-mips.c (mips_cpu_info_table): Clean up entries related
