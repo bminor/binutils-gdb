@@ -63,7 +63,11 @@ struct a29k_opcode {
   char *args;
 };
 
-static const struct a29k_opcode a29k_opcodes[] =
+#ifndef CONST
+#define CONST
+#endif /* CONST */
+
+static CONST struct a29k_opcode a29k_opcodes[] =
 {
 
 { "add", 0x14000000, "c,a,b" },
@@ -279,11 +283,14 @@ static const struct a29k_opcode a29k_opcodes[] =
 			   if we've run off the end of the table.  */
 };
 
-const unsigned int num_opcodes = (((sizeof a29k_opcodes) / (sizeof a29k_opcodes[0])) - 1);
+CONST unsigned int num_opcodes = (((sizeof a29k_opcodes) / (sizeof a29k_opcodes[0])) - 1);
 
 /*
  * $Log$
- * Revision 1.3  1991/08/05 22:31:05  rich
+ * Revision 1.4  1991/08/06 07:20:27  rich
+ * Fixing CONST declarations.
+ *
+ * Revision 1.3  1991/08/05  22:31:05  rich
  * *** empty log message ***
  *
  * Revision 1.2  1991/07/15  23:34:04  steve
