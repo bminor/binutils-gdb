@@ -1,3 +1,8 @@
+2004-05-07  Michael Snyder  <msnyder@redhat.com>
+
+	* tracepoint.c (scope_info): Add handling for LOC_COMPUTED,
+	LOC_COMPUTED_ARG, and LOC_INDIRECT.
+
 2004-05-13  Andrew Cagney  <cagney@redhat.com>
 
 	* infrun.c (handle_inferior_event): Use frame_unwind_id.

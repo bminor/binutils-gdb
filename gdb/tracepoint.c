@@ -2345,7 +2345,7 @@ scope_info (char *args, int from_tty)
 
   sals = decode_line_1 (&args, 1, NULL, 0, &canonical, NULL);
   if (sals.nelts == 0)
-    return;			/* presumably decode_line_1 has already warned */
+    return;		/* presumably decode_line_1 has already warned */
 
   /* Resolve line numbers to PC */
   resolve_sal_pc (&sals.sals[0]);
@@ -2387,7 +2387,8 @@ scope_info (char *args, int from_tty)
 	      break;
 	    case LOC_STATIC:
 	      printf_filtered ("in static storage at address ");
-	      print_address_numeric (SYMBOL_VALUE_ADDRESS (sym), 1, gdb_stdout);
+	      print_address_numeric (SYMBOL_VALUE_ADDRESS (sym), 
+				     1, gdb_stdout);
 	      break;
 	    case LOC_REGISTER:
 	      printf_filtered ("a local variable in register $%s",
@@ -2419,12 +2420,13 @@ scope_info (char *args, int from_tty)
 	      continue;
 	    case LOC_LABEL:
 	      printf_filtered ("a label at address ");
-	      print_address_numeric (SYMBOL_VALUE_ADDRESS (sym), 1, gdb_stdout);
+	      print_address_numeric (SYMBOL_VALUE_ADDRESS (sym), 
+				     1, gdb_stdout);
 	      break;
 	    case LOC_BLOCK:
 	      printf_filtered ("a function at address ");
-	      print_address_numeric (BLOCK_START (SYMBOL_BLOCK_VALUE (sym)), 1,
-				     gdb_stdout);
+	      print_address_numeric (BLOCK_START (SYMBOL_BLOCK_VALUE (sym)),
+				     1, gdb_stdout);
 	      break;
 	    case LOC_BASEREG:
 	      printf_filtered ("a variable at offset %ld from register $%s",
@@ -2437,7 +2439,8 @@ scope_info (char *args, int from_tty)
 			       REGISTER_NAME (SYMBOL_BASEREG (sym)));
 	      break;
 	    case LOC_UNRESOLVED:
-	      msym = lookup_minimal_symbol (DEPRECATED_SYMBOL_NAME (sym), NULL, NULL);
+	      msym = lookup_minimal_symbol (DEPRECATED_SYMBOL_NAME (sym), 
+					    NULL, NULL);
 	      if (msym == NULL)
 		printf_filtered ("Unresolved Static");
 	      else
@@ -2450,10 +2453,22 @@ scope_info (char *args, int from_tty)
 	    case LOC_OPTIMIZED_OUT:
 	      printf_filtered ("optimized out.\n");
 	      continue;
+	    case LOC_HP_THREAD_LOCAL_STATIC:
+	      printf_filtered ("HP thread local static ");
+	      break;
+	    case LOC_INDIRECT:
+	      printf_filtered ("extern (local indirect) at address ");
+	      print_address_numeric (SYMBOL_VALUE_ADDRESS (sym), 
+				     1, gdb_stdout);
+	      break;
+	    case LOC_COMPUTED:
+	    case LOC_COMPUTED_ARG:
+	      SYMBOL_OPS (sym)->describe_location (sym, gdb_stdout);
+	      break;
 	    }
 	  if (SYMBOL_TYPE (sym))
 	    printf_filtered (", length %d.\n",
-			   TYPE_LENGTH (check_typedef (SYMBOL_TYPE (sym))));
+			     TYPE_LENGTH (check_typedef (SYMBOL_TYPE (sym))));
 	}
       if (BLOCK_FUNCTION (block))
 	break;
