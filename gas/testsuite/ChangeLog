@@ -1,5 +1,8 @@
 Fri May 29 12:07:35 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* gas/mips/mips.exp: Adjust ilocks initialization to match current
+	assembler defaults more closely.
+
 	* gas/sh/fp.s: Remove ftst/nan.  The assembler no longer supports
 	the instruction.
 	* gas/sh/basic.exp: Adjust accordingly.

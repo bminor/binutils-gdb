@@ -6,8 +6,9 @@ if [istarget mips*-*-*] then {
     set svr4pic [expr [istarget *-*-elf*] || [istarget *-*-irix5*] || [istarget *-*-irix6* ] ]
     set empic [expr [istarget *-*-ecoff*] || [istarget *-*-ultrix*] || [istarget *-*-irix\[1-4\]*] ]
     set aout [expr [istarget *-*-bsd*] || [istarget *-*-netbsd*] || [istarget *-*-openbsd*]]
-    set ilocks [expr [istarget mips64vr4300*-*-*] || [istarget mips64vr4100*-*-*] || [istarget mipstx39*-*-*]]
+    set ilocks [istarget mipstx39*-*-*]
     set gpr_ilocks [expr [istarget mipstx39*-*-*]]
+    set addr32 [expr [istarget mipstx39*-*-*]]
 
 # start-sanitize-tx19
     set ilocks [expr $ilocks || [istarget mipstx19*-*-*]]
@@ -32,6 +33,9 @@ if [istarget mips*-*-*] then {
     run_dump_test "add"
     run_dump_test "and"
     run_dump_test "break20"
+# start-sanitize-r5900
+    run_dump_test "break5900"
+# end-sanitize-r5900
     run_dump_test "trap20"
     run_dump_test "beq"
     run_dump_test "bge"
@@ -57,7 +61,17 @@ if [istarget mips*-*-*] then {
 	run_dump_test "lb-xgot-ilocks"
     }
     if $empic { run_dump_test "lb-empic" }
-    if !$aout { if !$gpr_ilocks { run_dump_test "ld" } else { run_dump_test "ld-ilocks" } } 
+    if !$aout { 
+        if !$gpr_ilocks { 
+            run_dump_test "ld" 
+        } else { 
+            if !$addr32 {
+                run_dump_test "ld-ilocks"
+            } else {
+                run_dump_test "ld-ilocks-addr32"
+            }
+        }
+    }
     if $svr4pic { run_dump_test "ld-svr4pic" }
     if $svr4pic { run_dump_test "ld-xgot" }
     if $empic { run_dump_test "ld-empic" }
