@@ -656,13 +656,16 @@ symbol_file_add (name, from_tty, addr, mainline, mapped, readnow)
       /* We either created a new mapped symbol table, mapped an existing
 	 symbol table file which has not had initial symbol reading
 	 performed, or need to read an unmapped symbol table. */
-      if (pre_add_symbol_hook)
-        pre_add_symbol_hook (name);
       if (from_tty || info_verbose)
 	{
-      printf_filtered ("Reading symbols from %s...", name);
-      wrap_here ("");
-      gdb_flush (gdb_stdout);
+      if (pre_add_symbol_hook)
+        pre_add_symbol_hook (name);
+      else
+        {
+          printf_filtered ("Reading symbols from %s...", name);
+          wrap_here ("");
+          gdb_flush (gdb_stdout);
+        }
 	}
       syms_from_objfile (objfile, addr, mainline, from_tty);
     }      
@@ -689,12 +692,15 @@ symbol_file_add (name, from_tty, addr, mainline, mapped, readnow)
 	}
     }
 
-  if (post_add_symbol_hook)
-    post_add_symbol_hook ();
   if (from_tty || info_verbose)
     {
-      printf_filtered ("done.\n");
-      gdb_flush (gdb_stdout);
+      if (post_add_symbol_hook)
+        post_add_symbol_hook ();
+      else
+        {
+          printf_filtered ("done.\n");
+          gdb_flush (gdb_stdout);
+        }
     }
 
   new_symfile_objfile (objfile, mainline, from_tty);
@@ -1199,11 +1205,12 @@ add_symbol_file_command (args, from_tty)
     }
 
   /* FIXME-32x64: Assumes text_addr fits in a long.  */
-  if (!query ("add symbol table from file \"%s\" at text_addr = %s?\n",
-	      name, local_hex_string ((unsigned long)text_addr)))
+  if ((from_tty)
+      && (!query ("add symbol table from file \"%s\" at text_addr = %s?\n",
+	          name, local_hex_string ((unsigned long)text_addr))))
     error ("Not confirmed.");
 
-  symbol_file_add (name, 0, text_addr, 0, mapped, readnow);
+  symbol_file_add (name, from_tty, text_addr, 0, mapped, readnow);
 
   /* Getting new symbols may change our opinion about what is
      frameless.  */
@@ -1458,7 +1465,6 @@ deduce_language_from_filename (filename)
 	symtab->dirname
 	symtab->free_code
 	symtab->free_ptr
-	initialize any EXTRA_SYMTAB_INFO
 	possibly free_named_symtabs (symtab->filename);
  */
 
@@ -1485,6 +1491,10 @@ allocate_symtab (filename, objfile)
   symtab -> next = objfile -> symtabs;
   objfile -> symtabs = symtab;
 
+  /* FIXME: This should go away.  It is only defined for the Z8000,
+     and the Z8000 definition of this macro doesn't have anything to
+     do with the now-nonexistent EXTRA_SYMTAB_INFO macro, it's just
+     here for convenience.  */
 #ifdef INIT_EXTRA_SYMTAB_INFO
   INIT_EXTRA_SYMTAB_INFO (symtab);
 #endif
