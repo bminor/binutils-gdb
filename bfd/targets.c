@@ -216,7 +216,7 @@ $ SDEF (void,   _bfd_truncate_arname, (bfd *, CONST char *, char *));
 $ SDEF (boolean, write_armap, (bfd *arch, 
 $                              unsigned int elength,
 $                              struct orl *map,
-$                              int orl_count, 
+$                              unsigned int orl_count, 
 $                              int stridx));
 
 Standard stuff.
@@ -340,6 +340,7 @@ extern bfd_target m68kcoff_vec;
 extern bfd_target i386coff_vec;
 extern bfd_target i386aout_vec;
 extern bfd_target a29kcoff_big_vec;
+extern bfd_target trad_core_vec;
 
 #ifdef SELECT_VECS
 
@@ -469,8 +470,7 @@ bfd_target *target_vector[] = {
 #endif
 
 #ifdef	TRAD_CORE
-	&trad_core_big_vec,
-	&trad_core_little_vec,
+	&trad_core_vec,
 #endif
 
         NULL, /* end of list marker */

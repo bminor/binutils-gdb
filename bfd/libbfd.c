@@ -1,30 +1,29 @@
-/* Copyright (C) 1990, 1991 Free Software Foundation, Inc.
+/* libbfd.c -- random BFD support routines, only used internally.
+   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Written by Cygnus Support.
 
-This file is part of BFD, the Binary File Diddler.
+This file is part of BFD, the Binary File Descriptor library.
 
-BFD is free software; you can redistribute it and/or modify
+This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 1, or (at your option)
-any later version.
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-BFD is distributed in the hope that it will be useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with BFD; see the file COPYING.  If not, write to
-the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* $Id$ */
 
-/*** libbfd.c -- random bfd support routines used internally only. */
-#include <sysdep.h>
 #include "bfd.h"
+#include "sysdep.h"
 #include "libbfd.h"
 
-
-
 /** Dummies for targets that don't want or need to implement
    certain operations */
 
@@ -130,7 +129,7 @@ DEFUN(zalloc,(size),
 
 
 /* Note that archive entries don't have streams; they share their parent's.
-   This allows someone to play with the iostream behind bfd's back.
+   This allows someone to play with the iostream behind BFD's back.
 
    Also, note that the origin pointer points to the beginning of a file's
    contents (0 for non-archive elements).  For archive entries this is the
@@ -157,12 +156,22 @@ DEFUN(bfd_read,(ptr, size, nitems, abfd),
 
 bfd_size_type
 DEFUN(bfd_write,(ptr, size, nitems, abfd),
-      PTR ptr AND
+      CONST PTR ptr AND
       bfd_size_type size AND
       bfd_size_type nitems AND
       bfd *abfd)
 {
   return fwrite (ptr, 1, (int)(size*nitems), bfd_cache_lookup(abfd));
+}
+
+void
+DEFUN(bfd_write_bigendian_4byte_int,(abfd, i),
+      bfd *abfd AND
+      int i)
+{
+  char buffer[4];
+  _do_putb32(i, buffer);
+  bfd_write(buffer, 4, 1, abfd);
 }
 
 int
@@ -171,7 +180,7 @@ DEFUN(bfd_seek,(abfd, position, direction),
       CONST file_ptr position AND
       CONST int direction)
 {
-        /* For the time being, a bfd may not seek to it's end.  The
+        /* For the time being, a BFD may not seek to it's end.  The
            problem is that we don't easily have a way to recognize
            the end of an element in an archive. */
 
@@ -274,7 +283,7 @@ DEFUN(bfd_add_to_string_table,(table, new_string, table_length, free_ptr),
 *i bfd_get_size
 These macros as used for reading and writing raw data in sections;
 each access (except for bytes) is vectored through the target format
-of the bfd and mangled accordingly. The mangling performs any
+of the BFD and mangled accordingly. The mangling performs any
 necessary endian translations and removes alignment restrictions.
 *+
 #define bfd_put_8(abfd, val, ptr) \
@@ -324,14 +333,14 @@ endan order.
 *-
 *-*/ 
 
-unsigned int
+bfd_vma
 DEFUN(_do_getb16,(addr),
       register bfd_byte *addr)
 {
         return (addr[0] << 8) | addr[1];
 }
 
-unsigned int
+bfd_vma
 DEFUN(_do_getl16,(addr),
       register bfd_byte *addr)
 {
@@ -340,7 +349,7 @@ DEFUN(_do_getl16,(addr),
 
 void
 DEFUN(_do_putb16,(data, addr),
-      int data AND
+      bfd_vma data AND
       register bfd_byte *addr)
 {
         addr[0] = (bfd_byte)(data >> 8);
@@ -349,28 +358,28 @@ DEFUN(_do_putb16,(data, addr),
 
 void
 DEFUN(_do_putl16,(data, addr),
-      int data AND              
+      bfd_vma data AND              
       register bfd_byte *addr)
 {
         addr[0] = (bfd_byte )data;
         addr[1] = (bfd_byte)(data >> 8);
 }
 
-unsigned int
+bfd_vma
 DEFUN(_do_getb32,(addr),
       register bfd_byte *addr)
 {
         return ((((addr[0] << 8) | addr[1]) << 8) | addr[2]) << 8 | addr[3];
 }
 
-unsigned int
+bfd_vma
 _do_getl32 (addr)
         register bfd_byte *addr;
 {
         return ((((addr[3] << 8) | addr[2]) << 8) | addr[1]) << 8 | addr[0];
 }
 
-bfd_64_type
+bfd_vma
 DEFUN(_do_getb64,(addr),
       register bfd_byte *addr)
 {
@@ -389,14 +398,13 @@ DEFUN(_do_getb64,(addr),
 
   return high << 32 | low;
 #else
-  bfd_64_type foo;
   BFD_FAIL();
-  return foo;
+  return 0;
 #endif
 
 }
 
-bfd_64_type
+bfd_vma
 DEFUN(_do_getl64,(addr),
       register bfd_byte *addr)
 {
@@ -415,16 +423,15 @@ DEFUN(_do_getl64,(addr),
 
   return high << 32 | low;
 #else
-bfd_64_type foo;
   BFD_FAIL();
-return foo;
+  return 0;
 #endif
 
 }
 
 void
 DEFUN(_do_putb32,(data, addr),
-      unsigned long data AND
+      bfd_vma data AND
       register bfd_byte *addr)
 {
         addr[0] = (bfd_byte)(data >> 24);
@@ -435,7 +442,7 @@ DEFUN(_do_putb32,(data, addr),
 
 void
 DEFUN(_do_putl32,(data, addr),
-      unsigned long data AND
+      bfd_vma data AND
       register bfd_byte *addr)
 {
         addr[0] = (bfd_byte)data;
@@ -445,7 +452,7 @@ DEFUN(_do_putl32,(data, addr),
 }
 void
 DEFUN(_do_putb64,(data, addr),
-        bfd_64_type data AND
+        bfd_vma data AND
         register bfd_byte *addr)
 {
 #ifdef HOST_64_BIT
@@ -465,7 +472,7 @@ DEFUN(_do_putb64,(data, addr),
 
 void
 DEFUN(_do_putl64,(data, addr),
-      bfd_64_type data AND
+      bfd_vma data AND
       register bfd_byte *addr)
 {
 #ifdef HOST_64_BIT
@@ -496,9 +503,30 @@ DEFUN(bfd_generic_get_section_contents, (abfd, section, location, offset, count)
 {
     if (count == 0)
         return true;
-    if ((bfd_size_type)offset >= section->size
+    if ((bfd_size_type)(offset+count) > section->size
         || bfd_seek(abfd,(file_ptr)( section->filepos + offset), SEEK_SET) == -1
         || bfd_read(location, (bfd_size_type)1, count, abfd) != count)
+        return (false); /* on error */
+    return (true);
+}
+
+/* This generic function can only be used in implementations where creating
+   NEW sections is disallowed.  It is useful in patching existing sections
+   in read-write files, though.  See other set_section_contents functions
+   to see why it doesn't work for new sections.  */
+boolean
+DEFUN(bfd_generic_set_section_contents, (abfd, section, location, offset, count),
+      bfd *abfd AND
+      sec_ptr section AND
+      PTR location AND
+      file_ptr offset AND
+      bfd_size_type count)
+{
+    if (count == 0)
+        return true;
+    if ((bfd_size_type)(offset+count) > section->size
+        || bfd_seek(abfd, (file_ptr)(section->filepos + offset), SEEK_SET) == -1
+        || bfd_write(location, (bfd_size_type)1, count, abfd) != count)
         return (false); /* on error */
     return (true);
 }

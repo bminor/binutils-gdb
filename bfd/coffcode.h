@@ -249,16 +249,6 @@ $ } coff_symbol_type;
 /* $Id$ */
 /* Most of this hacked by Steve Chamberlain, steve@cygnus.com */
 
-/* Align an address upward to a boundary, expressed as a number of bytes.
-   E.g. align to an 8-byte boundary with argument of 8.  */
-#define ALIGN(this, boundary) \
-  ((( (this) + ((boundary) -1)) & (~((boundary)-1))))
-
-/* Align an address upward to a power of two.  Argument is the power
-   of two, e.g. 8-byte alignment uses argument of 3 (8 == 2^3).  */
-#define	i960_align(addr, align)	\
-	( ((addr) + ((1<<(align))-1)) & (-1 << (align)))
-
 
 #define PUTWORD bfd_h_put_32
 #define PUTHALF bfd_h_put_16
@@ -1188,13 +1178,20 @@ struct internal_syment *syment)
     syment->n_value = coff_symbol_ptr->symbol.value;
   }	  
   else {
-    syment->n_scnum	 = 
-      coff_symbol_ptr->symbol.section->output_section->index+1;
+    if (coff_symbol_ptr->symbol.section) {
+      syment->n_scnum	 = 
+       coff_symbol_ptr->symbol.section->output_section->index+1;
 	    
-    syment->n_value = 
-      coff_symbol_ptr->symbol.value +
+      syment->n_value = 
+       coff_symbol_ptr->symbol.value +
 	coff_symbol_ptr->symbol.section->output_offset +
-	  coff_symbol_ptr->symbol.section->output_section->vma;
+	 coff_symbol_ptr->symbol.section->output_section->vma;
+    }
+    else {
+      /* This can happen, but I don't know why yet (steve@cygnus.com) */
+      syment->n_scnum = N_ABS;
+      syment->n_value = coff_symbol_ptr->symbol.value; 
+    }
   }
 }
 
@@ -1530,6 +1527,7 @@ unsigned int written)
   for (j = 0; j != native->u.syment.n_numaux;  j++) 
       {
 	AUXENT buf1;
+	bzero((PTR)&buf, AUXESZ);
 	coff_swap_aux_out(abfd,
 			 &( (native + j + 1)->u.auxent), type, class, &buf1);
 	bfd_write((PTR) (&buf1), 1, AUXESZ, abfd);

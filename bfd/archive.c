@@ -28,7 +28,7 @@ Archives are supported in BFD in @code{archive.c}.
 
 An archive is represented internally just like another BFD, with a
 pointer to a chain of contained BFDs. Archives can be created by
-opening BFDs, linking them together and attatching them as children to
+opening BFDs, linking them together and attaching them as children to
 another BFD and then closing the parent BFD. 
 
 *-*/
@@ -41,8 +41,8 @@ another BFD and then closing the parent BFD.
 
 /* $Id$ */
 
-#include <sysdep.h>
 #include "bfd.h"
+#include "sysdep.h"
 #include "libbfd.h"
 #include "ar.h"
 #include "ranlib.h"
@@ -124,9 +124,12 @@ _bfd_create_empty_archive_element_shell (obfd)
 }
 
 /*proto* bfd_set_archive_head
+
 Used whilst processing archives. Sets the head of the chain of BFDs
 contained in an archive to @var{new_head}. (see chapter on archives)
+
 *; PROTO(boolean, bfd_set_archive_head, (bfd *output, bfd *new_head));
+
 */
 
 boolean
@@ -340,6 +343,7 @@ get_elt_at_filepos (archive, filepos)
 }
 
 /*proto* bfd_get_elt_at_index
+Return the sub bfd contained within the archive at archive index n.
 
 *; PROTO(bfd *, bfd_get_elt_at_index, (bfd *, int));
 
@@ -562,12 +566,15 @@ bfd_slurp_coff_armap (abfd)
   }
 
   /* The coff armap must be read sequentially.  So we construct a bsd-style
-     one in core all at once, for simplicity. */
+     one in core all at once, for simplicity. 
 
-  stringsize = mapdata->parsed_size - (4 * (*raw_armap)) - 4;
+     It seems that all numeric information in a coff archive is always
+     in big endian format, nomatter the host or target. */
+
+  stringsize = mapdata->parsed_size - (4 * (_do_getb32((PTR)raw_armap))) - 4;
 
   {
-    unsigned int nsymz = *raw_armap;
+    unsigned int nsymz = _do_getb32( (PTR)raw_armap);
     unsigned int carsym_size = (nsymz * sizeof (carsym));
     unsigned int ptrsize = (4 * nsymz);
     unsigned int i;
@@ -586,14 +593,14 @@ bfd_slurp_coff_armap (abfd)
     for (i = 0; i < nsymz; i++) 
       {
 	rawptr = raw_armap + i + 1;
-	carsyms->file_offset = *rawptr;
+	carsyms->file_offset = _do_getb32((PTR)rawptr);
 	carsyms->name = stringbase;
 	for (; *(stringbase++););
 	carsyms++;
       }
     *stringbase = 0;
   }
-  ardata->symdef_count = *raw_armap;
+  ardata->symdef_count = _do_getb32((PTR)raw_armap);
   ardata->first_file_filepos = bfd_tell (abfd);
   /* Pad to an even boundary if you have to */
   ardata->first_file_filepos += (ardata->first_file_filepos) %2;
@@ -1153,9 +1160,9 @@ bsd_write_armap (arch, elength, map, orl_count, stridx)
      int orl_count;
      int stridx;
 {
-  unsigned int ranlibsize = (orl_count * sizeof (struct ranlib)) + 4;
+  unsigned int ranlibsize = orl_count * sizeof (struct ranlib);
   unsigned int stringsize = stridx + 4;
-  unsigned int mapsize = stringsize + ranlibsize;
+  unsigned int mapsize = stringsize + ranlibsize + 4;
   file_ptr firstreal;
   bfd *current = arch->archive_head;
   bfd *last_elt = current;		/* last element arch seen */
@@ -1233,19 +1240,22 @@ bsd_write_armap (arch, elength, map, orl_count, stridx)
 */
   
 boolean
-coff_write_armap (arch, elength, map, orl_count, stridx)
+coff_write_armap (arch, elength, map, symbol_count, stridx)
      bfd *arch;
      unsigned int elength;
      struct orl *map;
-     int orl_count;
+     unsigned int symbol_count;
      int stridx;
 {
-    unsigned int ranlibsize = (orl_count * 4) + 4;
+    /* The size of the ranlib is the number of exported symbols in the
+       archive * the number of bytes in a int, + an int for the count */
+
+    unsigned int ranlibsize = (symbol_count * 4) + 4;
     unsigned int stringsize = stridx;
     unsigned int mapsize = stringsize + ranlibsize;
     file_ptr archive_member_file_ptr;
     bfd *current = arch->archive_head;
-    int last_eltno = 0;		/* last element arch seen */
+    bfd *last_elt = current;	/* last element arch seen */
     int count;
     struct ar_hdr hdr;
     unsigned int i;
@@ -1253,8 +1263,8 @@ coff_write_armap (arch, elength, map, orl_count, stridx)
   
     if (padit) mapsize ++;
 
-    archive_member_file_ptr =
-	mapsize + elength + sizeof (struct ar_hdr) + SARMAG;
+    /* work out where the first object file will go in the archive */
+    archive_member_file_ptr =   mapsize + elength + sizeof (struct ar_hdr) + SARMAG;
 
     memset ((char *)(&hdr), 0, sizeof (struct ar_hdr));
     hdr.ar_name[0] = '/';
@@ -1267,37 +1277,44 @@ coff_write_armap (arch, elength, map, orl_count, stridx)
     hdr.ar_fmag[0] = '`'; hdr.ar_fmag[1] = '\n';
 
     for (i = 0; i < sizeof (struct ar_hdr); i++)
-	if (((char *)(&hdr))[i] == '\0') (((char *)(&hdr))[i]) = ' ';
+     if (((char *)(&hdr))[i] == '\0') (((char *)(&hdr))[i]) = ' ';
 
     /* Write the ar header for this item and the number of symbols */
 
+  
     bfd_write ((PTR)&hdr, 1, sizeof (struct ar_hdr), arch);
-    /* FIXME, this needs to be byte-swapped */
-    bfd_write ((PTR)&orl_count, 1, sizeof (orl_count), arch);
+
+    bfd_write_bigendian_4byte_int(arch, symbol_count);
 
     /* Two passes, first write the file offsets for each symbol -
        remembering that each offset is on a two byte boundary
        */
 
-    for (count = 0; count < orl_count; count++) {
-	while ((map[count]).pos != last_eltno) {
-	    /* If this is the first time we've seen a ref to this archive
-	       then remember it's size */
-	    archive_member_file_ptr +=
-		arelt_size (current) + sizeof (struct ar_hdr);
-	    archive_member_file_ptr += archive_member_file_ptr % 2;
-	    current = current->next;
-	    last_eltno++;
+    /* Write out the file offset for the file associated with each
+       symbol, and remember to keep the offsets padded out */
+
+    current = arch->archive_head;
+    count = 0;
+    while (current != (bfd *)NULL && count < symbol_count) {
+	/* For each symbol which is used defined in this object, write out
+	   the object file's address in the archive */
+    
+	while (((bfd *)(map[count]).pos) == current) {
+	    bfd_write_bigendian_4byte_int(arch, archive_member_file_ptr);
+	    count++;
 	}
-	/* FIXME, this needs to be byte-swapped */
-	bfd_write ((PTR)&archive_member_file_ptr,
-		   1,
-		   sizeof (archive_member_file_ptr),
-		   arch);
-    }
+	/* Add size of this archive entry */
+	archive_member_file_ptr += arelt_size (current) + sizeof (struct
+								  ar_hdr);
+	/* remember aboout the even alignment */
+	archive_member_file_ptr += archive_member_file_ptr % 2;
+	current = current->next;
+    }  
+
+
 
     /* now write the strings themselves */
-    for (count = 0; count < orl_count; count++) {
+    for (count = 0; count < symbol_count; count++) {
 	bfd_write ((PTR)*((map[count]).name),
 		   1,
 		   strlen (*((map[count]).name))+1, arch);
@@ -1306,7 +1323,7 @@ coff_write_armap (arch, elength, map, orl_count, stridx)
     /* The spec sez this should be a newline.  But in order to be
        bug-compatible for arc960 we use a null. */
     if (padit)
-	bfd_write("\0",1,1,arch);
+     bfd_write("\0",1,1,arch);
 
     return true;
 }

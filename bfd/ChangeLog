@@ -1,7 +1,33 @@
+Mon Oct 21 09:34:11 1991  Steve Chamberlain  (steve at rtl.cygnus.com)
+
+	* targets.c (proto write_armap). Changed orl_count to unsigned.
+	* opncls.c (bfd_close_all_done). Added so that generative
+	programs like gas can close a bfd without causing bfd confusion.
+	* libbfd.h (changed becuase of protos)
+	* amdcoff.c: messed with the way that jmp displacements are
+	calcualated. This may not yet be totally correct.
+	* archive.c (coff_write_armap): rewrote the way that ranlibs are
+	written out.
+	* coffcode.h (fixup_symbol_value): now doesn't core dump if a non
+	abs symbol has no section (like a register symbol).
+	(coff_write_symbol) now zeros auxent before filling it up to help
+	with sensitive applications.
+	* libbfd.c (bfd_write_bigendian_4byte_int): added.
+	
+Wed Oct 16 22:58:45 1991  John Gilmore  (gnu at cygnus.com)
+
+	* bfd.c:  Make sure we don't get a macro strerror().
+	* opncls.c (bfd_fdopenr):  If FASCIST_FDOPEN, use "r", not "r+".
+	* trad-core.c (trad_unix_core_file_failing_command):  Suppress
+	attempt to recover command, ifdef NO_CORE_COMMAND.
+	* hosts/h-tahoe.h:  Add FASCIST_FDOPEN and NO_CORE_COMMAND;
+	revamp HOST_*, etc.
+	* hosts/h-i386v.h:  Use <utime.h>, not <sys/utime.h>, unlike POSIX.
+
 Wed Oct 16 12:43:49 1991  Per Bothner  (bothner at cygnus.com)
 
 	* archive.c (bsd_write_argmap): The size of the ranlib structures
-	should not include teh size field itself.
+	should not include the size field itself.
 	* aoutx.h, libaout.h (NAME(aout, sizeof_headers)):  Use
 	adata(abfd)->exec_bytes_size field instead of constant macro,
 	because aoutx.h compiles to a simple .o file shared by
