@@ -1,3 +1,8 @@
+Fri Jun  9 07:54:29 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* coff-i960.c (coff_i960_relocate):  Compare output section names
+	when converting for vxworks.
+
 Wed Jun  7 19:01:30 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* elfcode.h (elf_fake_sections): Permit .scommon or COMMON
