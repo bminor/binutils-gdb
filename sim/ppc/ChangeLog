@@ -1,3 +1,10 @@
+Thu May 16 10:56:45 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* configure.in (AC_CHECK_HEADERS): Add sys/ioctl.h.
+	* config{.in,ure}: Regenerate.
+	* emul_netbsd.c: If HAVE_SYS_IOCTL_H is not defined, don't include
+	sys/ioctl.h.
+
 Tue May  7 17:28:12 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* hw_pal.c (hw_pal_instance_read_callback): Remove unused

@@ -57,8 +57,13 @@
 int getrusage();
 #endif
 
+#if HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
+#endif
+
+#if HAVE_SYS_MOUNT_H
 #include <sys/mount.h>
+#endif
 
 #if HAVE_DIRENT_H
 # include <dirent.h>
@@ -311,14 +316,9 @@ do_read(os_emul_data *emul,
 #endif
   status = read (d, scratch_buffer, nbytes);
   
-  if (status == -1) {
-    cpu_registers(processor)->gpr[0] = errno;
-  } else {
-    cpu_registers(processor)->gpr[3] = status;
-    
-    if (status > 0)
-      emul_write_buffer(scratch_buffer, buf, status, processor, cia);
-  }
+  emul_write_status(processor, status, errno);
+  if (status > 0)
+    emul_write_buffer(scratch_buffer, buf, status, processor, cia);
   
   zfree(scratch_buffer);
 }
@@ -412,17 +412,19 @@ do_break(os_emul_data *emul,
 {
   /* just pass this onto the `vm' device */
   psim *system = cpu_system(processor);
+  unsigned_word new_break = cpu_registers(processor)->gpr[arg0];
+  int status;
 
   if (WITH_TRACE && ppc_trace[trace_os_emul])
     printf_filtered ("0x%lx", (long)cpu_registers(processor)->gpr[arg0]);
 
   SYS(break);
-  device_ioctl(emul->vm,
-	       system,
-	       processor,
-	       cia,
-	       0, /*ioctl*/
-	       NULL); /*ioctl-data*/
+  status = device_ioctl(emul->vm,
+			system,
+			processor,
+			cia,
+			new_break); /*ioctl-data*/
+  emul_write_status(processor, 0, status);
 }
 
 
@@ -434,7 +436,7 @@ do_getpid(os_emul_data *emul,
 	  unsigned_word cia)
 {
   SYS(getpid);
-  cpu_registers(processor)->gpr[3] = (int)getpid();
+  emul_write_status(processor, (int)getpid(), 0);
 }
 
 
@@ -446,7 +448,7 @@ do_getuid(os_emul_data *emul,
 	  unsigned_word cia)
 {
   SYS(getuid);
-  cpu_registers(processor)->gpr[3] = (int)getuid();
+  emul_write_status(processor, (int)getuid(), 0);
 }
 
 
@@ -458,7 +460,7 @@ do_geteuid(os_emul_data *emul,
 	   unsigned_word cia)
 {
   SYS(geteuid);
-  cpu_registers(processor)->gpr[3] = (int)geteuid();
+  emul_write_status(processor, (int)geteuid(), 0);
 }
 
 
@@ -491,12 +493,13 @@ do_dup(os_emul_data *emul,
 {
   int oldd = cpu_registers(processor)->gpr[arg0];
   int status = dup(oldd);
+  int err = errno;
 
   if (WITH_TRACE && ppc_trace[trace_os_emul])
     printf_filtered ("%d", oldd);
 
   SYS(dup);
-  emul_write_status(processor, status, errno);
+  emul_write_status(processor, status, err);
 }
 
 
@@ -508,7 +511,7 @@ do_getegid(os_emul_data *emul,
 	   unsigned_word cia)
 {
   SYS(getegid);
-  cpu_registers(processor)->gpr[3] = (int)getegid();
+  emul_write_status(processor, (int)getegid(), 0);
 }
 
 
@@ -520,7 +523,7 @@ do_getgid(os_emul_data *emul,
 	  unsigned_word cia)
 {
   SYS(getgid);
-  cpu_registers(processor)->gpr[3] = (int)getgid();
+  emul_write_status(processor, (int)getgid(), 0);
 }
 
 
@@ -539,7 +542,7 @@ do_sigprocmask(os_emul_data *emul,
   if (WITH_TRACE && ppc_trace[trace_os_emul])
     printf_filtered ("%ld, 0x%ld, 0x%ld", (long)how, (long)set, (long)oset);
 
-  cpu_registers(processor)->gpr[3] = 0;
+  emul_write_status(processor, 0, 0);
   cpu_registers(processor)->gpr[4] = set;
 }
 
@@ -588,7 +591,7 @@ do_umask(os_emul_data *emul,
     printf_filtered ("0%o", mask);
 
   SYS(umask);
-  cpu_registers(processor)->gpr[3] = umask(mask);
+  emul_write_status(processor, umask(mask), 0);
 }
 
 
@@ -602,12 +605,13 @@ do_dup2(os_emul_data *emul,
   int oldd = cpu_registers(processor)->gpr[arg0];
   int newd = cpu_registers(processor)->gpr[arg0+1];
   int status = dup2(oldd, newd);
+  int err = errno;
 
   if (WITH_TRACE && ppc_trace[trace_os_emul])
     printf_filtered ("%d, %d", oldd, newd);
 
   SYS(dup2);
-  emul_write_status(processor, status, errno);
+  emul_write_status(processor, status, err);
 }
 
 
@@ -645,12 +649,13 @@ do_gettimeofday(os_emul_data *emul,
   struct timezone tz;
   int status = gettimeofday((t_addr != 0 ? &t : NULL),
 			    (tz_addr != 0 ? &tz : NULL));
+  int err = errno;
 
   if (WITH_TRACE && ppc_trace[trace_os_emul])
     printf_filtered ("0x%lx, 0x%lx", (long)t_addr, (long)tz_addr);
 
   SYS(gettimeofday);
-  emul_write_status(processor, status, errno);
+  emul_write_status(processor, status, err);
   if (status == 0) {
     if (t_addr != 0)
       write_timeval(t_addr, t, processor, cia);
@@ -674,12 +679,13 @@ do_getrusage(os_emul_data *emul,
   unsigned_word rusage_addr = cpu_registers(processor)->gpr[arg0+1];
   struct rusage rusage;
   int status = getrusage(who, (rusage_addr != 0 ? &rusage : NULL));
+  int err = errno;
 
   if (WITH_TRACE && ppc_trace[trace_os_emul])
     printf_filtered ("%d, 0x%lx", who, (long)rusage_addr);
 
   SYS(getrusage);
-  emul_write_status(processor, status, errno);
+  emul_write_status(processor, status, err);
   if (status == 0) {
     if (rusage_addr != 0)
       write_rusage(rusage_addr, rusage, processor, cia);
@@ -842,6 +848,7 @@ do_lseek(os_emul_data *emul,
   if (status == -1)
     emul_write_status(processor, -1, errno);
   else {
+    emul_write_status(processor, 0, 0); /* success */
     emul_write_gpr64(processor, 3, status);
   }
 }
@@ -911,7 +918,7 @@ do___sysctl(os_emul_data *emul,
     error("sysctl() name[0]=%d unknown\n", (int)mib);
     break;
   }
-  cpu_registers(processor)->gpr[3] = 0;
+  emul_write_status(processor, 0, 0); /* always succeed */
 }
 
 
