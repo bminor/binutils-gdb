@@ -1,3 +1,7 @@
+2003-07-09  Joel Brobecker  <brobecker@gnat.com>      
+
+	* somread.c (som_symfile_offsets): Fix compilation error.   
+
 2003-07-09  Andrew Cagney  <cagney@redhat.com>
 
 	* regcache.c (register_size): Only check REGISTER_RAW_SIZE once.
