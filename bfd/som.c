@@ -133,7 +133,6 @@ static boolean som_mkobject PARAMS ((bfd *));
 static bfd_target * som_object_setup PARAMS ((bfd *,
 					      struct header *,
 					      struct som_exec_auxhdr *));
-static asection * make_unique_section PARAMS ((bfd *, CONST char *, int));
 static boolean setup_sections PARAMS ((bfd *, struct header *));
 static bfd_target * som_object_p PARAMS ((bfd *));
 static boolean som_write_object_contents PARAMS ((bfd *));
@@ -155,6 +154,7 @@ static void som_print_symbol PARAMS ((bfd *, PTR,
 static boolean som_new_section_hook PARAMS ((bfd *, asection *));
 static boolean som_bfd_copy_private_section_data PARAMS ((bfd *, asection *,
 							  bfd *, asection *));
+static boolean som_bfd_copy_private_bfd_data PARAMS ((bfd *, bfd *));
 static boolean som_bfd_is_local_label PARAMS ((bfd *, asymbol *));
 static boolean som_set_section_contents PARAMS ((bfd *, sec_ptr, PTR,
 						 file_ptr, bfd_size_type));
@@ -962,7 +962,6 @@ static reloc_howto_type som_hppa_howto_table[] =
   {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"},
   {R_RESERVED, 0, 0, 32, false, 0, 0, hppa_som_reloc, "R_RESERVED"}};
   
-
 /* Initialize the SOM relocation queue.  By definition the queue holds
    the last four multibyte fixups.  */
   
@@ -1592,6 +1591,16 @@ som_object_setup (abfd, file_hdrp, aux_hdrp)
   obj_som_str_filepos (abfd) = file_hdrp->symbol_strings_location;
   obj_som_reloc_filepos (abfd) = file_hdrp->fixup_request_location;
 
+  obj_som_exec_data (abfd) = (struct som_exec_data *)
+    bfd_zalloc (abfd, sizeof (struct som_exec_data ));
+  if (obj_som_exec_data (abfd) == NULL)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return NULL;
+    }
+
+  obj_som_exec_data (abfd)->system_id = file_hdrp->system_id;
+  obj_som_exec_data (abfd)->exec_flags = aux_hdrp->exec_flags;
   return abfd->xvec;
 }
 
@@ -1717,8 +1726,7 @@ setup_sections (abfd, file_hdr)
 					     subspace.quadrant);
 
 	  /* Keep an easy mapping between subspaces and sections.  */
-	  som_section_data (subspace_asect)->subspace_index 
-	    = total_subspaces++;
+	  subspace_asect->target_index = total_subspaces++;
 
 	  /* Set SEC_READONLY and SEC_CODE/SEC_DATA as specified
 	     by the access_control_bits in the subspace header.  */
@@ -1911,14 +1919,6 @@ som_mkobject (abfd)
       bfd_set_error (bfd_error_no_memory);
       return false;
     }
-  obj_som_file_hdr (abfd)
-    = (struct header *) bfd_zalloc (abfd, sizeof (struct header));
-  if (obj_som_file_hdr (abfd) == NULL)
-
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return false;
-    }
   return true;
 }
 
@@ -1930,12 +1930,25 @@ static boolean
 som_prep_headers (abfd)
      bfd *abfd;
 {
-  struct header *file_hdr = obj_som_file_hdr (abfd);
+  struct header *file_hdr;
   asection *section;
+
+  /* Make and attach a file header to the BFD.  */
+  file_hdr = (struct header *) bfd_zalloc (abfd, sizeof (struct header));
+  if (file_hdr == NULL)
+
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return false;
+    }
+  obj_som_file_hdr (abfd) = file_hdr;
 
   /* FIXME.  This should really be conditional based on whether or not
      PA1.1 instructions/registers have been used.  */
-  file_hdr->system_id = CPU_PA_RISC1_0;
+  if (abfd->flags & EXEC_P)
+    file_hdr->system_id = obj_som_exec_data (abfd)->system_id;
+  else
+    file_hdr->system_id = CPU_PA_RISC1_0;
 
   if (abfd->flags & EXEC_P)
     {
@@ -1958,15 +1971,9 @@ som_prep_headers (abfd)
   file_hdr->file_time.secs = 0;
   file_hdr->file_time.nanosecs = 0; 
 
-  if (abfd->flags & EXEC_P)
-    abort ();
-  else
-    {
-      file_hdr->entry_space = 0;
-      file_hdr->entry_subspace = 0;
-      file_hdr->entry_offset = 0;
-    }
-  
+  file_hdr->entry_space = 0;
+  file_hdr->entry_subspace = 0;
+  file_hdr->entry_offset = 0;
   file_hdr->presumed_dp = 0;
 
   /* Now iterate over the sections translating information from
@@ -2905,7 +2912,7 @@ som_begin_writing (abfd)
 	      first_subspace = 0;
 	    }
 
-	  som_section_data (subsection)->subspace_index = total_subspaces++;
+	  subsection->target_index = total_subspaces++;
 	  /* This is real data to be loaded from the file.  */
 	  if (subsection->flags & SEC_LOAD)
 	    {
@@ -2968,7 +2975,7 @@ som_begin_writing (abfd)
 	      || (subsection->flags & SEC_ALLOC) != 0)
 	    continue;
 
-	  som_section_data (subsection)->subspace_index = total_subspaces++;
+	  subsection->target_index = total_subspaces;
 	  /* This is real data to be loaded from the file.  */
 	  if ((subsection->flags & SEC_LOAD) == 0)
 	    {
@@ -3020,6 +3027,9 @@ som_begin_writing (abfd)
   if (abfd->flags & EXEC_P)
     {
       long tmp;
+
+      exec_header.exec_entry = bfd_get_start_address (abfd);
+      exec_header.exec_flags = obj_som_exec_data (abfd)->exec_flags;
 
       /* Oh joys.  Ram some of the BSS data into the DATA section
 	 to be compatable with how the hp linker makes objects
@@ -3331,7 +3341,7 @@ som_bfd_derive_misc_symbol_info (abfd, sym, info)
   /* For all other symbols, the symbol_info field contains the 
      subspace index of the space this symbol is contained in.  */
   else
-    info->symbol_info = som_section_data (sym->section)->subspace_index;
+    info->symbol_info = sym->section->target_index;
 
   /* Set the symbol's value.  */
   info->symbol_value = sym->value + sym->section->vma;
@@ -3495,7 +3505,7 @@ som_section_from_subspace_index (abfd, index)
   asection *section;
 
   for (section = abfd->sections; section != NULL; section = section->next)
-    if (som_section_data (section)->subspace_index == index)
+    if (section->target_index == index)
       return section;
 
   /* Should never happen.  */
@@ -4148,10 +4158,6 @@ som_new_section_hook (abfd, newsect)
     }
   newsect->alignment_power = 3;
 
-  /* Initialize the subspace_index field to -1 so that it does
-     not match a subspace with an index of 0.  */
-  som_section_data (newsect)->subspace_index = -1;
-
   /* We allow more than three sections internally */
   return true;
 }
@@ -4177,8 +4183,38 @@ som_bfd_copy_private_section_data (ibfd, isection, obfd, osection)
   if (som_section_data (osection)->containing_space)
     som_section_data (osection)->containing_space =
       som_section_data (osection)->containing_space->output_section;
+
+  return true;
 }
-       
+
+/* Copy any private info we understand from the input bfd
+   to the output bfd.  */
+
+static boolean
+som_bfd_copy_private_bfd_data (ibfd, obfd)
+     bfd *ibfd, *obfd;
+{
+  /* One day we may try to grok other private data.  */
+  if (ibfd->xvec->flavour != bfd_target_som_flavour
+      || obfd->xvec->flavour != bfd_target_som_flavour)
+    return false;
+
+  /* Allocate some memory to hold the data we need.  */
+  obj_som_exec_data (obfd) = (struct som_exec_data *)
+    bfd_zalloc (obfd, sizeof (struct som_exec_data));
+  if (obj_som_exec_data (obfd) == NULL)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return false;
+    }
+
+  /* Now copy the data.  */
+  memcpy (obj_som_exec_data (obfd), obj_som_exec_data (ibfd),
+	  sizeof (struct som_exec_data));
+
+  return true;
+}
+
 /* Set backend info for sections which can not be described
    in the BFD data structures.  */
 
@@ -5372,9 +5408,6 @@ som_write_armap (abfd)
 #define som_core_file_failing_command	_bfd_dummy_core_file_failing_command
 #define som_core_file_failing_signal	_bfd_dummy_core_file_failing_signal
 #define som_core_file_matches_executable_p	_bfd_dummy_core_file_matches_executable_p
-
-#define som_bfd_copy_private_bfd_data \
-  ((boolean (*) PARAMS ((bfd *, bfd *))) bfd_true)
 
 bfd_target som_vec =
 {

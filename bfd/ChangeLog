@@ -1,5 +1,27 @@
 Fri Mar 18 18:13:49 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* som.h (struct som_exec_data): New structure to hold exec
+	info that must be preserved when running objcopy/strip.
+	(struct somdata): Add new "exec_data" field and accessor
+	macro.  Add some comments on how the various fields are used.
+	(som_section_data_struct): Make is_space and is_subspace bitfields.
+	Delete unused subspace_index.  All references now use the
+	target_index field within the section structure itself.
+
+	* som.c (make_unique_section): Delete unused declaration.
+	(som_bfd_copy_private_bfd_data): New function.
+	(som_object_setup): Allocate space for and save exec information
+	that needs to be copied during objcopy/strip.
+	(som_mkobject): Do not allocate space for a file header here.
+	It is not used when only reading SOM objects.
+	(som_prep_headers): Allocate space for and attach a file header
+	to the output bfd.  For executables, use the saved system_id
+	value rather than trying to guess the right value.  Do not abort
+	wwhen setting file_hdr->entry* for executables.
+	(som_begin_writing): For executables, set the exec_entry and
+	exec_flags fields.
+	(som_copy_private_backend_section_data): Always return a value.
+
 	* libhppa.h (PA_PAGESIZE): Define.
 
 	* som.c (SOM_ALIGN): Define.

@@ -1,5 +1,5 @@
 /* HP PA-RISC SOM object file format:  definitions internal to BFD.
-   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+   Copyright (C) 1990, 91, 92, 93, 94 Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the
    University of Utah (pa-gdb-bugs@cs.utah.edu).
@@ -76,21 +76,49 @@ typedef struct som_symbol
   }
 som_symbol_type;
 
+/* A structure containing all the magic information stored in a BFD's
+   private data which needs to be copied during an objcopy/strip run.  */
+struct som_exec_data
+  {
+    /* Sort-of a magic number.  BSD uses it to distinguish between
+       native executables and hpux executables.  */
+    short system_id;
+
+    /* Magic exec flags.  These control things like whether or not
+       null pointer dereferencing is allowed and the like.  */
+    long exec_flags;
+
+    /* Add more stuff here as needed.  Good examples of information
+       we might want to pass would be presumed_dp, entry_* and maybe
+       others from the file header.  */
+  };
+
 struct somdata
   {
+    /* All the magic information about an executable which lives
+       in the private BFD structure and needs to be copied from
+       the input bfd to the output bfd during a objcopy/strip.  */
+    struct som_exec_data *exec_data;
+
+    /* These three fields are only used when writing files and are
+       generated from scratch.  They need not be copied for objcopy
+       or strip to work.  */
     struct header *file_hdr;
     struct copyright_aux_hdr *copyright_aux_hdr;
     struct user_string_aux_hdr *version_aux_hdr;
+
+    /* Pointers to a saved copy of the symbol and string tables.  These
+       need not be copied for objcopy or strip to work.  */
     som_symbol_type *symtab;
     char *stringtab;
 
     /* We remember these offsets so that after check_file_format, we have
-       no dependencies on the particular format of the exec_hdr.  */
+       no dependencies on the particular format of the exec_hdr.
+       These offsets need not be copied for objcopy or strip to work.  */
 
     file_ptr sym_filepos;
     file_ptr str_filepos;
     file_ptr reloc_filepos;
-
     unsigned stringtab_size;
   };
 
@@ -113,17 +141,17 @@ struct som_data_struct
 
 struct som_section_data_struct
   {
+    unsigned int is_space : 1;
+    unsigned int is_subspace : 1;
     unsigned int reloc_size;
     char *reloc_stream;
-    unsigned int subspace_index;
     asection *containing_space;
-    int is_space;
     struct space_dictionary_record space_dict;
-    int is_subspace;
     struct subspace_dictionary_record subspace_dict;
   };
 
 #define somdata(bfd)			((bfd)->tdata.som_data->a)
+#define obj_som_exec_data(bfd)		(somdata(bfd).exec_data)
 #define obj_som_file_hdr(bfd)		(somdata(bfd).file_hdr)
 #define obj_som_copyright_hdr(bfd)	(somdata(bfd).copyright_aux_hdr)
 #define obj_som_version_hdr(bfd)	(somdata(bfd).version_aux_hdr)
