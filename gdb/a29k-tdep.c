@@ -402,7 +402,7 @@ init_frame_info (innermost_frame, frame)
   else
     frame->frame = frame->next->frame + frame->next->rsize;
   
-#if CALL_DUMMY_LOCATION == ON_STACK
+#if 0 /* CALL_DUMMY_LOCATION == ON_STACK */
   This wont work;
 #else
   if (PC_IN_CALL_DUMMY (p, 0, 0))
@@ -825,6 +825,16 @@ push_dummy_frame ()
   gr1 = read_register (GR1_REGNUM) - DUMMY_FRAME_RSIZE;
   write_register (GR1_REGNUM, gr1);
 
+#ifdef VXWORKS_TARGET
+  /* We force re-reading all registers to get the new local registers set
+     after gr1 has been modified. This fix is due to the lack of single
+     register read/write operation in the RPC interface between VxGDB and
+     VxWorks. This really must be changed ! */
+
+  vx_read_register (-1);
+
+#endif /* VXWORK_TARGET */
+
   rab = read_register (RAB_REGNUM);
   if (gr1 < rab)
     {
@@ -966,6 +976,30 @@ a29k_get_processor_type ()
     }
   fprintf_filtered (gdb_stderr, " revision %c\n", 'A' + ((cfg_reg >> 24) & 0x0f));
 }
+
+#ifdef GET_LONGJMP_TARGET
+/* Figure out where the longjmp will land.  We expect that we have just entered
+  longjmp and haven't yet setup the stack frame, so the args are still in the
+   output regs.  lr2 (LR2_REGNUM) points at the jmp_buf structure from which we
+   extract the pc (JB_PC) that we will land at.  The pc is copied into ADDR.
+   This routine returns true on success */
+
+int
+get_longjmp_target(pc)
+     CORE_ADDR *pc;
+{
+  CORE_ADDR jb_addr;
+
+  jb_addr = read_register(LR2_REGNUM);
+
+  if (target_read_memory(jb_addr + JB_PC * JB_ELEMENT_SIZE, (char *) pc,
+                         sizeof(CORE_ADDR)))
+    return 0;
+
+  SWAP_TARGET_AND_HOST(pc, sizeof(CORE_ADDR));
+  return 1;
+}
+#endif /* GET_LONGJMP_TARGET */
 
 void
 _initialize_a29k_tdep ()

@@ -97,7 +97,7 @@ vx_read_register (regno)
 
   /* PAD For now, don't care about exop register */
 
-  bzero (&registers[REGISTER_BYTE (EXO_REGNUM)], 1 * AM29K_GREG_SIZE);
+  memset (&registers[REGISTER_BYTE (EXO_REGNUM)], '\0', AM29K_GREG_SIZE);
 
   /* If the target has floating point registers, fetch them.
      Otherwise, zero the floating point register values in
@@ -113,16 +113,16 @@ vx_read_register (regno)
 
       /* PAD For now, don't care about registers (?) AI0 to q */
 
-      bzero (&registers[REGISTER_BYTE (161)], 21 * AM29K_FPREG_SIZE);
+      memset (&registers[REGISTER_BYTE (161)], '\0', 21 * AM29K_FPREG_SIZE);
     }
   else
     { 
-      bzero (&registers[REGISTER_BYTE (FPE_REGNUM)], 1 * AM29K_FPREG_SIZE);
-      bzero (&registers[REGISTER_BYTE (FPS_REGNUM)], 1 * AM29K_FPREG_SIZE);
+      memset (&registers[REGISTER_BYTE (FPE_REGNUM)], '\0', AM29K_FPREG_SIZE);
+      memset (&registers[REGISTER_BYTE (FPS_REGNUM)], '\0', AM29K_FPREG_SIZE);
 
       /* PAD For now, don't care about registers (?) AI0 to q */
 
-      bzero (&registers[REGISTER_BYTE (161)], 21 * AM29K_FPREG_SIZE);
+      memset (&registers[REGISTER_BYTE (161)], '\0', 21 * AM29K_FPREG_SIZE);
     }
 
   /* Mark the register cache valid.  */
@@ -165,5 +165,24 @@ vx_write_register (regno)
       net_write_registers (am29k_fpreg_packet, AM29K_FPREG_PLEN,
                            PTRACE_SETFPREGS);
     }
+}
+
+/* VxWorks zeroes fp when the task is initialized; we use this
+   to terminate the frame chain. Chain means here the nominal address of
+   a frame, that is, the return address (lr0) address in the stack. To
+   obtain the frame pointer (lr1) contents, we must add 4 bytes.
+   Note : may be we should modify init_frame_info() to get the frame pointer
+          and store it into the frame_info struct rather than reading its
+          contents when FRAME_CHAIN_VALID is invoked. */
+
+int
+get_fp_contents (chain, thisframe)
+     CORE_ADDR chain;
+     struct frame_info *thisframe;      /* not used here */
+{
+   int fp_contents;
+
+   read_memory ((CORE_ADDR)(chain + 4), (char *) &fp_contents, 4);
+   return (fp_contents != 0);
 }
 

@@ -56,9 +56,16 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <symtab.h>
 
+/* Maximum number of bytes to transfer in a single
+   PTRACE_{READ,WRITE}DATA request.  */
+#define VX_MEMXFER_MAX 4096
+
+extern void vx_read_register ();
+extern void vx_write_register ();
 extern void symbol_file_command ();
 extern int stop_soon_quietly;		/* for wait_for_inferior */
 
+static int net_step ();
 static int net_ptrace_clnt_call ();	/* Forward decl */
 static enum clnt_stat net_clnt_call ();	/* Forward decl */
 extern struct target_ops vx_ops, vx_run_ops;	/* Forward declaration */
@@ -72,7 +79,7 @@ static char *vx_running;		/* Called function */
 /* Nonzero means target that is being debugged remotely has a floating
    point processor.  */
 
-static int target_has_fp;
+int target_has_fp;
 
 /* Default error message when the network is forking up.  */
 
@@ -340,7 +347,13 @@ net_wait (pEvent)
     status = net_clnt_call (PROCESS_WAIT, xdr_int, &pid, xdr_RDB_EVENT,
 			    pEvent);
 
-    return (status == RPC_SUCCESS)? pEvent->status: -1;
+    /* return (status == RPC_SUCCESS)? pEvent->status: -1; */
+    if (status == RPC_SUCCESS)
+      return ((pEvent->status) ? 1 : 0);
+    else if (status == RPC_TIMEDOUT)
+      return (1);
+    else
+      return (-1);
 }
     
 /* Suspend the remote task.
@@ -368,64 +381,91 @@ net_quit ()
 
 /* Read a register or registers from the remote system.  */
 
-static void
-vx_read_register (regno)
-     int regno;
+void
+net_read_registers (reg_buf, len, procnum)
+     char *reg_buf;
+     int len;
+     u_long procnum;
 {
   int status;
   Rptrace ptrace_in;
   Ptrace_return ptrace_out;
-  C_bytes in_data;
   C_bytes out_data;
-  extern char registers[];
+  char message[100];
 
   memset ((char *) &ptrace_in, '\0', sizeof (ptrace_in));
   memset ((char *) &ptrace_out, '\0', sizeof (ptrace_out));
 
-  /* FIXME, eventually only get the ones we need.  */
-  registers_fetched ();
-  
+  /* Initialize RPC input argument structure.  */
+
   ptrace_in.pid = inferior_pid;
+  ptrace_in.info.ttype = NOINFO;
+
+  /* Initialize RPC return value structure.  */
+
+  out_data.bytes = reg_buf;
+  out_data.len = len;
   ptrace_out.info.more_data = (caddr_t) &out_data;
-  out_data.len   = VX_NUM_REGS * REGISTER_RAW_SIZE (0);
-  out_data.bytes = (caddr_t) registers;
-  
-  status = net_ptrace_clnt_call (PTRACE_GETREGS, &ptrace_in, &ptrace_out);
+
+  /* Call RPC; take an error exit if appropriate.  */
+
+  status = net_ptrace_clnt_call (procnum, &ptrace_in, &ptrace_out);
   if (status)
     error (rpcerr);
   if (ptrace_out.status == -1)
     {
       errno = ptrace_out.errno;
-      perror_with_name ("net_ptrace_clnt_call(PTRACE_GETREGS)");
+      sprintf (message, "reading %s registers", (procnum == PTRACE_GETREGS)
+						 ? "general-purpose"
+						 : "floating-point");
+      perror_with_name (message);
     }
-  
-#ifdef VX_SIZE_FPREGS
-  /* If the target has floating point registers, fetch them.
-     Otherwise, zero the floating point register values in
-     registers[] for good measure, even though we might not
-     need to.  */
+}
 
-  if (target_has_fp)
+/* Write register values to a VxWorks target.  REG_BUF points to a buffer
+   containing the raw register values, LEN is the length of REG_BUF in
+   bytes, and PROCNUM is the RPC procedure number (PTRACE_SETREGS or
+   PTRACE_SETFPREGS).  An error exit is taken if the RPC call fails or
+   if an error status is returned by the remote debug server.  This is
+   a utility routine used by vx_write_register ().  */
+
+void
+net_write_registers (reg_buf, len, procnum)
+     char *reg_buf;
+     int len;
+     u_long procnum;
+{
+  int status;
+  Rptrace ptrace_in;
+  Ptrace_return ptrace_out;
+  C_bytes in_data;
+  char message[100];
+
+  memset ((char *) &ptrace_in, '\0', sizeof (ptrace_in));
+  memset ((char *) &ptrace_out, '\0', sizeof (ptrace_out));
+
+  /* Initialize RPC input argument structure.  */
+
+  in_data.bytes = reg_buf;
+  in_data.len = len;
+
+  ptrace_in.pid = inferior_pid;
+  ptrace_in.info.ttype = DATA;
+  ptrace_in.info.more_data = (caddr_t) &in_data;
+
+  /* Call RPC; take an error exit if appropriate.  */
+
+  status = net_ptrace_clnt_call (procnum, &ptrace_in, &ptrace_out);
+  if (status)
+    error (rpcerr);
+  if (ptrace_out.status == -1)
     {
-      ptrace_in.pid = inferior_pid;
-      ptrace_out.info.more_data = (caddr_t) &out_data;
-      out_data.len   =  VX_SIZE_FPREGS;
-      out_data.bytes = (caddr_t) &registers[REGISTER_BYTE (FP0_REGNUM)];
-  
-      status = net_ptrace_clnt_call (PTRACE_GETFPREGS, &ptrace_in, &ptrace_out);
-      if (status)
-	error (rpcerr);
-      if (ptrace_out.status == -1)
-	{
-	  errno = ptrace_out.errno;
-	  perror_with_name ("net_ptrace_clnt_call(PTRACE_GETFPREGS)");
-	}
+      errno = ptrace_out.errno;
+      sprintf (message, "writing %s registers", (procnum == PTRACE_SETREGS)
+						 ? "general-purpose"
+						 : "floating-point");
+      perror_with_name (message);
     }
-  else
-    {
-      memset (&registers[REGISTER_BYTE (FP0_REGNUM)], '\0', VX_SIZE_FPREGS);
-    }
-#endif /* VX_SIZE_FPREGS */
 }
 
 /* Prepare to store registers.  Since we will store all of them,
@@ -436,70 +476,6 @@ vx_prepare_to_store ()
 {
   /* Fetch all registers, if any of them are not yet fetched.  */
   read_register_bytes (0, NULL, REGISTER_BYTES);
-}
-
-
-/* Store our register values back into the inferior.
-   If REGNO is -1, do this for all registers.
-   Otherwise, REGNO specifies which register (so we can save time).  */
-/* FIXME, look at REGNO to save time here */
-
-static void
-vx_write_register (regno)
-     int regno;
-{
-  C_bytes in_data;
-  C_bytes out_data;
-  extern char registers[];
-  int status;
-  Rptrace ptrace_in;
-  Ptrace_return ptrace_out;
-
-  memset ((char *) &ptrace_in, '\0', sizeof (ptrace_in));
-  memset ((char *) &ptrace_out, '\0', sizeof (ptrace_out));
-
-  ptrace_in.pid = inferior_pid;
-  ptrace_in.info.ttype     = DATA;
-  ptrace_in.info.more_data = (caddr_t) &in_data;
-
-  in_data.bytes = registers;
-
-  in_data.len = VX_NUM_REGS * REGISTER_SIZE;
-
-  /* XXX change second param to be a proc number */
-  status = net_ptrace_clnt_call (PTRACE_SETREGS, &ptrace_in, &ptrace_out);
-  if (status)
-    error (rpcerr);
-  if (ptrace_out.status == -1)
-    {
-      errno = ptrace_out.errno;
-      perror_with_name ("net_ptrace_clnt_call(PTRACE_SETREGS)");
-    }
-
-#ifdef VX_SIZE_FPREGS
-  /* Store floating point registers if the target has them.  */
-
-  if (target_has_fp)
-    {
-      ptrace_in.pid = inferior_pid;
-      ptrace_in.info.ttype     = DATA;
-      ptrace_in.info.more_data = (caddr_t) &in_data;
-
-
-      in_data.bytes = &registers[REGISTER_BYTE (FP0_REGNUM)];
-      in_data.len = VX_SIZE_FPREGS;
-
-      status = net_ptrace_clnt_call (PTRACE_SETFPREGS, &ptrace_in,
-				     &ptrace_out);
-      if (status)
-	  error (rpcerr);
-      if (ptrace_out.status == -1)
-	{
-	  errno = ptrace_out.errno;
-	  perror_with_name ("net_ptrace_clnt_call(PTRACE_SETFPREGS)");
-	}
-    }
-#endif  /* VX_SIZE_FPREGS */
 }
 
 /* Copy LEN bytes to or from remote inferior's memory starting at MEMADDR
@@ -522,6 +498,8 @@ vx_xfer_memory (memaddr, myaddr, len, write, target)
   Rptrace ptrace_in;
   Ptrace_return ptrace_out;
   C_bytes data;
+  enum ptracereq request;
+  int nleft, nxfer;
 
   memset ((char *) &ptrace_in, '\0', sizeof (ptrace_in));
   memset ((char *) &ptrace_out, '\0', sizeof (ptrace_out));
@@ -537,28 +515,55 @@ vx_xfer_memory (memaddr, myaddr, len, write, target)
 
       data.bytes = (caddr_t) myaddr;	/* Where from */
       data.len   = len;			/* How many bytes (again, for XDR) */
-
-      /* XXX change second param to be a proc number */
-      status = net_ptrace_clnt_call (PTRACE_WRITEDATA, &ptrace_in,
-				     &ptrace_out);
+      request = PTRACE_WRITEDATA;
     }
   else
     {
       ptrace_out.info.more_data = (caddr_t) &data;
-      data.bytes = myaddr;		/* Where to */
-      data.len   = len;			/* How many (again, for XDR) */
-
-      /* XXX change second param to be a proc number */
-      status = net_ptrace_clnt_call (PTRACE_READDATA, &ptrace_in, &ptrace_out);
+      request = PTRACE_READDATA;
     }
+  /* Loop until the entire request has been satisfied, transferring
+     at most VX_MEMXFER_MAX bytes per iteration.  Break from the loop
+     if an error status is returned by the remote debug server.  */
 
-  if (status)
-      error (rpcerr);
-  if (ptrace_out.status == -1)
+  nleft = len;
+  status = 0;
+
+  while (nleft > 0 && status == 0)
     {
-      return 0;		/* No bytes moved */
+      nxfer = min (nleft, VX_MEMXFER_MAX);
+
+      ptrace_in.addr = (int) memaddr;
+      ptrace_in.data = nxfer;
+      data.bytes = (caddr_t) myaddr;
+      data.len = nxfer;
+
+      /* Request a block from the remote debug server; if RPC fails,
+         report an error and return to debugger command level.  */
+
+      if (net_ptrace_clnt_call (request, &ptrace_in, &ptrace_out))
+        error (rpcerr);
+
+      status = ptrace_out.status;
+      if (status == 0)
+        {
+          memaddr += nxfer;
+          myaddr += nxfer;
+          nleft -= nxfer;
+        }
+      else
+        {
+          /* A target-side error has ocurred.  Set errno to the error
+             code chosen by the target so that a later perror () will
+             say something meaningful.  */
+
+          errno = ptrace_out.errno;
+        }
     }
-  return len;		/* Moved *all* the bytes */
+
+  /* Return the number of bytes transferred.  */
+
+  return (len - nleft);
 }
 
 static void
@@ -589,6 +594,7 @@ vx_resume (pid, step, siggnal)
   int status;
   Rptrace ptrace_in;
   Ptrace_return ptrace_out;
+  CORE_ADDR cont_addr;
 
   if (pid == -1)
     pid = inferior_pid;
@@ -596,15 +602,29 @@ vx_resume (pid, step, siggnal)
   if (siggnal != 0 && siggnal != stop_signal)
     error ("Cannot send signals to VxWorks processes");
 
+  /* Set CONT_ADDR to the address at which we are continuing,
+     or to 1 if we are continuing from where the program stopped.
+     This conforms to traditional ptrace () usage, but at the same
+     time has special meaning for the VxWorks remote debug server.
+     If the address is not 1, the server knows that the target
+     program is jumping to a new address, which requires special
+     handling if there is a breakpoint at the new address.  */
+
+  cont_addr = read_register (PC_REGNUM);
+  if (cont_addr == stop_pc)
+    cont_addr = 1;
+
   memset ((char *) &ptrace_in, '\0', sizeof (ptrace_in));
   memset ((char *) &ptrace_out, '\0', sizeof (ptrace_out));
 
   ptrace_in.pid = pid;
-  ptrace_in.addr = 1;	/* Target side insists on this, or it panics.  */
+  ptrace_in.addr = cont_addr; /* Target side insists on this, or it panics.  */
 
-  /* XXX change second param to be a proc number */
-  status = net_ptrace_clnt_call (step? PTRACE_SINGLESTEP: PTRACE_CONT,
-				 &ptrace_in, &ptrace_out);
+  if (step)
+    status = net_step();
+  else
+    status = net_ptrace_clnt_call (PTRACE_CONT, &ptrace_in, &ptrace_out);
+
   if (status)
     error (rpcerr);
   if (ptrace_out.status == -1)
@@ -719,6 +739,18 @@ vx_load_command (arg_string, from_tty)
 
   dont_repeat ();
 
+  /* Refuse to load the module if a debugged task is running.  Doing so
+     can have a number of unpleasant consequences to the running task.  */
+
+  if (inferior_pid != 0 && target_has_execution)
+    {
+      if (query ("You may not load a module while the target task is running.\n\
+Kill the target task? "))
+        target_kill ();
+      else
+        error ("Load cancelled.");
+    }
+
   QUIT;
   immediate_quit++;
   if (net_load (arg_string, &text_addr, &data_addr, &bss_addr) == -1)
@@ -732,7 +764,6 @@ vx_load_command (arg_string, from_tty)
   reinit_frame_cache ();
 }
 
-#ifdef FIXME  /* Not ready for prime time */
 /* Single step the target program at the source or machine level.
    Takes an error exit if rpc fails.
    Returns -1 if remote single-step operation fails, else 0.  */
@@ -765,7 +796,6 @@ net_step ()
   else 
     error (rpcerr);
 }
-#endif
 
 /* Emulate ptrace using RPC calls to the VxWorks target system.
    Returns nonzero (-1) if RPC status to VxWorks is bad, 0 otherwise.  */
@@ -1228,6 +1258,29 @@ vx_attach (args, from_tty)
      in order for other parts of GDB to work correctly.  */
   inferior_pid = pid;
   vx_running = 0;
+#if defined (START_INFERIOR_HOOK)
+  START_INFERIOR_HOOK ();
+#endif
+
+  mark_breakpoints_out ();
+
+  /* Set up the "saved terminal modes" of the inferior
+     based on what modes we are starting it with.  */
+
+  target_terminal_init ();
+
+  /* Install inferior's terminal modes.  */
+
+  target_terminal_inferior ();
+
+  /* We will get a task spawn event immediately.  */
+
+  init_wait_for_inferior ();
+  clear_proceed_status ();
+  stop_soon_quietly = 1;
+  wait_for_inferior ();
+  stop_soon_quietly = 0;
+  normal_stop ();
 }
 
 

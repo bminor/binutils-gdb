@@ -1,5 +1,10 @@
 Tue Feb 28 14:38:39 1995  Kung Hsu  <kung@mexican.cygnus.com>
 
+	* a29k-tdep.c (get_longjmp_target): add this function, from WRS.
+	* remote-vx.c: move read_register and write_register out to 
+	target specific files.
+	* remote-vx29k.c (get_fp_contnets): add this function, from WRS.
+
 	* defs.h: define SWAP_TARGET_AND_HOST macro.
 	* findvar.c, monitor.c, hppa-tdep.c: remove definition of
 	SWAP_TARGET_AND_HOST.
