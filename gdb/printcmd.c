@@ -41,6 +41,7 @@
 #include "completer.h"		/* for completion functions */
 #include "ui-out.h"
 #include "gdb_assert.h"
+#include "disasm.h"
 
 extern int asm_demangle;	/* Whether to demangle syms in asm printouts */
 extern int addressprint;	/* Whether to print hex addresses in HLL " */
@@ -135,8 +136,6 @@ static void delete_display (int);
 static void enable_display (char *, int);
 
 static void disable_display_command (char *, int);
-
-static void disassemble_command (char *, int);
 
 static void printf_command (char *, int);
 
@@ -2270,114 +2269,6 @@ printf_command (char *arg, int from_tty)
   }
   do_cleanups (old_cleanups);
 }
-
-/* Dump a specified section of assembly code.  With no command line
-   arguments, this command will dump the assembly code for the
-   function surrounding the pc value in the selected frame.  With one
-   argument, it will dump the assembly code surrounding that pc value.
-   Two arguments are interpeted as bounds within which to dump
-   assembly.  */
-
-/* ARGSUSED */
-static void
-disassemble_command (char *arg, int from_tty)
-{
-  CORE_ADDR low, high;
-  char *name;
-  CORE_ADDR pc, pc_masked;
-  char *space_index;
-#if 0
-  asection *section;
-#endif
-
-  name = NULL;
-  if (!arg)
-    {
-      if (!selected_frame)
-	error ("No frame selected.\n");
-
-      pc = get_frame_pc (selected_frame);
-      if (find_pc_partial_function (pc, &name, &low, &high) == 0)
-	error ("No function contains program counter for selected frame.\n");
-#if defined(TUI)
-      else if (tui_version)
-	low = tuiGetLowDisassemblyAddress (low, pc);
-#endif
-      low += FUNCTION_START_OFFSET;
-    }
-  else if (!(space_index = (char *) strchr (arg, ' ')))
-    {
-      /* One argument.  */
-      pc = parse_and_eval_address (arg);
-      if (find_pc_partial_function (pc, &name, &low, &high) == 0)
-	error ("No function contains specified address.\n");
-#if defined(TUI)
-      else if (tui_version)
-	low = tuiGetLowDisassemblyAddress (low, pc);
-#endif
-      low += FUNCTION_START_OFFSET;
-    }
-  else
-    {
-      /* Two arguments.  */
-      *space_index = '\0';
-      low = parse_and_eval_address (arg);
-      high = parse_and_eval_address (space_index + 1);
-    }
-
-#if defined(TUI)
-  if (!tui_is_window_visible (DISASSEM_WIN))
-#endif
-    {
-      printf_filtered ("Dump of assembler code ");
-      if (name != NULL)
-	{
-	  printf_filtered ("for function %s:\n", name);
-	}
-      else
-	{
-	  printf_filtered ("from ");
-	  print_address_numeric (low, 1, gdb_stdout);
-	  printf_filtered (" to ");
-	  print_address_numeric (high, 1, gdb_stdout);
-	  printf_filtered (":\n");
-	}
-
-      /* Dump the specified range.  */
-      pc = low;
-
-#ifdef GDB_TARGET_MASK_DISAS_PC
-      pc_masked = GDB_TARGET_MASK_DISAS_PC (pc);
-#else
-      pc_masked = pc;
-#endif
-
-      while (pc_masked < high)
-	{
-	  QUIT;
-	  print_address (pc_masked, gdb_stdout);
-	  printf_filtered (":\t");
-	  /* We often wrap here if there are long symbolic names.  */
-	  wrap_here ("    ");
-	  pc += print_insn (pc, gdb_stdout);
-	  printf_filtered ("\n");
-
-#ifdef GDB_TARGET_MASK_DISAS_PC
-	  pc_masked = GDB_TARGET_MASK_DISAS_PC (pc);
-#else
-	  pc_masked = pc;
-#endif
-	}
-      printf_filtered ("End of assembler dump.\n");
-      gdb_flush (gdb_stdout);
-    }
-#if defined(TUI)
-  else
-    {
-      tui_show_assembly (low);
-    }
-#endif
-}
 
 /* Print the instruction at address MEMADDR in debugged memory,
    on STREAM.  Returns length of the instruction, in bytes.  */
@@ -2426,15 +2317,6 @@ according to the format.\n\n\
 Defaults for format and size letters are those previously used.\n\
 Default count is 1.  Default address is following last thing printed\n\
 with this command or \"print\".", NULL));
-
-  c = add_com ("disassemble", class_vars, disassemble_command,
-	       "Disassemble a specified section of memory.\n\
-Default is the function surrounding the pc of the selected frame.\n\
-With a single argument, the function surrounding that address is dumped.\n\
-Two arguments are taken as a range of memory to dump.");
-  set_cmd_completer (c, location_completer);
-  if (xdb_commands)
-    add_com_alias ("va", "disassemble", class_xdb, 0);
 
 #if 0
   add_com ("whereis", class_vars, whereis_command,

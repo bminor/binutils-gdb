@@ -1,3 +1,11 @@
+2002-11-07  Fernando Nasser  <fnasser@redhat.com>
+
+	* printcmd.c (disassemble_command): Remove obsolete function.
+	(_initialize_printcmd): Do not create disassemble command here.
+	* cli/cli-cmds.c (disassemble_command): New function.  Implements
+	disassemble command.
+	(init_cli_cmds): Create disassemble command here instead.
+
 2002-11-07  Andrew Cagney  <ac131313@redhat.com>
 
 	* MAINTAINERS: Add Daniel Jacobowitz to global maintainers list.

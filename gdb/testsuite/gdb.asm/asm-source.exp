@@ -289,7 +289,7 @@ gdb_test "print globalvar" ".* = 11" "look at global variable"
 gdb_test "print staticvar" ".* = 5" "look at static variable"
 
 # See if we can look at a static function
-gdb_test "disassem foostatic" ".*<foostatic>:.*End of assembler dump." \
+gdb_test "disassem foostatic" ".*<foostatic\\+0>:.*End of assembler dump." \
 	"look at static function"
 
 remote_exec build "rm -f ${subdir}/arch.inc"

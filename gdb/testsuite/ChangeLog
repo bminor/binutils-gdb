@@ -1,3 +1,8 @@
+2002-09-18  Fernando Nasser  <fnasser@redhat.com>
+
+	* gdb.asm/asm-source.exp: Adjust patter to new disassembler routine
+	which explicitly prints the zero offset as "+0".
+
 2002-10-22  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.threads/schedlock.c (args): Make unsigned.
