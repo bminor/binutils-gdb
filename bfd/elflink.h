@@ -353,25 +353,39 @@ elf_link_add_archive_symbols (abfd, info)
 	  if (h == NULL)
 	    {
 	      char *p, *copy;
+	      size_t len, first;
 
 	      /* If this is a default version (the name contains @@),
-		 look up the symbol again without the version.  The
-		 effect is that references to the symbol without the
-		 version will be matched by the default symbol in the
-		 archive.  */
+		 look up the symbol again with only one `@' as well
+		 as without the version.  The effect is that references
+		 to the symbol with and without the version will be
+		 matched by the default symbol in the archive.  */
 
 	      p = strchr (symdef->name, ELF_VER_CHR);
 	      if (p == NULL || p[1] != ELF_VER_CHR)
 		continue;
 
-	      copy = bfd_alloc (abfd, (bfd_size_type) (p - symdef->name + 1));
+	      /* First check with only one `@'.  */
+	      len = strlen (symdef->name);
+	      copy = bfd_alloc (abfd, (bfd_size_type) len);
 	      if (copy == NULL)
 		goto error_return;
-	      memcpy (copy, symdef->name, (size_t) (p - symdef->name));
-	      copy[p - symdef->name] = '\0';
+	      first = p - symdef->name + 1;
+	      memcpy (copy, symdef->name, first);
+	      memcpy (copy + first, symdef->name + first + 1, len - first);
 
 	      h = elf_link_hash_lookup (elf_hash_table (info), copy,
 					false, false, false);
+
+	      if (h == NULL)
+	        {
+		  /* We also need to check references to the symbol
+		     without the version.  */
+
+		  copy[first - 1] = '\0';
+		  h = elf_link_hash_lookup (elf_hash_table (info),
+					    copy, false, false, false);
+		}
 
 	      bfd_release (abfd, copy);
 	    }

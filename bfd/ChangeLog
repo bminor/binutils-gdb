@@ -1,3 +1,8 @@
+2002-06-23  H.J. Lu  <hjl@gnu.org>
+
+	* elflink.h (elf_link_add_archive_symbols): For the default
+	version, check references with only one `@' first.
+
 2002-06-23  John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
 	* elf64-hppa.c (elf64_hppa_mark_milli_and_exported_functions): New
