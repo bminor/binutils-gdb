@@ -1,5 +1,8 @@
 Fri May 17 14:40:14 1991  Roland H. Pesch  (pesch at fowanton.cygnus.com)
 
+	* Makefile.dist: added readline/inc-*.texinfo to dependencies for
+	gdb.dvi target
+
 	* readline/inc-history.texinfo, readline/inc-readline.texinfo:
 	applied various small fixes due to or inspired by RMS comments
 
