@@ -403,6 +403,8 @@ md_parse_option (c, arg)
 	    current_cpu = S390_OPCODE_G6;
 	  else if (strcmp (arg + 5, "z900") == 0)
 	    current_cpu = S390_OPCODE_Z900;
+	  else if (strcmp (arg + 5, "z990") == 0)
+	    current_cpu = S390_OPCODE_Z990;
 	  else
 	    {
 	      as_bad (_("invalid switch -m%s"), arg);
@@ -500,14 +502,18 @@ md_begin ()
 
   op_end = s390_opcodes + s390_num_opcodes;
   for (op = s390_opcodes; op < op_end; op++)
-    {
-      retval = hash_insert (s390_opcode_hash, op->name, (PTR) op);
-      if (retval != (const char *) NULL)
-	{
-	  as_bad (_("Internal assembler error for instruction %s"), op->name);
-	  dup_insn = TRUE;
-	}
-    }
+    if (op->min_cpu <= current_cpu)
+      {
+	retval = hash_insert (s390_opcode_hash, op->name, (PTR) op);
+	if (retval != (const char *) NULL)
+	  {
+	    as_bad (_("Internal assembler error for instruction %s"),
+		    op->name);
+	    dup_insn = TRUE;
+	  }
+	while (op < op_end - 1 && strcmp (op->name, op[1].name) == 0)
+	  op++;
+      }
 
   if (dup_insn)
     abort ();
@@ -585,6 +591,9 @@ s390_insert_operand (insn, operand, val, file, line)
 	}
       /* val is ok, now restrict it to operand->bits bits.  */
       uval = (addressT) val & ((((addressT) 1 << (operand->bits-1)) << 1) - 1);
+      /* val is restrict, now check for special case.  */
+      if (operand->bits == 20 && operand->shift == 20)
+        uval = (uval >> 12) | ((uval & 0xfff) << 8);
     }
   else
     {
@@ -1255,8 +1264,12 @@ md_gather_operands (str, insn, opcode)
 
 	  if (suffix == ELF_SUFFIX_GOT)
 	    {
-	      if (operand->flags & S390_OPERAND_DISP)
+	      if ((operand->flags & S390_OPERAND_DISP) &&
+		  (operand->bits == 12))
 		reloc = BFD_RELOC_390_GOT12;
+	      else if ((operand->flags & S390_OPERAND_DISP) &&
+		       (operand->bits == 20))
+		reloc = BFD_RELOC_390_GOT20;
 	      else if ((operand->flags & S390_OPERAND_SIGNED)
 		       && (operand->bits == 16))
 		reloc = BFD_RELOC_390_GOT16;
@@ -1308,6 +1321,9 @@ md_gather_operands (str, insn, opcode)
 	      if ((operand->flags & S390_OPERAND_DISP)
 		  && (operand->bits == 12))
 		reloc = BFD_RELOC_390_TLS_GOTIE12;
+	      else if ((operand->flags & S390_OPERAND_DISP)
+		       && (operand->bits == 20))
+		reloc = BFD_RELOC_390_TLS_GOTIE20;
 	    }
 	  else if (suffix == ELF_SUFFIX_TLS_IE)
 	    {
@@ -1482,6 +1498,7 @@ md_gather_operands (str, insn, opcode)
 	     because fixup_segment will signal an overflow for large 4 byte
 	     quantities for GOT12 relocations.  */
 	  if (   fixups[i].reloc == BFD_RELOC_390_GOT12
+	      || fixups[i].reloc == BFD_RELOC_390_GOT20
 	      || fixups[i].reloc == BFD_RELOC_390_GOT16)
 	    fixP->fx_no_overflow = 1;
 	}
@@ -1522,12 +1539,6 @@ md_assemble (str)
       as_bad ("Opcode %s not available in this mode", str);
       return;
     }
-  else if (opcode->min_cpu > current_cpu)
-    {
-      as_bad ("Opcode %s not available for this cpu", str);
-      return;
-    }
-
   memcpy (insn, opcode->opcode, sizeof (insn));
   md_gather_operands (s, insn, opcode);
 }
@@ -1866,12 +1877,14 @@ tc_s390_fix_adjustable (fixP)
       || fixP->fx_r_type == BFD_RELOC_390_PLT32DBL
       || fixP->fx_r_type == BFD_RELOC_390_PLT64
       || fixP->fx_r_type == BFD_RELOC_390_GOT12
+      || fixP->fx_r_type == BFD_RELOC_390_GOT20
       || fixP->fx_r_type == BFD_RELOC_390_GOT16
       || fixP->fx_r_type == BFD_RELOC_32_GOT_PCREL
       || fixP->fx_r_type == BFD_RELOC_390_GOT64
       || fixP->fx_r_type == BFD_RELOC_390_GOTENT
       || fixP->fx_r_type == BFD_RELOC_390_GOTPLT12
       || fixP->fx_r_type == BFD_RELOC_390_GOTPLT16
+      || fixP->fx_r_type == BFD_RELOC_390_GOTPLT20
       || fixP->fx_r_type == BFD_RELOC_390_GOTPLT32
       || fixP->fx_r_type == BFD_RELOC_390_GOTPLT64
       || fixP->fx_r_type == BFD_RELOC_390_GOTPLTENT
@@ -1881,6 +1894,7 @@ tc_s390_fix_adjustable (fixP)
       || fixP->fx_r_type == BFD_RELOC_390_TLS_GD32
       || fixP->fx_r_type == BFD_RELOC_390_TLS_GD64
       || fixP->fx_r_type == BFD_RELOC_390_TLS_GOTIE12
+      || fixP->fx_r_type == BFD_RELOC_390_TLS_GOTIE20
       || fixP->fx_r_type == BFD_RELOC_390_TLS_GOTIE32
       || fixP->fx_r_type == BFD_RELOC_390_TLS_GOTIE64
       || fixP->fx_r_type == BFD_RELOC_390_TLS_LDM32
@@ -1912,6 +1926,7 @@ tc_s390_force_relocation (fixp)
   switch (fixp->fx_r_type)
     {
     case BFD_RELOC_390_GOT12:
+    case BFD_RELOC_390_GOT20:
     case BFD_RELOC_32_GOT_PCREL:
     case BFD_RELOC_32_GOTOFF:
     case BFD_RELOC_390_GOTOFF64:
@@ -1929,6 +1944,7 @@ tc_s390_force_relocation (fixp)
     case BFD_RELOC_390_PLT64:
     case BFD_RELOC_390_GOTPLT12:
     case BFD_RELOC_390_GOTPLT16:
+    case BFD_RELOC_390_GOTPLT20:
     case BFD_RELOC_390_GOTPLT32:
     case BFD_RELOC_390_GOTPLT64:
     case BFD_RELOC_390_GOTPLTENT:
@@ -2006,6 +2022,12 @@ md_apply_fix3 (fixP, valP, seg)
 	  fixP->fx_where += 4;
 	  fixP->fx_r_type = BFD_RELOC_390_12;
 	}
+      else if (operand->bits == 20 && operand->shift == 20)
+	{
+	  fixP->fx_size = 2;
+	  fixP->fx_where += 2;
+	  fixP->fx_r_type = BFD_RELOC_390_20;
+	}
       else if (operand->bits == 8 && operand->shift == 8)
 	{
 	  fixP->fx_size = 1;
@@ -2070,6 +2092,19 @@ md_apply_fix3 (fixP, valP, seg)
 	      mop |= (unsigned short) (value & 0xfff);
 	      bfd_putb16 ((bfd_vma) mop, (unsigned char *) where);
 	    }
+	  break;
+
+	case BFD_RELOC_390_20:
+	case BFD_RELOC_390_GOT20:
+	case BFD_RELOC_390_GOTPLT20:
+	  if (fixP->fx_done)
+	    {
+	      unsigned int mop;
+	      mop = bfd_getb32 ((unsigned char *) where);
+	      mop |= (unsigned int) ((value & 0xfff) << 8 |
+				     (value & 0xff000) >> 12);
+	      bfd_putb32 ((bfd_vma) mop, (unsigned char *) where);
+	    } 
 	  break;
 
 	case BFD_RELOC_16:
@@ -2175,6 +2210,7 @@ md_apply_fix3 (fixP, valP, seg)
 	case BFD_RELOC_390_TLS_GD32:
 	case BFD_RELOC_390_TLS_GD64:
 	case BFD_RELOC_390_TLS_GOTIE12:
+	case BFD_RELOC_390_TLS_GOTIE20:
 	case BFD_RELOC_390_TLS_GOTIE32:
 	case BFD_RELOC_390_TLS_GOTIE64:
 	case BFD_RELOC_390_TLS_LDM32:

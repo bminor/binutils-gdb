@@ -1,3 +1,15 @@
+2003-07-01  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* config/tc-s390.c (md_parse_option): Add cpu type z990.
+	(md_begin): Add minimal cpu type logic for instructions with different
+	binary format depending on the cpu.
+	(md_assemble): Remove check for minimal cpu.
+	(s390_insert_operand): Add support for long displacements.
+	(md_gather_operands): Likewise.
+	(tc_s390_fix_adjustable): Likewise.
+	(tc_s390_force_relocation): Likewise.
+	(md_apply_fix3): Likewise.
+
 2003-06-30  Chris Demetriou  <cgd@broadcom.com>
 
 	* config/tc-mips.c (s_mipsset): Implement -march= handling
