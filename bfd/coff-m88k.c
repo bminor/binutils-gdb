@@ -85,11 +85,7 @@ static reloc_howto_type howto_table[] =
 #define BADMAG(x) MC88BADMAG(x)
 #include "coffcode.h"
 
-
-
-
-#define coff_write_armap coff_write_armap
-
+#undef coff_write_armap
 
 bfd_target m88kbcs_vec =
 {

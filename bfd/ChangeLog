@@ -1,3 +1,7 @@
+Tue Nov 12 07:21:41 1991  John Gilmore  (gnu at cygnus.com)
+
+	* coff-m88k.c (coff_write_armap):  Just #undef it.
+
 Mon Nov 11 20:30:18 1991  Steve Chamberlain  (sac at cygnus.com)
 
 	* Makefile.in: standardize on MINUS_G to disable debugging
