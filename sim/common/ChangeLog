@@ -1,3 +1,8 @@
+Mon Mar 16 12:37:33 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-trace.h, sim-trace.c (trace_prefix): Pass in sim_cia so that
+ 	trace_prefix can abort cleanly.
+
 Sat Mar 14 18:36:12 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* dv-sockser.c, dv-sockser.h: New files.
@@ -14,7 +19,7 @@ Sat Mar 14 18:36:12 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* sim-base.h (struct sim_state_base): Add prog_syms and
 	define macro STATE_PROG_SYMS.
-	* sim-trace.c (trace_one_insn): Add variables abfd, symsize,
+	* sim-trace.c (trace_prefix): Add variables abfd, symsize,
 	symbol_count, and asymbols.  Call bfd_get_symtab_upper_bound
 	and bfd_canonicalize_symtab, to get symbol table on first use
 	and preserve it via STATE_PROG_SYMS for future calls to
