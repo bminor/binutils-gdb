@@ -37,7 +37,7 @@ regarded as a program in the language TeX).
 @settitle STABS
 @titlepage
 @title The ``stabs'' debug format
-@author Julia Menapace
+@author Julia Menapace, Jim Kingdon, David MacKenzie
 @author Cygnus Support
 @page
 @tex
@@ -82,8 +82,8 @@ This document describes the stabs debugging format.
 * Type Descriptors::		Table of Symbol Descriptors
 * Expanded reference::		Reference information by stab type
 * Questions::			Questions and anomolies
-* xcoff-differences::		Differences between GNU stabs in a.out
-                                and GNU stabs in xcoff
+* XCOFF-differences::		Differences between GNU stabs in a.out
+                                and GNU stabs in XCOFF
 * Sun-differences::		Differences between GNU stabs and Sun
                                 native stabs
 * Stabs-in-ELF::		Stabs in an ELF file.
@@ -141,9 +141,9 @@ parameters, and scopes.
 For some object file formats, the debugging information is encapsulated
 in assembler directives known collectively as @dfn{stab} (symbol table)
 directives, which are interspersed with the generated code.  Stabs are
-the native format for debugging information in the a.out and xcoff
-object file formats.  The GNU tools can also emit stabs in the coff and
-ecoff object file formats.
+the native format for debugging information in the a.out and XCOFF
+object file formats.  The GNU tools can also emit stabs in the COFF and
+ECOFF object file formats.
 
 The assembler adds the information from stabs to the symbol information
 it places by default in the symbol table and the string table of the
@@ -159,7 +159,7 @@ There are three overall formats for stab assembler directives,
 differentiated by the first word of the stab.  The name of the directive
 describes which combination of four possible data fields follows.  It is
 either @code{.stabs} (string), @code{.stabn} (number), or @code{.stabd}
-(dot).  IBM's xcoff assembler uses @code{.stabx} (and some other
+(dot).  IBM's XCOFF assembler uses @code{.stabx} (and some other
 directives such as @code{.file} and @code{.bi}) instead of
 @code{.stabs}, @code{.stabn} or @code{.stabd}.
 
@@ -580,7 +580,7 @@ group of other stabs describing elements of the procedure.  These other
 stabs describe the procedure's parameters, its block local variables, and
 its block structure.
 
-Going back to our "hello world" example program,
+Going back to our ``hello world'' example program,
 
 @example
 48      ret
@@ -615,7 +615,7 @@ The program's block structure is represented by the @code{N_LBRAC} (left
 brace) and the @code{N_RBRAC} (right brace) stab types.  The variables
 defined inside a block preceded the @code{N_LBRAC} symbol for most
 compilers, including GCC.  Other compilers, such as the Convex, Acorn
-RISC machine, and Sun acc compilers, put the variables after the
+RISC machine, and Sun @code{acc} compilers, put the variables after the
 @code{N_LBRAC} symbol.  The values of the @code{N_LBRAC} and
 @code{N_RBRAC} symbols are the start and end addresses of the code of
 the block, respectively.  For most machines, they are relative to the
@@ -947,7 +947,7 @@ produce an external symbol.
 @c According to an old version of this manual, AIX uses C_RPSYM instead
 @c of C_RSYM.  I am skeptical; this should be verified.
 Register variables have their own stab type, @code{N_RSYM}, and their
-own symbol descriptor, @code{r}.  The stab's value field contains the
+own symbol descriptor, @samp{r}.  The stab's value field contains the
 number of the register where the variable data will be stored.
 
 The value is the register number.
@@ -1002,10 +1002,10 @@ Initialized static variables are represented by the @samp{S} and
 In a.out files, @code{N_STSYM} means the data segment, @code{N_FUN}
 means the text segment, and @code{N_LCSYM} means the bss segment.
 
-In xcoff files, each symbol has a section number, so the stab type
+In XCOFF files, each symbol has a section number, so the stab type
 need not indicate the segment.
 
-In ecoff files, the storage class is used to specify the section, so the
+In ECOFF files, the storage class is used to specify the section, so the
 stab type need not indicate the segment.
 
 @c In ELF files, it apparently is a big mess.  See kludge in dbxread.c
@@ -1060,7 +1060,7 @@ Because this is kind of ugly, some compilers use symbol descriptor
 @samp{P} or @samp{R} to indicate an argument which is in a register.
 The symbol value is the register number.  @samp{P} and @samp{R} mean the
 same thing, the difference is that @samp{P} is a GNU invention and
-@samp{R} is an IBM (xcoff) invention.  As of version 4.9, GDB should
+@samp{R} is an IBM (XCOFF) invention.  As of version 4.9, GDB should
 handle either one.  Symbol type @code{C_RPSYM} is used with @samp{R} and
 @code{N_RSYM} is used with @samp{P}.
 
@@ -1742,7 +1742,7 @@ Enumerations are defined with the @samp{e} type descriptor.
 @c FIXME: Where does this information properly go?  Perhaps it is
 @c redundant with something we already explain.
 The source line below declares an enumeration type.  It is defined at
-file scope between the bodies of main and s_proc in example2.c.
+file scope between the bodies of main and @code{s_proc} in @file{example2.c}.
 The type definition is located after the @code{N_RBRAC} that marks the end of
 the previous procedure's block scope, and before the @code{N_FUN} that marks
 the beginning of the next procedure's block scope.  Therefore it does not
@@ -1765,7 +1765,7 @@ The symbol descriptor (T) says that the stab describes a structure,
 enumeration, or type tag.  The type descriptor e, following the 22= of
 the type definition narrows it down to an enumeration type.  Following
 the e is a list of the elements of the enumeration.  The format is
-name:value,. The list of elements ends with a ;.
+@var{name:value,}. The list of elements ends with a @samp{;}.
 
 There is no standard way to specify the size of an enumeration type; it
 is determined by the architecture (normally all enumerations types are
@@ -1808,15 +1808,15 @@ of the program in .common.
 @end example
 
 The structure tag is an @code{N_LSYM} stab type because, like the enum, the
-symbol is file scope.  Like the enum, the symbol descriptor is T, for
-enumeration, struct or tag type.  The symbol descriptor s following
-the 16= of the type definition narrows the symbol type to struct.
+symbol is file scope.  Like the enum, the symbol descriptor is @samp{T}, for
+enumeration, struct or tag type.  The symbol descriptor @samp{s} following
+the @samp{16=} of the type definition narrows the symbol type to struct.
 
-Following the struct symbol descriptor is the number of bytes the
-struct occupies, followed by a description of each structure element.
-The structure element descriptions are of the form name:type, bit
-offset from the start of the struct, and number of bits in the
-element.
+Following the struct symbol descriptor is the number of bytes the struct
+occupies, followed by a description of each structure element.  The
+structure element descriptions are of the form
+@var{name:type, bit offset from the start of the struct,
+number of bits in the element}.
 
 
 @example
@@ -1839,7 +1839,7 @@ types.  For these, the type following the name: part of the element
 description is a simple type reference.  The other two structure
 elements are new types.  In this case there is a type definition
 embedded after the name:.  The type definition for the array element
-looks just like a type definition for a standalone array.  The s_next
+looks just like a type definition for a standalone array.  The @code{s_next}
 field is a pointer to the same kind of structure that the field is an
 element of.  So the definition of structure type 16 contains an type
 definition for an element which is a pointer to type 16.
@@ -1896,8 +1896,8 @@ start.
 The stab for the union tag, however is located preceding the code for
 the procedure in which it is defined.  The stab type is @code{N_LSYM}.  This
 would seem to imply that the union type is file scope, like the struct
-type s_tag.  This is not true.  The contents and position of the stab
-for u_type do not convey any infomation about its procedure local
+type @code{s_tag}.  This is not true.  The contents and position of the stab
+for @code{u_type} do not convey any infomation about its procedure local
 scope.
 
 @display
@@ -1915,13 +1915,13 @@ scope.
            128,0,0,0
 @end smallexample
 
-The symbol descriptor, T, following the name: means that the stab
-describes an enumeration, struct or type tag.  The type descriptor u,
-following the 23= of the type definition, narrows it down to a union
-type definition.  Following the u is the number of bytes in the union.
+The symbol descriptor, @samp{T}, following the @samp{name:} means that the stab
+describes an enumeration, struct or type tag.  The type descriptor @samp{u},
+following the @samp{23=} of the type definition, narrows it down to a union
+type definition.  Following the @samp{u} is the number of bytes in the union.
 After that is a list of union element descriptions.  Their format is
-name:type, bit offset into the union, and number of bytes for the
-element;.
+@var{name:type, bit offset into the union, number of bytes for the
+element;}.
 
 The stab for the union variable follows.
 
@@ -2002,10 +2002,11 @@ struct internal_nlist @{
 @};
 @end example
 
-For @code{.stabs} directives, the @code{n_strx} field holds the character offset
+For @code{.stabs} directives, the @code{n_strx} field holds the offset
+in bytes
 from the start of the string table to the string table entry
 containing the @var{string} field.  For other classes of stabs (@code{.stabn} and
-@code{.stabd}) this field is null.
+@code{.stabd}) this field is zero.
 
 Symbol table entries with @code{n_type} fields containing a value greater or
 equal to 0x20 originated as stabs generated by the compiler (with one
@@ -2025,10 +2026,10 @@ assembler and linker symbols, the columns are: @var{value}, @var{type},
 @var{string}.
 
 There are a few important things to notice about symbol tables.  Where
-the value field of a stab contains a frame pointer offset, or a
+the @var{value} field of a stab contains a frame pointer offset, or a
 register number, that value is unchanged by the rest of the build.
 
-Where the value field of a stab contains an assembly language label,
+Where the @var{value} field of a stab contains an assembly language label,
 it is transformed by each build step.  The assembler turns it into a
 relocatable address and the linker turns it into an absolute address.
 This source line defines a static variable at file scope:
@@ -2077,7 +2078,7 @@ generates the stab:
 
 The variable is represented by the following two symbol table entries
 in the object file.  The first one originated as a stab.  The second
-one is an external symbol.  The upper case D signifies that the @code{n_type}
+one is an external symbol.  The upper case @samp{D} signifies that the @code{n_type}
 field of the symbol table contains 7, @code{N_DATA} with local linkage.
 The value field following the file's line number is empty
 for the stab entry.  For the linker symbol it contains the
@@ -3173,7 +3174,7 @@ Gould non-base registers; see @ref{Gould}.
 @node Symbol Descriptors
 @appendix Table of Symbol Descriptors
 
-These tell in the .stabs @var{string} field what kind of symbol the stab
+These tell in the @code{.stabs} @var{string} field what kind of symbol the stab
 represents.  They follow the symbol name and a colon.  @xref{String
 Field}, for more information about their use.
 
@@ -3281,7 +3282,7 @@ Function return variable; see @ref{Parameters}.
 @node Type Descriptors
 @appendix Table of Type Descriptors
 
-These tell in the .stabs @var{string} field what kind of type is being
+These tell in the @code{.stabs} @var{string} field what kind of type is being
 defined.  They follow the type number and an equals sign.
 @xref{Overview}, for more information about their use.
 
@@ -3501,7 +3502,7 @@ value  -> supposedly the line number (stab.def is skeptical)
 @end example
 
 @display
-stabdump.c says:
+@file{stabdump.c} says:
 
 global pascal symbol: name,,0,subtype,line
 << subtype? >>
@@ -3562,7 +3563,7 @@ GNU Modula2 definition module dependency
 
 GNU Modula-2 definition module dependency.  Value is the modification
 time of the definition file.  Other is non-zero if it is imported with
-the GNU M2 keyword %INITIALIZE.  Perhaps N_M2C can be used if there
+the GNU M2 keyword @code{%INITIALIZE}.  Perhaps @code{N_M2C} can be used if there
 are enough empty fields?
 
 @node N_EHDECL
@@ -3685,33 +3686,33 @@ default.  GDB reads either format of stab. (GCC or SunC).  How about
 DBX?
 @end itemize
 
-@node xcoff-differences
-@appendix Differences between GNU stabs in a.out and GNU stabs in xcoff
+@node XCOFF-differences
+@appendix Differences between GNU stabs in a.out and GNU stabs in XCOFF
 
 @c FIXME: Merge *all* these into the main body of the document.
-The AIX/RS6000 native object file format is xcoff with stabs.  This
+The AIX/RS6000 native object file format is XCOFF with stabs.  This
 appendix only covers those differences which are not covered in the main
 body of this document.
 
 @itemize @bullet
 @item
-BSD a.out stab types correspond to AIX xcoff storage classes. In general the
+BSD a.out stab types correspond to AIX XCOFF storage classes. In general the
 mapping is @code{N_STABTYPE} becomes @code{C_STABTYPE}.  Some stab types in a.out
-are not supported in xcoff.
+are not supported in XCOFF.
 
 @c FIXME: Get C_* types for the block, figure out whether it is always
 @c used (I suspect not), explain clearly, and move to node Statics.
 Exception:
 initialised static @code{N_STSYM} and un-initialized static @code{N_LCSYM} both map
 to the @code{C_STSYM} storage class.  But the destinction is preserved
-because in xcoff @code{N_STSYM} and @code{N_LCSYM} must be emited in a named static
+because in XCOFF @code{N_STSYM} and @code{N_LCSYM} must be emited in a named static
 block.  Begin the block with @samp{.bs s[RW] data_section_name} for @code{N_STSYM}
 or @samp{.bs s bss_section_name} for @code{N_LCSYM}.  End the block with @samp{.es}.
 
 @c FIXME: I think they are trying to say something about whether the
 @c assembler defaults the value to the location counter.
 @item
-If the xcoff stab is a @code{N_FUN} (@code{C_FUN}) then follow the string field with
+If the XCOFF stab is a @code{N_FUN} (@code{C_FUN}) then follow the string field with
 @samp{,.} instead of just @samp{,}.
 @end itemize
 
@@ -3720,7 +3721,7 @@ better presented.  This is just a list of what I have noticed so far.
 There are a @emph{lot} of differences in the information in the symbol
 tables of the executable and object files.
 
-Mapping of a.out stab types to xcoff storage classes:
+Mapping of a.out stab types to XCOFF storage classes:
 
 @example
 stab type       storage class
