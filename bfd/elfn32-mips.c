@@ -1348,6 +1348,16 @@ mips_elf_literal_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
   bfd_reloc_status_type ret;
   bfd_vma gp;
 
+  /* R_MIPS_LITERAL relocations are defined for local symbols only.  */
+  if (output_bfd != NULL
+      && (symbol->flags & BSF_SECTION_SYM) == 0
+      && (symbol->flags & BSF_LOCAL) != 0)
+    {
+      *error_message = (char *)
+	_("literal relocation occurs for an external symbol");
+      return bfd_reloc_outofrange;
+    }
+
   /* FIXME: The entries in the .lit8 and .lit4 sections should be merged.  */
   if (output_bfd != NULL)
     relocatable = TRUE;

@@ -1,3 +1,10 @@
+2005-02-11  Maciej W. Rozycki  <macro@mips.com>
+
+	* elf32-mips.c (_bfd_mips_elf32_gprel16_reloc): Reject
+	R_MIPS_LITERAL relocations for external symbols.
+	* elf64-mips.c (mips_elf64_literal_reloc): Likewise.
+	* elfn32-mips.c (mips_elf_literal_reloc): Likewise.
+
 2005-02-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* bfd-in2.h: Rebuilt.

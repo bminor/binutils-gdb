@@ -770,6 +770,17 @@ _bfd_mips_elf32_gprel16_reloc (bfd *abfd, arelent *reloc_entry,
   bfd_reloc_status_type ret;
   bfd_vma gp;
 
+  /* R_MIPS_LITERAL relocations are defined for local symbols only.  */
+  if (reloc_entry->howto->type == R_MIPS_LITERAL
+      && output_bfd != NULL
+      && (symbol->flags & BSF_SECTION_SYM) == 0
+      && (symbol->flags & BSF_LOCAL) != 0)
+    {
+      *error_message = (char *)
+	_("literal relocation occurs for an external symbol");
+      return bfd_reloc_outofrange;
+    }
+
   if (output_bfd != NULL)
     relocatable = TRUE;
   else
