@@ -1065,30 +1065,6 @@ that control @value{GDBN}, and level 2 has been deprecated.
 The annotation mechanism has largely been superseeded by @sc{gdb/mi}
 (@pxref{GDB/MI}).
 
-@item -async
-@cindex @code{--async}
-Use the asynchronous event loop for the command-line interface.
-@value{GDBN} processes all events, such as user keyboard input, via a
-special event loop.  This allows @value{GDBN} to accept and process user
-commands in parallel with the debugged process being
-run@footnote{@value{GDBN} built with @sc{djgpp} tools for
-MS-DOS/MS-Windows supports this mode of operation, but the event loop is
-suspended when the debuggee runs.}, so you don't need to wait for
-control to return to @value{GDBN} before you type the next command.
-(@emph{Note:} as of version 5.1, the target side of the asynchronous
-operation is not yet in place, so @samp{-async} does not work fully
-yet.)
-@c FIXME: when the target side of the event loop is done, the above NOTE
-@c should be removed.
-
-When the standard input is connected to a terminal device, @value{GDBN}
-uses the asynchronous event loop by default, unless disabled by the
-@samp{-noasync} option.
-
-@item -noasync
-@cindex @code{--noasync}
-Disable the asynchronous event loop for the command-line interface.
-
 @item --args
 @cindex @code{--args}
 Change interpretation of command line so that arguments following the
