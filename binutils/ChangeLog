@@ -1,3 +1,19 @@
+2001-12-04  Jakub Jelinek  <jakub@redhat.com>
+
+	* strings.c: Include config.h before bfd.h.
+	(file_off): New type.
+	(file_open): Define.
+	(print_strings): Use file_off instead of file_ptr.  Print addresses
+	which don't fit into long correctly.
+	(get_char): Use file_off instead of file_ptr.  Use getc_unlocked if
+	available.
+	(strings_file): Use file_off instead of file_ptr.  Use file_open.
+	* configure.in: Check for getc_unlocked.
+	Check for fopen64 and whether _LARGEFILE64_SOURCE needs to
+	be defined for it.
+	* configure: Rebuilt.
+	* config.h.in: Rebuilt.
+
 2001-11-29  H.J. Lu <hjl@gnu.org>
 
 	* bucomm.c (make_tempname): Revert the changes made on

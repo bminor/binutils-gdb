@@ -56,6 +56,9 @@
    Written by Richard Stallman <rms@gnu.ai.mit.edu>
    and David MacKenzie <djm@gnu.ai.mit.edu>.  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 #include "bfd.h"
 #include <stdio.h>
 #include <getopt.h>
@@ -89,6 +92,14 @@ extern int errno;
 
 /* The BFD section flags that identify an initialized data section.  */
 #define DATA_FLAGS (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS)
+
+#ifdef HAVE_FOPEN64
+typedef off64_t file_off;
+#define file_open(s,m) fopen64(s,m)
+#else
+typedef off_t file_off;
+#define file_open(s,m) fopen(s,m)
+#endif
 
 /* Radix for printing addresses (must be 8, 10 or 16).  */
 static int address_radix;
@@ -133,10 +144,10 @@ static boolean strings_object_file PARAMS ((const char *));
 static boolean strings_file PARAMS ((char *file));
 static int integer_arg PARAMS ((char *s));
 static void print_strings PARAMS ((const char *filename, FILE *stream,
-				  file_ptr address, int stop_point,
+				  file_off address, int stop_point,
 				  int magiccount, char *magic));
 static void usage PARAMS ((FILE *stream, int status));
-static long get_char PARAMS ((FILE *stream, file_ptr *address,
+static long get_char PARAMS ((FILE *stream, file_off *address,
 			      int *magiccount, char **magic));
 
 int
@@ -371,10 +382,7 @@ strings_file (file)
     {
       FILE *stream;
 
-      stream = fopen (file, "rb");
-      /* Not all systems permit "rb", so try "r" if it failed.  */
-      if (stream == NULL)
-	stream = fopen (file, "r");
+      stream = file_open (file, FOPEN_RB);
       if (stream == NULL)
 	{
 	  fprintf (stderr, "%s: ", program_name);
@@ -382,7 +390,7 @@ strings_file (file)
 	  return false;
 	}
 
-      print_strings (file, stream, (file_ptr) 0, 0, 0, (char *) 0);
+      print_strings (file, stream, (file_off) 0, 0, 0, (char *) 0);
 
       if (fclose (stream) == EOF)
 	{
@@ -408,7 +416,7 @@ strings_file (file)
 static long
 get_char (stream, address, magiccount, magic)
      FILE *stream;
-     file_ptr *address;
+     file_off *address;
      int *magiccount;
      char **magic;
 {
@@ -427,7 +435,11 @@ get_char (stream, address, magiccount, magic)
 	{
 	  if (stream == NULL)
 	    return EOF;
+#ifdef HAVE_GETC_UNLOCKED
+	  c = getc_unlocked (stream);
+#else
 	  c = getc (stream);
+#endif
 	  if (c == EOF)
 	    return EOF;
 	}
@@ -479,7 +491,7 @@ static void
 print_strings (filename, stream, address, stop_point, magiccount, magic)
      const char *filename;
      FILE *stream;
-     file_ptr address;
+     file_off address;
      int stop_point;
      int magiccount;
      char *magic;
@@ -488,7 +500,7 @@ print_strings (filename, stream, address, stop_point, magiccount, magic)
 
   while (1)
     {
-      file_ptr start;
+      file_off start;
       int i;
       long c;
 
@@ -517,15 +529,48 @@ print_strings (filename, stream, address, stop_point, magiccount, magic)
 	switch (address_radix)
 	  {
 	  case 8:
-	    printf ("%7lo ", (unsigned long) start);
+#if __STDC_VERSION__ >= 199901L || (defined(__GNUC__) && __GNUC__ >= 2)
+	    if (sizeof (start) > sizeof (long))
+	      printf ("%7Lo ", (unsigned long long) start);
+	    else
+#else
+# if !BFD_HOST_64BIT_LONG
+	    if (start != (unsigned long) start)
+	      printf ("++%7lo ", (unsigned long) start);
+	    else
+# endif
+#endif
+	      printf ("%7lo ", (unsigned long) start);
 	    break;
 
 	  case 10:
-	    printf ("%7ld ", (long) start);
+#if __STDC_VERSION__ >= 199901L || (defined(__GNUC__) && __GNUC__ >= 2)
+	    if (sizeof (start) > sizeof (long))
+	      printf ("%7Ld ", (unsigned long long) start);
+	    else
+#else
+# if !BFD_HOST_64BIT_LONG
+	    if (start != (unsigned long) start)
+	      printf ("++%7ld ", (unsigned long) start);
+	    else
+# endif
+#endif
+	      printf ("%7ld ", (long) start);
 	    break;
 
 	  case 16:
-	    printf ("%7lx ", (unsigned long) start);
+#if __STDC_VERSION__ >= 199901L || (defined(__GNUC__) && __GNUC__ >= 2)
+	    if (sizeof (start) > sizeof (long))
+	      printf ("%7Lx ", (unsigned long long) start);
+	    else
+#else
+# if !BFD_HOST_64BIT_LONG
+	    if (start != (unsigned long) start)
+	      printf ("%lx%8.8lx ", start >> 32, start & 0xffffffff);
+	    else
+# endif
+#endif
+	      printf ("%7lx ", (unsigned long) start);
 	    break;
 	  }
 

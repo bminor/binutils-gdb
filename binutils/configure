@@ -4899,7 +4899,7 @@ EOF
 
 fi
 
-for ac_func in sbrk utimes setmode
+for ac_func in sbrk utimes setmode getc_unlocked
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
 echo "configure:4906: checking for $ac_func" >&5
@@ -4954,6 +4954,67 @@ else
 fi
 done
 
+
+# Check whether fopen64 is available and whether _LARGEFILE64_SOURCE
+# needs to be defined for it
+echo $ac_n "checking for fopen64""... $ac_c" 1>&6
+echo "configure:4962: checking for fopen64" >&5
+if eval "test \"`echo '$''{'bu_cv_have_fopen64'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  cat > conftest.$ac_ext <<EOF
+#line 4967 "configure"
+#include "confdefs.h"
+#include <stdio.h>
+int main() {
+FILE *f = fopen64 ("/tmp/foo","r");
+; return 0; }
+EOF
+if { (eval echo configure:4974: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+  rm -rf conftest*
+  bu_cv_have_fopen64=yes
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  saved_CPPFLAGS=$CPPFLAGS
+ CPPFLAGS="$CPPFLAGS -D_LARGEFILE64_SOURCE"
+ cat > conftest.$ac_ext <<EOF
+#line 4984 "configure"
+#include "confdefs.h"
+#include <stdio.h>
+int main() {
+FILE *f = fopen64 ("/tmp/foo","r");
+; return 0; }
+EOF
+if { (eval echo configure:4991: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+  rm -rf conftest*
+  bu_cv_have_fopen64="need -D_LARGEFILE64_SOURCE"
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  bu_cv_have_fopen64=no
+fi
+rm -f conftest*
+fi
+rm -f conftest*
+fi
+ CPPFLAGS=$saved_CPPFLAGS
+
+echo "$ac_t""$bu_cv_have_fopen64" 1>&6
+if test $bu_cv_have_fopen64 != no; then
+  cat >> confdefs.h <<\EOF
+#define HAVE_FOPEN64 1
+EOF
+
+  if test $bu_cv_have_fopen64 = "need -D_LARGEFILE64_SOURCE"; then
+    cat >> confdefs.h <<\EOF
+#define _LARGEFILE64_SOURCE 1
+EOF
+
+  fi
+fi
 
 # Some systems have frexp only in -lm, not in -lc.
 
