@@ -102,6 +102,14 @@ char *alpha_regs[32] =
 #define PAL_FORMAT(op, extra, name) \
 {(op<<26)+(extra),name, PAL_FORMAT_CODE}  
 
+#define FLOAT_MEMORY_FORMAT_CODE 8
+#define FLOAT_MEMORY_FORMAT(op, name) \
+ { op << 26, name, FLOAT_MEMORY_FORMAT_CODE }
+
+#define FLOAT_BRANCH_FORMAT_CODE  9
+#define FLOAT_BRANCH_FORMAT(op, name) \
+ { (op<<26), name , FLOAT_BRANCH_FORMAT_CODE }
+
 
 
 alpha_insn alpha_insn_set[] =
@@ -109,23 +117,23 @@ alpha_insn alpha_insn_set[] =
   
 /* Memory format instruction opcodes */
 MEMORY_FORMAT(0x08,"lda"),
-MEMORY_FORMAT(0x21,"ldg"),
+FLOAT_MEMORY_FORMAT(0x21,"ldg"),
 MEMORY_FORMAT(0x29,"ldq"),
-MEMORY_FORMAT(0x22,"lds"),
-MEMORY_FORMAT(0x25,"stg"),
+FLOAT_MEMORY_FORMAT(0x22,"lds"),
+FLOAT_MEMORY_FORMAT(0x25,"stg"),
 MEMORY_FORMAT(0x2d,"stq"),
-MEMORY_FORMAT(0x26,"sts"),
+FLOAT_MEMORY_FORMAT(0x26,"sts"),
 MEMORY_FORMAT(0x09,"ldah"),
 MEMORY_FORMAT(0x28,"ldl"),
 MEMORY_FORMAT(0x2b,"ldq_l"),
-MEMORY_FORMAT(0x23,"ldt"),
+FLOAT_MEMORY_FORMAT(0x23,"ldt"),
 MEMORY_FORMAT(0x2c,"stl"),
 MEMORY_FORMAT(0x2f,"stq_c"),
-MEMORY_FORMAT(0x27,"stt"),
-MEMORY_FORMAT(0x20,"ldf"),
+FLOAT_MEMORY_FORMAT(0x27,"stt"),
+FLOAT_MEMORY_FORMAT(0x20,"ldf"),
 MEMORY_FORMAT(0x2a,"ldl_l"),
 MEMORY_FORMAT(0x0b,"ldq_u"),
-MEMORY_FORMAT(0x24,"stf"),
+FLOAT_MEMORY_FORMAT(0x24,"stf"),
 MEMORY_FORMAT(0x2e,"stl_c"),
 MEMORY_FORMAT(0x0f,"stq_u"),
 
@@ -145,18 +153,18 @@ MEMORY_BRANCH_FORMAT(0x1a, 0x3, "jsr_coroutine"),
 
 
 BRANCH_FORMAT(0x30,"br"),
-BRANCH_FORMAT(0x33,"fble"),
-BRANCH_FORMAT(0x36,"fbge"),
+FLOAT_BRANCH_FORMAT(0x33,"fble"),
+FLOAT_BRANCH_FORMAT(0x36,"fbge"),
 BRANCH_FORMAT(0x39,"beq"),
 BRANCH_FORMAT(0x3c,"blbs"),
 BRANCH_FORMAT(0x3f,"bgt"),
-BRANCH_FORMAT(0x31,"fbeq"),
+FLOAT_BRANCH_FORMAT(0x31,"fbeq"),
 BRANCH_FORMAT(0x34,"bsr"),
-BRANCH_FORMAT(0x37,"fbgt"),
+FLOAT_BRANCH_FORMAT(0x37,"fbgt"),
 BRANCH_FORMAT(0x3a,"blt"),
 BRANCH_FORMAT(0x3d,"bne"),
-BRANCH_FORMAT(0x32,"fblt"),
-BRANCH_FORMAT(0x35,"fbne"),
+FLOAT_BRANCH_FORMAT(0x32,"fblt"),
+FLOAT_BRANCH_FORMAT(0x35,"fbne"),
 BRANCH_FORMAT(0x38,"blbc"),
 BRANCH_FORMAT(0x3b,"ble"),
 BRANCH_FORMAT(0x3e,"bge"),

@@ -1,3 +1,13 @@
+Sun Nov  7 23:52:34 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* alpha-opc.h, alpha-dis.c (print_insn_alpha):  Add
+	FLOAT_MEMORY_FORMAT_CODE, FLOAT_BRANCH_FORMAT_CODE, correct 
+	FLOAT_FORMAT_CODE to put out floating point register names.
+
+Mon Nov  1 18:17:51 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* mips-opc.c: Use macros for jal variants, to support SVR4 PIC.
+
 Thu Oct 28 17:42:23 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* a29k-dis.c (print_insn): Use 0x%08x, not 0x%8x.
