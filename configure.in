@@ -211,12 +211,6 @@ case "${target}" in
   i[34]86-*-sco*)
     configdirs=`echo ${configdirs} | sed -e 's/gprof//'`
     ;;
-  *-*-solaris2*)
-    configdirs=`echo ${configdirs} | sed -e 's/ld//;s/gas //'`
-    ;;
-  *-*-sysv4*)
-    configdirs=`echo ${configdirs} | sed -e 's/ld//;s/binutils//;s/gas //'`
-    ;;
   *-*-vms)
     configdirs=`echo ${configdirs} | sed -e 's/bfd//;s/ld//;s/binutils//'`
     ;;
