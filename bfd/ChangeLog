@@ -1,3 +1,7 @@
+2001-08-01  Adam Nemet  <anemet@lnxw.com>
+
+	* elf.c (elf_sort_sections): Return zero only as the last step.
+
 2001-08-01  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* config.bfd (arm-vxworks): Change name of define from VXWORKS to

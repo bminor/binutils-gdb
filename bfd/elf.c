@@ -2677,18 +2677,22 @@ elf_sort_sections (arg1, arg2)
   if (TOEND (sec1))
     {
       if (TOEND (sec2))
-	return sec1->target_index - sec2->target_index;
+	{
+	  /* If the indicies are the same, do not return 0
+	     here, but continue to try the next comparison.  */
+	  if (sec1->target_index - sec2->target_index != 0)
+	    return sec1->target_index - sec2->target_index;
+	}
       else
 	return 1;
     }
-
-  if (TOEND (sec2))
+  else if (TOEND (sec2))
     return -1;
 
 #undef TOEND
 
-  /* Sort by size, to put zero sized sections before others at the
-     same address.  */
+  /* Sort by size, to put zero sized sections
+     before others at the same address.  */
 
   if (sec1->_raw_size < sec2->_raw_size)
     return -1;
