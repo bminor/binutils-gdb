@@ -1,3 +1,7 @@
+2004-10-05  Andrew Cagney  <cagney@gnu.org>
+
+	* version.in: Bump to version 6.2.50_YYYY-MM-DD-cvs.
+
 2004-10-05  Daniel Jacobowitz  <dan@debian.org>
 
 	* dwarf2read.c (REF_HASH_SIZE): Move earlier.
