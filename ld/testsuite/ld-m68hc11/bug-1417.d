@@ -8,8 +8,8 @@
 
 Disassembly of section .text:
 0+8000 <_start> tst	0+ <__bss_size>
-0+8003 <_start\+0x3> bne	0+8008 <L1>
-0+8005 <_start\+0x5> jsr	0+800c <foo>
-0+8008 <L1> bset	\*0+ <__bss_size> \#\$04
-0+800b <L2> rts
-0+800c <foo> rts
+0+8003 <_start\+0x3> bne	0+8007 <L1>
+0+8005 <_start\+0x5> bsr	0+800b <foo>
+0+8007 <L1> bset	\*0+ <__bss_size> \#\$04
+0+800a <L2> rts
+0+800b <foo> rts

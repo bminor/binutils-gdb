@@ -1,3 +1,7 @@
+2003-04-04  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* ld-m68hc11/bug-1417.d: Update to take into account jsr->bsr relax.
+
 2003-04-02  Bob Wilson  <bob.wilson@acm.org>
 
 	* ld-xtensa/coalesce.exp: Skip if target is not xtensa-*-*.
