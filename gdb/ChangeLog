@@ -1,3 +1,9 @@
+Fri Jul 14 16:16:56 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* Makefile.in, configure.in: Use one variable, frags, to hold
+	pathnames of makefile fragments.
+	* configure: regenerated.
+
 Fri Jul 14 09:49:47 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* procfs.c (procfs_ops): Fix typo in last change.
