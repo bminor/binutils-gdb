@@ -497,19 +497,25 @@ static struct type *
 mips_register_virtual_type (int reg)
 {
   if (FP0_REGNUM <= reg && reg < FP0_REGNUM + 32)
-    return builtin_type_double;
+    {
+      /* Floating point registers...  */
+      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+	return builtin_type_ieee_double_big;
+      else
+	return builtin_type_ieee_double_little;
+    }
   else if (reg == PS_REGNUM /* CR */)
     return builtin_type_uint32;
   else if (FCRCS_REGNUM <= reg && reg <= LAST_EMBED_REGNUM)
     return builtin_type_uint32;
   else
     {
-      /* Everything else... return ``long long'' when registers
-         are 64-bits wide, ``int'' otherwise.  */
-      if (MIPS_REGSIZE == TYPE_LENGTH (builtin_type_long_long))
-	return builtin_type_long_long;
+      /* Everything else...
+         Return type appropriate for width of register.  */
+      if (MIPS_REGSIZE == TYPE_LENGTH (builtin_type_uint64))
+	return builtin_type_uint64;
       else
-	return builtin_type_int;
+	return builtin_type_uint32;
     }
 }
 
