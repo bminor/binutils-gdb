@@ -1,5 +1,17 @@
 Sat Feb  5 08:03:41 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* remote-mips.c (mips_insert_breakpoint, mips_remove_breakpoint):
+	New functions.
+	(mips_store_word): Change calling convention to return errors, and
+	to provide old contents if the caller wants it.
+	(mips_xfer_memory): Deal with errors from mips_store_word.
+	* config/mips/tm-idt.h, config/mips/tm-idtl.h: Remove BREAKPOINT
+	define now that remote-mips.c doesn't use BREAKPOINT.
+
+	* remote-mips.c (mips_create_inferior): Call warning if arguments
+	specified, and then execute "set args" command.  Call error, not
+	mips_error, if executable file not specified.
+
 	* remote-e7000.c: Replace "snoop" command (e7000_noecho) with
 	remote_debug.
 

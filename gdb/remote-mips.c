@@ -93,8 +93,8 @@ mips_store_registers PARAMS ((int regno));
 static int
 mips_fetch_word PARAMS ((CORE_ADDR addr));
 
-static void
-mips_store_word PARAMS ((CORE_ADDR addr, int value));
+static int
+mips_store_word PARAMS ((CORE_ADDR addr, int value, char *old_contents));
 
 static int
 mips_xfer_memory PARAMS ((CORE_ADDR memaddr, char *myaddr, int len,
@@ -1248,25 +1248,34 @@ mips_fetch_word (addr)
   return val;
 }
 
-/* Store a word to the target board.  */
+/* Store a word to the target board.  Returns errno code or zero for
+   success.  If OLD_CONTENTS is non-NULL, put the old contents of that
+   memory location there.  */
 
-static void
-mips_store_word (addr, val)
+static int
+mips_store_word (addr, val, old_contents)
      CORE_ADDR addr;
      int val;
+     char *old_contents;
 {
   int err;
+  unsigned int oldcontents;
 
-  mips_request ('D', (unsigned int) addr, (unsigned int) val, &err,
-		mips_receive_wait);
+  oldcontents = mips_request ('D', (unsigned int) addr, (unsigned int) val,
+			      &err,
+			      mips_receive_wait);
   if (err)
     {
       /* Data space failed; try instruction space.  */
-      mips_request ('I', (unsigned int) addr, (unsigned int) val, &err,
-		    mips_receive_wait);
+      oldcontents = mips_request ('I', (unsigned int) addr,
+				  (unsigned int) val, &err,
+				  mips_receive_wait);
       if (err)
-	mips_error ("Can't write address 0x%x: %s", addr, safe_strerror (errno));
+	return errno;
     }
+  if (old_contents != NULL)
+    store_unsigned_integer (old_contents, 4, oldcontents);
+  return 0;
 }
 
 /* Read or write LEN bytes from inferior memory at MEMADDR,
@@ -1291,6 +1300,8 @@ mips_xfer_memory (memaddr, myaddr, len, write, ignore)
   register int count = (((memaddr + len) - addr) + 3) / 4;
   /* Allocate buffer of that many longwords.  */
   register char *buffer = alloca (count * 4);
+
+  int status;
 
   if (write)
     {
@@ -1317,7 +1328,14 @@ mips_xfer_memory (memaddr, myaddr, len, write, ignore)
 
       for (i = 0; i < count; i++, addr += 4)
 	{
-	  mips_store_word (addr, extract_unsigned_integer (&buffer[i*4], 4));
+	  status = mips_store_word (addr,
+				    extract_unsigned_integer (&buffer[i*4], 4),
+				    NULL);
+	  if (status)
+	    {
+	      errno = status;
+	      return 0;
+	    }
 	  /* FIXME: Do we want a QUIT here?  */
 	}
     }
@@ -1378,10 +1396,15 @@ mips_create_inferior (execfile, args, env)
   CORE_ADDR entry_pt;
 
   if (args && *args)
-    mips_error ("Can't pass arguments to remote MIPS board.");
+    {
+      warning ("\
+Can't pass arguments to remote MIPS board; arguments ignored.");
+      /* And don't try to use them on the next "run" command.  */
+      execute_command ("set args", 0);
+    }
 
   if (execfile == 0 || exec_bfd == 0)
-    mips_error ("No exec file specified");
+    error ("No executable file specified");
 
   entry_pt = (CORE_ADDR) bfd_get_start_address (exec_bfd);
 
@@ -1399,6 +1422,47 @@ mips_mourn_inferior ()
 {
   unpush_target (&mips_ops);
   generic_mourn_inferior ();
+}
+
+/* We can write a breakpoint and read the shadow contents in one
+   operation.  */
+
+/* The IDT board uses an unusual breakpoint value, and sometimes gets
+   confused when it sees the usual MIPS breakpoint instruction.  */
+
+#if TARGET_BYTE_ORDER == BIG_ENDIAN
+static unsigned char break_insn[] = {0, 0, 0x0a, 0x0d};
+#else
+static unsigned char break_insn[] = {0x0d, 0x0a, 0, 0};
+#endif
+
+/* Insert a breakpoint on targets that don't have any better breakpoint
+   support.  We read the contents of the target location and stash it,
+   then overwrite it with a breakpoint instruction.  ADDR is the target
+   location in the target machine.  CONTENTS_CACHE is a pointer to 
+   memory allocated for saving the target contents.  It is guaranteed
+   by the caller to be long enough to save sizeof BREAKPOINT bytes (this
+   is accomplished via BREAKPOINT_MAX).  */
+
+static int
+mips_insert_breakpoint (addr, contents_cache)
+     CORE_ADDR addr;
+     char *contents_cache;
+{
+  int status;
+
+  return
+    mips_store_word (addr,
+		     extract_unsigned_integer (break_insn, sizeof break_insn),
+		     contents_cache);
+}
+
+static int
+mips_remove_breakpoint (addr, contents_cache)
+     CORE_ADDR addr;
+     char *contents_cache;
+{
+  return target_write_memory (addr, contents_cache, sizeof break_insn);
 }
 
 /* The target vector.  */
@@ -1422,8 +1486,8 @@ HOST:PORT to access a board over a network",  /* to_doc */
   mips_prepare_to_store,	/* to_prepare_to_store */
   mips_xfer_memory,		/* to_xfer_memory */
   mips_files_info,		/* to_files_info */
-  NULL,				/* to_insert_breakpoint */
-  NULL,				/* to_remove_breakpoint */
+  mips_insert_breakpoint,	/* to_insert_breakpoint */
+  mips_remove_breakpoint,	/* to_remove_breakpoint */
   NULL,				/* to_terminal_init */
   NULL,				/* to_terminal_inferior */
   NULL,				/* to_terminal_ours_for_output */
