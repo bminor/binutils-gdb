@@ -1,3 +1,16 @@
+Wed Oct 16 19:03:54 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* testsuite/gdb.base/break.exp:  Make backtrace from factorial
+	errors unique.
+	* testsuite/gdb.base/nodebug.exp:  Whack out all -g options
+	explicitly.
+
+start-sanitize-v850
+	* v850-tdep.c (v850_init_extra_frame_info v850_frame_chain):  Fix
+	sign bugs with scanning prologues.  Get a little smarter about
+	calculating the length of uninteresting instructions.
+
+end-sanitize-v850
 Wed Oct 16 17:46:03 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* breakpoint.c (must_shift_inst_regs): New global.

@@ -86,36 +86,33 @@ v850_init_extra_frame_info (fi)
     {
       int insn;
 
-      insn = read_memory_integer (current_pc, 2);
+      insn = read_memory_unsigned_integer (current_pc, 2);
 
       if ((insn & 0xffe0) == ((SP_REGNUM << 11) | 0x0240)) /* add <imm>,sp */
-	frameoffset = (insn & 0x1f) | ~0x1f;
+	frameoffset = ((insn & 0x1f) ^ 0x10) - 0x10;
       else if (insn == ((SP_REGNUM << 11) | 0x0600 | SP_REGNUM)) /* addi <imm>,sp,sp */
-	{
-	  current_pc += 2;
-
-	  frameoffset = read_memory_integer (current_pc, 2);
-	}
+	  frameoffset = read_memory_integer (current_pc + 2, 2);
       else if (insn == ((FP_REGNUM << 11) | 0x0000 | 12)) /* mov r12,r2 */
 	framereg = FP_REGNUM;	/* Setting up fp */
       else if ((insn & 0x07ff) == (0x0760 | SP_REGNUM))	/* st.w <reg>,<offset>[sp] */
 	{
 	  reg = (insn >> 11) & 0x1f;	/* Extract <reg> */
-	  current_pc += 2;
 
-	  insn = read_memory_integer (current_pc, 2) & ~1;
+	  insn = read_memory_integer (current_pc + 2, 2) & ~1;
 
 	  fi->fsr.regs[reg] = insn + frameoffset;
 	}
       else if ((insn & 0x07ff) == (0x0760 | FP_REGNUM))	/* st.w <reg>,<offset>[fp] */
 	{
 	  reg = (insn >> 11) & 0x1f;	/* Extract <reg> */
-	  current_pc += 2;
 
-	  insn = read_memory_integer (current_pc, 2) & ~1;
+	  insn = read_memory_integer (current_pc + 2, 2) & ~1;
 
 	  fi->fsr.regs[reg] = insn;
 	}
+
+      if ((insn & 0x0780) >= 0x0600) /* Four byte instruction? */
+	current_pc += 2;
     }
 
   if (PC_IN_CALL_DUMMY (fi->pc, NULL, NULL))
@@ -208,21 +205,16 @@ v850_frame_chain (fi)
     {
       int insn;
 
-      insn = read_memory_integer (current_pc, 2);
+      insn = read_memory_unsigned_integer (current_pc, 2);
 
       if ((insn & 0xffe0) == ((SP_REGNUM << 11) | 0x0240)) /* add <imm>,sp */
-	frameoffset = (insn & 0x1f) | ~0x1f;
+	frameoffset = ((insn & 0x1f) ^ 0x10) - 0x10;
       else if (insn == ((SP_REGNUM << 11) | 0x0600 | SP_REGNUM)) /* addi <imm>,sp,sp */
-	{
-	  current_pc += 2;
-
-	  frameoffset = read_memory_integer (current_pc, 2);
-	}
+	frameoffset = read_memory_integer (current_pc + 2, 2);
       else if (insn == ((FP_REGNUM << 11) | 0x0000 | 12)) /* mov r12,r2 */
 	return v850_find_callers_reg (fi, FP_REGNUM); /* It's using a frame pointer reg */
-      else if ((insn & 0x07ff) == (0x0760 | SP_REGNUM))	/* st.w <reg>,<offset>[sp] */
-	current_pc += 2;
-      else if ((insn & 0x07ff) == (0x0760 | FP_REGNUM))	/* st.w <reg>,<offset>[fp] */
+
+      if ((insn & 0x0780) >= 0x0600) /* Four byte instruction? */
 	current_pc += 2;
     }
 
