@@ -46,7 +46,7 @@ static int
 print_insn_arg PARAMS ((const char *, unsigned char *, unsigned char *,
 			bfd_vma, disassemble_info *));
 
-CONST char * CONST fpcr_names[] = {
+const char * const fpcr_names[] = {
     "", "%fpiar", "%fpsr", "%fpiar/%fpsr", "%fpcr",
     "%fpiar/%fpcr", "%fpsr/%fpcr", "%fpiar/%fpsr/%fpcr"
 };
@@ -478,7 +478,7 @@ print_insn_arg (d, buffer, p0, addr, info)
   register int place = d[1];
   register unsigned char *p = p0;
   int regno;
-  register CONST char *regname;
+  register const char *regname;
   register unsigned char *p1;
   double flval;
   int flt_p;
