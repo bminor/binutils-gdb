@@ -861,9 +861,9 @@ do_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 
   if (!write && trust_readonly)
     {
-      /* User-settable option, "trust-readonly".  If true, then
-	 memory from any SEC_READONLY bfd section may be read
-	 directly from the bfd file. */
+      /* User-settable option, "trust-readonly-sections".  If true,
+         then memory from any SEC_READONLY bfd section may be read
+         directly from the bfd file. */
 
       struct section_table *secp;
 

@@ -1,3 +1,8 @@
+2002-04-26  Ben Elliston  <bje@redhat.com>
+
+	* target.c (do_xfer_memory): Correct reference to the new option
+	"trust-readonly-sections".
+
 2002-04-26  Elena Zannoni  <ezannoni@redhat.com>
 
 	* gdbtypes.h (TYPE_FLAG_VECTOR, TYPE_VECTOR): Define.
