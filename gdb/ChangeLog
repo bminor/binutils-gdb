@@ -1,3 +1,8 @@
+Thu May 23 15:13:56 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* symfile.c (generic_load): Print the starting address
+	of the file just loaded.
+
 Thu May 23 12:09:52 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-make.sed: Edit @THREAD_DB_OBS@ out of makefile.
