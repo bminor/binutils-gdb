@@ -1,3 +1,7 @@
+2004-04-22  Nick Clifton  <nickc@redhat.com>
+
+	* bfd.c (bfd_archive_filename): Return NULL on NULL input.
+
 2004-04-22  Peter Barada <peter@the-baradas.com>
 
 	* archures.c: Add bfd_mach_mcfv4e to bfd_architecture.

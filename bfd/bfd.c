@@ -509,7 +509,7 @@ const char *
 bfd_archive_filename (bfd *abfd)
 {
   if (abfd == NULL)
-    return _("<unknown>");
+    return NULL;
   
   if (abfd->my_archive)
     {
