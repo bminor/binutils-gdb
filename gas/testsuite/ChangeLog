@@ -1,3 +1,21 @@
+Wed Feb 15 15:43:26 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gas/mips/uld.d: New file.
+	* gas/mips/uld.s: New file.
+	* gas/mips/usd.d: New file.
+	* gas/mips/usd.s: New file.
+	* gas/mips/mips.exp: Run new tests.
+
+Thu Feb  2 00:34:55 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+        * gas/hppa/reloc/picreloc.c: New test.
+	* gas/hppa/reloc/reloc.exp (do_pic_relocation_test): Run it.
+
+Fri Jan 27 14:02:02 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* gas/h8300/ffxx1.d, gas/h8300/ffxx1.s, gas/h8300/cmpsi2.s,
+	gas/h8300/h8300.exp: New tests.
+
 Mon Jan 23 21:44:26 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* gas/hppa/basic/basic.exp (do_system): Update.

@@ -80,10 +80,14 @@ trunc.s
 ulh-empic.d
 ulh-pic.s
 ulh-svr4pic.d
+uld.d
+uld.s
 ulh.d
 ulh.s
 ulw.d
 ulw.s
+usd.d
+usd.s
 ush.d
 ush.s
 usw.d
