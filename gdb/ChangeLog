@@ -1,5 +1,9 @@
 Fri Jun 25 11:22:28 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* remote.c: Move comments regarding packets to top of file with the
+	rest of the protocol comments.
+	Fix incorrect description of 'T' response.
+
 	* README (Reporting Bugs): Refer people to the GDB manual.
 
 	* c-valprint.c (c_val_print): Handle TYPE_CODE_BOOLEAN.

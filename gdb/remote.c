@@ -18,6 +18,25 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Remote communication protocol.
+
+   A debug packet whose contents are <data>
+   is encapsulated for transmission in the form:
+
+	$ <data> # CSUM1 CSUM2
+
+	<data> must be ASCII alphanumeric and cannot include characters
+	'$' or '#'
+
+	CSUM1 and CSUM2 are ascii hex representation of an 8-bit 
+	checksum of <data>, the most significant nibble is sent first.
+	the hex digits 0-9,a-f are used.
+
+   Receiver responds with:
+
+	+	- if CSUM is correct and ready for next packet
+	-	- if CSUM is incorrect
+
+   <data> is as follows:
    All values are encoded in ascii hex digits.
 
 	Request		Packet
@@ -63,10 +82,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	The reply comes when the machine stops.
 	It is		SAA		AA is the "signal number"
 
-	or...		TAAPPPPPPPPFFFFFFFF
-					where AA is the signal number,
-					PPPPPPPP is the PC (PC_REGNUM), and
-					FFFFFFFF is the frame ptr (FP_REGNUM).
+	or...		TAAn...:r...;n:r...;n...:r...;
+					AA = signal number
+					n... = register number
+					r... = register contents
 
 	kill req	k
 */
@@ -76,6 +95,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <fcntl.h>
 #include "frame.h"
 #include "inferior.h"
+#include "bfd.h"
 #include "symfile.h"
 #include "target.h"
 #include "wait.h"
@@ -255,7 +275,7 @@ device is attached to the remote system (e.g. /dev/ttya).");
   /* Start the remote connection; if error (0), discard this target. */
   immediate_quit++;		/* Allow user to interrupt it */
   if (!catch_errors (remote_start_remote, (char *)0, 
-	"Couldn't establish connection to remote target\n"))
+	"Couldn't establish connection to remote target\n", RETURN_MASK_ALL))
     pop_target();
 }
 
@@ -368,7 +388,7 @@ remote_interrupt_twice (signo)
 Give up (and stop debugging it)? "))
     {
       target_mourn_inferior ();
-      return_to_top_level ();
+      return_to_top_level (RETURN_QUIT);
     }
   else
     {
@@ -654,26 +674,8 @@ struct target_ops *ignore;
   puts_filtered ("Debugging a target over a serial line.\n");
 }
 
-/*
-
-A debug packet whose contents are <data>
-is encapsulated for transmission in the form:
-
-	$ <data> # CSUM1 CSUM2
-
-	<data> must be ASCII alphanumeric and cannot include characters
-	'$' or '#'
-
-	CSUM1 and CSUM2 are ascii hex representation of an 8-bit 
-	checksum of <data>, the most significant nibble is sent first.
-	the hex digits 0-9,a-f are used.
-
-Receiver responds with:
-
-	+	- if CSUM is correct and ready for next packet
-	-	- if CSUM is incorrect
-
-*/
+/* Stuff for dealing with the packets which are part of this protocol.
+   See comment at top of file for details.  */
 
 /* Read a single character from the remote end, masking it down to 7 bits. */
 
