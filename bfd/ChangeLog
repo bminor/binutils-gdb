@@ -1,3 +1,9 @@
+2000-04-20  H.J. Lu  <hjl@gnu.org>
+
+	* elf32-i386.c (elf_i386_relocate_section): Restrict 1998-12-10
+	patch to symbols defined by a shared object.
+	* elf32-ppc.c (ppc_elf_relocate_section): Similarly.
+
 2000-04-19  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
 	K&R compiler fixes.

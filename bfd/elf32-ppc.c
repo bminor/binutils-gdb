@@ -3043,7 +3043,9 @@ ppc_elf_relocate_section (output_bfd, info, input_bfd, input_section,
                              It's here to avoid a crash when
                              generating a shared library with DWARF
                              debugging information.  */
-		          || (input_section->flags & SEC_DEBUGGING) != 0)
+			  || ((input_section->flags & SEC_DEBUGGING) != 0
+			      && (h->elf_link_hash_flags
+				  & ELF_LINK_HASH_DEF_DYNAMIC) != 0))
 		      && (r_type == R_PPC_ADDR32
 			  || r_type == R_PPC_ADDR24
 			  || r_type == R_PPC_ADDR16
