@@ -204,6 +204,20 @@ sunos_read_dynamic_info (abfd)
   info->dyninfo.ld_text = GET_WORD (abfd, linkinfo.ld_text);
   info->dyninfo.ld_plt_sz = GET_WORD (abfd, linkinfo.ld_plt_sz);
 
+  /* Reportedly the addresses need to be offset by the size of the
+     exec header in an NMAGIC file.  */
+  if (adata (abfd).magic == n_magic)
+    {
+      unsigned long exec_bytes_size = adata (abfd).exec_bytes_size;
+
+      info->dyninfo.ld_need += exec_bytes_size;
+      info->dyninfo.ld_rules += exec_bytes_size;
+      info->dyninfo.ld_rel += exec_bytes_size;
+      info->dyninfo.ld_hash += exec_bytes_size;
+      info->dyninfo.ld_stab += exec_bytes_size;
+      info->dyninfo.ld_symbols += exec_bytes_size;
+    }
+
   /* The only way to get the size of the symbol information appears to
      be to determine the distance between it and the string table.  */
   info->dynsym_count = ((info->dyninfo.ld_symbols - info->dyninfo.ld_stab)

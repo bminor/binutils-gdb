@@ -1,5 +1,8 @@
 Mon Sep 25 11:48:02 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* sunos.c (sunos_read_dynamic_info): Adjust offsets in an NMAGIC
+	file.  From Peter DeWolf <pld@amt.tay1.dec.com>.
+
 	* init.c (initialized): Remove static variable.
 	(bfd_init): Don't bother setting initialized.
 	(bfd_check_init): Remove.
