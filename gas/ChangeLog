@@ -1,3 +1,13 @@
+Mon May  6 15:26:28 1996  Doug Evans  <dje@canuck.cygnus.com>
+
+	* config/tc-arm.h (TC_HANDLES_FX_DONE): Define.
+	(MD_APPLY_FIX3): Define.
+	* config/tc-arm.c (my_get_expression): Only watch for bad segments
+	if OBJ_AOUT.
+	(md_apply_fix3): Renamed from md_apply_fix.
+	If pcrel reloc and symbol is in different section, undo effects
+	of md_pcrel_from.
+
 Sat May  4 12:49:35 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-hppa.c (hppa_fix_adjustable): Don't adjust
