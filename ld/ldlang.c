@@ -368,6 +368,7 @@ new_afile (name, file_type, target)
   p->next = (lang_statement_union_type *) NULL;
   p->symbol_count = 0;
   p->common_output_section = (asection *) NULL;
+  p->loaded = false;
   lang_statement_append (&input_file_chain,
 			 (lang_statement_union_type *) p,
 			 &p->next_real_file);
@@ -775,10 +776,22 @@ lookup_name (name)
       search = new_afile (name, lang_input_file_is_file_enum, default_target);
     }
 
+  /* If we have already added this file, or this file is not real
+     (FIXME: can that ever actually happen?) or the name is NULL
+     (FIXME: can that ever actually happen?) don't add this file.  */
+  if (search->loaded
+      || ! search->real
+      || search->filename == (const char *) NULL)
+    return search;
+
   ldfile_open_file (search);
 
   if (bfd_check_format (search->the_bfd, bfd_object))
-    ldlang_add_file (search);
+    {
+      ldlang_add_file (search);
+      if (trace_files || trace_file_tries)
+	info_msg ("%I\n", search);
+    }
   else if (bfd_check_format (search->the_bfd, bfd_archive))
     {
       /* There is nothing to do here; the add_symbols routine will
@@ -790,6 +803,8 @@ lookup_name (name)
 
   if (bfd_link_add_symbols (search->the_bfd, &link_info) == false)
     einfo ("%F%B: could not read symbols: %E\n", search->the_bfd);
+
+  search->loaded = true;
 
   return search;
 }
@@ -2281,6 +2296,8 @@ void
 ldlang_add_file (entry)
      lang_input_statement_type * entry;
 {
+  bfd **pp;
+
   lang_statement_append (&file_chain,
 			 (lang_statement_union_type *) entry,
 			 &entry->next);
@@ -2289,8 +2306,11 @@ ldlang_add_file (entry)
      a link.  */
   ASSERT (entry->the_bfd->link_next == (bfd *) NULL);
   ASSERT (entry->the_bfd != output_bfd);
-  entry->the_bfd->link_next = link_info.input_bfds;
-  link_info.input_bfds = entry->the_bfd;
+  for (pp = &link_info.input_bfds;
+       *pp != (bfd *) NULL;
+       pp = &(*pp)->link_next)
+    ;
+  *pp = entry->the_bfd;
   entry->the_bfd->usrdata = (PTR) entry;
 }
 

@@ -1,3 +1,9 @@
+Fri Jan 21 00:44:44 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ldlang.c (new_afile): Initialize loaded field to false.
+	(lookup_name): If file was already loaded, don't call the
+	add_symbols entry point again.
+
 Wed Jan 19 13:57:00 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* ld.texinfo: Clarify what -T option does.
