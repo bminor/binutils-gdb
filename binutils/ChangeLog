@@ -1,3 +1,13 @@
+2000-06-13  DJ Delorie  <dj@cygnus.com>
+
+	* rcparse.y (control): ICON controls take an id as the first
+	parameter, not an optional string.  Also, call new convenience
+	function that takes res_id's.
+	* resrc.c (define_control): missing text means zero-length string,
+	not zero ID.
+	(define_icon_control): New.
+	* windres.h: declare define_icon_control.
+
 2000-06-13  H.J. Lu  <hjl@gnu.org>
 
 	* configure: Regenerate.

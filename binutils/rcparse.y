@@ -636,39 +636,29 @@ control:
 	      rcparse_warning (_("IEDIT requires DIALOGEX"));
 	    res_string_to_id (&$$->class, "HEDIT");
 	  }
-	| ICON optstringc numexpr cnumexpr cnumexpr opt_control_data
-	  {
-	    $$ = define_control ($2, $3, $4, $5, 0, 0, CTL_STATIC,
-				 SS_ICON | WS_CHILD | WS_VISIBLE, 0);
-	    if ($6 != NULL)
-	      {
-		if (dialog.ex == NULL)
-		  rcparse_warning (_("control data requires DIALOGEX"));
-		$$->data = $6;
-	      }
-	  }
-	| ICON optstringc numexpr cnumexpr cnumexpr cnumexpr cnumexpr
+	| ICON id cnumexpr cnumexpr cnumexpr opt_control_data
+          {
+	    $$ = define_icon_control ($2, $3, $4, $5, 0, 0, 0, $6,
+				      dialog.ex);
+          }
+	| ICON id cnumexpr cnumexpr cnumexpr cnumexpr cnumexpr
+	    opt_control_data
+          {
+	    $$ = define_icon_control ($2, $3, $4, $5, 0, 0, 0, $8,
+				      dialog.ex);
+          }
+	| ICON id cnumexpr cnumexpr cnumexpr cnumexpr cnumexpr
 	    icon_styleexpr optcnumexpr opt_control_data
-	  {
-    	    $$ = define_control ($2, $3, $4, $5, $6, $7, CTL_STATIC,
-				 style, $9);
-	    if ($10 != NULL)
-	      {
-		if (dialog.ex == NULL)
-		  rcparse_warning (_("control data requires DIALOGEX"));
-		$$->data = $10;
-	      }
-	  }
-	| ICON optstringc numexpr cnumexpr cnumexpr cnumexpr cnumexpr
+          {
+	    $$ = define_icon_control ($2, $3, $4, $5, style, $9, 0, $10,
+				      dialog.ex);
+          }
+	| ICON id numexpr cnumexpr cnumexpr cnumexpr cnumexpr
 	    icon_styleexpr cnumexpr cnumexpr opt_control_data
-	  {
-    	    $$ = define_control ($2, $3, $4, $5, $6, $7, CTL_STATIC,
-				 style, $9);
-	    if (dialog.ex == NULL)
-	      rcparse_warning (_("help ID requires DIALOGEX"));
-	    $$->help = $10;
-	    $$->data = $11;
-	  }
+          {
+	    $$ = define_icon_control ($2, $3, $4, $5, style, $9, $10, $11,
+				      dialog.ex);
+          }
 	| IEDIT
 	    {
 	      default_style = ES_LEFT | WS_BORDER | WS_TABSTOP;
