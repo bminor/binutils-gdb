@@ -48,10 +48,8 @@ Tue Apr 21 22:34:25 1998  Tom Tromey  <tromey@scribbles.cygnus.com>
 	i18n problems.
 	* config/tc-sh.c (md_convert_frag): Added as_bad to avoid i18n
 	problems.
-start-sanitize-v850
 	* config/tc-v850.c (md_assemble): Changed C++ comment into C
 	comment.
-end-sanitize-v850
 	* config/tc-vax.c (md_assemble): Added as_warn to avoid i18n
 	problems.
 	* as.c (print_version_id): Added an fprintf to avoid i18n
