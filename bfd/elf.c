@@ -2430,7 +2430,7 @@ elf_fake_sections (bfd *abfd, asection *asect, void *failedptrarg)
     case SHT_HASH:
       this_hdr->sh_entsize = bed->s->sizeof_hash_entry;
       break;
-  
+
     case SHT_DYNSYM:
       this_hdr->sh_entsize = bed->s->sizeof_sym;
       break;
@@ -7066,7 +7066,7 @@ elfcore_write_note (bfd  *abfd,
       pad = -namesz & ((1 << bed->s->log_file_align) - 1);
     }
 
-  newspace = sizeof (Elf_External_Note) - 1 + namesz + pad + size;
+  newspace = 12 + namesz + pad + size;
 
   p = realloc (buf, *bufsiz + newspace);
   dest = p + *bufsiz;

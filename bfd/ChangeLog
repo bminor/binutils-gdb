@@ -1,3 +1,8 @@
+2003-09-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (elfcore_write_note): Don't use sizeof(Elf_External_note)
+	since some ABIs round up the size of the struct.
+
 2003-09-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elflink.c (_bfd_elf_merge_symbol): Allow type change if
@@ -69,10 +74,10 @@
 	(v850_elf_print_private_bfd_data): Interpret E_V850E1_ARCH flag.
 	(v850_elf_merge_private_bfd_data): Allow v850e1 binaries to be
 	linked with v850e binaries.  Mark the output as v850e.
-	
+
 2003-09-03  Nick Clifton  <nickc@redhat.com>
 
-	* cofflink.c (_bfd_coff_link_input_bfd): Do not skip section 
+	* cofflink.c (_bfd_coff_link_input_bfd): Do not skip section
 	symbols that are used in relocs.
 
 2003-08-30  Robert Millan  <robertmh@gnu.org>
@@ -127,7 +132,7 @@
 
 2003-08-24  Jason Eckhardt  <jle@rice.edu>
 
-	* coff-i860.c (CALC_ADDEND): Define to be a no-op. 
+	* coff-i860.c (CALC_ADDEND): Define to be a no-op.
 
 2003-08-24  Jason Eckhardt  <jle@rice.edu>
 
@@ -136,7 +141,7 @@
 
 2003-08-23  Jason Eckhardt  <jle@rice.edu>
 
-        * coff-i860.c (coff_i860_reloc_nyi): New function.
+	* coff-i860.c (coff_i860_reloc_nyi): New function.
 	(howto_table): Add entries for relocations PAIR, HIGHADJ, HIGH,
 	LOWn, SPLITn, and BRADDR.
 	(RTYPE2HOWTO): Check that the r_type is within the howto_table
