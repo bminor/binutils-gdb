@@ -1,3 +1,8 @@
+Tue Jul 25 11:43:44 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mdebugread.c (psymtab_to_symtab_1): Relocate encoded stab
+	line numbers using the psymtab's section offsets.
+
 Tue Jul 25 10:43:27 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* config/rs6000/tm-rs6000.h (rs6000_framedata): Rename from
