@@ -284,7 +284,8 @@ value_of_register (int regnum, struct frame_info *frame)
 
   /* Convert raw data to virtual format if necessary.  */
 
-  if (DEPRECATED_REGISTER_CONVERTIBLE (regnum))
+  if (DEPRECATED_REGISTER_CONVERTIBLE_P ()
+      && DEPRECATED_REGISTER_CONVERTIBLE (regnum))
     {
       DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL (regnum, register_type (current_gdbarch, regnum),
 					      raw_buffer, VALUE_CONTENTS_RAW (reg_val));

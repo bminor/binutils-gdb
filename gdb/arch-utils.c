@@ -317,7 +317,8 @@ legacy_pc_in_sigtramp (CORE_ADDR pc, char *name)
 int
 legacy_convert_register_p (int regnum, struct type *type)
 {
-  return DEPRECATED_REGISTER_CONVERTIBLE (regnum);
+  return (DEPRECATED_REGISTER_CONVERTIBLE_P ()
+	  && DEPRECATED_REGISTER_CONVERTIBLE (regnum));
 }
 
 void

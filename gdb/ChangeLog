@@ -1,5 +1,9 @@
 2004-02-14  Andrew Cagney  <cagney@redhat.com>
 
+	* arch-utils.c (legacy_convert_register_p): Check
+	DEPRECATED_REGISTER_CONVERTIBLE_P.
+	* findvar.c (value_of_register): Ditto.
+
 	* gdbarch.sh (DEPRECATED_REGISTER_CONVERTIBLE): Add predicate.
 	* gdbarch.h, gdbarch.c: Re-generate.
 	* arch-utils.c (deprecated_register_convertible_not): Delete.
