@@ -1,3 +1,16 @@
+2004-04-22  Chris Demetriou  <cgd@broadcom.com>
+
+	* config/tc-mips.c (md_longopts): Remove -membedded-pic option.
+	(OPTION_MEMBEDDED_PIC): Remove.
+	(OPTION_TRAP, OPTION_BREAK, OPTION_EB, OPTION_EL)
+	(OPTION_FP32, OPTION_GP32, OPTION_CONSTRUCT_FLOATS)
+	(OPTION_NO_CONSTRUCT_FLOATS, OPTIONS_FP64, OPTION_GP64)
+	(OPTION_RELAX_BRANCH, OPTION_NO_RELAX_BRANCH)
+	(OPTION_ELF_BASE): Renumber.
+	(md_parse_option): Remove OPTION_MEMBEDDED_PIC handling.
+	(md_show_usage): Remove mention of -membedded-pic.
+	* doc/as.texinfo: Remove mention of -membedded-pic.
+
 2004-04-23  Thiemo Seufer  <seufer@csv.ica.uni-stuttgart.de>
 
 	* config/tc-mips.h (USE_GLOBAL_POINTER_OPT): Remove.

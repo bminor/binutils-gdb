@@ -10254,38 +10254,36 @@ struct option md_longopts[] =
 
   /* Miscellaneous options.  */
 #define OPTION_MISC_BASE (OPTION_FIX_BASE + 4)
-#define OPTION_MEMBEDDED_PIC (OPTION_MISC_BASE + 0)
-  {"membedded-pic", no_argument, NULL, OPTION_MEMBEDDED_PIC},
-#define OPTION_TRAP (OPTION_MISC_BASE + 1)
+#define OPTION_TRAP (OPTION_MISC_BASE + 0)
   {"trap", no_argument, NULL, OPTION_TRAP},
   {"no-break", no_argument, NULL, OPTION_TRAP},
-#define OPTION_BREAK (OPTION_MISC_BASE + 2)
+#define OPTION_BREAK (OPTION_MISC_BASE + 1)
   {"break", no_argument, NULL, OPTION_BREAK},
   {"no-trap", no_argument, NULL, OPTION_BREAK},
-#define OPTION_EB (OPTION_MISC_BASE + 3)
+#define OPTION_EB (OPTION_MISC_BASE + 2)
   {"EB", no_argument, NULL, OPTION_EB},
-#define OPTION_EL (OPTION_MISC_BASE + 4)
+#define OPTION_EL (OPTION_MISC_BASE + 3)
   {"EL", no_argument, NULL, OPTION_EL},
-#define OPTION_FP32 (OPTION_MISC_BASE + 5)
+#define OPTION_FP32 (OPTION_MISC_BASE + 4)
   {"mfp32", no_argument, NULL, OPTION_FP32},
-#define OPTION_GP32 (OPTION_MISC_BASE + 6)
+#define OPTION_GP32 (OPTION_MISC_BASE + 5)
   {"mgp32", no_argument, NULL, OPTION_GP32},
-#define OPTION_CONSTRUCT_FLOATS (OPTION_MISC_BASE + 7)
+#define OPTION_CONSTRUCT_FLOATS (OPTION_MISC_BASE + 6)
   {"construct-floats", no_argument, NULL, OPTION_CONSTRUCT_FLOATS},
-#define OPTION_NO_CONSTRUCT_FLOATS (OPTION_MISC_BASE + 8)
+#define OPTION_NO_CONSTRUCT_FLOATS (OPTION_MISC_BASE + 7)
   {"no-construct-floats", no_argument, NULL, OPTION_NO_CONSTRUCT_FLOATS},
-#define OPTION_FP64 (OPTION_MISC_BASE + 9)
+#define OPTION_FP64 (OPTION_MISC_BASE + 8)
   {"mfp64", no_argument, NULL, OPTION_FP64},
-#define OPTION_GP64 (OPTION_MISC_BASE + 10)
+#define OPTION_GP64 (OPTION_MISC_BASE + 9)
   {"mgp64", no_argument, NULL, OPTION_GP64},
-#define OPTION_RELAX_BRANCH (OPTION_MISC_BASE + 11)
-#define OPTION_NO_RELAX_BRANCH (OPTION_MISC_BASE + 12)
+#define OPTION_RELAX_BRANCH (OPTION_MISC_BASE + 10)
+#define OPTION_NO_RELAX_BRANCH (OPTION_MISC_BASE + 11)
   {"relax-branch", no_argument, NULL, OPTION_RELAX_BRANCH},
   {"no-relax-branch", no_argument, NULL, OPTION_NO_RELAX_BRANCH},
 
   /* ELF-specific options.  */
 #ifdef OBJ_ELF
-#define OPTION_ELF_BASE    (OPTION_MISC_BASE + 13)
+#define OPTION_ELF_BASE    (OPTION_MISC_BASE + 12)
 #define OPTION_CALL_SHARED (OPTION_ELF_BASE + 0)
   {"KPIC",        no_argument, NULL, OPTION_CALL_SHARED},
   {"call_shared", no_argument, NULL, OPTION_CALL_SHARED},
@@ -10480,16 +10478,6 @@ md_parse_option (int c, char *arg)
 
     case OPTION_NO_MIPS3D:
       mips_opts.ase_mips3d = 0;
-      break;
-
-    case OPTION_MEMBEDDED_PIC:
-      mips_pic = EMBEDDED_PIC;
-      if (g_switch_seen)
-	{
-	  as_bad (_("-G may not be used with embedded PIC code"));
-	  return 0;
-	}
-      g_switch_value = 0x7fffffff;
       break;
 
     case OPTION_FIX_VR4120:
@@ -14293,7 +14281,6 @@ md_show_usage (FILE *stream)
 
   fprintf (stream, _("\
 MIPS options:\n\
--membedded-pic		generate embedded position independent code\n\
 -EB			generate big endian output\n\
 -EL			generate little endian output\n\
 -g, -g2			do not remove unneeded NOPs or swap branches\n\
