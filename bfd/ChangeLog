@@ -1,5 +1,13 @@
 2001-10-02  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-ppc.c (ppc64_elf_check_relocs): Use a local var and cast
+	result of ELF64_R_TYPE to enum before using in a switch.
+	(ppc64_elf_gc_mark_hook): Likewise.
+	(ppc64_elf_gc_sweep_hook): Likewise.
+	(ppc64_elf_reloc_type_class): Likewise.
+
+2001-10-02  Alan Modra  <amodra@bigpond.net.au>
+
 	* version.h: New file.
 	* bfd-in.h: (BFD_VERSION): Substitute bfd_version.
 	(BFD_VERSION_DATE): Define.

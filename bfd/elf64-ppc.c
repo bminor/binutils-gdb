@@ -1842,6 +1842,7 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
     {
       unsigned long r_symndx;
       struct elf_link_hash_entry *h;
+      enum elf_ppc_reloc_type r_type;
 
       r_symndx = ELF64_R_SYM (rel->r_info);
       if (r_symndx < symtab_hdr->sh_info)
@@ -1849,7 +1850,8 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
       else
 	h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 
-      switch (ELF64_R_TYPE (rel->r_info))
+      r_type = (enum elf_ppc_reloc_type) ELF64_R_TYPE (rel->r_info);
+      switch (r_type)
 	{
 	  /* GOT16 relocations */
 	case R_PPC64_GOT16:
@@ -1997,7 +1999,7 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
 	     symbol.  */
 	  if ((info->shared
 	       && (sec->flags & SEC_ALLOC) != 0
-	       && (IS_ABSOLUTE_RELOC (ELF64_R_TYPE (rel->r_info))
+	       && (IS_ABSOLUTE_RELOC (r_type)
 		   || (h != NULL
 		       && (! info->symbolic
 			   || h->root.type == bfd_link_hash_defweak
@@ -2081,7 +2083,7 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
 		    }
 
 		  p->count += 1;
-		  if (!IS_ABSOLUTE_RELOC (ELF64_R_TYPE (rel->r_info)))
+		  if (!IS_ABSOLUTE_RELOC (r_type))
 		    p->pc_count += 1;
 		}
 	      else
@@ -2112,7 +2114,10 @@ ppc64_elf_gc_mark_hook (abfd, info, rel, h, sym)
 {
   if (h != NULL)
     {
-      switch (ELF64_R_TYPE (rel->r_info))
+      enum elf_ppc_reloc_type r_type;
+
+      r_type = (enum elf_ppc_reloc_type) ELF64_R_TYPE (rel->r_info);
+      switch (r_type)
 	{
 	case R_PPC64_GNU_VTINHERIT:
 	case R_PPC64_GNU_VTENTRY:
@@ -2161,8 +2166,6 @@ ppc64_elf_gc_sweep_hook (abfd, info, sec, relocs)
   struct elf_link_hash_entry **sym_hashes;
   bfd_signed_vma *local_got_refcounts;
   const Elf_Internal_Rela *rel, *relend;
-  unsigned long r_symndx;
-  struct elf_link_hash_entry *h;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (abfd);
@@ -2170,116 +2173,119 @@ ppc64_elf_gc_sweep_hook (abfd, info, sec, relocs)
 
   relend = relocs + sec->reloc_count;
   for (rel = relocs; rel < relend; rel++)
-    switch (ELF64_R_TYPE (rel->r_info))
-      {
-      case R_PPC64_GOT16:
-      case R_PPC64_GOT16_DS:
-      case R_PPC64_GOT16_HA:
-      case R_PPC64_GOT16_HI:
-      case R_PPC64_GOT16_LO:
-      case R_PPC64_GOT16_LO_DS:
-	r_symndx = ELF64_R_SYM (rel->r_info);
-	if (r_symndx >= symtab_hdr->sh_info)
-	  {
-	    h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	    if (h->got.refcount > 0)
-	      h->got.refcount--;
-	  }
-	else
-	  {
-	    if (local_got_refcounts[r_symndx] > 0)
-	      local_got_refcounts[r_symndx]--;
-	  }
-        break;
+    {
+      unsigned long r_symndx;
+      enum elf_ppc_reloc_type r_type;
+      struct elf_link_hash_entry *h;
 
-      case R_PPC64_PLT16_HA:
-      case R_PPC64_PLT16_HI:
-      case R_PPC64_PLT16_LO:
-      case R_PPC64_PLT32:
-      case R_PPC64_PLT64:
-	r_symndx = ELF64_R_SYM (rel->r_info);
-	if (r_symndx >= symtab_hdr->sh_info)
-	  {
-	    h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	    if (h->plt.refcount > 0)
-	      h->plt.refcount--;
-	  }
-	break;
+      r_symndx = ELF64_R_SYM (rel->r_info);
+      r_type = (enum elf_ppc_reloc_type) ELF64_R_TYPE (rel->r_info);
+      switch (r_type)
+	{
+	case R_PPC64_GOT16:
+	case R_PPC64_GOT16_DS:
+	case R_PPC64_GOT16_HA:
+	case R_PPC64_GOT16_HI:
+	case R_PPC64_GOT16_LO:
+	case R_PPC64_GOT16_LO_DS:
+	  if (r_symndx >= symtab_hdr->sh_info)
+	    {
+	      h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	      if (h->got.refcount > 0)
+		h->got.refcount--;
+	    }
+	  else
+	    {
+	      if (local_got_refcounts[r_symndx] > 0)
+		local_got_refcounts[r_symndx]--;
+	    }
+	  break;
 
-      case R_PPC64_REL14:
-      case R_PPC64_REL14_BRNTAKEN:
-      case R_PPC64_REL14_BRTAKEN:
-      case R_PPC64_REL24:
-      case R_PPC64_REL32:
-      case R_PPC64_REL64:
-	r_symndx = ELF64_R_SYM (rel->r_info);
-	if (r_symndx >= symtab_hdr->sh_info)
-	  {
-	    struct ppc_link_hash_entry *eh;
-	    struct ppc_dyn_relocs **pp;
-	    struct ppc_dyn_relocs *p;
+	case R_PPC64_PLT16_HA:
+	case R_PPC64_PLT16_HI:
+	case R_PPC64_PLT16_LO:
+	case R_PPC64_PLT32:
+	case R_PPC64_PLT64:
+	  if (r_symndx >= symtab_hdr->sh_info)
+	    {
+	      h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	      if (h->plt.refcount > 0)
+		h->plt.refcount--;
+	    }
+	  break;
 
-	    h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	    eh = (struct ppc_link_hash_entry *) h;
+	case R_PPC64_REL14:
+	case R_PPC64_REL14_BRNTAKEN:
+	case R_PPC64_REL14_BRTAKEN:
+	case R_PPC64_REL24:
+	case R_PPC64_REL32:
+	case R_PPC64_REL64:
+	  if (r_symndx >= symtab_hdr->sh_info)
+	    {
+	      struct ppc_link_hash_entry *eh;
+	      struct ppc_dyn_relocs **pp;
+	      struct ppc_dyn_relocs *p;
 
-	    for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
-	      if (p->sec == sec)
-		{
-		  p->pc_count -= 1;
-		  p->count -= 1;
-		  if (p->count == 0)
-		    *pp = p->next;
-		  break;
-		}
-	  }
-	break;
+	      h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	      eh = (struct ppc_link_hash_entry *) h;
 
-      case R_PPC64_ADDR14:
-      case R_PPC64_ADDR14_BRNTAKEN:
-      case R_PPC64_ADDR14_BRTAKEN:
-      case R_PPC64_ADDR16:
-      case R_PPC64_ADDR16_DS:
-      case R_PPC64_ADDR16_HA:
-      case R_PPC64_ADDR16_HI:
-      case R_PPC64_ADDR16_HIGHER:
-      case R_PPC64_ADDR16_HIGHERA:
-      case R_PPC64_ADDR16_HIGHEST:
-      case R_PPC64_ADDR16_HIGHESTA:
-      case R_PPC64_ADDR16_LO:
-      case R_PPC64_ADDR16_LO_DS:
-      case R_PPC64_ADDR24:
-      case R_PPC64_ADDR30:
-      case R_PPC64_ADDR32:
-      case R_PPC64_ADDR64:
-      case R_PPC64_UADDR16:
-      case R_PPC64_UADDR32:
-      case R_PPC64_UADDR64:
-      case R_PPC64_TOC:
-	r_symndx = ELF64_R_SYM (rel->r_info);
-	if (r_symndx >= symtab_hdr->sh_info)
-	  {
-	    struct ppc_link_hash_entry *eh;
-	    struct ppc_dyn_relocs **pp;
-	    struct ppc_dyn_relocs *p;
+	      for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
+		if (p->sec == sec)
+		  {
+		    p->pc_count -= 1;
+		    p->count -= 1;
+		    if (p->count == 0)
+		      *pp = p->next;
+		    break;
+		  }
+	    }
+	  break;
 
-	    h = sym_hashes[r_symndx - symtab_hdr->sh_info];
-	    eh = (struct ppc_link_hash_entry *) h;
+	case R_PPC64_ADDR14:
+	case R_PPC64_ADDR14_BRNTAKEN:
+	case R_PPC64_ADDR14_BRTAKEN:
+	case R_PPC64_ADDR16:
+	case R_PPC64_ADDR16_DS:
+	case R_PPC64_ADDR16_HA:
+	case R_PPC64_ADDR16_HI:
+	case R_PPC64_ADDR16_HIGHER:
+	case R_PPC64_ADDR16_HIGHERA:
+	case R_PPC64_ADDR16_HIGHEST:
+	case R_PPC64_ADDR16_HIGHESTA:
+	case R_PPC64_ADDR16_LO:
+	case R_PPC64_ADDR16_LO_DS:
+	case R_PPC64_ADDR24:
+	case R_PPC64_ADDR30:
+	case R_PPC64_ADDR32:
+	case R_PPC64_ADDR64:
+	case R_PPC64_UADDR16:
+	case R_PPC64_UADDR32:
+	case R_PPC64_UADDR64:
+	case R_PPC64_TOC:
+	  if (r_symndx >= symtab_hdr->sh_info)
+	    {
+	      struct ppc_link_hash_entry *eh;
+	      struct ppc_dyn_relocs **pp;
+	      struct ppc_dyn_relocs *p;
 
-	    for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
-	      if (p->sec == sec)
-		{
-		  p->count -= 1;
-		  if (p->count == 0)
-		    *pp = p->next;
-		  break;
-		}
-	  }
-	break;
+	      h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	      eh = (struct ppc_link_hash_entry *) h;
 
-      default:
-	break;
-      }
+	      for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
+		if (p->sec == sec)
+		  {
+		    p->count -= 1;
+		    if (p->count == 0)
+		      *pp = p->next;
+		    break;
+		  }
+	    }
+	  break;
 
+	default:
+	  break;
+	}
+    }
   return true;
 }
 
@@ -3833,7 +3839,10 @@ static enum elf_reloc_type_class
 ppc64_elf_reloc_type_class (rela)
      const Elf_Internal_Rela *rela;
 {
-  switch ((int) ELF64_R_TYPE (rela->r_info))
+  enum elf_ppc_reloc_type r_type;
+
+  r_type = (enum elf_ppc_reloc_type) ELF64_R_TYPE (rela->r_info);
+  switch (r_type)
     {
     case R_PPC64_RELATIVE:
       return reloc_class_relative;
