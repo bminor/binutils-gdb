@@ -10206,29 +10206,6 @@ Mb).
 Display the current autoloading size threshold, in megabytes.
 @end table
 
-On @sc{elf} based systems, @value{GDBN} supports automatically loading
-symbol tables and debug information from a file separate from the
-executable.  This works by putting information in the executable about
-the name and checksum of the file with debug information.  When
-@value{GDBN} reads such an executable it automatically tries to locate
-the debug file and load it. 
-
-@value{GDBN} searchs for the file first in the same directory as the
-executable, and then in a subdirectory called @file{.debug}. 
-If both these fail @value{GDBN} looks in the global debug directory, with the
-full pathname of the executable.  So if you are loading
-@file{/usr/bin/ls} and it references the debug file @file{ls.debug}
-@value{GDBN} will look for @file{usr/bin/ls.debug} in the global debug
-directory.
-
-@table @code
-@kindex set debug-file-directory
-@item set debug-file-directory @var{directory}
-Set the global directory where @value{GDBN} searches for separate
-debug files to @var{directory}.
-@end table
-
-
 @node Symbol Errors
 @section Errors reading symbol files
 
