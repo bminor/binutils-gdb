@@ -36,6 +36,7 @@
 #include "objc-lang.h"
 #include "block.h"
 #include "parser-defs.h"
+#include "cp-support.h"
 
 /* This is defined in valops.c */
 extern int overload_resolution;

@@ -117,4 +117,10 @@ struct type *cp_lookup_transparent_type (const char *name);
 
 extern struct cmd_list_element *maint_cplus_cmd_list;
 
+/* Pointer to member function.  Depends on compiler implementation.  */
+
+#define METHOD_PTR_IS_VIRTUAL(ADDR)  ((ADDR) & 0x80000000)
+#define METHOD_PTR_FROM_VOFFSET(OFFSET) (0x80000000 + (OFFSET))
+#define METHOD_PTR_TO_VOFFSET(ADDR) (~0x80000000 & (ADDR))
+
 #endif /* CP_SUPPORT_H */

@@ -35,6 +35,7 @@
 #include "target.h"
 #include "cp-abi.h"
 #include "valprint.h"
+#include "cp-support.h"
 
 int vtblprint;			/* Controls printing of vtbl's */
 int objectprint;		/* Controls looking up an object's derived type

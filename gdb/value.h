@@ -246,11 +246,6 @@ struct internalvar
   struct value *value;
 };
 
-/* Pointer to member function.  Depends on compiler implementation.  */
-
-#define METHOD_PTR_IS_VIRTUAL(ADDR)  ((ADDR) & 0x80000000)
-#define METHOD_PTR_FROM_VOFFSET(OFFSET) (0x80000000 + (OFFSET))
-#define METHOD_PTR_TO_VOFFSET(ADDR) (~0x80000000 & (ADDR))
 
 
 #include "symtab.h"

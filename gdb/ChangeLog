@@ -1,5 +1,12 @@
 2005-02-08  Andrew Cagney  <cagney@gnu.org>
 
+	* value.h (METHOD_PTR_IS_VIRTUAL, METHOD_PTR_FROM_VOFFSET) 
+	(METHOD_PTR_TO_VOFFSET): Move from here ...
+	* cp-support.h (METHOD_PTR_IS_VIRTUAL, METHOD_PTR_FROM_VOFFSET) 
+	(METHOD_PTR_TO_VOFFSET): ... to here.
+	* cp-valprint.c, p-valprint.c, eval.c: Include "cp-support.h".
+	* Makefile.in: Update dependencies.
+	
 	* exceptions.c: Do not include <setjmp.h>.
 	(SIGJMP_BUF, SIGSETJMP, SIGLONGJMP): Delete macros.
 	(catch_exception, catch_exceptions_with_msg, catch_errors) 

@@ -1823,7 +1823,7 @@ cpu32bug-rom.o: cpu32bug-rom.c $(defs_h) $(gdbcore_h) $(target_h) \
 cp-valprint.o: cp-valprint.c $(defs_h) $(gdb_obstack_h) $(symtab_h) \
 	$(gdbtypes_h) $(expression_h) $(value_h) $(command_h) $(gdbcmd_h) \
 	$(demangle_h) $(annotate_h) $(gdb_string_h) $(c_lang_h) $(target_h) \
-	$(cp_abi_h) $(valprint_h)
+	$(cp_abi_h) $(valprint_h) $(cp_support_h)
 cris-tdep.o: cris-tdep.c $(defs_h) $(frame_h) $(frame_unwind_h) \
 	$(frame_base_h) $(trad_frame_h) $(dwarf2_frame_h) $(symtab_h) \
 	$(inferior_h) $(gdbtypes_h) $(gdbcore_h) $(gdbcmd_h) $(target_h) \
@@ -1891,7 +1891,7 @@ environ.o: environ.c $(defs_h) $(environ_h) $(gdb_string_h)
 eval.o: eval.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(value_h) $(expression_h) $(target_h) $(frame_h) $(language_h) \
 	$(f_lang_h) $(cp_abi_h) $(infcall_h) $(objc_lang_h) $(block_h) \
-	$(parser_defs_h)
+	$(parser_defs_h) $(cp_support_h)
 event-loop.o: event-loop.c $(defs_h) $(event_loop_h) $(event_top_h) \
 	$(gdb_string_h) $(exceptions_h)
 event-top.o: event-top.c $(defs_h) $(top_h) $(inferior_h) $(target_h) \
@@ -2378,7 +2378,8 @@ p-typeprint.o: p-typeprint.c $(defs_h) $(gdb_obstack_h) $(bfd_h) $(symtab_h) \
 p-valprint.o: p-valprint.c $(defs_h) $(gdb_obstack_h) $(symtab_h) \
 	$(gdbtypes_h) $(expression_h) $(value_h) $(command_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(demangle_h) $(valprint_h) $(typeprint_h) \
-	$(language_h) $(target_h) $(annotate_h) $(p_lang_h) $(cp_abi_h)
+	$(language_h) $(target_h) $(annotate_h) $(p_lang_h) $(cp_abi_h) \
+	$(cp_support_h)
 regcache.o: regcache.c $(defs_h) $(inferior_h) $(target_h) $(gdbarch_h) \
 	$(gdbcmd_h) $(regcache_h) $(reggroups_h) $(gdb_assert_h) \
 	$(gdb_string_h) $(gdbcmd_h) $(observer_h)
