@@ -1,5 +1,5 @@
 #    Makefile template for Configure for the erc32sim library.
-#    Copyright (C) 1993 Free Software Foundation, Inc.
+#    Copyright (C) 1993, 1996 Free Software Foundation, Inc.
 #    Written by Cygnus Support
 #    Modified by J.Gaisler ESA/ESTEC
 # 
@@ -15,181 +15,53 @@
 # 
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-VPATH = @srcdir@
-srcdir = @srcdir@
+# SIM_AC_OUTPUT combines this with ../common/Make-common.in to produce the
+# real Makefile.
 
-prefix = @prefix@
-exec_prefix = @exec_prefix@
+## Begin config
+SIM_OBJS = exec.o erc32.o func.o help.o float.o interf.o
+SIM_EXTRA_LIBS = ../../readline/libreadline.a -ltermcap -lm
+SIM_EXTRA_LIBDEPS = ../../readline/libreadline.a
+SIM_EXTRA_ALL = sis
+SIM_EXTRA_INSTALL = install-sis
+SIM_EXTRA_CLEAN = clean-sis
 
-host_alias = @host_alias@
-target_alias = @target_alias@
-program_transform_name = @program_transform_name@
-bindir = @bindir@
-libdir = @libdir@
-tooldir = $(exec_prefix)/$(target_alias)
-
-datadir = @datadir@
-mandir = @mandir@
-man1dir = $(mandir)/man1
-man2dir = $(mandir)/man2
-man3dir = $(mandir)/man3
-man4dir = $(mandir)/man4
-man5dir = $(mandir)/man5
-man6dir = $(mandir)/man6
-man7dir = $(mandir)/man7
-man8dir = $(mandir)/man8
-man9dir = $(mandir)/man9
-infodir = @infodir@
-includedir = @includedir@
-
-SHELL = /bin/sh
-
-INSTALL = @INSTALL@
-INSTALL_PROGRAM = @INSTALL_PROGRAM@
-INSTALL_DATA = @INSTALL_DATA@
-INSTALL_XFORM = $(INSTALL) -t='$(program_transform_name)'
-INSTALL_XFORM1= $(INSTALL_XFORM) -b=.1
-
-AR = @AR@
-AR_FLAGS = rc
-CC = @CC@
-CFLAGS = @CFLAGS@
-MAKEINFO = makeinfo
-RANLIB = @RANLIB@
-CC_FOR_BUILD = @CC_FOR_BUILD@
-
-#
 # UARTS run at about 115200 baud (simulator time). Add -DFAST_UART to
 # CFLAGS if faster (infinite) UART speed is desired. Might affect the
 # behaviour of UART interrupt routines ...
-#
+SIM_EXTRA_CFLAGS = -DSTAT -DFAST_UART -DIUREV0 -DMECREV0
+## End config
 
-CFLAGS2 = -g -O3 -DSTAT -DFAST_UART -DIUREV0 -DMECREV0
+# `sis' doesn't need interf.o.
+SIS_OFILES = exec.o erc32.o func.o help.o float.o
 
-INCDIR = $(srcdir)/../../include
-CSEARCH = -I. -I$(srcdir) -I$(INCDIR) -I../../bfd -I$(srcdir)/../../bfd \
-		-I$(srcdir)/../../gdb -I$(srcdir)/../../gdb/config
-DEP = mkdep
+sis: sis.o $(SIS_OFILES) $(COMMON_OBJS) $(LIBDEPS)
+	$(CC) $(ALL_CFLAGS) -o sis \
+	  sis.o $(SIS_OFILES) $(COMMON_OBJS) $(EXTRA_LIBS)
 
-
-TARGETLIB = libsim.a
-
-CFILES = sis.c exec.c erc32.c interf.c run.c help.c float.c
-OFILES =  exec.o erc32.o func.o help.o float.o
-
-
-all: end.h sis run $(TARGETLIB)
-
-end : $(srcdir)/end.c
+# FIXME: This computes the build host's endianness, doesn't it?
+# There is AC_C_BIGENDIAN but it doesn't handle float endianness.
+# [Are int/float endians every different on a sparc?]
+end: $(srcdir)/end.c
 	$(CC_FOR_BUILD) $(srcdir)/end.c -o end
-
-end.h : end
+end.h: end
 	./end > end.h
 
-sis: sis.o $(OFILES)
-	$(CC) $(CFLAGS) $(CLAGS2) -o sis sis.o $(OFILES) \
-	../../opcodes/libopcodes.a ../../readline/libreadline.a \
-	../../bfd/libbfd.a ../../libiberty/libiberty.a \
-	-ltermcap -lm
+# Copy the files into directories where they will be run.
+install-sis:
+	$(INSTALL_XFORM) sis $(bindir)/sis
 
-run: run.o interf.o $(OFILES)
-	$(CC) $(CFLAGS) $(CLAGS2) -o run run.o interf.o $(OFILES) \
-	../../opcodes/libopcodes.a ../../readline/libreadline.a \
-	../../bfd/libbfd.a ../../libiberty/libiberty.a \
-	-ltermcap -lm
-
-clean:
-	rm -f *.o libsim.a sis run end end.h config.log
-
-distclean: clean
-	rm -rf Makefile config.status sysdep.h
-
-#### host and target dependent Makefile fragments come in here.
-###
-
-FLAGS_TO_PASS = \
-	"against=$(against)" \
-	"AR=$(AR)" \
-	"AR_FLAGS=$(AR_FLAGS)" \
-	"CC=$(CC)" \
-	"CFLAGS=$(CFLAGS)" \
-	"RANLIB=$(RANLIB)" \
-	"MAKEINFO=$(MAKEINFO)" \
-	"INSTALL=$(INSTALL)" \
-	"INSTALL_DATA=$(INSTALL_DATA)" \
-	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
-	"BISON=$(BISON)"
-
-$(OFILES) sis.o interf.o : end.h sis.h
-
-.c.o:
-	$(CC) -c $(CFLAGS) $(CFLAGS2) $(HDEFINES) $(TDEFINES) $(CSEARCH) $(CSWITCHES) $<
-
-
-# C source files that correspond to .o's.
-
-STAGESTUFF = $(TARGETLIB) $(OFILES)
-
-all: $(TARGETLIB) 
-
-
-.NOEXPORT:
-
-check:
-
-info:
-clean-info:
-install-info:
-
-# HDEPFILES comes from the host config; TDEPFILES from the target config.
-
-
-$(TARGETLIB): $(OFILES) interf.o
-	 rm -f $(TARGETLIB)
-	 $(AR) $(AR_FLAGS) $(TARGETLIB) $(OFILES) interf.o
-	 $(RANLIB) $(TARGETLIB)
+clean-sis:
+	rm -f sis end end.h
 
 # Circumvent Sun Make bug with VPATH.
-sparc-opc.o: sparc-opc.c
-
-tags etags: TAGS
-
-TAGS: force
-	etags $(INCDIR)/*.h $(srcdir)/*.h $(srcdir)/*.c
-
-
-sis.o: sis.c sis.h end.h
-exec.o: exec.c sis.h end.h
 erc32.o: erc32.c sis.h end.h
+exec.o: exec.c sis.h end.h
+float.o: float.c sis.h end.h
+func.o: func.c
+help.o: help.c
 interf.o: interf.c sis.h end.h 
 run.o: run.c
-help.o: help.c
-float.o: float.c sis.h end.h
-
-# Mark everything as depending on config.status, since the timestamp on
-# sysdep.h might actually move backwards if we reconfig and relink it
-# to a different hosts/h-xxx.h file.  This will force a recompile anyway.
-RECONFIG = config.status
-
-# Dummy target to force execution of dependent targets.
-#
-force:
-
-# Copy the files into directories where they will be run.
-install:
-	$(INSTALL_XFORM) sis $(bindir)/sis ;  \
-	n=`echo sis | sed '$(program_transform_name)'`; \
-	rm -f $(bindir)/sis;  \
-	ln $(bindir)/$$n $(bindir)/sis \
-	  || $(INSTALL_PROGRAM) sis $(bindir)/sis; \
-	test -d $(tooldir) || mkdir $(tooldir); \
-	test -d $(tooldir)/bin || mkdir $(tooldir)/bin; \
-	rm -f $(tooldir)/bin/sis;  \
-	ln $(bindir)/$$n $(tooldir)/bin/sis \
-	  || $(INSTALL_PROGRAM) sis $(tooldir)/bin/sis; \
-
-
-Makefile: $(srcdir)/Makefile.in
-	$(SHELL) ./config.status
+sis.o: sis.c sis.h end.h
