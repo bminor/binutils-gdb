@@ -1,3 +1,7 @@
+2001-08-30  Jim Blandy  <jimb@redhat.com>
+
+	* symfile.c (load_command): Invalidate the overlay cache.
+
 2001-08-30  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/i386/xm-i386.h (HOST_BYTE_ORDER): Removed.

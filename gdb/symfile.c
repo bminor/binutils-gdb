@@ -1154,6 +1154,10 @@ load_command (char *arg, int from_tty)
   if (arg == NULL)
     arg = get_exec_file (1);
   target_load (arg, from_tty);
+
+  /* After re-loading the executable, we don't really know which
+     overlays are mapped any more.  */
+  overlay_cache_invalid = 1;
 }
 
 /* This version of "load" should be usable for any target.  Currently
