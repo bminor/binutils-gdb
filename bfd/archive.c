@@ -894,10 +894,10 @@ do_slurp_coff_armap (abfd)
 
     bfd_seek (abfd,   ardata->first_file_filepos, SEEK_SET);
     tmp = (struct areltdata *) _bfd_read_ar_hdr (abfd);
-    if (tmp != NULL) 
+    if (tmp != NULL)
       {
 	if (tmp->arch_header[0] == '/'
-	    && tmp->arch_header[1] == ' ') 
+	    && tmp->arch_header[1] == ' ')
 	  {
 	    ardata->first_file_filepos +=
 	      (tmp->parsed_size + sizeof(struct ar_hdr) + 1) & ~1;
@@ -1340,6 +1340,23 @@ _bfd_construct_extended_name_table (abfd, trailing_slash, tabloc, tablen)
 
 /** A couple of functions for creating ar_hdrs */
 
+#ifdef HPUX_LARGE_AR_IDS
+/* Function to encode large UID/GID values according to HP.  */
+static void
+hpux_uid_gid_encode (str, id)
+     char str[6];
+     long int id;
+{
+  int cnt;
+
+  str[5] = '@' + (id & 3);
+  id >>= 2;
+
+  for (cnt = 4; cnt >= 0; ++cnt, id >>= 6)
+    str[cnt] = ' ' + (id & 0x3f);
+}
+#endif	/* HPUX_LARGE_AR_IDS */
+
 #ifndef HAVE_GETUID
 #define getuid() 0
 #endif
@@ -1393,7 +1410,21 @@ bfd_ar_hdr_from_filesystem (abfd, filename, member)
 
   /* Goddamned sprintf doesn't permit MAXIMUM field lengths */
   sprintf ((hdr->ar_date), "%-12ld", (long) status.st_mtime);
-  sprintf ((hdr->ar_uid), "%ld", (long) status.st_uid);
+#ifdef HPUX_LARGE_AR_IDS
+  /* HP has a very "special" way to handle UID/GID's with numeric values
+     > 99999.  */
+  if (status.st_uid > 99999)
+    hpux_uid_gid_encode (hdr->ar_gid, (long) status.st_uid);
+  else
+#endif
+    sprintf ((hdr->ar_uid), "%ld", (long) status.st_uid);
+#ifdef HPUX_LARGE_AR_IDS
+  /* HP has a very "special" way to handle UID/GID's with numeric values
+     > 99999.  */
+  if (status.st_gid > 99999)
+    hpux_uid_gid_encode (hdr->ar_uid, (long) status.st_gid);
+  else
+#endif
   sprintf ((hdr->ar_gid), "%ld", (long) status.st_gid);
   sprintf ((hdr->ar_mode), "%-8o", (unsigned int) status.st_mode);
   sprintf ((hdr->ar_size), "%-10ld", (long) status.st_size);
@@ -1453,10 +1484,30 @@ bfd_generic_stat_arch_elt (abfd, buf)
 #define foo(arelt, stelt, size)  \
   buf->stelt = strtol (hdr->arelt, &aloser, size); \
   if (aloser == hdr->arelt) return -1;
+  /* Some platforms support special notations for large IDs.  */
+#ifdef HPUX_LARGE_AR_IDS
+# define foo2(arelt, stelt, size) \
+  if (hdr->arelt[5] == ' ') { foo (arelt, stelt, size); } \
+  else { \
+    int cnt; \
+    for (buf->stelt = cnt = 0; cnt < 5; ++cnt) \
+      { \
+	if (hdr->arelt[cnt] < ' ' || hdr->arelt[cnt] > ' ' + 0x3f) \
+	  return -1; \
+	buf->stelt <<= 6; \
+	buf->stelt += hdr->arelt[cnt] - ' '; \
+      } \
+    if (hdr->arelt[5] < '@' || hdr->arelt[5] > '@' + 3) return -1; \
+    buf->stelt <<= 2; \
+    buf->stelt += hdr->arelt[5] - '@'; \
+  }
+#else
+# define foo2(arelt, stelt, size) foo (arelt, stelt, size)
+#endif
 
   foo (ar_date, st_mtime, 10);
-  foo (ar_uid, st_uid, 10);
-  foo (ar_gid, st_gid, 10);
+  foo2 (ar_uid, st_uid, 10);
+  foo2 (ar_gid, st_gid, 10);
   foo (ar_mode, st_mode, 8);
 
   buf->st_size = arch_eltdata (abfd)->parsed_size;

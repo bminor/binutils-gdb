@@ -1,3 +1,11 @@
+Mon Apr 24 01:49:03 2000  Ulrich Drepper  <drepper@cygnus.com>
+
+	* archive.c (hpux_uid_gid_encode): New function.
+	(bfd_ar_hdr_from_filesystem): Use it if HPUX_LARGE_AR_IDS is
+	defined and the ID is greater than 99999.
+	(bfd_generic_stat_arch_elt): If HPUX_LARGE_AR_IDS is defined decode
+	special uid/gid fields into 32 bit values.
+
 2000-04-21  Matthew Green  <mrg@cygnus.com>
 
 	* config.bfd: Add NetBSD/sparc64 support.
