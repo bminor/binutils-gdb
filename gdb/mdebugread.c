@@ -2922,6 +2922,9 @@ parse_partial_symbols (objfile, section_offsets)
 					   psymtab_include_list, includes_used,
 					   -1, save_pst->texthigh,
 					   dependency_list, dependencies_used);
+      includes_used = 0;
+      dependencies_used = 0;
+
       if (objfile->ei.entry_point >= save_pst->textlow &&
 	  objfile->ei.entry_point < save_pst->texthigh)
 	{

@@ -20,11 +20,11 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-/* Native only:  Need struct tbtable in <sys/debug.h> from host, and 
-		 need xcoff_add_toc_to_loadinfo in rs6000-tdep.c from target.
-		 need xcoff_init_loadinfo ditto.  
-   However, if you grab <sys/debug.h> and make it available on your
-   host, and define FAKING_RS6000, then this code will compile.  */
+/* RS/6000 and PowerPC only:
+   Needs xcoff_add_toc_to_loadinfo and xcoff_init_loadinfo in
+   rs6000-tdep.c from target.
+   However, if you define FAKING_RS6000, then this code will link with
+   any target.  */
 
 #include "defs.h"
 #include "bfd.h"
@@ -34,13 +34,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <ctype.h>
 #include "gdb_string.h"
 
-#include "obstack.h"
 #include <sys/param.h>
 #ifndef	NO_SYS_FILE
 #include <sys/file.h>
 #endif
 #include "gdb_stat.h"
-#include <sys/debug.h>
 
 #include "coff/internal.h"
 #include "libcoff.h"		/* FIXME, internal data from BFD */
@@ -52,6 +50,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "objfiles.h"
 #include "buildsym.h"
 #include "stabsread.h"
+#include "expression.h"
+#include "language.h"		/* Needed inside partial-stab.h */
 #include "complaints.h"
 
 #include "gdb-stabs.h"
@@ -133,11 +133,6 @@ struct coff_symbol {
   unsigned int c_type;
 };
 
-/* The COFF line table, in raw form.  */
-static char *linetab = NULL;		/* Its actual contents */
-static long linetab_offset;		/* Its offset in the file */
-static unsigned long linetab_size;	/* Its size */
-
 /* last function's saved coff symbol `cs' */
 
 static struct coff_symbol fcn_cs_saved;
@@ -187,17 +182,17 @@ struct coff_symfile_info {
   int symtbl_num_syms;
 };
 
-static struct complaint rsym_complaint = 
-  {"Non-stab C_RSYM `%s' needs special handling", 0, 0};
-
 static struct complaint storclass_complaint =
   {"Unexpected storage class: %d", 0, 0};
 
 static struct complaint bf_notfound_complaint =
   {"line numbers off, `.bf' symbol not found", 0, 0};
 
-extern struct complaint ef_complaint;
-extern struct complaint eb_complaint;
+static struct complaint ef_complaint = 
+  {"Mismatched .ef symbol ignored starting at symnum %d", 0, 0};
+
+static struct complaint eb_complaint = 
+  {"Mismatched .eb symbol ignored starting at symnum %d", 0, 0};
 
 static void
 enter_line_range PARAMS ((struct subfile *, unsigned, unsigned,
@@ -546,7 +541,6 @@ static void
 process_linenos (start, end)
      CORE_ADDR start, end;
 {
-  char *pp;
   int offset, ii;
   file_ptr max_offset =
     ((struct coff_symfile_info *)this_symtab_psymtab->objfile->sym_private)
@@ -560,10 +554,9 @@ process_linenos (start, end)
      All the following line numbers in the function are relative to
      this, and we record absolute line numbers in record_line().  */
 
-  int main_source_baseline = 0;
+  unsigned int main_source_baseline = 0;
 
   unsigned *firstLine;
-  CORE_ADDR addr;
 
   offset =
     ((struct symloc *)this_symtab_psymtab->read_symtab_private)->lineno_off;
@@ -803,166 +796,6 @@ enter_line_range (subfile, beginoffset, endoffset, startaddr, endaddr,
     }
 }
 
-typedef struct {
-  int fsize;				/* file size */
-  int fixedparms;			/* number of fixed parms */
-  int floatparms;			/* number of float parms */
-  unsigned int parminfo;		/* parameter info. 
-  					   See /usr/include/sys/debug.h
-					   tbtable_ext.parminfo */
-  int framesize;			/* function frame size */
-} TracebackInfo;
-
-static TracebackInfo *retrieve_tracebackinfo
-  PARAMS ((bfd *, struct coff_symbol *));
-
-/* Given a function symbol, return its traceback information. */
-
-static TracebackInfo *
-retrieve_tracebackinfo (abfd, cs)
-     bfd *abfd;
-     struct coff_symbol *cs;
-{
-#define TBTABLE_BUFSIZ  2000
-
-  static TracebackInfo tbInfo;
-  struct tbtable *ptb;
-
-  static char buffer [TBTABLE_BUFSIZ];
-
-  int  *pinsn;
-  int  bytesread=0;			/* total # of bytes read so far */
-  int  bufferbytes;			/* number of bytes in the buffer */
-  int functionstart;
-
-  asection *textsec;
-
-  /* FIXME: Should be looking through all sections, based on the
-     address we are considering.  Just using ".text" loses if more
-     than one section has code in it.  */
-  textsec = bfd_get_section_by_name (abfd, ".text");
-  if (!textsec)
-    {
-#if 0
-      /* If there is only data, no text, that is OK.  */
-      printf_unfiltered ("Unable to locate text section!\n");
-#endif
-      return;
-    }
-
-  functionstart = cs->c_value - textsec->vma;
-
-  memset (&tbInfo, '\0', sizeof (tbInfo));
-
-  /* keep reading blocks of data from the text section, until finding a zero
-     word and a traceback table. */
-
-  /* Note: The logical thing way to write this code would be to assign
-     to bufferbytes within the while condition.  But that triggers a
-     compiler (xlc in AIX 3.2) bug, so simplify it...  */
-  bufferbytes = 
-    (TBTABLE_BUFSIZ < (textsec->_raw_size - functionstart - bytesread) ? 
-     TBTABLE_BUFSIZ : (textsec->_raw_size - functionstart - bytesread));
-  while (bufferbytes 
-	 && (bfd_get_section_contents
-	     (abfd, textsec, buffer, 
-	      (file_ptr)(functionstart + bytesread), bufferbytes)))
-  {
-    bytesread += bufferbytes;
-    pinsn = (int*) buffer;
-
-    /* If this is the first time we filled the buffer, retrieve function
-       framesize info.  */
-
-    if (bytesread == bufferbytes) {
-
-      /* skip over unrelated instructions */
-
-      if (*pinsn == 0x7c0802a6)			/* mflr r0 */
-        ++pinsn;
-      if ((*pinsn & 0xfc00003e) == 0x7c000026)	/* mfcr Rx */
-	++pinsn;
-      if ((*pinsn & 0xfc000000) == 0x48000000)	/* bl foo, save fprs */
-        ++pinsn;
-      if ((*pinsn  & 0xfc1f0000) == 0xbc010000)	/* stm Rx, NUM(r1) */
-        ++pinsn;
-
-      do {
-	int tmp = (*pinsn >> 16) & 0xffff;
-
-	if (tmp ==  0x9421) {			/* stu  r1, NUM(r1) */
-	  tbInfo.framesize = 0x10000 - (*pinsn & 0xffff);
-	  break;
-	}
-	else if ((*pinsn == 0x93e1fffc) ||	/* st   r31,-4(r1) */
-		 (tmp == 0x9001))		/* st   r0, NUM(r1) */
-	;
-	/* else, could not find a frame size. */
-	else
-	  return NULL;
-
-      } while (++pinsn && *pinsn);
-
-      if (!tbInfo.framesize)
-        return NULL;      
-
-    }
-
-    /* look for a zero word. */
-
-    while (*pinsn && (pinsn < (int*)(buffer + bufferbytes - sizeof(int))))
-      ++pinsn;
-
-    if (pinsn >= (int*)(buffer + bufferbytes))
-      continue;
-
-    if (*pinsn == 0) {
-
-      /* function size is the amount of bytes we have skipped so far. */
-      tbInfo.fsize = bytesread - (buffer + bufferbytes - (char*)pinsn);
-
-      ++pinsn;
-
-      /* if we don't have the whole traceback table in the buffer, re-read
-         the whole thing. */
-
-      /* This is how much to read to get the traceback table.
-	 8 bytes of the traceback table are always present, plus we
-	 look at parminfo.  */
-#define	MIN_TBTABSIZ	12
-				
-      if ((char*)pinsn > (buffer + bufferbytes - MIN_TBTABSIZ)) {
-
-	/* In case if we are *very* close to the end of the text section
-	   and cannot read properly from that point on, abort by returning
-	   NULL.
-
-	   This could happen if the traceback table is only 8 bytes,
-	   but we try to read 12 bytes of it.
-	   Handle this case more graciously -- FIXME */
-
-	if (!bfd_get_section_contents (
-		abfd, textsec, buffer, 
-		(file_ptr)(functionstart + 
-		 bytesread - (buffer + bufferbytes - (char*)pinsn)),MIN_TBTABSIZ))
-	  { printf_unfiltered ("Abnormal return!..\n"); return NULL; }
-
-	ptb = (struct tbtable *)buffer;
-      }
-      else
-        ptb = (struct tbtable *)pinsn;
-
-      tbInfo.fixedparms = ptb->tb.fixedparms;
-      tbInfo.floatparms = ptb->tb.floatparms;
-      tbInfo.parminfo = ptb->tb_ext.parminfo;
-      return &tbInfo;
-    }
-    bufferbytes = 
-      (TBTABLE_BUFSIZ < (textsec->_raw_size - functionstart - bytesread) ? 
-       TBTABLE_BUFSIZ : (textsec->_raw_size - functionstart - bytesread));
-  }
-  return NULL;
-}
 
 /* Save the vital information for use when closing off the current file.
    NAME is the file name the symbols came from, START_ADDR is the first
@@ -991,25 +824,6 @@ retrieve_tracebackinfo (abfd, cs)
   prim_record_minimal_symbol_and_info (namestr, (ADDR), (TYPE), \
 				       (char *)NULL, (SECTION), (OBJFILE)); \
   misc_func_recorded = 1;					\
-}
-
-
-/* A parameter template, used by ADD_PARM_TO_PENDING.  It is initialized
-   in our initializer function at the bottom of the file, to avoid
-   dependencies on the exact "struct symbol" format.  */
-
-static struct symbol parmsym;
-
-/* Add a parameter to a given pending symbol list. */ 
-
-#define	ADD_PARM_TO_PENDING(PARM, VALUE, PTYPE, PENDING_SYMBOLS)	\
-{									\
-  PARM = (struct symbol *)						\
-      obstack_alloc (&objfile->symbol_obstack, sizeof (struct symbol));	\
-  *(PARM) = parmsym;							\
-  SYMBOL_TYPE (PARM) = PTYPE;						\
-  SYMBOL_VALUE (PARM) = VALUE;						\
-  add_symbol_to_list (PARM, &PENDING_SYMBOLS);				\
 }
 
 
@@ -1080,7 +894,6 @@ read_xcoff_symtab (pst)
   struct objfile *objfile = pst->objfile;
   bfd *abfd = objfile->obfd;
   char *raw_auxptr;		/* Pointer to first raw aux entry for sym */
-  TracebackInfo *ptb;		/* Pointer to traceback table */
   char *strtbl = ((struct coff_symfile_info *)objfile->sym_private)->strtbl;
   char *debugsec =
     ((struct coff_symfile_info *)objfile->sym_private)->debugsec;
@@ -1095,15 +908,12 @@ read_xcoff_symtab (pst)
   unsigned int max_symnum;
   int just_started = 1;
   int depth = 0;
-  int val;
-  int fcn_start_addr;
-  size_t size;
+  int fcn_start_addr = 0;
 
   struct coff_symbol fcn_stab_saved;
 
   /* fcn_cs_saved is global because process_xcoff_symbol needs it. */
   union internal_auxent fcn_aux_saved;
-  struct type *fcn_type_saved = NULL;
   struct context_stack *new;
 
   char *filestring = " _start_ ";	/* Name of the current file. */
@@ -1111,7 +921,6 @@ read_xcoff_symtab (pst)
   char *last_csect_name;		/* last seen csect's name and value */
   CORE_ADDR last_csect_val;
   int last_csect_sec;
-  int  misc_func_recorded;		/* true if any misc. function */
 
   this_symtab_psymtab = pst;
 
@@ -1122,7 +931,6 @@ read_xcoff_symtab (pst)
   last_source_file = NULL;
   last_csect_name = 0;
   last_csect_val = 0;
-  misc_func_recorded = 0;
 
   start_stabs ();
   start_symtab (filestring, (char *)NULL, file_start_addr);
@@ -1307,15 +1115,13 @@ read_xcoff_symtab (pst)
 			  last_csect_sec = secnum_to_section (cs->c_secnum, objfile);
 			}
 		    }
-		    misc_func_recorded = 0;
 		    continue;
 
-		  case XMC_RW :
-		    break;
+		    /* All other symbols are put into the minimal symbol
+		       table only.  */
 
-		    /* If the section is not a data description,
-		       ignore it. Note that uninitialized data will
-		       show up as XTY_CM/XMC_RW pair. */
+		  case XMC_RW:
+		    continue;
 
 		  case XMC_TC0:
 		    continue;
@@ -1344,101 +1150,6 @@ read_xcoff_symtab (pst)
 		     when `.bf' is seen. */
 		  fcn_cs_saved = *cs;
 		  fcn_aux_saved = main_aux;
-
-		  ptb = NULL;
-
-		  /* If function has two auxent, then debugging information is
-		     already available for it. Process traceback table for
-		     functions with only one auxent. */
-
-		  if (cs->c_naux == 1)
-		    ptb = retrieve_tracebackinfo (abfd, cs);
-
-		  else if (cs->c_naux != 2)
-		    {
-		      static struct complaint msg =
-			{"Expected one or two auxents for function", 0, 0};
-		      complain (&msg);
-		    }
-
-		  /* If there is traceback info, create and add parameters
-		     for it. */
-
-		  if (ptb && (ptb->fixedparms || ptb->floatparms))
-		    {
-
-		      int parmcnt = ptb->fixedparms + ptb->floatparms;
-		      char *parmcode = (char*) &ptb->parminfo;
-
-		      /* The link area is 0x18 bytes.  */
-		      int parmvalue = ptb->framesize + 0x18;
-		      unsigned int ii, mask;
-
-		      for (ii=0, mask = 0x80000000; ii <parmcnt; ++ii)
-			{
-			  struct symbol *parm;
-
-			  if (ptb->parminfo & mask)
-			    {
-			      /* float or double */
-			      mask = mask >> 1;
-			      if (ptb->parminfo & mask)
-				{
-				  /* double parm */
-				  ADD_PARM_TO_PENDING
-				    (parm, parmvalue, builtin_type_double,
-				     local_symbols);
-				  parmvalue += sizeof (double);
-				}
-			      else
-				{
-				  /* float parm */
-				  ADD_PARM_TO_PENDING
-				    (parm, parmvalue, builtin_type_float,
-				     local_symbols);
-				  parmvalue += sizeof (float);
-				}
-			    }
-			  else
-			    {
-			      static struct type *intparm_type;
-			      if (intparm_type == NULL)
-				{
-
-				  /* Create a type, which is a pointer
-				     type (a kludge to make it print
-				     in hex), but which has a name
-				     indicating we don't know the real
-				     type.  */
-
-				  intparm_type =
-				    init_type
-				      (TYPE_CODE_PTR,
-				       TARGET_PTR_BIT / HOST_CHAR_BIT,
-				       0,
-				       "<non-float parameter>",
-				       NULL);
-				  TYPE_TARGET_TYPE (intparm_type) =
-				    builtin_type_void;
-				}
-			      ADD_PARM_TO_PENDING
-				(parm, parmvalue,
-				 intparm_type,
-				 local_symbols);
-			      parmvalue += sizeof (int);
-			    }
-			  mask = mask >> 1;
-			}
-		
-		      /* Fake this as a function.  Needed in
-                         process_xcoff_symbol().  */
-		      cs->c_type = 32;
-
-		      finish_block
-			(process_xcoff_symbol (cs, objfile), &local_symbols, 
-			 pending_blocks, cs->c_value,
-			 cs->c_value + ptb->fsize, objfile);
-		    }
 		  continue;
 
 		case XMC_GL:
@@ -1454,11 +1165,17 @@ read_xcoff_symtab (pst)
 		  /* xlc puts each variable in a separate csect, so we get
 		     an XTY_SD for each variable.  But gcc puts several
 		     variables in a csect, so that each variable only gets
-		     an XTY_LD.  We still need to record them.  This will
-		     typically be XMC_RW; I suspect XMC_RO and XMC_BS might
-		     be possible too.  */
-		  break;
+		     an XTY_LD. This will typically be XMC_RW; I suspect
+		     XMC_RO and XMC_BS might be possible too.
+		     These variables are put in the minimal symbol table
+		     only.  */
+		  continue;
 		}
+	      break;
+
+	    case XTY_CM:
+	      /* Common symbols are put into the minimal symbol table only.  */
+	      continue;
 
 	    default:
 	      break;
@@ -1543,6 +1260,12 @@ read_xcoff_symtab (pst)
 	      /* { main_aux.x_sym.x_misc.x_lnsz.x_lnno
 		 contains number of lines to '}' */
 
+	      if (context_stack_depth <= 0)
+		{		/* We attempted to pop an empty context stack */
+		  complain (&ef_complaint, cs->c_symnum);
+		  within_function = 0;
+		  break;
+		}
 	      new = pop_context ();
 	      /* Stack must be empty now.  */
 	      if (context_stack_depth > 0 || new == NULL)
@@ -1601,6 +1324,7 @@ read_xcoff_symtab (pst)
 	  break;
 
 	case C_HIDEXT:
+	case C_STAT:
 	  break;
 
 	case C_BINCL:
@@ -1630,10 +1354,15 @@ read_xcoff_symtab (pst)
 	    }
 	  else if (STREQ (cs->c_name, ".eb"))
 	    {
+	      if (context_stack_depth <= 0)
+		{		/* We attempted to pop an empty context stack */
+		  complain (&eb_complaint, cs->c_symnum);
+		  break;
+		}
 	      new = pop_context ();
 	      if (depth-- != new->depth)
 		{
-		  complain (&eb_complaint, symnum);
+		  complain (&eb_complaint, cs->c_symnum);
 		  break;
 		}
 	      if (local_symbols && context_stack_depth > 0)
@@ -1696,10 +1425,7 @@ process_xcoff_symbol (cs, objfile)
   struct symbol onesymbol;
   register struct symbol *sym = &onesymbol;
   struct symbol *sym2 = NULL;
-  struct type *ttype;
-  char *name, *pp, *qq;
-  int struct_and_type_combined;
-  int nameless;
+  char *name, *pp;
 
   int sec;
   CORE_ADDR off;
@@ -1753,17 +1479,19 @@ process_xcoff_symbol (cs, objfile)
       switch (cs->c_sclass)
 	{
 #if 0
+	/* The values of functions and global symbols are now resolved
+	   via the global_sym_chain in stabsread.c.  */
 	case C_FUN:
 	  if (fcn_cs_saved.c_sclass == C_EXT)
 	    add_stab_to_list (name, &global_stabs);
 	  else
 	    add_stab_to_list (name, &file_stabs);
 	  break;
-#endif
 
 	case C_GSYM:
 	  add_stab_to_list (name, &global_stabs);
 	  break;
+#endif
 
 	case C_BCOMM:
 	  common_block_start (cs->c_name, objfile);
@@ -1783,6 +1511,7 @@ process_xcoff_symbol (cs, objfile)
 	case C_ECOML:
 	case C_LSYM:
 	case C_RSYM:
+	case C_GSYM:
 
 	  {
 	    sym = define_symbol (cs->c_value + off, cs->c_name, 0, 0, objfile);
@@ -1818,53 +1547,6 @@ process_xcoff_symbol (cs, objfile)
 	      SYMBOL_SECTION (sym) = static_block_section;
 	    }
 	  return sym;
-
-#if 0
-	  /* These appear to be vestigial remnants of coffread.c; I don't
-	     think any of them are used for xcoff.  */
-
-	case C_AUTO:
-	  SYMBOL_CLASS (sym) = LOC_LOCAL;
-	  SYMBOL_NAME (sym) = SYMNAME_ALLOC (name, symname_alloced);
-	  SYMBOL_SECTION (sym) = secnum_to_section (cs->c_secnum, objfile);
-	  SYMBOL_DUP (sym, sym2);
-	  add_symbol_to_list (sym2, &local_symbols);
-	  break;
-
-	case C_STAT:
-	  SYMBOL_CLASS (sym) = LOC_STATIC;
-	  SYMBOL_NAME (sym) = SYMNAME_ALLOC (name, symname_alloced);
-	  SYMBOL_SECTION (sym) = secnum_to_section (cs->c_secnum, objfile);
-	  SYMBOL_DUP (sym, sym2);
-	  add_symbol_to_list 
-	    (sym2, within_function ? &local_symbols : &file_symbols);
-	  break;
-
-	case C_RSYM:
-	  pp = (char*) strchr (name, ':');
-	  if (pp)
-	    {
-	      sym = define_symbol (cs->c_value, cs->c_name, 0, 0, objfile);
-	      if (sym != NULL)
-		SYMBOL_SECTION (sym) = secnum_to_section (cs->c_secnum, objfile);
-	      return sym;
-	    }
-	  else
-	    {
-	      complain (&rsym_complaint, name);
-	      return NULL;
-	    }
-#endif /* 0 */
-
-	  /* I think this one is used (dubious, I think, shouldn't
-	     it go into the msyms only?).  */
-	case C_EXT:
-	  SYMBOL_CLASS (sym) = LOC_STATIC;
-	  SYMBOL_NAME (sym) = SYMNAME_ALLOC (name, symname_alloced);
-	  SYMBOL_SECTION (sym) = secnum_to_section (cs->c_secnum, objfile);
-	  SYMBOL_DUP (sym, sym2);
-	  add_symbol_to_list (sym2, &global_symbols);
-	  break;
 
 	}
     }
@@ -2143,6 +1825,8 @@ static void
 xcoff_new_init (objfile)
      struct objfile *objfile;
 {
+  stabsread_new_init ();
+  buildsym_new_init ();
 }
 
 /* Do initialization in preparation for reading symbols from OBJFILE.
@@ -2217,6 +1901,9 @@ init_stringtab (abfd, offset, objfile)
   strtbl = (char *) obstack_alloc (&objfile->symbol_obstack, length);
   ((struct coff_symfile_info *)objfile->sym_private)->strtbl = strtbl;
 
+  /* Copy length buffer, the first byte is usually zero and is
+     used for stabs with a name length of zero.  */
+  memcpy (strtbl, lengthbuf, sizeof lengthbuf);
   if (length == sizeof lengthbuf)
     return;
 
@@ -2372,11 +2059,7 @@ xcoff_end_psymtab (pst, include_list, num_includes, capping_symbol_number,
       /* Throw away this psymtab, it's empty.  We can't deallocate it, since
 	 it is on the obstack, but we can forget to chain it on the list.  */
       /* Empty psymtabs happen as a result of header files which don't have
-	 any symbols in them.  There can be a lot of them.  But this check
-	 is wrong, in that a psymtab with N_SLINE entries but nothing else
-	 is not empty, but we don't realize that.  Fixing that without slowing
-	 things down might be tricky.  (FIXME: For XCOFF, it shouldn't be
-	 tricky at all).  */
+	 any symbols in them.  There can be a lot of them.  */
       struct partial_symtab *prev_pst;
 
       /* First, snip it out of the psymtab chain */
@@ -2465,13 +2148,10 @@ scan_xcoff_symtab (section_offsets, objfile)
      struct objfile *objfile;
 {
   int toc_offset = 0;		/* toc offset value in data section. */
-  char *filestring;
+  char *filestring = NULL;
 
   char *namestring;
-  int nsl;
   int past_first_source_file = 0;
-  CORE_ADDR last_o_file_start = 0;
-  struct cleanup *back_to;
   bfd *abfd;
   unsigned int nsyms;
 
@@ -2493,9 +2173,9 @@ scan_xcoff_symtab (section_offsets, objfile)
   unsigned int ssymnum;
 
   char *last_csect_name = NULL;		/* last seen csect's name and value */
-  CORE_ADDR last_csect_val;
-  int last_csect_sec;
-  int  misc_func_recorded;		/* true if any misc. function */
+  CORE_ADDR last_csect_val = 0;
+  int last_csect_sec = 0;
+  int  misc_func_recorded = 0;		/* true if any misc. function */
 
   pst = (struct partial_symtab *) 0;
 
@@ -2519,7 +2199,7 @@ scan_xcoff_symtab (section_offsets, objfile)
   ssymnum = 0;
   while (ssymnum < nsyms)
     {
-      int sclass = ((struct external_syment *)sraw_symbol)->e_sclass[0];
+      int sclass = ((struct external_syment *)sraw_symbol)->e_sclass[0] & 0xff;
       /* This is the type we pass to partial-stab.h.  A less kludgy solution
 	 would be to break out partial-stab.h into its various parts--shuffle
 	 off the DBXREAD_ONLY stuff to dbxread.c, and make separate
@@ -2552,6 +2232,11 @@ scan_xcoff_symtab (section_offsets, objfile)
 	      }
 	    else
 	      csect_aux = main_aux;
+
+	    /* If symbol name starts with ".$" or "$", ignore it.  */
+	    if (namestring[0] == '$'
+		|| (namestring[0] == '.' && namestring[1] == '$'))
+	      break;
 
 	    switch (csect_aux.x_csect.x_smtyp & 0x7)
 	      {
@@ -2614,17 +2299,29 @@ scan_xcoff_symtab (section_offsets, objfile)
 		      }
 		    misc_func_recorded = 0;
 		    break;
+
 		  case XMC_RW:
+		    /* Data variables are recorded in the minimal symbol
+		       table, except for section symbols.  */
+		    if (*namestring != '.')
+		      prim_record_minimal_symbol_and_info
+			(namestring, symbol.n_value,
+			 sclass == C_HIDEXT ? mst_file_data : mst_data,
+			 NULL, secnum_to_section (symbol.n_scnum, objfile),
+			 objfile);
 		    break;
+
 		  case XMC_TC0:
 		    if (toc_offset)
 		      warning ("More than one XMC_TC0 symbol found.");
 		    toc_offset = symbol.n_value;
 		    break;
+
 		  case XMC_TC:
 		    /* These symbols tell us where the TOC entry for a
 		       variable is, not the variable itself.  */
 		    break;
+
 		  default:
 		    break;
 		  }
@@ -2634,36 +2331,18 @@ scan_xcoff_symtab (section_offsets, objfile)
 		switch (csect_aux.x_csect.x_smclas)
 		  {
 		  case XMC_PR:
-		    {
-		      /* A function entry point.  */
-		      char *namestr = namestring;
+		    /* A function entry point.  */
 
-		      if (first_fun_line_offset == 0)
-			first_fun_line_offset =
-			  main_aux.x_sym.x_fcnary.x_fcn.x_lnnoptr;
-		      if (namestr[0] == '.')
-			++namestr;
-		      prim_record_minimal_symbol_and_info
-			(namestr, symbol.n_value, mst_text,
-			 NULL, secnum_to_section (symbol.n_scnum, objfile),
-			 objfile);
-		      misc_func_recorded = 1;
-
-		      /* We also create full symbols for these, so
-			 better make a partial symbol.  This seems bogus
-			 to me, but I'm not going to try to fix it now.
-			 (Note that allocate_space_in_inferior can't
-			 yet deal with a minimal symbol for malloc on xcoff
-			 because it doesn't understand the fact that
-			 function pointers don't just contain the address of
-			 the function).  */
-		      ADD_PSYMBOL_ADDR_TO_LIST (namestr, strlen (namestr),
-						VAR_NAMESPACE, LOC_BLOCK,
-						objfile->global_psymbols,
-						symbol.n_value,
-						psymtab_language, objfile);
-		    }
+		    if (first_fun_line_offset == 0 && symbol.n_numaux > 1)
+		      first_fun_line_offset =
+			main_aux.x_sym.x_fcnary.x_fcn.x_lnnoptr;
+		    RECORD_MINIMAL_SYMBOL
+		      (namestring, symbol.n_value,
+		       sclass == C_HIDEXT ? mst_file_text : mst_text,
+		       secnum_to_section (symbol.n_scnum, objfile),
+		       objfile);
 		    break;
+
 		  case XMC_GL:
 		    /* shared library function trampoline code entry
 		       point. */
@@ -2694,17 +2373,33 @@ scan_xcoff_symtab (section_offsets, objfile)
 		       still need to record them.  This will
 		       typically be XMC_RW; I suspect XMC_RO and
 		       XMC_BS might be possible too.  */
-
-		    /* FIXME: Shouldn't these be going into the minimal
-		       symbols instead of partial/full symbols?  */
-
-		    ADD_PSYMBOL_ADDR_TO_LIST (namestring, strlen (namestring),
-					      VAR_NAMESPACE, LOC_STATIC,
-					      objfile->global_psymbols,
-					      symbol.n_value,
-					      psymtab_language, objfile);
+		    if (*namestring != '.')
+		      prim_record_minimal_symbol_and_info
+			(namestring, symbol.n_value,
+			 sclass == C_HIDEXT ? mst_file_data : mst_data,
+			 NULL, secnum_to_section (symbol.n_scnum, objfile),
+			 objfile);
 		    break;
 		  }
+		break;
+
+	      case XTY_CM:
+		switch (csect_aux.x_csect.x_smclas)
+		  {
+		  case XMC_RW:
+		  case XMC_BS:
+		    /* Common variables are recorded in the minimal symbol
+		       table, except for section symbols.  */
+		    if (*namestring != '.')
+		      prim_record_minimal_symbol_and_info
+			(namestring, symbol.n_value,
+			 sclass == C_HIDEXT ? mst_file_bss : mst_bss,
+			 NULL, secnum_to_section (symbol.n_scnum, objfile),
+			 objfile);
+		    break;
+		  }
+		break;
+
 	      default:
 		break;
 	      }
@@ -2851,24 +2546,11 @@ scan_xcoff_symtab (section_offsets, objfile)
 #define END_PSYMTAB(pst,ilist,ninc,c_off,c_text,dep_list,n_deps)\
   do {} while (0)
 /* We have already set the namestring.  */
-#define SET_NAMESTRING() 0
+#define SET_NAMESTRING() /* */
 
 #include "partial-stab.h"
 	}
     }
-#if 0
-      /* What is this?  */
-  /* If there's stuff to be cleaned up, clean it up.  */
-  if (DBX_SYMCOUNT (objfile) > 0			/* We have some syms */
-/*FIXME, does this have a bug at start address 0? */
-      && last_o_file_start
-      && objfile -> ei.entry_point < bufp->n_value
-      && objfile -> ei.entry_point >= last_o_file_start)
-    {
-      objfile -> ei.entry_file_lowpc = last_o_file_start;
-      objfile -> ei.entry_file_highpc = bufp->n_value;
-    }
-#endif
 
   if (pst)
     {
@@ -3068,13 +2750,6 @@ void
 _initialize_xcoffread ()
 {
   add_symtab_fns(&xcoff_sym_fns);
-
-  /* Initialize symbol template later used for arguments.  Its other
-     fields are zero, or are filled in later.  */
-  SYMBOL_NAME (&parmsym) = "";
-  SYMBOL_INIT_LANGUAGE_SPECIFIC (&parmsym, language_c);
-  SYMBOL_NAMESPACE (&parmsym) = VAR_NAMESPACE;
-  SYMBOL_CLASS (&parmsym) = LOC_ARG;
 
   func_symbol_type = init_type (TYPE_CODE_FUNC, 1, 0,
 				"<function, no debug info>", NULL);

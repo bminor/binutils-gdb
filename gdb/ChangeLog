@@ -1,3 +1,29 @@
+Sat Sep 23 01:22:23 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* mdebugread.c (parse_partial_symbols):  Reset includes_used
+	and dependencies_used after finishing the partial symbol table.
+
+	* rs6000-nat.c (xcoff_relocate_core):  Don't relocate data
+	addresses for the main objfile if DONT_RELOCATE_SYMFILE_OBJFILE
+	is defined.
+	* xcoffread.c:  gcc -Wall lint. Remove traceback table reading
+	code. The existing code tried to add parameter information for
+	functions compiled without -g, which cannot be done properly
+	for optimized code and produced misleading parameter displays.
+	(ef_complaint, eb_complaint):  Make a local static copy to avoid
+	dependency on coffread.c.
+	(read_xcoff_symtab, process_xcoff_symbol, scan_xcoff_symtab):
+	Enter C_EXT/C_HIDEXT symbols into the minimal symbol table only.
+	(read_xcoff_symtab):  Ignore C_STAT section auxiliary entry
+	symbols. Complain about unmatched .ef and .eb symbols instead of
+	segfaulting.
+	(process_xcoff_symbol):  Determine value of C_GSYM symbols via
+	the global_sym_chain mechanism in stabsread.c.
+	(xcoff_new_init):  Call stabsread_new_init and buildsym_new_init.
+	(init_string_tab):  Initialize length field bytes in the strtbl.
+	(scan_xcoff_symtab):  Skip symbols that start with `$' or `.$'.
+	Set first_fun_line_offset for symbols with two auxents only.
+
 Wed Sep 20 21:06:35 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* op50-rom.c (op50n_cmds): Send ".\r" after the interrupt

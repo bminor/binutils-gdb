@@ -1,5 +1,6 @@
 /* IBM RS/6000 native-dependent code for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1994 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992, 1994, 1995
+	     Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -716,6 +717,14 @@ xcoff_relocate_core (target)
       vp->tend = vp->tstart + ldip->ldinfo_textsize;
       vp->dstart = (CORE_ADDR) ldip->ldinfo_dataorg;
       vp->dend = vp->dstart + ldip->ldinfo_datasize;
+
+#ifdef DONT_RELOCATE_SYMFILE_OBJFILE
+      if (vp == vmap)
+	{
+	  vp->dstart = (CORE_ADDR) 0;
+	  vp->dend = ldip->ldinfo_datasize;
+	}
+#endif
 
       if (vp->tadj != 0)
 	{
