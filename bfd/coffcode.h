@@ -3873,7 +3873,9 @@ coff_write_object_contents (abfd)
     internal_f.f_flags |= IMAGE_FILE_DEBUG_STRIPPED;
 #endif
 
-#ifndef COFF_WITH_PE
+#ifdef COFF_WITH_PE
+  internal_f.f_flags |= IMAGE_FILE_32BIT_MACHINE;
+#else
   if (bfd_little_endian (abfd))
     internal_f.f_flags |= F_AR32WR;
   else

@@ -1,3 +1,8 @@
+2003-07-12  Jeff Muizelaar  <muizelaar@rogers.com>
+
+	* coffcode.h (coff_set_section_contents): Set the
+	IMAGE_FILE_32BIT_MACHINE flag for PE targets.
+
 2003-07-11  Richard Sandiford  <rsandifo@redhat.com>
 
 	* bfd-in.h (bfd_h8300_pad_address): Declare.
