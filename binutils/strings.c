@@ -39,10 +39,11 @@
    -o		Like -to.  (Some other implementations have -o like -to,
 		others like -td.  We chose one arbitrarily.)
 
-   --encoding={s,b,l,B,L}
-   -e {s,b,l,B,L}
-		Select character encoding: single-byte, bigendian 16-bit,
-		littleendian 16-bit, bigendian 32-bit, littleendian 32-bit
+   --encoding={s,S,b,l,B,L}
+   -e {s,S,b,l,B,L}
+		Select character encoding: 7-bit-character, 8-bit-character,
+		bigendian 16-bit, littleendian 16-bit, bigendian 32-bit,
+		littleendian 32-bit.
 
    --target=BFDNAME
 		Specify a non-default object file format.
@@ -80,11 +81,14 @@
 #endif
 #if O_BINARY
 #include <io.h>
-#define SET_BINARY(f) do { if (!isatty(f)) setmode(f,O_BINARY); } while (0)
+#define SET_BINARY(f) do { if (!isatty (f)) setmode (f,O_BINARY); } while (0)
 #endif
 #endif
 
-#define isgraphic(c) (ISPRINT (c) || (c) == '\t')
+#define STRING_ISGRAPHIC(c) \
+      (   (c) >= 0 \
+       && (c) <= 255 \
+       && ((c) == '\t' || ISPRINT (c) || (encoding == 'S' && (c) > 127)))
 
 #ifndef errno
 extern int errno;
@@ -95,10 +99,10 @@ extern int errno;
 
 #ifdef HAVE_FOPEN64
 typedef off64_t file_off;
-#define file_open(s,m) fopen64(s,m)
+#define file_open(s,m) fopen64(s, m)
 #else
 typedef off_t file_off;
-#define file_open(s,m) fopen(s,m)
+#define file_open(s,m) fopen(s, m)
 #endif
 
 /* Radix for printing addresses (must be 8, 10 or 16).  */
@@ -148,12 +152,11 @@ static bfd_boolean strings_file
 static int integer_arg
   PARAMS ((char *s));
 static void print_strings
-  PARAMS ((const char *filename, FILE *stream, file_off address,
-	   int stop_point, int magiccount, char *magic));
+  PARAMS ((const char *, FILE *, file_off, int, int, char *));
 static void usage
-  PARAMS ((FILE *stream, int status));
+  PARAMS ((FILE *, int));
 static long get_char
-  PARAMS ((FILE *stream, file_off *address, int *magiccount, char **magic));
+  PARAMS ((FILE *, file_off *, int *, char **));
 
 int main
   PARAMS ((int, char **));
@@ -202,9 +205,7 @@ main (argc, argv)
 	case 'n':
 	  string_min = integer_arg (optarg);
 	  if (string_min < 1)
-	    {
-	      fatal (_("invalid number %s"), optarg);
-	    }
+	    fatal (_("invalid number %s"), optarg);
 	  break;
 
 	case 'o':
@@ -267,6 +268,7 @@ main (argc, argv)
 
   switch (encoding)
     {
+    case 'S':
     case 's':
       encoding_bytes = 1;
       break;
@@ -330,6 +332,7 @@ strings_a_section (abfd, sect, filearg)
     {
       bfd_size_type sz = bfd_get_section_size_before_reloc (sect);
       PTR mem = xmalloc (sz);
+
       if (bfd_get_section_contents (abfd, sect, mem, (file_ptr) 0, sz))
 	{
 	  got_a_section = TRUE;
@@ -352,10 +355,8 @@ strings_object_file (file)
   bfd *abfd = bfd_openr (file, target);
 
   if (abfd == NULL)
-    {
-      /* Treat the file as a non-object file.  */
-      return FALSE;
-    }
+    /* Treat the file as a non-object file.  */
+    return FALSE;
 
   /* This call is mainly for its side effect of reading in the sections.
      We follow the traditional behavior of `strings' in that we don't
@@ -460,6 +461,7 @@ get_char (stream, address, magiccount, magic)
 
   switch (encoding)
     {
+    case 'S':
     case 's':
       r = buf[0];
       break;
@@ -524,7 +526,7 @@ print_strings (filename, stream, address, stop_point, magiccount, magic)
 	  c = get_char (stream, &address, &magiccount, &magic);
 	  if (c == EOF)
 	    return;
-	  if (c > 255 || c < 0 || !isgraphic (c))
+	  if (! STRING_ISGRAPHIC (c))
 	    /* Found a non-graphic.  Try again starting with next char.  */
 	    goto tryline;
 	  buf[i] = c;
@@ -592,7 +594,7 @@ print_strings (filename, stream, address, stop_point, magiccount, magic)
 	  c = get_char (stream, &address, &magiccount, &magic);
 	  if (c == EOF)
 	    break;
-	  if (c > 255 || c < 0 || !isgraphic (c))
+	  if (! STRING_ISGRAPHIC (c))
 	    break;
 	  putchar (c);
 	}
@@ -642,9 +644,8 @@ integer_arg (s)
     p--;
 
   if (*p)
-    {
-      fatal (_("invalid integer argument %s"), s);
-    }
+    fatal (_("invalid integer argument %s"), s);
+
   return value;
 }
 
@@ -663,8 +664,8 @@ usage (stream, status)
   -t --radix={o,x,d}        Print the location of the string in base 8, 10 or 16\n\
   -o                        An alias for --radix=o\n\
   -T --target=<BFDNAME>     Specify the binary file format\n\
-  -e --encoding={s,b,l,B,L} Select character size and endianness:\n\
-                            s = 8-bit, {b,l} = 16-bit, {B,L} = 32-bit\n\
+  -e --encoding={s,S,b,l,B,L} Select character size and endianness:\n\
+                            s = 7-bit, S = 8-bit, {b,l} = 16-bit, {B,L} = 32-bit\n\
   -h --help                 Display this information\n\
   -v --version              Print the program's version number\n"));
   list_supported_targets (program_name, stream);

@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Added 'S' encoding to strings to allow the display of 8-bit characters.
+
 * Added --prefix-symbols=<text>, --prefix-sections=<text> and
   --prefix-alloc-sections=<text> to objcopy.
 
