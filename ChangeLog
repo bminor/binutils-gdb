@@ -1,3 +1,8 @@
+Fri Sep  1 08:06:58 1995  James G. Smith  <jsmith@beauty.cygnus.com>
+
+	* config.sub: recognise mips64vr4300 and mips64vr4300el as valid
+ 	targets.
+
 Wed Aug 30 21:06:50 1995  Jason Molenda  (crash@phydeaux.cygnus.com)
 
 	* configure.in: treat i386-win32 canadian cross the same as
