@@ -1,9 +1,10 @@
-<<<<<<< ChangeLog
 Fri Jul  2 18:22:54 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* eval.c (evaluate_subexp): Improve error messages for OP_TYPE and
+	default cases.
 
 	* Makefile.in (distclean): Remove y.tab.h.
 
-=======
 Fri Jul  2 14:55:48 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* exec.c (exec_file_command):  Remove Mar 28 hack as BFD handles
@@ -18,7 +19,8 @@ Fri Jul  2 13:33:12 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
 	New target macros for getting at the pc, sp and fp.
 	* infcmd.c (read_pc, write_pc):  Modify to use new macros.
 	(read_sp, write_sp, read_fp, write_fp): New functions.
-	* blockframe.c (reinit_frame_cache, get_prev_frame_info):  Use new functions.
+	* blockframe.c (reinit_frame_cache, get_prev_frame_info):
+	Use new functions.
 	* breakpoint.c (bpstat_alloc): ditto.
 	* infrun.c (wait_for_inferior): ditto.
 	* stack.c (print_frame_info): ditto.
@@ -31,7 +33,6 @@ Fri Jul  2 13:33:12 1993  Steve Chamberlain  (sac@phydeaux.cygnus.com)
 	* config/alpha/xm-alpha.h: Add MAKEVA_END.
 	* config/h8500/tm-h8500.h: Define new macros.
 
->>>>>>> 1.1453
 Fri Jul  2 13:51:04 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* configure.in (mipos-*-riscos*): New host and target; use riscos.

@@ -162,7 +162,7 @@ evaluate_subexp (expect_type, exp, pos, noside)
      enum noside noside;
 {
   enum exp_opcode op;
-  int tem;
+  int tem, tem2, tem3;
   register int pc, pc2, oldpos;
   register value arg1, arg2, arg3;
   struct type *type;
@@ -176,8 +176,7 @@ evaluate_subexp (expect_type, exp, pos, noside)
     {
     case OP_SCOPE:
       tem = longest_to_int (exp->elts[pc + 2].longconst);
-      (*pos) += 4 + ((tem + sizeof (union exp_element))
-		     / sizeof (union exp_element));
+      (*pos) += 4 + BYTES_TO_EXP_ELEM (tem + 1);
       arg1 = value_struct_elt_for_reference (exp->elts[pc + 1].type,
 					     0,
 					     exp->elts[pc + 1].type,
@@ -238,12 +237,10 @@ evaluate_subexp (expect_type, exp, pos, noside)
       (*pos) += 2;
       return value_of_register (longest_to_int (exp->elts[pc + 1].longconst));
 
-    /* start-sanitize-chill */
     case OP_BOOL:
       (*pos) += 2;
       return value_from_longest (builtin_type_chill_bool,
 				 exp->elts[pc + 1].longconst);
-    /* end-sanitize-chill */
 
     case OP_INTERNALVAR:
       (*pos) += 2;
@@ -251,11 +248,30 @@ evaluate_subexp (expect_type, exp, pos, noside)
 
     case OP_STRING:
       tem = longest_to_int (exp->elts[pc + 1].longconst);
-      (*pos) += 3 + ((tem + sizeof (union exp_element))
-		     / sizeof (union exp_element));
+      (*pos) += 3 + BYTES_TO_EXP_ELEM (tem + 1);
       if (noside == EVAL_SKIP)
 	goto nosideret;
       return value_string (&exp->elts[pc + 2].string, tem);
+
+    case OP_BITSTRING:
+      error ("support for OP_BITSTRING unimplemented");
+      break;
+
+    case OP_ARRAY:
+      (*pos) += 3;
+      tem2 = longest_to_int (exp->elts[pc + 1].longconst);
+      tem3 = longest_to_int (exp->elts[pc + 2].longconst);
+      nargs = tem3 - tem2 + 1;
+      argvec = (value *) alloca (sizeof (value) * nargs);
+      for (tem = 0; tem < nargs; tem++)
+	{
+	  /* Ensure that array expressions are coerced into pointer objects. */
+	  argvec[tem] = evaluate_subexp_with_coercion (exp, pos, noside);
+	}
+      if (noside == EVAL_SKIP)
+	goto nosideret;
+      return (value_array (tem2, tem3, argvec));
+      break;
 
     case TERNOP_COND:
       /* Skip third and second args to evaluate the first one.  */
@@ -351,7 +367,7 @@ evaluate_subexp (expect_type, exp, pos, noside)
 	  /* First, evaluate the structure into arg2 */
 	  pc2 = (*pos)++;
 	  tem2 = longest_to_int (exp->elts[pc2 + 1].longconst);
-	  *pos += 3 + (tem2 + sizeof (union exp_element)) / sizeof (union exp_element);
+	  *pos += 3 + BYTES_TO_EXP_ELEM (tem2 + 1);
 	  if (noside == EVAL_SKIP)
 	    goto nosideret;
 
@@ -371,6 +387,8 @@ evaluate_subexp (expect_type, exp, pos, noside)
 	  nargs = longest_to_int (exp->elts[pc + 1].longconst);
 	  tem = 0;
 	}
+      /* Allocate arg vector, including space for the function to be
+	 called in argvec[0] and a terminating NULL */
       argvec = (value *) alloca (sizeof (value) * (nargs + 2));
       for (; tem <= nargs; tem++)
 	/* Ensure that array expressions are coerced into pointer objects. */
@@ -393,7 +411,7 @@ evaluate_subexp (expect_type, exp, pos, noside)
 	  if (VALUE_OFFSET (temp))
 	    {
 	      arg2 = value_from_longest (lookup_pointer_type (VALUE_TYPE (temp)),
-				      value_as_long (arg2)+VALUE_OFFSET (temp));
+					 VALUE_ADDRESS (temp)+VALUE_OFFSET (temp));
 	      argvec[1] = arg2;
 	    }
 	  if (static_memfuncp)
@@ -432,8 +450,7 @@ evaluate_subexp (expect_type, exp, pos, noside)
 
     case STRUCTOP_STRUCT:
       tem = longest_to_int (exp->elts[pc + 1].longconst);
-      (*pos) += 3 + ((tem + sizeof (union exp_element))
-		     / sizeof (union exp_element));
+      (*pos) += 3 + BYTES_TO_EXP_ELEM (tem + 1);
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
@@ -451,13 +468,12 @@ evaluate_subexp (expect_type, exp, pos, noside)
 
     case STRUCTOP_PTR:
       tem = longest_to_int (exp->elts[pc + 1].longconst);
-      (*pos) += 3 + (tem + sizeof (union exp_element)) / sizeof (union exp_element);
+      (*pos) += 3 + BYTES_TO_EXP_ELEM (tem + 1);
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	return value_zero (lookup_struct_elt_type (TYPE_TARGET_TYPE
-						   (VALUE_TYPE (arg1)),
+	return value_zero (lookup_struct_elt_type (VALUE_TYPE (arg1),
 						   &exp->elts[pc + 2].string,
 						   0),
 			   lval_memory);
@@ -492,6 +508,16 @@ evaluate_subexp (expect_type, exp, pos, noside)
       return value_ind (arg3);
     bad_pointer_to_member:
       error("non-pointer-to-member value used in pointer-to-member construct");
+
+    case BINOP_CONCAT:
+      arg1 = evaluate_subexp_with_coercion (exp, pos, noside);
+      arg2 = evaluate_subexp_with_coercion (exp, pos, noside);
+      if (noside == EVAL_SKIP)
+	goto nosideret;
+      if (binop_user_defined_p (op, arg1, arg2))
+	return value_x_binop (arg1, arg2, op, OP_NULL);
+      else
+	return value_concat (arg1, arg2);
 
     case BINOP_ASSIGN:
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
@@ -860,7 +886,7 @@ evaluate_subexp (expect_type, exp, pos, noside)
 	  if (op == OP_SCOPE)
 	    {
 	      int temm = longest_to_int (exp->elts[pc+3].longconst);
-	      (*pos) += 3 + (temm + sizeof (union exp_element)) / sizeof (union exp_element);
+	      (*pos) += 3 + BYTES_TO_EXP_ELEM (temm + 1);
 	    }
 	  else
 	    evaluate_subexp (expect_type, exp, pos, EVAL_SKIP);
@@ -961,8 +987,22 @@ evaluate_subexp (expect_type, exp, pos, noside)
       (*pos) += 1;
       return value_of_this (1);
 
+    case OP_TYPE:
+      error ("Attempt to use a type name as an expression");
+
     default:
-      error ("internal error: I do not know how to evaluate what you gave me");
+      /* Removing this case and compiling with gcc -Wall reveals that
+	 a lot of cases are hitting this case.  Some of these should
+	 probably be removed from expression.h (e.g. do we need a BINOP_SCOPE
+	 and an OP_SCOPE?); others are legitimate expressions which are
+	 (apparently) not fully implemented.
+
+	 If there are any cases landing here which mean a user error,
+	 then they should be separate cases, with more descriptive
+	 error messages.  */
+
+      error ("\
+GDB does not (yet) know how to evaluated that kind of expression");
     }
 
  nosideret:
