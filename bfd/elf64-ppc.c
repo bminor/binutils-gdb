@@ -4213,7 +4213,9 @@ update_plt_info (bfd *abfd, struct ppc_link_hash_entry *eh, bfd_vma addend)
     }
   ent->plt.refcount += 1;
   eh->elf.needs_plt = 1;
-  eh->is_func = 1;
+  if (eh->elf.root.root.string[0] == '.'
+      && eh->elf.root.root.string[1] != '\0')
+    eh->is_func = 1;
   return TRUE;
 }
 
@@ -5486,12 +5488,10 @@ func_desc_adjust (struct elf_link_hash_entry *h, void *inf)
      been imported from another library.  Function code syms that
      are really in the library we must leave global to prevent the
      linker dragging in a definition from a static library.  */
-  force_local
-    = (info->shared
-       && (!fh->elf.def_regular
-	   || fdh == NULL
-	   || !fdh->elf.def_regular
-	   || fdh->elf.forced_local));
+  force_local = (!fh->elf.def_regular
+		 || fdh == NULL
+		 || !fdh->elf.def_regular
+		 || fdh->elf.forced_local);
   _bfd_elf_link_hash_hide_symbol (info, &fh->elf, force_local);
 
   return TRUE;

@@ -1,3 +1,10 @@
+2005-03-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (update_plt_info): Don't mark new ABI call syms
+	with is_func.
+	(func_desc_adjust): Force dot-syms local in executables as well
+	as shared libs.
+
 2005-03-04  David Daney  <ddaney@avtrex.com>
 
 	* elfxx-mips.c (mips_elf_calculate_relocation): Handle special
