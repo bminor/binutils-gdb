@@ -1,5 +1,8 @@
 Thu Sep 30 11:30:56 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* blockframe.c (find_pc_partial_function): If pst->readin is
+	set, don't try to get symbols from pst.
+
 	* inflow.c (generic_mourn_inferior): Call reinit_frame_cache
 	instead	of doing it ourself.
 	* blockframe.c (reinit_frame_cache): Use code which was in
