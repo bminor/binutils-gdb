@@ -1,3 +1,8 @@
+2003-09-14  Andrew Cagney  <cagney@redhat.com>
+
+	* config/djgpp/fnchange.lst: Rename "amd64fbsd-tdep.c" and
+	"amd64fbsd-nat.c" to "a64fb-tdep.c" and "a64fb-nat.c".
+
 2003-09-11  Daniel Jacobowitz  <drow@mvista.com>
 
 	Merge from mainline:
