@@ -1,3 +1,10 @@
+Wed Mar  4 12:10:43 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* cpu.h,model.c,sem-switch.c,sem.c: Regenerate.
+start-sanitize-m32rx
+	* cpux.h,decodex.[ch],modelx.c,readx.c,semx.c: Regenerate.
+end-sanitize-m32rx
+
 Thu Feb 26 18:38:35 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-if.c (sim_open): Initialize PROFILE_INFO_CPU_CALLBACK.
