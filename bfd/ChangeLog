@@ -1,5 +1,8 @@
 Mon Apr 24 02:17:31 2000  Jeffrey A Law  (law@cygnus.com)
 
+	* targets.c (bfd_target_vector): Add bfd_elf64_hppa_vec.
+	(bfd_elf64_hppa_vec): Declare.
+
 	* Makefile.am (BFD64_BACKENDS): Add elf64-hppa.lo
 	(BFD64_BACKENDS_CFILES): Add elf64-hppa.c
 	(elf64-hppa.lo): Add dependencies.
