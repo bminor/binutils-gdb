@@ -120,7 +120,7 @@ renaming):
 
 	$  make -f Makefile.in autoconf-changelog
 	$  more */new-ChangeLog
-	$  for f in */new-ChangeLog ; do echo $f ; mv $f `dirname $f`/ChangeLog ; done
+	$  make -f Makefile.in autoconf-install
 
 
 

@@ -210,9 +210,11 @@ autoconf-common:
 	done
 
 autoconf-changelog:
-	user="`finger $$USER | sed -n 's/^.*Name: //p'` <$$USER@`hostname`>" ; \
+	id="`id | sed -e 's/^[^(]*(\([^)]*\).*$$/\1/'`" ; \
+	name=`grep "^$$id:" /etc/passwd | cut -f 5 -d ':'` ; \
+	host="`hostname`" ; \
 	date="`date | sed 's/ [^ ]* \([0-9]*\)$$/ \1/'`" ; \
-	echo "$$date $$user" ; \
+	echo "$$date $$name $$id@$$host" ; \
 	for d in * ; \
 	do \
 	    if [ -d $$d -a -f $$d/configure.in ] ; \
@@ -220,12 +222,25 @@ autoconf-changelog:
 		if grep SIM_AC_COMMON $$d/configure.in >/dev/null ; \
 		then \
 		    echo "Creating new-ChangeLog in $$d ..." ; \
-		    ( echo "$$date  $$user" ; \
+		    ( echo "$$date  $$name  <$$id@$$host>" ; \
 		      echo "" ; \
 		      echo "	* configure: Regenerated to track ../common/aclocal.m4 changes." ; \
 		      echo "" ; \
 		      cat $$d/ChangeLog \
 		    ) > $$d/new-ChangeLog ; \
+		fi ; \
+	    fi ; \
+	done
+
+autoconf-install:
+	for d in * ; \
+	do \
+	    if [ -d $$d -a -f $$d/configure.in ] ; \
+	    then \
+		if grep SIM_AC_COMMON $$d/configure.in >/dev/null ; \
+		then \
+		    echo "Moving $$d/new-ChangeLog to $$d/ChangeLog ..." ; \
+		    mv $$d/new-ChangeLog $$d/ChangeLog ; \
 		fi ; \
 	    fi ; \
 	done

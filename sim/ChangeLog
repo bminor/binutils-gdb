@@ -1,6 +1,10 @@
+Wed Apr  2 15:09:05 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* Makefile.in (autoconf-install): New target.
+
 Wed Apr  2 14:25:52 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
 
-	* Makefile.in (autoconf-common-changelog): New target, update
+	* Makefile.in (autoconf-changelog): New target, update
  	ChangeLog for all subdirectories - normally used after
  	autoconf-common target.
 
