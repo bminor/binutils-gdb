@@ -7,4 +7,6 @@
 #msg  (but see comments in Makefile.dist about compiling with gcc).
 
 XDEPFILES= infptrace.o coredep.o
+REGEX=regex.o
+REGEX1=regex.o
 XM_FILE= xm-vax.h
