@@ -1,5 +1,10 @@
 2005-02-15  Jan Beulich  <jbeulich@novell.com>
 
+	* gas/ia64/pcrel.[ds]: New.
+	* gas/ia64/ia64.exp: Run new test.
+
+2005-02-15  Jan Beulich  <jbeulich@novell.com>
+
 	* gas/ia64/dv-raw-err.l: Expect specific resource for RAW violation on b0.
 	* gas/ia64/regval.[ls]: New.
 	* gas/ia64/ia64.exp: Run new test.

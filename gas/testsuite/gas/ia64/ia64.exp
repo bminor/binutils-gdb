@@ -53,6 +53,7 @@ if [istarget "ia64-*"] then {
 
     run_dump_test "reloc"
     run_list_test "reloc-bad" ""
+    run_dump_test "pcrel"
 
     run_dump_test "real"
     run_dump_test "align"

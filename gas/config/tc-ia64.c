@@ -11243,27 +11243,24 @@ md_apply_fix3 (fix, valP, seg)
 
   if (fix->fx_pcrel)
     {
-      switch (fix->fx_r_type)
-	{
-	case BFD_RELOC_IA64_DIR32MSB:
-	  fix->fx_r_type = BFD_RELOC_IA64_PCREL32MSB;
-	  break;
-
-	case BFD_RELOC_IA64_DIR32LSB:
-	  fix->fx_r_type = BFD_RELOC_IA64_PCREL32LSB;
-	  break;
-
-	case BFD_RELOC_IA64_DIR64MSB:
-	  fix->fx_r_type = BFD_RELOC_IA64_PCREL64MSB;
-	  break;
-
-	case BFD_RELOC_IA64_DIR64LSB:
-	  fix->fx_r_type = BFD_RELOC_IA64_PCREL64LSB;
-	  break;
-
-	default:
-	  break;
-	}
+    switch (fix->fx_r_type)
+      {
+      case BFD_RELOC_IA64_PCREL21B: break;
+      case BFD_RELOC_IA64_PCREL21BI: break;
+      case BFD_RELOC_IA64_PCREL21F: break;
+      case BFD_RELOC_IA64_PCREL21M: break;
+      case BFD_RELOC_IA64_PCREL60B: break;
+      case BFD_RELOC_IA64_PCREL22: break;
+      case BFD_RELOC_IA64_PCREL64I: break;
+      case BFD_RELOC_IA64_PCREL32MSB: break;
+      case BFD_RELOC_IA64_PCREL32LSB: break;
+      case BFD_RELOC_IA64_PCREL64MSB: break;
+      case BFD_RELOC_IA64_PCREL64LSB: break;
+      default:
+	fix->fx_r_type = ia64_gen_real_reloc_type (pseudo_func[FUNC_PC_RELATIVE].u.sym,
+					       fix->fx_r_type);
+	break;
+      }
     }
   if (fix->fx_addsy)
     {

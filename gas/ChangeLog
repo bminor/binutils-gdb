@@ -1,5 +1,11 @@
 2005-02-15  Jan Beulich  <jbeulich@novell.com>
 
+	* config/tc-ia64.c (md_apply_fix3): Call ia64_gen_real_reloc_type
+	instead of explicitly dealing with the translation; exclude
+	relocations that are already pcrel, however.
+
+2005-02-15  Jan Beulich  <jbeulich@novell.com>
+
 	* config/tc-ia64.c: Include limits.h (if available).
 	(gr_values[0]): Set path to INT_MAX.
 	(dot_reg_val): Don't allow changing value of r0. Limit range of
