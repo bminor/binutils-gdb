@@ -1,3 +1,8 @@
+2001-12-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-hppa.c (clobber_millicode_symbols): Don't do anything if
+	already forced local.
+
 2001-12-05  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* elf32-arm.h (elf32_arm_merge_private_bfd_data): Combine
