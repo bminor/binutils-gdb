@@ -2980,7 +2980,6 @@ output_jump ()
 {
   char *p;
   int size;
-  fixS *fixP;
 
   if (i.tm.opcode_modifier & JumpByte)
     {
@@ -3031,9 +3030,8 @@ output_jump ()
   p = frag_more (1 + size);
   *p++ = i.tm.base_opcode;
 
-  fixP = fix_new_exp (frag_now, p - frag_now->fr_literal, size,
-		      i.op[0].disps, 1, reloc (size, 1, 1, i.reloc[0]));
-  fixP->fx_pcrel_adjust = size;
+  fix_new_exp (frag_now, p - frag_now->fr_literal, size,
+	       i.op[0].disps, 1, reloc (size, 1, 1, i.reloc[0]));
 }
 
 static void
@@ -3226,7 +3224,6 @@ output_disp ()
 	      int size = 4;
 	      int sign = 0;
 	      int pcrel = (i.flags[n] & Operand_PCrel) != 0;
-	      fixS *fixP;
 
 	      /* The PC relative address is computed relative
 		 to the instruction boundary, so in case immediate
@@ -3266,11 +3263,9 @@ output_disp ()
 		}
 
 	      p = frag_more (size);
-	      fixP = fix_new_exp (frag_now, p - frag_now->fr_literal, size,
-				  i.op[n].disps, pcrel,
-				  reloc (size, pcrel, sign, i.reloc[n]));
-	      if (pcrel)
-		fixP->fx_pcrel_adjust = size;
+	      fix_new_exp (frag_now, p - frag_now->fr_literal, size,
+			   i.op[n].disps, pcrel,
+			   reloc (size, pcrel, sign, i.reloc[n]));
 	    }
 	}
     }
@@ -4215,7 +4210,6 @@ md_estimate_size_before_relax (fragP, segment)
       RELOC_ENUM reloc_type;
       unsigned char *opcode;
       int old_fr_fix;
-      fixS *fixP;
 
       if (fragP->fr_var != NO_RELOC)
 	reloc_type = fragP->fr_var;
@@ -4233,11 +4227,10 @@ md_estimate_size_before_relax (fragP, segment)
 	  /* Make jmp (0xeb) a (d)word displacement jump.  */
 	  opcode[0] = 0xe9;
 	  fragP->fr_fix += size;
-	  fixP = fix_new (fragP, old_fr_fix, size,
-			  fragP->fr_symbol,
-			  fragP->fr_offset, 1,
-			  reloc_type);
-	  fixP->fx_pcrel_adjust = size;
+	  fix_new (fragP, old_fr_fix, size,
+		   fragP->fr_symbol,
+		   fragP->fr_offset, 1,
+		   reloc_type);
 	  break;
 
 	case COND_JUMP86:
@@ -4255,11 +4248,10 @@ md_estimate_size_before_relax (fragP, segment)
 	      /* We added two extra opcode bytes, and have a two byte
 		 offset.  */
 	      fragP->fr_fix += 2 + 2;
-	      fixP = fix_new (fragP, old_fr_fix + 2, 2,
-			      fragP->fr_symbol,
-			      fragP->fr_offset, 1,
-			      reloc_type);
-	      fixP->fx_pcrel_adjust = size;
+	      fix_new (fragP, old_fr_fix + 2, 2,
+		       fragP->fr_symbol,
+		       fragP->fr_offset, 1,
+		       reloc_type);
 	      break;
 	    }
 	  /* Fall through.  */
@@ -4274,11 +4266,10 @@ md_estimate_size_before_relax (fragP, segment)
 	  opcode[0] = TWO_BYTE_OPCODE_ESCAPE;
 	  /* We've added an opcode byte.  */
 	  fragP->fr_fix += 1 + size;
-	  fixP = fix_new (fragP, old_fr_fix + 1, size,
-			  fragP->fr_symbol,
-			  fragP->fr_offset, 1,
-			  reloc_type);
-	  fixP->fx_pcrel_adjust = size;
+	  fix_new (fragP, old_fr_fix + 1, size,
+		   fragP->fr_symbol,
+		   fragP->fr_offset, 1,
+		   reloc_type);
 	  break;
 
 	default:
@@ -4607,6 +4598,8 @@ md_apply_fix3 (fixP, valP, seg)
   else if (use_rela_relocations)
     {
       fixP->fx_no_overflow = 1;
+      /* Remember value for tc_gen_reloc.  */
+      fixP->fx_addnumber = value;
       value = 0;
     }
 #endif
@@ -5120,9 +5113,23 @@ tc_gen_reloc (section, fixp)
   /* Use the rela in 64bit mode.  */
   else
     {
-      rel->addend = fixp->fx_offset;
-      if (fixp->fx_pcrel)
-	rel->addend -= fixp->fx_pcrel_adjust;
+      if (!fixp->fx_pcrel)
+	rel->addend = fixp->fx_offset;
+      else
+	switch (code)
+	  {
+	  case BFD_RELOC_X86_64_PLT32:
+	  case BFD_RELOC_X86_64_GOT32:
+	  case BFD_RELOC_X86_64_GOTPCREL:
+	    rel->addend = fixp->fx_offset - fixp->fx_size;
+	    break;
+	  default:
+	    rel->addend = (section->vma
+			   - fixp->fx_size
+			   + fixp->fx_addnumber
+			   + md_pcrel_from (fixp));
+	    break;
+	  }
     }
 
   rel->howto = bfd_reloc_type_lookup (stdoutput, code);

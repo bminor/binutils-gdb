@@ -1,3 +1,11 @@
+2002-04-24  Andreas Schwab  <schwab@suse.de>
+
+	* config/tc-i386.c (output_jump, output_disp)
+	(md_estimate_size_before_relax): Don't set fx_pcrel_adjust any
+	more.
+	(md_apply_fix3): Remember addend value for rela relocations.
+	(tc_gen_reloc): Correctly compute pc-relative relocation addend.
+
 2002-04-22  Chris Demetriou  <cgd@broadcom.com>
 
 	* config/tc-mips.c (macro_build): Add close-parenthesis missing
