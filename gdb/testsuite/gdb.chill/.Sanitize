@@ -70,7 +70,9 @@ pr-8742.ch
 pr-8742.exp
 pr-8894.ch
 pr-8894-grt.ch
-pr-8894.exp  
+pr-8894.exp
+pr-9095.ch
+pr-9095.exp
 result.ch
 result.exp
 string.ch
