@@ -13,6 +13,8 @@ Mon Nov 18 15:12:45 1991  John Gilmore  (gnu at cygnus.com)
 	* tm-*.h:  Remove FRAME_CHAIN_COMBINE macros, since all are
 	default.
 	* coffread.c:  Remove tdesc stuff.
+	* tconfig/delta88, tconfig/m88k:  Remove tdesc stuff.
+	* xconfig/m88k:  Rename tm-88k.h to tm-m88k.h.
 
 Mon Nov 18 13:51:37 1991  Per Bothner  (bothner at cygnus.com)
 

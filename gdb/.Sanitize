@@ -186,14 +186,11 @@ tahoe-pinsn.c
 target.c
 target.h
 tconfig
-tdesc-lib
-tdesc.c
-tdesc.h
 terminal.h
 tm-29k.h
 tm-3b1.h
 tm-68k.h
-tm-88k.h
+tm-m88k.h
 tm-altos.h
 tm-altosgas.h
 tm-amix.h
@@ -243,7 +240,7 @@ vax-pinsn.c
 vx-share
 xconfig
 xm-3b1.h
-xm-88k.h
+xm-m88k.h
 xm-altos.h
 xm-amix.h
 xm-arm.h
