@@ -1060,10 +1060,13 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
     default:
       break;
     }
-  
-  /* Initially set everything according to the ABI.  */
+
+  /* Initially set everything according to the ABI.
+     Use 16-bit integers since it will be the case for most
+     programs.  The size of these types should normally be set
+     according to the dwarf2 debug information.  */
   set_gdbarch_short_bit (gdbarch, 16);
-  set_gdbarch_int_bit (gdbarch, 32);
+  set_gdbarch_int_bit (gdbarch, 16);
   set_gdbarch_float_bit (gdbarch, 32);
   set_gdbarch_double_bit (gdbarch, 64);
   set_gdbarch_long_double_bit (gdbarch, 64);

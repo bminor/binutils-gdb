@@ -1,3 +1,7 @@
+2001-07-22  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* m68hc11-tdep.c (m68hc11_gdbarch_init): Define int at 16-bits.
+
 2001-07-21  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* utils.c (init_page_info): Use tui_get_command_dimension.
