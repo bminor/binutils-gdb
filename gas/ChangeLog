@@ -1,5 +1,8 @@
 Tue Jan 11 13:01:20 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* config/obj-ecoff.c (ecoff_frob_file): Force .sdata and .sbss
+	sections to be close together.
+
 	* config/tc-mips.c (macro): Corrected $at warnings in a couple of
 	spots.
 
