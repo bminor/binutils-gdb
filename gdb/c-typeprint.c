@@ -35,6 +35,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include <string.h>
 #include <errno.h>
+#include <ctype.h>
 
 static void
 c_type_print_args PARAMS ((struct type *, GDB_FILE *));
@@ -641,6 +642,14 @@ c_type_print_base (type, stream, show, level)
 	      int is_constructor = name && STREQ(method_name, name);
 	      for (j = 0; j < len2; j++)
 		{
+		  char *physname = TYPE_FN_FIELD_PHYSNAME (f, j);
+		  int is_full_physname_constructor = 
+		    ((physname[0]=='_' && physname[1]=='_' && 
+		      (isdigit(physname[2])
+		       || physname[2]=='Q'
+		       || physname[2]=='t'))
+		     || (strncmp(physname, "__ct__", 6) == 0));
+
 		  QUIT;
 		  if (TYPE_FN_FIELD_PROTECTED (f, j))
 		    {
@@ -680,7 +689,7 @@ c_type_print_base (type, stream, show, level)
 			       TYPE_FN_FIELD_PHYSNAME (f, j));
 		      break;
 		    }
-		  else if (!is_constructor)
+		  else if (!is_constructor && !is_full_physname_constructor)
 		    {
 		      type_print (TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE (f, j)),
 				  "", stream, 0);

@@ -31,6 +31,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 int vtblprint;			/* Controls printing of vtbl's */
 int objectprint;		/* Controls looking up an object's derived type
 				   using what we find in its vtables.  */
+static int static_field_print;	/* Controls printing of static fields. */
 struct obstack dont_print_obstack;
 
 static void
@@ -240,8 +241,8 @@ cp_print_value_fields (type, valaddr, stream, format, recurse, pretty,
 
       for (i = n_baseclasses; i < len; i++)
 	{
-	  /* Check if static field */
-	  if (TYPE_FIELD_STATIC (type, i))
+	  /* If requested, skip printing of static fields.  */
+	  if (!static_field_print && TYPE_FIELD_STATIC (type, i))
 	    continue;
 	  if (fields_seen)
 	    fprintf_filtered (stream, ", ");
@@ -273,6 +274,8 @@ cp_print_value_fields (type, valaddr, stream, format, recurse, pretty,
 		fputs_filtered ("\"( ptr \"", stream);
 	      else
 		fputs_filtered ("\"( nodef \"", stream);
+	      if (TYPE_FIELD_STATIC (type, i))
+		fputs_filtered ("static ", stream);
 	      fprintf_symbol_filtered (stream, TYPE_FIELD_NAME (type, i),
 				       language_cplus,
 				       DMGL_PARAMS | DMGL_ANSI);
@@ -286,6 +289,8 @@ cp_print_value_fields (type, valaddr, stream, format, recurse, pretty,
 	    {
 	      annotate_field_begin (TYPE_FIELD_TYPE (type, i));
 
+	      if (TYPE_FIELD_STATIC (type, i))
+		fputs_filtered ("static ", stream);
 	      fprintf_symbol_filtered (stream, TYPE_FIELD_NAME (type, i),
 				       language_cplus,
 				       DMGL_PARAMS | DMGL_ANSI);
@@ -294,7 +299,7 @@ cp_print_value_fields (type, valaddr, stream, format, recurse, pretty,
 	      annotate_field_value ();
 	    }
 
-	  if (TYPE_FIELD_PACKED (type, i))
+	  if (!TYPE_FIELD_STATIC (type, i) && TYPE_FIELD_PACKED (type, i))
 	    {
 	      value_ptr v;
 
@@ -318,6 +323,24 @@ cp_print_value_fields (type, valaddr, stream, format, recurse, pretty,
 	      if (TYPE_FIELD_IGNORE (type, i))
 		{
 		   fputs_filtered ("<optimized out or zero length>", stream);
+		}
+	      else if (TYPE_FIELD_STATIC (type, i))
+		{
+		  value_ptr v;
+		  char *phys_name = TYPE_FIELD_STATIC_PHYSNAME (type, i);
+		  struct symbol *sym =
+		      lookup_symbol (phys_name, 0, VAR_NAMESPACE, 0, NULL);
+		  if (sym == NULL)
+		    fputs_filtered ("<optimized out>", stream);
+		  else
+		    {
+		      v = value_at (TYPE_FIELD_TYPE (type, i),
+				    (CORE_ADDR)SYMBOL_BLOCK_VALUE (sym));
+		      val_print (TYPE_FIELD_TYPE (type, i), 
+				 VALUE_CONTENTS_RAW (v),
+				 VALUE_ADDRESS (v),
+				 stream, format, 0, recurse + 1, pretty);
+		    }
 		}
 	      else
 		{
@@ -493,6 +516,15 @@ cp_print_class_member (valaddr, domain, stream, prefix)
 void
 _initialize_cp_valprint ()
 {
+  add_show_from_set
+    (add_set_cmd ("static-members", class_support, var_boolean,
+		  (char *)&static_field_print,
+		  "Set printing of C++ static members.",
+		  &setprintlist),
+     &showprintlist);
+  /* Turn on printing of static fields.  */
+  static_field_print = 1;
+
   add_show_from_set
     (add_set_cmd ("vtbl", class_support, var_boolean, (char *)&vtblprint,
 		  "Set printing of C++ virtual function tables.",

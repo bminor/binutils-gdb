@@ -1,3 +1,24 @@
+Sat Sep 17 02:26:58 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* cp-valprint.c (static_field_print):  New variable, controls
+	printing of static members.
+	(_initialize_cp_valprint):  New print set subcommand
+	"static-members". Turn on printing of static members by default.
+	(cp_print_value_fields):  Print static members if necessary.
+
+	* solib.c:  Remove inclusion of libelf.h and elf/mips.h.
+	(elf_locate_base):  Use only standard BFD functions to collect
+	information about the .dynamic section. Check for DT_MIPS_RLD_MAP
+	tag only if it got defined via the inclusion of <link.h>.
+
+	* f-exp.y:  Write block for OP_VAR_VALUE.
+	* f-valprint.c (info_common_command):  Handle `info common'
+	without an argument correctly.
+
+	* c-typeprint.c (c_type_print_base):  Handle template constructors.
+	* symtab.c (gdb_mangle_name):  Handle template method mangling,
+	get rid of GCC_MANGLE_BUG code, which only applied to gcc-2.2.2.
+
 Fri Sep 16 16:06:08 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
 	* gdbtypes.h (TYPE_INDEX_TYPE):  New macro.

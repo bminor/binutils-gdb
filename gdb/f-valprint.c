@@ -786,10 +786,10 @@ info_common_command (comname, from_tty)
 	funname = SYMBOL_NAME (msymbol);
     }
   
-  /* If comnname is NULL, we assume the user wishes to see the 
+  /* If comname is NULL, we assume the user wishes to see the 
      which COMMON blocks are visible here and then return */ 
   
-  if (strlen (comname) == 0) 
+  if (comname == 0)
     {
       list_all_visible_commons (funname);
       return; 
