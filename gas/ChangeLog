@@ -1,3 +1,9 @@
+2001-08-29  Joel Sherrill <joel@OARcorp.com>
+
+	* configure.in (i[3456]86-*-rtems*, m68*-*-rtems*): Change 
+	default from coff to elf.
+	* configure: Regenerate.
+
 Wed Aug 29 12:05:13 2001  J"orn Rennecke <amylaar@redhat.com>
 
 	* configure.in: Add case for h8300-*-elf.
