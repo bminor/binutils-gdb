@@ -1,3 +1,8 @@
+2000-09-15  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
+
+	* config/tc-vax.c (synthetic_votstrs): Remove jbssi and jbcci.
+	Likewise in relaxation description comments.
+
 2000-09-18  Alan Modra  <alan@linuxcare.com.au>
 
 	* config/tc-hppa.h (TC_FORCE_RELOCATION_SECTION): Allow

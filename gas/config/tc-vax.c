@@ -113,8 +113,6 @@ int flag_no_hash_mixed_case;	/* -h NUM */
  bbcs		e3
  bbsc		e4
  bbcc		e5
- bbssi		e6
- bbcci		e7
  Always, you complement 0th bit to reverse condition.
  Always, 1-byte opcde, longword-address, byte-address, 1-byte-displacement
 
@@ -1663,8 +1661,6 @@ static const struct vot
   {"jbcs",	{"rlvbb?", 0x800000e3}},
   {"jbsc",	{"rlvbb?", 0x800000e4}},
   {"jbcc",	{"rlvbb?", 0x800000e5}},
-  {"jbssi",	{"rlvbb?", 0x800000e6}},
-  {"jbcci",	{"rlvbb?", 0x800000e7}},
   {"jlbs",	{"rlb?", 0x800000e8}},
   {"jlbc",	{"rlb?", 0x800000e9}},
 
