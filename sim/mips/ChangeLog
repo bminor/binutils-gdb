@@ -1,3 +1,15 @@
+start-sanitize-r5900
+Thu Jun  4 16:47:27 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips.igen (check_mt_hilo): 2.1 of r5900 spec stalls for HILO.
+  	Select corresponding check_mt_hilo function.
+	(check_mult_hilo, check_div_hilo, check_mf_hilo, check_mt_hilo):
+ 	Ditto.
+	
+	* r5900.igen (check_mult_hilo_hi1lo1, check_div_hilo_hi1lo1): Mark
+ 	as r5900 specific.
+
+end-sanitize-r5900
 Tue Jun  2 15:48:02 1998  Ian Carmichael  <iancarm@cygnus.com>
 
 	* interp.c (signal_exception): SystemCall exception now uses

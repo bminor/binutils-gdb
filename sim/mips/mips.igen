@@ -132,9 +132,6 @@
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
-// start-sanitize-r5900
-*r5900:
-// end-sanitize-r5900
 {
   signed64 time = sim_events_time (SD);
   int ok = check_mf_cycles (SD_, history, time, "MT");
@@ -148,6 +145,9 @@
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
+// start-sanitize-r5900
+*r5900:
+// end-sanitize-r5900
 {
   signed64 time = sim_events_time (SD);
   history->mt.timestamp = time;
@@ -155,7 +155,20 @@
   return 1;
 }
 
+
 :function:::int:check_mf_hilo:hilo_history *history, hilo_history *peer
+*mipsI,mipsII,mipsIII,mipsIV:
+*vr5000:
+// start-sanitize-vr4320
+*vr4320:
+// end-sanitize-vr4320
+// start-sanitize-vr5400
+*vr5400:
+// end-sanitize-vr5400
+*r3900:
+// start-sanitize-tx19
+*tx19:
+// end-sanitize-tx19
 {
   signed64 time = sim_events_time (SD);
   int ok = 1;
@@ -177,6 +190,24 @@
   return ok;
 }
 
+// start-sanitize-r5900
+// The r5900 mfhi et.al insns _can_ be exectuted immediatly after a div
+:function:::int:check_mf_hilo:hilo_history *history, hilo_history *peer
+// end-sanitize-r5900
+// start-sanitize-r5900
+*r5900:
+// end-sanitize-r5900
+// start-sanitize-r5900
+{
+  /* FIXME: could record the fact that a stall occured if we want */
+  signed64 time = sim_events_time (SD);
+  history->mf.timestamp = time;
+  history->mf.cia = CIA;
+  return 1;
+}
+// end-sanitize-r5900
+
+
 :function:::int:check_mult_hilo:hilo_history *hi, hilo_history *lo
 *mipsI,mipsII,mipsIII,mipsIV:
 *vr5000:
@@ -186,9 +217,6 @@
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
-// start-sanitize-r5900
-*r5900:
-// end-sanitize-r5900
 {
   signed64 time = sim_events_time (SD);
   int ok = (check_mf_cycles (SD_, hi, time, "OP")
@@ -200,7 +228,6 @@
   return ok;
 }
 
-
 // The r3900 mult and multu insns _can_ be exectuted immediatly after
 // a mf{hi,lo}
 :function:::int:check_mult_hilo:hilo_history *hi, hilo_history *lo
@@ -208,7 +235,11 @@
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
+// start-sanitize-r5900
+*r5900:
+// end-sanitize-r5900
 {
+  /* FIXME: could record the fact that a stall occured if we want */
   signed64 time = sim_events_time (SD);
   hi->op.timestamp = time;
   lo->op.timestamp = time;
@@ -216,6 +247,7 @@
   lo->op.cia = CIA;
   return 1;
 }
+
 
 :function:::int:check_div_hilo:hilo_history *hi, hilo_history *lo
 *mipsI,mipsII,mipsIII,mipsIV:
@@ -230,9 +262,6 @@
 // start-sanitize-tx19
 *tx19:
 // end-sanitize-tx19
-// start-sanitize-r5900
-*r5900:
-// end-sanitize-r5900
 {
   signed64 time = sim_events_time (SD);
   int ok = (check_mf_cycles (SD_, hi, time, "OP")
@@ -243,6 +272,27 @@
   lo->op.cia = CIA;
   return ok;
 }
+
+
+// start-sanitize-r5900
+// The r5900 div et.al insns _can_ be exectuted immediatly after
+// a mf{hi,lo}
+:function:::int:check_div_hilo:hilo_history *hi, hilo_history *lo
+// end-sanitize-r5900
+// start-sanitize-r5900
+*r5900:
+// end-sanitize-r5900
+// start-sanitize-r5900
+{
+  /* FIXME: could record the fact that a stall occured if we want */
+  signed64 time = sim_events_time (SD);
+  hi->op.timestamp = time;
+  lo->op.timestamp = time;
+  hi->op.cia = CIA;
+  lo->op.cia = CIA;
+  return 1;
+}
+// end-sanitize-r5900
 
 
 
@@ -2074,33 +2124,53 @@
   address_word reverseendian = (ReverseEndian ? -1 : 0);
   address_word bigendiancpu = (BigEndianCPU ? -1 : 0);
   unsigned int byte;
+  unsigned int word;
   address_word paddr;
   int uncached;
   unsigned64 memval;
   address_word vaddr;
+  int nr_lhs_bits;
+  int nr_rhs_bits;
+  unsigned_word lhs_mask;
+  unsigned_word temp;
 
   vaddr = base + offset;
   AddressTranslation (vaddr, isDATA, isLOAD, &paddr, &uncached, isTARGET, isREAL);
   paddr = (paddr ^ (reverseendian & mask));
   if (BigEndianMem == 0)
     paddr = paddr & ~access;
-  byte = ((vaddr & mask) ^ (bigendiancpu & mask));
-  LoadMemory (&memval, NULL, uncached, byte & access, paddr, vaddr, isDATA, isREAL);
-  /* printf ("ll: 0x%08lx %d@0x%08lx 0x%08lx\n",
-     (long) vaddr, byte, (long) paddr, (long) memval); */
-  if ((byte & ~access) == 0)
+
+  /* compute where within the word/mem we are */
+  byte = ((vaddr ^ bigendiancpu) & access); /* 0..access */
+  word = ((vaddr ^ bigendiancpu) & (mask & ~access)) / (access + 1); /* 0..1 */
+  nr_lhs_bits = 8 * byte + 8;
+  nr_rhs_bits = 8 * access - 8 * byte;
+  /* nr_lhs_bits + nr_rhs_bits == 8 * (accesss + 1) */
+
+  /* fprintf (stderr, "l[wd]l: 0x%08lx%08lx 0x%08lx%08lx %d:%d %d+%d\n",
+	   (long) ((unsigned64) vaddr >> 32), (long) vaddr,
+	   (long) ((unsigned64) paddr >> 32), (long) paddr,
+	   word, byte, nr_lhs_bits, nr_rhs_bits); */
+
+  LoadMemory (&memval, NULL, uncached, byte, paddr, vaddr, isDATA, isREAL);
+  if (word == 0)
     {
-      int bits = 8 * (access - byte);
-      unsigned_word screen = LSMASK (bits - 1, 0);
-      rt &= screen;
-      rt |= ((memval << bits) & ~screen);
+      /* GPR{31..32-NR_LHS_BITS} = memval{NR_LHS_BITS-1..0} */
+      temp = (memval << nr_rhs_bits);
     }
   else
     {
-      unsigned_word screen = LSMASK (8 * (access - (byte & access)) - 1, 0);
-      rt &= screen;
-      rt |= ((memval >> (8 * (mask - byte))) & ~screen);
+      /* GPR{31..32-NR_LHS_BITS = memval{32+NR_LHS_BITS..32} */
+      temp = (memval >> nr_lhs_bits);
     }
+  lhs_mask = LSMASK (nr_lhs_bits + nr_rhs_bits - 1, nr_rhs_bits);
+  rt = (rt & ~lhs_mask) | (temp & lhs_mask);
+
+  /* fprintf (stderr, "l[wd]l: 0x%08lx%08lx -> 0x%08lx%08lx & 0x%08lx%08lx -> 0x%08lx%08lx\n",
+	   (long) ((unsigned64) memval >> 32), (long) memval,
+	   (long) ((unsigned64) temp >> 32), (long) temp,
+	   (long) ((unsigned64) lhs_mask >> 32), (long) lhs_mask,
+	   (long) (rt >> 32), (long) rt); */
   return rt;
 }
 
@@ -3212,22 +3282,43 @@
   address_word reverseendian = (ReverseEndian ? -1 : 0);
   address_word bigendiancpu = (BigEndianCPU ? -1 : 0);
   unsigned int byte;
+  unsigned int word;
   address_word paddr;
   int uncached;
   unsigned64 memval;
   address_word vaddr;
+  int nr_lhs_bits;
+  int nr_rhs_bits;
 
   vaddr = base + offset;
   AddressTranslation (vaddr, isDATA, isSTORE, &paddr, &uncached, isTARGET, isREAL);
   paddr = (paddr ^ (reverseendian & mask));
   if (BigEndianMem == 0)
     paddr = paddr & ~access;
-  byte = ((vaddr & mask) ^ (bigendiancpu & mask));
-  if ((byte & ~access) == 0)
-    memval = (rt >> (8 * (access - byte)));
+
+  /* compute where within the word/mem we are */
+  byte = ((vaddr ^ bigendiancpu) & access); /* 0..access */
+  word = ((vaddr ^ bigendiancpu) & (mask & ~access)) / (access + 1); /* 0..1 */
+  nr_lhs_bits = 8 * byte + 8;
+  nr_rhs_bits = 8 * access - 8 * byte;
+  /* nr_lhs_bits + nr_rhs_bits == 8 * (accesss + 1) */
+  /* fprintf (stderr, "s[wd]l: 0x%08lx%08lx 0x%08lx%08lx %d:%d %d+%d\n",
+	   (long) ((unsigned64) vaddr >> 32), (long) vaddr,
+	   (long) ((unsigned64) paddr >> 32), (long) paddr,
+	   word, byte, nr_lhs_bits, nr_rhs_bits); */
+
+  if (word == 0)
+    {
+      memval = (rt >> nr_rhs_bits);
+    }
   else
-    memval = (rt << (8 * (mask - byte)));
-  StoreMemory (uncached, byte & access, memval, 0, paddr, vaddr, isREAL);
+    {
+      memval = (rt << nr_lhs_bits);
+    }
+  /* fprintf (stderr, "s[wd]l: 0x%08lx%08lx -> 0x%08lx%08lx\n",
+	   (long) ((unsigned64) rt >> 32), (long) rt,
+	   (long) ((unsigned64) memval >> 32), (long) memval); */
+  StoreMemory (uncached, byte, memval, 0, paddr, vaddr, isREAL);
 }
 
 
