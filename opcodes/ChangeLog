@@ -1,3 +1,14 @@
+Mon Feb 19 02:03:50 1996  Doug Evans  <dje@charmed.cygnus.com>
+
+	* sparc-dis.c (MASK_V9,V9_ONLY_P,V9_P): Define.
+	(print_insn_sparc): Rewrite v9/not-v9 tests.
+	(compare_opcodes): Likewise.
+	* sparc-opc.c (MASK_<ARCH>): Define.
+	(v6,v7,v8,sparclite,v9,v9a): Redefine.
+	(sparclet,v6notv9): Define.
+	(sparc_opcode_archs): Delete member `conflicts'.  Add `supported'.
+	(sparc_opcodes): Delete F_NOTV9, use v6notv9 instead.
+
 Thu Feb 15 14:45:05 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Call AC_PROG_CC before configure.host.
