@@ -10748,7 +10748,8 @@ mips_frob_file (void)
 	  if (*pos == l->fixp)
 	    hi_pos = pos;
 
-	  if ((*pos)->fx_r_type == BFD_RELOC_LO16
+	  if (((*pos)->fx_r_type == BFD_RELOC_LO16
+	       || (*pos)->fx_r_type == BFD_RELOC_MIPS16_LO16)
 	      && (*pos)->fx_addsy == l->fixp->fx_addsy
 	      && (*pos)->fx_offset >= l->fixp->fx_offset
 	      && (lo_pos == NULL
@@ -12689,7 +12690,9 @@ mips_fix_adjustable (fixS *fixp)
      placed anywhere.  Rather than break backwards compatibility by changing
      this, it seems better not to force the issue, and instead keep the
      original symbol.  This will work with either linker behavior.  */
-  if ((fixp->fx_r_type == BFD_RELOC_LO16 || reloc_needs_lo_p (fixp->fx_r_type))
+  if ((fixp->fx_r_type == BFD_RELOC_LO16
+       || fixp->fx_r_type == BFD_RELOC_MIPS16_LO16
+       || reloc_needs_lo_p (fixp->fx_r_type))
       && HAVE_IN_PLACE_ADDENDS
       && (S_GET_SEGMENT (fixp->fx_addsy)->flags & SEC_MERGE) != 0)
     return 0;

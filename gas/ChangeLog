@@ -1,3 +1,10 @@
+2005-03-21  Maciej W. Rozycki  <macro@mips.com>
+
+	* config/tc-mips.c (mips_frob_file): Sort BFD_RELOC_MIPS16_LO16
+	relocations correctly as well.
+	(mips_fix_adjustable): Don't make BFD_RELOC_MIPS16_LO16
+	relocations in mergeable sections section-relative either.
+
 2005-03-21  Bob Wilson  <bob.wilson@acm.org>
 
 	* config/tc-xtensa.c (md_apply_fix3): Recognize XTENSA_PLT relocations.
