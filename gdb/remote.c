@@ -1735,7 +1735,12 @@ remote_current_thread (ptid_t oldpid)
   putpkt ("qC");
   getpkt (buf, (rs->remote_packet_size), 0);
   if (buf[0] == 'Q' && buf[1] == 'C')
-    return pid_to_ptid (strtol (&buf[2], NULL, 16));
+    /* Use strtoul here, so we'll correctly parse values whose highest
+       bit is set.  The protocol carries them as a simple series of
+       hex digits; in the absence of a sign, strtol will see such
+       values as positive numbers out of range for signed 'long', and
+       return LONG_MAX to indicate an overflow.  */
+    return pid_to_ptid (strtoul (&buf[2], NULL, 16));
   else
     return oldpid;
 }
@@ -1782,7 +1787,13 @@ remote_threads_info (void)
 	    {
 	      do
 		{
-		  tid = strtol (bufp, &bufp, 16);
+		  /* Use strtoul here, so we'll correctly parse values
+		     whose highest bit is set.  The protocol carries
+		     them as a simple series of hex digits; in the
+		     absence of a sign, strtol will see such values as
+		     positive numbers out of range for signed 'long',
+		     and return LONG_MAX to indicate an overflow.  */
+		  tid = strtoul (bufp, &bufp, 16);
 		  if (tid != 0 && !in_thread_list (pid_to_ptid (tid)))
 		    add_thread (pid_to_ptid (tid));
 		}

@@ -1,3 +1,8 @@
+2004-12-07  Jim Blandy  <jimb@redhat.com>
+
+	* remote.c (remote_threads_info, remote_current_thread): Use
+	strtoul to parse thread ID numbers.
+
 2004-12-07  Mark Kettenis  <kettenis@gnu.org>
 
 	* inf-ttrace.c: Include "gdbthread.h".
