@@ -1,3 +1,8 @@
+2005-03-21  Michael Snyder  <msnyder@redhat.com>
+
+	* mn10300-tdep.c (mn10300_frame_unwind_cache): Use func addr
+	instead of pc addr for frame_id.  Otherwise "until" won't work.
+
 2005-03-21  Kevin Buettner  <kevinb@redhat.com>
 
 	* frv-linux-tdep.c (frv_linux_sigcontext_reg_addr): Fix typo in

@@ -317,7 +317,8 @@ mn10300_frame_unwind_cache (struct frame_info *next_frame,
   mn10300_analyze_prologue (next_frame, (void **) &cache, pc);
 
   trad_frame_set_id (cache, 
-		     frame_id_build (trad_frame_get_this_base (cache), pc));
+		     frame_id_build (trad_frame_get_this_base (cache), 
+				     frame_func_unwind (next_frame)));
 
   (*this_prologue_cache) = cache;
   return cache;
