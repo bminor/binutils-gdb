@@ -1,3 +1,8 @@
+Mon Apr 14 16:25:10 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* gdbserver/Makefile.in (INSTALL): Change install.sh to
+	install-sh.
+
 Mon Apr 14 11:55:27 1997  Geoffrey Noer  <noer@pizza.cygnus.com>
 
 	* config/i386/cygwin32.mh: remove -lkernel32 from XM_CLIBS
