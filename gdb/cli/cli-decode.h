@@ -286,12 +286,6 @@ extern void delete_cmd (char *, struct cmd_list_element **);
 extern void help_cmd_list (struct cmd_list_element *, enum command_class,
 			   char *, int, struct ui_file *);
 
-extern struct cmd_list_element *add_set_cmd (char *name, enum
-					     command_class class,
-					     var_types var_type, void *var,
-					     char *doc,
-					     struct cmd_list_element **list);
-
 /* Functions that implement commands about CLI commands. */
 
 extern void help_cmd (char *, struct ui_file *);

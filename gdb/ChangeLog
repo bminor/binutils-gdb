@@ -1,3 +1,12 @@
+2005-02-21  Andrew Cagney  <cagney@gnu.org>
+
+	* command.h (deprecated_add_set_cmd): Rename add_set_cmd.
+	* cli/cli-decode.h (add_set_cmd): Delete declaration.
+	* cli/cli-decode.c (deprecated_add_set_cmd): Rename add_set_cmd.
+	* i386-nat.c (_initialize_i386_nat): Update call.
+	* valprint.c (_initialize_valprint): Update comment.
+	* gnu-nat.c (_initialize_gnu_nat): Update call.
+
 2005-02-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* elfread.c (elf_symtab_read): Discard section syms.

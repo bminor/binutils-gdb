@@ -368,12 +368,12 @@ add_setshow_cmd_full (char *name,
 }
 
 struct cmd_list_element *
-add_set_cmd (char *name,
-	     enum command_class class,
-	     var_types var_type,
-	     void *var,
-	     char *doc,
-	     struct cmd_list_element **list)
+deprecated_add_set_cmd (char *name,
+			enum command_class class,
+			var_types var_type,
+			void *var,
+			char *doc,
+			struct cmd_list_element **list)
 {
   return add_set_or_show_cmd (name, set_cmd, class, var_type, var, doc, list);
 }

@@ -1274,8 +1274,10 @@ Show default output radix for printing of values."), NULL,
   /* The "set radix" and "show radix" commands are special in that
      they are like normal set and show commands but allow two normally
      independent variables to be either set or shown with a single
-     command.  So the usual deprecated_add_set_cmd() and
+     command.  So the usual deprecated_add_set_cmd() and [deleted]
      add_show_from_set() commands aren't really appropriate. */
+  /* FIXME: i18n: With the new add_setshow_integer command, that is no
+     longer true - show can display anything.  */
   add_cmd ("radix", class_support, set_radix, _("\
 Set default input and output number radices.\n\
 Use 'set input-radix' or 'set output-radix' to independently set each.\n\
