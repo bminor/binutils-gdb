@@ -814,9 +814,9 @@ char *str;
 				
 			default:
 				abort();
-			}
+			} /* switch on arg code */
 			break;
-		}
+		} /* for each arg that we expect */
 	error:
 		if (match == 0) {
 			/* Args don't match. */
