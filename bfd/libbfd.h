@@ -125,9 +125,13 @@ PROTO (boolean, bsd_write_armap, (bfd *arch, unsigned int elength,
 PROTO (boolean, coff_write_armap, (bfd *arch, unsigned int elength,
 				   struct orl *map, int orl_count, int stridx));
 
-PROTO ( bfd *,bfd_generic_openr_next_archived_file, (bfd *archive, bfd *last_file));
+PROTO (bfd *, bfd_generic_openr_next_archived_file, (bfd *archive,
+						     bfd *last_file));
 
 PROTO(int, bfd_generic_stat_arch_elt, (bfd *, struct stat *));
+
+PROTO(boolean, bfd_generic_get_section_contents,
+      (bfd *abfd, sec_ptr section, PTR location, file_ptr offset, int count));
 
 /* Macros to tell if bfds are read or write enabled.
 

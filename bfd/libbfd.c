@@ -325,10 +325,22 @@ _do_putllong (data, addr)
 	addr[2] = (bfd_byte)(data >> 16);
 	addr[3] = (bfd_byte)(data >> 24);
 }
+
+/* Default implementation */
 
-
-
-
-
-
-
+boolean
+bfd_generic_get_section_contents (abfd, section, location, offset, count)
+     bfd *abfd;
+     sec_ptr section;
+     PTR location;
+     file_ptr offset;
+     int count;
+{
+    if (count == 0)
+	return true;
+    if (offset >= section->size
+	|| bfd_seek(abfd, section->filepos + offset, SEEK_SET) == -1
+	|| bfd_read(location, 1, count, abfd) != count)
+	return (false); /* on error */
+    return (true);
+}
