@@ -1,3 +1,7 @@
+2004-03-23  Paul Brook  <paul@codesourcery.com>
+
+	* elf32-arm.h (arm_print_private_bfd_data): Add EABI v3.
+
 2004-03-22  Bob Wilson  <bob.wilson@acm.org>
 
 	* elf32-xtensa.c (elf_xtensa_check_relocs): Remove code to read

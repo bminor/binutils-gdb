@@ -2679,6 +2679,18 @@ elf32_arm_print_private_bfd_data (abfd, ptr)
 		 | EF_ARM_MAPSYMSFIRST);
       break;
 
+    case EF_ARM_EABI_VER3:
+      fprintf (file, _(" [Version3 EABI]"));
+
+      if (flags & EF_ARM_BE8)
+	fprintf (file, _(" [BE8]"));
+
+      if (flags & EF_ARM_LE8)
+	fprintf (file, _(" [LE8]"));
+
+      flags &= ~(EF_ARM_LE8 | EF_ARM_BE8);
+      break;
+
     default:
       fprintf (file, _(" <EABI version unrecognised>"));
       break;

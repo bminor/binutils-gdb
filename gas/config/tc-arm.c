@@ -191,6 +191,7 @@ static int march_cpu_opt = -1;
 static int march_fpu_opt = -1;
 static int mfpu_opt = -1;
 static int mfloat_abi_opt = -1;
+static int meabi_flags = EF_ARM_EABI_UNKNOWN;
 
 /* This array holds the chars that always start a comment.  If the
    pre-processor is disabled, these aren't very useful.  */
@@ -2551,6 +2552,7 @@ static int arm_parse_cpu PARAMS ((char *));
 static int arm_parse_arch PARAMS ((char *));
 static int arm_parse_fpu PARAMS ((char *));
 static int arm_parse_float_abi PARAMS ((char *));
+static int arm_parse_eabi PARAMS ((char *));
 #if 0 /* Suppressed - for now.  */
 #if defined OBJ_COFF || defined OBJ_ELF
 static void arm_add_note PARAMS ((const char *, const char *, unsigned int));
@@ -11687,37 +11689,49 @@ md_begin ()
 
 #if defined OBJ_COFF || defined OBJ_ELF
   {
-    unsigned int flags = 0;
+    unsigned int flags = meabi_flags;
 
-    /* Set the flags in the private structure.  */
-    if (uses_apcs_26)      flags |= F_APCS26;
-    if (support_interwork) flags |= F_INTERWORK;
-    if (uses_apcs_float)   flags |= F_APCS_FLOAT;
-    if (pic_code)          flags |= F_PIC;
-    if ((cpu_variant & FPU_ANY) == FPU_NONE
-	 || (cpu_variant & FPU_ANY) == FPU_ARCH_VFP) /* VFP layout only.  */
+    switch (meabi_flags)
       {
-	flags |= F_SOFT_FLOAT;
-      }
-    switch (mfloat_abi_opt)
-      {
-      case ARM_FLOAT_ABI_SOFT:
-      case ARM_FLOAT_ABI_SOFTFP:
-	flags |= F_SOFT_FLOAT;
-	break;
+      case EF_ARM_EABI_UNKNOWN:
+	/* Set the flags in the private structure.  */
+	if (uses_apcs_26)      flags |= F_APCS26;
+	if (support_interwork) flags |= F_INTERWORK;
+	if (uses_apcs_float)   flags |= F_APCS_FLOAT;
+	if (pic_code)          flags |= F_PIC;
+	if ((cpu_variant & FPU_ANY) == FPU_NONE
+	     || (cpu_variant & FPU_ANY) == FPU_ARCH_VFP) /* VFP layout only.  */
+	  {
+	    flags |= F_SOFT_FLOAT;
+	  }
+	switch (mfloat_abi_opt)
+	  {
+	  case ARM_FLOAT_ABI_SOFT:
+	  case ARM_FLOAT_ABI_SOFTFP:
+	    flags |= F_SOFT_FLOAT;
+	    break;
 
-      case ARM_FLOAT_ABI_HARD:
-	if (flags & F_SOFT_FLOAT)
-	  as_bad (_("hard-float conflicts with specified fpu"));
-	break;
-      }
-    /* Using VFP conventions (even if soft-float).  */
-    if (cpu_variant & FPU_VFP_EXT_NONE) flags |= F_VFP_FLOAT;
+	  case ARM_FLOAT_ABI_HARD:
+	    if (flags & F_SOFT_FLOAT)
+	      as_bad (_("hard-float conflicts with specified fpu"));
+	    break;
+	  }
+	/* Using VFP conventions (even if soft-float).  */
+	if (cpu_variant & FPU_VFP_EXT_NONE) flags |= F_VFP_FLOAT;
 
 #if defined OBJ_ELF
-    if (cpu_variant & FPU_ARCH_MAVERICK)
-	flags |= EF_ARM_MAVERICK_FLOAT;
+	if (cpu_variant & FPU_ARCH_MAVERICK)
+	    flags |= EF_ARM_MAVERICK_FLOAT;
 #endif
+	break;
+
+      case EF_ARM_EABI_VER3:
+	/* No additional flags to set.  */
+	break;
+
+      default:
+	abort ();
+      }
 
     bfd_set_private_flags (stdoutput, flags);
 
@@ -13450,6 +13464,20 @@ static struct arm_float_abi_option_table arm_float_abis[] =
   {NULL, 0}
 };
 
+struct arm_eabi_option_table
+{
+  char *name;
+  unsigned int value;
+};
+
+/* We only know hot to output GNU and ver 3 (AAELF) formats.  */
+static struct arm_eabi_option_table arm_eabis[] =
+{
+  {"gnu",	EF_ARM_EABI_UNKNOWN},
+  {"3",		EF_ARM_EABI_VER3},
+  {NULL, 0}
+};
+
 struct arm_long_option_table
 {
   char *option;		/* Substring to match.  */
@@ -13613,6 +13641,22 @@ arm_parse_float_abi (str)
   return 0;
 }
 
+static int
+arm_parse_eabi (str)
+     char * str;
+{
+  struct arm_eabi_option_table *opt;
+
+  for (opt = arm_eabis; opt->name != NULL; opt++)
+    if (strcmp (opt->name, str) == 0)
+      {
+	meabi_flags = opt->value;
+	return 1;
+      }
+  as_bad (_("unknown EABI `%s'\n"), str);
+  return 0;
+}
+
 struct arm_long_option_table arm_long_opts[] =
 {
   {"mcpu=", N_("<cpu name>\t  assemble for CPU <cpu name>"),
@@ -13623,6 +13667,8 @@ struct arm_long_option_table arm_long_opts[] =
    arm_parse_fpu, NULL},
   {"mfloat-abi=", N_("<abi>\t  assemble for floating point ABI <abi>"),
    arm_parse_float_abi, NULL},
+  {"meabi=", N_("<ver>\t  assemble for eabi version <ver>"),
+   arm_parse_eabi, NULL},
   {NULL, NULL, 0, NULL}
 };
 

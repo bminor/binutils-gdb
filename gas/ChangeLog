@@ -1,3 +1,13 @@
+2004-03-23  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (meabi_flags): New variable.
+	(arm_parse_eabi): New function.
+	(md_begin): Set flags for EABI v3.
+	(arm_eabis): Add.
+	(arm_long_opts): Add meabi.
+	* doc/as.texinf <ARM>: Document -meabi.
+	* doc/c-arm.texi: Ditto.
+
 2004-03-22  Bob Wilson  <bob.wilson@acm.org>
 
 	* config/tc-xtensa.c (xtensa_post_relax_hook): Create literal
