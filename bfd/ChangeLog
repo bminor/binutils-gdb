@@ -1,3 +1,15 @@
+Tue May 23 15:58:15 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* Makefile.in: Install bfdlink.h too.
+
+Sun May 21 22:25:09 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* elf32-hppa.c (elf32_hppa_relocate_section): Handle undefined and
+	notsupported return codes from final_link_relocate (used when
+	$global$ is undefined or nonexistant).
+	(elf32_hppa_bfd_link_link_relocate): If $global$ exists, but is
+	not defined,then return bfd_reloc_undefined.
+
 Fri May 19 10:00:14 1995  Steve Chamberlain  <sac@rtl.cygnus.com>
 
 	* coffswap.h: (IMAGE_BASE): Define to 0 if not.
