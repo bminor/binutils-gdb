@@ -685,7 +685,7 @@ sol_thread_store_registers (int regno)
   if (regno != -1)
     {				/* Not writing all the regs */
       /* save new register value */
-      char old_value[REGISTER_SIZE];
+      char* old_value = (char*) alloca (REGISTER_SIZE);
       memcpy (old_value, &registers[REGISTER_BYTE (regno)], REGISTER_SIZE);
 
       val = p_td_thr_getgregs (&thandle, gregset);

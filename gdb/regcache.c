@@ -558,7 +558,7 @@ write_register_bytes (int myregstart, char *myaddr, int inlen)
       /* The register partially overlaps the range being written.  */
       else
 	{
-	  char regbuf[MAX_REGISTER_RAW_SIZE];
+	  char *regbuf = (char*) alloca (MAX_REGISTER_RAW_SIZE);
 	  /* What's the overlap between this register's bytes and
              those the caller wants to write?  */
 	  int overlapstart = max (regstart, myregstart);

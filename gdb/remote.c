@@ -2604,7 +2604,7 @@ remote_wait (int pid, struct target_waitstatus *status)
 	  {
 	    int i;
 	    long regno;
-	    char regs[MAX_REGISTER_RAW_SIZE];
+	    char* regs = (char*) alloca (MAX_REGISTER_RAW_SIZE);
 
 	    /* Expedited reply, containing Signal, {regno, reg} repeat */
 	    /*  format is:  'Tssn...:r...;n...:r...;n...:r...;#cc', where
@@ -2825,7 +2825,7 @@ remote_async_wait (int pid, struct target_waitstatus *status)
 	  {
 	    int i;
 	    long regno;
-	    char regs[MAX_REGISTER_RAW_SIZE];
+	    char* regs = (char*) alloca (MAX_REGISTER_RAW_SIZE);
 
 	    /* Expedited reply, containing Signal, {regno, reg} repeat */
 	    /*  format is:  'Tssn...:r...;n...:r...;n...:r...;#cc', where

@@ -570,7 +570,7 @@ value_assign (register value_ptr toval, register value_ptr fromval)
 {
   register struct type *type;
   register value_ptr val;
-  char raw_buffer[MAX_REGISTER_RAW_SIZE];
+  char *raw_buffer = (char*) alloca (MAX_REGISTER_RAW_SIZE);
   int use_buffer = 0;
 
   if (!toval->modifiable)
@@ -1027,7 +1027,7 @@ CORE_ADDR
 push_word (CORE_ADDR sp, ULONGEST word)
 {
   register int len = REGISTER_SIZE;
-  char buffer[MAX_REGISTER_RAW_SIZE];
+  char *buffer = alloca (MAX_REGISTER_RAW_SIZE);
 
   store_unsigned_integer (buffer, len, word);
   if (INNER_THAN (1, 2))
@@ -1665,7 +1665,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
     SAVE_DUMMY_FRAME_TOS (sp);
 
   {
-    char retbuf[REGISTER_BYTES];
+    char *retbuf = (char*) alloca (REGISTER_BYTES);
     char *name;
     struct symbol *symbol;
 

@@ -1467,8 +1467,8 @@ do_registers_info (int regnum, int fpregs)
 
   for (i = 0; i < numregs; i++)
     {
-      char raw_buffer[MAX_REGISTER_RAW_SIZE];
-      char virtual_buffer[MAX_REGISTER_VIRTUAL_SIZE];
+      char *raw_buffer = (char*) alloca (MAX_REGISTER_RAW_SIZE);
+      char *virtual_buffer = (char*) alloca (MAX_REGISTER_VIRTUAL_SIZE);
 
       /* Decide between printing all regs, nonfloat regs, or specific reg.  */
       if (regnum == -1)

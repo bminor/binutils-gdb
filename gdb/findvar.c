@@ -393,7 +393,7 @@ value_of_register (int regnum)
   CORE_ADDR addr;
   int optim;
   register value_ptr reg_val;
-  char raw_buffer[MAX_REGISTER_RAW_SIZE];
+  char *raw_buffer = (char*) alloca (MAX_REGISTER_RAW_SIZE);
   enum lval_type lval;
 
   get_saved_register (raw_buffer, &optim, &addr,
@@ -606,7 +606,7 @@ addresses have not been bound by the dynamic loader. Try again when executable i
     case LOC_BASEREG:
     case LOC_BASEREG_ARG:
       {
-	char buf[MAX_REGISTER_RAW_SIZE];
+	char *buf = (char*) alloca (MAX_REGISTER_RAW_SIZE);
 	get_saved_register (buf, NULL, NULL, frame, SYMBOL_BASEREG (var),
 			    NULL);
 	addr = extract_address (buf, REGISTER_RAW_SIZE (SYMBOL_BASEREG (var)));
@@ -616,7 +616,7 @@ addresses have not been bound by the dynamic loader. Try again when executable i
 
     case LOC_THREAD_LOCAL_STATIC:
       {
-	char buf[MAX_REGISTER_RAW_SIZE];
+	char *buf = (char*) alloca (MAX_REGISTER_RAW_SIZE);
 
 	get_saved_register (buf, NULL, NULL, frame, SYMBOL_BASEREG (var),
 			    NULL);
@@ -711,7 +711,7 @@ addresses have not been bound by the dynamic loader. Try again when executable i
 value_ptr
 value_from_register (struct type *type, int regnum, struct frame_info *frame)
 {
-  char raw_buffer[MAX_REGISTER_RAW_SIZE];
+  char *raw_buffer = (char*) alloca (MAX_REGISTER_RAW_SIZE);
   CORE_ADDR addr;
   int optim;
   value_ptr v = allocate_value (type);

@@ -1,3 +1,16 @@
+2001-02-06  Michael Snyder  <msnyder@makita.cygnus.com>
+	Submitted by Paul Hilfinger (hilfingr@gnat.com) 
+	and Andrei Petrov (and@genesyslab.com).
+	* findvar.c: Buffers of size MAX_REGISTER_RAW_SIZE or REGISTER_BYTES
+	must be allocated dynamically, since these are no longer constants.
+	* infcmd.c: Ditto.
+	* regcache.c: Ditto.
+	* remote.c: Ditto.
+	* sol-thread.c: Ditto.
+	* valops.c: Ditto.
+	* config/sparc/sun4sol2.mh (MH_CFLAGS): Add -I/usr/include/v9, as a
+	work-around for a missing Sun header file in solaris for sparc64.
+
 2001-02-04  Philip Blundell  <philb@gnu.org>
 
 	* config/arm/linux.mh (NATDEPFILES): Add proc-service.o,
