@@ -1,5 +1,12 @@
 Wed Dec 11 09:23:46 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* mn10200-dis.c: Finish writing disassembler.
+	* mn10200-opc.c (mn10200_opcodes): Fix mask for "mov imm8,dn".
+	Fix mask for "jmp (an)".
+
+	* mn10300-dis.c (disassemble, print_insn_mn10300): Corrently
+	handle endianness issues for mn10300.
+
 	* mn10200-opc.c (mn10200_opcodes): Fix operands for "movb dm,(an)".
 
 Tue Dec 10 12:08:05 1996  Jeffrey A Law  (law@cygnus.com)

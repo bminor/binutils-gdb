@@ -155,7 +155,7 @@ const struct mn10200_operand mn10200_operands[] = {
    sorted by major opcode.  */
 
 const struct mn10200_opcode mn10200_opcodes[] = {
-{ "mov",	0x8000,		0xfc00,		FMT_2, {SIMM8, DN01}},
+{ "mov",	0x8000,		0xf000,		FMT_2, {SIMM8, DN01}},
 { "mov",	0x80,		0xf0,		FMT_1, {DN1, DM0}},
 { "mov",	0xf230,		0xfff0,		FMT_4, {DM1, AN0}},
 { "mov",	0xf2f0,		0xfff0,		FMT_4, {AN1, DM0}},
@@ -322,7 +322,7 @@ const struct mn10200_opcode mn10200_opcodes[] = {
 
 { "jmp",	0xfc0000,	0xff0000,	FMT_3, {IMM16_PCREL}},
 { "jmp",	0xf4e00000,	0xffff0000,	FMT_7, {IMM24_PCREL}},
-{ "jmp",	0xf000,		0xfffc,		FMT_4, {PAREN,AN1,PAREN}},
+{ "jmp",	0xf000,		0xfff3,		FMT_4, {PAREN,AN1,PAREN}},
 { "jsr",	0xfd0000,	0xff0000,	FMT_3, {IMM16_PCREL}},
 { "jsr",	0xf4e10000,	0xffff0000,	FMT_7, {IMM24_PCREL}},
 { "jsr",	0xf001,		0xfff3,		FMT_4, {PAREN,AN1,PAREN}},
