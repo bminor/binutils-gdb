@@ -271,9 +271,9 @@ mi_cmd_data_list_register_names (char *command, char **argv, int argc)
      case, some entries of REGISTER_NAME will change depending upon
      the particular processor being debugged.  */
 
-  numregs = NUM_REGS;
+  numregs = NUM_REGS + NUM_PSEUDO_REGS;
 
-  ui_out_tuple_begin (uiout, "register-names");
+  ui_out_list_begin (uiout, "register-names");
 
   if (argc == 0)		/* No args, just do all the regs */
     {
@@ -283,9 +283,9 @@ mi_cmd_data_list_register_names (char *command, char **argv, int argc)
 	{
 	  if (REGISTER_NAME (regnum) == NULL
 	      || *(REGISTER_NAME (regnum)) == '\0')
-	    continue;
-
-	  ui_out_field_string (uiout, NULL, REGISTER_NAME (regnum));
+	    ui_out_field_string (uiout, NULL, "");
+	  else
+	    ui_out_field_string (uiout, NULL, REGISTER_NAME (regnum));
 	}
     }
 
@@ -293,19 +293,18 @@ mi_cmd_data_list_register_names (char *command, char **argv, int argc)
   for (i = 0; i < argc; i++)
     {
       regnum = atoi (argv[i]);
-
-      if (regnum >= 0
-	  && regnum < numregs
-	  && REGISTER_NAME (regnum) != NULL
-	  && *REGISTER_NAME (regnum) != '\000')
-	ui_out_field_string (uiout, NULL, REGISTER_NAME (regnum));
-      else
+      if (regnum < 0 || regnum >= numregs)
 	{
 	  xasprintf (&mi_error_message, "bad register number");
 	  return MI_CMD_ERROR;
 	}
+      if (REGISTER_NAME (regnum) == NULL
+	  || *(REGISTER_NAME (regnum)) == '\0')
+	ui_out_field_string (uiout, NULL, "");
+      else
+	ui_out_field_string (uiout, NULL, REGISTER_NAME (regnum));
     }
-  ui_out_tuple_end (uiout);
+  ui_out_list_end (uiout);
   return MI_CMD_DONE;
 }
 

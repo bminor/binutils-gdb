@@ -1,3 +1,12 @@
+2001-06-25  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-main.c (mi_cmd_data_list_register_names): Output a list of
+	register names.
+	(mi_cmd_data_list_register_names): Include the pseudo registers.
+	(mi_cmd_data_list_register_names): Don't leave holes in the list,
+	output "" for NULL registers.
+	* gdbmi.texinfo (data-list-register-names): Update documentation.
+
 2001-06-23  Andrew Cagney  <ac131313@redhat.com>
 
 	* mi-main.c (mi_cmd_data_list_changed_registers): Output a list of

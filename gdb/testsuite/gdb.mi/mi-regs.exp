@@ -116,7 +116,7 @@ proc sparc_register_tests { } {
     set float2 "\-?\[0-9\]+"
 
     mi_gdb_test "111-data-list-register-names" \
-	    "111\\^done,register-names=\{\"g0\",\"g1\",\"g2\",\"g3\",\"g4\",\"g5\",\"g6\",\"g7\",\"o0\",\"o1\",\"o2\",\"o3\",\"o4\",\"o5\",\"sp\",\"o7\",\"l0\",\"l1\",\"l2\",\"l3\",\"l4\",\"l5\",\"l6\",\"l7\",\"i0\",\"i1\",\"i2\",\"i3\",\"i4\",\"i5\",\"fp\",\"i7\",\"f0\",\"f1\",\"f2\",\"f3\",\"f4\",\"f5\",\"f6\",\"f7\",\"f8\",\"f9\",\"f10\",\"f11\",\"f12\",\"f13\",\"f14\",\"f15\",\"f16\",\"f17\",\"f18\",\"f19\",\"f20\",\"f21\",\"f22\",\"f23\",\"f24\",\"f25\",\"f26\",\"f27\",\"f28\",\"f29\",\"f30\",\"f31\",\"y\",\"psr\",\"wim\",\"tbr\",\"pc\",\"npc\",\"fpsr\",\"cpsr\"\}" \
+	    "111\\^done,register-names=\\\[\"g0\",\"g1\",\"g2\",\"g3\",\"g4\",\"g5\",\"g6\",\"g7\",\"o0\",\"o1\",\"o2\",\"o3\",\"o4\",\"o5\",\"sp\",\"o7\",\"l0\",\"l1\",\"l2\",\"l3\",\"l4\",\"l5\",\"l6\",\"l7\",\"i0\",\"i1\",\"i2\",\"i3\",\"i4\",\"i5\",\"fp\",\"i7\",\"f0\",\"f1\",\"f2\",\"f3\",\"f4\",\"f5\",\"f6\",\"f7\",\"f8\",\"f9\",\"f10\",\"f11\",\"f12\",\"f13\",\"f14\",\"f15\",\"f16\",\"f17\",\"f18\",\"f19\",\"f20\",\"f21\",\"f22\",\"f23\",\"f24\",\"f25\",\"f26\",\"f27\",\"f28\",\"f29\",\"f30\",\"f31\",\"y\",\"psr\",\"wim\",\"tbr\",\"pc\",\"npc\",\"fpsr\",\"cpsr\"\\\]" \
 	    "list register names"
 
     mi_gdb_test "222-data-list-register-values x" \
@@ -150,7 +150,7 @@ proc sparc_register_tests { } {
 	    "register values r"
 
     mi_gdb_test "999-data-list-register-names 68 69 70 71" \
-	    "999\\^done,register-names=\{\"pc\",\"npc\",\"fpsr\",\"cpsr\"\}" \
+	    "999\\^done,register-names=\\\[\"pc\",\"npc\",\"fpsr\",\"cpsr\"\\\]" \
 	    "list names of some regs"
 
     mi_gdb_test "001-data-list-register-values x 68 69 70 71" \
