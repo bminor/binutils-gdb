@@ -6406,14 +6406,14 @@ arm_canonicalize_symbol_name (name)
 
   return name;
 }
-
+/* start-sanitize-armelf */
 boolean
 arm_fix_adjustable(fixP)
   fixS *fixP;
 {
   return 1;
 }
-
+/* end-sanitize-armelf */
 
 boolean
 arm_validate_fix (fixP)

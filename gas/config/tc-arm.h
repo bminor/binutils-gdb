@@ -95,11 +95,15 @@ extern void arm_frob_label PARAMS ((struct symbol *));
    deliberately not been updated to mark assembler created stabs
    symbols as Thumb.  */
 
+/* start-sanitize-armelf */
 #ifdef OBJ_ELF
 #define obj_fix_adjustable(fixP) arm_fix_adjustable(fixP)
 #else
+/* end-sanitize-armelf */
 #define obj_fix_adjustable(fixP) 0
+/* start-sanitize-armelf */
 #endif
+/* end-sanitize-armelf */
 
 /* We need to keep some local information on symbols.  */
 
