@@ -324,6 +324,22 @@ static int prev_insn_extended;
    noreorder.  */
 static int prev_prev_insn_unreordered;
 
+/* If this is set, it points to a frag holding nop instructions which
+   were inserted before the start of a noreorder section.  If those
+   nops turn out to be unnecessary, the size of the frag can be
+   decreased.  */
+static fragS *prev_nop_frag;
+
+/* The number of nop instructions we created in prev_nop_frag.  */
+static int prev_nop_frag_holds;
+
+/* The number of nop instructions that we know we need in
+   prev_nop_frag. */
+static int prev_nop_frag_required;
+
+/* The number of instructions we've seen since prev_nop_frag.  */
+static int prev_nop_frag_since;
+
 /* For ECOFF and ELF, relocations against symbols are done in two
    parts, with a HI relocation and a LO relocation.  Each relocation
    has only 16 bits of space to store an addend.  This means that in
@@ -503,7 +519,7 @@ static void append_insn PARAMS ((char *place,
 				 expressionS * p,
 				 bfd_reloc_code_real_type r,
 				 boolean));
-static void mips_no_prev_insn PARAMS ((void));
+static void mips_no_prev_insn PARAMS ((int));
 static void mips_emit_delays PARAMS ((boolean));
 #ifdef USE_STDARG
 static void macro_build PARAMS ((char *place, int *counter, expressionS * ep,
@@ -961,7 +977,7 @@ md_begin ()
   symbol_table_insert (symbol_new ("$pc", reg_section, -1,
 				   &zero_address_frag));
 
-  mips_no_prev_insn ();
+  mips_no_prev_insn (false);
 
   mips_gprmask = 0;
   mips_cprmask[0] = 0;
@@ -1255,8 +1271,10 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
   prev_pinfo = prev_insn.insn_mo->pinfo;
   pinfo = ip->insn_mo->pinfo;
 
-  if (place == NULL && ! mips_noreorder)
+  if (place == NULL && (! mips_noreorder || prev_nop_frag != NULL))
     {
+      int prev_prev_nop;
+
       /* If the previous insn required any delay slots, see if we need
 	 to insert a NOP or two.  There are eight kinds of possible
 	 hazards, of which an instruction can have at most one type.
@@ -1394,6 +1412,11 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	    nops += 2;
 	}
 
+      /* If the previous instruction was in a noreorder section, then
+         we don't want to insert the nop after all.  */
+      if (prev_insn_unreordered)
+	nops = 0;
+
       /* There are two cases which require two intervening
 	 instructions: 1) setting the condition codes using a move to
 	 coprocessor instruction which requires a general coprocessor
@@ -1402,30 +1425,39 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	 which have interlocks).  If we are not already emitting a NOP
 	 instruction, we must check for these cases compared to the
 	 instruction previous to the previous instruction.  */
-      if (nops == 0
-	  && ((! mips16
-	       && mips_isa < 4
-	       && (prev_prev_insn.insn_mo->pinfo & INSN_COPROC_MOVE_DELAY)
-	       && (prev_prev_insn.insn_mo->pinfo & INSN_WRITE_COND_CODE)
-	       && (pinfo & INSN_READ_COND_CODE)
-               && ! cop_interlocks)
-	      || ((prev_prev_insn.insn_mo->pinfo & INSN_READ_LO)
-		  && (pinfo & INSN_WRITE_LO)
-		  && ! interlocks)
-	      || ((prev_prev_insn.insn_mo->pinfo & INSN_READ_HI)
-		  && (pinfo & INSN_WRITE_HI)
-		  && ! interlocks)))
+      if ((! mips16
+	   && mips_isa < 4
+	   && (prev_prev_insn.insn_mo->pinfo & INSN_COPROC_MOVE_DELAY)
+	   && (prev_prev_insn.insn_mo->pinfo & INSN_WRITE_COND_CODE)
+	   && (pinfo & INSN_READ_COND_CODE)
+	   && ! cop_interlocks)
+	  || ((prev_prev_insn.insn_mo->pinfo & INSN_READ_LO)
+	      && (pinfo & INSN_WRITE_LO)
+	      && ! interlocks)
+	  || ((prev_prev_insn.insn_mo->pinfo & INSN_READ_HI)
+	      && (pinfo & INSN_WRITE_HI)
+	      && ! interlocks))
+	prev_prev_nop = 1;
+      else
+	prev_prev_nop = 0;
+
+      if (prev_prev_insn_unreordered)
+	prev_prev_nop = 0;
+
+      if (prev_prev_nop && nops == 0)
 	++nops;
 
       /* If we are being given a nop instruction, don't bother with
 	 one of the nops we would otherwise output.  This will only
 	 happen when a nop instruction is used with mips_optimize set
 	 to 0.  */
-      if (nops > 0 && ip->insn_opcode == (mips16 ? 0x6500 : 0))
+      if (nops > 0
+	  && ! mips_noreorder
+	  && ip->insn_opcode == (mips16 ? 0x6500 : 0))
 	--nops;
 
       /* Now emit the right number of NOP instructions.  */
-      if (nops > 0)
+      if (nops > 0 && ! mips_noreorder)
 	{
 	  fragS *old_frag;
 	  unsigned long old_frag_offset;
@@ -1467,8 +1499,45 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 	    ecoff_fix_loc (old_frag, old_frag_offset);
 #endif
 	}
+      else if (prev_nop_frag != NULL)
+	{
+	  /* We have a frag holding nops we may be able to remove.  If
+             we don't need any nops, we can decrease the size of
+             prev_nop_frag by the size of one instruction.  If we do
+             need some nops, we count them in prev_nops_required. */
+	  if (prev_nop_frag_since == 0)
+	    {
+	      if (nops == 0)
+		{
+		  prev_nop_frag->fr_fix -= mips16 ? 2 : 4;
+		  --prev_nop_frag_holds;
+		}
+	      else
+		prev_nop_frag_required += nops;
+	    }
+	  else
+	    {
+	      if (prev_prev_nop == 0)
+		{
+		  prev_nop_frag->fr_fix -= mips16 ? 2 : 4;
+		  --prev_nop_frag_holds;
+		}
+	      else
+		++prev_nop_frag_required;
+	    }
+
+	  if (prev_nop_frag_holds <= prev_nop_frag_required)
+	    prev_nop_frag = NULL;
+
+	  ++prev_nop_frag_since;
+
+	  /* Sanity check: by the time we reach the second instruction
+             after prev_nop_frag, we should have used up all the nops
+             one way or another.  */
+	  assert (prev_nop_frag_since <= 1 || prev_nop_frag == NULL);
+	}
     }
-  
+
   if (reloc_type > BFD_RELOC_UNUSED)
     {
       /* We need to set up a variant frag.  */
@@ -1970,8 +2039,11 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
       /* We need to record a bit of information even when we are not
          reordering, in order to determine the base address for mips16
          PC relative relocs.  */
+      prev_prev_insn = prev_insn;
       prev_insn = *ip;
       prev_insn_reloc_type = reloc_type;
+      prev_prev_insn_unreordered = prev_insn_unreordered;
+      prev_insn_unreordered = 1;
     }
 
   /* We just output an insn, so the next one doesn't have a label.  */
@@ -1979,13 +2051,22 @@ append_insn (place, ip, address_expr, reloc_type, unmatched_hi)
 }
 
 /* This function forgets that there was any previous instruction or
-   label.  */
+   label.  If PRESERVE is non-zero, it remembers enough information to
+   know whether nops are needed before a noreorder section. */
 
 static void
-mips_no_prev_insn ()
+mips_no_prev_insn (preserve)
+     int preserve;
 {
-  prev_insn.insn_mo = &dummy_opcode;
-  prev_prev_insn.insn_mo = &dummy_opcode;
+  if (! preserve)
+    {
+      prev_insn.insn_mo = &dummy_opcode;
+      prev_prev_insn.insn_mo = &dummy_opcode;
+      prev_nop_frag = NULL;
+      prev_nop_frag_holds = 0;
+      prev_nop_frag_required = 0;
+      prev_nop_frag_since = 0;
+    }
   prev_insn_valid = 0;
   prev_insn_is_delay_slot = 0;
   prev_insn_unreordered = 0;
@@ -2007,9 +2088,9 @@ mips_emit_delays (insns)
 {
   if (! mips_noreorder)
     {
-      int nop;
+      int nops;
 
-      nop = 0;
+      nops = 0;
       if ((! mips16
 	   && mips_isa < 4
 	   && (! cop_interlocks
@@ -2027,7 +2108,7 @@ mips_emit_delays (insns)
 		  & (INSN_LOAD_MEMORY_DELAY
 		     | INSN_COPROC_MEMORY_DELAY))))
 	{
-	  nop = 1;
+	  ++nops;
 	  if ((! mips16
 	       && mips_isa < 4
 	       && (! cop_interlocks
@@ -2035,7 +2116,10 @@ mips_emit_delays (insns)
 	      || (! interlocks
 		  && ((prev_insn.insn_mo->pinfo & INSN_READ_HI)
 		      || (prev_insn.insn_mo->pinfo & INSN_READ_LO))))
-	    emit_nop ();
+	    ++nops;
+
+	  if (prev_insn_unreordered)
+	    nops = 0;
 	}
       else if ((! mips16
 		&& mips_isa < 4
@@ -2044,12 +2128,37 @@ mips_emit_delays (insns)
 	       || (! interlocks
 		   && ((prev_prev_insn.insn_mo->pinfo & INSN_READ_HI)
 		       || (prev_prev_insn.insn_mo->pinfo & INSN_READ_LO))))
-	nop = 1;
-      if (nop)
+	{
+	  if (! prev_prev_insn_unreordered)
+	    ++nops;
+	}
+
+      if (nops > 0)
 	{
 	  struct insn_label_list *l;
 
-	  emit_nop ();
+	  if (insns)
+	    {
+	      /* Record the frag which holds the nop instructions, so
+                 that we can remove them if we don't need them.  */
+	      frag_grow (mips16 ? nops * 2 : nops * 4);
+	      prev_nop_frag = frag_now;
+	      prev_nop_frag_holds = nops;
+	      prev_nop_frag_required = 0;
+	      prev_nop_frag_since = 0;
+	    }
+
+	  for (; nops > 0; --nops)
+	    emit_nop ();
+
+	  if (insns)
+	    {
+	      /* Move on to a new frag, so that it is safe to simply
+                 decrease the size of prev_nop_frag. */
+	      frag_wane (frag_now);
+	      frag_new (0);
+	    }
+
 	  for (l = insn_labels; l != NULL; l = l->next)
 	    {
 	      assert (S_GET_SEGMENT (l->label) == now_seg);
@@ -2084,7 +2193,7 @@ mips_emit_delays (insns)
 	}
     }
 
-  mips_no_prev_insn ();
+  mips_no_prev_insn (insns);
 }
 
 /* Build an instruction created by a macro expansion.  This is passed
@@ -8068,12 +8177,12 @@ md_parse_option (c, arg)
 
     case OPTION_MIPS16:
       mips16 = 1;
-      mips_no_prev_insn ();
+      mips_no_prev_insn (false);
       break;
 
     case OPTION_NO_MIPS16:
       mips16 = 0;
-      mips_no_prev_insn ();
+      mips_no_prev_insn (false);
       break;
 
     case OPTION_MEMBEDDED_PIC:
@@ -8996,10 +9105,13 @@ s_mipsset (x)
 
   if (strcmp (name, "reorder") == 0)
     {
-      if (mips_noreorder)
+      if (mips_noreorder && prev_nop_frag != NULL)
 	{
-	  prev_insn_unreordered = 1;
-	  prev_prev_insn_unreordered = 1;
+	  /* If we still have pending nops, we can discard them.  The
+	     usual nop handling will insert any that are still
+	     needed. */
+	  prev_nop_frag->fr_fix -= prev_nop_frag_holds * (mips16 ? 2 : 4);
+	  prev_nop_frag = NULL;
 	}
       mips_noreorder = 0;
     }

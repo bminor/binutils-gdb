@@ -1,3 +1,19 @@
+Thu Feb 13 11:40:58 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c (prev_nop_frag): New static variable.
+	(prev_nop_frag_holds): New static variable.
+	(prev_nop_frag_required): New static variable.
+	(prev_nop_frag_since): New static variable.
+	(append_insn): If we aren't reordering, and prev_nop_frag is not
+	NULL, and we don't need any nops, then decrease the size of
+	prev_nop_frag.  Don't insert nops because of instructions in
+	noreorder sections.  Remember whether the previous instructions
+	where in noreorder sections even when not reordering.
+	(mips_no_prev_insn): Add preserver parameter.  Change all
+	callers.  Refer prev_nop_frag variables when appropriate.
+	(mips_emit_delays): Set up prev_nop_frag.
+	(s_mipsset): Clear prev_nop_frag if reordering.
+
 Wed Feb 12 14:36:29 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (append_insn): Remove useless code which
