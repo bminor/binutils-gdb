@@ -1,3 +1,8 @@
+Sat Oct 28 01:54:25 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-scripts/script.t: Put .pr in .text, and .rw in .data, for
+	convenience when testing XCOFF.
+
 Thu Oct 26 22:53:17 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld-bootstrap/bootstrap.exp: On AIX, pass -bI/lib/syscalls.exp
