@@ -110,7 +110,9 @@ static char * get_sparc_rel_type   PARAMS ((bfd_vma rtype));
 static char * get_m32r_rel_type    PARAMS ((bfd_vma rtype));
 static char * get_v850_rel_type    PARAMS ((bfd_vma rtype));
 static char * get_d10v_rel_type    PARAMS ((bfd_vma rtype));
+/* start-sanitize-d30v */
 static char * get_d30v_rel_type    PARAMS ((bfd_vma rtype));
+/* end-sanitize-d30v */
 static char * get_sh_rel_type      PARAMS ((bfd_vma rtype));
 static char * get_mn10300_rel_type PARAMS ((bfd_vma rtype));
 static char * get_mn10200_rel_type PARAMS ((bfd_vma rtype));
@@ -409,7 +411,7 @@ get_d10v_rel_type (rtype)
     }
 }
 
-
+/* start-sanitize-d30v */
 static char *
 get_d30v_rel_type (rtype)
      bfd_vma rtype;
@@ -433,7 +435,7 @@ get_d30v_rel_type (rtype)
     }
 }
 
-
+/* end-sanitize-d30v */
 static char *
 get_sh_rel_type (rtype)
      bfd_vma rtype;
@@ -616,7 +618,9 @@ dump_relocations (rpnt, rel_size)
     case EM_SPARC:
     case EM_PPC:
     case EM_CYGNUS_V850:
+      /* start-sanitize-d30v */
     case EM_CYGNUS_D30V:
+      /* end-sanitize-d30v */
     case EM_CYGNUS_MN10200:
     case EM_CYGNUS_MN10300:
     case EM_SH:
@@ -699,10 +703,12 @@ dump_relocations (rpnt, rel_size)
 	  rtype = get_d10v_rel_type (ELF32_R_TYPE (rpnt->r_info));
 	  break;
 	  
+	  /* start-sanitize-d30v */
 	case EM_CYGNUS_D30V:
 	  rtype = get_d30v_rel_type (ELF32_R_TYPE (rpnt->r_info));
 	  break;
 	  
+	  /* end-sanitize-d30v */
 	case EM_SH:
 	  rtype = get_sh_rel_type (ELF32_R_TYPE (rpnt->r_info));
 	  break;
@@ -814,7 +820,9 @@ get_machine_name (e_machine)
     case EM_SH:		 	return "Hitachi SH";
     case EM_ALPHA:       	return "Alpha";
     case EM_CYGNUS_D10V:        return "d10v";
+      /* start-sanitize-d30v */
     case EM_CYGNUS_D30V:        return "d30v";
+      /* end-sanitize-d30v */
     case EM_CYGNUS_M32R:	return "M32r";
     case EM_CYGNUS_V850:	return "v850";
     case EM_CYGNUS_MN10300:	return "mn10300";
