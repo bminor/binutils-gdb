@@ -133,8 +133,9 @@ TARGETS = $(NATIVE) \
 	sparc-aout	sparc-lynx	sparc-vxworks	\
 	sparclite-aout  sparclite-vxworks \
 	sparclite-coff  z8k-coff \
-	OSE68000 OSE68k
-# The OSE68000 and OSE68k targets are for Ericsson only.
+	OSE68000 OSE68k mips-ncd-elf
+# The OSE68000 and OSE68k targets are for Ericsson only;
+# the mips-ncd-elf target is for NCD only.
 GCC = gcc -O2 -pipe
 all: all-cygnus
 endif

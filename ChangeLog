@@ -1,3 +1,8 @@
+Fri Nov 11 15:31:26 1994  Bill Cox  (bill@rtl.cygnus.com)
+
+	* build-all.mk: Add mips-ncd-elf target to sun4 targets
+	  for special NCD build.
+
 Mon Nov  7 20:58:17 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* Makefile.in (DEVO_SUPPORT): Remove configure.bat and
@@ -10,6 +15,19 @@ Mon Nov  7 17:25:18 1994  Bill Cox  (bill@cirdan.cygnus.com)
 	* build-all.mk: Add Ericsson targets to sun4 and solaris
 	  hosts.  Add  BNR's sun4 target to solaris host, so their
 	  build-from-source will be tested in-house first.
+
+Sat Nov  5 18:43:30 1994  Jason Merrill  (jason@phydeaux.cygnus.com)
+
+	* Makefile.in (LIBCFLAGS): New variable.
+	(CFLAGS_FOR_TARGET): Ditto.
+	(LIBCFLAGS_FOR_TARGET): Ditto.
+	(LIBCXXFLAGS): Ditto.
+	(CXXFLAGS_FOR_TARGET): Ditto.
+	(LIBCXXFLAGS_FOR_TARGET): Ditto.
+	(BASE_FLAGS_TO_PASS): Pass them.
+	(EXTRA_TARGET_FLAGS): Ditto.
+
+	* configure.in, config/m[th]-*pic: Support --enable-shared.
 
 Sat Nov  5 15:44:00 1994  Per Bothner  <bothner@kalessin.cygnus.com>
 
