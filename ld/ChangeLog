@@ -1,4 +1,16 @@
+Thu Nov 16 03:09:32 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	Version 2.6 released.
+	* ldver.c (ldversion): Update to 2.6.
+
+	* Makefile.in (mostlyclean): Delete ldemul-list.h here, but not
+	$(GENERATED_*FILES), since they need to be retained by distclean.
+	(maintainer-clean, realclean): Delete them here.
+
 Tue Nov 14 17:08:06 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* emultempl/pe.em (gld_${EMULATION_NAME}_parse_args): Open the
+	base file with FOPEN_WB, not "w".
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_after_open): Use the
 	environment variable LD_RUN_PATH if neither -rpath nor -rpath-link

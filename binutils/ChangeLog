@@ -1,3 +1,21 @@
+Thu Nov 16 03:39:20 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	Version 2.6 released.
+	* Makefile.in (VERSION): Update to 2.6.
+
+Wed Nov 15 12:14:17 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (CC_FOR_TARGET): Define.
+	(check): Pass CC and CFLAGS to runtest.
+
+	* nm.c (display_rel_file): Don't require a DYNAMIC object when
+	dumping the dynamic symbol table.
+
+	* objdump.c (compare_symbols): Sort global symbols before local
+	symbols before debugging symbols.
+	(objdump_print_address): Don't futz around looking for a global
+	symbol with the same value.
+
 Tue Nov 14 17:19:11 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* dlltool.c: Use FOPEN_* macros rather than "r" or "w".

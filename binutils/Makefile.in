@@ -74,7 +74,7 @@ LEX_OPTIONS = -I -Cem
 LEX = `if [ -f ../flex/flex ] ; then echo ../flex/flex ; else echo flex ; fi`
 
 # Distribution version
-VERSION=cygnus-2.5.3
+VERSION=cygnus-2.6
 # Distribution name
 DIST_NAME=binutils-${VERSION}
 
@@ -128,8 +128,6 @@ BFDDIR = $(BASEDIR)/bfd
 INCDIR	= $(BASEDIR)/include
 INCLUDES = -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR)
 
-@target_makefile_fragment@
-
 ALL_CFLAGS = $(INCLUDES) @HDEFINES@ $(CFLAGS)
 
 .c.o:
@@ -170,6 +168,21 @@ RUNTEST = `if [ -f ${srcdir}/../dejagnu/runtest ] ; then \
            echo ${srcdir}/../dejagnu/runtest ; \
            else echo runtest ;  fi`
 RUNTESTFLAGS =
+
+CC_FOR_TARGET = ` \
+  if [ -f $$r/../gcc/xgcc ] ; then \
+    if [ -f $$r/../newlib/Makefile ] ; then \
+      echo $$r/../gcc/xgcc -B$$r/../gcc/ -idirafter $$r/../newlib/targ-include -idirafter $${srcroot}/../newlib/libc/include -nostdinc; \
+    else \
+      echo $$r/../gcc/xgcc -B$$r/../gcc/; \
+    fi; \
+  else \
+    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
+      echo $(CC); \
+    else \
+      echo gcc | sed '$(program_transform_name)'; \
+    fi; \
+  fi`
 
 FLAGS_TO_PASS = \
 	"CC=$(CC)" \
@@ -220,7 +233,7 @@ check: site.exp
 	   TCL_LIBRARY=$${srcroot}/../tcl/library ; \
 	   export TCL_LIBRARY ; else true; fi ; \
 	$(RUNTEST) --tool binutils --srcdir $(srcdir)/testsuite \
-	  $(RUNTESTFLAGS)
+	  $(RUNTESTFLAGS) CC="$(CC_FOR_TARGET)" CFLAGS="$(CFLAGS)"
 
 installcheck:
 	/bin/sh $(srcdir)/sanity.sh $(bindir)
