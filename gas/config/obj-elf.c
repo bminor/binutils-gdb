@@ -65,6 +65,7 @@ static void obj_elf_type PARAMS ((int));
 static void obj_elf_ident PARAMS ((int));
 static void obj_elf_weak PARAMS ((int));
 static void obj_elf_local PARAMS ((int));
+static void obj_elf_visibility PARAMS ((int));
 static void obj_elf_symver PARAMS ((int));
 static void obj_elf_vtable_inherit PARAMS ((int));
 static void obj_elf_vtable_entry PARAMS ((int));
@@ -88,6 +89,11 @@ static const pseudo_typeS elf_pseudo_table[] =
   {"type", obj_elf_type, 0},
   {"version", obj_elf_version, 0},
   {"weak", obj_elf_weak, 0},
+
+  /* These define symbol visibility. */
+  {"internal", obj_elf_visibility, STV_INTERNAL},
+  {"hidden", obj_elf_visibility, STV_HIDDEN},
+  {"protected", obj_elf_visibility, STV_PROTECTED},
 
   /* These are used for stabs-in-elf configurations.  */
   {"line", obj_elf_line, 0},
@@ -473,6 +479,48 @@ obj_elf_weak (ignore)
   while (c == ',');
   demand_empty_rest_of_line ();
 }
+
+static void
+obj_elf_visibility (visibility)
+     int visibility;
+{
+  char *name;
+  int c;
+  symbolS *symbolP;
+  asymbol *bfdsym;
+  elf_symbol_type *elfsym;
+
+  do
+    {
+      name = input_line_pointer;
+      c = get_symbol_end ();
+      symbolP = symbol_find_or_make (name);
+      *input_line_pointer = c;
+      
+      SKIP_WHITESPACE ();
+      
+      bfdsym = symbol_get_bfdsym (symbolP);
+      elfsym = elf_symbol_from (bfd_asymbol_bfd (bfdsym), bfdsym);
+      
+      assert (elfsym);
+      
+      elfsym->internal_elf_sym.st_other = visibility;
+      
+      if (c == ',')
+	{
+	  input_line_pointer ++;
+	  
+	  SKIP_WHITESPACE ();
+	  
+	  if (*input_line_pointer == '\n')
+	    c = '\n';
+	}
+    }
+  while (c == ',');
+  
+  demand_empty_rest_of_line ();
+}
+
 
 static segT previous_section;
 static int previous_subsection;

@@ -3195,6 +3195,9 @@ Some machine configurations provide additional directives.
 * Type::                        @code{.type @var{int}}
 * Val::                         @code{.val @var{addr}}
 @end ifset
+@ifset ELF
+* Visibility::                  @code{.internal @var{name}, .hidden @var{name}, .protected @var{name}}
+@end ifset
 
 * Uleb128::                     @code{.uleb128 @var{expressions}}
 * Word::                        @code{.word @var{expressions}}
@@ -4755,6 +4758,40 @@ configured for @code{b.out}, it accepts this directive but ignores it.
 @var{uleb128} stands for ``unsigned little endian base 128.''  This is a 
 compact, variable length representation of numbers used by the DWARF
 symbolic debugging format.  @xref{Sleb128,@code{.sleb128}}.
+
+@ifset ELF
+@node Visibility
+@section @code{.internal}, @code{.hidden}, @code{.protected}
+@cindex @code{internal} directive
+@cindex @code{hidden} directive
+@cindex @code{protected} directive
+@cindex symbol visibility
+
+These directives can be used to set the visibility of a specified symbol.  By
+default a symbol's visibility is set by its binding (local, global or weak),
+but these directives can be used to override that.
+
+A visibility of @code{protected} means that any references to the symbol from
+within the component that defines the symbol must be resolved to the definition
+in that component, even if a definition in another component would normally
+preempt this.
+
+A visibility of @code{hidden} means that the symbol is not visible to other 
+components.  Such a symbol is always considered to be protected as well.
+
+A visibility of @code{internal} is the same as a visibility of @code{hidden},
+except that some extra, processor specific processing must also be performed
+upon the symbol. 
+
+For ELF targets, the directives are used like this:
+
+@smallexample
+.internal @var{name}
+.hidden @var{name}
+.protected @var{name}
+@end smallexample
+
+@end ifset
 
 @node Word
 @section @code{.word @var{expressions}}

@@ -1,3 +1,11 @@
+2000-01-03  Martin v. Loewis  <loewis@informatik.hu-berlin.de>
+
+	* config/obj-elf.c (elf_pseudo_table): Define visibility pseudos.
+	(obj_elf_visibility): New function.
+	
+	* doc/as.texinfo (Visibility): New node: document visibility
+	pseudo ops.
+
 1999-12-27  Alan Modra  <alan@spri.levels.unisa.edu.au>
 
 	* config/tc-i386.c (MATCH): Relax JumpAbsolute check.  Emit a
