@@ -1,3 +1,25 @@
+2000-09-01  David Anderson  <davea@sgi.com>
+
+	* arch-utils.c arch-utils.h blockframe.c fork-child.c:
+	Corrected comment spelling dependant->dependent.
+	* corelow.c (default_core_sniffer): Corrected comment 
+	spelling.
+	* cp-valprint.c (cp_print_value_fields): Corrected 
+	comment spelling.
+	* d10v-tdep.c dbxread.c: Corrected comment spelling 
+	dependan->dependen.
+	* defs.h: Corrected spelling, meant 64, not 32, in comment.
+	* dst.h eval.c event-loop.c: Corrected comment spelling.
+	* event-top.c gdb-events.sh: Corrected comment spelling.
+	* gdbarch.c: Corrected comment spelling.
+	* gdbarch.h gdbarch.sh: Corrected comment spelling,
+	dependant->dependent.
+	* gdbtypes.c gdbtypes.h: Corrected comment spelling.
+	* infcmd.c infrun.c: Corrected comment spelling.
+	* symfile.c symfile.h target.h: Corrected comment spelling,
+	dependant->dependent.
+	* tracepoint.h: Corrected comment spelling.
+
 2000-09-01  Kevin Buettner  <kevinb@redhat.com>
 
 	* hppa-tdep.c (record_text_segment_lowaddr): Protoize.
