@@ -1,5 +1,11 @@
 2001-03-01  Andrew Cagney  <ac131313@redhat.com>
 
+	* Makefile.in (os9kread.o): Do not compile with WERROR_CFLAGS.
+	* os9kread.c (os9k_process_one_symbol): Add assert to detect
+	``loses if sizeof (char *) > sizeof (int)''.
+
+2001-03-01  Andrew Cagney  <ac131313@redhat.com>
+
 	* gdb_assert.h: Document pragmatics behind gdb_assert's case.
 
 2001-03-01  Andrew Cagney  <ac131313@redhat.com>

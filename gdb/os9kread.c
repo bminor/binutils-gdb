@@ -35,6 +35,7 @@
 
 #include "defs.h"
 #include "gdb_string.h"
+#include "gdb_assert.h"
 #include <stdio.h>
 
 #if defined(USG) || defined(__CYGNUSCLIB__)
@@ -1509,6 +1510,7 @@ os9k_process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
       /* Relocate for dynamic loading and for ELF acc fn-relative syms.  */
       valu += ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
       /* FIXME: loses if sizeof (char *) > sizeof (int) */
+      gdb_assert (sizeof (name) <= sizeof (int));
       record_line (current_subfile, (int) name, valu);
       break;
 

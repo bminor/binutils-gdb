@@ -1635,10 +1635,13 @@ mdebugread.o: mdebugread.c buildsym.h complaints.h $(bfd_h) $(defs_h) \
 
 mipsm3-nat.o: mipsm3-nat.c $(defs_h) $(inferior_h) $(regcache_h)
 
+# os9kread assumes that sizeof(char*) <= sizeof(int).  This looses on
+# 64 bit targets where often, sizeof(int)=4 but sizeof(char*)=9.
 os9kread.o: os9kread.c buildsym.h complaints.h $(bfd_h) $(defs_h) \
-        $(expression_h) gdb-stabs.h $(gdbcore_h) $(gdbtypes_h) language.h \
-        objfiles.h stabsread.h symfile.h $(symtab_h) \
-	target.h gdb_string.h
+	        $(expression_h) gdb-stabs.h $(gdbcore_h) $(gdbtypes_h) \
+		language.h objfiles.h stabsread.h symfile.h $(symtab_h) \
+		target.h gdb_string.h
+	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(NO_WERROR_CFLAGS) $<
 
 mem-break.o: mem-break.c $(defs_h) 
 
