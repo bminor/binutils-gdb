@@ -5,6 +5,9 @@ Tue Sep  9 17:14:33 1997  Doug Evans  <dje@canuck.cygnus.com>
 	(TARGET_CPU_HFILES): Add tc-arc.h.
 	(dependencies): Rebuild.
 	* Makefile.in: Rebuild.
+	* configure.in: Recognize arc-*-elf*.
+	* configure: Regenerated.
+	* config/tc-arc.[ch]: New files.
 
 Tue Sep  9 10:19:37 1997  Nick Clifton  <nickc@cygnus.com>
 
