@@ -6,6 +6,9 @@
 /* Define if your struct reg has r_fs.  */
 #undef HAVE_STRUCT_REG_R_FS
 
+/* Define if your struct stat has st_blocks.  */
+#undef HAVE_STRUCT_STAT_ST_BLOCKS
+
 /* Define if your struct reg has r_gs.  */
 #undef HAVE_STRUCT_REG_R_GS
 

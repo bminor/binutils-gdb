@@ -1,5 +1,12 @@
 2003-12-30  Eli Zaretskii  <eliz@elta.co.il>
 
+	* configure.in: Check for st_blocks member in struct stat and
+	define HAVE_STRUCT_STAT_ST_BLOCKS accordingly.
+
+	* acconfig.h (HAVE_STRUCT_STAT_ST_BLOCKS): New undef.
+
+	* configure, config.in: Regenerated.
+
 	* remote-fileio.c (remote_fileio_to_fio_stat)
 	(remote_fileio_func_fstat) [HAVE_STRUCT_STAT_ST_BLOCKS]: Support
 	systems that don't have `st_blocks' member in `struct stat'.
