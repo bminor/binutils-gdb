@@ -45,19 +45,6 @@ struct value;
 struct type;
 struct inferior_status;
 
-/* Get at various relevent fields of an instruction word. */
-
-#define MASK_5 0x1f
-#define MASK_11 0x7ff
-#define MASK_14 0x3fff
-#define MASK_21 0x1fffff
-
-/* This macro gets bit fields using HP's numbering (MSB = 0) */
-#ifndef GET_FIELD
-#define GET_FIELD(X, FROM, TO) \
-  ((X) >> (31 - (TO)) & ((1 << ((TO) - (FROM) + 1)) - 1))
-#endif
-
 /* Sequence of bytes for breakpoint instruction.  */
 
 const unsigned char *hppa_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr);
@@ -121,27 +108,6 @@ extern int hppa_pc_requires_run_before_use (CORE_ADDR pc);
 #define ARG2_REGNUM 24		/* The third argument of a callee. */
 #define ARG3_REGNUM 23		/* The fourth argument of a callee. */
 
-/*
- * Processor Status Word Masks
- */
-
-#define PSW_T   0x01000000	/* Taken Branch Trap Enable */
-#define PSW_H   0x00800000	/* Higher-Privilege Transfer Trap Enable */
-#define PSW_L   0x00400000	/* Lower-Privilege Transfer Trap Enable */
-#define PSW_N   0x00200000	/* PC Queue Front Instruction Nullified */
-#define PSW_X   0x00100000	/* Data Memory Break Disable */
-#define PSW_B   0x00080000	/* Taken Branch in Previous Cycle */
-#define PSW_C   0x00040000	/* Code Address Translation Enable */
-#define PSW_V   0x00020000	/* Divide Step Correction */
-#define PSW_M   0x00010000	/* High-Priority Machine Check Disable */
-#define PSW_CB  0x0000ff00	/* Carry/Borrow Bits */
-#define PSW_R   0x00000010	/* Recovery Counter Enable */
-#define PSW_Q   0x00000008	/* Interruption State Collection Enable */
-#define PSW_P   0x00000004	/* Protection ID Validation Enable */
-#define PSW_D   0x00000002	/* Data Address Translation Enable */
-#define PSW_I   0x00000001	/* External, Power Failure, Low-Priority */
-				/* Machine Check Interruption Enable */
-
 /* When fetching register values from an inferior or a core file,
    clean them up using this macro.  BUF is a char pointer to
    the raw value of the register in the registers[] array.  */
@@ -184,9 +150,6 @@ extern void hppa_frame_init_saved_regs (struct frame_info *);
   hppa_frame_init_saved_regs (FI)
 
 #define INSTRUCTION_SIZE 4
-
-/* Non-level zero PA's have space registers (but they don't always have
-   floating-point, do they????  */
 
 /* This sequence of words is the instructions
 
@@ -249,14 +212,6 @@ extern void hppa_frame_init_saved_regs (struct frame_info *);
    sure that we never try to execute a 0xffffffff instruction and
    avoid the kernel bug.  The second NOP is needed to keep the call
    dummy 8 byte aligned.  */
-
-/* Define offsets into the call dummy for the target function address */
-#define FUNC_LDIL_OFFSET (INSTRUCTION_SIZE * 9)
-#define FUNC_LDO_OFFSET (INSTRUCTION_SIZE * 10)
-
-/* Define offsets into the call dummy for the _sr4export address */
-#define SR4EXPORT_LDIL_OFFSET (INSTRUCTION_SIZE * 12)
-#define SR4EXPORT_LDO_OFFSET (INSTRUCTION_SIZE * 13)
 
 #define CALL_DUMMY {0x4BDA3FB9, 0x4BD93FB1, 0x4BD83FA9, 0x4BD73FA1,\
                     0x37C13FB9, 0x24201004, 0x2C391005, 0x24311006,\
@@ -351,25 +306,6 @@ struct unwind_table_entry
    GDB reads in the stubs from the $UNWIND_END$ subspace, then 
    "converts" them into normal unwind entries using some of the reserved
    fields to store the stub type.  */
-
-struct stub_unwind_entry
-  {
-    /* The offset within the executable for the associated stub.  */
-    unsigned stub_offset;
-
-    /* The type of stub this unwind entry describes.  */
-    char type;
-
-    /* Unknown.  Not needed by GDB at this time.  */
-    char prs_info;
-
-    /* Length (in instructions) of the associated stub.  */
-    short stub_length;
-  };
-
-/* Sizes (in bytes) of the native unwind entries.  */
-#define UNWIND_ENTRY_SIZE 16
-#define STUB_UNWIND_ENTRY_SIZE 8
 
 /* The gaps represent linker stubs used in MPE and space for future
    expansion.  */

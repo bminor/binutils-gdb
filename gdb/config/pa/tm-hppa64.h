@@ -35,9 +35,14 @@ struct frame_info;
    the conversion for hppa64 hasn't been completed yet.  */
 #define GDB_MULTI_ARCH 0
 
-/* FIXME: brobecker 2003-04-21: All the definition from this point until
-   the include of pa/tm-hppah.h are extracted from tm-hppa.h.  They have
-   been temporarily moved here, until hppa64 is multiarched too.  */
+/* FIXME: brobecker 2003-05-22: All the definition from this point until
+   the include of pa/tm-hppah.h are extracted from tm-hppa.h and tm-hppah.h.
+   They have been temporarily moved here, until hppa64 is multiarched too.  */
+
+#if !GDB_MULTI_ARCH
+extern int hppa_hpux_pc_in_sigtramp (CORE_ADDR pc, char *name);
+#define PC_IN_SIGTRAMP(pc, name) hppa_hpux_pc_in_sigtramp (pc, name)
+#endif
 
 #if !GDB_MULTI_ARCH
 extern int hppa_reg_struct_has_addr (int gcc_p, struct type *type);

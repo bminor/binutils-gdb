@@ -945,12 +945,6 @@ extern void (*target_new_objfile_hook) (struct objfile *);
 #define target_get_thread_local_address_p() \
     (target_get_thread_local_address != NULL)
 
-/* Hook to call target-dependent code after reading in a new symbol table.  */
-
-#ifndef TARGET_SYMFILE_POSTREAD
-#define TARGET_SYMFILE_POSTREAD(OBJFILE)
-#endif
-
 /* Hook to call target dependent code just after inferior target process has
    started.  */
 

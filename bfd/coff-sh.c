@@ -3132,7 +3132,7 @@ sh_coff_get_relocated_section_contents (output_bfd, link_info, link_order,
 /* The target vectors.  */
 
 #ifndef TARGET_SHL_SYM
-CREATE_BIG_COFF_TARGET_VEC (shcoff_vec, "coff-sh", BFD_IS_RELAXABLE, 0, '_', NULL)
+CREATE_BIG_COFF_TARGET_VEC (shcoff_vec, "coff-sh", BFD_IS_RELAXABLE, 0, '_', NULL, COFF_SWAP_TABLE)
 #endif
 
 #ifdef TARGET_SHL_SYM
@@ -3147,10 +3147,10 @@ CREATE_BIG_COFF_TARGET_VEC (shcoff_vec, "coff-sh", BFD_IS_RELAXABLE, 0, '_', NUL
 
 #ifdef COFF_WITH_PE
 CREATE_LITTLE_COFF_TARGET_VEC (TARGET_SYM, TARGET_SHL_NAME, BFD_IS_RELAXABLE,
-			       SEC_CODE | SEC_DATA, '_', NULL);
+			       SEC_CODE | SEC_DATA, '_', NULL, COFF_SWAP_TABLE);
 #else
 CREATE_LITTLE_COFF_TARGET_VEC (TARGET_SYM, TARGET_SHL_NAME, BFD_IS_RELAXABLE,
-			       0, '_', NULL)
+			       0, '_', NULL, COFF_SWAP_TABLE)
 #endif
 
 #ifndef TARGET_SHL_SYM

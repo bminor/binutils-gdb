@@ -3643,7 +3643,7 @@ sh64_elf64_size_dynamic_sections (output_bfd, info)
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       /* Set the contents of the .interp section to the interpreter.  */
-      if (! info->shared)
+      if (info->executable)
 	{
 	  s = bfd_get_section_by_name (dynobj, ".interp");
 	  BFD_ASSERT (s != NULL);
@@ -3777,7 +3777,7 @@ sh64_elf64_size_dynamic_sections (output_bfd, info)
 	 must add the entries now so that we get the correct size for
 	 the .dynamic section.  The DT_DEBUG entry is filled in by the
 	 dynamic linker and used by the debugger.  */
-      if (! info->shared)
+      if (info->executable)
 	{
 	  if (! bfd_elf64_add_dynamic_entry (info, DT_DEBUG, 0))
 	    return FALSE;

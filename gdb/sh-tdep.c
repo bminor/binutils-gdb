@@ -1921,14 +1921,14 @@ sh64_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 static CORE_ADDR
 sh_extract_struct_value_address (char *regbuf)
 {
-  return (extract_address ((regbuf), REGISTER_RAW_SIZE (0)));
+  return (extract_unsigned_integer ((regbuf), REGISTER_RAW_SIZE (0)));
 }
 
 static CORE_ADDR
 sh64_extract_struct_value_address (char *regbuf)
 {
-  return (extract_address ((regbuf + REGISTER_BYTE (STRUCT_RETURN_REGNUM)), 
-			   REGISTER_RAW_SIZE (STRUCT_RETURN_REGNUM)));
+  return (extract_unsigned_integer ((regbuf + REGISTER_BYTE (STRUCT_RETURN_REGNUM)), 
+				    REGISTER_RAW_SIZE (STRUCT_RETURN_REGNUM)));
 }
 
 static CORE_ADDR
@@ -2123,7 +2123,7 @@ sh_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	  if (argreg <= tdep->ARGLAST_REGNUM)
 	    {			
 	      /* there's room in a register */
-	      regval = extract_address (val, REGISTER_RAW_SIZE (argreg));
+	      regval = extract_unsigned_integer (val, REGISTER_RAW_SIZE (argreg));
 	      write_register (argreg++, regval);
 	    }
 	  /* Store the value 4 bytes at a time.  This means that things
@@ -2238,7 +2238,7 @@ sh64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	      if (int_argreg <= tdep->ARGLAST_REGNUM)
 		{			
 		  /* there's room in a register */
-		  regval = extract_address (val, argreg_size);
+		  regval = extract_unsigned_integer (val, argreg_size);
 		  write_register (int_argreg, regval);
 		}
 	      /* Store the value 8 bytes at a time.  This means that

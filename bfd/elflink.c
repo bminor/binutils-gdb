@@ -94,7 +94,7 @@ _bfd_elf_create_got_section (abfd, info)
       h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
       h->type = STT_OBJECT;
 
-      if (info->shared
+      if (! info->executable
 	  && ! _bfd_elf_link_record_dynamic_symbol (info, h))
 	return FALSE;
 
@@ -144,7 +144,7 @@ _bfd_elf_link_create_dynamic_sections (abfd, info)
 
   /* A dynamically linked executable has a .interp section, but a
      shared library does not.  */
-  if (! info->shared)
+  if (info->executable)
     {
       s = bfd_make_section (abfd, ".interp");
       if (s == NULL
@@ -227,7 +227,7 @@ _bfd_elf_link_create_dynamic_sections (abfd, info)
   h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
   h->type = STT_OBJECT;
 
-  if (info->shared
+  if (! info->executable
       && ! _bfd_elf_link_record_dynamic_symbol (info, h))
     return FALSE;
 
@@ -295,7 +295,7 @@ _bfd_elf_create_dynamic_sections (abfd, info)
       h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
       h->type = STT_OBJECT;
 
-      if (info->shared
+      if (! info->executable
 	  && ! _bfd_elf_link_record_dynamic_symbol (info, h))
 	return FALSE;
     }
@@ -1760,7 +1760,7 @@ _bfd_elf_link_assign_sym_version (h, data)
 
       /* If we are building an application, we need to create a
 	 version node for this version.  */
-      if (t == NULL && ! info->shared)
+      if (t == NULL && info->executable)
 	{
 	  struct bfd_elf_version_tree **pp;
 	  int version_index;

@@ -70,7 +70,6 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
   for (regno = 0; regno < ALPHA_ZERO_REGNUM; regno++)
     supply_register (regno, regs + (regmap[regno] * 8));
   supply_register (ALPHA_ZERO_REGNUM, NULL);
-  supply_register (DEPRECATED_FP_REGNUM, NULL);
   supply_register (PC_REGNUM, regs + (28 * 8));
 
   /* Floating point registers.  */
@@ -190,21 +189,7 @@ alphanbsd_sigcontext_addr (struct frame_info *frame)
   /* FIXME: This is not correct for all versions of NetBSD/alpha.
      We will probably need to disassemble the trampoline to figure
      out which trampoline frame type we have.  */
-  return frame->frame;
-}
-
-static CORE_ADDR
-alphanbsd_skip_sigtramp_frame (struct frame_info *frame, CORE_ADDR pc)
-{
-  char *name;
-
-  /* FIXME: This is not correct for all versions of NetBSD/alpha.
-     We will probably need to disassemble the trampoline to figure
-     out which trampoline frame type we have.  */
-  find_pc_partial_function (pc, &name, (CORE_ADDR *) NULL, (CORE_ADDR *) NULL);
-  if (PC_IN_SIGTRAMP (pc, name))
-    return frame->frame;
-  return 0;
+  return get_frame_base (frame);
 }
 
 static void
@@ -212,6 +197,12 @@ alphanbsd_init_abi (struct gdbarch_info info,
                     struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  /* Hook into the DWARF CFI frame unwinder.  */
+  alpha_dwarf2_init_abi (info, gdbarch);
+
+  /* Hook into the MDEBUG frame unwinder.  */
+  alpha_mdebug_init_abi (info, gdbarch);
 
   set_gdbarch_pc_in_sigtramp (gdbarch, alphanbsd_pc_in_sigtramp);
 
@@ -222,7 +213,6 @@ alphanbsd_init_abi (struct gdbarch_info info,
   set_solib_svr4_fetch_link_map_offsets (gdbarch,
                                  nbsd_lp64_solib_svr4_fetch_link_map_offsets);
 
-  tdep->skip_sigtramp_frame = alphanbsd_skip_sigtramp_frame;
   tdep->dynamic_sigtramp_offset = alphanbsd_sigtramp_offset;
   tdep->sigcontext_addr = alphanbsd_sigcontext_addr;
 

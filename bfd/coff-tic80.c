@@ -719,4 +719,4 @@ coff_tic80_relocate_section (output_bfd, info, input_bfd,
 #undef C_LASTENT		/* Clashes with TIc80's C_STATLAB */
 #include "coffcode.h"
 
-CREATE_LITTLE_COFF_TARGET_VEC (tic80coff_vec, "coff-tic80", D_PAGED, 0, '_', NULL)
+CREATE_LITTLE_COFF_TARGET_VEC (tic80coff_vec, "coff-tic80", D_PAGED, 0, '_', NULL, COFF_SWAP_TABLE)

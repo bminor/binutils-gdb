@@ -2719,7 +2719,7 @@ allocate_dynrelocs (h, inf)
 	     for two entries is allocated.  */
 	  s->_raw_size += PLT_ENTRY_SIZE;
 	  if ((s->_raw_size - PLT_INITIAL_ENTRY_SIZE) / PLT_ENTRY_SIZE
-	      >= PLT_NUM_SINGLE_ENTRIES)
+	      > PLT_NUM_SINGLE_ENTRIES)
 	    s->_raw_size += PLT_ENTRY_SIZE;
 
 	  /* We also need to make an entry in the .rela.plt section.  */
@@ -2920,7 +2920,7 @@ ppc_elf_size_dynamic_sections (output_bfd, info)
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       /* Set the contents of the .interp section to the interpreter.  */
-      if (! info->shared)
+      if (info->executable)
 	{
 	  s = bfd_get_section_by_name (htab->elf.dynobj, ".interp");
 	  BFD_ASSERT (s != NULL);
@@ -3102,7 +3102,7 @@ ppc_elf_size_dynamic_sections (output_bfd, info)
 #define add_dynamic_entry(TAG, VAL) \
   bfd_elf32_add_dynamic_entry (info, (bfd_vma) (TAG), (bfd_vma) (VAL))
 
-      if (!info->shared)
+      if (info->executable)
 	{
 	  if (!add_dynamic_entry (DT_DEBUG, 0))
 	    return FALSE;

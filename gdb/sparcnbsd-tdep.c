@@ -447,7 +447,7 @@ sparcnbsd_get_longjmp_target_32 (CORE_ADDR *pc)
   if (target_read_memory (jb_addr + 12, buf, sizeof (buf)))
     return 0;
 
-  *pc = extract_address (buf, sizeof (buf));
+  *pc = extract_unsigned_integer (buf, sizeof (buf));
 
   return 1;
 }
@@ -463,7 +463,7 @@ sparcnbsd_get_longjmp_target_64 (CORE_ADDR *pc)
   if (target_read_memory (jb_addr + 16, buf, sizeof (buf)))
     return 0;
 
-  *pc = extract_address (buf, sizeof (buf));
+  *pc = extract_unsigned_integer (buf, sizeof (buf));
 
   return 1;
 }

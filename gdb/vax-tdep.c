@@ -300,7 +300,8 @@ vax_store_return_value (struct type *valtype, char *valbuf)
 static CORE_ADDR
 vax_extract_struct_value_address (char *regbuf)
 {
-  return (extract_address (regbuf + REGISTER_BYTE (0), REGISTER_RAW_SIZE (0)));
+  return (extract_unsigned_integer (regbuf + REGISTER_BYTE (0),
+				    REGISTER_RAW_SIZE (0)));
 }
 
 static const unsigned char *

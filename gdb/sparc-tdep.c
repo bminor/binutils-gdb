@@ -508,7 +508,7 @@ sparc_frame_saved_pc (struct frame_info *frame)
          stack layout has changed or the stack is corrupt.  */
       target_read_memory (sigcontext_addr + saved_pc_offset,
 			  scbuf, sizeof (scbuf));
-      return extract_address (scbuf, sizeof (scbuf));
+      return extract_unsigned_integer (scbuf, sizeof (scbuf));
     }
   else if (get_frame_extra_info (frame)->in_prologue ||
 	   (get_next_frame (frame) != NULL &&
@@ -534,7 +534,7 @@ sparc_frame_saved_pc (struct frame_info *frame)
     return PC_ADJUST (read_register (O7_REGNUM));
 
   read_memory (addr, buf, SPARC_INTREG_SIZE);
-  return PC_ADJUST (extract_address (buf, SPARC_INTREG_SIZE));
+  return PC_ADJUST (extract_unsigned_integer (buf, SPARC_INTREG_SIZE));
 }
 
 /* Since an individual frame in the frame cache is defined by two
@@ -1796,7 +1796,7 @@ get_longjmp_target (CORE_ADDR *pc)
 			  LONGJMP_TARGET_SIZE))
     return 0;
 
-  *pc = extract_address (buf, LONGJMP_TARGET_SIZE);
+  *pc = extract_unsigned_integer (buf, LONGJMP_TARGET_SIZE);
 
   return 1;
 }
@@ -2104,20 +2104,7 @@ sparc_print_registers (struct gdbarch *gdbarch,
 	  continue;
 	}
 
-      /* FIXME: cagney/2002-08-03: This code shouldn't be necessary.
-         The function frame_register_read() should have returned the
-         pre-cooked register so no conversion is necessary.  */
-      /* Convert raw data to virtual format if necessary.  */
-      if (REGISTER_CONVERTIBLE (i))
-	{
-	  REGISTER_CONVERT_TO_VIRTUAL (i, REGISTER_VIRTUAL_TYPE (i),
-				       raw_buffer, virtual_buffer);
-	}
-      else
-	{
-	  memcpy (virtual_buffer, raw_buffer,
-		  REGISTER_VIRTUAL_SIZE (i));
-	}
+      memcpy (virtual_buffer, raw_buffer, REGISTER_VIRTUAL_SIZE (i));
 
       /* If virtual format is floating, print it that way, and in raw
          hex.  */
@@ -3165,19 +3152,6 @@ sparc_saved_pc_after_call (struct frame_info *fi)
   return sparc_pc_adjust (read_register (RP_REGNUM));
 }
 
-/* Convert registers between 'raw' and 'virtual' formats.
-   They are the same on sparc, so there's nothing to do.  */
-
-static void
-sparc_convert_to_virtual (int regnum, struct type *type, char *from, char *to)
-{	/* do nothing (should never be called) */
-}
-
-static void
-sparc_convert_to_raw (struct type *type, int regnum, char *from, char *to)
-{	/* do nothing (should never be called) */
-}
-
 /* Init saved regs: nothing to do, just a place-holder function.  */
 
 static void
@@ -3241,6 +3215,15 @@ sparc_return_value_on_stack (struct type *type)
     return 1;
   else
     return 0;
+}
+
+/* Get the ith function argument for the current function.  */
+CORE_ADDR
+sparc_fetch_pointer_argument (struct frame_info *frame, int argi, struct type *type)
+{
+  CORE_ADDR addr;
+  frame_read_register (frame, O0_REGNUM + argi, &addr);
+  return addr;
 }
 
 /*
@@ -3339,11 +3322,6 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_push_return_address (gdbarch, sparc_push_return_address);
   set_gdbarch_deprecated_push_dummy_frame (gdbarch, sparc_push_dummy_frame);
   set_gdbarch_read_pc (gdbarch, generic_target_read_pc);
-  set_gdbarch_register_convert_to_raw (gdbarch, sparc_convert_to_raw);
-  set_gdbarch_register_convert_to_virtual (gdbarch, 
-					   sparc_convert_to_virtual);
-  set_gdbarch_register_convertible (gdbarch, 
-				    generic_register_convertible_not);
   set_gdbarch_reg_struct_has_addr (gdbarch, sparc_reg_struct_has_addr);
   set_gdbarch_return_value_on_stack (gdbarch, sparc_return_value_on_stack);
   set_gdbarch_deprecated_saved_pc_after_call (gdbarch, sparc_saved_pc_after_call);
@@ -3353,6 +3331,9 @@ sparc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_sp_regnum (gdbarch, SPARC_SP_REGNUM);
   set_gdbarch_deprecated_use_generic_dummy_frames (gdbarch, 0);
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
+
+  /* Helper for function argument information.  */
+  set_gdbarch_fetch_pointer_argument (gdbarch, sparc_fetch_pointer_argument);
 
   /*
    * Settings that depend only on 32/64 bit word size 

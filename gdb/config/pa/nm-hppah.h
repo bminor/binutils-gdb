@@ -55,8 +55,8 @@
 
 /* While this is for use by threaded programs, it doesn't appear
  * to hurt non-threaded ones.  This is used in infrun.c: */
-#define PREPARE_TO_PROCEED(select_it) hppa_prepare_to_proceed()
-extern int hppa_prepare_to_proceed (void);
+#define PREPARE_TO_PROCEED(select_it) generic_prepare_to_proceed(select_it)
+extern int generic_prepare_to_proceed (int select_it);
 
 /* In infptrace.c or infttrace.c: */
 #define CHILD_PID_TO_EXEC_FILE

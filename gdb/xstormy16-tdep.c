@@ -228,8 +228,8 @@ xstormy16_extract_return_value (struct type *type, char *regbuf, char *valbuf)
       /* Aggregates and return values > 12 bytes are returned in memory,
          pointed to by R2. */
       return_buffer =
-	extract_address (regbuf + REGISTER_BYTE (E_PTR_RET_REGNUM),
-			 REGISTER_RAW_SIZE (E_PTR_RET_REGNUM));
+	extract_unsigned_integer (regbuf + REGISTER_BYTE (E_PTR_RET_REGNUM),
+				  REGISTER_RAW_SIZE (E_PTR_RET_REGNUM));
 
       read_memory (return_buffer, valbuf, TYPE_LENGTH (type));
     }
@@ -410,9 +410,8 @@ xstormy16_store_return_value (struct type *type, char *valbuf)
 static CORE_ADDR
 xstormy16_extract_struct_value_address (char *regbuf)
 {
-  return extract_address (regbuf +
-			  xstormy16_register_byte (E_PTR_RET_REGNUM),
-			  xstormy16_reg_size);
+  return extract_unsigned_integer (regbuf + xstormy16_register_byte (E_PTR_RET_REGNUM),
+				   xstormy16_reg_size);
 }
 
 /* Function: xstormy16_use_struct_convention 
@@ -962,7 +961,7 @@ static CORE_ADDR
 xstormy16_pointer_to_address (struct type *type, const void *buf)
 {
   enum type_code target = TYPE_CODE (TYPE_TARGET_TYPE (type));
-  CORE_ADDR addr = extract_address (buf, TYPE_LENGTH (type));
+  CORE_ADDR addr = extract_unsigned_integer (buf, TYPE_LENGTH (type));
 
   if (target == TYPE_CODE_FUNC || target == TYPE_CODE_METHOD)
     {

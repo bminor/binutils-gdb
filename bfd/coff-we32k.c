@@ -66,4 +66,4 @@ static reloc_howto_type howto_table[] =
 
 #define coff_write_armap bsd_write_armap
 
-CREATE_BIG_COFF_TARGET_VEC (we32kcoff_vec, "coff-we32k", 0, 0, 0, NULL)
+CREATE_BIG_COFF_TARGET_VEC (we32kcoff_vec, "coff-we32k", 0, 0, 0, NULL, COFF_SWAP_TABLE)

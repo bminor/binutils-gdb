@@ -27,10 +27,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /* -- opc.h */
 
-#undef CGEN_DIS_HASH_SIZE
+#undef  CGEN_DIS_HASH_SIZE
 #define CGEN_DIS_HASH_SIZE 128
-#undef CGEN_DIS_HASH
+#undef  CGEN_DIS_HASH
 #define CGEN_DIS_HASH(buffer, value) (((value) >> 18) & 127)
+
+/* Allows reason codes to be output when assembler errors occur.  */
+#define CGEN_VERBOSE_ASSEMBLER_ERRORS
 
 /* Vliw support.  */
 #define FRV_VLIW_SIZE 4 /* fr500 has largest vliw size of 4.  */

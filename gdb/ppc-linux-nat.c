@@ -426,7 +426,7 @@ store_altivec_registers (int tid)
   int ret;
   gdb_vrregset_t regs;
 
-  ret = ptrace (PTRACE_GETVRREGS, tid, 0, (int) &regs);
+  ret = ptrace (PTRACE_GETVRREGS, tid, 0, &regs);
   if (ret < 0)
     {
       if (errno == EIO)
@@ -439,7 +439,7 @@ store_altivec_registers (int tid)
 
   fill_vrregset (&regs);
   
-  if (ptrace (PTRACE_SETVRREGS, tid, 0, (int) &regs) < 0)
+  if (ptrace (PTRACE_SETVRREGS, tid, 0, &regs) < 0)
     perror_with_name ("Couldn't write AltiVec registers");
 }
 

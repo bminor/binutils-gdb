@@ -384,6 +384,7 @@ AC_CHECK_FUNCS(sbrk)
 AC_CHECK_FUNCS(setpgid setpgrp)
 AC_CHECK_FUNCS(sigaction sigprocmask sigsetmask)
 AC_CHECK_FUNCS(socketpair)
+AC_CHECK_FUNCS(syscall)
 
 dnl AC_FUNC_SETPGRP does not work when cross compiling
 dnl Instead, assume we will have a prototype for setpgrp if cross compiling.
@@ -909,6 +910,24 @@ fi
 if test "x$gdb_cv_thread_db_h_has_td_notalloc" = "xyes"; then
   AC_DEFINE(THREAD_DB_HAS_TD_NOTALLOC, 1,
             [Define if <thread_db.h> has the TD_NOTALLOC error code.])
+fi
+
+dnl See if we have a sys/syscall header file that has __NR_tkill.
+if test "x$ac_cv_header_sys_syscall_h" = "xyes"; then
+   AC_CACHE_CHECK([whether <sys/syscall.h> has __NR_tkill],
+                  gdb_cv_sys_syscall_h_has_tkill,
+     AC_TRY_COMPILE(
+       [#include <sys/syscall.h>],
+       [int i = __NR_tkill;],
+       gdb_cv_sys_syscall_h_has_tkill=yes,
+       gdb_cv_sys_syscall_h_has_tkill=no
+     )
+   )
+fi
+dnl See if we can issue tkill syscall.
+if test "x$gdb_cv_sys_syscall_h_has_tkill" = "xyes" && test "x$ac_cv_func_syscall" = "xyes"; then
+  AC_DEFINE(HAVE_TKILL_SYSCALL, 1,
+            [Define if we can use the tkill syscall.])
 fi
 
 dnl Handle optional features that can be enabled.

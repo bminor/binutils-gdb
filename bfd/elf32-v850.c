@@ -189,7 +189,7 @@ static reloc_howto_type v850_elf_howto_table[] =
 	 FALSE),			/* pcrel_offset */
 
   /* Simple 32bit reloc.  */
-  HOWTO (R_V850_32,			/* type */
+  HOWTO (R_V850_ABS32,			/* type */
 	 0,				/* rightshift */
 	 2,				/* size (0 = byte, 1 = short, 2 = long) */
 	 32,				/* bitsize */
@@ -197,7 +197,7 @@ static reloc_howto_type v850_elf_howto_table[] =
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 v850_elf_reloc,		/* special_function */
-	 "R_V850_32",			/* name */
+	 "R_V850_ABS32",		/* name */
 	 FALSE,				/* partial_inplace */
 	 0xffffffff,			/* src_mask */
 	 0xffffffff,			/* dst_mask */
@@ -518,6 +518,21 @@ static reloc_howto_type v850_elf_howto_table[] =
        0,                     /* src_mask */
        0,                     /* dst_mask */
        TRUE),                 /* pcrel_offset */
+  
+  /* Simple pc-relative 32bit reloc.  */
+  HOWTO (R_V850_REL32,			/* type */
+	 0,				/* rightshift */
+	 2,				/* size (0 = byte, 1 = short, 2 = long) */
+	 32,				/* bitsize */
+	 TRUE,				/* pc_relative */
+	 0,				/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 v850_elf_reloc,		/* special_function */
+	 "R_V850_REL32",		/* name */
+	 FALSE,				/* partial_inplace */
+	 0xffffffff,			/* src_mask */
+	 0xffffffff,			/* dst_mask */
+	 FALSE),			/* pcrel_offset */
 };
 
 /* Map BFD reloc types to V850 ELF reloc types.  */
@@ -538,7 +553,8 @@ static const struct v850_elf_reloc_map v850_elf_reloc_map[] =
   { BFD_RELOC_HI16_S,		           R_V850_HI16_S                 },
   { BFD_RELOC_HI16,		           R_V850_HI16                   },
   { BFD_RELOC_LO16,		           R_V850_LO16                   },
-  { BFD_RELOC_32,		           R_V850_32                     },
+  { BFD_RELOC_32,		           R_V850_ABS32                  },
+  { BFD_RELOC_32_PCREL,		           R_V850_REL32                  },
   { BFD_RELOC_16,		           R_V850_16                     },
   { BFD_RELOC_8,		           R_V850_8                      },
   { BFD_RELOC_V850_SDA_16_16_OFFSET,       R_V850_SDA_16_16_OFFSET       },
@@ -672,7 +688,8 @@ v850_elf_check_relocs (abfd, info, sec, relocs)
 	case R_V850_HI16_S:
 	case R_V850_HI16:
 	case R_V850_LO16:
-	case R_V850_32:
+	case R_V850_ABS32:
+	case R_V850_REL32:
 	case R_V850_16:
 	case R_V850_8:
 	case R_V850_CALLT_6_7_OFFSET:
@@ -905,7 +922,8 @@ v850_elf_perform_relocation (abfd, r_type, addend, address)
       /* fprintf (stderr, "reloc type %d not SUPPORTED\n", r_type ); */
       return bfd_reloc_notsupported;
 
-    case R_V850_32:
+    case R_V850_REL32:
+    case R_V850_ABS32:
       bfd_put_32 (abfd, addend, address);
       return bfd_reloc_ok;
 
@@ -1466,11 +1484,17 @@ v850_elf_final_link_relocate (howto, input_bfd, output_bfd,
       value = SEXT24 (value);
       break;
 
+    case R_V850_REL32:
+      value -= (input_section->output_section->vma
+		+ input_section->output_offset
+		+ offset);
+      break;
+
     case R_V850_HI16_S:
     case R_V850_HI16:
     case R_V850_LO16:
     case R_V850_16:
-    case R_V850_32:
+    case R_V850_ABS32:
     case R_V850_8:
       break;
 

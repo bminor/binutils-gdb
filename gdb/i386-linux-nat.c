@@ -70,6 +70,9 @@
 /* Defines I386_LINUX_ORIG_EAX_REGNUM.  */
 #include "i386-linux-tdep.h"
 
+/* Defines ps_err_e, struct ps_prochandle.  */
+#include "gdb_proc_service.h"
+
 /* Prototypes for local functions.  */
 static void dummy_sse_values (void);
 
@@ -683,6 +686,21 @@ i386_linux_dr_set (int regnum, unsigned long value)
     perror_with_name ("Couldn't write debug register");
 }
 
+extern ps_err_e
+ps_get_thread_area(const struct ps_prochandle *ph, 
+		   lwpid_t lwpid, int idx, void **base)
+{
+  unsigned long int desc[3];
+#define PTRACE_GET_THREAD_AREA 25
+
+  if  (ptrace (PTRACE_GET_THREAD_AREA, 
+	       lwpid, (void *) idx, (unsigned long) &desc) < 0)
+    return PS_ERR;
+
+  *(int *)base = desc[1];
+  return PS_OK;
+}
+
 void
 i386_linux_dr_set_control (unsigned long control)
 {
@@ -852,7 +870,7 @@ child_resume (ptid_t ptid, int step, enum target_signal signal)
 	  /* Then check the system call number.  */
 	  if (syscall == SYS_sigreturn || syscall == SYS_rt_sigreturn)
 	    {
-	      CORE_ADDR sp = read_register (SP_REGNUM);
+	      CORE_ADDR sp = read_register (I386_ESP_REGNUM);
 	      CORE_ADDR addr = sp;
 	      unsigned long int eflags;
 

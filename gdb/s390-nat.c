@@ -251,9 +251,26 @@ supply_gregset (gregset_t * gregsetp)
   for (regi = 0; regi < S390_NUM_GPRS; regi++)
     supply_register (S390_GP0_REGNUM + regi,
 		     (char *) &gregp[S390_GP0_REGNUM + regi]);
+
+#if defined (CONFIG_ARCH_S390X)
+  /* On the s390x, each element of gregset_t is 8 bytes long, but
+     each access register is still only 32 bits long.  So they're
+     packed two per element.  It's apparently traditional that
+     gregset_t must be an array, so when the registers it provides
+     have different sizes, something has to get strange
+     somewhere.  */
+  {
+    unsigned int *acrs = (unsigned int *) &gregp[S390_FIRST_ACR];
+
+    for (regi = 0; regi < S390_NUM_ACRS; regi++)
+      supply_register (S390_FIRST_ACR + regi, (char *) &acrs[regi]);
+  }
+#else
   for (regi = 0; regi < S390_NUM_ACRS; regi++)
     supply_register (S390_FIRST_ACR + regi,
-		     (char *) &gregp[S390_FIRST_ACR + regi]);
+                     (char *) &gregp[S390_FIRST_ACR + regi]);
+#endif
+
   /* unfortunately this isn't in gregsetp */
   for (regi = 0; regi < S390_NUM_CRS; regi++)
     supply_register (S390_FIRST_CR + regi, NULL);
@@ -284,12 +301,35 @@ fill_gregset (gregset_t * gregsetp, int regno)
       for (regi = 0; regi < S390_NUM_GPRS; regi++)
         regcache_collect (S390_GP0_REGNUM + regi,
 			  &gregp[S390_GP0_REGNUM + regi]);
+#if defined (CONFIG_ARCH_S390X)
+      /* See the comments about the access registers in
+         supply_gregset, above.  */
+      {
+        unsigned int *acrs = (unsigned int *) &gregp[S390_FIRST_ACR];
+        
+        for (regi = 0; regi < S390_NUM_ACRS; regi++)
+          regcache_collect (S390_FIRST_ACR + regi, &acrs[regi]);
+      }
+#else
       for (regi = 0; regi < S390_NUM_ACRS; regi++)
         regcache_collect (S390_FIRST_ACR + regi,
 			  &gregp[S390_FIRST_ACR + regi]);
+#endif
     }
-  else if (regno >= S390_PSWM_REGNUM && regno <= S390_LAST_ACR)
+  else if (regno >= S390_PSWM_REGNUM && regno < S390_FIRST_ACR)
     regcache_collect (regno, &gregp[regno]);
+  else if (regno >= S390_FIRST_ACR && regno <= S390_LAST_ACR)
+    {
+#if defined (CONFIG_ARCH_S390X)
+      /* See the comments about the access registers in
+         supply_gregset, above.  */
+      unsigned int *acrs = (unsigned int *) &gregp[S390_FIRST_ACR];
+        
+      regcache_collect (regno, &acrs[regno - S390_FIRST_ACR]);
+#else
+      regcache_collect (regno, &gregp[regno]);
+#endif
+    }
 }
 
 /*  Given a pointer to a floating point register set in /proc format

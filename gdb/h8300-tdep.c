@@ -706,7 +706,7 @@ h8300_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 
               for (offset = 0; offset < padded_len; offset += wordsize)
                 {
-                  ULONGEST word = extract_address (padded + offset, wordsize);
+                  ULONGEST word = extract_unsigned_integer (padded + offset, wordsize);
                   write_register (reg++, word);
                 }
             }
@@ -830,11 +830,11 @@ h8300_store_return_value (struct type *type, char *valbuf)
     {
     case 1:			/* char */
     case 2:			/* short, int */
-      regval = extract_address (valbuf, len);
+      regval = extract_unsigned_integer (valbuf, len);
       write_register (0, regval);
       break;
     case 4:			/* long, float */
-      regval = extract_address (valbuf, len);
+      regval = extract_unsigned_integer (valbuf, len);
       if (wordsize == 4)
 	{
 	  write_register (0, regval);
@@ -1032,8 +1032,8 @@ h8300_use_struct_convention (int gcc_p, struct type *type)
 static CORE_ADDR
 h8300_extract_struct_value_address (char *regbuf)
 {
-  return extract_address (regbuf + h8300_register_byte (E_ARG0_REGNUM),
-			  h8300_register_raw_size (E_ARG0_REGNUM));
+  return extract_unsigned_integer (regbuf + h8300_register_byte (E_ARG0_REGNUM),
+				   h8300_register_raw_size (E_ARG0_REGNUM));
 }
 
 const static unsigned char *
@@ -1074,18 +1074,28 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   switch (info.bfd_arch_info->mach)
     {
-      case bfd_mach_h8300:
-	h8300smode = 0;
-	h8300hmode = 0;
-	break;
-      case bfd_mach_h8300h:
-	h8300smode = 0;
-	h8300hmode = 1;
-	break;
-      case bfd_mach_h8300s:
-	h8300smode = 1;
-	h8300hmode = 1;
-	break;
+    case bfd_mach_h8300:
+      h8300sxmode = 0;
+      h8300smode = 0;
+      h8300hmode = 0;
+      break;
+    case bfd_mach_h8300h:
+    case bfd_mach_h8300hn:
+      h8300sxmode = 0;
+      h8300smode = 0;
+      h8300hmode = 1;
+      break;
+    case bfd_mach_h8300s:
+    case bfd_mach_h8300sn:
+      h8300sxmode = 0;
+      h8300smode = 1;
+      h8300hmode = 1;
+      break;
+    case bfd_mach_h8300sx:
+      h8300sxmode = 1;
+      h8300smode = 1;
+      h8300hmode = 1;
+      break;
     }
 
   gdbarch = gdbarch_alloc (&info, 0);

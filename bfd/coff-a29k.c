@@ -580,4 +580,4 @@ coff_a29k_adjust_symndx (obfd, info, ibfd, sec, irel, adjustedp)
 
 #include "coffcode.h"
 
-CREATE_BIG_COFF_TARGET_VEC (a29kcoff_big_vec, "coff-a29k-big", 0, SEC_READONLY, '_', NULL)
+CREATE_BIG_COFF_TARGET_VEC (a29kcoff_big_vec, "coff-a29k-big", 0, SEC_READONLY, '_', NULL, COFF_SWAP_TABLE)

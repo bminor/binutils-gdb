@@ -261,9 +261,10 @@ init_remote_state (struct gdbarch *gdbarch)
   int regnum;
   struct remote_state *rs = xmalloc (sizeof (struct remote_state));
 
-  /* Start out by having the remote protocol mimic the existing
-     behavour - just copy in the description of the register cache.  */
-  rs->sizeof_g_packet = DEPRECATED_REGISTER_BYTES; /* OK */
+  if (DEPRECATED_REGISTER_BYTES != 0)
+    rs->sizeof_g_packet = DEPRECATED_REGISTER_BYTES;
+  else
+    rs->sizeof_g_packet = 0;
 
   /* Assume a 1:1 regnum<->pnum table.  */
   rs->regs = xcalloc (NUM_REGS + NUM_PSEUDO_REGS, sizeof (struct packet_reg));
@@ -274,8 +275,11 @@ init_remote_state (struct gdbarch *gdbarch)
       r->regnum = regnum;
       r->offset = REGISTER_BYTE (regnum);
       r->in_g_packet = (regnum < NUM_REGS);
-      /* ...size = REGISTER_RAW_SIZE (regnum); */
       /* ...name = REGISTER_NAME (regnum); */
+
+      /* Compute packet size by accumulating the size of all registers. */
+      if (DEPRECATED_REGISTER_BYTES == 0)
+        rs->sizeof_g_packet += register_size (current_gdbarch, regnum);
     }
 
   /* Default maximum number of characters in a packet body. Many

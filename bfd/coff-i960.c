@@ -617,7 +617,7 @@ coff_i960_adjust_symndx (obfd, info, ibfd, sec, irel, adjustedp)
 
 extern const bfd_target icoff_big_vec;
 
-CREATE_LITTLE_COFF_TARGET_VEC (icoff_little_vec, "coff-Intel-little", 0, 0, '_', & icoff_big_vec)
+CREATE_LITTLE_COFF_TARGET_VEC (icoff_little_vec, "coff-Intel-little", 0, 0, '_', & icoff_big_vec, COFF_SWAP_TABLE)
 
 const bfd_target icoff_big_vec =
 {

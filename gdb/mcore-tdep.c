@@ -992,7 +992,7 @@ mcore_use_struct_convention (int gcc_p, struct type *type)
 CORE_ADDR
 mcore_extract_struct_value_address (char *regbuf)
 {
-  return extract_address (regbuf + REGISTER_BYTE (FIRST_ARGREG), DEPRECATED_REGISTER_SIZE);
+  return extract_unsigned_integer (regbuf + REGISTER_BYTE (FIRST_ARGREG), DEPRECATED_REGISTER_SIZE);
 }
 
 /* Given a function which returns a value of type TYPE, extract the

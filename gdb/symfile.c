@@ -792,13 +792,6 @@ syms_from_objfile (struct objfile *objfile,
   /* Discard cleanups as symbol reading was successful.  */
 
   discard_cleanups (old_chain);
-
-  /* Call this after reading in a new symbol table to give target
-     dependent code a crack at the new symbols.  For instance, this
-     could be used to update the values of target-specific symbols GDB
-     needs to keep track of (such as _sigtramp, or whatever).  */
-
-  TARGET_SYMFILE_POSTREAD (objfile);
 }
 
 /* Perform required actions after either reading in the initial
@@ -2041,14 +2034,6 @@ reread_symbols (void)
 	         again now.  */
 	      objfile->mtime = new_modtime;
 	      reread_one = 1;
-
-	      /* Call this after reading in a new symbol table to give target
-	         dependent code a crack at the new symbols.  For instance, this
-	         could be used to update the values of target-specific symbols GDB
-	         needs to keep track of (such as _sigtramp, or whatever).  */
-
-	      TARGET_SYMFILE_POSTREAD (objfile);
-
               reread_separate_symbols (objfile);
 	    }
 	}

@@ -230,6 +230,16 @@ rs6000_saved_pc_after_call (struct frame_info *fi)
   return read_register (gdbarch_tdep (current_gdbarch)->ppc_lr_regnum);
 }
 
+/* Get the ith function argument for the current function.  */
+CORE_ADDR
+rs6000_fetch_pointer_argument (struct frame_info *frame, int argi, 
+			       struct type *type)
+{
+  CORE_ADDR addr;
+  frame_read_register (frame, 3 + argi, &addr);
+  return addr;
+}
+
 /* Calculate the destination of a branch/jump.  Return -1 if not a branch.  */
 
 static CORE_ADDR
@@ -526,13 +536,13 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 
       if ((op & 0xfc1fffff) == 0x7c0802a6)
 	{			/* mflr Rx */
-	  lr_reg = (op & 0x03e00000) | 0x90010000;
+	  lr_reg = (op & 0x03e00000);
 	  continue;
 
 	}
       else if ((op & 0xfc1fffff) == 0x7c000026)
 	{			/* mfcr Rx */
-	  cr_reg = (op & 0x03e00000) | 0x90010000;
+	  cr_reg = (op & 0x03e00000);
 	  continue;
 
 	}
@@ -558,7 +568,7 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 	    {
 	      fdata->saved_gpr = reg;
 	      if ((op & 0xfc1f0003) == 0xf8010000)
-		op = (op >> 1) << 1;
+		op &= ~3UL;
 	      fdata->gpr_offset = SIGNED_SHORT (op) + offset;
 	    }
 	  continue;
@@ -590,20 +600,42 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 	  continue;
 
 	}
-      else if (lr_reg != -1 && (op & 0xffff0000) == lr_reg)
-	{			/* st Rx,NUM(r1) 
-				   where Rx == lr */
-	  fdata->lr_offset = SIGNED_SHORT (op) + offset;
+      else if (lr_reg != -1 &&
+	       /* std Rx, NUM(r1) || stdu Rx, NUM(r1) */
+	       (((op & 0xffff0000) == (lr_reg | 0xf8010000)) ||
+		/* stw Rx, NUM(r1) */
+		((op & 0xffff0000) == (lr_reg | 0x90010000)) ||
+		/* stwu Rx, NUM(r1) */
+		((op & 0xffff0000) == (lr_reg | 0x94010000))))
+	{	/* where Rx == lr */
+	  fdata->lr_offset = offset;
 	  fdata->nosavedpc = 0;
 	  lr_reg = 0;
+	  if ((op & 0xfc000003) == 0xf8000000 ||	/* std */
+	      (op & 0xfc000000) == 0x90000000)		/* stw */
+	    {
+	      /* Does not update r1, so add displacement to lr_offset.  */
+	      fdata->lr_offset += SIGNED_SHORT (op);
+	    }
 	  continue;
 
 	}
-      else if (cr_reg != -1 && (op & 0xffff0000) == cr_reg)
-	{			/* st Rx,NUM(r1) 
-				   where Rx == cr */
-	  fdata->cr_offset = SIGNED_SHORT (op) + offset;
+      else if (cr_reg != -1 &&
+	       /* std Rx, NUM(r1) || stdu Rx, NUM(r1) */
+	       (((op & 0xffff0000) == (cr_reg | 0xf8010000)) ||
+		/* stw Rx, NUM(r1) */
+		((op & 0xffff0000) == (cr_reg | 0x90010000)) ||
+		/* stwu Rx, NUM(r1) */
+		((op & 0xffff0000) == (cr_reg | 0x94010000))))
+	{	/* where Rx == cr */
+	  fdata->cr_offset = offset;
 	  cr_reg = 0;
+	  if ((op & 0xfc000003) == 0xf8000000 ||
+	      (op & 0xfc000000) == 0x90000000)
+	    {
+	      /* Does not update r1, so add displacement to cr_offset.  */
+	      fdata->cr_offset += SIGNED_SHORT (op);
+	    }
 	  continue;
 
 	}
@@ -647,30 +679,41 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 				   this branch */
 	  continue;
 
-	  /* update stack pointer */
 	}
-      else if ((op & 0xffff0000) == 0x94210000 ||	/* stu r1,NUM(r1) */
-	       (op & 0xffff0003) == 0xf8210001)		/* stdu r1,NUM(r1) */
-	{
+      /* update stack pointer */
+      else if ((op & 0xfc1f0000) == 0x94010000)
+	{		/* stu rX,NUM(r1) ||  stwu rX,NUM(r1) */
 	  fdata->frameless = 0;
-	  if ((op & 0xffff0003) == 0xf8210001)
-	    op = (op >> 1) << 1;
 	  fdata->offset = SIGNED_SHORT (op);
 	  offset = fdata->offset;
 	  continue;
-
 	}
-      else if (op == 0x7c21016e)
-	{			/* stwux 1,1,0 */
+      else if ((op & 0xfc1f016a) == 0x7c01016e)
+	{			/* stwux rX,r1,rY */
+	  /* no way to figure out what r1 is going to be */
 	  fdata->frameless = 0;
 	  offset = fdata->offset;
 	  continue;
-
-	  /* Load up minimal toc pointer */
 	}
-      else if ((op >> 22) == 0x20f
+      else if ((op & 0xfc1f0003) == 0xf8010001)
+	{			/* stdu rX,NUM(r1) */
+	  fdata->frameless = 0;
+	  fdata->offset = SIGNED_SHORT (op & ~3UL);
+	  offset = fdata->offset;
+	  continue;
+	}
+      else if ((op & 0xfc1f016a) == 0x7c01016a)
+	{			/* stdux rX,r1,rY */
+	  /* no way to figure out what r1 is going to be */
+	  fdata->frameless = 0;
+	  offset = fdata->offset;
+	  continue;
+	}
+      /* Load up minimal toc pointer */
+      else if (((op >> 22) == 0x20f	||	/* l r31,... or l r30,... */
+	       (op >> 22) == 0x3af)		/* ld r31,... or ld r30,... */
 	       && !minimal_toc_loaded)
-	{			/* l r31,... or l r30,... */
+	{
 	  minimal_toc_loaded = 1;
 	  continue;
 
@@ -2957,6 +3000,9 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_args_address (gdbarch, rs6000_frame_args_address);
   set_gdbarch_frame_locals_address (gdbarch, rs6000_frame_args_address);
   set_gdbarch_deprecated_saved_pc_after_call (gdbarch, rs6000_saved_pc_after_call);
+
+  /* Helpers for function argument information.  */
+  set_gdbarch_fetch_pointer_argument (gdbarch, rs6000_fetch_pointer_argument);
 
   /* We can't tell how many args there are
      now that the C compiler delays popping them.  */

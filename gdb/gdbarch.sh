@@ -568,7 +568,7 @@ F:2:INTEGER_TO_ADDRESS:CORE_ADDR:integer_to_address:struct type *type, void *buf
 f:2:RETURN_VALUE_ON_STACK:int:return_value_on_stack:struct type *type:type:::generic_return_value_on_stack_not::0
 # Replaced by PUSH_DUMMY_CALL
 F:2:DEPRECATED_PUSH_ARGUMENTS:CORE_ADDR:deprecated_push_arguments:int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr:nargs, args, sp, struct_return, struct_addr
-M::PUSH_DUMMY_CALL:CORE_ADDR:push_dummy_call:struct regcache *regcache, CORE_ADDR dummy_addr, int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr:regcache, dummy_addr, nargs, args, sp, struct_return, struct_addr
+M::PUSH_DUMMY_CALL:CORE_ADDR:push_dummy_call:CORE_ADDR func_addr, struct regcache *regcache, CORE_ADDR bp_addr, int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr:func_addr, regcache, bp_addr, nargs, args, sp, struct_return, struct_addr
 F:2:DEPRECATED_PUSH_DUMMY_FRAME:void:deprecated_push_dummy_frame:void:-:::0
 # NOTE: This can be handled directly in push_dummy_call.
 F:2:DEPRECATED_PUSH_RETURN_ADDRESS:CORE_ADDR:deprecated_push_return_address:CORE_ADDR pc, CORE_ADDR sp:pc, sp:::0
@@ -716,6 +716,8 @@ M:2:ADDRESS_CLASS_TYPE_FLAGS_TO_NAME:const char *:address_class_type_flags_to_na
 M:2:ADDRESS_CLASS_NAME_TO_TYPE_FLAGS:int:address_class_name_to_type_flags:const char *name, int *type_flags_ptr:name, type_flags_ptr
 # Is a register in a group
 m:::int:register_reggroup_p:int regnum, struct reggroup *reggroup:regnum, reggroup:::default_register_reggroup_p::0
+# Fetch the pointer to the ith function argument.  
+F::FETCH_POINTER_ARGUMENT:CORE_ADDR:fetch_pointer_argument:struct frame_info *frame, int argi, struct type *type:frame, argi, type:::::::::
 EOF
 }
 
@@ -853,10 +855,8 @@ do
 	printf "#if (GDB_MULTI_ARCH ${gt_level}) && defined (${macro})\n"
 	printf "#error \"Non multi-arch definition of ${macro}\"\n"
 	printf "#endif\n"
-	printf "#if GDB_MULTI_ARCH\n"
-	printf "#if (GDB_MULTI_ARCH ${gt_level}) || !defined (${macro})\n"
+	printf "#if !defined (${macro})\n"
 	printf "#define ${macro} (gdbarch_${function} (current_gdbarch))\n"
-	printf "#endif\n"
 	printf "#endif\n"
     fi
 done
@@ -924,18 +924,9 @@ do
 	printf "#if (GDB_MULTI_ARCH ${gt_level}) && defined (${macro})\n"
 	printf "#error \"Non multi-arch definition of ${macro}\"\n"
 	printf "#endif\n"
-	if test "${level}" = ""
-	then
-	    printf "#if !defined (${macro})\n"
-	    printf "#define ${macro} (gdbarch_${function} (current_gdbarch))\n"
-	    printf "#endif\n"
-	else
-	    printf "#if GDB_MULTI_ARCH\n"
-	    printf "#if (GDB_MULTI_ARCH ${gt_level}) || !defined (${macro})\n"
-	    printf "#define ${macro} (gdbarch_${function} (current_gdbarch))\n"
-	    printf "#endif\n"
-	    printf "#endif\n"
-	fi
+	printf "#if !defined (${macro})\n"
+	printf "#define ${macro} (gdbarch_${function} (current_gdbarch))\n"
+	printf "#endif\n"
     fi
     if class_is_function_p
     then
@@ -982,8 +973,16 @@ do
 	    printf "#if (GDB_MULTI_ARCH ${gt_level}) && defined (${macro})\n"
 	    printf "#error \"Non multi-arch definition of ${macro}\"\n"
 	    printf "#endif\n"
-	    printf "#if GDB_MULTI_ARCH\n"
-	    printf "#if (GDB_MULTI_ARCH ${gt_level}) || !defined (${macro})\n"
+	    if [ "x${actual}" = "x" ]
+	    then
+		d="#define ${macro}() (gdbarch_${function} (current_gdbarch))"
+	    elif [ "x${actual}" = "x-" ]
+	    then
+		d="#define ${macro} (gdbarch_${function} (current_gdbarch))"
+	    else
+		d="#define ${macro}(${actual}) (gdbarch_${function} (current_gdbarch, ${actual}))"
+	    fi
+	    printf "#if !defined (${macro})\n"
 	    if [ "x${actual}" = "x" ]
 	    then
 		printf "#define ${macro}() (gdbarch_${function} (current_gdbarch))\n"
@@ -993,7 +992,6 @@ do
 	    else
 		printf "#define ${macro}(${actual}) (gdbarch_${function} (current_gdbarch, ${actual}))\n"
 	    fi
-	    printf "#endif\n"
 	    printf "#endif\n"
 	fi
     fi

@@ -2903,7 +2903,7 @@ elfNN_ia64_size_dynamic_sections (output_bfd, info)
 
   /* Set the contents of the .interp section to the interpreter.  */
   if (ia64_info->root.dynamic_sections_created
-      && !info->shared)
+      && info->executable)
     {
       sec = bfd_get_section_by_name (dynobj, ".interp");
       BFD_ASSERT (sec != NULL);
@@ -3078,7 +3078,7 @@ elfNN_ia64_size_dynamic_sections (output_bfd, info)
 	 later (in finish_dynamic_sections) but we must add the entries now
 	 so that we get the correct size for the .dynamic section.  */
 
-      if (!info->shared)
+      if (info->executable)
 	{
 	  /* The DT_DEBUG entry is filled in by the dynamic linker and used
 	     by the debugger.  */

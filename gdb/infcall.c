@@ -530,6 +530,17 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 	}
       break;
     case AT_ENTRY_POINT:
+      if (DEPRECATED_FIX_CALL_DUMMY_P ())
+	{
+	  /* Sigh.  Some targets use DEPRECATED_FIX_CALL_DUMMY to
+             shove extra stuff onto the stack or into registers.  That
+             code should be in PUSH_DUMMY_CALL, however, in the mean
+             time ...  */
+	  /* If the target is manipulating DUMMY1, it looses big time.  */
+	  void *dummy1 = NULL;
+	  DEPRECATED_FIX_CALL_DUMMY (dummy1, sp, funaddr, nargs, args,
+				     value_type, using_gcc);
+	}
       real_pc = funaddr;
       dummy_addr = CALL_DUMMY_ADDRESS ();
       /* A call dummy always consists of just a single breakpoint, so
@@ -736,7 +747,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
     /* When there is no push_dummy_call method, should this code
        simply error out.  That would the implementation of this method
        for all ABIs (which is probably a good thing).  */
-    sp = gdbarch_push_dummy_call (current_gdbarch, current_regcache,
+    sp = gdbarch_push_dummy_call (current_gdbarch, funaddr, current_regcache,
 				  bp_addr, nargs, args, sp, struct_return,
 				  struct_addr);
   else  if (DEPRECATED_PUSH_ARGUMENTS_P ())
@@ -798,15 +809,16 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
   if (struct_return && DEPRECATED_STORE_STRUCT_RETURN_P ())
     DEPRECATED_STORE_STRUCT_RETURN (struct_addr, sp);
 
-  /* Write the stack pointer.  This is here because the statements above
-     might fool with it.  On SPARC, this write also stores the register
-     window into the right place in the new stack frame, which otherwise
-     wouldn't happen.  (See store_inferior_registers in sparc-nat.c.)  */
-  /* NOTE: cagney/2003-03-23: Disable this code when there is a
-     push_dummy_call() method.  Since that method will have already
-     stored the stack pointer (as part of creating the fake call
-     frame), and none of the code following that code adjusts the
-     stack-pointer value, the below call is entirely redundant.  */
+  /* Write the stack pointer.  This is here because the statements
+     above might fool with it.  On SPARC, this write also stores the
+     register window into the right place in the new stack frame,
+     which otherwise wouldn't happen (see store_inferior_registers in
+     sparc-nat.c).  */
+  /* NOTE: cagney/2003-03-23: Since the architecture method
+     push_dummy_call() should have already stored the stack pointer
+     (as part of creating the fake call frame), and none of the code
+     following that call adjusts the stack-pointer value, the below
+     call is entirely redundant.  */
   if (DEPRECATED_DUMMY_WRITE_SP_P ())
     DEPRECATED_DUMMY_WRITE_SP (sp);
 

@@ -20,96 +20,125 @@
 
 #include "defs.h"
 #include "frame.h"
-#include "gdbcore.h"
-#include "value.h"
+#include "gdb_assert.h"
 #include "osabi.h"
 
 #include "alpha-tdep.h"
 
-/* Under GNU/Linux, signal handler invocations can be identified by the
-   designated code sequence that is used to return from a signal
+/* Under GNU/Linux, signal handler invocations can be identified by
+   the designated code sequence that is used to return from a signal
    handler.  In particular, the return address of a signal handler
-   points to the following sequence (the first instruction is quadword
-   aligned):
-  
-   bis $30,$30,$16
-   addq $31,0x67,$0
-   call_pal callsys 
-      
-   Each instruction has a unique encoding, so we simply attempt to
-   match the instruction the pc is pointing to with any of the above
-   instructions.  If there is a hit, we know the offset to the start
-   of the designated sequence and can then check whether we really are
-   executing in a designated sequence.  If not, -1 is returned,
-   otherwise the offset from the start of the desingated sequence is
-   returned.
-   
-   There is a slight chance of false hits: code could jump into the
-   middle of the designated sequence, in which case there is no
-   guarantee that we are in the middle of a sigreturn syscall.  Don't
-   think this will be a problem in praxis, though.  */
-LONGEST
-alpha_linux_sigtramp_offset (CORE_ADDR pc)
+   points to a sequence that copies $sp to $16, loads $0 with the
+   appropriate syscall number, and finally enters the kernel.
+
+   This is somewhat complicated in that:
+     (1) the expansion of the "mov" assembler macro has changed over
+         time, from "bis src,src,dst" to "bis zero,src,dst",
+     (2) the kernel has changed from using "addq" to "lda" to load the
+         syscall number,
+     (3) there is a "normal" sigreturn and an "rt" sigreturn which
+         has a different stack layout.
+*/
+
+static long
+alpha_linux_sigtramp_offset_1 (CORE_ADDR pc)
 {
-  unsigned int i[3], w;
-  long off;
-
-  if (read_memory_nobpt (pc, (char *) &w, 4) != 0)
-    return -1;
-
-  off = -1;
-  switch (w)
+  switch (alpha_read_insn (pc))
     {
-    case 0x47de0410:
-      off = 0;
-      break;			/* bis $30,$30,$16 */
-    case 0x43ecf400:
-      off = 4;
-      break;			/* addq $31,0x67,$0 */
-    case 0x00000083:
-      off = 8;
-      break;			/* call_pal callsys */
+    case 0x47de0410:		/* bis $30,$30,$16 */
+    case 0x47fe0410:		/* bis $31,$30,$16 */
+      return 0;
+
+    case 0x43ecf400:		/* addq $31,103,$0 */
+    case 0x201f0067:		/* lda $0,103($31) */
+    case 0x201f015f:		/* lda $0,351($31) */
+      return 4;
+
+    case 0x00000083:		/* call_pal callsys */
+      return 8;
+
     default:
       return -1;
     }
-  pc -= off;
-  if (pc & 0x7)
-    {
-      /* designated sequence is not quadword aligned */
-      return -1;
-    }
-  if (read_memory_nobpt (pc, (char *) i, sizeof (i)) != 0)
+}
+
+static LONGEST
+alpha_linux_sigtramp_offset (CORE_ADDR pc)
+{
+  long i, off;
+
+  if (pc & 3)
     return -1;
 
-  if (i[0] == 0x47de0410 && i[1] == 0x43ecf400 && i[2] == 0x00000083)
-    return off;
+  /* Guess where we might be in the sequence.  */
+  off = alpha_linux_sigtramp_offset_1 (pc);
+  if (off < 0)
+    return -1;
 
-  return -1;
+  /* Verify that the other two insns of the sequence are as we expect.  */
+  pc -= off;
+  for (i = 0; i < 12; i += 4)
+    {
+      if (i == off)
+	continue;
+      if (alpha_linux_sigtramp_offset_1 (pc + i) != i)
+	return -1;
+    }
+
+  return off;
 }
 
 static int
 alpha_linux_pc_in_sigtramp (CORE_ADDR pc, char *func_name)
 {
-  return (alpha_linux_sigtramp_offset (pc) >= 0);
+  return alpha_linux_sigtramp_offset (pc) >= 0;
 }
 
 static CORE_ADDR
-alpha_linux_sigcontext_addr (struct frame_info *frame)
+alpha_linux_sigcontext_addr (struct frame_info *next_frame)
 {
-  return (get_frame_base (frame) - 0x298); /* sizeof(struct sigcontext) */
+  CORE_ADDR pc;
+  ULONGEST sp;
+  long off;
+
+  pc = frame_pc_unwind (next_frame);
+  frame_unwind_unsigned_register (next_frame, ALPHA_SP_REGNUM, &sp);
+
+  off = alpha_linux_sigtramp_offset (pc);
+  gdb_assert (off >= 0);
+
+  /* __NR_rt_sigreturn has a couple of structures on the stack.  This is:
+
+	struct rt_sigframe {
+	  struct siginfo info;
+	  struct ucontext uc;
+        };
+
+	offsetof (struct rt_sigframe, uc.uc_mcontext);
+  */
+  if (alpha_read_insn (pc - off + 4) == 0x201f015f)
+    return sp + 176;
+
+  /* __NR_sigreturn has the sigcontext structure at the top of the stack.  */
+  return sp;
 }
 
 static void
-alpha_linux_init_abi (struct gdbarch_info info,
-                      struct gdbarch *gdbarch)
+alpha_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  struct gdbarch_tdep *tdep;
+
+  /* Hook into the DWARF CFI frame unwinder.  */
+  alpha_dwarf2_init_abi (info, gdbarch);
+
+  /* Hook into the MDEBUG frame unwinder.  */
+  alpha_mdebug_init_abi (info, gdbarch);
 
   set_gdbarch_pc_in_sigtramp (gdbarch, alpha_linux_pc_in_sigtramp);
 
+  tdep = gdbarch_tdep (gdbarch);
   tdep->dynamic_sigtramp_offset = alpha_linux_sigtramp_offset;
   tdep->sigcontext_addr = alpha_linux_sigcontext_addr;
-
   tdep->jb_pc = 2;
   tdep->jb_elt_size = 8;
 }

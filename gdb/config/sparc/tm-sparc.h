@@ -277,7 +277,7 @@ extern void sparc32_store_return_value (struct type *, struct regcache *,
 
 #define EXTRACT_STRUCT_VALUE_ADDRESS(REGCACHE) \
      sparc_extract_struct_value_address (REGCACHE)
-extern CORE_ADDR sparc_extract_struct_value_address (char *);
+extern CORE_ADDR sparc_extract_struct_value_address (struct regcache *);
 
 /* Stack must be aligned on 64-bit boundaries when synthesizing
    function calls (128-bit for sparc64).  */

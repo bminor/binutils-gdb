@@ -94,15 +94,22 @@ hppa_hpux_frame_find_saved_regs_in_sigtramp (struct frame_info *fi,
     }
 }
 
+static void
+hppa_hpux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+{
+  set_gdbarch_pc_in_sigtramp (gdbarch, hppa_hpux_pc_in_sigtramp);
+}
 
 static void
 hppa_hpux_som_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
+  hppa_hpux_init_abi (info, gdbarch);
 }
 
 static void
 hppa_hpux_elf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
+  hppa_hpux_init_abi (info, gdbarch);
 }
 
 void

@@ -386,8 +386,7 @@ kernel_u_size (void)
 void
 _initialize_i386bsd_nat (void)
 {
-  int sc_pc_offset;
-  int sc_sp_offset;
+  int offset;
 
   /* To support the recognition of signal handlers, i386bsd-tdep.c
      hardcodes some constants.  Inclusion of this file means that we
@@ -396,51 +395,69 @@ _initialize_i386bsd_nat (void)
      information.  */
 
 #if defined (__FreeBSD_version) && __FreeBSD_version >= 400011
-  extern int i386fbsd4_sc_pc_offset;
-  extern int i386fbsd4_sc_sp_offset;
-#define SC_PC_OFFSET i386fbsd4_sc_pc_offset
-#define SC_SP_OFFSET i386fbsd4_sc_sp_offset
+  extern int i386fbsd4_sc_reg_offset[];
+#define SC_REG_OFFSET i386fbsd4_sc_reg_offset
+#elif defined (__FreeBSD_version) && __FreeBSD_version >= 300005
+  extern int i386fbsd_sc_reg_offset[];
+#define SC_REG_OFFSET i386fbsd_sc_reg_offset
 #elif defined (NetBSD) || defined (__NetBSD_Version__)
-  extern int i386nbsd_sc_pc_offset;
-  extern int i386nbsd_sc_sp_offset;
-#define SC_PC_OFFSET i386nbsd_sc_pc_offset
-#define SC_SP_OFFSET i386nbsd_sc_sp_offset
+  extern int i386nbsd_sc_reg_offset[];
+#define SC_REG_OFFSET i386nbsd_sc_reg_offset
 #elif defined (OpenBSD)
-  extern int i386obsd_sc_pc_offset;
-  extern int i386obsd_sc_sp_offset;
-#define SC_PC_OFFSET i386obsd_sc_pc_offset
-#define SC_SP_OFFSET i386obsd_sc_sp_offset
+  extern int i386obsd_sc_reg_offset[];
+#define SC_REG_OFFSET i386obsd_sc_reg_offset
 #else
-  extern int i386bsd_sc_pc_offset;
-  extern int i386bsd_sc_sp_offset;
-#define SC_PC_OFFSET i386bsd_sc_pc_offset
-#define SC_SP_OFFSET i386bsd_sc_sp_offset
+  extern int i386bsd_sc_reg_offset[];
+#define SC_PC_OFFSET i386bsd_sc_reg_offset
 #endif
+
+  /* We only check the program counter, stack pointer and frame
+     pointer since these members of `struct sigcontext' are essential
+     for providing backtraces.  More checks could be added, but would
+     involve adding configure checks for the appropriate structure
+     members, since older BSD's don't provide all of them.  */
+
+#define SC_PC_OFFSET SC_REG_OFFSET[I386_EIP_REGNUM]
+#define SC_SP_OFFSET SC_REG_OFFSET[I386_ESP_REGNUM]
+#define SC_FP_OFFSET SC_REG_OFFSET[I386_EBP_REGNUM]
 
   /* Override the default value for the offset of the program counter
      in the sigcontext structure.  */
-  sc_pc_offset = offsetof (struct sigcontext, sc_pc);
+  offset = offsetof (struct sigcontext, sc_pc);
 
-  if (SC_PC_OFFSET != sc_pc_offset)
+  if (SC_PC_OFFSET != offset)
     {
       warning ("\
 offsetof (struct sigcontext, sc_pc) yields %d instead of %d.\n\
-Please report this to <bug-gdb@gnu.org>.",
-	       sc_pc_offset, SC_PC_OFFSET);
+Please report this to <bug-gdb@gnu.org>.", 
+	       offset, SC_PC_OFFSET);
     }
 
-  SC_PC_OFFSET = sc_pc_offset;
+  SC_PC_OFFSET = offset;
 
   /* Likewise for the stack pointer.  */
-  sc_sp_offset = offsetof (struct sigcontext, sc_sp);
+  offset = offsetof (struct sigcontext, sc_sp);
 
-  if (SC_SP_OFFSET != sc_sp_offset)
+  if (SC_SP_OFFSET != offset)
     {
       warning ("\
 offsetof (struct sigcontext, sc_sp) yields %d instead of %d.\n\
 Please report this to <bug-gdb@gnu.org>.",
-	       sc_sp_offset, SC_SP_OFFSET);
+	       offset, SC_SP_OFFSET);
     }
 
-  SC_SP_OFFSET = sc_sp_offset;
+  SC_SP_OFFSET = offset;
+
+  /* And the frame pointer.  */
+  offset = offsetof (struct sigcontext, sc_fp);
+
+  if (SC_FP_OFFSET != offset)
+    {
+      warning ("\
+offsetof (struct sigcontext, sc_fp) yields %d instead of %d.\n\
+Please report this to <bug-gdb@gnu.org>.",
+	       offset, SC_FP_OFFSET);
+    }
+
+  SC_FP_OFFSET = offset;
 }

@@ -651,10 +651,19 @@ frv_cgen_insert_operand (cd, opindex, fields, buffer, pc)
     case FRV_OPERAND_FRINTI :
       errmsg = insert_normal (cd, fields->f_FRi, 0, 0, 17, 6, 32, total_length, buffer);
       break;
+    case FRV_OPERAND_FRINTIEVEN :
+      errmsg = insert_normal (cd, fields->f_FRi, 0, 0, 17, 6, 32, total_length, buffer);
+      break;
     case FRV_OPERAND_FRINTJ :
       errmsg = insert_normal (cd, fields->f_FRj, 0, 0, 5, 6, 32, total_length, buffer);
       break;
+    case FRV_OPERAND_FRINTJEVEN :
+      errmsg = insert_normal (cd, fields->f_FRj, 0, 0, 5, 6, 32, total_length, buffer);
+      break;
     case FRV_OPERAND_FRINTK :
+      errmsg = insert_normal (cd, fields->f_FRk, 0, 0, 30, 6, 32, total_length, buffer);
+      break;
+    case FRV_OPERAND_FRINTKEVEN :
       errmsg = insert_normal (cd, fields->f_FRk, 0, 0, 30, 6, 32, total_length, buffer);
       break;
     case FRV_OPERAND_FRJ :
@@ -942,10 +951,19 @@ frv_cgen_extract_operand (cd, opindex, ex_info, insn_value, fields, pc)
     case FRV_OPERAND_FRINTI :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 17, 6, 32, total_length, pc, & fields->f_FRi);
       break;
+    case FRV_OPERAND_FRINTIEVEN :
+      length = extract_normal (cd, ex_info, insn_value, 0, 0, 17, 6, 32, total_length, pc, & fields->f_FRi);
+      break;
     case FRV_OPERAND_FRINTJ :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 5, 6, 32, total_length, pc, & fields->f_FRj);
       break;
+    case FRV_OPERAND_FRINTJEVEN :
+      length = extract_normal (cd, ex_info, insn_value, 0, 0, 5, 6, 32, total_length, pc, & fields->f_FRj);
+      break;
     case FRV_OPERAND_FRINTK :
+      length = extract_normal (cd, ex_info, insn_value, 0, 0, 30, 6, 32, total_length, pc, & fields->f_FRk);
+      break;
+    case FRV_OPERAND_FRINTKEVEN :
       length = extract_normal (cd, ex_info, insn_value, 0, 0, 30, 6, 32, total_length, pc, & fields->f_FRk);
       break;
     case FRV_OPERAND_FRJ :
@@ -1216,10 +1234,19 @@ frv_cgen_get_int_operand (cd, opindex, fields)
     case FRV_OPERAND_FRINTI :
       value = fields->f_FRi;
       break;
+    case FRV_OPERAND_FRINTIEVEN :
+      value = fields->f_FRi;
+      break;
     case FRV_OPERAND_FRINTJ :
       value = fields->f_FRj;
       break;
+    case FRV_OPERAND_FRINTJEVEN :
+      value = fields->f_FRj;
+      break;
     case FRV_OPERAND_FRINTK :
+      value = fields->f_FRk;
+      break;
+    case FRV_OPERAND_FRINTKEVEN :
       value = fields->f_FRk;
       break;
     case FRV_OPERAND_FRJ :
@@ -1441,10 +1468,19 @@ frv_cgen_get_vma_operand (cd, opindex, fields)
     case FRV_OPERAND_FRINTI :
       value = fields->f_FRi;
       break;
+    case FRV_OPERAND_FRINTIEVEN :
+      value = fields->f_FRi;
+      break;
     case FRV_OPERAND_FRINTJ :
       value = fields->f_FRj;
       break;
+    case FRV_OPERAND_FRINTJEVEN :
+      value = fields->f_FRj;
+      break;
     case FRV_OPERAND_FRINTK :
+      value = fields->f_FRk;
+      break;
+    case FRV_OPERAND_FRINTKEVEN :
       value = fields->f_FRk;
       break;
     case FRV_OPERAND_FRJ :
@@ -1675,10 +1711,19 @@ frv_cgen_set_int_operand (cd, opindex, fields, value)
     case FRV_OPERAND_FRINTI :
       fields->f_FRi = value;
       break;
+    case FRV_OPERAND_FRINTIEVEN :
+      fields->f_FRi = value;
+      break;
     case FRV_OPERAND_FRINTJ :
       fields->f_FRj = value;
       break;
+    case FRV_OPERAND_FRINTJEVEN :
+      fields->f_FRj = value;
+      break;
     case FRV_OPERAND_FRINTK :
+      fields->f_FRk = value;
+      break;
+    case FRV_OPERAND_FRINTKEVEN :
       fields->f_FRk = value;
       break;
     case FRV_OPERAND_FRJ :
@@ -1897,10 +1942,19 @@ frv_cgen_set_vma_operand (cd, opindex, fields, value)
     case FRV_OPERAND_FRINTI :
       fields->f_FRi = value;
       break;
+    case FRV_OPERAND_FRINTIEVEN :
+      fields->f_FRi = value;
+      break;
     case FRV_OPERAND_FRINTJ :
       fields->f_FRj = value;
       break;
+    case FRV_OPERAND_FRINTJEVEN :
+      fields->f_FRj = value;
+      break;
     case FRV_OPERAND_FRINTK :
+      fields->f_FRk = value;
+      break;
+    case FRV_OPERAND_FRINTKEVEN :
       fields->f_FRk = value;
       break;
     case FRV_OPERAND_FRJ :

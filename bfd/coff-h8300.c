@@ -1398,4 +1398,4 @@ h8300_bfd_link_add_symbols (abfd, info)
   bfd_coff_reloc16_get_relocated_section_contents
 #define coff_bfd_relax_section bfd_coff_reloc16_relax_section
 
-CREATE_BIG_COFF_TARGET_VEC (h8300coff_vec, "coff-h8300", BFD_IS_RELAXABLE, 0, '_', NULL)
+CREATE_BIG_COFF_TARGET_VEC (h8300coff_vec, "coff-h8300", BFD_IS_RELAXABLE, 0, '_', NULL, COFF_SWAP_TABLE)

@@ -31,8 +31,15 @@ set testfile "dump"
 
 set srcfile  ${testfile}.c
 set binfile  ${objdir}/${subdir}/${testfile}
+set options  {debug}
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
+if [istarget "alpha*-*-*"] then {
+    # SREC etc cannot handle 64-bit addresses.  Force the test
+    # program into the low 31 bits of the address space.
+    lappend options "additional_flags=-Wl,-taso"
+}
+
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable ${options}] != "" } {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 

@@ -168,6 +168,10 @@ captured_main (void *data)
   /* This needs to happen before the first use of malloc.  */
   init_malloc (NULL);
 
+#ifdef HAVE_SBRK
+  lim_at_start = (char *) sbrk (0);
+#endif
+
 #if defined (ALIGN_STACK_ON_STARTUP)
   i = (int) &count & 0x3;
   if (i != 0)

@@ -1171,8 +1171,8 @@ m68hc11_return_value_on_stack (struct type *type)
 static CORE_ADDR
 m68hc11_extract_struct_value_address (char *regbuf)
 {
-  return extract_address (&regbuf[HARD_D_REGNUM * 2],
-                          REGISTER_RAW_SIZE (HARD_D_REGNUM));
+  return extract_unsigned_integer (&regbuf[HARD_D_REGNUM * 2],
+				   REGISTER_RAW_SIZE (HARD_D_REGNUM));
 }
 
 /* Function: push_return_address (pc)
@@ -1391,8 +1391,6 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_deprecated_store_struct_return (gdbarch, m68hc11_store_struct_return);
   set_gdbarch_deprecated_store_return_value (gdbarch, m68hc11_store_return_value);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, m68hc11_extract_struct_value_address);
-  set_gdbarch_register_convertible (gdbarch, generic_register_convertible_not);
-
 
   set_gdbarch_deprecated_frame_chain (gdbarch, m68hc11_frame_chain);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, m68hc11_frame_saved_pc);

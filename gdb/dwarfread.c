@@ -701,7 +701,7 @@ static void
 read_lexical_block_scope (struct dieinfo *dip, char *thisdie, char *enddie,
 			  struct objfile *objfile)
 {
-  register struct context_stack *new;
+  struct context_stack *new;
 
   push_context (0, dip->at_low_pc);
   process_dies (thisdie + dip->die_length, enddie, objfile);
@@ -862,7 +862,8 @@ decode_die_type (struct dieinfo *dip)
     }
   else if (dip->at_user_def_type)
     {
-      if ((type = lookup_utype (dip->at_user_def_type)) == NULL)
+      type = lookup_utype (dip->at_user_def_type);
+      if (type == NULL)
 	{
 	  type = alloc_utype (dip->at_user_def_type, NULL);
 	}
@@ -916,7 +917,8 @@ struct_type (struct dieinfo *dip, char *thisdie, char *enddie,
   char *nextdie;
   int anonymous_size;
 
-  if ((type = lookup_utype (dip->die_ref)) == NULL)
+  type = lookup_utype (dip->die_ref);
+  if (type == NULL)
     {
       /* No forward references created an empty type, so install one now */
       type = alloc_utype (dip->die_ref, NULL);
@@ -1149,7 +1151,8 @@ decode_array_element_type (char *scan)
   attribute = target_to_host (scan, SIZEOF_ATTRIBUTE, GET_UNSIGNED,
 			      current_objfile);
   scan += SIZEOF_ATTRIBUTE;
-  if ((nbytes = attribute_size (attribute)) == -1)
+  nbytes = attribute_size (attribute);
+  if (nbytes == -1)
     {
       bad_array_element_type_complaint (DIE_ID, DIE_NAME, attribute);
       typep = dwarf_fundamental_type (current_objfile, FT_INTEGER);
@@ -1169,7 +1172,8 @@ decode_array_element_type (char *scan)
 	case AT_user_def_type:
 	  die_ref = target_to_host (scan, nbytes, GET_UNSIGNED,
 				    current_objfile);
-	  if ((typep = lookup_utype (die_ref)) == NULL)
+	  typep = lookup_utype (die_ref);
+	  if (typep == NULL)
 	    {
 	      typep = alloc_utype (die_ref, NULL);
 	    }
@@ -1334,14 +1338,16 @@ dwarf_read_array_type (struct dieinfo *dip)
 		 "DIE @ 0x%x \"%s\", array not row major; not handled correctly",
 		 DIE_ID, DIE_NAME);
     }
-  if ((sub = dip->at_subscr_data) != NULL)
+  sub = dip->at_subscr_data;
+  if (sub != NULL)
     {
       nbytes = attribute_size (AT_subscr_data);
       blocksz = target_to_host (sub, nbytes, GET_UNSIGNED, current_objfile);
       subend = sub + nbytes + blocksz;
       sub += nbytes;
       type = decode_subscript_data_item (sub, subend);
-      if ((utype = lookup_utype (dip->die_ref)) == NULL)
+      utype = lookup_utype (dip->die_ref);
+      if (utype == NULL)
 	{
 	  /* Install user defined type that has not been referenced yet. */
 	  alloc_utype (dip->die_ref, type);
@@ -1390,7 +1396,8 @@ read_tag_pointer_type (struct dieinfo *dip)
   struct type *utype;
 
   type = decode_die_type (dip);
-  if ((utype = lookup_utype (dip->die_ref)) == NULL)
+  utype = lookup_utype (dip->die_ref);
+  if (utype == NULL)
     {
       utype = lookup_pointer_type (type);
       alloc_utype (dip->die_ref, utype);
@@ -1509,7 +1516,8 @@ read_subroutine_type (struct dieinfo *dip, char *thisdie, char *enddie)
   /* Check to see if we already have a partially constructed user
      defined type for this DIE, from a forward reference. */
 
-  if ((ftype = lookup_utype (dip->die_ref)) == NULL)
+  ftype = lookup_utype (dip->die_ref);
+  if (ftype == NULL)
     {
       /* This is the first reference to one of these types.  Make
          a new one and place it in the user defined types. */
@@ -1623,7 +1631,8 @@ enum_type (struct dieinfo *dip, struct objfile *objfile)
   int nbytes;
   int unsigned_enum = 1;
 
-  if ((type = lookup_utype (dip->die_ref)) == NULL)
+  type = lookup_utype (dip->die_ref);
+  if (type == NULL)
     {
       /* No forward references created an empty type, so install one now */
       type = alloc_utype (dip->die_ref, NULL);
@@ -1643,7 +1652,8 @@ enum_type (struct dieinfo *dip, struct objfile *objfile)
     {
       TYPE_LENGTH (type) = dip->at_byte_size;
     }
-  if ((scan = dip->at_element_list) != NULL)
+  scan = dip->at_element_list;
+  if (scan != NULL)
     {
       if (dip->short_element_list)
 	{
@@ -1734,7 +1744,7 @@ static void
 read_func_scope (struct dieinfo *dip, char *thisdie, char *enddie,
 		 struct objfile *objfile)
 {
-  register struct context_stack *new;
+  struct context_stack *new;
 
   /* AT_name is absent if the function is described with an
      AT_abstract_origin tag.
@@ -2431,7 +2441,8 @@ add_enum_psymbol (struct dieinfo *dip, struct objfile *objfile)
   unsigned short blocksz;
   int nbytes;
 
-  if ((scan = dip->at_element_list) != NULL)
+  scan = dip->at_element_list;
+  if (scan != NULL)
     {
       if (dip->short_element_list)
 	{
@@ -3144,7 +3155,8 @@ decode_modified_type (char *modifiers, unsigned int modcount, int mtype)
 	  nbytes = attribute_size (AT_user_def_type);
 	  die_ref = target_to_host (modifiers, nbytes, GET_UNSIGNED,
 				    current_objfile);
-	  if ((typep = lookup_utype (die_ref)) == NULL)
+	  typep = lookup_utype (die_ref);
+	  if (typep == NULL)
 	    {
 	      typep = alloc_utype (die_ref, NULL);
 	    }
@@ -3493,7 +3505,8 @@ completedieinfo (struct dieinfo *dip, struct objfile *objfile)
     {
       attr = target_to_host (diep, SIZEOF_ATTRIBUTE, GET_UNSIGNED, objfile);
       diep += SIZEOF_ATTRIBUTE;
-      if ((nbytes = attribute_size (attr)) == -1)
+      nbytes = attribute_size (attr);
+      if (nbytes == -1)
 	{
 	  complaint (&symfile_complaints,
 		     "DIE @ 0x%x \"%s\", unknown attribute length, skipped remaining attributes",

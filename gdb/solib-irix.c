@@ -123,16 +123,12 @@ union irix_obj_info
 
 /* MIPS sign extends its 32 bit addresses.  We could conceivably use
    extract_typed_address here, but to do so, we'd have to construct an
-   appropriate type.  Calling extract_signed_integer or
-   extract_address seems simpler.  */
+   appropriate type.  Calling extract_signed_integer seems simpler.  */
 
 static CORE_ADDR
 extract_mips_address (void *addr, int len)
 {
-  if (len <= 32)
-    return extract_signed_integer (addr, len);
-  else
-    return extract_address (addr, len);
+  return extract_signed_integer (addr, len);
 }
 
 /* Fetch and return the link map data associated with ADDR.  Note that

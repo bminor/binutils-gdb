@@ -3181,8 +3181,7 @@ static struct symbol *
 standard_lookup (const char *name, domain_enum domain)
 {
   struct symbol *sym;
-  struct symtab *symtab;
-  sym = lookup_symbol (name, (struct block *) NULL, domain, 0, &symtab);
+  sym = lookup_symbol (name, (struct block *) NULL, domain, 0, NULL);
   return sym;
 }
 

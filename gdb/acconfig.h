@@ -95,6 +95,9 @@
 /* Define if using Solaris thread debugging.  */
 #undef HAVE_THREAD_DB_LIB
 
+/* Define if you support the tkill syscall.  */
+#undef HAVE_TKILL_SYSCALL
+
 /* Define on a GNU/Linux system to work around problems in sys/procfs.h.  */
 #undef START_INFERIOR_TRAPS_EXPECTED
 #undef sys_quotactl

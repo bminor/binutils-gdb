@@ -156,7 +156,7 @@ get_longjmp_target (CORE_ADDR *pc)
 			  TARGET_PTR_BIT / TARGET_CHAR_BIT))
     return 0;
 
-  *pc = extract_address (buf, TARGET_PTR_BIT / TARGET_CHAR_BIT);
+  *pc = extract_unsigned_integer (buf, TARGET_PTR_BIT / TARGET_CHAR_BIT);
 
   return 1;
 }

@@ -231,14 +231,20 @@ i386nto_pc_in_sigtramp (CORE_ADDR pc, char *name)
   return name && strcmp ("__signalstub", name) == 0;
 }
 
-#define SIGCONTEXT_OFFSET 136
-static CORE_ADDR
-i386nto_sigcontext_addr (struct frame_info *frame)
-{
-  if (get_next_frame (frame))
-    return get_frame_base (get_next_frame (frame)) + SIGCONTEXT_OFFSET;
+#define I386_NTO_SIGCONTEXT_OFFSET 136
 
-  return read_register (SP_REGNUM) + SIGCONTEXT_OFFSET;
+/* Assuming NEXT_FRAME is a frame following a QNX Neutrino sigtramp
+   routine, return the address of the associated sigcontext structure.  */
+
+static CORE_ADDR
+i386nto_sigcontext_addr (struct frame_info *next_frame)
+{
+  char buf[4];
+
+  frame_unwind_register (next_frame, SP_REGNUM, buf);
+  sp = extract_unsigned_integer (buf, 4);
+
+  return sp + I386_NTO_SIGCONTEXT_OFFSET;
 }
 
 static void

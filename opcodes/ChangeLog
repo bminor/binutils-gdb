@@ -1,3 +1,39 @@
+2003-06-03  Nick Clifton  <nickc@redhat.com>
+
+	* frv-desc.c: Regenerate.
+	* frv-opc.c: Regenerate.
+	* frv-asm.c: Regenerate.
+	* frv-desc.h: Regenerate.
+	* frv-dis.c: Regenerate.
+	* frv-ibld.c: Regenerate.
+	* frv-opc.h: Regenerate.
+	* po/opcodes.pot: Regenerate.
+
+2003-06-03  Michael Snyder  <msnyder@redhat.com>
+	and Bernd Schmidt   <bernds@redhat.com>
+	and Alexandre Oliva <aoliva@redhat.com>
+
+	* disassemble.c (disassembler): Add support for h8300sx.
+	* h8300-dis.c: Ditto.
+
+2003-06-03  Nick Clifton  <nickc@redhat.com>
+
+	* frv-desc.c: Regenerate.
+	* frv-opc.c: Regenerate.
+
+	* aclocal.m4: Regenerate.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* iq2000-asm.c: Regenerate.
+	* iq2000-desc.c: Regenerate.
+	* iq2000-desc.h: Regenerate.
+	* iq2000-dis.c: Regenerate.
+	* iq2000-ibld.c: Regenerate.
+	* iq2000-opc.c: Regenerate.
+	* iq2000-opc.h: Regenerate.
+	* po/POTFILES.in: Regenerate.
+	* po/opcodes.pot: Regenerate.
+
 2003-05-23  Jason Eckhardt  <jle@rice.edu>
 
 	* i860-dis.c (crnames): Add bear, ccr, p0, p1, p2, p3.

@@ -7799,10 +7799,10 @@ _bfd_mips_elf_hide_symbol (info, entry, force_local)
   h = (struct mips_elf_link_hash_entry *) entry;
   if (h->forced_local)
     return;
-  h->forced_local = TRUE;
+  h->forced_local = force_local;
 
   dynobj = elf_hash_table (info)->dynobj;
-  if (dynobj != NULL)
+  if (dynobj != NULL && force_local)
     {
       got = mips_elf_got_section (dynobj, FALSE);
       g = mips_elf_section_data (got)->u.got_info;
@@ -7898,7 +7898,7 @@ _bfd_mips_elf_discard_info (abfd, cookie, info)
   cookie->rel = cookie->rels;
   cookie->relend = cookie->rels + o->reloc_count;
 
-  for (i = 0, skip = 0; i < o->_raw_size; i ++)
+  for (i = 0, skip = 0; i < o->_raw_size / PDR_SIZE; i ++)
     {
       if (MNAME(abfd,_bfd_elf,reloc_symbol_deleted_p) (i * PDR_SIZE, cookie))
 	{

@@ -24,19 +24,21 @@
 #include "defs.h"
 #include "inferior.h"
 #include "gdbcore.h"
-#include "gdb_string.h"
 #include "regcache.h"
-#include "x86-64-tdep.h"
-#include "dwarf2cfi.h"
 #include "osabi.h"
 
-#define LINUX_SIGTRAMP_INSN0 (0x48)	/* mov $NNNNNNNN,%rax */
-#define LINUX_SIGTRAMP_OFFSET0 (0)
-#define LINUX_SIGTRAMP_INSN1 (0x0f)	/* syscall */
-#define LINUX_SIGTRAMP_OFFSET1 (7)
+#include "gdb_string.h"
 
-static const unsigned char linux_sigtramp_code[] = {
-  /*  mov $__NR_rt_sigreturn,%rax */
+#include "x86-64-tdep.h"
+
+#define LINUX_SIGTRAMP_INSN0	0x48	/* mov $NNNNNNNN, %rax */
+#define LINUX_SIGTRAMP_OFFSET0	0
+#define LINUX_SIGTRAMP_INSN1	0x0f	/* syscall */
+#define LINUX_SIGTRAMP_OFFSET1	7
+
+static const unsigned char linux_sigtramp_code[] =
+{
+  /* mov $__NR_rt_sigreturn, %rax */
   LINUX_SIGTRAMP_INSN0, 0xc7, 0xc0, 0x0f, 0x00, 0x00, 0x00,
   /* syscall */
   LINUX_SIGTRAMP_INSN1, 0x05
@@ -51,6 +53,14 @@ static CORE_ADDR
 x86_64_linux_sigtramp_start (CORE_ADDR pc)
 {
   unsigned char buf[LINUX_SIGTRAMP_LEN];
+
+  /* We only recognize a signal trampoline if PC is at the start of
+     one of the two instructions.  We optimize for finding the PC at
+     the start, as will be the case when the trampoline is not the
+     first frame on the stack.  We assume that in the case where the
+     PC is not at the start of the instruction sequence, there will be
+     a few trailing readable bytes on the stack.  */
+
   if (read_memory_nobpt (pc, (char *) buf, LINUX_SIGTRAMP_LEN) != 0)
     return 0;
 
@@ -71,133 +81,93 @@ x86_64_linux_sigtramp_start (CORE_ADDR pc)
   return pc;
 }
 
-#define LINUX_SIGINFO_SIZE 0
-
-/* Offset to struct sigcontext in ucontext, from <asm/ucontext.h>.  */
-#define LINUX_UCONTEXT_SIGCONTEXT_OFFSET 40
-
-/* Offset to saved PC in sigcontext, from <asm/sigcontext.h>.  */
-#define LINUX_SIGCONTEXT_PC_OFFSET 128
-#define LINUX_SIGCONTEXT_FP_OFFSET 120
-
-/* Assuming FRAME is for a GNU/Linux sigtramp routine, return the
-   address of the associated sigcontext structure.  */
-static CORE_ADDR
-x86_64_linux_sigcontext_addr (struct frame_info *frame)
-{
-  CORE_ADDR pc;
-  ULONGEST rsp;
-
-  pc = x86_64_linux_sigtramp_start (get_frame_pc (frame));
-  if (pc)
-    {
-      if (get_next_frame (frame))
-	/* If this isn't the top frame, the next frame must be for the
-	   signal handler itself.  The sigcontext structure is part of
-	   the user context. */
-	return get_frame_base (get_next_frame (frame)) + LINUX_SIGINFO_SIZE +
-	  LINUX_UCONTEXT_SIGCONTEXT_OFFSET;
-
-
-      /* This is the top frame. */
-      rsp = read_register (SP_REGNUM);
-      return rsp + LINUX_SIGINFO_SIZE + LINUX_UCONTEXT_SIGCONTEXT_OFFSET;
-
-    }
-
-  error ("Couldn't recognize signal trampoline.");
-  return 0;
-}
-
-/* Assuming FRAME is for a GNU/Linux sigtramp routine, return the
-   saved program counter.  */
-
-static CORE_ADDR
-x86_64_linux_sigtramp_saved_pc (struct frame_info *frame)
-{
-  CORE_ADDR addr;
-
-  addr = x86_64_linux_sigcontext_addr (frame);
-  return read_memory_integer (addr + LINUX_SIGCONTEXT_PC_OFFSET, 8);
-}
-
-/* Immediately after a function call, return the saved pc.  */
-
-CORE_ADDR
-x86_64_linux_saved_pc_after_call (struct frame_info *frame)
-{
-  if ((get_frame_type (frame) == SIGTRAMP_FRAME))
-    return x86_64_linux_sigtramp_saved_pc (frame);
-
-  return read_memory_integer (read_register (SP_REGNUM), 8);
-}
-
-/* Saved Pc.  Get it from sigcontext if within sigtramp.  */
-CORE_ADDR
-x86_64_linux_frame_saved_pc (struct frame_info *frame)
-{
-  if ((get_frame_type (frame) == SIGTRAMP_FRAME))
-    return x86_64_linux_sigtramp_saved_pc (frame);
-  return cfi_get_ra (frame);
-}
-
 /* Return whether PC is in a GNU/Linux sigtramp routine.  */
 
-int
-x86_64_linux_in_sigtramp (CORE_ADDR pc, char *name)
+static int
+x86_64_linux_pc_in_sigtramp (CORE_ADDR pc, char *name)
 {
-  if (name)
-    return strcmp ("__restore_rt", name) == 0;
+  /* If we have NAME, we can optimize the search.  The trampoline is
+     named __restore_rt.  However, it isn't dynamically exported from
+     the shared C library, so the trampoline may appear to be part of
+     the preceding function.  This should always be sigaction,
+     __sigaction, or __libc_sigaction (all aliases to the same
+     function).  */
+  if (name == NULL || strstr (name, "sigaction") != NULL)
+    return (x86_64_linux_sigtramp_start (pc) != 0);
 
-  return (x86_64_linux_sigtramp_start (pc) != 0);
+  return (strcmp ("__restore_rt", name) == 0);
 }
 
-CORE_ADDR
-x86_64_linux_frame_chain (struct frame_info *fi)
+/* Offset to struct sigcontext in ucontext, from <asm/ucontext.h>.  */
+#define X86_64_LINUX_UCONTEXT_SIGCONTEXT_OFFSET 40
+
+/* Assuming NEXT_FRAME is a frame following a GNU/Linux sigtramp
+   routine, return the address of the associated sigcontext structure.  */
+
+static CORE_ADDR
+x86_64_linux_sigcontext_addr (struct frame_info *next_frame)
 {
-  ULONGEST addr;
-  CORE_ADDR fp, pc;
+  CORE_ADDR sp;
+  char buf[8];
 
-  if (!(get_frame_type (fi) == SIGTRAMP_FRAME))
-    {
-      fp = cfi_frame_chain (fi);
-      if (fp)
-	return fp;
-      else
-	addr = get_frame_base (fi);
-    }
-  else
-    addr = get_frame_base (get_next_frame (fi));
+  frame_unwind_register (next_frame, SP_REGNUM, buf);
+  sp = extract_unsigned_integer (buf, 8);
 
-  addr += LINUX_SIGINFO_SIZE + LINUX_UCONTEXT_SIGCONTEXT_OFFSET;
-
-  fp = read_memory_integer (addr + LINUX_SIGCONTEXT_FP_OFFSET, 8) + 8;
-
-  return fp;
-}
-
-CORE_ADDR
-x86_64_init_frame_pc (int fromleaf, struct frame_info *fi)
-{
-  CORE_ADDR addr;
-
-  if (get_next_frame (fi)
-      && (get_frame_type (get_next_frame (fi)) == SIGTRAMP_FRAME))
-    {
-      addr = get_frame_base (get_next_frame (get_next_frame (fi)))
-	+ LINUX_SIGINFO_SIZE + LINUX_UCONTEXT_SIGCONTEXT_OFFSET;
-      return read_memory_integer (addr + LINUX_SIGCONTEXT_PC_OFFSET, 8);
-    }
-  else
-    return cfi_init_frame_pc (fromleaf, fi);
+  /* The sigcontext structure is part of the user context.  A pointer
+     to the user context is passed as the third argument to the signal
+     handler, i.e. in %rdx.  Unfortunately %rdx isn't preserved across
+     function calls so we can't use it.  Fortunately the user context
+     is part of the signal frame and the unwound %rsp directly points
+     at it.  */
+  return sp + X86_64_LINUX_UCONTEXT_SIGCONTEXT_OFFSET;
 }
 
+
+/* From <asm/sigcontext.h>.  */
+static int x86_64_linux_sc_reg_offset[X86_64_NUM_GREGS] =
+{
+  13 * 8,			/* %rax */
+  11 * 8,			/* %rbx */
+  14 * 8,			/* %rcx */
+  12 * 8,			/* %rdx */
+  9 * 8,			/* %rsi */
+  8 * 8,			/* %rdi */
+  10 * 8,			/* %rbp */
+  15 * 8,			/* %rsp */
+  0 * 8,			/* %r8 */
+  1 * 8,			/* %r9 */
+  2 * 8,			/* %r10 */
+  3 * 8,			/* %r11 */
+  4 * 8,			/* %r12 */
+  5 * 8,			/* %r13 */
+  6 * 8,			/* %r14 */
+  7 * 8,			/* %r15 */
+  16 * 8,			/* %rip */
+  17 * 8,			/* %eflags */
+  -1,				/* %ds */
+  -1,				/* %es */
+
+  /* FIXME: kettenis/2002030531: The registers %fs and %gs are
+     available in `struct sigcontext'.  However, they only occupy two
+     bytes instead of four, which makes using them here rather
+     difficult.  Leave them out for now.  */
+  -1,				/* %fs */
+  -1				/* %gs */
+};
 
 static void
 x86_64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   x86_64_init_abi (info, gdbarch);
+
+  set_gdbarch_pc_in_sigtramp (gdbarch, x86_64_linux_pc_in_sigtramp);
+
+  tdep->sigcontext_addr = x86_64_linux_sigcontext_addr;
+  tdep->sc_reg_offset = x86_64_linux_sc_reg_offset;
+  tdep->sc_num_regs = X86_64_NUM_GREGS;
 }
+
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 extern void _initialize_x86_64_linux_tdep (void);

@@ -119,11 +119,7 @@ main (ac, av)
   /* FIXME: This is currently being rewritten to have each simulator
      do all argv processing.  */
 
-#ifdef SIM_H8300 /* FIXME: quick hack */
-  while ((i = getopt (ac, av, "a:c:m:op:s:hStv")) != EOF)
-#else
   while ((i = getopt (ac, av, "a:c:m:op:s:tv")) != EOF)
-#endif
     switch (i)
       {
       case 'a':
@@ -176,14 +172,6 @@ main (ac, av)
 	/* sim_set_verbose (1); */
 	break;
 	/* FIXME: Quick hack, to be replaced by more general facility.  */
-#ifdef SIM_H8300
-      case 'h':
-	set_h8300h (1, 0);
-	break;
-      case 'S':
-	set_h8300h (1, 1);
-	break;
-#endif
       default:
 	usage ();
       }
@@ -288,11 +276,6 @@ main (ac, av)
      the signal that the simulator received; we want to return that to
      indicate failure.  */
 
-#ifdef SIM_H8300 /* FIXME: Ugh.  grep for SLEEP in compile.c  */
-  if (sigrc == SIGILL)
-    abort ();
-  sigrc = 0;
-#else
   /* Why did we stop? */
   switch (reason)
     {
@@ -311,7 +294,6 @@ main (ac, av)
       break;
 
     }
-#endif
 
   return sigrc;
 }
@@ -324,10 +306,6 @@ usage ()
   fprintf (stderr, "-a args         Pass `args' to simulator.\n");
 #ifdef SIM_HAVE_SIMCACHE
   fprintf (stderr, "-c size         Set simulator cache size to `size'.\n");
-#endif
-#ifdef SIM_H8300
-  fprintf (stderr, "-h              Executable is for H8/300H.\n");
-  fprintf (stderr, "-S              Executable is for H8S.\n");
 #endif
   fprintf (stderr, "-m size         Set memory size of simulator, in bytes.\n");
 #ifdef SIM_HAVE_ENVIRONMENT

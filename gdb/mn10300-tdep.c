@@ -131,8 +131,8 @@ mn10300_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 static CORE_ADDR
 mn10300_extract_struct_value_address (char *regbuf)
 {
-  return extract_address (regbuf + REGISTER_BYTE (4),
-			  REGISTER_RAW_SIZE (4));
+  return extract_unsigned_integer (regbuf + REGISTER_BYTE (4),
+				   REGISTER_RAW_SIZE (4));
 }
 
 static void
