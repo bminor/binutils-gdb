@@ -1,5 +1,5 @@
 /* Low level interface to i386 running the GNU Hurd.
-   Copyright (C) 1992, 1995, 1996 Free Software Foundation, Inc.
+   Copyright (C) 1992, 1995, 1996, 2000 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -265,6 +265,7 @@ gnu_store_registers (int regno)
       thread_state_data_t old_state;
       int was_aborted = thread->aborted;
       int was_valid = thread->state_valid;
+      int trace;
 
       if (!was_aborted && was_valid)
 	memcpy (&old_state, &thread->state, sizeof (old_state));
@@ -275,6 +276,10 @@ gnu_store_registers (int regno)
 	  warning ("Couldn't store registers into %s", proc_string (thread));
 	  return;
 	}
+
+      /* Save the T bit.  We might try to restore the %eflags register
+         below, but changing the T bit would seriously confuse GDB.  */
+      trace = ((struct i386_thread_state *)state)->efl & 0x100;
 
       if (!was_aborted && was_valid)
 	/* See which registers have changed after aborting the thread.  */
@@ -319,6 +324,10 @@ gnu_store_registers (int regno)
 	  assert (register_valid[regno]);
 	  fill (state, regno);
 	}
+
+      /* Restore the T bit.  */
+      ((struct i386_thread_state *)state)->efl &= ~0x100;
+      ((struct i386_thread_state *)state)->efl |= trace;
     }
 
 #undef fill

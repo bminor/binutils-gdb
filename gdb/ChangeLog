@@ -1,3 +1,9 @@
+2000-03-11  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386gnu-nat.c (gnu_store_registers): Make sure the T bit in the
+	%eflags isn't modified.  This fixes a bug where every call to a
+	function in the program beyond the first call would fail.
+
 2000-03-10  Daniel Berlin  <dan@cgsoftware.com>
 	Fix C++ overloading, add support for seeing through references.
 
