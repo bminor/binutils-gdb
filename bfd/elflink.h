@@ -1554,6 +1554,18 @@ elf_adjust_dynamic_symbol (h, data)
 	}
     }
 
+  /* If this is a final link, and the symbol was defined as a common
+     symbol in a regular object file, and there was no definition in
+     any dynamic object, then the linker will have allocated space for
+     the symbol in a common section but the ELF_LINK_HASH_DEF_REGULAR
+     flag will not have been set.  */
+  if (h->root.type == bfd_link_hash_defined
+      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0
+      && (h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR) != 0
+      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) == 0
+      && (h->root.u.def.section->owner->flags & DYNAMIC) == 0)
+    h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
+
   /* If -Bsymbolic was used (which means to bind references to global
      symbols to the definition within the shared object), and this
      symbol was defined in a regular object, then it actually doesn't

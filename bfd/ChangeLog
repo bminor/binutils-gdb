@@ -1,3 +1,8 @@
+Mon Apr  1 12:35:36 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elflink.h (elf_adjust_dynamic_symbol): If a common symbol got
+	defined in a regular file, set ELF_LINK_HASH_DEF_REGULAR.
+
 Sun Mar 31 01:58:41 1996  steve chamberlain  <sac@slash.cygnus.com>
 
 	* peicode.h (coff_swap_aouthdr_out): Delete test for .junk.
