@@ -59,6 +59,7 @@ static CONST char *current_target;
 static CONST char *output_target;
 static int longest_section_name = 8;
 static lang_statement_list_type statement_list;
+static struct lang_phdr *lang_phdr_list;
 
 static void print_size PARAMS ((size_t value));
 static void print_alignment PARAMS ((unsigned int value));
@@ -128,12 +129,13 @@ static void lang_place_orphans PARAMS ((void));
 static int topower PARAMS ((int));
 static void lang_set_startof PARAMS ((void));
 static void reset_memory_regions PARAMS ((void));
+static void lang_record_phdrs PARAMS ((void));
 
 /* EXPORTS */
 lang_output_section_statement_type *abs_output_section;
 lang_statement_list_type *stat_ptr = &statement_list;
 lang_statement_list_type file_chain = { 0 };
-static const char *entry_symbol = 0;
+const char *entry_symbol = NULL;
 boolean entry_from_cmdline;
 boolean lang_has_input_file = false;
 boolean had_output_filename = false;
@@ -526,6 +528,7 @@ lang_output_section_statement_lookup (name)
       lookup->subsection_alignment = -1;
       lookup->section_alignment = -1;
       lookup->load_base = (union etree_union *) NULL;
+      lookup->phdrs = NULL;
 
       lang_statement_append (&lang_output_section_statement,
 			     (lang_statement_union_type *) lookup,
@@ -2245,7 +2248,8 @@ lang_finish ()
   h = bfd_link_hash_lookup (link_info.hash, entry_symbol, false, false, true);
   if (h != (struct bfd_link_hash_entry *) NULL
       && (h->type == bfd_link_hash_defined
-	  || h->type == bfd_link_hash_defweak))
+	  || h->type == bfd_link_hash_defweak)
+      && h->u.def.section->output_section != NULL)
     {
       bfd_vma val;
 
@@ -2724,6 +2728,10 @@ lang_process ()
 
   ldemul_before_allocation ();
 
+  /* We must record the program headers before we try to fix the
+     section positions, since they will affect SIZEOF_HEADERS.  */
+  lang_record_phdrs ();
+
   /* Now run around and relax if we can */
   if (command_line.relax)
     {
@@ -3113,4 +3121,141 @@ void
 lang_leave_group ()
 {
   stat_ptr = &statement_list;
+}
+
+/* Add a new program header.  This is called for each entry in a PHDRS
+   command in a linker script.  */
+
+void
+lang_new_phdr (name, type, hdrs, at)
+     const char *name;
+     etree_type *type;
+     unsigned int hdrs;
+     etree_type *at;
+{
+  struct lang_phdr *n, **pp;
+
+  n = (struct lang_phdr *) stat_alloc (sizeof (struct lang_phdr));
+  n->next = NULL;
+  n->name = name;
+  n->type = exp_get_value_int (type, 0, "program header type",
+			       lang_final_phase_enum);
+  n->hdrs = hdrs;
+  n->at = at;
+
+  for (pp = &lang_phdr_list; *pp != NULL; pp = &(*pp)->next)
+    ;
+  *pp = n;
+}
+
+/* Record that a section should be placed in a phdr.  */
+
+void
+lang_section_in_phdr (name)
+     const char *name;
+{
+  struct lang_output_section_phdr_list *n;
+
+  n = ((struct lang_output_section_phdr_list *)
+       stat_alloc (sizeof (struct lang_output_section_phdr_list)));
+  n->name = name;
+  n->used = false;
+  n->next = current_section->phdrs;
+  current_section->phdrs = n;
+}
+
+/* Record the program header information in the output BFD.  FIXME: We
+   should not be calling an ELF specific function here.  */
+
+static void
+lang_record_phdrs ()
+{
+  unsigned int alc;
+  asection **secs;
+  struct lang_output_section_phdr_list *last;
+  struct lang_phdr *l;
+  lang_statement_union_type *u;
+
+  alc = 10;
+  secs = xmalloc (alc * sizeof (asection *));
+  last = NULL;
+  for (l = lang_phdr_list; l != NULL; l = l->next)
+    {
+      unsigned int c;
+      bfd_vma at;
+
+      c = 0;
+      for (u = lang_output_section_statement.head;
+	   u != NULL;
+	   u = u->output_section_statement.next)
+	{
+	  lang_output_section_statement_type *os;
+	  struct lang_output_section_phdr_list *pl;
+
+	  os = &u->output_section_statement;
+
+	  pl =  os->phdrs;
+	  if (pl != NULL)
+	    last = pl;
+	  else
+	    {
+	      if (! os->loadable
+		  || os->bfd_section == NULL
+		  || (os->bfd_section->flags & SEC_ALLOC) == 0)
+		continue;
+	      pl = last;
+	    }
+
+	  if (os->bfd_section == NULL)
+	    continue;
+
+	  for (; pl != NULL; pl = pl->next)
+	    {
+	      if (strcmp (pl->name, l->name) == 0)
+		{
+		  if (c >= alc)
+		    {
+		      alc *= 2;
+		      secs = xrealloc (secs, alc * sizeof (asection *));
+		    }
+		  secs[c] = os->bfd_section;
+		  ++c;
+		  pl->used = true;
+		}
+	    }
+	}
+
+      if (l->at == NULL)
+	at = 0;
+      else
+	at = exp_get_vma (l->at, 0, "phdr load address",
+			  lang_final_phase_enum);
+      if (! bfd_record_phdr (output_bfd, l->type, false, 0,
+			     l->at == NULL ? false : true,
+			     at,
+			     (l->hdrs & LANG_PHDR_FILEHDR) ? true : false,
+			     (l->hdrs & LANG_PHDR_PHDRS) ? true : false,
+			     c, secs))
+	einfo ("%F%P: bfd_record_phdr failed: %E\n");
+    }
+
+  free (secs);
+
+  /* Make sure all the phdr assignments succeeded.  */
+  for (u = lang_output_section_statement.head;
+       u != NULL;
+       u = u->output_section_statement.next)
+    {
+      struct lang_output_section_phdr_list *pl;
+
+      if (u->output_section_statement.bfd_section == NULL)
+	continue;
+
+      for (pl = u->output_section_statement.phdrs;
+	   pl != NULL;
+	   pl = pl->next)
+	if (! pl->used && strcmp (pl->name, "NONE") != 0)
+	  einfo ("%X%P: section `%s' assigned to non-existent phdr `%s'\n",
+		 u->output_section_statement.name, pl->name);
+    }
 }

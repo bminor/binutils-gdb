@@ -1,3 +1,24 @@
+Fri Dec  1 16:48:36 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldgram.y (PHDRS): New token.
+	(ifile_p1): Accept phdrs.
+	(section): Accept phdr_opt at the end of the section definition.
+	(phdr_op): New nonterminal.
+	(phdrs, phdr_list, phdr, phdr_type, opt_hdrs, hdr): Likewise.
+	* ldlex.l: Accept PHDRS.
+	* ldlang.h (struct lang_output_section_phdr_list): Define.
+	(lang_output_section_statement_type): Add phdrs field.
+	(struct lang_phdr): Define.
+	(LANG_PHDR_FILEHDR, LANG_PHDR_PHDRS): Define.
+	(lang_new_phdr): Declare.
+	* ldlang.c (lang_phdr_list): New static variable.
+	(lang_output_section_statement_lookup): Initialize phdrs field.
+	(lang_process): Call lang_record_phdrs.
+	(lang_new_phdr): New function.
+	(lang_section_in_phdr): New function.
+	(lang_record_phdrs): New static function.
+	* ld.texinfo: Document PHDRS.
+
 Thu Nov 30 13:14:30 1995  Kim Knuttila  <krk@cygnus.com>
 
 	* scripttempl/ppcpe.sc: Moved .edata into its own section to
