@@ -251,6 +251,7 @@ rs6000-nat.c
 rs6000-pinsn.c
 rs6000-tdep.c
 saber.suppress
+ser-e7kpc.c
 ser-go32.c
 ser-tcp.c
 ser-unix.c

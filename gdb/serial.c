@@ -52,13 +52,15 @@ serial_add_interface(optable)
 /* Open up a device or a network socket, depending upon the syntax of NAME. */
 
 serial_t
-serial_open(name)
+serial_open (name)
      const char *name;
 {
   serial_t scb;
   struct serial_ops *ops;
 
-  if (strchr (name, ':'))
+  if (strcmp (name, "pc") == 0)
+    ops = serial_interface_lookup ("pc");
+  else if (strchr (name, ':'))
     ops = serial_interface_lookup ("tcp");
   else
     ops = serial_interface_lookup ("hardwire");
