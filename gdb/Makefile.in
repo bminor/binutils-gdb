@@ -51,6 +51,9 @@ AR = ar
 AR_FLAGS = qv
 RANLIB = ranlib
 
+M_INSTALL=@:
+M_UNINSTALL=@:
+
 # Flags that describe where you can find the termcap library.
 # This can be overridden in the host Makefile fragment file.
 TERMCAP = -ltermcap
@@ -141,8 +144,10 @@ GLOBAL_CFLAGS = $(MT_CFLAGS) $(MH_CFLAGS)
 # when running make.  I.E.  "make CFLAGS=-Wmissing-prototypes".
 CFLAGS = -g
 
-# Need to pass this to testsuite for "make check"
-CXXFLAGS = -g
+# Need to pass this to testsuite for "make check".  Probably should be
+# consistent with top-level Makefile.in and gdb/testsuite/Makefile.in
+# so "make check" has the same result no matter where it is run.
+CXXFLAGS = -g -O
 
 # INTERNAL_CFLAGS is the aggregate of all other *CFLAGS macros.
 INTERNAL_CFLAGS = $(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) \
@@ -841,11 +846,11 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	go32-xdep.c gould-pinsn.c gould-xdep.c h8300-tdep.c h8500-tdep.c \
 	hp300ux-nat.c hppa-pinsn.c hppa-tdep.c hppab-nat.c hppah-nat.c \
 	i386-pinsn.c i386-tdep.c i386b-nat.c i386mach-nat.c i386v-nat.c \
-	i386aix-nat.c i386m3-nat.c i386v4-nat.c i386lynx-nat.c i386ly-tdep.c \
+	i386aix-nat.c i386m3-nat.c i386v4-nat.c i386ly-nat.c i386ly-tdep.c \
 	i387-tdep.c \
 	i960-pinsn.c i960-tdep.c \
 	infptrace.c inftarg.c irix4-nat.c isi-xdep.c m3-nat.c \
-	m68k-pinsn.c m68k-tdep.c \
+	m68k-pinsn.c m68k-tdep.c m68kly-nat.c \
 	m88k-nat.c m88k-pinsn.c m88k-tdep.c mips-nat.c mips-pinsn.c \
 	mips-tdep.c mipsm3-nat.c news-xdep.c \
 	nindy-share/Onindy.c nindy-share/nindy.c \
@@ -858,8 +863,9 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	remote-st.c remote-utils.c dcache.c \
 	remote-udi.c remote-vx.c remote-z8k.c rs6000-nat.c rs6000-pinsn.c \
 	rs6000-tdep.c ser-go32.c ser-tcp.c sh-tdep.c solib.c sparc-nat.c \
-	sparc-pinsn.c sparc-tdep.c sun3-nat.c sun386-nat.c symm-tdep.c \
-	symm-nat.c tahoe-pinsn.c ultra3-nat.c ultra3-xdep.c umax-xdep.c \
+	sparc-pinsn.c sparc-tdep.c sparcly-nat.c sun3-nat.c sun386-nat.c \
+	symm-tdep.c symm-nat.c \
+	tahoe-pinsn.c ultra3-nat.c ultra3-xdep.c umax-xdep.c \
 	vax-pinsn.c \
 	vx-share/xdr_ld.c vx-share/xdr_ptrace.c vx-share/xdr_rdb.c \
 	xcoffexec.c xcoffread.c xcoffsolib.c z8k-tdep.c
@@ -971,6 +977,7 @@ ALLCONFIG = config/a29k/a29k-kern.mt config/a29k/a29k-udi.mt \
 	config/m68k/es1800.mt config/m68k/hp300bsd.mh \
 	config/m68k/hp300bsd.mt config/m68k/hp300hpux.mh \
 	config/m68k/hp300hpux.mt config/m68k/isi.mh config/m68k/isi.mt \
+	config/m68k/m68klynx.mh config/m68k/m68klynx.mt \
 	config/m68k/m68k-em.mt \
 	config/m68k/monitor.mt \
 	config/m68k/news.mh config/m68k/news.mt config/m68k/news1000.mh \
@@ -993,6 +1000,7 @@ ALLCONFIG = config/a29k/a29k-kern.mt config/a29k/a29k-udi.mt \
 	config/pa/hppahpux.mt config/pyr/pyramid.mh config/pyr/pyramid.mt \
 	config/romp/rtbsd.mh config/rs6000/rs6000.mh config/rs6000/rs6000.mt \
 	config/sh/sh.mt config/sparc/sparc-em.mt config/sparc/sparclite.mt \
+	config/sparc/sparclynx.mh config/sparc/sparclynx.mt \
 	config/sparc/sun4os4.mh config/sparc/sun4os4.mt \
 	config/sparc/sun4sol2.mh config/sparc/sun4sol2.mt \
 	config/sparc/vxsparc.mt config/tahoe/tahoe.mh config/tahoe/tahoe.mt \
@@ -1144,7 +1152,7 @@ hppah-nat.o: hppah-nat.c $(bfd_h) $(defs_h) $(inferior_h) target.h
 i386-pinsn.o: i386-pinsn.c $(bfd_h) $(dis-asm_h) $(defs_h)
 i386-tdep.o: i386-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h
 i386b-nat.o: i386b-nat.c $(defs_h) 
-i386lynx-nat.o: i386lynx-nat.c $(defs_h) $(frame_h) $(inferior_h) target.h
+i386ly-nat.o: i386ly-nat.c $(defs_h) $(frame_h) $(inferior_h) target.h
 i386ly-tdep.o: i386ly-tdep.c $(defs_h) $(inferior_h) target.h
 i386mach-nat.o: i386mach-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) 
 
@@ -1194,6 +1202,7 @@ m2-valprint.o: m2-valprint.c $(defs_h) $(gdbtypes_h) $(symtab_h) \
 
 m68k-pinsn.o: m68k-pinsn.c $(bfd_h) $(dis-asm_h) $(defs_h) 
 m68k-tdep.o: m68k-tdep.c $(defs_h) $(frame_h) $(symtab_h) 
+m68kly-nat.o: m68kly-nat.c $(defs_h) $(frame_h) $(inferior_h) target.h
 m88k-nat.o: m88k-nat.c $(defs_h) $(gdbcore_h) $(inferior_h)
 m88k-pinsn.o: m88k-pinsn.c $(defs_h) $(symtab_h) 
 m88k-tdep.o: m88k-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h)
@@ -1350,6 +1359,8 @@ sparc-pinsn.o: sparc-pinsn.c $(bfd_h) $(dis-asm_h) $(defs_h)
 
 sparc-tdep.o: sparc-tdep.c $(ieee-float_h) $(defs_h) $(gdbcore_h) \
 	$(inferior_h) objfiles.h symfile.h target.h
+
+sparcly-nat.o: sparcly-nat.c $(bfd_h) $(defs_h) $(inferior_h) target.h
 
 stabsread.o: stabsread.c $(bfd_h) $(INCLUDE_DIR)/aout/stab.def \
 	$(INCLUDE_DIR)/aout/stab_gnu.h buildsym.h complaints.h $(defs_h) \

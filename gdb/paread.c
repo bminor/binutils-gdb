@@ -182,11 +182,13 @@ pa_symtab_read (abfd, addr, objfile)
 	      bufp->symbol_value &= ~0x3; /* clear out permission bits */
 
 	    check_strange_names:
-	      /* GAS leaves symbols with the prefixes "LS$", "LBB$",
-		 and "LBE$" in .o files after assembling.  And thus
-		 they appear in the final executable.  This can
-		 cause problems if these special symbols have the
-		 same value as real symbols.  So ignore them.  Also "LC$".  */
+	      /* GAS leaves labels in .o files after assembling.  At
+		 least labels starting with "LS$", "LBB$", "LBE$",
+		 "LC$", and "L$" can happen.  This should be fixed in
+		 the assembler and/or compiler, to save space in the
+		 executable (and because having GDB make gross
+		 distinctions based on the name is kind of ugly), but
+		 until then, just ignore them.  */
 	      if (*symname == 'L'
 		  && (symname[1] == '$' || symname[2] == '$' 
 		      || symname[3] == '$'))

@@ -1,3 +1,12 @@
+Mon Nov  1 09:40:21 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* paread.c (pa_symtab_read): Change comments to say ignoring
+	labels really should be handled by the assembler/compiler.
+
+	* Makefile.in: Add -O to CXXFLAGS.
+
+	* TODO: Expand comments on fast watchpoints.
+
 Sun Oct 31 19:45:06 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* paread.c (pa_symtab_read): Also filter out local symbols
