@@ -595,10 +595,22 @@ switch (CUR_SYMBOL_TYPE)
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
 	/* Do not fix textlow==0 for .o or NLM files, as 0 is a legit
 	   value for the bottom of the text seg in those cases. */
+	if (CUR_SYMBOL_VALUE == ANOFFSET (objfile->section_offsets, 
+	                                  SECT_OFF_TEXT (objfile)))
+	  {
+	    CORE_ADDR minsym_valu = 
+	      find_stab_function_addr (namestring, pst->filename, objfile);
+	    /* find_stab_function_addr will return 0 if the minimal
+	       symbol wasn't found.  (Unfortunately, this might also
+	       be a valid address.)  Anyway, if it *does* return 0,
+	       it is likely that the value was set correctly to begin
+	       with... */
+	    if (minsym_valu != 0)
+	      CUR_SYMBOL_VALUE = minsym_valu;
+	  }
 	if (pst && textlow_not_set)
 	  {
-	    pst->textlow =
-	      find_stab_function_addr (namestring, pst->filename, objfile);
+	    pst->textlow = CUR_SYMBOL_VALUE;
 	    textlow_not_set = 0;
 	  }
 #endif
@@ -652,8 +664,17 @@ switch (CUR_SYMBOL_TYPE)
 	   value for the bottom of the text seg in those cases. */
 	if (CUR_SYMBOL_VALUE == ANOFFSET (objfile->section_offsets, 
 	                                  SECT_OFF_TEXT (objfile)))
-	  CUR_SYMBOL_VALUE = 
-	    find_stab_function_addr (namestring, pst->filename, objfile);
+	  {
+	    CORE_ADDR minsym_valu = 
+	      find_stab_function_addr (namestring, pst->filename, objfile);
+	    /* find_stab_function_addr will return 0 if the minimal
+	       symbol wasn't found.  (Unfortunately, this might also
+	       be a valid address.)  Anyway, if it *does* return 0,
+	       it is likely that the value was set correctly to begin
+	       with... */
+	    if (minsym_valu != 0)
+	      CUR_SYMBOL_VALUE = minsym_valu;
+	  }
 	if (pst && textlow_not_set)
 	  {
 	    pst->textlow = CUR_SYMBOL_VALUE;

@@ -2270,8 +2270,18 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 	         from N_FUN symbols.  */
 	      if (type == N_FUN
 		  && valu == ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile)))
-		valu = 
-		  find_stab_function_addr (name, last_source_file, objfile);
+		{
+		  CORE_ADDR minsym_valu = 
+		    find_stab_function_addr (name, last_source_file, objfile);
+
+		  /* find_stab_function_addr will return 0 if the minimal
+		     symbol wasn't found.  (Unfortunately, this might also
+		     be a valid address.)  Anyway, if it *does* return 0,
+		     it is likely that the value was set correctly to begin
+		     with... */
+		  if (minsym_valu != 0)
+		    valu = minsym_valu;
+		}
 #endif
 
 #ifdef SUN_FIXED_LBRAC_BUG

@@ -1,3 +1,13 @@
+2001-10-15  Kevin Buettner  <kevinb@redhat.com>
+
+	* dbxread.c (process_one_symbol): Don't use error result from
+	find_stab_function_addr().
+	* partial-stab.h (case 'F'): Likewise.
+
+	* partial-stab.h (case 'f'): Make SOFUN_ADDRESS_MAYBE_MISSING
+	code match that used for case 'F'.  This fixes the divergence
+	that was introduced by my 1999-09-14 changes to partial-stab.h.
+
 2001-10-13  Andrew Cagney  <ac131313@redhat.com>
 
 	S/390 31 & 64 bit target and GNU/Linux native support.
