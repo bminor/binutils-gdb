@@ -5,21 +5,95 @@
 
 srctrigger=libbfd.c
 srcname="bfd"
-commontargets=true
 
 # per-host:
 
-if [ ! -f config/hmake-${host} ] ; then
-	echo No such host available: ${host}
+if [ "${host_os}" = "posix" ] ; then
+	bfd_host=posix
+else
+	case "${host_cpu}" in
+	rs6000)	bfd_host=aix ;;
+	mips)
+		case "${host_vendor}" in
+		dec)	bfd_host=dec3100 ;;
+		esac
+		;;
+	m88k)
+		case "${host_vendor}" in
+		*)
+			case "${host_os}" in
+			dgux)	bfd_host=dgux ;;
+			esac
+			;;
+		esac
+		;;
+
+	m68k)
+		case "${host_vendor}" in
+		hp)	bfd_host=hp9000 ;;
+		sony)	bfd_host=news ;;
+		sun)	bfd_host=sun3 ;;
+		esac
+		;;
+
+	i386)
+		case "${host_vendor}" in
+		*)
+			case "${host_os}" in
+			sysv)	bfd_host=i386v ;;
+			esac
+			;;
+		esac
+		;;
+
+	sparc)
+		case "${host_vendor}" in
+		sun)	bfd_host=sun4 ;;
+		esac
+		;;
+
+	rtpc)	bfd_host=rtbsd ;;
+	tahoe | vax)	bfd_host=${host_cpu} ;;
+	esac
+fi
+
+if [ ! -f config/hmake-${bfd_host} ] ; then
+	echo '***' BFD does not support host ${host}
 	exit 1
 fi
+
+host_makefile_frag=config/hmake-${bfd_host}
 
 # per-target:
 
-if [ ! -f config/tmake-${target} ] ; then
-	echo No such target available: ${target}
+case ${target_os} in
+aout | coff | bout) bfd_target=${target_cpu}-${target_os} ;;
+sunos*)
+	case "${target_cpu}" in
+	m68k)	bfd_target=sun3 ;;
+	sparc)	bfd_target=sun4 ;;
+	esac
+	;;
+newsos)	bfd_target=news ;;
+*)
+	case "${target_cpu}" in
+	tahoe | vax)
+		bfd_target=${target_cpu} ;;
+	mips)
+		case "${host_vendor}" in
+		dec)	bfd_host=dec3100 ;;
+		esac
+		;;
+	esac
+	;;
+esac
+
+if [ ! -f config/tmake-${bfd_target} ] ; then
+	echo '***' BFD does not support target ${target}
 	exit 1
 fi
+
+target_makefile_fragment=config/tmake-${bfd_target}
 
 files=
 links=

@@ -1,9 +1,23 @@
 #
 # Makefile for directory with subdirs to build.
+#   Copyright (C) 1990, 1991 Cygnus Support
 #
-# Last Mod Wed Jul 24 18:25:48 PDT 1991, by rich@cygint.cygnus.com
+# This file is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #
-
+# Last Mod Tue Aug 20 12:48:54 PDT 1991, by rich@cygint.cygnus.com
+#
 # $Id$
 
 srcdir = .
@@ -15,9 +29,9 @@ destdir = /usr/local
 RANLIB = ranlib
 AR = ar
 AR_FLAGS = cqv
-BISONPATH = $(srcdir)/../bison`if [ -d $(srcdir)/bison.$(target) ] ; then echo .$(target) ; fi`
+BISONPATH = 
 
-BISON = $(BISONPATH)$(subdir)/bison -L $(BISONPATH)/
+BISON = `if [ -d $(srcdir)/../bison\`if [ -d $(srcdir)/bison.$(target) ] ; then echo .$(target) ; fi\`$(subdir) ] ; then echo $(srcdir)/../bison\`if [ -d $(srcdir)/bison.$(target) ] ; then echo .$(target) ; fi\`$(subdir)/bison -L $(srcdir)/../bison\`if [ -d $(srcdir)/bison.$(target) ] ; then echo .$(target) ; fi\`/; else echo yacc ; fi`
 
 SUBDIRS = libiberty readline bfd gdb binutils ld gas gcc gnulib
 OTHERS = 
@@ -78,6 +92,8 @@ pass:
 		"LOADLIBES=$(srcdir)/../gnulib`if [ -d $(srcdir)/binutils.$(target) ] ; \
 		then echo .$(target) ; fi`$(subdir)/$(stagepass)/gnulib.a /lib/libc.a" \
 		"LDFLAGS=-nostdlib /lib/crt0.o \
+		-L$(srcdir)/../gnulib`if [ -d $(srcdir)/gnulib.$(target) ] ; \
+		then echo .$(target) ; fi`$(subdir)/$(stagepass)/ \
 		-B$(srcdir)/../ld`if [ -d $(srcdir)/ld.$(target) ] ; \
 		then echo .$(target) ; fi`$(subdir)/$(stagepass)/"
 
@@ -148,7 +164,7 @@ force:
 Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
 	(cd $(srcdir) ; \
 		./configure +destdir=$(destdir) +norecurse \
-		 `if [ "$(srcdir)" != "." ] ; then echo +f; fi` \
+		 `if [ "$(srcdir)" != "." ] ; then echo +subdirs; fi` \
 		$(host) +target=$(target))
 
 #
@@ -163,6 +179,7 @@ bfd.ilrt.tar.Z: force_update
 	make clean
 	./configure -rm sun4
 	rm -f bfd.ilrt.tar.Z
+	chmod og=u `find $(DEVO_SUPPORT) $(GDB_SUPPORT_DIRS) -print`
 	tar cf - $(DEVO_SUPPORT) $(GDB_SUPPORT_DIRS) \
 		| compress -v >bfd.ilrt.tar.Z
 
@@ -170,7 +187,22 @@ force_update:
 
 #
 # $Log$
-# Revision 1.20  1991/07/31 02:47:14  gnu
+# Revision 1.25  1991/08/22 07:15:49  rich
+# Three part names, etc.
+#
+# Revision 1.24  1991/08/20  01:57:31  rich
+# Another try at passing gnulib's location.
+#
+# Revision 1.23  1991/08/16  21:47:41  rich
+# Pass on BISON as bison only if bison is here.
+#
+# Revision 1.22  1991/08/07  19:15:26  rich
+# +forcesubdirs -> +subdirs
+#
+# Revision 1.21  1991/07/31  18:07:59  gnu
+# Set file permissions the same for everyone before making tar file.
+#
+# Revision 1.20  1991/07/31  02:47:14  gnu
 # Add bfd.ilrt.tar.Z "make" rules.
 #
 # Revision 1.19  1991/07/27  07:46:34  rich
