@@ -1,3 +1,10 @@
+2004-07-24  Mark Kettenis  <kettenis@gnu.org>
+
+	Partial fix for PR backtrace/1718.
+	* i386-tdep.c (i386_analyze_frame_setup): Handle more instructions
+	that GCC migrates into the prolugue.  Don't handle any
+	instructions that clobber %ebx.
+
 2004-07-23  Andrew Cagney  <cagney@gnu.org>
 
 	Use regcache_raw_collect instead of regcache_collect.

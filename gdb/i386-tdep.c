@@ -503,20 +503,28 @@ i386_analyze_frame_setup (CORE_ADDR pc, CORE_ADDR current_pc,
 
       op = read_memory_unsigned_integer (pc + 1, 1);
 
-      /* Check for some special instructions that might be migrated
-	 by GCC into the prologue.  We check for
+      /* Check for some special instructions that might be migrated by
+	 GCC into the prologue.  At this point in the prologue, code
+	 should only touch the scratch registers %eax, %ecx and %edx,
+	 so we check for
 
-	    xorl %ebx, %ebx
+	    movl $XXX, %eax
+	    movl $XXX, %ecx
+	    movl $XXX, %edx
+
+	 These instructions have opcodes 0xb8, 0xb9 and 0xba.
+
+	 We also check for
+
+	    xorl %eax, %eax
 	    xorl %ecx, %ecx
 	    xorl %edx, %edx
-	    xorl %eax, %eax
 
 	 and the equivalent
 
-	    subl %ebx, %ebx
+	    subl %eax, %eax
 	    subl %ecx, %ecx
 	    subl %edx, %edx
-	    subl %eax, %eax
 
 	 Because of the symmetry, there are actually two ways to
 	 encode these instructions; with opcode bytes 0x29 and 0x2b
@@ -524,20 +532,34 @@ i386_analyze_frame_setup (CORE_ADDR pc, CORE_ADDR current_pc,
 
 	 Make sure we only skip these instructions if we later see the
 	 `movl %esp, %ebp' that actually sets up the frame.  */
-      while (op == 0x29 || op == 0x2b || op == 0x31 || op == 0x33)
+      while ((op >= 0xb8 && op <= 0xba)
+	     || op == 0x29 || op == 0x2b
+	     || op == 0x31 || op == 0x33)
 	{
-	  op = read_memory_unsigned_integer (pc + skip + 2, 1);
-	  switch (op)
+	  if (op >= 0xb8 && op <= 0xba)
 	    {
-	    case 0xdb:	/* %ebx */
-	    case 0xc9:	/* %ecx */
-	    case 0xd2:	/* %edx */
-	    case 0xc0:	/* %eax */
-	      skip += 2;
-	      break;
-	    default:
-	      return pc + 1;
+	      /* Skip the `movl' instructions cited above.  */
+	      skip += 5;
 	    }
+	  else
+	    {
+	      /* Skip the `subl' and `xorl' instructions cited above.  */
+	      op = read_memory_unsigned_integer (pc + skip + 2, 1);
+	      switch (op)
+		{
+		case 0xc0:	/* %eax */
+		case 0xc9:	/* %ecx */
+		case 0xd2:	/* %edx */
+		  skip += 2;
+		  break;
+		default:
+		  return pc + 1;
+		}
+	    }
+
+	  /* If that's all, return now.  */
+	  if (current_pc <= pc + skip + 1)
+	    return current_pc;
 
 	  op = read_memory_unsigned_integer (pc + skip + 1, 1);
 	}
