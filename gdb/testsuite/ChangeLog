@@ -1,3 +1,8 @@
+2003-06-23  Elena Zannoni  <ezannoni@redhat.com>
+
+        * gdb.objc/basicclass.exp: Return -1 if we cannot compile
+        the testcase.
+
 2003-06-22  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdb.base/relocate.exp: Test add-symbol-file with a variable
