@@ -17,7 +17,7 @@
 	(build_bytes): Ditto.
 	(get_specific): Ditto.
 	(md_assemble): Ditto.
-	
+
 2002-11-19  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* config/tc-s390.c (tc_s390_fix_adjustable): Re-add patch to prevent
@@ -69,7 +69,7 @@
 	(md_parse_options): Revised commandprompt swicthes and added new
 	ones.
 	(md_show_usage): Complete rewrite of printout.
-	
+
 2002-11-16  Svein E. Seldal  <Svein.Seldal@solidas.com>
 
 	* config/tc-tic4x.c: Remove c4x_pseudo_ignore function.
@@ -95,7 +95,7 @@
 	function. Add support for new DSP, TMS320VC33. Fix bug for
 	converting flonum constants.
 	(c4x_do_align): Add proper align handling. Setup align to insert
-	NOP's. 
+	NOP's.
 	(c4x_gen_to_words): Support for extended TI type floats.
 	(md_atof): Proper dumping of multiple-word littlenums.
 	(c4x_atof): Added support for extended TI type floats.
@@ -130,7 +130,7 @@
 	(alpha_fix_adjustable): ... here.
 	* config/tc-alpha.h (TC_VALIDATE_FIX): Remove.
 
-2002-11-07  Eric Kohl  <ekohl@rz-online.de> 
+2002-11-07  Eric Kohl  <ekohl@rz-online.de>
 
 	* config/te-pe.h (LEX_AT): Accept at-sign (@) as first character
 	of a label.
@@ -1248,9 +1248,6 @@ Thu Oct 10 14:31:30 2002  J"orn Rennecke <joern.rennecke@superh.com>
 	(output_imm): Added arguments.  Compute properly addend for
 	R_386_GOTPC.
 	(md_apply_fix3): Remove R_386_GOTPC handling.
-	* testsuite/gas/i386/gotpc.s: New.
-	* testsuite/gas/i386/gotpc.d: New.
-	* testsuite/gas/i386/i386.exp: Add gotpc test.
 
 2002-08-06  George France <france@handhelds.org>
 
@@ -1832,9 +1829,6 @@ Thu Oct 10 14:31:30 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
 	* config/tc-sh.c (parse_at): @(symbol,pc) is A_DISP_PC again,
 	but warn about it.
-	* testsuite/gas/sh/pcrel.s: Also test @(symbol,pc).
-	* testsuite/gas/sh/pcrel.d: Update.
-	* testsuite/gas/sh/pcrel.l: New file.
 
 2002-06-06  Daniel Jacobowitz  <drow@mvista.com>
 
@@ -2124,16 +2118,6 @@ Thu Oct 10 14:31:30 2002  J"orn Rennecke <joern.rennecke@superh.com>
 	(md_begin): Support TLS operators.
 	(md_operand): Likewise.
 	(ia64_gen_real_reloc_type): Support TLS relocs.
-	* testsuite/gas/i386/tlspic.s: New file.
-	* testsuite/gas/i386/tlsd.s: New file.
-	* testsuite/gas/i386/tlsnopic.s: New file.
-	* testsuite/gas/i386/tlsd.d: New file.
-	* testsuite/gas/i386/tlsnopic.d: New file.
-	* testsuite/gas/i386/tlspic.d: New file.
-	* testsuite/gas/i386/i386.exp: Add tlsd, tlsnopic and tlspic tests.
-	* testsuite/gas/ia64/tls.s: New file.
-	* testsuite/gas/ia64/tls.d: New file.
-	* testsuite/gas/ia64/ia64.exp: Add tls test.
 	* write.c (adjust_reloc_syms): Don't change symbols in
 	SEC_THREAD_LOCAL sections to STT_SECTION + addend.
 

@@ -23,7 +23,7 @@
 	* gas/tic4x/registers_c3x.d: Create
 	* gas/tic4x/registers_c4x.d: Create
 	* gas/tic4x/zeros.d: Create
-	* gas/tic4x/zeros.s: Create 
+	* gas/tic4x/zeros.s: Create
 	* gas/tic4x/opcodes_new.d: Added new testsuite for
 	the enhanced and special insns.
 	* gas/tic4x/tic4x.exp: Create. Added the opcodes_new testsuite
@@ -126,7 +126,7 @@
 	gas/sh/sh64/shift64-noexp-3.d, gas/sh/sh64/syntax-1.d,
 	gas/sh/sh64/syntax-2.d, gas/sh/sh64/ua32-1.d,
 	gas/sh/sh64/ua64-1.d: Likewise.
-	
+
 2002-10-03  Chris Demetriou  <cgd@broadcom.com>
 
 	* gas/mips/mips-no-jalx.l: Make error message regexps accomodate
@@ -141,7 +141,7 @@
 	* gas/sh/sh64/ptc32-noexp-1.d: Adjust for changes to *ABS*
 	symbol generation.
 	* gas/sh/sh64/ptc64-noexp-1.d: Likewise.
-	
+
 2002-09-30  H.J. Lu <hjl@gnu.org>
 
 	* gas/mips/mips.exp: Undo the last change.
@@ -157,12 +157,12 @@
 	rest of output.
 
 2002-09-30  Gavin Romig-Koch  <gavin@redhat.com>
-            Ken Raeburn  <raeburn@cygnus.com>
-            Aldy Hernandez  <aldyh@redhat.com>
-            DJ Delorie  <dj@redhat.com>
-            Michael Meissner  <meissner@redhat.com>
-            Eric Christopher  <echristo@redhat.com>
-            Richard Sandiford  <rsandifo@redhat.com>
+	    Ken Raeburn  <raeburn@cygnus.com>
+	    Aldy Hernandez  <aldyh@redhat.com>
+	    DJ Delorie  <dj@redhat.com>
+	    Michael Meissner  <meissner@redhat.com>
+	    Eric Christopher  <echristo@redhat.com>
+	    Richard Sandiford  <rsandifo@redhat.com>
 
 	* gas/mips/mips4100.[sd]: Move dmadd16 and madd16 checks to...
 	* gas/mips/vr4111.[sd]: ...this new test.
@@ -325,17 +325,17 @@
 
 	* gas/arm/arch5tej.s: Add nops to align output.
 	* gas/arm/arch5tej.d: Expect nops.
-        * gas/arm/arm7t.s: Add nops, remove thumb instructions.
-        * gas/arm/arm7t.d: Expect nops.
-        * gas/arm/armv1.s: Add nops.
-        * gas/arm/armv1.d: Expect nops.
-        * gas/arm/fpa-mem.s: Add nops.
-        * gas/arm/fpa-mem.d: Expext nops.
-        * gas/arm/vfp1.s: Add nops.
-        * gas/arm/vfp1.d: Expect nops.
-        * gas/arm/xscale.s: Add nops.
-        * gas/arm/xscale.d: Expect nops.
-        * gas/arm/arm.exp: Do not run thumb tests for arm-aout
+	* gas/arm/arm7t.s: Add nops, remove thumb instructions.
+	* gas/arm/arm7t.d: Expect nops.
+	* gas/arm/armv1.s: Add nops.
+	* gas/arm/armv1.d: Expect nops.
+	* gas/arm/fpa-mem.s: Add nops.
+	* gas/arm/fpa-mem.d: Expext nops.
+	* gas/arm/vfp1.s: Add nops.
+	* gas/arm/vfp1.d: Expect nops.
+	* gas/arm/xscale.s: Add nops.
+	* gas/arm/xscale.d: Expect nops.
+	* gas/arm/arm.exp: Do not run thumb tests for arm-aout
 	toolchain.
 
 2002-08-22  Alan Modra  <amodra@bigpond.net.au>
@@ -351,11 +351,10 @@
 
 2002-08-19  Elena Zannoni   <ezannoni@redhat.com>
 
-        From  matthew green  <mrg@redhat.com>
-        
-        * e500.s: New tests for e500 instructions.
-        * e500.d: Results for new test.
-        * ppc.exp: Test e500.s.
+	From  matthew green  <mrg@redhat.com>
+	* e500.s: New tests for e500 instructions.
+	* e500.d: Results for new test.
+	* ppc.exp: Test e500.s.
 
 2002-08-16  Stephen Clarke <stephen.clarke@superh.com>
 
@@ -412,6 +411,12 @@
 
 	* gas/mips/empic.d: Treat "addiu" and "daddiu" as equivalent when
 	$0 is source.
+
+2002-08-09  Jakub Jelinek  <jakub@redhat.com>
+
+	* gas/i386/gotpc.s: New.
+	* gas/i386/gotpc.d: New.
+	* gas/i386/i386.exp: Add gotpc test.
 
 2002-08-06  Alan Modra  <amodra@bigpond.net.au>
 
@@ -492,6 +497,12 @@ Mon Jun 17 16:23:59 2002  J"orn Rennecke <joern.rennecke@superh.com>
 	* gas/ppc/test1xcoff32.d : Change text section alignment.
 	* gas/ppc/booke_xcoff.d: Remove invalid pad.
 
+2002-06-06  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* testsuite/gas/sh/pcrel.s: Also test @(symbol,pc).
+	* testsuite/gas/sh/pcrel.d: Update.
+	* testsuite/gas/sh/pcrel.l: New file.
+
 2002-06-06  John David Anglin  <dave@hiauly1.hia.nrc.ca>
 
 	* gas/hppa/basic/add.s: Set code level to 1.1.
@@ -538,10 +549,10 @@ Mon Jun 17 16:23:59 2002  J"orn Rennecke <joern.rennecke@superh.com>
 	* gas/d10v/d10v.exp: Add -gstabs packing, sequence control
 	packing, warning, instruction packing, label, immediate and,
 	error tests.
-	* gas/d10v/instruction_packing-001.d - intruction_packing-010.d: 
+	* gas/d10v/instruction_packing-001.d - intruction_packing-010.d:
 	New tests.
 	* gas/d10v/control-001.d: New test.
-	* gas/d10v/warning-001.d - warning-019.d: New tests.  
+	* gas/d10v/warning-001.d - warning-019.d: New tests.
 	* gas/d10v/label-001.d: New test.
 	* gas/d10v/error-001.d - error-002.d : New tests.
 	* gas/d10v/immediate-001.d - immediate-007.d: New tests.
@@ -564,6 +575,19 @@ Mon Jun 17 16:23:59 2002  J"orn Rennecke <joern.rennecke@superh.com>
 	* rtype.s: New file: Test arithmetic insns.
 	* store.d: New file: Expected results.
 	* store.s: New file: Test store insns.
+
+2002-05-23  Jakub Jelinek  <jakub@redhat.com>
+
+	* gas/i386/tlspic.s: New file.
+	* gas/i386/tlsd.s: New file.
+	* gas/i386/tlsnopic.s: New file.
+	* gas/i386/tlsd.d: New file.
+	* gas/i386/tlsnopic.d: New file.
+	* gas/i386/tlspic.d: New file.
+	* gas/i386/i386.exp: Add tlsd, tlsnopic and tlspic tests.
+	* gas/ia64/tls.s: New file.
+	* gas/ia64/tls.d: New file.
+	* gas/ia64/ia64.exp: Add tls test.
 
 2002-05-23  Tom Rix  <trix@redhat.com>
 
@@ -1278,8 +1302,8 @@ Wed May 22 14:26:07 2002  J"orn Rennecke <joern.rennecke@superh.com>
 2001-10-09  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* sh/basic.exp: Add dsp dump test.
-        * sh/dsp/d: New file: Expected output of disassembly of dsp.s
-        * sh/dsp.s: New file: Test assembly source of DSP single data
+	* sh/dsp/d: New file: Expected output of disassembly of dsp.s
+	* sh/dsp.s: New file: Test assembly source of DSP single data
 	transfer instructions.
 
 2001-10-08  Aldy Hernandez  <aldyh@redhat.com>
@@ -1693,9 +1717,9 @@ Wed May 22 14:26:07 2002  J"orn Rennecke <joern.rennecke@superh.com>
 2001-06-06  Peter Jakubek <pjak@snafu.de>
 
 	* gas/mri/for.d: Correct for swapped operands.
-        * gas/mri/if.d: Likewise.
-        * gas/mri/repeat.d: Likewise.
-        * gas/mri/while.d: Likewise.
+	* gas/mri/if.d: Likewise.
+	* gas/mri/repeat.d: Likewise.
+	* gas/mri/while.d: Likewise.
 
 2001-06-12  Alan Modra  <amodra@bigpond.net.au>
 
@@ -1988,15 +2012,15 @@ Wed May 22 14:26:07 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
 2001-05-02  Johan Rydberg  <jrydberg@opencores.org>
 
-        * gas/openrisc/addi.s: New file.
-        * gas/openrisc/addi.d: Likewise.
-        * gas/openrisc/allinsn.exp: Likewise.
-        * gas/openrisc/allinsn.s: Likewise.
-        * gas/openrisc/allinsn.d: Likewise.
-        * gas/openrisc/lohi.s: Likewise.
-        * gas/openrisc/lohi.d: Likewise.
-        * gas/openrisc/store.s: Likewise.
-        * gas/openrisc/store.d: Likewise.
+	* gas/openrisc/addi.s: New file.
+	* gas/openrisc/addi.d: Likewise.
+	* gas/openrisc/allinsn.exp: Likewise.
+	* gas/openrisc/allinsn.s: Likewise.
+	* gas/openrisc/allinsn.d: Likewise.
+	* gas/openrisc/lohi.s: Likewise.
+	* gas/openrisc/lohi.d: Likewise.
+	* gas/openrisc/store.s: Likewise.
+	* gas/openrisc/store.d: Likewise.
 
 2001-04-05  Hans-Peter Nilsson  <hp@axis.com>
 
@@ -2266,47 +2290,47 @@ Wed May 22 14:26:07 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
 2000-12-02  Chris Demetriou  <cgd@sibyte.com>
 
-        * gas/mips/elf_e_flags.s: Add padding to the end of the
-        file so that objdump output will be consistent.
-        * gas/mips/elf_e_flags1.d, gas/mips/elf_e_flags2.d,
-        gas/mips/elf_e_flags3.d, gas/mips/elf_e_flags4.d: Expect
-        "..." at end of objdump output because of zero bytes at end
-        of section.
-        * gas/mips/elf_e_flags.c: Add note to comment about
-        what's changing in elf_e_flags.s.
+	* gas/mips/elf_e_flags.s: Add padding to the end of the
+	file so that objdump output will be consistent.
+	* gas/mips/elf_e_flags1.d, gas/mips/elf_e_flags2.d,
+	gas/mips/elf_e_flags3.d, gas/mips/elf_e_flags4.d: Expect
+	"..." at end of objdump output because of zero bytes at end
+	of section.
+	* gas/mips/elf_e_flags.c: Add note to comment about
+	what's changing in elf_e_flags.s.
 
-        * gas/mips/la.s: Add padding to the end of the file so that
-        objdump output will be consistent.
-        * gas/mips/la-svr4pic.d, gas/mips/la-xgot.d: Expect "..." at
-        end of objdump output because of zero bytes at end of
-        section.
+	* gas/mips/la.s: Add padding to the end of the file so that
+	objdump output will be consistent.
+	* gas/mips/la-svr4pic.d, gas/mips/la-xgot.d: Expect "..." at
+	end of objdump output because of zero bytes at end of
+	section.
 
-        * gas/mips/sync.s: Add padding to the end of the file so that
-        objdump output will be consistent.
-        * gas/mips/sync.d: Expect "..." at end of objdump output
-        because of zero bytes at end of section.
+	* gas/mips/sync.s: Add padding to the end of the file so that
+	objdump output will be consistent.
+	* gas/mips/sync.d: Expect "..." at end of objdump output
+	because of zero bytes at end of section.
 
-        * gas/mips/empic.d: Pad sections out to 16 bytes, to avoid
-        alignment issues so tests are useful on multiple targets.
-        * gas/mips/empic.s: Likewise.
-        * gas/mips/mips16-e.d: Likewise.
-        * gas/mips/mips16-e.s: Likewise.
-        * gas/mips/mips16-f.d: Likewise.
-        * gas/mips/mips16-f.s: Likewise.
+	* gas/mips/empic.d: Pad sections out to 16 bytes, to avoid
+	alignment issues so tests are useful on multiple targets.
+	* gas/mips/empic.s: Likewise.
+	* gas/mips/mips16-e.d: Likewise.
+	* gas/mips/mips16-e.s: Likewise.
+	* gas/mips/mips16-f.d: Likewise.
+	* gas/mips/mips16-f.s: Likewise.
 
-        * gas/mips/mips32.d: Expect disassembly of madd and maddu
-        to use their correct names.  Add tests for break and sdbbp.
-        * gas/mips/mips32.s: Likewise.
+	* gas/mips/mips32.d: Expect disassembly of madd and maddu
+	to use their correct names.  Add tests for break and sdbbp.
+	* gas/mips/mips32.s: Likewise.
 
-        * gas/mips/mips64.s: Add test for assembly of MIPS64
-        extensions.
-        * gas/mips/mips64.d: Likewise.
-        * gas/mips/mips.exp: Test using the new "mips64" test.
+	* gas/mips/mips64.s: Add test for assembly of MIPS64
+	extensions.
+	* gas/mips/mips64.d: Likewise.
+	* gas/mips/mips.exp: Test using the new "mips64" test.
 
 2000-12-01  Chris Demetriou  <cgd@sibyte.com>
 
-        * gas/mips/mips16.d: Expect mips16 nops to be used for padding
-        when mips16 code generation is enabled.
+	* gas/mips/mips16.d: Expect mips16 nops to be used for padding
+	when mips16 code generation is enabled.
 
 	* gas/mips/empic.d: Adjust for the fact that the difference
 	between two symbols in the same section are not expected to
@@ -2314,9 +2338,9 @@ Wed May 22 14:26:07 2002  J"orn Rennecke <joern.rennecke@superh.com>
 	* gas/mips/empic.s: Likewise.  Also, correct typo in comment
 	about expected relocs.
 
-        * gas/mips/mips32.s, gas/mips/mips32.d: New files for MIPS32
-        instruction assembly test.
-        * gas/mips/mips.exp: Add the test mentioned above.
+	* gas/mips/mips32.s, gas/mips/mips32.d: New files for MIPS32
+	instruction assembly test.
+	* gas/mips/mips.exp: Add the test mentioned above.
 
 2000-11-30  Diego Novillo  <dnovillo@redhat.com>
 
@@ -2434,11 +2458,11 @@ Wed May 22 14:26:07 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
 2000-08-29  Timothy Wall  <twall@cygnus.com>
 
-        * gas/ia64/dv-mutex.s: Add stop to avoid DV error on cmp.eq.
-        * gas/ia64/dv-mutex.d: Update regexp pattern.
-        * gas/ia64/dv-entry-err.s: Add stop to avoid DV error on cmp.eq.
-        * gas/ia64/dv-imply.s: Add stops to avoid DV errors on cmp.REL.
-        Test still fails due to insn opcode pattern changes.
+	* gas/ia64/dv-mutex.s: Add stop to avoid DV error on cmp.eq.
+	* gas/ia64/dv-mutex.d: Update regexp pattern.
+	* gas/ia64/dv-entry-err.s: Add stop to avoid DV error on cmp.eq.
+	* gas/ia64/dv-imply.s: Add stops to avoid DV errors on cmp.REL.
+	Test still fails due to insn opcode pattern changes.
 
 2000-08-21  H.J. Lu <hjl@gnu.org>
 
@@ -2455,7 +2479,7 @@ Wed May 22 14:26:07 2002  J"orn Rennecke <joern.rennecke@superh.com>
 2000-08-16  Nick Clifton  <nickc@redhat.com>
 
 	* gas/arm/inst.s: Add tests for edge cases of shift based
-        addressing modes.
+	addressing modes.
 
 	* gas/arm/inst.d: Add expected results for new tests.
 
@@ -2477,8 +2501,8 @@ Wed May 22 14:26:07 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
 2000-07-18  Scott Bambrough  <scottb@netwinder.org>
 
-        * gas/arm/inst.d: Fix expected results to match current assembler
-        output.  Patch from Justin Seger <justin.m.seger@intel.com>.
+	* gas/arm/inst.d: Fix expected results to match current assembler
+	output.  Patch from Justin Seger <justin.m.seger@intel.com>.
 
 2000-07-10  Alan Modra  <alan@linuxcare.com.au>
 
@@ -2816,9 +2840,9 @@ Wed May 22 14:26:07 2002  J"orn Rennecke <joern.rennecke@superh.com>
 
 1999-09-01  Scott Bambrough  <scottb@netwinder.org>
 
-        * gas/vtable/vtable.exp: Added [istarget "arm*-*-*"] to run dump
-        test "entry0" instead of "entry1".  ARM targets use REL relocs,
-        and should use the test entry0.
+	* gas/vtable/vtable.exp: Added [istarget "arm*-*-*"] to run dump
+	test "entry0" instead of "entry1".  ARM targets use REL relocs,
+	and should use the test entry0.
 
 1999-09-01  H.J. Lu  <hjl@gnu.org>
 
@@ -3057,31 +3081,31 @@ Mon Aug 30 12:18:40 1999  Jeffrey A Law  (law@cygnus.com)
 1999-03-16  Martin Hunt  <hunt@cygnus.com>
 
 	* gas/d30v/d30.exp (run_list_test): Add new tests,
-        label, guard-debug, serial, warn_oddreg, bittest, and mul.
+	label, guard-debug, serial, warn_oddreg, bittest, and mul.
 
 	* gas/d30v/opt.s: Fix some warnings and add a few labels
-        to keep things from parallelizing where we don't want them to.
+	to keep things from parallelizing where we don't want them to.
 
 	* gas/d30v/reloc.s: Fix warning.
 
 	* gas/d30v/opt.d, reloc.d, inst.d: Rebuild.
 
 	* gas/d30v/label.s: New test. Check that labels are aligned
-        on 8-byte boundaries.
+	on 8-byte boundaries.
 
 	* gas/d30v/guard-debug.s: New test. Test output with "-g".
 
 	* gas/d30v/serial.s: New test. Check for warnings with
-        illegal serial instructions.
+	illegal serial instructions.
 
 	* gas/d30v/warn_oddreg.s: New test. CHeck for warnings when
-        odd-numbered registers are used for some instructions.
+	odd-numbered registers are used for some instructions.
 
 	* gas/d30v/bittest.s: New test. Check for bit operation
-        instructions (BCLR, BNOT, BSET, BTST) in the IU.
+	instructions (BCLR, BNOT, BSET, BTST) in the IU.
 
 	* gas/d30v/mul.s: New test. Check for restricted sequences
-        in a bunch of different multiply instructions.
+	in a bunch of different multiply instructions.
 
 	* gas/vtable/vtable.exp (run_list_test): Don't
 	run test on D30V.
@@ -3840,7 +3864,7 @@ Tue Feb 11 15:46:27 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 Mon Feb 10 22:24:00 1997  Dawn Perchik  <dawn@cygnus.com>
 
-        * gas/mips/itbl-test.c: Add copyright message and fix indentation.
+	* gas/mips/itbl-test.c: Add copyright message and fix indentation.
 
 Mon Feb 10 17:54:00 1997  Dawn Perchik  <dawn@cygnus.com>
 
@@ -4481,7 +4505,7 @@ Wed Aug 16 12:24:12 1995  Ian Lance Taylor  <ian@cygnus.com>
 	expect failure for targets which use SOM.
 
 	* lib/gas-defs.exp (run_dump_test): If the program to run does not
-        exist, mark the test as untested.
+	exist, mark the test as untested.
 
 	* gas/mri/mri.exp: Add setup_xfail for i960 b.out targets for
 	common test.
@@ -4509,7 +4533,7 @@ Tue Aug 15 15:42:33 1995  Ian Lance Taylor  <ian@cygnus.com>
 Mon Aug 14 16:03:07 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/mri/expr.d: Permit leading zeroes, in case we're using a
-        64-bit BFD.
+	64-bit BFD.
 
 	* gasp/mri/*: New tests.
 	* gasp/gasp.exp: Run them.  Also, clean up the test names used in
@@ -4694,7 +4718,7 @@ Thu Feb  9 10:57:39 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 Thu Feb  2 00:34:55 1995  Jeff Law  (law@snake.cs.utah.edu)
 
-        * gas/hppa/reloc/picreloc.s: New test.
+	* gas/hppa/reloc/picreloc.s: New test.
 	* gas/hppa/reloc/reloc.exp (do_pic_relocation_test): Run it.
 
 Fri Jan 27 14:02:02 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
@@ -5004,7 +5028,7 @@ Mon Feb 28 14:10:04 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 Thu Feb 24 07:11:57 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
-        * gas/hppa/more.parse/parse.exp (no subspace test): Only expect
+	* gas/hppa/more.parse/parse.exp (no subspace test): Only expect
 	a failure if gas is not producing an ELF object.
 
 Mon Feb 14 09:24:03 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
