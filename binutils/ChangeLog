@@ -1,3 +1,7 @@
+1999-07-16  Jakub Jelinek  <jj@ultra.linux.cz>
+
+	* readelf.c (get_machine_flags): Print EF_SPARC_SUN_US3.
+
 1999-07-15  Ian Lance Taylor  <ian@zembu.com>
 
 	* configure.in: Bump version number to 2.9.5.

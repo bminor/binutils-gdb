@@ -1104,7 +1104,10 @@ get_machine_flags (e_flags, e_machine)
 	    strcat (buf, ", v8+");
 
 	  if (e_flags & EF_SPARC_SUN_US1)
-	    strcat (buf, ", ultrasparc");
+	    strcat (buf, ", ultrasparcI");
+
+	  if (e_flags & EF_SPARC_SUN_US3)
+	    strcat (buf, ", ultrasparcIII");
 
 	  if (e_flags & EF_SPARC_HAL_R1)
 	    strcat (buf, ", halr1");
