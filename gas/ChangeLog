@@ -1,3 +1,8 @@
+Wed Mar 15 14:45:42 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ecoff.c (ecoff_build_debug): The cur_scope field of a fil_ptr
+	may be NULL when given strange input.  Don't core dump.
+
 Tue Mar 14 21:36:34 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-mips.c (load_register): Don't use addiu for dli of an
