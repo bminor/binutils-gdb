@@ -34,6 +34,26 @@ case "${target}" in
 			fi ;;
 esac
 
+# Begin stuff to support --enable-shared
+AC_ARG_ENABLE(shared,
+[  --enable-shared         use shared libraries],
+[case "${enableval}" in
+  yes) shared=true ;;
+  no)  shared=false ;;
+  *) shared=true ;;
+esac])dnl
+RPATH_ENVVAR=LD_LIBRARY_PATH
+# If we have shared libraries, try to set RPATH_ENVVAR reasonably.
+if test "${shared}" = "true"; then
+  case "${host}" in
+  *-*-hpux*)
+    RPATH_ENVVAR=SHLIB_PATH
+    ;;
+  esac
+fi
+AC_SUBST(RPATH_ENVVAR)
+# End stuff to support --enable-shared
+
 # configure the subdirectories too
 AC_CONFIG_SUBDIRS($configdirs)
 

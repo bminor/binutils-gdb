@@ -1,3 +1,53 @@
+Fri Sep 13 12:05:34 1996  Fred Fish  <fnf@cygnus.com>
+
+	* Makefile.in (RPATH_ENVVAR): New var, set to @RPATH_ENVVAR@.
+	(just-check): Add shared library paths for libstdc++, tk,
+	tcl, bfd, and opcodes to the environment variable specified
+	in RPATH_ENVVAR.
+	* configure.in: Add support to recognize --enable-shared flag
+	and generate correct value for RPATH_ENVVAR.
+	* configure: Regenerated with autoconf.
+
+Mon Sep  2 06:36:02 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.base/break.exp: Expand "Delete all breakpoints" xfail to
+ 	include all osf versions.
+	* gdb.threads/pthreads.exp: Expand "run to main" xfail to include
+	all osf versions.  Add -D_MIT_POSIX_THREADS to compilation command
+	when target is linux.  When failing to build pthreads test
+	executable, give more meaningful message.
+	* gdb.threads/pthreads.c: Hpux also uses old definition of second
+	arg for pthread_create.
+	
+Mon Aug 19 09:58:59 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.threads/pthreads.c (PTHREAD_CREATE_ARG2,
+ 	PTHREAD_CREATE_NULL_ARG2): Accomodate old pthreads implementations.
+	* gdb.threads/pthreads.exp: Try linking with both -lpthread (Solaris)
+ 	and -lpthreads (everybody else).
+	(test_startup): Fail gracefully if threads are not supported.
+	* gdb.base/nodebug.exp: Add setup_xfail hppa*-*-hpux* for
+	"p/c array_index("abcdef",2)" when not gcc compiled.
+	* gdb.base/corefile.exp: Add setup_xfail hppa*-*-hpux* for
+	"print func2::coremaker_local" when not gcc compiled.
+	* gdb.base/opaque.exp: Remove setup_xfail hppa*-*-hpux* for
+	"ptype on opaque struct tagname (statically)",
+	"ptype on opaque struct tagname (dynamically) 1", and
+	"ptype on opaque struct tagname (dynamically) 2"
+	for not compiled with gcc.
+	* gdb.base/mips_pro.exp: Only do setup_xfail hppa*-*-* for
+	backtrace when compiled with gcc.
+	* lib/gdb.exp (runto_main): Return result of "runto main" rather 
+	than always return success.
+
+Sat Aug 17 13:28:00 1996  Fred Fish  <fnf@cygnus.com>
+
+	* gdb.c++/virtfunc.exp: Remove setup_xfail for "mips-*-irix5*".
+
+Tue Aug 13 10:26:10 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* gdb.base/structs.exp: Undo last change.
+
 Mon Aug 12 15:29:08 1996  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.base/a1-selftest.exp (do_steps_and_nexts): New routine to
