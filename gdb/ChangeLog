@@ -1,3 +1,12 @@
+Wed Jul 27 09:24:19 1994  Fred Fish  (fnf@cygnus.com)
+
+	* Makefile.in (DISTSTUFF):  Add definition.
+	(diststuff):  Add for new distribution support.
+	(gdb.tar.Z, make-proto-gdb.dir, setup-to-dist,
+	gdb-$(VERSION).tar.Z, make-proto-gdb-1, make-proto-testsuite.dir):
+	Remove old distribution building rules, now uses standard
+	distribution support in parent directory Makefile.in.
+
 Tue Jul 26 14:15:53 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* target.c (push_target): Cast result from xmalloc.

@@ -487,6 +487,10 @@ SUBDIRS = doc testsuite
 YYFILES = c-exp.tab.c m2-exp.tab.c ch-exp.tab.c
 YYOBJ = c-exp.tab.o m2-exp.tab.o ch-exp.tab.o
 
+# Things which need to be built when making a distribution.
+
+DISTSTUFF = $(YYFILES)
+
 # Prevent Sun make from putting in the machine type.  Setting
 # TARGET_ARCH to nothing works for SunOS 3, 4.0, but not for 4.1.
 .c.o:
@@ -702,75 +706,6 @@ TAGS: $(TAGFILES_NO_SRCDIR) $(TAGFILES_WITH_SRCDIR)
 
 tags: TAGS
 
-# Making distributions of GDB and friends.
-
-# Make a tar file containing the GDB directory of the distribution.
-gdb.tar.Z: force_update
-	$(MAKE) $(MFLAGS) -f Makefile.in setup-to-dist
-	$(MAKE) $(MFLAGS) -f Makefile.in gdb-$(VERSION).tar.Z
-
-# Make a directory `proto-gdb.dir' that contains an image of the GDB
-# directory of the distribution, built up with symlinks.  Note that this
-# make target is not directly referenced by any other rules in this makefile,
-# it is referenced by the makefile in the parent directory.
-make-proto-gdb.dir: force_update 
-	$(MAKE) $(MFLAGS) -f Makefile.in setup-to-dist
-	$(MAKE) $(MFLAGS) -f Makefile make-proto-gdb-1
-
-# Set up the GDB source directory for distribution, by building all files that
-# are products of other files.
-setup-to-dist: force_update
-	../configure none
-	(cd doc; $(MAKE) $(MFLAGS) GDBvn.texi)
-	$(MAKE) $(MFLAGS) gdb.info
-	$(MAKE) $(MFLAGS) refcard.ps
-
-# Build a tar file from a proto-gdb.dir.
-gdb-$(VERSION).tar.Z: force_update
-	rm -f gdb.tar gdb-$(VERSION).tar.Z
-	$(MAKE) $(MFLAGS) -f Makefile make-proto-gdb-1
-	ln -s proto-gdb.dir $(DIST)
-	tar chf - $(DIST) | compress >gdb-$(VERSION).tar.Z
-	rm -rf $(DIST) proto-gdb.dir
-
-# Build a proto-gdb.dir after GDB has been set up for distribution.
-# This stuff must be run in `Makefile', not `Makefile.in`; we use the makefile
-# built in the setup-to-dist process, since it defines things like ALLCONFIG
-# and ALLDEPFILES, that we need.
-make-proto-gdb-1: $(TARFILES) $(TARDIRS) gdb.info
-	rm -rf proto-gdb.dir
-	mkdir proto-gdb.dir
-	rootme=`pwd`/ ; export rootme ; \
-	  for i in `echo $(TARDIRS)`; do \
-	    (cd proto-gdb.dir ; \
-	    mkdir -p $$i; \
-	    cd $$i; \
-	    ln -s $${rootme}/$$i/* .; \
-	    rm -rf SCCS CVS CVS.adm RCS config.status; \
-	    if test -f Makefile.in; then rm -f Makefile; else true; fi;); \
-	  done ; \
-	  for i in `echo $(TARFILES)`; do \
-	    (cd proto-gdb.dir ; \
-	    dir=`dirname $$i`; \
-	    if test -d $$dir; then true; else mkdir -p $$dir; fi; \
-	    ln -s $${rootme}/$$i $$i;); \
-	  done
-	chmod og=u `find . -print`
-
-# Build a proto-testsuite.dir.
-make-proto-testsuite.dir: force_update
-	rm -rf proto-testsuite.dir
-	mkdir proto-testsuite.dir
-	rootme=`pwd`/ ; export rootme ; \
-	  for i in `find testsuite -type f -print`; do \
-	    (cd proto-testsuite.dir ; \
-	    dir=`dirname $$i`; \
-	    if test -d $$dir; then true; else mkdir -p $$dir; fi; \
-	    ln -s $${rootme}/$$i $$i;); \
-	  done
-	find proto-testsuite.dir -name Makefile -exec rm {} \;
-	find proto-testsuite.dir -name config.status -exec rm {} \;
-
 clean mostlyclean:
 	@$(MAKE) $(FLAGS_TO_PASS) DO=clean "DODIRS=$(SUBDIRS)" subdir_do 
 	rm -f *.o $(ADD_FILES) *~ init.c-tmp
@@ -794,6 +729,11 @@ realclean: clean
 	rm -f nm.h tm.h xm.h config.status
 	rm -f y.output yacc.acts yacc.tmp
 	rm -f Makefile
+
+diststuff: $(DISTSTUFF)
+	(cd doc; $(MAKE) $(MFLAGS) GDBvn.texi)
+	$(MAKE) $(MFLAGS) gdb.info
+	$(MAKE) $(MFLAGS) refcard.ps
 
 subdir_do: force
 	@for i in $(DODIRS); do \
