@@ -21,6 +21,7 @@ Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "getopt.h"
 #include "progress.h"
 #include "bucomm.h"
+#include <sys/types.h>
 #include <stdio.h>
 #include <ctype.h>
 #include "dis-asm.h"

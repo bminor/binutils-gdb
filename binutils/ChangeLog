@@ -1,5 +1,7 @@
 Fri Nov  3 12:38:09 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* objdump.c: Include <sys/types.h>.
+
 	Permit user to override DEMANGLER_PROG from command line.  From
 	Manfred Hollstein <manfred@lts.sel.alcatel.de>.
 	* Makefile.in ($(DEMANGLER_PROG)): Depend upon
