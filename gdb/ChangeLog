@@ -1,3 +1,7 @@
+Mon Mar  2 16:59:15 1998  Jason Molenda  (crash@bugshack.cygnus.com)
+
+	* rdi-share/etherdrv.c (sys_errlist): Add correct decl for Linux.
+
 Mon Mar  2 16:51:44 1998  Jason Molenda  (crash@bugshack.cygnus.com)
 
 	* Makefile.in (YYFILES): Remove in maintainer-clean, not distclean.
