@@ -86,12 +86,6 @@ static const char *mips_abi_strings[] = {
   NULL
 };
 
-struct frame_extra_info
-{
-  struct mdebug_extra_func_info *proc_desc;
-  int num_args;
-};
-
 /* Various MIPS ISA options (related to stack analysis) can be
    overridden dynamically.  Establish an enum/array for managing
    them. */
@@ -2203,8 +2197,6 @@ mips_software_single_step (enum target_signal sig, int insert_breakpoints_p)
   else
     target_remove_breakpoint (next_pc, break_mem);
 }
-
-static struct mdebug_extra_func_info temp_proc_desc;
 
 /* Test whether the PC points to the return instruction at the
    end of a function. */
