@@ -1,3 +1,12 @@
+Mon Apr 22 18:02:37 1996  Doug Evans  <dje@blues.cygnus.com>
+
+	* config/tc-sparc.c (in_bitfield_range): New static function.
+	(sparc_ip): New cases X,Y.  Use SPARC_OPCODE_ARCH_V9_P.
+	(md_apply_fix, cases BFD_RELOC_32_PCREL_S2,
+	BFD_RELOC_SPARC_{WDISP16,WDISP19}): Fix undefined code.
+	(md_apply_fix): New cases BFD_RELOC_SPARC_[56].
+	(tc_gen_reloc): New cases BFD_RELOC_SPARC_[56].
+
 Thu Apr 18 18:58:33 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/obj-coff.c: BFD_ASSEMBLER:
