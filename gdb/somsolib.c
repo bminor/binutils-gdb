@@ -36,7 +36,8 @@ and by Cygnus Support.  */
 
 /* TODO:
 
-   * Relocate data addresses in the shared library.
+   * Access to static (file scoped) variables in shared libraries
+   still doesn't work.
 
    * Most of this code should work for hp300 shared libraries.  Does
    anyone care enough to weed out any SOM-isms.
@@ -578,7 +579,7 @@ som_solib_section_offsets (objfile, offsets)
     {
       /* Oh what a pain!  We need the offsets before so_list->objfile
 	 is valid.  The BFDs will never match.  Make a best guess.  */
-      if (!strcmp (so_list->som_solib.name, objfile->name))
+      if (strstr (objfile->name, so_list->som_solib.name))
 	{
 	  asection *private_section;
 

@@ -1,5 +1,7 @@
 Wed Jun  7 12:41:42 1995  Jeff Law  (law@snake.cs.utah.edu)
 
+	* somsolib.c (som_solib_section_offsets): Handle relative pathnames.
+
 	* hppa-tdep.c (frame_saved_pc): Handle backtracing through signal
 	handler in dynamically linked executables.
 
