@@ -171,46 +171,6 @@ extern void mips_register_convert_from_type (int regnum,
   mips_register_convert_from_type ((n), (type), (buffer))
 
 
-/* Describe the pointer in each stack frame to the previous stack frame
-   (its caller).  */
-
-/* FRAME_CHAIN takes a frame's nominal address
-   and produces the frame's chain-pointer. */
-
-#define FRAME_CHAIN(thisframe) (CORE_ADDR) mips_frame_chain (thisframe)
-extern CORE_ADDR mips_frame_chain (struct frame_info *);
-
-/* Define other aspects of the stack frame.  */
-
-
-/* A macro that tells us whether the function invocation represented
-   by FI does not have a frame on the stack associated with it.  If it
-   does not, FRAMELESS is set to 1, else 0.  */
-/* We handle this differently for mips, and maybe we should not */
-
-#define FRAMELESS_FUNCTION_INVOCATION(FI)  (0)
-
-/* Saved Pc.  */
-
-#define FRAME_SAVED_PC(FRAME)	(mips_frame_saved_pc(FRAME))
-extern CORE_ADDR mips_frame_saved_pc (struct frame_info *);
-
-#define FRAME_ARGS_ADDRESS(fi)	(fi)->frame
-
-#define FRAME_LOCALS_ADDRESS(fi) (fi)->frame
-
-/* Return number of args passed to a frame.
-   Can return -1, meaning no way to tell.  */
-
-#define FRAME_NUM_ARGS(fi)	(mips_frame_num_args(fi))
-extern int mips_frame_num_args (struct frame_info *);
-
-/* Return number of bytes at start of arglist that are not really args.  */
-
-#define FRAME_ARGS_SKIP 0
-
-
-
 /* Things needed for making the inferior call functions.  */
 
 /* Stack must be aligned on 32-bit boundaries when synthesizing

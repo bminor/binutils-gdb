@@ -1,3 +1,14 @@
+2002-08-19  Michael Snyder  <msnyder@redhat.com>
+
+	* mips-tdep.c (mips_frame_num_args): New function.
+	(mips_gdbarch_init): Set frame_chain, frameless_function_invocation,
+	frame_saved_pc, frame_args_address, frame_locals_address, 
+	frame_num_args, and frame_args_skip.
+	* config/mips/tm-mips.h (FRAME_CHAIN, FRAMELESS_FUNCTION_INVOCATION,
+	FRAME_SAVED_PC, FRAME_ARGS_ADDRESS, FRAME_LOCALS_ADDRESS, 
+	FRAME_NUM_ARGS, FRAME_ARGS_SKIP): Delete.
+	* config/mips/tm-mipsv4.h (FRAME_CHAIN_VALID): Delete.
+
 2002-08-20  Michael Snyder  <msnyder@redhat.com>
 
 	* config/mips/tm-mips.h (STORE_STRUCT_RETURN): Delete.

@@ -4143,15 +4143,6 @@ mips_do_registers_info (int regnum, int fpregs)
     }
 }
 
-/* Return number of args passed to a frame. described by FIP.
-   Can return -1, meaning no way to tell.  */
-
-int
-mips_frame_num_args (struct frame_info *frame)
-{
-  return -1;
-}
-
 /* Is this a branch with a delay slot?  */
 
 static int is_delayed (unsigned long);
@@ -5922,7 +5913,16 @@ mips_gdbarch_init (struct gdbarch_info info,
 
   set_gdbarch_coerce_float_to_double (gdbarch, mips_coerce_float_to_double);
 
+  set_gdbarch_frame_chain (gdbarch, mips_frame_chain);
   set_gdbarch_frame_chain_valid (gdbarch, func_frame_chain_valid);
+  set_gdbarch_frameless_function_invocation (gdbarch, 
+					     generic_frameless_function_invocation_not);
+  set_gdbarch_frame_saved_pc (gdbarch, mips_frame_saved_pc);
+  set_gdbarch_frame_args_address (gdbarch, default_frame_address);
+  set_gdbarch_frame_locals_address (gdbarch, default_frame_address);
+  set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
+  set_gdbarch_frame_args_skip (gdbarch, 0);
+
   set_gdbarch_get_saved_register (gdbarch, mips_get_saved_register);
 
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
