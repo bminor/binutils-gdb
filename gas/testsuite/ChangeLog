@@ -1,5 +1,8 @@
 Mon Apr 11 07:54:10 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	* gas/hppa/more.parse/callinfobug.s: Add missing name for
+	procedure.
+
 	* gas/hppa/reloc/funcrelocbug.s: Place the trampoline in the
 	$DATA$ rather than $LIT$ subspace.
 
