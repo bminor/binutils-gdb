@@ -1,6 +1,14 @@
 2001-03-25  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	From  Andrew Cagney  <ac131313@redhat.com>
+
+        * coffread.c: Include "gdb_assert.h".
+	(coff_symtab_read): Cast the integer s_sclass to a long before
+ 	casting it to a pointer.
+
+2001-03-25  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	From  Andrew Cagney  <ac131313@redhat.com>
 	
         * coffread.c (coff_symtab_read): Initialize
  	``fcn_first_line_addr''.  Check that the ``.bf'' always preceeds

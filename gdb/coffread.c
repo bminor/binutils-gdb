@@ -43,6 +43,7 @@
 #include "stabsread.h"
 #include "complaints.h"
 #include "target.h"
+#include "gdb_assert.h"
 
 extern void _initialize_coffread (void);
 
@@ -966,9 +967,15 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 	      {
 		struct minimal_symbol *msym;
 
+ 		/* FIXME: cagney/2001-02-01: The nasty (int) -> (long)
+                   -> (void*) cast is to ensure that that the value of
+                   cs->c_sclass can be correctly stored in a void
+                   pointer in MSYMBOL_INFO.  Better solutions
+                   welcome. */
+		gdb_assert (sizeof (void *) >= sizeof (cs->c_sclass));
 		msym = prim_record_minimal_symbol_and_info
-		  (cs->c_name, tmpaddr, ms_type, (char *) cs->c_sclass, sec,
-		   NULL, objfile);
+		  (cs->c_name, tmpaddr, ms_type, (void *) (long) cs->c_sclass,
+		   sec, NULL, objfile);
 #ifdef COFF_MAKE_MSYMBOL_SPECIAL
 		if (msym)
 		  COFF_MAKE_MSYMBOL_SPECIAL (cs->c_sclass, msym);
