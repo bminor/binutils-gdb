@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 #include <ctype.h>
+#include "sysdep.h"
 #include "as.h"
 #include "subsegs.h"
 /* Needed by opcode/dvp.h.  */
@@ -34,14 +35,24 @@ static void insert_operand_final
      PARAMS ((dvp_cpu, const dvp_operand *, int,
 	      DVP_INSN *, offsetT, char *, unsigned int));
 
+static int insert_file PARAMS ((const char *));
+
+static void install_pke_length PARAMS ((char *, int));
+
 const char comment_chars[] = ";";
 const char line_comment_chars[] = "#";
 const char line_separator_chars[] = "!";
 const char EXP_CHARS[] = "eE";
 const char FLT_CHARS[] = "dD";
 
-/* Non-zero if in vu-mode.  */
-static int vu_mode_p;
+/* Current assembler state.
+   Instructions like mpg and direct are followed by a restricted set of
+   instructions until an end marker (e.g. mpg is followed by vu insns).  */
+typedef enum { ASM_INIT, ASM_MPG, ASM_GPUIF, ASM_VU } asm_state;
+static asm_state cur_asm_state = ASM_INIT;
+
+/* Pointer to pke insn currently being assembled or NULL if none.  */
+static char *cur_pke_insn;
 
 /* Non-zero if packing pke instructions in dma tags.  */
 static int dma_pack_pke_p;
@@ -83,7 +94,7 @@ static void s_enddirect PARAMS ((int));
 static void s_endgpuif PARAMS ((int));
 static void s_endmpg PARAMS ((int));
 static void s_endunpack PARAMS ((int));
-static void s_vu PARAMS ((int));
+static void s_state PARAMS ((int));
 
 /* The target specific pseudo-ops which we support.  */
 const pseudo_typeS md_pseudo_table[] =
@@ -95,9 +106,9 @@ const pseudo_typeS md_pseudo_table[] =
     { "endgpuif", s_endgpuif, 0 },
     { "endmpg", s_endmpg, 0 },
     { "endunpack", s_endunpack, 0 },
-    /* .vu,.endvu added to simplify debugging */
-    { "vu", s_vu, 1 },
-    { "endvu", s_vu, 0 },
+    /* .vu,.gpuif added to simplify debugging */
+    { "vu", s_state, ASM_VU },
+    { "gpuif", s_state, ASM_GPUIF },
     { NULL, NULL, 0 }
 };
 
@@ -119,7 +130,7 @@ md_begin ()
      This involves computing the hash chains.  */
   dvp_opcode_init_tables (0);
 
-  vu_mode_p = 0;
+  cur_asm_state = ASM_INIT;
   dma_pack_pke_p = 0;
 }
 
@@ -131,6 +142,8 @@ struct dvp_fixup
 {
   /* index into `dvp_operands' */
   int opindex;
+  /* byte offset from beginning of instruction */
+  int offset;
   expressionS exp;
 };
 
@@ -169,17 +182,20 @@ md_assemble (str)
   while (isspace (*str))
     str++;
 
-  if (! vu_mode_p)
+  if (cur_asm_state == ASM_INIT)
     {
       if (strncasecmp (str, "dma", 3) == 0)
 	assemble_dma (str);
-      else if (strncasecmp (str, "gpuif", 5) == 0)
-	assemble_gpuif (str);
       else
 	assemble_pke (str);
     }
-  else
+  else if (cur_asm_state == ASM_GPUIF)
+    assemble_gpuif (str);
+  else if (cur_asm_state == ASM_VU
+	   || cur_asm_state == ASM_MPG)
     assemble_vu (str);
+  else
+    as_fatal ("unknown parse state");
 }
 
 /* Subroutine of md_assemble to assemble DMA instructions.  */
@@ -222,13 +238,7 @@ assemble_pke (str)
     return;
 
   if (opcode->flags & PKE_OPCODE_LENVAR)
-    {
-      /* Call back into the parser's state to get the insn's length.
-	 This is just the length of the insn, not of any following data.
-	 The result 0 if the length is unknown.  */
-      len = pke_len ();
-      /* FIXME: not done yet */
-    }
+    len = 1; /* actual data follows later */
   else if (opcode->flags & PKE_OPCODE_LEN2)
     len = 2;
   else if (opcode->flags & PKE_OPCODE_LEN5)
@@ -250,7 +260,7 @@ assemble_pke (str)
      copies of this bit of code.  */
   for (i = 0; i < fixup_count; ++i)
     {
-      int op_type, reloc_type;
+      int op_type, reloc_type, offset;
       const dvp_operand *operand;
 
       /* Create a fixup for this operand.
@@ -261,12 +271,46 @@ assemble_pke (str)
 	 feature.  We pick a BFD reloc type in md_apply_fix.  */
 
       op_type = fixups[i].opindex;
+      offset = fixups[i].offset;
       reloc_type = encode_fixup_reloc_type (DVP_PKE, op_type);
       operand = &pke_operands[op_type];
-      fix_new_exp (frag_now, f - frag_now->fr_literal, 4,
+      fix_new_exp (frag_now, f + offset - frag_now->fr_literal, 4,
 		   &fixups[i].exp,
 		   (operand->flags & DVP_OPERAND_RELATIVE_BRANCH) != 0,
 		   (bfd_reloc_code_real_type) reloc_type);
+    }
+
+  if (opcode->flags & PKE_OPCODE_LENVAR)
+    {
+      /* Name of file to read data from.  */
+      char *file;
+      /* In 32 bit words.  */
+      int data_len;
+
+      cur_pke_insn = NULL;
+      file = NULL;
+      data_len = 0;
+      pke_get_var_data (&file, &data_len);
+      if (file)
+	{
+	  int byte_len = insert_file (file);
+	  install_pke_length (f, byte_len);
+	  /* Update $.MpgLoc.  */
+	  pke_set_mpgloc (pke_get_mpgloc () + byte_len);
+	}
+      else
+	{
+	  /* data_len == -1 means the value must be computed from
+	     the data.  */
+	  if (data_len == 0 || data_len < -2)
+	    as_bad ("invalid data length");
+	  else if (data_len == -1)
+	    cur_pke_insn = f;
+	  else
+	    install_pke_length (f, data_len * 4);
+	  if (opcode->flags & PKE_OPCODE_MPG)
+	    cur_asm_state = ASM_VU;
+	}
     }
 }
 
@@ -599,6 +643,7 @@ assemble_one_insn (cpu, opcode, operand_table, pstr, insn_buf)
 			as_fatal ("too many fixups");
 		      fixups[fixup_count].exp = exp;
 		      fixups[fixup_count].opindex = index;
+		      fixups[fixup_count].offset = (operand->shift / 32) * 4;
 		      ++fixup_count;
 		      value = 0;
 		    }
@@ -964,6 +1009,70 @@ md_atof (type, litP, sizeP)
   return 0;
 }
 
+/* Install length LEN, in bytes, in the pke insn at BUF.
+   The bytes in BUF are in target order.  */
+
+static void
+install_pke_length (buf, len)
+     char *buf;
+     int len;
+{
+  char cmd = buf[3];
+
+  if ((cmd & 0x70) == 0x40)
+    {
+      /* mpg */
+      len /= 4;
+      if (len > 256)
+	as_bad ("mpg data length must be between 1 and 256");
+      buf[2] = len;
+    }
+  else if ((cmd & 0x70) == 0x50)
+    {
+      /* direct/directhl */
+    }
+  else if ((cmd & 0x60) == 0x60)
+    {
+      /* unpack */
+    }
+  else
+    as_fatal ("bad call to install_pke_length");
+}
+
+/* Insert a file into the output.
+   The result is the number of bytes inserted.
+   If an error occurs an error message is printed and zero is returned.  */
+
+static int
+insert_file (file)
+     const char *file;
+{
+  FILE *f;
+  char buf[256];
+  int n, total;
+
+  f = fopen (file, FOPEN_RB);
+  if (f == NULL)
+    {
+      as_bad ("unable to read file `%s'", file);
+      return 0;
+    }
+
+  total = 0;
+  do {
+    n = fread (buf, 1, sizeof (buf), f);
+    if (n > 0)
+      {
+	char *fr = frag_more (n);
+	memcpy (fr, buf, n);
+	total += n;
+      }
+  } while (n > 0);
+
+  fclose (f);
+  return total;
+}
+
 /* Insert an operand value into an instruction.  */
 
 static void
@@ -1181,21 +1290,30 @@ static void
 s_endmpg (ignore)
      int ignore;
 {
-  vu_mode_p = 0;
+  if (cur_asm_state != ASM_MPG || cur_pke_insn == NULL)
+    as_bad ("`.endmpg' has no matching `mpg' instruction");
+  else
+    {
+      /* Compute the length and install it in the instruction.  */
+      /*FIXME*/
+
+      cur_asm_state = ASM_INIT;
+      cur_pke_insn = NULL;
+    }
 }
 
 static void
 s_endunpack (ignore)
      int ignore;
 {
-  vu_mode_p = 0;
+  cur_asm_state = ASM_INIT;
 }
 
 static void
-s_vu (enable_p)
-     int enable_p;
+s_state (state)
+     int state;
 {
-  vu_mode_p = enable_p;
+  cur_asm_state = state;
 }
 
 /* Parse a DMA data spec which can be either of '*' or a quad word count.  */
@@ -1232,6 +1350,7 @@ parse_dma_count( pstr, errmsg)
 	    as_fatal( "too many fixups");
 	fixups[fixup_count].exp = exp;
 	fixups[fixup_count].opindex = 0 /*FIXME*/;
+	fixups[fixup_count].offset = 0 /*FIXME*/;
 	++fixup_count;
 	value = 0;
     }
@@ -1254,4 +1373,3 @@ parse_dma_count( pstr, errmsg)
     *errmsg = "invalid dma count";
     return 0;
 }
-
