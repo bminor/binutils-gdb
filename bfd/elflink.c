@@ -2479,7 +2479,7 @@ _bfd_elf_dynamic_symbol_p (struct elf_link_hash_entry *h,
       /* Proper resolution for function pointer equality may require
 	 that these symbols perhaps be resolved dynamically, even though
 	 we should be resolving them to the current module.  */
-      if (!ignore_protected)
+      if (!ignore_protected || h->type != STT_FUNC)
 	binding_stays_local_p = TRUE;
       break;
 
@@ -2540,6 +2540,10 @@ _bfd_elf_symbol_refs_local_p (struct elf_link_hash_entry *h,
 
   /* However, STV_HIDDEN or STV_INTERNAL ones must be local.  */
   if (ELF_ST_VISIBILITY (h->other) != STV_PROTECTED)
+    return TRUE;
+
+  /* STV_PROTECTED non-function symbols are local.  */
+  if (h->type != STT_FUNC)
     return TRUE;
 
   /* Function pointer equality tests may require that STV_PROTECTED

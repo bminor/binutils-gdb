@@ -1,3 +1,10 @@
+2005-01-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 679
+	* elflink.c (_bfd_elf_dynamic_symbol_p): Only protected
+	non-function symbols are local.
+	(_bfd_elf_symbol_refs_local_p): Likewise.
+
 2005-01-18  Alan Modra  <amodra@bigpond.net.au>
 
 	* bfd.c (bfd_link_just_syms): Add abfd param.
