@@ -124,7 +124,7 @@ struct elf_sect_data
 
 /* Forward declarations of static functions */
 
-static struct sec *section_from_elf_index PARAMS ((bfd *, unsigned int));
+static asection *section_from_elf_index PARAMS ((bfd *, unsigned int));
 
 static int elf_section_from_bfd_section PARAMS ((bfd *, struct sec *));
 
@@ -135,6 +135,8 @@ static int elf_symbol_from_bfd_symbol PARAMS ((bfd *,
 
 static boolean elf_map_symbols PARAMS ((bfd *));
 static boolean swap_out_syms PARAMS ((bfd *));
+
+static boolean bfd_section_from_shdr PARAMS ((bfd *, unsigned int shindex));
 
 #ifdef DEBUG
 static void elf_debug_section PARAMS ((char *, int, Elf_Internal_Shdr *));
@@ -474,69 +476,67 @@ bfd_section_from_shdr (abfd, shindex)
     case SHT_PROGBITS:
     case SHT_DYNAMIC:
       /* Bits that get saved. This one is real. */
-      if (!hdr->rawdata)
+      if (hdr->rawdata == NULL)
 	{
-	  newsect = bfd_make_section (abfd, name);
-	  if (newsect != NULL)
+	  newsect = bfd_make_section_anyway (abfd, name);
+	  if (newsect == NULL)
+	    return false;
+
+	  newsect->filepos = hdr->sh_offset;
+	  newsect->flags |= SEC_HAS_CONTENTS;
+	  newsect->vma = hdr->sh_addr;
+	  newsect->_raw_size = hdr->sh_size;
+	  newsect->alignment_power = bfd_log2 (hdr->sh_addralign);
+
+	  if (hdr->sh_flags & SHF_ALLOC)
 	    {
-	      newsect->filepos = hdr->sh_offset;	/* so we can read back the bits */
-	      newsect->flags |= SEC_HAS_CONTENTS;
-	      newsect->vma = hdr->sh_addr;
-	      newsect->_raw_size = hdr->sh_size;
-	      newsect->alignment_power = bfd_log2 (hdr->sh_addralign);
-
-	      if (hdr->sh_flags & SHF_ALLOC)
-		{
-		  newsect->flags |= SEC_ALLOC;
-		  newsect->flags |= SEC_LOAD;
-		}
-
-	      if (!(hdr->sh_flags & SHF_WRITE))
-		newsect->flags |= SEC_READONLY;
-
-	      if (hdr->sh_flags & SHF_EXECINSTR)
-		newsect->flags |= SEC_CODE;	/* FIXME: may only contain SOME code */
-	      else if (newsect->flags & SEC_ALLOC)
-		newsect->flags |= SEC_DATA;
-
-	      /* The debugging sections appear to recognized only by
-		 name.  */
-	      if (strncmp (name, ".debug", sizeof ".debug" - 1) == 0
-		  || strncmp (name, ".line", sizeof ".line" - 1) == 0
-		  || strncmp (name, ".stab", sizeof ".stab" - 1) == 0)
-		newsect->flags |= SEC_DEBUGGING;
-
-	      hdr->rawdata = (void *) newsect;
+	      newsect->flags |= SEC_ALLOC;
+	      newsect->flags |= SEC_LOAD;
 	    }
-	  else
-	    hdr->rawdata = (void *) bfd_get_section_by_name (abfd, name);
+
+	  if (!(hdr->sh_flags & SHF_WRITE))
+	    newsect->flags |= SEC_READONLY;
+
+	  if (hdr->sh_flags & SHF_EXECINSTR)
+	    newsect->flags |= SEC_CODE;	/* FIXME: may only contain SOME code */
+	  else if (newsect->flags & SEC_ALLOC)
+	    newsect->flags |= SEC_DATA;
+
+	  /* The debugging sections appear to recognized only by name,
+	     not any sort of flag.  */
+	  if (strncmp (name, ".debug", sizeof ".debug" - 1) == 0
+	      || strncmp (name, ".line", sizeof ".line" - 1) == 0
+	      || strncmp (name, ".stab", sizeof ".stab" - 1) == 0)
+	    newsect->flags |= SEC_DEBUGGING;
+
+	  hdr->rawdata = (PTR) newsect;
 	}
       return true;
 
     case SHT_NOBITS:
       /* Bits that get saved. This one is real. */
-      if (!hdr->rawdata)
+      if (hdr->rawdata == NULL)
 	{
-	  newsect = bfd_make_section (abfd, name);
-	  if (newsect != NULL)
-	    {
-	      newsect->vma = hdr->sh_addr;
-	      newsect->_raw_size = hdr->sh_size;
-	      newsect->filepos = hdr->sh_offset;	/* fake */
-	      newsect->alignment_power = bfd_log2 (hdr->sh_addralign);
-	      if (hdr->sh_flags & SHF_ALLOC)
-		newsect->flags |= SEC_ALLOC;
+	  newsect = bfd_make_section_anyway (abfd, name);
+	  if (newsect == NULL)
+	    return false;
 
-	      if (!(hdr->sh_flags & SHF_WRITE))
-		newsect->flags |= SEC_READONLY;
+	  newsect->vma = hdr->sh_addr;
+	  newsect->_raw_size = hdr->sh_size;
+	  newsect->filepos = hdr->sh_offset;	/* fake */
+	  newsect->alignment_power = bfd_log2 (hdr->sh_addralign);
+	  if (hdr->sh_flags & SHF_ALLOC)
+	    newsect->flags |= SEC_ALLOC;
 
-	      /* FIXME: This section is empty.  Does it really make
-		 sense to set SEC_CODE for it?  */
-	      if (hdr->sh_flags & SHF_EXECINSTR)
-		newsect->flags |= SEC_CODE;	/* FIXME: may only contain SOME code */
+	  if (!(hdr->sh_flags & SHF_WRITE))
+	    newsect->flags |= SEC_READONLY;
 
-	      hdr->rawdata = (void *) newsect;
-	    }
+	  /* FIXME: This section is empty.  Does it really make sense
+	     to set SEC_CODE for it?  */
+	  if (hdr->sh_flags & SHF_EXECINSTR)
+	    newsect->flags |= SEC_CODE;	/* FIXME: may only contain SOME code */
+
+	  hdr->rawdata = (PTR) newsect;
 	}
       return true;
 
@@ -582,7 +582,8 @@ bfd_section_from_shdr (abfd, shindex)
 	    Elf_Internal_Shdr *hdr2 = elf_elfsections (abfd)[i];
 	    if (hdr2->sh_link == shindex)
 	      {
-		bfd_section_from_shdr (abfd, i);
+		if (! bfd_section_from_shdr (abfd, i))
+		  return false;
 		if (elf_onesymtab (abfd) == i)
 		  {
 		    elf_tdata (abfd)->strtab_hdr = *hdr;
@@ -595,7 +596,7 @@ bfd_section_from_shdr (abfd, shindex)
 		    elf_elfsections (abfd)[shindex] = &elf_tdata (abfd)->dynstrtab_hdr;
 		    return true;
 		  }
-#if 0				/* Not handling other string tables specially right now.  */
+#if 0 /* Not handling other string tables specially right now.  */
 		hdr2 = elf_elfsections (abfd)[i];	/* in case it moved */
 		/* We have a strtab for some random other section.  */
 		newsect = (asection *) hdr2->rawdata;
@@ -610,30 +611,30 @@ bfd_section_from_shdr (abfd, shindex)
 	  }
       }
 
-      newsect = bfd_make_section (abfd, name);
-      if (newsect)
-	{
-	  newsect->flags = SEC_HAS_CONTENTS;
-	  hdr->rawdata = (PTR) newsect;
-	  newsect->_raw_size = hdr->sh_size;
-	  newsect->alignment_power = bfd_log2 (hdr->sh_addralign);
-	  newsect->vma = hdr->sh_addr;
-	  newsect->filepos = hdr->sh_offset;
+      newsect = bfd_make_section_anyway (abfd, name);
+      if (newsect == NULL)
+	return false;
 
-	  if (hdr->sh_flags & SHF_ALLOC)
-	    newsect->flags |= SEC_ALLOC | SEC_LOAD;
-	  if (!(hdr->sh_flags & SHF_WRITE))
-	    newsect->flags |= SEC_READONLY;
-	  if (hdr->sh_flags & SHF_EXECINSTR)
-	    newsect->flags |= SEC_CODE;
-	  else if (newsect->flags & SEC_ALLOC)
-	    newsect->flags |= SEC_DATA;
+      newsect->flags = SEC_HAS_CONTENTS;
+      hdr->rawdata = (PTR) newsect;
+      newsect->_raw_size = hdr->sh_size;
+      newsect->alignment_power = bfd_log2 (hdr->sh_addralign);
+      newsect->vma = hdr->sh_addr;
+      newsect->filepos = hdr->sh_offset;
 
-	  /* Check for debugging string tables.  */
-	  if (strncmp (name, ".debug", sizeof ".debug" - 1) == 0
-	      || strncmp (name, ".stab", sizeof ".stab" - 1) == 0)
-	    newsect->flags |= SEC_DEBUGGING;
-	}
+      if (hdr->sh_flags & SHF_ALLOC)
+	newsect->flags |= SEC_ALLOC | SEC_LOAD;
+      if (!(hdr->sh_flags & SHF_WRITE))
+	newsect->flags |= SEC_READONLY;
+      if (hdr->sh_flags & SHF_EXECINSTR)
+	newsect->flags |= SEC_CODE;
+      else if (newsect->flags & SEC_ALLOC)
+	newsect->flags |= SEC_DATA;
+
+      /* Check for debugging string tables.  */
+      if (strncmp (name, ".debug", sizeof ".debug" - 1) == 0
+	  || strncmp (name, ".stab", sizeof ".stab" - 1) == 0)
+	newsect->flags |= SEC_DEBUGGING;
 
       return true;
 
@@ -667,8 +668,9 @@ bfd_section_from_shdr (abfd, shindex)
 		     ? sizeof (Elf_External_Rela)
 		     : sizeof (Elf_External_Rel)));
 
-	bfd_section_from_shdr (abfd, hdr->sh_info);	/* target */
-	bfd_section_from_shdr (abfd, hdr->sh_link);	/* symbol table */
+	if (! bfd_section_from_shdr (abfd, hdr->sh_info)     /* target */
+	    || ! bfd_section_from_shdr (abfd, hdr->sh_link)) /* symbol table */
+	  return false;
 	target_sect = section_from_elf_index (abfd, hdr->sh_info);
 	if (target_sect == NULL
 	    || elf_section_data (target_sect) == NULL)
@@ -784,6 +786,8 @@ bfd_section_from_phdr (abfd, hdr, index)
     }
   strcpy (name, namebuf);
   newsect = bfd_make_section (abfd, name);
+  if (newsect == NULL)
+    return false;
   newsect->vma = hdr->p_vaddr;
   newsect->_raw_size = hdr->p_filesz;
   newsect->filepos = hdr->p_offset;
@@ -815,6 +819,8 @@ bfd_section_from_phdr (abfd, hdr, index)
 	}
       strcpy (name, namebuf);
       newsect = bfd_make_section (abfd, name);
+      if (newsect == NULL)
+	return false;
       newsect->vma = hdr->p_vaddr + hdr->p_filesz;
       newsect->_raw_size = hdr->p_memsz - hdr->p_filesz;
       if (hdr->p_type == PT_LOAD)
@@ -1009,7 +1015,8 @@ elf_object_p (abfd)
     }
   if (i_ehdrp->e_shstrndx)
     {
-      bfd_section_from_shdr (abfd, i_ehdrp->e_shstrndx);
+      if (! bfd_section_from_shdr (abfd, i_ehdrp->e_shstrndx))
+	goto got_no_match;
     }
 
   /* Read in the string table containing the names of the sections.  We
@@ -1032,7 +1039,8 @@ elf_object_p (abfd)
 
   for (shindex = 1; shindex < i_ehdrp->e_shnum; shindex++)
     {
-      bfd_section_from_shdr (abfd, shindex);
+      if (! bfd_section_from_shdr (abfd, shindex))
+	goto got_no_match;
     }
 
   return (abfd->xvec);
@@ -2455,7 +2463,7 @@ NAME(bfd_elf,write_object_contents) (abfd)
    The mapping has to hide in the Elf_Internal_Shdr since asection
    doesn't have anything like a tdata field... */
 
-static struct sec *
+static asection *
 section_from_elf_index (abfd, index)
      bfd *abfd;
      unsigned int index;
@@ -2469,7 +2477,7 @@ section_from_elf_index (abfd, index)
     return &bfd_com_section;
 
   if (index > elf_elfheader (abfd)->e_shnum)
-    return 0;
+    return NULL;
 
   {
     Elf_Internal_Shdr *hdr = elf_elfsections (abfd)[index];
@@ -2479,8 +2487,11 @@ section_from_elf_index (abfd, index)
 	/* ELF sections that map to BFD sections */
       case SHT_PROGBITS:
       case SHT_NOBITS:
-	if (!hdr->rawdata)
-	  bfd_section_from_shdr (abfd, index);
+	if (hdr->rawdata == NULL)
+	  {
+	    if (! bfd_section_from_shdr (abfd, index))
+	      return NULL;
+	  }
 	return (struct sec *) hdr->rawdata;
 
       default:
@@ -2687,6 +2698,8 @@ elf_slurp_symbol_table (abfd, symptrs, dynamic)
 	    {
 	      sym->symbol.section = section_from_elf_index (abfd,
 							    i_sym.st_shndx);
+	      if (sym->symbol.section == NULL)
+		goto error_return;
 	    }
 	  else if (i_sym.st_shndx == SHN_ABS)
 	    {
@@ -3341,14 +3354,14 @@ elf_no_info_to_howto_rel (abfd, cache_ptr, dst)
 #ifdef HAVE_PROCFS		/* Some core file support requires host /proc files */
 #include <sys/procfs.h>
 #else
-#define bfd_prstatus(abfd, descdata, descsz, filepos)	/* Define away */
-#define bfd_fpregset(abfd, descdata, descsz, filepos)	/* Define away */
-#define bfd_prpsinfo(abfd, descdata, descsz, filepos)	/* Define away */
+#define bfd_prstatus(abfd, descdata, descsz, filepos) true
+#define bfd_fpregset(abfd, descdata, descsz, filepos) true
+#define bfd_prpsinfo(abfd, descdata, descsz, filepos) true
 #endif
 
 #ifdef HAVE_PROCFS
 
-static void
+static boolean
 bfd_prstatus (abfd, descdata, descsz, filepos)
      bfd *abfd;
      char *descdata;
@@ -3361,6 +3374,8 @@ bfd_prstatus (abfd, descdata, descsz, filepos)
   if (descsz == sizeof (prstatus_t))
     {
       newsect = bfd_make_section (abfd, ".reg");
+      if (newsect == NULL)
+	return false;
       newsect->_raw_size = sizeof (status->pr_reg);
       newsect->filepos = filepos + (long) &status->pr_reg;
       newsect->flags = SEC_ALLOC | SEC_HAS_CONTENTS;
@@ -3370,11 +3385,12 @@ bfd_prstatus (abfd, descdata, descsz, filepos)
 	  memcpy (core_prstatus (abfd), descdata, descsz);
 	}
     }
+  return true;
 }
 
 /* Stash a copy of the prpsinfo structure away for future use. */
 
-static void
+static boolean
 bfd_prpsinfo (abfd, descdata, descsz, filepos)
      bfd *abfd;
      char *descdata;
@@ -3385,14 +3401,17 @@ bfd_prpsinfo (abfd, descdata, descsz, filepos)
 
   if (descsz == sizeof (prpsinfo_t))
     {
-      if ((core_prpsinfo (abfd) = bfd_alloc (abfd, descsz)) != NULL)
+      if ((core_prpsinfo (abfd) = bfd_alloc (abfd, descsz)) == NULL)
 	{
-	  memcpy (core_prpsinfo (abfd), descdata, descsz);
+	  bfd_set_error (bfd_error_no_memory);
+	  return false;
 	}
+      memcpy (core_prpsinfo (abfd), descdata, descsz);
     }
+  return true;
 }
 
-static void
+static boolean
 bfd_fpregset (abfd, descdata, descsz, filepos)
      bfd *abfd;
      char *descdata;
@@ -3402,10 +3421,13 @@ bfd_fpregset (abfd, descdata, descsz, filepos)
   asection *newsect;
 
   newsect = bfd_make_section (abfd, ".reg2");
+  if (newsect == NULL)
+    return false;
   newsect->_raw_size = descsz;
   newsect->filepos = filepos;
   newsect->flags = SEC_ALLOC | SEC_HAS_CONTENTS;
   newsect->alignment_power = 2;
+  return true;
 }
 
 #endif /* HAVE_PROCFS */
@@ -3571,17 +3593,20 @@ elf_corefile_note (abfd, hdr)
 	    {
 	    case NT_PRSTATUS:
 	      /* process descdata as prstatus info */
-	      bfd_prstatus (abfd, descdata, i_note.descsz, filepos);
+	      if (! bfd_prstatus (abfd, descdata, i_note.descsz, filepos))
+		return false;
 	      sectname = ".prstatus";
 	      break;
 	    case NT_FPREGSET:
 	      /* process descdata as fpregset info */
-	      bfd_fpregset (abfd, descdata, i_note.descsz, filepos);
+	      if (! bfd_fpregset (abfd, descdata, i_note.descsz, filepos))
+		return false;
 	      sectname = ".fpregset";
 	      break;
 	    case NT_PRPSINFO:
 	      /* process descdata as prpsinfo */
-	      bfd_prpsinfo (abfd, descdata, i_note.descsz, filepos);
+	      if (! bfd_prpsinfo (abfd, descdata, i_note.descsz, filepos))
+		return false;
 	      sectname = ".prpsinfo";
 	      break;
 	    default:
@@ -3592,6 +3617,8 @@ elf_corefile_note (abfd, hdr)
 	  if (sectname != NULL)
 	    {
 	      newsect = bfd_make_section (abfd, sectname);
+	      if (newsect == NULL)
+		return false;
 	      newsect->_raw_size = i_note.descsz;
 	      newsect->filepos = filepos;
 	      newsect->flags = SEC_ALLOC | SEC_HAS_CONTENTS;
@@ -3777,7 +3804,8 @@ elf_core_file_p (abfd)
       bfd_section_from_phdr (abfd, i_phdrp + phindex, phindex);
       if ((i_phdrp + phindex)->p_type == PT_NOTE)
 	{
-	  elf_corefile_note (abfd, i_phdrp + phindex);
+	  if (! elf_corefile_note (abfd, i_phdrp + phindex))
+	    return NULL;
 	}
     }
 

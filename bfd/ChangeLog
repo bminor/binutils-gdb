@@ -1,3 +1,21 @@
+Mon Apr 25 15:31:04 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* elfcode.h (bfd_section_from_shdr): Use bfd_make_section_anyway
+	to create sections.  Check return value of recursive calls.
+	(bfd_section_from_phdr): Check return value of bfd_make_section.
+	(elf_symbol_from_bfd_symbol): Likewise.
+	(elf_object_p): Check return value of bfd_section_from_shdr.
+	(section_from_elf_index): Likewise.
+	(elf_slurp_symbol_table): Check return value of
+	section_from_elf_index.
+	(bfd_prstatus): Return boolean value.  Check return value of
+	bfd_make_section.
+	(bfd_fpregset): Likewise.
+	(bfd_prpsinfo): Return boolean value.
+	(elf_corefile_note): Check return values of bfd_prstatus,
+	bfd_fpregset, and bfd_prpsinfo.
+	(elf_core_file_p): Check return value of elf_corefile_note.
+
 Fri Apr 22 11:08:38 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	Get rid of the ECOFF .reginfo section hack.
