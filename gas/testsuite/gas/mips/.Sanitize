@@ -77,6 +77,8 @@ lif-xgot.d
 lifloat.d
 lifloat.s
 mips.exp
+mips16.d
+mips16.s
 mips4.d
 mips4.s
 mul-ilocks.d
