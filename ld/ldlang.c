@@ -410,7 +410,7 @@ lang_init ()
 				    (char *) NULL);
   abs_output_section = lang_output_section_statement_lookup (BFD_ABS_SECTION_NAME);
 
-  abs_output_section->bfd_section = &bfd_abs_section;
+  abs_output_section->bfd_section = bfd_abs_section_ptr;
 
 }
 
@@ -1617,10 +1617,10 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 	   break;
 	 }
 
-       if (os->bfd_section == &bfd_abs_section)
+       if (bfd_is_abs_section (os->bfd_section))
        {
 	 /* No matter what happens, an abs section starts at zero */
-	 bfd_set_section_vma (0, os->bfd_section, 0);
+	 ASSERT (os->bfd_section->vma == 0);
        }
        else
        {
@@ -1664,10 +1664,9 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 	   os->bfd_section->lma 
 	     = exp_get_value_int(os->load_base, 0,"load base", lang_final_phase_enum);
 	 }
+
+	 os->bfd_section->output_offset = 0;
        }
-
-
-       os->bfd_section->output_offset = 0;
 
        (void) lang_size_sections (os->children.head, os, &os->children.head,
 				  os->fill, dot, relax);
@@ -1679,13 +1678,15 @@ lang_size_sections (s, output_section_statement, prev, fill, dot, relax)
 			/* The coercion here is important, see ld.h.  */
 			(bfd_vma) os->block_value);
 
-       os->bfd_section->_raw_size = after - os->bfd_section->vma;
+       if (bfd_is_abs_section (os->bfd_section))
+	 ASSERT (after == os->bfd_section->vma);
+       else
+	 os->bfd_section->_raw_size = after - os->bfd_section->vma;
        dot = os->bfd_section->vma + os->bfd_section->_raw_size;
        os->processed = true;
 
        /* Replace into region ? */
-       if (os->addr_tree == (etree_type *) NULL
-	   && os->region != (lang_memory_region_type *) NULL)
+       if (os->region != (lang_memory_region_type *) NULL)
        {
 	 os->region->current = dot;
 	 /* Make sure this isn't silly */
@@ -2806,7 +2807,7 @@ lang_abs_symbol_at_beginning_of (secname, name)
       else
 	h->u.def.value = bfd_get_section_vma (output_bfd, sec);
 
-      h->u.def.section = &bfd_abs_section;
+      h->u.def.section = bfd_abs_section_ptr;
     }
 }
 
@@ -2841,7 +2842,7 @@ lang_abs_symbol_at_end_of (secname, name)
 	h->u.def.value = (bfd_get_section_vma (output_bfd, sec)
 			  + bfd_section_size (output_bfd, sec));
 
-      h->u.def.section = &bfd_abs_section;
+      h->u.def.section = bfd_abs_section_ptr;
     }
 }
 
