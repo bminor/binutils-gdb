@@ -138,7 +138,8 @@ funcvec_hash_newfunc (entry, gen_table, string)
      but it's not easily available here.  */
   if (bfd_get_mach (table->abfd) == bfd_mach_h8300)
     table->offset += 2;
-  else if (bfd_get_mach (table->abfd) == bfd_mach_h8300h)
+  else if (bfd_get_mach (table->abfd) == bfd_mach_h8300h
+	   || bfd_get_mach (table->abfd) == bfd_mach_h8300s)
     table->offset += 4;
   else
     return NULL;
@@ -258,7 +259,7 @@ static reloc_howto_type howto_table[] =
 #define SELECT_RELOC(x,howto) \
   { x.r_type = select_reloc(howto); }
 
-#define BADMAG(x) (H8300BADMAG(x)&& H8300HBADMAG(x))
+#define BADMAG(x) (H8300BADMAG(x) && H8300HBADMAG(x) && H8300SBADMAG(x))
 #define H8300 1			/* Customize coffcode.h */
 #define __A_MAGIC_SET__
 
@@ -565,7 +566,8 @@ h8300_reloc16_estimate(abfd, input_section, reloc, shrink, link_info)
       if ((bfd_get_mach (abfd) == bfd_mach_h8300
 	   && value >= 0xff00
 	   && value <= 0xffff)
-	  || (bfd_get_mach (abfd) == bfd_mach_h8300h
+	  || ((bfd_get_mach (abfd) == bfd_mach_h8300h
+	       || bfd_get_mach (abfd) == bfd_mach_h8300s)
 	      && value >= 0xffff00
 	      && value <= 0xffffff))
 	{
@@ -587,7 +589,8 @@ h8300_reloc16_estimate(abfd, input_section, reloc, shrink, link_info)
 
       /* The address is in 0xffff00..0xffffff inclusive on the h8300h,
 	 then we can relax this mov.b  */
-      if (bfd_get_mach (abfd) == bfd_mach_h8300h
+      if ((bfd_get_mach (abfd) == bfd_mach_h8300h
+	   || bfd_get_mach (abfd) == bfd_mach_h8300s)
 	  && value >= 0xffff00
 	  && value <= 0xffffff)
 	{
@@ -1125,7 +1128,8 @@ h8300_reloc16_extra_cases (abfd, link_info, link_order, reloc, data, src_ptr,
 						  link_info,
 						  input_section),
 		      vectors_sec->contents + h->offset);
-	else if (bfd_get_mach (input_section->owner) == bfd_mach_h8300h)
+	else if (bfd_get_mach (input_section->owner) == bfd_mach_h8300h
+		 || bfd_get_mach (input_section->owner) == bfd_mach_h8300s)
 	  bfd_put_32 (abfd,
 		      bfd_coff_reloc16_get_value (reloc,
 						  link_info,
@@ -1294,7 +1298,8 @@ h8300_bfd_link_add_symbols(abfd, info)
 		     takes 2 bytes on the h8300 and 4 bytes on the h8300h.  */
 		  if (bfd_get_mach (abfd) == bfd_mach_h8300)
 		    h8300_coff_hash_table (info)->vectors_sec->_raw_size += 2;
-		  else if (bfd_get_mach (abfd) == bfd_mach_h8300h)
+		  else if (bfd_get_mach (abfd) == bfd_mach_h8300h
+			   || bfd_get_mach (abfd) == bfd_mach_h8300s)
 		    h8300_coff_hash_table (info)->vectors_sec->_raw_size += 4;
 		}
 	    }

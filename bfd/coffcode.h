@@ -1111,7 +1111,7 @@ coff_set_alignment_hook (abfd, section, scnhdr)
     }
 #endif
 
-#ifdef COFF_WITH_PE
+#ifdef COFF_IMAGE_WITH_PE
   /* In a PE image file, the s_paddr field holds the virtual size of a
      section, while the s_size field holds the raw size.  */
   if (hdr->s_paddr != 0)
@@ -1499,7 +1499,6 @@ coff_set_arch_mach_hook (abfd, filehdr)
       break;
 #endif
 
-/* start-sanitize-h8s */
 #ifdef H8300SMAGIC
     case H8300SMAGIC:
       arch = bfd_arch_h8300;
@@ -1509,7 +1508,6 @@ coff_set_arch_mach_hook (abfd, filehdr)
       break;
 #endif
 
-/* end-sanitize-h8s */
 #ifdef SH_ARCH_MAGIC_BIG
     case SH_ARCH_MAGIC_BIG:
     case SH_ARCH_MAGIC_LITTLE:
@@ -1960,11 +1958,9 @@ coff_set_flags (abfd, magicp, flagsp)
 	case bfd_mach_h8300h:
 	  *magicp = H8300HMAGIC;
 	  return true;
-/* start-sanitize-h8s */
 	case bfd_mach_h8300s:
 	  *magicp = H8300SMAGIC;
 	  return true;
-/* end-sanitize-h8s */
 	}
       break;
 #endif
@@ -2186,7 +2182,7 @@ coff_compute_section_file_positions (abfd)
 #endif
       current->filepos = sofar;
 
-#ifdef COFF_WITH_PE
+#ifdef COFF_IMAGE_WITH_PE
       /* With PE we have to pad each section to be a multiple of its
 	 page size too, and remember both sizes.  */
 
@@ -2464,6 +2460,9 @@ coff_write_object_contents (abfd)
       section.s_size =  current->_raw_size;
 
 #ifdef COFF_WITH_PE
+      section.s_paddr = 0;
+#endif
+#ifdef COFF_IMAGE_WITH_PE
       /* Reminder: s_paddr holds the virtual size of the section.  */
       if (coff_section_data (abfd, current) != NULL
 	  && pei_section_data (abfd, current) != NULL)

@@ -1,5 +1,5 @@
 /* BFD library support routines for architectures.
-   Copyright (C) 1990, 91-95, 1996 Free Software Foundation, Inc.
+   Copyright (C) 1990, 91, 92, 93, 94, 95, 1996 Free Software Foundation, Inc.
    Hacked by John Gilmore and Steve Chamberlain of Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -86,21 +86,22 @@ DESCRIPTION
 .#define bfd_mach_i960_mc        4
 .#define bfd_mach_i960_xa        5
 .#define bfd_mach_i960_ca        6
-. {* start-sanitize-i960xl *}
-.#define bfd_mach_i960_xl	 7
-. {* end-sanitize-i960xl *}
+.#define bfd_mach_i960_jx	 7
 .#define bfd_mach_i960_hx        8
 .
 .  bfd_arch_a29k,      {* AMD 29000 *}
 .  bfd_arch_sparc,     {* SPARC *}
 .#define bfd_mach_sparc			1
 .{* The difference between v8plus and v9 is that v9 is a true 64 bit env.  *}
-.#define bfd_mach_sparc_v8plus		2
-.#define bfd_mach_sparc_v8plusa		3 {* with ultrasparc add'ns *}
-.#define bfd_mach_sparc_v9		4
-.#define bfd_mach_sparc_v9a		5 {* with ultrasparc add'ns *}
+.#define bfd_mach_sparc_sparclet	2
+.#define bfd_mach_sparc_sparclite	3
+.#define bfd_mach_sparc_v8plus		4
+.#define bfd_mach_sparc_v8plusa		5 {* with ultrasparc add'ns *}
+.#define bfd_mach_sparc_v9		6
+.#define bfd_mach_sparc_v9a		7 {* with ultrasparc add'ns *}
 .{* Nonzero if MACH has the v9 instruction set.  *}
-.#define bfd_mach_sparc_v9_p(mach) ((mach) != bfd_mach_sparc)
+.#define bfd_mach_sparc_v9_p(mach) \
+.  ((mach) >= bfd_mach_sparc_v8plus && (mach) <= bfd_mach_sparc_v9a)
 .  bfd_arch_mips,      {* MIPS Rxxxx *}
 .  bfd_arch_i386,      {* Intel 386 *}
 .  bfd_arch_we32k,     {* AT&T WE32xxx *}
@@ -114,6 +115,7 @@ DESCRIPTION
 .  bfd_arch_h8300,     {* Hitachi H8/300 *}
 .#define bfd_mach_h8300   1
 .#define bfd_mach_h8300h  2
+.#define bfd_mach_h8300s  3
 .  bfd_arch_powerpc,   {* PowerPC *}
 .  bfd_arch_rs6000,    {* IBM RS/6000 *}
 .  bfd_arch_hppa,      {* HP PA RISC *}
@@ -126,9 +128,6 @@ DESCRIPTION
 .  bfd_arch_arm,       {* Advanced Risc Machines ARM *}
 .  bfd_arch_ns32k,     {* National Semiconductors ns32000 *}
 .  bfd_arch_w65,       {* WDC 65816 *}
-. {* start-sanitize-rce *}
-.  bfd_arch_rce,       {* Motorola RCE *}
-. {* end-sanitize-rce *}
 . {* start-sanitize-arc *}
 .  bfd_arch_arc,       {* Argonaut RISC Core *}
 .#define bfd_mach_arc_base 0
@@ -192,9 +191,6 @@ extern const bfd_arch_info_type bfd_mips_arch;
 extern const bfd_arch_info_type bfd_powerpc_arch;
 extern const bfd_arch_info_type bfd_rs6000_arch;
 extern const bfd_arch_info_type bfd_sh_arch;
-/* start-sanitize-rce */
-extern const bfd_arch_info_type bfd_rce_arch;
-/* end-sanitize-rce */
 extern const bfd_arch_info_type bfd_sparc_arch;
 extern const bfd_arch_info_type bfd_vax_arch;
 extern const bfd_arch_info_type bfd_we32k_arch;
@@ -225,9 +221,6 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
   &bfd_powerpc_arch,
   &bfd_rs6000_arch,
   &bfd_sh_arch,
-/* start-sanitize-rce */
-  &bfd_rce_arch,
-/* end-sanitize-rce */
   &bfd_sparc_arch,
   &bfd_vax_arch,
   &bfd_we32k_arch,

@@ -207,7 +207,6 @@ Tue Jun 18 15:17:36 1996  Jeffrey A. Law  <law@rtl.cygnus.com>
 	* coff-h8300.c: Remove #if 0 code.
 	(compatable): Don't allow mixing/matching of different architectures.
 	
-start-sanitize-h8s
 	* archures.c (bfd_mach_h8300s): Add.
 	* bfd-in2.h: Rebuilt.
 	* coff-h8300.c (funcvec_hash_newfunc): Handle H8/S too.
@@ -220,7 +219,6 @@ start-sanitize-h8s
 	* cpu-h8300.c (h8300_scan): Likewise.
 	Add H8/S to bfd_h8300_arch list.
 
-end-sanitize-h8s
 Tue Jun 18 14:42:58 1996  Klaus Kaempf  <kkaempf@progis.de>
 
 	Added support for Alpha OpenVMS:

@@ -1192,6 +1192,7 @@ enum bfd_architecture
   bfd_arch_h8300,      /* Hitachi H8/300 */
 #define bfd_mach_h8300   1
 #define bfd_mach_h8300h  2
+#define bfd_mach_h8300s  3
   bfd_arch_powerpc,    /* PowerPC */
   bfd_arch_rs6000,     /* IBM RS/6000 */
   bfd_arch_hppa,       /* HP PA RISC */
@@ -1592,8 +1593,8 @@ relocation types already defined. */
   BFD_RELOC_SPARC_6,
   BFD_RELOC_SPARC_5,
 
-/* Alpha ECOFF relocations.  Some of these treat the symbol or "addend"
-in some special way.
+/* Alpha ECOFF and ELF relocations.  Some of these treat the symbol or
+"addend" in some special way.
 For GPDISP_HI16 ("gpdisp") relocations, the symbol is ignored when
 writing; when reading, it will be the absolute section symbol.  The
 addend is the displacement in bytes of the "lda" instruction from
@@ -1605,6 +1606,11 @@ with GPDISP_HI16 relocs.  The addend is ignored when writing the
 relocations out, and is filled in with the file's GP value on
 reading, for convenience. */
   BFD_RELOC_ALPHA_GPDISP_LO16,
+
+/* The ELF GPDISP relocation is exactly the same as the GPDISP_HI16
+relocation except that there is no accompanying GPDISP_LO16
+relocation. */
+  BFD_RELOC_ALPHA_GPDISP,
 
 /* The Alpha LITERAL/LITUSE relocs are produced by a symbol reference;
 the assembler turns it into a LDQ instruction to load the address of
