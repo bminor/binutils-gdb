@@ -1,3 +1,7 @@
+Tue Apr 26 10:23:04 1994  Stu Grossman  (grossman at cygnus.com)
+
+	* i386-nlmstub.c:  An interim version till we get PIN for the x86.
+
 Tue Apr 26 09:50:45 1994  Stu Grossman  (grossman at cygnus.com)
 
 	* dbxread.c (record_minimal_symbol):  Record the section

@@ -77,6 +77,7 @@
 #include <advanced.h>
 #include <debugapi.h>
 #include <process.h>
+#include <errno.h>
 
 /****************************************************/
 /* This information is from Novell.  It is not in any of the standard
@@ -138,9 +139,6 @@ static char *error_message;
 /* The AIO port handle.  */
 static int AIOhandle;
 
-/* The console screen.  */
-static int console_screen;
-
 /* BUFMAX defines the maximum number of characters in inbound/outbound
    buffers.  At least NUMREGBYTES*2 are needed for register packets */
 #define BUFMAX 400
@@ -160,6 +158,8 @@ enum regnames {EAX, ECX, EDX, EBX, ESP, EBP, ESI, EDI,
 
 /* Register values.  */
 static int registers[NUMREGBYTES/4];
+
+__main() {};
 
 /* Read a character from the serial port.  This must busy wait, but
    that's OK because we will be the only thread running anyhow.  */
@@ -196,12 +196,12 @@ putDebugChar (c)
   int err;
   LONG put;
 
-  err = AIOWriteData (AIOhandle, (char *) &c, 1, &put);
-  if (err != 0 || put != 1)
+  put = 0;
+  while (put < 1)
     {
-      error_message = "AIOWriteData failed";
-      ResumeThread (mainthread);
-      return 0;
+      err = AIOWriteData (AIOhandle, (char *) &c, 1, &put);
+      if (err != 0)
+	ConsolePrintf ("AIOWriteData: err = %d, put = %d\r\n", err, put);
     }
   return 1;
 }
@@ -593,7 +593,7 @@ handle_exception (T_StackFrame *old_frame)
 
   if (remote_debug)
     {
-      ConsolePrintf ("vector=%d: %s, sr=0x%x, pc=0x%x, thread=%d\r\n",
+      ConsolePrintf ("vector=%d: %s, sr=%08x, pc=%08x, thread=%08x\r\n",
 		     frame->ExceptionNumber,
 		     frame->ExceptionDescription,
 		     frame->ExceptionSystemFlags,
@@ -611,6 +611,11 @@ handle_exception (T_StackFrame *old_frame)
 		frame->ExceptionErrorCode);
       first_insn = *(char *) handle->LDInitializationProcedure;
       *(unsigned char *) handle->LDInitializationProcedure = 0xcc;
+      ConsolePrintf ("NLM offsets/lengths:  Code: 0x%x/0x%x, Data: 0x%x/0x%x, BSS: /0x%x\r\n",
+		     handle->LDCodeImageOffset, handle->LDCodeImageLength,
+		     handle->LDDataImageOffset, handle->LDDataImageLength,
+		     handle->LDUninitializedDataLength);
+
       return RETURN_TO_PROGRAM;
     }
 
@@ -678,7 +683,7 @@ handle_exception (T_StackFrame *old_frame)
       remcomOutBuffer[0] = 'N';
       remcomOutBuffer[1] =  hexchars[sigval >> 4];
       remcomOutBuffer[2] =  hexchars[sigval % 16];
-      sprintf (remcomOutBuffer + 3, "0x%x;0x%x;0x%x",
+      sprintf (remcomOutBuffer + 3, "%x;%x;%x",
 	       handle->LDCodeImageOffset,
 	       handle->LDDataImageOffset,
 	       handle->LDDataImageOffset + handle->LDDataImageLength);
@@ -707,7 +712,7 @@ handle_exception (T_StackFrame *old_frame)
 	  remcomOutBuffer[0] = 'N';
 	  remcomOutBuffer[1] =  hexchars[sigval >> 4];
 	  remcomOutBuffer[2] =  hexchars[sigval % 16];
-	  sprintf (remcomOutBuffer + 3, "0x%x;0x%x;0x%x",
+	  sprintf (remcomOutBuffer + 3, "%x;%x;%x",
 		   handle->LDCodeImageOffset,
 		   handle->LDDataImageOffset,
 		   handle->LDDataImageOffset + handle->LDDataImageLength);
@@ -814,6 +819,16 @@ handle_exception (T_StackFrame *old_frame)
     }
 }
 
+char *baudRates[] = { "50", "75", "110", "134.5", "150", "300", "600", "1200",
+			"1800", "2000",	"2400", "3600", "4800", "7200", "9600",
+			"19200", "38400", "57600", "115200" };
+
+char dataBits[] = "5678";
+
+char *stopBits[] = { "1", "1.5", "2" };
+
+char parity[] = "NOEMS";
+
 /* Start up.  The main thread opens the named serial I/O port, loads
    the named NLM module and then goes to sleep.  The serial I/O port
    is named as a board number and a port number.  It would be more DOS
@@ -831,15 +846,18 @@ main (argc, argv)
   char *cmdlin;
   int i;
 
-  /* Create a screen for the debugger.  */
-  console_screen = CreateScreen ("System Console", 0);
-  if (DisplayScreen (console_screen) != ESUCCESS)
-    fprintf (stderr, "DisplayScreen failed\n");
+/* Use the -B option to invoke the NID if you want to debug the stub. */
+
+  if (argc > 1 && strcmp(argv[1], "-B") == 0)
+    {
+      Breakpoint(argc);
+      ++argv, --argc;
+    }
 
   if (argc < 4)
     {
       fprintf (stderr,
-	       "Usage: load gdbserver board port program [arguments]\n");
+	       "Usage: load gdbserve board port program [arguments]\n");
       exit (1);
     }
 
@@ -872,11 +890,40 @@ main (argc, argv)
   err = AIOConfigurePort (AIOhandle, AIO_BAUD_9600, AIO_DATA_BITS_8,
 			  AIO_STOP_BITS_1, AIO_PARITY_NONE,
 			  AIO_HARDWARE_FLOW_CONTROL_OFF);
-  if (err != AIO_SUCCESS)
+
+  if (err == AIO_QUALIFIED_SUCCESS)
+    {
+      AIOPORTCONFIG portConfig;
+      AIODVRCONFIG dvrConfig;
+
+      fprintf (stderr, "Port configuration changed!\n");
+      AIOGetPortConfiguration (AIOhandle, &portConfig, &dvrConfig);
+      fprintf (stderr,
+	       "  Bit Rate: %s, Data Bits: %c, Stop Bits: %s, Parity: %c,\
+ Flow:%s\n",
+	       baudRates[portConfig.bitRate],
+	       dataBits[portConfig.dataBits],
+	       stopBits[portConfig.stopBits],
+	       parity[portConfig.parityMode],
+	       portConfig.flowCtrlMode ? "ON" : "OFF");
+    }
+  else if (err != AIO_SUCCESS)
     {
       fprintf (stderr, "Could not configure port: %d\n", err);
       AIOReleasePort (AIOhandle);
       exit (1);
+    }
+
+  if (AIOSetExternalControl(AIOhandle, AIO_EXTERNAL_CONTROL,
+			    (AIO_EXTCTRL_DTR | AIO_EXTCTRL_RTS))
+      != AIO_SUCCESS)
+    {
+      LONG extStatus, chgdExtStatus;
+
+      fprintf (stderr, "Could not set desired port controls!\n");
+      AIOGetExternalStatus (AIOhandle, &extStatus, &chgdExtStatus);
+      fprintf (stderr, "Port controls now: %d, %d\n", extStatus, 
+	       chgdExtStatus);
     }
 
   /* Register ourselves as an alternate debugger.  */
@@ -928,11 +975,11 @@ main (argc, argv)
   talking = 0;
 
   if (remote_debug > 0)
-    ConsolePrintf ("About to call LoadModule with \"%s\" %d %d\r\n",
-		   cmdlin, console_screen, __GetScreenID (console_screen));
+    ConsolePrintf ("About to call LoadModule with \"%s\" %08x\r\n",
+		   cmdlin, __GetScreenID (GetCurrentScreen()));
 
   /* Start up the module to be debugged.  */
-  err = LoadModule ((struct ScreenStruct *) __GetScreenID (console_screen),
+  err = LoadModule ((struct ScreenStruct *) __GetScreenID (GetCurrentScreen()),
 		    cmdlin, LO_DEBUG);
   if (err != 0)
     {
@@ -944,10 +991,10 @@ main (argc, argv)
 
   /* Wait for the debugger to wake us up.  */
   if (remote_debug > 0)
-    ConsolePrintf ("Suspending main thread (%d)\r\n", mainthread);
+    ConsolePrintf ("Suspending main thread (%08x)\r\n", mainthread);
   SuspendThread (mainthread);
   if (remote_debug > 0)
-    ConsolePrintf ("Resuming main thread (%d)\r\n", mainthread);
+    ConsolePrintf ("Resuming main thread (%08x)\r\n", mainthread);
 
   /* If we are woken up, print an optional error message, deregister
      ourselves and exit.  */
