@@ -1,3 +1,10 @@
+start-sanitize-tx49
+Wed Oct 29 15:10:56 1997  Gavin Koch  <gavin@cygnus.com>
+
+	* mips-opc.c (deret,dmult,dmultu,madd,maddu,pref,sdbbp): 
+	Add tx49 insns and configury.
+
+end-sanitize-tx49
 Tue Oct 28 17:59:32 1997  Ken Raeburn  <raeburn@cygnus.com>
 
 	* mips-opc.c (ffc, ffs): Fix mask.
