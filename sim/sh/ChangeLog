@@ -1,3 +1,51 @@
+Wed May 18 14:18:53 1994  Doug Evans  (dje@canuck.cygnus.com)
+
+	* interp.c (sim_*): Make result void where there isn't one.
+	(sim_set_pc): Delete.
+	(sim_info): Delete printf_fn arg, all callers changed.
+	Call printf_filtered instead.
+	(sim_close): New function.
+	(sim_load): New function.
+	(sim_create_inferior): Renamed from sim_set_args, all callers changed.
+	* run.c: #include <varargs.h>, "remote-sim.h".
+	(printf_filtered): New function.
+
+Wed Apr 27 12:03:48 1994  Steve Chamberlain  (sac@cygnus.com)
+
+	* gencode.c (table): Get direction of some opcodes right.
+        (trapa, rte): Implement fully.
+	* interp.c (trap): Make stat call more portable.
+
+Fri Feb 11 21:59:38 1994  Steve Chamberlain  (sac@sphagnum.cygnus.com)
+
+	* gencode.c (main, gendefines): New -d option prints table of defines.
+	* interp.c (trap): Add a load of system calls. 
+	(sim_memory_size): Now default to 8Mbyte.
+        (PARANOID): Keep vector of registers with undefined contents.
+
+Mon Nov 15 14:37:18 1993  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* gencode.c: mova uses aligned addresses
+	* interp.c (trap): Return results in r0.
+
+Tue Oct 26 10:38:55 1993  Doug Evans  (dje@canuck.cygnus.com)
+
+	* Makefile.in (CSEARCH): Add -I$(srcdir)/../../gdb
+	* interp.c: #include "remote-sim.h".
+	(sim_resume): int result, new arg `siggnal'.
+	(sim_write): Use SIM_ADDR for type of arg `addr'.
+	(sim_read): Use SIM_ADDR for type of arg `addr'.
+	Use unsigned char * for `buffer'.
+	(sim_store_register): int result.
+	(sim_fetch_register): Ditto.
+	(sim_stop_reason): Renamed from sim_stop_signal.  New arg `reason'.
+	(sim_set_pc): int result, use SIM_ADDR for type of arg `x'.
+	(sim_info): int result, new args `verbose', `printf_fn'.
+	(sim_kill): int result.
+	(sim_open): int result, new arg `name'.
+	* run.c: #include <stdio.h>
+	(main): Update call to sim_info.
+
 Sat Oct 23 15:09:29 1993  Doug Evans  (dje@canuck.cygnus.com)
 
 	* interp.c (sim_stop_signal): Result is now enum sim_stop.

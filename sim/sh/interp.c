@@ -17,11 +17,14 @@
    MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 
 */
+
 #include <signal.h>
 #include "sysdep.h"
 #include <sys/times.h>
 #include <sys/param.h>
 #include "bfd.h"
+#include "remote-sim.h"
+#include "../../newlib/libc/sys/sh/sys/syscall.h"
 #define O_RECOMPILE 85
 #define DEFINE_TABLE
 
@@ -48,7 +51,36 @@
 #define PC pc
 #define C cycles
 
+char *fail()
+{
+
+
+}
+
+
+
+/* Define this to enable register lifetime checking.
+   The compiler generates "add #0,rn" insns to mark registers as invalid, 
+   the simulator uses this info to call fail if it finds a ref to an invalid
+   register before a def
+   
+   #define PARANOID
+*/
+
+#ifdef PARANOID
+int valid[16];
+#define CREF(x)  if(!valid[x]) fail();
+#define CDEF(x)  valid[x] = 1;
+#define UNDEF(x) valid[x] = 0;
+#else
+#define CREF(x)
+#define CDEF(x)
+#define UNDEF(x)
+#endif
+
+
 #ifdef TARGET_BIG_ENDIAN
+#if 0
 #define LMEM(x) 	*((long *)(memory+((x)&maskl)))
 #define BMEM(x) 	*((char *)(memory+((x)&maskb)))
 #define UWMEM(x) 	*((unsigned short *)(memory+((x)&maskw)))
@@ -60,6 +92,19 @@
 #define RUWAT(x)  	(UWMEM(x))
 #define WBAT(x,value)  	(BMEM(x) = value)
 #define RBAT(x)  	(BMEM(x))
+#else
+#define LMEM(x) 	((x)&maskl ? fail() :  *((long *)(memory+((x)&maskl))))
+#define BMEM(x) 	((x) &maskb ? fail() : *((char *)(memory+((x)&maskb))))
+#define UWMEM(x) 	((x)&maskw ? fail() : *((unsigned short *)(memory+((x)&maskw))))
+#define SWMEM(x) 	((x)&maskw ? fail() : *((short *)(memory+((x)&maskw))))
+#define WLAT(x,value)  	(LMEM(x) = value)
+#define RLAT(x)  	(LMEM(x))
+#define WWAT(x,value)  	(UWMEM(x) = value)
+#define RSWAT(x)  	(SWMEM(x))
+#define RUWAT(x)  	(UWMEM(x))
+#define WBAT(x,value)  	(BMEM(x) = value)
+#define RBAT(x)  	(BMEM(x))
+#endif
 #else
 /* For little endian or unknown host machines */
 #define WLAT(x,value)\
@@ -95,10 +140,18 @@
 #define SL(TEMPPC)  	iword= RUWAT(TEMPPC); goto top;
 
 
+int empty[16];
+
 #define L(x)   thislock = x;
 #define TL(x)  if ((x) == prevlock) stalls++;
 #define TB(x,y)  if ((x) == prevlock || (y)==prevlock) stalls++;
+
+#ifdef __GO32__
 int sim_memory_size = 19;
+#else
+int sim_memory_size = 24;
+#endif
+
 static int sim_profile_size = 17;
 static int nsamples;
 static int sim_timeout;
@@ -163,7 +216,7 @@ saved_state_type saved_state;
 static int
 get_now ()
 {
-  return time((char*)0);
+  return time((long*)0);
 }
 
 static int
@@ -226,7 +279,27 @@ ptr (x)
   return (char *) (x + saved_state.asregs.memory);
 }
 
-/* Simulate a monitor trap.  */
+static char *wwat(ptr, val)
+char *ptr;
+int val;
+{
+  ptr[0] = val >> 8;
+  ptr[1] = val;
+  return ptr+2;
+}
+
+static char *wlat(ptr,val)
+char *ptr;
+int val;
+{
+  ptr[0] = val>> 24;
+  ptr[1] = val >> 16;
+  ptr[2] = val >>8;
+  ptr[3] = val;
+  return ptr+4;
+}
+
+/* Simulate a monitor trap, put the result into r0 and errno into r1 */
 
 static void
 trap (i, regs)
@@ -249,31 +322,102 @@ trap (i, regs)
 
 	switch (regs[4])
 	  {
-	  case 3:
-	    regs[4] = read (regs[5], ptr (regs[6]), regs[7]);
+#ifndef __GO32__
+	  case SYS_fork: 
+	    regs[0] = fork();
 	    break;
-	  case 4:
-	    regs[4] = write (regs[5], ptr (regs[6]), regs[7]);
+
+	  case SYS_execve:
+	    regs[0] = execve(ptr(regs[5]), ptr(regs[6]), ptr(regs[7]));
 	    break;
-	  case 19:
-	    regs[4] = lseek (regs[5], regs[6], regs[7]);
+	  case SYS_execv:
+	    regs[0] = execv(ptr(regs[5]), ptr(regs[6]));
 	    break;
-	  case 6:
-	    regs[4] = close (regs[5]);
+	  case SYS_pipe:
+	    {
+	      char* buf;
+	      int host_fd[2];
+
+	      buf = ptr(regs[5]);
+
+	      regs[0] = pipe(host_fd); 
+
+	      buf = wlat(buf, host_fd[0]);
+	      buf = wlat(buf, host_fd[1]);
+	    }
 	    break;
-	  case 5:
-	    regs[4] = open (ptr (regs[5]), regs[6]);
+
+	  case SYS_wait: 
+            regs[0] = wait(ptr(regs[5]));	
 	    break;
-	  case 1:
+#endif
+	  case SYS_read:
+	    regs[0] = read (regs[5], ptr (regs[6]), regs[7]);
+	    break;
+	  case SYS_write:
+	    regs[0] = write (regs[5], ptr (regs[6]), regs[7]);
+	    break;
+	  case SYS_lseek:
+	    regs[0] = lseek (regs[5], regs[6], regs[7]);
+	    break;
+	  case SYS_close:
+	    regs[0] = close (regs[5]);
+	    break;
+	  case SYS_open:
+	    regs[0] = open (ptr (regs[5]), regs[6]);
+	    break;
+	  case SYS_exit:
 	    /* EXIT */
 	    saved_state.asregs.exception = SIGQUIT;
 	    errno = regs[5];
 	    break;
 	    
+	  case SYS_stat: 	/* added at hmsi */
+	    /* stat system call */
+	    {      
+	      struct stat host_stat;
+	      char *buf;
+
+	      regs[0] = stat( ptr(regs[5]), &host_stat);
+
+	      buf = ptr(regs[6]); 
+
+	      buf = wwat(buf, host_stat.st_dev);
+	      buf = wwat(buf, host_stat.st_ino);
+
+	      buf = wlat(buf, host_stat.st_mode);
+
+	      buf = wwat(buf, host_stat.st_nlink);
+	      buf = wwat(buf, host_stat.st_uid);
+	      buf = wwat(buf, host_stat.st_gid);
+	      buf = wwat(buf, host_stat.st_rdev);
+
+	      buf = wlat(buf, host_stat.st_size);
+	      buf = wlat(buf, host_stat.st_atime);
+	      buf = wlat(buf, 0);
+	      buf = wlat(buf, host_stat.st_mtime);
+	      buf = wlat(buf, 0);
+	      buf = wlat(buf, host_stat.st_ctime);
+	      buf = wlat(buf, 0);
+	      buf = wlat(buf, host_stat.st_blksize);
+	      buf = wlat(buf, host_stat.st_blocks);
+	    }   
+            break;    
+
+          case SYS_chown:
+	    regs[0] =  chown( ptr(regs[5]), regs[6], regs[7] );
+	    break;
+	  case SYS_chmod:
+	    regs[0] = chmod( ptr(regs[5]), regs[6]);
+            break;
+          case SYS_utime:
+	    regs[0] = utime (ptr(regs[5]), ptr(regs[6]));
+	    break;
+
 	  default:
 	    abort ();
 	  }
-	regs[0] = errno;
+	regs[1] = errno;
 	errno = perrno;
       }
 
@@ -281,6 +425,7 @@ trap (i, regs)
 
     case 255:
       saved_state.asregs.exception = SIGTRAP;
+      saved_state.asregs.exception = 5;
       break;
     }
 
@@ -528,9 +673,10 @@ gotcall (from, to)
 }
 
 #define MMASKB ((saved_state.asregs.msize -1) & ~0)
+
 void
-sim_resume (step)
-     int step;
+sim_resume (step, siggnal)
+     int step, siggnal;
 {
   register unsigned int pc;
   register int cycles = 0;
@@ -651,7 +797,7 @@ sim_resume (step)
 
 int
 sim_write (addr, buffer, size)
-     long int addr;
+     SIM_ADDR addr;
      unsigned char *buffer;
      int size;
 {
@@ -662,13 +808,13 @@ sim_write (addr, buffer, size)
     {
       saved_state.asregs.memory[MMASKB & (addr + i)] = buffer[i];
     }
-return size;
+  return size;
 }
 
 int
 sim_read (addr, buffer, size)
-     long int addr;
-     char *buffer;
+     SIM_ADDR addr;
+     unsigned char *buffer;
      int size;
 {
   int i;
@@ -679,14 +825,14 @@ sim_read (addr, buffer, size)
     {
       buffer[i] = saved_state.asregs.memory[MMASKB & (addr + i)];
     }
-return size;
+  return size;
 }
 
 
 void
 sim_store_register (rn, value)
      int rn;
-     unsigned char value[4];
+     unsigned char *value;
 {
   saved_state.asregs.regs[rn] = (value[0] << 24) | (value[1] << 16) | (value[2] << 8) | (value[3]);
 }
@@ -694,7 +840,7 @@ sim_store_register (rn, value)
 void
 sim_fetch_register (rn, buf)
      int rn;
-     char *buf;
+     unsigned char *buf;
 {
   int value = ((int *) (&saved_state))[rn];
 
@@ -708,41 +854,36 @@ sim_trace ()
   return 0;
 }
 
-enum sim_stop
-sim_stop_signal (sigrc)
+void
+sim_stop_reason (reason, sigrc)
+     enum sim_stop *reason;
      int *sigrc;
 {
+  *reason = sim_stopped;
   *sigrc = saved_state.asregs.exception;
-  return sim_stopped;
-}
-
-void
-sim_set_pc (x)
-     int x;
-{
-  saved_state.asregs.pc = x;
 }
 
 
 void
-sim_info ()
+sim_info (verbose)
+     int verbose;
 {
   double timetaken = (double) saved_state.asregs.ticks / (double) now_persec ();
   double virttime = saved_state.asregs.cycles / 36.0e6;
 
-  printf ("\n\n# instructions executed  %10d\n", saved_state.asregs.insts);
-  printf ("# cycles                 %10d\n", saved_state.asregs.cycles);
-  printf ("# pipeline stalls        %10d\n", saved_state.asregs.stalls);
-  printf ("# real time taken        %10.4f\n", timetaken);
-  printf ("# virtual time taken     %10.4f\n", virttime);
-  printf ("# profiling size         %10d\n", sim_profile_size);
-  printf ("# profiling frequency    %10d\n", saved_state.asregs.profile);
-  printf ("# profile maxpc          %10x\n", (1 << sim_profile_size) << PROFILE_SHIFT);
+  printf_filtered ("\n\n# instructions executed  %10d\n", saved_state.asregs.insts);
+  printf_filtered ("# cycles                 %10d\n", saved_state.asregs.cycles);
+  printf_filtered ("# pipeline stalls        %10d\n", saved_state.asregs.stalls);
+  printf_filtered ("# real time taken        %10.4f\n", timetaken);
+  printf_filtered ("# virtual time taken     %10.4f\n", virttime);
+  printf_filtered ("# profiling size         %10d\n", sim_profile_size);
+  printf_filtered ("# profiling frequency    %10d\n", saved_state.asregs.profile);
+  printf_filtered ("# profile maxpc          %10x\n", (1 << sim_profile_size) << PROFILE_SHIFT);
 
   if (timetaken != 0)
     {
-      printf ("# cycles/second          %10d\n", (int) (saved_state.asregs.cycles / timetaken));
-      printf ("# simulation ratio       %10.4f\n", virttime / timetaken);
+      printf_filtered ("# cycles/second          %10d\n", (int) (saved_state.asregs.cycles / timetaken));
+      printf_filtered ("# simulation ratio       %10.4f\n", virttime / timetaken);
     }
 }
 
@@ -763,19 +904,39 @@ sim_set_profile_size (n)
 
 
 void
-sim_kill()
+sim_open (name)
+     char *name;
 {
+  /* nothing to do */
+}
 
+void
+sim_close (quitting)
+     int quitting;
+{
+  /* nothing to do */
 }
 
 int
-sim_open()
+sim_load (prog, from_tty)
+     char *prog;
+     int from_tty;
 {
-  return 0;
-}
-int sim_set_args()
-{
-  return 0;
+  /* Return nonzero so GDB will handle it.  */
+  return 1;
 }
 
+void
+sim_create_inferior (start_address, argv, env)
+     SIM_ADDR start_address;
+     char **argv;
+     char **env;
+{
+  saved_state.asregs.pc = start_address;
+}
 
+void
+sim_kill ()
+{
+  /* nothing to do */
+}

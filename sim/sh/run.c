@@ -22,10 +22,10 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
    sac@cygnus.com */
 
 #include <stdio.h>
+#include <varargs.h>
 #include "bfd.h"
 #include "sysdep.h"
-
-extern printf();
+#include "remote-sim.h"
 
 int
 main (ac, av)
@@ -93,7 +93,7 @@ main (ac, av)
 	    }
 
 	  start_address = bfd_get_start_address (abfd);
-	  sim_set_pc (start_address);
+	  sim_create_inferior (start_address, NULL, NULL);
 	  if (trace)
 	    {
 	      int done = 0;
@@ -107,7 +107,7 @@ main (ac, av)
 	      sim_resume (0, 0);
 	    }
 	  if (verbose)
-	    sim_info (printf, 0);
+	    sim_info (0);
 
 	  /* Find out what was in r0 and return that */
 	  {
@@ -120,4 +120,20 @@ main (ac, av)
     }
 
   return 1;
+}
+
+/* Callbacks used by the simulator proper.  */
+
+void
+printf_filtered (va_alist)
+     va_dcl
+{
+  va_list args;
+  char *format;
+
+  va_start (args);
+  format = va_arg (args, char *);
+
+  vfprintf (stdout, format, args);
+  va_end (args);
 }
