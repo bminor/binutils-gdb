@@ -1,3 +1,8 @@
+Mon Feb  9 14:16:11 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am: Update dependencies.
+	* Makefile.in: Rebuild.
+
 Sat Feb  7 15:33:51 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure, aclocal.m4: Rebuild with new libtool.
