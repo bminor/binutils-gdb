@@ -4,6 +4,8 @@
 if {[istarget *arm*-*-*] || [istarget "xscale-*-*"]} then {
     run_dump_test "inst"
 
+    run_dump_test "ldconst"
+
     gas_test "arm3.s" "-marm3" $stdoptlist "Arm 3 instructions"
 
     gas_test "arm6.s" "-marm6" $stdoptlist "Arm 6 instructions"

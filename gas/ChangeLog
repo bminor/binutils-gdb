@@ -1,3 +1,8 @@
+2002-01-11  Richard Earnshaw  <rearnsha@arm.com>
+
+	* tc-arm.c ((do_ldst): Fix handling an immediate expression pseudo
+	op that can be translated into a mvn instruction.
+
 2002-01-11  Steve Ellcey  <sje@cup.hp.com>
 
 	* gas/config/tc-ia64.h (MD_FLAGS_DEFAULT): New Macro for

@@ -1,3 +1,9 @@
+2002-01-11   Richard Earnshaw  <rearnsha@arm.com>
+
+	* gas/arm/ldconst.s gas/arm/ldconst.d: New files.  Test ldr with
+	immediate pseudo-operations.
+	* gas/arm/arm.exp: Run it.
+
 2002-01-10  matthew green  <mrg@redhat.com>
 
 	* gas/xstormy16/allinsn.sh (movf, jmp, call, icall): Update.

@@ -475,6 +475,7 @@ struct reg_entry
   int          number;
 };
 
+/* Some well known registers that we refer to directly elsewhere.  */
 #define REG_SP  13
 #define REG_LR  14
 #define REG_PC	15
@@ -4888,32 +4889,48 @@ do_ldst (str)
 	  return;
 	}
 
-      if (inst.reloc.exp.X_op == O_constant
-	  && (value = validate_immediate (inst.reloc.exp.X_add_number)) != FAIL)
+      if (inst.reloc.exp.X_op == O_constant)
 	{
-	  /* This can be done with a mov instruction.  */
-	  inst.instruction &= LITERAL_MASK;
-	  inst.instruction |= INST_IMMEDIATE | (OPCODE_MOV << DATA_OP_SHIFT);
-	  inst.instruction |= (value & 0xfff);
-	  end_of_line (str);
-	  return;
-	}
-      else
-	{
-	  /* Insert into literal pool.  */
-	  if (add_to_lit_pool () == FAIL)
+	  value = validate_immediate (inst.reloc.exp.X_add_number);
+
+	  if (value != FAIL)
 	    {
-	      if (!inst.error)
-		inst.error = _("literal pool insertion failed");
+	      /* This can be done with a mov instruction.  */
+	      inst.instruction &= LITERAL_MASK;
+	      inst.instruction |= (INST_IMMEDIATE
+				   | (OPCODE_MOV << DATA_OP_SHIFT));
+	      inst.instruction |= value & 0xfff;
+	      end_of_line (str);
 	      return;
 	    }
 
-	  /* Change the instruction exp to point to the pool.  */
-	  inst.reloc.type = BFD_RELOC_ARM_LITERAL;
-	  inst.reloc.pc_rel = 1;
-	  inst.instruction |= (REG_PC << 16);
-	  pre_inc = 1;
+	  value = validate_immediate (~inst.reloc.exp.X_add_number);
+
+	  if (value != FAIL)
+	    {
+	      /* This can be done with a mvn instruction.  */
+	      inst.instruction &= LITERAL_MASK;
+	      inst.instruction |= (INST_IMMEDIATE
+				   | (OPCODE_MVN << DATA_OP_SHIFT));
+	      inst.instruction |= value & 0xfff;
+	      end_of_line (str);
+	      return;
+	    }
 	}
+
+      /* Insert into literal pool.  */
+      if (add_to_lit_pool () == FAIL)
+	{
+	  if (!inst.error)
+	    inst.error = _("literal pool insertion failed");
+	  return;
+	}
+
+      /* Change the instruction exp to point to the pool.  */
+      inst.reloc.type = BFD_RELOC_ARM_LITERAL;
+      inst.reloc.pc_rel = 1;
+      inst.instruction |= (REG_PC << 16);
+      pre_inc = 1;
     }
   else
     {
@@ -5841,7 +5858,7 @@ do_fpa_ldmstm (str)
       abort ();
     }
 
-  if (inst.instruction & (CP_T_Pre | CP_T_UD)) /* ed/fd format.  */
+  if (inst.instruction & (CP_T_Pre | CP_T_UD)) /* ea/fd format.  */
     {
       int reg;
       int write_back;
@@ -7995,7 +8012,6 @@ md_begin ()
     default:
       mach = bfd_mach_arm_4;
       break;
-
     }
 
   /* Catch special cases.  */
