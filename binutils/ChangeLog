@@ -1,3 +1,32 @@
+Mon May  3 19:11:48 1993  Per Bothner  (bothner@cygnus.com)
+
+	* Makefile.in:  Change definition of $(tooldir) to match FSF.
+
+Wed Apr 28 23:41:32 1993  David J. Mackenzie  (djm@rtl.cygnus.com)
+
+	* size.c (usage): Add missing options.
+	(main): Clean up option parser.
+
+	* objdump.c (usage): Add missing options.
+	(display_file): Print program name before calling
+	bdf_perror. 
+
+	* nm.c (usage): Add missing options.
+	(main): Clean up option parser.
+	(display_file): Print program name before calling
+	bdf_perror. 
+
+	* copy.c (copy_usage, strip_usage): Add missing options.
+
+	* ar.c (usage): New function.
+	(main): Call it.
+	(open_inarch, do_quick_append): Print program name before calling
+	bdf_perror. 
+
+Thu Apr 22 15:01:35 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* nm.c (main): Accept and ignore -A and -B for MIPS compatibility.
+
 Mon Apr 19 14:06:59 1993  Rob Savoye  (rob@cygnus.com)
 
 	* Makefile.in: Added FLAGS_TO_PASS so tests get run on freshly

@@ -25,7 +25,7 @@ program_transform_name =
 exec_prefix = $(prefix)
 bindir = $(exec_prefix)/bin
 libdir = $(exec_prefix)/lib
-tooldir = $(libdir)/$(target_alias)
+tooldir = $(exec_prefix)/$(target_alias)
 
 datadir = $(prefix)/lib
 mandir = $(prefix)/man
@@ -110,10 +110,6 @@ INCLUDES = -I. -I$(srcdir) -I$(BASEDIR)/include -I$(BASEDIR)/bfd
 .c.o:
 	$(CC) -c $(CFLAGS) $(INCLUDES) $(HDEFINES) $(TDEFINES) $<
 
-# When adding .o files, to make VPATH work in Sun Make, you have to
-# also add a foo.o: foo.c line at the bottom of the file.
-DISASMS = i960-pinsn.o am29k-pinsn.o
-
 #
 ## Random definitions
 # Hopefully all these may be flushed once we get configuration down pat.
@@ -141,20 +137,35 @@ ADDL_LIBS = $(MALLOC) $(BULIBS) $(BFD) $(LIBIBERTY)
 
 BFD = $(LIBDIR)/libbfd.a
 OPCODES = $(OPCODEDIR)/libopcodes.a
+
+RUNTESTFLAGS = 
+FLAGS_TO_PASS = \
+	"RUNTESTFLAGS=$(RUNTESTFLAGS) \
+	SIZE=`if [ -f $$rootme/$(SIZE_PROG) ] ; then echo $$rootme/$(SIZE_PROG) ; else echo $(SIZE_PROG); fi` \
+	COPY=`if [ -f $$rootme/$(COPY_PROG) ] ; then echo $$rootme/$(COPY_PROG) ; else echo $(COPY_PROG); fi` \
+	NM=`if [ -f $$rootme/$(NM_PROG) ] ; then echo $$rootme/$(NM_PROG) ; else echo $(NM_PROG); fi` \
+	AR=`if [ -f $$rootme/$(AR_PROG) ] ; then echo $$rootme/$(AR_PROG) ; else echo $(AR_PROG); fi` \
+	OBJDUMP=`if [ -f $$rootme/$(OBJDUMP_PROG) ] ; then echo $$rootme/$(OBJDUMP_PROG) ; else echo $(OBJDUMP_PROG); fi` \
+	STRIP=`if [ -f $$rootme/$(STRIP_PROG) ] ; then echo $$rootme/$(STRIP_PROG) ; else echo $(STRIP_PROG); fi` \
+	RANLIB=`if [ -f $$rootme/$(RANLIB_PROG) ] ; then echo $$rootme/$(RANLIB_PROG) ; else echo $(RANLIB_PROG); fi` \
+	DEMANGLE=`if [ -f $$rootme/$(DEMANGLER_PROG) ] ; then echo $$rootme/$(DEMANGLER_PROG) ; else echo $(DEMANGLER_PROG); fi`"
+
 #
 ## The rules
 
-all: $(ADDL_LIBS) $(PROGS) testsuite
+all: $(ADDL_LIBS) $(PROGS)
 
 testsuite:
 	if [ -d testsuite ]; then \
 			(rootme=`pwd`/ ; export rootme ; \
 			 rootsrc=`cd $(srcdir); pwd`/ ; export rootsrc ; \
-			 cd testsuite; $(MAKE) $(FLAGS_TO_PASS)); \
+			 cd testsuite; $(MAKE) FLAGS_TO_PASS=$(FLAGS_TO_PASS)); \
 	else true ; fi
 
-check: all
-	/bin/sh $(srcdir)/sanity.sh .
+check: force
+	rootme=`pwd`; export rootme; cd testsuite ; \
+	$(MAKE) check $(FLAGS_TO_PASS)
+#	/bin/sh $(srcdir)/sanity.sh .
 
 installcheck:
 	/bin/sh $(srcdir)/sanity.sh $(bindir)
@@ -178,8 +189,8 @@ $(STRIP_PROG): $(ADDL_LIBS) copy.o is-strip.o $(BFD)
 $(NM_PROG): $(ADDL_LIBS) nm.o $(BFD)
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $(NM_PROG) nm.o $(ADDL_LIBS) $(LOADLIBES)
 
-$(OBJDUMP_PROG): $(ADDL_LIBS) size.o objdump.o $(DISASMS) $(BFD) $(OPCODES)
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(OBJDUMP_PROG) objdump.o $(DISASMS) $(OPCODES) $(ADDL_LIBS) $(LOADLIBES)
+$(OBJDUMP_PROG): $(ADDL_LIBS) size.o objdump.o $(BFD) $(OPCODES)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $(OBJDUMP_PROG) objdump.o $(OPCODES) $(ADDL_LIBS) $(LOADLIBES)
 
 $(DEMANGLER_PROG): $(LIBIBERTY_SRC_DIR)/cplus-dem.c
 	$(CC) $(LDFLAGS) $(CFLAGS) $(INCLUDES) $(HDEFINES) $(TDEFINES) -DMAIN -o $(DEMANGLER_PROG) $(LIBIBERTY_SRC_DIR)/cplus-dem.c $(LIBIBERTY) $(LOADLIBES)
@@ -392,7 +403,6 @@ $(DIST_NAME).tar.Z:
 
 # These get around a bug in Sun Make in SunOS 4.1.1
 alloca.o:alloca.c
-am29k-pinsn.o: am29k-pinsn.c
 ar.o: ar.c
 arsup.o: arsup.c
 bucomm.o: bucomm.c
@@ -401,7 +411,6 @@ filemode.o:filemode.c
 getopt.o:getopt.c
 getopt1.o:getopt1.c
 gmalloc.o:gmalloc.c
-i960-pinsn.o: i960-pinsn.c
 is-ranlib.o:is-ranlib.c
 is-strip.o:is-strip.c
 maybe-ranlib.o:maybe-ranlib.c
