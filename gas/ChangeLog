@@ -1,3 +1,9 @@
+Thu Dec 12 15:18:21 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* config/tc-ppc.c (ppc_elf_suffix): Move @plt to
+	BFD_RELOC_24_PLT_PCREL relocation.
+	(md_apply_fix3): Support BFD_RELOC_24_PLT_PCREL.
+
 start-sanitize-d10v
 Tue Dec 10 13:51:55 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
@@ -6,6 +12,9 @@ Tue Dec 10 13:51:55 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 end-sanitize-d10v
 Tue Dec 10 12:23:19 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-mn10300.c (md_assemble): Update to handle endianness
+	issues correctly.
 
 	* config/tc-mn10200.c (md_assemble): Opcode 0x0 is valid!
 	* config/tc-mn10300.c (md_assemble): Likewise.
