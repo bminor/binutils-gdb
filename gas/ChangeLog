@@ -1,3 +1,8 @@
+Sat Feb 13 00:17:26 1999  Richard Henderson  <rth@cygnus.com>
+
+	* config/tc-i386.c (i386_intel_operand): Ignore `SHORT' rather
+	than treat as an immediate specifier.
+
 Thu Feb 11 16:18:31 1999  Richard Henderson  <rth@cygnus.com>
 
 	* config/tc-i386.c: Prototype many functions.
