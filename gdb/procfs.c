@@ -5254,20 +5254,3 @@ procfs_first_available ()
   else
     return -1;
 }
-
-int
-procfs_get_pid_fd (pid)
-     int pid;
-{
-  procinfo *pi;
-
-  if (pid == -1 && inferior_pid != 0)
-    pi = find_procinfo (PIDGET (inferior_pid), 0);
-  else
-    pi = find_procinfo (PIDGET (pid), 0);
-
-  if (pi)
-    return pi->ctl_fd;
-  else
-    return -1;
-}

@@ -1318,61 +1318,24 @@ ps_lsetfpregs (gdb_ps_prochandle_t ph, lwpid_t lwpid,
 
 #ifdef TM_I386SOL2_H
 
-/* Get local descriptor table.  */
-
-#include <sys/procfs.h>
-#include <sys/reg.h>
-#include <sys/sysi86.h>
-
-static int nldt_allocated = 0;
-static struct ssd *ldt_bufp = NULL;
-
 /* Reads the local descriptor table of a LWP.  */
 
 ps_err_e
 ps_lgetLDT (gdb_ps_prochandle_t ph, lwpid_t lwpid,
 	    struct ssd *pldt)
 {
-  gregset_t gregset;
-  int lwp_fd;
-  ps_err_e val;
-  int nldt;
-  int i;
+  /* NOTE: only used on Solaris, therefore OK to refer to procfs.c */
+  extern struct ssd *procfs_find_LDT_entry (int);
+  struct ssd *ret;
 
-  /* Get procfs file descriptor for the LWP.  */
-  lwp_fd = procfs_get_pid_fd (BUILD_LWP (lwpid, PIDGET (inferior_pid)));
-  if (lwp_fd < 0)
-    return PS_BADLID;
-
-  /* Fetch registers und LDT descriptors.  */
-  if (ioctl (lwp_fd, PIOCGREG, &gregset) == -1)
-    return PS_ERR;
-
-  if (ioctl (lwp_fd, PIOCNLDT, &nldt) == -1)
-    return PS_ERR;
-
-  if (nldt_allocated < nldt)
+  ret = procfs_find_LDT_entry (BUILD_LWP (lwpid, PIDGET (inferior_pid)));
+  if (ret)
     {
-      ldt_bufp
-	= (struct ssd *) xrealloc (ldt_bufp, (nldt + 1) * sizeof (struct ssd));
-      nldt_allocated = nldt;
+      memcpy (pldt, ret, sizeof (struct ssd));
+      return PS_OK;
     }
-
-  if (ioctl (lwp_fd, PIOCLDT, ldt_bufp) == -1)
+  else	/* LDT not found. */
     return PS_ERR;
-
-  /* Search LDT for the LWP via register GS.  */
-  for (i = 0; i < nldt; i++)
-    {
-      if (ldt_bufp[i].sel == (gregset[GS] & 0xffff))
-	{
-	  *pldt = ldt_bufp[i];
-	  return PS_OK;
-	}
-    }
-
-  /* LDT not found.  */
-  return PS_ERR;
 }
 #endif /* TM_I386SOL2_H */
 
