@@ -1,3 +1,9 @@
+Mon Jan 18 12:51:44 1999  Christopher Faylor <cgf@cygnus.com>
+
+	* configure.in: Ensure that -luser32 is always linked in
+	for cygwin build.
+	* configure: Regenerated.
+
 Mon Jan 18 08:38:05 1999  Mark Alexander  <marka@cygnus.com>
 
 	* values.c (value_virtual_fn_field): Clear the pointed-to
