@@ -1,3 +1,44 @@
+Fri Sep  1 18:06:28 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: For a native configuration, set COREFILE and
+	COREFLAG based on the canonical host name.
+	* configure: Rebuild.
+	* Makefile.in: Rebuild dependencies.
+	(ALL_CFLAGS): Add @COREFLAG@.
+	(OFILES): Replace $(HDEPFILES) with @COREFILE@.
+	* coff-rs6000.c: Check AIX_CORE rather than HOST_AIX for core file
+	support routines.  Check LYNX_CORE rather than HOST_LYNX.
+	* lynx-core.c: Check LYNX_CORE rather than HOST_LYNX.
+	* i386lynx.c: Likewise.
+	* m68klynx.c: Likewise.
+	* sparclynx.c: Likewise.
+	* rs6000-core.c: Check AIX_CORE rather than HOST_AIX.
+	* *-core.c: Comment changes.
+	* config/decstation.mh (HDEPFILES): Remove.
+	(HDEFINES): Remove -DTRAD_CORE.
+	* config/irix3.mh (RANLIB): Remove.
+	* config/irix4.mh (HDEPFILES, RANLIB): Remove.
+	(HDEFINES): Remove -DIRIX_CORE.
+	* config/riscos.mh (RANLIB, HDEPFILES): Remove.
+	(HDEFINES): Remove -DTRAD_CORE.
+	* config/ncr3000.mh (AR_FLAGS, RANLIB): Remove.
+	* config/ultra3.mh (RANLIB): Remove.
+	* config/aix4.mh, config/alphaosf.mh, config/amix.mh: Remove.
+	* config/apollo.mh, config/delta68.mh, config/delta88.mh: Remove.
+	* config/dpx2.mh, config/esix.mh, config/harris.mh: Remove.
+	* config/hp300.mh, config/hp300bsd.mh, config/hppabsd.mh: Remove.
+	* config/hppahpux.mh, config/hppaosf.mh: Remove.
+	* config/i386aix.mh, config/i386bsd.mh: Remove.
+	* config/i386linux.mh, config/i386mach3.mh: Remove.
+	* config/i386sco.mh, config/i386v.mh, config/i386v4.mh: Remove.
+	* config/irix5.mh, config/m88kmach3.mh, config/mipsbsd.mh: Remove.
+	* config/mipsmach3.mh, config/news-mips.mh: Remove.
+	* config/news.mh, config/pc532mach.mh, config/riscix.mh: Remove.
+	* config/rs600.mh, config/rs6000lynx.mh: Remove.
+	* config/solaris2.mh, config/stratus.mh: Remove.
+	* config/symmetry.mh, config/sysv4.mh, config/tahoe.mh: Remove.
+	* config/vaxbsd.mh, config/vaxult.mh, config/vaxult2.mh: Remove.
+
 Fri Sep  1 15:18:50 1995  Kazumoto Kojima  <kkojima@info.kanagawa-u.ac.jp>
 
 	* elflink.h (elf_bfd_final_link): Don't change a DT_INIT or

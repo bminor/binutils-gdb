@@ -37,7 +37,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define TARGET_IS_BIG_ENDIAN_P
 
-#ifdef HOST_LYNX
+#ifdef LYNX_CORE
 
 char *lynx_core_file_failing_command();
 int lynx_core_file_failing_signal();
@@ -49,6 +49,6 @@ const bfd_target *lynx_core_file_p();
 #define	MY_core_file_matches_executable_p lynx_core_file_matches_executable_p
 #define	MY_core_file_p lynx_core_file_p
 
-#endif /* HOST_LYNX */
+#endif /* LYNX_CORE */
 
 #include "aout-target.h"

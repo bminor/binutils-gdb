@@ -254,7 +254,7 @@ FLAGS_TO_PASS = \
 	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
 	"BISON=$(BISON)"
 
-ALL_CFLAGS=$(CFLAGS) $(HDEFINES) $(TDEFINES) $(CSEARCH) $(CSWITCHES)
+ALL_CFLAGS=$(CFLAGS) $(HDEFINES) @COREFLAG@ $(TDEFINES) $(CSEARCH) $(CSWITCHES)
 .c.o:
 	$(CC) -c $(ALL_CFLAGS) $<
 
@@ -320,9 +320,9 @@ diststuff: info headers
 # BFD_LIBS	Generic routines, always needed.
 # BFD_BACKENDS	Routines the configured targets need.
 # BFD_MACHINES	Architecture-specific routines the configured targets need.
-# HDEPFILES	Routines the host needs, regardless of target.
+# COREFILE	Core file routines for a native configuration
 # TDEPFILES	Routines the target needs, regardless of host.
-OFILES = $(BFD_LIBS) $(BFD_BACKENDS) $(BFD_MACHINES) $(HDEPFILES) $(TDEPFILES)
+OFILES = $(BFD_LIBS) $(BFD_BACKENDS) $(BFD_MACHINES) @COREFILE@ $(TDEPFILES)
 
 ofiles : Makefile
 	rm -f ofiles
@@ -836,15 +836,15 @@ pe-i386.o: pe-i386.c coff-i386.c $(INCDIR)/coff/i386.h \
   $(INCDIR)/bfdlink.h coffcode.h coffswap.h
 pei-i386.o: pei-i386.c coff-i386.c $(INCDIR)/coff/i386.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
-  $(INCDIR)/bfdlink.h coffcode.h coffswap.h peicode.h
+  $(INCDIR)/bfdlink.h coffcode.h peicode.h
 versados.o: versados.c $(INCDIR)/libiberty.h
 coff-arm.o: coff-arm.c $(INCDIR)/coff/arm.h $(INCDIR)/coff/internal.h \
   libcoff.h $(INCDIR)/bfdlink.h coffcode.h coffswap.h
 pe-arm.o: pe-arm.c coff-arm.c $(INCDIR)/coff/arm.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
-  $(INCDIR)/bfdlink.h coffcode.h coffswap.h 
+  $(INCDIR)/bfdlink.h coffcode.h coffswap.h
 pei-arm.o: pei-arm.c coff-arm.c $(INCDIR)/coff/arm.h \
   $(INCDIR)/coff/internal.h $(INCDIR)/coff/pe.h libcoff.h \
-  $(INCDIR)/bfdlink.h coffcode.h coffswap.h peicode.h
+  $(INCDIR)/bfdlink.h coffcode.h peicode.h
 
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY
