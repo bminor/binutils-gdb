@@ -1,3 +1,24 @@
+Tue Oct  3 08:30:20 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	From David Mosberger-Tang  <davidm@azstarnet.com>
+
+	* alpha-opc.h (MEMORY_FUNCTION_FORMAT_MASK): added.
+  	(alpha_insn_set): added definitions for VAX floating point
+ 	instructions (Unix compilers don't generate these, but handcoded
+ 	assembly might still use them).
+
+	* alpha-dis.c (print_insn_alpha): added support for disassembling
+ 	the miscellaneous instructions in the Alpha instruction set.
+
+Tue Sep 26 18:47:20 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-config.in: Add m68k-opc.c.o to BFD_MACHINES for m68k,
+	no longer create sysdep.h, sed ppc-opc.c to work around a
+	serious Metrowerks C bug.
+	* mpw-make.in: Remove.
+	* mpw-make.sed: New file, used by mpw-configure to edit
+	Makefile.in into an MPW makefile.
+
 Wed Sep 20 12:55:28 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (maintainer-clean): New synonym for realclean.
