@@ -1,3 +1,9 @@
+Thu Oct 24 12:12:04 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in (EXTRA_GCC_FLAGS): Pass down GCC_FOR_TARGET
+	unconditionally.
+	(MAKEOVERRIDES): Define (revert this part of October 18 change).
+
 Thu Oct 24 09:02:07 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* Makefile.in (FLAGS_TO_PASS):  Add $(HOST_FLAGS) to allow the

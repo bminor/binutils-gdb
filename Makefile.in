@@ -418,11 +418,7 @@ EXTRA_GCC_FLAGS = \
 	'HOST_PREFIX_1=$(HOST_PREFIX_1)' \
 	'NM=$(NM)' \
 	'RANLIB=$$(RANLIB_FOR_TARGET)' \
-	"GCC_FOR_TARGET=`if echo '$(MAKEFLAGS)' | grep CC_FOR_TARGET >/dev/null 2>&1; then \
-	  echo '$$(CC_FOR_TARGET)'; \
-	else \
-	  echo $(GCC_FOR_TARGET); \
-	fi`" \
+	'GCC_FOR_TARGET=$(GCC_FOR_TARGET)' \
 	`if test x"$(LANGUAGES)" != x; then echo "LANGUAGES=$(LANGUAGES)"; fi` \
 	`if test x"$(STMP_FIXPROTO)" != x; then echo "STMP_FIXPROTO=$(STMP_FIXPROTO)"; fi` \
 	`if test x"$(LIMITS_H_TEST)" != x; then echo "LIMITS_H_TEST=$(LIMITS_H_TEST)"; fi` \
@@ -1573,6 +1569,7 @@ newlib.tar.gz: $(DIST_SUPPORT) $(NEWLIB_SUPPORT_DIRS) newlib
 		DEVO_SUPPORT="$(DEVO_SUPPORT) COPYING.NEWLIB" newlib
 
 .NOEXPORT:
+MAKEOVERRIDES=
 
 # start-sanitize-chill
 ## This is ugly, but I don't want GNU make to put these variables in
