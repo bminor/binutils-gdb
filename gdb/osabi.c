@@ -462,6 +462,13 @@ generic_elf_osabi_sniff_abi_tag_sections (bfd *abfd, asection *sect, void *obj)
 	}
       return;
     }
+
+  /* .note.netbsdcore.procinfo notes, used by NetBSD.  */
+  if (strcmp (name, ".note.netbsdcore.procinfo") == 0 && sectsize > 0)
+    {
+      *os_ident_ptr = GDB_OSABI_NETBSD_ELF;
+      return;
+    }
 }
 
 static enum gdb_osabi
