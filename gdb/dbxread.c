@@ -946,22 +946,15 @@ fill_symbuf (bfd *sym_bfd)
   symbuf_read += nbytes;
 }
 
-#define SWAP_SYMBOL(symp, abfd) \
-  { \
-    (symp)->n_strx = bfd_h_get_32(abfd,			\
-				(unsigned char *)&(symp)->n_strx);	\
-    (symp)->n_desc = bfd_h_get_16 (abfd,			\
-				(unsigned char *)&(symp)->n_desc);  	\
-    (symp)->n_value = bfd_h_get_32 (abfd,			\
-				(unsigned char *)&(symp)->n_value); 	\
-  }
-
 #define INTERNALIZE_SYMBOL(intern, extern, abfd)			\
   {									\
     (intern).n_type = bfd_h_get_8 (abfd, (extern)->e_type);		\
     (intern).n_strx = bfd_h_get_32 (abfd, (extern)->e_strx);		\
     (intern).n_desc = bfd_h_get_16 (abfd, (extern)->e_desc);  		\
-    (intern).n_value = bfd_h_get_32 (abfd, (extern)->e_value);		\
+    if (bfd_get_sign_extend_vma (abfd))					\
+      (intern).n_value = bfd_h_get_signed_32 (abfd, (extern)->e_value);	\
+    else								\
+      (intern).n_value = bfd_h_get_32 (abfd, (extern)->e_value);	\
   }
 
 /* Invariant: The symbol pointed to by symbuf_idx is the first one
