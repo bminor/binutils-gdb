@@ -1,3 +1,8 @@
+Mon Nov 28 11:37:35 1994  Doug Evans  <dje@canuck.cygnus.com>
+
+	* app.c (do_scrub_next_char): Insert missing newline at end of file
+	like warning says we do.
+
 Mon Nov 28 00:11:15 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.h (pa_check_eof): Declare new extern function.
