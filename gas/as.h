@@ -364,6 +364,10 @@ enum _relax_state {
      bytes to skip when aligning, or 0 if there is no maximum.  */
   rs_align_code,
 
+  /* Test for alignment.  Like rs_align, but used by several targets
+     to warn if data is not properly aligned.  */
+  rs_align_test,
+
   /* Org: Fr_offset, fr_symbol: address. 1 variable char: fill
      character.  */
   rs_org,

@@ -2582,7 +2582,7 @@ sh_cons_align (nbytes)
       return;
     }
 
-  p = frag_var (rs_align_code, 1, 1, (relax_substateT) 0,
+  p = frag_var (rs_align_test, 1, 1, (relax_substateT) 0,
 		(symbolS *) NULL, (offsetT) nalign, (char *) NULL);
 
   record_alignment (now_seg, nalign);
@@ -2596,17 +2596,47 @@ void
 sh_handle_align (frag)
      fragS *frag;
 {
+  int bytes = frag->fr_next->fr_address - frag->fr_address - frag->fr_fix;
+
+  if (frag->fr_type == rs_align_code)
+    {
+      static const unsigned char big_nop_pattern[] = { 0x00, 0x09 };
+      static const unsigned char little_nop_pattern[] = { 0x09, 0x00 };
+
+      char *p = frag->fr_literal + frag->fr_fix;
+
+      if (bytes & 1)
+	{
+	  *p++ = 0;
+	  bytes--;
+	  frag->fr_fix += 1;
+	}
+
+      if (target_big_endian)
+	{
+	  memcpy (p, big_nop_pattern, sizeof big_nop_pattern);
+	  frag->fr_var = sizeof big_nop_pattern;
+	}
+      else
+	{
+	  memcpy (p, little_nop_pattern, sizeof little_nop_pattern);
+	  frag->fr_var = sizeof little_nop_pattern;
+	}
+    }
+  else if (frag->fr_type == rs_align_test)
+    {
+      if (bytes != 0)
+	as_warn_where (frag->fr_file, frag->fr_line, _("misaligned data"));
+    }
+
   if (sh_relax
-      && frag->fr_type == rs_align
+      && (frag->fr_type == rs_align
+	  || frag->fr_type == rs_align_code)
       && frag->fr_address + frag->fr_fix > 0
       && frag->fr_offset > 1
       && now_seg != bss_section)
     fix_new (frag, frag->fr_fix, 2, &abs_symbol, frag->fr_offset, 0,
 	     BFD_RELOC_SH_ALIGN);
-
-  if (frag->fr_type == rs_align_code
-      && frag->fr_next->fr_address - frag->fr_address - frag->fr_fix != 0)
-    as_warn_where (frag->fr_file, frag->fr_line, _("misaligned data"));
 }
 
 /* This macro decides whether a particular reloc is an entry in a
@@ -3081,36 +3111,6 @@ tc_coff_sizemachdep (frag)
 }
 
 #endif /* OBJ_COFF */
-
-/* When we align the .text section, insert the correct NOP pattern.  */
-
-int
-sh_do_align (n, fill, len, max)
-     int n;
-     const char *fill;
-     int len ATTRIBUTE_UNUSED;
-     int max;
-{
-  if (fill == NULL
-      && subseg_text_p (now_seg)
-      && n > 1)
-    {
-      static const unsigned char big_nop_pattern[] = { 0x00, 0x09 };
-      static const unsigned char little_nop_pattern[] = { 0x09, 0x00 };
-
-      /* First align to a 2 byte boundary, in case there is an odd
-         .byte.  */
-      frag_align (1, 0, 0);
-      if (target_big_endian)
-	frag_align_pattern (n, big_nop_pattern, sizeof big_nop_pattern, max);
-      else
-	frag_align_pattern (n, little_nop_pattern, sizeof little_nop_pattern,
-			    max);
-      return 1;
-    }
-
-  return 0;
-}
 
 #ifndef BFD_ASSEMBLER
 #ifdef OBJ_COFF

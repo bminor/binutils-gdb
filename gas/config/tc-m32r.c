@@ -327,54 +327,44 @@ const pseudo_typeS md_pseudo_table[] =
 #define NOP_INSN 0x7000
 #define PAR_NOP_INSN 0xf000 /* Can only be used in 2nd slot.  */
 
-/* When we align the .text section, insert the correct NOP pattern.
-   N is the power of 2 alignment.  LEN is the length of pattern FILL.
-   MAX is the maximum number of characters to skip when doing the alignment,
-   or 0 if there is no maximum.  */
+/* This is called from HANDLE_ALIGN in write.c.  Fill in the contents
+   of an rs_align_code fragment.  */
 
-int
-m32r_do_align (n, fill, len, max)
-     int n;
-     const char *fill;
-     int len;
-     int max;
+void
+m32r_handle_align (fragp)
 {
-  /* Only do this if the fill pattern wasn't specified.  */
-  if (fill == NULL
-      && subseg_text_p (now_seg)
-      /* Only do this special handling if aligning to at least a
-	 4 byte boundary.  */
-      && n > 1
-     /* Only do this special handling if we're allowed to emit at
-	 least two bytes.  */
-      && (max == 0 || max > 1))
+  static const unsigned char nop_pattern[] = { 0xf0, 0x00 };
+  static const unsigned char multi_nop_pattern[] = { 0x70, 0x00, 0xf0, 0x00 };
+
+  int bytes, fix;
+  char *p;
+
+  if (fragp->fr_type != rs_align_code)
+    return;
+
+  bytes = fragp->fr_next->fr_address - fragp->fr_address - fragp->fr_fix;
+  p = fragp->fr_literal + fragp->fr_fix;
+  fix = 0;
+
+  if (bytes & 1)
     {
-      static const unsigned char nop_pattern[] = { 0xf0, 0x00 };
-
-#if 0
-      /* First align to a 2 byte boundary, in case there is an odd .byte.  */
-      /* FIXME: How much memory will cause gas to use when assembling a big
-	 program?  Perhaps we can avoid the frag_align call?  */
-      frag_align (1, 0, 0);
-#endif
-      /* Next align to a 4 byte boundary (we know n >= 2) using a parallel
-	 nop.  */
-      frag_align_pattern (2, nop_pattern, sizeof nop_pattern, 0);
-      /* If doing larger alignments use a repeating sequence of appropriate
-	 nops.  */
-      if (n > 2)
-	{
-	  static const unsigned char multi_nop_pattern[] =
-	  { 0x70, 0x00, 0xf0, 0x00 };
-	  frag_align_pattern (n, multi_nop_pattern, sizeof multi_nop_pattern,
-			      max ? max - 2 : 0);
-	}
-
-      prev_insn.insn = NULL;
-      return 1;
+      fix = 1;
+      *p++ = 0;
+      bytes--;
     }
 
-  return 0;
+  if (bytes & 2)
+    {
+      memcpy (p, nop_pattern, 2);
+      p += 2;
+      bytes -= 2;
+      fix += 2;
+    }
+
+  memcpy (p, multi_nop_pattern, 4);
+
+  fragp->fr_fix += fix;
+  fragp->fr_var = 4;
 }
 
 /* If the last instruction was the first of 2 16 bit insns,
@@ -390,7 +380,7 @@ static void
 fill_insn (ignore)
      int ignore;
 {
-  (void) m32r_do_align (2, NULL, 0, 0);
+  frag_align_code (2, 0);
   prev_insn.insn = NULL;
   seen_relaxable_p = 0;
 }

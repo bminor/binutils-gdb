@@ -4085,53 +4085,65 @@ sparc_cons_align (nbytes)
       return;
     }
 
-  p = frag_var (rs_align_code, 1, 1, (relax_substateT) 0,
+  p = frag_var (rs_align_test, 1, 1, (relax_substateT) 0,
 		(symbolS *) NULL, (offsetT) nalign, (char *) NULL);
 
   record_alignment (now_seg, nalign);
 }
 
-/* This is where we do the unexpected alignment check.
-   This is called from HANDLE_ALIGN in tc-sparc.h.  */
+/* This is called from HANDLE_ALIGN in tc-sparc.h.  */
 
 void
 sparc_handle_align (fragp)
      fragS *fragp;
 {
-  if (fragp->fr_type == rs_align_code && !fragp->fr_subtype
-      && fragp->fr_next->fr_address - fragp->fr_address - fragp->fr_fix != 0)
-    as_bad_where (fragp->fr_file, fragp->fr_line, _("misaligned data"));
-  if (fragp->fr_type == rs_align_code && fragp->fr_subtype == 1024)
+  int count, fix;
+  char *p;
+
+  count = fragp->fr_next->fr_address - fragp->fr_address - fragp->fr_fix;
+  
+  switch (fragp->fr_type)
     {
-      int count =
-	fragp->fr_next->fr_address - fragp->fr_address - fragp->fr_fix;
+    case rs_align_test:
+      if (count != 0)
+	as_bad_where (fragp->fr_file, fragp->fr_line, _("misaligned data"));
+      break;
 
-      if (count >= 4
-	  && !(count & 3)
-	  && count <= 1024
-	  && !((long) (fragp->fr_literal + fragp->fr_fix) & 3))
+    case rs_align_code:
+      p = fragp->fr_literal + fragp->fr_fix;
+      fix = 0;
+
+      if (count & 3)
 	{
-	  unsigned *p = (unsigned *) (fragp->fr_literal + fragp->fr_fix);
-	  int i;
-
-	  for (i = 0; i < count; i += 4, p++)
-	    if (INSN_BIG_ENDIAN)
-	      /* Emit nops.  */
-	      number_to_chars_bigendian ((char *) p, 0x01000000, 4);
-	    else
-	      number_to_chars_littleendian ((char *) p, 0x10000000, 4);
-
-	  if (SPARC_OPCODE_ARCH_V9_P (max_architecture) && count > 8)
-	    {
-	      char *waddr = &fragp->fr_literal[fragp->fr_fix];
-	      unsigned wval = (0x30680000 | count >> 2); /* ba,a,pt %xcc, 1f  */
-	      if (INSN_BIG_ENDIAN)
-		number_to_chars_bigendian (waddr, wval, 4);
-	      else
-		number_to_chars_littleendian (waddr, wval, 4);
-	    }
-	  fragp->fr_var = count;
+	  fix = count & 3;
+	  memset (p, 0, fix);
+	  p += fix;
+	  count -= fix;
 	}
+
+      if (SPARC_OPCODE_ARCH_V9_P (max_architecture) && count > 8)
+	{
+	  unsigned wval = (0x30680000 | count >> 2); /* ba,a,pt %xcc, 1f  */
+	  if (INSN_BIG_ENDIAN)
+	    number_to_chars_bigendian (p, wval, 4);
+	  else
+	    number_to_chars_littleendian (p, wval, 4);
+	  p += 4;
+	  count -= 4;
+	  fix += 4;
+	}
+
+      if (INSN_BIG_ENDIAN)
+	number_to_chars_bigendian (p, 0x01000000, 4);
+      else
+	number_to_chars_littleendian (p, 0x01000000, 4);
+
+      fragp->fr_fix += fix;
+      fragp->fr_var = 4;
+      break;
+
+    default:
+      break;
     }
 }
 

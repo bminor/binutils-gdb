@@ -322,6 +322,39 @@ frag_align_pattern (alignment, fill_pattern, n_fill, max)
   memcpy (p, fill_pattern, n_fill);
 }
 
+/* The NOP_OPCODE is for the alignment fill value.  Fill it with a nop
+   instruction so that the disassembler does not choke on it.  */
+#ifndef NOP_OPCODE
+#define NOP_OPCODE 0x00
+#endif
+
+/* Use this to restrict the amount of memory allocated for representing
+   the alignment code.  Needs to be large enough to hold any fixed sized
+   prologue plus the replicating portion.  */
+#ifndef MAX_MEM_FOR_RS_ALIGN_CODE
+  /* Assume that if HANDLE_ALIGN is not defined then no special action
+     is required to code fill, which means that we get just repeat the
+     one NOP_OPCODE byte.  */
+# ifndef HANDLE_ALIGN
+#  define MAX_MEM_FOR_RS_ALIGN_CODE  1
+# else
+#  define MAX_MEM_FOR_RS_ALIGN_CODE  ((1 << alignment) - 1)
+# endif
+#endif
+
+void
+frag_align_code (alignment, max)
+     int alignment;
+     int max;
+{
+  char *p;
+
+  p = frag_var (rs_align_code, MAX_MEM_FOR_RS_ALIGN_CODE, 1,
+		(relax_substateT) max, (symbolS *) 0,
+		(offsetT) alignment, (char *) 0);
+  *p = NOP_OPCODE;
+}
+
 addressT
 frag_now_fix_octets ()
 {

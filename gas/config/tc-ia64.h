@@ -83,7 +83,8 @@ extern void ia64_validate_fix PARAMS ((struct fix *fix));
 extern char * ia64_canonicalize_symbol_name PARAMS ((char *));
 extern flagword ia64_elf_section_flags PARAMS ((flagword, int, int));
 extern long ia64_pcrel_from_section PARAMS ((struct fix *fix, segT sec));
-extern int ia64_md_do_align PARAMS ((int, const char *, int, int));
+extern void ia64_md_do_align PARAMS ((int, const char *, int, int));
+extern void ia64_handle_align PARAMS ((fragS *f));
 
 #define md_end()       			ia64_end_of_source ()
 #define md_start_line_hook()		ia64_start_line ()
@@ -108,7 +109,10 @@ extern int ia64_md_do_align PARAMS ((int, const char *, int, int));
 #define TC_CONS_FIX_NEW(f,o,l,e)	ia64_cons_fix_new (f, o, l, e)
 #define TC_VALIDATE_FIX(fix,seg,skip)	ia64_validate_fix (fix)
 #define MD_PCREL_FROM_SECTION(fix,sec)	ia64_pcrel_from_section (fix, sec)
-#define md_do_align(n,f,l,m,j)		if (ia64_md_do_align (n,f,l,m)) goto j
+#define md_do_align(n,f,l,m,j)		ia64_md_do_align (n,f,l,m)
+#define HANDLE_ALIGN(f)			ia64_handle_align (f)
+
+#define MAX_MEM_FOR_RS_ALIGN_CODE  (15 + 16)
 
 /* Call md_apply_fix3 with segment instead of md_apply_fix.  */
 #define MD_APPLY_FIX3

@@ -1,3 +1,55 @@
+2000-12-28  Richard Henderson  <rth@redhat.com>
+
+	* as.h (rs_align_test): New.
+	* frags.c (NOP_OPCODE): Move default from read.c.
+	(MAX_MEM_FOR_RS_ALIGN_CODE): New default.
+	(frag_align_code): New.
+	* frags.h (frag_align_code): Declare.
+	* read.c (NOP_OPCODE): Remove.
+	(do_align): Use frag_align_code.
+	* write.c (NOP_OPCODE): Remove.
+	(get_recorded_alignment): New.
+	(cvt_frag_to_fill): Handle rs_align_test.
+	(relax_segment): Likewise.
+	(subsegs_finish): Align last subseg in section to the
+	section alignment.  Use frag_align_code.
+	* write.h (get_recorded_alignment): Declare.
+	* config/obj-coff.c (size_section): Handle rs_align_test.
+	(fill_section, fixup_mdeps): Likewise.
+	(write_object_file): Use frag_align_code.
+
+	* config/tc-alpha.c (alpha_align): Use frag_align_code.
+	(alpha_handle_align): New.
+	* config/tc-alpha.h (HANDLE_ALIGN): New.
+	(MAX_MEM_FOR_RS_ALIGN_CODE): New.
+
+	* config/tc-i386.h (md_do_align): Use frag_align_code.
+	(MAX_MEM_FOR_RS_ALIGN_CODE): New.
+
+	* config/tc-ia64.c (ia64_md_do_align): Don't do code alignment.
+	(ia64_handle_align): New.
+	* config/tc-ia64.h (HANDLE_ALIGN): New.
+	(MAX_MEM_FOR_RS_ALIGN_CODE): New.
+
+	* config/tc-m32r.c (m32r_do_align): Remove.
+	(m32r_handle_align): New.
+	(fill_insn): Use frag_align_code.
+	* config/tc-m32r.h (md_do_align): Remove.
+	(HANDLE_ALIGN, MAX_MEM_FOR_RS_ALIGN_CODE): New.
+	* config/tc-m88k.c, config/tc-m88k.h: Similarly.
+	* config/tc-mips.c, config/tc-mips.h: Similarly.
+
+	* config/tc-sh.c (sh_cons_align): Use rs_align_test.
+	(sh_handle_align): Likewise.  Handle rs_align_code.
+	(sh_do_align): Remove.
+	* config/tc-sh.h (md_do_align): Remove.
+	(MAX_MEM_FOR_RS_ALIGN_CODE): New.
+
+	* config/tc-sparc.c (sparc_cons_align): Use rs_align_test.
+	(sparc_handle_align): Likewise.  Handle rs_align_code.
+	* config/tc-sparc.h (md_do_align): Remove.
+	(MAX_MEM_FOR_RS_ALIGN_CODE): New.
+
 2000-12-22  DJ Delorie  <dj@redhat.com>
 
 	* config/tc-d10v.c (md_assemble): set prev_seg and prev_subseg

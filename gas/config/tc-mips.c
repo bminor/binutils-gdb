@@ -11550,34 +11550,37 @@ static procS cur_proc;
 static procS *cur_proc_ptr;
 static int numprocs;
 
-/* When we align code in the .text section of mips16, use the correct two
-   byte nop pattern of 0x6500 (move $0,$0) */
+/* Fill in an rs_align_code fragment.  */
 
-int
-mips_do_align (n, fill, len, max)
-     int n;
-     const char *fill;
-     int len ATTRIBUTE_UNUSED;
-     int max;
+void
+mips_handle_align (fragp)
+     fragS *fragp;
 {
-  if (fill == NULL
-      && subseg_text_p (now_seg)
-      && n > 1
-      && mips_opts.mips16)
+  if (fragp->fr_type != rs_align_code)
+    return;
+
+  if (mips_opts.mips16)
     {
       static const unsigned char be_nop[] = { 0x65, 0x00 };
       static const unsigned char le_nop[] = { 0x00, 0x65 };
 
-      frag_align (1, 0, 0);
+      int bytes;
+      char *p;
 
-      if (target_big_endian)
-	frag_align_pattern (n, be_nop, 2, max);
-      else
-	frag_align_pattern (n, le_nop, 2, max);
-      return 1;
+      bytes = fragp->fr_next->fr_address - fragp->fr_address - fragp->fr_fix;
+      p = fragp->fr_literal + fragp->fr_fix;
+
+      if (bytes & 1)
+	{
+	  *p++ = 0;
+	  fragp->fr_fix += 1;
+	}
+
+      memcpy (p, (target_big_endian ? be_nop : le_nop), 2);
+      fragp->fr_var = 2;
     }
 
-  return 0;
+  /* For mips32, a nop is a zero, which we trivially get by doing nothing.  */
 }
 
 static void

@@ -9768,42 +9768,52 @@ md_section_align (seg, size)
 
 /* Handle ia64 specific semantics of the align directive.  */
 
-int
+void
 ia64_md_do_align (n, fill, len, max)
      int n;
      const char *fill;
      int len ATTRIBUTE_UNUSED;
      int max;
 {
-  /* Fill any pending bundle with nops.  */
-  if (bfd_get_section_flags (stdoutput, now_seg) & SEC_CODE)
+  if (subseg_text_p (now_seg))
     ia64_flush_insns ();
+}
 
-  /* When we align code in a text section, emit a bundle of 3 nops instead of
-     zero bytes.  We can only do this if a multiple of 16 bytes was requested.
-     N is log base 2 of the requested alignment.  */
-  if (fill == NULL
-      && bfd_get_section_flags (stdoutput, now_seg) & SEC_CODE
-      && n > 4)
+/* This is called from HANDLE_ALIGN in write.c.  Fill in the contents
+   of an rs_align_code fragment.  */
+
+void
+ia64_handle_align (fragp)
+     fragS *fragp;
+{
+  /* Use mfi bundle of nops with no stop bits.  */
+  static const unsigned char be_nop[]
+    = { 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00,
+	0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x0c};
+  static const unsigned char le_nop[]
+    = { 0x0c, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
+	0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00};
+
+  int bytes;
+  char *p;
+
+  if (fragp->fr_type != rs_align_code)
+    return;
+
+  bytes = fragp->fr_next->fr_address - fragp->fr_address - fragp->fr_fix;
+  p = fragp->fr_literal + fragp->fr_fix;
+
+  /* Make sure we are on a 16-byte boundary, in case someone has been
+     putting data into a text section.  */
+  if (bytes & 15)
     {
-      /* Use mfi bundle of nops with no stop bits.  */
-      static const unsigned char be_nop[]
-	= { 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00,
-	    0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x0c};
-      static const unsigned char le_nop[]
-	= { 0x0c, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
-	    0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00};
-
-      /* Make sure we are on a 16-byte boundary, in case someone has been
-	 putting data into a text section.  */
-      frag_align (4, 0, 0);
-
-      if (target_big_endian)
-	frag_align_pattern (n, be_nop, 16, max);
-      else
-	frag_align_pattern (n, le_nop, 16, max);
-      return 1;
+      int fix = bytes & 15;
+      memset (p, 0, fix);
+      p += fix;
+      bytes -= fix;
+      fragp->fr_fix += fix;
     }
 
-  return 0;
+  memcpy (p, (target_big_endian ? be_nop : le_nop), 16);
+  fragp->fr_var = 16;
 }

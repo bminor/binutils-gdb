@@ -31,12 +31,6 @@
 #undef  BFD_FAST_SECTION_FILL
 #define BFD_FAST_SECTION_FILL
 
-/* The NOP_OPCODE is for the alignment fill value.  Fill it with a nop
-   instruction so that the disassembler does not choke on it.  */
-#ifndef NOP_OPCODE
-#define NOP_OPCODE 0x00
-#endif
-
 #ifndef TC_ADJUST_RELOC_COUNT
 #define TC_ADJUST_RELOC_COUNT(FIXP,COUNT)
 #endif
@@ -383,6 +377,19 @@ record_alignment (seg, align)
 #endif
 }
 
+int
+get_recorded_alignment (seg)
+     segT seg;
+{
+  if (seg == absolute_section)
+    return 0;
+#ifdef BFD_ASSEMBLER
+  return bfd_get_section_alignment (stdoutput, seg);
+#else
+  return section_alignment[(int) seg];
+#endif
+}
+
 #ifdef BFD_ASSEMBLER
 
 /* Reset the section indices after removing the gas created sections.  */
@@ -494,6 +501,7 @@ cvt_frag_to_fill (headersP, sec, fragP)
     {
     case rs_align:
     case rs_align_code:
+    case rs_align_test:
     case rs_org:
     case rs_space:
 #ifdef HANDLE_ALIGN
@@ -1390,14 +1398,28 @@ subsegs_finish ()
 
   for (frchainP = frchain_root; frchainP; frchainP = frchainP->frch_next)
     {
+      int alignment;
+
       subseg_set (frchainP->frch_seg, frchainP->frch_subseg);
 
       /* This now gets called even if we had errors.  In that case,
          any alignment is meaningless, and, moreover, will look weird
          if we are generating a listing.  */
-      frag_align (had_errors () ? 0 : SUB_SEGMENT_ALIGN (now_seg),
-		  subseg_text_p (now_seg) ? NOP_OPCODE : 0,
-		  0);
+      alignment = had_errors () ? 0 : SUB_SEGMENT_ALIGN (now_seg);
+
+      /* The last subsegment gets an aligment corresponding to the
+	 alignment of the section.  This allows proper nop-filling
+	 at the end of code-bearing sections.  */
+      if (!frchainP->frch_next || frchainP->frch_next->frch_seg != now_seg)
+	alignment = get_recorded_alignment (now_seg);
+
+      if (alignment > 0)
+	{
+	  if (subseg_text_p (now_seg))
+	    frag_align_code (alignment, 0);
+	  else
+	    frag_align (alignment, 0, 0);
+	}
 
       /* frag_align will have left a new frag.
 	 Use this last frag for an empty ".fill".
@@ -2156,6 +2178,7 @@ relax_segment (segment_frag_root, segment)
 
 	case rs_align:
 	case rs_align_code:
+	case rs_align_test:
 	  {
 	    addressT offset = relax_align (address, (int) fragP->fr_offset);
 
@@ -2305,6 +2328,7 @@ relax_segment (segment_frag_root, segment)
 #endif
 	      case rs_align:
 	      case rs_align_code:
+	      case rs_align_test:
 		{
 		  addressT oldoff, newoff;
 

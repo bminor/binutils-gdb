@@ -67,13 +67,6 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
   while (0)
 #endif
 
-/* The NOP_OPCODE is for the alignment fill value.
-   Fill it a nop instruction so that the disassembler does not choke
-   on it.  */
-#ifndef NOP_OPCODE
-#define NOP_OPCODE 0x00
-#endif
-
 char *input_line_pointer;	/*->next char of source file to parse.  */
 
 #if BITS_PER_CHAR != 8
@@ -1172,26 +1165,21 @@ do_align (n, fill, len, max)
      int len;
      int max;
 {
-  char default_fill;
-
 #ifdef md_do_align
   md_do_align (n, fill, len, max, just_record_alignment);
 #endif
 
-  if (fill == NULL)
-    {
-      if (subseg_text_p (now_seg))
-	default_fill = NOP_OPCODE;
-      else
-	default_fill = 0;
-      fill = &default_fill;
-      len = 1;
-    }
-
   /* Only make a frag if we HAVE to...  */
   if (n != 0 && !need_pass_2)
     {
-      if (len <= 1)
+      if (fill == NULL)
+	{
+	  if (subseg_text_p (now_seg))
+	    frag_align_code (n, max);
+	  else
+	    frag_align (n, 0, max);
+	}
+      else if (len <= 1)
 	frag_align (n, *fill, max);
       else
 	frag_align_pattern (n, fill, len, max);

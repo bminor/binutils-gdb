@@ -61,11 +61,11 @@ m32r_relax_frag (fragP, stretch)
 /* Account for nop if 32 bit insn falls on odd halfword boundary.  */
 #define TC_CGEN_MAX_RELAX(insn, len) (6)
 
-/* Alignments are used to ensure 32 bit insns live on 32 bit boundaries, so
-   we use a special alignment function to insert the correct nop pattern.  */
-extern int m32r_do_align PARAMS ((int, const char *, int, int));
-#define md_do_align(n, fill, len, max, l) \
-if (m32r_do_align (n, fill, len, max)) goto l
+/* Fill in rs_align_code fragments.  */
+extern void m32r_handle_align PARAMS ((fragS *));
+#define HANDLE_ALIGN(f)  m32r_handle_align (f)
+
+#define MAX_MEM_FOR_RS_ALIGN_CODE  (1 + 2 + 4)
 
 #define MD_APPLY_FIX3
 #define md_apply_fix3 gas_cgen_md_apply_fix3

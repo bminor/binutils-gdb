@@ -1427,23 +1427,34 @@ md_pcrel_from (fixp)
   /*NOTREACHED*/
 }
 
-/* When we align the .init section, insert the correct NOP pattern.  */
+/* Fill in rs_align_code fragments.  */
 
-int
-m88k_do_align (n, fill, max, len)
-     int n;
-     const char *fill;
-     int len;
-     int max;
+void
+m88k_handle_align (fragp)
+     fragS *fragp;
 {
-  if (fill == NULL
-      && strcmp (obj_segment_name (now_seg), ".init") == 0)
+  static const unsigned char nop_pattern[] = { 0xf4, 0x00, 0x58, 0x00 };
+
+  int bytes;
+  char *p;
+
+  if (fragp->fr_type != rs_align_code)
+    return;
+
+  bytes = fragp->fr_next->fr_address - fragp->fr_address - fragp->fr_fix;
+  p = fragp->fr_literal + fragp->fr_fix;
+
+  if (bytes & 3)
     {
-      static const unsigned char nop_pattern[] = { 0xf4, 0x00, 0x58, 0x00 };
-      frag_align_pattern (n, nop_pattern, sizeof (nop_pattern), max);
-      return 1;
+      int fix = bytes & 3;
+      memset (p, 0, fix);
+      p += fix;
+      bytes -= fix;
+      fragp->fr_fix += fix;
     }
-  return 0;
+
+  memcpy (p, nop_pattern, 4);
+  fragp->fr_var = 4;
 }
 
 #endif /* M88KCOFF */

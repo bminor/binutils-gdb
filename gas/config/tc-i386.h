@@ -505,12 +505,11 @@ if ((n) && !need_pass_2							\
     && (!(fill) || ((char)*(fill) == (char)0x90 && (len) == 1))		\
     && subseg_text_p (now_seg))						\
   {									\
-    char *p;								\
-    p = frag_var (rs_align_code, 15, 1, (relax_substateT) max,		\
-		  (symbolS *) 0, (offsetT) (n), (char *) 0);		\
-    *p = 0x90;								\
+    frag_align_code ((n), (max));					\
     goto around;							\
   }
+
+#define MAX_MEM_FOR_RS_ALIGN_CODE  15
 
 extern void i386_align_code PARAMS ((fragS *, int));
 

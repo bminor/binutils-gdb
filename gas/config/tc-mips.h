@@ -55,8 +55,10 @@ extern int mips_relax_frag PARAMS ((struct frag *, long));
 #define md_undefined_symbol(name)	(0)
 #define md_operand(x)
 
-extern int mips_do_align PARAMS ((int, const char *, int, int));
-#define md_do_align(n,fill,len,max,l) if (mips_do_align (n,fill,len,max)) goto l
+extern void mips_handle_align PARAMS ((struct frag *));
+#define HANDLE_ALIGN(fragp)  mips_handle_align (fragp)
+
+#define MAX_MEM_FOR_RS_ALIGN_CODE  (1 + 2)
 
 /* We permit PC relative difference expressions when generating
    embedded PIC code.  */

@@ -5673,27 +5673,8 @@ alpha_align (n, pfill, label, force)
 
   if (pfill == NULL)
     {
-      if (n > 2
-	  && (bfd_get_section_flags (stdoutput, now_seg) & SEC_CODE) != 0)
-	{
-	  static char const unop[4] = { 0x00, 0x00, 0xe0, 0x2f };
-	  static char const nopunop[8] = {
-		0x1f, 0x04, 0xff, 0x47,
-		0x00, 0x00, 0xe0, 0x2f
-	  };
-
-	  /* First, make sure we're on a four-byte boundary, in case
-	     someone has been putting .byte values into the text
-	     section.  The DEC assembler silently fills with unaligned
-	     no-op instructions.  This will zero-fill, then nop-fill
-	     with proper alignment.  */
-	  if (alpha_current_align < 2)
-	    frag_align (2, 0, 0);
-	  if (alpha_current_align < 3)
-	    frag_align_pattern (3, unop, sizeof unop, 0);
-	  if (n > 3)
-	    frag_align_pattern (n, nopunop, sizeof nopunop, 0);
-	}
+      if (subseg_text_p (now_seg))
+	frag_align_code (n, 0);
       else
 	frag_align (n, 0, 0);
     }
@@ -5710,8 +5691,53 @@ alpha_align (n, pfill, label, force)
 
   record_alignment (now_seg, n);
 
-  /* ??? if alpha_flag_relax && force && elf, record the requested alignment
+  /* ??? If alpha_flag_relax && force && elf, record the requested alignment
      in a reloc for the linker to see.  */
+}
+
+/* This is called from HANDLE_ALIGN in write.c.  Fill in the contents
+   of an rs_align_code fragment.  */
+
+void 
+alpha_handle_align (fragp)
+     fragS *fragp;
+{
+  static char const unop[4] = { 0x00, 0x00, 0xe0, 0x2f };
+  static char const nopunop[8] = {
+	0x1f, 0x04, 0xff, 0x47,
+	0x00, 0x00, 0xe0, 0x2f
+  };
+
+  int bytes, fix;
+  char *p;
+
+  if (fragp->fr_type != rs_align_code)
+    return;
+
+  bytes = fragp->fr_next->fr_address - fragp->fr_address - fragp->fr_fix;
+  p = fragp->fr_literal + fragp->fr_fix;
+  fix = 0;
+
+  if (bytes & 3)
+    {
+      fix = bytes & 3;
+      memset (p, 0, fix);
+      p += fix;
+      bytes -= fix;
+    }
+
+  if (bytes & 4)
+    {
+      memcpy (p, unop, 4);
+      p += 4;
+      bytes -= 4;
+      fix += 4;
+    }
+
+  memcpy (p, nopunop, 8);
+
+  fragp->fr_fix += fix;
+  fragp->fr_var = 8;
 }
 
 /* The Alpha has support for some VAX floating point types, as well as for

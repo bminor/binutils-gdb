@@ -53,6 +53,8 @@ extern void sh_cons_align PARAMS ((int));
 #define HANDLE_ALIGN(frag) sh_handle_align (frag)
 extern void sh_handle_align PARAMS ((fragS *));
 
+#define MAX_MEM_FOR_RS_ALIGN_CODE (1 + 2)
+
 /* We need to force out some relocations when relaxing.  */
 #define TC_FORCE_RELOCATION(fix) sh_force_relocation (fix)
 extern int sh_force_relocation ();
@@ -75,11 +77,6 @@ extern boolean sh_fix_adjustable PARAMS ((struct fix *));
 
 extern const struct relax_type md_relax_table[];
 #define TC_GENERIC_RELAX_TABLE md_relax_table
-
-/* We use a special alignment function to insert the correct nop
-   pattern.  */
-extern int sh_do_align PARAMS ((int, const char *, int, int));
-#define md_do_align(n,fill,len,max,l) if (sh_do_align (n,fill,len,max)) goto l
 
 /* We record, for each section, whether we have most recently output a
    CODE reloc or a DATA reloc.  */

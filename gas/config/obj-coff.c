@@ -1826,6 +1826,7 @@ size_section (abfd, idx)
 	  break;
 	case rs_align:
 	case rs_align_code:
+	case rs_align_test:
 	  {
 	    addressT off;
 
@@ -2135,6 +2136,7 @@ fill_section (abfd, h, file_cursor)
 		case rs_fill:
 		case rs_align:
 		case rs_align_code:
+		case rs_align_test:
 		case rs_org:
 		  if (frag->fr_fix)
 		    {
@@ -3443,12 +3445,15 @@ write_object_file ()
       md_do_align (SUB_SEGMENT_ALIGN (now_seg), (char *) NULL, 0, 0,
 		   alignment_done);
 #endif
-      frag_align (SUB_SEGMENT_ALIGN (now_seg),
-		  subseg_text_p (now_seg) ? NOP_OPCODE : 0,
-		  0);
+      if (subseg_text_p (now_seg))
+	frag_align_code (SUB_SEGMENT_ALIGN (now_seg), 0);
+      else
+	frag_align (SUB_SEGMENT_ALIGN (now_seg), 0, 0);
+
 #ifdef md_do_align
     alignment_done:
 #endif
+
       frag_wane (frag_now);
       frag_now->fr_fix = 0;
       know (frag_now->fr_next == NULL);
@@ -4092,6 +4097,7 @@ fixup_mdeps (frags, h, this_segment)
 	{
 	case rs_align:
 	case rs_align_code:
+	case rs_align_test:
 	case rs_org:
 #ifdef HANDLE_ALIGN
 	  HANDLE_ALIGN (frags);

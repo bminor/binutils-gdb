@@ -50,30 +50,23 @@ extern const char *sparc_target_format PARAMS ((void));
 
 #define WORKING_DOT_WORD
 
-#define md_convert_frag(b,s,f)		{as_fatal (_("sparc convert_frag\n"));}
+#define md_convert_frag(b,s,f) \
+  as_fatal (_("sparc convert_frag\n"))
 #define md_estimate_size_before_relax(f,s) \
-			(as_fatal(_("estimate_size_before_relax called")),1)
+  (as_fatal(_("estimate_size_before_relax called")), 1)
 
 #define LISTING_HEADER "SPARC GAS "
 
 extern int sparc_pic_code;
 
-#define md_do_align(n, fill, len, max, around)				\
-if ((n) && (n) <= 10 && !need_pass_2 && !(fill)				\
-    && subseg_text_p (now_seg))						\
-  {									\
-    char *p;								\
-    p = frag_var (rs_align_code, 1 << n, 1, (relax_substateT) 1024,	\
-                  (symbolS *) 0, (offsetT) (n), (char *) 0);		\
-    *p = 0x00;								\
-    goto around;							\
-  }
-
 /* We require .word, et. al., to be aligned correctly.  */
 #define md_cons_align(nbytes) sparc_cons_align (nbytes)
 extern void sparc_cons_align PARAMS ((int));
+
 #define HANDLE_ALIGN(fragp) sparc_handle_align (fragp)
 extern void sparc_handle_align PARAMS ((struct frag *));
+
+#define MAX_MEM_FOR_RS_ALIGN_CODE  (3 + 4 + 4)
 
 #if defined (OBJ_ELF) || defined (OBJ_AOUT)
 

@@ -132,6 +132,7 @@ void frag_align_pattern PARAMS ((int alignment,
 				 const char *fill_pattern,
 				 int n_fill,
 				 int max));
+void frag_align_code PARAMS ((int alignment, int max));
 void frag_new PARAMS ((int old_frags_var_max_size));
 void frag_wane PARAMS ((fragS * fragP));
 
