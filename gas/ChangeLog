@@ -1,3 +1,7 @@
+2001-05-22  Alan Modra  <amodra@one.net.au>
+
+	* config/tc-v850.c: Update copyright.
+
 2001-05-16  Jeff Johnston  <jjohnstn@redhat.com>
 
         * cgen.c (gas_cgen_tc_gen_reloc): Changed error message when
@@ -62,7 +66,6 @@
 	(md_assemble): Call dwarf2_emit_insn.
 	Include "dwarf2dbg2.h".  Formatting fixes throughout file.
 	* config/tc-arc.h (DWARF2_LINE_MIN_INSN_LENGTH): Define.
-
 	* doc/c-arc.texi (ARC_CORE_DEFAULT): Update to new default.
 
 2001-05-11  Jakub Jelinek  <jakub@redhat.com>
