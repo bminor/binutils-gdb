@@ -42,3 +42,28 @@ Some functions, e.g. fputs_filtered() or error(), specify that they
 that any actions you need to reverse in the case of an error or
 interruption must be on the cleanup chain before you call these functions,
 since they might never return to your code (they "longjmp" instead).
+
+
+
+  Configuring GDB for release
+
+
+GDB should be released after doing "config.gdb none" in the top level
+directory.  This will leave a makefile there, but no tm- or xm- files.
+The makefile is needed, for example, for "make gdb.tar.Z"...  If you
+have tm- or xm-files in the main source directory, C's include rules
+cause them to be used in preference to tm- and xm-files in the 
+subdirectories where the user will actually configure and build the
+binaries.
+
+"config.gdb none" is also a good way to rebuild the top level Makefile
+after changing Makefile.dist, alldeps.mak, etc.
+
+
+
+
+  The README file
+
+
+Check the README file, it often has useful information that does not
+appear anywhere else in the directory.
