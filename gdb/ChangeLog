@@ -15,10 +15,9 @@ Tue Nov 16 17:15:03 1993  Stu Grossman  (grossman at cygnus.com)
 
 Tue Nov 16 13:33:47 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
-	* symtab.c (gdb_mangle_name): If we detect something as a
-	constructor because the field name equals the class name, the
-	physname is just the args, not the whole mangled name.  Needed for
-	testsuite to work with GCC 2.4.5.
+	* symtab.c (gdb_mangle_name): Only assume that the physname is
+	the entire mangled name if it looks like the mangled name of a
+	constructor.  Needed for testsuite to work with GCC 2.4.5.
 
 	* a68v-nat.c: Replace with new version from Troy Rollo.  The
 	version	I am replacing appears to be an old copy of sun3-nat.c.

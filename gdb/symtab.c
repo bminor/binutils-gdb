@@ -260,6 +260,11 @@ gdb_mangle_name (type, i, j)
   char *field_name = TYPE_FN_FIELDLIST_NAME (type, i);
   char *physname = TYPE_FN_FIELD_PHYSNAME (f, j);
   char *newname = type_name_no_tag (type);
+
+  /* Does the form of physname indicate that it is the full mangled name
+     of a constructor (not just the args)?  */
+  int is_full_physname_constructor;
+
   int is_constructor;
   int is_destructor = DESTRUCTOR_PREFIX_P (physname);
   /* Need a new type prefix.  */
@@ -268,17 +273,19 @@ gdb_mangle_name (type, i, j)
   char buf[20];
   int len = (newname == NULL ? 0 : strlen (newname));
 
-  is_constructor = newname && STREQ(field_name, newname);
-  if (!is_constructor)
-    is_constructor = (physname[0]=='_' && physname[1]=='_' && 
-		(isdigit(physname[2]) || physname[2]=='Q' || physname[2]=='t'));
-  if (!is_constructor)
-    is_constructor = (strncmp(physname, "__ct", 4) == 0); 
+  is_full_physname_constructor = 
+    ((physname[0]=='_' && physname[1]=='_' && 
+      (isdigit(physname[2]) || physname[2]=='Q' || physname[2]=='t'))
+     || (strncmp(physname, "__ct", 4) == 0));
+
+  is_constructor =
+    is_full_physname_constructor || (newname && STREQ(field_name, newname));
+
   if (!is_destructor)
     is_destructor = (strncmp(physname, "__dt", 4) == 0); 
 
 #ifndef GCC_MANGLE_BUG
-  if (is_destructor || is_constructor)
+  if (is_destructor || is_full_physname_constructor)
     {
       mangled_name = (char*) xmalloc(strlen(physname)+1);
       strcpy(mangled_name, physname);
