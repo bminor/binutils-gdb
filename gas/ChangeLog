@@ -1,3 +1,17 @@
+2005-03-25  Bob Wilson  <bob.wilson@acm.org>
+
+	* config/tc-xtensa.c (use_longcalls): Delete.
+	(xg_symbolic_immeds_fit): Check for direct calls and return TRUE if
+	the use_longcalls flag is set.  Do this before checking the segment.
+	(xg_expand_assembly_insn): Rearrange to use new do_expand flag.  Never
+	expand direct calls at this point.
+	(xtensa_set_frag_assembly_state): Set use_longcalls flag.
+	(xtensa_find_unmarked_state_frags): Likewise.
+	(md_assemble): Do not disable longcalls by setting is_specific_opcode.
+	(xg_assemble_vliw_tokens): Switch frags when use_longcalls changes.
+	(convert_frag_immed): Remove unnecessary check of is_specific_opcode.
+	* config/tc-xtensa.h (xtensa_frag_type): Add use_longcalls flag.
+
 2005-03-21  Bob Wilson  <bob.wilson@acm.org>
 
 	* config/tc-xtensa.c (md_apply_fix3): Recognize XTENSA_PLT relocations.
