@@ -1,4 +1,10 @@
 start-sanitize-arc
+Mon Feb 13 09:35:30 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* elf32-arc.c (reloc_type): New type R_ARC_B26.
+	(elf_arc_howto_table): Likewise.
+	* reloc.c (BFD_RELOC_ARC_B26): Likewise.
+
 Thu Feb  9 17:31:40 1995  Doug Evans  <dje@canuck.cygnus.com>
 
 	* archures (bfd_mach_arc_base): #define.
@@ -23,9 +29,6 @@ Thu Feb  9 12:02:35 1995  Ian Lance Taylor  <ian@cygnus.com>
 	* i386linux.c (NEEDS_SHRLIB): Define.
 	(linux_tally_symbols): Crash if a NEEDS_SHRLIB symbol is
 	undefined.  From hjl@nynexst.com (H.J. Lu).
-
-	* elfcode.h (elf_bfd_final_link): Add assertion to make sure that
-	dynamic and dynobj are in synch.
 
 Wed Feb  8 17:26:00 1995  Ian Lance Taylor  <ian@cygnus.com>
 
