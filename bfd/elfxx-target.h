@@ -367,6 +367,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifndef elf_backend_write_section
 #define elf_backend_write_section		NULL
 #endif
+#ifndef elf_backend_mips_irix_compat
+#define elf_backend_mips_irix_compat		NULL
+#endif
+#ifndef elf_backend_mips_rtype_to_howto
+#define elf_backend_mips_rtype_to_howto		NULL
+#endif
 
 /* Previously, backends could only use SHT_REL or SHT_RELA relocation
    sections, but not both.  They defined USE_REL to indicate SHT_REL
@@ -458,6 +464,8 @@ static const struct elf_backend_data elfNN_bed =
   elf_backend_discard_info,
   elf_backend_ignore_discarded_relocs,
   elf_backend_write_section,
+  elf_backend_mips_irix_compat,
+  elf_backend_mips_rtype_to_howto,
   elf_backend_ecoff_debug_swap,
   ELF_MACHINE_ALT1,
   ELF_MACHINE_ALT2,

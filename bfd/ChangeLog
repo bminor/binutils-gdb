@@ -1,3 +1,46 @@
+2002-04-04  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* Makefile.am: Add elfxx-mips.c to the known backends.
+	(elf32-mips.lo): remove dependency to coff/external.h.
+	* Makefile.in: Regenerate.
+	* configure.in: Add elfxx-mips.lo to all vectors using elf32-mips.lo
+	Remove elf32-mips.lo from 64 bit vectors. Update dependencies
+	accordingly.
+	* configure: Regenerate.
+	* elf-bfd.h: Move all MIPS ELF specific prototypes to elfxx-mips.h.
+	(irix_compat_t): IRIX compatibility level, moved from elf32-mips.c.
+	(elf_backend_mips_irix_compat, elf_backend_mips_rtype_to_howto): New
+	MIPS specific backend functions.
+	* elf32-mips.c: Moved most code to elfxx-mips.c.
+	(mips_elf_hi16_reloc): Rename from _bfd_mips_elf_hi16_reloc and make
+	static.
+	(mips_elf_lo16_reloc): Likewise, was _bfd_mips_elf_lo16_reloc.
+	(mips_elf_got16_reloc): Likewise, was _bfd_mips_elf_got16_reloc.
+	(mips_elf_gprel32_reloc): Likewise, was _bfd_mips_elf_gprel32_reloc.
+	(mips_elf32_rtype_to_howto): Rename from mips_rtype_to_howto. Changed
+	interface to allow selection of the right REL or RELA howto table.
+	(mips_elf32_object_p): Rename from _bfd_mips_elf_object_p and made
+	static. Let it refuse n32 objects.
+	(elf32_mips_grok_prstatus): Rename from _bfd_elf32_mips_grok_prstatus.
+	(elf32_mips_grok_psinfo): Rename from _bfd_elf32_mips_grok_psinfo.
+	(elf32_mips_discard_info): Rename from _bfd_elf32_mips_discard_info.
+	(elf32_mips_ignore_discarded_relocs): Rename from
+	_bfd_elf32_mips_ignore_discarded_relocs.
+	(elf32_mips_write_section): Rename from _bfd_elf32_mips_write_section.
+	(elf32_mips_irix_compat): New function, replaces IRIX_COMPAT.
+	(elf_mips_howto_table_rela): Remove.
+	* elf64-mips.c: Moved most code to elfxx-mips.c.
+	(bfd_elf64_bfd_reloc_type_lookup): Make static.
+	(mips_elf64_rtype_to_howto): New function.
+	(mips_elf64_object_p): Likewise.
+	(elf64_mips_irix_compat): Likewise.
+	* elfxx-mips.c: New file containing common code merged together from
+	elf32-mips.c and elf64-mips.c.
+	* elfxx-mips.h: New file containing MIPS specific prototypes from
+	elf-bfd.h.
+	* elfxx-target.h: Add handling for elf_backend_mips_irix_compat and
+	elf_backend_mips_rtype_to_howto.
+
 2002-04-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* srec.c (MAXCHUNK, Chunk): Revise comments.
