@@ -1,3 +1,8 @@
+Mon Dec 11 06:57:07 1995  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
+
+	* builtins.exp, pr-5016.{ch,exp}, result.{ch,exp},
+	tests1.{ch,exp}: Enhance test cases.
+
 Thu Dec  7 05:16:34 1995  Wilfried Moser (Alcatel)  <moser@rtl.cygnus.com>
 
 	* builtins.ch, builtins.exp, Makefile.in: New test case.

@@ -274,12 +274,15 @@ proc test_length {} {
     # string expressions
     test_print_accept "print length(\"the quick brown fox ...\")" "23"
     test_print_accept "print length(B'010101010101')" "12"
+    test_print_accept "print length(\"foo \" // \"bar\")" "7"
 
     # check some failures
     setup_xfail "*-*-*"
     test_print_accept "print length(m_chars)" "typename in invalid context"
     setup_xfail "*-*-*"
     test_print_accept "print length(v_byte)" "bad argument to LENGTH builtin"
+    setup_xfail "*-*-*"
+    test_print_accept "print length(b'000000' // b'111111')" "12"
 }
 
 proc test_size {} {

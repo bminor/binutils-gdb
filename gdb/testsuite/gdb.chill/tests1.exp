@@ -131,7 +131,7 @@ proc test_modes {} {
     test_print_accept "ptype BOOL" "bool"
     test_print_accept "ptype CHAR" "char"
 
-    test_print_accept "ptype set1" "SET \[(\]a, b, c\[)\]" \
+    test_print_accept "ptype set1" "SET \[(\]aaa, bbb, ccc\[)\]" \
 	"print unnumbered set mode"
     test_print_accept "ptype nset1" "SET \[(\]na = 1, nb = 34, nc = 20\[)\]" \
 	"print numbered set mode"
@@ -152,8 +152,9 @@ proc test_modes {} {
     test_print_accept "ptype r16" "long \\(-2147483648:2147483647\\)" \
 	"print long range mode"
 
-    test_print_accept "ptype r2" "set1 \\(b:c\\)" \
+    test_print_accept "ptype r2" "set1 \\(bbb:ccc\\)" \
 	"print unnumbered set range mode"
+    setup_xfail "*-*-*"
     test_print_accept "ptype r3" "nset1 \\(na:na\\)" \
 	"print numbered set range mode"
     # really this order ?
@@ -245,15 +246,18 @@ proc test_modes {} {
     
     # structure modes
     # some checks are in chillvars.exp
-    setup_xfail "*-*-*"
-    test_print_accept "ptype stru1m" "STRUCT \\(.*a long,.*b long,.*CASE b OF.*\\(42\\):.*ch1 CHARS\\(20\\),.*\\(52\\):.*ch2 CHARS\\(10\\).*ELSE.*ch3 CHARS\\(1\\).*ESAC.*\\)" \
+    # setup_xfail "*-*-*"
+    test_print_accept "ptype stru1m" "STRUCT \\(.*a long,.*b long,.*CASE OF.*:.*ch1 CHARS \\(20\\).*:.*ch2 CHARS \\(10\\).*ELSE.*ch3 CHARS \\(1\\).*ESAC.*\\)" \
 	"print structure mode 1"
-    setup_xfail "*-*-*"
-    test_print_accept "ptype stru2m" "STRUCT \\(.*f set1\\(a, b, c\\),.*CASE f OF.*\\(a\\):.*ch1 CHARS\\(20\\),.*\\(b\\):.*ch2 CHARS\\(10\\) VARYING.*ELSE.*ch3 CHARS\\(0\\) VARYING.*ESAC.*\\)" \
+    #setup_xfail "*-*-*"
+    test_print_accept "ptype stru2m" "STRUCT \\(.*f set1,.*CASE OF.*:.*ch1 CHARS \\(20\\).*:.*ch2 CHARS \\(10\\) VARYING.*ELSE.*ch3 CHARS \\(0\\) VARYING.*ESAC.*\\)" \
 	"print structure mode 2"
-    setup_xfail "*-*-*"
-    test_print_accept "ptype stru3m" "STRUCT \\(.*f nset1\\(na = 1, na = 1\\),.*CASE f OF.*\\(na\\):.*ch1 CHARS\\(20\\).*ESAC.*\\)" \
+    #setup_xfail "*-*-*"
+    test_print_accept "ptype stru3m" "STRUCT \\(.*f r3,.*CASE OF.*:.*ch1 CHARS \\(20\\).*ESAC.*\\)" \
 	"print structure mode 3"
+    # setup_xfail "*-*-*"
+    test_print_accept "ptype stru4m" "STRUCT \\(.*i long,.*CASE OF.*:.*i1 int,.*i11 int,.*b1 bool,.*c1 char.*:.*i2 long,.*i22 long,.*bs2 BOOLS \\(10\\).*:.*s3 STRUCT \\(.*i3 int,.*CASE OF.*:.*foo long.*ELSE.*bar char.*ESAC.*\\).*ELSE.*x stru2m.*ESAC,.*y stru3m.*\\)" \
+	"print structure mode 4"
    
     
     if $passcount then {
@@ -271,11 +275,11 @@ proc test_locations {} {
     # various location tests can be found in chillvars.exp
 
     # set locations
-    test_print_accept "ptype s1l" "SET \\(a, b, c\\)" \
+    test_print_accept "ptype s1l" "SET \\(aaa, bbb, ccc\\)" \
 	"print mode of set location"
     test_print_accept "whatis s1l" "set1" \
 	"print modename of set location"
-    test_print_accept "print s1l" "c" "print set location"
+    test_print_accept "print s1l" "ccc" "print set location"
     test_print_accept "ptype s2l" "SET \\(na = 1, nb = 34, nc = 20\\)" \
 	"print mode of numbered set location"
     test_print_accept "whatis s2l" "nset1" \
@@ -455,13 +459,17 @@ proc test_locations {} {
     
     # reference modes
     test_print_accept "ptype ref3l" "PTR" "print mode of reference location"
+    setup_xfail "*-*-*"
     test_print_accept "whatis ref3l" "ref3" \
 	"print modename of reference location"
+    setup_xfail "*-*-*"
     test_print_accept "print ref3l" "ref3\\(H'.*\\)" \
 	"print reference location"
     test_print_accept "ptype ref4l" "PTR" "print mode of reference location"
+    setup_xfail "*-*-*"
     test_print_accept "whatis ref4l" "ref4" \
 	"print modename of reference location"
+    setup_xfail "*-*-*"
     test_print_accept "print ref4l" "ref4\\(H'.*\\)" \
 	"print reference location"
     test_print_accept "ptype ref5l" "PTR" "print mode of reference location"
@@ -592,10 +600,10 @@ proc test_locations {} {
 	"print mode of array location"
     gdb_test "whatis arrl1" "arr1m" \
 	"print mode name of array location"
-    gdb_test_exact "print arrl1" {[(1:100): a]} \
+    gdb_test_exact "print arrl1" {[(1:100): aaa]} \
 	"print array location"
     test_print_accept "ptype arrl1(1)" \
-	"SET \\(a, b, c\\)" \
+	"SET \\(aaa, bbb, ccc\\)" \
 	"print mode of array element"
     gdb_test_exact "print arrl3" \
 	{[(1:5): [(1:3): [(1:2): -2147483648]]]} \

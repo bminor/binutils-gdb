@@ -38,7 +38,7 @@ tests1: module;
 seize 	__print_event,
 	__print_buffer;
 
-newmode	set1 = set(a, b, c);
+newmode	set1 = set(aaa, bbb, ccc);
 newmode	nset1 = set(na = 1, nb = 34, nc = 20);
 newmode r11 = range (0 : upper(ubyte));
 newmode r12 = range (0 : upper(uint));
@@ -46,7 +46,7 @@ newmode r12 = range (0 : upper(uint));
 newmode r14 = range (lower(byte) : upper(byte));
 newmode r15 = range (lower(int) : upper(int));
 newmode r16 = range (lower(long): upper(long));
-newmode r2 = set1(b : c);
+newmode r2 = set1(bbb : ccc);
 newmode r3 = nset1(na : na);
 newmode r4 = nset1(nc : nb);
 newmode r5 = nset1(lower(nset1) : upper(nset1));
@@ -89,24 +89,41 @@ newmode arr6m = array(1:5, 1:3, 1:2) long;
 
 newmode stru1m = struct (a, b long, 
 			 case b of 
-			   (42): ch1 char(20),
-			   (52): ch2 char(10)
-			   else  ch3 char(1)
+			   (42): ch1 chars(20),
+			   (52): ch2 chars(10)
+			   else  ch3 chars(1)
   			 esac);
 
 newmode stru2m = struct (f set1,
 			 case f of
-			    (a): ch1 char(20),
-			    (b): ch2 char(10) varying
+			    (aaa): ch1 char(20),
+			    (bbb): ch2 char(10) varying
 			 else	ch3 char(0) varying
 			 esac);
 newmode stru3m = struct (f r3,
 			 case f of
 			    (na): ch1 char(20)
 			 esac);
+newmode stru4m = struct (i long,
+			 case of
+			   : i1, i11 int,
+			     b1 bool,
+			     c1 char,
+			   : i2, i22 long,
+			     bs2 bools (10),
+			   :
+			     s3 struct (i3 int,
+					case of
+					  : foo long
+					  else bar char
+					esac)
+			   else
+                             x stru2m
+                         esac,
+                         y stru3m);
 
 -- set mode locations
-dcl s1l set1 := c;
+dcl s1l set1 := ccc;
 dcl s2l nset1 := nb;
 
 -- range mode locations

@@ -50,11 +50,13 @@ proc do_tests {} {
 
     runto dump
     # Linux thinks type is "_cint" (and so does sparc-sun-sunos4, alpha-dec-osf2.0)
-    setup_xfail "i*86-*-linux*" "sparc-sun-sunos4*" "alpha-dec-osf2*"
+    #setup_xfail "i*86-*-linux*" "sparc-sun-sunos4*" "alpha-dec-osf2*"
     gdb_test "whatis i" "type = m_index" "whatis int-range"
     gdb_test_exact "ptype m_index" "type = RANGE (1:10)" "ptype m_index"
     gdb_test_exact "whatis a" "type = /*LOC*/ vector"
     gdb_test "ptype a" "type = /\\*LOC\\*/ ARRAY \\(1:10\\) (INT|int)"
+    send "step\n"; expect -re "$prompt $"
+    gdb_test_exact "whatis i" "type = long" "whatis loop counter i"
 }
 
 do_tests

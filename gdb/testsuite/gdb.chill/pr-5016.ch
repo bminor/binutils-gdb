@@ -6,7 +6,7 @@ NEWMODE vector = ARRAY (m_index) INT;
 DCL a, b, c vector;
 
 dump: PROC( a vector LOC, c CHAR );
-  DCL i m_index;
+  DCL i m_index := 5;
   DO FOR i IN m_index;
     WRITETEXT( STDOUT, "%C(%C)=%C ", c, i, a(i) );
   OD;
