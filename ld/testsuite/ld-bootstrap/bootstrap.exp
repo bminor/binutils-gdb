@@ -137,7 +137,13 @@ foreach flags {"" "strip" "--static" "--traditional-format"
     send_log "compare (tail of) tmpdir/ld2 tmpdir/ld3\n"
     verbose  "compare (tail of) tmpdir/ld2 tmpdir/ld3"
     if {[istarget "*-*-pe"]
-	|| [istarget "*-*-wince"]} {
+	|| [istarget "*-*-wince"]
+	|| [istarget "*-*-cygwin*"]
+	|| [istarget "*-*-winnt*"]
+	|| [istarget "*-*-mingw32*"]
+	|| [istarget "*-*-interix*"]
+	|| [istarget "*-*-beospe*"]
+	|| [istarget "*-*-netbsdpe*"]} {
         # Trim off the date present in PE binaries by only looking
         #   at the ends of the files
         # Although this works, a way to set the date would be better.
