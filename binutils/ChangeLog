@@ -1,3 +1,8 @@
+Tue Jan 28 16:47:26 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* objdump.c (disassemble_bytes): Don't skip zeroes if the
+	disassembler has told us that we are in a branch delay slot.
+
 Mon Jan 20 14:24:04 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* size.c (berkeley_sum): Rewrite.  Skip sections which are not
