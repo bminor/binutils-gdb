@@ -4121,7 +4121,7 @@ md_apply_fix3 (fixP, valp, seg)
   if ((fixP->fx_r_type == BFD_RELOC_32_PCREL
        || fixP->fx_r_type == BFD_RELOC_16_PCREL
        || fixP->fx_r_type == BFD_RELOC_8_PCREL)
-      && fixP->fx_addsy)
+      && fixP->fx_addsy && !use_rela_relocations)
     {
 #ifndef OBJ_AOUT
       if (OUTPUT_FLAVOR == bfd_target_elf_flavour
@@ -4706,15 +4706,6 @@ tc_gen_reloc (section, fixp)
   else
     {
       rel->addend = fixp->fx_offset;
-#ifdef OBJ_ELF
-      /* Ohhh, this is ugly.  The problem is that if this is a local global
-         symbol, the relocation will entirely be performed at link time, not
-         at assembly time.  bfd_perform_reloc doesn't know about this sort
-         of thing, and as a result we need to fake it out here.  */
-      if ((S_IS_EXTERN (fixp->fx_addsy) || S_IS_WEAK (fixp->fx_addsy))
-	  && !S_IS_COMMON (fixp->fx_addsy))
-	rel->addend -= symbol_get_bfdsym (fixp->fx_addsy)->value;
-#endif
       if (fixp->fx_pcrel)
 	rel->addend -= fixp->fx_size;
     }
