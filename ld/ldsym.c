@@ -360,7 +360,10 @@ LANG_FOR_EACH_INPUT_STATEMENT(entry)
       for (i = 0; i < entry->symbol_count; i++) 
 	{
 	  asymbol *p = entry->asymbols[i];
+	  /* FIXME, temporary hack, since not all of ld knows about the new abs section convention */
 
+	  if (p->section == 0)
+	    p->section = &bfd_abs_section;
 	  if (flag_is_global(p->flags) )
 	    {
 	      /* We are only interested in outputting 

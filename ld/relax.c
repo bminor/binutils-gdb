@@ -28,7 +28,7 @@ DEFUN(build_it,(statement),
 {
   switch (statement->header.type) {
   case lang_fill_statement_enum: 
-      {
+    {
 #if 0
       bfd_byte play_area[SHORT_SIZE];
       unsigned int i;
@@ -57,13 +57,13 @@ DEFUN(build_it,(statement),
 
 	}
 #endif
+      abort();
     }
     break;
   case lang_data_statement_enum:
-    {
-abort();
-      
 #if 0
+    {
+
       bfd_vma value = statement->data_statement.value;
       bfd_byte play_area[LONG_SIZE];
       unsigned int size = 0;
@@ -89,29 +89,29 @@ abort();
 			       size);
 			       
 			       
-#endif
 
     }
+#endif
     break;
   case lang_input_section_enum:
-      {
-	/* Create a new seclet in the output section with this
-	   attached */
+    {
+      /* Create a new seclet in the output section with this
+	 attached */
 
-	asection *i  = statement->input_section.section;
+      asection *i  = statement->input_section.section;
 
-	asection *output_section = i->output_section;
+      asection *output_section = i->output_section;
 	
-	bfd_seclet_type *seclet  = bfd_new_seclet(output_section->owner,output_section);
+      bfd_seclet_type *seclet  = bfd_new_seclet(output_section->owner,output_section);
 	
-	seclet->type = bfd_indirect_seclet;
-	seclet->u.indirect.section = i;
-	seclet->u.indirect.symbols = statement->input_section.ifile->asymbols;
-	seclet->size = bfd_get_section_size_before_reloc(i);
-	seclet->offset = i->output_offset;
-	seclet->next = 0;
+      seclet->type = bfd_indirect_seclet;
+      seclet->u.indirect.section = i;
+      seclet->u.indirect.symbols = statement->input_section.ifile->asymbols;
+      seclet->size = bfd_get_section_size_before_reloc(i);
+      seclet->offset = i->output_offset;
+      seclet->next = 0;
 	
-      }
+    }
     break;
 
   default:
