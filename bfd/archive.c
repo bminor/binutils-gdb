@@ -221,7 +221,7 @@ bfd_get_next_mapent (bfd *abfd, symindex prev, carsym **entry)
   return prev;
 }
 
-/* To be called by backends only */
+/* To be called by backends only.  */
 
 bfd *
 _bfd_create_empty_archive_element_shell (bfd *obfd)
@@ -261,7 +261,8 @@ _bfd_look_for_bfd_in_cache (bfd *arch_bfd, file_ptr filepos)
   return NULL;
 }
 
-/* Kind of stupid to call cons for each one, but we don't do too many */
+/* Kind of stupid to call cons for each one, but we don't do too many.  */
+
 bfd_boolean
 _bfd_add_bfd_to_archive_cache (bfd *arch_bfd, file_ptr filepos, bfd *new_elt)
 {
@@ -316,8 +317,7 @@ get_extended_arelt_filename (bfd *arch, const char *name)
    Presumes the file pointer is already in the right place (ie pointing
    to the ar_hdr in the file).   Moves the file pointer; on success it
    should be pointing to the front of the file contents; on failure it
-   could have been moved arbitrarily.
-*/
+   could have been moved arbitrarily.  */
 
 void *
 _bfd_generic_read_ar_hdr (bfd *abfd)
@@ -670,7 +670,7 @@ bfd_generic_archive_p (bfd *abfd)
 /* The size of the string count.  */
 #define BSD_STRING_COUNT_SIZE 4
 
-/* Returns FALSE on error, TRUE otherwise */
+/* Returns FALSE on error, TRUE otherwise.  */
 
 static bfd_boolean
 do_slurp_bsd_armap (bfd *abfd)
@@ -901,8 +901,8 @@ bfd_slurp_armap (bfd *abfd)
   return TRUE;
 }
 
-/* Returns FALSE on error, TRUE otherwise */
-/* flavor 2 of a bsd armap, similar to bfd_slurp_bsd_armap except the
+/* Returns FALSE on error, TRUE otherwise.  */
+/* Flavor 2 of a bsd armap, similar to bfd_slurp_bsd_armap except the
    header is in a slightly different order and the map name is '/'.
    This flavour is used by hp300hpux.  */
 
@@ -932,7 +932,7 @@ bfd_slurp_bsd_armap_f2 (bfd *abfd)
     return FALSE;
 
   if (!strncmp (nextname, "__.SYMDEF       ", 16)
-      || !strncmp (nextname, "__.SYMDEF/      ", 16)) /* old Linux archives */
+      || !strncmp (nextname, "__.SYMDEF/      ", 16)) /* Old Linux archives.  */
     return do_slurp_bsd_armap (abfd);
 
   if (strncmp (nextname, "/               ", 16))
@@ -1296,7 +1296,7 @@ _bfd_construct_extended_name_table (bfd *abfd,
   return TRUE;
 }
 
-/** A couple of functions for creating ar_hdrs */
+/* A couple of functions for creating ar_hdrs.  */
 
 #ifdef HPUX_LARGE_AR_IDS
 /* Function to encode large UID/GID values according to HP.  */
@@ -1765,9 +1765,9 @@ _bfd_compute_and_write_armap (bfd *arch, unsigned int elength)
   bfd *current;
   file_ptr elt_no = 0;
   struct orl *map = NULL;
-  unsigned int orl_max = 1024;		/* fine initial default */
+  unsigned int orl_max = 1024;		/* Fine initial default.  */
   unsigned int orl_count = 0;
-  int stridx = 0;		/* string index */
+  int stridx = 0;
   asymbol **syms = NULL;
   long syms_max = 0;
   bfd_boolean ret;
@@ -1916,7 +1916,7 @@ bsd_write_armap (bfd *arch,
   unsigned int mapsize = ranlibsize + stringsize + 8;
   file_ptr firstreal;
   bfd *current = arch->archive_head;
-  bfd *last_elt = current;	/* last element arch seen */
+  bfd *last_elt = current;	/* Last element arch seen.  */
   bfd_byte temp[4];
   unsigned int count;
   struct ar_hdr hdr;
@@ -1960,7 +1960,7 @@ bsd_write_armap (bfd *arch,
 	      current = current->next;
 	    }
 	  while (current != map[count].u.abfd);
-	}			/* if new archive element */
+	}
 
       last_elt = current;
       H_PUT_32 (arch, map[count].namidx, buf);
@@ -2058,8 +2058,7 @@ _bfd_archive_bsd_update_armap_timestamp (bfd *arch)
    symbol name 0
    symbol name 1
 
-   symbol name n-1
-*/
+   symbol name n-1  */
 
 bfd_boolean
 coff_write_armap (bfd *arch,
@@ -2104,7 +2103,6 @@ coff_write_armap (bfd *arch,
       (((char *) (&hdr))[i]) = ' ';
 
   /* Write the ar header for this item and the number of symbols.  */
-
   if (bfd_bwrite (&hdr, sizeof (struct ar_hdr), arch)
       != sizeof (struct ar_hdr))
     return FALSE;

@@ -189,9 +189,9 @@ bfd *bfd_last_cache;
  	otherwise, it has to perform the complicated lookup function.
 
   .#define bfd_cache_lookup(x) \
-  .    ((x)==bfd_last_cache? \
-  .      (FILE*) (bfd_last_cache->iostream): \
-  .       bfd_cache_lookup_worker(x))
+  .    ((x) == bfd_last_cache ? \
+  .      (FILE *) (bfd_last_cache->iostream): \
+  .       bfd_cache_lookup_worker (x))
 
  */
 
@@ -438,7 +438,8 @@ DESCRIPTION
 	quick answer.  Find a file descriptor for @var{abfd}.  If
 	necessary, it open it.  If there are already more than
 	<<BFD_CACHE_MAX_OPEN>> files open, it tries to close one first, to
-	avoid running out of file descriptors.
+	avoid running out of file descriptors.  It will abort rather than
+	returning NULL if it is unable to (re)open the @var{abfd}.
 */
 
 FILE *
@@ -461,12 +462,10 @@ bfd_cache_lookup_worker (bfd *abfd)
     }
   else
     {
-      if (bfd_open_file (abfd) == NULL)
-	return NULL;
-      if (abfd->where != (unsigned long) abfd->where)
-	return NULL;
-      if (real_fseek ((FILE *) abfd->iostream, abfd->where, SEEK_SET) != 0)
-	return NULL;
+      if (bfd_open_file (abfd) == NULL
+	  || abfd->where != (unsigned long) abfd->where
+	  || real_fseek ((FILE *) abfd->iostream, abfd->where, SEEK_SET) != 0)
+	abort ();
     }
 
   return (FILE *) abfd->iostream;
