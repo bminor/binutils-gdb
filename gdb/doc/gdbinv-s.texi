@@ -4,8 +4,8 @@
 @c This text diverted to "Remote Debugging" section in general case;
 @c however, if we're doing a manual specifically for one of these, it
 @c belongs up front (in "Getting In and Out" chapter).
-@ifset REMOTESTUB
 
+@ifset REMOTESTUB
 @node Remote Serial
 @subsection The @value{GDBN} remote serial protocol
 
@@ -74,13 +74,13 @@ The @file{README} file in the @value{GDBN} distribution may list other
 recently added stubs.
 
 @menu
-* stub contents::       What the stub can do for you
-* bootstrapping::       What you must do for the stub
-* debug session::       Putting it all together
-* protocol::            Outline of the communication protocol
+* Stub Contents::       What the stub can do for you
+* Bootstrapping::       What you must do for the stub
+* Debug Session::       Putting it all together
+* Protocol::            Outline of the communication protocol
 @end menu
 
-@node stub contents
+@node Stub Contents
 @subsubsection What the stub can do for you
 
 @cindex remote serial stub
@@ -131,7 +131,7 @@ to make certain your program stops at a predetermined point for the
 start of your debugging session.
 @end table
 
-@node bootstrapping
+@node Bootstrapping
 @subsubsection What you must do for the stub
 
 @cindex remote stub, support routines
@@ -181,7 +181,7 @@ but in general the stubs are likely to use any of the common library
 subroutines which @code{gcc} generates as inline code.
 
 
-@node debug session
+@node Debug Session
 @subsubsection Putting it all together
 
 @cindex remote serial debugging summary
@@ -244,7 +244,7 @@ step and continue the remote program.
 To resume the remote program and stop debugging it, use the @code{detach}
 command.
 
-@node protocol
+@node Protocol
 @subsubsection Outline of the communication protocol
 
 @cindex debugging stub, example
@@ -364,7 +364,7 @@ session.  @xref{Target Commands, ,Commands for Managing Targets}.
 @menu
 * Nindy Startup::               Startup with Nindy
 * Nindy Options::               Options for Nindy
-* Nindy reset::                 Nindy Reset Command
+* Nindy Reset::                 Nindy reset command
 @end menu
 
 @node Nindy Startup
@@ -382,7 +382,7 @@ Attach /dev/ttyNN -- specify NN, or "quit" to quit:
 Respond to the prompt with whatever suffix (after @samp{/dev/tty})
 identifies the serial port you want to use.  You can, if you choose,
 simply start up with no Nindy connection by responding to the prompt
-with an empty line.  If you do this, and later wish to attach to Nindy,
+with an empty line.  If you do this and later wish to attach to Nindy,
 use @code{target} (@pxref{Target Commands, ,Commands for Managing Targets}).
 
 @node Nindy Options
@@ -428,7 +428,7 @@ The standard @samp{-b} option controls the line speed used on the serial
 port.
 
 @c @group
-@node Nindy reset
+@node Nindy Reset
 @subsubsection Nindy Reset Command
 
 @table @code
@@ -456,16 +456,16 @@ you've hooked the cable between the PC's @file{COM1} port and
 @file{/dev/ttya} on the Unix system.
 
 @menu
-* Comms (EB29K)::               Communications Setup
+* Comms (EB29K)::               Communications setup
 * gdb-EB29K::                   EB29K cross-debugging
-* Remote Log::                  Remote Log
+* Remote Log::                  Remote log
 @end menu
 
 @node Comms (EB29K)
 @subsubsection Communications Setup
 
-The next step is to set up the PC's port, by doing something like the
-following in DOS on the PC:
+The next step is to set up the PC's port, by doing something like this
+in DOS on the PC:
 
 @example
 C:\> MODE com1:9600,n,8,1,none
@@ -706,31 +706,31 @@ Once you have included the RDB interface in your VxWorks system image
 and set your Unix execution search path to find @value{GDBN}, you are ready
 to run @value{GDBN}.  From your UNIX host, type:
 
-@smallexample
+@example
 % @value{GDBP}
-@end smallexample
+@end example
 
 @value{GDBN} will come up showing the prompt:
 
-@smallexample
+@example
 (@value{GDBP})
-@end smallexample
+@end example
 
 @menu
-* VxWorks connection::          Connecting to VxWorks
-* VxWorks download::            VxWorks Download
-* VxWorks attach::              Running Tasks
+* VxWorks Connection::          Connecting to VxWorks
+* VxWorks Download::            VxWorks download
+* VxWorks Attach::              Running tasks
 @end menu
 
-@node VxWorks connection
+@node VxWorks Connection
 @subsubsection Connecting to VxWorks
 
 The @value{GDBN} command @code{target} lets you connect to a VxWorks target on the
 network.  To connect to a target whose host name is ``@code{tt}'', type:
 
-@smallexample
+@example
 (@value{GDBP}) target vxworks tt
-@end smallexample
+@end example
 
 @value{GDBN} will display a message similar to the following:
 
@@ -744,16 +744,16 @@ these files by searching the directories listed in the command search
 path (@pxref{Environment, ,Your Program's Environment}); if it fails
 to find an object file, it will display a message such as:
 
-@smallexample
+@example
 prog.o: No such file or directory.
-@end smallexample
+@end example
 
 This will cause the @code{target} command to abort.  When this happens,
 you should add the appropriate directory to the search path, with the
 @value{GDBN} command @code{path}, and execute the @code{target} command
 again.
 
-@node VxWorks download
+@node VxWorks Download
 @subsubsection VxWorks Download
 
 @cindex download to VxWorks
@@ -769,16 +769,16 @@ directory in which the object file resides, and then to reference the
 file by its name, without any path.  Thus, to load a program
 @file{prog.o}, residing in @file{wherever/vw/demo/rdb}, on VxWorks type:
 
-@smallexample
+@example
 -> cd "wherever/vw/demo/rdb"
-@end smallexample
+@end example
 
 On @value{GDBN} type:
 
-@smallexample
+@example
 (@value{GDBP}) cd wherever/vw/demo/rdb 
 (@value{GDBP}) load prog.o
-@end smallexample
+@end example
 
 @value{GDBN} will display a response similar to the following:
 
@@ -794,16 +794,16 @@ history.  (This is necessary in order to preserve the integrity of
 debugger data structures that reference the target system's symbol
 table.)
 
-@node VxWorks attach
+@node VxWorks Attach
 @subsubsection Running Tasks
 
 @cindex running VxWorks tasks
 You can also attach to an existing task using the @code{attach} command as
 follows:
 
-@smallexample
+@example
 (@value{GDBP}) attach @var{task}
-@end smallexample
+@end example
 
 @noindent
 where @var{task} is the VxWorks hexadecimal task ID.  The task can be running
@@ -868,7 +868,7 @@ degugger, you give it just the numeric part of the serial port's name;
 for example, @samp{asyncstr 2} below runs @code{asyncstr} on
 @code{COM2}.
 
-@smallexample
+@example
 (eg-C:\H8300\TEST) mode com2:9600,n,8,1,p
 
 Resident portion of MODE loaded
@@ -876,7 +876,7 @@ Resident portion of MODE loaded
 COM2: 9600, n, 8, 1, p
 
 (eg-C:\H8300\TEST) asynctsr 2
-@end smallexample
+@end example
 
 @quotation
 @emph{Warning:} We have noticed a bug in PC-NFS that conflicts with
