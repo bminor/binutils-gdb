@@ -1,3 +1,11 @@
+Wed Jun 29 13:11:45 1994  Steve Chamberlain  (sac@cirdan.cygnus.com)
+
+	* remote-e7000.c (e7000_open): Don't try a tcp open if we're
+	using go32.
+	* remote-hms.c (flush): New function.
+	(expect): Get edge case right.
+	(hms_read_inferior_memory): Be more tolerant of line noise.
+
 Tue Jun 28 14:17:03 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* configure.in: Use i386m3.mh and i386m3.mt as names of host and

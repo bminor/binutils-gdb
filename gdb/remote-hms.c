@@ -238,10 +238,15 @@ static const char *dev_name;
    hms_open knows that we don't have a file open when the program
    starts.  */
 
-int is_open = 0;
+static int before = 0xdead;
+static int is_open = 0;
+static int after = 0xdead;
 int
 check_open ()
 {
+if (before != 0xdead
+    || after != 0xdead)
+  printf("OUTCH! \n");
   if (!is_open)
     {
       error ("remote device not open");
@@ -276,6 +281,16 @@ readchar ()
   return buf & 0x7f;
 }
 
+static void flush()
+{
+  while (1)
+    {
+      int b = SERIAL_READCHAR (desc, 0);
+      if (b == SERIAL_TIMEOUT)
+	return;
+    }
+}
+
 static int
 readchar_nofail ()
 {
@@ -298,11 +313,12 @@ expect (string)
      char *string;
 {
   char *p = string;
-
+  char c;
   immediate_quit = 1;
   while (1)
     {
-      if (readchar () == *p)
+      c = readchar();
+      if (c == *p)
 	{
 	  p++;
 	  if (*p == '\0')
@@ -311,8 +327,12 @@ expect (string)
 	      return;
 	    }
 	}
-      else
-	p = string;
+      else 
+	{
+	  p = string;
+	  if (c == *p)
+	    p++;
+	}
     }
 }
 
@@ -612,7 +632,7 @@ hms_open (name, from_tty)
 
   printf_filtered ("Connected to remote board running HMS monitor.\n");
   add_commands ();
-  hms_drain ();
+/*  hms_drain ();*/
 }
 
 /* Close out all files and local state before this target loses control. */
@@ -1319,6 +1339,8 @@ hms_read_inferior_memory (memaddr, myaddr, len)
     abort ();
 
   sprintf (buffer, "m %4x %4x", start & 0xffff, end & 0xffff);
+
+  flush();
   hms_write_cr (buffer);
   /* drop the echo and newline*/
   for (i = 0; i < 13; i++)
@@ -1338,8 +1360,15 @@ hms_read_inferior_memory (memaddr, myaddr, len)
       buffer[0] = readchar ();
       if (buffer[0] == 'M')
 	break;
-      for (i = 1; i < 66; i++)
+
+      for (i = 1; i < 60; i++) {
 	buffer[i] = readchar ();
+      }
+      /* sometimes we loose characters in the ascii representation of the 
+	 data.  I don't know where.  So just scan for the end of line */
+      i = readchar();
+      while (i != '\n' && i != '\r')
+	i = readchar();	
 
       /* Now parse the line */
 
@@ -1350,7 +1379,6 @@ hms_read_inferior_memory (memaddr, myaddr, len)
 	  byte[p] = gethex (2, buffer + idx, &ok);
 	  byte[p + 1] = gethex (2, buffer + idx + 2, &ok);
 	  idx += 5;
-
 	}
 
       for (p = 0; p < 16; p++)
@@ -1545,7 +1573,6 @@ static void
 hms_drain (args, fromtty)
      char *args;
      int fromtty;
-
 {
   int c;
   while (1)
@@ -1566,7 +1593,7 @@ static void
 add_commands ()
 {
 
-  add_com ("hmsdrain", class_obscure, hms_drain,
+  add_com ("hms_drain", class_obscure, hms_drain,
 	   "Drain pending hms text buffers.");
 }
 

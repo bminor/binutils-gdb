@@ -316,7 +316,6 @@ go32_readchar (scb, timeout)
 {
   char buf;
 
-
   /* Shortcut for polling */
   if (timeout == 0)
     {
