@@ -1,3 +1,17 @@
+2000-07-08  Alan Modra  <alan@linuxcare.com.au>
+
+	* section.c (struct sec): Add id field.  Tidy comment formatting.
+	(bfd_make_section_anyway): Set id.
+	(STD_SECTION): Init id too.
+	Change CONST to const throughout.
+	* archures.c (bfd_arch_info): Tidy comment.
+	(bfd_arch_list): Change a CONST to const.
+	* libbfd-in.h: Tidy comments and replace CONST with const.
+	* elf-bfd.h: Likewise.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* libcoff.h: Regenerate.
+
 2000-07-07  DJ Delorie  <dj@redhat.com>
 
 	* archive.c (_bfd_write_archive_contents): Add an informative

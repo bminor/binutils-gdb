@@ -256,7 +256,7 @@ DESCRIPTION
 .  const char *arch_name;
 .  const char *printable_name;
 .  unsigned int section_align_power;
-. {* true if this is the default machine for the architecture *}
+.  {* True if this is the default machine for the architecture.  *}
 .  boolean the_default;	
 .  const struct bfd_arch_info * (*compatible)
 .	PARAMS ((const struct bfd_arch_info *a,
@@ -444,7 +444,7 @@ bfd_arch_list ()
 	}
     }
 
-  name_list = (CONST char **)
+  name_list = (const char **)
     bfd_malloc ((vec_length + 1) * sizeof (char **));
   if (name_list == NULL)
     return NULL;

@@ -1013,8 +1013,8 @@ extern boolean _bfd_elf_set_arch_mach PARAMS ((bfd *, enum bfd_architecture,
 						unsigned long));
 extern boolean _bfd_elf_find_nearest_line PARAMS ((bfd *, asection *,
 						    asymbol **,
-						    bfd_vma, CONST char **,
-						    CONST char **,
+						    bfd_vma, const char **,
+						    const char **,
 						    unsigned int *));
 #define _bfd_elf_read_minisymbols _bfd_generic_read_minisymbols
 #define _bfd_elf_minisymbol_to_symbol _bfd_generic_minisymbol_to_symbol
