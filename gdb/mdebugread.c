@@ -63,9 +63,6 @@
 
 #ifndef MDEBUG_EFI_SYMBOL_NAME
 #define MDEBUG_EFI_SYMBOL_NAME "__GDB_EFI_INFO__"
-#ifndef RA_REGNUM
-#define RA_REGNUM 0
-#endif
 #endif
 
 #include "gdb_stat.h"
@@ -1977,7 +1974,11 @@ parse_procedure (PDR *pr, struct symtab *search_symtab,
 	  && strcmp (sh_name, "setjmp") == 0)
 	{
 	  complaint (&symfile_complaints, "fixing bad setjmp PDR from libc");
+#ifdef RA_REGNUM
 	  e->pdr.pcreg = RA_REGNUM;
+#else
+	  e->pdr.pcreg = 0;
+#endif
 	  e->pdr.regmask = 0x80000000;
 	  e->pdr.regoffset = -4;
 	}
