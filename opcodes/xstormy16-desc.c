@@ -1099,6 +1099,21 @@ static const CGEN_IBASE xstormy16_cgen_insn_table[MAX_INSNS] =
     XSTORMY16_INSN_DIV, "div", "div", 16,
     { 0, { (1<<MACH_BASE) } }
   },
+/* sdiv */
+  {
+    XSTORMY16_INSN_SDIV, "sdiv", "sdiv", 16,
+    { 0, { (1<<MACH_BASE) } }
+  },
+/* sdivlh */
+  {
+    XSTORMY16_INSN_SDIVLH, "sdivlh", "sdivlh", 16,
+    { 0, { (1<<MACH_BASE) } }
+  },
+/* divlh */
+  {
+    XSTORMY16_INSN_DIVLH, "divlh", "divlh", 16,
+    { 0, { (1<<MACH_BASE) } }
+  },
 /* nop */
   {
     XSTORMY16_INSN_NOP, "nop", "nop", 16,
