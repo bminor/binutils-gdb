@@ -5495,6 +5495,7 @@ _bfd_mips_elf_check_relocs (abfd, info, sec, relocs)
 	case R_MIPS_CALL16:
 	case R_MIPS_CALL_HI16:
 	case R_MIPS_CALL_LO16:
+	case R_MIPS_JALR:
 	  break;
 	}
 
