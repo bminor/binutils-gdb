@@ -955,10 +955,7 @@ display_rel_file (abfd, archive_bfd)
   if (! dynamic)
     {
       if (!(bfd_get_file_flags (abfd) & HAS_SYMS))
-	{
-	  non_fatal (_("%s: no symbols"), bfd_get_filename (abfd));
-	  return;
-	}
+	return;
     }
 
   symcount = bfd_read_minisymbols (abfd, dynamic, &minisyms, &size);
@@ -966,10 +963,7 @@ display_rel_file (abfd, archive_bfd)
     bfd_fatal (bfd_get_filename (abfd));
 
   if (symcount == 0)
-    {
-      non_fatal (_("%s: no symbols"), bfd_get_filename (abfd));
-      return;
-    }
+    return;
 
   /* Discard the symbols we don't want to print.
      It's OK to do this in place; we'll free the storage anyway

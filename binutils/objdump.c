@@ -383,7 +383,6 @@ slurp_symtab (abfd)
 
   if (!(bfd_get_file_flags (abfd) & HAS_SYMS))
     {
-      non_fatal (_("%s: no symbols"), bfd_get_filename (abfd));
       symcount = 0;
       return NULL;
     }
@@ -397,8 +396,6 @@ slurp_symtab (abfd)
   symcount = bfd_canonicalize_symtab (abfd, sy);
   if (symcount < 0)
     bfd_fatal (bfd_get_filename (abfd));
-  if (symcount == 0)
-    non_fatal (_("%s: no symbols"), bfd_get_filename (abfd));
   return sy;
 }
 
@@ -429,8 +426,6 @@ slurp_dynamic_symtab (abfd)
   dynsymcount = bfd_canonicalize_dynamic_symtab (abfd, sy);
   if (dynsymcount < 0)
     bfd_fatal (bfd_get_filename (abfd));
-  if (dynsymcount == 0)
-    non_fatal (_("%s: No dynamic symbols"), bfd_get_filename (abfd));
   return sy;
 }
 
@@ -2284,18 +2279,17 @@ dump_symbols (abfd, dynamic)
     {
       current = dynsyms;
       max = dynsymcount;
-      if (max == 0)
-	return;
       printf ("DYNAMIC SYMBOL TABLE:\n");
     }
   else
     {
       current = syms;
       max = symcount;
-      if (max == 0)
-	return;
       printf ("SYMBOL TABLE:\n");
     }
+
+  if (max == 0)
+    printf (_("no symbols\n"));
 
   for (count = 0; count < max; count++)
     {

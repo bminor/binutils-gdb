@@ -1,3 +1,10 @@
+2002-08-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* nm.c (display_rel_file): Don't report "no symbols" as an error.
+	* objdump.c (slurp_symtab): Likewise.
+	(slurp_dynamic_symtab): Likewise.
+	(dump_symbols): Likewise.  Do print "no symbols" to stdout.
+
 2002-08-24  Geoffrey Keating  <geoffk@redhat.com>
 
 	* MAINTAINERS: Change my mailing address.
