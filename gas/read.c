@@ -361,7 +361,7 @@ read_a_source_file (name)
 	      if (input_line_pointer[-1] == '\n')
 		bump_line_counters ();
 
-#if defined (MRI) || defined (LABLES_WITHOUT_COLONS)
+#if defined (MRI) || defined (LABELS_WITHOUT_COLONS)
 	      /* Text at the start of a line must be a label, we run down
 		 and stick a colon in.  */
 	      if (is_name_beginner (*input_line_pointer))
