@@ -1,3 +1,7 @@
+Wed Sep  4 18:06:51 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* rldefs.h:  Enable HANDLE_SIGNALS for cygwin32.
+
 Thu Aug 29 16:59:45 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* configure.in (i[345]86-*-*): Recognize i686 for pentium pro.
