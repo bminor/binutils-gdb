@@ -1,3 +1,7 @@
+2003-08-06  Michael Chastain  <mec@shout.net>
+
+	* gdb.java/jmisc1.exp: Add test for pr gdb/1322.
+
 2003-08-12  Michael Snyder  <msnyder@redhat.com>
 
 	* gdb.base/float.exp: Add test for SH.
