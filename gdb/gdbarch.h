@@ -3381,23 +3381,11 @@ extern const struct bfd_arch_info *target_architecture;
 
 /* The target-system-dependent disassembler is semi-dynamic */
 
-extern int dis_asm_read_memory (bfd_vma memaddr, bfd_byte *myaddr,
-				unsigned int len, disassemble_info *info);
-
-extern void dis_asm_memory_error (int status, bfd_vma memaddr,
-				  disassemble_info *info);
-
-extern void dis_asm_print_address (bfd_vma addr,
-				   disassemble_info *info);
+/* Use gdb_disassemble, and gdbarch_print_insn instead.  */
+extern int (*deprecated_tm_print_insn) (bfd_vma, disassemble_info*);
 
 /* Use set_gdbarch_print_insn instead.  */
-extern int (*deprecated_tm_print_insn) (bfd_vma, disassemble_info*);
-extern disassemble_info tm_print_insn_info;
-#ifndef TARGET_PRINT_INSN_INFO
-#define TARGET_PRINT_INSN_INFO (&tm_print_insn_info)
-#endif
-
-
+extern disassemble_info deprecated_tm_print_insn_info;
 
 /* Set the dynamic target-system-dependent parameters (architecture,
    byte-order, ...) using information found in the BFD */

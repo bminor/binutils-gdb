@@ -2252,5 +2252,5 @@ _initialize_ia64_tdep (void)
   register_gdbarch_init (bfd_arch_ia64, ia64_gdbarch_init);
 
   deprecated_tm_print_insn = print_insn_ia64;
-  tm_print_insn_info.bytes_per_line = SLOT_MULTIPLIER;
+  deprecated_tm_print_insn_info.bytes_per_line = SLOT_MULTIPLIER;
 }

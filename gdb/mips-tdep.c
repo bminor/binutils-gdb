@@ -5543,9 +5543,9 @@ mips_gdbarch_init (struct gdbarch_info info,
 
   /* Reset the disassembly info, in case it was set to something
      non-default.  */
-  tm_print_insn_info.flavour = bfd_target_unknown_flavour;
-  tm_print_insn_info.arch = bfd_arch_unknown;
-  tm_print_insn_info.mach = 0;
+  deprecated_tm_print_insn_info.flavour = bfd_target_unknown_flavour;
+  deprecated_tm_print_insn_info.arch = bfd_arch_unknown;
+  deprecated_tm_print_insn_info.mach = 0;
 
   elf_flags = 0;
 
@@ -5626,7 +5626,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   if (wanted_abi != MIPS_ABI_UNKNOWN)
     mips_abi = wanted_abi;
 
-  /* We have to set tm_print_insn_info before looking for a
+  /* We have to set deprecated_tm_print_insn_info before looking for a
      pre-existing architecture, otherwise we may return before we get
      a chance to set it up.  */
   if (mips_abi == MIPS_ABI_N32 || mips_abi == MIPS_ABI_N64)
@@ -5634,17 +5634,17 @@ mips_gdbarch_init (struct gdbarch_info info,
       /* Set up the disassembler info, so that we get the right
 	 register names from libopcodes.  */
       if (mips_abi == MIPS_ABI_N32)
-	tm_print_insn_info.disassembler_options = "gpr-names=n32";
+	deprecated_tm_print_insn_info.disassembler_options = "gpr-names=n32";
       else
-	tm_print_insn_info.disassembler_options = "gpr-names=64";
-      tm_print_insn_info.flavour = bfd_target_elf_flavour;
-      tm_print_insn_info.arch = bfd_arch_mips;
+	deprecated_tm_print_insn_info.disassembler_options = "gpr-names=64";
+      deprecated_tm_print_insn_info.flavour = bfd_target_elf_flavour;
+      deprecated_tm_print_insn_info.arch = bfd_arch_mips;
       if (info.bfd_arch_info != NULL
 	  && info.bfd_arch_info->arch == bfd_arch_mips
 	  && info.bfd_arch_info->mach)
-	tm_print_insn_info.mach = info.bfd_arch_info->mach;
+	deprecated_tm_print_insn_info.mach = info.bfd_arch_info->mach;
       else
-	tm_print_insn_info.mach = bfd_mach_mips8000;
+	deprecated_tm_print_insn_info.mach = bfd_mach_mips8000;
     }
   else
     /* This string is not recognized explicitly by the disassembler,
@@ -5652,7 +5652,7 @@ mips_gdbarch_init (struct gdbarch_info info,
        the bfd elf headers, such that, if the user overrides the ABI
        of a program linked as NewABI, the disassembly will follow the
        register naming conventions specified by the user.  */
-    tm_print_insn_info.disassembler_options = "gpr-names=32";
+    deprecated_tm_print_insn_info.disassembler_options = "gpr-names=32";
 
   if (gdbarch_debug)
     {

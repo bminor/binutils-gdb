@@ -6219,8 +6219,6 @@ gdbarch_update_p (struct gdbarch_info info)
 
 /* Pointer to the target-dependent disassembly function.  */
 int (*deprecated_tm_print_insn) (bfd_vma, disassemble_info *);
-disassemble_info tm_print_insn_info;
-
 
 extern void _initialize_gdbarch (void);
 
@@ -6228,12 +6226,6 @@ void
 _initialize_gdbarch (void)
 {
   struct cmd_list_element *c;
-
-  INIT_DISASSEMBLE_INFO_NO_ARCH (tm_print_insn_info, gdb_stdout, (fprintf_ftype)fprintf_filtered);
-  tm_print_insn_info.flavour = bfd_target_unknown_flavour;
-  tm_print_insn_info.read_memory_func = dis_asm_read_memory;
-  tm_print_insn_info.memory_error_func = dis_asm_memory_error;
-  tm_print_insn_info.print_address_func = dis_asm_print_address;
 
   add_show_from_set (add_set_cmd ("arch",
 				  class_maintenance,

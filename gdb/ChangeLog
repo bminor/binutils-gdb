@@ -1,5 +1,37 @@
 2003-04-30  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh (deprecated_tm_print_insn_info): Rename
+	"tm_print_insn_info".
+	(TARGET_PRINT_INSN_INFO): Delete macro.
+	(dis_asm_read_memory): Delete function declaration.
+	(dis_asm_memory_error, dis_asm_print_address): Ditto.
+	(tm_print_insn_info): Delete variable definition.
+	(_initialize_gdbarch): Do not initialize "tm_print_insn_info".
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* d10v-tdep.c (display_trace): Replace "tm_print_insn_info" with
+	"deprecated_tm_print_insn_info".
+	* mcore-tdep.c (mcore_dump_insn): Ditto.
+	* mips-tdep.c (mips_gdbarch_init): Ditto.
+	* sparc-tdep.c (_initialize_sparc_tdep): Ditto.
+	* v850-tdep.c (v850_scan_prologue, v850_gdbarch_init): Ditto.
+	* ia64-tdep.c (_initialize_ia64_tdep): Ditto.
+	* printcmd.c (print_insn): Use "deprecated_tm_print_insn_info"
+	instead of TARGET_PRINT_INSN_INFO, add comment.
+	* s390-tdep.c (s390_get_frame_info): Instead of
+	"dis_asm_read_memory", use "deprecated_tm_print_insn_info".
+	(s390_check_function_end, s390_is_sigreturn): Ditto.
+	* corefile.c (dis_asm_read_memory): Move to "disasm.c".
+	(dis_asm_memory_error, dis_asm_print_address): Ditto.
+	* disasm.c: Include "gdbcore.h".
+	(_initialize_disasm): New function, initialize
+	"deprecated_tm_print_insn_info".
+	(deprecated_tm_print_insn_info): New variable.
+	(dis_asm_read_memory): Moved from "corefile.c", made static.
+	(dis_asm_print_address, dis_asm_memory_error): Ditto.
+	* Makefile.in (disasm.o): Update dependencies.
+
+2003-04-30  Andrew Cagney  <cagney@redhat.com>
+
 	* sparc-tdep.c (SPARC_HAS_FPU): When multi-arch, define as 1.
 
 2003-04-29  Adam Fedor  <fedor@gnu.org>

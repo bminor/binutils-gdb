@@ -280,7 +280,7 @@ s390_get_frame_info (CORE_ADDR pc, struct frame_extra_info *fextra_info,
 
   memset (gprs_saved, 0, sizeof (gprs_saved));
   memset (fprs_saved, 0, sizeof (fprs_saved));
-  info.read_memory_func = dis_asm_read_memory;
+  info.read_memory_func = deprecated_tm_print_insn_info.read_memory_func;
 
   save_link_regidx = subtract_sp_regidx = 0;
   if (fextra_info)
@@ -682,7 +682,7 @@ s390_check_function_end (CORE_ADDR pc)
   disassemble_info info;
   int regidx, instrlen;
 
-  info.read_memory_func = dis_asm_read_memory;
+  info.read_memory_func = deprecated_tm_print_insn_info.read_memory_func;
   instrlen = s390_readinstruction (instr, pc, &info);
   if (instrlen < 0)
     return -1;
@@ -819,7 +819,7 @@ s390_is_sigreturn (CORE_ADDR pc, struct frame_info *sighandler_fi,
 
   scontext = temp_sregs = 0;
 
-  info.read_memory_func = dis_asm_read_memory;
+  info.read_memory_func = deprecated_tm_print_insn_info.read_memory_func;
   instrlen = s390_readinstruction (instr, pc, &info);
   if (sigcaller_pc)
     *sigcaller_pc = 0;

@@ -1360,7 +1360,7 @@ display_trace (int low, int high)
 	  printf_filtered ("\t");
 	  wrap_here ("    ");
 	  next_address += TARGET_PRINT_INSN (next_address,
-					     &tm_print_insn_info);
+					     &deprecated_tm_print_insn_info);
 	  printf_filtered ("\n");
 	  gdb_flush (gdb_stdout);
 	}

@@ -73,7 +73,11 @@ tui_disassemble (struct tui_asm_line* lines, CORE_ADDR pc, int count)
   /* now init the ui_file structure */
   gdb_dis_out = tui_sfileopen (256);
 
-  memcpy (&asm_info, TARGET_PRINT_INSN_INFO, sizeof (asm_info));
+  /* FIXME: cagney/2003-04-28: Should instead be using the generic
+     disassembler but first need to clean that up and stop it trying
+     to access the exec file.  */
+
+  memcpy (&asm_info, &deprecated_tm_print_insn_info, sizeof (asm_info));
   asm_info.stream = gdb_dis_out;
 
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)

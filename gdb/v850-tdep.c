@@ -614,7 +614,7 @@ v850_scan_prologue (CORE_ADDR pc, struct prologue_info *pi)
 
 #ifdef DEBUG
       printf_filtered ("0x%.8lx ", (long) current_pc);
-      TARGET_PRINT_INSN (current_pc, &tm_print_insn_info);
+      TARGET_PRINT_INSN (current_pc, &deprecated_tm_print_insn_info);
 #endif
 
       insn = read_memory_unsigned_integer (current_pc, 2);
@@ -1215,7 +1215,7 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       if (v850_processor_type_table[i].mach == info.bfd_arch_info->mach)
 	{
 	  v850_register_names = v850_processor_type_table[i].regnames;
-	  tm_print_insn_info.mach = info.bfd_arch_info->mach;
+	  deprecated_tm_print_insn_info.mach = info.bfd_arch_info->mach;
 	  break;
 	}
     }
