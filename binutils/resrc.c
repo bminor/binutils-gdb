@@ -2009,7 +2009,7 @@ write_rc_rcdata (e, rcdata, ind)
 		else
 		  {
 		    fprintf (e, ",\n");
-		    indent (e, ind);
+		    indent (e, ind + 2);
 		  }
 		fprintf (e, "%luL", l);
 	      }
@@ -2024,7 +2024,7 @@ write_rc_rcdata (e, rcdata, ind)
 		else
 		  {
 		    fprintf (e, ",\n");
-		    indent (e, ind);
+		    indent (e, ind + 2);
 		  }
 		fprintf (e, "%d", i);
 		i += 2;
@@ -2037,7 +2037,7 @@ write_rc_rcdata (e, rcdata, ind)
 		else
 		  {
 		    fprintf (e, ",\n");
-		    indent (e, ind);
+		    indent (e, ind + 2);
 		  }
 		if ((ri->u.buffer.data[i] & 0x7f) == ri->u.buffer.data[i]
 		    && isprint (ri->u.buffer.data[i]))

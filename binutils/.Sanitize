@@ -84,6 +84,7 @@ ranlib.1
 ranlib.sh
 rclex.l
 rcparse.y
+rescoff.c
 resrc.c
 rdcoff.c
 rddbg.c

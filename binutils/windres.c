@@ -306,22 +306,9 @@ res_id_print (stream, id, quote)
     fprintf (stream, "%lu", id.u.id);
   else
     {
-      unsigned short *s, *se;
-
       if (quote)
 	putc ('"', stream);
-      s = id.u.n.name;
-      se = s + id.u.n.length;
-      while (s < se)
-	{
-	  if (*s == '"')
-	    fprintf (stream, "\\\"");
-	  else if ((*s & 0xff) == *s && isprint (*s))
-	    putc (*s, stream);
-	  else
-	    fprintf (stream, "\\%03o", *s);
-	  ++s;
-	}
+      unicode_print (stream, id.u.n.name, id.u.n.length);
       if (quote)
 	putc ('"', stream);
     }
@@ -600,8 +587,8 @@ format_from_filename (filename, input)
 
   fclose (e);
 
-  /* A PE executable starts with 0x4d 0x5a 0x90 0x00.  */
-  if (b1 == 0x4d && b2 == 0x5a && b3 == 0x90 && b4 == 0)
+  /* A PE executable starts with 0x4d 0x5a.  */
+  if (b1 == 0x4d && b2 == 0x5a)
     return RES_FORMAT_COFF;
 
   /* A COFF .o file starts with a COFF magic number.  */
@@ -882,15 +869,6 @@ read_res_file (filename)
      const char *filename;
 {
   fatal ("read_res_file unimplemented");
-  return NULL;
-}
-
-struct res_directory *
-read_coff_rsrc (filename, target)
-     const char *filename;
-     const char *target;
-{
-  fatal ("read_coff_rsrc unimplemented");
   return NULL;
 }
 

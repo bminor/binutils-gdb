@@ -6,6 +6,7 @@ Sun Jun 22 17:29:41 1997  Ian Lance Taylor  <ian@cygnus.com>
 	* resrc.c: New file.
 	* rcparse.y: New file.
 	* rclex.l: New file.
+	* rescoff.c: New file.
 	* configure.in: Define and substitute BUILD_WINDRES.
 	* configure: Rebuild.
 	* Makefile.in: Rebuild dependencies.
