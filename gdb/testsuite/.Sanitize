@@ -64,6 +64,25 @@ Things-to-lose:
 
 Do-last:
 
+never_files="ChangeLog"
+for i in $never_files ; do
+        if test ! -d $i && (grep sanitize-cygnus-never $i > /dev/null) ; then
+                if [ -n "${verbose}" ] ; then
+                        echo Removing traces of \"cygnus-never\" from $i...
+                fi
+                cp $i new
+                sed '/start\-sanitize\-cygnus-never/,/end\-sanitize\-cygnus-never/
+d' < $i > new
+                if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+                        if [ -n "${verbose}" ] ; then
+                                echo Caching $i in .Recover...
+                        fi
+                        mv $i .Recover
+                fi
+                mv new $i
+        fi
+done
+
 am33_files="ChangeLog"
 if ( echo $* | grep keep\-am33 > /dev/null ) ; then
 	for i in $am33_files ; do
