@@ -1,3 +1,13 @@
+2001-12-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Adjust
+	section_tail when fiddling with section list.
+	(gld${EMULATION_NAME}_list_options): Ensure sentences aren't
+	broken into separate strings to make translation easier.
+	* emultempl/mmo.em (mmo_place_orphan): Adjust section_tail when
+	fiddling with section list.
+	* emultempl/pe.em (gld_${EMULATION_NAME}_place_orphan): Likewise.
+
 2001-12-16  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* scripttempl/mmo.sc: Add .debug_ranges to listed sections.

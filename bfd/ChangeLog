@@ -1,3 +1,35 @@
+2001-12-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* bfd.c (struct _bfd): Add section_htab, section_tail.
+	* libbfd-in.h (_bfd_delete_bfd): Declare.
+	(bfd_section_hash_newfunc): Declare.
+	* opncls.c (_bfd_new_bfd): Free memory on failure.  Init
+	section_htab and section_tail.
+	(_bfd_delete_bfd): New function.
+	(bfd_openr): Use it.
+	(bfd_fdopenr): Likewise.
+	(bfd_openstreamr): Likewise.
+	(bfd_openw): Likewise.
+	(bfd_close): Likewise.
+	(bfd_close_all_done): Likewise.
+	(bfd_release): Comment.
+	* section.c (struct section_hash_entry): New.
+	(bfd_section_hash_newfunc): New function.
+	(section_hash_lookup): Define.
+	(bfd_section_init): New function, split out from
+	bfd_make_section_anyway.
+	(bfd_get_section_by_name): Lookup via hash table.
+	(bfd_get_unique_section_name): Likewise.
+	(bfd_make_section_old_way): Rewrite to use hash table.
+	(bfd_make_section_anyway): Likewise.
+	(bfd_make_section): Likewise.  Return NULL for attempts to make
+	BFD_{ABS,COM,UND,IND}_SECTION_NAME.
+	(_bfd_strip_section_from_output): Adjust section_tail if needed.
+	* configure.in: Bump bfd version.
+	* configure: Regenerate.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+
 2001-12-15  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* elf64-mips.c (mips_elf64_link_hash_entry): New link hash.
