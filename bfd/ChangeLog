@@ -1,3 +1,8 @@
+Tue Aug 20 15:18:02 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
+
+	* Makefile.in: include core.p in PROTOS (building better bfd.h)
+	* archures.c: remove empty foo() definition (crept in at vn1.9)
+
 Mon Aug 19 13:48:22 1991  Roland H. Pesch  (pesch at cygint.cygnus.com)
 
 	* bfd.texinfo: use @setchapternewpage on instead of lots of

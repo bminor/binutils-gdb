@@ -234,7 +234,7 @@ docs: syms.texi bfd.texi cache.texi format.texi section.texi \
 
 
 PROTOS = opncls.p archures.p libbfd.p section.p syms.p bfd.p \
-	archive.p reloc.p targets.p format.p coffcode.p
+	archive.p reloc.p targets.p format.p coffcode.p core.p
 
 IPROTOS = libbfd.ip cache.ip 
 
