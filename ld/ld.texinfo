@@ -1338,7 +1338,7 @@ of debugging information.
 
 Every loadable or allocatable output section has two addresses.  The
 first is the @dfn{VMA}, or virtual memory address.  This is the address
-the sectin will have when the output file is run.  The second is the
+the section will have when the output file is run.  The second is the
 @dfn{LMA}, or load memory address.  This is the address at which the
 section will be loaded.  In most cases the two addresses will be the
 same.  An example of when they might be different is when a data section
@@ -1423,6 +1423,14 @@ output section in some other way (other ways are described later), the
 address is set from the current value of the location counter.  The
 location counter is then incremented by the size of the output section.
 
+The first line inside the @samp{SECTIONS} command of the above example
+sets the value of the special symbol @samp{.}, which is the location
+counter.  If you do not specify the address of an output section in some
+other way (other ways are described later), the address is set from the
+current value of the location counter.  The location counter is then
+incremented by the size of the output section.  At the start of the
+@samp{SECTIONS} command, the location counter has the value @samp{0}.
+
 The second line defines an output section, @samp{.text}.  The colon is
 required syntax which may be ignored for now.  Within the curly braces
 after the output section name, you list the names of the input sections
@@ -1435,12 +1443,19 @@ Since the location counter is @samp{0x10000} when the output section
 @samp{.text} section in the output file to be @samp{0x10000}.
 
 The remaining lines define the @samp{.data} and @samp{.bss} sections in
-the output file.  The @samp{.data} output section will be at address
-@samp{0x8000000}.  When the @samp{.bss} output section is defined, the
-value of the location counter will be @samp{0x8000000} plus the size of
-the @samp{.data} output section.  The effect is that the @samp{.bss}
-output section will follow immediately after the @samp{.data} output
-section in memory.
+the output file.  The linker will place the @samp{.data} output section
+at address @samp{0x8000000}.  After the linker places the @samp{.data}
+output section, the value of the location counter will be
+@samp{0x8000000} plus the size of the @samp{.data} output section.  The
+effect is that the linker will place the @samp{.bss} output section
+immediately after the @samp{.data} output section in memory
+
+The linker will ensure that each output section has the required
+alignment, by increasing the location counter if necessary.  In this
+example, the specified addresses for the @samp{.text} and @samp{.data}
+sections will probably satisfy any alignment constraints, but the linker
+may have to create a small gap between the @samp{.data} and @samp{.bss}
+sections.
 
 That's it!  That's a simple and complete linker script.
 
@@ -1760,11 +1775,12 @@ SECTIONS
 @}
 @end smallexample
 
-In this example, if the program defines @samp{_etext}, the linker will
-give a multiple definition error.  If, on the other hand, the program
-defines @samp{etext}, the linker will silently use the definition in the
-program.  If the program references @samp{etext} but does not define it,
-the linker will use the definition in the linker script.
+In this example, if the program defines @samp{_etext} (with a leading
+underscore), the linker will give a multiple definition error.  If, on
+the other hand, the program defines @samp{etext} (with no leading
+underscore), the linker will silently use the definition in the program.
+If the program references @samp{etext} but does not define it, the
+linker will use the definition in the linker script.
 
 @node SECTIONS
 @section SECTIONS command
@@ -2439,8 +2455,8 @@ You can assign a section to a previously defined program segment by
 using @samp{:@var{phdr}}.  @xref{PHDRS}.  If a section is assigned to
 one or more segments, then all subsequent allocated sections will be
 assigned to those segments as well, unless they use an explicitly
-@code{:@var{phdr}} modifier.  To prevent a section from being assigned
-to a segment when it would normally default to one, use @code{:NONE}.
+@code{:@var{phdr}} modifier.  You can use @code{:NONE} to tell the
+linker to not put the section in any segment at all.
 
 Here is a simple example:
 @smallexample
@@ -2764,8 +2780,9 @@ If you place a section in one or more segments using @samp{:@var{phdr}},
 then the linker will place all subsequent allocatable sections which do
 not specify @samp{:@var{phdr}} in the same segments.  This is for
 convenience, since generally a whole set of contiguous sections will be
-placed in a single segment.  To prevent a section from being assigned to
-a segment when it would normally default to one, use @code{:NONE}.
+placed in a single segment.  You can use @code{:NONE} to override the
+default segment and tell the linker to not put the section in any
+segment at all.
 
 @kindex FILEHDR
 @kindex PHDRS
