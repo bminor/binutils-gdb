@@ -26,6 +26,9 @@
 	* coff-alpha.c (alpha_adjust_reloc_in): Remove redundant test from
 	BFD_ASSERT.
 
+	* coff-tic4x.c (coff_rtype_to_howto): Move definition before
+	inclusion of coffcode.h so that it is actually picked up.
+
 2005-02-12  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (toc_adjusting_stub_needed): Return true for

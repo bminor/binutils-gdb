@@ -68,6 +68,10 @@ ticoff_bfd_is_local_label_name (abfd, name)
    The COFF1 and COFF0 vectors use custom _bad_format_hook procs
    instead of setting BADMAG.  */
 #define BADMAG(x) COFF2_BADMAG(x)
+
+#undef coff_rtype_to_howto
+#define coff_rtype_to_howto coff_tic4x_rtype_to_howto
+
 #include "coffcode.h"
 
 static bfd_reloc_status_type
@@ -171,9 +175,6 @@ tic4x_lookup_howto (internal, dst)
 			 (unsigned int) dst->r_type);
   abort();
 }
-
-#undef coff_rtype_to_howto
-#define coff_rtype_to_howto coff_tic4x_rtype_to_howto
 
 static reloc_howto_type *
 coff_tic4x_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
