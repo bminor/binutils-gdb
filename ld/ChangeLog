@@ -1,3 +1,9 @@
+1999-05-30  Cort Dougan  <cort@attis.cs.nmt.edu>
+
+	* Makefile.am (ALL_EMULATIONS): Add eelf32ppclinux.o.
+	* configure.tgt (powerpc-*-linux-gnu): Use it.
+	* emulparams/elf32ppclinux.sh: New file.
+
 1999-05-29  Ian Lance Taylor  <ian@zembu.com>
 
 	* ld.texinfo (Options): Clarify that options which refer to files
