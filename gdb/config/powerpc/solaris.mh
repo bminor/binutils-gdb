@@ -7,11 +7,6 @@ XM_CLIBS= -lsocket -lnsl
 NAT_FILE= nm-solaris.h
 NATDEPFILES= corelow.o core-sol2.o solib.o procfs.o fork-child.o
 
-# SVR4 comes standard with terminfo, and in some implementations, the
-# old termcap descriptions are incomplete.  So ensure that we use the
-# new terminfo interface and latest terminal descriptions.
-TERMCAP=-ltermlib
-
 # If you are compiling with Sun's compiler, add the -xs option to CC
 # (e.g. `make CC="cc -xs"').
 # Sun's compilers require the -xs option to produce debug information

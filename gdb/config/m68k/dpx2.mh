@@ -5,5 +5,3 @@ XDEPFILES=
 
 NAT_FILE= nm-dpx2.h
 NATDEPFILES= infptrace.o corelow.o core-aout.o inftarg.o dpx2-nat.o fork-child.o
-
-TERMCAP=-lcurses

@@ -13,6 +13,5 @@ $(XDEPFILES):
 	  $(MAKE) $(FLAGS_TO_PASS) all )
 
 XM_FILE=xm-windows.h
-TERMCAP=
 MMALLOC=
 SER_HARDWIRE =

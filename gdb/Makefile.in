@@ -59,7 +59,7 @@ WINDRES = @WINDRES@
 
 # Flags that describe where you can find the termcap library.
 # This can be overridden in the host Makefile fragment file.
-TERMCAP = -ltermcap
+TERMCAP = @TERM_LIB@
 
 # If you are compiling with GCC, make sure that either 1) You have the
 # fixed include files where GCC can reach them, or 2) You use the

@@ -46,7 +46,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "language.h"
 #include "annotate.h"
 
-#include "readline/readline.h"
+#include <readline/readline.h>
 
 /* readline defines this.  */
 #undef savestring
