@@ -1,3 +1,19 @@
+Fri Aug 20 11:16:44 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-mips.c (mips_isa): New static variable.
+	(md_begin): Initialize mips_isa based on TARGET_CPU.  Don't sanity
+	check macros.  Set text alignment and GP size here.
+	(md_assemble): Don't set text alignment and GP size here.
+	(append_insn): Don't insert NOPs for load delays if mips_isa >= 2.
+	Use the right mask and shift for WRITE_FPR_T and WRITE_FPR_S.  Add
+	a NOP after a branch likely.
+	(mips_emit_delays): Don't insert NOPS for load delays if mips_isa
+	>= 2.
+	(macro): Support r6000 and r4000 macros.
+	(mips_ip): Check insn ISA level against mips_isa before using it.
+	Added 'x' case for ignored register.
+	(md_parse_option): Handle -mipsN and -mcpu=XX.
+
 Fri Aug 20 01:26:52 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* config/tc-i386.c (md_pseudo_table) [OBJ_ELF]: Handle ".zero".

@@ -2,7 +2,8 @@
    Copyright (C) 1993 Free Software Foundation, Inc.
    Contributed by the OSF and Ralph Campbell.
    Written by Keith Knowles and Ralph Campbell, working independently.
-   Modified for ECOFF support by Ian Lance Taylor of Cygnus Support.
+   Modified for ECOFF and R4000 support by Ian Lance Taylor of Cygnus
+   Support.
 
    This file is part of GAS.
 
@@ -21,6 +22,7 @@
    the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "as.h"
+#include "config.h"
 
 #include <ctype.h>
 
@@ -43,6 +45,9 @@
 #define AT  1
 #define GP  28
 #define RA  31
+
+/* MIPS ISA (Instruction Set Architecture) level.  */
+static int mips_isa = -1;
 
 static int mips_warn_about_macros;
 static int mips_noreorder;
@@ -286,6 +291,21 @@ md_begin ()
   register char *retval = NULL;
   register unsigned int i = 0;
 
+  if (mips_isa == -1)
+    {
+      if (strcmp (TARGET_CPU, "mips") == 0)
+	mips_isa = 1;
+      else if (strcmp (TARGET_CPU, "r6000") == 0
+	       || strcmp (TARGET_CPU, "mips2") == 0)
+	mips_isa = 2;
+      else if (strcmp (TARGET_CPU, "mips64") == 0
+	       || strcmp (TARGET_CPU, "r4000") == 0
+	       || strcmp (TARGET_CPU, "mips3") == 0)
+	mips_isa = 3;
+      else
+	mips_isa = 1;
+    }
+
   if ((op_hash = hash_new ()) == NULL)
     {
       as_fatal ("Virtual memory exhausted");
@@ -303,8 +323,9 @@ md_begin ()
 	}
       do
 	{
-	  if ((mips_opcodes[i].match & mips_opcodes[i].mask) !=
-	      mips_opcodes[i].match)
+	  if (mips_opcodes[i].pinfo != INSN_MACRO
+	      && ((mips_opcodes[i].match & mips_opcodes[i].mask)
+		  != mips_opcodes[i].match))
 	    {
 	      fprintf (stderr, "internal error: bad opcode: `%s' \"%s\"\n",
 		       mips_opcodes[i].name, mips_opcodes[i].args);
@@ -316,6 +337,13 @@ md_begin ()
     }
 
   mips_no_prev_insn ();
+
+  /* set the default alignment for the text section (2**2) */
+  record_alignment (text_section, 2);
+
+#ifdef OBJ_ECOFF
+  bfd_set_gp_size (stdoutput, g_switch_value);
+#endif
 
 #ifndef OBJ_ECOFF
   md_obj_begin ();
@@ -335,18 +363,6 @@ md_assemble (str)
      char *str;
 {
   struct mips_cl_insn insn;
-  static int init;
-
-  if (!init)
-    {
-      /* set the default alignment for the text section (2**2) */
-      /* This should go in md_begin but text_section isn't initialized then */
-      record_alignment (text_section, 2);
-#ifdef OBJ_ECOFF
-      bfd_set_gp_size (stdoutput, g_switch_value);
-#endif
-      init = 1;
-    }
 
   imm_expr.X_op = O_absent;
   offset_expr.X_op = O_absent;
@@ -434,14 +450,16 @@ append_insn (ip, address_expr, reloc_type)
   if (! mips_noreorder)
     {
       /* If the previous insn required any delay slots, see if we need
-	 to insert a NOP or two.  There are six kinds of possible
+	 to insert a NOP or two.  There are eight kinds of possible
 	 hazards, of which an instruction can have at most one type.
-	 (1) a load delay
-	 (2) an unconditional branch delay
-	 (3) a conditional branch delay
-	 (4) a generic coprocessor delay
-	 (5) a coprocessor condition code delay
-	 (6) a HI/LO special register delay
+	 (1) a load from memory delay
+	 (2) a load from a coprocessor delay
+	 (3) an unconditional branch delay
+	 (4) a conditional branch delay
+	 (5) a move to coprocessor register delay
+	 (6) a load coprocessor register from memory delay
+	 (7) a coprocessor condition code delay
+	 (8) a HI/LO special register delay
 
 	 There are a lot of optimizations we could do that we don't.
 	 In particular, we do not, in general, reorder instructions.
@@ -456,10 +474,14 @@ append_insn (ip, address_expr, reloc_type)
 
       /* The previous insn might require a delay slot, depending upon
 	 the contents of the current insn.  */
-      if (prev_insn.insn_mo->pinfo & INSN_LOAD_DELAY)
+      if ((prev_insn.insn_mo->pinfo & INSN_LOAD_COPROC_DELAY)
+	  || (mips_isa < 2
+	      && (prev_insn.insn_mo->pinfo & INSN_LOAD_MEMORY_DELAY)))
 	{
-	  /* A load delay.  All load delays delay the use of general
-	     register rt for one instruction.  */
+	  /* A load from a coprocessor or from memory.  All load
+	     delays delay the use of general register rt for one
+	     instruction on the r3000.  The r6000 and r4000 use
+	     interlocks.  */
 	  know (prev_insn.insn_mo->pinfo & INSN_WRITE_GPR_T);
 	  if (mips_optimize == 0
 	      || insn_uses_reg (ip,
@@ -468,7 +490,9 @@ append_insn (ip, address_expr, reloc_type)
 				0))
 	    ++nops;
 	}
-      else if (prev_insn.insn_mo->pinfo & INSN_COPROC_DELAY)
+      else if ((prev_insn.insn_mo->pinfo & INSN_COPROC_MOVE_DELAY)
+	       || (mips_isa < 2
+		   && (prev_insn.insn_mo->pinfo & INSN_COPROC_MEMORY_DELAY)))
 	{
 	  /* A generic coprocessor delay.  The previous instruction
 	     modified a coprocessor general or control register.  If
@@ -476,6 +500,9 @@ append_insn (ip, address_expr, reloc_type)
 	     coprocessor instruction (this is probably not always
 	     required, but it sometimes is).  If it modified a general
 	     register, we avoid using that register.
+
+	     On the r6000 and r4000 loading a coprocessor register
+	     from memory is interlocked, and does not require a delay.
 
 	     This case is not handled very well.  There is no special
 	     knowledge of CP0 handling, and the coprocessors other
@@ -485,17 +512,17 @@ append_insn (ip, address_expr, reloc_type)
 	    {
 	      if (mips_optimize == 0
 		  || insn_uses_reg (ip,
-				    ((prev_insn.insn_opcode >> OP_SH_RT)
-				     & OP_MASK_RT),
+				    ((prev_insn.insn_opcode >> OP_SH_FT)
+				     & OP_MASK_FT),
 				    1))
 		++nops;
 	    }
-	  else if (prev_insn.insn_mo->pinfo & INSN_WRITE_FPR_D)
+	  else if (prev_insn.insn_mo->pinfo & INSN_WRITE_FPR_S)
 	    {
 	      if (mips_optimize == 0
 		  || insn_uses_reg (ip,
-				    ((prev_insn.insn_opcode >> OP_SH_RD)
-				     & OP_MASK_RD),
+				    ((prev_insn.insn_opcode >> OP_SH_FS)
+				     & OP_MASK_FS),
 				    1))
 		++nops;
 	    }
@@ -554,7 +581,7 @@ append_insn (ip, address_expr, reloc_type)
 	 compared to the instruction previous to the previous
 	 instruction.  */
       if (nops == 0
-	  && (((prev_prev_insn.insn_mo->pinfo & INSN_COPROC_DELAY)
+	  && (((prev_prev_insn.insn_mo->pinfo & INSN_COPROC_MOVE_DELAY)
 	       && (prev_prev_insn.insn_mo->pinfo & INSN_WRITE_COND_CODE)
 	       && (ip->insn_mo->pinfo & INSN_READ_COND_CODE))
 	      || ((prev_prev_insn.insn_mo->pinfo & INSN_READ_LO)
@@ -685,11 +712,15 @@ append_insn (ip, address_expr, reloc_type)
 		 delay slot, becase the target of the branch might
 		 interfere with that instruction.  */
 	      || (prev_insn.insn_mo->pinfo
-		  & (INSN_LOAD_DELAY
-		     | INSN_COPROC_DELAY
+		  & (INSN_LOAD_COPROC_DELAY
+		     | INSN_COPROC_MOVE_DELAY
 		     | INSN_WRITE_COND_CODE
 		     | INSN_READ_LO
 		     | INSN_READ_HI))
+	      || (mips_isa < 2
+		  && (prev_insn.insn_mo->pinfo
+		      & (INSN_LOAD_MEMORY_DELAY
+			 | INSN_COPROC_MEMORY_DELAY)))
 	      /* We can not swap with a branch instruction.  */
 	      || (prev_insn.insn_mo->pinfo
 		  & (INSN_UNCOND_BRANCH_DELAY | INSN_COND_BRANCH_DELAY))
@@ -718,7 +749,10 @@ append_insn (ip, address_expr, reloc_type)
 	      /* If the previous previous instruction has a load
 		 delay, and sets a register that the branch reads, we
 		 can not swap.  */
-	      || ((prev_prev_insn.insn_mo->pinfo & INSN_LOAD_DELAY)
+	      || (((prev_prev_insn.insn_mo->pinfo & INSN_LOAD_COPROC_DELAY)
+		   || (mips_isa < 2
+		       && (prev_prev_insn.insn_mo->pinfo
+			   & INSN_LOAD_MEMORY_DELAY)))
 		  && insn_uses_reg (ip,
 				    ((prev_prev_insn.insn_opcode >> OP_SH_RT)
 				     & OP_MASK_RT),
@@ -766,6 +800,17 @@ append_insn (ip, address_expr, reloc_type)
 	      prev_prev_insn.insn_mo = &dummy_opcode;
 	      prev_insn.insn_mo = &dummy_opcode;
 	    }
+	}
+      else if (ip->insn_mo->pinfo & INSN_COND_BRANCH_LIKELY)
+	{
+	  /* We don't yet optimize a branch likely.  What we should do
+	     is look at the target, copy the instruction found there
+	     into the delay slot, and increment the branch to jump to
+	     the next instruction.  */
+	  emit_nop ();
+	  /* Update the previous insn information.  */
+	  prev_prev_insn = *ip;
+	  prev_insn.insn_mo = &dummy_opcode;
 	}
       else
 	{
@@ -822,7 +867,16 @@ mips_emit_delays ()
       int nop;
 
       nop = 0;
-      if (prev_insn.insn_mo->pinfo & ANY_DELAY)
+      if ((prev_insn.insn_mo->pinfo
+	   & (INSN_LOAD_COPROC_DELAY
+	      | INSN_COPROC_MOVE_DELAY
+	      | INSN_WRITE_COND_CODE
+	      | INSN_READ_LO
+	      | INSN_READ_HI))
+	  || (mips_isa < 2
+	      && (prev_insn.insn_mo->pinfo
+		  & (INSN_LOAD_MEMORY_DELAY
+		     | INSN_COPROC_MEMORY_DELAY))))
 	{
 	  nop = 1;
 	  if ((prev_insn.insn_mo->pinfo & INSN_WRITE_COND_CODE)
@@ -1221,7 +1275,11 @@ macro (ip)
   int used_at;
   expressionS expr1;
   const char *s;
+  const char *s2;
   const char *fmt;
+  int likely = 0;
+  int dbl = 0;
+  int coproc = 0;
 
   treg = (ip->insn_opcode >> 16) & 0x1f;
   dreg = (ip->insn_opcode >> 11) & 0x1f;
@@ -1258,13 +1316,26 @@ macro (ip)
       return;
 
     case M_ADD_I:
+      s = "addi";
+      s2 = "add";
+      goto do_addi;
     case M_ADDU_I:
+      s = "addiu";
+      s2 = "addu";
+      goto do_addi;
+    case M_DADD_I:
+      s = "daddi";
+      s2 = "dadd";
+      goto do_addi;
+    case M_DADDU_I:
+      s = "daddiu";
+      s2 = "daddu";
+    do_addi:
       switch (imm_expr.X_add_number & 0xffff8000)
 	{
 	case 0:
 	case 0xffff8000:
-	  macro_build (&icnt, &imm_expr,
-		   mask == M_ADD_I ? "addi" : "addiu", "t,r,j", treg, sreg);
+	  macro_build (&icnt, &imm_expr, s, "t,r,j", treg, sreg);
 	  return;
 
 	case 0x8000:
@@ -1277,8 +1348,7 @@ macro (ip)
 	    macro_build (&icnt, &imm_expr, "addiu", "t,r,j", AT, AT);
 	  break;
 	}
-      macro_build (&icnt, NULL,
-		 mask == M_ADD_I ? "add" : "addu", "d,v,t", treg, sreg, AT);
+      macro_build (&icnt, NULL, s2, "d,v,t", treg, sreg, AT);
       break;
 
     case M_AND_I:
@@ -1337,55 +1407,89 @@ macro (ip)
       break;
 
     case M_BEQ_I:
+      s = "beq";
+      goto beq_i;
+    case M_BEQL_I:
+      s = "beql";
+      likely = 1;
+      goto beq_i;
     case M_BNE_I:
+      s = "bne";
+      goto beq_i;
+    case M_BNEL_I:
+      s = "bnel";
+      likely = 1;
+    beq_i:
       if (imm_expr.X_add_number == 0)
 	{
-	  macro_build (&icnt, &offset_expr, mask == M_BEQ_I ? "beq" : "bne",
-		       "s,t,p", sreg, 0);
+	  macro_build (&icnt, &offset_expr, s, "s,t,p", sreg, 0);
 	  return;
 	}
       load_register (&icnt, ip, AT, &imm_expr);
-      macro_build (&icnt, &offset_expr, mask == M_BEQ_I ? "beq" : "bne",
-		   "s,t,p", sreg, AT);
+      macro_build (&icnt, &offset_expr, s, "s,t,p", sreg, AT);
       break;
 
+    case M_BGEL:
+      likely = 1;
     case M_BGE:
       if (treg == 0)
 	{
-	  macro_build (&icnt, &offset_expr, "bgez", "s,p", sreg);
+	  macro_build (&icnt, &offset_expr,
+		       likely ? "bgezl" : "bgez",
+		       "s,p", sreg);
 	  return;
 	}
       if (sreg == 0)
 	{
-	  macro_build (&icnt, &offset_expr, "blez", "s,p", treg);
+	  macro_build (&icnt, &offset_expr,
+		       likely ? "blezl" : "blez",
+		       "s,p", treg);
 	  return;
 	}
       macro_build (&icnt, NULL, "slt", "d,v,t", AT, sreg, treg);
-      macro_build (&icnt, &offset_expr, "beq", "s,t,p", AT, 0);
+      macro_build (&icnt, &offset_expr,
+		   likely ? "beql" : "beq",
+		   "s,t,p", AT, 0);
       break;
 
+    case M_BGTL_I:
+      likely = 1;
     case M_BGT_I:
       /* check for > max integer */
       if (imm_expr.X_add_number == 0x7fffffff)
 	{
 	do_false:
 	  /* result is always false */
-	  as_warn ("Branch %s is always false (nop)", ip->insn_mo->name);
-	  macro_build (&icnt, NULL, "nop", "", 0);
+	  if (! likely)
+	    {
+	      as_warn ("Branch %s is always false (nop)", ip->insn_mo->name);
+	      macro_build (&icnt, NULL, "nop", "", 0);
+	    }
+	  else
+	    {
+	      as_warn ("Branch likely %s is always false", ip->insn_mo->name);
+	      macro_build (&icnt, &offset_expr, "bnel", "s,t,p", 0, 0);
+	    }
 	  return;
 	}
       imm_expr.X_add_number++;
       /* FALLTHROUGH */
-
     case M_BGE_I:
+    case M_BGEL_I:
+      if (mask == M_BGEL_I)
+	likely = 1;
       if (imm_expr.X_add_number == 0)
 	{
-	  macro_build (&icnt, &offset_expr, "bgez", "s,p", sreg);
+	  macro_build (&icnt, &offset_expr,
+		       likely ? "bgezl" : "bgez",
+		       "s,p", sreg);
 	  return;
 	}
       if (imm_expr.X_add_number == 1)
 	{
-	  macro_build (&icnt, &offset_expr, "bgtz", "s,p", sreg);
+	  macro_build (&icnt, &offset_expr,
+		       likely ? "bgtzl" : "bgtz",
+		       "s,p", sreg);
 	  return;
 	}
       if (imm_expr.X_add_number == 0x80000000)
@@ -1397,161 +1501,245 @@ macro (ip)
 	  return;
 	}
       set_at (&icnt, sreg);
-      macro_build (&icnt, &offset_expr, "beq", "s,t,p", AT, 0);
+      macro_build (&icnt, &offset_expr,
+		   likely ? "beql" : "beq",
+		   "s,t,p", AT, 0);
       break;
 
+    case M_BGEUL:
+      likely = 1;
     case M_BGEU:
       if (treg == 0)
 	goto do_true;
       if (sreg == 0)
 	{
-	  macro_build (&icnt, &offset_expr, "beq", "s,t,p", 0, treg);
+	  macro_build (&icnt, &offset_expr,
+		       likely ? "beql" : "beq",
+		       "s,t,p", 0, treg);
 	  return;
 	}
       macro_build (&icnt, NULL, "sltu", "d,v,t", AT, sreg, treg);
-      macro_build (&icnt, &offset_expr, "beq", "s,t,p", AT, 0);
+      macro_build (&icnt, &offset_expr,
+		   likely ? "beql" : "beq",
+		   "s,t,p", AT, 0);
       break;
 
+    case M_BGTUL_I:
+      likely = 1;
     case M_BGTU_I:
       if (sreg == 0 || imm_expr.X_add_number == 0xffffffff)
 	goto do_false;
       imm_expr.X_add_number++;
       /* FALLTHROUGH */
-
     case M_BGEU_I:
+    case M_BGEUL_I:
+      if (mask == M_BGEUL_I)
+	likely = 1;
       if (imm_expr.X_add_number == 0)
 	goto do_true;
       if (imm_expr.X_add_number == 1)
 	{
-	  macro_build (&icnt, &offset_expr, "bne", "s,t,p", sreg, 0);
+	  macro_build (&icnt, &offset_expr,
+		       likely ? "bnel" : "bne",
+		       "s,t,p", sreg, 0);
 	  return;
 	}
       set_at_unsigned (&icnt, sreg);
-      macro_build (&icnt, &offset_expr, "beq", "s,t,p", AT, 0);
+      macro_build (&icnt, &offset_expr,
+		   likely ? "beql" : "beq",
+		   "s,t,p", AT, 0);
       break;
 
+    case M_BGTL:
+      likely = 1;
     case M_BGT:
       if (treg == 0)
 	{
-	  macro_build (&icnt, &offset_expr, "bgtz", "s,p", sreg);
+	  macro_build (&icnt, &offset_expr,
+		       likely ? "bgtzl" : "bgtz",
+		       "s,p", sreg);
 	  return;
 	}
       if (sreg == 0)
 	{
-	  macro_build (&icnt, &offset_expr, "bltz", "s,p", treg);
+	  macro_build (&icnt, &offset_expr,
+		       likely ? "bltzl" : "bltz",
+		       "s,p", treg);
 	  return;
 	}
       macro_build (&icnt, NULL, "slt", "d,v,t", AT, treg, sreg);
-      macro_build (&icnt, &offset_expr, "bne", "s,t,p", AT, 0);
+      macro_build (&icnt, &offset_expr,
+		   likely ? "bnel" : "bne",
+		   "s,t,p", AT, 0);
       break;
 
+    case M_BGTUL:
+      likely = 1;
     case M_BGTU:
       if (treg == 0)
 	{
-	  macro_build (&icnt, &offset_expr, "bne", "s,t,p", sreg, 0);
+	  macro_build (&icnt, &offset_expr,
+		       likely ? "bnel" : "bne",
+		       "s,t,p", sreg, 0);
 	  return;
 	}
       if (sreg == 0)
 	goto do_false;
       macro_build (&icnt, NULL, "sltu", "d,v,t", AT, treg, sreg);
-      macro_build (&icnt, &offset_expr, "bne", "s,t,p", AT, 0);
+      macro_build (&icnt, &offset_expr,
+		   likely ? "bnel" : "bne",
+		   "s,t,p", AT, 0);
       break;
 
+    case M_BLEL:
+      likely = 1;
     case M_BLE:
       if (treg == 0)
 	{
-	  macro_build (&icnt, &offset_expr, "blez", "s,p", sreg);
+	  macro_build (&icnt, &offset_expr,
+		       likely ? "blezl" : "blez",
+		       "s,p", sreg);
 	  return;
 	}
       if (sreg == 0)
 	{
-	  macro_build (&icnt, &offset_expr, "bgez", "s,p", treg);
+	  macro_build (&icnt, &offset_expr,
+		       likely ? "bgezl" : "bgez",
+		       "s,p", treg);
 	  return;
 	}
       macro_build (&icnt, NULL, "slt", "d,v,t", AT, treg, sreg);
-      macro_build (&icnt, &offset_expr, "beq", "s,t,p", AT, 0);
+      macro_build (&icnt, &offset_expr,
+		   likely ? "beql" : "beq",
+		   "s,t,p", AT, 0);
       break;
 
+    case M_BLEL_I:
+      likely = 1;
     case M_BLE_I:
       if (imm_expr.X_add_number == 0x7fffffff)
 	goto do_true;
       imm_expr.X_add_number++;
       /* FALLTHROUGH */
-
     case M_BLT_I:
+    case M_BLTL_I:
+      if (mask == M_BLTL_I)
+	likely = 1;
       if (imm_expr.X_add_number == 0)
 	{
-	  macro_build (&icnt, &offset_expr, "bltz", "s,p", sreg);
+	  macro_build (&icnt, &offset_expr,
+		       likely ? "bltzl" : "bltz",
+		       "s,p", sreg);
 	  return;
 	}
       if (imm_expr.X_add_number == 1)
 	{
-	  macro_build (&icnt, &offset_expr, "blez", "s,p", sreg);
+	  macro_build (&icnt, &offset_expr,
+		       likely ? "blezl" : "blez",
+		       "s,p", sreg);
 	  return;
 	}
       set_at (&icnt, sreg);
-      macro_build (&icnt, &offset_expr, "bne", "s,t,p", AT, 0);
+      macro_build (&icnt, &offset_expr,
+		   likely ? "bnel" : "bne",
+		   "s,t,p", AT, 0);
       break;
 
+    case M_BLEUL:
+      likely = 1;
     case M_BLEU:
       if (treg == 0)
 	{
-	  macro_build (&icnt, &offset_expr, "beq", "s,t,p", sreg, 0);
+	  macro_build (&icnt, &offset_expr,
+		       likely ? "beql" : "beq",
+		       "s,t,p", sreg, 0);
 	  return;
 	}
       if (sreg == 0)
 	goto do_true;
       macro_build (&icnt, NULL, "sltu", "d,v,t", AT, treg, sreg);
-      macro_build (&icnt, &offset_expr, "beq", "s,t,p", AT, 0);
+      macro_build (&icnt, &offset_expr,
+		   likely ? "beql" : "beq",
+		   "s,t,p", AT, 0);
       break;
 
+    case M_BLEUL_I:
+      likely = 1;
     case M_BLEU_I:
       if (sreg == 0 || imm_expr.X_add_number == 0xffffffff)
 	goto do_true;
       imm_expr.X_add_number++;
       /* FALLTHROUGH */
-
     case M_BLTU_I:
+    case M_BLTUL_I:
+      if (mask == M_BLTUL_I)
+	likely = 1;
       if (imm_expr.X_add_number == 0)
 	goto do_false;
       if (imm_expr.X_add_number == 1)
 	{
-	  macro_build (&icnt, &offset_expr, "beq", "s,t,p", sreg, 0);
+	  macro_build (&icnt, &offset_expr,
+		       likely ? "beql" : "beq",
+		       "s,t,p", sreg, 0);
 	  return;
 	}
       set_at_unsigned (&icnt, sreg);
-      macro_build (&icnt, &offset_expr, "bne", "s,t,p", AT, 0);
+      macro_build (&icnt, &offset_expr,
+		   likely ? "bnel" : "bne",
+		   "s,t,p", AT, 0);
       break;
 
+    case M_BLTL:
+      likely = 1;
     case M_BLT:
       if (treg == 0)
 	{
-	  macro_build (&icnt, &offset_expr, "bltz", "s,p", sreg);
+	  macro_build (&icnt, &offset_expr,
+		       likely ? "bltzl" : "bltz",
+		       "s,p", sreg);
 	  return;
 	}
       if (sreg == 0)
 	{
-	  macro_build (&icnt, &offset_expr, "bgtz", "s,p", treg);
+	  macro_build (&icnt, &offset_expr,
+		       likely ? "bgtzl" : "bgtz",
+		       "s,p", treg);
 	  return;
 	}
       macro_build (&icnt, NULL, "slt", "d,v,t", AT, sreg, treg);
-      macro_build (&icnt, &offset_expr, "bne", "s,t,p", AT, 0);
+      macro_build (&icnt, &offset_expr,
+		   likely ? "bnel" : "bne",
+		   "s,t,p", AT, 0);
       break;
 
+    case M_BLTUL:
+      likely = 1;
     case M_BLTU:
       if (treg == 0)
 	goto do_false;
       if (sreg == 0)
 	{
-	  macro_build (&icnt, &offset_expr, "bne", "s,t,p", 0, treg);
+	  macro_build (&icnt, &offset_expr,
+		       likely ? "bnel" : "bne",
+		       "s,t,p", 0, treg);
 	  return;
 	}
       macro_build (&icnt, NULL, "sltu", "d,v,t", AT, sreg, treg);
-      macro_build (&icnt, &offset_expr, "bne", "s,t,p", AT, 0);
+      macro_build (&icnt, &offset_expr,
+		   likely ? "bnel" : "bne",
+		   "s,t,p", AT, 0);
       break;
 
+    case M_DDIV_3:
+      dbl = 1;
     case M_DIV_3:
+      s = "mflo";
+      goto do_div3;
+    case M_DREM_3:
+      dbl = 1;
     case M_REM_3:
+      s = "mfhi";
+    do_div3:
       if (treg == 0)
 	{
 	  as_warn ("Divide by zero.");
@@ -1561,30 +1749,75 @@ macro (ip)
 
       mips_emit_delays ();
       ++mips_noreorder;
-      macro_build (&icnt, NULL, "div", "s,t", sreg, treg);
+      macro_build (&icnt, NULL,
+		   dbl ? "ddiv" : "div",
+		   "s,t", sreg, treg);
       expr1.X_add_number = 8;
       macro_build (&icnt, &expr1, "bne", "s,t,p", treg, 0);
       macro_build (&icnt, NULL, "nop", "", 0);
       macro_build (&icnt, NULL, "break", "c", 7);
       expr1.X_add_number = -1;
-      macro_build (&icnt, &expr1, "addiu", "t,r,j", AT, 0);
-      expr1.X_add_number = 16;
+      macro_build (&icnt, &expr1,
+		   dbl ? "daddiu" : "addiu",
+		   "t,r,j", AT, 0);
+      expr1.X_add_number = dbl ? 20 : 16;
       macro_build (&icnt, &expr1, "bne", "s,t,p", treg, AT);
-      expr1.X_add_number = 0x80000000;
-      macro_build_lui (&icnt, &expr1, AT);
+      if (dbl)
+	{
+	  expr1.X_add_number = 1;
+	  macro_build (&icnt, &expr1, "daddiu", "t,r,j", AT, 0);
+	  macro_build (&icnt, NULL, "dsll32", "d,w,<", AT, AT, 31);
+	}
+      else
+	{
+	  expr1.X_add_number = 0x80000000;
+	  macro_build_lui (&icnt, &expr1, AT);
+	}
       expr1.X_add_number = 8;
       macro_build (&icnt, &expr1, "bne", "s,t,p", sreg, AT);
       macro_build (&icnt, NULL, "nop", "", 0);
       macro_build (&icnt, NULL, "break", "c", 6);
       --mips_noreorder;
-      macro_build (&icnt, NULL, mask == M_DIV_3 ? "mflo" : "mfhi", "d", dreg);
+      macro_build (&icnt, NULL, s, "d", dreg);
       /* with reorder on there will be two implicit nop instructions here. */
       break;
 
     case M_DIV_3I:
+      s = "div";
+      s2 = "mflo";
+      goto do_divi;
     case M_DIVU_3I:
+      s = "divu";
+      s2 = "mflo";
+      goto do_divi;
     case M_REM_3I:
+      s = "div";
+      s2 = "mfhi";
+      goto do_divi;
     case M_REMU_3I:
+      s = "divu";
+      s2 = "mfhi";
+      goto do_divi;
+    case M_DDIV_3I:
+      dbl = 1;
+      s = "ddiv";
+      s2 = "mflo";
+      goto do_divi;
+    case M_DDIVU_3I:
+      dbl = 1;
+      s = "ddivu";
+      s2 = "mflo";
+      goto do_divi;
+    case M_DREM_3I:
+      dbl = 1;
+      s = "ddiv";
+      s2 = "mfhi";
+      goto do_divi;
+    case M_DREMU_3I:
+      dbl = 1;
+      s = "ddivu";
+      s2 = "mfhi";
+    do_divi:
       if (imm_expr.X_add_number == 0)
 	{
 	  as_warn ("Divide by zero.");
@@ -1593,37 +1826,58 @@ macro (ip)
 	}
       if (imm_expr.X_add_number == 1)
 	{
-	  if (mask == (int) M_DIV_3I || mask == (int) M_DIVU_3I)
+	  if (strcmp (s2, "mflo") == 0)
 	    macro_build (&icnt, NULL, "move", "d,s", dreg, sreg);
+	  else
+	    macro_build (&icnt, NULL, "move", "d,s", dreg, 0);
+	  return;
+	}
+      if (imm_expr.X_add_number == -1
+	  && s[strlen (s) - 1] != 'u')
+	{
+	  if (strcmp (s2, "mflo") == 0)
+	    {
+	      if (dbl)
+		macro_build (&icnt, NULL, "dneg", "d,w", dreg, sreg);
+	      else
+		macro_build (&icnt, NULL, "neg", "d,w", dreg, sreg);
+	    }
 	  else
 	    macro_build (&icnt, NULL, "move", "d,s", dreg, 0);
 	  return;
 	}
 
       load_register (&icnt, ip, AT, &imm_expr);
-      if (mask == (int) M_DIV_3I || mask == (int) M_REM_3I)
-	macro_build (&icnt, NULL, "div", "s,t", sreg, AT);
-      else
-	macro_build (&icnt, NULL, "divu", "s,t", sreg, AT);
-
-      if (mask == (int) M_DIV_3I || mask == (int) M_DIVU_3I)
-	macro_build (&icnt, NULL, "mflo", "d", dreg);
-      else
-	macro_build (&icnt, NULL, "mfhi", "d", dreg);
+      macro_build (&icnt, NULL, s, "s,t", sreg, AT);
+      macro_build (&icnt, NULL, s2, "d", dreg);
       /* two implicit nop's required for mflo or mfhi */
       break;
 
     case M_DIVU_3:
+      s = "divu";
+      s2 = "mflo";
+      goto do_divu3;
     case M_REMU_3:
+      s = "divu";
+      s2 = "mfhi";
+      goto do_divu3;
+    case M_DDIVU_3:
+      s = "ddivu";
+      s2 = "mflo";
+      goto do_divu3;
+    case M_DREMU_3:
+      s = "ddivu";
+      s2 = "mfhi";
+    do_divu3:
       mips_emit_delays ();
       ++mips_noreorder;
-      macro_build (&icnt, NULL, "divu", "s,t", sreg, treg);
+      macro_build (&icnt, NULL, s, "s,t", sreg, treg);
       expr1.X_add_number = 8;
       macro_build (&icnt, &expr1, "bne", "s,t,p", treg, 0);
       macro_build (&icnt, NULL, "nop", "", 0);
       macro_build (&icnt, NULL, "break", "c", 7);
       --mips_noreorder;
-      macro_build (&icnt, NULL, mask == M_DIVU_3 ? "mflo" : "mfhi", "d", dreg);
+      macro_build (&icnt, NULL, s2, "d", dreg);
       /* with reorder on there will be two implicit nop instructions here. */
       return;
 
@@ -1676,29 +1930,55 @@ macro (ip)
       goto ld;
     case M_LWC0_AB:
       s = "lwc0";
+      coproc = 1;
       goto ld;
     case M_LWC1_AB:
     case M_LI_SS:
       s = "lwc1";
+      coproc = 1;
       goto ld;
     case M_LWC2_AB:
       s = "lwc2";
+      coproc = 1;
       goto ld;
     case M_LWC3_AB:
       s = "lwc3";
+      coproc = 1;
       goto ld;
     case M_LWL_AB:
       s = "lwl";
       goto ld;
     case M_LWR_AB:
       s = "lwr";
+      goto ld;
+    case M_LDC1_AB:
+      s = "ldc1";
+      coproc = 1;
+      goto ld;
+    case M_LDC2_AB:
+      s = "ldc2";
+      coproc = 1;
+      goto ld;
+    case M_LDC3_AB:
+      s = "ldc3";
+      coproc = 1;
+      goto ld;
+    case M_LDL_AB:
+      s = "ldl";
+      goto ld;
+    case M_LDR_AB:
+      s = "ldr";
+      goto ld;
+    case M_LL_AB:
+      s = "ll";
+      goto ld;
+    case M_LLD_AB:
+      s = "lld";
+      goto ld;
+    case M_LWU_AB:
+      s = "lwu";
     ld:
-      if (breg == treg
-	  || mask == M_LWC0_AB
-	  || mask == M_LWC1_AB
-	  || mask == M_LI_SS
-	  || mask == M_LWC2_AB
-	  || mask == M_LWC3_AB)
+      if (breg == treg || coproc)
 	{
 	  tempreg = AT;
 	  used_at = 1;
@@ -1720,33 +2000,60 @@ macro (ip)
       goto st;
     case M_SWC0_AB:
       s = "swc0";
+      coproc = 1;
       goto st;
     case M_SWC1_AB:
       s = "swc1";
+      coproc = 1;
       goto st;
     case M_SWC2_AB:
       s = "swc2";
+      coproc = 1;
       goto st;
     case M_SWC3_AB:
       s = "swc3";
+      coproc = 1;
       goto st;
     case M_SWL_AB:
       s = "swl";
       goto st;
     case M_SWR_AB:
       s = "swr";
+      goto st;
+    case M_SC_AB:
+      s = "sc";
+      goto st;
+    case M_SCD_AB:
+      s = "scd";
+      goto st;
+    case M_SDC1_AB:
+      s = "sdc1";
+      coproc = 1;
+      goto st;
+    case M_SDC2_AB:
+      s = "sdc2";
+      coproc = 1;
+      goto st;
+    case M_SDC3_AB:
+      s = "sdc3";
+      coproc = 1;
+      goto st;
+    case M_SDL_AB:
+      s = "sdl";
+      goto st;
+    case M_SDR_AB:
+      s = "sdr";
     st:
       tempreg = AT;
       used_at = 1;
     ld_st:
-      if (mask == M_LWC1_AB || mask == M_SWC1_AB || mask == M_LI_SS)
+      if (mask == M_LWC1_AB
+	  || mask == M_SWC1_AB
+	  || mask == M_LI_SS
+	  || mask == M_LDC1_AB
+	  || mask == M_SDC1_AB)
 	fmt = "T,o(b)";
-      else if (mask == M_LWC0_AB
-	       || mask == M_LWC2_AB
-	       || mask == M_LWC3_AB
-	       || mask == M_SWC0_AB
-	       || mask == M_SWC2_AB
-	       || mask == M_SWC3_AB)
+      else if (coproc)
 	fmt = "E,o(b)";
       else
 	fmt = "t,o(b)";
@@ -1785,18 +2092,29 @@ macro (ip)
 	  .double 3.133435
 	 */
       macro_build_lui (&icnt, &offset_expr, AT);
-      macro_build (&icnt, &offset_expr, "lw", "t,o(b)", treg, AT);
-      offset_expr.X_add_number = 4;
-      macro_build (&icnt, &offset_expr, "lw", "t,o(b)", treg + 1, AT);
+      if (mips_isa >= 3)
+	macro_build (&icnt, &offset_expr, "ld", "t,o(b)", treg, AT);
+      else
+	{
+	  macro_build (&icnt, &offset_expr, "lw", "t,o(b)", treg, AT);
+	  offset_expr.X_add_number += 4;
+	  macro_build (&icnt, &offset_expr, "lw", "t,o(b)", treg + 1, AT);
+	}
       break;
 
     case M_LI_DD:
       /* Load a floating point number from the .lit8 section.  */
+      if (mips_isa >= 2)
+	{
+	  macro_build (&icnt, &offset_expr, "ldc1", "T,o(b)", treg, GP);
+	  return;
+	}
       breg = GP;
       /* Fall through.  */
     case M_L_DOB:
       /* Even on a big endian machine $fn comes before $fn+1.  We have
 	 to adjust when loading from memory.  */
+      assert (mips_isa < 2);
       macro_build (&icnt, &offset_expr, "lwc1", "T,o(b)",
 		   byte_order == LITTLE_ENDIAN ? treg : treg + 1,
 		   breg);
@@ -1835,15 +2153,20 @@ macro (ip)
 	    macro_build (&icnt, NULL, "addu", "d,v,t", AT, AT, breg);
 	  tempreg = AT;
 	}
-      /* Even on a big endian machine $fn comes before $fn+1.  We have
-	 to adjust when loading from memory.  */
-      macro_build (&icnt, &offset_expr, "lwc1", "T,o(b)",
-		   byte_order == LITTLE_ENDIAN ? treg : treg + 1,
-		   tempreg);
-      offset_expr.X_add_number += 4;
-      macro_build (&icnt, &offset_expr, "lwc1", "T,o(b)",
-		   byte_order == LITTLE_ENDIAN ? treg + 1 : treg,
-		   tempreg);
+      if (mips_isa >= 2)
+	macro_build (&icnt, &offset_expr, "ldc1", "T,o(b)", treg, tempreg);
+      else
+	{
+	  /* Even on a big endian machine $fn comes before $fn+1.  We
+	     have to adjust when loading from memory.  */
+	  macro_build (&icnt, &offset_expr, "lwc1", "T,o(b)",
+		       byte_order == LITTLE_ENDIAN ? treg : treg + 1,
+		       tempreg);
+	  offset_expr.X_add_number += 4;
+	  macro_build (&icnt, &offset_expr, "lwc1", "T,o(b)",
+		       byte_order == LITTLE_ENDIAN ? treg + 1 : treg,
+		       tempreg);
+	}
       if (tempreg == AT)
 	break;
       return;
@@ -1854,13 +2177,15 @@ macro (ip)
     case M_SD_OB:
       s = "sw";
     sd_ob:
+      assert (mips_isa < 3);
       macro_build (&icnt, &offset_expr, s, "t,o(b)", treg, breg);
-      offset_expr.X_add_number = 4;
+      offset_expr.X_add_number += 4;
       macro_build (&icnt, &offset_expr, s, "t,o(b)", treg + 1, breg);
       return;
 
     case M_LD_AB:
       s = "lw";
+      s2 = "ld";
       if (breg == treg)
 	{
 	  tempreg = AT;
@@ -1874,6 +2199,7 @@ macro (ip)
       goto sd_ab;
     case M_SD_AB:
       s = "sw";
+      s2 = "sd";
       tempreg = AT;
       used_at = 1;
     sd_ab:
@@ -1894,29 +2220,78 @@ macro (ip)
 	  if (breg != 0)
 	    macro_build (&icnt, NULL, "addu", "d,v,t", tempreg, tempreg, breg);
 	}
-      macro_build (&icnt, &offset_expr, s, "t,o(b)", treg, tempreg);
-      offset_expr.X_add_number += 4;
-      macro_build (&icnt, &offset_expr, s, "t,o(b)", treg + 1, tempreg);
+      if (mips_isa >= 3)
+	macro_build (&icnt, &offset_expr, s2, "t,o(b)", treg, tempreg);
+      else
+	{
+	  macro_build (&icnt, &offset_expr, s, "t,o(b)", treg, tempreg);
+	  offset_expr.X_add_number += 4;
+	  macro_build (&icnt, &offset_expr, s, "t,o(b)", treg + 1, tempreg);
+	}
       if (used_at)
 	break;
       return;
 
+    case M_DMUL:
+      dbl = 1;
     case M_MUL:
-      macro_build (&icnt, NULL, "multu", "s,t", sreg, treg);
+      macro_build (&icnt, NULL,
+		   dbl ? "dmultu" : "multu",
+		   "s,t", sreg, treg);
       macro_build (&icnt, NULL, "mflo", "d", dreg);
       /* two implicit nop's required for mflo */
       return;
 
+    case M_DMUL_I:
+      dbl = 1;
     case M_MUL_I:
-      /*
-       * The mips assembler some times generates shifts and adds.
-       * Im not trying to be that fancy. GCC should do this for us
-       * anyway.
-       */
+      /* The MIPS assembler some times generates shifts and adds.  I'm
+	 not trying to be that fancy. GCC should do this for us
+	 anyway.  */
       load_register (&icnt, ip, AT, &imm_expr);
-      macro_build (&icnt, NULL, "mult", "s,t", sreg, AT);
+      macro_build (&icnt, NULL,
+		   dbl ? "dmult" : "mult",
+		   "s,t", sreg, AT);
       macro_build (&icnt, NULL, "mflo", "d", dreg);
       /* two implicit nop's required for mflo */
+      break;
+
+    case M_DMULO:
+      dbl = 1;
+    case M_MULO:
+      mips_emit_delays ();
+      ++mips_noreorder;
+      macro_build (&icnt, NULL,
+		   dbl ? "dmult" : "mult",
+		   "s,t", sreg, treg);
+      macro_build (&icnt, NULL, "mflo", "d", dreg);
+      macro_build (&icnt, NULL,
+		   dbl ? "dsra32" : "sra",
+		   "d,w,<", dreg, dreg, 31);
+      macro_build (&icnt, NULL, "mfhi", "d", AT);
+      expr1.X_add_number = 8;
+      macro_build (&icnt, &expr1, "beq", "s,t,p", dreg, AT);
+      macro_build (&icnt, NULL, "nop", "", 0);
+      macro_build (&icnt, NULL, "break", "c", 6);
+      --mips_noreorder;
+      macro_build (&icnt, NULL, "mflo", "d", dreg);
+      break;
+
+    case M_DMULOU:
+      dbl = 1;
+    case M_MULOU:
+      mips_emit_delays ();
+      ++mips_noreorder;
+      macro_build (&icnt, NULL,
+		   dbl ? "dmultu" : "multu",
+		   "s,t", sreg, treg);
+      macro_build (&icnt, NULL, "mfhi", "d", AT);
+      macro_build (&icnt, NULL, "mflo", "d", dreg);
+      expr1.X_add_number = 8;
+      macro_build (&icnt, &expr1, "beq", "s,t,p", AT, 0);
+      macro_build (&icnt, NULL, "nop", "", 0);
+      macro_build (&icnt, NULL, "break", "c", 6);
+      --mips_noreorder;
       break;
 
     case M_ROL:
@@ -1950,6 +2325,7 @@ macro (ip)
       break;
 
     case M_S_DOB:
+      assert (mips_isa < 2);
       /* Even on a big endian machine $fn comes before $fn+1.  We have
 	 to adjust when storing to memory.  */
       macro_build (&icnt, &offset_expr, "swc1", "T,o(b)",
@@ -1980,15 +2356,20 @@ macro (ip)
 	    macro_build (&icnt, NULL, "addu", "d,v,t", AT, AT, breg);
 	  tempreg = AT;
 	}
-      /* Even on a big endian machine $fn comes before $fn+1.  We have
-	 to adjust when storing to memory.  */
-      macro_build (&icnt, &offset_expr, "swc1", "T,o(b)",
-		   byte_order == LITTLE_ENDIAN ? treg : treg + 1,
-		   tempreg);
-      offset_expr.X_add_number += 4;
-      macro_build (&icnt, &offset_expr, "swc1", "T,o(b)",
-		   byte_order == LITTLE_ENDIAN ? treg + 1 : treg,
-		   tempreg);
+      if (mips_isa >= 2)
+	macro_build (&icnt, &offset_expr, "sdc1", "T,o(b)", treg, tempreg);
+      else
+	{
+	  /* Even on a big endian machine $fn comes before $fn+1.  We
+	     have to adjust when storing to memory.  */
+	  macro_build (&icnt, &offset_expr, "swc1", "T,o(b)",
+		       byte_order == LITTLE_ENDIAN ? treg : treg + 1,
+		       tempreg);
+	  offset_expr.X_add_number += 4;
+	  macro_build (&icnt, &offset_expr, "swc1", "T,o(b)",
+		       byte_order == LITTLE_ENDIAN ? treg + 1 : treg,
+		       tempreg);
+	}
       if (tempreg == AT)
 	break;
       return;
@@ -2193,30 +2574,65 @@ macro (ip)
 	break;
       return;
 
+    case M_DSUB_I:
+      dbl = 1;
     case M_SUB_I:
       if (imm_expr.X_add_number < 32768 && imm_expr.X_add_number > -32768)
 	{
 	  imm_expr.X_add_number = -imm_expr.X_add_number;
-	  macro_build (&icnt, &imm_expr, "addi", "t,r,j", dreg, sreg);
+	  macro_build (&icnt, &imm_expr,
+		       dbl ? "daddi" : "addi",
+		       "t,r,j", dreg, sreg);
 	  return;
 	}
       load_register (&icnt, ip, AT, &imm_expr);
-      macro_build (&icnt, NULL, "sub", "d,v,t", dreg, sreg, AT);
+      macro_build (&icnt, NULL,
+		   dbl ? "dsub" : "sub",
+		   "d,v,t", dreg, sreg, AT);
       break;
 
+    case M_DSUBU_I:
+      dbl = 1;
     case M_SUBU_I:
       if (imm_expr.X_add_number < 32768 && imm_expr.X_add_number > -32768)
 	{
 	  imm_expr.X_add_number = -imm_expr.X_add_number;
-	  macro_build (&icnt, &imm_expr, "addiu", "t,r,j", dreg, sreg);
+	  macro_build (&icnt, &imm_expr,
+		       dbl ? "daddiu" : "addiu",
+		       "t,r,j", dreg, sreg);
 	  return;
 	}
       load_register (&icnt, ip, AT, &imm_expr);
-      macro_build (&icnt, NULL, "subu", "d,v,t", dreg, sreg, AT);
+      macro_build (&icnt, NULL,
+		   dbl ? "dsubu" : "subu",
+		   "d,v,t", dreg, sreg, AT);
+      break;
+
+    case M_TEQ_I:
+      s = "teq";
+      goto trap;
+    case M_TGE_I:
+      s = "tge";
+      goto trap;
+    case M_TGEU_I:
+      s = "tgeu";
+      goto trap;
+    case M_TLT_I:
+      s = "tlt";
+      goto trap;
+    case M_TLTU_I:
+      s = "tltu";
+      goto trap;
+    case M_TNE_I:
+      s = "tne";
+    trap:
+      load_register (&icnt, ip, AT, &imm_expr);
+      macro_build (&icnt, NULL, s, "s,t", sreg, AT);
       break;
 
     case M_TRUNCWD:
     case M_TRUNCWS:
+      assert (mips_isa < 2);
       sreg = (ip->insn_opcode >> 11) & 0x1f;	/* floating reg */
       dreg = (ip->insn_opcode >> 06) & 0x1f;	/* floating reg */
 
@@ -2343,6 +2759,7 @@ macro (ip)
 
     default:
       as_bad ("Macro %s not implemented yet", ip->insn_mo->name);
+      break;
     }
   if (mips_noat)
     as_warn ("Macro used $at after \".set noat\"");
@@ -2394,7 +2811,31 @@ mips_ip (str, ip)
   argsStart = s;
   for (;;)
     {
+      int insn_isa;
+
       assert (strcmp (insn->name, str) == 0);
+
+      if (insn->pinfo == INSN_MACRO)
+	insn_isa = insn->match;
+      else if (insn->pinfo & INSN_ISA2)
+	insn_isa = 2;
+      else if (insn->pinfo & INSN_ISA3)
+	insn_isa = 3;
+      else
+	insn_isa = 1;
+
+      if (insn_isa > mips_isa)
+	{
+	  if (insn + 1 < &mips_opcodes[NUMOPCODES]
+	      && strcmp (insn->name, insn[1].name) == 0)
+	    {
+	      ++insn;
+	      continue;
+	    }
+	  insn_error = "ERROR: instruction not supported on this processor";
+	  return;
+	}
+
       ip->insn_mo = insn;
       ip->insn_opcode = insn->match;
       for (args = insn->args;; ++args)
@@ -2508,6 +2949,7 @@ mips_ip (str, ip)
 	    case 'w':		/* both dest and target */
 	    case 'E':		/* coprocessor target register */
 	    case 'G':		/* coprocessor destination register */
+	    case 'x':		/* ignore register name */
 	      s_reset = s;
 	      if (s[0] == '$')
 		{
@@ -2580,6 +3022,16 @@ mips_ip (str, ip)
 		    case 't':
 		    case 'E':
 		      ip->insn_opcode |= regno << 16;
+		      break;
+		    case 'x':
+		      /* This case exists because on the r3000 trunc
+			 expands into a macro which requires a gp
+			 register.  On the r6000 or r4000 it is
+			 assembled into a single instruction which
+			 ignores the register.  Thus the insn version
+			 is MIPS_ISA2 and uses 'x', and the macro
+			 version is MIPS_ISA1 and uses 't'.  */
+		      break;
 		    }
 		  lastregno = regno;
 		  continue;
@@ -3114,7 +3566,7 @@ md_parse_option (argP, cntP, vecP)
      char ***vecP;
 {
   /* Accept -nocpp but ignore it. */
-  if (!strcmp (*argP, "nocpp"))
+  if (strcmp (*argP, "nocpp") == 0)
     {
       *argP += 5;
       return 1;
@@ -3144,6 +3596,78 @@ md_parse_option (argP, cntP, vecP)
 	mips_optimize = 0;
       return 1;
     }
+
+  if (strncmp (*argP, "mips", 4) == 0)
+    {
+      mips_isa = atol (*argP + 4);
+      if (mips_isa == 0)
+	mips_isa = 1;
+      else if (mips_isa < 1 || mips_isa > 3)
+	{
+	  as_bad ("-mips%d not supported", mips_isa);
+	  mips_isa = 1;
+	}
+      *argP = "";
+      return 1;
+    }
+
+  if (strncmp (*argP, "mcpu=", 5) == 0)
+    {
+      char *p;
+
+      /* Identify the processor type */
+      p = *argP + 5;
+      if (strcmp (p, "default") == 0
+	  || strcmp (p, "DEFAULT") == 0)
+	mips_isa = -1;
+      else
+	{
+	  if (*p == 'r' || *p == 'R')
+	    p++;
+
+	  mips_isa = -1;
+	  switch (*p)
+	    {
+	    case '2':
+	      if (strcmp (p, "2000") == 0
+		  || strcmp (p, "2k") == 0
+		  || strcmp (p, "2K") == 0)
+		mips_isa = 1;
+	      break;
+
+	    case '3':
+	      if (strcmp (p, "3000") == 0
+		  || strcmp (p, "3k") == 0
+		  || strcmp (p, "3K") == 0)
+		mips_isa = 1;
+	      break;
+
+	    case '4':
+	      if (strcmp (p, "4000") == 0
+		  || strcmp (p, "4k") == 0
+		  || strcmp (p, "4K") == 0)
+		mips_isa = 3;
+	      break;
+
+	    case '6':
+	      if (strcmp (p, "6000") == 0
+		  || strcmp (p, "6k") == 0
+		  || strcmp (p, "6K") == 0)
+		mips_isa = 2;
+	      break;
+	    }
+
+	  if (mips_isa == -1)
+	    {
+	      as_bad ("bad value (%s) for -mcpu= switch", *argP + 5);
+	      mips_isa = 1;
+	    }
+	}
+
+      *argP = "";
+      return 1;
+    }
+
 
 #ifdef OBJ_ECOFF
   if (**argP == 'G')
