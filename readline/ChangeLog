@@ -2,6 +2,7 @@ Sun Apr  7 22:06:11 1996  Fred Fish  <fnf@cygnus.com>
 
 	From: Miles Bader  <miles@gnu.ai.mit.edu>
 	* config/mh-gnu: New file.
+	* configure.in (*-*-gnu*): New host.
 
 Sun Apr  7 13:21:51 1996  Fred Fish  <fnf@cygnus.com>
 
