@@ -1,5 +1,7 @@
 2000-07-04  Alexandre Oliva  <aoliva@redhat.com>
 
+	* armemu.c (ARMul_Emulate, t_undefined): Proceed to next insn.
+
 	* armemu.h (INSN_SIZE): New macro.
 	(SET_ABORT): Save CPSR in SPSR and set LR.
 	* armemu.c (ARMul_Emulate, isize): Set to INSN_SIZE.

@@ -428,7 +428,7 @@ ARMul_Emulate26 (register ARMul_State * state)
 	    {
 	    case t_undefined:
 	      ARMul_UndefInstr (state, instr);	/* This is a Thumb instruction */
-	      break;
+	      goto donext;
 
 	    case t_branch:	/* already processed */
 	      goto donext;
