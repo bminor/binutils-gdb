@@ -1,5 +1,8 @@
 Fri Sep  8 00:27:46 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/tc-mips.c (macro): Handle a non zero base register for
+	M_U{L,S}{D,W,H}_A.
+
 	* gasp.c (show_usage): Put program_name argument in first fprintf,
 	not second.
 
