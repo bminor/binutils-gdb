@@ -49,13 +49,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define	SET_STACK_LIMIT_HUGE
 
-/* Override copies of {fetch,store}_inferior_registers in infptrace.c.  */
-#define FETCH_INFERIOR_REGISTERS
-
-/* If we ever *do* end up using the standard fetch_inferior_registers,
-   this is the right value for U_REGS_OFFSET.  */
-#define	U_REGS_OFFSET	0
-
 /* System doesn't provide siginterrupt().  */
 #define	NO_SIGINTERRUPT
 

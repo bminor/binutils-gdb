@@ -1,5 +1,20 @@
 Thu Oct 15 21:53:53 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
+	Ultra3 host/target/native split.  (untested).
+
+	* ultra3-xdep.c: updated copyright.  Do not include sys/ptrace.h.
+	  (fetch_register, fetch_inferior_registers,
+	  store_inferior_registers, fetch_core_registers): removed to
+	  ultra3-nat.c.
+	* xm-ultra3.h (FETCH_INFERIOR_REGISTERS, U_REGS_OFFSET): removed
+	  to nm-ultra3.h.
+	* Makefile.in (HFILES): added nm-ultra3.h.
+	* nm-ultra3.h, ultra3-nat.c: new files for native support.
+	* config/ultra3.mh (XDEPFILES): removed infptrace.o inftarg.o
+	  fork-child.o.
+	  (NAT_FILE, NATDEPFILES): new macros for native support.
+	* config/ultra3.mt (TDEPFILES): exec.o removed.
+
 	* xm-vaxult.h: add MEM_FNS_DECLARED.
 
 Thu Oct 15 02:59:30 1992  John Gilmore  (gnu@cygnus.com)

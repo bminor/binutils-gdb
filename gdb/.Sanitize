@@ -151,6 +151,7 @@ nm-sun2.h
 nm-sun3.h
 nm-sun4os4.h
 nm-trash.h
+nm-ultra3.h
 ns32k-opcode.h
 ns32k-pinsn.c
 objfiles.c
@@ -267,6 +268,7 @@ tm-umax.h
 tm-vax.h
 tm-vx68.h
 tm-vx960.h
+ultra3-nat.c
 ultra3-xdep.c
 umax-xdep.c
 utils.c
