@@ -35,6 +35,9 @@
 #include <varargs.h>
 #endif
 
+/* Value of VIF `nop' instruction.  */
+#define VIFNOP 0
+
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 
 /* Compute DMA operand index number of OP.  */
@@ -66,10 +69,13 @@ static void insert_operand_final
      PARAMS ((dvp_cpu, const dvp_operand *, int,
 	      DVP_INSN *, offsetT, char *, unsigned int));
 
-static void insert_mpg_marker PARAMS ((void));
-static int insert_file PARAMS ((const char *, void (*) (), int));
+static void insert_mpg_marker PARAMS ((unsigned long));
+static void insert_unpack_marker PARAMS ((unsigned long));
+static int insert_file PARAMS ((const char *,
+				void (*) PARAMS ((unsigned long)),
+				unsigned long, int));
 
-static int cur_vif_insn_length PARAMS ((void));
+static int vif_length_value PARAMS ((int, int, int, int));
 static void install_vif_length PARAMS ((char *, int));
 
 const char comment_chars[] = ";";
@@ -77,7 +83,7 @@ const char line_comment_chars[] = "#";
 const char line_separator_chars[] = "!";
 const char EXP_CHARS[] = "eE";
 const char FLT_CHARS[] = "dD";
-
+
 /* Current assembler state.
    Instructions like mpg and direct are followed by a restricted set of
    instructions.  In the case of a '*' length argument an end marker must
@@ -108,7 +114,7 @@ static int cur_state_index;
 static void push_asm_state PARAMS ((asm_state));
 static void pop_asm_state PARAMS ((int));
 static void set_asm_state PARAMS ((asm_state));
-
+
 /* Current cpu (machine variant) type state.
    We copy the mips16 way of recording what the current machine type is in
    the code.  A label is created whenever necessary and has an "other" value
@@ -127,22 +133,28 @@ static int dma_data_state = 0;
 /* Label of .DmaData (internally generated for inline data).  */
 static const char *dma_data_name;
 
-/* Type of gif tag.  */
-static gif_type gif_insn_type;
-/* Name of label of current gif<foo> insn's data.  */
+/* Variable length VIF insn support.  */
+/* Label at start of insn's data.  */
+static symbolS *vif_data_start;
+/* Label at end of insn's data.  */
+static symbolS *vif_data_end;
+
+/* Special symbol $.mpgloc.  */
+static symbolS *mpgloc_sym;
+/* Special symbol $.unpackloc.  */
+static symbolS *unpackloc_sym;
+
+/* GIF insn support.  */
+/* Type of insn.  */
+static int gif_insn_type;
+/* Name of label of insn's data.  */
 static const char *gif_data_name;
-/* Pointer to frag of current gif insn.  */
+/* Pointer to frag of insn.  */
 static fragS *gif_insn_frag;
 /* Pointer to current gif insn in gif_insn_frag.  */
 static char *gif_insn_frag_loc;
-
-/* For variable length instructions, pointer to the initial frag
-   and pointer into that frag.  These only hold valid values if
-   CUR_ASM_STATE is one of ASM_MPG, ASM_DIRECT, ASM_UNPACK.  */
-static fragS *cur_varlen_frag;
-static char *cur_varlen_insn;
 /* The length value specified in the insn, or -1 if '*'.  */
-static int cur_varlen_value;
+static int gif_user_value;
 
 /* Count of vu insns seen since the last mpg.
    Set to -1 to disable automatic mpg insertion.  */
@@ -156,6 +168,13 @@ static int dma_pack_vif_p;
 static int output_dma = 1;
 /* Non-zero if vif insns are to be included in the output.  */
 static int output_vif = 1;
+
+/* Current opcode/operand for use by md_operand.  */
+static const dvp_opcode *cur_opcode;
+static const dvp_operand *cur_operand;
+
+/* Options for the `caller' argument to s_endmpg.  */
+typedef enum { ENDMPG_USER, ENDMPG_INTERNAL, ENDMPG_MIDDLE } endmpg_caller;
 
 const char *md_shortopts = "";
 
@@ -223,10 +242,9 @@ const pseudo_typeS md_pseudo_table[] =
   { "dmapackvif", s_dmapackvif, 0 },
   { "enddirect", s_enddirect, 0 },
   { "enddmadata", s_enddmadata, 0 },
-  { "endmpg", s_endmpg, 0 },
+  { "endmpg", s_endmpg, ENDMPG_USER },
   { "endunpack", s_endunpack, 0 },
   { "endgif", s_endgif, 0 },
-  /* .vu added to simplify debugging and creation of input files */
   { "vu", s_state, ASM_VU },
   { NULL, NULL, 0 }
 };
@@ -250,6 +268,10 @@ md_begin ()
 
   /* Disable automatic mpg insertion.  */
   vu_count = -1;
+
+  /* Create special symbols.  */
+  mpgloc_sym = expr_build_uconstant (0);
+  unpackloc_sym = expr_build_uconstant (0);
 }
 
 /* We need to keep a list of fixups.  We can't simply generate them as
@@ -262,6 +284,11 @@ struct dvp_fixup
   int opindex;
   /* byte offset from beginning of instruction */
   int offset;
+  /* user specified value [when there is one] */
+  int user_value;
+  /* wl,cl values, only used with unpack insn */
+  short wl,cl;
+  /* the expression */
   expressionS exp;
 };
 
@@ -336,7 +363,7 @@ md_assemble (str)
 	   || CUR_ASM_STATE == ASM_MPG)
     assemble_vu (str);
   else
-    as_fatal ("unknown parse state");
+    as_fatal ("internal error: unknown parse state");
 }
 
 /* Subroutine of md_assemble to assemble DMA instructions.  */
@@ -357,6 +384,10 @@ assemble_dma (str)
     {
       /* Do an implicit alignment to a 16 byte boundary.
 	 Do it now so that inline dma data labels are at the right place.  */
+      /* ??? One can certainly argue all this implicit alignment is
+	 questionable.  The thing is assembler programming is all that will
+	 mostly likely ever be done and not doing so forces an extra [and
+	 arguably unnecessary] burden on the programmer.  */
       frag_align (4, 0, 0);
       record_alignment (now_seg, 4);
     }
@@ -417,7 +448,6 @@ assemble_dma (str)
   if (! dma_pack_vif_p)
     {
       f = frag_more (8);
-#define VIFNOP 0
       md_number_to_chars (f + 0, VIFNOP, 4);
       md_number_to_chars (f + 4, VIFNOP, 4);
     }
@@ -437,8 +467,13 @@ assemble_vif (str)
   int len;
   /* Pointer to allocated frag.  */
   char *f;
-  int i;
+  int i,wl,cl;
   const dvp_opcode *opcode;
+  fragS * insn_frag;
+  /* Name of file to read data from.  */
+  const char *file;
+  /* Length in 32 bit words.  */
+  int data_len;
 
   opcode = assemble_one_insn (DVP_VIF,
 			      vif_opcode_lookup_asm (str), vif_operands,
@@ -457,42 +492,155 @@ assemble_vif (str)
 
   /* We still have to switch modes (if mpg for example) so we can't exit
      early if -no-vif.  */
+
   if (output_vif)
     {
       /* Record the mach before doing the alignment so that we properly
-	 disassemble any inserted vifnop's.  For variable length insns
-	 force the recording of the mach type for the next insn.  A label may
-	 be embedded in it to compute the length and this will cause the
-	 disassembler to wrongly disassemble the next insn.  */
+	 disassemble any inserted vifnop's.  For mpg and direct insns
+	 force the recording of the mach type for the next insn.  The data
+	 will switch the mach type and we want to ensure it's switched
+	 back.  */
 
-      if (opcode->flags & VIF_OPCODE_LENVAR)
+      if (opcode->flags & (VIF_OPCODE_MPG | VIF_OPCODE_DIRECT))
 	record_mach (DVP_VIF, 1);
       else
 	record_mach (DVP_VIF, 0);
 
+      /* For variable length instructions record a fixup that is the symbol
+	 marking the end of the data.  eval_expr will queue the fixup
+	 which will then be emitted later.  */
+      if (opcode->flags & VIF_OPCODE_LENVAR)
+	{
+	  char *name;
+
+	  asprintf (&name, "%s%s", LOCAL_LABEL_PREFIX,
+		    unique_name ("varlen"));
+	  vif_data_end = symbol_new (name, now_seg, 0, 0);
+	  symbol_table_insert (vif_data_end);
+	  fixups[fixup_count].exp.X_op = O_symbol;
+	  fixups[fixup_count].exp.X_add_symbol = vif_data_end;
+	  fixups[fixup_count].exp.X_add_number = 0;
+	  fixups[fixup_count].opindex = vif_operand_datalen_special;
+	  fixups[fixup_count].offset = 0;
+
+	  /* See what the user specified.  */
+	  vif_get_var_data (&file, &data_len);
+	  if (file)
+	    data_len = -1;
+	  fixups[fixup_count].user_value = data_len;
+	  /* Get the wl,cl values.  Only useful for the unpack insn but
+	     it doesn't hurt to always record them.  */
+	  vif_get_wl_cl (&wl, &cl);
+	  fixups[fixup_count].wl = wl;
+	  fixups[fixup_count].cl = cl;
+	  ++fixup_count;
+	}
+
+      /* Obtain space in which to store the instruction.  */
+
       if (opcode->flags & VIF_OPCODE_MPG)
 	{
+	  /* The data must be aligned on a 64 bit boundary (so the mpg insn
+	     comes just before that 64 bit boundary).
+	     Do this by putting the mpg insn in a relaxable fragment
+	     with a symbol that marks the beginning of the aligned data.  */
+
+	  /* This dance with frag_grow is to ensure the variable part and
+	     fixed part are in the same fragment.  */
+	  frag_grow (8);
+	  /* Allocate space for the fixed part.  */
+	  f = frag_more (4);
+	  insn_frag = frag_now;
+
+	  frag_var (rs_machine_dependent,
+		    4, /* max chars */
+		    0, /* variable part already allocated */
+		    1, /* subtype */
+		    NULL, /* no symbol */
+		    0, /* offset */
+		    f); /* opcode */
+
 	  frag_align (3, 0, 0);
 	  record_alignment (now_seg, 3);
-	  /* FIXME: The data must be aligned on a 64 bit boundary.
-	     Not sure how to do this yet, other than by performing relaxing,
-	     so punt by making the mpg insn 8 bytes (vifnop,mpg).  */
-	  f = frag_more (4);
-	  memset (f, 0, 4);
+
+	  /* Put a symbol at the start of data.  The relaxation code uses
+	     this to figure out how many bytes to insert.  $.mpgloc
+	     calculations also use it.  */
+	  vif_data_start = create_colon_label (STO_DVP_VU, LOCAL_LABEL_PREFIX,
+					       unique_name ("mpg"));
+	  insn_frag->fr_symbol = vif_data_start;
+
+	  /* Get the value of mpgloc.  If it wasn't '*' update $.mpgloc.  */
+	  {
+	    int mpgloc = vif_get_mpgloc ();
+	    if (mpgloc != -1)
+	      {
+		mpgloc_sym->sy_value.X_op = O_constant;
+		mpgloc_sym->sy_value.X_add_number = mpgloc;
+		mpgloc_sym->sy_value.X_unsigned = 1;
+	      }
+	  }
 	}
       else if (opcode->flags & VIF_OPCODE_DIRECT)
 	{
+	  /* The data must be aligned on a 128 bit boundary (so the direct insn
+	     comes just before that 128 bit boundary).
+	     Do this by putting the direct insn in a relaxable fragment.
+	     with a symbol that marks the beginning of the aligned data.  */
+
+	  /* This dance with frag_grow is to ensure the variable part and
+	     fixed part are in the same fragment.  */
+	  frag_grow (16);
+	  /* Allocate space for the fixed part.  */
+	  f = frag_more (4);
+	  insn_frag = frag_now;
+
+	  frag_var (rs_machine_dependent,
+		    12, /* max chars */
+		    0, /* variable part already allocated */
+		    2, /* subtype */
+		    NULL, /* no symbol */
+		    0, /* offset */
+		    f); /* opcode */
+
 	  frag_align (4, 0, 0);
 	  record_alignment (now_seg, 4);
-	  /* FIXME: revisit */
-	  f = frag_more (12);
-	  memset (f, 0, 12);
-	}
 
-      /* Reminder: it is important to fetch enough space in one call to
-	 `frag_more'.  We use (f - frag_now->fr_literal) to compute where
-	 we are and we don't want frag_now to change between calls.  */
-      f = frag_more (len * 4);
+	  /* Put a symbol at the start of data.  The relaxation code uses
+	     this to figure out how many bytes to insert.  */
+	  vif_data_start = create_colon_label (0, LOCAL_LABEL_PREFIX,
+					       unique_name ("direct"));
+	  insn_frag->fr_symbol = vif_data_start;
+	}
+      else if (opcode->flags & VIF_OPCODE_UNPACK)
+	{
+	  f = frag_more (len * 4);
+	  insn_frag = frag_now;
+	  /* Put a symbol at the start of data.  $.unpackloc calculations
+	     use it.  */
+	  vif_data_start = create_colon_label (STO_DVP_VIF, LOCAL_LABEL_PREFIX,
+					       unique_name ("unpack"));
+
+	  /* Get the value of unpackloc.  If it wasn't '*' update
+	     $.unpackloc.  */
+	  {
+	    int unpackloc = vif_get_unpackloc ();
+	    if (unpackloc != -1)
+	      {
+		unpackloc_sym->sy_value.X_op = O_constant;
+		unpackloc_sym->sy_value.X_add_number = unpackloc;
+		unpackloc_sym->sy_value.X_unsigned = 1;
+	      }
+	  }
+	}
+      else
+	{
+	  /* Reminder: it is important to fetch enough space in one call to
+	     `frag_more'.  We use (f - frag_now->fr_literal) to compute where
+	     we are and we don't want frag_now to change between calls.  */
+	  f = frag_more (len * 4);
+	  insn_frag = frag_now;
+	}
 
       /* Write out the instruction.  */
       for (i = 0; i < len; ++i)
@@ -505,6 +653,7 @@ assemble_vif (str)
 	{
 	  int op_type, reloc_type, offset;
 	  const dvp_operand *operand;
+	  fixS *fixP;
 
 	  /* Create a fixup for this operand.
 	     At this point we do not use a bfd_reloc_code_real_type for
@@ -517,10 +666,17 @@ assemble_vif (str)
 	  offset = fixups[i].offset;
 	  reloc_type = encode_fixup_reloc_type (DVP_VIF, op_type);
 	  operand = &vif_operands[op_type];
-	  fix_new_exp (frag_now, f + offset - frag_now->fr_literal, 4,
-		       &fixups[i].exp,
-		       (operand->flags & DVP_OPERAND_RELATIVE_BRANCH) != 0,
-		       (bfd_reloc_code_real_type) reloc_type);
+	  fixP = fix_new_exp (insn_frag, f + offset - insn_frag->fr_literal, 4,
+			      &fixups[i].exp,
+			      (operand->flags & DVP_OPERAND_RELATIVE_BRANCH) != 0,
+			      (bfd_reloc_code_real_type) reloc_type);
+	  fixP->tc_fix_data.user_value = fixups[i].user_value;
+	  fixP->tc_fix_data.wl = fixups[i].wl;
+	  fixP->tc_fix_data.cl = fixups[i].cl;
+
+	  /* Set fx_tcbit so other parts of the code know this fixup is for
+	     a vif insn.  */
+	  fixP->fx_tcbit = 1;
 	}
     }
 
@@ -528,25 +684,12 @@ assemble_vif (str)
 
   if (opcode->flags & VIF_OPCODE_LENVAR)
     {
-      /* Name of file to read data from.  */
-      char *file;
-      /* Length in 32 bit words.  */
-      int data_len;
-
-      file = NULL;
-      data_len = 0;
+      /* See what the user specified.  */
       vif_get_var_data (&file, &data_len);
-
-      cur_varlen_frag = frag_now;
-      cur_varlen_insn = f;
-      cur_varlen_value = data_len;
 
       if (file)
 	{
 	  int byte_len;
-
-	  /* Indicate length must be computed.  */
-	  cur_varlen_value = -1;
 
 	  /* The handling for each of mpg,direct,unpack is basically the same:
 	     - emit a label to set the mach type for the data we're inserting
@@ -558,31 +701,36 @@ assemble_vif (str)
 	    {
 	      record_mach (DVP_VUUP, 1);
 	      set_asm_state (ASM_MPG);
-	      byte_len = insert_file (file, insert_mpg_marker, 256 * 8);
-	      s_endmpg (1);
+	      byte_len = insert_file (file, insert_mpg_marker, 0, 256 * 8);
+	      s_endmpg (ENDMPG_INTERNAL);
 	    }
 	  else if (opcode->flags & VIF_OPCODE_DIRECT)
 	    {
 	      record_mach (DVP_GIF, 1);
 	      set_asm_state (ASM_DIRECT);
-	      byte_len = insert_file (file, NULL, 0);
+	      byte_len = insert_file (file, NULL, 0, 0);
 	      s_enddirect (1);
 	    }
 	  else if (opcode->flags & VIF_OPCODE_UNPACK)
 	    {
+	      int max_len = 0; /*unpack_max_byte_len (insn_buf[0]);*/
 	      set_asm_state (ASM_UNPACK);
-	      byte_len = insert_file (file, NULL, 0);
+	      byte_len = insert_file (file, NULL /*insert_unpack_marker*/,
+				      insn_buf[0], max_len);
 	      s_endunpack (1);
 	    }
 	  else
-	    as_fatal ("unknown cpu type for variable length vif insn");
+	    as_fatal ("internal error: unknown cpu type for variable length vif insn");
 	}
-      else
+      else /* file == NULL */
 	{
 	  /* data_len == -1 means the value must be computed from
 	     the data.  */
-	  if (data_len == 0 || data_len < -2)
+	  if (data_len == 0 || data_len <= -2)
 	    as_bad ("invalid data length");
+
+	  if (output_vif && data_len != -1)
+	    install_vif_length (f, data_len);
 
 	  if (opcode->flags & VIF_OPCODE_MPG)
 	    {
@@ -627,7 +775,8 @@ assemble_gif (str)
      to disassemble them as mips insns (since it uses the st_other field)
      of the closest label to choose the mach type and since we don't have
      a special st_other value for "data".  */
-  gif_data_name = S_GET_NAME (create_colon_label (0, "", unique_name (NULL)));
+  gif_data_name = S_GET_NAME (create_colon_label (0, LOCAL_LABEL_PREFIX,
+						  unique_name ("gifdata")));
 
   record_mach (DVP_GIF, 1);
 
@@ -661,7 +810,7 @@ assemble_vu (str)
   /* Handle automatic mpg insertion if enabled.  */
   if (CUR_ASM_STATE == ASM_MPG
       && vu_count == 256)
-    insert_mpg_marker ();
+    insert_mpg_marker (0);
 
   /* Do an implicit alignment to a 8 byte boundary.  */
   frag_align (3, 0, 0);
@@ -813,6 +962,7 @@ assemble_one_insn (cpu, opcode, operand_table, pstr, insn_buf)
 	  int mods,index;
 	  const dvp_operand *operand;
 	  const char *errmsg;
+	  long value;
 
 	  /* Non operand chars must match exactly.
 	     Operand chars that are letters are not part of symbols
@@ -872,14 +1022,16 @@ assemble_one_insn (cpu, opcode, operand_table, pstr, insn_buf)
 		    break;
 		}
 	      ++syn;
+	      continue;
 	    }
+
 	  /* Are we finished with suffixes?  */
-	  else if (!past_opcode_p)
+	  if (!past_opcode_p)
 	    {
 	      long suf_value;
 
 	      if (!(operand->flags & DVP_OPERAND_SUFFIX))
-		as_fatal ("bad opcode table, missing suffix flag");
+		as_fatal ("internal error: bad opcode table, missing suffix flag");
 
 	      /* If we're at a space in the input string, we want to skip the
 		 remaining suffixes.  There may be some fake ones though, so
@@ -908,44 +1060,49 @@ assemble_one_insn (cpu, opcode, operand_table, pstr, insn_buf)
 			      (offsetT) suf_value, &errmsg);
 
 	      ++syn;
+	      continue;
+	    }
+
+	  /* This is an operand, either a register or an expression of
+	     some kind.  */
+
+	  value = 0;
+
+	  if (operand->flags & DVP_OPERAND_SUFFIX)
+	    as_fatal ("internal error: bad opcode table, suffix wrong");
+
+	  /* Is there anything left to parse?
+	     We don't check for this at the top because we want to parse
+	     any trailing fake arguments in the syntax string.  */
+	  /* ??? This doesn't allow operands with a legal value of "".  */
+	  if (*str == '\0')
+	    break;
+
+	  /* Parse the operand.  */
+	  if (operand->flags & DVP_OPERAND_FLOAT)
+	    {
+	      errmsg = 0;
+	      value = parse_float (&str, &errmsg);
+	      if (errmsg)
+		break;
+	    }
+	  else if ((operand->flags & DVP_OPERAND_DMA_ADDR)
+		   && (mods & DVP_OPERAND_AUTOCOUNT))
+	    {
+	      errmsg = 0;
+	      value = parse_dma_addr_autocount (opcode, operand, mods,
+						insn_buf, &str, &errmsg);
+	      if (errmsg)
+		break;
 	    }
 	  else
-	    /* This is an operand, either a register or an expression of
-	       some kind.  */
 	    {
-	      char c;
-	      char *hold;
-	      long value = 0;
+	      char *origstr,*hold;
 	      expressionS exp;
 
-	      if (operand->flags & DVP_OPERAND_SUFFIX)
-		as_fatal ("bad opcode table, suffix wrong");
-
-	      /* Is there anything left to parse?
-		 We don't check for this at the top because we want to parse
-		 any trailing fake arguments in the syntax string.  */
-	      /* ??? This doesn't allow operands with a legal value of "".  */
-	      if (*str == '\0')
-		break;
-
-	      /* Parse the operand.  */
-	      if (operand->flags & DVP_OPERAND_FLOAT)
-		{
-		  errmsg = 0;
-		  value = parse_float (&str, &errmsg);
-		  if (errmsg)
-		    break;
-		}
-	      else if ((operand->flags & DVP_OPERAND_DMA_ADDR)
-		       && (mods & DVP_OPERAND_AUTOCOUNT))
-		{
-		  errmsg = 0;
-		  value = parse_dma_addr_autocount (opcode, operand, mods,
-						    insn_buf, &str, &errmsg);
-		  if (errmsg)
-		    break;
-		}
-	      else if (operand->parse)
+	      /* First see if there is a special parser.  */
+	      origstr = str;
+	      if (operand->parse)
 		{
 		  errmsg = NULL;
 		  value = (*operand->parse) (opcode, operand, mods,
@@ -953,11 +1110,19 @@ assemble_one_insn (cpu, opcode, operand_table, pstr, insn_buf)
 		  if (errmsg)
 		    break;
 		}
-	      else
+
+	      /* If there wasn't a special parser, or there was and it
+		 left the input stream unchanged, use the general
+		 expression parser.  */
+	      if (str == origstr)
 		{
 		  hold = input_line_pointer;
 		  input_line_pointer = str;
+		  /* Set cur_{opcode,operand} for md_operand.  */
+		  cur_opcode = opcode;
+		  cur_operand = operand;
 		  expression (&exp);
+		  cur_opcode = NULL;
 		  str = input_line_pointer;
 		  input_line_pointer = hold;
 
@@ -967,12 +1132,12 @@ assemble_one_insn (cpu, opcode, operand_table, pstr, insn_buf)
 		  else if (exp.X_op == O_constant)
 		    value = exp.X_add_number;
 		  else if (exp.X_op == O_register)
-		    as_fatal ("got O_register");
+		    as_fatal ("internal error: got O_register");
 		  else
 		    {
 		      /* We need to generate a fixup for this expression.  */
 		      if (fixup_count >= MAX_FIXUPS)
-			as_fatal ("too many fixups");
+			as_fatal ("internal error: too many fixups");
 		      fixups[fixup_count].exp = exp;
 		      fixups[fixup_count].opindex = index;
 		      /* FIXME: Revisit.  Do we really need operand->word?
@@ -988,16 +1153,16 @@ assemble_one_insn (cpu, opcode, operand_table, pstr, insn_buf)
 		      value = 0;
 		    }
 		}
-
-	      /* Insert the register or expression into the instruction.  */
-	      errmsg = NULL;
-	      insert_operand (cpu, opcode, operand, mods, insn_buf,
-			      (offsetT) value, &errmsg);
-	      if (errmsg != (const char *) NULL)
-		break;
-
-	      ++syn;
 	    }
+
+	  /* Insert the register or expression into the instruction.  */
+	  errmsg = NULL;
+	  insert_operand (cpu, opcode, operand, mods, insn_buf,
+			  (offsetT) value, &errmsg);
+	  if (errmsg != (const char *) NULL)
+	    break;
+
+	  ++syn;
 	}
 
       /* If we're at the end of the syntax string, we're done.  */
@@ -1097,7 +1262,7 @@ push_asm_state (new_state)
 {
   ++cur_state_index;
   if (cur_state_index == MAX_STATE_DEPTH)
-    as_fatal ("unexpected state push");
+    as_fatal ("internal error: unexpected state push");
   asm_state_stack[cur_state_index] = new_state;
 }
 
@@ -1114,7 +1279,7 @@ pop_asm_state (top_ok_p)
       if (top_ok_p)
 	asm_state_stack[cur_state_index] = ASM_INIT;
       else
-	as_fatal ("unexpected state pop");
+	as_fatal ("internal error: unexpected state pop");
     }
   else
     --cur_state_index;
@@ -1131,6 +1296,32 @@ void
 md_operand (expressionP)
      expressionS *expressionP;
 {
+  /* Check if this is a '*' for mpgloc.  */
+  if (cur_opcode
+      && (cur_opcode->flags & VIF_OPCODE_MPG) != 0
+      && (cur_operand->flags & DVP_OPERAND_VU_ADDRESS) != 0
+      && *input_line_pointer == '*')
+    {
+      expressionP->X_op = O_symbol;
+      expressionP->X_add_symbol = mpgloc_sym;
+      expressionP->X_add_number = 0;
+
+      /* Advance over the '*'.  */
+      ++input_line_pointer;
+    }
+  /* Check if this is a '*' for mpgloc.  */
+  else if (cur_opcode
+	   && (cur_opcode->flags & VIF_OPCODE_UNPACK) != 0
+	   && (cur_operand->flags & DVP_OPERAND_UNPACK_ADDRESS) != 0
+	   && *input_line_pointer == '*')
+    {
+      expressionP->X_op = O_symbol;
+      expressionP->X_add_symbol = unpackloc_sym;
+      expressionP->X_add_number = 0;
+
+      /* Advance over the '*'.  */
+      ++input_line_pointer;
+    }
 }
 
 valueT
@@ -1165,7 +1356,7 @@ dvp_after_pass_hook ()
 	 level.  */
   /* Check for missing .EndMpg, and supply one if necessary.  */
   if (CUR_ASM_STATE == ASM_MPG)
-    s_endmpg (1);
+    s_endmpg (ENDMPG_INTERNAL);
   else if (CUR_ASM_STATE == ASM_DIRECT)
     s_enddirect (0);
   else if (CUR_ASM_STATE == ASM_UNPACK)
@@ -1185,6 +1376,104 @@ dvp_frob_label (sym)
   if (CUR_ASM_STATE == ASM_MPG
       || CUR_ASM_STATE == ASM_VU)
     S_SET_OTHER (sym, STO_DVP_VU);
+}
+
+/* mpg/direct alignment is handled via relaxation */
+
+/* Return an initial guess of the length by which a fragment must grow to
+   hold a branch to reach its destination.
+   Also updates fr_type/fr_subtype as necessary.
+
+   Called just before doing relaxation.
+   Any symbol that is now undefined will not become defined.
+   The guess for fr_var is ACTUALLY the growth beyond fr_fix.
+   Whatever we do to grow fr_fix or fr_var contributes to our returned value.
+   Although it may not be explicit in the frag, pretend fr_var starts with a
+   0 value.  */
+
+int
+md_estimate_size_before_relax (fragP, segment)
+     fragS * fragP;
+     segT segment;
+{
+  /* Our initial estimate is always 0.  */
+  return 0;
+} 
+
+/* Perform the relaxation.
+   All we have to do is figure out how many bytes we need to insert to
+   get to the recorded symbol (which is at the required alignment).  */
+
+long
+dvp_relax_frag (fragP, stretch)
+     fragS * fragP;
+     long stretch;
+{
+  /* Address of variable part.  */
+  long address = fragP->fr_address + fragP->fr_fix;
+  /* Symbol marking start of data.  */
+  symbolS * symbolP = fragP->fr_symbol;
+  /* Address of the symbol.  */
+  long target = S_GET_VALUE (symbolP) + symbolP->sy_frag->fr_address;
+  long growth;
+
+  /* subtype >= 10 means "done" */
+  if (fragP->fr_subtype >= 10)
+    return 0;
+
+  /* subtype 1 = mpg */
+  if (fragP->fr_subtype == 1)
+    {
+      growth = target - address;
+      if (growth < 0)
+	as_fatal ("internal error: bad mpg alignment handling");
+      fragP->fr_subtype = 10 + growth;
+      return growth;
+    }
+
+  /* subtype 2 = direct */
+  if (fragP->fr_subtype == 2)
+    {
+      growth = target - address;
+      if (growth < 0)
+	as_fatal ("internal error: bad direct alignment handling");
+      fragP->fr_subtype = 10 + growth;
+      return growth;
+    }
+
+  as_fatal ("internal error: unknown fr_subtype");
+}
+
+/* *fragP has been relaxed to its final size, and now needs to have
+   the bytes inside it modified to conform to the new size.
+
+   Called after relaxation is finished.
+   fragP->fr_type == rs_machine_dependent.
+   fragP->fr_subtype is the subtype of what the address relaxed to.  */
+
+void
+md_convert_frag (abfd, sec, fragP)
+  bfd * abfd;
+  segT sec;
+  fragS * fragP;
+{
+  int growth = fragP->fr_subtype - 10;
+
+  fragP->fr_fix += growth;
+
+  if (growth != 0)
+    {
+      /* We had to grow this fragment.  Shift the mpg/direct insn to the end
+	 (so it abuts the following data).  */
+      DVP_INSN insn = bfd_getl32 (fragP->fr_opcode);
+      md_number_to_chars (fragP->fr_opcode, VIFNOP, 4);
+      if (growth > 8)
+	md_number_to_chars (fragP->fr_opcode, VIFNOP, 8);
+      md_number_to_chars (fragP->fr_literal + fragP->fr_fix - 4, insn, 4);
+
+      /* Adjust fr_opcode so md_apply_fix3 works with the right bytes.  */
+      fragP->fr_opcode += growth;
+    }
 }
 
 /* Functions concerning relocs.  */
@@ -1224,7 +1513,7 @@ decode_fixup_reloc_type (fixup_reloc, cpuP, operandP)
     case DVP_DMA : *operandP = &dma_operands[opnum]; break;
     case DVP_VIF : *operandP = &vif_operands[opnum]; break;
     case DVP_GIF : *operandP = &gif_operands[opnum]; break;
-    default : as_fatal ("bad fixup encoding");
+    default : as_fatal ("internal error: bad fixup encoding");
     }
 }
 
@@ -1242,15 +1531,32 @@ md_pcrel_from_section (fixP, sec)
       && (! S_IS_DEFINED (fixP->fx_addsy)
 	  || S_GET_SEGMENT (fixP->fx_addsy) != sec))
     {
+      /* If fx_tcbit is set this is for a vif insn and thus should never
+	 happen in correct code.  */
+      /* ??? The error message could be a bit more descriptive.  */
+      if (fixP->fx_tcbit)
+	as_bad ("unable to compute length of vif insn");
       /* The symbol is undefined (or is defined but not in this section).
 	 Let the linker figure it out.  +8: branch offsets are relative to the
 	 delay slot.  */
       return 8;
     }
 
-  /* We assume this is a vu branch.
-     Offsets are calculated based on the address of the next insn.  */
-  return ((fixP->fx_frag->fr_address + fixP->fx_where) & -8L) + 8;
+  /* If fx_tcbit is set, this is a vif end-of-variable-length-insn marker.
+     In this case the offset is relative to the start of data.
+     Otherwise we assume this is a vu branch.  In this case
+     offsets are calculated based on the address of the next insn.  */
+  if (fixP->fx_tcbit)
+    {
+      /* As a further refinement, if fr_opcode is NULL this is `unpack'
+	 which doesn't involve any relaxing.  */
+      if (fixP->fx_frag->fr_opcode == NULL)
+	return fixP->fx_frag->fr_address + fixP->fx_where + 4;
+      else
+	return fixP->fx_frag->fr_address + fixP->fx_frag->fr_fix;
+    }
+  else
+    return ((fixP->fx_frag->fr_address + fixP->fx_where) & -8L) + 8;
 }
 
 /* Apply a fixup to the object code.  This is called for all the
@@ -1312,9 +1618,40 @@ md_apply_fix3 (fixP, valueP, seg)
       dvp_cpu cpu;
       const dvp_operand *operand;
       DVP_INSN insn;
+      fragS *fragP = fixP->fx_frag;
+
+      /* If this was a relaxable insn, the opcode may have moved.  Find it.  */
+      if (fragP->fr_opcode != NULL)
+	where = fragP->fr_opcode;
 
       decode_fixup_reloc_type ((int) fixP->fx_r_type,
 			       & cpu, & operand);
+
+      /* For variable length vif insn data lengths, validate the user specified
+	 value or install the computed value in the instruction.  */
+      if (cpu == DVP_VIF
+	  && (operand - vif_operands) == vif_operand_datalen_special)
+	{
+	  value = vif_length_value (where[3],
+				    fixP->tc_fix_data.wl, fixP->tc_fix_data.cl,
+				    value);
+	  if (fixP->tc_fix_data.user_value != -1)
+	    {
+	      if (fixP->tc_fix_data.user_value != value)
+		as_warn_where (fixP->fx_file, fixP->fx_line,
+			       "specified length value doesn't match computed value");
+	      /* Don't override the user specified value.  */
+	    }
+	  else
+	    {
+	      if (output_vif)
+		{
+		  install_vif_length (where, value);
+		}
+	    }
+	  fixP->fx_done = 1;
+	  return 1;
+	}
 
       /* For the gif nloop operand, if it was specified by the user ensure
 	 it matches the value we computed.  */
@@ -1324,11 +1661,11 @@ md_apply_fix3 (fixP, valueP, seg)
 	  value = compute_nloop (fixP->tc_fix_data.type,
 				 fixP->tc_fix_data.nregs,
 				 value);
-	  if (fixP->tc_fix_data.user_nloop != -1)
+	  if (fixP->tc_fix_data.user_value != -1)
 	    {
 	      check_nloop (fixP->tc_fix_data.type,
 			   fixP->tc_fix_data.nregs,
-			   fixP->tc_fix_data.user_nloop,
+			   fixP->tc_fix_data.user_value,
 			   value,
 			   fixP->fx_file, fixP->fx_line);
 	      /* Don't override the user specified value.  */
@@ -1345,6 +1682,10 @@ md_apply_fix3 (fixP, valueP, seg)
       insert_operand_final (cpu, operand, DVP_MOD_THIS_WORD, &insn,
 			    (offsetT) value, fixP->fx_file, fixP->fx_line);
       bfd_putl32 ((bfd_vma) insn, (unsigned char *) where);
+
+      /* If this is mpgloc/unpackloc, we're done.  */
+      if (operand->flags & (DVP_OPERAND_VU_ADDRESS | DVP_OPERAND_UNPACK_ADDRESS))
+	fixP->fx_done = 1;
 
       if (fixP->fx_done)
 	{
@@ -1390,7 +1731,7 @@ md_apply_fix3 (fixP, valueP, seg)
 	  md_number_to_chars (where, value, 4);
 	  break;
 	default:
-	  as_fatal ("unexpected fixup");
+	  as_fatal ("internal error: unexpected fixup");
 	}
     }
 
@@ -1541,7 +1882,7 @@ scan_symbol (sym)
   return sym;
 }
 
-/* Evaluate an expression.
+/* Evaluate an expression for an operand.
    The result is the value of the expression if it can be evaluated,
    or 0 if it cannot (say because some symbols haven't been defined yet)
    in which case a fixup is queued.
@@ -1585,6 +1926,9 @@ eval_expr (opindex, offset, fmt, va_alist)
 	  fixups[fixup_count].exp = exp;
 	  fixups[fixup_count].opindex = opindex;
 	  fixups[fixup_count].offset = offset;
+	  fixups[fixup_count].user_value = -1;
+	  fixups[fixup_count].wl = -1;
+	  fixups[fixup_count].cl = -1;
 	  ++fixup_count;
 	}
       value = 0;
@@ -1641,8 +1985,6 @@ create_colon_label (sto, prefix, name)
 
 /* Return a malloc'd string useful in creating unique labels.
    PREFIX is the prefix to use or NULL if we're to pick one.  */
-/* ??? Presumably such a routine already exists somewhere
-   [but a first pass at finding it didn't turn up anything].  */
 
 static char *
 unique_name (prefix)
@@ -1657,7 +1999,7 @@ unique_name (prefix)
   ++counter;
   return result;
 }
-
+
 /* Compute a value for nloop.  */
 
 static int
@@ -1803,33 +2145,36 @@ parse_dma_addr_autocount (opcode, operand, mods, insn_buf, pstr, errmsg)
   return retval;
 }
 
-/* Return length in bytes of the variable length VIF insn
-   currently being assembled.  */
+/* Return the length value to insert in a VIF instruction whose upper
+   byte is CMD and whose data length is BYTES.
+   WL,CL are used for unpack insns and are the stcycl values in effect.
+   This does not do the max -> 0 conversion.  */
 
 static int
-cur_vif_insn_length ()
+vif_length_value (cmd, wl, cl, bytes)
+     int cmd;
+     int wl,cl;
+     int bytes;
 {
-  int byte_len;
-  fragS *f;
-
-  /* FIXME: A better and less fragile way would be to use eval_expr.  */
-
-  if (cur_varlen_frag == frag_now)
-    byte_len = frag_more (0) - cur_varlen_insn - 4; /* -4 for mpg itself */
-  else
+  switch (cmd & 0x70)
     {
-      byte_len = (cur_varlen_frag->fr_fix
-		  /*+ cur_varlen_frag->fr_offset + cur_varlen_frag->fr_var*/
-		  - (cur_varlen_insn - cur_varlen_frag->fr_literal)) - 4;
-      for (f = cur_varlen_frag->fr_next; f != frag_now; f = f->fr_next)
-	byte_len += f->fr_fix /*+ f->fr_offset + f->fr_var*/;
-      byte_len += frag_now_fix ();
+    case 0x50 : /* direct */
+      /* ??? Worry about data /= 16 cuts off?  */
+      return bytes / 16;
+    case 0x40 : /* mpg */
+      /* ??? Worry about data /= 8 cuts off?  */
+      return bytes / 8;
+    case 0x60 : /* unpack */
+    case 0x70 :
+      return vif_unpack_len_value (cmd & 15, wl, cl, bytes);
+    default :
+      as_fatal ("internal error: bad call to vif_length_value");
     }
-
-  return byte_len;
 }
 
-/* Install length LEN, in bytes, in the vif insn at BUF.
+/* Install length LEN in the vif insn at BUF.
+   LEN is the actual value to store, except that the max->0 conversion
+   hasn't been done (we do it).
    The bytes in BUF are in target order.  */
 
 static void
@@ -1837,13 +2182,11 @@ install_vif_length (buf, len)
      char *buf;
      int len;
 {
-  char cmd = buf[3];
+  unsigned char cmd = buf[3];
 
   if ((cmd & 0x70) == 0x40)
     {
       /* mpg */
-      len /= 8;
-      /* ??? Worry about data /= 8 cuts off?  */
       if (len > 256)
 	as_bad ("`mpg' data length must be between 1 and 256");
       buf[2] = len == 256 ? 0 : len;
@@ -1851,8 +2194,6 @@ install_vif_length (buf, len)
   else if ((cmd & 0x70) == 0x50)
     {
       /* direct/directhl */
-      /* ??? Worry about data /= 16 cuts off?  */
-      len /= 16;
       if (len > 65536)
 	as_bad ("`direct' data length must be between 1 and 65536");
       len = len == 65536 ? 0 : len;
@@ -1862,51 +2203,61 @@ install_vif_length (buf, len)
   else if ((cmd & 0x60) == 0x60)
     {
       /* unpack */
-      /* Round up to a word boundary.  */
-      len = (len + 3) & ~3;
-      /* Compute value to insert.  */
-      len = vif_unpack_len_value (cmd & 15, len);
-      /* -1 is returned if wl,cl are unknown and thus we can't compute
+      /* len == -1 means wl,cl are unknown and thus we can't compute
 	 a useful value */
       if (len == -1)
 	{
 	  as_bad ("missing `stcycle', can't compute length of `unpack' insn");
 	  len = 1;
 	}
-      if (len > 256)
+      if (len < 1 || len > 256)
 	as_bad ("`unpack' data length must be between 1 and 256");
       len = len == 256 ? 0 : len;
       buf[2] = len;
     }
   else
-    as_fatal ("bad call to install_vif_length");
+    as_fatal ("internal error: bad call to install_vif_length");
 }
 
-/* Finish off the current set of mpg insns, and start a new set.  */
+/* Finish off the current set of mpg insns, and start a new set.
+   The IGNORE arg exists because insert_unpack_marker uses it and both
+   of these functions are passed to insert_file.  */
 
 static void
-insert_mpg_marker ()
+insert_mpg_marker (ignore)
+     unsigned long ignore;
 {
-  s_endmpg (1);
-  /* Update mpgloc.  */
-  vif_set_mpgloc (vif_get_mpgloc () + 256);
+  s_endmpg (ENDMPG_MIDDLE);
+  /* mpgloc is updated by s_endmpg.  */
   md_assemble ("mpg *,*");
   /* Record the cpu type in case we're in the middle of reading binary
      data.  */
   record_mach (DVP_VUUP, 0);
 }
 
+/* Finish off the current unpack insn and start a new one.
+   INSN0 is the first word of the insn and is used to figure out what
+   kind of unpack insn it is.  */
+
+static void
+insert_unpack_marker (insn0)
+     unsigned long insn0;
+{
+}
+
 /* Insert a file into the output.
    The -I arg passed to GAS is used to specify where to find the file.
-   INSERT_MARKER if non-NULL is called every SIZE bytes.  This is used
-   by the mpg insn to insert mpg's every 256 insns.
+   INSERT_MARKER if non-NULL is called every SIZE bytes with an argument of
+   INSERT_MARKER_ARG.  This is used by the mpg insn to insert mpg's every 256
+   insns and by the unpack insn.
    The result is the number of bytes inserted.
    If an error occurs an error message is printed and zero is returned.  */
 
 static int
-insert_file (file, insert_marker, size)
+insert_file (file, insert_marker, insert_marker_arg, size)
      const char *file;
-     void (*insert_marker) ();
+     void (*insert_marker) PARAMS ((unsigned long));
+     unsigned long insert_marker_arg;
      int size;
 {
   FILE *f;
@@ -1951,10 +2302,10 @@ insert_file (file, insert_marker, size)
 	  {
 	    left_before_marker += n;
 	    if (left_before_marker > size)
-	      as_fatal ("file insertion sanity checky failed");
+	      as_fatal ("internal error: file insertion sanity checky failed");
 	    if (left_before_marker == size)
 	      {
-		(*insert_marker) ();
+		(*insert_marker) (insert_marker_arg);
 		left_before_marker = 0;
 	      }
 	  }
@@ -2183,68 +2534,70 @@ static void
 s_enddirect (internal_p)
      int internal_p;
 {
-  int byte_len;
-
   if (CUR_ASM_STATE != ASM_DIRECT)
     {
       as_bad ("`.enddirect' has no matching `direct' instruction");
       return;
     }
 
-  byte_len = cur_vif_insn_length ();
-  if (cur_varlen_value != -1
-      && cur_varlen_value * 16 != byte_len)
-    as_warn ("length in `direct' instruction does not match length of data");
-  if (output_vif)
-    install_vif_length (cur_varlen_insn, byte_len);
+  /* Record in the end data symbol the current location.  */
+  if (now_seg != S_GET_SEGMENT (vif_data_end))
+    as_bad (".enddirect in different section");
+  vif_data_end->sy_frag = frag_now;
+  S_SET_VALUE (vif_data_end, (valueT) frag_now_fix ());
 
   set_asm_state (ASM_INIT);
 
-  /* These needn't be reset, but to catch bugs they are.  */
-  cur_varlen_frag = NULL;
-  cur_varlen_insn = NULL;
-  cur_varlen_value = 0;
+  /* Needn't be reset, but to catch bugs it is.  */
+  vif_data_end = NULL;
 
   if (! internal_p)
     demand_empty_rest_of_line ();
 }
 
-/* INTERNAL_P is non-zero if invoked internally by this file rather than
-   by the user.  In this case we don't touch the input stream.  */
+/* CALLER denotes who's calling us.
+   If ENDMPG_USER then .endmpg was found in the input stream.
+   If ENDMPG_INTERNAL then we've been invoked to finish off file insertion.
+   If ENDMPG_MIDDLE then we've been invoked in the middle of a long stretch
+   of vu code.  */
 
 static void
-s_endmpg (internal_p)
-     int internal_p;
+s_endmpg (caller)
+     int caller;
 {
-  int byte_len;
-
   if (CUR_ASM_STATE != ASM_MPG)
     {
       as_bad ("`.endmpg' has no matching `mpg' instruction");
       return;
     }
 
-  byte_len = cur_vif_insn_length ();
-  if (cur_varlen_value != -1
-      && cur_varlen_value * 8 != byte_len)
-    as_warn ("length in `mpg' instruction does not match length of data");
-  if (output_vif)
-    install_vif_length (cur_varlen_insn, byte_len);
+  /* Record in the end data symbol the current location.  */
+  if (now_seg != S_GET_SEGMENT (vif_data_end))
+    as_bad (".endmpg in different section");
+  vif_data_end->sy_frag = frag_now;
+  S_SET_VALUE (vif_data_end, (valueT) frag_now_fix ());
+
+  /* Update $.mpgloc.
+     We have to leave the old value alone as it may be used in fixups
+     already recorded.  The new value is the old value plus the number of
+     double words in this chunk.  */
+  {
+    symbolS *s;
+    s = expr_build_binary (O_subtract, vif_data_end, vif_data_start);
+    s = expr_build_binary (O_divide, s, expr_build_uconstant (8));
+    mpgloc_sym = expr_build_binary (O_add, mpgloc_sym, s);
+  }
 
   set_asm_state (ASM_INIT);
 
-  /* These needn't be reset, but to catch bugs they are.  */
-  cur_varlen_frag = NULL;
-  cur_varlen_insn = NULL;
-  cur_varlen_value = 0;
+  /* Needn't be reset, but to catch bugs it is.  */
+  vif_data_end = NULL;
 
   /* Reset the vu insn counter.  */
-  vu_count = -1;
+  if (caller != ENDMPG_MIDDLE)
+    vu_count = -1;
 
-  /* Update $.MpgLoc.  */
-  vif_set_mpgloc (vif_get_mpgloc () + byte_len);
-
-  if (! internal_p)
+  if (caller == ENDMPG_USER)
     demand_empty_rest_of_line ();
 }
 
@@ -2255,36 +2608,33 @@ static void
 s_endunpack (internal_p)
      int internal_p;
 {
-  int byte_len;
-
   if (CUR_ASM_STATE != ASM_UNPACK)
     {
       as_bad ("`.endunpack' has no matching `unpack' instruction");
       return;
     }
 
-  byte_len = cur_vif_insn_length ();
   /* Round up to next word boundary.  */
-  if (byte_len % 4)
-    frag_align (2, 0, 0);
+  frag_align (2, 0, 0);
 
-#if 0 /* unpack doesn't support prespecifying a length */
-  if (cur_varlen_value * 16 != bytelen)
-    as_warn ("length in `direct' instruction does not match length of data");
-#endif
+  /* Record in the end data symbol the current location.  */
+  if (now_seg != S_GET_SEGMENT (vif_data_end))
+    as_bad (".endunpack in different section");
+  vif_data_end->sy_frag = frag_now;
+  S_SET_VALUE (vif_data_end, (valueT) frag_now_fix ());
 
-  if (output_vif)
-    install_vif_length (cur_varlen_insn, byte_len);
+  /* Update $.UnpackLoc.  */
+  {
+    symbolS *s;
+    s = expr_build_binary (O_subtract, vif_data_end, vif_data_start);
+    s = expr_build_binary (O_divide, s, expr_build_uconstant (16));
+    unpackloc_sym = expr_build_binary (O_add, unpackloc_sym, s);
+  }
 
   set_asm_state (ASM_INIT);
 
-  /* These needn't be reset, but to catch bugs they are.  */
-  cur_varlen_frag = NULL;
-  cur_varlen_insn = NULL;
-  cur_varlen_value = 0;
-
-  /* Update $.UnpackLoc.  */
-  vif_set_unpackloc (vif_get_unpackloc () + byte_len);
+  /* Needn't be reset, but to catch bugs it is.  */
+  vif_data_end = NULL;
 
   if (! internal_p)
     demand_empty_rest_of_line ();
@@ -2319,10 +2669,10 @@ s_endgif (ignore)
     case GIF_IMAGE :   frag_align (4, 0, 0); break;
     }
 
-  /* The -16 is because the `gif_data_name' label is emitted at the start
-     of the gif tag.  If we're in a different frag from the one we started
-     with, this can't be computed until much later.  To cope we queue a fixup
-     and deal with it then.
+  /* The -16 is because the `gif_data_name' label is emitted at the
+     start of the gif tag.  If we're in a different frag from the one we
+     started with, this can't be computed until much later.  To cope we queue
+     a fixup and deal with it then.
      ??? The other way to handle this is by having expr() compute "syma - symb"
      when they're in different fragments but the difference is constant.
      Not sure how much of a slowdown that will introduce though.  */
@@ -2337,7 +2687,8 @@ s_endgif (ignore)
 
       /* If the user specified nloop, verify it.  */
       if (specified_nloop != -1)
-	check_nloop (gif_insn_type, nregs, specified_nloop, computed_nloop,
+	check_nloop (gif_insn_type, nregs,
+		     specified_nloop, computed_nloop,
 		     file, line);
     }
 
@@ -2358,14 +2709,15 @@ s_endgif (ignore)
       reloc_type = encode_fixup_reloc_type (DVP_GIF, op_type);
       operand = &gif_operands[op_type];
       fix = fix_new_exp (gif_insn_frag,
-			 gif_insn_frag_loc + offset - gif_insn_frag->fr_literal,
+			 (gif_insn_frag_loc + offset
+			  - gif_insn_frag->fr_literal),
 			 4, &fixups[0].exp, 0,
 			 (bfd_reloc_code_real_type) reloc_type);
       /* Record user specified value so we can test it when we compute the
 	 actual value.  */
       fix->tc_fix_data.type = gif_insn_type;
       fix->tc_fix_data.nregs = nregs;
-      fix->tc_fix_data.user_nloop = specified_nloop;
+      fix->tc_fix_data.user_value = specified_nloop;
     }
   else if (specified_nloop != -1)
     ; /* nothing to do */
@@ -2378,7 +2730,11 @@ s_endgif (ignore)
       bfd_putl32 ((bfd_vma) insn, gif_insn_frag_loc);
     }
 
+  /* These needn't be reset, but to catch bugs they are.  */
   gif_data_name = NULL;
+  gif_insn_frag = NULL;
+  gif_insn_frag_loc = NULL;
+
   demand_empty_rest_of_line ();
 }
 
