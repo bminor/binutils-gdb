@@ -1621,12 +1621,18 @@ as appropriate for the CPU or architecture specified by
 @var{ARCH}.  By default, CP0 register names are selected according to
 the architecture and CPU of the binary being disassembled.
 
+@item hwr-names=@var{ARCH}
+Print HWR (hardware register, used by the @code{rdhwr} instruction) names
+as appropriate for the CPU or architecture specified by
+@var{ARCH}.  By default, HWR names are selected according to
+the architecture and CPU of the binary being disassembled.
+
 @item reg-names=@var{ABI}
 Print GPR and FPR names as appropriate for the selected ABI.
 
 @item reg-names=@var{ARCH}
-Print CPU-specific register names (i.e., only the CP0 register names,
-for now) as appropriate for the selected CPU or architecture.
+Print CPU-specific register names (CP0 register and HWR names)
+as appropriate for the selected CPU or architecture.
 @end table
 
 For any of the options listed above, @var{ABI} or

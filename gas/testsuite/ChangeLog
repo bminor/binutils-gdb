@@ -1,3 +1,16 @@
+2002-12-29  Chris Demetriou  <cgd@broadcom.com>
+
+	* gas/mips/cp0-names-mips32r2.d: New test.
+	* gas/mips/hwr-names-mips32r2.d: New test.
+	* gas/mips/hwr-names-numeric.d: New test.
+	* gas/mips/hwr-names.s: New test source file.
+	* gas/mips/mips32r2.d: New test.
+	* gas/mips/mips32r2.s: New test source file.
+	* gas/mips/mips32r2-ill.l: New test.
+	* gas/mips/mips32r2-ill.s: New test source file.
+	* gas/mips/mips.exp: Add mips32r2 architecture data array
+	entry.  Run new tests mentioned above.
+
 2002-12-24    Dmitry Diky <diwil@mail.ru>
 
 	* gas/msp430: New directory.

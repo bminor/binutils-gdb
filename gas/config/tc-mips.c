@@ -260,6 +260,18 @@ static int mips_32bitmode = 0;
    || (ISA) == ISA_MIPS64            \
    )
 
+/* Return true if ISA supports 64-bit right rotate (dror et al.)
+   instructions.  */
+#define ISA_HAS_DROR(ISA) (	\
+   0				\
+   )
+
+/* Return true if ISA supports 32-bit right rotate (ror et al.)
+   instructions.  */
+#define ISA_HAS_ROR(ISA) (	\
+   (ISA) == ISA_MIPS32R2	\
+   )
+
 #define HAVE_32BIT_GPRS		                   \
     (mips_opts.gp32 || ! ISA_HAS_64BIT_REGS (mips_opts.isa))
 
@@ -3010,6 +3022,7 @@ macro_build (place, counter, ep, name, fmt, va_alist)
 
 	case 'd':
 	case 'G':
+	case 'K':
 	  insn.insn_opcode |= va_arg (args, int) << OP_SH_RD;
 	  continue;
 
@@ -6940,7 +6953,7 @@ macro2 (ip)
       break;
 
     case M_DROL:
-      if (CPU_HAS_DROR (mips_arch))
+      if (ISA_HAS_DROR (mips_opts.isa) || CPU_HAS_DROR (mips_arch))
 	{
 	  if (dreg == sreg)
 	    {
@@ -6971,7 +6984,7 @@ macro2 (ip)
       break;
 
     case M_ROL:
-      if (CPU_HAS_ROR (mips_arch))
+      if (ISA_HAS_ROR (mips_opts.isa) || CPU_HAS_ROR (mips_arch))
 	{
 	  if (dreg == sreg)
 	    {
@@ -7009,7 +7022,7 @@ macro2 (ip)
 	if (imm_expr.X_op != O_constant)
 	  as_bad (_("Improper rotate count"));
 	rot = imm_expr.X_add_number & 0x3f;
-	if (CPU_HAS_DROR (mips_arch))
+	if (ISA_HAS_DROR (mips_opts.isa) || CPU_HAS_DROR (mips_arch))
 	  {
 	    rot = (64 - rot) & 0x3f;
 	    if (rot >= 32)
@@ -7045,7 +7058,7 @@ macro2 (ip)
 	if (imm_expr.X_op != O_constant)
 	  as_bad (_("Improper rotate count"));
 	rot = imm_expr.X_add_number & 0x1f;
-	if (CPU_HAS_ROR (mips_arch))
+	if (ISA_HAS_ROR (mips_opts.isa) || CPU_HAS_ROR (mips_arch))
 	  {
 	    macro_build ((char *) NULL, &icnt, NULL, "ror",
 			 "d,w,<", dreg, sreg, (32 - rot) & 0x1f);
@@ -7067,7 +7080,7 @@ macro2 (ip)
       break;
 
     case M_DROR:
-      if (CPU_HAS_DROR (mips_arch))
+      if (ISA_HAS_DROR (mips_opts.isa) || CPU_HAS_DROR (mips_arch))
 	{
 	  macro_build ((char *) NULL, &icnt, NULL, "drorv",
 		       "d,t,s", dreg, sreg, treg);
@@ -7084,7 +7097,7 @@ macro2 (ip)
       break;
 
     case M_ROR:
-      if (CPU_HAS_ROR (mips_arch))
+      if (ISA_HAS_ROR (mips_opts.isa) || CPU_HAS_ROR (mips_arch))
 	{
 	  macro_build ((char *) NULL, &icnt, NULL, "rorv",
 		       "d,t,s", dreg, sreg, treg);
@@ -7108,7 +7121,7 @@ macro2 (ip)
 	if (imm_expr.X_op != O_constant)
 	  as_bad (_("Improper rotate count"));
 	rot = imm_expr.X_add_number & 0x3f;
-	if (CPU_HAS_DROR (mips_arch))
+	if (ISA_HAS_DROR (mips_opts.isa) || CPU_HAS_DROR (mips_arch))
 	  {
 	    if (rot >= 32)
 	      macro_build ((char *) NULL, &icnt, NULL, "dror32",
@@ -7143,7 +7156,7 @@ macro2 (ip)
 	if (imm_expr.X_op != O_constant)
 	  as_bad (_("Improper rotate count"));
 	rot = imm_expr.X_add_number & 0x1f;
-	if (CPU_HAS_ROR (mips_arch))
+	if (ISA_HAS_ROR (mips_opts.isa) || CPU_HAS_ROR (mips_arch))
 	  {
 	    macro_build ((char *) NULL, &icnt, NULL, "ror",
 			 "d,w,<", dreg, sreg, rot);
@@ -8003,6 +8016,18 @@ validate_mips_insn (opc)
       case ',': break;
       case '(': break;
       case ')': break;
+      case '+':
+    	switch (c = *p++)
+	  {
+	  case 'A': USE_BITS (OP_MASK_SHAMT,	OP_SH_SHAMT);	break;
+	  case 'B': USE_BITS (OP_MASK_INSMSB,	OP_SH_INSMSB);	break;
+	  case 'C': USE_BITS (OP_MASK_EXTMSBD,	OP_SH_EXTMSBD);	break;
+	  default:
+	    as_bad (_("internal: bad mips opcode (unknown extension operand type `+%c'): %s %s"),
+		    c, opc->name, opc->args);
+	    return 0;
+	  }
+	break;
       case '<': USE_BITS (OP_MASK_SHAMT,	OP_SH_SHAMT);	break;
       case '>':	USE_BITS (OP_MASK_SHAMT,	OP_SH_SHAMT);	break;
       case 'A': break;
@@ -8015,6 +8040,7 @@ validate_mips_insn (opc)
       case 'H': USE_BITS (OP_MASK_SEL,		OP_SH_SEL);	break;
       case 'I': break;
       case 'J': USE_BITS (OP_MASK_CODE19,       OP_SH_CODE19);  break;
+      case 'K':	USE_BITS (OP_MASK_RD,		OP_SH_RD);	break;
       case 'L': break;
       case 'M':	USE_BITS (OP_MASK_CCC,		OP_SH_CCC);	break;
       case 'N':	USE_BITS (OP_MASK_BCC,		OP_SH_BCC);	break;
@@ -8089,6 +8115,7 @@ mips_ip (str, ip)
   char *argsStart;
   unsigned int regno;
   unsigned int lastregno = 0;
+  unsigned int lastpos = 0;
   char *s_reset;
   char save_c = 0;
 
@@ -8254,6 +8281,70 @@ mips_ip (str, ip)
 		continue;
 	      break;
 
+	    case '+':		/* Opcode extension character.  */
+	      switch (*++args)
+		{
+		  case 'A':		/* ins/ext "pos".  */
+		    my_getExpression (&imm_expr, s);
+		    check_absolute_expr (ip, &imm_expr);
+		    if ((unsigned long) imm_expr.X_add_number > 31)
+		      {
+			as_bad (_("Improper position (%lu)"),
+				(unsigned long) imm_expr.X_add_number);
+			imm_expr.X_add_number = 0;
+		      }
+		    lastpos = imm_expr.X_add_number;
+		    ip->insn_opcode |= lastpos << OP_SH_SHAMT;
+		    imm_expr.X_op = O_absent;
+		    s = expr_end;
+		    continue;
+
+		  case 'B':		/* "ins" size spec (becomes MSB).  */
+		    my_getExpression (&imm_expr, s);
+		    check_absolute_expr (ip, &imm_expr);
+		    if (imm_expr.X_add_number == 0
+			|| (unsigned long) imm_expr.X_add_number > 32
+			|| ((unsigned long) imm_expr.X_add_number
+			    + lastpos) > 32)
+		      {
+			as_bad (_("Improper insert size (%lu, position %lu)"),
+				(unsigned long) imm_expr.X_add_number,
+				(unsigned long) lastpos);
+			imm_expr.X_add_number &= OP_MASK_INSMSB;
+		      }
+		    ip->insn_opcode |= (lastpos + imm_expr.X_add_number
+					- 1) << OP_SH_INSMSB;
+		    imm_expr.X_op = O_absent;
+		    s = expr_end;
+		    continue;
+
+		  case 'C':		/* "ext" size spec (becomes MSBD).  */
+		    my_getExpression (&imm_expr, s);
+		    check_absolute_expr (ip, &imm_expr);
+		    if (imm_expr.X_add_number == 0
+			|| (unsigned long) imm_expr.X_add_number > 32
+			|| ((unsigned long) imm_expr.X_add_number
+			    + lastpos) > 32)
+		      {
+			as_bad (_("Improper extract size (%lu, position %lu)"),
+				(unsigned long) imm_expr.X_add_number,
+				(unsigned long) lastpos);
+			imm_expr.X_add_number &= OP_MASK_EXTMSBD;
+		      }
+		    ip->insn_opcode |= (imm_expr.X_add_number
+					- 1) << OP_SH_EXTMSBD;
+		    imm_expr.X_op = O_absent;
+		    s = expr_end;
+		    continue;
+
+		default:
+		  as_bad (_("internal: bad mips opcode (unknown extension operand type `+%c'): %s %s"),
+		    *args, insn->name, insn->args);
+		  /* Further processing is fruitless.  */
+		  return;
+		}
+	      break;
+
 	    case '<':		/* must be at least one digit */
 	      /*
 	       * According to the manual, if the shift amount is greater
@@ -8391,6 +8482,7 @@ mips_ip (str, ip)
 	    case 'w':		/* both dest and target */
 	    case 'E':		/* coprocessor target register */
 	    case 'G':		/* coprocessor destination register */
+	    case 'K':		/* 'rdhwr' destination register */
 	    case 'x':		/* ignore register name */
 	    case 'z':		/* must be zero register */
 	    case 'U':           /* destination register (clo/clz).  */
@@ -8412,7 +8504,7 @@ mips_ip (str, ip)
 		      if (regno > 31)
 			as_bad (_("Invalid register number (%d)"), regno);
 		    }
-		  else if (*args == 'E' || *args == 'G')
+		  else if (*args == 'E' || *args == 'G' || *args == 'K')
 		    goto notreg;
 		  else
 		    {
@@ -8486,7 +8578,8 @@ mips_ip (str, ip)
 		  if (regno == AT
 		      && ! mips_opts.noat
 		      && *args != 'E'
-		      && *args != 'G')
+		      && *args != 'G'
+		      && *args != 'K')
 		    as_warn (_("Used $at without \".set noat\""));
 		  c = *args;
 		  if (*s == ' ')
@@ -8516,6 +8609,7 @@ mips_ip (str, ip)
 		      break;
 		    case 'd':
 		    case 'G':
+		    case 'K':
 		      ip->insn_opcode |= regno << OP_SH_RD;
 		      break;
 		    case 'U':
@@ -10377,8 +10471,10 @@ struct option md_longopts[] =
 #define OPTION_NO_RELAX_BRANCH (OPTION_MD_BASE + 40)
   {"relax-branch", no_argument, NULL, OPTION_RELAX_BRANCH},
   {"no-relax-branch", no_argument, NULL, OPTION_NO_RELAX_BRANCH},
+#define OPTION_MIPS32R2 (OPTION_MD_BASE + 41)
+  {"mips32r2", no_argument, NULL, OPTION_MIPS32R2},
 #ifdef OBJ_ELF
-#define OPTION_ELF_BASE    (OPTION_MD_BASE + 41)
+#define OPTION_ELF_BASE    (OPTION_MD_BASE + 42)
 #define OPTION_CALL_SHARED (OPTION_ELF_BASE + 0)
   {"KPIC",        no_argument, NULL, OPTION_CALL_SHARED},
   {"call_shared", no_argument, NULL, OPTION_CALL_SHARED},
@@ -10497,6 +10593,10 @@ md_parse_option (c, arg)
 
     case OPTION_MIPS32:
       file_mips_isa = ISA_MIPS32;
+      break;
+
+    case OPTION_MIPS32R2:
+      file_mips_isa = ISA_MIPS32R2;
       break;
 
     case OPTION_MIPS64:
@@ -12019,27 +12119,49 @@ s_mipsset (x)
     mips_opts.ase_mdmx = 0;
   else if (strncmp (name, "mips", 4) == 0)
     {
-      int isa;
+      int reset = 0;
 
       /* Permit the user to change the ISA on the fly.  Needless to
 	 say, misuse can cause serious problems.  */
-      isa = atoi (name + 4);
-      switch (isa)
+      if (strcmp (name, "mips0") == 0)
+	{
+	  reset = 1;
+	  mips_opts.isa = file_mips_isa;
+	}
+      else if (strcmp (name, "mips1") == 0)
+	mips_opts.isa = ISA_MIPS1;
+      else if (strcmp (name, "mips2") == 0)
+	mips_opts.isa = ISA_MIPS2;
+      else if (strcmp (name, "mips3") == 0)
+	mips_opts.isa = ISA_MIPS3;
+      else if (strcmp (name, "mips4") == 0)
+	mips_opts.isa = ISA_MIPS4;
+      else if (strcmp (name, "mips5") == 0)
+	mips_opts.isa = ISA_MIPS5;
+      else if (strcmp (name, "mips32") == 0)
+	mips_opts.isa = ISA_MIPS32;
+      else if (strcmp (name, "mips32r2") == 0)
+	mips_opts.isa = ISA_MIPS32R2;
+      else if (strcmp (name, "mips64") == 0)
+	mips_opts.isa = ISA_MIPS64;
+      else
+	as_bad (_("unknown ISA level %s"), name + 4);
+
+      switch (mips_opts.isa)
 	{
 	case  0:
-	  mips_opts.gp32 = file_mips_gp32;
-	  mips_opts.fp32 = file_mips_fp32;
 	  break;
-	case  1:
-	case  2:
-	case 32:
+	case ISA_MIPS1:
+	case ISA_MIPS2:
+	case ISA_MIPS32:
+	case ISA_MIPS32R2:
 	  mips_opts.gp32 = 1;
 	  mips_opts.fp32 = 1;
 	  break;
-	case  3:
-	case  4:
-	case  5:
-	case 64:
+	case ISA_MIPS3:
+	case ISA_MIPS4:
+	case ISA_MIPS5:
+	case ISA_MIPS64:
 	  mips_opts.gp32 = 0;
 	  mips_opts.fp32 = 0;
 	  break;
@@ -12047,18 +12169,10 @@ s_mipsset (x)
 	  as_bad (_("unknown ISA level %s"), name + 4);
 	  break;
 	}
-
-      switch (isa)
+      if (reset)
 	{
-	case  0: mips_opts.isa = file_mips_isa;   break;
-	case  1: mips_opts.isa = ISA_MIPS1;       break;
-	case  2: mips_opts.isa = ISA_MIPS2;       break;
-	case  3: mips_opts.isa = ISA_MIPS3;       break;
-	case  4: mips_opts.isa = ISA_MIPS4;       break;
-	case  5: mips_opts.isa = ISA_MIPS5;       break;
-	case 32: mips_opts.isa = ISA_MIPS32;      break;
-	case 64: mips_opts.isa = ISA_MIPS64;      break;
-	default: as_bad (_("unknown ISA level %s"), name + 4); break;
+	  mips_opts.gp32 = file_mips_gp32;
+	  mips_opts.fp32 = file_mips_fp32;
 	}
     }
   else if (strcmp (name, "autoextend") == 0)
@@ -14360,6 +14474,7 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
   { "mips4",          1,      ISA_MIPS4,      CPU_R8000 },
   { "mips5",          1,      ISA_MIPS5,      CPU_MIPS5 },
   { "mips32",         1,      ISA_MIPS32,     CPU_MIPS32 },
+  { "mips32r2",       1,      ISA_MIPS32R2,   CPU_MIPS32R2 },
   { "mips64",         1,      ISA_MIPS64,     CPU_MIPS64 },
 
   /* MIPS I */
@@ -14586,6 +14701,7 @@ MIPS options:\n\
 -mips4			generate MIPS ISA IV instructions\n\
 -mips5                  generate MIPS ISA V instructions\n\
 -mips32                 generate MIPS32 ISA instructions\n\
+-mips32r2               generate MIPS32 release 2 ISA instructions\n\
 -mips64                 generate MIPS64 ISA instructions\n\
 -march=CPU/-mtune=CPU	generate code/schedule for CPU, where CPU is one of:\n"));
 

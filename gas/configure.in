@@ -519,6 +519,9 @@ changequote([,])dnl
 	  mipsisa32 | mipsisa32el)
 	    mips_cpu=mips32
 	    ;;
+	  mipsisa32r2 | mipsisa32r2el)
+	    mips_cpu=mips32r2
+	    ;;
 	  mipsisa64 | mipsisa64el)
 	    mips_cpu=mips64
 	    ;;
@@ -527,6 +530,11 @@ changequote([,])dnl
 	    ;;
 	  mips64vr | mips64vrel)
 	    mips_cpu=vr4100
+	    ;;
+	  mipsisa32r2*)
+changequote(,)dnl
+	    mips_cpu=`echo $target_cpu | sed -e 's/[a-z]*..r2//' -e 's/el$//'`
+changequote([,])dnl
 	    ;;
 	  mips64* | mipsisa64* | mipsisa32*)
 changequote(,)dnl

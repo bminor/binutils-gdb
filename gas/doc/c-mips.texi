@@ -65,13 +65,15 @@ to select big-endian output, and @samp{-EL} for little-endian.
 @itemx -mips4
 @itemx -mips5
 @itemx -mips32
+@itemx -mips32r2
 @itemx -mips64
 Generate code for a particular MIPS Instruction Set Architecture level.
 @samp{-mips1} corresponds to the @sc{r2000} and @sc{r3000} processors,
 @samp{-mips2} to the @sc{r6000} processor, @samp{-mips3} to the
 @sc{r4000} processor, and @samp{-mips4} to the @sc{r8000} and
-@sc{r10000} processors.  @samp{-mips5}, @samp{-mips32}, and
-@samp{-mips64} correspond to generic @sc{MIPS V}, @sc{MIPS32}, and
+@sc{r10000} processors.  @samp{-mips5}, @samp{-mips32}, @samp{-mips32r2}, and
+@samp{-mips64} correspond to generic @sc{MIPS V}, @sc{MIPS32},
+@sc{MIPS32 Release 2}, and
 @sc{MIPS64} ISA processors, respectively.  You can also switch
 instruction sets during the assembly; see @ref{MIPS ISA, Directives to
 override the ISA level}.

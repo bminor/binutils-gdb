@@ -1,3 +1,31 @@
+2002-12-30  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips-dis.c (mips_cp0_names_mips3264r2, mips_hwr_names_numeric)
+	(mips_hwr_names_mips3264r2): New arrays.
+	(mips_arch_choice): New "hwr_names" member.
+	(mips_arch_choices): Adjust for structure change, and add a new
+	entry for "mips32r2" ISA.
+	(mips_hwr_names): New variable.
+	(set_default_mips_dis_options): Set mips_hwr_names.
+	(parse_mips_dis_option): New "hwr-names" option which sets
+	mips_hwr_names, and adjust "reg-names=ARCH" to set mips_hwr_names.
+	(print_insn_arg): Change return type to "int"
+	and use that to indicate number of characters consumed.
+	Add support for "+" operand extension character, "+A", "+B",
+	"+C", and "K" operands.
+	(print_insn_mips): Adjust for changes to print_insn_arg.
+	(print_mips_disassembler_options): Adjust for "hwr-names"
+	addition and "reg-names" change.
+	* mips-opc (I33): New define (shorthand for INSN_ISA32R2).
+	(mips_builtin_opcodes): Note that "nop" and "ssnop" are special
+	forms of "sll".  Add new MIPS32 Release 2 instructions: ehb,
+	di, ei, ext, ins, jr.hb, jalr.hb, mfhc1, mfhc2, mthc1, mthc2,
+	rdhwr, rdpgpr, seb, seh, synci, wrpgpr, wsbh.
+	Note that hardware rotate instructions (ror, rorv) can be
+	used on MIPS32 Release 2, and add the official mnemonics
+	for them (rotr, rotrv) and the similar "rotl" mnemonic for
+	left-rotate.
+
 2002-12-30    Dmitry Diky <diwil@mail.ru>
 
 	* configure.in: Add msp430 target.

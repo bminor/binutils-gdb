@@ -343,6 +343,10 @@ mips_arch_create mips5 	64	mips4	{} \
 mips_arch_create mips32	32	mips2	{} \
 			{ -march=mips32 -mtune=mips32 } { -mmips:isa32 } \
 			{ mipsisa32-*-* mipsisa32el-*-* }
+mips_arch_create mips32r2 32	mips32	{ ror } \
+			{ -march=mips32r2 -mtune=mips32r2 } \
+			{ -mmips:isa32r2 } \
+			{ mipsisa32r2-*-* mipsisa32r2el-*-* }
 mips_arch_create mips64	64	mips5	{ mips32 } \
 			{ -march=mips64 -mtune=mips64 } { -mmips:isa64 } \
 			{ mipsisa64-*-* mipsisa64el-*-* }
@@ -522,6 +526,9 @@ if { [istarget mips*-*-*] } then {
 
     run_dump_test_arches "mips32"	[mips_arch_list_matching mips32]
 
+    run_dump_test_arches "mips32r2"	[mips_arch_list_matching mips32r2]
+    run_list_test_arches "mips32r2-ill" "" [mips_arch_list_matching mips32r2]
+
     run_dump_test_arches "mips64"	[mips_arch_list_matching mips64]
 
     run_dump_test "mips64-mips3d"
@@ -610,6 +617,10 @@ if { [istarget mips*-*-*] } then {
 
     run_dump_test "cp0-names-numeric"
     run_dump_test "cp0-names-mips32"
+    run_dump_test "cp0-names-mips32r2"
     run_dump_test "cp0-names-mips64"
     run_dump_test "cp0-names-sb1"
+
+    run_dump_test "hwr-names-numeric"
+    run_dump_test "hwr-names-mips32r2"
 }

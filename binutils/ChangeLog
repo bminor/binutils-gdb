@@ -1,3 +1,8 @@
+2002-12-30  Chris Demetriou  <cgd@broadcom.com>
+
+	* doc/binutils.texi (objdump): Note MIPS HWR (Hardware Register)
+	changes in MIPS -M options.
+
 2002-12-30    Dmitry Diky <diwil@mail.ru>
 
 	* Makefile.am: Add msp430 target.

@@ -1,3 +1,29 @@
+2002-12-30  Chris Demetriou  <cgd@broadcom.com>
+
+	* configure.in: Recognize mipsisa32r2, mipsisa32r2el, and
+	CPU variants.
+	* configure: Regenerate.
+	* config/tc-mips.c (ISA_HAS_DROR, ISA_HAS_ROR): New defines.
+	(macro_build): Handle "K" operand.
+	(macro2): Use ISA_HAS_DROR and ISA_HAS_ROR in the places where
+	CPU_HAS_DROR and CPU_HAS_ROR are currently used.
+	(mips_ip): New variable "lastpos", and implement "+A", "+B",
+	and "+C" operands for MIPS32 Release 2 ins/ext instructions.
+	Implement "K" operand for MIPS32 Release 2 rdhwr instruction.
+	(validate_mips_insn): Implement "+" as a way to extend the
+	allowed operands, and implement "K", "+A", "+B", and "+C"
+	operands.
+	(OPTION_MIPS32R2): New define.
+	(md_longopts): Add entry for OPTION_MIPS32R2.
+	(OPTION_ELF_BASE): Adjust to accomodate OPTIONS_MIPS32R2.
+	(md_parse_option): Handle OPTION_MIPS32R2.
+	(s_mipsset): Reimplement handling of ".set mipsN" options
+	and add support for ".set mips32r2".
+	(mips_cpu_info_table): Add entry for "mips32r2" (MIPS32 Release 2).
+	(md_show_usage): Document "-mips32r2" option.
+	* doc/as.texinfo: Document "-mips32r2" option.
+	* doc/c-mips.texi: Likewise.
+
 2002-12-30    Dmitry Diky <diwil@mail.ru>
 
 	* configure.in: Add msp430 target.

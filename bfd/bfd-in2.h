@@ -1572,6 +1572,7 @@ enum bfd_architecture
 #define bfd_mach_mips5                 5
 #define bfd_mach_mips_sb1              12310201 /* octal 'SB', 01 */
 #define bfd_mach_mipsisa32             32
+#define bfd_mach_mipsisa32r2           33
 #define bfd_mach_mipsisa64             64
   bfd_arch_i386,      /* Intel 386 */
 #define bfd_mach_i386_i386 1

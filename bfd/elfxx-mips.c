@@ -3102,6 +3102,8 @@ elf_mips_isa (flags)
       return 32;
     case E_MIPS_ARCH_64:
       return 64;
+    case E_MIPS_ARCH_32R2:
+      return 33;
     }
   return 4;
 }
@@ -3171,6 +3173,10 @@ _bfd_elf_mips_mach (flags)
 
 	case E_MIPS_ARCH_64:
 	  return bfd_mach_mipsisa64;
+	  break;
+
+	case E_MIPS_ARCH_32R2:
+	  return bfd_mach_mipsisa32r2;
 	  break;
 	}
     }
@@ -6047,6 +6053,11 @@ _bfd_mips_elf_final_write_processing (abfd, linker)
 
     case bfd_mach_mipsisa64:
       val = E_MIPS_ARCH_64;
+      break;
+
+    case bfd_mach_mipsisa32r2:
+      val = E_MIPS_ARCH_32R2;
+      break;
     }
 
   elf_elfheader (abfd)->e_flags &= ~(EF_MIPS_ARCH | EF_MIPS_MACH);
@@ -7854,8 +7865,10 @@ _bfd_mips_elf_merge_private_bfd_data (ibfd, obfd)
 	     using 64-bit ISAs.  They will normally use the same data sizes
 	     and calling conventions.  */
 
-	  if ((  (new_isa == 1 || new_isa == 2 || new_isa == 32)
-	       ^ (old_isa == 1 || old_isa == 2 || old_isa == 32)) != 0)
+	  if ((  (new_isa == 1 || new_isa == 2 || new_isa == 32
+		  || new_isa == 33)
+	       ^ (old_isa == 1 || old_isa == 2 || old_isa == 32
+		  || old_isa == 33)) != 0)
 	    {
 	      (*_bfd_error_handler)
 	       (_("%s: ISA mismatch (-mips%d) with previous modules (-mips%d)"),
@@ -8005,6 +8018,8 @@ _bfd_mips_elf_print_private_bfd_data (abfd, ptr)
     fprintf (file, _(" [mips32]"));
   else if ((elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_64)
     fprintf (file, _(" [mips64]"));
+  else if ((elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_32R2)
+    fprintf (file, _(" [mips32r2]"));
   else
     fprintf (file, _(" [unknown ISA]"));
 
