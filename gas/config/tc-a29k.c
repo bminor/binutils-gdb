@@ -851,11 +851,21 @@ md_apply_fix (fixP, val)
 
     case RELOC_JUMPTARG:	/* 00XX00XX pattern in a word */
       if (!fixP->fx_done)
-	/* let linker deal */
-	;
+	{
+	  /* The linker tries to support both AMD and old GNU style
+             R_IREL relocs.  That means that if the addend is exactly
+             the negative of the address within the section, the
+             linker will not handle it correctly.  */
+	  if (fixP->fx_pcrel
+	      && val != 0
+	      && val == - (fixP->fx_frag->fr_address + fixP->fx_where))
+	    as_bad_where
+	      (fixP->fx_file, fixP->fx_line,
+	       "the linker will not handle this relocation correctly");
+	}
       else if (fixP->fx_pcrel)
 	{
-	  long v = val >> 16;
+	  long v = val >> 17;
 	  if (v != 0 && v != -1)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  "call/jmp target out of range");
