@@ -1,3 +1,7 @@
+Tue Jan 25 12:12:04 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabs.texinfo (String Field): Discuss continuing stabs with ?.
+
 Wed Jan 19 06:39:24 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* stabs.texinfo (Non-Stab Symbol Types): Mention N_SET* | N_EXT.

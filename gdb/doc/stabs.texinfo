@@ -282,7 +282,9 @@ except the string field.  The string field of every stab except the last
 is marked as continued with a backslash at the end (in the assembly code
 this may be written as a double backslash, depending on the assembler).
 Removing the backslashes and concatenating the string fields of each
-stab produces the original, long string.
+stab produces the original, long string.  Just to be incompatible (or so
+they don't have to worry about what the assembler does with
+backslashes), AIX can use @samp{?} instead of backslash.
 
 @node C Example
 @section A Simple Example in C Source
