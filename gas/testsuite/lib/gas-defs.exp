@@ -45,7 +45,7 @@ proc gas_run { prog as_opts redir } {
     catch "exec $srcdir/lib/run $AS $ASFLAGS $as_opts $srcdir/$subdir/$prog $redir" comp_output
     set comp_output [prune_warnings $comp_output]
     verbose "output was $comp_output"
-    return [list $comp_output ""];
+    return [list $comp_output ""]
 }
 
 proc all_ones { args } {

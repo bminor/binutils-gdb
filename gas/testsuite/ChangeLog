@@ -1,3 +1,19 @@
+2004-05-12  Ben Elliston  <bje@au.ibm.com>
+
+	* gas/h8300/t03_add.exp: Remove stray semicolons.
+	* gas/h8300/t04_sub.exp: Likewise.
+	* gas/h8300/t05_cmp.exp: Likewise.
+	* gas/h8300/t08_or.exp: Likewise.
+	* gas/h8300/t09_xor.exp: Likewise.
+	* gas/h8300/t10_and.exp: Likewise.
+	* gas/hppa/reloc/reloc.exp: Likewise.
+	* gas/hppa/unsorted/unsorted.exp: Likewise.
+	* gas/i386/i386.exp: Likewise.
+	* gas/m68hc11/m68hc11.exp: Likewise.
+	* gas/mips/mips.exp: Likewise.
+	* gas/sparc/sparc.exp: Likewise.
+	* lib/gas-defs.exp: Likewise.
+
 2004-05-11  Nick Clifton  <nickc@redhat.com>
 
 	* gas/elf/section4.s: New test.  Checks label arithmetic when

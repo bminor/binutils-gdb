@@ -254,7 +254,7 @@ proc mips_arch_list_matching {args} {
 	# properties actually are.
 	if { [string compare $arch default] == 0
 	     && [string length [mips_arch_properties default]] == 0} {
-	    continue;
+	    continue
 	}
 	if { [mips_arch_matches $arch $args] } {
 	    lappend l $arch

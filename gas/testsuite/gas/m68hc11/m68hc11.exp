@@ -43,7 +43,7 @@ proc gas_m68hc11_message { kind options line expect } {
     regsub -all "\n" "$line: $expect" " " title
 
     # Make a file containing the instructions to assemble.
-    set fd [open "$srcdir/$subdir/tst-m68hc1x.s" "w"];
+    set fd [open "$srcdir/$subdir/tst-m68hc1x.s" "w"]
     puts -nonewline $fd "$line"
     close $fd
 
