@@ -1,3 +1,8 @@
+Thu Jan  5 01:16:40 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* stabsread.c (define_symbol): Handle `a' symbol type used for
+	reference parameter passed in a register.
+
 start-sanitize-gdbtk
 Wed Jan  4 19:49:10 1995  Stan Shebs  <shebs@andros.cygnus.com>
 

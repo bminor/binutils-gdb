@@ -1186,6 +1186,20 @@ define_symbol (valu, string, desc, type, objfile)
       add_symbol_to_list (sym, &local_symbols);
       break;
 
+    case 'a':
+      /* Reference parameter which is in a register.  */
+      SYMBOL_TYPE (sym) = read_type (&p, objfile);
+      SYMBOL_CLASS (sym) = LOC_REGPARM_ADDR;
+      SYMBOL_VALUE (sym) = STAB_REG_TO_REGNUM (valu);
+      if (SYMBOL_VALUE (sym) >= NUM_REGS)
+	{
+	  complain (&reg_value_complaint, SYMBOL_SOURCE_NAME (sym));
+	  SYMBOL_VALUE (sym) = SP_REGNUM;  /* Known safe, though useless */
+	}
+      SYMBOL_NAMESPACE (sym) = VAR_NAMESPACE;
+      add_symbol_to_list (sym, &local_symbols);
+      break;
+
     case 'X':
       /* This is used by Sun FORTRAN for "function result value".
 	 Sun claims ("dbx and dbxtool interfaces", 2nd ed)
