@@ -161,6 +161,12 @@ extern int legacy_convert_register_p (int regnum);
 extern void legacy_register_to_value (int regnum, struct type *type, char *from, char *to);
 extern void legacy_value_to_register (struct type *type, int regnum, char *from, char *to);
 
+/* For compatibility with older architectures, returns
+   (LEGACY_SIM_REGNO_IGNORE) when the register doesn't have a valid
+   name.  */
+
+extern int legacy_register_sim_regno (int regnum);
+
 /* Initialize a ``struct info''.  Can't use memset(0) since some
    default values are not zero.  */
 extern void gdbarch_info_init (struct gdbarch_info *info);

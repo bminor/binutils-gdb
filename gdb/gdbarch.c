@@ -39,7 +39,6 @@
 #if GDB_MULTI_ARCH
 #include "gdbcmd.h"
 #include "inferior.h" /* enum CALL_DUMMY_LOCATION et.al. */
-#include "sim-regno.h"		/* For legacy_register_sim_regno().  */
 #else
 /* Just include everything in sight so that the every old definition
    of macro is visible. */

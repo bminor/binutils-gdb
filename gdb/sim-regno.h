@@ -38,11 +38,6 @@ enum sim_regno {
   LEGACY_SIM_REGNO_IGNORE = -2
 };
 
-/* For compatibility with older architectures, returns
-   (LEGACY_SIM_REGNO_IGNORE) when a register doesn't have.  */
-
-extern int legacy_register_sim_regno (int regnum);
-
 /* Treat all raw registers as valid.  */
 
 extern int one2one_register_sim_regno (int regnum);

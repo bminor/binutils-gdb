@@ -42,6 +42,7 @@
 #endif
 #include "regcache.h"
 #include "gdb_assert.h"
+#include "sim-regno.h"
 
 #include "version.h"
 
@@ -88,6 +89,22 @@ legacy_breakpoint_from_pc (CORE_ADDR * pcptr, int *lenptr)
 #endif
   *lenptr = 0;
   return NULL;
+}
+
+int
+legacy_register_sim_regno (int regnum)
+{
+  /* Only makes sense to supply raw registers.  */
+  gdb_assert (regnum >= 0 && regnum < NUM_REGS);
+  /* NOTE: cagney/2002-05-13: The old code did it this way and it is
+     suspected that some GDB/SIM combinations may rely on this
+     behavour.  The default should be one2one_register_sim_regno
+     (below).  */
+  if (REGISTER_NAME (regnum) != NULL
+      && REGISTER_NAME (regnum)[0] != '\0')
+    return regnum;
+  else
+    return LEGACY_SIM_REGNO_IGNORE;
 }
 
 int

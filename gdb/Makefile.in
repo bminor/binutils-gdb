@@ -1586,7 +1586,7 @@ arch-utils.o: arch-utils.c $(defs_h) $(bfd_h) $(gdbcmd_h) \
 	$(arch_utils_h) $(gdb_assert_h) $(inferior_h) \
 	$(gdb_string_h) $(symtab.h) $(frame_h) $(breakpoint_h) $(gdb_wait_h) \
 	$(gdbcore_h) $(target_h) $(annotate_h) $(regcache_h) $(gdb_assert_h) \
-	$(version_h) $(floatformat_h)
+	$(version_h) $(floatformat_h) $(sim_regno_h)
 
 gdbtypes.o: gdbtypes.c $(bfd_h) $(complaints_h) $(defs_h) $(expression_h) \
 	$(gdbtypes_h) $(language_h) $(objfiles_h) $(symfile_h) $(symtab_h) \

@@ -1,3 +1,16 @@
+2002-05-29  Andrew Cagney  <ac131313@redhat.com>
+
+	* Makefile.in (arch-utils.o): Add $(sim_regno_h).
+	* arch-utils.c: Include "sim-regno.h".
+	* gdbarch.sh: Don't include "sim-regno.h".
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* sim-regno.h (legacy_register_sim_regno): Move declaration from
+	here.
+	* arch-utils.h (legacy_register_sim_regno): To here.
+	* remote-sim.c (legacy_register_sim_regno): Move function from
+	here.
+	* arch-utils.c (legacy_register_sim_regno): To here.
+
 2002-05-28  Andrew Cagney  <ac131313@redhat.com>
 
 	* sim-regno.h: New file.
