@@ -1,3 +1,7 @@
+2005-03-10  Bob Rossi  <bob@brasko.net>
+
+	* gdb.texinfo: Update copyright
+
 2005-02-09  Theodore A. Roth  <troth@openavr.org>
 
 	* gdb.texinfo (General Query Packets): Fix texinfo compile warning and
