@@ -583,11 +583,7 @@ udi_wait (status)
       WSETSTOP ((*status), SIGTSTP);
       break;
     case UDIWarned:
-#ifdef SIGLOST
-      WSETSTOP ((*status), SIGLOST);
-#else
       WSETSTOP ((*status), SIGURG);
-#endif
       break;
     case UDIStepped:
     case UDIBreak:
