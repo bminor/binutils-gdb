@@ -1,5 +1,10 @@
 Mon Oct  5 09:28:57 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
+	 fix i960+non-bfd coff bit rot. 
+	* obj-coff.c (c_dot_file_symbol, obj_coff_ln, obj_coff_line):
+	support for C source listings. (obj_coff_endef): look in the right
+	part of the symbol for the symbol name
+
 	* tc-m68k.c (get_num): make it work for all segments, not just the
 	first three.
 
