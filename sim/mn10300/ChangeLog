@@ -1,3 +1,9 @@
+Wed Feb 25 01:59:29 1998  Jeffrey A Law  (law@cygnus.com)
+
+        * simops.c (signed multiply instructions): Cast input operands to
+        signed32 before casting them to signed64 so that the sign bit
+        is propagated properly.
+
 Mon Feb 23 20:23:19 1998  Mark Alexander  <marka@cygnus.com>
 
 	* Makefile.in: Last change was bad.  Define NL_TARGET
