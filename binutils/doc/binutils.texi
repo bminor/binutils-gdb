@@ -1476,11 +1476,6 @@ those expected to contain instructions.
 When disassembling, print the complete address on each line.  This is
 the older disassembly format.
 
-@item --disassemble-zeroes
-Normally the disassembly output will skip blocks of zeroes.  This
-option directs the disassembler to disassemble those blocks, just like
-any other data.
-
 @item -EB
 @itemx -EL
 @itemx --endian=@{big|little@}
@@ -1691,6 +1686,12 @@ relocation entries.  Using @option{-x} is equivalent to specifying all of
 @cindex wide output, printing
 Format some lines for output devices that have more than 80 columns.
 Also do not truncate symbol names when they are displayed.
+
+@item -z
+@item --disassemble-zeroes
+Normally the disassembly output will skip blocks of zeroes.  This
+option directs the disassembler to disassemble those blocks, just like
+any other data.
 @end table
 
 @c man end
