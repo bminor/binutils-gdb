@@ -1,3 +1,8 @@
+2001-12-09  Fred Fish  <fnf@redhat.com>
+
+	* mdebugread.c (cross_ref): Pass TYPE_FLAG_STUB to init_type()
+	rather than setting it after the type is created.
+
 2001-12-09  Elena Zannoni  <ezannoni@redhat.com>
 
 	* config/rs6000/tm-rs6000.h (STAB_REG_TO_REGNUM): Remove

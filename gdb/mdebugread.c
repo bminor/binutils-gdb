@@ -4234,8 +4234,7 @@ cross_ref (int fd, union aux_ext *ax, struct type **tpp, enum type_code type_cod
   if (rf == -1)
     {
       *pname = "<undefined>";
-      *tpp = init_type (type_code, 0, 0, (char *) NULL, current_objfile);
-      TYPE_FLAGS (*tpp) |= TYPE_FLAG_STUB;
+      *tpp = init_type (type_code, 0, TYPE_FLAG_STUB, (char *) NULL, current_objfile);
       return result;
     }
 
