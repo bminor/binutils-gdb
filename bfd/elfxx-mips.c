@@ -516,11 +516,11 @@ static bfd *reldyn_sorting_bfd;
 
 /* The name of the options section.  */
 #define MIPS_ELF_OPTIONS_SECTION_NAME(abfd) \
-  (ABI_64_P (abfd) ? ".MIPS.options" : ".options")
+  (NEWABI_P (abfd) ? ".MIPS.options" : ".options")
 
 /* The name of the stub section.  */
 #define MIPS_ELF_STUB_SECTION_NAME(abfd) \
-  (ABI_64_P (abfd) ? ".MIPS.stubs" : ".stub")
+  (NEWABI_P (abfd) ? ".MIPS.stubs" : ".stub")
 
 /* The size of an external REL relocation.  */
 #define MIPS_ELF_REL_SIZE(abfd) \
@@ -1663,7 +1663,7 @@ mips_elf_rel_dyn_section (dynobj, create_p)
 				       | SEC_LINKER_CREATED
 				       | SEC_READONLY))
 	  || ! bfd_set_section_alignment (dynobj, sreloc,
-					  4))
+					  MIPS_ELF_LOG_FILE_ALIGN (dynobj)))
 	return NULL;
     }
   return sreloc;
@@ -2873,7 +2873,7 @@ mips_elf_create_got_section (abfd, info, maybe_exclude)
   s = bfd_make_section (abfd, ".got");
   if (s == NULL
       || ! bfd_set_section_flags (abfd, s, flags)
-      || ! bfd_set_section_alignment (abfd, s, 4))
+      || ! bfd_set_section_alignment (abfd, s, MIPS_ELF_LOG_FILE_ALIGN (abfd)))
     return FALSE;
 
   /* Define the symbol _GLOBAL_OFFSET_TABLE_.  We don't do this in the
@@ -4974,19 +4974,19 @@ _bfd_mips_elf_create_dynamic_sections (abfd, info)
       /* Change alignments of some sections.  */
       s = bfd_get_section_by_name (abfd, ".hash");
       if (s != NULL)
-	bfd_set_section_alignment (abfd, s, 4);
+	bfd_set_section_alignment (abfd, s, MIPS_ELF_LOG_FILE_ALIGN (abfd));
       s = bfd_get_section_by_name (abfd, ".dynsym");
       if (s != NULL)
-	bfd_set_section_alignment (abfd, s, 4);
+	bfd_set_section_alignment (abfd, s, MIPS_ELF_LOG_FILE_ALIGN (abfd));
       s = bfd_get_section_by_name (abfd, ".dynstr");
       if (s != NULL)
-	bfd_set_section_alignment (abfd, s, 4);
+	bfd_set_section_alignment (abfd, s, MIPS_ELF_LOG_FILE_ALIGN (abfd));
       s = bfd_get_section_by_name (abfd, ".reginfo");
       if (s != NULL)
-	bfd_set_section_alignment (abfd, s, 4);
+	bfd_set_section_alignment (abfd, s, MIPS_ELF_LOG_FILE_ALIGN (abfd));
       s = bfd_get_section_by_name (abfd, ".dynamic");
       if (s != NULL)
-	bfd_set_section_alignment (abfd, s, 4);
+	bfd_set_section_alignment (abfd, s, MIPS_ELF_LOG_FILE_ALIGN (abfd));
     }
 
   if (!info->shared)

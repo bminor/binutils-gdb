@@ -1,5 +1,14 @@
 2003-06-11  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
+	* elfxx-mips.c (MIPS_ELF_OPTIONS_SECTION_NAME): Use .MIPS.options
+	for n32, too.
+	(MIPS_ELF_STUB_SECTION_NAME): Use .MIPS.stubs for n32, too.
+	(mips_elf_rel_dyn_section): Use appropriate section alignment.
+	(mips_elf_create_got_section): Likewise.
+	(_bfd_mips_elf_create_dynamic_sections): Likewise.
+
+2003-06-11  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
 	* elf32-mips.c (mips_elf_generic_reloc): New Function.
 	(elf_mips_howto_table_rel): Use it.
 	(gprel32_with_gp): Move prototype.

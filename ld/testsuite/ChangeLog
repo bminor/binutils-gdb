@@ -1,3 +1,8 @@
+2003-06-11  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* ld-mips-elf/multi-got-1.d: Adjust addresses.
+	* ld-mips-elf/rel32-n32.d: Likewise.
+
 2003-06-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-srec/srec.exp (run_srec_test): Remove powerpc64 xfails, and
