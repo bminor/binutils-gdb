@@ -333,6 +333,7 @@ ser-tcp.c
 ser-unix.c
 serial.c
 serial.h
+sh-stub.c
 sh-tdep.c
 sh3-rom.c
 signals.h
