@@ -102,7 +102,7 @@ PROTO (void, _do_putlshort, (int data, unsigned char *addr));
 
 PROTO (boolean, bfd_false, (bfd *ignore));
 PROTO (boolean, bfd_true, (bfd *ignore));
-PROTO (void *, bfd_nullvoidptr, (bfd *ignore));
+PROTO (PTR, bfd_nullvoidptr, (bfd *ignore));
 PROTO (int, bfd_0, (bfd *ignore));
 PROTO (unsigned int, bfd_0u, (bfd *ignore));
 PROTO (void, bfd_void, (bfd *ignore));

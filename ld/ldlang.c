@@ -506,7 +506,7 @@ DEFUN(init_os,(s),
   /* We initialize an output sections output offset to minus its own */
   /* vma to allow us to output a section through itself */
   s->bfd_section->output_offset = 0;
-  get_userdata( s->bfd_section) = new;
+  get_userdata( s->bfd_section) = (PTR)new;
 }
 
 /***********************************************************************
@@ -1996,7 +1996,7 @@ DEFUN_VOID(lang_process)
   current_target = default_target;
   lang_for_each_statement(open_input_bfds);
 
-  common_section.userdata = &common_section_userdata;
+  common_section.userdata = (PTR)&common_section_userdata;
 
   /* Run through the contours of the script and attatch input sections
      to the correct output sections 

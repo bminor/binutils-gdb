@@ -38,41 +38,40 @@ typedef struct ieee_per_section
 
   
 
-typedef struct {
+typedef struct 
+{
   boolean read_symbols;
   boolean read_data;	
-unsigned  char *input_p;
-unsigned char *first_byte;
+  unsigned  char *input_p;
+  unsigned char *first_byte;
   file_ptr output_cursor;
   /* Map of section indexes to section ptrs */
   asection * section_table[NSECTIONS];
   ieee_address_descriptor_type ad;
   ieee_module_begin_type mb;
   ieee_w_variable_type w;
-
+  
   unsigned int section_count;
-  struct obstack ieee_obstack;
-
-
+  
   unsigned int map_idx;
   /* List of GLOBAL EXPORT symbols */
   ieee_symbol_type *external_symbols;
   /* List of UNDEFINED symbols */
   ieee_symbol_type *external_reference;
-
+  
   /* When the symbols have been canonicalized, they are in a
-   * special order, we remember various bases here.. */
+    * special order, we remember various bases here.. */
   unsigned int external_symbol_max_index;
   unsigned int external_symbol_min_index;
   unsigned int external_symbol_count;
   int external_symbol_base_offset;
-
+  
   unsigned int external_reference_max_index;
   unsigned int external_reference_min_index;
   unsigned int external_reference_count;
   int external_reference_base_offset;
-
-
+  
+  bfd *abfd;
   boolean symbol_table_full;
 } ieee_data_type;
 
