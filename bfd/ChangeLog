@@ -1,3 +1,17 @@
+Mon Jul  8 16:18:03 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* coff-mips.c (struct mips_hi): Define.
+	(mips_refhi_list): New static variable.
+ 	(mips_refhi_addr, mips_refhi_addend): Remove.
+	(mips_refhi_reloc): Maintain a list of unmatched REFHI relocs.
+	(mips_reflo_reloc): Process mips_refhi_list.
+	(mips_relhi_list): New static variable.
+	(mips_relhi_addr, mips_relhi_addend): Remove.
+	(mips_relhi_reloc): Maintain a list of unmatched RELHI relocs.
+	(mips_rello_reloc): Process mips_relhi_list.
+	(mips_relocate_section): Permit an arbitrary number of REFHI or
+	RELHI relocs before the associated REFLO or RELLO reloc.
+
 Fri Jul  5 19:27:49 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* aout-target.h (MY(callback)): Set reloc_count fields.
