@@ -1,3 +1,7 @@
+Sun May 10 22:35:54 1998  Jeffrey A Law  (law@cygnus.com)
+
+        * po/Makefile.in (install-info): New target.
+
 Sun Apr 19 19:20:00 1998  Tom Tromey  <tromey@cygnus.com>
 
 	* aclocal.m4, configure: Rebuilt.
