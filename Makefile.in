@@ -197,6 +197,17 @@ AS_FOR_TARGET = ` \
     fi; \
   fi`
 
+DLLTOOL_FOR_TARGET = ` \
+  if [ -f $$r/binutils/dlltool ] ; then \
+    echo $$r/binutils/dlltool ; \
+  else \
+    if [ "$(host_canonical)" = "$(target_canonical)" ] ; then \
+      echo $(DLLTOOL); \
+    else \
+       t='$(program_transform_name)'; echo dlltool | sed -e 's/x/x/' $$t ; \
+    fi; \
+  fi`
+
 AR_FOR_TARGET = ` \
   if [ -f $$r/binutils/ar ] ; then \
     echo $$r/binutils/ar ; \
@@ -253,6 +264,7 @@ BASE_FLAGS_TO_PASS = \
 	"CXXFLAGS=$(CXXFLAGS)" \
 	"CXXFLAGS_FOR_TARGET=$(CXXFLAGS_FOR_TARGET)" \
 	"CXX_FOR_TARGET=$(CXX_FOR_TARGET)" \
+	"DLLTOOL_FOR_TARGET=$(DLLTOOL_FOR_TARGET)" \
 	"GCC_FOR_TARGET=$(CC_FOR_TARGET)" \
 	"INSTALL=$(INSTALL)" \
 	"INSTALL_DATA=$(INSTALL_DATA)" \
@@ -310,6 +322,7 @@ EXTRA_TARGET_FLAGS = \
 	'CFLAGS=$$(CFLAGS_FOR_TARGET)' \
 	'CXX=$$(CXX_FOR_TARGET)' \
 	'CXXFLAGS=$$(CXXFLAGS_FOR_TARGET)' \
+	'DLLTOOL=$$(DLLTOOL_FOR_TARGET)' \
 	'LIBCFLAGS=$$(LIBCFLAGS_FOR_TARGET)' \
 	'LIBCXXFLAGS=$$(LIBCXXFLAGS_FOR_TARGET)' \
 	'NM=$$(NM_FOR_TARGET)' \
@@ -1169,14 +1182,22 @@ gdb.tar.gz: $(DIST_SUPPORT) $(GDB_SUPPORT_DIRS) gdb
 		SUPPORT_FILES="$(GDB_SUPPORT_DIRS)"
 
 .PHONY: newlib.tar.gz
-NEWLIB_SUPPORT_DIRS=
+NEWLIB_SUPPORT_DIRS=libgloss
 # taz configures for the sun4 target which won't configure newlib.
-# compensate here by configuring newlib for a simple (no multilib support)
-# cross target (sparc64).
+# We need newlib configured so that the .info files are made.
+# Unfortunately, it is not enough to just configure newlib separately:
+# taz will build the .info files but since SUBDIRS won't contain newlib,
+# distclean won't be run (leaving Makefile, config.status, and the tmp files
+# used in building the .info files, eg: *.def, *.ref).
+# Compensate here by configuring newlib for a simple (no multilib support)
+# cross target (sparc64), building the info files, and doing make distclean
+# ourselves.
 newlib.tar.gz: $(DIST_SUPPORT) $(NEWLIB_SUPPORT_DIRS) newlib
 	rootme=`pwd` ; \
 	  cd newlib && ../configure --srcdir $$rootme/newlib \
 		--host sun4 --target sparc64-elf
+	cd newlib ; make info
+	cd newlib ; make distclean
 	$(MAKE) -f Makefile.in taz TOOL=newlib \
 		SUPPORT_FILES="$(NEWLIB_SUPPORT_DIRS)" \
 		DEVO_SUPPORT="$(DEVO_SUPPORT) COPYING.NEWLIB" \

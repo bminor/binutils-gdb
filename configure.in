@@ -111,7 +111,7 @@ case "${host}" in
   i[345]86-*-solaris2*)   host_makefile_frag=config/mh-sysv4 ;;
   i[345]86-*-aix*)	  host_makefile_frag=config/mh-aix386 ;;
   i[345]86-*-go32*)	  host_makefile_frag=config/mh-go32 ;;
-  i[345]86-*-pe*)	  host_makefile_frag=config/mh-i386pe ;;
+  i[345]86-*-win32)	  host_makefile_frag=config/mh-i386win32 ;;
   vax-*-ultrix2*)         host_makefile_frag=config/mh-vaxult2 ;;
   *-ibm-aix*)             host_makefile_frag=config/mh-aix ;;
   *-bull-bosx*)           host_makefile_frag=config/mh-aix ;;
@@ -317,7 +317,7 @@ done
 
 case "${host}" in
   i[345]86-*-go32*)
-		  configdirs="$configdirs dosrel" ;;
+	  configdirs="$configdirs dosrel" ;;
 esac
 
 # Remove more programs from consideration, based on the host or 
@@ -333,8 +333,8 @@ case "${host}" in
   i[345]86-*-go32)
     noconfigdirs="tcl tk expect deja-gnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff"
 	;;
-  i[345]86-*-pe*)
-    noconfigdirs="tcl tk expect deja-gnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff"
+  i[345]86-*-win32)
+    noconfigdirs="tcl tk expect deja-gnu make texinfo bison patch flex byacc send-pr gprof uudecode dejagnu diff gdb"
     ;;
 esac
 
@@ -390,11 +390,15 @@ case "${target}" in
     configdirs=`echo go32 ${configdirs}`
     noconfigdirs="$noconfigdirs gdb libg++ libstdc++ libio librx"
     ;;
+
+  i[345]86-*-win32)
+    # Can't build gdb for win32 target
+    noconfigdirs="$noconfigdirs gdb tk"
+    # but put newlib back
+    configdirs="$configdirs newlib"
+    ;;    
   i[345]86-*-pe)
-    # add the pe support tools to the list
-    # but don't build gdb
-    configdirs=`echo pei386 ${configdirs}`
-    noconfigdirs="$noconfigdirs gdb libg++ libstdc++ libio librx"
+    noconfigdirs="$noconfigdirs libg++ libstdc++ libio librx"
     ;;
   i[345]86-*-sco*)
     noconfigdirs="$noconfigdirs gprof"
