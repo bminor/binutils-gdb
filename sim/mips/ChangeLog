@@ -1,3 +1,10 @@
+start-sanitize-sky
+Thu Apr 16 15:24:14 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* interp.c (decode_coproc): Adapt COP2 micro interlock to
+	clarified specs.  Reset "M" bit; exit also on "E" bit.
+
+end-sanitize-sky
 start-sanitize-r5900
 Thu Apr 16 10:40:29 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 

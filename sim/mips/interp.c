@@ -3316,12 +3316,17 @@ decode_coproc (SIM_DESC sd,
 	    int rt = i_20_16;
 	    int id = i_15_11;
 
-	    /* interlock checking */
+	    /* interlock checking: wait until M or E bits set */
 	    /* POLICY: never busy in macro mode */
-	    if(vu0_busy() && interlock)
+	    while(vu0_busy() && interlock)
 	      {
-		while(! vu0_micro_interlock_released())
-		  vu0_issue(sd);
+		if(vu0_micro_interlock_released())
+		  {
+		    vu0_micro_interlock_clear();
+		    break;
+		  }
+
+		vu0_issue(sd);
 	      }
 	    
 	    /* perform VU register address */
