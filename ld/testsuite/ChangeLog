@@ -1,3 +1,8 @@
+Wed Aug  7 18:00:58 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-scripts/phdrs.exp: New test.
+	* ld-scripts/phdrs.s, ld-scripts/phdrs.t: New files.
+
 Sun Aug  4 21:58:12 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld-scripts/crossref.exp: On a29k targets, use --defsym to define

@@ -32,6 +32,9 @@ crossref.exp
 defined.exp
 defined.s
 defined.t
+phdrs.exp
+phdrs.s
+phdrs.t
 script.exp
 script.s
 script.t
