@@ -1,3 +1,11 @@
+2004-11-04  Hans-Peter Nilsson  <hp@axis.com>
+
+	* configure.tgt (crisv32-*-*): Handle like cris-*-* for non-aout.
+	* emulparams/criself.sh (INIT_START): Remove emitted "push srp".
+	(FINI_START): Ditto.
+	(INIT_END): Remove emitted "jump [sp+]".
+	(FINI_END): Ditto.
+
 2004-11-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/ppc64elf.em (no_tls_opt): Rename from notlsopt.
