@@ -53,7 +53,6 @@ SECTIONS
   .rela.data	${RELOCATING-0} : { *(.rela.data) 	}
   .rela.rodata	${RELOCATING-0} : { *(.rela.rodata) 	}
   .rela.got	${RELOCATING-0} : { *(.rela.got)	}
-  .rela.got.neg	${RELOCATING-0} : { *(.rela.got.neg)	}
   .rela.got1	${RELOCATING-0} : { *(.rela.got1)	}
   .rela.got2	${RELOCATING-0} : { *(.rela.got2)	}
   .rela.ctors	${RELOCATING-0} : { *(.rela.ctors)	}
@@ -98,55 +97,47 @@ SECTIONS
      get relocated with -mrelocatable. Also put in the .fixup pointers.
      The current compiler no longer needs this, but keep it around for 2.7.2  */
 
-		${RELOCATING+_GOT2_START_ = .;}
+		${RELOCATING+PROVIDE (_GOT2_START_ = .);}
   .got2		${RELOCATING-0} :  { *(.got2) }
 
-		${RELOCATING+__CTOR_LIST__ = .;}
+		${RELOCATING+PROVIDE (__CTOR_LIST__ = .);}
   .ctors	${RELOCATING-0} : { *(.ctors) }
-		${RELOCATING+__CTOR_END__ = .;}
+		${RELOCATING+PROVIDE (__CTOR_END__ = .);}
 
-		${RELOCATING+__DTOR_LIST__ = .;}
+		${RELOCATING+PROVIDE (__DTOR_LIST__ = .);}
   .dtors	${RELOCATING-0} : { *(.dtors) }
-		${RELOCATING+__DTOR_END__ = .;}
+		${RELOCATING+PROVIDE (__DTOR_END__ = .);}
 
-		${RELOCATING+_FIXUP_START_ = .;}
+		${RELOCATING+PROVIDE (_FIXUP_START_ = .);}
   .fixup	${RELOCATING-0} : { *(.fixup) }
-		${RELOCATING+_FIXUP_END_ = .;}
-		${RELOCATING+_GOT2_END_ = .;}
+		${RELOCATING+PROVIDE (_FIXUP_END_ = .);}
+		${RELOCATING+PROVIDE (_GOT2_END_ = .);}
 
-  /* .got.neg is for items that would normally go in the .got that are addressed
-     negative of _GLOBAL_OFFSET_TABLE.  .got.blrl is to hold the blrl instruction
-     that is _GLOBAL_OFFSET_TABLE_-4 so that a function can easily get the
-     address of _GLOBAL_OFFSET_TABLE.   */
-
-  .got.neg	${RELOCATING-0} : { *(.got.neg) }
-  .got.blrl	${RELOCATING-0} : { *(.got.blrl) }
-		${RELOCATING+_GOT_START_ = .;}
-		${RELOCATING+_GLOBAL_OFFSET_TABLE_ = .;}
+		${RELOCATING+PROVIDE (_GOT_START_ = .);}
+		${RELOCATING+PROVIDE (_GLOBAL_OFFSET_TABLE_ = .);}
   .got		${RELOCATING-0} : { *(.got) }
   .got.plt	${RELOCATING-0} : { *(.got.plt) }
-		${RELOCATING+_GOT_END_ = .;}
+		${RELOCATING+PROVIDE (_GOT_END_ = .);}
 
   ${DATA_PLT+${PLT}}
 
   /* We want the small data sections together, so single-instruction offsets
      can access them all, and initialized data all before uninitialized, so
      we can shorten the on-disk segment size.  */
-  ${RELOCATING+_SDA_BASE_ = . + 32768;}
-  .sdata   ${RELOCATING-0} : { *(.sdata) }
+  .sdata	${RELOCATING-0} : { *(.sdata) }
   ${RELOCATING+_edata  =  .;}
   ${RELOCATING+PROVIDE (edata = .);}
   .sbss    ${RELOCATING-0} :
   {
-    ${RELOCATING+__sbss_start = .;}
+    ${RELOCATING+PROVIDE (__sbss_start = .);}
     *(.sbss)
     *(.scommon)
-    ${RELOCATING+__sbss_end = .;}
+    ${RELOCATING+PROVIDE (__sbss_end = .);}
   }
   .bss     ${RELOCATING-0} :
   {
    ${RELOCATING+${OTHER_BSS_SYMBOLS}}
-   ${RELOCATING+__bss_start = .;}
+   ${RELOCATING+PROVIDE (__bss_start = .);}
    *(.dynbss)
    *(.bss)
    *(COMMON)
