@@ -345,7 +345,7 @@ call_dummy
 	ldil 0, r1			; _sr4export will be placed here.
 	ldo 0(r1), r1
 	ldsid (0,r1), r20
-	combt,=,n r3, r20, text_space	; If target is in data space, do a
+	combt,=,n r4, r20, text_space	; If target is in data space, do a
 	ble 0(sr5, r22)			; "normal" procedure call
 	copy r31, r2
 	break 4, 8 
@@ -388,7 +388,7 @@ text_space				; Otherwise, go through _sr4export,
 #define CALL_DUMMY {0x4BDA3FB9, 0x4BD93FB1, 0x4BD83FA9, 0x4BD73FA1,\
                     0x37C13FB9, 0x24201004, 0x2C391005, 0x24311006,\
                     0x2C291007, 0x22C00000, 0x36D60000, 0x02C010A4,\
-                    0x20200000, 0x34210000, 0x002010b4, 0x82832022,\
+                    0x20200000, 0x34210000, 0x002010b4, 0x82842022,\
                     0xe6c06000, 0x081f0242, 0x00010004, 0x00151820,\
                     0xe6c00002, 0xe4202000, 0x6bdf3fd1, 0x00010004,\
                     0x00151820, 0xe6c00002, 0x08000240, 0x08000240}
