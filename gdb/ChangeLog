@@ -1,3 +1,9 @@
+2000-08-09  Kevin Buettner  <kevinb@redhat.com>
+
+	* core-sol2.c (fetch_core_registers): Protoize; add prefatory
+	comment.
+	* corefile.c (specify_exec_file_hook, generic_search): Protoize.
+
 2000-08-09  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* blockframe.c (sigtramp_saved_pc): Use dynamic allocation, 

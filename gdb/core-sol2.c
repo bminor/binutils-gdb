@@ -45,12 +45,15 @@
 
 static void fetch_core_registers (char *, unsigned, int, CORE_ADDR);
 
+/* Fetch registers from core file data pointed to by CORE_REG_SECT.  When
+   WHICH is 0, the the general register set is fetched; when WHICH is
+   2, the floating point registers are fetched.  CORE_REG_SIZE is used
+   to validate the size of the data pointed to by CORE_REG_SECT.  REG_ADDR
+   is unused. */
+
 static void
-fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
-     char *core_reg_sect;
-     unsigned core_reg_size;
-     int which;
-     CORE_ADDR reg_addr;	/* Unused in this version */
+fetch_core_registers (char *core_reg_sect, unsigned core_reg_size, int which,
+		      CORE_ADDR reg_addr)
 {
   prgregset_t prgregset;
   prfpregset_t prfpregset;

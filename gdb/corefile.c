@@ -120,8 +120,7 @@ call_extra_exec_file_hooks (char *filename)
    This is called from the x-window display code.  */
 
 void
-specify_exec_file_hook (hook)
-     void (*hook) (char *);
+specify_exec_file_hook (void (*hook) (char *))
 {
   hook_type *new_array;
 
@@ -349,17 +348,9 @@ read_memory_string (CORE_ADDR memaddr, char *buffer, int max_len)
    if the protocol has a less general search function, they can call this
    in the cases it can't handle.  */
 void
-generic_search (len, data, mask, startaddr, increment, lorange, hirange
-		addr_found, data_found)
-     int len;
-     char *data;
-     char *mask;
-     CORE_ADDR startaddr;
-     int increment;
-     CORE_ADDR lorange;
-     CORE_ADDR hirange;
-     CORE_ADDR *addr_found;
-     char *data_found;
+generic_search (int len, char *data, char *mask, CORE_ADDR startaddr,
+		int increment, CORE_ADDR lorange, CORE_ADDR hirange,
+		CORE_ADDR *addr_found, char *data_found)
 {
   int i;
   CORE_ADDR curaddr = startaddr;
