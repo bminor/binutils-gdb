@@ -1,3 +1,9 @@
+2001-11-16  Ben Harris  <bjh21@netbsd.org>
+
+	* Makefile.in (armemu32.o): Replace $< with autoconf recommended
+	$(srcdir)/....
+	(armemu26.o): Ditto.
+
 2001-10-18  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* armemu.h (CP_ACCESS_ALLOWED): New macro.
