@@ -1,5 +1,8 @@
 Tue Jan 11 00:53:46 1994  John Gilmore  (gnu@cygnus.com)
 
+	* stack.c (frame_info):  If FRAME_FIND_SAVED_REGS isn't defined,
+	print a newline to end the display anyway.
+
 	* sparc-tdep.c (sparc_pop_frame):  Pop the fsr and csr (float and
 	coprocessor status regs) when popping a frame.  This fixes 
 	float exceptions that occur after calling inferior functions.
