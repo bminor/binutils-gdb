@@ -1,3 +1,18 @@
+Wed Nov  4 18:49:43 1998  Dave Brolley  <brolley@cygnus.com>
+
+	* config.sub: Add fr30.
+
+Mon Nov  2 15:19:33 1998  Geoffrey Noer  <noer@cygnus.com>
+
+        * configure.in: drop "32" from config/mh-cygwin32.  Check
+	cygwin* instead of cygwin32*.
+	* config.sub: Check cygwin* instead of cygwin32*.
+
+1998-10-20  Syd Polk  <spolk@cygnus.com>
+
+	* Makefile.in configure.in: Add the ability to use tcl8.1 and tk8.1
+	if desired.
+
 start-sanitize-cygnus
 Mon Oct 19 15:43:17 1998  Doug Evans  <devans@canuck.cygnus.com>
 
