@@ -52,6 +52,8 @@ const char comment_chars[] = "|";
 /* Also note that comments like this one will always work. */
 const char line_comment_chars[] = "#";
 
+const char line_separator_chars[] = "";
+
 /* Chars that can be used to separate mant from exp in floating point nums */
 const char EXP_CHARS[] = "eE";
 
@@ -577,10 +579,16 @@ static char alt_notend_table[256];
  * advance the pointer.
  */
 
-enum _register m68k_reg_parse(ccp)
-register char **ccp;
+enum _register
+m68k_reg_parse(ccp)
+     register char **ccp;
 {
   char *start = *ccp;
+
+#ifdef REGISTER_PREFIX
+  if (*start == REGISTER_PREFIX)
+    ++start;
+#endif
 
   if (isalpha(*start) &&  is_name_beginner(*start))
   {
@@ -589,12 +597,11 @@ register char **ccp;
     symbolS *symbolP;
 
     c = *p++;
-    while (isalpha(c) || isdigit(c)) 
-    {
-    c = *p++;
-  }      
+    while (isalpha(c) || isdigit(c) || c == '_')
+      {
+	c = *p++;
+      }
 
-     ;
     * -- p = 0;
     symbolP = symbol_find(start);
     *p  = c;
@@ -1965,7 +1972,6 @@ void m68k_ip (instring)
 	  break;
 	} /* Its BIG */
 	if(offs(opP->con1)>0) {
-	  as_warn("Bignum assumed to be binary bit-pattern");
 	  if(offs(opP->con1)>baseo) {
 	    as_warn("Bignum too big for %c format; truncated",s[1]);
 	    offs(opP->con1)=baseo;
@@ -3500,7 +3506,14 @@ void
 fixS *fixP;
 long val;
 {
+#ifdef IBM_COMPILER_SUX
+	/* This is unnecessary but it convinces the native rs6000
+	   compiler to generate the code we want. */
+	char *buf = fixP->fx_frag->fr_literal;
+	buf += fixP->fx_where;
+#else /* IBM_COMPILER_SUX */
 	char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
+#endif /* IBM_COMPILER_SUX */
 
 	switch(fixP->fx_size) {
 	case 1:
@@ -4136,19 +4149,6 @@ int ok;
 			break;
 		}
 		break;
-	case SEG_TEXT:
-	case SEG_DATA:
-	case SEG_BSS:
-	case SEG_UNKNOWN:
-	case SEG_DIFFERENCE:
-		if(ok>=10 && ok<=70) {
-			seg(exp)=SEG_ABSOLUTE;
-			adds(exp)=0;
-			subs(exp)=0;
-			offs(exp)= (ok==10) ? 1 : 0;
-			as_warn("Can't deal with expression \"%s\": defaulting to %ld",exp->e_beg,offs(exp));
-		}
-		break;
 	case SEG_BIG:
 		if (offs (exp) < 0 /* flonum */
 		    && (ok == 80 /* no bignums */
@@ -4176,7 +4176,21 @@ int ok;
 		}
 		break;
 	default:
-		as_fatal("failed sanity check.");
+	case SEG_TEXT:
+	case SEG_DATA:
+	case SEG_BSS:
+	case SEG_UNKNOWN:
+	case SEG_DIFFERENCE:
+		if(ok>=10 && ok<=70) {
+			seg(exp)=SEG_ABSOLUTE;
+			adds(exp)=0;
+			subs(exp)=0;
+			offs(exp)= (ok==10) ? 1 : 0;
+			as_warn("Can't deal with expression \"%s\": defaulting to %ld",exp->e_beg,offs(exp));
+		}
+		break;
+
+
 	}
 	if(input_line_pointer!=exp->e_end+1)
 	    as_bad("Ignoring junk after expression");

@@ -22,6 +22,7 @@
    much bloody rewriting required before.  There still probably is.  */
 
 #include "as.h"
+#include "read.h"
 
 #include "opcode/a29k.h"
 
@@ -102,7 +103,7 @@ int md_reloc_size = 12;		/* Not bfdized*/
 
 /* This array holds the chars that always start a comment.  If the
    pre-processor is disabled, these aren't very useful */
-char comment_chars[] = ";";
+const char comment_chars[] = ";";
 
 /* This array holds the chars that only start a comment at the beginning of
    a line.  If the line seems to have the form '# 123 filename'
@@ -111,19 +112,19 @@ char comment_chars[] = ";";
    first line of the input file.  This is because the compiler outputs
    #NO_APP at the beginning of its output. */
 /* Also note that comments like this one will always work */
-char line_comment_chars[] = "#";
+const char line_comment_chars[] = "#";
 
 /* We needed an unused char for line separation to work around the
    lack of macros, using sed and such.  */
-char line_separator_chars[] = "@";
+const char line_separator_chars[] = "@";
 
 /* Chars that can be used to separate mant from exp in floating point nums */
-char EXP_CHARS[] = "eE";
+const char EXP_CHARS[] = "eE";
 
 /* Chars that mean this number is a floating point constant */
 /* As in 0f12.456 */
 /* or    0d1.2345e12 */
-char FLT_CHARS[] = "rRsSfFdDxXpP";
+const char FLT_CHARS[] = "rRsSfFdDxXpP";
 
 /* Also be aware that MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT may have to be
    changed in read.c .  Ideally it shouldn't have to know about it at all,

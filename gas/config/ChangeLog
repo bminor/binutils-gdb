@@ -1,3 +1,12 @@
+Tue Nov 10 09:50:25 1992  Ian Lance Taylor  (ian@cygnus.com)
+
+	* obj-coffbfd.c (fill_section): set STYP_NOLOAD bit for .bss
+	section.
+
+	* atof-ieee.c, atof-ns32k.c, tc-*.c: made EXP_CHARS, FLT_CHARS,
+	comment_chars, line_comment_chars and line_seperator_chars
+	consistently const, and always initialized them.  Included read.h.
+
 Thu Nov  5 17:55:41 1992  Jim Wilson  (wilson@sphagnum.cygnus.com)
 
 	* tc-sparc.c (sparc_ip): Add code to flag error if an absolute

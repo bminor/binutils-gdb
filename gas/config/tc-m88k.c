@@ -148,18 +148,20 @@ long omagic = OMAGIC;
 
 /* These chars start a comment anywhere in a source file (except inside
    another comment */
-char comment_chars[] = ";";
+const char comment_chars[] = ";";
 
 /* These chars only start a comment at the beginning of a line. */
-char line_comment_chars[] = "#";
+const char line_comment_chars[] = "#";
+
+const char line_separator_chars[] = "";
 
 /* Chars that can be used to separate mant from exp in floating point nums */
-char EXP_CHARS[] = "eE";
+const char EXP_CHARS[] = "eE";
 
 /* Chars that mean this number is a floating point constant */
 /* as in 0f123.456 */
 /* or    0H1.234E-12 (see exp chars above) */
-char FLT_CHARS[] = "dDfF";
+const char FLT_CHARS[] = "dDfF";
 
 extern void float_cons (), cons (), s_globl (), s_line (),
   s_space (), s_set (), stringer (), s_lcomm ();

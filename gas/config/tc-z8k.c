@@ -28,12 +28,14 @@
 #include "../opcodes/z8k-opc.h"
 
 #include "as.h"
+#include "read.h"
 #include "bfd.h"
 #include <ctype.h>
 #include "listing.h"
 
-char  comment_chars[]  = { ';',0 };
-char line_separator_chars[] = { '$' ,0};
+const char  comment_chars[]  = { '!',0 };
+const char line_separator_chars[] = { ';' ,0};
+const char line_comment_chars[] = "";
 
 extern int machine;
 extern int coff_flags;
@@ -74,8 +76,8 @@ const pseudo_typeS md_pseudo_table[] =
 { "import", 	s_ignore, 	0},
 { "page", 	listing_eject,	0},
 { "program", 	s_ignore,	0},
-{ "SEGM",       s_segm,         0},
-{ "UNSEG",       s_unseg,         0},
+{ "z8001",       s_segm,         0},
+{ "z8002",       s_unseg,         0},
 { 0,0,0 }
 };
 
@@ -85,7 +87,7 @@ const char EXP_CHARS[] = "eE";
 /* Chars that mean this number is a floating point constant */
 /* As in 0f12.456 */
 /* or    0d1.2345e12 */
-char FLT_CHARS[] = "rRsSfFdDxXpP";
+const char FLT_CHARS[] = "rRsSfFdDxXpP";
 
 
 const relax_typeS md_relax_table[1];
@@ -139,9 +141,11 @@ typedef struct z8k_op
 
 
 
-static op_type *da_address;
-static op_type *imm_operand;
+static expressionS *da_operand;
+static expressionS *imm_operand;
 
+
+int reg[16];
 int the_cc;
 
 char * 
@@ -187,24 +191,24 @@ DEFUN(parse_reg,(src, mode, reg),
       unsigned int *reg)
 {
   char *res = 0;
-  if (src[0] == 'R') 
+  if (src[0] == 'r') 
   {
-    if (src[1] == 'R')
+    if (src[1] == 'r')
     {
       *mode = CLASS_REG_LONG;
       res =   whatreg(reg, src+2);
     }
-    else  if (src[1] == 'H')
+    else  if (src[1] == 'h')
     {
       *mode = CLASS_REG_BYTE;
       res = whatreg(reg, src+2);
     }
-    else if (src[1] == 'L')
+    else if (src[1] == 'l')
     {
       *mode = CLASS_REG_BYTE;
       res = whatreg(reg, src+2);
     }
-    else if (src[1] == 'Q')
+    else if (src[1] == 'q')
     {
     * mode = CLASS_REG_QUAD;
       res = whatreg(reg, src+2);
@@ -318,27 +322,28 @@ char *name;
 
 struct cc_names table[] = 
 {
-  0x0,"F",
-  0x6,"Z",
-  0xe,"NZ",
-  0x7,"C",
-  0xf,"NC",
-  0xd,"PL",
-  0x5,"MI",
-  0xe,"NE",
-  0x6,"EQ",
-  0x4,"OV",
-  0xc,"NOV",
-  0x4,"PE",
-  0xC,"PO",
-  0x9,"GE",
-  0x1,"LT",
-  0xa,"GT",
-  0x2,"LE",
-  0xf,"UGE",
-  0x7,"ULT",
-  0xb,"UGT",
-  0x3,"ULE",
+  0x0,"f",
+  0x1,"lt",
+  0x2,"le",
+  0x3,"ule",
+  0x4,"ov",
+  0x4,"pe",
+  0x5,"mi",
+  0x6,"eq",
+  0x6,"z",
+  0x7,"c",
+  0x7,"ult",
+  0x8,"t",
+  0x9,"ge",
+  0xa,"gt",
+  0xb,"ugt",
+  0xc,"nov",
+  0xc,"po",
+  0xd,"pl",
+  0xe,"ne",
+  0xe,"nz",
+  0xf,"nc",
+  0xf,"uge",
   0,0
  };
 
@@ -351,6 +356,9 @@ DEFUN(get_cc_operand,(ptr, mode, dst),
   char *src = *ptr;
   int r;
   int i;
+  while (*src== ' ')
+   src++;
+
   mode->mode = CLASS_CC;
   for (i = 0; table[i].name; i++)
   {
@@ -360,12 +368,12 @@ DEFUN(get_cc_operand,(ptr, mode, dst),
       if (table[i].name[j] != src[j])
        goto fail;
     }
-   the_cc = table[i].value;
+    the_cc = table[i].value;
     *ptr = src + j;
     return;
    fail:;
   }
-the_cc = 0x8;
+  the_cc = 0x8;
   return ;
 }
 
@@ -382,10 +390,13 @@ DEFUN(get_operand,(ptr, mode, dst),
   unsigned int size;
   mode->mode = 0;
 
+
+  while (*src == ' ')
+   src++;
   if (*src == '#') 
   {
     mode->mode = CLASS_IMM;
-    imm_operand = mode;
+    imm_operand = &(mode->exp);
     src = parse_exp(src+1, &(mode->exp));
   }	
   else if (*src == '@') {
@@ -395,8 +406,8 @@ DEFUN(get_operand,(ptr, mode, dst),
   }
   else 
   {
-    int reg;
-    end = parse_reg(src, &mode->mode, &reg);
+    int regn;
+    end = parse_reg(src, &mode->mode, &regn);
 
     if (end)
     {
@@ -423,9 +434,9 @@ DEFUN(get_operand,(ptr, mode, dst),
 	  regaddr(mode->mode,"ra(rb) ra");
 	  regword(mode->mode,"ra(rb) rb");
 	  mode->mode = CLASS_BX;
-	  mode->reg = reg;
+	  mode->reg = regn;
 	  mode->x_reg = nr;
-
+	  reg[ARG_RX] = nr;
 	}
 	else 
 	{
@@ -435,13 +446,14 @@ DEFUN(get_operand,(ptr, mode, dst),
 	  src = parse_exp(src, &(mode->exp));
 	  src = checkfor(src, ')');
 	  mode->mode = CLASS_BA;
-	  mode->reg = reg;
+	  mode->reg = regn;
 	  mode->x_reg = 0;
+	  da_operand = &(mode->exp);
 	}
       }
       else
       {
-	mode->reg = reg;
+	mode->reg = regn;
 	mode->x_reg = 0;
       }
     }
@@ -452,12 +464,12 @@ DEFUN(get_operand,(ptr, mode, dst),
       if (*src == '(') 
       {
 	src++;
-	end = parse_reg(src, &(mode->mode), &reg);
+	end = parse_reg(src, &(mode->mode), &regn);
 	regword(mode->mode,"addr(Ra) ra");
 	mode->mode = CLASS_X;
-	mode->reg = reg;
+	mode->reg = regn;
 	mode->x_reg =0;
-	da_address = mode;
+	da_operand = &(mode->exp);
 	src = checkfor(end, ')');
       }
       else 
@@ -466,7 +478,7 @@ DEFUN(get_operand,(ptr, mode, dst),
 	mode->mode = CLASS_DA;
 	mode->reg = 0;
 	mode->x_reg = 0;
-	da_address = mode;
+	da_operand = &(mode->exp);
       }
     }
   }
@@ -488,9 +500,17 @@ DEFUN(get_operands,(opcode, op_end, operand),
     operand[1].mode = 0;
     break;
 		    
-   case 1:    
+   case 1:
     ptr++;
-    get_operand(& ptr, operand +0,0);
+    if (opcode->arg_info[0] == CLASS_CC)
+    {
+      get_cc_operand(&ptr, operand+0,0);
+    }
+    else 
+    {
+
+      get_operand(& ptr, operand +0,0);
+    }
     operand[1].mode =0;
     break;
 		    
@@ -502,10 +522,20 @@ DEFUN(get_operands,(opcode, op_end, operand),
     }
     else
     {
+
       get_operand(& ptr, operand +0,0);
     }
     if (*ptr == ',') ptr++;
     get_operand(& ptr, operand +1, 1);
+    break;
+
+   case 3:
+    ptr++;
+    get_operand(& ptr, operand +0,0);
+    if (*ptr == ',') ptr++;
+    get_operand(& ptr, operand +1, 1);
+    if (*ptr == ',') ptr++;
+    get_operand(& ptr, operand +2, 2);
     break;
 		    
    default:
@@ -521,8 +551,8 @@ DEFUN(get_operands,(opcode, op_end, operand),
    provided
    */
 
-int reg[16];
-expressionS disp;
+
+
 
 static
 opcode_entry_type *
@@ -547,9 +577,34 @@ DEFUN(get_specific,(opcode,  operands),
     {
       int mode = operands[i].mode;
 
-      if ((mode&CLASS_MASK) != (this_try->arg_info[i] & CLASS_MASK)) goto fail;
-
-      reg[this_try->arg_info[i] & ARG_MASK] = operands[i].reg;
+      if ((mode&CLASS_MASK) != (this_try->arg_info[i] & CLASS_MASK))
+      {
+	/* it could be an pc rel operand, if this is a da mode and 
+	   we like disps, then insert it */
+	 
+	if (mode == CLASS_DA && this_try->arg_info[i] == CLASS_DISP)
+	{
+	  /* This is the case */
+	  operands[i].mode = CLASS_DISP;
+	}
+	else {
+	  /* Can't think of a way to turn what we've been given into
+	     something that's ok */
+	  goto fail;
+	}
+      }
+      switch (mode & CLASS_MASK) {
+       default:
+	break;
+       case CLASS_X:
+       case CLASS_IR:
+       case CLASS_BA:
+       case CLASS_BX:
+       case CLASS_DISP:
+       case CLASS_REG:
+	reg[this_try->arg_info[i] & ARG_MASK] = operands[i].reg;
+	break;
+      }
     }
 
     found =1;
@@ -587,17 +642,20 @@ static void
 DEFUN(newfix,(ptr, type, operand),
       int ptr AND
       int type AND
-      op_type *operand)
+      expressionS *operand)
 {
-
-  fix_new(frag_now,
-	  ptr,
-	  1,
-	  operand->exp.X_add_symbol,
-	  operand->exp.X_subtract_symbol,
-	  operand->exp.X_add_number,
-	  0,
-	  type);
+  if (operand->X_add_symbol
+      || operand->X_subtract_symbol
+      || operand->X_add_number) {
+    fix_new(frag_now,
+	    ptr,
+	    1,
+	    operand->X_add_symbol,
+	    operand->X_subtract_symbol,
+	    operand->X_add_number,
+	    0,
+	    type);
+  }
 }
 
 
@@ -619,15 +677,7 @@ static void
   int nib;
   int nibble;
   unsigned short *class_ptr;
-  length = this_try->length;
-  if (segmented_mode && da_address) 
-  {
-    /* two more bytes when in segmented mode and using da address
-       mode */
-    length += 2;	
-  }
-  output  = frag_more(length);
-memset(buffer, 20, 0);  
+  memset(buffer, 20, 0);  
   class_ptr = this_try->byte_info;
  top: ;
 
@@ -637,19 +687,38 @@ memset(buffer, 20, 0);
     switch (c & CLASS_MASK) 
     {
      default:
+
       abort();
      case CLASS_ADDRESS:
       /* Direct address, we don't cope with the SS mode right now */
       if (segmented_mode) {
-	newfix((output_ptr-buffer)/2, R_DA | R_SEG, da_address);
-	output_ptr += 8;
+	newfix((output_ptr-buffer)/2, R_DA | R_SEG, da_operand);
+	*output_ptr++ = 0;
+	*output_ptr++ = 0;
+	*output_ptr++ = 0;
+	*output_ptr++ = 0;
+	*output_ptr++ = 0;
+	*output_ptr++ = 0;
+	*output_ptr++ = 0;
+	*output_ptr++ = 0;
       }
       else {
-	newfix((output_ptr-buffer)/2, R_DA, da_address);
-	output_ptr += 4;
+	newfix((output_ptr-buffer)/2, R_DA, da_operand);
+	*output_ptr++ = 0;
+	*output_ptr++ = 0;
+	*output_ptr++ = 0;
+	*output_ptr++ = 0;
       }
-      da_address = 0;
+      da_operand = 0;
       break;
+     case CLASS_DISP8:
+      /* pc rel 8 bit */
+      newfix((output_ptr-buffer)/2, R_JR, da_operand);
+      da_operand = 0;
+      *output_ptr++ = 0;
+      *output_ptr++ = 0;
+      break;
+
      case CLASS_CC:
       *output_ptr++ = the_cc;
       break;
@@ -670,27 +739,51 @@ memset(buffer, 20, 0);
 	 right reg */
       *output_ptr++ =  reg[c & 0xf];
       break;
+     case CLASS_DISP:
+      newfix((output_ptr-buffer)/2, R_DA, da_operand);
+      da_operand= 0;
+      output_ptr += 4;
+      break;
      case CLASS_IMM:
      {
        nib = 0;
        switch (c & ARG_MASK)
        {
 	case ARG_IMM4:
+	 *output_ptr ++ = imm_operand->X_add_number;
+	 imm_operand->X_add_number = 0;
+	 newfix((output_ptr-buffer)/2, R_IMM4L, imm_operand);
+	 break;
+	case ARG_IMMNMINUS1:
+	 imm_operand->X_add_number --;
 	 newfix((output_ptr-buffer)/2, R_IMM4L, imm_operand);
 	 *output_ptr++ = 0;
 	 break;
-
 	case   ARG_IMM8:  
 	 newfix((output_ptr-buffer)/2, R_IMM8, imm_operand);
 	 *output_ptr++ = 0;
 	 *output_ptr++ = 0;
 
+	case ARG_NIM16:
+	 imm_operand->X_add_number = - imm_operand->X_add_number;
+	 newfix((output_ptr-buffer)/2, R_DA, imm_operand);
+	 *output_ptr++ = 0;
+	 *output_ptr++ = 0;
+	 *output_ptr++ = 0;
+	 *output_ptr++ = 0;
+	 break;
+
 	case   ARG_IMM16:  
-	 newfix((output_ptr-buffer)/2, R_IMM16, imm_operand);
-	 *output_ptr++ = 0;
-	 *output_ptr++ = 0;
-	 *output_ptr++ = 0;
-	 *output_ptr++ = 0;
+	{
+	  int n = imm_operand->X_add_number ;
+	  imm_operand->X_add_number = 0;
+	 newfix((output_ptr-buffer)/2, R_DA, imm_operand);
+	 *output_ptr++ = n>>24;
+	 *output_ptr++ = n>>16;
+	 *output_ptr++ = n>>8;
+	 *output_ptr++ = n;
+       }
+
 	 break;
 
 	case   ARG_IMM32:  
@@ -719,8 +812,11 @@ memset(buffer, 20, 0);
   /* Copy from the nibble buffer into the frag */
 
  {
+   int  length = (output_ptr - buffer) / 2 ;
    char *src = buffer;
-   char *fragp = output;
+   char *fragp = frag_more(length);
+   frag_wane(frag_now);
+   frag_new(0);
    while (src < output_ptr) 
    {
      *fragp = (src[0] << 4) | src[1];
@@ -747,7 +843,7 @@ void
   char *op_start;
   char *op_end;
   unsigned int i;
-  struct       z8k_op operand[2];  
+  struct       z8k_op operand[3];  
   opcode_entry_type *opcode;
   opcode_entry_type * prev_opcode;
 	
@@ -954,12 +1050,18 @@ long val;
     buf[0] = (buf[0] & 0xf0) | ((buf[0] + val) & 0xf);
     break;
 
+   case R_JR:
+
+   *buf++=  val;
+/*    if (val != 0) abort();*/
+    break;
+
+
    case R_IMM8:
     buf[0] += val;
     break;
-
+    break;
    case R_DA:
-   case R_IMM16:
     *buf++=(val>>8);
     *buf++=val;
     break;
@@ -1033,7 +1135,7 @@ bfd_vma base;
     {
 			    
      case 2:
-      intr->r_type = R_IMM16;
+      intr->r_type = R_DA;
       break;
      case 1:
       intr->r_type = R_IMM8;

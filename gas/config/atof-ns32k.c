@@ -23,7 +23,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 extern FLONUM_TYPE generic_floating_point_number; /* Flonums returned here. */
 
-extern char EXP_CHARS[];
+extern const char EXP_CHARS[];
 				/* Precision in LittleNums. */
 #define MAX_PRECISION (4)
 #define F_PRECISION (2)

@@ -481,7 +481,7 @@ static void DEFUN(fill_section,(abfd, filehdr, file_cursor),
       else if (strcmp(s->s_name,".data")==0)
        s->s_flags |= STYP_DATA;
       else if (strcmp(s->s_name,".bss")==0)
-       s->s_flags |= STYP_BSS;
+       s->s_flags |= STYP_BSS | STYP_NOLOAD;
       else if (strcmp(s->s_name,".lit")==0)
        s->s_flags = STYP_LIT | STYP_TEXT;
 
