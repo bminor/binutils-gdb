@@ -1,3 +1,101 @@
+2000-05-24  David Mosberger  <davidm@hpl.hp.com>
+
+	* config/tc-ia64.c (dot_restorereg_p): New function.
+	(md_pseudo_table): Add restorereg.p.
+	(output_X3_format): Fix typo: record type should be UNW_X3, not UNW_X1.
+	(output_X4_format): Fix typo: record type should be UNW_X4, not UNW_X2.
+
+	* config/tc-ia64.h (unw_record_type): Add unwabi.
+	(unw_r_record): Rename member MASK to GRMASK.  Add sub-structure
+	called MASK with members for imask, and the masks produced by
+	fr_mem, gr_mem, br_mem, and frgr_mem.
+	(unw_p_record): Add members ABI and CONTEXT.
+	(unw_x_record): Add member AB.
+	* config/tc-ia64.c (enum reg_symbol): Add REG_PSP and REG_PRIUNAT
+	as pseudo-register for use during unwind info generation.
+	(AR_PFS, AR_LC): New macros.
+	(enum pseudo_type): Add PSEUDO_FUNC_REG to permit declaring registers
+	whose names start with an at sign (as in "@priunat").
+	(pseudo_func): Add "svr4", "hpux", "nt" constants and "priunat"
+	register.
+	(unwind_list, unwind_tail, current_unwind_entry, proc_start,
+	proc_end, unwind_info, personality_routine): Consolidate into
+	"unwind" structure to reduce offset-table use.  Add member
+	NEXT_SLOT_NUMBER to track the slot number for the next instruction
+	to be emitted.
+	(output_R1_format, output_R3_format, output_P3_format,
+	output_P6_format): Initialize R with zero to reduce compiler warnings.
+	(output_P7_format): Ditto.  Add `default' branch to switch
+	statement to reduce compiler warnings.
+	(output_P8_format, output_B1_format, output_B4_format): Ditto.
+	(output_P4_format): Rename 2nd & 3rd arg to IMASK and IMASK_SIZE.
+	(format_ab_reg): Rename from format_a_b_reg.  Merge A and B args
+	into single argument.
+	(output_X1_format, output_X3_format): Initialize R with zero to reduce
+	compiler warnings.  Merge A and B args into single argument.
+	(output_X2_format, output_X4_format): Remove unused variable R.  Merge
+	A and B args into single argument.
+	(free_record): Removed (wasn't used).
+	(free_list_records): Also free imasks in prologue records.
+	(output_prologue, output_prologue_gr): Initialize mask bits to zero.
+	(output_spill_mask): Remove.
+	(output_unwabi): New function.
+	(output_epilogue, output_label_state, output_copy_state): Call
+	alloc_record.
+	(output_spill_psprel, output_spill_sprel, output_spill_psprel_p,
+	output_spill_sprel_p, output_spill_reg, output_spill_reg_p): Add AB
+	argument.
+	(process_one_record): New locals FR_MASK and GR_MASK.  Ignore
+	gr_mem, fr_mem, br_mem, and frgr_mem records and instead emit them
+	as part of handling the prologue records.  Emit region's imask if
+	we have one.  Handle unwabi, epilogue, label_state, copy_state,
+	spill_psprel, spill_sprel, spill_reg, spill_psprel_p,
+	spill_sprel_p, and spill_reg_p records.
+	(set_imask, count_bits, slot_index): New function.
+	(fixup_unw_records): Fix region size computation.  Handle
+	epilogue, spill_reg, spill_sprel, spill_psprel, spill_reg_p,
+	spill_sprel_p, and spill_psprel_p records.  Merge mask bits of
+	frgr_mem, fr_mem, gr_mem, br_mem on a per-region basis and
+	set_imask accordingly.  Update imask for gr_gr, and br_gr records.
+	(convert_expr_to_ab_reg, convert_expr_to_xy_reg): New function.
+	(dot_save): Use manifest constants for applicaton registers.
+	Handle REG_PR and REG_PRIUNAT.
+	(dot_restore): Don't just ignore it.
+	(dot_restorereg): New function..
+	(generate_unwind_image): Ensure unwind info is a multiple of eight
+	bytes, not just four bytes.
+	(dot_handlerdata, dot_unwentry): Demand empty rest of line.
+	(dot_altrp): Don't just ignore it.
+	(dot_savemem): New function.  Replaces dot_savesp() and
+	dot_savepsp().  Use manifest constants for applicaton registers.
+	Handle REG_PR and REG_PRIUNAT.
+	(dot_savef): Simplify.
+	(dot_saveb): Support generation of br_gr.
+	(dot_spillreg, dot_spillmem, dot_spillreg_p, dot_spillmem_p,
+	 dot_label_state, dot_copy_state): New function.
+	(dot_unwabi): Don't just ignore it.
+	(md_pseudo_table): Add restorereg, spillreg, spillsp, spillpsp,
+	spillreg.p, spillsp.p, spillpsp, label_state, copy_state, 
+	unwabi, vframesp, and vframepsp.  Fix typo alprp->altrp.
+	(emit_one_bundle): Set slot number for prologue/body records
+	*before* emitting the first insn.
+	(emit_one_bundle): Set UNWIND.NEXT_SLOT_NUMBER.
+	(md_begin): Declare "psp" pseudo-register.
+	(md_operand): Handle PSEUDO_FUNC_REG.  Fix printing of error message
+	so we don't get segfault.
+	(output_psp_sprel): Output sp/psp relative offsets as 4-byte word
+	counts as required per SW Conventions manual
+	(output_rp_psprel, output_rp_sprel, output_pfs_psprel,output_pfs_sprel,
+	output_preds_psprel, output_preds_sprel, output_spill_base,
+	output_unat_psprel, output_unat_sprel, output_lc_psprel,
+	output_lc_sprel, output_fpsr_psprel, output_fpsr_sprel,
+	output_priunat_psprel, output_priunat_sprel, output_bsp_psprel,
+	output_bsp_sprel, output_bspstore_psprel, output_bspstore_sprel,
+	output_rnat_psprel, output_rnat_sprel, output_spill_psprel,
+	output_spill_sprel, output_spill_psprel_p, output_spill_sprel_p):Ditto.
+	(dot_vframe): Implement.
+	(dot_vframesp, dot_vframepsp): New function.
+
 Tue May 23 00:57:05 2000  Hans-Peter Nilsson  <hp@axis.com>
 
 	* configure.in (i386-*-freebsd a.out entry): Quote properly.

@@ -1,5 +1,5 @@
 /* tc-ia64.h -- Header file for tc-ia64.c.
-   Copyright (C) 1998, 1999 Free Software Foundation, Inc.
+   Copyright (C) 1998, 1999, 2000 Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
    This file is part of GAS, the GNU Assembler.
@@ -157,7 +157,7 @@ typedef enum
   bspstore_gr, bspstore_psprel, bspstore_sprel, rnat_when, rnat_gr,
   rnat_psprel, rnat_sprel, epilogue, label_state, copy_state,
   spill_psprel, spill_sprel, spill_reg, spill_psprel_p, spill_sprel_p,
-  spill_reg_p
+  spill_reg_p, unwabi
 } unw_record_type;
 
 
@@ -167,8 +167,18 @@ typedef enum
 typedef struct unw_r_record
 {
   unsigned long rlen;
-  unsigned short mask;
+  unsigned short grmask;
   unsigned short grsave;
+  /* masks to represent the union of save.g, save.f, save.b, and
+     save.gf: */
+  unsigned long imask_size;
+  struct
+  {
+    unsigned char *i;
+    unsigned long fr_mem;
+    unsigned char gr_mem;
+    unsigned char br_mem;
+  } mask;
 } unw_r_record;
 
 typedef struct unw_p_record
@@ -184,6 +194,8 @@ typedef struct unw_p_record
   unsigned short grmask;
   unsigned long frmask;
   unsigned short brmask;
+  unsigned char abi;
+  unsigned char context;
 } unw_p_record;
 
 typedef struct unw_b_record
@@ -201,7 +213,8 @@ typedef struct unw_x_record
   unsigned short reg;
   unsigned short treg;
   unsigned short qp;
-  unsigned short xy;   /* Value of the XY field..  */
+  unsigned short ab;	/* Value of the AB field..  */
+  unsigned short xy;	/* Value of the XY field..  */
 } unw_x_record;
 
 /* This structure is used to determine the specific record type and 

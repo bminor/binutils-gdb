@@ -1,5 +1,5 @@
 /* tc-ia64.c -- Assembler for the HP/Intel IA-64 architecture.
-   Copyright (C) 1998, 1999 Free Software Foundation.
+   Copyright (C) 1998, 1999, 2000 Free Software Foundation.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
    This file is part of GAS, the GNU Assembler.
@@ -32,8 +32,6 @@
 	.previous
 	.psr
 	.pushsection
-	.save
-	.vframe
   - labels are wrong if automatic alignment is introduced
     (e.g., checkout the second real10 definition in test-data.s)
   - DV-related stuff:
@@ -112,6 +110,9 @@ enum reg_symbol
     IND_PMC,
     IND_PMD,
     IND_RR,
+    /* The following pseudo-registers are used for unwind directives only: */
+    REG_PSP,
+    REG_PRIUNAT,
     REG_NUM
   };
 
@@ -252,15 +253,17 @@ md;
 
 /* application registers: */
 
-#define AR_K0           0
-#define AR_K7           7
-#define AR_RSC          16
-#define AR_BSP          17
-#define AR_BSPSTORE     18
-#define AR_RNAT         19
-#define AR_UNAT         36
-#define AR_FPSR         40
-#define AR_ITC          44
+#define AR_K0		0
+#define AR_K7		7
+#define AR_RSC		16
+#define AR_BSP		17
+#define AR_BSPSTORE	18
+#define AR_RNAT		19
+#define AR_UNAT		36
+#define AR_FPSR		40
+#define AR_ITC		44
+#define AR_PFS		64
+#define AR_LC		65
 
 static const struct
   {
@@ -419,6 +422,7 @@ static struct
 	PSEUDO_FUNC_NONE,
 	PSEUDO_FUNC_RELOC,
 	PSEUDO_FUNC_CONST,
+	PSEUDO_FUNC_REG,
 	PSEUDO_FUNC_FLOAT
       }
     type;
@@ -461,6 +465,14 @@ pseudo_func[] =
     { "inf",	PSEUDO_FUNC_CONST, { 0x020 } },
 
     { "natval",	PSEUDO_FUNC_CONST, { 0x100 } }, /* old usage */
+
+    /* unwind-related constants: */
+    { "svr4",	PSEUDO_FUNC_CONST, { 0 } },
+    { "hpux",	PSEUDO_FUNC_CONST, { 1 } },
+    { "nt",	PSEUDO_FUNC_CONST, { 2 } },
+
+    /* unwind-related registers: */
+    { "priunat",PSEUDO_FUNC_REG, { REG_PRIUNAT } }
   };
 
 /* 41-bit nop opcodes (one per unit): */
@@ -546,28 +558,33 @@ static struct gr {
 
 typedef struct unw_rec_list {
   unwind_record r;
-  unsigned long  slot_number;
+  unsigned long slot_number;
   struct unw_rec_list *next;
 } unw_rec_list;
 
 #define SLOT_NUM_NOT_SET        -1
 
-/* TRUE if processing unwind directives in a prologue region.  */
-static int unwind_prologue = 0;
+static struct
+{
+  unsigned long next_slot_number;
 
-/* Maintain a list of unwind entries for the current function.  */
-static unw_rec_list *unwind_list = 0;
-static unw_rec_list *unwind_tail = 0;
+  /* Maintain a list of unwind entries for the current function.  */
+  unw_rec_list *list;
+  unw_rec_list *tail;
 
-/* Any unwind entires that should be attached to the current
-   slot that an insn is being constructed for.  */
-static unw_rec_list *current_unwind_entry = 0;
+  /* Any unwind entires that should be attached to the current slot
+     that an insn is being constructed for.  */
+  unw_rec_list *current_entry;
 
-/* These are used to create the unwind table entry for this function.  */
-static symbolS *proc_start = 0;
-static symbolS *proc_end = 0;
-static symbolS *unwind_info = 0;
-static symbolS *personality_routine = 0;
+  /* These are used to create the unwind table entry for this function.  */
+  symbolS *proc_start;
+  symbolS *proc_end;
+  symbolS *info;		/* pointer to unwind info */
+  symbolS *personality_routine;
+
+  /* TRUE if processing unwind directives in a prologue region.  */
+  int prologue;
+} unwind;
 
 typedef void (*vbyte_func) PARAMS ((int, char *, char *));
 
@@ -586,8 +603,7 @@ static void dot_restore PARAMS ((int));
 static void dot_handlerdata  PARAMS ((int));
 static void dot_unwentry PARAMS ((int));
 static void dot_altrp PARAMS ((int));
-static void dot_savesp PARAMS ((int));
-static void dot_savepsp PARAMS ((int));
+static void dot_savemem PARAMS ((int));
 static void dot_saveg PARAMS ((int));
 static void dot_savef PARAMS ((int));
 static void dot_saveb PARAMS ((int));
@@ -618,6 +634,7 @@ static void dot_reg_val PARAMS ((int));
 static void dot_dv_mode PARAMS ((int));
 static void dot_entry PARAMS ((int));
 static void dot_mem_offset PARAMS ((int));
+static void add_unwind_entry PARAMS((unw_rec_list *ptr));
 static symbolS* declare_register PARAMS ((const char *name, int regnum));
 static void declare_register_set PARAMS ((const char *, int, int));
 static unsigned int operand_width PARAMS ((enum ia64_opnd));
@@ -810,21 +827,19 @@ output_R1_format (f, rtype, rlen)
      unw_record_type rtype;
      int rlen;
 {
-  int r;
+  int r = 0;
   char byte;
   if (rlen > 0x1f)
     {
       output_R3_format (f, rtype, rlen);
       return;
     }
-  if (rtype == prologue)
-    r = 0;
-  else
-    if (rtype == body)
-      r = 1;
-    else
-      as_bad ("record type is not valid");
   
+  if (rtype == body)
+    r = 1;
+  else if (rtype != prologue)
+    as_bad ("record type is not valid");
+
   byte = UNW_R1 | (r << 5) | (rlen & 0x1f);
   (*f) (1, &byte, NULL);
 }
@@ -852,20 +867,18 @@ output_R3_format (f, rtype, rlen)
      unw_record_type rtype;
      unsigned long rlen;
 {
-  int r, count;
+  int r = 0, count;
   char bytes[20];
   if (rlen <= 0x1f)
     {
       output_R1_format (f, rtype, rlen);
       return;
     }
-  if (rtype == prologue)
-    r = 0;
-  else
-    if (rtype == body)
-      r = 1;
-    else
-      as_bad ("record type is not valid");
+  
+  if (rtype == body)
+    r = 1;
+  else if (rtype != prologue)
+    as_bad ("record type is not valid");
   bytes[0] = (UNW_R3 | r);
   count = output_leb128 (bytes + 1, rlen, 0);
   (*f) (count + 1, bytes, NULL);
@@ -901,7 +914,7 @@ output_P3_format (f, rtype, reg)
      int reg;
 {
   char bytes[2];
-  int r;
+  int r = 0;
   reg = (reg & 0x7f);
   switch (rtype)
   {
@@ -951,16 +964,13 @@ output_P3_format (f, rtype, reg)
 
 
 static void
-output_P4_format (f, count, imask)
+output_P4_format (f, imask, imask_size)
      vbyte_func f;
-     int count;
-     char *imask;
+     unsigned char *imask;
+     unsigned long imask_size;
 {
-  char *bytes;
-  bytes = alloca (count + 1);
-  bytes[0] = UNW_P4;
-  memcpy (bytes + 1, imask, count);
-  (*f) (count + 1, bytes, NULL);
+  imask[0] = UNW_P4;
+  (*f) (imask_size, imask, NULL);
 }
 
 static void
@@ -986,14 +996,12 @@ output_P6_format (f, rtype, rmask)
      int rmask;
 {
   char byte;
-  int r;
-  if (rtype == fr_mem)
-    r = 0;
-  else
-    if (rtype == gr_mem)
-      r = 1;
-    else
-      as_bad ("Invalid record type for format P6");
+  int r = 0;
+  
+  if (rtype == gr_mem)
+    r = 1;
+  else if (rtype != fr_mem)
+    as_bad ("Invalid record type for format P6");
   byte = (UNW_P6 | (r << 4) | (rmask & 0x0f));
   (*f) (1, &byte, NULL);
 }
@@ -1007,7 +1015,7 @@ output_P7_format (f, rtype, w1, w2)
 {
   char bytes[20];
   int count = 1;
-  int r;
+  int r = 0;
   count += output_leb128 (bytes + 1, w1, 0);
   switch (rtype)
     {
@@ -1060,6 +1068,8 @@ output_P7_format (f, rtype, w1, w2)
       case fpsr_psprel:
         r = 15;
 	break;
+      default:
+	break;
     }
   bytes[0] = (UNW_P7 | r);
   (*f) (count, bytes, NULL);
@@ -1072,7 +1082,7 @@ output_P8_format (f, rtype, t)
      unsigned long t;
 {
   char bytes[20];
-  int r;
+  int r = 0;
   int count = 2;
   bytes[0] = UNW_P8;
   switch (rtype)
@@ -1134,6 +1144,8 @@ output_P8_format (f, rtype, t)
       case priunat_when_mem:
         r = 19;
 	break;
+      default:
+	break;
     }
   bytes[1] = r;
   count += output_leb128 (bytes + 2, t, 0);
@@ -1173,19 +1185,16 @@ output_B1_format (f, rtype, label)
      unsigned long label;
 {
   char byte;
-  int r;
+  int r = 0;
   if (label > 0x1f) 
     {
       output_B4_format (f, rtype, label);
       return;
     }
-  if (rtype == label_state)
-    r = 0;
-  else
-    if (rtype == copy_state)
-      r = 1;
-    else
-      as_bad ("Invalid record type for format B1");
+  if (rtype == copy_state)
+    r = 1;
+  else if (rtype != label_state)
+    as_bad ("Invalid record type for format B1");
 
   byte = (UNW_B1 | (r << 5) | (label & 0x1f));
   (*f) (1, &byte, NULL);
@@ -1235,20 +1244,18 @@ output_B4_format (f, rtype, label)
      unsigned long label;
 {
   char bytes[20];
-  int r;
+  int r = 0;
   int count = 1;
   if (label <= 0x1f) 
     {
       output_B1_format (f, rtype, label);
       return;
     }
-  if (rtype == label_state)
-    r = 0;
-  else
-    if (rtype == copy_state)
-      r = 1;
-    else
-      as_bad ("Invalid record type for format B1");
+  
+  if (rtype == copy_state)
+    r = 1;
+  else if (rtype != label_state)
+    as_bad ("Invalid record type for format B1");
 
   bytes[0] = (UNW_B4 | (r << 3));
   count += output_leb128 (bytes + 1, label, 0);
@@ -1256,101 +1263,94 @@ output_B4_format (f, rtype, label)
 }
 
 static char
-format_a_b_reg (a, b, reg)
-  int a, b;
+format_ab_reg (ab, reg)
+  int ab;
   int reg;
 {
   int ret;
-  a = (a & 1);
-  b = (b & 1);
+  ab = (ab & 3);
   reg = (reg & 0x1f);
-  ret = (a << 6) | (a << 5) | reg;
+  ret = (ab << 5) | reg;
   return ret;
 }
 
 static void
-output_X1_format (f, rtype, a, b, reg, t, w1)
+output_X1_format (f, rtype, ab, reg, t, w1)
      vbyte_func f;
      unw_record_type rtype;
-     int a, b, reg;
+     int ab, reg;
      unsigned long t;
      unsigned long w1;
 {
   char bytes[20];
-  int r;
+  int r = 0;
   int count = 2;
   bytes[0] = UNW_X1;
-  if (rtype == spill_psprel)
-    r = 0;
-  else
-    if (rtype = spill_sprel)
-      r = 1;
-    else
-      as_bad ("Invalid record type for format X1");
-  bytes[1] = ((r << 7) | format_a_b_reg (a, b, reg));
+  
+  if (rtype == spill_sprel)
+    r = 1;
+  else if (rtype != spill_psprel)
+    as_bad ("Invalid record type for format X1");
+  bytes[1] = ((r << 7) | format_ab_reg (ab, reg));
   count += output_leb128 (bytes + 2, t, 0);
   count += output_leb128 (bytes + count, w1, 0);
   (*f) (count, bytes, NULL);
 }
 
 static void
-output_X2_format (f, a, b, reg, x, y, treg, t)
+output_X2_format (f, ab, reg, x, y, treg, t)
      vbyte_func f;
-     int a, b, reg;
+     int ab, reg;
      int x, y, treg;
      unsigned long t;
 {
   char bytes[20];
-  int r;
   int count = 3;
   bytes[0] = UNW_X2;
-  bytes[1] = (((x & 1) << 7) | format_a_b_reg (a, b, reg));
+  bytes[1] = (((x & 1) << 7) | format_ab_reg (ab, reg));
   bytes[2] = (((y & 1) << 7) | (treg & 0x7f));
   count += output_leb128 (bytes + 3, t, 0);
   (*f) (count, bytes, NULL);
 }
 
 static void
-output_X3_format (f, rtype, qp, a, b, reg, t, w1)
+output_X3_format (f, rtype, qp, ab, reg, t, w1)
      vbyte_func f;
      unw_record_type rtype;
      int qp;
-     int a, b, reg;
+     int ab, reg;
      unsigned long t;
      unsigned long w1;
 {
   char bytes[20];
-  int r;
+  int r = 0;
   int count = 3;
-  bytes[0] = UNW_X1;
-  if (rtype == spill_psprel_p)
-    r = 0;
-  else
-    if (rtype = spill_sprel_p)
-      r = 1;
-    else
-      as_bad ("Invalid record type for format X1");
+  bytes[0] = UNW_X3;
+
+  if (rtype == spill_sprel_p)
+    r = 1;
+  else if (rtype != spill_psprel_p)
+    as_bad ("Invalid record type for format X3");
   bytes[1] = ((r << 7) | (qp & 0x3f));
-  bytes[2] = format_a_b_reg (a, b, reg);
+  bytes[2] = format_ab_reg (ab, reg);
   count += output_leb128 (bytes + 3, t, 0);
   count += output_leb128 (bytes + count, w1, 0);
   (*f) (count, bytes, NULL);
 }
 
 static void
-output_X4_format (f, qp, a, b, reg, x, y, treg, t)
+output_X4_format (f, qp, ab, reg, x, y, treg, t)
      vbyte_func f;
      int qp;
-     int a, b, reg;
+     int ab, reg;
      int x, y, treg;
      unsigned long t;
 {
   char bytes[20];
-  int r;
   int count = 4;
-  bytes[0] = UNW_X2;
+  bytes[0] = UNW_X4;
   bytes[1] = (qp & 0x3f);
-  bytes[2] = (((x & 1) << 7) | format_a_b_reg (a, b, reg));
+  bytes[2] = (((x & 1) << 7) | format_ab_reg (ab, reg));
   bytes[3] = (((y & 1) << 7) | (treg & 0x7f));
   count += output_leb128 (bytes + 4, t, 0);
   (*f) (count, bytes, NULL);
@@ -1368,13 +1368,6 @@ alloc_record (unw_record_type t)
   return ptr;
 }
 
-/* This function frees a record list structure.  */
-static void
-free_record (unw_rec_list *ptr)
-{
-  free (ptr);
-}
-
 /* This function frees an entire list of record structures.  */
 void
 free_list_records (unw_rec_list *first)
@@ -1383,6 +1376,11 @@ free_list_records (unw_rec_list *first)
   for (ptr = first; ptr != NULL; )
     {
       unw_rec_list *tmp = ptr;
+
+      if ((tmp->r.type == prologue || tmp->r.type == prologue_gr)
+	  && tmp->r.record.r.mask.i)
+	free (tmp->r.record.r.mask.i);
+
       ptr = ptr->next;
       free (tmp);
     }
@@ -1392,6 +1390,7 @@ static unw_rec_list *
 output_prologue ()
 {
   unw_rec_list *ptr = alloc_record (prologue);
+  memset (&ptr->r.record.r.mask, 0, sizeof (ptr->r.record.r.mask));
   return ptr;
 }
 
@@ -1401,7 +1400,8 @@ output_prologue_gr (saved_mask, reg)
      unsigned int reg;
 {
   unw_rec_list *ptr = alloc_record (prologue_gr);
-  ptr->r.record.r.mask = saved_mask;
+  memset (&ptr->r.record.r.mask, 0, sizeof (ptr->r.record.r.mask));
+  ptr->r.record.r.grmask = saved_mask;
   ptr->r.record.r.grsave = reg;
   return ptr;
 }
@@ -1443,7 +1443,7 @@ output_psp_sprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (psp_sprel);
-  ptr->r.record.p.spoff = offset;
+  ptr->r.record.p.spoff = offset/4;
   return ptr;
 }
 
@@ -1477,7 +1477,7 @@ output_rp_psprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (rp_psprel);
-  ptr->r.record.p.pspoff = offset;
+  ptr->r.record.p.pspoff = offset/4;
   return ptr;
 }
 
@@ -1486,7 +1486,7 @@ output_rp_sprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (rp_sprel);
-  ptr->r.record.p.spoff = offset;
+  ptr->r.record.p.spoff = offset/4;
   return ptr;
 }
 
@@ -1511,7 +1511,7 @@ output_pfs_psprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (pfs_psprel);
-  ptr->r.record.p.pspoff = offset;
+  ptr->r.record.p.pspoff = offset/4;
   return ptr;
 }
 
@@ -1520,7 +1520,7 @@ output_pfs_sprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (pfs_sprel);
-  ptr->r.record.p.spoff = offset;
+  ptr->r.record.p.spoff = offset/4;
   return ptr;
 }
 
@@ -1545,7 +1545,7 @@ output_preds_psprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (preds_psprel);
-  ptr->r.record.p.pspoff = offset;
+  ptr->r.record.p.pspoff = offset/4;
   return ptr;
 }
 
@@ -1554,7 +1554,7 @@ output_preds_sprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (preds_sprel);
-  ptr->r.record.p.spoff = offset;
+  ptr->r.record.p.spoff = offset/4;
   return ptr;
 }
 
@@ -1622,18 +1622,7 @@ output_spill_base (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (spill_base);
-  ptr->r.record.p.pspoff = offset;
-  return ptr;
-}
-
-static unw_rec_list *
-output_spill_mask ()
-{
-/* TODO - how to implement this record.... I guess GAS could fill in the
-   correct fields from the record list and construct one of these
-   after the symbols have been resolved and we know how big the
-   region is.  This could be done in fixup_unw_records.  */
-  unw_rec_list *ptr = NULL;
+  ptr->r.record.p.pspoff = offset/4;
   return ptr;
 }
 
@@ -1658,7 +1647,7 @@ output_unat_psprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (unat_psprel);
-  ptr->r.record.p.pspoff = offset;
+  ptr->r.record.p.pspoff = offset/4;
   return ptr;
 }
 
@@ -1667,7 +1656,7 @@ output_unat_sprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (unat_sprel);
-  ptr->r.record.p.spoff = offset;
+  ptr->r.record.p.spoff = offset/4;
   return ptr;
 }
 
@@ -1692,7 +1681,7 @@ output_lc_psprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (lc_psprel);
-  ptr->r.record.p.pspoff = offset;
+  ptr->r.record.p.pspoff = offset/4;
   return ptr;
 }
 
@@ -1701,7 +1690,7 @@ output_lc_sprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (lc_sprel);
-  ptr->r.record.p.spoff = offset;
+  ptr->r.record.p.spoff = offset/4;
   return ptr;
 }
 
@@ -1726,7 +1715,7 @@ output_fpsr_psprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (fpsr_psprel);
-  ptr->r.record.p.pspoff = offset;
+  ptr->r.record.p.pspoff = offset/4;
   return ptr;
 }
 
@@ -1735,7 +1724,7 @@ output_fpsr_sprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (fpsr_sprel);
-  ptr->r.record.p.spoff = offset;
+  ptr->r.record.p.spoff = offset/4;
   return ptr;
 }
 
@@ -1767,7 +1756,7 @@ output_priunat_psprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (priunat_psprel);
-  ptr->r.record.p.pspoff = offset;
+  ptr->r.record.p.pspoff = offset/4;
   return ptr;
 }
 
@@ -1776,7 +1765,7 @@ output_priunat_sprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (priunat_sprel);
-  ptr->r.record.p.spoff = offset;
+  ptr->r.record.p.spoff = offset/4;
   return ptr;
 }
 
@@ -1801,7 +1790,7 @@ output_bsp_psprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (bsp_psprel);
-  ptr->r.record.p.pspoff = offset;
+  ptr->r.record.p.pspoff = offset/4;
   return ptr;
 }
 
@@ -1810,7 +1799,7 @@ output_bsp_sprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (bsp_sprel);
-  ptr->r.record.p.spoff = offset;
+  ptr->r.record.p.spoff = offset/4;
   return ptr;
 }
 
@@ -1835,7 +1824,7 @@ output_bspstore_psprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (bspstore_psprel);
-  ptr->r.record.p.pspoff = offset;
+  ptr->r.record.p.pspoff = offset/4;
   return ptr;
 }
 
@@ -1844,7 +1833,7 @@ output_bspstore_sprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (bspstore_sprel);
-  ptr->r.record.p.spoff = offset;
+  ptr->r.record.p.spoff = offset/4;
   return ptr;
 }
 
@@ -1869,7 +1858,7 @@ output_rnat_psprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (rnat_psprel);
-  ptr->r.record.p.pspoff = offset;
+  ptr->r.record.p.pspoff = offset/4;
   return ptr;
 }
 
@@ -1878,86 +1867,110 @@ output_rnat_sprel (offset)
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (rnat_sprel);
-  ptr->r.record.p.spoff = offset;
+  ptr->r.record.p.spoff = offset/4;
   return ptr;
 }
 
 static unw_rec_list *
-output_epilogue ()
+output_unwabi (abi, context)
+     unsigned long abi;
+     unsigned long context;
 {
-  unw_rec_list *ptr = NULL;
+  unw_rec_list *ptr = alloc_record (unwabi);
+  ptr->r.record.p.abi = abi;
+  ptr->r.record.p.context = context;
   return ptr;
 }
 
 static unw_rec_list *
-output_label_state ()
+output_epilogue (unsigned long ecount)
 {
-  unw_rec_list *ptr = NULL;
+  unw_rec_list *ptr = alloc_record (epilogue);
+  ptr->r.record.b.ecount = ecount;
   return ptr;
 }
 
 static unw_rec_list *
-output_copy_state ()
+output_label_state (unsigned long label)
 {
-  unw_rec_list *ptr = NULL;
+  unw_rec_list *ptr = alloc_record (label_state);
+  ptr->r.record.b.label = label;
   return ptr;
 }
 
 static unw_rec_list *
-output_spill_psprel (reg, offset)
+output_copy_state (unsigned long label)
+{
+  unw_rec_list *ptr = alloc_record (copy_state);
+  ptr->r.record.b.label = label;
+  return ptr;
+}
+
+static unw_rec_list *
+output_spill_psprel (ab, reg, offset)
+     unsigned int ab;
      unsigned int reg;
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (spill_psprel);
+  ptr->r.record.x.ab = ab;
   ptr->r.record.x.reg = reg;
-  ptr->r.record.x.pspoff = offset;
+  ptr->r.record.x.pspoff = offset/4;
   return ptr;
 }
 
 static unw_rec_list *
-output_spill_sprel (reg, offset)
+output_spill_sprel (ab, reg, offset)
+     unsigned int ab;
      unsigned int reg;
      unsigned int offset;
 {
   unw_rec_list *ptr = alloc_record (spill_sprel);
+  ptr->r.record.x.ab = ab;
   ptr->r.record.x.reg = reg;
-  ptr->r.record.x.spoff = offset;
+  ptr->r.record.x.spoff = offset/4;
   return ptr;
 }
 
 static unw_rec_list *
-output_spill_psprel_p (reg, offset, predicate)
+output_spill_psprel_p (ab, reg, offset, predicate)
+     unsigned int ab;
      unsigned int reg;
      unsigned int offset;
      unsigned int predicate;
 {
   unw_rec_list *ptr = alloc_record (spill_psprel_p);
+  ptr->r.record.x.ab = ab;
   ptr->r.record.x.reg = reg;
-  ptr->r.record.x.pspoff = offset;
+  ptr->r.record.x.pspoff = offset/4;
   ptr->r.record.x.qp = predicate;
   return ptr;
 }
 
 static unw_rec_list *
-output_spill_sprel_p (reg, offset, predicate)
+output_spill_sprel_p (ab, reg, offset, predicate)
+     unsigned int ab;
      unsigned int reg;
      unsigned int offset;
      unsigned int predicate;
 {
   unw_rec_list *ptr = alloc_record (spill_sprel_p);
+  ptr->r.record.x.ab = ab;
   ptr->r.record.x.reg = reg;
-  ptr->r.record.x.spoff = offset;
+  ptr->r.record.x.spoff = offset/4;
   ptr->r.record.x.qp = predicate;
   return ptr;
 }
 
 static unw_rec_list *
-output_spill_reg (reg, targ_reg, xy)
+output_spill_reg (ab, reg, targ_reg, xy)
+     unsigned int ab;
      unsigned int reg;
      unsigned int targ_reg;
      unsigned int xy;
 {
   unw_rec_list *ptr = alloc_record (spill_reg);
+  ptr->r.record.x.ab = ab;
   ptr->r.record.x.reg = reg;
   ptr->r.record.x.treg = targ_reg;
   ptr->r.record.x.xy = xy;
@@ -1965,13 +1978,15 @@ output_spill_reg (reg, targ_reg, xy)
 }
 
 static unw_rec_list *
-output_spill_reg_p (reg, targ_reg, xy, predicate)
+output_spill_reg_p (ab, reg, targ_reg, xy, predicate)
+     unsigned int ab;
      unsigned int reg;
      unsigned int targ_reg;
      unsigned int xy;
      unsigned int predicate;
 {
   unw_rec_list *ptr = alloc_record (spill_reg_p);
+  ptr->r.record.x.ab = ab;
   ptr->r.record.x.reg = reg;
   ptr->r.record.x.treg = targ_reg;
   ptr->r.record.x.xy = xy;
@@ -1986,15 +2001,51 @@ process_one_record (ptr, f)
      unw_rec_list *ptr;
      vbyte_func f;
 {
+  unsigned long fr_mask, gr_mask;
+
   switch (ptr->r.type) 
     {
+      case gr_mem:
+      case fr_mem:
+      case br_mem:
+      case frgr_mem:
+	/* these are taken care of by prologue/prologue_gr */
+	break;
+
+      case prologue_gr:
       case prologue:
+	if (ptr->r.type == prologue_gr)
+	  output_R2_format (f, ptr->r.record.r.grmask,
+			    ptr->r.record.r.grsave, ptr->r.record.r.rlen);
+	else
+	  output_R1_format (f, ptr->r.type, ptr->r.record.r.rlen);
+
+	/* output descriptor(s) for union of register spills (if any): */
+	gr_mask = ptr->r.record.r.mask.gr_mem;
+	fr_mask = ptr->r.record.r.mask.fr_mem;
+	if (fr_mask)
+	  {
+	    if ((fr_mask & ~0xfUL) == 0)
+	      output_P6_format (f, fr_mem, fr_mask);
+	    else
+	      {
+		output_P5_format (f, gr_mask, fr_mask);
+		gr_mask = 0;
+	      }
+	  }
+	if (gr_mask)
+	  output_P6_format (f, gr_mem, gr_mask);
+	if (ptr->r.record.r.mask.br_mem)
+	  output_P1_format (f, ptr->r.record.r.mask.br_mem);
+
+	/* output imask descriptor if necessary: */
+	if (ptr->r.record.r.mask.i)
+	  output_P4_format (f, ptr->r.record.r.mask.i,
+			    ptr->r.record.r.imask_size);
+	break;
+
       case body:
 	output_R1_format (f, ptr->r.type, ptr->r.record.r.rlen);
-	break;
-      case prologue_gr:
-	output_R2_format (f, ptr->r.record.r.mask, 
-			  ptr->r.record.r.grsave, ptr->r.record.r.rlen);
 	break;
       case mem_stack_f:
       case mem_stack_v:
@@ -2049,18 +2100,8 @@ process_one_record (ptr, f)
       case rnat_sprel:
 	output_P8_format (f, ptr->r.type, ptr->r.record.p.spoff);
 	break;
-      case fr_mem:
-      case gr_mem:
-	output_P6_format (f, ptr->r.type, ptr->r.record.p.rmask);
-	break;
-      case frgr_mem:
-	output_P5_format (f, ptr->r.record.p.grmask, ptr->r.record.p.frmask);
-	break;
       case gr_gr:
 	output_P9_format (f, ptr->r.record.p.grmask, ptr->r.record.p.gr);
-	break;
-      case br_mem:
-	output_P1_format (f, ptr->r.record.p.brmask);
 	break;
       case br_gr:
 	output_P2_format (f, ptr->r.record.p.brmask, ptr->r.record.p.gr);
@@ -2081,22 +2122,46 @@ process_one_record (ptr, f)
       case rnat_psprel:
 	output_P8_format (f, ptr->r.type, ptr->r.record.p.pspoff);
 	break;
+      case unwabi:
+	output_P10_format (f, ptr->r.record.p.abi, ptr->r.record.p.context);
+	break;
       case epilogue:
-	as_bad ("epilogue record unimplemented.");
+	output_B3_format (f, ptr->r.record.b.ecount, ptr->r.record.b.t);
 	break;
       case label_state:
-	as_bad ("label_state record unimplemented.");
-	break;
       case copy_state:
-	as_bad ("copy_state record unimplemented.");
+	output_B4_format (f, ptr->r.type, ptr->r.record.b.label);
 	break;
       case spill_psprel:
+	output_X1_format (f, ptr->r.type, ptr->r.record.x.ab,
+			  ptr->r.record.x.reg, ptr->r.record.x.t,
+			  ptr->r.record.x.pspoff);
+	break;
       case spill_sprel:
+	output_X1_format (f, ptr->r.type, ptr->r.record.x.ab,
+			  ptr->r.record.x.reg, ptr->r.record.x.t,
+			  ptr->r.record.x.spoff);
+	break;
       case spill_reg:
+	output_X2_format (f, ptr->r.record.x.ab, ptr->r.record.x.reg,
+			  ptr->r.record.x.xy >> 1, ptr->r.record.x.xy,
+			  ptr->r.record.x.treg, ptr->r.record.x.t);
+	break;
       case spill_psprel_p:
+	output_X3_format (f, ptr->r.type, ptr->r.record.x.qp,
+			  ptr->r.record.x.ab, ptr->r.record.x.reg,
+			  ptr->r.record.x.t, ptr->r.record.x.pspoff);
+	break;
       case spill_sprel_p:
+	output_X3_format (f, ptr->r.type, ptr->r.record.x.qp,
+			  ptr->r.record.x.ab, ptr->r.record.x.reg,
+			  ptr->r.record.x.t, ptr->r.record.x.spoff);
+	break;
       case spill_reg_p:
-	as_bad ("spill_* record unimplemented.");
+	output_X4_format (f, ptr->r.record.x.qp, ptr->r.record.x.ab,
+			  ptr->r.record.x.reg, ptr->r.record.x.xy >> 1,
+			  ptr->r.record.x.xy, ptr->r.record.x.treg,
+			  ptr->r.record.x.t);
 	break;
       default:
 	as_bad ("record_type_not_valid");
@@ -2126,6 +2191,82 @@ calc_record_size (list)
   return vbyte_count;
 }
 
+/* Update IMASK bitmask to reflect the fact that one or more registers
+   of type TYPE are saved starting at instruction with index T.  If N
+   bits are set in REGMASK, it is assumed that instructions T through
+   T+N-1 save these registers.
+
+   TYPE values:
+	0: no save
+	1: instruction saves next fp reg
+	2: instruction saves next general reg
+	3: instruction saves next branch reg */
+static void
+set_imask (region, regmask, t, type)
+     unw_rec_list *region;
+     unsigned long regmask;
+     unsigned long t;
+     unsigned int type;
+{
+  unsigned char *imask;
+  unsigned long imask_size;
+  unsigned int i;
+  int pos;
+
+  imask = region->r.record.r.mask.i;
+  imask_size = region->r.record.r.imask_size;
+  if (!imask)
+    {
+      imask_size = (region->r.record.r.rlen*2 + 7)/8 + 1;
+      imask = xmalloc (imask_size);
+      memset (imask, 0, imask_size);
+
+      region->r.record.r.imask_size = imask_size;
+      region->r.record.r.mask.i = imask;
+    }
+
+  i = (t/4) + 1;
+  pos = 2*(3 - t%4);
+  while (regmask)
+    {
+      if (i >= imask_size)
+	{
+	  as_bad ("Ignoring attempt to spill beyond end of region");
+	  return;
+	}
+
+      imask[i] |= (type & 0x3) << pos;
+	
+      regmask &= (regmask - 1);
+      pos -= 2;
+      if (pos < 0)
+	{
+	  pos = 0;
+	  ++i;
+	}
+    }
+}
+
+static int
+count_bits (unsigned long mask)
+{
+  int n = 0;
+
+  while (mask)
+    {
+      mask &= mask - 1;
+      ++n;
+    }
+  return n;
+}
+
+unsigned long
+slot_index (unsigned long slot_addr, unsigned long first_addr)
+{
+  return (3*((slot_addr >> 4) - (first_addr >> 4))
+	  + ((slot_addr & 0x3) - (first_addr & 0x3)));
+}
+
 /* Given a complete record list, process any records which have
    unresolved fields, (ie length counts for a prologue).  After
    this has been run, all neccessary information should be available 
@@ -2134,12 +2275,14 @@ static void
 fixup_unw_records (list)
      unw_rec_list *list;
 {
-  unw_rec_list *ptr;
-  unsigned long first_addr = 0;
+  unw_rec_list *ptr, *region = 0;
+  unsigned long first_addr = 0, rlen = 0, t;
+
   for (ptr = list; ptr; ptr = ptr->next)
     {
       if (ptr->slot_number == SLOT_NUM_NOT_SET)
         as_bad (" Insn slot not set in unwind record.");
+      t = slot_index (ptr->slot_number, first_addr);
       switch (ptr->r.type)
 	{
 	  case prologue:
@@ -2147,24 +2290,62 @@ fixup_unw_records (list)
 	  case body:
 	    {
 	      unw_rec_list *last;
-	      int size;
+	      int size, dir_len = 0;
 	      unsigned long last_addr;
+
 	      first_addr = ptr->slot_number;
 	      ptr->slot_number = 0;
 	      /* Find either the next body/prologue start, or the end of 
 		 the list, and determine the size of the region.  */
-	      for (last = ptr; last->next != NULL; last = last->next)
-		if (last->next->r.type == prologue
-		    || last->next->r.type == prologue_gr
-		    || last->next->r.type == body)
+	      last_addr = unwind.next_slot_number;
+	      for (last = ptr->next; last != NULL; last = last->next)
+		if (last->r.type == prologue || last->r.type == prologue_gr
+		    || last->r.type == body)
 		  {
+		    last_addr = last->slot_number;
 		    break;
 		  }
-	      last_addr = last->slot_number;
-	      size = ((last_addr - first_addr) / 16) * 3 + last_addr % 4;
-	      ptr->r.record.r.rlen = size;
+		else if (!last->next)
+		  {
+		    /* In the absence of an explicit .body directive,
+		       the prologue ends after the last instruction
+		       covered by an unwind directive. */
+		    if (ptr->r.type != body)
+		      {
+			last_addr = last->slot_number;
+			switch (last->r.type)
+			  {
+			  case frgr_mem:
+			    dir_len = (count_bits (last->r.record.p.frmask)
+				       + count_bits (last->r.record.p.grmask));
+			    break;
+			  case fr_mem:
+			  case gr_mem:
+			    dir_len += count_bits (last->r.record.p.rmask);
+			    break;
+			  case br_mem:
+			  case br_gr:
+			    dir_len += count_bits (last->r.record.p.brmask);
+			    break;
+			  case gr_gr:
+			    dir_len += count_bits (last->r.record.p.grmask);
+			    break;
+			  default:
+			    dir_len = 1;
+			    break;
+			  }
+		      }
+		    break;
+		  }
+	      size = slot_index (last_addr, first_addr) + dir_len;
+	      rlen = ptr->r.record.r.rlen = size;
+	      region = ptr;
 	      break;
 	    }
+	  case epilogue:
+	    ptr->r.record.b.t = rlen - 1 - t;
+	    break;
+
 	  case mem_stack_f:
 	  case mem_stack_v:
 	  case rp_when:
@@ -2178,14 +2359,76 @@ fixup_unw_records (list)
 	  case bsp_when:
 	  case bspstore_when:
 	  case rnat_when:
-	    {
-	      /* All the time fields.  */
-	      int x = ptr->slot_number - first_addr;
-	      ptr->r.record.p.t = (x / 16) * 3 + (ptr->slot_number % 4);
-	      break;
-	    }
-	  /* TODO. We also need to combine all the register masks into a single
-	     record. (Ie, all the save.g save.gf, save.f and save.br's)  */
+	    ptr->r.record.p.t = t;
+	    break;
+
+	  case spill_reg:
+	  case spill_sprel:
+	  case spill_psprel:
+	  case spill_reg_p:
+	  case spill_sprel_p:
+	  case spill_psprel_p:
+	    ptr->r.record.x.t = t;
+	    break;
+
+	  case frgr_mem:
+	    if (!region)
+	      {
+		as_bad ("frgr_mem record before region record!\n");
+		return;
+	      }
+	    region->r.record.r.mask.fr_mem |= ptr->r.record.p.frmask;
+	    region->r.record.r.mask.gr_mem |= ptr->r.record.p.grmask;
+	    set_imask (region, ptr->r.record.p.frmask, t, 1);
+	    set_imask (region, ptr->r.record.p.grmask, t, 2);
+	    break;
+	  case fr_mem:
+	    if (!region)
+	      {
+		as_bad ("fr_mem record before region record!\n");
+		return;
+	      }
+	    region->r.record.r.mask.fr_mem |= ptr->r.record.p.rmask;
+	    set_imask (region, ptr->r.record.p.rmask, t, 1);
+	    break;
+	  case gr_mem:
+	    if (!region)
+	      {
+		as_bad ("gr_mem record before region record!\n");
+		return;
+	      }
+	    region->r.record.r.mask.gr_mem |= ptr->r.record.p.rmask;
+	    set_imask (region, ptr->r.record.p.rmask, t, 2);
+	    break;
+	  case br_mem:
+	    if (!region)
+	      {
+		as_bad ("br_mem record before region record!\n");
+		return;
+	      }
+	    region->r.record.r.mask.br_mem |= ptr->r.record.p.brmask;
+	    set_imask (region, ptr->r.record.p.brmask, t, 3);
+	    break;
+
+	  case gr_gr:
+	    if (!region)
+	      {
+		as_bad ("gr_gr record before region record!\n");
+		return;
+	      }
+	    set_imask (region, ptr->r.record.p.grmask, t, 2); 
+	    break;
+	  case br_gr:
+	    if (!region)
+	      {
+		as_bad ("br_gr record before region record!\n");
+		return;
+	      }
+	    set_imask (region, ptr->r.record.p.brmask, t, 3); 
+	    break;
+
+	  default:
+	    break;
 	}
     }
 }
@@ -2226,6 +2469,91 @@ output_unw_records (list, ptr)
   return size + extra + 16;
 }
 
+static int
+convert_expr_to_ab_reg (e, ab, regp)
+     expressionS *e;
+     unsigned int *ab;
+     unsigned int *regp;
+{
+  unsigned int reg;
+
+  if (e->X_op != O_register)
+    return 0;
+
+  reg = e->X_add_number;
+  if (reg >= REG_GR + 4 && reg <= REG_GR + 7)
+    {
+      *ab = 0;
+      *regp = reg - REG_GR;
+    }
+  else if ((reg >= REG_FR + 2 && reg <= REG_FR + 5)
+	   || (reg >= REG_FR + 16 && reg <= REG_FR + 31))
+    {
+      *ab = 1;
+      *regp = reg - REG_FR;
+    }
+  else if (reg >= REG_BR + 1 && reg <= REG_BR + 5)
+    {
+      *ab = 2;
+      *regp = reg - REG_BR;
+    }
+  else
+    {
+      *ab = 3;
+      switch (reg)
+	{
+	case REG_PR:		*regp =  0; break;
+	case REG_PSP:		*regp =  1; break;
+	case REG_PRIUNAT:	*regp =  2; break;
+	case REG_BR + 0:	*regp =  3; break;
+	case REG_AR + AR_BSP:	*regp =  4; break;
+	case REG_AR + AR_BSPSTORE: *regp = 5; break;
+	case REG_AR + AR_RNAT:	*regp =  6; break;
+	case REG_AR + AR_UNAT:	*regp =  7; break;
+	case REG_AR + AR_FPSR:	*regp =  8; break;
+	case REG_AR + AR_PFS:	*regp =  9; break;
+	case REG_AR + AR_LC:	*regp = 10; break;
+
+	default:
+	  return 0;
+	}
+    }
+  return 1;
+} 
+
+static int
+convert_expr_to_xy_reg (e, xy, regp)
+     expressionS *e;
+     unsigned int *xy;
+     unsigned int *regp;
+{
+  unsigned int reg;
+
+  if (e->X_op != O_register)
+    return 0;
+
+  reg = e->X_add_number;
+
+  if (reg >= REG_GR && reg <= REG_GR + 127)
+    {
+      *xy = 0;
+      *regp = reg - REG_GR;
+    }
+  else if (reg >= REG_FR && reg <= REG_FR + 127)
+    {
+      *xy = 1;
+      *regp = reg - REG_FR;
+    }
+  else if (reg >= REG_BR && reg <= REG_BR + 7)
+    {
+      *xy = 2;
+      *regp = reg - REG_BR;
+    }
+  else
+    return -1;
+  return 1;
+} 
+
 static void
 dot_radix (dummy)
      int dummy;
@@ -2255,15 +2583,15 @@ static void
 add_unwind_entry (ptr)
      unw_rec_list *ptr;
 {
-  if (unwind_tail)
-    unwind_tail->next = ptr;
+  if (unwind.tail)
+    unwind.tail->next = ptr;
   else
-    unwind_list = ptr;
-  unwind_tail = ptr;
+    unwind.list = ptr;
+  unwind.tail = ptr;
 
   /* The current entry can in fact be a chain of unwind entries.  */
-  if (current_unwind_entry == NULL)
-    current_unwind_entry = ptr;
+  if (unwind.current_entry == NULL)
+    unwind.current_entry = ptr;
 }
 
 static void 
@@ -2271,21 +2599,63 @@ dot_fframe (dummy)
      int dummy;
 {
   expressionS e;
+
   parse_operand (&e);
   
   if (e.X_op != O_constant)
     as_bad ("Operand to .fframe must be a constant");
   else
-    {
-      add_unwind_entry (output_mem_stack_f (e.X_add_number));
-    }
+    add_unwind_entry (output_mem_stack_f (e.X_add_number));
 }
 
 static void 
 dot_vframe (dummy)
      int dummy;
 {
-  discard_rest_of_line ();
+  expressionS e;
+  unsigned reg;
+
+  parse_operand (&e);
+  reg = e.X_add_number - REG_GR;
+  if (e.X_op == O_register && reg < 128)
+    {
+      add_unwind_entry (output_mem_stack_v ());
+      add_unwind_entry (output_psp_gr (reg));
+    }
+  else
+    as_bad ("First operand to .vframe must be a general register");
+}
+
+static void 
+dot_vframesp (dummy)
+     int dummy;
+{
+  expressionS e;
+
+  parse_operand (&e);
+  if (e.X_op == O_constant)
+    {
+      add_unwind_entry (output_mem_stack_v ());
+      add_unwind_entry (output_psp_sprel (e.X_add_number));
+    }
+  else
+    as_bad ("First operand to .vframesp must be a general register");
+}
+
+static void 
+dot_vframepsp (dummy)
+     int dummy;
+{
+  expressionS e;
+
+  parse_operand (&e);
+  if (e.X_op == O_constant)
+    {
+      add_unwind_entry (output_mem_stack_v ());
+      add_unwind_entry (output_psp_sprel (e.X_add_number));
+    }
+  else
+    as_bad ("First operand to .vframepsp must be a general register");
 }
 
 static void 
@@ -2301,65 +2671,142 @@ dot_save (dummy)
     as_bad ("No second operand to .save");
   sep = parse_operand (&e2);
 
-  reg1 = e1.X_add_number - REG_AR;
+  reg1 = e1.X_add_number;
   reg2 = e2.X_add_number - REG_GR;
   
   /* Make sure its a valid ar.xxx reg, OR its br0, aka 'rp'.  */
-  if (e1.X_op == O_register 
-      && ((reg1 >=0 && reg1 < 128) || reg1 == REG_BR - REG_AR))
+  if (e1.X_op == O_register)
     {
       if (e2.X_op == O_register && reg2 >=0 && reg2 < 128)
 	{
 	  switch (reg1)
 	    {
-	      case 17:		/* ar.bsp */
+	      case REG_AR + AR_BSP:
 	        add_unwind_entry (output_bsp_when ());
 	        add_unwind_entry (output_bsp_gr (reg2));
 		break;
-	      case 18:		/* ar.bspstore */
+	      case REG_AR + AR_BSPSTORE:
 	        add_unwind_entry (output_bspstore_when ());
 	        add_unwind_entry (output_bspstore_gr (reg2));
 		break;
-	      case 19:		/* ar.rnat */
+	      case REG_AR + AR_RNAT:
 	        add_unwind_entry (output_rnat_when ());
 	        add_unwind_entry (output_rnat_gr (reg2));
 		break;
-	      case 36:		/* ar.unat */
+	      case REG_AR+AR_UNAT:
 	        add_unwind_entry (output_unat_when ());
 	        add_unwind_entry (output_unat_gr (reg2));
 		break;
-	      case 40:		/* ar.fpsr */
+	      case REG_AR+AR_FPSR:
 	        add_unwind_entry (output_fpsr_when ());
 	        add_unwind_entry (output_fpsr_gr (reg2));
 		break;
-	      case 64:		/* ar.pfs */
+	      case REG_AR+AR_PFS:
 	        add_unwind_entry (output_pfs_when ());
 	        add_unwind_entry (output_pfs_gr (reg2));
 		break;
-	      case 65:		/* ar.lc */
+	      case REG_AR+AR_LC:
 	        add_unwind_entry (output_lc_when ());
 	        add_unwind_entry (output_lc_gr (reg2));
 		break;
-	      case REG_BR - REG_AR:	/* rp  */
+	      case REG_BR:
 		add_unwind_entry (output_rp_when ());
 		add_unwind_entry (output_rp_gr (reg2));
 		break;
+	      case REG_PR:
+		add_unwind_entry (output_preds_when ());
+		add_unwind_entry (output_preds_gr (reg2));
+		break;
+	      case REG_PRIUNAT:
+		add_unwind_entry (output_priunat_when_gr ());
+		add_unwind_entry (output_priunat_gr (reg2));
+		break;
 	      default:
-	        as_bad ("first operand is unknown application register");
+	        as_bad ("First operand not a valid register");
 	    }
 	}
       else
 	as_bad (" Second operand not a valid register");
     }
   else
-    as_bad ("First operand not a valid register");
+    as_bad ("First operand not a register");
 }
 
 static void 
 dot_restore (dummy)
      int dummy;
 {
-  discard_rest_of_line ();
+  expressionS e1, e2;
+  unsigned long ecount = 0;
+  int sep;
+
+  sep = parse_operand (&e1);
+  if (e1.X_op != O_register || e1.X_add_number != REG_GR + 12)
+    {
+      as_bad ("First operand to .restore must be stack pointer (sp)");
+      return;
+    }
+
+  if (sep == ',')
+    {
+      parse_operand (&e2);
+      if (e1.X_op != O_constant)
+	{
+	  as_bad ("Second operand to .restore must be constant");
+	  return;
+	}
+      ecount = e1.X_op;
+    }
+  add_unwind_entry (output_epilogue (ecount));
+}
+
+static void 
+dot_restorereg (dummy)
+     int dummy;
+{
+  unsigned int ab, reg;
+  expressionS e;
+
+  parse_operand (&e);
+
+  if (!convert_expr_to_ab_reg (&e, &ab, &reg))
+    {
+      as_bad ("First operand to .restorereg must be a preserved register");
+      return;
+    }
+  add_unwind_entry (output_spill_reg (ab, reg, 0, 0));
+}
+
+static void 
+dot_restorereg_p (dummy)
+     int dummy;
+{
+  unsigned int qp, ab, reg;
+  expressionS e1, e2;
+  int sep;
+
+  sep = parse_operand (&e1);
+  if (sep != ',')
+    {
+      as_bad ("No second operand to .restorereg.p");
+      return;
+    }
+
+  parse_operand (&e2);
+
+  qp = e1.X_add_number - REG_P;
+  if (e1.X_op != O_register || qp > 63)
+    {
+      as_bad ("First operand to .restorereg.p must be a predicate");
+      return;
+    }
+
+  if (!convert_expr_to_ab_reg (&e2, &ab, &reg))
+    {
+      as_bad ("Second operand to .restorereg.p must be a preserved register");
+      return;
+    }
+  add_unwind_entry (output_spill_reg_p (ab, reg, 0, 0, qp));
 }
 
 static int
@@ -2367,25 +2814,21 @@ generate_unwind_image ()
 {
   int size;
   unsigned char *unw_rec;
-  int x;
 
   /* Generate the unwind record.  */
-  size = output_unw_records (unwind_list, &unw_rec);
-  if (size % 4 != 0)
-    as_bad ("Unwind record is ont a multiple of 4 bytes.");
+  size = output_unw_records (unwind.list, &unw_rec);
+  if (size % 8 != 0)
+    as_bad ("Unwind record is not a multiple of 8 bytes.");
 
   /* If there are unwind records, switch sections, and output the info.  */
   if (size != 0)
     {
-      int x;
       unsigned char *where;
-      unsigned char *personality;
       expressionS exp;
-      char *save;
       set_section ((char *) special_section_name[SPECIAL_SECTION_UNWIND_INFO]);
 
       /* Set expression which points to start of unwind descriptor area.  */
-      unwind_info = expr_build_dot ();
+      unwind.info = expr_build_dot ();
 
       where = (unsigned char *)frag_more (size);
 
@@ -2396,20 +2839,20 @@ generate_unwind_image ()
 	 data is already in the correct byte order.  */
       memcpy (where, unw_rec, size);
       /* Add the personality address to the image.  */
-      if (personality_routine != 0)
+      if (unwind.personality_routine != 0)
         {
 	  exp.X_op  = O_symbol;
-	  exp.X_add_symbol = personality_routine;
+	  exp.X_add_symbol = unwind.personality_routine;
 	  exp.X_add_number = 0;
 	  fix_new_exp (frag_now, frag_now_fix () - 8, 8,
 	  		     &exp, 0, BFD_RELOC_IA64_LTOFF_FPTR64LSB);
-	  personality_routine = 0;
+	  unwind.personality_routine = 0;
         }
       obj_elf_previous (0);
     }
 
-  free_list_records (unwind_list);
-  unwind_list = unwind_tail = current_unwind_entry = NULL;
+  free_list_records (unwind.list);
+  unwind.list = unwind.tail = unwind.current_entry = NULL;
 
   return size;
 }
@@ -2419,25 +2862,34 @@ dot_handlerdata  (dummy)
      int dummy;
 {
   generate_unwind_image ();
+  demand_empty_rest_of_line ();
 }
 
 static void 
 dot_unwentry (dummy)
      int dummy;
 {
-  discard_rest_of_line ();
+  demand_empty_rest_of_line ();
 }
 
 static void 
 dot_altrp (dummy)
      int dummy;
 {
-  discard_rest_of_line ();
+  expressionS e;
+  unsigned reg;
+
+  parse_operand (&e);
+  reg = e.X_add_number - REG_BR;
+  if (e.X_op == O_register && reg < 8)
+    add_unwind_entry (output_rp_br (reg));
+  else
+    as_bad ("First operand not a valid branch register");
 }
 
 static void 
-dot_savesp (dummy)
-     int dummy;
+dot_savemem (psprel)
+     int psprel;
 {
   expressionS e1, e2;
   int sep;
@@ -2445,72 +2897,88 @@ dot_savesp (dummy)
 
   sep = parse_operand (&e1);
   if (sep != ',')
-    as_bad ("No second operand to .savesp");
+    as_bad ("No second operand to .save%ssp", psprel ? "p" : "");
   sep = parse_operand (&e2);
 
-  reg1 = e1.X_add_number - REG_AR;
+  reg1 = e1.X_add_number;
   val = e2.X_add_number;
   
   /* Make sure its a valid ar.xxx reg, OR its br0, aka 'rp'.  */
-  if (e1.X_op == O_register 
-      && ((reg1 >=0 && reg1 < 128) || reg1 == REG_BR - REG_AR || reg1 == REG_PR - REG_AR))
+  if (e1.X_op == O_register)
     {
       if (e2.X_op == O_constant)
 	{
 	  switch (reg1)
 	    {
-	      case 17:		/* ar.bsp */
+	      case REG_AR + AR_BSP:
 	        add_unwind_entry (output_bsp_when ());
-	        add_unwind_entry (output_bsp_sprel (val));
+	        add_unwind_entry ((psprel
+				   ? output_bsp_psprel
+				   : output_bsp_sprel) (val));
 		break;
-	      case 18:		/* ar.bspstore */
+	      case REG_AR + AR_BSPSTORE:
 	        add_unwind_entry (output_bspstore_when ());
-	        add_unwind_entry (output_bspstore_sprel (val));
+	        add_unwind_entry ((psprel
+				   ? output_bspstore_psprel
+				   : output_bspstore_sprel) (val));
 		break;
-	      case 19:		/* ar.rnat */
+	      case REG_AR + AR_RNAT:
 	        add_unwind_entry (output_rnat_when ());
-	        add_unwind_entry (output_rnat_sprel (val));
+	        add_unwind_entry ((psprel
+				   ? output_rnat_psprel
+				   : output_rnat_sprel) (val));
 		break;
-	      case 36:		/* ar.unat */
+	      case REG_AR + AR_UNAT:
 	        add_unwind_entry (output_unat_when ());
-	        add_unwind_entry (output_unat_sprel (val));
+	        add_unwind_entry ((psprel
+				   ? output_unat_psprel
+				   : output_unat_sprel) (val));
 		break;
-	      case 40:		/* ar.fpsr */
+	      case REG_AR + AR_FPSR:
 	        add_unwind_entry (output_fpsr_when ());
-	        add_unwind_entry (output_fpsr_sprel (val));
+	        add_unwind_entry ((psprel
+				   ? output_fpsr_psprel
+				   : output_fpsr_sprel) (val));
 		break;
-	      case 64:		/* ar.pfs */
+	      case REG_AR + AR_PFS:
 	        add_unwind_entry (output_pfs_when ());
-	        add_unwind_entry (output_pfs_sprel (val));
+	        add_unwind_entry ((psprel
+				   ? output_pfs_psprel
+				   : output_pfs_sprel) (val));
 		break;
-	      case 65:		/* ar.lc */
+	      case REG_AR + AR_LC:
 	        add_unwind_entry (output_lc_when ());
-	        add_unwind_entry (output_lc_sprel (val));
+	        add_unwind_entry ((psprel
+				   ? output_lc_psprel
+				   : output_lc_sprel) (val));
 		break;
-	      case REG_BR - REG_AR:	/* rp  */
+	      case REG_BR:
 		add_unwind_entry (output_rp_when ());
-		add_unwind_entry (output_rp_sprel (val));
+		add_unwind_entry ((psprel
+				   ? output_rp_psprel
+				   : output_rp_sprel) (val));
 		break;
-	      case REG_PR - REG_AR:     /* Predicate registers.  */
+	      case REG_PR:
 		add_unwind_entry (output_preds_when ());
-		add_unwind_entry (output_preds_sprel (val));
+		add_unwind_entry ((psprel
+				   ? output_preds_psprel
+				   : output_preds_sprel) (val));
+		break;
+	      case REG_PRIUNAT:
+		add_unwind_entry (output_priunat_when_mem ());
+		add_unwind_entry ((psprel
+				   ? output_priunat_psprel
+				   : output_priunat_sprel) (val));
 		break;
 	      default:
-	        as_bad ("first operand is unknown application register");
+	        as_bad ("First operand not a valid register");
 	    }
 	}
       else
 	as_bad (" Second operand not a valid constant");
     }
   else
-    as_bad ("First operand not a valid register");
-}
-
-static void 
-dot_savepsp (dummy)
-     int dummy;
-{
-  discard_rest_of_line ();
+    as_bad ("First operand not a register");
 }
 
 static void 
@@ -2545,34 +3013,49 @@ static void
 dot_savef (dummy)
      int dummy;
 {
-  expressionS e1, e2;
+  expressionS e1;
   int sep;
   sep = parse_operand (&e1);
   
   if (e1.X_op != O_constant)
     as_bad ("Operand to .save.f must be a constant.");
   else
-    {
-      int frmask = e1.X_add_number;
-      add_unwind_entry (output_fr_mem (e1.X_add_number));
-    }
+    add_unwind_entry (output_fr_mem (e1.X_add_number));
 }
 
 static void 
 dot_saveb (dummy)
      int dummy;
 {
-  expressionS e1;
-  int sep;
+  expressionS e1, e2;
+  unsigned int reg;
+  unsigned char sep;
+  int brmask;
+
   sep = parse_operand (&e1);
-  
   if (e1.X_op != O_constant)
-    as_bad ("Operand to .save.b must be a constant.");
-  else
     {
-      int brmask = e1.X_add_number;
-      add_unwind_entry (output_br_mem (brmask));
+      as_bad ("First operand to .save.b must be a constant.");
+      return;
     }
+  brmask = e1.X_add_number;
+
+  if (sep == ',')
+    {
+      sep = parse_operand (&e2);
+      reg = e2.X_add_number - REG_GR;
+      if (e2.X_op != O_register || reg > 127)
+	{
+	  as_bad ("Second operand to .save.b must be a general register.");
+	  return;
+	}
+      add_unwind_entry (output_br_gr (brmask, e2.X_add_number));
+    }
+  else
+    add_unwind_entry (output_br_mem (brmask));
+
+  if (!is_end_of_line[sep] && !is_it_end_of_statement ())
+    ignore_rest_of_line ();
 }
 
 static void 
@@ -2600,21 +3083,244 @@ dot_spill (dummy)
      int dummy;
 {
   expressionS e;
-  parse_operand (&e);
+  unsigned char sep;
+
+  sep = parse_operand (&e);
+  if (!is_end_of_line[sep] && !is_it_end_of_statement ())
+    ignore_rest_of_line ();
   
   if (e.X_op != O_constant)
     as_bad ("Operand to .spill must be a constant");
   else
+    add_unwind_entry (output_spill_base (e.X_add_number));
+}
+
+static void
+dot_spillreg (dummy)
+     int dummy;
+{
+  int sep, ab, xy, reg, treg;
+  expressionS e1, e2;
+
+  sep = parse_operand (&e1);
+  if (sep != ',')
     {
-      add_unwind_entry (output_spill_base (e.X_add_number));
+      as_bad ("No second operand to .spillreg");
+      return;
     }
+
+  parse_operand (&e2);
+
+  if (!convert_expr_to_ab_reg (&e1, &ab, &reg))
+    {
+      as_bad ("First operand to .spillreg must be a preserved register");
+      return;
+    }
+
+  if (!convert_expr_to_xy_reg (&e2, &xy, &treg))
+    {
+      as_bad ("Second operand to .spillreg must be a register");
+      return;
+    }
+
+  add_unwind_entry (output_spill_reg (ab, reg, treg, xy));
+}
+
+static void
+dot_spillmem (psprel)
+     int psprel;
+{
+  expressionS e1, e2;
+  int sep, ab, reg;
+
+  sep = parse_operand (&e1);
+  if (sep != ',')
+    {
+      as_bad ("Second operand missing");
+      return;
+    }
+
+  parse_operand (&e2);
+
+  if (!convert_expr_to_ab_reg (&e1, &ab, &reg))
+    {
+      as_bad ("First operand to .spill%s must be a preserved register",
+	      psprel ? "psp" : "sp");
+      return;
+    }
+
+  if (e2.X_op != O_constant)
+    {
+      as_bad ("Second operand to .spill%s must be a constant",
+	      psprel ? "psp" : "sp");
+      return;
+    }
+
+  if (psprel)
+    add_unwind_entry (output_spill_psprel (ab, reg, e2.X_add_number));
+  else
+    add_unwind_entry (output_spill_sprel (ab, reg, e2.X_add_number));
+}
+
+static void
+dot_spillreg_p (dummy)
+     int dummy;
+{
+  int sep, ab, xy, reg, treg;
+  expressionS e1, e2, e3;
+  unsigned int qp;
+
+  sep = parse_operand (&e1);
+  if (sep != ',')
+    {
+      as_bad ("No second and third operand to .spillreg.p");
+      return;
+    }
+
+  sep = parse_operand (&e2);
+  if (sep != ',')
+    {
+      as_bad ("No third operand to .spillreg.p");
+      return;
+    }
+
+  parse_operand (&e3);
+
+  qp = e1.X_add_number - REG_P;
+
+  if (e1.X_op != O_register || qp > 63)
+    {
+      as_bad ("First operand to .spillreg.p must be a predicate");
+      return;
+    }
+
+  if (!convert_expr_to_ab_reg (&e2, &ab, &reg))
+    {
+      as_bad ("Second operand to .spillreg.p must be a preserved register");
+      return;
+    }
+
+  if (!convert_expr_to_xy_reg (&e3, &xy, &treg))
+    {
+      as_bad ("Third operand to .spillreg.p must be a register");
+      return;
+    }
+
+  add_unwind_entry (output_spill_reg_p (ab, reg, treg, xy, qp));
+}
+
+static void
+dot_spillmem_p (psprel)
+     int psprel;
+{
+  expressionS e1, e2, e3;
+  int sep, ab, reg;
+  unsigned int qp;
+
+  sep = parse_operand (&e1);
+  if (sep != ',')
+    {
+      as_bad ("Second operand missing");
+      return;
+    }
+
+  parse_operand (&e2);
+  if (sep != ',')
+    {
+      as_bad ("Second operand missing");
+      return;
+    }
+
+  parse_operand (&e3);
+
+  qp = e1.X_add_number - REG_P;
+  if (e1.X_op != O_register || qp > 63)
+    {
+      as_bad ("First operand to .spill%s_p must be a predicate",
+	      psprel ? "psp" : "sp");
+      return;
+    }
+
+  if (!convert_expr_to_ab_reg (&e2, &ab, &reg))
+    {
+      as_bad ("Second operand to .spill%s_p must be a preserved register",
+	      psprel ? "psp" : "sp");
+      return;
+    }
+
+  if (e3.X_op != O_constant)
+    {
+      as_bad ("Third operand to .spill%s_p must be a constant",
+	      psprel ? "psp" : "sp");
+      return;
+    }
+
+  if (psprel)
+    add_unwind_entry (output_spill_psprel_p (qp, ab, reg, e3.X_add_number));
+  else
+    add_unwind_entry (output_spill_sprel_p (qp, ab, reg, e3.X_add_number));
+}
+
+static void
+dot_label_state (dummy)
+     int dummy;
+{
+  expressionS e;
+
+  parse_operand (&e);
+  if (e.X_op != O_constant)
+    {
+      as_bad ("Operand to .label_state must be a constant");
+      return;
+    }
+  add_unwind_entry (output_label_state (e.X_add_number));
+}
+
+static void
+dot_copy_state (dummy)
+     int dummy;
+{
+  expressionS e;
+
+  parse_operand (&e);
+  if (e.X_op != O_constant)
+    {
+      as_bad ("Operand to .copy_state must be a constant");
+      return;
+    }
+  add_unwind_entry (output_copy_state (e.X_add_number));
 }
 
 static void 
 dot_unwabi (dummy)
      int dummy;
 {
-  discard_rest_of_line ();
+  expressionS e1, e2;
+  unsigned char sep;
+
+  sep = parse_operand (&e1);
+  if (sep != ',')
+    {
+      as_bad ("Second operand to .unwabi missing");
+      return;
+    }
+  sep = parse_operand (&e2);
+  if (!is_end_of_line[sep] && !is_it_end_of_statement ())
+    ignore_rest_of_line ();
+
+  if (e1.X_op != O_constant)
+    {
+      as_bad ("First operand to .unwabi must be a constant");
+      return;
+    }
+
+  if (e2.X_op != O_constant)
+    {
+      as_bad ("Second operand to .unwabi must be a constant");
+      return;
+    }
+
+  add_unwind_entry (output_unwabi (e1.X_add_number, e2.X_add_number));
 }
 
 static void 
@@ -2626,7 +3332,7 @@ dot_personality (dummy)
   name = input_line_pointer;
   c = get_symbol_end ();
   p = input_line_pointer;
-  personality_routine = symbol_find_or_make (name);
+  unwind.personality_routine = symbol_find_or_make (name);
   *p = c;
   SKIP_WHITESPACE ();
   demand_empty_rest_of_line ();
@@ -2639,8 +3345,8 @@ dot_proc (dummy)
   char *name, *p, c;
   symbolS *sym;
 
-  proc_start = expr_build_dot ();
-  /* Parse names of main and alternate entry points and mark them s
+  unwind.proc_start = expr_build_dot ();
+  /* Parse names of main and alternate entry points and mark them as
      function symbols: */
   while (1)
     {
@@ -2649,9 +3355,9 @@ dot_proc (dummy)
       c = get_symbol_end ();
       p = input_line_pointer;
       sym = symbol_find_or_make (name);
-      if (proc_start == 0)
+      if (unwind.proc_start == 0)
         {
-	  proc_start = sym;
+	  unwind.proc_start = sym;
 	}
       symbol_get_bfdsym (sym)->flags |= BSF_FUNCTION;
       *p = c;
@@ -2663,32 +3369,35 @@ dot_proc (dummy)
   demand_empty_rest_of_line ();
   ia64_do_align (16);
 
-  unwind_list = unwind_tail = current_unwind_entry = NULL;
-  personality_routine = 0;
+  unwind.list = unwind.tail = unwind.current_entry = NULL;
+  unwind.personality_routine = 0;
 }
 
 static void
 dot_body (dummy)
      int dummy;
 {
-  unwind_prologue = 0;
+  unwind.prologue = 0;
   add_unwind_entry (output_body ());
+  demand_empty_rest_of_line ();
 }
 
 static void
 dot_prologue (dummy)
      int dummy;
 {
-  unwind_prologue = 1;
-  SKIP_WHITESPACE ();
-  if (! is_end_of_line[(unsigned char) *input_line_pointer])
+  unsigned char sep;
+
+  unwind.prologue = 1;
+  if (!is_it_end_of_statement ())
     {
       expressionS e1, e2;
-      char sep;
       sep = parse_operand (&e1);
       if (sep != ',')
 	as_bad ("No second operand to .prologue");
       sep = parse_operand (&e2);
+      if (!is_end_of_line[sep] && !is_it_end_of_statement ())
+	      ignore_rest_of_line ();
 
       if (e1.X_op == O_constant)
         {
@@ -2714,7 +3423,6 @@ dot_endp (dummy)
 {
   expressionS e;
   unsigned char *ptr;
-  int size;
   long where;
   segT saved_seg;
   subsegT saved_subseg;
@@ -2729,13 +3437,13 @@ dot_endp (dummy)
   ia64_flush_insns ();
 
   /* If there was a .handlerdata, we haven't generated an image yet.  */
-  if (unwind_info == 0)
+  if (unwind.info == 0)
     {
       generate_unwind_image ();
     }
 
   subseg_set (md.last_text_seg, 0);
-  proc_end = expr_build_dot ();
+  unwind.proc_end = expr_build_dot ();
 
   set_section ((char *) special_section_name[SPECIAL_SECTION_UNWIND]);
   ptr = frag_more (24);
@@ -2745,28 +3453,28 @@ dot_endp (dummy)
   e.X_op = O_pseudo_fixup;
   e.X_op_symbol = pseudo_func[FUNC_SEG_RELATIVE].u.sym;
   e.X_add_number = 0;
-  e.X_add_symbol = proc_start;
+  e.X_add_symbol = unwind.proc_start;
   ia64_cons_fix_new (frag_now, where, 8, &e);
 
   e.X_op = O_pseudo_fixup;
   e.X_op_symbol = pseudo_func[FUNC_SEG_RELATIVE].u.sym;
   e.X_add_number = 0;
-  e.X_add_symbol = proc_end;
+  e.X_add_symbol = unwind.proc_end;
   ia64_cons_fix_new (frag_now, where + 8, 8, &e);
 
-  if (unwind_info != 0)
+  if (unwind.info != 0)
     {
       e.X_op = O_pseudo_fixup;
       e.X_op_symbol = pseudo_func[FUNC_SEG_RELATIVE].u.sym;
       e.X_add_number = 0;
-      e.X_add_symbol = unwind_info;
+      e.X_add_symbol = unwind.info;
       ia64_cons_fix_new (frag_now, where + 16, 8, &e);
     }
   else
     md_number_to_chars (ptr + 16, 0, 8);
 
   subseg_set (saved_seg, saved_subseg);
-  proc_start = proc_end = unwind_info = 0;
+  unwind.proc_start = unwind.proc_end = unwind.info = 0;
 }
 
 static void
@@ -3435,18 +4143,30 @@ const pseudo_typeS md_pseudo_table[] =
 
     { "fframe", dot_fframe },
     { "vframe", dot_vframe },
+    { "vframesp", dot_vframesp },
+    { "vframepsp", dot_vframepsp },
     { "save", dot_save },
     { "restore", dot_restore },
+    { "restorereg", dot_restorereg },
+    { "restorereg.p", dot_restorereg_p },
     { "handlerdata", dot_handlerdata },
     { "unwentry", dot_unwentry },
-    { "alprp", dot_altrp },
-    { "savesp", dot_savesp },
-    { "savepsp", dot_savepsp },
+    { "altrp", dot_altrp },
+    { "savesp", dot_savemem, 0 },
+    { "savepsp", dot_savemem, 1 },
     { "save.g", dot_saveg },
     { "save.f", dot_savef },
     { "save.b", dot_saveb },
     { "save.gf", dot_savegf },
     { "spill", dot_spill },
+    { "spillreg", dot_spillreg },
+    { "spillsp", dot_spillmem, 0 },
+    { "spillpsp", dot_spillmem, 1 },
+    { "spillreg.p", dot_spillreg_p },
+    { "spillsp.p", dot_spillmem_p, 0 },
+    { "spillpsp.p", dot_spillmem_p, 1 },
+    { "label_state", dot_label_state }, 
+    { "copy_state", dot_copy_state }, 
     { "unwabi", dot_unwabi },
     { "personality", dot_personality },
 #if 0
@@ -4347,6 +5067,7 @@ emit_one_bundle ()
   struct ia64_opcode *idesc;
   int end_of_insn_group = 0, user_template = -1;
   int n, i, j, first, curr;
+  unw_rec_list *ptr, *prev;
   bfd_vma t0 = 0, t1 = 0;
   struct label_fix *lfix;
   struct insn_fix *ifix;
@@ -4388,6 +5109,25 @@ emit_one_bundle ()
   end_of_insn_group = 0;
   for (i = 0; i < 3 && md.num_slots_in_use > 0; ++i)
     {
+      /* Set the slot number for prologue/body records now as those
+	 refer to the current point, not the point after the
+	 instruction has been issued: */
+      prev = 0;
+      for (ptr = md.slot[curr].unwind_record; ptr; ptr = ptr->next)
+	{
+	  if (ptr->r.type == prologue || ptr->r.type == prologue_gr
+	      || ptr->r.type == body)
+	    {
+	      ptr->slot_number = (unsigned long) f + i;
+	      if (prev)
+		prev->next = ptr->next;
+	      else
+		md.slot[curr].unwind_record = ptr->next;
+	    }
+	  else
+	    prev = ptr;
+	}
+
       if (idesc->flags & IA64_OPCODE_SLOT2)
 	{
 	  if (manual_bundling && i != 2)
@@ -4589,9 +5329,10 @@ emit_one_bundle ()
       /* Set slot counts for unwind records.  */
       while (md.slot[curr].unwind_record) 
 	{
-	  md.slot[curr].unwind_record->slot_number = (unsigned long) (f + i);
+	  md.slot[curr].unwind_record->slot_number = (unsigned long) f + i;
 	  md.slot[curr].unwind_record = md.slot[curr].unwind_record->next;
 	}
+      unwind.next_slot_number = (unsigned long) f + i + ((i == 2)?(0x10-2):1);
       if (required_unit == IA64_UNIT_L)
 	{
 	  know (i == 1);
@@ -4985,6 +5726,9 @@ md_begin ()
   declare_register ("gp", REG_GR +  1);
   declare_register ("sp", REG_GR + 12);
   declare_register ("rp", REG_BR +  0);
+
+  /* pseudo-registers used to specify unwind info: */
+  declare_register ("psp", REG_PSP);
 
   declare_register_set ("ret", 4, REG_GR + 8);
   declare_register_set ("farg", 8, REG_FR + 8);
@@ -7677,10 +8421,10 @@ md_assemble (str)
     dwarf2_where (&CURR_SLOT.debug_line);
 
   /* Add unwind entry, if there is one.  */
-  if (current_unwind_entry)
+  if (unwind.current_entry)
     {
-      CURR_SLOT.unwind_record = current_unwind_entry;
-      current_unwind_entry = NULL;
+      CURR_SLOT.unwind_record = unwind.current_entry;
+      unwind.current_entry = NULL;
     }
 
   /* check for dependency violations */
@@ -7717,6 +8461,7 @@ md_operand (e)
      expressionS *e;
 {
   enum pseudo_type pseudo_type;
+  const char *name;
   size_t len;
   int ch, i;
 
@@ -7782,8 +8527,15 @@ md_operand (e)
 	  e->X_add_number = pseudo_func[i].u.ival;
 	  break;
 
+	case PSEUDO_FUNC_REG:
+	  e->X_op = O_register;
+	  e->X_add_number = pseudo_func[i].u.ival;
+	  break;
+
 	default:
-	  as_bad ("Unknown pseudo function `%s'", input_line_pointer - 1);
+	  name = input_line_pointer - 1;
+	  get_symbol_end ();
+	  as_bad ("Unknown pseudo function `%s'", name);
 	  goto err;
 	}
       break;
