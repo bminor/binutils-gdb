@@ -1,3 +1,10 @@
+Mon Apr 10 15:36:39 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* lib/gas-defs.exp (pass_phase): New proc.
+	(run_dump_test): Note passing or failing of each phase of this
+	test, instead of failure of phases or passing of complete test.
+	Ensure test file name is in reported message.
+
 Sat Apr  8 12:46:33 1995  Doug Evans  <dje@chestnut.cygnus.com>
 
 start-sanitize-arc
