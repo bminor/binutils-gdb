@@ -1,3 +1,8 @@
+Tue Oct 21 10:20:11 1997  Doug Evans  <devans@canuck.cygnus.com>
+
+	* config/tc-sparc.c (md_apply_fix3, cases ..._H44, ..._HIX22): Leave
+	overflow signalling to linker.
+
 Mon Oct 20 14:54:06 1997  Klaus K"ampf  <kkaempf@progis.de>
 
 	* makefile.vms: Fix for dec c.

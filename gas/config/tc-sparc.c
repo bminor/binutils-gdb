@@ -2504,7 +2504,6 @@ md_apply_fix3 (fixP, value, segment)
 
 	case BFD_RELOC_SPARC_LM22:
 	case BFD_RELOC_HI22:
-	  /* FIXME: HI22 should signal overflow for 64 bit ABI.  */
 	  if (!fixP->fx_addsy)
 	    {
 	      insn |= (val >> 10) & 0x3fffff;
@@ -2556,9 +2555,6 @@ md_apply_fix3 (fixP, value, segment)
 	    {
 	      bfd_vma tval = val;
 	      tval >>= 22;
-	      if (! in_unsigned_range (tval, 0x3fffff))
-		as_bad_where (fixP->fx_file, fixP->fx_line,
-			      "relocation overflow");
 	      insn |= tval & 0x3fffff;
 	    }
 	  break;
@@ -2577,9 +2573,6 @@ md_apply_fix3 (fixP, value, segment)
 	  if (!fixP->fx_addsy)
 	    {
 	      val ^= ~ (offsetT) 0;
-	      if ((val & ~ (offsetT) 0xffffffff) != 0)
-		as_bad_where (fixP->fx_file, fixP->fx_line,
-			      "relocation overflow");
 	      insn |= (val >> 10) & 0x3fffff;
 	    }
 	  break;
