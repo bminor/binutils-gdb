@@ -1,3 +1,335 @@
+2003-02-07  Andrew Cagney  <ac131313@redhat.com>
+
+	* sol-thread.c, hpux-thread.c: Include "gdb_stat.h" instead of
+	<sys/stat.h>.
+	* Makefile.in (sol-thread.o, hpux-thread.o): Update dependencies.
+	
+2003-02-06  Andrew Cagney  <ac131313@redhat.com>
+
+	* Makefile.in (symm-nat.o): Update dependencies.
+	(sparc-nat.o, procfs.o, proc-api.o, ppc-linux-nat.o): Ditto.
+	(lynx-nat.o, ia64-linux-nat.): Ditto.
+	* symm-nat.c, sparc-nat.c, procfs.c, proc-api.c: Include
+	"gdb_wait.h" instead of <wait.h> or <sys/wait.h>.
+	* ppc-linux-nat.c, lynx-nat.c, ia64-linux-nat.c: Ditto.
+
+	* Makefile.in (inflow_h): Define.
+	(procfs.o, inflow.o, procfs.o): Update dependencies.
+	* inftarg.c (child_stop): Delete extern declaration of
+	inferior_process_group.  Include "inflow.h".
+	* procfs.c (procfs_stop): Ditto.  Include "inflow.h".
+	* inflow.c (PROCESS_GROUP_TYPE): Move definitions from here ...
+	* inflow.h (PROCESS_GROUP_TYPE): ... to here.  New file.
+	(our_process_group, inferior_process_group): Extern declarations.
+
+	* procfs.c: Include "gdb_assert.h".
+
+	* linux-proc.c: Include "gdb_stat.h" instead of <sys/stat.h>.
+	* cp-valprint.c (cp_print_value_fields): Eliminate STREQN.
+	* jv-typeprint.c (java_type_print_base): Ditto.
+	* typeprint.c (typedef_print): Eliminate STREQ.
+	* cli/cli-script.c (define_command, define_command): Ditto.
+	* main.c (captured_main): Ditto.
+	* values.c (lookup_internalvar): Ditto.
+	* utils.c (safe_strerror, parse_escape): Eliminate assignment
+	within `if' conditional.
+	* linespec.c (decode_line_2): Ditto.
+	* cli/cli-dump.c (bfd_openr_with_cleanup): Ditto.
+	(bfd_openw_with_cleanup): Ditto.
+
+2003-02-07  Mark Kettenis  <kettenis@gnu.org>
+
+	* x86-64-tdep.c (x86_64_init_abi): Set extract_return_value to
+	legacy_extract_return_value and store_return_value to
+	legacy_return_value.
+
+2003-02-06  Raoul Gough  <RaoulGough@yahoo.co.uk>
+
+	* win32-nat.c (get_relocated_section_addrs): New function.  Find
+	section load addresses for symbol handling in relocated DLLs.
+	(solib_symbols_add): Open a bfd and call get_relocated_section_addrs.
+
+2003-02-05  Fred Fish  <fnf@intrinsity.com>
+
+	* remote-e7000.c (e7000_drain_command): Fix precedence problem with
+	'=' and '!='.
+	* rdi-share/ardi.c (wait_for_debug_message): Fix precedence problem
+	with '&' and '=='.
+	(angel_RDI_info): Ditto.
+	* infttrace.c (threads_continue_all_but_one): Fix precedence problem
+	with '&' and '!='.
+	(threads_continue_all_with_signals): Ditto.
+  
+2003-02-05  Jim Ingham <jingham@apple.com>
+            Keith Seitz  <keiths@redhat.com>
+            Elena Zannoni  <ezannoni@redhat.com>
+            Andrew Cagney  <ac131313@redhat.com>
+
+	* Makefile.in (SUBDIR_CLI_OBS): Add "cli-interp.o".
+	(SUBDIR_CLI_SRCS): Add "cli/cli-interp.c".
+	(SUBDIR_MI_OBS): Add "mi-interp.o".
+	(SUBDIR_MI_SRCS): Add "mi/mi-interp.c".
+	(SFILES): Add "interps.c".
+	(COMMON_OBS): Add "interps.o".
+	(interps_h, mi_main_h): Define.
+	(interps.o, cli-interp.o, mi-interp.o): Add dependencies.
+	(mi-main.o, main.o, event-top.o): Update dependencies.
+	* cli/cli-interp.c: New file.
+	* interps.h, interps.c: New files.
+	* top.c: (gdb_init): Don't install the default interpreter, handed
+	by captured_main.
+	* main.c: Include "interps.h".
+	(interpreter_p): Note that it should malloc'ed.
+	(captured_command_loop): Call current_interp_command_loop.
+	(captured_main): Initialize interpreter_p to INTERP_CONSOLE.  Use
+	xfree and xstrdup when updating interpreter_p.  Install the
+	default interpreter.  Add hack to stop mi1's copyright notice
+	being encoded.
+	* event-top.h (gdb_setup_readline): Declare.
+	(gdb_disable_readline): Declare.
+	* event-top.c: Include "interps.h".
+	(display_gdb_prompt): Call current_interp_display_prompt_p.
+	(gdb_setup_readline): Initialize gdb_stdout, gdb_stderr,
+	gdb_stdlog, and gdb_stdtarg.
+	(_initialize_event_loop): Don't call gdb_setup_readline.
+	* cli-out.c (cli_out_set_stream): New function.
+	* cli-out.h (cli_out_set_stream): Declare.
+
+2003-02-06  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure.tgt (i[3456]86-*-sysv4.2*, i[3456]86-*-sysv4*,
+	i[3456]86-*-sysv5*, i[3456]86-*-sco3.2v5*): Remove.  These are all
+	handled fine by i[3456]86-*sco* and i[3456]86-sysv*.
+	* config/i386/i386sco5.mt, config/i386/i386v4.mt,
+	config/i386/i386v42mp.mt: Removed.
+
+2003-02-05  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure.tgt (*-*-solaris*): Set gdb_osabi to
+	GDB_OSABI_SOLARIS.
+
+2003-02-05  Michael Chastain  <mec@shout.net>
+
+	* PROBLEMS (i[3456]86-*-linux*): Warn about binutils
+	2.12.1 and earlier versions.
+
+2003-02-05  Andrew Cagney  <ac131313@redhat.com>
+
+	Remove orphaned hosts, targets and files.
+	* config/i386/gdbserve.mt, config/m68k/nm-apollo68b.h: Delete.
+	* config/m68k/nm-hp300bsd.h, config/m68k/tm-apollo68b.h: Delete.
+	* config/m68k/tm-es1800.h, config/m68k/tm-hp300bsd.h: Delete.
+	* config/m68k/tm-mac.h, config/m68k/xm-apollo68b.h: Delete.
+	* config/pa/hpux1020.mt, config/pa/hpux11.mt: Delete.
+	* config/pa/hpux11w.mt, config/powerpc/gdbserve.mt: Delete.
+	* config/powerpc/ppcle-eabi.mt, config/powerpc/ppcle-sim.mt: Delete.
+	* config/powerpc/tm-ppc-sim.h, config/sparc/sp64sim.mt: Delete.
+	* config/sparc/tm-sp64sim.h: Delete.
+	* configure.host: Delete strongarm-*-*, xscale-*-*, and arm*-*-*
+	hosts.
+	* configure.tgt: Delete i[3456]86-*-sco3.2v4*, and
+	mips*-dec-mach3* targets.
+
+2003-02-04  Michael Chastain  <mec@shout.net>
+
+	* NEWS: Fix typo: sepcifying -> specifying.
+
+2003-02-04  Michael Chastain  <mec@shout.net>
+
+	* dwarfread.c: Add documentation on the state of dwarf-1,
+	looking towards obsoletion.
+
+2003-02-03  Michael Chastain  <mec@shout.net>
+
+	* config/djgpp/fnchange.lst: Add gdb/testsuite/gdb.c++/pr-1023.cc,
+	gdb/testsuite/gdb.c++/pr-1023.exp.
+
+2003-02-04  Andrew Cagney  <ac131313@redhat.com>
+
+	* values.c: Delete code conditional on IS_TRAPPED_INTERNALVAR.
+	* TODO: Delete reference to IS_TRAPPED_INTERNALVAR.
+
+	* utils.c (init_page_info): Delete reference to MPW in comments.
+	* main.c (captured_main): Delete #ifdef MPW.
+
+2003-02-04  Andrew Cagney  <ac131313@redhat.com>
+
+	* NEWS: Note that the m32r-*-elf* is obsolete. 
+	* monitor.c (monitor_expect): Obsolete reference to m32r.
+	* configure.tgt: Mark m32r-*-elf* as obsolete.
+	* MAINTAINERS: Mark m32k as obsolete.
+	* m32r-rom.c: Obsolete file.
+	* config/m32r/m32r.mt: Obsolete file.
+	* config/m32r/tm-m32r.h: Obsolete file.
+	* m32r-stub.c: Obsolete file.
+	* m32r-tdep.c: Obsolete file.
+
+2003-02-04  Andrew Cagney  <ac131313@redhat.com>
+
+	* NEWS: Mention that the z8k-zilog-none is obsolete.
+	* MAINTAINERS: Mark z8k as obsolete.
+	* configure.tgt: Obsolete the z8k-*-coff* target.
+	* config/z8k/z8k.mt: Obsolete file.
+	* config/z8k/tm-z8k.h: Obsolete file.
+	* z8k-tdep.c: Obsolete file.
+
+2003-02-04  Andrew Cagney  <ac131313@redhat.com>
+
+	* NEWS: Mention that the mn10200-elf is obsolete.
+	* configure.tgt: Obsolete mn10200-*-* target.
+	* breakpoint.c (update_breakpoints_after_exec): Update comment to
+	mention that the mn10200 is obsolete.
+	* breakpoint.h: Ditto.
+	* MAINTAINERS: Mark the mn10200-elf as obsolete.
+	* config/mn10200/mn10200.mt: Obsolete file.
+	* config/mn10200/tm-mn10200.h: Obsolete file.
+	* mn10200-tdep.c: Obsolete file.
+
+2003-02-04  Andrew Cagney  <ac131313@redhat.com>
+
+	* MAINTAINERS: Mark h8500 as obsolete.
+	* configure.tgt (h8500-*-*): Mark h8500 code as obsolete.
+	* findvar.c (value_from_register): Ditto.
+	* h8500-tdep.c: Mark file as obsolete.
+	* config/h8500/h8500.mt: Ditto.
+	* config/h8500/tm-h8500.h: Ditto.
+	* NEWS: Mention that h8500 is obsolete.
+
+2003-02-04  David Carlton  <carlton@math.stanford.edu>
+
+	* objfiles.c (allocate_objfile): Always set name.  Add comment at
+	start of function.
+	* jv-lang.c (get_dynamics_objfile): Add comment.
+
+2003-02-04  David Carlton  <carlton@math.stanford.edu>
+
+	* symtab.h (SYMBOL_LINKAGE_NAME): Delete.
+	* printcmd.c (build_address_symbolic): Replace uses of
+	SYMBOL_LINKAGE_NAME by equivalent uses of SYMBOL_SOURCE_NAME,
+	SYMBOL_NAME, and asm_demangle.
+	Update copyright.
+
+2003-02-04  David Carlton  <carlton@math.stanford.edu>
+
+	* linespec.c (decode_compound): Extract code into
+	lookup_prefix_sym.
+	(lookup_prefix_sym): New function.
+
+2003-02-04  David Carlton  <carlton@math.stanford.edu>
+
+	* gdbtypes.h: Delete INTEGER_COERCION_BADNESS,
+	FLOAT_COERCION_BADNESS.
+	* gdbtypes.c (rank_one_type): Replace all uses of
+	INTEGER_COERCION_BADNESS by INTEGER_CONVERSION_BADNESS.
+
+2003-02-04  Jim Blandy  <jimb@redhat.com>
+
+	* dwarf2read.c (dwarf2_locate_sections): When we find a macro info
+	section, let dwarf_macinfo_section point to it, not
+	dwarf_loc_section.
+
+2003-02-04  Daniel Jacobowitz  <drow@mvista.com>
+
+	Pointed out by Anton Blanchard <anton@samba.org>.
+	* ppc-linux-tdep.c (insn_is_sigreturn): New function.
+	(ppc_linux_at_sigtramp_return_path): Use it.
+
+2003-02-04  Daniel Jacobowitz  <drow@mvista.com>
+
+	* defs.h (streq): Add prototype.
+	* utils.c (streq): New function.
+
+	* dwarf2read.c (new_symbol): Use SYMBOL_SET_NAMES instead of
+	SYMBOL_NAME and SYMBOL_INIT_DEMANGLED_NAME.
+	* mdebugread.c (new_symbol): Likewise.
+	* stabsread.c (define_symbol): Likewise.
+	* coffread.c (process_coff_symbol): Likewise.
+	* dwarfread.c (new_symbol): Likewise.
+
+	* minsyms.c (prim_record_minimal_symbol_and_info): Use
+	SYMBOL_SET_NAMES instead of setting SYMBOL_NAME.  Set the language
+	here.
+	(install_minimal_symbols): Don't set SYMBOL_LANGUAGE or call
+	SYMBOL_INIT_DEMANGLED_NAME.
+	* objfiles.c: Include "hashtab.h".
+	(allocate_objfile): Call htab_set_functions_ex for the
+	demangled_names_hash.
+	(free_objfile): Call htab_delete for the demangled_names_hash.
+	* objfiles.h (struct htab): Add declaration.
+	(struct objfile): Add demangled_names_hash.
+	* symfile.c: Include "hashtab.h".
+	(reread_symbols): Call htab_delete for the demangled_names_hash.
+	(add_psymbol_to_list): Use SYMBOL_SET_NAMES instead of putting
+	SYMBOL_NAME in the bcache.
+	* symtab.c: Include "hashtab.h".  Update comments.
+	(create_demangled_names_hash, symbol_set_names): New functions.
+	(symbol_find_demangled_name): New function, broken out from
+	symbol_init_demangled_names.
+	(symbol_init_demangled_names): Use it.
+	* symtab.h (SYMBOL_INIT_DEMANGLED_NAME): Add missing parentheses.
+	(SYMBOL_SET_NAMES): New macro.
+	(symbol_set_names): Add prototype.
+
+2003-02-03  Jim Blandy  <jimb@redhat.com>
+
+	Use a single, consistent representation for an empty minimal
+	symbol table in an objfile.
+	* objfiles.c (terminate_minimal_symbol_table): New function.
+	(allocate_objfile): Call it.
+	* objfiles.h (terminate_minimal_symbol_table): New declaration.
+	(ALL_MSYMBOLS): No need to test whether (objfile)->msymbols is
+	non-NULL. 
+	* minsyms.c (lookup_minimal_symbol_by_pc_section): To see whether
+	objfile has minimal symbols, compare minimal_symbol_count to zero,
+	instead of comparing msymbols with NULL.
+	* objfiles.c (have_minimal_symbols): Same.
+	* solib-sunos.c (solib_add_common_symbols): Call
+	terminate_minimal_symbol_table.
+	* symfile.c (reread_symbols): Same.
+	
+2003-02-03  Kevin Buettner  <kevinb@redhat.com>
+
+	* s390-tdep.c (s390_address_class_type_flags)
+	(s390_address_class_type_flags_to_name)
+	(s390_address_class_name_to_type_flags): New functions.
+	(s390_gdbarch_init): Define ADDRESS_CLASS_TYPE_FLAGS_TO_NAME,
+	ADDRESS_CLASS_NAME_TO_TYPE_FLAGS, and ADDRESS_CLASS_TYPE_FLAGS.
+
+2003-02-03  Michael Snyder  <msnyder@redhat.com>
+
+	* arm-tdep.c: Fix spell-o in comment.
+
+2003-02-03  Michal Ludvig  <mludvig@suse.cz>
+
+	* dwarf2cfi.c (pointer_encoding): Added new parameter.
+	* dwarf2cfi.c, dwarf2read.c: Changed all warnings and
+	error messages to contain BFD filename. 
+
+2003-02-02  Elena Zannoni  <ezannoni@redhat.com>
+
+	Fix PR gdb/742 gdb/743 gdb/877
+	* disasm.c (dump_insns): Use make_cleanup_ui_out_tuple_begin_end.
+	(do_mixed_source_and_assembly): Use
+	make_cleanup_ui_out_tuple_begin_end and
+	make_cleanup_ui_out_tuple_begin_end.
+	(do_mixed_source_and_assembly): Ditto.
+	* thread.c (do_captured_list_thread_ids): Ditto.
+	* ui-out.h (ui_out_table_begin, ui_out_list_begin,
+	ui_out_tuple_begin, ui_out_table_end, ui_out_list_end,
+	ui_out_tuple_end): Delete prototypes.
+	* ui-out.c (ui_out_list_begin, ui_out_tuple_begin,
+	ui_out_list_end, ui_out_tuple_end): Delete.
+
+	From Kevin Buettner  <kevinb@redhat.com>:
+	* ui-out.h (make_cleanup_ui_out_table_begin_end): New function.
+        * ui-out.c (make_cleanup_ui_out_table_begin_end)
+        (do_cleanup_table_end):  New functions.
+        * breakpoint.c (print_it_typical, print_one_breakpoint, mention):
+        Use cleanups to invoke_ui_out_tuple_end().
+        (breakpoint_1): Use cleanup to invoke ui_out_table_end().
+	* cli/cli-setshow.c (cmd_show_list): Use
+	make_cleanup_ui_out_tuple_begin_end.
+	
 2003-02-02  Andrew Cagney  <ac131313@redhat.com>
 
 	* frame.c (frame_unwind_register): New function.
@@ -357,6 +689,17 @@
 	* config.in: Regenerated.
 	* configure: Regenerated.
 
+2003-01-24  Nick Clifton  <nickc@redhat.com>
+
+	* Add sh2e support:
+
+	2002-04-02  Elena Zannoni  <ezannoni@redhat.com>
+
+		* gdb/sh-tdep.c (sh_sh2e_register_name): New.
+		(sh2e_show_regs): New.
+		(sh_gdbarch_init): Handle bfd_mach_sh2e.
+		* config/sh/tm-sh.h: Added sh2e to comments.
+
 2003-01-23  Jim Blandy  <jimb@redhat.com>
 
 	* symfile.c (syms_from_objfile): Don't print the "(no debugging
@@ -610,6 +953,7 @@
 
 2003-01-14  Elena Zannoni  <ezannoni@redhat.com>
 
+	Fix PR gdb/898
 	* breakpoint.c (until_break_command): Add new argument.  Use it to
 	decide whether to stop only at the current frame or not.
 	* breakpoint.h (until_break_command): Update prototype.

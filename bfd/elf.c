@@ -476,6 +476,23 @@ bfd_elf_get_elf_syms (ibfd, symtab_hdr, symcount, symoffset,
   return intsym_buf;
 }
 
+/* Look up a symbol name.  */
+const char *
+bfd_elf_local_sym_name (abfd, isym)
+     bfd *abfd;
+     Elf_Internal_Sym *isym;
+{
+  unsigned int iname = isym->st_name;
+  unsigned int shindex = elf_tdata (abfd)->symtab_hdr.sh_link;
+  if (iname == 0 && ELF_ST_TYPE (isym->st_info) == STT_SECTION)
+    {
+      iname = elf_elfsections (abfd)[isym->st_shndx]->sh_name;
+      shindex = elf_elfheader (abfd)->e_shstrndx;
+    }
+
+  return bfd_elf_string_from_elf_section (abfd, shindex, iname);
+}
+
 /* Elf_Internal_Shdr->contents is an array of these for SHT_GROUP
    sections.  The first element is the flags, the rest are section
    pointers.  */
@@ -497,8 +514,6 @@ group_signature (abfd, ghdr)
   unsigned char esym[sizeof (Elf64_External_Sym)];
   Elf_External_Sym_Shndx eshndx;
   Elf_Internal_Sym isym;
-  unsigned int iname;
-  unsigned int shindex;
 
   /* First we need to ensure the symbol table is available.  */
   if (! bfd_section_from_shdr (abfd, ghdr->sh_link))
@@ -510,16 +525,7 @@ group_signature (abfd, ghdr)
 			    &isym, esym, &eshndx) == NULL)
     return NULL;
 
-  /* Look up the symbol name.  */
-  iname = isym.st_name;
-  shindex = hdr->sh_link;
-  if (iname == 0 && ELF_ST_TYPE (isym.st_info) == STT_SECTION)
-    {
-      iname = elf_elfsections (abfd)[isym.st_shndx]->sh_name;
-      shindex = elf_elfheader (abfd)->e_shstrndx;
-    }
-
-  return bfd_elf_string_from_elf_section (abfd, shindex, iname);
+  return bfd_elf_local_sym_name (abfd, &isym);
 }
 
 /* Set next_in_group list pointer, and group name for NEWSECT.  */
@@ -969,11 +975,8 @@ merge_sections_remove_hook (abfd, sec)
      bfd *abfd ATTRIBUTE_UNUSED;
      asection *sec;
 {
-  struct bfd_elf_section_data *sec_data;
-
-  sec_data = elf_section_data (sec);
-  BFD_ASSERT (sec_data->sec_info_type == ELF_INFO_TYPE_MERGE);
-  sec_data->sec_info_type = ELF_INFO_TYPE_NONE;
+  BFD_ASSERT (sec->sec_info_type == ELF_INFO_TYPE_MERGE);
+  sec->sec_info_type = ELF_INFO_TYPE_NONE;
 }
 
 /* Finish SHF_MERGE section merging.  */
@@ -1001,7 +1004,7 @@ _bfd_elf_link_just_syms (sec, info)
   if (!is_elf_hash_table (info))
     return;
 
-  elf_section_data (sec)->sec_info_type = ELF_INFO_TYPE_JUST_SYMS;
+  sec->sec_info_type = ELF_INFO_TYPE_JUST_SYMS;
 }
 
 /* Copy the program header and other data from one object module to
@@ -1423,8 +1426,8 @@ _bfd_elf_link_hash_newfunc (entry, table, string)
       ret->vtable_entries_size = 0;
       ret->vtable_entries_used = NULL;
       ret->vtable_parent = NULL;
-      ret->got.refcount = htab->init_refcount;
-      ret->plt.refcount = htab->init_refcount;
+      ret->got = htab->init_refcount;
+      ret->plt = htab->init_refcount;
       ret->size = 0;
       ret->type = STT_NOTYPE;
       ret->other = 0;
@@ -1499,7 +1502,7 @@ _bfd_elf_link_hash_hide_symbol (info, h, force_local)
      struct elf_link_hash_entry *h;
      bfd_boolean force_local;
 {
-  h->plt.offset = (bfd_vma) -1;
+  h->plt = elf_hash_table (info)->init_offset;
   h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
   if (force_local)
     {
@@ -1529,8 +1532,9 @@ _bfd_elf_link_hash_table_init (table, abfd, newfunc)
   table->dynobj = NULL;
   /* Make sure can_refcount is extended to the width and signedness of
      init_refcount before we subtract one from it.  */
-  table->init_refcount = get_elf_backend_data (abfd)->can_refcount;
-  --table->init_refcount;
+  table->init_refcount.refcount = get_elf_backend_data (abfd)->can_refcount;
+  table->init_refcount.refcount -= 1;
+  table->init_offset.offset = -(bfd_vma) 1;
   /* The first dynamic symbol is a dummy.  */
   table->dynsymcount = 1;
   table->dynstr = NULL;
@@ -2007,8 +2011,7 @@ bfd_section_from_shdr (abfd, shindex)
 	/* In the section to which the relocations apply, mark whether
 	   its relocations are of the REL or RELA variety.  */
 	if (hdr->sh_size != 0)
-	  elf_section_data (target_sect)->use_rela_p
-	    = (hdr->sh_type == SHT_RELA);
+	  target_sect->use_rela_p = hdr->sh_type == SHT_RELA;
 	abfd->flags |= HAS_RELOC;
 	return TRUE;
       }
@@ -2148,8 +2151,7 @@ _bfd_elf_new_section_hook (abfd, sec)
     }
 
   /* Indicate whether or not this section should use RELA relocations.  */
-  sdata->use_rela_p
-    = get_elf_backend_data (abfd)->default_use_rela_p;
+  sec->use_rela_p = get_elf_backend_data (abfd)->default_use_rela_p;
 
   return TRUE;
 }
@@ -2507,7 +2509,7 @@ elf_fake_sections (abfd, asect, failedptrarg)
       && !_bfd_elf_init_reloc_shdr (abfd,
 				    &elf_section_data (asect)->rel_hdr,
 				    asect,
-				    elf_section_data (asect)->use_rela_p))
+				    asect->use_rela_p))
     *failedptr = TRUE;
 }
 
@@ -5190,8 +5192,7 @@ _bfd_elf_copy_private_section_data (ibfd, isec, obfd, osec)
   elf_next_in_group (osec) = elf_next_in_group (isec);
   elf_group_name (osec) = elf_group_name (isec);
 
-  elf_section_data (osec)->use_rela_p
-    = elf_section_data (isec)->use_rela_p;
+  osec->use_rela_p = isec->use_rela_p;
 
   return TRUE;
 }
@@ -5308,7 +5309,7 @@ swap_out_syms (abfd, sttp, relocatable_p)
       symtab_shndx_hdr->sh_entsize = sizeof (Elf_External_Sym_Shndx);
     }
 
-  /* now generate the data (for "contents") */
+  /* Now generate the data (for "contents").  */
   {
     /* Fill in zeroth symbol and swap it out.  */
     Elf_Internal_Sym sym;
@@ -5374,6 +5375,7 @@ swap_out_syms (abfd, sttp, relocatable_p)
 	      value += sec->output_offset;
 	      sec = sec->output_section;
 	    }
+
 	  /* Don't add in the section vma for relocatable output.  */
 	  if (! relocatable_p)
 	    value += sec->vma;
@@ -5425,7 +5427,16 @@ swap_out_syms (abfd, sttp, relocatable_p)
 		     section of a symbol to be a section that is
 		     actually in the output file.  */
 		  sec2 = bfd_get_section_by_name (abfd, sec->name);
-		  BFD_ASSERT (sec2 != 0);
+		  if (sec2 == NULL)
+		    {
+		      _bfd_error_handler (_("\
+Unable to find equivalent output section for symbol '%s' from section '%s'"),
+					  syms[idx]->name ? syms[idx]->name : "<Local sym>",
+					  sec->name);
+		      bfd_set_error (bfd_error_invalid_operation);      
+		      return FALSE;
+		    }
+  
 		  shndx = _bfd_elf_section_from_bfd_section (abfd, sec2);
 		  BFD_ASSERT (shndx != -1);
 		}
@@ -5446,7 +5457,7 @@ swap_out_syms (abfd, sttp, relocatable_p)
       if (syms[idx]->section->flags & SEC_THREAD_LOCAL)
 	type = STT_TLS;
 
-      /* Processor-specific types */
+      /* Processor-specific types.  */
       if (type_ptr != NULL
 	  && bed->elf_backend_get_symbol_type)
 	type = ((*bed->elf_backend_get_symbol_type)
@@ -7336,7 +7347,7 @@ _bfd_elf_rela_local_sym (abfd, sym, sec, rel)
 		+ sym->st_value);
   if ((sec->flags & SEC_MERGE)
       && ELF_ST_TYPE (sym->st_info) == STT_SECTION
-      && elf_section_data (sec)->sec_info_type == ELF_INFO_TYPE_MERGE)
+      && sec->sec_info_type == ELF_INFO_TYPE_MERGE)
     {
       asection *msec;
 
@@ -7361,7 +7372,7 @@ _bfd_elf_rel_local_sym (abfd, sym, psec, addend)
 {
   asection *sec = *psec;
 
-  if (elf_section_data (sec)->sec_info_type != ELF_INFO_TYPE_MERGE)
+  if (sec->sec_info_type != ELF_INFO_TYPE_MERGE)
     return sym->st_value + addend;
 
   return _bfd_merged_section_offset (abfd, psec,
@@ -7379,7 +7390,7 @@ _bfd_elf_section_offset (abfd, info, sec, offset)
   struct bfd_elf_section_data *sec_data;
 
   sec_data = elf_section_data (sec);
-  switch (sec_data->sec_info_type)
+  switch (sec->sec_info_type)
     {
     case ELF_INFO_TYPE_STABS:
       return _bfd_stab_section_offset (abfd,

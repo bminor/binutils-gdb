@@ -26,6 +26,7 @@
 #include "terminal.h"		/* for job_control */
 #include "event-loop.h"
 #include "event-top.h"
+#include "interps.h"
 #include <signal.h>
 
 /* For dont_repeat() */
@@ -250,9 +251,9 @@ display_gdb_prompt (char *new_prompt)
   int prompt_length = 0;
   char *gdb_prompt = get_prompt ();
 
-  /* When an alternative interpreter has been installed, do not
-     display the comand prompt. */
-  if (interpreter_p)
+  /* Each interpreter has its own rules on displaying the command
+     prompt.  */
+  if (!current_interp_display_prompt_p ())
     return;
 
   if (target_executing && sync_execution)
@@ -1125,6 +1126,11 @@ gdb_setup_readline (void)
 
   if (event_loop_p)
     {
+      gdb_stdout = stdio_fileopen (stdout);
+      gdb_stderr = stdio_fileopen (stderr);
+      gdb_stdlog = gdb_stderr;  /* for moment */
+      gdb_stdtarg = gdb_stderr; /* for moment */
+
       /* If the input stream is connected to a terminal, turn on
          editing.  */
       if (ISATTY (instream))
@@ -1197,8 +1203,6 @@ gdb_disable_readline (void)
 void
 _initialize_event_loop (void)
 {
-  gdb_setup_readline ();
-
   /* Tell gdb to use the cli_command_loop as the main loop. */
   if (event_loop_p && command_loop_hook == NULL)
     command_loop_hook = cli_command_loop;

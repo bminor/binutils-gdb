@@ -83,9 +83,7 @@ maintainer works with the native maintainer when resolving API issues.
 	h8300		--target=h8300hms ,-Werror
 			Maintenance only
 
-	h8500		(--target=h8500hms broken)
-			Maintenance only
-			Not multi-arch, work in progress
+	h8500		(--target=h8500hms OBSOLETE)
 
 	i386		--target=i386-elf ,-Werror
 			Mark Kettenis           kettenis@gnu.org
@@ -96,9 +94,7 @@ maintainer works with the native maintainer when resolving API issues.
 			(--target=ia64-elf broken)
 			Kevin Buettner		kevinb@redhat.com
 
-	m32r		(--target=m32r-elf broken)
-			Michael Snyder		msnyder@redhat.com
-			OBSOLETE candidate, not multi-arch
+	m32r		(--target=m32r-elf OBSOLETE)
 
 	m68hc11		--target=m68hc11-elf ,-Werror ,
 			Stephane Carrez		stcarrez@nerim.fr
@@ -114,9 +110,7 @@ maintainer works with the native maintainer when resolving API issues.
 	mips		--target=mips-elf ,-Werror
 			Andrew Cagney		cagney@redhat.com
 
-	mn10200		--target=mn10200-elf ,-Werror
-			Maintenance only
-			OBSOLETE candidate, not multi-arch
+	mn10200		(--target=mn10200-elf OBSOLETE)
 
 	mn10300		--target=mn10300-elf ,-Werror
 			Maintenance only
@@ -156,10 +150,7 @@ maintainer works with the native maintainer when resolving API issues.
 	xstormy16	--target=xstormy16-elf ,-Werror
 			Corinna Vinschen	vinschen@redhat.com
 
-	z8k		--target=z8k-coff ,-Werror
-			Known problem in 5.1
-			Maintenance only
-			OBSOLETE candidate, not multi-arch
+	z8k		(--target=z8k-coff OBSOLETE)
 
 All developers recognized by this file can make arbitrary changes to
 OBSOLETE targets.

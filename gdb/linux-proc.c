@@ -23,7 +23,7 @@
 #include "inferior.h"
 #include <sys/param.h>	/* for MAXPATHLEN */
 #include <sys/procfs.h>	/* for elf_gregset etc. */
-#include <sys/stat.h>	/* for struct stat */
+#include "gdb_stat.h"	/* for struct stat */
 #include <ctype.h>	/* for isdigit */
 #include <unistd.h>	/* for open, pread64 */
 #include <fcntl.h>	/* for O_RDONLY */

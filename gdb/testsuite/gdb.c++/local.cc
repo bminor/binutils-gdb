@@ -4,6 +4,9 @@ void marker1 (void)
 { 
 }
 
+void marker2 (void)
+{
+}
   
 int foobar (int x)
 {
@@ -19,6 +22,8 @@ int foobar (int x)
   Local l;
   static Local l1;
   char  c;
+
+  marker1 ();
 
   l.loc1 = 23;
 
@@ -56,6 +61,6 @@ int main()
 
    il.ilc = 'b';
    il.ip = &c;
-   marker1();
+   marker2();
  }
 }

@@ -175,10 +175,6 @@ Deprecate, if not delete, the following:
 		The size of the cache can be computed
 		on the fly.
 
-	IS_TRAPPED_INTERNALVAR
-		The pseudo registers should eventually make
-		this redundant.
-
 --
 
 Obsolete the targets:

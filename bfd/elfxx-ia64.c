@@ -3763,8 +3763,7 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	  value = _bfd_elf_rela_local_sym (output_bfd, sym, sym_sec, rel);
 	  if ((sym_sec->flags & SEC_MERGE)
 	      && ELF_ST_TYPE (sym->st_info) == STT_SECTION
-	      && (elf_section_data (sym_sec)->sec_info_type
-		  == ELF_INFO_TYPE_MERGE))
+	      && sym_sec->sec_info_type == ELF_INFO_TYPE_MERGE)
  	    {
 	      struct elfNN_ia64_local_hash_entry *loc_h;
 

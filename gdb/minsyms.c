@@ -411,8 +411,9 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc, asection *section)
          "null symbol".  If there are no real symbols, then there is no
          minimal symbol table at all. */
 
-      if ((msymbol = objfile->msymbols) != NULL)
+      if (objfile->minimal_symbol_count > 0)
 	{
+          msymbol = objfile->msymbols;
 	  lo = 0;
 	  hi = objfile->minimal_symbol_count - 1;
 
@@ -611,9 +612,10 @@ prim_record_minimal_symbol_and_info (const char *name, CORE_ADDR address,
       msym_bunch = new;
     }
   msymbol = &msym_bunch->contents[msym_bunch_index];
-  SYMBOL_NAME (msymbol) = obsavestring ((char *) name, strlen (name),
-					&objfile->symbol_obstack);
   SYMBOL_INIT_LANGUAGE_SPECIFIC (msymbol, language_unknown);
+  SYMBOL_LANGUAGE (msymbol) = language_auto;
+  SYMBOL_SET_NAMES (msymbol, (char *)name, strlen (name), objfile);
+
   SYMBOL_VALUE_ADDRESS (msymbol) = address;
   SYMBOL_SECTION (msymbol) = section;
   SYMBOL_BFD_SECTION (msymbol) = bfd_section;
@@ -865,7 +867,6 @@ install_minimal_symbols (struct objfile *objfile)
 	  for (bindex = 0; bindex < msym_bunch_index; bindex++, mcount++)
 	    {
 	      msymbols[mcount] = bunch->contents[bindex];
-	      SYMBOL_LANGUAGE (&msymbols[mcount]) = language_auto;
 	      if (SYMBOL_NAME (&msymbols[mcount])[0] == leading_char)
 		{
 		  SYMBOL_NAME (&msymbols[mcount])++;
@@ -925,11 +926,6 @@ install_minimal_symbols (struct objfile *objfile)
 	      }
 	  }
       }
-      
-      /* Now walk through all the minimal symbols, selecting the newly added
-         ones and attempting to cache their C++ demangled names. */
-      for (; mcount-- > 0; msymbols++)
-	SYMBOL_INIT_DEMANGLED_NAME (msymbols, &objfile->symbol_obstack);
 
       /* Now build the hash tables; we can't do this incrementally
          at an earlier point since we weren't finished with the obstack

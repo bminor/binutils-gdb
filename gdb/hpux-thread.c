@@ -41,7 +41,7 @@
 #include "inferior.h"
 #include "regcache.h"
 #include <fcntl.h>
-#include <sys/stat.h>
+#include "gdb_stat.h"
 #include "gdbcore.h"
 
 extern int child_suppress_run;

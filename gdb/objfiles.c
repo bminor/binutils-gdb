@@ -1,7 +1,7 @@
 /* GDB routines for manipulating objfiles.
 
    Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002 Free Software Foundation, Inc.
+   2001, 2002, 2003 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
@@ -39,6 +39,7 @@
 #include <fcntl.h>
 #include "gdb_obstack.h"
 #include "gdb_string.h"
+#include "hashtab.h"
 
 #include "breakpoint.h"
 
@@ -149,6 +150,15 @@ build_objfile_section_table (struct objfile *objfile)
    OBJF_SHARED are simply copied through to the new objfile flags
    member. */
 
+/* NOTE: carlton/2003-02-04: This function is called with args NULL, 0
+   by jv-lang.c, to create an artificial objfile used to hold
+   information about dynamically-loaded Java classes.  Unfortunately,
+   that branch of this function doesn't get tested very frequently, so
+   it's prone to breakage.  (E.g. at one time the name was set to NULL
+   in that situation, which broke a loop over all names in the dynamic
+   library loader.)  If you change this function, please try to leave
+   things in a consistent state even if abfd is NULL.  */
+
 struct objfile *
 allocate_objfile (bfd *abfd, int flags)
 {
@@ -191,6 +201,11 @@ allocate_objfile (bfd *abfd, int flags)
 	      objfile->md = md;
 	      objfile->mmfd = fd;
 	      /* Update pointers to functions to *our* copies */
+	      if (objfile->demangled_names_hash)
+		htab_set_functions_ex
+		  (objfile->demangled_names_hash, htab_hash_string,
+		   (int (*) (const void *, const void *)) streq, NULL,
+		   objfile->md, xmcalloc, xmfree);
 	      obstack_chunkfun (&objfile->psymbol_cache.cache, xmmalloc);
 	      obstack_freefun (&objfile->psymbol_cache.cache, xmfree);
 	      obstack_chunkfun (&objfile->macro_cache.cache, xmmalloc);
@@ -281,6 +296,8 @@ allocate_objfile (bfd *abfd, int flags)
       obstack_specify_allocation (&objfile->type_obstack, 0, 0, xmalloc,
 				  xfree);
       flags &= ~OBJF_MAPPED;
+
+      terminate_minimal_symbol_table (objfile);
     }
 
   /* Update the per-objfile information that comes from the bfd, ensuring
@@ -304,6 +321,10 @@ allocate_objfile (bfd *abfd, int flags)
 	  error ("Can't find the file sections in `%s': %s",
 		 objfile->name, bfd_errmsg (bfd_get_error ()));
 	}
+    }
+  else
+    {
+      objfile->name = "<<anonymous objfile>>";
     }
 
   /* Initialize the section indexes for this objfile, so that we can
@@ -332,6 +353,33 @@ allocate_objfile (bfd *abfd, int flags)
 
   return (objfile);
 }
+
+
+/* Create the terminating entry of OBJFILE's minimal symbol table.
+   If OBJFILE->msymbols is zero, allocate a single entry from
+   OBJFILE->symbol_obstack; otherwise, just initialize
+   OBJFILE->msymbols[OBJFILE->minimal_symbol_count].  */
+void
+terminate_minimal_symbol_table (struct objfile *objfile)
+{
+  if (! objfile->msymbols)
+    objfile->msymbols = ((struct minimal_symbol *)
+                         obstack_alloc (&objfile->symbol_obstack,
+                                        sizeof (objfile->msymbols[0])));
+
+  {
+    struct minimal_symbol *m
+      = &objfile->msymbols[objfile->minimal_symbol_count];
+
+    memset (m, 0, sizeof (*m));
+    SYMBOL_NAME (m) = NULL;
+    SYMBOL_VALUE_ADDRESS (m) = 0;
+    MSYMBOL_INFO (m) = NULL;
+    MSYMBOL_TYPE (m) = mst_unknown;
+    SYMBOL_INIT_LANGUAGE_SPECIFIC (m, language_unknown);
+  }
+}
+
 
 /* Put one object file before a specified on in the global list.
    This can be used to make sure an object file is destroyed before
@@ -522,6 +570,8 @@ free_objfile (struct objfile *objfile)
       /* Free the obstacks for non-reusable objfiles */
       bcache_xfree (objfile->psymbol_cache);
       bcache_xfree (objfile->macro_cache);
+      if (objfile->demangled_names_hash)
+	htab_delete (objfile->demangled_names_hash);
       obstack_free (&objfile->psymbol_obstack, 0);
       obstack_free (&objfile->symbol_obstack, 0);
       obstack_free (&objfile->type_obstack, 0);
@@ -810,7 +860,7 @@ have_minimal_symbols (void)
 
   ALL_OBJFILES (ofp)
   {
-    if (ofp->msymbols != NULL)
+    if (ofp->minimal_symbol_count > 0)
       {
 	return 1;
       }

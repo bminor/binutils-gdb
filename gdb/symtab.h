@@ -149,9 +149,15 @@ extern void symbol_init_language_specific (struct general_symbol_info *symbol,
 					   enum language language);
 
 #define SYMBOL_INIT_DEMANGLED_NAME(symbol,obstack) \
-  (symbol_init_demangled_name (&symbol->ginfo, (obstack)))
+  (symbol_init_demangled_name (&(symbol)->ginfo, (obstack)))
 extern void symbol_init_demangled_name (struct general_symbol_info *symbol,
 					struct obstack *obstack);
+
+#define SYMBOL_SET_NAMES(symbol,name,len,objfile) \
+  symbol_set_names (&(symbol)->ginfo, name, len, objfile)
+extern void symbol_set_names (struct general_symbol_info *symbol,
+			      const char *name, int len,
+			      struct objfile *objfile);
 
 /* Return the demangled name for a symbol based on the language for
    that symbol.  If no demangled name exists, return NULL. */
@@ -169,17 +175,6 @@ extern char *symbol_demangled_name (struct general_symbol_info *symbol);
 
 #define SYMBOL_SOURCE_NAME(symbol)					\
   (demangle && SYMBOL_DEMANGLED_NAME (symbol) != NULL			\
-   ? SYMBOL_DEMANGLED_NAME (symbol)					\
-   : SYMBOL_NAME (symbol))
-
-/* Macro that returns the "natural assembly name" of a symbol.  In C++ this is
-   the "mangled" form of the name if demangle is off, or if demangle is on and
-   asm_demangle is off.  Otherwise if asm_demangle is on it is the "demangled"
-   form.  In other languages this is just the symbol name.  The result should
-   never be NULL. */
-
-#define SYMBOL_LINKAGE_NAME(symbol)					\
-  (demangle && asm_demangle && SYMBOL_DEMANGLED_NAME (symbol) != NULL	\
    ? SYMBOL_DEMANGLED_NAME (symbol)					\
    : SYMBOL_NAME (symbol))
 

@@ -3437,13 +3437,6 @@ method like @code{INTEGER_TO_ADDRESS} certainly makes it possible for
 @xref{Target Architecture Definition, , Pointers Are Not Always
 Addresses}.
 
-@item IS_TRAPPED_INTERNALVAR (@var{name})
-@findex IS_TRAPPED_INTERNALVAR
-This is an ugly hook to allow the specification of special actions that
-should occur as a side-effect of setting the value of a variable
-internal to @value{GDBN}.  Currently only used by the h8500.  Note that this
-could be either a host or target conditional.
-
 @item NEED_TEXT_START_END
 @findex NEED_TEXT_START_END
 Define this if @value{GDBN} should determine the start and end addresses of the

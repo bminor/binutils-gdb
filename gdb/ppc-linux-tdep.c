@@ -36,10 +36,15 @@
 #include "solib-svr4.h"
 #include "ppc-tdep.h"
 
-/* The following two instructions are used in the signal trampoline
-   code on GNU/Linux PPC.  */
-#define INSTR_LI_R0_0x7777	0x38007777
-#define INSTR_SC		0x44000002
+/* The following instructions are used in the signal trampoline code
+   on GNU/Linux PPC. The kernel used to use magic syscalls 0x6666 and
+   0x7777 but now uses the sigreturn syscalls.  We check for both.  */
+#define INSTR_LI_R0_0x6666		0x38006666
+#define INSTR_LI_R0_0x7777		0x38007777
+#define INSTR_LI_R0_NR_sigreturn	0x38000077
+#define INSTR_LI_R0_NR_rt_sigreturn	0x380000AC
+
+#define INSTR_SC			0x44000002
 
 /* Since the *-tdep.c files are platform independent (i.e, they may be
    used to build cross platform debuggers), we can't include system
@@ -183,6 +188,21 @@ ppc_linux_in_sigtramp (CORE_ADDR pc, char *func_name)
   return (pc == handler || pc == handler + 4);
 }
 
+static inline int
+insn_is_sigreturn (unsigned long pcinsn)
+{
+  switch(pcinsn)
+    {
+    case INSTR_LI_R0_0x6666:
+    case INSTR_LI_R0_0x7777:
+    case INSTR_LI_R0_NR_sigreturn:
+    case INSTR_LI_R0_NR_rt_sigreturn:
+      return 1;
+    default:
+      return 0;
+    }
+}
+
 /*
  * The signal handler trampoline is on the stack and consists of exactly
  * two instructions.  The easiest and most accurate way of determining
@@ -202,11 +222,11 @@ ppc_linux_at_sigtramp_return_path (CORE_ADDR pc)
   pcinsn = extract_unsigned_integer (buf + 4, 4);
 
   return (
-	   (pcinsn == INSTR_LI_R0_0x7777
+	   (insn_is_sigreturn (pcinsn)
 	    && extract_unsigned_integer (buf + 8, 4) == INSTR_SC)
 	   ||
 	   (pcinsn == INSTR_SC
-	    && extract_unsigned_integer (buf, 4) == INSTR_LI_R0_0x7777));
+	    && insn_is_sigreturn (extract_unsigned_integer (buf, 4))));
 }
 
 CORE_ADDR

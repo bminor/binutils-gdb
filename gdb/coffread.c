@@ -1,6 +1,6 @@
 /* Read coff symbol tables and convert to internal format, for GDB.
    Copyright 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001, 2002
+   1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Contributed by David D. Johnson, Brown University (ddj@cs.brown.edu).
 
@@ -1469,10 +1469,8 @@ process_coff_symbol (register struct coff_symbol *cs,
   memset (sym, 0, sizeof (struct symbol));
   name = cs->c_name;
   name = EXTERNAL_NAME (name, objfile->obfd);
-  SYMBOL_NAME (sym) = obsavestring (name, strlen (name),
-				    &objfile->symbol_obstack);
   SYMBOL_LANGUAGE (sym) = language_auto;
-  SYMBOL_INIT_DEMANGLED_NAME (sym, &objfile->symbol_obstack);
+  SYMBOL_SET_NAMES (sym, name, strlen (name), objfile);
 
   /* default assumptions */
   SYMBOL_VALUE (sym) = cs->c_value;

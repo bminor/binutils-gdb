@@ -8,7 +8,7 @@ all info install-info dvi install uninstall installcheck check:
 
 clean mostlyclean:
 	-rm -f actions circ collection limits
-	-rm -f *.o *.diff *~ *.bad core sh3 hppa mn10200 mn10300
+	-rm -f *.o *.diff *~ *.bad core sh3 hppa mn10300
 
 distclean maintainer-clean realclean: clean
 	-rm -f Makefile config.status config.log

@@ -67,15 +67,15 @@ typedef_print (struct type *type, struct symbol *new, struct ui_file *stream)
       fprintf_filtered (stream, "typedef ");
       type_print (type, "", stream, 0);
       if (TYPE_NAME ((SYMBOL_TYPE (new))) == 0
-	  || !STREQ (TYPE_NAME ((SYMBOL_TYPE (new))), SYMBOL_NAME (new)))
+	  || strcmp (TYPE_NAME ((SYMBOL_TYPE (new))), SYMBOL_NAME (new)) != 0)
 	fprintf_filtered (stream, " %s", SYMBOL_SOURCE_NAME (new));
       break;
 #endif
 #ifdef _LANG_m2
     case language_m2:
       fprintf_filtered (stream, "TYPE ");
-      if (!TYPE_NAME (SYMBOL_TYPE (new)) ||
-	  !STREQ (TYPE_NAME (SYMBOL_TYPE (new)), SYMBOL_NAME (new)))
+      if (!TYPE_NAME (SYMBOL_TYPE (new))
+	  || strcmp (TYPE_NAME ((SYMBOL_TYPE (new))), SYMBOL_NAME (new)) != 0)
 	fprintf_filtered (stream, "%s = ", SYMBOL_SOURCE_NAME (new));
       else
 	fprintf_filtered (stream, "<builtin> = ");

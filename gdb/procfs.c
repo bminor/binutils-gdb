@@ -1,5 +1,8 @@
 /* Machine independent support for SVR4 /proc (process file system) for GDB.
-   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+
+   Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation,
+   Inc.
+
    Written by Michael Snyder at Cygnus Solutions.
    Based on work by Fred Fish, Stu Grossman, Geoff Noer, and others.
 
@@ -39,9 +42,11 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <sys/syscall.h>
 #endif
 #include <sys/errno.h>
-#include <sys/wait.h>
+#include "gdb_wait.h"
 #include <signal.h>
 #include <ctype.h>
+#include "gdb_assert.h"
+#include "inflow.h"
 
 /* 
  * PROCFS.C
@@ -4605,8 +4610,6 @@ procfs_can_run (void)
 static void
 procfs_stop (void)
 {
-  extern pid_t inferior_process_group;
-
   kill (-inferior_process_group, SIGINT);
 }
 

@@ -4779,10 +4779,8 @@ new_symbol (char *name)
 				     sizeof (struct symbol)));
 
   memset (s, 0, sizeof (*s));
-  SYMBOL_NAME (s) = obsavestring (name, strlen (name),
-				  &current_objfile->symbol_obstack);
   SYMBOL_LANGUAGE (s) = psymtab_language;
-  SYMBOL_INIT_DEMANGLED_NAME (s, &current_objfile->symbol_obstack);
+  SYMBOL_SET_NAMES (s, name, strlen (name), current_objfile);
   return s;
 }
 

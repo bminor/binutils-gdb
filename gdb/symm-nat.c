@@ -1,7 +1,7 @@
 /* Sequent Symmetry host interface, for GDB when running under Unix.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1999, 2000,
-   2001
-   Free Software Foundation, Inc.
+
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995, 1999,
+   2000, 2001, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -34,7 +34,7 @@
 #define _INKERNEL
 #include <signal.h>
 #undef _INKERNEL
-#include <sys/wait.h>
+#include "gdb_wait.h"
 #include <sys/param.h>
 #include <sys/user.h>
 #include <sys/proc.h>

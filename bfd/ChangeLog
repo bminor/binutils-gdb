@@ -1,3 +1,147 @@
+2003-02-07  Nick Clifton  <nickc@redhat.com>
+
+	* elf.c (swap_out_syms): Generate an error message if an
+	equivalent output section cannot be found for a symbol.
+
+2003-02-07  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf64-alpha.c (elf64_alpha_relax_section): Don't crash if
+	local_got_entries is NULL.
+
+
+2003-02-06  Andreas Schwab  <schwab@suse.de>
+
+	* elf-eh-frame.c (get_DW_EH_PE_signed): Define.
+	(read_value): Add parameter is_signed, use signed extraction if
+	the value is signed.
+	(_bfd_elf_write_section_eh_frame): Pass signed flag of the
+	encoding to read_value.
+
+2003-02-06  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (ppc64_elf_copy_indirect_symbol): Don't copy got and
+	plt info when called to transfer weak sym info.
+
+2003-02-05  Alan Modra  <amodra@bigpond.net.au>
+
+	* reloc.c: Add PPC and PPC64 TLS relocs.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* elf64-ppc.c (TP_OFFSET, DTP_OFFSET): Declare.
+	(ppc64_elf_howto_raw): Add TLS howto's.  Adjust R_PPC64_NONE to be
+	against a 32 bit field.
+	(ppc64_elf_reloc_type_lookup): Handle TLS relocs.
+	(_ppc64_elf_section_data): Add t_symndx and comments.
+	(ppc64_elf_section_data): Use elf_section_data macro.
+	(ppc64_elf_new_section_hook): American spelling.
+	(struct got_entry, struct plt_entry): New.
+	(MUST_BE_DYN_RELOC): Rename from IS_ABSOLUTE_RELOC.
+	(struct ppc_stub_hash_entry): Add "addend" field.
+	(struct ppc_link_hash_entry): Add "tls_type".
+	(TLS_TLS, TLS_GD_LD, TLS_LD, TLS_TPREL, TLS_DTPREL,
+	TLS_EXPLICIT): Define.
+	(struct ppc_link_hash_table): Add tls_sec, tls_get_addr, tlsld_got.
+	(link_hash_newfunc): Init new fields.
+	(ppc64_elf_link_hash_table_create): Likewise.  Set init_relcount and
+	init_offset to NULL.
+	(ppc64_elf_copy_indirect_symbol): Copy got and plt info.  Don't call
+	_bfd_elf_link_hash_copy_indirect, rather insert relevant code from
+	there.
+	(update_local_sym_info, update_plt_info): New functions.
+	(ppc64_elf_check_relocs): Use them.  Handle TLS relocs.  Adjust GOT
+	handling to use got.glist rather than got.refcount.  Likewise for PLT.
+	(ppc64_elf_gc_sweep_hook): Handle TLS relocs, new GOT and PLT lists.
+	(func_desc_adjust): Adjust for new PLT list.
+	(ppc64_elf_adjust_dynamic_symbol): Likewise.
+	(get_sym_h, get_tls_type): New functions.
+	(ppc64_elf_edit_opd): Remove unused variable.  Use get_sym_h.
+	(ppc64_elf_tls_optimize): New function.
+	(allocate_dynrelocs): Adjust for new PLT and GOT lists.  Allocate
+	TLS relocs.
+	(ppc64_elf_size_dynamic_sections): Likewise.
+	(ppc_type_of_stub): Adjust for new PLT list.
+	(ppc_build_one_stub): Likewise.
+	(ppc64_elf_size_stubs): Likewise.  Use get_sym_h.  Treat __tls_get_addr
+	calls specially.
+	(ppc64_elf_relocate_section): Adjust for new GOT and PLT lists.  Handle
+	TLS relocs.  Report local syms using bfd_elf_local_sym_name.  Don't
+	init GOT entries that have a reloc.  Generate GOT relocs here..
+	(ppc64_elf_finish_dynamic_symbol): ..not here.  Adjust for PLT list.
+	* elf64-ppc.h (ppc64_elf_tls_optimize): Declare.
+
+2003-02-04  Andreas Schwab  <schwab@suse.de>
+
+	* elf32-m68k.c (elf_m68k_hash_entry): Define.
+	(elf_m68k_link_hash_traverse): Remove.
+	(elf_m68k_link_hash_newfunc): Use struct bfd_hash_entry and
+	elf_m68k_hash_entry instead of struct elf_m68k_link_hash_entry to
+	reduce casting.
+	(elf_m68k_check_relocs): Use elf_m68k_hash_entry instead of
+	casting.
+	(elf_m68k_size_dynamic_sections): Use elf_link_hash_traverse
+	instead of elf_m68k_link_hash_traverse.
+	(elf_m68k_discard_copies): Change first parameter to pointer to
+	struct elf_link_hash_entry and use elf_m68k_hash_entry when struct
+	elf_m68k_link_hash_entry is needed.
+
+2003-02-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (struct got_entry, struct plt_entry): Forward declare.
+	(struct elf_link_hash_entry): Add "glist" and "plist" fields to
+	"got" union, and declare as gotplt_union.  Use gotplt_uinion for
+	"plt" field.
+	(struct elf_link_hash_table): Make "init_refcount" a gotplt_union.
+	Add "init_offset" field.
+	(struct elf_obj_tdata <local_got>): Add "struct got_entry **" to union.
+	(elf_local_got_ents): Declare.
+	* elf.c (_bfd_elf_link_hash_newfunc): Adjust initialization of "got"
+	and "plt".
+	(_bfd_elf_link_hash_hide_symbol): Use "init_offset".
+	(_bfd_elf_link_hash_table_init): Set "init_offset".
+	* elflink.h (NAME(bfd_elf,size_dynamic_sections)): Set init_refcount
+	from init_offset.
+	(elf_adjust_dynamic_symbol): Set plt and got offsets using init_offset.
+
+	* elf.c (bfd_elf_local_sym_name): Split out from..
+	(group_signature): ..here.
+	* elf-bfd.h (bfd_elf_local_sym_name): Declare.
+
+2003-02-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (enum elf_link_info_type): Remove.
+	(struct bfd_elf_section_data): Move sec_info_type, use_rela_p fields
+	to struct sec.  Remove linkonce_p field.
+	(elf_linkonce_p): Delete.
+	(elf_discarded_section): Update for sec_info_type change.
+	* section.c (struct sec): Add sec_info_type, use_rela_p, has_tls_reloc,
+	flag11, flag12, flag13, flag14, flag15, flag16, flag20, flag24.
+	(ELF_INFO_TYPE_NONE): Define.
+	(ELF_INFO_TYPE_STABS): Define.
+	(ELF_INFO_TYPE_MERGE): Define.
+	(ELF_INFO_TYPE_EH_FRAME): Define.
+	(ELF_INFO_TYPE_JUST_SYMS): Define.
+	(STD_SECTION): Update struct sec initializer.
+	* ecoff.c (bfd_debug_section): Likewise.
+	* elf.c: Likewise.  Update occurrences of sec_info_type and use_rela_p.
+	* elflink.h: Likewise.
+	* elf-eh-frame.c: Likewise.
+	* elf64-alpha.c: Likewise.
+	* elfxx-ia64.c: Likewise.
+	* elfxx-mips.c: Likewise.
+	* bfd-in2.h: Regenerate.
+
+	* elf32-sparc.c (sec_do_relax): Use elf_section_data macro rather than
+	referring to used_by_bfd.
+	* elf64-sparc.c (sec_do_relax): Likewise.
+	* elf64-mmix.c (mmix_elf_section_data): Likewise.
+	* elfxx-mips.c (mips_elf_section_data): Likewise.
+	* ieee.c (ieee_slurp_section_data): Use ieee_per_section macro.
+	(ieee_get_section_contents): Likewise.
+	(ieee_new_section_hook): Formatting.
+	(ieee_canonicalize_reloc): Remove commented out code.
+	* mmo.c (mmo_section_data): Define.  Use throughout file.
+	* oasys.c (oasys_get_section_contents): Use oasys_per_section macro.
+
 2003-01-31  Graydon Hoare <graydon@redhat.com>
 
 	* Makefile.am (opncls.lo): Add dependency upon libiberty.h.

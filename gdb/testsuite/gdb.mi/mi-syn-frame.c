@@ -43,11 +43,16 @@ handler (int sig)
   subroutine (sig);
 }
 
+/* The first statement in subroutine () is a place for a breakpoint.  
+   Without it, the breakpoint is put on the while comparison and will
+   be hit at each iteration. */
+
 void
 subroutine (int in)
 {
-  while (in < 100)
-    in++;
+  int count = in;
+  while (count < 100)
+    count++;
 }
 
 void
