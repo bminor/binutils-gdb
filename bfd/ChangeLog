@@ -1,9 +1,41 @@
+Mon Feb  2 20:05:42 1998  Jason Molenda  (crash@bugshack.cygnus.com)
+
+	* configure.in: Change version to 2.8.4.
+	* configure: Regenerated.
+
+Mon Feb  2 17:39:39 1998  Steve Haworth  <steve@pm.cse.rmit.EDU.AU>
+
+	Add tms320c30 support:
+	* cpu-tic30.c: New file.
+	* aout-tic30.c: New file.
+	* coff-tic30.c: New file.
+	* archures.c (bfd_arch_tic30): Define.
+	(bfd_tic30_arch): Declare.
+	(bfd_archures_list): Add bfd_tic30_arch.
+	* targets.c (bfd_target_vector): Add tic30_aout_vec and
+	tic30_coff_vec.
+	* reloc.c (BFD_RELOC_TIC30_LDP): Define.
+	* coffcode.h (coff_set_arch_mach_hook): Add tic30 case.
+	(coff_set_flags): Likewise.
+	* config.bfd (tic30-*-*aout*, tic30-*-*coff*): New targets.
+	* configure.in (tic30_aout_vec, tic30_coff_vec): New vectors.
+	* Makefile.am: Rebuild dependencies.
+	(ALL_MACHINES): Add cpu-tic30.lo.
+	(ALL_MACHINES_CFILES): Add cpu-tic30.c.
+	(BFD32_BACKENDS): Add aout-tic30.lo and coff-tic30.lo.
+	(BFD32_BACKENDS_CFILES): Add aout-tic30.c and coff-tic30.c.
+	* configure, Makefile.in, bfd-in2.h, libbfd.h: Rebuild.
+
 Mon Feb  2 12:25:12 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* elf32-v850.c (v850_elf_store_addend_in_insn): Allow HI16_S reloc
 	to lag behind LO16 reloc by a couple of instructions.
 
 Mon Feb  2 14:09:46 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.am ($(srcdir)/bfd-in2.h): Add dummy command to force
+	make to reexamine the file timestamp.
+	($(srcdir)/libbfd.h, $(srcddir)/libcoff.h): Likewise.
 
 	* elf64-alpha.c (ELF_MAXPAGESIZE): Change to 0x10000 from
 	0x100000.

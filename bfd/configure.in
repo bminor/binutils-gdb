@@ -14,7 +14,7 @@ AC_INIT(libbfd.c)
 AC_CANONICAL_SYSTEM
 AC_ISC_POSIX
 
-AM_INIT_AUTOMAKE(bfd, 2.8.2)
+AM_INIT_AUTOMAKE(bfd, 2.8.4)
 
 dnl These must be called before AM_PROG_LIBTOOL, because it may want
 dnl to call AC_CHECK_PROG.
@@ -519,6 +519,8 @@ do
     sunos_big_vec)		tb="$tb sunos.lo aout32.lo" ;;
     symbolsrec_vec)		tb="$tb srec.lo" ;;
     tekhex_vec)			tb="$tb tekhex.lo" ;;
+    tic30_aout_vec)		tb="$tb aout-tic30.lo" ;;
+    tic30_coff_vec)		tb="$tb coff-tic30.lo" ;;
 # start-sanitize-tic80
     tic80coff_vec)		tb="$tb coff-tic80.lo cofflink.lo" ;;
 # end-sanitize-tic80
