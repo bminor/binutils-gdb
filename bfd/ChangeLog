@@ -1,3 +1,7 @@
+1999-06-11  Ian Lance Taylor  <ian@zembu.com>
+
+	* dwarf2.c (decode_line_info): Remove unused variable first_time.
+
 1999-06-10  Jakub Jelinek  <jj@ultra.linux.cz>
 
 	* elf64_sparc.c (sparc64_elf_relocate_section): Use R_SPARC_max_std

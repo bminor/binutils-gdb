@@ -852,7 +852,6 @@ decode_line_info (unit)
       int is_stmt = lh.default_is_stmt;
       int basic_block = 0;
       int end_sequence = 0;
-      boolean first_time = true;
 
       /* Decode the table. */
       while (! end_sequence)
