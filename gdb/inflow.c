@@ -22,7 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "inferior.h"
 #include "command.h"
 #include "signals.h"
-#include "terminal.h"
+#include "serial.h"
 #include "target.h"
 
 #ifdef USG
@@ -42,8 +42,6 @@ kill_command PARAMS ((char *, int));
 static void
 terminal_ours_1 PARAMS ((int));
 
-extern struct target_ops child_ops;
-
 /* Nonzero if we are debugging an attached outside process
    rather than an inferior.  */
 
@@ -52,42 +50,28 @@ int attach_flag;
 
 /* Record terminal status separately for debugger and inferior.  */
 
-/* Does GDB have a terminal (on stdin)?  */
-int gdb_has_a_terminal;
-#if !defined(__GO32__)
-static TERMINAL sg_inferior;
-static TERMINAL sg_ours;
-#endif
+static serial_t stdin_serial;
+
+/* TTY state for the inferior.  We save it whenever the inferior stops, and
+   restore it when it resumes.  */
+static serial_ttystate inferior_ttystate;
+
+/* Our own tty state, which we restore every time we need to deal with the
+   terminal.  We only set it once, when GDB first starts.  The settings of
+   flags which readline saves and restores and unimportant.  */
+static serial_ttystate our_ttystate;
+
+/* fcntl flags for us and the inferior.  Saved and restored just like
+   {our,inferior}_ttystate.  */
 static int tflags_inferior;
 static int tflags_ours;
 
-#if defined(TIOCGETC) && !defined(TIOCGETC_BROKEN)
-static struct tchars tc_inferior;
-static struct tchars tc_ours;
-#endif
-
-#if defined(TIOCGLTC) && !defined(TIOCGLTC_BROKEN)
-static struct ltchars ltc_inferior;
-static struct ltchars ltc_ours;
-#endif
-
-#ifdef TIOCLGET
-static int lmode_inferior;
-static int lmode_ours;
-#endif
-
-#ifdef TIOCGPGRP
-# ifdef SHORT_PGRP
-static short pgrp_inferior;
-static short pgrp_ours;
-# else /* not def SHORT_PGRP */
-static int pgrp_inferior;
-static int pgrp_ours;
-# endif /* not def SHORT_PGRP */
-#else /* not def TIOCGPGRP */
+/* While the inferior is running, we want SIGINT and SIGQUIT to go to the
+   inferior only.  If we have job control, that takes care of it.  If not,
+   we save our handlers in these two variables and set SIGINT and SIGQUIT
+   to SIG_IGN.  */
 static void (*sigint_ours) ();
 static void (*sigquit_ours) ();
-#endif /* TIOCGPGRP */
 
 /* The name of the tty (from the `tty' command) that we gave to the inferior
    when it was last started.  */
@@ -99,6 +83,38 @@ static char *inferior_thisrun_terminal;
 
 static int terminal_is_ours;
 
+enum {yes, no, have_not_checked} gdb_has_a_terminal_flag = have_not_checked;
+
+/* Does GDB have a terminal (on stdin)?  */
+int
+gdb_has_a_terminal ()
+{
+  switch (gdb_has_a_terminal_flag)
+    {
+    case yes:
+      return 1;
+    case no:
+      return 0;
+    case have_not_checked:
+      /* Get all the current tty settings (including whether we have a tty at
+	 all!).  Can't do this in _initialize_inflow because SERIAL_FDOPEN
+	 won't work until the serial_ops_list is initialized.  */
+
+      tflags_ours = fcntl (0, F_GETFL, 0);
+
+      gdb_has_a_terminal_flag = no;
+      stdin_serial = SERIAL_FDOPEN (0);
+      if (stdin_serial != NULL)
+	{
+	  our_ttystate = SERIAL_GET_TTY_STATE (stdin_serial);
+	  if (our_ttystate != NULL)
+	    gdb_has_a_terminal_flag = yes;
+	}
+
+      return gdb_has_a_terminal_flag == yes;
+    }
+}
+
 /* Macro for printing errors from ioctl operations */
 
 #define	OOPSY(what)	\
@@ -106,7 +122,7 @@ static int terminal_is_ours;
     fprintf(stderr, "[%s failed in terminal_inferior: %s]\n", \
 	    what, strerror (errno))
 
-static void terminal_ours_1 ();
+static void terminal_ours_1 PARAMS ((int));
 
 /* Initialize the terminal settings we record for the inferior,
    before we actually run the inferior.  */
@@ -114,26 +130,19 @@ static void terminal_ours_1 ();
 void
 terminal_init_inferior ()
 {
-#if !defined(__GO32__)
-  sg_inferior = sg_ours;
-  tflags_inferior = tflags_ours;
+  /* Make sure that our_ttystate (etc) are initialized.  */
+  gdb_has_a_terminal ();
 
-#if defined(TIOCGETC) && !defined(TIOCGETC_BROKEN)
-  tc_inferior = tc_ours;
-#endif
+  /* We could just as well copy our_ttystate (if we felt like adding
+     a new function SERIAL_COPY_TTY_STATE).  */
+  if (inferior_ttystate)
+    free (inferior_ttystate);
+  inferior_ttystate = SERIAL_GET_TTY_STATE (stdin_serial);
+  SERIAL_SET_PROCESS_GROUP (stdin_serial, inferior_ttystate, inferior_pid);
 
-#if defined(TIOCGLTC) && !defined(TIOCGLTC_BROKEN)
-  ltc_inferior = ltc_ours;
-#endif
-
-#ifdef TIOCLGET
-  lmode_inferior = lmode_ours;
-#endif
-
-#ifdef TIOCGPGRP
-  pgrp_inferior = inferior_pid;
-#endif /* TIOCGPGRP */
-#endif
+  /* Make sure that next time we call terminal_inferior (which will be
+     before the program runs, as it needs to be), we install the new
+     process group.  */
   terminal_is_ours = 1;
 }
 
@@ -143,44 +152,44 @@ terminal_init_inferior ()
 void
 terminal_inferior ()
 {
-#if !defined(__GO32__)
-  int result;
-
-  if (gdb_has_a_terminal && terminal_is_ours && inferior_thisrun_terminal == 0)
+  if (gdb_has_a_terminal () && terminal_is_ours
+      && inferior_thisrun_terminal == 0)
     {
+      int result;
+
+      /* Is there a reason this is being done twice?  It happens both
+	 places we use F_SETFL, so I'm inclined to think perhaps there
+	 is some reason, however perverse.  Perhaps not though...  */
       result = fcntl (0, F_SETFL, tflags_inferior);
       result = fcntl (0, F_SETFL, tflags_inferior);
       OOPSY ("fcntl F_SETFL");
-      result = ioctl (0, TIOCSETN, &sg_inferior);
-      OOPSY ("ioctl TIOCSETN");
 
-#if defined(TIOCGETC) && !defined(TIOCGETC_BROKEN)
-      result = ioctl (0, TIOCSETC, &tc_inferior);
-      OOPSY ("ioctl TIOCSETC");
-#endif
-#if defined(TIOCGLTC) && !defined(TIOCGLTC_BROKEN)
-      result = ioctl (0, TIOCSLTC, &ltc_inferior);
-      OOPSY ("ioctl TIOCSLTC");
-#endif
-#ifdef TIOCLGET
-      result = ioctl (0, TIOCLSET, &lmode_inferior);
-      OOPSY ("ioctl TIOCLSET");
-#endif
+      /* Because we were careful to not change in or out of raw mode in
+	 terminal_ours, we will not change in our out of raw mode with
+	 this call, so we don't flush any input.  */
+      result = SERIAL_SET_TTY_STATE (stdin_serial, inferior_ttystate);
 
-#ifdef TIOCGPGRP
-      result = ioctl (0, TIOCSPGRP, &pgrp_inferior);
-      /* If we attached to the process, we might or might not be sharing
-	 a terminal.  Avoid printing error msg if we are unable to set our
-	 terminal's process group to his process group ID.  */
-      if (!attach_flag) {
-	OOPSY ("ioctl TIOCSPGRP");
-      }
-#else
-      sigint_ours = (void (*) ()) signal (SIGINT, SIG_IGN);
-      sigquit_ours = (void (*) ()) signal (SIGQUIT, SIG_IGN);
-#endif /* TIOCGPGRP */
+      /* If attach_flag is set, we don't know whether we are sharing a
+	 terminal with the inferior or not.  (attaching a process
+	 without a terminal is one case where we do not; attaching a
+	 process which we ran from the same shell as GDB via `&' is
+	 one case where we do, I think (but perhaps this is not
+	 `sharing' in the sense that we need to save and restore tty
+	 state)).  I don't know if there is any way to tell whether we
+	 are sharing a terminal.  So what we do is to go through all
+	 the saving and restoring of terminal state, but ignore errors
+	 (which will occur, in tcsetpgrp, if we are not sharing a
+	 terminal).  */
+
+      if (!attach_flag)
+	OOPSY ("setting tty state");
+
+      if (!job_control)
+	{
+	  sigint_ours = (void (*) ()) signal (SIGINT, SIG_IGN);
+	  sigquit_ours = (void (*) ()) signal (SIGQUIT, SIG_IGN);
+	}
     }
-#endif
   terminal_is_ours = 0;
 }
 
@@ -208,86 +217,73 @@ terminal_ours ()
   terminal_ours_1 (0);
 }
 
+/* output_only is not used, and should not be used unless we introduce
+   separate terminal_is_ours and terminal_is_ours_for_output
+   flags.  */
+
 static void
 terminal_ours_1 (output_only)
      int output_only;
 {
-#if !defined(__GO32__)
-  int result;
-#ifdef TIOCGPGRP
-  /* Ignore this signal since it will happen when we try to set the pgrp.  */
-  void (*osigttou) ();
-#endif /* TIOCGPGRP */
-
   /* Checking inferior_thisrun_terminal is necessary so that
      if GDB is running in the background, it won't block trying
      to do the ioctl()'s below.  Checking gdb_has_a_terminal
      avoids attempting all the ioctl's when running in batch.  */
-  if (inferior_thisrun_terminal != 0 || gdb_has_a_terminal == 0)
+  if (inferior_thisrun_terminal != 0 || gdb_has_a_terminal () == 0)
     return;
 
   if (!terminal_is_ours)
     {
+      /* Ignore this signal since it will happen when we try to set the
+	 pgrp.  */
+      void (*osigttou) ();
+      int result;
+
       terminal_is_ours = 1;
 
-#ifdef TIOCGPGRP
-      osigttou = (void (*) ()) signal (SIGTTOU, SIG_IGN);
+#ifdef SIGTTOU
+      if (job_control)
+	osigttou = (void (*) ()) signal (SIGTTOU, SIG_IGN);
+#endif
 
-      result = ioctl (0, TIOCGPGRP, &pgrp_inferior);
-      result = ioctl (0, TIOCSPGRP, &pgrp_ours);
+      if (inferior_ttystate)
+	free (inferior_ttystate);
+      inferior_ttystate = SERIAL_GET_TTY_STATE (stdin_serial);
 
-      signal (SIGTTOU, osigttou);
-#else
-      signal (SIGINT, sigint_ours);
-      signal (SIGQUIT, sigquit_ours);
-#endif /* TIOCGPGRP */
+      /* Here we used to set ICANON in our ttystate, but I believe this
+	 was an artifact from before when we used readline.  Readline sets
+	 the tty state when it needs to.  */
+
+      /* Set tty state to our_ttystate.  We don't change in our out of raw
+	 mode, to avoid flushing input.  We need to do the same thing
+	 regardless of output_only, because we don't have separate
+	 terminal_is_ours and terminal_is_ours_for_output flags.  It's OK,
+	 though, since readline will deal with raw mode when/if it needs to.
+	 */
+      SERIAL_NOFLUSH_SET_TTY_STATE (stdin_serial, our_ttystate,
+				    inferior_ttystate);
+
+#ifdef SIGTTOU
+      if (job_control)
+	signal (SIGTTOU, osigttou);
+#endif
+
+      if (!job_control)
+	{
+	  signal (SIGINT, sigint_ours);
+	  signal (SIGQUIT, sigquit_ours);
+	}
 
       tflags_inferior = fcntl (0, F_GETFL, 0);
-      result = ioctl (0, TIOCGETP, &sg_inferior);
 
-#if defined(TIOCGETC) && !defined(TIOCGETC_BROKEN)
-      result = ioctl (0, TIOCGETC, &tc_inferior);
-#endif
-#if defined(TIOCGLTC) && !defined(TIOCGLTC_BROKEN)
-      result = ioctl (0, TIOCGLTC, &ltc_inferior);
-#endif
-#ifdef TIOCLGET
-      result = ioctl (0, TIOCLGET, &lmode_inferior);
-#endif
+      /* Is there a reason this is being done twice?  It happens both
+	 places we use F_SETFL, so I'm inclined to think perhaps there
+	 is some reason, however perverse.  Perhaps not though...  */
+      result = fcntl (0, F_SETFL, tflags_ours);
+      result = fcntl (0, F_SETFL, tflags_ours);
+
+      result = result;	/* lint */
     }
-
-#ifdef HAVE_TERMIO
-  sg_ours.c_lflag |= ICANON;
-  if (output_only && !(sg_inferior.c_lflag & ICANON))
-    sg_ours.c_lflag &= ~ICANON;
-#else /* not HAVE_TERMIO */
-  sg_ours.sg_flags &= ~RAW & ~CBREAK;
-  if (output_only)
-    sg_ours.sg_flags |= (RAW | CBREAK) & sg_inferior.sg_flags;
-#endif /* not HAVE_TERMIO */
-
-  result = fcntl (0, F_SETFL, tflags_ours);
-  result = fcntl (0, F_SETFL, tflags_ours);
-  result = ioctl (0, TIOCSETN, &sg_ours);
-
-#if defined(TIOCGETC) && !defined(TIOCGETC_BROKEN)
-  result = ioctl (0, TIOCSETC, &tc_ours);
-#endif
-#if defined(TIOCGLTC) && !defined(TIOCGLTC_BROKEN)
-  result = ioctl (0, TIOCSLTC, &ltc_ours);
-#endif
-#ifdef TIOCLGET
-  result = ioctl (0, TIOCLSET, &lmode_ours);
-#endif
-
-#ifdef HAVE_TERMIO
-  sg_ours.c_lflag |= ICANON;
-#else /* not HAVE_TERMIO */
-  sg_ours.sg_flags &= ~RAW & ~CBREAK;
-#endif /* not HAVE_TERMIO */
-
-  result = result;	/* lint */
-#endif
 }
 
 /* ARGSUSED */
@@ -305,58 +301,65 @@ child_terminal_info (args, from_tty)
      char *args;
      int from_tty;
 {
-  register int i;
+  if (!gdb_has_a_terminal ())
+    {
+      printf_filtered ("This GDB does not control a terminal.\n");
+      return;
+    }
 
-  if (!gdb_has_a_terminal) {
-    printf_filtered ("This GDB does not control a terminal.\n");
-    return;
-  }
-#if !defined(__GO32__)
-#ifdef TIOCGPGRP
   printf_filtered ("Inferior's terminal status (currently saved by GDB):\n");
 
-  printf_filtered ("owner pgrp = %d, fcntl flags = 0x%x.\n",
-	  pgrp_inferior, tflags_inferior);
-#endif /* TIOCGPGRP */
+  /* First the fcntl flags.  */
+  {
+    int flags;
+    
+    flags = tflags_inferior;
 
-#ifdef HAVE_TERMIO
+    printf_filtered ("File descriptor flags = ");
 
-  printf_filtered ("c_iflag = 0x%x, c_oflag = 0x%x,\n",
-	  sg_inferior.c_iflag, sg_inferior.c_oflag);
-  printf_filtered ("c_cflag = 0x%x, c_lflag = 0x%x, c_line = 0x%x.\n",
-	  sg_inferior.c_cflag, sg_inferior.c_lflag, sg_inferior.c_line);
-  printf_filtered ("c_cc: ");
-  for (i = 0; (i < NCC); i += 1)
-    printf_filtered ("0x%x ", sg_inferior.c_cc[i]);
-  printf_filtered ("\n");
+#ifndef O_ACCMODE
+#define O_ACCMODE (O_RDONLY | O_WRONLY | O_RDWR)
+#endif
+    /* (O_ACCMODE) parens are to avoid Ultrix header file bug */
+    switch (flags & (O_ACCMODE))
+      {
+      case O_RDONLY: printf_filtered ("O_RDONLY"); break;
+      case O_WRONLY: printf_filtered ("O_WRONLY"); break;
+      case O_RDWR: printf_filtered ("O_RDWR"); break;
+      }
+    flags &= ~(O_ACCMODE);
 
-#else /* not HAVE_TERMIO */
-
-  printf_filtered ("sgttyb.sg_flags = 0x%x.\n", sg_inferior.sg_flags);
-
-#endif /* not HAVE_TERMIO */
-
-#if defined(TIOCGETC) && !defined(TIOCGETC_BROKEN)
-  printf_filtered ("tchars: ");
-  for (i = 0; i < (int)sizeof (struct tchars); i++)
-    printf_filtered ("0x%x ", ((unsigned char *)&tc_inferior)[i]);
-  printf_filtered ("\n");
+#ifdef O_NONBLOCK
+    if (flags & O_NONBLOCK) 
+      printf_filtered (" | O_NONBLOCK");
+    flags &= ~O_NONBLOCK;
+#endif
+    
+#if defined (O_NDELAY)
+    /* If O_NDELAY and O_NONBLOCK are defined to the same thing, we will
+       print it as O_NONBLOCK, which is good cause that is what POSIX
+       has, and the flag will already be cleared by the time we get here.  */
+    if (flags & O_NDELAY)
+      printf_filtered (" | O_NDELAY");
+    flags &= ~O_NDELAY;
 #endif
 
-#if defined(TIOCGLTC) && !defined(TIOCGLTC_BROKEN)
-  printf_filtered ("ltchars: ");
-  for (i = 0; i < (int)sizeof (struct ltchars); i++)
-    printf_filtered ("0x%x ", ((unsigned char *)&ltc_inferior)[i]);
-  printf_filtered ("\n");
-#endif
-  
-#ifdef TIOCLGET
-  printf_filtered ("lmode:  0x%x\n", lmode_inferior);
-#endif
-#else
-  printf_filtered("This is a DOS machine; there is no terminal state\n");
+    if (flags & O_APPEND)
+      printf_filtered (" | O_APPEND");
+    flags &= ~O_APPEND;
+
+#if defined (O_BINARY)
+    if (flags & O_BINARY)
+      printf_filtered (" | O_BINARY");
+    flags &= ~O_BINARY;
 #endif
 
+    if (flags)
+      printf_filtered (" | 0x%x", flags);
+    printf_filtered ("\n");
+  }
+
+  SERIAL_PRINT_TTY_STATE (stdin_serial, inferior_ttystate);
 }
 
 /* NEW_TTY_PREFORK is called before forking a new child process,
@@ -396,7 +399,7 @@ new_tty ()
       osigttou = (void (*)()) signal(SIGTTOU, SIG_IGN);
       ioctl(tty, TIOCNOTTY, 0);
       close(tty);
-      (void) signal(SIGTTOU, osigttou);
+      signal(SIGTTOU, osigttou);
     }
 #endif
 
@@ -422,7 +425,7 @@ new_tty ()
     { close (2); dup (tty); }
   if (tty > 2)
     close(tty);
-#endif /* !go32*/o
+#endif /* !go32 */
 }
 
 /* Kill the inferior process.  Make us have no inferior.  */
@@ -433,9 +436,10 @@ kill_command (arg, from_tty)
      char *arg;
      int from_tty;
 {
+  /* Shouldn't this be target_has_execution?  FIXME.  */
   if (inferior_pid == 0)
     error ("The program is not being run.");
-  if (!query ("Kill the inferior process? "))
+  if (!query ("Kill the program being debugged? "))
     error ("Not confirmed.");
   target_kill ();
 
@@ -478,101 +482,42 @@ generic_mourn_inferior ()
      from previous runs of the inferior.  So clear them.  */
   breakpoint_clear_ignore_counts ();
 }
-
-void
-child_mourn_inferior ()
-{
-  unpush_target (&child_ops);
-  generic_mourn_inferior ();
-}
 
-#if 0 
-/* This function is just for testing, and on some systems (Sony NewsOS
-   3.2) <sys/user.h> also includes <sys/time.h> which leads to errors
-   (since on this system at least sys/time.h is not protected against
-   multiple inclusion).  */
+/* Call set_sigint_trap when you need to pass a signal on to an attached
+   process when handling SIGINT */
+
 /* ARGSUSED */
 static void
-try_writing_regs_command (arg, from_tty)
-     char *arg;
-     int from_tty;
+pass_signal (signo)
+    int signo;
 {
-  register int i;
-  register int value;
-
-  if (inferior_pid == 0)
-    error ("There is no inferior process now.");
-
-  /* A Sun 3/50 or 3/60 (at least) running SunOS 4.0.3 will have a
-     kernel panic if we try to write past the end of the user area.
-     Presumably Sun will fix this bug (it has been reported), but it
-     is tacky to crash the system, so at least on SunOS4 we need to
-     stop writing when we hit the end of the user area.  */
-  for (i = 0; i < sizeof (struct user); i += 2)
-    {
-      QUIT;
-      errno = 0;
-      value = call_ptrace (3, inferior_pid, (PTRACE_ARG3_TYPE) i, 0);
-      call_ptrace (6, inferior_pid, (PTRACE_ARG3_TYPE) i, value);
-      if (errno == 0)
-	{
-	  printf (" Succeeded with address 0x%x; value 0x%x (%d).\n",
-		  i, value, value);
-	}
-      else if ((i & 0377) == 0)
-	printf (" Failed at 0x%x.\n", i);
-    }
+  kill (inferior_pid, SIGINT);
 }
-#endif
+
+static void (*osig)();
+
+void
+set_sigint_trap()
+{
+  osig = (void (*) ()) signal (SIGINT, pass_signal);
+}
+
+void
+clear_sigint_trap()
+{
+  signal (SIGINT, osig);
+}
 
 void
 _initialize_inflow ()
 {
-  int result;
-
   add_info ("terminal", term_info,
 	   "Print inferior's saved terminal status.");
-
-#if 0
-  add_com ("try-writing-regs", class_obscure, try_writing_regs_command,
-	   "Try writing all locations in inferior's system block.\n\
-Report which ones can be written.");
-#endif
 
   add_com ("kill", class_run, kill_command,
 	   "Kill execution of program being debugged.");
 
   inferior_pid = 0;
-
-  /* Get all the current tty settings (including whether we have a tty at
-     all!).  */
-
-#if !defined(__GO32__)
-  tflags_ours = fcntl (0, F_GETFL, 0);
-
-  result = ioctl (0, TIOCGETP, &sg_ours);
-  if (result == 0) {
-    gdb_has_a_terminal = 1;
-    /* Get the rest of the tty settings, then... */
-#if defined(TIOCGETC) && !defined(TIOCGETC_BROKEN)
-    ioctl (0, TIOCGETC, &tc_ours);
-#endif
-#if defined(TIOCGLTC) && !defined(TIOCGLTC_BROKEN)
-    ioctl (0, TIOCGLTC, &ltc_ours);
-#endif
-#ifdef TIOCLGET
-    ioctl (0, TIOCLGET, &lmode_ours);
-#endif
-#ifdef TIOCGPGRP
-    ioctl (0, TIOCGPGRP, &pgrp_ours);
-#endif /* TIOCGPGRP */
-  } else {
-    gdb_has_a_terminal = 0;
-  }
-#else
-  gdb_has_a_terminal = 0;
-#endif
-
 
   terminal_is_ours = 1;
 }
