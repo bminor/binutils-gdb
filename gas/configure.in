@@ -86,8 +86,15 @@ aix*)
 
 bout*) obj_format=bout ;;
 nindy*) obj_format=bout ;;
-bsd* | sunos*) obj_format=aout ;;
+bsd* | sunos*) 
+	obj_format=aout 
+	emulation=sun3	;;
 
+udi)
+	obj_format=coffbfd
+	need_bfd="./../bfd/libbfd.a"
+	target_cpu=ebmon29k
+	;;
 ebmon-old)
 	obj_format=coff
 	need_bfd="./../bfd/libbfd.a"
@@ -154,6 +161,11 @@ case ${target_cpu} in
 ns32k)	atof=ns32k ;;
 vax)	atof=vax ;;
 *)	atof=ieee ;;
+esac
+
+# check for architecture variants
+case ${target_cpu} in
+sparclite) cpu_type=sparc ;;
 esac
 
 # and target makefile frag

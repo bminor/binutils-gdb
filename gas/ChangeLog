@@ -1,3 +1,7 @@
+Thu May 28 11:22:02 1992  Jim Wilson  (wilson@sphagnum.cygnus.com)
+
+	* configure.in: Recognize sparclite as a sparc variant.
+
 Tue May 26 16:47:56 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* config/tc-a29k.c: lint
