@@ -204,10 +204,16 @@ AC_C_INLINE
 # Checks for library functions.  #
 # ------------------------------ #
 
-AC_CHECK_FUNCS(btowc canonicalize_file_name isascii poll \
-	realpath sbrk setpgid setpgrp sigaction sigprocmask sigsetmask )
 AC_FUNC_ALLOCA
+AC_FUNC_MMAP
 AC_FUNC_VFORK
+AC_CHECK_FUNCS(canonicalize_file_name realpath)
+AC_CHECK_FUNCS(poll)
+AC_CHECK_FUNCS(sbrk)
+AC_CHECK_FUNCS(setpgid setpgrp)
+AC_CHECK_FUNCS(sigaction sigprocmask, sigsetmask)
+AC_CHECK_FUNCS(socketpair)
+
 dnl AC_FUNC_SETPGRP does not work when cross compiling
 dnl Instead, assume we will have a prototype for setpgrp if cross compiling.
 if test "$cross_compiling" = no; then
@@ -302,9 +308,6 @@ AC_MSG_RESULT($gdb_cv_have_pt_getxmmregs)
 if test $gdb_cv_have_pt_getxmmregs = yes; then
   AC_DEFINE(HAVE_PT_GETXMMREGS)
 fi
-
-
-AC_CHECK_FUNCS(socketpair)
 
 
 BFD_NEED_DECLARATION(malloc)
@@ -571,8 +574,6 @@ if test $gdb_cv_scanf_has_long_double = yes; then
   AC_DEFINE(SCANF_HAS_LONG_DOUBLE)
 fi
 AC_MSG_RESULT($gdb_cv_scanf_has_long_double)
-
-AC_FUNC_MMAP
 
 case ${host_os} in
 aix*)

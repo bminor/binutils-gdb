@@ -1,5 +1,9 @@
 2003-01-02  Mark Kettenis  <kettenis@gnu.org>
 
+	* configure.in: Reorganize "Checks for library functions section"
+	a bit.  Remove check for `btowc' and `isascii' functions.
+	* configure: Regenerated.
+
 	* acconfig.h (_MSE_INT_H): Remove.
 	* configure.in: Create "Checks for header files" section, and move
 	appropriate tests there.  Don't check for objlist.h, wchar.h,
