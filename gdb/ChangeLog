@@ -1,5 +1,9 @@
 2003-12-29  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparcnbsd-tdep.c (sparc32nbsd_sigcontext_frame_cache): Fix comment.
+	* sparc64fbsd-tdep.c (sparc64fbsd_sigtramp_frame_cache): Fix
+	comment.  Use FPRS_FEF instead of hard-coded constant.
+
 	* sparc-sol2-tdep.c (sparc_sol2_pc_in_sigtramp): Recognize
 	ucbvechandler.
 	(sparc32_sol2_sigtramp_frame_cache): Call sparc_frame_cache

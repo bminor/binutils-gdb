@@ -152,9 +152,8 @@ sparc32nbsd_sigcontext_frame_cache (struct frame_info *next_frame,
 
   cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
 
-  /* The third argument is a pointer to an instance of `ucontext_t',
-     which has a member `uc_mcontext' that contains the saved
-     registers.  */
+  /* We find the appropriate instance of `struct sigcontext' at a
+     fixed offset in the signal frame.  */
   sigcontext_addr = cache->base + 64 + 16;
 
   cache->saved_regs[SPARC_SP_REGNUM].addr = sigcontext_addr + 8;

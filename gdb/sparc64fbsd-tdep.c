@@ -148,7 +148,7 @@ sparc64fbsd_sigtramp_frame_cache (struct frame_info *next_frame,
     cache->saved_regs[regnum].addr = addr;
 
   /* The `local' and `in' registers have been saved in the register
-     save areas.  */
+     save area.  */
   addr = cache->saved_regs[SPARC_SP_REGNUM].addr;
   sp = get_frame_memory_unsigned (next_frame, addr, 8);
   for (regnum = SPARC_L0_REGNUM, addr = sp + BIAS;
@@ -162,7 +162,7 @@ sparc64fbsd_sigtramp_frame_cache (struct frame_info *next_frame,
 
   addr = cache->saved_regs[SPARC64_FPRS_REGNUM].addr;
   fprs = get_frame_memory_unsigned (next_frame, addr, 8);
-  if (fprs & (1 << 2))
+  if (fprs & FPRS_FEF)
     {
       for (regnum = SPARC_F0_REGNUM, addr = mcontext_addr + 32 * 8;
 	   regnum <= SPARC_F31_REGNUM; regnum++, addr += 4)
