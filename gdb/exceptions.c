@@ -23,7 +23,6 @@
 
 #include "defs.h"
 #include "exceptions.h"
-#include <setjmp.h>
 #include "breakpoint.h"
 #include "target.h"
 #include "inferior.h"
@@ -34,18 +33,6 @@
 #include "serial.h"
 
 const struct exception exception_none = { 0, NO_ERROR, NULL };
-
-/* One should use catch_errors rather than manipulating these
-   directly.  */
-#if defined(HAVE_SIGSETJMP)
-#define SIGJMP_BUF		sigjmp_buf
-#define SIGSETJMP(buf)		sigsetjmp((buf), 1)
-#define SIGLONGJMP(buf,val)	siglongjmp((buf), (val))
-#else
-#define SIGJMP_BUF		jmp_buf
-#define SIGSETJMP(buf)		setjmp(buf)
-#define SIGLONGJMP(buf,val)	longjmp((buf), (val))
-#endif
 
 /* Possible catcher states.  */
 enum catcher_state {
@@ -69,7 +56,7 @@ struct catcher
 {
   enum catcher_state state;
   /* Jump buffer pointing back at the exception handler.  */
-  SIGJMP_BUF buf;
+  EXCEPTIONS_SIGJMP_BUF buf;
   /* Status buffer belonging to the exception handler.  */
   volatile struct exception *exception;
   /* Saved/current state.  */
@@ -83,10 +70,10 @@ struct catcher
 /* Where to go for throw_exception().  */
 static struct catcher *current_catcher;
 
-static SIGJMP_BUF *
-catcher_init (struct ui_out *func_uiout,
-	      volatile struct exception *exception,
-	      return_mask mask)
+EXCEPTIONS_SIGJMP_BUF *
+exceptions_state_mc_init (struct ui_out *func_uiout,
+			  volatile struct exception *exception,
+			  return_mask mask)
 {
   struct catcher *new_catcher = XZALLOC (struct catcher);
 
@@ -133,8 +120,8 @@ catcher_pop (void)
 /* Catcher state machine.  Returns non-zero if the m/c should be run
    again, zero if it should abort.  */
 
-int
-catcher_state_machine (enum catcher_action action)
+static int
+exceptions_state_mc (enum catcher_action action)
 {
   switch (current_catcher->state)
     {
@@ -210,6 +197,18 @@ catcher_state_machine (enum catcher_action action)
     }
 }
 
+int
+exceptions_state_mc_action_iter (void)
+{
+  return exceptions_state_mc (CATCH_ITER);
+}
+
+int
+exceptions_state_mc_action_iter_1 (void)
+{
+  return exceptions_state_mc (CATCH_ITER_1);
+}
+
 /* Return EXCEPTION to the nearest containing catch_errors().  */
 
 NORETURN void
@@ -232,9 +231,9 @@ throw_exception (struct exception exception)
   /* Jump to the containing catch_errors() call, communicating REASON
      to that call via setjmp's return value.  Note that REASON can't
      be zero, by definition in defs.h. */
-  catcher_state_machine (CATCH_THROWING);
+  exceptions_state_mc (CATCH_THROWING);
   *current_catcher->exception = exception;
-  SIGLONGJMP (current_catcher->buf, exception.reason);
+  EXCEPTIONS_SIGLONGJMP (current_catcher->buf, exception.reason);
 }
 
 static char *last_message;
@@ -465,11 +464,10 @@ catch_exception (struct ui_out *uiout,
 		 return_mask mask)
 {
   volatile struct exception exception;
-  SIGJMP_BUF *catch;
-  catch = catcher_init (uiout, &exception, mask);
-  for (SIGSETJMP ((*catch));
-       catcher_state_machine (CATCH_ITER);)
-    (*func) (uiout, func_args);
+  TRY_CATCH (exception, mask)
+    {
+      (*func) (uiout, func_args);
+    }
   return exception;
 }
 
@@ -482,9 +480,10 @@ catch_exceptions_with_msg (struct ui_out *uiout,
 {
   volatile struct exception exception;
   volatile int val = 0;
-  SIGJMP_BUF *catch = catcher_init (uiout, &exception, mask);
-  for (SIGSETJMP ((*catch)); catcher_state_machine (CATCH_ITER);)
-    val = (*func) (uiout, func_args);
+  TRY_CATCH (exception, mask)
+    {
+      val = (*func) (uiout, func_args);
+    }
   print_any_exception (gdb_stderr, NULL, exception);
   gdb_assert (val >= 0);
   gdb_assert (exception.reason <= 0);
@@ -511,12 +510,10 @@ catch_errors (catch_errors_ftype *func, void *func_args, char *errstring,
 {
   volatile int val = 0;
   volatile struct exception exception;
-  SIGJMP_BUF *catch = catcher_init (uiout, &exception, mask);
-  /* This illustrates how it is possible to nest the mechanism and
-     hence catch "break".  Of course this doesn't address the need to
-     also catch "return".  */
-  for (SIGSETJMP ((*catch)); catcher_state_machine (CATCH_ITER);)
-    val = func (func_args);
+  TRY_CATCH (exception, mask)
+    {
+      val = func (func_args);
+    }
   print_any_exception (gdb_stderr, errstring, exception);
   if (exception.reason != 0)
     return 0;
@@ -528,9 +525,10 @@ catch_command_errors (catch_command_errors_ftype * command,
 		      char *arg, int from_tty, return_mask mask)
 {
   volatile struct exception e;
-  SIGJMP_BUF *catch = catcher_init (uiout, &e, mask);
-  for (SIGSETJMP ((*catch)); catcher_state_machine (CATCH_ITER);)
-    command (arg, from_tty);
+  TRY_CATCH (e, mask)
+    {
+      command (arg, from_tty);
+    }
   print_any_exception (gdb_stderr, NULL, e);
   if (e.reason < 0)
     return 0;

@@ -24,6 +24,10 @@
 #ifndef EXCEPTIONS_H
 #define EXCEPTIONS_H
 
+struct ui_out;
+
+#include <setjmp.h>
+
 /* Reasons for calling throw_exceptions().  NOTE: all reason values
    must be less than zero.  enum value 0 is reserved for internal use
    as the return value from an initial setjmp().  The function
@@ -65,6 +69,59 @@ struct exception
 
 /* A pre-defined non-exception.  */
 extern const struct exception exception_none;
+
+/* Wrap set/long jmp so that it's more portable (internal to
+   exceptions).  */
+
+#if defined(HAVE_SIGSETJMP)
+#define EXCEPTIONS_SIGJMP_BUF		sigjmp_buf
+#define EXCEPTIONS_SIGSETJMP(buf)	sigsetjmp((buf), 1)
+#define EXCEPTIONS_SIGLONGJMP(buf,val)	siglongjmp((buf), (val))
+#else
+#define EXCEPTIONS_SIGJMP_BUF		jmp_buf
+#define EXCEPTIONS_SIGSETJMP(buf)	setjmp(buf)
+#define EXCEPTIONS_SIGLONGJMP(buf,val)	longjmp((buf), (val))
+#endif
+
+/* Functions to drive the exceptions state m/c (internal to
+   exceptions).  */
+EXCEPTIONS_SIGJMP_BUF *exceptions_state_mc_init (struct ui_out *func_uiout,
+						 volatile struct exception *
+						 exception,
+						 return_mask mask);
+int exceptions_state_mc_action_iter (void);
+int exceptions_state_mc_action_iter_1 (void);
+
+/* Macro to wrap up standard try/catch behavior.
+
+   The double loop lets us correctly handle code "break"ing out of the
+   try catch block.  (It works as the "break" only exits the inner
+   "while" loop, the outer for loop detects this handling it
+   correctly.)  Of course "return" and "goto" are not so lucky.
+
+   For instance:
+
+   *INDENT-OFF*
+
+   volatile struct exception e;
+   TRY_CATCH (e, RETURN_MASK_ERROR)
+     {
+     }
+   switch (e.reason)
+     {
+     case RETURN_ERROR: ...
+     }
+
+  */
+
+#define TRY_CATCH(EXCEPTION,MASK) \
+    for (EXCEPTIONS_SIGSETJMP \
+           (*exceptions_state_mc_init (uiout, &(EXCEPTION), (MASK))); \
+         exceptions_state_mc_action_iter (); ) \
+      while (exceptions_state_mc_action_iter_1 ())
+
+/* *INDENT-ON* */
+
 
 /* If E is an exception, print it's error message on the specified
    stream. for _fprintf, prefix the message with PREFIX...  */

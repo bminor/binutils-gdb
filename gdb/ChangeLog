@@ -1,5 +1,21 @@
 2005-02-08  Andrew Cagney  <cagney@gnu.org>
 
+	* exceptions.c: Do not include <setjmp.h>.
+	(SIGJMP_BUF, SIGSETJMP, SIGLONGJMP): Delete macros.
+	(catch_exception, catch_exceptions_with_msg, catch_errors) 
+	(catch_command_errors): Use TRY_CATCH.
+	(struct catcher): Use EXCEPTIONS_SIGJMP_BUF.
+	(exceptions_state_mc_init): Rename catcher_init.
+	(exceptions_state_mc): Rename catcher_state_machine.
+	(exceptions_state_mc_action_iter)
+	(exceptions_state_mc_action_iter_1): New functions.
+	* exceptions.h: Include <setjmp.h>.
+	(EXCEPTIONS_SIGJMP_BUF, EXCEPTIONS_SIGSETJMP) 
+	(EXCEPTIONS_SIGLONGJMP): Define.
+	(exceptions_state_mc_init, exceptions_state_mc_action_iter)
+	(exceptions_state_mc_action_iter_1): Declare.
+	(TRY_CATCH): Define.
+
 	* ppc-linux-tdep.c (ppc_linux_init_abi): Do not set malloc name,
 	no longer needed.
 
