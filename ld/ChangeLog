@@ -1,3 +1,15 @@
+Wed Sep 17 16:45:34 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* Makefile.am, Makefile.in: Add rule for ev850.c
+	* configure.tgt (targ_extra_emuls): Add v850 target.
+
+start-sanitize-v850e
+Wed Sep 17 16:43:39 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* emulparams/v850.sh (CALL_TABLE_START_ADDR): New entry.
+	* scripttempl/v850.sc: Add call table data area
+
+end-sanitize-v850e
 start-sanitize-d30v
 Mon Sep 15 11:29:13 1997  Ken Raeburn  <raeburn@cygnus.com>
 
@@ -605,13 +617,11 @@ Fri Jan  3 14:04:40 1997  Ian Lance Taylor  <ian@cygnus.com>
 	* ld.texinfo (Operators): Remove '@' from @smallexmple in comment
 	to avoid confusing texi2roff.
 
-start-sanitize-v850
 Fri Jan  3 11:27:02 1997  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* scripttempl/v850.sc (.zdata): Add .zcommon section.
 	(.tdata): Add .tcommon and .tcommon_byte sections.
 
-end-sanitize-v850
 Thu Jan  2 18:14:32 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.tgt (mips*el-*-linux*, mips*-*-linux*): New targets.
@@ -631,17 +641,14 @@ Tue Dec 31 14:48:30 1996  Ian Lance Taylor  <ian@cygnus.com>
 	size_dynamic_sections.
 	* ld.texinfo, ld.1: Document --filter/-F and --auxiliary/-f.
 
-start-sanitize-v850
 Mon Dec 30 13:55:57 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* scripttempl/v850.sc (.tdata) Add .tbss and .tbyte sections.
 
-end-sanitize-v850
 Wed Dec 18 22:57:35 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-make.sed: Use NewFolderRecursive for installation.
 
-start-sanitize-v850
 Fri Dec 13 14:08:50 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* scripttempl/v850.sc: Make sure __{e,g}p start relative to the
@@ -652,7 +659,6 @@ Fri Dec 13 14:08:50 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 	* emulparams/v850.sh ({TEXT,{Z,S,T}DATA}_START_ADDR): Define
 	appropriately.  Remove crud not used anymore.	
 
-end-sanitize-v850
 Fri Dec 13 10:19:57 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* Makefile.in (emn10200.c): Add dependencies.
@@ -687,11 +693,8 @@ Mon Dec  2 11:43:50 1996  Ian Lance Taylor  <ian@cygnus.com>
 Wed Nov 27 03:22:05 1996  Jason Merrill  <jason@yorick.cygnus.com>
 
 	* scripttempl/elf{,mips,ppc}.sc: Add the remaining DWARF sections.
-
 	* scripttempl/elfd10v.sc: Likewise.
-start-sanitize-v850
 	* scripttempl/v850.sc: Likewise.
-end-sanitize-v850
 
 Tue Nov 26 16:58:33 1996  Ian Lance Taylor  <ian@cygnus.com>
 
@@ -725,13 +728,11 @@ Fri Nov  1 10:01:27 1996  Ian Lance Taylor  <ian@cygnus.com>
 	* scripttempl/m68kcoff.sc: Make sure the etext and __CTOR_LIST__
 	symbols are correctly aligned.
 
-start-sanitize-v850
 Thu Oct 31 09:28:59 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* scriptempl/v850.sc (zdata): Handle reszdata, romzdata and
 	romzbss too.
 
-end-sanitize-v850
 Tue Oct 29 12:33:05 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* emulparams/d10velf.sh: Changes needed for D10V-EVA board. 
@@ -745,7 +746,6 @@ Mon Oct 28 15:37:00 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* configure.tgt (sparclet*-*-aout*): Delete, use sparc*-*-aout*.
 
-start-sanitize-v850
 Wed Oct 23 16:17:22 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* scriptempl/v850.sc (zdata): Fix typo "zrodata" -> "rozdata".
@@ -761,7 +761,6 @@ Tue Oct 22 11:36:47 1996  Jeffrey A Law  (law@cygnus.com)
 	* scriptempl/v850.sc: Move all "normal" sections into
 	the external memory region (0x100000 - 0x200000).
 
-end-sanitize-v850
 Mon Oct 21 17:16:59 1996  Michael Meissner  <meissner@wogglebug.tiac.net>
 
 	* scripttempl/elfd10v.sc: Clone from elf.sc, move .text to
@@ -786,12 +785,10 @@ Fri Oct 18 15:43:38 1996  Ian Lance Taylor  <ian@cygnus.com>
 	EMULATION_OFILES.
 	* configure: Rebuild.
 
-start-sanitize-v850
 Fri Oct 18 12:58:35 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* scripttempl/v850.sc (__gp, __ep): Define.
 
-end-sanitize-v850
 Thu Oct 17 18:14:07 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld.texinfo: Try to consistently use a single or a double dash
@@ -801,7 +798,6 @@ Thu Oct 17 10:17:20 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* emulparams/m32relf.sh (EMBEDDED): Define.
 
-start-sanitize-v850
 Thu Oct 17 10:56:49 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* scripttempl/v850.sc (.zdata): Add this before .text.
@@ -816,7 +812,6 @@ Wed Oct 16 23:10:01 1996  Jeffrey A Law  (law@cygnus.com)
 	* scripttempl/v850.sc: New linker script for the V850.
 	* Makefile.in: Use it.
 
-end-sanitize-v850
 Thu Oct 10 17:57:00 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* emulparams/elf32b4300.sh: Define _gp in OTHER_GOT_SYMBOLS, not
@@ -933,12 +928,10 @@ Mon Sep 16 17:55:21 1996  Ian Lance Taylor  <ian@cygnus.com>
 	* scripttempl/armcoff.sc: For -N or -n, don't align .data.  From
  	Chris Hadley <Christopher.Hadley@cl.cam.ac.uk>
 
-start-sanitize-v850
 Sun Sep 15 22:09:56 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* emulparms/v850.sh: Fix OTHER_RELOCATING_SECTIONS.
 
-end-sanitize-v850
 Sun Sep 15 10:38:16 1996  Mark Alexander  <marka@cygnus.com>
 
 	* emulparms/d10v.sh: Set OTHER_RELOCATING_SECTIONS to put
@@ -964,7 +957,6 @@ Wed Sep  4 15:53:43 1996  Ian Lance Taylor  <ian@cygnus.com>
 	* configure.tgt (alpha-*-gnu*): New target.  From Fila Kolodny
 	<fila@ibi.com>.
 
-start-sanitize-v850
 Tue Sep  3 00:52:54 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* emulparms/v850.sh: Set OTHER_RELOCATING_SECTIONS
@@ -978,7 +970,6 @@ Fri Aug 30 22:30:30 1996  Jeffrey A Law  (law@cygnus.com)
 	* emulparms/v850.sh: Entry symbol is "_start", tweak
 	ctor/dtor support.
 
-end-sanitize-v850
 Fri Aug 30 18:32:31 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.tgt (sh-*-elf*): New target.
@@ -1019,14 +1010,12 @@ Thu Aug 22 17:10:40 1996  Ian Lance Taylor  <ian@cygnus.com>
 	* Makefile.in (HLDENV): New variable.
 	($(LD_PROG)): Use $(HLDENV).
 
-start-sanitize-v850
 Thu Aug 22 16:29:28 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* Makefile.in (ev850.c): New target.
 	* configure.tgt (v850-*-*): New target.
 	* emulparams/v850.sh: New file.
 
-end-sanitize-v850
 Thu Aug 22 11:16:02 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-make.sed: Add @DASH_C_FLAG@ to compiler edit.

@@ -31,14 +31,6 @@ else
 	lose_these_too="${tic80_files} ${lose_these_too}"
 fi
 
-v850_files="v850.sc"
-
-if ( echo $* | grep keep\-v850 > /dev/null ) ; then
-	keep_these_too="${v850_files} ${keep_these_too}"
-else
-	lose_these_too="${v850_files} ${lose_these_too}"
-fi
-
 # All files listed between the "Things-to-keep:" line and the
 # "Do-last:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -90,6 +82,7 @@ sh.sc
 sparccoff.sc
 sparclynx.sc
 st2000.sc
+v850.sc
 vanilla.sc
 w65.sc
 z8000.sc
@@ -101,3 +94,63 @@ Things-to-lose:
 # done.
 
 Do-last:
+
+v850_files="v850.sc"
+
+if ( echo $* | grep keep\-v850eq > /dev/null ) ; then
+	for i in $v850_files ; do
+		if test ! -d $i && (grep sanitize-v850eq $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping v850eq stuff in $i
+			fi
+		fi
+	done
+else
+	for i in $v850_files ; do
+		if test ! -d $i && (grep sanitize-v850eq $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"v850eq\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-v850eq/,/end-\sanitize\-v850eq/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+if ( echo $* | grep keep\-v850e > /dev/null ) ; then
+	for i in $v850_files ; do
+		if test ! -d $i && (grep sanitize-v850e $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping v850e stuff in $i
+			fi
+		fi
+	done
+else
+  if ( echo $* | grep keep\-v850eq > /dev/null ) ; then
+    true
+  else
+	for i in $v850_files ; do
+		if test ! -d $i && (grep sanitize-v850e $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"v850e\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-v850e/,/end-\sanitize\-v850e/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+  fi
+fi
+

@@ -189,9 +189,7 @@ rs6000-*-aix*)		targ_emul=aixrs6 ;;
 # start-sanitize-tic80
 tic80-*-*)		targ_emul=tic80coff ;;
 # end-sanitize-tic80
-# start-sanitize-v850
 v850-*-*)		targ_emul=v850 ;;
-# end-sanitize-v850
 # start-sanitize-v850e
 v850e-*-*)		targ_emul=v850 ;;
 # end-sanitize-v850e
