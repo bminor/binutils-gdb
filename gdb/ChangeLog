@@ -1,3 +1,9 @@
+2002-07-12  Peter Schauer  <Peter.Schauer@Regent.E-Technik.TU-Muenchen.DE>
+
+	* valops.c (find_method_list): Remove comment about
+	removed STATIC_MEMFUNCP argument.
+	(value_find_oload_method_list): Likewise.
+
 2002-07-12  Kevin Buettner  <kevinb@redhat.com>
 
 	From Nicholas Duffek:

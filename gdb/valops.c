@@ -2525,7 +2525,6 @@ value_struct_elt (struct value **argp, struct value **args,
  * ARGP is a pointer to a pointer to a value (the object)
  * METHOD is a string containing the method name
  * OFFSET is the offset within the value
- * STATIC_MEMFUNCP is set if the method is static
  * TYPE is the assumed type of the object
  * NUM_FNS is the number of overloaded instances
  * BASETYPE is set to the actual type of the subobject where the method is found
@@ -2616,7 +2615,6 @@ find_method_list (struct value **argp, char *method, int offset,
  * ARGP is a pointer to a pointer to a value (the object)
  * METHOD is the method name
  * OFFSET is the offset within the value contents
- * STATIC_MEMFUNCP is set if the method is static
  * NUM_FNS is the number of overloaded instances
  * BASETYPE is set to the type of the base subobject that defines the method
  * BOFFSET is the offset of the base subobject which defines the method */
