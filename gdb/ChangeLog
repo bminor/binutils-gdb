@@ -1,3 +1,12 @@
+2001-01-08  Nicholas Duffek  <nsd@redhat.com>
+
+	* regcache.c: Change "write-back" comment to "write-through".
+	Change "regno" to "regnum".
+	(read_register, read_signed_register): Remove "raw" from return
+	value description.
+	(supply_register): Spelling fix.
+	* value.h: Change "regno" to "regnum".
+
 2001-01-08  Fernando Nasser  <fnasser@redhat.com>
 
 	* Makefile.in (install-gdbtk): Add .itcl files to the list of files

@@ -470,27 +470,27 @@ extern void read_register_bytes (int regbyte, char *myaddr, int len);
 
 extern void write_register_bytes (int regbyte, char *myaddr, int len);
 
-extern void read_register_gen (int regno, char *myaddr);
+extern void read_register_gen (int regnum, char *myaddr);
 
-extern void write_register_gen (int regno, char *myaddr);
+extern void write_register_gen (int regnum, char *myaddr);
 
 /* Rename to read_unsigned_register()? */
-extern ULONGEST read_register (int regno);
+extern ULONGEST read_register (int regnum);
 
-extern LONGEST read_signed_register (int regno);
+extern LONGEST read_signed_register (int regnum);
 
 /* Rename to read_unsigned_register_pid()? */
-extern ULONGEST read_register_pid (int regno, int pid);
+extern ULONGEST read_register_pid (int regnum, int pid);
 
-extern LONGEST read_signed_register_pid (int regno, int pid);
+extern LONGEST read_signed_register_pid (int regnum, int pid);
 
-extern void write_register (int regno, LONGEST val);
+extern void write_register (int regnum, LONGEST val);
 
-extern void write_register_pid (int regno, CORE_ADDR val, int pid);
+extern void write_register_pid (int regnum, CORE_ADDR val, int pid);
 
-extern void supply_register (int regno, char *val);
+extern void supply_register (int regnum, char *val);
 
-extern int register_cached (int regno);
+extern int register_cached (int regnum);
 
 extern void register_changed (int regnum);
 
