@@ -1,5 +1,7 @@
 2004-10-24  Hans-Peter Nilsson  <hp@bitrange.com>
 
+	* mmo.c: Adjust to ISO C.
+
 	* mmo.c (mmo_write_section_description): New function broken out
 	of mmo_internal_write_section.
 	(mmo_internal_write_section): For each of .text and .data, call
