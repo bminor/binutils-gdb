@@ -3870,9 +3870,9 @@ Tue Mar  7 00:23:47 1995  Stu Grossman  (grossman@cygnus.com)
 	match the IDP monitor.  Also, set NUM_REGS to 18 cuz there's no
 	floating-point for this card.
 
-	* serial.h, ser-go32.c, ser-go32-para.c, ser-mac.c, ser-tcp.c,
-	ser-unix.c:  Add SERIAL_SETSTOPBITS to set the number of stopbits
-	(needed for IDP board?!?!?).
+	* serial.h, ser-go32.c, ser-mac.c, ser-tcp.c, ser-unix.c: Add
+ 	SERIAL_SETSTOPBITS to set the number of stopbits (needed for IDP
+ 	board?!?!?).
 
 	* defs.h, utils.c, remote-hms.c, remote-pa.c, remote.c:  Fix defs
 	and usage of fputc_unfiltered and putchar_unfiltered.  Eliminate
@@ -4334,10 +4334,6 @@ Sat Feb  4 13:29:52 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* config/m68k/est.mt (TDEPFILES): Remove m68k-pinsn.o.
 
-Fri Feb  3 16:47:31 1995  Kung Hsu  <kung@mexican.cygnus.com>
-
-	* ser-go32-para.c (dos_read): fix syntax errors.
-
 Fri Feb  3 11:19:20 1995  Stu Grossman  (grossman@cygnus.com)
 
 	* core.c (dis_asm_read_memory), defs.h, top.c: Get rid of
@@ -4372,7 +4368,6 @@ Thu Feb  2 16:11:04 1995  Kung Hsu  <kung@mexican.cygnus.com>
 	* config/arc/go32.mh: new go32 host makefile for arc processor.
 	* config/arc/xm-go32.h: new go32 host header for arc processor.
 	* arc-tdep.c: new target dependent codes for arc processor.
-	* ser-go32-para.c: new file for go32 parallel port communication.
 
 Thu Feb  2 13:58:40 1995  Stan Shebs  <shebs@andros.cygnus.com>
 

@@ -428,7 +428,6 @@ z8k-tdep.c
 
 Things-to-lose:
 
-ser-go32-para.c
 HOW_TO_RELEASE
 tracepoint.c
 tracepoint.h
