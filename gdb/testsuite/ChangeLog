@@ -1,3 +1,11 @@
+2000-04-26  Michael Snyder  <msnyder@seadog.cygnus.com>
+
+	* gdb.base/call-ar-st.exp: Bail out if target is sparclet.
+	This test depends on parsing the printf output from the target.
+	Since the sparclet stub doesn't do stdio, this will never work.
+	* gdb.base/call-rt-st.exp: ditto.
+	* gdb.base/call-strs: ditto.
+
 2000-04-24  Michael Snyder  <msnyder@seadog.cygnus.com>
 
 	* gdb.base/miscexprs.exp: make sizeof long array test portable.
