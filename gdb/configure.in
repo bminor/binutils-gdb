@@ -356,6 +356,7 @@ fi
 
 configdir="unix"
 
+GDBTKLIBS=
 if test "${enable_gdbtk}" = "yes"; then
 
     CY_AC_PATH_TCLCONFIG
@@ -417,8 +418,10 @@ if test "${enable_gdbtk}" = "yes"; then
 	   fi
 	   # Yes, the ordering seems wrong here.  But it isn't.
 	   # TK_LIBS is the list of libraries that need to be linked
-	   # after Tcl/Tk.
-	   LIBS="${LIBS} ${TCL_LIBS} ${TK_LIBS}"
+	   # after Tcl/Tk.  Note that this isn't put into LIBS.  If it
+	   # were in LIBS then any link tests after this point would
+	   # try to include things like `$(LIBGUI)', which wouldn't work.
+	   GDBTKLIBS="${TCL_LIBS} ${TK_LIBS}"
 	   CONFIG_OBS="${CONFIG_OBS} gdbtk.o"
 
 	   if test x$gdb_cv_os_cygwin32 = xyes; then
@@ -436,6 +439,7 @@ AC_SUBST(X_LDFLAGS)
 AC_SUBST(X_LIBS)
 AC_SUBST(TIXLIB)
 AC_SUBST(TIX_DEPS)
+AC_SUBST(GDBTKLIBS)
 # end-sanitize-gdbtk
 
 AC_PATH_X

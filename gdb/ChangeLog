@@ -1,5 +1,12 @@
 Tue Apr 28 19:41:33 1998  Tom Tromey  <tromey@cygnus.com>
 
+	* Makefile.in (GDBTKLIBS): New macro.
+	(INSTALLED_LIBS): Include GDBTKLIBS.
+	(CLIBS): Likewise.
+	* configure: Rebuilt.
+	* configure.in: Put Tcl/Tk libs into GDBTKLIBS, not LIBS.
+	(GDBTKLIBS): AC_SUBST.
+
 	* tracepoint.c (memrange_cmp): Another typo fix; `memrbnge' ->
 	`memrange'.
 
