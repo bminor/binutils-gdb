@@ -1,3 +1,8 @@
+2003-03-20  H.J. Lu <hjl@gnu.org>
+
+	* elfxx-ia64.c (elfNN_ia64_relax_section): Don't try relax for
+	non-ELF outputs.
+
 2003-03-20  Nick Clifton  <nickc@redhat.com>
 
 	* peXXigen.c (_bfd_XXi_swap_aouthdr_out): Initialise $idata2 and

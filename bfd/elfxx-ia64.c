@@ -696,6 +696,10 @@ elfNN_ia64_relax_section (abfd, sec, link_info, again)
      one pass.  */
   *again = FALSE;
 
+  /* Don't even try to relax for non-ELF outputs.  */
+  if (link_info->hash->creator->flavour != bfd_target_elf_flavour)
+    return FALSE;
+
   /* Nothing to do if there are no relocations.  */
   if ((sec->flags & SEC_RELOC) == 0
       || sec->reloc_count == 0)
