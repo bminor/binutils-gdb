@@ -645,6 +645,14 @@ static int maintenance_profile_p;
 
 #if defined (HAVE_MONSTARTUP) && defined (HAVE__MCLEANUP)
 
+#ifdef HAVE__ETEXT
+extern char _etext;
+#define TEXTEND &_etext
+#else
+extern char etext;
+#define TEXTEND &etext
+#endif
+
 static int profiling_state;
 
 static void
@@ -669,7 +677,6 @@ maintenance_set_profile_cmd (char *args, int from_tty, struct cmd_list_element *
       static int profiling_initialized;
 
       extern void monstartup (unsigned long, unsigned long);
-      extern char _etext;
       extern int main();
 
       if (!profiling_initialized)
@@ -680,7 +687,7 @@ maintenance_set_profile_cmd (char *args, int from_tty, struct cmd_list_element *
 
       /* "main" is now always the first function in the text segment, so use
 	 its address for monstartup.  */
-      monstartup ((unsigned long) &main, (unsigned long) &_etext);
+      monstartup ((unsigned long) &main, (unsigned long) TEXTEND);
     }
   else
     {

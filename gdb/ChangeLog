@@ -1,3 +1,10 @@
+2003-02-14  Mark Kettenis  <kettenis@gnu.org>
+
+	* configure.in: Add check for _etext.
+	* maint.c (maintenance_set_profile_cmd): Use etext if _etext isn't
+	available.
+	* config.in, configure: regenerated.
+
 2003-02-14  Daniel Jacobowitz  <drow@mvista.com>
 
 	* dwarf2read.c (dwarf2_get_pc_bounds): Offset addresses by base.
