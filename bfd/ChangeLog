@@ -1,3 +1,14 @@
+2004-05-21  Nick Clifton  <nickc@redhat.com>
+
+	* bfdio.c (bfd_bread): Do not use iovec if it is NULL.
+	(bfd_bwrite): Likewise.
+	(bfd_tell): Likewise.
+	(bfd_flush): Likewise.
+	(bfd_stat): Likewise.
+	(bfd_seek): Likewise.
+	(bfd_get_mtime): Likewise.
+	(bfd_get_size): Likewise.
+
 2004-05-19  Ben Elliston  <bje@au.ibm.com>
 
 	* dwarf2.c (_bfd_dwarf2_find_nearest_line): Comment correction.

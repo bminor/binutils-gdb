@@ -125,7 +125,10 @@ bfd_bread (void *ptr, bfd_size_type size, bfd *abfd)
       return get;
     }
 
-  nread = abfd->iovec->bread (abfd, ptr, size);
+  if (abfd->iovec)
+    nread = abfd->iovec->bread (abfd, ptr, size);
+  else
+    nread = 0;
   if (nread != (size_t) -1)
     abfd->where += nread;
 
@@ -140,6 +143,7 @@ bfd_bwrite (const void *ptr, bfd_size_type size, bfd *abfd)
   if ((abfd->flags & BFD_IN_MEMORY) != 0)
     {
       struct bfd_in_memory *bim = abfd->iostream;
+
       size = (size_t) size;
       if (abfd->where + size > bim->size)
 	{
@@ -164,7 +168,11 @@ bfd_bwrite (const void *ptr, bfd_size_type size, bfd *abfd)
       return size;
     }
 
-  nwrote = abfd->iovec->bwrite (abfd, ptr, size);
+  if (abfd->iovec)
+    nwrote = abfd->iovec->bwrite (abfd, ptr, size);
+  else
+    nwrote = 0;
+
   if (nwrote != (size_t) -1)
     abfd->where += nwrote;
   if (nwrote != size)
@@ -185,10 +193,16 @@ bfd_tell (bfd *abfd)
   if ((abfd->flags & BFD_IN_MEMORY) != 0)
     return abfd->where;
 
-  ptr = abfd->iovec->btell (abfd);
+  if (abfd->iovec)
+    {
+      ptr = abfd->iovec->btell (abfd);
 
-  if (abfd->my_archive)
-    ptr -= abfd->origin;
+      if (abfd->my_archive)
+	ptr -= abfd->origin;
+    }
+  else
+    ptr = 0;
+
   abfd->where = ptr;
   return ptr;
 }
@@ -198,7 +212,10 @@ bfd_flush (bfd *abfd)
 {
   if ((abfd->flags & BFD_IN_MEMORY) != 0)
     return 0;
-  return abfd->iovec->bflush (abfd);
+
+  if (abfd->iovec)
+    return abfd->iovec->bflush (abfd);
+  return 0;
 }
 
 /* Returns 0 for success, negative value for failure (in which case
@@ -211,7 +228,11 @@ bfd_stat (bfd *abfd, struct stat *statbuf)
   if ((abfd->flags & BFD_IN_MEMORY) != 0)
     abort ();
 
-  result = abfd->iovec->bstat (abfd, statbuf);
+  if (abfd->iovec)
+    result = abfd->iovec->bstat (abfd, statbuf);
+  else
+    result = -1;
+
   if (result < 0)
     bfd_set_error (bfd_error_system_call);
   return result;
@@ -251,6 +272,7 @@ bfd_seek (bfd *abfd, file_ptr position, int direction)
 	      (abfd->direction == both_direction))
 	    {
 	      bfd_size_type newsize, oldsize;
+
 	      oldsize = (bim->size + 127) & ~(bfd_size_type) 127;
 	      bim->size = abfd->where;
 	      /* Round up to cut down on memory fragmentation */
@@ -313,7 +335,11 @@ bfd_seek (bfd *abfd, file_ptr position, int direction)
   if (direction == SEEK_SET && abfd->my_archive != NULL)
     file_position += abfd->origin;
 
-  result = abfd->iovec->bseek (abfd, file_position, direction);
+  if (abfd->iovec)
+    result = abfd->iovec->bseek (abfd, file_position, direction);
+  else
+    result = -1;
+
   if (result != 0)
     {
       int hold_errno = errno;
@@ -363,6 +389,9 @@ bfd_get_mtime (bfd *abfd)
   if (abfd->mtime_set)
     return abfd->mtime;
 
+  if (abfd->iovec == NULL)
+    return 0;
+
   if (abfd->iovec->bstat (abfd, &buf) != 0)
     return 0;
 
@@ -410,6 +439,9 @@ bfd_get_size (bfd *abfd)
 
   if ((abfd->flags & BFD_IN_MEMORY) != 0)
     return ((struct bfd_in_memory *) abfd->iostream)->size;
+
+  if (abfd->iovec == NULL)
+    return 0;
 
   if (abfd->iovec->bstat (abfd, &buf) != 0)
     return 0;
