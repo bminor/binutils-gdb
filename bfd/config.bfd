@@ -129,7 +129,7 @@ case "${targ}" in
     ;;
 
   i[345]86-*-sysv4* | i[345]86-*-unixware | i[345]86-*-solaris2* | \
-  i[345]86-*-elf | i[345]86-*-sco*elf*)
+  i[345]86-*-elf | i[345]86-*-sco*elf* | i[345]86-*-freebsdelf*)
     targ_defvec=bfd_elf32_i386_vec
     targ_selvecs=i386coff_vec
     ;;
@@ -371,11 +371,11 @@ case "${targ}" in
     ;;
   mips*el-*-elf*)
     targ_defvec=bfd_elf32_littlemips_vec
-    targ_selvecs=bfd_elf32_bigmips_vec
+    targ_selvecs="bfd_elf32_bigmips_vec bfd_elf64_bigmips_vec bfd_elf64_littlemips_vec"
     ;;
   mips*-*-elf*)
     targ_defvec=bfd_elf32_bigmips_vec
-    targ_selvecs=bfd_elf32_littlemips_vec
+    targ_selvecs="bfd_elf32_littlemips_vec bfd_elf64_bigmips_vec bfd_elf64_littlemips_vec"
     ;;
 
   ns32k-pc532-mach* | ns32k-pc532-ux*)
@@ -390,9 +390,10 @@ case "${targ}" in
   powerpc-*-aix*)
     targ_defvec=rs6000coff_vec
     ;;
-  powerpc-*-elf* | powerpc-*-sysv4* | powerpc-*-eabi* | powerpc-*-solaris2*)
+  powerpc-*-elf* | powerpc-*-sysv4* | powerpc-*-eabi* | \
+  powerpc-*-solaris2* | powerpc-*-linux*)
     targ_defvec=bfd_elf32_powerpc_vec
-    targ_selvecs="rs6000coff_vec bfd_elf32_powerpcle_vec bfd_powerpcle_pei_vec bfd_powerpc_pei_vec bfd_powerpcle_pe_vec bfd_powerpc_pe_vec"
+    targ_selvecs="rs6000coff_vec bfd_elf32_powerpcle_vec bfd_powerpcle_pei_vec bfd_powerpc_pei_vec bfd_powerpcle_pe_vec bfd_powerpc_pe_vec ppcboot_vec"
     ;;
   powerpc-*-macos* | powerpc-*-mpw*)
     targ_defvec=pmac_xcoff_vec
@@ -402,9 +403,9 @@ case "${targ}" in
     targ_selvecs="nlm32_powerpc_vec rs6000coff_vec"
     ;;
   powerpcle-*-elf* | powerpcle-*-sysv4* | powerpcle-*-eabi* | \
-  powerpcle-*-solaris2*)
+  powerpcle-*-solaris2* | powerpcle-*-linux*)
     targ_defvec=bfd_elf32_powerpcle_vec
-    targ_selvecs="rs6000coff_vec bfd_elf32_powerpc_vec bfd_powerpcle_pei_vec bfd_powerpc_pei_vec bfd_powerpcle_pe_vec bfd_powerpc_pe_vec"
+    targ_selvecs="rs6000coff_vec bfd_elf32_powerpc_vec bfd_powerpcle_pei_vec bfd_powerpc_pei_vec bfd_powerpcle_pe_vec bfd_powerpc_pe_vec ppcboot_vec"
     ;;
 
   powerpcle-*-pe | powerpcle-*-winnt* | powerpcle-*-cygwin32)

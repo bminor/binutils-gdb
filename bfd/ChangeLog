@@ -1,3 +1,13 @@
+Thu Jun  6 11:24:37 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config.bfd: Recognize powerpc-*-linux* and powerpcle-*-linux*.
+	From Kevin Buettner <kev@primenet.com>.
+
+Wed Jun  5 15:16:04 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* aoutx.h (translate_to_native_sym_flags): Don't try to print the
+	name of a NULL section.
+
 Tue Jun  4 18:53:58 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* linker.c (_bfd_generic_link_add_one_symbol): If notice_all is
