@@ -1114,7 +1114,7 @@ lookup_symbol_aux_using_loop (const char *prefix,
     {
       /* First, see if the prefix matches the start of this using
 	 directive.  */
-      if (prefix_len >= current->current->outer_length
+      if (prefix_len <= current->current->outer_length
 	  && strncmp (prefix, current->current->name, prefix_len) == 0)
 	{
 	  /* Great, it matches: now does the rest of the using
@@ -1123,10 +1123,10 @@ lookup_symbol_aux_using_loop (const char *prefix,
 	  const char *rest_of_outer = current->current->name + prefix_len;
 	  int rest_of_outer_len
 	    = current->current->outer_length - prefix_len;
-	  /* Should we skip some colons?  (Should always be true
-	     unless PREFIX_LEN is zero (and hence we're in the global
-	     namespace.)  */
-	  if (*rest_of_outer == ':')
+	  /* Should we skip some colons?  Should be true unless
+	     PREFIX_LEN is zero (and hence we're in the global
+	     namespace) or we've finished all of outer.  */
+	  if (rest_of_outer_len != 0 && *rest_of_outer == ':')
 	    {
 	      rest_of_outer += 2;
 	      rest_of_outer_len -= 2;

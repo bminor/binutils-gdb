@@ -72,6 +72,12 @@ static struct using_direct_node *using_list;
 static int compare_line_numbers (const void *ln1p, const void *ln2p);
 
 static void scan_for_anonymous_namespaces (struct symbol *symbol);
+
+static struct using_direct_node *copy_usings_to_obstack (struct
+							 using_direct_node
+							 *usings,
+							 struct obstack
+							 *obstack);
 
 
 /* Initial sizes of data structures.  These are realloc'd larger if
@@ -115,9 +121,9 @@ add_free_pendings (struct pending *list)
     }
 }
       
-/* Add a symbol to one of the lists of symbols.  While we're at it,
-   check to see if it references an anonymous namespace; if so, add an
-   appropriate using directive.  */
+/* Add a symbol to one of the lists of symbols.  While we're at it, if
+   we're in the C++ case, check to see if it references an anonymous
+   namespace; if so, add an appropriate using directive.  */
 
 void
 add_symbol_to_list (struct symbol *symbol, struct pending **listhead)
@@ -151,10 +157,10 @@ add_symbol_to_list (struct symbol *symbol, struct pending **listhead)
 
   /* Check to see if we might need to look for a mention of anonymous
      namespaces.  */
-  /* TODOTODO */
-/*   if (SYMBOL_LANGUAGE (symbol) == language_cplus */
-/*       && SYMBOL_CPLUS_DEMANGLED_NAME (symbol) != NULL) */
-/*     scan_for_anonymous_namespaces (symbol) */
+  
+   if (SYMBOL_LANGUAGE (symbol) == language_cplus
+       && SYMBOL_CPLUS_DEMANGLED_NAME (symbol) != NULL)
+     scan_for_anonymous_namespaces (symbol);
 }
 
 /* Check to see if a symbol is contained within an anonymous
@@ -176,7 +182,7 @@ scan_for_anonymous_namespaces (struct symbol *symbol)
 
   for (beginning = name, end = cp_find_first_component (name);
        *end == ':';
-       /* The "+ 2" is for ':'.  */
+       /* The "+ 2" is for the "::"-.  */
        beginning = end + 2, end = cp_find_first_component (beginning))
     {
       if ((end - beginning) == ANONYMOUS_NAMESPACE_LEN
@@ -219,27 +225,31 @@ find_symbol_in_list (struct pending *list, char *name, int length)
 
 /* This adds a using directive to using_list.  NAME is the start of a
    string that should contain the namespaces we want to add as initial
-   substrings, OUTER_INDEX is the end of the outer namespace, and
-   INNER_INDEX is the end of the inner namespace.  If the using
+   substrings, OUTER_LENGTH is the end of the outer namespace, and
+   INNER_LENGTH is the end of the inner namespace.  If the using
    directive in question has already been added, don't add it
    twice.  */
 
 void
-add_using_directive (const char *name, unsigned int outer_index,
-		     unsigned int inner_index)
+add_using_directive (const char *name, unsigned int outer_length,
+		     unsigned int inner_length)
 {
   struct using_direct_node *current;
+  struct using_direct_node *new_node;
+  struct using_direct *new;
 
-  gdb_assert (outer_index < inner_index);
+  gdb_assert (outer_length < inner_length);
 
   /* Has it already been added?  */
 
   for (current = using_list; current; current = current->next)
-    if (strncmp (current->current->name, name, outer_index) == 0
-	&& strncmp (current->current->name, name, inner_index) == 0)
+    if (current->current->outer_length == outer_length
+	&& current->current->inner_length == inner_length
+	&& (strncmp (current->current->name, name, inner_length) == 0))
       return;
 
-  /* TODOTODO */
+  using_list = cp_add_using_xmalloc (name, outer_length, inner_length,
+				     using_list);
 }
 
 
@@ -444,8 +454,9 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 	       next = cp_find_first_component (next + 2))
 	    {
 	      BLOCK_USING (block)
-		= cp_add_using (name, 0, next - name, BLOCK_USING (block),
-				&objfile->symbol_obstack);
+		= cp_add_using_obstack (name, 0, next - name,
+					BLOCK_USING (block),
+					&objfile->symbol_obstack);
 	    }
 
 	  /* FIMXE: carlton/2002-10-09: Until I understand the
@@ -1011,10 +1022,13 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
       finish_block (0, &global_symbols, 0, last_source_start_addr, end_addr,
 		    objfile);
       blockvector = make_blockvector (objfile);
-      /* TODOTODO */
-/*       BLOCK_USING (BLOCKVECTOR_BLOCK (blockvector, STATIC_BLOCK)) */
-/* 	= cp_copy_usings_obstack (using_list, &objfile->symbol_obstack); */
-/*       cp_deep_free_usings (using_list); */
+      if (using_list != NULL)
+	{
+	  BLOCK_USING (BLOCKVECTOR_BLOCK (blockvector, STATIC_BLOCK))
+	    = copy_usings_to_obstack (using_list,
+				      &objfile->symbol_obstack);
+	  using_list = NULL;
+	}
     }
 
 #ifndef PROCESS_LINENUMBER_HOOK
@@ -1143,6 +1157,32 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
   pending_macros = NULL;
 
   return symtab;
+}
+
+/* This reallocates USINGS using OBSTACK and xfree's USINGS.  It
+   returns the reallocated version of USINGS.  */
+
+static struct using_direct_node *
+copy_usings_to_obstack (struct using_direct_node *usings,
+			struct obstack *obstack)
+{
+  if (usings == NULL)
+    return NULL;
+  else
+    {
+      struct using_direct_node *new_node
+	= cp_add_using_obstack (usings->current->name,
+				usings->current->outer_length,
+				usings->current->inner_length,
+				copy_usings_to_obstack (usings->next,
+							obstack),
+				obstack);
+
+      xfree (usings->current);
+      xfree (usings);
+
+      return new_node;
+    }
 }
 
 /* Search the block for global symbols indicating the presence of

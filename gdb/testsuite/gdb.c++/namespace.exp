@@ -205,3 +205,10 @@ gdb_test "print 'E::cde'" "\\$\[0-9\].* = 5" "print E::cde"
 # FIXME: carlton/2002-10-11: It would be nice to test printing
 # "E::ce", but unfortunately GDB will print it out even though it
 # shouldn't.  Oops.
+
+gdb_test "print cX" "\\$\[0-9\].* = 6" "print cX"
+gdb_test "print 'F::cXf'" "\\$\[0-9\].* = 7" "print F::cXf"
+gdb_test "print 'F::cXfX'" "\\$\[0-9\].* = 8" "print F::cXfX"
+gdb_test "print X" "\\$\[0-9\].* = 9" "print X"
+gdb_test "print 'G::Xg'" "\\$\[0-9\].* = 10" "print G::Xg"
+gdb_test "print 'G::XgX'" "\\$\[0-9\].* = 11" "print G::XgX"

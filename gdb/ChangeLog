@@ -1,21 +1,34 @@
+2002-10-15  David Carlton  <carlton@math.stanford.edu>
+
+	* symtab.c (lookup_symbol_aux_using_loop): prefix_len should be <=
+	outer_length.
+	(lookup_symbol_aux_using_loop): Don't skip colons in rest_of_outer
+	if we've used all of outer.
+	* cp-support.h: Rename declaration of cp_add_using to
+	cp_add_using_obstack.
+	* cp-support.c (cp_add_using_obstack): Rename from cp_add_using.
+	* buildsym.h: Rename arguments in declaration of
+	add_using_directive.
+	* buildsym.c (add_using_directive): Finish definition, rename
+	arguments.
+	* cp-support.h: Add declaration for cp_add_using_xmalloc.
+	* cp-support.c (cp_add_using_xmalloc): New function.
+	* buildsym.c (copy_usings_to_obstack): New function.
+	(end_symtab): Set STATIC_BLOCK's BLOCK_USING using
+	copy_usings_to_obstack.
+
 2002-10-14  David Carlton  <carlton@math.stanford.edu>
 
 	* buildsym.c (add_using_directive): Rewrite to match new version
 	of struct using_direct.
 	(finish_block): Ditto.
-
 	* symtab.c (lookup_symbol_aux_using_loop): Add 'prefix_len'
 	argument; rewrite to match new version of struct using_direct.
-
 	* cp-support.h: Update declaration for cp_add_using.
-
 	* cp-support.c (cp_add_using): Rewrite to match new version of
 	struct using_direct.
-
 	* cp-support.h (struct using_direct): Rewrite struct.
-
 	* buildsym.h: Declaration for add_using_directive.
-
 	* buildsym.c: New variable 'using_list'.
 	(start_symtab): Initialize using_list.
 	(end_symtab): Initialize BLOCK_USING of STATIC_BLOCK.

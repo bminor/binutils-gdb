@@ -176,11 +176,11 @@ method_name_from_physname (const char *physname)
    using_direct_node.  All memory is allocated using OBSTACK.  */
 
 struct using_direct_node *
-cp_add_using (const char *name,
-	      unsigned short outer_length,
-	      unsigned short inner_length,
-	      struct using_direct_node *next,
-	      struct obstack *obstack)
+cp_add_using_obstack (const char *name,
+		      unsigned short outer_length,
+		      unsigned short inner_length,
+		      struct using_direct_node *next,
+		      struct obstack *obstack)
 {
   struct using_direct *current
     = obstack_alloc (obstack, sizeof (struct using_direct));
@@ -198,8 +198,33 @@ cp_add_using (const char *name,
   return retval;
 }
 
+/* Same as cp_add_using, except that it uses xmalloc instead of
+   obstacks.  */
+
+struct using_direct_node *
+cp_add_using_xmalloc (const char *name,
+		      unsigned short outer_length,
+		      unsigned short inner_length,
+		      struct using_direct_node *next)
+{
+  struct using_direct *current = xmalloc (sizeof (struct using_direct));
+  struct using_direct_node *retval
+    = xmalloc (sizeof (struct using_direct_node));
+
+  gdb_assert (outer_length < inner_length);
+
+  current->name = name;
+  current->outer_length = outer_length;
+  current->inner_length = inner_length;
+  retval->current = current;
+  retval->next = next;
+
+  return retval;
+}
+
 /* This copies the using_direct_nodes in TOCOPY, using xmalloc, and
-   sticks them onto a list ending in TAIL.  */
+   sticks them onto a list ending in TAIL.  (It doesn't copy the
+   using_directs, just the using_direct_nodes.)  */
 
 struct using_direct_node *
 cp_copy_usings (struct using_direct_node *tocopy,

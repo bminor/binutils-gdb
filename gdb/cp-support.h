@@ -67,11 +67,19 @@ struct using_direct_node
   struct using_direct_node *next;
 };
 
-extern struct using_direct_node *cp_add_using (const char *name,
-					       unsigned short outer_length,
-					       unsigned short inner_length,
-					       struct using_direct_node *next,
-					       struct obstack *obstack);
+extern struct
+using_direct_node *cp_add_using_obstack (const char *name,
+					 unsigned short outer_length,
+					 unsigned short inner_length,
+					 struct using_direct_node *next,
+					 struct obstack *obstack);
+
+extern
+struct using_direct_node *cp_add_using_xmalloc (const char *name,
+						unsigned short outer_length,
+						unsigned short inner_length,
+						struct using_direct_node
+						*next);
 
 extern
 struct using_direct_node *cp_copy_usings (struct using_direct_node *tocopy,

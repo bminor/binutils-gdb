@@ -1,3 +1,8 @@
+2002-10-15  David Carlton  <carlton@math.stanford.edu>
+
+	* gdb.c++/namespace.exp: Add anonymous namespace tests.
+	* gdb.c++/namespace.cc: Add anonymous namespaces.
+
 2002-10-11  David Carlton  <carlton@math.stanford.edu>
 
 	* gdb.c++/namespace.exp: Add tests from within C::D::marker2.

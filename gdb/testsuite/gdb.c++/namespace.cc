@@ -68,9 +68,39 @@ void marker1(void)
   return;
 }
 
+namespace
+{
+  int X = 9;
+
+  namespace G
+  {
+    int Xg = 10;
+
+    namespace
+    {
+      int XgX = 11;
+    }
+  }
+}
+
 namespace C
 {
   int c = 1;
+
+  namespace
+  {
+    int cX = 6;
+    
+    namespace F
+    {
+      int cXf = 7;
+
+      namespace
+      {
+	int cXfX = 8;
+      }
+    }
+  }
 
   namespace C
   {
@@ -103,12 +133,17 @@ namespace C
       cd;
       E::cde;
       //E::ce;
+      cX;
+      F::cXf;
+      F::cXfX;
+      X;
+      G::Xg;
+      G::XgX;
       return;
     }
 
   }
 }
-
 
 int main ()
 {
