@@ -1,6 +1,8 @@
 CC=i386-win32-gcc
 AR=i386-win32-ar
+ARFLAGS=rv
 RANLIB=i386-win32-ranlib
+BISON=byacc
 CC_FOR_BUILD=gcc
 HOST_CC=gcc
 HOST_CFLAGS=
