@@ -1,6 +1,6 @@
 /* MI Command Set for GDB, the GNU debugger.
 
-   Copyright 2000, 2003 Free Software Foundation, Inc.
+   Copyright 2000, 2003, 2004 Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions (a Red Hat company).
 
