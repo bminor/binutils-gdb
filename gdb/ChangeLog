@@ -1,3 +1,12 @@
+Fri Mar  3 17:13:05 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* sparc-tdep.c (sparc_extract_struct_value_address): Move
+	sparc64 support to here.
+	(sparc64_extract_struct_value_address): Deleted.
+	(dump_ccreg): Add a prototype so long long arg -> int.
+	* sparc/tm-sp64.h (USE_STRUCT_CONVENTION): Define.
+	(EXTRACT_STRUCT_VALUE_ADDRESS): Delete.
+
 Fri Mar  3 15:12:12 1995  Jeff Law  (law@snake.cs.utah.edu)
 
 	* hpread.c (hpread_record_lines): New argument "offset".  All
