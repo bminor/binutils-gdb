@@ -1,3 +1,15 @@
+2003-05-31  Andrew Cagney  <cagney@redhat.com>
+
+	* mips-tdep.c (print_gp_register_row): Replace do_gp_register_row.
+	(print_fp_register_row): Replace do_fp_register_row.
+	(mips_print_fp_register): Add "file" and "frame" parameters.
+	(mips_print_register): Add "file" and "frame" parameters.
+	(mips_print_registers_info): Replace mips_do_registers_info.
+	(mips_gdbarch_init): Set print_registers_info instead of
+	deprecated_do_registers_info.
+	(mips_read_fp_register_single): Add "frame" parameter.
+	(mips_read_fp_register_double): Add "frame" parameter.
+
 2003-05-31  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-tdep.c (i386_register_name): Check for MMX registers first.

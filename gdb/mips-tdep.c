@@ -350,8 +350,6 @@ mips_stack_argsize (void)
 
 int gdb_print_insn_mips (bfd_vma, disassemble_info *);
 
-static void mips_print_register (int, int);
-
 static mips_extra_func_info_t heuristic_proc_desc (CORE_ADDR, CORE_ADDR,
 						   struct frame_info *, int);
 
@@ -371,9 +369,6 @@ static mips_extra_func_info_t find_proc_desc (CORE_ADDR pc,
 
 static CORE_ADDR after_prologue (CORE_ADDR pc,
 				 mips_extra_func_info_t proc_desc);
-
-static void mips_read_fp_register_single (int regno, char *rare_buffer);
-static void mips_read_fp_register_double (int regno, char *rare_buffer);
 
 static struct type *mips_float_register_type (void);
 static struct type *mips_double_register_type (void);
@@ -3921,12 +3916,13 @@ mips_double_register_type (void)
    into rare_buffer.  */
 
 static void
-mips_read_fp_register_single (int regno, char *rare_buffer)
+mips_read_fp_register_single (struct frame_info *frame, int regno,
+			      char *rare_buffer)
 {
   int raw_size = REGISTER_RAW_SIZE (regno);
   char *raw_buffer = alloca (raw_size);
 
-  if (!frame_register_read (deprecated_selected_frame, regno, raw_buffer))
+  if (!frame_register_read (frame, regno, raw_buffer))
     error ("can't read register %d (%s)", regno, REGISTER_NAME (regno));
   if (raw_size == 8)
     {
@@ -3952,7 +3948,8 @@ mips_read_fp_register_single (int regno, char *rare_buffer)
    register.  */
 
 static void
-mips_read_fp_register_double (int regno, char *rare_buffer)
+mips_read_fp_register_double (struct frame_info *frame, int regno,
+			      char *rare_buffer)
 {
   int raw_size = REGISTER_RAW_SIZE (regno);
 
@@ -3960,7 +3957,7 @@ mips_read_fp_register_double (int regno, char *rare_buffer)
     {
       /* We have a 64-bit value for this register, and we should use
 	 all 64 bits.  */
-      if (!frame_register_read (deprecated_selected_frame, regno, rare_buffer))
+      if (!frame_register_read (frame, regno, rare_buffer))
 	error ("can't read register %d (%s)", regno, REGISTER_NAME (regno));
     }
   else
@@ -3974,19 +3971,20 @@ mips_read_fp_register_double (int regno, char *rare_buffer)
 	 each register.  */
       if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 	{
-	  mips_read_fp_register_single (regno, rare_buffer + 4);
-	  mips_read_fp_register_single (regno + 1, rare_buffer);
+	  mips_read_fp_register_single (frame, regno, rare_buffer + 4);
+	  mips_read_fp_register_single (frame, regno + 1, rare_buffer);
 	}
       else
 	{
-	  mips_read_fp_register_single (regno, rare_buffer);
-	  mips_read_fp_register_single (regno + 1, rare_buffer + 4);
+	  mips_read_fp_register_single (frame, regno, rare_buffer);
+	  mips_read_fp_register_single (frame, regno + 1, rare_buffer + 4);
 	}
     }
 }
 
 static void
-mips_print_fp_register (int regnum)
+mips_print_fp_register (struct ui_file *file, struct frame_info *frame,
+			int regnum)
 {				/* do values for FP (float) regs */
   char *raw_buffer;
   double doub, flt1, flt2;	/* doubles extracted from raw hex data */
@@ -3994,94 +3992,94 @@ mips_print_fp_register (int regnum)
 
   raw_buffer = (char *) alloca (2 * REGISTER_RAW_SIZE (FP0_REGNUM));
 
-  printf_filtered ("%s:", REGISTER_NAME (regnum));
-  printf_filtered ("%*s", 4 - (int) strlen (REGISTER_NAME (regnum)), "");
+  fprintf_filtered (file, "%s:", REGISTER_NAME (regnum));
+  fprintf_filtered (file, "%*s", 4 - (int) strlen (REGISTER_NAME (regnum)),
+		    "");
 
   if (REGISTER_RAW_SIZE (regnum) == 4 || mips2_fp_compat ())
     {
       /* 4-byte registers: Print hex and floating.  Also print even
          numbered registers as doubles.  */
-      mips_read_fp_register_single (regnum, raw_buffer);
+      mips_read_fp_register_single (frame, regnum, raw_buffer);
       flt1 = unpack_double (mips_float_register_type (), raw_buffer, &inv1);
 
-      print_scalar_formatted (raw_buffer, builtin_type_uint32, 'x', 'w',
-                              gdb_stdout);
+      print_scalar_formatted (raw_buffer, builtin_type_uint32, 'x', 'w', file);
 
-      printf_filtered (" flt: ");
+      fprintf_filtered (file, " flt: ");
       if (inv1)
-	printf_filtered (" <invalid float> ");
+	fprintf_filtered (file, " <invalid float> ");
       else
-	printf_filtered ("%-17.9g", flt1);
+	fprintf_filtered (file, "%-17.9g", flt1);
 
       if (regnum % 2 == 0)
 	{
-	  mips_read_fp_register_double (regnum, raw_buffer);
+	  mips_read_fp_register_double (frame, regnum, raw_buffer);
 	  doub = unpack_double (mips_double_register_type (), raw_buffer,
 	                        &inv2);
 
-	  printf_filtered (" dbl: ");
+	  fprintf_filtered (file, " dbl: ");
 	  if (inv2)
-	    printf_filtered ("<invalid double>");
+	    fprintf_filtered (file, "<invalid double>");
 	  else
-	    printf_filtered ("%-24.17g", doub);
+	    fprintf_filtered (file, "%-24.17g", doub);
 	}
     }
   else
     {
       /* Eight byte registers: print each one as hex, float and double.  */
-      mips_read_fp_register_single (regnum, raw_buffer);
+      mips_read_fp_register_single (frame, regnum, raw_buffer);
       flt1 = unpack_double (mips_float_register_type (), raw_buffer, &inv1);
 
-      mips_read_fp_register_double (regnum, raw_buffer);
+      mips_read_fp_register_double (frame, regnum, raw_buffer);
       doub = unpack_double (mips_double_register_type (), raw_buffer, &inv2);
 
 
-      print_scalar_formatted (raw_buffer, builtin_type_uint64, 'x', 'g',
-                              gdb_stdout);
+      print_scalar_formatted (raw_buffer, builtin_type_uint64, 'x', 'g', file);
 
-      printf_filtered (" flt: ");
+      fprintf_filtered (file, " flt: ");
       if (inv1)
-	printf_filtered ("<invalid float>");
+	fprintf_filtered (file, "<invalid float>");
       else
-	printf_filtered ("%-17.9g", flt1);
+	fprintf_filtered (file, "%-17.9g", flt1);
 
-      printf_filtered (" dbl: ");
+      fprintf_filtered (file, " dbl: ");
       if (inv2)
-	printf_filtered ("<invalid double>");
+	fprintf_filtered (file, "<invalid double>");
       else
-	printf_filtered ("%-24.17g", doub);
+	fprintf_filtered (file, "%-24.17g", doub);
     }
 }
 
 static void
-mips_print_register (int regnum, int all)
+mips_print_register (struct ui_file *file, struct frame_info *frame,
+		     int regnum, int all)
 {
   char raw_buffer[MAX_REGISTER_SIZE];
   int offset;
 
   if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (regnum)) == TYPE_CODE_FLT)
     {
-      mips_print_fp_register (regnum);
+      mips_print_fp_register (file, frame, regnum);
       return;
     }
 
   /* Get the data in raw format.  */
-  if (!frame_register_read (deprecated_selected_frame, regnum, raw_buffer))
+  if (!frame_register_read (frame, regnum, raw_buffer))
     {
-      printf_filtered ("%s: [Invalid]", REGISTER_NAME (regnum));
+      fprintf_filtered (file, "%s: [Invalid]", REGISTER_NAME (regnum));
       return;
     }
 
-  fputs_filtered (REGISTER_NAME (regnum), gdb_stdout);
+  fputs_filtered (REGISTER_NAME (regnum), file);
 
   /* The problem with printing numeric register names (r26, etc.) is that
      the user can't use them on input.  Probably the best solution is to
      fix it so that either the numeric or the funky (a2, etc.) names
      are accepted on input.  */
   if (regnum < MIPS_NUMREGS)
-    printf_filtered ("(r%d): ", regnum);
+    fprintf_filtered (file, "(r%d): ", regnum);
   else
-    printf_filtered (": ");
+    fprintf_filtered (file, ": ");
 
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     offset = REGISTER_RAW_SIZE (regnum) - REGISTER_VIRTUAL_SIZE (regnum);
@@ -4090,18 +4088,19 @@ mips_print_register (int regnum, int all)
 
   print_scalar_formatted (raw_buffer + offset,
 			  REGISTER_VIRTUAL_TYPE (regnum),
-			  'x', 0, gdb_stdout);
+			  'x', 0, file);
 }
 
 /* Replacement for generic do_registers_info.
    Print regs in pretty columns.  */
 
 static int
-do_fp_register_row (int regnum)
+print_fp_register_row (struct ui_file *file, struct frame_info *frame,
+		       int regnum)
 {
-  printf_filtered (" ");
-  mips_print_fp_register (regnum);
-  printf_filtered ("\n");
+  fprintf_filtered (file, " ");
+  mips_print_fp_register (file, frame, regnum);
+  fprintf_filtered (file, "\n");
   return regnum + 1;
 }
 
@@ -4109,7 +4108,8 @@ do_fp_register_row (int regnum)
 /* Print a row's worth of GP (int) registers, with name labels above */
 
 static int
-do_gp_register_row (int regnum)
+print_gp_register_row (struct ui_file *file, struct frame_info *frame,
+		       int regnum)
 {
   /* do values for GP (int) regs */
   char raw_buffer[MAX_REGISTER_SIZE];
@@ -4120,19 +4120,20 @@ do_gp_register_row (int regnum)
 
 
   /* For GP registers, we print a separate row of names above the vals */
-  printf_filtered ("     ");
+  fprintf_filtered (file, "     ");
   for (col = 0; col < ncols && regnum < numregs; regnum++)
     {
       if (*REGISTER_NAME (regnum) == '\0')
 	continue;		/* unused register */
       if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (regnum)) == TYPE_CODE_FLT)
 	break;			/* end the row: reached FP register */
-      printf_filtered (MIPS_REGSIZE == 8 ? "%17s" : "%9s",
-		       REGISTER_NAME (regnum));
+      fprintf_filtered (file, MIPS_REGSIZE == 8 ? "%17s" : "%9s",
+			REGISTER_NAME (regnum));
       col++;
     }
-  printf_filtered (start_regnum < MIPS_NUMREGS ? "\n R%-4d" : "\n      ",
-		   start_regnum);	/* print the R0 to R31 names */
+  fprintf_filtered (file,
+		    start_regnum < MIPS_NUMREGS ? "\n R%-4d" : "\n      ",
+		    start_regnum);	/* print the R0 to R31 names */
 
   regnum = start_regnum;	/* go back to start of row */
   /* now print the values in hex, 4 or 8 to the row */
@@ -4143,7 +4144,7 @@ do_gp_register_row (int regnum)
       if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (regnum)) == TYPE_CODE_FLT)
 	break;			/* end row: reached FP register */
       /* OK: get the data in raw format.  */
-      if (!frame_register_read (deprecated_selected_frame, regnum, raw_buffer))
+      if (!frame_register_read (frame, regnum, raw_buffer))
 	error ("can't read register %d (%s)", regnum, REGISTER_NAME (regnum));
       /* pad small registers */
       for (byte = 0; byte < (MIPS_REGSIZE - REGISTER_VIRTUAL_SIZE (regnum)); byte++)
@@ -4153,17 +4154,17 @@ do_gp_register_row (int regnum)
 	for (byte = REGISTER_RAW_SIZE (regnum) - REGISTER_VIRTUAL_SIZE (regnum);
 	     byte < REGISTER_RAW_SIZE (regnum);
 	     byte++)
-	  printf_filtered ("%02x", (unsigned char) raw_buffer[byte]);
+	  fprintf_filtered (file, "%02x", (unsigned char) raw_buffer[byte]);
       else
 	for (byte = REGISTER_VIRTUAL_SIZE (regnum) - 1;
 	     byte >= 0;
 	     byte--)
-	  printf_filtered ("%02x", (unsigned char) raw_buffer[byte]);
-      printf_filtered (" ");
+	  fprintf_filtered (file, "%02x", (unsigned char) raw_buffer[byte]);
+      fprintf_filtered (file, " ");
       col++;
     }
   if (col > 0)			/* ie. if we actually printed anything... */
-    printf_filtered ("\n");
+    fprintf_filtered (file, "\n");
 
   return regnum;
 }
@@ -4171,15 +4172,16 @@ do_gp_register_row (int regnum)
 /* MIPS_DO_REGISTERS_INFO(): called by "info register" command */
 
 static void
-mips_do_registers_info (int regnum, int fpregs)
+mips_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
+			   struct frame_info *frame, int regnum, int all)
 {
   if (regnum != -1)		/* do one specified register */
     {
       if (*(REGISTER_NAME (regnum)) == '\0')
 	error ("Not a valid register for the current processor type");
 
-      mips_print_register (regnum, 0);
-      printf_filtered ("\n");
+      mips_print_register (file, frame, regnum, 0);
+      fprintf_filtered (file, "\n");
     }
   else
     /* do all (or most) registers */
@@ -4188,12 +4190,14 @@ mips_do_registers_info (int regnum, int fpregs)
       while (regnum < NUM_REGS)
 	{
 	  if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (regnum)) == TYPE_CODE_FLT)
-	    if (fpregs)		/* true for "INFO ALL-REGISTERS" command */
-	      regnum = do_fp_register_row (regnum);	/* FP regs */
-	    else
-	      regnum += MIPS_NUMREGS;	/* skip floating point regs */
+	    {
+	      if (all)		/* true for "INFO ALL-REGISTERS" command */
+		regnum = print_fp_register_row (file, frame, regnum);
+	      else
+		regnum += MIPS_NUMREGS;	/* skip floating point regs */
+	    }
 	  else
-	    regnum = do_gp_register_row (regnum);	/* GP (int) regs */
+	    regnum = print_gp_register_row (file, frame, regnum);
 	}
     }
 }
@@ -5962,7 +5966,7 @@ mips_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_register_virtual_type (gdbarch, mips_register_virtual_type);
   set_gdbarch_register_virtual_size (gdbarch, generic_register_size);
 
-  set_gdbarch_deprecated_do_registers_info (gdbarch, mips_do_registers_info);
+  set_gdbarch_print_registers_info (gdbarch, mips_print_registers_info);
   set_gdbarch_pc_in_sigtramp (gdbarch, mips_pc_in_sigtramp);
 
   /* Hook in OS ABI-specific overrides, if they have been registered.  */
