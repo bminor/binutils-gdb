@@ -689,8 +689,11 @@ static void load_partial_dies (bfd *, char *, struct dwarf2_cu *);
 static char *load_partial_die (struct partial_die_info *,
 			       bfd *, char *, struct dwarf2_cu *);
 
-static void read_partial_die (struct partial_die_info *,
-			      bfd *, char *, struct dwarf2_cu *);
+static struct partial_die_info *find_partial_die (unsigned long,
+						  struct dwarf2_cu *);
+
+static void fixup_partial_die (struct partial_die_info *,
+			       struct dwarf2_cu *);
 
 static char *read_full_die (struct die_info **, bfd *, char *,
 			    struct dwarf2_cu *, int *);
@@ -1199,13 +1202,13 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 
   /* Since the objects we're extracting from dwarf_info_buffer vary in
      length, only the individual functions to extract them (like
-     read_comp_unit_head and read_partial_die) can really know whether
+     read_comp_unit_head and load_partial_die) can really know whether
      the buffer is large enough to hold another complete object.
 
      At the moment, they don't actually check that.  If
      dwarf_info_buffer holds just one extra byte after the last
      compilation unit's dies, then read_comp_unit_head will happily
-     read off the end of the buffer.  read_partial_die is similarly
+     read off the end of the buffer.  load_partial_die is similarly
      casual.  Those functions should be fixed.
 
      For this loop condition, simply checking whether there's any data
@@ -1350,66 +1353,64 @@ scan_partial_symbols (char *info_ptr, CORE_ADDR *lowpc,
 {
   struct objfile *objfile = cu->objfile;
   bfd *abfd = objfile->obfd;
-  struct partial_die_info pdi, *pdi_p;
+  struct partial_die_info *pdi_p;
 
   /* Now, march along the PDI's, descending into ones which have
      interesting children but skipping the children of the other ones,
      until we reach the end of the compilation unit.  */
 
-  read_partial_die (&pdi, abfd, info_ptr, cu);
-  pdi_p = &pdi;
+  pdi_p = find_partial_die (info_ptr - dwarf_info_buffer, cu);
 
   while (pdi_p != NULL)
     {
-      /* FIXME */
-      read_partial_die (&pdi, abfd, pdi_p->offset + dwarf_info_buffer, cu);
+      fixup_partial_die (pdi_p, cu);
 
       /* Anonymous namespaces have no name but have interesting
 	 children, so we need to look at them.  Ditto for anonymous
 	 enums.  */
 
-      if (pdi.name != NULL || pdi.tag == DW_TAG_namespace
-	  || pdi.tag == DW_TAG_enumeration_type)
+      if (pdi_p->name != NULL || pdi_p->tag == DW_TAG_namespace
+	  || pdi_p->tag == DW_TAG_enumeration_type)
 	{
-	  switch (pdi.tag)
+	  switch (pdi_p->tag)
 	    {
 	    case DW_TAG_subprogram:
-	      if (pdi.has_pc_info)
+	      if (pdi_p->has_pc_info)
 		{
-		  if (pdi.lowpc < *lowpc)
+		  if (pdi_p->lowpc < *lowpc)
 		    {
-		      *lowpc = pdi.lowpc;
+		      *lowpc = pdi_p->lowpc;
 		    }
-		  if (pdi.highpc > *highpc)
+		  if (pdi_p->highpc > *highpc)
 		    {
-		      *highpc = pdi.highpc;
+		      *highpc = pdi_p->highpc;
 		    }
-		  if (!pdi.is_declaration)
+		  if (!pdi_p->is_declaration)
 		    {
-		      add_partial_symbol (&pdi, cu, namespace);
+		      add_partial_symbol (pdi_p, cu, namespace);
 		    }
 		}
 	      break;
 	    case DW_TAG_variable:
 	    case DW_TAG_typedef:
 	    case DW_TAG_union_type:
-	      if (!pdi.is_declaration)
+	      if (!pdi_p->is_declaration)
 		{
-		  add_partial_symbol (&pdi, cu, namespace);
+		  add_partial_symbol (pdi_p, cu, namespace);
 		}
 	      break;
 	    case DW_TAG_class_type:
 	    case DW_TAG_structure_type:
-	      if (!pdi.is_declaration)
+	      if (!pdi_p->is_declaration)
 		{
-		  info_ptr = add_partial_structure (&pdi, info_ptr, cu,
+		  info_ptr = add_partial_structure (pdi_p, info_ptr, cu,
 						    namespace);
 		}
 	      break;
 	    case DW_TAG_enumeration_type:
-	      if (!pdi.is_declaration)
+	      if (!pdi_p->is_declaration)
 		{
-		  info_ptr = add_partial_enumeration (&pdi, info_ptr, cu,
+		  info_ptr = add_partial_enumeration (pdi_p, info_ptr, cu,
 						      namespace);
 		}
 	      break;
@@ -1417,7 +1418,7 @@ scan_partial_symbols (char *info_ptr, CORE_ADDR *lowpc,
             case DW_TAG_subrange_type:
 	      /* File scope base type definitions are added to the partial
 	         symbol table.  */
-	      add_partial_symbol (&pdi, cu, namespace);
+	      add_partial_symbol (pdi_p, cu, namespace);
 	      break;
 	    case DW_TAG_namespace:
 	      /* We've hit a DW_TAG_namespace entry, so we know this
@@ -1425,7 +1426,7 @@ scan_partial_symbols (char *info_ptr, CORE_ADDR *lowpc,
 		 generates them; update NAMESPACE to reflect that.  */
 	      if (namespace == NULL)
 		namespace = "";
-	      info_ptr = add_partial_namespace (&pdi, info_ptr, lowpc, highpc,
+	      info_ptr = add_partial_namespace (pdi_p, info_ptr, lowpc, highpc,
 						cu, namespace);
 	      break;
 	    default:
@@ -1434,7 +1435,7 @@ scan_partial_symbols (char *info_ptr, CORE_ADDR *lowpc,
 	}
 
       /* FIXME unnecessary now */
-      if (pdi.tag == 0)
+      if (pdi_p->tag == 0)
 	break;
 
       /* If the die has a sibling, skip to the sibling, unless another
@@ -1442,13 +1443,9 @@ scan_partial_symbols (char *info_ptr, CORE_ADDR *lowpc,
 
       /* NOTE: carlton/2003-06-16: This is a bit hackish, but whether
 	 or not we want to update this depends on enough stuff (not
-	 only pdi.tag but also whether or not pdi.name is NULL) that
+	 only pdi_p->tag but also whether or not pdi_p->name is NULL) that
 	 this seems like the easiest way to handle the issue.  */
 
-      /*
-      if (!info_ptr_updated)
-	info_ptr = locate_pdi_sibling (&pdi, info_ptr, abfd, cu);
-      */
       pdi_p = pdi_p->die_sibling;
       // if (pdi_p)
       // fprintf_unfiltered (gdb_stderr, "scan: Advancing to DIE %x\n", pdi_p->offset);
@@ -1730,7 +1727,6 @@ add_partial_structure (struct partial_die_info *struct_pdi, char *info_ptr,
   xfree (actual_class_name);
 
   return (struct_pdi->offset + dwarf_info_buffer);
-  /* return locate_pdi_sibling (struct_pdi, info_ptr, abfd, cu); */
 }
 
 /* Read a partial die corresponding to an enumeration type.  */
@@ -4559,48 +4555,42 @@ load_partial_die (struct partial_die_info *part_die, bfd *abfd,
 
 /* Like load_partial_die, but also patch up the partial DIE's name
    according to its specification if necessary.  */
-/* FIXME: I've over-eagerly removed calls to this.  The fixup has to happen
-   sometime.  */
-static void
-read_partial_die (struct partial_die_info *part_die, bfd *abfd,
-		  char *info_ptr, struct dwarf2_cu *cu)
+static struct partial_die_info *
+find_partial_die (unsigned long offset, struct dwarf2_cu *cu)
 {
   struct partial_die_info *lookup_die = NULL;
+  splay_tree_node node;
 
-  if (cu->partial_dies)
-    {
-      splay_tree_node node;
-      node = splay_tree_lookup (cu->partial_dies,
-				info_ptr - dwarf_info_buffer);
-      if (node == NULL)
-	internal_error (__FILE__, __LINE__,
-			"could not find partial DIE in cache\n");
+  node = splay_tree_lookup (cu->partial_dies, offset);
+  if (node == NULL)
+    internal_error (__FILE__, __LINE__,
+		    "could not find partial DIE in cache\n");
 
-      lookup_die = (struct partial_die_info *) node->value;
+  return (struct partial_die_info *) node->value;
+}
 
-      *part_die = *lookup_die;
-    }
-  else
-    info_ptr = load_partial_die (part_die, abfd, info_ptr, cu);
-
+static void
+fixup_partial_die (struct partial_die_info *part_die,
+		   struct dwarf2_cu *cu)
+{
   /* If we found a reference attribute and the die has no name, try
      to find a name in the referred to die.  */
 
   if (part_die->has_specification && part_die->name == NULL)
     {
-      struct partial_die_info spec_die;
-      char *spec_ptr;
+      struct partial_die_info *spec_die;
+      unsigned long spec_offset;
 
-      spec_ptr = dwarf_info_buffer
-	+ dwarf2_get_ref_die_offset (&part_die->spec_attr, cu);
-      read_partial_die (&spec_die, abfd, spec_ptr, cu);
-      if (spec_die.name)
+      spec_offset = dwarf2_get_ref_die_offset (&part_die->spec_attr, cu);
+      spec_die = find_partial_die (spec_offset, cu);
+
+      if (spec_die->name)
 	{
-	  part_die->name = spec_die.name;
+	  part_die->name = spec_die->name;
 
 	  /* Copy DW_AT_external attribute if it is set.  */
-	  if (spec_die.is_external)
-	    part_die->is_external = spec_die.is_external;
+	  if (spec_die->is_external)
+	    part_die->is_external = spec_die->is_external;
 	}
     }
 }
