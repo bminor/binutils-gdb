@@ -35,6 +35,7 @@
 #include "command.h"
 #include "gdb_string.h"
 #include "infcall.h"
+#include "dummy-frame.h"
 
 /* NOTE: cagney/2003-04-16: What's the future of this code?
 
@@ -308,6 +309,9 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
   CORE_ADDR real_pc;
   struct type *ftype = check_typedef (SYMBOL_TYPE (function));
   CORE_ADDR bp_addr;
+  struct regcache *caller_regcache;
+  struct cleanup *caller_regcache_cleanup;
+  struct frame_id dummy_id;
 
   if (!target_has_execution)
     noprocess ();
@@ -325,23 +329,12 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
   inf_status = save_inferior_status (1);
   inf_status_cleanup = make_cleanup_restore_inferior_status (inf_status);
 
-  /* FIXME: cagney/2003-02-26: Step zero of this little tinker is to
-     extract the generic dummy frame code from the architecture
-     vector.  Hence this direct call.
-
-     A follow-on change is to modify this interface so that it takes
-     thread OR frame OR ptid as a parameter, and returns a dummy frame
-     handle.  The handle can then be used further down as a parameter
-     to generic_save_dummy_frame_tos().  Hmm, thinking about it, since
-     everything is ment to be using generic dummy frames, why not even
-     use some of the dummy frame code to here - do a regcache dup and
-     then pass the duped regcache, along with all the other stuff, at
-     one single point.
-
-     In fact, you can even save the structure's return address in the
-     dummy frame and fix one of those nasty lost struct return edge
-     conditions.  */
-  generic_push_dummy_frame ();
+  /* Save the caller's registers so that they can be restored once the
+     callee returns.  To allow nested calls the registers are (further
+     down) pushed onto a dummy frame stack.  Include a cleanup (which
+     is tossed once the regcache has been pushed).  */
+  caller_regcache = frame_save_as_regcache (get_current_frame ());
+  caller_regcache_cleanup = make_cleanup_regcache_xfree (caller_regcache);
 
   /* Ensure that the initial SP is correctly aligned.  */
   {
@@ -490,10 +483,6 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
     default:
       internal_error (__FILE__, __LINE__, "bad switch");
     }
-
-  /* Save where the breakpoint is going to be inserted so that the
-     dummy-frame code is later able to re-identify it.  */
-  generic_save_call_dummy_addr (bp_addr, bp_addr + 1);
 
   if (nargs < TYPE_NFIELDS (ftype))
     error ("too few arguments in function call");
@@ -660,36 +649,44 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
   else
     error ("This target does not support function calls");
 
+  /* Set up a frame ID for the dummy frame so we can pass it to
+     set_momentary_breakpoint.  We need to give the breakpoint a frame
+     ID so that the breakpoint code can correctly re-identify the
+     dummy breakpoint.  */
   /* Sanity.  The exact same SP value is returned by PUSH_DUMMY_CALL,
      saved as the dummy-frame TOS, and used by unwind_dummy_id to form
      the frame ID's stack address.  */
-  generic_save_dummy_frame_tos (sp);
+  dummy_id = frame_id_build (sp, bp_addr);
 
-  /* Now proceed, having reached the desired place.  */
-  clear_proceed_status ();
-    
   /* Create a momentary breakpoint at the return address of the
      inferior.  That way it breaks when it returns.  */
 
   {
     struct breakpoint *bpt;
     struct symtab_and_line sal;
-    struct frame_id frame;
     init_sal (&sal);		/* initialize to zeroes */
     sal.pc = bp_addr;
     sal.section = find_pc_overlay (sal.pc);
-    /* Set up a frame ID for the dummy frame so we can pass it to
-       set_momentary_breakpoint.  We need to give the breakpoint a
-       frame ID so that the breakpoint code can correctly re-identify
-       the dummy breakpoint.  */
     /* Sanity.  The exact same SP value is returned by
        PUSH_DUMMY_CALL, saved as the dummy-frame TOS, and used by
        unwind_dummy_id to form the frame ID's stack address.  */
-    frame = frame_id_build (sp, sal.pc);
-    bpt = set_momentary_breakpoint (sal, frame, bp_call_dummy);
+    bpt = set_momentary_breakpoint (sal, dummy_id, bp_call_dummy);
     bpt->disposition = disp_del;
   }
 
+  /* Everything's ready, push all the info needed to restore the
+     caller (and identify the dummy-frame) onto the dummy-frame
+     stack.  */
+  dummy_frame_push (caller_regcache, &dummy_id);
+  discard_cleanups (caller_regcache_cleanup);
+
+  /* - SNIP - SNIP - SNIP - SNIP - SNIP - SNIP - SNIP - SNIP - SNIP -
+     If you're looking to implement asynchronous dummy-frames, then
+     just below is the place to chop this function in two..  */
+
+  /* Now proceed, having reached the desired place.  */
+  clear_proceed_status ();
+    
   /* Execute a "stack dummy", a piece of code stored in the stack by
      the debugger to be executed in the inferior.
 

@@ -521,8 +521,6 @@ extern void *frame_obstack_zalloc (unsigned long size);
 /* Create a regcache, and copy the frame's registers into it.  */
 struct regcache *frame_save_as_regcache (struct frame_info *this_frame);
 
-extern void generic_save_dummy_frame_tos (CORE_ADDR sp);
-
 extern struct block *get_frame_block (struct frame_info *,
                                       CORE_ADDR *addr_in_block);
 
@@ -575,11 +573,7 @@ extern void print_frame_info (struct frame_info *, int print_level,
 
 extern struct frame_info *block_innermost_frame (struct block *);
 
-extern void generic_push_dummy_frame (void);
-
 extern int deprecated_pc_in_call_dummy (CORE_ADDR pc);
-
-extern void generic_save_call_dummy_addr (CORE_ADDR lo, CORE_ADDR hi);
 
 /* FIXME: cagney/2003-02-02: Should be deprecated or replaced with a
    function called get_frame_register_p().  This slightly weird (and

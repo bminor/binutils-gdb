@@ -31,6 +31,7 @@
 #include "frame-unwind.h"
 #include "command.h"
 #include "gdbcmd.h"
+#include "gdb_string.h"
 
 static int pc_in_dummy_frame (CORE_ADDR pc);
 
@@ -94,27 +95,24 @@ pc_in_dummy_frame (CORE_ADDR pc)
   return 0;
 }
 
-/* Save all the registers on the dummy frame stack.  Most ports save the
-   registers on the target stack.  This results in lots of unnecessary memory
-   references, which are slow when debugging via a serial line.  Instead, we
-   save all the registers internally, and never write them to the stack.  The
-   registers get restored when the called function returns to the entry point,
-   where a breakpoint is laying in wait.  */
+/* Push the caller's state, along with the dummy frame info, onto a
+   dummy-frame stack.  */
 
 void
-generic_push_dummy_frame (void)
+dummy_frame_push (struct regcache *caller_regcache,
+		  const struct frame_id *dummy_id)
 {
   struct dummy_frame *dummy_frame;
-  CORE_ADDR fp = get_frame_base (get_current_frame ());
 
-  /* check to see if there are stale dummy frames, 
-     perhaps left over from when a longjump took us out of a 
-     function that was called by the debugger */
-
+  /* Check to see if there are stale dummy frames, perhaps left over
+     from when a longjump took us out of a function that was called by
+     the debugger.  */
   dummy_frame = dummy_frame_stack;
   while (dummy_frame)
-    if (gdbarch_inner_than (current_gdbarch, dummy_frame->top, fp))
-      /* stale -- destroy! */
+    /* FIXME: cagney/2004-08-02: Should just test IDs.  */
+    if (gdbarch_inner_than (current_gdbarch, dummy_frame->top,
+			    dummy_id->stack_addr))
+      /* Stale -- destroy!  */
       {
 	dummy_frame_stack = dummy_frame->next;
 	regcache_xfree (dummy_frame->regcache);
@@ -124,29 +122,17 @@ generic_push_dummy_frame (void)
     else
       dummy_frame = dummy_frame->next;
 
-  dummy_frame = xmalloc (sizeof (struct dummy_frame));
-  dummy_frame->regcache = frame_save_as_regcache (get_current_frame ());
-
-  dummy_frame->pc = read_pc ();
-  dummy_frame->top = 0;
-  dummy_frame->id = get_frame_id (get_current_frame ());
+  dummy_frame = XZALLOC (struct dummy_frame);
+  dummy_frame->regcache = caller_regcache;
+  dummy_frame->id = (*dummy_id);
+  /* FIXME: cagney/2004-08-02: Retain for compatibility - trust the
+     ID.  */
+  dummy_frame->pc = dummy_id->code_addr;
+  dummy_frame->top = dummy_id->stack_addr;
+  dummy_frame->call_lo = dummy_id->code_addr + 0;
+  dummy_frame->call_hi = dummy_id->code_addr + 1;
   dummy_frame->next = dummy_frame_stack;
   dummy_frame_stack = dummy_frame;
-}
-
-void
-generic_save_dummy_frame_tos (CORE_ADDR sp)
-{
-  dummy_frame_stack->top = sp;
-}
-
-/* Record the upper/lower bounds on the address of the call dummy.  */
-
-void
-generic_save_call_dummy_addr (CORE_ADDR lo, CORE_ADDR hi)
-{
-  dummy_frame_stack->call_lo = lo;
-  dummy_frame_stack->call_hi = hi;
 }
 
 /* Return the dummy frame cache, it contains both the ID, and a

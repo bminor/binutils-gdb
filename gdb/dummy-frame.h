@@ -1,6 +1,6 @@
 /* Code dealing with dummy stack frames, for GDB, the GNU debugger.
 
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2002, 2004 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -26,6 +26,22 @@ struct frame_info;
 struct regcache;
 struct frame_unwind;
 struct frame_id;
+
+/* Push the information needed to identify, and unwind from, a dummy
+   frame onto the dummy frame stack.  */
+
+/* NOTE: cagney/2004-08-02: This interface will eventually need to be
+   parameterized with the caller's thread - that will allow per-thread
+   dummy-frame stacks and, hence, per-thread inferior function
+   calls.  */
+
+/* NOTE: cagney/2004-08-02: In the case of ABIs using push_dummy_code
+   containing more than one instruction, this interface many need to
+   be expanded so that it knowns the lower/upper extent of the dummy
+   frame's code.  */
+
+extern void dummy_frame_push (struct regcache *regcache,
+			      const struct frame_id *dummy_id);
 
 /* If the PC falls in a dummy frame, return a dummy frame
    unwinder.  */

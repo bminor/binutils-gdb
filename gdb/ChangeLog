@@ -1,3 +1,23 @@
+2004-08-02  Andrew Cagney  <cagney@gnu.org>
+
+	* dummy-frame.c: Include "gdb_string.h".
+	(generic_save_call_dummy_addr, generic_push_dummy_frame)
+	(generic_save_dummy_frame_tos): Delete.
+	(dummy_frame_push): New function, replaces above.
+	* dummy-frame.h: Update copyright.
+	(dummy_frame_push): Declare.
+	* frame.h (generic_save_dummy_frame_tos, generic_push_dummy_frame)
+	(generic_save_call_dummy_addr): Delete declarations.
+	* infcall.c: Include "dummy-frame.h".
+	(call_function_by_hand): Add locals caller_regcache,
+	caller_regcache_cleanup and dummy_id.  Replace push_dummy_frame
+	with call to frame_save_as_regcache plus cleanup.  Delete calls to
+	generic_save_call_dummy_addr and generic_save_dummy_frame_tos.
+	Move clear_proceed_status to just before the resume, add call to
+	dummy_frame_push (discard cleanup).
+	* Makefile.in (infcall.o): Add $(dummy_frame_h).
+	(dummy-frame.o): Add $(gdb_string_h).
+
 2004-08-01  Andrew Cagney  <cagney@gnu.org>
 
 	* dummy-frame.h (dummy_frame_unwind): Replace dummy_frame_sniffer.
