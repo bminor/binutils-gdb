@@ -319,11 +319,11 @@ elf_symtab_read (abfd, addr, objfile)
 		      ms_type = mst_file_text;
 		    }
 		}
-	      else if (sym -> section -> flags & SEC_DATA)
+	      else if (sym -> section -> flags & SEC_ALLOC)
 		{
 		  if (sym -> flags & BSF_GLOBAL)
 		    {
-		      if (sym -> section -> flags & SEC_HAS_CONTENTS)
+		      if (sym -> section -> flags & SEC_LOAD)
 			{
 			  ms_type = mst_data;
 			}
@@ -391,7 +391,7 @@ elf_symtab_read (abfd, addr, objfile)
 			}
 		      /* Not a special stabs-in-elf symbol, do regular
 			 symbol processing. */
-		      if (sym -> section -> flags & SEC_HAS_CONTENTS)
+		      if (sym -> section -> flags & SEC_LOAD)
 			{
 			  ms_type = mst_file_data;
 			}
