@@ -3,6 +3,25 @@ Fri Mar 21 13:08:26 1997  Ian Lance Taylor  <ian@cygnus.com>
 	* elf32-sparc.c (elf32_sparc_size_dynamic_sections): If there is
 	no .rela.plt section, don't output a DT_PLTGOT dynamic entry.
 
+Fri Mar 21 12:36:46 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* elf32-m32r.c (m32r_elf_howto_table): Use special function for LO16.
+	(m32r_hi16_list): New static local.
+	(m32r_elf_hi16_reloc): Don't perform reloc, just queue it up.
+	(m32r_elf_do_hi16_reloc): Delete.
+	(m32r_elf_relocate_hi16): New function.
+	(m32r_elf_lo16_reloc): New function.
+	(m32r_elf_relocate_section): For HI16 relocs, scan for corresponding
+	LO16 reloc.
+
+	Mon Mar 10 16:03:31 1997  Doug Evans  <dje@seba.cygnus.com>
+
+	* elf32-m32r.c (m32r_elf_create_linker_section): Delete.
+	(m32r_elf_add_symbol_hook): Rewrite _SDA_BASE_ support.
+	(m32r_elf_final_sda_base): New function.
+	(m32r_elf_relocate_section): Rewrite sdata support.
+	(m32r_elf_finish_dynamic_sections): Delete.
+
 Thu Mar 20 12:39:02 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	Based on patches from Philippe De Muyter <phdm@info.ucl.ac.be>.
@@ -50,11 +69,9 @@ Tue Mar 18 22:40:09 1997  H.J. Lu  <hjl@lucon.org>
 
 Tue Mar 18 12:58:08 1997  Ian Lance Taylor  <ian@cygnus.com>
 
-start-sanitize-m32r
 	* elf32-m32r.c (m32r_elf_is_local_label_name): Remove.
 	(bfd_elf32_bfd_is_local_label): Don't define.
 
-end-sanitize-m32r
 	* xcofflink.c (_bfd_xcoff_bfd_final_link): Call bfd_malloc rather
 	than malloc.
 
@@ -264,14 +281,12 @@ end-sanitize-tic80
 	* coff-w65.c: Ditto
 	* coff-z8k.c: Ditto.
 	
-start-sanitize-m32r
 Wed Mar  5 13:59:09 1997  Doug Evans  <dje@seba.cygnus.com>
 
 	* elf32-m32r.c (m32r_elf_do_10_pcrel_reloc): Fix overflow calc.
 	(m32r_elf_relax_section, m32r_elf_relax_delete_bytes,
 	m32r_elf_get_relocated_section_contents): First pass at relax support.
 
-end-sanitize-m32r
 Mon Mar  3 13:27:09 1997  Ulrich Drepper  <drepper@rtl.cygnus.com>
 
 	* elflink.h (elf_link_add_object_symbols): Use correct sh_size
@@ -478,7 +493,6 @@ Fri Feb 21 16:15:18 1997  Jeffrey A Law  (law@cygnus.com)
 	relaxing.  Implement abs24 -> abs16, imm24 -> imm16 and d24 -> d16
 	relaxing.
 
-start-sanitize-m32r
 Fri Feb 21 13:55:14 1997  Doug Evans  <dje@seba.cygnus.com>
 
 	* elf32-m32r.c: Rewrite to use ELF backend linker.
@@ -487,7 +501,6 @@ Fri Feb 21 13:55:14 1997  Doug Evans  <dje@seba.cygnus.com>
 	* reloc.c: Document BFD_RELOC_M32R_SDA16.
 	* bfd-in2.h,libbfd.h: Regenerated.
 
-end-sanitize-m32r
 Thu Feb 20 23:50:31 1997  Jeffrey A Law  (law@cygnus.com)
 
 	* elf32-mn10200.c (mn10200_elf_relax_section): New function.
@@ -596,13 +609,11 @@ Tue Feb 11 15:27:32 1997  Ian Lance Taylor  <ian@cygnus.com>
 	* reloc.c (BFD_RELOC_MIPS16_GPREL): Define.
 	* bfd-in2.h, libbfd.h: Rebuild.
 
-start-sanitize-m32r
 Mon Feb 10 23:25:00 1997  Doug Evans  <dje@seba.ricochet.net>
 
 	* elf32-m32r.c (elf_m32r_howto_table): Change partial_inplace to true
 	for R_M32R_{16,32,24,HI16_ULO,HI16_SLO,LO16}.
 
-end-sanitize-m32r
 start-sanitize-r5900
         Fri Feb  7 16:20:17 1997  Gavin Koch   <gavin@cygnus.com>
         
@@ -667,14 +678,12 @@ Wed Jan 29 00:00:49 1997  Jeffrey A Law  (law@cygnus.com)
 	(elf_mn10200_howto_table): Likewise.
 	(mn10200_reloc_map): Likewise.
 
-start-sanitize-m32r
 Mon Jan 27 12:07:35 1997  Doug Evans  <dje@seba.cygnus.com>
 
 	* reloc.c: Add relocs BFD_RELOC_M32R_{HI16_[US]LO,LO16}.
 	* bfd-in2.h, libbfd.h: Regenerated.
 	* elf32-m32r.c: Add support for them.
 
-end-sanitize-m32r
 Mon Jan 27 12:25:02 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* aout-arm.c (MY_swap_std_reloc_in): Remove unused r_length.
@@ -1150,13 +1159,11 @@ Mon Nov 11 10:37:02 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 	appropriate relocations in the .so file if shared.
 	(ppc_elf_relocate_section): Ditto.
 
-start-sanitize-m32r
 Tue Oct 29 15:03:02 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* elf32-m32r.c (elf_m32r_howto_table, R_M32R_24): Use
 	complain_overflow_unsigned.
 
-end-sanitize-m32r
 Tue Oct 29 12:53:46 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* elf32-d10v.c (elf_d10v_howto_table): Don't complain on
@@ -1244,7 +1251,6 @@ Mon Oct 21 10:54:58 1996  Ian Lance Taylor  <ian@cygnus.com>
 	when attempting to do a relocateable link with different object
 	file formats, rather than calling abort.
 
-start-sanitize-m32r
 Thu Oct 17 10:43:29 1996  Doug Evans  <dje@canuck.cygnus.com>
 
 	* reloc.c (m32r relocs): Rename them.
@@ -1254,7 +1260,6 @@ Thu Oct 17 10:43:29 1996  Doug Evans  <dje@canuck.cygnus.com>
 	(elf_m32r_howto_table, R_M32R_10_PCREL entry): Use it.
 	(elf_m32r_howto_table, R_M32R_24 entry): Fix {src,dst}_masks.
 
-end-sanitize-m32r
 Wed Oct 16 11:24:35 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* linker.c (_bfd_generic_final_link): Set "linker_mark" for
@@ -1501,14 +1506,12 @@ Mon Sep 23 13:33:00 1996  Ian Lance Taylor  <ian@cygnus.com>
 	* elf32-ppc.c (ppc_elf_add_symbol_hook): Create the .sbss section
 	by hand, rather than by calling bfd_make_section.
 
-start-sanitize-m32r
 Mon Sep 23 09:23:41 1996  Doug Evans  <dje@seba.cygnus.com>
 
 	* reloc.c: Rename m32r relocs.
 	* bfd-in2.h, libbfd.h: Rebuilt.
 	* elf32-m32r.c: Update.
 
-end-sanitize-m32r
 Fri Sep 20 11:43:43 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* aoutx.h (aout_link_input_section_ext): When doing a relocateable
@@ -1577,14 +1580,12 @@ Fri Sep 13 15:50:57 1996  Ian Lance Taylor  <ian@cygnus.com>
 	R_PARISC_DIR32, so that _bfd_stab_section_find_nearest_line passes
 	its sanity check.
 
-start-sanitize-m32r
 Thu Sep 12 11:45:57 1996  Doug Evans  <dje@seba.cygnus.com>
 
 	* reloc.c: Add m32r relocs.
 	* bfd-in2.h, libbfd.h: Rebuilt.
 	* cpu-m32r.c,elf32-m32r.c: New files.
 
-end-sanitize-m32r
 Thu Sep 12 11:10:05 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ieee.c (ieee_vec): Set symbol_leading_char field to '_'.
@@ -1682,18 +1683,14 @@ Tue Sep 10 16:18:30 1996  Fred Fish  <fnf@cygnus.com>
 	(copy_name): Ditto.
 	* syms.c (coff_section_type): Ditto.
 	
-start-sanitize-m32r
 Mon Sep  9 22:36:01 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* bfd-in2.h: Rebuilt after m32r changes.
 
-end-sanitize-m32r
 Mon Sep  9 12:31:22 1996  Doug Evans  <dje@canuck.cygnus.com>
 
-start-sanitize-m32r
 	* config.bfd,configure.in,configure: Add m32r support.
 	* Makefile.in,archures.c,elf.c,targets.c: Likewise.
-end-sanitize-m32r
 	* config.bfd: Keep target list alphabetically sorted.
 
 start-sanitize-v850
