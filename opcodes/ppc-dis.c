@@ -32,32 +32,46 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  *
 static int print_insn_powerpc PARAMS ((bfd_vma, struct disassemble_info *,
 				       int bigendian, int dialect));
 
-/* Print a big endian PowerPC instruction.  For convenience, also
-   disassemble instructions supported by the Motorola PowerPC 601
-   and the Altivec vector unit.  */
+static int powerpc_dialect PARAMS ((struct disassemble_info *));
+
+/* Determine which set of machines to disassemble for.  PPC403/601 or
+   Motorola BookE.  For convenience, also disassemble instructions
+   supported by the AltiVec vector unit.  */
+
+int
+powerpc_dialect(info)
+     struct disassemble_info *info;
+{
+  int dialect = PPC_OPCODE_PPC | PPC_OPCODE_ALTIVEC;
+
+  if (info->disassembler_options &&
+      (strcmp(info->disassembler_options, "booke") == 0 ||
+       strcmp(info->disassembler_options, "booke32") == 0 ||
+       strcmp(info->disassembler_options, "booke64") == 0))
+    dialect |= PPC_OPCODE_BOOKE | PPC_OPCODE_BOOKE64;
+  else 
+    dialect |= PPC_OPCODE_403 | PPC_OPCODE_601;
+  return dialect;
+}
+
+/* Print a big endian PowerPC instruction.  */
 
 int
 print_insn_big_powerpc (memaddr, info)
      bfd_vma memaddr;
      struct disassemble_info *info;
 {
-  return print_insn_powerpc (memaddr, info, 1,
-			     PPC_OPCODE_PPC | PPC_OPCODE_601 |
-			     PPC_OPCODE_ALTIVEC);
+  return print_insn_powerpc (memaddr, info, 1, powerpc_dialect(info));
 }
 
-/* Print a little endian PowerPC instruction.  For convenience, also
-   disassemble instructions supported by the Motorola PowerPC 601
-   and the Altivec vector unit.  */
+/* Print a little endian PowerPC instruction.  */
 
 int
 print_insn_little_powerpc (memaddr, info)
      bfd_vma memaddr;
      struct disassemble_info *info;
 {
-  return print_insn_powerpc (memaddr, info, 0,
-			     PPC_OPCODE_PPC | PPC_OPCODE_601 |
-			     PPC_OPCODE_ALTIVEC);
+  return print_insn_powerpc (memaddr, info, 0, powerpc_dialect(info));
 }
 
 /* Print a POWER (RS/6000) instruction.  */

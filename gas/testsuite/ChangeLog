@@ -1,3 +1,9 @@
+2001-10-12  matthew green  <mrg@redhat.com>
+
+	* gas/ppc/booke.s: New test for Motorola BookE.
+	* gas/ppc/booke.d: New file.
+	* gas/ppc/ppc.exp: Test booke.s.
+
 2001-10-09  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* sh/basic.exp: Add dsp dump test.

@@ -1,3 +1,33 @@
+2001-10-12  matthew green  <mrg@redhat.com>
+
+	* ppc-opc.c (insert_de, extract_de, insert_des, extract_des): New
+	instruction field instruction/extraction functions for new BookE
+	DE form instructions.
+	(CT): New macro for CT field in an X form instruction.
+	(DE, DES, DEO, DE_MASK): New macros for DE/DES fields in DE form
+	instructions.
+	(PPC64): Don't include PPC_OPCODE_PPC.
+	(403): New opcode macro for PPC403 processors.
+	(BOOKE): New opcode macro for BookE processors.
+	(bce, bcel, bcea, bcela, bclre, bclrel: New BookE instructions.
+	(bcctre, bcctrel, be, bel, bea, bela, icbt, icbte, lwzxe): Likewise.
+	(dcbste, lwzuxe, luxe, dcbfe, lbzxe, lwarxe, lbzuxe): Likewise.
+	(stwcxe, stwxe, stxe, stwuxe, stuxe, stbxe, dcbtste, stbuxe): Likewise.
+	(mfapidi, dcbte, lhzxe, lhzuxe, lhaxe, lhauxe, subfe64): Likewise.
+	(subfeo64, adde64, addeo64, sthxe, sthuxe, subfze64): Likewise.
+	(subfzeo64, addze64, addzeo64, dcbie, subfme64, subfmeo64): Likewise.
+	(addme64, addmeo64, stdcxe., mcrxr64, lwbrxe, lfsxe, lfsuxe): Likewise.
+	(lfdxe, lfduxe, stwbrxe, stfsxe, stfsuxe, stfdxe, dcbae): Likewise.
+	(stfduxe, tlbivax, tlbivaxe, lhbrxe, ldxe, lduxe, tlbsx): Likewise.
+	(tlbsxe, sthbrxe, stdxe, stduxe, icbie, stfiwxe, dcbze, lbze): Likewise.
+	(lbzue, ldue, lhze, lhzue, lhae, lhaue, lwze, lwzue): Likewise.
+	(stbe, stbue, sthe, sthue, stwe, stwue, lfse, lfsue, lfde): Likewise.
+	(lfdue, stde, stdue, stfse, stfsue, stfde, stfdue): Likewise.
+
+	* ppc-dis.c (print_insn_big_powerpc, print_insn_little_powerpc): Look
+	for a disassembler option of `booke', `booke32' or `booke64' to enable
+	BookE support in the disassembler.
+
 2001-10-12  John Healy  <jhealy@redhat.com>
 
 	* cgen-dis.in (print_insn): Use min (cd->base_insn_bitsize, buflen*8)

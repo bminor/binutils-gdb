@@ -1,3 +1,17 @@
+2001-10-12  matthew green  <mrg@redhat.com>
+
+	* config/tc-ppc.c (md_parse_option): New -m7410, -m7450 and -m7455
+	flags, equivalent to -m7400.  New -maltivec to enable AltiVec
+	instructions.  New -mbook64 and -mbooke/-mbooke32 flags to enable
+	64-bit and 32-bit BookE support, respectively.  Change -m403 and
+	-m405 to set PPC403 option.
+	(md_show_usage): Adjust for new options.
+	* doc/all.texi: Set PPC.
+	* doc/as.texinfo: Add PPC support and pull in c-ppc.texi.
+	* doc/c-ppc.texi: New file.
+	* doc/Makefile.am (CPU_DOCS): Add c-ppc.texi.
+	* doc/Makefile.in: Regenerate.
+
 2001-10-12  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* read.c (s_bad_endr): New function.  Issues a warning message

@@ -46,6 +46,7 @@
 @set MIPS
 @set PDP11
 @set PJ
+@set PPC
 @set SH
 @set SPARC
 @set C54X

@@ -45,6 +45,7 @@
 @set MIPS
 @set PDP11
 @set PJ
+@set PPC
 @set SH
 @set SPARC
 @set C54X
@@ -290,6 +291,16 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @end ifset
 @ifset PJ
  [ -mb | -me ]
+@end ifset
+@ifset PPC
+ [ -mpwrx | -mpwr2 | -mpwr | -m601 | -mppc | -mppc32 | -m603 | -m604 |
+   -m403 | -m405 | -mppc64 | -m620 | -mppc64bridge | -mbooke |
+   -mbooke32 | -mbooke64 ]
+ [ -mcom | -many | -maltivec ] [ -memb ]
+ [ -mregnames | -mno-regnames ]
+ [ -mrelocatable | -mrelocatable-lib ]
+ [ -mlittle | -mlittle-endian | -mbig, -mbig-endian ]
+ [ -msolaris | -mno-solaris ]
 @end ifset
 @ifset SPARC
 @c The order here is important.  See c-sparc.texi.
@@ -1845,6 +1856,9 @@ is considered a comment and is ignored.  The line comment character is
 @end ifset
 @ifset PJ
 @samp{;} for picoJava;
+@end ifset
+@ifset PPC
+@samp{;} for Motorola PowerPC;
 @end ifset
 @ifset SH
 @samp{!} for the Hitachi SH;
@@ -5560,6 +5574,9 @@ subject, see the hardware manufacturer's manual.
 @ifset PJ
 * PJ-Dependent::                picoJava Dependent Features
 @end ifset
+@ifset PPC
+* PPC-Dependent::               PowerPC Dependent Features
+@end ifset
 @ifset SPARC
 * Sparc-Dependent::             SPARC Dependent Features
 @end ifset
@@ -5685,6 +5702,10 @@ family.
 
 @ifset PJ
 @include c-pj.texi
+@end ifset
+
+@ifset PPC
+@include c-ppc.texi
 @end ifset
 
 @ifset SH

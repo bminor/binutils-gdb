@@ -42,6 +42,7 @@ CPU_DOCS = \
 	c-ns32k.texi \
 	c-pdp11.texi \
 	c-pj.texi \
+	c-ppc.texi \
 	c-sh.texi \
 	c-sparc.texi \
         c-tic54x.texi \

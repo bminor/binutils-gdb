@@ -887,23 +887,40 @@ md_parse_option (c, arg)
 	 Motorola PowerPC 603/604.  */
       else if (strcmp (arg, "ppc") == 0
 	       || strcmp (arg, "ppc32") == 0
-	       || strcmp (arg, "403") == 0
-	       || strcmp (arg, "405") == 0
 	       || strcmp (arg, "603") == 0
 	       || strcmp (arg, "604") == 0)
 	ppc_cpu = PPC_OPCODE_PPC;
-      else if (strcmp (arg, "7400") == 0)
+      /* -m403 and -m405 mean to assemble for the Motorola PowerPC 403/405.  */
+      else if (strcmp (arg, "403") == 0
+               || strcmp (arg, "405") == 0)
+	ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_403;
+      else if (strcmp (arg, "7400") == 0
+               || strcmp (arg, "7410") == 0
+               || strcmp (arg, "7450") == 0
+               || strcmp (arg, "7455") == 0)
 	ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_ALTIVEC;
+      else if (strcmp (arg, "altivec") == 0)
+	ppc_cpu |= PPC_OPCODE_ALTIVEC;
       /* -mppc64 and -m620 mean to assemble for the 64-bit PowerPC
 	 620.  */
       else if (strcmp (arg, "ppc64") == 0 || strcmp (arg, "620") == 0)
 	{
-	  ppc_cpu = PPC_OPCODE_PPC;
+	  ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_64;
 	  ppc_size = PPC_OPCODE_64;
 	}
       else if (strcmp (arg, "ppc64bridge") == 0)
 	{
-	  ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_64_BRIDGE;
+	  ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_64_BRIDGE | PPC_OPCODE_64;
+	  ppc_size = PPC_OPCODE_64;
+	}
+      /* -mbooke/-mbooke32 mean enable 32-bit BookE support.  */
+      else if (strcmp (arg, "booke") == 0 || strcmp (arg, "booke32") == 0)
+	ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_BOOKE;
+      /* -mbooke64 means enable 64-bit BookE support.  */
+      else if (strcmp (arg, "booke64") == 0)
+	{
+	  ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_BOOKE | 
+		    PPC_OPCODE_BOOKE64 | PPC_OPCODE_64;
 	  ppc_size = PPC_OPCODE_64;
 	}
       /* -mcom means assemble for the common intersection between Power
@@ -1011,10 +1028,13 @@ PowerPC options:\n\
 -mpwrx, -mpwr2		generate code for IBM POWER/2 (RIOS2)\n\
 -mpwr			generate code for IBM POWER (RIOS1)\n\
 -m601			generate code for Motorola PowerPC 601\n\
--mppc, -mppc32, -m403, -m405, -m603, -m604\n\
+-mppc, -mppc32, -m603, -m604\n\
 			generate code for Motorola PowerPC 603/604\n\
+-m403, -m405            generate code for Motorola PowerPC 403/405\n\
 -mppc64, -m620		generate code for Motorola PowerPC 620\n\
 -mppc64bridge		generate code for PowerPC 64, including bridge insns\n\
+-mbooke64               generate code for 64-bit Motorola BookE\n\
+-mbooke, mbooke32       generate code for 32-bit Motorola BookE\n\
 -mcom			generate code Power/PowerPC common instructions\n\
 -many			generate code for any architecture (PWR/PWRX/PPC)\n\
 -mregnames		Allow symbolic names for registers\n\
