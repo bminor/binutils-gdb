@@ -1,3 +1,11 @@
+Fri Jan 29 12:57:34 1999  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* Makefile.in (m2-exp.tab.c): use YACC not BISON.
+	(f-exp.tab.c): ditto
+	(jv-exp.tab.c): ditto
+	(c-exp.tab.c): ditto
+	(YACC): define as @YACC@
+
 1999-01-29  Martin Hunt  <hunt@cygnus.com>
 	Changes from Keith Seitz  <keiths@cygnus.com>
 	
