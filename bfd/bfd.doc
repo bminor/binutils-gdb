@@ -93,7 +93,7 @@ char * bfd_format_string (bfd_format format)
 Error handling
 
 General rules:
-funtions which are boolean return true on success and false on failure
+functions which are boolean return true on success and false on failure
 (unless they're a predicate).  Functions which return pointers to
 objects return NULL on error.  The specifics are documented with each
 function.
