@@ -1,3 +1,8 @@
+Mon Jun 13 12:08:52 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/obj-aout.c (obj_aout_frob_symbol): Warn about an attempt
+	to put a common symbol in a set.
+
 Sat Jun 11 16:41:21 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	Add weak symbols as an extension to a.out.
