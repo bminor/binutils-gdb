@@ -1,8 +1,7 @@
 2001-09-27  Nick Clifton  <nickc@cambridge.redhat.com>
 
-	* elf32-arm.h (elf32_arm_merge_private_bfd_data): Replace
-	bfd_get_filename with bfd_archive_filename in error message.
-	Fix detection of conflicting float flags.
+	* elf32-arm.h (elf32_arm_merge_private_bfd_data): Fix detection of
+	conflicting float flags.
 
 2001-09-26  Alan Modra  <amodra@bigpond.net.au>
 

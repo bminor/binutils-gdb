@@ -2091,7 +2091,7 @@ elf32_arm_copy_private_bfd_data (ibfd, obfd)
 	  if (out_flags & EF_ARM_INTERWORK)
 	    _bfd_error_handler (_("\
 Warning: Clearing the interwork flag in %s because non-interworking code in %s has been linked with it"),
-				bfd_archive_filename (obfd),
+				bfd_get_filename (obfd),
 				bfd_archive_filename (ibfd));
 
 	  in_flags &= ~EF_ARM_INTERWORK;
@@ -2188,7 +2188,7 @@ elf32_arm_merge_private_bfd_data (ibfd, obfd)
 Error: %s compiled for EABI version %d, whereas %s is compiled for version %d"),
 			  bfd_archive_filename (ibfd),
 			  (in_flags & EF_ARM_EABIMASK) >> 24,
-			  bfd_archive_filename (obfd),
+			  bfd_get_filename (obfd),
 			  (out_flags & EF_ARM_EABIMASK) >> 24);
       return false;
     }
@@ -2202,7 +2202,7 @@ Error: %s compiled for EABI version %d, whereas %s is compiled for version %d"),
 Error: %s compiled for APCS-%d, whereas %s is compiled for APCS-%d"),
 			      bfd_archive_filename (ibfd),
 			      in_flags & EF_ARM_APCS_26 ? 26 : 32,
-			      bfd_archive_filename (obfd),
+			      bfd_get_filename (obfd),
 			      out_flags & EF_ARM_APCS_26 ? 26 : 32);
 	  flags_compatible = false;
 	}
@@ -2215,7 +2215,7 @@ Error: %s compiled for APCS-%d, whereas %s is compiled for APCS-%d"),
 	  _bfd_error_handler (_("\
 Error: %s passes floats in %s registers, whereas %s passes them in %s registers"),
 			      bfd_archive_filename (ibfd), s1,
-			      bfd_archive_filename (obfd), s2);
+			      bfd_get_filename (obfd), s2);
 	  flags_compatible = false;
 	}
 
@@ -2228,7 +2228,7 @@ Error: %s passes floats in %s registers, whereas %s passes them in %s registers"
 	  _bfd_error_handler (_ ("\
 Error: %s uses %s floating point, whereas %s uses %s floating point"),
 			      bfd_archive_filename (ibfd), s1,
-			      bfd_archive_filename (obfd), s2);
+			      bfd_get_filename (obfd), s2);
 	  flags_compatible = false;
 	}
 #endif
@@ -2243,7 +2243,7 @@ Error: %s uses %s floating point, whereas %s uses %s floating point"),
 	  _bfd_error_handler (_("\
 Warning: %s %s interworking, whereas %s %s"),
 			      bfd_archive_filename (ibfd), s1,
-			      bfd_archive_filename (obfd), s2);
+			      bfd_get_filename (obfd), s2);
 	}
     }
 
