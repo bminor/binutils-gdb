@@ -1259,15 +1259,7 @@ step_into_function:
           if (!bpstat_explains_signal (stop_bpstat)
 	      && (stop_signal != SIGCLD) 
               && !stopped_by_random_signal)
-            {
-            CORE_ADDR pc_contents = read_register (PC_REGNUM);
-            CORE_ADDR npc_contents = read_register (NPC_REGNUM);
-            if (pc_contents != npc_contents)
-              {
-              write_register (NNPC_REGNUM, npc_contents);
-              write_register (NPC_REGNUM, pc_contents);
-	      }
-            }
+            SHIFT_INST_REGS();
 #endif /* SHIFT_INST_REGS */
 
 	  resume (CURRENTLY_STEPPING (), stop_signal);

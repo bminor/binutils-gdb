@@ -395,8 +395,7 @@ which has no line number information.\n", name);
       if (! stop_step)
 	break;
 #if defined (SHIFT_INST_REGS)
-      write_register (NNPC_REGNUM, read_register (NPC_REGNUM));
-      write_register (NPC_REGNUM, read_register (PC_REGNUM));
+      SHIFT_INST_REGS();
 #endif
     }
 
