@@ -100,7 +100,7 @@ extern struct exp_data_seg {
     exp_dataseg_relro_adjust,
     exp_dataseg_adjust
   } phase;
-  bfd_vma base, relro_end, end, pagesize;
+  bfd_vma base, min_base, relro_end, end, pagesize, maxpagesize;
 } exp_data_seg;
 
 /* A maps from a segment name to a base address.  */

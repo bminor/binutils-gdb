@@ -1,3 +1,11 @@
+2004-12-17  Jakub Jelinek  <jakub@redhat.com>
+
+	* ldexp.h (exp_data_seg): Add min_base and maxpagesize fields.
+	* ldexp.c (fold_binary) <case DATA_SEGMENT_ALIGN>: Initialize them.
+	* ldlang.c (lang_size_sections): Use them to avoid wasting virtual
+	address space at DATA_SEGMENT_ALIGN.  Fix computation of expected
+	PT_GNU_RELRO segment end.
+
 2004-12-14  P.J. Darcy  <darcypj@us.ibm.com>
 
 	* configure.tgt: Add s390x-ibm-tpf support.

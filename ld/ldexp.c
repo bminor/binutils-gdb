@@ -435,8 +435,10 @@ fold_binary (etree_type *tree,
 		      if (allocation_done == lang_allocating_phase_enum)
 			{
 			  exp_data_seg.phase = exp_dataseg_align_seen;
+			  exp_data_seg.min_base = align_n (dot, maxpage);
 			  exp_data_seg.base = result.value;
 			  exp_data_seg.pagesize = other.value;
+			  exp_data_seg.maxpagesize = maxpage;
 			  exp_data_seg.relro_end = 0;
 			}
 		    }

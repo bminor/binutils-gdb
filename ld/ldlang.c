@@ -3858,15 +3858,21 @@ lang_size_sections
     {
       /* If DATA_SEGMENT_ALIGN DATA_SEGMENT_RELRO_END pair was seen, try
 	 to put exp_data_seg.relro on a (common) page boundary.  */
-      bfd_vma old_base, relro_end;
+      bfd_vma old_min_base, relro_end, maxpage;
 
       exp_data_seg.phase = exp_dataseg_relro_adjust;
-      old_base = exp_data_seg.base;
+      old_min_base = exp_data_seg.min_base;
+      maxpage = exp_data_seg.maxpagesize;
       exp_data_seg.base += (-exp_data_seg.relro_end
 			    & (exp_data_seg.pagesize - 1));
       /* Compute the expected PT_GNU_RELRO segment end.  */
       relro_end = (exp_data_seg.relro_end + exp_data_seg.pagesize - 1)
-		  & (exp_data_seg.pagesize - 1);
+		  & ~(exp_data_seg.pagesize - 1);
+      if (old_min_base + maxpage < exp_data_seg.base)
+	{
+	  exp_data_seg.base -= maxpage;
+	  relro_end -= maxpage;
+	}
       result = lang_size_sections_1 (s, output_section_statement, prev, fill,
 				     dot, relax, check_regions);
       if (exp_data_seg.relro_end > relro_end)
@@ -3888,7 +3894,7 @@ lang_size_sections
 	  if (((bfd_vma) 1 << max_alignment_power) < exp_data_seg.pagesize)
 	    {
 	      if (exp_data_seg.base - (1 << max_alignment_power)
-		  < old_base)
+		  < old_min_base)
 		exp_data_seg.base += exp_data_seg.pagesize;
 	      exp_data_seg.base -= (1 << max_alignment_power);
 	      result = lang_size_sections_1 (s, output_section_statement,
