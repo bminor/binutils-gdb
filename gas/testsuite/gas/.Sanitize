@@ -31,7 +31,7 @@ alpha
 arm
 hppa
 i386
-ieee.fp
+ieee-fp
 m68k
 m68k-coff
 mips

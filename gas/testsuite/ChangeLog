@@ -1,3 +1,11 @@
+Wed Dec  7 16:49:14 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* gas/ieee-fp: Renamed from ieee.fp.
+
+Wed Nov 30 10:48:00 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* gas/hppa/parse: Renamed from gas/hppa/more.parse.
+
 Mon Nov 28 00:40:26 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* gas/hppa/more.parse/parse.exp (nosubspace.s): No longer expected
