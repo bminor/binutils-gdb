@@ -1,3 +1,11 @@
+Thu Mar  6 13:51:51 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* elf32-mn10300.c (reloc_type): Remove PCREL{8,16,32}_{1,2}BYTE
+	relocs.  Replace them with generic PCREL_{8,16,32} relocs.
+	(elf32_mn10300_howto_table): Likewise.
+	(elf32_mn10300_reloc_map): Likewise.
+	(bfd_elf32_mn10300_reloc): Delete unused function.
+
 Thu Mar  6 12:19:59 1997  Fred Fish  <fnf@cygnus.com>
 
 start-sanitize-tic80

@@ -40,11 +40,9 @@ enum reloc_type
   R_MN10300_32,
   R_MN10300_16,
   R_MN10300_8,
-  R_MN10300_PCREL32_1BYTE,
-  R_MN10300_PCREL16_1BYTE,
-  R_MN10300_PCREL8_1BYTE,
-  R_MN10300_PCREL32_2BYTE,
-  R_MN10300_PCREL16_2BYTE,
+  R_MN10300_PCREL32,
+  R_MN10300_PCREL16,
+  R_MN10300_PCREL8,
   R_MN10300_MAX
 };
 
@@ -106,80 +104,47 @@ static reloc_howto_type elf_mn10300_howto_table[] =
 	 0xff,
 	 0xff,
 	 false),
-  /* Simple 32bit pc-relative reloc with a 1 byte adjustment
-     to get the pc-relative offset correct.  */
-  HOWTO (R_MN10300_PCREL32_1BYTE,
+  /* Standard 32bit pc-relative reloc.  */
+  HOWTO (R_MN10300_PCREL32,
 	 0,
 	 2,
 	 32,
 	 true,
 	 0,
 	 complain_overflow_bitfield,
-	 bfd_elf32_mn10300_reloc,
-	 "R_MN10300_PCREL32_1BYTE",
-	 true,
+	 bfd_elf_generic_reloc,
+	 "R_MN10300_PCREL32",
+	 false,
 	 0xffffffff,
 	 0xffffffff,
-	 false),
-  /* Simple 16bit pc-relative reloc with a 1 byte adjustment
-     to get the pc-relative offset correct.  */
-  HOWTO (R_MN10300_PCREL16_1BYTE,
+	 true),
+  /* Standard 16bit pc-relative reloc.  */
+  HOWTO (R_MN10300_PCREL16,
 	 0,
 	 1,
 	 16,
 	 true,
 	 0,
 	 complain_overflow_bitfield,
-	 bfd_elf32_mn10300_reloc,
-	 "R_MN10300_PCREL16_1BYTE",
-	 true,
+	 bfd_elf_generic_reloc,
+	 "R_MN10300_PCREL16",
+	 false,
 	 0xffff,
 	 0xffff,
-	 false),
-  /* Simple 8 pc-relative reloc with a 1 byte adjustment
-     to get the pc-relative offset correct.  */
-  HOWTO (R_MN10300_PCREL8_1BYTE,
+	 true),
+  /* Standard 8 pc-relative reloc.  */
+  HOWTO (R_MN10300_PCREL8,
 	 0,
 	 0,
 	 8,
 	 true,
 	 0,
 	 complain_overflow_bitfield,
-	 bfd_elf32_mn10300_reloc,
-	 "R_MN10300_PCREL8_1BYTE",
-	 true,
+	 bfd_elf_generic_reloc,
+	 "R_MN10300_PCREL8",
+	 false,
 	 0xff,
 	 0xff,
-	 true),
-  /* Simple 32 pc-relative reloc with a 2 byte adjustment
-     to get the pc-relative offset correct.  */
-  HOWTO (R_MN10300_PCREL32_2BYTE,
-	 0,
-	 2,
-	 32,
-	 true,
-	 0,
-	 complain_overflow_bitfield,
-	 bfd_elf32_mn10300_reloc,
-	 "R_MN10300_PCREL32_2BYTE",
-	 true,
-	 0xffffffff,
-	 0xffffffff,
-	 true),
-  /* Simple 16 pc-relative reloc with a 2 byte adjustment
-     to get the pc-relative offset correct.  */
-  HOWTO (R_MN10300_PCREL16_2BYTE,
-	 0,
-	 1,
-	 16,
-	 true,
-	 0,
-	 complain_overflow_bitfield,
-	 bfd_elf32_mn10300_reloc,
-	 "R_MN10300_PCREL16_2BYTE",
-	 true,
-	 0xffff,
-	 0xffff,
 	 true),
 };
 
@@ -195,11 +160,9 @@ static const struct mn10300_reloc_map mn10300_reloc_map[] =
   { BFD_RELOC_32, R_MN10300_32, },
   { BFD_RELOC_16, R_MN10300_16, },
   { BFD_RELOC_8, R_MN10300_8, },
-  { BFD_RELOC_32_PCREL, R_MN10300_PCREL32_1BYTE, },
-  { BFD_RELOC_16_PCREL, R_MN10300_PCREL16_1BYTE, },
-  { BFD_RELOC_8_PCREL, R_MN10300_PCREL8_1BYTE, },
-  { BFD_RELOC_MN10300_32_PCREL, R_MN10300_PCREL32_2BYTE, },
-  { BFD_RELOC_MN10300_16_PCREL, R_MN10300_PCREL16_2BYTE, },
+  { BFD_RELOC_32_PCREL, R_MN10300_PCREL32, },
+  { BFD_RELOC_16_PCREL, R_MN10300_PCREL16, },
+  { BFD_RELOC_8_PCREL, R_MN10300_PCREL8, },
 };
 
 static reloc_howto_type *
@@ -233,102 +196,6 @@ mn10300_info_to_howto (abfd, cache_ptr, dst)
   r_type = ELF32_R_TYPE (dst->r_info);
   BFD_ASSERT (r_type < (unsigned int) R_MN10300_MAX);
   cache_ptr->howto = &elf_mn10300_howto_table[r_type];
-}
-
-static bfd_reloc_status_type
-bfd_elf32_mn10300_reloc (abfd, reloc, symbol, data, isection, obfd, err)
-     bfd *abfd;
-     arelent *reloc;
-     asymbol *symbol;
-     PTR data;
-     asection *isection;
-     bfd *obfd;
-     char **err;
-{
-  if (obfd != (bfd *) NULL
-      && (symbol->flags & BSF_SECTION_SYM) == 0
-      && (! reloc->howto->partial_inplace
-	  || reloc->addend == 0))
-    {
-      reloc->address += isection->output_offset;
-      return bfd_reloc_ok;
-    }
-  else if (obfd != NULL)
-    {
-      return bfd_reloc_continue;
-    }
-
-  /* Catch relocs involving undefined symbols.  */
-  if (bfd_is_und_section (symbol->section)
-      && (symbol->flags & BSF_WEAK) == 0
-      && obfd == NULL)
-    return bfd_reloc_undefined;
-
-  /* We handle final linking of some relocs ourselves.  */
-    {
-      long relocation;
-
-      /* Is the address of the relocation really within the section?  */
-      if (reloc->address > isection->_cooked_size)
-	return bfd_reloc_outofrange;
-
-      /* Work out which section the relocation is targetted at and the
-	 initial relocation command value.  */
-
-      /* Get symbol value.  (Common symbols are special.)  */
-      if (bfd_is_com_section (symbol->section))
-	relocation = 0;
-      else
-	relocation = symbol->value;
-
-      /* Convert input-section-relative symbol value to absolute + addend.  */
-      relocation += symbol->section->output_section->vma;
-      relocation += symbol->section->output_offset;
-      relocation += reloc->addend;
-
-      if (reloc->howto->pc_relative == true)
-	{
-	  /* Here the variable relocation holds the final address of the
-	     symbol we are relocating against, plus any addend.  */
-	  relocation -= isection->output_section->vma + isection->output_offset;
-
-	  /* Deal with pcrel_offset */
-	  relocation -= reloc->address;
-
-	  if (reloc->howto->type == R_MN10300_PCREL32_1BYTE
-	      || reloc->howto->type == R_MN10300_PCREL16_1BYTE
-	      || reloc->howto->type == R_MN10300_PCREL8_1BYTE)
-            relocation += 1;
-	  else if (reloc->howto->type == R_MN10300_PCREL32_2BYTE
-	      || reloc->howto->type == R_MN10300_PCREL16_2BYTE)
-            relocation += 2;
-	}
-
-      /* I've got no clue... */
-      reloc->addend = 0;	
-
-      if (reloc->howto->size == 0)
-	{
-	  if (relocation > 0x7f || relocation < -0x80)
-	    return bfd_reloc_overflow;
-
-	  bfd_put_8 (abfd, relocation & 0xff,
-		     (bfd_byte *)data + reloc->address);
-	}
-      else if (reloc->howto->size == 1)
-	{
-	  if (relocation > 0x7fff || relocation < -0x8000)
-	    return bfd_reloc_overflow;
-
-	  bfd_put_16 (abfd, relocation & 0xffff,
-		      (bfd_byte *)data + reloc->address);
- 	}
-      else if (reloc->howto->size == 2)
-	bfd_put_32 (abfd, relocation, (bfd_byte *)data + reloc->address);
-      return bfd_reloc_ok;
-    }
-
-  return bfd_reloc_continue;
 }
 
 #define TARGET_LITTLE_SYM	bfd_elf32_mn10300_vec
