@@ -58,25 +58,23 @@
 #define DISCARD_SECTION_NAME "/DISCARD/"
 
 /* A file name list */
-typedef struct name_list
-{
-   const char *name;
-   struct name_list *next;
-} name_list;
+typedef struct name_list {
+  const char *name;
+  struct name_list *next;
+}
+name_list;
 
 /* A wildcard specification.  This is only used in ldgram.y, but it
    winds up in ldgram.h, so we need to define it outside.  */
 
-struct wildcard_spec
-{
+struct wildcard_spec {
   const char *name;
   struct name_list *exclude_name_list;
   boolean sorted;
 };
 
 /* Extra information we hold on sections */
-typedef struct  user_section_struct
-{
+typedef struct user_section_struct {
   /* Pointer to the section where this data will go */
   struct lang_input_statement_struct *file;
 } section_userdata_type;
@@ -96,8 +94,7 @@ typedef struct  user_section_struct
 #define ALIGN_N(this, boundary) \
   ((( (this) + ((boundary) -1)) & (~((boundary)-1))))
 
-typedef struct
-{
+typedef struct {
   /* 1 => assign space to common symbols even if `relocatable_output'.  */
   boolean force_common_definition;
   boolean relax;
@@ -161,8 +158,7 @@ extern args_type command_line;
 
 typedef int token_code_type;
 
-typedef struct
-{
+typedef struct {
   bfd_size_type specified_data_size;
   boolean magic_demand_paged;
   boolean make_executable;
@@ -215,8 +211,7 @@ typedef struct
 
 extern ld_config_type config;
 
-typedef enum
-{
+typedef enum {
   lang_first_phase_enum,
   lang_allocating_phase_enum,
   lang_final_phase_enum

@@ -43,7 +43,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 /* FORWARDS */
 static lang_statement_union_type *new_statement PARAMS ((enum statement_enum,
 							 size_t,
-							 lang_statement_list_type*));
+							 lang_statement_list_type *));
 
 /* LOCALS */
 static struct obstack stat_obstack;
@@ -4622,8 +4622,7 @@ static etree_type *overlay_max;
 
 /* A list of all the sections in this overlay.  */
 
-struct overlay_list
-{
+struct overlay_list {
   struct overlay_list *next;
   lang_output_section_statement_type *os;
 };
@@ -5030,7 +5029,7 @@ lang_do_version_exports_section ()
 	einfo (_("%X%P: unable to read .exports section contents"), sec);
 
       p = contents;
-      while (p < contents+len)
+      while (p < contents + len)
 	{
 	  greg = lang_new_vers_regex (greg, p, NULL);
 	  p = strchr (p, '\0') + 1;

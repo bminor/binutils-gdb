@@ -1030,8 +1030,7 @@ constructor_callback (info, constructor, name, abfd, section, value)
 /* A structure used by warning_callback to pass information through
    bfd_map_over_sections.  */
 
-struct warning_callback_info
-{
+struct warning_callback_info {
   boolean found;
   const char *warning;
   const char *symbol;

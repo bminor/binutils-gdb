@@ -62,8 +62,7 @@ char *slash = ":";
 
 static search_dirs_type **search_tail_ptr = &search_head;
 
-typedef struct search_arch
-{
+typedef struct search_arch {
   char *name;
   struct search_arch *next;
 } search_arch_type;
@@ -165,7 +164,7 @@ ldfile_open_file_search (arch, entry, lib, suffix)
     }
 
   for (search = search_head;
-       search != (search_dirs_type *)NULL;
+       search != (search_dirs_type *) NULL;
        search = search->next)
     {
       char *string;
@@ -304,16 +303,16 @@ ldfile_find_command_file (name, extend)
   FILE *result;
   char buffer[1000];
 
-  /* First try raw name */
+  /* First try raw name.  */
   result = try_open (name, "");
-  if (result == (FILE *)NULL)
+  if (result == (FILE *) NULL)
     {
-      /* Try now prefixes */
+      /* Try now prefixes.  */
       for (search = search_head;
-	   search != (search_dirs_type *)NULL;
+	   search != (search_dirs_type *) NULL;
 	   search = search->next)
 	{
-	  sprintf (buffer,"%s%s%s", search->name, slash, name);
+	  sprintf (buffer, "%s%s%s", search->name, slash, name);
 
 	  result = try_open (buffer, extend);
 	  if (result)
@@ -331,7 +330,7 @@ ldfile_open_command_file (name)
   FILE *ldlex_input_stack;
   ldlex_input_stack = ldfile_find_command_file (name, "");
 
-  if (ldlex_input_stack == (FILE *)NULL)
+  if (ldlex_input_stack == (FILE *) NULL)
     {
       bfd_set_error (bfd_error_system_call);
       einfo (_("%P%F: cannot open linker script file %s: %E\n"), name);
@@ -371,7 +370,7 @@ gnu960_map_archname (name)
     }
 
   if (tp->cmd_switch == NULL)
-    einfo (_("%P%F: unknown architecture: %s\n"),name);
+    einfo (_("%P%F: unknown architecture: %s\n"), name);
 
   return tp->arch;
 }
@@ -381,7 +380,7 @@ ldfile_add_arch (name)
      char *name;
 {
   search_arch_type *new =
-    (search_arch_type *)xmalloc ((bfd_size_type)(sizeof (search_arch_type)));
+    (search_arch_type *) xmalloc ((bfd_size_type) (sizeof (search_arch_type)));
 
   if (*name != '\0')
     {
@@ -394,17 +393,17 @@ ldfile_add_arch (name)
       ldfile_output_machine_name = name;
     }
 
-  new->next = (search_arch_type*)NULL;
+  new->next = (search_arch_type *) NULL;
   new->name = gnu960_map_archname (name);
   *search_arch_tail_ptr = new;
   search_arch_tail_ptr = &new->next;
 }
 
-#else	/* not GNU960 */
+#else /* not GNU960 */
 
 void
 ldfile_add_arch (in_name)
-     CONST char * in_name;
+     CONST char *in_name;
 {
   char *name = buystring (in_name);
   search_arch_type *new =
@@ -413,7 +412,7 @@ ldfile_add_arch (in_name)
   ldfile_output_machine_name = in_name;
 
   new->name = name;
-  new->next = (search_arch_type*)NULL;
+  new->next = (search_arch_type *) NULL;
   while (*name)
     {
       if (isupper ((unsigned char) *name))
@@ -426,7 +425,8 @@ ldfile_add_arch (in_name)
 }
 #endif
 
-/* Set the output architecture */
+/* Set the output architecture.  */
+
 void
 ldfile_set_output_arch (string)
      CONST char *string;

@@ -188,7 +188,6 @@ ldemul_default_target ()
 void
 after_parse_default ()
 {
-
 }
 
 void
@@ -199,13 +198,11 @@ after_open_default ()
 void
 after_allocation_default ()
 {
-
 }
 
 void
 before_allocation_default ()
 {
-
 }
 
 void

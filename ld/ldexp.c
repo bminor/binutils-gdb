@@ -66,8 +66,7 @@ static void
 exp_print_token (code)
      token_code_type code;
 {
-  static CONST struct
-  {
+  static CONST struct {
     token_code_type code;
     char *name;
   } table[] = {

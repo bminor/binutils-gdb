@@ -1,5 +1,17 @@
 2000-10-09  Kazu Hirata  <kazu@hxi.com>
 
+	* ld.h: Fix formatting.
+	* ldcref.c: Likewise.
+	* ldctor.h: Likewise.
+	* ldemul.c: Likewise.
+	* ldemul.h: Likewise.
+	* ldexp.c: Likewise.
+	* ldexp.h: Likewise.
+	* ldfile.c: Likewise.
+	* ldfile.h: Likewise.
+	* ldlang.c: Likewise.
+	* ldlang.h: Likewise.
+	* ldmain.c: Likewise.
 	* pe-dll.c: Fix formatting.
 
 2000-10-08  Kazu Hirata  <kazu@hxi.com>

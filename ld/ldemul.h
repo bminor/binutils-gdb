@@ -54,8 +54,7 @@ extern void hll_default PARAMS ((char*));
 extern int  ldemul_find_potential_libraries
   PARAMS ((char *, struct lang_input_statement_struct *));
 
-typedef struct ld_emulation_xfer_struct
-{
+typedef struct ld_emulation_xfer_struct {
   /* Run before parsing the command line and script file.
      Set the architecture, maybe other things.  */
   void   (*before_parse) PARAMS ((void));
@@ -142,10 +141,9 @@ typedef struct ld_emulation_xfer_struct
 
 } ld_emulation_xfer_type;
 
-typedef enum
-{
+typedef enum {
   intel_ic960_ld_mode_enum,
-  default_mode_enum ,
+  default_mode_enum,
   intel_gld960_ld_mode_enum
 } lang_emulation_mode_enum_type;
 
