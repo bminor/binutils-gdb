@@ -1777,22 +1777,14 @@ mark_symbols_used_in_relocations (ibfd, isection, symbolsarg)
   if (relcount < 0)
     bfd_fatal (bfd_get_filename (ibfd));
 
-  /* Examine each symbol used in a relocation.  */
+  /* Examine each symbol used in a relocation.  If it's not one of the
+     special bfd section symbols, then mark it with BSF_KEEP.  */
   for (i = 0; i < relcount; i++)
     {
-      asymbol * sym = * relpp[i]->sym_ptr_ptr;
-      
-      /* If the symbol's output section does not exist (because it
-	 has been removed with -R) then do not keep the symbol.  */
-      if (bfd_get_output_section (sym) == NULL)
-	continue;
-      
-      /* If the symbols is not one of the special bfd
-	 section symbols, then mark it with BSF_KEEP.  */
-      if (sym != bfd_com_section_ptr->symbol
-	  && sym != bfd_abs_section_ptr->symbol
-	  && sym != bfd_und_section_ptr->symbol)
-	sym->flags |= BSF_KEEP;
+      if (*relpp[i]->sym_ptr_ptr != bfd_com_section_ptr->symbol
+	  && *relpp[i]->sym_ptr_ptr != bfd_abs_section_ptr->symbol
+	  && *relpp[i]->sym_ptr_ptr != bfd_und_section_ptr->symbol)
+	(*relpp[i]->sym_ptr_ptr)->flags |= BSF_KEEP;
     }
 
   if (relpp != NULL)
