@@ -4548,7 +4548,7 @@ set_cu_language (unsigned int lang)
     case DW_LANG_Pascal83:
     case DW_LANG_Modula2:
     default:
-      cu_language = language_unknown;
+      cu_language = language_minimal;
       break;
     }
   cu_language_defn = language_def (cu_language);

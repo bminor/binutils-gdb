@@ -1,5 +1,10 @@
 2003-05-08  J. Brobecker  <brobecker@gnat.com>
 
+	* dwarf2read.c (set_cu_language): Set the language to "minimal" if
+	the language of the CU is not currently supported by GDB.
+
+2003-05-08  J. Brobecker  <brobecker@gnat.com>
+
 	* defs.h (language): Add language_minimal enum value.
 	* c-lang.c (minimal_language_defn): New language definition.
 	(_initialize_c_language): Add the new minimal language to the list
