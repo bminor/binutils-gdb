@@ -15,7 +15,7 @@ TREE	= devo
 
 NATIVE  = native
 
-DATE	= 921119
+DATE	= 921127
 
 TAG	= latest-$(DATE)
 
@@ -102,6 +102,14 @@ all-cygnus:
 	       echo "     completed successfully" ; \
 	  fi ; \
 	done
+	@echo done at `date`
+
+native:
+	@echo build started at `date`
+	[ -d $(INSTALLDIR) ] || mkdir $(INSTALLDIR)
+	rm -f /usr/cygnus/$(TAG)
+	ln -s $(INSTALLDIR) /usr/cygnus/$(TAG) 
+	$(MAKE) -f test-build.mk $(FLAGS_TO_PASS) $(host)-stamp-3stage-done $(log)
 	@echo done at `date`
 
 build-cygnus:

@@ -3,6 +3,8 @@ Fri Nov 27 18:35:54 1992  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 	* Makefile.in: define flags for X11 include files and library file
 	locations, pass them down to the programs that need this info
 
+	* build-all.mk: added a 'native' target, to 3stage the native toolchain
+
 	* config/{mh-hpux,mh-solaris}: define the "standard" locations for
 	the vendor supplied X11 headers and libraries
 
