@@ -170,8 +170,8 @@ maintainer works with the native maintainer when resolving API issues.
 
 	w65		Deleted.
 
-	x86-64		--target=x86_64-linux-gnu
-			Michal Ludvig           mludvig@suse.cz
+	x86-64		(--target=x86_64-linux-gnu, broken)
+			Maintenance only
 
 	xstormy16	--target=xstormy16-elf ,-Werror
 			Corinna Vinschen	vinschen@redhat.com
@@ -387,6 +387,7 @@ Jason Thorpe					thorpej@wasabisystems.com
 Tom Tromey					tromey@redhat.com
 Corinna Vinschen				vinschen@redhat.com
 Keith Walker					keith.walker@arm.com
+Michal Ludvig                                   mludvig@suse.cz
 
 
 
