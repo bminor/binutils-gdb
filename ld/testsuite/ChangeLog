@@ -1,3 +1,7 @@
+2004-03-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-scripts/provide-2.d: Ignore random symbols.
+
 2004-03-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-powerpc/tls.d: Update.
