@@ -301,21 +301,21 @@ get_i386_rel_type (rtype)
 {
   switch (rtype)
     {
-    case R_386_NONE: return "R_386_NONE";
-    case R_386_32: return "R_386_32";
-    case R_386_PC32: return "R_386_PC32";
-    case R_386_GOT32: return "R_386_GOT32";
-    case R_386_PLT32: return "R_386_PLT32";
-    case R_386_COPY: return "R_386_COPY";
+    case R_386_NONE:     return "R_386_NONE";
+    case R_386_32:       return "R_386_32";
+    case R_386_PC32:     return "R_386_PC32";
+    case R_386_GOT32:    return "R_386_GOT32";
+    case R_386_PLT32:    return "R_386_PLT32";
+    case R_386_COPY:     return "R_386_COPY";
     case R_386_GLOB_DAT: return "R_386_GLOB_DAT";
     case R_386_JMP_SLOT: return "R_386_JMP_SLOT";
     case R_386_RELATIVE: return "R_386_RELATIVE";
-    case R_386_GOTOFF: return "R_386_GOTOFF";
-    case R_386_GOTPC: return "R_386_GOTPC";
-    case R_386_16: return "R_386_16";
-    case R_386_PC16: return "R_386_PC16";
-    case R_386_PC8: return "R_386_PC8";
-    default: return _("*INVALID*");
+    case R_386_GOTOFF:   return "R_386_GOTOFF";
+    case R_386_GOTPC:    return "R_386_GOTPC";
+    case R_386_16:       return "R_386_16";
+    case R_386_PC16:     return "R_386_PC16";
+    case R_386_PC8:      return "R_386_PC8";
+    default:		 return NULL;
     }
 }
 
@@ -348,7 +348,7 @@ get_m68k_rel_type (rtype)
     case R_68K_GLOB_DAT: return "R_68K_GLOB_DAT";
     case R_68K_JMP_SLOT: return "R_68K_JMP_SLOT";
     case R_68K_RELATIVE: return "R_68K_RELATIVE";
-    default: return _("*INVALID*");
+    default:		 return NULL;
     }
 }
 
@@ -409,7 +409,7 @@ get_sparc_rel_type (rtype)
     case R_SPARC_REGISTER: return "R_SPARC_REGISTER";
     case R_SPARC_UA64: return "R_SPARC_UA64";
     case R_SPARC_UA16: return "R_SPARC_UA16";
-    default: return _("*INVALID*");
+    default:		 return NULL;
     }
 }
 
@@ -431,7 +431,7 @@ get_m32r_rel_type (rtype)
     case R_M32R_HI16_SLO: return "R_M32R_HI16_SLO";
     case R_M32R_LO16: return "R_M32R_LO16";
     case R_M32R_SDA16: return "R_M32R_SDA16";
-    default: return _("*INVALID*");
+    default:		 return NULL;
     }
 }
 
@@ -467,7 +467,7 @@ get_v850_rel_type (rtype)
     case R_V850_CALLT_6_7_OFFSET: return "R_V850_CALLT_6_7_OFFSET";
     case R_V850_CALLT_16_16_OFFSET: return "R_V850_CALLT_16_16_OFFSET";
 /* end-sanitize-v850e */
-    default: return _("*INVALID*");
+    default:		 return NULL;
     }
 }
 
@@ -485,7 +485,7 @@ get_d10v_rel_type (rtype)
     case R_D10V_18: return "R_D10V_18";
     case R_D10V_18_PCREL: return "R_D10V_18_PCREL";
     case R_D10V_32: return "R_D10V_32";
-    default: return _("*INVALID*");
+    default:		 return NULL;
     }
 }
 
@@ -509,7 +509,7 @@ get_d30v_rel_type (rtype)
     case R_D30V_32: return "R_D30V_32";
     case R_D30V_32_PCREL: return "R_D30V_32_PCREL";
     case R_D30V_32_NORMAL: return "R_D30V_32_NORMAL";
-    default: return _("*INVALID*");
+    default:		 return NULL;
     }
 }
 
@@ -538,7 +538,7 @@ get_sh_rel_type (rtype)
     case R_SH_CODE: return "R_SH_CODE";
     case R_SH_DATA: return "R_SH_DATA";
     case R_SH_LABEL: return "R_SH_LABEL";
-    default: return _("*INVALID*");
+    default:		 return NULL;
     }
 }
 
@@ -556,7 +556,7 @@ get_mn10300_rel_type (rtype)
     case R_MN10300_PCREL32: return "R_MN10300_PCREL32";
     case R_MN10300_PCREL16: return "R_MN10300_PCREL16";
     case R_MN10300_PCREL8: return "R_MN10300_PCREL8";
-    default: return _("*INVALID*");
+    default:		 return NULL;
     }
 }
 
@@ -575,7 +575,7 @@ get_mn10200_rel_type (rtype)
     case R_MN10200_PCREL8: return "R_MN10200_PCREL8";
     case R_MN10200_PCREL16: return "R_MN10200_PCREL16";
     case R_MN10200_PCREL24: return "R_MN10200_PCREL24";
-    default: return _("*INVALID*");
+    default:		 return NULL;
     }
 }
 
@@ -640,7 +640,7 @@ get_ppc_rel_type (rtype)
     case R_PPC_EMB_BIT_FLD: return "R_PPC_EMB_BIT_FLD";
     case R_PPC_EMB_RELSDA: return "R_PPC_EMB_RELSDA";
     case R_PPC_TOC16: return "R_PPC_TOC16";
-    default: return _("*INVALID*");
+    default:		 return NULL;
     }
 }
 
@@ -664,7 +664,7 @@ get_mips_rel_type (rtype)
     case R_MIPS_PC16: return "R_MIPS_PC16";
     case R_MIPS_CALL16: return "R_MIPS_CALL16";
     case R_MIPS_GPREL32: return "R_MIPS_GPREL32";
-    default: return _("*INVALID*");
+    default:		 return NULL;
     }
 }
 
@@ -703,7 +703,7 @@ get_alpha_rel_type (rtype)
     case R_ALPHA_GLOB_DAT: return "R_ALPHA_GLOB_DAT";
     case R_ALPHA_JMP_SLOT: return "R_ALPHA_JMP_SLOT";
     case R_ALPHA_RELATIVE: return "R_ALPHA_RELATIVE";
-    default: return _("*INVALID*");
+    default:		 return NULL;
     }
 }
 
@@ -726,7 +726,7 @@ get_arm_rel_type (rtype)
     case R_ARM_GOTPC: return "R_ARM_GOTPC";
     case R_ARM_GOT32: return "R_ARM_GOT32";
     case R_ARM_PLT32: return "R_ARM_PLT32";
-    default: return _("*INVALID*");
+    default:		 return NULL;
     }
 }
 
@@ -852,7 +852,7 @@ dump_relocations (file, rel_offset, rel_size, symtab, strtab)
       switch (elf_header.e_machine)
 	{
 	default:
-	  rtype = "<unknown>";
+	  rtype = NULL;
 	  break;
 
 	case EM_CYGNUS_M32R:
@@ -916,7 +916,10 @@ dump_relocations (file, rel_offset, rel_size, symtab, strtab)
 	  break;
 	}
 
-      printf ("%-21.21s", rtype);
+      if (rtype == NULL)
+	printf ("unrecognised: %-7x", ELF32_R_TYPE (info));
+      else
+	printf ("%-21.21s", rtype);
 
       symtab_index = ELF32_R_SYM (info);
 

@@ -1,3 +1,8 @@
+Wed Jul 22 10:26:32 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* readelf.c (dump_relocations): Display number of unrecognised
+	relocations. 
+
 1998-07-21 13:13  Ulrich Drepper  <drepper@cygnus.com>
 
 	* readelf.c: Use symbolic names of relocation entries for the various
