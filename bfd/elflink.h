@@ -639,8 +639,14 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash, skip,
       *skip = TRUE;
       /* Make sure this symbol is dynamic.  */
       h->elf_link_hash_flags |= ELF_LINK_HASH_REF_DYNAMIC;
-      /* FIXME: Should we check type and size for protected symbol?  */
-      return _bfd_elf_link_record_dynamic_symbol (info, h);
+      /* A protected symbol has external availability. Make sure it is
+	 recorded as dynamic.
+
+	 FIXME: Should we check type and size for protected symbol?  */
+      if (ELF_ST_VISIBILITY (h->other) == STV_PROTECTED)
+	return _bfd_elf_link_record_dynamic_symbol (info, h);
+      else
+	return TRUE;
     }
   else if (!newdyn
 	   && ELF_ST_VISIBILITY (sym->st_other)
@@ -649,10 +655,15 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash, skip,
       /* If the new symbol with non-default visibility comes from a
 	 relocatable file and the old definition comes from a dynamic
 	 object, we remove the old definition.  */
+      if ((*sym_hash)->root.type == bfd_link_hash_indirect)
+	h = *sym_hash;
       h->root.type = bfd_link_hash_new;
       h->root.u.undef.abfd = NULL;
-      h->elf_link_hash_flags &= ~ELF_LINK_HASH_DEF_DYNAMIC;
-      h->elf_link_hash_flags |= ELF_LINK_HASH_REF_DYNAMIC;
+      if (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC)
+	{
+	  h->elf_link_hash_flags &= ~ELF_LINK_HASH_DEF_DYNAMIC;
+	  h->elf_link_hash_flags |= ELF_LINK_HASH_REF_DYNAMIC;
+	}
       /* FIXME: Should we check type and size for protected symbol?  */
       h->size = 0;
       h->type = 0;
@@ -1049,6 +1060,9 @@ elf_add_default_symbol (abfd, info, h, name, sym, psec, value,
 			  &size_change_ok, dt_needed))
     return FALSE;
 
+  if (skip)
+    return TRUE;
+
   if (! override)
     {
       bh = &hi->root;
@@ -1157,6 +1171,9 @@ elf_add_default_symbol (abfd, info, h, name, sym, psec, value,
 			  &hi, &skip, &override, &type_change_ok,
 			  &size_change_ok, dt_needed))
     return FALSE;
+
+  if (skip)
+    return TRUE;
 
   if (override)
     {
