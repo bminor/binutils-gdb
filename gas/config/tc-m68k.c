@@ -784,7 +784,8 @@ tc_m68k_fix_adjustable (fixP)
      fixS *fixP;
 {
   /* Prevent all adjustments to global symbols. */
-  if (S_IS_EXTERNAL (fixP->fx_addsy))
+  if (S_IS_EXTERNAL (fixP->fx_addsy)
+      || S_IS_WEAK (fixP->fx_addsy))
     return 0;
 
   /* adjust_reloc_syms doesn't know about the GOT */
@@ -918,6 +919,19 @@ tc_gen_reloc (section, fixp)
 
 #endif /* BFD_ASSEMBLER */
 
+/* Return zero if the reference to SYMBOL from within the same segment may
+   be relaxed.  */
+#ifdef OBJ_ELF
+
+#define relaxable_symbol(symbol) \
+  (! S_IS_EXTERNAL (symbol) && ! S_IS_WEAK (symbol))
+
+#else
+
+#define relaxable_symbol(symbol) 1
+
+#endif
+ 
 /* Handle of the OPCODE hash table.  NULL means any use before
    m68k_ip_begin() will crash.  */
 static struct hash_control *op_hash;
@@ -2305,6 +2319,7 @@ m68k_ip (instring)
 		      && opP->disp.pic_reloc == pic_none
 #endif
 		      && S_GET_SEGMENT (adds (&opP->disp)) == now_seg
+		      && relaxable_symbol (adds (&opP->disp))
 		      && HAVE_LONG_BRANCH(current_architecture)
 		      && !flag_long_jumps
 		      && !strchr ("~%&$?", s[0]))
@@ -4428,7 +4443,8 @@ md_estimate_size_before_relax (fragP, segment)
 
     case TAB (PCREL, SZ_UNDEF):
       {
-	if (S_GET_SEGMENT (fragP->fr_symbol) == segment
+	if ((S_GET_SEGMENT (fragP->fr_symbol) == segment
+	     && relaxable_symbol (fragP->fr_symbol))
 	    || flag_short_refs
 	    || cpu_of_arch (current_architecture) < m68020
 	    || cpu_of_arch (current_architecture) == mcf5200)
@@ -4525,7 +4541,8 @@ md_estimate_size_before_relax (fragP, segment)
 
     case TAB (PCLEA, SZ_UNDEF):
       {
-	if ((S_GET_SEGMENT (fragP->fr_symbol)) == segment
+	if (((S_GET_SEGMENT (fragP->fr_symbol)) == segment
+	     && relaxable_symbol (fragP->fr_symbol))
 	    || flag_short_refs
 	    || cpu_of_arch (current_architecture) < m68020
 	    || cpu_of_arch (current_architecture) == mcf5200)
@@ -4542,7 +4559,8 @@ md_estimate_size_before_relax (fragP, segment)
       }				/* TAB(PCLEA,SZ_UNDEF) */
 
     case TAB (PCINDEX, SZ_UNDEF):
-      if (S_GET_SEGMENT (fragP->fr_symbol) == segment
+      if ((S_GET_SEGMENT (fragP->fr_symbol) == segment
+	   && relaxable_symbol (fragP->fr_symbol))
 	  || cpu_of_arch (current_architecture) < m68020
 	  || cpu_of_arch (current_architecture) == mcf5200)
 	{
@@ -5441,6 +5459,7 @@ static int mri_control_index;
 
 /* Some function prototypes.  */
 
+static void mri_assemble PARAMS ((char *));
 static char *mri_control_label PARAMS ((void));
 static struct mri_control_info *push_mri_control
   PARAMS ((enum mri_control_type));
@@ -5455,6 +5474,24 @@ static void build_mri_control_operand
 	   const char *, int));
 static void parse_mri_control_expression
   PARAMS ((char *, int, const char *, const char *, int));
+
+/* Assemble an instruction for an MRI structured control directive.  */
+
+static void
+mri_assemble (str)
+     char *str;
+{
+  char *s;
+
+  /* md_assemble expects the opcode to be in lower case.  */
+  for (s = str; *s != ' ' && *s != '\0'; s++)
+    {
+      if (isupper ((unsigned char) *s))
+	*s = tolower ((unsigned char) *s);
+    }
+
+  md_assemble (str);
+}
 
 /* Generate a new MRI label structured control directive label name.  */
 
@@ -5748,7 +5785,7 @@ build_mri_control_operand (qual, cc, leftstart, leftstop, rightstart,
       memcpy (s, rightstart, rightstop - rightstart);
       s += rightstop - rightstart;
       *s = '\0';
-      md_assemble (buf);
+      mri_assemble (buf);
       free (buf);
     }
       
@@ -5761,7 +5798,7 @@ build_mri_control_operand (qual, cc, leftstart, leftstop, rightstart,
     *s++ = extent;
   *s++ = ' ';
   strcpy (s, truelab);
-  md_assemble (buf);
+  mri_assemble (buf);
   free (buf);
 }
 
@@ -6002,7 +6039,7 @@ s_mri_else (qual)
   q[0] = qual;
   q[1] = '\0';
   sprintf (buf, "bra%s %s", q, mri_control_stack->bottom);
-  md_assemble (buf);
+  mri_assemble (buf);
   free (buf);
 
   colon (mri_control_stack->next);
@@ -6075,7 +6112,7 @@ s_mri_break (extent)
   ex[0] = extent;
   ex[1] = '\0';
   sprintf (buf, "bra%s %s", ex, n->bottom);
-  md_assemble (buf);
+  mri_assemble (buf);
   free (buf);
 
   if (flag_mri)
@@ -6114,7 +6151,7 @@ s_mri_next (extent)
   ex[0] = extent;
   ex[1] = '\0';
   sprintf (buf, "bra%s %s", ex, n->next);
-  md_assemble (buf);
+  mri_assemble (buf);
   free (buf);
 
   if (flag_mri)
@@ -6303,7 +6340,7 @@ s_mri_for (qual)
   memcpy (s, varstart, varstop - varstart);
   s += varstop - varstart;
   *s = '\0';
-  md_assemble (buf);
+  mri_assemble (buf);
 
   colon (n->top);
 
@@ -6321,7 +6358,7 @@ s_mri_for (qual)
   memcpy (s, varstart, varstop - varstart);
   s += varstop - varstart;
   *s = '\0';
-  md_assemble (buf);
+  mri_assemble (buf);
 
   /* bcc bottom */
   ex[0] = extent;
@@ -6330,7 +6367,7 @@ s_mri_for (qual)
     sprintf (buf, "blt%s %s", ex, n->bottom);
   else
     sprintf (buf, "bgt%s %s", ex, n->bottom);
-  md_assemble (buf);
+  mri_assemble (buf);
 
   /* Put together the add or sub instruction used by ENDF.  */
   s = buf;
@@ -6375,10 +6412,10 @@ s_mri_endf (ignore)
 
   colon (mri_control_stack->next);
 
-  md_assemble (mri_control_stack->incr);
+  mri_assemble (mri_control_stack->incr);
 
   sprintf (mri_control_stack->incr, "bra %s", mri_control_stack->top);
-  md_assemble (mri_control_stack->incr);
+  mri_assemble (mri_control_stack->incr);
 
   free (mri_control_stack->incr);
 
@@ -6518,7 +6555,7 @@ s_mri_endw (ignore)
 
   buf = (char *) xmalloc (20 + strlen (mri_control_stack->next));
   sprintf (buf, "bra %s", mri_control_stack->next);
-  md_assemble (buf);
+  mri_assemble (buf);
   free (buf);
 
   colon (mri_control_stack->bottom);

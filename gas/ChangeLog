@@ -1,3 +1,11 @@
+Fri May 29 13:46:07 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-m68k.c (mri_assemble): New static function.
+	(build_mri_control_operand): Call mri_assemble rather than
+	md_assemble.
+	(s_mri_else, s_mri_break, s_mri_next, s_mri_for): Likewise.
+	(s_mri_endf, s_mri_endw): Likewise.
+
 start-sanitize-sky
 Thu May 28 16:23:08 1998  Doug Evans  <devans@canuck.cygnus.com>
 
