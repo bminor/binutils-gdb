@@ -1,3 +1,13 @@
+2000-03-08  Dave Brolley  <brolley@redhat.com>
+
+	* cgen-par.h (cgen_write_queue_kind): Add CGEN_FN_SF_WRITE.
+	(CGEN_WRITE_QUEUE_ELEMENT): Add fn_sf_write.
+	(sim_queue_fn_si_write): Last argument is has type USI.
+	(sim_queue_fn_sf_write): New function.
+	* cgen-par.c (sim_queue_fn_si_write): Declare 'value' as USI.
+	(sim_queue_fn_sf_write): New function.
+	(cgen_write_queue_element_execute): Handle CGEN_FN_SF_WRITE.
+
 Tue Feb 22 16:45:09 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* run.c (main): When SIM_HAVE_ENVIRONMENT enable tracing with

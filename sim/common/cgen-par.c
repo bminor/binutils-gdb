@@ -93,7 +93,7 @@ void sim_queue_fn_si_write (
   SIM_CPU *cpu,
   void (*write_function)(SIM_CPU *cpu, UINT, USI),
   UINT regno,
-  SI value
+  USI value
 )
 {
   CGEN_WRITE_QUEUE *q = CPU_WRITE_QUEUE (cpu);
@@ -103,6 +103,22 @@ void sim_queue_fn_si_write (
   element->kinds.fn_si_write.function = write_function;
   element->kinds.fn_si_write.regno = regno;
   element->kinds.fn_si_write.value = value;
+}
+
+void sim_queue_fn_sf_write (
+  SIM_CPU *cpu,
+  void (*write_function)(SIM_CPU *cpu, UINT, SF),
+  UINT regno,
+  SF value
+)
+{
+  CGEN_WRITE_QUEUE *q = CPU_WRITE_QUEUE (cpu);
+  CGEN_WRITE_QUEUE_ELEMENT *element = CGEN_WRITE_QUEUE_NEXT (q);
+  element->kind = CGEN_FN_SF_WRITE;
+  element->insn_address = CPU_PC_GET (cpu);
+  element->kinds.fn_sf_write.function = write_function;
+  element->kinds.fn_sf_write.regno = regno;
+  element->kinds.fn_sf_write.value = value;
 }
 
 void sim_queue_fn_di_write (
@@ -363,6 +379,11 @@ cgen_write_queue_element_execute (SIM_CPU *cpu, CGEN_WRITE_QUEUE_ELEMENT *item)
       item->kinds.fn_si_write.function (cpu,
 					item->kinds.fn_si_write.regno,
 					item->kinds.fn_si_write.value);
+      break;
+    case CGEN_FN_SF_WRITE:
+      item->kinds.fn_sf_write.function (cpu,
+					item->kinds.fn_sf_write.regno,
+					item->kinds.fn_sf_write.value);
       break;
     case CGEN_FN_DI_WRITE:
       item->kinds.fn_di_write.function (cpu,

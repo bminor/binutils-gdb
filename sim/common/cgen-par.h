@@ -25,7 +25,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 enum cgen_write_queue_kind {
   CGEN_BI_WRITE, CGEN_QI_WRITE, CGEN_SI_WRITE, CGEN_SF_WRITE,
   CGEN_PC_WRITE,
-  CGEN_FN_HI_WRITE, CGEN_FN_SI_WRITE, CGEN_FN_DI_WRITE, CGEN_FN_DF_WRITE,
+  CGEN_FN_HI_WRITE, CGEN_FN_SI_WRITE, CGEN_FN_SF_WRITE,
+  CGEN_FN_DI_WRITE, CGEN_FN_DF_WRITE,
   CGEN_FN_XI_WRITE, CGEN_FN_PC_WRITE,
   CGEN_MEM_QI_WRITE, CGEN_MEM_HI_WRITE, CGEN_MEM_SI_WRITE, CGEN_MEM_DI_WRITE,
   CGEN_MEM_DF_WRITE, CGEN_MEM_XI_WRITE,
@@ -68,6 +69,11 @@ typedef struct {
       SI   value;
       void (*function)(SIM_CPU *, UINT, USI);
     } fn_si_write;
+    struct {
+      UINT regno;
+      SF   value;
+      void (*function)(SIM_CPU *, UINT, SF);
+    } fn_sf_write;
     struct {
       UINT regno;
       DI   value;
@@ -181,7 +187,8 @@ extern void sim_queue_sf_write (SIM_CPU *, SI *, SF);
 extern void sim_queue_pc_write (SIM_CPU *, USI);
 
 extern void sim_queue_fn_hi_write (SIM_CPU *, void (*)(SIM_CPU *, UINT, UHI), UINT, UHI);
-extern void sim_queue_fn_si_write (SIM_CPU *, void (*)(SIM_CPU *, UINT, USI), UINT, SI);
+extern void sim_queue_fn_si_write (SIM_CPU *, void (*)(SIM_CPU *, UINT, USI), UINT, USI);
+extern void sim_queue_fn_sf_write (SIM_CPU *, void (*)(SIM_CPU *, UINT, SF), UINT, SF);
 extern void sim_queue_fn_di_write (SIM_CPU *, void (*)(SIM_CPU *, UINT, DI), UINT, DI);
 extern void sim_queue_fn_df_write (SIM_CPU *, void (*)(SIM_CPU *, UINT, DF), UINT, DF);
 extern void sim_queue_fn_xi_write (SIM_CPU *, void (*)(SIM_CPU *, UINT, SI *), UINT, SI *);
