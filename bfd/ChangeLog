@@ -1,3 +1,8 @@
+Thu Oct 23 00:53:14 1997  Richard Henderson  <rth@dot.cygnus.com>
+
+	* configure.in (sparc*-*-linux*): Use trad-core and ...
+	* hosts/sparclinux.h: New file.
+
 Thu Oct 23 00:25:29 1997  Richard Henderson  <rth@dot.cygnus.com>
 
 	* config.bfd (sparc64-*-linux*): New target.
