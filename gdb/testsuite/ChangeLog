@@ -1,5 +1,7 @@
 Mon Jan  9 16:22:46 1995  Jim Kingdon  <kingdon@lioth.cygnus.com>
 
+	* gdb.base/signals.exp: Call gdb_exit and gdb_start.
+
 	* gdb.base/help.exp: Replace most of docstrings for "info signals"
 	and "signal" with ".*".
 
