@@ -50,6 +50,7 @@ typedef enum {
   trace_semantics,
   trace_idecode,
   trace_alu,
+  trace_load_store,
   /**/
   trace_vm,
   trace_core,

@@ -1,3 +1,59 @@
+Thu Nov  2 08:54:04 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* main.c (main): Call psim_print_info with verbose == 2.
+
+	* mon.c (mon_print_info): Align the cpu number and number of
+	instructions fields.  Do not print an instruction category if the
+	CPU did not execute any of those instructions.
+	
+	* configure.in: Add support for --enable-sim-opcode=stupid.
+	* configure: Regenerate.
+
+Wed Nov  1 23:46:59 1995  Andrew Cagney - aka Noid  <cagney@highland.com.au>
+
+	* std-config (INLINE_DEVICE_TREE): Don't inline either of
+        device_tree.c or devices.c.  There is no significant gain.
+
+	* configure.in, Makefile.in: add --enable-sim-icache=[0-9]* and
+ 	IGEN_ICACHE macro.
+	
+Wed Nov  1 23:46:59 1995  Andrew Cagney - aka Noid  <cagney@highland.com.au>
+
+	* igen.c (main), misc.h (target_a2i, i2target), misc.c: Add
+        functions to convert between target and igen internal bit numbers.
+        Make IO go through these functions. Add -b (bit size) and -h (high
+        bit nr) options to igen.  Typical usage would be: ./igen -b 16 -h
+        15 for a 16 bit instruction format with the msb given a number 15.
+
+Wed Nov  1 22:17:32 1995  Andrew Cagney - aka Noid  <cagney@highland.com.au>
+
+	* dgen.c (main): Was outputting optarg even when it was NULL.
+
+Tue Oct 31 23:48:33 1995  Andrew Cagney - aka Noid  <cagney@highland.com.au>
+
+	* vm_n.h (vm_data_map_load_N, vm_data_map_store_n), debug.h,
+        debug.c: Add tracing of load/store unit (virtual) with -t
+        load-store.
+
+Tue Oct 31 21:44:01 1995  Andrew Cagney - aka Noid  <cagney@highland.com.au>
+
+        * std-config.h (WITH_ENVIRONMENT): Add USER_ENVIRONMENT which does
+        not include things such as the time base and events.
+
+	* interrupt.c, sim_calls.c, cpu.h, vm.c, configure.in: Add UEA to
+ 	all environment switches for above.
+
+	* psim.c (psim_create): ditto - new device tree node name is
+        /options/environment-architecture with values user, virtual and
+        operating.
+
+Tue Oct 31 21:31:32 1995  Andrew Cagney - aka Noid  <cagney@highland.com.au>
+
+	* ppc-opcode-stupid: Third example of use of opcode table - this
+        one expands all mtspr/mfspr and branch instructions.  Appears to
+        give about a 10% gain in performance if everything enabled.  Also
+        takes about 150mb of swap to build.
+
 Wed Nov  1 10:49:48 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* emul_netbsd.c (do_exit): Print arguments and close parenthesis

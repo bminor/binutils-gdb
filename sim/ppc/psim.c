@@ -22,6 +22,10 @@
 #ifndef _PSIM_C_
 #define _PSIM_C_
 
+#include <stdio.h>
+#include <ctype.h>
+#include <stdlib.h>
+
 #include "config.h"
 #include "ppc-config.h"
 #include "inline.h"
@@ -36,7 +40,26 @@
 #include "cpu.h" /* includes psim.h */
 #include "idecode.h"
 
+#include "bfd.h"
+
+
 #include "inline.c"
+
+/* Any starting address less than this is assumed to be an OEA program
+   rather than VEA.  */
+#ifndef OEA_START_ADDRESS
+#define OEA_START_ADDRESS 4096
+#endif
+
+/* Any starting address greater than this is assumed to be an OpenBoot
+   rather than VEA */
+#ifndef OPENBOOT_START_ADDRESS
+#define OPENBOOT_START_ADDRESS 0x80000000
+#endif
+
+#ifndef OEA_MEMORY_SIZE
+#define OEA_MEMORY_SIZE 0x100000
+#endif
 
 
 /* system structure, actual size of processor array determined at
@@ -44,7 +67,8 @@
 
 struct _psim {
   event_queue *events;
-  device_node *devices;
+  device_tree *devices;
+  mon *monitor;
   core *memory;
   /* escape routine for inner functions */
   void *path_to_halt;
@@ -54,7 +78,7 @@ struct _psim {
   /* the processes proper */
   int nr_cpus;
   int last_cpu; /* CPU that last (tried to) execute an instruction */
-  cpu *processors[0];
+  cpu *processors[MAX_NR_PROCESSORS];
 };
 
 
@@ -62,64 +86,348 @@ int current_target_byte_order;
 int current_host_byte_order;
 int current_environment;
 int current_alignment;
+int current_floating_point;
+
+
+/* create a device tree from the image */
+
+
+
+/* Raw hardware tree:
+
+   A small default set of devices are configured.  Each section of the
+   image is loaded directly into physical memory. */
+
+STATIC_INLINE_PSIM void
+create_hardware_device_tree(bfd *image,
+			    device_tree *root)
+{
+  char *name;
+  const memory_size = OEA_MEMORY_SIZE;
+
+  /* options */
+  device_tree_add_passthrough(root, "/options");
+  device_tree_add_integer(root, "/options/smp",
+			  MAX_NR_PROCESSORS);
+  device_tree_add_boolean(root, "/options/little-endian?",
+			  !image->xvec->byteorder_big_p);
+  device_tree_add_string(root, "/options/environment-architecture",
+			 "operating");
+  device_tree_add_boolean(root, "/options/strict-alignment?",
+			  (WITH_ALIGNMENT == STRICT_ALIGNMENT
+			   || !image->xvec->byteorder_big_p));
+  device_tree_add_boolean(root, "/options/floating-point?",
+			  WITH_FLOATING_POINT);
+
+  /* hardware */
+  name = printd_uw_u_u("/memory", 0, memory_size, access_read_write_exec);
+  device_tree_add_found_device(root, name);
+  zfree(name);
+  device_tree_add_found_device(root, "/iobus@0x400000");
+  device_tree_add_found_device(root, "/iobus/console@0x000000,16");
+  device_tree_add_found_device(root, "/iobus/halt@0x100000,4");
+  device_tree_add_found_device(root, "/iobus/icu@0x200000,4");
+
+  /* initialization */
+  device_tree_add_passthrough(root, "/init");
+  device_tree_add_found_device(root, "/init/register@pc,0x0");
+  name = printd_c_uw("/init/register", "sp", memory_size);
+  device_tree_add_found_device(root, name);
+  zfree(name);
+  name = printd_c_uw("/init/register", "msr",
+		     (image->xvec->byteorder_big_p
+		      ? 0
+		      : msr_little_endian_mode));
+  device_tree_add_found_device(root, name);
+  zfree(name);
+  /* AJC puts the PC at zero and wants a stack while MM puts it above
+     zero and doesn't. Really there should be no stack *but* this
+     makes testing easier */
+  device_tree_add_found_device(root,
+			       (bfd_get_start_address(image) == 0
+				? "/init/stack@elf"
+				: "/init/stack@none"));
+  name = printd_c("/init/load-binary", bfd_get_filename(image));
+  device_tree_add_found_device(root, name);
+  zfree(name);
+}
+
+
+/* Openboot model (under development):
+
+   An extension of the hardware model.  The image is read into memory
+   as a single block.  Sections of the image are then mapped as
+   required using a HTAB. */
+
+STATIC_INLINE_PSIM void
+create_openboot_device_tree(bfd *image,
+			    device_tree *root)
+{
+  create_hardware_device_tree(image, root);
+}
+
+
+/* User mode model:
+
+   Image sections loaded into virtual addresses as specified.  A
+   (large) stack is reserved (but only allocated as needed). System
+   calls that include suport for heap growth are attached. */
+
+STATIC_INLINE_PSIM void
+create_vea_device_tree(bfd *image,
+		       device_tree *root)
+{
+  unsigned_word top_of_stack;
+  unsigned stack_size;
+  int elf_binary;
+  char *name;
+
+  /* establish a few defaults */
+  if (image->xvec->flavour == bfd_target_elf_flavour) {
+    elf_binary = 1;
+    top_of_stack = 0xe0000000;
+    stack_size =   0x00100000;
+  }
+  else {
+    elf_binary = 0;
+    top_of_stack = 0x20000000;
+    stack_size =   0x00100000;
+  }
+
+  /* options */
+  device_tree_add_passthrough(root, "/options");
+  device_tree_add_integer(root, "/options/smp", 1); /* always */
+  device_tree_add_boolean(root, "/options/little-endian?",
+			  !image->xvec->byteorder_big_p);
+  device_tree_add_string(root, "/options/environment-architecture",
+			 (WITH_ENVIRONMENT == USER_ENVIRONMENT
+			  ? "user" : "virtual"));
+  device_tree_add_boolean(root, "/options/strict-alignment?",
+			  (WITH_ALIGNMENT == STRICT_ALIGNMENT
+			    || !image->xvec->byteorder_big_p));
+  device_tree_add_boolean(root, "/options/floating-point?",
+			  WITH_FLOATING_POINT);
+
+  /* virtual memory - handles growth of stack/heap */
+  name = printd_uw_u("/vm", top_of_stack - stack_size, stack_size);
+  device_tree_add_found_device(root, name);
+  zfree(name);
+  name = printd_c("/vm/map-binary", bfd_get_filename(image));
+  device_tree_add_found_device(root, name);
+  zfree(name);
+
+  /* finish the init */
+  device_tree_add_passthrough(root, "/init");
+  name = printd_c_uw("/init/register", "pc", bfd_get_start_address(image));
+  device_tree_add_found_device(root, name); /*pc*/
+  zfree(name);
+  name = printd_c_uw("/init/register", "sp", top_of_stack);
+  device_tree_add_found_device(root, name);
+  zfree(name);
+  name = printd_c_uw("/init/register", "msr",
+		     (image->xvec->byteorder_big_p
+		      ? 0
+		      : msr_little_endian_mode));
+  device_tree_add_found_device(root, name);
+  zfree(name);
+  device_tree_add_found_device(root, (elf_binary
+				      ? "/init/stack@elf"
+				      : "/init/stack@xcoff"));
+}
+
+
+/* File device:
+
+   The file contains lines that specify the describe the device tree
+   to be created, read them in and load them into the tree */
+
+STATIC_INLINE_PSIM void
+create_filed_device_tree(const char *file_name,
+			 device_tree *root)
+{
+  FILE *description = fopen(file_name, "r");
+  int line_nr = 0;
+  char device_path[1000];
+  while (fgets(device_path, sizeof(device_path), description)) {
+    /* check all of line was read */
+    {
+      char *end = strchr(device_path, '\n');
+      if (end == NULL) {
+	fclose(description);
+	error("create_filed_device_tree() line %d to long: %s\n",
+	      line_nr, device_path);
+      }
+      line_nr++;
+      *end = '\0';
+    }
+    /* check for leading comment */
+    if (device_path[0] != '/')
+      continue;
+    /* enter it in varying ways */
+    if (strchr(device_path, '@') != NULL) {
+      device_tree_add_found_device(root, device_path);
+    }
+    else {
+      char *space = strchr(device_path, ' ');
+      if (space == NULL) {
+	/* intermediate node */
+	device_tree_add_passthrough(root, device_path);
+      }
+      else if (space[-1] == '?') {
+	/* boolean */
+	*space = '\0';
+	device_tree_add_boolean(root, device_path, space[1] != '0');
+      }
+      else if (isdigit(space[1])) {
+	/* integer */
+	*space = '\0';
+	device_tree_add_integer(root, device_path, strtoul(space+1, 0, 0));
+      }
+      else if (space[1] == '"') {
+	/* quoted string */
+	char *end = strchr(space+2, '\0');
+	if (end[-1] == '"')
+	  end[-1] = '\0';
+	*space = '\0';
+	device_tree_add_string(root, device_path, space + 2);
+      }
+      else {
+	/* any thing else */
+	space = '\0';
+	device_tree_add_string(root, device_path, space + 1);
+      }
+    }
+  }
+  fclose(description);
+}
+
+
+/* Given the file containing the `image', create a device tree that
+   defines the machine to be modeled */
+
+STATIC_INLINE_PSIM device_tree *
+create_device_tree(const char *file_name,
+		   core *memory)
+{
+  bfd *image;
+  const device *core_device = core_device_create(memory);
+  device_tree *root = device_tree_add_device(NULL, "/", core_device);
+
+  bfd_init(); /* could be redundant but ... */
+
+  /* open the file */
+  image = bfd_openr(file_name, NULL);
+  if (image == NULL) {
+    bfd_perror("open failed:");
+    error("nothing loaded\n");
+  }
+
+  /* check it is valid */
+  if (!bfd_check_format(image, bfd_object)) {
+    printf_filtered("create_device_tree() - FIXME - should check more bfd bits\n");
+    printf_filtered("create_device_tree() - %s not an executable, assume device file\n", file_name);
+    bfd_close(image);
+    image = NULL;
+  }
+
+  /* depending on what was found about the file, load it */
+  if (image != NULL) {
+    if (bfd_get_start_address(image) < OEA_START_ADDRESS) {
+      TRACE(trace_device_tree, ("create_device_tree() - hardware image\n"));
+      create_hardware_device_tree(image, root);
+    }
+    else if (bfd_get_start_address(image) < OPENBOOT_START_ADDRESS) {
+      TRACE(trace_device_tree, ("create_device_tree() - vea image\n"));
+      create_vea_device_tree(image, root);
+    }
+    else {
+      TRACE(trace_device_tree, ("create_device_tree() - openboot? image\n"));
+      create_openboot_device_tree(image, root);
+    }
+    bfd_close(image);
+  }
+  else {
+    TRACE(trace_device_tree, ("create_device_tree() - text image\n"));
+    create_filed_device_tree(file_name, root);
+  }
+
+  return root;
+}
+
+
 
 INLINE_PSIM psim *
-psim_create(const char *file_name,
-	    int nr_processors)
+psim_create(const char *file_name)
 {
   int cpu_nr;
+  const char *env;
   psim *system;
 
-  /* sanity check */
-  if (nr_processors <= 0
-      || (!WITH_SMP && nr_processors != 1))
-    error("psim_create() invalid number of cpus\n");
-
   /* create things */
-  system = (psim*)zalloc(sizeof(psim)
-			 + sizeof(cpu*) * (nr_processors + 1));
-  system->nr_cpus = nr_processors;
+  system = ZALLOC(psim);
   system->events = event_queue_create();
-  system->devices = device_tree_create(file_name);
-  system->memory = core_create(system->devices, 0);
-  for (cpu_nr = 0; cpu_nr < nr_processors; cpu_nr++) {
+  system->memory = core_create();
+  system->monitor = mon_create();
+  system->devices = create_device_tree(file_name, system->memory);
+  for (cpu_nr = 0; cpu_nr < MAX_NR_PROCESSORS; cpu_nr++) {
     system->processors[cpu_nr] = cpu_create(system,
 					    system->memory,
 					    system->events,
+					    mon_cpu(system->monitor,
+						    cpu_nr),
 					    cpu_nr);
   }
 
-  /* fill in the missing endian information */
-  current_target_byte_order
-    = (device_tree_find_boolean(system->devices, "/options/little-endian?")
-       ? LITTLE_ENDIAN
-       : BIG_ENDIAN);
-  if (WITH_TARGET_BYTE_ORDER
-      && WITH_TARGET_BYTE_ORDER != current_target_byte_order)
+  /* fill in the missing real number of CPU's */
+  system->nr_cpus = device_tree_find_integer(system->devices,
+					     "/options/smp");
+
+  /* fill in the missing TARGET BYTE ORDER information */
+  current_target_byte_order = (device_tree_find_boolean(system->devices,
+							"/options/little-endian?")
+			       ? LITTLE_ENDIAN
+			       : BIG_ENDIAN);
+  if (CURRENT_TARGET_BYTE_ORDER != current_target_byte_order)
     error("target byte order conflict\n");
 
-  current_host_byte_order = 1;
-  current_host_byte_order = (*(char*)(&current_host_byte_order)
-			     ? LITTLE_ENDIAN
-			     : BIG_ENDIAN);
-  if (WITH_HOST_BYTE_ORDER
-      && WITH_HOST_BYTE_ORDER != current_host_byte_order)
+  /* fill in the missing HOST BYTE ORDER information */
+  current_host_byte_order = (current_host_byte_order = 1,
+			     (*(char*)(&current_host_byte_order)
+			      ? LITTLE_ENDIAN
+			      : BIG_ENDIAN));
+  if (CURRENT_HOST_BYTE_ORDER != current_host_byte_order)
     error("host byte order conflict\n");
 
   /* fill in the missing OEA/VEA information */
-  current_environment = (device_tree_find_boolean(system->devices,
-						  "/options/vea?")
+  env = device_tree_find_string(system->devices,
+				"/options/environment-architecture");
+  current_environment = (strcmp(env, "user") == 0
+			 ? USER_ENVIRONMENT
+			 : strcmp(env, "virtual") == 0
 			 ? VIRTUAL_ENVIRONMENT
-			 : OPERATING_ENVIRONMENT);
+			 : strcmp(env, "operating") == 0
+			 ? OPERATING_ENVIRONMENT
+			 : 0);
+  if (current_environment == 0)
+    error("unreconized /options/environment-architecture\n");
+  if (CURRENT_ENVIRONMENT != current_environment)
+    error("target environment conflict\n");
 
   /* fill in the missing ALLIGNMENT information */
   current_alignment = (device_tree_find_boolean(system->devices,
-						"/options/aligned?")
+						"/options/strict-alignment?")
 		       ? STRICT_ALIGNMENT
 		       : NONSTRICT_ALIGNMENT);
-  if (WITH_ALIGNMENT
-      && CURRENT_ALIGNMENT != WITH_ALIGNMENT)
-    error("target alignment support conflict\n");
+  if (CURRENT_ALIGNMENT != current_alignment)
+    error("target alignment conflict\n");
+
+  /* fill in the missing FLOATING POINT information */
+  current_floating_point = (device_tree_find_boolean(system->devices,
+						     "/options/floating-point?")
+			    ? HARD_FLOATING_POINT
+			    : SOFT_FLOATING_POINT);
+  if (CURRENT_FLOATING_POINT != current_floating_point)
+    error("target floating-point conflict\n");
 
   return system;
 }
@@ -185,207 +493,32 @@ psim_cpu(psim *system,
 }
 
 
-
-STATIC_INLINE_PSIM int
-sizeof_argument_strings(char **arg)
+const device *
+psim_device(psim *system,
+	    const char *path)
 {
-  int sizeof_strings = 0;
-
-  /* robust */
-  if (arg == NULL)
-    return 0;
-
-  /* add up all the string sizes (padding as we go) */
-  for (; *arg != NULL; arg++) {
-    int len = strlen(*arg) + 1;
-    sizeof_strings += ALIGN_8(len);
-  }
-
-  return sizeof_strings;
+  return device_tree_find_device(system->devices, path);
 }
 
-STATIC_INLINE_PSIM int
-number_of_arguments(char **arg)
-{
-  int nr;
-  if (arg == NULL)
-    return 0;
-  for (nr = 0; *arg != NULL; arg++, nr++);
-  return nr;
-}
-
-STATIC_INLINE_PSIM int
-sizeof_arguments(char **arg)
-{
-  return ALIGN_8((number_of_arguments(arg) + 1) * sizeof(unsigned_word));
-}
-
-STATIC_INLINE_PSIM void
-write_stack_arguments(psim *system,
-		      char **arg,
-		      unsigned_word start_block,
-		      unsigned_word start_arg)
-{
-  if (CURRENT_ENVIRONMENT != VIRTUAL_ENVIRONMENT)
-    {
-      TRACE(trace_create_stack, ("write_stack_arguments() - skipping, OEA program\n"));
-      return;
-    }
-
-  TRACE(trace_create_stack,
-	("write_stack_arguments() - %s=0x%x %s=0x%x %s=0x%x %s=0x%x\n",
-	 "system", system, "arg", arg,
-	 "start_block", start_block, "start_arg", start_arg));
-  if (arg == NULL)
-    error("write_arguments: character array NULL\n");
-  /* only copy in arguments, memory is already zero */
-  for (; *arg != NULL; arg++) {
-    int len = strlen(*arg)+1;
-    TRACE(trace_create_stack,
-	  ("write_stack_arguments - write %s=%s at %s=0x%x %s=0x%x %s=0x%x\n",
-	   "**arg", *arg, "start_block", start_block,
-	   "len", len, "start_arg", start_arg));
-    if (psim_write_memory(system, 0, *arg,
-			  start_block, len,
-			  raw_transfer, 0) != len)
-      error("write_arguments() - write of **arg (%s) at 0x%x failed\n",
-	    *arg, start_block);
-    if (psim_write_memory(system, 0, &start_block,
-			  start_arg, sizeof(start_block),
-			  cooked_transfer, 0) != sizeof(start_block))
-      error("write_arguments() - write of *arg failed\n");
-    start_block += ALIGN_8(len);
-    start_arg += sizeof(start_block);
-  }
-}
-
-STATIC_INLINE_PSIM void
-create_elf_stack_frame(psim *system,
-		       unsigned_word bottom_of_stack,
-		       char **argv,
-		       char **envp)
-{
-  /* fixme - this is over aligned */
-
-  /* information block */
-  const unsigned sizeof_envp_block = sizeof_argument_strings(envp);
-  const unsigned_word start_envp_block = bottom_of_stack - sizeof_envp_block;
-  const unsigned sizeof_argv_block = sizeof_argument_strings(argv);
-  const unsigned_word start_argv_block = start_envp_block - sizeof_argv_block;
-
-  /* auxiliary vector - contains only one entry */
-  const unsigned sizeof_aux_entry = 2*sizeof(unsigned_word); /* magic */
-  const unsigned_word start_aux = start_argv_block - ALIGN_8(sizeof_aux_entry);
-
-  /* environment points (including null sentinal) */
-  const unsigned sizeof_envp = sizeof_arguments(envp);
-  const unsigned_word start_envp = start_aux - sizeof_envp;
-
-  /* argument pointers (including null sentinal) */
-  const int argc = number_of_arguments(argv);
-  const unsigned sizeof_argv = sizeof_arguments(argv);
-  const unsigned_word start_argv = start_envp - sizeof_argv;
-
-  /* link register save address - alligned to a 16byte boundary */
-  const unsigned_word top_of_stack = ((start_argv
-				       - 2 * sizeof(unsigned_word))
-				      & ~0xf);
-
-  /* force some stack space */
-  if (CURRENT_ENVIRONMENT == VIRTUAL_ENVIRONMENT
-      && core_stack_lower_bound(system->memory) > top_of_stack) {
-    unsigned_word extra_stack_space = (core_stack_lower_bound(system->memory)
-				       - FLOOR_PAGE(top_of_stack));
-    TRACE(trace_create_stack,
-	  ("create_elf_stack_frame() - growing stack by 0x%x\n",
-	   extra_stack_space));
-    core_add_stack(system->memory, extra_stack_space);
-  }
-
-  /* install arguments on stack */
-  write_stack_arguments(system, envp, start_envp_block, start_envp);
-  write_stack_arguments(system, argv, start_argv_block, start_argv);
-
-  /* set up the registers */
-  psim_write_register(system, -1,
-		      &top_of_stack, "r1", cooked_transfer);
-  psim_write_register(system, -1,
-		      &argc, "r3", cooked_transfer);
-  psim_write_register(system, -1,
-		      &start_argv, "r4", cooked_transfer);
-  psim_write_register(system, -1,
-		      &start_envp, "r5", cooked_transfer);
-  psim_write_register(system, -1,
-		      &start_aux, "r6", cooked_transfer);
-}
-
-STATIC_INLINE_PSIM void
-create_aix_stack_frame(psim *system,
-		       unsigned_word bottom_of_stack,
-		       char **argv,
-		       char **envp)
-{
-  unsigned_word core_envp;
-  unsigned_word core_argv;
-  unsigned_word core_argc;
-  unsigned_word core_aux;
-  unsigned_word top_of_stack;
-
-  /* cheat - create an elf stack frame */
-  create_elf_stack_frame(system, bottom_of_stack, argv, envp);
-  
-  /* extract argument addresses from registers */
-  psim_read_register(system, 0, &top_of_stack, "r1", cooked_transfer);
-  psim_read_register(system, 0, &core_argc, "r3", cooked_transfer);
-  psim_read_register(system, 0, &core_argv, "r4", cooked_transfer);
-  psim_read_register(system, 0, &core_envp, "r5", cooked_transfer);
-  psim_read_register(system, 0, &core_aux, "r6", cooked_transfer);
-
-  /* check stack fits at least this much */
-  if (CURRENT_ENVIRONMENT == VIRTUAL_ENVIRONMENT
-      && core_stack_lower_bound(system->memory) > top_of_stack) {
-    unsigned_word extra_stack_space = (core_stack_lower_bound(system->memory)
-				       - FLOOR_PAGE(top_of_stack));
-    TRACE(trace_create_stack,
-	  ("create_aix_stack_frame() - growing stack by 0x%x\n",
-	   extra_stack_space));
-    core_add_stack(system->memory, extra_stack_space);
-  }
-
-  /* extract arguments from registers */
-  error("create_aix_stack_frame() - what happens next?\n");
-}
 
 
 INLINE_PSIM void
-psim_load(psim *system)
+psim_init(psim *system)
 {
-  unsigned_word program_counter;
-  msreg msr;
+  int cpu_nr;
 
-  /* load in core data */
-  core_init(system->memory);
+  /* scrub the monitor */
+  mon_init(system->monitor, system->nr_cpus);
 
-  /* set up all processor entry points (to same thing).  Maybe
-     someday, the device tree could include information specifying the
-     entry point for each processor, one day */
-  TRACE(trace_tbd,
-	("TBD - device tree specifying entry point of each processor\n"));
-  program_counter = device_tree_find_int(system->devices,
-					 "/options/program-counter");
-  psim_write_register(system, -1,
-		      &program_counter,
-		      "pc", cooked_transfer);
-  system->last_cpu = system->nr_cpus - 1; /* force loop to restart */
+  /* scrub all the cpus */
+  for (cpu_nr = 0; cpu_nr < system->nr_cpus; cpu_nr++)
+    cpu_init(system->processors[cpu_nr]);
 
-  /* set up the MSR for at least be/le mode */
-  msr = (device_tree_find_boolean(system->devices,
-				  "/options/little-endian?")
-	 ? msr_little_endian_mode
-	 : 0);
-  psim_write_register(system, -1,
-		      &msr,
-		      "msr", cooked_transfer);
+  /* init all the devices */
+  device_tree_init(system->devices, system);
+
+  /* force loop to restart */
+  system->last_cpu = system->nr_cpus - 1;
 }
 
 INLINE_PSIM void
@@ -393,13 +526,19 @@ psim_stack(psim *system,
 	   char **argv,
 	   char **envp)
 {
-  unsigned_word stack_pointer = device_tree_find_int(system->devices,
-						     "/options/stack-pointer");
-  if (device_tree_find_boolean(system->devices,
-			       "/options/elf?"))
-    create_elf_stack_frame(system, stack_pointer, argv, envp);
-  else
-    create_aix_stack_frame(system, stack_pointer, argv, envp);
+  /* pass the stack device the argv/envp and let it work out what to
+     do with it */
+  const device *stack_device = device_tree_find_device(system->devices,
+						       "/init/stack");
+  unsigned_word stack_pointer;
+  psim_read_register(system, 0, &stack_pointer, "sp", cooked_transfer);
+  stack_device->callback->ioctl(stack_device,
+				system,
+				NULL, /*cpu*/
+				0, /*cia*/
+				stack_pointer,
+				argv,
+				envp);
 }
 
 
@@ -416,8 +555,16 @@ STATIC_INLINE_PSIM void
 run_until_stop(psim *system,
 	       volatile int *keep_running)
 {
+  jmp_buf halt;
+  jmp_buf restart;
+  int cpu_nr;
+#if WITH_IDECODE_CACHE_SIZE
+  for (cpu_nr = 0; cpu_nr < system->nr_cpus; cpu_nr++)
+    cpu_flush_icache(system->processors[cpu_nr]);
+#endif
+  psim_set_halt_and_restart(system, &halt, &restart);
 
-#if (WITH_IDECODE_CACHE == 0 && WITH_SMP == 0)
+#if (!WITH_IDECODE_CACHE_SIZE && WITH_SMP == 0)
 
   /* CASE 1: No instruction cache and no SMP.
 
@@ -429,9 +576,6 @@ run_until_stop(psim *system,
      later functions always save the current cpu instruction
      address. */
 
-  jmp_buf halt;
-  jmp_buf restart;
-  psim_set_halt_and_restart(system, &halt, &restart);
   if (!setjmp(halt)) {
     do {
       if (!setjmp(restart)) {
@@ -456,11 +600,10 @@ run_until_stop(psim *system,
       }
     } while(keep_running == NULL || *keep_running);
   }
-  psim_clear_halt_and_restart(system);
 #endif
 
 
-#if (WITH_IDECODE_CACHE > 0 && WITH_SMP == 0)
+#if (WITH_IDECODE_CACHE_SIZE && WITH_SMP == 0)
 
   /* CASE 2: Instruction case but no SMP
 
@@ -468,9 +611,6 @@ run_until_stop(psim *system,
      different cache implementations.  A simple function address cache
      or a full cracked instruction cache */
 
-  jmp_buf halt;
-  jmp_buf restart;
-  psim_set_halt_and_restart(system, &halt, &restart);
   if (!setjmp(halt)) {
     do {
       if (!setjmp(restart)) {
@@ -484,39 +624,24 @@ run_until_stop(psim *system,
 	      cia = cpu_get_program_counter(processor);
 	    }
 	  { 
-	    idecode_cache *const cache_entry
-	      = cpu_icache(processor) + (cia / 4 % IDECODE_CACHE_SIZE);
+	    idecode_cache *const cache_entry = cpu_icache_entry(processor,
+								cia);
 	    if (cache_entry->address == cia) {
 	      idecode_semantic *const semantic = cache_entry->semantic;
-#if WITH_IDECODE_CACHE == 1
-	      cia = semantic(processor, cache_entry->instruction, cia);
-#else
 	      cia = semantic(processor, cache_entry, cia);
-#endif
 	    }
 	    else {
 	      instruction_word const instruction
 		= vm_instruction_map_read(cpu_instruction_map(processor),
 					  processor,
 					  cia);
-#if WITH_IDECODE_CACHE == 1
-	      idecode_semantic *const semantic = idecode(processor,
-							 instruction,
-							 cia);
-#else
 	      idecode_semantic *const semantic = idecode(processor,
 							 instruction,
 							 cia,
 							 cache_entry);
-#endif
 	      cache_entry->address = cia;
 	      cache_entry->semantic = semantic;
-#if WITH_IDECODE_CACHE == 1
-	      cache_entry->instruction = instruction;
-	      cia = semantic(processor, instruction, cia);
-#else
 	      cia = semantic(processor, cache_entry, cia);
-#endif
 	    }
 	  }
 	} while (keep_running == NULL || *keep_running);
@@ -524,11 +649,10 @@ run_until_stop(psim *system,
       }
     } while(keep_running == NULL || *keep_running);
   }
-  psim_clear_halt_and_restart(system);
 #endif
 
 
-#if (WITH_IDECODE_CACHE == 0 && WITH_SMP > 0)
+#if (!WITH_IDECODE_CACHE_SIZE && WITH_SMP > 0)
 
   /* CASE 3: No ICACHE but SMP
 
@@ -536,10 +660,6 @@ run_until_stop(psim *system,
      system when it is aborted.  In particular if cpu0 requests a
      restart, the next cpu is still cpu1.  Cpu0 being restarted after
      all the other CPU's and the event queue have been processed */
-
-  jmp_buf halt;
-  jmp_buf restart;
-  psim_set_halt_and_restart(system, &halt, &restart);
 
   if (!setjmp(halt)) {
     int first_cpu = setjmp(restart);
@@ -571,20 +691,15 @@ run_until_stop(psim *system,
       }
     } while (keep_running == NULL || *keep_running);
   }
-  psim_clear_halt_and_restart(system);
 #endif
 
-#if (WITH_IDECODE_CACHE > 0 && WITH_SMP > 0)
+#if (WITH_IDECODE_CACHE_SIZE && WITH_SMP > 0)
 
   /* CASE 4: ICACHE and SMP ...
 
      This time, everything goes wrong.  Need to restart loops
      correctly, need to save the program counter and finally need to
      keep track of each processors current address! */
-
-  jmp_buf halt;
-  jmp_buf restart;
-  psim_set_halt_and_restart(system, &halt, &restart);
 
   if (!setjmp(halt)) {
     int first_cpu = setjmp(restart);
@@ -602,47 +717,25 @@ run_until_stop(psim *system,
 	else {
 	  cpu *processor = system->processors[current_cpu];
 	  unsigned_word const cia = cpu_get_program_counter(processor);
-	  idecode_cache *cache_entry
-	    = (cpu_icache(processor) + (cia / 4 % IDECODE_CACHE_SIZE));
+	  idecode_cache *cache_entry = cpu_icache_entry(processor, cia);
 	  if (cache_entry->address == cia) {
 	    idecode_semantic *semantic = cache_entry->semantic;
-#if WITH_IDECODE_CACHE == 1
 	    cpu_set_program_counter(processor,
-				    semantic(processor,
-					     cache_entry->instruction,
-					     cia);
-#else
-	    cpu_set_program_counter(processor,
-				    semantic(processor,
-					     cache_entry,
-					     cia);
-#endif
+				    semantic(processor, cache_entry, cia));
 	  }
 	  else {
 	    instruction_word instruction =
 	      vm_instruction_map_read(cpu_instruction_map(processor),
 				      processor,
 				      cia);
-#if WITH_IDECODE_CACHE == 1
-	    idecode_semantic *semantic = idecode(processor,
-						 instruction,
-						 cia);
-#else
 	    idecode_semantic *semantic = idecode(processor,
 						 instruction,
 						 cia,
 						 cache_entry);
-#endif
 	    cache_entry->address = cia;
 	    cache_entry->semantic = semantic;
-#if WITH_IDECODE_CACHE == 1
-	    cache_entry->instruction = instruction;
 	    cpu_set_program_counter(processor,
-				    semantic(processor, instruction, cia));
-#else
-	    cpu_set_program_counter(processor,
-				    semantic(processor, cache_entry, cia);
-#endif
+				    semantic(processor, cache_entry, cia));
 	  }
 	}
 	if (!(keep_running == NULL || *keep_running))
@@ -650,8 +743,9 @@ run_until_stop(psim *system,
       }
     } while (keep_running == NULL || *keep_running);
   }
-  psim_clear_halt_and_restart(system);
 #endif
+
+  psim_clear_halt_and_restart(system);
 }
 
 
@@ -662,7 +756,7 @@ INLINE_PSIM void
 psim_step(psim *system)
 {
   volatile int keep_running = 0;
-  psim_run_until_stop(system, &keep_running);
+  run_until_stop(system, &keep_running);
 }
 
 INLINE_PSIM void
@@ -694,10 +788,10 @@ psim_read_register(psim *system,
   cpu *processor;
 
   /* find our processor */
-  if (which_cpu < 0 || which_cpu > system->nr_cpus)
-    error("psim_read_register() - invalid processor %d\n", which_cpu);
-  if (which_cpu == system->nr_cpus)
+  if (which_cpu == MAX_NR_PROCESSORS)
     which_cpu = system->last_cpu;
+  if (which_cpu < 0 || which_cpu >= system->nr_cpus)
+    error("psim_read_register() - invalid processor %d\n", which_cpu);
   processor = system->processors[which_cpu];
 
   /* find the register description */
@@ -783,14 +877,13 @@ psim_write_register(psim *system,
   char cooked_buf[sizeof(natural_word)];
 
   /* find our processor */
+  if (which_cpu == MAX_NR_PROCESSORS)
+    which_cpu = system->last_cpu;
   if (which_cpu == -1) {
     int i;
     for (i = 0; i < system->nr_cpus; i++)
       psim_write_register(system, i, buf, reg, mode);
     return;
-  }
-  else if (which_cpu == system->nr_cpus) {
-    which_cpu = system->last_cpu;
   }
   else if (which_cpu < 0 || which_cpu >= system->nr_cpus) {
     error("psim_read_register() - invalid processor %d\n", which_cpu);
@@ -873,17 +966,16 @@ psim_read_memory(psim *system,
 		 int which_cpu,
 		 void *buffer,
 		 unsigned_word vaddr,
-		 unsigned len,
-		 transfer_mode mode)
+		 unsigned nr_bytes)
 {
   cpu *processor;
-  if (which_cpu < 0 || which_cpu > system->nr_cpus)
-    error("psim_read_memory() invalid cpu\n");
-  if (which_cpu == system->nr_cpus)
+  if (which_cpu == MAX_NR_PROCESSORS)
     which_cpu = system->last_cpu;
+  if (which_cpu < 0 || which_cpu >= system->nr_cpus)
+    error("psim_read_memory() invalid cpu\n");
   processor = system->processors[which_cpu];
   return vm_data_map_read_buffer(cpu_data_map(processor),
-				 buffer, vaddr, len, mode);
+				 buffer, vaddr, nr_bytes);
 }
 
 
@@ -892,44 +984,26 @@ psim_write_memory(psim *system,
 		  int which_cpu,
 		  const void *buffer,
 		  unsigned_word vaddr,
-		  unsigned len,
-		  transfer_mode mode,
+		  unsigned nr_bytes,
 		  int violate_read_only_section)
 {
   cpu *processor;
-  if (which_cpu < 0 || which_cpu > system->nr_cpus)
-    error("psim_read_memory() invalid cpu\n");
-  if (which_cpu == system->nr_cpus)
+  if (which_cpu == MAX_NR_PROCESSORS)
     which_cpu = system->last_cpu;
+  if (which_cpu < 0 || which_cpu >= system->nr_cpus)
+    error("psim_read_memory() invalid cpu\n");
   processor = system->processors[which_cpu];
   return vm_data_map_write_buffer(cpu_data_map(processor),
-				  buffer, vaddr, len, mode, 1);
+				  buffer, vaddr, nr_bytes, 1);
 }
 
 
 INLINE_PSIM void
-psim_print_info(psim *system, int verbose)
+psim_print_info(psim *system,
+		int verbose)
 {
-  psim_status status;
-  int i;
-
-
-  status = psim_get_status(system);
-  switch (status.reason) {
-  default:
-    break;	/* our caller will print an appropriate error message */
-
-  case was_exited:
-    printf ("Exit status = %d\n", status.signal);
-    break;
-
-  case was_signalled:
-    printf ("Got signal %d\n", status.signal);
-    break;
-  }
-
-  for (i = 0; i < system->nr_cpus; i++)
-    cpu_print_info (system->processors[i], verbose);
+  mon_print_info(system->monitor, verbose);
 }
+
 
 #endif /* _PSIM_C_ */

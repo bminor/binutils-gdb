@@ -39,7 +39,6 @@
 /* Structures used by the simulator, for gdb just have static structures */
 
 static psim *simulator;
-static int nr_cpus;
 static char *register_names[] = REGISTER_NAMES;
 static int print_info = 0;
 
@@ -52,53 +51,39 @@ sim_open (char *args)
   TRACE(trace_gdb, ("sim_open(args=%s) called\n", args ? args : "(null)"));
 
   if (args) {
-    char *buf = (char *)alloca (strlen (args) + 1);
-    char *p;
-    strcpy (buf, args);
+    char **argv = buildargv(args);
+    int argp = 0;
+    int argc;
+    for (argc = 0; argv[argc]; argc++);
 
-    p = strtok (args, " \t");
-    while (p != (char *)0) {
-      if (*p != '-')
-	error ("Argument is not an option '%s'", p);
+    while (argp < argc) {
+      if (*argv[argp] != '-')
+	error ("Argument is not an option '%s'", argv[argp]);
 
       else {
 	/* check arguments -- note, main.c also contains argument processing
 	   code for the standalone emulator.  */
-	while (*++p != '\0') {
+	char *p = argv[argp] + 1;
+	while (*p != '\0') {
 	  switch (*p) {
 	  default:
-	    error ("Usage: target sim [ -a -p -c -C -s -i -I -t ]\n");
+	    printf_filtered("Usage:\n\ttarget sim [ -t <trace-option> ]\n");
+	    trace_usage();
+	    error ("");
 	    break;
-	  case 'a':
-	    for (i = 0; i < nr_trace; i++)
-	      trace[i] = 1;
-	    break;
-	  case 'p':
-	    trace[trace_cpu] = trace[trace_semantics] = 1;
-	    break;
-	  case 'c':
-	    trace[trace_core] = 1;
-	    break;
-	  case 'C':
-	    trace[trace_console_device] = 1;
-	    break;
-	  case 's':
-	    trace[trace_create_stack] = 1;
-	    break;
-	  case 'i':
-	    trace[trace_icu_device] = 1;
+	  case 't':
+	    argp += 1;
+	    if (argv[argp] == NULL)
+	      error("Missing <trace> option for -t\n");
+	    trace_option(argv[argp]); /* better fail if NULL */
 	    break;
 	  case 'I':
 	    print_info = 1;
 	    break;
-	  case 't':
-	    trace[trace_device_tree] = 1;
-	    break;
 	  }
 	}
       }
-
-      p = strtok ((char *)0, " \t");
+      argp += 1;
     }
   }
 
@@ -122,24 +107,26 @@ sim_close (int quitting)
 int
 sim_load (char *prog, int from_tty)
 {
+  char **argv;
   TRACE(trace_gdb, ("sim_load(prog=%s, from_tty=%d) called\n",
 		    prog, from_tty));
+  ASSERT(prog != NULL);
 
-  /* sanity check */
-  if (prog == NULL) {
-    error ("sim_load() - TBD - read stan shebs e-mail about how to find the program name?\n");
-    return -1;
-  }
-  TRACE(trace_tbd, ("sim_load() - TBD - parse that prog stripping things like quotes\n"));
+  /* parse the arguments, assume that the file is argument 0 */
+  argv = buildargv(prog);
+  ASSERT(argv != NULL && argv[0] != NULL);
 
   /* create the simulator */
   TRACE(trace_gdb, ("sim_load() - first time, create the simulator\n"));
-  nr_cpus = (WITH_SMP ? WITH_SMP : 1);
-  simulator = psim_create(prog, nr_cpus);
+  simulator = psim_create(argv[0]);
 
   /* bring in all the data section */
-  psim_load(simulator);
+  psim_init(simulator);
 
+  /* release the arguments */
+  freeargv(argv);
+
+  /* `I did it my way' */
   return 0;
 }
 
@@ -155,16 +142,23 @@ sim_kill (void)
 int
 sim_read (SIM_ADDR mem, unsigned char *buf, int length)
 {
-  return psim_read_memory(simulator, nr_cpus, buf, mem, length,
-			  raw_transfer);
+  int result = psim_read_memory(simulator, MAX_NR_PROCESSORS,
+				buf, mem, length);
+  TRACE(trace_gdb, ("sim_read(mem=0x%x, buf=0x%x, length=%d) = %d\n",
+		    mem, buf, length, result));
+  return result;
 }
 
 
 int
 sim_write (SIM_ADDR mem, unsigned char *buf, int length)
 {
-  return psim_write_memory(simulator, nr_cpus, buf, mem, length,
-			   raw_transfer, 1/*violate_ro*/);
+  int result = psim_write_memory(simulator, MAX_NR_PROCESSORS,
+				 buf, mem, length,
+				 1/*violate_ro*/);
+  TRACE(trace_gdb, ("sim_write(mem=0x%x, buf=0x%x, length=%d) = %d\n",
+		    mem, buf, length, result));
+  return result;
 }
 
 
@@ -174,8 +168,10 @@ sim_fetch_register (int regno, unsigned char *buf)
   if (simulator == NULL) {
     return;
   }
-
-  psim_read_register(simulator, nr_cpus, buf, register_names[regno],
+  TRACE(trace_gdb, ("sim_fetch_register(regno=%d(%s), buf=0x%x)\n",
+		    regno, register_names[regno], buf));
+  psim_read_register(simulator, MAX_NR_PROCESSORS,
+		     buf, register_names[regno],
 		     raw_transfer);
 }
 
@@ -185,8 +181,10 @@ sim_store_register (int regno, unsigned char *buf)
 {
   if (simulator == NULL)
     return;
-
-  psim_write_register(simulator, nr_cpus, buf, register_names[regno],
+  TRACE(trace_gdb, ("sim_store_register(regno=%d(%s), buf=0x%x)\n",
+		    regno, register_names[regno], buf));
+  psim_write_register(simulator, MAX_NR_PROCESSORS,
+		      buf, register_names[regno],
 		      raw_transfer);
 }
 
@@ -207,7 +205,7 @@ sim_create_inferior (SIM_ADDR start_address, char **argv, char **envp)
   TRACE(trace_gdb, ("sim_create_inferior(start_address=0x%x, ...)\n",
 		    start_address));
 
-  psim_load(simulator);
+  psim_init(simulator);
   psim_stack(simulator, argv, envp);
 
   psim_write_register(simulator, -1 /* all start at same PC */,
@@ -224,6 +222,7 @@ sim_stop_reason (enum sim_stop *reason, int *sigrc)
 
   switch (CURRENT_ENVIRONMENT) {
 
+  case USER_ENVIRONMENT:
   case VIRTUAL_ENVIRONMENT:
     switch (status.reason) {
     case was_continuing:
@@ -257,6 +256,9 @@ sim_stop_reason (enum sim_stop *reason, int *sigrc)
     error("sim_stop_reason() - unknown environment\n");
   
   }
+
+  TRACE(trace_gdb, ("sim_stop_reason(reason=0x%x(%d), sigrc=0x%x(%d))\n",
+		    reason, *reason, sigrc, *sigrc));
 }
 
 
@@ -273,6 +275,9 @@ sim_resume (int step, int siggnal)
 {
   void (*prev) ();
   unsigned_word program_counter;
+
+  TRACE(trace_gdb, ("sim_resume(step=%d, siggnal=%d)\n",
+		    step, siggnal));
 
   prev = signal(SIGINT, sim_ctrl_c);
   sim_should_run = 1;

@@ -96,18 +96,19 @@ extern int current_target_byte_order;
 
 /* Program environment:
 
-   Two environments are available. VEA (or virtual environment
-   architecture) and OEA (or operating environment architecture).  The
-   former is the environment that a user program would see while the
-   latter is the environment as seen by an operating system.  By
+   Three environments are available - UEA (user), VEA (virtual) and
+   OEA (perating).  The former two are environment that users would
+   expect to see (VEA includes things like coherency and the time
+   base) while OEA is what an operating system expects to see.  By
    setting these to specific values, the build process is able to
    eliminate non relevent environment code
 
    CURRENT_ENVIRONMENT specifies which of vea or oea is required for
    the current runtime. */
 
-#define VIRTUAL_ENVIRONMENT		1
-#define OPERATING_ENVIRONMENT		2
+#define USER_ENVIRONMENT		1
+#define VIRTUAL_ENVIRONMENT		2
+#define OPERATING_ENVIRONMENT		3
 
 #ifndef WITH_ENVIRONMENT
 #define WITH_ENVIRONMENT		0
@@ -131,7 +132,7 @@ extern int current_environment;
    queue implements this.  Unfortunatly this adds the need to check
    for any events once each full instruction cycle. */
 
-#define WITH_EVENTS                     (WITH_ENVIRONMENT != VIRTUAL_ENVIRONMENT)
+#define WITH_EVENTS                     (WITH_ENVIRONMENT != USER_ENVIRONMENT)
 
 
 /* Time base:
@@ -141,7 +142,7 @@ extern int current_environment;
    of of some instruction cycles. */
 
 #ifndef WITH_TIME_BASE
-#define WITH_TIME_BASE			1
+#define WITH_TIME_BASE			(WITH_ENVIRONMENT != USER_ENVIRONMENT)
 #endif
 
 
@@ -374,7 +375,7 @@ extern int current_floating_point;
    not a leaf */
 
 #ifndef DEVICE_TREE_INLINE
-#define DEVICE_TREE_INLINE		DEFAULT_INLINE
+#define DEVICE_TREE_INLINE		0
 #endif
 
 #ifndef DEVICES_INLINE

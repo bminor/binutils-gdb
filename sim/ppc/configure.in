@@ -48,7 +48,7 @@ $srcdir/config.make Makefile CONFIG_FILE --enable-sim-config "$enable_sim_config
 
 $srcdir/config.make Makefile IGEN_OPCODE_RULES --enable-sim-opcode "$enable_sim_opcode" \
   "" "ppc-opcode-simple" "no" "ppc-opcode-simple" "yes" "ppc-opcode-simple" \
-  "complex" "ppc-opcode-complex" "simple" "ppc-opcode-simple" 1>&6
+  "complex" "ppc-opcode-complex" "simple" "ppc-opcode-simple" "stupid" "ppc-opcode-stupid" 1>&6
 
 $srcdir/config.make Makefile DGEN_FLAGS --enable-sim-switch "$enable_sim_switch" \
   "" "" "no" "" "yes" "-s" 1>&6
@@ -58,6 +58,9 @@ $srcdir/config.make Makefile IGEN_DUPLICATE --enable-sim-duplicate "$enable_sim_
 
 $srcdir/config.make Makefile IGEN_FILTER --enable-sim-filter "$enable_sim_filter" \
   "" "-f 64" "no" "" "yes" "-f 64" "*" "$enable_sim_filter" 1>&6
+
+$srcdir/config.make Makefile IGEN_ICACHE --enable-sim-icache "$enable_sim_icache" \
+  "" "" "no" "" "yes" "-r 1024" "*" "-r $enable_sim_icache" 1>&6
 
 flags=""
 if test x"$enable_sim_inline" != x""; then
@@ -117,7 +120,9 @@ $srcdir/config.hdr config.h WITH_HOST_WORD_BITSIZE --enable-sim-hostbitsize "$en
 $srcdir/config.hdr config.h WITH_ENVIRONMENT --enable-sim-env "$enable_sim_env" \
   "yes" "0" \
   "operating" "OPERATING_ENVIRONMENT" "os" "OPERATING_ENVIRONMENT" "oea" "OPERATING_ENVIRONMENT" \
-  "virtual" "VIRTUAL_ENVIRONMENT" "vea" "VIRTUAL_ENVIRONMENT" 1>&6
+  "virtual" "VIRTUAL_ENVIRONMENT" "vea" "VIRTUAL_ENVIRONMENT" \
+  "user" "USER_ENVIRONMENT" "uea" "USER_ENVIRONMENT" \
+  1>&6
 
 $srcdir/config.hdr config.h WITH_TIME_BASE --enable-sim-timebase "$enable_sim_timebase" \
   "no" "0" "yes" "1" 1>&6

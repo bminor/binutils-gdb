@@ -29,13 +29,14 @@
 #include "basics.h"
 #include "registers.h"
 #include "device_tree.h"
-#include "memory_map.h"
 #include "core.h"
 #include "vm.h"
 #include "events.h"
 #include "interrupts.h"
 #include "psim.h"
 #include "icache.h"
+#include "itable.h"
+#include "mon.h"
 
 
 /* typedef struct _cpu cpu;
@@ -50,12 +51,18 @@ INLINE_CPU cpu *cpu_create
 (psim *system,
  core *memory,
  event_queue *events,
+ cpu_mon *monitor,
  int cpu_nr);
 
+INLINE_CPU void cpu_init
+(cpu *processor);
 
 /* Find our way home */
 
 INLINE_CPU psim *cpu_system
+(cpu *processor);
+
+INLINE_CPU cpu_mon *cpu_monitor
 (cpu *processor);
 
 INLINE_CPU int cpu_nr
@@ -108,16 +115,21 @@ INLINE_CPU void cpu_halt
  int signal);
 
 
-#if WITH_IDECODE_CACHE
-/* gain acces to the processors instruction cracking cache
+#if WITH_IDECODE_CACHE_SIZE
+/* Return the cache entry that matches the given CIA.  No guarentee
+   that the cache entry actually contains the instruction for that
+   address */
 
-   Only useful (and visable) if we're cracking the cache */
-INLINE_CPU idecode_cache *cpu_icache
+INLINE_CPU idecode_cache *cpu_icache_entry
+(cpu *processor,
+ unsigned_word cia);
+
+INLINE_CPU void cpu_flush_icache
 (cpu *processor);
 #endif
 
 
-/* reveal the processor address maps
+/* reveal the processors VM:
 
    At first sight it may seem better to, instead of exposing the cpu's
    inner vm maps, to have the cpu its self provide memory manipulation
@@ -128,13 +140,10 @@ INLINE_CPU idecode_cache *cpu_icache
    the vm protection (eg store breakpoint instruction in the
    instruction map). */
 
-INLINE_CPU vm_instruction_map *cpu_instruction_map
-(cpu *processor);
-
 INLINE_CPU vm_data_map *cpu_data_map
 (cpu *processor);
 
-INLINE_CPU core *cpu_core
+INLINE_CPU vm_instruction_map *cpu_instruction_map
 (cpu *processor);
 
 
@@ -149,15 +158,10 @@ INLINE_CPU memory_reservation *cpu_reservation
 (cpu *processor);
 
 
-INLINE_CPU void cpu_increment_number_of_insns
-(cpu *processor);
-
-INLINE_CPU long cpu_get_number_of_insns
-(cpu *processor);
-
 INLINE_CPU void cpu_print_info
 (cpu *processor,
  int verbose);
+
 
 /* Registers:
 
@@ -173,15 +177,20 @@ INLINE_CPU void cpu_synchronize_context
 (cpu *processor);
 
 #define IS_PROBLEM_STATE(PROCESSOR) \
-(CURRENT_ENVIRONMENT == VIRTUAL_ENVIRONMENT \
- || (cpu_registers(PROCESSOR)->msr & msr_problem_state))
+(CURRENT_ENVIRONMENT == OPERATING_ENVIRONMENT \
+ ? (cpu_registers(PROCESSOR)->msr & msr_problem_state) \
+ : 1)
 
 #define IS_64BIT_MODE(PROCESSOR) \
-((CURRENT_ENVIRONMENT == VIRTUAL_ENVIRONMENT && WITH_64BIT_TARGET) \
- || (cpu_registers(PROCESSOR)->msr & msr_64bit_mode))
+(WITH_TARGET_WORD_BITSIZE == 64 \
+ ? (CURRENT_ENVIRONMENT == OPERATING_ENVIRONMENT \
+    ? (cpu_registers(PROCESSOR)->msr & msr_64bit_mode) \
+    : 1) \
+ : 0)
 
 #define IS_FP_AVAILABLE(PROCESSOR) \
-(CURRENT_ENVIRONMENT == VIRTUAL_ENVIRONMENT \
- || (cpu_registers(PROCESSOR)->msr & msr_floating_point_available))
+(CURRENT_ENVIRONMENT == OPERATING_ENVIRONMENT \
+ ? (cpu_registers(PROCESSOR)->msr & msr_floating_point_available) \
+ : 1)
 
 #endif

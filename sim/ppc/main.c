@@ -70,7 +70,9 @@ zfree(void *chunk)
 static void
 usage(void)
 {
-  error ("Usage: psim [ -a -p -c -C -s -i -I -t -g ] <image> [ <image-args> ... ]\n");
+  printf_filtered("Usage:\n\tpsim [ -t <trace-option> ] <image> [ <image-args> ... ]\n");
+  trace_usage();
+  error("");
 }
 
 int
@@ -87,36 +89,14 @@ main(int argc, char **argv)
 
   /* check for arguments -- note sim_calls.c also contains argument processing
      code for the simulator linked within gdb.  */
-  while ((letter = getopt (argc, argv, "acCiIpstg")) != EOF)
+  while ((letter = getopt (argc, argv, "It:")) != EOF)
     {
       switch (letter) {
-      case 'a':
-	for (i = 0; i < nr_trace; i++)
-	  ppc_trace[i] = 1;
-	break;
-      case 'p':
-	ppc_trace[trace_cpu] = ppc_trace[trace_semantics] = 1;
-	break;
-      case 'c':
-	ppc_trace[trace_core] = 1;
-	break;
-      case 'C':
-	ppc_trace[trace_console_device] = 1;
-	break;
-      case 's':
-	ppc_trace[trace_create_stack] = 1;
-	break;
-      case 'i':
-	ppc_trace[trace_icu_device] = 1;
+      case 't':
+	trace_option(optarg);
 	break;
       case 'I':
 	print_info = 1;
-	break;
-      case 't':
-	ppc_trace[trace_device_tree] = 1;
-	break;
-      case 'g':
-	ppc_trace[trace_gdb] = 1;
 	break;
       default:
 	usage();
@@ -127,7 +107,7 @@ main(int argc, char **argv)
   name_of_file = argv[optind];
 
   /* create the simulator */
-  system = psim_create(name_of_file, ((WITH_SMP > 0) ? WITH_SMP : 1));
+  system = psim_create(name_of_file);
 
   /* fudge the environment so that _=prog-name */
   arg_ = (char*)zalloc(strlen(argv[optind]) + strlen("_=") + 1);
@@ -143,7 +123,7 @@ main(int argc, char **argv)
 
   /* any final clean up */
   if (print_info)
-    psim_print_info (system, 1);
+    psim_print_info (system, 2);
 
   /* why did we stop */
   status = psim_get_status(system);
@@ -158,8 +138,8 @@ main(int argc, char **argv)
     return status.signal;
   case was_signalled:
     printf ("%s: Caught signal %d at address 0x%lx\n",
-	    name_of_file, (int)status.signal,
-	    (long)status.program_counter);
+ 	    name_of_file, (int)status.signal,
+ 	    (long)status.program_counter);
     return status.signal;
   default:
     error("unknown halt condition\n");

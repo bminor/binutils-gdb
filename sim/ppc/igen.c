@@ -31,9 +31,11 @@
 /****************************************************************/
 
 enum {
-  insn_size = 32,
+  max_insn_size = 32,
 };
 
+int hi_bit_nr = 0;
+int insn_size = max_insn_size;
 int idecode_expand_semantics = 0;
 int idecode_cache = 0;
 int number_lines = 1;
@@ -51,7 +53,6 @@ char *cache_semantic_actual = "processor, entry, cia";
 char *semantic_formal = "cpu *processor,\n instruction_word instruction,\n unsigned_word cia";
 char *semantic_actual = "processor, instruction, cia";
 
-char *semantic_local = "unsigned_word nia = cia + 4;";
 
 
 /****************************************************************/
@@ -98,7 +99,7 @@ load_cache_rules(char *file_name)
   cache_rules **curr_rule = &table;
   while ((entry = table_entry_read(file)) != NULL) {
     cache_rules *new_rule = ZALLOC(cache_rules);
-    new_rule->valid = a2i(entry->fields[ca_valid]);
+    new_rule->valid = target_a2i(hi_bit_nr, entry->fields[ca_valid]);
     new_rule->old_name = entry->fields[ca_old_name];
     new_rule->new_name = entry->fields[ca_new_name];
     new_rule->type = (strlen(entry->fields[ca_type])
@@ -184,10 +185,10 @@ load_opcode_rules(char *file_name)
   opcode_rules **curr_rule = &table;
   while ((entry = table_entry_read(file)) != NULL) {
     opcode_rules *new_rule = ZALLOC(opcode_rules);
-    new_rule->first = a2i(entry->fields[op_first]);
-    new_rule->last = a2i(entry->fields[op_last]);
-    new_rule->force_first = a2i(entry->fields[op_force_first]);
-    new_rule->force_last = a2i(entry->fields[op_force_last]);
+    new_rule->first = target_a2i(hi_bit_nr, entry->fields[op_first]);
+    new_rule->last = target_a2i(hi_bit_nr, entry->fields[op_last]);
+    new_rule->force_first = target_a2i(hi_bit_nr, entry->fields[op_force_first]);
+    new_rule->force_last = target_a2i(hi_bit_nr, entry->fields[op_force_last]);
     new_rule->force_slash = a2i(entry->fields[op_force_slash]);
     new_rule->force_expansion = entry->fields[op_force_expansion];
     new_rule->use_switch = a2i(entry->fields[op_use_switch]);
@@ -253,7 +254,7 @@ struct _insn_field {
 
 typedef struct _insn_fields insn_fields;
 struct _insn_fields {
-  insn_field *bits[insn_size];
+  insn_field *bits[max_insn_size];
   insn_field *first;
   insn_field *last;
   unsigned value;
@@ -350,7 +351,7 @@ parse_insn_format(table_entry *entry,
     /* the pos */
     new_field->pos_string = (char*)zalloc(strlen_pos+1);
     strncpy(new_field->pos_string, start_pos, strlen_pos);
-    new_field->first = a2i(new_field->pos_string);
+    new_field->first = target_a2i(hi_bit_nr, new_field->pos_string);
     new_field->last = new_field->next->first - 1; /* guess */
     new_field->width = new_field->last - new_field->first + 1; /* guess */
     new_field->prev->last = new_field->first-1; /*fix*/
@@ -1119,7 +1120,8 @@ lf_print_idecode_table(lf *file,
     lf_print_table_name(file, entry);
     lf_printf(file, ";\n");
     lf_printf(file, "int opcode = EXTRACTED32(instruction, %d, %d);\n",
-	      entry->opcode->first, entry->opcode->last);
+	      i2target(hi_bit_nr, entry->opcode->first),
+	      i2target(hi_bit_nr, entry->opcode->last));
     lf_printf(file, "idecode_table_entry *table_entry = table + opcode;\n");
     lf_printf(file, "while (1) {\n");
     lf_indent(file, +2);
@@ -1660,7 +1662,8 @@ lf_print_c_extraction(lf *file,
     if (!get_value_from_cache) {
       if (strcmp(field_name, cur_field->val_string) == 0)
 	lf_printf(file, "EXTRACTED32(instruction, %d, %d)",
-		  cur_field->first, cur_field->last);
+		  i2target(hi_bit_nr, cur_field->first),
+		  i2target(hi_bit_nr, cur_field->last));
       else if (field_expression != NULL)
 	lf_printf(file, "%s", field_expression);
       else
@@ -1949,8 +1952,7 @@ lf_print_c_semantic(lf *file,
   lf_print_my_prefix(file,
 		     instruction->file_entry,
 		     0/*not putting value in cache*/);
-  lf_putstr(file, semantic_local);
-  lf_printf(file, "\n");
+  lf_printf(file, "unsigned_word nia = cia + %d;\n", insn_size / 8);
 
   lf_printf(file, "\n");
   lf_print_c_extractions(file,
@@ -2231,11 +2233,13 @@ idecode_table_leaf(insn_table *entry,
       lf_printf(file, "  /*%d*/ { ", entry->opcode_nr);
       if (entry->opcode->is_boolean)
 	lf_printf(file, "MASK32(%d,%d), 0, ",
-		  entry->opcode->first, entry->opcode->last);
+		  i2target(hi_bit_nr, entry->opcode->first),
+		  i2target(hi_bit_nr, entry->opcode->last));
       else
 	lf_printf(file, "%d, MASK32(%d,%d), ",
 		  insn_size - entry->opcode->last - 1,
-		  entry->opcode->first, entry->opcode->last);
+		  i2target(hi_bit_nr, entry->opcode->first),
+		  i2target(hi_bit_nr, entry->opcode->last));
       lf_print_table_name(file, entry);
       lf_printf(file, " },\n");
     }
@@ -2289,7 +2293,8 @@ idecode_switch_start(insn_table *table,
   ASSERT(table->opcode_rule->use_switch);
 
   lf_printf(file, "switch (EXTRACTED32(instruction, %d, %d)) {\n",
-	    table->opcode->first, table->opcode->last);
+	    i2target(hi_bit_nr, table->opcode->first),
+	    i2target(hi_bit_nr, table->opcode->last));
 }
 
 
@@ -2726,21 +2731,27 @@ main(int argc,
 
   if (argc == 1) {
     printf("Usage:\n");
-    printf("-f <filter-out-flag>  eg -f 64 to skip 64bit instructions\n");
-    printf("-[Ii] <instruction-table>  -I to dump internal table\n");
-    printf("-[Oo] <opcode-rules>\n");
-    printf("-[Kk] <cache-rules>\n");
-    printf("-[Ss] <schematic>  output schematic.h(S) schematic.c(s)\n");
-    printf("-[Dd] <schematic>  output idecode.h(S) idecode.c(s)\n");
-    printf("-[Tt] <table>      output itable.h(t) itable.c(t)\n");
-    printf("-[Cc] <schematic>  output icache.h(S) invalid(s)\n");
-    printf("-e  Expand (duplicate) semantic functions\n");
-    printf("-r <size>  Generate a cracking cache of <size>\n");
-    printf("-l  Supress includsion of CPP line numbering in output files\n");
+    printf("  igen <config-opts> ... <input-opts>... <output-opts>...\n");
+    printf("Config options:\n");
+    printf("  -f <filter-out-flag>  eg -f 64 to skip 64bit instructions\n");
+    printf("  -e    Expand (duplicate) semantic functions\n");
+    printf("  -r <icache-size>  Generate cracking cache version\n");
+    printf("  -l    Supress line numbering in output files\n");
+    printf("  -b <bit-size>  Set the number of bits in an instruction\n");
+    printf("  -h <high-bit>  Set the nr of the high (msb bit)\n");
+    printf("Input options (ucase version also dumps loaded table):\n");
+    printf("  -[Oo] <opcode-rules>\n");
+    printf("  -[Kk] <cache-rules>\n");
+    printf("  -[Ii] <instruction-table>\n");
+    printf("Output options:\n");
+    printf("  -[Cc] <output-file>  output icache.h(C) invalid(c)\n");
+    printf("  -[Dd] <output-file>  output idecode.h(D) idecode.c(d)\n");
+    printf("  -[Ss] <output-file>  output schematic.h(S) schematic.c(s)\n");
+    printf("  -[Tt] <table>      output itable.h(T) itable.c(t)\n");
   }
 
   while ((ch = getopt(argc, argv,
-		      "ler:f:I:i:O:o:K:k:n:S:s:D:d:T:t:C:")) != -1) {
+		      "leb:h:r:f:I:i:O:o:K:k:n:S:s:D:d:T:t:C:")) != -1) {
     fprintf(stderr, "\t-%c %s\n", ch, (optarg ? optarg : ""));
     switch(ch) {
     case 'l':
@@ -2751,6 +2762,15 @@ main(int argc,
       break;
     case 'r':
       idecode_cache = a2i(optarg);
+      break;
+    case 'b':
+      insn_size = a2i(optarg);
+      ASSERT(insn_size > 0 && insn_size <= max_insn_size
+	     && (hi_bit_nr == insn_size-1 || hi_bit_nr == 0));
+      break;
+    case 'h':
+      hi_bit_nr = a2i(optarg);
+      ASSERT(hi_bit_nr == insn_size-1 || hi_bit_nr == 0);
       break;
     case 'f':
       {
