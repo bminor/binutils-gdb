@@ -1,3 +1,15 @@
+2004-02-18  Andrew Cagney  <cagney@redhat.com>
+
+	* configure.in: Add a TUI target to CONFIG_ALL, CONFIG_CLEAN,
+	CONFIG_INSTALL and CONFIG_UNINSTALL.
+	* configure: Re-generate.
+	* interps.h (INTERP_TUI): Define.
+	* Makefile.in: Update dependencies.
+	(TUI): New macro.
+	(tui-main.o): Specify dependencies.
+	(install-tui, uninstall-tui, clean-tui, all-tui): New rules.
+	* tui/tui-main.c: New file.
+
 2004-02-18  Mark Kettenis  <kettenis@gnu.org>
 
 	* amd64obsd-tdep.c, amd64obsd-nat.c: New files.

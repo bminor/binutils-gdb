@@ -179,6 +179,10 @@ SUBDIR_MI_CFLAGS= \
 #
 # TUI sub directory definitions
 #
+
+# Name of the TUI program
+TUI=gdbtui
+
 SUBDIR_TUI_OBS = \
 	tui-command.o \
 	tui-data.o \
@@ -638,8 +642,8 @@ cp_abi_h = cp-abi.h
 cp_support_h = cp-support.h $(symtab_h)
 dcache_h = dcache.h
 defs_h = defs.h $(config_h) $(ansidecl_h) $(gdb_locale_h) $(gdb_signals_h) \
-	$(libiberty_h) $(bfd_h) $(ui_file_h) $(xm_h) $(nm_h) \
-	$(tm_h) $(fopen_same_h) $(gdbarch_h)
+	$(libiberty_h) $(bfd_h) $(ui_file_h) $(xm_h) $(nm_h) $(tm_h) \
+	$(fopen_same_h) $(gdbarch_h)
 dictionary_h = dictionary.h
 disasm_h = disasm.h
 doublest_h = doublest.h $(floatformat_h)
@@ -932,6 +936,8 @@ DISTSTUFF = $(YYFILES)
 
 all: gdb$(EXEEXT) $(CONFIG_ALL)
 	@$(MAKE) $(FLAGS_TO_PASS) DO=all "DODIRS=`echo $(SUBDIRS) | sed 's/testsuite//'`" subdir_do
+.PHONY: all-tui
+all-tui: $(TUI)$(EXEEXT)
 
 installcheck:
 
@@ -975,6 +981,23 @@ install-only: $(CONFIG_INSTALL)
 		$(INSTALL_DATA) $(srcdir)/gdb.1 \
 			$(DESTDIR)$(man1dir)/$$transformed_name.1
 	@$(MAKE) DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do
+.PHONY: install-tui
+install-tui:
+	transformed_name=`t='$(program_transform_name)'; \
+			  echo $(TUI) | sed -e "$$t"` ; \
+		if test "x$$transformed_name" = x; then \
+		  transformed_name=$(TUI) ; \
+		else \
+		  true ; \
+		fi ; \
+		$(SHELL) $(srcdir)/../mkinstalldirs $(DESTDIR)$(bindir) ; \
+		$(INSTALL_PROGRAM) $(TUI)$(EXEEXT) \
+			$(DESTDIR)$(bindir)/$$transformed_name$(EXEEXT) ; \
+		$(SHELL) $(srcdir)/../mkinstalldirs \
+			$(DESTDIR)$(man1dir) ; \
+		$(INSTALL_DATA) $(srcdir)/gdb.1 \
+			$(DESTDIR)$(man1dir)/$$transformed_name.1
+
 
 uninstall: force $(CONFIG_UNINSTALL)
 	transformed_name=`t='$(program_transform_name)'; \
@@ -987,6 +1010,17 @@ uninstall: force $(CONFIG_UNINSTALL)
 		rm -f $(DESTDIR)$(bindir)/$$transformed_name$(EXEEXT) \
 		      $(DESTDIR)$(man1dir)/$$transformed_name.1
 	@$(MAKE) DO=uninstall "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do
+.PHONY: uninstall-tui
+uninstall-tui:
+	transformed_name=`t='$(program_transform_name)'; \
+			  echo $(TUI) | sed -e $$t` ; \
+		if test "x$$transformed_name" = x; then \
+		  transformed_name=$(TUI) ; \
+		else \
+		  true ; \
+		fi ; \
+		rm -f $(DESTDIR)$(bindir)/$$transformed_name$(EXEEXT) \
+		      $(DESTDIR)$(man1dir)/$$transformed_name.1
 
 # We do this by grepping through sources.  If that turns out to be too slow,
 # maybe we could just require every .o file to have an initialization routine
@@ -1081,6 +1115,12 @@ gdb$(EXEEXT): gdb.o libgdb.a $(ADD_DEPS) $(CDEPS) $(TDEPLIBS)
 		-o gdb$(EXEEXT) gdb.o libgdb.a \
 		$(TDEPLIBS) $(TUI_LIBRARY) $(CLIBS) $(LOADLIBES)
 
+$(TUI)$(EXEEXT): tui-main.o libgdb.a $(ADD_DEPS) $(CDEPS) $(TDEPLIBS)
+	rm -f $(TUI)$(EXEEXT)
+	$(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) \
+		-o $(TUI)$(EXEEXT) tui-main.o libgdb.a \
+		$(TDEPLIBS) $(TUI_LIBRARY) $(CLIBS) $(LOADLIBES)
+
 nlm:	force
 	rootme=`pwd`; export rootme; $(MAKE) $(TARGET_FLAGS_TO_PASS) DO=all DODIRS=nlm subdir_do
 
@@ -1145,6 +1185,9 @@ clean mostlyclean: $(CONFIG_CLEAN)
 	rm -f init.c version.c
 	rm -f gdb$(EXEEXT) core make.log
 	rm -f gdb[0-9]$(EXEEXT)
+.PHONY: clean-tui
+clean-tui:
+	rm -f $(TUI)$(EXEEXT)
 
 # This used to depend on c-exp.c m2-exp.c TAGS
 # I believe this is wrong; the makefile standards for distclean just
@@ -2185,11 +2228,11 @@ rs6000-tdep.o: rs6000-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(symtab_h) \
 s390-nat.o: s390-nat.c $(defs_h) $(tm_h) $(regcache_h) $(inferior_h) \
 	$(s390_tdep_h)
 s390-tdep.o: s390-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) $(inferior_h) \
-	$(symtab_h) $(target_h) $(gdbcore_h) $(gdbcmd_h) $(symfile_h) \
-	$(objfiles_h) $(tm_h) $(__bfd_bfd_h) $(floatformat_h) $(regcache_h) \
-	$(trad_frame_h) $(frame_base_h) $(frame_unwind_h) \
-	$(reggroups_h) $(regset_h) $(value_h) $(gdb_assert_h) $(dis_asm_h) \
-	$(solib_svr4_h) $(s390_tdep_h)
+	$(symtab_h) $(target_h) $(gdbcore_h) $(gdbcmd_h) $(objfiles_h) \
+	$(tm_h) $(__bfd_bfd_h) $(floatformat_h) $(regcache_h) \
+	$(trad_frame_h) $(frame_base_h) $(frame_unwind_h) $(reggroups_h) \
+	$(regset_h) $(value_h) $(gdb_assert_h) $(dis_asm_h) $(solib_svr4_h) \
+	$(s390_tdep_h)
 scm-exp.o: scm-exp.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(expression_h) \
 	$(parser_defs_h) $(language_h) $(value_h) $(c_lang_h) $(scm_lang_h) \
 	$(scm_tags_h)
@@ -2770,6 +2813,9 @@ tui-layout.o: $(srcdir)/tui/tui-layout.c $(defs_h) $(command_h) $(symtab_h) \
 	$(tui_wingeneral_h) $(tui_stack_h) $(tui_regs_h) $(tui_win_h) \
 	$(tui_winsource_h) $(tui_disasm_h) $(gdb_string_h) $(gdb_curses_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-layout.c
+tui-main.o: $(srcdir)/tui/tui-main.c $(defs_h) $(main_h) $(gdb_string_h) \
+	$(interps_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-main.c
 tui-out.o: $(srcdir)/tui/tui-out.c $(defs_h) $(ui_out_h) $(tui_h) \
 	$(gdb_string_h) $(gdb_assert_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-out.c
