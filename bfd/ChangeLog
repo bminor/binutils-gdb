@@ -1,5 +1,9 @@
 Tue Jun  7 13:25:08 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* elfcode.h (assign_section_numbers): Put shstrtab, symtab and
+	strtab sections at end of file.  Avoids bug in some versions of
+	SVR4 strip.  From Eric Youngdale <eric@tantalus.nrl.navy.mil>.
+
 	* coffcode.h (styp_to_sec_flags): If COFF_PAGE_SIZE is defined,
 	set SEC_DEBUGGING for STYP_INFO sections.
 	(coff_compute_section_file_positions): If COFF_PAGE_SIZE is
