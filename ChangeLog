@@ -1,3 +1,9 @@
+Sun Aug 28 18:13:45 1994  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* config.guess (*-unknown-freebsd*):  Get rid of possible
+	trailing "(Release)" in version string.
+	Patch from Paul Richards <paul@isl.cf.ac.uk>.
+
 Sat Aug 27 15:00:49 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
 	* config.guess:  Fix i486-ncr-sysv43 -> i486-ncr-sysv4.3.
