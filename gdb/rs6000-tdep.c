@@ -1144,6 +1144,7 @@ static void
 rs6000_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
 {
   int offset = 0;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
   if (TYPE_CODE (valtype) == TYPE_CODE_FLT)
     {
@@ -1164,6 +1165,13 @@ rs6000_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
 	  ff = (float) dd;
 	  memcpy (valbuf, &ff, sizeof (float));
 	}
+    }
+  else if (TYPE_CODE (valtype) == TYPE_CODE_ARRAY
+           && TYPE_LENGTH (valtype) == 16
+           && TYPE_VECTOR (valtype))
+    {
+      memcpy (valbuf, regbuf + REGISTER_BYTE (tdep->ppc_vr0_regnum + 2),
+	      TYPE_LENGTH (valtype));
     }
   else
     {
@@ -1909,6 +1917,8 @@ rs6000_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 static void
 rs6000_store_return_value (struct type *type, char *valbuf)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
 
     /* Floating point values are returned starting from FPR1 and up.
@@ -1917,6 +1927,13 @@ rs6000_store_return_value (struct type *type, char *valbuf)
 
     write_register_bytes (REGISTER_BYTE (FP0_REGNUM + 1), valbuf,
 			  TYPE_LENGTH (type));
+  else if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
+    {
+      if (TYPE_LENGTH (type) == 16
+          && TYPE_VECTOR (type))
+	write_register_bytes (REGISTER_BYTE (tdep->ppc_vr0_regnum + 2),
+			      valbuf, TYPE_LENGTH (type));
+    }
   else
     /* Everything else is returned in GPR3 and up. */
     write_register_bytes (REGISTER_BYTE (gdbarch_tdep (current_gdbarch)->ppc_gp0_regnum + 3),
@@ -2706,7 +2723,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
           || osabi == ELFOSABI_NETBSD
           || osabi == ELFOSABI_FREEBSD)
 	set_gdbarch_use_struct_convention (gdbarch,
-					   generic_use_struct_convention);
+					   ppc_sysv_abi_broken_use_struct_convention);
       else
 	set_gdbarch_use_struct_convention (gdbarch,
 					   ppc_sysv_abi_use_struct_convention);

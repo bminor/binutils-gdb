@@ -415,11 +415,29 @@ ppc_linux_frame_chain (struct frame_info *thisframe)
    it may be used generically by ports which use either the SysV ABI or
    the EABI */
 
+/* Until November 2001, gcc was not complying to the SYSV ABI for
+   returning structures less than or equal to 8 bytes in size.  It was
+   returning everything in memory.  When this was corrected, it wasn't
+   fixed for native platforms.  */
+int
+ppc_sysv_abi_broken_use_struct_convention (int gcc_p, struct type *value_type)
+{
+  if (TYPE_LENGTH (value_type) == 16
+      && TYPE_VECTOR (value_type))
+    return 0;
+
+  return generic_use_struct_convention (gcc_p, value_type);
+}
+
 /* Structures 8 bytes or less long are returned in the r3 & r4
    registers, according to the SYSV ABI. */
 int
 ppc_sysv_abi_use_struct_convention (int gcc_p, struct type *value_type)
 {
+  if (TYPE_LENGTH (value_type) == 16
+      && TYPE_VECTOR (value_type))
+    return 0;
+
   return (TYPE_LENGTH (value_type) > 8);
 }
 
@@ -445,7 +463,12 @@ ppc_sysv_abi_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 			     int struct_return, CORE_ADDR struct_addr)
 {
   int argno;
-  int greg, freg;
+  /* Next available general register for non-float, non-vector arguments. */
+  int greg;
+  /* Next available floating point register for float arguments. */
+  int freg;
+  /* Next available vector register for vector arguments. */
+  int vreg;
   int argstkspace;
   int structstkspace;
   int argoffset;
@@ -458,6 +481,7 @@ ppc_sysv_abi_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 
   greg = struct_return ? 4 : 3;
   freg = 1;
+  vreg = 2;
   argstkspace = 0;
   structstkspace = 0;
 
@@ -500,21 +524,38 @@ ppc_sysv_abi_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	      greg += 2;
 	    }
 	}
-      else
-	{
+      else if (!TYPE_VECTOR (type))
+        {
 	  if (len > 4
 	      || TYPE_CODE (type) == TYPE_CODE_STRUCT
 	      || TYPE_CODE (type) == TYPE_CODE_UNION)
 	    {
 	      /* Rounding to the nearest multiple of 8 may not be necessary,
-	         but it is safe.  Particularly since we don't know the
-	         field types of the structure */
+		 but it is safe.  Particularly since we don't know the
+		 field types of the structure */
 	      structstkspace += round2 (len, 8);
 	    }
 	  if (greg <= 10)
 	    greg++;
 	  else
 	    argstkspace += 4;
+    	}
+      else
+        {
+          if (len == 16
+	      && TYPE_CODE (type) == TYPE_CODE_ARRAY
+	      && TYPE_VECTOR (type))
+	    {
+	      if (vreg <= 13)
+		vreg++;
+	      else
+		{
+		  /* Vector arguments must be aligned to 16 bytes on
+                     the stack. */
+		  argstkspace += round2 (argstkspace, 16);
+		  argstkspace += 16;
+		}
+	    }
 	}
     }
 
@@ -540,6 +581,7 @@ ppc_sysv_abi_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   structoffset = argoffset + argstkspace;
   freg = 1;
   greg = 3;
+  vreg = 2;
   /* Fill in r3 with the return structure, if any */
   if (struct_return)
     {
@@ -561,7 +603,7 @@ ppc_sysv_abi_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	    {
 	      if (len > 8)
 		printf_unfiltered (
-				    "Fatal Error: a floating point parameter #%d with a size > 8 is found!\n", argno);
+				   "Fatal Error: a floating point parameter #%d with a size > 8 is found!\n", argno);
 	      memcpy (&registers[REGISTER_BYTE (FP0_REGNUM + freg)],
 		      VALUE_CONTENTS (arg), len);
 	      freg++;
@@ -599,7 +641,7 @@ ppc_sysv_abi_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	      greg += 2;
 	    }
 	}
-      else
+      else if (!TYPE_VECTOR (type))
 	{
 	  char val_buf[4];
 	  if (len > 4
@@ -617,7 +659,6 @@ ppc_sysv_abi_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	    }
 	  if (greg <= 10)
 	    {
-	      *(int *) &registers[REGISTER_BYTE (greg)] = 0;
 	      memcpy (&registers[REGISTER_BYTE (greg)], val_buf, 4);
 	      greg++;
 	    }
@@ -627,6 +668,30 @@ ppc_sysv_abi_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	      argoffset += 4;
 	    }
 	}
+      else
+	{
+	  if (len == 16
+	      && TYPE_CODE (type) == TYPE_CODE_ARRAY
+	      && TYPE_VECTOR (type))
+	    {
+	      struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+	      char *v_val_buf = alloca (16);
+	      memset (v_val_buf, 0, 16);
+	      memcpy (v_val_buf, VALUE_CONTENTS (arg), len);
+	      if (vreg <= 13)
+		{
+		  memcpy (&registers[REGISTER_BYTE (tdep->ppc_vr0_regnum
+						    + vreg)],
+			  v_val_buf, 16);
+		  vreg++;
+		}
+	      else
+		{
+		  write_memory (sp + argoffset, v_val_buf, 16);
+		  argoffset += 16;
+		}
+	    }
+        }
     }
 
   target_store_registers (-1);

@@ -32,6 +32,7 @@ int ppc_linux_frameless_function_invocation (struct frame_info *);
 void ppc_linux_frame_init_saved_regs (struct frame_info *);
 CORE_ADDR ppc_linux_frame_chain (struct frame_info *);
 int ppc_sysv_abi_use_struct_convention (int, struct type *);
+int ppc_sysv_abi_broken_use_struct_convention (int, struct type *);
 CORE_ADDR ppc_sysv_abi_push_arguments (int, struct value **, CORE_ADDR, int,
 				       CORE_ADDR);
 int ppc_linux_memory_remove_breakpoint (CORE_ADDR addr, char *contents_cache);
