@@ -95,35 +95,6 @@ tui_get_function_from_frame (struct frame_info *fi)
 }
 
 /*
-   ** tuiClearLocatorDisplay()
- */
-void
-tuiClearLocatorDisplay (void)
-{
-  TuiGenWinInfoPtr locator = locatorWinInfoPtr ();
-  int i;
-
-  if (locator->handle != (WINDOW *) NULL)
-    {
-      /* No need to werase, since writing a line of
-         * blanks which we do below, is equivalent.
-       */
-      /* werase(locator->handle); */
-      wmove (locator->handle, 0, 0);
-      wstandout (locator->handle);
-      for (i = 0; i < locator->width; i++)
-	waddch (locator->handle, ' ');
-      wstandend (locator->handle);
-      tuiRefreshWin (locator);
-      wmove (locator->handle, 0, 0);
-      locator->contentInUse = FALSE;
-    }
-
-  return;
-}				/* tuiClearLocatorDisplay */
-
-
-/*
    ** tuiShowLocatorContent()
  */
 void
@@ -142,6 +113,7 @@ tuiShowLocatorContent (void)
 	  wmove (locator->handle, 0, 0);
 	  wstandout (locator->handle);
 	  waddstr (locator->handle, string);
+          wclrtoeol (locator->handle);
 	  wstandend (locator->handle);
 	  tuiRefreshWin (locator);
 	  wmove (locator->handle, 0, 0);
@@ -314,7 +286,6 @@ tuiSetLocatorContent (struct frame_info *frameInfo)
 void
 tuiUpdateLocatorDisplay (struct frame_info *frameInfo)
 {
-  tuiClearLocatorDisplay ();
   tuiSetLocatorContent (frameInfo);
   tuiShowLocatorContent ();
 
