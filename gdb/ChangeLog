@@ -1,3 +1,22 @@
+2003-06-20  Daniel Jacobowitz  <drow@mvista.com>
+
+	* config/arm/linux.mt: Remove code protected by GDBSERVER define.
+	* config/arm/nm-linux.h: Likewise.
+	* config/arm/tm-linux.h: Likewise.
+	* config/ia64/nm-linux.h: Likewise.
+	* config/ia64/tm-ia64.h: Likewise.
+	* config/s390/tm-linux.h: Likewise.
+	* config/s390/tm-s390.h: Likewise.
+	* s390-nat.c: Likewise.
+	* s390-tdep.c: Likewise.
+
+	* config/i386/linux.mt: Don't set GDBSERVER_DEPFILES.
+	* config/ia64/linux.mt: Likewise.
+	* config/m68k/linux.mh: Likewise.
+	* config/mips/linux.mt: Likewise.
+	* config/powerpc/linux.mh: Likewise.
+	* config/sh/linux.mt: Likewise.
+
 2003-06-19  Kris Warkentin  <kewarken@qnx.com>
 
 	* solib.c (solib_open): Change tests for whether to search

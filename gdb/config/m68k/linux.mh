@@ -10,5 +10,3 @@ NATDEPFILES= infptrace.o inftarg.o fork-child.o \
 # The dynamically loaded libthread_db needs access to symbols in the
 # gdb executable.
 LOADLIBES = -ldl -rdynamic
-
-GDBSERVER_DEPFILES = linux-low.o linux-m68k-low.o reg-m68k.o

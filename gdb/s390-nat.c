@@ -60,20 +60,14 @@ s390_register_u_addr (int blockend, int regnum)
     retval = PT_CR_9 + ((regnum - (S390_FIRST_CR + 9)) * S390_CR_SIZE);
   else
     {
-#ifdef GDBSERVER
-      error ("s390_register_u_addr invalid regnum %s %d regnum=%d",
-             __FILE__, (int) __LINE__, regnum);
-#else
       internal_error (__FILE__, __LINE__,
                       "s390_register_u_addr invalid regnum regnum=%d",
                       regnum);
-#endif
       retval = 0;
     }
   return retval + blockend;
 }
 
-#ifndef GDBSERVER
 /* watch_areas are required if you put 2 or more watchpoints on the same 
    address or overlapping areas gdb will call us to delete the watchpoint 
    more than once when we try to delete them.
@@ -362,4 +356,3 @@ fill_fpregset (fpregset_t * fpregsetp, int regno)
 #error "libc files are inconsistent with linux/include/asm-s390/"
 #error "3) you didn't do a completely clean build & delete config.cache."
 #endif
-#endif /* GDBSERVER */

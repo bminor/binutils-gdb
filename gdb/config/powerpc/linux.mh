@@ -9,5 +9,3 @@ NATDEPFILES= infptrace.o inftarg.o fork-child.o linux-proc.o \
 	gcore.o linux-nat.o
 
 LOADLIBES = -ldl -rdynamic
-
-GDBSERVER_DEPFILES = linux-low.o linux-ppc-low.o reg-ppc.o

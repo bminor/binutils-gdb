@@ -84,7 +84,6 @@ s390_register_byte (int reg_nr)
     return S390_FP0_OFFSET + (((reg_nr) - S390_FP0_REGNUM) * S390_FPR_SIZE);
 }
 
-#ifndef GDBSERVER
 #define S390_MAX_INSTR_SIZE (6)
 #define S390_SYSCALL_OPCODE (0x0a)
 #define S390_SYSCALL_SIZE   (2)
@@ -1915,5 +1914,3 @@ _initialize_s390_tdep (void)
   if (!deprecated_tm_print_insn)	/* Someone may have already set it */
     deprecated_tm_print_insn = gdb_print_insn_s390;
 }
-
-#endif /* GDBSERVER */
