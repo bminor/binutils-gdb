@@ -248,11 +248,15 @@ if [ -n "${template}" ] ; then
 			fi
 
 			for i in ${configdir} ${targetspecificdirs} ; do
-				if [ -r $i/configure ] ; then
-					(cd $i ;
-						./configure +template=${template} ${verbose})
+				if [ -d $i ] ; then
+					if [ -r $i/configure ] ; then
+						(cd $i ;
+							./configure +template=${template} ${verbose})
+					else
+						echo No configure script in `pwd`/$i
+					fi
 				else
-					echo No configure script in `pwd`/$i
+					echo Warning: directory $i is missing.
 				fi
 			done
 		done
@@ -477,18 +481,23 @@ links="host.h targ-cpu.c targ-cpu.h targ-env.h obj-format.h obj-format.c atof-ta
 			cat ${srcdir}/Makefile.in >> Makefile
 
 			# and shake thoroughly.
-			host_var_file=hmake-${host}
-			target_var_file=tmake-${target}
+			if [ -z "${host_makefile_frag}" ] ; then
+				host_makefile_frag=config/hmake-${host}
+			fi
+
+			if [ -z "${target_makefile_frag}" ] ; then
+				target_makefile_frag=config/tmake-${target}
+			fi
 
 			# Conditionalize the makefile for this host.
-			if [ -f ${srcdir}/config/${host_var_file} ] ; then
-				sed -e "/^####/  r ${srcdir}/config/${host_var_file}" Makefile > Makefile.tem
+			if [ -f ${srcdir}/${host_makefile_frag} ] ; then
+				sed -e "/^####/  r ${srcdir}/${host_makefile_frag}" Makefile > Makefile.tem
 				mv Makefile.tem Makefile
 			fi
 
 			# Conditionalize the makefile for this target.
-			if [ -f ${srcdir}/config/${target_var_file} ] ; then
-				sed -e "/^####/  r ${srcdir}/config/${target_var_file}" Makefile > Makefile.tem
+			if [ -f ${srcdir}/${target_makefile_frag} ] ; then
+				sed -e "/^####/  r ${srcdir}/${target_makefile_frag}" Makefile > Makefile.tem
 				mv Makefile.tem Makefile
 			fi
 
@@ -515,15 +524,15 @@ links="host.h targ-cpu.c targ-cpu.h targ-env.h obj-format.h obj-format.c atof-ta
 			mv Makefile.tem Makefile
 
 			using=
-			if [ -f ${srcdir}/config/${host_var_file} ] ; then
-				using=" using \"${host_var_file}\""
+			if [ -f ${srcdir}/${host_makefile_frag} ] ; then
+				using=" using \"${host_makefile_frag}\""
 			fi
 
-			if [ -f ${srcdir}/config/${target_var_file} ] ; then
+			if [ -f ${srcdir}/${target_makefile_frag} ] ; then
 				if [ -z "${using}" ] ; then
-					andusing=" using \"${target_var_file}\""
+					andusing=" using \"${target_makefile_frag}\""
 				else
-					andusing="${using} and \"${target_var_file}\""
+					andusing="${using} and \"${target_makefile_frag}\""
 				fi
 			else
 				andusing=${using}
@@ -583,9 +592,13 @@ for configdir in ${configdirs} ; do
 		done # for each host
 
 		if [ -n "${commons}" ] ; then
-			(cd ${configdir} ;
-				./configure ${commons} ${verbose} ${forcesubdirs} ${removing}) \
-				| sed 's/^/	/'
+			if [ -d ${configdir} ] ; then
+				(cd ${configdir} ;
+					./configure ${commons} ${verbose} ${forcesubdirs} ${removing}) \
+					| sed 's/^/	/'
+			else
+				echo Warning: directory \"${configdir}\" is missing.
+			fi
 		fi # if any common hosts
 
 		if [ -n "${specifics}" ] ; then
@@ -615,9 +628,13 @@ for configdir in ${configdirs} ; do
 		fi # if verbose
 
 		if [ -n "${commons}" ] ; then
-			(cd ${configdir} ;
-				./configure ${hosts} ${verbose} ${forcesubdirs} ${removing} ${commons}) \
-				| sed 's/^/	/'
+			if [ -d ${configdir} ] ; then
+				(cd ${configdir} ;
+					./configure ${hosts} ${verbose} ${forcesubdirs} ${removing} ${commons}) \
+					| sed 's/^/	/'
+			else
+				echo Warning: directory \"${configdir}\" is missing.
+			fi
 		fi # if any commons
 
 		if [ -n "${specifics}" ] ; then
@@ -635,8 +652,12 @@ exit 0
 
 #
 # $Log$
-# Revision 1.9  1991/05/14 14:14:08  rich
-# see devo/configure 1.11
+# Revision 1.10  1991/05/19 00:31:35  rich
+# Changes to deal with missing subdirs gracefully, and changes dictated
+# from dropping configure over gdb.
+#
+# Revision 1.4  1991/05/19  00:16:45  rich
+# Configure for gdb.
 #
 # Revision 1.10  1991/05/04  00:58:38  rich
 # Fix program name bug.
