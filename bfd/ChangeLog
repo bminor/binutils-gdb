@@ -1,3 +1,7 @@
+Wed Nov  1 13:51:54 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	* i386linux.c (MY(vec)): Declare before use.
+
 Wed Nov  1 11:45:07 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* elf.c (bfd_elf_set_dt_needed_name): Don't do anything if the
