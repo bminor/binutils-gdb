@@ -1,3 +1,21 @@
+Thu Feb 27 06:11:05 1992  John Gilmore  (gnu at cygnus.com)
+
+	* breakpoint.h (ALL_BREAKPOINTS_SAFE):  Add.
+	* breakpoint.c (breakpoint_re_set):  Use ALL_BREAKPOINTS_SAFE.
+	* symtab.c (find_pc_symtab):  Handle having no objfiles.
+	* infcmd.c:  Fix comment.
+	* objfiles.c (free_all_objfiles):  Add.
+	* symfile.h (ALL_OBJFILES, ALL_OBJFILES_SAFE):  Add.
+	* symfile.c (symbol_file_command):  free all objfiles when
+	specifying a new symbol file.
+	(reread_symbols):  Stat the file name, don't fstat the descriptor.
+
+Tue Feb 25 19:31:19 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* dbxread.c (end_psymtab):  Delete empty psymtabs.
+	* symfile.c (allocate_psymtab):  Recycle empty psymtabs.
+	* symfile.h (struct objfile):  Add free_psymtabs.
+
 Sat Feb 22 02:00:32 1992  John Gilmore  (gnu at cygnus.com)
 
 	* Makefile.in (VERSION):  Roll to gdb-4.4.4.

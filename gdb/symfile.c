@@ -554,15 +554,12 @@ symbol_file_command (args, from_tty)
 
   if (args == NULL)
     {
-      if (symfile_objfile)
-	{
-	  if ((have_full_symbols () || have_partial_symbols ())
-	      && from_tty
-	      && !query ("Discard symbol table from `%s'? ",
-			 symfile_objfile -> name))
-	    error ("Not confirmed.");
-	  free_objfile (symfile_objfile);
-	}
+      if ((have_full_symbols () || have_partial_symbols ())
+	  && from_tty
+	  && !query ("Discard symbol table from `%s'? ",
+		     symfile_objfile -> name))
+	error ("Not confirmed.");
+      free_all_objfiles ();
       symfile_objfile = NULL;
       /* FIXME, this does not account for the main file and subsequent
          files (shared libs, dynloads, etc) having different formats. 
@@ -769,6 +766,8 @@ reread_symbols ()
   struct objfile *objfile;
   long new_modtime;
   int reread_one = 0;
+  struct stat new_statbuf;
+  int res;
 
   /* With the addition of shared libraries, this should be modified,
      the load time should be saved in the partial symbol tables, since
@@ -779,7 +778,14 @@ reread_symbols ()
 the_big_top:
   for (objfile = object_files; objfile; objfile = objfile->next) {
     if (objfile->obfd) {
-      new_modtime = bfd_get_mtime (objfile->obfd);
+      res = stat (objfile->name, &new_statbuf);
+      if (res != 0) {
+	/* FIXME, should use print_sys_errmsg but it's not filtered. */
+	printf_filtered ("`%s' has disappeared; keeping its symbols.\n",
+			 objfile->name);
+	continue;
+      }
+      new_modtime = new_statbuf.st_mtime;
       if (new_modtime != objfile->mtime) {
 	printf_filtered ("`%s' has changed; re-reading symbols.\n",
 			 objfile->name);
@@ -799,7 +805,6 @@ the_big_top:
   if (reread_one)
     breakpoint_re_set ();
 }
-
 
 /* Functions to handle complaints during symbol reading.  */
 
@@ -957,9 +962,16 @@ allocate_psymtab (filename, objfile)
 {
   struct partial_symtab *psymtab;
 
-  psymtab = (struct partial_symtab *)
-    obstack_alloc (&objfile -> psymbol_obstack,
-		   sizeof (struct partial_symtab));
+  if (objfile -> free_psymtabs)
+    {
+      psymtab = objfile -> free_psymtabs;
+      objfile -> free_psymtabs = psymtab -> next;
+    }
+  else
+    psymtab = (struct partial_symtab *)
+      obstack_alloc (&objfile -> psymbol_obstack,
+		     sizeof (struct partial_symtab));
+
   (void) memset (psymtab, 0, sizeof (struct partial_symtab));
   psymtab -> filename = obsavestring (filename, strlen (filename),
 				      &objfile -> psymbol_obstack);

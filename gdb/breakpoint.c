@@ -113,7 +113,7 @@ static void
 breakpoints_info PARAMS ((char *, int));
 
 static void
-breakpoint_1 PARAMS ((int, int));
+breakpoint_1 PARAMS ((int, enum bptype));
 
 static bpstat
 bpstat_alloc PARAMS ((struct breakpoint *, bpstat));
@@ -143,7 +143,16 @@ extern int demangle;			/* Print de-mangled symbol names? */
 /* Are we executing breakpoint commands?  */
 static int executing_breakpoint_commands;
 
+/* Walk the following statement or block through all breakpoints.
+   ALL_BREAKPOINTS_SAFE does so even if the statment deletes the current
+   breakpoint.  */
+
 #define ALL_BREAKPOINTS(b)  for (b = breakpoint_chain; b; b = b->next)
+
+#define ALL_BREAKPOINTS_SAFE(b,tmp)	\
+	for (b = breakpoint_chain;	\
+	     b? (tmp=b->next, 1): 0;	\
+	     b = tmp)
 
 /* Chain of all breakpoints defined.  */
 
@@ -810,7 +819,7 @@ bpstat_stop_status (pc, frame_address)
   int real_breakpoint = 0;
 #endif
   /* Root of the chain of bpstat's */
-  struct bpstat__struct root_bs[1];
+  struct bpstat root_bs[1];
   /* Pointer to the last thing in the chain currently.  */
   bpstat bs = root_bs;
 
@@ -2229,11 +2238,11 @@ breakpoint_re_set_one (bint)
 void
 breakpoint_re_set ()
 {
-  struct breakpoint *b;
+  struct breakpoint *b, *temp;
   static char message1[] = "Error in re-setting breakpoint %d:\n";
   char message[sizeof (message1) + 30 /* slop */];
   
-  ALL_BREAKPOINTS (b)
+  ALL_BREAKPOINTS_SAFE (b, temp)
     {
       b->symtab = 0;		/* Be sure we don't point to old dead symtab */
       sprintf (message, message1, b->number);	/* Format possible error msg */

@@ -163,6 +163,20 @@ free_objfile (objfile)
   (*objfile -> free) (objfile);
 }
 
+
+/* Free all the object files at once.  */
+
+void
+free_all_objfiles ()
+{
+  struct objfile *objfile, *temp;
+
+  ALL_OBJFILES_SAFE (objfile, temp)
+    {
+      free_objfile (objfile);
+    }
+}
+
 /* Many places in gdb want to test just to see if we have any partial
    symbols available.  This function returns zero if none are currently
    available, nonzero otherwise. */
