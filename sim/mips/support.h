@@ -48,7 +48,10 @@ typedef unsigned long long uword64;
 /* Sign-extend the given value (e) as a value (b) bits long. We cannot
    assume the HI32bits of the operand are zero, so we must perform a
    mask to ensure we can use the simple subtraction to sign-extend. */
-#define SIGNEXTEND(e,b) (((e) & ((uword64)1 << ((b) - 1))) ? (((e) & (((uword64)1 << (b)) - 1)) - ((uword64)1 << (b))) : (e))
+#define SIGNEXTEND(e,b) \
+  (((e) & ((uword64) 1 << ((b) - 1))) \
+   ? (((e) & (((uword64) 1 << (b)) - 1)) - ((uword64)1 << (b))) \
+   : ((e) & (((((uword64) 1 << ((b) - 1)) - 1) << 1) | 1)))
 
 /* Check if a value will fit within a word (unsigned int): */
 #define NOTWORDVALUE(v) ((((((uword64)(v)>>32) == 0) && !((v) & ((unsigned)1 << 31))) || ((((uword64)(v)>>32) == 0xFFFFFFFF) && ((v) & ((unsigned)1 << 31)))) ? (1 == 0) : (1 == 1))

@@ -1530,6 +1530,7 @@ process_instructions(doarch,features)
                       printf("     GPR[destreg] = SIGNEXTEND(GPR[destreg],32);\n");
                    } else { /* store */
                      printf("     memval = (op2 << (byte * 8));\n");
+		     build_endian_shift(proc64,datalen,2,s_left,32);
                      printf("     StoreMemory(uncached,(%s - byte),memval,paddr,vaddr,isREAL);\n",accesslength);
                    }
                  }
