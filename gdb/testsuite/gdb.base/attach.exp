@@ -128,7 +128,7 @@ proc do_attach_tests {} {
       # This reponse is expected on HP-UX 10.20 (i.e., ptrace-based).
       -re "Attaching to.*, process 0.*No such process.*$gdb_prompt $"\
                       {pass "attach to nonexistent process is prohibited"}
-      # This response is expected on HP-UX 10.30 & 11.0 (i.e., ttrace-based).
+      # This response is expected on HP-UX 11.0 (i.e., ttrace-based).
       -re "Attaching to.*, process 0 failed.*Hint.*$gdb_prompt $"\
                       {pass "attach to nonexistent process is prohibited"}
       -re "$gdb_prompt $" {fail "attach to nonexistent process is prohibited"}
@@ -386,8 +386,8 @@ proc do_call_attach_tests {} {
 
    # Get rid of the process
    #
-   gdb_test "p should_exit = 1" ".*" ""
-   gdb_test "c" ".*Program exited normally.*" ""
+   gdb_test "p should_exit = 1" ".*"
+   gdb_test "c" ".*Program exited normally.*"
    
    # Be paranoid
    #

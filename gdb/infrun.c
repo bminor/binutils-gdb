@@ -1298,6 +1298,16 @@ init_execution_control_state (ecs)
   ecs->wp = &(ecs->ws);
 }
 
+/* Call this function before setting step_resume_breakpoint, as a
+   sanity check.  We should never be setting a new
+   step_resume_breakpoint when we have an old one active.  */
+static void
+check_for_old_step_resume_breakpoint ()
+{
+  if (step_resume_breakpoint)
+    warning ("GDB bug: infrun.c (wait_for_inferior): dropping old step_resume breakpoint");
+}
+
 /* Given an execution control state that has been freshly filled in
    by an event from the inferior, figure out what it means and take
    appropriate action.  */
@@ -2143,16 +2153,39 @@ handle_inferior_event (ecs)
 	if (signal_program[stop_signal] == 0)
 	  stop_signal = TARGET_SIGNAL_0;
 
-	/* If we're in the middle of a "next" command, let the code for
-	   stepping over a function handle this. pai/1997-09-10
+	/* I'm not sure whether this needs to be check_sigtramp2 or
+	   whether it could/should be keep_going.
 
-	   A previous comment here suggested it was possible to change
-	   this to jump to keep_going in all cases. */
+	   This used to jump to step_over_function if we are stepping,
+	   which is wrong.
 
-	if (step_over_calls > 0)
-	  goto step_over_function;
-	else
-	  goto check_sigtramp2;
+	   Suppose the user does a `next' over a function call, and while
+	   that call is in progress, the inferior receives a signal for
+	   which GDB does not stop (i.e., signal_stop[SIG] is false).  In
+	   that case, when we reach this point, there is already a
+	   step-resume breakpoint established, right where it should be:
+	   immediately after the function call the user is "next"-ing
+	   over.  If we jump to step_over_function now, two bad things
+	   happen:
+
+	   - we'll create a new breakpoint, at wherever the current
+	     frame's return address happens to be.  That could be
+	     anywhere, depending on what function call happens to be on
+	     the top of the stack at that point.  Point is, it's probably
+	     not where we need it.
+
+           - the existing step-resume breakpoint (which is at the correct
+	     address) will get orphaned: step_resume_breakpoint will point
+	     to the new breakpoint, and the old step-resume breakpoint
+	     will never be cleaned up.
+
+           The old behavior was meant to help HP-UX single-step out of
+           sigtramps.  It would place the new breakpoint at prev_pc, which
+           was certainly wrong.  I don't know the details there, so fixing
+           this probably breaks that.  As with anything else, it's up to
+           the HP-UX maintainer to furnish a fix that doesn't break other
+           platforms.  --JimB, 20 May 1999 */
+	goto check_sigtramp2;
       }
 
     /* Handle cases caused by hitting a breakpoint.  */
@@ -2513,6 +2546,7 @@ handle_inferior_event (ecs)
 	      /* We could probably be setting the frame to
 	         step_frame_address; I don't think anyone thought to
 	         try it.  */
+	      check_for_old_step_resume_breakpoint ();
 	      step_resume_breakpoint =
 		set_momentary_breakpoint (sr_sal, NULL, bp_step_resume);
 	      if (breakpoints_inserted)
@@ -2595,6 +2629,7 @@ handle_inferior_event (ecs)
 		INIT_SAL (&xxx);	/* initialize to zeroes */
 		xxx.pc = tmp;
 		xxx.section = find_pc_overlay (xxx.pc);
+		check_for_old_step_resume_breakpoint ();
 		step_resume_breakpoint =
 		  set_momentary_breakpoint (xxx, NULL, bp_step_resume);
 		insert_breakpoints ();
@@ -2619,51 +2654,30 @@ handle_inferior_event (ecs)
       step_over_function:
 	/* A subroutine call has happened.  */
 	{
-	  /* Set a special breakpoint after the return */
+	  /* We've just entered a callee, and we wish to resume until it
+	     returns to the caller.  Setting a step_resume breakpoint on
+	     the return address will catch a return from the callee.
+
+	     However, if the callee is recursing, we want to be careful
+	     not to catch returns of those recursive calls, but only of
+	     THIS instance of the call.
+
+	     To do this, we set the step_resume bp's frame to our current
+	     caller's frame (step_frame_address, which is set by the "next"
+	     or "until" command, before execution begins).  */
 	  struct symtab_and_line sr_sal;
 
-	  INIT_SAL (&sr_sal);
-	  sr_sal.symtab = NULL;
-	  sr_sal.line = 0;
+	  INIT_SAL (&sr_sal);	/* initialize to zeros */
+	  sr_sal.pc = 
+	    ADDR_BITS_REMOVE (SAVED_PC_AFTER_CALL (get_current_frame ()));
+	  sr_sal.section = find_pc_overlay (sr_sal.pc);
 
-	  /* If we came here after encountering a signal in the middle of
-	     a "next", use the stashed-away previous frame pc */
-	  sr_sal.pc
-	    = stopped_by_random_signal
-	    ? prev_pc
-	    : ADDR_BITS_REMOVE (SAVED_PC_AFTER_CALL (get_current_frame ()));
-
+	  check_for_old_step_resume_breakpoint ();
 	  step_resume_breakpoint =
-	    set_momentary_breakpoint (sr_sal,
-				      stopped_by_random_signal ?
-				      NULL : get_current_frame (),
+	    set_momentary_breakpoint (sr_sal, get_current_frame (),
 				      bp_step_resume);
 
-	  /* We've just entered a callee, and we wish to resume until
-	     it returns to the caller.  Setting a step_resume bp on
-	     the return PC will catch a return from the callee.
-
-	     However, if the callee is recursing, we want to be
-	     careful not to catch returns of those recursive calls,
-	     but of THIS instance of the call.
-
-	     To do this, we set the step_resume bp's frame to our
-	     current caller's frame (step_frame_address, which is
-	     set by the "next" or "until" command, before execution
-	     begins).
-
-	     But ... don't do it if we're single-stepping out of a
-	     sigtramp, because the reason we're single-stepping is
-	     precisely because unwinding is a problem (HP-UX 10.20,
-	     e.g.) and the frame address is likely to be incorrect.
-	     No danger of sigtramp recursion.  */
-
-	  if (ecs->stepping_through_sigtramp)
-	    {
-	      step_resume_breakpoint->frame = (CORE_ADDR) NULL;
-	      ecs->stepping_through_sigtramp = 0;
-	    }
-	  else if (!IN_SOLIB_DYNSYM_RESOLVE_CODE (sr_sal.pc))
+	  if (!IN_SOLIB_DYNSYM_RESOLVE_CODE (sr_sal.pc))
 	    step_resume_breakpoint->frame = step_frame_address;
 
 	  if (breakpoints_inserted)
@@ -2713,6 +2727,7 @@ handle_inferior_event (ecs)
 	    /* Do not specify what the fp should be when we stop
 	       since on some machines the prologue
 	       is where the new fp value is established.  */
+	    check_for_old_step_resume_breakpoint ();
 	    step_resume_breakpoint =
 	      set_momentary_breakpoint (sr_sal, NULL, bp_step_resume);
 	    if (breakpoints_inserted)
@@ -2757,6 +2772,7 @@ handle_inferior_event (ecs)
 	    /* Do not specify what the fp should be when we stop
 	       since on some machines the prologue
 	       is where the new fp value is established.  */
+	    check_for_old_step_resume_breakpoint ();
 	    step_resume_breakpoint =
 	      set_momentary_breakpoint (sr_sal, NULL, bp_step_resume);
 	    if (breakpoints_inserted)

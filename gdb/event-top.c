@@ -634,9 +634,8 @@ command_line_handler (rl)
 
   free (rl);			/* Allocated in readline.  */
 
-  if (p == linebuffer || *(p - 1) == '\\')
+  if (*(p - 1) == '\\')
     {
-      /* We come here also if the line entered is empty (just a 'return') */
       p--;			/* Put on top of '\'.  */
 
       if (*p == '\\')

@@ -884,7 +884,7 @@ symbol_file_command (args, from_tty)
 
 	      if (text_relocation == (CORE_ADDR) 0)
 		return;
-	      else if (text_relocation == (CORE_ADDR) - 1)
+	      else if (text_relocation == (CORE_ADDR) -1)
 		{
 		  symbol_file_add (name, from_tty, (CORE_ADDR) 0,
 				   1, mapped, readnow, 1, 0);
@@ -1313,7 +1313,7 @@ add_symbol_file_command (args, from_tty)
   else
     {
       target_link (name, &text_addr);
-      if (text_addr == (CORE_ADDR) - 1)
+      if (text_addr == (CORE_ADDR) -1)
 	error ("Don't know how to get text start location for this file");
     }
 

@@ -26,6 +26,18 @@
 #define REGISTER_U_ADDR(addr, blockend, regno)				\
 { addr = (int)(blockend) + REGISTER_BYTE (regno);}
 
+/* This isn't really correct, because ptrace is actually a 32-bit
+   interface.  However, the modern HP-UX targets all really use
+   ttrace, which is a 64-bit interface --- a debugger running in
+   either 32- or 64-bit mode can debug a 64-bit process.  BUT, the
+   code doesn't use ttrace directly --- it calls call_ptrace instead,
+   which is supposed to be drop-in substitute for ptrace.  In other
+   words, they access a 64-bit system call (ttrace) through a
+   compatibility layer which is allegedly a 32-bit interface.
+
+   So I don't feel the least bit guilty about this.  */
+#define PTRACE_ARG3_TYPE CORE_ADDR
+
 /* HPUX 8.0, in its infinite wisdom, has chosen to prototype ptrace
    with five arguments, so programs written for normal ptrace lose.  */
 #define FIVE_ARG_PTRACE

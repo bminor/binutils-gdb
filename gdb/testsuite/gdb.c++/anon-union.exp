@@ -76,6 +76,16 @@ gdb_expect -re "$gdb_prompt $"
 
 # NOTE: Add -- ptype foo.x, etc. when things are working
 
+#Initialize foo
+send_gdb "next\n"
+gdb_expect {
+   -re "40\[ \t\]*foo.paper = 33;\r\n$gdb_prompt $" {
+      pass "next 1"
+    }
+    -re ".*$gdb_prompt $" { fail "next 1" }
+    timeout { fail "(timeout) next 1" }
+}
+
 # Print out the big anon union.
 send_gdb "print foo\n"
 gdb_expect {
@@ -245,10 +255,10 @@ gdb_expect {
 }
 
 
-# Step over next two assignments
-send_gdb "next 2\n"
+# Step over next four assignments
+send_gdb "next 4\n"
 gdb_expect {
-   -re "52\[ \t\]*w = 45;\r\n$gdb_prompt $" {
+   -re "53\[ \t\]*w = 45;\r\n$gdb_prompt $" {
       pass "next 3"
     }
     -re ".*$gdb_prompt $" { fail "next 3" }
@@ -257,30 +267,28 @@ gdb_expect {
 
 # Tests for anon unions that are not members of a class or struct
 
-# w is not yet initialized; it contains garbage
-#send_gdb "print w\n"
-#gdb_expect {
-#   -re "\\$\[0-9\]* = 0\r\n$gdb_prompt $" {
-#      pass "print w 1"
-#    }
-#    -re ".*$gdb_prompt $" { fail "print w 1" }
-#    timeout { fail "(timeout) print w 1" }
-#}
-#
-# z is not yet initialized; it contains garbage
-#send_gdb "print z\n"
-#gdb_expect {
-#   -re "\\$\[0-9\]* = 0\r\n$gdb_prompt $" {
-#      pass "print z 1"
-#    }
-#    -re ".*$gdb_prompt $" { fail "print z 1" }
-#    timeout { fail "(timeout) print z 1" }
-#}
+send_gdb "print w\n"
+gdb_expect {
+   -re "\\$\[0-9\]* = 0\r\n$gdb_prompt $" {
+      pass "print w 1"
+    }
+    -re ".*$gdb_prompt $" { fail "print w 1" }
+    timeout { fail "(timeout) print w 1" }
+}
+
+send_gdb "print z\n"
+gdb_expect {
+   -re "\\$\[0-9\]* = 0\r\n$gdb_prompt $" {
+      pass "print z 1"
+    }
+    -re ".*$gdb_prompt $" { fail "print z 1" }
+    timeout { fail "(timeout) print z 1" }
+}
 
 # Step over next assignment to w
 send_gdb "next\n"
 gdb_expect {
-   -re "54\[ \t\]*\}\r\n$gdb_prompt $" {
+   -re "55\[ \t\]*\}\r\n$gdb_prompt $" {
       pass "next 4"
     }
     -re ".*$gdb_prompt $" { fail "next 4" }

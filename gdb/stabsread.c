@@ -4701,18 +4701,30 @@ read_range_type (pp, typenums, objfile)
   /* We used to do this only for subrange of self or subrange of int.  */
   else if (n2 == 0)
     {
+      /* -1 is used for the upper bound of (4 byte) "unsigned int" and
+         "unsigned long", and we already checked for that,
+         so don't need to test for it here.  */
+
       if (n3 < 0)
 	/* n3 actually gives the size.  */
 	return init_type (TYPE_CODE_INT, -n3, TYPE_FLAG_UNSIGNED,
 			  NULL, objfile);
-      if (n3 == 0xff)
-	return init_type (TYPE_CODE_INT, 1, TYPE_FLAG_UNSIGNED, NULL, objfile);
-      if (n3 == 0xffff)
-	return init_type (TYPE_CODE_INT, 2, TYPE_FLAG_UNSIGNED, NULL, objfile);
 
-      /* -1 is used for the upper bound of (4 byte) "unsigned int" and
-         "unsigned long", and we already checked for that,
-         so don't need to test for it here.  */
+      /* Is n3 == 2**(8n))-1 for some integer n?  Then it's an
+         unsigned n-byte integer.  But do require n to be a power of
+         two; we don't want 3- and 5-byte integers flying around.  */
+      {
+	int bytes;
+	unsigned long bits;
+
+	bits = n3;
+	for (bytes = 0; (bits & 0xff) == 0xff; bytes++)
+	  bits >>= 8;
+	if (bits == 0
+	    && ((bytes - 1) & bytes) == 0) /* "bytes is a power of two" */
+	  return init_type (TYPE_CODE_INT, bytes, TYPE_FLAG_UNSIGNED, NULL,
+			    objfile);
+      }
     }
   /* I think this is for Convex "long long".  Since I don't know whether
      Convex sets self_subrange, I also accept that particular size regardless

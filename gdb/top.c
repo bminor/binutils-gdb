@@ -680,6 +680,12 @@ gdb_init (argv0)
   getcwd (gdb_dirbuf, sizeof (gdb_dirbuf));
   current_directory = gdb_dirbuf;
 
+#ifdef __MSDOS__
+  /* Make sure we return to the original directory upon exit, come
+     what may, since the OS doesn't do that for us.  */
+  make_final_cleanup ((make_cleanup_func) chdir, strsave (current_directory));
+#endif
+
   init_cmd_lists ();		/* This needs to be done first */
   initialize_targets ();	/* Setup target_terminal macros for utils.c */
   initialize_utils ();		/* Make errors and warnings possible */
@@ -3362,13 +3368,32 @@ cd_command (dir, from_tty)
   if (chdir (dir) < 0)
     perror_with_name (dir);
 
+#if defined(_WIN32) || defined(__MSDOS__)
+  /* There's too much mess with DOSish names like "d:", "d:.",
+     "d:./foo" etc.  Instead of having lots of special #ifdef'ed code,
+     simply get the canonicalized name of the current directory.  */
+  dir = getcwd (gdb_dirbuf, sizeof (gdb_dirbuf));
+#endif
+
   len = strlen (dir);
-  dir = savestring (dir, len - (len > 1 && SLASH_P (dir[len - 1])));
+  if (SLASH_P (dir[len-1]))
+    {
+      /* Remove the trailing slash unless this is a root directory
+	 (including a drive letter on non-Unix systems).  */
+      if (!(len == 1) /* "/" */
+#if defined(_WIN32) || defined(__MSDOS__)
+	  && !(!SLASH_P (*dir) && ROOTED_P (dir) && len <= 3) /* "d:/" */
+#endif
+	  )
+	len--;
+    }
+
+  dir = savestring (dir, len);
   if (ROOTED_P (dir))
     current_directory = dir;
   else
     {
-      if (SLASH_P (current_directory[0]) && current_directory[1] == '\0')
+      if (SLASH_P (current_directory[strlen (current_directory) - 1]))
 	current_directory = concat (current_directory, dir, NULL);
       else
 	current_directory = concat (current_directory, SLASH_STRING, dir, NULL);
@@ -3755,7 +3780,12 @@ init_history ()
       /* We include the current directory so that if the user changes
          directories the file written will be the same as the one
          that was read.  */
+#ifdef __MSDOS__
+    /* No leading dots in file names are allowed on MSDOS.  */
+    history_filename = concat (current_directory, "/_gdb_history", NULL);
+#else
       history_filename = concat (current_directory, "/.gdb_history", NULL);
+#endif
     }
   read_history (history_filename);
 }

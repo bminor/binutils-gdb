@@ -533,10 +533,10 @@ gdb_expect  {
         }
 
 
-send_gdb "file ${srcdir}/gdb.base/a1\t"
+send_gdb "file ${srcdir}/gdb.base/self\t"
 sleep 1
 gdb_expect  {
-        -re "^file ${srcdir}/gdb.base/.*'a1.*-self\\.exp' $"\
+        -re "^file ${srcdir}/gdb.base/.*'selftest\\.exp' $"\
             { send_gdb "\n"
               gdb_expect {
                       -re "\r\nA program is being debugged already\\.  Kill it\\? \\(y or n\\) $"
@@ -544,17 +544,17 @@ gdb_expect  {
                       { send_gdb "n\n"
                         gdb_expect {
                                 -re "\r\nProgram not killed\\.\r\n$gdb_prompt $"\
-                                        { pass "complete 'file gdb.base/a1'"}
-                                -re ".*$gdb_prompt $" { fail "complete 'file gdb.base/a1'"}
-                                timeout           {fail "(timeout) complete 'file gdb.base/a1'"}
+                                        { pass "complete 'file gdb.base/self'"}
+                                -re ".*$gdb_prompt $" { fail "complete 'file gdb.base/self'"}
+                                timeout           {fail "(timeout) complete 'file gdb.base/self'"}
                                }
                       }
-                      -re ".*$gdb_prompt $" { fail "complete 'file gdb.base/a1'"}
-                      timeout           {fail "(timeout) complete 'file gdb.base/a1'"}
+                      -re ".*$gdb_prompt $" { fail "complete 'file gdb.base/self'"}
+                      timeout           {fail "(timeout) complete 'file gdb.base/self'"}
                      }
             }
-        -re ".*$gdb_prompt $"       { fail "complete 'file gdb.base/a1'" }
-        timeout         { fail "(timeout) complete 'file gdb.base/a1'" }
+        -re ".*$gdb_prompt $"       { fail "complete 'file gdb.base/self'" }
+        timeout         { fail "(timeout) complete 'file gdb.base/self'" }
         }
 
 

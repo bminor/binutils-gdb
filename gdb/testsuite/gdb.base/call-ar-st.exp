@@ -465,12 +465,6 @@ gdb_test "tbreak 1300" \
 gdb_test continue "Continuing\\..*Contents of two_floats_t:.*main \\(\\) at.*call-ar-st.c:1300.*1300.*init_bit_flags_combo\\(flags_combo, \\(unsigned\\)1, \\(unsigned\\)0, .y.,.*" \
   "continue to 1300"
 
-
-# FIXME:
-# HP aCC demangler currently does not handle hp aCC functions with >10 args
-# DTS CLLbs16994  coulter 990114
-
-if {$hp_aCC_compiler} {setup_xfail "hppa*-*-*"}
 #step
     send_gdb "step\n"
     gdb_expect {
@@ -501,6 +495,13 @@ gdb_test continue "Continuing\\..*main \\(\\) at .*call-ar-st.c:1305\[\r\n\t \]+
 "continue to 1305"
 
 #call print_long_arg_list(a, b, c, d, e, f, *struct1, *struct2, *struct3, *struct4, *flags, *flags_combo, *three_char, *five_char, *int_char_combo, *d1, *d2, *d3, *f1, *f2, *f3)
+
+# FIXME:
+# HP aCC demangler currently does not handle hp aCC functions with >10 args
+# DTS CLLbs16994  coulter 990114
+
+if {$hp_aCC_compiler} {setup_xfail "hppa*-*-*" CLLbs16994}
+
 if {![target_info exists gdb,skip_float_tests]} {
   send_gdb "print print_long_arg_list(a, b, c, d, e, f, *struct1, *struct2, *struct3, *struct4, *flags, *flags_combo, *three_char, *five_char, *int_char_combo, *d1, *d2, *d3, *f1, *f2, *f3)\n"
   gdb_expect {

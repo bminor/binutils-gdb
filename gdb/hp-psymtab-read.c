@@ -1622,7 +1622,7 @@ hpread_build_psymtabs (objfile, section_offsets, mainline)
 
   /* Just in case the stabs reader left turds lying around.  */
   free_pending_blocks ();
-  make_cleanup ((make_cleanup_func) really_free_pendings, 0);
+  make_cleanup (really_free_pendings, 0);
 
   pst = (struct partial_symtab *) 0;
 

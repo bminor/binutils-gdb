@@ -129,7 +129,8 @@ gdb_test "ptype boolean" "type = enum (boolean |)\{FALSE, TRUE\}.*" "ptype unnam
 # as (51) doesn't have a name.  Only 55 has a name.
 
 if {!$gcc_compiled && !$hp_aCC_compiler} {
-    setup_xfail "rs6000-*-*" "i*86-*-sysv4*" "hppa*-*-*" # CLLbs14773
+    setup_xfail "rs6000-*-*" "i*86-*-sysv4*"
+    setup_xfail "hppa*-*-*" CLLbs14773
 }
 get_debug_format
 setup_xfail_format "DWARF 1"

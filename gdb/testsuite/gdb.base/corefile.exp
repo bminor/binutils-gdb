@@ -217,8 +217,7 @@ gdb_expect {
 # test reinit_frame_cache
 
 gdb_load ${binfile}
-# HP defect CLLbs17002
-setup_xfail "*-*-*"
+setup_xfail "*-*-*" CLLbs17002
 gdb_test "up" "#\[0-9\]* *\[0-9xa-fH'\]* in .* \\(\\)" "up in corefile.exp (reinit)"
 
 gdb_test "core" "No core file now."

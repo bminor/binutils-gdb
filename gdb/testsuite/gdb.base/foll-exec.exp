@@ -209,7 +209,7 @@ proc do_exec_tests {} {
    # DTS CLLbs16760
    # PA64 doesn't know about $START$ in dld.sl at this point.  It should.
    # - Michael Coulter
-   setup_xfail hppa2.0w-hp-hpux*
+   setup_xfail hppa2.0w-hp-hpux* CLLbs16760
    send_gdb "continue\n"
    gdb_expect {
      -re ".*Executing new program:.*${testfile2}.*Catchpoint .*(exec\'d .*${testfile2}).*in .START..*$gdb_prompt $"\

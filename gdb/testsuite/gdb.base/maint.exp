@@ -92,10 +92,18 @@ match_max 6000
 # so that branch will really never be covered in this tests here!!
 #
 
+# guo: on linux this command output is huge.  for some reason splitting up
+# the regexp checks works.
+#
 send_gdb "maint check-symtabs\n"
 gdb_expect  {
-        -re "^maint check-symtabs.*$gdb_prompt $"\
+        -re "^maint check-symtabs" {
+	    gdb_expect {
+		-re "$gdb_prompt $" \
                           { pass "maint check-symtabs" }
+		timeout { fail "(timeout) maint check-symtabs" }
+	    }
+	}
         -re ".*$gdb_prompt $"       { fail "maint check-symtabs" }
         timeout         { fail "(timeout) maint check-symtabs" }
         }
@@ -235,7 +243,9 @@ gdb_expect  {
                   send_gdb "shell grep 'main.*function' psymbols_output\n"
                   gdb_expect {
                         -re ".main., function, $hex.*$gdb_prompt $"\
-                                               { pass "maint print psymbols" }
+                                               { pass "maint print psymbols 1" }
+                        -re ".*main.  .., function, $hex.*$gdb_prompt $"\
+                                               { pass "maint print psymbols 2" }
                         -re ".*$gdb_prompt $"       { fail "maint print psymbols" }
                          timeout         { fail "(timeout) maint print psymbols" }
                          }
@@ -338,13 +348,18 @@ gdb_expect  {
         timeout         { fail "(timeout) maint print type" }
         }
 
-#send_gdb "maint print unwind &main\n"
-#gdb_expect  {
-#        -re ".*unwind_table_entry \\($hex\\):\r\n\tregion_start = $hex <main>\r\n\tregion_end = $hex <main\\+220>\r\n\tflags = Args_stored Save_RP\r\n\tRegion_description = $hex\r\n\tEntry_FR = $hex\r\n\tEntry_GR = $hex\r\n\tTotal_frame_size = $hex\r\n$gdb_prompt $"\
-#                        { pass "maint print unwind" }
-#        -re ".*$gdb_prompt $"       { fail "maint print unwind" }
-#        timeout         { fail "(timeout) maint print unwind" }
-#        }
+if [istarget "hppa*-*-11*"] {
+    setup_xfail hppa*-*-*11* CLLbs14860
+    send "maint print unwind &main\n"
+    expect  {
+        -re ".*unwind_table_entry \\($hex\\):\r\n\tregion_start = $hex <main>\r\n\tregion_end = $hex <main\\+\[0-9\]*>\r\n\tflags = Args_stored Save_RP\r\n\tRegion_description = $hex\r\n\tEntry_FR = $hex\r\n\tEntry_GR = $hex\r\n\tTotal_frame_size = $hex\r\n$gdb_prompt $"\
+	    { pass "maint print unwind" }
+        -re ".*unwind_table_entry \\($hex\\):\r\n\tregion_start = $hex <main>\r\n\tregion_end = $hex <main\\+\[0-9\]*>\r\n\tflags = Args_stored Save_RP\r\n\tFLD = $hex\r\n\tFLD = $hex\r\n\tFLD = $hex\r\n\tFLD = $hex\r\n$gdb_prompt $"\
+	    { xfail "maint print unwind" }
+        -re ".*$gdb_prompt $"       { xfail "maint info unwind" }
+        timeout         { fail "(timeout) maint print unwind" }
+    }
+}
 
 set oldtimeout $timeout
 set timeout [expr $timeout + 300]
@@ -369,7 +384,7 @@ gdb_expect  {
 
 send_gdb "maint info breakpoints\n"
 gdb_expect {
-    -re "Num\[ \t\]+Type\[ \t\]+Disp\[ \t\]+Enb\[ \t\]+Address\[ \t\]+What\r\n1\[ \t\]+breakpoint\[ \t\]+keep\[ \t\]+y\[ \t\]+$hex in main at.*break.c:60\r\n\[ \t\]+breakpoint already hit 1 time\r\n.*$gdb_prompt $"\
+    -re "Num\[ \t\]+Type\[ \t\]+Disp\[ \t\]+Enb\[ \t\]+Address\[ \t\]+What\r\n1\[ \t\]+breakpoint\[ \t\]+keep\[ \t\]+y\[ \t\]+$hex in main at.*break.c:75\r\n\[ \t\]+breakpoint already hit 1 time\r\n.*$gdb_prompt $"\
 				{ pass "maint info breakpoints" }
     -re ".*$gdb_prompt $"       { fail "maint info breakpoints" }
     timeout			{ fail "(timeout) maint info breakpoints" }
@@ -383,7 +398,9 @@ if {! ([istarget "hppa*-*-hpux*"]
 }
 send_gdb "maint info breakpoints\n"
 gdb_expect  {
-    -re "Num\[ \t\]+Type\[ \t\]+Disp\[ \t\]+Enb\[ \t\]+Address\[ \t\]+What\r\n1\[ \t\]+breakpoint\[ \t\]+keep\[ \t\]+y\[ \t\]+$hex in main at.*break.c:60\r\n\[ \t\]+breakpoint already hit 1 time\r\n-1\[ \t\]+shlib events\[ \t\]+keep\[ \t\]+y\[ \t\]+$hex.*breakpoint already hit.*$gdb_prompt $"\
+        -re "Num\[ \t\]+Type\[ \t\]+Disp\[ \t\]+Enb\[ \t\]+Address\[ \t\]+What\r\n1\[ \t\]+breakpoint\[ \t\]+keep\[ \t\]+y\[ \t\]+$hex in main at.*break.c:75\r\n\[ \t\]+breakpoint already hit 1 time\r\n.*$gdb_prompt $"\
+                        { pass "maint info breakpoints" }
+    -re "Num\[ \t\]+Type\[ \t\]+Disp\[ \t\]+Enb\[ \t\]+Address\[ \t\]+What\r\n1\[ \t\]+breakpoint\[ \t\]+keep\[ \t\]+y\[ \t\]+$hex in main at.*break.c:75\r\n\[ \t\]+breakpoint already hit 1 time\r\n-1\[ \t\]+shlib events\[ \t\]+keep\[ \t\]+y\[ \t\]+$hex.*breakpoint already hit.*$gdb_prompt $"\
 	    { pass "maint info breakpoints: shlib events" }
     -re ".*$gdb_prompt $" {
 	fail "maint info breakpoints: shlib events"
@@ -521,13 +538,15 @@ gdb_expect  {
         timeout         { fail "(timeout) help maint print type" }
         }
 
-#send_gdb "help maint print unwind\n"
-#gdb_expect  {
-#        -re "Print unwind table entry at given address\\..*$gdb_prompt $"\
-#                        { pass "help maint print unwind" }
-#        -re ".*$gdb_prompt $"       { fail "help maint print unwind" }
-#        timeout         { fail "(timeout) help maint print unwind" }
-#        }
+if [istarget "hppa*-*-*"] {
+    send_gdb "help maint print unwind\n"
+    gdb_expect  {
+        -re "Print unwind table entry at given address\\..*$gdb_prompt $"\
+	    { pass "help maint print unwind" }
+        -re ".*$gdb_prompt $"       { fail "help maint print unwind" }
+        timeout         { fail "(timeout) help maint print unwind" }
+    }
+}
 
 send_gdb "help maint info sections\n"
 gdb_expect  {

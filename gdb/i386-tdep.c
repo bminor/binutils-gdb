@@ -722,6 +722,140 @@ i386v4_sigtramp_saved_pc (frame)
 }
 #endif /* I386V4_SIGTRAMP_SAVED_PC */
 
+#ifdef I386_LINUX_SIGTRAMP
+
+/* When the i386 Linux kernel calls a signal handler, the return
+   address points to a bit of code on the stack.  This function
+   returns whether the PC appears to be within this bit of code.
+
+   The instruction sequence is
+       pop    %eax
+       mov    $0x77,%eax
+       int    $0x80
+   or 0x58 0xb8 0x77 0x00 0x00 0x00 0xcd 0x80.
+
+   Checking for the code sequence should be somewhat reliable, because
+   the effect is to call the system call sigreturn.  This is unlikely
+   to occur anywhere other than a signal trampoline.
+
+   It kind of sucks that we have to read memory from the process in
+   order to identify a signal trampoline, but there doesn't seem to be
+   any other way.  The IN_SIGTRAMP macro in tm-linux.h arranges to
+   only call us if no function name could be identified, which should
+   be the case since the code is on the stack.  */
+
+#define LINUX_SIGTRAMP_INSN0 (0x58)	/* pop %eax */
+#define LINUX_SIGTRAMP_OFFSET0 (0)
+#define LINUX_SIGTRAMP_INSN1 (0xb8)	/* mov $NNNN,%eax */
+#define LINUX_SIGTRAMP_OFFSET1 (1)
+#define LINUX_SIGTRAMP_INSN2 (0xcd)	/* int */
+#define LINUX_SIGTRAMP_OFFSET2 (6)
+
+static const unsigned char linux_sigtramp_code[] =
+{
+  LINUX_SIGTRAMP_INSN0,					/* pop %eax */
+  LINUX_SIGTRAMP_INSN1, 0x77, 0x00, 0x00, 0x00,		/* mov $0x77,%eax */
+  LINUX_SIGTRAMP_INSN2, 0x80				/* int $0x80 */
+};
+
+#define LINUX_SIGTRAMP_LEN (sizeof linux_sigtramp_code)
+
+/* If PC is in a sigtramp routine, return the address of the start of
+   the routine.  Otherwise, return 0.  */
+
+static CORE_ADDR
+i386_linux_sigtramp_start (pc)
+     CORE_ADDR pc;
+{
+  unsigned char buf[LINUX_SIGTRAMP_LEN];
+
+  /* We only recognize a signal trampoline if PC is at the start of
+     one of the three instructions.  We optimize for finding the PC at
+     the start, as will be the case when the trampoline is not the
+     first frame on the stack.  We assume that in the case where the
+     PC is not at the start of the instruction sequence, there will be
+     a few trailing readable bytes on the stack.  */
+
+  if (read_memory_nobpt (pc, (char *) buf, LINUX_SIGTRAMP_LEN) != 0)
+    return 0;
+
+  if (buf[0] != LINUX_SIGTRAMP_INSN0)
+    {
+      int adjust;
+
+      switch (buf[0])
+	{
+	case LINUX_SIGTRAMP_INSN1:
+	  adjust = LINUX_SIGTRAMP_OFFSET1;
+	  break;
+	case LINUX_SIGTRAMP_INSN2:
+	  adjust = LINUX_SIGTRAMP_OFFSET2;
+	  break;
+	default:
+	  return 0;
+	}
+
+      pc -= adjust;
+
+      if (read_memory_nobpt (pc, (char *) buf, LINUX_SIGTRAMP_LEN) != 0)
+	return 0;
+    }
+
+  if (memcmp (buf, linux_sigtramp_code, LINUX_SIGTRAMP_LEN) != 0)
+    return 0;
+
+  return pc;
+}
+
+/* Return whether PC is in a Linux sigtramp routine.  */
+
+int
+i386_linux_sigtramp (pc)
+     CORE_ADDR pc;
+{
+  return i386_linux_sigtramp_start (pc) != 0;
+}
+
+/* Assuming FRAME is for a Linux sigtramp routine, return the saved
+   program counter.  The Linux kernel will set up a sigcontext
+   structure immediately before the sigtramp routine on the stack.  */
+
+CORE_ADDR
+i386_linux_sigtramp_saved_pc (frame)
+     struct frame_info *frame;
+{
+  CORE_ADDR pc;
+
+  pc = i386_linux_sigtramp_start (frame->pc);
+  if (pc == 0)
+    error ("i386_linux_sigtramp_saved_pc called when no sigtramp");
+  return read_memory_integer ((pc
+			       - LINUX_SIGCONTEXT_SIZE
+			       + LINUX_SIGCONTEXT_PC_OFFSET),
+			      4);
+}
+
+/* Assuming FRAME is for a Linux sigtramp routine, return the saved
+   stack pointer.  The Linux kernel will set up a sigcontext structure
+   immediately before the sigtramp routine on the stack.  */
+
+CORE_ADDR
+i386_linux_sigtramp_saved_sp (frame)
+     struct frame_info *frame;
+{
+  CORE_ADDR pc;
+
+  pc = i386_linux_sigtramp_start (frame->pc);
+  if (pc == 0)
+    error ("i386_linux_sigtramp_saved_sp called when no sigtramp");
+  return read_memory_integer ((pc
+			       - LINUX_SIGCONTEXT_SIZE
+			       + LINUX_SIGCONTEXT_SP_OFFSET),
+			      4);
+}
+
+#endif /* I386_LINUX_SIGTRAMP */
+
 #ifdef STATIC_TRANSFORM_NAME
 /* SunPRO encodes the static variables.  This is not related to C++ mangling,
    it is done for C too.  */

@@ -1327,7 +1327,7 @@ psymtab_to_symtab_1 (pst)
   back_to = make_cleanup (dwarf2_free_tmp_obstack, NULL);
 
   buildsym_init ();
-  make_cleanup ((make_cleanup_func) really_free_pendings, NULL);
+  make_cleanup (really_free_pendings, NULL);
 
   /* read in the comp_unit header  */
   cu_header.length = read_4_bytes (abfd, info_ptr);

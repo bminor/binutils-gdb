@@ -43,9 +43,6 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 
-# Create and source the file that provides information about the compiler
-# used to compile the test case.
-
 if [get_compiler_info ${binfile} "c++"] {
     return -1
 }
@@ -88,6 +85,7 @@ gdb_expect {
   }
 
 
+setup_xfail "hppa*-*-*" CLLbs16901
 send_gdb "ptype foo_instance1\n"
 gdb_expect {
   -re "type = class foo \{.*public:.*int ifoo;.*const char \\*ccpfoo;.*foo\\(int\\);.*foo\\(int, (const char|char const) \\*\\);.*foo\\(foo &\\);.*~foo\\(void\\);.*void foofunc\\(int\\);.*void foofunc\\(int, signed char \\*\\);.*int overload1arg\\(void\\);.*int overload1arg\\(char\\);.*int overload1arg\\(signed char\\);.*int overload1arg\\(unsigned char\\);.*int overload1arg\\(short\\);.*int overload1arg\\(unsigned short\\);.*int overload1arg\\(int\\);.*int overload1arg\\(unsigned int\\);.*int overload1arg\\(long\\);.*int overload1arg\\(unsigned long\\);.*int overload1arg\\(float\\);.*int overload1arg\\(double\\);.*int overloadargs\\(int\\);.*int overloadargs\\(int, int\\);.*int overloadargs\\(int, int, int\\);.*int overloadargs\\(int, int, int, int\\);.*int overloadargs\\(int, int, int, int, int\\);.*int overloadargs\\(int, int, int, int, int, int\\);.*int overloadargs\\(int, int, int, int, int, int, int\\);.*int overloadargs\\(int, int, int, int, int, int, int, int\\);.*int overloadargs\\(int, int, int, int, int, int, int, int, int\\);.*int overloadargs\\(int, int, int, int, int, int, int, int, int, int\\);.*int overloadargs\\(int, int, int, int, int, int, int, int, int, int, int\\);\r\n\}\r\n$gdb_prompt $" {
@@ -123,8 +121,8 @@ gdb_expect {
 # work right for G++ output, since the list of parameters seems not to
 # be filled in correctly.  Until this gets fixed, don't expect to pass
 # these tests.
-if {$gcc_compiled} then { setup_xfail "*-*-*" }
 
+setup_xfail "*-*-*" CLLbs16901
 send_gdb "print foo_instance1.overloadargs(1)\n"
 gdb_expect {
     -re ".\[0-9\]* = 1\r\n$gdb_prompt $" {
@@ -135,7 +133,7 @@ gdb_expect {
   }
 
 
-if {$gcc_compiled} then { setup_xfail "*-*-*" }
+setup_xfail "*-*-*" CLLbs16901
 
 send_gdb "print foo_instance1.overloadargs(1, 2)\n"
 gdb_expect {
@@ -147,7 +145,7 @@ gdb_expect {
   }
 
 
-if {$gcc_compiled} then { setup_xfail "*-*-*" }
+setup_xfail "*-*-*" CLLbs16901
 
 send_gdb "print foo_instance1.overloadargs(1, 2, 3)\n"
 gdb_expect {
@@ -159,7 +157,7 @@ gdb_expect {
   }
 
 
-if {$gcc_compiled} then { setup_xfail "*-*-*" }
+setup_xfail "*-*-*" CLLbs16901
 
 send_gdb "print foo_instance1.overloadargs(1, 2, 3, 4)\n"
 gdb_expect {
@@ -171,7 +169,7 @@ gdb_expect {
   }
 
 
-if {$gcc_compiled} then { setup_xfail "*-*-*" }
+setup_xfail "*-*-*" CLLbs16901
 
 send_gdb "print foo_instance1.overloadargs(1, 2, 3, 4, 5)\n"
 gdb_expect {
@@ -183,7 +181,7 @@ gdb_expect {
   }
 
 
-if {$gcc_compiled} then { setup_xfail "*-*-*" }
+setup_xfail "*-*-*" CLLbs16901
 
 send_gdb "print foo_instance1.overloadargs(1, 2, 3, 4, 5, 6)\n"
 gdb_expect {
@@ -195,7 +193,7 @@ gdb_expect {
   }
 
 
-if {$gcc_compiled} then { setup_xfail "*-*-*" }
+setup_xfail "*-*-*" CLLbs16901
 
 send_gdb "print foo_instance1.overloadargs(1, 2, 3, 4, 5, 6, 7)\n"
 gdb_expect {
@@ -207,7 +205,7 @@ gdb_expect {
   }
 
 
-if {$gcc_compiled} then { setup_xfail "*-*-*" }
+setup_xfail "*-*-*" CLLbs16901
 
 send_gdb "print foo_instance1.overloadargs(1, 2, 3, 4, 5, 6, 7, 8)\n"
 gdb_expect {
@@ -219,7 +217,7 @@ gdb_expect {
   }
 
 
-if {$gcc_compiled} then { setup_xfail "*-*-*" }
+setup_xfail "*-*-*" CLLbs16901
 
 send_gdb "print foo_instance1.overloadargs(1, 2, 3, 4, 5, 6, 7, 8, 9)\n"
 gdb_expect {
@@ -231,7 +229,7 @@ gdb_expect {
   }
 
 
-if {$gcc_compiled} then { setup_xfail "*-*-*" }
+setup_xfail "*-*-*" CLLbs16901
 
 send_gdb "print foo_instance1.overloadargs(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)\n"
 gdb_expect {
@@ -243,7 +241,7 @@ gdb_expect {
   }
 
 
-if {$gcc_compiled} then { setup_xfail "*-*-*" }
+setup_xfail "*-*-*" CLLbs16901
 
 send_gdb "print foo_instance1.overloadargs(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)\n"
 gdb_expect {
@@ -255,7 +253,7 @@ gdb_expect {
   }
 
 
-if {$gcc_compiled} then { setup_xfail "*-*-*" }
+setup_xfail "*-*-*" CLLbs16901
 
 send_gdb "print foo_instance1.overload1arg()\n"
 gdb_expect {
@@ -267,7 +265,7 @@ gdb_expect {
   }
 
 
-if {$gcc_compiled} then { setup_xfail "*-*-*" }
+setup_xfail "*-*-*" CLLbs16901
 
 send_gdb "print foo_instance1.overload1arg((char)arg2)\n"
 gdb_expect {
@@ -279,7 +277,7 @@ gdb_expect {
   }
 
 
-if {$gcc_compiled} then { setup_xfail "*-*-*" }
+setup_xfail "*-*-*" CLLbs16901
 
 send_gdb "print foo_instance1.overload1arg((signed char)arg3)\n"
 gdb_expect {
@@ -291,7 +289,7 @@ gdb_expect {
   }
 
 
-if {$gcc_compiled} then { setup_xfail "*-*-*" }
+setup_xfail "*-*-*" CLLbs16901
 
 send_gdb "print foo_instance1.overload1arg((unsigned char)arg4)\n"
 gdb_expect {
@@ -303,7 +301,7 @@ gdb_expect {
   }
 
 
-if {$gcc_compiled} then { setup_xfail "*-*-*" }
+setup_xfail "*-*-*" CLLbs16901
 
 send_gdb "print foo_instance1.overload1arg((short)arg5)\n"
 gdb_expect {
@@ -315,7 +313,7 @@ gdb_expect {
   }
 
 
-if {$gcc_compiled} then { setup_xfail "*-*-*" }
+setup_xfail "*-*-*" CLLbs16901
 
 send_gdb "print foo_instance1.overload1arg((unsigned short)arg6)\n"
 gdb_expect {
@@ -327,7 +325,7 @@ gdb_expect {
   }
 
 
-if {$gcc_compiled} then { setup_xfail "*-*-*" }
+setup_xfail "*-*-*" CLLbs16901
 
 send_gdb "print foo_instance1.overload1arg((int)arg7)\n"
 gdb_expect {
@@ -339,7 +337,7 @@ gdb_expect {
   }
 
 
-if {$gcc_compiled} then { setup_xfail "*-*-*" }
+setup_xfail "*-*-*" CLLbs16901
 
 send_gdb "print foo_instance1.overload1arg((unsigned int)arg8)\n"
 gdb_expect {
@@ -351,7 +349,7 @@ gdb_expect {
   }
 
 
-if {$gcc_compiled} then { setup_xfail "*-*-*" }
+setup_xfail "*-*-*" CLLbs16901
 
 send_gdb "print foo_instance1.overload1arg((long)arg9)\n"
 gdb_expect {
@@ -363,7 +361,7 @@ gdb_expect {
   }
 
 
-if {$gcc_compiled} then { setup_xfail "*-*-*" }
+setup_xfail "*-*-*" CLLbs16901
 
 send_gdb "print foo_instance1.overload1arg((unsigned long)arg10)\n"
 gdb_expect {
@@ -375,7 +373,7 @@ gdb_expect {
   }
 
 
-if {$gcc_compiled} then { setup_xfail "*-*-*" }
+setup_xfail "*-*-*" CLLbs16901
 
 send_gdb "print foo_instance1.overload1arg((float)arg11)\n"
 gdb_expect {
@@ -387,7 +385,7 @@ gdb_expect {
   }
 
 
-if {$gcc_compiled} then { setup_xfail "*-*-*" }
+setup_xfail "*-*-*" CLLbs16901
 
 send_gdb "print foo_instance1.overload1arg((double)arg12)\n"
 gdb_expect {

@@ -36,7 +36,7 @@ public:
   void  operator ||     (foo&);
   void  operator ~      (void);
   void  operator --     (int);
-  void  operator ->     (void);
+  foo*  operator ->     (void);
   void  operator -=     (foo&);
   void  operator /=     (foo&);
   void  operator <<=    (foo&);
@@ -63,7 +63,7 @@ extern "C" {
 };
 #endif
 
-main () {
+int main () {
 #ifdef usestubs
    set_debug_traps();
    breakpoint();
@@ -105,7 +105,7 @@ void  foo::operator ^      (foo& afoo) { afoo.ifoo = 0; }
 void  foo::operator ||     (foo& afoo) { afoo.ifoo = 0; }
 void  foo::operator ~      (void) {}
 void  foo::operator --     (int ival) { ival = 0; }
-void  foo::operator ->     (void) {}
+foo*  foo::operator ->     (void) {return this;}
 void  foo::operator -=     (foo& afoo) { afoo.ifoo = 0; }
 void  foo::operator /=     (foo& afoo) { afoo.ifoo = 0; }
 void  foo::operator <<=    (foo& afoo) { afoo.ifoo = 0; }

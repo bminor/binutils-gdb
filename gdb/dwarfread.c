@@ -2456,8 +2456,7 @@ psymtab_to_symtab_1 (pst)
 	  if (DBLENGTH (pst))	/* Otherwise it's a dummy */
 	    {
 	      buildsym_init ();
-	      old_chain = make_cleanup ((make_cleanup_func)
-					really_free_pendings, 0);
+	      old_chain = make_cleanup (really_free_pendings, 0);
 	      read_ofile_symtab (pst);
 	      if (info_verbose)
 		{

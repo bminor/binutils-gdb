@@ -127,9 +127,9 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
-gdb_test "set print sevenbit-strings" "" ""
-gdb_test "set print address off" "" ""
-gdb_test "set width 0" "" ""
+gdb_test "set print sevenbit-strings" ""
+gdb_test "set print address off" ""
+gdb_test "set width 0" ""
 
 if [target_info exists gdb,cannot_call_functions] {
     setup_xfail "*-*-*" 2416

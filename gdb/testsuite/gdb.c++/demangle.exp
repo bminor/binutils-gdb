@@ -54,11 +54,11 @@ proc set_demangling_style {style} {
 	    pass "$style: check demangling style"
 	}
 	-re ".*$gdb_prompt $" {
-	    fail "gnu: check demangling style"
+	    fail "$style: check demangling style"
 	    error "set_demangling_style: check style"
 	}
 	timeout { 
-	    fail "gnu: check demangling style (timeout)" 
+	    fail "$style: check demangling style (timeout)" 
 	    error "set_demangling_style: check style"
 	}
     }

@@ -79,9 +79,9 @@ proc initialize {} {
 
 
     # ??rehrauer: To fix DTS #CHFts23014, in which setting a watchpoint
-    # before running can cause the inferior to croak on HP-UX 10.30 and
-    # 11.0 for reasons as yet unknown, we've disabled the ability to set
-    # watches without a running inferior.  Verify the restriction.
+    # before running can cause the inferior to croak on HP-UX 11.0 for
+    # reasons yet unknown, we've disabled the ability to set watches
+    # without a running inferior.  Verify the restriction. 
     #
     send_gdb "watch ival3\n"
     gdb_expect {
@@ -157,8 +157,8 @@ proc test_simple_watchpoint {} {
 
     if { !$wp_set } {
 	# ??rehrauer: To fix DTS #CHFts23014, in which setting a watchpoint
-	# before running can cause the inferior to croak on HP-UX 10.30 and
-	# 11.0 for reasons as yet unknown, we've disabled the ability to set
+	# before running can cause the inferior to croak on HP-UX 11.0
+	# for reasons yet unknown, we've disabled the ability to set 
 	# watches without a running inferior.  The following testpoints used
 	# to be in [initialize].
 	#

@@ -134,10 +134,11 @@ typedef struct
   {
     struct minimal_symbol *msym;
     CORE_ADDR solib_handle;
+    CORE_ADDR return_val;
   }
 args_for_find_stub;
 
-static CORE_ADDR cover_find_stub_with_shl_get PARAMS ((args_for_find_stub *));
+static int cover_find_stub_with_shl_get (PTR);
 
 static int is_pa_2 = 0;		/* False */
 
@@ -1914,13 +1915,13 @@ find_stub_with_shl_get (function, handle)
 }
 
 /* Cover routine for find_stub_with_shl_get to pass to catch_errors */
-static CORE_ADDR
-cover_find_stub_with_shl_get (args)
-     args_for_find_stub *args;
+static int
+cover_find_stub_with_shl_get (PTR args_untyped)
 {
-  return find_stub_with_shl_get (args->msym, args->solib_handle);
+  args_for_find_stub *args = args_untyped;
+  args->return_val = find_stub_with_shl_get (args->msym, args->solib_handle);
+  return 0;
 }
-
 
 /* Insert the specified number of args and function address
    into a call sequence of the above form stored at DUMMYNAME.
@@ -2519,7 +2520,7 @@ pa_print_registers (raw_regs, regnum, fpregs)
   /* Alas, we are compiled so that "long long" is 32 bits */
   long raw_val[2];
   long long_val;
-  int rows = 24, columns = 3;
+  int rows = 48, columns = 2;
 
   for (i = 0; i < rows; i++)
     {
@@ -2540,17 +2541,18 @@ pa_print_registers (raw_regs, regnum, fpregs)
 	      /* Being big-endian, on this machine the low bits
 	         (the ones we want to look at) are in the second longword. */
 	      long_val = extract_signed_integer (&raw_val[1], 4);
-	      printf_filtered ("%8.8s: %8x",
+	      printf_filtered ("%10.10s: %8x   ",
 			       REGISTER_NAME (regnum), long_val);
 	    }
 	  else
 	    {
 	      /* raw_val = extract_signed_integer(&raw_val, 8); */
 	      if (raw_val[0] == 0)
-		printf_filtered ("%8.8s:         %8x",
+		printf_filtered ("%10.10s:         %8x   ",
 				 REGISTER_NAME (regnum), raw_val[1]);
 	      else
-		printf_filtered ("%8.8s: %8x%8.8x", REGISTER_NAME (regnum),
+		printf_filtered ("%10.10s: %8x%8.8x   ",
+				 REGISTER_NAME (regnum),
 				 raw_val[0], raw_val[1]);
 	    }
 	}
@@ -3886,17 +3888,17 @@ int hp_cxx_exception_support_initialized = 0;
 /* Similar to above, but imported from breakpoint.c -- non-target-specific */
 extern int exception_support_initialized;
 /* Address of __eh_notify_hook */
-static CORE_ADDR eh_notify_hook_addr = NULL;
+static CORE_ADDR eh_notify_hook_addr = 0;
 /* Address of __d_eh_notify_callback */
-static CORE_ADDR eh_notify_callback_addr = NULL;
+static CORE_ADDR eh_notify_callback_addr = 0;
 /* Address of __d_eh_break */
-static CORE_ADDR eh_break_addr = NULL;
+static CORE_ADDR eh_break_addr = 0;
 /* Address of __d_eh_catch_catch */
-static CORE_ADDR eh_catch_catch_addr = NULL;
+static CORE_ADDR eh_catch_catch_addr = 0;
 /* Address of __d_eh_catch_throw */
-static CORE_ADDR eh_catch_throw_addr = NULL;
+static CORE_ADDR eh_catch_throw_addr = 0;
 /* Sal for __d_eh_break */
-static struct symtab_and_line *break_callback_sal = NULL;
+static struct symtab_and_line *break_callback_sal = 0;
 
 /* Code in end.c expects __d_pid to be set in the inferior,
    otherwise __d_eh_notify_callback doesn't bother to call
@@ -4049,11 +4051,12 @@ initialize_hp_cxx_exception_support ()
 
       args.solib_handle = som_solib_get_solib_by_pc (eh_notify_callback_addr);
       args.msym = msym;
+      args.return_val = 0;
 
       recurse++;
-      eh_notify_callback_addr = catch_errors ((int (*)PARAMS ((char *))) cover_find_stub_with_shl_get,
-					      (char *) &args,
-					      message, RETURN_MASK_ALL);
+      catch_errors (cover_find_stub_with_shl_get, (PTR) &args, message,
+		    RETURN_MASK_ALL);
+      eh_notify_callback_addr = args.return_val;
       recurse--;
 
       exception_catchpoints_are_fragile = 1;

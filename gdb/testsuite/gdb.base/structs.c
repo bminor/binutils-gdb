@@ -102,68 +102,120 @@ struct struct16 fun16()
   return foo16; 
 }
 
+#ifdef PROTOTYPES
+void Fun1(struct struct1 foo1)
+#else
 void Fun1(foo1)
      struct struct1 foo1;
+#endif
 {
   L1 = foo1;
 }
+#ifdef PROTOTYPES
+void Fun2(struct struct2 foo2)
+#else
 void Fun2(foo2)
      struct struct2 foo2;
+#endif
 {
   L2 = foo2;
 }
+#ifdef PROTOTYPES
+void Fun3(struct struct3 foo3)
+#else
 void Fun3(foo3)
      struct struct3 foo3;
+#endif
 {
   L3 = foo3;
 }
+#ifdef PROTOTYPES
+void Fun4(struct struct4 foo4)
+#else
 void Fun4(foo4)
      struct struct4 foo4;
+#endif
 {
   L4 = foo4;
 }
+#ifdef PROTOTYPES
+void Fun5(struct struct5 foo5)
+#else
 void Fun5(foo5)
      struct struct5 foo5;
+#endif
 {
   L5 = foo5;
 }
+#ifdef PROTOTYPES
+void Fun6(struct struct6 foo6)
+#else
 void Fun6(foo6)
      struct struct6 foo6;
+#endif
 {
   L6 = foo6;
 }
+#ifdef PROTOTYPES
+void Fun7(struct struct7 foo7)
+#else
 void Fun7(foo7)
      struct struct7 foo7;
+#endif
 {
   L7 = foo7;
 }
+#ifdef PROTOTYPES
+void Fun8(struct struct8 foo8)
+#else
 void Fun8(foo8)
      struct struct8 foo8;
+#endif
 {
   L8 = foo8;
 }
+#ifdef PROTOTYPES
+void Fun9(struct struct9 foo9)
+#else
 void Fun9(foo9)
      struct struct9 foo9;
+#endif
 {
   L9 = foo9;
 }
+#ifdef PROTOTYPES
+void Fun10(struct struct10 foo10)
+#else
 void Fun10(foo10)
      struct struct10 foo10;
+#endif
 {
   L10 = foo10; 
 }
+#ifdef PROTOTYPES
+void Fun11(struct struct11 foo11)
+#else
 void Fun11(foo11)
      struct struct11 foo11;
+#endif
 {
   L11 = foo11; 
 }
+#ifdef PROTOTYPES
+void Fun12(struct struct12 foo12)
+#else
 void Fun12(foo12)
      struct struct12 foo12;
+#endif
 {
   L12 = foo12; 
 }
+#ifdef PROTOTYPES
+void Fun16(struct struct16 foo16)
+#else
 void Fun16(foo16)
      struct struct16 foo16;
+#endif
 {
   L16 = foo16; 
 }

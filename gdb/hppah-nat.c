@@ -209,7 +209,7 @@ child_xfer_memory (memaddr, myaddr, len, write, target)
 {
   register int i;
   /* Round starting address down to longword boundary.  */
-  register CORE_ADDR addr = memaddr & -sizeof (int);
+  register CORE_ADDR addr = memaddr & - (CORE_ADDR)(sizeof (int));
   /* Round ending address up; get number of longwords that makes.  */
   register int count
   = (((memaddr + len) - addr) + sizeof (int) - 1) / sizeof (int);

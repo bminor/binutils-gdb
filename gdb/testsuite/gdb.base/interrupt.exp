@@ -110,7 +110,7 @@ if ![file exists $binfile] then {
 		# terminates the program. A defect is pending on this
 		# issue [defect #DTS CHFts24203]. Hence calling setup_xfail
 		# below.
-	        setup_xfail "hppa*-*-*11*"
+	        setup_xfail "hppa*-*-*11*" CHFts24203
 		fail "call function when asleep (wrong output)"
 	    }
 	    default {

@@ -34,6 +34,10 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 
+if {[get_compiler_info $binfile "c++"] == -1} {
+    return -1
+}
+
 #
 #  Cause gdb to lookup a specific C++ function and print the demangled
 #  form.
@@ -44,7 +48,10 @@ proc info_func { regex demangled } {
 
     send_gdb "info function $regex\n"
     gdb_expect {
-	-re "File .*:\r\n$demangled\r\n$gdb_prompt $" {
+	-re "File .*:\r\n$demangled\r\n.*$gdb_prompt $" {
+	    pass "info function for \"$regex\""
+	}
+	-re "File .*:\r\nclass $demangled\r\n.*$gdb_prompt $" {
 	    pass "info function for \"$regex\""
 	}
 	-re ".*$gdb_prompt $" {
@@ -125,7 +132,7 @@ proc test_lookup_operator_functions {} {
     info_func "operator,("  "void foo::operator,\\(foo &\\);"
 
     info_func "operator~("  "void foo::operator~\\(void\\);"
-    info_func "operator delete("  "void foo::operator delete\\(void \\*\\);"
+    info_func "operator delete("  "void foo::operator delete\\(void \\*\\)(| static);"
     info_func "operator/("  "void foo::operator/\\(foo &\\);"
     info_func "operator==("  "void foo::operator==\\(foo &\\);"
     info_func "operator^("  "void foo::operator\\^\\(foo &\\);"
@@ -146,14 +153,14 @@ proc test_lookup_operator_functions {} {
     info_func "operator--("  "void foo::operator--\\(int\\);"
     info_func "operator!=("  "void foo::operator!=\\(foo &\\);"
     info_func "operator!("  "void foo::operator!\\(void\\);"
-    info_func "operator new("  "void \\*foo::operator new\\(.*\\);"
+    info_func "operator new("  "void \\*foo::operator new\\(.*\\)(| static);"
     info_func "operator||("  "void foo::operator\\|\\|\\(foo &\\);"
     info_func "operator char \\*("  "char \\*foo::operator char \\*\\(void\\);"
     info_func "operator int("  "int foo::operator int\\(void\\);"
     info_func "operator|("  "void foo::operator\\|\\(foo &\\);"
     info_func "operator+("  "void foo::operator\\+\\(foo &\\);"
     info_func "operator++("  "void foo::operator\\+\\+\\(int\\);"
-    info_func "operator->("  "void foo::operator->\\(void\\);"
+    info_func "operator->("  "foo \\*foo::operator->\\(void\\);"
     info_func "operator->\\*("  "void foo::operator->\\*\\(foo &\\);"
     info_func "operator>>("  "void foo::operator\>\>\\(foo &\\);"
 
@@ -167,6 +174,7 @@ proc test_lookup_operator_functions {} {
 
 proc test_paddr_operator_functions {} {
     global hex
+    global hp_aCC_compiler
 
     print_addr_of "foo::operator&&(foo &)"
     print_addr_of "foo::operator&=(foo &)"
@@ -184,7 +192,12 @@ proc test_paddr_operator_functions {} {
     print_addr_of "foo::operator()(foo &)"
     print_addr_of "foo::operator, (foo &)"
     print_addr_of "foo::operator~(void)"
-    print_addr_of "foo::operator delete(void *)"
+    if { !$hp_aCC_compiler } {
+	print_addr_of "foo::operator delete(void *)"
+    } else {
+	gdb_test "print &'foo::operator delete(void *) static'" \
+	    " = .*(0x\[0-9a-f\]+|) <foo::operator delete.*>"
+    }
     print_addr_of "foo::operator/(foo &)"
     print_addr_of "foo::operator==(foo &)"
     print_addr_of "foo::operator^(foo &)"
@@ -200,7 +213,7 @@ proc test_paddr_operator_functions {} {
     print_addr_of "foo::operator!=(foo &)"
     print_addr_of "foo::operator!(void)"
     gdb_test "print &'foo::operator new'" \
-	" = .* $hex <foo::operator new\\(.*\\)>"
+	" = .* $hex <foo::operator new\\(.*\\)(| static)>"
     print_addr_of "foo::operator||(foo &)"
     print_addr_of "foo::operator char *(void)"
     print_addr_of "foo::operator int(void)"

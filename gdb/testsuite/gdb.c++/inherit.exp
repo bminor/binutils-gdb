@@ -43,15 +43,6 @@ if [get_compiler_info ${binfile} "c++"] {
     return -1
 }
 
-# if we are on HPUX and we are not compiled with gcc, then skip these tests.
-
-if [istarget hppa*-*-hpux*] {
-    if {!$gcc_compiled} {
-	continue 
-    }
-}
-
-
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug c++}] != "" } {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
@@ -120,6 +111,7 @@ proc test_ptype_si {} {
     global gdb_prompt
     global ws
     global nl
+    global hp_aCC_compiler
 
     # Print class A as a type.
 
@@ -144,7 +136,7 @@ proc test_ptype_si {} {
 	    pass "ptype class A (FIXME)"
 	}
 	-re "type = struct A \{$nl\[ \]*int a;$nl\[ \]*int x;$nl\[ \]*\}$nl$gdb_prompt $" {
-	    setup_xfail "*-*-*"
+            if {!$hp_aCC_compiler} {setup_xfail "*-*-*"}
 	    fail "ptype class A (FIXME)"
 	}
 	-re ".*$gdb_prompt $" { fail "ptype class A" }
@@ -159,7 +151,7 @@ proc test_ptype_si {} {
 	    pass "ptype g_A (FIXME)"
 	}
 	-re "type = struct A \{$nl\[ \]*int a;$nl\[ \]*int x;$nl\[ \]*\}$nl$gdb_prompt $" {
-	    setup_xfail "*-*-*"
+            if {!$hp_aCC_compiler} {setup_xfail "*-*-*"}
 	    fail "ptype g_A (FIXME)"
 	}
 	-re ".*$gdb_prompt $" { fail "ptype g_A" }
@@ -243,12 +235,12 @@ proc test_print_si_classes {} {
     # Print all members of g_B.
 
     setup_xfail_format "DWARF 1"
-    gdb_test "print g_B" ".* = \{\<A\> = \{a = 3, x = 4\}, b = 5, x = 6\}" "print g_B"
+    gdb_test "print g_B" ".* = \{\<(class |)A\> = \{a = 3, x = 4\}, b = 5, x = 6\}" "print g_B"
 
     # Print all members of g_C.
 
     setup_xfail_format "DWARF 1"
-    gdb_test "print g_C" ".* = \{\<A\> = \{a = 7, x = 8\}, c = 9, x = 10\}" "print g_C"
+    gdb_test "print g_C" ".* = \{\<(class |)A\> = \{a = 7, x = 8\}, c = 9, x = 10\}" "print g_C"
 }
 
 #
@@ -270,10 +262,10 @@ proc test_print_anon_union {} {
     setup_xfail_format "DWARF 1"
     send_gdb "print g_anon_union\n"
     gdb_expect {
-	-re ".* = \{one = 1,  = \{a = 2, b = 2\}\}$nl$gdb_prompt $" {
+	-re ".* = \{one = 1, ( = |)\{a = 2, b = 2\}\}$nl$gdb_prompt $" {
 	    pass "print variable of type anonymous union"
 	}
-	-re ".* = .*\{one = 1,  = \{a = 2, b = .*\}\}$nl$gdb_prompt $" {
+	-re ".* = .*\{one = 1, ( = |)\{a = 2, b = .*\}\}$nl$gdb_prompt $" {
 	    pass "print variable of type anonymous union (obsolete gcc or gdb)"
 	}
 	-re ".*$nl$gdb_prompt $" {
@@ -308,6 +300,7 @@ proc test_print_anon_union {} {
 proc test_print_mi_members {} {
     global gdb_prompt
     global nl
+    global hp_aCC_compiler
 
     # Print all members of g_A.
 
@@ -341,13 +334,19 @@ proc test_print_mi_members {} {
     # For now, accept gdb's behavior as an expected failure if it
     # simply prints either member correctly.
 
-    setup_xfail "*-*-*"
+    if {!$hp_aCC_compiler} {setup_xfail "*-*-*"}
     send_gdb "print g_D.A::a\n"
-    gdb_expect {
-	-re ".* = 11$nl$gdb_prompt $" {
-	    fail "print g_D.A::a (FIXME)"
+    gdb_expect {	
+	-re "warning: A ambiguous; using D::C::A. Use a cast to disambiguate.$nl\\$\[0-9\]* = 15$nl$gdb_prompt $" {
+	    pass "print g_D.A::a"
+	}
+	-re "warning: A ambiguous; using D::B::A. Use a cast to disambiguate.$nl\\$\[0-9\]* = 11$nl$gdb_prompt $" {
+	    pass "print g_D.A::a (using B)"
 	}
 	-re ".* = 15$nl$gdb_prompt $" {
+	    fail "print g_D.A::a (FIXME)"
+	}
+	-re ".* = 11$nl$gdb_prompt $" {
 	    fail "print g_D.A::a (FIXME)"
 	}
 	-re ".*$gdb_prompt $" { fail "print g_D.A::a" }
@@ -358,13 +357,19 @@ proc test_print_mi_members {} {
     # For now, accept gdb's behavior as an expected failure if it
     # simply prints either member correctly.
 
-    setup_xfail "*-*-*"
+    if {!$hp_aCC_compiler} {setup_xfail "*-*-*"}
     send_gdb "print g_D.A::x\n"
     gdb_expect {
-	-re ".* = 12$nl$gdb_prompt $" {
-	    fail "print g_D.A::x (FIXME)"
+	-re "warning: A ambiguous; using D::C::A. Use a cast to disambiguate.$nl\\$\[0-9\]* = 16$nl$gdb_prompt $" {
+	    pass "print g_D.A::x"
+	}
+	-re "warning: A ambiguous; using D::B::A. Use a cast to disambiguate.$nl\\$\[0-9\]* = 12$nl$gdb_prompt $" {
+	    pass "print g_D.A::x (using B)"
 	}
 	-re ".* = 16$nl$gdb_prompt $" {
+	    fail "print g_D.A::x (FIXME)"
+	}
+	-re ".* = 12$nl$gdb_prompt $" {
 	    fail "print g_D.A::x (FIXME)"
 	}
 	-re ".*$gdb_prompt $" { fail "print g_D.A::x" }
@@ -408,13 +413,19 @@ proc test_print_mi_members {} {
     # For now, accept gdb's behavior as an expected failure if it
     # simply prints either member correctly.
 
-    setup_xfail "*-*-*"
+    if {!$hp_aCC_compiler} {setup_xfail "*-*-*"}
     send_gdb "print g_E.A::x\n"
     gdb_expect {
-	-re ".* = 22$nl$gdb_prompt $" {
-	    fail "print g_E.A::x (FIXME)"
+	-re "warning: A ambiguous; using E::D::C::A. Use a cast to disambiguate.$nl\\$\[0-9\]* = 26$nl$gdb_prompt $" {
+	    pass "print g_E.A::x"
+	}
+	-re "warning: A ambiguous; using E::D::B::A. Use a cast to disambiguate.$nl\\$\[0-9\]* = 22$nl$gdb_prompt $" {
+	    pass "print g_E.A::x (using B)"
 	}
 	-re ".* = 26$nl$gdb_prompt $" {
+	    fail "print g_E.A::x (FIXME)"
+	}
+	-re ".* = 22$nl$gdb_prompt $" {
 	    fail "print g_E.A::x (FIXME)"
 	}
 	-re ".*$gdb_prompt $" { fail "print g_E.A::x" }
@@ -474,12 +485,12 @@ proc test_print_mi_classes {} {
     # Print all members of g_D.
 
     setup_xfail_format "DWARF 1"
-    gdb_test "print g_D" ".* = \{\<B\> = \{\<A\> = \{a = 11, x = 12\}, b = 13, x = 14\}, \<C\> = \{\<A\> = \{a = 15, x = 16\}, c = 17, x = 18\}, d = 19, x = 20\}" "print g_D"
+    gdb_test "print g_D" ".* = \{\<(class |)B\> = \{\<(class |)A\> = \{a = 11, x = 12\}, b = 13, x = 14\}, \<(class |)C\> = \{\<(class |)A\> = \{a = 15, x = 16\}, c = 17, x = 18\}, d = 19, x = 20\}" "print g_D"
 
     # Print all members of g_E.
 
     setup_xfail_format "DWARF 1"
-    gdb_test "print g_E" ".* = \{\<D\> = \{\<B\> = \{\<A\> = \{a = 21, x = 22\}, b = 23, x = 24\}, \<C\> = \{\<A\> = \{a = 25, x = 26\}, c = 27, x = 28\}, d = 29, x = 30\}, e = 31, x = 32\}" "print g_E"
+    gdb_test "print g_E" ".* = \{\<(class |)D\> = \{\<(class |)B\> = \{\<(class |)A\> = \{a = 21, x = 22\}, b = 23, x = 24\}, \<(class |)C\> = \{\<(class |)A\> = \{a = 25, x = 26\}, c = 27, x = 28\}, d = 29, x = 30\}, e = 31, x = 32\}" "print g_E"
 }
 
 #
@@ -563,6 +574,7 @@ proc test_print_svi_members {} {
 
 proc test_ptype_vi {} {
     global gdb_prompt
+    global ws
     global nl
 
     # This class does not use any C++-specific features, so it's fine for
@@ -608,22 +620,82 @@ proc test_ptype_vi {} {
     }
 
     setup_xfail_format "DWARF 1"
-    gdb_test "ptype vB" "ptype vB\[\r\n\]+type = class vB : public virtual vA \{$nl  private:$nl\[ \]+vA \[*\]+_vb\[\\\$\.\]+vA;$nl  public:$nl\[ \]+int vb;$nl\[ \]+int vx;$nl.*\}" "ptype vB"
+    send_gdb "ptype vB\n"
+    gdb_expect {
+	-re "ptype vB${nl}type = class vB : public virtual vA \{$nl  private:${ws}vA \[*\]+_vb\[\\\$\.\]+vA;$nl  public:${ws}int vb;${ws}int vx;$nl.*\}$nl$gdb_prompt $" {
+	    pass "ptype vB"
+	}
+	-re "ptype vB${nl}type = class vB : public virtual vA \{$nl  public:${ws}int vb;${ws}int vx;$nl.*\}$nl$gdb_prompt $" {
+	    pass "ptype vB (aCC)"
+	}
+	-re ".*$gdb_prompt $" { fail "ptype vB" }
+	timeout { fail "ptype vB (timeout)" }
+    }
 
     setup_xfail_format "DWARF 1"
-    gdb_test "ptype class vB" "type = class vB : public virtual vA \{$nl\[ \]*private:$nl\[ \]*vA \[*\]+_vb\[\\\$\.\]vA;$nl\[ \]*public:$nl\[ \]*int vb;$nl\[ \]*int vx;$nl.*\}" "ptype class vB"
+    send_gdb "ptype class vB\n"
+    gdb_expect {
+	-re "type = class vB : public virtual vA \{$nl\[ \]*private:$nl\[ \]*vA \[*\]+_vb\[\\\$\.\]vA;$nl\[ \]*public:$nl\[ \]*int vb;$nl\[ \]*int vx;$nl.*\}$nl$gdb_prompt $" {
+	    pass "ptype class vB"
+	}
+	-re "type = class vB : public virtual vA \{$nl\[ \]*public:$nl\[ \]*int vb;$nl\[ \]*int vx;$nl.*\}$nl$gdb_prompt $" {
+	    pass "ptype class vB (aCC)"
+	}
+	-re ".*$gdb_prompt $" { fail "ptype class vB" }
+	timeout { fail "ptype class vB (timeout)" }
+    }
 
     setup_xfail_format "DWARF 1"
-    gdb_test "ptype g_vB" "type = class vB : public virtual vA \{$nl\[ \]*private:$nl\[ \]*vA \[*\]+_vb\[\\\$\.\]vA;$nl\[ \]*public:$nl\[ \]*int vb;$nl\[ \]*int vx;$nl.*\}" "ptype g_vB"
+    send_gdb "ptype g_vB\n"
+    gdb_expect {
+	-re "type = class vB : public virtual vA \{$nl\[ \]*private:$nl\[ \]*vA \[*\]+_vb\[\\\$\.\]vA;$nl\[ \]*public:$nl\[ \]*int vb;$nl\[ \]*int vx;$nl.*\}$nl$gdb_prompt $" {
+	    pass "ptype g_vB"
+	}
+	-re "type = class vB : public virtual vA \{$nl\[ \]*public:$nl\[ \]*int vb;$nl\[ \]*int vx;$nl.*\}$nl$gdb_prompt $" {
+	    pass "ptype g_vB (aCC)"
+	}
+	-re ".*$gdb_prompt $" { fail "ptype g_vB" }
+	timeout { fail "ptype g_vB (timeout)" }
+    }
 
     setup_xfail_format "DWARF 1"
-    gdb_test "ptype vC" "type = class vC : public virtual vA \{$nl\[ \]*private:$nl\[ \]*vA \[*\]+_vb\[\\\$\.\]vA;$nl\[ \]*public:$nl\[ \]*int vc;$nl\[ \]*int vx;$nl.*\}" "ptype vC"
+    send_gdb "ptype vC\n"
+    gdb_expect {
+	-re "type = class vC : public virtual vA \{$nl\[ \]*private:$nl\[ \]*vA \[*\]+_vb\[\\\$\.\]vA;$nl\[ \]*public:$nl\[ \]*int vc;$nl\[ \]*int vx;$nl.*\}$nl$gdb_prompt $" {
+            pass "ptype vC"
+	}
+	-re "type = class vC : public virtual vA \{$nl\[ \]*public:$nl\[ \]*int vc;$nl\[ \]*int vx;$nl.*\}$nl$gdb_prompt $" {
+            pass "ptype vC (aCC)"
+	}
+	-re ".*$gdb_prompt $" { fail "ptype vC" }
+	timeout { fail "ptype vC (timeout)" }
+    }
 
     setup_xfail_format "DWARF 1"
-    gdb_test "ptype class vC" "type = class vC : public virtual vA \{$nl\[ \]*private:$nl\[ \]*vA \[*\]+_vb\[\\\$\.\]vA;$nl\[ \]*public:$nl\[ \]*int vc;$nl\[ \]*int vx;$nl.*\}" "ptype class vC"
+    send_gdb "ptype class vC\n"
+    gdb_expect {
+	-re "type = class vC : public virtual vA \{$nl\[ \]*private:$nl\[ \]*vA \[*\]+_vb\[\\\$\.\]vA;$nl\[ \]*public:$nl\[ \]*int vc;$nl\[ \]*int vx;$nl.*\}$nl$gdb_prompt $" {
+            pass "ptype class vC"
+	}
+	-re "type = class vC : public virtual vA \{$nl\[ \]*public:$nl\[ \]*int vc;$nl\[ \]*int vx;$nl.*\}$nl$gdb_prompt $" {
+            pass "ptype class vC (aCC)"
+	}
+	-re ".*$gdb_prompt $" { fail "ptype class vC" }
+	timeout { fail "ptype class vC (timeout)" }
+    }
 
     setup_xfail_format "DWARF 1"
-    gdb_test "ptype g_vC" "type = class vC : public virtual vA \{$nl\[ \]*private:$nl\[ \]*vA \[*\]+_vb\[\\\$\.\]vA;$nl\[ \]*public:$nl\[ \]*int vc;$nl\[ \]*int vx;$nl.*\}" "ptype g_vC"
+    send_gdb "ptype g_vC\n"
+    gdb_expect {
+	-re "type = class vC : public virtual vA \{$nl\[ \]*private:$nl\[ \]*vA \[*\]+_vb\[\\\$\.\]vA;$nl\[ \]*public:$nl\[ \]*int vc;$nl\[ \]*int vx;$nl.*\}$nl$gdb_prompt $" {
+            pass "ptype g_vC"
+	}
+	-re "type = class vC : public virtual vA \{$nl\[ \]*public:$nl\[ \]*int vc;$nl\[ \]*int vx;$nl.*\}$nl$gdb_prompt $" {
+            pass "ptype g_vC (aCC)"
+	}
+	-re ".*$gdb_prompt $" { fail "ptype g_vC" }
+	timeout { fail "ptype g_vC (timeout)" }
+    }
 }
 
 #
@@ -645,6 +717,12 @@ proc test_print_svi_classes {} {
     setup_xfail_format "DWARF 1"
     send_gdb "print g_vB\n"
     gdb_expect {
+	-re ".* = \{\<class vA\> = \{va = 3, vx = 4\}, vb = 5, vx = 6, Virtual table at $hex\}$nl$gdb_prompt $" {
+           pass "print g_vB (aCC)"
+	}
+	-re ".* = \{\<class vA\> = \{va = 3, vx = 4\}, vb = 5, vx = 6, __vfp = $hex\}$nl$gdb_prompt $" {
+	    pass "print g_vB (aCC)"
+	}
 	-re ".* = \{\<vA\> = \{va = 3, vx = 4\}, _vb\[\\\$\.\]vA = $hex, vb = 5, vx = 6\}$nl$gdb_prompt $" {
 	    pass "print g_vB"
 	}
@@ -661,7 +739,20 @@ proc test_print_svi_classes {} {
     # Print all members of g_vC.
 
     setup_xfail_format "DWARF 1"
-    gdb_test "print g_vC" ".* = \{\<vA\> = \{va = 7, vx = 8\}, _vb\[\\\$\.\]vA = $hex, vc = 9, vx = 10\}" "print g_vC"
+    send_gdb "print g_vC\n"
+    gdb_expect {
+	-re ".* = \{\<class vA\> = \{va = 7, vx = 8\}, vc = 9, vx = 10, Virtual table at $hex\}$nl$gdb_prompt $" {
+	    pass "print g_vC (aCC)"
+	}
+	-re ".* = \{\<class vA\> = \{va = 7, vx = 8\}, vc = 9, vx = 10, __vfp = $hex\}$nl$gdb_prompt $" {
+	    pass "print g_vC (aCC)"
+	}
+	-re ".* = \{\<vA\> = \{va = 7, vx = 8\}, _vb\[\\\$\.\]vA = $hex, vc = 9, vx = 10\}$nl$gdb_prompt $" {
+	    pass "print g_vC"
+	}
+	-re ".*$gdb_prompt $" { fail "print g_vC" }
+	timeout { fail "print g_vC (timeout)" }
+    }
 }
 
 #
@@ -743,25 +834,87 @@ proc test_print_mvi_members {} {
 #
 
 proc test_ptype_mvi {} {
+    global gdb_prompt
+    global ws
     global nl
 
     setup_xfail_format "DWARF 1"
-    gdb_test "ptype vD" "type = class vD : public virtual vB, public virtual vC \{$nl\[ \]*private:$nl\[ \]*vC \[*\]+_vb\[\\\$\.\]vC;$nl\[ \]*vB \[*\]+_vb\[\\\$\.\]vB;$nl\[ \]*public:$nl\[ \]*int vd;$nl\[ \]*int vx;$nl.*\}" "ptype vD"
+    send_gdb "ptype vD\n"
+    gdb_expect {
+	-re "type = class vD : public virtual vB, public virtual vC \{${ws}private:${ws}vC \[*\]+_vb\[\\\$\.\]vC;${ws}vB \[*\]+_vb\[\\\$\.\]vB;${ws}public:${ws}int vd;${ws}int vx;$nl.*\}.*$gdb_prompt $" {
+	    pass "ptype vD"
+	}
+        -re ".*class vD : public virtual vB, public virtual vC \{${ws}public:${ws}int vd;${ws}int vx;.*\}.*$gdb_prompt $" {
+	    pass "ptype vD"
+	}
+	-re ".*$gdb_prompt $" { fail "ptype vD" }
+	timeout { fail "(timeout) ptype vD" }
+    }
 
     setup_xfail_format "DWARF 1"
-    gdb_test "ptype class vD" "type = class vD : public virtual vB, public virtual vC \{$nl\[ \]*private:$nl\[ \]*vC \[*\]+_vb\[\\\$\.\]vC;$nl\[ \]*vB \[*\]+_vb\[\\\$\.\]vB;$nl\[ \]*public:$nl\[ \]*int vd;$nl\[ \]*int vx;$nl.*\}" "ptype class vD"
+    send_gdb "ptype class vD\n"
+    gdb_expect {
+	-re "type = class vD : public virtual vB, public virtual vC \{${ws}private:${ws}vC \[*\]+_vb\[\\\$\.\]vC;${ws}vB \[*\]+_vb\[\\\$\.\]vB;${ws}public:${ws}int vd;${ws}int vx;$nl.*\}.*$gdb_prompt $" {
+	    pass "ptype class vD"
+	}
+	-re ".*class vD : public virtual vB, public virtual vC \{${ws}public:${ws}int vd;${ws}int vx;.*\}.*$gdb_prompt $" {
+	    pass "ptype class vD"
+	}
+	-re ".*$gdb_prompt $" { fail "ptype class vD" }
+	timeout { fail "(timeout) ptype class vD" }
+    }
 
     setup_xfail_format "DWARF 1"
-    gdb_test "ptype g_vD" "type = class vD : public virtual vB, public virtual vC \{$nl\[ \]*private:$nl\[ \]*vC \[*\]+_vb\[\\\$\.\]vC;$nl\[ \]*vB \[*\]+_vb\[\\\$\.\]vB;$nl\[ \]*public:$nl\[ \]*int vd;$nl\[ \]*int vx;$nl.*\}" "ptype g_vD"
+    send_gdb "ptype g_vD\n"
+    gdb_expect {
+	-re "type = class vD : public virtual vB, public virtual vC \{${ws}private:${ws}vC \[*\]+_vb\[\\\$\.\]vC;${ws}vB \[*\]+_vb\[\\\$\.\]vB;${ws}public:${ws}int vd;${ws}int vx;$nl.*\}.*$gdb_prompt $" {
+	    pass "ptype g_vD"
+	}
+	-re ".*class vD : public virtual vB, public virtual vC \{${ws}public:${ws}int vd;${ws}int vx;\r\n.*\}.*$gdb_prompt $" {
+	    pass "ptype g_vD"
+	}
+	-re ".*$gdb_prompt $" { fail "ptype g_vD" }
+	timeout { fail "(timeout) ptype g_vD" }
+    }
 
     setup_xfail_format "DWARF 1"
-    gdb_test "ptype vE" "type = class vE : public virtual vD \{$nl\[ \]*private:$nl\[ \]*vD \[*\]+_vb\[\\\$\.\]vD;$nl\[ \]*public:$nl\[ \]*int ve;$nl\[ \]*int vx;$nl.*\}" "ptype vE"
+    send_gdb "ptype vE\n"
+    gdb_expect {
+	-re "type = class vE : public virtual vD \{${ws}private:${ws}vD \[*\]+_vb\[\\\$\.\]vD;${ws}public:${ws}int ve;${ws}int vx;$nl.*\}.*$gdb_prompt $" {
+	    pass "ptype vE"
+	}
+	-re ".*class vE : public virtual vD \{${ws}public:${ws}int ve;${ws}int vx;\r\n.*\}.*$gdb_prompt $" {
+	    pass "ptype vE"
+	}
+	-re ".*$gdb_prompt $" { fail "ptype vE" }
+	timeout { fail "(timeout) ptype vE" }
+    }
 
     setup_xfail_format "DWARF 1"
-    gdb_test "ptype class vE" "type = class vE : public virtual vD \{$nl\[ \]*private:$nl\[ \]*vD \[*\]+_vb\[\\\$\.\]vD;$nl\[ \]*public:$nl\[ \]*int ve;$nl\[ \]*int vx;$nl.*\}" "ptype class vE"
+    send_gdb "ptype class vE\n"
+    gdb_expect {
+	-re "type = class vE : public virtual vD \{${ws}private:${ws}vD \[*\]+_vb\[\\\$\.\]vD;${ws}public:${ws}int ve;${ws}int vx;$nl.*\}.*$gdb_prompt $" {
+	    pass "ptype class vE"
+	}
+	-re "type = class vE : public virtual vD \{${ws}public:${ws}int ve;${ws}int vx;\r\n.*\}.*$gdb_prompt $" {
+	    pass "ptype class vE"
+	}
+	-re ".*$gdb_prompt $" { fail "ptype class vE" }
+	timeout { fail "(timeout) ptype class vE" }
+    }
 
     setup_xfail_format "DWARF 1"
-    gdb_test "ptype g_vE" "type = class vE : public virtual vD \{$nl\[ \]*private:$nl\[ \]*vD \[*\]+_vb\[\\\$\.\]vD;$nl\[ \]*public:$nl\[ \]*int ve;$nl\[ \]*int vx;$nl.*\}" "ptype g_vE"
+    send_gdb "ptype g_vE\n"
+    gdb_expect {
+	-re "type = class vE : public virtual vD \{${ws}private:${ws}vD \[*\]+_vb\[\\\$\.\]vD;${ws}public:${ws}int ve;${ws}int vx;$nl.*\}.*$gdb_prompt $" {
+	    pass "ptype g_vE"
+	}
+	-re "type = class vE : public virtual vD \{${ws}public:${ws}int ve;${ws}int vx;\r\n.*\}.*$gdb_prompt $" {
+	    pass "ptype g_vE"
+	}
+	-re ".*$gdb_prompt $" { fail "ptype g_vE" }
+	timeout { fail "(timeout) ptype g_vE" }
+    }
 }
 
 #
@@ -779,6 +932,12 @@ proc test_print_mvi_classes {} {
     setup_xfail_format "DWARF 1"
     send_gdb "print g_vD\n"
     gdb_expect {
+	-re ".* = \{\<class vB\> = \{\<class vA\> = \{va = 19, vx = 20\}, vb = 21, vx = 22, Virtual table at $hex\}, \<class vC\> = \{vc = 23, vx = 24, Virtual table at $hex\}, vd = 25, vx = 26, Virtual table at $hex\}$nl$gdb_prompt $" {
+	    pass "print g_vD (aCC)"
+	}
+	-re ".* = \{\<class vB\> = \{\<class vA\> = \{va = 19, vx = 20\}, vb = 21, vx = 22, __vfp = $hex\}, \<class vC\> = \{vc = 23, vx = 24, __vfp = $hex\}, vd = 25, vx = 26, __vfp = $hex\}$nl$gdb_prompt $" {
+	    pass "print g_vD (aCC)"
+	}
 	-re ".* = \{\<vB\> = \{\<vA\> = \{va = 19, vx = 20\}, _vb\[\\\$\.\]vA = $hex, vb = 21, vx = 22\}, \<vC\> = \{_vb\[\\\$\.\]vA = $hex, vc = 23, vx = 24\}, _vb\[\\\$\.\]vC = $hex, _vb\[\\\$\.\]vB = $hex, vd = 25, vx = 26\}$nl$gdb_prompt $" {
 	    pass "print g_vD"
 	}
@@ -795,7 +954,20 @@ proc test_print_mvi_classes {} {
     # Print all members of g_vE.
 
     setup_xfail_format "DWARF 1"
-    gdb_test "print g_vE" ".* = \{\<vD\> = \{\<vB\> = \{\<vA\> = \{va = 0, vx = 0\}, _vb\[\\\$\.\]vA = $hex, vb = 0, vx = 0\}, \<vC\> = \{_vb\[\\\$\.\]vA = $hex, vc = 0, vx = 0\}, _vb\[\\\$\.\]vC = $hex, _vb\[\\\$\.\]vB = $hex, vd = 0, vx = 0\}, _vb\[\\\$\.\]vD = $hex, ve = 27, vx = 28\}" "print g_vE"
+    send_gdb "print g_vE\n"
+    gdb_expect {
+	-re ".* = \{\<class vD\> = \{\<class vB\> = \{\<class vA\> = \{va = 0, vx = 0\}, vb = 0, vx = 0, Virtual table at $hex\}, \<class vC\> = \{vc = 0, vx = 0, Virtual table at $hex\}, vd = 0, vx = 0, Virtual table at $hex\}, ve = 27, vx = 28, Virtual table at $hex\}$nl$gdb_prompt $" {
+	    pass "print g_vE (aCC)"
+	}
+	-re ".* = \{\<class vD\> = \{\<class vB\> = \{\<class vA\> = \{va = 0, vx = 0\}, vb = 0, vx = 0, __vfp = $hex\}, \<class vC\> = \{vc = 0, vx = 0, __vfp = $hex\}, vd = 0, vx = 0, __vfp = $hex\}, ve = 27, vx = 28, __vfp = $hex\}$nl$gdb_prompt $" {
+	    pass "print g_vE (aCC)"
+	}
+	-re ".* = \{\<vD\> = \{\<vB\> = \{\<vA\> = \{va = 0, vx = 0\}, _vb\[\\\$\.\]vA = $hex, vb = 0, vx = 0\}, \<vC\> = \{_vb\[\\\$\.\]vA = $hex, vc = 0, vx = 0\}, _vb\[\\\$\.\]vC = $hex, _vb\[\\\$\.\]vB = $hex, vd = 0, vx = 0\}, _vb\[\\\$\.\]vD = $hex, ve = 27, vx = 28\}$nl$gdb_prompt $" {
+	    pass "print g_vE"
+	}
+	-re ".*$gdb_prompt $" { fail "print g_vE" }
+	timeout { fail "print g_vE (timeout)" }
+    }
 }
 
 proc do_tests {} {

@@ -347,7 +347,7 @@ os9k_symfile_read (objfile, section_offsets, mainline)
     init_psymbol_list (objfile, DBX_SYMCOUNT (objfile));
 
   free_pending_blocks ();
-  back_to = make_cleanup ((make_cleanup_func) really_free_pendings, 0);
+  back_to = make_cleanup (really_free_pendings, 0);
 
   make_cleanup ((make_cleanup_func) discard_minimal_symbols, 0);
   read_minimal_symbols (objfile, section_offsets);
@@ -1248,7 +1248,7 @@ os9k_psymtab_to_symtab_1 (pst)
       /* Init stuff necessary for reading in symbols */
       stabsread_init ();
       buildsym_init ();
-      old_chain = make_cleanup ((make_cleanup_func) really_free_pendings, 0);
+      old_chain = make_cleanup (really_free_pendings, 0);
 
       /* Read in this file's symbols */
       os9k_read_ofile_symtab (pst);

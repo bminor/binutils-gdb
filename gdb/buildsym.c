@@ -148,7 +148,7 @@ find_symbol_in_list (struct pending *list, char *name, int length)
 
 /* ARGSUSED */
 void
-really_free_pendings (int foo)
+really_free_pendings (PTR dummy)
 {
   struct pending *next, *next1;
 

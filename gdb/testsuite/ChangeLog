@@ -1,3 +1,103 @@
+1999-07-30  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdb.c++/ref-types.cc, gdb.c++/ref-types.exp: Appease doschk
+	by merging in ref-types2 tests.
+	* gdb.c++/ref-types2.cc, gdb.c++/ref-types2.exp: Remove.
+
+	From Jimmy Guo <guo@cup.hp.com> and others at HP:
+	* gdb.c++/Makefile.in: Add standard actions.
+	(EXECUTABLES): Rename from PROGS, update list.
+	* gdb.c++/ambiguous.cc, gdb.c++/ambiguous.exp: Move to here
+	from gdb.hp.
+	* gdb.c++/anon-union.cc: Don't use anonymous struct, make
+	foo and bar locals.
+	* gdb.c++/anon-union.exp: Fix tests to match.
+	* gdb.c++/classes.exp: Run if HP compiler used, add extra
+	expect matches to handle output variations.
+	* gdb.c++/cplusfuncs.cc: Make operator -> return foo *.
+	* gdb.c++/cplusfuncs.exp: Update to match, allow word "class" in
+ 	output, add HP alternatives for new and delete prints.
+	* gdb.c++/ctti.exp, gdb.c++/cttiadd.cc, gdb.c++/cttiadd1.cc,
+ 	gdb.c++/cttiadd2.cc, gdb.c++/cttiadd3.cc: Move here from gdb.hp.
+	* gdb.c++/demangle.exp: Use $style when reporting failure.
+	* gdb.c++/derivation.exp: Add some xfails if GCC-compiled.
+	* gdb.c++/inherit.exp: Run if HP compiler used, add some
+	match alternatives.
+	* gdb.c++/local.exp: Add match alternatives or xfails for HP
+ 	compilers.
+	* gdb.c++/member-ptr.exp: Add xfails for hppa*-*-*.
+	* gdb.c++/method.exp: Add match alternatives.
+	* gdb.c++/misc.cc: Add bool types.
+	* gdb.c++/misc.exp: Add tests for bool types.
+	* gdb.c++/overload.exp: Add xfails.
+	* gdb.c++/templates.cc: Remove bogus arglist init, init fvpchar.
+	* gdb.c++/templates.exp: Run if HP compiler used, add some xfails,
+	add some more template parameter tests (only for HP currently).
+	* gdb.c++/userdef.exp: Add xfails for hppa*-*-*.
+	* gdb.c++/virtfunc.cc: Add return type and value for main.
+	* gdb.c++/virtfunc.exp: Run if HP compiler used, add some
+	match alternatives.
+	
+1999-07-30  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* gdb.base/display.exp: Fix output of 'p/a &&j' test.
+
+1999-07-29  Jim Blandy  <jimb@savonarola.red-bean.com>
+
+	* gdb.base/signals.exp: Don't expect getting a backtrace from
+	within a signal handler to fail on Linux.
+
+1999-07-29  Stan Shebs  <shebs@andros.cygnus.com>
+
+	From Jimmy Guo <guo@cup.hp.com> and others at HP:
+	* lib/gdb.exp: Remove some gratuitious semicolons.
+	(delete_breakpoints): Increase timeout.
+	(gdb_expect): Add -notransfer option.
+	(gdb_test): Use -notransfer option.
+	(get_compiler_info): Add f77 case.
+	(get_compiler): New proc, split out from gdb_preprocess, add f77
+ 	case.
+	(gdb_preprocess): Call get_compiler.
+
+	* gdb.base/Makefile.in (EXECUTABLES): Update the list.
+	* gdb.base/attach.exp, gdb.base/display.exp,
+ 	gdb.base/ending-run.exp, gdb.base/gdbvars.exp,
+ 	gdb.base/long_long.exp, gdb.base/printcmds.exp,
+ 	gdb.base/structs.exp, gdb.base/structs2.exp: Remove or fill in
+ 	third arg to gdb_test.
+	* gdb.base/call-ar-st.exp: Add HP-UX xfail for >10-arg functions.
+	* gdb.base/callfuncs.exp, gdb.base/callfwmall.exp: Remove some
+ 	HP-UX xfails, add others.
+	* gdb.base/completion.exp: Reflect name change of self-test.
+	* gdb.base/condbreak.exp, gdb.base/corefile.exp,
+ 	gdb.base/foll-exec.exp, gdb.base/interrupt.exp,
+ 	gdb.base/ptype.exp, gdb.base/scope.exp, gdb.base/setvar.exp: Note
+ 	HP failure number.
+	* gdb.base/foll-vfork.exp: Loosen matches slightly, remove
+	useless HP-UX 10.30 references.
+	* gdb.base/maint.exp: Loosen matches.
+	* gdb.base/pointers.c (main): Declare more_code.
+	* gdb.base/pointers.exp: Match on output of a `next'.
+	* gdb.base/structs.c: Add prototypes.
+	* gdb.base/watchpoint.exp: Remove HP-UX 10.30 reference.
+	* gdb.base/whatis.exp: Fail for both HP-UX 10.20 and 11.
+
+1999-07-29  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* gdb.base/list.exp: Add tests for repeating 'list <linenum>'
+ 	command.
+
+1999-07-27  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* gdb.c++/annota2.exp: Fix delete breakpoint query testcase.
+	Fix run to main failures. Watchpoint can be hardware watchpoint.
+	
+	* gdb.base/annota1.exp: Clean up some more, in case printf has 
+	debug info.  Deal with lack of signal hanlder info in stack.
+
+        From Jim Kingdon  <kingdon@redhat.com>:
+	* gdb.base/annota1.exp: If printf has debug info, deal with it.
+
 1999-07-19  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* gdb.base/foll-exec.exp, gdb.base/foll-fork.exp,

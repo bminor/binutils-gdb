@@ -850,8 +850,17 @@ sim_store_register (sd,rn,memory,length)
       cpu->fpr_state[rn - FGRIDX] = fmt_uninterpreted;
       if (cpu->register_widths[rn] == 32)
 	{
-	  cpu->fgr[rn - FGRIDX] = T2H_4 (*(unsigned32*)memory);
-	  return 4;
+	  if (length == 8)
+	    {
+	      cpu->fgr[rn - FGRIDX] = 
+		(unsigned32) T2H_8 (*(unsigned64*)memory);
+	      return 8;
+	    }
+	  else
+	    {
+	      cpu->fgr[rn - FGRIDX] = T2H_4 (*(unsigned32*)memory);
+	      return 4;
+	    }
 	}
       else
 	{
@@ -862,8 +871,17 @@ sim_store_register (sd,rn,memory,length)
 
   if (cpu->register_widths[rn] == 32)
     {
-      cpu->registers[rn] = T2H_4 (*(unsigned32*)memory);
-      return 4;
+      if (length == 8)
+	{
+	  cpu->registers[rn] =
+	    (unsigned32) T2H_8 (*(unsigned64*)memory);
+	  return 8;
+	}
+      else
+	{
+	  cpu->registers[rn] = T2H_4 (*(unsigned32*)memory);
+	  return 4;
+	}
     }
   else
     {
@@ -903,8 +921,17 @@ sim_fetch_register (sd,rn,memory,length)
     {
       if (cpu->register_widths[rn] == 32)
 	{
-	  *(unsigned32*)memory = H2T_4 (cpu->fgr[rn - FGRIDX]);
-	  return 4;
+	  if (length == 8)
+	    {
+	      *(unsigned64*)memory =
+		H2T_8 ((unsigned32) (cpu->fgr[rn - FGRIDX]));
+	      return 8;
+	    }
+	  else
+	    {
+	      *(unsigned32*)memory = H2T_4 (cpu->fgr[rn - FGRIDX]);
+	      return 4;
+	    }
 	}
       else
 	{
@@ -915,8 +942,17 @@ sim_fetch_register (sd,rn,memory,length)
 
   if (cpu->register_widths[rn] == 32)
     {
-      *(unsigned32*)memory = H2T_4 ((unsigned32)(cpu->registers[rn]));
-      return 4;
+      if (length == 8)
+	{
+	  *(unsigned64*)memory =
+	    H2T_8 ((unsigned32) (cpu->registers[rn]));
+	  return 8;
+	}
+      else
+	{
+	  *(unsigned32*)memory = H2T_4 ((unsigned32)(cpu->registers[rn]));
+	  return 4;
+	}
     }
   else
     {

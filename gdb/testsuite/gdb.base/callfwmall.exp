@@ -19,7 +19,7 @@
 
 # This file was written by Fred Fish. (fnf@cygnus.com)
 
-# SAME tests as in callfns.exp but here the inferior program does not
+# SAME tests as in callfuncs.exp but here the inferior program does not
 # call malloc.
 
 
@@ -99,6 +99,8 @@ proc set_lang_c {} {
 proc do_function_calls {} {
     global prototypes
     global gcc_compiled
+    global gdb_prompt
+
     # We need to up this because this can be really slow on some boards.
     set timeout 60;
 
@@ -134,13 +136,13 @@ proc do_function_calls {} {
 	# Gcc emits different stabs for the two parameters; the first is
 	# claimed to be a float, the second a double.
 	# dbxout.c in gcc claims this is the desired behavior.
-	setup_xfail "mn10300-*-*" "hppa*-*-*11*"
+	setup_xfail "mn10300-*-*"
 	gdb_test "p t_float_values(3.14159,-2.3765)" " = 1"
-	setup_xfail "mn10300-*-*" "hppa*-*-*11*"
+	setup_xfail "mn10300-*-*"
 	gdb_test "p t_float_values(float_val1,float_val2)" " = 1"
-	setup_xfail "mn10300-*-*" "hppa*-*-*11*"
+	setup_xfail "mn10300-*-*"
 	gdb_test "p t_float_values(3.14159,float_val2)" " = 1"
-	setup_xfail "mn10300-*-*" "hppa*-*-*11*"
+	setup_xfail "mn10300-*-*"
 	gdb_test "p t_float_values(float_val1,-2.3765)" " = 1"
 
 	# Test passing of arguments which might not be widened.
@@ -192,38 +194,14 @@ proc do_function_calls {} {
     setup_xfail "rs6000*-*-*"
     setup_xfail "powerpc*-*-*"
 
-    if {!$gcc_compiled && [istarget hppa*-*-hpux*]} then {
-        send_gdb "p t_func_values(add,func_val2)\n"
-        gdb_expect {
-          -re "You cannot.*ignored.*" {pass "p t_func_values(add,func_val2)"}
-          -re "Program received signal SIGBUS, Bus error.*" {
-            if [istarget hppa*-*-hpux*] {
-                pass "p t_func_values(add,func_val2)"
-            } else {
-                fail "p t_func_values(add,func_val2)"
-            }
-          }
-        }
-    } else {
+    if {![istarget hppa*-*-hpux*]} then {
 	gdb_test "p t_func_values(add,func_val2)" " = 1"
     }
 
     setup_xfail "rs6000*-*-*"
     setup_xfail "powerpc*-*-*"
 
-    if {!$gcc_compiled && [istarget hppa*-*-hpux*]} then {
-        send_gdb "p t_func_values(func_val1,doubleit)\n"
-        gdb_expect {
-          -re "You cannot.*ignored.*" {pass "p t_func_values(func_val1,doubleit)"}
-          -re "Program received signal SIGBUS, Bus error.*" {
-            if [istarget hppa*-*-hpux*] {
-                pass "p t_func_values(func_val1,doubleit)"
-            } else {
-                fail "p t_func_values(func_val1,doubleit)"
-            }
-          }
-        }
-    } else {
+    if {![istarget hppa*-*-hpux*]} then {
 	gdb_test "p t_func_values(func_val1,doubleit)" " = 1"
     }
 
@@ -232,19 +210,7 @@ proc do_function_calls {} {
     setup_xfail "rs6000*-*-*"
     setup_xfail "powerpc*-*-*"
 
-    if {!$gcc_compiled && [istarget hppa*-*-hpux*]} then {
-        send_gdb "p t_call_add(add,3,4)\n"
-        gdb_expect {
-          -re "You cannot.*ignored.*" {pass "p t_call_add(add,3,4)"}
-          -re "Program received signal SIGBUS, Bus error.*" {
-            if [istarget hppa*-*-hpux*] {
-                pass "p t_call_add(add,3,4)"
-            } else {
-                fail "p t_call_add(add,3,4)"
-            }
-          }
-        }
-    } else {
+    if {![istarget hppa*-*-hpux*]} then {
 	gdb_test "p t_call_add(add,3,4)" " = 7"
     }
     

@@ -50,7 +50,9 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
 }
 
-
+if [get_compiler_info $binfile "c++"] {
+  return -1
+}
 
 gdb_exit
 gdb_start
@@ -143,7 +145,20 @@ gdb_expect {
 send_gdb "print this\n"
 gdb_expect {
    -re "\\$\[0-9\]* = \\(const class A \\*\\) $hex\r\n$gdb_prompt $" {
+     global gcc_compiled
+     if {$gcc_compiled} {
+       xfail "print this (in bar)"
+     } else {
        pass "print this (in bar)"
+     }
+   }
+   -re "\\$\[0-9\]* = \\(A \\*\\) $hex\r\n$gdb_prompt $" {
+     global gcc_compiled
+     if {$gcc_compiled} {
+       pass "print this (in bar)"
+     } else {
+       xfail "print this (in bar)"
+     }
    }
    -re ".*$gdb_prompt $" { fail "print this (in bar)" }
    timeout { fail "(timeout) print this (in bar)" }
@@ -209,7 +224,7 @@ gdb_expect {
 
 send_gdb "ptype A\n"
 gdb_expect {
-   -re "type = class A \{\r\n\[ \]*public:\r\n\[ \]*int x;\r\n\[ \]*int y;\r\n\r\n\\[ \]*A & operator=\\(A const &\\);\r\n\[ \]*A\\(A const &\\)\r\n\[ \]*A\\(void\\)\r\n[ \]*int foo\\(int\\);\r\n\[ \]*int bar\\(int\\) const;\r\n\[ \]*int baz\\(int, char\\) volatile;\r\n\[ \]*int qux\\(int, float\\) const volatile;\r\n\}\r\n$gdb_prompt $" {
+   -re "type = class A \{\r\n\[ \]*public:\r\n\[ \]*int x;\r\n\[ \]*int y;\r\n\r\n\[ \]*A & operator=\\(A const &\\);\r\n\[ \]*A\\(A const &\\);\r\n\[ \]*A\\(void\\);\r\n\[ \]*int foo\\(int\\);\r\n\[ \]*int bar\\(int\\) const;\r\n\[ \]*int baz\\(int, char\\) volatile;\r\n\[ \]*int qux\\(int, float\\) const volatile;\r\n\}\r\n$gdb_prompt $" {
       pass "ptype A"
    }
    -re "type = class A \{\r\n\[ \]*public:\r\n\[ \]*int x;\r\n\[ \]*int y;\r\n\r\n\[ \]*int foo\\(int\\);\r\n\[ \]*int bar\\(int\\) const;\r\n\[ \]*int baz\\(int, char\\);\r\n\[ \]*int qux\\(int, float\\) const;\r\n\}\r\n$gdb_prompt $" {

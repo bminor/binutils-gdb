@@ -1403,13 +1403,12 @@ get_process_first_stopped_thread_id (pid, thread_state)
 {
   int tt_status;
 
-  tt_status = call_real_ttrace (
-				 TT_PROC_GET_FIRST_LWP_STATE,
-				 (pid_t) pid,
-				 (lwpid_t) TT_NIL,
-				 (TTRACE_ARG_TYPE) thread_state,
-				 (TTRACE_ARG_TYPE) sizeof (*thread_state),
-				 TT_NIL);
+  tt_status = call_real_ttrace (TT_PROC_GET_FIRST_LWP_STATE,
+				(pid_t) pid,
+				(lwpid_t) TT_NIL,
+				(TTRACE_ARG_TYPE) thread_state,
+				(TTRACE_ARG_TYPE) sizeof (*thread_state),
+				TT_NIL);
 
   if (errno)
     {
@@ -4330,7 +4329,7 @@ thread_fake_step (tid, signal)
   p = find_thread_info (tid);
   if (p != NULL)
     {
-      if (p->have_signal && signal == NULL)
+      if (p->have_signal && signal == TARGET_SIGNAL_0)
 	{
 	  /* Pass on a saved signal.
 	   */
@@ -5874,6 +5873,11 @@ _initialize_infttrace ()
 
   errno = 0;
   memory_page_dictionary.page_size = sysconf (_SC_PAGE_SIZE);
+
+  /* We do a lot of casts from pointers to TTRACE_ARG_TYPE; make sure
+     this is okay.  */
+  if (sizeof (TTRACE_ARG_TYPE) < sizeof (void *))
+    abort ();
 
   if (errno || (memory_page_dictionary.page_size <= 0))
     perror_with_name ("sysconf");

@@ -228,7 +228,7 @@ gdb_expect {
 #
 send_gdb "continue\n"
 gdb_expect {
-  -re "\r\n\032\032post-prompt\r\nContinuing.\r\n\r\n\032\032starting\r\n\r\n\032\032frames-invalid\r\n\r\n\032\032breakpoint 3\r\n\r\nBreakpoint 3, \r\n\032\032frame-begin 0 $hex\r\n\r\n\032\032frame-address\r\n$hex\r\n\032\032frame-address-end\r\n in \r\n\032\032frame-function-name\r\nprintf\r\n\032\032frame-args\r\n \\(\\)\r\n\032\032frame-where\r\n from.*\032\032frame-end\r\n\r\n\032\032stopped\r\n$gdb_prompt$" \
+  -re "\r\n\032\032post-prompt\r\nContinuing.\r\n\r\n\032\032starting\r\n\r\n\032\032frames-invalid\r\n\r\n\032\032breakpoint 3\r\n\r\nBreakpoint 3, \r\n\032\032frame-begin 0 $hex\r\n\r\n(\032\032frame-address\r\n$hex\r\n\032\032frame-address-end\r\n in \r\n)*\032\032frame-function-name\r\nprintf\r\n\032\032frame-args\r\n.*\032\032frame-end\r\n\r\n\032\032stopped\r\n$gdb_prompt$" \
 	  { pass "continue to printf" }
   -re ".*$gdb_prompt$"     { fail "continue to printf" }
   timeout	            { fail "continue to printf (timeout)" }
@@ -242,7 +242,7 @@ gdb_expect {
 #
 send_gdb "backtrace\n"
 gdb_expect {
-  -re "\r\n\032\032post-prompt\r\n\r\n\032\032frame-begin 0 $hex\r\n.0  \r\n\032\032frame-address\r\n$hex\r\n\032\032frame-address-end\r\n in \r\n\032\032frame-function-name\r\nprintf\r\n\032\032frame-args\r\n \\(\\)\r\n\032\032frame-where\r\n from.*\r\n\032\032frame-end\r\n\r\n\032\032frame-begin 1 $hex\r\n.1  \r\n\032\032frame-address\r\n$hex\r\n\032\032frame-address-end\r\n in \r\n\032\032frame-function-name\r\nmain\r\n\032\032frame-args\r\n \\(\\)\r\n\032\032frame-source-begin\r\n at \r\n\032\032frame-source-file\r\n${srcdir}/${subdir}/${srcfile}\r\n\032\032frame-source-file-end\r\n:\r\n\032\032frame-source-line\r\n.*\r\n\032\032frame-source-end\r\n\r\n\r\n\032\032frame-end\r\n$gdb_prompt$" \
+  -re "\r\n\032\032post-prompt\r\n\r\n\032\032frame-begin 0 $hex\r\n.0  \r\n(\032\032frame-address\r\n$hex\r\n\032\032frame-address-end\r\n in \r\n)*\032\032frame-function-name\r\nprintf\r\n\032\032frame-args\r\n \\(.*frame-end\r\n\r\n\032\032frame-begin 1 $hex\r\n.1  \r\n\032\032frame-address\r\n$hex\r\n\032\032frame-address-end\r\n in \r\n\032\032frame-function-name\r\nmain\r\n\032\032frame-args\r\n \\(\\)\r\n\032\032frame-source-begin\r\n at \r\n\032\032frame-source-file\r\n${srcdir}/${subdir}/${srcfile}\r\n\032\032frame-source-file-end\r\n:\r\n\032\032frame-source-line\r\n.*\r\n\032\032frame-source-end\r\n\r\n\r\n\032\032frame-end\r\n$gdb_prompt$" \
 	  { pass "bactrace from shlibrary" }
   -re ".*$gdb_prompt$"     { fail "backtrace from shlibrary" }
   timeout	            { fail "backtrace from shlibrary (timeout)" }
@@ -277,7 +277,7 @@ match_max 3000
 verbose "match_max now is: [match_max]"
 send_gdb "backtrace\n"
 gdb_expect {
-  -re ".*frame-begin 0 $hex.*0.*frame-end.*frame-begin 1 $hex.*1.*\032\032signal-handler-caller\r\n.signal handler called.\r\n\r\n\032\032frame-end\r\n\r\n.*frame-begin 2 $hex.*2.*frame-begin 3 $hex.*3.*frame-end.*$gdb_prompt$" \
+  -re "frame-begin 0 $hex.*0.*frame-end.*frame-begin 1 $hex.*1.*(\032\032signal-handler-caller\r\n.signal handler called.\r\n\r\n)*\032\032frame-end\r\n\r\n\032\032frame-begin 2 $hex.*2.*(frame-begin 3 $hex.*3.*)*frame-end.*$gdb_prompt$" \
 	{ pass "backtrace @ signal handler" }
   -re ".*$gdb_prompt$"     { fail "backtrace @ signal handler" }
   timeout	            { fail "backtrace @ signal handler (timeout)" }

@@ -1,17 +1,24 @@
 VPATH = @srcdir@
 srcdir = @srcdir@
 
-PROGS = annota2 anon-union compiler cplusfuncs derivation inherit local \
-	member-ptr method misc \
-        overload ovldbreak ref-types ref-types2 templates userdef virtfunc
+EXECUTABLES = ambiguous annota2 anon-union cplusfuncs cttiadd \
+	derivation inherit local member-ptr method misc \
+        overload ovldbreak ref-typ ref-typ2 templates userdef virtfunc
 
 all: 
 	@echo "Nothing to be done for all..."
 
-#### host, target, and site specific Makefile frags come in here.
+info:
+install-info:
+dvi:
+install:
+uninstall: force
+installcheck:
+check:
 
 clean mostlyclean:
-	-rm -f *.ci *.o ${OBJS} ${PROGS} *~ core 
+	-rm -f *~ *.o *.ci
+	-rm -f core ${EXECUTABLES}
 
 distclean maintainer-clean realclean: clean
 	-rm -f Makefile config.status config.log

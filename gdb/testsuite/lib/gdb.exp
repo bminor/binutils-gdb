@@ -131,8 +131,11 @@ proc gdb_unload {} {
 proc delete_breakpoints {} {
     global gdb_prompt
 
+    # we need a larger timeout value here or this thing just confuses
+    # itself.  May need a better implementation if possible. - guo
+    #
     send_gdb "delete breakpoints\n"
-    gdb_expect 30 {
+    gdb_expect 100 {
 	 -re "Delete all breakpoints.*y or n.*$" {
 	    send_gdb "y\n";
 	    exp_continue
@@ -142,7 +145,7 @@ proc delete_breakpoints {} {
 	 timeout { perror "Delete all breakpoints in delete_breakpoints (timeout)" ; return }
     }
     send_gdb "info breakpoints\n"
-    gdb_expect 30 {
+    gdb_expect 100 {
 	 -re "No breakpoints or watchpoints..*$gdb_prompt $" {}
 	 -re "$gdb_prompt $" { perror "breakpoints not deleted" ; return }
 	 -re "Delete all breakpoints.*or n.*$" {
@@ -376,7 +379,12 @@ proc gdb_test { args } {
 		    fail "$message";
 		    return $result;
 		}
-		gdb_expect 2 {
+		# since we're checking if each line of the multi-line
+		# command are 'accepted' by GDB here,
+		# we need to set -notransfer expect option so that
+		# command output is not lost for pattern matching
+		# - guo
+		gdb_expect -notransfer 2 {
 		    -re "\[\r\n\]" { }
 		    timeout { }
 		}
@@ -885,7 +893,7 @@ proc get_compiler_info {binfile args} {
 		    return 1;
 		}
 	    }
-	} else {
+	} elseif { $args != "f77" } {
 	    if { [eval gdb_preprocess \
 		    [list "${srcdir}/${subdir}/compiler.c" "${binfile}.ci"] \
 		    $args] != "" } {
@@ -932,51 +940,68 @@ proc get_compiler_info {binfile args} {
     return 0;
 }
 
-proc gdb_preprocess {source dest args} {
-    global CC_FOR_TARGET
-    global CXX_FOR_TARGET
+proc get_compiler {args} {
+    global CC CC_FOR_TARGET CXX CXX_FOR_TARGET F77_FOR_TARGET
 
-    if { [llength $args] == 0 } {
+    if { [llength $args] == 0 
+	 || ([llength $args] == 1 && [lindex $args 0] == "") } {
         set which_compiler "c"
     } else {
         if { $args =="c++" } {
             set which_compiler "c++"
+	} elseif { $args =="f77" } {
+	    set which_compiler "f77"
         } else {
 	    perror "Unknown compiler type supplied to gdb_preprocess"
-	    return 1;
+	    return ""
         }
     }
 
     if [info exists CC_FOR_TARGET] {
-	if { $which_compiler == "c"} {
-	    set compiler $CC_FOR_TARGET;
+	if {$which_compiler == "c"} {
+	    set compiler $CC_FOR_TARGET
 	}
     }
  
     if [info exists CXX_FOR_TARGET] {
-	if { $which_compiler == "c++"} {
-	    set compiler $CXX_FOR_TARGET;
+	if {$which_compiler == "c++"} {
+	    set compiler $CXX_FOR_TARGET
+	}
+    }
+
+    if [info exists F77_FOR_TARGET] {
+	if {$which_compiler == "f77"} {
+	    set compiler $F77_FOR_TARGET
 	}
     }
 
     if { ![info exists compiler] } {
         if { $which_compiler == "c" } {
 	    if {[info exists CC]} {
-		set compiler $CC;
+		set compiler $CC
 	    }
 	}
         if { $which_compiler == "c++" } {
 	    if {[info exists CXX]} {
-		set compiler $CXX;
+		set compiler $CXX
 	    }
 	}
 	if {![info exists compiler]} {
 	    set compiler [board_info [target_info name] compiler];
 	    if { $compiler == "" } {
-		puts "default_target_compile: No compiler to compile with";
-		return "default_target_compile: No compiler to compile with";
+		perror "get_compiler: No compiler found"
+		return ""
 	    }
 	}
+    }
+
+    return $compiler
+}
+
+proc gdb_preprocess {source dest args} {
+    set compiler [get_compiler "$args"]
+    if { $compiler == "" } {
+	return 1
     }
 
     set cmdline "$compiler -E $source > $dest"
@@ -1034,6 +1059,20 @@ proc send_gdb { string } {
 #
 
 proc gdb_expect { args } {
+    # allow -notransfer expect flag specification,
+    # used by gdb_test routine for multi-line commands.
+    # packed with gtimeout when fed to remote_expect routine,
+    # which is a hack but due to what looks like a res and orig
+    # parsing problem in remote_expect routine (dejagnu/lib/remote.exp):
+    # what's fed into res is not removed from orig.
+    # - guo
+    if { [lindex $args 0] == "-notransfer" } {
+	set notransfer -notransfer;
+	set args [lrange $args 1 end];
+    } else {
+	set notransfer "";
+    }
+
     if { [llength $args] == 2  && [lindex $args 0] != "-re" } {
 	set gtimeout [lindex $args 0];
 	set expcode [list [lindex $args 1]];
@@ -1073,7 +1112,8 @@ proc gdb_expect { args } {
 	    set remote_suppress_flag 1;
 	}
     }
-    set code [catch {uplevel remote_expect host $gtimeout $expcode} string];
+    set code [catch \
+	{uplevel remote_expect host "$gtimeout $notransfer" $expcode} string];
     if [info exists old_val] {
 	set remote_suppress_flag $old_val;
     } else {

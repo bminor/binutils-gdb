@@ -1319,7 +1319,21 @@ lookup_block_symbol (block, name, namespace)
 	         PC, then use the main symbol.
 
 	         ?!? Is checking the current pc correct?  Is this routine
-	         ever called to look up a symbol from another context?  */
+	         ever called to look up a symbol from another context?
+
+		 FIXME: No, it's not correct.  If someone sets a
+		 conditional breakpoint at an address, then the
+		 breakpoint's `struct expression' should refer to the
+		 `struct symbol' appropriate for the breakpoint's
+		 address, which may not be the PC.
+
+		 Even if it were never called from another context,
+		 it's totally bizarre for lookup_symbol's behavior to
+		 depend on the value of the inferior's current PC.  We
+		 should pass in the appropriate PC as well as the
+		 block.  The interface to lookup_symbol should change
+		 to require the caller to provide a PC.  */
+
 	      if (SYMBOL_ALIASES (sym))
 		sym = find_active_alias (sym, read_pc ());
 

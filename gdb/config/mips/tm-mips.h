@@ -109,8 +109,6 @@ extern int in_sigtramp PARAMS ((CORE_ADDR, char *));
 
 #define INNER_THAN(lhs,rhs) ((lhs) < (rhs))
 
-#define BIG_ENDIAN 4321
-
 /* BREAKPOINT_FROM_PC uses the program counter value to determine whether a
    16- or 32-bit breakpoint should be used.  It returns a pointer
    to a string of bytes that encode a breakpoint instruction, stores

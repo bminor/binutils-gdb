@@ -62,7 +62,7 @@ if ![runto_main] then {
     continue
 }
 
-gdb_test "next" "" "continuing after dummy()"
+gdb_test "next " "more_code.*;" "continuing after dummy()"
 
 
 #

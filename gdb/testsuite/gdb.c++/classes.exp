@@ -42,13 +42,6 @@ if [get_compiler_info ${binfile} "c++"] {
     return -1
 }
 
-# if we are on HPUX and we are not compiled with gcc, then skip these tests.
-
-if [istarget hppa*-*-hpux*] {
-    if {!$gcc_compiled} {
-	continue 
-    }
-}
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug c++}] != "" } {
      gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
@@ -142,6 +135,9 @@ proc test_ptype_class_objects {} {
 	-re "type = struct mixed_protection_struct \{${ws}int a;${ws}int b;${ws}private:${ws}int c;${ws}int d;${ws}protected:${ws}int e;${ws}int f;${ws}public:${ws}int g;${ws}private:${ws}int h;${ws}protected:${ws}int i;$nl\}$nl$gdb_prompt $" {
 	    pass "ptype struct mixed_protection_struct (FIXME)"
 	}
+        -re "type = struct mixed_protection_struct \{${ws}public:${ws}int a;${ws}int b;${ws}private:${ws}int c;${ws}int d;${ws}protected:${ws}int e;${ws}int f;${ws}public:${ws}int g;${ws}private:${ws}int h;${ws}protected:${ws}int i;$nl.*\}$nl$gdb_prompt $" {
+            pass "ptype struct mixed_protection_struct (extra public)"
+        }
 	-re "type = class mixed_protection_struct \{${ws}public:${ws}int a;${ws}int b;${ws}private:${ws}int c;${ws}int d;${ws}protected:${ws}int e;${ws}int f;${ws}public:${ws}int g;${ws}private:${ws}int h;${ws}protected:${ws}int i;$nl.*\}$nl$gdb_prompt $" {
 	    setup_xfail "*-*-*"
 	    fail "ptype struct mixed_protection_struct (FIXME)"
@@ -203,6 +199,9 @@ proc test_ptype_class_objects {} {
 	-re "type = class explicit_private_class \{${ws}private:${ws}int a;${ws}int b;$nl.*\}$nl$gdb_prompt $" {
 	    pass "ptype class explicit_private_class"
 	}
+        -re "type = class explicit_private_class \{${ws}int a;${ws}int b;$nl.*\}$nl$gdb_prompt $" {
+            pass "ptype class explicit_private_class (OK for HP aCC)"
+        }
 	-re "type = struct explicit_private_class \{${ws}int a;${ws}int b;$nl.*\}$nl$gdb_prompt $" {
 	    setup_xfail "*-*-*"
 	    fail "ptype class explicit_private_class"
@@ -340,6 +339,9 @@ proc test_ptype_class_objects {} {
 	    setup_xfail "*-*-*"
 	    fail "ptype class vB (FIXME: non-portable virtual table constructs)"
 	}
+        -re "type = class vB : public virtual vA \{${ws}public:${ws}int vb;${ws}int vx;${ws}\}$nl$gdb_prompt $" {
+            pass "ptype class vB (aCC)"
+        }
 	-re "type = class vB : public virtual vA \{${ws}private:${ws}vA \\*_vb.vA;${ws}public:${ws}int vb;${ws}int vx;((${ws}vB & operator=\\(vB const &\\);)|(${ws}vB\\(int, vB const &\\);)|(${ws}vB\\(int\\);))*${ws}\}$nl$gdb_prompt $" {
 	    setup_xfail "*-*-*"
 	    fail "ptype class vB (FIXME) (obsolescent gcc or gdb)"
@@ -364,6 +366,9 @@ proc test_ptype_class_objects {} {
 	    setup_xfail "*-*-*"
 	    fail "ptype class vC (FIXME: non-portable virtual table constructs)"
 	}
+        -re "type = class vC : public virtual vA \{${ws}public:${ws}int vc;${ws}int vx;${ws}\}$nl$gdb_prompt $" {
+            pass "ptype class vC (aCC)"
+        }
 	-re "type = class vC : public virtual vA \{${ws}private:${ws}vA \\*_vb.vA;${ws}public:${ws}int vc;${ws}int vx;((${ws}vC & operator=\\(vC const &\\);)|(${ws}vC\\(int, vC const &\\);)|(${ws}vC\\(int\\);))*${ws}\}$nl$gdb_prompt $" {
 	    setup_xfail "*-*-*"
 	    fail "ptype class vC (FIXME) (obsolescent gcc or gdb)"
@@ -388,6 +393,9 @@ proc test_ptype_class_objects {} {
 	    setup_xfail "*-*-*"
 	    fail "ptype class vD (FIXME: non-portable virtual table constructs)"
 	}
+        -re "type = class vD : public virtual vB, public virtual vC \{${ws}public:${ws}int vd;${ws}int vx;${ws}\}$nl$gdb_prompt $" {
+            pass "ptype class vD (aCC)"
+        }
 	-re "type = class vD : public virtual vB, public virtual vC \{${ws}private:${ws}vC \\*_vb.vC;${ws}vB \\*_vb.vB;${ws}public:${ws}int vd;${ws}int vx;((${ws}vD & operator=\\(vD const &\\);)|(${ws}vD\\(int, vD const &\\);)|(${ws}vD\\(int\\);))*${ws}\}$nl$gdb_prompt $" {
 	    setup_xfail "*-*-*"
 	    fail "ptype class vD (FIXME) (obsolescent gcc or gdb)"
@@ -412,6 +420,9 @@ proc test_ptype_class_objects {} {
 	    setup_xfail "*-*-*"
 	    fail "ptype class vE (FIXME: non-portable virtual table constructs)"
 	}
+        -re "type = class vE : public virtual vD \{${ws}public:${ws}int ve;${ws}int vx;${ws}\}$nl$gdb_prompt $" {
+            pass "ptype class vE (aCC)"
+        }
 	-re "type = class vE : public virtual vD \{${ws}private:${ws}vD \\*_vb.vD;${ws}public:${ws}int ve;${ws}int vx;((${ws}vE & operator=\\(vE const &\\);)|(${ws}vE\\(int, vE const &\\);)|(${ws}vE\\(int\\);))*${ws}\}$nl$gdb_prompt $" {
 	    setup_xfail "*-*-*"
 	    fail "ptype class vE (FIXME) (obsolescent gcc or gdb)"
@@ -446,6 +457,9 @@ proc test_ptype_class_objects {} {
     setup_xfail_format "DWARF 1"
     send_gdb "ptype class Foo\n"
     gdb_expect {
+        -re "type = class Foo \{${ws}public:${ws}int x;${ws}int y;${ws}static int st;\r\n${ws}Foo\\(int, int\\);${ws}int operator!.void.;${ws}operator int.void.;${ws}int times.int.;$nl\}$nl$gdb_prompt $" {
+            pass "ptype class Foo(aCC)"
+        }
 	-re "type = class Foo \{${ws}public:${ws}int x;${ws}int y;${ws}static int st;${ws}Foo & operator=\\(Foo const &\\);${ws}Foo\\(Foo const &\\);${ws}Foo\\(int, int\\);${ws}int operator!\\(void\\);${ws}int operator int\\(void\\);${ws}int times\\(int\\);${ws}\}$nl$gdb_prompt $" {
 	    pass "ptype class Foo"
 	}
@@ -584,7 +598,7 @@ proc test_pointers_to_class_members {} {
 	timeout { fail "print (int)&Bar::y == 2*sizeof(int) (timeout)" ; return }
     }
 
-    send_gdb "next\n"
+    send_gdb "next 2\n"
     setup_xfail "*-*-*"
     gdb_expect {
 	-re "$decimal\[ \t\]+inheritance3 \[)(\]+;$nl$gdb_prompt $" {}
@@ -774,15 +788,15 @@ do_tests
 
 
 # set a breakpoint and go there
-send_gdb "break 503\n"   
+send_gdb "break 516\n"   
 gdb_expect {   
-   -re "Breakpoint \[0-9\] at.*$gdb_prompt $" { pass "set break 503" }
-   -re "$gdb_prompt $"                     { fail "set break 503" }
-   timeout                             { fail "(timeout) set break 503" }
+   -re "Breakpoint \[0-9\] at.*$gdb_prompt $" { pass "set break 516" }
+   -re "$gdb_prompt $"                     { fail "set break 516" }
+   timeout                             { fail "(timeout) set break 516" }
 }
 send_gdb "continue\n"   
 gdb_expect {   
-   -re "Continuing\\.\r\n\r\nBreakpoint \[0-9\]*, main....at.*misc\\.cc:503\r\n503.*\r\n$gdb_prompt $" { pass "continue" }
+   -re "Continuing\\.\r\n\r\nBreakpoint \[0-9\]*, main....at.*misc\\.cc:516\r\n516.*\r\n$gdb_prompt $" { pass "continue" }
    -re "$gdb_prompt $"                     { fail "continue" }
    timeout                             { fail "(timeout) continue" }
 }
@@ -829,13 +843,17 @@ gdb_expect {
 }
 
 # ptype on the object
+# g++ is putting out the wrong debug info.  This works with aCC
+if {!$hp_aCC_compiler} {setup_xfail "hppa*-*-*"}
 send_gdb "ptype obj_with_enum\n"   
 gdb_expect {   
-   -re "type = class ClassWithEnum \\{\r\n\[ \t\]*public:\r\n\[ \t\]*enum ClassWithEnum::PrivEnum priv_enum;\r\n\[ \t\]*int x;\r\n\\}\r\n$gdb_prompt $" { pass "ptype obj_with_enum" }
+   -re "type = class ClassWithEnum \\{\r\n\[ \t\]*public:\r\n\[ \t\]*(enum |)ClassWithEnum::PrivEnum priv_enum;\r\n\[ \t\]*int x;\r\n\\}\r\n$gdb_prompt $" { pass "ptype obj_with_enum" }
    -re "$gdb_prompt $"                     { fail "ptype obj_with_enum" }
    timeout                             { fail "(timeout) ptype obj_with_enum" }
 }
 
+# g++ is putting out the wrong debug info.  This works with aCC
+if {!$hp_aCC_compiler} {setup_xfail "hppa*-*-*"}
 send_gdb "print (ClassWithEnum::PrivEnum) 42\n"   
 gdb_expect {   
    -re "\\$\[0-9\]* = yellow.*$gdb_prompt $" { pass "print (ClassWithEnum::PrivEnum) 42" }

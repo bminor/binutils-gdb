@@ -301,11 +301,10 @@ gdb_test "whatis v_union2" \
     "whatis unnamed union"
 
 
-if { [istarget "hppa*-hp-hpux10.20"] && $hp_aCC_compiler } {
-    # On HP-UX 10.20 with aCC compiler and objdebug mode,
-    # we need the 'void' pattern; without objdebug mode,
-    # we still need to '' pattern.
-    # FIXME: need to look into this further.
+if { [istarget "hppa*-hp-hpux*"] && $hp_aCC_compiler } {
+    # HP-UX: HP aCC compiler w/ +objdebug option detects language as
+    # c++, so we need the 'void' pattern here.
+    # Without +objdebug compilation option we still need to match ''.
     # - guo
     set void "(void|)"
 } else {

@@ -516,7 +516,7 @@ public:
     int (*manage[5])(double,
 		     void *(*malloc)(unsigned size),
 		     void (*free)(void *pointer));
-    int (*device[5])(int open(const char *, unsigned mode, unsigned perms, int extra = 0), 
+    int (*device[5])(int open(const char *, unsigned mode, unsigned perms, int extra), 
 		     int *(*read)(int fd, void *place, unsigned size),
 		     int *(*write)(int fd, void *place, unsigned size),
 		     void (*close)(int fd));
@@ -716,7 +716,7 @@ int main()
 
   Foo<int> fint;
   Foo<char> fchar;
-  Foo<volatile char *> fvpchar;
+  Foo<volatile char *> fvpchar = {0, 0};
 
   Bar<int, 33> bint;
   Bar<int, (4 > 3)> bint2;

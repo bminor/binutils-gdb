@@ -95,8 +95,7 @@ gdb_expect {
 
 send_gdb "run\n"
   gdb_expect {
-    -re "\r\n\032\032post-prompt\r\nStarting program: $binfile \(\r\n\r\n\032\032frames-invalid\)+\(\r\n\r\n\032\032breakpoints-invalid\)*.*\(\r\n\r\n\032\032frames-invalid\)*\r\n\r\n\032\032starting\(\r\n\r\n\032\032frames-invalid\)+\r\n\r\n\032\032breakpoint 1\r\n\r\nBreakpoint 1, \r\n\032\032frame-begin 0 $hex\r\n\r\n\032\032frame-function-name\r\nmain\r\n\032\032frame-args\r\n \\(\\)\r\n\032\032frame-source-begin\r\n at \r\n\032\032frame-source-file\r\n.*annota2.cc\r\n\032\032frame-source-file-end\r\n:\r\n\032\032frame-source-line\r\n$main_line\r\n\032\032frame-source-end\r\n\r\n\r\n\032\032source.*$srcfile:$main_line:.*:beg:$hex\r\n\r\n\032\032frame-end\r\n\r\n\032\032stopped\r\n$gdb_prompt$" \
-	                    { pass "run until main breakpoint" }
+    -re "$main_line.*$gdb_prompt$" { pass "run until main breakpoint" }
     -re ".*$gdb_prompt$"       { fail "run until main breakpoint" }
     timeout	            { fail "run until main breakpoint (timeout)" }
   }
@@ -135,7 +134,7 @@ gdb_expect {
 #
 send_gdb "delete\n"
 gdb_expect {
-  -re " " {
+  -re ".*Delete all breakpoints. \\(y or n\\) \r\n\032\032query.*$" {
            send_gdb "y\n"
            gdb_expect {
 	     -re " " { pass "delete bps" }
@@ -166,10 +165,11 @@ set main_line 22
 #
 # run program up to breakpoint.
 #
+
+
 send_gdb "run\n"
   gdb_expect {
-    -re "\r\n\032\032post-prompt\r\n.*Starting program: $binfile \(\r\n\r\n\032\032frames-invalid\)+\(\r\n\r\n\032\032breakpoints-invalid\)*.*\(\r\n\r\n\032\032frames-invalid\)*\r\n\r\n\032\032starting\(\r\n\r\n\032\032frames-invalid\)+\r\n\r\n\032\032breakpoint 2\r\n\r\nBreakpoint 2, \r\n\032\032frame-begin 0 $hex\r\n\r\n\032\032frame-function-name\r\nmain\r\n\032\032frame-args\r\n \\(\\)\r\n\032\032frame-source-begin\r\n at \r\n\032\032frame-source-file\r\n.*annota2.cc\r\n\032\032frame-source-file-end\r\n:\r\n\032\032frame-source-line\r\n$main_line\r\n\032\032frame-source-end\r\n\r\n\r\n\032\032source.*$srcfile:$main_line:.*:beg:$hex\r\n\r\n\032\032frame-end\r\n\r\n\032\032stopped\r\n$gdb_prompt$" \
-	                    { pass "run until main breakpoint" }
+    -re "$main_line.*$gdb_prompt$"    { pass "run until main breakpoint" }
     -re ".*$gdb_prompt$"       { fail "run until main breakpoint" }
     timeout	            { fail "run until main breakpoint (timeout)" }
   }
@@ -179,7 +179,7 @@ send_gdb "run\n"
 #
 send_gdb "watch a.x\n"
 gdb_expect {
-   -re "\r\n\032\032post-prompt\r\n\r\n\032\032breakpoints-invalid\r\nWatchpoint 3: a.x\r\n$gdb_prompt$" \
+   -re "\r\n\032\032post-prompt\r\n\r\n\032\032breakpoints-invalid\r\n.*atchpoint 3: a.x\r\n$gdb_prompt$" \
 	   { pass "set watch on a.x" }
    -re ".*$gdb_prompt$"  { fail "set watch on a.x" }
    timeout    { fail "set watch on a.x (timeout)" }
@@ -222,3 +222,4 @@ gdb_expect {
 # reinstall the old prompt for the rest of the testsuite.
 
 set gdb_prompt $old_gdb_prompt
+

@@ -170,7 +170,7 @@ extern "C" {
 };
 #endif
 
-main()
+int main()
 {
 #ifdef usestubs
    set_debug_traps();
@@ -182,6 +182,8 @@ main()
     e.vb = 11;
 
     test_calls();
+    return 0;
+    
 }
 
 int A::f() {return 1;}

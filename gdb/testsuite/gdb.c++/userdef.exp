@@ -68,7 +68,7 @@ send_gdb "break marker1\n" ; gdb_expect -re ".*$gdb_prompt $"
     }
 
 
-    setup_xfail hppa_*_*
+setup_xfail "hppa*-*-*"
 send_gdb "print one+two\n"
 gdb_expect {
     -re "FIXME.*$gdb_prompt $" {
@@ -78,6 +78,7 @@ gdb_expect {
     timeout           { fail "(timeout) print value of one two" }
   }
 
+setup_xfail "hppa*-*-*"
 send_gdb "print one-two\n"
 gdb_expect {
     -re ".*FIXME.*$gdb_prompt $" {
@@ -87,6 +88,7 @@ gdb_expect {
     timeout           { fail "(timeout) print value of one - two" }
   }
 
+setup_xfail "hppa*-*-*"
 send_gdb "print one*two\n"
 gdb_expect {
     -re ".*FIXME.*$gdb_prompt $" {
@@ -96,6 +98,7 @@ gdb_expect {
     timeout           { fail "(timeout) print value of one * two" }
   }
 
+setup_xfail "hppa*-*-*"
 send_gdb "print one/two\n"
 gdb_expect {
     -re ".*FIXME.*$gdb_prompt $" {
@@ -105,6 +108,7 @@ gdb_expect {
     timeout           { fail "(timeout) print value of one / two" }
   }
 
+setup_xfail "hppa*-*-*"
 send_gdb "print one%two\n"
 gdb_expect {
     -re ".*FIXME.*$gdb_prompt $" {
@@ -114,6 +118,7 @@ gdb_expect {
     timeout           { fail "(timeout) print value of one % two" }
   }
 
+setup_xfail "hppa*-*-*"
 send_gdb "print one&&two\n"
 gdb_expect {
     -re ".*FIXME.*$gdb_prompt $" {
@@ -123,6 +128,7 @@ gdb_expect {
     timeout           { fail "(timeout) print value of one && two" }
   }
 
+setup_xfail "hppa*-*-*"
 send_gdb "print one||two\n"
 gdb_expect {
     -re ".*FIXME.*$gdb_prompt $" {
@@ -132,6 +138,7 @@ gdb_expect {
     timeout           { fail "(timeout) print value of one|| two" }
   }
 
+setup_xfail "hppa*-*-*"
 send_gdb "print one&two\n"
 gdb_expect {
     -re ".*FIXME.*$gdb_prompt $" {
@@ -141,6 +148,7 @@ gdb_expect {
     timeout           { fail "(timeout) print value of one & two" }
   }
 
+setup_xfail "hppa*-*-*"
 send_gdb "print one|two\n"
 gdb_expect {
     -re ".*FIXME.*$gdb_prompt $" {
@@ -150,6 +158,7 @@ gdb_expect {
     timeout           { fail "(timeout) print value of one | two" }
   }
 
+setup_xfail "hppa*-*-*"
 send_gdb "print one ^ two\n"
 gdb_expect {
     -re ".*FIXME.*$gdb_prompt $" {
@@ -159,6 +168,8 @@ gdb_expect {
     timeout           { fail "(timeout) print value of one ^  two" }
   }
 
+
+setup_xfail "hppa*-*-*"
 send_gdb "print one < two\n"
 gdb_expect {
     -re ".*FIXME.*$gdb_prompt $" {
@@ -168,6 +179,7 @@ gdb_expect {
     timeout           { fail "(timeout) print value of one <  two" }
   }
 
+setup_xfail "hppa*-*-*"
 send_gdb "print one <= two\n"
 gdb_expect {
     -re ".*FIXME.*$gdb_prompt $" {
@@ -177,6 +189,7 @@ gdb_expect {
     timeout           { fail "(timeout) print value of one <=  two" }
   }
 
+setup_xfail "hppa*-*-*"
 send_gdb "print one > two\n"
 gdb_expect {
     -re ".*FIXME.*$gdb_prompt $" {
@@ -186,6 +199,7 @@ gdb_expect {
     timeout           { fail "(timeout) print value of one >  two" }
   }
 
+setup_xfail "hppa*-*-*"
 send_gdb "print one >= two\n"
 gdb_expect {
     -re ".*FIXME.*$gdb_prompt $" {
@@ -196,6 +210,7 @@ gdb_expect {
   }
 
 
+setup_xfail "hppa*-*-*"
 send_gdb "print one==two\n"
 gdb_expect {
     -re ".*FIXME.*$gdb_prompt $" {
@@ -205,6 +220,8 @@ gdb_expect {
     timeout           { fail "(timeout) print value of one == two" }
   }
 
+
+setup_xfail "hppa*-*-*"
 send_gdb "print one!=two\n"
 gdb_expect {
     -re ".*FIXME.*$gdb_prompt $" {
@@ -214,6 +231,7 @@ gdb_expect {
     timeout           { fail "(timeout) print value of one != two" }
   }
 
+setup_xfail "hppa*-*-*"
 send_gdb "print one<<31\n"
 gdb_expect {
     -re ".*FIXME.*$gdb_prompt $" {
@@ -223,6 +241,7 @@ gdb_expect {
     timeout           { fail "(timeout) print value of one<<31" }
   }
 
+setup_xfail "hppa*-*-*"
 send_gdb "print one>>31\n"
 gdb_expect {
     -re ".*FIXME.*$gdb_prompt $" {
@@ -232,6 +251,7 @@ gdb_expect {
     timeout           { fail "(timeout) print value of one>>31" }
   }
 
+setup_xfail "hppa*-*-*"
 send_gdb "print !one\n"
 gdb_expect {
     -re ".*FIXME.*$gdb_prompt $" {
@@ -241,6 +261,7 @@ gdb_expect {
     timeout           { fail "(timeout) print value of !one" }
   }
 
+setup_xfail "hppa*-*-*"
 send_gdb "print ~one\n"
 gdb_expect {
     -re ".*FIXME.*$gdb_prompt $" {
@@ -250,6 +271,7 @@ gdb_expect {
     timeout           { fail "(timeout) print value of ~one" }
   }
 
+setup_xfail "hppa*-*-*"
 send_gdb "print -one\n"
 gdb_expect {
     -re ".*FIXME.*$gdb_prompt $" {
@@ -259,6 +281,7 @@ gdb_expect {
     timeout           { fail "(timeout) print value of -one" }
   }
 
+setup_xfail "hppa*-*-*"
 send_gdb "print one++\n"
 gdb_expect {
     -re ".*FIXME.*$gdb_prompt $" {
@@ -268,6 +291,7 @@ gdb_expect {
     timeout           { fail "(timeout) print value of one++" }
   }
 
+setup_xfail "hppa*-*-*"
 send_gdb "print ++one\n"
 gdb_expect {
     -re ".*FIXME.*$gdb_prompt $" {
@@ -277,6 +301,7 @@ gdb_expect {
     timeout           { fail "(timeout) print value of ++one" }
   }
 
+setup_xfail "hppa*-*-*"
 send_gdb "print one--\n"
 gdb_expect {
     -re ".*.FIXME*$gdb_prompt $" {
@@ -286,6 +311,8 @@ gdb_expect {
     timeout           { fail "(timeout) print value of one-->>31" }
   }
 
+
+setup_xfail "hppa*-*-*"
 send_gdb "print --one\n"
 gdb_expect {
     -re ".*FIXME.*$gdb_prompt $" {
@@ -295,6 +322,7 @@ gdb_expect {
     timeout           { fail "(timeout) print value of --one" }
   }
 
+setup_xfail "hppa*-*-*"
 send_gdb "print one+=7\n"
 gdb_expect {
     -re ".*FIXME.*$gdb_prompt $" {
@@ -304,6 +332,7 @@ gdb_expect {
     timeout           { fail "(timeout) print value of one+=7" }
   }
 
+setup_xfail "hppa*-*-*"
 send_gdb "print two=one\n"
 gdb_expect {
     -re ".*FIXME.*$gdb_prompt $" {

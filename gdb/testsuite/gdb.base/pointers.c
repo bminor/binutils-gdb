@@ -74,6 +74,7 @@ int y;
 int main ()
 {
     void dummy();
+    int more_code();
     
     /* Ensure that malloc is a pointer type; avoid use of "void" and any include files. */
     /* extern char *malloc();*/

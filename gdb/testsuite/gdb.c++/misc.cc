@@ -1,5 +1,9 @@
 // Test various -*- C++ -*- things.
 
+// ====================== basic C++ types  =======================
+bool            v_bool;
+bool            v_bool_array[2];
+
 typedef struct fleep fleep;
 struct fleep { int a; } s;
 
@@ -477,6 +481,14 @@ register_class ()
   return v.x + 5;
 }
 
+void dummy()
+{
+  v_bool = true;
+  v_bool_array[0] = false;
+  v_bool_array[1] = v_bool;
+}
+
+
 int
 main()
 {
@@ -484,6 +496,7 @@ main()
   set_debug_traps();
   breakpoint();
 #endif
+  dummy();
   inheritance1 ();
   inheritance3 ();
   register_class ();

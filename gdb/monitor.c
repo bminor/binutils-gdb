@@ -607,9 +607,43 @@ monitor_expect (string, buf, buflen)
 	}
       else
 	{
-	  p = string;
-	  if (c == *p)
-	    p++;
+	  /* We got a character that doesn't match the string.  We need to
+	     back up p, but how far?  If we're looking for "..howdy" and the
+	     monitor sends "...howdy"?  There's certainly a match in there,
+	     but when we receive the third ".", we won't find it if we just
+	     restart the matching at the beginning of the string.
+
+	     This is a Boyer-Moore kind of situation.  We want to reset P to
+	     the end of the longest prefix of STRING that is a suffix of
+	     what we've read so far.  In the example above, that would be
+	     ".." --- the longest prefix of "..howdy" that is a suffix of
+	     "...".  This longest prefix could be the empty string, if C
+	     is nowhere to be found in STRING.
+
+	     If this longest prefix is not the empty string, it must contain
+	     C, so let's search from the end of STRING for instances of C,
+	     and see if the portion of STRING before that is a suffix of
+	     what we read before C.  Actually, we can search backwards from
+	     p, since we know no prefix can be longer than that.
+
+	     Note that we can use STRING itself, along with C, as a record
+	     of what we've received so far.  :) */
+	  int i;
+
+	  for (i = (p - string) - 1; i >= 0; i--)
+	    if (string[i] == c)
+	      {
+		/* Is this prefix a suffix of what we've read so far?
+		   In other words, does
+                     string[0 .. i-1] == string[p - i, p - 1]? */
+		if (! memcmp (string, p - i, i))
+		  {
+		    p = string + i + 1;
+		    break;
+		  }
+	      }
+	  if (i < 0)
+	    p = string;
 	}
     }
 }

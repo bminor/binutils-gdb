@@ -282,6 +282,48 @@ proc test_list_forward {} {
     gdb_stop_suppressing_tests;
 }
 
+# Test that repeating the list linenum command doesn't print the same
+# lines over again.  Note that this test makes sure that the argument
+# linenum is dropped, when we repeat the previous command. 'x/5i $pc'
+# works the same way.  
+
+proc test_repeat_list_command {} {
+    global gdb_prompt
+
+    set testcnt 0
+
+    send_gdb "list list0.c:10\n"
+    gdb_expect {
+	-re "5\[ \t\]+int x;.*14\[ \t\]+foo \[(\]+.*\[)\]+;\r\n$gdb_prompt $" { incr testcnt }
+	-re ".*$gdb_prompt $" { fail "list list0.c:10" ; gdb_suppress_tests }
+	timeout { fail "list list0.c:10 (timeout)" ; gdb_suppress_tests }
+    }
+
+    send_gdb "\n"
+    gdb_expect {
+	-re "15\[ \t\]+foo \[(\]+.*\[)\]+;.*24\[ \t\]+foo \[(\]+.*\[)\]+;\r\n$gdb_prompt $" { incr testcnt }
+	-re ".*$gdb_prompt $" { fail "list 15-24" ; gdb_suppress_tests }
+	timeout { fail "list 15-24 (timeout)" ; gdb_suppress_tests }
+    }
+
+    send_gdb "\n"
+    gdb_expect {
+	-re "25\[ \t\]+foo \[(\]+.*\[)\]+;.*34\[ \t\]+foo \[(\]+.*\[)\]+;\r\n$gdb_prompt $" { incr testcnt }
+	-re ".*$gdb_prompt $" { fail "list 25-34" ; gdb_suppress_tests }
+	timeout { fail "list 25-34 (timeout)" ; gdb_suppress_tests }
+    }
+
+    send_gdb "\n"
+    gdb_expect {
+	-re "35\[ \t\]+foo \\(.*\\);.*42\[ \t\]+.*\}\r\n$gdb_prompt $" { incr testcnt }
+	-re ".*$gdb_prompt $" { fail "list 35-42" ; gdb_suppress_tests }
+	timeout { fail "list 35-42 (timeout)" ; gdb_suppress_tests }
+    }
+
+    pass "repeat list commands to page forward using 'return' ($testcnt tests)"
+    gdb_stop_suppressing_tests;
+}
+
 proc test_list_backwards {} {
     global gdb_prompt
 
@@ -513,6 +555,7 @@ if [ set_listsize 10 ] then {
     test_list_function
     test_list_forward
     test_list_backwards
+    test_repeat_list_command
     test_list_range
     test_list_filename_and_function
     test_forward_search

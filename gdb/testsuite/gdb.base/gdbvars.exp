@@ -84,7 +84,7 @@ proc test_value_history {} {
     gdb_test "print \$0"	"\\\$8 = 102" \
 	"Print value-history\[MAX\] using explicit index \$0"
 
-    gdb_test "print 108"	"\\\$9 = 108" ""
+    gdb_test "print 108"	"\\\$9 = 108"
 
     gdb_test "print \$\$0"	"\\\$10 = 108" \
 	"Print value-history\[MAX\] using explicit index \$\$0"

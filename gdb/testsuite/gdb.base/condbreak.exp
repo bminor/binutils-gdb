@@ -151,8 +151,7 @@ gdb_test "continue" "Continuing\\..*Breakpoint \[0-9\]+, marker1 \\(\\) at .*$sr
 #
 # run until the breakpoint at marker2
 #
-#See 11512CLLbs
-setup_xfail hppa2.0w-*-*
+setup_xfail hppa2.0w-*-* 11512CLLbs
 gdb_test "continue" "Continuing\\..*Breakpoint \[0-9\]+, marker2 \\(a=43\\) at .*$srcfile:4\[49\].*4\[49\]\[\t \]+.*" \
 			"run until breakpoint at marker2"
 

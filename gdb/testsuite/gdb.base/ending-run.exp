@@ -52,19 +52,19 @@ gdb_load ${binfile}
 # to the prolog--that's another bug...)
 #
 gdb_test "b 1" ".*Breakpoint.*line 1.*" "bpt at line before routine"
-gdb_test "b 13" ".*Note.*also.*Breakpoint.*2.*" ""
+gdb_test "b 13" ".*Note.*also.*Breakpoint.*2.*"
 
 # Set up to go to the next-to-last line of the program
 #
-gdb_test "b 31" ".*Breakpoint.*3.*" ""
+gdb_test "b 31" ".*Breakpoint.*3.*"
 
 # Expect to hit the bp at line "1", but symbolize this
 # as line "13".  Then try to clear it--this should work.
 #
 if [target_info exists use_gdb_stub] {
-  gdb_test "continue" ".*Breakpoint.*1.*callee.*13.*" ""
+  gdb_test "continue" ".*Breakpoint.*1.*callee.*13.*"
 } else {
-  gdb_test "r" ".*Breakpoint.*1.*callee.*13.*" ""
+  gdb_test "r" ".*Breakpoint.*1.*callee.*13.*"
 }
 gdb_test "cle" ".*Deleted breakpoints 2 1.*" "clear worked"
 send_gdb "i b\n"
@@ -76,15 +76,15 @@ gdb_expect {
 
 # Test some other "clear" combinations
 #
-gdb_test "b 1" ".*Breakpoint.*4.*" ""
-gdb_test "b 13" ".*Note.*also.*Breakpoint.*5.*" ""
+gdb_test "b 1" ".*Breakpoint.*4.*"
+gdb_test "b 13" ".*Note.*also.*Breakpoint.*5.*"
 gdb_test "cle 13" ".*Deleted breakpoint 5.*" "Only cleared 1 by line"
 
 send_gdb "inf line 13\n"
 gdb_expect {
     -re ".*address (0x\[0-9a-fA-F]*).*$gdb_prompt $" {
         set line_eight $expect_out(1,string)
-        gdb_test "b 13" ".*Breakpoint.*6.*" ""
+        gdb_test "b 13" ".*Breakpoint.*6.*"
         gdb_test "cle *$line_eight" ".*Deleted breakpoints 6 4.*" "Clear 2 by address"
     }
     -re ".*$gdb_prompt $" {
@@ -96,9 +96,9 @@ send_gdb "inf line 14\n"
 gdb_expect {
     -re ".*address (0x\[0-9a-fA-F]*).*$gdb_prompt $" {
         set line_nine $expect_out(1,string)
-        gdb_test "b 14"       ".*Breakpoint.*7.*" ""
-        gdb_test "b *$line_nine" ".*Note.*also.*Breakpoint.*8.*" ""
-        gdb_test "c" ".*Breakpoint.*7.*callee.*14.*" ""
+        gdb_test "b 14"       ".*Breakpoint.*7.*"
+        gdb_test "b *$line_nine" ".*Note.*also.*Breakpoint.*8.*"
+        gdb_test "c" ".*Breakpoint.*7.*callee.*14.*"
         gdb_test "cle" ".*Deleted breakpoints 8 7.*" "Clear 2 by default"
     }
     -re ".*$gdb_prompt $" {
@@ -123,7 +123,7 @@ gdb_expect {
 # See if we can step out with control.  The "1 2 3" stuff
 # is output from the program.
 #
-gdb_test "cont" ".*Breakpoint.*32.*" ""
+gdb_test "cont" ".*Breakpoint.*31.*"
 gdb_test "next" ".*1 2 7 14 23 34 47 62 79  Goodbye!.*32.*" "Step to return"
 
 set old_timeout $timeout

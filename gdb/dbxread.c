@@ -623,7 +623,7 @@ dbx_symfile_read (objfile, section_offsets, mainline)
   symbol_table_offset = DBX_SYMTAB_OFFSET (objfile);
 
   free_pending_blocks ();
-  back_to = make_cleanup ((make_cleanup_func) really_free_pendings, 0);
+  back_to = make_cleanup (really_free_pendings, 0);
 
   init_minimal_symbol_collection ();
   make_cleanup ((make_cleanup_func) discard_minimal_symbols, 0);
@@ -1664,7 +1664,7 @@ dbx_psymtab_to_symtab_1 (pst)
       /* Init stuff necessary for reading in symbols */
       stabsread_init ();
       buildsym_init ();
-      old_chain = make_cleanup ((make_cleanup_func) really_free_pendings, 0);
+      old_chain = make_cleanup (really_free_pendings, 0);
       file_string_table_offset = FILE_STRING_OFFSET (pst);
       symbol_size = SYMBOL_SIZE (pst);
 

@@ -1,3 +1,124 @@
+1999-08-01  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* config/mips/tm-mips.h (BIG_ENDIAN): Don't define here.
+
+1999-08-01  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* stabsread.c (read_range_type): Handle an unsigned range type
+	whose length in bytes is any power of two, not just a few
+	common ones.
+
+	* monitor.c (monitor_expect): When we receive a character that
+	isn't part of the string we were expecting, don't just start
+	matching again at the beginning of the string --- some shorter
+	suffix of the input might be a prefix of the string too.
+
+1999-07-31  Fred Fish  <fnf@cygnus.com>
+
+	* symfile.c (symbol_file_command): Fix typo that made -1 casted
+	to a CORE_ADDR look like an subtraction expression.
+	(add_symbol_file_command): Ditto.
+
+1999-07-30  Jim Blandy  <jimb@cris.red-bean.com>
+
+	* hppa-tdep.c (pa_print_registers): Frob register output some more.
+
+1999-07-29  Jim Blandy  <jimb@cris.red-bean.com>
+
+	* config/pa/nm-hppah.h (PTRACE_ARG3_TYPE): After more
+	consideration, make this a CORE_ADDR, like WDB did. 
+
+	Rather than casting every single use of really_free_pendings to 
+	make_cleanup_func, why not actually make it have that type?  Golly!
+	* buildsym.c (really_free_pendings): Change argument type to PTR.
+	buildsym.h (really_free_pendings): Fix declaration.
+	* dbxread.c (dbx_symfile_read, dbx_psymtab_to_symtab_1),
+	dwarf2read.c (psymtab_to_symtab_1), dwarfread
+	(psymtab_to_symtab_1), hp-psymtab-read.c (hpread_build_psymtabs),
+	os9kread.c (os9k_symfile_read, os9k_psymtab_to_symtab_1),
+	xcoffread.c (xcoff_psymtab_to_symtab_1, xcoff_initial_scan):
+	Remove casts.
+
+	Pass a CORE_ADDR safely through catch_errors.
+	* hppa-tdep.c (args_for_find_stub): New member, return_val.
+	(cover_find_stub_with_shl_get): Change argument and return type to
+	match catch_errors.  Save return value of find_stub_with_shl_get
+	in *args.
+	(initialize_hp_cxx_exception_support): Collect value of
+	eh_notify_callback_addr from args. 
+
+	Get rid of some noise.  It would be nice to get helpful warnings
+	from the compiler about lossy conversions.
+	* hppa-tdep.c (eh_notify_hook_addr, eh_notify_callback_addr,
+	eh_break_addr, eh_catch_catch_addr, eh_catch_throw_addr,
+	break_callback_sal): Initialize these to zero, not NULL, to shush
+	warnings.
+	* infttrace.c (thread_fake_step): Compare signal to
+	TARGET_SIGNAL_0, not NULL, to avoid warnings.
+	(_initialize_infttrace): Add sanity check.
+
+	* config/pa/nm-hppah.h (PTRACE_ARG3_TYPE): Define this to be
+	long, so we can pass arguments properly to ptrace.
+
+	* hppah-nat.c (child_xfer_memory): Correctly compute mask to round
+	address to an int boundary.
+
+1999-07-29  Jim Blandy  <jimb@savonarola.red-bean.com>
+
+	Change from Ian Lance Taylor <ian@zembu.com>.  The
+	i386_linux_sigtramp* functions should be moved to
+	i386-linux-tdep.c, when that file is introduced.
+
+	* config/i386/tm-linux.h (LINUX_SIGCONTEXT_SIZE): Define.
+	(LINUX_SIGCONTEXT_PC_OFFSET): Define.
+	(LINUX_SIGCONTEXT_SP_OFFSET): Define.
+	(SIGCONTEXT_PC_OFFSET): Don't define.
+	(I386_LINUX_SIGTRAMP): Define.
+	(IN_SIGTRAMP): Define.
+	(i386_linux_sigtramp): Declare.
+	(sigtramp_saved_pc): Define.
+	(i386_linux_sigtramp_saved_pc): Declare.
+	(FRAMELESS_SIGNAL): Define.
+	(FRAME_CHAIN, FRAME_SAVED_PC): Define after #undef.
+	* i386-tdep.c (i386_linux_sigtramp_start): New static function if
+	I386_LINUX_SIGTRAMP.
+	(i386_linux_sigtramp): New function if I386_LINUX_SIGTRAMP.
+	(i386_linux_sigtramp_saved_pc): Likewise.
+	(i386_linux_sigtramp_saved_sp): Likewise.
+
+1999-07-28  Jim Blandy  <jimb@savonarola.red-bean.com>
+
+	* infrun.c (handle_inferior_event): Don't try to use the code for
+	stepping over a function call to also handle stepping out of a
+	sigtramp on HP-UX.  That ends up trashing step-resume breakpoints.
+	This change reverts some of David Taylor's change of 31 Dec 1998.
+	The HP-UX maintainer needs to submit a new change for whatever
+	problem the original change was trying to fix.
+
+1999-07-28  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* event-top.c (command_line_handler): Don't treat an empty line
+ 	from readline the same way as a multiline command. This avoids
+ 	missing detecting when the user presses just 'enter'.
+
+1999-07-28  Jim Blandy  <jimb@savonarola.red-bean.com>
+
+	Provide more sanity checking:
+	* infrun.c (handle_inferior_event): Before assigning a new
+	breakpoint to step_resume_breakpoint, make sure it's not already
+	pointing at one; if it is, that's a bug.
+	(check_for_old_step_resume_breakpoint): New function.
+
+1999-07-28  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+        From Eli Zaretskii  <eliz@is.elta.co.il>:
+	* top.c (gdb_init) [__MSDOS__]: Arrange for GDB to return to the
+	original directory before exiting.
+	(cd_command) [_WIN32 || __MSDOS__]: Canonicalize the new directory
+	name explicitly.  Handle "d:/" names correctly.
+	(init_history) [__MSDOS__]: Use _gdb_history as the default GDB
+	history file name.
+
 Mon Jul 26 17:13:39 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote.c (enum packet_support, enum packet_detect, struct
@@ -30,8 +151,9 @@ Mon Jul 26 17:13:39 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 1999-07-15  Jim Blandy  <jimb@cris.red-bean.com>
 	
 	Make the output from "info registers" fit withinin 80 columns.
-	* hppa-tdep.c: Make it easy to change row and column counts.
-	Switch to three columns, instead of four, and adjust spacing.
+	* hppa-tdep.c (pa_print_registers): Make it easy to change row and
+	column counts.  Switch to three columns, instead of four, and
+	adjust spacing.
 
 	First cut at supporting HPPA2.0 in "wide" (64-bit) mode.
 	* configure.tgt: Add hppa2.0w target.
