@@ -32,9 +32,10 @@ Makefile.in
 TODO
 alloca.c
 ar.c
-is-ranlib.o
-not-ranlib.o
-maybe-ranlib.o
+is-ranlib.c
+not-ranlib.c
+maybe-ranlib.c
+binutils.texinfo
 bucomm.c
 config
 config.sub
@@ -63,7 +64,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.4  1991/10/07 23:14:30  bothner
+# Revision 1.5  1991/10/08 01:48:04  gnu
+# Add binutils.texinfo, and change *-ranlib.o to *-ranlib.c.
+#
+# Revision 1.4  1991/10/07  23:14:30  bothner
 # 	* ar.c, Makefile.in, new files {is,not,maybe}-ranlib.c:
 # 	Make two different binaries for ar and ranlib, instead of
 # 	distinguishing them at run time using argv[0].
