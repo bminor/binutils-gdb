@@ -45,7 +45,7 @@ GDB_NLM_DEPS =
 
 SHELL = /bin/sh
 
-INSTALL = $${srcroot}/install.sh -c
+INSTALL = $$s/install.sh -c
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL) -m 644
 INSTALL_XFORM = $(INSTALL) -t='$(program_transform_name)'
@@ -123,8 +123,8 @@ EXPECT = `if [ -f $$r/expect/expect ] ; \
 	then echo $$r/expect/expect ; \
 	else echo expect ; fi`
 
-RUNTEST = `if [ -f $${srcroot}/dejagnu/runtest ] ; \
-	then echo $${srcroot}/dejagnu/runtest ; \
+RUNTEST = `if [ -f $$s/dejagnu/runtest ] ; \
+	then echo $$s/dejagnu/runtest ; \
 	else echo runtest ; fi`
 
 
@@ -173,9 +173,9 @@ CC_FOR_TARGET = ` \
   if [ -f $$r/gcc/Makefile ] ; then \
     if [ -f $$r/$(TARGET_SUBDIR)/newlib/Makefile ] ; then \
       if [ -f $$r/$(TARGET_SUBDIR)/winsup/Makefile ] ; then \
-        echo $$r/gcc/xgcc -B$$r/gcc/ -B$$r/newlib/ -L$$r/winsup -idirafter $$r/$(TARGET_SUBDIR)/newlib/targ-include -idirafter $${srcroot}/newlib/libc/include -nostdinc; \
+        echo $$r/gcc/xgcc -B$$r/gcc/ -B$$r/newlib/ -L$$r/winsup -idirafter $$r/$(TARGET_SUBDIR)/newlib/targ-include -idirafter $$s/newlib/libc/include -nostdinc; \
       else \
-        echo $$r/gcc/xgcc -B$$r/gcc/ -idirafter $$r/$(TARGET_SUBDIR)/newlib/targ-include -idirafter $${srcroot}/newlib/libc/include -nostdinc; \
+        echo $$r/gcc/xgcc -B$$r/gcc/ -idirafter $$r/$(TARGET_SUBDIR)/newlib/targ-include -idirafter $$s/newlib/libc/include -nostdinc; \
       fi; \
     else \
       echo $$r/gcc/xgcc -B$$r/gcc/; \
@@ -206,9 +206,9 @@ CXX_FOR_TARGET = ` \
   if [ -f $$r/gcc/Makefile ] ; then \
     if [ -f $$r/$(TARGET_SUBDIR)/newlib/Makefile ] ; then \
       if [ -f $$r/$(TARGET_SUBDIR)/winsup/Makefile ] ; then \
-        echo $$r/gcc/xgcc -B$$r/gcc/ -B$$r/newlib/ -L$$r/winsup -idirafter $$r/$(TARGET_SUBDIR)/newlib/targ-include -idirafter $${srcroot}/newlib/libc/include -nostdinc; \
+        echo $$r/gcc/xgcc -B$$r/gcc/ -B$$r/newlib/ -L$$r/winsup -idirafter $$r/$(TARGET_SUBDIR)/newlib/targ-include -idirafter $$s/newlib/libc/include -nostdinc; \
       else \
-        echo $$r/gcc/xgcc -B$$r/gcc/ -idirafter $$r/$(TARGET_SUBDIR)/newlib/targ-include -idirafter $${srcroot}/newlib/libc/include -nostdinc; \
+        echo $$r/gcc/xgcc -B$$r/gcc/ -idirafter $$r/$(TARGET_SUBDIR)/newlib/targ-include -idirafter $$s/newlib/libc/include -nostdinc; \
       fi; \
     else \
       echo $$r/gcc/xgcc -B$$r/gcc/; \
@@ -768,7 +768,7 @@ DO_X = \
 $(DO_X):
 	@target=`echo $@ | sed -e 's/^do-//'`; \
 	r=`pwd`; export r; \
-	srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	s=`cd $(srcdir); pwd`; export s; \
 	$(SET_LIB_PATH) \
 	for i in $(SUBDIRS) -dummy-; do \
 	  if [ -f ./$$i/Makefile ]; then \
@@ -796,7 +796,7 @@ $(DO_X):
 	done
 	@target=`echo $@ | sed -e 's/^do-//'`; \
 	r=`pwd`; export r; \
-	srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	s=`cd $(srcdir); pwd`; export s; \
 	$(SET_LIB_PATH) \
 	for i in $(TARGET_CONFIGDIRS) -dummy-; do \
 	  if [ -f $(TARGET_SUBDIR)/$$i/Makefile ]; then \
@@ -824,7 +824,7 @@ installcheck: do-installcheck
 dvi: do-dvi
 
 install-info: do-install-info dir.info
-	srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	s=`cd $(srcdir); pwd`; export s; \
 	if [ -f dir.info ] ; then \
 	  $(INSTALL_DATA) dir.info $(infodir)/dir.info ; \
 	else true ; fi
@@ -855,7 +855,7 @@ $(CLEAN_MODULES) $(CLEAN_X11_MODULES) clean-gcc:
 	@dir=`echo $@ | sed -e 's/clean-//'`; \
 	if [ -f ./$${dir}/Makefile ] ; then \
 	  r=`pwd`; export r; \
-	  srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	  s=`cd $(srcdir); pwd`; export s; \
 	  $(SET_LIB_PATH) \
 	  (cd $${dir}; $(MAKE) $(FLAGS_TO_PASS) clean); \
 	else \
@@ -868,7 +868,7 @@ $(CLEAN_TARGET_MODULES):
 	rm -f $(TARGET_SUBDIR)/$${dir}/multilib.out $(TARGET_SUBDIR)/$${dir}/tmpmulti.out; \
 	if [ -f $(TARGET_SUBDIR)/$${dir}/Makefile ] ; then \
 	  r=`pwd`; export r; \
-	  srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	  s=`cd $(srcdir); pwd`; export s; \
 	  $(SET_LIB_PATH) \
 	  (cd $(TARGET_SUBDIR)/$${dir}; $(MAKE) $(TARGET_FLAGS_TO_PASS) clean); \
 	else \
@@ -947,7 +947,7 @@ gcc-no-fixedincludes:
 	  touch gcc/stmp-fixinc gcc/include/fixed; \
 	  rm -f gcc/stmp-headers gcc/stmp-int-hdrs; \
 	  r=`pwd`; export r; \
-	  srcroot=`cd $(srcdir); pwd` ; export srcroot; \
+	  s=`cd $(srcdir); pwd` ; export s; \
 	  $(SET_LIB_PATH) \
 	  (cd ./gcc; \
 	   $(MAKE) $(GCC_FLAGS_TO_PASS) install); \
@@ -966,7 +966,7 @@ $(ALL_MODULES) all-gui all-libproc:
 	@dir=`echo $@ | sed -e 's/all-//'`; \
 	if [ -f ./$${dir}/Makefile ] ; then \
 	  r=`pwd`; export r; \
-	  srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	  s=`cd $(srcdir); pwd`; export s; \
 	  $(SET_LIB_PATH) \
 	  (cd $${dir}; $(MAKE) $(FLAGS_TO_PASS) all); \
 	else \
@@ -983,7 +983,7 @@ $(NATIVE_CHECK_MODULES):
 	  dir=`echo $@ | sed -e 's/check-//'`; \
 	  if [ -f ./$${dir}/Makefile ] ; then \
 	    r=`pwd`; export r; \
-	    srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	    s=`cd $(srcdir); pwd`; export s; \
 	    $(SET_LIB_PATH) \
 	    (cd $${dir}; $(MAKE) $(FLAGS_TO_PASS) check); \
 	  else \
@@ -995,7 +995,7 @@ $(CROSS_CHECK_MODULES):
 	@dir=`echo $@ | sed -e 's/check-//'`; \
 	if [ -f ./$${dir}/Makefile ] ; then \
 	  r=`pwd`; export r; \
-	  srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	  s=`cd $(srcdir); pwd`; export s; \
 	  $(SET_LIB_PATH) \
 	  (cd $${dir}; $(MAKE) $(FLAGS_TO_PASS) check); \
 	else \
@@ -1009,7 +1009,7 @@ $(INSTALL_MODULES): install-dirs
 	@dir=`echo $@ | sed -e 's/install-//'`; \
 	if [ -f ./$${dir}/Makefile ] ; then \
 	  r=`pwd`; export r; \
-	  srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	  s=`cd $(srcdir); pwd`; export s; \
 	  $(SET_LIB_PATH) \
 	  (cd $${dir}; $(MAKE) $(FLAGS_TO_PASS) install); \
 	else \
@@ -1045,7 +1045,7 @@ $(CONFIGURE_TARGET_MODULES):
 	  if [ -d $(srcdir)/$${dir} ]; then \
 	    [ -d $(TARGET_SUBDIR)/$${dir} ] || mkdir $(TARGET_SUBDIR)/$${dir};\
 	    r=`pwd`; export r; \
-	    srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	    s=`cd $(srcdir); pwd`; export s; \
 	    $(SET_LIB_PATH) \
 	    AR="$(AR_FOR_TARGET)"; export AR; \
 	    AS="$(AS_FOR_TARGET)"; export AS; \
@@ -1070,7 +1070,7 @@ $(CONFIGURE_TARGET_MODULES):
 	    esac; \
 	    if [ "$(srcdir)" = "." ] ; then \
 	      if [ "$(TARGET_SUBDIR)" != "." ] ; then \
-		if $(SHELL) $${srcroot}/symlink-tree $${topdir}/$${dir} "no-such-file" ; then \
+		if $(SHELL) $$s/symlink-tree $${topdir}/$${dir} "no-such-file" ; then \
 		  if [ -f Makefile ]; then \
 		    if $(MAKE) distclean; then \
 		      true; \
@@ -1090,14 +1090,14 @@ $(CONFIGURE_TARGET_MODULES):
 	      libsrcdir="."; \
 	    else \
 	      srcdiroption="--srcdir=$${topdir}/$${dir}"; \
-	      libsrcdir="$${srcroot}/$${dir}"; \
+	      libsrcdir="$$s/$${dir}"; \
 	    fi; \
 	    if [ -f $${libsrcdir}/configure ] ; then \
 	      $(SHELL) $${libsrcdir}/configure \
 		$(CONFIG_ARGUMENTS) $${srcdiroption} \
 		--with-target-subdir="$(TARGET_SUBDIR)"; \
 	    else \
-	      $(SHELL) $${srcroot}/configure \
+	      $(SHELL) $$s/configure \
 		$(CONFIG_ARGUMENTS) $${srcdiroption} \
 		--with-target-subdir="$(TARGET_SUBDIR)"; \
 	    fi; \
@@ -1115,7 +1115,7 @@ $(ALL_TARGET_MODULES):
 	@dir=`echo $@ | sed -e 's/all-target-//'`; \
 	if [ -f $(TARGET_SUBDIR)/$${dir}/Makefile ] ; then \
 	  r=`pwd`; export r; \
-	  srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	  s=`cd $(srcdir); pwd`; export s; \
 	  $(SET_LIB_PATH) \
 	  (cd $(TARGET_SUBDIR)/$${dir}; $(MAKE) $(TARGET_FLAGS_TO_PASS) all); \
 	else \
@@ -1129,7 +1129,7 @@ $(CHECK_TARGET_MODULES):
 	@dir=`echo $@ | sed -e 's/check-target-//'`; \
 	if [ -f $(TARGET_SUBDIR)/$${dir}/Makefile ] ; then \
 	  r=`pwd`; export r; \
-	  srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	  s=`cd $(srcdir); pwd`; export s; \
 	  $(SET_LIB_PATH) \
 	  (cd $(TARGET_SUBDIR)/$${dir};$(MAKE) $(TARGET_FLAGS_TO_PASS) check);\
 	else \
@@ -1144,7 +1144,7 @@ $(INSTALL_TARGET_MODULES): install-dirs
 	@dir=`echo $@ | sed -e 's/install-target-//'`; \
 	if [ -f $(TARGET_SUBDIR)/$${dir}/Makefile ] ; then \
 	  r=`pwd`; export r; \
-	  srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	  s=`cd $(srcdir); pwd`; export s; \
 	  $(SET_LIB_PATH) \
 	  (cd $(TARGET_SUBDIR)/$${dir}; \
 	    $(MAKE) $(TARGET_FLAGS_TO_PASS) install); \
@@ -1159,7 +1159,7 @@ $(ALL_X11_MODULES):
 	@dir=`echo $@ | sed -e 's/all-//'`; \
 	if [ -f ./$${dir}/Makefile ] ; then \
 	  r=`pwd`; export r; \
-	  srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	  s=`cd $(srcdir); pwd`; export s; \
 	  $(SET_LIB_PATH) \
 	  (cd $${dir}; \
 	   $(MAKE) $(FLAGS_TO_PASS) $(X11_FLAGS_TO_PASS) all); \
@@ -1174,7 +1174,7 @@ $(CHECK_X11_MODULES):
 	@dir=`echo $@ | sed -e 's/check-//'`; \
 	if [ -f ./$${dir}/Makefile ] ; then \
 	  r=`pwd`; export r; \
-	  srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	  s=`cd $(srcdir); pwd`; export s; \
 	  $(SET_LIB_PATH) \
 	  (cd $${dir}; \
 	   $(MAKE) $(FLAGS_TO_PASS) $(X11_FLAGS_TO_PASS) check); \
@@ -1189,7 +1189,7 @@ $(INSTALL_X11_MODULES):
 	@dir=`echo $@ | sed -e 's/install-//'`; \
 	if [ -f ./$${dir}/Makefile ] ; then \
 	  r=`pwd`; export r; \
-	  srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	  s=`cd $(srcdir); pwd`; export s; \
 	  $(SET_LIB_PATH) \
 	  (cd $${dir}; \
 	   $(MAKE) $(FLAGS_TO_PASS) $(X11_FLAGS_TO_PASS) install); \
@@ -1202,7 +1202,7 @@ $(INSTALL_X11_MODULES):
 all-gcc:
 	@if [ -f ./gcc/Makefile ] ; then \
 	  r=`pwd`; export r; \
-	  srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	  s=`cd $(srcdir); pwd`; export s; \
 	  $(SET_LIB_PATH) \
 	  (cd gcc; $(MAKE) $(GCC_FLAGS_TO_PASS) all); \
 	else \
@@ -1213,7 +1213,7 @@ all-gcc:
 all-bootstrap:
 	@if [ -f ./gcc/Makefile ] ; then \
 	  r=`pwd`; export r; \
-	  srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	  s=`cd $(srcdir); pwd`; export s; \
 	  $(SET_LIB_PATH) \
 	  (cd gcc; $(MAKE) $(GCC_FLAGS_TO_PASS) bootstrap); \
 	else \
@@ -1224,7 +1224,7 @@ all-bootstrap:
 check-gcc:
 	@if [ -f ./gcc/Makefile ] ; then \
 	  r=`pwd`; export r; \
-	  srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	  s=`cd $(srcdir); pwd`; export s; \
 	  $(SET_LIB_PATH) \
 	  (cd gcc; $(MAKE) $(GCC_FLAGS_TO_PASS) check); \
 	else \
@@ -1235,7 +1235,7 @@ check-gcc:
 install-gcc:
 	@if [ -f ./gcc/Makefile ] ; then \
 	  r=`pwd`; export r; \
-	  srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	  s=`cd $(srcdir); pwd`; export s; \
 	  $(SET_LIB_PATH) \
 	  (cd gcc; $(MAKE) $(GCC_FLAGS_TO_PASS) install); \
 	else \
@@ -1251,7 +1251,7 @@ install-dosrel: install-dirs info
 	@dir=`echo $@ | sed -e 's/install-//'`; \
 	if [ -f ./$${dir}/Makefile ] ; then \
 	  r=`pwd`; export r; \
-	  srcroot=`cd $(srcdir); pwd`; export srcroot; \
+	  s=`cd $(srcdir); pwd`; export s; \
 	  $(SET_LIB_PATH) \
 	  (cd $${dir}; $(MAKE) $(FLAGS_TO_PASS) install); \
 	else \

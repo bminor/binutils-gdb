@@ -1,5 +1,8 @@
 Tue Oct  8 10:39:08 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* Makefile.in: Replace all uses of srcroot with s, to shrink
+	command line lengths.
+
 	Patches from Geoffrey Noer <noer@cygnus.com>:
 	* configure.in: If configuring for newlib, pass --with-newlib to
 	subdirectories.
