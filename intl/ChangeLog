@@ -1,4 +1,8 @@
-2002-03-08  Daniel Jacobowitz  <drow@mvista.com>  
+2002-03-08  Daniel Jacobowitz  <drow@mvista.com>
+
+	* Makefile.in (distclean): Remove config.h.
+
+2002-03-08  Daniel Jacobowitz  <drow@mvista.com>
 
 	* Makefile.in (distclean): Remove config.cache, stamp-h, and
 	config.status.
