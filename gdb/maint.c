@@ -197,14 +197,14 @@ match_substring (const char *string, const char *substr)
   while ((tok = strstr (string, substr)) != NULL)
     {
       /* Got a partial match.  Is it a whole word? */
-      if (tok == string  ||
-	  tok[-1] == ' ' ||
-	  tok[-1] == '\t')
+      if (tok == string
+	  || tok[-1] == ' '
+	  || tok[-1] == '\t')
       {
 	/* Token is delimited at the front... */
-	if (tok[substr_len] == ' ' ||
-	    tok[substr_len] == '\t' ||
-	    tok[substr_len] == '\0')
+	if (tok[substr_len] == ' '
+	    || tok[substr_len] == '\t'
+	    || tok[substr_len] == '\0')
 	{
 	  /* Token is delimited at the rear.  Got a whole-word match.  */
 	  return 1;
@@ -311,9 +311,9 @@ print_bfd_section_info (bfd *abfd,
   flagword flags = bfd_get_section_flags (abfd, asect);
   const char *name = bfd_section_name (abfd, asect);
 
-  if (arg == NULL || *((char *) arg) == '\0' ||
-      match_substring ((char *) arg, name) ||
-      match_bfd_flags ((char *) arg, flags))
+  if (arg == NULL || *((char *) arg) == '\0'
+      || match_substring ((char *) arg, name)
+      || match_bfd_flags ((char *) arg, flags))
     {
       CORE_ADDR addr, endaddr;
 
@@ -331,9 +331,9 @@ print_objfile_section_info (bfd *abfd,
   flagword flags = bfd_get_section_flags (abfd, asect->the_bfd_section);
   const char *name = bfd_section_name (abfd, asect->the_bfd_section);
 
-  if (string == NULL || *string == '\0' ||
-      match_substring (string, name) ||
-      match_bfd_flags (string, flags))
+  if (string == NULL || *string == '\0'
+      || match_substring (string, name)
+      || match_bfd_flags (string, flags))
     {
       print_section_info (name, flags, asect->addr, asect->endaddr, 
 			  asect->the_bfd_section->filepos);
