@@ -73,7 +73,7 @@ fr30-*-elf*)		gdb_target=fr30 ;;
 
 hppa*-*-bsd*)		gdb_target=hppabsd ;;
 hppa*-*-pro*)		gdb_target=hppapro ;;
-hppa2.0w-*-hpux11*)	gdb_target=hppa64 ;;
+hppa*64*-*-hpux11*)	gdb_target=hppa64 ;;
 hppa*-*-hpux*)		gdb_target=hppahpux ;;
 hppa*-*-hiux*)		gdb_target=hppahpux ;;
 hppa*-*-osf*)		gdb_target=hppaosf ;;

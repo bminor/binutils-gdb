@@ -1,3 +1,9 @@
+Tue Jun 13 09:21:23 2000  Jeffrey A Law  (law@cygnus.com)
+
+	* configure.host (hppa*64*): Renamed from hppa2.0w per
+	gcc/binutils changes.
+	* configure.tgt: Similarly.
+
 2000-06-12  Bill Nottingham <notting@redhat.com>
 
 	Patch applied by Kevin Buettner <kevinb@redhat.com>:
