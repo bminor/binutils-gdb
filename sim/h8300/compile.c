@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #endif
 #include <sys/param.h>
+#include "wait.h"
 #include "ansidecl.h"
 #include "callback.h"
 #include "remote-sim.h"
@@ -1254,7 +1255,10 @@ sim_resume (step, siggnal)
 	  cpu.exception = SIGILL;
 	  goto end;
 	case O (O_SLEEP, SB):
-	  if ((short) cpu.regs[0] == -255)
+	  /* The format of r0 is defined by devo/include/wait.h.
+	     cpu.exception handling needs some cleanup: we need to make the
+	     the handling of normal exits vs signals, etc. more sensible.  */
+	  if (! WIFEXITED (cpu.regs[0]) && WIFSIGNALED (cpu.regs[0]))
 	    cpu.exception = SIGILL;
 	  else
 	    cpu.exception = SIGTRAP;

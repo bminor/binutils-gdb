@@ -1,6 +1,7 @@
 Mon Mar 11 09:53:25 1996  Doug Evans  <dje@charmed.cygnus.com>
 
-	* compile.c (sim_resume): Watch for calls to abort.
+	* compile.c: #include "wait.h".
+ 	(sim_resume, sleep insn): Check program exit status in r0.
 	* run.c: #include <signal.h>.
 	(main): Abort if program got SIGILL.
 
