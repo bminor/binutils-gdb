@@ -1,5 +1,10 @@
 2004-01-09  Michael Chastain  <mec.gnu@mindspring.com>
 
+	* gdb.hp/gdb.aCC/exception.exp: Re-create as a nearly empty
+	file.
+
+2004-01-09  Michael Chastain  <mec.gnu@mindspring.com>
+
 	* gdb.cp/exception.cc: Change <iostream.h> to <iostream>.
 	* gdb.cp/exception.exp: Use gdb test, gdb_test_multiple.
 	Use gdb_compile.  Remove restriction on gcc.  Add some patterns
