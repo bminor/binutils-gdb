@@ -1,3 +1,12 @@
+start-sanitize-cygnus
+Wed Jul  1 18:52:40 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* configure.in: configure cgen if --enable-cgen-maint.
+	* Makefile.in (ALL_MODULES,CLEAN_MODULES): Add all-cgen.
+	(all-cgen): New rule.
+	(all-opcodes,all-sim): Depend on all-cgen.
+
+end-sanitize-cygnus
 Wed Jul  1 16:45:21 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ltconfig: Update to correct AIX handling.
