@@ -38,15 +38,23 @@ run.c
 run.1
 sim-alu.h
 sim-basics.h
+sim-bits-n.h
 sim-bits.c
 sim-bits.h
 sim-config.h
+sim-core-n.h
+sim-core.c
+sim-core.h
 sim-endian-n.h
 sim-endian.c
 sim-endian.h
+sim-events.c
+sim-events.h
 sim-inline.c
-sim-types.h
 sim-inline.h
+sim-io.c
+sim-io.h
+sim-types.h
 tconfig.in
 
 Things-to-lose:
