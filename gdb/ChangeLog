@@ -1,5 +1,8 @@
 2001-11-08  Jim Blandy  <jimb@redhat.com>
 
+	* s390-tdep.c (s390_gdbarch_init): Use func_frame_chain_valid, not
+ 	file_frame_chain_valid.
+
 	* s390-tdep.c (s390_get_frame_info): If the prologue loads r12
  	from the constant pool, but doesn't add in the constant pool's
  	address to it, then this function probably isn't using r12 as a
