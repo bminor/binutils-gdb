@@ -176,7 +176,10 @@ tic80_init_extra_frame_info (fi)
   if (fi->next)
     fi->pc = FRAME_SAVED_PC (fi->next);
 
-  memset (fi->fsr.regs, '\000', sizeof fi->fsr.regs);
+  /* Because zero is a valid register offset relative to SP, we initialize
+     the offsets to -1 to indicate unused entries.  */
+  for (reg = 0; reg < NUM_REGS; reg++)
+    fi->fsr.regs[reg] = -1;
 
   if (PC_IN_CALL_DUMMY (fi->pc, fi->frame, fi->frame))
     {
@@ -194,12 +197,18 @@ tic80_init_extra_frame_info (fi)
       if (!fi->next)			/* this is the innermost frame? */
 	fi->frame = read_register (fi->framereg);
       else			 	/* not the innermost frame */
-	if (fi->framereg == FP_REGNUM)		    /* we have an FP */
-	  if (fi->next->fsr.regs[FP_REGNUM] != 0)   /* caller saved our FP */
-	    fi->frame = read_memory_integer (fi->next->fsr.regs[FP_REGNUM], 4);
+	/* If this function uses FP as the frame register, and the function
+	   it called saved the FP, get the saved FP.  */
+	if (fi->framereg == FP_REGNUM &&
+	    fi->next->fsr.regs[FP_REGNUM] != (unsigned) -1)
+	  fi->frame = read_memory_integer (fi->next->fsr.regs[FP_REGNUM], 4);
+
+      /* Convert SP-relative offsets of saved registers to real addresses.  */
       for (reg = 0; reg < NUM_REGS; reg++)
-	if (fi->fsr.regs[reg] != 0)
-	  fi->fsr.regs[reg] += fi->frame - fi->frameoffset;
+	if (fi->fsr.regs[reg] == (unsigned) -1)
+	    fi->fsr.regs[reg] = 0;	/* unused entry */
+	  else
+	    fi->fsr.regs[reg] += fi->frame - fi->frameoffset;
     }
 }
 
