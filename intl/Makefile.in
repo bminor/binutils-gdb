@@ -1,5 +1,5 @@
 # Makefile for directory with message catalog handling in GNU NLS Utilities.
-# Copyright (C) 1995, 1996, 1997, 1998 Free Software Foundation, Inc.
+# Copyright (C) 1995, 1996, 1997 Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -79,13 +79,12 @@ DISTFILES.gettext = libintl.glibc intlh.inst.in
 .c.lo:
 	$(LIBTOOL) --mode=compile $(COMPILE) $<
 
-INCLUDES = -I. -I$(srcdir)
+INCLUDES = -I.. -I. -I$(top_srcdir)/intl -I$(top_srcdir)/lib
 
 all: all-@USE_INCLUDED_LIBINTL@
 
 all-yes: libintl.$la intlh.inst
 all-no:
-install-info:
 
 libintl.a: $(OBJECTS)
 	rm -f $@
@@ -151,7 +150,7 @@ uninstall:
 
 info dvi:
 
-$(OBJECTS): config.h libgettext.h
+$(OBJECTS): ../config.h libgettext.h
 bindtextdom.$lo finddomain.$lo loadmsgcat.$lo: gettextP.h gettext.h loadinfo.h
 dcgettext.$lo: gettextP.h gettext.h hash-string.h loadinfo.h
 
@@ -172,7 +171,7 @@ mostlyclean:
 clean: mostlyclean
 
 distclean: clean
-	rm -f Makefile ID TAGS po2msg.sed po2tbl.sed libintl.h config.log
+	rm -f Makefile ID TAGS po2msg.sed po2tbl.sed
 
 maintainer-clean: distclean
 	@echo "This command is intended for maintainers to use;"
@@ -196,8 +195,9 @@ dist distdir: Makefile $(DISTFILES)
 dist-libc:
 	tar zcvf intl-glibc.tar.gz $(COMSRCS) $(COMHDRS) libintl.h.glibc
 
-Makefile: Makefile.in config.status
-	CONFIG_FILES=$@ CONFIG_HEADERS= $(SHELL) ./config.status
+Makefile: Makefile.in ../config.status
+	cd .. \
+	  && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
 
 # The dependency for intlh.inst is different in gettext and all other
 # packages.  Because we cannot you GNU make features we have to solve
