@@ -1802,6 +1802,10 @@ setup_sections (abfd, file_hdr)
 					  space.space_number) == false)
 	goto error_return;
 
+      /* If the space has no subspaces, then we're done.  */
+      if (space.subspace_quantity == 0)
+	continue;
+
       /* Now, read in the first subspace for this space */
       if (bfd_seek (abfd, file_hdr->subspace_location
 		    + space.subspace_index * sizeof subspace,
