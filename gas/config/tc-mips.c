@@ -9140,7 +9140,9 @@ md_parse_option (c, arg)
 	list = bfd_target_list ();
 	for (l = list; *l != NULL; l++)
 	  if (strcmp (*l, "elf64-bigmips") == 0
-	      || strcmp (*l, "elf64-littlemips") == 0)
+	      || strcmp (*l, "elf64-littlemips") == 0
+	      || strcmp (*l, "elf64-tradbigmips") == 0
+	      || strcmp (*l, "elf64-tradlittlemips") == 0)
 	    break;
 	if (*l == NULL)
 	  as_fatal (_("No compiled in support for 64 bit object file format"));

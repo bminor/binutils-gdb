@@ -1,3 +1,8 @@
+2001-04-29  Keith M Wesolowski <wesolows@foobazco.org>
+
+	* config/tc-mips.c (md_parse_option): Also accept
+	elf64-tradbigmips and elf64-tradlittlemips for OPTION_64.
+
 2001-04-27  David Mosberger  <davidm@hpl.hp.com>
 
 	* config/tc-ia64.c (dot_spillmem_p): Fix output_spill_?sprel_p()
