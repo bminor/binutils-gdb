@@ -1,5 +1,4 @@
-\input cyginfo
-@c\input texinfo 
+\input texinfo
 @setfilename bfdinfo
 @c $Id$
 @synindex ky cp
@@ -29,8 +28,6 @@ Permission is granted to copy and distribute translations of this manual
 into another language, under the above conditions for modified versions.
 @end ifinfo
 @iftex
-@c this removes the gaps around @examples
-
 @c@finalout
 @c@setchapternewpage odd
 @settitle LIB BFD, the Binary File Descriptor Library
@@ -164,29 +161,8 @@ methods to the @code{bfd}, the mapping is defined within @code{bfd.h} in
 a set of macros, all beginning @code{bfd}_something. 
 
 For example, this sequence would do what you expect:
-@tex
-\globaldefs=1
-\def\example{\begingroup\inENV %This group ends at the end of the @lisp body
-\hfuzz=12truept % Don't be fussy
-% Make spaces be word-separators rather than space tokens.
-\sepspaces %
-% Single space lines
-\singlespace %
-% The following causes blank lines not to be ignored
-% by adding a space to the end of each line.
-\let\par=\lisppar
-\def\Eexample{\endgroup}%
-\parskip=0pt
-\advance \leftskip by \lispnarrowing
-\parindent=0pt
-\let\exdent=\internalexdent
-\obeyspaces \obeylines \tt \rawbackslash
-\def\next##1{}\next}
-\globaldefs=0
-@end tex
-
 @lisp
-@w{
+@cartouche
 #include "bfd.h"
 
 unsigned int number_of_sections(abfd)
@@ -194,7 +170,7 @@ bfd *abfd;
 @{
   return bfd_count_sections(abfd);
 @}
-}
+@end cartouche
 @end lisp
 
 The metaphor used within @code{bfd} is that an object file has a header,
@@ -347,7 +323,7 @@ What is a backend
 @node BFD front end, BFD back end, Mechanism, Top
 @page
 @chapter BFD front end
-@include doc/bfd.doc
+@include  bfd.c.texi
 @page
 @node Memory Usage, Sections, bfd, Top
 @section Memory Usage
@@ -372,37 +348,37 @@ greediest open bfd, close it to reclaim the memory, perform some
 operation and reopen the bfd again, to get a fresh copy of the data structures.
 
 @node Sections,Symbols ,Memory Usage, Top
-@include doc/section.doc
+@include  section.c.texi
 @page
 @node Symbols, Archives ,Sections, To
-@include doc/syms.doc
+@include  syms.c.texi
 @page
 @node Archives, Formats, Symbols, Top
-@include doc/archive.doc
+@include  archive.c.texi
 @page
 @node Formats, Relocations, Archives, Top
-@include doc/format.doc
+@include  format.c.texi
 @page
 @node Relocations, Core Files,Formats, Top
-@include doc/reloc.doc
+@include  reloc.c.texi
 @page
 @node Core Files, Targets,  Relocations, Top
-@include doc/core.doc
+@include  core.c.texi
 @page
 @node Targets, Architectures, Core Files, Top
-@include doc/targets.doc
+@include  targets.c.texi
 @page
 @node Architectures, Opening and Closing, Targets, Top
-@include doc/archures.doc
+@include  archures.c.texi
 @page
 @node Opening and Closing, Internal, Architectures, Top
-@include doc/opncls.doc
+@include  opncls.c.texi
 @page
 @node Internal, File Caching, Opening and Closing, Top
-@include doc/libbfd.doc
+@include  libbfd.c.texi
 @page
 @node File Caching, Top, Internal, Top
-@include doc/cache.doc
+@include  cache.c.texi
 @page
 @chapter BFD back end
 @node BFD back end, ,BFD front end, Top
@@ -418,10 +394,10 @@ operation and reopen the bfd again, to get a fresh copy of the data structures.
 All of bfd lives in one directory.
 @page
 @node aout backends, coff backends, What to Put Where, BFD back end
-@include doc/aoutx.doc
+@include  aoutx.h.texi
 @page
 @node coff backends, oasys backends, aout backends, BFD back end
-@include doc/coffcode.doc
+@include  coffcode.h.texi
 @page
 @node Index,  , BFD, Top
 @unnumbered Function Index
