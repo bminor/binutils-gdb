@@ -108,16 +108,19 @@ sim_core_signal (SIM_DESC sd,
 		 sim_core_signals sig)
 {
   const char *copy = (transfer == read_transfer ? "read" : "write");
+  /* The CIA could either be a struct or a simple type.  Regardless,
+     the address of the instruction is found in the first word. */
+  address_word ip = *(address_word*)&cia;
   switch (sig)
     {
     case sim_core_unmapped_signal:
-      sim_io_eprintf (sd, "core: %d byte %s to unmaped address 0x%lx\n",
-		      nr_bytes, copy, (unsigned long) addr);
+      sim_io_eprintf (sd, "core: %d byte %s to unmaped address 0x%lx at 0x%lx\n",
+		      nr_bytes, copy, (unsigned long) addr, (unsigned long) ip);
       sim_engine_halt (sd, cpu, NULL, cia, sim_signalled, SIGSEGV);
       break;
     case sim_core_unaligned_signal:
-      sim_io_eprintf (sd, "core: %d byte misaligned %s to address 0x%lx",
-		      nr_bytes, copy, (unsigned long) addr);
+      sim_io_eprintf (sd, "core: %d byte misaligned %s to address 0x%lx at 0x%lx\n",
+		      nr_bytes, copy, (unsigned long) addr, (unsigned long) ip);
       sim_engine_halt (sd, cpu, NULL, cia, sim_signalled, SIGBUS);
       break;
     default:
