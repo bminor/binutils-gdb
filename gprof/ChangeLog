@@ -1,3 +1,9 @@
+Mon Apr  8 14:44:33 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Permit --enable-shared to specify a list of
+	directories.
+	* configure: Rebuild.
+
 Thu Mar 21 17:18:25 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* core.c (core_create_function_syms): Move filename and func_name

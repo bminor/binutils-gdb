@@ -1,5 +1,9 @@
 Mon Apr  8 11:56:23 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.in: Permit --enable-shared to specify a list of
+	directories.
+	* configure: Rebuild.
+
 	* lexsup.c (parse_args): Add -E as a synonym for -export-dynamic,
 	for HP/UX compatibility.
 

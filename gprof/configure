@@ -521,7 +521,8 @@ if test "${enable_shared+set}" = set; then
   case "${enableval}" in
   yes) shared=true ;;
   no)  shared=false ;;
-  *)   { echo "configure: error: bad value ${enableval} for BFD shared option" 1>&2; exit 1; } ;;
+  *bfd*) shared=true ;;
+  *) shared=false ;;
 esac
 fi
 
@@ -611,7 +612,7 @@ else
   yes;
 #endif
 EOF
-if { ac_try='${CC-cc} -E conftest.c'; { (eval echo configure:615: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }; } | egrep yes >/dev/null 2>&1; then
+if { ac_try='${CC-cc} -E conftest.c'; { (eval echo configure:616: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }; } | egrep yes >/dev/null 2>&1; then
   ac_cv_prog_gcc=yes
 else
   ac_cv_prog_gcc=no

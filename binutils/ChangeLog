@@ -1,3 +1,9 @@
+Mon Apr  8 14:40:05 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Permit --enable-shared to specify a list of
+	directories.
+	* configure: Rebuild.
+
 Fri Mar 29 16:11:33 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* objdump.c (dump_section_header): Print the SEC_LINK_ONCE flag

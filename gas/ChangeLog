@@ -1,3 +1,9 @@
+Mon Apr  8 14:42:53 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Permit --enable-shared to specify a list of
+	directories.
+	* configure: Rebuild.
+
 Fri Apr  5 17:01:35 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* config/tc-h8300.c (get_specific): Remove some #if 0 code.
