@@ -21,11 +21,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* Steve Chamberlain
    sac@cygnus.com */
 
+#include <signal.h>
 #include <stdio.h>
 #include <varargs.h>
 #include "bfd.h"
 #include "sysdep.h"
 #include "remote-sim.h"
+
+#ifndef SIGQUIT
+#define SIGQUIT SIGTERM
+#endif
 
 void usage();
 extern int optind;
@@ -45,6 +50,8 @@ main (ac, av)
   int verbose = 0;
   int trace = 0;
   char *name = "";
+  enum sim_stop reason;
+  int sigrc;
 
   while ((i = getopt (ac, av, "m:p:s:tv")) != EOF) 
     switch (i)
@@ -116,14 +123,20 @@ main (ac, av)
 	  if (verbose)
 	    sim_info (0);
 
-	  /* Assume we left through the exit system call,
-	     in which case r5 has the exit code */
-	  {
-	    unsigned char b[4];
-	    sim_fetch_register (5, b);
-	    return b[3];
-	  }
+	  sim_stop_reason (&reason, &sigrc);
 
+	  /* Check to see if we left through the exit system call.
+	     If we did, then we will have gotten a SIGQUIT and the exit
+	     code is in r5.  Otherwise, report the error number as the
+	     exit code.  */
+	  if (sigrc == SIGQUIT)
+	    {
+	      unsigned char b[4];
+	      sim_fetch_register (5, b);
+	      return b[3];
+	    }
+	  else
+	    return sigrc;
 	}
     }
 
