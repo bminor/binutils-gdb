@@ -4780,7 +4780,10 @@ lang_leave_overlay (fill, memspec, phdrs, lma_memspec)
 	l->os->fill = fill;
       if (region != NULL && l->os->region == NULL)
 	l->os->region = region;
-      if (lma_region != NULL && l->os->lma_region == NULL)
+      /* We only set lma_region for the first overlay section, as
+	 subsequent overlay sections will have load_base set relative
+	 to the first section.  */
+      if (lma_region != NULL && l->os->lma_region == NULL && l->next == NULL)
 	l->os->lma_region = lma_region;
       if (phdrs != NULL && l->os->phdrs == NULL)
 	l->os->phdrs = phdrs;

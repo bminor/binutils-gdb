@@ -1,3 +1,8 @@
+2001-01-23  Alan Modra  <alan@linuxcare.com.au>
+
+	* ldlang.c (lang_leave_overlay): Only set lma_region from the
+	default for the first section of a group of overlay sections.
+
 2001-01-22  Alan Modra  <alan@linuxcare.com.au>
 
 	* Makefile.am (GENSCRIPTS): Pass exec_prefix.
