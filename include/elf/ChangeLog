@@ -1,3 +1,11 @@
+Fri Jul 31 10:01:40 1998 Catherine Moore  <clm@cygnus.com>
+
+        * arm.h: Add R_ARM_THM_PC9 relocation.
+
+1998-07-30 16:25  Ulrich Drepper  <drepper@cygnus.com>
+
+	* common.h: Add new DT_* entries and there flag macros from Solaris.
+
 Tue Jul 28 18:14:07 1998  Stan Cox  <scox@equinox.cygnus.com>
 
 	* sparc.h: (R_SPARC_REV32): Added for little endian data e.g. sparc 86x.
