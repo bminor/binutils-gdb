@@ -1561,7 +1561,7 @@ m68k_ip (instring)
 	      && !(ok_arch & current_architecture))
 	    {
 	      char buf[200], *cp;
-	      int len;
+
 	      strcpy (buf,
 		      "invalid instruction for this architecture; needs ");
 	      cp = buf + strlen (buf);
@@ -1603,8 +1603,7 @@ m68k_ip (instring)
 		      }
 		  }
 		}
-	      len = cp - buf + 1;
-	      cp = malloc (len);
+	      cp = xmalloc (strlen (buf) + 1);
 	      strcpy (cp, buf);
 	      the_ins.error = cp;
 	    }
