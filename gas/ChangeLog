@@ -1,3 +1,14 @@
+Mon Jun 24 11:58:14 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: On alpha*-*-osf*, link against libbfd.a if not
+	using shared libraries.
+	* configure: Rebuild.
+
+Fri Jun 21 18:22:23 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c (mips_ip): In case 'i'/'j', don't require an
+	absolute expression if a relocation type was specified.
+
 Fri Jun 21 17:40:16 1996  Joel Sherrill  <joel@merlin.gcs.redstone.army.mil>
 
 	* configure.in: Add support for *-*-rtems* configurations.
