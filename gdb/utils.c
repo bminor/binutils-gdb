@@ -1,5 +1,5 @@
 /* General utility routines for GDB, the GNU debugger.
-   Copyright (C) 1986, 1989, 1990, 1991 Free Software Foundation, Inc.
+   Copyright 1986, 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -32,10 +32,24 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "bfd.h"
 #include "target.h"
 
-extern volatile void return_to_top_level ();
-extern volatile void exit ();
-extern char *gdb_readline ();
-extern char *getenv();
+/* Prototypes for local functions */
+
+#if !defined (NO_MALLOC_CHECK)
+static void
+malloc_botch PARAMS ((void));
+#endif /* NO_MALLOC_CHECK  */
+
+static void
+fatal_dump_core ();	/* Can't prototype with <varargs.h> usage... */
+
+static void
+prompt_for_continue PARAMS ((void));
+
+static void 
+set_width_command PARAMS ((char *, int, struct cmd_list_element *));
+
+static void
+vfprintf_filtered PARAMS ((FILE *, char *, va_list));
 
 /* If this definition isn't overridden by the header files, assume
    that isatty and fileno exist on this system.  */
@@ -86,8 +100,8 @@ char *warning_pre_print;
 
 struct cleanup *
 make_cleanup (function, arg)
-     void (*function) ();
-     int arg;
+     void (*function) PARAMS ((PTR));
+     PTR arg;
 {
   register struct cleanup *new
     = (struct cleanup *) xmalloc (sizeof (struct cleanup));
@@ -223,7 +237,7 @@ warning (va_alist)
    and the remaining args are passed as arguments to it.  */
 
 /* VARARGS */
-volatile void
+NORETURN void
 error (va_alist)
      va_dcl
 {
@@ -245,10 +259,13 @@ error (va_alist)
 
 /* Print an error message and exit reporting failure.
    This is for a error that we cannot continue from.
-   The arguments are printed a la printf.  */
+   The arguments are printed a la printf.
+
+   This function cannot be declared volatile (NORETURN) in an
+   ANSI environment because exit() is not declared volatile. */
 
 /* VARARGS */
-volatile void
+NORETURN void
 fatal (va_alist)
      va_dcl
 {
@@ -266,8 +283,9 @@ fatal (va_alist)
 
 /* Print an error message and exit, dumping core.
    The arguments are printed a la printf ().  */
+
 /* VARARGS */
-void
+static void
 fatal_dump_core (va_alist)
      va_dcl
 {
@@ -288,6 +306,7 @@ fatal_dump_core (va_alist)
   /* We should never get here, but just in case...  */
   exit (1);
 }
+
 
 /* Memory management stuff (malloc friends).  */
 
@@ -305,6 +324,8 @@ malloc_botch ()
 void
 init_malloc ()
 {
+  extern PTR (*__morecore) PARAMS ((long));
+
   mcheck (malloc_botch);
   mtrace ();
 }
@@ -312,18 +333,13 @@ init_malloc ()
 
 /* Like malloc but get error if no storage available.  */
 
-#ifdef __STDC__
-void *
-#else
-char *
-#endif
+PTR
 xmalloc (size)
      long size;
 {
   register char *val;
 
-  /* At least one place (dbxread.c:condense_misc_bunches where misc_count == 0)
-     GDB wants to allocate zero bytes.  */
+  /* Protect against gdb wanting to allocate zero bytes. */
   if (size == 0)
     return NULL;
   
@@ -335,11 +351,7 @@ xmalloc (size)
 
 /* Like realloc but get error if no storage available.  */
 
-#ifdef __STDC__
-void *
-#else
-char *
-#endif
+PTR
 xrealloc (ptr, size)
      char *ptr;
      long size;
@@ -550,6 +562,7 @@ query (va_alist)
       printf ("Please answer y or n.\n");
     }
 }
+
 
 /* Parse a C escape sequence.  STRING_PTR points to a variable
    containing a pointer to the string to parse.  That pointer
@@ -804,7 +817,7 @@ fputs_filtered (linebuffer, stream)
      const char *linebuffer;
      FILE *stream;
 {
-  char *lineptr;
+  const char *lineptr;
 
   if (linebuffer == 0)
     return;
@@ -912,11 +925,6 @@ fputs_demangled (linebuffer, stream, arg_mode)
      FILE *stream;
      int arg_mode;
 {
-#ifdef __STDC__
-  extern char *cplus_demangle (const char *, int);
-#else
-  extern char *cplus_demangle ();
-#endif
 #define SYMBOL_MAX 1024
 
 #define SYMBOL_CHAR(c) (isascii(c) \
@@ -998,12 +1006,11 @@ fputs_demangled (linebuffer, stream, arg_mode)
    (since prompt_for_continue may do so) so this routine should not be
    called when cleanups are not in place.  */
 
-/* VARARGS */
-void
+static void
 vfprintf_filtered (stream, format, args)
-     va_list args;
      FILE *stream;
      char *format;
+     va_list args;
 {
   static char *linebuffer = (char *) 0;
   static int line_size;
@@ -1041,9 +1048,9 @@ void
 fprintf_filtered (va_alist)
      va_dcl
 {
-  va_list args;
   FILE *stream;
   char *format;
+  va_list args;
 
   va_start (args);
   stream = va_arg (args, FILE *);
@@ -1051,7 +1058,7 @@ fprintf_filtered (va_alist)
 
   /* This won't blow up if the restrictions described above are
      followed.   */
-  (void) vfprintf_filtered (stream, format, args);
+  vfprintf_filtered (stream, format, args);
   va_end (args);
 }
 
@@ -1066,7 +1073,7 @@ printf_filtered (va_alist)
   va_start (args);
   format = va_arg (args, char *);
 
-  (void) vfprintf_filtered (stdout, format, args);
+  vfprintf_filtered (stdout, format, args);
   va_end (args);
 }
 
@@ -1113,7 +1120,6 @@ print_spaces_filtered (n, stream)
 }
 
 /* C++ demangler stuff.  */
-char *cplus_demangle ();
 
 /* Print NAME on STREAM, demangling if necessary.  */
 void

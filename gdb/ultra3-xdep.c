@@ -156,7 +156,7 @@ fetch_inferior_registers (regno)
  * NOTE: Assumes AMD's binary compatibility standard. 
  */
 
-int
+void
 store_inferior_registers (regno)
      int regno;
 {
@@ -166,7 +166,7 @@ store_inferior_registers (regno)
   if (regno >= 0)
     {
       if (CANNOT_STORE_REGISTER(regno)) 
-	return 0;			/*  Pretend success */
+	return;
       regaddr = register_addr (regno, 0);
       errno = 0;
       ptrace (PT_WRITE_U, inferior_pid,(int*)regaddr,read_register(regno));
@@ -209,7 +209,7 @@ store_inferior_registers (regno)
 	{
 	   sprintf (buf, "writing all special registers");
 	   perror_with_name (buf);
- 	   return -1;
+	   return;
 	}
 #else
       store_inferior_registers(GR1_REGNUM);
@@ -229,13 +229,13 @@ store_inferior_registers (regno)
       store_inferior_registers(FC_REGNUM);
 #endif	/* ULTRA3 */
     }
-  return 0;
 }
 
 /* 
  * Read AMD's Binary Compatibilty Standard conforming core file.
  * struct ptrace_user is the first thing in the core file
  */
+
 void
 fetch_core_registers ()
 {

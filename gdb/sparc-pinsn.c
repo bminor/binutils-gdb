@@ -116,7 +116,7 @@ print_insn (memaddr, stream)
       opcodes_sorted = 1;
     }
 
-  read_memory (memaddr, &insn, sizeof (insn));
+  read_memory (memaddr, (char *) &insn, sizeof (insn));
 
   for (i = 0; i < NUMOPCODES; ++i)
     {

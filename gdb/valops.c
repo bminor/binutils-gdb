@@ -1211,8 +1211,8 @@ value_struct_elt (argp, args, name, static_memfuncp, err)
    if NAME is inappropriate for TYPE, an error is signaled.  */
 int
 destructor_name_p (name, type)
-     char *name;
-     struct type *type;
+     const char *name;
+     const struct type *type;
 {
   /* destructors are a special case.  */
 
@@ -1272,8 +1272,8 @@ check_field_in (type, name)
 
 int
 check_field (arg1, name)
-     register value arg1;
-     char *name;
+     register const value arg1;
+     const char *name;
 {
   register struct type *t;
 

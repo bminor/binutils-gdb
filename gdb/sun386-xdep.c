@@ -41,9 +41,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/file.h>
 #include <sys/stat.h>
 #include <sys/core.h>
+
 
 void
-fetch_inferior_registers ()
+fetch_inferior_registers (regno)
+     int regno;
 {
   struct regs inferior_registers;
   struct fp_state inferior_fp_registers;
@@ -67,6 +69,7 @@ fetch_inferior_registers ()
    If REGNO is -1, do this for all registers.
    Otherwise, REGNO specifies which register (so we can save time).  */
 
+void
 store_inferior_registers (regno)
      int regno;
 {
@@ -255,12 +258,15 @@ double_to_i387 (from, to)
 
 /* These functions shouldn't be called when we're cross-debugging.  */
 
+/* ARGSUSED */
 void
-fetch_inferior_registers ()
+fetch_inferior_registers (regno)
+     int regno;
 {
 }
 
 /* ARGSUSED */
+void
 store_inferior_registers (regno)
      int regno;
 {
@@ -268,10 +274,11 @@ store_inferior_registers (regno)
 
 /* ARGSUSED */
 void
-fetch_core_registers (core_reg_sect, core_reg_size, which)
+fetch_core_registers (core_reg_sect, core_reg_size, which, reg_addr)
      char *core_reg_sect;
      unsigned core_reg_size;
      int which;
+     unsigned int reg_addr;	/* Unused in this version */
 {
 }
 

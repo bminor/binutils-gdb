@@ -1,6 +1,6 @@
 /* Macro definitions for GDB on all SVR4 target systems.
-   Copyright (C) 1991, Free Software Foundation, Inc.
-   Written by Fred Fish at Cygnus Support (fnf@cygint)
+   Copyright (C) 1991, 1992, Free Software Foundation, Inc.
+   Written by Fred Fish at Cygnus Support (fnf@cygnus.com).
 
 This file is part of GDB.
 
@@ -18,20 +18,4 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* Support for SVR4 shared libraries. */
-
-#define CLEAR_SOLIB			clear_solib
-extern void clear_solib ();			/* solib.c */
-
-#define SOLIB_ADD(filename, from_tty, targ) solib_add (filename, from_tty, targ)
-extern void solib_add ();			/* solib.c */
-
-#define SOLIB_CREATE_INFERIOR_HOOK	solib_create_inferior_hook
-extern void solib_create_inferior_hook();	/* solib.c */
-
-/* If we can't set a breakpoint, and it's in a shared library, just
-   disable it.  */
-
-#define DISABLE_UNSETTABLE_BREAK(addr)	solib_address(addr)
-extern int solib_address ();			/* solib.c */
-
+#include "solib.h"	/* Support for shared libraries. */

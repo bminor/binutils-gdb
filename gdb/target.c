@@ -31,10 +31,41 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 extern int errno;
 
-extern int memory_insert_breakpoint(), memory_remove_breakpoint();
-extern void host_convert_to_virtual(), host_convert_from_virtual();
+static void
+target_info PARAMS ((char *, int));
 
-static void cleanup_target ();
+static void
+cleanup_target PARAMS ((struct target_ops *));
+
+static void
+maybe_kill_then_create_inferior PARAMS ((char *, char *, char **));
+
+static void
+maybe_kill_then_attach PARAMS ((char *, int));
+
+static void
+kill_or_be_killed PARAMS ((int));
+
+static void
+default_terminal_info PARAMS ((char *, int));
+
+static int
+nosymbol PARAMS ((char *, CORE_ADDR *));
+
+static void
+noprocess PARAMS ((void));
+
+static void
+tcomplain PARAMS ((void));
+
+static int
+nomemory PARAMS ((CORE_ADDR, char *, int, int));
+
+static void
+ignore PARAMS ((void));
+
+static void
+target_command PARAMS ((char *, int));
 
 /* Pointer to array of target architecture structures; the size of the
    array; the current index into the array; the allocated size of the 
@@ -110,8 +141,9 @@ add_target (t)
   if (target_struct_size >= target_struct_allocsize)
     {
       target_struct_allocsize *= 2;
-      target_structs = (struct target_ops **) xrealloc (target_structs, 
-	target_struct_allocsize * sizeof (*target_structs));
+      target_structs = (struct target_ops **)
+	  xrealloc ((char *) target_structs, 
+		    target_struct_allocsize * sizeof (*target_structs));
     }
   target_structs[target_struct_size++] = t;
   cleanup_target (t);
@@ -152,7 +184,7 @@ tcomplain ()
 	 current_target->to_shortname);
 }
 
-static int
+static void
 noprocess ()
 {
   error ("You can't do that without a process to debug");
@@ -271,19 +303,19 @@ cleanup_target (t)
 
   /*        FIELD			DEFAULT VALUE        */
 
-  de_fault (to_open, 			tcomplain);
+  de_fault (to_open, 			(void (*)())tcomplain);
   de_fault (to_close, 			(void (*)())ignore);
   de_fault (to_attach, 			maybe_kill_then_attach);
   de_fault (to_detach, 			(void (*)())ignore);
   de_fault (to_resume, 			(void (*)())noprocess);
-  de_fault (to_wait, 			noprocess);
-  de_fault (to_fetch_registers, 	ignore);
+  de_fault (to_wait, 			(int (*)())noprocess);
+  de_fault (to_fetch_registers, 	(void (*)())ignore);
   de_fault (to_store_registers,		(void (*)())noprocess);
   de_fault (to_prepare_to_store,	(void (*)())noprocess);
   de_fault (to_convert_to_virtual,	host_convert_to_virtual);
   de_fault (to_convert_from_virtual,	host_convert_from_virtual);
-  de_fault (to_xfer_memory,		nomemory);
-  de_fault (to_files_info,		ignore);
+  de_fault (to_xfer_memory,		(int (*)())nomemory);
+  de_fault (to_files_info,		(void (*)())ignore);
   de_fault (to_insert_breakpoint,	memory_insert_breakpoint);
   de_fault (to_remove_breakpoint,	memory_remove_breakpoint);
   de_fault (to_terminal_init,		ignore);
@@ -292,7 +324,7 @@ cleanup_target (t)
   de_fault (to_terminal_ours,		ignore);
   de_fault (to_terminal_info,		default_terminal_info);
   de_fault (to_kill,			(void (*)())noprocess);
-  de_fault (to_load,			tcomplain);
+  de_fault (to_load,			(void (*)())tcomplain);
   de_fault (to_lookup_symbol,		nosymbol);
   de_fault (to_create_inferior,		maybe_kill_then_create_inferior);
   de_fault (to_mourn_inferior,		(void (*)())noprocess);

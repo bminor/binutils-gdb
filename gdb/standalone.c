@@ -338,6 +338,8 @@ get_exec_file (err)
   return "run";
 }
 
+/* Nonzero if there is a core file.  */
+
 have_core_file_p ()
 {
   return 0;
