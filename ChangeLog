@@ -1,5 +1,8 @@
 Thu Sep 10 10:43:19 1992  Ian Lance Taylor  (ian@cygnus.com)
 
+	* Makefile.in: added -I for newlib/targ-include to XTRAFLAGS, to
+	pick up the machine and system specific header files.
+
 	* configure.in, config.sub: added new target m68010-adobe-scout,
 	with alias of adobe68k.  Changed configure.in to check for
 	-scout before -sco* to avoid a false match.

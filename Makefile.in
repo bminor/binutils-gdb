@@ -142,7 +142,7 @@ XTRAFLAGS = ` \
     if [ "$(host_cpu)-$(host_vendor)-$(host_os)" = "$(target_cpu)-$(target_vendor)-$(target_os)" ] ; then \
       echo -I$${rootme}/gcc/include ; \
     else \
-      echo -I$${rootme}/gcc/include -I$${srcroot}/newlib/libc/include ; \
+      echo -I$${rootme}/gcc/include -I$${rootme}/newlib/targ-include -I$${srcroot}/newlib/libc/include ; \
     fi ; \
   else \
      echo ; \
