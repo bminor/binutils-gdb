@@ -1,3 +1,9 @@
+Mon Mar 17 10:52:59 1997  Gavin Koch  <gavin@cetus.cygnus.com>
+
+	* interp.c : Replace uses of pr_addr with pr_uword64
+	where the bit length is always 64 independent of SIM_ADDR.
+	(pr_uword64) : added.
+
 Mon Mar 17 15:10:07 1997  Andrew Cagney  <cagney@kremvax.cygnus.com>
 
 	* configure: Re-generate.
