@@ -216,6 +216,9 @@ static struct abbrev_info **read_abbrevs
 static char *read_attribute
   PARAMS ((struct attribute *, struct attr_abbrev *,
 	   struct comp_unit *, char *));
+static char *read_attribute_value
+  PARAMS ((struct attribute *, unsigned,
+	   struct comp_unit *, char *));
 static void add_line_info
   PARAMS ((struct line_info_table *, bfd_vma, char *,
 	   unsigned int, unsigned int, int));
@@ -564,12 +567,12 @@ read_abbrevs (abfd, offset, stash)
   return abbrevs;
 }
 
-/* Read an attribute described by an abbreviated attribute.  */
+/* Read an attribute value described by an attribute form.  */
 
 static char *
-read_attribute (attr, abbrev, unit, info_ptr)
+read_attribute_value (attr, form, unit, info_ptr)
      struct attribute   *attr;
-     struct attr_abbrev *abbrev;
+     unsigned form;
      struct comp_unit   *unit;
      char               *info_ptr;
 {
@@ -578,10 +581,9 @@ read_attribute (attr, abbrev, unit, info_ptr)
   struct dwarf_block *blk;
   bfd_size_type amt;
 
-  attr->name = abbrev->name;
-  attr->form = abbrev->form;
+  attr->form = form;
 
-  switch (abbrev->form)
+  switch (form)
     {
     case DW_FORM_addr:
     case DW_FORM_ref_addr:
@@ -676,13 +678,31 @@ read_attribute (attr, abbrev, unit, info_ptr)
       DW_UNSND (attr) = read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
       info_ptr += bytes_read;
       break;
-    case DW_FORM_strp:
     case DW_FORM_indirect:
+      form = read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
+      info_ptr += bytes_read;
+      info_ptr = read_attribute_value (attr, form, unit, info_ptr);
+      break;
+    case DW_FORM_strp:
     default:
       (*_bfd_error_handler) (_("Dwarf Error: Invalid or unhandled FORM value: %d."),
-			     abbrev->form);
+			     form);
       bfd_set_error (bfd_error_bad_value);
     }
+  return info_ptr;
+}
+
+/* Read an attribute described by an abbreviated attribute.  */
+
+static char *
+read_attribute (attr, abbrev, unit, info_ptr)
+     struct attribute   *attr;
+     struct attr_abbrev *abbrev;
+     struct comp_unit   *unit;
+     char               *info_ptr;
+{
+  attr->name = abbrev->name;
+  info_ptr = read_attribute_value (attr, abbrev->form, unit, info_ptr);
   return info_ptr;
 }
 
