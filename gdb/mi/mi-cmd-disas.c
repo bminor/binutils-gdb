@@ -1,5 +1,5 @@
 /* MI Command Set - disassemble commands.
-   Copyright 2000, 2001 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions (a Red Hat company).
 
    This file is part of GDB.
@@ -438,7 +438,7 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
 		xfree (name);
 
 	      ui_file_rewind (stb->stream);
-	      pc += (*tm_print_insn) (pc, &di);
+	      pc += TARGET_PRINT_INSN (pc, &di);
 	      ui_out_field_stream (uiout, "inst", stb);
 	      ui_file_rewind (stb->stream);
 	      ui_out_tuple_end (uiout);
@@ -486,7 +486,7 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
 	    xfree (name);
 
 	  ui_file_rewind (stb->stream);
-	  pc += (*tm_print_insn) (pc, &di);
+	  pc += TARGET_PRINT_INSN (pc, &di);
 	  ui_out_field_stream (uiout, "inst", stb);
 	  ui_file_rewind (stb->stream);
 	  ui_out_tuple_end (uiout);

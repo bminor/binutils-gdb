@@ -1,3 +1,9 @@
+2002-04-05  Elena Zannoni  <ezannoni@redhat.com>
+
+	* mi-cmd-disas.c (mi_cmd_disassemble): Use TARGET_PRINT_INSN
+	instead of tm_print_insn.
+	Update copyright year.
+
 2002-04-04  Daniel Jacobowitz  <drow@mvista.com>
 
 	* mi-cmd-disas.c (mi_cmd_disassemble): Skip end-of-function
