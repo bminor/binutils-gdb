@@ -46,7 +46,7 @@ README
 TODO
 cdtest-foo.cc
 cdtest-foo.h
-cdtest-func.cc
+cdtest-bar.cc
 cdtest-main.cc
 cdtest.exp
 config
