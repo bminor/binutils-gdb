@@ -162,7 +162,6 @@ struct gdbarch
   gdbarch_deprecated_dummy_write_sp_ftype *deprecated_dummy_write_sp;
   int deprecated_register_size;
   int call_dummy_location;
-  gdbarch_deprecated_fix_call_dummy_ftype *deprecated_fix_call_dummy;
   gdbarch_push_dummy_code_ftype *push_dummy_code;
   gdbarch_deprecated_do_registers_info_ftype *deprecated_do_registers_info;
   gdbarch_print_registers_info_ftype *print_registers_info;
@@ -316,7 +315,6 @@ struct gdbarch startup_gdbarch =
   0,  /* deprecated_dummy_write_sp */
   0,  /* deprecated_register_size */
   0,  /* call_dummy_location */
-  0,  /* deprecated_fix_call_dummy */
   0,  /* push_dummy_code */
   0,  /* deprecated_do_registers_info */
   default_print_registers_info,  /* print_registers_info */
@@ -605,7 +603,6 @@ verify_gdbarch (struct gdbarch *current_gdbarch)
   /* Skip verify of deprecated_push_return_address, has predicate */
   /* Skip verify of deprecated_dummy_write_sp, has predicate */
   /* Skip verify of call_dummy_location, invalid_p == 0 */
-  /* Skip verify of deprecated_fix_call_dummy, has predicate */
   /* Skip verify of push_dummy_code, has predicate */
   /* Skip verify of deprecated_do_registers_info, has predicate */
   /* Skip verify of print_registers_info, invalid_p == 0 */
@@ -972,25 +969,6 @@ gdbarch_dump (struct gdbarch *current_gdbarch, struct ui_file *file)
                       "gdbarch_dump: DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS = <0x%08lx>\n",
                       (long) current_gdbarch->deprecated_extract_struct_value_address
                       /*DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS ()*/);
-#endif
-#ifdef DEPRECATED_FIX_CALL_DUMMY_P
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "DEPRECATED_FIX_CALL_DUMMY_P()",
-                      XSTRING (DEPRECATED_FIX_CALL_DUMMY_P ()));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_FIX_CALL_DUMMY_P() = %d\n",
-                      DEPRECATED_FIX_CALL_DUMMY_P ());
-#endif
-#ifdef DEPRECATED_FIX_CALL_DUMMY
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: %s # %s\n",
-                      "DEPRECATED_FIX_CALL_DUMMY(dummy, pc, fun, nargs, args, type, gcc_p)",
-                      XSTRING (DEPRECATED_FIX_CALL_DUMMY (dummy, pc, fun, nargs, args, type, gcc_p)));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: DEPRECATED_FIX_CALL_DUMMY = <0x%08lx>\n",
-                      (long) current_gdbarch->deprecated_fix_call_dummy
-                      /*DEPRECATED_FIX_CALL_DUMMY ()*/);
 #endif
 #ifdef DEPRECATED_FP_REGNUM
   fprintf_unfiltered (file,
@@ -3214,30 +3192,6 @@ set_gdbarch_call_dummy_location (struct gdbarch *gdbarch,
                                  int call_dummy_location)
 {
   gdbarch->call_dummy_location = call_dummy_location;
-}
-
-int
-gdbarch_deprecated_fix_call_dummy_p (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  return gdbarch->deprecated_fix_call_dummy != NULL;
-}
-
-void
-gdbarch_deprecated_fix_call_dummy (struct gdbarch *gdbarch, char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs, struct value **args, struct type *type, int gcc_p)
-{
-  gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->deprecated_fix_call_dummy != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_deprecated_fix_call_dummy called\n");
-  gdbarch->deprecated_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p);
-}
-
-void
-set_gdbarch_deprecated_fix_call_dummy (struct gdbarch *gdbarch,
-                                       gdbarch_deprecated_fix_call_dummy_ftype deprecated_fix_call_dummy)
-{
-  gdbarch->deprecated_fix_call_dummy = deprecated_fix_call_dummy;
 }
 
 int

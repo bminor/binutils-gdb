@@ -551,7 +551,6 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Call dummy info */
   set_gdbarch_deprecated_pop_frame (gdbarch, ns32k_pop_frame);
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
-  set_gdbarch_deprecated_fix_call_dummy (gdbarch, ns32k_fix_call_dummy);
 
   /* Breakpoint info */
   set_gdbarch_breakpoint_from_pc (gdbarch, ns32k_breakpoint_from_pc);

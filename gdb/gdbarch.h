@@ -827,36 +827,6 @@ extern void set_gdbarch_call_dummy_location (struct gdbarch *gdbarch, int call_d
 #define CALL_DUMMY_LOCATION (gdbarch_call_dummy_location (current_gdbarch))
 #endif
 
-/* DEPRECATED_FIX_CALL_DUMMY can be deleted.  For the SPARC, implement
-   PUSH_DUMMY_CODE and set CALL_DUMMY_LOCATION to ON_STACK. */
-
-#if defined (DEPRECATED_FIX_CALL_DUMMY)
-/* Legacy for systems yet to multi-arch DEPRECATED_FIX_CALL_DUMMY */
-#if !defined (DEPRECATED_FIX_CALL_DUMMY_P)
-#define DEPRECATED_FIX_CALL_DUMMY_P() (1)
-#endif
-#endif
-
-extern int gdbarch_deprecated_fix_call_dummy_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_FIX_CALL_DUMMY_P)
-#error "Non multi-arch definition of DEPRECATED_FIX_CALL_DUMMY"
-#endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_FIX_CALL_DUMMY_P)
-#define DEPRECATED_FIX_CALL_DUMMY_P() (gdbarch_deprecated_fix_call_dummy_p (current_gdbarch))
-#endif
-
-typedef void (gdbarch_deprecated_fix_call_dummy_ftype) (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs, struct value **args, struct type *type, int gcc_p);
-extern void gdbarch_deprecated_fix_call_dummy (struct gdbarch *gdbarch, char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs, struct value **args, struct type *type, int gcc_p);
-extern void set_gdbarch_deprecated_fix_call_dummy (struct gdbarch *gdbarch, gdbarch_deprecated_fix_call_dummy_ftype *deprecated_fix_call_dummy);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_FIX_CALL_DUMMY)
-#error "Non multi-arch definition of DEPRECATED_FIX_CALL_DUMMY"
-#endif
-#if !defined (DEPRECATED_FIX_CALL_DUMMY)
-#define DEPRECATED_FIX_CALL_DUMMY(dummy, pc, fun, nargs, args, type, gcc_p) (gdbarch_deprecated_fix_call_dummy (current_gdbarch, dummy, pc, fun, nargs, args, type, gcc_p))
-#endif
-
-/* This is a replacement for DEPRECATED_FIX_CALL_DUMMY et.al. */
-
 extern int gdbarch_push_dummy_code_p (struct gdbarch *gdbarch);
 
 typedef CORE_ADDR (gdbarch_push_dummy_code_ftype) (struct gdbarch *gdbarch, CORE_ADDR sp, CORE_ADDR funaddr, int using_gcc, struct value **args, int nargs, struct type *value_type, CORE_ADDR *real_pc, CORE_ADDR *bp_addr);

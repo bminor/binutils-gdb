@@ -3658,7 +3658,6 @@ This method replaces @code{DEPRECATED_PUSH_ARGUMENTS}.
 
 @item CORE_ADDR push_dummy_code (@var{gdbarch}, @var{sp}, @var{funaddr}, @var{using_gcc}, @var{args}, @var{nargs}, @var{value_type}, @var{real_pc}, @var{bp_addr})
 @findex push_dummy_code
-@findex DEPRECATED_FIX_CALL_DUMMY
 @anchor{push_dummy_code} Given a stack based call dummy, push the
 instruction sequence (including space for a breakpoint) to which the
 called function should return.
@@ -3672,7 +3671,7 @@ By default, the stack is grown sufficient to hold a frame-aligned
 reserved for that breakpoint, and @var{real_pc} set to @var{funaddr}.
 
 This method replaces @code{CALL_DUMMY_LOCATION},
-@code{DEPRECATED_REGISTER_SIZE}, and @code{DEPRECATED_FIX_CALL_DUMMY}.
+@code{DEPRECATED_REGISTER_SIZE}.
 
 @item DEPRECATED_REGISTER_BYTES
 @findex DEPRECATED_REGISTER_BYTES

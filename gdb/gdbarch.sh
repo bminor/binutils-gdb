@@ -525,10 +525,6 @@ F:2:DEPRECATED_DUMMY_WRITE_SP:void:deprecated_dummy_write_sp:CORE_ADDR val:val
 # DEPRECATED_REGISTER_SIZE can be deleted.
 v::DEPRECATED_REGISTER_SIZE:int:deprecated_register_size
 v::CALL_DUMMY_LOCATION:int:call_dummy_location:::::AT_ENTRY_POINT::0
-# DEPRECATED_FIX_CALL_DUMMY can be deleted.  For the SPARC, implement
-# PUSH_DUMMY_CODE and set CALL_DUMMY_LOCATION to ON_STACK.
-F::DEPRECATED_FIX_CALL_DUMMY:void:deprecated_fix_call_dummy:char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs, struct value **args, struct type *type, int gcc_p:dummy, pc, fun, nargs, args, type, gcc_p
-# This is a replacement for DEPRECATED_FIX_CALL_DUMMY et.al.
 M::PUSH_DUMMY_CODE:CORE_ADDR:push_dummy_code:CORE_ADDR sp, CORE_ADDR funaddr, int using_gcc, struct value **args, int nargs, struct type *value_type, CORE_ADDR *real_pc, CORE_ADDR *bp_addr:sp, funaddr, using_gcc, args, nargs, value_type, real_pc, bp_addr
 
 F:2:DEPRECATED_DO_REGISTERS_INFO:void:deprecated_do_registers_info:int reg_nr, int fpregs:reg_nr, fpregs

@@ -1,6 +1,9 @@
 2004-05-08  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Delete
+	references to DEPRECATED_FIX_CALL_DUMMY.
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
 	description of DEPRECATED_CALL_DUMMY_WORDS,
 	DEPRECATED_SIZEOF_CALL_DUMMY_WORDS, and CALL_DUMMY.
 

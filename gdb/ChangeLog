@@ -1,5 +1,13 @@
 2004-05-08  Andrew Cagney  <cagney@redhat.com>
 
+	* gdbarch.sh (DEPRECATED_FIX_CALL_DUMMY): Delete.
+	* gdbarch.h, gdbarch.c: Re-generate.
+	* ns32k-tdep.c (ns32k_gdbarch_init): Do not set
+	deprecated_fix_call_dummy.
+	* v850-tdep.c (v850_gdbarch_init): Ditto.
+	* infcall.c (call_function_by_hand): Do not call
+	DEPRECATED_FIX_CALL_DUMMY.
+
 	* gdbarch.sh (DEPRECATED_CALL_DUMMY_WORDS)
 	(DEPRECATED_SIZEOF_CALL_DUMMY_WORDS): Delete.
 	* gdbarch.h, gdbarch.c: Re-generate.

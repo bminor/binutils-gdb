@@ -451,18 +451,6 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 	}
       break;
     case AT_ENTRY_POINT:
-      if (DEPRECATED_FIX_CALL_DUMMY_P ()
-	  && !gdbarch_push_dummy_call_p (current_gdbarch))
-	{
-	  /* Sigh.  Some targets use DEPRECATED_FIX_CALL_DUMMY to
-             shove extra stuff onto the stack or into registers.  That
-             code should be in PUSH_DUMMY_CALL, however, in the mean
-             time ...  */
-	  /* If the target is manipulating DUMMY1, it looses big time.  */
-	  void *dummy1 = NULL;
-	  DEPRECATED_FIX_CALL_DUMMY (dummy1, sp, funaddr, nargs, args,
-				     value_type, using_gcc);
-	}
       real_pc = funaddr;
       dummy_addr = entry_point_address ();
       /* Make certain that the address points at real code, and not a
