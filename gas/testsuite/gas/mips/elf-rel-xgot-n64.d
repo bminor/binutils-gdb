@@ -726,14 +726,14 @@ Disassembly of section \.text:
 			490: R_MIPS_NONE	\*ABS\*\+0xc0
 			490: R_MIPS_NONE	\*ABS\*\+0xc0
 0000000000000494 <fn\+0x494> df810000 	ld	at,0\(gp\)
-			494: R_MIPS_GOT_PAGE	\.data\+0xb4
-			494: R_MIPS_NONE	\*ABS\*\+0xb4
-			494: R_MIPS_NONE	\*ABS\*\+0xb4
+			494: R_MIPS_GOT_PAGE	\.data\+0xd6
+			494: R_MIPS_NONE	\*ABS\*\+0xd6
+			494: R_MIPS_NONE	\*ABS\*\+0xd6
 0000000000000498 <fn\+0x498> 0025082d 	daddu	at,at,a1
 000000000000049c <fn\+0x49c> dc250000 	ld	a1,0\(at\)
-			49c: R_MIPS_GOT_OFST	\.data\+0xb4
-			49c: R_MIPS_NONE	\*ABS\*\+0xb4
-			49c: R_MIPS_NONE	\*ABS\*\+0xb4
+			49c: R_MIPS_GOT_OFST	\.data\+0xd6
+			49c: R_MIPS_NONE	\*ABS\*\+0xd6
+			49c: R_MIPS_NONE	\*ABS\*\+0xd6
 00000000000004a0 <fn\+0x4a0> df810000 	ld	at,0\(gp\)
 			4a0: R_MIPS_GOT_PAGE	\.data\+0xec
 			4a0: R_MIPS_NONE	\*ABS\*\+0xec

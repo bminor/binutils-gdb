@@ -1,3 +1,10 @@
+2003-12-06  Richard Sandiford  <rsandifo@redhat.com>
+
+	* gas/mips/elf-rel16.[sd]: New test.
+	* gas/mips/mips.exp: Run it.
+	* gas/mips/elf-rel-xgot-n32.d: Fix addends for "lw $5,dl1+34($5)".
+	* gas/mips/elf-rel-xgot-n64.d: Likewise.
+
 2003-12-05  Ricardo Anguiano <anguiano@codesourcery.com>
 	    Mark Mitchell  <mark@codesourcery.com>
 	    Richard Earnshaw  <rearnsha@arm.com>

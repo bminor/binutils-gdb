@@ -6348,13 +6348,13 @@ macro (struct mips_cl_insn *ip)
 	       lw	$tempreg,<sym>($gp)	(BFD_RELOC_MIPS_GOT_PAGE)
 	       <op>	$treg,<sym>($tempreg)   (BFD_RELOC_MIPS_GOT_OFST)  */
 	  assert (offset_expr.X_op == O_symbol);
+	  frag_grow (36);
 	  frag_now->tc_frag_data.tc_fr_offset =
 	    expr1.X_add_number = offset_expr.X_add_number;
 	  offset_expr.X_add_number = 0;
 	  if (expr1.X_add_number < -0x8000
 	      || expr1.X_add_number >= 0x8000)
 	    as_bad (_("PIC code offset overflow (max 16 signed bits)"));
-	  frag_grow (36);
 	  macro_build (NULL, &icnt, &offset_expr, "lui", "t,u", tempreg,
 		       BFD_RELOC_MIPS_GOT_HI16);
 	  macro_build (NULL, &icnt, NULL, ADDRESS_ADD_INSN, "d,v,t",

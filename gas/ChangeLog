@@ -1,3 +1,8 @@
+2003-12-06  Richard Sandiford  <rsandifo@redhat.com>
+
+	* config/tc-mips.c (macro): Switch misordered call to frag_grow()
+	and setting of tc_fr_offset.
+
 2003-12-05  Ricardo Anguiano <anguiano@codesourcery.com>
 	    Mark Mitchell  <mark@codesourcery.com>
 	    Richard Earnshaw  <rearnsha@arm.com>

@@ -442,10 +442,10 @@ Disassembly of section \.text:
 00000490 <fn\+0x490> 8ca50000 	lw	a1,0\(a1\)
 			490: R_MIPS_GOT_OFST	\.data\+0xc0
 00000494 <fn\+0x494> 8f810000 	lw	at,0\(gp\)
-			494: R_MIPS_GOT_PAGE	\.data\+0xb4
+			494: R_MIPS_GOT_PAGE	\.data\+0xd6
 00000498 <fn\+0x498> 00250821 	addu	at,at,a1
 0000049c <fn\+0x49c> 8c250000 	lw	a1,0\(at\)
-			49c: R_MIPS_GOT_OFST	\.data\+0xb4
+			49c: R_MIPS_GOT_OFST	\.data\+0xd6
 000004a0 <fn\+0x4a0> 8f810000 	lw	at,0\(gp\)
 			4a0: R_MIPS_GOT_PAGE	\.data\+0xec
 000004a4 <fn\+0x4a4> 00250821 	addu	at,at,a1
