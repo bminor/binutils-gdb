@@ -1,5 +1,21 @@
 2004-02-21  Daniel Jacobowitz  <drow@mvista.com>
 
+	* dwarf2read.c (struct partial_die_info): Add full_name.
+	(scan_partial_symbols, add_partial_symbol, add_partial_structure)
+	(add_partial_enumeration): Change namespace argument to
+	have_namespace_info flag.  Move DW_TAG_namespace handling to
+	add_partial_symbol.  Update comments.
+	(pdi_needs_namespace): Remove namespace argument.  Handle
+	DW_TAG_namespace.
+	(partial_determine_prefix, partial_determine_prefix_aux): Remove.
+	(dwarf2_build_psymtabs_hard): Update call to scan_partial_symbols.
+	(partial_die_full_name): New function.
+	(load_partial_die): Correct comment formatting.  Don't handle
+	DW_TAG_enumeration_type.
+	(load_partial_dies): Correct comment formatting.
+
+2004-02-21  Daniel Jacobowitz  <drow@mvista.com>
+
 	* dwarf2read.c (load_partial_dies): Check for NULL name before
 	adding types.
 

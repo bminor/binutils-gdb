@@ -404,6 +404,7 @@ struct partial_die_info
     unsigned int has_specification : 1;
     unsigned int has_pc_info : 1;
     char *name;
+    char *full_name;
     struct dwarf_block *locdesc;
     CORE_ADDR lowpc;
     CORE_ADDR highpc;
@@ -647,26 +648,24 @@ static void dwarf2_build_psymtabs_hard (struct objfile *, int);
 
 static void scan_partial_symbols (struct partial_die_info *,
 				  CORE_ADDR *, CORE_ADDR *,
-				  struct dwarf2_cu *,
-				  const char *namespace);
+				  struct dwarf2_cu *, int);
 
 static void add_partial_symbol (struct partial_die_info *, struct dwarf2_cu *,
-				const char *namespace);
+				int have_namespace_info);
 
-static int pdi_needs_namespace (enum dwarf_tag tag, const char *namespace);
+static int pdi_needs_namespace (enum dwarf_tag tag);
 
 static void add_partial_namespace (struct partial_die_info *pdi,
 				   CORE_ADDR *lowpc, CORE_ADDR *highpc,
-				   struct dwarf2_cu *cu,
-				   const char *namespace);
+				   struct dwarf2_cu *cu);
 
 static void add_partial_structure (struct partial_die_info *struct_pdi,
 				   struct dwarf2_cu *cu,
-				   const char *namespace);
+				   int have_namespace_info);
 
 static void add_partial_enumeration (struct partial_die_info *enum_pdi,
 				     struct dwarf2_cu *cu,
-				     const char *namespace);
+				     int have_namespace_info);
 
 static char *locate_pdi_sibling (struct partial_die_info *orig_pdi,
 				 char *info_ptr,
@@ -789,10 +788,6 @@ static void read_type_die (struct die_info *, struct dwarf2_cu *);
 static char *determine_prefix (struct die_info *die, struct dwarf2_cu *);
 
 static char *determine_prefix_aux (struct die_info *die, struct dwarf2_cu *);
-
-static char *partial_determine_prefix (struct partial_die_info *die, struct dwarf2_cu *);
-
-static char *partial_determine_prefix_aux (struct partial_die_info *die, struct dwarf2_cu *);
 
 static char *typename_concat (const char *prefix, const char *suffix);
 
@@ -1370,7 +1365,7 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 
 	  first_die = load_partial_dies (abfd, info_ptr, &cu);
 
-	  scan_partial_symbols (first_die, &lowpc, &highpc, &cu, NULL);
+	  scan_partial_symbols (first_die, &lowpc, &highpc, &cu, 0);
 
 	  cu.partial_dies = NULL;
 	  obstack_free (&cu.partial_die_obstack, NULL);
@@ -1420,7 +1415,7 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 static void
 scan_partial_symbols (struct partial_die_info *first_die, CORE_ADDR *lowpc,
 		      CORE_ADDR *highpc, struct dwarf2_cu *cu,
-		      const char *namespace)
+		      int have_namespace_info)
 {
   struct objfile *objfile = cu->objfile;
   bfd *abfd = objfile->obfd;
@@ -1458,7 +1453,7 @@ scan_partial_symbols (struct partial_die_info *first_die, CORE_ADDR *lowpc,
 		    }
 		  if (!pdi_p->is_declaration)
 		    {
-		      add_partial_symbol (pdi_p, cu, namespace);
+		      add_partial_symbol (pdi_p, cu, have_namespace_info);
 		    }
 		}
 	      break;
@@ -1467,89 +1462,112 @@ scan_partial_symbols (struct partial_die_info *first_die, CORE_ADDR *lowpc,
 	    case DW_TAG_union_type:
 	      if (!pdi_p->is_declaration)
 		{
-		  add_partial_symbol (pdi_p, cu, namespace);
+		  add_partial_symbol (pdi_p, cu, have_namespace_info);
 		}
 	      break;
 	    case DW_TAG_class_type:
 	    case DW_TAG_structure_type:
 	      if (!pdi_p->is_declaration)
 		{
-		  add_partial_structure (pdi_p, cu, namespace);
+		  add_partial_structure (pdi_p, cu, have_namespace_info);
 		}
 	      break;
 	    case DW_TAG_enumeration_type:
 	      if (!pdi_p->is_declaration)
-		add_partial_enumeration (pdi_p, cu, namespace);
+		add_partial_enumeration (pdi_p, cu, have_namespace_info);
 	      break;
 	    case DW_TAG_base_type:
             case DW_TAG_subrange_type:
 	      /* File scope base type definitions are added to the partial
 	         symbol table.  */
-	      add_partial_symbol (pdi_p, cu, namespace);
+	      add_partial_symbol (pdi_p, cu, have_namespace_info);
 	      break;
 	    case DW_TAG_namespace:
 	      /* We've hit a DW_TAG_namespace entry, so we know this
 		 file has been compiled using a compiler that
 		 generates them; update NAMESPACE to reflect that.  */
-	      if (namespace == NULL)
-		namespace = "";
-	      add_partial_namespace (pdi_p, lowpc, highpc, cu, namespace);
+	      have_namespace_info = 1;
+	      add_partial_namespace (pdi_p, lowpc, highpc, cu);
 	      break;
 	    default:
 	      break;
 	    }
 	}
 
-      /* FIXME unnecessary now */
-      if (pdi_p->tag == 0)
-	break;
-
-      /* If the die has a sibling, skip to the sibling, unless another
-	 function has already updated info_ptr for us.  */
-
-      /* NOTE: carlton/2003-06-16: This is a bit hackish, but whether
-	 or not we want to update this depends on enough stuff (not
-	 only pdi_p->tag but also whether or not pdi_p->name is NULL) that
-	 this seems like the easiest way to handle the issue.  */
+      /* If the die has a sibling, skip to the sibling.  */
 
       pdi_p = pdi_p->die_sibling;
-      // if (pdi_p)
-      // fprintf_unfiltered (gdb_stderr, "scan: Advancing to DIE %x\n", pdi_p->offset);
     }
+}
+
+static char *
+partial_die_full_name (struct partial_die_info *pdi, int allocate,
+		       struct dwarf2_cu *cu)
+{
+  char *full_name, *parent_name;
+  struct partial_die_info *real_parent;
+
+  /* Note: this code could be micro-optimized.  We could avoid redoing
+     the hash table lookup, which we've probably already done once,
+     and we might be able to use real_pdi->full_name if there is a
+     specification.  */
+
+  if (pdi->has_specification)
+    real_parent = find_partial_die (pdi->spec_offset, cu)->die_parent;
+  else
+    real_parent = pdi->die_parent;
+
+  if (real_parent == NULL)
+    return NULL;
+
+  parent_name = real_parent->full_name;
+  if (parent_name == NULL)
+    parent_name = real_parent->name;
+
+  if (allocate)
+    full_name = obconcat (&cu->partial_die_obstack,
+			  parent_name, "::", pdi->name);
+  else
+    full_name = concat (parent_name, "::", pdi->name, NULL);
+
+  return full_name;
 }
 
 static void
 add_partial_symbol (struct partial_die_info *pdi,
-		    struct dwarf2_cu *cu, const char *namespace)
+		    struct dwarf2_cu *cu, int have_namespace_info)
 {
   struct objfile *objfile = cu->objfile;
   CORE_ADDR addr = 0;
-  char *actual_name = pdi->name;
+  char *actual_name;
   const char *my_prefix;
   const struct partial_symbol *psym = NULL;
   CORE_ADDR baseaddr;
+  int free_actual_name = 0;
 
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
-  /* If we're not in the global namespace and if the namespace name
-     isn't encoded in a mangled actual_name, add it.  */
-
-  if (pdi->spec_offset
-      && pdi_needs_namespace (pdi->tag, "foo"))
-    my_prefix = partial_determine_prefix (pdi, cu);
-  else
-    my_prefix = namespace;
-
-  if (pdi_needs_namespace (pdi->tag, my_prefix))
+  if (pdi_needs_namespace (pdi->tag) && pdi->full_name == NULL)
     {
-      actual_name = alloca (strlen (pdi->name) + 2 + strlen (my_prefix) + 1);
-      strcpy (actual_name, my_prefix);
-      strcat (actual_name, "::");
-      strcat (actual_name, pdi->name);
+      if (pdi->tag == DW_TAG_namespace
+	  || pdi->tag == DW_TAG_class_type
+	  || pdi->tag == DW_TAG_structure_type
+	  || pdi->tag == DW_TAG_union_type)
+	{
+	  pdi->full_name = partial_die_full_name (pdi, 1, cu);
+	  actual_name = pdi->full_name;
+	}
+      else
+	{
+	  actual_name = partial_die_full_name (pdi, 0, cu);
+	  if (actual_name)
+	    free_actual_name = 1;
+	}
+      if (actual_name == NULL)
+	actual_name = pdi->name;
     }
-
-  if (my_prefix)
-    free ((char *) my_prefix);
+  else
+    actual_name = pdi->name;
 
   switch (pdi->tag)
     {
@@ -1623,6 +1641,12 @@ add_partial_symbol (struct partial_die_info *pdi,
 			   &objfile->static_psymbols,
 			   0, (CORE_ADDR) 0, cu->language, objfile);
       break;
+    case DW_TAG_namespace:
+      add_psymbol_to_list (actual_name, strlen (actual_name),
+			   VAR_DOMAIN, LOC_TYPEDEF,
+			   &objfile->global_psymbols,
+			   0, (CORE_ADDR) 0, cu->language, objfile);
+      break;
     case DW_TAG_class_type:
     case DW_TAG_structure_type:
     case DW_TAG_union_type:
@@ -1668,25 +1692,26 @@ add_partial_symbol (struct partial_die_info *pdi,
      mangled name to begin with.  */
 
   if (cu->language == language_cplus
-      && namespace == NULL
+      && have_namespace_info == 0
       && psym != NULL
       && SYMBOL_CPLUS_DEMANGLED_NAME (psym) != NULL)
     cp_check_possible_namespace_symbols (SYMBOL_CPLUS_DEMANGLED_NAME (psym),
 					 objfile);
+
+  if (free_actual_name)
+    xfree (actual_name);
 }
 
-/* Determine whether a die of type TAG living in the C++ namespace
-   NAMESPACE needs to have the name of the namespace prepended to the
+/* Determine whether a die of type TAG living in a C++ class or
+   namespace needs to have the name of the scope prepended to the
    name listed in the die.  */
 
 static int
-pdi_needs_namespace (enum dwarf_tag tag, const char *namespace)
+pdi_needs_namespace (enum dwarf_tag tag)
 {
-  if (namespace == NULL || namespace[0] == '\0')
-    return 0;
-
   switch (tag)
     {
+    case DW_TAG_namespace:
     case DW_TAG_typedef:
     case DW_TAG_class_type:
     case DW_TAG_structure_type:
@@ -1706,37 +1731,23 @@ pdi_needs_namespace (enum dwarf_tag tag, const char *namespace)
 static void
 add_partial_namespace (struct partial_die_info *pdi,
 		       CORE_ADDR *lowpc, CORE_ADDR *highpc,
-		       struct dwarf2_cu *cu, const char *namespace)
+		       struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->objfile;
-  const char *new_name = pdi->name;
   char *full_name;
 
   /* Calculate the full name of the namespace that we just entered.  */
 
-  if (new_name == NULL)
-    new_name = "(anonymous namespace)";
-  full_name = alloca (strlen (namespace) + 2 + strlen (new_name) + 1);
-  strcpy (full_name, namespace);
-  if (*namespace != '\0')
-    strcat (full_name, "::");
-  strcat (full_name, new_name);
+  if (pdi->name == NULL)
+    pdi->name = "(anonymous namespace)";
 
-  /* FIXME: carlton/2003-10-07: We can't just replace this by a call
-     to add_partial_symbol, because we don't have a way to pass in the
-     full name to that function; that might be a flaw in
-     add_partial_symbol's interface.  */
-
-  add_psymbol_to_list (full_name, strlen (full_name),
-		       VAR_DOMAIN, LOC_TYPEDEF,
-		       &objfile->global_psymbols,
-		       0, 0, cu->language, objfile);
+  add_partial_symbol (pdi, cu, 1);
 
   /* Now scan partial symbols in that namespace.  */
 
   if (pdi->has_children)
     scan_partial_symbols (pdi->die_child,
-			  lowpc, highpc, cu, full_name);
+			  lowpc, highpc, cu, 1);
 }
 
 /* Read a partial die corresponding to a class or structure.  */
@@ -1744,14 +1755,16 @@ add_partial_namespace (struct partial_die_info *pdi,
 static void
 add_partial_structure (struct partial_die_info *struct_pdi,
 		       struct dwarf2_cu *cu,
-		       const char *namespace)
+		       int have_namespace_info)
 {
   bfd *abfd = cu->objfile->obfd;
-  char *actual_class_name = NULL;
+  char *full_name;
+
+  if (struct_pdi->name == NULL)
+    struct_pdi->name = "(anonymous class)";
 
   if (cu->language == language_cplus
-      && namespace == NULL
-      && struct_pdi->name != NULL
+      && have_namespace_info == 0
       && struct_pdi->has_children)
     {
       /* See if we can figure out if the class lives in a namespace
@@ -1771,9 +1784,16 @@ add_partial_structure (struct partial_die_info *struct_pdi,
 	{
 	  if (child_pdi->tag == DW_TAG_subprogram)
 	    {
-	      actual_class_name = class_name_from_physname (child_pdi->name);
+	      char *actual_class_name
+		= class_name_from_physname (child_pdi->name);
 	      if (actual_class_name != NULL)
-		struct_pdi->name = actual_class_name;
+		{
+		  struct_pdi->full_name
+		    = obsavestring (actual_class_name,
+				    strlen (actual_class_name),
+				    &cu->partial_die_obstack);
+		  xfree (actual_class_name);
+		}
 	      break;
 	    }
 
@@ -1781,22 +1801,21 @@ add_partial_structure (struct partial_die_info *struct_pdi,
 	}
     }
 
-  add_partial_symbol (struct_pdi, cu, namespace);
-  xfree (actual_class_name);
+  add_partial_symbol (struct_pdi, cu, have_namespace_info);
 }
 
 /* Read a partial die corresponding to an enumeration type.  */
 
 static void
 add_partial_enumeration (struct partial_die_info *enum_pdi,
-			 struct dwarf2_cu *cu, const char *namespace)
+			 struct dwarf2_cu *cu, int have_namespace_info)
 {
   struct objfile *objfile = cu->objfile;
   bfd *abfd = objfile->obfd;
   struct partial_die_info *pdi_p;
 
   if (enum_pdi->name != NULL)
-    add_partial_symbol (enum_pdi, cu, namespace);
+    add_partial_symbol (enum_pdi, cu, have_namespace_info);
   
   pdi_p = enum_pdi->die_child;
   while (pdi_p)
@@ -1804,7 +1823,7 @@ add_partial_enumeration (struct partial_die_info *enum_pdi,
       if (pdi_p->tag != DW_TAG_enumerator || pdi_p->name == NULL)
 	complaint (&symfile_complaints, "malformed enumerator DIE ignored");
       else
-	add_partial_symbol (pdi_p, cu, namespace);
+	add_partial_symbol (pdi_p, cu, have_namespace_info);
       pdi_p = pdi_p->die_sibling;
     }
 }
@@ -4548,18 +4567,18 @@ load_partial_dies (bfd *abfd, char *info_ptr, struct dwarf2_cu *cu)
       info_ptr = load_partial_die (part_die, abbrev, bytes_read,
 				   abfd, info_ptr, cu);
 
-      /* This two-pass algorithm for processing partial symbols has a high
-	 cost in cache pressure.  Thus, handle some trivial cases here
-	 which cover the majority of C partial symbols.  DIEs which
-         neither have specification tags in them, nor could have specification
-         tags elsewhere pointing at them, can simply be processed and
-	 discarded.
+      /* This two-pass algorithm for processing partial symbols has a
+	 high cost in cache pressure.  Thus, handle some simple cases
+	 here which cover the majority of C partial symbols.  DIEs
+	 which neither have specification tags in them, nor could have
+	 specification tags elsewhere pointing at them, can simply be
+	 processed and discarded.
 
 	 This segment is also optional; scan_partial_symbols and
 	 add_partial_symbol will handle these DIEs if we simply chain
 	 them in normally.  When compilers which do not emit large
-         quantities of duplicate debug information are more common,
-         this code can probably be removed.  */
+	 quantities of duplicate debug information are more common,
+	 this code can probably be removed.  */
 
       /* Any complete simple types at the top level (pretty much all
 	 of them, for a language without namespaces), can be processed
@@ -4569,8 +4588,7 @@ load_partial_dies (bfd *abfd, char *info_ptr, struct dwarf2_cu *cu)
 	  && part_die->is_declaration == 0
 	  && (part_die->tag == DW_TAG_typedef
 	      || part_die->tag == DW_TAG_base_type
-	      || part_die->tag == DW_TAG_subrange_type
-	      || part_die->tag == DW_TAG_enumeration_type))
+	      || part_die->tag == DW_TAG_subrange_type))
 	{
 	  if (part_die->name != NULL)
 	    add_psymbol_to_list (part_die->name, strlen (part_die->name),
@@ -4620,11 +4638,10 @@ load_partial_dies (bfd *abfd, char *info_ptr, struct dwarf2_cu *cu)
       if (first_die == NULL)
 	first_die = part_die;
 
-      /* Maybe add the DIE to the hash table.  Not all DIEs need that
-	 we find interesting need to be in the hash table, because we
+      /* Maybe add the DIE to the hash table.  Not all DIEs that we
+	 find interesting need to be in the hash table, because we
 	 also have the parent/sibling/child chains; only those that we
-	 might refer to by offset later during partial symbol
-	 reading.
+	 might refer to by offset later during partial symbol reading.
 
 	 For now this means things that might have be the target of a
 	 DW_AT_specification, DW_AT_abstract_origin, or
@@ -6556,70 +6573,6 @@ determine_prefix_aux (struct die_info *die, struct dwarf2_cu *cu)
 	  else
 	    retval = class_name (parent, cu);
 	}
-	break;
-      default:
-	retval = parent_prefix;
-	break;
-      }
-
-      if (retval != parent_prefix)
-	xfree (parent_prefix);
-      return retval;
-    }
-}
-
-/* Likewise for partial DIEs.  */
-
-static char *
-partial_determine_prefix (struct partial_die_info *die, struct dwarf2_cu *cu)
-{
-  char *prefix = partial_determine_prefix_aux (die, cu);
-
-  return prefix ? prefix : xstrdup ("");
-}
-
-/* Return the name of the namespace/class that DIE is defined
-   within, or NULL if we can't tell.  The caller should xfree the
-   result.  */
-
-static char *
-partial_determine_prefix_aux (struct partial_die_info *die, struct dwarf2_cu *cu)
-{
-  struct partial_die_info *parent;
-
-  if (cu->language != language_cplus)
-    return NULL;
-
-  if (die->spec_offset)
-    die = find_partial_die (die->spec_offset, cu);
-
-  parent = die->die_parent;
-
-  if (parent == NULL)
-    {
-      return (processing_has_namespace_info ? xstrdup ("") : NULL);
-    }
-  else
-    {
-      char *parent_prefix = partial_determine_prefix_aux (parent, cu);
-      char *retval;
-
-      fixup_partial_die (parent, cu);
-
-      switch (parent->tag) {
-      case DW_TAG_namespace:
-	if (parent->name != NULL)
-	  retval = typename_concat (parent_prefix, parent->name);
-	else
-	  retval = typename_concat (parent_prefix, "(anonymous namespace)");
-	break;
-      case DW_TAG_class_type:
-      case DW_TAG_structure_type:
-	if (parent->name != NULL)
-	  retval = typename_concat (parent_prefix, parent->name);
-	else
-	  retval = typename_concat (parent_prefix,
-				    "<<anonymous class>>");
 	break;
       default:
 	retval = parent_prefix;
