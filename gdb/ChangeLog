@@ -1,5 +1,10 @@
 2001-10-18  Andrew Cagney  <ac131313@redhat.com>
 
+	* config/powerpc/nbsd.mt (SIM_OBS, SIM): Define.
+	* config/powerpc/linux.mt (SIM, SIM_OBS): Ditto
+
+2001-10-18  Andrew Cagney  <ac131313@redhat.com>
+
 	* README: Mention problems with HP/UX.
 
 2001-10-16  Andrew Cagney  <ac131313@redhat.com>
