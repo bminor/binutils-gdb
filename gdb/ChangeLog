@@ -1,3 +1,11 @@
+Sat Apr 27 20:38:32 1996  Fred Fish  <fnf@cygnus.com>
+
+	* Makefile.in (CLIBS): Move $(MMALLOC) past all other libs,
+	so that anything that wants an allocation function not yet pulled
+	in, will get it from mmalloc rather than a system library.
+	* Makefile.in (INSTALLED_LIBS): Reorder to match order of CLIBS,
+	to avoid surprising results when used.
+
 Sat Apr 27 00:12:05 1996  Dawn Perchik  (dawn@cygnus.com)
 
 	* stabsread.c: Changes and bug fixes for cfront support.

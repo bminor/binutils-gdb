@@ -194,20 +194,23 @@ REGEX1 = gnu-regex.o
 # Libraries and corresponding dependencies for compiling gdb.
 # {X,T}M_CLIBS, defined in *config files, have host- and target-dependent libs.
 # TERMCAP comes after readline, since readline depends on it.
+# MMALLOC comes after anything else that might want an allocation function.
+# LIBIBERTY appears twice on purpose.
 # If you have the Cygnus libraries installed,
 # you can use 'CLIBS=$(INSTALLED_LIBS)' 'CDEPS='
-INSTALLED_LIBS=-lbfd -lreadline $(TERMCAP) -lopcodes -lmmalloc -liberty \
-	$(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS) $(ENABLE_CLIBS) @LIBS@
-CLIBS = $(SIM) $(BFD) $(READLINE) $(OPCODES) $(MMALLOC) $(LIBIBERTY) \
-	$(ENABLE_CLIBS) $(TERMCAP) $(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS) \
-	$(LIBIBERTY) @LIBS@
+INSTALLED_LIBS=-lbfd -lreadline -lopcodes -liberty $(ENABLE_CLIBS) \
+	$(TERMCAP) $(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS) @LIBS@ \
+	-lmmalloc -liberty
+CLIBS = $(SIM) $(BFD) $(READLINE) $(OPCODES) $(LIBIBERTY) $(ENABLE_CLIBS) \
+	$(TERMCAP) $(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS) @LIBS@ \
+	$(MMALLOC) $(LIBIBERTY)
 CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
 	$(OPCODES) $(MMALLOC) $(LIBIBERTY)
 
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 4.15.3
+VERSION = 4.16.1
 DIST=gdb
 
 LINT=/usr/5bin/lint
