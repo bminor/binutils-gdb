@@ -1,3 +1,8 @@
+Mon Aug 31 09:51:14 1998  Richard Henderson  <rth@cygnus.com>
+
+	* config/obj-elf.c (obj_elf_vtable_inherit): Print error message
+	before we clobber the symbol involved.
+
 Mon Aug 31 10:58:06 1998  Catherine Moore  <clm@cygnus.com>
 
         * config/tc-arm.c:  Remove OBJ_ELF definitions for 

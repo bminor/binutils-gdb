@@ -1,5 +1,5 @@
 /* ELF object file format
-   Copyright (C) 1992, 93, 94, 95, 96, 1997 Free Software Foundation, Inc.
+   Copyright (C) 1992, 93, 94, 95, 96, 1997, 1998 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -67,6 +67,8 @@ static void obj_elf_weak PARAMS ((int));
 static void obj_elf_local PARAMS ((int));
 static void obj_elf_common PARAMS ((int));
 static void obj_elf_symver PARAMS ((int));
+static void obj_elf_vtable_inherit PARAMS ((int));
+static void obj_elf_vtable_entry PARAMS ((int));
 static void obj_elf_data PARAMS ((int));
 static void obj_elf_text PARAMS ((int));
 static void obj_elf_subsection PARAMS ((int));
@@ -94,6 +96,10 @@ static const pseudo_typeS elf_pseudo_table[] =
 
   /* A GNU extension to change subsection only.  */
   {"subsection", obj_elf_subsection, 0},
+
+  /* These are GNU extensions to aid in garbage collecting C++ vtables.  */
+  {"vtable_inherit", obj_elf_vtable_inherit, 0},
+  {"vtable_entry", obj_elf_vtable_entry, 0},
 
   /* These are used for dwarf. */
   {"2byte", cons, 2},
@@ -265,14 +271,14 @@ obj_elf_common (ignore)
   SKIP_WHITESPACE ();
   if (*input_line_pointer != ',')
     {
-      as_bad ("Expected comma after symbol-name");
+      as_bad (_("Expected comma after symbol-name"));
       ignore_rest_of_line ();
       return;
     }
   input_line_pointer++;		/* skip ',' */
   if ((temp = get_absolute_expression ()) < 0)
     {
-      as_bad (".COMMon length (%d.) <0! Ignored.", temp);
+      as_bad (_(".COMMon length (%d.) <0! Ignored."), temp);
       ignore_rest_of_line ();
       return;
     }
@@ -282,7 +288,7 @@ obj_elf_common (ignore)
   *p = c;
   if (S_IS_DEFINED (symbolP) && ! S_IS_COMMON (symbolP))
     {
-      as_bad ("Ignoring attempt to re-define symbol");
+      as_bad (_("Ignoring attempt to re-define symbol"));
       ignore_rest_of_line ();
       return;
     }
@@ -290,7 +296,7 @@ obj_elf_common (ignore)
     {
       if (S_GET_VALUE (symbolP) != size)
 	{
-	  as_warn ("Length of .comm \"%s\" is already %ld. Not changed to %d.",
+	  as_warn (_("Length of .comm \"%s\" is already %ld. Not changed to %d."),
 		   S_GET_NAME (symbolP), (long) S_GET_VALUE (symbolP), size);
 	}
     }
@@ -313,7 +319,7 @@ obj_elf_common (ignore)
 	  if (temp < 0)
 	    {
 	      temp = 0;
-	      as_warn ("Common alignment negative; 0 assumed");
+	      as_warn (_("Common alignment negative; 0 assumed"));
 	    }
 	}
       if (symbolP->local)
@@ -332,7 +338,7 @@ obj_elf_common (ignore)
 	      for (align = 0; (temp & 1) == 0; temp >>= 1, ++align);
 	      if (temp != 1)
 		{
-		  as_bad ("Common alignment not a power of 2");
+		  as_bad (_("Common alignment not a power of 2"));
 		  ignore_rest_of_line ();
 		  return;
 		}
@@ -395,7 +401,7 @@ obj_elf_common (ignore)
       p++;
     c = *p;
     *p = '\0';
-    as_bad ("bad .common segment %s", input_line_pointer + 1);
+    as_bad (_("bad .common segment %s"), input_line_pointer + 1);
     *p = c;
     input_line_pointer = p;
     ignore_rest_of_line ();
@@ -580,7 +586,7 @@ obj_elf_section (xxx)
 	p++;
       if (p == input_line_pointer)
 	{
-	  as_warn ("Missing section name");
+	  as_warn (_("Missing section name"));
 	  ignore_rest_of_line ();
 	  return;
 	}
@@ -645,7 +651,7 @@ obj_elf_section (xxx)
 		  break;
 		default:
 		  {
-		    char *bad_msg = "Bad .section directive: want a,w,x in string";
+		    char *bad_msg = _("Bad .section directive: want a,w,x in string");
 #ifdef md_elf_section_letter
 		    int md_attr = md_elf_section_letter (*input_line_pointer, &bad_msg);
 		    if (md_attr)
@@ -694,7 +700,7 @@ obj_elf_section (xxx)
 		    else
 #endif
 		      {
-			as_warn ("Unrecognized section type");
+			as_warn (_("Unrecognized section type"));
 			ignore_rest_of_line ();
 		      }
 		    }
@@ -708,7 +714,7 @@ obj_elf_section (xxx)
 	      SKIP_WHITESPACE ();
 	      if (*input_line_pointer != '#')
 		{
-		  as_warn ("Bad .section directive - character following name is not '#'");
+		  as_warn (_("Bad .section directive - character following name is not '#'"));
 		  ignore_rest_of_line ();
 		  return;
 		}
@@ -740,7 +746,7 @@ obj_elf_section (xxx)
 		  else
 #endif
 		    {
-		      as_warn ("Unrecognized section attribute");
+		      as_warn (_("Unrecognized section attribute"));
 		      ignore_rest_of_line ();
 		      return;
 		    }
@@ -761,7 +767,7 @@ obj_elf_section (xxx)
 	  if (type == SHT_NULL)
 	    type = special_sections[i].type;
 	  else if (type != special_sections[i].type)
-	    as_warn ("Setting incorrect section type for %s", string);
+	    as_warn (_("Setting incorrect section type for %s"), string);
 
 	  if ((attr &~ special_sections[i].attributes) != 0)
 	    {
@@ -771,7 +777,7 @@ obj_elf_section (xxx)
                  the output file.  */
 	      if (strcmp (string, ".note") != 0
 		  || attr != SHF_ALLOC)
-		as_warn ("Setting incorrect section attributes for %s",
+		as_warn (_("Setting incorrect section attributes for %s"),
 			 string);
 	    }
 	  attr |= special_sections[i].attributes;
@@ -799,6 +805,10 @@ obj_elf_section (xxx)
       flags = md_elf_section_flags (flags, attr, type);
 #endif
     }
+
+  /* Prevent SEC_HAS_CONTENTS from being inadvertently set.  */
+  if (type == SHT_NOBITS)
+    seg_info (sec)->bss = 1;
 
   bfd_set_section_flags (stdoutput, sec, flags);
 
@@ -892,7 +902,7 @@ obj_elf_previous (ignore)
 {
   if (previous_section == 0)
     {
-      as_bad (".previous without corresponding .section; ignored");
+      as_bad (_(".previous without corresponding .section; ignored"));
       return;
     }
 
@@ -918,7 +928,7 @@ obj_elf_line (ignore)
   demand_empty_rest_of_line ();
 }
 
-/* This handle the .symver pseudo-op, which is used to specify a
+/* This handles the .symver pseudo-op, which is used to specify a
    symbol version.  The syntax is ``.symver NAME,SYMVERNAME''.
    SYMVERNAME may contain ELF_VER_CHR ('@') characters.  This
    pseudo-op causes the assembler to emit a symbol named SYMVERNAME
@@ -941,7 +951,7 @@ obj_elf_symver (ignore)
 
   if (sym->sy_obj.versioned_name != NULL)
     {
-      as_bad ("multiple .symver directives for symbol `%s'",
+      as_bad (_("multiple .symver directives for symbol `%s'"),
 	      S_GET_NAME (sym));
       ignore_rest_of_line ();
       return;
@@ -950,7 +960,7 @@ obj_elf_symver (ignore)
   SKIP_WHITESPACE ();
   if (*input_line_pointer != ',')
     {
-      as_bad ("expected comma after name in .symver");
+      as_bad (_("expected comma after name in .symver"));
       ignore_rest_of_line ();
       return;
     }
@@ -971,11 +981,108 @@ obj_elf_symver (ignore)
 
   if (strchr (sym->sy_obj.versioned_name, ELF_VER_CHR) == NULL)
     {
-      as_bad ("missing version name in `%s' for symbol `%s'",
+      as_bad (_("missing version name in `%s' for symbol `%s'"),
 	      sym->sy_obj.versioned_name, S_GET_NAME (sym));
       ignore_rest_of_line ();
       return;
     }
+
+  demand_empty_rest_of_line ();
+}
+
+/* This handles the .vtable_inherit pseudo-op, which is used to indicate
+   to the linker the hierarchy in which a particular table resides.  The
+   syntax is ".vtable_inherit CHILDNAME, PARENTNAME".  */
+
+static void
+obj_elf_vtable_inherit (ignore)
+{
+  char *cname, *pname;
+  symbolS *csym, *psym;
+  char c, bad = 0;
+
+  cname = input_line_pointer;
+  c = get_symbol_end ();
+  csym = symbol_find (cname);
+
+  /* GCFIXME: should check that we don't have two .vtable_inherits for
+     the same child symbol.  Also, we can currently only do this if the
+     child symbol is already exists and is placed in a fragment.  */
+
+  if (csym == NULL || csym->sy_frag == NULL)
+    {
+      as_bad ("expected `%s' to have already been set for .vtable_inherit",
+	      cname);
+      bad = 1;
+    }
+
+  *input_line_pointer = c;
+
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer != ',')
+    {
+      as_bad ("expected comma after name in .vtable_inherit");
+      ignore_rest_of_line ();
+      return;
+    }
+
+  ++input_line_pointer;
+  SKIP_WHITESPACE ();
+  if (input_line_pointer[0] == '0'
+      && (input_line_pointer[1] == '\0'
+	  || isspace(input_line_pointer[1])))
+    {
+      psym = section_symbol (absolute_section);
+      ++input_line_pointer;
+    }
+  else
+    {
+      pname = input_line_pointer;
+      c = get_symbol_end ();
+      psym = symbol_find_or_make (pname);
+      *input_line_pointer = c;
+    }
+
+  demand_empty_rest_of_line ();
+
+  if (bad)
+    return;
+
+  assert (csym->sy_value.X_op == O_constant);
+  fix_new (csym->sy_frag, csym->sy_value.X_add_number, 0, psym, 0, 0,
+	   BFD_RELOC_VTABLE_INHERIT);
+}
+  
+/* This handles the .vtable_entry pseudo-op, which is used to indicate
+   to the linker that a vtable slot was used.  The syntax is
+   ".vtable_entry tablename, offset".  */
+
+static void
+obj_elf_vtable_entry (ignore)
+{
+  char *name;
+  symbolS *sym;
+  offsetT offset;
+  char c;
+
+  name = input_line_pointer;
+  c = get_symbol_end ();
+  sym = symbol_find_or_make (name);
+  *input_line_pointer = c;
+
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer != ',')
+    {
+      as_bad ("expected comma after name in .vtable_entry");
+      ignore_rest_of_line ();
+      return;
+    }
+
+  ++input_line_pointer;
+  offset = get_absolute_expression ();
+
+  fix_new (frag_now, frag_now_fix (), 0, sym, offset, 0,
+	   BFD_RELOC_VTABLE_ENTRY);
 
   demand_empty_rest_of_line ();
 }
@@ -1064,7 +1171,7 @@ obj_elf_version (ignore)
     }
   else
     {
-      as_bad ("Expected quoted string");
+      as_bad (_("Expected quoted string"));
     }
   demand_empty_rest_of_line ();
 }
@@ -1085,7 +1192,7 @@ obj_elf_size (ignore)
   if (*input_line_pointer != ',')
     {
       *p = 0;
-      as_bad ("expected comma after name `%s' in .size directive", name);
+      as_bad (_("expected comma after name `%s' in .size directive"), name);
       *p = c;
       ignore_rest_of_line ();
       return;
@@ -1094,7 +1201,7 @@ obj_elf_size (ignore)
   expression (&exp);
   if (exp.X_op == O_absent)
     {
-      as_bad ("missing expression in .size directive");
+      as_bad (_("missing expression in .size directive"));
       exp.X_op = O_constant;
       exp.X_add_number = 0;
     }
@@ -1154,7 +1261,7 @@ obj_elf_type (ignore)
 	   || strcmp (typename, "STT_OBJECT") == 0)
     type = BSF_OBJECT;
   else
-    as_bad ("ignoring unrecognized symbol type \"%s\"", typename);
+    as_bad (_("ignoring unrecognized symbol type \"%s\""), typename);
 
   *input_line_pointer = c;
 
@@ -1324,7 +1431,7 @@ elf_frob_symbol (symp, puntp)
 		       + symp->sy_obj.size->X_add_number));
 	  break;
 	default:
-	  as_bad (".size expression too complicated to fix up");
+	  as_bad (_(".size expression too complicated to fix up"));
 	  break;
 	}
       free (symp->sy_obj.size);
@@ -1355,7 +1462,7 @@ elf_frob_symbol (symp, puntp)
 	  know (p != NULL);
 	  if (p[1] == ELF_VER_CHR)
 	    {
-	      as_bad ("invalid attempt to declare external version name as default in symbol `%s'",
+	      as_bad (_("invalid attempt to declare external version name as default in symbol `%s'"),
 		      symp->sy_obj.versioned_name);
 	      *puntp = true;
 	    }
@@ -1398,7 +1505,7 @@ elf_frob_symbol (symp, puntp)
   if (symp->bsym->flags & BSF_WEAK)
     {
       if (S_IS_COMMON (symp))
-	as_bad ("Symbol `%s' can not be both weak and common",
+	as_bad (_("Symbol `%s' can not be both weak and common"),
 		S_GET_NAME (symp));
     }
 
@@ -1481,7 +1588,7 @@ elf_frob_file_after_relocs ()
       debug.external_ext = debug.external_ext_end = NULL;
       if (! bfd_ecoff_debug_externals (stdoutput, &debug, debug_swap, true,
 				       elf_get_extr, elf_set_index))
-	as_fatal ("Failed to set up debugging information: %s",
+	as_fatal (_("Failed to set up debugging information: %s"),
 		  bfd_errmsg (bfd_get_error ()));
 
       sec = bfd_get_section_by_name (stdoutput, ".mdebug");
@@ -1497,7 +1604,7 @@ elf_frob_file_after_relocs ()
 
       if (! bfd_set_section_contents (stdoutput, sec, (PTR) NULL,
 				      (file_ptr) 0, (bfd_size_type) 0))
-	as_fatal ("Can't start writing .mdebug section: %s",
+	as_fatal (_("Can't start writing .mdebug section: %s"),
 		  bfd_errmsg (bfd_get_error ()));
 
       know (stdoutput->output_has_begun == true);
@@ -1505,7 +1612,7 @@ elf_frob_file_after_relocs ()
 
       if (! bfd_ecoff_write_debug (stdoutput, &debug, debug_swap,
 				   sec->filepos))
-	as_fatal ("Could not write .mdebug section: %s",
+	as_fatal (_("Could not write .mdebug section: %s"),
 		  bfd_errmsg (bfd_get_error ()));
     }
 #endif /* NEED_ECOFF_DEBUG */
