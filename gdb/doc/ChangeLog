@@ -1,3 +1,8 @@
+Fri Mar 17 06:47:02 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* stabs.texinfo (Negative Type Numbers): Mention the fact that
+	GDB, as well as AIX dbx, supports the size type attribute.
+
 Thu Mar 16 12:11:32 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* stabs.texinfo (Negative Type Numbers): Document types -31 to -34.

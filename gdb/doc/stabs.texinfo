@@ -1481,7 +1481,7 @@ the debugger, and, unless you get both AIX dbx and GDB to accept the
 change, introduces an incompatibility), or use a type attribute
 (@pxref{String Field}) to define a new type with the appropriate size
 (which merely requires a debugger which understands type attributes,
-like AIX dbx).  For example,
+like AIX dbx or GDB).  For example,
 
 @example
 .stabs "boolean:t10=@@s8;-16",128,0,0,0
