@@ -1,3 +1,8 @@
+Mon Jun  8 14:17:42 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* configure.in:  Tandem debug monitor (st2000) support.
+	* remote-st2000.c, config/st2000.mt:  ditto.
+
 Fri Jun  5 11:51:01 1992  John Gilmore  (gnu at cygnus.com)
 
 	* blockframe.c (inside_entry_file, inside_main_func,

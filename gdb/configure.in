@@ -233,6 +233,12 @@ m68030)
 	esac
 	;;
 
+m68kmote)
+	case "${target_vendor}" in
+	tandem)	gdb_target=st2000 ;;
+	esac
+	;;
+
 none | arm | tahoe | vax | np1 | pn | np1 | pn | pyramid | merlin)
 	gdb_target=${target_cpu} ;;
 
