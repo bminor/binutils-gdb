@@ -197,6 +197,7 @@ print_function_name(lf *file,
       case '-':
 	break;
       case ' ':
+      case '.':
 	nr += lf_putchr(file, '_');
 	break;
       default:

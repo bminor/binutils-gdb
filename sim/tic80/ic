@@ -1,25 +1,39 @@
 compute:Dest:Dest:
-compute:Dest:rDest:signed32 *:(&(CPU)->reg[Dest])
+compute:Dest:rDest:signed_word *:(&(CPU)->reg[Dest])
 #
 compute:Source1:Source1:
-compute:Source1:rSource1:signed32:(Source1 == 0 ? 0 : (CPU)->reg[Source1])
+compute:Source1:rSource1:signed_word:(Source1 == 0 ? 0 : (CPU)->reg[Source1])
 #
 compute:Source2:Source2:
-compute:Source2:rSource2:signed32:(Source2 == 0 ? 0 : (CPU)->reg[Source2])
+compute:Source2:rSource2:signed_word:(Source2 == 0 ? 0 : (CPU)->reg[Source2])
 #
 compute:Source:Source:
-compute:Source:rSource:signed32:(Source == 0 ? 0 : (CPU)->reg[Source])
+compute:Source:rSource:signed_word:(Source == 0 ? 0 : (CPU)->reg[Source])
 #
 compute:IndOff:IndOff:
-compute:IndOff:rIndOff:signed32:(IndOff == 0 ? 0 : (CPU)->reg[IndOff])
+compute:IndOff:rIndOff:signed_word:(IndOff == 0 ? 0 : (CPU)->reg[IndOff])
+#
+compute:Base:Base:
+compute:Base:rBase:signed_word:(Base == 0 ? 0 : (CPU)->reg[Base])
+#
+compute:Link:Link:
+compute:Link:rLink:signed_word:(&(CPU)->reg[Link])
 #
 # Trap Number
 compute:UTN:UTN:
 compute:INDTR:INDTR:
-compute:INDTR:UTN:unsigned32:(INDTR == 0 ? 0 : (CPU)->reg[INDTR])
+compute:INDTR:UTN:unsigned_word:(INDTR == 0 ? 0 : (CPU)->reg[INDTR])
 #
 compute:A:A:
 #
-compute:SI:SI:
-compute:SI:SignedOffset:unsigned32:SEXT (SI, 14)
+compute:SignedImmediate:SignedImmediate:
+compute:SignedImmediate:vSource1:signed_word:SEXT (SignedImmediate, 14)
+#
+compute:UnsignedImmediate:UnsignedImmediate:
+compute:UnsignedImmediate:vSource1:signed_word:UnsignedImmediate
+#
 compute:BITNUM:BITNUM:
+compute:Code:Code:
+#
+compute:SignedOffset:SignedOffset:
+compute:SignedOffset:vSignedOffset:signed_word:SEXT (SignedOffset, 14)

@@ -1,3 +1,7 @@
+Wed Apr 23 20:06:36 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* igen.c (print_function_name): Allow dot's in instruction names.
+
 Tue Apr 22 21:46:28 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* igen.c (main), igen.h: Support new option - delayed-branch -
