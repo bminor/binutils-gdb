@@ -16,6 +16,8 @@ typedef struct _sim_cpu SIM_CPU;
 
 /* These must be defined before sim-base.h.  */
 typedef SI sim_cia;
+#define CIA_GET(cpu)     0 /* FIXME:(CPU_CGEN_HW (cpu)->h_pc) */
+#define CIA_SET(cpu,val) 0 /* FIXME:(CPU_CGEN_HW (cpu)->h_pc = (val)) */
 
 /* FIXME: Shouldn't be required to define these this early.  */
 #define SIM_ENGINE_HALT_HOOK(SD, LAST_CPU, CIA)
@@ -61,8 +63,6 @@ struct _sim_cpu {
 /* start-sanitize-m32rx */
 #elif defined (WANT_CPU_M32RX)
   M32RX_CPU_DATA cpu_data;
-  PARALLEL_EXEC par_exec;
-#define CPU_PAR_EXEC(cpu) (& (cpu)->par_exec)
 /* end-sanitize-m32rx */
 #endif
 

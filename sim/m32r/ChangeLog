@@ -1,4 +1,6 @@
-Wed Feb 11 18:52:40 1998  Doug Evans  <devans@seba.cygnus.com>
+Wed Feb 11 19:53:48 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* sim-main.h (CIA_GET,CIA_SET): Provide dummy definitions for now.
 
 	* decode.c, decode.h, sem.c, sem-switch.c, model.c: Regenerate.
 start-sanitize-m32rx
