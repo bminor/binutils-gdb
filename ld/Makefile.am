@@ -46,7 +46,8 @@ MANCONF = -Dman
 
 TEXI2POD = perl $(BASEDIR)/etc/texi2pod.pl
 
-POD2MAN = pod2man --center="GNU" --release="binutils-$(VERSION)" --section=1
+POD2MAN = pod2man --center="GNU Development Tools" \
+	--release="binutils-$(VERSION)" --section=1
 
 #stuff for self hosting (can be overridden in config file).
 HOSTING_CRT0 = @HOSTING_CRT0@

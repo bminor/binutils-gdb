@@ -9,6 +9,10 @@
 
 @c @smallbook
 
+@macro gcctabopt{body}
+@code{\body\}
+@end macro
+
 @c man begin NAME
 @ifset man
 @c Configure for the generation of man pages
@@ -162,7 +166,7 @@ section entitled "GNU Free Documentation License".
 
 @ifset man
 @c man begin SYNOPSIS
-ld [ options ] objfile...
+ld [@b{options}] @var{objfile} @dots{}
 @c man end
 
 @c man begin SEEALSO
@@ -174,25 +178,25 @@ the Info entries for @file{binutils} and
 
 @c man begin DESCRIPTION
 
-@code{ld} combines a number of object and archive files, relocates
+@command{ld} combines a number of object and archive files, relocates
 their data and ties up symbol references. Usually the last step in
-compiling a program is to run @code{ld}.
+compiling a program is to run @command{ld}.
 
-@code{ld} accepts Linker Command Language files written in
+@command{ld} accepts Linker Command Language files written in
 a superset of AT&T's Link Editor Command Language syntax,
 to provide explicit and total control over the linking process.
 
 @ifset man
 @c For the man only
 This man page does not describe the command language; see the 
-@code{ld} entry in @code{info}, or the manual
+@command{ld} entry in @code{info}, or the manual
 ld: the GNU linker, for full details on the command language and 
 on other aspects of the GNU linker. 
 @end ifset
 
 @ifclear SingleFormat
-This version of @code{ld} uses the general purpose BFD libraries
-to operate on object files. This allows @code{ld} to read, combine, and
+This version of @command{ld} uses the general purpose BFD libraries
+to operate on object files. This allows @command{ld} to read, combine, and
 write object files in many different formats---for example, COFF or
 @code{a.out}.  Different formats may be linked together to produce any
 available kind of object file.  @xref{BFD}, for more information.
@@ -201,7 +205,7 @@ available kind of object file.  @xref{BFD}, for more information.
 Aside from its flexibility, the @sc{gnu} linker is more helpful than other
 linkers in providing diagnostic information.  Many linkers abandon
 execution immediately upon encountering an error; whenever possible,
-@code{ld} continues executing, allowing you to identify other errors
+@command{ld} continues executing, allowing you to identify other errors
 (or, in some cases, to get an output file in spite of the error).
 
 @c man end
@@ -211,7 +215,7 @@ execution immediately upon encountering an error; whenever possible,
 
 @c man begin DESCRIPTION
 
-The @sc{gnu} linker @code{ld} is meant to cover a broad range of situations,
+The @sc{gnu} linker @command{ld} is meant to cover a broad range of situations,
 and to be as compatible as possible with other linkers.  As a result,
 you have many choices to control its behavior.
 
@@ -235,7 +239,7 @@ you have many choices to control its behavior.
 The linker supports a plethora of command-line options, but in actual
 practice few of them are used in any particular context.
 @cindex standard Unix system
-For instance, a frequent use of @code{ld} is to link standard Unix
+For instance, a frequent use of @command{ld} is to link standard Unix
 object files on a standard, supported Unix system.  On such a system, to
 link a file @code{hello.o}:
 
@@ -243,12 +247,12 @@ link a file @code{hello.o}:
 ld -o @var{output} /lib/crt0.o hello.o -lc
 @end smallexample
 
-This tells @code{ld} to produce a file called @var{output} as the
+This tells @command{ld} to produce a file called @var{output} as the
 result of linking the file @code{/lib/crt0.o} with @code{hello.o} and
 the library @code{libc.a}, which will come from the standard search
 directories.  (See the discussion of the @samp{-l} option below.)
 
-Some of the command-line options to @code{ld} may be specified at any
+Some of the command-line options to @command{ld} may be specified at any
 point in the command line.  However, options which refer to files, such
 as @samp{-l} or @samp{-T}, cause the file to be read at the point at
 which the option appears in the command line, relative to the object
@@ -317,7 +321,7 @@ silently drop the linker options, resulting in a bad link.
 Here is a table of the generic command line switches accepted by the GNU
 linker:
 
-@table @code
+@table @gcctabopt
 @kindex -a@var{keyword}
 @item -a@var{keyword}
 This option is supported for HP/UX compatibility.  The @var{keyword}
@@ -332,14 +336,14 @@ to @samp{-Bdynamic}.  This option may be used any number of times.
 @item -A@var{architecture}
 @kindex --architecture=@var{arch}
 @itemx --architecture=@var{architecture}
-In the current release of @code{ld}, this option is useful only for the
-Intel 960 family of architectures.  In that @code{ld} configuration, the
+In the current release of @command{ld}, this option is useful only for the
+Intel 960 family of architectures.  In that @command{ld} configuration, the
 @var{architecture} argument identifies the particular architecture in
 the 960 family, enabling some safeguards and modifying the
-archive-library search path.  @xref{i960,,@code{ld} and the Intel 960
+archive-library search path.  @xref{i960,,@command{ld} and the Intel 960
 family}, for details.
 
-Future releases of @code{ld} may support similar functionality for
+Future releases of @command{ld} may support similar functionality for
 other architecture families.
 @end ifset
 
@@ -351,12 +355,12 @@ other architecture families.
 @cindex input format
 @item -b @var{input-format}
 @itemx --format=@var{input-format}
-@code{ld} may be configured to support more than one kind of object
-file.  If your @code{ld} is configured this way, you can use the
+@command{ld} may be configured to support more than one kind of object
+file.  If your @command{ld} is configured this way, you can use the
 @samp{-b} option to specify the binary format for input object files
-that follow this option on the command line.  Even when @code{ld} is
+that follow this option on the command line.  Even when @command{ld} is
 configured to support alternative object formats, you don't usually need
-to specify this, as @code{ld} should be configured to expect as a
+to specify this, as @command{ld} should be configured to expect as a
 default input format the most usual format on each machine.
 @var{input-format} is a text string, the name of a particular format
 supported by the BFD libraries.  (You can list the available binary
@@ -386,7 +390,7 @@ see @ref{Format Commands}.
 @cindex compatibility, MRI
 @item -c @var{MRI-commandfile}
 @itemx --mri-script=@var{MRI-commandfile}
-For compatibility with linkers produced by MRI, @code{ld} accepts script
+For compatibility with linkers produced by MRI, @command{ld} accepts script
 files written in an alternate, restricted command language, described in
 @ifclear man
 @ref{MRI,,MRI Compatible Script Files}.
@@ -396,8 +400,8 @@ the MRI Compatible Script Files section of GNU ld documentation.
 @end ifset
 Introduce MRI script files with
 the option @samp{-c}; use the @samp{-T} option to run linker
-scripts written in the general-purpose @code{ld} scripting language.
-If @var{MRI-cmdfile} does not exist, @code{ld} looks for it in the directories
+scripts written in the general-purpose @command{ld} scripting language.
+If @var{MRI-cmdfile} does not exist, @command{ld} looks for it in the directories
 specified by any @samp{-L} options.
 
 @cindex common allocation
@@ -498,12 +502,12 @@ found in the shared object @var{name}.  Thus the filter object can be
 used to select a subset of the symbols provided by the object
 @var{name}.
 
-Some older linkers used the @code{-F} option throughout a compilation
+Some older linkers used the @option{-F} option throughout a compilation
 toolchain for specifying object-file format for both input and output
 object files.  The @sc{gnu} linker uses other mechanisms for this
-purpose: the @code{-b}, @code{--format}, @code{--oformat} options, the
+purpose: the @option{-b}, @option{--format}, @option{--oformat} options, the
 @code{TARGET} command in linker scripts, and the @code{GNUTARGET}
-environment variable.  The @sc{gnu} linker will ignore the @code{-F}
+environment variable.  The @sc{gnu} linker will ignore the @option{-F}
 option when not creating an ELF shared object.
 
 @cindex finalization function
@@ -558,13 +562,13 @@ function to call.
 @item -l@var{archive}
 @itemx --library=@var{archive}
 Add archive file @var{archive} to the list of files to link.  This
-option may be used any number of times.  @code{ld} will search its
+option may be used any number of times.  @command{ld} will search its
 path-list for occurrences of @code{lib@var{archive}.a} for every
 @var{archive} specified.
 
-On systems which support shared libraries, @code{ld} may also search for
+On systems which support shared libraries, @command{ld} may also search for
 libraries with extensions other than @code{.a}.  Specifically, on ELF
-and SunOS systems, @code{ld} will search a directory for a library with
+and SunOS systems, @command{ld} will search a directory for a library with
 an extension of @code{.so} before searching for one with an extension of
 @code{.a}.  By convention, a @code{.so} extension indicates a shared
 library.
@@ -576,14 +580,14 @@ command line, the linker will include the appropriate file(s) from the
 archive.  However, an undefined symbol in an object appearing later on
 the command line will not cause the linker to search the archive again.
 
-See the @code{-(} option for a way to force the linker to search
+See the @option{-(} option for a way to force the linker to search
 archives multiple times.
 
 You may list the same archive multiple times on the command line.
 
 @ifset GENERIC
 This type of archive searching is standard for Unix linkers.  However,
-if you are using @code{ld} on AIX, note that it is different from the
+if you are using @command{ld} on AIX, note that it is different from the
 behaviour of the AIX linker.
 @end ifset
 
@@ -592,17 +596,17 @@ behaviour of the AIX linker.
 @kindex --library-path=@var{dir}
 @item -L@var{searchdir}
 @itemx --library-path=@var{searchdir}
-Add path @var{searchdir} to the list of paths that @code{ld} will search
-for archive libraries and @code{ld} control scripts.  You may use this
+Add path @var{searchdir} to the list of paths that @command{ld} will search
+for archive libraries and @command{ld} control scripts.  You may use this
 option any number of times.  The directories are searched in the order
 in which they are specified on the command line.  Directories specified
 on the command line are searched before the default directories.  All
-@code{-L} options apply to all @code{-l} options, regardless of the
+@option{-L} options apply to all @option{-l} options, regardless of the
 order in which the options appear.
 
 @ifset UsesEnvVars
 The default set of paths searched (without being specified with
-@samp{-L}) depends on which emulation mode @code{ld} is using, and in
+@samp{-L}) depends on which emulation mode @command{ld} is using, and in
 some cases also on how it was configured.  @xref{Environment}.
 @end ifset
 
@@ -664,14 +668,14 @@ style magic numbers, mark the output as @code{OMAGIC}.
 @cindex naming the output file
 @item -o @var{output}
 @itemx --output=@var{output}
-Use @var{output} as the name for the program produced by @code{ld}; if this
+Use @var{output} as the name for the program produced by @command{ld}; if this
 option is not specified, the name @file{a.out} is used by default.  The
 script command @code{OUTPUT} can also specify the output file name.
 
 @kindex -O @var{level}
 @cindex generating optimized output
 @item -O @var{level}
-If @var{level} is a numeric values greater than zero @code{ld} optimizes
+If @var{level} is a numeric values greater than zero @command{ld} optimizes
 the output.  This might take significantly longer and therefore probably
 should only be enabled for the final binary.
 
@@ -692,11 +696,11 @@ in larger executables.
 @item -r
 @itemx --relocateable
 Generate relocatable output---i.e., generate an output file that can in
-turn serve as input to @code{ld}.  This is often called @dfn{partial
+turn serve as input to @command{ld}.  This is often called @dfn{partial
 linking}.  As a side effect, in environments that support standard Unix
 magic numbers, this option also sets the output file's magic number to
 @code{OMAGIC}.
-@c ; see @code{-N}.
+@c ; see @option{-N}.
 If this option is not specified, an absolute file is produced.  When
 linking C++ programs, this option @emph{will not} resolve references to
 constructors; to do that, use @samp{-Ur}.
@@ -719,9 +723,9 @@ relocate it or include it in the output.  This allows your output file
 to refer symbolically to absolute locations of memory defined in other
 programs.  You may use this option more than once.
 
-For compatibility with other ELF linkers, if the @code{-R} option is
+For compatibility with other ELF linkers, if the @option{-R} option is
 followed by a directory name, rather than a file name, it is treated as
-the @code{-rpath} option.
+the @option{-rpath} option.
 
 @kindex -s
 @kindex --strip-all
@@ -742,7 +746,7 @@ Omit debugger symbol information (but not all symbols) from the output file.
 @cindex input files, displaying
 @item -t
 @itemx --trace
-Print the names of the input files as @code{ld} processes them.
+Print the names of the input files as @command{ld} processes them.
 
 @kindex -T @var{script}
 @kindex --script=@var{script}
@@ -750,7 +754,7 @@ Print the names of the input files as @code{ld} processes them.
 @item -T @var{scriptfile}
 @itemx --script=@var{scriptfile}
 Use @var{scriptfile} as the linker script.  This script replaces
-@code{ld}'s default linker script (rather than adding to it), so
+@command{ld}'s default linker script (rather than adding to it), so
 @var{commandfile} must specify everything necessary to describe the
 output file.  @xref{Scripts}.  If @var{scriptfile} does not exist in
 the current directory, @code{ld} looks for it in the directories
@@ -773,7 +777,7 @@ option is equivalent to the @code{EXTERN} linker script command.
 @item -Ur
 For anything other than C++ programs, this option is equivalent to
 @samp{-r}: it generates relocatable output---i.e., an output file that can in
-turn serve as input to @code{ld}.  When linking C++ programs, @samp{-Ur}
+turn serve as input to @command{ld}.  When linking C++ programs, @samp{-Ur}
 @emph{does} resolve references to constructors, unlike @samp{-r}.
 It does not work to use @samp{-Ur} on files that were themselves linked
 with @samp{-Ur}; once the constructor table has been built, it cannot
@@ -797,7 +801,7 @@ in a linker script.
 @item -v
 @itemx --version
 @itemx -V
-Display the version number for @code{ld}.  The @code{-V} option also
+Display the version number for @command{ld}.  The @option{-V} option also
 lists the supported emulations.
 
 @kindex -x
@@ -893,14 +897,14 @@ for which shared libraries are supported.  This option is normally the
 default on such platforms.  The different variants of this option are
 for compatibility with various systems.  You may use this option
 multiple times on the command line: it affects library searching for
-@code{-l} options which follow it.
+@option{-l} options which follow it.
 
 @kindex -Bgroup
 @item -Bgroup
 Set the @code{DF_1_GROUP} flag in the @code{DT_FLAGS_1} entry in the dynamic
 section.  This causes the runtime linker to handle lookups in this
 object and its dependencies to be performed only inside the group.
-@code{--no-undefined} is implied.  This option is only meaningful on ELF
+@option{--no-undefined} is implied.  This option is only meaningful on ELF
 platforms which support shared libraries.
 
 @kindex -Bstatic
@@ -915,7 +919,7 @@ Do not link against shared libraries.  This is only meaningful on
 platforms for which shared libraries are supported.  The different
 variants of this option are for compatibility with various systems.  You
 may use this option multiple times on the command line: it affects
-library searching for @code{-l} options which follow it.
+library searching for @option{-l} options which follow it.
 
 @kindex -Bsymbolic
 @item -Bsymbolic
@@ -1060,10 +1064,10 @@ Print a link map to the file @var{mapfile}.  See the description of the
 @cindex memory usage
 @kindex --no-keep-memory
 @item --no-keep-memory
-@code{ld} normally optimizes for speed over memory usage by caching the
-symbol tables of input files in memory.  This option tells @code{ld} to
+@command{ld} normally optimizes for speed over memory usage by caching the
+symbol tables of input files in memory.  This option tells @command{ld} to
 instead optimize for memory usage, by rereading the symbol tables as
-necessary.  This may be required if @code{ld} runs out of memory space
+necessary.  This may be required if @command{ld} runs out of memory space
 while linking a large executable.
 
 @kindex --no-undefined
@@ -1089,17 +1093,17 @@ is also normal for HPPA shared libraries to have undefined symbols.
 
 @kindex --no-warn-mismatch
 @item --no-warn-mismatch
-Normally @code{ld} will give an error if you try to link together input
+Normally @command{ld} will give an error if you try to link together input
 files that are mismatched for some reason, perhaps because they have
 been compiled for different processors or for different endiannesses.
-This option tells @code{ld} that it should silently permit such possible
+This option tells @command{ld} that it should silently permit such possible
 errors.  This option should only be used with care, in cases when you
 have taken some special action that ensures that the linker errors are
 inappropriate.
 
 @kindex --no-whole-archive
 @item --no-whole-archive
-Turn off the effect of the @code{--whole-archive} option for subsequent
+Turn off the effect of the @option{--whole-archive} option for subsequent
 archive files.
 
 @cindex output file after errors
@@ -1110,20 +1114,14 @@ Normally, the linker will not produce an output file if it encounters
 errors during the link process; it exits without writing an output file
 when it issues any error whatsoever.
 
-@kindex -nostdlib
-@item -nostdlib
-Only search library directories explicitly specified on the
-command line.  Library directories specified in linker scripts
-(including linker scripts specified on the command line) are ignored.
-
 @ifclear SingleFormat
 @kindex --oformat
 @item --oformat @var{output-format}
-@code{ld} may be configured to support more than one kind of object
-file.  If your @code{ld} is configured this way, you can use the
+@command{ld} may be configured to support more than one kind of object
+file.  If your @command{ld} is configured this way, you can use the
 @samp{--oformat} option to specify the binary format for the output
-object file.  Even when @code{ld} is configured to support alternative
-object formats, you don't usually need to specify this, as @code{ld}
+object file.  Even when @command{ld} is configured to support alternative
+object formats, you don't usually need to specify this, as @command{ld}
 should be configured to produce as a default output format the most
 usual format on each machine.  @var{output-format} is a text string, the
 name of a particular format supported by the BFD libraries.  (You can
@@ -1149,10 +1147,10 @@ An option with machine dependent effects.
 This option is only supported on a few targets.
 @end ifset
 @ifset H8300
-@xref{H8/300,,@code{ld} and the H8/300}.
+@xref{H8/300,,@command{ld} and the H8/300}.
 @end ifset
 @ifset I960
-@xref{i960,, @code{ld} and the Intel 960 family}.
+@xref{i960,, @command{ld} and the Intel 960 family}.
 @end ifset
 
 
@@ -1197,26 +1195,26 @@ line.  It overrides @samp{-s} and @samp{-S}.
 @cindex runtime library search path
 @kindex -rpath
 Add a directory to the runtime library search path.  This is used when
-linking an ELF executable with shared objects.  All @code{-rpath}
+linking an ELF executable with shared objects.  All @option{-rpath}
 arguments are concatenated and passed to the runtime linker, which uses
-them to locate shared objects at runtime.  The @code{-rpath} option is
+them to locate shared objects at runtime.  The @option{-rpath} option is
 also used when locating shared objects which are needed by shared
 objects explicitly included in the link; see the description of the
-@code{-rpath-link} option.  If @code{-rpath} is not used when linking an
+@option{-rpath-link} option.  If @option{-rpath} is not used when linking an
 ELF executable, the contents of the environment variable
 @code{LD_RUN_PATH} will be used if it is defined.
 
-The @code{-rpath} option may also be used on SunOS.  By default, on
+The @option{-rpath} option may also be used on SunOS.  By default, on
 SunOS, the linker will form a runtime search patch out of all the
-@code{-L} options it is given.  If a @code{-rpath} option is used, the
-runtime search path will be formed exclusively using the @code{-rpath}
-options, ignoring the @code{-L} options.  This can be useful when using
-gcc, which adds many @code{-L} options which may be on NFS mounted
+@option{-L} options it is given.  If a @option{-rpath} option is used, the
+runtime search path will be formed exclusively using the @option{-rpath}
+options, ignoring the @option{-L} options.  This can be useful when using
+gcc, which adds many @option{-L} options which may be on NFS mounted
 filesystems.
 
-For compatibility with other ELF linkers, if the @code{-R} option is
+For compatibility with other ELF linkers, if the @option{-R} option is
 followed by a directory name, rather than a file name, it is treated as
-the @code{-rpath} option.
+the @option{-rpath} option.
 @end ifset
 
 @ifset GENERIC
@@ -1230,9 +1228,9 @@ of the input files.
 When the linker encounters such a dependency when doing a non-shared,
 non-relocatable link, it will automatically try to locate the required
 shared library and include it in the link, if it is not included
-explicitly.  In such a case, the @code{-rpath-link} option
+explicitly.  In such a case, the @option{-rpath-link} option
 specifies the first set of directories to search.  The
-@code{-rpath-link} option may specify a sequence of directory names
+@option{-rpath-link} option may specify a sequence of directory names
 either by specifying a list of names separated by colons, or by
 appearing multiple times.
 
@@ -1245,20 +1243,20 @@ The linker uses the following search paths to locate required shared
 libraries.
 @enumerate
 @item
-Any directories specified by @code{-rpath-link} options.
+Any directories specified by @option{-rpath-link} options.
 @item
-Any directories specified by @code{-rpath} options.  The difference
-between @code{-rpath} and @code{-rpath-link} is that directories
-specified by @code{-rpath} options are included in the executable and
-used at runtime, whereas the @code{-rpath-link} option is only effective
+Any directories specified by @option{-rpath} options.  The difference
+between @option{-rpath} and @option{-rpath-link} is that directories
+specified by @option{-rpath} options are included in the executable and
+used at runtime, whereas the @option{-rpath-link} option is only effective
 at link time. It is for the native linker only.
 @item
-On an ELF system, if the @code{-rpath} and @code{rpath-link} options
+On an ELF system, if the @option{-rpath} and @code{rpath-link} options
 were not used, search the contents of the environment variable
 @code{LD_RUN_PATH}. It is for the native linker only.
 @item
-On SunOS, if the @code{-rpath} option was not used, search any
-directories specified using @code{-L} options.
+On SunOS, if the @option{-rpath} option was not used, search any
+directories specified using @option{-L} options.
 @item
 For a native linker, the contents of the environment variable
 @code{LD_LIBRARY_PATH}.
@@ -1285,12 +1283,12 @@ warning and continue with the link.
 @cindex shared libraries
 Create a shared library.  This is currently only supported on ELF, XCOFF
 and SunOS platforms.  On SunOS, the linker will automatically create a
-shared library if the @code{-e} option is not used and there are
+shared library if the @option{-e} option is not used and there are
 undefined symbols in the link.
 
 @item --sort-common
 @kindex --sort-common
-This option tells @code{ld} to sort the common symbols by size when it
+This option tells @command{ld} to sort the common symbols by size when it
 places them in the appropriate output sections.  First come all the one
 byte symbols, then all the two byte, then all the four byte, and then
 everything else.  This is to prevent gaps between symbols due to
@@ -1298,7 +1296,7 @@ alignment constraints.
 
 @kindex --split-by-file
 @item --split-by-file [@var{size}]
-Similar to @code{--split-by-reloc} but creates a new output section for
+Similar to @option{--split-by-reloc} but creates a new output section for
 each input file when @var{size} is reached.  @var{size} defaults to a
 size of 1 if not given.
 
@@ -1323,16 +1321,16 @@ as execution time and memory usage.
 @kindex --traditional-format
 @cindex traditional format
 @item --traditional-format
-For some targets, the output of @code{ld} is different in some ways from
-the output of some existing linker.  This switch requests @code{ld} to
+For some targets, the output of @command{ld} is different in some ways from
+the output of some existing linker.  This switch requests @command{ld} to
 use the traditional format instead.
 
 @cindex dbx
-For example, on SunOS, @code{ld} combines duplicate entries in the
+For example, on SunOS, @command{ld} combines duplicate entries in the
 symbol string table.  This can reduce the size of an output file with
 full debugging information by over 30 percent.  Unfortunately, the SunOS
 @code{dbx} program can not read the resulting program (@code{gdb} has no
-trouble).  The @samp{--traditional-format} switch tells @code{ld} to not
+trouble).  The @samp{--traditional-format} switch tells @command{ld} to not
 combine duplicate entries.
 
 @kindex --section-start @var{sectionname}=@var{org}
@@ -1364,7 +1362,7 @@ for compatibility with other linkers, you may omit the leading
 @cindex verbose
 @item --dll-verbose
 @itemx --verbose
-Display the version number for @code{ld} and list the linker emulations
+Display the version number for @command{ld} and list the linker emulations
 supported.  Display which input files can and cannot be opened.  Display
 the linker script being used by the linker.
 
@@ -1503,15 +1501,15 @@ the section (@pxref{SECTIONS}).
 @cindex including an entire archive
 @item --whole-archive
 For each archive mentioned on the command line after the
-@code{--whole-archive} option, include every object file in the archive
+@option{--whole-archive} option, include every object file in the archive
 in the link, rather than searching the archive for the required object
 files.  This is normally used to turn an archive file into a shared
 library, forcing every object to be included in the resulting shared
 library.  This option may be used more than once.
 
 Two notes when using this option from gcc: First, gcc doesn't know
-about this option, so you have to use @code{-Wl,-whole-archive}.
-Second, don't forget to use @code{-Wl,-no-whole-archive} after your
+about this option, so you have to use @option{-Wl,-whole-archive}.
+Second, don't forget to use @option{-Wl,-no-whole-archive} after your
 list of archives, because gcc will add its own list of archives to
 your link and you may not want this flag to affect those as well.
 
@@ -1538,13 +1536,13 @@ __wrap_malloc (int c)
 @}
 @end smallexample
 
-If you link other code with this file using @code{--wrap malloc}, then
+If you link other code with this file using @option{--wrap malloc}, then
 all calls to @code{malloc} will call the function @code{__wrap_malloc}
 instead.  The call to @code{__real_malloc} in @code{__wrap_malloc} will
 call the real @code{malloc} function.
 
 You may wish to provide a @code{__real_malloc} function as well, so that
-links without the @code{--wrap} option will succeed.  If you do this,
+links without the @option{--wrap} option will succeed.  If you do this,
 you should not put the definition of @code{__real_malloc} in the same
 file as @code{__wrap_malloc}; if you do, the assembler may resolve the
 call before the linker has a chance to wrap it to @code{malloc}.
@@ -1555,8 +1553,8 @@ call before the linker has a chance to wrap it to @code{malloc}.
 @itemx --disable-new-dtags
 This linker can create the new dynamic tags in ELF. But the older ELF
 systems may not understand them. If you specify
-@code{--enable-new-dtags}, the dynamic tags will be created as needed.
-If you specify @code{--disable-new-dtags}, no new dynamic tags will be
+@option{--enable-new-dtags}, the dynamic tags will be created as needed.
+If you specify @option{--disable-new-dtags}, no new dynamic tags will be
 created. By default, the new dynamic tags are not created. Note that
 those options are only available for ELF systems.
 
@@ -1568,7 +1566,7 @@ those options are only available for ELF systems.
 
 @c man begin OPTIONS
 
-The i386 PE linker supports the @code{-shared} option, which causes
+The i386 PE linker supports the @option{-shared} option, which causes
 the output to be a dynamically linked library (DLL) instead of a
 normal executable.  You should name the output @code{*.dll} when you
 use this option.  In addition, the linker fully supports the standard
@@ -1582,7 +1580,7 @@ support additional command line options that are specific to the i386
 PE target.  Options that take values may be separated from their
 values by either a space or an equals sign.
 
-@table @code
+@table @gcctabopt
 
 @kindex --add-stdcall-alias
 @item --add-stdcall-alias
@@ -1598,7 +1596,7 @@ addresses of all the relocations needed for generating DLLs with
 @kindex --dll
 @item --dll
 Create a DLL instead of a regular executable.  You may also use
-@code{-shared} or specify a @code{LIBRARY} in a given @code{.def}
+@option{-shared} or specify a @code{LIBRARY} in a given @code{.def}
 file.
 
 @kindex --enable-stdcall-fixup
@@ -1614,9 +1612,9 @@ undefined symbol @code{_foo} might be linked to the function
 to the function @code{_bar}.  When the linker does this, it prints a
 warning, since it normally should have failed to link, but sometimes
 import libraries generated from third-party dlls may need this feature
-to be usable.  If you specify @code{--enable-stdcall-fixup}, this
+to be usable.  If you specify @option{--enable-stdcall-fixup}, this
 feature is fully enabled and warnings are not printed.  If you specify
-@code{--disable-stdcall-fixup}, this feature is disabled and such
+@option{--disable-stdcall-fixup}, this feature is disabled and such
 mismatches are considered to be errors.
 
 @cindex DLLs, creating
@@ -1903,7 +1901,7 @@ subsystem version also.
 
 @c man begin ENVIRONMENT
 
-You can change the behavior of @code{ld} with the environment variables
+You can change the behavior of @command{ld} with the environment variables
 @code{GNUTARGET}, @code{LDEMULATION}, and @code{COLLECT_NO_DEMANGLE}.
 
 @kindex GNUTARGET
@@ -1911,7 +1909,7 @@ You can change the behavior of @code{ld} with the environment variables
 @code{GNUTARGET} determines the input-file object format if you don't
 use @samp{-b} (or its synonym @samp{--format}).  Its value should be one
 of the BFD names for an input format (@pxref{BFD}).  If there is no
-@code{GNUTARGET} in the environment, @code{ld} uses the natural format
+@code{GNUTARGET} in the environment, @command{ld} uses the natural format
 of the target. If @code{GNUTARGET} is set to @code{default} then BFD
 attempts to discover the input format by examining binary input files;
 this method often succeeds, but there are potential ambiguities, since
@@ -2184,7 +2182,7 @@ Several linker script commands deal with files.
 @cindex including a linker script
 Include the linker script @var{filename} at this point.  The file will
 be searched for in the current directory, and in any directory specified
-with the @code{-L} option.  You can nest calls to @code{INCLUDE} up to
+with the @option{-L} option.  You can nest calls to @code{INCLUDE} up to
 10 levels deep.
 
 @item INPUT(@var{file}, @var{file}, @dots{})
@@ -2208,7 +2206,7 @@ it is not found, the linker will search through the archive library
 search path.  See the description of @samp{-L} in @ref{Options,,Command
 Line Options}.
 
-If you use @samp{INPUT (-l@var{file})}, @code{ld} will transform the
+If you use @samp{INPUT (-l@var{file})}, @command{ld} will transform the
 name to @code{lib@var{file}.a}, as with the command line argument
 @samp{-l}.
 
@@ -2243,7 +2241,7 @@ output file other than the usual default of @file{a.out}.
 @cindex archive search path in linker script
 @cindex search path in linker script
 The @code{SEARCH_DIR} command adds @var{path} to the list of paths where
-@code{ld} looks for archive libraries.  Using
+@command{ld} looks for archive libraries.  Using
 @code{SEARCH_DIR(@var{path})} is exactly like using @samp{-L @var{path}}
 on the command line (@pxref{Options,,Command Line Options}).  If both
 are used, then the linker will search both paths.  Paths specified using
@@ -2331,7 +2329,7 @@ command has the same effect as the @samp{-u} command-line option.
 @kindex FORCE_COMMON_ALLOCATION
 @cindex common allocation in linker script
 This command has the same effect as the @samp{-d} command-line option:
-to make @code{ld} assign space to common symbols even if a relocatable
+to make @command{ld} assign space to common symbols even if a relocatable
 output file is specified (@samp{-r}).
 
 @item INHIBIT_COMMON_ALLOCATION
@@ -2344,7 +2342,7 @@ to common symbols even for a non-relocatable output file.
 @item NOCROSSREFS(@var{section} @var{section} @dots{})
 @kindex NOCROSSREFS(@var{sections})
 @cindex cross references
-This command may be used to tell @code{ld} to issue an error about any
+This command may be used to tell @command{ld} to issue an error about any
 references among certain output sections.
 
 In certain types of programs, particularly on embedded systems when
@@ -2354,7 +2352,7 @@ errors.  For example, it would be an error if code in one section called
 a function defined in the other section.
 
 The @code{NOCROSSREFS} command takes a list of output section names.  If
-@code{ld} detects any cross references between the sections, it reports
+@command{ld} detects any cross references between the sections, it reports
 an error and returns a non-zero exit status.  Note that the
 @code{NOCROSSREFS} command uses output section names, not input section
 names.
@@ -4257,8 +4255,8 @@ read.  This can affect archive searching.
 @chapter Machine Dependent Features
 
 @cindex machine dependencies
-@code{ld} has additional features on some platforms; the following
-sections describe them.  Machines where @code{ld} has no additional
+@command{ld} has additional features on some platforms; the following
+sections describe them.  Machines where @command{ld} has no additional
 functionality are not listed.
 
 @menu
@@ -4270,7 +4268,7 @@ functionality are not listed.
 * MMIX::			@code{ld} and MMIX
 @end ifset
 @ifset TICOFF
-* TI COFF::                     @code{ld} and TI COFF
+* TI COFF::                     @command{ld} and TI COFF
 @end ifset
 @end menu
 @end ifset
@@ -4283,16 +4281,16 @@ functionality are not listed.
 @end ifclear
 
 @node H8/300
-@section @code{ld} and the H8/300
+@section @command{ld} and the H8/300
 
 @cindex H8/300 support
-For the H8/300, @code{ld} can perform these global optimizations when
+For the H8/300, @command{ld} can perform these global optimizations when
 you specify the @samp{--relax} command-line option.
 
 @table @emph
 @cindex relaxing on H8/300
 @item relaxing address modes
-@code{ld} finds all @code{jsr} and @code{jmp} instructions whose
+@command{ld} finds all @code{jsr} and @code{jmp} instructions whose
 targets are within eight bits, and turns them into eight-bit
 program-counter relative @code{bsr} and @code{bra} instructions,
 respectively.
@@ -4300,7 +4298,7 @@ respectively.
 @cindex synthesizing on H8/300
 @item synthesizing instructions
 @c FIXME: specifically mov.b, or any mov instructions really?
-@code{ld} finds all @code{mov.b} instructions which use the
+@command{ld} finds all @code{mov.b} instructions which use the
 sixteen-bit absolute address form, but refer to the top
 page of memory, and changes them to use the eight-bit address form.
 (That is: the linker turns @samp{mov.b @code{@@}@var{aa}:16} into
@@ -4318,9 +4316,9 @@ top page of memory).
 @c This stuff is pointless to say unless you're especially concerned
 @c with Hitachi chips; don't enable it for generic case, please.
 @node Hitachi
-@chapter @code{ld} and other Hitachi chips
+@chapter @command{ld} and other Hitachi chips
 
-@code{ld} also supports the H8/300H, the H8/500, and the Hitachi SH.  No
+@command{ld} also supports the H8/300H, the H8/500, and the Hitachi SH.  No
 special features, commands, or command-line options are required for
 these chips.
 @end ifset
@@ -4332,7 +4330,7 @@ these chips.
 @end ifclear
 
 @node i960
-@section @code{ld} and the Intel 960 family
+@section @command{ld} and the Intel 960 family
 
 @cindex i960 support
 
@@ -4344,7 +4342,7 @@ linker's search strategy for archive libraries, to support the use of
 libraries specific to each particular architecture, by including in the
 search loop names suffixed with the string identifying the architecture.
 
-For example, if your @code{ld} command line included @w{@samp{-ACA}} as
+For example, if your @command{ld} command line included @w{@samp{-ACA}} as
 well as @w{@samp{-ltry}}, the linker would look (in its built-in search
 paths, and in any paths you specify with @samp{-L}) for a library with
 the names
@@ -4367,13 +4365,13 @@ the 960 architecture family allows combination of target architectures; each
 use will add another pair of name variants to search for when @w{@samp{-l}}
 specifies a library.
 
-@cindex @code{--relax} on i960
+@cindex @option{--relax} on i960
 @cindex relaxing on i960
-@code{ld} supports the @samp{--relax} option for the i960 family.  If
-you specify @samp{--relax}, @code{ld} finds all @code{balx} and
+@command{ld} supports the @samp{--relax} option for the i960 family.  If
+you specify @samp{--relax}, @command{ld} finds all @code{balx} and
 @code{calx} instructions whose targets are within 24 bits, and turns
 them into 24-bit program-counter relative @code{bal} and @code{cal}
-instructions, respectively.  @code{ld} also turns @code{cal}
+instructions, respectively.  @command{ld} also turns @code{cal}
 instructions into @code{bal} instructions when it determines that the
 target subroutine is a leaf routine (that is, the target subroutine does
 not itself call any subroutines).
@@ -4388,11 +4386,11 @@ not itself call any subroutines).
 @end ifclear
 
 @node ARM
-@section @code{ld}'s support for interworking between ARM and Thumb code
+@section @command{ld}'s support for interworking between ARM and Thumb code
 
 @cindex ARM interworking support
 @kindex --support-old-code
-For the ARM, @code{ld} will generate code stubs to allow functions calls
+For the ARM, @command{ld} will generate code stubs to allow functions calls
 betweem ARM and Thumb code.  These stubs only work with code that has
 been compiled and assembled with the @samp{-mthumb-interwork} command
 line option.  If it is necessary to link with old ARM object files or
@@ -4413,18 +4411,18 @@ branched to using a BX instruction, and the program will start
 executing in Thumb mode straight away.
 
 @node HPPA ELF32
-@section @code{ld} and HPPA 32-bit ELF support
+@section @command{ld} and HPPA 32-bit ELF support
 @cindex HPPA multiple sub-space stubs
 @kindex --multi-subspace
-When generating a shared library, @code{ld} will by default generate
+When generating a shared library, @command{ld} will by default generate
 import stubs suitable for use with a single sub-space application.
-The @samp{--multi-subspace} switch causes @code{ld} to generate export
+The @samp{--multi-subspace} switch causes @command{ld} to generate export
 stubs, and different (larger) import stubs suitable for use with
 multiple sub-spaces.
 
 @cindex HPPA stub grouping
 @kindex --stub-group-size=@var{N}
-Long branch stubs and import/export stubs are placed by @code{ld} in
+Long branch stubs and import/export stubs are placed by @command{ld} in
 stub sections located between groups of input sections.
 @samp{--stub-group-size} specifies the maximum size of a group of input
 sections handled by one stub section.  Since branch offsets are signed,
@@ -4435,7 +4433,7 @@ prediction) that stub sections only serve one group of input sections.
 A negative value for @samp{N} chooses this scheme, ensuring that
 branches to stubs always use a negative offset.  Two special values of
 @samp{N} are recognized, @samp{1} and @samp{-1}.  These both instruct
-@code{ld} to automatically size input section groups for the branch types
+@command{ld} to automatically size input section groups for the branch types
 detected, with the same behaviour regarding stub placement as other
 positive or negative values of @samp{N} respectively.
 
@@ -4472,13 +4470,13 @@ are left out from an mmo file.
 
 @ifset TICOFF
 @node TI COFF
-@section @code{ld}'s support for various TI COFF versions
+@section @command{ld}'s support for various TI COFF versions
 @cindex TI COFF versions
 @kindex --format=@var{version}
 The @samp{--format} switch allows selection of one of the various
 TI COFF versions.  The latest of this writing is 2; versions 0 and 1 are
 also supported.  The TI COFF versions also vary in header byte-order
-format; @code{ld} will read any version or byte order, but the output
+format; @command{ld} will read any version or byte order, but the output
 header format depends on the default specified by the specific target.
 @end ifset
 
@@ -4531,16 +4529,16 @@ conversion and during output. @xref{BFD information loss}.
 
 @node Reporting Bugs
 @chapter Reporting Bugs
-@cindex bugs in @code{ld}
-@cindex reporting bugs in @code{ld}
+@cindex bugs in @command{ld}
+@cindex reporting bugs in @command{ld}
 
-Your bug reports play an essential role in making @code{ld} reliable.
+Your bug reports play an essential role in making @command{ld} reliable.
 
 Reporting a bug may help you by bringing a solution to your problem, or
 it may not.  But in any case the principal function of a bug report is
-to help the entire community by making the next version of @code{ld}
+to help the entire community by making the next version of @command{ld}
 work better.  Bug reports are your contribution to the maintenance of
-@code{ld}.
+@command{ld}.
 
 In order for a bug report to serve its purpose, you must include the
 information that enables us to fix the bug.
@@ -4562,37 +4560,37 @@ If you are not sure whether you have found a bug, here are some guidelines:
 @cindex crash of linker
 @item
 If the linker gets a fatal signal, for any input whatever, that is a
-@code{ld} bug.  Reliable linkers never crash.
+@command{ld} bug.  Reliable linkers never crash.
 
 @cindex error on valid input
 @item
-If @code{ld} produces an error message for valid input, that is a bug.
+If @command{ld} produces an error message for valid input, that is a bug.
 
 @cindex invalid input
 @item
-If @code{ld} does not produce an error message for invalid input, that
+If @command{ld} does not produce an error message for invalid input, that
 may be a bug.  In the general case, the linker can not verify that
 object files are correct.
 
 @item
 If you are an experienced user of linkers, your suggestions for
-improvement of @code{ld} are welcome in any case.
+improvement of @command{ld} are welcome in any case.
 @end itemize
 
 @node Bug Reporting
 @section How to report bugs
 @cindex bug reports
-@cindex @code{ld} bugs, reporting
+@cindex @command{ld} bugs, reporting
 
 A number of companies and individuals offer support for @sc{gnu}
-products.  If you obtained @code{ld} from a support organization, we
+products.  If you obtained @command{ld} from a support organization, we
 recommend you contact that organization first.
 
 You can find contact information for many support companies and
 individuals in the file @file{etc/SERVICE} in the @sc{gnu} Emacs
 distribution.
 
-Otherwise, send bug reports for @code{ld} to
+Otherwise, send bug reports for @command{ld} to
 @samp{bug-binutils@@gnu.org}.
 
 The fundamental principle of reporting bugs usefully is this:
@@ -4622,14 +4620,14 @@ To enable us to fix the bug, you should include all these things:
 
 @itemize @bullet
 @item
-The version of @code{ld}.  @code{ld} announces it if you start it with
+The version of @command{ld}.  @command{ld} announces it if you start it with
 the @samp{--version} argument.
 
 Without this, we will not know whether there is any point in looking for
-the bug in the current version of @code{ld}.
+the bug in the current version of @command{ld}.
 
 @item
-Any patches you may have applied to the @code{ld} source, including any
+Any patches you may have applied to the @command{ld} source, including any
 patches made to the @code{BFD} library.
 
 @item
@@ -4637,7 +4635,7 @@ The type of machine you are using, and the operating system name and
 version number.
 
 @item
-What compiler (and its version) was used to compile @code{ld}---e.g.
+What compiler (and its version) was used to compile @command{ld}---e.g.
 ``@code{gcc-2.7}''.
 
 @item
@@ -4666,14 +4664,14 @@ how @code{gas} or @code{gcc} were configured.
 A description of what behavior you observe that you believe is
 incorrect.  For example, ``It gets a fatal signal.''
 
-Of course, if the bug is that @code{ld} gets a fatal signal, then we
+Of course, if the bug is that @command{ld} gets a fatal signal, then we
 will certainly notice it.  But if the bug is incorrect output, we might
 not notice unless it is glaringly wrong.  You might as well not give us
 a chance to make a mistake.
 
 Even if the problem you experience is a fatal signal, you should still
 say so explicitly.  Suppose something strange is going on, such as, your
-copy of @code{ld} is out of synch, or you have encountered a bug in the
+copy of @command{ld} is out of synch, or you have encountered a bug in the
 C library on your system.  (This has happened!)  Your copy might crash
 and ours would not.  If you told us to expect a crash, then when ours
 fails to crash, we would know that the bug was not happening for us.  If
@@ -4681,10 +4679,10 @@ you had not told us to expect a crash, then we would not be able to draw
 any conclusion from our observations.
 
 @item
-If you wish to suggest changes to the @code{ld} source, send us context
+If you wish to suggest changes to the @command{ld} source, send us context
 diffs, as generated by @code{diff} with the @samp{-u}, @samp{-c}, or
 @samp{-p} option.  Always send diffs from the old file to the new file.
-If you even discuss something in the @code{ld} source, refer to it by
+If you even discuss something in the @command{ld} source, refer to it by
 context, not by line number.
 
 The line numbers in our development sources will not match those in your
@@ -4722,7 +4720,7 @@ the necessary information, such as the test case, on the assumption that
 a patch is all we need.  We might see problems with your patch and decide
 to fix the problem another way, or we might not understand it at all.
 
-Sometimes with a program as complicated as @code{ld} it is very hard to
+Sometimes with a program as complicated as @command{ld} it is very hard to
 construct an example that will make the program follow a certain path
 through the code.  If you do not send us the example, we will not be
 able to construct one, so we will not be able to verify that the bug is
@@ -4742,12 +4740,12 @@ things without first using the debugger to find the facts.
 @node MRI
 @appendix MRI Compatible Script Files
 @cindex MRI compatibility
-To aid users making the transition to @sc{gnu} @code{ld} from the MRI
-linker, @code{ld} can use MRI compatible linker scripts as an
+To aid users making the transition to @sc{gnu} @command{ld} from the MRI
+linker, @command{ld} can use MRI compatible linker scripts as an
 alternative to the more general-purpose linker scripting language
 described in @ref{Scripts}.  MRI compatible linker scripts have a much
 simpler command set than the scripting language otherwise used with
-@code{ld}.  @sc{gnu} @code{ld} supports the most commonly used MRI
+@command{ld}.  @sc{gnu} @command{ld} supports the most commonly used MRI
 linker commands; these commands are described here.
 
 In general, MRI scripts aren't of much use with the @code{a.out} object
@@ -4760,7 +4758,7 @@ You can specify a file containing an MRI-compatible script using the
 Each command in an MRI-compatible script occupies its own line; each
 command line starts with the keyword that identifies the command (though
 blank lines are also allowed for punctuation).  If a line of an
-MRI-compatible script begins with an unrecognized keyword, @code{ld}
+MRI-compatible script begins with an unrecognized keyword, @command{ld}
 issues a warning message, but continues processing the script.
 
 Lines beginning with @samp{*} are comments.
@@ -4773,7 +4771,7 @@ The following list shows only the upper-case form of each command.
 @cindex @code{ABSOLUTE} (MRI)
 @item ABSOLUTE @var{secname}
 @itemx ABSOLUTE @var{secname}, @var{secname}, @dots{} @var{secname}
-Normally, @code{ld} includes in the output file all sections from all
+Normally, @command{ld} includes in the output file all sections from all
 the input files.  However, in an MRI-compatible script, you can use the
 @code{ABSOLUTE} command to restrict the sections that will be present in
 your output program.  If the @code{ABSOLUTE} command is used at all in a
@@ -4828,7 +4826,7 @@ COFF (the @samp{coff-m68k} variant in BFD), if @var{output-format} is
 @cindex @code{LIST} (MRI)
 @item LIST @var{anything}@dots{}
 Print (to the standard output file) a link map, as produced by the
-@code{ld} command-line option @samp{-M}.
+@command{ld} command-line option @samp{-M}.
 
 The keyword @code{LIST} may be followed by anything on the
 same line, with no change in its effect.
@@ -4837,19 +4835,19 @@ same line, with no change in its effect.
 @item LOAD @var{filename}
 @itemx LOAD @var{filename}, @var{filename}, @dots{} @var{filename}
 Include one or more object file @var{filename} in the link; this has the
-same effect as specifying @var{filename} directly on the @code{ld}
+same effect as specifying @var{filename} directly on the @command{ld}
 command line.
 
 @cindex @code{NAME} (MRI)
 @item NAME @var{output-name}
-@var{output-name} is the name for the program produced by @code{ld}; the
+@var{output-name} is the name for the program produced by @command{ld}; the
 MRI-compatible command @code{NAME} is equivalent to the command-line
 option @samp{-o} or the general script language command @code{OUTPUT}.
 
 @cindex @code{ORDER} (MRI)
 @item ORDER @var{secname}, @var{secname}, @dots{} @var{secname}
 @itemx ORDER @var{secname} @var{secname} @var{secname}
-Normally, @code{ld} orders the sections in its output file in the
+Normally, @command{ld} orders the sections in its output file in the
 order in which they first appear in the input files.  In an MRI-compatible
 script, you can override this ordering with the @code{ORDER} command.  The
 sections you list with @code{ORDER} will appear first in your output
