@@ -1,4 +1,14 @@
+Thu Sep 16 20:27:21 1993  Jim Kingdon  (kingdon@cirdan.cygnus.com)
+
+	* sym.h, symconst.h: Add comment stating these files are not part
+	of GDB, GAS, etc.  In 1991, when we asked rms whether we could
+	include these files in GDB (although they are copyrighted by
+	someone besides the FSF), he said it was OK if they were not
+	considered part of GDB.
+
 Fri Sep 10 17:40:35 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ecoff.h (AUX_PUT_ANY): Cast val argument to bfd_vma.
 
 	* alpha.c (external_aouthdr): Need four bytes of padding between
 	vstamp and tsize.
