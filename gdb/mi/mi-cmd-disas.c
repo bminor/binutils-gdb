@@ -418,8 +418,7 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
 		    num_displayed++;
 		}
 	      ui_out_list_begin (uiout, NULL);
-	      print_address_numeric (pc, 1, stb->stream);
-	      ui_out_field_stream (uiout, "address", stb);
+	      ui_out_field_core_addr (uiout, "address", pc);
 
 	      if (!build_address_symbolic (pc, 0, &name, &offset, &filename, &line, &unmapped))
 		{
@@ -467,8 +466,7 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
 		num_displayed++;
 	    }
 	  ui_out_list_begin (uiout, NULL);
-	  print_address_numeric (pc, 1, stb->stream);
-	  ui_out_field_stream (uiout, "address", stb);
+	  ui_out_field_core_addr (uiout, "address", pc);
 
 	  if (!build_address_symbolic (pc, 0, &name, &offset, &filename, &line, &unmapped))
 	    {

@@ -1,3 +1,9 @@
+2000-03-01  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* mi-cmd-disas.c (mi_cmd_disassemble): Use
+ 	ui_out_field_core_addr() instead of print_address_numeric(), to
+ 	maintain consistency throughout MI.
+
 Wed Feb 23 17:09:39 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mi-cmd-break.c, mi-cmd-disas.c, mi-cmd-stack.c, mi-cmd-var.c,
