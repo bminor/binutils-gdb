@@ -1,3 +1,19 @@
+Mon May 13 19:51:37 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* libcoff-in.h (struct pei_section_tdata): Define structure.
+	(pei_section_data): Define macro.
+	* libcoff.h: Rebuild.
+	* coffcode.h (coff_set_alignment_hook): If COFF_IMAGE_WITH_PE,
+	store s_paddr field in pei_section_data.
+	(coff_compute_section_file_positions): Use pei_section_data rather
+	than _cooked_size, and don't overwrite an existing value.
+	(coff_write_object_contents): If COFF_OBJ_WITH_PE, set s_paddr to
+	0.  If COFF_IMAGE_WITH_PE, set s_paddr to pei_section_data.
+	* peicode.h (coff_bfd_copy_private_section_data): Define if
+	COFF_IMAGE_WITH_PE.
+ 	(pe_bfd_copy_private_section_data): New static function if
+	COFF_IMAGE_WITH_PE.
+
 Wed May  8 16:10:38 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* srec.c (srec_set_arch_mach): Write as a function rather than a
