@@ -1,3 +1,7 @@
+Thu Jun 12 20:57:12 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* gdb.base/funcargs.exp: Remove spurious suppress tests call.
+
 Tue Jun  3 15:20:20 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* config/monitor.exp(gdb_target_monitor): Call gdb_file_cmd
@@ -5,6 +9,7 @@ Tue Jun  3 15:20:20 1997  Bob Manson  <manson@charmed.cygnus.com>
  	sure the connection to the target is closed.
 	(gdb_load): Pass the name of the executable to gdb_target_monitor.
 	Don't call gdb_file_cmd here; let gdb_target_monitor do it.
+	Also detect "Timeout reading from remote" error.
 
 	* config/gdbserver.exp: Pass the executable being loaded to
  	gdb_target_monitor. Don't call gdb_file_cmd here; let
