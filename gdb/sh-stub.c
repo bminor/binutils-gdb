@@ -202,8 +202,7 @@ static int computeSignal (int exceptionVector);
 static void handle_exception (int exceptionVector);
 void init_serial();
 
-
-int putDebugChar (char);
+void putDebugChar (char);
 char getDebugChar (void);
 
 /* These are in the file but in asm statements so the compiler can't see them */
@@ -1457,8 +1456,6 @@ exceptions()
 #define BPS			32	/* 9600 for 10 Mhz */
 #endif
 
-char getDebugChar (void);
-int putDebugChar (char);
 void handleError (char theSSR);
 
 void
@@ -1531,7 +1528,7 @@ putDebugCharReady()
   return (SSR1 & SCI_TDRE);
 }
 
-int 
+void
 putDebugChar (char ch)
 {
   while (!putDebugCharReady())
@@ -1542,7 +1539,6 @@ putDebugChar (char ch)
    */
   TDR1 = ch;
   SSR1 &= ~SCI_TDRE;
-  return 1;
 }
 
 void 

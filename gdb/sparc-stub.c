@@ -92,8 +92,8 @@
  * external low-level support routines
  */
 
-extern putDebugChar();   /* write a single character      */
-extern getDebugChar();   /* read and return a single char */
+extern void putDebugChar();	/* write a single character      */
+extern int getDebugChar();	/* read and return a single char */
 
 /************************************************************************/
 /* BUFMAX defines the maximum number of characters in inbound/outbound buffers*/
@@ -371,8 +371,7 @@ putpacket(buffer)
 
       while (ch = buffer[count])
 	{
-	  if (! putDebugChar(ch))
-	    return;
+	  putDebugChar(ch);
 	  checksum += ch;
 	  count += 1;
 	}
