@@ -1,3 +1,8 @@
+2001-08-14  Jeff Johnston  <jjohnstn@redhat.com>
+
+        * expr.c (operand)[LITERAL_PREFIXDOLLAR_HEX]: Treat $L as
+        a label, not a hex constant.
+
 2001-08-13  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* config/tc-v850.h: Add missing prototypes.

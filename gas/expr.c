@@ -811,6 +811,9 @@ operand (expressionP)
 
 #ifdef LITERAL_PREFIXDOLLAR_HEX
     case '$':
+      /* $L is the start of a local label, not a hex constant.  */
+      if (* input_line_pointer == 'L')
+      goto isname;
       integer_constant (16, expressionP);
       break;
 #endif
