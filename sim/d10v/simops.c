@@ -6,7 +6,7 @@
 
 #include "d10v_sim.h"
 #include "simops.h"
-#include "syscall.h"
+#include "sys/syscall.h"
 
 /* #define DEBUG 1 */
 
@@ -2259,8 +2259,8 @@ OP_5F00 ()
 	    break;
 #endif
 
-#ifdef SYS_stat:	/* added at hmsi *
-			   case SYS_stat:	/* added at hmsi */
+#ifdef SYS_stat
+	  case SYS_stat:
 	    /* stat system call */
 	    {
 	      struct stat host_stat;
@@ -2325,7 +2325,7 @@ OP_5F00 ()
       /* Trap 2 calls printf */
       {
 	char *fstr = State.regs[2] + State.imem;
-	printf (fstr,State.regs[3],State.regs[4],State.regs[5]);
+	printf (fstr, (short)State.regs[3], (short)State.regs[4], (short)State.regs[5]);
 	break;
       }
 

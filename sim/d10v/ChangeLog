@@ -1,3 +1,18 @@
+Wed Sep 04 04:45:34 1996  Mark Alexander  <marka@cygnus.com>
+
+	* simops.c: Include correct syscall.h for d10v, not host's.
+	Fix #ifdef SYS_stat.
+
+Tue Sep  3 14:00:04 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* simops.c (OP_5F00): Wrap all SYS_xxx traps with #ifdef.
+	Add trap 2 to be printf and trap 3 to be putchar.
+
+Wed Aug 28 21:42:34 1996  Mark Alexander  <marka@cygnus.com>
+
+	* Makefile.in, d10v_sim.h, interp.c, simops.c: Add support
+	for low-level system calls.
+
 Wed Aug 28 17:33:19 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* Makefile.in, d10v_sim.h, interp.c: Fix byte-order problems.
