@@ -1,3 +1,8 @@
+2000-03-20  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* gdb.texinfo: Add white space to prevent overprinting in 
+	two places.
+
 2000-03-17  Stan Shebs  <shebs@apple.com>
 
 	* gdb.texinfo: Many minor changes from Dmitry Sivachenko

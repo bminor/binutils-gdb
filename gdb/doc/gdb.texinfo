@@ -9338,6 +9338,9 @@ Where @var{pid} is a HEX encoded 16 bit process id.
 @item query @var{LIST} or @var{threadLIST} @strong{(deprecated)}
 @tab @code{q}@code{L}@var{startflag}@var{threadcount}@var{nextthread}
 @tab
+@item
+@tab
+@tab
 Obtain thread information from RTOS.  Where: @var{startflag} (one hex
 digit) is one to indicate the first query and zero to indicate a
 subsequent query; @var{threadcount} (two hex digits) is the maximum
@@ -9346,6 +9349,9 @@ number of threads the response packet can contain; and @var{nextthread}
 returned in the response as @var{argthread}.
 @item
 @tab reply @code{q}@code{M}@var{count}@var{done}@var{argthread}@var{thread...}
+@tab
+@item
+@tab
 @tab
 Where: @var{count} (two hex digits) is the number of threads being
 returned; @var{done} (one hex digit) is zero to indicate more threads
