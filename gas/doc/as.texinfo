@@ -257,11 +257,15 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
  [ -ACA | -ACA_A | -ACB | -ACC | -AKA | -AKB | -AKC | -AMC ]
  [ -b ] [ -no-relax ]
 @end ifset
+@ifset M32R
+ [ --m32rx | --[no-]warn-explicit-parallel-conflicts | --W[n]p ]
+@end ifset
 @ifset M680X0
  [ -l ] [ -m68000 | -m68010 | -m68020 | ... ]
 @end ifset
 @ifset MCORE
  [ -jsri2bsr ] [ -sifilter ] [ -relax ]
+ [ -mcpu=[210|340] ]
 @end ifset
 @ifset MIPS
  [ -nocpp ] [ -EL ] [ -EB ] [ -G @var{num} ] [ -mcpu=@var{CPU} ]
@@ -486,6 +490,26 @@ error if necessary.
 @end table
 @end ifset
 
+@ifset M32R
+The following options are available when @value{AS} is configured for the
+Mitsubishi M32R series.
+
+@table @code
+
+@item --m32rx
+Specify which processor in the M32R family is the target.  The default
+is normally the M32R, but this option changes it to the M32RX.
+
+@item --warn-explicit-parallel-conflicts or --Wp
+Produce warning messages when questionable parallel constructs are
+encountered. 
+
+@item --no-warn-explicit-parallel-conflicts or --Wnp
+Do not produce warning messages when questionable parallel constructs are 
+encountered. 
+
+@end table
+@end ifset
 
 @ifset M680X0
 The following options are available when @value{AS} is configured for the
@@ -533,7 +557,6 @@ Generate ``little endian'' format output.
 
 @end table
 @end ifset
-
 
 @ifset SPARC
 The following options are available when @code{@value{AS}} is configured
@@ -659,6 +682,15 @@ The default can be overidden by the @samp{-sifilter} command line option.
 @item -relax
 Alter jump instructions for long displacements.
 
+@item -mcpu=[210|340]
+Select the cpu type on the target hardware.  This controls which instructions
+can be assembled.
+
+@item -EB
+Assemble for a big endian target.
+
+@item -EL
+Assemble for a little endian target.
 
 @end table
 @end ifset
@@ -4936,6 +4968,9 @@ subject, see the hardware manufacturer's manual.
 @ifset I960
 * i960-Dependent::              Intel 80960 Dependent Features
 @end ifset
+@ifset M32R
+* M32R-Dependent::              M32R Dependent Features
+@end ifset
 @ifset M680X0
 * M68K-Dependent::              M680x0 Dependent Features
 @end ifset
@@ -5109,6 +5144,9 @@ family.
 @include c-i960.texi
 @end ifset
 
+@ifset M32R
+@include c-m32r.texi
+@end ifset
 
 @ifset M680X0
 @include c-m68k.texi

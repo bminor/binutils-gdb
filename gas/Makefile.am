@@ -41,6 +41,7 @@ CPU_TYPES = \
 	alpha \
 	arc \
 	arm \
+	avr \
 	d10v \
 	d30v \
 	fr30 \
@@ -199,6 +200,7 @@ TARGET_CPU_CFILES = \
 	config/tc-alpha.c \
 	config/tc-arc.c \
 	config/tc-arm.c \
+	config/tc-avr.c \
 	config/tc-d10v.c \
 	config/tc-d30v.c \
 	config/tc-fr30.c \
@@ -234,6 +236,7 @@ TARGET_CPU_HFILES = \
 	config/tc-alpha.h \
 	config/tc-arc.h \
 	config/tc-arm.h \
+	config/tc-avr.h \
 	config/tc-d10v.h \
 	config/tc-d30v.h \
 	config/tc-fr30.h \
