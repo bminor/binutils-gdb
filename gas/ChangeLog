@@ -1,3 +1,9 @@
+Wed Jan 11 17:51:38 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* config/tc-m68k.c (m68k_ip, cases AOFF and AINDEX): Don't
+	generate 68020 addressing modes for a 68000 processor.
+	(md_estimate_size_before_relax, cases PCREL and PCLEA): Ditto.
+
 Tue Jan 10 13:34:14 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* config/obj-coff.c (write_object_file): Don't treat h8300 and z8k
