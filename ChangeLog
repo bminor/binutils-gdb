@@ -1,3 +1,8 @@
+Mon Jun  6 16:06:34 1994  Karen Christiansen (karen@cirdan.cygnus.com)
+
+	* brought devo/test-build.mk update-to-date with progressive/
+	  test-build.mk. Add lynx targets and hppa flag info.
+
 Sat Jun  4 17:23:54 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
 	* configure.in:  Use mh-ncrsvr43.  Patch from
@@ -8,15 +13,11 @@ Fri Jun  3 17:47:24 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 	* config.guess (i386-unknown-bsdi):  No longer need to
 	check #if defined(__bsdi__) && defined(__i386__).
 
-Tue May 31 16:36:36 1994  Paul Eggert  (eggert@twinsun.com)
-
-	* config.guess (i386-unknown-bsdi): New system to guess.
-
 Thu Jun  2 18:56:46 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* configure: Set program_transform_nameoption correctly.
 
-Thu Jun  2 10:57:06 1994  Karen Christianse (karen@cirdan.cygnus.com)
+Thu Jun  2 10:57:06 1994  Karen Christiansen (karen@cirdan.cygnus.com)
 
 	* brought build-all.mk update-to-date with progressive build-all.mk,
 	  added new targets and hppa info.
@@ -46,6 +47,10 @@ Tue May 31 17:16:33 1994  Tom Lord  (lord@cygnus.com)
 
 	* Makefile.in (CHECK_MODULES): split into
 	HOST_ONLY_CHECK_MODULES and CROSS_CHECK_MODULES.
+
+Tue May 31 16:36:36 1994  Paul Eggert  (eggert@twinsun.com)
+
+	* config.guess (i386-unknown-bsdi): New system to guess.
 
 Wed May 25 16:47:10 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
