@@ -63,11 +63,6 @@ struct dbx_symfile_info {
   int symbol_size;		/* Bytes in a single symbol */
   struct stab_section_info *stab_section_info; 	/* section starting points
 				   of the original .o files before linking. */
-/* FIXME:  HP kludges that shouldn't be here.  */
-  int hp_symcount;
-  char *hp_stringtab;
-  int hp_stringtab_size;
-  file_ptr hp_symtab_offset;
 };
 
 #define DBX_SYMFILE_INFO(o)	((struct dbx_symfile_info *)((o)->sym_private))
@@ -77,10 +72,5 @@ struct dbx_symfile_info {
 #define DBX_STRINGTAB_SIZE(o)	(DBX_SYMFILE_INFO(o)->stringtab_size)
 #define DBX_SYMTAB_OFFSET(o)	(DBX_SYMFILE_INFO(o)->symtab_offset)
 #define DBX_SYMBOL_SIZE(o)	(DBX_SYMFILE_INFO(o)->symbol_size)
-/* We don't use a macro for stab_section_info.  */
-#define HP_SYMCOUNT(o)		(DBX_SYMFILE_INFO(o)->hp_symcount)
-#define HP_STRINGTAB(o)		(DBX_SYMFILE_INFO(o)->hp_stringtab)
-#define HP_STRINGTAB_SIZE(o)	(DBX_SYMFILE_INFO(o)->hp_stringtab_size)
-#define HP_SYMTAB_OFFSET(o)	(DBX_SYMFILE_INFO(o)->hp_symtab_offset)
 
 #endif /* GDBSTABS_H */

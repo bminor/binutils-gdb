@@ -1,0 +1,421 @@
+/* Read HP PA/Risc object files for GDB.
+   Copyright 1991, 1992 Free Software Foundation, Inc.
+   Written by Fred Fish at Cygnus Support.
+
+This file is part of GDB.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+/************************************************************************
+ *									*
+ *				NOTICE					*
+ *									*
+ * This file is still under construction.  When it is complete, this	*
+ * notice will be removed.  Until then, direct any questions or changes	*
+ * to Fred Fish at Cygnus Support (fnf@cygnus.com)			*
+ *									* 
+ * FIXME	Still needs support for shared libraries.		*
+ * FIXME	Still needs support for core files.			*
+ * FIXME	The ".debug" and ".line" section names are hardwired.	*
+ *									*
+ ************************************************************************/
+
+#include "defs.h"
+#include "bfd.h"
+#include "libbfd.h"
+#include "libhppa.h"
+#include <syms.h>
+#include "symtab.h"
+#include "symfile.h"
+#include "objfiles.h"
+#include "buildsym.h"
+#include "gdb-stabs.h"
+#include "complaints.h"
+#include <string.h>
+#include "demangle.h"
+#include <sys/file.h>
+
+/* Various things we might complain about... */
+
+static void
+pa_symfile_init PARAMS ((struct objfile *));
+
+static void
+pa_new_init PARAMS ((struct objfile *));
+
+static void
+pa_symfile_read PARAMS ((struct objfile *, struct section_offsets *, int));
+
+static void
+pa_symfile_finish PARAMS ((struct objfile *));
+
+static void
+pa_symtab_read PARAMS ((bfd *,  CORE_ADDR, struct objfile *));
+
+static void
+free_painfo PARAMS ((PTR));
+
+static struct section_offsets *
+pa_symfile_offsets PARAMS ((struct objfile *, CORE_ADDR));
+
+static void
+record_minimal_symbol PARAMS ((char *, CORE_ADDR,
+			       enum minimal_symbol_type,
+			       struct objfile *));
+
+static void
+record_minimal_symbol (name, address, ms_type, objfile)
+     char *name;
+     CORE_ADDR address;
+     enum minimal_symbol_type ms_type;
+     struct objfile *objfile;
+{
+  name = obsavestring (name, strlen (name), &objfile -> symbol_obstack);
+  prim_record_minimal_symbol (name, address, ms_type);
+}
+
+/*
+
+LOCAL FUNCTION
+
+	pa_symtab_read -- read the symbol table of a PA file
+
+SYNOPSIS
+
+	void pa_symtab_read (bfd *abfd, CORE_ADDR addr,
+			      struct objfile *objfile)
+
+DESCRIPTION
+
+	Given an open bfd, a base address to relocate symbols to, and a
+	flag that specifies whether or not this bfd is for an executable
+	or not (may be shared library for example), add all the global
+	function and data symbols to the minimal symbol table.
+*/
+
+static void
+pa_symtab_read (abfd, addr, objfile)
+     bfd *abfd;
+     CORE_ADDR addr;
+     struct objfile *objfile;
+{
+  unsigned int number_of_symbols;
+  unsigned int i;
+  int val;
+  char *stringtab;
+  struct symbol_dictionary_record *buf, *bufp;
+
+  number_of_symbols = obj_hp_sym_count (abfd);
+
+  buf = alloca (obj_hp_symbol_entry_size (abfd) * number_of_symbols);
+  bfd_seek (abfd, obj_hp_sym_filepos (abfd), L_SET);
+  val = bfd_read (buf, obj_hp_symbol_entry_size (abfd) * number_of_symbols,
+		  1, abfd);
+  if (val != obj_hp_symbol_entry_size (abfd) * number_of_symbols)
+    error ("Couldn't read symbol dictionary!");
+
+  stringtab = alloca (obj_hp_stringtab_size (abfd));
+  bfd_seek (abfd, obj_hp_str_filepos (abfd), L_SET);
+  val = bfd_read (stringtab, obj_hp_stringtab_size (abfd), 1, abfd);
+  if (val != obj_hp_stringtab_size (abfd))
+    error ("Can't read in HP string table.");
+  
+  for (i = 0, bufp = buf; i < number_of_symbols; i++, bufp++)
+    {
+      enum minimal_symbol_type ms_type;
+
+      QUIT;
+
+      if (bufp->symbol_scope != SS_UNIVERSAL)
+	continue;
+
+      switch (bufp->symbol_type)
+        {
+        case ST_SYM_EXT:
+        case ST_ARG_EXT:
+          continue;
+        case ST_CODE:
+        case ST_PRI_PROG:
+        case ST_SEC_PROG:
+        case ST_ENTRY:
+        case ST_MILLICODE:
+          ms_type = mst_text;
+          bufp->symbol_value &= ~0x3; /* clear out permission bits */
+          break;
+        case ST_DATA:
+          ms_type = mst_data;
+          break;
+        default:
+          continue;
+        }
+
+      if (bufp->name.n_strx > obj_hp_stringtab_size (abfd))
+	error ("Invalid symbol data; bad HP string table offset: %d",
+	       bufp->name.n_strx);
+
+      record_minimal_symbol (bufp->name.n_strx + stringtab,
+			     bufp->symbol_value, ms_type, 
+			     objfile);
+    }
+
+  install_minimal_symbols (objfile);
+}
+
+/* Scan and build partial symbols for a symbol file.
+   We have been initialized by a call to pa_symfile_init, which 
+   currently does nothing.
+
+   SECTION_OFFSETS is a set of offsets to apply to relocate the symbols
+   in each section.  This is ignored, as it isn't needed for the PA.
+
+   MAINLINE is true if we are reading the main symbol
+   table (as opposed to a shared lib or dynamically loaded file).
+
+   This function only does the minimum work necessary for letting the
+   user "name" things symbolically; it does not read the entire symtab.
+   Instead, it reads the external and static symbols and puts them in partial
+   symbol tables.  When more extensive information is requested of a
+   file, the corresponding partial symbol table is mutated into a full
+   fledged symbol table by going back and reading the symbols
+   for real.
+
+   We look for sections with specific names, to tell us what debug
+   format to look for:  FIXME!!!
+
+   pastab_build_psymtabs() handles STABS symbols.
+
+   Note that PA files have a "minimal" symbol table, which is vaguely
+   reminiscent of a COFF symbol table, but has only the minimal information
+   necessary for linking.  We process this also, and use the information to
+   build gdb's minimal symbol table.  This gives us some minimal debugging
+   capability even for files compiled without -g.  */
+
+static void
+pa_symfile_read (objfile, section_offsets, mainline)
+     struct objfile *objfile;
+     struct section_offsets *section_offsets;
+     int mainline;
+{
+  bfd *abfd = objfile->obfd;
+  struct cleanup *back_to;
+  CORE_ADDR offset;
+
+  init_minimal_symbol_collection ();
+  back_to = make_cleanup (discard_minimal_symbols, 0);
+
+  make_cleanup (free_painfo, (PTR) objfile);
+
+  /* Process the normal PA symbol table first. */
+
+  /* FIXME, should take a section_offsets param, not just an offset.  */
+
+  offset = ANOFFSET (section_offsets, 0);
+  pa_symtab_read (abfd, offset, objfile);
+
+  /* Now process debugging information, which is contained in
+     special PA sections.  */
+
+  pastab_build_psymtabs (objfile, section_offsets, mainline);
+
+  do_cleanups (back_to);
+}
+
+/* This cleans up the objfile's sym_private pointer, and the chain of
+   stab_section_info's, that might be dangling from it.  */
+
+static void
+free_painfo (objp)
+     PTR objp;
+{
+  struct objfile *objfile = (struct objfile *)objp;
+  struct dbx_symfile_info *dbxinfo = (struct dbx_symfile_info *)
+				     objfile->sym_private;
+  struct stab_section_info *ssi, *nssi;
+
+  ssi = dbxinfo->stab_section_info;
+  while (ssi)
+    {
+      nssi = ssi->next;
+      mfree (objfile->md, ssi);
+      ssi = nssi;
+    }
+
+  dbxinfo->stab_section_info = 0;	/* Just say No mo info about this.  */
+}
+
+/* Initialize anything that needs initializing when a completely new symbol
+   file is specified (not just adding some symbols from another file, e.g. a
+   shared library).
+
+   We reinitialize buildsym, since we may be reading stabs from a PA file.  */
+
+static void
+pa_new_init (ignore)
+     struct objfile *ignore;
+{
+  stabsread_new_init ();
+  buildsym_new_init ();
+}
+
+/* Perform any local cleanups required when we are done with a particular
+   objfile.  I.E, we are in the process of discarding all symbol information
+   for an objfile, freeing up all memory held for it, and unlinking the
+   objfile struct from the global list of known objfiles. */
+
+static void
+pa_symfile_finish (objfile)
+     struct objfile *objfile;
+{
+  if (objfile -> sym_private != NULL)
+    {
+      mfree (objfile -> md, objfile -> sym_private);
+    }
+}
+
+#if 0
+
+
+
+
+
+	  mainline,
+	  stabsect->filepos,				/* .stab offset */
+	  bfd_get_section_size_before_reloc (stabsect),	/* .stab size */
+	  stabstringsect->filepos,			/* .stabstr offset */
+	  bfd_get_section_size_before_reloc (stabstringsect),  /* .stabstr size */
+	  obj_dbx_symbol_entry_size (abfd));
+
+
+#endif
+
+/* PA specific initialization routine for reading symbols.
+
+   It is passed a pointer to a struct sym_fns which contains, among other
+   things, the BFD for the file whose symbols are being read, and a slot for
+   a pointer to "private data" which we can fill with goodies.
+
+   This routine is almost a complete ripoff of dbx_symfile_init.  The
+   common parts of these routines should be extracted and used instead of
+   duplicating this code.  FIXME. */
+
+static void
+pa_symfile_init (objfile)
+     struct objfile *objfile;
+{
+  int val;
+  bfd *sym_bfd = objfile->obfd;
+  char *name = bfd_get_filename (sym_bfd);
+
+  /* Allocate struct to keep track of the symfile */
+  objfile->sym_private = (PTR)
+    xmmalloc (objfile -> md, sizeof (struct dbx_symfile_info));
+
+  /* FIXME POKING INSIDE BFD DATA STRUCTURES */
+#define	STRING_TABLE_OFFSET	(obj_dbx_str_filepos (sym_bfd))
+#define	SYMBOL_TABLE_OFFSET	(obj_dbx_sym_filepos (sym_bfd))
+
+  /* FIXME POKING INSIDE BFD DATA STRUCTURES */
+
+  DBX_SYMFILE_INFO (objfile)->stab_section_info = NULL;
+  DBX_TEXT_SECT (objfile) = bfd_get_section_by_name (sym_bfd, ".text");
+  if (!DBX_TEXT_SECT (objfile))
+    error ("Can't find .text section in symbol file");
+
+  DBX_SYMBOL_SIZE (objfile) = obj_dbx_symbol_entry_size (sym_bfd);
+  DBX_SYMCOUNT (objfile) = obj_dbx_sym_count (sym_bfd);
+  DBX_SYMTAB_OFFSET (objfile) = SYMBOL_TABLE_OFFSET;
+
+  /* Read the string table and stash it away in the psymbol_obstack.  It is
+     only needed as long as we need to expand psymbols into full symbols,
+     so when we blow away the psymbol the string table goes away as well.
+     Note that gdb used to use the results of attempting to malloc the
+     string table, based on the size it read, as a form of sanity check
+     for botched byte swapping, on the theory that a byte swapped string
+     table size would be so totally bogus that the malloc would fail.  Now
+     that we put in on the psymbol_obstack, we can't do this since gdb gets
+     a fatal error (out of virtual memory) if the size is bogus.  We can
+     however at least check to see if the size is zero or some negative
+     value. */
+
+  DBX_STRINGTAB_SIZE (objfile) = obj_dbx_stringtab_size (sym_bfd);
+
+  if (DBX_SYMCOUNT (objfile) == 0
+      || DBX_STRINGTAB_SIZE (objfile) == 0)
+    return;
+
+  if (DBX_STRINGTAB_SIZE (objfile) <= 0
+      || DBX_STRINGTAB_SIZE (objfile) > bfd_get_size (sym_bfd))
+    error ("ridiculous string table size (%d bytes).",
+	   DBX_STRINGTAB_SIZE (objfile));
+
+  DBX_STRINGTAB (objfile) =
+    (char *) obstack_alloc (&objfile -> psymbol_obstack,
+			    DBX_STRINGTAB_SIZE (objfile));
+
+  /* Now read in the string table in one big gulp.  */
+
+  val = bfd_seek (sym_bfd, STRING_TABLE_OFFSET, L_SET);
+  if (val < 0)
+    perror_with_name (name);
+  val = bfd_read (DBX_STRINGTAB (objfile), DBX_STRINGTAB_SIZE (objfile), 1,
+		  sym_bfd);
+  if (val != DBX_STRINGTAB_SIZE (objfile))
+    perror_with_name (name);
+}
+
+/* PA specific parsing routine for section offsets.
+
+   Plain and simple for now.  */
+
+static struct section_offsets *
+pa_symfile_offsets (objfile, addr)
+     struct objfile *objfile;
+     CORE_ADDR addr;
+{
+  struct section_offsets *section_offsets;
+  int i;
+ 
+  section_offsets = (struct section_offsets *)
+    obstack_alloc (&objfile -> psymbol_obstack,
+		   sizeof (struct section_offsets) +
+		          sizeof (section_offsets->offsets) * (SECT_OFF_MAX-1));
+
+  for (i = 0; i < SECT_OFF_MAX; i++)
+    ANOFFSET (section_offsets, i) = addr;
+  
+  return section_offsets;
+}
+
+/*  Register that we are able to handle PA object file formats. */
+
+/* This is probably a mistake.  FIXME.  Why can't the HP's use an ordinary
+   file format name with an -hppa suffix?  */
+static struct sym_fns pa_sym_fns =
+{
+  "hppa",		/* sym_name: name or name prefix of BFD target type */
+  4,			/* sym_namelen: number of significant sym_name chars */
+  pa_new_init,		/* sym_new_init: init anything gbl to entire symtab */
+  pa_symfile_init,	/* sym_init: read initial info, setup for sym_read() */
+  pa_symfile_read,	/* sym_read: read a symbol file into symtab */
+  pa_symfile_finish,	/* sym_finish: finished with file, cleanup */
+  pa_symfile_offsets,	/* sym_offsets:  Translate ext. to int. relocation */
+  NULL			/* next: pointer to next struct sym_fns */
+};
+
+void
+_initialize_paread ()
+{
+  add_symtab_fns (&pa_sym_fns);
+}

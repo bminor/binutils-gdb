@@ -1,3 +1,14 @@
+Thu Dec 31 09:03:02 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* paread.c:  New file that contains all HPPA/HPUX symbol reading
+	code.
+	* dbxread.c:  Remove almost all HPPA/HPUX symbol reading code.
+	* (dbx_symfile_init):  Use sizeof(long) instead of 4.
+	* (dbx_symfile_offsets):  Make static.
+	* (pastab_build_psymtabs):  New interface routine for paread to
+	send stabs into dbxread.
+	* gdb-stabs.h:  Remove gobs of HPPA cruft.
+
 Wed Dec 30 19:47:13 1992  Fred Fish  (fnf@cygnus.com)
 
 	* c-exp.y, m2-exp.y (yyrule, yyname):  Remap like other yy* names
