@@ -1,3 +1,10 @@
+2003-05-28  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.asm/asm-source.exp: Don't handle powerpc64-*-* along with
+	powerpc-*-*; treat the former as an architecture this test doesn't
+	support.  At the moment, the asm-source test program hangs and
+	becomes an unkillable process on PPC64 Linux.
+
 2003-05-22  Jim Blandy  <jimb@redhat.com>
 
 	* gdb.base/corefile.exp: Tolerate stuff after argument parens in

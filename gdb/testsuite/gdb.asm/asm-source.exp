@@ -75,6 +75,10 @@ switch -glob -- [istarget] {
     "mips*-*" {
         set asm-arch mips
     }
+    "powerpc64-*-linux*" {
+        # At the moment, this test makes the kernel hang; we're
+        # disabling it until we can sort that out.
+    }
     "powerpc*-*" {
         set asm-arch powerpc
     }
