@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.13:
+
 Support for the Fujitsu FRV architecture added by Red Hat. Models for FR400 and
 FR500 included.
 
