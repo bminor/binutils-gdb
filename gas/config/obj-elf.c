@@ -675,8 +675,9 @@ obj_elf_change_section (name, type, attr, entsize, group_name, linkonce, push)
 	  /* As a GNU extension, we permit a .note section to be
 	     allocatable.  If the linker sees an allocateable .note
 	     section, it will create a PT_NOTE segment in the output
-	     file.  */
-	  if (strcmp (name, ".note") != 0 || attr != SHF_ALLOC)
+	     file.  We also allow "x" for .note.GNU-stack.  */
+	  if (!(def_type == SHT_NOTE
+		&& (attr == SHF_ALLOC || attr == SHF_EXECINSTR)))
 	    as_warn (_("setting incorrect section attributes for %s"),
 		     name);
 	}
