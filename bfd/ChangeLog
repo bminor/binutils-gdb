@@ -1,3 +1,24 @@
+Wed Apr 15 22:15:16 1998  Richard Henderson  <rth@cygnus.com>
+
+	* elf64-alpha.c: Initial implementation of relaxation --
+	(struct alpha_elf_link_hash_entry): Add use_count member.
+	(elf64_alpha_check_relocs): Initialize and increment it.
+	(elf64_alpha_can_merge_gots): Check it when considering merging.
+	(elf64_alpha_merge_gots): Drop entries with zero use.
+	(elf64_alpha_calc_got_offsets_for_symbol): Likewise.
+	(elf64_alpha_always_size_sections): Split out got sizing ...
+	(elf64_alpha_size_got_sections): ... here.  New function.
+	(elf64_alpha_relax_find_reloc_ofs): New function.
+	(elf64_alpha_relax_with_lituse): Likewise.
+	(elf64_alpha_relax_without_lituse): Likewise.
+	(elf64_alpha_relax_opt_call): Likewise.
+	(elf64_alpha_relax_section): Likewise.
+	(elf64_alpha_add_symbol_hook): Likewise.
+	(elf64_alpha_howto_table): Implement GPRELHIGH/LOW & IMMED_GP_16.
+	(elf64_alpha_relocate_section): Likewise.
+	(bfd_elf64_bfd_relax_section): Define.
+	(elf_backend_add_symbol_hook): Likewise.
+
 Wed Apr 15 16:08:46 1998  Richard Henderson  <rth@cygnus.com>
 
 	* elf.c (prep_headers): Use new EM_SPARCV9 symbol.
