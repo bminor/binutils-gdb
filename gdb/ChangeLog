@@ -53,6 +53,11 @@ Tue May 23 17:44:18 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* TODO: Update.
 
+2000-05-17  Michael Snyder  <msnyder@seadog.cygnus.com>
+
+	* config/sparc/tm-sun4sol2.h: Turn on multi-arch.
+	sparc-tdep.c (gdb_print_insn_sparc): Remove temporary multi-arch hack.
+
 2000-05-17  Andrew Cagney  <cagney@sourceware.cygnus.com>
 
 	* GDB 5.0 released.
@@ -177,6 +182,7 @@ Mon May 22 11:46:01 2000  Andrew Cagney  <cagney@b1.cygnus.com>
  	config/powerpc/tm-nbsd.h, config/powerpc/nm-nbsd.h,
  	config/powerpc/xm-nbsd.h: New files.
 
+>>>>>>> 1.399
 2000-05-17  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* gdb/config/djgpp/README: Fine-tune installation instructions
