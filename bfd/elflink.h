@@ -5898,6 +5898,7 @@ elf_link_input_bfd (finfo, input_bfd)
   asection *o;
   struct elf_backend_data *bed;
   boolean emit_relocs;
+  struct elf_link_hash_entry **sym_hashes;
 
   output_bfd = finfo->output_bfd;
   bed = get_elf_backend_data (output_bfd);
@@ -6070,6 +6071,7 @@ elf_link_input_bfd (finfo, input_bfd)
     }
 
   /* Relocate the contents of each section.  */
+  sym_hashes = elf_sym_hashes (input_bfd);
   for (o = input_bfd->sections; o != NULL; o = o->next)
     {
       bfd_byte *contents;
@@ -6117,25 +6119,64 @@ elf_link_input_bfd (finfo, input_bfd)
 	      && o->reloc_count > 0)
 	    return false;
 
-#if BFD_VERSION_DATE < 20031005
 	  {
 	    Elf_Internal_Rela *rel, *relend;
-	    /* Run through the relocs looking for any against section
-	       symbols from removed link-once sections.  Zero any such
-	       relocs.  We should really complain if anything in the
-	       final link tries to use it, but DWARF-based exception
-	       handling might have an entry in .eh_frame to describe a
-	       routine in the linkonce section, and it turns out to be
-	       hard to remove the .eh_frame entry too.  FIXME.  */
+	    /* Run through the relocs looking for any against symbols
+	       from discarded sections and section symbols from
+	       removed link-once sections. Complain about relocs
+	       against discarded sections. Zero relocs against removed
+	       link-once sections. We should really complain if
+	       anything in the final link tries to use it, but
+	       DWARF-based exception handling might have an entry in
+	       .eh_frame to describe a routine in the linkonce section,
+	       and it turns out to be hard to remove the .eh_frame
+	       entry too.  FIXME.  */
 	    rel = internal_relocs;
 	    relend = rel + o->reloc_count * bed->s->int_rels_per_ext_rel;
 	    for ( ; rel < relend; rel++)
 	      {
 		unsigned long r_symndx = ELF_R_SYM (rel->r_info);
 
-		if (r_symndx < locsymcount
-		    && (!elf_bad_symtab (input_bfd)
-			|| finfo->sections[r_symndx] != NULL))
+		if (r_symndx >= locsymcount
+		    || (elf_bad_symtab (input_bfd)
+			&& finfo->sections[r_symndx] == NULL))
+		  {
+		    struct elf_link_hash_entry *h;
+
+		    h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+		    while (h->root.type == bfd_link_hash_indirect
+			   || h->root.type == bfd_link_hash_warning)
+		      h = (struct elf_link_hash_entry *) h->root.u.i.link;
+		    /* Complain if the definition comes from a
+		       discarded section.  */
+		    if ((h->root.type == bfd_link_hash_defined
+			 || h->root.type == bfd_link_hash_defweak)
+			&& ! bfd_is_abs_section (h->root.u.def.section)
+			&& bfd_is_abs_section (h->root.u.def.section->output_section))
+		      {
+#if BFD_VERSION_DATE < 20031005
+			if ((o->flags & SEC_DEBUGGING) != 0)
+			  {
+#if BFD_VERSION_DATE > 20021005
+			    (*finfo->info->callbacks->warning)
+			      (finfo->info,
+			       _("warning: relocation against removed section; zeroing"),
+				   NULL, input_bfd, o, rel->r_offset);
+#endif
+			      memset (rel, 0, sizeof (*rel));
+			  }
+			else
+#endif
+			  {
+			    if (! ((*finfo->info->callbacks->undefined_symbol)
+				    (finfo->info, h->root.root.string,
+				     input_bfd, o, rel->r_offset,
+				     true)))
+			      return false;
+			  }
+		      }
+		  }
+		else
 		  {
 		    isym = finfo->internal_syms + r_symndx;
 		    if (ELF_ST_TYPE (isym->st_info) == STT_SECTION)
@@ -6143,24 +6184,50 @@ elf_link_input_bfd (finfo, input_bfd)
 			asection *sec = finfo->sections[r_symndx];
 
 			if (sec != NULL
-			    && (sec->flags & SEC_LINK_ONCE) != 0
+			    && ! bfd_is_abs_section (sec)
 			    && bfd_is_abs_section (sec->output_section))
 			  {
+#if BFD_VERSION_DATE < 20031005
+			    if ((o->flags & SEC_DEBUGGING) != 0
+			        || (sec->flags & SEC_LINK_ONCE) != 0)
+			      {
 #if BFD_VERSION_DATE > 20021005
-			    (*finfo->info->callbacks->warning)
-			      (finfo->info,
-			       _("warning: relocation against removed section; zeroing"),
-			       NULL, input_bfd, o, rel->r_offset);
+				(*finfo->info->callbacks->warning)
+				  (finfo->info,
+				   _("warning: relocation against removed section; zeroing"),
+				   NULL, input_bfd, o, rel->r_offset);
 #endif
-			    memset (rel, 0, sizeof (*rel));
+				memset (rel, 0, sizeof (*rel));
+			      }
+			    else
+#endif
+			      {
+				boolean ok;
+				const char *msg =
+				  _("local symbols in discarded section");
+				char *buf
+				  = (char *) bfd_malloc
+				      (strlen (sec->name) + 3
+				       + strlen (msg));
+				if (buf != NULL)
+				  sprintf (buf, "%s: %s", msg,
+					   sec->name);
+				else
+				  buf = (char *) sec->name;
+				ok = (*finfo->info->callbacks->undefined_symbol)
+				       (finfo->info, buf,
+					input_bfd, o, rel->r_offset,
+					true);
+				if (buf != sec->name)
+				  free (buf);
+				if (!ok)
+				  return false;
+			      }
 			  }
 		      }
 		  }
 	      }
 	  }
-#else
-#error "gcc should be fixed by now, and this kludge no longer needed"
-#endif
 
 	  /* Relocate the section by invoking a back end routine.
 
