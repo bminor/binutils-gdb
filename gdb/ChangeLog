@@ -1,3 +1,10 @@
+start-sanitize-v9
+Sun Mar 20 15:11:42 1994  Doug Evans  (dje@cygnus.com)
+
+	* sp64-tdep.c (target_ptr_bit, set_target_ptr_bit): Deleted,
+	can no longer set this at run time.
+end-sanitize-v9
+
 Sat Mar 19 08:51:12 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config/m68k/{cisco.mt,tm-cisco.h}: New files.
