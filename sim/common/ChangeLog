@@ -1,3 +1,9 @@
+1999-05-08  Felix Lee  <flee@cygnus.com>
+
+        * aclocal.m4: Use AC_EXEEXT instead of AM_EXEEXT.  Delete defn of
+        AM_CYGWIN32 and AM_EXEEXT.
+	* configure: Regenerate.
+	
 Fri Apr 16 16:43:22 1999  Doug Evans  <devans@charmed.cygnus.com>
 
 	* sim-core.c (device_error,device_io_read_buffer,

@@ -764,6 +764,7 @@ coff_symtab_read (symtab_offset, nsyms, section_offsets, objfile)
   char *filestring = "";
   int depth = 0;
   int fcn_first_line = 0;
+  CORE_ADDR fcn_first_line_addr;
   int fcn_last_line = 0;
   int fcn_start_addr = 0;
   long fcn_line_ptr = 0;
@@ -1020,6 +1021,7 @@ coff_symtab_read (symtab_offset, nsyms, section_offsets, objfile)
 		if (cs->c_naux != 1)
 		  complain (&bf_no_aux_complaint, cs->c_symnum);
 		fcn_first_line = main_aux.x_sym.x_misc.x_lnsz.x_lnno;
+		fcn_first_line_addr = cs->c_value;
 
 		/* Might want to check that locals are 0 and
 		   context_stack_depth is zero, and complain if not.  */
@@ -1030,7 +1032,6 @@ coff_symtab_read (symtab_offset, nsyms, section_offsets, objfile)
 		new->name =
 		  process_coff_symbol (&fcn_cs_saved, &fcn_aux_saved,
 				       section_offsets, objfile);
-	        record_line (current_subfile, fcn_first_line, cs->c_value);
 	      }
 	    else if (STREQ (cs->c_name, ".ef"))
 	      {
@@ -1063,8 +1064,18 @@ coff_symtab_read (symtab_offset, nsyms, section_offsets, objfile)
 		  {
 		    fcn_last_line = main_aux.x_sym.x_misc.x_lnsz.x_lnno;
 		  }
-		enter_linenos (fcn_line_ptr, fcn_first_line, fcn_last_line,
-			       section_offsets);
+		/* fcn_first_line is the line number of the opening '{'.
+		   Do not record it - because it would affect gdb's idea
+		   of the line number of the first statement of the function -
+		   except for one-line functions, for which it is also the line
+		   number of all the statements and of the closing '}', and
+		   for which we do not have any other statement-line-number. */
+		if (fcn_last_line == 1)
+	          record_line (current_subfile, fcn_first_line,
+			       fcn_first_line_addr);
+		else
+		  enter_linenos (fcn_line_ptr, fcn_first_line, fcn_last_line,
+				 section_offsets);
 
 		finish_block (new->name, &local_symbols, new->old_blocks,
 			      new->start_addr,

@@ -1012,7 +1012,7 @@ extern void store_floating PARAMS ((void *, int, DOUBLEST));
    I'm not sure it's used in all contexts.  It exists to deal with there
    being a few stray bits in the PC which would mislead us, not as some sort
    of generic thing to handle alignment or segmentation (it's possible it
-   should be in TARGET_READ_PC instead).  */
+   should be in TARGET_READ_PC instead). */
 #if !defined (ADDR_BITS_REMOVE)
 #define ADDR_BITS_REMOVE(addr) (addr)
 #endif /* No ADDR_BITS_REMOVE.  */
@@ -1032,6 +1032,7 @@ struct target_waitstatus;
 struct cmd_list_element;
 #endif
 
+extern void (*async_hook) PARAMS ((void));                                                                   
 extern void (*init_ui_hook) PARAMS ((char *argv0));
 extern void (*command_loop_hook) PARAMS ((void));
 extern void (*fputs_unfiltered_hook) PARAMS ((const char *linebuffer,

@@ -1,3 +1,7 @@
+1999-05-08  Felix Lee  <flee@cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	
 Wed Nov 25 18:22:10 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* support.c: Include <errno.h>

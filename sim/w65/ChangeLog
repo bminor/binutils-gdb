@@ -1,3 +1,7 @@
+1999-05-08  Felix Lee  <flee@cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	
 Sun Apr 26 15:31:55 1998  Tom Tromey  <tromey@creche>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

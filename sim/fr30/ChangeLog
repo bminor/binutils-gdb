@@ -1,3 +1,7 @@
+1999-05-08  Felix Lee  <flee@cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	
 Fri Apr 16 16:50:31 1999  Doug Evans  <devans@charmed.cygnus.com>
 
 	* devices.c (device_io_read_buffer): New arg `sd'.

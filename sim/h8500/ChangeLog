@@ -1,3 +1,7 @@
+1999-05-08  Felix Lee  <flee@cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	
 Tue Apr 28 18:33:31 1998  Geoffrey Noer  <noer@cygnus.com>
 
         * configure: Regenerated to track ../common/aclocal.m4 changes.

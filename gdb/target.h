@@ -106,9 +106,14 @@ enum target_waitkind {
    signals (insofar as various unices use the same numbers, anyway).
    It is also the numbering of the GDB remote protocol.  Other remote
    protocols, if they use a different numbering, should make sure to
-   translate appropriately.  */
+   translate appropriately.
 
-/* This is based strongly on Unix/POSIX signals for several reasons:
+   Since these numbers have actually made it out into other software
+   (stubs, etc.), you mustn't disturb the assigned numbering.  If you
+   need to add new signals here, add them to the end of the explicitly
+   numbered signals.
+
+   This is based strongly on Unix/POSIX signals for several reasons:
    (1) This set of signals represents a widely-accepted attempt to
    represent events of this sort in a portable fashion, (2) we want a
    signal to make it from wait to child_wait to the user intact, (3) many
@@ -205,6 +210,10 @@ enum target_signal {
   TARGET_SIGNAL_REALTIME_61 = 73,
   TARGET_SIGNAL_REALTIME_62 = 74,
   TARGET_SIGNAL_REALTIME_63 = 75,
+
+  /* Used internally by Solaris threads.  See signal(5) on Solaris.  */
+  TARGET_SIGNAL_CANCEL = 76,
+
 #if defined(MACH) || defined(__MACH__)
   /* Mach exceptions */
   TARGET_EXC_BAD_ACCESS,

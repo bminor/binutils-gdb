@@ -3371,7 +3371,7 @@ EOF
 fi
 
 
-for ac_func in setpgid sbrk sigaction isascii bzero bcopy btowc
+for ac_func in setpgid sbrk sigaction isascii bzero bcopy btowc poll
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
 echo "configure:3378: checking for $ac_func" >&5
@@ -5372,6 +5372,11 @@ fi
 fi
 
 
+# libreadline needs libuser32.a in a cygwin environment
+WIN32LIBS=
+if test x$gdb_cv_os_cygwin = xyes; then
+    WIN32LIBS="-luser32"
+fi
 
 
 
@@ -5380,7 +5385,7 @@ fi
 # Uses ac_ vars as temps to allow command line to override cache and checks.
 # --without-x overrides everything else, but does not touch the cache.
 echo $ac_n "checking for X""... $ac_c" 1>&6
-echo "configure:6593: checking for X" >&5
+echo "configure:6597: checking for X" >&5
 
 # Check whether --with-x or --without-x was given.
 if test "${with_x+set}" = set; then
@@ -5442,12 +5447,12 @@ if test "$ac_x_includes" = NO; then
 
   # First, try using that file with no special directory specified.
 cat > conftest.$ac_ext <<EOF
-#line 6655 "configure"
+#line 6659 "configure"
 #include "confdefs.h"
 #include <$x_direct_test_include>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:6660: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:6664: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -5516,14 +5521,14 @@ if test "$ac_x_libraries" = NO; then
   ac_save_LIBS="$LIBS"
   LIBS="-l$x_direct_test_library $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 6729 "configure"
+#line 6733 "configure"
 #include "confdefs.h"
 
 int main() {
 ${x_direct_test_function}()
 ; return 0; }
 EOF
-if { (eval echo configure:6736: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:6740: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   LIBS="$ac_save_LIBS"
 # We can link X programs with no special library path.
@@ -5796,12 +5801,12 @@ fi
 
 
 echo $ac_n "checking for Cygwin environment""... $ac_c" 1>&6
-echo "configure:7080: checking for Cygwin environment" >&5
+echo "configure:7084: checking for Cygwin environment" >&5
 if eval "test \"`echo '$''{'ac_cv_cygwin'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 7085 "configure"
+#line 7089 "configure"
 #include "confdefs.h"
 
 int main() {
@@ -5812,7 +5817,7 @@ int main() {
 return __CYGWIN__;
 ; return 0; }
 EOF
-if { (eval echo configure:7096: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:7100: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_cygwin=yes
 else
@@ -5829,19 +5834,19 @@ echo "$ac_t""$ac_cv_cygwin" 1>&6
 CYGWIN=
 test "$ac_cv_cygwin" = yes && CYGWIN=yes
 echo $ac_n "checking for mingw32 environment""... $ac_c" 1>&6
-echo "configure:7113: checking for mingw32 environment" >&5
+echo "configure:7117: checking for mingw32 environment" >&5
 if eval "test \"`echo '$''{'ac_cv_mingw32'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 7118 "configure"
+#line 7122 "configure"
 #include "confdefs.h"
 
 int main() {
 return __MINGW32__;
 ; return 0; }
 EOF
-if { (eval echo configure:7125: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+if { (eval echo configure:7129: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
   rm -rf conftest*
   ac_cv_mingw32=yes
 else
@@ -5860,7 +5865,7 @@ test "$ac_cv_mingw32" = yes && MINGW32=yes
 
 
 echo $ac_n "checking for executable suffix""... $ac_c" 1>&6
-echo "configure:7144: checking for executable suffix" >&5
+echo "configure:7148: checking for executable suffix" >&5
 if eval "test \"`echo '$''{'ac_cv_exeext'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5870,10 +5875,10 @@ else
   rm -f conftest*
   echo 'int main () { return 0; }' > conftest.$ac_ext
   ac_cv_exeext=
-  if { (eval echo configure:7154: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
+  if { (eval echo configure:7158: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; }; then
     for file in conftest.*; do
       case $file in
-      *.c | *.o | *.obj | *.ilk | *.pdb) ;;
+      *.c | *.o | *.obj) ;;
       *) ac_cv_exeext=`echo $file | sed -e s/conftest//` ;;
       esac
     done
@@ -6082,6 +6087,7 @@ s%@MACHINE_OBS@%$MACHINE_OBS%g
 s%@DLLTOOL@%$DLLTOOL%g
 s%@WINDRES@%$WINDRES%g
 s%@TERM_LIB@%$TERM_LIB%g
+s%@WIN32LIBS@%$WIN32LIBS%g
 s%@ENABLE_IDE@%$ENABLE_IDE%g
 s%@FOUNDRY_LIB_BASE@%$FOUNDRY_LIB_BASE%g
 s%@LIBGUI@%$LIBGUI%g
@@ -6091,7 +6097,6 @@ s%@IDE_X@%$IDE_X%g
 s%@LIBIDETCL@%$LIBIDETCL%g
 s%@LIBIDE@%$LIBIDE%g
 s%@IDE_DEPS@%$IDE_DEPS%g
-s%@WIN32LIBS@%$WIN32LIBS%g
 s%@WIN32LDAPP@%$WIN32LDAPP%g
 s%@TCL_VERSION@%$TCL_VERSION%g
 s%@TCL_MAJOR_VERSION@%$TCL_MAJOR_VERSION%g

@@ -1,3 +1,7 @@
+1999-05-08  Felix Lee  <flee@cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	
 Tue Dec  1 17:25:16 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* Makefile.in (NL_TARGET): Define as -DNL_TARGET_v850.

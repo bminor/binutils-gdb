@@ -41,6 +41,19 @@ extern char gdbinit[];
 #define SIGLONGJMP(buf,val)	longjmp(buf,val)
 #endif
 
+/* Temporary variable for SET_TOP_LEVEL.  */
+
+int top_level_val;
+
+/* Do a setjmp on error_return and quit_return.  catch_errors is
+   generally a cleaner way to do this, but main() would look pretty
+   ugly if it had to use catch_errors each time.  */
+
+#define SET_TOP_LEVEL() \
+  (((top_level_val = SIGSETJMP (error_return)) \
+    ? (PTR) 0 : (PTR) memcpy (quit_return, error_return, sizeof (SIGJMP_BUF))) \
+   , top_level_val)
+
 extern SIGJMP_BUF error_return;
 extern SIGJMP_BUF quit_return;
 
@@ -54,6 +67,9 @@ extern void command_loop PARAMS ((void));
 extern int quit_confirm PARAMS ((void));
 extern void quit_force PARAMS ((char *, int));
 extern void quit_command PARAMS ((char *, int));
+
+extern void setup_event_loop PARAMS ((void));
+extern void async_init_signals PARAMS ((void));
 
 /* This function returns a pointer to the string that is used
    by gdb for its command prompt. */

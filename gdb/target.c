@@ -1258,6 +1258,7 @@ static struct {
   {"SIG61", "Real-time event 61"},
   {"SIG62", "Real-time event 62"},
   {"SIG63", "Real-time event 63"},
+  {"SIGCANCEL", "LWP internal signal"},
 
 #if defined(MACH) || defined(__MACH__)
   /* Mach exceptions */
@@ -1446,6 +1447,9 @@ target_signal_from_host (hostsig)
 #if defined (SIGWAITING)
   if (hostsig == SIGWAITING) return TARGET_SIGNAL_WAITING;
 #endif
+#if defined (SIGCANCEL)
+  if (hostsig == SIGCANCEL) return TARGET_SIGNAL_CANCEL;
+#endif
 #if defined (SIGLWP)
   if (hostsig == SIGLWP) return TARGET_SIGNAL_LWP;
 #endif
@@ -1623,6 +1627,9 @@ target_signal_to_host (oursig)
 #endif
 #if defined (SIGWAITING)
     case TARGET_SIGNAL_WAITING: return SIGWAITING;
+#endif
+#if defined (SIGCANCEL)
+    case TARGET_SIGNAL_CANCEL: return SIGCANCEL;
 #endif
 #if defined (SIGLWP)
     case TARGET_SIGNAL_LWP: return SIGLWP;

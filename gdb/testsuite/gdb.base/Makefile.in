@@ -14,10 +14,6 @@ EXECUTABLES = all-types bitfields break \
 	solib so-impl-ld so-indr-cl \
 	step-test structs structs2 twice-tmp varargs watchpoint whatis
 
-# uuencoded format to avoid SCCS/RCS problems with binary files.
-CROSS_EXECUTABLES = i486-elf i860-elf m68k-elf m68k-aout m68k-aout2  \
-	mips-ecoff sparc-aout sparc-elf
-
 MISCELLANEOUS = coremmap.data shr1.sl shr2.sl solib1.sl solib2.sl
 
 all:
@@ -32,7 +28,7 @@ installcheck:
 check:
 
 clean mostlyclean:
-	-rm -f *~ *.o a.out xgdb *.x $(CROSS_EXECUTABLES) *.ci *.tmp
+	-rm -f *~ *.o a.out xgdb *.x *.ci *.tmp
 	-rm -f core core.coremaker coremaker.core corefile $(EXECUTABLES)
 	-rm -f $(MISCELLANEOUS) twice-tmp.c
 

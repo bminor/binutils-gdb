@@ -35,19 +35,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "gdb_string.h"
 
-/* Temporary variable for SET_TOP_LEVEL.  */
-
-static int top_level_val;
-
-/* Do a setjmp on error_return and quit_return.  catch_errors is
-   generally a cleaner way to do this, but main() would look pretty
-   ugly if it had to use catch_errors each time.  */
-
-#define SET_TOP_LEVEL() \
-  (((top_level_val = SIGSETJMP (error_return)) \
-    ? (PTR) 0 : (PTR) memcpy (quit_return, error_return, sizeof (SIGJMP_BUF))) \
-   , top_level_val)
-
 /* If nonzero, display time usage both at startup and for each command.  */
 
 int display_time;
@@ -55,6 +42,12 @@ int display_time;
 /* If nonzero, display space usage both at startup and for each command.  */
 
 int display_space;
+
+/* Whether this is the async version or not.  The async version is
+invoked on the command line with the -nw --async options.  In this
+version, the usual command_loop is substituted by and event loop which
+processes UI events asynchronously. */
+int async = 0;
 
 /* Whether this is the command line version or not */
 int tui_version = 0;
@@ -185,7 +178,8 @@ main (argc, argv)
        short option (or arbitrary numbers starting at 10 for those
        with no equivalent).  */
     static struct option long_options[] =
-      {
+       {
+        {"async", no_argument, &async, 1},  
 #if defined(TUI)
 	{"tui", no_argument, &tui_version, 1},
 #endif
@@ -397,6 +391,10 @@ main (argc, argv)
       quiet = 1;
   }
 
+  /* Get ready to invoke the event loop instead of the
+     command_loop. See event-loop.h for more details.*/
+  if (async)
+    async_hook = setup_event_loop;
 #if defined(TUI)
   if (tui_version)
     init_ui_hook = tuiInit;
@@ -624,6 +622,12 @@ main (argc, argv)
 #endif
     }
 
+  /* Call the event loop, if gdb was invoked with the --async
+     option. Control will never get back to this file, if the event
+     loop is invoked. See the files event-*.[ch] for details. */
+  if (async_hook)
+    async_hook();
+                
   /* The default command loop. 
      The WIN32 Gui calls this main to set up gdb's state, and 
      has its own command loop. */

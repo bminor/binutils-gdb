@@ -75,7 +75,7 @@ AC_HEADER_STAT
 
 AC_C_CONST
 
-AC_CHECK_FUNCS(setpgid sbrk sigaction isascii bzero bcopy btowc)
+AC_CHECK_FUNCS(setpgid sbrk sigaction isascii bzero bcopy btowc poll)
 AC_FUNC_ALLOCA
 
 BFD_NEED_DECLARATION(malloc)
@@ -447,7 +447,12 @@ fi
 fi
 AC_SUBST(TERM_LIB)
 
-
+# libreadline needs libuser32.a in a cygwin environment
+WIN32LIBS=
+if test x$gdb_cv_os_cygwin = xyes; then
+    WIN32LIBS="-luser32"
+fi
+AC_SUBST(WIN32LIBS)
 
 
 AC_PATH_X

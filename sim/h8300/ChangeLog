@@ -1,3 +1,7 @@
+1999-05-08  Felix Lee  <flee@cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	
 1999-04-02  Keith Seitz  <keiths@cygnus.com>
 
 	* compile.c (POLL_QUIT_INTERVAL): Define. Used to tweak the

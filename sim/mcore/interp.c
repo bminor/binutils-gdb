@@ -40,8 +40,6 @@ static unsigned long  heap_ptr = 0;
 host_callback *       callback;
 
 
-#define TARGET_BYTE_ORDER BIG_ENDIAN /* XXX */
-
 unsigned long
 mcore_extract_unsigned_integer (addr, len)
      unsigned char * addr;
@@ -59,8 +57,11 @@ mcore_extract_unsigned_integer (addr, len)
   /* Start at the most significant end of the integer, and work towards
      the least significant.  */
   retval = 0;
-  for (p = startaddr; p < endaddr; ++p)
-     retval = (retval << 8) | * p;
+
+    {
+      for (p = startaddr; p < endaddr;)
+	retval = (retval << 8) | * p ++;
+    }
   
   return retval;
 }
@@ -74,24 +75,20 @@ mcore_store_unsigned_integer (addr, len, val)
   unsigned char * p;
   unsigned char * startaddr = (unsigned char *)addr;
   unsigned char * endaddr = startaddr + len;
- 
-  /* Start at the least significant end of the integer, and work towards
-     the most significant.  */
-  for (p = endaddr - 1; p >= startaddr; --p)
+
     {
-      * p = val & 0xff;
-      val >>= 8;
+      for (p = endaddr; p > startaddr;)
+	{
+	  * -- p = val & 0xff;
+	  val >>= 8;
+	}
     }
 }
 
 /* The machine state.
    This state is maintained in host byte order.  The 
    fetch/store register functions must translate between host
-   byte order and the target processor byte order (for MCore this
-   is big-endian).  Since we know that the MCore is always big-endian,
-   we cheat a bit and use the ntohl() and htonl() macros to
-   achieve this end.
-  
+   byte order and the target processor byte order.  
    Keeping this data in target byte order simplifies the register
    read/write functions.  Keeping this data in native order improves
    the performance of the simulator.  Simulation speed is deemed more
@@ -121,7 +118,7 @@ union
   word asints [1];		/* but accessed larger... */
 } cpu;
 
-#define LAST_VALID_CREG	12		/* only 0..12 implemented */
+#define LAST_VALID_CREG	12	/* only 0..12 implemented */
 #define	NUM_MCORE_REGS	(16 + 16 + LAST_VALID_CREG)
 
 int memcycles = 1;
@@ -149,12 +146,12 @@ static int issue_messages = 0;
 #define mem	asregs.memory
 
 /* maniuplate the carry bit */
-#define	C_ON()	(cpu.sr & 1)
+#define	C_ON()	 (cpu.sr & 1)
 #define	C_VALUE() (cpu.sr & 1)
-#define	C_OFF()	((cpu.sr & 1) == 0)
-#define	SET_C()	{cpu.sr |= 1;}
-#define	CLR_C()	{cpu.sr &= 0xfffffffe;}
-#define	NEW_C(v){CLR_C(); cpu.sr |= ((v) & 1);}
+#define	C_OFF()	 ((cpu.sr & 1) == 0)
+#define	SET_C()	 {cpu.sr |= 1;}
+#define	CLR_C()	 {cpu.sr &= 0xfffffffe;}
+#define	NEW_C(v) {CLR_C(); cpu.sr |= ((v) & 1);}
 
 #define	SR_AF() ((cpu.sr >> 1) & 1)
 
@@ -246,7 +243,8 @@ what (x, v)
       if ((x & 1) != 0)
 	{
 	  if (issue_messages)
-	    fprintf (stderr, "short write to unaligned memory address: 0x%x\n", x);
+	    fprintf (stderr, "short write to unaligned memory address: 0x%x\n",
+		     x);
       
 	  cpu.asregs.exception = SIGBUS;
 	}
@@ -376,7 +374,8 @@ sim_size (power)
     {
       if (issue_messages)
 	fprintf (stderr,
-		 "Not enough VM for simulation of %d bytes of RAM\n", cpu.asregs.msize);
+		 "Not enough VM for simulation of %d bytes of RAM\n",
+		 cpu.asregs.msize);
 
       cpu.asregs.msize = 1;
       cpu.mem = (unsigned char *) calloc (1, 1);
@@ -481,7 +480,7 @@ handle_trap1 ()
 {
   unsigned long a[3];
 
-  switch ((unsigned long) (cpu.gr[TRAPCODE]))
+  switch ((unsigned long) (cpu.gr [TRAPCODE]))
     {
     case 3:
       a[0] = (unsigned long) (cpu.gr[PARM1]);
@@ -587,7 +586,8 @@ handle_trap1 ()
       
     default:
       if (issue_messages)
-	fprintf (stderr, "WARNING: sys call %d unimplemented\n", cpu.gr[TRAPCODE]);
+	fprintf (stderr, "WARNING: sys call %d unimplemented\n",
+		 cpu.gr[TRAPCODE]);
       break;
     }
 }
@@ -600,6 +600,7 @@ process_stub (what)
   switch (what)
     {
     case 3:  /* _read */
+    case 4:  /* _write */
     case 5:  /* _open */
     case 6:  /* _close */
     case 10: /* _unlink */
@@ -660,7 +661,7 @@ util (what)
       break;
 
     case 0xFF:
-      process_stub (what);
+      process_stub (cpu.gr[1]);
       break;
       
     default:
@@ -733,7 +734,7 @@ sim_resume (sd, step, siggnal)
   cpu.asregs.exception = step ? SIGTRAP: 0;
   pc = cpu.asregs.pc;
 
-  /* fetch the initial instructions that we'll decode */
+  /* Fetch the initial instructions that we'll decode. */
   ibuf = rlat (pc & 0xFFFFFFFC);
   needfetch = 0;
 
@@ -755,16 +756,18 @@ sim_resume (sd, step, siggnal)
 
   do
     {
+      word oldpc;
+      
       insts ++;
       
       if (pc & 02)
 	{
-	  inst = ibuf & 0xFFFF;
+	    inst = ibuf & 0xFFFF;
 	  needfetch = 1;
 	}
       else
 	{
-	  inst = ibuf >> 16;
+	    inst = ibuf >> 16;
 	}
 
 #ifdef WATCHFUNCTIONS
@@ -798,7 +801,7 @@ sim_resume (sd, step, siggnal)
 	  WLendpc = 0;
 	} 
 
-      /* optimize with a hash to speed loop */
+      /* Optimize with a hash to speed loop.  */
       if (WLincyc == 0)
 	{
           if ((WLhash == 0) || ((WLhash & pc) != 0))
@@ -822,7 +825,9 @@ sim_resume (sd, step, siggnal)
 
       if (tracing)
 	fprintf (stderr, "%.4x: inst = %.4x ", pc, inst);
- 
+
+      oldpc = pc;
+      
       pc += 2;
       
       switch (inst >> 8)
@@ -845,7 +850,7 @@ sim_resume (sd, step, siggnal)
 		  cpu.sr = cpu.esr;
 		  needfetch = 1;
 		  
-		  if (SR_AF())
+		  if (SR_AF ())
 		    cpu.asregs.active_gregs = & cpu.asregs.alt_gregs[0];
 		  else
 		    cpu.asregs.active_gregs = & cpu.asregs.gregs[0];
@@ -874,7 +879,7 @@ sim_resume (sd, step, siggnal)
 		    
 		case 0x6:				/* doze */
 		  if (issue_messages)
-		    fprintf (stderr, "WARNING: oze unimplemented\n");
+		    fprintf (stderr, "WARNING: doze unimplemented\n");
 		  break;
 		    
 		case 0x7:
@@ -1611,14 +1616,14 @@ sim_resume (sd, step, siggnal)
 
       if (tracing)
 	fprintf (stderr, "\n");
-      
+
       if (needfetch)   
 	{
 	  /* Do not let him fetch from a bad address! */
 	  if (((uword)pc) >= cpu.asregs.msize)
 	    {
 	      if (issue_messages)
-		fprintf (stderr, "PC outside of available memory! (%x)\n", pc);
+		fprintf (stderr, "PC loaded at 0x%x is outside of available memory! (0x%x)\n", oldpc, pc);
 	      
 	      cpu.asregs.exception = SIGSEGV;
 	    }
@@ -1686,11 +1691,10 @@ sim_store_register (sd, rn, memory, length)
     {
       if (length == 4)
 	{
-	  /* ival is in 'target' order, which we know to be big-endian.
-	     Let's convert it to natural order.  */
 	  long ival;
-
-	  ival = mcore_extract_unsigned_integer (memory, 4);/* misalignment safe */
+	  
+	  /* misalignment safe */
+	  ival = mcore_extract_unsigned_integer (memory, 4);
 	  cpu.asints[rn] = ival;
 	}
 
@@ -1713,11 +1717,10 @@ sim_fetch_register (sd, rn, memory, length)
     {
       if (length == 4)
 	{
-	  /* caller expects 'target order', which is big-endian. Convert
-	   * the native order we used [to speed up simulation] to the
-	   * byte order expected by the caller.  */
 	  long ival = cpu.asints[rn];
-	  mcore_store_unsigned_integer (memory, 4, ival);/* misalignment-safe */
+
+	  /* misalignment-safe */
+	  mcore_store_unsigned_integer (memory, 4, ival);
 	}
       
       return 4;
@@ -1778,27 +1781,36 @@ sim_info (sd, verbose)
 #endif
   double virttime = cpu.asregs.cycles / 36.0e6;
 
-  callback->printf_filtered (callback, "\n\n# instructions executed  %10d\n", cpu.asregs.insts);
-  callback->printf_filtered (callback, "# cycles                 %10d\n", cpu.asregs.cycles);
-  callback->printf_filtered (callback, "# pipeline stalls        %10d\n", cpu.asregs.stalls);
-  callback->printf_filtered (callback, "# virtual time taken     %10.4f\n", virttime);
+  callback->printf_filtered (callback, "\n\n# instructions executed  %10d\n",
+			     cpu.asregs.insts);
+  callback->printf_filtered (callback, "# cycles                 %10d\n",
+			     cpu.asregs.cycles);
+  callback->printf_filtered (callback, "# pipeline stalls        %10d\n",
+			     cpu.asregs.stalls);
+  callback->printf_filtered (callback, "# virtual time taken     %10.4f\n",
+			     virttime);
 
 #ifdef WATCHFUNCTIONS
-  callback->printf_filtered (callback, "\nNumber of watched functions: %d\n",ENDWL);
+  callback->printf_filtered (callback, "\nNumber of watched functions: %d\n",
+			     ENDWL);
 
   wcyc = 0;
   
   for (w = 1; w <= ENDWL; w++)
     {
       callback->printf_filtered (callback, "WL = %s %8x\n",WLstr[w],WL[w]);
-      callback->printf_filtered (callback, "  calls = %d, cycles = %d\n", WLcnts[w],WLcyc[w]);
+      callback->printf_filtered (callback, "  calls = %d, cycles = %d\n",
+				 WLcnts[w],WLcyc[w]);
       
       if (WLcnts[w] != 0)
-	callback->printf_filtered (callback, "  maxcpc = %d, mincpc = %d, avecpc = %d\n",WLmax[w],WLmin[w],WLcyc[w]/WLcnts[w]);
+	callback->printf_filtered (callback,
+				   "  maxcpc = %d, mincpc = %d, avecpc = %d\n",
+				   WLmax[w],WLmin[w],WLcyc[w]/WLcnts[w]);
       wcyc += WLcyc[w];
     }
   
-  callback->printf_filtered (callback, "Total cycles for watched functions: %d\n",wcyc);
+  callback->printf_filtered (callback,
+			     "Total cycles for watched functions: %d\n",wcyc);
 #endif
 }
 
@@ -1886,7 +1898,7 @@ sim_load (sd, prog, abfd, from_tty)
 	printf ("``%s'' is not appropriate object file.\n", prog);
 	return SIM_RC_FAIL;
       }
-    
+
     /* Look for that bss section.  */
     s_bss = bfd_get_section_by_name (handle, ".bss");
     
@@ -1919,6 +1931,7 @@ sim_load (sd, prog, abfd, from_tty)
   if (prog_bfd == NULL)
     return SIM_RC_FAIL;
   
+    
   if (abfd == NULL)
     bfd_close (prog_bfd);
 

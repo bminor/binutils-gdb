@@ -1,3 +1,132 @@
+1999-05-10  Martin Hunt  <hunt@cygnus.com>
+
+	* debugify.c, debugify.h: Removed because they are no
+	longer used.
+
+1999-05-08  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* infrun.c (_initialize_infrun): Handle TARGET_SIGNAL_LWP,
+	TARGET_SIGNAL_WAITING, and TARGET_SIGNAL_CANCEL like SIGALRM or
+	SIGIO --- pass them through to the inferior silently. 
+	* target.h (enum target_signals): Add TARGET_SIGNAL_CANCEL, for
+	Solaris's SIGCANCEL.
+	* target.c (target_signal_from_host, target_signal_to_host): Add
+ 	mapping between SIGCANCEL and TARGET_SIGNAL_CANCEL.
+	(signals): Add entry for SIGCANCEL.
+
+1999-05-07  Stan Shebs  <shebs@andros.cygnus.com>
+
+	After years of talking about it, finally break up the
+ 	wait_for_inferior loop.
+	* infrun.c (struct execution_control_state): New struct,
+	holds what used to be local vars governing wfi behavior.
+	(init_execution_control_state): New function, was code in
+	wfi that set up execution control state.
+	(handle_inferior_event): New function, was body of main
+	wfi loop.  Rewrite all local var references to go through
+	the ecs structure passed into this function.
+	(wait_for_inferior): Rewrite to set up and use execution control
+ 	state, and to call the new functions.
+	(currently_stepping): New function, was the macro
+ 	CURRENTLY_STEPPING.
+	(enum infwait_states): Rename from wfi_states.
+	(infwait_normal_state, etc): Similarly.
+
+Thu May  6 15:25:32 1999  Philippe De Muyter  <phdm@macqel.be>
+
+	* coffread.c (coff_symtab_read): Call `record_line' with the line
+	number of the ".bf" symbol only for one-line functions.
+
+1999-05-06  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* Makefile.in: thread.o depends on target.h.
+
+1999-05-06  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* event-top.c (change_line_handler): Use POLLIN instead of
+	POLLRDNORM, for compatibility with Linux.
+	(setup_event_loop): Ditto.
+
+1999-05-06  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	* mips-tdep.c (heuristic_proc_start): Rewrite cryptic error
+	message about hitting the "heuristic fence post" with something
+	that actually gives the user a fighting chance of figuring out
+	why GDB is unhappy.
+	
+1999-05-06  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* top.c: Include event-loop.h.
+	(init_main): Add async version of 'set prompt' command.
+	If in async mode define the editing and annotate set 
+	commands in a different way.
+	Initialize new variable asyn_command_editing_p to 1.
+	Initialize the gdb prompt for async mode.
+	(quit_cover): Make not static, for use by the event loop.
+	(gdb_init): Call async_init_signals for the asynchronous case.
+	(source_line_number, source_file_name, source_error,
+	source_pre_error, history_expansion_p): Make non-static, so
+	event-top.c can use them.
+	(command_loop_marker): Make non-static, for use in event-top.c.
+	Include event-loop.h.
+	
+	* top.h: Add prototype for async_init_signals.
+	(SET_TOP_LEVEL): Move here from main.c.
+	Add setup_event_loop to exported functions.
+
+	* defs.h: Add async_hook to exported variables.
+
+	* main.c (SET_TOP_LEVEL): Move to top.h, so that it is visible in 
+	event-loop.c.  Add new global variable async to determine whether 
+	we are running in async mode or not.
+	(main): Add support for --async switch. Use async_hook to call
+	setup_event_loop, when running in async mode.
+
+	* event-top.c: New file. Gdb input line handler and command line
+	handler for the event loop. Initialization of signal handlers.
+	All the handled	signals have handlers called handle_<signalname>.
+	Set up all the appropriate tokens for asynchronous signal 
+	handling.
+		
+	* event-loop.h: New file. Data structures and definitions for the
+	event loop.
+
+	* event-loop.c: New file. Functions for the event loop 
+	implementation.
+
+	* config.in: Regenerate with autoheader.
+
+	* configure.in (AC_CHECK_FUNCS): Add poll to list of functions 
+	to be checked for. 
+
+	* configure: Regenerate.
+                                                        
+	* Makefile.in (SFILES): Add new source files.
+	(eventloop_h): Define.
+	(COMMON_OBS): Add new object files.
+	(event-loop.o): Add rule for target object.
+	(event-top.o): Ditto.
+
+1999-05-05  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* infrun.c (wait_for_inferior): Transform breaks and continues
+	into gotos, move the target_wait to the very top of the loop.
+
+1999-05-05  Jonathan Larmour  <jlarmour@cygnus.co.uk>
+
+	* configure.in: Ensure that GDB links with libuser32.a under
+	cygwin because libreadline requires it.
+	* Makefile.in (WIN32LIBS): Substitute in result from configure
+	* configure: regenerate
+
+1999-05-04  Jim Blandy  <jimb@zwingli.cygnus.com>
+
+	Fix from John Rigby.  Richard Henderson says it seems okay.
+	* alpha-tdep.c (PROC_DUMMY_FRAME): As long as we're abusing fields
+	of (proc)->pdr, we ought to at least abuse one large enough to
+	hold the value we're trying to store in it.  iopt is only 32 bits
+	wide; cbLineOffset is a bfd_vma.
+
 1999-05-04  DJ Delorie  <dj@cygnus.com>
 
 	DJGPP changes from Robert Hoehne  <robert.hoehne@gmx.net>

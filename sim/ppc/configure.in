@@ -690,7 +690,7 @@ else
 fi
 
 dnl Check for exe extension
-AM_EXEEXT
+AC_EXEEXT
 
 AC_SUBST(CC_FOR_BUILD)
 AC_SUBST(CFLAGS)

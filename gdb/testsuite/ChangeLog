@@ -1,3 +1,19 @@
+1999-05-06  Keith Seitz  <keiths@cygnus.com>
+
+	* gdb.base/annota2.cc: Include stdio.h.
+
+Wed May  5 17:44:31 1999  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdb.base/crossload.exp: Remove, this has been disabled ever
+	since BFD stopped including all targets, and cross-GDB gets
+	plenty of testing anyway.
+	* gdb.base/i486-elf.u, gdb.base/m68k-aout.u, gdb.base/m68k-elf.u,
+ 	gdb.base/sparc-aout.u, gdb.base/i860-elf.u, gdb.base/m68k-aout2.u,
+ 	gdb.base/mips-ecoff.u, gdb.base/sparc-elf.u: Remove.
+	* gdb.base/README: Remove, was doc for this.
+	* gdb.base/Makefile.in (CROSS_EXECUTABLES): Remove, no longer
+ 	needed.
+
 1999-05-04  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* gdb.base/call-ar-st.exp: Fix one regular expression in test

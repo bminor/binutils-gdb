@@ -1,3 +1,7 @@
+1999-05-08  Felix Lee  <flee@cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+	
 1999-03-03  DJ Delorie  <dj@cygnus.com>
 
 	* configure.in: add termcap and -luser32 for host=cygwin

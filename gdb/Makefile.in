@@ -148,6 +148,8 @@ OPCODES_CFLAGS = -I$(OP_INCLUDE)
 # should set this to list all the .o or .a files to be linked in.
 SIM =
 
+WIN32LIBS = @WIN32LIBS@
+
 
 ENABLE_CFLAGS= @ENABLE_CFLAGS@
 
@@ -217,7 +219,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 19990504
+VERSION = 19990510
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -368,6 +370,7 @@ SFILES = ax-general.c ax-gdb.c bcache.c blockframe.c breakpoint.c \
 	ch-exp.c ch-lang.c ch-typeprint.c ch-valprint.c coffread.c \
 	command.c complaints.c corefile.c cp-valprint.c dbxread.c \
 	demangle.c dwarfread.c dwarf2read.c elfread.c environ.c eval.c \
+	event-loop.c event-top.c \
 	expprint.c f-exp.y f-lang.c f-typeprint.c f-valprint.c \
 	findvar.c gdbarch.c gdbtypes.c infcmd.c inflow.c infrun.c language.c \
 	jv-exp.y jv-lang.c jv-valprint.c jv-typeprint.c \
@@ -436,6 +439,7 @@ defs_h =	defs.h xm.h tm.h nm.h config.status config.h gdbarch.h
 inferior_h =	inferior.h $(breakpoint_h)
 tracepoint_h =	tracepoint.h
 ax_h = 		ax.h
+event_loop_h = event-loop.h
 
 # Header files that need to have srcdir added.  Note that in the cases
 # where we use a macro like $(gdbcmd_h), things are carefully arranged
@@ -491,7 +495,9 @@ TAGFILES_WITH_SRCDIR = $(HFILES_WITH_SRCDIR)
 COMMON_OBS = version.o blockframe.o breakpoint.o findvar.o stack.o thread.o \
 	source.o values.o eval.o valops.o valarith.o valprint.o printcmd.o \
 	symtab.o symfile.o symmisc.o infcmd.o infrun.o command.o \
-	expprint.o environ.o gdbarch.o gdbtypes.o copying.o $(DEPFILES) \
+	expprint.o environ.o \
+	event-loop.o event-top.o \
+	gdbarch.o gdbtypes.o copying.o $(DEPFILES) \
 	mem-break.o target.o parse.o language.o $(YYOBJ) buildsym.o \
 	exec.o bcache.o objfiles.o minsyms.o maint.o demangle.o \
 	dbxread.o coffread.o elfread.o \
@@ -1101,6 +1107,11 @@ eval.o: eval.c $(bfd_h) $(defs_h) $(expression_h) $(frame_h) \
 	$(gdbtypes_h) language.h $(symtab_h) target.h $(value_h) \
 	gdb_string.h
 
+event-loop.o: event-loop.c $(event_loop_h)
+
+event-top.o: event-top.c top.h $(readline_headers) \
+      $(defs_h) $(inferior_h) $(event_loop_h)
+
 exec.o: exec.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) $(inferior_h) \
 	target.h language.h gdb_string.h
 
@@ -1545,11 +1556,11 @@ tic80-tdep.o: tic80-tdep.c $(defs_h)
 target.o: target.c $(bfd_h) $(defs_h) $(gdbcmd_h) $(inferior_h) \
 	objfiles.h symfile.h target.h gdb_string.h
 
-thread.o: thread.c $(defs_h) gdbthread.h $(gdbcmd_h)
+thread.o: thread.c $(defs_h) gdbthread.h $(gdbcmd_h) target.h
 
 top.o: top.c top.h $(bfd_h) $(getopt_h) $(readline_headers) call-cmds.h \
 	$(defs_h) $(gdbcmd_h) $(inferior_h) language.h signals.h \
-	$(remote_utils_h) gdb_string.h
+	$(remote_utils_h) gdb_string.h $(event_loop_h)
 
 typeprint.o: typeprint.c $(defs_h) $(expression_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(gdbtypes_h) language.h $(symtab_h) target.h \

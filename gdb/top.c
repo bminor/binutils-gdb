@@ -33,6 +33,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "terminal.h" /* For job_control.  */
 #include "annotate.h"
 #include "top.h"
+#include "event-loop.h"
 
 /* readline include files */
 #include <readline/readline.h>
@@ -70,7 +71,16 @@ static char * line_completion_function PARAMS ((char *, int, char *, int));
 
 static char * readline_line_completion_function PARAMS ((char *, int));
 
-static void command_loop_marker PARAMS ((int));
+/* NOTE 4/29/99: this function will be static again, after we make the
+   event loop be the default command loop for gdb, and we merge
+   event-top.c into this file, top.c */
+/* static */ void command_loop_marker PARAMS ((int));
+
+extern void set_async_editing_command PARAMS ((char *, int, struct cmd_list_element *));
+ 
+extern void set_async_annotation_level PARAMS ((char *, int, struct cmd_list_element *));
+
+extern void set_async_prompt PARAMS ((char *, int, struct cmd_list_element *));
 
 static void while_command PARAMS ((char *, int));
 
@@ -139,7 +149,10 @@ static void complete_command PARAMS ((char *, int));
 static void do_nothing PARAMS ((int));
 
 #ifdef SIGHUP
-static int quit_cover PARAMS ((PTR));
+/* NOTE 4/29/99: This function will be static again, once we modify
+   gdb to use the event loop as the default command loop and we merge
+   event-top.c into this file, top.c */
+/* static */ int quit_cover PARAMS ((PTR));
 
 static void disconnect PARAMS ((int));
 #endif
@@ -586,7 +599,10 @@ int signo;
 
 /* Just a little helper function for disconnect().  */
 
-static int
+/* NOTE 4/29/99: This function will be static again, once we modify
+   gdb to use the event loop as the default command loop and we merge
+   event-top.c into this file, top.c */
+/* static */ int
 quit_cover (s)
      PTR s;
 {
@@ -598,19 +614,31 @@ quit_cover (s)
 #endif /* defined SIGHUP */
 
 /* Line number we are currently in in a file which is being sourced.  */
-static int source_line_number;
+/* NOTE 4/29/99: This variable will be static again, once we modify
+   gdb to use the event loop as the default command loop and we merge
+   event-top.c into this file, top.c */
+/* static */ int source_line_number;
 
 /* Name of the file we are sourcing.  */
-static char *source_file_name;
+/* NOTE 4/29/99: This variable will be static again, once we modify
+   gdb to use the event loop as the default command loop and we merge
+   event-top.c into this file, top.c */
+/* static */ char *source_file_name;
 
 /* Buffer containing the error_pre_print used by the source stuff.
    Malloc'd.  */
-static char *source_error;
+/* NOTE 4/29/99: This variable will be static again, once we modify
+   gdb to use the event loop as the default command loop and we merge
+   event-top.c into this file, top.c */
+/* static */ char *source_error;
 static int source_error_allocated;
 
 /* Something to glom on to the start of error_pre_print if source_file_name
    is set.  */
-static char *source_pre_error;
+/* NOTE 4/29/99: This variable will be static again, once we modify
+   gdb to use the event loop as the default command loop and we merge
+   event-top.c into this file, top.c */
+/* static */ char *source_pre_error;
 
 /* Clean up on error during a "source" command (or execution of a
    user-defined command).  */
@@ -657,7 +685,15 @@ gdb_init (argv0)
   initialize_utils ();	/* Make errors and warnings possible */
   initialize_all_files ();
   init_main ();		/* But that omits this file!  Do it now */
-  init_signals ();
+
+  /* The signal handling mechanism is different depending whether or
+     not the async version is run. NOTE: in the future we plan to make
+     the event loop be the default engine of gdb, and this difference
+     will disappear. */
+  if (async_hook)
+    async_init_signals ();
+  else
+    init_signals ();
 
   init_proc ();
 
@@ -1293,7 +1329,10 @@ execute_command (p, from_tty)
 }
 
 /* ARGSUSED */
-static void
+/* NOTE 4/29/99: This function will be static again, once we modify
+   gdb to use the event loop as the default command loop and we merge
+   event-top.c into this file, top.c */
+/* static */ void
 command_loop_marker (foo)
      int foo;
 {
@@ -1479,7 +1518,10 @@ gdb_readline (prrompt)
    substitution.  These variables are given default values at the end
    of this file.  */
 static int command_editing_p;
-static int history_expansion_p;
+/* NOTE 4/29/99: This variable will be static again, once we modify
+   gdb to use the event loop as the default command loop and we merge
+   event-top.c into this file, top.c */
+/* static */ int history_expansion_p;
 static int write_history_p;
 static int history_size;
 static char *history_filename;
@@ -3448,14 +3490,44 @@ init_main ()
 {
   struct cmd_list_element *c;
 
+ /* from event-top.c */
+  extern int async_command_editing_p;
+  extern struct prompts the_prompts;
+  extern char *async_annotation_suffix;
+  extern char *new_async_prompt;
+
+  /* If we are running the asynchronous version,
+     we initialize the prompts differently. */
+  if (!async_hook)
+    {
 #ifdef DEFAULT_PROMPT
-  prompt = savestring (DEFAULT_PROMPT, strlen(DEFAULT_PROMPT));
+      prompt = savestring (DEFAULT_PROMPT, strlen(DEFAULT_PROMPT));
 #else
-  prompt = savestring ("(gdb) ", 6);
+      prompt = savestring ("(gdb) ", 6);
 #endif
+    }
+  else
+    {
+      /* initialize the prompt stack to a simple "(gdb) " prompt or to
+	 whatever the DEFULAT_PROMPT is. */
+      the_prompts.top = 0;
+      PREFIX(0) = "";
+#ifdef DEFAULT_PROMPT
+      PROMPT(0) = savestring (DEFAULT_PROMPT, strlen(DEFAULT_PROMPT));
+#else
+      PROMPT(0) = savestring ("(gdb) ", 6);
+#endif
+      SUFFIX(0) = "";
+      /* Set things up for annotation_level > 1, if the user ever decides
+	 to use it. */
+      async_annotation_suffix = "prompt";
+      /* Set the variable associated with the setshow prompt command. */
+      new_async_prompt = savestring (PROMPT (0), strlen (PROMPT (0)));
+    }
 
   /* Set the important stuff up for command editing.  */
   command_editing_p = 1;
+  async_command_editing_p = 1;
   history_expansion_p = 0;
   write_history_p = 0;
 
@@ -3503,11 +3575,27 @@ The change does not take effect for the program being debugged\n\
 until the next time it is started.", &cmdlist);
   c->completer = filename_completer;
 
-  add_show_from_set
-    (add_set_cmd ("prompt", class_support, var_string, (char *)&prompt,
-	   "Set gdb's prompt",
-	   &setlist),
-     &showlist);
+  /* The set prompt command is different depending whether or not the
+     async version is run. NOTE: this difference is going to
+     disappear as we make the event loop be the default engine of
+     gdb. */
+  if (!async_hook)
+    {
+      add_show_from_set
+	(add_set_cmd ("prompt", class_support, var_string, (char *)&prompt,
+		      "Set gdb's prompt",
+		      &setlist),
+	 &showlist);
+    }
+  else
+    {
+      c = add_set_cmd ("prompt", class_support, var_string, 
+		      (char *)&new_async_prompt,
+		      "Set gdb's prompt",
+		       &setlist);
+      add_show_from_set (c, &showlist);
+      c->function.sfunc = set_async_prompt;
+    }
 
   add_com ("echo", class_support, echo_command,
 	   "Print a constant string.  Give string as argument.\n\
@@ -3558,13 +3646,30 @@ hitting return.");
   c->function.sfunc = set_verbose;
   set_verbose (NULL, 0, c);
 
-  add_show_from_set
-    (add_set_cmd ("editing", class_support, var_boolean, (char *)&command_editing_p,
-	   "Set editing of command lines as they are typed.\n\
+  /* The set editing command is different depending whether or not the
+     async version is run. NOTE: this difference is going to disappear
+     as we make the event loop be the default engine of gdb. */
+  if (!async_hook)
+    {
+      add_show_from_set
+	(add_set_cmd ("editing", class_support, var_boolean, (char *)&command_editing_p,
+		      "Set editing of command lines as they are typed.\n\
 Use \"on\" to enable the editing, and \"off\" to disable it.\n\
 Without an argument, command line editing is enabled.  To edit, use\n\
 EMACS-like or VI-like commands like control-P or ESC.", &setlist),
-     &showlist);
+	 &showlist);
+    }
+  else
+    {
+      c = add_set_cmd ("editing", class_support, var_boolean, (char *)&async_command_editing_p,
+		       "Set editing of command lines as they are typed.\n\
+Use \"on\" to enable the editing, and \"off\" to disable it.\n\
+Without an argument, command line editing is enabled.  To edit, use\n\
+EMACS-like or VI-like commands like control-P or ESC.", &setlist);
+
+      add_show_from_set (c, &showlist);
+      c->function.sfunc = set_async_editing_command;
+    }
 
   add_prefix_cmd ("history", class_support, set_history,
 		  "Generic command for setting command history parameters.",
@@ -3664,10 +3769,27 @@ This value is used to set the time limit for gdb to wait for a response\n\
 from the target.", &setlist),
 		     &showlist);
 
-  c = add_set_cmd ("annotate", class_obscure, var_zinteger, 
-		   (char *)&annotation_level, "Set annotation_level.\n\
+  /* The set annotate command is different depending whether or not
+     the async version is run. NOTE: this difference is going to
+     disappear as we make the event loop be the default engine of
+     gdb. */
+  if (!async_hook)
+    {
+      c = add_set_cmd ("annotate", class_obscure, var_zinteger, 
+		       (char *)&annotation_level, "Set annotation_level.\n\
 0 == normal;     1 == fullname (for use when running under emacs)\n\
 2 == output annotated suitably for use by programs that control GDB.",
-		 &setlist);
-  c = add_show_from_set (c, &showlist);
+		       &setlist);
+      c = add_show_from_set (c, &showlist);
+    }
+  else
+    {
+      c = add_set_cmd ("annotate", class_obscure, var_zinteger, 
+		       (char *)&annotation_level, "Set annotation_level.\n\
+0 == normal;     1 == fullname (for use when running under emacs)\n\
+2 == output annotated suitably for use by programs that control GDB.",
+		       &setlist);     
+      add_show_from_set (c, &showlist);
+      c->function.sfunc = set_async_annotation_level;
+    }
 }

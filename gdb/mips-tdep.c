@@ -1153,21 +1153,29 @@ heuristic_proc_start (pc)
 	      {
 		static int blurb_printed = 0;
 
-		if (fence == VM_MIN_ADDRESS)
-		  warning("Hit beginning of text section without finding");
-		else
-		  warning("Hit heuristic-fence-post without finding");
+		warning ("Warning: GDB can't find the start of the function at 0x%s.", 
+			 paddr_nz (pc));
 		
-		warning("enclosing function for address 0x%s", paddr_nz (pc));
 		if (!blurb_printed)
 		  {
-		    printf_filtered ("\
-This warning occurs if you are debugging a function without any symbols\n\
-(for example, in a stripped executable).  In that case, you may wish to\n\
-increase the size of the search with the `set heuristic-fence-post' command.\n\
-\n\
-Otherwise, you told GDB there was a function where there isn't one, or\n\
-(more likely) you have encountered a bug in GDB.\n");
+		    /* This actually happens frequently in embedded
+		       development, when you first connect to a board
+		       and your stack pointer and pc are nowhere in
+		       particular.  This message needs to give people
+		       in that situation enough information to
+		       determine that it's no big deal.  */
+		    printf_filtered ("\n\
+    GDB is unable to find the start of the function at 0x%s\n\
+and thus can't determine the size of that function's stack frame.\n\
+This means that GDB may be unable to access that stack frame, or\n\
+the frames below it.\n\
+    This problem is most likely caused by an invalid program counter or\n\
+stack pointer.\n\
+    However, if you think GDB should simply search farther back\n\
+from 0x%s for code which looks like the beginning of a\n\
+function, you can increase the range of the search using the `set\n\
+heuristic-fence-post' command.\n",
+				     paddr_nz (pc), paddr_nz (pc));
 		    blurb_printed = 1;
 		  }
 	      }

@@ -135,6 +135,9 @@
 /* Define if you have the bzero function.  */
 #undef HAVE_BZERO
 
+/* Define if you have the poll function.  */
+#undef HAVE_POLL
+
 /* Define if you have the dcgettext function.  */
 #undef HAVE_DCGETTEXT
 
