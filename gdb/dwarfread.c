@@ -76,7 +76,7 @@ typedef unsigned int DIE_REF;	/* Reference to a DIE */
 #endif
 
 #ifndef LCC_PRODUCER
-#define LCC_PRODUCER "LUCID C++ "
+#define LCC_PRODUCER "NCR C/C++ "
 #endif
 
 #ifndef CFRONT_PRODUCER

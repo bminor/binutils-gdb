@@ -1,3 +1,8 @@
+Thu Jul 16 12:07:40 1992  Fred Fish  (fnf@cygnus.com)
+
+	* dwarfread.c (LCC_PRODUCER):  Change to match current NCR
+	lcc producer string.
+
 Thu Jul 16 11:40:55 1992  Stu Grossman  (grossman at cygnus.com)
 
 	* WHATS.NEW renamed to NEWS.

@@ -21,17 +21,21 @@ diff -c -r2.56 .Sanitize
   environ.h
   eval.c
 ===================================================================
-*** Makefile.in	Wed Jul 15 12:22:03 1992
---- Makefile.in	Wed Jul 15 12:15:34 1992
+*** Makefile.in	Wed Jul 15 12:33:12 1992
+--- Makefile.in	Thu Jul 16 12:03:36 1992
 ***************
 *** 123,128 ****
---- 123,132 ----
+--- 123,136 ----
   READLINE_DEP = $$(READLINE_DIR)
   RL_LIB = ./../readline${subdir}/libreadline.a
   
-+ # Energize libraries
-+ ENERGIZE_DIR = ${srcdir}/../gdb/energize
-+ ENERGIZE_LIB = ./../gdb/energize${subdir}/libconn.a
++ # Energize libraries.  Works slightly differently than other libraries
++ # because it is a gdb subdir and we try to build the energize library
++ # if it doesn't exist, unlike readline, bfd, mmalloc, etc.  Note
++ # that SDIR and BDIR will be different if we configured with -srcdir.
++ ENERGIZE_SDIR = ${srcdir}/../gdb/energize
++ ENERGIZE_BDIR = ./../gdb/energize${subdir}
++ ENERGIZE_LIB  = ${ENERGIZE_BDIR}/libconn.a
 + 
   # All the includes used for CFLAGS and for lint.
   # -I. for config files.
@@ -50,7 +54,7 @@ diff -c -r2.56 .Sanitize
   
   VERSION = 4.6.1
   DIST=gdb
---- 159,171 ----
+--- 163,175 ----
   # {X,T}M_CLIBS, defined in *config files, have host- and target-dependent libs.
   # TERMCAP comes after readline, since readline depends on it.
   CLIBS = ${BFD_LIB}  ${RL_LIB} ${TERMCAP} ${MMALLOC_LIB} ${LIBIBERTY} \
@@ -73,7 +77,7 @@ diff -c -r2.56 .Sanitize
   
   # Source files in subdirectories (which will be handled separately by
   #  'make gdb.tar.Z').
---- 195,201 ----
+--- 199,205 ----
   	 ${DEMANGLER}.c mem-break.c target.c inftarg.c \
   	 dbxread.c coffread.c elfread.c dwarfread.c xcoffread.c \
   	 ieee-float.c language.c parse.c buildsym.c objfiles.c \
@@ -90,7 +94,7 @@ diff -c -r2.56 .Sanitize
       dbxread.o coffread.o elfread.o dwarfread.o xcoffread.o mipsread.o
   
   RAPP_OBS = rgdb.o rudp.o rserial.o serial.o udp.o $(XDEPFILES)
---- 281,287 ----
+--- 285,291 ----
       command.o utils.o expprint.o environ.o version.o gdbtypes.o \
       copying.o $(DEPFILES) ${DEMANGLER}.o mem-break.o target.o \
       inftarg.o ieee-float.o putenv.o parse.o language.o $(YYOBJ) \
@@ -107,22 +111,22 @@ diff -c -r2.56 .Sanitize
   
   # For now, shortcut the "configure GDB for fewer languages" stuff.
   YYFILES = c-exp.tab.c m2-exp.tab.c
---- 294,300 ----
+--- 298,304 ----
   
   NTSSTART = kdb-start.o
   
-! SUBDIRS = doc ${ENERGIZE_DIR}
+! SUBDIRS = doc ${ENERGIZE_BDIR}
   
   # For now, shortcut the "configure GDB for fewer languages" stuff.
   YYFILES = c-exp.tab.c m2-exp.tab.c
 ***************
 *** 343,348 ****
---- 348,367 ----
+--- 352,371 ----
   	#load `echo " "$(DEPFILES) | sed -e 's/\.o/.c/g' -e 's, , ../,g'`
   	echo "Load .c corresponding to:" $(DEPFILES)
   
 + ${ENERGIZE_LIB} :
-+ 	@(cd ${ENERGIZE_DIR}; \
++ 	@(cd ${ENERGIZE_BDIR}; \
 + 		$(MAKE) \
 + 			"against=$(against)" \
 + 			"AR=$(AR)" \
@@ -140,7 +144,7 @@ diff -c -r2.56 .Sanitize
   # on itself without copying the executable.  So "make gdb1" will make
 ***************
 *** 665,670 ****
---- 684,694 ----
+--- 688,698 ----
   
   xcoffexec.o: ${srcdir}/xcoffexec.c
   	${CC} -c ${INTERNAL_CFLAGS} -I$(BFD_DIR) ${srcdir}/xcoffexec.c
@@ -148,7 +152,7 @@ diff -c -r2.56 .Sanitize
 + # Energize support has dependencies on ENERGIZE header files.
 + 
 + energize.o: ${srcdir}/energize.c
-+ 	${CC} -c ${INTERNAL_CFLAGS} -I$(ENERGIZE_DIR) ${srcdir}/energize.c
++ 	${CC} -c ${INTERNAL_CFLAGS} -I$(ENERGIZE_SDIR) ${srcdir}/energize.c
   
   # Drag in the files that are in another directory.
   
