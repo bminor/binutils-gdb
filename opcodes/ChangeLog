@@ -1,3 +1,8 @@
+2003-05-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* i386-dis.c (print_insn): Test intel_syntax against (char) -1 in
+	case char is unsigned.
+
 2003-05-01  Christian Groessler <chris@groessler.org>
 
 	* z8k-dis.c (z8k_lookup_instr): Optimize FETCH_DATA calls.
