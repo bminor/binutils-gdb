@@ -1,3 +1,11 @@
+start-sanitize-vr4320
+Tue Mar  3 11:24:05 1998  Gavin Koch  <gavin@cygnus.com>
+
+	* mips-cpu.c: Reorganize sanitization.
+
+	* archures.c, bfd-in2.h, mips-cpu.c : Added bfd_mach_mips4320.
+
+end-sanitize-vr4320
 Mon Feb 23 19:31:19 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Add elf.lo to elf shell variable.

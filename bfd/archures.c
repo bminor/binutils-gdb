@@ -115,6 +115,9 @@ DESCRIPTION
 .#define bfd_mach_mips4400		4400
 .#define bfd_mach_mips4600		4600
 .#define bfd_mach_mips4650		4650
+. {* start-sanitize-vr4320 *}
+.#define bfd_mach_mips4320		4320
+. {* end-sanitize-4320 *}
 . {* start-sanitize-tx49 *}
 .#define bfd_mach_mips4900		4900
 . {* end-sanitize-tx49 *}
@@ -132,9 +135,9 @@ DESCRIPTION
 . {* start-sanitize-sky *}
 . {* The DVP is a machine within the mips architecture.  *}
 .#define bfd_mach_dvp_dma               42000
-.#define bfd_mach_dvp_pke               42001
+.#define bfd_mach_dvp_vif               42001
 .#define bfd_mach_dvp_vu                42002
-.#define bfd_mach_dvp_gpuif             42003
+.#define bfd_mach_dvp_gif               42003
 .#define bfd_mach_dvp_p(mach) ((mach) >= 42000 && (mach) <= 42003)
 . {* end-sanitize-sky *}
 .  bfd_arch_i386,      {* Intel 386 *}
@@ -180,6 +183,7 @@ DESCRIPTION
 .#define bfd_mach_arm_4T 	6
 .  bfd_arch_ns32k,     {* National Semiconductors ns32000 *}
 .  bfd_arch_w65,       {* WDC 65816 *}
+.  bfd_arch_tic30,     {* Texas Instruments TMS320C30 *}
 . {* start-sanitize-tic80 *}
 .  bfd_arch_tic80,     {* TI TMS320c80 (MVP) *}
 . {* end-sanitize-tic80 *}
@@ -260,12 +264,10 @@ extern const bfd_arch_info_type bfd_powerpc_arch;
 extern const bfd_arch_info_type bfd_rs6000_arch;
 extern const bfd_arch_info_type bfd_sh_arch;
 extern const bfd_arch_info_type bfd_sparc_arch;
+extern const bfd_arch_info_type bfd_tic30_arch;
 /* start-sanitize-tic80 */
 extern const bfd_arch_info_type bfd_tic80_arch;
 /* end-sanitize-tic80 */
-/* start-sanitize-sky */
-extern const bfd_arch_info_type bfd_txvu_arch;
-/* end-sanitize-sky */
 extern const bfd_arch_info_type bfd_vax_arch;
 extern const bfd_arch_info_type bfd_we32k_arch;
 extern const bfd_arch_info_type bfd_z8k_arch;
@@ -302,12 +304,10 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
   &bfd_rs6000_arch,
   &bfd_sh_arch,
   &bfd_sparc_arch,
+  &bfd_tic30_arch,
 /* start-sanitize-tic80 */
   &bfd_tic80_arch,
 /* end-sanitize-tic80 */
-/* start-sanitize-sky */
-  &bfd_txvu_arch,
-/* end-sanitize-sky */
   &bfd_vax_arch,
   &bfd_we32k_arch,
   &bfd_z8k_arch,

@@ -1207,6 +1207,9 @@ enum bfd_architecture
 #define bfd_mach_mips4400              4400
 #define bfd_mach_mips4600              4600
 #define bfd_mach_mips4650              4650
+  /* start-sanitize-vr4320 */
+#define bfd_mach_mips4320              4320
+  /* start-sanitize-vr4320 */
   /* start-sanitize-tx49 */
 #define bfd_mach_mips4900              4900
   /* end-sanitize-tx49 */
@@ -1224,9 +1227,9 @@ enum bfd_architecture
   /* start-sanitize-sky */
   /* The DVP is a machine within the mips architecture.  */
 #define bfd_mach_dvp_dma               42000
-#define bfd_mach_dvp_pke               42001
+#define bfd_mach_dvp_vif               42001
 #define bfd_mach_dvp_vu                42002
-#define bfd_mach_dvp_gpuif             42003
+#define bfd_mach_dvp_gif               42003
 #define bfd_mach_dvp_p(mach) ((mach) >= 42000 && (mach) <= 42003)
   /* end-sanitize-sky */
   bfd_arch_i386,       /* Intel 386 */
@@ -1272,6 +1275,7 @@ enum bfd_architecture
 #define bfd_mach_arm_4T        6
   bfd_arch_ns32k,      /* National Semiconductors ns32000 */
   bfd_arch_w65,        /* WDC 65816 */
+  bfd_arch_tic30,      /* Texas Instruments TMS320C30 */
   /* start-sanitize-tic80 */
   bfd_arch_tic80,      /* TI TMS320c80 (MVP) */
   /* end-sanitize-tic80 */
@@ -1794,6 +1798,9 @@ to compensate for the borrow when the low bits are added. */
 This is an 11-bit pc relative reloc.  The recorded address is for the
 lower instruction word, and the value is in 128 bit units. */
   BFD_RELOC_MIPS_DVP_11_PCREL,
+
+/* This is a 27 bit address left shifted by 4. */
+  BFD_RELOC_MIPS_DVP_27_S4,
 /* end-sanitize-sky */
 
 
@@ -2083,6 +2090,11 @@ instruction. */
 /* This is a 16bit pcrel reloc for the mn10300, offset by two bytes in the
 instruction. */
   BFD_RELOC_MN10300_16_PCREL,
+
+/* This is a 8bit DP reloc for the tms320c30, where the most
+significant 8 bits of a 24 bit word are placed into the least
+significant 8 bits of the opcode. */
+  BFD_RELOC_TIC30_LDP,
   BFD_RELOC_UNUSED };
 typedef enum bfd_reloc_code_real bfd_reloc_code_real_type;
 reloc_howto_type *
