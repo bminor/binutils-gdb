@@ -630,7 +630,7 @@ i387_fill_fxsave (char *fxsave, int regnum)
 	/* Most of the FPU control registers occupy only 16 bits in
            the fxsave area.  Give those a special treatment.  */
 	if (i >= FPC_REGNUM && i < XMM0_REGNUM
-	    && i != FIOFF_REGNUM && i != FDOFF_REGNUM)
+	    && i != FIOFF_REGNUM && i != FOOFF_REGNUM)
 	  {
 	    unsigned char buf[4];
 
