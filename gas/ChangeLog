@@ -1,5 +1,9 @@
 Mon Nov  7 01:58:49 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
+	* configure.in: Compare generic cpu name against "sparc", not
+	"sparc*", since sparc variants should be changed to "sparc".
+	* configure: Regenerated with autoconf 2.1.
+
 	* config/tc-a29k.c (octal, toHex): Variables deleted.
 	(isoctal): Macro deleted.
 	(md_begin): Don't initialize them.
