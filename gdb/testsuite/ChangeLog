@@ -1,5 +1,9 @@
 2004-10-12  Daniel Jacobowitz  <dan@debian.org>
 
+	* gdb.dwarf2/dw2-basic.exp: Run on Hurd also.
+
+2004-10-12  Daniel Jacobowitz  <dan@debian.org>
+
 	* configure.in: Add gdb.dwarf2.
 	* configure: Regenerated.
 	* Makefile.in: Add gdb.dwarf2.
