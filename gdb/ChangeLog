@@ -1,5 +1,7 @@
 2001-03-26  Mark Kettenis  <kettenis@gnu.org>
 
+	* config/i386/tm-symmetry.h (PUSH_ARGUMENTS): #undef.
+
 	* i386-tdep.c (i386_push_arguments, i386_store_struct_return): New
 	functions.
 	* config/i386/tm-i386.h (PUSH_ARGUMENTS): New macro.

@@ -299,6 +299,7 @@ switch (regno) { \
    passes it on the stack.  gcc should be fixed in future versions to
    adopt native cc conventions.  */
 
+#undef  PUSH_ARGUMENTS
 #undef  STORE_STRUCT_RETURN
 #define STORE_STRUCT_RETURN(ADDR, SP) write_register(0, (ADDR))
 
