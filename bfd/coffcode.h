@@ -315,6 +315,9 @@ CODE_FRAGMENT
 static long sec_to_styp_flags PARAMS ((const char *, flagword));
 static flagword styp_to_sec_flags PARAMS ((bfd *, PTR, const char *));
 static boolean coff_bad_format_hook PARAMS ((bfd *, PTR));
+static void coff_set_custom_section_alignment
+  PARAMS ((bfd *, asection *, const struct coff_section_alignment_entry *,
+	   unsigned int));
 static boolean coff_new_section_hook PARAMS ((bfd *, asection *));
 static boolean coff_set_arch_mach_hook PARAMS ((bfd *, PTR));
 static boolean coff_write_relocs PARAMS ((bfd *, int));
@@ -1076,15 +1079,73 @@ coff_bad_format_hook (abfd, filehdr)
   return true;
 }
 
-/*
-   initialize a section structure with information peculiar to this
-   particular implementation of coff
-*/
+/* Check whether this section uses an alignment other than the
+   default.  */
+
+static void
+coff_set_custom_section_alignment (abfd, section, alignment_table, table_size)
+     bfd *abfd ATTRIBUTE_UNUSED;
+     asection *section;
+     const struct coff_section_alignment_entry *alignment_table;
+     const unsigned int table_size;
+{
+  const unsigned int default_alignment = COFF_DEFAULT_SECTION_ALIGNMENT_POWER;
+  unsigned int i;
+
+  for (i = 0; i < table_size; ++i)
+    {
+      const char *secname = bfd_get_section_name (abfd, section);
+      if (alignment_table[i].comparison_length == (unsigned int) -1
+	  ? strcmp (alignment_table[i].name, secname) == 0
+	  : strncmp (alignment_table[i].name, secname,
+		     alignment_table[i].comparison_length) == 0)
+	break;
+    }
+  if (i >= table_size)
+    return;
+
+  if (alignment_table[i].default_alignment_min != COFF_ALIGNMENT_FIELD_EMPTY
+      && default_alignment < alignment_table[i].default_alignment_min)
+    return;
+
+  if (alignment_table[i].default_alignment_max != COFF_ALIGNMENT_FIELD_EMPTY
+      && default_alignment > alignment_table[i].default_alignment_max)
+    return;
+
+  section->alignment_power = alignment_table[i].alignment_power;
+}
+
+/* Custom section alignment records.  */
+
+static const struct coff_section_alignment_entry
+coff_section_alignment_table[] =
+{
+#ifdef COFF_SECTION_ALIGNMENT_ENTRIES
+  COFF_SECTION_ALIGNMENT_ENTRIES,
+#endif
+  /* There must not be any gaps between .stabstr sections.  */
+  { COFF_SECTION_NAME_PARTIAL_MATCH (".stabstr"),
+    1, COFF_ALIGNMENT_FIELD_EMPTY, 0 },
+  /* The .stab section must be aligned to 2**2 at most, to avoid gaps.  */
+  { COFF_SECTION_NAME_PARTIAL_MATCH (".stab"),
+    3, COFF_ALIGNMENT_FIELD_EMPTY, 2 },
+  /* Similarly for the .ctors and .dtors sections.  */
+  { COFF_SECTION_NAME_EXACT_MATCH (".ctors"),
+    3, COFF_ALIGNMENT_FIELD_EMPTY, 2 },
+  { COFF_SECTION_NAME_EXACT_MATCH (".dtors"),
+    3, COFF_ALIGNMENT_FIELD_EMPTY, 2 }
+};
+
+static const unsigned int coff_section_alignment_table_size =
+  sizeof coff_section_alignment_table / sizeof coff_section_alignment_table[0];
+
+/* Initialize a section structure with information peculiar to this
+   particular implementation of COFF.  */
 
 static boolean
 coff_new_section_hook (abfd, section)
-     bfd * abfd;
-     asection * section;
+     bfd *abfd;
+     asection *section;
 {
   combined_entry_type *native;
 
@@ -1120,22 +1181,9 @@ coff_new_section_hook (abfd, section)
 
   coffsymbol (section->symbol)->native = native;
 
-  /* The .stab section must be aligned to 2**2 at most, because
-     otherwise there may be gaps in the section which gdb will not
-     know how to interpret.  Examining the section name is a hack, but
-     that is also how gdb locates the section.
-     We need to handle the .ctors and .dtors sections similarly, to
-     avoid introducing null words in the tables.  */
-  if (COFF_DEFAULT_SECTION_ALIGNMENT_POWER > 2
-      && (strncmp (section->name, ".stab", 5) == 0
-	  || strcmp (section->name, ".ctors") == 0
-	  || strcmp (section->name, ".dtors") == 0))
-    section->alignment_power = 2;
-
-  /* Similarly, the .stabstr section must be aligned to 2**0 at most.  */
-  if (COFF_DEFAULT_SECTION_ALIGNMENT_POWER > 0
-      && strncmp (section->name, ".stabstr", 8) == 0)
-    section->alignment_power = 0;
+  coff_set_custom_section_alignment (abfd, section,
+				     coff_section_alignment_table,
+				     coff_section_alignment_table_size);
 
   return true;
 }

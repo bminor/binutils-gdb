@@ -1,5 +1,5 @@
 /* BFD COFF object file private structure.
-   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 97, 1998
+   Copyright (C) 1990, 91, 92, 93, 94, 95, 96, 97, 98, 1999
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -465,6 +465,41 @@ struct coff_final_link_info
   bfd_byte *external_relocs;
   /* Buffer large enough to hold swapped relocs of any input section.  */
   struct internal_reloc *internal_relocs;
+};
+
+/* Most COFF variants have no way to record the alignment of a
+   section.  This struct is used to set a specific alignment based on
+   the name of the section.  */
+
+struct coff_section_alignment_entry
+{
+  /* The section name.  */
+  const char *name;
+
+  /* This is either (unsigned int) -1, indicating that the section
+     name must match exactly, or it is the number of letters which
+     must match at the start of the name.  */
+  unsigned int comparison_length;
+
+  /* These macros may be used to fill in the first two fields in a
+     structure initialization.  */
+#define COFF_SECTION_NAME_EXACT_MATCH(name) (name), ((unsigned int) -1)
+#define COFF_SECTION_NAME_PARTIAL_MATCH(name) (name), (sizeof (name) - 1)
+
+  /* Only use this entry if the default section alignment for this
+     target is at least that much (as a power of two).  If this field
+     is COFF_ALIGNMENT_FIELD_EMPTY, it should be ignored.  */
+  unsigned int default_alignment_min;
+
+  /* Only use this entry if the default section alignment for this
+     target is no greater than this (as a power of two).  If this
+     field is COFF_ALIGNMENT_FIELD_EMPTY, it should be ignored.  */
+  unsigned int default_alignment_max;
+
+#define COFF_ALIGNMENT_FIELD_EMPTY ((unsigned int) -1)
+
+  /* The desired alignment for this section (as a power of two).  */
+  unsigned int alignment_power;
 };
 
 extern struct bfd_hash_entry *_bfd_coff_link_hash_newfunc

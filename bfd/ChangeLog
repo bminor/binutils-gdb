@@ -1,3 +1,14 @@
+1999-08-08  Mark Elbrecht  <snowball3@bigfoot.com>
+
+	* libcoff-in.h (struct coff_section_alignment_entry): Define.
+	* coffcode.h (coff_set_custom_section_alignment): New static
+	function.
+	(coff_section_alignment_table): New static array.
+	(coff_new_section_hook): Use coff_set_customer_section_alignment.
+	* coff-go32.c (COFF_SECTION_ALIGNMENT_ENTRIES): Define.
+	* coff-stgo32.c (COFF_SECTION_ALIGNMENT_ENTRIES): Define.
+	* libcoff.h: Rebuild.
+
 1999-08-08  Ian Lance Taylor  <ian@zembu.com>
 
 	* Makefile.am: Rename .dep* files to DEP*.  Change DEP variable to
