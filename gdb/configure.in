@@ -538,7 +538,7 @@ AC_ARG_ENABLE(gdbtk,
 	AC_MSG_ERROR(bad value ${enableval} given for gdbtk option) ;;
 esac],
 [
-# Default is on for everything but go32 and cygwin32
+# Default is on for everything but go32 and Cygwin
 case "$host" in
     *go32* | *windows*)
 	;;
@@ -547,7 +547,7 @@ case "$host" in
     esac
 ])
 
-# In the cygwin32 environment, we need some additional flags.
+# In the Cygwin environment, we need some additional flags.
 AC_CACHE_CHECK([for cygwin32], gdb_cv_os_cygwin32,
 [AC_EGREP_CPP(lose, [
 #ifdef __CYGWIN32__
@@ -593,7 +593,7 @@ if test "${enable_gdbtk}" = "yes"; then
 	   TIXVERSION=4.1.8.0
 	   . ${ac_cv_c_tclconfig}/tclConfig.sh
 	   case "${host}" in
-	   *-*-cygwin32*)
+	   *-*-cygwin*)
 		tixdir=../tix/win/tcl8.0
 		;;
 	   *)

@@ -1,3 +1,8 @@
+Mon Nov  2 15:26:33 1998  Geoffrey Noer  <noer@cygnus.com>
+
+        * configure.in: Check cygwin* instead of cygwin32*.
+	* configure: regenerate
+
 Thu Oct 29 10:04:20 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	[Support for trace debugging: registers that were not collected.]
