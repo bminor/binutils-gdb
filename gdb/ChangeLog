@@ -1,5 +1,10 @@
 2003-04-14  David Carlton  <carlton@math.stanford.edu>
 
+	* symtab.c (symbol_set_names): Add prefix when storing Java names
+	in hash table.  Fix for PR java/1039.
+
+2003-04-14  David Carlton  <carlton@math.stanford.edu>
+
 	* symtab.c (symbol_set_names): Rename 'name' arg to
 	'linkage_name', and 'tmpname' variable to 'linkage_name_copy'.
 	* symtab.h: Change 'name' argument in declaration of

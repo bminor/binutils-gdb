@@ -490,6 +490,25 @@ symbol_find_demangled_name (struct general_symbol_info *gsymbol,
    LINKAGE_NAME is copied, so the pointer can be discarded after
    calling this function.  */
 
+/* We have to be careful when dealing with Java names: when we run
+   into a Java minimal symbol, we don't know it's a Java symbol, so it
+   gets demangled as a C++ name.  This is unfortunate, but there's not
+   much we can do about it: but when demangling partial symbols and
+   regular symbols, we'd better not reuse the wrong demangled name.
+   (See PR gdb/1039.)  We solve this by putting a distinctive prefix
+   on Java names when storing them in the hash table.  */
+
+/* FIXME: carlton/2003-03-13: This is an unfortunate situation.  I
+   don't mind the Java prefix so much: different languages have
+   different demangling requirements, so it's only natural that we
+   need to keep language data around in our demangling cache.  But
+   it's not good that the minimal symbol has the wrong demangled name.
+   Unfortunately, I can't think of any easy solution to that
+   problem.  */
+
+#define JAVA_PREFIX "##JAVA$$"
+#define JAVA_PREFIX_LEN 8
+
 void
 symbol_set_names (struct general_symbol_info *gsymbol,
 		  const char *linkage_name, int len, struct objfile *objfile)
@@ -497,30 +516,52 @@ symbol_set_names (struct general_symbol_info *gsymbol,
   char **slot;
   /* A 0-terminated copy of the linkage name.  */
   const char *linkage_name_copy;
+  /* A copy of the linkage name that might have a special Java prefix
+     added to it, for use when looking names up in the hash table.  */
+  const char *lookup_name;
+  /* The length of lookup_name.  */
+  int lookup_len;
 
   if (objfile->demangled_names_hash == NULL)
     create_demangled_names_hash (objfile);
 
   /* The stabs reader generally provides names that are not
      NUL-terminated; most of the other readers don't do this, so we
-     can just use the given copy.  */
-  if (linkage_name[len] != '\0')
+     can just use the given copy, unless we're in the Java case.  */
+  if (gsymbol->language == language_java)
     {
       char *alloc_name;
+      lookup_len = len + JAVA_PREFIX_LEN;
 
-      alloc_name = alloca (len + 1);
+      alloc_name = alloca (lookup_len + 1);
+      memcpy (alloc_name, JAVA_PREFIX, JAVA_PREFIX_LEN);
+      memcpy (alloc_name + JAVA_PREFIX_LEN, linkage_name, len);
+      alloc_name[lookup_len] = '\0';
+
+      lookup_name = alloc_name;
+      linkage_name_copy = alloc_name + JAVA_PREFIX_LEN;
+    }
+  else if (linkage_name[len] != '\0')
+    {
+      char *alloc_name;
+      lookup_len = len;
+
+      alloc_name = alloca (lookup_len + 1);
       memcpy (alloc_name, linkage_name, len);
-      alloc_name[len] = '\0';
+      alloc_name[lookup_len] = '\0';
 
+      lookup_name = alloc_name;
       linkage_name_copy = alloc_name;
     }
   else
     {
+      lookup_len = len;
+      lookup_name = linkage_name;
       linkage_name_copy = linkage_name;
     }
 
   slot = (char **) htab_find_slot (objfile->demangled_names_hash,
-				   linkage_name_copy, INSERT);
+				   lookup_name, INSERT);
 
   /* If this name is not in the hash table, add it.  */
   if (*slot == NULL)
@@ -533,21 +574,21 @@ symbol_set_names (struct general_symbol_info *gsymbol,
 	 Otherwise, just place a second zero byte after the end of the mangled
 	 name.  */
       *slot = obstack_alloc (&objfile->symbol_obstack,
-			     len + demangled_len + 2);
-      memcpy (*slot, linkage_name_copy, len + 1);
+			     lookup_len + demangled_len + 2);
+      memcpy (*slot, lookup_name, lookup_len + 1);
       if (demangled_name != NULL)
 	{
-	  memcpy (*slot + len + 1, demangled_name, demangled_len + 1);
+	  memcpy (*slot + lookup_len + 1, demangled_name, demangled_len + 1);
 	  xfree (demangled_name);
 	}
       else
-	(*slot)[len + 1] = '\0';
+	(*slot)[lookup_len + 1] = '\0';
     }
 
-  gsymbol->name = *slot;
-  if ((*slot)[len + 1] != '\0')
+  gsymbol->name = *slot + lookup_len - len;
+  if ((*slot)[lookup_len + 1] != '\0')
     gsymbol->language_specific.cplus_specific.demangled_name
-      = &(*slot)[len + 1];
+      = &(*slot)[lookup_len + 1];
   else
     gsymbol->language_specific.cplus_specific.demangled_name = NULL;
 }
