@@ -411,7 +411,16 @@ remote_fileio_to_fio_stat (struct stat *st, struct fio_stat *fst)
   remote_fileio_to_fio_uint ((long) st->st_rdev, fst->fst_rdev);
   remote_fileio_to_fio_ulong ((LONGEST) st->st_size, fst->fst_size);
   remote_fileio_to_fio_ulong ((LONGEST) st->st_blksize, fst->fst_blksize);
+#if HAVE_STRUCT_STAT_ST_BLOCKS
   remote_fileio_to_fio_ulong ((LONGEST) st->st_blocks, fst->fst_blocks);
+#else
+  /* FIXME: This is correct for DJGPP, but other systems that don't
+     have st_blocks, if any, might prefer 512 instead of st_blksize.
+     (eliz, 30-12-2003)  */
+  remote_fileio_to_fio_ulong (((LONGEST) st->st_size + st->st_blksize - 1)
+			      / (LONGEST) st->st_blksize,
+			      fst->fst_blocks);
+#endif
   remote_fileio_to_fio_time (st->st_atime, fst->fst_atime);
   remote_fileio_to_fio_time (st->st_mtime, fst->fst_mtime);
   remote_fileio_to_fio_time (st->st_ctime, fst->fst_ctime);
@@ -1131,7 +1140,9 @@ remote_fileio_func_fstat (char *buf)
       st.st_rdev = 0;
       st.st_size = 0;
       st.st_blksize = 512;
+#if HAVE_STRUCT_STAT_ST_BLOCKS
       st.st_blocks = 0;
+#endif
       if (!gettimeofday (&tv, NULL))
 	st.st_atime = st.st_mtime = st.st_ctime = tv.tv_sec;
       else
