@@ -1,3 +1,10 @@
+2001-10-17  Chris Demetriou  <cgd@broadcom.com>
+
+	* gas/mips/mips.exp (sb1-ext-ps): New test to test
+	SB-1 core's paired-single extensions to the MIPS64 ISA.
+	* gas/mips/sb1-ext-ps.d: New file.
+	* gas/mips/sb1-ext-ps.s: New file.
+
 2001-10-17  matthew green  <mrg@redhat.com>
 
 	* gas/ppc/altivec.s: New test for AltiVec.

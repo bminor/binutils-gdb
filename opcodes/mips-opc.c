@@ -87,6 +87,7 @@ Software Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  *
 #define V1      INSN_4100
 #define T3      INSN_3900
 #define M1	INSN_10000
+#define SB1     INSN_SB1
 
 #define G1      (T3             \
                  )
@@ -384,6 +385,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"div",     "d,v,I",	0,    (int) M_DIV_3I,	INSN_MACRO,		I1	},
 {"div.d",   "D,V,T",	0x46200003, 0xffe0003f,	WR_D|RD_S|RD_T|FP_D,	I1	},
 {"div.s",   "D,V,T",	0x46000003, 0xffe0003f,	WR_D|RD_S|RD_T|FP_S,	I1	},
+{"div.ps",  "D,V,T",	0x46c00003, 0xffe0003f,	WR_D|RD_S|RD_T|FP_D,	SB1	},
 /* For divu, see the comments about div.  */
 {"divu",    "z,s,t",    0x0000001b, 0xfc00ffff, RD_s|RD_t|WR_HILO,      I1      },
 {"divu",    "z,t",      0x0000001b, 0xffe0ffff, RD_s|RD_t|WR_HILO,      I1      },
@@ -652,6 +654,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 
 {"recip.d", "D,S",	0x46200015, 0xffff003f, WR_D|RD_S|FP_D,		I4	},
 {"recip.s", "D,S",	0x46000015, 0xffff003f, WR_D|RD_S|FP_S,		I4	},
+{"recip.ps","D,S",	0x46c00015, 0xffff003f, WR_D|RD_S|FP_D,		SB1	},
 {"rem",     "z,s,t",    0x0000001a, 0xfc00ffff, RD_s|RD_t|WR_HILO,      I1	},
 {"rem",     "d,v,t",	0,    (int) M_REM_3,	INSN_MACRO,		I1	},
 {"rem",     "d,v,I",	0,    (int) M_REM_3I,	INSN_MACRO,		I1	},
@@ -669,6 +672,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"round.w.s", "D,S",	0x4600000c, 0xffff003f, WR_D|RD_S|FP_S,		I2	},
 {"rsqrt.d", "D,S",	0x46200016, 0xffff003f, WR_D|RD_S|FP_D,		I4	},
 {"rsqrt.s", "D,S",	0x46000016, 0xffff003f, WR_D|RD_S|FP_S,		I4	},
+{"rsqrt.ps","D,S",	0x46c00016, 0xffff003f, WR_D|RD_S|FP_D,		SB1	},
 {"sb",      "t,o(b)",	0xa0000000, 0xfc000000,	SM|RD_t|RD_b,		I1	},
 {"sb",      "t,A(b)",	0,    (int) M_SB_AB,	INSN_MACRO,		I1	},
 {"sc",	    "t,o(b)",	0xe0000000, 0xfc000000, SM|RD_t|WR_t|RD_b,	I2	},
@@ -730,6 +734,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"sne",     "d,v,I",	0,    (int) M_SNE_I,	INSN_MACRO,		I1	},
 {"sqrt.d",  "D,S",	0x46200004, 0xffff003f, WR_D|RD_S|FP_D,		I2	},
 {"sqrt.s",  "D,S",	0x46000004, 0xffff003f, WR_D|RD_S|FP_S,		I2	},
+{"sqrt.ps", "D,S",	0x46c00004, 0xffff003f, WR_D|RD_S|FP_D,		SB1	},
 {"srav",    "d,t,s",	0x00000007, 0xfc0007ff,	WR_d|RD_t|RD_s,		I1	},
 {"sra",     "d,w,s",	0x00000007, 0xfc0007ff,	WR_d|RD_t|RD_s,		I1	}, /* srav */
 {"sra",     "d,w,<",	0x00000003, 0xffe0003f,	WR_d|RD_t,		I1	},

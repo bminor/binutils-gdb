@@ -1,3 +1,11 @@
+2001-10-17  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips-dis.c (mips_isa_type): Make the ISA used to disassemble
+	SB-1 binaries include instructions specific to the SB-1.
+	* mips-opc.c (SB1): New definition.
+	(mips_builtin_opcodes): Add SB-1 extension opcodes "div.ps",
+	"recip.ps", "rsqrt.ps", and "sqrt.ps".
+
 2001-10-17  matthew green  <mrg@redhat.com>
 
 	* ppc-opc.c (STRM): New AltiVec operand.

@@ -375,7 +375,7 @@ mips_isa_type (mach, isa, cputype)
       break;
     case bfd_mach_mips_sb1:
       *cputype = CPU_SB1;
-      *isa = ISA_MIPS64;
+      *isa = ISA_MIPS64 | INSN_SB1;
       break;
     case bfd_mach_mipsisa32:
       * cputype = CPU_MIPS32;
