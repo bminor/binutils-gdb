@@ -21,6 +21,10 @@ Tue Aug 22 03:00:33 1995  Ken Raeburn  <raeburn@kr-laptop.cygnus.com>
 	(VMS_Initialized_Data_Size):  simplify search loop; return
 	type is offsetT; second argument is unsigned.
 
+	Sat Jun 17 19:05:25 1995  Pat Rankin  (rankin@eql.caltech.edu)
+
+	* messages.c (as_perror): Use xstrerror instead of strerror.
+
 Mon Aug 21 13:57:20 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* as.c (parse_args): Accept --defsym SYM=VALUE.
