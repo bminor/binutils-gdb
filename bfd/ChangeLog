@@ -1,3 +1,15 @@
+2004-01-09  Dmitry Semyonov  <Dmitry.Semyonov@oktet.ru>
+
+	* coff-arm.c (aoutarm_std_reloc_howto): [ARM_WINCE] Synchronize ARM_26D
+	relocation howto with ARM_26 one for consistency.
+	(coff_arm_relocate_section): Set partial_inplace for ARM_26 relocations
+	that will be converted to ARM_26D ones, since we always want 'done'
+	relocations to be reflected in section's data.
+	(coff_arm_relocate_section): [ARM_WINCE] Quick fix for BL instruction
+	offset.
+	(_bfd_final_link_relocate): Do not modify "inplace" data, if not
+	requested.
+
 2004-01-08  Dmitry Semyonov  <Dmitry.Semyonov@oktet.ru>
 
 	* coff-arm.c (coff_arm_relocate_section): Do not alter relocs that
