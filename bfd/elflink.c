@@ -3518,20 +3518,23 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 
 		  if (isym->st_shndx != SHN_UNDEF)
 		    {
-		      if (vernum > elf_tdata (abfd)->dynverdef_hdr.sh_info)
-			{
-			  (*_bfd_error_handler)
-			    (_("%B: %s: invalid version %u (max %d)"),
-			     abfd, name, vernum,
-			     elf_tdata (abfd)->dynverdef_hdr.sh_info);
-			  bfd_set_error (bfd_error_bad_value);
-			  goto error_free_vers;
-			}
+		      if (vernum > elf_tdata (abfd)->cverdefs)
+			verstr = NULL;
 		      else if (vernum > 1)
 			verstr =
 			  elf_tdata (abfd)->verdef[vernum - 1].vd_nodename;
 		      else
 			verstr = "";
+
+		      if (verstr == NULL)
+			{
+			  (*_bfd_error_handler)
+			    (_("%B: %s: invalid version %u (max %d)"),
+			     abfd, name, vernum,
+			     elf_tdata (abfd)->cverdefs);
+			  bfd_set_error (bfd_error_bad_value);
+			  goto error_free_vers;
+			}
 		    }
 		  else
 		    {
