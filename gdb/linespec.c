@@ -54,6 +54,8 @@ static struct symtabs_and_lines decode_compound (char **argptr,
 						 char *saved_arg,
 						 char *p);
 
+static struct symbol *lookup_prefix_sym (char **argptr, char *p);
+
 static NORETURN void cplusplus_error (const char *name,
 				      const char *fmt, ...)
      ATTR_NORETURN ATTR_FORMAT (printf, 2, 3);
@@ -930,7 +932,7 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
 		 char *saved_arg, char *p)
 {
   struct symtabs_and_lines values;
-  char *p1, *p2;
+  char *p2;
 #if 0
   char *q, *q1;
 #endif
@@ -975,22 +977,7 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
   p2 = p;		/* Save for restart.  */
   while (1)
     {
-      /* Extract the class name.  */
-      p1 = p;
-      while (p != *argptr && p[-1] == ' ')
-	--p;
-      copy = (char *) alloca (p - *argptr + 1);
-      memcpy (copy, *argptr, p - *argptr);
-      copy[p - *argptr] = 0;
-
-      /* Discard the class name from the arg.  */
-      p = p1 + (p1[0] == ':' ? 2 : 1);
-      while (*p == ' ' || *p == '\t')
-	p++;
-      *argptr = p;
-
-      sym_class = lookup_symbol (copy, 0, STRUCT_NAMESPACE, 0,
-				 (struct symtab **) NULL);
+      sym_class = lookup_prefix_sym (argptr, p);
 
       if (sym_class &&
 	  (t = check_typedef (SYMBOL_TYPE (sym_class)),
@@ -1166,6 +1153,37 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
   cplusplus_error (saved_arg,
 		   "Can't find member of namespace, class, struct, or union named \"%s\"\n",
 		   copy);
+}
+
+/* Next come some helper functions for decode_compound.  */
+
+/* Return the symbol corresponding to the substring of *ARGPTR ending
+   at P, allowing whitespace.  Also, advance *ARGPTR past the symbol
+   name in question, the compound object separator ("::" or "."), and
+   whitespace.  */
+
+static struct symbol *
+lookup_prefix_sym (char **argptr, char *p)
+{
+  char *p1;
+  char *copy;
+
+  /* Extract the class name.  */
+  p1 = p;
+  while (p != *argptr && p[-1] == ' ')
+    --p;
+  copy = (char *) alloca (p - *argptr + 1);
+  memcpy (copy, *argptr, p - *argptr);
+  copy[p - *argptr] = 0;
+
+  /* Discard the class name from the arg.  */
+  p = p1 + (p1[0] == ':' ? 2 : 1);
+  while (*p == ' ' || *p == '\t')
+    p++;
+  *argptr = p;
+
+  return lookup_symbol (copy, 0, STRUCT_NAMESPACE, 0,
+			(struct symtab **) NULL);
 }
 
 

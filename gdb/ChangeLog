@@ -1,5 +1,11 @@
 2003-02-04  David Carlton  <carlton@math.stanford.edu>
 
+	* linespec.c (decode_compound): Extract code into
+	lookup_prefix_sym.
+	(lookup_prefix_sym): New function.
+
+2003-02-04  David Carlton  <carlton@math.stanford.edu>
+
 	* gdbtypes.h: Delete INTEGER_COERCION_BADNESS,
 	FLOAT_COERCION_BADNESS.
 	* gdbtypes.c (rank_one_type): Replace all uses of
