@@ -1704,7 +1704,7 @@ read_type (pp)
 	type = dbx_alloc_type (typenums);
 	TYPE_CODE (type) = code;
 	TYPE_NAME (type) = type_name;
-	TYPE_CPLUS_SPECIFIC(type) = &cplus_struct_default;
+	INIT_CPLUS_SPECIFIC(type);
 	TYPE_FLAGS (type) |= TYPE_FLAG_STUB;
 
 	add_undefined_type (type);
@@ -1921,7 +1921,7 @@ read_struct_type (pp, type)
   int nfn_fields = 0;
 
   TYPE_CODE (type) = TYPE_CODE_STRUCT;
-  TYPE_CPLUS_SPECIFIC(type) = &cplus_struct_default;
+  INIT_CPLUS_SPECIFIC(type);
 
   /* First comes the total size in bytes.  */
 

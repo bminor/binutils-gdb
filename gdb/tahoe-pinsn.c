@@ -22,7 +22,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <stdio.h>
 #include "defs.h"
 #include "symtab.h"
-#include "tahoe-opcode.h"
+#include "opcode/tahoe.h"
 
 /* Tahoe instructions are never longer than this.  */
 #define MAXLEN 62

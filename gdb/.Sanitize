@@ -44,7 +44,6 @@ am29k-pinsn.c
 am29k-tdep.c
 ansidecl.h
 arm-convert.s
-arm-opcode.h
 arm-pinsn.c
 arm-tdep.c
 arm-xdep.c
@@ -112,7 +111,6 @@ m2-exp.y
 m68k-pinsn.c
 m68k-stub.c
 m68k-tdep.c
-m88k-opcode.h
 m88k-pinsn.c
 m88k-tdep.c
 m88k-xdep.c
@@ -131,17 +129,14 @@ munch
 news-xdep.c
 nindy-share
 nindy-tdep.c
-np1-opcode.h
 ns32k-opcode.h
 ns32k-pinsn.c
 parse.c
 parser-defs.h
 partial-stab.h
-pn-opcode.h
 printcmd.c
 procfs.c
 putenv.c
-pyr-opcode.h
 pyr-pinsn.c
 pyr-tdep.c
 pyr-xdep.c
@@ -179,7 +174,6 @@ symm-xdep.c
 symmisc.c
 symtab.c
 symtab.h
-tahoe-opcode.h
 tahoe-pinsn.c
 target.c
 target.h
@@ -235,7 +229,6 @@ valops.c
 valprint.c
 value.h
 values.c
-vax-opcode.h
 vax-pinsn.c
 vx-share
 xcoffexec.c

@@ -560,11 +560,8 @@ fill_symbuf (sym_bfd)
    (a \ at the end of the text of a name)
    call this function to get the continuation.  */
 
-#ifdef READ_MIPS_FORMAT
-extern char *next_symbol_text ();
-#else
 char *
-next_symbol_text ()
+dbx_next_symbol_text ()
 {
   if (symbuf_idx == symbuf_end)
     fill_symbuf (symfile_bfd);
@@ -572,7 +569,6 @@ next_symbol_text ()
   SWAP_SYMBOL(&symbuf[symbuf_idx], symfile_bfd);
   return symbuf[symbuf_idx++].n_strx + stringtab_global;
 }
-#endif
 
 /* Initializes storage for all of the partial symbols that will be
    created by read_dbx_symtab and subsidiaries.  */
@@ -734,6 +730,7 @@ read_dbx_symtab (addr, objfile, stringtab, stringtab_size, nlistlen,
   symfile_bfd = objfile->obfd;	/* For next_text_symbol */
   abfd = objfile->obfd;
   symbuf_end = symbuf_idx = 0;
+  next_symbol_text_func = dbx_next_symbol_text;
 
   for (symnum = 0; symnum < nlistlen; symnum++)
     {
@@ -775,23 +772,11 @@ read_dbx_symtab (addr, objfile, stringtab, stringtab_size, nlistlen,
 #define CUR_SYMBOL_TYPE bufp->n_type
 #define CUR_SYMBOL_VALUE bufp->n_value
 #define DBXREAD_ONLY
-#define CHECK_SECOND_N_SO() \
-	  if (symbuf_idx == symbuf_end) \
-	      fill_symbuf (abfd);\
-	  bufp = &symbuf[symbuf_idx];\
-	  /* n_type is only a char, so swapping swapping is irrelevant.  */\
-	  if (CUR_SYMBOL_TYPE == (unsigned char)N_SO)\
-	    {\
-	      SWAP_SYMBOL (bufp, abfd);\
-	      SET_NAMESTRING ();\
-	      valu = CUR_SYMBOL_VALUE;\
-	      symbuf_idx++;\
-	      symnum++;\
-	    }
 #define START_PSYMTAB(ofile,addr,fname,low,symoff,global_syms,static_syms)\
   start_psymtab(ofile, addr, fname, low, symoff, global_syms, static_syms)
 #define END_PSYMTAB(pst,ilist,ninc,c_off,c_text,dep_list,n_deps)\
   end_psymtab(pst,ilist,ninc,c_off,c_text,dep_list,n_deps)
+
 #include "partial-stab.h"
     }
 
@@ -1148,6 +1133,8 @@ dbx_psymtab_to_symtab (pst)
 
       /* FIXME POKING INSIDE BFD DATA STRUCTURES */
       symbol_size = obj_symbol_entry_size (sym_bfd);
+
+      next_symbol_text_func = dbx_next_symbol_text;
 
       /* FIXME, this uses internal BFD variables.  See above in
 	 dbx_symbol_file_open where the macro is defined!  */

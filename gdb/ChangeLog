@@ -1,3 +1,44 @@
+Fri Dec 27 10:11:33 1991  Per Bothner  (bothner at cygnus.com)
+
+	* arm-opcode.h, m88k-opcode.h, pn-opcode.h, np1-opcode.h,
+	pyr-opcode.h, tahoe-opcode, vax-opcode.h:  Removed -
+	these are all essentially the same as the versions
+	in ../include/opcode.  The remaining *-opcode.h here
+	are not quite so obviously the same, and need study.
+	* arm-pinsn.c, gould-pinsn.c, m88k-pinsn.c, pyr-pinsn.c,
+	tahoe-pinsn.c, vax-pinsn.c:  Change so these include
+	opcode/FOO.h (actually ../include/opcode/FOO.h)
+	instead of the recenntly departed opcode-FOO.h files.
+	* sparc-pinsn.c:  Now that we're using the much tighter
+	opcode table in ../include/opcode/sparc.h, we shouldn't
+	need to sort the opcodes before dis-assembly.
+
+	* symtab.h, symmisc.c:  Make cplus_struct_default be const.
+	* symtab.h, buildsym.c:  Add and use INIT_CPLUS_SPECIFIC macro.
+	* symmisc.c:  Remove unused 'nfields' variable.
+	* buildsym.h:  Add extern decl of unknown_symtype_complaint,
+	since it used used by partial-stab.h (included two places).
+	* partial-stab.h:  Re-arrange DBXREAD_ONLY #ifdefs so that
+	we should never hit the default case (until new stab codes
+	are added).  Hence, we can leave the complaint in the
+	default case in even when DBXREAD_ONLY is off.
+	* partial_stab.h: Recognize a pair of N_SO stabs (one for the
+	directory, one for the filename proper) without peeking ahead.
+	* dbxread.c, mipsread.c: Because of previous change, don't need
+	ugly CHECK_SECOND_N_SO macro.
+	* buildsym.h, dbxread.c, mipsread.c:  Make next_symbol_text a
+	macro that invokes a function pointer in next_symbol_text_func.
+	* mipsread.c:  Added comments various places to
+	explain what is going on.
+	* mipsread.c (parse_symbol):  Support the new (SGI-specific?)
+	symbol types stStruct, stUnion, and stEnum.
+	Also, some fixes in the code for dealing with tags.
+	* mipsread.c:  Change handling of startup_file_start and _end
+	- now just use the textlow and texhigh of a psymtab
+	to check if we've found the startup-file.
+	* mipsread.c:  Replace s_idx by global cur_sdx in many places.
+	This is so mips_next_symbol_text can get at it.
+
 Thu Dec 26 19:52:01 1991  Fred Fish  (fnf at cygnus.com)
 
 	* dbxread.c, symmisc.c:  Move add_psymbol_to_plist() from

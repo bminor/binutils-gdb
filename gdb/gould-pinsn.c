@@ -23,9 +23,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "frame.h"
 #include "gdbcore.h"
 #if defined GOULD_PN
-#include "pn-opcode.h"
+#include "opcode/pn.h"
 #else
-#include "np1-opcode.h"
+#include "opcode/np1.h"
 #endif
 
 /* GOULD RISC instructions are never longer than this many bytes.  */

@@ -7,7 +7,7 @@ am29k-tdep.o : am29k-tdep.c defs.h xm.h config.status tm.h config.status gdbcore
   ${srcdir}/../include/ansidecl.h ${srcdir}/../include/obstack.h frame.h value.h symtab.h \
   inferior.h breakpoint.h 
 arm-pinsn.o : arm-pinsn.c defs.h xm.h config.status tm.h config.status symtab.h ${srcdir}/../include/obstack.h \
-  arm-opcode.h 
+  ${srcdir}/../include/opcode/arm.h 
 arm-tdep.o : arm-tdep.c defs.h xm.h config.status tm.h config.status frame.h inferior.h breakpoint.h \
   value.h symtab.h ${srcdir}/../include/obstack.h arm-opcode.h gdbcore.h \
   ${srcdir}/../include/bfd.h ${srcdir}/../include/ansidecl.h 
@@ -73,7 +73,7 @@ findvar.o : findvar.c defs.h xm.h config.status tm.h config.status symtab.h ${sr
   inferior.h breakpoint.h target.h 
 gould-pinsn.o : gould-pinsn.c defs.h xm.h config.status tm.h config.status symtab.h \
   ${srcdir}/../include/obstack.h frame.h gdbcore.h ${srcdir}/../include/bfd.h \
-  ${srcdir}/../include/ansidecl.h np1-opcode.h 
+  ${srcdir}/../include/ansidecl.h ${srcdir}/../include/opcode/np1.h 
 gould-xdep.o : gould-xdep.c defs.h xm.h config.status tm.h config.status frame.h inferior.h \
   breakpoint.h value.h symtab.h ${srcdir}/../include/obstack.h gdbcore.h \
   ${srcdir}/../include/bfd.h ${srcdir}/../include/ansidecl.h 
@@ -123,8 +123,8 @@ m68k-pinsn.o : m68k-pinsn.c defs.h xm.h config.status tm.h config.status symtab.
   ${srcdir}/../include/bfd.h ${srcdir}/../include/ansidecl.h 
 m68k-tdep.o : m68k-tdep.c defs.h xm.h config.status tm.h config.status ieee-float.h frame.h symtab.h \
   ${srcdir}/../include/obstack.h 
-m88k-pinsn.o : m88k-pinsn.c m88k-opcode.h defs.h xm.h config.status tm.h config.status symtab.h \
-  ${srcdir}/../include/obstack.h 
+m88k-pinsn.o : m88k-pinsn.c ${srcdir}/../include/opcode/m88k.h defs.h xm.h config.status tm.h config.status \
+  symtab.h ${srcdir}/../include/obstack.h 
 m88k-tdep.o : m88k-tdep.c defs.h xm.h config.status tm.h config.status frame.h inferior.h breakpoint.h \
   value.h symtab.h ${srcdir}/../include/obstack.h gdbcore.h ${srcdir}/../include/bfd.h \
   ${srcdir}/../include/ansidecl.h /usr/include/setjmp.h 
@@ -172,7 +172,8 @@ printcmd.o : printcmd.c defs.h xm.h config.status tm.h config.status frame.h sym
   ${srcdir}/../include/bfd.h ${srcdir}/../include/ansidecl.h gdbcmd.h command.h target.h 
 procfs.o : procfs.c defs.h xm.h config.status tm.h config.status 
 pyr-pinsn.o : pyr-pinsn.c defs.h xm.h config.status tm.h config.status symtab.h ${srcdir}/../include/obstack.h \
-  pyr-opcode.h gdbcore.h ${srcdir}/../include/bfd.h ${srcdir}/../include/ansidecl.h 
+  ${srcdir}/../include/opcode/pyr.h gdbcore.h ${srcdir}/../include/bfd.h \
+  ${srcdir}/../include/ansidecl.h 
 pyr-tdep.o : pyr-tdep.c defs.h xm.h config.status tm.h config.status 
 pyr-xdep.o : pyr-xdep.c defs.h xm.h config.status tm.h config.status frame.h inferior.h breakpoint.h \
   value.h symtab.h ${srcdir}/../include/obstack.h gdbcore.h ${srcdir}/../include/bfd.h \
@@ -245,7 +246,7 @@ symtab.o : symtab.c defs.h xm.h config.status tm.h config.status symtab.h ${srcd
   gdbcore.h ${srcdir}/../include/bfd.h ${srcdir}/../include/ansidecl.h frame.h target.h \
   value.h symfile.h gdbcmd.h command.h regex.h language.h 
 tahoe-pinsn.o : tahoe-pinsn.c defs.h xm.h config.status tm.h config.status symtab.h \
-  ${srcdir}/../include/obstack.h tahoe-opcode.h 
+  ${srcdir}/../include/obstack.h ${srcdir}/../include/opcode/tahoe.h 
 target.o : target.c defs.h xm.h config.status tm.h config.status target.h ${srcdir}/../include/bfd.h \
   ${srcdir}/../include/ansidecl.h ${srcdir}/../include/obstack.h gdbcmd.h command.h symtab.h \
   inferior.h breakpoint.h value.h frame.h symfile.h 
@@ -270,7 +271,7 @@ values.o : values.c defs.h xm.h config.status tm.h config.status symtab.h ${srcd
   value.h gdbcore.h ${srcdir}/../include/bfd.h ${srcdir}/../include/ansidecl.h frame.h \
   command.h gdbcmd.h 
 vax-pinsn.o : vax-pinsn.c defs.h xm.h config.status tm.h config.status symtab.h ${srcdir}/../include/obstack.h \
-  vax-opcode.h 
+  ${srcdir}/../include/opcode/vax.h 
 xdr_ld.o : ${srcdir}/vx-share/xdr_ld.c ${srcdir}/vx-share/vxWorks.h ${srcdir}/vx-share/vxTypes.h \
   /usr/include/rpc/rpc.h ${srcdir}/vx-share/xdr_ld.h 
 xdr_ptrace.o : ${srcdir}/vx-share/xdr_ptrace.c 

@@ -302,3 +302,11 @@ struct subfile_stack
 };
 
 EXTERN struct subfile_stack *subfile_stack;
+
+extern struct complaint unknown_symtype_complaint;
+
+#define next_symbol_text() (*next_symbol_text_func)()
+
+/* Function to invoke get the next symbol.  Return the symbol name. */
+
+EXTERN char * (*next_symbol_text_func)();

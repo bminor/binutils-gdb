@@ -32,7 +32,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	   * Standard, external, non-debugger, symbols
 	   */
 
-#ifdef DBXREAD_ONLY
 	case N_TEXT | N_EXT:
 	case N_NBTEXT | N_EXT:
 	case N_NBDATA | N_EXT:
@@ -41,6 +40,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	case N_ABS | N_EXT:
 	case N_DATA | N_EXT:
 	case N_BSS | N_EXT:
+#ifdef DBXREAD_ONLY
 
 	  CUR_SYMBOL_VALUE += addr;		/* Relocate */
 
@@ -49,7 +49,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	bss_ext_symbol:
 	  record_misc_function (namestring, CUR_SYMBOL_VALUE,
 				CUR_SYMBOL_TYPE); /* Always */
-
+#endif /* DBXREAD_ONLY */
 	  continue;
 
 	  /* Standard, local, non-debugger, symbols */
@@ -64,6 +64,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	case N_FN:
 	case N_FN_SEQ:
 	case N_TEXT:
+#ifdef DBXREAD_ONLY
 	  CUR_SYMBOL_VALUE += addr;		/* Relocate */
 	  SET_NAMESTRING();
 	  if ((namestring[0] == '-' && namestring[1] == 'l')
@@ -93,9 +94,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 		past_first_source_file = 1;
 	      last_o_file_start = CUR_SYMBOL_VALUE;
 	    }
+#endif /* DBXREAD_ONLY */
 	  continue;
 
 	case N_DATA:
+#ifdef DBXREAD_ONLY
 	  CUR_SYMBOL_VALUE += addr;		/* Relocate */
 	  SET_NAMESTRING ();
 	  /* Check for __DYNAMIC, which is used by Sun shared libraries. 
@@ -108,9 +111,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	      record_misc_function (namestring, CUR_SYMBOL_VALUE,
 				    CUR_SYMBOL_TYPE); /* Always */
 	  }
+#endif /* DBXREAD_ONLY */
 	  continue;
 
 	case N_UNDF | N_EXT:
+#ifdef DBXREAD_ONLY
 	  if (CUR_SYMBOL_VALUE != 0) {
 	    /* This is a "Fortran COMMON" symbol.  See if the target
 	       environment knows where it has been relocated to.  */
@@ -125,8 +130,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	    CUR_SYMBOL_VALUE = reladdr;
 	    goto bss_ext_symbol;
 	  }
+#endif /* DBXREAD_ONLY */
 	  continue;	/* Just undefined, not COMMON */
-#endif
 
 	    /* Lots of symbol types we can just ignore.  */
 
@@ -169,13 +174,27 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 	  SET_NAMESTRING();
 
-	  /* Peek at the next symbol.  If it is also an N_SO, the
-	     first one just indicates the directory.  */
-	  CHECK_SECOND_N_SO();
 	  valu += addr;		/* Relocate */
 
 	  if (pst && past_first_source_file)
 	    {
+	      /* Some compilers (including gcc) emit a pair of initial N_SOs.
+		 The first one is a directory name; the second the file name.
+		 If pst exists, is empty, and has a filename ending in '/',
+		 we assume the previous N_SO was a directory name. */
+	      if (global_psymbols.next
+		  ==  (global_psymbols.list + pst->globals_offset)
+		&& static_psymbols.next
+		  == (static_psymbols.list + pst->statics_offset)
+		&& pst->filename && pst->filename[0]
+		&& pst->filename[strlen(pst->filename)-1] == '/') {
+		  /* Just replace the directory name with the real filename. */
+		  pst->filename =
+		      (char *) obstack_alloc (psymbol_obstack,
+					      strlen (namestring) + 1);
+		  strcpy (pst->filename, namestring);
+		  continue;
+	      }
 	      END_PSYMTAB (pst, psymtab_include_list, includes_used,
 			   first_symnum * symbol_size, valu,
 			   dependency_list, dependencies_used);
@@ -193,8 +212,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	  continue;
 	}
 
-#ifdef DBXREAD_ONLY
 	case N_BINCL:
+#ifdef DBXREAD_ONLY
 	  /* Add this bincl to the bincl_list for future EXCLs.  No
 	     need to save the string; it'll be around until
 	     read_dbx_symtab function returns */
@@ -217,8 +236,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 		     includes_used * sizeof (char *));
 	    }
 
+#endif /* DBXREAD_ONLY */
 	  continue;
-#endif
 
 	case N_SOL:
 	  /* Mark down an include file in the current psymtab */
@@ -261,6 +280,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 		     includes_used * sizeof (char *));
 	    }
 	  continue;
+
 	case N_LSYM:		/* Typedef or automatic variable. */
 	case N_STSYM:		/* Data seg var -- static  */
 	case N_LCSYM:		/* BSS      "  */
@@ -294,7 +314,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 				   VAR_NAMESPACE, LOC_TYPEDEF,
 				   static_psymbols, CUR_SYMBOL_VALUE);
 	    check_enum:
-#ifdef DBXREAD_ONLY
 	      /* If this is an enumerated type, we need to
 		 add all the enum constants to the partial symbol
 		 table.  This does not cover enums without names, e.g.
@@ -353,7 +372,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 			p++;
 		    }
 		}
-#endif
 	      continue;
 	    case 'c':
 	      /* Constant, e.g. from "const" in Pascal.  */
@@ -467,8 +485,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	      continue;
 	    }
 
-#ifdef DBXREAD_ONLY
 	case N_EXCL:
+#ifdef DBXREAD_ONLY
 
 	  SET_NAMESTRING();
 
@@ -519,12 +537,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	      error ("Invalid symbol data: \"repeated\" header file not previously seen, at symtab pos %d.",
 		     symnum);
 	  }
+#endif /* DBXREAD_ONLY */
 	  continue;
-#endif
 
 	case N_RBRAC:
 #ifdef HANDLE_RBRAC
 	  HANDLE_RBRAC(CUR_SYMBOL_VALUE);
+	  continue;
 #endif
 	case N_EINCL:
 	case N_DSLINE:
@@ -551,10 +570,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	  continue;
 
 	default:
-#ifdef DBXREAD_ONLY
 	  /* If we haven't found it yet, ignore it.  It's probably some
 	     new type we don't know about yet.  */
 	  complain (&unknown_symtype_complaint, local_hex_string(CUR_SYMBOL_TYPE));
-#endif
 	  continue;
 	}

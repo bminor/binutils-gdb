@@ -23,7 +23,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include "symtab.h"
-#include "arm-opcode.h"
+#include "opcode/arm.h"
 
 extern char *reg_names[];
 

@@ -21,7 +21,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "defs.h"
 #include "symtab.h"
-#include "vax-opcode.h"
+#include "opcode/vax.h"
 
 /* Vax instructions are never longer than this.  */
 #define MAXLEN 62

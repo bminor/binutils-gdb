@@ -26,9 +26,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "string.h"
 #include "target.h"
 
-extern void qsort ();
-
-
 extern char *reg_names[];
 #define	freg_names	(&reg_names[4 * 8])
 
@@ -92,8 +89,6 @@ is_delayed_branch (insn)
   return 0;
 }
 
-static int opcodes_sorted = 0;
-
 /* Print one instruction from MEMADDR on STREAM.  */
 int
 print_insn (memaddr, stream)
@@ -103,14 +98,6 @@ print_insn (memaddr, stream)
   union sparc_insn insn;
 
   register unsigned int i;
-
-  if (!opcodes_sorted)
-    {
-      static int compare_opcodes ();
-      qsort ((char *) sparc_opcodes, NUMOPCODES,
-	     sizeof (sparc_opcodes[0]), compare_opcodes);
-      opcodes_sorted = 1;
-    }
 
   read_memory (memaddr, &insn, sizeof (insn));
 
@@ -231,6 +218,7 @@ print_insn (memaddr, stream)
 		      /* Check to see whether we have a 1+i, and take
 			 note of that fact.
 
+			 FIXME: No longer true/relavant ???
 			 Note: because of the way we sort the table,
 			 we will be matching 1+i rather than i+1,
 			 so it is OK to assume that i is after +,
@@ -357,108 +345,4 @@ print_insn (memaddr, stream)
 
   printf_filtered ("%#8x", insn.code);
   return sizeof (insn);
-}
-
-
-/* Compare opcodes A and B.  */
-
-static int
-compare_opcodes (a, b)
-     char *a, *b;
-{
-  struct sparc_opcode *op0 = (struct sparc_opcode *) a;
-  struct sparc_opcode *op1 = (struct sparc_opcode *) b;
-  unsigned long int match0 = op0->match, match1 = op1->match;
-  unsigned long int lose0 = op0->lose, lose1 = op1->lose;
-  register unsigned int i;
-
-  /* If a bit is set in both match and lose, there is something
-     wrong with the opcode table.  */
-  if (match0 & lose0)
-    {
-      fprintf (stderr, "Internal error:  bad sparc-opcode.h: \"%s\", %#.8lx, %#.8lx\n",
-	       op0->name, match0, lose0);
-      op0->lose &= ~op0->match;
-      lose0 = op0->lose;
-    }
-
-  if (match1 & lose1)
-    {
-      fprintf (stderr, "Internal error: bad sparc-opcode.h: \"%s\", %#.8lx, %#.8lx\n",
-	       op1->name, match1, lose1);
-      op1->lose &= ~op1->match;
-      lose1 = op1->lose;
-    }
-
-  /* Because the bits that are variable in one opcode are constant in
-     another, it is important to order the opcodes in the right order.  */
-  for (i = 0; i < 32; ++i)
-    {
-      unsigned long int x = 1 << i;
-      int x0 = (match0 & x) != 0;
-      int x1 = (match1 & x) != 0;
-
-      if (x0 != x1)
-	return x1 - x0;
-    }
-
-  for (i = 0; i < 32; ++i)
-    {
-      unsigned long int x = 1 << i;
-      int x0 = (lose0 & x) != 0;
-      int x1 = (lose1 & x) != 0;
-
-      if (x0 != x1)
-	return x1 - x0;
-    }
-
-  /* They are functionally equal.  So as long as the opcode table is
-     valid, we can put whichever one first we want, on aesthetic grounds.  */
-
-  /* Our first aesthetic ground is that aliases defer to real insns.  */
-  {
-    int alias_diff = (op0->flags & F_ALIAS) - (op1->flags & F_ALIAS);
-    if (alias_diff != 0)
-      /* Put the one that isn't an alias first.  */
-      return alias_diff;
-  }
-
-  /* Except for the above aliases, two "identical" instructions had
-     better have the same opcode.  This is a sanity check on the table.  */
-  if (0 != strcmp (op0->name, op1->name))
-      fprintf (stderr, "Internal error: bad sparc-opcode.h: \"%s\" == \"%s\"\n",
-	op0->name, op1->name);
-
-  /* Fewer arguments are preferred.  */
-  {
-    int length_diff = strlen (op0->args) - strlen (op1->args);
-    if (length_diff != 0)
-      /* Put the one with fewer arguments first.  */
-      return length_diff;
-  }
-
-  /* Put 1+i before i+1.  */
-  {
-    char *p0 = (char *) strchr(op0->args, '+');
-    char *p1 = (char *) strchr(op1->args, '+');
-
-    if (p0 && p1)
-      {
-	/* There is a plus in both operands.  Note that a plus
-	   sign cannot be the first character in args,
-	   so the following [-1]'s are valid.  */
-	if (p0[-1] == 'i' && p1[1] == 'i')
-	  /* op0 is i+1 and op1 is 1+i, so op1 goes first.  */
-	  return 1;
-	if (p0[1] == 'i' && p1[-1] == 'i')
-	  /* op0 is 1+i and op1 is i+1, so op0 goes first.  */
-	  return -1;
-      }
-  }
-
-  /* They are, as far as we can tell, identical.
-     Since qsort may have rearranged the table partially, there is
-     no way to tell which one was first in the opcode table as
-     written, so just say there are equal.  */
-  return 0;
 }
