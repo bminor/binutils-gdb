@@ -234,7 +234,7 @@ else
 	done
 fi
 
-sky_files="ChangeLog configure.tgt Makefile.am Makefile.in"
+sky_files="ChangeLog configure.tgt"
 
 if ( echo $* | grep keep\-sky > /dev/null ) ; then
 	for i in $sky_files ; do

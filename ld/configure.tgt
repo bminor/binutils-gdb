@@ -203,10 +203,13 @@ rs6000-*-aix*)		targ_emul=aixrs6 ;;
 # start-sanitize-tic80
 tic80-*-*)		targ_emul=tic80coff ;;
 # end-sanitize-tic80
+# start-sanitize-sky
+dvp-*-*)		targ_emul=elf32l4300 ;; # mips64r5900-elf
+# end-sanitize-sky
 v850-*-*)		targ_emul=v850 ;;
 # start-sanitize-v850e
 v850e-*-*)		targ_emul=v850 ;;
-v850eq-*-*)		targ_emul=v850 ;;
+v850ea-*-*)		targ_emul=v850 ;;
 # end-sanitize-v850e
 w65-*-*)		targ_emul=w65 ;;
 *-*-aout)		targ_emul=${target_cpu}-${target_vendor} ;;

@@ -1,3 +1,9 @@
+start-sanitize-sky
+Wed Jan 28 12:19:31 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* configure.tgt (dvp-*-*): Recognize.
+
+end-sanitize-sky
 Wed Jan 28 14:10:01 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ld.texinfo (Options): Mention LDEMULATION in description of -m.
@@ -71,16 +77,6 @@ Thu Jan  1 18:04:51 1998  Jeffrey A Law  (law@cygnus.com)
 	* scripttempl/h8300h.sc: Fix typo.
 	* scripttempl/h8300s.sc: Likewise.
 
-start-sanitize-sky
-Mon Dec 22 16:54:39 1997  Doug Evans  <devans@canuck.cygnus.com>
-
-	* Makefile.am (etxvuelf.c): Add rule for.
-	* Makefile.in: Regenerate.
-	* configure: Regenerate.
-	* configure.tgt (txvu-*-*): Recognize.
-	* emulparams/txvuelf.sh: New file.
-
-end-sanitize-sky
 Sun Dec 21 12:51:49 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldexp.c (fold_name): Don't crash if the symbol is defined in a
