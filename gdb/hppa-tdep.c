@@ -1987,6 +1987,7 @@ hppa_stub_frame_unwind_cache (struct frame_info *next_frame,
 {
   struct gdbarch *gdbarch = get_frame_arch (next_frame);
   struct hppa_stub_unwind_cache *info;
+  struct unwind_table_entry *u;
 
   if (*this_cache)
     return *this_cache;
@@ -1995,8 +1996,26 @@ hppa_stub_frame_unwind_cache (struct frame_info *next_frame,
   *this_cache = info;
   info->saved_regs = trad_frame_alloc_saved_regs (next_frame);
 
-  info->saved_regs[HPPA_PCOQ_HEAD_REGNUM].realreg = HPPA_RP_REGNUM;
   info->base = frame_unwind_register_unsigned (next_frame, HPPA_SP_REGNUM);
+
+  if (gdbarch_osabi (gdbarch) == GDB_OSABI_HPUX_ELF 
+      || gdbarch_osabi (gdbarch) == GDB_OSABI_HPUX_SOM)
+    {
+      /* HPUX uses export stubs in function calls; the export stub clobbers
+         the return value of the caller, and, later restores it from the
+	 stack.  */
+      u = find_unwind_entry (frame_pc_unwind (next_frame));
+
+      if (u && u->stub_unwind.stub_type == EXPORT)
+	{
+          info->saved_regs[HPPA_PCOQ_HEAD_REGNUM].addr = info->base - 24;
+
+	  return info;
+	}
+    }
+
+  /* By default we assume that stubs do not change the rp.  */
+  info->saved_regs[HPPA_PCOQ_HEAD_REGNUM].realreg = HPPA_RP_REGNUM;
 
   return info;
 }
