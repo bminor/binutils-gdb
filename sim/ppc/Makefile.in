@@ -197,7 +197,9 @@ $(TARGETLIB): tmp-gencode $(LIB_OBJ) $(GDB_OBJ)
 	$(AR) $(AR_FLAGS) $(TARGETLIB) $(LIB_OBJ) $(GDB_OBJ)
 	$(RANLIB) $(TARGETLIB)
 
-psim.o: psim.c psim.h $(CPU_H) $(IDECODE_H) $(INLINE)
+# Given that inlines are turned on now, rebuild psim whenever
+# anything changes.
+psim.o: psim.c psim.h $(CPU_H) $(IDECODE_H) $(INLINE) $(LIB_SRC)
 
 bits.o: bits.c bits.h
 

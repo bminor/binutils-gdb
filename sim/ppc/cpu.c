@@ -206,8 +206,16 @@ cpu_halt(cpu *processor,
 	 stop_reason reason,
 	 int signal)
 {
-  processor->program_counter = cia;
-  psim_halt(processor->system, processor->cpu_nr, cia, reason, signal);
+  if (processor == NULL) {
+    error("cpu_halt() processor=NULL, cia=0x%x, reason=%d, signal=%d\n",
+	  cia,
+	  reason,
+	  signal);
+  }
+  else {
+    processor->program_counter = cia;
+    psim_halt(processor->system, processor->cpu_nr, cia, reason, signal);
+  }
 }
 
 
@@ -233,12 +241,6 @@ INLINE_CPU vm_data_map *
 cpu_data_map(cpu *processor)
 {
   return processor->data_map;
-}
-
-INLINE_CPU core *
-cpu_core(cpu *processor)
-{
-  return processor->physical;
 }
 
 
@@ -268,6 +270,14 @@ cpu_synchronize_context(cpu *processor)
   for (i = 0; i < IDECODE_CACHE_SIZE; i++)
     processor->icache[i].address = MASK(0,63);
 #endif
+
+  /* don't allow the processor to change endian modes */
+  if ((cpu_registers(processor)->msr & msr_little_endian_mode)
+      && CURRENT_TARGET_BYTE_ORDER != LITTLE_ENDIAN) {
+    error("vm_synchronize_context() - unsuported change of byte order\n");
+  }
+
+  /* update virtual memory */
   vm_synchronize_context(processor->virtual,
 			 processor->regs.spr,
 			 processor->regs.sr,
@@ -289,12 +299,33 @@ cpu_get_number_of_insns(cpu *processor)
   return processor->number_of_insns;
 }
 
+static INLINE_CPU char *
+cpu_add_commas(char *endbuf, long value)
+{
+  int comma = 3;
+
+  *--endbuf = '\0';
+  do {
+    if (comma-- == 0)
+      {
+	*--endbuf = ',';
+	comma = 2;
+      }
+
+    *--endbuf = (value % 10) + '0';
+  } while ((value /= 10) != 0);
+
+  return endbuf;
+}
+
 INLINE_CPU void
 cpu_print_info(cpu *processor, int verbose)
 {
-  printf_filtered("CPU #%d executed %ld instructions.\n",
+  char buffer[20];
+
+  printf_filtered("CPU #%d executed %s instructions.\n",
 		  processor->cpu_nr+1,
-		  processor->number_of_insns);
+		  cpu_add_commas(buffer + sizeof(buffer), processor->number_of_insns));
 }
 
 #endif /* _CPU_C_ */

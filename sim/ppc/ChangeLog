@@ -1,5 +1,12 @@
 Thu Oct 12 11:35:53 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
+	* Makefile.in (psim.o): Now that inlines are turned on, make
+	psim.o depend on all sources.
+
+	* cpu.c (cpu_add_commas): New function to format a long with
+	commas.
+	(cpu_print_info): Use it to print number_of_insns.
+	
 	* ppc-endian.c (SWAP_n): New macros to speed up byte swapping for
 	2, 4, and 8 bytes.
 	(ENDIAN_N): If both target and host byte orders are known, don't
