@@ -1863,7 +1863,7 @@ attach_command (char *args, int from_tty)
 static void
 detach_command (char *args, int from_tty)
 {
-  dont_repeat ();		/* Not for the faint of heart */
+  dont_repeat ();		/* Not for the faint of heart.  */
   target_detach (args, from_tty);
 #if defined(SOLIB_RESTART)
   SOLIB_RESTART ();
@@ -1937,7 +1937,8 @@ No floating-point info available for this processor.\n");
 static void
 float_info (char *args, int from_tty)
 {
-  print_float_info (current_gdbarch, gdb_stdout, deprecated_selected_frame, args);
+  print_float_info (current_gdbarch, gdb_stdout, 
+		    deprecated_selected_frame, args);
 }
 
 static void
