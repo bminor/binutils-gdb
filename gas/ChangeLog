@@ -1,3 +1,8 @@
+2002-11-11  Christopher Faylor  <cgf@redhat.com>
+
+	* config/tc-i386.h (EXTERN_FORCE_RELOC): Define only if
+	STRICT_PE_FORMAT.
+
 2002-11-11  Svein E. Seldal  <Svein.Seldal@solidas.com>
 
 	* config/tc-tic4x.c: Declare as many functions as possible as

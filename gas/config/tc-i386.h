@@ -472,9 +472,11 @@ extern int tc_i386_fix_adjustable PARAMS ((struct fix *));
 
 /* ELF wants external syms kept, as does PE COFF.  */
 #ifdef TE_PE
-#define EXTERN_FORCE_RELOC				\
+# ifdef STRICT_PE_FORMAT
+#   define EXTERN_FORCE_RELOC				\
   (OUTPUT_FLAVOR == bfd_target_elf_flavour		\
    || OUTPUT_FLAVOR == bfd_target_coff_flavour)
+# endif
 #else
 #define EXTERN_FORCE_RELOC				\
   (OUTPUT_FLAVOR == bfd_target_elf_flavour)
