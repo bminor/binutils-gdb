@@ -1,5 +1,5 @@
 /* IA-64 support for 64-bit ELF
-   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -148,6 +148,8 @@ struct elfNN_ia64_link_hash_table
 
   bfd_size_type minplt_entries;	/* number of minplt entries */
   unsigned reltext : 1;		/* are there relocs against readonly sections? */
+  unsigned self_dtpmod_done : 1;/* has self DTPMOD entry been finished? */
+  bfd_vma self_dtpmod_offset;	/* .got offset to self DTPMOD entry */
 
   struct elfNN_ia64_local_hash_table loc_hash_table;
 };
@@ -2416,8 +2418,23 @@ allocate_global_data_got (dyn_i, data)
     }
   if (dyn_i->want_dtpmod)
     {
-      dyn_i->dtpmod_offset = x->ofs;
-      x->ofs += 8;
+      if (elfNN_ia64_dynamic_symbol_p (dyn_i->h, x->info))
+	{
+	  dyn_i->dtpmod_offset = x->ofs;
+	  x->ofs += 8;
+	}
+      else
+	{
+	  struct elfNN_ia64_link_hash_table *ia64_info;
+
+	  ia64_info = elfNN_ia64_hash_table (x->info);
+	  if (ia64_info->self_dtpmod_offset == (bfd_vma) -1)
+	    {
+	      ia64_info->self_dtpmod_offset = x->ofs;
+	      x->ofs += 8;
+	    }
+	  dyn_i->dtpmod_offset = ia64_info->self_dtpmod_offset;
+	}
     }
   if (dyn_i->want_dtprel)
     {
@@ -2687,7 +2704,7 @@ allocate_dynrel_entries (dyn_i, data)
     ia64_info->rel_got_sec->_raw_size += sizeof (ElfNN_External_Rela);
   if ((dynamic_symbol || shared) && dyn_i->want_tprel)
     ia64_info->rel_got_sec->_raw_size += sizeof (ElfNN_External_Rela);
-  if ((dynamic_symbol || shared) && dyn_i->want_dtpmod)
+  if (dynamic_symbol && dyn_i->want_dtpmod)
     ia64_info->rel_got_sec->_raw_size += sizeof (ElfNN_External_Rela);
   if (dynamic_symbol && dyn_i->want_dtprel)
     ia64_info->rel_got_sec->_raw_size += sizeof (ElfNN_External_Rela);
@@ -2753,6 +2770,7 @@ elfNN_ia64_size_dynamic_sections (output_bfd, info)
 
   dynobj = elf_hash_table(info)->dynobj;
   ia64_info = elfNN_ia64_hash_table (info);
+  ia64_info->self_dtpmod_offset = (bfd_vma) -1;
   BFD_ASSERT(dynobj != NULL);
   data.info = info;
 
@@ -2831,6 +2849,8 @@ elfNN_ia64_size_dynamic_sections (output_bfd, info)
       /* Allocate space for the dynamic relocations that turned out to be
 	 required.  */
 
+      if (info->shared && ia64_info->self_dtpmod_offset != (bfd_vma) -1)
+	ia64_info->rel_got_sec->_raw_size += sizeof (ElfNN_External_Rela);
       elfNN_ia64_dyn_sym_traverse (ia64_info, allocate_dynrel_entries, &data);
     }
 
@@ -3264,8 +3284,17 @@ set_got_entry (abfd, info, dyn_i, dynindx, addend, value, dyn_r_type)
       got_offset = dyn_i->tprel_offset;
       break;
     case R_IA64_DTPMOD64LSB:
-      done = dyn_i->dtpmod_done;
-      dyn_i->dtpmod_done = TRUE;
+      if (dyn_i->dtpmod_offset != ia64_info->self_dtpmod_offset)
+	{
+	  done = dyn_i->dtpmod_done;
+	  dyn_i->dtpmod_done = TRUE;
+	}
+      else
+	{
+	  done = ia64_info->self_dtpmod_done;
+	  ia64_info->self_dtpmod_done = TRUE;
+	  dynindx = 0;
+	}
       got_offset = dyn_i->dtpmod_offset;
       break;
     case R_IA64_DTPREL64LSB:
@@ -4224,6 +4253,8 @@ elfNN_ia64_relocate_section (output_bfd, info, input_bfd, input_section,
 	case R_IA64_DTPREL14:
 	case R_IA64_DTPREL22:
 	case R_IA64_DTPREL64I:
+	case R_IA64_DTPREL64LSB:
+	case R_IA64_DTPREL64MSB:
 	  value -= elfNN_ia64_dtprel_base (info);
 	  r = elfNN_ia64_install_value (output_bfd, hit_addr, value, r_type);
 	  break;

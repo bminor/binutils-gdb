@@ -1,3 +1,7 @@
+2003-01-16  Jakub Jelinek  <jakub@redhat.com>
+
+	* config/tc-ia64.c (ia64_cons_fix_new): Handle @dtprel() in data.
+
 2003-01-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".

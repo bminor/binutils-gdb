@@ -1,5 +1,5 @@
 /* tc-ia64.c -- Assembler for the HP/Intel IA-64 architecture.
-   Copyright 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
    This file is part of GAS, the GNU Assembler.
@@ -10072,6 +10072,16 @@ ia64_cons_fix_new (f, where, nbytes, exp)
 	  else
 	    code = BFD_RELOC_IA64_IPLTLSB;
 	  exp->X_op = O_symbol;
+	  break;
+	}
+      else if (exp->X_op == O_pseudo_fixup
+	       && exp->X_op_symbol
+	       && S_GET_VALUE (exp->X_op_symbol) == FUNC_DTP_RELATIVE)
+	{
+	  if (target_big_endian)
+	    code = BFD_RELOC_IA64_DTPREL64MSB;
+	  else
+	    code = BFD_RELOC_IA64_DTPREL64LSB;
 	  break;
 	}
       else

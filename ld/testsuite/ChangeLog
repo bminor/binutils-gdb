@@ -1,3 +1,22 @@
+2003-01-16  Jakub Jelinek  <jakub@redhat.com>
+
+	* ld-ia64/ia64.exp: New.
+	* ld-ia64/tlsbin.dd: New test.
+	* ld-ia64/tlsbinpic.s: New test.
+	* ld-ia64/tlsbin.rd: New test.
+	* ld-ia64/tlsbin.s: New test.
+	* ld-ia64/tlsbin.sd: New test.
+	* ld-ia64/tlsbin.td: New test.
+	* ld-ia64/tlsg.s: New test.
+	* ld-ia64/tlsg.sd: New test.
+	* ld-ia64/tlslib.s: New test.
+	* ld-ia64/tlspic1.s: New test.
+	* ld-ia64/tlspic2.s: New test.
+	* ld-ia64/tlspic.dd: New test.
+	* ld-ia64/tlspic.rd: New test.
+	* ld-ia64/tlspic.sd: New test.
+	* ld-ia64/tlspic.td: New test.
+
 2003-01-02  Richard Sandiford  <rsandifo@redhat.com>
 
 	* ld-mips-elf/mips-elf-flags.exp: Add -mips4 to a -mgp64 test.

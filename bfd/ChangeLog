@@ -1,3 +1,17 @@
+2003-01-16  Jakub Jelinek  <jakub@redhat.com>
+
+	* elfxx-ia64.c (struct elfNN_ia64_link_hash_table): Add
+	self_dtpmod_done and self_dtpmod_offset.
+	(allocate_global_data_got): Only use one got entry for all
+	dtpmod relocs against local symbols.
+	(allocate_dynrel_entries): Only need .rela.got entry for
+	dtpmod against global symbol.
+	(elfNN_ia64_size_dynamic_sections): Initialize self_dtpmod_offset.
+	Reserve space in .rela.got for the local dtpmod entry.
+	(set_got_entry): Initialize the common local dtpmod .got entry.
+	(elfNN_ia64_relocate_section): Handle R_IA_64_DTPREL64LSB
+	and R_IA_64_DTPREL64MSB.
+
 2003-01-16  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c: Include elf/ppc64.h rather than elf/ppc.h.
