@@ -1,5 +1,10 @@
 Thu Apr  2 00:55:56 1992  John Gilmore  (gnu at cygnus.com)
 
+	* buildsym.c (read_struct_type):  Avoid coredump when C++
+	abbreviated type name is messed up.  Reported by Joe Buck.
+	FIXME, we need to determine whether GDB or GCC needs to be
+	smarter to correctly locate this type name.
+
 	* c-exp.y, coffread.c, command.c, command.h, copying.awk,
 	dbxread.c, gdbtypes.c, infcmd.c, inferior.h, infrun.c,
 	m2-exp.y, printcmd.c, remote.c, solib.c, source.c, stack.c,

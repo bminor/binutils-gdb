@@ -2210,7 +2210,7 @@ read_struct_type (pp, type, objfile)
 	      if (name == 0)
 		{
 		  complain (&invalid_cpp_type_complaint, (char *) symnum);
-		  TYPE_NAME (context) = name;
+		  name = "FOO";
 		}
 	      list->field.name = obconcat (&objfile -> type_obstack,
 					   prefix, name, "");
