@@ -1,3 +1,7 @@
+2001-01-15  Chris Demetriou  <cgd@broadcom.com>
+
+	* MAINTAINERS: Added self and Andrew for the mips sim.
+
 2000-10-25  Geoff Keating  <geoffk@cygnus.com>
 
 	* MAINTAINERS: Added self and Andrew for the ppc sim.
