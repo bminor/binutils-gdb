@@ -1,3 +1,7 @@
+2004-08-27  Richard Sandiford  <rsandifo@redhat.com>
+
+	* frv.cpu (cfmovs): Change UNIT attribute to FMALL.
+
 2004-05-15  Nick Clifton  <nickc@redhat.com>
 
 	* iq2000.opc (iq2000_cgen_insn_supported): Make 'insn' argument const.

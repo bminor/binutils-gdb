@@ -1,3 +1,7 @@
+2004-08-27  Richard Sandiford  <rsandifo@redhat.com>
+
+	* frv-desc.[ch], frv-opc.[ch]: Regenerated.
+
 2004-07-30  Michal Ludvig  <mludvig@suse.cz>
 
 	* i386-dis.c (GRPPADLCK): Renamed to GRPPADLCK1

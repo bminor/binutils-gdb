@@ -1,3 +1,8 @@
+2004-08-27  Richard Sandiford  <rsandifo@redhat.com>
+
+	* gas/frv/fr550-pack1.[sd]: New test.
+	* gas/frv/allinsn.exp: Run it.
+
 2004-08-27  Nick Clifton  <nickc@redhat.com>
 
 	* gas/i386/i386.exp: Allow pcrel test for COFF targets as well,
