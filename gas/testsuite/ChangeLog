@@ -1,3 +1,8 @@
+Wed Oct 15 10:40:14 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/hppa/unsorted/unsorted.exp: Update for recent disassembler
+	changes.
+
 Thu Oct  9 18:10:44 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* gas/sparc/set64.[sd]: `set' doesn't take negative arguments.
