@@ -1,3 +1,9 @@
+2003-04-24  Adam Fedor  <fedor@gnu.org>
+
+	* objc-lang.c (FETCH_ARGUMENT, CONVERT_FUNCPTR): Remove 
+	architecture dependant compilation and mark as unimplemented
+	(until they get put in the gdbarch vector).
+
 2003-04-23  David Carlton  <carlton@bactrian.org>
 
 	* cp-support.c (cp_find_first_component): Accept 'operator' in
