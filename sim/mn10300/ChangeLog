@@ -1,3 +1,15 @@
+Mon May  5 18:07:48 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300_sim.h (struct _state): Add space for mdrq register.
+	(REG_MDRQ): Define.
+	* simops.c: Don't abort for trap.  Add support for the extended
+	instructions, "getx", "putx", "mulq", "mulqu", "sat16", "sat24",
+	and "bsch".
+
+Thu Apr 24 00:39:51 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 Fri Apr 18 14:04:04 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (sim_stop): Add stub function.

@@ -60,8 +60,8 @@ struct simops
 
 struct _state
 {
-  reg_t regs[12];		/* registers, d0-d3, a0-a3, sp, pc, mdr, psw,
-				   lir, lar */
+  reg_t regs[15];		/* registers, d0-d3, a0-a3, sp, pc, mdr, psw,
+				   lir, lar, mdrq */
   uint8 *mem;			/* main memory */
   int exception;
 } State;
@@ -85,6 +85,7 @@ extern struct simops Simops[];
 #define REG_PSW 11
 #define REG_LIR 12
 #define REG_LAR 13
+#define REG_MDRQ 14
 
 #define SEXT3(x)	((((x)&0x7)^(~0x3))+0x4)	
 
