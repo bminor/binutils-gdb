@@ -1,4 +1,9 @@
 start-sanitize-d30v
+Sun Nov  9 17:36:20 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* configure.in (d30v-*-*): Configure newlib, libiberty directories
+	for the D30V.
+
 Sat Nov  8 14:42:59 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* configure.in (d30v-*-*): Configure target-libgloss on the D30V.
