@@ -1,9 +1,11 @@
 -*- text -*-
 
-Changes since binutils 2.7
+Changes in binutils 2.8:
 
 * The objdump disassembly format has been changed, and hopefully improved.  Use
-  the new --prefix-addresses option to get the old format.
+  the new --prefix-addresses option to get the old format.  There are also new
+  --disassemble-zeroes and --no-show-raw-insn options which affect disassembler
+  output.
 
 * Formats may now be specified as configuration triplets.  For example,
   objdump -b i386-pc-linux.  The triplets are not passed through config.sub,
@@ -15,7 +17,9 @@ Changes since binutils 2.7
 
 * objdump --dynamic-reloc now works on ELF executables and shared libraries.
 
-Changes since binutils 2.6
+* Added --adjust-vma option to objdump.
+
+Changes in binutils 2.7:
 
 * Added --enable-shared and --enable-commonbfdlib options to configure.
 
@@ -33,7 +37,7 @@ Changes since binutils 2.6
 
 * Added support for Alpha OpenVMS/AXP.
 
-Changes since binutils 2.5
+Changes in binutils 2.6:
 
 * Added -N/--strip-symbol and -K/--keep-symbol arguments to strip and objcopy.
 
@@ -45,7 +49,7 @@ Changes since binutils 2.5
 
 * ar and ranlib now work on AIX.  The tools are now built by default on AIX.
 
-Changes since binutils 2.4
+Changes in binutils 2.5:
 
 * Changed objdump -dr to dump the relocs interspersed with the assembly
   listing, for a more useful listing of relocateable files.
@@ -58,7 +62,7 @@ Changes since binutils 2.4
 * strip and objcopy should now be able to handle dynamically linked ELF
   executables.
 
-Changes since binutils 2.3
+Changes in binutils 2.4:
 
 * Support for HP-PA (by Jeff Law), i386 Mach (by David Mackenzie), RS/6000 and
   PowerPC (except ar and ranlib; by Ian Taylor).
@@ -68,7 +72,7 @@ Changes since binutils 2.3
 * Programs `strip' and `objcopy' will not attempt to write dynamically linked
   ELF output files, since BFD currently can't create them properly.
 
-Changes since binutils 2.2
+Changes in binutils 2.3:
 
 * A new --stabs argument has been added to objdump to dump stabs sections in
   ELF and COFF files.
@@ -78,7 +82,7 @@ Changes since binutils 2.2
 
 * The strings program has been added.
 
-Changes since binutils 2.1
+Changes in binutils 2.2:
 
 * The 'copy' program has been renamed to 'objcopy', for consistency with
   'objdump', and because 'copy' might more plausibly be used as a synonym for
@@ -101,7 +105,7 @@ Changes since binutils 2.1
 
 * There is the beginnings of a test suite.
 
-Changes since binutils 2.0
+Changes in binutils 2.1:
 
 * There is now support for writing ECOFF files, so ld and the other utilities
   should work on Risc/Ultrix and Irix.  Please let us know how well this works.

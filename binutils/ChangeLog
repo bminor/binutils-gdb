@@ -1,3 +1,28 @@
+Sat Mar 15 15:35:56 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* objdump.c (usage): Mention --no-show-raw-insn.
+	(long_options): Add "no-show-raw-insn".
+	(disassemble_bytes): Handle --no-show-raw-insn.
+	* binutils.texi, objdump.1: Document --no-show-raw-insn.
+
+Wed Mar 12 11:42:00 1997  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* rddbg.c (free_saved_stabs): Set the strings to NULL after being
+	freed.
+
+Fri Feb 28 17:18:45 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* bucomm.c (set_default_bfd_target): New function.
+	* bucomm.h (set_default_bfd_target): Declare.
+	* ar.c (main): Call set_default_bfd_target.
+	* nlmconv.c (main): Likewise.
+	* nm.c (main): Likewise.
+	* objcopy.c (main): Likewise.
+	* objdump.c (main): Likewise.
+	* size.c (main): Likewise.
+	* strings.c (main): Likewise.
+	* Makefile.in (bucomm.o): New target, to define TARGET.
+
 Tue Feb 25 21:28:38 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* objdump.c (adjust_section_vma): New static variable.

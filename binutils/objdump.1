@@ -48,7 +48,7 @@ objdump \- display information from object files.
 .RB "[\|" \-R | \-\-dynamic\-reloc "\|]" 
 .RB "[\|" \-s | \-\-full\-contents "\|]"
 .RB "[\|" \-S | \-\-source "\|]"
-.RB "[\|" \-\-show\-raw\-insn "\|]" 
+.RB "[\|" \-\-[no\-]show\-raw\-insn "\|]" 
 .RB "[\|" \-\-stabs "\|]"
 .RB "[\|" \-t | \-\-syms "\|]" 
 .RB "[\|" \-T | \-\-dynamic\-syms "\|]" 
@@ -282,6 +282,13 @@ Display source code intermixed with disassembly, if possible.  Implies
 .B \-\-show\-raw\-insn
 When disassembling instructions, print the instruction in hex as well as
 in symbolic form.  This is the default except when
+.B \-\-prefix\-addresses
+is used.
+
+.TP
+.B \-\-no\-show\-raw\-insn
+When disassembling instructions, do not print the instruction bytes.
+This is the default when
 .B \-\-prefix\-addresses
 is used.
 

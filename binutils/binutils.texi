@@ -1050,7 +1050,7 @@ objdump [ -a | --archive-headers ]
         [ -t | --syms ] [ -T | --dynamic-syms ] [ -x | --all-headers ]
         [ -w | --wide ] [ --start-address=@var{address} ]
         [ --stop-address=@var{address} ]
-        [ --prefix-addresses] [ --show-raw-insn ]
+        [ --prefix-addresses] [ --[no-]show-raw-insn ]
         [ --adjust-vma=@var{offset} ]
         [ --version ]  [ --help ]
         @var{objfile}@dots{}
@@ -1225,6 +1225,10 @@ Display source code intermixed with disassembly, if possible.  Implies
 When disassembling instructions, print the instruction in hex as well as
 in symbolic form.  This is the default except when
 @code{--prefix-addresses} is used.
+
+@item --no-show-raw-insn
+When disassembling instructions, do not print the instruction bytes.
+This is the default when @code{--prefix-addresses} is used.
 
 @item --stabs
 @cindex stab

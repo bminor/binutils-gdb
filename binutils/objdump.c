@@ -68,6 +68,7 @@ static int wide_output;			/* -w */
 static bfd_vma start_address = (bfd_vma) -1; /* --start-address */
 static bfd_vma stop_address = (bfd_vma) -1;  /* --stop-address */
 static int dump_debugging;		/* --debugging */
+static bfd_vma adjust_section_vma = 0;	/* --adjust-vma */
 
 /* Extra info to pass to the disassembler address printing function.  */
 struct objdump_disasm_info {
@@ -170,7 +171,7 @@ Usage: %s [-ahifdDprRtTxsSlw] [-b bfdname] [-m machine] [-j section-name]\n\
        [--syms] [--all-headers] [--dynamic-syms] [--dynamic-reloc]\n\
        [--wide] [--version] [--help] [--private-headers]\n\
        [--start-address=addr] [--stop-address=addr]\n\
-       [--prefix-addresses] [--show-raw-insn]\n\
+       [--prefix-addresses] [--[no-]show-raw-insn] [--adjust-vma=offset]\n\
        [-EB|-EL] [--endian={big|little}] objfile...\n\
 at least one option besides -l (--line-numbers) must be given\n");
   list_supported_targets (program_name, stream);
@@ -184,9 +185,11 @@ at least one option besides -l (--line-numbers) must be given\n");
 #define OPTION_ENDIAN (150)
 #define OPTION_START_ADDRESS (OPTION_ENDIAN + 1)
 #define OPTION_STOP_ADDRESS (OPTION_START_ADDRESS + 1)
+#define OPTION_ADJUST_VMA (OPTION_STOP_ADDRESS + 1)
 
 static struct option long_options[]=
 {
+  {"adjust-vma", required_argument, NULL, OPTION_ADJUST_VMA},
   {"all-headers", no_argument, NULL, 'x'},
   {"private-headers", no_argument, NULL, 'p'},
   {"architecture", required_argument, NULL, 'm'},
@@ -204,6 +207,7 @@ static struct option long_options[]=
   {"help", no_argument, NULL, 'H'},
   {"info", no_argument, NULL, 'i'},
   {"line-numbers", no_argument, NULL, 'l'},
+  {"no-show-raw-insn", no_argument, &show_raw_insn, -1},
   {"prefix-addresses", no_argument, &prefix_addresses, 1},
   {"reloc", no_argument, NULL, 'r'},
   {"section", required_argument, NULL, 'j'},
@@ -1166,7 +1170,9 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
 	      buf[j - i] = '\0';
 	    }
 
-	  if (! prefix_addresses || show_raw_insn)
+	  if (prefix_addresses
+	      ? show_raw_insn > 0
+	      : show_raw_insn >= 0)
 	    {
 	      long j;
 
@@ -1216,7 +1222,9 @@ disassemble_bytes (info, disassemble_fn, insns, data, start, stop, relppp,
 
 	  printf ("%s", buf);
 
-	  if (! prefix_addresses || show_raw_insn)
+	  if (prefix_addresses
+	      ? show_raw_insn > 0
+	      : show_raw_insn >= 0)
 	    {
 	      while (pb < bytes)
 		{
@@ -1481,7 +1489,8 @@ disassemble_data (abfd)
 	  asymbol *sym;
 	  long place;
 
-	  sym = find_symbol_for_address (abfd, section, i, true, &place);
+	  sym = find_symbol_for_address (abfd, section, section->vma + i,
+					 true, &place);
 	  ++place;
 	  while (i < stop)
 	    {
@@ -1489,7 +1498,10 @@ disassemble_data (abfd)
 	      long nextstop;
 	      boolean insns;
 
-	      disasm_info.symbol = sym;
+	      if (sym != NULL && bfd_asymbol_value (sym) <= section->vma + i)
+		disasm_info.symbol = sym;
+	      else
+		disasm_info.symbol = NULL;
 
 	      printf ("\n");
 	      objdump_print_addr_with_sym (abfd, section, sym,
@@ -1498,7 +1510,9 @@ disassemble_data (abfd)
 					   false);
 	      printf (":\n");
 
-	      if (sym == NULL)
+	      if (sym != NULL && bfd_asymbol_value (sym) > section->vma + i)
+		nextsym = sym;
+	      else if (sym == NULL)
 		nextsym = NULL;
 	      else
 		{
@@ -1513,7 +1527,13 @@ disassemble_data (abfd)
 		    nextsym = sorted_syms[place];
 		}
 
-	      if (nextsym == NULL)
+	      if (sym != NULL && bfd_asymbol_value (sym) > section->vma + i)
+		{
+		  nextstop = bfd_asymbol_value (sym) - section->vma;
+		  if (nextstop > stop)
+		    nextstop = stop;
+		}
+	      else if (nextsym == NULL)
 		nextstop = stop;
 	      else
 		{
@@ -1527,6 +1547,7 @@ disassemble_data (abfd)
                  disassembling them.  */
 	      if (disassemble_all
 		  || sym == NULL
+		  || bfd_asymbol_value (sym) > section->vma + i
 		  || ((sym->flags & BSF_OBJECT) == 0
 		      && (strstr (bfd_asymbol_name (sym), "gnu_compiled")
 			  == NULL)
@@ -1810,6 +1831,20 @@ display_bfd (abfd)
 	  free (matching);
 	}
       return;
+    }
+
+  /* If we are adjusting section VMA's, change them all now.  Changing
+     the BFD information is a hack.  However, we must do it, or
+     bfd_find_nearest_line will not do the right thing.  */
+  if (adjust_section_vma != 0)
+    {
+      asection *s;
+
+      for (s = abfd->sections; s != NULL; s = s->next)
+	{
+	  s->vma += adjust_section_vma;
+	  s->lma += adjust_section_vma;
+	}
     }
 
   printf ("\n%s:     file format %s\n", bfd_get_filename (abfd),
@@ -2436,6 +2471,7 @@ main (argc, argv)
   START_PROGRESS (program_name, 0);
 
   bfd_init ();
+  set_default_bfd_target ();
 
   while ((c = getopt_long (argc, argv, "pib:m:VdDlfahrRtTxsSj:wE:",
 			   long_options, (int *) 0))
@@ -2514,6 +2550,9 @@ main (argc, argv)
 	  break;
 	case 'w':
 	  wide_output = 1;
+	  break;
+	case OPTION_ADJUST_VMA:
+	  adjust_section_vma = parse_vma (optarg, "--adjust-vma");
 	  break;
 	case OPTION_START_ADDRESS:
 	  start_address = parse_vma (optarg, "--start-address");
