@@ -605,7 +605,7 @@ load_command (arg, from_tty)
 /* This function runs the add_syms command of our current target.  */
 
 void
-add_syms_command (args, from_tty)
+add_symbol_file_command (args, from_tty)
      char *args;
      int from_tty;
 {
@@ -623,7 +623,7 @@ add_syms_addr_command (arg_string, from_tty)
   CORE_ADDR text_addr;
   
   if (arg_string == 0)
-    error ("add-syms takes a file name and an address");
+    error ("add-symbol-file takes a file name and an address");
 
   arg_string = tilde_expand (arg_string);
   make_cleanup (free, arg_string);
@@ -634,7 +634,7 @@ add_syms_addr_command (arg_string, from_tty)
   *arg_string++ = (char) 0;
 
   if (name[0] == 0)
-    error ("add-syms takes a file name and an address");
+    error ("add-symbol-file takes a file name and an address");
 
   text_addr = parse_and_eval_address (arg_string);
 
@@ -918,7 +918,7 @@ _initialize_symfile ()
 The `file' command can also load symbol tables, as well as setting the file\n\
 to execute.");
 
-  add_com ("add-syms", class_files, add_syms_command,
+  add_com ("add-symbol-file", class_files, add_symbol_file_command,
    "Load the symbols from FILE, assuming FILE has been dynamically loaded.\n\
 The second argument provides the starting address of the file's text.");
 
