@@ -1,5 +1,14 @@
 2001-09-24  Andrew Cagney  <ac131313@redhat.com>
 
+	* maint.c (maintenance_set_cmdlist, maintenance_show_cmdlist): New
+	variables.
+	(maintenance_set_profile_cmd): New function.
+	(maintenance_show_cmd, maintenance_set_cmd): New functions.
+	(_initialize_maint_cmds): Add "maintenance set" and "maintenance
+	show" and, commented out, "maintenance set/show profile" commands.
+
+2001-09-24  Andrew Cagney  <ac131313@redhat.com>
+
 	* findvar.c (read_var_value): For LOC_INDIRECT and LOC_REF_ARG
 	convert the pointer into a CORE_ADDRs.
 

@@ -1,3 +1,8 @@
+2001-09-22  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.base/maint.exp: Add "maintenance set/show" to list of valid
+	responses from "help maint".
+
 2001-09-19  Frank Ch. Eigler  <fche@redhat.com>
 
 	* lib/insight-support.exp (_gdbtk_xvfb_init): Set DISPLAY

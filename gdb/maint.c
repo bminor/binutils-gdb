@@ -471,10 +471,42 @@ maintenance_do_deprecate (char *text, int deprecate)
     }
 }
 
+/* Maintenance set/show framework.  */
+
+static struct cmd_list_element *maintenance_set_cmdlist;
+static struct cmd_list_element *maintenance_show_cmdlist;
+
+static void
+maintenance_set_cmd (char *args, int from_tty)
+{
+  printf_unfiltered ("\"maintenance set\" must be followed by the name of a set command.\n");
+  help_list (maintenance_set_cmdlist, "maintenance set ", -1, gdb_stdout);
+}
+
+static void
+maintenance_show_cmd (char *args, int from_tty)
+{
+  cmd_show_list (maintenance_show_cmdlist, from_tty, "");
+}
+
+#ifdef NOTYET
+/* Profiling support.  */
+
+static int maintenance_profile_p;
+
+static void
+maintenance_set_profile_cmd (char *args, int from_tty, struct cmd_list_element *c)
+{
+  maintenance_profile_p = 0;
+  warning ("\"maintenance set profile\" command not supported.\n");
+}
+#endif
 
 void
 _initialize_maint_cmds (void)
 {
+  struct cmd_list_element *tmpcmd;
+
   add_prefix_cmd ("maintenance", class_maintenance, maintenance_command,
 		  "Commands for use by GDB maintainers.\n\
 Includes commands to dump specific internal GDB structures in\n\
@@ -498,6 +530,20 @@ to test internal functions such as the C++ demangler, etc.",
   add_prefix_cmd ("print", class_maintenance, maintenance_print_command,
 		  "Maintenance command for printing GDB internal state.",
 		  &maintenanceprintlist, "maintenance print ", 0,
+		  &maintenancelist);
+
+  add_prefix_cmd ("set", class_maintenance, maintenance_set_cmd, "\
+Set GDB internal variables used by the GDB maintainer.\n\
+Configure variables internal to GDB that aid in GDB's maintenance",
+		  &maintenance_set_cmdlist, "maintenance set ",
+		  0/*allow-unknown*/,
+		  &maintenancelist);
+
+  add_prefix_cmd ("show", class_maintenance, maintenance_show_cmd, "\
+Show GDB internal variables used by the GDB maintainer.\n\
+Configure variables internal to GDB that aid in GDB's maintenance",
+		  &maintenance_show_cmdlist, "maintenance show ",
+		  0/*allow-unknown*/,
 		  &maintenancelist);
 
 #ifndef _WIN32
@@ -596,4 +642,19 @@ When non-zero, this timeout is used instead of waiting forever for a target to\n
 finish a low-level step or continue operation.  If the specified amount of time\n\
 passes without a response from the target, an error occurs.", &setlist),
 		      &showlist);
+
+
+#ifdef NOTYET
+  /* FIXME: cagney/2001-09-24: A patch introducing a
+     add_set_boolean_cmd() is pending, the below should probably use
+     it.  A patch implementing profiling is pending, this just sets up
+     the framework.  */
+  tmpcmd = add_set_cmd ("profile", class_maintenance,
+			var_boolean, &maintenance_profile_p,
+			"Set internal profiling.\n\
+When enabled GDB is profiled.",
+			&maintenance_set_cmdlist);
+  tmpcmd->function.sfunc = maintenance_set_profile_cmd;
+  add_show_from_set (tmpcmd, &maintenance_show_cmdlist);
+#endif
 }
