@@ -1,5 +1,7 @@
 Thu Oct 28 09:14:42 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* NEWS: Add notes about Alpha and "set remotedebug" for UDI.
+
 	* valops.c (value_assign): Change bitfield code to use a buffer of
 	the correct size, rather than an int.
 

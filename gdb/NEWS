@@ -1,10 +1,16 @@
 		What has changed since GDB-3.5?
 		(Organized release by release)
 
+GDB now works on the DEC Alpha.  GCC 2.4.5 does not produce usable
+debug info, but GDB works fairly well with the DEC compiler and should
+work with a future GCC release.  See the README file for a few
+Alpha-specific notes.
+
 The "set remotedebug" option is now consistent between the mips remote
-target, remote targets using the gdb-specific protocol, and the 88k
-bug monitor.  It is now an integer specifying a debug level (normally
-0 or 1, but 2 means more debugging info for the mips target).
+target, remote targets using the gdb-specific protocol, UDI (AMD's
+debug protocol for the 29k) and the 88k bug monitor.  It is now an
+integer specifying a debug level (normally 0 or 1, but 2 means more
+debugging info for the mips target).
 
 *** Changes in GDB-4.10:
 
