@@ -197,12 +197,12 @@ static char *ep_parse_optional_filename (char **arg);
 static void catch_exec_command_1 (char *arg, int tempflag, int from_tty);
 #endif
 
-static void create_exception_catchpoint
-  (int tempflag, char *cond_string,
-   enum exception_event_kind ex_event, struct symtab_and_line *sal);
+static void create_exception_catchpoint (int tempflag, char *cond_string,
+					 enum exception_event_kind ex_event,
+					 struct symtab_and_line *sal);
 
-static void catch_exception_command_1
-  (enum exception_event_kind ex_event, char *arg, int tempflag, int from_tty);
+static void catch_exception_command_1 (enum exception_event_kind ex_event, 
+				       char *arg, int tempflag, int from_tty);
 
 static void tcatch_command (char *arg, int from_tty);
 
@@ -696,10 +696,9 @@ read_memory_nobpt (CORE_ADDR memaddr, char *myaddr, unsigned len)
       if (bp_addr + bp_size < memaddr + len)
 	{
 	  /* Copy the section of memory after the breakpoint.  */
-	  status = read_memory_nobpt
-	    (bp_addr + bp_size,
-	     myaddr + bp_addr + bp_size - memaddr,
-	     memaddr + len - (bp_addr + bp_size));
+	  status = read_memory_nobpt (bp_addr + bp_size,
+				      myaddr + bp_addr + bp_size - memaddr,
+				      memaddr + len - (bp_addr + bp_size));
 	  if (status != 0)
 	    return status;
 	}
@@ -1613,11 +1612,9 @@ ep_is_catchpoint (struct breakpoint *ep)
     || (ep->type == bp_catch_vfork)
     || (ep->type == bp_catch_exec)
     || (ep->type == bp_catch_catch)
-    || (ep->type == bp_catch_throw)
-
+    || (ep->type == bp_catch_throw);
 
   /* ??rehrauer: Add more kinds here, as are implemented... */
-    ;
 }
 
 int
@@ -1625,8 +1622,7 @@ ep_is_shlib_catchpoint (struct breakpoint *ep)
 {
   return
     (ep->type == bp_catch_load)
-    || (ep->type == bp_catch_unload)
-    ;
+    || (ep->type == bp_catch_unload);
 }
 
 int
@@ -1634,8 +1630,7 @@ ep_is_exception_catchpoint (struct breakpoint *ep)
 {
   return
     (ep->type == bp_catch_catch)
-    || (ep->type == bp_catch_throw)
-    ;
+    || (ep->type == bp_catch_throw);
 }
 
 /* Clear a bpstat so that it says we are not at any breakpoint.
@@ -3338,10 +3333,9 @@ print_one_breakpoint (struct breakpoint *b,
 	  annotate_field (4);
 	  /* FIXME-32x64: need a print_address_numeric with
 	     field width */
-	  printf_filtered
-	    ("%s ",
-	     local_hex_string_custom
-	     ((unsigned long) b->address, "08l"));
+	  printf_filtered ("%s ",
+			   local_hex_string_custom
+			   ((unsigned long) b->address, "08l"));
 	}
       annotate_field (5);
       *last_addr = b->address;
@@ -3681,15 +3675,15 @@ describe_other_breakpoints (CORE_ADDR pc, asection *section)
 	    b->section == section)
 	  {
 	    others--;
-	    printf_filtered
-	      ("%d%s%s ",
-	       b->number,
-	       ((b->enable == disabled || 
-		 b->enable == shlib_disabled || 
-		 b->enable == call_disabled) ? " (disabled)" 
-		: b->enable == permanent ? " (permanent)"
-		: ""),
-	       (others > 1) ? "," : ((others == 1) ? " and" : ""));
+	    printf_filtered ("%d%s%s ",
+			     b->number,
+			     ((b->enable == disabled || 
+			       b->enable == shlib_disabled || 
+			       b->enable == call_disabled) ? " (disabled)" 
+			      : b->enable == permanent ? " (permanent)"
+			      : ""),
+			     (others > 1) ? "," 
+			     : ((others == 1) ? " and" : ""));
 	  }
       printf_filtered ("also set at pc ");
       print_address_numeric (pc, 1, gdb_stdout);

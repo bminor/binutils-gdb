@@ -1,3 +1,12 @@
+2001-02-28  Michael Snyder  <msnyder@mvstp600e.cygnus.com>
+
+	* breakpoint.c (print_one_breakpoint): Formatting clean-up.
+	(read_memory_nobpt): Ditto.
+	(ep_is_catchpoint): Ditto.
+	(ep_is_shlib_catchpoint): Ditto.
+	(ep_is_exception_catchpoint): Ditto.
+	(describe_other_breakpoints): Ditto.
+
 Wed Feb 28 20:37:36 2001  Andrew Cagney  <ac131313@redhat.com>
 
 	* regcache.h (register_valid): Fix comment documenting valid
