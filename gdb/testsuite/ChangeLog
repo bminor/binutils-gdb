@@ -1,3 +1,10 @@
+2003-01-15  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdb.base/default.exp: Adapt "info float" test for recent changes
+	to that command.  Add test for "info vector".
+	* gdb.base/float.exp: New file.  Add test for "info float" that
+	resembles the old test in gdb.base/default.exp.
+
 2003-01-15  David Carlton  <carlton@math.stanford.edu>
 
 	* gdb.base/selftest.exp (do_steps_and_nexts): Allow gdb_sysroot.
