@@ -1,3 +1,8 @@
+Thu Jun 26 12:07:03 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ld-elfvers/vers.exp: Use egrep rather than grep when looking for
+	an alternation.  From Greg Margo <gmargo@dl.com>.
+
 Wed Jun 25 12:47:22 1997  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
 
 	* ld-shared/shared.exp: Add setup_xfail for m68k-linux on tests
