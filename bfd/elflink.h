@@ -6343,53 +6343,49 @@ elf_link_input_bfd (finfo, input_bfd)
 		    }
 		  else
 		    {
-		      isym = finfo->internal_syms + r_symndx;
-		      if (ELF_ST_TYPE (isym->st_info) == STT_SECTION)
+		      asection *sec = finfo->sections[r_symndx];
+
+		      if (sec != NULL
+			  && ! bfd_is_abs_section (sec)
+			  && bfd_is_abs_section (sec->output_section))
 			{
-			  asection *sec = finfo->sections[r_symndx];
-
-			  if (sec != NULL
-			      && ! bfd_is_abs_section (sec)
-			      && bfd_is_abs_section (sec->output_section))
-			    {
 #if BFD_VERSION_DATE < 20031005
-			      if ((o->flags & SEC_DEBUGGING) != 0
-				  || (sec->flags & SEC_LINK_ONCE) != 0)
-				{
+			  if ((o->flags & SEC_DEBUGGING) != 0
+			      || (sec->flags & SEC_LINK_ONCE) != 0)
+			    {
 #if BFD_VERSION_DATE > 20021005
-				  (*finfo->info->callbacks->warning)
-				    (finfo->info,
-				     _("warning: relocation against removed section"),
-				     NULL, input_bfd, o, rel->r_offset);
+			      (*finfo->info->callbacks->warning)
+				(finfo->info,
+				 _("warning: relocation against removed section"),
+				 NULL, input_bfd, o, rel->r_offset);
 #endif
-				  rel->r_info
-				    = ELF_R_INFO (0, ELF_R_TYPE (rel->r_info));
-				  rel->r_addend = 0;
-				}
-			      else
+			      rel->r_info
+				= ELF_R_INFO (0, ELF_R_TYPE (rel->r_info));
+			      rel->r_addend = 0;
+			    }
+			  else
 #endif
-				{
-				  boolean ok;
-				  const char *msg
-				    = _("local symbols in discarded section %s");
-				  bfd_size_type amt
-				    = strlen (sec->name) + strlen (msg) - 1;
-				  char *buf = (char *) bfd_malloc (amt);
+			    {
+			      boolean ok;
+			      const char *msg
+				= _("local symbols in discarded section %s");
+			      bfd_size_type amt
+				= strlen (sec->name) + strlen (msg) - 1;
+			      char *buf = (char *) bfd_malloc (amt);
 
-				  if (buf != NULL)
-				    sprintf (buf, msg, sec->name);
-				  else
-				    buf = (char *) sec->name;
-				  ok = (*finfo->info->callbacks
-					->undefined_symbol) (finfo->info, buf,
-							     input_bfd, o,
-							     rel->r_offset,
-							     true);
-				  if (buf != sec->name)
-				    free (buf);
-				  if (!ok)
-				    return false;
-				}
+			      if (buf != NULL)
+				sprintf (buf, msg, sec->name);
+			      else
+				buf = (char *) sec->name;
+			      ok = (*finfo->info->callbacks
+				    ->undefined_symbol) (finfo->info, buf,
+							 input_bfd, o,
+							 rel->r_offset,
+							 true);
+			      if (buf != sec->name)
+				free (buf);
+			      if (!ok)
+				return false;
 			    }
 			}
 		    }
@@ -6595,7 +6591,7 @@ elf_link_input_bfd (finfo, input_bfd)
 
       /* Write out the modified section contents.  */
       if (bed->elf_backend_write_section
-	  && bed->elf_backend_write_section (output_bfd, o, contents))
+	  && (*bed->elf_backend_write_section) (output_bfd, o, contents))
 	{
 	  /* Section written out.  */
 	}
@@ -7786,9 +7782,9 @@ elf_reloc_symbol_deleted_p (offset, cookie)
       if (rcookie->rel->r_offset != offset)
 	continue;
 
-      if (rcookie->locsyms)
+      if (rcookie->locsyms && r_symndx < rcookie->locsymcount)
 	elf_swap_symbol_in (rcookie->abfd,
-			    ((Elf_External_Sym *)rcookie->locsyms) + r_symndx,
+			    (Elf_External_Sym *) rcookie->locsyms + r_symndx,
 			    &isym);
 
       if (r_symndx >= rcookie->locsymcount
@@ -7953,11 +7949,9 @@ elf_section_ignore_discarded_relocs (sec)
     return true;
   else if ((get_elf_backend_data (sec->owner)
 	    ->elf_backend_ignore_discarded_relocs != NULL)
-	   && (get_elf_backend_data (sec->owner)
-	       ->elf_backend_ignore_discarded_relocs (sec)))
+	   && (*get_elf_backend_data (sec->owner)
+	       ->elf_backend_ignore_discarded_relocs) (sec))
     return true;
   else
     return false;
 }
-
-
