@@ -28,15 +28,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdbcore.h"
 #include "symfile.h"
 
-char *mn10300_generic_register_names[] = REGISTER_NAMES;
+static char *mn10300_generic_register_names[] = 
+{ "d0", "d1", "d2", "d3", "a0", "a1", "a2", "a3",
+  "sp", "pc", "mdr", "psw", "lir", "lar", "", "",
+  "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "fp" };
 
+char **mn10300_register_names = mn10300_generic_register_names;
 /* start-sanitize-am33 */
-char *am33_register_names [] =
+static char *am33_register_names [] =
 { "d0", "d1", "d2", "d3", "a0", "a1", "a2", "a3",
   "sp", "pc", "mdr", "psw", "lir", "lar", "",
   "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
   "ssp", "msp", "usp", "mcrh", "mcrl", "mcvf", "", "", ""};
-int am33_mode;
+static int am33_mode;
 /* end-sanitize-am33 */
 
 static CORE_ADDR mn10300_analyze_prologue PARAMS ((struct frame_info *fi,
@@ -739,6 +744,41 @@ mn10300_init_extra_frame_info (fi)
   mn10300_analyze_prologue (fi, 0);
 }
 
+/* Function: mn10300_virtual_frame_pointer
+   Return the register that the function uses for a frame pointer, 
+   plus any necessary offset to be applied to the register before
+   any frame pointer offsets.  */
+
+void
+mn10300_virtual_frame_pointer (pc, reg, offset)
+     CORE_ADDR pc;
+     long *reg;
+     long *offset;
+{
+  struct frame_info fi;
+
+  /* Set up a dummy frame_info. */
+  fi.next = NULL;
+  fi.prev = NULL;
+  fi.frame = 0;
+  fi.pc = pc;
+
+  /* Analyze the prolog and fill in the extra info.  */
+  mn10300_init_extra_frame_info (&fi);
+
+  /* Results will tell us which type of frame it uses.  */
+  if (fi.status & MY_FRAME_IN_SP)
+    {
+      *reg    = SP_REGNUM;
+      *offset = -(fi.stack_size);
+    }
+  else
+    {
+      *reg    = A3_REGNUM;
+      *offset = 0;
+    }
+}
+  
 /* This can be made more generic later.  */
 static void
 set_machine_hook (filename)
@@ -749,16 +789,15 @@ set_machine_hook (filename)
   if (bfd_get_mach (exec_bfd) == bfd_mach_mn10300
       || bfd_get_mach (exec_bfd) == 0)
     {
-      for (i = 0; i < NUM_REGS; i++)
-	reg_names[i] = mn10300_generic_register_names[i];
+      mn10300_register_names = mn10300_generic_register_names;
     }
 
   /* start-sanitize-am33 */
   am33_mode = 0;
   if (bfd_get_mach (exec_bfd) == bfd_mach_am33)
     {
-      for (i = 0; i < NUM_REGS; i++)
-	reg_names[i] = am33_register_names[i];
+      
+      mn10300_register_names = am33_register_names;
       am33_mode = 1;
     }
   /* end-sanitize-am33 */

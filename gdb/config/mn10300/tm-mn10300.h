@@ -37,11 +37,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define REGISTER_BYTES (NUM_REGS * REGISTER_SIZE)
 
-#define REGISTER_NAMES \
-{ "d0", "d1", "d2", "d3", "a0", "a1", "a2", "a3", \
-  "sp", "pc", "mdr", "psw", "lir", "lar", "", "", \
-  "", "", "", "", "", "", "", "", \
-  "", "", "", "", "", "", "", "fp" }
+extern char **mn10300_register_names;
+#define REGISTER_NAME(i) mn10300_register_names[i]
 
 #define D2_REGNUM 2
 #define D3_REGNUM 3

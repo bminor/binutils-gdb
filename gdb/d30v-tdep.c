@@ -791,10 +791,10 @@ d30v_do_registers_info (regnum, fpregs)
 
   if (regnum != -1)
     {
-      if (reg_names[0] == NULL || reg_names[0][0] == '\000')
+      if (REGISTER_NAME (0) == NULL || REGISTER_NAME (0)[0] == '\000')
 	return;
 
-      printf_filtered ("%s ", reg_names[regnum]);
+      printf_filtered ("%s ", REGISTER_NAME (regnum));
       d30v_print_register (regnum, 0);
 
       printf_filtered ("\n");

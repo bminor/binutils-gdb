@@ -1450,7 +1450,7 @@ fetch_register (regno)
   supply_register(regno, (char *) &To);
 
   if (remote_debug)
-    printf_unfiltered("Fetching register %s = 0x%x\n", reg_names[regno], To);
+    printf_unfiltered("Fetching register %s = 0x%x\n", REGISTER_NAME (regno), To);
 }
 /*****************************************************************************/ 
 /* Store a single register indicated by 'regno'. 
@@ -1471,7 +1471,7 @@ store_register (regno)
   From =  read_register (regno);	/* get data value */
 
   if (remote_debug)
-    printf_unfiltered("Storing register %s = 0x%x\n", reg_names[regno], From);
+    printf_unfiltered("Storing register %s = 0x%x\n", REGISTER_NAME (regno), From);
 
   if (regno == GR1_REGNUM)
     {

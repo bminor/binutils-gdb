@@ -577,7 +577,7 @@ value_of_register (regnum)
 	      REGISTER_RAW_SIZE (regnum));
     else
       fatal ("Register \"%s\" (%d) has conflicting raw (%d) and virtual (%d) size",
-	     reg_names [regnum], regnum,
+	     REGISTER_NAME (regnum), regnum,
 	     REGISTER_RAW_SIZE (regnum), REGISTER_VIRTUAL_SIZE (regnum));
   VALUE_LVAL (reg_val) = lval;
   VALUE_ADDRESS (reg_val) = addr;
@@ -686,7 +686,7 @@ read_register_bytes (inregbyte, myaddr, inlen)
       if (register_valid[regno])
 	continue;
 
-      if (reg_names[regno] == NULL || *reg_names[regno] == '\0')
+      if (REGISTER_NAME (regno) == NULL || *REGISTER_NAME (regno) == '\0')
 	continue;
 
       regstart = REGISTER_BYTE (regno);

@@ -465,7 +465,7 @@ extern void init_extra_frame_info PARAMS ((struct frame_info *));
   { \
     if (fi && fi->proc_desc && fi->proc_desc->pdr.framereg < NUM_REGS) \
       printf_filtered (" frame pointer is at %s+%d\n", \
-                       reg_names[fi->proc_desc->pdr.framereg], \
+                       REGISTER_NAME (fi->proc_desc->pdr.framereg), \
                                  fi->proc_desc->pdr.frameoffset); \
   }
 

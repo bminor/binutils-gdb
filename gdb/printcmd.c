@@ -121,12 +121,13 @@ static int display_number;
 int (*tm_print_insn) PARAMS ((bfd_vma, disassemble_info *));
 disassemble_info tm_print_insn_info;
 
-/* Functions exported for general use: */
+/* Prototypes for exported functions. */
 
 void output_command PARAMS ((char *, int));
 
+void _initialize_printcmd PARAMS ((void));
 
-/* Prototypes for local functions.  */
+/* Prototypes for local functions. */
 
 static void delete_display PARAMS ((int));
 
@@ -1106,7 +1107,7 @@ address_info (exp, from_tty)
       break;
 
     case LOC_REGISTER:
-      printf_filtered ("a variable in register %s", reg_names[val]);
+      printf_filtered ("a variable in register %s", REGISTER_NAME (val));
       break;
 
     case LOC_STATIC:
@@ -1123,11 +1124,11 @@ address_info (exp, from_tty)
       break;
 
     case LOC_REGPARM:
-      printf_filtered ("an argument in register %s", reg_names[val]);
+      printf_filtered ("an argument in register %s", REGISTER_NAME (val));
       break;
 
     case LOC_REGPARM_ADDR:
-      printf_filtered ("address of an argument in register %s", reg_names[val]);
+      printf_filtered ("address of an argument in register %s", REGISTER_NAME (val));
       break;
 
     case LOC_ARG:
@@ -1148,12 +1149,12 @@ address_info (exp, from_tty)
 
     case LOC_BASEREG:
       printf_filtered ("a variable at offset %ld from register %s",
-	      val, reg_names[basereg]);
+	      val, REGISTER_NAME (basereg));
       break;
 
     case LOC_BASEREG_ARG:
       printf_filtered ("an argument at offset %ld from register %s",
-	      val, reg_names[basereg]);
+	      val, REGISTER_NAME (basereg));
       break;
 
     case LOC_TYPEDEF:
@@ -1921,9 +1922,9 @@ printf_command (arg, from_tty)
      char *arg;
      int from_tty;
 {
-  register char *f;
+  register char *f = NULL;
   register char *s = arg;
-  char *string;
+  char *string = NULL;
   value_ptr *val_args;
   char *substrings;
   char *current_substring;

@@ -345,7 +345,7 @@ gdbsim_fetch_register (regno)
       for (regno = 0; regno < NUM_REGS; regno++)
 	gdbsim_fetch_register (regno);
     }
-  else if (reg_names[regno] != NULL && *reg_names[regno] != '\0')
+  else if (REGISTER_NAME (regno) != NULL && *REGISTER_NAME (regno) != '\0')
     {
       char buf[MAX_REGISTER_RAW_SIZE];
       int nr_bytes = sim_fetch_register (gdbsim_desc, regno, buf, REGISTER_RAW_SIZE (regno));
@@ -356,7 +356,7 @@ gdbsim_fetch_register (regno)
 	       && warn_user)
 	{
 	  printf_unfiltered ("Size of register %s (%d) incorrect (%d instead of %d))",
-			     reg_names [regno], regno,
+			     REGISTER_NAME (regno), regno,
 			     nr_bytes, REGISTER_RAW_SIZE (regno));
 	  warn_user = 0;
 	}
@@ -380,7 +380,7 @@ gdbsim_store_register (regno)
       for (regno = 0; regno < NUM_REGS; regno++)
 	gdbsim_store_register (regno);
     }
-  else if (reg_names[regno] != NULL && *reg_names[regno] != '\0')
+  else if (REGISTER_NAME (regno) != NULL && *REGISTER_NAME (regno) != '\0')
     {
       char tmp[MAX_REGISTER_RAW_SIZE];
       int nr_bytes;

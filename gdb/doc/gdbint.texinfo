@@ -556,8 +556,10 @@ code, initialized data, and uninitialized data, respectively.
 The @file{a.out} format is so simple that it doesn't have any reserved
 place for debugging information.  (Hey, the original Unix hackers used
 @file{adb}, which is a machine-language debugger.)  The only debugging
-format for @file{a.out} is stabs, which for this format are encoded as
-symbols with distinctive properties.
+format for @file{a.out} is stabs, which is encoded as a set of normal
+symbols with distinctive attributes.
+
+The basic @file{a.out} reader is in @file{dbxread.c}.
 
 @subsection COFF
 
@@ -570,7 +572,14 @@ was a step forward, the debugging information was woefully limited.  For
 instance, it was not possible to represent code that came from an
 included file.
 
+The COFF reader is in @file{coffread.c}.
+
 @subsection ECOFF
+
+ECOFF is an extended COFF originally introduced for Mips and Alpha
+workstations.
+
+The basic ECOFF reader is in @file{mipsread.c}.
 
 @subsection XCOFF
 
@@ -580,8 +589,8 @@ symbols are dbx-style stabs whose strings are located in the
 @samp{.debug} section (rather than the string table).  For more
 information, see @xref{Top,,,stabs,The Stabs Debugging Format}.
 
-The shared library scheme has a nice clean interface for figuring out
-what shared libraries are in use, but the catch is that everything which
+The shared library scheme has a clean interface for figuring out what
+shared libraries are in use, but the catch is that everything which
 refers to addresses (symbol tables and breakpoints at least) needs to be
 relocated for both shared libraries and the main executable.  At least
 using the standard mechanism this can only be done once the program has
@@ -590,7 +599,10 @@ been run (or the core file has been read).
 @subsection PE
 
 Windows 95 and NT use the PE (Portable Executable) format for their
-executables.  PE is basically COFF with an additional header or two.
+executables.  PE is basically COFF with additional headers.
+
+While BFD includes special PE support, GDB needs only the basic
+COFF reader.
 
 @subsection ELF
 
@@ -598,19 +610,69 @@ The ELF format came with System V Release 4 (SVR4) Unix.  ELF is similar
 to COFF in being organized into a number of sections, but it removes
 many of COFF's limitations.
 
+The basic ELF reader is in @file{elfread.c}.
+
 @subsection SOM
+
+SOM is HP's object file and debug format (not to be confused with IBM's
+SOM, which is a cross-language ABI).
+
+The SOM reader is in @file{hpread.c}.
+
+@subsection Other File Formats
+
+Other file formats that have been supported by GDB include Netware
+Loadable Modules (@file{nlmread.c}.
 
 @section Debugging File Formats
 
+This section describes characteristics of debugging information that
+are independent of the object file format.
+
 @subsection stabs
+
+@code{stabs} started out as special symbols within the @code{a.out}
+format.  Since then, it has been encapsulated into other file
+formats, such as COFF and ELF.
+
+While @file{dbxread.c} does some of the basic stab processing,
+including for encapsulated versions, @file{stabsread.c} does
+the real work.
 
 @subsection COFF
 
+The basic COFF definition includes debugging information.  The level
+of support is minimal and non-extensible, and is not often used.
+
+@subsection Mips debug (Third Eye)
+
+ECOFF includes a definition of a special debug format.
+
+The file @file{mdebugread.c} implements reading for this format.
+
 @subsection DWARF 1
+
+DWARF 1 is a debugging format that was originally designed to be
+used with ELF in SVR4 systems.
+
+@c CHILL_PRODUCER
+@c GCC_PRODUCER
+@c GPLUS_PRODUCER
+@c LCC_PRODUCER
+@c If defined, these are the producer strings in a DWARF 1 file.  All of
+@c these have reasonable defaults already.
+
+The DWARF 1 reader is in @file{dwarfread.c}.
 
 @subsection DWARF 2
 
+DWARF 2 is an improved but incompatible version of DWARF 1.
+
+The DWARF 2 reader is in @file{dwarf2read.c}.
+
 @subsection SOM
+
+Like COFF, the SOM definition includes debugging information.
 
 @section Adding a New Symbol Reader to GDB
 
@@ -1071,7 +1133,7 @@ GDB does not have a magical way to match up with the compiler's idea of
 which registers are which; however, it is critical that they do match up
 accurately.  The only way to make this work is to get accurate
 information about the order that the compiler uses, and to reflect that
-in the @code{REGISTER_NAMES} and related macros.
+in the @code{REGISTER_NAME} and related macros.
 
 GDB can handle big-endian, little-endian, and bi-endian architectures.
 
@@ -1177,13 +1239,6 @@ A C expression that should be nonzero if @var{regno} should not be
 written to the target.  This is often the case for program counters,
 status words, and other special registers.  If this is not defined, GDB
 will assume that all registers may be written.
-
-@item CHILL_PRODUCER
-@item GCC_PRODUCER
-@item GPLUS_PRODUCER
-@item LCC_PRODUCER
-If defined, these are the producer strings in a DWARF 1 file.  All of
-these have reasonable defaults already.
 
 @item DO_DEFERRED_STORES
 @item CLEAR_DEFERRED_STORES
@@ -1360,21 +1415,19 @@ given @var{pc}.  On machines where the address is just a compile time
 constant, the macro expansion will typically just ignore the supplied
 @var{pc}.
 
-@item IN_SOLIB_TRAMPOLINE pc name
+@item IN_SOLIB_CALL_TRAMPOLINE pc name
 Define this to evaluate to nonzero if the program is stopped in the
 trampoline that connects to a shared library.
+
+@item IN_SOLIB_RETURN_TRAMPOLINE pc name
+Define this to evaluate to nonzero if the program is stopped in the
+trampoline that returns from a shared library.
 
 @item IS_TRAPPED_INTERNALVAR (name)
 This is an ugly hook to allow the specification of special actions that
 should occur as a side-effect of setting the value of a variable
 internal to GDB.  Currently only used by the h8500.  Note that this
 could be either a host or target conditional.
-
-@item KERNEL_DEBUGGING
-tm-ultra3.h
-
-@item MIPSEL
-mips-tdep.c
 
 @item NEED_TEXT_START_END
 Define this if GDB should determine the start and end addresses of the
@@ -1447,9 +1500,9 @@ Used in @samp{call_function_by_hand} to create an artificial stack frame.
 The total amount of space needed to store GDB's copy of the machine's
 register state.
 
-@item REGISTER_NAMES
-Define this to expand into an initializer of an array of strings.  Each
-string is the name of a register.
+@item REGISTER_NAME(i)
+Return the name of register @var{i} as a string.  May return @var{NULL}
+or @var{NUL} to indicate that register @var{i} is not valid.
 
 @item REG_STRUCT_HAS_ADDR (gcc_p, type)
 Define this to return 1 if the given type will be passed by pointer

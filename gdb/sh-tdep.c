@@ -38,9 +38,19 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 /* A set of original names, to be used when restoring back to generic
    registers from a specific set.  */
 
-char *sh_generic_reg_names[] = REGISTER_NAMES;
+static char *sh_generic_reg_names[] = {
+  "r0",   "r1",   "r2",   "r3",   "r4",   "r5",   "r6",   "r7",
+  "r8",   "r9",   "r10",  "r11",  "r12",  "r13",  "r14",  "r15",
+  "pc",   "pr",   "gbr",  "vbr",  "mach", "macl", "sr",
+  "fpul", "fpscr",
+  "fr0",  "fr1",  "fr2",  "fr3",  "fr4",  "fr5",  "fr6",  "fr7",
+  "fr8",  "fr9",  "fr10", "fr11", "fr12", "fr13", "fr14", "fr15",
+  "ssr",  "spc",
+  "r0b0", "r1b0", "r2b0", "r3b0", "r4b0", "r5b0", "r6b0", "r7b0",
+  "r0b1", "r1b1", "r2b1", "r3b1", "r4b1", "r5b1", "r6b1", "r7b1",
+};
 
-char *sh_reg_names[] = {
+static char *sh_reg_names[] = {
   "r0",   "r1",   "r2",   "r3",   "r4",   "r5",   "r6",   "r7",
   "r8",   "r9",   "r10",  "r11",  "r12",  "r13",  "r14",  "r15",
   "pc",   "pr",   "gbr",  "vbr",  "mach", "macl", "sr",
@@ -52,7 +62,7 @@ char *sh_reg_names[] = {
   "",     "",     "",     "",     "",     "",     "",     "",
 };
 
-char *sh3_reg_names[] = {
+static char *sh3_reg_names[] = {
   "r0",   "r1",   "r2",   "r3",   "r4",   "r5",   "r6",   "r7",
   "r8",   "r9",   "r10",  "r11",  "r12",  "r13",  "r14",  "r15",
   "pc",   "pr",   "gbr",  "vbr",  "mach", "macl", "sr",
@@ -64,7 +74,7 @@ char *sh3_reg_names[] = {
   "r0b1", "r1b1", "r2b1", "r3b1", "r4b1", "r5b1", "r6b1", "r7b1"
 };
 
-char *sh3e_reg_names[] = {
+static char *sh3e_reg_names[] = {
   "r0",   "r1",   "r2",   "r3",   "r4",   "r5",   "r6",   "r7",
   "r8",   "r9",   "r10",  "r11",  "r12",  "r13",  "r14",  "r15",
   "pc",   "pr",   "gbr",  "vbr",  "mach", "macl", "sr",
@@ -75,6 +85,9 @@ char *sh3e_reg_names[] = {
   "r0b0", "r1b0", "r2b0", "r3b0", "r4b0", "r5b0", "r6b0", "r7b0",
   "r0b1", "r1b1", "r2b1", "r3b1", "r4b1", "r5b1", "r6b1", "r7b1",
 };
+
+char **sh_register_names = sh_generic_reg_names;
+
 
 struct {
   char **regnames;
@@ -598,9 +611,7 @@ sh_target_architecture_hook (ap)
     {
       if (sh_processor_type_table[i].mach == ap->mach)
 	{
-	  for (j = 0; j < NUM_REGS; ++j)
-	    reg_names[j] = sh_processor_type_table[i].regnames[j];
-	  return 1;
+	  sh_register_names = sh_processor_type_table[i].regnames;
 	}
     }
 

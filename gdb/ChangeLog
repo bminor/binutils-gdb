@@ -1,3 +1,19 @@
+Thu Dec 10 07:14:56 1998  Andrew Cagney  <cagney@chook>
+
+	* config/arm/tm-arm.h, arm-tdep.c: Replace REGISTER_NAMES with
+ 	REGISTER_NAME.
+	* mn10300-tdep.c, config/mn10300/tm-mn10300.h: Ditto.
+	* sh-tdep.c, config/sh/tm-sh.h: Ditto.
+
+	* defs.h (REGISTER_NAME): Provide default for old targets.
+	* defs.h, infcmd.c: Rename reg_names to gdb_register_names.
+	
+	* tracepoint.c, target.c, parse.c, infcmd.c, remote-udi.c,
+ 	expprint.c, infcmd.c, printcmd.c, eval.c, stack.c, findvar.c,
+ 	remote-udi.c, config/alpha/tm-alpha.h, remote-sim.c, d30v-tdep.c,
+ 	config/mips/tm-mips.h, config/mips/tm-txvu.h, txvu-tdep.c,
+ 	hppa-tdep.c: Use REGISTER_NAME.
+
 1998-12-08  James E Wilson  <wilson@wilson-pc.cygnus.com>
 
 	* config/i960/mon960.mt (SIM_OBJS, SIM): Define.

@@ -2363,7 +2363,7 @@ scope_info (args, from_tty)
 	    break;
 	  case LOC_REGISTER:
 	    printf_filtered ("a local variable in register $%s",
-			     reg_names [SYMBOL_VALUE (sym)]);
+			     REGISTER_NAME (SYMBOL_VALUE (sym)));
 	    break;
 	  case LOC_ARG:
 	  case LOC_LOCAL_ARG:
@@ -2380,11 +2380,11 @@ scope_info (args, from_tty)
 	    break;
 	  case LOC_REGPARM:
 	    printf_filtered ("an argument in register $%s",
-			     reg_names[SYMBOL_VALUE (sym)]);
+			     REGISTER_NAME (SYMBOL_VALUE (sym)));
 	    break;
 	  case LOC_REGPARM_ADDR:
 	    printf_filtered ("the address of an argument, in register $%s",
-			     reg_names[SYMBOL_VALUE (sym)]);
+			     REGISTER_NAME (SYMBOL_VALUE (sym)));
 	    break;
 	  case LOC_TYPEDEF:
 	    printf_filtered ("a typedef.\n");
@@ -2401,12 +2401,12 @@ scope_info (args, from_tty)
 	  case LOC_BASEREG:
 	    printf_filtered ("a variable at offset %d from register $%s",
 			     SYMBOL_VALUE (sym),
-			     reg_names [SYMBOL_BASEREG (sym)]);
+			     REGISTER_NAME  (SYMBOL_BASEREG (sym)));
 	    break;
 	  case LOC_BASEREG_ARG:
 	    printf_filtered ("an argument at offset %d from register $%s",
 			     SYMBOL_VALUE (sym),
-			     reg_names [SYMBOL_BASEREG (sym)]);
+			     REGISTER_NAME  (SYMBOL_BASEREG (sym)));
 	    break;
 	  case LOC_UNRESOLVED:
 	    msym = lookup_minimal_symbol (SYMBOL_NAME (sym), NULL, NULL);

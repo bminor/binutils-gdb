@@ -1,3 +1,7 @@
+Wed Dec  9 21:13:57 1998  Andrew Cagney  <cagney@chook>
+
+	* gdbint.texinfo (REGISTER_NAME): Replace REGISTER_NAMES.
+
 1998-12-03  J.T. Conklin  <jtc@redbacknetworks.com>
 
 	* remote.texi: Changed wording that implied that the GDB remote

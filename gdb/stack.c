@@ -1,5 +1,5 @@
 /* Print and select stack frames for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1993, 1994, 1995
+   Copyright 1986, 87, 89, 91, 92, 93, 94, 95, 96, 1998
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -34,6 +34,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "demangle.h"
 #include "inferior.h"
 #include "annotate.h"
+#include "symfile.h"
+#include "objfiles.h"
+
+/* Prototypes for exported functions. */
+
+void args_info PARAMS ((char *, int));
+
+void locals_info PARAMS ((char *, int));
+
+void (*selected_frame_level_changed_hook) PARAMS ((int));
+
+void _initialize_stack PARAMS ((void));
+
+/* Prototypes for local functions. */
 
 static void return_command PARAMS ((char *, int));
 
@@ -49,13 +63,9 @@ static void frame_command PARAMS ((char *, int));
 
 static void select_frame_command PARAMS ((char *, int));
 
-static void args_info PARAMS ((char *, int));
-
 static void print_frame_arg_vars PARAMS ((struct frame_info *, GDB_FILE *));
 
 static void catch_info PARAMS ((char *, int));
-
-static void locals_info PARAMS ((char *, int));
 
 static void print_frame_label_vars PARAMS ((struct frame_info *, int,
 					    GDB_FILE *));
@@ -142,7 +152,7 @@ print_stack_frame (fi, level, source)
   args.source = source;
   args.args = 1;
 
-  catch_errors (print_stack_frame_stub, (char *)&args, "", RETURN_MASK_ERROR);
+  catch_errors (print_stack_frame_stub, (char *)&args, "", RETURN_MASK_ALL);
 }
 
 struct print_args_args {
@@ -284,7 +294,7 @@ print_frame_info (fi, level, source, args)
     }
   else
     {
-      register struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (fi->pc);
+      struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (fi->pc);
       if (msymbol != NULL)
 	{
 	  funname = SYMBOL_NAME (msymbol);
@@ -317,7 +327,8 @@ print_frame_info (fi, level, source, args)
 	  struct print_args_args args;
 	  args.fi = fi;
 	  args.func = func;
-	  catch_errors (print_args_stub, (char *)&args, "", RETURN_MASK_ERROR);
+	  catch_errors (print_args_stub, (char *)&args, "", RETURN_MASK_ALL);
+	  QUIT;
 	}
       printf_filtered (")");
       if (sal.symtab && sal.symtab->filename)
@@ -564,7 +575,7 @@ frame_info (addr_exp, from_tty)
       print_address_numeric (fi->frame, 1, gdb_stdout);
       printf_filtered (":\n");
     }
-  printf_filtered (" %s = ", reg_names[PC_REGNUM]);
+  printf_filtered (" %s = ", REGISTER_NAME (PC_REGNUM));
   print_address_numeric (fi->pc, 1, gdb_stdout);
 
   wrap_here ("   ");
@@ -579,7 +590,7 @@ frame_info (addr_exp, from_tty)
     printf_filtered (" (%s:%d)", sal.symtab->filename, sal.line);
   puts_filtered ("; ");
   wrap_here ("    ");
-  printf_filtered ("saved %s ", reg_names[PC_REGNUM]);
+  printf_filtered ("saved %s ", REGISTER_NAME (PC_REGNUM));
   print_address_numeric (FRAME_SAVED_PC (fi), 1, gdb_stdout);
   printf_filtered ("\n");
 
@@ -672,7 +683,7 @@ frame_info (addr_exp, from_tty)
 	else
 	  puts_filtered (",");
 	wrap_here (" ");
-	printf_filtered (" %s at ", reg_names[i]);
+	printf_filtered (" %s at ", REGISTER_NAME (i));
 	print_address_numeric (fsr.regs[i], 1, gdb_stdout);
 	count++;
       }
@@ -1006,7 +1017,7 @@ print_frame_label_vars (fi, this_level_only, stream)
 }
 
 /* ARGSUSED */
-static void
+void
 locals_info (args, from_tty)
      char *args;
      int from_tty;
@@ -1091,7 +1102,7 @@ print_frame_arg_vars (fi, stream)
     }
 }
 
-static void
+void
 args_info (ignore, from_tty)
      char *ignore;
      int from_tty;
@@ -1100,6 +1111,7 @@ args_info (ignore, from_tty)
     error ("No frame selected.");
   print_frame_arg_vars (selected_frame, gdb_stdout);
 }
+
 
 /* Select frame FI, and note that its stack level is LEVEL.
    LEVEL may be -1 if an actual level number is not known.  */
@@ -1113,6 +1125,8 @@ select_frame (fi, level)
 
   selected_frame = fi;
   selected_frame_level = level;
+  if (selected_frame_level_changed_hook)
+    selected_frame_level_changed_hook (level);
 
   /* Ensure that symbols for this frame are read in.  Also, determine the
      source language of this frame, and switch to it if desired.  */

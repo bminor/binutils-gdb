@@ -1102,12 +1102,32 @@ set_reg_offset (regno, offset)
 }
 
 
+/* Test whether the PC points to the return instruction at the
+   end of a function. */
+
+static int 
+mips_about_to_return (pc)
+     CORE_ADDR pc;
+{
+  if (pc_is_mips16 (pc))
+    /* This mips16 case isn't necessarily reliable.  Sometimes the compiler
+       generates a "jr $ra"; other times it generates code to load
+       the return address from the stack to an accessible register (such
+       as $a3), then a "jr" using that register.  This second case
+       is almost impossible to distinguish from an indirect jump
+       used for switch statements, so we don't even try.  */
+    return mips_fetch_instruction (pc) == 0xe820;	/* jr $ra */
+  else
+    return mips_fetch_instruction (pc) == 0x3e00008;	/* jr $ra */
+}
+
+
 /* This fencepost looks highly suspicious to me.  Removing it also
    seems suspicious as it could affect remote debugging across serial
    lines.  */
 
 static CORE_ADDR
-heuristic_proc_start(pc)
+heuristic_proc_start (pc)
     CORE_ADDR pc;
 {
     CORE_ADDR start_pc;
@@ -1181,7 +1201,7 @@ Otherwise, you told GDB there was a function where there isn't one, or\n\
 	    else
 	      seen_adjsp = 0;
 	  }
-	else if (ABOUT_TO_RETURN(start_pc))
+	else if (mips_about_to_return (start_pc))
 	  {
 	    start_pc += 2 * MIPS_INSTLEN; /* skip return, and its delay slot */
 	    break;
@@ -2136,7 +2156,7 @@ mips_print_register (regnum, all)
   /* Get the data in raw format.  */
   if (read_relative_register_raw_bytes (regnum, raw_buffer))
     {
-      printf_filtered ("%s: [Invalid]", reg_names[regnum]);
+      printf_filtered ("%s: [Invalid]", REGISTER_NAME (regnum));
       return;
     }
 
@@ -2156,7 +2176,7 @@ mips_print_register (regnum, all)
 		   gdb_stdout, 0, 1, 0, Val_pretty_default);
 	printf_filtered ("); ");
       }
-  fputs_filtered (reg_names[regnum], gdb_stdout);
+  fputs_filtered (REGISTER_NAME (regnum), gdb_stdout);
 
   /* The problem with printing numeric register names (r26, etc.) is that
      the user can't use them on input.  Probably the best solution is to
@@ -2210,14 +2230,14 @@ do_fp_register_row (regnum)
 
   /* Get the data in raw format.  */
   if (read_relative_register_raw_bytes (regnum, raw_buffer[HI]))
-    error ("can't read register %d (%s)", regnum, reg_names[regnum]);
+    error ("can't read register %d (%s)", regnum, REGISTER_NAME (regnum));
   if (REGISTER_RAW_SIZE(regnum) == 4)
     {
       /* 4-byte registers: we can fit two registers per row. */
       /* Also print every pair of 4-byte regs as an 8-byte double. */
       if (read_relative_register_raw_bytes (regnum + 1, raw_buffer[LO]))
 	error ("can't read register %d (%s)", 
-	       regnum + 1, reg_names[regnum + 1]);
+	       regnum + 1, REGISTER_NAME (regnum + 1));
 
       /* copy the two floats into one double, and unpack both */
       memcpy (dbl_buffer, raw_buffer, sizeof(dbl_buffer));
@@ -2226,9 +2246,9 @@ do_fp_register_row (regnum)
       doub = unpack_double (builtin_type_double, dbl_buffer,     &inv3);
 
       printf_filtered (inv1 ? " %-5s: <invalid float>" : 
-		       " %-5s%-17.9g", reg_names[regnum],     flt1);
+		       " %-5s%-17.9g", REGISTER_NAME (regnum),     flt1);
       printf_filtered (inv2 ? " %-5s: <invalid float>" : 
-		       " %-5s%-17.9g", reg_names[regnum + 1], flt2);
+		       " %-5s%-17.9g", REGISTER_NAME (regnum + 1), flt2);
       printf_filtered (inv3 ? " dbl: <invalid double>\n" : 
 		       " dbl: %-24.17g\n", doub);
       /* may want to do hex display here (future enhancement) */
@@ -2244,7 +2264,7 @@ do_fp_register_row (regnum)
       doub = unpack_double (builtin_type_double, dbl_buffer,    &inv3);
 
       printf_filtered (inv1 ? " %-5s: <invalid float>" : 
-		       " %-5s flt: %-17.9g", reg_names[regnum], flt1);
+		       " %-5s flt: %-17.9g", REGISTER_NAME (regnum), flt1);
       printf_filtered (inv3 ? " dbl: <invalid double>\n" : 
 		       " dbl: %-24.17g\n", doub);
       /* may want to do hex display here (future enhancement) */
@@ -2276,12 +2296,12 @@ do_gp_register_row (regnum)
   printf_filtered ("     ");
   for (col = 0; col < ncols && regnum < numregs; regnum++)
     {
-      if (*reg_names[regnum] == '\0')
+      if (*REGISTER_NAME (regnum) == '\0')
 	continue;	/* unused register */
       if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (regnum)) == TYPE_CODE_FLT)
 	break;	/* end the row: reached FP register */
       printf_filtered (MIPS_REGSIZE == 8 ? "%17s" : "%9s", 
-		       reg_names[regnum]);
+		       REGISTER_NAME (regnum));
       col++;
     }
   printf_filtered (start_regnum < MIPS_NUMREGS ? "\n R%-4d" : "\n      ", 
@@ -2291,13 +2311,13 @@ do_gp_register_row (regnum)
   /* now print the values in hex, 4 or 8 to the row */
   for (col = 0; col < ncols && regnum < numregs; regnum++)
     {
-      if (*reg_names[regnum] == '\0')
+      if (*REGISTER_NAME (regnum) == '\0')
 	continue;	/* unused register */
       if (TYPE_CODE (REGISTER_VIRTUAL_TYPE (regnum)) == TYPE_CODE_FLT)
 	break;	/* end row: reached FP register */
       /* OK: get the data in raw format.  */
       if (read_relative_register_raw_bytes (regnum, raw_buffer))
-	error ("can't read register %d (%s)", regnum, reg_names[regnum]);
+	error ("can't read register %d (%s)", regnum, REGISTER_NAME (regnum));
       /* pad small registers */
       for (byte = 0; byte < (MIPS_REGSIZE - REGISTER_RAW_SIZE (regnum)); byte++)
 	printf_filtered ("  ");
@@ -2326,7 +2346,7 @@ mips_do_registers_info (regnum, fpregs)
 {
   if (regnum != -1)	/* do one specified register */
     {
-      if (*(reg_names[regnum]) == '\0')
+      if (*(REGISTER_NAME (regnum)) == '\0')
 	error ("Not a valid register for the current processor type");
 
       mips_print_register (regnum, 0);
@@ -2825,7 +2845,8 @@ mips_set_processor_type (str)
 	  mips_processor_type = str;
 
 	  for (j = 0; j < NUM_REGS; ++j)
-	    reg_names[j] = mips_processor_type_table[i].regnames[j];
+	    /* FIXME - MIPS should be defining REGISTER_NAME() instead */
+	    gdb_register_names[j] = mips_processor_type_table[i].regnames[j];
 
 	  return 1;
 
@@ -2898,6 +2919,19 @@ gdb_print_insn_mips (memaddr, info)
     return print_insn_little_mips (memaddr, info);
 }
 
+/* Old-style breakpoint macros.
+   The IDT board uses an unusual breakpoint value, and sometimes gets
+   confused when it sees the usual MIPS breakpoint instruction.  */
+
+#define BIG_BREAKPOINT {0, 0x5, 0, 0xd}
+#define LITTLE_BREAKPOINT {0xd, 0, 0x5, 0}
+#define PMON_BIG_BREAKPOINT {0, 0, 0, 0xd}
+#define PMON_LITTLE_BREAKPOINT {0xd, 0, 0, 0}
+#define IDT_BIG_BREAKPOINT {0, 0, 0x0a, 0xd}
+#define IDT_LITTLE_BREAKPOINT {0xd, 0x0a, 0, 0}
+#define MIPS16_BIG_BREAKPOINT {0xe8, 0xa5}
+#define MIPS16_LITTLE_BREAKPOINT {0xa5, 0xe8}
+
 /* This function implements the BREAKPOINT_FROM_PC macro.  It uses the program
    counter value to determine whether a 16- or 32-bit breakpoint should be
    used.  It returns a pointer to a string of bytes that encode a breakpoint
@@ -2964,26 +2998,6 @@ unsigned char *mips_breakpoint_from_pc (pcptr, lenptr)
 	}
     }
 }
-
-/* Test whether the PC points to the return instruction at the
-   end of a function.  This implements the ABOUT_TO_RETURN macro.  */
-
-int 
-mips_about_to_return (pc)
-     CORE_ADDR pc;
-{
-  if (pc_is_mips16 (pc))
-    /* This mips16 case isn't necessarily reliable.  Sometimes the compiler
-       generates a "jr $ra"; other times it generates code to load
-       the return address from the stack to an accessible register (such
-       as $a3), then a "jr" using that register.  This second case
-       is almost impossible to distinguish from an indirect jump
-       used for switch statements, so we don't even try.  */
-    return mips_fetch_instruction (pc) == 0xe820;	/* jr $ra */
-  else
-    return mips_fetch_instruction (pc) == 0x3e00008;	/* jr $ra */
-}
-
 
 /* If PC is in a mips16 call or return stub, return the address of the target
    PC, which is either the callee or the caller.  There are several

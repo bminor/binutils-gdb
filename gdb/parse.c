@@ -129,8 +129,8 @@ target_map_name_to_register (str, len)
 
   /* Search architectural register name space. */
   for (i = 0; i < NUM_REGS; i++)
-    if (reg_names[i] && len == strlen (reg_names[i])
-	&& STREQN (str, reg_names[i], len))
+    if (REGISTER_NAME (i) && len == strlen (REGISTER_NAME (i))
+	&& STREQN (str, REGISTER_NAME (i), len))
       {
 	return i;
       }

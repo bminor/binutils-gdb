@@ -1839,7 +1839,7 @@ pa_do_registers_info (regnum, fpregs)
   if (regnum == -1)
     pa_print_registers (raw_regs, regnum, fpregs);
   else if (regnum < FP0_REGNUM)
-    printf_unfiltered ("%s %x\n", reg_names[regnum], *(long *)(raw_regs +
+    printf_unfiltered ("%s %x\n", REGISTER_NAME (regnum), *(long *)(raw_regs +
 						    REGISTER_BYTE (regnum)));
   else
     pa_print_fp_reg (regnum);
@@ -1860,7 +1860,7 @@ pa_print_registers (raw_regs, regnum, fpregs)
 	{
 	  val =
 	    extract_signed_integer (raw_regs + REGISTER_BYTE (i+(j*18)), 4);
-	  printf_unfiltered ("%8.8s: %8x  ", reg_names[i+(j*18)], val);
+	  printf_unfiltered ("%8.8s: %8x  ", REGISTER_NAME (i+(j*18)), val);
 	}
       printf_unfiltered ("\n");
     }
@@ -1883,8 +1883,8 @@ pa_print_fp_reg (i)
   /* Put it in the buffer.  No conversions are ever necessary.  */
   memcpy (virtual_buffer, raw_buffer, REGISTER_RAW_SIZE (i));
 
-  fputs_filtered (reg_names[i], gdb_stdout);
-  print_spaces_filtered (8 - strlen (reg_names[i]), gdb_stdout);
+  fputs_filtered (REGISTER_NAME (i), gdb_stdout);
+  print_spaces_filtered (8 - strlen (REGISTER_NAME (i)), gdb_stdout);
   fputs_filtered ("(single precision)     ", gdb_stdout);
 
   val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, gdb_stdout, 0,
@@ -1903,8 +1903,8 @@ pa_print_fp_reg (i)
 	      REGISTER_RAW_SIZE (i));
 
       /* Dump it as a double.  */
-      fputs_filtered (reg_names[i], gdb_stdout);
-      print_spaces_filtered (8 - strlen (reg_names[i]), gdb_stdout);
+      fputs_filtered (REGISTER_NAME (i), gdb_stdout);
+      print_spaces_filtered (8 - strlen (REGISTER_NAME (i)), gdb_stdout);
       fputs_filtered ("(double precision)     ", gdb_stdout);
 
       val_print (builtin_type_double, virtual_buffer, 0, gdb_stdout, 0,

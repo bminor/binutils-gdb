@@ -77,7 +77,7 @@ alpha_saved_pc_after_call PARAMS ((struct frame_info *));
 
 /* Stack grows downward.  */
 
-#define INNER_THAN <
+#define INNER_THAN(lhs,rhs) ((lhs) < (rhs))
 
 #define BREAKPOINT {0x80, 0, 0, 0} /* call_pal bpt */
 
@@ -409,7 +409,7 @@ init_extra_frame_info PARAMS ((struct frame_info *));
   { \
     if (fi && fi->proc_desc && fi->proc_desc->pdr.framereg < NUM_REGS) \
       printf_filtered (" frame pointer is at %s+%d\n", \
-                       reg_names[fi->proc_desc->pdr.framereg], \
+                       REGISTER_NAME (fi->proc_desc->pdr.framereg), \
                                  fi->proc_desc->pdr.frameoffset); \
   }
 
