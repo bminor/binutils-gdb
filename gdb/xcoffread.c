@@ -116,6 +116,9 @@ static char *debugsec;
 /* pointer to the a.out symbol table */
 static char *symtbl;
 
+/* Number of symbols in symtbl.  */
+static int symtbl_num_syms;
+
 /* initial symbol-table-debug-string vector length */
 
 #define	INITIAL_STABVECTOR_LENGTH	40
@@ -199,10 +202,10 @@ static void
 find_linenos PARAMS ((bfd *, sec_ptr, PTR));
 
 static int
-read_symbol_lineno PARAMS ((char *, int));
+read_symbol_lineno PARAMS ((int));
 
 static int
-read_symbol_nvalue PARAMS ((char *, int));
+read_symbol_nvalue PARAMS ((int));
 
 static struct symbol *
 process_xcoff_symbol PARAMS ((struct coff_symbol *, struct objfile *));
@@ -709,13 +712,13 @@ enter_line_range (subfile, beginoffset, endoffset, startaddr, endaddr, firstLine
 
     /* find the address this line represents */
     addr = P_LINENO(pp) ? 
-      P_LINEADDR(pp) : read_symbol_nvalue (symtbl, P_LINESYM(pp)); 
+      P_LINEADDR(pp) : read_symbol_nvalue (P_LINESYM(pp)); 
 
     if (addr < startaddr || (endaddr && addr > endaddr))
       return;
 
     if (P_LINENO(pp) == 0) {
-      *firstLine = read_symbol_lineno (symtbl, P_LINESYM(pp));
+      *firstLine = read_symbol_lineno (P_LINESYM(pp));
       record_line (subfile, 0, addr);
       --(*firstLine);
     }
@@ -1071,6 +1074,7 @@ read_xcoff_symtab (objfile, nsyms)
 
   size = coff_data (abfd)->local_symesz * nsyms;
   symtbl = xmalloc (size);
+  symtbl_num_syms = nsyms;
 
   val = bfd_read (symtbl, size, 1, abfd);
   if (val != size)
@@ -1542,7 +1546,7 @@ function_entry_point:
       break;
 
     case C_BSTAT	:		/* begin static block	*/
-      static_block_base = read_symbol_nvalue (symtbl, cs->c_value);
+      static_block_base = read_symbol_nvalue (cs->c_value);
       break;
 
     case C_ESTAT	:		/* end of static block	*/
@@ -1940,34 +1944,51 @@ process_xcoff_symbol (cs, objfile)
   return sym2;
 }
 
-/* FIXME: Somewhere in here we should check to see that symno is a
-   valid number, so that we can print an error message on corrupt input
-   files rather than dumping core.  */
+/* Get value corresponding to symbol number symno in symtbl.  */
+
 static int
-read_symbol_nvalue (symtable, symno)
-     char *symtable;
+read_symbol_nvalue (symno)
      int symno;
 {
   struct internal_syment symbol[1];
 
-  bfd_coff_swap_sym_in (symfile_bfd, symtable + (symno*local_symesz), symbol);
+  if (symno < 0 || symno >= symtbl_num_syms)
+    {
+      struct complaint msg =
+	{"Invalid symbol offset", 0, 0};
+      complain (&msg);
+      return 0;
+    }
+  bfd_coff_swap_sym_in (symfile_bfd, symtbl + (symno*local_symesz), symbol);
   return symbol->n_value;  
 }
 
 
+/* Find the address of the function corresponding to symno, where
+   symno is the symbol pointed to by the linetable.  */
+
 static int
-read_symbol_lineno (symtable, symno)
-  char *symtable;
+read_symbol_lineno (symno)
   int symno;
 {
   struct internal_syment symbol[1];
   union internal_auxent main_aux[1];
 
-  int ii;
+  /* Note that just searching for a short distance (e.g. 50 symbols)
+     is not enough, at least in the following case.
 
-  for (ii = 0; ii < 50; ii++) {
+     .extern foo
+     [many .stabx entries]
+     [a few functions, referring to foo]
+     .globl foo
+     .bf
+
+     What happens here is that the assembler moves the .stabx entries
+     to right before the ".bf" for foo, but the symbol for "foo" is before
+     all the stabx entries.  See PR gdb/2222.  */
+  while (symno < symtbl_num_syms) {
     bfd_coff_swap_sym_in (symfile_bfd,
-			     symtable + (symno*local_symesz), symbol);
+			  symtbl + (symno*local_symesz), symbol);
     if (symbol->n_sclass == C_FCN && STREQ (symbol->n_name, ".bf"))
       goto gotit;
     symno += symbol->n_numaux+1;
@@ -1979,7 +2000,7 @@ read_symbol_lineno (symtable, symno)
 gotit:
   /* take aux entry and return its lineno */
   symno++;
-  bfd_coff_swap_aux_in (symfile_bfd, symtable+(symno*local_symesz),
+  bfd_coff_swap_aux_in (symfile_bfd, symtbl+(symno*local_symesz),
 			symbol->n_type, symbol->n_sclass, main_aux);
 
   return main_aux->x_sym.x_misc.x_lnsz.x_lnno;
