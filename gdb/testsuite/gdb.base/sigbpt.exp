@@ -29,6 +29,11 @@
 # instruction.  Since the kernel problems can be "fixed" using
 # software single-step this is KFAILed rather than XFAILed.
 
+if [target_info exists gdb,nosignals] {
+    verbose "Skipping signals.exp because of nosignals."
+    continue
+}
+
 if $tracelevel {
     strace $tracelevel
 }

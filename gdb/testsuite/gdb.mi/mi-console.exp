@@ -64,23 +64,25 @@ gdb_expect {
     }
 }
 
-gdb_expect {
-    -re "@\"H\"\r\n.*@\"e\"\r\n.*@\"l\"\r\n.*@\"l\"\r\n.*@\"o\"\r\n.*@\" \"\r\n.*@\"\\\\\\\\\"\r\n.*@\"\\\\\"\"\r\n.*@\"!\"\r\n.*@\"\\\\r\"\r\n.*@\"\\\\n\"\r\n" {
-	pass "Hello message"
-    }
-    -re "Hello" {
+if { ![target_info exists gdb,noinferiorio]}  {
+    gdb_expect {
+	-re "@\"H\"\r\n.*@\"e\"\r\n.*@\"l\"\r\n.*@\"l\"\r\n.*@\"o\"\r\n.*@\" \"\r\n.*@\"\\\\\\\\\"\r\n.*@\"\\\\\"\"\r\n.*@\"!\"\r\n.*@\"\\\\r\"\r\n.*@\"\\\\n\"\r\n" {
+	    pass "Hello message"
+	}
+	-re "Hello" {
 
-	# Probably a native system where GDB doesn't have direct
-	# control over the inferior console.
-	# For this to work, GDB would need to run the inferior process
-	# under a PTY and then use the even-loops ability to wait on
-	# multiple event sources to channel the output back through the
-	# MI.
+	    # Probably a native system where GDB doesn't have direct #
+	    # control over the inferior console.  # For this to work,
+	    # GDB would need to run the inferior process # under a PTY
+	    # and then use the even-loops ability to wait on #
+	    # multiple event sources to channel the output back
+	    # through the # MI.
 
-	kfail "gdb/623" "Hello message"
-    }
-    timeout {
-	fail "Hello message (timeout)"
+	    kfail "gdb/623" "Hello message"
+	}
+	timeout {
+	    fail "Hello message (timeout)"
+	}
     }
 }
     

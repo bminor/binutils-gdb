@@ -1,3 +1,17 @@
+2005-03-08  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* gdb.base/sigbpt.exp: Disable if gdb,nosignals.
+	* gdb.base/signull.exp: Disable if gdb,nosignals.
+	* gdb.cp/bs15503.exp: Disable if skip_cplus_tests
+	* gdb.cp/exception.exp: Disable if skip_cplus_tests.
+	* gdb.mi/mi-console.exp: Disable hello test if gdb,noinferiorio.
+	* gdb.mi/mi2-console.exp: Likewise.
+	* gdb.trace/collection.exp (run_trace_experiment): Consume the
+	continue output at start.
+	(gdb_collect_locals_test): Robustify regexp.
+	* gdb.trace/passc-dyn.exp: Fix comment typo.
+	* gdb.trace/tfind.exp: Don't enable optimization. Remove stray ']'.
+
 2005-03-08  Corinna Vinschen  <vinschen@redhat.com>
 
 	* gdb.asm/asm-source.exp: Add iq2000 case.

@@ -22,6 +22,8 @@ if $tracelevel {
     strace $tracelevel
 }
 
+if { [skip_cplus_tests] } { continue }
+
 set testfile "bs15503"
 set srcfile ${testfile}.cc
 set binfile ${objdir}/${subdir}/${testfile}

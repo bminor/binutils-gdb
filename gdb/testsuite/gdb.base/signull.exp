@@ -28,6 +28,11 @@
 
 # This also tests backtrace/gdb1476.
 
+if [target_info exists gdb,nosignals] {
+    verbose "Skipping signals.exp because of nosignals."
+    continue
+}
+
 if $tracelevel {
     strace $tracelevel
 }

@@ -79,7 +79,18 @@ proc test_register { reg test_id } {
 }
 
 proc run_trace_experiment { msg test_func } {
-    gdb_run_cmd 
+    global gdb_prompt
+    gdb_run_cmd
+    gdb_expect {
+	-re ".*Breakpoint \[0-9\]+, begin .*$gdb_prompt $" { 
+	}
+	-re ".*$gdb_prompt $" { 
+	    fail "collect $msg: advance to go"
+	}
+	timeout { 
+	    fail "collect $msg: advance to go (timeout)"
+	}
+    }
     gdb_test "tstart" \
 	    "\[\r\n\]+" \
 	    "collect $msg: start trace experiment"
@@ -280,7 +291,7 @@ proc gdb_collect_locals_test { func mylocs msg } {
     run_trace_experiment $msg $func
 
     gdb_test "print locc" \
-	    "\\$\[0-9\]+ = 11 '.013'$cr" \
+	"\\$\[0-9\]+ = 11 '.\[a-z0-7\]+'$cr" \
 	    "collect $msg: collected local char"
     gdb_test "print loci" \
 	    "\\$\[0-9\]+ = 12$cr" \

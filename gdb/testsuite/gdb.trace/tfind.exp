@@ -54,12 +54,8 @@ if [istarget "m68k-*-elf"] then {
     set srcfile ${testfile}.c
     set binfile $objdir/$subdir/$testfile
 
-    # Why does this test require '-O1' level optimization?  (In
-    # general, the optimization level should be left under the control
-    # of the test framework (target_list and so on), so if we don't
-    # have to override it in individual tests like this, we shouldn't.)
     if { [gdb_compile "$srcdir/$subdir/$srcfile" "$binfile" \
-	    executable {debug additional_flags=-w optimize=-O1}] != "" } {
+	    executable {debug additional_flags=-w}] != "" } {
 	gdb_suppress_entire_file "Testcase compile failed, so all tests in this file will automatically fail."
     }
     gdb_load $binfile
@@ -303,7 +299,7 @@ gdb_tfind_test "8.13: tracepoint <no arg>" "tracepoint" \
 	"\$tracepoint" "$tdp1";
 gdb_test "printf \"x \%d x\\n\", \$trace_frame == \$save_frame" \
 	"x 0 x" \
-	"8.13: tracepoint <no arg>, tracepoint number unchanged"]
+	"8.13: tracepoint <no arg>, tracepoint number unchanged"
 
 # 1.12 set tracepoint in prologue
 #
