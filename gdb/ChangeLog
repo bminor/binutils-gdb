@@ -1,3 +1,9 @@
+2003-10-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* hppa-tdep.c (hppa_in_solib_call_trampoline): Don't refer directly to
+	_cooked_size and vma;  Use bfd_section_size and bfd_get_section_vma.
+	Correct test for pc within section.
+
 2003-10-11  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdbarch.sh: Remove trailing whitepsace from comments.

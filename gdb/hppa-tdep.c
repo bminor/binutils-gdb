@@ -3095,8 +3095,9 @@ hppa_in_solib_call_trampoline (CORE_ADDR pc, char *name)
 
     sec = SYMBOL_BFD_SECTION (minsym);
 
-    if (sec->vma <= pc
-	&& sec->vma + sec->_cooked_size < pc)
+    if (bfd_get_section_vma (sec->owner, sec) <= pc
+	&& pc < (bfd_get_section_vma (sec->owner, sec)
+		 + bfd_section_size (sec->owner, sec)))
       return 0;
 
     /* We might be in a stub.  Peek at the instructions.  Stubs are 3
