@@ -1,3 +1,9 @@
+Thu Jan 30 11:41:45 1992  Stu Grossman  (grossman at cygnus.com)
+
+	* host-aout.c:  Change TARGETNAME to "a.out" to be compatible with
+	gdb.  config/mt-hp300bsd:  Change DEFAULT_VECTOR to host_aout_vec
+	to prevent undefined symbol.
+
 Thu Jan 30 07:26:53 1992  Steve Chamberlain  (sac at rtl.cygnus.com)
 
 	Various lints found on PersSony
