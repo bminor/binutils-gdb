@@ -1,3 +1,7 @@
+Wed Aug 14 17:00:04 1996  Richard Henderson  <rth@tamu.edu>
+
+	* alpha-opc.c (EV4EXTHWINDEX): Field width should be 8 not 5.
+
 start-sanitize-d10v
 Mon Aug 12 14:30:37 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
