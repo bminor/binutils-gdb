@@ -689,6 +689,7 @@
 	sym check if we find one.
 	* elf64-s390.c (elf_s390_size_dynamic_sections): Likewise.
 	* elf32-hppa.c (elf32_hppa_size_dynamic_sections): Likewise.
+	* elf32-i386.c (elf_i386_size_dynamic_sections): Likewise.
 	* elf32-s390.c (elf_s390_size_dynamic_sections): Likewise.
 	(elf_s390_grok_prstatus): Add missing prototype.
 
