@@ -1,3 +1,7 @@
+Wed Apr  1 13:11:23 1998  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* binutils.texi: Use @itemx for a secondary item in a table.
+
 Tue Mar 31 18:44:13 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* dep-in.sed: Add rule to remove @OBJDIR@.

@@ -1318,7 +1318,7 @@ relocation entries.  Using @samp{-x} is equivalent to specifying all of
 @samp{-a -f -h -r -t}.
 
 @item -w
-@item --wide
+@itemx --wide
 @cindex wide output, printing
 Format some lines for output devices that have more than 80 columns.
 @end table
@@ -1488,8 +1488,8 @@ Print the name of the file before each string.
 @item --help
 Print a summary of the program usage on the standard output and exit.
 
-@itemx -@var{min-len}
-@item -n @var{min-len}
+@item -@var{min-len}
+@itemx -n @var{min-len}
 @itemx --bytes=@var{min-len}
 Print sequences of characters that are at least @var{min-len} characters
 long, instead of the default 4.
