@@ -2059,8 +2059,7 @@ packet_command (args, from_tty)
 {
   char buf[PBUFSIZ];
 
-  if (!current_target.to_shortname ||
-      strcmp (current_target.to_shortname, "remote") != 0)
+  if (! remote_desc)
     error ("command can only be used with remote target");
 
   if (! args)
@@ -2082,7 +2081,7 @@ init_remote_ops ()
 {
   remote_ops.to_shortname = "remote";		
   remote_ops.to_longname = "Remote serial target in gdb-specific protocol";
-  remote_ops.to_doc = "Use a remote computer via a serial line; using a gdb-specific protocol.\n\
+  remote_ops.to_doc = "Use a remote computer via a serial line, using a gdb-specific protocol.\n\
 Specify the serial device it is connected to (e.g. /dev/ttya).";  
   remote_ops.to_open = remote_open;		
   remote_ops.to_close = remote_close;		
@@ -2116,7 +2115,7 @@ init_extended_remote_ops ()
 
   extended_remote_ops.to_shortname = "extended-remote";	
   extended_remote_ops.to_longname = "Extended remote serial target in gdb-specific protocol";
-  extended_remote_ops.to_doc = "Use a remote computer via a serial line; using a gdb-specific protocol.\n\
+  extended_remote_ops.to_doc = "Use a remote computer via a serial line, using a gdb-specific protocol.\n\
 Specify the serial device it is connected to (e.g. /dev/ttya).",
   extended_remote_ops.to_open = extended_remote_open;	
   extended_remote_ops.to_create_inferior = extended_remote_create_inferior;
