@@ -50,6 +50,9 @@ case "${host}" in
   mips-*-bsd*)
     gas_host=mipsbsd
     ;;
+  mips-sgi-irix*)
+    gas_host=irix
+    ;;
   i[34]86-ibm-aix*)
     gas_host=i386aix
     ;;
@@ -258,7 +261,11 @@ links="host.h targ-cpu.c targ-cpu.h targ-env.h obj-format.h obj-format.c atof-ta
 
 case ${bfd_gas} in
   yes)
-    echo BFDDEF=-DBFD_ASSEMBLER >> Makefile
+    rm -f Makefile.tem
+    mv Makefile Makefile.tem
+    echo BFDDEF=-DBFD_ASSEMBLER > Makefile
+    cat Makefile.tem >> Makefile
+    rm -f Makefile.tem
     need_bfd=yes
     ;;
   *)
@@ -267,7 +274,11 @@ esac
 
 case ${need_bfd} in
   yes)
-    echo BFDLIB=../bfd/libbfd.a >> Makefile
+    rm -f Makefile.tem
+    mv Makefile Makefile.tem
+    echo BFDLIB=../bfd/libbfd.a > Makefile
+    cat Makefile.tem >> Makefile
+    rm -f Makefile.tem
     ;;
   *)
     ;;

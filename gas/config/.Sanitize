@@ -44,6 +44,7 @@ ho-go32.h
 ho-hpux.h
 ho-i386.h
 ho-i386aix.h
+ho-irix.h
 ho-mipsbsd.h
 ho-rs6000.h
 ho-sun3.h
