@@ -1,3 +1,8 @@
+Wed Jan 21 22:26:46 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ldlang.c (lang_memory_default): Correct parenthisization of
+	expression.
+
 Wed Jan 21 21:20:32 1998  Manfred Hollstein  <manfred@s-direktnet.de>
 
 	* emultempl/sunos.em: Don't include sys/types.h and sys/stat.h
