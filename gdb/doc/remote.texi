@@ -445,9 +445,8 @@ to make a quick decision about single-stepping or conditional breakpoints.
 This eliminates the need to fetch the entire register set for each instruction
 being stepped through.
 
-The @value{GDBN} remote serial protocol now implements a write-through 
-cache for registers.  @value{GDBN} only re-reads the registers if the 
-target has run.
+@value{GDBN} now implements a write-through cache for registers and only
+re-reads the registers if the target has run.
 @end table
 
 @kindex set remotedebug

@@ -1,3 +1,8 @@
+1998-12-03  J.T. Conklin  <jtc@redbacknetworks.com>
+
+	* remote.texi: Changed wording that implied that the GDB remote
+	protocol caches register values instead of GDB itself.
+
 Tue Dec  1 17:45:43 1998  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* gdbint.texinfo: Add some info about symbol readers.
