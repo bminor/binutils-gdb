@@ -290,6 +290,8 @@ CONFIG_H =
 gas: $(OBJS) $(LIBDEPS)
 	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o gas $(OBJS) $(LIBS)
 
+objdump:
+
 all.internal: native
 # This is what is made with the host's compiler if making a cross assembler.
 native: config.status gas
@@ -511,11 +513,11 @@ bootstrap2: force
 	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage1/ $(CFLAGS)" libdir=$(libdir) ALLOCA= gas
 	$(MAKE) stage2
 	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage2/ $(CFLAGS)" libdir=$(libdir) ALLOCA= gas
-	for i in *.o; do cmp $$i stage2/$$i; done
+	$(MAKE) stage-last
 
 bootstrap3: force
 	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage2/ $(CFLAGS)" libdir=$(libdir) ALLOCA= gas
-	for i in *.o; do cmp $$i stage2/$$i; done
+	$(MAKE) comparison
 
 # Copy the object files from a particular stage into a subdirectory.
 stage1: force
@@ -542,6 +544,9 @@ stage4: force
 	-rm -f stage4/gnulib
 	-cp gnulib stage4
 	-if $(RANLIB_TEST) ; then $(RANLIB) stage4/gnulib; else true; fi
+
+stage-last:
+	for i in *.o; do cmp $$i stage2/$$i; done
 
 # Copy just the executable files from a particular stage into a subdirectory,
 # and delete the object files.  Use this if you're just verifying a version
@@ -578,7 +583,17 @@ risky-stage4: force
 .PHONY: stage1 stage2 stage3 stage4 clean realclean TAGS bootstrap
 .PHONY: risky-stage1 risky-stage2 risky-stage3 risky-stage4
 
+comparison: clean
+	$(MAKE) "CC=/usr/local/bin/gcc -Wall" gas
+	$(MAKE) stage1
+	- $(MAKE) "CC=/usr/local/bin/gcc -Wall -b$(target) -Bstage1/" gas -k
+	$(MAKE) stage2
+	- $(MAKE) "CC=/usr/local/bin/gcc -Wall -b$(target)" gas -k
+	$(MAKE) stage-last
+
 force:
 
 Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
-	(cd $(srcdir) ; configure -host=$(host) $(target))
+	(cd $(srcdir) ; \
+		./configure `if [ "$(srcdir)" != "." ] ; then echo +f; fi` -host=$(host) $(target))
+
