@@ -1,6 +1,6 @@
 /* Generic BFD library interface and support routines.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002
+   2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -567,7 +567,7 @@ FUNCTION
 	bfd_get_reloc_upper_bound
 
 SYNOPSIS
-	long bfd_get_reloc_upper_bound(bfd *abfd, asection *sect);
+	long bfd_get_reloc_upper_bound (bfd *abfd, asection *sect);
 
 DESCRIPTION
 	Return the number of bytes required to store the
@@ -662,7 +662,7 @@ FUNCTION
 	bfd_set_file_flags
 
 SYNOPSIS
-	bfd_boolean bfd_set_file_flags(bfd *abfd, flagword flags);
+	bfd_boolean bfd_set_file_flags (bfd *abfd, flagword flags);
 
 DESCRIPTION
 	Set the flag word in the BFD @var{abfd} to the value @var{flags}.
@@ -813,7 +813,7 @@ FUNCTION
 	bfd_set_start_address
 
 SYNOPSIS
- 	bfd_boolean bfd_set_start_address(bfd *abfd, bfd_vma vma);
+ 	bfd_boolean bfd_set_start_address (bfd *abfd, bfd_vma vma);
 
 DESCRIPTION
 	Make @var{vma} the entry point of output BFD @var{abfd}.
@@ -836,7 +836,7 @@ FUNCTION
 	bfd_get_gp_size
 
 SYNOPSIS
-	unsigned int bfd_get_gp_size(bfd *abfd);
+	unsigned int bfd_get_gp_size (bfd *abfd);
 
 DESCRIPTION
 	Return the maximum size of objects to be optimized using the GP
@@ -863,7 +863,7 @@ FUNCTION
 	bfd_set_gp_size
 
 SYNOPSIS
-	void bfd_set_gp_size(bfd *abfd, unsigned int i);
+	void bfd_set_gp_size (bfd *abfd, unsigned int i);
 
 DESCRIPTION
 	Set the maximum size of objects to be optimized using the GP
@@ -926,7 +926,7 @@ FUNCTION
 	bfd_scan_vma
 
 SYNOPSIS
-	bfd_vma bfd_scan_vma(const char *string, const char **end, int base);
+	bfd_vma bfd_scan_vma (const char *string, const char **end, int base);
 
 DESCRIPTION
 	Convert, like <<strtoul>>, a numerical expression
@@ -1016,7 +1016,7 @@ FUNCTION
 	bfd_copy_private_bfd_data
 
 SYNOPSIS
-	bfd_boolean bfd_copy_private_bfd_data(bfd *ibfd, bfd *obfd);
+	bfd_boolean bfd_copy_private_bfd_data (bfd *ibfd, bfd *obfd);
 
 DESCRIPTION
 	Copy private BFD information from the BFD @var{ibfd} to the
@@ -1037,7 +1037,7 @@ FUNCTION
 	bfd_merge_private_bfd_data
 
 SYNOPSIS
-	bfd_boolean bfd_merge_private_bfd_data(bfd *ibfd, bfd *obfd);
+	bfd_boolean bfd_merge_private_bfd_data (bfd *ibfd, bfd *obfd);
 
 DESCRIPTION
 	Merge private BFD information from the BFD @var{ibfd} to the
@@ -1058,7 +1058,7 @@ FUNCTION
 	bfd_set_private_flags
 
 SYNOPSIS
-	bfd_boolean bfd_set_private_flags(bfd *abfd, flagword flags);
+	bfd_boolean bfd_set_private_flags (bfd *abfd, flagword flags);
 
 DESCRIPTION
 	Set private BFD flag information in the BFD @var{abfd}.
@@ -1069,43 +1069,41 @@ DESCRIPTION
 	Not enough memory exists to create private data for @var{obfd}.
 
 .#define bfd_set_private_flags(abfd, flags) \
-.     BFD_SEND (abfd, _bfd_set_private_flags, \
-.		(abfd, flags))
+.     BFD_SEND (abfd, _bfd_set_private_flags, (abfd, flags))
 
 */
 
 /*
 FUNCTION
-	stuff
+	Other functions
 
 DESCRIPTION
-	Stuff which should be documented:
+	The following functions exist but have not yet been documented.
 
 .#define bfd_sizeof_headers(abfd, reloc) \
-.     BFD_SEND (abfd, _bfd_sizeof_headers, (abfd, reloc))
+.       BFD_SEND (abfd, _bfd_sizeof_headers, (abfd, reloc))
 .
 .#define bfd_find_nearest_line(abfd, sec, syms, off, file, func, line) \
-.     BFD_SEND (abfd, _bfd_find_nearest_line,  (abfd, sec, syms, off, file, func, line))
+.       BFD_SEND (abfd, _bfd_find_nearest_line, \
+.                 (abfd, sec, syms, off, file, func, line))
 .
-.       {* Do these three do anything useful at all, for any back end?  *}
 .#define bfd_debug_info_start(abfd) \
-.        BFD_SEND (abfd, _bfd_debug_info_start, (abfd))
+.       BFD_SEND (abfd, _bfd_debug_info_start, (abfd))
 .
 .#define bfd_debug_info_end(abfd) \
-.        BFD_SEND (abfd, _bfd_debug_info_end, (abfd))
+.       BFD_SEND (abfd, _bfd_debug_info_end, (abfd))
 .
 .#define bfd_debug_info_accumulate(abfd, section) \
-.        BFD_SEND (abfd, _bfd_debug_info_accumulate, (abfd, section))
-.
+.       BFD_SEND (abfd, _bfd_debug_info_accumulate, (abfd, section))
 .
 .#define bfd_stat_arch_elt(abfd, stat) \
-.        BFD_SEND (abfd, _bfd_stat_arch_elt,(abfd, stat))
+.       BFD_SEND (abfd, _bfd_stat_arch_elt,(abfd, stat))
 .
 .#define bfd_update_armap_timestamp(abfd) \
-.        BFD_SEND (abfd, _bfd_update_armap_timestamp, (abfd))
+.       BFD_SEND (abfd, _bfd_update_armap_timestamp, (abfd))
 .
 .#define bfd_set_arch_mach(abfd, arch, mach)\
-.        BFD_SEND ( abfd, _bfd_set_arch_mach, (abfd, arch, mach))
+.       BFD_SEND ( abfd, _bfd_set_arch_mach, (abfd, arch, mach))
 .
 .#define bfd_relax_section(abfd, section, link_info, again) \
 .       BFD_SEND (abfd, _bfd_relax_section, (abfd, section, link_info, again))
@@ -1265,7 +1263,7 @@ FUNCTION
 	bfd_alt_mach_code
 
 SYNOPSIS
-	bfd_boolean bfd_alt_mach_code(bfd *abfd, int alternative);
+	bfd_boolean bfd_alt_mach_code (bfd *abfd, int alternative);
 
 DESCRIPTION
 

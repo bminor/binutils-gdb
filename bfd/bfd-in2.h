@@ -3872,33 +3872,31 @@ bfd_boolean
 bfd_set_private_flags PARAMS ((bfd *abfd, flagword flags));
 
 #define bfd_set_private_flags(abfd, flags) \
-     BFD_SEND (abfd, _bfd_set_private_flags, \
-               (abfd, flags))
+     BFD_SEND (abfd, _bfd_set_private_flags, (abfd, flags))
 #define bfd_sizeof_headers(abfd, reloc) \
-     BFD_SEND (abfd, _bfd_sizeof_headers, (abfd, reloc))
+       BFD_SEND (abfd, _bfd_sizeof_headers, (abfd, reloc))
 
 #define bfd_find_nearest_line(abfd, sec, syms, off, file, func, line) \
-     BFD_SEND (abfd, _bfd_find_nearest_line,  (abfd, sec, syms, off, file, func, line))
+       BFD_SEND (abfd, _bfd_find_nearest_line, \
+                 (abfd, sec, syms, off, file, func, line))
 
-       /* Do these three do anything useful at all, for any back end?  */
 #define bfd_debug_info_start(abfd) \
-        BFD_SEND (abfd, _bfd_debug_info_start, (abfd))
+       BFD_SEND (abfd, _bfd_debug_info_start, (abfd))
 
 #define bfd_debug_info_end(abfd) \
-        BFD_SEND (abfd, _bfd_debug_info_end, (abfd))
+       BFD_SEND (abfd, _bfd_debug_info_end, (abfd))
 
 #define bfd_debug_info_accumulate(abfd, section) \
-        BFD_SEND (abfd, _bfd_debug_info_accumulate, (abfd, section))
-
+       BFD_SEND (abfd, _bfd_debug_info_accumulate, (abfd, section))
 
 #define bfd_stat_arch_elt(abfd, stat) \
-        BFD_SEND (abfd, _bfd_stat_arch_elt,(abfd, stat))
+       BFD_SEND (abfd, _bfd_stat_arch_elt,(abfd, stat))
 
 #define bfd_update_armap_timestamp(abfd) \
-        BFD_SEND (abfd, _bfd_update_armap_timestamp, (abfd))
+       BFD_SEND (abfd, _bfd_update_armap_timestamp, (abfd))
 
 #define bfd_set_arch_mach(abfd, arch, mach)\
-        BFD_SEND ( abfd, _bfd_set_arch_mach, (abfd, arch, mach))
+       BFD_SEND ( abfd, _bfd_set_arch_mach, (abfd, arch, mach))
 
 #define bfd_relax_section(abfd, section, link_info, again) \
        BFD_SEND (abfd, _bfd_relax_section, (abfd, section, link_info, again))
@@ -4357,14 +4355,17 @@ const char **
 bfd_target_list PARAMS ((void));
 
 const bfd_target *
-bfd_search_for_target PARAMS ((int (* search_func) (const bfd_target *, void *), void *));
+bfd_search_for_target PARAMS ((int (* search_func)
+       (const bfd_target *, void *),
+    void *));
 
 /* Extracted from format.c.  */
 bfd_boolean
 bfd_check_format PARAMS ((bfd *abfd, bfd_format format));
 
 bfd_boolean
-bfd_check_format_matches PARAMS ((bfd *abfd, bfd_format format, char ***matching));
+bfd_check_format_matches PARAMS ((bfd *abfd, bfd_format format,
+    char ***matching));
 
 bfd_boolean
 bfd_set_format PARAMS ((bfd *abfd, bfd_format format));
