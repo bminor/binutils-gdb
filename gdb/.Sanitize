@@ -52,6 +52,7 @@ arm-xdep.c
 blockframe.c
 breakpoint.c
 breakpoint.h
+c-exp.y
 coffread.c
 command.c
 command.h
@@ -77,8 +78,6 @@ environ.h
 eval.c
 exec.c
 expprint.c
-expread.tab.c
-expread.y
 expression.h
 findvar.c
 frame.h
@@ -95,6 +94,7 @@ i386-pinsn.c
 i386-stub.c
 i386-tdep.c
 i386-xdep.c
+i387-tdep.c
 i960-pinsn.c
 i960-tdep.c
 ieee-float.c
@@ -106,6 +106,9 @@ infptrace.c
 infrun.c
 inftarg.c
 kdb-start.c
+language.c
+language.h
+m2-exp.y
 m68k-opcode.h
 m68k-pinsn.c
 m68k-stub.c
@@ -134,6 +137,8 @@ ns32k-opcode.h
 ns32k-pinsn.c
 param-no-tm.h
 param.h
+parse.c
+parser-defs.h
 pn-opcode.h
 printcmd.c
 putenv.c

@@ -132,7 +132,7 @@ CDEPS = ${XM_CDEPS} ${TM_CDEPS} ${BFD_LIB} ${LIBIBERTY} ${RL_LIB}
 ADD_FILES = ${REGEX} ${ALLOCA}  ${GNU_MALLOC} ${XM_ADD_FILES} ${TM_ADD_FILES}
 ADD_DEPS = ${REGEX1} ${ALLOCA1} ${GNU_MALLOC} ${XM_ADD_FILES} ${TM_ADD_FILES}
 
-VERSION = 4.0.3
+VERSION = 4.0.4
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -146,10 +146,10 @@ SFILES_MAINDIR = \
 	 environ.c eval.c expprint.c findvar.c infcmd.c inflow.c infrun.c \
 	 main.c printcmd.c \
 	 remote.c source.c stack.c symmisc.c symtab.c symfile.c \
-	 utils.c valarith.c valops.c valprint.c values.c expread.y \
+	 utils.c valarith.c valops.c valprint.c values.c c-exp.y m2-exp.y \
 	 signame.c cplus-dem.c mem-break.c target.c inftarg.c \
 	 dbxread.c coffread.c \
-	 ieee-float.c 
+	 ieee-float.c language.c parse.c
 
 # Source files in subdirectories (which will be handled separately by
 #  'make gdb.tar.Z').
@@ -183,7 +183,7 @@ NONSRC_SUBDIR = \
 SFILES = $(SFILES_MAINDIR) $(SFILES_SUBDIR)
 
 # All source files that lint should look at
-LINTFILES = $(SFILES) expread.tab.c init.c
+LINTFILES = $(SFILES) $(YYFILES) init.c
 
 # Any additional files specified on these lines should also be added to
 # the OTHERS = definition below, so they go in the tar files.
@@ -196,7 +196,7 @@ HFILES=	breakpoint.h command.h defs.h environ.h \
 	getpagesize.h ieee-float.h inferior.h param-no-tm.h param.h \
 	signals.h signame.h symfile.h symtab.h \
 	target.h tdesc.h terminal.h tm-68k.h tm-i960.h tm-sunos.h \
-	value.h
+	language.h parser-defs.h value.h
 
 # Header files for machine opcode tables.
 # when OPCODE_DIR changes to ../include, remove the whole $(OPCODES)
@@ -228,7 +228,7 @@ OTHERS = Makefile.in depend alldeps.mak \
 	 createtags munch configure configure.in config.sub \
 	 ChangeLog ChangeLog-3.x refcard.ps \
 	 README TODO TAGS WHATS.NEW Projects \
-	 .gdbinit COPYING expread.tab.c \
+	 .gdbinit COPYING $(YYFILES) \
 	 copying.c Convex.notes copying.awk \
 	 saber.suppress standalone.c stuff.c kdb-start.c \
 	 putenv.c
@@ -242,7 +242,7 @@ INFOFILES = gdb.info*
 
 DEPFILES= ${TDEPFILES} ${XDEPFILES}
 
-SOURCES=$(SFILES) $(ALLDEPFILES)
+SOURCES=$(SFILES) $(ALLDEPFILES) $(YYFILES)
 TAGFILES = $(SOURCES) ${HFILES} ${OPCODES} ${ALLPARAM} ${POSSLIBS} 
 TAGFILES_MAINDIR = $(SFILES_MAINDIR) $(ALLDEPFILES_MAINDIR) \
              ${HFILES} ${OPCODES} ${ALLPARAM} ${POSSLIBS_MAINDIR} 
@@ -251,9 +251,9 @@ TARFILES = ${TAGFILES_MAINDIR} ${OTHERS} ${REMOTE_EXAMPLES}
 OBS = main.o blockframe.o breakpoint.o findvar.o stack.o source.o \
     values.o eval.o valops.o valarith.o valprint.o printcmd.o \
     symtab.o symfile.o symmisc.o infcmd.o infrun.o remote.o \
-    command.o utils.o expread.o expprint.o environ.o version.o \
+    command.o utils.o expprint.o environ.o version.o \
     copying.o $(DEPFILES) signame.o cplus-dem.o mem-break.o target.o \
-    inftarg.o ieee-float.o putenv.o \
+    inftarg.o ieee-float.o putenv.o parse.o language.o $(YYOBJ) \
     dbxread.o coffread.o # mipsread.o
 
 RAPP_OBS = rgdb.o rudp.o rserial.o serial.o udp.o $(XDEPFILES)
@@ -265,6 +265,10 @@ NTSOBS = standalone.o
 TSSTART = /lib/crt0.o
 
 NTSSTART = kdb-start.o
+
+# For now, shortcut the "configure GDB for fewer languages" stuff.
+YYFILES = c-exp.tab.c m2-exp.tab.c
+YYOBJ = c-exp.tab.o m2-exp.tab.o
 
 # Prevent Sun make from putting in the machine type.  Setting
 # TARGET_ARCH to nothing works for SunOS 3, 4.0, but not for 4.1.
@@ -288,9 +292,9 @@ gdb: $(OBS) $(TSOBS) ${ADD_DEPS} ${CDEPS} init.o
 saber_gdb: $(SFILES) $(DEPFILES) copying.c version.c
 	#setopt load_flags $(CFLAGS) -I$(BFD_DIR) -DHOST_SYS=SUN4_SYS
 	#load ./init.c $(SFILES)
-	#unload ${srcdir}/expread.y ${srcdir}/vx-share/*.h
+	#unload ${srcdir}/c-exp.y ${srcdir}/m2-exp.y ${srcdir}/vx-share/*.h
 	#unload ${srcdir}/nindy-share/[A-Z]*
-	#load ${srcdir}/expread.tab.c
+	#load ${srcdir}/c-exp.tab.c ${srcdir}/m2-exp.tab.c
 	#load copying.c version.c
 	#load `echo " "$(DEPFILES) | sed -e 's/\.o/.c/g' -e 's, , ../,g'`
 	#load ${LIBIBERTY_DIR}/*.c
@@ -482,13 +486,13 @@ clean:
 	rm -f gdb[0-9]
 	cd $(srcdir)/doc; $(MAKE) clean
 
-distclean: clean expread.tab.c TAGS
+distclean: clean c-exp.tab.c m2-exp.tab.c TAGS
 	rm -f tm.h xm.h config.status
 	rm -f y.output yacc.acts yacc.tmp
 	rm -f ${TESTS} Makefile depend
 
 realclean: clean
-	rm -f expread.tab.c TAGS
+	rm -f c-exp.tab.c m2-exp.tab.c TAGS
 	rm -f tm.h xm.h config.status
 	rm -f Makefile depend
 
@@ -566,17 +570,18 @@ copying.c : COPYING copying.awk
 version.c : Makefile.in
 	echo 'char *version = "$(VERSION)";' >version.c
 
-# expread.tab.c is generated in srcdir from expread.y, then compiled in target
-# directory to expread.o.
-${srcdir}/expread.tab.c : $(srcdir)/expread.y
+# c-exp.tab.c is generated in srcdir from c-exp.y, then compiled in target
+# directory to c-exp.tab.o.
+${srcdir}/c-exp.tab.c : $(srcdir)/c-exp.y
 	@echo 'Expect 4 shift/reduce conflicts.'
-	${YACC} $(srcdir)/expread.y
-	mv y.tab.c ${srcdir}/expread.tab.c
+	${YACC} $(srcdir)/c-exp.y
+	mv y.tab.c ${srcdir}/c-exp.tab.c
 
-expread.o : ${srcdir}/expread.tab.c defs.h param.h symtab.h \
-            frame.h expression.h value.h command.h
-	$(CC) -c ${CFLAGS} `echo ${srcdir}/expread.tab.c | sed 's,^\./,,'`
-	mv expread.tab.o expread.o
+# m2-exp.tab.c is generated in srcdir from m2-exp.y, then compiled in target
+# directory to m2-exp.tab.o.
+${srcdir}/m2-exp.tab.c : $(srcdir)/m2-exp.y
+	${YACC} $(srcdir)/m2-exp.y
+	mv y.tab.c ${srcdir}/m2-exp.tab.c
 
 # dbxread, coffread, mipsread have dependencies on BFD header files.
 dbxread.o: ${srcdir}/dbxread.c
