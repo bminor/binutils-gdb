@@ -1,3 +1,24 @@
+2002-05-07  Richard Sandiford  <rsandifo@redhat.com>
+
+	* ldlang.h (lang_output_section_statement_type): Add update_dot_tree.
+	(lang_enter_overlay): Remove the last two parameters.
+	(lang_leave_overlay): Take them here instead.
+	* ldgram.y (memspec_at_opt): Set $$ to null if no region is given.
+	(section): Pass LMA and crossref flag to lang_leave_overlay rather
+	than lang_enter_overlay.
+	* ldlang.c (lang_memory_region_lookup): Return null for null names.
+	(lang_output_section_statement_lookup): Initialize update_dot_tree.
+	(lang_size_sections_1): Evaluate it.
+	(lang_leave_output_section_statement): Rework LMA lookup.
+	(overlay_lma, overlay_nocrossrefs): Remove.
+	(lang_enter_overlay): Remove LMA and corssref arguments.
+	(lang_enter_overlay_section): Don't set the LMA here.
+	(lang_leave_overlay): Take LMA and crossref arguments.  Move the '.'
+	assignment to the last section's update_dot_tree.  Unconditionally
+	use the load and run-time regions specified in the OVERLAY statement.
+	Likewise the first section's LMA.  Only set the other sections' LMAs
+	when no load region is given.
+
 2002-05-06  Nick Clifton <nickc@redhat.com>
 
 	* po/sv.po: New translation.

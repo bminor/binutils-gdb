@@ -617,6 +617,10 @@ lang_memory_region_lookup (name)
 {
   lang_memory_region_type *p;
 
+  /* NAME is NULL for LMA memspecs if no region was specified.  */
+  if (name == NULL)
+    return NULL;
+
   for (p = lang_memory_region_list;
        p != (lang_memory_region_type *) NULL;
        p = p->next)
@@ -738,6 +742,7 @@ lang_output_section_statement_lookup (name)
       lookup->subsection_alignment = -1;
       lookup->section_alignment = -1;
       lookup->load_base = (union etree_union *) NULL;
+      lookup->update_dot_tree = NULL;
       lookup->phdrs = NULL;
 
       lang_statement_append (&lang_output_section_statement,
@@ -3009,8 +3014,13 @@ lang_size_sections_1 (s, output_section_statement, prev, fill, dot, relax)
 	    else
 	      os->bfd_section->_raw_size =
 		(after - os->bfd_section->vma) * opb;
+
 	    dot = os->bfd_section->vma + os->bfd_section->_raw_size / opb;
 	    os->processed = true;
+
+	    if (os->update_dot_tree != 0)
+	      exp_fold_tree (os->update_dot_tree, abs_output_section,
+			     lang_allocating_phase_enum, dot, &dot);
 
 	    /* Update dot in the region ?
 	       We only do this if the section is going to be allocated,
@@ -4514,14 +4524,13 @@ lang_leave_output_section_statement (fill, memspec, phdrs, lma_memspec)
 {
   current_section->fill = fill;
   current_section->region = lang_memory_region_lookup (memspec);
-  if (strcmp (lma_memspec, "*default*") != 0)
-    {
-      current_section->lma_region = lang_memory_region_lookup (lma_memspec);
-      /* If no runtime region has been given, but the load region has
-         been, use the load region.  */
-      if (strcmp (memspec, "*default*") == 0)
-	current_section->region = lang_memory_region_lookup (lma_memspec);
-    }
+  current_section->lma_region = lang_memory_region_lookup (lma_memspec);
+
+  /* If no runtime region has been given, but the load region has
+     been, use the load region.  */
+  if (current_section->lma_region != 0 && strcmp (memspec, "*default*") == 0)
+    current_section->region = current_section->lma_region;
+
   current_section->phdrs = phdrs;
   stat_ptr = &statement_list;
 }
@@ -4803,12 +4812,6 @@ lang_add_nocrossref (l)
 /* The overlay virtual address.  */
 static etree_type *overlay_vma;
 
-/* The overlay load address.  */
-static etree_type *overlay_lma;
-
-/* Whether nocrossrefs is set for this overlay.  */
-static int overlay_nocrossrefs;
-
 /* An expression for the maximum section size seen so far.  */
 static etree_type *overlay_max;
 
@@ -4824,24 +4827,18 @@ static struct overlay_list *overlay_list;
 /* Start handling an overlay.  */
 
 void
-lang_enter_overlay (vma_expr, lma_expr, nocrossrefs)
+lang_enter_overlay (vma_expr)
      etree_type *vma_expr;
-     etree_type *lma_expr;
-     int nocrossrefs;
 {
   /* The grammar should prevent nested overlays from occurring.  */
-  ASSERT (overlay_vma == NULL
-	  && overlay_lma == NULL
-	  && overlay_list == NULL
-	  && overlay_max == NULL);
+  ASSERT (overlay_vma == NULL && overlay_max == NULL);
 
   overlay_vma = vma_expr;
-  overlay_lma = lma_expr;
-  overlay_nocrossrefs = nocrossrefs;
 }
 
 /* Start a section in an overlay.  We handle this by calling
-   lang_enter_output_section_statement with the correct VMA and LMA.  */
+   lang_enter_output_section_statement with the correct VMA.
+   lang_leave_overlay sets up the LMA and memory regions.  */
 
 void
 lang_enter_overlay_section (name)
@@ -4851,16 +4848,13 @@ lang_enter_overlay_section (name)
   etree_type *size;
 
   lang_enter_output_section_statement (name, overlay_vma, normal_section,
-				       0, 0, 0, overlay_lma);
+				       0, 0, 0, 0);
 
-  /* If this is the first section, then base the VMA and LMA of future
+  /* If this is the first section, then base the VMA of future
      sections on this one.  This will work correctly even if `.' is
      used in the addresses.  */
   if (overlay_list == NULL)
-    {
-      overlay_vma = exp_nameop (ADDR, name);
-      overlay_lma = exp_nameop (LOADADDR, name);
-    }
+    overlay_vma = exp_nameop (ADDR, name);
 
   /* Remember the section.  */
   n = (struct overlay_list *) xmalloc (sizeof *n);
@@ -4869,9 +4863,6 @@ lang_enter_overlay_section (name)
   overlay_list = n;
 
   size = exp_nameop (SIZEOF, name);
-
-  /* Adjust the LMA for the next section.  */
-  overlay_lma = exp_binop ('+', overlay_lma, size);
 
   /* Arrange to work out the maximum section end address.  */
   if (overlay_max == NULL)
@@ -4895,8 +4886,10 @@ lang_leave_overlay_section (fill, phdrs)
 
   name = current_section->name;
 
-  lang_leave_output_section_statement (fill, "*default*",
-				       phdrs, "*default*");
+  /* For now, assume that "*default*" is the run-time memory region and
+     that no load-time region has been specified.  It doesn't really
+     matter what we say here, since lang_leave_overlay will override it.  */
+  lang_leave_output_section_statement (fill, "*default*", phdrs, 0);
 
   /* Define the magic symbols.  */
 
@@ -4926,31 +4919,29 @@ lang_leave_overlay_section (fill, phdrs)
    looks through all the sections in the overlay and sets them.  */
 
 void
-lang_leave_overlay (fill, memspec, phdrs, lma_memspec)
+lang_leave_overlay (lma_expr, nocrossrefs, fill, memspec, phdrs, lma_memspec)
+     etree_type *lma_expr;
+     int nocrossrefs;
      fill_type *fill;
      const char *memspec;
      struct lang_output_section_phdr_list *phdrs;
      const char *lma_memspec;
 {
   lang_memory_region_type *region;
-  lang_memory_region_type *default_region;
   lang_memory_region_type *lma_region;
   struct overlay_list *l;
   struct lang_nocrossref *nocrossref;
 
-  default_region = lang_memory_region_lookup ("*default*");
-
-  if (memspec == NULL)
-    region = NULL;
-  else
-    region = lang_memory_region_lookup (memspec);
-
-  if (lma_memspec == NULL)
-    lma_region = NULL;
-  else
-    lma_region = lang_memory_region_lookup (lma_memspec);
+  region = lang_memory_region_lookup (memspec);
+  lma_region = lang_memory_region_lookup (lma_memspec);
 
   nocrossref = NULL;
+
+  /* After setting the size of the last section, set '.' to end of the
+     overlay region.  */
+  if (overlay_list != NULL)
+    overlay_list->os->update_dot_tree
+      = exp_assop ('=', ".", exp_binop ('+', overlay_vma, overlay_max));
 
   l = overlay_list;
   while (l != NULL)
@@ -4960,28 +4951,24 @@ lang_leave_overlay (fill, memspec, phdrs, lma_memspec)
       if (fill != (fill_type *) 0 && l->os->fill == (fill_type *) 0)
 	l->os->fill = fill;
 
-      /* Assign a region to the sections, if one has been specified.
-	 Override the assignment of the default section, but not
-	 other sections.  */
-      if (region != NULL &&
-	  (l->os->region == NULL ||
-	   l->os->region == default_region))
-	l->os->region = region;
+      l->os->region = region;
+      l->os->lma_region = lma_region;
 
-      /* We only set lma_region for the first overlay section, as
-	 subsequent overlay sections will have load_base set relative
-	 to the first section.  Also, don't set lma_region if
-	 load_base is specified.  FIXME:  There should really be a test
-	 that `AT ( LDADDR )' doesn't conflict with `AT >LMA_REGION'
-	 rather than letting LDADDR simply override LMA_REGION.  */
-      if (lma_region != NULL && l->os->lma_region == NULL
-	  && l->next == NULL && l->os->load_base == NULL)
-	l->os->lma_region = lma_region;
+      /* The first section has the load address specified in the
+	 OVERLAY statement.  The rest are worked out from that.
+	 The base address is not needed (and should be null) if
+	 an LMA region was specified.  */
+      if (l->next == 0)
+	l->os->load_base = lma_expr;
+      else if (lma_region == 0)
+	l->os->load_base = exp_binop ('+',
+				      exp_nameop (LOADADDR, l->next->os->name),
+				      exp_nameop (SIZEOF, l->next->os->name));
 
       if (phdrs != NULL && l->os->phdrs == NULL)
 	l->os->phdrs = phdrs;
 
-      if (overlay_nocrossrefs)
+      if (nocrossrefs)
 	{
 	  struct lang_nocrossref *nc;
 
@@ -4999,13 +4986,7 @@ lang_leave_overlay (fill, memspec, phdrs, lma_memspec)
   if (nocrossref != NULL)
     lang_add_nocrossref (nocrossref);
 
-  /* Update . for the end of the overlay.  */
-  lang_add_assignment (exp_assop ('=', ".",
-				  exp_binop ('+', overlay_vma, overlay_max)));
-
   overlay_vma = NULL;
-  overlay_lma = NULL;
-  overlay_nocrossrefs = 0;
   overlay_list = NULL;
   overlay_max = NULL;
 }

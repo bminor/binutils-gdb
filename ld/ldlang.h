@@ -135,6 +135,12 @@ typedef struct lang_output_section_statement_struct {
 
   union etree_union *load_base;
 
+  /* If non-null, an expression to evaluate after setting the section's
+     size.  The expression is evaluated inside REGION (above) with '.'
+     set to the end of the section.  Used in the last overlay section
+     to move '.' past all the overlaid sections.  */
+  union etree_union *update_dot_tree;
+
   struct lang_output_section_phdr_list *phdrs;
 } lang_output_section_statement_type;
 
@@ -456,13 +462,13 @@ extern void lang_new_phdr
   PARAMS ((const char *, etree_type *, boolean, boolean, etree_type *,
 	   etree_type *));
 extern void lang_add_nocrossref PARAMS ((struct lang_nocrossref *));
-extern void lang_enter_overlay PARAMS ((etree_type *, etree_type *, int));
+extern void lang_enter_overlay PARAMS ((etree_type *));
 extern void lang_enter_overlay_section PARAMS ((const char *));
 extern void lang_leave_overlay_section
   PARAMS ((fill_type *, struct lang_output_section_phdr_list *));
 extern void lang_leave_overlay
-  PARAMS ((fill_type *, const char *, struct lang_output_section_phdr_list *,
-           const char *));
+  PARAMS ((etree_type *, int, fill_type *, const char *,
+	   struct lang_output_section_phdr_list *, const char *));
 
 extern struct bfd_elf_version_tree *lang_elf_version_info;
 

@@ -820,7 +820,7 @@ exp	:
 
 memspec_at_opt:
                 AT '>' NAME { $$ = $3; }
-        |       { $$ = "*default*"; }
+        |       { $$ = 0; }
         ;
 
 opt_at:
@@ -851,7 +851,7 @@ section:	NAME 		{ ldlex_expression(); }
 			{ ldlex_popstate (); ldlex_script (); }
 		'{' 
 			{
-			  lang_enter_overlay ($3, $5, (int) $4);
+			  lang_enter_overlay ($3);
 			}
 		overlay_section
 		'}'
@@ -859,7 +859,8 @@ section:	NAME 		{ ldlex_expression(); }
 		memspec_opt memspec_at_opt phdr_opt fill_opt
 			{
 			  ldlex_popstate ();
-			  lang_leave_overlay ($15, $12, $14, $13);
+			  lang_leave_overlay ($5, (int) $4,
+					      $15, $12, $14, $13);
 			}
 		opt_comma
 	|	/* The GROUP case is just enough to support the gcc
