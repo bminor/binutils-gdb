@@ -1,3 +1,17 @@
+2002-04-04  Michael Snyder  <msnyder@redhat.com>
+
+	* breakpoint.c: Add support for hardware breakpoints in overlays.
+	(overlay_events_enabled): New state variable.
+	(insert_breakpoints): Use overlay_events_enabled to decide
+	whether to attempt to set a breakpoint at the overlay load addr.
+	Handle bp_hardware_breakpoint as well as bp_breakpoint.
+	(remove_breakpoint): Use overlay_events_enabled to decide
+	whether breakpoints need to be removed from overlay load addr.
+	Handle bp_hardware_breakpoint as well as bp_breakpoint.
+	(bpstat_stop_status): Handle bp_hardware_breakpoint in overlays.
+	(create_overlay_event_breakpoint, enable_overlay_breakpoints, 
+	disable_overlay_breakpoints): Update overlay_events_enabled.
+
 2002-04-04  Daniel Jacobowitz  <drow@mvista.com>
 
 	* dwarf2read.c (struct function_range): New.

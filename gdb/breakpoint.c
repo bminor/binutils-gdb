@@ -217,6 +217,9 @@ extern int addressprint;	/* Print machine addresses? */
 /* Are we executing breakpoint commands?  */
 static int executing_breakpoint_commands;
 
+/* Are overlay event breakpoints enabled? */
+static int overlay_events_enabled;
+
 /* Walk the following statement or block through all breakpoints.
    ALL_BREAKPOINTS_SAFE does so even if the statment deletes the current
    breakpoint.  */
@@ -735,33 +738,65 @@ insert_breakpoints (void)
 	&& !b->inserted
 	&& !b->duplicate)
       {
-	if (b->type == bp_hardware_breakpoint)
-	  val = target_insert_hw_breakpoint (b->address, b->shadow_contents);
+	/* "Normal" instruction breakpoint: either the standard
+	   trap-instruction bp (bp_breakpoint), or a
+	   bp_hardware_breakpoint.  */
+
+	/* First check to see if we have to handle an overlay.  */
+	if (overlay_debugging == ovly_off
+	    || b->section == NULL
+	    || !(section_is_overlay (b->section)))
+	  {
+	    /* No overlay handling: just set the breakpoint.  */
+
+	    if (b->type == bp_hardware_breakpoint)
+	      val = target_insert_hw_breakpoint (b->address, 
+						 b->shadow_contents);
+	    else
+	      val = target_insert_breakpoint (b->address, b->shadow_contents);
+	  }
 	else
 	  {
-	    /* Check to see if breakpoint is in an overlay section;
-	       if so, we should set the breakpoint at the LMA address.
-	       Only if the section is currently mapped should we ALSO
-	       set a break at the VMA address. */
-	    if (overlay_debugging && b->section 
-		&& section_is_overlay (b->section))
+	    /* This breakpoint is in an overlay section.  
+	       Shall we set a breakpoint at the LMA?  */
+	    if (!overlay_events_enabled)
 	      {
-		CORE_ADDR addr;
-
-		addr = overlay_unmapped_address (b->address, b->section);
-		val = target_insert_breakpoint (addr, b->shadow_contents);
-		/* This would be the time to check val, to see if the
-		   breakpoint write to the load address succeeded.  
-		   However, this might be an ordinary occurrance, eg. if 
-		   the unmapped overlay is in ROM.  */
-		val = 0;	/* in case unmapped address failed */
-		if (section_is_mapped (b->section))
+		/* Yes -- overlay event support is not active, 
+		   so we must try to set a breakpoint at the LMA.
+		   This will not work for a hardware breakpoint.  */
+		if (b->type == bp_hardware_breakpoint)
+		  warning ("hw breakpoint %d not supported in overlay!\n",
+			   b->number);
+		else
+		  {
+		    CORE_ADDR addr = overlay_unmapped_address (b->address, 
+							       b->section);
+		    /* Set a software (trap) breakpoint at the LMA.  */
+		    val = target_insert_breakpoint (addr, b->shadow_contents);
+		    if (val != 0)
+		      warning ("overlay breakpoint %d failed: in ROM?", 
+			       b->number);
+		  }
+	      }
+	    /* Shall we set a breakpoint at the VMA? */
+	    if (section_is_mapped (b->section))
+	      {
+		/* Yes.  This overlay section is mapped into memory.  */
+		if (b->type == bp_hardware_breakpoint)
+		  val = target_insert_hw_breakpoint (b->address, 
+						     b->shadow_contents);
+		else
 		  val = target_insert_breakpoint (b->address,
 						  b->shadow_contents);
 	      }
-	    else		/* ordinary (non-overlay) address */
-	      val = target_insert_breakpoint (b->address, b->shadow_contents);
+	    else
+	      {
+		/* No.  This breakpoint will not be inserted.  
+		   No error, but do not mark the bp as 'inserted'.  */
+		continue;
+	      }
 	  }
+
 	if (val)
 	  {
 	    /* Can't set the breakpoint.  */
@@ -1266,32 +1301,61 @@ remove_breakpoint (struct breakpoint *b, insertion_state_t is)
       && b->type != bp_catch_catch
       && b->type != bp_catch_throw)
     {
-      if (b->type == bp_hardware_breakpoint)
-	val = target_remove_hw_breakpoint (b->address, b->shadow_contents);
+      /* "Normal" instruction breakpoint: either the standard
+	 trap-instruction bp (bp_breakpoint), or a
+	 bp_hardware_breakpoint.  */
+
+      /* First check to see if we have to handle an overlay.  */
+      if (overlay_debugging == ovly_off
+	  || b->section == NULL
+	  || !(section_is_overlay (b->section)))
+	{
+	  /* No overlay handling: just remove the breakpoint.  */
+
+	  if (b->type == bp_hardware_breakpoint)
+	    val = target_remove_hw_breakpoint (b->address, 
+					       b->shadow_contents);
+	  else
+	    val = target_remove_breakpoint (b->address, b->shadow_contents);
+	}
       else
 	{
-	  /* Check to see if breakpoint is in an overlay section;
-	     if so, we should remove the breakpoint at the LMA address.
-	     If that is not equal to the raw address, then we should 
-	     presumably remove the breakpoint there as well.  */
-	  if (overlay_debugging && b->section 
-	      && section_is_overlay (b->section))
+	  /* This breakpoint is in an overlay section.  
+	     Did we set a breakpoint at the LMA?  */
+	  if (!overlay_events_enabled)
+	      {
+		/* Yes -- overlay event support is not active, so we
+		   should have set a breakpoint at the LMA.  Remove it.  
+		*/
+		CORE_ADDR addr = overlay_unmapped_address (b->address, 
+							   b->section);
+		/* Ignore any failures: if the LMA is in ROM, we will
+		   have already warned when we failed to insert it.  */
+		if (b->type != bp_hardware_breakpoint)
+		  target_remove_hw_breakpoint (addr, b->shadow_contents);
+		else
+		  target_remove_breakpoint (addr, b->shadow_contents);
+	      }
+	  /* Did we set a breakpoint at the VMA? 
+	     If so, we will have marked the breakpoint 'inserted'.  */
+	  if (b->inserted)
 	    {
-	      CORE_ADDR addr;
-
-	      addr = overlay_unmapped_address (b->address, b->section);
-	      val = target_remove_breakpoint (addr, b->shadow_contents);
-	      /* This would be the time to check val, to see if the
-	         shadow breakpoint write to the load address succeeded.  
-	         However, this might be an ordinary occurrance, eg. if 
-	         the unmapped overlay is in ROM.  */
-	      val = 0;		/* in case unmapped address failed */
-	      if (section_is_mapped (b->section))
+	      /* Yes -- remove it.  Previously we did not bother to
+		 remove the breakpoint if the section had been
+		 unmapped, but let's not rely on that being safe.  We
+		 don't know what the overlay manager might do.  */
+	      if (b->type == bp_hardware_breakpoint)
+		val = target_remove_hw_breakpoint (b->address, 
+						   b->shadow_contents);
+	      else
 		val = target_remove_breakpoint (b->address,
 						b->shadow_contents);
 	    }
-	  else			/* ordinary (non-overlay) address */
-	    val = target_remove_breakpoint (b->address, b->shadow_contents);
+	  else
+	    {
+	      /* No -- not inserted, so no need to remove.  No error.  */
+	      val = 0;
+	    }
 	}
       if (val)
 	return val;
@@ -2398,9 +2462,15 @@ bpstat_stop_status (CORE_ADDR *pc, int not_a_breakpoint)
 	  continue;
       }
 
-    if (b->type == bp_hardware_breakpoint
-	&& b->address != (*pc - DECR_PC_AFTER_HW_BREAK))
-      continue;
+    if (b->type == bp_hardware_breakpoint)
+      {
+	if (b->address != (*pc - DECR_PC_AFTER_HW_BREAK))
+	  continue;
+	if (overlay_debugging		/* unmapped overlay section */
+	    && section_is_overlay (b->section) 
+	    && !section_is_mapped (b->section))
+	  continue;
+      }
 
     /* Is this a catchpoint of a load or unload?  If so, did we
        get a load or unload of the specified library?  If not,
@@ -3824,9 +3894,15 @@ create_overlay_event_breakpoint (char *func_name)
   b->addr_string = xstrdup (func_name);
 
   if (overlay_debugging == ovly_auto)
-    b->enable_state = bp_enabled;
+    {
+      b->enable_state = bp_enabled;
+      overlay_events_enabled = 1;
+    }
   else 
-    b->enable_state = bp_disabled;
+    {
+      b->enable_state = bp_disabled;
+      overlay_events_enabled = 0;
+    }
 }
 
 void
@@ -3839,6 +3915,7 @@ enable_overlay_breakpoints (void)
     {
       b->enable_state = bp_enabled;
       check_duplicates (b);
+      overlay_events_enabled = 1;
     }
 }
 
@@ -3852,6 +3929,7 @@ disable_overlay_breakpoints (void)
     {
       b->enable_state = bp_disabled;
       check_duplicates (b);
+      overlay_events_enabled = 0;
     }
 }
 
