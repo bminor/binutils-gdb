@@ -372,23 +372,54 @@ group_signature (abfd, ghdr)
 {
   struct elf_backend_data *bed;
   file_ptr pos;
-  unsigned char ename[4];
-  unsigned long iname;
+  bfd_size_type amt;
+  Elf_Internal_Shdr *hdr;
+  Elf_Internal_Shdr *shndx_hdr;
+  unsigned char esym[sizeof (Elf64_External_Sym)];
+  Elf_External_Sym_Shndx eshndx;
+  Elf_Internal_Sym isym;
+  unsigned int iname;
+  unsigned int shindex;
 
   /* First we need to ensure the symbol table is available.  */
   if (! bfd_section_from_shdr (abfd, ghdr->sh_link))
     return NULL;
 
-  /* Fortunately, the name index is at the same place in the external
-     symbol for both 32 and 64 bit ELF.  */
+  /* Go read the symbol.  */
+  hdr = &elf_tdata (abfd)->symtab_hdr;
   bed = get_elf_backend_data (abfd);
-  pos = elf_tdata (abfd)->symtab_hdr.sh_offset;
-  pos += ghdr->sh_info * bed->s->sizeof_sym;
+  amt = bed->s->sizeof_sym;
+  pos = hdr->sh_offset + ghdr->sh_info * amt;
   if (bfd_seek (abfd, pos, SEEK_SET) != 0
-      || bfd_bread (ename, (bfd_size_type) 4, abfd) != 4)
+      || bfd_bread (esym, amt, abfd) != amt)
     return NULL;
-  iname = H_GET_32 (abfd, ename);
-  return elf_string_from_elf_strtab (abfd, iname);
+
+  /* And possibly the symbol section index extension.  */
+  shndx_hdr = &elf_tdata (abfd)->symtab_shndx_hdr;
+  if (elf_elfsections (abfd) != NULL
+      && elf_elfsections (abfd)[shndx_hdr->sh_link] == hdr)
+    {
+      amt = sizeof (Elf_External_Sym_Shndx);
+      pos = shndx_hdr->sh_offset + ghdr->sh_info * amt;
+      if (bfd_seek (abfd, pos, SEEK_SET) != 0
+	  || bfd_bread ((PTR) &eshndx, amt, abfd) != amt)
+	return NULL;
+    }
+
+  /* Convert to internal format.  */
+  (*bed->s->swap_symbol_in) (abfd, (const PTR *) &esym, (const PTR *) &eshndx,
+			     &isym);
+
+  /* Look up the symbol name.  */
+  iname = isym.st_name;
+  shindex = hdr->sh_link;
+  if (iname == 0 && ELF_ST_TYPE (isym.st_info) == STT_SECTION)
+    {
+      iname = elf_elfsections (abfd)[isym.st_shndx]->sh_name;
+      shindex = elf_elfheader (abfd)->e_shstrndx;
+    }
+
+  return bfd_elf_string_from_elf_section (abfd, shindex, iname);
 }
 
 /* Set next_in_group list pointer, and group name for NEWSECT.  */
@@ -536,6 +567,8 @@ setup_group (abfd, hdr, newsect)
 		    elf_next_in_group (newsect) = newsect;
 		  }
 
+		/* If the group section has been created, point to the
+		   new member.  */
 		if (shdr->bfd_section != NULL)
 		  elf_next_in_group (shdr->bfd_section) = newsect;
 
@@ -2357,9 +2390,10 @@ set_group_contents (abfd, sec, failedptrarg)
 {
   boolean *failedptr = (boolean *) failedptrarg;
   unsigned long symindx;
-  asection *elt;
+  asection *elt, *first;
   unsigned char *loc;
   struct bfd_link_order *l;
+  boolean gas;
 
   if (elf_section_data (sec)->this_hdr.sh_type != SHT_GROUP
       || *failedptr)
@@ -2374,10 +2408,15 @@ set_group_contents (abfd, sec, failedptrarg)
     symindx = elf_section_data (sec)->this_idx;
   elf_section_data (sec)->this_hdr.sh_info = symindx;
 
-  /* Nor will the contents be allocated for "ld -r".  */
+  /* Nor will the contents be allocated for "ld -r" or objcopy.  */
+  gas = true;
   if (sec->contents == NULL)
     {
+      gas = false;
       sec->contents = bfd_alloc (abfd, sec->_raw_size);
+
+      /* Arrange for the section to be written out.  */
+      elf_section_data (sec)->this_hdr.contents = sec->contents;
       if (sec->contents == NULL)
 	{
 	  *failedptr = true;
@@ -2387,9 +2426,10 @@ set_group_contents (abfd, sec, failedptrarg)
 
   loc = sec->contents + sec->_raw_size;
 
-  /* Get the pointer to the first section in the group that we
-     squirreled away here.  */
-  elt = elf_next_in_group (sec);
+  /* Get the pointer to the first section in the group that gas
+     squirreled away here.  objcopy arranges for this to be set to the
+     start of the input section group.  */
+  first = elt = elf_next_in_group (sec);
 
   /* First element is a flag word.  Rest of section is elf section
      indices for all the sections of the group.  Write them backwards
@@ -2397,9 +2437,20 @@ set_group_contents (abfd, sec, failedptrarg)
      directives, not that it matters.  */
   while (elt != NULL)
     {
+      asection *s;
+      unsigned int idx;
+
       loc -= 4;
-      H_PUT_32 (abfd, elf_section_data (elt)->this_idx, loc);
+      s = elt;
+      if (!gas)
+	s = s->output_section;
+      idx = 0;
+      if (s != NULL)
+	idx = elf_section_data (s)->this_idx;
+      H_PUT_32 (abfd, idx, loc);
       elt = elf_next_in_group (elt);
+      if (elt == first)
+	break;
     }
 
   /* If this is a relocatable link, then the above did nothing because
@@ -2418,10 +2469,16 @@ set_group_contents (abfd, sec, failedptrarg)
 	}
       while (elt != elf_next_in_group (l->u.indirect.section));
 
-  loc -= 4;
-  H_PUT_32 (abfd, sec->flags & SEC_LINK_ONCE ? GRP_COMDAT : 0, loc);
+  /* With ld -r, merging SHT_GROUP sections results in wasted space
+     due to allowing for the flag word on each input.  We may well
+     duplicate entries too.  */
+  while ((loc -= 4) > sec->contents)
+    H_PUT_32 (abfd, 0, loc);
 
-  BFD_ASSERT (loc == sec->contents);
+  if (loc != sec->contents)
+    abort ();
+
+  H_PUT_32 (abfd, sec->flags & SEC_LINK_ONCE ? GRP_COMDAT : 0, loc);
 }
 
 /* Assign all ELF section numbers.  The dummy first section is handled here
@@ -4940,6 +4997,12 @@ _bfd_elf_copy_private_section_data (ibfd, isec, obfd, osec)
       || ihdr->sh_type == SHT_GNU_verneed
       || ihdr->sh_type == SHT_GNU_verdef)
     ohdr->sh_info = ihdr->sh_info;
+
+  /* Set things up for objcopy.  The output SHT_GROUP section will
+     have its elf_next_in_group pointing back to the input group
+     members.  */
+  elf_next_in_group (osec) = elf_next_in_group (isec);
+  elf_group_name (osec) = elf_group_name (isec);
 
   elf_section_data (osec)->use_rela_p
     = elf_section_data (isec)->use_rela_p;

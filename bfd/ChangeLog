@@ -1,5 +1,13 @@
 2002-06-05  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf.c (group_signature): Swap in the whole symbol, and handle
+	extracting section symbol names.
+	(setup_group): Add comment.
+	(set_group_contents): When called from objcopy or ld, arrange for
+	section contents to be written.  Write group member output section
+	indices to allow objcopy to reorganize sections.
+	(_bfd_elf_copy_private_section_data): Copy group info.
+
 	* elf-bfd.h (struct elf_size_info): Add swap_symbol_in field.
 	(bfd_elf32_swap_symbol_in): Update prototype.
 	(bfd_elf64_swap_symbol_in): Likewise.
