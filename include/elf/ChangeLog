@@ -1,3 +1,7 @@
+Thu May 30 12:35:57 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* mips.h (E_MIPS_ARCH_4): Define.
+
 Wed May 29 15:35:33 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* mips.h (Elf64_Mips_External_Rel): Define.

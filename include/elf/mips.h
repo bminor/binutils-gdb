@@ -50,6 +50,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* -mips3 code.  */
 #define E_MIPS_ARCH_3		0x20000000
+
+/* -mips4 code.  */
+#define E_MIPS_ARCH_4		0x30000000
 
 /* Processor specific section indices.  These sections do not actually
    exist.  Symbols with a st_shndx field corresponding to one of these
