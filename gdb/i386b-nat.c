@@ -28,12 +28,26 @@ static int tregmap[] =
   tESP, tEBP, tESI, tEDI,
   tEIP, tEFLAGS, tCS, tSS
 };
+
+#ifdef sEAX
 static int sregmap[] = 
 {
   sEAX, sECX, sEDX, sEBX,
   sESP, sEBP, sESI, sEDI,
   sEIP, sEFLAGS, sCS, sSS
 };
+#else /* No sEAX */
+
+/* NetBSD has decided to collapse the s* and t* symbols.  So if the s*
+   ones aren't around, use the t* ones for sregmap too.  */
+
+static int sregmap[] = 
+{
+  tEAX, tECX, tEDX, tEBX,
+  tESP, tEBP, tESI, tEDI,
+  tEIP, tEFLAGS, tCS, tSS
+};
+#endif /* No sEAX */
 
 /* blockend is the value of u.u_ar0, and points to the
    place where ES is stored.  */

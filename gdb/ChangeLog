@@ -1,3 +1,7 @@
+Fri Jan  7 12:55:25 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* i386b-nat.c (sregmap): If sEAX, etc., not defined, use tEAX, etc.
+
 Thu Jan  6 07:17:53 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* symtab.c (lookup_symbol): Don't try adding .c to the name.
