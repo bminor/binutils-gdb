@@ -2524,7 +2524,7 @@ section_from_elf_index (abfd, index)
   if (index == SHN_COMMON)
     return bfd_com_section_ptr;
 
-  if (index > elf_elfheader (abfd)->e_shnum)
+  if (index >= elf_elfheader (abfd)->e_shnum)
     return NULL;
 
   {

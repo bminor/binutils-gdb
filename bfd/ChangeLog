@@ -1,5 +1,8 @@
 Fri Aug 12 11:22:40 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
+	* elfcode.h (section_from_elf_index): Correct check for invalid
+	section index.
+
 	* elfcode.h (elf_link_add_object_symbols): If there is no symbol
 	table, try using the dynamic symbol table.  From Eric Youngdale
 	<ericy@cais.cais.com>.
