@@ -1,3 +1,21 @@
+Mon Feb  2 12:39:05 1998  Geoff Keating  <geoffk@ozemail.com.au>
+
+	* config/tc-ppc.c (md_apply_fix3): Change BFD_RELOC_HI16 and
+ 	BFD_RELOC_HI16_S to store the high bits of any value.
+
+	* config/tc-ppc.h (tc_fix_adjustable): Undo change of Fri Jun 27.
+	(TC_RELOC_RTSYM_LOC_FIXUP): Don't let the
+	assembler calculate relocations to any external symbol at all.
+	* config/tc-ppc.c (md_apply_fix3) [OBJ_ELF]: Correct bugs
+	involving generation of pc-relative relocs.
+	(md_pcrel_from_section) [OBJ_ELF]: The job this code used to do
+	has been moved to md_apply_fix3.
+
+	* config/tc-ppc.c (md_apply_fix3): Fix test for too-far branch.
+	(ppc_elf_suffix): Warn about 'identifier+constant@got' syntax,
+	which actually means (the address of identifier's GOT entry) +
+	constant, which is not particularly useful.
+
 Fri Jan 30 11:02:35 1998  Doug Evans  <devans@canuck.cygnus.com>
 
 	* read.h (include_dirs): Declare.
