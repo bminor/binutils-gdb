@@ -1,3 +1,9 @@
+Thu Feb  3 14:06:41 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* objdump.c (dump_section_stabs, read_section_stabs,
+	print_section_stabs): Functions broken out of dump_stabs_1.
+	Free the stabs and strings when done with them.
+
 Wed Feb  2 13:42:23 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 	* nlmconv.c (main): Use bfd_get_flavour instead of struct member.

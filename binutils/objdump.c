@@ -671,9 +671,10 @@ struct stab_print stab_print[] = {
   {0, ""}
 };
 
-void dump_stabs_1 ();
+void dump_section_stabs PARAMS ((bfd *abfd, char *stabsect_name,
+				 char *strsect_name));
 
-/* This dumps the stabs section from object files that have a section that
+/* Dump the stabs sections from an object file that has a section that
    uses Sun stabs encoding.  It has to use some hooks into BFD because
    string table sections are not normally visible to BFD callers.  */
 
@@ -681,11 +682,11 @@ void
 dump_stabs (abfd)
      bfd *abfd;
 {
-  int i;
-
   /* Allocate and initialize stab name array if first time.  */
   if (stab_name == NULL) 
     {
+      int i;
+
       stab_name = (char **) xmalloc (256 * sizeof(char *));
       /* Clear the array. */
       for (i = 0; i < 256; i++)
@@ -695,56 +696,54 @@ dump_stabs (abfd)
 	stab_name[stab_print[i].value] = stab_print[i].string;
     }
 
-  dump_stabs_1 (abfd, ".stab", ".stabstr");
-  dump_stabs_1 (abfd, ".stab.excl", ".stab.exclstr");
-  dump_stabs_1 (abfd, ".stab.index", ".stab.indexstr");
-  dump_stabs_1 (abfd, "$GDB_SYMBOLS$", "$GDB_STRINGS$");
+  dump_section_stabs (abfd, ".stab", ".stabstr");
+  dump_section_stabs (abfd, ".stab.excl", ".stab.exclstr");
+  dump_section_stabs (abfd, ".stab.index", ".stab.indexstr");
+  dump_section_stabs (abfd, "$GDB_SYMBOLS$", "$GDB_STRINGS$");
 }
 
-void
-dump_stabs_1 (abfd, name1, name2)
+static struct internal_nlist *stabs;
+static bfd_size_type stab_size;
+
+static char *strtab;
+static bfd_size_type stabstr_size;
+
+/* Read ABFD's stabs section STABSECT_NAME into `stabs'
+   and string table section STRSECT_NAME into `strtab'.
+   If the section exists and was read, allocate the space and return true.
+   Otherwise return false.  */
+
+boolean
+read_section_stabs (abfd, stabsect_name, strsect_name)
      bfd *abfd;
-     char *name1;		/* Section name of .stab */
-     char *name2;		/* Section name of its string section */
+     char *stabsect_name;
+     char *strsect_name;
 {
   Elf_Internal_Shdr *stab_hdr, *stabstr_hdr;
   asection *stabsect, *stabstrsect;
-  char *strtab;
-  struct internal_nlist *stabs, *stabs_end;
-  int i;
-  int stab_size, stabstr_size;
-  unsigned file_string_table_offset, next_file_string_table_offset;
   int is_elf = (0 == strncmp ("elf", abfd->xvec->name, 3));
 
   if (is_elf)
-    {
-      stab_hdr = bfd_elf_find_section (abfd, name1);
-    }
+    stab_hdr = bfd_elf_find_section (abfd, stabsect_name);
   else
-    {
-      stabsect = bfd_get_section_by_name (abfd, name1);
-    }
+    stabsect = bfd_get_section_by_name (abfd, stabsect_name);
 
   if (is_elf ? (0 == stab_hdr) : (0 == stabsect))
     {
-      printf ("No %s section present.\n\n", name1);
-      return;
+      printf ("No %s section present\n\n", stabsect_name);
+      return false;
     }
 
   if (is_elf)
-    {
-      stabstr_hdr = bfd_elf_find_section (abfd, name2);
-    }
+    stabstr_hdr = bfd_elf_find_section (abfd, strsect_name);
   else
-    {
-      stabstrsect = bfd_get_section_by_name (abfd, name2);
-    }
+    stabstrsect = bfd_get_section_by_name (abfd, strsect_name);
 
   if (is_elf ? (0 == stabstr_hdr) : (0 == stabstrsect))
     {
       fprintf (stderr, "%s: %s has no %s section\n", program_name,
-	       bfd_get_filename (abfd), name2);
-      return;
+	       bfd_get_filename (abfd), strsect_name);
+      return false;
     }
  
   stab_size    = (is_elf ? stab_hdr   ->sh_size : bfd_section_size (abfd, stabsect));
@@ -752,7 +751,6 @@ dump_stabs_1 (abfd, name1, name2)
 
   stabs  = (struct internal_nlist *) xmalloc (stab_size);
   strtab = (char *) xmalloc (stabstr_size);
-  stabs_end = (struct internal_nlist *) (stab_size + (char *) stabs);
   
   if (is_elf) 
     {
@@ -760,9 +758,11 @@ dump_stabs_1 (abfd, name1, name2)
 	  stab_size != bfd_read ((PTR) stabs, stab_size, 1, abfd))
 	{
 	  fprintf (stderr, "%s: Reading %s section of %s failed\n",
-		   program_name, name1, 
+		   program_name, stabsect_name, 
 		   bfd_get_filename (abfd));
-	  return;
+	  free (stabs);
+	  free (strtab);
+	  return false;
 	}
     }
   else
@@ -776,67 +776,82 @@ dump_stabs_1 (abfd, name1, name2)
 	  stabstr_size != bfd_read ((PTR) strtab, stabstr_size, 1, abfd))
 	{
 	  fprintf (stderr, "%s: Reading %s section of %s failed\n",
-		   program_name, name2,
+		   program_name, strsect_name,
 		   bfd_get_filename (abfd));
-	  return;
+	  free (stabs);
+	  free (strtab);
+	  return false;
 	}
     }
   else
     {
       bfd_get_section_contents (abfd, stabstrsect, (PTR) strtab, 0, stabstr_size);
     }
+  return true;
+}
 
 #define SWAP_SYMBOL(symp, abfd) \
-  { \
+{ \
     (symp)->n_strx = bfd_h_get_32(abfd,			\
-				(unsigned char *)&(symp)->n_strx);	\
+				  (unsigned char *)&(symp)->n_strx);	\
     (symp)->n_desc = bfd_h_get_16 (abfd,			\
-				(unsigned char *)&(symp)->n_desc);  	\
+				   (unsigned char *)&(symp)->n_desc);  	\
     (symp)->n_value = bfd_h_get_32 (abfd,			\
-				(unsigned char *)&(symp)->n_value); 	\
-  }
+				    (unsigned char *)&(symp)->n_value);	\
+}
 
-  printf ("Contents of %s section:\n\n", name1);
+/* Print ABFD's stabs section STABSECT_NAME (in `stabs'),
+   using string table section STRSECT_NAME (in `strtab').  */
+
+void
+print_section_stabs (abfd, stabsect_name, strsect_name)
+     bfd *abfd;
+     char *stabsect_name;
+     char *strsect_name;
+{
+  int i;
+  unsigned file_string_table_offset = 0, next_file_string_table_offset = 0;
+  struct internal_nlist *stabp = stabs,
+  *stabs_end = (struct internal_nlist *) (stab_size + (char *) stabs);
+
+  printf ("Contents of %s section:\n\n", stabsect_name);
   printf ("Symnum n_type n_othr n_desc n_value  n_strx String\n");
-
-  file_string_table_offset = 0;
-  next_file_string_table_offset = 0;
 
   /* Loop through all symbols and print them.
 
      We start the index at -1 because there is a dummy symbol on
-     the front of stabs-in-{coff,elf} sections that supplies sizes. */
+     the front of stabs-in-{coff,elf} sections that supplies sizes.  */
 
-  for (i = -1; stabs < stabs_end; stabs++, i++)
+  for (i = -1; stabp < stabs_end; stabp++, i++)
     {
-      SWAP_SYMBOL (stabs, abfd);
+      SWAP_SYMBOL (stabp, abfd);
       printf ("\n%-6d ", i);
-      /* Print either the stab name, or, if unnamed, print its number
+      /* Either print the stab name, or, if unnamed, print its number
 	 again (makes consistent formatting for tools like awk). */
-      if (stab_name[stabs->n_type])
-	printf ("%-6s", stab_name[stabs->n_type]);
+      if (stab_name[stabp->n_type])
+	printf ("%-6s", stab_name[stabp->n_type]);
       else
 	printf ("%-6d", i);
-      printf (" %-6d %-6d ", stabs->n_other, stabs->n_desc);
-      printf_vma (stabs->n_value);
-      printf (" %-6lu", stabs->n_strx);
+      printf (" %-6d %-6d ", stabp->n_other, stabp->n_desc);
+      printf_vma (stabp->n_value);
+      printf (" %-6lu", stabp->n_strx);
 
       /* Symbols with type == 0 (N_UNDF) specify the length of the
 	 string table associated with this file.  We use that info
 	 to know how to relocate the *next* file's string table indices.  */
 
-      if (stabs->n_type == N_UNDF)
+      if (stabp->n_type == N_UNDF)
 	{
 	  file_string_table_offset = next_file_string_table_offset;
-	  next_file_string_table_offset += stabs->n_value;
+	  next_file_string_table_offset += stabp->n_value;
 	}
       else
 	{
-	  /* Now, using the possibly updated string table offset, print the
+	  /* Using the (possibly updated) string table offset, print the
 	     string (if any) associated with this symbol.  */
 
-	  if ((stabs->n_strx + file_string_table_offset) < stabstr_size)
-	    printf (" %s", &strtab[stabs->n_strx + file_string_table_offset]);
+	  if ((stabp->n_strx + file_string_table_offset) < stabstr_size)
+	    printf (" %s", &strtab[stabp->n_strx + file_string_table_offset]);
 	  else
 	    printf (" *");
 	}
@@ -844,6 +859,20 @@ dump_stabs_1 (abfd, name1, name2)
   printf ("\n\n");
 }
 
+void
+dump_section_stabs (abfd, stabsect_name, strsect_name)
+     bfd *abfd;
+     char *stabsect_name;
+     char *strsect_name;
+{
+  if (read_section_stabs (abfd, stabsect_name, strsect_name))
+    {
+      print_section_stabs (abfd, stabsect_name, strsect_name);
+      free (stabs);
+      free (strtab);
+    }
+}
+
 static void
 dump_bfd_header (abfd)
      bfd *abfd;
