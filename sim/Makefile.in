@@ -63,7 +63,7 @@ SUBDIRS = " this is set by configire, don't change this "
 
 ALL=all-nothing
 CLEAN=clean-nothing
-INSTALL=install-nothing
+DO_INSTALL=install-nothing
 
 #### host and target dependent Makefile fragments come in here.
 ###
@@ -90,8 +90,12 @@ STAGESTUFF = $(TARGETLIB) $(OFILES)
 all:	endian.h $(ALL)
 	
 clean:  $(CLEAN)
+	rm -f endian e.h endian.h
 
-install: $(INSTALL)
+install: $(DO_INSTALL)
+
+info:
+install-info:
 
 ### build endian.h via a temporary so that interrupted builds will not
 ### leave an incomplete endian.h lying around.
@@ -185,6 +189,34 @@ clean-h8500: force
 	if [ -f ./h8500/Makefile ] ; then \
 		rootme=`pwd` ; export rootme ; \
 		( cd ./h8500 ; $(MAKE) $(FLAGS_TO_PASS) clean) ; \
+	else \
+		true ; \
+	fi
+
+###
+
+### sh
+
+all-sh: force
+	if [ -f ./sh/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		( cd ./sh ; $(MAKE) $(FLAGS_TO_PASS) all) ; \
+	else \
+		true ; \
+	fi
+
+install-sh: force
+	if [ -f ./sh/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		( cd ./sh ; $(MAKE) $(FLAGS_TO_PASS) install) ; \
+	else \
+		true ; \
+	fi
+
+clean-sh: force
+	if [ -f ./sh/Makefile ] ; then \
+		rootme=`pwd` ; export rootme ; \
+		( cd ./sh ; $(MAKE) $(FLAGS_TO_PASS) clean) ; \
 	else \
 		true ; \
 	fi

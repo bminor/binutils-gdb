@@ -3,7 +3,7 @@
 # appropriate for this directory.  For more information, check any
 # existing configure script.
 
-srctrigger=compile.c
+srctrigger=interp.c
 srcname="shsim"
 
 # per-host:
