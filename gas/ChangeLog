@@ -1,5 +1,29 @@
 Sat Oct 30 14:26:20 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
+	Rework space/subspace handling in PA code to fully support
+	SOM spaces/subspaces.
+	* config/tc-hppa.c (USE_ALIASES): New object-format dependent define
+	to control the use of space/subspace name aliases.
+	(update_subspace): Accept space chain entry for containing space
+	as a new parameter.  All callers changed.
+	(pa_get_label): Use current_space rather than pa_segment_to_space.
+	(pa_define_label): Likewise.
+	(pa_undefine_label): Likewise.
+	(md_begin): Change into the (possibly modified) text_section.
+	(pa_parse_space_stmt): Create a new segment/space if create_flag
+	is true, and the space name is not one of the two predefined spaces.
+	(pa_subspace): Use current_space rather than a lookup via 
+	pa_segment_to_space.  Reset BFD section flags as required by 
+	the .subspace directive.  Likewise for the section alignment.
+	Pass the current space to update_subspace and create_new_subspace.
+	(pa_spaces_begin): Only use space/subspace aliases if USE_ALIASES
+	is true.  When not using aliases, create a BFD section for each
+	subspace encountered.  When not using aliases replace the default
+	text, data, and bss segments with new ones.
+	(create_new_subspace): When not using aliases each subspace has a 
+	section/segment and subsegments are not needed, so set the subsegment
+	to zero. 
+
 	* config/tc-hppa.c (pa_parse_space_stmt): If needed, call
 	obj_set_section_attributes to pass space attributes to the 
 	BFD backend.
