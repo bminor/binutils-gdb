@@ -101,11 +101,12 @@ static int debug_control_mirror;
 static CORE_ADDR address_lookup[DR_LASTADDR - DR_FIRSTADDR + 1];
 
 static int
-i386_insert_nonaligned_watchpoint PARAMS ((int, CORE_ADDR, CORE_ADDR, int,
+i386_insert_aligned_watchpoint PARAMS ((int, CORE_ADDR, CORE_ADDR, int,
 					   int));
 
 static int
-i386_insert_aligned_watchpoint PARAMS ((pid, addr, len, rw));
+i386_insert_nonaligned_watchpoint PARAMS ((int, CORE_ADDR, CORE_ADDR, int,
+					   int));
 
 /* Insert a watchpoint.  */
 
@@ -210,7 +211,7 @@ i386_insert_nonaligned_watchpoint (pid, waddr, addr, len, rw)
       size = (len > 4) ? 3 : len - 1;
       size = size_try_array[size * 4 + align];
 
-      rv = i386_insert_watchpoint (pid, waddr, addr, size, rw);
+      rv = i386_insert_aligned_watchpoint (pid, waddr, addr, size, rw);
       if (rv)
 	{
 	  i386_remove_watchpoint (pid, waddr, size);

@@ -1,10 +1,18 @@
+Wed Mar  8 12:51:00 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* Makefile.in (VERSION): Bump to 4.14.1.
+	* NEWS, README: Update for 4.14.
+	* i386v-nat.c (i386_insert_aligned_watchpoint): Fix declaration.
+	(i386_insert_nonaligned_watchpoint): Call aligned instead of
+	generic watchpoint insertion.
+
 Tue Mar  7 19:26:10 1995  Per Bothner  <bothner@kalessin.cygnus.com>
 
 	* valops.c (value_slice):  Do COERCE_VARYING_ARRAY.
 
 Tue Mar  7 00:23:47 1995  Stu Grossman  (grossman@cygnus.com)
 
-	* monitor.c array-rom.c monitor.h rom68k-rom.c:  Move target_ops
+	* monitor.c, array-rom.c, monitor.h, rom68k-rom.c:  Move target_ops
 	into monitor.c.
 	* monitor.c (monitor_create_inferior):  Allow run command to start
 	program.
@@ -12,7 +20,7 @@ Tue Mar  7 00:23:47 1995  Stu Grossman  (grossman@cygnus.com)
 	* monitor.c (monitor_load):  Set PC to start address when done
 	loading.
 
-	* array-rom.c monitor.h rom68k-rom.c:  Clean up target_ops.
+	* array-rom.c, monitor.h, rom68k-rom.c:  Clean up target_ops.
 	Remove ref to monitor_create_inferior.
 
 	* monitor.c:  More general cleanups.  Add prototypes, remove
@@ -24,23 +32,23 @@ Tue Mar  7 00:23:47 1995  Stu Grossman  (grossman@cygnus.com)
 	* Makefile.in:  Add rules for monitor.o and rom68k-rom.o to make
 	Sun make (with VPATH) work...
 
-	* monitor.c monitor.h rom68k-rom.c:  Serious cleanup to make IDP
+	* monitor.c, monitor.h, rom68k-rom.c:  Serious cleanup to make IDP
 	(rom68k) target work right.
-	* array-rom.c op50-rom.c w89k-rom.c:  Partial updates to new
+	* array-rom.c, op50-rom.c, w89k-rom.c:  Partial updates to new
 	monitor.c interface.  More work needs to be done here.
 	* config/m68k/tm-monitor.h:  Change DECR_PC_AFTER_BREAK to 0 to
 	match the IDP monitor.  Also, set NUM_REGS to 18 cuz there's no
 	floating-point for this card.
 
-	* serial.h ser-go32.c ser-go32-para.c ser-mac.c ser-tcp.c
+	* serial.h, ser-go32.c, ser-go32-para.c, ser-mac.c, ser-tcp.c,
 	ser-unix.c:  Add SERIAL_SETSTOPBITS to set the number of stopbits
 	(needed for IDP board?!?!?).
 
-	* defs.h utils.c remote-hms.c remote-pa.c remote.c:  Fix defs and
-	usage of fputc_unfiltered and putchar_unfiltered.  Eliminate
+	* defs.h, utils.c, remote-hms.c, remote-pa.c, remote.c:  Fix defs
+	and usage of fputc_unfiltered and putchar_unfiltered.  Eliminate
 	putc_unfiltered (it's superfluous).
 
-	* command.h command.c top.c:  Add var_enum command type.  It's
+	* command.h, command.c, top.c:  Add var_enum command type.  It's
 	like var_string but allows only only one of the specified strings.
 
 Mon Mar  6 15:03:59 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)

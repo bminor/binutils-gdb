@@ -1,5 +1,22 @@
-		What has changed since GDB-3.5?
-		(Organized release by release)
+		What has changed in GDB?
+	     (Organized release by release)
+
+*** Changes in GDB-4.14:
+
+* New native configurations
+
+x86 FreeBSD					i[345]86-*-freebsd
+x86 NetBSD					i[345]86-*-netbsd
+NS32k NetBSD					ns32k-*-netbsd
+Sparc NetBSD					sparc-*-netbsd
+
+* New targets
+
+A29K VxWorks					a29k-*-vxworks
+HP PA PRO embedded (WinBond W89K & Oki OP50N)	hppa*-*-pro*
+CPU32 EST-300 emulator				m68*-*-est*
+PowerPC ELF					powerpc-*-elf
+WDC 65816					w65-*-*
 
 * Alpha OSF/1 support for procfs
 
@@ -9,9 +26,11 @@ filesystem is optional on the Alpha, GDB automatically determines
 the availability of /proc during startup.  This can lead to problems
 if /proc is unmounted after GDB has been started.
 
-* User commands may accept up to 10 arguments separated by whitespace.
-Arguments are accessed within the user command via $arg0..$arg0.
-A trivial example:
+* Arguments to user-defined commands
+
+User commands may accept up to 10 arguments separated by whitespace.
+Arguments are accessed within the user command via $arg0..$arg9.  A
+trivial example:
 define adder
   print $arg0 + $arg1 + $arg2
 
@@ -22,15 +41,64 @@ Defines the command "adder" which prints the sum of its three arguments.
 Note the arguments are text substitutions, so they may reference variables,
 use complex expressions, or even perform inferior function calls.
 
-* New "if" and "while" commands.  This makes it possible to write
-somewhat more sophisticated user-defined commands.
+* New `if' and `while' commands
 
-* Most debugging facilities now work on dynamic executables for HPPAs
-running hpux9 or later.  See the GDB manual for the few minor problems
-and potential workarounds.
+This makes it possible to write more sophisticated user-defined
+commands.  Both commands take a single argument, which is the
+expression to evaluate, and must be followed by the commands to
+execute, one per line, if the expression is nonzero, the list being
+terminated by the word `end'.  The `if' command list may include an
+`else' word, which causes the following commands to be executed only
+if the expression is zero.
 
-* GDB can now read debug symbols produced by the HP C compiler on HPPAs
-(sorry, no C++, Fortran or 68k support).
+* Fortran source language mode
+
+GDB now includes partial support for Fortran 77.  It will recognize
+Fortran programs and can evaluate a subset of Fortran expressions, but
+variables and functions may not be handled correctly.  GDB will work
+with G77, but does not yet know much about symbols emitted by other
+Fortran compilers.
+
+* Better HPUX support
+
+Most debugging facilities now work on dynamic executables for HPPAs
+running hpux9 or later.  You can attach to running dynamically linked
+processes, but by default the dynamic libraries will be read-only, so
+for instance you won't be able to put breakpoints in them.  To change
+that behavior do the following before running the program:
+
+	adb -w a.out
+	__dld_flags?W 0x5
+	control-d
+
+This will cause the libraries to be mapped private and read-write.
+To revert to the normal behavior, do this:
+
+	adb -w a.out
+	__dld_flags?W 0x4
+	control-d
+
+You cannot set breakpoints or examine data in the library until after
+the library is loaded if the function/data symbols do not have
+external linkage.
+
+GDB can now also read debug symbols produced by the HP C compiler on
+HPPAs (sorry, no C++, Fortran or 68k support).
+
+* Target byte order now dynamically selectable
+
+You can choose which byte order to use with a target system, via the
+commands "set endian big" and "set endian little", and you can see the
+current setting by using "show endian".  You can also give the command
+"set endian auto", in which case GDB will use the byte order
+associated with the executable.  Currently, only embedded MIPS
+configurations support dynamic selection of target byte order.
+
+* New DOS host serial code
+
+This version uses DPMI interrupts to handle buffered I/O, so you
+no longer need to run asynctsr when debugging boards connected to
+a PC's serial port.
 
 *** Changes in GDB-4.13:
 
