@@ -1,3 +1,8 @@
+2004-08-07  Andrew Cagney  <cagney@gnu.org>
+
+	* regcache.c (regcache_raw_read): For the moment, #ifdef assert
+	that the register is valid.
+
 2004-08-05  Mark Kettenis  <kettenis@chello.nl>
 
 	* i386-linux-tdep.c (i386_linux_sigtramp_start)

@@ -614,7 +614,15 @@ regcache_raw_read (struct regcache *regcache, int regnum, void *buf)
 	}
       if (!register_cached (regnum))
 	target_fetch_registers (regnum);
+#if 0
+      /* FIXME: cagney/2004-08-07: At present a number of targets
+	 forget (or didn't know that they needed) set this leading to
+	 panics.  Also is the problem that target's need to indicate
+	 that a register is in one of the possible states: valid,
+	 undefined, unknown.  The last of which isn't yet
+	 possible.  */
       gdb_assert (register_cached (regnum));
+#endif
     }
   /* Copy the value directly into the register cache.  */
   memcpy (buf, register_buffer (regcache, regnum),
