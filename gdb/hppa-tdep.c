@@ -1797,7 +1797,7 @@ hppa_alignof (type)
       return hppa_alignof (TYPE_FIELD_TYPE (type, 0));
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
-      max_align = 2;
+      max_align = 1;
       for (i = 0; i < TYPE_NFIELDS (type); i++)
 	{
 	  /* Bit fields have no real alignment. */

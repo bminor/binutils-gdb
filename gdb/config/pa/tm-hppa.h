@@ -63,6 +63,8 @@ struct inferior_status;
 #define REG_STRUCT_HAS_ADDR(gcc_p,type) \
   (TYPE_LENGTH (type) > 8)
 
+#define USE_STRUCT_CONVENTION(gcc_p,type) (TYPE_LENGTH (type) > 8)
+
 /* Offset from address of function to start of its code.
    Zero on most machines.  */
 
@@ -664,3 +666,5 @@ extern int hpread_adjust_stack_address PARAMS ((CORE_ADDR));
    probably much more common.  (FIXME). */
 
 #define COERCE_FLOAT_TO_DOUBLE (current_language -> la_language == language_c)
+
+#define STACK_ALIGN(ADDR) (((ADDR) + 7) & -8)
