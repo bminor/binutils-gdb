@@ -1,3 +1,12 @@
+Thu Feb 27 12:46:53 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Define BSD44_FORMAT if the target looks like a
+	BSD4.4 derived system.
+	* configure: Rebuild.
+	* Makefile.in (.c.o): Add @DEFS@.
+	* gmon_io.c (gmon_out_read): In BSD44_FORMAT code, get profrate
+	from profrate field, not version field.
+
 Thu Jan 16 17:42:54 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* dummy.c (find_call): Clear ignore_direct_calls.

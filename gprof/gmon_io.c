@@ -188,7 +188,7 @@ DEFUN (gmon_out_read, (filename), const char *filename)
       {
 	int profrate;
 
-	profrate = bfd_get_32 (core_bfd, (bfd_byte *) &raw.version[0]);
+	profrate = bfd_get_32 (core_bfd, (bfd_byte *) &raw.profrate[0]);
 	if (!s_highpc)
 	  hz = profrate;
 	else if (hz != profrate)

@@ -33,6 +33,15 @@ esac
 
 AC_SUBST(MY_TARGET)
 
+dnl We need to set BSD44_FORMAT on a host which uses the additional
+dnl header fields.  This is an attempt to do that.  I can't think of a
+dnl good feature test for this.
+case "${target}" in
+*-*-bsd4.4* | *-*-netbsd* | *-*-freebsd* | *-*-openbsd*)
+  AC_DEFINE(BSD44_FORMAT)
+  ;;
+esac
+
 BFDLIB='-L../bfd -lbfd'
 
 # We need to handle some special cases if BFD was built shared.

@@ -925,6 +925,15 @@ esac
 
 
 
+case "${target}" in
+*-*-bsd4.4* | *-*-netbsd* | *-*-freebsd* | *-*-openbsd*)
+  cat >> confdefs.h <<\EOF
+#define BSD44_FORMAT 1
+EOF
+
+  ;;
+esac
+
 BFDLIB='-L../bfd -lbfd'
 
 # We need to handle some special cases if BFD was built shared.
