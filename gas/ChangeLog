@@ -1,3 +1,8 @@
+1999-06-11  Ian Lance Taylor  <ian@zembu.com>
+
+	* symbols.c (resolve_symbol_value): Don't permit subtraction of
+	undefined symbols.
+
 1999-06-10  Jakub Jelinek  <jj@ultra.linux.cz>
 
         * config/tc-sparc.c (sparc_ip): Don't use side-effect expression

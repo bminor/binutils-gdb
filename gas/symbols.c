@@ -1040,8 +1040,11 @@ resolve_symbol_value (symp, finalize)
 	     expressions, such as IEEE-695.  */
 	  /* Don't emit messages unless we're finalizing the symbol value,
 	     otherwise we may get the same message multiple times.  */
-	  if ((seg_left != absolute_section || seg_right != absolute_section)
-	      && (op != O_subtract || seg_left != seg_right)
+	  if ((seg_left != absolute_section
+	       || seg_right != absolute_section)
+	      && (op != O_subtract
+		  || seg_left != seg_right
+		  || seg_left == undefined_section)
 	      && finalize)
 	    {
 	      char *file;
