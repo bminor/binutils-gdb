@@ -3,25 +3,31 @@
 #
 # $Id$
 #
-srcdir	= .
+srcdir	= ../common
+VPATH = ../common
 BASEDIR	= ../..
-
+HOSTDIR = ../$(HOST)/
 INCLUDE	= $(srcdir)/$(BASEDIR)/include-cygnus
-INCLUDES = -I$(srcdir)  -I$(INCLUDE) 
+INCLUDES = -I. -I$(srcdir)  -I$(INCLUDE) 
 DEBUG	= -g
-CFLAGS	= $(INCLUDES) $(DEBUG) 
 
+
+#__sun3__#EXTRA_DEF=-DHOST_SYS=SUN3_SYS
+#__sun4__#EXTRA_DEF=-DHOST_SYS=SUN4_SYS
+
+CFLAGS	= $(INCLUDES) $(EXTRA_DEF) $(DEBUG)
+LINTFLAGS =  $(INCLUDES) $(EXTRA_DEF) 
 # go directly to ld.new in case this ld isn't capable of
 # linking native object on this host.  It can be renamed on
 # install.
-PROGS	= ld.new
+PROGS	= $(HOSTDIR)/ld.new
 
 # for self hosting
 GNUTARGET=a.out-generic-big
 LDEMULATION=gld
 bfdlib=$(srcdir)/$(BASEDIR)/bfd/$(HOST)/libbfd.a
 
-OBJS= ldgram.o ldlex.o ldlang.o ldmain.o ldwrite.o ldexp.o ld-lnk960.o \
+OBJS= ldgram.o ldlex.o ldlang.o ldmain.o ldwrite.o ldexp.o ld-lnk960.o ld-gld68k.o \
 	ld-gld.o ld-gld960.o ld-emul.o ldversion.o ldmisc.o ldsym.o ldfile.o
 
 HEADERS=config.h ldmain.h ldmain.h ldmisc.h ldsym.h ldlang.h ldexp.h \
@@ -29,7 +35,7 @@ HEADERS=config.h ldmain.h ldmain.h ldmisc.h ldsym.h ldlang.h ldexp.h \
 
 MANSOURCES=ld.tex
 
-LDCSOURCES=ldlang.c ldmain.c ldwrite.c ld-lnk960.c ld-gld.c \
+LDCSOURCES=ldlang.c ldmain.c ldwrite.c ld-lnk960.c ld-gld.c ld-gld68k.c \
 	ld-gld960.c ld-emul.c ldversion.c ldmisc.c ldexp.c ldsym.c ldfile.c
 
 GENERATED_SOURCES=ldgram.tab.c ldlex.c ldgram.tab.h y.tab.h
@@ -37,14 +43,19 @@ GENERATED_HEADERS=ldgram.tab.h
 
 LDSOURCES=$(LDCSOURCES) ldgram.y ldlex.l
 
-#BFDSOURCES=../bfd/libbfd.c ../bfd/bfd.c  ../bfd/sunos.c ../bfd/icoff.c ../bfd/b.out.c   ../bfd/archive.c  ../bfd/srec.c
+BFDSOURCES=../../bfd/common/*.c
 
 SOURCES= $(LDSOURCES) $(BFDSOURCES)
 LINTSOURCES=   $(LDCSOURCES) $(BFDSOURCES) $(GENERATED_SOURCES)
 
-all: $(PROGS)
+all: Makefile $(PROGS) 
 
-$(PROGS): $(OBJS)
+
+
+$(BFDLIB): $(BFDSOURCES)
+	(cd ../bfd; make)
+
+$(PROGS): $(OBJS) $(BFDLIB)
 #	(cd ../bfd; make)
 #	LDEMULATION=gld; export LDEMULATION;  GNUTARGET=a.out-generic-big;./ldok -format a.out-generic-big  -o ld /lib/crt0.o   $(OBJS) $(bfdlib) -lc /usr/local/lib/gcc/sparc/1.91/gnulib
 #	gld -o ld /lib/crt0.o   $(OBJS) $(bfdlib) -lc /usr/local/lib/gcc/sparc/1.91/gnulib
@@ -71,7 +82,7 @@ ldgram.o:ldgram.y
 	$(CC) -c $(CFLAGS) ldgram.tab.c
 	mv ldgram.tab.o ldgram.o
 
-ldgram.tab.h:ldgram.o 
+ldgram.tab.h:y.tab.h
 	cp y.tab.h ldgram.tab.h
 	
 ldlex.c: ldlex.l ldgram.tab.h
@@ -83,6 +94,7 @@ ldfile.o: ldfile.c
 ldwrite.o: ldwrite.c
 ldlang.o: ldlang.c ldgram.tab.h
 ld-gld.o: ld-gld.c
+ld-gld68k.o: ld-gld68k.c
 ld-gld960.o: ld-gld960.c
 ld-emul.o:ld-emul.c
 ld-lnk960.o:ld-lnk960.c
@@ -92,11 +104,11 @@ ldsym.o:ldsym.c
 
 clean:
 	- rm -f $(OBJS) $(GENERATED_SOURCES) $(GENERATED_HEADERS)
-	- rm -f ld ld1 ld2
+	- rm -f ld ld1 ld2 ld3 ld.new
 
 
 lintlog:$(SOURCES) Makefile
-	$(LINT) -abhxzn  $(CFLAGS)  $(LINTSOURCES) \
+	$(LINT) -abhxzn  $(LINTFLAGS)  $(LINTSOURCES) \
 | grep -v "pointer casts may be troublesome" \
 | grep -v "possible pointer alignment problem" \
 | grep -v "ignore" \
