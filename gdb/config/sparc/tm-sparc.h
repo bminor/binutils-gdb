@@ -683,7 +683,7 @@ void sparc_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun,
 /* Push an empty stack frame, to record the current PC, etc.  */
 
 #define DEPRECATED_PUSH_DUMMY_FRAME	sparc_push_dummy_frame ()
-#define POP_FRAME		sparc_pop_frame ()
+#define DEPRECATED_POP_FRAME		sparc_pop_frame ()
 
 void sparc_push_dummy_frame (void);
 void sparc_pop_frame (void);

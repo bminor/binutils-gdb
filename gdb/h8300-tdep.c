@@ -1151,7 +1151,7 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_push_return_address (gdbarch, h8300_push_return_address);
   set_gdbarch_deprecated_extract_return_value (gdbarch, h8300_extract_return_value);
   set_gdbarch_push_arguments (gdbarch, h8300_push_arguments);
-  set_gdbarch_pop_frame (gdbarch, h8300_pop_frame);
+  set_gdbarch_deprecated_pop_frame (gdbarch, h8300_pop_frame);
   set_gdbarch_store_struct_return (gdbarch, h8300_store_struct_return);
   set_gdbarch_deprecated_store_return_value (gdbarch, h8300_store_return_value);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, h8300_extract_struct_value_address);

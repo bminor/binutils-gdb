@@ -1303,7 +1303,7 @@ hand_function_call (struct value *function, int nargs, struct value **args)
   if (DEPRECATED_PUSH_DUMMY_FRAME_P ())
     {
       /* DEPRECATED_PUSH_DUMMY_FRAME is responsible for saving the
-	 inferior registers (and POP_FRAME for restoring them).  (At
+	 inferior registers (and frame_pop() for restoring them).  (At
 	 least on most machines) they are saved on the stack in the
 	 inferior.  */
       DEPRECATED_PUSH_DUMMY_FRAME;

@@ -198,12 +198,12 @@ frame_pop (struct frame_info *this_frame)
   struct regcache *scratch_regcache;
   struct cleanup *cleanups;
 
-  if (POP_FRAME_P ())
+  if (DEPRECATED_POP_FRAME_P ())
     {
       /* A legacy architecture that has implemented a custom pop
 	 function.  All new architectures should instead be using the
 	 generic code below.  */
-      POP_FRAME;
+      DEPRECATED_POP_FRAME;
     }
   else
     {

@@ -1,3 +1,8 @@
+2003-03-13  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Replace
+	POP_FRAME with DEPRECATED_POP_FRAME.  Update description.
+
 2003-03-12  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbint.texinfo (Target Architecture Definition): Rename

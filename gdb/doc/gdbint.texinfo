@@ -3680,12 +3680,11 @@ A hook defined for XCOFF reading.
 If defined, this is the number of the processor status register.  (This
 definition is only used in generic code when parsing "$ps".)
 
-@item POP_FRAME
-@findex POP_FRAME
-@findex call_function_by_hand
-@findex return_command
-Used in @samp{call_function_by_hand} to remove an artificial stack
-frame and in @samp{return_command} to remove a real stack frame.
+@item DEPRECATED_POP_FRAME
+@findex DEPRECATED_POP_FRAME
+@findex frame_pop
+If defined, used by @code{frame_pop} to remove a stack frame.  This
+method has been superseeded by generic code.
 
 @item PUSH_ARGUMENTS (@var{nargs}, @var{args}, @var{sp}, @var{struct_return}, @var{struct_addr})
 @findex PUSH_ARGUMENTS

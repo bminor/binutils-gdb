@@ -4379,7 +4379,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_store_struct_return (gdbarch, sh_store_struct_return);
   set_gdbarch_use_struct_convention (gdbarch, sh_use_struct_convention);
   set_gdbarch_deprecated_extract_struct_value_address (gdbarch, sh_extract_struct_value_address);
-  set_gdbarch_pop_frame (gdbarch, sh_pop_frame);
+  set_gdbarch_deprecated_pop_frame (gdbarch, sh_pop_frame);
   set_gdbarch_print_insn (gdbarch, gdb_print_insn_sh);
   set_gdbarch_register_sim_regno (gdbarch, legacy_register_sim_regno);
   skip_prologue_hard_way = sh_skip_prologue_hard_way;
@@ -4621,7 +4621,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       /*set_gdbarch_store_struct_return (gdbarch, sh64_store_struct_return);*/
       set_gdbarch_deprecated_extract_struct_value_address (gdbarch, sh64_extract_struct_value_address);
       set_gdbarch_use_struct_convention (gdbarch, sh64_use_struct_convention);
-      set_gdbarch_pop_frame (gdbarch, sh64_pop_frame);
+      set_gdbarch_deprecated_pop_frame (gdbarch, sh64_pop_frame);
       set_gdbarch_elf_make_msymbol_special (gdbarch,
                                             sh64_elf_make_msymbol_special);
       break;

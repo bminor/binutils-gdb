@@ -1151,7 +1151,7 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_args_address (gdbarch, mcore_frame_args_address);
   set_gdbarch_frame_locals_address (gdbarch, mcore_frame_locals_address);
   set_gdbarch_frame_num_args (gdbarch, frame_num_args_unknown);
-  set_gdbarch_pop_frame (gdbarch, mcore_pop_frame);
+  set_gdbarch_deprecated_pop_frame (gdbarch, mcore_pop_frame);
   set_gdbarch_virtual_frame_pointer (gdbarch, mcore_virtual_frame_pointer);
 
   /* Misc.:  */

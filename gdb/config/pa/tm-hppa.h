@@ -463,7 +463,7 @@ extern void hppa_push_dummy_frame (struct inferior_status *);
 /* Discard from the stack the innermost frame, 
    restoring all saved registers.  */
 #if !GDB_MULTI_ARCH
-#define POP_FRAME  hppa_pop_frame ()
+#define DEPRECATED_POP_FRAME  hppa_pop_frame ()
 extern void hppa_pop_frame (void);
 #endif
 

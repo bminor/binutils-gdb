@@ -559,7 +559,7 @@ f:2:RETURN_VALUE_ON_STACK:int:return_value_on_stack:struct type *type:type:::gen
 f:2:PUSH_ARGUMENTS:CORE_ADDR:push_arguments:int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr:nargs, args, sp, struct_return, struct_addr:::default_push_arguments::0
 F:2:DEPRECATED_PUSH_DUMMY_FRAME:void:deprecated_push_dummy_frame:void:-:::0
 F:2:PUSH_RETURN_ADDRESS:CORE_ADDR:push_return_address:CORE_ADDR pc, CORE_ADDR sp:pc, sp:::0
-F:2:POP_FRAME:void:pop_frame:void:-:::0
+F:2:DEPRECATED_POP_FRAME:void:deprecated_pop_frame:void:-:::0
 #
 f:2:STORE_STRUCT_RETURN:void:store_struct_return:CORE_ADDR addr, CORE_ADDR sp:addr, sp:::0
 #

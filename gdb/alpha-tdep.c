@@ -70,7 +70,6 @@ static gdbarch_saved_pc_after_call_ftype alpha_saved_pc_after_call;
 static gdbarch_frame_chain_ftype alpha_frame_chain;
 
 static gdbarch_push_arguments_ftype alpha_push_arguments;
-static gdbarch_pop_frame_ftype alpha_pop_frame;
 static gdbarch_fix_call_dummy_ftype alpha_fix_call_dummy;
 
 static gdbarch_get_longjmp_target_ftype alpha_get_longjmp_target;
@@ -1857,7 +1856,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_use_generic_dummy_frames (gdbarch, 0);
   set_gdbarch_call_dummy_length (gdbarch, 0);
   set_gdbarch_push_arguments (gdbarch, alpha_push_arguments);
-  set_gdbarch_pop_frame (gdbarch, alpha_pop_frame);
+  set_gdbarch_deprecated_pop_frame (gdbarch, alpha_pop_frame);
 
   /* On the Alpha, the call dummy code is never copied to user space,
      stopping the user call is achieved via a bp_call_dummy breakpoint.

@@ -1418,7 +1418,7 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
     (gdbarch, m68hc11_extract_struct_value_address);
   set_gdbarch_use_struct_convention (gdbarch, m68hc11_use_struct_convention);
   set_gdbarch_deprecated_init_extra_frame_info (gdbarch, m68hc11_init_extra_frame_info);
-  set_gdbarch_pop_frame (gdbarch, m68hc11_pop_frame);
+  set_gdbarch_deprecated_pop_frame (gdbarch, m68hc11_pop_frame);
   set_gdbarch_skip_prologue (gdbarch, m68hc11_skip_prologue);
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_decr_pc_after_break (gdbarch, 0);

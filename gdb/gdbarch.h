@@ -1706,40 +1706,40 @@ extern void set_gdbarch_push_return_address (struct gdbarch *gdbarch, gdbarch_pu
 #endif
 #endif
 
-#if defined (POP_FRAME)
-/* Legacy for systems yet to multi-arch POP_FRAME */
-#if !defined (POP_FRAME_P)
-#define POP_FRAME_P() (1)
+#if defined (DEPRECATED_POP_FRAME)
+/* Legacy for systems yet to multi-arch DEPRECATED_POP_FRAME */
+#if !defined (DEPRECATED_POP_FRAME_P)
+#define DEPRECATED_POP_FRAME_P() (1)
 #endif
 #endif
 
 /* Default predicate for non- multi-arch targets. */
-#if (!GDB_MULTI_ARCH) && !defined (POP_FRAME_P)
-#define POP_FRAME_P() (0)
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_POP_FRAME_P)
+#define DEPRECATED_POP_FRAME_P() (0)
 #endif
 
-extern int gdbarch_pop_frame_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (POP_FRAME_P)
-#error "Non multi-arch definition of POP_FRAME"
+extern int gdbarch_deprecated_pop_frame_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_POP_FRAME_P)
+#error "Non multi-arch definition of DEPRECATED_POP_FRAME"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (POP_FRAME_P)
-#define POP_FRAME_P() (gdbarch_pop_frame_p (current_gdbarch))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_POP_FRAME_P)
+#define DEPRECATED_POP_FRAME_P() (gdbarch_deprecated_pop_frame_p (current_gdbarch))
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (POP_FRAME)
-#define POP_FRAME (internal_error (__FILE__, __LINE__, "POP_FRAME"), 0)
+#if (!GDB_MULTI_ARCH) && !defined (DEPRECATED_POP_FRAME)
+#define DEPRECATED_POP_FRAME (internal_error (__FILE__, __LINE__, "DEPRECATED_POP_FRAME"), 0)
 #endif
 
-typedef void (gdbarch_pop_frame_ftype) (void);
-extern void gdbarch_pop_frame (struct gdbarch *gdbarch);
-extern void set_gdbarch_pop_frame (struct gdbarch *gdbarch, gdbarch_pop_frame_ftype *pop_frame);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (POP_FRAME)
-#error "Non multi-arch definition of POP_FRAME"
+typedef void (gdbarch_deprecated_pop_frame_ftype) (void);
+extern void gdbarch_deprecated_pop_frame (struct gdbarch *gdbarch);
+extern void set_gdbarch_deprecated_pop_frame (struct gdbarch *gdbarch, gdbarch_deprecated_pop_frame_ftype *deprecated_pop_frame);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_POP_FRAME)
+#error "Non multi-arch definition of DEPRECATED_POP_FRAME"
 #endif
 #if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (POP_FRAME)
-#define POP_FRAME (gdbarch_pop_frame (current_gdbarch))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_POP_FRAME)
+#define DEPRECATED_POP_FRAME (gdbarch_deprecated_pop_frame (current_gdbarch))
 #endif
 #endif
 
