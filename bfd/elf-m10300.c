@@ -2462,6 +2462,7 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	  asection *sym_sec = NULL;
 	  const char *sym_name;
 	  char *new_name;
+	  bfd_vma saved_addend;
 
 	  /* A local symbol.  */
 	  isym = isymbuf + ELF32_R_SYM (irel->r_info);
@@ -2474,13 +2475,25 @@ mn10300_elf_relax_section (abfd, sec, link_info, again)
 	  else
 	    sym_sec = bfd_section_from_elf_index (abfd, isym->st_shndx);
 
-	  symval = (isym->st_value
-		    + sym_sec->output_section->vma
-		    + sym_sec->output_offset);
 	  sym_name = bfd_elf_string_from_elf_section (abfd,
 						      symtab_hdr->sh_link,
 						      isym->st_name);
 
+	  if ((sym_sec->flags & SEC_MERGE)
+	      && ELF_ST_TYPE (isym->st_info) == STT_SECTION
+	      && sym_sec->sec_info_type == ELF_INFO_TYPE_MERGE)
+	    {
+	      saved_addend = irel->r_addend;
+	      symval = _bfd_elf_rela_local_sym (abfd, isym, &sym_sec, irel);
+	      symval += irel->r_addend;
+	      irel->r_addend = saved_addend;
+	    }
+	  else
+	    {
+	      symval = (isym->st_value
+			+ sym_sec->output_section->vma
+			+ sym_sec->output_offset);
+	    }
 	  /* Tack on an ID so we can uniquely identify this
 	     local symbol in the global hash table.  */
 	  new_name = bfd_malloc ((bfd_size_type) strlen (sym_name) + 10);
