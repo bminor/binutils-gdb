@@ -332,6 +332,10 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
 	      && le[i].pc == le[i + 1].pc)
 	    continue;		/* Ignore duplicates */
 
+	  /* Skip any end-of-function markers.  */
+	  if (le[i].line == 0)
+	    continue;
+
 	  mle[newlines].line = le[i].line;
 	  if (le[i].line > le[i + 1].line)
 	    out_of_order = 1;

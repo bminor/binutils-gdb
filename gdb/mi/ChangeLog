@@ -1,3 +1,8 @@
+2002-04-04  Daniel Jacobowitz  <drow@mvista.com>
+
+	* mi-cmd-disas.c (mi_cmd_disassemble): Skip end-of-function
+	markers in the line table.
+
 2002-03-15  Andrew Cagney  <ac131313@redhat.com>
 
 	* mi-main.c (XMALLOC): Delete macro.
