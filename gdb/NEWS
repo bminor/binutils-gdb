@@ -1,7 +1,7 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB 6.1:
+*** Changes in GDB 6.2:
 
 * "-async" and "-noasync" options removed.
 
