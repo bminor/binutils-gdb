@@ -1,16 +1,29 @@
+Thu Apr 30 15:59:54 1998  Jason Molenda  (crash@bugshack.cygnus.com)
+
+	* Makefile.in (config-check-targets, config-check-hosts): Removed.
+
+1998-04-30  Paul Eggert  <eggert@twinsun.com>
+
+        * Makefile.in (maintainer-clean):
+        Don't get ahead of yourself and delete Makefile
+        before running `make'.
+        (local-maintainer-clean, do-maintainer-clean): New rules.
+
 Wed Apr 29 10:20:40 1998  John Metzler  <jmetzler@cygnus.com>
 
-	* nec4102rom.c : New file implements rom monitor adapter for
-        nec-vr4102 board. This board hosts the vr4111 chip. This file
-        required extenstions to the monitor_ops structure, hooks for wiat
+	* nec4102rom.c: New file implements ROM monitor adapter for
+        nec-vr4102 board.  This board hosts the vr4111 chip.  This file
+        required extenstions to the monitor_ops structure, hooks for wait
         filter, new flags. This version does not support more than one
         breakpoint and resuming after a breakpoint in 16 bit mode is
-        completely disfunctional.  * monitor.h : Defined additional hooks
-        for dmpregs, confinuer_hooks and wait_filter. These additions
-        require that all rom monitor interfaces be recoded to to
-        initializa monitor ops using assignments rather than static
-        structure initialization.  Added new bits to flags
-        MO_EXACT_DUMPADDR, MO_HAS_BLOCKWRITES
+        completely disfunctional.  
+
+	* monitor.h: Defined additional hooks for dmpregs, configure_hooks
+	and wait_filter. These additions require that all ROM monitor
+	interfaces be recoded to initialize monitor ops using assignments
+	rather than static structure initialization.  Added new bits to
+	flags MO_EXACT_DUMPADDR, MO_HAS_BLOCKWRITES.
+
         * monitor.c (RDEBUG): Conditional tracing throughout the file.
         (fromhex): Now recognized upper cse hex digits
         (monitor_printf_noecho):
@@ -39,8 +52,6 @@ Wed Apr 29 10:20:40 1998  John Metzler  <jmetzler@cygnus.com>
         mod to use.
         (monitor_read_memory): Can now handle dump formats in which the bytes 
         preceeding the requested data is not printed.
-	* monitor.h: Added new fields to the structure
-
 
 Tue Apr 28 19:41:33 1998  Tom Tromey  <tromey@cygnus.com>
 
