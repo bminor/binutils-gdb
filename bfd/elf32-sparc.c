@@ -1,5 +1,5 @@
 /* SPARC-specific support for 32-bit ELF
-   Copyright 1993, 1994, 1995 Free Software Foundation, Inc.
+   Copyright (C) 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
