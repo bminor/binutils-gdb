@@ -56,62 +56,79 @@ m32r_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
 }
 
 
-/* BREAKPOINT */
-#define M32R_BE_BREAKPOINT32 {0x10, 0xf1, 0x70, 0x00}
-#define M32R_LE_BREAKPOINT32 {0xf1, 0x10, 0x00, 0x70}
-#define M32R_BE_BREAKPOINT16 {0x10, 0xf1}
-#define M32R_LE_BREAKPOINT16 {0xf1, 0x10}
+/* Breakpoints
+ 
+   The little endian mode of M32R is unique. In most of architectures,
+   two 16-bit instructions, A and B, are placed as the following:
+  
+   Big endian:
+   A0 A1 B0 B1
+  
+   Little endian:
+   A1 A0 B1 B0
+  
+   In M32R, they are placed like this:
+  
+   Big endian:
+   A0 A1 B0 B1
+  
+   Little endian:
+   B1 B0 A1 A0
+  
+   This is because M32R always fetches instructions in 32-bit.
+  
+   The following functions take care of this behavior. */
 
 static int
 m32r_memory_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
 {
   int val;
-  unsigned char *bp;
-  int bplen;
-
-  bplen = (addr & 3) ? 2 : 4;
+  char buf[4];
+  char bp_entry[] = { 0x10, 0xf1 };	/* dpt */
 
   /* Save the memory contents.  */
-  val = target_read_memory (addr, contents_cache, bplen);
+  val = target_read_memory (addr & 0xfffffffc, contents_cache, 4);
   if (val != 0)
     return val;			/* return error */
 
   /* Determine appropriate breakpoint contents and size for this address.  */
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     {
-      if (((addr & 3) == 0)
-	  && ((contents_cache[0] & 0x80) || (contents_cache[2] & 0x80)))
+      if ((addr & 3) == 0)
 	{
-	  static unsigned char insn[] = M32R_BE_BREAKPOINT32;
-	  bp = insn;
-	  bplen = sizeof (insn);
+	  buf[0] = bp_entry[0];
+	  buf[1] = bp_entry[1];
+	  buf[2] = contents_cache[2] & 0x7f;
+	  buf[3] = contents_cache[3];
 	}
       else
 	{
-	  static unsigned char insn[] = M32R_BE_BREAKPOINT16;
-	  bp = insn;
-	  bplen = sizeof (insn);
+	  buf[0] = contents_cache[0];
+	  buf[1] = contents_cache[1];
+	  buf[2] = bp_entry[0];
+	  buf[3] = bp_entry[1];
 	}
     }
-  else
-    {				/* little-endian */
-      if (((addr & 3) == 0)
-	  && ((contents_cache[1] & 0x80) || (contents_cache[3] & 0x80)))
+  else				/* little-endian */
+    {
+      if ((addr & 3) == 0)
 	{
-	  static unsigned char insn[] = M32R_LE_BREAKPOINT32;
-	  bp = insn;
-	  bplen = sizeof (insn);
+	  buf[0] = contents_cache[0];
+	  buf[1] = contents_cache[1] & 0x7f;
+	  buf[2] = bp_entry[1];
+	  buf[3] = bp_entry[0];
 	}
       else
 	{
-	  static unsigned char insn[] = M32R_LE_BREAKPOINT16;
-	  bp = insn;
-	  bplen = sizeof (insn);
+	  buf[0] = bp_entry[1];
+	  buf[1] = bp_entry[0];
+	  buf[2] = contents_cache[2];
+	  buf[3] = contents_cache[3];
 	}
     }
 
   /* Write the breakpoint.  */
-  val = target_write_memory (addr, (char *) bp, bplen);
+  val = target_write_memory (addr & 0xfffffffc, buf, 4);
   return val;
 }
 
@@ -119,47 +136,35 @@ static int
 m32r_memory_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
 {
   int val;
-  int bplen;
+  char buf[4];
 
-  /* Determine appropriate breakpoint contents and size for this address.  */
+  buf[0] = contents_cache[0];
+  buf[1] = contents_cache[1];
+  buf[2] = contents_cache[2];
+  buf[3] = contents_cache[3];
+
+  /* Remove parallel bit.  */
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     {
-      if (((addr & 3) == 0)
-	  && ((contents_cache[0] & 0x80) || (contents_cache[2] & 0x80)))
-	{
-	  static unsigned char insn[] = M32R_BE_BREAKPOINT32;
-	  bplen = sizeof (insn);
-	}
-      else
-	{
-	  static unsigned char insn[] = M32R_BE_BREAKPOINT16;
-	  bplen = sizeof (insn);
-	}
+      if ((buf[0] & 0x80) == 0 && (buf[2] & 0x80) != 0)
+	buf[2] &= 0x7f;
     }
-  else
+  else				/* little-endian */
     {
-      /* little-endian */
-      if (((addr & 3) == 0)
-	  && ((contents_cache[1] & 0x80) || (contents_cache[3] & 0x80)))
-	{
-	  static unsigned char insn[] = M32R_BE_BREAKPOINT32;
-	  bplen = sizeof (insn);
-	}
-      else
-	{
-	  static unsigned char insn[] = M32R_BE_BREAKPOINT16;
-	  bplen = sizeof (insn);
-	}
+      if ((buf[3] & 0x80) == 0 && (buf[1] & 0x80) != 0)
+	buf[1] &= 0x7f;
     }
 
   /* Write contents.  */
-  val = target_write_memory (addr, contents_cache, bplen);
+  val = target_write_memory (addr & 0xfffffffc, buf, 4);
   return val;
 }
 
 static const unsigned char *
 m32r_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
 {
+  static char be_bp_entry[] = { 0x10, 0xf1, 0x70, 0x00 };	/* dpt -> nop */
+  static char le_bp_entry[] = { 0x00, 0x70, 0xf1, 0x10 };	/* dpt -> nop */
   unsigned char *bp;
 
   /* Determine appropriate breakpoint.  */
@@ -167,30 +172,26 @@ m32r_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenptr)
     {
       if ((*pcptr & 3) == 0)
 	{
-	  static unsigned char insn[] = M32R_BE_BREAKPOINT32;
-	  bp = insn;
-	  *lenptr = sizeof (insn);
+	  bp = be_bp_entry;
+	  *lenptr = 4;
 	}
       else
 	{
-	  static unsigned char insn[] = M32R_BE_BREAKPOINT16;
-	  bp = insn;
-	  *lenptr = sizeof (insn);
+	  bp = be_bp_entry;
+	  *lenptr = 2;
 	}
     }
   else
     {
       if ((*pcptr & 3) == 0)
 	{
-	  static unsigned char insn[] = M32R_LE_BREAKPOINT32;
-	  bp = insn;
-	  *lenptr = sizeof (insn);
+	  bp = le_bp_entry;
+	  *lenptr = 4;
 	}
       else
 	{
-	  static unsigned char insn[] = M32R_LE_BREAKPOINT16;
-	  bp = insn;
-	  *lenptr = sizeof (insn);
+	  bp = le_bp_entry + 2;
+	  *lenptr = 2;
 	}
     }
 
