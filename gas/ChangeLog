@@ -1,3 +1,40 @@
+Wed Aug 16 12:49:17 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* expr.c (operand): Add support for .startof. and .sizeof. by
+	using magic symbol names which the linker will recognize
+	specially.
+	* doc/as.texinfo: Take out note that .startof. and .sizeof. are
+	not supported.
+
+Tue Aug 15 15:08:49 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-m68k.c (md_pseudo_table): Add MRI structured control
+	directives: if, if.b, if.w, if.l, else, else.s, else.l, endi,
+	break, break.s, break.l, next, next.s, next.l, for, for.b, for.w,
+	for.l, endf, repeat, until, until.b, until.w, until.l, while,
+	while.b, while.w, while.l, endw.
+	(enum mri_control_type): Define.
+	(struct mri_control_info): Define.
+	(mri_control_stack): New static variable.
+	(mri_control_index): New static variable.
+	(mri_control_label): New static function.
+	(push_mri_control, pop_mri_control): New static functions.
+	(parse_mri_condition): New static function.
+	(parse_mri_control_operand): New static function.
+	(swap_mri_condition, reverse_mri_condition): New static functions.
+	(build_mri_control_operand): New static function.
+	(parse_mri_control_expression): New static function.
+	(s_mri_if, s_mri_else, s_mri_endi): New static functions.
+	(s_mri_break, s_mri_next): New static functions.
+	(s_mri_for, s_mri_endf): New static functions.
+	(s_mri_repeat, s_mri_until): New static functions.
+	(s_mri_while, s_mri_endw): New static functions.
+	* gasp.c (mrikinfo): Remove IF.
+	* expr.c (get_symbol_end): Accept \001 as part of a name.
+
+	* symbols.c (colon): Change parameter to const char *.
+	* symbols.h (colon): Update declaration.
+
 Mon Aug 14 20:51:56 1995  Ken Raeburn  <raeburn@kr-laptop.cygnus.com>
 
 	* write.c (write_contents): Always do it the BFD_FAST_SECTION_FILL

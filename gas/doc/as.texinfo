@@ -1040,11 +1040,6 @@ seem of little consequence.  Some of these may be supported in future releases.
 
 @itemize @bullet
 
-@item @code{.STARTOF.} and @code{.SIZEOF.} operators
-
-The @code{.STARTOF.} and @code{.SIZEOF.} operators are not supported.  They
-require linker support.
-
 @item EBCDIC strings
 
 EBCDIC strings are not supported.
@@ -1092,6 +1087,16 @@ The @code{XREF} pseudo-op is ignored.
 @item macros
 
 Macros are not supported directly, but are supported by @code{gasp}.
+
+@item @code{IFC}, @code{IFNC} pseudo-ops.
+
+The @code{IFC} and @code{IFNC} pseudo-ops are not supported directly, but are
+supported by @code{gasp}.
+
+@item @code{IRP}, @code{IRPC}, @code{REPT}, @code{ENDR} pseudo-ops
+
+The repeating pseudo-ops are not supported directly, but are supported by
+@code{gasp}.
 @end itemize
 
 @node o
