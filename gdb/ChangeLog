@@ -1,5 +1,13 @@
 2002-06-30  Mark Kettenis  <kettenis@gnu.org>
 
+	* configure.tgt (i[3456]86-*-openbsd*): Fold into
+	i[3456]86-*-netbsd* case.
+	* config/i386/tm-obsd.h: Removed.
+	* config/i386/obsd.mt: Removed.
+	* config/i386/obsd.mh (NATDEPFILES): Remove corelow.o and
+	core-aout.o.
+	(MH_CFLAGS): Add -DYYDEBUG=0.
+
 	* i386bsd-nat.c (_initialize_i386bsd_nat): Define SC_PC_OFFSET to
 	i386nbsd_sc_pc_offset on OpenBSD too.
 
