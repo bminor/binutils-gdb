@@ -244,13 +244,13 @@ fork_inferior (char *exec_file, char *allargs, char **env,
   if (pre_trace_fun != NULL)
     (*pre_trace_fun) ();
 
-#if defined(USG) && !defined(HAVE_VFORK)
-  pid = fork ();
-#else
+#ifdef HAVE_VFORK
   if (debug_fork)
     pid = fork ();
   else
     pid = vfork ();
+#else
+  pid = fork ();
 #endif
 
   if (pid < 0)
@@ -416,13 +416,13 @@ clone_and_follow_inferior (int child_pid, int *followed_child)
     error ("error getting pipe for handoff semaphore");
 
   /* Clone the debugger. */
-#if defined(USG) && !defined(HAVE_VFORK)
-  debugger_pid = fork ();
-#else
+#ifdef HAVE_VFORK
   if (debug_fork)
     debugger_pid = fork ();
   else
     debugger_pid = vfork ();
+#else
+  debugger_pid = fork ();
 #endif
 
   if (debugger_pid < 0)

@@ -1,3 +1,12 @@
+Sun Dec  3 02:28:26 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* ser-pipe.c (pipe_open): Only use vfork when available.
+	* fork-child.c (fork_inferior): Fix #ifdef HAVE_VFORK test.
+	(clone_and_follow_inferior): Ditto.
+
+	* configure.in (AC_CHECK_FUNCS): Check for vfork.
+	* configure, config.in: Regenerate.
+
 Sun Dec  3 01:54:49 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* ser-unix.c (wait_for): Initialize the FD_SET before every select

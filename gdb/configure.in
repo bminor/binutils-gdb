@@ -129,7 +129,7 @@ AC_HEADER_STAT
 
 AC_C_CONST
 
-AC_CHECK_FUNCS(setpgid sbrk sigaction isascii bzero bcopy btowc poll sigprocmask)
+AC_CHECK_FUNCS(setpgid sbrk sigaction isascii bzero bcopy btowc poll sigprocmask vfork)
 AC_FUNC_ALLOCA
 
 # See if machine/reg.h supports the %fs and %gs i386 segment registers.

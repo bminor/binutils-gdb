@@ -225,6 +225,9 @@
 /* Define if you have the strchr function.  */
 #undef HAVE_STRCHR
 
+/* Define if you have the vfork function.  */
+#undef HAVE_VFORK
+
 /* Define if you have the <argz.h> header file.  */
 #undef HAVE_ARGZ_H
 

@@ -3557,7 +3557,7 @@ EOF
 fi
 
 
-for ac_func in setpgid sbrk sigaction isascii bzero bcopy btowc poll sigprocmask
+for ac_func in setpgid sbrk sigaction isascii bzero bcopy btowc poll sigprocmask vfork
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
 echo "configure:3564: checking for $ac_func" >&5
