@@ -858,6 +858,8 @@ if ![target_info exists use_gdb_stub] {
     }
     -re "Starting program.*Breakpoint \[0-9\]+,.*main .*argc.*argv.* at .*$srcfile:75.*75\[\t \]+if .argc.* \{.*$gdb_prompt $"\
 	                    { pass "run until function breakpoint, optimized file" }
+    -re "Starting program.*Breakpoint \[0-9\]+,.*main .*argc.*argv.* at .*$gdb_prompt $"\
+	                    { pass "run until function breakpoint, optimized file (code motion)" }
     -re ".*$gdb_prompt $"       { fail "run until function breakpoint, optimized file" }
     timeout	            { fail "run until function breakpoint, optimized file (timeout)" }
   }

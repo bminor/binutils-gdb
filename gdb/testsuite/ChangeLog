@@ -4,6 +4,11 @@ Mon May  1 15:37:58 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 	* gdb.c++/templates.cc: Properly check for GCC version number.
 	* lib/compiler.cc: Likewise
 
+2000-04-28  Michael Snyder  <msnyder@seadog.cygnus.com>
+
+	* gdb.base/break.exp: When compiled with -O2 optimization, 
+	gdb may not stop at the first line of main, due to code motion.
+
 2000-04-26  Michael Snyder  <msnyder@seadog.cygnus.com>
 
 	* gdb.base/call-ar-st.exp: Bail out if target is sparclet.
