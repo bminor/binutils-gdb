@@ -184,5 +184,10 @@ if [istarget hppa*-*-*] then {
     # GAS-1.36 choked on this file.
     # FIXME.  Should check relocations made for this test!
     gas_test "exprbug.s" "" "" "Check for sym1-sym2 acceptance"
+
+    # Bad things happen in the PA ELF backend (others too?) if a non-default
+    # section is created...
+    setup_xfail hppa*-*-osf*
+    gas_test "ssbug.s" "" "" "Check for acceptance of non-default subspaces"
 }
 

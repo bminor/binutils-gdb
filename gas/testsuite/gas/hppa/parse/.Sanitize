@@ -42,6 +42,7 @@ nosubspace.s
 parse.exp
 procbug.s
 spacebug.s
+ssbug.s
 stringer.s
 undefbug.s
 versionbug.s
