@@ -951,8 +951,19 @@ DEFUN(translate_to_native_sym_flags,(sym_pointer, cache_ptr, abfd),
       sym_pointer->e_type[0] = (N_UNDF | N_EXT);
     }    
   else {    
-      bfd_error_vector.nonrepresentable_section(abfd,
-						bfd_get_output_section(cache_ptr)->name);
+      if (cache_ptr->section->output_section) 
+      {
+	
+	bfd_error_vector.nonrepresentable_section(abfd,
+						  bfd_get_output_section(cache_ptr)->name);
+      }
+      else 
+      {
+	bfd_error_vector.nonrepresentable_section(abfd,
+						  cache_ptr->section->name);
+	
+      }
+      
     }
   /* Turn the symbol from section relative to absolute again */
     
