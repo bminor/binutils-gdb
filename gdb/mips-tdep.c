@@ -123,6 +123,11 @@ mips_frame_saved_pc(frame)
 static struct mips_extra_func_info temp_proc_desc;
 static struct frame_saved_regs temp_saved_regs;
 
+/* This fencepost looks highly suspicious to me.  Removing it also
+   seems suspicious as it could affect remote debugging across serial
+   lines.  At the very least, this needs a warning message.
+   rich@cygnus.com 12mar93. */
+
 static CORE_ADDR
 heuristic_proc_start(pc)
     CORE_ADDR pc;
@@ -135,7 +140,11 @@ heuristic_proc_start(pc)
 
     /* search back for previous return */
     for (start_pc -= 4; ; start_pc -= 4)
-	if (start_pc < fence) return 0; 
+	if (start_pc < fence)
+	  {
+	    warning("Cannot find enclosing function for pc 0x%x", pc);
+	    return 0; 
+	  }
 	else if (ABOUT_TO_RETURN(start_pc))
 	    break;
 
@@ -757,7 +766,7 @@ void
 _initialize_mips_tdep ()
 {
   add_show_from_set
-    (add_set_cmd ("mips_fpu", class_support, var_boolean,
+    (add_set_cmd ("mipsfpu", class_support, var_boolean,
 		  (char *) &mips_fpu,
 		  "Set use of floating point coprocessor.\n\
 Turn off to avoid using floating point instructions when calling functions\n\

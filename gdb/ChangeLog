@@ -1,3 +1,9 @@
+Fri Mar 12 16:23:54 1993  K. Richard Pixley  (rich@cygnus.com)
+
+	* mips-tdep.c (heuristic_proc_start): if we walk the pc into the
+	  fence post without finding the enclosing function, then print a
+	  warning.
+
 Thu Mar 11 09:33:01 1993  Fred Fish  (fnf@cygnus.com)
 
 	* utils.c (fputs_demangled, fprint_symbol):  Remove.
