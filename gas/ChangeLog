@@ -1,3 +1,43 @@
+Thu Mar 24 21:29:29 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* config/tc-alpha.c (alpha_ip): Only set GP prolog size if using
+	PV register.
+	(T12): New macro.
+	(emit_insn): New function.
+	(md_assemble): Call it.
+	(alpha_force_relocation): Handle BFD_RELOC_26, for call_pal
+	instructions.
+	(lituse_pending): New variable.  Set by anything that generates a
+	LITERAL reloc, cleared by anything that generates a LITUSE reloc,
+	tested by code that might want to emit a LITUSE reloc.
+	(emit_unaligned_io): New function.  Currently calls md_assemble,
+	but it should eventually be converted to generate the insn itself
+	and call emit_insn directly.
+	(emit_load_unal, emit_store_unal, emit_byte_manip_r,
+	emit_extract_r, emit_insert_r, emit_mask_r, emit_sign_extend,
+	emit_bis_r): Likewise.
+	(alpha_ip, case 'I'): Handle with BFD_RELOC_23.
+	(alpha_ip, label get_macro): Don't emit the final instruction if
+	the opcode is zero.
+	(alpha_ip, case 'B', subcase 'd'): New case, for subword and
+	unaligned memory access macros.
+	(md_apply_fix): Handle BFD_RELOC_26.  Generate an error message if
+	the value can't be resolved.
+
+Wed Mar 23 16:06:08 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-mips.c (md_parse_option): For -membedded-pic, force
+	the -G value to 0x7fffffff.  For SVR4 PIC options, don't call
+	bfd_set_gp_size here, it's done in md_begin.  Don't permit -G with
+	-membedded-pic.
+	(mips_force_relocation): New function.
+	(md_apply_fix): Set fixP->fx_done appropriately.
+	(s_change_sec): For EMBEDDED_PIC, change .data and .rdata to
+	.sdata.
+	* config/tc-mips.h (TC_FORCE_RELOCATION): Define.
+	(mips_force_relocation): Declare.
+	(TC_HANDLE_FX_DONE): Define.
+
 Tue Mar 22 13:58:37 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/tc-mips.c (enum mips_pic_level): New enum.
