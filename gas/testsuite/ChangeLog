@@ -1,3 +1,10 @@
+start-sanitize-d30v
+Fri Feb 21 14:23:14 1997  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* gas/d30v/{align.d, align.s, d30.exp, guard.d, guard.s,
+	inst.d, inst.s, opt.d, opt.s}: Test files for D30V.
+
+end-sanitize-d30v	
 Wed Feb 19 00:55:29 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* gas/macros/semi.s, gas/macros/semi.d: New test.
