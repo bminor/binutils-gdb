@@ -1,3 +1,15 @@
+2002-10-02  Stephen Clarke <stephen.clarke@superh.com>
+
+	* elf32-sh.c (elf_sh_link_hash_entry): Add gotplt_refcount.
+	(sh_elf_link_hash_newfunc): Initialize it.
+	(allocate_dynrelocs): Transfer gotplt refs from plt.refcount
+	to got.refcount for symbols that are forced local or when
+	we have direct got refs.
+	(sh_elf_gc_sweep_hook): Adjust gotplt_refcount.  Use it
+	to correctly adjust got.refcount and plt.refcount.
+	(sh_elf_copy_indirect_symbol): Copy gotplt_refcount across.
+	(sh_elf_check_relocs): Increment gotplt_refcount.
+	
 2002-10-01  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf32-i386.c (elf_i386_relocate_section): Fix
