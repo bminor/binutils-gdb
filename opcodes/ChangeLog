@@ -1,3 +1,9 @@
+Thu Jan 22 16:20:17 1998  Fred Fish  <fnf@cygnus.com>
+
+	* d10v-dis.c (PC_MASK): Correct value.
+	(print_operand): If there's a reloc, don't calculate the
+ 	address because they could be in different sections.
+
 start-sanitize-cygnus
 Thu Jan 22 16:10:32 1998  Doug Evans  <devans@seba.cygnus.com>
 
