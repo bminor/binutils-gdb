@@ -64,5 +64,11 @@ extern void *memset();
 /* Kernel is a bit tenacious about sharing text segments, disallowing bpts.  */
 #define	ONE_PROCESS_WRITETEXT
 
+/* HAVE_SGTTY also works, except for the lack of usleep (which it would be
+   possible to work around by writing our own using setitimer directly).
+
+   But we have termios, at least as of Ultrix 4.2A, so use it.  */
+#define HAVE_TERMIOS
+
 /* Mips hosts need aligned va_list arguments.  */
 #include "mips/xm-makeva.h"
