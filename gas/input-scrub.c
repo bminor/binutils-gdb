@@ -59,14 +59,15 @@
 static char *buffer_start;	/*->1st char of full buffer area.  */
 static char *partial_where;	/*->after last full line in buffer.  */
 static int partial_size;	/* >=0. Number of chars in partial line in buffer.  */
+
+/* Because we need AFTER_STRING just after last full line, it clobbers
+   1st part of partial line. So we preserve 1st part of partial line
+   here.  */
 static char save_source[AFTER_SIZE];
-/* Because we need AFTER_STRING just after last */
-/* full line, it clobbers 1st part of partial */
-/* line. So we preserve 1st part of partial */
-/* line here.  */
-static unsigned int buffer_length;	/* What is the largest size buffer that */
-/* input_file_give_next_buffer() could */
-/* return to us? */
+
+/* What is the largest size buffer that input_file_give_next_buffer()
+   could return to us?  */
+static unsigned int buffer_length;
 
 /* The index into an sb structure we are reading from.  -1 if none.  */
 static int sb_index = -1;
@@ -101,24 +102,23 @@ static line_numberT physical_input_line;
 static int logical_input_line;
 
 /* Struct used to save the state of the input handler during include files */
-struct input_save
-  {
-    char *buffer_start;
-    char *partial_where;
-    int partial_size;
-    char save_source[AFTER_SIZE];
-    unsigned int buffer_length;
-    char *physical_input_file;
-    char *logical_input_file;
-    line_numberT physical_input_line;
-    int logical_input_line;
-    int sb_index;
-    sb from_sb;
-    int from_sb_is_expansion;       /* Should we do a conditional check? */
-    struct input_save *next_saved_file;	/* Chain of input_saves */
-    char *input_file_save;	/* Saved state of input routines */
-    char *saved_position;	/* Caller's saved position in buf */
-  };
+struct input_save {
+  char *buffer_start;
+  char *partial_where;
+  int partial_size;
+  char save_source[AFTER_SIZE];
+  unsigned int buffer_length;
+  char *physical_input_file;
+  char *logical_input_file;
+  line_numberT physical_input_line;
+  int logical_input_line;
+  int sb_index;
+  sb from_sb;
+  int from_sb_is_expansion;	/* Should we do a conditional check? */
+  struct input_save *next_saved_file;	/* Chain of input_saves */
+  char *input_file_save;	/* Saved state of input routines */
+  char *saved_position;		/* Caller's saved position in buf */
+};
 
 static struct input_save *input_scrub_push PARAMS ((char *saved_position));
 static char *input_scrub_pop PARAMS ((struct input_save *arg));
@@ -132,6 +132,7 @@ static struct input_save *next_saved_file;
 /* Push the state of input reading and scrubbing so that we can #include.
    The return value is a 'void *' (fudged for old compilers) to a save
    area, which can be restored by passing it to input_scrub_pop().  */
+
 static struct input_save *
 input_scrub_push (saved_position)
      char *saved_position;
@@ -166,7 +167,7 @@ input_scrub_push (saved_position)
   memcpy (buffer_start, BEFORE_STRING, (int) BEFORE_SIZE);
 
   return saved;
-}				/* input_scrub_push() */
+}
 
 static char *
 input_scrub_pop (saved)
@@ -196,12 +197,12 @@ input_scrub_pop (saved)
   return saved_position;
 }
 
-
 void
 input_scrub_begin ()
 {
   know (strlen (BEFORE_STRING) == BEFORE_SIZE);
-  know (strlen (AFTER_STRING) == AFTER_SIZE || (AFTER_STRING[0] == '\0' && AFTER_SIZE == 1));
+  know (strlen (AFTER_STRING) == AFTER_SIZE
+	|| (AFTER_STRING[0] == '\0' && AFTER_SIZE == 1));
 
   input_file_begin ();
 
@@ -229,9 +230,10 @@ input_scrub_end ()
     }
 }
 
-/* Start reading input from a new file.  */
+/* Start reading input from a new file.
+   Return start of caller's part of buffer.  */
 
-char *				/* Return start of caller's part of buffer.  */
+char *
 input_scrub_new_file (filename)
      char *filename;
 {
@@ -311,16 +313,17 @@ input_scrub_next_buffer (bufp)
       if (sb_index >= from_sb.len)
 	{
 	  sb_kill (&from_sb);
-          if (from_sb_is_expansion
+	  if (from_sb_is_expansion
 	      )
-            {
-              cond_finish_check (macro_nest);
+	    {
+	      cond_finish_check (macro_nest);
 #ifdef md_macro_end
-              /* allow the target to clean up per-macro expansion data */
-              md_macro_end ();
+	      /* Allow the target to clean up per-macro expansion
+	         data.  */
+	      md_macro_end ();
 #endif
-            }
-          --macro_nest;
+	    }
+	  --macro_nest;
 	  partial_where = NULL;
 	  if (next_saved_file != NULL)
 	    *bufp = input_scrub_pop (next_saved_file);
@@ -404,15 +407,13 @@ input_scrub_next_buffer (bufp)
 	}
     }
   return (partial_where);
-}				/* input_scrub_next_buffer() */
+}
 
-/*
- * The remaining part of this file deals with line numbers, error
- * messages and so on.
- */
+/* The remaining part of this file deals with line numbers, error
+   messages and so on.  Return TRUE if we opened any file.  */
 
 int
-seen_at_least_1_file ()		/* TRUE if we opened any file.  */
+seen_at_least_1_file ()
 {
   return (physical_input_file != NULL);
 }
@@ -428,20 +429,17 @@ bump_line_counters ()
     }
 }
 
-/*
- *			new_logical_line()
- *
- * Tells us what the new logical line number and file are.
- * If the line_number is -1, we don't change the current logical line
- * number.  If it is -2, we decrement the logical line number (this is
- * to support the .appfile pseudo-op inserted into the stream by
- * do_scrub_chars).
- * If the fname is NULL, we don't change the current logical file name.
- * Returns nonzero if the filename actually changes.
- */
+/* Tells us what the new logical line number and file are.
+   If the line_number is -1, we don't change the current logical line
+   number.  If it is -2, we decrement the logical line number (this is
+   to support the .appfile pseudo-op inserted into the stream by
+   do_scrub_chars).
+   If the fname is NULL, we don't change the current logical file name.
+   Returns nonzero if the filename actually changes.  */
+
 int
 new_logical_line (fname, line_number)
-     char *fname;		/* DON'T destroy it! We point to it! */
+     char *fname;		/* DON'T destroy it!  We point to it!  */
      int line_number;
 {
   if (line_number >= 0)
@@ -458,15 +456,12 @@ new_logical_line (fname, line_number)
     }
   else
     return 0;
-}				/* new_logical_line() */
+}
 
-/*
- *			a s _ w h e r e ()
- *
- * Return the current file name and line number.
- * namep should be char * const *, but there are compilers which screw
- * up declarations like that, and it's easier to avoid it.
- */
+/* Return the current file name and line number.
+   namep should be char * const *, but there are compilers which screw
+   up declarations like that, and it's easier to avoid it.  */
+
 void
 as_where (namep, linep)
      char **namep;
@@ -491,22 +486,17 @@ as_where (namep, linep)
       if (linep != NULL)
 	*linep = 0;
     }
-}				/* as_where() */
+}
 
+/* Output to given stream how much of line we have scanned so far.
+   Assumes we have scanned up to and including input_line_pointer.
+   No free '\n' at end of line.  */
 
-/*
- *			a s _ h o w m u c h ()
- *
- * Output to given stream how much of line we have scanned so far.
- * Assumes we have scanned up to and including input_line_pointer.
- * No free '\n' at end of line.
- */
 void
 as_howmuch (stream)
      FILE *stream;		/* Opened for write please.  */
 {
   register char *p;		/* Scan input line.  */
-  /* register char c; JF unused */
 
   for (p = input_line_pointer - 1; *p != '\n'; --p)
     {
@@ -536,5 +526,3 @@ as_1_char (c, stream)
     }
   (void) putc (c, stream);
 }
-
-/* end of input_scrub.c */

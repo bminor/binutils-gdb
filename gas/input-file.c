@@ -1,5 +1,5 @@
 /* input_file.c - Deal with Input Files -
-   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 98, 1999
+   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 98, 99, 2000
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -57,13 +57,12 @@ static FILE *f_in;
 static char *file_name;
 
 /* Struct for saving the state of this module for file includes.  */
-struct saved_file
-  {
-    FILE *f_in;
-    char *file_name;
-    int preprocess;
-    char *app_save;
-  };
+struct saved_file {
+  FILE *f_in;
+  char *file_name;
+  int preprocess;
+  char *app_save;
+};
 
 /* These hooks accomodate most operating systems.  */
 
@@ -188,7 +187,7 @@ input_file_close ()
       fclose (f_in);
     }				/* don't close a null file pointer */
   f_in = 0;
-}				/* input_file_close() */
+}
 
 /* This function is passed to do_scrub_chars.  */
 
@@ -245,5 +244,3 @@ input_file_give_next_buffer (where)
     }
   return (return_value);
 }
-
-/* end of input-file.c */
