@@ -4,4 +4,4 @@
 # is facilitated via either a serial line, or a TCP or TELNET connection to
 # a serial line on a terminal multiplexor.
 TDEPFILES= exec.o m68k-pinsn.o m68k-tdep.o remote-st2000.o
-TM_FILE= tm-68k.h
+TM_FILE= tm-st2000.h
