@@ -145,7 +145,7 @@ Things-to-lose:
 Do-last:
 
 if ( echo $* | grep keep\-v9 > /dev/null ) ; then
-	echo Keeping tc-sparc64 and v9 stuff in tc-sparc.c.
+	echo Keeping tc-sparc64 and v9 stuff in tc-sparc.c obj-elf.h.
 else
 	echo Cleaning tc-sparc.c...
 	sed '/start\-sanitize/,/end-sanitize/d' < tc-sparc.c > new
@@ -153,6 +153,12 @@ else
 		cp tc-sparc.c .Recover
 	fi
 	mv new tc-sparc.c
+	echo Cleaning obj-elf.h...
+	grep -v v9 < obj-elf.h > new
+	if [ -n "${safe}" ] ; then
+		cp obj-elf.h .Recover
+	fi
+	mv new obj-elf.h
 	echo Deleting tc-sparc64 files.
 	rm -f tc-sparc64.c tc-sparc64.h
 fi
