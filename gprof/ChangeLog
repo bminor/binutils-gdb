@@ -1,3 +1,9 @@
+2003-08-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* dep-in.sed: Remove libintl.h.
+	* Makefile.am (POTFILES.in): Unset LC_COLLATE.
+	* Makefile.in: Regenerate.
+
 2003-07-24  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.

@@ -1,4 +1,4 @@
-# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
+# Makefile.in generated automatically by automake 1.4-p6 from Makefile.am
 
 # Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
@@ -605,7 +605,7 @@ deffilep.c ldgram.c ldlex.c
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = gtar
+TAR = tar
 GZIP_ENV = --best
 SOURCES = $(ld_new_SOURCES) $(EXTRA_ld_new_SOURCES)
 OBJECTS = $(ld_new_OBJECTS)
@@ -1087,7 +1087,7 @@ distclean-generic:
 	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
-	-test -z "ldlexldeffilephdeffilepcldgramhldgramc$(MAINTAINERCLEANFILES)" || rm -f ldlexl deffileph deffilepc ldgramh ldgramc $(MAINTAINERCLEANFILES)
+	-test -z "ldlex.cdeffilep.hdeffilep.cldgram.hldgram.c$(MAINTAINERCLEANFILES)" || rm -f ldlex.c deffilep.h deffilep.c ldgram.h ldgram.c $(MAINTAINERCLEANFILES)
 mostlyclean-am:  mostlyclean-hdr mostlyclean-noinstPROGRAMS \
 		mostlyclean-compile mostlyclean-libtool \
 		mostlyclean-aminfo mostlyclean-tags mostlyclean-generic \
@@ -1144,7 +1144,7 @@ mostlyclean distclean maintainer-clean
 
 
 po/POTFILES.in: @MAINT@ Makefile
-	for file in $(POTFILES); do echo $$file; done | sort > tmp \
+	for f in $(POTFILES); do echo $$f; done | LC_COLLATE= sort > tmp \
 	  && mv tmp $(srcdir)/po/POTFILES.in
 
 ldmain.o: ldmain.c config.status
