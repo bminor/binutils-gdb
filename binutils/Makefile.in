@@ -25,6 +25,7 @@ ddestdir = /usr/local
 idestdir = $(ddestdir)
 
 SHELL = /bin/sh
+MAKEINFO=makeinfo
 
 # Distribution version
 VERSION=1.91
@@ -104,8 +105,7 @@ BFD = $(LIBDIR)/libbfd.a
 #
 ## The rules
 
-all: $(ADDL_LIBS) $(PROGS) 
-
+all: $(ADDL_LIBS) $(PROGS) binutils.info
 
 #$(BFD):$(LIBDIR)/../common/*.c
 #	(cd $(LIBDIR); make)
@@ -183,7 +183,7 @@ binutils.dvi: $(srcdir)/binutils.texi
 
 # info file for online browsing
 binutils.info: $(srcdir)/binutils.texi
-	makeinfo -o binutils.info $(srcdir)/binutils.texi
+	- $(MAKEINFO) -o binutils.info $(srcdir)/binutils.texi
 
 #   different targets for -ms, -mm, -me
 #   (we don't use a variable because we don't trust all makes to handle
@@ -231,12 +231,19 @@ realclean: clean
 
 install: $(PROGS)
 	for i in $(PROGS) ; do \
-		cp $$i $(bindir)/$$i.new ; \
-		mv -f $(bindir)/$$i.new $(bindir)/$$i ; \
+		(cp $$i $(bindir)/$$i.new \
+			&& mv -f $(bindir)/$$i.new $(bindir)/$$i) \
+		|| exit 1 ; \
 	done
 	for i in $(MANPAGES) ; do \
-		cp $(srcdir)/$$i $(mandir)/man1/$$i.new ; \
-		mv -f $(mandir)/man1/$$i.new $(mandir)/man1/$$i ; \
+		(cp $(srcdir)/$$i $(mandir)/man1/$$i.new \
+			&& mv -f $(mandir)/man1/$$i.new $(mandir)/man1/$$i) \
+		|| exit 1 ; \
+	done
+	for i in *.info* ; do \
+		(cp $$i $(idestdir)/info/$$i.new \
+			&& mv -f $(idestdir)/info/$$i.new $(idestdir)/info/$$i) \
+		|| exit 1 ; \
 	done
 
 dist: $(DIST_NAME).tar.Z
