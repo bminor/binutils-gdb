@@ -1177,33 +1177,6 @@ m68hc11_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
   return sp;
 }
 
-/* Index within `registers' of the first byte of the space for
-   register N.  */
-static int
-m68hc11_register_byte (int reg_nr)
-{
-  return (reg_nr * M68HC11_REG_SIZE);
-}
-
-static int
-m68hc11_register_raw_size (int reg_nr)
-{
-  switch (reg_nr)
-    {
-    case HARD_PAGE_REGNUM:
-    case HARD_A_REGNUM:
-    case HARD_B_REGNUM:
-    case HARD_CCR_REGNUM:
-      return 1;
-
-    case M68HC12_HARD_PC_REGNUM:
-      return 4;
-
-    default:
-      return M68HC11_REG_SIZE;
-    }
-}
-
 /* Test whether the ELF symbol corresponds to a function using rtc or
    rti to return.  */
    
@@ -1311,9 +1284,6 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_fp0_regnum (gdbarch, -1);
   set_gdbarch_max_register_raw_size (gdbarch, 2);
   set_gdbarch_max_register_virtual_size (gdbarch, 2);
-  set_gdbarch_register_raw_size (gdbarch, m68hc11_register_raw_size);
-  set_gdbarch_register_virtual_size (gdbarch, m68hc11_register_raw_size);
-  set_gdbarch_register_byte (gdbarch, m68hc11_register_byte);
   set_gdbarch_frame_init_saved_regs (gdbarch, m68hc11_frame_init_saved_regs);
   set_gdbarch_frame_args_skip (gdbarch, 0);
 

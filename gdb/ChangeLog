@@ -1,3 +1,9 @@
+2002-11-29  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* m68hc11-tdep.c (m68hc11_register_raw_size): Remove.
+	(m68hc11_register_byte): Remove.
+	(m68hc11_gdbarch_init): Don't set the above.
+
 2002-11-29  Andrew Cagney  <cagney@redhat.com>
 
 	* remote-mips.c (mips_initialize): Force a selected frame rebuild
