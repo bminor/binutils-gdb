@@ -38,3 +38,12 @@ extern void free PARAMS ((void *));
 #define NO_SIGINTERRUPT
 
 #define KERNEL_U_ADDR 0
+
+
+#define MAKEVA_END(list)  		\
+{ 					\
+  va_list ret;				\
+  ret.a0 = (char *)(list)->arg_bytes;	\
+  ret.offset = (list)->argindex;	\
+  return ret;				\
+}
