@@ -1,5 +1,7 @@
 2004-04-09  Mark Kettenis  <kettenis@gnu.org>
 
+	* i386-linux-nat.c: Update copyrigth year.  Tweak comment.
+
 	* amd64-tdep.c (amd64_sigtramp_frame_sniffer): Rewrite to use new
 	sigtramp_p member of `struct gdbarch_tdep'.  Also check whether
 	the program counter is in the range specified by `struct
