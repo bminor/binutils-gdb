@@ -1,3 +1,8 @@
+Fri May 23 10:53:13 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-engine.h: Update below so that it is using an enumerated
+ 	type.
+
 Thu May 22 09:12:16 1997  Gavin Koch  <gavin@cygnus.com>
 
 	* sim-engine.c (sim_engine_restart): 
