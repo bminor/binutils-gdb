@@ -4394,9 +4394,9 @@ swap_out_syms (abfd, sttp, relocatable_p)
 	flagword flags = syms[idx]->flags;
 	int type;
 
-	if ((flags & BSF_SECTION_SYM) != 0)
+	if ((flags & (BSF_SECTION_SYM | BSF_GLOBAL)) == BSF_SECTION_SYM)
 	  {
-	    /* Section symbols have no name.  */
+	    /* Local section symbols have no name.  */
 	    sym.st_name = 0;
 	  }
 	else
@@ -4505,7 +4505,12 @@ swap_out_syms (abfd, sttp, relocatable_p)
           type = (*bed->elf_backend_get_symbol_type) (&type_ptr->internal_elf_sym, type);
 
 	if (flags & BSF_SECTION_SYM)
-	  sym.st_info = ELF_ST_INFO (STB_LOCAL, STT_SECTION);
+	  {
+	    if (flags & BSF_GLOBAL)
+	      sym.st_info = ELF_ST_INFO (STB_GLOBAL, STT_SECTION);
+	    else
+	      sym.st_info = ELF_ST_INFO (STB_LOCAL, STT_SECTION);
+	  }
 	else if (bfd_is_com_section (syms[idx]->section))
 	  sym.st_info = ELF_ST_INFO (STB_GLOBAL, type);
 	else if (bfd_is_und_section (syms[idx]->section))

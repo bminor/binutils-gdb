@@ -1,3 +1,7 @@
+2001-06-08  H.J. Lu  <hjl@gnu.org>
+
+	* elf.c (swap_out_syms): Keep names for global section symbols.
+
 2001-06-07  H.J. Lu  <hjl@gnu.org>
 
 	* config.bfd: Put back ecoff for Linux/mips. Firmwares on some
