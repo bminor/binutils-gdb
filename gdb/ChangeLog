@@ -1,5 +1,11 @@
 Fri Apr  4 08:21:21 1997  Stu Grossman  (grossman@critters.cygnus.com)
 
+	* remote.c:  Fix problems realized while showering.
+	* (hexnumlen):  Add prototype.  Use max, not min.
+	* (remote_write_bytes remote_read_bytes):  Fix max packet size
+	calculations to properly account for packet overhead.  Also handle
+	(probably rare) case where remote_register_buf_size isn't set.
+
 	* remote.c:  Fix doc for `C' and `S' commands to indicate full
 	address.
 	* (remote_ops extended_remote_ops remote_desc remote_write_size):
