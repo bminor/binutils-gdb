@@ -115,6 +115,7 @@ extern CORE_ADDR mips_skip_prologue PARAMS ((CORE_ADDR addr, int lenient));
    but do serve to get the desired values when passed to read_register.  */
 
 #define ZERO_REGNUM 0		/* read-only register, always 0 */
+#define V0_REGNUM 2		/* Function integer return value */
 #define A0_REGNUM 4		/* Loc of first arg during a subr call */
 #define SP_REGNUM 29		/* Contains address of top of stack */
 #define RA_REGNUM 31		/* Contains return address value */
@@ -232,8 +233,13 @@ extern CORE_ADDR mips_skip_prologue PARAMS ((CORE_ADDR addr, int lenient));
 /* Extract from an array REGBUF containing the (raw) register state
    the address in which a function should return its structure value,
    as a CORE_ADDR (or an expression that can be used as one).  */
+/* The address is passed in a0 upon entry to the function, but when
+   the function exits, the compiler has copied the value to v0.  This
+   seems to be a convention followed by both cc and gcc.  */
 
-#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) (*(int *)(REGBUF+16))
+#define EXTRACT_STRUCT_VALUE_ADDRESS(REGBUF) \
+  (extract_address (REGBUF + REGISTER_BYTE (V0_REGNUM), \
+		    REGISTER_RAW_SIZE (V0_REGNUM)))
 
 /* Structures are returned by ref in extra arg0 */
 #define USE_STRUCT_CONVENTION(gcc_p, type)	1
