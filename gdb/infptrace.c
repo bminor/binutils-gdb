@@ -1,6 +1,5 @@
 /* Low level Unix child interface to ptrace, for GDB when running under Unix.
-   Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995
-   Free Software Foundation, Inc.
+   Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -16,7 +15,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
 #include "frame.h"
@@ -41,20 +40,33 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif
 #endif /* NO_PTRACE_H */
 
-#if !defined (PT_KILL)
-#define PT_KILL 8
+#if !defined (PT_READ_I)
+#define PT_READ_I	1	/* Read word from text space */
 #endif
-
+#if !defined (PT_READ_D)
+#define	PT_READ_D	2	/* Read word from data space */
+#endif
+#if !defined (PT_READ_U)
+#define PT_READ_U	3	/* Read word from kernel user struct */
+#endif
+#if !defined (PT_WRITE_I)
+#define PT_WRITE_I	4	/* Write word to text space */
+#endif
+#if !defined (PT_WRITE_D)
+#define PT_WRITE_D	5	/* Write word to data space */
+#endif
+#if !defined (PT_WRITE_U)
+#define PT_WRITE_U	6	/* Write word to kernel user struct */
+#endif
+#if !defined (PT_CONTINUE)
+#define PT_CONTINUE	7	/* Continue after signal */
+#endif
 #if !defined (PT_STEP)
-#define PT_STEP 9
-#define PT_CONTINUE 7
-#define PT_READ_U 3
-#define PT_WRITE_U 6
-#define PT_READ_I 1
-#define	PT_READ_D 2
-#define PT_WRITE_I 4
-#define PT_WRITE_D 5
-#endif /* No PT_STEP.  */
+#define PT_STEP		9	/* Set flag for single stepping */
+#endif
+#if !defined (PT_KILL)
+#define PT_KILL		8	/* Send child a SIGKILL signal */
+#endif
 
 #ifndef PT_ATTACH
 #define PT_ATTACH PTRACE_ATTACH
@@ -459,5 +471,60 @@ child_xfer_memory (memaddr, myaddr, len, write, target)
 	      len);
     }
   return len;
+}
+
+
+static void
+udot_info ()
+{
+  int udot_off;		/* Offset into user struct */
+  int udot_val;		/* Value from user struct at udot_off */
+  char mess[128];	/* For messages */
+
+   if (!target_has_execution)
+     {
+       error ("The program is not being run.");
+     }
+
+#if !defined (KERNEL_U_SIZE)
+
+  /* Adding support for this command is easy.  Typically you just add a
+     routine, called "kernel_u_size" that returns the size of the user
+     struct, to the appropriate *-nat.c file and then add to the native
+     config file "#define KERNEL_U_SIZE kernel_u_size()" */
+  error ("Don't know how large ``struct user'' is in this version of gdb.");
+
+#else
+
+  for (udot_off = 0; udot_off < KERNEL_U_SIZE; udot_off += sizeof (udot_val))
+    {
+      if ((udot_off % 24) == 0)
+	{
+	  if (udot_off > 0)
+	    {
+	      printf_filtered ("\n");
+	    }
+	  printf_filtered ("%04x:", udot_off);
+	}
+      udot_val = ptrace (PT_READ_U, inferior_pid, (PTRACE_ARG3_TYPE) udot_off, 0);
+      if (errno != 0)
+	{
+	  sprintf (mess, "\nreading user struct at offset 0x%x", udot_off);
+	  perror_with_name (mess);
+	}
+      /* Avoid using nonportable (?) "*" in print specs */
+      printf_filtered (sizeof (int) == 4 ? " 0x%08x" : " 0x%16x", udot_val);
+    }
+  printf_filtered ("\n");
+
+#endif
+}
+
+void
+_initialize_infptrace ()
+{
+  add_info ("udot", udot_info,
+	    "Print contents of kernel ``struct user'' for current child.");
+
 }
 #endif /* !defined (CHILD_XFER_MEMORY).  */

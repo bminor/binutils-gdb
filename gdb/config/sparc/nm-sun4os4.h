@@ -1,5 +1,5 @@
 /* Macro definitions for running gdb on a Sun 4 running sunos 4.
-   Copyright (C) 1989, 1992, Free Software Foundation, Inc.
+   Copyright (C) 1989, 1992, 1996 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -25,3 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define FETCH_INFERIOR_REGISTERS
 
+/* Return sizeof user struct to callers in less machine dependent routines */
+
+#define KERNEL_U_SIZE kernel_u_size()
+extern int kernel_u_size PARAMS ((void));

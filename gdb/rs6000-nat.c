@@ -1,5 +1,5 @@
 /* IBM RS/6000 native-dependent code for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1992, 1994, 1995
+   Copyright 1986, 1987, 1989, 1991, 1992, 1994, 1995, 1996
 	     Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -787,3 +787,10 @@ xcoff_relocate_core (target)
   breakpoint_re_set ();
   do_cleanups (old);
 }
+
+int
+kernel_u_size ()
+{
+  return (sizeof (struct user));
+}
+

@@ -1,5 +1,5 @@
 /* Low level Alpha interface, for GDB when running native.
-   Copyright 1993, 1995 Free Software Foundation, Inc.
+   Copyright 1993, 1995, 1996 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -23,6 +23,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "target.h"
 #include <sys/ptrace.h>
 #include <machine/reg.h>
+#include <sys/user.h>
 
 /* Size of elements in jmpbuf */
 
@@ -141,6 +142,12 @@ register_addr (regno, blockend)
      int blockend;
 {
   return REGISTER_PTRACE_ADDR (regno);
+}
+
+int
+kernel_u_size ()
+{
+  return (sizeof (struct user));
 }
 
 #ifdef USE_PROC_FS

@@ -1,5 +1,5 @@
 /* Native-dependent code for BSD Unix running on i386's, for GDB.
-   Copyright 1988, 1989, 1991, 1992, 1994 Free Software Foundation, Inc.
+   Copyright 1988, 1989, 1991, 1992, 1994, 1996 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -220,6 +220,12 @@ i386_float_info ()
     }
   
   print_387_status (0, (struct env387 *)buf);
+}
+
+int
+kernel_u_size ()
+{
+  return (sizeof (struct user));
 }
 
 #endif

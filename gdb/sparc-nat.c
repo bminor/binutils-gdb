@@ -1,5 +1,5 @@
 /* Functions specific to running gdb native on a SPARC running SunOS4.
-   Copyright 1989, 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1989, 1992, 1993, 1994, 1996 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -25,6 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <sys/ptrace.h>
 #include <sys/wait.h>
 #include <machine/reg.h>
+#include <sys/user.h>
 
 /* We don't store all registers immediately when requested, since they
    get sent over in large chunks anyway.  Instead, we accumulate most
@@ -295,3 +296,8 @@ fetch_core_registers (core_reg_sect, core_reg_size, which, ignore)
   }
 }
 
+int
+kernel_u_size ()
+{
+  return (sizeof (struct user));
+}

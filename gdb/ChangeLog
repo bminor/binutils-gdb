@@ -1,3 +1,37 @@
+Thu Jan  4 10:44:17 1996  Fred Fish  <fnf@cirdan.cygnus.com>
+
+	* infptrace.c (udot_info): New function.
+	(PT_*): Define each individually if that one is not defined.
+	Update copyright to 1996.
+	* rs6000-nat.c (kernel_u_size): New function
+	Include <sys/user.h> for "struct user"
+	Update copyright to 1996.
+	* alpha-nat.c (kernel_u_size): New function.
+	Include <sys/user.h> for "struct user"
+	Update copyright to 1996.
+	* sparc-nat.c (kernel_u_size): New function.
+	Include <sys/user.h> for "struct user"
+	Update copyright to 1996.
+	* i386b-nat.c (kernel_u_size): New function.
+	Update copyright to 1996.
+	* i386v-nat.c (kernel_u_size): New function.
+	Update copyright to 1996.
+	* config/i386/nm-fbsd.h (KERNEL_U_SIZE): Define.
+	(kernel_u_size): Declare.
+	Update copyright to 1996.
+	* config/i386/nm-linux.h (KERNEL_U_SIZE): Define.
+	(kernel_u_size): Declare.
+	Update copyright to 1996.
+	* config/sparc/nm-sun4os4.h (KERNEL_U_SIZE): Define.
+	(kernel_u_size): Declare.
+	Update copyright to 1996.
+	* config/alpha/nm-osf2.h (KERNEL_U_SIZE): Define.
+	(kernel_u_size): Declare.
+	Update copyright to 1996.
+	* config/rs6000/nm-rs6000.h (KERNEL_U_SIZE): Define.
+	(kernel_u_size): Declare.
+	Update copyright to 1996.
+
 Thu Jan  4 11:00:01 1996  steve chamberlain  <sac@slash.cygnus.com>
 
 	* mdebugread.c (mylookup_symbol): enum namespace becomes

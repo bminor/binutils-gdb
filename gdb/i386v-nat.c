@@ -1,5 +1,5 @@
 /* Intel 386 native support for SYSV systems (pre-SVR4).
-   Copyright (C) 1988, 1989, 1991, 1992, 1994 Free Software Foundation, Inc.
+   Copyright (C) 1988, 1989, 1991, 1992, 1994, 1996 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -91,6 +91,12 @@ i386_register_u_addr (blockend, regnum)
       return (ubase + 4 * regmap[regnum]);
     }
   
+}
+
+int
+kernel_u_size ()
+{
+  return (sizeof (struct user));
 }
 
 #ifdef TARGET_HAS_HARDWARE_WATCHPOINTS
