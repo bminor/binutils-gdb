@@ -1,3 +1,37 @@
+Wed Aug 24 11:49:19 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* aoutx.h (translate_to_native_sym_flags): Use the output_section
+	(and output_offset) if there is one.
+
+	* aoutx.h (aout_link_check_archive_element): Discard the symbols
+	if the archive element was not needed.
+
+	* aoutx.h (aout_get_external_symbols): Ensure that a zero string
+	index yields an empty string.
+	(aout_link_write_symbols): If info->keep_memory is false, use name
+	from original hash table entry, not from entry in *sym_hash.
+
+	* aoutx.h (struct aout_final_link_info): Add fields contents,
+	relocs, symbol_map and output_syms.
+	(NAME(aout,final_link)): Work out the largest section size, reloc
+	size, and number of symbols.  Use them to preallocate buffers that
+	are large enough for all cases.
+	(aout_link_input_bfd): Use preallocated symbol_map.
+	(aout_link_write_symbols): Remove symbol_map argument; use
+	preallocated symbol_map instead.  Change all callers.  Use
+	preallocated output_syms.
+	(aout_link_input_section): Remove symbol_map argument.  Change all
+	callers.  Use preallocated contents and relocs.
+	(aout_link_input_section_std): Remove symbol_map argument; use
+	preallocated symbol_map instead.  Change all callers.
+	(aout_link_input_section_ext): Likewise.
+
+Tue Aug 23 10:51:09 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* archive.c (_bfd_write_archive_contents): Don't update the
+	symbol map timestamp if there is no symbol map.  From
+	schwab@issan.informatik.uni-dortmund.de (Andreas Schwab).
+
 Mon Aug 22 12:26:42 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
 
 	* targets.c (BFD_JUMP_TABLE_ARCHIVE): Add _update_armap_timestamp.
