@@ -1,3 +1,27 @@
+Fri Jan 26 18:33:35 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* syms.c: Include "bfdlink.h".
+	(struct stab_find_info): Define.
+	(_bfd_stab_section_find_nearest_line): New function.
+	* libbfd-in.h (_bfd_stab_section_find_nearest_line): Declare.
+	* libbfd.h: Rebuild.
+	* elf-bfd.h (struct elf_obj_tdata): Add line_info field.
+	* elf.c (_bfd_elf_find_nearest_line): Try calling
+	_bfd_stab_section_find_nearest_line before searching the ELF
+	symbol table.  Find the closest STT_FUNC symbol, not the last one.
+	* libcoff-in.h (coff_data_type): Add line_info field.
+	* libcoff.h: Rebuild.
+	* coffgen.c (coff_find_nearest_line): Try calling
+	_bfd_stab_section_find_nearest_line before searching the COFF
+	symbol table.
+	* Makefile.in: Rebuild dependencies.
+
+Fri Jan 26 16:11:19 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* elf32-ppc.c (R_PPC_EMB_SDA21 relocations): Make relocation size
+	4 bytes, so we get the correct value when updating the register
+	field in little endian mode.
+
 Thu Jan 25 12:14:16 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* libcoff-in.h (struct xcoff_tdata): Remove toc_section and

@@ -1,5 +1,6 @@
 #    Makefile template for Configure for the BFD library.
-#    Copyright (C) 1990, 91, 92, 93, 94, 1995 Free Software Foundation, Inc.
+#    Copyright (C) 1990, 91, 92, 93, 94, 95, 1996
+#    Free Software Foundation, Inc.
 #    Written by Cygnus Support.
 # 
 # This file is part of BFD, the Binary File Descriptor library.
@@ -713,7 +714,8 @@ libbfd.o: libbfd.c
 opncls.o: opncls.c
 reloc.o: reloc.c $(INCDIR)/bfdlink.h
 section.o: section.c
-syms.o: syms.c $(INCDIR)/aout/stab_gnu.h $(INCDIR)/aout/stab.def
+syms.o: syms.c $(INCDIR)/bfdlink.h $(INCDIR)/aout/stab_gnu.h \
+  $(INCDIR)/aout/stab.def
 targets.o: targets.c
 hash.o: hash.c
 linker.o: linker.c $(INCDIR)/bfdlink.h genlink.h
@@ -852,7 +854,7 @@ elf32-ppc.o: elf32-ppc.c $(INCDIR)/bfdlink.h elf-bfd.h \
   $(INCDIR)/elf/ppc.h elf32-target.h
 elf32-sparc.o: elf32-sparc.c $(INCDIR)/bfdlink.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
-  elf32-target.h
+  $(INCDIR)/elf/sparc.h elf32-target.h
 elf32.o: elf32.c elfcode.h $(INCDIR)/bfdlink.h elf-bfd.h \
   $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
   elfcore.h elflink.h
@@ -962,8 +964,8 @@ aout64.o: aout64.c aoutx.h $(INCDIR)/bfdlink.h libaout.h \
   $(INCDIR)/aout/ar.h
 coff-alpha.o: coff-alpha.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/sym.h $(INCDIR)/coff/symconst.h $(INCDIR)/coff/ecoff.h \
-  $(INCDIR)/coff/alpha.h libcoff.h libecoff.h coffswap.h \
-  ecoffswap.h
+  $(INCDIR)/coff/alpha.h $(INCDIR)/aout/ar.h libcoff.h \
+  libecoff.h coffswap.h ecoffswap.h
 demo64.o: demo64.c aoutf1.h $(INCDIR)/aout/sun4.h libaout.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/aout/aout64.h $(INCDIR)/aout/stab_gnu.h \
   $(INCDIR)/aout/stab.def $(INCDIR)/aout/ar.h aout-target.h
@@ -987,8 +989,7 @@ hpux-core.o: hpux-core.c
 irix-core.o: irix-core.c
 lynx-core.o: lynx-core.c
 osf-core.o: osf-core.c
-trad-core.o: trad-core.c libaout.h $(INCDIR)/bfdlink.h \
-  hosts/i386bsd.h
+trad-core.o: trad-core.c libaout.h $(INCDIR)/bfdlink.h
 cisco-core.o: cisco-core.c
 i386dynix.o: i386dynix.c $(INCDIR)/aout/dynix3.h aoutx.h \
   $(INCDIR)/bfdlink.h libaout.h $(INCDIR)/aout/aout64.h \

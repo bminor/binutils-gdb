@@ -554,6 +554,7 @@ _bfd_elf_link_hash_newfunc (entry, table, string)
       ret->weakdef = NULL;
       ret->got_offset = (bfd_vma) -1;
       ret->plt_offset = (bfd_vma) -1;
+      ret->linker_section_pointer = (elf_linker_section_pointers_t *)0;
       ret->type = STT_NOTYPE;
       ret->elf_link_hash_flags = 0;
     }
@@ -3142,15 +3143,26 @@ _bfd_elf_find_nearest_line (abfd,
      CONST char **functionname_ptr;
      unsigned int *line_ptr;
 {
+  boolean found;
   const char *filename;
   asymbol *func;
+  bfd_vma low_func;
   asymbol **p;
+
+  if (! _bfd_stab_section_find_nearest_line (abfd, symbols, section, offset,
+					     &found, filename_ptr,
+					     functionname_ptr, line_ptr,
+					     &elf_tdata (abfd)->line_info))
+    return false;
+  if (found)
+    return true;
 
   if (symbols == NULL)
     return false;
 
   filename = NULL;
   func = NULL;
+  low_func = 0;
 
   for (p = symbols; *p != NULL; p++)
     {
@@ -3169,9 +3181,13 @@ _bfd_elf_find_nearest_line (abfd,
 	  filename = bfd_asymbol_name (&q->symbol);
 	  break;
 	case STT_FUNC:
-	  if (func == NULL
-	      || q->symbol.value <= offset)
-	    func = (asymbol *) q;
+	  if (q->symbol.section == section
+	      && q->symbol.value >= low_func
+	      && q->symbol.value <= offset)
+	    {
+	      func = (asymbol *) q;
+	      low_func = q->symbol.value;
+	    }
 	  break;
 	}
     }

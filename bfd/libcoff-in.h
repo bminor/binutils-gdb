@@ -89,6 +89,9 @@ typedef struct coff_tdata
   int *local_toc_sym_map;
 
   struct bfd_link_info *link_info;
+
+  /* Used by coff_find_nearest_line.  */
+  PTR line_info;
 } coff_data_type;
 
 /* Tdata for pe image files. */
@@ -117,11 +120,11 @@ struct xcoff_tdata
   /* TOC value.  */
   bfd_vma toc;
 
-  /* Section holding TOC.  */
-  asection *toc_section;
+  /* Index of section holding TOC.  */
+  int sntoc;
 
-  /* Section holding entry point.  */
-  asection *entry_section;
+  /* Index of section holding entry point.  */
+  int snentry;
 
   /* .text alignment from optional header.  */
   int text_align_power;
@@ -223,11 +226,6 @@ struct coff_link_hash_entry
 
   /* Pointer to array of auxiliary entries, if any.  */
   union internal_auxent *aux;
-
-  /* If this symbol requires an entry in the table of contents, the
-     processor specific backend uses this field to hold the offset
-     into the .toc section.  */
-  bfd_vma toc_offset;
 };
 
 /* COFF linker hash table.  */
