@@ -715,7 +715,7 @@ bfd_seek (abfd, position, direction)
 	      bfd_set_error (bfd_error_file_truncated);
 	      return -1;
 	    }   
-	}      
+	}
       return 0;
     }
 

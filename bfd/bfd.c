@@ -759,7 +759,7 @@ bfd_get_sign_extend_vma (abfd)
   if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
     return (get_elf_backend_data (abfd)->sign_extend_vma);
 
-  bfd_set_error (bfd_error_wrong_format);  
+  bfd_set_error (bfd_error_wrong_format);
   return -1;
 }
 

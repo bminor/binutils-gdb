@@ -2150,7 +2150,7 @@ symname_in_debug_hook (abfd, sym)
 #ifdef XCOFF64
 #define FORCE_SYMNAMES_IN_STRINGS
 #endif
-  
+
 /* Handle the csect auxent of a C_EXT or C_HIDEXT symbol.  */
 
 static boolean coff_pointerize_aux_hook
@@ -5044,7 +5044,7 @@ static const bfd_coff_backend_data bfd_coff_std_swap_table =
 #else
   false,
 #endif
-  COFF_DEFAULT_SECTION_ALIGNMENT_POWER, 
+  COFF_DEFAULT_SECTION_ALIGNMENT_POWER,
 #ifdef COFF_FORCE_SYMBOLS_IN_STRINGS
   true,
 #else

@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-07-24 10:20-0700\n"
+"POT-Creation-Date: 2000-07-31 11:44-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -375,7 +375,7 @@ msgstr ""
 msgid "uncertain calling convention for non-COFF symbol"
 msgstr ""
 
-#: cofflink.c:526 elflink.h:1575
+#: cofflink.c:526 elflink.h:1585
 #, c-format
 msgid "Warning: type of symbol `%s' changed from %d to %d in %s"
 msgstr ""
@@ -1262,12 +1262,12 @@ msgid ""
 "0x%.8lx%s\n"
 msgstr ""
 
-#: elf.c:3739
+#: elf.c:3830
 #, c-format
 msgid "%s: warning: Empty loadable segment detected\n"
 msgstr ""
 
-#: elf.c:5054
+#: elf.c:5162
 #, c-format
 msgid "%s: unsupported relocation type %s"
 msgstr ""
@@ -1282,37 +1282,37 @@ msgstr ""
 msgid "%s: Section %s is already to large to put hole of %ld bytes in"
 msgstr ""
 
-#: elflink.h:1395
+#: elflink.h:1405
 #, c-format
 msgid "%s: %s: invalid version %u (max %d)"
 msgstr ""
 
-#: elflink.h:1436
+#: elflink.h:1446
 #, c-format
 msgid "%s: %s: invalid needed version %d"
 msgstr ""
 
-#: elflink.h:1553
+#: elflink.h:1563
 #, c-format
 msgid "Warning: size of symbol `%s' changed from %lu to %lu in %s"
 msgstr ""
 
-#: elflink.h:1797
+#: elflink.h:1809
 #, c-format
 msgid "%s: warning: unexpected redefinition of `%s'"
 msgstr ""
 
-#: elflink.h:3570
+#: elflink.h:3582
 #, c-format
 msgid "warning: type and size of dynamic symbol `%s' are not defined"
 msgstr ""
 
-#: elflink.h:3842
+#: elflink.h:3854
 #, c-format
 msgid "%s: undefined versioned symbol name %s"
 msgstr ""
 
-#: elflink.h:5086
+#: elflink.h:5100
 #, c-format
 msgid "%s: could not find output section %s for input section %s"
 msgstr ""

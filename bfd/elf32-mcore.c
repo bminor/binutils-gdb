@@ -488,7 +488,7 @@ mcore_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
       /* This is a final link.  */
 
-      /* Complain about known relocation that are not yet supported */
+      /* Complain about known relocation that are not yet supported.  */
       if (howto->special_function == mcore_elf_unsupported_reloc)
 	{
 	  _bfd_error_handler (_("%s: Relocation %s (%d) is not currently supported.\n"),
