@@ -279,16 +279,19 @@ core_files_info (t)
 {
   struct section_table *p;
 
-  printf ("\tCore file `%s'.\n", bfd_get_filename(core_bfd));
+  printf_filtered ("\t`%s', ", bfd_get_filename(core_bfd));
+  wrap_here ("        ");
+  printf_filtered ("file type %s.\n", bfd_get_target(core_bfd));
 
   for (p = t->sections; p < t->sections_end; p++) {
-    printf("\t%s", local_hex_string_custom (p->addr, "08"));
-    printf(" - %s is %s", local_hex_string_custom (p->endaddr, "08"),
-	   bfd_section_name (p->bfd, p->sec_ptr));
+    printf_filtered ("\t%s", local_hex_string_custom (p->addr, "08"));
+    printf_filtered (" - %s is %s",
+	local_hex_string_custom (p->endaddr, "08"),
+	bfd_section_name (p->bfd, p->sec_ptr));
     if (p->bfd != core_bfd) {
-      printf(" in %s", bfd_get_filename (p->bfd));
+      printf_filtered (" in %s", bfd_get_filename (p->bfd));
     }
-    printf ("\n");
+    printf_filtered ("\n");
   }
 }
 

@@ -1,5 +1,8 @@
 Fri Oct 25 02:02:13 1991  John Gilmore  (gnu at cygnus.com)
 
+	* core.c (core_file_info), exec.c (exec_file_info):  Print file
+	type.  Use printf_filtered.
+
 	* valops.c (value_fetch_lazy):  Avoid 0-length fetches.
 
 Thu Oct 24 23:06:40 1991  Fred Fish  (fnf at cygnus.com)
