@@ -1,3 +1,10 @@
+Mon Sep 12 16:56:02 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* mpw-make.in (ALL_CFLAGS): Add definition of HAVE_STDARG_H,
+	include of ::libiberty:.
+	(config.h): Ifdef contents on GAS_VERSION.
+	config/ho-mpw.h: Remove redefinitions of true and false.
+
 Wed Jun 29 17:56:52 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* mpw-make.in (as.c): Compile with C not gC.

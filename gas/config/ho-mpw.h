@@ -35,14 +35,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-
-#ifndef false
-#define false ffalse
-#endif
-#ifndef true
-#define true ttrue
-#endif
-
 #include <memory.h>
 
 char *strdup();

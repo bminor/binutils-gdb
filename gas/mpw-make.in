@@ -10,7 +10,7 @@ o = :
 
 CROSS = -d CROSS_COMPILE
 
-ALL_CFLAGS = {CFLAGS} {CROSS} -d TARGET_BYTES_BIG_ENDIAN -d BFD_ASSEMBLER -i "{topsrcdir}"include: -i "{topsrcdir}"bfd:,"{srcdir}",::bfd:,::extra-include,"{srcroot}"include:mpw:
+ALL_CFLAGS = {CFLAGS} {CROSS} -d HAVE_STDARG_H -d TARGET_BYTES_BIG_ENDIAN -d BFD_ASSEMBLER -i "{topsrcdir}"include: -i "{topsrcdir}"bfd:,"{srcdir}",::libiberty:,::bfd:,::extra-include,"{srcroot}"include:mpw:
 # debug options: -mbg on -sym on
 
 "{o}" \Option-f : "{s}"
@@ -75,7 +75,7 @@ as.new \Option-f\Option-f {OBJECTS} {TARG_OBJECTS} {CLIBS}
 
 "{o}"config-stamp \Option-f Makefile
 	Delete -i -y "{o}"config.new "{o}"config-stamp
-	echo '#ifndef TARGET_CPU'			       > "{o}"config.new
+	echo '#ifndef GAS_VERSION'			       > "{o}"config.new
 	echo '#define TARGET_CPU       "{target_cpu}"'        >> "{o}"config.new
 	echo '#define TARGET_ALIAS     "{target_alias}"'      >> "{o}"config.new
 	echo '#define TARGET_CANONICAL "{target_canonical}"'  >> "{o}"config.new
@@ -87,7 +87,7 @@ as.new \Option-f\Option-f {OBJECTS} {TARG_OBJECTS} {CLIBS}
 #	    else true; fi; \
 #	  done ; \
 #	else true; fi
-	echo '#endif /* TARGET_CPU */'			      >> "{o}"config.new
+	echo '#endif /* GAS_VERSION */'			      >> "{o}"config.new
 	MoveIfChange "{o}"config.new "{o}"config.h
 	Echo ' ' >"{o}"config-stamp
 
