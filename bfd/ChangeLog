@@ -1,3 +1,9 @@
+2000-09-12  Jason Eckhardt  <jle@cygnus.com>
+
+	* elf32-i860.c (elf32_i860_relocate_pc26): New function
+	and prototype.
+	(elf32_i860_relocate_section): Invoke new function from here.
+
 2000-09-11  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
 	* elf.c (_bfd_elf_make_section_from_shdr): Make debug_sec_names

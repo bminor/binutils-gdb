@@ -42,6 +42,9 @@ static bfd_reloc_status_type elf32_i860_relocate_splitn
 static bfd_reloc_status_type elf32_i860_relocate_pc16
   PARAMS ((bfd *,  asection *, Elf_Internal_Rela *, bfd_byte *, bfd_vma));
 
+static bfd_reloc_status_type elf32_i860_relocate_pc26
+  PARAMS ((bfd *,  asection *, Elf_Internal_Rela *, bfd_byte *, bfd_vma));
+
 static bfd_reloc_status_type elf32_i860_relocate_highadj
   PARAMS ((bfd *,  Elf_Internal_Rela *, bfd_byte *, bfd_vma));
 
@@ -763,6 +766,39 @@ elf32_i860_relocate_pc16 (input_bfd, input_section, rello, contents, value)
 }
 
 
+/* Specialized relocation handler for R_860_PC26.  This relocation
+   involves a 26-bit, PC-relative field which must be adjusted by 4.  */
+static bfd_reloc_status_type
+elf32_i860_relocate_pc26 (input_bfd, input_section, rello, contents, value)
+     bfd *input_bfd;
+     asection *input_section;
+     Elf_Internal_Rela *rello;
+     bfd_byte *contents;
+     bfd_vma value;
+{
+  bfd_vma insn;
+  reloc_howto_type *howto;
+  howto  = lookup_howto (ELF32_R_TYPE (rello->r_info));
+  insn = bfd_get_32 (input_bfd, contents + rello->r_offset);
+
+  /* Adjust for PC-relative relocation.  */
+  value -= (input_section->output_section->vma
+	    + input_section->output_offset);
+  value -= rello->r_offset;
+
+  /* Relocate.  */
+  value += rello->r_addend;
+
+  /* Adjust value by 4 and insert the field.  */
+  value = ((value - 4) >> howto->rightshift) & howto->dst_mask; 
+  insn = (insn & ~howto->dst_mask) | value;
+
+  bfd_put_32 (input_bfd, insn, contents + rello->r_offset);
+  return bfd_reloc_ok;
+
+}
+
+
 /* Specialized relocation handler for R_860_HIGHADJ.  */
 static bfd_reloc_status_type
 elf32_i860_relocate_highadj (input_bfd, rel, contents, value)
@@ -964,6 +1000,11 @@ elf32_i860_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	case R_860_PC16:
 	  r = elf32_i860_relocate_pc16 (input_bfd, input_section, rel,
+					contents, relocation);
+	  break;
+
+	case R_860_PC26:
+	  r = elf32_i860_relocate_pc26 (input_bfd, input_section, rel,
 					contents, relocation);
 	  break;
 
