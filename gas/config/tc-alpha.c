@@ -130,7 +130,7 @@ static void emit_ldah_num PARAMS ((int, bfd_vma, int));
 static void emit_addq_r PARAMS ((int, int, int));
 static void emit_lda_n PARAMS ((int, bfd_vma, int));
 static void emit_add64 PARAMS ((int, int, bfd_vma));
-static int in_range PARAMS ((bfd_vma, int, int));
+static int in_range_signed PARAMS ((bfd_vma, int));
 
 const pseudo_typeS md_pseudo_table[] =
 {
@@ -430,9 +430,9 @@ s_base ()
   demand_empty_rest_of_line ();
 }
 
-static int in_range (val, nbits, unsignedness)
+static int in_range_signed (val, nbits)
      bfd_vma val;
-     int nbits, unsignedness;
+     int nbits;
 {
   /* Look at top bit of value that would be stored, figure out how it
      would be extended by the hardware, and see if that matches the
@@ -445,26 +445,39 @@ static int in_range (val, nbits, unsignedness)
   stored_value = val & mask;
   top_bit = stored_value & (one << nbits - 1);
   missing_bits = val & ~mask;
-  if (unsignedness)
+  /* will sign-extend */
+  if (top_bit)
     {
-      return missing_bits == 0;
+      /* all remaining bits beyond mask should be one */
+      missing_bits |= mask;
+      return missing_bits + 1 == 0;
     }
   else
     {
-      /* will sign-extend */
-      if (top_bit)
-	{
-	  /* all remaining bits beyond mask should be one */
-	  missing_bits |= mask;
-	  return missing_bits + 1 == 0;
-	}
-      else
-	{
-	  /* all other bits should be zero */
-	  return missing_bits == 0;
-	}
+      /* all other bits should be zero */
+      return missing_bits == 0;
     }
 }
+
+#if 0
+static int in_range_unsigned (val, nbits)
+     bfd_vma val;
+     int nbits;
+{
+  /* Look at top bit of value that would be stored, figure out how it
+     would be extended by the hardware, and see if that matches the
+     original supplied value.  */
+  bfd_vma mask;
+  bfd_vma one = 1;
+  bfd_vma top_bit, stored_value, missing_bits;
+
+  mask = (one << nbits) - 1;
+  stored_value = val & mask;
+  top_bit = stored_value & (one << nbits - 1);
+  missing_bits = val & ~mask;
+  return missing_bits == 0;
+}
+#endif
 
 static void
 s_gprel32 ()
@@ -508,8 +521,6 @@ create_literal_section (secp, name)
 			 SEC_RELOC | SEC_ALLOC | SEC_LOAD | SEC_READONLY
 			 | SEC_DATA);
 }
-
-#define create_lita_section() create_literal_section (&lita_sec, ".lita")
 
 static valueT
 get_lit8_offset (val)
@@ -648,7 +659,7 @@ md_begin ()
 
   /* So .sbss will get used for tiny objects.  */
   bfd_set_gp_size (stdoutput, 8);
-  create_lita_section ();
+  create_literal_section (&lita_sec, ".lita");
   /* For handling the GP, create a symbol that won't be output in the
      symbol table.  We'll edit it out of relocs later.  */
   gp = symbol_create ("<GP value>", lita_sec, 0x8000, &zero_address_frag);
@@ -1136,14 +1147,14 @@ emit_add64 (in, out, num)
 {
   bfd_signed_vma snum = num;
 
-  if (in_range (num, 16, 0))
+  if (in_range_signed (num, 16))
     {
       emit_lda_n (out, num, in);
       return;
     }
   if ((num & 0xffff) == 0
       && in == ZERO
-      && in_range (snum >> 16, 16, 0))
+      && in_range_signed (snum >> 16, 16))
     {
       emit_ldah_num (out, snum >> 16, in);
       return;
@@ -1151,21 +1162,21 @@ emit_add64 (in, out, num)
   /* I'm not sure this one is getting invoked when it could.  */
   if ((num & 1) == 0 && in == ZERO)
     {
-      if (in_range (snum >> 1, 16, 0))
+      if (in_range_signed (snum >> 1, 16))
 	{
 	  emit_lda_n (out, snum >> 1, in);
 	  emit_addq_r (out, out, out);
 	  return;
 	}
       else if (num & 0x1fffe == 0
-	       && in_range (snum >> 17, 16, 0))
+	       && in_range_signed (snum >> 17, 16))
 	{
 	  emit_ldah_num (out, snum >> 17, in);
 	  emit_addq_r (out, out, out);
 	  return;
 	}
     }
-  if (in_range (num, 32, 0))
+  if (in_range_signed (num, 32))
     {
       bfd_vma lo = num & 0xffff;
       if (lo & 0x8000)
@@ -1202,12 +1213,6 @@ emit_add64 (in, out, num)
   }
 }
 
-/* Note that for now, this function is called recursively (by way of
-   calling md_assemble again).  Some of the macros defined as part of
-   the assembly language are currently rewritten as sequences of
-   strings to be assembled.  See, for example, the handling of "divq".
-
-   For efficiency, this should be fixed someday.  */
 static int
 alpha_ip (str, insns)
      char *str;
@@ -1223,6 +1228,8 @@ alpha_ip (str, insns)
   unsigned int mask;
   int match = 0, num_gen = 1;
   int comma = 0;
+  int do_add64, add64_in, add64_out;
+  bfd_vma add64_addend;
 
   for (s = str;
        islower (*s) || *s == '_' || *s == '/' || *s == '4' || *s == '8';
@@ -1248,7 +1255,7 @@ alpha_ip (str, insns)
     }
   if ((pattern = (struct alpha_opcode *) hash_find (op_hash, str)) == NULL)
     {
-      as_warn ("Unknown opcode: `%s'", str);
+      as_bad ("Unknown opcode: `%s'", str);
       return -1;
     }
   if (comma)
@@ -1257,6 +1264,7 @@ alpha_ip (str, insns)
   argsStart = s;
   for (;;)
     {
+      do_add64 = 0;
       opcode = pattern->match;
       num_gen = 1;
       for (i = 0; i < MAX_INSNS; i++)
@@ -1465,23 +1473,13 @@ alpha_ip (str, insns)
 	      insns[0].reloc[0].code = BFD_RELOC_26;
 	      goto immediate;
 
-#if 0
-	    case 't':		/* 12 bit 0...11 */
-	      insns[0].reloc = RELOC_0_12;
+	    case 't':		/* 12 bit displacement, for PALcode */
+	      insns[0].reloc[0].code = BFD_RELOC_12_PCREL;
 	      goto immediate;
 
 	    case '8':		/* 8 bit 0...7 */
-	      insns[0].reloc = RELOC_0_8;
+	      insns[0].reloc[0].code = BFD_RELOC_8;
 	      goto immediate;
-
-	    case 'I':		/* 26 bit immediate */
-	      insns[0].reloc = RELOC_0_25;
-#else
-	    case 't':
-	    case '8':
-	      abort ();
-#endif
-	      /*FALLTHROUGH*/
 
 	    immediate:
 	      if (*s == ' ')
@@ -1523,8 +1521,10 @@ alpha_ip (str, insns)
 		  else if (at_ok && macro_ok)
 		    {
 		      /* Constant value supplied, but it's too large.  */
-		      emit_add64 (ZERO, AT,
-				  insns[0].reloc[0].exp.X_add_number);
+		      do_add64 = 1;
+		      add64_in = ZERO;
+		      add64_out = AT;
+		      add64_addend = insns[0].reloc[0].exp.X_add_number;
 		      opcode &= ~ 0x1000;
 		      opcode |= (AT << SB);
 		      insns[0].reloc[0].code = BFD_RELOC_NONE;
@@ -1534,19 +1534,22 @@ alpha_ip (str, insns)
 		}
 	      else if (insns[0].reloc[0].code == BFD_RELOC_16
 		       && insns[0].reloc[0].exp.X_op == O_constant
-		       && !in_range (insns[0].reloc[0].exp.X_add_number,
-				     16, 0))
+		       && !in_range_signed (insns[0].reloc[0].exp.X_add_number,
+					    16))
 		{
 		  bfd_vma val = insns[0].reloc[0].exp.X_add_number;
 		  if (OPCODE (opcode) == 0x08)
 		    {
-		      emit_add64 (ZERO, AT, val);
+		      do_add64 = 1;
+		      add64_in = ZERO;
+		      add64_out = AT;
+		      add64_addend = val;
 		      opcode &= ~0x1000;
 		      opcode |= (AT << SB);
 		      insns[0].reloc[0].code = BFD_RELOC_NONE;
 		    }
 		  else if (OPCODE (opcode) == 0x09
-			   && in_range (val >> 16, 16, 0))
+			   && in_range_signed (val >> 16, 16))
 		    {
 		      /* ldah with high operand - convert to low */
 		      insns[0].reloc[0].exp.X_add_number >>= 16;
@@ -1667,7 +1670,10 @@ alpha_ip (str, insns)
 		  top = val - low;
 		  if (top)
 		    {
-		      emit_add64 (ZERO, AT, top);
+		      do_add64 = 1;
+		      add64_in = ZERO;
+		      add64_out = AT;
+		      add64_addend = top;
 		      opcode |= AT << SB;
 		    }
 		  else
@@ -1821,7 +1827,7 @@ alpha_ip (str, insns)
 		    note_gpreg (PV);
 
 		    jsr = &insns[num_gen++];
-		    jsr->opcode = (0x68004000	/* jsr */
+		    jsr->opcode = (pattern->match
 				   | (mask << SA)
 				   | (PV << SB)
 				   | 0);
@@ -2136,6 +2142,11 @@ alpha_ip (str, insns)
       break;
     }
 
+  if (do_add64)
+    {
+      emit_add64 (add64_in, add64_out, add64_addend);
+    }
+
   insns[0].opcode = opcode;
   return num_gen;
 }
@@ -2361,7 +2372,7 @@ s_alpha_set (x)
   else if (!strcmp ("volatile", s))
     /* ignore */ ;
   else
-    as_warn ("Tried to set unrecognized symbol: %s", name);
+    as_warn ("Tried to .set unrecognized mode `%s'", name);
   *input_line_pointer = ch;
   demand_empty_rest_of_line ();
 }
@@ -2531,6 +2542,13 @@ md_apply_fix (fixP, valueP)
       *p |= (value & 0x1f);
       goto done;
 
+    case BFD_RELOC_12_PCREL:
+      *p++ = value & 0xff;
+      value >>= 8;
+      *p &= 0xf0;
+      *p |= (value & 0x0f);
+      goto done;
+
     case BFD_RELOC_ALPHA_LITERAL:
     case BFD_RELOC_ALPHA_LITUSE:
       return 2;
@@ -2551,7 +2569,8 @@ md_apply_fix (fixP, valueP)
       return 2;
 
     default:
-      as_fatal ("unknown relocation type %d?", fixP->fx_r_type);
+      as_fatal ("unhandled relocation type %s",
+		bfd_get_reloc_code_name (fixP->fx_r_type));
       return 9;
     }
 

@@ -2,6 +2,9 @@ Fri Jan  6 16:59:41 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* gasp.c: Include string.h.  Put config.h before other includes.
 
+	* config/tc-alpha.c (alpha_ip): Delay calls to emit_add64 until
+	after any remaining operands are also known to match.
+
 Fri Dec 30 18:21:41 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* listing.c (list_symbol_table): Build a format string based on
