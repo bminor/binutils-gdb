@@ -3936,7 +3936,7 @@ macro (ip)
 	  if (mips_trap)
 	    macro_build ((char *) NULL, &icnt, NULL, "teq", "s,t", 0, 0);
 	  else
-	      macro_build ((char *) NULL, &icnt, NULL, "break", "c", 7);
+	    macro_build ((char *) NULL, &icnt, NULL, "break", "c", 7);
 	  return;
 	}
 
@@ -3957,7 +3957,7 @@ macro (ip)
 	  macro_build ((char *) NULL, &icnt, NULL,
 		       dbl ? "ddiv" : "div",
 		       "z,s,t", sreg, treg);
-	    macro_build ((char *) NULL, &icnt, NULL, "break", "c", 7);
+	  macro_build ((char *) NULL, &icnt, NULL, "break", "c", 7);
 	}
       expr1.X_add_number = -1;
       macro_build ((char *) NULL, &icnt, &expr1,
@@ -3996,7 +3996,7 @@ macro (ip)
 	     that later insns are available for delay slot filling.  */
 	  --mips_opts.noreorder;
 
-	    macro_build ((char *) NULL, &icnt, NULL, "break", "c", 6);
+	  macro_build ((char *) NULL, &icnt, NULL, "break", "c", 6);
 	}
       macro_build ((char *) NULL, &icnt, NULL, s, "d", dreg);
       break;
@@ -4213,9 +4213,13 @@ macro (ip)
 	}
       else if (mips_pic == SVR4_PIC && ! mips_big_got)
 	{
+	  int lw_reloc_type = (int) BFD_RELOC_MIPS_GOT16;
+
 	  /* If this is a reference to an external symbol, and there
 	     is no constant, we want
 	       lw	$tempreg,<sym>($gp)	(BFD_RELOC_MIPS_GOT16)
+	     or if tempreg is PIC_CALL_REG
+	       lw	$tempreg,<sym>($gp)	(BFD_RELOC_MIPS_CALL16)
 	     For a local symbol, we want
 	       lw	$tempreg,<sym>($gp)	(BFD_RELOC_MIPS_GOT16)
 	       nop
@@ -4242,9 +4246,11 @@ macro (ip)
 	  expr1.X_add_number = offset_expr.X_add_number;
 	  offset_expr.X_add_number = 0;
 	  frag_grow (32);
+	  if (expr1.X_add_number == 0 && tempreg == PIC_CALL_REG)
+	    lw_reloc_type = (int) BFD_RELOC_MIPS_CALL16;
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
 		       dbl ? "ld" : "lw",
-		       "t,o(b)", tempreg, (int) BFD_RELOC_MIPS_GOT16, GP);
+		       "t,o(b)", tempreg, lw_reloc_type, GP);
 	  if (expr1.X_add_number == 0)
 	    {
 	      int off;
@@ -4350,12 +4356,18 @@ macro (ip)
       else if (mips_pic == SVR4_PIC)
 	{
 	  int gpdel;
+	  int lui_reloc_type = (int) BFD_RELOC_MIPS_GOT_HI16;
+	  int lw_reloc_type = (int) BFD_RELOC_MIPS_GOT_LO16;
 
 	  /* This is the large GOT case.  If this is a reference to an
 	     external symbol, and there is no constant, we want
 	       lui	$tempreg,<sym>		(BFD_RELOC_MIPS_GOT_HI16)
 	       addu	$tempreg,$tempreg,$gp
 	       lw	$tempreg,<sym>($tempreg) (BFD_RELOC_MIPS_GOT_LO16)
+	     or if tempreg is PIC_CALL_REG
+	       lui	$tempreg,<sym>		(BFD_RELOC_MIPS_CALL_HI16)
+	       addu	$tempreg,$tempreg,$gp
+	       lw	$tempreg,<sym>($tempreg) (BFD_RELOC_MIPS_CALL_LO16)
 	     For a local symbol, we want
 	       lw	$tempreg,<sym>($gp)	(BFD_RELOC_MIPS_GOT16)
 	       nop
@@ -4394,8 +4406,13 @@ macro (ip)
 	    gpdel = 4;
 	  else
 	    gpdel = 0;
+	  if (expr1.X_add_number == 0 && tempreg == PIC_CALL_REG)
+	    {
+	      lui_reloc_type = (int) BFD_RELOC_MIPS_CALL_HI16;
+	      lw_reloc_type = (int) BFD_RELOC_MIPS_CALL_LO16;
+	    }
 	  macro_build ((char *) NULL, &icnt, &offset_expr, "lui", "t,u",
-		       tempreg, (int) BFD_RELOC_MIPS_GOT_HI16);
+		       tempreg, lui_reloc_type);
 	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 		       ((bfd_arch_bits_per_address (stdoutput) == 32
 			 || ! ISA_HAS_64BIT_REGS (mips_opts.isa))
@@ -4403,8 +4420,7 @@ macro (ip)
 		       "d,v,t", tempreg, tempreg, GP);
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
 		       dbl ? "ld" : "lw",
-		       "t,o(b)", tempreg, (int) BFD_RELOC_MIPS_GOT_LO16,
-		       tempreg);
+		       "t,o(b)", tempreg, lw_reloc_type, tempreg);
 	  if (expr1.X_add_number == 0)
 	    {
 	      int off;
@@ -9057,6 +9073,7 @@ md_parse_option (c, arg)
       g_switch_value = 0x7fffffff;
       break;
 
+#ifdef OBJ_ELF
       /* When generating ELF code, we permit -KPIC and -call_shared to
 	 select SVR4_PIC, and -non_shared to select no PIC.  This is
 	 intended to be compatible with Irix 5.  */
@@ -9090,6 +9107,7 @@ md_parse_option (c, arg)
     case OPTION_XGOT:
       mips_big_got = 1;
       break;
+#endif /* OBJ_ELF */
 
     case 'G':
       if (! USE_GLOBAL_POINTER_OPT)
@@ -9107,6 +9125,7 @@ md_parse_option (c, arg)
       g_switch_seen = 1;
       break;
 
+#ifdef OBJ_ELF
       /* The -32 and -64 options tell the assembler to output the 32
          bit or the 64 bit MIPS ELF format.  */
     case OPTION_32:
@@ -9128,6 +9147,7 @@ md_parse_option (c, arg)
 	mips_64 = 1;
       }
       break;
+#endif /* OBJ_ELF */
 
     case OPTION_GP32:
       mips_gp32 = 1;

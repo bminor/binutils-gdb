@@ -521,7 +521,7 @@ extern bfd *bfd_last_cache;
 
 /* List of supported target vectors, and the default vector (if
    bfd_default_vector[0] is NULL, there is no default).  */
-extern const bfd_target * const bfd_target_vector[];
+extern const bfd_target * const *bfd_target_vector;
 extern const bfd_target *bfd_default_vector[];
 
 /* Functions shared by the ECOFF and MIPS ELF backends, which have no
@@ -735,6 +735,8 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_NS32K_DISP_8_PCREL",
   "BFD_RELOC_NS32K_DISP_16_PCREL",
   "BFD_RELOC_NS32K_DISP_32_PCREL",
+  "BFD_RELOC_PDP11_DISP_8_PCREL",
+  "BFD_RELOC_PDP11_DISP_6_PCREL",
   "BFD_RELOC_PJ_CODE_HI16",
   "BFD_RELOC_PJ_CODE_LO16",
   "BFD_RELOC_PJ_CODE_DIR16",
@@ -910,6 +912,23 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_AVR_HI8_LDI_PM_NEG",
   "BFD_RELOC_AVR_HH8_LDI_PM_NEG",
   "BFD_RELOC_AVR_CALL",
+  "BFD_RELOC_390_12",
+  "BFD_RELOC_390_GOT12",
+  "BFD_RELOC_390_PLT32",
+  "BFD_RELOC_390_COPY",
+  "BFD_RELOC_390_GLOB_DAT",
+  "BFD_RELOC_390_JMP_SLOT",
+  "BFD_RELOC_390_RELATIVE",
+  "BFD_RELOC_390_GOTPC",
+  "BFD_RELOC_390_GOT16",
+  "BFD_RELOC_390_PC16DBL",
+  "BFD_RELOC_390_PLT16DBL",
+  "BFD_RELOC_390_PC32DBL",
+  "BFD_RELOC_390_PLT32DBL",
+  "BFD_RELOC_390_GOTPCDBL",
+  "BFD_RELOC_390_GOT64",
+  "BFD_RELOC_390_PLT64",
+  "BFD_RELOC_390_GOTENT",
   "BFD_RELOC_VTABLE_INHERIT",
   "BFD_RELOC_VTABLE_ENTRY",
   "BFD_RELOC_IA64_IMM14",

@@ -1,5 +1,5 @@
 /* tc-mn10300.c -- Assembler code for the Matsushita 10300
-   Copyright (C) 1996, 1997, 1998, 1999, 2000 Free Software Foundation.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1963,9 +1963,11 @@ md_apply_fix3 (fixp, valuep, seg)
 
   md_number_to_chars (fixpos, value, size);
 
-  fixp->fx_done = 1;
-  return 0;
+  /* If a symbol remains, pass the fixup, as a reloc, onto the linker.  */
+  if (fixp->fx_addsy == NULL)
+    fixp->fx_done = 1;
 
+  return 0;
 }
 
 /* Return nonzero if the fixup in FIXP will require a relocation,

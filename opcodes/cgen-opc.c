@@ -1,6 +1,6 @@
 /* CGEN generic opcode support.
 
-   Copyright (C) 1996, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils and GDB, the GNU debugger.
 
@@ -374,7 +374,7 @@ cgen_get_insn_value (cd, buf, length)
      unsigned char *buf;
      int length;
 {
-  bfd_get_bits (buf, length, cd->insn_endian == CGEN_ENDIAN_BIG);
+  return bfd_get_bits (buf, length, cd->insn_endian == CGEN_ENDIAN_BIG);
 }
 
 /* Cover function to store an insn value properly byteswapped.  */

@@ -1,3 +1,109 @@
+2001-02-27  Alan Modra  <alan@linuxcare.com.au>
+
+	* configure.in (BFD_VERSION): New.
+	(AM_INIT_AUTOMAKE): Use $BFD_VERSION.
+	* configure: Regenerate.
+	* Makefile.am: Run "make dep-am"
+	* Makefile.in: Regenerate.
+
+2001-02-26  Timothy Wall  <twall@cygnus.com>
+
+	* emulparams/elf64_aix.sh: Add additional read-only sections;
+	uncomment lines which are now required.
+
+2001-02-26  H.J. Lu  <hjl@gnu.org>
+
+	* ldlang.c (open_input_bfds): Set the bfd error handler so
+        that problems can be caught whilst loading symbols.
+        (record_bfd_errors): New function: Report BFD errors and mark
+        the executable output as being invalid.
+
+2001-02-22  Timothy Wall  <twall@cygnus.com>
+
+	* configure.host: Add configuration for ia64-*-aix*.
+	* Makefile.am (ALL_64_EMULATIONS): Add emulation for ia64-*-aix*.
+	Add dependencies for eelf64_aix.c.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Add ia64-*-aix* mapping.
+	* emulparams/elf64_aix.sh: Add settings for elf64 on aix5.
+	* testsuite/ld-bootstrap/boostrap.exp: Exclude ia64 flavor from
+	AIX-specific test. 
+	
+2001-02-20  H.J. Lu  <hjl@gnu.org>
+
+	* ldfile.c (ldfile_open_file): Set entry->search_dirs_flag to
+	false if we found the file.
+
+2001-02-18  David O'Brien  <obrien@FreeBSD.org>
+
+	* configure.tgt: Add FreeBSD/Alpha, FreeBSD/x86-64, FreeBSD/ia64,
+	FreeBSD/PowerPC, FreeBSD/arm, and FreeBSD/sparc64 entries.
+
+2001-02-18  lars brinkhoff  <lars@nocrew.org>
+
+	* Makefile.am: Add PDP-11 target.
+	* configure.tgt: Likewise.
+	* emulparams/pdp11.sh: New file.
+
+2001-02-17  David O'Brien  <obrien@FreeBSD.org>
+
+	* configure.host: Add a generic FreeBSD configuration entry such that
+	all [modern] FreeBSD systems on all platforms will look the same.
+
+2001-02-14  H.J. Lu  <hjl@gnu.org>
+
+	* configure.tgt: Remove mention of earmelf_linux26.
+
+2001-02-13  Richard Henderson  <rth@redhat.com>
+
+	* emulparams/elf64_ia64.sh (OTHER_GOT_SYMBOLS): Remove.
+
+2001-02-13  H.J. Lu  <hjl@gnu.org>
+
+	* ldexp.h (node_type): Add etree_provided.
+	* ldexp.c (exp_fold_tree): Handle etree_provided. Set the node
+	type to etree_provided if defined by PROVIDE. Allow updating
+	for etree_provided. 
+	(exp_print_tree): Handle etree_provided.
+	* mpw-elfmips.c (gldelf32ebmip_find_exp_assignment): Handle
+	etree_provided.
+
+2001-02-09  David Mosberger  <davidm@hpl.hp.com>
+
+	* emulparams/elf64_ia64.sh (OTHER_READONLY_SECTIONS): Add
+	.IA_64.unwind.* pattern to unwind table section and
+	.IA_64.unwind_info* pattern to unwind info section.
+
+2001-02-09  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* Makefile.am: Add linux target for S/390.
+	* Makefile.in: Likewise.
+	* configure.host: Likewise.
+	* configure.tgt: Likewise.
+	* emulparams/elf64_s390.sh: New file.
+	* emulparams/elf_s390.sh: New file.
+
+2001-02-09  Jakub Jelinek  <jakub@redhat.com>
+
+	* configure.tgt (sparc64-*-linux-gnu*): Add elf32_sparc into
+	targ_extra_libpath.
+	(sparc-*-linux-gnu*): Add elf64_sparc into targ_extra_libpath.
+
+2001-02-06  Philip Blundell  <philb@gnu.org>
+
+	* Makefile.am: Remove mention of earmelf_linux26.
+	* Makefile.in: Regenerate.
+
+2001-02-04  Philip Blundell  <philb@gnu.org>
+
+	* emulparams/armelf_linux.sh (TEXT_START_ADDR): Set to 0x8000.
+	* emulparams/armelf_linux26.sh: Delete.
+	* configure.tgt: Remove mention of armelf_linux26 emulation.
+
+2001-02-01  Nick Clifton  <nickc@redhat.com>
+
+	* ld.1: Replace occurances of -oformat with --oformat.
+
 2001-01-25  Jim Driftmyer <jdrift@stny.rr.com>
 
 	* ldlang.c (lang_leave_overlay): Don't set lma_region when

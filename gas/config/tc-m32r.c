@@ -1384,7 +1384,8 @@ const relax_typeS md_relax_table[] =
 };
 
 long
-m32r_relax_frag (fragP, stretch)
+m32r_relax_frag (segment, fragP, stretch)
+     segT segment;
      fragS *fragP;
      long stretch;
 {
@@ -1411,7 +1412,7 @@ m32r_relax_frag (fragP, stretch)
     }
   else
     {
-      growth = relax_frag (fragP, stretch);
+      growth = relax_frag (segment, fragP, stretch);
 
       /* Long jump on odd halfword boundary?  */
       if (fragP->fr_subtype == 2 && (address & 3) != 0)

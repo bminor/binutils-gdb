@@ -44,8 +44,10 @@ m6812*|m68hc12*) targ_archs="bfd_m68hc12_arch bfd_m68hc11_arch" ;;
 m68*)	targ_archs=bfd_m68k_arch ;;
 m88*)	targ_archs=bfd_m88k_arch ;;
 mips*)	targ_archs=bfd_mips_arch ;;
+pdp11*)	targ_archs=bfd_pdp11_arch ;;
 pj*)	targ_archs="bfd_pj_arch bfd_i386_arch";;
 powerpc*) targ_archs="bfd_rs6000_arch bfd_powerpc_arch" ;;
+s390*)  targ_archs=bfd_s390_arch ;;
 rs6000)	targ_archs="bfd_rs6000_arch bfd_powerpc_arch" ;;
 sparc*) targ_archs=bfd_sparc_arch ;;
 v850*)	targ_archs=bfd_v850_arch ;;
@@ -84,7 +86,11 @@ case "${targ}" in
   alpha*-*-*)
     targ_defvec=ecoffalpha_little_vec
     ;;
-  ia64*-*-linux-gnu* | ia64*-*-elf*)
+  ia64*-*-aix*)
+    targ_defvec=bfd_elf64_ia64_aix_little_vec
+    targ_selvecs="bfd_elf64_ia64_aix_big_vec bfd_efi_app_ia64_vec"
+    ;;
+  ia64*-*-freebsd* | ia64*-*-linux-gnu* | ia64*-*-elf*)
     targ_defvec=bfd_elf64_ia64_little_vec
     targ_selvecs="bfd_elf64_ia64_big_vec bfd_efi_app_ia64_vec"
     ;;
@@ -92,7 +98,7 @@ case "${targ}" in
     targ_defvec=bfd_elf64_ia64_big_vec
     targ_selvecs="bfd_elf32_ia64_big_vec"
     ;;
-  sparc64-*-netbsd*)
+  sparc64-*-freebsd* | sparc64-*-netbsd*)
     targ_defvec=bfd_elf64_sparc_vec
     targ_selvecs="bfd_elf32_sparc_vec sunos_big_vec"
     ;;
@@ -147,7 +153,7 @@ case "${targ}" in
     targ_defvec=bfd_elf32_bigarm_vec
     targ_selvecs=bfd_elf32_littlearm_vec
     ;;
-  arm-*-elf | arm*-*-linux-gnu* | arm*-*-conix* | arm*-*-uclinux*)
+  arm-*-elf | arm-*-freebsd* | arm*-*-linux-gnu* | arm*-*-conix* | arm*-*-uclinux*)
     targ_defvec=bfd_elf32_littlearm_vec
     targ_selvecs=bfd_elf32_bigarm_vec
     ;;
@@ -364,6 +370,10 @@ case "${targ}" in
     targ_selvecs="i386linux_vec bfd_efi_app_ia32_vec"
     ;;
 #ifdef BFD64    
+  x86_64-*-freebsd*)
+    targ_defvec=bfd_elf64_x86_64_vec
+    targ_selvecs="bfd_elf32_i386_vec i386coff_vec bfd_efi_app_ia32_vec"
+    ;;
   x86_64-*-linux-gnu*)
     targ_defvec=bfd_elf64_x86_64_vec
     targ_selvecs="bfd_elf32_i386_vec i386linux_vec bfd_efi_app_ia32_vec"
@@ -679,6 +689,11 @@ case "${targ}" in
     targ_underscore=yes
     ;;
 
+  pdp11-*-*)
+    targ_defvec=pdp11_aout_vec
+    targ_underscore=yes
+    ;;
+
   pj-*-*)
     targ_defvec=bfd_elf32_pj_vec
     targ_selvecs="bfd_elf32_pj_vec bfd_elf32_pjl_vec"
@@ -689,7 +704,7 @@ case "${targ}" in
     targ_selvecs="bfd_elf32_pjl_vec bfd_elf32_pj_vec bfd_elf32_i386_vec"
     ;;
 
-  powerpc-*-aix* | powerpc-*-beos*)
+  powerpc-*-aix* | powerpc-*-beos* | rs6000-*-*)
     targ_defvec=rs6000coff_vec
     targ_selvecs="rs6000coff64_vec"
     ;;
@@ -718,9 +733,14 @@ case "${targ}" in
     targ_selvecs="bfd_powerpcle_pei_vec bfd_powerpc_pei_vec bfd_powerpcle_pe_vec bfd_powerpc_pe_vec"
     ;;
 
-  rs6000-*-*)
-    targ_defvec=rs6000coff_vec
+  s390-*-linux*)
+    targ_defvec=bfd_elf32_s390_vec
     ;;
+#ifdef BFD64
+  s390x-*-linux*)
+    targ_defvec=bfd_elf64_s390_vec
+    ;;
+#endif
 
   sh-*-linux*)
     targ_defvec=bfd_elf32_shblin_vec

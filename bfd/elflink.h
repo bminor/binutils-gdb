@@ -80,15 +80,19 @@ elf_bfd_link_add_symbols (abfd, info)
     }
 }
 
-/* Return true iff this is a non-common definition of a symbol.  */
+/* Return true iff this is a non-common, definition of a non-function symbol.  */
 static boolean
-is_global_symbol_definition (abfd, sym)
+is_global_data_symbol_definition (abfd, sym)
      bfd * abfd ATTRIBUTE_UNUSED;
      Elf_Internal_Sym * sym;
 {
   /* Local symbols do not count, but target specific ones might.  */
   if (ELF_ST_BIND (sym->st_info) != STB_GLOBAL
       && ELF_ST_BIND (sym->st_info) < STB_LOOS)
+    return false;
+
+  /* Function symbols do not count.  */
+  if (ELF_ST_TYPE (sym->st_info) == STT_FUNC)
     return false;
 
   /* If the section is undefined, then so is the symbol.  */
@@ -116,7 +120,7 @@ is_global_symbol_definition (abfd, sym)
 }
 
 /* Search the symbol table of the archive element of the archive ABFD
-   whoes archove map contains a mention of SYMDEF, and determine if
+   whoes archive map contains a mention of SYMDEF, and determine if
    the symbol is defined in this element.  */
 static boolean
 elf_link_is_defined_archive_symbol (abfd, symdef)
@@ -201,7 +205,7 @@ elf_link_is_defined_archive_symbol (abfd, symdef)
 
       if (strcmp (name, symdef->name) == 0)
 	{
-	  result = is_global_symbol_definition (abfd, & sym);
+	  result = is_global_data_symbol_definition (abfd, & sym);
 	  break;
 	}
     }
@@ -4431,7 +4435,7 @@ elf_bfd_final_link (abfd, info)
   /* sh_link is set in assign_section_numbers.  */
   /* sh_info is set below.  */
   /* sh_offset is set just below.  */
-  symtab_hdr->sh_addralign = 4;  /* FIXME: system dependent?  */
+  symtab_hdr->sh_addralign = bed->s->file_align;
 
   off = elf_tdata (abfd)->next_file_pos;
   off = _bfd_elf_assign_file_position_for_section (symtab_hdr, off, true);
@@ -5511,14 +5515,24 @@ elf_link_input_bfd (finfo, input_bfd)
 	    }
 	}
 
+      name = NULL;
       if (isym->st_shndx == SHN_UNDEF)
-	isec = bfd_und_section_ptr;
+        {
+	  isec = bfd_und_section_ptr;
+	  name = isec->name;
+	}
       else if (isym->st_shndx > 0 && isym->st_shndx < SHN_LORESERVE)
 	isec = section_from_elf_index (input_bfd, isym->st_shndx);
       else if (isym->st_shndx == SHN_ABS)
-	isec = bfd_abs_section_ptr;
+	{
+	  isec = bfd_abs_section_ptr;
+	  name = isec->name;
+	}
       else if (isym->st_shndx == SHN_COMMON)
-	isec = bfd_com_section_ptr;
+	{
+	  isec = bfd_com_section_ptr;
+	  name = isec->name;
+	}
       else
 	{
 	  /* Who knows?  */
@@ -5537,7 +5551,18 @@ elf_link_input_bfd (finfo, input_bfd)
 
 	  /* Save away all section symbol values.  */
 	  if (isec != NULL)
-	    isec->symbol->value = isym->st_value;
+	    {
+	      if (name)
+		{
+		  if (isec->symbol->value != isym->st_value)
+		    (*_bfd_error_handler)
+		      (_("%s: invalid section symbol index 0x%x (%s) ingored"),
+		       bfd_get_filename (input_bfd), isym->st_shndx,
+		       name);
+		  continue;
+		}
+	      isec->symbol->value = isym->st_value;
+	    }
 
 	  /* If this is a discarded link-once section symbol, update
 	     it's value to that of the kept section symbol.  The

@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-07-27 16:32-0700\n"
+"POT-Creation-Date: 2001-02-06 18:02-0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -33,27 +33,27 @@ msgstr ""
 msgid "[find_call] 0x%lx: bsr"
 msgstr ""
 
-#: basic_blocks.c:123 call_graph.c:86 hist.c:122
+#: basic_blocks.c:125 call_graph.c:86 hist.c:122
 #, c-format
 msgid "%s: %s: unexpected end of file\n"
 msgstr ""
 
-#: basic_blocks.c:198
+#: basic_blocks.c:200
 #, c-format
 msgid "%s: warning: ignoring basic-block exec counts (use -l or --line)\n"
 msgstr ""
 
 #. FIXME: This only works if bfd_vma is unsigned long.
-#: basic_blocks.c:296 basic_blocks.c:306
+#: basic_blocks.c:298 basic_blocks.c:308
 #, c-format
 msgid "%s:%d: (%s:0x%lx) %lu executions\n"
 msgstr ""
 
-#: basic_blocks.c:297 basic_blocks.c:307
+#: basic_blocks.c:299 basic_blocks.c:309
 msgid "<unknown>"
 msgstr ""
 
-#: basic_blocks.c:551
+#: basic_blocks.c:553
 #, c-format
 msgid ""
 "\n"
@@ -64,36 +64,36 @@ msgid ""
 "\n"
 msgstr ""
 
-#: basic_blocks.c:575
+#: basic_blocks.c:577
 msgid ""
 "\n"
 "Execution Summary:\n"
 "\n"
 msgstr ""
 
-#: basic_blocks.c:576
+#: basic_blocks.c:578
 #, c-format
 msgid "%9ld   Executable lines in this file\n"
 msgstr ""
 
-#: basic_blocks.c:578
+#: basic_blocks.c:580
 #, c-format
 msgid "%9ld   Lines executed\n"
 msgstr ""
 
-#: basic_blocks.c:579
+#: basic_blocks.c:581
 #, c-format
 msgid "%9.2f   Percent of the file executed\n"
 msgstr ""
 
-#: basic_blocks.c:583
+#: basic_blocks.c:585
 #, c-format
 msgid ""
 "\n"
 "%9lu   Total number of line executions\n"
 msgstr ""
 
-#: basic_blocks.c:585
+#: basic_blocks.c:587
 #, c-format
 msgid "%9.2f   Average executions per line\n"
 msgstr ""

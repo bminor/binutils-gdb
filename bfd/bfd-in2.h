@@ -1424,6 +1424,7 @@ enum bfd_architecture
 #define bfd_mach_h8300   1
 #define bfd_mach_h8300h  2
 #define bfd_mach_h8300s  3
+  bfd_arch_pdp11,     /* DEC PDP-11 */
   bfd_arch_powerpc,   /* PowerPC */
 #define bfd_mach_ppc           0
 #define bfd_mach_ppc_403       403
@@ -1517,6 +1518,9 @@ enum bfd_architecture
 #define bfd_mach_avr4          4
 #define bfd_mach_avr5          5
   bfd_arch_cris,      /* Axis CRIS */
+  bfd_arch_s390,      /* IBM s390 */
+#define bfd_mach_s390_esa      0
+#define bfd_mach_s390_esame    1
   bfd_arch_last
   };
 
@@ -2085,6 +2089,10 @@ to compensate for the borrow when the low bits are added. */
   BFD_RELOC_NS32K_DISP_16_PCREL,
   BFD_RELOC_NS32K_DISP_32_PCREL,
 
+/* PDP11 relocations */
+  BFD_RELOC_PDP11_DISP_8_PCREL,
+  BFD_RELOC_PDP11_DISP_6_PCREL,
+
 /* Picojava relocs.  Not all of these appear in object files. */
   BFD_RELOC_PJ_CODE_HI16,
   BFD_RELOC_PJ_CODE_LO16,
@@ -2514,6 +2522,57 @@ value of SUBI insn. */
 /* This is a 32 bit reloc for the AVR that stores 23 bit value
 into 22 bits. */
   BFD_RELOC_AVR_CALL,
+
+/* Direct 12 bit. */
+  BFD_RELOC_390_12,
+
+/* 12 bit GOT offset. */
+  BFD_RELOC_390_GOT12,
+
+/* 32 bit PC relative PLT address. */
+  BFD_RELOC_390_PLT32,
+
+/* Copy symbol at runtime. */
+  BFD_RELOC_390_COPY,
+
+/* Create GOT entry. */
+  BFD_RELOC_390_GLOB_DAT,
+
+/* Create PLT entry. */
+  BFD_RELOC_390_JMP_SLOT,
+
+/* Adjust by program base. */
+  BFD_RELOC_390_RELATIVE,
+
+/* 32 bit PC relative offset to GOT. */
+  BFD_RELOC_390_GOTPC,
+
+/* 16 bit GOT offset. */
+  BFD_RELOC_390_GOT16,
+
+/* PC relative 16 bit shifted by 1. */
+  BFD_RELOC_390_PC16DBL,
+
+/* 16 bit PC rel. PLT shifted by 1. */
+  BFD_RELOC_390_PLT16DBL,
+
+/* PC relative 32 bit shifted by 1. */
+  BFD_RELOC_390_PC32DBL,
+
+/* 32 bit PC rel. PLT shifted by 1. */
+  BFD_RELOC_390_PLT32DBL,
+
+/* 32 bit PC rel. GOT shifted by 1. */
+  BFD_RELOC_390_GOTPCDBL,
+
+/* 64 bit GOT offset. */
+  BFD_RELOC_390_GOT64,
+
+/* 64 bit PC relative PLT address. */
+  BFD_RELOC_390_PLT64,
+
+/* 32 bit rel. offset to GOT entry. */
+  BFD_RELOC_390_GOTENT,
 
 /* These two relocations are used by the linker to determine which of
 the entries in a C++ virtual function table are actually used.  When

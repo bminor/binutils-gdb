@@ -1,3 +1,40 @@
+2001-02-26  H.J. Lu  <hjl@gnu.org>
+
+	* gas/ia64/opc-a-err.l: Change "Operand [3|4]" to "Operand [34]".
+
+2001-02-23  H.J. Lu  <hjl@gnu.org>
+
+	* gas/ia64/opc-a-err.l: Fix "cmp4.lt.or".
+
+	* gas/ia64/opc-a.pl: Add tests for pseudo-ops for "cmp" and
+	"cmp4".
+	* gas/ia64/opc-a.s: Rebuilt.
+	* gas/ia64/opc-a.d: Likewise.
+
+2001-02-17  Chris Demetriou  <cgd@broadcom.com>
+
+	* gas/mips/mips32.d: Remove ELF dependencies.  This test
+	wasn't meant to be ELF specific, and doesn't have to be.
+	* gas/mips/mips64.d: Likewise.
+
+2001-02-17  Chris Demetriou  <cgd@broadcom.com>
+
+	* gas/mips/mips.exp: Don't attempt the elf_e_flags family of
+	tests if not ELF; they test ELF-specific features.
+
+2001-02-08  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* gas/mri/mri.exp: Don't execute the M68K specific tests 
+	on m6811-elf and m6812-elf targets, still run the generic MRI tests.
+
+2001-02-04  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* gas/m68hc11/malis.s: New test to verify compliance with Motorola
+	Assembly Language Input Standard.
+	* gas/m68hc11/malis.d: New file.
+	* gas/m68hc11/malis-include.s: New file.
+	* gas/m68hc11/all.exp: Add the new test.
+
 2001-01-12  Alan Modra  <alan@linuxcare.com.au>
 
 	* gas/i386/i386.exp (gas_64_check): Correct target string.

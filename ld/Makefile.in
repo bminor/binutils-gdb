@@ -218,7 +218,6 @@ ALL_EMULATIONS = \
 	earmcoff.o \
 	earmelf.o \
 	earmelf_linux.o \
-	earmelf_linux26.o \
 	earmelf_oabi.o \
 	earmnbsd.o \
 	earmpe.o \
@@ -262,6 +261,7 @@ ALL_EMULATIONS = \
 	eelf_i386.o \
 	eelf_i386_be.o \
 	eelf_i386_chaos.o \
+	eelf_s390.o \
 	egld960.o \
 	egld960coff.o \
 	eh8300.o \
@@ -316,6 +316,7 @@ ALL_EMULATIONS = \
 	enews.o \
 	ens32knbsd.o \
 	epc532macha.o \
+	epdp11.o \
 	epjelf.o \
 	epjlelf.o \
 	eppcmacos.o \
@@ -350,8 +351,10 @@ ALL_EMULATIONS = \
 
 
 ALL_64_EMULATIONS = \
+	eelf64_aix.o \
 	eelf64_ia64.o \
 	eelf_x86_64.o \
+	eelf64_s390.o \
 	eelf64_sparc.o \
 	eelf64alpha.o \
 	eelf64bmip.o \
@@ -1046,10 +1049,6 @@ earmelf_linux.c: $(srcdir)/emulparams/armelf_linux.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/armelf.em \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} armelf_linux "$(tdir_armelf_linux)"
-earmelf_linux26.c: $(srcdir)/emulparams/armelf_linux26.sh \
-  $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/armelf.em \
-  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} armelf_linux26 "$(tdir_armelf_linux26)"
 earmaoutb.c:	$(srcdir)/emulparams/armaoutb.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/armaout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} armaoutb "$(tdir_armaoutb)"
@@ -1202,9 +1201,15 @@ eelf64alpha.c: $(srcdir)/emulparams/elf64alpha.sh \
 eelf64hppa.c: $(srcdir)/emulparams/elf64hppa.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64hppa "$(tdir_elf64hppa)"
+eelf64_aix.c: $(srcdir)/emulparams/elf64_aix.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf64_aix "$(tdir_elf64_aix)"
 eelf64_ia64.c: $(srcdir)/emulparams/elf64_ia64.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64_ia64 "$(tdir_elf64_ia64)"
+eelf64_s390.c: $(srcdir)/emulparams/elf64_s390.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf64_s390 "$(tdir_elf64_s390)"
 eelf64_sparc.c: $(srcdir)/emulparams/elf64_sparc.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64_sparc "$(tdir_elf64_sparc)"
@@ -1223,6 +1228,9 @@ eelf_i386_be.c: $(srcdir)/emulparams/elf_i386_be.sh \
 eelf_i386_chaos.c: $(srcdir)/emulparams/elf_i386_chaos.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf_i386_chaos "$(tdir_elf_i386_chaos)"
+eelf_s390.c: $(srcdir)/emulparams/elf_s390.sh \
+  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf_s390 "$(tdir_elf_s390)"
 egld960.c: $(srcdir)/emulparams/gld960.sh \
   $(srcdir)/emultempl/gld960.em $(srcdir)/scripttempl/i960.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} gld960 "$(tdir_gld960)"
@@ -1394,6 +1402,9 @@ ens32knbsd.c:	$(srcdir)/emulparams/ns32knbsd.sh \
 epc532macha.c: $(srcdir)/emulparams/pc532macha.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} pc532macha "$(tdir_pc532macha)"
+epdp11.c: $(srcdir)/emulparams/pdp11.sh \
+  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} pdp11 "$(tdir_pdp11)"
 epjelf.c: $(srcdir)/emulparams/pjelf.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} pjelf "$(tdir_pjelf)"
@@ -1709,9 +1720,9 @@ ldwrite.o: ldwrite.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   ldlang.h ldwrite.h ldmisc.h ldgram.h ldmain.h
 lexsup.o: lexsup.c ../bfd/bfd.h $(INCDIR)/ansidecl.h \
   sysdep.h config.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
-  $(INCDIR)/getopt.h $(INCDIR)/bfdlink.h ld.h $(INCDIR)/bin-bugs.h \
-  ldmain.h ldmisc.h ldexp.h ldlang.h ldgram.h ldlex.h \
-  ldfile.h ldver.h ldemul.h $(INCDIR)/demangle.h
+  $(INCDIR)/bfdlink.h ld.h $(INCDIR)/bin-bugs.h ldmain.h \
+  ldmisc.h ldexp.h ldlang.h ldgram.h ldlex.h ldfile.h \
+  ldver.h ldemul.h $(INCDIR)/demangle.h
 mri.o: mri.c ../bfd/bfd.h $(INCDIR)/ansidecl.h sysdep.h \
   config.h $(INCDIR)/fopen-same.h ld.h $(INCDIR)/bin-bugs.h \
   ldexp.h ldlang.h ldmisc.h mri.h ldgram.h $(INCDIR)/libiberty.h

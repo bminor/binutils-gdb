@@ -1,5 +1,5 @@
 /* SPARC-specific support for 64-bit ELF
-   Copyright (C) 1993, 95, 96, 97, 98, 99, 2000
+   Copyright (C) 1993, 95, 96, 97, 98, 99, 2000, 2001
    Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -63,6 +63,8 @@ static boolean sparc64_elf_add_symbol_hook
 static void sparc64_elf_symbol_processing
   PARAMS ((bfd *, asymbol *));
 
+static boolean sparc64_elf_copy_private_bfd_data
+  PARAMS ((bfd *, bfd *));
 static boolean sparc64_elf_merge_private_bfd_data
   PARAMS ((bfd *, bfd *));
 
@@ -118,7 +120,7 @@ static reloc_howto_type sparc64_elf_howto_table[] =
   HOWTO(R_SPARC_GLOB_DAT,  0,0,00,false,0,complain_overflow_dont,    bfd_elf_generic_reloc,  "R_SPARC_GLOB_DAT",false,0,0x00000000,true),
   HOWTO(R_SPARC_JMP_SLOT,  0,0,00,false,0,complain_overflow_dont,    bfd_elf_generic_reloc,  "R_SPARC_JMP_SLOT",false,0,0x00000000,true),
   HOWTO(R_SPARC_RELATIVE,  0,0,00,false,0,complain_overflow_dont,    bfd_elf_generic_reloc,  "R_SPARC_RELATIVE",false,0,0x00000000,true),
-  HOWTO(R_SPARC_UA32,      0,0,00,false,0,complain_overflow_dont,    bfd_elf_generic_reloc,  "R_SPARC_UA32",    false,0,0x00000000,true),
+  HOWTO(R_SPARC_UA32,      0,2,32,false,0,complain_overflow_bitfield,bfd_elf_generic_reloc,  "R_SPARC_UA32",    false,0,0xffffffff,true),
 #ifndef SPARC64_OLD_RELOCS
   /* These aren't implemented yet.  */
   HOWTO(R_SPARC_PLT32,     0,0,00,false,0,complain_overflow_dont,    sparc_elf_notsup_reloc, "R_SPARC_PLT32",    false,0,0x00000000,true),
@@ -994,7 +996,8 @@ sparc64_elf_check_relocs (abfd, info, sec, relocs)
   srelgot = NULL;
   sreloc = NULL;
 
-  rel_end = relocs + sec->reloc_count;
+  rel_end = relocs + elf_section_data (sec)->rel_hdr.sh_size
+		     / elf_section_data (sec)->rel_hdr.sh_entsize;
   for (rel = relocs; rel < rel_end; rel++)
     {
       unsigned long r_symndx;
@@ -1900,7 +1903,8 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
   sgot = splt = sreloc = NULL;
 
   rel = relocs;
-  relend = relocs + input_section->reloc_count;
+  relend = relocs + elf_section_data (input_section)->rel_hdr.sh_size
+		    / elf_section_data (input_section)->rel_hdr.sh_entsize;
   for (; rel < relend; rel++)
     {
       int r_type;
@@ -2705,6 +2709,13 @@ sparc64_elf_finish_dynamic_symbol (output_bfd, info, h, sym)
 	  /* Mark the symbol as undefined, rather than as defined in
 	     the .plt section.  Leave the value alone.  */
 	  sym->st_shndx = SHN_UNDEF;
+	  /* If the symbol is weak, we do need to clear the value.
+	     Otherwise, the PLT entry would provide a definition for
+	     the symbol even if the symbol wasn't defined anywhere,
+	     and so the symbol would never be NULL.  */
+	  if ((h->elf_link_hash_flags & ELF_LINK_HASH_REF_REGULAR_NONWEAK)
+	      == 0)
+	    sym->st_value = 0;
 	}
     }
 
@@ -2892,6 +2903,24 @@ sparc64_elf_finish_dynamic_sections (output_bfd, info)
 }
 
 /* Functions for dealing with the e_flags field.  */
+
+/* Copy backend specific data from one object module to another */
+static boolean
+sparc64_elf_copy_private_bfd_data (ibfd, obfd)
+     bfd *ibfd, *obfd;
+{
+  if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour
+      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
+    return true;
+
+  BFD_ASSERT (!elf_flags_init (obfd)
+              || (elf_elfheader (obfd)->e_flags
+                  == elf_elfheader (ibfd)->e_flags));
+
+  elf_elfheader (obfd)->e_flags = elf_elfheader (ibfd)->e_flags;
+  elf_flags_init (obfd) = true;
+  return true;
+}
 
 /* Merge backend specific data from an object file to the output
    object file when linking.  */
@@ -3114,7 +3143,8 @@ const struct elf_size_info sparc64_elf_size_info =
   sparc64_elf_print_symbol_all
 #define elf_backend_output_arch_syms \
   sparc64_elf_output_arch_syms
-
+#define bfd_elf64_bfd_copy_private_bfd_data \
+  sparc64_elf_copy_private_bfd_data
 #define bfd_elf64_bfd_merge_private_bfd_data \
   sparc64_elf_merge_private_bfd_data
 

@@ -21,7 +21,7 @@ fpcmp-s1;	fpcmp[Field(sf)==s1]
 fpcmp-s2;	fpcmp[Field(sf)==s2]
 fpcmp-s3;	fpcmp[Field(sf)==s3]
 fr-readers;	IC:fp-arith, IC:fp-non-arith, IC:pr-writers-fp, chk.s[Format in {M21}], getf
-fr-writers;	IC:fp-arith, IC:fp-non-arith\fclass, IC:mem-readers-fp
+fr-writers;	IC:fp-arith, IC:fp-non-arith\fclass, IC:mem-readers-fp, setf
 gr-readers;	IC:gr-readers-writers, IC:mem-readers, IC:mem-writers, chk.s, cmp, cmp4, fc, itc.i, itc.d, itr.i, itr.d, IC:mov-to-AR-gr, IC:mov-to-BR, IC:mov-to-CR, IC:mov-to-IND, IC:mov-from-IND, IC:mov-to-PR-allreg, IC:mov-to-PSR-l, IC:mov-to-PSR-um, IC:probe-all, ptc.e, ptc.g, ptc.ga, ptc.l, ptr.i, ptr.d, setf, tbit, tnat
 gr-readers-writers;	IC:mov-from-IND, add, addl, addp4, adds, and, andcm, IC:czx, dep\dep[Format in {I13}], extr, IC:mem-readers-int, IC:ld-all-postinc, IC:lfetch-postinc, IC:mix, IC:mux, or, IC:pack, IC:padd, IC:pavg, IC:pavgsub, IC:pcmp, IC:pmax, IC:pmin, IC:pmpy, IC:pmpyshr, popcnt, IC:probe-nofault, IC:psad, IC:pshl, IC:pshladd, IC:pshr, IC:pshradd, IC:psub, shl, shladd, shladdp4, shr, shrp, IC:st-postinc, sub, IC:sxt, tak, thash, tpa, ttag, IC:unpack, xor, IC:zxt
 gr-writers;	alloc, dep, getf, IC:gr-readers-writers, IC:mem-readers-int, IC:mov-from-AR, IC:mov-from-BR, IC:mov-from-CR, IC:mov-from-PR, IC:mov-from-PSR, IC:mov-from-PSR-um, IC:mov-ip, movl

@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Support for PDP-11 by Lars Brinkhoff.
+
 * Add support for ARM v5t and v5te architectures and Intel's XScale ARM
   extenstions.
 

@@ -80,6 +80,12 @@ struct mips_elf_link_hash_entry
      section) against this symbol.  */
   unsigned int min_dyn_reloc_index;
 
+  /* We must not create a stub for a symbol that has relocations
+     related to taking the function's address, i.e. any but
+     R_MIPS_CALL*16 ones -- see "MIPS ABI Supplement, 3rd Edition",
+     p. 4-20.  */
+  boolean no_fn_stub;
+
   /* If there is a stub that 32 bit functions should use to call this
      16 bit function, this points to the section containing the stub.  */
   asection *fn_stub;
@@ -193,7 +199,7 @@ static bfd_vma mips_elf_got16_entry
 static boolean mips_elf_create_dynamic_relocation
   PARAMS ((bfd *, struct bfd_link_info *, const Elf_Internal_Rela *,
 	   struct mips_elf_link_hash_entry *, asection *,
-	   bfd_vma, bfd_vma *, asection *, boolean local_p));
+	   bfd_vma, bfd_vma *, asection *));
 static void mips_elf_allocate_dynamic_relocations
   PARAMS ((bfd *, unsigned int));
 static boolean mips_elf_stub_section_p
@@ -531,7 +537,7 @@ static reloc_howto_type elf_mips_howto_table[] =
 	 complain_overflow_dont, /* complain_on_overflow */
 	 			/* This needs complex overflow
 				   detection, because the upper four
-				   bits must match the PC.  */
+				   bits must match the PC + 4.  */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_MIPS_26",		/* name */
 	 true,			/* partial_inplace */
@@ -3955,6 +3961,7 @@ mips_elf_link_hash_newfunc (entry, table, string)
       ret->esym.ifd = -2;
       ret->possibly_dynamic_relocs = 0;
       ret->min_dyn_reloc_index = 0;
+      ret->no_fn_stub = false;
       ret->fn_stub = NULL;
       ret->need_fn_stub = false;
       ret->call_stub = NULL;
@@ -4330,24 +4337,36 @@ mips_elf_output_extsym (h, data)
     }
   else if ((h->root.elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0)
     {
-      /* Set type and value for a symbol with a function stub.  */
-      h->esym.asym.st = stProc;
-      sec = h->root.root.u.def.section;
-      if (sec == NULL)
-	h->esym.asym.value = 0;
-      else
+      struct mips_elf_link_hash_entry *hd = h;
+      boolean no_fn_stub = h->no_fn_stub;
+
+      while (hd->root.root.type == bfd_link_hash_indirect)
 	{
-	  output_section = sec->output_section;
-	  if (output_section != NULL)
-	    h->esym.asym.value = (h->root.plt.offset
-				  + sec->output_offset
-				  + output_section->vma);
-	  else
-	    h->esym.asym.value = 0;
+	  hd = (struct mips_elf_link_hash_entry *)h->root.root.u.i.link;
+	  no_fn_stub = no_fn_stub || hd->no_fn_stub;
 	}
+
+      if (!no_fn_stub)
+	{
+	  /* Set type and value for a symbol with a function stub.  */
+	  h->esym.asym.st = stProc;
+	  sec = hd->root.root.u.def.section;
+	  if (sec == NULL)
+	    h->esym.asym.value = 0;
+	  else
+	    {
+	      output_section = sec->output_section;
+	      if (output_section != NULL)
+		h->esym.asym.value = (hd->root.plt.offset
+				      + sec->output_offset
+				      + output_section->vma);
+	      else
+		h->esym.asym.value = 0;
+	    }
 #if 0 /* FIXME?  */
-      h->esym.ifd = 0;
+	  h->esym.ifd = 0;
 #endif
+	}
     }
 
   if (! bfd_ecoff_debug_one_external (einfo->abfd, einfo->debug, einfo->swap,
@@ -5748,7 +5767,7 @@ mips_elf_next_relocation (r_type, relocation, relend)
 
 static boolean
 mips_elf_create_dynamic_relocation (output_bfd, info, rel, h, sec,
-				    symbol, addendp, input_section, local_p)
+				    symbol, addendp, input_section)
      bfd *output_bfd;
      struct bfd_link_info *info;
      const Elf_Internal_Rela *rel;
@@ -5757,7 +5776,6 @@ mips_elf_create_dynamic_relocation (output_bfd, info, rel, h, sec,
      bfd_vma symbol;
      bfd_vma *addendp;
      asection *input_section;
-     boolean local_p;
 {
   Elf_Internal_Rel outrel;
   boolean skip;
@@ -5842,15 +5860,16 @@ mips_elf_create_dynamic_relocation (output_bfd, info, rel, h, sec,
 	  /* The relocation we're building is section-relative.
 	     Therefore, the original addend must be adjusted by the
 	     section offset.  */
-	  *addendp += symbol - sec->output_section->vma;
+	  *addendp += section_offset;
 	  /* Now, the relocation is just against the section.  */
 	  symbol = sec->output_section->vma;
 	}
 
-      /* If the relocation is against a local symbol was previously an
-	 absolute relocation, we must adjust it by the value we give
-	 it in the dynamic symbol table.  */
-      if (local_p && r_type != R_MIPS_REL32)
+      /* If the relocation was previously an absolute relocation and
+	 this symbol will not be referred to by the relocation, we must
+	 adjust it by the value we give it in the dynamic symbol table.
+	 Otherwise leave the job up to the dynamic linker.  */
+      if (!indx && r_type != R_MIPS_REL32)
 	*addendp += symbol;
 
       /* The relocation is always an REL32 relocation because we don't
@@ -6225,7 +6244,7 @@ mips_elf_calculate_relocation (abfd,
 				 symbol + addend, sgot->contents + g);
 	    }
 	}
-      else if (r_type == R_MIPS_GOT16)
+      else if (r_type == R_MIPS_GOT16 || r_type == R_MIPS_CALL16)
 	/* There's no need to create a local GOT entry here; the
 	   calculation for a local GOT16 entry does not involve G.  */
 	break;
@@ -6288,7 +6307,7 @@ mips_elf_calculate_relocation (abfd,
 						   sec,
 						   symbol,
 						   &value,
-						   input_section, local_p))
+						   input_section))
 	    return false;
 	}
       else
@@ -6320,14 +6339,14 @@ mips_elf_calculate_relocation (abfd,
       break;
 
     case R_MIPS16_26:
-      /* The calculation for R_MIPS_26 is just the same as for an
+      /* The calculation for R_MIPS16_26 is just the same as for an
 	 R_MIPS_26.  It's only the storage of the relocated field into
 	 the output file that's different.  That's handled in
 	 mips_elf_perform_relocation.  So, we just fall through to the
 	 R_MIPS_26 case here.  */
     case R_MIPS_26:
       if (local_p)
-	value = (((addend << 2) | (p & 0xf0000000)) + symbol) >> 2;
+	value = (((addend << 2) | ((p + 4) & 0xf0000000)) + symbol) >> 2;
       else
 	value = (mips_elf_sign_extend (addend << 2, 28) + symbol) >> 2;
       value &= howto->dst_mask;
@@ -6393,6 +6412,7 @@ mips_elf_calculate_relocation (abfd,
       break;
 
     case R_MIPS_GOT16:
+    case R_MIPS_CALL16:
       if (local_p)
 	{
 	  boolean forced;
@@ -6415,7 +6435,6 @@ mips_elf_calculate_relocation (abfd,
 
       /* Fall through.  */
 
-    case R_MIPS_CALL16:
     case R_MIPS_GOT_DISP:
       value = g;
       overflowed_p = mips_elf_overflow_p (value, 16);
@@ -6620,9 +6639,9 @@ mips_elf_perform_relocation (info, howto, relocation, value,
 	 ((sub1 << 16) | sub2)).
 
 	 When producing a relocateable object file, the calculation is
-	 (((A < 2) | (P & 0xf0000000) + S) >> 2)
+	 (((A < 2) | ((P + 4) & 0xf0000000) + S) >> 2)
 	 When producing a fully linked file, the calculation is
-	 let R = (((A < 2) | (P & 0xf0000000) + S) >> 2)
+	 let R = (((A < 2) | ((P + 4) & 0xf0000000) + S) >> 2)
 	 ((R & 0x1f0000) << 5) | ((R & 0x3e00000) >> 5) | (R & 0xffff)  */
 
       if (!info->relocateable)
@@ -7728,10 +7747,10 @@ _bfd_mips_elf_check_relocs (abfd, info, sec, relocs)
 	  /* We may need a local GOT entry for this relocation.  We
 	     don't count R_MIPS_GOT_PAGE because we can estimate the
 	     maximum number of pages needed by looking at the size of
-	     the segment.  Similar comments apply to R_MIPS_GOT16.  We
-	     don't count R_MIPS_GOT_HI16, or R_MIPS_CALL_HI16 because
-	     these are always followed by an R_MIPS_GOT_LO16 or
-	     R_MIPS_CALL_LO16.
+	     the segment.  Similar comments apply to R_MIPS_GOT16 and
+	     R_MIPS_CALL16.  We don't count R_MIPS_GOT_HI16, or
+	     R_MIPS_CALL_HI16 because these are always followed by an
+	     R_MIPS_GOT_LO16 or R_MIPS_CALL_LO16.
 
 	     This estimation is very conservative since we can merge
 	     duplicate entries in the GOT.  In order to be less
@@ -7860,6 +7879,25 @@ _bfd_mips_elf_check_relocs (abfd, info, sec, relocs)
 	  break;
 
 	default:
+	  break;
+	}
+
+      /* We must not create a stub for a symbol that has relocations
+         related to taking the function's address.  */
+      switch (r_type)
+	{
+	default:
+	  if (h != NULL)
+	    {
+	      struct mips_elf_link_hash_entry *mh;
+
+	      mh = (struct mips_elf_link_hash_entry *) h;
+	      mh->no_fn_stub = true;
+	    }
+	  break;
+	case R_MIPS_CALL16:
+	case R_MIPS_CALL_HI16:
+	case R_MIPS_CALL_LO16:
 	  break;
 	}
 
@@ -7998,6 +8036,8 @@ _bfd_mips_elf_copy_indirect_symbol (dir, ind)
       || (indmips->min_dyn_reloc_index != 0
 	  && indmips->min_dyn_reloc_index < dirmips->min_dyn_reloc_index))
     dirmips->min_dyn_reloc_index = indmips->min_dyn_reloc_index;
+  if (indmips->no_fn_stub)
+    dirmips->no_fn_stub = true;
 }
 
 /* Adjust a symbol defined by a dynamic object and referenced by a
@@ -8038,8 +8078,9 @@ _bfd_mips_elf_adjust_dynamic_symbol (info, h)
     mips_elf_allocate_dynamic_relocations (dynobj,
 					   hmips->possibly_dynamic_relocs);
 
-  /* For a function, create a stub, if needed.  */
-  if ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0)
+  /* For a function, create a stub, if allowed.  */
+  if (! hmips->no_fn_stub
+      && (h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0)
     {
       if (! elf_hash_table (info)->dynamic_sections_created)
 	return true;

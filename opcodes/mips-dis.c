@@ -137,7 +137,7 @@ print_insn_arg (d, l, pc, info)
 
     case 'a':
       (*info->print_address_func)
-	(((pc & ~ (bfd_vma) 0x0fffffff)
+	((((pc + 4) & ~ (bfd_vma) 0x0fffffff)
 	  | (((l >> OP_SH_TARGET) & OP_MASK_TARGET) << 2)),
 	 info);
       break;
@@ -1038,9 +1038,9 @@ print_mips16_insn_arg (type, op, l, use_extend, extend, memaddr, info)
       if (! use_extend)
 	extend = 0;
       l = ((l & 0x1f) << 23) | ((l & 0x3e0) << 13) | (extend << 2);
-      (*info->print_address_func) ((memaddr & 0xf0000000) | l, info);
+      (*info->print_address_func) (((memaddr + 4) & 0xf0000000) | l, info);
       info->insn_type = dis_jsr;
-      info->target = (memaddr & 0xf0000000) | l;
+      info->target = ((memaddr + 4) & 0xf0000000) | l;
       info->branch_delay_insns = 1;
       break;
 

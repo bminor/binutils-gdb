@@ -253,6 +253,13 @@ proc run_srec_test { test objs } {
 	set flags "$flags --defsym __truncsipsi2_d0_d2=0"
     }
 
+    # m6811/m6812 code has references to soft registers.
+    if {[istarget m6811-*-*] || [istarget m6812-*-*]} {
+	set flags "$flags --defsym _.frame=0 --defsym _.d1=0 --defsym _.d2=0"
+	set flags "$flags --defsym _.d3=0 --defsym _.d4=0"
+	set flags "$flags --defsym _.tmp=0 --defsym _.xy=0"
+    }
+
     # V850 targets need libgcc.a
     if [istarget v850*-*-elf] {
 	set objs "$objs -L ../gcc -lgcc"

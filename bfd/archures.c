@@ -155,6 +155,7 @@ DESCRIPTION
 .#define bfd_mach_h8300   1
 .#define bfd_mach_h8300h  2
 .#define bfd_mach_h8300s  3
+.  bfd_arch_pdp11,     {* DEC PDP-11 *}
 .  bfd_arch_powerpc,   {* PowerPC *}
 .#define bfd_mach_ppc		0
 .#define bfd_mach_ppc_403	403
@@ -248,6 +249,9 @@ DESCRIPTION
 .#define bfd_mach_avr4		4
 .#define bfd_mach_avr5		5
 .  bfd_arch_cris,      {* Axis CRIS *}
+.  bfd_arch_s390,      {* IBM s390 *}
+.#define bfd_mach_s390_esa      0
+.#define bfd_mach_s390_esame    1
 .  bfd_arch_last
 .  };
 */
@@ -305,6 +309,7 @@ extern const bfd_arch_info_type bfd_m88k_arch;
 extern const bfd_arch_info_type bfd_mips_arch;
 extern const bfd_arch_info_type bfd_mn10200_arch;
 extern const bfd_arch_info_type bfd_mn10300_arch;
+extern const bfd_arch_info_type bfd_pdp11_arch;
 extern const bfd_arch_info_type bfd_powerpc_arch;
 extern const bfd_arch_info_type bfd_rs6000_arch;
 extern const bfd_arch_info_type bfd_pj_arch;
@@ -323,6 +328,7 @@ extern const bfd_arch_info_type bfd_fr30_arch;
 extern const bfd_arch_info_type bfd_mcore_arch;
 extern const bfd_arch_info_type bfd_avr_arch;
 extern const bfd_arch_info_type bfd_ia64_arch;
+extern const bfd_arch_info_type bfd_s390_arch;
 
 static const bfd_arch_info_type * const bfd_archures_list[] = {
 #ifdef SELECT_ARCHITECTURES
@@ -350,6 +356,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] = {
   &bfd_mips_arch,
   &bfd_mn10200_arch,
   &bfd_mn10300_arch,
+  &bfd_pdp11_arch,
   &bfd_powerpc_arch,
   &bfd_rs6000_arch,
   &bfd_sh_arch,
@@ -367,6 +374,7 @@ static const bfd_arch_info_type * const bfd_archures_list[] = {
   &bfd_mcore_arch,
   &bfd_avr_arch,
   &bfd_ia64_arch,
+  &bfd_s390_arch,
 #endif
   0
 };

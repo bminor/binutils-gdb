@@ -231,23 +231,32 @@ ldfile_open_file (entry)
   else
     {
       search_arch_type *arch;
+      boolean found = false;
 
       /* Try to open <filename><suffix> or lib<filename><suffix>.a */
       for (arch = search_arch_head;
 	   arch != (search_arch_type *) NULL;
 	   arch = arch->next)
 	{
-	  if (ldfile_open_file_search (arch->name, entry, "lib", ".a"))
-	    return;
+	  found = ldfile_open_file_search (arch->name, entry, "lib", ".a");
+	  if (found)
+	    break;
 #ifdef VMS
-	  if (ldfile_open_file_search (arch->name, entry, ":lib", ".a"))
-	    return;
+	  found = ldfile_open_file_search (arch->name, entry, ":lib", ".a");
+	  if (found)
+	    break;
 #endif
-	  if (ldemul_find_potential_libraries (arch->name, entry))
-	    return;
+	  found = ldemul_find_potential_libraries (arch->name, entry);
+	  if (found)
+	    break;
 	}
 
-      einfo (_("%F%P: cannot find %s\n"), entry->local_sym_name);
+      /* If we have found the file, we don't need to search directories
+	 again.  */
+      if (found)
+	entry->search_dirs_flag = false;
+      else
+	einfo (_("%F%P: cannot find %s\n"), entry->local_sym_name);
     }
 }
 

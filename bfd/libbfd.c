@@ -959,7 +959,7 @@ bfd_putb16 (data, addr)
      register bfd_byte *addr;
 {
   addr[0] = (bfd_byte) (data >> 8);
-  addr[1] = (bfd_byte )data;
+  addr[1] = (bfd_byte) data;
 }
 
 void
@@ -967,7 +967,7 @@ bfd_putl16 (data, addr)
      bfd_vma data;
      register bfd_byte *addr;
 {
-  addr[0] = (bfd_byte )data;
+  addr[0] = (bfd_byte) data;
   addr[1] = (bfd_byte) (data >> 8);
 }
 
@@ -1126,7 +1126,7 @@ bfd_putb32 (data, addr)
         addr[0] = (bfd_byte) (data >> 24);
         addr[1] = (bfd_byte) (data >> 16);
         addr[2] = (bfd_byte) (data >>  8);
-        addr[3] = (bfd_byte)data;
+        addr[3] = (bfd_byte) data;
 }
 
 void
@@ -1134,7 +1134,7 @@ bfd_putl32 (data, addr)
      bfd_vma data;
      register bfd_byte *addr;
 {
-        addr[0] = (bfd_byte)data;
+        addr[0] = (bfd_byte) data;
         addr[1] = (bfd_byte) (data >>  8);
         addr[2] = (bfd_byte) (data >> 16);
         addr[3] = (bfd_byte) (data >> 24);

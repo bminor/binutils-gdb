@@ -64,28 +64,28 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
    PIC long branch stub:
    :		b,l .+8,%r1
-   :		addil L'X - ($PIC_pcrel$0 - 4),%r1
-   :		be,n R'X - ($PIC_pcrel$0 - 8)(%sr4,%r1)
+   :		addil LR'X - ($PIC_pcrel$0 - 4),%r1
+   :		be,n RR'X - ($PIC_pcrel$0 - 8)(%sr4,%r1)
 
    Import stub to call shared library routine from normal object file
    (single sub-space version)
-   :		addil L'lt_ptr+ltoff,%dp	; get procedure entry point
-   :		ldw R'lt_ptr+ltoff(%r1),%r21
+   :		addil LR'lt_ptr+ltoff,%dp	; get procedure entry point
+   :		ldw RR'lt_ptr+ltoff(%r1),%r21
    :            bv %r0(%r21)
-   :		ldw R'lt_ptr+ltoff+4(%r1),%r19	; get new dlt value.
+   :		ldw RR'lt_ptr+ltoff+4(%r1),%r19	; get new dlt value.
 
    Import stub to call shared library routine from shared library
    (single sub-space version)
-   :		addil L'ltoff,%r19		; get procedure entry point
-   :		ldw R'ltoff(%r1),%r21
+   :		addil LR'ltoff,%r19		; get procedure entry point
+   :		ldw RR'ltoff(%r1),%r21
    :            bv %r0(%r21)
-   :		ldw R'ltoff+4(%r1),%r19		; get new dlt value.
+   :		ldw RR'ltoff+4(%r1),%r19	; get new dlt value.
 
    Import stub to call shared library routine from normal object file
    (multiple sub-space support)
-   :		addil L'lt_ptr+ltoff,%dp	; get procedure entry point
-   :		ldw R'lt_ptr+ltoff(%r1),%r21
-   :		ldw R'lt_ptr+ltoff+4(%r1),%r19	; get new dlt value.
+   :		addil LR'lt_ptr+ltoff,%dp	; get procedure entry point
+   :		ldw RR'lt_ptr+ltoff(%r1),%r21
+   :		ldw RR'lt_ptr+ltoff+4(%r1),%r19	; get new dlt value.
    :		ldsid (%r21),%r1
    :		mtsp %r1,%sr0
    :		be 0(%sr0,%r21)			; branch to target
@@ -93,9 +93,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
    Import stub to call shared library routine from shared library
    (multiple sub-space support)
-   :		addil L'ltoff,%r19		; get procedure entry point
-   :		ldw R'ltoff(%r1),%r21
-   :		ldw R'ltoff+4(%r1),%r19		; get new dlt value.
+   :		addil LR'ltoff,%r19		; get procedure entry point
+   :		ldw RR'ltoff(%r1),%r21
+   :		ldw RR'ltoff+4(%r1),%r19	; get new dlt value.
    :		ldsid (%r21),%r1
    :		mtsp %r1,%sr0
    :		be 0(%sr0,%r21)			; branch to target
@@ -781,16 +781,16 @@ hppa_type_of_stub (input_sec, rel, hash, destination)
 #define BE_SR4_R1	0xe0202002	/* be,n  RR'XXX(%sr4,%r1)	*/
 
 #define BL_R1		0xe8200000	/* b,l   .+8,%r1		*/
-#define ADDIL_R1	0x28200000	/* addil L'XXX,%r1,%r1		*/
+#define ADDIL_R1	0x28200000	/* addil LR'XXX,%r1,%r1		*/
 #define DEPI_R1		0xd4201c1e	/* depi  0,31,2,%r1		*/
 
-#define ADDIL_DP	0x2b600000	/* addil L'XXX,%dp,%r1		*/
-#define LDW_R1_R21	0x48350000	/* ldw   R'XXX(%sr0,%r1),%r21	*/
+#define ADDIL_DP	0x2b600000	/* addil LR'XXX,%dp,%r1		*/
+#define LDW_R1_R21	0x48350000	/* ldw   RR'XXX(%sr0,%r1),%r21	*/
 #define BV_R0_R21	0xeaa0c000	/* bv    %r0(%r21)		*/
-#define LDW_R1_R19	0x48330000	/* ldw   R'XXX(%sr0,%r1),%r19	*/
+#define LDW_R1_R19	0x48330000	/* ldw   RR'XXX(%sr0,%r1),%r19	*/
 
-#define ADDIL_R19	0x2a600000	/* addil L'XXX,%r19,%r1		*/
-#define LDW_R1_DP	0x483b0000	/* ldw   R'XXX(%sr0,%r1),%dp	*/
+#define ADDIL_R19	0x2a600000	/* addil LR'XXX,%r19,%r1	*/
+#define LDW_R1_DP	0x483b0000	/* ldw   RR'XXX(%sr0,%r1),%dp	*/
 
 #define LDSID_R21_R1	0x02a010a1	/* ldsid (%sr0,%r21),%r1	*/
 #define MTSP_R1		0x00011820	/* mtsp  %r1,%sr0		*/
@@ -2138,7 +2138,7 @@ clobber_millicode_symbols (h, info)
   /* Note!  We only want to remove these from the dynamic symbol
      table.  Therefore we do not set ELF_LINK_FORCED_LOCAL.  */
   if (h->type == STT_PARISC_MILLI)
-    elf32_hppa_hide_symbol(info, h);
+    elf32_hppa_hide_symbol (info, h);
   return true;
 }
 
@@ -3024,7 +3024,9 @@ elf32_hppa_set_gp (abfd, info)
   h = elf_link_hash_lookup (&hplink->root, "$global$",
 			    false, false, false);
 
-  if (h != NULL && h->root.type == bfd_link_hash_defined)
+  if (h != NULL
+      && (h->root.type == bfd_link_hash_defined
+	  || h->root.type == bfd_link_hash_defweak))
     {
       gp_val = h->root.u.def.value;
       sec = h->root.u.def.section;
@@ -3066,6 +3068,16 @@ elf32_hppa_set_gp (abfd, info)
 	      /* No .plt or .got.  Who cares what the LTP is?  */
 	      sec = bfd_get_section_by_name (abfd, ".data");
 	    }
+	}
+
+      if (h != NULL)
+	{
+	  h->root.type = bfd_link_hash_defined;
+	  h->root.u.def.value = gp_val;
+	  if (sec != NULL)
+	    h->root.u.def.section = sec;
+	  else
+	    h->root.u.def.section = bfd_abs_section_ptr;
 	}
     }
 

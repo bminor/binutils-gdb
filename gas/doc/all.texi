@@ -42,6 +42,7 @@
 @set M680X0
 @set MCORE
 @set MIPS
+@set PDP11
 @set PJ
 @set SH
 @set SPARC

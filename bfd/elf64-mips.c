@@ -161,7 +161,7 @@ static reloc_howto_type mips_elf64_howto_table_rel[] =
 	 complain_overflow_dont, /* complain_on_overflow */
 	 			/* This needs complex overflow
 				   detection, because the upper four
-				   bits must match the PC.  */
+				   bits must match the PC + 4.  */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_MIPS_26",		/* name */
 	 true,			/* partial_inplace */
@@ -714,7 +714,7 @@ static reloc_howto_type mips_elf64_howto_table_rela[] =
 	 complain_overflow_dont, /* complain_on_overflow */
 	 			/* This needs complex overflow
 				   detection, because the upper four
-				   bits must match the PC.  */
+				   bits must match the PC + 4.  */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_MIPS_26",		/* name */
 	 true,			/* partial_inplace */

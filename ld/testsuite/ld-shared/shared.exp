@@ -27,18 +27,12 @@ if ![isnative] then {return}
 
 # This test can only be run on a couple of ELF platforms.
 # Square bracket expressions seem to confuse istarget.
-if { ![istarget i386-*-sysv4*] \
-     && ![istarget i486-*-sysv4*] \
-     && ![istarget i586-*-sysv4*] \
-     && ![istarget i386-*-unixware] \
-     && ![istarget i486-*-unixware] \
-     && ![istarget i586-*-unixware] \
-     && ![istarget i386-*-elf*] \
-     && ![istarget i486-*-elf*] \
-     && ![istarget i586-*-elf*] \
-     && ![istarget i386-*-linux*] \
-     && ![istarget i486-*-linux*] \
-     && ![istarget i586-*-linux*] \
+if { ![istarget i?86-*-sysv4*] \
+     && ![istarget i?86-*-unixware] \
+     && ![istarget i?86-*-elf*] \
+     && ![istarget i?86-*-linux*] \
+     && ![istarget ia64-*-elf*] \
+     && ![istarget ia64-*-linux*] \
      && ![istarget m68k-*-linux*] \
      && ![istarget mips*-*-irix5*] \
      && ![istarget powerpc-*-elf*] \
@@ -198,6 +192,7 @@ if ![ld_compile "$CC $CFLAGS $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o] 
 	# SunOS non PIC shared libraries don't permit some cases of
 	# overriding.
 	setup_xfail "*-*-sunos4*"
+	setup_xfail "ia64-*-linux*"
 	shared_test shnp "shared (non PIC)" mainnp.o sh1np.o sh2np.o shared
 
 	# Test ELF shared library relocations with a non-zero load
@@ -207,6 +202,7 @@ if ![ld_compile "$CC $CFLAGS $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o] 
 	setup_xfail "*-*-sunos4*"
 	setup_xfail "*-*-linux*libc1"
 	setup_xfail "powerpc-*-linux*"
+	setup_xfail "ia64-*-linux*"
 	shared_test shnp "shared (non PIC, load offset)" \
 		mainnp.o sh1np.o sh2np.o shared \
 		"-T $srcdir/$subdir/elf-offset.ld"
@@ -241,6 +237,7 @@ if ![ld_compile "$CC $CFLAGS $SHCFLAG $picflag" $srcdir/$subdir/main.c $tmpdir/m
 	    # SunOS non PIC shared libraries don't permit some cases of
 	    # overriding.
 	    setup_xfail "*-*-sunos4*"
+	    setup_xfail "ia64-*-linux*"
 	    shared_test shmpnp "shared (PIC main, non PIC so)" mainp.o sh1np.o sh2np.o shared
 	}
     } else {

@@ -1300,6 +1300,21 @@ v850_elf_reloc (abfd, reloc, symbol, data, isection, obfd, err)
   relocation += symbol->section->output_offset;
   relocation += reloc->addend;
 
+#if 0 /* Since this reloc is going to be processed later on, we should
+	 not make it pc-relative here.  To test this, try assembling and
+	 linking this program:
+
+	 	.text
+		.globl _start
+		nop
+	_start:         
+        	jr foo
+
+	        .section ".foo","ax"
+		nop
+	foo:
+        	nop
+      */
   if (reloc->howto->pc_relative == true)
     {
       /* Here the variable relocation holds the final address of the
@@ -1309,7 +1324,7 @@ v850_elf_reloc (abfd, reloc, symbol, data, isection, obfd, err)
       /* Deal with pcrel_offset */
       relocation -= reloc->address;
     }
-
+#endif
   reloc->addend = relocation;
   return bfd_reloc_ok;
 }

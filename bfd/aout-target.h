@@ -156,7 +156,7 @@ MY(object_p) (abfd)
 #ifdef SWAP_MAGIC
   exec.a_info = SWAP_MAGIC (exec_bytes.e_info);
 #else
-  exec.a_info = bfd_h_get_32 (abfd, exec_bytes.e_info);
+  exec.a_info = GET_MAGIC (abfd, exec_bytes.e_info);
 #endif /* SWAP_MAGIC */
 
   if (N_BADMAG (exec)) return 0;

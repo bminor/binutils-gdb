@@ -74,6 +74,7 @@
 #include "elf/cris.h"
 #include "elf/i860.h"
 #include "elf/x86-64.h"
+#include "elf/s390.h"
 
 #include "bucomm.h"
 #include "getopt.h"
@@ -104,6 +105,7 @@ int 			do_syms;
 int 			do_reloc;
 int 			do_sections;
 int 			do_segments;
+int			do_unwind;
 int 			do_using_dynamic;
 int 			do_header;
 int 			do_dump;
@@ -150,6 +152,8 @@ static const char *       get_mips_dynamic_type       PARAMS ((unsigned long));
 static const char *       get_sparc64_dynamic_type    PARAMS ((unsigned long));
 static const char *       get_parisc_dynamic_type     PARAMS ((unsigned long));
 static const char *       get_dynamic_type            PARAMS ((unsigned long));
+static int		  slurp_rela_relocs 	      PARAMS ((FILE *, unsigned long, unsigned long, Elf_Internal_Rela **, unsigned long *));
+static int		  slurp_rel_relocs 	      PARAMS ((FILE *, unsigned long, unsigned long, Elf_Internal_Rel **, unsigned long *));
 static int                dump_relocations            PARAMS ((FILE *, unsigned long, unsigned long, Elf_Internal_Sym *, unsigned long, char *, int));
 static char *             get_file_type               PARAMS ((unsigned));
 static char *             get_machine_name            PARAMS ((unsigned));
@@ -157,9 +161,11 @@ static void		  decode_ARM_machine_flags    PARAMS ((unsigned, char []));
 static char *             get_machine_flags           PARAMS ((unsigned, unsigned));
 static const char *       get_mips_segment_type       PARAMS ((unsigned long));
 static const char *       get_parisc_segment_type     PARAMS ((unsigned long));
+static const char *       get_ia64_segment_type       PARAMS ((unsigned long));
 static const char *       get_segment_type            PARAMS ((unsigned long));
 static const char *       get_mips_section_type_name  PARAMS ((unsigned int));
 static const char *       get_parisc_section_type_name PARAMS ((unsigned int));
+static const char *       get_ia64_section_type_name  PARAMS ((unsigned int));
 static const char *       get_section_type_name       PARAMS ((unsigned int));
 static const char *       get_symbol_binding          PARAMS ((unsigned int));
 static const char *       get_symbol_type             PARAMS ((unsigned int));
@@ -171,6 +177,7 @@ static void               parse_args                  PARAMS ((int, char **));
 static int                process_file_header         PARAMS ((void));
 static int                process_program_headers     PARAMS ((FILE *));
 static int                process_section_headers     PARAMS ((FILE *));
+static int		  process_unwind	      PARAMS ((FILE *));
 static void               dynamic_segment_mips_val    PARAMS ((Elf_Internal_Dyn *));
 static void               dynamic_segment_parisc_val  PARAMS ((Elf_Internal_Dyn *));
 static int                process_dynamic_segment     PARAMS ((FILE *));
@@ -187,6 +194,7 @@ static int		  get_64bit_program_headers   PARAMS ((FILE *, Elf_Internal_Phdr *))
 static int                get_file_header             PARAMS ((FILE *));
 static Elf_Internal_Sym * get_32bit_elf_symbols       PARAMS ((FILE *, unsigned long, unsigned long));
 static Elf_Internal_Sym * get_64bit_elf_symbols       PARAMS ((FILE *, unsigned long, unsigned long));
+static const char *	  get_elf_section_flags	      PARAMS ((bfd_vma));
 static int *              get_dynamic_data            PARAMS ((FILE *, unsigned int));
 static int                get_32bit_dynamic_segment   PARAMS ((FILE *));
 static int                get_64bit_dynamic_segment   PARAMS ((FILE *));
@@ -244,7 +252,7 @@ typedef int Elf32_Word;
 /* If we can support a 64 bit data type then BFD64 should be defined
    and sizeof (bfd_vma) == 8.  In this case when translating from an
    external 8 byte field to an internal field, we can assume that the
-   internal field is also 8 bytes wide and so we can extact all the data.
+   internal field is also 8 bytes wide and so we can extract all the data.
    If, however, BFD64 is not defined, then we must assume that the
    internal data structure only has 4 byte wide fields that are the
    equivalent of the 8 byte wide external counterparts, and so we must
@@ -576,6 +584,7 @@ guess_is_rela (e_machine)
     case EM_CRIS:
     case EM_860:
     case EM_X86_64:
+    case EM_S390:
       return TRUE;
 
     case EM_MMA:
@@ -602,6 +611,144 @@ guess_is_rela (e_machine)
     }
 }
 
+static int
+slurp_rela_relocs (file, rel_offset, rel_size, relasp, nrelasp)
+     FILE *file;
+     unsigned long rel_offset;
+     unsigned long rel_size;
+     Elf_Internal_Rela **relasp;
+     unsigned long *nrelasp;
+{
+  Elf_Internal_Rela *relas;
+  unsigned long nrelas;
+  unsigned int i;
+
+  if (is_32bit_elf)
+    {
+      Elf32_External_Rela * erelas;
+
+      GET_DATA_ALLOC (rel_offset, rel_size, erelas,
+		      Elf32_External_Rela *, "relocs");
+
+      nrelas = rel_size / sizeof (Elf32_External_Rela);
+
+      relas = (Elf_Internal_Rela *)
+	malloc (nrelas * sizeof (Elf_Internal_Rela));
+
+      if (relas == NULL)
+	{
+	  error(_("out of memory parsing relocs"));
+	  return 0;
+	}
+
+      for (i = 0; i < nrelas; i++)
+	{
+	  relas[i].r_offset = BYTE_GET (erelas[i].r_offset);
+	  relas[i].r_info   = BYTE_GET (erelas[i].r_info);
+	  relas[i].r_addend = BYTE_GET (erelas[i].r_addend);
+	}
+
+      free (erelas);
+    }
+  else
+    {
+      Elf64_External_Rela * erelas;
+
+      GET_DATA_ALLOC (rel_offset, rel_size, erelas,
+		      Elf64_External_Rela *, "relocs");
+
+      nrelas = rel_size / sizeof (Elf64_External_Rela);
+
+      relas = (Elf_Internal_Rela *)
+	malloc (nrelas * sizeof (Elf_Internal_Rela));
+
+      if (relas == NULL)
+	{
+	  error(_("out of memory parsing relocs"));
+	  return 0;
+	}
+
+      for (i = 0; i < nrelas; i++)
+	{
+	  relas[i].r_offset = BYTE_GET8 (erelas[i].r_offset);
+	  relas[i].r_info   = BYTE_GET8 (erelas[i].r_info);
+	  relas[i].r_addend = BYTE_GET8 (erelas[i].r_addend);
+	}
+
+      free (erelas);
+    }
+  *relasp = relas;
+  *nrelasp = nrelas;
+  return 1;
+}
+
+static int
+slurp_rel_relocs (file, rel_offset, rel_size, relsp, nrelsp)
+     FILE *file;
+     unsigned long rel_offset;
+     unsigned long rel_size;
+     Elf_Internal_Rel **relsp;
+     unsigned long *nrelsp;
+{
+  Elf_Internal_Rel *rels;
+  unsigned long nrels;
+  unsigned int i;
+
+  if (is_32bit_elf)
+    {
+      Elf32_External_Rel * erels;
+
+      GET_DATA_ALLOC (rel_offset, rel_size, erels,
+		      Elf32_External_Rel *, "relocs");
+
+      nrels = rel_size / sizeof (Elf32_External_Rel);
+
+      rels = (Elf_Internal_Rel *) malloc (nrels * sizeof (Elf_Internal_Rel));
+
+      if (rels == NULL)
+	{
+	  error(_("out of memory parsing relocs"));
+	  return 0;
+	}
+
+      for (i = 0; i < nrels; i++)
+	{
+	  rels[i].r_offset = BYTE_GET (erels[i].r_offset);
+	  rels[i].r_info   = BYTE_GET (erels[i].r_info);
+	}
+
+      free (erels);
+    }
+  else
+    {
+      Elf64_External_Rel * erels;
+
+      GET_DATA_ALLOC (rel_offset, rel_size, erels,
+		      Elf64_External_Rel *, "relocs");
+
+      nrels = rel_size / sizeof (Elf64_External_Rel);
+
+      rels = (Elf_Internal_Rel *) malloc (nrels * sizeof (Elf_Internal_Rel));
+
+      if (rels == NULL)
+	{
+	  error(_("out of memory parsing relocs"));
+	  return 0;
+	}
+
+      for (i = 0; i < nrels; i++)
+	{
+	  rels[i].r_offset = BYTE_GET8 (erels[i].r_offset);
+	  rels[i].r_info   = BYTE_GET8 (erels[i].r_info);
+	}
+
+      free (erels);
+    }
+  *relsp = rels;
+  *nrelsp = nrels;
+  return 1;
+}
+
 /* Display the contents of the relocation data found at the specified offset.  */
 static int
 dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
@@ -623,123 +770,13 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 
   if (is_rela)
     {
-      if (is_32bit_elf)
-	{
-	  Elf32_External_Rela * erelas;
-
-	  GET_DATA_ALLOC (rel_offset, rel_size, erelas,
-			  Elf32_External_Rela *, "relocs");
-
-	  rel_size = rel_size / sizeof (Elf32_External_Rela);
-
-	  relas = (Elf_Internal_Rela *)
-	    malloc (rel_size * sizeof (Elf_Internal_Rela));
-
-	  if (relas == NULL)
-	    {
-	      error(_("out of memory parsing relocs"));
-	      return 0;
-	    }
-
-	  for (i = 0; i < rel_size; i++)
-	    {
-	      relas[i].r_offset = BYTE_GET (erelas[i].r_offset);
-	      relas[i].r_info   = BYTE_GET (erelas[i].r_info);
-	      relas[i].r_addend = BYTE_GET (erelas[i].r_addend);
-	    }
-
-	  free (erelas);
-
-	  rels = (Elf_Internal_Rel *) relas;
-	}
-      else
-	{
-	  Elf64_External_Rela * erelas;
-
-	  GET_DATA_ALLOC (rel_offset, rel_size, erelas,
-			  Elf64_External_Rela *, "relocs");
-
-	  rel_size = rel_size / sizeof (Elf64_External_Rela);
-
-	  relas = (Elf_Internal_Rela *)
-	    malloc (rel_size * sizeof (Elf_Internal_Rela));
-
-	  if (relas == NULL)
-	    {
-	      error(_("out of memory parsing relocs"));
-	      return 0;
-	    }
-
-	  for (i = 0; i < rel_size; i++)
-	    {
-	      relas[i].r_offset = BYTE_GET8 (erelas[i].r_offset);
-	      relas[i].r_info   = BYTE_GET8 (erelas[i].r_info);
-	      relas[i].r_addend = BYTE_GET8 (erelas[i].r_addend);
-	    }
-
-	  free (erelas);
-
-	  rels = (Elf_Internal_Rel *) relas;
-	}
+      if (!slurp_rela_relocs (file, rel_offset, rel_size, &relas, &rel_size))
+	return 0;
     }
   else
     {
-      if (is_32bit_elf)
-	{
-	  Elf32_External_Rel * erels;
-
-	  GET_DATA_ALLOC (rel_offset, rel_size, erels,
-			  Elf32_External_Rel *, "relocs");
-
-	  rel_size = rel_size / sizeof (Elf32_External_Rel);
-
-	  rels = (Elf_Internal_Rel *)
-	    malloc (rel_size * sizeof (Elf_Internal_Rel));
-
-	  if (rels == NULL)
-	    {
-	      error(_("out of memory parsing relocs"));
-	      return 0;
-	    }
-
-	  for (i = 0; i < rel_size; i++)
-	    {
-	      rels[i].r_offset = BYTE_GET (erels[i].r_offset);
-	      rels[i].r_info   = BYTE_GET (erels[i].r_info);
-	    }
-
-	  free (erels);
-
-	  relas = (Elf_Internal_Rela *) rels;
-	}
-      else
-	{
-	  Elf64_External_Rel * erels;
-
-	  GET_DATA_ALLOC (rel_offset, rel_size, erels,
-			  Elf64_External_Rel *, "relocs");
-
-	  rel_size = rel_size / sizeof (Elf64_External_Rel);
-
-	  rels = (Elf_Internal_Rel *)
-	    malloc (rel_size * sizeof (Elf_Internal_Rel));
-
-	  if (rels == NULL)
-	    {
-	      error(_("out of memory parsing relocs"));
-	      return 0;
-	    }
-
-	  for (i = 0; i < rel_size; i++)
-	    {
-	      rels[i].r_offset = BYTE_GET8 (erels[i].r_offset);
-	      rels[i].r_info   = BYTE_GET8 (erels[i].r_info);
-	    }
-
-	  free (erels);
-
-	  relas = (Elf_Internal_Rela *) rels;
-	}
+      if (!slurp_rel_relocs (file, rel_offset, rel_size, &rels, &rel_size))
+	return 0;
     }
 
   if (is_rela)
@@ -903,6 +940,10 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	case EM_X86_64:
 	  rtype = elf_x86_64_reloc_type (type);
 	  break;
+
+        case EM_S390:
+          rtype = elf_s390_reloc_type (type);
+          break;
 	}
 
       if (rtype == NULL)
@@ -956,7 +997,10 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
       putchar ('\n');
     }
 
-  free (relas);
+  if (is_rela)
+    free (relas);
+  else
+    free (rels);
 
   return 1;
 }
@@ -1280,6 +1324,7 @@ get_machine_name (e_machine)
     case EM_HUANY:       	return "Harvard Universitys's machine-independent object format";
     case EM_PRISM:       	return "SiTera Prism";
     case EM_X86_64:		return "Advanced Micro Devices X86-64";
+    case EM_S390:               return "IBM S/390";
     default:
       sprintf (buff, _("<unknown>: %x"), e_machine);
       return buff;
@@ -1314,12 +1359,13 @@ decode_ARM_machine_flags (e_flags, buf)
   switch (eabi)
     {
     default:
-      strcat (buf, ", <unknown EABI>");
+      strcat (buf, ", <unrecognised EABI>");
       if (e_flags)
 	unknown = 1;
       break;
 
     case EF_ARM_EABI_VER1:
+      strcat (buf, ", Version1 EABI");
       while (e_flags)
 	{
 	  unsigned flag;
@@ -1330,7 +1376,7 @@ decode_ARM_machine_flags (e_flags, buf)
 
 	  switch (flag)
 	    {
-	    case EF_ARM_SYMSARESORTED: /* Conflicts with EF_INTERWORK.  */
+	    case EF_ARM_SYMSARESORTED: /* Conflicts with EF_ARM_INTERWORK.  */
 	      strcat (buf, ", sorted symbol tables");
 	      break;
 
@@ -1341,7 +1387,8 @@ decode_ARM_machine_flags (e_flags, buf)
 	}
       break;
 
-    case EF_ARM_EABI_UNKNOWN:
+    case EF_ARM_EABI_VER2:
+      strcat (buf, ", Version2 EABI");
       while (e_flags)
 	{
 	  unsigned flag;
@@ -1352,35 +1399,66 @@ decode_ARM_machine_flags (e_flags, buf)
 
 	  switch (flag)
 	    {
-	    case EF_INTERWORK:
+	    case EF_ARM_SYMSARESORTED: /* Conflicts with EF_ARM_INTERWORK.  */
+	      strcat (buf, ", sorted symbol tables");
+	      break;
+
+	    case EF_ARM_DYNSYMSUSESEGIDX:
+	      strcat (buf, ", dynamic symbols use segment index");
+	      break;
+
+	    case EF_ARM_MAPSYMSFIRST:
+	      strcat (buf, ", mapping symbols precede others");
+	      break;
+
+	    default:
+	      unknown = 1;
+	      break;
+	    }
+	}
+      break;
+
+    case EF_ARM_EABI_UNKNOWN:
+      strcat (buf, ", GNU EABI");
+      while (e_flags)
+	{
+	  unsigned flag;
+
+	  /* Process flags one bit at a time.  */
+	  flag = e_flags & - e_flags;
+	  e_flags &= ~ flag;
+
+	  switch (flag)
+	    {
+	    case EF_ARM_INTERWORK:
 	      strcat (buf, ", interworking enabled");
 	      break;
 
-	    case EF_APCS_26:
+	    case EF_ARM_APCS_26:
 	      strcat (buf, ", uses APCS/26");
 	      break;
 
-	    case EF_APCS_FLOAT:
+	    case EF_ARM_APCS_FLOAT:
 	      strcat (buf, ", uses APCS/float");
 	      break;
 
-	    case EF_PIC:
+	    case EF_ARM_PIC:
 	      strcat (buf, ", position independent");
 	      break;
 
-	    case EF_ALIGN8:
+	    case EF_ARM_ALIGN8:
 	      strcat (buf, ", 8 bit structure alignment");
 	      break;
 
-	    case EF_NEW_ABI:
+	    case EF_ARM_NEW_ABI:
 	      strcat (buf, ", uses new ABI");
 	      break;
 
-	    case EF_OLD_ABI:
+	    case EF_ARM_OLD_ABI:
 	      strcat (buf, ", uses old ABI");
 	      break;
 
-	    case EF_SOFT_FLOAT:
+	    case EF_ARM_SOFT_FLOAT:
 	      strcat (buf, ", software FP");
 	      break;
 
@@ -1565,6 +1643,21 @@ get_machine_flags (e_flags, e_machine)
 	  if ((e_flags & EF_PICOJAVA_GNUCALLS) == EF_PICOJAVA_GNUCALLS)
 	    strcat (buf, ", gnu calling convention");
 	  break;
+
+	case EM_IA_64:
+	  if ((e_flags & EF_IA_64_ABI64))
+	    strcat (buf, ", 64-bit");
+	  else
+	    strcat (buf, ", 32-bit");
+	  if ((e_flags & EF_IA_64_REDUCEDFP))
+	    strcat (buf, ", reduced fp model");
+	  if ((e_flags & EF_IA_64_NOFUNCDESC_CONS_GP))
+	    strcat (buf, ", no function descriptors, constant gp");
+	  else if ((e_flags & EF_IA_64_CONS_GP))
+	    strcat (buf, ", constant gp");
+	  if ((e_flags & EF_IA_64_ABSOLUTE))
+	    strcat (buf, ", absolute");
+	  break;
 	}
     }
 
@@ -1618,6 +1711,21 @@ get_parisc_segment_type (type)
 }
 
 static const char *
+get_ia64_segment_type (type)
+     unsigned long type;
+{
+  switch (type)
+    {
+    case PT_IA_64_ARCHEXT:	return "IA_64_ARCHEXT";
+    case PT_IA_64_UNWIND:	return "IA_64_UNWIND";
+    default:
+      break;
+    }
+
+  return NULL;
+}
+
+static const char *
 get_segment_type (p_type)
      unsigned long p_type;
 {
@@ -1646,6 +1754,9 @@ get_segment_type (p_type)
 	      break;
 	    case EM_PARISC:
 	      result = get_parisc_segment_type (p_type);
+	      break;
+	    case EM_IA_64:
+	      result = get_ia64_segment_type (p_type);
 	      break;
 	    default:
 	      result = NULL;
@@ -1750,6 +1861,20 @@ get_parisc_section_type_name (sh_type)
 }
 
 static const char *
+get_ia64_section_type_name (sh_type)
+     unsigned int sh_type;
+{
+  switch (sh_type)
+    {
+    case SHT_IA_64_EXT:		return "IA_64_EXT";
+    case SHT_IA_64_UNWIND:	return "IA_64_UNWIND";
+    default:
+      break;
+    }
+  return NULL;
+}
+
+static const char *
 get_section_type_name (sh_type)
      unsigned int sh_type;
 {
@@ -1796,6 +1921,9 @@ get_section_type_name (sh_type)
 	    case EM_PARISC:
 	      result = get_parisc_section_type_name (sh_type);
 	      break;
+	    case EM_IA_64:
+	      result = get_ia64_section_type_name (sh_type);
+	      break;
 	    default:
 	      result = NULL;
 	      break;
@@ -1837,6 +1965,7 @@ struct option options [] =
   {"use-dynamic",      no_argument, 0, 'D'},
   {"hex-dump",         required_argument, 0, 'x'},
   {"debug-dump",       optional_argument, 0, 'w'},
+  {"unwind",	       no_argument, 0, 'u'},
 #ifdef SUPPORT_DISASSEMBLY
   {"instruction-dump", required_argument, 0, 'i'},
 #endif
@@ -1861,6 +1990,7 @@ usage ()
   fprintf (stdout, _("  -s or --syms or --symbols Display the symbol table\n"));
   fprintf (stdout, _("  -n or --notes             Display the core notes (if present)\n"));
   fprintf (stdout, _("  -r or --relocs            Display the relocations (if present)\n"));
+  fprintf (stdout, _("  -u or --unwind            Display the unwind info (if present)\n"));
   fprintf (stdout, _("  -d or --dynamic           Display the dynamic segment (if present)\n"));
   fprintf (stdout, _("  -V or --version-info      Display the version sections (if present)\n"));
   fprintf (stdout, _("  -A or --arch-specific     Display architecture specific information (if any).\n"));
@@ -1923,7 +2053,7 @@ parse_args (argc, argv)
     usage ();
 
   while ((c = getopt_long
-	  (argc, argv, "ersahnldSDAIw::x:i:vV", options, NULL)) != EOF)
+	  (argc, argv, "ersuahnldSDAIw::x:i:vV", options, NULL)) != EOF)
     {
       char *    cp;
       int	section;
@@ -1940,6 +2070,7 @@ parse_args (argc, argv)
 	case 'a':
 	  do_syms ++;
 	  do_reloc ++;
+	  do_unwind ++;
 	  do_dynamic ++;
 	  do_header ++;
 	  do_sections ++;
@@ -1962,6 +2093,9 @@ parse_args (argc, argv)
 	  break;
 	case 'r':
 	  do_reloc ++;
+	  break;
+	case 'u':
+	  do_unwind ++;
 	  break;
 	case 'h':
 	  do_header ++;
@@ -2065,7 +2199,7 @@ parse_args (argc, argv)
 	}
     }
 
-  if (!do_dynamic && !do_syms && !do_reloc && !do_sections
+  if (!do_dynamic && !do_syms && !do_reloc && !do_unwind && !do_sections
       && !do_segments && !do_header && !do_dump && !do_version
       && !do_histogram && !do_debugging && !do_arch && !do_notes)
     usage ();
@@ -2976,6 +3110,365 @@ process_relocs (file)
   return 1;
 }
 
+#include "unwind-ia64.h"
+
+/* An absolute address consists of a section and an offset.  If the
+   section is NULL, the offset itself is the address, otherwise, the
+   address equals to LOAD_ADDRESS(section) + offset.  */
+
+struct absaddr
+  {
+    unsigned short section;
+    bfd_vma offset;
+  };
+
+struct unw_aux_info
+  {
+    struct unw_table_entry
+      {
+	struct absaddr    start;
+	struct absaddr    end;
+	struct absaddr    info;
+      }
+    *table;				/* Unwind table.  */
+    unsigned long         table_len;	/* Length of unwind table.  */
+    unsigned char *       info;		/* Unwind info.  */
+    unsigned long         info_size;	/* Size of unwind info.  */
+    bfd_vma               info_addr;	/* starting address of unwind info.  */
+    bfd_vma               seg_base;	/* Starting address of segment.  */
+    Elf_Internal_Sym *    symtab;	/* The symbol table.  */
+    unsigned              long nsyms;	/* Number of symbols.  */
+    const char *          strtab;	/* The string table.  */
+    unsigned long         strtab_size;	/* Size of string table.  */
+  };
+
+static void find_symbol_for_address PARAMS ((struct unw_aux_info *,
+					     struct absaddr, const char **,
+					     bfd_vma *));
+static void dump_ia64_unwind PARAMS ((struct unw_aux_info *));
+static int  slurp_ia64_unwind_table PARAMS ((FILE *, struct unw_aux_info *,
+					    Elf32_Internal_Shdr *));
+
+static void
+find_symbol_for_address (aux, addr, symname, offset)
+     struct unw_aux_info *aux;
+     struct absaddr addr;
+     const char **symname;
+     bfd_vma *offset;
+{
+  bfd_vma dist = (bfd_vma) 0x100000;
+  Elf_Internal_Sym *sym, *best = NULL;
+  unsigned long i;
+
+  for (i = 0, sym = aux->symtab; i < aux->nsyms; ++i, ++sym)
+    {
+      if (ELF_ST_TYPE (sym->st_info) == STT_FUNC
+	  && sym->st_name != 0
+	  && (addr.section == SHN_UNDEF || addr.section == sym->st_shndx)
+	  && addr.offset >= sym->st_value
+	  && addr.offset - sym->st_value < dist)
+	{
+	  best = sym;
+	  dist = addr.offset - sym->st_value;
+	  if (!dist)
+	    break;
+	}
+    }
+  if (best)
+    {
+      *symname = (best->st_name >= aux->strtab_size
+		  ? "<corrupt>" : aux->strtab + best->st_name);
+      *offset = dist;
+      return;
+    }
+  *symname = NULL;
+  *offset = addr.offset;
+}
+
+static void
+dump_ia64_unwind (aux)
+     struct unw_aux_info *aux;
+{
+  bfd_vma addr_size;
+  struct unw_table_entry * tp;
+  int in_body;
+  
+  addr_size = is_32bit_elf ? 4 : 8;
+
+  for (tp = aux->table; tp < aux->table + aux->table_len; ++tp)
+    {
+      bfd_vma stamp;
+      bfd_vma offset;
+      const unsigned char * dp;
+      const unsigned char * head;
+      const char * procname;
+
+      find_symbol_for_address (aux, tp->start, &procname, &offset);
+
+      fputs ("\n<", stdout);
+
+      if (procname)
+	{
+	  fputs (procname, stdout);
+
+	  if (offset)
+	    printf ("+%lx", (unsigned long) offset);
+	}
+
+      fputs (">: [", stdout);
+      print_vma (tp->start.offset, PREFIX_HEX);
+      fputc ('-', stdout);
+      print_vma (tp->end.offset, PREFIX_HEX);
+      printf ("), info at +0x%lx\n",
+	      (unsigned long) (tp->info.offset - aux->seg_base));
+
+      head = aux->info + (tp->info.offset - aux->info_addr);
+      stamp = BYTE_GET8 ((unsigned char *) head);
+
+      printf ("  v%u, flags=0x%lx (%s%s ), len=%lu bytes\n",
+	      (unsigned) UNW_VER (stamp),
+	      (unsigned long) ((stamp & UNW_FLAG_MASK) >> 32),
+	      UNW_FLAG_EHANDLER (stamp) ? " ehandler" : "",
+	      UNW_FLAG_UHANDLER (stamp) ? " uhandler" : "",
+	      (unsigned long) (addr_size * UNW_LENGTH (stamp)));
+
+      if (UNW_VER (stamp) != 1)
+	{
+	  printf ("\tUnknown version.\n");
+	  continue;
+	}
+
+      in_body = 0;
+      for (dp = head + 8; dp < head + 8 + addr_size * UNW_LENGTH (stamp);)
+	dp = unw_decode (dp, in_body, & in_body);
+    }
+}
+
+static int
+slurp_ia64_unwind_table (file, aux, sec)
+     FILE *file;
+     struct unw_aux_info *aux;
+     Elf32_Internal_Shdr *sec;
+{
+  unsigned long size, addr_size, nrelas, i;
+  Elf_Internal_Phdr *prog_hdrs, *seg;
+  struct unw_table_entry *tep;
+  Elf32_Internal_Shdr *relsec;
+  Elf_Internal_Rela *rela, *rp;
+  unsigned char *table, *tp;
+  Elf_Internal_Sym *sym;
+  const char *relname;
+  int result;
+
+  addr_size = is_32bit_elf ? 4 : 8;
+
+  /* First, find the starting address of the segment that includes
+     this section: */
+
+  if (elf_header.e_phnum)
+    {
+      prog_hdrs = (Elf_Internal_Phdr *)
+	xmalloc (elf_header.e_phnum * sizeof (Elf_Internal_Phdr));
+
+      if (is_32bit_elf)
+	result = get_32bit_program_headers (file, prog_hdrs);
+      else
+	result = get_64bit_program_headers (file, prog_hdrs);
+
+      if (!result)
+	{
+	  free (prog_hdrs);
+	  return 0;
+	}
+
+      for (seg = prog_hdrs; seg < prog_hdrs + elf_header.e_phnum; ++seg)
+	{
+	  if (seg->p_type != PT_LOAD)
+	    continue;
+
+	  if (sec->sh_addr >= seg->p_vaddr
+	      && (sec->sh_addr + sec->sh_size <= seg->p_vaddr + seg->p_memsz))
+	    {
+	      aux->seg_base = seg->p_vaddr;
+	      break;
+	    }
+	}
+
+      free (prog_hdrs);
+    }
+
+  /* Second, build the unwind table from the contents of the unwind section:  */
+  size = sec->sh_size;
+  GET_DATA_ALLOC (sec->sh_offset, size, table, char *, "unwind table");
+
+  tep = aux->table = xmalloc (size / (3 * addr_size) * sizeof (aux->table[0]));
+  for (tp = table; tp < table + size; tp += 3 * addr_size, ++ tep)
+    {
+      tep->start.section = SHN_UNDEF;
+      tep->end.section   = SHN_UNDEF;
+      tep->info.section  = SHN_UNDEF;
+      if (is_32bit_elf)
+	{
+	  tep->start.offset = byte_get ((unsigned char *) tp + 0, 4);
+	  tep->end.offset   = byte_get ((unsigned char *) tp + 4, 4);
+	  tep->info.offset  = byte_get ((unsigned char *) tp + 8, 4);
+	}
+      else
+	{
+	  tep->start.offset = BYTE_GET8 ((unsigned char *) tp +  0);
+	  tep->end.offset   = BYTE_GET8 ((unsigned char *) tp +  8);
+	  tep->info.offset  = BYTE_GET8 ((unsigned char *) tp + 16);
+	}
+      tep->start.offset += aux->seg_base;
+      tep->end.offset   += aux->seg_base;
+      tep->info.offset  += aux->seg_base;
+    }
+  free (table);
+
+  /* Third, apply any relocations to the unwind table: */
+
+  for (relsec = section_headers;
+       relsec < section_headers + elf_header.e_shnum;
+       ++relsec)
+    {
+      if (relsec->sh_type != SHT_RELA
+	  || section_headers + relsec->sh_info != sec)
+	continue;
+
+      if (!slurp_rela_relocs (file, relsec->sh_offset, relsec->sh_size,
+			      & rela, & nrelas))
+	return 0;
+
+      for (rp = rela; rp < rela + nrelas; ++rp)
+	{
+	  if (is_32bit_elf)
+	    {
+	      relname = elf_ia64_reloc_type (ELF32_R_TYPE (rp->r_info));
+	      sym = aux->symtab + ELF32_R_SYM (rp->r_info);
+
+	      if (ELF32_ST_TYPE (sym->st_info) != STT_SECTION)
+		{
+		  warn (_("Skipping unexpected symbol type %u"),
+			ELF32_ST_TYPE (sym->st_info));
+		  continue;
+		}
+	    }
+	  else
+	    {
+	      relname = elf_ia64_reloc_type (ELF64_R_TYPE (rp->r_info));
+	      sym = aux->symtab + ELF64_R_SYM (rp->r_info);
+
+	      if (ELF64_ST_TYPE (sym->st_info) != STT_SECTION)
+		{
+		  warn (_("Skipping unexpected symbol type %u"),
+			ELF64_ST_TYPE (sym->st_info));
+		  continue;
+		}
+	    }
+
+	  if (strncmp (relname, "R_IA64_SEGREL", 13) != 0)
+	    {
+	      warn (_("Skipping unexpected relocation type %s"), relname);
+	      continue;
+	    }
+
+	  i = rp->r_offset / (3 * addr_size);
+
+	  switch (rp->r_offset/addr_size % 3)
+	    {
+	    case 0:
+	      aux->table[i].start.section = sym->st_shndx;
+	      aux->table[i].start.offset += rp->r_addend;
+	      break;
+	    case 1:
+	      aux->table[i].end.section   = sym->st_shndx;
+	      aux->table[i].end.offset   += rp->r_addend;
+	      break;
+	    case 2:
+	      aux->table[i].info.section  = sym->st_shndx;
+	      aux->table[i].info.offset  += rp->r_addend;
+	      break;
+	    default:
+	      break;
+	    }
+	}
+
+      free (rela);
+    }
+
+  aux->table_len = size / (3 * addr_size);
+  return 1;
+}
+
+static int
+process_unwind (file)
+     FILE * file;
+{
+  Elf32_Internal_Shdr *sec, *unwsec = NULL, *strsec;
+  unsigned long i, addr_size;
+  struct unw_aux_info aux;
+
+  memset (& aux, 0, sizeof (aux));
+
+  addr_size = is_32bit_elf ? 4 : 8;
+
+  if (!do_unwind)
+    return 1;
+
+  for (i = 0, sec = section_headers; i < elf_header.e_shnum; ++i, ++sec)
+    {
+      if (sec->sh_type == SHT_SYMTAB)
+	{
+	  aux.nsyms = sec->sh_size / sec->sh_entsize;
+	  aux.symtab = GET_ELF_SYMBOLS (file, sec->sh_offset, aux.nsyms);
+
+	  strsec = section_headers + sec->sh_link;
+	  aux.strtab_size = strsec->sh_size;
+	  GET_DATA_ALLOC (strsec->sh_offset, aux.strtab_size,
+			  (char *) aux.strtab, char *, "string table");
+	}
+      else if (sec->sh_type == SHT_IA_64_UNWIND)
+	unwsec = sec;
+      else if (strcmp (SECTION_NAME (sec), ELF_STRING_ia64_unwind_info) == 0)
+	{
+	  aux.info_size = sec->sh_size;
+	  aux.info_addr = sec->sh_addr;
+	  GET_DATA_ALLOC (sec->sh_offset, aux.info_size, aux.info,
+			  char *, "unwind info");
+	}
+    }
+
+  if (unwsec)
+    {
+      printf (_("\nUnwind section "));
+
+      if (string_table == NULL)
+	printf ("%d", unwsec->sh_name);
+      else
+	printf ("'%s'", SECTION_NAME (unwsec));
+
+      printf (_(" at offset 0x%lx contains %lu entries:\n"),
+	      unwsec->sh_offset, (unsigned long) (unwsec->sh_size / (3 * addr_size)));
+
+      (void) slurp_ia64_unwind_table (file, & aux, unwsec);
+
+      if (aux.table_len > 0)
+	dump_ia64_unwind (& aux);
+    }
+  else
+    printf (_("\nThere are no unwind sections in this file.\n"));
+
+  if (aux.table)
+    free ((char *) aux.table);
+  if (aux.info)
+    free ((char *) aux.info);
+  if (aux.symtab)
+    free (aux.symtab);
+  if (aux.strtab)
+    free ((char *) aux.strtab);
+
+  return 1;
+}
 
 static void
 dynamic_segment_mips_val (entry)
@@ -7895,6 +8388,8 @@ process_file (file_name)
   process_dynamic_segment (file);
 
   process_relocs (file);
+
+  process_unwind (file);
 
   process_symbol_table (file);
 

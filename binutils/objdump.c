@@ -2644,14 +2644,14 @@ endian_string (endian)
 static void
 display_target_list ()
 {
-  extern bfd_target *bfd_target_vector[];
+  extern const bfd_target *const *bfd_target_vector;
   char *dummy_name;
   int t;
 
   dummy_name = make_temp_file (NULL);
   for (t = 0; bfd_target_vector[t]; t++)
     {
-      bfd_target *p = bfd_target_vector[t];
+      const bfd_target *p = bfd_target_vector[t];
       bfd *abfd = bfd_openw (dummy_name, p->name);
       int a;
 
@@ -2692,7 +2692,7 @@ display_info_table (first, last)
      int first;
      int last;
 {
-  extern bfd_target *bfd_target_vector[];
+  extern const bfd_target *const *bfd_target_vector;
   int t, a;
   char *dummy_name;
 
@@ -2710,7 +2710,7 @@ display_info_table (first, last)
 		bfd_printable_arch_mach (a, 0));
 	for (t = first; t < last && bfd_target_vector[t]; t++)
 	  {
-	    bfd_target *p = bfd_target_vector[t];
+	    const bfd_target *p = bfd_target_vector[t];
 	    boolean ok = true;
 	    bfd *abfd = bfd_openw (dummy_name, p->name);
 
@@ -2761,7 +2761,7 @@ static void
 display_target_tables ()
 {
   int t, columns;
-  extern bfd_target *bfd_target_vector[];
+  extern const bfd_target *const *bfd_target_vector;
   char *colum;
 
   columns = 0;

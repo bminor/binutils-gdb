@@ -643,16 +643,19 @@ elf_i386_check_relocs (abfd, info, sec, relocs)
 	     including in the link (i.e., DEF_REGULAR is set).  At
 	     this point we have not seen all the input files, so it is
 	     possible that DEF_REGULAR is not set now but will be set
-	     later (it is never cleared).  We account for that
-	     possibility below by storing information in the
-	     pcrel_relocs_copied field of the hash table entry.
-	     A similar situation occurs when creating shared libraries
-	     and symbol visibility changes render the symbol local.  */
+	     later (it is never cleared).  In case of a weak definition,
+	     DEF_REGULAR may be cleared later by a strong definition in
+	     a shared library. We account for that possibility below by
+	     storing information in the relocs_copied field of the hash
+	     table entry.  A similar situation occurs when creating
+	     shared libraries and symbol visibility changes render the
+	     symbol local.  */
 	  if (info->shared
 	      && (sec->flags & SEC_ALLOC) != 0
 	      && (ELF32_R_TYPE (rel->r_info) != R_386_PC32
 		  || (h != NULL
 		      && (! info->symbolic
+			  || h->root.type == bfd_link_hash_defweak
 			  || (h->elf_link_hash_flags
 			      & ELF_LINK_HASH_DEF_REGULAR) == 0))))
 	    {

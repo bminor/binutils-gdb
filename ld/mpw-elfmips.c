@@ -522,6 +522,7 @@ gldelf32ebmip_find_exp_assignment (exp)
   switch (exp->type.node_class)
     {
     case etree_provide:
+    case etree_provided:
       h = bfd_link_hash_lookup (link_info.hash, exp->assign.dst,
 				false, false, false);
       if (h == NULL)
@@ -541,7 +542,7 @@ gldelf32ebmip_find_exp_assignment (exp)
 	{
 	  if (! (bfd_elf32_record_link_assignment
 		 (output_bfd, &link_info, exp->assign.dst,
-		  exp->type.node_class == etree_provide ? true : false)))
+		  exp->type.node_class != etree_assign ? true : false)))
 	    einfo (_("%P%F: failed to record assignment to %s: %E\n"),
 		   exp->assign.dst);
 	}

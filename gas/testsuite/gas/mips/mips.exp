@@ -91,18 +91,18 @@ if [istarget mips*-*-*] then {
     run_dump_test "mips32"
     run_dump_test "mips64"
 
-    # Make sure that -mcpu=FOO and -mFOO are equivalent.  Assemble a file
-    # containing 4650-specific instructions with -m4650 and -mcpu=4650,
-    # and verify that they're the same.  Specifically, we're checking
-    # that the EF_MIPS_MACH field is set, and that the 4650 'mul'
-    # instruction does get used.  In previous versions of GAS, 
-    # only -mcpu=4650 would set the EF_MIPS_MACH field; -m4650 wouldn't.
-    run_dump_test "elf_e_flags1"
-    run_dump_test "elf_e_flags2"
-    run_dump_test "elf_e_flags3"
-    run_dump_test "elf_e_flags4"
-    
     if $svr4pic {
+	# Make sure that -mcpu=FOO and -mFOO are equivalent.  Assemble a file
+	# containing 4650-specific instructions with -m4650 and -mcpu=4650,
+	# and verify that they're the same.  Specifically, we're checking
+	# that the EF_MIPS_MACH field is set, and that the 4650 'mul'
+	# instruction does get used.  In previous versions of GAS, 
+	# only -mcpu=4650 would set the EF_MIPS_MACH field; -m4650 wouldn't.
+	run_dump_test "elf_e_flags1"
+	run_dump_test "elf_e_flags2"
+	run_dump_test "elf_e_flags3"
+	run_dump_test "elf_e_flags4"
+    
 	run_dump_test "elf-rel"
 	if [istarget mips64*-*-*] { 
 	    run_dump_test "elf-rel2" 

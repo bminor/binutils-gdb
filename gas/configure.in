@@ -11,7 +11,10 @@ AC_INIT(as.h)
 AC_CANONICAL_SYSTEM
 AC_ISC_POSIX
 
-AM_INIT_AUTOMAKE(gas, 2.10.91)
+changequote(,)dnl
+BFD_VERSION=`sed -n -e 's/^.._INIT_AUTOMAKE.*,[ 	]*\([^ 	]*\)[ 	]*).*/\1/p' < ${srcdir}/../bfd/configure.in`
+changequote([,])dnl
+AM_INIT_AUTOMAKE(gas, ${BFD_VERSION})
 
 AM_PROG_LIBTOOL
 
@@ -139,6 +142,8 @@ changequote([,])dnl
       powerpcle*)	cpu_type=ppc endian=little ;;
       powerpc*)		cpu_type=ppc endian=big ;;
       rs6000*)		cpu_type=ppc ;;
+      s390x*)		cpu_type=s390 arch=s390x ;;
+      s390*)		cpu_type=s390 arch=s390 ;;
       sparclite*)	cpu_type=sparc arch=sparclite ;;
       sparclet*)	cpu_type=sparc arch=sparclet ;;
       sparc64*)		cpu_type=sparc arch=v9-64 ;;
@@ -247,7 +252,6 @@ changequote(,)dnl
       i386-*-freebsdaout* | i386-*-freebsd[12].* | i386-*-freebsd[12])
                             fmt=aout em=386bsd ;;
 changequote([,])dnl
-      i386-*-freebsd*)	    fmt=elf bfd_gas=yes ;;
       i386-*-coff | i386-*-sysv* | i386-*-sco3.2v5*coff | i386-*-isc*)
                           fmt=coff ;;
       i386-*-sco3.2v5*)      fmt=elf
@@ -290,6 +294,7 @@ changequote([,])dnl
       i960-*-elf*)	    fmt=elf ;;
 
       ia64-*-elf*)	    fmt=elf ;;
+      ia64-*-aix*)	    fmt=elf em=ia64aix ;;
       ia64-*-linux-gnu*)    fmt=elf em=linux ;;
       ia64-*-hpux*)	    fmt=elf em=hpux ;;
 
@@ -377,12 +382,15 @@ changequote([,])dnl
       ppc-*-netware*)       fmt=elf em=ppcnw ;;
       ppc-*-vxworks*)       fmt=elf ;;
 
+      s390x-*-linux-gnu*)   fmt=elf em=linux ;;
+      s390-*-linux-gnu*)    fmt=elf em=linux ;;
+
       sh-*-linux*)	    fmt=elf em=linux ;;
       sh-*-elf*)	    fmt=elf ;;
-      sh-*-coff*)           fmt=coff ;;
+      sh-*-coff*)           fmt=coff bfd_gas=yes;;
       sh-*-pe*)             fmt=coff em=pe bfd_gas=yes;;
       sh-*-rtemself*)       fmt=elf ;;
-      sh-*-rtems*)	    fmt=coff ;;
+      sh-*-rtems*)	    fmt=coff bfd_gas=yes;;
 
       ns32k-pc532-mach* | ns32k-pc532-ux*)    fmt=aout em=pc532mach ;;
       ns32k-pc532-netbsd* | ns32k-pc532-lites*)  fmt=aout em=nbsd532 ;;
@@ -439,6 +447,7 @@ changequote([,])dnl
 
       *-*-aout | *-*-scout)
 			    fmt=aout ;;
+      *-*-freebsd*)	    fmt=elf bfd_gas=yes ;;
       *-*-nindy*)
 			    fmt=bout ;;
       *-*-bsd*)
@@ -474,6 +483,7 @@ changequote([,])dnl
       ia64*-*)	bfd_gas=yes ;;
       mips-*)	bfd_gas=yes ;;
       ns32k-*)	bfd_gas=yes ;;
+      pdp11-*)	bfd_gas=yes ;;
       ppc-*)	bfd_gas=yes ;;
       sparc-*)	bfd_gas=yes ;;
       strongarm-*)	bfd_gas=yes ;;
@@ -522,6 +532,12 @@ changequote([,])dnl
 	*) extra_objects="$extra_objects m68k-parse.o" ;;
 	esac
 	;;
+
+      s390)
+       if test $this_target = $target ; then
+	  AC_DEFINE_UNQUOTED(DEFAULT_ARCH, "${arch}", [Default architecture.])
+       fi
+       ;;
 
       mips)
 	echo ${extra_objects} | grep -s "itbl-parse.o" 
@@ -637,6 +653,7 @@ fi
 # is emulated.
 case ${target_cpu} in
   vax | tahoe )	atof=${target_cpu} ;;
+  pdp11)	atof=vax ;;
   *)		atof=ieee ;;
 esac
 
@@ -717,9 +734,9 @@ GAS_UNIQ(emulations)
 for em in . $emulations ; do
   case $em in
     .)	continue ;;
-    mipsbelf | mipslelf)
+    mipsbelf | mipslelf | mipself)
 	fmt=elf   file=mipself ;;
-    mipsbecoff | mipslecoff)
+    mipsbecoff | mipslecoff | mipsecoff)
 	fmt=ecoff file=mipsecoff ;;
     *coff)
 	fmt=coff  file=$em ;;

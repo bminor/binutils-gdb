@@ -1,3 +1,84 @@
+2001-02-28  Philip Blundell  <pb@futuretv.com>
+
+	* readelf.c (decode_ARM_machine_flags): Explicitly mention which
+	ABI is in use; remove ambiguity between the "unknown" EABI and
+	unrecognised ABIs.  Handle version 2 ARM EABI.  Update uses of
+	renamed EF_xx constants.
+
+2001-02-27  Alan Modra  <alan@linuxcare.com.au>
+
+	* configure.in (BFD_VERSION): New.
+	(AM_INIT_AUTOMAKE): Use $BFD_VERSION.
+	* configure: Regenerate.
+	* Makefile.am: Run "make dep-am"
+	* Makefile.in: Regenerate.
+
+2001-02-14  Nick Clifton  <nickc@redhat.com>
+
+	* MAINTAINERS: Add "Obvious Fix" rule.
+
+2001-02-11  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
+
+	* unwind-ia64.c: Don't use ANSI C preprocessor stringisation and string
+	literal concatenation.
+
+2001-02-11  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
+
+	* readelf.c (struct unw_aux_info): Remove const from the info member.
+	(process_unwind): Don't type-cast the third argument to the
+	GET_DATA_ALLOC macro.
+
+2001-02-11  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (dump_relocations): Free corrected allocated
+	array.
+	(process_unwind): Fix compile time warning.
+
+2001-02-10  Nick Clifton  <nickc@redhat.com>
+
+	* binutils.texi: Document new --unwind option to readelf.
+
+2001-02-09  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* readelf.c: Add linux target for S/390.
+
+2001-02-10  Alan Modra  <alan@linuxcare.com.au>
+
+	* nm.c (print_symbol_info_bsd): Don't #ifdef inside printf in case
+	printf is a macro.
+
+2001-02-08  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* acinclude.m4 (AM_PROG_LEX): Override installed definition.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2001-02-07  Todd Vierling  <tv@wasabisystems.com>
+
+	* bucomm.c (bfd_target_vector): Change extern array to pointer.
+	* objdump.c (bfd_target_vector): Likewise.
+
+2001-02-07  David Mosberger  <davidm@hpl.hp.com>
+
+	* readelf.c (process_unwind): New function.
+	(slurp_ia64_unwind_table): Ditto.
+	(dump_ia64_unwind): Ditto.
+	(find_symbol_for_address): Ditto.
+	(slurp_rela_relocs): New function (split off from dump_relocations()).
+	(slurp_rel_relocs): Ditto.
+	(parse_args): Handle '-u' option.
+
+	* unwind-ia64.c: New file.
+	* unwind-ia64.h: New file.
+	* Makefile.am: Include unwind-ia64.c in readelf build.
+	* Makefile.in: Regenerate.
+	* po/binutils.pot: Regenerate.
+
+2001-02-04  Philip Blundell  <philb@gnu.org>
+
+	* configure.in (OBJDUMP_DEFS): Match `arm*-*', not just `arm-*'.
+	* configure: Regenerate.
+
 2001-01-31  Steve deRosier  <sderosier@vari-lite.com>
 
 	* ieee.c (ieee_add_bb11): Don't check for backslashes
@@ -126,7 +207,7 @@ Mon Dec 11 14:30:21 MET 2000  Jan Hubicka  <jh@suse.cz>
 
 2000-11-28  Hans-Peter Nilsson  <hp@bitrange.com>
 
-	* MAINTAINERS: Add Jörn Rennecke and self as SH maintainers.
+	* MAINTAINERS: Add Jvrn Rennecke and self as SH maintainers.
 	Change sourceware.cygnus.com to sources.redhat.com.
 	Fix typo for "amongst".
 

@@ -1,5 +1,5 @@
 /* tc-ia64.c -- Assembler for the HP/Intel IA-64 architecture.
-   Copyright (C) 1998, 1999, 2000 Free Software Foundation.
+   Copyright (C) 1998, 1999, 2000, 2001 Free Software Foundation.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
    This file is part of GAS, the GNU Assembler.
@@ -122,6 +122,13 @@ enum dynreg_type
     DYNREG_FR,		/* dynamic floating point register */
     DYNREG_PR,		/* dynamic predicate register */
     DYNREG_NUM_TYPES
+  };
+
+enum operand_match_result
+  {
+    OPERAND_MATCH,
+    OPERAND_OUT_OF_RANGE,
+    OPERAND_MISMATCH
   };
 
 /* On the ia64, we can't know the address of a text label until the
@@ -617,10 +624,14 @@ static struct
   symbolS *proc_end;
   symbolS *info;		/* pointer to unwind info */
   symbolS *personality_routine;
+  segT saved_text_seg;
+  subsegT saved_text_subseg;
+  unsigned int force_unwind_entry : 1;	/* force generation of unwind entry? */
 
   /* TRUE if processing unwind directives in a prologue region.  */
   int prologue;
   int prologue_mask;
+  unsigned int prologue_count;	/* number of .prologues seen so far */
 } unwind;
 
 typedef void (*vbyte_func) PARAMS ((int, char *, char *));
@@ -686,8 +697,9 @@ static void add_unwind_entry PARAMS((unw_rec_list *ptr));
 static symbolS *declare_register PARAMS ((const char *name, int regnum));
 static void declare_register_set PARAMS ((const char *, int, int));
 static unsigned int operand_width PARAMS ((enum ia64_opnd));
-static int operand_match PARAMS ((const struct ia64_opcode *idesc,
-				  int index, expressionS *e));
+static enum operand_match_result operand_match PARAMS ((const struct ia64_opcode *idesc,
+							int index,
+							expressionS *e));
 static int parse_operand PARAMS ((expressionS *e));
 static struct ia64_opcode * parse_operands PARAMS ((struct ia64_opcode *));
 static void build_insn PARAMS ((struct slot *, bfd_vma *));
@@ -825,11 +837,28 @@ static void set_imask PARAMS ((unw_rec_list *, unsigned long, unsigned long, uns
 static int count_bits PARAMS ((unsigned long));
 static unsigned long slot_index PARAMS ((unsigned long, fragS *,
 					 unsigned long, fragS *));
+static unw_rec_list *optimize_unw_records PARAMS ((unw_rec_list *));
 static void fixup_unw_records PARAMS ((unw_rec_list *));
 static int output_unw_records PARAMS ((unw_rec_list *, void **));
 static int convert_expr_to_ab_reg PARAMS ((expressionS *, unsigned int *, unsigned int *));
 static int convert_expr_to_xy_reg PARAMS ((expressionS *, unsigned int *, unsigned int *));
-static int generate_unwind_image PARAMS ((void));
+static int generate_unwind_image PARAMS ((const char *));
+
+/* Build the unwind section name by appending the (possibly stripped)
+   text section NAME to the unwind PREFIX.  The resulting string
+   pointer is assigned to RESULT.  The string is allocated on the
+   stack, so this must be a macro... */
+#define make_unw_section_name(special, text_name, result)		   \
+  {									   \
+    char *_prefix = special_section_name[special];			   \
+    size_t _prefix_len = strlen (_prefix), _text_len = strlen (text_name); \
+    char *_result = alloca (_prefix_len + _text_len + 1);		   \
+    memcpy(_result, _prefix, _prefix_len);				   \
+    memcpy(_result + _prefix_len, text_name, _text_len);		   \
+    _result[_prefix_len + _text_len] = '\0';				   \
+    result = _result;							   \
+  }									   \
+while (0)
 
 /* Determine if application register REGNUM resides in the integer
    unit (as opposed to the memory unit).  */
@@ -872,6 +901,22 @@ ia64_elf_section_flags (flags, attr, type)
   if (attr & SHF_IA_64_SHORT)
     flags |= SEC_SMALL_DATA;
   return flags;
+}
+
+int
+ia64_elf_section_type (str, len)
+	const char *str;
+	size_t len;
+{
+  len = sizeof (ELF_STRING_ia64_unwind_info) - 1;
+  if (strncmp (str, ELF_STRING_ia64_unwind_info, len) == 0)
+    return SHT_PROGBITS;
+
+  len = sizeof (ELF_STRING_ia64_unwind) - 1;
+  if (strncmp (str, ELF_STRING_ia64_unwind, len) == 0)
+    return SHT_IA_64_UNWIND;
+
+  return -1;
 }
 
 static unsigned int
@@ -2495,6 +2540,25 @@ slot_index (slot_addr, slot_frag, first_addr, first_frag)
   return index;
 }
 
+/* Optimize unwind record directives.  */
+
+static unw_rec_list *
+optimize_unw_records (list)
+     unw_rec_list *list;
+{
+  if (!list)
+    return NULL;
+
+  /* If the only unwind record is ".prologue" or ".prologue" followed
+     by ".body", then we can optimize the unwind directives away.  */
+  if (list->r.type == prologue
+      && (list->next == NULL
+	  || (list->next->r.type == body && list->next->next == NULL)))
+    return NULL;
+
+  return list;
+}
+
 /* Given a complete record list, process any records which have
    unresolved fields, (ie length counts for a prologue).  After
    this has been run, all neccessary information should be available
@@ -2681,6 +2745,9 @@ output_unw_records (list, ptr)
   int size, x, extra = 0;
   unsigned char *mem;
 
+  *ptr = NULL;
+
+  list = optimize_unw_records (list);
   fixup_unw_records (list);
   size = calc_record_size (list);
 
@@ -2688,24 +2755,33 @@ output_unw_records (list, ptr)
   x = size % 8;
   if (x != 0)
     extra = 8 - x;
-  /* Add 8 for the header + 8 more bytes for the personality offset.  */
-  mem = xmalloc (size + extra + 16);
 
-  vbyte_mem_ptr = mem + 8;
-  /* Clear the padding area and personality.  */
-  memset (mem + 8 + size, 0 , extra + 8);
-  /* Initialize the header area.  */
-  md_number_to_chars (mem, (((bfd_vma) 1 << 48)     /* version */
-			    | (unwind.personality_routine
-			       ? ((bfd_vma) 3 << 32) /* U & E handler flags */
-			       : 0)
-			    | ((size + extra) / 8)),  /* length (dwords) */
-		      8);
+  if (size > 0 || unwind.force_unwind_entry)
+    {
+      unwind.force_unwind_entry = 0;
 
-  process_unw_records (list, output_vbyte_mem);
+      /* Add 8 for the header + 8 more bytes for the personality offset.  */
+      mem = xmalloc (size + extra + 16);
 
-  *ptr = mem;
-  return size + extra + 16;
+      vbyte_mem_ptr = mem + 8;
+      /* Clear the padding area and personality.  */
+      memset (mem + 8 + size, 0 , extra + 8);
+      /* Initialize the header area.  */
+      md_number_to_chars (mem,
+			  (((bfd_vma) 1 << 48)     /* version */
+			   | (unwind.personality_routine
+			      ? ((bfd_vma) 3 << 32) /* U & E handler flags */
+			      : 0)
+			   | ((size + extra) / 8)),  /* length (dwords) */
+			  8);
+
+      process_unw_records (list, output_vbyte_mem);
+
+      *ptr = mem;
+
+      size += extra + 16;
+    }
+  return size;
 }
 
 static int
@@ -2980,7 +3056,7 @@ dot_restore (dummy)
      int dummy ATTRIBUTE_UNUSED;
 {
   expressionS e1, e2;
-  unsigned long ecount = 0;
+  unsigned long ecount;	/* # of _additional_ regions to pop */
   int sep;
 
   sep = parse_operand (&e1);
@@ -2993,14 +3069,21 @@ dot_restore (dummy)
   if (sep == ',')
     {
       parse_operand (&e2);
-      if (e1.X_op != O_constant)
+      if (e2.X_op != O_constant || e2.X_add_number < 0)
 	{
-	  as_bad ("Second operand to .restore must be constant");
+	  as_bad ("Second operand to .restore must be a constant >= 0");
 	  return;
 	}
-      ecount = e1.X_op;
+      ecount = e2.X_add_number;
     }
+  else
+    ecount = unwind.prologue_count - 1;
   add_unwind_entry (output_epilogue (ecount));
+
+  if (ecount < unwind.prologue_count)
+    unwind.prologue_count -= ecount + 1;
+  else
+    unwind.prologue_count = 0;
 }
 
 static void
@@ -3053,7 +3136,8 @@ dot_restorereg_p (dummy)
 }
 
 static int
-generate_unwind_image ()
+generate_unwind_image (text_name)
+     const char *text_name;
 {
   int size;
   unsigned char *unw_rec;
@@ -3071,8 +3155,13 @@ generate_unwind_image ()
   if (size != 0)
     {
       unsigned char *where;
+      char *sec_name;
       expressionS exp;
-      set_section ((char *) special_section_name[SPECIAL_SECTION_UNWIND_INFO]);
+
+      make_unw_section_name (SPECIAL_SECTION_UNWIND_INFO, text_name, sec_name);
+      set_section (sec_name);
+      bfd_set_section_flags (stdoutput, now_seg,
+			     SEC_LOAD | SEC_ALLOC | SEC_READONLY);
 
       /* Make sure the section has 8 byte alignment.  */
       record_alignment (now_seg, 3);
@@ -3088,6 +3177,7 @@ generate_unwind_image ()
       /* Copy the information from the unwind record into this section. The
 	 data is already in the correct byte order.  */
       memcpy (where, unw_rec, size);
+
       /* Add the personality address to the image.  */
       if (unwind.personality_routine != 0)
 	{
@@ -3098,7 +3188,6 @@ generate_unwind_image ()
 	  		     &exp, 0, BFD_RELOC_IA64_LTOFF_FPTR64LSB);
 	  unwind.personality_routine = 0;
 	}
-      obj_elf_previous (0);
     }
 
   free_list_records (unwind.list);
@@ -3111,7 +3200,23 @@ static void
 dot_handlerdata (dummy)
      int dummy ATTRIBUTE_UNUSED;
 {
-  generate_unwind_image ();
+  const char *text_name = segment_name (now_seg);
+
+  /* If text section name starts with ".text" (which it should),
+     strip this prefix off.  */
+  if (strcmp (text_name, ".text") == 0)
+    text_name = "";
+
+  unwind.force_unwind_entry = 1;
+
+  /* Remember which segment we're in so we can switch back after .endp */
+  unwind.saved_text_seg = now_seg;
+  unwind.saved_text_subseg = now_subseg;
+
+  /* Generate unwind info into unwind-info section and then leave that
+     section as the currently active one so dataXX directives go into
+     the language specific data area of the unwind info block.  */
+  generate_unwind_image (text_name);
   demand_empty_rest_of_line ();
 }
 
@@ -3119,6 +3224,7 @@ static void
 dot_unwentry (dummy)
      int dummy ATTRIBUTE_UNUSED;
 {
+  unwind.force_unwind_entry = 1;
   demand_empty_rest_of_line ();
 }
 
@@ -3583,6 +3689,7 @@ dot_personality (dummy)
   c = get_symbol_end ();
   p = input_line_pointer;
   unwind.personality_routine = symbol_find_or_make (name);
+  unwind.force_unwind_entry = 1;
   *p = c;
   SKIP_WHITESPACE ();
   demand_empty_rest_of_line ();
@@ -3619,6 +3726,7 @@ dot_proc (dummy)
   demand_empty_rest_of_line ();
   ia64_do_align (16);
 
+  unwind.prologue_count = 0;
   unwind.list = unwind.tail = unwind.current_entry = NULL;
   unwind.personality_routine = 0;
 }
@@ -3673,6 +3781,7 @@ dot_prologue (dummy)
 
   unwind.prologue = 1;
   unwind.prologue_mask = mask;
+  ++unwind.prologue_count;
 }
 
 static void
@@ -3685,57 +3794,115 @@ dot_endp (dummy)
   long where;
   segT saved_seg;
   subsegT saved_subseg;
+  const char *sec_name, *text_name;
 
-  saved_seg = now_seg;
-  saved_subseg = now_subseg;
+  if (unwind.saved_text_seg)
+    {
+      saved_seg = unwind.saved_text_seg;
+      saved_subseg = unwind.saved_text_subseg;
+      unwind.saved_text_seg = NULL;
+    }
+  else
+    {
+      saved_seg = now_seg;
+      saved_subseg = now_subseg;
+    }
+
+  /*
+    Use a slightly ugly scheme to derive the unwind section names from
+    the text section name:
+
+    text sect.  unwind table sect.
+    name:       name:                      comments:
+    ----------  -----------------          --------------------------------
+    .text       .IA_64.unwind
+    .text.foo   .IA_64.unwind.text.foo
+    .foo        .IA_64.unwind.foo
+    _info       .IA_64.unwind_info         gas issues error message (ditto)
+    _infoFOO    .IA_64.unwind_infoFOO      gas issues error message (ditto)
+
+    This mapping is done so that:
+
+	(a) An object file with unwind info only in .text will use
+	    unwind section names .IA_64.unwind and .IA_64.unwind_info.
+	    This follows the letter of the ABI and also ensures backwards
+	    compatibility with older toolchains.
+
+	(b) An object file with unwind info in multiple text sections
+	    will use separate unwind sections for each text section.
+	    This allows us to properly set the "sh_info" and "sh_link"
+	    fields in SHT_IA_64_UNWIND as required by the ABI and also
+	    lets GNU ld support programs with multiple segments
+	    containing unwind info (as might be the case for certain
+	    embedded applications).
+	    
+	(c) An error is issued if there would be a name clash.
+  */
+  text_name = segment_name (saved_seg);
+  if (strncmp (text_name, "_info", 5) == 0)
+    {
+      as_bad ("Illegal section name `%s' (causes unwind section name clash)",
+	      text_name);
+      ignore_rest_of_line ();
+      return;
+    }
+  if (strcmp (text_name, ".text") == 0)
+    text_name = "";
 
   expression (&e);
   demand_empty_rest_of_line ();
 
   insn_group_break (1, 0, 0);
 
-  /* If there was a .handlerdata, we haven't generated an image yet.  */
-  if (unwind.info == 0)
+  /* If there wasn't a .handlerdata, we haven't generated an image yet.  */
+  if (!unwind.info)
+    generate_unwind_image (text_name);
+
+  if (unwind.info || unwind.force_unwind_entry)
     {
-      generate_unwind_image ();
-    }
+      subseg_set (md.last_text_seg, 0);
+      unwind.proc_end = expr_build_dot ();
 
-  subseg_set (md.last_text_seg, 0);
-  unwind.proc_end = expr_build_dot ();
+      make_unw_section_name (SPECIAL_SECTION_UNWIND, text_name, sec_name);
+      set_section ((char *) sec_name);
+      bfd_set_section_flags (stdoutput, now_seg,
+			     SEC_LOAD | SEC_ALLOC | SEC_READONLY);
 
-  set_section ((char *) special_section_name[SPECIAL_SECTION_UNWIND]);
+      /* Make sure the section has 8 byte alignment.  */
+      record_alignment (now_seg, 3);
 
-  /* Make sure the section has 8 byte alignment.  */
-  record_alignment (now_seg, 3);
+      ptr = frag_more (24);
+      where = frag_now_fix () - 24;
+      bytes_per_address = bfd_arch_bits_per_address (stdoutput) / 8;
 
-  ptr = frag_more (24);
-  where = frag_now_fix () - 24;
-  bytes_per_address = bfd_arch_bits_per_address (stdoutput) / 8;
-
-  /* Issue the values of  a) Proc Begin,  b) Proc End,  c) Unwind Record.  */
-  e.X_op = O_pseudo_fixup;
-  e.X_op_symbol = pseudo_func[FUNC_SEG_RELATIVE].u.sym;
-  e.X_add_number = 0;
-  e.X_add_symbol = unwind.proc_start;
-  ia64_cons_fix_new (frag_now, where, bytes_per_address, &e);
-
-  e.X_op = O_pseudo_fixup;
-  e.X_op_symbol = pseudo_func[FUNC_SEG_RELATIVE].u.sym;
-  e.X_add_number = 0;
-  e.X_add_symbol = unwind.proc_end;
-  ia64_cons_fix_new (frag_now, where + bytes_per_address, bytes_per_address, &e);
-
-  if (unwind.info != 0)
-    {
+      /* Issue the values of  a) Proc Begin, b) Proc End, c) Unwind Record. */
       e.X_op = O_pseudo_fixup;
       e.X_op_symbol = pseudo_func[FUNC_SEG_RELATIVE].u.sym;
       e.X_add_number = 0;
-      e.X_add_symbol = unwind.info;
-      ia64_cons_fix_new (frag_now, where + (bytes_per_address * 2), bytes_per_address, &e);
-    }
-  else
-    md_number_to_chars (ptr + (bytes_per_address * 2), 0, bytes_per_address);
+      e.X_add_symbol = unwind.proc_start;
+      ia64_cons_fix_new (frag_now, where, bytes_per_address, &e);
 
+      e.X_op = O_pseudo_fixup;
+      e.X_op_symbol = pseudo_func[FUNC_SEG_RELATIVE].u.sym;
+      e.X_add_number = 0;
+      e.X_add_symbol = unwind.proc_end;
+      ia64_cons_fix_new (frag_now, where + bytes_per_address,
+			 bytes_per_address, &e);
+
+      if (unwind.info)
+	{
+	  e.X_op = O_pseudo_fixup;
+	  e.X_op_symbol = pseudo_func[FUNC_SEG_RELATIVE].u.sym;
+	  e.X_add_number = 0;
+	  e.X_add_symbol = unwind.info;
+	  ia64_cons_fix_new (frag_now, where + (bytes_per_address * 2),
+			     bytes_per_address, &e);
+	}
+      else
+	md_number_to_chars (ptr + (bytes_per_address * 2), 0,
+			    bytes_per_address);
+
+    }
   subseg_set (saved_seg, saved_subseg);
   unwind.proc_start = unwind.proc_end = unwind.info = 0;
 }
@@ -4581,7 +4748,7 @@ operand_width (opnd)
   return bits;
 }
 
-static int
+static enum operand_match_result
 operand_match (idesc, index, e)
      const struct ia64_opcode *idesc;
      int index;
@@ -4598,62 +4765,77 @@ operand_match (idesc, index, e)
 
     case IA64_OPND_AR_CCV:
       if (e->X_op == O_register && e->X_add_number == REG_AR + 32)
-	return 1;
+	return OPERAND_MATCH;
       break;
 
     case IA64_OPND_AR_PFS:
       if (e->X_op == O_register && e->X_add_number == REG_AR + 64)
-	return 1;
+	return OPERAND_MATCH;
       break;
 
     case IA64_OPND_GR0:
       if (e->X_op == O_register && e->X_add_number == REG_GR + 0)
-	return 1;
+	return OPERAND_MATCH;
       break;
 
     case IA64_OPND_IP:
       if (e->X_op == O_register && e->X_add_number == REG_IP)
-	return 1;
+	return OPERAND_MATCH;
       break;
 
     case IA64_OPND_PR:
       if (e->X_op == O_register && e->X_add_number == REG_PR)
-	return 1;
+	return OPERAND_MATCH;
       break;
 
     case IA64_OPND_PR_ROT:
       if (e->X_op == O_register && e->X_add_number == REG_PR_ROT)
-	return 1;
+	return OPERAND_MATCH;
       break;
 
     case IA64_OPND_PSR:
       if (e->X_op == O_register && e->X_add_number == REG_PSR)
-	return 1;
+	return OPERAND_MATCH;
       break;
 
     case IA64_OPND_PSR_L:
       if (e->X_op == O_register && e->X_add_number == REG_PSR_L)
-	return 1;
+	return OPERAND_MATCH;
       break;
 
     case IA64_OPND_PSR_UM:
       if (e->X_op == O_register && e->X_add_number == REG_PSR_UM)
-	return 1;
+	return OPERAND_MATCH;
       break;
 
     case IA64_OPND_C1:
-      if (e->X_op == O_constant && e->X_add_number == 1)
-	return 1;
+      if (e->X_op == O_constant)
+	{
+	  if (e->X_add_number == 1)
+	    return OPERAND_MATCH;
+	  else
+	    return OPERAND_OUT_OF_RANGE;
+	}
       break;
 
     case IA64_OPND_C8:
-      if (e->X_op == O_constant && e->X_add_number == 8)
-	return 1;
+      if (e->X_op == O_constant)
+	{
+	  if (e->X_add_number == 8)
+	    return OPERAND_MATCH;
+	  else
+	    return OPERAND_OUT_OF_RANGE;
+	}
       break;
 
     case IA64_OPND_C16:
-      if (e->X_op == O_constant && e->X_add_number == 16)
-	return 1;
+      if (e->X_op == O_constant)
+	{
+	  if (e->X_add_number == 16)
+	    return OPERAND_MATCH;
+	  else
+	    return OPERAND_OUT_OF_RANGE;
+	}
       break;
 
       /* register operands:  */
@@ -4661,20 +4843,20 @@ operand_match (idesc, index, e)
     case IA64_OPND_AR3:
       if (e->X_op == O_register && e->X_add_number >= REG_AR
 	  && e->X_add_number < REG_AR + 128)
-	return 1;
+	return OPERAND_MATCH;
       break;
 
     case IA64_OPND_B1:
     case IA64_OPND_B2:
       if (e->X_op == O_register && e->X_add_number >= REG_BR
 	  && e->X_add_number < REG_BR + 8)
-	return 1;
+	return OPERAND_MATCH;
       break;
 
     case IA64_OPND_CR3:
       if (e->X_op == O_register && e->X_add_number >= REG_CR
 	  && e->X_add_number < REG_CR + 128)
-	return 1;
+	return OPERAND_MATCH;
       break;
 
     case IA64_OPND_F1:
@@ -4683,14 +4865,14 @@ operand_match (idesc, index, e)
     case IA64_OPND_F4:
       if (e->X_op == O_register && e->X_add_number >= REG_FR
 	  && e->X_add_number < REG_FR + 128)
-	return 1;
+	return OPERAND_MATCH;
       break;
 
     case IA64_OPND_P1:
     case IA64_OPND_P2:
       if (e->X_op == O_register && e->X_add_number >= REG_P
 	  && e->X_add_number < REG_P + 64)
-	return 1;
+	return OPERAND_MATCH;
       break;
 
     case IA64_OPND_R1:
@@ -4698,13 +4880,17 @@ operand_match (idesc, index, e)
     case IA64_OPND_R3:
       if (e->X_op == O_register && e->X_add_number >= REG_GR
 	  && e->X_add_number < REG_GR + 128)
-	return 1;
+	return OPERAND_MATCH;
       break;
 
     case IA64_OPND_R3_2:
-      if (e->X_op == O_register && e->X_add_number >= REG_GR
-	  && e->X_add_number < REG_GR + 4)
-	return 1;
+      if (e->X_op == O_register && e->X_add_number >= REG_GR)
+	{ 
+	  if (e->X_add_number < REG_GR + 4)
+	    return OPERAND_MATCH;
+	  else if (e->X_add_number < REG_GR + 128)
+	    return OPERAND_OUT_OF_RANGE;
+	}
       break;
 
       /* indirect operands:  */
@@ -4721,12 +4907,12 @@ operand_match (idesc, index, e)
       if (e->X_op == O_index && e->X_op_symbol
 	  && (S_GET_VALUE (e->X_op_symbol) - IND_CPUID
 	      == opnd - IA64_OPND_CPUID_R3))
-	return 1;
+	return OPERAND_MATCH;
       break;
 
     case IA64_OPND_MR3:
       if (e->X_op == O_index && !e->X_op_symbol)
-	return 1;
+	return OPERAND_MATCH;
       break;
 
       /* immediate operands:  */
@@ -4734,40 +4920,58 @@ operand_match (idesc, index, e)
     case IA64_OPND_LEN4:
     case IA64_OPND_LEN6:
       bits = operand_width (idesc->operands[index]);
-      if (e->X_op == O_constant
-	  && (bfd_vma) (e->X_add_number - 1) < ((bfd_vma) 1 << bits))
-	return 1;
+      if (e->X_op == O_constant)
+	{
+	  if ((bfd_vma) (e->X_add_number - 1) < ((bfd_vma) 1 << bits))
+	    return OPERAND_MATCH;
+	  else
+	    return OPERAND_OUT_OF_RANGE;
+	}
       break;
 
     case IA64_OPND_CNT2b:
-      if (e->X_op == O_constant
-	  && (bfd_vma) (e->X_add_number - 1) < 3)
-	return 1;
+      if (e->X_op == O_constant)
+	{
+	  if ((bfd_vma) (e->X_add_number - 1) < 3)
+	    return OPERAND_MATCH;
+	  else
+	    return OPERAND_OUT_OF_RANGE;
+	}
       break;
 
     case IA64_OPND_CNT2c:
       val = e->X_add_number;
-      if (e->X_op == O_constant
-	  && (val == 0 || val == 7 || val == 15 || val == 16))
-	return 1;
+      if (e->X_op == O_constant)
+	{
+	  if ((val == 0 || val == 7 || val == 15 || val == 16))
+	    return OPERAND_MATCH;
+	  else
+	    return OPERAND_OUT_OF_RANGE;
+	}
       break;
 
     case IA64_OPND_SOR:
       /* SOR must be an integer multiple of 8 */
-      if (e->X_add_number & 0x7)
-	break;
+      if (e->X_op == O_constant && e->X_add_number & 0x7)
+	return OPERAND_OUT_OF_RANGE;
     case IA64_OPND_SOF:
     case IA64_OPND_SOL:
-      if (e->X_op == O_constant &&
-	  (bfd_vma) e->X_add_number <= 96)
-	return 1;
+      if (e->X_op == O_constant)
+	{
+	  if ((bfd_vma) e->X_add_number <= 96)
+	    return OPERAND_MATCH;
+	  else
+	    return OPERAND_OUT_OF_RANGE;
+	}
       break;
 
     case IA64_OPND_IMMU62:
       if (e->X_op == O_constant)
 	{
 	  if ((bfd_vma) e->X_add_number < ((bfd_vma) 1 << 62))
-	    return 1;
+	    return OPERAND_MATCH;
+	  else
+	    return OPERAND_OUT_OF_RANGE;
 	}
       else
 	{
@@ -4793,10 +4997,10 @@ operand_match (idesc, index, e)
 	  fix->expr = *e;
 	  fix->is_pcrel = 0;
 	  ++CURR_SLOT.num_fixups;
-	  return 1;
+	  return OPERAND_MATCH;
 	}
       else if (e->X_op == O_constant)
-	return 1;
+	return OPERAND_MATCH;
       break;
 
     case IA64_OPND_CCNT5:
@@ -4814,59 +5018,78 @@ operand_match (idesc, index, e)
     case IA64_OPND_MHTYPE8:
     case IA64_OPND_POS6:
       bits = operand_width (idesc->operands[index]);
-      if (e->X_op == O_constant
-	  && (bfd_vma) e->X_add_number < ((bfd_vma) 1 << bits))
-	return 1;
+      if (e->X_op == O_constant)
+	{
+	  if ((bfd_vma) e->X_add_number < ((bfd_vma) 1 << bits))
+	    return OPERAND_MATCH;
+	  else
+	    return OPERAND_OUT_OF_RANGE;
+	}
       break;
 
     case IA64_OPND_IMMU9:
       bits = operand_width (idesc->operands[index]);
-      if (e->X_op == O_constant
-	  && (bfd_vma) e->X_add_number < ((bfd_vma) 1 << bits))
+      if (e->X_op == O_constant)
 	{
-	  int lobits = e->X_add_number & 0x3;
-	  if (((bfd_vma) e->X_add_number & 0x3C) != 0 && lobits == 0)
-	    e->X_add_number |= (bfd_vma) 0x3;
-	  return 1;
+	  if ((bfd_vma) e->X_add_number < ((bfd_vma) 1 << bits))
+	    {
+	      int lobits = e->X_add_number & 0x3;
+	      if (((bfd_vma) e->X_add_number & 0x3C) != 0 && lobits == 0)
+		e->X_add_number |= (bfd_vma) 0x3;
+	      return OPERAND_MATCH;
+	    }
+	  else
+	    return OPERAND_OUT_OF_RANGE;
 	}
       break;
 
     case IA64_OPND_IMM44:
       /* least 16 bits must be zero */
       if ((e->X_add_number & 0xffff) != 0)
+	/* XXX technically, this is wrong: we should not be issuing warning
+	   messages until we're sure this instruction pattern is going to
+	   be used! */
 	as_warn (_("lower 16 bits of mask ignored"));
 
-      if (e->X_op == O_constant
-	  && ((e->X_add_number >= 0
-	       && (bfd_vma) e->X_add_number < ((bfd_vma) 1 << 44))
-	      || (e->X_add_number < 0
-		  && (bfd_vma) -e->X_add_number <= ((bfd_vma) 1 << 44))))
+      if (e->X_op == O_constant)
 	{
-	  /* sign-extend */
-	  if (e->X_add_number >= 0
-	      && (e->X_add_number & ((bfd_vma) 1 << 43)) != 0)
+	  if (((e->X_add_number >= 0
+		&& (bfd_vma) e->X_add_number < ((bfd_vma) 1 << 44))
+	       || (e->X_add_number < 0
+		   && (bfd_vma) -e->X_add_number <= ((bfd_vma) 1 << 44))))
 	    {
-	      e->X_add_number |= ~(((bfd_vma) 1 << 44) - 1);
+	      /* sign-extend */
+	      if (e->X_add_number >= 0
+		  && (e->X_add_number & ((bfd_vma) 1 << 43)) != 0)
+		{
+		  e->X_add_number |= ~(((bfd_vma) 1 << 44) - 1);
+		}
+	      return OPERAND_MATCH;
 	    }
-	  return 1;
+	  else
+	    return OPERAND_OUT_OF_RANGE;
 	}
       break;
 
     case IA64_OPND_IMM17:
       /* bit 0 is a don't care (pr0 is hardwired to 1) */
-      if (e->X_op == O_constant
-	  && ((e->X_add_number >= 0
-	       && (bfd_vma) e->X_add_number < ((bfd_vma) 1 << 17))
-	      || (e->X_add_number < 0
-		  && (bfd_vma) -e->X_add_number <= ((bfd_vma) 1 << 17))))
+      if (e->X_op == O_constant)
 	{
-	  /* sign-extend */
-	  if (e->X_add_number >= 0
-	      && (e->X_add_number & ((bfd_vma) 1 << 16)) != 0)
+	  if (((e->X_add_number >= 0
+		&& (bfd_vma) e->X_add_number < ((bfd_vma) 1 << 17))
+	       || (e->X_add_number < 0
+		   && (bfd_vma) -e->X_add_number <= ((bfd_vma) 1 << 17))))
 	    {
-	      e->X_add_number |= ~(((bfd_vma) 1 << 17) - 1);
+	      /* sign-extend */
+	      if (e->X_add_number >= 0
+		  && (e->X_add_number & ((bfd_vma) 1 << 16)) != 0)
+		{
+		  e->X_add_number |= ~(((bfd_vma) 1 << 17) - 1);
+		}
+	      return OPERAND_MATCH;
 	    }
-	  return 1;
+	  else
+	    return OPERAND_OUT_OF_RANGE;
 	}
       break;
 
@@ -4904,18 +5127,18 @@ operand_match (idesc, index, e)
 	  fix->expr = *e;
 	  fix->is_pcrel = 0;
 	  ++CURR_SLOT.num_fixups;
-	  return 1;
+	  return OPERAND_MATCH;
 	}
       else if (e->X_op != O_constant
 	       && ! (e->X_op == O_big && opnd == IA64_OPND_IMM8M1U8))
-	return 0;
+	return OPERAND_MISMATCH;
 
       if (opnd == IA64_OPND_IMM8M1U4)
 	{
 	  /* Zero is not valid for unsigned compares that take an adjusted
 	     constant immediate range.  */
 	  if (e->X_add_number == 0)
-	    return 0;
+	    return OPERAND_OUT_OF_RANGE;
 
 	  /* Sign-extend 32-bit unsigned numbers, so that the following range
 	     checks will work.  */
@@ -4927,7 +5150,7 @@ operand_match (idesc, index, e)
 	  /* Check for 0x100000000.  This is valid because
 	     0x100000000-1 is the same as ((uint32_t) -1).  */
 	  if (val == ((bfd_signed_vma) 1 << 32))
-	    return 1;
+	    return OPERAND_MATCH;
 
 	  val = val - 1;
 	}
@@ -4936,7 +5159,7 @@ operand_match (idesc, index, e)
 	  /* Zero is not valid for unsigned compares that take an adjusted
 	     constant immediate range.  */
 	  if (e->X_add_number == 0)
-	    return 0;
+	    return OPERAND_OUT_OF_RANGE;
 
 	  /* Check for 0x10000000000000000.  */
 	  if (e->X_op == O_big)
@@ -4946,9 +5169,9 @@ operand_match (idesc, index, e)
 		  && generic_bignum[2] == 0
 		  && generic_bignum[3] == 0
 		  && generic_bignum[4] == 1)
-		return 1;
+		return OPERAND_MATCH;
 	      else
-		return 0;
+		return OPERAND_OUT_OF_RANGE;
 	    }
 	  else
 	    val = e->X_add_number - 1;
@@ -4969,17 +5192,22 @@ operand_match (idesc, index, e)
 
       if ((val >= 0 && (bfd_vma) val < ((bfd_vma) 1 << (bits - 1)))
 	  || (val < 0 && (bfd_vma) -val <= ((bfd_vma) 1 << (bits - 1))))
-	return 1;
-      break;
+	return OPERAND_MATCH;
+      else
+	return OPERAND_OUT_OF_RANGE;
 
     case IA64_OPND_INC3:
       /* +/- 1, 4, 8, 16 */
       val = e->X_add_number;
       if (val < 0)
 	val = -val;
-      if (e->X_op == O_constant
-	  && (val == 1 || val == 4 || val == 8 || val == 16))
-	return 1;
+      if (e->X_op == O_constant)
+	{
+	  if ((val == 1 || val == 4 || val == 8 || val == 16))
+	    return OPERAND_MATCH;
+	  else
+	    return OPERAND_OUT_OF_RANGE;
+	}
       break;
 
     case IA64_OPND_TGT25:
@@ -5005,23 +5233,26 @@ operand_match (idesc, index, e)
 	  fix->expr = *e;
 	  fix->is_pcrel = 1;
 	  ++CURR_SLOT.num_fixups;
-	  return 1;
+	  return OPERAND_MATCH;
 	}
     case IA64_OPND_TAG13:
     case IA64_OPND_TAG13b:
       switch (e->X_op)
 	{
 	case O_constant:
-	  return 1;
+	  return OPERAND_MATCH;
 
 	case O_symbol:
 	  fix = CURR_SLOT.fixup + CURR_SLOT.num_fixups;
-	  fix->code = ia64_gen_real_reloc_type (e->X_op_symbol, 0);
+	  /* There are no external relocs for TAG13/TAG13b fields, so we
+	     create a dummy reloc.  This will not live past md_apply_fix3.  */
+	  fix->code = BFD_RELOC_UNUSED;
+	  fix->code = ia64_gen_real_reloc_type (e->X_op_symbol, fix->code);
 	  fix->opnd = idesc->operands[index];
 	  fix->expr = *e;
 	  fix->is_pcrel = 1;
 	  ++CURR_SLOT.num_fixups;
-	  return 1;
+	  return OPERAND_MATCH;
 
 	default:
 	  break;
@@ -5031,7 +5262,7 @@ operand_match (idesc, index, e)
     default:
       break;
     }
-  return 0;
+  return OPERAND_MISMATCH;
 }
 
 static int
@@ -5079,8 +5310,9 @@ parse_operands (idesc)
      struct ia64_opcode *idesc;
 {
   int i = 0, highest_unmatched_operand, num_operands = 0, num_outputs = 0;
-  int sep = 0;
+  int error_pos, out_of_range_pos, curr_out_of_range_pos, sep = 0;
   enum ia64_opnd expected_operand = IA64_OPND_NIL;
+  enum operand_match_result result;
   char mnemonic[129];
   char *first_arg = 0, *end, *saved_input_pointer;
   unsigned int sof;
@@ -5162,6 +5394,8 @@ parse_operands (idesc)
     }
 
   highest_unmatched_operand = 0;
+  curr_out_of_range_pos = -1;
+  error_pos = 0;
   expected_operand = idesc->operands[0];
   for (; idesc; idesc = get_next_opcode (idesc))
     {
@@ -5169,16 +5403,52 @@ parse_operands (idesc)
 	continue;		/* mismatch in # of outputs */
 
       CURR_SLOT.num_fixups = 0;
-      for (i = 0; i < num_operands && idesc->operands[i]; ++i)
-	if (!operand_match (idesc, i, CURR_SLOT.opnd + i))
-	  break;
 
-      if (i != num_operands)
+      /* Try to match all operands.  If we see an out-of-range operand,
+	 then continue trying to match the rest of the operands, since if
+	 the rest match, then this idesc will give the best error message.  */
+
+      out_of_range_pos = -1;
+      for (i = 0; i < num_operands && idesc->operands[i]; ++i)
 	{
-	  if (i > highest_unmatched_operand)
+	  result = operand_match (idesc, i, CURR_SLOT.opnd + i);
+	  if (result != OPERAND_MATCH)
+	    {
+	      if (result != OPERAND_OUT_OF_RANGE)
+		break;
+	      if (out_of_range_pos < 0)
+		/* remember position of the first out-of-range operand: */
+		out_of_range_pos = i;
+	    }
+	}
+
+      /* If we did not match all operands, or if at least one operand was
+	 out-of-range, then this idesc does not match.  Keep track of which
+	 idesc matched the most operands before failing.  If we have two
+	 idescs that failed at the same position, and one had an out-of-range
+	 operand, then prefer the out-of-range operand.  Thus if we have
+	 "add r0=0x1000000,r1" we get an error saying the constant is out
+	 of range instead of an error saying that the constant should have been
+	 a register.  */
+
+      if (i != num_operands || out_of_range_pos >= 0)
+	{
+	  if (i > highest_unmatched_operand
+	      || (i == highest_unmatched_operand
+		  && out_of_range_pos > curr_out_of_range_pos))
 	    {
 	      highest_unmatched_operand = i;
-	      expected_operand = idesc->operands[i];
+	      if (out_of_range_pos >= 0)
+		{
+		  expected_operand = idesc->operands[out_of_range_pos];
+		  error_pos = out_of_range_pos;
+		}
+	      else
+		{
+		  expected_operand = idesc->operands[i];
+		  error_pos = i;
+		}
+	      curr_out_of_range_pos = out_of_range_pos;
 	    }
 	  continue;
 	}
@@ -5193,7 +5463,7 @@ parse_operands (idesc)
     {
       if (expected_operand)
 	as_bad ("Operand %u of `%s' should be %s",
-		highest_unmatched_operand + 1, mnemonic,
+		error_pos + 1, mnemonic,
 		elf64_ia64_operands[expected_operand].desc);
       else
 	as_bad ("Operand mismatch");
@@ -5223,8 +5493,9 @@ errata_nop_necessary_p (slot, insn_unit)
 	    || idesc->operands[i] == IA64_OPND_P2)
 	  {
 	    int regno = slot->opnd[i].X_add_number - REG_P;
+	    /* Ignore invalid operands; they generate errors elsewhere.  */
 	    if (regno >= 64)
-	      abort ();
+	      return 0;
 	    this_group->p_reg_set[regno] = 1;
 	  }
     }
@@ -5239,8 +5510,9 @@ errata_nop_necessary_p (slot, insn_unit)
 	    || idesc->operands[i] == IA64_OPND_R3)
 	  {
 	    int regno = slot->opnd[i].X_add_number - REG_GR;
+	    /* Ignore invalid operands; they generate errors elsewhere.  */
 	    if (regno >= 128)
-	      abort ();
+	      return 0;
 	    if (strncmp (idesc->name, "add", 3) != 0
 		&& strncmp (idesc->name, "sub", 3) != 0
 		&& strncmp (idesc->name, "shladd", 6) != 0
@@ -5270,8 +5542,9 @@ errata_nop_necessary_p (slot, insn_unit)
 	  || idesc->operands[i] == IA64_OPND_MR3)
 	{
 	  int regno = slot->opnd[i].X_add_number - REG_GR;
+	  /* Ignore invalid operands; they generate errors elsewhere.  */
 	  if (regno >= 128)
-	    abort ();
+	    return 0;
 	  if (idesc->operands[i] == IA64_OPND_R3)
 	    {
 	      if (strcmp (idesc->name, "fc") != 0
@@ -5776,6 +6049,7 @@ md_parse_option (c, arg)
      int c;
      char *arg;
 {
+
   switch (c)
     {
     /* Switches from the Intel assembler.  */
@@ -5831,12 +6105,13 @@ md_parse_option (c, arg)
       break;
 
     case 'a':
-      /* ??? Conflicts with gas' listing option.  */
       /* indirect=<tgt>	Assume unannotated indirect branches behavior
 			according to <tgt> --
 			exit:	branch out from the current context (default)
 			labels:	all labels in context may be branch targets
        */
+      if (strncmp (arg, "indirect=", 9) != 0)
+        return 0;
       break;
 
     case 'x':
@@ -6194,16 +6469,32 @@ ia64_target_format ()
       if (md.flags & EF_IA_64_BE)
 	{
 	  if (md.flags & EF_IA_64_ABI64)
+#ifdef TE_AIX50
+	    return "elf64-ia64-aix-big";
+#else
 	    return "elf64-ia64-big";
+#endif
 	  else
+#ifdef TE_AIX50
+	    return "elf32-ia64-aix-big";
+#else
 	    return "elf32-ia64-big";
+#endif
 	}
       else
 	{
 	  if (md.flags & EF_IA_64_ABI64)
+#ifdef TE_AIX50
+	    return "elf64-ia64-aix-little";
+#else
 	    return "elf64-ia64-little";
+#endif
 	  else
+#ifdef TE_AIX50
+	    return "elf32-ia64-aix-little";
+#else
 	    return "elf32-ia64-little";
+#endif
 	}
     }
   else
@@ -9651,16 +9942,15 @@ md_apply_fix3 (fix, valuep, seg)
     }
   if (fix->fx_addsy)
     {
-      switch (fix->fx_r_type)
+      if (fix->fx_r_type == (int) BFD_RELOC_UNUSED)
 	{
-	case 0:
+	  /* This must be a TAG13 or TAG13b operand.  There are no external
+	     relocs defined for them, so we must give an error.  */
 	  as_bad_where (fix->fx_file, fix->fx_line,
 			"%s must have a constant value",
 			elf64_ia64_operands[fix->tc_fix_data.opnd].desc);
-	  break;
-
-	default:
-	  break;
+	  fix->fx_done = 1;
+	  return 1;
 	}
 
       /* ??? This is a hack copied from tc-i386.c to make PCREL relocs
@@ -9787,10 +10077,10 @@ md_section_align (seg, size)
 
 void
 ia64_md_do_align (n, fill, len, max)
-     int n;
-     const char *fill;
+     int n ATTRIBUTE_UNUSED;
+     const char *fill ATTRIBUTE_UNUSED;
      int len ATTRIBUTE_UNUSED;
-     int max;
+     int max ATTRIBUTE_UNUSED;
 {
   if (subseg_text_p (now_seg))
     ia64_flush_insns ();

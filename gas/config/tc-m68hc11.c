@@ -226,6 +226,8 @@ const pseudo_typeS md_pseudo_table[] = {
   {"fdb", cons, 2},
   {"fcc", stringer, 1},
   {"rmb", s_space, 0},
+
+  /* Dwarf2 support for Gcc.  */
   {"file", dwarf2_directive_file, 0},
   {"loc", dwarf2_directive_loc, 0},
 
@@ -286,6 +288,16 @@ int
 m68hc11_mach ()
 {
   return 0;
+}
+
+/* Listing header selected according to cpu.  */
+const char *
+m68hc11_listing_header ()
+{
+  if (current_architecture & cpu6811)
+    return "M68HC11 GAS ";
+  else
+    return "M68HC12 GAS ";
 }
 
 void
@@ -371,7 +383,7 @@ md_parse_option (c, arg)
   get_default_target ();
   switch (c)
     {
-      /* -S means keep external to 2 bits offset rather than 16 bits one.  */
+      /* -S means keep external to 2 bit offset rather than 16 bit one.  */
     case OPTION_SHORT_BRANCHS:
     case 'S':
       flag_fixed_branchs = 1;
@@ -1198,7 +1210,7 @@ check_range (num, mode)
   if (mode & M6812_AUTO_INC_DEC)
     return (num != 0 && num <= 8 && num >= -8);
 
-  /* The 68HC12 supports 5, 9 and 16-bits offsets.  */
+  /* The 68HC12 supports 5, 9 and 16-bit offsets.  */
   if (mode & (M6812_INDEXED_IND | M6812_INDEXED | M6812_OP_IDX))
     mode = M6811_OP_IND16;
 
@@ -1307,7 +1319,7 @@ fixup8 (oper, mode, opmode)
     }
 }
 
-/* Put a 2 bytes expression described by 'oper'.  If this expression contains
+/* Put a 2 byte expression described by 'oper'.  If this expression contains
    unresolved symbols, generate a 16-bit fixup.  */
 static void
 fixup16 (oper, mode, opmode)
@@ -1392,7 +1404,6 @@ build_jump_insn (opcode, operands, nb_operands, jmp_mode)
      int jmp_mode;
 {
   unsigned char code;
-  int insn_size;
   char *f;
   unsigned long n;
 
@@ -1403,7 +1414,6 @@ build_jump_insn (opcode, operands, nb_operands, jmp_mode)
   assert (operands[0].reg1 == REG_NONE && operands[0].reg2 == REG_NONE);
 
   code = opcode->opcode;
-  insn_size = 1;
 
   n = operands[0].exp.X_add_number;
 
@@ -1527,7 +1537,6 @@ build_dbranch_insn (opcode, operands, nb_operands, jmp_mode)
      int jmp_mode;
 {
   unsigned char code;
-  int insn_size;
   char *f;
   unsigned long n;
 
@@ -1538,7 +1547,6 @@ build_dbranch_insn (opcode, operands, nb_operands, jmp_mode)
   assert (operands[0].reg1 != REG_NONE);
 
   code = opcode->opcode & 0x0FF;
-  insn_size = 1;
 
   f = m68hc11_new_insn (1);
   number_to_chars_bigendian (f, code, 1);
@@ -1872,7 +1880,6 @@ build_insn (opcode, operands, nb_operands)
 {
   int i;
   char *f;
-  int insn_size = 1;
   long format;
   int move_insn = 0;
 
@@ -1892,7 +1899,6 @@ build_insn (opcode, operands, nb_operands)
 
       number_to_chars_bigendian (f, page_code, 1);
       f++;
-      insn_size = 2;
     }
   else
     f = m68hc11_new_insn (1);
@@ -1908,13 +1914,13 @@ build_insn (opcode, operands, nb_operands)
       move_insn = 1;
       if (format & M6812_OP_IDX)
 	{
-	  insn_size += build_indexed_byte (&operands[0], format, 1);
+	  build_indexed_byte (&operands[0], format, 1);
 	  i = 1;
 	  format &= ~M6812_OP_IDX;
 	}
       if (format & M6812_OP_IDX_P2)
 	{
-	  insn_size += build_indexed_byte (&operands[1], format, 1);
+	  build_indexed_byte (&operands[1], format, 1);
 	  i = 0;
 	  format &= ~M6812_OP_IDX_P2;
 	}
@@ -1922,7 +1928,6 @@ build_insn (opcode, operands, nb_operands)
 
   if (format & (M6811_OP_DIRECT | M6811_OP_IMM8))
     {
-      insn_size++;
       fixup8 (&operands[i].exp,
 	      format & (M6811_OP_DIRECT | M6811_OP_IMM8 | M6812_OP_TRAP_ID),
 	      operands[i].mode);
@@ -1930,7 +1935,6 @@ build_insn (opcode, operands, nb_operands)
     }
   else if (format & (M6811_OP_IMM16 | M6811_OP_IND16))
     {
-      insn_size += 2;
       fixup16 (&operands[i].exp, format & (M6811_OP_IMM16 | M6811_OP_IND16),
 	       operands[i].mode);
       i++;
@@ -1942,36 +1946,31 @@ build_insn (opcode, operands, nb_operands)
       if ((format & M6811_OP_IY) && (operands[0].reg1 != REG_Y))
 	as_bad (_("Invalid indexed register, expecting register Y."));
 
-      insn_size++;
       fixup8 (&operands[0].exp, M6811_OP_IX, operands[0].mode);
       i = 1;
     }
   else if (format &
 	   (M6812_OP_IDX | M6812_OP_IDX_2 | M6812_OP_IDX_1 | M6812_OP_D_IDX))
     {
-      insn_size += build_indexed_byte (&operands[i], format, move_insn);
+      build_indexed_byte (&operands[i], format, move_insn);
       i++;
     }
   else if (format & M6812_OP_REG && current_architecture & cpu6812)
     {
-      insn_size += build_reg_mode (&operands[i], format);
+      build_reg_mode (&operands[i], format);
       i++;
     }
   if (format & M6811_OP_BITMASK)
     {
-      insn_size++;
       fixup8 (&operands[i].exp, M6811_OP_BITMASK, operands[i].mode);
       i++;
     }
   if (format & M6811_OP_JUMP_REL)
     {
-      insn_size++;
       fixup8 (&operands[i].exp, M6811_OP_JUMP_REL, operands[i].mode);
-      i++;
     }
   else if (format & M6812_OP_IND16_P2)
     {
-      insn_size += 2;
       fixup16 (&operands[1].exp, M6811_OP_IND16, operands[1].mode);
     }
 }
@@ -2288,7 +2287,7 @@ md_assemble (str)
     }
 
   /* Identify a possible instruction alias.  There are some on the
-     68HC12 to emulate a fiew 68HC11 instructions.  */
+     68HC12 to emulate a few 68HC11 instructions.  */
   if (opc == NULL && (current_architecture & cpu6812))
     {
       int i;
@@ -2808,10 +2807,4 @@ md_apply_fix (fixp, valuep)
     }
 
   return 0;
-}
-
-int
-m68hc11_cleanup ()
-{
-  return 1;
 }

@@ -542,6 +542,7 @@ extern const bfd_target bfd_elf32_pj_vec;
 extern const bfd_target bfd_elf32_pjl_vec;
 extern const bfd_target bfd_elf32_powerpc_vec;
 extern const bfd_target bfd_elf32_powerpcle_vec;
+extern const bfd_target bfd_elf32_s390_vec;
 extern const bfd_target bfd_elf32_sh_vec;
 extern const bfd_target bfd_elf32_shblin_vec;
 extern const bfd_target bfd_elf32_shl_vec;
@@ -556,10 +557,13 @@ extern const bfd_target bfd_elf64_big_generic_vec;
 extern const bfd_target bfd_elf64_bigmips_vec;
 extern const bfd_target bfd_elf64_hppa_linux_vec;
 extern const bfd_target bfd_elf64_hppa_vec;
+extern const bfd_target bfd_elf64_ia64_aix_big_vec;
+extern const bfd_target bfd_elf64_ia64_aix_little_vec;
 extern const bfd_target bfd_elf64_ia64_big_vec;
 extern const bfd_target bfd_elf64_ia64_little_vec;
 extern const bfd_target bfd_elf64_little_generic_vec;
 extern const bfd_target bfd_elf64_littlemips_vec;
+extern const bfd_target bfd_elf64_s390_vec;
 extern const bfd_target bfd_elf64_sparc_vec;
 extern const bfd_target bfd_elf64_x86_64_vec;
 extern const bfd_target bfd_powerpc_pe_vec;
@@ -622,6 +626,7 @@ extern const bfd_target nlm32_sparc_vec;
 extern const bfd_target oasys_vec;
 extern const bfd_target pc532machaout_vec;
 extern const bfd_target pc532netbsd_vec;
+extern const bfd_target pdp11_aout_vec;
 extern const bfd_target pmac_xcoff_vec;
 extern const bfd_target ppcboot_vec;
 extern const bfd_target riscix_vec;
@@ -682,7 +687,7 @@ extern const bfd_target sco5_core_vec;
 extern const bfd_target trad_core_vec;
 extern const bfd_target ptrace_core_vec;
 
-const bfd_target * const bfd_target_vector[] = {
+static const bfd_target * const _bfd_target_vector[] = {
 
 #ifdef SELECT_VECS
 
@@ -722,6 +727,8 @@ const bfd_target * const bfd_target_vector[] = {
 	&bfd_elf64_alpha_vec,
 	&bfd_elf64_hppa_vec,
 	&bfd_elf64_hppa_linux_vec,
+	&bfd_elf64_ia64_aix_little_vec,
+	&bfd_elf64_ia64_aix_big_vec,
 	&bfd_elf64_ia64_little_vec,
 	&bfd_elf64_ia64_big_vec,
 #endif
@@ -882,6 +889,7 @@ const bfd_target * const bfd_target_vector[] = {
 	&oasys_vec,
 #endif
 	&pc532machaout_vec,
+	&pdp11_aout_vec,
 #if 0
 	/* We have no way of distinguishing these from other a.out variants */
 	&aout_arm_big_vec,
@@ -925,7 +933,10 @@ const bfd_target * const bfd_target_vector[] = {
 	&vms_vax_vec,
 	&we32kcoff_vec,
 	&z8kcoff_vec,
-
+        &bfd_elf32_s390_vec, 
+#ifdef BFD64
+        &bfd_elf64_s390_vec,
+#endif
 #endif /* not SELECT_VECS */
 
 /* Always support S-records, for convenience.  */
@@ -971,6 +982,7 @@ const bfd_target * const bfd_target_vector[] = {
 
 	NULL /* end of list marker */
 };
+const bfd_target * const *bfd_target_vector = _bfd_target_vector;
 
 /* bfd_default_vector[0] contains either the address of the default vector,
    if there is one, or zero if there isn't.  */

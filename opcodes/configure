@@ -777,7 +777,7 @@ fi
 # We currently only use the version number for the name of any shared
 # library.  For user convenience, we always use the same version
 # number that BFD is using.
-BFD_VERSION=`grep INIT_AUTOMAKE ${srcdir}/../bfd/configure.in | sed -n -e 's/[ 	]//g' -e 's/^.*,\(.*\)).*$/\1/p'`
+BFD_VERSION=`sed -n -e 's/^.._INIT_AUTOMAKE.*,[ 	]*\([^ 	]*\)[ 	]*).*/\1/p' < ${srcdir}/../bfd/configure.in`
 
 # Find a good install program.  We prefer a C program (faster),
 # so one script is as good as another.  But avoid the broken or
@@ -4542,12 +4542,14 @@ if test x${all_targets} = xfalse ; then
 	bfd_mn10200_arch)	ta="$ta m10200-dis.lo m10200-opc.lo" ;;
 	bfd_mn10300_arch)	ta="$ta m10300-dis.lo m10300-opc.lo" ;;
 	bfd_ns32k_arch)		ta="$ta ns32k-dis.lo" ;;
+	bfd_pdp11_arch)		ta="$ta pdp11-dis.lo pdp11-opc.lo" ;;
 	bfd_pj_arch)	        ta="$ta pj-dis.lo pj-opc.lo" ;;
 	bfd_powerpc_arch)	ta="$ta ppc-dis.lo ppc-opc.lo" ;;
 	bfd_pyramid_arch)	;;
+	bfd_powerpc_64_arch)	ta="$ta ppc-dis.lo ppc-opc.lo" ;;
 	bfd_romp_arch)		;;
 	bfd_rs6000_arch)	ta="$ta ppc-dis.lo ppc-opc.lo" ;;
-	bfd_powerpc_64_arch)	ta="$ta ppc-dis.lo ppc-opc.lo" ;;
+	bfd_s390_arch)		ta="$ta s390-dis.lo s390-opc.lo" ;;
 	bfd_sh_arch)
 				ta="$ta sh-dis.lo" ;;
 	bfd_sparc_arch)		ta="$ta sparc-dis.lo sparc-opc.lo" ;;

@@ -76,3 +76,14 @@ one of the above lists (blanket write or maintainers).
 [It's a huge list, folks.  You know who you are.  If you have the
  *ability* to do binutils checkins, you're in this group.  Just remember
  to get approval before checking anything in.]
+
+	       -------------  Obvious Fixes -------------
+
+Fixes for obvious mistakes do not need approval, and can be checked in
+right away, but the patch should still be sent to the binutils list.
+The definition of obvious is a bit hazy, and if you are not sure, then
+you should seek approval first.  Obvious fixes include fixes for
+spelling mistakes, blatantly incorrect code (where the correct code is
+also blatantly obvious), and so on.  Obvious fixes should always be
+small, the larger they are, the more likely it is that they contain
+some un-obvious side effect or consequence.

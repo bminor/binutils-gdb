@@ -1,7 +1,289 @@
+2001-02-28  Andreas Jaeger  <aj@suse.de>, Bo Thorsen  <bo@suse.de>
+
+	* config/tc-i386.c (tc_gen_reloc): Remove ugly hack which is not needed
+	anymore since we use bfd_elf_generic_reloc now.
+	(md_apply_fix3): Only apply hack for partial_inplace if not using RELA.
+
+2001-02-27  Alan Modra  <alan@linuxcare.com.au>
+
+	* configure.in (BFD_VERSION): New.
+	(AM_INIT_AUTOMAKE): Use $BFD_VERSION.
+	* configure: Regenerate.
+	* Makefile.am: Run "make dep-am"
+	* Makefile.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+
+2001-02-26  Mark Elbrecht  <snowball3@bigfoot.com>
+
+	* config/obj-coff.c [BFD_ASSEMBLER] (obj_coff_section): Set
+	SEC_NEVER_LOAD when the 'n' flag is used.
+	Add SEC_NEVER_LOAD to matchflags.
+
+2001-02-24  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* symbols.c (decode_local_label_name): Initialize message_format
+	only when an error is reported (perf pb due to I18N).
+
+2001-02-23  H.J. Lu  <hjl@gnu.org>
+
+	* dwarf2dbg.c (dwarf2_directive_file): Call s_app_file (0) if
+	BFD_ASSEMBLER is not defined.
+
+2001-02-23   Richard Sandiford <rsandifo@redhat.com>
+
+	* config/tc-mn10300.c (md_apply_fix3): Don't mark a fixup as
+	done if it's against a symbol.
+
+2001-02-22  Timothy Wall  <twall@cygnus.com>
+
+	* config/tc-ia64.c (ia64_target_format): Return ia64-aix-specific
+	target formats if applicable.
+	* config/te-ia64aix.h: New.  Configuration for AIX5 on IA-64.
+	* Makefile.am (TARG_ENV_HFILES): Added config/te-ia64aix.h.
+	* Makefile.in: Regenerated.
+	* configure.in: Added configuration for ia64-*-aix*.
+	* configure: Regenerated.
+
+2001-02-21  David Mosberger  <davidm@hpl.hp.com>
+
+	* config/tc-ia64.c (enum operand_match_result): New type.
+	(operand_match): Change return type to operand_match_result.
+	Fix all returns appropriately, adding support for returning the
+	out-of-range result.
+	(parse_operands): New locals result, error_pos, out_of_range_pos,
+	curr_out_of_range_pos.  Rewrite operand matching loop to give better
+	error messages.
+
+2001-02-21  David Mosberger  <davidm@hpl.hp.com>
+
+	* config/tc-ia64.c (struct unwind): Add member "prologue_count".
+	(dot_proc): Clear unwind.prologue_count to zero.
+	(dot_prologue): Increment unwind.prologue_count.
+	(dot_restore): If second operand is omitted, use
+	unwind.prologue_count -1 for "ecount" (# of additional regions to
+	pop).  Decrement unwind.prologue_count by number of regions
+	popped.
+
+2001-02-21  Nick Clifton  <nickc@redhat.com>
+
+	* doc/as.texinfo (Section): Note that some flags to the COFF
+	version of .section remove attributes rather than setting them.
+
+2001-02-20  Kazu Hirata  <kazu@hxi.com>
+
+	* tc-pdp11.c: Fix formatting.
+	* tc-pdp11.h: Likewise.
+
+2001-02-20  Bo Thorsen  <bo@suse.de>
+
+	* config/tc-i386.c (tc_i386_fix_adjustable): Fix GOTPCREL GOT
+	entry.
+
+2001-02-18  David O'Brien  <obrien@FreeBSD.org>
+
+	* configure.in (cpu_type, arch): Add a generic FreeBSD specification as
+	all FreeBSD platforms should look the same at this level.
+	* configure: Rebuilt.
+	* config/tc-i386.c: Add support for old FreeBSD a.out hosts.
+
+2001-02-18  lars brinkhoff  <lars@nocrew.org>
+
+	* Makefile.am: Add PDP-11 target.
+	* configure.in: Likewise.
+	* config/tc-pdp11.c: New file.
+	* config/tc-pdp11.h: New file.
+	* doc/Makefile.am: Add PDP-11 documentation.
+	* doc/all.texi: Likewise.
+	* doc/as.texinfo: Likewise.
+	* doc/c-pdp11.texi: New file.
+
+2001-02-16  matthew green  <mrg@redhat.com>
+
+	* gas/cgen.c (gas_cgen_md_apply_fix3): Support BFD_RELOC_64.
+
+2001-02-13  Jim Wilson  <wilson@redhat.com>
+
+	* config/tc-ia64.c (operand_match, case TAG13): Make a BFD_RELOC_UNUSED
+	reloc instead of a 0 reloc.
+	(md_apply_fix3): Check for BFD_RELOC_UNUSED instead of 0, and mark it
+	as done.
+	* config/tc-ia64.h (TC_RELOC_RTSYM_LOC_FIXUP): Likewise.
+
+2001-02-13  Ian Lance Taylor  <ian@zembu.com>
+
+	* write.c (is_dnrange): Stop as soon as the address becomes
+	larger.
+	(relax_frag): Add segment parameter.  Only call symbol_get_frag
+	once.  Only call is_dnrange if the symbol is in the same segment,
+	and the symbol address is larger.
+	(relax_segment): Pass segment to md_relax_frag and relax_frag.
+	* write.h (relax_frag): Update declaration.
+	* config/tc-fr30.c (fr30_relax_frag): Add segment parameter.  Pass
+	it to relax_frag.
+	* config/tc-m32r.c (m32r_relax_frag): Likewise.
+	* config/tc-m32r.h (md_relax_frag): Add segment parameter.
+	(m32r_relax_frag): Update declaration.
+	* config/tc-mips.h (md_relax_frag): Add segment parameter.
+	* config/tc-tic54x.h (md_relax_frag): Likewise.
+	* doc/internals.texi (CPU backend): Update documentation for
+	md_relax_frag.
+
+2001-02-13  Alan Modra  <alan@linuxcare.com.au>
+
+	* doc/c-i386.texi (i386-Arch): Add "jumps"/"nojumps" blurb.
+	Mention effect of < 386 architectures on jump promotion.
+	(i386-Jumps): xref above.  Don't assume long disp is 32 bits.
+
+	* config/tc-i386.c (no_cond_jump_promotion): New.
+	(set_cpu_arch): Parse "jumps" arch modifier.
+	(insn_size): Modify usage comment.
+	(ENCODE_RELAX_STATE): Reformat and protect macro arg.
+	(SIZE_FROM_RELAX_STATE): Rename to DISP_SIZE_FROM_RELAX_STATE.
+	(TYPE_FROM_RELAX_STATE): New define.
+	(UNCOND_JUMP, COND_JUMP): Renumber.
+	(md_relax_table): Reorder to suit.
+	(COND_JUMP86): New define.
+	(md_relax_table): Handle COND_JUMP86 cases. Add a few comments.
+	(md_assemble): Create frag var for jumps of max size, encode relax
+	state for COND_JUMP86.
+	(md_estimate_size_before_relax): Handle COND_JUMP86 cases, and
+	leave conditional jumps small if no_cond_jump_promotion.
+	(md_convert_frag): Likewise.
+
+	* expr.c (operator): Don't bump input_line_pointer for two char
+	operators.  Instead return operator size via new param num_chars.
+	(expr): Use above to parse multi-char operators correctly.
+
+Mon Feb 12 17:45:50 CET 2001  Jan Hubicka  <jh@suse.cz>
+
+	* tc-i386.c (i386_displacement): Fix handling of
+	BFD_RELOC_X86_64_GOTPCREL.
+	(i386_validate_fix): Likewise.
+
+2001-02-12  Philip Blundell  <pb@futuretv.com>
+
+	* config/tc-arm.c (do_ldst): Improve warnings for unpredictable
+	ldrt/strt instructions.
+
+2001-02-11  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
+
+	* config/tc-mips.c (macro): For M_LA_AB emit a
+	BFD_RELOC_MIPS_CALL16 relocation or a
+	BFD_RELOC_MIPS_CALL_HI16/BFD_RELOC_MIPS_CALL_LO16 pair instead of
+	BFD_RELOC_MIPS_GOT16 and
+	BFD_RELOC_MIPS_GOT_HI16/BFD_RELOC_MIPS_GOT_LO16, respectively for
+	loading the jump register when generating SVR4_PIC code.
+
+2001-02-10  Chris Demetriou  <cgd@broadcom.com>
+
+	* configure.in: Make 'mipself' and 'mipsecoff' emulations
+	map to MIPS-specific files, as they used to do before the
+	change on 2000-05-21.
+	* configure: Regerate.
+
+2001-02-10  Chris Demetriou  <cgd@broadcom.com>
+
+	* config/tc-mips.c (md_parse_option): Don't try to compile
+	ELF-only option code if not ELF.
+
+2001-02-08  David Mosberger  <davidm@hpl.hp.com>
+
+	* config/tc-ia64.h (md_elf_section_type): New macro.
+	(ELF_TC_SPECIAL_SECTIONS): Drop .IA_64.unwind and .IA_64.unwind_info
+	(they're now handled via ia64_elf_section_type.
+
+	* config/tc-ia64.c (unwind): New members saved_text_seg,
+	saved_text_subseg, and force_unwind_entry.
+	(optimize_unw_records): New function to optimize away unnecessary
+	unwind directives.
+	(ia64_elf_section_type): New function.
+	(output_unw_records): Generate unwind info only if the size is
+	non-zero or if it's forced for some other reason (e.g.,
+	handlerdata or a personality routine).
+	(generate_unwind_image): Don't switch back to previous
+	section---stay inside the unwind info section instead so that
+	handlerdata that may follow goes into the right place.
+	(dot_handlerdata): Force generation of unwind entry and save the
+	current active text segment before generating unwind image.
+	(dot_unwentry): Force generation of unwind entry.
+	(dot_personality): Ditto.
+	(dot_endp): Generate unwind table entry only if there is
+	some unwind info or the unwind entry was forced.
+
+	* config/tc-ia64.c (make_unw_section_name): New macro to form
+	unwind section name.
+	(generate_unwind_image): Add "text_name" argument.  Use it to
+	form unwind section name.
+	(dot_handlerdata): Determine current segment (section) name and
+	pass it to generate_unwind_image().
+	(dot_endp): Determine current segment (section) name and use
+	it to determine the appropriate unwind section name.
+	(ia64_md_do_align): Add missing ATTRIBUTE_UNUSED declarations to
+	n, fill, and max arguments.
+
+2001-02-09  Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* Makefile.am: Add linux target for S/390.
+	* configure.in: Likewise.
+	* config/tc-s390.c: New file.
+	* config/tc-s390.h: New file.
+
+2001-02-09  Alexandre Oliva  <aoliva@redhat.com>
+
+	* config/tc-sh.c (md_pseudo_table): Add uaquad.  Use s_uacons for
+	2byte, 4byte and 8byte.
+
+2001-02-08  Alan Modra   <alan@linuxcare.com.au>
+
+	* config/tc-hppa.c (pa_build_unwind_subspace): Don't call
+	md_number_to_chars with size > sizeof (valueT).
+
+2001-02-06  H.J. Lu  <hjl@gnu.org>
+
+	* config/tc-ia64.h (TC_RELOC_RTSYM_LOC_FIXUP): Do fixup if
+	there is no relocation.
+
+2001-02-06  H.J. Lu  <hjl@gnu.org>
+
+	* config/tc-ia64.h (TC_RELOC_RTSYM_LOC_FIXUP): New. Defined.
+
+	* config/tc-ia64.c (md_parse_option): Only accept the valid
+	ia64 options on "-axxx".
+
+2001-02-05  Jim Wilson  <wilson@redhat.com>
+
+	* config/tc-ia64.c (errata_nop_necessary_p): Return 0 instead of
+	aborting for invalid operands.
+
+2001-02-06  Alan Modra  <alan@linuxcare.com.au>
+
+	* config/tc-hppa.c (fix_new_hppa): Pass in unwind directly rather
+	than via pointer.  Update all callers.
+	(UNWIND_LOW32): Define.
+	(UNWIND_HIGH32): Define.
+	(pa_build_unwind_subspace): Use the above macros instead of dumping
+	bitfields directly.  Call frag_more once rather than multiple times.
+	(md_assemble): Use UNWIND_LOW32.
+	(pa_entry): Likewise
+	(pa_procend): Likewise.
+	(process_exit): Use UNWIND_HIGH32.
+
+2001-02-04  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
+
+	* config/tc-m68hc11.h (LISTING_HEADER): Use m68hc11_listing_header
+	function to select the header according to the cpu.
+	(md_after_pass_hook, md_do_align): Remove.
+	(md_cleanup, m68hc11_cleanup): Remove.
+	(md_pcrel_from_section): Declare.
+	* config/tc-m68hc11.c (build_dbranch_insn): Remove insn_size.
+	(build_jump_insn, build_insn): Likewise.
+	(m68hc11_listing_header): New function.
+	(m68hc11_cleanup): Remove.
+
 2001-02-02  Stephane Carrez  <Stephane.Carrez@worldnet.fr>
 
 	* config/tc-m68hc11.c (relaxable_symbol): Relax externally visible
-	symbols because there is no support for shared libraries and these 
+	symbols because there is no support for shared libraries and these
 	symbols can't be overridden (unless they are weak).
 
 2001-02-01  Momchil Velikov  <velco@fadata.bg>
@@ -20,7 +302,7 @@
 	still set.  Issue an error message instead.
 	(md_estimate_size_before_relax): Delete unused variable
 	'buffer_address'.  Fixup parentheses around if statement.
-	
+
 2001-01-23  Kazu Hirata  <kazu@hxi.com>
 
 	* as.c: Fix formatting.

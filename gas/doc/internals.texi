@@ -1166,9 +1166,10 @@ relocations.
 
 @item md_relax_frag
 @cindex md_relax_frag
-This macro may be defined to relax a frag.  GAS will call this with the frag
-and the change in size of all previous frags; @code{md_relax_frag} should
-return the change in size of the frag.  @xref{Relaxation}.
+This macro may be defined to relax a frag.  GAS will call this with the
+segment, the frag, and the change in size of all previous frags;
+@code{md_relax_frag} should return the change in size of the frag.
+@xref{Relaxation}.
 
 @item TC_GENERIC_RELAX_TABLE
 @cindex TC_GENERIC_RELAX_TABLE

@@ -2108,6 +2108,13 @@ ENUMDOC
   ns32k relocations
 
 ENUM
+  BFD_RELOC_PDP11_DISP_8_PCREL
+ENUMX
+  BFD_RELOC_PDP11_DISP_6_PCREL
+ENUMDOC
+  PDP11 relocations
+
+ENUM
   BFD_RELOC_PJ_CODE_HI16
 ENUMX
   BFD_RELOC_PJ_CODE_LO16
@@ -2735,6 +2742,75 @@ ENUMDOC
   This is a 32 bit reloc for the AVR that stores 23 bit value
   into 22 bits.
 
+ENUM
+  BFD_RELOC_390_12
+ENUMDOC
+   Direct 12 bit.
+ENUM
+  BFD_RELOC_390_GOT12
+ENUMDOC
+  12 bit GOT offset.
+ENUM
+  BFD_RELOC_390_PLT32
+ENUMDOC
+  32 bit PC relative PLT address.
+ENUM
+  BFD_RELOC_390_COPY
+ENUMDOC
+  Copy symbol at runtime.
+ENUM
+  BFD_RELOC_390_GLOB_DAT
+ENUMDOC
+  Create GOT entry.
+ENUM
+  BFD_RELOC_390_JMP_SLOT
+ENUMDOC
+  Create PLT entry.
+ENUM
+  BFD_RELOC_390_RELATIVE
+ENUMDOC
+  Adjust by program base.
+ENUM
+  BFD_RELOC_390_GOTPC
+ENUMDOC
+  32 bit PC relative offset to GOT.
+ENUM
+  BFD_RELOC_390_GOT16
+ENUMDOC
+  16 bit GOT offset.
+ENUM
+  BFD_RELOC_390_PC16DBL
+ENUMDOC
+  PC relative 16 bit shifted by 1.
+ENUM
+  BFD_RELOC_390_PLT16DBL
+ENUMDOC
+  16 bit PC rel. PLT shifted by 1.
+ENUM
+  BFD_RELOC_390_PC32DBL
+ENUMDOC
+  PC relative 32 bit shifted by 1.
+ENUM
+  BFD_RELOC_390_PLT32DBL
+ENUMDOC
+  32 bit PC rel. PLT shifted by 1.
+ENUM
+  BFD_RELOC_390_GOTPCDBL
+ENUMDOC
+  32 bit PC rel. GOT shifted by 1.
+ENUM
+  BFD_RELOC_390_GOT64
+ENUMDOC
+  64 bit GOT offset.
+ENUM
+  BFD_RELOC_390_PLT64
+ENUMDOC
+  64 bit PC relative PLT address.
+ENUM
+  BFD_RELOC_390_GOTENT
+ENUMDOC
+  32 bit rel. offset to GOT entry.
+                  
 ENUM
   BFD_RELOC_VTABLE_INHERIT
 ENUMX

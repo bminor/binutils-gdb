@@ -108,7 +108,7 @@ extern void tic54x_start_line_hook ();
 tic54x_estimate_size_before_relax(f,s)
 extern int tic54x_estimate_size_before_relax(fragS *, segT);
 
-#define md_relax_frag(f,s) tic54x_relax_frag(f,s)
+#define md_relax_frag(seg, f,s) tic54x_relax_frag(f,s)
 extern int tic54x_relax_frag(fragS *, long);
 
 #define md_convert_frag(b,s,f)	tic54x_convert_frag(b,s,f)

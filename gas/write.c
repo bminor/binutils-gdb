@@ -1998,21 +1998,30 @@ write_object_file ()
 static int is_dnrange PARAMS ((fragS *, fragS *));
 
 /* Subroutines of relax_segment.  */
+
 static int
 is_dnrange (f1, f2)
      fragS *f1;
      fragS *f2;
 {
+  addressT f2addr;
+
+  f2addr = f2->fr_address;
   for (; f1; f1 = f1->fr_next)
-    if (f1->fr_next == f2)
-      return 1;
+    {
+      if (f1->fr_next == f2)
+	return 1;
+      if (f1->fr_address > f2addr)
+	break;
+    }
   return 0;
 }
 
 /* Relax a fragment by scanning TC_GENERIC_RELAX_TABLE.  */
 
 long
-relax_frag (fragP, stretch)
+relax_frag (segment, fragP, stretch)
+     segT segment;
      fragS *fragP;
      long stretch;
 {
@@ -2034,6 +2043,10 @@ relax_frag (fragP, stretch)
 
   if (symbolP)
     {
+      fragS *sym_frag;
+
+      sym_frag = symbol_get_frag (symbolP);
+
 #ifndef DIFF_EXPR_OK
 #if !defined (MANY_SEGMENTS) && !defined (BFD_ASSEMBLER)
       know ((S_GET_SEGMENT (symbolP) == SEG_ABSOLUTE)
@@ -2041,23 +2054,24 @@ relax_frag (fragP, stretch)
 	    || (S_GET_SEGMENT (symbolP) == SEG_BSS)
 	    || (S_GET_SEGMENT (symbolP) == SEG_TEXT));
 #endif
-      know (symbolP->sy_frag);
+      know (sym_frag != NULL);
 #endif
       know (!(S_GET_SEGMENT (symbolP) == absolute_section)
-	    || symbolP->sy_frag == &zero_address_frag);
-      target += S_GET_VALUE (symbolP) + symbol_get_frag (symbolP)->fr_address;
+	    || sym_frag == &zero_address_frag);
+      target += S_GET_VALUE (symbolP) + sym_frag->fr_address;
 
       /* If frag has yet to be reached on this pass,
 	 assume it will move by STRETCH just as we did.
 	 If this is not so, it will be because some frag
 	 between grows, and that will force another pass.
 
-	 Beware zero-length frags.
+	 Beware zero-length frags.  */
 
-	 There should be a faster way to do this.  */
-
-      if (symbol_get_frag (symbolP)->fr_address >= was_address
-	  && is_dnrange (fragP, symbol_get_frag (symbolP)))
+      if (stretch != 0
+	  && S_GET_SEGMENT (symbolP) == segment
+	  && (sym_frag->fr_address > was_address
+	      || (sym_frag->fr_address == was_address
+		  && is_dnrange (fragP, sym_frag))))
 	{
 	  target += stretch;
 	}
@@ -2413,12 +2427,12 @@ relax_segment (segment_frag_root, segment)
 
 	      case rs_machine_dependent:
 #ifdef md_relax_frag
-		growth = md_relax_frag (fragP, stretch);
+		growth = md_relax_frag (segment, fragP, stretch);
 #else
 #ifdef TC_GENERIC_RELAX_TABLE
 		/* The default way to relax a frag is to look through
 		   TC_GENERIC_RELAX_TABLE.  */
-		growth = relax_frag (fragP, stretch);
+		growth = relax_frag (segment, fragP, stretch);
 #endif /* TC_GENERIC_RELAX_TABLE  */
 #endif
 		break;
