@@ -1,3 +1,9 @@
+2003-03-03  Andrew Cagney  <cagney@redhat.com>
+
+	* stabs.texinfo (Structures): Use @samp and separate @var's
+	instead of a single @var containing a comma separated list.
+	(Unions): Ditto.
+
 2003-03-02  Daniel Jacobowitz  <drow@mvista.com>
 
 	* Makefile.in (distclean): Remove config.log.
