@@ -1,3 +1,7 @@
+2002-01-02  GDB Administrator  <gdbadmin@sources.redhat.com>
+
+	* version.in: Bump version to 5.1.0.1.
+
 2001-11-18  GDB Administrator  <gdbadmin@sourceware.cygnus.com>
 
 	* version.in: Bump version to 5.1.
