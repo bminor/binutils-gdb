@@ -1031,7 +1031,10 @@ static const bfd_target * const _bfd_target_vector[] = {
 	&sparclynx_coff_vec,
 	&sparcnetbsd_vec,
 	&sunos_big_vec,
+#if 0
+	/* bfd_sym_object_p is broken.  */
 	&sym_vec,
+#endif
 	&tic30_aout_vec,
 	&tic30_coff_vec,
 	&tic54x_coff0_beh_vec,
