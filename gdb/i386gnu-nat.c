@@ -267,14 +267,14 @@ gnu_store_registers (int regno)
 
 	  for (i = 0; i < I386_NUM_GREGS; i++)
 	    if (regcache_valid_p (regcache, i))
-	      regcache_raw_supply (regcache, i, REG_ADDR (state, i));
+	      regcache_raw_collect (regcache, i, REG_ADDR (state, i));
 	}
       else
 	{
 	  proc_debug (thread, "storing register %s", REGISTER_NAME (regno));
 
 	  gdb_assert (regcache_valid_p (regcache, regno));
-	  regcache_raw_supply (regcache, regno, REG_ADDR (state, regno));
+	  regcache_craw_collect (regcache, regno, REG_ADDR (state, regno));
 	}
 
       /* Restore the T bit.  */
