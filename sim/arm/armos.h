@@ -93,3 +93,5 @@
 
 extern unsigned long fpecode[];
 extern unsigned long fpesize;
+
+extern int SWI_vector_installed;

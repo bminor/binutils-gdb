@@ -114,8 +114,6 @@ ARMul_Debug (ARMul_State * state ATTRIBUTE_UNUSED, ARMword pc ATTRIBUTE_UNUSED, 
   return 0;
 }
 
-int SWI_vector_installed = FALSE;
-
 int
 sim_write (sd, addr, buffer, size)
      SIM_DESC sd ATTRIBUTE_UNUSED;
@@ -126,9 +124,6 @@ sim_write (sd, addr, buffer, size)
   int i;
 
   init ();
-
-  if ((addr <= 0x8) && ((addr + size) >= 0x8))
-    SWI_vector_installed = TRUE;
 
   for (i = 0; i < size; i++)
     ARMul_WriteByte (state, addr + i, buffer[i]);

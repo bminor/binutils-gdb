@@ -171,6 +171,8 @@ ARMul_OSInit (ARMul_State * state)
   for (i = ARMul_ResetV; i <= ARMFIQV; i += 4)
     ARMul_WriteWord (state, i, instr);	/* write hardware vectors */
   
+  SWI_vector_installed = 0;
+
   for (i = ARMul_ResetV; i <= ARMFIQV + 4; i += 4)
     {
       ARMul_WriteWord (state, ADDRSOFTVECTORS + i, SOFTVECTORCODE + i * 4);
@@ -628,8 +630,6 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
     default:
       {
 	/* If there is a SWI vector installed use it.  */
-	extern int SWI_vector_installed;
-
 	if (state->is_XScale && saved_number != -1)
 	  number = saved_number;
 	    

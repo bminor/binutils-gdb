@@ -49,6 +49,8 @@ defined to generate aborts. */
 #define PAGEBITS 16
 #define OFFSETBITS 0xffff
 
+int SWI_vector_installed = FALSE;
+
 /***************************************************************************\
 *        Get a Word from Virtual Memory, maybe allocating the page          *
 \***************************************************************************/
@@ -110,6 +112,9 @@ PutWord (ARMul_State * state, ARMword address, ARMword data)
 
       *(pagetable + page) = pageptr;
     }
+
+  if (address == 0x8)
+    SWI_vector_installed = TRUE;
 
   *(pageptr + offset) = data;
 }

@@ -1,3 +1,12 @@
+2001-01-31  Nick Clifton  <nickc@redhat.com>
+
+	* armvirt.c (PutWord): Detect installation of SWI vector.
+	(SWI_vector_installed): Define.
+	* armos.c (ARMul_OsInit): Reset SWI_vector_installed.
+	* armos.h (SWI_vector_installed): Declare.
+	* wrapper.c (SWI_vector_installed): Remove definition.
+	(sim_write): Remove check of SWI vector	installation
+
 2000-12-18  Nick Clifton  <nickc@redhat.com>
 
 	* armemu.c (ARMul_Emulate26): Fix test for StoreDouble
