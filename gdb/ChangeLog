@@ -1,3 +1,15 @@
+2003-05-08  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbarch.sh: Add comments on MAX_REGISTER_SIZE.
+	* gdbarch.h: Re-generate.
+	* defs.h (MAX_REGISTER_VIRTUAL_SIZE): Delete macro.
+	(legacy_max_register_virtual_size): Delete declaration.
+	* infcmd.c (default_print_registers_info): Use MAX_REGISTER_SIZE.
+	* d10v-tdep.c (d10v_print_registers_info): Ditto.
+	* tracepoint.c (memrange_sortmerge): Ditto.
+	* sparc-tdep.c (sparc_print_registers): Ditto.
+	* regcache.c (legacy_max_register_virtual_size): Delete function.
+
 2002-05-08  J. Brobecker  <brobecker@gnat.com>
 
 	* fork-child.c (escape_bang_in_quoted_argument): New function.

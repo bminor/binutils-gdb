@@ -480,30 +480,22 @@ v::REGISTER_BYTES:int:register_bytes
 # migration process - old code, calling REGISTER_BYTE, doesn't need to
 # be modified.
 F::REGISTER_BYTE:int:register_byte:int reg_nr:reg_nr::generic_register_byte:generic_register_byte
-# The methods REGISTER_VIRTUAL_TYPE, MAX_REGISTER_RAW_SIZE,
-# MAX_REGISTER_VIRTUAL_SIZE, MAX_REGISTER_RAW_SIZE,
-# REGISTER_VIRTUAL_SIZE and REGISTER_RAW_SIZE are all being replaced
-# by REGISTER_TYPE.
+# The methods REGISTER_VIRTUAL_TYPE, REGISTER_VIRTUAL_SIZE and
+# REGISTER_RAW_SIZE are all being replaced by REGISTER_TYPE.
 f:2:REGISTER_RAW_SIZE:int:register_raw_size:int reg_nr:reg_nr::generic_register_size:generic_register_size::0
-# The methods REGISTER_VIRTUAL_TYPE, MAX_REGISTER_RAW_SIZE,
-# MAX_REGISTER_VIRTUAL_SIZE, MAX_REGISTER_RAW_SIZE,
-# REGISTER_VIRTUAL_SIZE and REGISTER_RAW_SIZE are all being replaced
-# by REGISTER_TYPE.
+# The methods DEPRECATED_MAX_REGISTER_RAW_SIZE, MAX_REGISTER_RAW_SIZE,
+# DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE, and MAX_REGISTER_VIRTUAL_SIZE
+# are all being replaced by MAX_REGISTER_SIZE (a constant).
 V:2:DEPRECATED_MAX_REGISTER_RAW_SIZE:int:deprecated_max_register_raw_size
-# The methods REGISTER_VIRTUAL_TYPE, MAX_REGISTER_RAW_SIZE,
-# MAX_REGISTER_VIRTUAL_SIZE, MAX_REGISTER_RAW_SIZE,
-# REGISTER_VIRTUAL_SIZE and REGISTER_RAW_SIZE are all being replaced
-# by REGISTER_TYPE.
+# The methods REGISTER_VIRTUAL_TYPE, REGISTER_VIRTUAL_SIZE and
+# REGISTER_RAW_SIZE are all being replaced by REGISTER_TYPE.
 f:2:REGISTER_VIRTUAL_SIZE:int:register_virtual_size:int reg_nr:reg_nr::generic_register_size:generic_register_size::0
-# The methods REGISTER_VIRTUAL_TYPE, MAX_REGISTER_RAW_SIZE,
-# MAX_REGISTER_VIRTUAL_SIZE, MAX_REGISTER_RAW_SIZE,
-# REGISTER_VIRTUAL_SIZE and REGISTER_RAW_SIZE are all being replaced
-# by REGISTER_TYPE.
+# The methods DEPRECATED_MAX_REGISTER_RAW_SIZE, MAX_REGISTER_RAW_SIZE,
+# DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE, and MAX_REGISTER_VIRTUAL_SIZE
+# are all being replaced by MAX_REGISTER_SIZE (a constant).
 V:2:DEPRECATED_MAX_REGISTER_VIRTUAL_SIZE:int:deprecated_max_register_virtual_size
-# The methods REGISTER_VIRTUAL_TYPE, MAX_REGISTER_RAW_SIZE,
-# MAX_REGISTER_VIRTUAL_SIZE, MAX_REGISTER_RAW_SIZE,
-# REGISTER_VIRTUAL_SIZE and REGISTER_RAW_SIZE have all being replaced
-# by REGISTER_TYPE.
+# The methods REGISTER_VIRTUAL_TYPE, REGISTER_VIRTUAL_SIZE and
+# REGISTER_RAW_SIZE are all being replaced by REGISTER_TYPE.
 F:2:REGISTER_VIRTUAL_TYPE:struct type *:register_virtual_type:int reg_nr:reg_nr::0:0
 M:2:REGISTER_TYPE:struct type *:register_type:int reg_nr:reg_nr::0:
 #

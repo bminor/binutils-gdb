@@ -1086,6 +1086,11 @@ extern void *alloca ();
 #include "arch-utils.h"
 #endif
 
+/* Maximum size of a register.  Something small, but large enough for
+   all known ISAs.  If it turns out to be too small, make it bigger.  */
+
+enum { MAX_REGISTER_SIZE = 16 };
+
 /* FIXME: cagney/2003-03-01: Hack to prop up old targets while they
    migrate to the overhauled register cache.
 
@@ -1101,13 +1106,6 @@ extern void *alloca ();
 #endif
 extern int legacy_max_register_raw_size (void);
 #define MAX_REGISTER_RAW_SIZE legacy_max_register_raw_size ()
-
-#ifdef MAX_REGISTER_VIRTUAL_SIZE
-#error MAX_REGISTER_VIRTUAL_SIZE defined
-#endif
-extern int legacy_max_register_virtual_size (void);
-#define MAX_REGISTER_VIRTUAL_SIZE legacy_max_register_virtual_size ()
-
 
 /* Static target-system-dependent parameters for GDB. */
 

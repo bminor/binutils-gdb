@@ -865,7 +865,7 @@ d10v_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
   }
 
   {
-    char *num = alloca (max_register_size (gdbarch));
+    char num[MAX_REGISTER_SIZE];
     int a;
     fprintf_filtered (file, "A0-A%d", NR_A_REGS - 1);
     for (a = a0_regnum (gdbarch); a < a0_regnum (gdbarch) + NR_A_REGS; a++)
