@@ -28,6 +28,7 @@ ChangeLog
 Makefile.in
 config
 configure.in
+gdb.stabs
 gdb.t00
 gdb.t01
 gdb.t02
@@ -55,6 +56,8 @@ gdb.t31
 lib
 
 Things-to-lose:
+
+gdb.all
 
 # The lines between the "Do-last:" line and the end of the file
 # are executed as a /bin/sh shell script after everything else is
