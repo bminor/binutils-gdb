@@ -1,4 +1,15 @@
+Tue Dec  3 17:37:45 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* simops.c: Treat both operands as signed values for
+	"div" instruction.
+
+	* simops.c: Fix simulation of division instructions.
+	Fix typos/thinkos in several "cmp" and "sub" instructions.
+
 Mon Dec  2 12:31:40 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* simops.c: Fix carry bit handling in "sub" and "cmp"
+	instructions.
 
 	* simops.c: Fix "mov imm8,an" and "mov imm16,dn".
 

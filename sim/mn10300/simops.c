@@ -1421,8 +1421,8 @@ void OP_F260 ()
   temp = State.regs[REG_MDR];
   temp <<= 32;
   temp |= State.regs[REG_D0 + (insn & 0x3)];
-  State.regs[REG_MDR] = temp % State.regs[REG_D0 + ((insn & 0xc) >> 2)];
-  temp /= State.regs[REG_D0 + ((insn & 0xc) >> 2)];
+  State.regs[REG_MDR] = temp % (long)State.regs[REG_D0 + ((insn & 0xc) >> 2)];
+  temp /= (long)State.regs[REG_D0 + ((insn & 0xc) >> 2)];
   State.regs[REG_D0 + (insn & 0x3)] = temp & 0xffffffff;
   State.regs[REG_MDR] = temp & 0xffffffff00000000LL;
   z = (State.regs[REG_D0 + (insn & 0x3)] == 0);
