@@ -1,5 +1,13 @@
 2002-03-23  Andrew Cagney  <ac131313@redhat.com>
 
+	* cli/cli-decode.c: Include "gdb_assert.h".
+	(add_set_or_show_cmd): New static function.
+	(add_set_cmd): Rewrite.  Use add_set_or_show_cmd.
+	(add_show_from_set): Rewrite. Use add_set_or_show_cmd.  Don't copy
+	all fields, such as func, from the set command.
+
+2002-03-23  Andrew Cagney  <ac131313@redhat.com>
+
 	* MAINTAINERS (sh-elf): Change warning flag to -w.
 
 2002-03-23  Andrew Cagney  <cagney@redhat.com>

@@ -28,6 +28,8 @@
 #include "cli/cli-cmds.h"
 #include "cli/cli-decode.h"
 
+#include "gdb_assert.h"
+
 /* Prototypes for local functions */
 
 static void undef_cmd_error (char *, char *);
@@ -298,12 +300,34 @@ empty_sfunc (char *args, int from_tty, struct cmd_list_element *c)
 {
 }
 
-/* Add element named NAME to command list LIST (the list for set
+/* Add element named NAME to command list LIST (the list for set/show
    or some sublist thereof).
+   TYPE is set_cmd or show_cmd.
    CLASS is as in add_cmd.
    VAR_TYPE is the kind of thing we are setting.
    VAR is address of the variable being controlled by this command.
    DOC is the documentation string.  */
+
+static struct cmd_list_element *
+add_set_or_show_cmd (char *name,
+		     enum cmd_types type,
+		     enum command_class class,
+		     var_types var_type,
+		     void *var,
+		     char *doc,
+		     struct cmd_list_element **list)
+{
+  struct cmd_list_element *c = add_cmd (name, class, NULL, doc, list);
+  gdb_assert (type == set_cmd || type == show_cmd);
+  c->type = type;
+  c->var_type = var_type;
+  c->var = var;
+  /* This needs to be something besides NULL so that this isn't
+     treated as a help class.  */
+  set_cmd_sfunc (c, empty_sfunc);
+  return c;
+}
+
 
 struct cmd_list_element *
 add_set_cmd (char *name,
@@ -313,15 +337,7 @@ add_set_cmd (char *name,
 	     char *doc,
 	     struct cmd_list_element **list)
 {
-  struct cmd_list_element *c = add_cmd (name, class, NULL, doc, list);
-
-  c->type = set_cmd;
-  c->var_type = var_type;
-  c->var = var;
-  /* This needs to be something besides NULL so that this isn't
-     treated as a help class.  */
-  set_cmd_sfunc (c, empty_sfunc);
-  return c;
+  return add_set_or_show_cmd (name, set_cmd, class, var_type, var, doc, list);
 }
 
 /* Add element named NAME to command list LIST (the list for set
@@ -386,44 +402,30 @@ add_set_boolean_cmd (char *name,
 }
 
 /* Where SETCMD has already been added, add the corresponding show
-   command to LIST and return a pointer to the added command (not 
+   command to LIST and return a pointer to the added command (not
    necessarily the head of LIST).  */
+/* NOTE: cagney/2002-03-17: The original version of add_show_from_set
+   used memcpy() to clone `set' into `show'.  This ment that in
+   addition to all the needed fields (var, name, et.al.) some
+   unnecessary fields were copied (namely the callback function).  The
+   function explictly copies relevant fields.  For a `set' and `show'
+   command to share the same callback, the caller must set both
+   explicitly.  */
 struct cmd_list_element *
 add_show_from_set (struct cmd_list_element *setcmd,
 		   struct cmd_list_element **list)
 {
-  struct cmd_list_element *showcmd =
-  (struct cmd_list_element *) xmalloc (sizeof (struct cmd_list_element));
-  struct cmd_list_element *p;
+  char *doc;
+  const static char setstring[] = "Set ";
 
-  memcpy (showcmd, setcmd, sizeof (struct cmd_list_element));
-  delete_cmd (showcmd->name, list);
-  showcmd->type = show_cmd;
+  /* Create a doc string by replacing "Set " at the start of the
+     `set'' command's doco with "Show ".  */
+  gdb_assert (strncmp (setcmd->doc, setstring, sizeof (setstring) - 1) == 0);
+  doc = concat ("Show ", setcmd->doc + sizeof (setstring) - 1, NULL);
 
-  /* Replace "set " at start of docstring with "show ".  */
-  if (setcmd->doc[0] == 'S' && setcmd->doc[1] == 'e'
-      && setcmd->doc[2] == 't' && setcmd->doc[3] == ' ')
-    showcmd->doc = concat ("Show ", setcmd->doc + 4, NULL);
-  else
-    fprintf_unfiltered (gdb_stderr, "GDB internal error: Bad docstring for set command\n");
-
-  if (*list == NULL || strcmp ((*list)->name, showcmd->name) >= 0)
-    {
-      showcmd->next = *list;
-      *list = showcmd;
-    }
-  else
-    {
-      p = *list;
-      while (p->next && strcmp (p->next->name, showcmd->name) <= 0)
-	{
-	  p = p->next;
-	}
-      showcmd->next = p->next;
-      p->next = showcmd;
-    }
-
-  return showcmd;
+  /* Insert the basic command.  */
+  return add_set_or_show_cmd (setcmd->name, show_cmd, setcmd->class,
+			      setcmd->var_type, setcmd->var, doc, list);
 }
 
 /* Remove the command named NAME from the command list.  */
