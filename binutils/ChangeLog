@@ -1,5 +1,11 @@
 Fri Apr  4 13:28:02 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* configure.in: Add AC_FUNC_ALLOCA.
+	* configure, config.in: Rebuild.
+	* bucomm.h: Add alloca handling, copied from gas/as.h.
+	* dlltool.c: Add #pragma alloca for AIX to start of file.
+	* nlmconv.c: Likewise.
+
 	* Makefile.in (distclean): Remove site.exp and site.bak.  Remove
 	everything that clean removes.
 
