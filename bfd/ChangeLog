@@ -1,3 +1,13 @@
+Wed Dec  6 17:05:37 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* xcofflink.c (struct xcoff_loader_info): Add export_defineds
+	field.
+	(bfd_xcoff_size_dynamic_sections): Add export_defineds parameter.
+	(xcoff_build_ldsyms): If export_defineds is set, set XCOFF_EXPORT
+	for all symbols.
+	* bfd-in.h (bfd_xcoff_size_dynamic_sections): Update declaration.
+	* bfd-in2.h: Rebuild.
+
 Mon Dec  4 16:40:47 1995  Kim Knuttila  <krk@cygnus.com>
 
 	* coffcode.h (coff_set_alignment_hook): Removed some debugging printf's

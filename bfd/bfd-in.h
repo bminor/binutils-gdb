@@ -645,6 +645,6 @@ extern boolean bfd_xcoff_record_link_assignment
 extern boolean bfd_xcoff_size_dynamic_sections
   PARAMS ((bfd *, struct bfd_link_info *, const char *, const char *,
 	   unsigned long, unsigned long, unsigned long, boolean,
-	   int, boolean, struct sec **));
+	   int, boolean, boolean, struct sec **));
 
 /* And more from the source.  */
