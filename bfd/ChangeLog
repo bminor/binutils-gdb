@@ -1,3 +1,7 @@
+2002-01-22  Steve Ellcey <sje@cup.hp.com>
+
+	* bfd/elfxx-ia64.c: Reset AIX vector function overrides for HP-UX.
+
 2002-01-25  Philipp Thomas  <pthomas@suse.de>
 
 	* coffgen.c (coff_print_symbol): Don't mark info message

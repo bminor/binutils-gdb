@@ -4600,6 +4600,16 @@ elfNN_hpux_backend_section_from_bfd_section (abfd, sec, retval)
 #undef  TARGET_BIG_NAME
 #define TARGET_BIG_NAME                 "elfNN-ia64-hpux-big"
 
+/* We need to undo the AIX specific functions.  */
+
+#undef  elf_backend_add_symbol_hook
+#define elf_backend_add_symbol_hook	elfNN_ia64_add_symbol_hook
+
+#undef  bfd_elfNN_bfd_link_add_symbols
+#define bfd_elfNN_bfd_link_add_symbols	_bfd_generic_link_add_symbols
+
+/* These are HP-UX specific functions.  */
+
 #undef  elf_backend_post_process_headers
 #define elf_backend_post_process_headers elfNN_hpux_post_process_headers
 
