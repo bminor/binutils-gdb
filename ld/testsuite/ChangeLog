@@ -1,3 +1,9 @@
+2002-02-05  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld-selective/keepdot.d, ld-selective/keepdot.ld,
+	ld-selective/keepdot.s, ld-selective/keepdot0.d: New tests.
+	* ld-selective/sel-dump.exp: New, driver for run_dump_test:s.
+
 2002-02-04  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* ld-mmix/bpo-18.d, ld-mmix/bpo64addr.ld, ld-mmix/bpo-18m.d,
