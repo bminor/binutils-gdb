@@ -679,17 +679,25 @@ elf_link_add_object_symbols (abfd, info)
 	     by some other object.  If it has, we want to use the
 	     existing definition, and we do not want to report a
 	     multiple symbol definition error; we do this by
-	     clobbering sec to be bfd_und_section_ptr.  */
+	     clobbering sec to be bfd_und_section_ptr.  We treat a
+	     common symbol as a definition if the symbol in the shared
+	     library is a function, since common symbols always
+	     represent variables; this can cause confusion in
+	     principle, but any such confusion would seem to indicate
+	     an erroneous program or shared library.  */
 	  if (dynamic && definition)
 	    {
 	      if (h->root.type == bfd_link_hash_defined
 		  || h->root.type == bfd_link_hash_defweak
 		  || (h->root.type == bfd_link_hash_common
-		      && bind == STB_WEAK))
+		      && (bind == STB_WEAK
+			  || ELF_ST_TYPE (sym.st_info) == STT_FUNC)))
 		{
 		  sec = bfd_und_section_ptr;
 		  definition = false;
 		  size_change_ok = true;
+		  if (h->root.type == bfd_link_hash_common)
+		    type_change_ok = true;
 		}
 	    }
 
@@ -700,7 +708,10 @@ elf_link_add_object_symbols (abfd, info)
 	     objects, even if they are defined after the dynamic
 	     object in the link.  */
 	  if (! dynamic
-	      && definition
+	      && (definition
+		  || (bfd_is_com_section (sec)
+		      && (h->root.type == bfd_link_hash_defweak
+			  || h->type == STT_FUNC)))
 	      && (h->root.type == bfd_link_hash_defined
 		  || h->root.type == bfd_link_hash_defweak)
 	      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0
@@ -715,6 +726,8 @@ elf_link_add_object_symbols (abfd, info)
 	      h->root.type = bfd_link_hash_undefined;
 	      h->root.u.undef.abfd = h->root.u.def.section->owner;
 	      size_change_ok = true;
+	      if (bfd_is_com_section (sec))
+		type_change_ok = true;
 	    }
 	}
 
