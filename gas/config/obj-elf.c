@@ -25,6 +25,10 @@
 #include "ecoff.h"
 #endif
 
+#ifdef TC_MIPS
+#include "elf/mips.h"
+#endif
+
 static int obj_elf_write_symbol_p PARAMS ((symbolS *sym));
 
 #ifdef ECOFF_DEBUGGING
@@ -350,6 +354,53 @@ static int previous_subsection;
    other possibilities, but I don't know what they are.  In any case,
    BFD doesn't really let us set the section type.  */
 
+/* Certain named sections have particular defined types, listed on p.
+   4-19 of the ABI.  */
+struct special_section
+{
+  const char *name;
+  int type;
+  int attributes;
+};
+
+static struct special_section special_sections[] =
+{
+  { ".bss",	SHT_NOBITS,	SHF_ALLOC + SHF_WRITE		},
+  { ".comment",	SHT_PROGBITS,	0				},
+  { ".data",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE		},
+  { ".data1",	SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE		},
+  { ".debug",	SHT_PROGBITS,	0				},
+  { ".fini",	SHT_PROGBITS,	SHF_ALLOC + SHF_EXECINSTR	},
+  { ".init",	SHT_PROGBITS,	SHF_ALLOC + SHF_EXECINSTR	},
+  { ".line",	SHT_PROGBITS,	0				},
+  { ".note",	SHT_NOTE,	0				},
+  { ".rodata",	SHT_PROGBITS,	SHF_ALLOC			},
+  { ".rodata1",	SHT_PROGBITS,	SHF_ALLOC			},
+  { ".text",	SHT_PROGBITS,	SHF_ALLOC + SHF_EXECINSTR	},
+
+#ifdef ELF_TC_SPECIAL_SECTIONS
+  ELF_TC_SPECIAL_SECTIONS
+#endif
+
+#if 0
+  /* The following section names are special, but they can not
+     reasonably appear in assembler code.  Some of the attributes are
+     processor dependent.  */
+  { ".dynamic",	SHT_DYNAMIC,	SHF_ALLOC /* + SHF_WRITE */ 	},
+  { ".dynstr",	SHT_STRTAB,	SHF_ALLOC			},
+  { ".dynsym",	SHT_DYNSYM,	SHF_ALLOC			},
+  { ".got",	SHT_PROGBITS,	0				},
+  { ".hash",	SHT_HASH,	SHF_ALLOC			},
+  { ".interp",	SHT_PROGBITS,	/* SHF_ALLOC */			},
+  { ".plt",	SHT_PROGBITS,	0				},
+  { ".shstrtab",SHT_STRTAB,	0				},
+  { ".strtab",	SHT_STRTAB,	/* SHF_ALLOC */			},
+  { ".symtab",	SHT_SYMTAB,	/* SHF_ALLOC */			},
+#endif
+
+  { NULL,	0,		0				}
+};
+
 void
 obj_elf_section (xxx)
      int xxx;
@@ -357,6 +408,8 @@ obj_elf_section (xxx)
   char *string;
   int new_sec;
   segT sec;
+  int type, attr;
+  int i;
   flagword flags;
 
   /* Get name of section.  */
@@ -408,26 +461,11 @@ obj_elf_section (xxx)
     }
 
   SKIP_WHITESPACE ();
-  if (*input_line_pointer != ',')
-    {
-      /* No flags given.  Guess at some useful defaults.  */
-      if (strcmp (string, ".data") == 0
-	  || strcmp (string, ".data1") == 0
-	  || strcmp (string, ".sdata") == 0
-	  || strcmp (string, ".rodata") == 0
-	  || strcmp (string, ".rodata1") == 0)
-	flags = SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_RELOC | SEC_DATA;
-      else if (strcmp (string, ".text") == 0
-	       || strcmp (string, ".init") == 0
-	       || strcmp (string, ".fini") == 0)
-	flags = SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_RELOC | SEC_CODE;
-      else if (strcmp (string, ".bss") == 0
-	       || strcmp (string, ".sbss") == 0)
-	flags = SEC_ALLOC;
-      else
-	flags = SEC_RELOC;
-    }
-  else
+
+  type = SHT_NULL;
+  attr = 0;
+
+  if (*input_line_pointer == ',')
     {
       /* Skip the comma.  */
       ++input_line_pointer;
@@ -436,20 +474,19 @@ obj_elf_section (xxx)
       if (*input_line_pointer == '"')
 	{
 	  /* Pick up a string with a combination of a, w, x.  */
-	  flags = SEC_READONLY | SEC_RELOC;
 	  ++input_line_pointer;
 	  while (*input_line_pointer != '"')
 	    {
 	      switch (*input_line_pointer)
 		{
 		case 'a':
-		  flags |= SEC_ALLOC | SEC_LOAD;
+		  attr |= SHF_ALLOC;
 		  break;
 		case 'w':
-		  flags &=~ SEC_READONLY;
+		  attr |= SHF_WRITE;
 		  break;
 		case 'x':
-		  flags |= SEC_CODE;
+		  attr |= SHF_EXECINSTR;
 		  break;
 		default:
 		  as_warn ("Bad .section directive: want a,w,x in string");
@@ -473,13 +510,13 @@ obj_elf_section (xxx)
 		  if (strncmp (input_line_pointer, "progbits",
 			       sizeof "progbits" - 1) == 0)
 		    {
-		      flags |= SEC_ALLOC | SEC_LOAD;
+		      type = SHT_PROGBITS;
 		      input_line_pointer += sizeof "progbits" - 1;
 		    }
 		  else if (strncmp (input_line_pointer, "nobits",
 				    sizeof "nobits" - 1) == 0)
 		    {
-		      flags &=~ SEC_LOAD;
+		      type = SHT_NOBITS;
 		      input_line_pointer += sizeof "nobits" - 1;
 		    }
 		  else
@@ -492,7 +529,6 @@ obj_elf_section (xxx)
 	}
       else
 	{
-	  flags = SEC_READONLY | SEC_RELOC;
 	  do
 	    {
 	      SKIP_WHITESPACE ();
@@ -506,19 +542,19 @@ obj_elf_section (xxx)
 	      if (strncmp (input_line_pointer, "write",
 			   sizeof "write" - 1) == 0)
 		{
-		  flags &=~ SEC_READONLY;
+		  attr |= SHF_WRITE;
 		  input_line_pointer += sizeof "write" - 1;
 		}
 	      else if (strncmp (input_line_pointer, "alloc",
 				sizeof "alloc" - 1) == 0)
 		{
-		  flags |= SEC_ALLOC | SEC_LOAD;
+		  attr |= SHF_ALLOC;
 		  input_line_pointer += sizeof "alloc" - 1;
 		}
 	      else if (strncmp (input_line_pointer, "execinstr",
 				sizeof "execinstr" - 1) == 0)
 		{
-		  flags |= SEC_CODE;
+		  attr |= SHF_EXECINSTR;
 		  input_line_pointer += sizeof "execinstr" - 1;
 		}
 	      else
@@ -532,6 +568,37 @@ obj_elf_section (xxx)
 	  while (*input_line_pointer++ == ',');
 	  --input_line_pointer;
 	}
+    }
+
+  /* See if this is one of the special sections.  */
+  for (i = 0; special_sections[i].name != NULL; i++)
+    {
+      if (string[1] == special_sections[i].name[1]
+	  && strcmp (string, special_sections[i].name) == 0)
+	{
+	  if (type == SHT_NULL)
+	    type = special_sections[i].type;
+	  else if (type != special_sections[i].type)
+	    as_warn ("Setting incorrect section type for %s", string);
+
+	  if ((attr &~ special_sections[i].attributes) != 0)
+	    as_warn ("Setting incorrect section attributes for %s", string);
+	  attr |= special_sections[i].attributes;
+
+	  break;
+	}
+    }
+
+  flags = (SEC_RELOC
+	   | ((attr & SHF_WRITE) ? 0 : SEC_READONLY)
+	   | ((attr & SHF_ALLOC) ? SEC_ALLOC | SEC_LOAD : 0)
+	   | ((attr & SHF_EXECINSTR) ? SEC_CODE : 0));
+  if (type == SHT_PROGBITS)
+    flags |= SEC_ALLOC | SEC_LOAD;
+  else if (type == SHT_NOBITS)
+    {
+      flags |= SEC_ALLOC;
+      flags &=~ SEC_LOAD;
     }
 
   bfd_set_section_flags (stdoutput, sec, flags);
@@ -867,6 +934,8 @@ obj_elf_ident (ignore)
   subseg_set (old_section, old_subsection);
 }
 
+#ifdef INIT_STAB_SECTION
+
 /* The first entry in a .stabs section is special.  */
 
 void
@@ -892,6 +961,8 @@ obj_elf_init_stab_section (seg)
   md_number_to_chars (p, stroff, 4);
   seg_info (seg)->stabu.p = p;
 }
+
+#endif
 
 /* Fill in the counts in the first entry in a .stabs section.  */
 
