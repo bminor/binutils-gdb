@@ -102,6 +102,9 @@ struct dwarf2_debug {
 
   /* Buffer for decode_line_info.  */
   char *dwarf_line_buffer;
+
+  /* Length of the loaded .debug_line section.  */
+  unsigned long dwarf_line_size;
 };
 
 struct arange {
@@ -783,7 +786,6 @@ decode_line_info (unit)
   if (! stash->dwarf_line_buffer)
     {
       asection *msec;
-      unsigned long size;
 
       msec = bfd_get_section_by_name (abfd, ".debug_line");
       if (! msec)
@@ -793,18 +795,29 @@ decode_line_info (unit)
 	  return 0;
 	}
       
-      size = msec->_raw_size;
-      stash->dwarf_line_buffer = (char *) bfd_alloc (abfd, size);
+      stash->dwarf_line_size = msec->_raw_size;
+      stash->dwarf_line_buffer = (char *) bfd_alloc (abfd, stash->dwarf_line_size);
       if (! stash->dwarf_line_buffer)
 	return 0;
 
       if (! bfd_get_section_contents (abfd, msec, 
 				      stash->dwarf_line_buffer, 0,
-				      size))
+				      stash->dwarf_line_size))
 	return 0;
 
       /* FIXME: We ought to apply the relocs against this section before
 	 we process it.... */
+    }
+
+  /* Since we are using un-relocated data, it is possible to get a bad value
+     for the line_offset.  Validate it here so that we won't get a segfault
+     below.  */
+  if (unit->line_offset >= stash->dwarf_line_size)
+    {
+      (*_bfd_error_handler) (_("Dwarf Error: Line offset (%u) bigger than line size (%u)."),
+			     unit->line_offset, stash->dwarf_line_size);
+      bfd_set_error (bfd_error_bad_value);
+      return 0;
     }
 
   table = (struct line_info_table*) bfd_alloc (abfd, 

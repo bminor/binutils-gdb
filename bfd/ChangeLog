@@ -1,3 +1,9 @@
+Fri Apr  7 11:33:47 2000  Jim Wilson  <wilson@cygnus.com>
+
+	* dwarf2.c (struct dwarf2_debug): New field dwarf_line_size.
+	(decode_line_info): Set it.  Report error if unit->line_offset is
+	equal to or larger than it.
+
 2000-04-07  Timothy Wall  <twall@cygnus.com>
 
 	* targets.c: Added vecs for tic54x.
