@@ -1,3 +1,55 @@
+Thu Aug 17 14:44:26 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	Add support for linking SPARC SunOS PIC compiled code.
+	* sunos.c (SPARC_PLT_PIC_WORD0): Define.
+	(SPARC_PLT_PIC_WORD1, SPARC_PLT_PIC_WORD2): Define.
+	(struct sunos_link_hash_entry): Add got_offset and plt_offset
+	fields.
+	(struct sunos_link_hash_table): Add dynamic_sections_created and
+	dynamic_sections_needed fields.
+	(sunos_link_hash_newfunc): Initialize new fields.
+	(sunos_link_hash_table_create): Initialize new fields.
+	(sunos_create_dynamic_sections): New static function, broken out
+	of sunos_add_dynamic_symbols.
+	(sunos_add_dynamic_symbols): Call sunos_create_dynamic_sections.
+	(sunos_add_one_symbol): Call sunos_create_dynamic_sections.
+	(bfd_sunos_size_dynamic_sections): Call sunos_scan_relocs before
+	checking whether we need to set up the dynamic link information.
+	Define __GLOBAL_OFFSET_TABLE if anything referred to it.
+	(sunos_scan_std_relocs): Call sunos_create_dynamic_sections.  Use
+	plt_offset field; only put symbol in .plt if it is not defined by
+	a regular object.
+	(sunos_scan_ext_relocs): Likewise.  Handle base relative relocs.
+	(sunos_scan_dynamic_symbol): Store dynobj in local variable.
+	(sunos_write_dynamic_symbol): Check plt_offset rather than
+	checking whether symbol is in .plt section.  If symbol is defined
+	in a regular object file, use SPARC_PLT_PIC_WORD[012], and don't
+	add a JMP_TBL reloc.
+	(sunos_check_dynamic_reloc): Add contents and relocationp fields.
+	If plt_offset is set, redirect relocation to PLT.  If this is a
+	base relative reloc, redirect relocation to GOT.  Check
+	dynamic_sections_needed field rather than whether dynobj is set.
+	(sunos_finish_dynamic_link): Check dynamic_sections_needed field
+	rather than whether dynobj is set.  Don't die if .need and .rules
+	sections were not created.
+	* aoutx.h (howto_table_ext): Mark PC10, PC22, and JMP_TBL entries
+	PC relative.  Mark PC10 complain_overflow_dont.  Mark PC22 and
+	JMP_TBL complain_overflow_signed.
+	(NAME(aout,final_link)): If info->shared is set, set DYNAMIC.
+	(aout_link_input_section_std): Call check_dynamic_reloc for all
+	relocs.  Pass contents and &relocation.  Don't warn about an
+	undefined symbol until check_dynamic_reloc has been called.  Don't
+	warn about an undefined symbol for a base relative reloc.
+	(aout_link_input_section_ext): Likewise.  For a base relative
+	reloc, always treat r_index as an index into the symbol table.
+	* libaout.h (struct aout_backend_data): Add contents and
+	relocation argument to check_dynamic_reloc entry point.
+	(struct aoutdata): Add local_got_offsets field.
+
+Wed Aug 16 01:03:07 1995  Ian Lance Taylor  <ian@cygnus.com>
+
+	* elf32-i386.c (elf_i386_check_relocs): Fix bug in last change.
+
 Mon Aug 14 11:39:24 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* aoutx.h (NAME(aout,machine_type)): Handle a machine of
