@@ -3216,11 +3216,16 @@ tc_m68hc11_fix_adjustable (fixP)
       /* For the linker relaxation to work correctly, these relocs
          need to be on the symbol itself.  */
     case BFD_RELOC_16:
-    case BFD_RELOC_LO16:
     case BFD_RELOC_M68HC11_RL_JUMP:
     case BFD_RELOC_M68HC11_RL_GROUP:
     case BFD_RELOC_VTABLE_INHERIT:
     case BFD_RELOC_VTABLE_ENTRY:
+
+      /* The memory bank addressing translation also needs the original
+         symbol.  */
+    case BFD_RELOC_LO16:
+    case BFD_RELOC_M68HC11_PAGE:
+    case BFD_RELOC_M68HC11_24:
       return 0;
 
     case BFD_RELOC_32:
