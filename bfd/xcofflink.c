@@ -4679,22 +4679,40 @@ xcoff_link_input_bfd (finfo, input_bfd)
 	  else
 	    {
 	      bfd_vma tocval, tocend;
+	      bfd *inp;
 
 	      tocval = ((*csectpp)->output_section->vma
 			+ (*csectpp)->output_offset
 			+ isym.n_value
 			- (*csectpp)->vma);
+
 	      /* We want to find out if tocval is a good value to use
                  as the TOC anchor--that is, whether we can access all
                  of the TOC using a 16 bit offset from tocval.  This
                  test assumes that the TOC comes at the end of the
                  output section, as it does in the default linker
-                 script.  FIXME: This doesn't handle .tocbss sections
-                 created from XMC_TD common symbols correctly.  */
-
+                 script.  */
 	      tocend = ((*csectpp)->output_section->vma
 			+ (*csectpp)->output_section->_raw_size);
-
+	      for (inp = finfo->info->input_bfds; 
+		   inp != NULL; 
+		   inp = inp->link_next)
+		{
+		  asection *o;
+		  
+		  for (o = inp->sections; o != NULL; o = o->next)
+		    if (strcmp (o->name, ".tocbss") == 0)
+		      {
+			bfd_vma new_toc_end;
+			new_toc_end = (o->output_section->vma
+				       + o->output_offset
+				       + o->_cooked_size);
+			if (new_toc_end > tocend)
+			  tocend = new_toc_end;
+		      }
+		  
+		}
+	      
 	      if (tocval + 0x10000 < tocend)
 		{
 		  (*_bfd_error_handler)

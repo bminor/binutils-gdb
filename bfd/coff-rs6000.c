@@ -373,7 +373,7 @@ _bfd_xcoff_swap_aux_out (abfd, inp, type, class, indx, numaux, extp)
   }
 
   PUTWORD(abfd, in->x_sym.x_tagndx.l, (bfd_byte *) ext->x_sym.x_tagndx);
-  PUTWORD(abfd, in->x_sym.x_tvndx , (bfd_byte *) ext->x_sym.x_tvndx);
+  bfd_h_put_16 (abfd, in->x_sym.x_tvndx , (bfd_byte *) ext->x_sym.x_tvndx);
 
   if (class == C_BLOCK || class == C_FCN || ISFCN (type) || ISTAG (class))
     {
@@ -708,7 +708,7 @@ reloc_howto_type xcoff_howto_table[] =
   HOWTO (0x18,	                /* type */                                 
 	 0,	                /* rightshift */                           
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */ 
-	 16,	                /* bitsize */                   
+	 26,	                /* bitsize */                   
 	 false,	                /* pc_relative */                          
 	 0,	                /* bitpos */                               
 	 complain_overflow_bitfield, /* complain_on_overflow */
@@ -723,7 +723,7 @@ reloc_howto_type xcoff_howto_table[] =
   HOWTO (0x19,	                /* type */                                 
 	 0,	                /* rightshift */                           
 	 2,	                /* size (0 = byte, 1 = short, 2 = long) */ 
-	 16,	                /* bitsize */                   
+	 32,	                /* bitsize */                   
 	 false,	                /* pc_relative */                          
 	 0,	                /* bitpos */                               
 	 complain_overflow_bitfield, /* complain_on_overflow */
@@ -843,8 +843,11 @@ _bfd_xcoff_rtype2howto (relent, internal)
   /* The r_size field of an XCOFF reloc encodes the bitsize of the
      relocation, as well as indicating whether it is signed or not.
      Doublecheck that the relocation information gathered from the
-     type matches this information.  */
-  if (relent->howto->bitsize != ((unsigned int) internal->r_size & 0x1f) + 1)
+     type matches this information.  The bitsize is not significant 
+     for R_REF relocs.  */ 
+  if (relent->howto->dst_mask != 0 
+      && (relent->howto->bitsize  
+	  != ((unsigned int) internal->r_size & 0x3f) + 1)) 
     abort ();
 #if 0
   if ((internal->r_size & 0x80) != 0

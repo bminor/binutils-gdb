@@ -1,3 +1,18 @@
+2000-09-06  Geoffrey Keating  <geoffk@cygnus.com>
+
+	* xcofflink.c (xcoff_link_input_bfd): Include the .tocbss
+ 	pseduo-section when determining where the TOC ends.
+
+	* coff-rs6000.c (_bfd_xcoff_swap_aux_out): Use bfd_h_put_16 to 
+	output x_tvndx as it is only two bytes wide. 
+	
+	* coff-rs6000.c (xcoff_howto_table): A modifiable branch-absolute 
+        reloc is 26 or 32 bits wide.
+	
+	* coff-rs6000.c (_bfd_xcoff_rtype2howto): The bitsize is irrelevant 
+        for relocs that don't change anything.  Also look at the full 
+        6 bits of bitsize.
+
 2000-09-06  Philip Blundell  <philb@gnu.org>
 
 	* config.bfd (arm*-*-uclinux*): New target.
