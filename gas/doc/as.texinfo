@@ -2907,26 +2907,45 @@ in a program.
 @cindex temporary symbol names
 @cindex symbol names, temporary
 Local symbols help compilers and programmers use names temporarily.
-There are ten local symbol names, which are re-used throughout the
-program.  You may refer to them using the names @samp{0} @samp{1}
-@dots{} @samp{9}.  To define a local symbol, write a label of the form
-@samp{@b{N}:} (where @b{N} represents any digit).  To refer to the most
-recent previous definition of that symbol write @samp{@b{N}b}, using the
-same digit as when you defined the label.  To refer to the next
-definition of a local label, write @samp{@b{N}f}---where @b{N} gives you
-a choice of 10 forward references.  The @samp{b} stands for
-``backwards'' and the @samp{f} stands for ``forwards''.
+They create symbols which are guaranteed to be unique over the entire scope of
+the input source code and which can be referred to by a simple notation.
+To define a local symbol, write a label of the form @samp{@b{N}:} (where @b{N}
+represents any positive integer).  To refer to the most recent previous
+definition of that symbol write @samp{@b{N}b}, using the same number as when
+you defined the label.  To refer to the next definition of a local label, write
+@samp{@b{N}f}--- The @samp{b} stands for``backwards'' and the @samp{f} stands
+for ``forwards''.
 
-Local symbols are not emitted by the current @sc{gnu} C compiler.
+There is no restriction on how you can use these labels, and you can reuse them
+too.  So that it is possible to repeatedly define the same local label (using
+the same number @samp{@b{N}}), although you can only refer to the most recently
+defined local label of that number (for a backwards reference) or the next
+definition of a specific local label for a forward reference.  It is also worth
+noting that the first 10 local labels (@samp{@b{0:}}@dots{}@samp{@b{9:}}) are
+implemented in a slightly more efficient manner than the others.
 
-There is no restriction on how you can use these labels, but
-remember that at any point in the assembly you can refer to at most
-10 prior local labels and to at most 10 forward local labels.
+Here is an example:
 
-Local symbol names are only a notation device.  They are immediately
-transformed into more conventional symbol names before the assembler
-uses them.  The symbol names stored in the symbol table, appearing in
-error messages and optionally emitted to the object file have these
+@smallexample
+1:        branch 1f
+2:        branch 1b
+1:        branch 2f
+2:        branch 1b
+@end smallexample
+
+Which is the equivalent of:
+
+@smallexample
+label_1:  branch label_3
+label_2:  branch label_1
+label_3:  branch label_4
+label_4:  branch label_3
+@end smallexample
+
+Local symbol names are only a notational device.  They are immediately
+transformed into more conventional symbol names before the assembler uses them.
+The symbol names stored in the symbol table, appearing in error messages and
+optionally emitted to the object file.  The names are constructed using these
 parts:
 
 @table @code
@@ -2938,25 +2957,42 @@ used for symbols you are never intended to see.  If you use the
 object file. If you also instruct @code{@value{LD}} to retain these symbols,
 you may use them in debugging.
 
-@item @var{digit}
-If the label is written @samp{0:} then the digit is @samp{0}.
-If the label is written @samp{1:} then the digit is @samp{1}.
-And so on up through @samp{9:}.
+@item @var{number}
+This is the number that was used in the local label definition.  So if the
+label is written @samp{55:} then the number is @samp{55}. 
 
-@item @kbd{C-A}
-This unusual character is included so you do not accidentally invent
-a symbol of the same name.  The character has ASCII value
-@samp{\001}.
+@item @kbd{C-B}
+This unusual character is included so you do not accidentally invent a symbol
+of the same name.  The character has ASCII value of @samp{\002} (control-B).
 
 @item @emph{ordinal number}
-This is a serial number to keep the labels distinct.  The first
-@samp{0:} gets the number @samp{1}; The 15th @samp{0:} gets the
-number @samp{15}; @emph{etc.}.  Likewise for the other labels @samp{1:}
-through @samp{9:}.
+This is a serial number to keep the labels distinct.  The first definition of
+@samp{0:} gets the number @samp{1}.  The 15th definition of @samp{0:} gets the 
+number @samp{15}, and so on.  Likewise the first definition of @samp{1:} gets
+the number @samp{1} and its 15th defintion gets @samp{15} as well.
 @end table
 
-For instance, the first @code{1:} is named @code{L1@kbd{C-A}1}, the 44th
-@code{3:} is named @code{L3@kbd{C-A}44}.
+So for example, the first @code{1:} is named @code{L1@kbd{C-B}1}, the 44th
+@code{3:} is named @code{L3@kbd{C-B}44}.
+
+@subheading Dollar Local Labels
+@cindex dollar local symbols
+
+@code{@value{AS}} also supports an even more local form of local labels called
+dollar labels.  These labels go out of scope (ie they become undefined) as soon
+as a non-local label is defined.  Thus they remain valid for only a small
+region of the input source code.  Normal local labels, by contrast, remain in
+scope for the entire file, or until they are redefined by another occurrence of
+the same local label.
+
+Dollar labels are defined in exactly the same way as ordinary local labels,
+except that instead of being terminated by a colon, they are terminated by a
+dollar sign.  eg @samp{@b{55$}}.
+
+They can also be distinguished from ordinary local labels by their transformed
+name which uses ASCII character @samp{\001} (control-A) as the magic character
+to distinguish them from ordinary labels.  Thus the 5th defintion of @samp{6$}
+is named @samp{L6@kbd{C-A}5}.
 
 @node Dot
 @section The Special Dot Symbol

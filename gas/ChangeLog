@@ -1,3 +1,8 @@
+2001-09-19  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* doc/as.texinfo (Symbol Names): Improve documentation on local
+	labels and add documenation about dollar labels.
+
 2001-09-18  Bruno Haible  <haible@clisp.cons.org>
 
 	* as.h: Don't include <ctype.h>.
