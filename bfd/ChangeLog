@@ -1,3 +1,11 @@
+2001-02-14  Philip Blundell  <pb@futuretv.com>
+
+	From 2001-02-06  H.J. Lu  <hjl@gnu.org>
+	* bfd/peicode.h (coff_swap_filehdr_in): Remove the e_magic
+	checking.
+	(pe_bfd_object_p): Rewrite with external_PEI_DOS_hdr and
+	external_PEI_IMAGE_hdr.
+	
 2001-02-14  Bo Thorsen  <bo@suse.de>
 
         * elf64-x86-64.c: Small formatting fixes and rearrangements of code.
