@@ -1,3 +1,29 @@
+2002-05-06  Jim Blandy  <jimb@redhat.com>
+
+	Separate the job of reading the line number info statement program
+	header (...expialidocious) out into its own function.
+	* dwarf2read.c (struct line_head, struct filenames, struct
+	directories): Replace with...
+	(struct line_header): New structure, containing the full
+	contents of the statement program header, including the
+	include directory and file name tables.
+	(read_file_scope): If we have line number info, instead of just
+	calling dwarf_decode_lines to do all the work, call
+	dwarf_decode_line_header first to get a `struct line_header'
+	containing the data in the statement program header, and then
+	pass that to dwarf_decode_lines, which will pick up where that
+	left off.  Be sure to clean up the `struct line_header' object.
+	(dwarf_decode_line_header, free_line_header, add_include_dir,
+	add_file_name): New functions.
+	(dwarf_decode_lines): Move all the code to read the statement
+	program header into dwarf_decode_line_header.  Take the line
+	header it built as the first argument, instead of the offset to
+	the compilation unit's line number info.  Use the new `struct
+	line_header' type instead of the old structures.  No need to do
+	cleanups here now, since we don't allocate anything.
+	(dwarf2_statement_list_fits_in_line_number_section,
+	dwarf2_line_header_too_long): New complaints.
+
 2002-05-06  Elena Zannoni  <ezannoni@redhat.com>
 
 	* gdbtypes.c (init_vector_type): New function.
