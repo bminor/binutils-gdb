@@ -13,12 +13,12 @@ SECTIONS
     ${RELOCATING+ etext  =  .;}
     ${CONSTRUCTING+ __CTOR_LIST__ = .;}
     ${CONSTRUCTING+ LONG((__CTOR_END__ - __CTOR_LIST__) / 4 - 2)}
-    *(.ctors)
+    ${CONSTRUCTING+ *(.ctors)}
     ${CONSTRUCTING+ LONG(0)}
     ${CONSTRUCTING+ __CTOR_END__ = .;}
     ${CONSTRUCTING+ __DTOR_LIST__ = .;}
     ${CONSTRUCTING+ LONG((__DTOR_END__ - __DTOR_LIST__) / 4 - 2)}
-    *(.dtors)
+    ${CONSTRUCTING+ *(.dtors)}
     ${CONSTRUCTING+ LONG(0)}
     ${CONSTRUCTING+ __DTOR_END__ = .;}
     *(.fini)
