@@ -202,12 +202,9 @@ _bfd_evax_write_emh (abfd)
 
       char *fname, *fout, *fptr;
 
-      fname = strdup (bfd_get_filename (abfd));
-      if (fname == 0)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return -1;
-	}
+      fptr = bfd_get_filename (abfd);
+      fname = (char *) alloca (strlen (fptr) + 1);
+      strcpy (fname, fptr);
       fout = strrchr (fname, ']');
       if (fout == 0)
 	fout = strchr (fname, ':');
@@ -234,7 +231,6 @@ _bfd_evax_write_emh (abfd)
 	    *fptr = 0;
 	}
       _bfd_evax_output_counted (abfd, fout);
-      free (fname);
     }
   else
     _bfd_evax_output_counted (abfd, "NONAME");
