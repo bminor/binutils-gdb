@@ -11,6 +11,9 @@ Changes in binutils 2.8:
   objdump -b i386-pc-linux.  The triplets are not passed through config.sub,
   so they must be in canonical form.
 
+* Added new addr2line program.  This uses the debugging information to convert
+  an address into a file name and line number within a program.
+
 * Added --change-leading-char argument to objcopy.
 
 * Added --weaken argument to objcopy.
@@ -18,6 +21,8 @@ Changes in binutils 2.8:
 * objdump --dynamic-reloc now works on ELF executables and shared libraries.
 
 * Added --adjust-vma option to objdump.
+
+* Added -C/--demangle option to objdump.
 
 Changes in binutils 2.7:
 
