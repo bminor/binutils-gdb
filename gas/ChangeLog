@@ -1,5 +1,9 @@
 Wed Mar  6 14:11:30 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* config/obj-elf.c (obj_elf_section): Only SEC_LOAD if the type is
+	not SHT_NOBITS.  Don't tamper with flags based on type if a
+	special section was found (revert Feb 29 change).
+
 	* config/tc-sh.c (sh_do_align): Only align using the nop pattern
 	if aligning to a longword boundary or greater.
 
