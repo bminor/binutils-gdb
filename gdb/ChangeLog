@@ -1,3 +1,10 @@
+2000-12-11  Fernando Nasser  <fnasser@redhat.com>
+
+	* configure.in: Fix a couple of typos in the handling of the
+	enable_gdbcli option.  Make it check enableval for the result
+	of AC_ARG_ENABLE.
+	* configure: Regenerate.
+
 2000-12-08  Michael Snyder  <msnyder@mvstp600e.cygnus.com>
 
 	* dwarf2read.c (DWARF2_REG_TO_REGNUM): New macro.  Provide default

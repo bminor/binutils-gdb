@@ -466,21 +466,21 @@ dnl Handle CLI sub-directory configury.
 AC_ARG_ENABLE(gdbcli,
 [  --enable-gdbcli            Enable GDB-CLI interface],
 [
-  case "${enable_gdbcli}" in
-    yes) ;;
-    "")  enable_gdbcli=yes ;;
+  case "${enableval}" in
+    yes) enable_gdbcli=yes ;;
+    "") enable_gdbcli=yes ;;
     no) 
       AC_MSG_ERROR(The CLI cannot be disabled yet)
     ;;
     *)
-      AC_MSG_ERROR(Bad value for --enable-gdbmi: ${enableval})
+      AC_MSG_ERROR(Bad value for --enable-gdbcli: ${enableval})
     ;;
   esac
 ],
 [enable_gdbcli=yes])
 case ${enable_gdbcli} in
   "yes" )
-    if test -d "${srcdir}/mi" ; then
+    if test -d "${srcdir}/cli" ; then
       CONFIG_OBS="${CONFIG_OBS} \$(SUBDIR_CLI_OBS)"
       CONFIG_DEPS="${CONFIG_DEPS} \$(SUBDIR_CLI_DEPS)"
       CONFIG_SRCS="${CONFIG_SRS} \$(SUBDIR_CLI_SRCS)"

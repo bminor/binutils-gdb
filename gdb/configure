@@ -5700,14 +5700,14 @@ fi
 if test "${enable_gdbcli+set}" = set; then
   enableval="$enable_gdbcli"
   
-  case "${enable_gdbcli}" in
-    yes) ;;
-    "")  enable_gdbcli=yes ;;
+  case "${enableval}" in
+    yes) enable_gdbcli=yes ;;
+    "") enable_gdbcli=yes ;;
     no) 
       { echo "configure: error: The CLI cannot be disabled yet" 1>&2; exit 1; }
     ;;
     *)
-      { echo "configure: error: Bad value for --enable-gdbmi: ${enableval}" 1>&2; exit 1; }
+      { echo "configure: error: Bad value for --enable-gdbcli: ${enableval}" 1>&2; exit 1; }
     ;;
   esac
 
@@ -5717,7 +5717,7 @@ fi
 
 case ${enable_gdbcli} in
   "yes" )
-    if test -d "${srcdir}/mi" ; then
+    if test -d "${srcdir}/cli" ; then
       CONFIG_OBS="${CONFIG_OBS} \$(SUBDIR_CLI_OBS)"
       CONFIG_DEPS="${CONFIG_DEPS} \$(SUBDIR_CLI_DEPS)"
       CONFIG_SRCS="${CONFIG_SRS} \$(SUBDIR_CLI_SRCS)"
