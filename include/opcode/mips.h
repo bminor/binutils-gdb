@@ -233,6 +233,27 @@ start-sanitize-cygnus
    "%" 3 bit immediate vr5400 vector alignment operand (OP_*_VECALIGN)
    see also "k" above
 end-sanitize-cygnus
+start-sanitize-r5900
+   "0" ???
+   "1" vu0 fp reg position 1
+   "2" vu0 fp reg position 2
+   "3" vu0 fp reg position 3
+   "4" vu0 int reg position 1
+   "5" vu0 int reg position 2
+   "6" vu0 int reg position 3
+   "7" vu0 fp reg with ftf modifier
+   "8" vu0 fp reg with fsf modifier
+   "9" vi27 for vcallmsr
+   "#" optional suffix that must match if present
+   "K" dest operant completer, must match previous dest if present
+   "&" dest instruction completer
+   ";" dest instruction completer, must by xyz
+   "J" vu0 I register
+   "Q" vu0 Q register
+   "X" vu0 R register
+   "U" vu0 ACC register
+   "O" ???
+end-sanitize-r5900
 
    Macro instructions:
    "A" General 32 bit expression
@@ -248,11 +269,17 @@ end-sanitize-cygnus
 start-sanitize-cygnus
    "[]" brackets around index for vector-op scalar operand specifier (vr5400)
 end-sanitize-cygnus
+start-sanitize-r5900
+   "+-" auto inc/dec decorators
+end-sanitize-r5900
 
    Characters used so far, for quick reference when adding more:
 start-sanitize-cygnus
    "Pe%[]" plus...
 end-sanitize-cygnus
+start-sanitize-r5900
+   "0123456789+-#&;KJWXUO"
+end-sanitize-r5900
    "<>(),"
    "ABCDEFGILMNSTRVW"
    "abcdfhijklopqrstuvwxz"
