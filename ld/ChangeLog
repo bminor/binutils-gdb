@@ -1,3 +1,12 @@
+2004-03-30  Stan Shebs  <shebs@apple.com>
+
+	Remove long-obsolete MPW support.
+	* mpw-config.in, mpw-make.sed, mac-ld.r: Remove files.
+	* Makefile.am (mpw): Remove file-presynthesizing actions.
+	* Makefile.in: Likewise.
+	* ldfile.c (slash): Remove MPW case.
+	* ldlex.l [MPW]: Remove unused definition.
+
 2004-03-30  Galit Heller  <Galit.Heller@nsc.com>
 
 	* Makefile.am (ALL_EMULATIONS): Add eelf32cr16c.o.
