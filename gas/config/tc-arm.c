@@ -9293,6 +9293,16 @@ struct option md_longopts[] =
   {"EB", no_argument, NULL, OPTION_EB},
 #define OPTION_EL (OPTION_MD_BASE + 1)
   {"EL", no_argument, NULL, OPTION_EL},
+#else
+  /* If the build isn't bi-endian, just support the flag that we are anyway.
+     This makes things more portable.  */
+#if TARGET_BYTES_BIG_ENDIAN
+#define OPTION_EB (OPTION_MD_BASE + 0)
+  {"EB", no_argument, NULL, OPTION_EB},
+#else
+#define OPTION_EL (OPTION_MD_BASE + 1)
+  {"EL", no_argument, NULL, OPTION_EL},
+#endif
 #endif
 #ifdef OBJ_ELF
 #define OPTION_OABI (OPTION_MD_BASE +2)
@@ -9312,10 +9322,13 @@ md_parse_option (c, arg)
 
   switch (c)
     {
-#ifdef ARM_BI_ENDIAN
+#ifdef OPTION_EB
     case OPTION_EB:
       target_big_endian = 1;
       break;
+#endif
+
+#ifdef OPTION_EL
     case OPTION_EL:
       target_big_endian = 0;
       break;

@@ -1,5 +1,11 @@
 2002-01-14  Richard Earnshaw  <rearnsha@arm.com>
 
+	* tc-arm.c (md_longopts): On targets that aren't bi-endian, support
+	the -EL/-EB option that matches the target's endianness.
+	(md_parse_option): Likewise.
+
+2002-01-14  Richard Earnshaw  <rearnsha@arm.com>
+
 	* tc-arm.c (md_longopts): Fix misplaced #endif -- the -oabi option 
 	is not dependent on ARM_BI_ENDIAN.
 
