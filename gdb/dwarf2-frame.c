@@ -163,7 +163,7 @@ dwarf2_frame_state_alloc_regs (struct dwarf2_frame_state_reg_info *rs,
     xrealloc (rs->reg, num_regs * size);
 
   /* Initialize newly allocated registers.  */
-  memset (rs->reg + rs->num_regs * size, 0, (num_regs - rs->num_regs) * size);
+  memset (rs->reg + rs->num_regs, 0, (num_regs - rs->num_regs) * size);
   rs->num_regs = num_regs;
 }
 

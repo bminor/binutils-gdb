@@ -1,3 +1,8 @@
+2003-06-01  Mark Kettenis  <kettenis@gnu.org>
+
+	From Richard Henderson  <rth@redhat.com>:
+	* dwarf2-frame.c (dwarf2_frame_state_alloc_regs): Fix ptr arithmetic.
+
 2003-05-31  Andrew Cagney  <cagney@redhat.com>
 
 	* mips-tdep.c (set_reg_offset): Add saved_regs parameter.  Add
