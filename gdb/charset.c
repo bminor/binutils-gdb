@@ -165,7 +165,23 @@ struct translation {
 #endif
 
 static const char *host_charset_name = GDB_DEFAULT_HOST_CHARSET;
+static void
+show_host_charset_name (struct ui_file *file, int from_tty,
+			struct cmd_list_element *c,
+			const char *value)
+{
+  fprintf_filtered (file, _("The host character set is \"%s\".\n"), value);
+}
+
 static const char *target_charset_name = GDB_DEFAULT_TARGET_CHARSET;
+static void
+show_target_charset_name (struct ui_file *file, int from_tty,
+			  struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("The target character set is \"%s\".\n"),
+		    value);
+}
+
 
 static const char *host_charset_enum[] = 
 {
@@ -1243,7 +1259,7 @@ You may only use supersets of ASCII for your host character set; GDB does\n\
 not support any others.\n\
 To see a list of the character sets GDB supports, type `set host-charset <TAB>'."),
 			set_host_charset_sfunc,
-			NULL, /* FIXME: i18n: */
+			show_host_charset_name,
 			&setlist, &showlist);
 
   add_setshow_enum_cmd ("target-charset", class_support,
@@ -1255,6 +1271,6 @@ GDB translates characters and strings between the host and target\n\
 character sets as needed.\n\
 To see a list of the character sets GDB supports, type `set target-charset'<TAB>"),
 			set_target_charset_sfunc,
-			NULL, /* FIXME: i18n: */
+			show_target_charset_name,
 			&setlist, &showlist);
 }

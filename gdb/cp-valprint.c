@@ -38,10 +38,39 @@
 #include "cp-support.h"
 #include "language.h"
 
-int vtblprint;			/* Controls printing of vtbl's */
-int objectprint;		/* Controls looking up an object's derived type
-				   using what we find in its vtables.  */
+/* Controls printing of vtbl's */
+int vtblprint;
+static void
+show_vtblprint (struct ui_file *file, int from_tty,
+		struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+Printing of C++ virtual function tables is %s.\n"),
+		    value);
+}
+
+/* Controls looking up an object's derived type using what we find in
+   its vtables.  */
+int objectprint;
+static void
+show_objectprint (struct ui_file *file, int from_tty,
+		  struct cmd_list_element *c,
+		  const char *value)
+{
+  fprintf_filtered (file, _("\
+Printing of object's derived type based on vtable info is %s.\n"),
+		    value);
+}
+
 int static_field_print;		/* Controls printing of static fields. */
+static void
+show_static_field_print (struct ui_file *file, int from_tty,
+			 struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Printing of C++ static members is %s.\n"),
+		    value);
+}
+
 
 static struct obstack dont_print_vb_obstack;
 static struct obstack dont_print_statmem_obstack;
@@ -815,7 +844,7 @@ _initialize_cp_valprint (void)
 Set printing of C++ static members."), _("\
 Show printing of C++ static members."), NULL,
 			   NULL,
-			   NULL, /* FIXME: i18n: */
+			   show_static_field_print,
 			   &setprintlist, &showprintlist);
   /* Turn on printing of static fields.  */
   static_field_print = 1;
@@ -824,14 +853,14 @@ Show printing of C++ static members."), NULL,
 Set printing of C++ virtual function tables."), _("\
 Show printing of C++ virtual function tables."), NULL,
 			   NULL,
-			   NULL, /* FIXME: i18n: */
+			   show_vtblprint,
 			   &setprintlist, &showprintlist);
 
   add_setshow_boolean_cmd ("object", class_support, &objectprint, _("\
 Set printing of object's derived type based on vtable info."), _("\
 Show printing of object's derived type based on vtable info."), NULL,
 			   NULL,
-			   NULL, /* FIXME: i18n: */
+			   show_objectprint,
 			   &setprintlist, &showprintlist);
 
   /* Give people the defaults which they are used to.  */

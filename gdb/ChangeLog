@@ -1,3 +1,73 @@
+2005-02-24  Andrew Cagney  <cagney@gnu.org>
+
+	Add show_VARIABLE functions, update add_setshow call.
+	* varobj.c (_initialize_varobj, show_varobjdebug): Add and update.
+	* valprint.c (_initialize_valprint, show_print_max) 
+	(show_stop_print_at_null, show_repeat_count_threshold) 
+	(show_prettyprint_structs, show_unionprint) 
+	(show_prettyprint_arrays, show_addressprint, show_input_radix) 
+	(show_output_radix): Ditto.
+	* valops.c (_initialize_valops, show_overload_resolution): Ditto.
+	* utils.c (initialize_utils, show_chars_per_line) 
+	(show_lines_per_page, show_demangle, show_pagination_enabled) 
+	(show_sevenbit_strings, show_asm_demangle): Ditto
+	* tui/tui-win.c (_initialize_tui_win, show_tui_border_kind) 
+	(show_tui_border_mode, show_tui_active_border_mode): Ditto.
+	* top.c (init_main, show_new_async_prompt) 
+	(show_async_command_editing_p, show_write_history_p) 
+	(show_history_size, show_history_filename, show_caution) 
+	(show_annotation_level, init_main): Ditto.
+	* target.c (initialize_targets, show_targetdebug)
+	(show_trust_readonly): Ditto.
+	* symfile.c (_initialize_symfile, show_symbol_reloading) 
+	(show_ext_args, show_download_write_size) 
+	(show_debug_file_directory): Ditto.
+	* source.c (_initialize_source, show_lines_to_list): Ditto.
+	* solib.c (_initialize_solib, show_auto_solib_add) 
+	(show_solib_search_path): Ditto.
+	* p-valprint.c (_initialize_pascal_valprint) 
+	(show_pascal_static_field_print): Ditto.
+	* printcmd.c (_initialize_printcmd, show_max_symbolic_offset) 
+	(show_print_symbol_filename): Add and update.
+	* parse.c (_initialize_parse, show_expressiondebug): Dito.
+	* observer.c (_initialize_observer, show_observer_debug): Dito.
+	* maint.c (_initialize_maint_cmds, show_watchdog) 
+	(show_maintenance_profile_p): Dito.
+	* linux-nat.c (_initialize_linux_nat, show_debug_linux_nat): Dito.
+	* infrun.c (_initialize_infrun, show_debug_infrun) 
+	(show_stop_on_solib_events, show_follow_fork_mode_string) 
+	(show_scheduler_mode, show_step_stop_if_no_debug): Ditto.
+	* infcall.c (_initialize_infcall, show_coerce_float_to_double_p) 
+	(show_unwind_on_signal_p): Ditto.
+	* gdbtypes.c (build_gdbtypes, show_opaque_type_resolution) 
+	(_initialize_gdbtypes, show_overload_debug): Ditto.
+	* gdb-events.c, gdb-events.sh (_initialize_gdb_events)
+	(show_gdb_events_debug): Ditto.
+	* gdbarch.c, gdbarch.sh (show_gdbarch_debug)
+	(_initialize_gdbarch): Ditto.
+	* frame.c (_initialize_frame, show_backtrace_past_main) 
+	(show_backtrace_past_entry, show_backtrace_limit) 
+	(show_frame_debug): Ditto.
+	* exec.c (_initialize_exec, show_write_files): Ditto.
+	* dwarf2read.c (_initialize_dwarf2_read) 
+	(show_dwarf2_max_cache_age): Ditto.
+	* demangle.c (_initialize_demangler)
+	(show_demangling_style_names): Ditto.
+	* dcache.c (_initialize_dcache, show_dcache_enabled_p): Ditto.
+	* cp-valprint.c (show_static_field_print) 
+	(_initialize_cp_valprint, show_vtblprint, show_objectprint): Ditto.
+	* corefile.c (_initialize_core, show_gnutarget_string): Ditto.
+	* cli/cli-logging.c (_initialize_cli_logging) 
+	(show_logging_overwrite, show_logging_redirect) 
+	(show_logging_filename): Ditto.
+	* cli/cli-cmds.c (show_info_verbose, show_history_expansion_p) 
+	(init_cli_cmds, show_baud_rate, show_remote_debug) 
+	(show_remote_timeout, show_max_user_call_depth): Ditto.
+	* charset.c (show_host_charset_name, show_target_charset_name)
+	(initialize_charset): Ditto.
+	* breakpoint.c (show_can_use_hw_watchpoints)
+	(show_pending_break_support, _initialize_breakpoint): Ditto.
+
 2005-02-23  Jim Blandy  <jimb@redhat.com>
 
 	* disasm.c (gdb_disassemble_info): Call disassemble_init_for_target.

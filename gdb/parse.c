@@ -81,6 +81,12 @@ int paren_depth;
 int comma_terminates;
 
 static int expressiondebug = 0;
+static void
+show_expressiondebug (struct ui_file *file, int from_tty,
+		      struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Expression debugging is %s.\n"), value);
+}
 
 static void free_funcalls (void *ignore);
 
@@ -1318,6 +1324,6 @@ Set expression debugging."), _("\
 Show expression debugging."), _("\
 When non-zero, the internal representation of expressions will be printed."),
 			    NULL,
-			    NULL, /* FIXME: i18n: */
+			    show_expressiondebug,
 			    &setdebuglist, &showdebuglist);
 }

@@ -580,6 +580,13 @@ extern int vtblprint;		/* Controls printing of vtbl's */
 extern int objectprint;		/* Controls looking up an object's derived type
 				   using what we find in its vtables.  */
 static int pascal_static_field_print;	/* Controls printing of static fields. */
+static void
+show_pascal_static_field_print (struct ui_file *file, int from_tty,
+				struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Printing of pascal static members is %s.\n"),
+		    value);
+}
 
 static struct obstack dont_print_vb_obstack;
 static struct obstack dont_print_statmem_obstack;
@@ -1112,7 +1119,7 @@ _initialize_pascal_valprint (void)
 Set printing of pascal static members."), _("\
 Show printing of pascal static members."), NULL,
 			   NULL,
-			   NULL, /* FIXME: i18n: */
+			   show_pascal_static_field_print,
 			   &setprintlist, &showprintlist);
   /* Turn on printing of static fields.  */
   pascal_static_field_print = 1;

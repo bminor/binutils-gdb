@@ -87,6 +87,12 @@ int inferior_ignoring_leading_exec_events = 0;
    no line number information.  The normal behavior is that we step
    over such function.  */
 int step_stop_if_no_debug = 0;
+static void
+show_step_stop_if_no_debug (struct ui_file *file, int from_tty,
+			    struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Mode of the step operation is %s.\n"), value);
+}
 
 /* In asynchronous mode, but simulating synchronous execution. */
 
@@ -108,6 +114,12 @@ static ptid_t previous_inferior_ptid;
 static int may_follow_exec = MAY_FOLLOW_EXEC;
 
 static int debug_infrun = 0;
+static void
+show_debug_infrun (struct ui_file *file, int from_tty,
+		   struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Inferior debugging is %s.\n"), value);
+}
 
 /* If the program uses ELF-style shared libraries, then calls to
    functions in shared libraries go through stubs, which live in a
@@ -245,6 +257,13 @@ static int trap_expected;
 /* Nonzero if we want to give control to the user when we're notified
    of shared library events by the dynamic linker.  */
 static int stop_on_solib_events;
+static void
+show_stop_on_solib_events (struct ui_file *file, int from_tty,
+			   struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Stopping for shared library events is %s.\n"),
+		    value);
+}
 #endif
 
 /* Nonzero means expecting a trace trap
@@ -314,6 +333,14 @@ static const char *follow_fork_mode_kind_names[] = {
 };
 
 static const char *follow_fork_mode_string = follow_fork_mode_parent;
+static void
+show_follow_fork_mode_string (struct ui_file *file, int from_tty,
+			      struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+Debugger response to a program call of fork or vfork is \"%s\".\n"),
+		    value);
+}
 
 
 static int
@@ -458,13 +485,21 @@ resume_cleanups (void *ignore)
 static const char schedlock_off[] = "off";
 static const char schedlock_on[] = "on";
 static const char schedlock_step[] = "step";
-static const char *scheduler_mode = schedlock_off;
 static const char *scheduler_enums[] = {
   schedlock_off,
   schedlock_on,
   schedlock_step,
   NULL
 };
+static const char *scheduler_mode = schedlock_off;
+static void
+show_scheduler_mode (struct ui_file *file, int from_tty,
+		     struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+Mode for locking scheduler during execution is \"%s\".\n"),
+		    value);
+}
 
 static void
 set_schedlock_func (char *args, int from_tty, struct cmd_list_element *c)
@@ -3835,7 +3870,7 @@ Set inferior debugging."), _("\
 Show inferior debugging."), _("\
 When non-zero, inferior specific debugging is enabled."),
 			    NULL,
-			    NULL, /* FIXME: i18n: */
+			    show_debug_infrun,
 			    &setdebuglist, &showdebuglist);
 
   numsigs = (int) TARGET_SIGNAL_LAST;
@@ -3894,7 +3929,7 @@ If nonzero, gdb will give control to the user when the dynamic linker\n\
 notifies gdb of shared library events.  The most common event of interest\n\
 to the user would be loading/unloading of a new library."),
 			    NULL,
-			    NULL, /* FIXME: i18n: */
+			    show_stop_on_solib_events,
 			    &setlist, &showlist);
 #endif
 
@@ -3909,7 +3944,7 @@ A fork or vfork creates a new process.  follow-fork-mode can be:\n\
 The unfollowed process will continue to run.\n\
 By default, the debugger will follow the parent process."),
 			NULL,
-			NULL, /* FIXME: i18n: */
+			show_follow_fork_mode_string,
 			&setlist, &showlist);
 
   add_setshow_enum_cmd ("scheduler-locking", class_run, 
@@ -3922,7 +3957,7 @@ step == scheduler locked during every single-step operation.\n\
 	In this mode, no other thread may run during a step command.\n\
 	Other threads may run while stepping over a function call ('next')."), 
 			set_schedlock_func,	/* traps on target vector */
-			NULL, /* FIXME: i18n: */
+			show_scheduler_mode,
 			&setlist, &showlist);
 
   add_setshow_boolean_cmd ("step-mode", class_run, &step_stop_if_no_debug, _("\
@@ -3932,7 +3967,7 @@ When set, doing a step over a function without debug line information\n\
 will stop at the first instruction of that function. Otherwise, the\n\
 function is skipped and the step command stops at a different source line."),
 			   NULL,
-			   NULL, /* FIXME: i18n: */
+			   show_step_stop_if_no_debug,
 			   &setlist, &showlist);
 
   /* ptid initializations */

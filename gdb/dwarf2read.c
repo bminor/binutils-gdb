@@ -659,6 +659,15 @@ static struct dwarf2_queue_item *dwarf2_queue, *dwarf2_queue_tail;
    sizes of up to at least twenty will improve startup time for
    typical inter-CU-reference binaries, at an obvious memory cost.  */
 static int dwarf2_max_cache_age = 5;
+static void
+show_dwarf2_max_cache_age (struct ui_file *file, int from_tty,
+			   struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+The upper bound on the age of cached dwarf2 compilation units is %s.\n"),
+		    value);
+}
+
 
 /* Various complaints about symbol reading that don't abort the process */
 
@@ -9650,7 +9659,7 @@ A higher limit means that cached compilation units will be stored\n\
 in memory longer, and more total memory will be used.  Zero disables\n\
 caching, which can slow down startup."),
 			    NULL,
-			    NULL, /* FIXME: i18n: The upper bound on the age of cached dwarf2 compilation units is %d.  */
+			    show_dwarf2_max_cache_age,
 			    &set_dwarf2_cmdlist,
 			    &show_dwarf2_cmdlist);
 }

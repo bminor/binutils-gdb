@@ -416,6 +416,12 @@ char *gnutarget;
 
 /* Same thing, except it is "auto" not NULL for the default case.  */
 static char *gnutarget_string;
+static void
+show_gnutarget_string (struct ui_file *file, int from_tty,
+		       struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("The current BFD target is \"%s\".\n"), value);
+}
 
 static void set_gnutarget_command (char *, int, struct cmd_list_element *);
 
@@ -455,7 +461,7 @@ Set the current BFD target."), _("\
 Show the current BFD target."), _("\
 Use `set gnutarget auto' to specify automatic detection."),
 				   set_gnutarget_command,
-				   NULL, /* FIXME: i18n: */
+				   show_gnutarget_string,
 				   &setlist, &showlist);
 
   if (getenv ("GNUTARGET"))

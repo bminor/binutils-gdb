@@ -133,18 +133,42 @@ int immediate_quit;
    C++/ObjC form rather than raw.  */
 
 int demangle = 1;
+static void
+show_demangle (struct ui_file *file, int from_tty,
+	       struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+Demangling of encoded C++/ObjC names when displaying symbols is %s.\n"),
+		    value);
+}
 
 /* Nonzero means that encoded C++/ObjC names should be printed out in their
    C++/ObjC form even in assembler language displays.  If this is set, but
    DEMANGLE is zero, names are printed raw, i.e. DEMANGLE controls.  */
 
 int asm_demangle = 0;
+static void
+show_asm_demangle (struct ui_file *file, int from_tty,
+		   struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+Demangling of C++/ObjC names in disassembly listings is %s.\n"),
+		    value);
+}
 
 /* Nonzero means that strings with character values >0x7F should be printed
    as octal escapes.  Zero means just print the value (e.g. it's an
    international character, and the terminal or window can cope.)  */
 
 int sevenbit_strings = 0;
+static void
+show_sevenbit_strings (struct ui_file *file, int from_tty,
+		       struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+Printing of 8-bit characters in strings as \\nnn is %s.\n"),
+		    value);
+}
 
 /* String to be printed before error messages, if any.  */
 
@@ -159,6 +183,13 @@ char *quit_pre_print;
 char *warning_pre_print = "\nwarning: ";
 
 int pagination_enabled = 1;
+static void
+show_pagination_enabled (struct ui_file *file, int from_tty,
+			 struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("State of pagination is %s.\n"), value);
+}
+
 
 
 /* Add a new cleanup to the cleanup_chain,
@@ -1525,9 +1556,25 @@ fputstrn_unfiltered (const char *str, int n, int quoter,
 
 /* Number of lines per page or UINT_MAX if paging is disabled.  */
 static unsigned int lines_per_page;
+static void
+show_lines_per_page (struct ui_file *file, int from_tty,
+		     struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+Number of lines gdb thinks are in a page is %s.\n"),
+		    value);
+}
 
 /* Number of chars per line or UINT_MAX if line folding is disabled.  */
 static unsigned int chars_per_line;
+static void
+show_chars_per_line (struct ui_file *file, int from_tty,
+		     struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+Number of characters gdb thinks are in a line is %s.\n"),
+		    value);
+}
 
 /* Current count of lines printed on this page, chars on this line.  */
 static unsigned int lines_printed, chars_printed;
@@ -2450,14 +2497,14 @@ initialize_utils (void)
 Set number of characters gdb thinks are in a line."), _("\
 Show number of characters gdb thinks are in a line."), NULL,
 			    set_width_command,
-			    NULL, /* FIXME: i18n: */
+			    show_chars_per_line,
 			    &setlist, &showlist);
 
   add_setshow_uinteger_cmd ("height", class_support, &lines_per_page, _("\
 Set number of lines gdb thinks are in a page."), _("\
 Show number of lines gdb thinks are in a page."), NULL,
 			    set_height_command,
-			    NULL, /* FIXME: i18n: */
+			    show_lines_per_page,
 			    &setlist, &showlist);
 
   init_page_info ();
@@ -2466,7 +2513,7 @@ Show number of lines gdb thinks are in a page."), NULL,
 Set demangling of encoded C++/ObjC names when displaying symbols."), _("\
 Show demangling of encoded C++/ObjC names when displaying symbols."), NULL,
 			   NULL,
-			   NULL, /* FIXME: i18n: */
+			   show_demangle,
 			   &setprintlist, &showprintlist);
 
   add_setshow_boolean_cmd ("pagination", class_support,
@@ -2474,7 +2521,7 @@ Show demangling of encoded C++/ObjC names when displaying symbols."), NULL,
 Set state of pagination."), _("\
 Show state of pagination."), NULL,
 			   NULL,
-			   NULL, /* FIXME: i18n: */
+			   show_pagination_enabled,
 			   &setlist, &showlist);
 
   if (xdb_commands)
@@ -2490,14 +2537,14 @@ Show state of pagination."), NULL,
 Set printing of 8-bit characters in strings as \\nnn."), _("\
 Show printing of 8-bit characters in strings as \\nnn."), NULL,
 			   NULL,
-			   NULL, /* FIXME: i18n: */
+			   show_sevenbit_strings,
 			   &setprintlist, &showprintlist);
 
   add_setshow_boolean_cmd ("asm-demangle", class_support, &asm_demangle, _("\
 Set demangling of C++/ObjC names in disassembly listings."), _("\
 Show demangling of C++/ObjC names in disassembly listings."), NULL,
 			   NULL,
-			   NULL, /* FIXME: i18n: */
+			   show_asm_demangle,
 			   &setprintlist, &showprintlist);
 }
 

@@ -124,7 +124,22 @@ struct type *builtin_type_CORE_ADDR;
 struct type *builtin_type_bfd_vma;
 
 int opaque_type_resolution = 1;
+static void
+show_opaque_type_resolution (struct ui_file *file, int from_tty,
+			     struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+Resolution of opaque struct/class/union types (if set before loading symbols) is %s.\n"),
+		    value);
+}
+
 int overload_debug = 0;
+static void
+show_overload_debug (struct ui_file *file, int from_tty,
+		     struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Debugging of C++ overloading is %s.\n"), value);
+}
 
 struct extra
   {
@@ -3257,7 +3272,7 @@ build_gdbtypes (void)
 Set resolution of opaque struct/class/union types (if set before loading symbols)."), _("\
 Show resolution of opaque struct/class/union types (if set before loading symbols)."), NULL,
 			   NULL,
-			   NULL, /* FIXME: i18n: */
+			   show_opaque_type_resolution,
 			   &setlist, &showlist);
   opaque_type_resolution = 1;
 
@@ -3712,6 +3727,6 @@ Set debugging of C++ overloading."), _("\
 Show debugging of C++ overloading."), _("\
 When enabled, ranking of the functions is displayed."),
 			    NULL,
-			    NULL, /* FIXME: i18n: */
+			    show_overload_debug,
 			    &setdebuglist, &showdebuglist);
 }

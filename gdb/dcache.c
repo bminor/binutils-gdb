@@ -181,6 +181,13 @@ static void dcache_info (char *exp, int tty);
 void _initialize_dcache (void);
 
 static int dcache_enabled_p = 0;
+static void
+show_dcache_enabled_p (struct ui_file *file, int from_tty,
+		       struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Cache use for remote targets is %s.\n"), value);
+}
+
 
 DCACHE *last_cache;		/* Used by info dcache */
 
@@ -595,7 +602,7 @@ Unfortunately, gdb does not currently know anything about volatile\n\
 registers and thus data caching will produce incorrect results with\n\
 volatile registers are in use.  By default, this option is off."),
 			   NULL,
-			   NULL, /* FIXME: i18n: */
+			   show_dcache_enabled_p,
 			   &setlist, &showlist);
 
   add_info ("dcache", dcache_info,

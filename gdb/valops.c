@@ -126,6 +126,14 @@ static int auto_abandon = 0;
 #endif
 
 int overload_resolution = 0;
+static void
+show_overload_resolution (struct ui_file *file, int from_tty,
+			  struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+Overload resolution in evaluating C++ functions is %s.\n"),
+		    value);
+}
 
 /* Find the address of function name NAME in the inferior.  */
 
@@ -2838,7 +2846,7 @@ _initialize_valops (void)
 Set overload resolution in evaluating C++ functions."), _("\
 Show overload resolution in evaluating C++ functions."), NULL,
 			   NULL,
-			   NULL, /* FIXME: i18n: */
+			   show_overload_resolution,
 			   &setlist, &showlist);
   overload_resolution = 1;
 }

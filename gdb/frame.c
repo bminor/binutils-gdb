@@ -112,12 +112,45 @@ struct frame_info
 /* Flag to control debugging.  */
 
 static int frame_debug;
+static void
+show_frame_debug (struct ui_file *file, int from_tty,
+		  struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Frame debugging is %s.\n"), value);
+}
 
 /* Flag to indicate whether backtraces should stop at main et.al.  */
 
 static int backtrace_past_main;
+static void
+show_backtrace_past_main (struct ui_file *file, int from_tty,
+			  struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+Whether backtraces should continue past \"main\" is %s.\n"),
+		    value);
+}
+
 static int backtrace_past_entry;
+static void
+show_backtrace_past_entry (struct ui_file *file, int from_tty,
+			   struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+Whether backtraces should continue past the entry point of a program is %s.\n"),
+		    value);
+}
+
 static unsigned int backtrace_limit = UINT_MAX;
+static void
+show_backtrace_limit (struct ui_file *file, int from_tty,
+		      struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+An upper bound on the number of backtrace levels is %s.\n"),
+		    value);
+}
+
 
 static void
 fprint_field (struct ui_file *file, const char *name, int p, CORE_ADDR addr)
@@ -1557,7 +1590,7 @@ Normally the caller of \"main\" is not of interest, so GDB will terminate\n\
 the backtrace at \"main\".  Set this variable if you need to see the rest\n\
 of the stack trace."),
 			   NULL,
-			   NULL, /* FIXME: i18n: Whether backtraces should continue past \"main\" is %s.  */
+			   show_backtrace_past_main,
 			   &set_backtrace_cmdlist,
 			   &show_backtrace_cmdlist);
 
@@ -1571,7 +1604,7 @@ Normally there are no callers beyond the entry point of a program, so GDB\n\
 will terminate the backtrace there.  Set this variable if you need to see \n\
 the rest of the stack trace."),
 			   NULL,
-			   NULL, /* FIXME: i18n: Whether backtraces should continue past the entry point is %s.  */
+			   show_backtrace_past_entry,
 			   &set_backtrace_cmdlist,
 			   &show_backtrace_cmdlist);
 
@@ -1582,7 +1615,7 @@ Show the upper bound on the number of backtrace levels."), _("\
 No more than the specified number of frames can be displayed or examined.\n\
 Zero is unlimited."),
 			    NULL,
-			    NULL, /* FIXME: i18n: An upper bound on the number of backtrace levels is %s.  */
+			    show_backtrace_limit,
 			    &set_backtrace_cmdlist,
 			    &show_backtrace_cmdlist);
 
@@ -1592,6 +1625,6 @@ Set frame debugging."), _("\
 Show frame debugging."), _("\
 When non-zero, frame specific internal debugging is enabled."),
 			    NULL,
-			    NULL, /* FIXME: i18n: */
+			    show_frame_debug,
 			    &setdebuglist, &showdebuglist);
 }

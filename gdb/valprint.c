@@ -67,11 +67,37 @@ void _initialize_valprint (void);
 
 unsigned int print_max;
 #define PRINT_MAX_DEFAULT 200	/* Start print_max off at this value. */
+static void
+show_print_max (struct ui_file *file, int from_tty,
+		struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+Limit on string chars or array elements to print is %s.\n"),
+		    value);
+}
+
 
 /* Default input and output radixes, and output format letter.  */
 
 unsigned input_radix = 10;
+static void
+show_input_radix (struct ui_file *file, int from_tty,
+		  struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+Default input radix for entering numbers is %s.\n"),
+		    value);
+}
+
 unsigned output_radix = 10;
+static void
+show_output_radix (struct ui_file *file, int from_tty,
+		   struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+Default output radix for printing of values is %s.\n"),
+		    value);
+}
 int output_format = 0;
 
 /* Print repeat counts if there are more than this many repetitions of an
@@ -79,27 +105,68 @@ int output_format = 0;
    print routines. */
 
 unsigned int repeat_count_threshold = 10;
+static void
+show_repeat_count_threshold (struct ui_file *file, int from_tty,
+			     struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Threshold for repeated print elements is %s.\n"),
+		    value);
+}
 
 /* If nonzero, stops printing of char arrays at first null. */
 
 int stop_print_at_null;
+static void
+show_stop_print_at_null (struct ui_file *file, int from_tty,
+			 struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+Printing of char arrays to stop at first null char is %s.\n"),
+		    value);
+}
 
 /* Controls pretty printing of structures. */
 
 int prettyprint_structs;
+static void
+show_prettyprint_structs (struct ui_file *file, int from_tty,
+			  struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Prettyprinting of structures is %s.\n"), value);
+}
 
 /* Controls pretty printing of arrays.  */
 
 int prettyprint_arrays;
+static void
+show_prettyprint_arrays (struct ui_file *file, int from_tty,
+			 struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Prettyprinting of arrays is %s.\n"), value);
+}
 
 /* If nonzero, causes unions inside structures or other unions to be
    printed. */
 
 int unionprint;			/* Controls printing of nested unions.  */
+static void
+show_unionprint (struct ui_file *file, int from_tty,
+		 struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+Printing of unions interior to structures is %s.\n"),
+		    value);
+}
 
 /* If nonzero, causes machine addresses to be printed in certain contexts. */
 
 int addressprint;		/* Controls printing of machine addresses */
+static void
+show_addressprint (struct ui_file *file, int from_tty,
+		   struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Printing of addresses is %s.\n"), value);
+}
 
 
 /* Print data of type TYPE located at VALADDR (within GDB), which came from
@@ -1210,14 +1277,14 @@ Set limit on string chars or array elements to print."), _("\
 Show limit on string chars or array elements to print."), _("\
 \"set print elements 0\" causes there to be no limit."),
 			    NULL,
-			    NULL, /* FIXME: i18n: */
+			    show_print_max,
 			    &setprintlist, &showprintlist);
 
   add_setshow_boolean_cmd ("null-stop", no_class, &stop_print_at_null, _("\
 Set printing of char arrays to stop at first null char."), _("\
 Show printing of char arrays to stop at first null char."), NULL,
 			   NULL,
-			   NULL, /* FIXME: i18n: */
+			   show_stop_print_at_null,
 			   &setprintlist, &showprintlist);
 
   add_setshow_uinteger_cmd ("repeats", no_class,
@@ -1226,49 +1293,49 @@ Set threshold for repeated print elements."), _("\
 Show threshold for repeated print elements."), _("\
 \"set print repeats 0\" causes all elements to be individually printed."),
 			    NULL,
-			    NULL, /* FIXME: i18n: */
+			    show_repeat_count_threshold,
 			    &setprintlist, &showprintlist);
 
   add_setshow_boolean_cmd ("pretty", class_support, &prettyprint_structs, _("\
 Set prettyprinting of structures."), _("\
 Show prettyprinting of structures."), NULL,
 			   NULL,
-			   NULL, /* FIXME: i18n: */
+			   show_prettyprint_structs,
 			   &setprintlist, &showprintlist);
 
   add_setshow_boolean_cmd ("union", class_support, &unionprint, _("\
 Set printing of unions interior to structures."), _("\
 Show printing of unions interior to structures."), NULL,
 			   NULL,
-			   NULL, /* FIXME: i18n: */
+			   show_unionprint,
 			   &setprintlist, &showprintlist);
 
   add_setshow_boolean_cmd ("array", class_support, &prettyprint_arrays, _("\
 Set prettyprinting of arrays."), _("\
 Show prettyprinting of arrays."), NULL,
 			   NULL,
-			   NULL, /* FIXME: i18n: */
+			   show_prettyprint_arrays,
 			   &setprintlist, &showprintlist);
 
   add_setshow_boolean_cmd ("address", class_support, &addressprint, _("\
 Set printing of addresses."), _("\
 Show printing of addresses."), NULL,
 			   NULL,
-			   NULL, /* FIXME: i18n: */
+			   show_addressprint,
 			   &setprintlist, &showprintlist);
 
   add_setshow_uinteger_cmd ("input-radix", class_support, &input_radix, _("\
 Set default input radix for entering numbers."), _("\
 Show default input radix for entering numbers."), NULL,
 			    set_input_radix,
-			    NULL, /* FIXME: i18n: */
+			    show_input_radix,
 			    &setlist, &showlist);
 
   add_setshow_uinteger_cmd ("output-radix", class_support, &output_radix, _("\
 Set default output radix for printing of values."), _("\
 Show default output radix for printing of values."), NULL,
 			    set_output_radix,
-			    NULL, /* FIXME: i18n: */
+			    show_output_radix,
 			    &setlist, &showlist);
 
   /* The "set radix" and "show radix" commands are special in that

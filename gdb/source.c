@@ -91,6 +91,14 @@ static int current_source_line;
    things are wrapping, but that would be a fair amount of work.  */
 
 int lines_to_list = 10;
+static void
+show_lines_to_list (struct ui_file *file, int from_tty,
+		    struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+Number of source lines gdb will list by default is %s.\n"),
+		    value);
+}
 
 /* Line number of last line printed.  Default for various commands.
    current_source_line is usually, but not always, the same as this.  */
@@ -1637,6 +1645,6 @@ The matching line number is also stored as the value of \"$_\"."));
 Set number of source lines gdb will list by default."), _("\
 Show number of source lines gdb will list by default."), NULL,
 			    NULL,
-			    NULL, /* FIXME: i18n: */
+			    show_lines_to_list,
 			    &setlist, &showlist);
 }

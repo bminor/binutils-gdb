@@ -69,6 +69,12 @@ static void maintenance_do_deprecate (char *, int);
    and one with slow communications.  */
 
 int watchdog = 0;
+static void
+show_watchdog (struct ui_file *file, int from_tty,
+	       struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Watchdog timer is %s.\n"), value);
+}
 
 /*
 
@@ -629,6 +635,12 @@ maintenance_show_cmd (char *args, int from_tty)
 /* Profiling support.  */
 
 static int maintenance_profile_p;
+static void
+show_maintenance_profile_p (struct ui_file *file, int from_tty,
+			    struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Internal profiling is %s.\n"), value);
+}
 
 #if defined (HAVE_MONSTARTUP) && defined (HAVE__MCLEANUP)
 
@@ -859,7 +871,7 @@ When non-zero, this timeout is used instead of waiting forever for a target\n\
 to finish a low-level step or continue operation.  If the specified amount\n\
 of time passes without a response from the target, an error occurs."),
 			    NULL,
-			    NULL, /* FIXME: i18n: */
+			    show_watchdog,
 			    &setlist, &showlist);
 
   add_setshow_boolean_cmd ("profile", class_maintenance,
@@ -868,7 +880,7 @@ Set internal profiling."), _("\
 Show internal profiling."), _("\
 When enabled GDB is profiled."),
 			   maintenance_set_profile_cmd,
-			   NULL, /* FIXME: i18n: Internal profiling is %s.  */
+			   show_maintenance_profile_p,
 			   &maintenance_set_cmdlist,
 			   &maintenance_show_cmdlist);
 }

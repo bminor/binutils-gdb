@@ -88,6 +88,14 @@ extern char lang_frame_mismatch_warn[];		/* language.c */
 /* Flag for whether we want all the "from_tty" gubbish printed.  */
 
 int caution = 1;		/* Default is yes, sigh. */
+static void
+show_caution (struct ui_file *file, int from_tty,
+	      struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+Whether to confirm potentially dangerous operations is %s.\n"),
+		    value);
+}
 
 /* stdio stream that command input is being read from.  Set to stdin normally.
    Set by source_command to the file we are sourcing.  Set to NULL if we are
@@ -655,13 +663,40 @@ gdb_readline (char *prompt_arg)
    substitution.  These variables are given default values at the end
    of this file.  */
 static int command_editing_p;
+
 /* NOTE 1999-04-29: This variable will be static again, once we modify
    gdb to use the event loop as the default command loop and we merge
    event-top.c into this file, top.c */
+
 /* static */ int history_expansion_p;
+
 static int write_history_p;
+static void
+show_write_history_p (struct ui_file *file, int from_tty,
+		      struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Saving of the history record on exit is %s.\n"),
+		    value);
+}
+
 static int history_size;
+static void
+show_history_size (struct ui_file *file, int from_tty,
+		   struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("The size of the command history is %s.\n"),
+		    value);
+}
+
 static char *history_filename;
+static void
+show_history_filename (struct ui_file *file, int from_tty,
+		       struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+The filename in which to record the command history is \"%s\".\n"),
+		    value);
+}
 
 /* This is like readline(), but it has some gdb-specific behavior.
    gdb can use readline in both the synchronous and async modes during
@@ -1336,6 +1371,37 @@ init_history (void)
 }
 
 static void
+show_new_async_prompt (struct ui_file *file, int from_tty,
+		       struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Gdb's prompt is \"%s\".\n"), value);
+}
+
+static void
+show_async_command_editing_p (struct ui_file *file, int from_tty,
+			      struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+Editing of command lines as they are typed is %s.\n"),
+		    value);
+}
+
+static void
+show_annotation_level (struct ui_file *file, int from_tty,
+		       struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Annotation_level is %s.\n"), value);
+}
+
+static void
+show_exec_done_display_p (struct ui_file *file, int from_tty,
+			  struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+Notification of completion for asynchronous execution commands is %s.\n"),
+		    value);
+}
+static void
 init_main (void)
 {
   struct cmd_list_element *c;
@@ -1379,7 +1445,7 @@ init_main (void)
 Set gdb's prompt"), _("\
 Show gdb's prompt"), NULL,
 			  set_async_prompt,
-			  NULL, /* FIXME: i18n: */
+			  show_new_async_prompt,
 			  &setlist, &showlist);
 
   add_com ("dont-repeat", class_support, dont_repeat_command, _("\
@@ -1395,7 +1461,7 @@ Use \"on\" to enable the editing, and \"off\" to disable it.\n\
 Without an argument, command line editing is enabled.  To edit, use\n\
 EMACS-like or VI-like commands like control-P or ESC."),
 			   set_async_editing_command,
-			   NULL, /* FIXME: i18n: */
+			   show_async_command_editing_p,
 			   &setlist, &showlist);
 
   add_setshow_boolean_cmd ("save", no_class, &write_history_p, _("\
@@ -1404,7 +1470,7 @@ Show saving of the history record on exit."), _("\
 Use \"on\" to enable the saving, and \"off\" to disable it.\n\
 Without an argument, saving is enabled."),
 			   NULL,
-			   NULL, /* FIXME: i18n: */
+			   show_write_history_p,
 			   &sethistlist, &showhistlist);
 
   add_setshow_integer_cmd ("size", no_class, &history_size, _("\
@@ -1412,7 +1478,7 @@ Set the size of the command history,"), _("\
 Show the size of the command history,"), _("\
 ie. the number of previous commands to keep a record of."),
 			   set_history_size_command,
-			   NULL, /* FIXME: i18n: */
+			   show_history_size,
 			   &sethistlist, &showhistlist);
 
   add_setshow_filename_cmd ("filename", no_class, &history_filename, _("\
@@ -1420,14 +1486,14 @@ Set the filename in which to record the command history"), _("\
 Show the filename in which to record the command history"), _("\
 (the list of previous commands of which a record is kept)."),
 			    NULL,
-			    NULL, /* FIXME: i18n: */
+			    show_history_filename,
 			    &sethistlist, &showhistlist);
 
   add_setshow_boolean_cmd ("confirm", class_support, &caution, _("\
 Set whether to confirm potentially dangerous operations."), _("\
 Show whether to confirm potentially dangerous operations."), NULL,
 			   NULL,
-			   NULL, /* FIXME: i18n: */
+			   show_caution,
 			   &setlist, &showlist);
 
   add_setshow_zinteger_cmd ("annotate", class_obscure, &annotation_level, _("\
@@ -1436,7 +1502,7 @@ Show annotation_level."), _("\
 0 == normal;     1 == fullname (for use when running under emacs)\n\
 2 == output annotated suitably for use by programs that control GDB."),
 			    set_async_annotation_level,
-			    NULL, /* FIXME: i18n: */
+			    show_annotation_level,
 			    &setlist, &showlist);
 
   add_setshow_boolean_cmd ("exec-done-display", class_support,
@@ -1445,7 +1511,7 @@ Set notification of completion for asynchronous execution commands."), _("\
 Show notification of completion for asynchronous execution commands."), _("\
 Use \"on\" to enable the notification, and \"off\" to disable it."),
 			   NULL,
-			   NULL, /* FIXME: i18n: */
+			   show_exec_done_display_p,
 			   &setlist, &showlist);
 }
 

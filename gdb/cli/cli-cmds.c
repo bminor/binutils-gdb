@@ -1039,6 +1039,60 @@ init_cmd_lists (void)
   showchecklist = NULL;
 }
 
+static void
+show_info_verbose (struct ui_file *file, int from_tty,
+		   struct cmd_list_element *c,
+		   const char *value)
+{
+  if (info_verbose)
+    fprintf_filtered (file, _("\
+Verbose printing of informational messages is %s.\n"), value);
+  else
+    fprintf_filtered (file, _("Verbosity is %s.\n"), value);
+}
+
+static void
+show_history_expansion_p (struct ui_file *file, int from_tty,
+			  struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("History expansion on command input is %s.\n"),
+		    value);
+}
+
+static void
+show_baud_rate (struct ui_file *file, int from_tty,
+		struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Baud rate for remote serial I/O is %s.\n"),
+		    value);
+}
+
+static void
+show_remote_debug (struct ui_file *file, int from_tty,
+		   struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Debugging of remote protocol is %s.\n"),
+		    value);
+}
+
+static void
+show_remote_timeout (struct ui_file *file, int from_tty,
+		     struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+Timeout limit to wait for target to respond is %s.\n"),
+		    value);
+}
+
+static void
+show_max_user_call_depth (struct ui_file *file, int from_tty,
+			  struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+The max call depth for user-defined commands is %s.\n"),
+		    value);
+}
+
 
 void
 init_cli_cmds (void)
@@ -1125,7 +1179,7 @@ when gdb is started."), &cmdlist);
 Set verbosity."), _("\
 Show verbosity."), NULL,
 			   set_verbose,
-			   NULL, /* FIXME: i18n: */
+			   show_info_verbose,
 			   &setlist, &showlist);
 
   add_prefix_cmd ("history", class_support, set_history,
@@ -1140,7 +1194,7 @@ Set history expansion on command input."), _("\
 Show history expansion on command input."), _("\
 Without an argument, history expansion is enabled."),
 			   NULL,
-			   NULL, /* FIXME: i18n: */
+			   show_history_expansion_p,
 			   &sethistlist, &showhistlist);
 
   add_prefix_cmd ("info", class_info, info_command, _("\
@@ -1187,7 +1241,7 @@ Show baud rate for remote serial I/O."), _("\
 This value is used to set the speed of the serial port when debugging\n\
 using remote targets."),
 			    NULL,
-			    NULL, /* FIXME: i18n: */
+			    show_baud_rate,
 			    &setlist, &showlist);
 
   add_setshow_zinteger_cmd ("remote", no_class, &remote_debug, _("\
@@ -1196,7 +1250,7 @@ Show debugging of remote protocol."), _("\
 When enabled, each packet sent or received with the remote target\n\
 is displayed."),
 			    NULL,
-			    NULL, /* FIXME: i18n: */
+			    show_remote_debug,
 			    &setdebuglist, &showdebuglist);
 
   add_setshow_integer_cmd ("remotetimeout", no_class, &remote_timeout, _("\
@@ -1205,7 +1259,7 @@ Show timeout limit to wait for target to respond."), _("\
 This value is used to set the time limit for gdb to wait for a response\n\
 from the target."),
 			   NULL,
-			   NULL, /* FIXME: i18n: */
+			   show_remote_timeout,
 			   &setlist, &showlist);
 
   add_prefix_cmd ("debug", no_class, set_debug,
@@ -1288,6 +1342,6 @@ With no argument, show definitions of all user defined commands."), &showlist);
 Set the max call depth for user-defined commands."), _("\
 Show the max call depth for user-defined commands."), NULL,
 			   NULL,
-			   NULL, /* FIXME: i18n: */
+			   show_max_user_call_depth,
 			   &setlist, &showlist);
 }

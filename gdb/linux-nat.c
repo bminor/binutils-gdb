@@ -82,6 +82,13 @@
 #endif
 
 static int debug_linux_nat;
+static void
+show_debug_linux_nat (struct ui_file *file, int from_tty,
+		      struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Debugging of GNU/Linux lwp module is %s.\n"),
+		    value);
+}
 
 static int linux_parent_pid;
 
@@ -3089,7 +3096,7 @@ Set debugging of GNU/Linux lwp module."), _("\
 Show debugging of GNU/Linux lwp module."), _("\
 Enables printf debugging output."),
 			    NULL,
-			    NULL, /* FIXME: i18n: */
+			    show_debug_linux_nat,
 			    &setdebuglist, &showdebuglist);
 }
 

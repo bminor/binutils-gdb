@@ -45,6 +45,13 @@ static struct gdb_events queue_event_hooks;
 static struct gdb_events *current_event_hooks = &null_event_hooks;
 
 int gdb_events_debug;
+static void
+show_gdb_events_debug (struct ui_file *file, int from_tty,
+		       struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Event debugging is %s.\n"), value);
+}
+
 
 void
 breakpoint_create_event (int b)
@@ -338,6 +345,6 @@ Set event debugging."), _("\
 Show event debugging."), _("\
 When non-zero, event/notify debugging is enabled."),
 			    NULL,
-			    NULL, /* FIXME: i18n: */
+			    show_gdb_events_debug,
 			    &setdebuglist, &showdebuglist);
 }

@@ -204,11 +204,30 @@ static void ep_skip_leading_whitespace (char **s);
    if such is available. */
 static int can_use_hw_watchpoints;
 
+static void
+show_can_use_hw_watchpoints (struct ui_file *file, int from_tty,
+			     struct cmd_list_element *c,
+			     const char *value)
+{
+  fprintf_filtered (file, _("\
+Debugger's willingness to use watchpoint hardware is %s.\n"),
+		    value);
+}
+
 /* If AUTO_BOOLEAN_FALSE, gdb will not attempt to create pending breakpoints.
    If AUTO_BOOLEAN_TRUE, gdb will automatically create pending breakpoints
    for unrecognized breakpoint locations.  
    If AUTO_BOOLEAN_AUTO, gdb will query when breakpoints are unrecognized.  */
 static enum auto_boolean pending_break_support;
+static void
+show_pending_break_support (struct ui_file *file, int from_tty,
+			    struct cmd_list_element *c,
+			    const char *value)
+{
+  fprintf_filtered (file, _("\
+Debugger's behavior regarding pending breakpoints is %s.\n"),
+		    value);
+}
 
 void _initialize_breakpoint (void);
 
@@ -7928,6 +7947,8 @@ an expression is either read or written."));
 	    _("Synonym for ``info breakpoints''."));
 
 
+  /* XXX: cagney/2005-02-23: This should be a boolean, and should
+     respond to changes - contrary to the description.  */
   add_setshow_zinteger_cmd ("can-use-hw-watchpoints", class_support,
 			    &can_use_hw_watchpoints, _("\
 Set debugger's willingness to use watchpoint hardware."), _("\
@@ -7937,7 +7958,7 @@ such is available.  (However, any hardware watchpoints that were\n\
 created before setting this to nonzero, will continue to use watchpoint\n\
 hardware.)"),
 			    NULL,
-			    NULL, /* FIXME: i18n: */
+			    show_can_use_hw_watchpoints,
 			    &setlist, &showlist);
 
   can_use_hw_watchpoints = 1;
@@ -7964,7 +7985,7 @@ pending breakpoint.  If off, an unrecognized breakpoint location results in\n\
 an error.  If auto, an unrecognized breakpoint location results in a\n\
 user-query to see if a pending breakpoint should be created."),
 				NULL,
-				NULL, /* FIXME: i18n: Debugger's behavior regarding pending breakpoints is %s.  */
+				show_pending_break_support,
 				&breakpoint_set_cmdlist,
 				&breakpoint_show_cmdlist);
 

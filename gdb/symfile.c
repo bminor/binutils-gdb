@@ -160,6 +160,15 @@ int symbol_reloading = SYMBOL_RELOADING_DEFAULT;
 #else
 int symbol_reloading = 0;
 #endif
+static void
+show_symbol_reloading (struct ui_file *file, int from_tty,
+		       struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+Dynamic symbol table reloading multiple times in one run is %s.\n"),
+		    value);
+}
+
 
 /* If non-zero, shared library symbols will be added automatically
    when the inferior is created, new libraries are loaded, or when
@@ -1052,6 +1061,14 @@ separate_debug_file_exists (const char *name, unsigned long crc)
 }
 
 static char *debug_file_directory = NULL;
+static void
+show_debug_file_directory (struct ui_file *file, int from_tty,
+			   struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+The directory where separate debug symbols are searched for is \"%s\".\n"),
+		    value);
+}
 
 #if ! defined (DEBUG_SUBDIRECTORY)
 #define DEBUG_SUBDIRECTORY ".debug"
@@ -1367,6 +1384,14 @@ load_command (char *arg, int from_tty)
    performance compares.  */
 
 static int download_write_size = 512;
+static void
+show_download_write_size (struct ui_file *file, int from_tty,
+			  struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+The write size used when downloading a program is %s.\n"),
+		    value);
+}
 static int validate_download = 0;
 
 /* Callback service function for generic_load (bfd_map_over_sections).  */
@@ -2086,6 +2111,14 @@ add_filename_language (char *ext, enum language lang)
 }
 
 static char *ext_args;
+static void
+show_ext_args (struct ui_file *file, int from_tty,
+	       struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+Mapping between filename extension and source language is \"%s\".\n"),
+		    value);
+}
 
 static void
 set_ext_lang_command (char *args, int from_tty, struct cmd_list_element *e)
@@ -3565,7 +3598,7 @@ for access from GDB."), &cmdlist);
 Set dynamic symbol table reloading multiple times in one run."), _("\
 Show dynamic symbol table reloading multiple times in one run."), NULL,
 			   NULL,
-			   NULL, /* FIXME: i18n: */
+			   show_symbol_reloading,
 			   &setlist, &showlist);
 
   add_prefix_cmd ("overlay", class_support, overlay_command,
@@ -3601,7 +3634,7 @@ Set mapping between filename extension and source language."), _("\
 Show mapping between filename extension and source language."), _("\
 Usage: set extension-language .foo bar"),
 				   set_ext_lang_command,
-				   NULL, /* FIXME: i18n: */
+				   show_ext_args,
 				   &setlist, &showlist);
 
   add_info ("extensions", info_ext_lang_command,
@@ -3617,7 +3650,7 @@ blocked writes. The actual size of each transfer is also\n\
 limited by the size of the target packet and the memory\n\
 cache."),
 			   NULL,
-			   NULL, /* FIXME: i18n: */
+			   show_download_write_size,
 			   &setlist, &showlist);
 
   debug_file_directory = xstrdup (DEBUGDIR);
@@ -3630,6 +3663,6 @@ directory as the binary, then in the `" DEBUG_SUBDIRECTORY "' subdirectory,\n\
 and lastly at the path of the directory of the binary with\n\
 the global debug-file directory prepended."),
 				     NULL,
-				     NULL, /* FIXME: i18n: */
+				     show_debug_file_directory,
 				     &setlist, &showlist);
 }

@@ -78,6 +78,14 @@ bfd *exec_bfd = NULL;
 /* Whether to open exec and core files read-only or read-write.  */
 
 int write_files = 0;
+static void
+show_write_files (struct ui_file *file, int from_tty,
+		  struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Writing into executable and core files is %s.\n"),
+		    value);
+}
+
 
 struct vmap *vmap;
 
@@ -746,7 +754,7 @@ file itself are wrong.  Each section must be changed separately.  The\n\
 Set writing into executable and core files."), _("\
 Show writing into executable and core files."), NULL,
 			   NULL,
-			   NULL, /* FIXME: i18n: */
+			   show_write_files,
 			   &setlist, &showlist);
 
   add_target (&exec_ops);

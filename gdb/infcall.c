@@ -65,6 +65,14 @@
    with "set coerce-float-to-double 0".  */
 
 static int coerce_float_to_double_p = 1;
+static void
+show_coerce_float_to_double_p (struct ui_file *file, int from_tty,
+			       struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+Coercion of floats to doubles when calling functions is %s.\n"),
+		    value);
+}
 
 /* This boolean tells what gdb should do if a signal is received while
    in a function called from gdb (call dummy).  If set, gdb unwinds
@@ -74,6 +82,15 @@ static int coerce_float_to_double_p = 1;
    The default is to stop in the frame where the signal was received. */
 
 int unwind_on_signal_p = 0;
+static void
+show_unwind_on_signal_p (struct ui_file *file, int from_tty,
+			 struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+Unwinding of stack if a signal is received while in a call dummy is %s.\n"),
+		    value);
+}
+
 
 /* Perform the standard coercions that are specified
    for arguments to be passed to C functions.
@@ -887,7 +904,7 @@ set, GDB will perform the conversion for a function it considers\n\
 unprototyped.\n\
 The default is to perform the conversion.\n"),
 			   NULL,
-			   NULL, /* FIXME: i18n: Coercion of floats to doubles when calling functions is %s.  */
+			   show_coerce_float_to_double_p,
 			   &setlist, &showlist);
 
   add_setshow_boolean_cmd ("unwindonsignal", no_class,
@@ -899,6 +916,6 @@ is received while in a function called from gdb (call dummy).  If set, gdb\n\
 unwinds the stack and restore the context to what as it was before the call.\n\
 The default is to stop in the frame where the signal was received."),
 			   NULL,
-			   NULL, /* FIXME: i18n: Unwinding of stack if a signal is received while in a call dummy is %s.  */
+			   show_unwind_on_signal_p,
 			   &setlist, &showlist);
 }

@@ -57,6 +57,12 @@
 #include "gdbcmd.h"
 
 static int observer_debug;
+static void
+show_observer_debug (struct ui_file *file, int from_tty,
+		     struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Observer debugging is %s.\n"), value);
+}
 
 /* The internal generic observer.  */
 
@@ -205,7 +211,7 @@ Set observer debugging."), _("\
 Show observer debugging."), _("\
 When non-zero, observer debugging is enabled."),
 			    NULL,
-			    NULL, /* FIXME: i18n: Observer debugging is %s.  */
+			    show_observer_debug,
 			    &setdebuglist, &showdebuglist);
 }
 

@@ -56,6 +56,14 @@ static char *current_demangling_style_string;
    _initialize_demangler from libiberty_demanglers[] array.  */
 
 static const char **demangling_style_names;
+static void
+show_demangling_style_names(struct ui_file *file, int from_tty,
+			    struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("The current C++ demangling style is \"%s\".\n"),
+		    value);
+}
+
 
 static void set_demangling_command (char *, int, struct cmd_list_element *);
 
@@ -200,7 +208,7 @@ Set the current C++ demangling style."), _("\
 Show the current C++ demangling style."), _("\
 Use `set demangle-style' without arguments for a list of demangling styles."),
 			set_demangling_command,
-			NULL, /* FIXME: i18n: */
+			show_demangling_style_names,
 			&setlist, &showlist);
 
   /* Set the default demangling style chosen at compilation time. */

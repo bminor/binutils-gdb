@@ -198,8 +198,34 @@ struct tui_translate tui_border_kind_translate_lrcorner[] = {
 
 /* Tui configuration variables controlled with set/show command.  */
 const char *tui_active_border_mode = "bold-standout";
+static void
+show_tui_active_border_mode (struct ui_file *file, int from_tty,
+			     struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+The attribute mode to use for the active TUI window border is \"%s\".\n"),
+		    value);
+}
+
 const char *tui_border_mode = "normal";
+static void
+show_tui_border_mode (struct ui_file *file, int from_tty,
+		      struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+The attribute mode to use for the TUI window borders is \"%s\".\n"),
+		    value);
+}
+
 const char *tui_border_kind = "acs";
+static void
+show_tui_border_kind (struct ui_file *file, int from_tty,
+		      struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("The kind of border for TUI windows is \"%s\".\n"),
+		    value);
+}
+
 
 /* Tui internal configuration variables.  These variables are
    updated by tui_update_variables to reflect the tui configuration
@@ -383,7 +409,7 @@ space           use a white space\n\
 ascii           use ascii characters + - | for the border\n\
 acs             use the Alternate Character Set"),
 			NULL,
-			NULL, /* FIXME: i18n: */
+			show_tui_border_kind,
 			&tui_setlist, &tui_showlist);
 
   add_setshow_enum_cmd ("border-mode", no_class, tui_border_mode_enums,
@@ -399,7 +425,7 @@ half-standout   use half bright and standout mode\n\
 bold            use extra bright or bold\n\
 bold-standout   use extra bright or bold with standout mode"),
 			NULL,
-			NULL, /* FIXME: i18n: */
+			show_tui_border_mode,
 			&tui_setlist, &tui_showlist);
 
   add_setshow_enum_cmd ("active-border-mode", no_class, tui_border_mode_enums,
@@ -415,7 +441,7 @@ half-standout   use half bright and standout mode\n\
 bold            use extra bright or bold\n\
 bold-standout   use extra bright or bold with standout mode"),
 			NULL,
-			NULL, /* FIXME: i18n: */
+			show_tui_active_border_mode,
 			&tui_setlist, &tui_showlist);
 }
 

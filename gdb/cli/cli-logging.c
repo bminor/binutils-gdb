@@ -38,7 +38,31 @@ static struct saved_output_files saved_output;
 static char *saved_filename;
 
 static char *logging_filename;
-int logging_overwrite, logging_redirect;
+static void
+show_logging_filename (struct ui_file *file, int from_tty,
+		       struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("The current logfile is \"%s\".\n"),
+		    value);
+}
+
+int logging_overwrite;
+static void
+show_logging_overwrite (struct ui_file *file, int from_tty,
+			struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+Whether logging overwrites or appends to the log file is %s.\n"),
+		    value);
+}
+
+int logging_redirect;
+static void
+show_logging_redirect (struct ui_file *file, int from_tty,
+		       struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("The logging output mode is %s.\n"), value);
+}
 
 /* If we've pushed output files, close them and pop them.  */
 static void
@@ -180,7 +204,7 @@ Set whether logging overwrites or appends to the log file."), _("\
 Show whether logging overwrites or appends to the log file."), _("\
 If set, logging overrides the log file."),
 			   NULL,
-			   NULL, /* FIXME: i18n: Whether logging overwrites or appends to the log file is %s.  */
+			   show_logging_overwrite,
 			   &set_logging_cmdlist, &show_logging_cmdlist);
   add_setshow_boolean_cmd ("redirect", class_support, &logging_redirect, _("\
 Set the logging output mode."), _("\
@@ -188,14 +212,14 @@ Show the logging output mode."), _("\
 If redirect is off, output will go to both the screen and the log file.\n\
 If redirect is on, output will go only to the log file."),
 			   NULL,
-			   NULL, /* FIXME: i18n: The logging output mode is %s.  */
+			   show_logging_redirect,
 			   &set_logging_cmdlist, &show_logging_cmdlist);
   add_setshow_filename_cmd ("file", class_support, &logging_filename, _("\
 Set the current logfile."), _("\
 Show the current logfile."), _("\
 The logfile is used when directing GDB's output."),
 			    NULL,
-			    NULL, /* FIXME: i18n: The current logfile is %s.  */
+			    show_logging_filename,
 			    &set_logging_cmdlist, &show_logging_cmdlist);
   add_cmd ("on", class_support, set_logging_on,
 	   _("Enable logging."), &set_logging_cmdlist);

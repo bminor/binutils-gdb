@@ -203,6 +203,12 @@ int attach_flag;
 /* Non-zero if we want to see trace of target level stuff.  */
 
 static int targetdebug = 0;
+static void
+show_targetdebug (struct ui_file *file, int from_tty,
+		  struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Target debugging is %s.\n"), value);
+}
 
 static void setup_target_debug (void);
 
@@ -1032,6 +1038,14 @@ target_stopped_data_address_p (struct target_ops *target)
 #endif
 
 static int trust_readonly = 0;
+static void
+show_trust_readonly (struct ui_file *file, int from_tty,
+		     struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+Mode for reading from readonly sections is %s.\n"),
+		    value);
+}
 
 /* Move memory to or from the targets.  The top target gets priority;
    if it cannot handle it, it is offered to the next one down, etc.
@@ -2559,7 +2573,7 @@ When non-zero, target debugging is enabled.  Higher numbers are more\n\
 verbose.  Changes do not take effect until the next \"run\" or \"target\"\n\
 command."),
 			    NULL,
-			    NULL, /* FIXME: i18n: */
+			    show_targetdebug,
 			    &setdebuglist, &showdebuglist);
 
   add_setshow_boolean_cmd ("trust-readonly-sections", class_support, 
@@ -2570,7 +2584,7 @@ When this mode is on, memory reads from readonly sections (such as .text)\n\
 will be read from the object file instead of from the target.  This will\n\
 result in significant performance improvement for remote targets."),
 			   NULL,
-			   NULL, /* FIXME: i18n: Mode for reading from readonly sections is %s.  */
+			   show_trust_readonly,
 			   &setlist, &showlist);
 
   add_com ("monitor", class_obscure, do_monitor_command,

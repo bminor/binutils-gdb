@@ -1176,6 +1176,12 @@ static void alloc_gdbarch_data (struct gdbarch *);
 #define GDBARCH_DEBUG 0
 #endif
 int gdbarch_debug = GDBARCH_DEBUG;
+static void
+show_gdbarch_debug (struct ui_file *file, int from_tty,
+                    struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Architecture debugging is %s.\\n"), value);
+}
 
 static const char *
 pformat (const struct floatformat *format)
@@ -2221,7 +2227,7 @@ Set architecture debugging."), _("\\
 Show architecture debugging."), _("\\
 When non-zero, architecture debugging is enabled."),
                             NULL,
-                            NULL, /* FIXME: i18n: */
+                            show_gdbarch_debug,
                             &setdebuglist, &showdebuglist);
 }
 EOF

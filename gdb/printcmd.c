@@ -83,10 +83,26 @@ static struct value *last_examine_value;
    printed as `0x1234 <symbol+offset>'.  */
 
 static unsigned int max_symbolic_offset = UINT_MAX;
+static void
+show_max_symbolic_offset (struct ui_file *file, int from_tty,
+			  struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+The largest offset that will be printed in <symbol+1234> form is %s.\n"),
+		    value);
+}
 
 /* Append the source filename and linenumber of the symbol when
    printing a symbolic value as `<symbol at filename:linenum>' if set.  */
 static int print_symbol_filename = 0;
+static void
+show_print_symbol_filename (struct ui_file *file, int from_tty,
+			    struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+Printing of source filename and line number with <symbol> is %s.\n"),
+		    value);
+}
 
 /* Number of auto-display expression currently being displayed.
    So that we can disable it if we get an error or a signal within it.
@@ -2133,14 +2149,14 @@ environment, the value is printed in its own window."));
 Set the largest offset that will be printed in <symbol+1234> form."), _("\
 Show the largest offset that will be printed in <symbol+1234> form."), NULL,
 			    NULL,
-			    NULL, /* FIXME: i18n: */
+			    show_max_symbolic_offset,
 			    &setprintlist, &showprintlist);
   add_setshow_boolean_cmd ("symbol-filename", no_class,
 			   &print_symbol_filename, _("\
 Set printing of source filename and line number with <symbol>."), _("\
 Show printing of source filename and line number with <symbol>."), NULL,
 			   NULL,
-			   NULL, /* FIXME: i18n: */
+			   show_print_symbol_filename,
 			   &setprintlist, &showprintlist);
 
   /* For examine/instruction a single byte quantity is specified as

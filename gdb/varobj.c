@@ -34,6 +34,12 @@
 /* Non-zero if we want to see trace of varobj level stuff.  */
 
 int varobjdebug = 0;
+static void
+show_varobjdebug (struct ui_file *file, int from_tty,
+		  struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Varobj debugging is %s.\n"), value);
+}
 
 /* String representations of gdb's format codes */
 char *varobj_format_string[] =
@@ -2545,6 +2551,6 @@ Set varobj debugging."), _("\
 Show varobj debugging."), _("\
 When non-zero, varobj debugging is enabled."),
 			    NULL,
-			    NULL, /* FIXME: i18n: */
+			    show_varobjdebug,
 			    &setlist, &showlist);
 }

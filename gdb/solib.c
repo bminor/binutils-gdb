@@ -70,6 +70,14 @@ static char *solib_absolute_prefix = NULL;
    symbol files.  This takes precedence over the environment variables PATH
    and LD_LIBRARY_PATH.  */
 static char *solib_search_path = NULL;
+static void
+show_solib_search_path (struct ui_file *file, int from_tty,
+			struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+The search path for loading non-absolute shared library symbol files is %s.\n"),
+		    value);
+}
 
 /*
 
@@ -886,6 +894,15 @@ reload_shared_libraries (char *ignored, int from_tty,
   solib_add (NULL, from_tty, NULL, auto_solib_add);
 }
 
+static void
+show_auto_solib_add (struct ui_file *file, int from_tty,
+		     struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Autoloading of shared library symbols is %s.\n"),
+		    value);
+}
+
+
 extern initialize_file_ftype _initialize_solib; /* -Wmissing-prototypes */
 
 void
@@ -909,7 +926,7 @@ automatically when the inferior begins execution, when the dynamic linker\n\
 informs gdb that a new library has been loaded, or when attaching to the\n\
 inferior.  Otherwise, symbols must be loaded manually, using `sharedlibrary'."),
 			   NULL,
-			   NULL, /* FIXME: i18n: */
+			   show_auto_solib_add,
 			   &setlist, &showlist);
 
   add_setshow_filename_cmd ("solib-absolute-prefix", class_support,
@@ -931,6 +948,6 @@ Set the search path for loading non-absolute shared library symbol files."), _("
 Show the search path for loading non-absolute shared library symbol files."), _("\
 This takes precedence over the environment variables PATH and LD_LIBRARY_PATH."),
 				     reload_shared_libraries,
-				     NULL, /* FIXME: i18n: */
+				     show_solib_search_path,
 				     &setlist, &showlist);
 }
