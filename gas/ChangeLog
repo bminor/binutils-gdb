@@ -1,5 +1,47 @@
 2003-07-09  Alexandre Oliva  <aoliva@redhat.com>
 
+	2003-02-25  Alexandre Oliva  <aoliva@redhat.com>
+	* config/tc-mn10300.c (mn10300_check_fixup): Set GOT_PCREL type
+	for subtracts from GLOBAL_OFFSET_TABLE that could not be
+	simplified.
+	2002-07-18  Alexandre Oliva  <aoliva@redhat.com>
+	* config/tc-mn10300.c (mn10300_check_fixup): Accept subtracts that
+	could not be simplified.
+	(tc_gen_reloc): Turn an absolute fx_subsy into part of fx_offset.
+	2001-11-04  Alexandre Oliva  <aoliva@redhat.com>
+	* config/tc-mn10300.h (TC_RELOC_RTSYM_LOC_FIXUP): Don't adjust
+	BDF_RELOC_MN10300_GOT32.
+	* config/tc-mn10300.c (mn10300_fix_adjustable): If
+	TC_RELOC_RTSYM_LOC_FIXUP doesn't hold, it's not adjustable.
+	2001-05-09  Alexandre Oliva  <aoliva@redhat.com>
+	* config/tc-mn10300.c (mn10300_parse_name): Don't return a
+	symbol if we know its value.
+	2001-05-09  Alexandre Oliva  <aoliva@redhat.com>
+	* config/tc-mn10300.h (GLOBAL_OFFSET_TABLE_NAME): Remove
+	duplicate underscore prefix.
+	2001-05-09  Alexandre Oliva  <aoliva@redhat.com>
+	* config/tc-mn10300.c (mn10300_parse_name): Store relocation
+	type in X_md, not X_add_number.  Zero X_add_number.
+	(mn10300_check_fixup): Extract relocation type from X_md.
+	* config/tc-mn10300.h: Update comment.
+	2001-04-14  Alexandre Oliva  <aoliva@redhat.com>
+	* config/tc-mn10300.h (O_GOTOFF, O_PLT, O_GOT): Replace with...
+	(O_PIC_reloc): this.
+	* config/tc-mn10300.c (mn10300_PIC_related_p): Use it.
+	(mn10300_check_fixup): Likewise.
+	(mn10300_parse_name): Set X_add_number to relocation type.
+	* config/tc-mn10300.h (DIFF_EXPR_OK, GLOBAL_OFFSET_TABLE_NAME,
+	TC_RELOC_RTSYM_LOC_FIXUP, md_parse_name, TC_CONS_FIX_NEW,
+	O_GOTOFF, O_PLT, O_GOT): Define.
+	* config/tc-mn10300.c (mn10300_PIC_related_p): New fn.
+	(mn10300_check_fixup): New fn.
+	(md_assemble): Call it.  Check for PIC-related relocs.
+	(mn10300_cons_fix_new): Likewise.  New fn.
+	(mn10300_end_of_match): New fn.
+	(mn10300_md_parse_name_cont): New fn.
+
+2003-07-09  Alexandre Oliva  <aoliva@redhat.com>
+
 	2000-05-25  Alexandre Oliva  <aoliva@cygnus.com>
 	* config/tc-mn10300.c (mn10300_insert_operand): Negate negative
 	accumulator's shift.

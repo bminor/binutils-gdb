@@ -1219,6 +1219,140 @@ md_begin ()
   current_machine = MN103;
 }
 
+static symbolS *GOT_symbol;
+
+static inline int mn10300_check_fixup PARAMS ((struct mn10300_fixup *));
+static inline int mn10300_PIC_related_p PARAMS ((symbolS *));
+
+static inline int
+mn10300_PIC_related_p (sym)
+     symbolS *sym;
+{
+  expressionS *exp;
+
+  if (! sym)
+    return 0;
+
+  if (sym == GOT_symbol)
+    return 1;
+
+  exp = symbol_get_value_expression (sym);
+
+  return (exp->X_op == O_PIC_reloc
+	  || mn10300_PIC_related_p (exp->X_add_symbol)
+	  || mn10300_PIC_related_p (exp->X_op_symbol));
+}
+
+static inline int
+mn10300_check_fixup (fixup)
+     struct mn10300_fixup *fixup;
+{
+  expressionS *exp = &fixup->exp;
+
+ repeat:
+  switch (exp->X_op)
+    {
+    case O_add:
+    case O_subtract: /* If we're sufficiently unlucky that the label
+			and the expression that references it happen
+			to end up in different frags, the subtract
+			won't be simplified within expression().  */
+      /* The PIC-related operand must be the first operand of a sum.  */
+      if (exp != &fixup->exp || mn10300_PIC_related_p (exp->X_op_symbol))
+	return 1;
+
+      if (exp->X_add_symbol && exp->X_add_symbol == GOT_symbol)
+	fixup->reloc = BFD_RELOC_32_GOT_PCREL;
+
+      exp = symbol_get_value_expression (exp->X_add_symbol);
+      goto repeat;
+
+    case O_symbol:
+      if (exp->X_add_symbol && exp->X_add_symbol == GOT_symbol)
+	fixup->reloc = BFD_RELOC_32_GOT_PCREL;
+      break;
+
+    case O_PIC_reloc:
+      fixup->reloc = exp->X_md;
+      exp->X_op = O_symbol;
+      if (fixup->reloc == BFD_RELOC_32_PLT_PCREL
+	  && fixup->opindex >= 0
+	  && (mn10300_operands[fixup->opindex].flags
+	      & MN10300_OPERAND_RELAX))
+	return 1;
+      break;
+
+    default:
+      return (mn10300_PIC_related_p (exp->X_add_symbol)
+	      || mn10300_PIC_related_p (exp->X_op_symbol));
+    }
+
+  return 0;
+}
+
+void
+mn10300_cons_fix_new (frag, off, size, exp)
+     fragS *frag;
+     int off, size;
+     expressionS *exp;
+{
+  struct mn10300_fixup fixup;
+
+  fixup.opindex = -1;
+  fixup.exp = *exp;
+  fixup.reloc = BFD_RELOC_UNUSED;
+
+  mn10300_check_fixup (&fixup);
+
+  if (fixup.reloc == BFD_RELOC_MN10300_GOT32)
+    switch (size)
+      {
+      case 2:
+	fixup.reloc = BFD_RELOC_MN10300_GOT16;
+	break;
+
+      case 3:
+	fixup.reloc = BFD_RELOC_MN10300_GOT24;
+	break;
+
+      case 4:
+	break;
+
+      default:
+	goto error;
+      }
+  else if (fixup.reloc == BFD_RELOC_UNUSED)
+    switch (size)
+      {
+      case 1:
+	fixup.reloc = BFD_RELOC_8;
+	break;
+
+      case 2:
+	fixup.reloc = BFD_RELOC_16;
+	break;
+
+      case 3:
+	fixup.reloc = BFD_RELOC_24;
+	break;
+
+      case 4:
+	fixup.reloc = BFD_RELOC_32;
+	break;
+
+      default:
+	goto error;
+      }
+  else if (size != 4)
+    {
+    error:
+      as_bad (_("unsupported BFD relocation size %u"), size);
+      fixup.reloc = BFD_RELOC_UNUSED;
+    }
+    
+  fix_new_exp (frag, off, size, &fixup.exp, 0, fixup.reloc);
+}
+
 void
 md_assemble (str)
      char *str;
@@ -1748,6 +1882,8 @@ md_assemble (str)
 	      fixups[fc].exp = ex;
 	      fixups[fc].opindex = *opindex_ptr;
 	      fixups[fc].reloc = BFD_RELOC_UNUSED;
+	      if (mn10300_check_fixup (& fixups[fc]))
+		goto error;
 	      ++fc;
 	      break;
 	    }
@@ -2042,7 +2178,11 @@ keep_going:
 	  const struct mn10300_operand *operand;
 
 	  operand = &mn10300_operands[fixups[i].opindex];
-	  if (fixups[i].reloc != BFD_RELOC_UNUSED)
+	  if (fixups[i].reloc != BFD_RELOC_UNUSED
+	      && fixups[i].reloc != BFD_RELOC_32_GOT_PCREL
+	      && fixups[i].reloc != BFD_RELOC_32_GOTOFF
+	      && fixups[i].reloc != BFD_RELOC_32_PLT_PCREL
+	      && fixups[i].reloc != BFD_RELOC_MN10300_GOT32)
 	    {
 	      reloc_howto_type *reloc_howto;
 	      int size;
@@ -2072,6 +2212,8 @@ keep_going:
 	      fixS *fixP;
 
 	      reloc = BFD_RELOC_NONE;
+	      if (fixups[i].reloc != BFD_RELOC_UNUSED)
+		reloc = fixups[i].reloc;
 	      /* How big is the reloc?  Remember SPLIT relocs are
 		 implicitly 32bits.  */
 	      if ((operand->flags & MN10300_OPERAND_SPLIT) != 0)
@@ -2083,11 +2225,15 @@ keep_going:
 
 	      /* Is the reloc pc-relative?  */
 	      pcrel = (operand->flags & MN10300_OPERAND_PCREL) != 0;
+	      if (reloc != BFD_RELOC_NONE)
+		pcrel = bfd_reloc_type_lookup (stdoutput, reloc)->pc_relative;
 
 	      offset = size - (reloc_size + operand->shift) / 8;
 
 	      /* Choose a proper BFD relocation type.  */
-	      if (pcrel)
+	      if (reloc != BFD_RELOC_NONE)
+		;
+	      else if (pcrel)
 		{
 		  if (reloc_size == 32)
 		    reloc = BFD_RELOC_32_PCREL;
@@ -2152,6 +2298,13 @@ tc_gen_reloc (seg, fixp)
       return NULL;
     }
   reloc->address = fixp->fx_frag->fr_address + fixp->fx_where;
+
+  if (fixp->fx_subsy
+      && S_GET_SEGMENT (fixp->fx_subsy) == absolute_section)
+    {
+      fixp->fx_offset -= S_GET_VALUE (fixp->fx_subsy);
+      fixp->fx_subsy = 0;
+    }
 
   if (fixp->fx_addsy && fixp->fx_subsy)
     {
@@ -2368,6 +2521,9 @@ bfd_boolean
 mn10300_fix_adjustable (fixp)
      struct fix *fixp;
 {
+  if (! TC_RELOC_RTSYM_LOC_FIXUP (fixp))
+    return 0;
+
   if (fixp->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixp->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
     return 0;
@@ -2559,4 +2715,88 @@ set_arch_mach (mach)
     as_warn (_("could not set architecture and machine"));
 
   current_machine = mach;
+}
+
+static inline char * mn10300_end_of_match PARAMS ((char *, char *));
+
+static inline char *
+mn10300_end_of_match (cont, what)
+     char *cont, *what;
+{
+  int len = strlen (what);
+
+  if (strncmp (cont, what, strlen (what)) == 0
+      && ! is_part_of_name (cont[len]))
+    return cont + len;
+
+  return NULL;
+}  
+
+int
+mn10300_parse_name (name, exprP, nextcharP)
+     char const *name;
+     expressionS *exprP;
+     char *nextcharP;
+{
+  char *next = input_line_pointer;
+  char *next_end;
+  int reloc_type;
+  segT segment;
+
+  exprP->X_op_symbol = NULL;
+
+  if (strcmp (name, GLOBAL_OFFSET_TABLE_NAME) == 0)
+    {
+      if (! GOT_symbol)
+	GOT_symbol = symbol_find_or_make (name);
+
+      exprP->X_add_symbol = GOT_symbol;
+    no_suffix:
+      /* If we have an absolute symbol or a reg,
+	 then we know its value now.  */
+      segment = S_GET_SEGMENT (exprP->X_add_symbol);
+      if (segment == absolute_section)
+	{
+	  exprP->X_op = O_constant;
+	  exprP->X_add_number = S_GET_VALUE (exprP->X_add_symbol);
+	  exprP->X_add_symbol = NULL;
+	}
+      else if (segment == reg_section)
+	{
+	  exprP->X_op = O_register;
+	  exprP->X_add_number = S_GET_VALUE (exprP->X_add_symbol);
+	  exprP->X_add_symbol = NULL;
+	}
+      else
+	{
+	  exprP->X_op = O_symbol;
+	  exprP->X_add_number = 0;
+	}
+
+      return 1;
+    }
+
+  exprP->X_add_symbol = symbol_find_or_make (name);
+  
+  if (*nextcharP != '@')
+    goto no_suffix;
+  else if ((next_end = mn10300_end_of_match (next + 1, "GOTOFF")))
+    reloc_type = BFD_RELOC_32_GOTOFF;
+  else if ((next_end = mn10300_end_of_match (next + 1, "GOT")))
+    reloc_type = BFD_RELOC_MN10300_GOT32;
+  else if ((next_end = mn10300_end_of_match (next + 1, "PLT")))
+    reloc_type = BFD_RELOC_32_PLT_PCREL;
+  else
+    goto no_suffix;
+
+  *input_line_pointer = *nextcharP;
+  input_line_pointer = next_end;
+  *nextcharP = *input_line_pointer;
+  *input_line_pointer = '\0';
+
+  exprP->X_op = O_PIC_reloc;
+  exprP->X_add_number = 0;
+  exprP->X_md = reloc_type;
+
+  return 1;
 }
