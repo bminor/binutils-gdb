@@ -193,13 +193,14 @@ build_so_list_from_mapfile (int pid, long match_mask, long match_val)
 
   {
     int mapbuf_allocation_size = 8192;
-    char map_pathname[64];
+    char *map_pathname;
     int map_fd;
 
     /* Open the map file */
 
-    xasprintf (map_pathname, "/proc/%d/map", pid);
+    xasprintf (&map_pathname, "/proc/%d/map", pid);
     map_fd = open (map_pathname, O_RDONLY);
+    free (map_pathname);
     if (map_fd < 0)
       return 0;
 

@@ -5,6 +5,8 @@
 	(ia64_get_saved_register): Use alloca() to allocate register
 	buffers.
 
+	* solib-aix5.c (build_so_lib_from_mapfile): Fix xasprintf() usage.
+
 2001-03-26  Kevin Buettner  <kevinb@redhat.com>
 
 	* proc-utils.h (procfs_ctl_t): New typedef.
