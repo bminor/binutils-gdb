@@ -3,7 +3,9 @@ Tue Mar 17 15:41:07 1998  Frank Ch. Eigler  <fche@cygnus.com>
 	* c_gen.pl: Added file from Toronto's /build directory.
 	* Makefile.in (C_GEN): Use local c_gen.pl script.
 	* ChangeLog: Added this entry.
-
+	* t-pke4.trc: New file.
+	* t-pke4.vif0expect: New file.
+	
 Mon Mar 16 19:04:26 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
 	* tsv308_1.trc: Fixed test case as per SCEI email.
