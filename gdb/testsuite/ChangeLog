@@ -1,3 +1,8 @@
+2002-04-04  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/relocate.exp: New file.
+	* gdb.base/relocate.c: New file.
+
 2002-04-04  Fred Fish  <fnf@redhat.com>
 
 	* gdb.base/step-test.exp: Update comment regarding stopping in
