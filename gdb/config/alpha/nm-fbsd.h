@@ -1,6 +1,6 @@
-/* Native-dependent definitions for FreeBSD/Alpha.
+/* Native-dependent definitions for FreeBSD/alpha.
 
-   Copyright 1986, 1987, 1989, 1992, 1996, 2000, 2004
+   Copyright 1986, 1987, 1989, 1992, 1996, 2000, 2004, 2005
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -23,9 +23,6 @@
 #ifndef NM_FBSD_H
 #define NM_FBSD_H
 
-/* Get generic BSD native definitions.  */
-#include "config/nm-bsd.h"
-
 /* The Alpha does not step over a breakpoint.  */
 #define CANNOT_STEP_BREAKPOINT 1
 
@@ -33,6 +30,5 @@
 /* Shared library support.  */
 
 #include "solib.h"		/* Support for shared libraries. */
-#include "elf/common.h"		/* Additional ELF shared library info. */
 
-#endif /* NM_FBSD_H */
+#endif /* nm-fbsd.h */

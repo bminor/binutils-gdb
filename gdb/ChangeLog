@@ -1,5 +1,22 @@
 2005-03-05  Mark Kettenis  <kettenis@gnu.org>
 
+	* alphabsd-nat.c: Update copyright year.  Include "inf-ptrace.h".
+	(alphabsd_fetch_inferior_registers): Rename from
+	fetch_inferior_registers.  Make static.
+	(alphabsd_store_inferior_registers): Rename from
+	store_inferior_registers.  Make static.
+	(_initialize_alphabsd_nat): New function.
+	* Makefile.in (alphabsd-nat.o): Update dependencies.
+	* config/alpha/fbsd.mh (NATDEPFILES): Remove infptrace.o and
+	inftarg.o.  Add inf-ptrace.o, fbsd-nat.o and gcore.o.
+	* config/alpha/nbsd.mh (NAT_CLIBS): Remove variable.
+	(NATDEPFILES): Remove infptrace.o and inftarg.o.  Add
+	alphabsd-nat.o.
+	* config/alpha/nm-fbsd.h: Update copyright year.  Don't include
+	"config/nm-bsd.h" and "elf/common.h".
+	* config/alpha/nm-nbsd.h: Update copyright year.  Don't include
+	"config/nm-nbsd.h".
+
 	* mips64obsd-tdep.c (mips64obsd_init_abi): Don't set
 	software_single_step.
 

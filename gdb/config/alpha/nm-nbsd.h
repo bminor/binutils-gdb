@@ -1,5 +1,7 @@
-/* Native-dependent definitions for Alpha running NetBSD, for GDB.
-   Copyright 2002 Free Software Foundation, Inc.
+/* Native-dependent definitions for NetBSD/alpha.
+
+   Copyright 2002, 2005 Free Software Foundation, Inc.
+
    Contributed by Wasabi Systems, Inc.
 
    This file is part of GDB.
@@ -22,10 +24,7 @@
 #ifndef NM_NBSD_H
 #define NM_NBSD_H
 
-/* Get generic NetBSD native definitions.  */
-#include "config/nm-nbsd.h"
-
 /* The Alpha does not step over a breakpoint.  */
 #define CANNOT_STEP_BREAKPOINT 1
 
-#endif /* NM_NBSD_H */
+#endif /* nm-nbsd.h */
