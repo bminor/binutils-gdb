@@ -654,8 +654,6 @@ static unsigned int heuristic_fence_post = 0;
    this will corrupt pdr.iline.  Fortunately we don't use it.  */
 #define PROC_SYMBOL(proc) (*(struct symbol**)&(proc)->pdr.isym)
 #define _PROC_MAGIC_ 0x0F0F0F0F
-#define PROC_DESC_IS_DUMMY(proc) ((proc)->pdr.isym == _PROC_MAGIC_)
-#define SET_PROC_DESC_IS_DUMMY(proc) ((proc)->pdr.isym = _PROC_MAGIC_)
 
 /* Number of bytes of storage in the actual machine representation for
    register N.  NOTE: This defines the pseudo register type so need to
@@ -901,16 +899,14 @@ after_prologue (CORE_ADDR pc)
 	 THEN create a "heuristic" proc_desc (by analyzing the actual
 	 code) to replace the "official" proc_desc.  */
       struct symtab_and_line val;
-      struct symbol *proc_symbol =
-	PROC_DESC_IS_DUMMY (proc_desc) ? 0 : PROC_SYMBOL (proc_desc);
-
-      if (proc_symbol)
+      if (PROC_SYMBOL (proc_desc))
 	{
 	  val = find_pc_line (BLOCK_START
-			      (SYMBOL_BLOCK_VALUE (proc_symbol)), 0);
+			      (SYMBOL_BLOCK_VALUE (PROC_SYMBOL (proc_desc))),
+			      0);
 	  val.pc = val.end ? val.end : pc;
 	}
-      if (!proc_symbol || pc < val.pc)
+      if (!PROC_SYMBOL (proc_desc) || pc < val.pc)
 	{
 	  mips_extra_func_info_t found_heuristic =
 	    heuristic_proc_desc (PROC_LOW_ADDR (proc_desc), pc, NULL, NULL);
@@ -6550,8 +6546,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: PRID_REGNUM = %d\n", PRID_REGNUM);
   fprintf_unfiltered (file,
-		      "mips_dump_tdep: PROC_DESC_IS_DUMMY = function?\n");
-  fprintf_unfiltered (file,
 		      "mips_dump_tdep: PROC_FRAME_ADJUST = function?\n");
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: PROC_FRAME_OFFSET = function?\n");
@@ -6579,8 +6573,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: SETUP_ARBITRARY_FRAME # %s\n",
 		      XSTRING (SETUP_ARBITRARY_FRAME (NUMARGS, ARGS)));
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: SET_PROC_DESC_IS_DUMMY = function?\n");
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: SKIP_TRAMPOLINE_CODE # %s\n",
 		      XSTRING (SKIP_TRAMPOLINE_CODE (PC)));
@@ -6646,8 +6638,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 		      (long) VM_MIN_ADDRESS);
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: ZERO_REGNUM = %d\n", ZERO_REGNUM);
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: _PROC_MAGIC_ = %d\n", _PROC_MAGIC_);
 }
 
 extern initialize_file_ftype _initialize_mips_tdep;	/* -Wmissing-prototypes */

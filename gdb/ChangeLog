@@ -1,5 +1,9 @@
 2004-09-03  Andrew Cagney  <cagney@gnu.org>
 
+	* mips-tdep.c (PROC_DESC_IS_DUMMY, SET_PROC_DESC_IS_DUMMY)
+	(_PROC_MAGIC_, after_prologue, mips_dump_tdep): Delete macros and
+	only use.
+
 	* mips-tdep.c (temp_saved_regs): Delete.
 	(set_reg_offset): Replace saved_regs parameter with this_cache.
 	(heuristic_proc_desc, mips16_heuristic_proc_desc)
