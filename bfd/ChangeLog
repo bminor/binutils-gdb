@@ -1,5 +1,8 @@
 Fri Apr  4 11:37:15 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* bfd.c (bfd_record_phdr): Cast count to size_t before
+	subtraction.
+
 	* coff-ppc.c (dump_toc): Add cast to avoid warning from SunOS cc.
 	* coff-rs6000.c (xcoff_read_ar_hdr): Likewise.
 	(xcoff_write_archive_contents): LIkewise.
