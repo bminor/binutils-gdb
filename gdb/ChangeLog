@@ -1,5 +1,8 @@
 2004-06-04  Jim Blandy  <jimb@redhat.com>
 
+	* ppc-linux-nat.c (fetch_register): Don't forget to pass the
+	gdbarch argument to register_size.
+
 	* rs6000-tdep.c (rs6000_store_return_value): Use
 	regcache_cooked_write_part instead of
 	deprecated_write_register_bytes.

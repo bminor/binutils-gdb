@@ -240,7 +240,7 @@ fetch_register (int tid, int regno)
      32-bit platform, 64-bit floating-point registers will require two
      transfers.  */
   for (bytes_transferred = 0;
-       bytes_transferred < register_size (regno);
+       bytes_transferred < register_size (current_gdbarch, regno);
        bytes_transferred += sizeof (PTRACE_XFER_TYPE))
     {
       errno = 0;
