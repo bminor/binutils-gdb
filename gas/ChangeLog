@@ -1,3 +1,7 @@
+Tue Dec 20 14:56:31 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* Makefile.in (SUBDIR_INCLUDES): Deleted.
+
 Tue Dec 20 13:40:36 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* config/obj-coff.h: Include bfd/libcoff.h, not libcoff.h.
