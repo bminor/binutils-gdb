@@ -1785,6 +1785,7 @@ if test x"$wire_cell_bitsize" != x; then
 fi
 fi
 
+# start-sanitize-am30
 
 sim_hardware="-DWITH_HW=1"
 sim_hw_obj="hw-device.o hw-ports.o hw-properties.o hw-base.o hw-tree.o"
@@ -1808,29 +1809,30 @@ for i in x $hardware ; do
     *) sim_hw="$sim_hw $i" ;;
   esac
 done
-sim_hw_obj="$sim_hw_obj `echo $sim_hw | sed -e 's/\([^ ]*\)/dv-\1.o/g'`"
+sim_hw_obj="$sim_hw_obj `echo $sim_hw | sed -e 's/\([^ ][^ ]*\)/dv-\1.o/g'`"
 if test x"$silent" != x"yes" && test x"$hardware" != x""; then
   echo "Setting hardware to $sim_hardware, $sim_hw, $sim_hw_obj"
 fi
 else
   
 sim_hw="$hardware"
-sim_hw_obj="$sim_hw_obj `echo $sim_hw | sed -e 's/\([^ ]*\)/dv-\1.o/g'`"
+sim_hw_obj="$sim_hw_obj `echo $sim_hw | sed -e 's/\([^ ][^ ]*\)/dv-\1.o/g'`"
 if test x"$silent" != x"yes"; then
   echo "Setting hardware to $sim_hardware, $sim_hw, $sim_hw_obj"
 fi
 fi
 
+# end-sanitize-am30
 
 for ac_func in time chmod utime fork execve execv chown
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
-echo "configure:1829: checking for $ac_func" >&5
+echo "configure:1831: checking for $ac_func" >&5
 if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1834 "configure"
+#line 1836 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -1853,7 +1855,7 @@ $ac_func();
 
 ; return 0; }
 EOF
-if { (eval echo configure:1857: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+if { (eval echo configure:1859: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
   rm -rf conftest*
   eval "ac_cv_func_$ac_func=yes"
 else
@@ -1881,17 +1883,17 @@ for ac_hdr in unistd.h stdlib.h string.h strings.h utime.h time.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
-echo "configure:1885: checking for $ac_hdr" >&5
+echo "configure:1887: checking for $ac_hdr" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 1890 "configure"
+#line 1892 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:1895: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:1897: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out`
 if test -z "$ac_err"; then
   rm -rf conftest*

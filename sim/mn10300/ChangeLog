@@ -1,9 +1,21 @@
+start-sanitize-am30
+Thu Mar 26 20:46:18 1998  Stu Grossman  <grossman@bhuna.cygnus.co.uk>
+
+	* dv-mn103cpu.c (deliver_mn103cpu_interrupt):  Save the entire PC
+	on the stack when delivering interrupts (not just the lower
+	half)...
+	* mn10300.igen (mov (Di,Am),Dn):  Fix decode.  Registers were
+	specified in the wrong order.
+
+end-sanitize-am30
+start-sanitize-am30
 Fri Mar 27 00:56:40 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* dv-mn103cpu.c (deliver_mn103cpu_interrupt): Stop loss of
  	succeeding interrupts, clear pending_handler when the handler
  	isn't re-scheduled.
 
+end-sanitize-am30
 Thu Mar 26 10:11:01 1998  Stu Grossman  <grossman@bhuna.cygnus.co.uk>
 
 	* Makefile.in (tmp-igen):  Prefix all usage of move-if-change
@@ -26,6 +38,7 @@ Wed Mar 25 12:08:00 1998  Joyce Janczyn  <janczyn@cygnus.com>
 
 	* simops.c (OP_F0FD): Initialise variable 'sp'.
 
+start-sanitize-am30
 Thu Mar 26 00:21:32 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* dv-mn103int.c (decode_group): A group register every 4 bytes not
@@ -33,6 +46,8 @@ Thu Mar 26 00:21:32 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 	(write_icr): Rewrite equation updating request field.
 	(read_iagr): Fix check that interrupt is still pending.
 
+end-sanitize-am30
+start-sanitize-am30
 Wed Mar 25 16:14:50 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (sim_open): Tidy up device creation.
@@ -43,15 +58,18 @@ Wed Mar 25 16:14:50 1998  Andrew Cagney  <cagney@b1.cygnus.com>
  	block offsets.
 	(read_icr, write_icr): Convert block offset into group offset.
 	
+end-sanitize-am30
 Wed Mar 25 15:08:49 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (sim_open): Create second 1mb memory region at
  	0x40000000.
 	(sim_open): Create a device tree.
 	(sim-hw.h): Include.
+start-sanitize-am30
 	(do_interrupt): Delete, needs to use dv-mn103cpu.c
 
 	* dv-mn103int.c, dv-mn103cpu.c: New files.
+end-sanitize-am30
 
 Wed Mar 25 08:47:38 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 

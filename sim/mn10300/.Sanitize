@@ -15,6 +15,13 @@
 
 Do-first:
 
+am30_files="dv-mn103cpu.c dv-mn103int.c"
+if ( echo $* | grep keep\-am30 > /dev/null ) ; then
+        keep_these_too="${am30_files} ${keep_these_too}"
+else
+        lose_these_too="${am30_files} ${lose_these_too}"
+fi
+
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -39,9 +46,34 @@ op_utils.c
 
 Things-to-lose:
 
-dv-mn103cpu.c
-dv-mn103int.c
-
 Do-last:
+
+am30_files="ChangeLog interp.c configure configure.in"
+if ( echo $* | grep keep\-am30 > /dev/null ) ; then
+        for i in $am30_files ; do
+                if test ! -d $i && (grep sanitize-am30 $i > /dev/null) ; then
+                        if [ -n "${verbose}" ] ; then
+                                echo Keeping am30 stuff in $i
+                        fi
+                fi
+        done
+else
+        for i in $am30_files ; do
+                if test ! -d $i && (grep sanitize-am30 $i > /dev/null) ; then
+                        if [ -n "${verbose}" ] ; then
+                                echo Removing traces of \"am30\" from $i...
+                        fi
+                        cp $i new
+                        sed '/start\-sanitize\-am30/,/end-\sanitize\-am30/d' < $i > new
+                        if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+                                if [ -n "${verbose}" ] ; then
+                                        echo Caching $i in .Recover...
+                                fi
+                                mv $i .Recover
+                        fi
+                        mv new $i
+                fi
+        done
+fi
 
 # End of file.

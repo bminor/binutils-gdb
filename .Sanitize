@@ -117,6 +117,16 @@ else
 	lose_these_too="${lose_these_too} ${ide_files}"
 fi
 
+# CGEN files:
+# It is not yet clear if the cgen package will be shipped with the
+# simulators.
+cgen_files="cgen"
+
+if (echo $* | grep keep\-cgen > /dev/null); then
+	keep_these_too="${keep_these_too} ${cgen_files}"
+else
+	lose_these_too="${lose_these_too} ${cgen_files}"
+fi
 
 # This top-level directory is special.  We often check out only subsets
 # of this directory, and complaining about directories or files we didn't
