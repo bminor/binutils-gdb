@@ -3743,7 +3743,7 @@ and @samp{bar2} are bound to the version node @samp{VERS_2.0}.
 When the linker finds a symbol defined in a library which is not
 specifically bound to a version node, it will effectively bind it to an
 unspecified base version of the library.  You can bind all otherwise
-unspecified symbols to a given version node by using @samp{global: *}
+unspecified symbols to a given version node by using @samp{global: *;};
 somewhere in the version script.
 
 The names of the version nodes have no specific meaning other than what
@@ -3757,7 +3757,7 @@ symbols, only selects which symbols will be globally visible out and which
 won't.
 
 @smallexample
-@{ global: foo; bar; local: *; @}
+@{ global: foo; bar; local: *; @};
 @end smallexample
 
 When you link an application against a shared library that has versioned
