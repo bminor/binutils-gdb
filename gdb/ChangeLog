@@ -1,3 +1,9 @@
+Fri Feb 18 07:30:55 1994  Jim Kingdon  (kingdon@cygnus.com)
+
+	* config/mips/littlemips64.mt: Rename to mipsel64.mt for 14
+	character file names.
+	Makefile.in: Add Kung's new mips64 files.
+
 Thu Feb 17 17:25:47 1994  Kung Hsu  (kung@mexican.cygnus.com)
 
 	* configure.in: add mips64-*-elf, mips64-*-ecoff, mips64el-*-elf,

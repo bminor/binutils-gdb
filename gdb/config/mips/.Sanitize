@@ -22,10 +22,13 @@ Do-first:
 Things-to-keep:
 
 bigmips.mt
+bigmips64.mt
 decstation.mh
 decstation.mt
 idt.mt
+idt64.mt
 idtl.mt
+idtl64.mt
 irix3.mh
 irix3.mt
 irix4.mh
@@ -33,6 +36,7 @@ irix5.mh
 irix5.mt
 littlemips.mh
 littlemips.mt
+mipsel64.mt
 mipsm3.mh
 mipsm3.mt
 news-mips.mh
@@ -44,11 +48,15 @@ nm-news-mips.h
 nm-riscos.h
 riscos.mh
 tm-bigmips.h
+tm-bigmips64.h
 tm-idt.h
+tm-idt64.h
 tm-idtl.h
+tm-idtl64.h
 tm-irix3.h
 tm-irix5.h
 tm-mips.h
+tm-mips64.h
 tm-mipsm3.h
 xm-irix3.h
 xm-irix4.h
