@@ -118,6 +118,7 @@ te-dpx2.h
 te-generic.h
 te-i386aix.h
 te-ic960.h
+te-irix.h
 te-sco386.h
 te-sun3.h
 te-sysv32.h
