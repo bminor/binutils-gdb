@@ -1249,8 +1249,8 @@ cpu-rs6000.lo: cpu-rs6000.c
 cpu-sh.lo: cpu-sh.c
 cpu-sparc.lo: cpu-sparc.c
 cpu-tic30.lo: cpu-tic30.c
-cpu-tic80.lo: cpu-tic80.c
 cpu-tic54x.lo: cpu-tic54x.c
+cpu-tic80.lo: cpu-tic80.c
 cpu-v850.lo: cpu-v850.c
 cpu-vax.lo: cpu-vax.c
 cpu-we32k.lo: cpu-we32k.c
@@ -1343,11 +1343,11 @@ coff-svm68k.lo: coff-svm68k.c coff-m68k.c $(INCDIR)/coff/m68k.h \
   coffcode.h coffswap.h
 coff-tic30.lo: coff-tic30.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/tic30.h \
   $(INCDIR)/coff/internal.h libcoff.h coffcode.h coffswap.h
+coff-tic54x.lo: coff-tic54x.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/tic54x.h \
+  $(INCDIR)/coff/ti.h $(INCDIR)/coff/internal.h libcoff.h \
+  coffcode.h coffswap.h
 coff-tic80.lo: coff-tic80.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/tic80.h \
   $(INCDIR)/coff/internal.h libcoff.h coffcode.h coffswap.h
-coff-tic54x.lo: coff-tic54x.c $(INCDIR)/bfdlink.h $(INCDIR)/coff/ti.h \
-  $(INCDIR)/coff/tic54x.h $(INCDIR)/coff/internal.h \
-  libcoff.h coffcode.h coffswap.h
 coff-u68k.lo: coff-u68k.c coff-m68k.c $(INCDIR)/coff/m68k.h \
   $(INCDIR)/coff/internal.h libcoff.h $(INCDIR)/bfdlink.h \
   coffcode.h coffswap.h
@@ -1380,10 +1380,10 @@ elf.lo: elf.c $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
 elf32-arc.lo: elf32-arc.c elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/elf/arc.h $(INCDIR)/elf/reloc-macros.h elf32-target.h
-elfarm-oabi.lo: elfarm-oabi.c $(INCDIR)/elf/arm.h \
-  $(INCDIR)/elf/reloc-macros.h elf-bfd.h $(INCDIR)/elf/common.h \
-  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
-  elf32-arm.h elf32-target.h
+elfarm-oabi.lo: elfarm-oabi.c $(INCDIR)/elf/arm.h $(INCDIR)/elf/reloc-macros.h \
+  elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h elf32-arm.h \
+  elf32-target.h
 elfarm-nabi.lo: elfarm-nabi.c $(INCDIR)/elf/arm.h $(INCDIR)/elf/reloc-macros.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h elf32-arm.h \
@@ -1659,8 +1659,7 @@ irix-core.lo: irix-core.c
 lynx-core.lo: lynx-core.c
 osf-core.lo: osf-core.c
 sco5-core.lo: sco5-core.c libaout.h $(INCDIR)/bfdlink.h
-trad-core.lo: trad-core.c libaout.h $(INCDIR)/bfdlink.h \
-  hosts/i386linux.h
+trad-core.lo: trad-core.c libaout.h $(INCDIR)/bfdlink.h
 cisco-core.lo: cisco-core.c
 # IF YOU PUT ANYTHING HERE IT WILL GO AWAY
 

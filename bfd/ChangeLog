@@ -1,5 +1,10 @@
 2000-04-12  Alan Modra  <alan@linuxcare.com.au>
 
+	* dep-in.sed: Match space before file name, not after.
+
+	* Makefile.am: Regenerate dependencies.
+	* Makefile.in: Regenerate.
+
 	* reloc.c (_bfd_relocate_contents): In complain_overflow_bitfield
 	case, allow address wrap-around stupidly removed 2000-03-17.  Sign
 	extend without an if statement.
