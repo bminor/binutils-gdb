@@ -187,10 +187,10 @@ int	  hairyfunc7 (PFPFPc_i_PFl_i arg)	{ arg = 0; return 0; }
 /* gdb has two demanglers (one for g++ 2.95, one for g++ 3).
    These marker functions help me figure out which demangler is in use. */
 
-int	dm_type_char_star (char * p)		{ return (int) p; }
+char *	dm_type_char_star (char * p)		{ return p; }
 int	dm_type_foo_ref (foo & foo)		{ return foo.ifoo; }
-int	dm_type_int_star (int * p)		{ return (int) p; }
-int	dm_type_long_star (long * p)		{ return (int) p; }
+int *	dm_type_int_star (int * p)		{ return p; }
+long *	dm_type_long_star (long * p)		{ return p; }
 int	dm_type_unsigned_int (unsigned int i)	{ return i; }
 int	dm_type_void (void)			{ return 0; }
-int	dm_type_void_star (void * p)		{ return (int) p; }
+void *	dm_type_void_star (void * p)		{ return p; }

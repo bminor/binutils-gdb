@@ -1,3 +1,10 @@
+2001-05-31  Michael Chastain  <chastain@redhat.com>
+
+	* gdb.c++/cplusfuncs.cc (dm_type_char_star): Remove superfluous cast.
+	(dm_type_int_star): Likewise.
+	(dm_type_long_star): Likewise.
+	(dm_type_void_star): Likewise.
+
 2001-05-29  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdb.base/completion.exp (INPUTRC): Set this environment variable
