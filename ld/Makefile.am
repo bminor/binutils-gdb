@@ -159,8 +159,6 @@ ALL_EMULATIONS = \
 	eelf32ppc.o \
 	eelf32ppclinux.o \
 	eelf32ppcsim.o \
-	eelf64ppc.o \
-	eelf64lppc.o \
 	eelf_i386.o \
 	eelf_i386_be.o \
 	eelf_i386_chaos.o \
@@ -267,6 +265,8 @@ ALL_64_EMULATIONS = \
 	eelf64btsmip.o \
 	eelf64ltsmip.o \
 	eelf64hppa.o \
+	eelf64ppc.o \
+	eelf64lppc.o \
 	eaixppc64.o \
 	ehppa64linux.o
 
