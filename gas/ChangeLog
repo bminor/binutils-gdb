@@ -1,3 +1,10 @@
+Tue Apr 12 18:25:13 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* subsegs.c (subsegs_begin): Call memset with args in the correct
+	order.
+	(subseg_get): Clear newly allocated seginfo, set its pointer slots
+	to NULL instead of 0.
+
 Mon Apr 11 09:00:57 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* config/tc-hppa.c (pa_procend): Handle case where label was

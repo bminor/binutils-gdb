@@ -1,5 +1,6 @@
 /* subsegs.c - subsegments -
-   Copyright (C) 1987, 1990, 1991, 1992 Free Software Foundation, Inc.
+   Copyright (C) 1987, 1990, 1991, 1992, 1993, 1994
+   Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -85,7 +86,7 @@ subsegs_begin ()
   /* Fake up 1st frag.  It won't be used=> is ok if obstack...
      pads the end of it for alignment. */
   frag_now = (fragS *) obstack_alloc (&frags, SIZEOF_STRUCT_FRAG);
-  memset (frag_now, SIZEOF_STRUCT_FRAG, 0);
+  memset (frag_now, 0, SIZEOF_STRUCT_FRAG);
 
 #ifndef BFD_ASSEMBLER
   /* This 1st frag will not be in any frchain.
@@ -140,7 +141,6 @@ subseg_change (seg, subseg)
 	if (! seginfo)
 	  abort ();
 	seginfo->fix_root = 0;
-	seginfo->fix_tail = 0;
 	seginfo->bfd_section = seg;
 	seginfo->sym = 0;
 	bfd_set_section_userdata (stdoutput, seg, (char *) seginfo);
@@ -249,7 +249,7 @@ subseg_set_rest (seg, subseg)
        * This should be the only code that creates a frchainS.
        */
       newP = (frchainS *) obstack_alloc (&frags, sizeof (frchainS));
-      memset (newP, sizeof (frchainS), 0);
+      memset (newP, 0, sizeof (frchainS));
       /* This begines on a good boundary because a obstack_done()
 	 preceeded it.  It implies an obstack_done(), so we expect
 	 the next object allocated to begin on a correct boundary. */
@@ -258,6 +258,10 @@ subseg_set_rest (seg, subseg)
       (frcP = newP)->frch_subseg = subseg;
       newP->frch_seg = seg;
       newP->frch_last = NULL;
+#ifdef BFD_ASSEMBLER
+      newP->fix_root = NULL;
+      newP->fix_tail = NULL;
+#endif
     }
   /*
    * Here with frcP ->ing to the frchainS for subseg.
@@ -400,17 +404,14 @@ subseg_get (segname, force_new)
     {
       secptr->output_section = secptr;
       seginfo = (segment_info_type *) xmalloc (sizeof (*seginfo));
-      seginfo->fix_root = 0;
-      seginfo->fix_tail = 0;
+      memset ((char *) seginfo, 0, sizeof(seginfo));
+      seginfo->fix_root = NULL;
       seginfo->bfd_section = secptr;
       bfd_set_section_userdata (stdoutput, secptr, (char *) seginfo);
-      seginfo->frchainP = 0;
-      seginfo->lineno_list_head = seginfo->lineno_list_tail = 0;
-      seginfo->sym = 0;
-      seginfo->dot = 0;
-      seginfo->hadone = 0;
-      seginfo->user_stuff = 0;
-      seginfo->stabu.stab_string_size = 0;
+      seginfo->frchainP = NULL;
+      seginfo->lineno_list_head = seginfo->lineno_list_tail = NULL;
+      seginfo->sym = NULL;
+      seginfo->dot = NULL;
     }
   return secptr;
 }
@@ -458,23 +459,33 @@ subseg_set (secptr, subseg)
     subseg_set_rest (secptr, subseg);
 }
 
+#ifndef obj_sec_sym_ok_for_reloc
+#define obj_sec_sym_ok_for_reloc(SEC)	0
+#endif
+
 symbolS *
 section_symbol (sec)
      segT sec;
 {
   segment_info_type *seginfo = seg_info (sec);
+  symbolS *s;
 
   if (seginfo == 0)
     abort ();
   if (seginfo->sym)
     return seginfo->sym;
-  seginfo->sym = symbol_find (sec->name);
-  if (!seginfo->sym)
+  s = symbol_find (sec->name);
+  if (!s)
     {
-      seginfo->sym = symbol_make (sec->name);
-      seginfo->sym->bsym = sec->symbol;
+      s = symbol_new (sec->name, sec, 0, &zero_address_frag);
+      S_CLEAR_EXTERNAL (s);
+
+      /* Use the BFD section symbol, if possible.  */
+      if (obj_sec_sym_ok_for_reloc (sec))
+	s->bsym = sec->symbol;
     }
-  return seginfo->sym;
+  seginfo->sym = s;
+  return s;
 }
 
 #endif /* BFD_ASSEMBLER */
