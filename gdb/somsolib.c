@@ -1614,3 +1614,10 @@ som_solib_thread_start_addr (struct so_list *so)
 {
   return so->som_solib.tsd_start_addr;
 }
+
+#ifdef PA_SOM_ONLY
+void
+no_shared_libraries (char *ignored, int from_tty)
+{
+}
+#endif
