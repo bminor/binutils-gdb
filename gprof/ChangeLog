@@ -1,3 +1,7 @@
+Wed Jan  6 00:58:09 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
+
+	* Makefile.in: fix install rule for $(PROG)
+
 Fri Oct  9 11:25:41 1992  Mark Eichin  (eichin@cygnus.com)
 
         * gprof.1: updated SYNOPSIS to match actual behavior.

@@ -61,7 +61,7 @@ install: all
 	-parent=`echo $(bindir)|sed -e 's@/[^/]*$$@@'`; \
 	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
 	-if [ -d $(bindir) ] ; then true ; else mkdir $(bindir) ; fi
-	$(INSTALL_PROGRAM) $(PROG) $(bindir)
+	$(INSTALL_PROGRAM) $(PROG) $(bindir)/$(PROG)
 	$(INSTALL_DATA) $(srcdir)/gprof.1 $(man1dir)/gprof.1
 
 $(PROG):	$(OBJS)
