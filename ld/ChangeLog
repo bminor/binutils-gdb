@@ -1,3 +1,8 @@
+2003-08-04  Nick Clifton  <nickc@redhat.com>
+
+	* emultempl/elf32.em (before_allocation): Prepend "warning: "
+	to messages produced for .gnu.warning.SYMBOL sections.
+
 2003-08-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/elf32.em (output_rel_find): Add "isdyn" param.  Put
