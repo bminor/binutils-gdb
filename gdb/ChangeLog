@@ -1,3 +1,17 @@
+2003-11-20  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c (i386_extract_return_value,
+	i386_store_return_value): Add gdbarch argument.  Use it instead of
+	determining it from REGCACHE.  Remove recursive call for
+	structures with a single member.
+	(i386_use_struct_convention): Remove.
+	(i386_reg_struct_return_p): New function.
+	(i386_return_value): New function.
+	(i386_gdbarch_init): Set return_value, don't set
+	extract_return_value, store_return_value and
+	use_struct_convention.
+	* x86-64-tdep.c (x86_64_init_abi): Set return_value to NULL.
+
 2003-11-20  Jim Blandy  <jimb@redhat.com>
 
 	* osabi.c (_initialize_gdb_osabi): Don't return before registering

@@ -1300,6 +1300,7 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_register_to_value (gdbarch, i387_register_to_value);
   set_gdbarch_value_to_register (gdbarch, i387_value_to_register);
 
+  set_gdbarch_return_value (gdbarch, NULL);
   set_gdbarch_extract_return_value (gdbarch, x86_64_extract_return_value);
   set_gdbarch_store_return_value (gdbarch, x86_64_store_return_value);
   /* Override, since this is handled by x86_64_extract_return_value.  */
