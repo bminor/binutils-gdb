@@ -1,3 +1,26 @@
+2001-10-03  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* config/tc-mips.c (mips_64): Remove.
+	(mips_target_format): Move downwards in file, use HAVE_64BIT_OBJECTS
+	in it.
+	(mips_abi_level, mips_abi): New enum.
+	(mips_32bit_abi): Remove.
+	(HAVE*PRS): Use mips_abi instead of mips_32bit_abi.
+	(HAVE_NEWABI): New define.
+	(HAVE_64BIT_OBJECTS): New define.
+	(HAVE_32BIT_ADDRESSES): Don't return true for 64bit objects.
+	(HAVE_64BIT_ADDRESSES): New define, inverse of HAVE_32BIT_ADDRESSES.
+	(support_64bit_objects): New prototype.
+	(md_begin): Use mips_abi instead of mips_32bit_abi. Don't write
+	.reginfo section for n32, use .MIPS.options instead.
+	(support_64bit_objects): New function, code from md_parse_option.
+	(md_longopts): Add -n32 option.
+	(md_parse_option): Use mips_abi instead of mips_32bit_abi/mips64.
+	Add -n32 option. Protect with OBJ_ELF.
+	(s_mipsset): Use mips_abi instead of mips_32bit_abi.
+	(mips_elf_final_processing): Likewise. Don't write .reginfo section
+	for n32, use .MIPS.options instead.
+
 2001-10-03  Alan Modra  <amodra@bigpond.net.au>
 
 	* po/POTFILES.in: Regenerate.

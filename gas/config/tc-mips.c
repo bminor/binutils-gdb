@@ -102,42 +102,6 @@ static char *mips_regmask_frag;
 
 extern int target_big_endian;
 
-/* 1 is we should use the 64 bit MIPS ELF ABI, 0 if we should use the
-   32 bit ABI.  This has no meaning for ECOFF.
-   Note that the default is always 32 bit, even if "configured" for
-   64 bit [e.g. --target=mips64-elf].  */
-static int mips_64;
-
-/* The default target format to use.  */
-
-const char *
-mips_target_format ()
-{
-  switch (OUTPUT_FLAVOR)
-    {
-    case bfd_target_aout_flavour:
-      return target_big_endian ? "a.out-mips-big" : "a.out-mips-little";
-    case bfd_target_ecoff_flavour:
-      return target_big_endian ? "ecoff-bigmips" : ECOFF_LITTLE_FORMAT;
-    case bfd_target_coff_flavour:
-      return "pe-mips";
-    case bfd_target_elf_flavour:
-#ifdef TE_TMIPS
-      /* This is traditional mips */
-      return (target_big_endian
-	      ? (mips_64 ? "elf64-tradbigmips" : "elf32-tradbigmips")
-	      : (mips_64 ? "elf64-tradlittlemips" : "elf32-tradlittlemips"));
-#else
-      return (target_big_endian
-	      ? (mips_64 ? "elf64-bigmips" : "elf32-bigmips")
-	      : (mips_64 ? "elf64-littlemips" : "elf32-littlemips"));
-#endif
-    default:
-      abort ();
-      return NULL;
-    }
-}
-
 /* The name of the readonly data section.  */
 #define RDATA_SECTION_NAME (OUTPUT_FLAVOR == bfd_target_aout_flavour \
 			    ? ".data" \
@@ -215,8 +179,18 @@ static int mips_arch = CPU_UNKNOWN;
    are optimizing.  */
 static int mips_tune = CPU_UNKNOWN;
 
-/* The argument of the -mabi= flag.  */
-static char * mips_abi_string = NULL;
+/* The ABI to use.  */
+enum mips_abi_level
+{
+  NO_ABI = 0,
+  O32_ABI,
+  O64_ABI,
+  N32_ABI,
+  N64_ABI,
+  EABI_ABI
+};
+
+static enum mips_abi_level mips_abi = NO_ABI;
 
 /* Whether we should mark the file EABI64 or EABI32.  */
 static int mips_eabi64 = 0;
@@ -230,9 +204,6 @@ static int mips_gp32 = 0;
 
 /* True if -mfp32 was passed.  */
 static int mips_fp32 = 0;
-
-/* True if the selected ABI is defined for 32-bit registers only.  */
-static int mips_32bit_abi = 0;
 
 /* Some ISA's have delay slots for instructions which read or write
    from a coprocessor (eg. mips1-mips3); some don't (eg mips4).
@@ -256,22 +227,31 @@ static int mips_32bit_abi = 0;
    || (ISA) == ISA_MIPS64            \
    )
 
-#define HAVE_32BIT_GPRS		            \
-   (mips_gp32                               \
-    || mips_32bit_abi                       \
-    || ! ISA_HAS_64BIT_REGS (mips_opts.isa))
+#define HAVE_32BIT_GPRS		                   \
+    (mips_gp32                                     \
+     || mips_abi == O32_ABI                        \
+     || ! ISA_HAS_64BIT_REGS (mips_opts.isa))
 
-#define HAVE_32BIT_FPRS                     \
-   (mips_fp32                               \
-    || mips_32bit_abi                       \
-    || ! ISA_HAS_64BIT_REGS (mips_opts.isa))
+#define HAVE_32BIT_FPRS                            \
+    (mips_fp32                                     \
+     || mips_abi == O32_ABI                        \
+     || ! ISA_HAS_64BIT_REGS (mips_opts.isa))
 
 #define HAVE_64BIT_GPRS (! HAVE_32BIT_GPRS)
 #define HAVE_64BIT_FPRS (! HAVE_32BIT_FPRS)
 
-#define HAVE_32BIT_ADDRESSES                \
-   (HAVE_32BIT_GPRS                         \
-    || bfd_arch_bits_per_address (stdoutput) == 32)
+#define HAVE_NEWABI (mips_abi == N32_ABI || mips_abi == N64_ABI)
+
+#define HAVE_64BIT_OBJECTS (mips_abi == N64_ABI)
+
+/* We can only have 64bit addresses if the object file format
+   supports it.  */
+#define HAVE_32BIT_ADDRESSES                       \
+   (HAVE_32BIT_GPRS                                \
+    || bfd_arch_bits_per_address (stdoutput) == 32 \
+    || ! HAVE_64BIT_OBJECTS)
+
+#define HAVE_64BIT_ADDRESSES (! HAVE_32BIT_ADDRESSES)
 
 /* Whether the processor uses hardware interlocks to protect
    reads from the HI and LO registers, and thus does not
@@ -697,6 +677,7 @@ static void mips16_immed PARAMS ((char *, unsigned int, int, offsetT, boolean,
 				  boolean *, unsigned short *));
 static int my_getSmallExpression PARAMS ((expressionS * ep, char *str));
 static void my_getExpression PARAMS ((expressionS * ep, char *str));
+static int support_64bit_objects PARAMS((void));
 static symbolS *get_symbol PARAMS ((void));
 static void mips_align PARAMS ((int to, int fill, symbolS *label));
 static void s_align PARAMS ((int));
@@ -934,6 +915,39 @@ mips_cpu_to_str (cpu)
   return s;
 }
 
+/* The default target format to use.  */
+
+const char *
+mips_target_format ()
+{
+  switch (OUTPUT_FLAVOR)
+    {
+    case bfd_target_aout_flavour:
+      return target_big_endian ? "a.out-mips-big" : "a.out-mips-little";
+    case bfd_target_ecoff_flavour:
+      return target_big_endian ? "ecoff-bigmips" : ECOFF_LITTLE_FORMAT;
+    case bfd_target_coff_flavour:
+      return "pe-mips";
+    case bfd_target_elf_flavour:
+#ifdef TE_TMIPS
+      /* This is traditional mips */
+      return (target_big_endian
+	      ? (HAVE_64BIT_OBJECTS ? "elf64-tradbigmips"
+		 : "elf32-tradbigmips")
+	      : (HAVE_64BIT_OBJECTS ? "elf64-tradlittlemips"
+		 : "elf32-tradlittlemips"));
+#else
+      return (target_big_endian
+	      ? (HAVE_64BIT_OBJECTS ? "elf64-bigmips" : "elf32-bigmips")
+	      : (HAVE_64BIT_OBJECTS ? "elf64-littlemips"
+		 : "elf32-littlemips"));
+#endif
+    default:
+      abort ();
+      return NULL;
+    }
+}
+
 /* This function is called once, at assembler startup time.  It should
    set up all the tables, etc. that the MD part of the assembler will need.  */
 
@@ -1075,8 +1089,7 @@ md_begin ()
      to change the ISA with directives.  This isn't really
      the best, but then neither is basing the abi on the isa.  */
   if (ISA_HAS_64BIT_REGS (mips_opts.isa)
-      && mips_abi_string
-      && 0 == strcmp (mips_abi_string, "eabi"))
+      && mips_abi == EABI_ABI)
     mips_eabi64 = 1;
 
   /* If they asked for mips1 or mips2 and a cpu that is
@@ -1216,7 +1229,7 @@ md_begin ()
 	if (strcmp (TARGET_OS, "elf") != 0)
 	  flags |= SEC_ALLOC | SEC_LOAD;
 
-	if (! mips_64)
+	if (! HAVE_NEWABI)
 	  {
 	    sec = subseg_new (".reginfo", (subsegT) 0);
 
@@ -8873,6 +8886,25 @@ md_number_to_chars (buf, val, n)
     number_to_chars_littleendian (buf, val, n);
 }
 
+static int support_64bit_objects(void)
+{
+  const char **list, **l;
+
+  list = bfd_target_list ();
+  for (l = list; *l != NULL; l++)
+#ifdef TE_TMIPS
+    /* This is traditional mips */
+    if (strcmp (*l, "elf64-tradbigmips") == 0
+	|| strcmp (*l, "elf64-tradlittlemips") == 0)
+#else
+    if (strcmp (*l, "elf64-bigmips") == 0
+	|| strcmp (*l, "elf64-littlemips") == 0)
+#endif
+      break;
+  free (list);
+  return (*l != NULL);
+}
+
 CONST char *md_shortopts = "nO::g::G:";
 
 struct option md_longopts[] =
@@ -8952,12 +8984,14 @@ struct option md_longopts[] =
 #define OPTION_NON_SHARED  (OPTION_ELF_BASE + 1)
 #define OPTION_XGOT        (OPTION_ELF_BASE + 2)
 #define OPTION_32 	   (OPTION_ELF_BASE + 3)
-#define OPTION_64          (OPTION_ELF_BASE + 4)
+#define OPTION_N32 	   (OPTION_ELF_BASE + 4)
+#define OPTION_64          (OPTION_ELF_BASE + 5)
   {"KPIC",        no_argument, NULL, OPTION_CALL_SHARED},
   {"call_shared", no_argument, NULL, OPTION_CALL_SHARED},
   {"non_shared",  no_argument, NULL, OPTION_NON_SHARED},
   {"xgot",        no_argument, NULL, OPTION_XGOT},
   {"32",          no_argument, NULL, OPTION_32},
+  {"n32",         no_argument, NULL, OPTION_N32},
   {"64",          no_argument, NULL, OPTION_64},
 #endif
 
@@ -9225,71 +9259,57 @@ md_parse_option (c, arg)
       /* The -32 and -64 options tell the assembler to output the 32
          bit or the 64 bit MIPS ELF format.  */
     case OPTION_32:
-      mips_64 = 0;
+      mips_abi = O32_ABI;
+      break;
+
+    case OPTION_N32:
+      mips_abi = N32_ABI;
       break;
 
     case OPTION_64:
-      {
-	const char **list, **l;
-
-	list = bfd_target_list ();
-	for (l = list; *l != NULL; l++)
-#ifdef TE_TMIPS
-	  /* This is traditional mips */
-	  if (strcmp (*l, "elf64-tradbigmips") == 0
-	      || strcmp (*l, "elf64-tradlittlemips") == 0)
-#else
-	  if (strcmp (*l, "elf64-bigmips") == 0
-	      || strcmp (*l, "elf64-littlemips") == 0)
-#endif
-	    break;
-	if (*l == NULL)
-	  as_fatal (_("No compiled in support for 64 bit object file format"));
-	free (list);
-	mips_64 = 1;
-      }
+      mips_abi = N64_ABI;
+      if (! support_64bit_objects())
+	as_fatal (_("No compiled in support for 64 bit object file format"));
       break;
-#endif /* OBJ_ELF */
 
     case OPTION_GP32:
       mips_gp32 = 1;
-
-      /* We deliberately don't allow "-gp32" to set the MIPS_32BITMODE
-	 flag in object files because to do so would make it
-	 impossible to link with libraries compiled without "-gp32".
-	 This is unnecessarily restrictive.
-
-	 We could solve this problem by adding "-gp32" multilibs to
-	 gcc, but to set this flag before gcc is built with such
-	 multilibs will break too many systems.  */
-
-#if 0
-      mips_32bitmode = 1;
-#endif
+      if (mips_abi != O32_ABI)
+	mips_abi = NO_ABI;
       break;
 
     case OPTION_GP64:
       mips_gp32 = 0;
-#if 0
-      mips_32bitmode = 0;
-#endif
+      if (mips_abi == O32_ABI)
+	mips_abi = NO_ABI;
       break;
 
     case OPTION_FP32:
       mips_fp32 = 1;
+      if (mips_abi != O32_ABI)
+	mips_abi = NO_ABI;
       break;
 
     case OPTION_MABI:
-      if (strcmp (arg, "32") == 0
-	  || strcmp (arg, "n32") == 0
-	  || strcmp (arg, "64") == 0
-	  || strcmp (arg, "o64") == 0
-	  || strcmp (arg, "eabi") == 0)
+      if (strcmp (arg, "32") == 0)
+	mips_abi = O32_ABI;
+      else if (strcmp (arg, "o64") == 0)
+	mips_abi = O64_ABI;
+      else if (strcmp (arg, "n32") == 0)
+	mips_abi = N32_ABI;
+      else if (strcmp (arg, "64") == 0)
 	{
-	  mips_abi_string = arg;
-	  mips_32bit_abi = (strcmp (arg, "32") == 0);
+	  mips_abi = N64_ABI;
+	  if (! support_64bit_objects())
+	    as_fatal (_("No compiled in support for 64 bit object file "
+			"format"));
 	}
+      else if (strcmp (arg, "eabi") == 0)
+	mips_abi = EABI_ABI;
+      else
+	mips_abi = NO_ABI;
       break;
+#endif /* OBJ_ELF */
 
     case OPTION_M7000_HILO_FIX:
       mips_7000_hilo_fix = true;
@@ -9416,8 +9436,9 @@ MIPS options:\n\
 -KPIC, -call_shared	generate SVR4 position independent code\n\
 -non_shared		do not generate position independent code\n\
 -xgot			assume a 32 bit GOT\n\
--32			create 32 bit object file (default)\n\
--64			create 64 bit object file\n"));
+-32			create o32 ABI object file (default)\n\
+-n32			create n32 ABI object file\n\
+-64			create 64 ABI object file\n"));
 #endif
 }
 
@@ -10408,7 +10429,7 @@ s_mipsset (x)
       int isa;
       static int saved_mips_gp32;
       static int saved_mips_fp32;
-      static int saved_mips_32bit_abi;
+      static enum mips_abi_level saved_mips_abi;
       static int is_saved;
 
       /* Permit the user to change the ISA on the fly.  Needless to
@@ -10419,7 +10440,7 @@ s_mipsset (x)
       case  0:
 	mips_gp32 = saved_mips_gp32;
 	mips_fp32 = saved_mips_fp32;
-	mips_32bit_abi = saved_mips_32bit_abi;
+	mips_abi = saved_mips_abi;
 	is_saved = 0;
 	break;
       case  1:
@@ -10429,7 +10450,7 @@ s_mipsset (x)
 	  {
 	    saved_mips_gp32 = mips_gp32;
 	    saved_mips_fp32 = mips_fp32;
-	    saved_mips_32bit_abi = mips_32bit_abi;
+	    saved_mips_abi = mips_abi;
 	  }
 	mips_gp32 = 1;
 	mips_fp32 = 1;
@@ -10443,11 +10464,11 @@ s_mipsset (x)
 	  {
 	    saved_mips_gp32 = mips_gp32;
 	    saved_mips_fp32 = mips_fp32;
-	    saved_mips_32bit_abi = mips_32bit_abi;
+	    saved_mips_abi = mips_abi;
 	  }
 	mips_gp32 = 0;
 	mips_fp32 = 0;
-	mips_32bit_abi = 0;
+	mips_abi = NO_ABI;
 	is_saved = 1;
 	break;
       default:
@@ -11662,7 +11683,7 @@ void
 mips_elf_final_processing ()
 {
   /* Write out the register information.  */
-  if (! mips_64)
+  if (! HAVE_NEWABI)
     {
       Elf32_RegInfo s;
 
@@ -11702,20 +11723,20 @@ mips_elf_final_processing ()
     elf_elfheader (stdoutput)->e_flags |= EF_MIPS_PIC;
 
   /* Set the MIPS ELF ABI flags.  */
-  if (mips_abi_string == NULL)
+  if (mips_abi == NO_ABI)
     ;
-  else if (strcmp (mips_abi_string, "32") == 0)
+  else if (mips_abi == O32_ABI)
     elf_elfheader (stdoutput)->e_flags |= E_MIPS_ABI_O32;
-  else if (strcmp (mips_abi_string, "o64") == 0)
+  else if (mips_abi == O64_ABI)
     elf_elfheader (stdoutput)->e_flags |= E_MIPS_ABI_O64;
-  else if (strcmp (mips_abi_string, "eabi") == 0)
+  else if (mips_abi == EABI_ABI)
     {
       if (mips_eabi64)
 	elf_elfheader (stdoutput)->e_flags |= E_MIPS_ABI_EABI64;
       else
 	elf_elfheader (stdoutput)->e_flags |= E_MIPS_ABI_EABI32;
     }
-  else if (strcmp (mips_abi_string, "n32") == 0)
+  else if (mips_abi == N32_ABI)
     elf_elfheader (stdoutput)->e_flags |= EF_MIPS_ABI2;
 
   /* Nothing to do for "64".  */
