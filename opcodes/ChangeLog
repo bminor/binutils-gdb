@@ -1,3 +1,7 @@
+2001-02-21  Greg McGary  <greg@mcgary.org>
+
+	* cgen-opc.c (cgen_get_insn_value): Add missing `return'.
+
 2001-02-20  H.J. Lu  <hjl@gnu.org>
 
 	* Makefile.am (ia64-ic.tbl): Remove the target.
