@@ -1,3 +1,11 @@
+start-sanitize-am33
+Mon Jul 27 08:54:41 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300-tdep.c (mn10300_frame_chain): Account for space saved
+	by am33 register saves.
+	(mn10300_frame_saved_pc): Similarly.
+
+end-sanitize-am33
 Fri Jul 24 14:41:19 1998  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* tracepoint.c (encode_actions): Treat register names and simple

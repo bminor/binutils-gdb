@@ -1,5 +1,5 @@
 /* Target-dependent code for the Matsushita MN10300 for GDB, the GNU debugger.
-   Copyright 1996, 1997 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -408,6 +408,12 @@ mn10300_frame_chain (fi)
       adjust += (fi->fsr.regs[3] ? 4 : 0);
       adjust += (fi->fsr.regs[6] ? 4 : 0);
       adjust += (fi->fsr.regs[7] ? 4 : 0);
+      /* start-sanitize-am33 */
+      adjust += (fi->fsr.regs[E0_REGNUM+5] ? 4 : 0);
+      adjust += (fi->fsr.regs[E0_REGNUM+4] ? 4 : 0);
+      adjust += (fi->fsr.regs[E0_REGNUM+3] ? 4 : 0);
+      adjust += (fi->fsr.regs[E0_REGNUM+2] ? 4 : 0);
+      /* end-sanitize-am33 */
 
       /* Our caller does not have a frame pointer.  So his frame starts
 	 at the base of our frame (fi->frame) + register save space. */
@@ -597,6 +603,12 @@ mn10300_frame_saved_pc (fi)
   adjust += (fi->fsr.regs[3] ? 4 : 0);
   adjust += (fi->fsr.regs[6] ? 4 : 0);
   adjust += (fi->fsr.regs[7] ? 4 : 0);
+  /* start-sanitize-am33 */
+  adjust += (fi->fsr.regs[E0_REGNUM+5] ? 4 : 0);
+  adjust += (fi->fsr.regs[E0_REGNUM+4] ? 4 : 0);
+  adjust += (fi->fsr.regs[E0_REGNUM+3] ? 4 : 0);
+  adjust += (fi->fsr.regs[E0_REGNUM+2] ? 4 : 0);
+  /* end-sanitize-am33 */
 
   return (read_memory_integer (fi->frame + adjust, REGISTER_SIZE));
 }
