@@ -1,3 +1,8 @@
+Thu May  5 19:14:43 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* doc/Makefile.in (distclean, clean-dvi, clean-info): Delete gasp
+	files too.
+
 Thu May  5 18:12:51 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/tc-mips.c (mips_emit_delays): Make call to
