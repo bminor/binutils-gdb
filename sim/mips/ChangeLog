@@ -1,3 +1,50 @@
+Mon Jun 29 09:21:07 1998  Gavin Koch  <gavin@cygnus.com>
+
+	* mips.igen (check_mf_hilo): Correct check.
+
+start-sanitize-r5900
+Fri Jun 19 14:44:46 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-main.h (NR_COP0_GPR, COP0_GPR, cop0_gpr, NR_COP0_BP,
+ 	COP0_BP, cop0_bp, NR_COP0_P, COP0_P, cop0_p): Add 32 COP0 general
+ 	purpose registers, add 8 COP0 break-point registers, add 64 COP0
+ 	performance registers.
+
+	* interp.c (decode_coproc): Accept any MTC0/MFC0, MTBP/MFBP, MTP*
+ 	MFP* instructions.  Just transfer value to/from corresponding
+ 	register.
+
+	* r5900.igen (BC0F, BC0FL, BC0T, BC0TL): Implement, assume COP0
+ 	status is always true.
+	(CACHE, TLBP, TPGWI, TLBWR): Treat as NOP.
+	(EI, DI): Set/clear Status-EIE bit.
+	
+end-sanitize-r5900
+start-sanitize-sky
+Fri Jun 19 14:44:46 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips.igen (BC0F, BC0FL, BC0T, BC0TL): Move to sky code to
+ 	r5900.igen.
+	
+end-sanitize-sky
+Wed Jun 17 12:20:49 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+start-sanitize-sky
+	* sky-vu.c (vu0_read_cop2_register, vu0_write_cop2_register): Call
+ 	ASSERT not assert.
+	* sky-gdb.c: Include "sim-assert.h".
+
+end-sanitize-sky
+	* sim-main.h (interrupt_event): Add prototype.
+
+start-sanitize-tx3904
+	* dv-tx3904tmr.c (tx3904tmr_io_write_buffer): Delete unused
+ 	register_ptr, register_value.
+	(deliver_tx3904tmr_tick): Fix types passed to printf fmt.
+
+end-sanitize-tx3904
+	* sim-main.h (tracefh): Make extern.
+
 start-sanitize-tx3904
 Tue Jun 16 14:39:00 1998  Frank Ch. Eigler  <fche@cygnus.com>
 

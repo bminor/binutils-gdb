@@ -174,7 +174,11 @@
   int ok = 1;
   if (peer != NULL
       && peer->mt.timestamp > history->op.timestamp
-      && history->mf.timestamp < history->op.timestamp)
+      && history->mt.timestamp < history->op.timestamp
+      && ! (history->mf.timestamp > history->op.timestamp
+	    && history->mf.timestamp < peer->mt.timestamp)
+      && ! (peer->mf.timestamp > history->op.timestamp
+	    && peer->mf.timestamp < peer->mt.timestamp))
     {
       /* The peer has been written to since the last OP yet we have
          not */
@@ -5367,26 +5371,6 @@
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
-// start-sanitize-r5900
-*r5900:
-// start-sanitize-sky
-{
-#ifdef TARGET_SKY
-  extern int sky_cpcond0A;
-  if (sky_cpcond0A == 0)
-    {
-      address_word dest = NIA + (EXTEND16 (OFFSET) << 2);
-      TRACE_BRANCH_RESULT (dest);
-      DELAY_SLOT (dest);
-    }
-  else
-    {
-      TRACE_BRANCH_RESULT (NIA);
-    }
-#endif    
-}
-// end-sanitize-sky
-// end-sanitize-r5900
 
 
 010000,01000,00010,16.OFFSET:COP0:32::BC0FL
@@ -5399,52 +5383,11 @@
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
-// start-sanitize-r5900
-*r5900:
-// start-sanitize-sky
-{
-#ifdef TARGET_SKY
-  extern int sky_cpcond0A;
-  if (sky_cpcond0A == 0)
-    {
-      address_word dest = NIA + (EXTEND16 (OFFSET) << 2);
-      TRACE_BRANCH_RESULT (dest);
-      DELAY_SLOT (dest);
-    }
-  else
-    {
-      TRACE_BRANCH_RESULT (0);
-      NULLIFY_NEXT_INSTRUCTION ();
-    }
-#endif
-}
-// end-sanitize-sky
-// end-sanitize-r5900
 
 
 010000,01000,00001,16.OFFSET:COP0:32::BC0T
 "bc0t <OFFSET>"
 *mipsI,mipsII,mipsIII,mipsIV:
-// start-sanitize-r5900
-*r5900:
-// start-sanitize-sky
-{
-#ifdef TARGET_SKY
-  extern int sky_cpcond0A;
-  if (sky_cpcond0A != 0)
-    {
-      address_word dest = NIA + (EXTEND16 (OFFSET) << 2);
-      TRACE_BRANCH_RESULT (dest);
-      DELAY_SLOT (dest);
-    }
-  else
-    {
-      TRACE_BRANCH_RESULT (NIA);
-    }
-#endif
-}
-// end-sanitize-sky
-// end-sanitize-r5900
 
 
 
@@ -5458,27 +5401,6 @@
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
-// start-sanitize-r5900
-*r5900:
-// start-sanitize-sky
-{
-#ifdef TARGET_SKY
-  extern int sky_cpcond0A;
-  if (sky_cpcond0A != 0)
-    {
-      address_word dest = NIA + (EXTEND16 (OFFSET) << 2);
-      TRACE_BRANCH_RESULT (dest);
-      DELAY_SLOT (dest);
-    }
-  else
-    {
-      TRACE_BRANCH_RESULT (0);
-      NULLIFY_NEXT_INSTRUCTION ();
-    }
-#endif
-}
-// end-sanitize-sky
-// end-sanitize-r5900
 
 
 101111,5.BASE,5.OP,16.OFFSET:NORMAL:32::CACHE
@@ -5491,9 +5413,6 @@
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
-// start-sanitize-r5900
-*r5900:
-// end-sanitize-r5900
 *r3900:
 // start-sanitize-tx19
 *tx19:
@@ -5523,9 +5442,6 @@
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
-// start-sanitize-r5900
-*r5900:
-// end-sanitize-r5900
 
 
 010000,10000,000000000000000,111000:COP0:32::EI
@@ -5538,9 +5454,6 @@
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
-// start-sanitize-r5900
-*r5900:
-// end-sanitize-r5900
 
 
 010000,10000,000000000000000,011000:COP0:32::ERET
@@ -5663,9 +5576,6 @@
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
-// start-sanitize-r5900
-*r5900:
-// end-sanitize-r5900
 
 
 010000,10000,000000000000000,000001:COP0:32::TLBR
@@ -5678,9 +5588,6 @@
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
-// start-sanitize-r5900
-*r5900:
-// end-sanitize-r5900
 
 
 010000,10000,000000000000000,000010:COP0:32::TLBWI
@@ -5693,9 +5600,6 @@
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
-// start-sanitize-r5900
-*r5900:
-// end-sanitize-r5900
 
 
 010000,10000,000000000000000,000110:COP0:32::TLBWR
@@ -5708,9 +5612,6 @@
 // start-sanitize-vr5400
 *vr5400:
 // end-sanitize-vr5400
-// start-sanitize-r5900
-*r5900:
-// end-sanitize-r5900
 
 
 :include:::m16.igen
