@@ -1,3 +1,12 @@
+2002-05-16  Marek Michalkiewicz  <marekm@amelek.gda.pl>
+
+	* emulparams/avr1.sh: New file.
+	* emulparams/avr2.sh: New file.
+	* emulparams/avr3.sh: New file.
+	* emulparams/avr4.sh: New file.
+	* emulparams/avr5.sh: New file.
+	* scripttempl/avr.sc: New file.
+
 2002-05-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c (section_already_linked): Call bfd_link_just_syms.
