@@ -1,3 +1,8 @@
+Fri Feb 13 00:47:44 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-mips.c (macro_build): Handle operand type 'C'.
+	(macro): Fix handling of M_COP[0-3].
+
 Thu Feb 12 14:06:59 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	Based on patches from Ross Harvey <ross@teraflop.com>:
