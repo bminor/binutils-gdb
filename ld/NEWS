@@ -1,5 +1,8 @@
 -*- text -*-
 
+* New linker script functions: ORIGIN() and LENGTH() which return information
+  about a specified memory region.
+
 * Port to MAXQ processor contributed by HCL Tech.
 
 * Added SEGMENT_START to the linker script language to permit the user to

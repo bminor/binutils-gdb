@@ -1,3 +1,12 @@
+2004-11-19  Jon Beniston <jon@beniston.com>
+
+	* ld/ldlex.l: Allow ORIGIN and LENGTH in EXPRESSION.
+	* ld/ldgram.y: Add ORIGIN and LENGTH expressions.
+	* ld/ldexp.c (fold_name): Implement LENGTH() and ORIGIN() functions 
+	which return the length and origin of a memory.
+	* ld/ld.texinfo: Document LENGTH() and ORIGIN() functions.
+	* NEWS: Mention support for ORIGIN and LENGTH operators.
+
 2004-11-17  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* emultempl/armelf.em (arm_elf_set_bfd_for_interworking): Don't use

@@ -1,23 +1,23 @@
 /* A YACC grammar to parse a superset of the AT&T linker scripting language.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003 Free Software Foundation, Inc.
+   2001, 2002, 2003, 2004 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support (steve@cygnus.com).
 
-This file is part of GNU ld.
+   This file is part of GNU ld.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 %{
 /*
@@ -762,88 +762,88 @@ nocrossref_list:
 		}
 	;
 
-mustbe_exp:		 { ldlex_expression(); }
+mustbe_exp:		 { ldlex_expression (); }
 		exp
-			 { ldlex_popstate(); $$=$2;}
+			 { ldlex_popstate (); $$=$2;}
 	;
 
 exp	:
 		'-' exp %prec UNARY
-			{ $$ = exp_unop('-', $2); }
+			{ $$ = exp_unop ('-', $2); }
 	|	'(' exp ')'
 			{ $$ = $2; }
 	|	NEXT '(' exp ')' %prec UNARY
-			{ $$ = exp_unop((int) $1,$3); }
+			{ $$ = exp_unop ((int) $1,$3); }
 	|	'!' exp %prec UNARY
-			{ $$ = exp_unop('!', $2); }
+			{ $$ = exp_unop ('!', $2); }
 	|	'+' exp %prec UNARY
 			{ $$ = $2; }
 	|	'~' exp %prec UNARY
-			{ $$ = exp_unop('~', $2);}
+			{ $$ = exp_unop ('~', $2);}
 
 	|	exp '*' exp
-			{ $$ = exp_binop('*', $1, $3); }
+			{ $$ = exp_binop ('*', $1, $3); }
 	|	exp '/' exp
-			{ $$ = exp_binop('/', $1, $3); }
+			{ $$ = exp_binop ('/', $1, $3); }
 	|	exp '%' exp
-			{ $$ = exp_binop('%', $1, $3); }
+			{ $$ = exp_binop ('%', $1, $3); }
 	|	exp '+' exp
-			{ $$ = exp_binop('+', $1, $3); }
+			{ $$ = exp_binop ('+', $1, $3); }
 	|	exp '-' exp
-			{ $$ = exp_binop('-' , $1, $3); }
+			{ $$ = exp_binop ('-' , $1, $3); }
 	|	exp LSHIFT exp
-			{ $$ = exp_binop(LSHIFT , $1, $3); }
+			{ $$ = exp_binop (LSHIFT , $1, $3); }
 	|	exp RSHIFT exp
-			{ $$ = exp_binop(RSHIFT , $1, $3); }
+			{ $$ = exp_binop (RSHIFT , $1, $3); }
 	|	exp EQ exp
-			{ $$ = exp_binop(EQ , $1, $3); }
+			{ $$ = exp_binop (EQ , $1, $3); }
 	|	exp NE exp
-			{ $$ = exp_binop(NE , $1, $3); }
+			{ $$ = exp_binop (NE , $1, $3); }
 	|	exp LE exp
-			{ $$ = exp_binop(LE , $1, $3); }
+			{ $$ = exp_binop (LE , $1, $3); }
   	|	exp GE exp
-			{ $$ = exp_binop(GE , $1, $3); }
+			{ $$ = exp_binop (GE , $1, $3); }
 	|	exp '<' exp
-			{ $$ = exp_binop('<' , $1, $3); }
+			{ $$ = exp_binop ('<' , $1, $3); }
 	|	exp '>' exp
-			{ $$ = exp_binop('>' , $1, $3); }
+			{ $$ = exp_binop ('>' , $1, $3); }
 	|	exp '&' exp
-			{ $$ = exp_binop('&' , $1, $3); }
+			{ $$ = exp_binop ('&' , $1, $3); }
 	|	exp '^' exp
-			{ $$ = exp_binop('^' , $1, $3); }
+			{ $$ = exp_binop ('^' , $1, $3); }
 	|	exp '|' exp
-			{ $$ = exp_binop('|' , $1, $3); }
+			{ $$ = exp_binop ('|' , $1, $3); }
 	|	exp '?' exp ':' exp
-			{ $$ = exp_trinop('?' , $1, $3, $5); }
+			{ $$ = exp_trinop ('?' , $1, $3, $5); }
 	|	exp ANDAND exp
-			{ $$ = exp_binop(ANDAND , $1, $3); }
+			{ $$ = exp_binop (ANDAND , $1, $3); }
 	|	exp OROR exp
-			{ $$ = exp_binop(OROR , $1, $3); }
+			{ $$ = exp_binop (OROR , $1, $3); }
 	|	DEFINED '(' NAME ')'
-			{ $$ = exp_nameop(DEFINED, $3); }
+			{ $$ = exp_nameop (DEFINED, $3); }
 	|	INT
 			{ $$ = exp_bigintop ($1.integer, $1.str); }
         |	SIZEOF_HEADERS
-			{ $$ = exp_nameop(SIZEOF_HEADERS,0); }
+			{ $$ = exp_nameop (SIZEOF_HEADERS,0); }
 
 	|	SIZEOF '(' NAME ')'
-			{ $$ = exp_nameop(SIZEOF,$3); }
+			{ $$ = exp_nameop (SIZEOF,$3); }
 	|	ADDR '(' NAME ')'
-			{ $$ = exp_nameop(ADDR,$3); }
+			{ $$ = exp_nameop (ADDR,$3); }
 	|	LOADADDR '(' NAME ')'
-			{ $$ = exp_nameop(LOADADDR,$3); }
+			{ $$ = exp_nameop (LOADADDR,$3); }
 	|	ABSOLUTE '(' exp ')'
-			{ $$ = exp_unop(ABSOLUTE, $3); }
+			{ $$ = exp_unop (ABSOLUTE, $3); }
 	|	ALIGN_K '(' exp ')'
-			{ $$ = exp_unop(ALIGN_K,$3); }
+			{ $$ = exp_unop (ALIGN_K,$3); }
 	|	ALIGN_K '(' exp ',' exp ')'
-			{ $$ = exp_binop(ALIGN_K,$3,$5); }
+			{ $$ = exp_binop (ALIGN_K,$3,$5); }
 	|	DATA_SEGMENT_ALIGN '(' exp ',' exp ')'
 			{ $$ = exp_binop (DATA_SEGMENT_ALIGN, $3, $5); }
 	|	DATA_SEGMENT_RELRO_END '(' exp ',' exp ')'
 			{ $$ = exp_binop (DATA_SEGMENT_RELRO_END, $5, $3); }
 	|	DATA_SEGMENT_END '(' exp ')'
-			{ $$ = exp_unop(DATA_SEGMENT_END, $3); }
+			{ $$ = exp_unop (DATA_SEGMENT_END, $3); }
         |       SEGMENT_START '(' NAME ',' exp ')'
                         { /* The operands to the expression node are
 			     placed in the opposite order from the way
@@ -854,15 +854,19 @@ exp	:
 					  $5,
 					  exp_nameop (NAME, $3)); }
 	|	BLOCK '(' exp ')'
-			{ $$ = exp_unop(ALIGN_K,$3); }
+			{ $$ = exp_unop (ALIGN_K,$3); }
 	|	NAME
-			{ $$ = exp_nameop(NAME,$1); }
+			{ $$ = exp_nameop (NAME,$1); }
 	|	MAX_K '(' exp ',' exp ')'
 			{ $$ = exp_binop (MAX_K, $3, $5 ); }
 	|	MIN_K '(' exp ',' exp ')'
 			{ $$ = exp_binop (MIN_K, $3, $5 ); }
 	|	ASSERT_K '(' exp ',' NAME ')'
 			{ $$ = exp_assert ($3, $5); }
+	|	ORIGIN '(' NAME ')'
+			{ $$ = exp_nameop (ORIGIN, $3); }
+	|	LENGTH '(' NAME ')'
+			{ $$ = exp_nameop (LENGTH, $3); }
 	;
 
 

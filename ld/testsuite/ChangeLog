@@ -1,3 +1,11 @@
+2004-11-19  Nick Clifton  <nickc@redhat.com>
+
+	* ld-scripts/script.exp: Add test of memory linker script.
+	Reorganise code to remove unnecessary indentation.
+	Fix target tests to avoid using --image-base with *-nto targets.
+	* ld-scripts/memory.t: New linker script to test the MEMORY
+	section and the ORIGIN and LENGTH operators.
+
 2004-11-17  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* ld-arm/mixed-app.d, ld-arm/mixed-app.r, ld-arm/mixed-app.s,

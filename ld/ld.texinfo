@@ -3886,6 +3886,16 @@ the next available address within the memory region.  If the combined
 output sections directed to a memory region are too large for the
 region, the linker will issue an error message.
 
+It is possible to access the origin and length of a memory in an
+expression via the @code{ORIGIN(@var{memory})} and 
+@code{LENGTH(@var{memory})} functions:
+
+@smallexample
+@group
+  _fstack = ORIGIN(ram) + LENGTH(ram) - 4;  
+@end group
+@end smallexample
+
 @node PHDRS
 @section PHDRS Command
 @kindex PHDRS
@@ -4661,6 +4671,10 @@ SECTIONS @{ @dots{}
 @end group
 @end smallexample
 
+@item LENGTH(@var{memory})
+@kindex LENGTH(@var{memory})
+Return the length of the memory region named @var{memory}.
+
 @item LOADADDR(@var{section})
 @kindex LOADADDR(@var{section})
 @cindex section load address in expression
@@ -4684,6 +4698,10 @@ Return the next unallocated address that is a multiple of @var{exp}.
 This function is closely related to @code{ALIGN(@var{exp})}; unless you
 use the @code{MEMORY} command to define discontinuous memory for the
 output file, the two functions are equivalent.
+
+@item ORIGIN(@var{memory})
+@kindex ORIGIN(@var{memory})
+Return the origin of the memory region named @var{memory}.
 
 @item SEGMENT_START(@var{segment}, @var{default})
 @kindex SEGMENT_START(@var{segment}, @var{default})

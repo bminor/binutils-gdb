@@ -4,22 +4,22 @@
    Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support <sac@cygnus.com>.
 
-This file is part of GLD, the Gnu Linker.
+   This file is part of GLD, the Gnu Linker.
 
-GLD is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
+   GLD is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
 
-GLD is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   GLD is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with GLD; see the file COPYING.  If not, write to the Free
-Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with GLD; see the file COPYING.  If not, write to the Free
+   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA.  */
 
 /* This module is in charge of working out the contents of expressions.
 
@@ -105,6 +105,8 @@ exp_print_token (token_code_type code, int infix_p)
     { DATA_SEGMENT_ALIGN, "DATA_SEGMENT_ALIGN" },
     { DATA_SEGMENT_RELRO_END, "DATA_SEGMENT_RELRO_END" },
     { DATA_SEGMENT_END, "DATA_SEGMENT_END" },
+    { ORIGIN, "ORIGIN" },
+    { LENGTH, "LENGTH" },
     { SEGMENT_START, "SEGMENT_START" }
   };
   unsigned int idx;
@@ -643,6 +645,32 @@ fold_name (etree_type *tree,
 	  if (os && os->processed > 0)
 	    result = new_abs (os->bfd_section->size / opb);
 	}
+      break;
+
+    case LENGTH:
+      {
+        lang_memory_region_type *mem;
+        
+        mem = lang_memory_region_lookup (tree->name.name, FALSE);  
+        if (mem != NULL) 
+          result = new_abs (mem->length);
+        else          
+          einfo (_("%F%S: undefined MEMORY region `%s' referenced in expression\n"),
+		   tree->name.name);
+      }
+      break;
+
+    case ORIGIN:
+      {
+        lang_memory_region_type *mem;
+        
+        mem = lang_memory_region_lookup (tree->name.name, FALSE);  
+        if (mem != NULL) 
+          result = new_abs (mem->origin);
+        else          
+          einfo (_("%F%S: undefined MEMORY region `%s' referenced in expression\n"),
+		   tree->name.name);
+      }
       break;
 
     default:
