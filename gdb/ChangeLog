@@ -1,3 +1,40 @@
+2003-08-21  Andrew Cagney  <cagney@redhat.com>
+
+	* i386-tdep.h (i386_regnums): Replace I386_EAX_REGNUM,
+	I386_EDX_REGNUM, I386_ESP_REGNUM, I386_EBP_REGNUM,
+	I386_EIP_REGNUM, I386_EFLAGS_REGNUM, I386_ST0_REGNUM.
+	* i386-linux-tdep.h (i386_linux_greg_offset): Declare.
+	(i386_linux_supply_fpxregset): Declare.
+	(i386_linux_supply_fpregset): Declare.
+	(i386_linux_supply_gregset): Declare.
+	* i386-linux-tdep.c: Include "gdb_assert.h", and "i387-tdep.h".
+	Do not include "gregset.h".
+	(enum user_regs): Define.
+	(struct regnum_map, struct regnum_to_user): Define.
+	(i386_linux_greg_offset): New function.
+	(dummy_sse_values): New function, copied from "i386-linux-nat.c"
+	make hist independant.
+	(i386_linux_supply_fpregset): New function.
+	(i386_linux_supply_gregset): New function.
+	(i386_linux_supply_fpxregset): New function.
+	(fetch_core_registers): New function.
+	(i386_linux_core_sniffer): New function.
+	(i386_linux_core_fns): New table.
+	(_initialize_i386_linux_tdep): Add i386_linux_core_fns to core
+	functions.
+	* i386-linux-nat.c: Do not include "gregset.h".
+	(dummy_sse_values) Delete function.
+	(regmap): Delete array.
+	(register_u_addr, fill_gregset, cannot_fetch_register): Use
+	i386_linux_greg_offset.
+	(cannot_store_register): Call cannot_fetch_register.
+	(supply_gregset): Call i386_linux_supply_gregset.
+	(supply_fpregset): Call i386_linux_supply_fpregset.
+	(supply_fpxregset): Call i386_linux_supply_fpxregset.
+	(fetch_core_registers): Delete function.
+	(linux_elf_core_fns): Delete table.
+	(_initialize_i386_linux_nat): Delete function.
+
 2003-08-20  Michael Snyder  <msnyder@redhat.com>
 
 	* sh-tdep.h (struct gdbarch_tdep): New member FLOAT_ARGLAST_REG.

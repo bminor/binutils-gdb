@@ -26,6 +26,7 @@
 #include "regcache.h"
 #include "inferior.h"
 #include "reggroups.h"
+#include "gdb_assert.h"
 
 /* For i386_linux_skip_solib_resolver.  */
 #include "symtab.h"
@@ -37,7 +38,122 @@
 #include "osabi.h"
 
 #include "i386-tdep.h"
+#include "i387-tdep.h"
 #include "i386-linux-tdep.h"
+
+
+/* The register sets used in GNU/Linux ELF core-dumps are identical to
+   the register sets in `struct user' that is used for a.out
+   core-dumps, and is also used by `ptrace'.  The corresponding types
+   are `elf_gregset_t' for the general-purpose registers (with
+   `elf_greg_t' the type of a single GP register) and `elf_fpregset_t'
+   for the floating-point registers.
+
+   Those types used to be available under the names `gregset_t' and
+   `fpregset_t' too, and this file used those names in the past.  But
+   those names are now used for the register sets used in the
+   `mcontext_t' type, and have a different size and layout.  */
+
+enum user_regs {
+  USER_INVALID = -1,
+  USER_EBX,
+  USER_ECX,
+  USER_EDX,
+  USER_ESI,
+  USER_EDI,
+  USER_EBP,
+  USER_EAX,
+  USER_DS,
+  USER_ES,
+  USER_FS,
+  USER_GS,
+  USER_ORIG_EAX,
+  USER_EIP,
+  USER_CS,
+  USER_EFL,
+  USER_UESP,
+  USER_SS,
+  USER_MAX
+};
+
+struct regnum_map
+{
+  enum i386_regnums regnum;
+  enum user_regs user;
+};
+
+struct regnum_to_user
+{
+  long nr;
+  const struct regnum_map *map;
+};
+
+long
+i386_linux_greg_offset (int regnum)
+{
+  /* Mapping between the general-purpose registers in `struct user'
+     format and GDB's register array layout.  */
+  static const struct regnum_map regnum_map[] = 
+  {
+    { I386_EAX_REGNUM, USER_EAX },
+    { I386_ECX_REGNUM, USER_ECX },
+    { I386_EDX_REGNUM, USER_EDX },
+    { I386_EBX_REGNUM, USER_EBX },
+    { I386_ESP_REGNUM, USER_UESP },
+    { I386_EBP_REGNUM, USER_EBP },
+    { I386_ESI_REGNUM, USER_ESI },
+    { I386_EDI_REGNUM, USER_EDI },
+    { I386_EIP_REGNUM, USER_EIP },
+    { I386_EFLAGS_REGNUM, USER_EFL },
+    { I386_CS_REGNUM, USER_CS },
+    { I386_SS_REGNUM, USER_SS },
+    { I386_DS_REGNUM, USER_DS },
+    { I386_ES_REGNUM, USER_ES },
+    { I386_FS_REGNUM, USER_FS },
+    { I386_GS_REGNUM, USER_GS },
+    { I386_ST0_REGNUM, USER_INVALID },
+    { I386_ST1_REGNUM, USER_INVALID },
+    { I386_ST2_REGNUM, USER_INVALID },
+    { I386_ST3_REGNUM, USER_INVALID },
+    { I386_ST4_REGNUM, USER_INVALID },
+    { I386_ST5_REGNUM, USER_INVALID },
+    { I386_ST6_REGNUM, USER_INVALID },
+    { I386_ST7_REGNUM, USER_INVALID },
+    { I386_FCTRL_REGNUM, USER_INVALID },
+    { I386_FSTAT_REGNUM, USER_INVALID },
+    { I386_FTAG_REGNUM, USER_INVALID },
+    { I386_FISEG_REGNUM, USER_INVALID },
+    { I386_FIOFF_REGNUM, USER_INVALID },
+    { I386_FOSEG_REGNUM, USER_INVALID },
+    { I386_FOOFF_REGNUM, USER_INVALID },
+    { I386_FOP_REGNUM, USER_INVALID },
+    { I386_XMM0_REGNUM, USER_INVALID },
+    { I386_XMM1_REGNUM, USER_INVALID },
+    { I386_XMM2_REGNUM, USER_INVALID },
+    { I386_XMM3_REGNUM, USER_INVALID },
+    { I386_XMM4_REGNUM, USER_INVALID },
+    { I386_XMM5_REGNUM, USER_INVALID },
+    { I386_XMM6_REGNUM, USER_INVALID },
+    { I386_XMM6_REGNUM, USER_INVALID },
+    { I386_MXCSR_REGNUM, USER_INVALID },
+    { I386_LINUX_ORIG_EAX_REGNUM, USER_ORIG_EAX }
+  };
+  const static struct regnum_to_user regnum_to_user =
+  {
+    ARRAY_SIZE (regnum_map), regnum_map
+  };
+
+  gdb_assert (TARGET_ARCHITECTURE->arch == bfd_arch_i386);
+  if (regnum < 0)
+    return USER_MAX * 4;
+  if (regnum >= regnum_to_user.nr)
+    return -1;
+  gdb_assert (regnum_to_user.map[regnum].regnum == regnum);
+  if (regnum_to_user.map[regnum].user < 0)
+    return -1;
+  return regnum_to_user.map[regnum].user * 4;
+}
+
 
 /* Return the name of register REG.  */
 
@@ -496,12 +612,160 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 				       i386_linux_svr4_fetch_link_map_offsets);
 }
 
+
+
+/* Interpreting register set info found in core files and ptrace
+   buffers.  */
+
+/* Fill GDB's register array with the floating-point register values in
+   *FPREGSETP.  */
+
+/* Fill the XMM registers in the register array with dummy values.  For
+   cases where we don't have access to the XMM registers.  I think
+   this is cleaner than printing a warning.  For a cleaner solution,
+   we should gdbarchify the i386 family.  */
+
+static void
+dummy_sse_values (void)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  int reg;
+  /* Assume i386 is always little endian.  */
+  static const char mxcsr[MAX_REGISTER_SIZE] = { 0x80, 0x1f };
+  /* C doesn't have a syntax for NaN's (0xffffffffff), so generate it
+     on the fly.  */
+  char nan[MAX_REGISTER_SIZE];
+  memset (nan, -1, sizeof nan);
+
+  for (reg = 0; reg < tdep->num_xmm_regs; reg++)
+    supply_register (XMM0_REGNUM + reg, (char *) nan);
+  if (tdep->num_xmm_regs > 0)
+    supply_register (MXCSR_REGNUM, (char *) &mxcsr);
+}
+
+void 
+i386_linux_supply_fpregset (void *fpregset)
+{
+  i387_supply_fsave (fpregset);
+  dummy_sse_values ();
+}
+
+/* Fill GDB's register array with the general-purpose register values
+   in *GREGSETP.  */
+
+void
+i386_linux_supply_gregset (void *gregset)
+{
+  bfd_byte *regp = gregset;
+  int i;
+
+  for (i = 0; i < I386_NUM_GREGS; i++)
+    {
+      long offset = i386_linux_greg_offset (i);
+      if (offset >= 0)
+	supply_register (i, regp + offset);
+    }
+
+  if (I386_LINUX_ORIG_EAX_REGNUM < NUM_REGS)
+    {
+      long offset = i386_linux_greg_offset (I386_LINUX_ORIG_EAX_REGNUM);
+      if (offset >= 0)
+	supply_register (I386_LINUX_ORIG_EAX_REGNUM, regp + offset);
+    }
+}
+
+/* Fill GDB's register array with the floating-point and SSE register
+   values in *FPXREGSETP.  */
+
+void
+i386_linux_supply_fpxregset (void *fpxregsetp)
+{
+  i387_supply_fxsave (fpxregsetp);
+}
+
+
+/* Provide registers to GDB from a core file.
+
+   (We can't use the generic version of this function in
+   core-regset.c, because GNU/Linux has *three* different kinds of
+   register set notes.  core-regset.c would have to call
+   supply_fpxregset, which most platforms don't have.)
+
+   CORE_REG_SECT points to an array of bytes, which are the contents
+   of a `note' from a core file which BFD thinks might contain
+   register contents.  CORE_REG_SIZE is its size.
+
+   WHICH says which register set corelow suspects this is:
+     0 --- the general-purpose register set, in elf_gregset_t format
+     2 --- the floating-point register set, in elf_fpregset_t format
+     3 --- the extended floating-point register set, in elf_fpxregset_t format
+
+   REG_ADDR isn't used on GNU/Linux.  */
+
+static void
+fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
+				 int which, CORE_ADDR reg_addr)
+{
+  switch (which)
+    {
+    case 0:
+      if (core_reg_size < i386_linux_greg_offset (-1))
+ 	warning ("Wrong size register set in core file.");
+      else
+	i386_linux_supply_gregset (core_reg_sect);
+      break;
+
+    case 2:
+      if (core_reg_size < 108)
+	warning ("Wrong size fpregset in core file.");
+      else
+	i386_linux_supply_fpregset (core_reg_sect);
+      break;
+
+    case 3:
+      if (core_reg_size < 512)
+	warning ("Wrong size fpxregset in core file.");
+      else
+	i386_linux_supply_fpxregset (core_reg_sect);
+      break;
+
+    default:
+      /* We've covered all the kinds of registers we know about here,
+         so this must be something we wouldn't know what to do with
+         anyway.  Just ignore it.  */
+      break;
+    }
+}
+
+static int
+i386_linux_core_sniffer (struct core_fns *our_fns, bfd *abfd)
+{
+  int result;
+
+  result = ((bfd_get_flavour (abfd) == our_fns -> core_flavour)
+	    && bfd_get_arch (abfd) == bfd_arch_i386
+	    && (bfd_get_mach (abfd) == bfd_mach_i386_i386
+		|| bfd_get_mach (abfd) == bfd_mach_i386_i386_intel_syntax));
+  return (result);
+}
+
+static struct core_fns i386_linux_core_fns = 
+{
+  bfd_target_elf_flavour,		/* core_flavour */
+  default_check_format,			/* check_format */
+  i386_linux_core_sniffer,		/* core_sniffer */
+  fetch_core_registers,			/* core_read_registers */
+  NULL					/* next */
+};
+
+
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 extern void _initialize_i386_linux_tdep (void);
 
 void
 _initialize_i386_linux_tdep (void)
 {
+  add_core_fns (&i386_linux_core_fns);
   gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_LINUX,
 			  i386_linux_init_abi);
 }

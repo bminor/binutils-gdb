@@ -33,4 +33,15 @@
    system call number that the kernel is supposed to restart.  */
 #define I386_LINUX_ORIG_EAX_REGNUM I386_SSE_NUM_REGS
 
+/* Given REGNUM, return the corresponding offset, into GREG/user
+   register area, or -1 if the map isn't applicable.  Given a -ve
+   REGNUM, return the GREG's upper bound.  */
+extern long i386_linux_greg_offset (int regnum);
+
+/* Given a system dependant PTRACE buffer, supply GDB's regcache with
+   the register values.  */
+extern void i386_linux_supply_gregset (void *gregset);
+extern void i386_linux_supply_fpregset (void *gregset);
+extern void i386_linux_supply_fpxregset (void *gregset);
+
 #endif /* i386-linux-tdep.h */

@@ -59,9 +59,6 @@
 #define DR_CONTROL 7
 #endif
 
-/* Prototypes for supply_gregset etc.  */
-#include "gregset.h"
-
 /* Prototypes for i387_supply_fsave etc.  */
 #include "i387-tdep.h"
 
@@ -73,40 +70,7 @@
 
 /* Defines ps_err_e, struct ps_prochandle.  */
 #include "gdb_proc_service.h"
-
-/* Prototypes for local functions.  */
-static void dummy_sse_values (void);
 
-
-/* The register sets used in GNU/Linux ELF core-dumps are identical to
-   the register sets in `struct user' that is used for a.out
-   core-dumps, and is also used by `ptrace'.  The corresponding types
-   are `elf_gregset_t' for the general-purpose registers (with
-   `elf_greg_t' the type of a single GP register) and `elf_fpregset_t'
-   for the floating-point registers.
-
-   Those types used to be available under the names `gregset_t' and
-   `fpregset_t' too, and this file used those names in the past.  But
-   those names are now used for the register sets used in the
-   `mcontext_t' type, and have a different size and layout.  */
-
-/* Mapping between the general-purpose registers in `struct user'
-   format and GDB's register array layout.  */
-static int regmap[] = 
-{
-  EAX, ECX, EDX, EBX,
-  UESP, EBP, ESI, EDI,
-  EIP, EFL, CS, SS,
-  DS, ES, FS, GS,
-  -1, -1, -1, -1,		/* st0, st1, st2, st3 */
-  -1, -1, -1, -1,		/* st4, st5, st6, st7 */
-  -1, -1, -1, -1,		/* fctrl, fstat, ftag, fiseg */
-  -1, -1, -1, -1,		/* fioff, foseg, fooff, fop */
-  -1, -1, -1, -1,		/* xmm0, xmm1, xmm2, xmm3 */
-  -1, -1, -1, -1,		/* xmm4, xmm5, xmm6, xmm6 */
-  -1,				/* mxcsr */
-  ORIG_EAX
-};
 
 /* Which ptrace request retrieves which registers?
    These apply to the corresponding SET requests as well.  */
@@ -154,7 +118,9 @@ int have_ptrace_getfpxregs =
 CORE_ADDR
 register_u_addr (CORE_ADDR blockend, int regnum)
 {
-  return (blockend + 4 * regmap[regnum]);
+  long offset = i386_linux_greg_offset (regnum);
+  gdb_assert (offset >= 0);
+  return (blockend + offset);
 }
 
 /* Return the size of the user struct.  */
@@ -232,14 +198,7 @@ store_register (int regno)
 void
 supply_gregset (elf_gregset_t *gregsetp)
 {
-  elf_greg_t *regp = (elf_greg_t *) gregsetp;
-  int i;
-
-  for (i = 0; i < I386_NUM_GREGS; i++)
-    supply_register (i, regp + regmap[i]);
-
-  if (I386_LINUX_ORIG_EAX_REGNUM < NUM_REGS)
-    supply_register (I386_LINUX_ORIG_EAX_REGNUM, regp + ORIG_EAX);
+  i386_linux_supply_gregset (gregsetp);
 }
 
 /* Fill register REGNO (if it is a general-purpose register) in
@@ -249,16 +208,23 @@ supply_gregset (elf_gregset_t *gregsetp)
 void
 fill_gregset (elf_gregset_t *gregsetp, int regno)
 {
-  elf_greg_t *regp = (elf_greg_t *) gregsetp;
+  bfd_byte *regp = (bfd_byte *) gregsetp;
   int i;
 
   for (i = 0; i < I386_NUM_GREGS; i++)
     if (regno == -1 || regno == i)
-      regcache_collect (i, regp + regmap[i]);
+      {
+	long offset = i386_linux_greg_offset (i);
+	if (offset >= 0)
+	  regcache_collect (i, regp + offset);
+      }
 
-  if ((regno == -1 || regno == I386_LINUX_ORIG_EAX_REGNUM)
-      && I386_LINUX_ORIG_EAX_REGNUM < NUM_REGS)
-    regcache_collect (I386_LINUX_ORIG_EAX_REGNUM, regp + ORIG_EAX);
+  if (regno == -1 || regno == I386_LINUX_ORIG_EAX_REGNUM)
+    {
+      long offset = i386_linux_greg_offset (I386_LINUX_ORIG_EAX_REGNUM);
+      if (offset >= 0)
+	regcache_collect (I386_LINUX_ORIG_EAX_REGNUM, regp + offset);
+    }
 }
 
 #ifdef HAVE_PTRACE_GETREGS
@@ -320,8 +286,7 @@ static void store_regs (int tid, int regno) {}
 void 
 supply_fpregset (elf_fpregset_t *fpregsetp)
 {
-  i387_supply_fsave ((char *) fpregsetp);
-  dummy_sse_values ();
+  i386_linux_supply_fpregset (fpregsetp);
 }
 
 /* Fill register REGNO (if it is a floating-point register) in
@@ -385,7 +350,7 @@ static void store_fpregs (int tid, int regno) {}
 void
 supply_fpxregset (elf_fpxregset_t *fpxregsetp)
 {
-  i387_supply_fxsave ((char *) fpxregsetp);
+  i386_linux_supply_fpxregset (fpxregsetp);
 }
 
 /* Fill register REGNO (if it is a floating-point or SSE register) in
@@ -456,32 +421,10 @@ store_fpxregs (int tid, int regno)
   return 1;
 }
 
-/* Fill the XMM registers in the register array with dummy values.  For
-   cases where we don't have access to the XMM registers.  I think
-   this is cleaner than printing a warning.  For a cleaner solution,
-   we should gdbarchify the i386 family.  */
-
-static void
-dummy_sse_values (void)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-  /* C doesn't have a syntax for NaN's, so write it out as an array of
-     longs.  */
-  static long dummy[4] = { 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff };
-  static long mxcsr = 0x1f80;
-  int reg;
-
-  for (reg = 0; reg < tdep->num_xmm_regs; reg++)
-    supply_register (XMM0_REGNUM + reg, (char *) dummy);
-  if (tdep->num_xmm_regs > 0)
-    supply_register (MXCSR_REGNUM, (char *) &mxcsr);
-}
-
 #else
 
 static int fetch_fpxregs (int tid) { return 0; }
 static int store_fpxregs (int tid, int regno) { return 0; }
-static void dummy_sse_values (void) {}
 
 #endif /* HAVE_PTRACE_GETFPXREGS */
 
@@ -497,14 +440,14 @@ int
 cannot_fetch_register (int regno)
 {
   gdb_assert (regno >= 0 && regno < NUM_REGS);
-  return (!have_ptrace_getregs && regmap[regno] == -1);
+  return (!have_ptrace_getregs
+	  && i386_linux_greg_offset (regno) < 0);
 }
 
 int
 cannot_store_register (int regno)
 {
-  gdb_assert (regno >= 0 && regno < NUM_REGS);
-  return (!have_ptrace_getregs && regmap[regno] == -1);
+  return cannot_fetch_register (regno);
 }
 
 /* Fetch register REGNO from the child process.  If REGNO is -1, do
@@ -729,81 +672,6 @@ i386_linux_dr_get_status (void)
 {
   return i386_linux_dr_get (DR_STATUS);
 }
-
-
-/* Interpreting register set info found in core files.  */
-
-/* Provide registers to GDB from a core file.
-
-   (We can't use the generic version of this function in
-   core-regset.c, because GNU/Linux has *three* different kinds of
-   register set notes.  core-regset.c would have to call
-   supply_fpxregset, which most platforms don't have.)
-
-   CORE_REG_SECT points to an array of bytes, which are the contents
-   of a `note' from a core file which BFD thinks might contain
-   register contents.  CORE_REG_SIZE is its size.
-
-   WHICH says which register set corelow suspects this is:
-     0 --- the general-purpose register set, in elf_gregset_t format
-     2 --- the floating-point register set, in elf_fpregset_t format
-     3 --- the extended floating-point register set, in elf_fpxregset_t format
-
-   REG_ADDR isn't used on GNU/Linux.  */
-
-static void
-fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
-		      int which, CORE_ADDR reg_addr)
-{
-  elf_gregset_t gregset;
-  elf_fpregset_t fpregset;
-
-  switch (which)
-    {
-    case 0:
-      if (core_reg_size != sizeof (gregset))
-	warning ("Wrong size gregset in core file.");
-      else
-	{
-	  memcpy (&gregset, core_reg_sect, sizeof (gregset));
-	  supply_gregset (&gregset);
-	}
-      break;
-
-    case 2:
-      if (core_reg_size != sizeof (fpregset))
-	warning ("Wrong size fpregset in core file.");
-      else
-	{
-	  memcpy (&fpregset, core_reg_sect, sizeof (fpregset));
-	  supply_fpregset (&fpregset);
-	}
-      break;
-
-#ifdef HAVE_PTRACE_GETFPXREGS
-      {
-	elf_fpxregset_t fpxregset;
-
-      case 3:
-	if (core_reg_size != sizeof (fpxregset))
-	  warning ("Wrong size fpxregset in core file.");
-	else
-	  {
-	    memcpy (&fpxregset, core_reg_sect, sizeof (fpxregset));
-	    supply_fpxregset (&fpxregset);
-	  }
-	break;
-      }
-#endif
-
-    default:
-      /* We've covered all the kinds of registers we know about here,
-         so this must be something we wouldn't know what to do with
-         anyway.  Just ignore it.  */
-      break;
-    }
-}
-
 
 /* The instruction for a GNU/Linux system call is:
        int $0x80
@@ -897,23 +765,4 @@ child_post_startup_inferior (ptid_t ptid)
 {
   i386_cleanup_dregs ();
   linux_child_post_startup_inferior (ptid);
-}
-
-
-/* Register that we are able to handle GNU/Linux ELF core file
-   formats.  */
-
-static struct core_fns linux_elf_core_fns =
-{
-  bfd_target_elf_flavour,		/* core_flavour */
-  default_check_format,			/* check_format */
-  default_core_sniffer,			/* core_sniffer */
-  fetch_core_registers,			/* core_read_registers */
-  NULL					/* next */
-};
-
-void
-_initialize_i386_linux_nat (void)
-{
-  add_core_fns (&linux_elf_core_fns);
 }
