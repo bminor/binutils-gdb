@@ -1,5 +1,12 @@
 2004-08-11  Joel Brobecker  <brobecker@gnat.com>
 
+	* doc/gdbint.texinfo (Host Definition): Remove documentation
+	for USE_O_NOCTTY, no longer used.
+	* config/xm-aix4.h (USE_O_NOCTTY): Remove, no longer used.
+	* config/rs6000/xm-rs6000.h (USE_O_NOCTTY): Likewise.
+
+2004-08-11  Joel Brobecker  <brobecker@gnat.com>
+
 	* config/xm-aix4.h (FIVE_ARG_PTRACE): Remove, no longer used.
 	* config/pa/nm-hppah.h (FIVE_ARG_PTRACE): Likewise.
 	* config/rs6000/xm-rs6000.h (FIVE_ARG_PTRACE): Likewise.

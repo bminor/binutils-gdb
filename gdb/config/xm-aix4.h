@@ -20,8 +20,3 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
-/* This system requires that we open a terminal with O_NOCTTY for it to
-   not become our controlling terminal.  */
-
-#define	USE_O_NOCTTY
-

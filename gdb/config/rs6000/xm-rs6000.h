@@ -43,11 +43,6 @@
 
 #define	USG 1
 
-/* This system requires that we open a terminal with O_NOCTTY for it to
-   not become our controlling terminal.  */
-
-#define	USE_O_NOCTTY
-
 /* Brain death inherited from PC's pervades.  */
 #undef NULL
 #define NULL 0

@@ -2257,11 +2257,6 @@ defined.
 This is the signal for stopping @value{GDBN}.  Defaults to
 @code{SIGTSTP}.  (Only redefined for the Convex.)
 
-@item USE_O_NOCTTY
-Define this if the interior's tty should be opened with the @code{O_NOCTTY}
-flag.  (FIXME: This should be a native-only flag, but @file{inflow.c} is
-always linked in.)
-
 @item USG
 Means that System V (prior to SVR4) include files are in use.  (FIXME:
 This symbol is abused in @file{infrun.c}, @file{regex.c}, and
