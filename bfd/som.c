@@ -149,6 +149,10 @@ static unsigned char * som_reloc_skip PARAMS ((bfd *, unsigned int,
 static unsigned char * som_reloc_addend PARAMS ((bfd *, int, unsigned char *,
 					         unsigned int *,
 						 struct reloc_queue *));
+static unsigned char * som_reloc_call PARAMS ((bfd *, unsigned char *,
+					       unsigned int *,
+					       arelent *, int,
+					       struct reloc_queue *));
 static unsigned long som_count_spaces PARAMS ((bfd *));
 static unsigned long som_count_subspaces PARAMS ((bfd *));
 static int compare_syms PARAMS ((asymbol **, asymbol **));
@@ -669,6 +673,119 @@ som_reloc_addend (abfd, addend, p, subspace_reloc_sizep, queue)
     }
   return p;
 }
+
+/* Handle a single function call relocation.  */
+
+static unsigned char *
+som_reloc_call (abfd, p, subspace_reloc_sizep, bfd_reloc, sym_num, queue)
+     bfd *abfd;
+     unsigned char *p;
+     unsigned int *subspace_reloc_sizep;
+     arelent *bfd_reloc;
+     int sym_num;
+     struct reloc_queue *queue;
+{
+  int arg_bits = HPPA_R_ARG_RELOC (bfd_reloc->addend);
+  int rtn_bits = arg_bits & 0x3;
+  int type, done = 0;
+  
+  /* You'll never believe all this is necessary to handle relocations
+     for function calls.  Having to compute and pack the argument
+     relocation bits is the real nightmare.
+     
+     If you're interested in how this works, just forget it.  You really
+     do not want to know about this braindamage.  */
+
+  /* First see if this can be done with a "simple" relocation.  Simple
+     relocations have a symbol number < 0x100 and have simple encodings
+     of argument relocations.  */
+
+  if (sym_num < 0x100)
+    {
+      switch (arg_bits)
+	{
+	case 0:
+	case 1:
+	  type = 0;
+	  break;
+	case 1 << 8:
+	case 1 << 8 | 1:
+	  type = 1;
+	  break;
+	case 1 << 8 | 1 << 6:
+	case 1 << 8 | 1 << 6 | 1:
+	  type = 2;
+	  break;
+	case 1 << 8 | 1 << 6 | 1 << 4:
+	case 1 << 8 | 1 << 6 | 1 << 4 | 1:
+	  type = 3;
+	  break;
+	case 1 << 8 | 1 << 6 | 1 << 4 | 1 << 2:
+	case 1 << 8 | 1 << 6 | 1 << 4 | 1 << 2 | 1:
+	  type = 4;
+	  break;
+	default:
+	  /* Not one of the easy encodings.  This will have to be
+	     handled by the more complex code below.  */
+	  type = -1;
+	  break;
+	}
+      if (type != -1)
+	{
+	  /* Account for the return value too.  */
+	  if (rtn_bits)
+	    type += 5;
+
+	  /* Emit a 2 byte relocation.  Then see if it can be handled
+	     with a relocation which is already in the relocation queue.  */
+	  bfd_put_8 (abfd, bfd_reloc->howto->type + type, p);
+	  bfd_put_8 (abfd, sym_num, p + 1);
+	  p = try_prev_fixup (abfd, subspace_reloc_sizep, p, 2, queue);
+	  done = 1;
+	}
+    }
+  
+  /* If this could not be handled with a simple relocation, then do a hard
+     one.  Hard relocations occur if the symbol number was too high or if
+     the encoding of argument relocation bits is too complex.  */
+  if (! done)
+    {
+      /* Don't ask about these magic sequences.  I took them straight
+	 from gas-1.36 which took them from the a.out man page.  */
+      type = rtn_bits;
+      if ((arg_bits >> 6 & 0xf) == 0xe)
+	type += 9 * 40;
+      else
+	type += (3 * (arg_bits >> 8 & 3) + (arg_bits >> 6 & 3)) * 40;
+      if ((arg_bits >> 2 & 0xf) == 0xe)
+	type += 9 * 4;
+      else
+	type += (3 * (arg_bits >> 4 & 3) + (arg_bits >> 2 & 3)) * 4;
+      
+      /* Output the first two bytes of the relocation.  These describe
+	 the length of the relocation and encoding style.  */
+      bfd_put_8 (abfd, bfd_reloc->howto->type + 10
+		 + 2 * (sym_num >= 0x100) + (type >= 0x100),
+		 p);
+      bfd_put_8 (abfd, type, p + 1);
+      
+      /* Now output the symbol index and see if this bizarre relocation
+	 just happened to be in the relocation queue.  */
+      if (sym_num < 0x100)
+	{
+	  bfd_put_8 (abfd, sym_num, p + 2);
+	  p = try_prev_fixup (abfd, subspace_reloc_sizep, p, 3, queue);
+	}
+      else
+	{
+	  bfd_put_8 (abfd, sym_num >> 16, p + 2);
+	  bfd_put_16 (abfd, sym_num, p + 3);
+	  p = try_prev_fixup (abfd, subspace_reloc_sizep, p, 5, queue);
+	}
+    }
+  return p;
+}
+
 
 /* Return the logarithm of X, base 2, considering X unsigned. 
    Abort if X is not a power of two -- this should never happen (FIXME:
