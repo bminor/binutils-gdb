@@ -1,3 +1,8 @@
+2002-05-02  Richard Henderson  <rth@redhat.com>
+
+	* elf64-alpha.c (elf64_alpha_relocate_section): Force relative relocs
+	vs SHN_UNDEF to zero.
+
 2002-05-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ppc64_elf_howto_raw <R_PPC64_SECTOFF>): Change to a
