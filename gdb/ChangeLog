@@ -1,3 +1,18 @@
+Thu Aug 27 20:04:56 1992  John Gilmore  (gnu@cygnus.com)
+
+	* configure.in (target configurations):  Reformat into table.
+	Remove unsupp. Amigados host and target.  Ditto Mach 386 target.
+
+	* tm-altosgas.h, tm-i386v-g.h:  Remove ancient coff encap configs.
+	* config/{altosgas.mt, i386v-g.mt, i386v32-g.mt}:  Ditto.
+	* config/{i386sco.mt,i386v32.mt}:  Remove; identical to i386v.mt.
+	* config/{go32.mt,i960.mt}:  Remove; they only printed error msgs.
+	* config/nindy960.mt:  Remove useless MT_CFLAGS setting.
+	* config/i386aout.mt:  Use tm-i386v.h, not tm-i386v-g.h.
+
+	* Makefile.in (config-check):  Add command to check whether
+	configure.in is consistent with config/*.
+
 Wed Aug 26 21:10:52 1992  John Gilmore  (gnu@cygnus.com)
 
 	* configure.in (host configurations):  Reformat nested cases into

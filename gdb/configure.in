@@ -15,61 +15,62 @@ arm-*-*)		gdb_host=arm ;;
 
 c[12]-*-*)		gdb_host=convex ;;
 
-hppa*-hp-hpux)		gdb_host=hppahpux ;;
 hppa*-hp-bsd)		gdb_host=hppabsd ;;
+hppa*-hp-hpux)		gdb_host=hppahpux ;;
 
-i[34]86-sequent-*)	gdb_host=symmetry ;;
 i[34]86-ncr-*)		gdb_host=ncr3000 ;;
+i[34]86-sequent-*)	gdb_host=symmetry ;;
 
 i[34]86-*-go32)		gdb_host=go32 ;;
-i[34]86-*-sysv32)	gdb_host=i386v32 ;;
+i[34]86-*-linux)	gdb_host=linux ;;
+i[34]86-*-mach)		gdb_host=i386mach ;;
+i[34]86-*-scosysv*)	gdb_host=i386sco ;;
 i[34]86-*-sunos*)	gdb_host=sun386 ;;
+i[34]86-*-sysv32)	gdb_host=i386v32 ;;
 i[34]86-*-sysv4*)	gdb_host=i386v4 ;;
 i[34]86-*-sysv*)	gdb_host=i386v ;;
-i[34]86-*-scosysv*)	gdb_host=i386sco ;;
-i[34]86-*-mach)		gdb_host=i386mach ;;
-i[34]86-*-linux)	gdb_host=linux ;;
 
 i860-*-*)		gdb_host=stratus ;;
-
-m68k-apollo*-sysv*)	gdb_host=apollo68v ;;
-
-m68k-att-*)		gdb_host=3b1 ;;
-
-m68k-altos-*)		gdb_host=altos ;;
-
-m68k-cbm-sysv4*)	gdb_host=amix ;;
-
-m68k-hp-hpux)		gdb_host=hp300hpux ;;
-m68k-hp-bsd)		gdb_host=hp300bsd ;;
-
-m68k-isi-*)		gdb_host=isi ;;
-m68k-sony-*)		gdb_host=news ;;
-
-m68k-sun-sunos3)	gdb_host=sun3os3 ;;
-m68k-sun-sunos4)	gdb_host=sun3os4 ;;
-m68k-sun-*)		gdb_host=sun3 ;;
 
 m68000-sun-sunos3)	gdb_host=sun2os3 ;;
 m68000-sun-sunos4)	gdb_host=sun2os4 ;;
 
 m68030-sony-*)		gdb_host=news1000 ;;
 
+m68k-altos-*)		gdb_host=altos ;;
+
+m68k-apollo*-sysv*)	gdb_host=apollo68v ;;
+
+m68k-att-*)		gdb_host=3b1 ;;
+
+m68k-cbm-sysv4*)	gdb_host=amix ;;
+
+m68k-hp-bsd)		gdb_host=hp300bsd ;;
+m68k-hp-hpux)		gdb_host=hp300hpux ;;
+
+m68k-isi-*)		gdb_host=isi ;;
+
+m68k-sony-*)		gdb_host=news ;;
+
+m68k-sun-sunos3)	gdb_host=sun3os3 ;;
+m68k-sun-sunos4)	gdb_host=sun3os4 ;;
+m68k-sun-*)		gdb_host=sun3 ;;
+
 m88k-motorola-*)	gdb_host=delta88 ;;
 m88k-*-*)		gdb_host=m88k ;;
 
-mips-sony-*)		gdb_host=bigmips ;;
 mips-dec-*)		gdb_host=decstation ;;
 mips-little-*)		gdb_host=littlemips ;;
 mips-sgi-irix3)		gdb_host=irix3 ;;
 mips-sgi-irix4)		gdb_host=irix4 ;;
+mips-sony-*)		gdb_host=bigmips ;;
 
 none-*-*)		gdb_host=none ;;
+
 np1-*-*)		gdb_host=np1 ;;
 
 ns32k-umax-*)		gdb_host=umax ;;
 ns32k-utek-sysv)	gdb_host=merlin ;;
-
 
 pn-*-*)			gdb_host=pn ;;
 
@@ -79,20 +80,15 @@ romp-*-*)		gdb_host=rtbsd ;;
 
 rs6000-*-*)		gdb_host=rs6000 ;;
 
+sparc-*-solaris2*)	gdb_host=sun4sol2 ;;
 sparc-*-sunos3)		gdb_host=sun4os3 ;;
 sparc-*-sunos4)		gdb_host=sun4os4 ;;
-sparc-*-solaris2*)	gdb_host=sun4sol2 ;;
 sparc-*-*)		gdb_host=sun4 ;;
 
 tahoe-*-*)		gdb_host=tahoe ;;
 
 vax-*-bsd*)		gdb_host=vaxbsd ;;
 vax-*-ultrix*)		gdb_host=vaxult ;;
-
-### unhandled hosts
-#altosgas
-#i386v-g
-#i386v32-g
 
 esac
 
@@ -107,178 +103,107 @@ hostfile=`awk '$1 == "XM_FILE=" { print $2 }' <${srcdir}/config/${gdb_host}.mh`
 
 # per-target:
 
-case "${target_cpu}" in
+case "${target}" in
 
-m68k)
-	case "${target_vendor}" in
-	att)	gdb_target=3b1 ;;
-	altos)	gdb_target=altos ;;
-	cbm)
-		case ${target_os} in
-		amigados)	gdb_target=amigados ;;
-		sysv4*)		gdb_target=amix ;;
-		esac
-		;;
-	ericsson) gdb_target=es1800 ;;
-	hp)
-		case "${target_os}" in
-		bsd)	gdb_target=hp300bsd ;;
-		hpux)	gdb_target=hp300hpux ;;
-		esac
-		;;
-	sun)
-		case "${target_os}" in
-		sunos3)	gdb_target=sun3os3 ;;
-		sunos4)	gdb_target=sun3os4 ;;
-		*)	gdb_target=sun3 ;;
-		esac
-		;;
-	wrs)	gdb_target=vxworks68 ;;
-	netx)	gdb_target=vxworks68 ;;
-	isi)	gdb_target=isi ;;
-	sony)	gdb_target=news ;;
-	esac
-	case "${target_os}" in
-	os68k)	gdb_target=os68k ;;
-	esac
-	;;
+a29k-*-aout)		gdb_target=a29k ;;
+a29k-*-coff)		gdb_target=a29k ;;
+a29k-*-ebmon)		gdb_target=a29k ;;
+a29k-*-kern)		gdb_target=a29k-kern ;;
+a29k-*-none)		gdb_target=a29k ;;
+a29k-*-sym1)		gdb_target=ultra3 ;;
+a29k-*-udi)		gdb_target=a29k-udi ;;
 
-m68000)
-	case "${target_vendor}" in
-	sun)
-		case "${target_os}" in
-		sunos3)	gdb_target=sun2os3 ;;
-		sunos4)	gdb_target=sun2os4 ;;
-		*)	gdb_target=sun2 ;;
-		esac
-		;;
-	ericsson) gdb_target=es1800 ;;
-	wrs)	gdb_target=vxworks68 ;;
-	esac
-	;;
+arm-*-*)		gdb_target=arm ;;
 
-m680[124]0)
-	case "${target_vendor}" in
-	wrs)	gdb_target=vxworks68 ;;
-	esac
-	;;
+c1-*-*)			gdb_target=convex ;;
+c2-*-*)			gdb_target=convex ;;
 
-m68030)
-	case "${target_vendor}" in
-	sony)	gdb_target=news1000 ;;
-	wrs)	gdb_target=vxworks68 ;;
-	esac
-	;;
+h8300-*-*)		gdb_target=h8300hms ;;
 
-m68kmote)
-	case "${target_vendor}" in
-	tandem)	gdb_target=st2000 ;;
-	esac
-	;;
+hppa*-*-bsd)		gdb_target=hppabsd ;;
+hppa*-*-hpux)		gdb_target=hppahpux ;;
 
-none | arm | tahoe | vax | np1 | pn | np1 | pn | pyramid | merlin)
-	gdb_target=${target_cpu} ;;
+i[34]86-sequent-*)	gdb_target=symmetry ;;
+i[34]86-ncr-*)		gdb_target=ncr3000 ;;
+i[34]86-*-sunos*)	gdb_target=sun386 ;;
+i[34]86-*-sysv4*)	gdb_target=i386v4 ;;
+i[34]86-*-scosysv3*)	gdb_target=i386v ;;
+i[34]86-*-sysv*)	gdb_target=i386v ;;
+i[34]86-*-coff)		gdb_target=i386v ;;
+i[34]86-*-aout)		gdb_target=i386aout ;;
+i[34]86-*-linux)	gdb_target=linux ;;
 
-m88k)
-	case "${target_vendor}" in
-	motorola) gdb_target=delta88 ;;
-	*) gdb_target=dgux ;;
-	esac
-	;;
-a29k)
-	case "${target_os}" in
-	none|aout|coff)	gdb_target=a29k ;;
-	sym1)	gdb_target=ultra3 ;;
-	kern)	gdb_target=a29k-kern ;;
-	ebmon)  gdb_target=a29k;;
-	udi)	gdb_target=a29k-udi;;
-	esac
-	;;
-	
-mips)
-	case "${target_vendor}" in
-	sony)	gdb_target=bigmips ;;
-	big)	gdb_target=bigmips ;;
-	dec)	gdb_target=decstation ;;
-	little)	gdb_target=littlemips ;;
-	sgi)	gdb_target=irix3 ;;
-	esac
-	;;
+i860-*-*)		gdb_target=stratus ;;
 
-c1 | c2)	gdb_target=convex ;;
+i960-*-bout)		gdb_target=vxworks960 ;;
+i960-*-coff)		gdb_target=nindy960 ;;
+i960-*-nindy)		gdb_target=nindy960 ;;
+i960-*-vxworks)		gdb_target=vxworks960 ;;
 
-sparc*)
-	case "${target_vendor}" in
-	sun | fujitsu)
-		case "${target_os}" in
-		sunos3)		gdb_target=sun4os3 ;;
-		sunos4)		gdb_target=sun4os4 ;;
-		solaris2*)	gdb_target=sun4sol2 ;;
-		*)		gdb_target=sun4 ;;
-		esac
-		;;
-	esac
-	;;
+m68000-ericsson-*)	gdb_target=es1800 ;;
 
-h8300)
-	gdb_target=h8300hms 
-	;;
+m68000-*-sunos3)	gdb_target=sun2os3 ;;
+m68000-*-sunos4)	gdb_target=sun2os4 ;;
 
-i860)	gdb_target=stratus
-	;;
+m680[01234]0-*-vxworks)	gdb_target=vxworks68 ;;
 
-i386 | i486)
-	case "${target_vendor}" in
-	sco)	gdb_target=i386sco ;;
-	sun)	gdb_target=sun386 ;;
-	sequent)	gdb_target=symmetry ;;
-	ncr)	gdb_target=ncr3000 ;;
-	*)
-		case "${target_os}" in
-		sysv32)	gdb_target=i386v32 ;;
-		scosysv3*) gdb_target=i386v32 ;;
-		sysv4*)	gdb_target=i386v4 ;;
-		sysv*)	gdb_target=i386v ;;
-		mach)	gdb_target=i386mach ;;
-		coff)	gdb_target=i386v ;;
-		aout)	gdb_target=i386aout ;;
-		linux)	gdb_target=linux ;;
-		esac
-	esac
-	;;
+m68030-sony-*)		gdb_target=news1000 ;;
 
-i960)
-	case "${target_vendor}" in
-	bout | wrs)	gdb_target=vxworks960 ;;
-	coff | intel)	gdb_target=nindy960 ;;
-	esac
-	;;
+m68k-altos-*)		gdb_target=altos ;;
+m68k-att-*)		gdb_target=3b1 ;;
 
-ns32k)
-	case "${target_vendor}" in
-	utek)	gdb_target=umax ;;
-	esac
-	;;
+m68k-cbm-sysv4*)	gdb_target=amix ;;
 
-rs6000)
-	gdb_target=rs6000
-	;;
+m68k-ericsson-*)	gdb_target=es1800 ;;
 
-hppa*)
-	case "${target_vendor}" in
-	hp)
-		case "${target_os}" in
-		hpux)	gdb_target=hppahpux ;;
-		bsd)	gdb_target=hppabsd ;;
-		esac
-		;;
-	esac
-	;;
+m68k-hp-bsd)		gdb_target=hp300bsd ;;
+m68k-hp-hpux)		gdb_target=hp300hpux ;;
 
-### unhandled targets
-# altosgas
-# i386v-g
-# i386v32-g
+m68k-isi-*)		gdb_target=isi ;;
+
+m68k-netx-*)		gdb_target=vxworks68 ;;
+
+m68k-sony-*)		gdb_target=news ;;
+
+m68k-*-sunos3*)		gdb_target=sun3os3 ;;
+m68k-*-sunos4*)		gdb_target=sun3os4 ;;
+m68k-sun-*)		gdb_target=sun3 ;;
+
+m68k-*-vxworks*)	gdb_target=vxworks68 ;;
+
+m68k-*-os68k)		gdb_target=os68k ;;
+
+m68kmote-tandem-*)	gdb_target=st2000 ;;
+
+m88k-motorola-*)	gdb_target=delta88 ;;
+m88k-*-*)		gdb_target=m88k ;;
+
+mips-big-*)		gdb_target=bigmips ;;
+mips-dec-*)		gdb_target=decstation ;;
+mips-little-*)		gdb_target=littlemips ;;
+mips-sgi-*)		gdb_target=irix3 ;;
+mips-sony-*)		gdb_target=bigmips ;;
+
+none-*-*)		gdb_target=none ;;
+
+np1-*-*)		gdb_target=np1 ;;
+
+ns32k-utek-sysv)	gdb_target=merlin ;;
+ns32k-utek-*)		gdb_target=umax ;;
+
+pn-*-*)			gdb_target=pn ;;
+
+pyramid-*-*)		gdb_target=pyramid ;;
+
+rs6000-*-*)		gdb_target=rs6000 ;;
+
+sparc-*-solaris2*)	gdb_target=sun4sol2 ;;
+sparc-*-sunos3)		gdb_target=sun4os3 ;;
+sparc-*-sunos4)		gdb_target=sun4os4 ;;
+sparc-*-*)		gdb_target=sun4 ;;
+
+tahoe-*-*)		gdb_target=tahoe ;;
+vax-*-*)		gdb_target=vax ;;
 
 esac
 
