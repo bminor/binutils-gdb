@@ -315,7 +315,7 @@ gdb_disassemble_info (struct gdbarch *gdbarch, struct ui_file *file)
 {
   disassemble_info di;
   INIT_DISASSEMBLE_INFO_NO_ARCH (di, file,
-				 (fprintf_ftype) fprintf_unfiltered);
+				 (fprintf_ftype) fprintf_filtered);
   di.flavour = bfd_target_unknown_flavour;
   di.memory_error_func = dis_asm_memory_error;
   di.print_address_func = dis_asm_print_address;

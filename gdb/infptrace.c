@@ -301,8 +301,8 @@ detach (int signal)
   errno = 0;
   ptrace (PT_DETACH, PIDGET (inferior_ptid), (PTRACE_ARG3_TYPE) 1,
           signal);
-  if (errno && errno != ESRCH)
-    perror_with_name ("ptrace");
+  if (errno)
+    print_sys_errmsg ("ptrace", errno);
   attach_flag = 0;
 }
 #endif /* ATTACH_DETACH */
