@@ -1171,6 +1171,7 @@ objdump [ -a | --archive-headers ]
         [ -z | --disassemble-zeroes ]
         [ -EB | -EL | --endian=@{big | little @} ]
         [ -f | --file-headers ]
+        [ --file-start-context ]
         [ -g | --debugging ]
         [ -h | --section-headers | --headers ]
         [ -i | --info ]
@@ -1298,6 +1299,12 @@ does not describe endianness information, such as S-records.
 @cindex object file header
 Display summary information from the overall header of
 each of the @var{objfile} files.
+
+@item --file-start-context
+@cindex source code context
+Specify that when displaying interlisted source code/disassembly
+(assumes '-S') from a file that has not yet been displayed, extend the
+context to the start of the file.
 
 @item -h
 @itemx --section-header

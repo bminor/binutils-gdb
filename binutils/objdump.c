@@ -75,6 +75,7 @@ static bfd_vma start_address = (bfd_vma) -1; /* --start-address */
 static bfd_vma stop_address = (bfd_vma) -1;  /* --stop-address */
 static int dump_debugging;		/* --debugging */
 static bfd_vma adjust_section_vma = 0;	/* --adjust-vma */
+static int file_start_context = 0;      /* --file-start-context */
 
 /* Extra info to pass to the disassembler address printing function.  */
 struct objdump_disasm_info {
@@ -257,6 +258,7 @@ usage (stream, status)
   -M  --disassembler-options <o> Pass text <o> on to the disassembler\n\
   -EB --endian=big               Assume big endian format when disassembling\n\
   -EL --endian=little            Assume little endian format when disassembling\n\
+      --file-start-context       Include context from start of file (with -S)\n\
   -l  --line-numbers             Include line numbers and filenames in output\n\
   -C  --demangle                 Decode mangled/processed symbol names\n\
   -w  --wide                     Format output for more than 80 columns\n\
@@ -300,6 +302,7 @@ static struct option long_options[]=
   {"dynamic-syms", no_argument, NULL, 'T'},
   {"endian", required_argument, NULL, OPTION_ENDIAN},
   {"file-headers", no_argument, NULL, 'f'},
+  {"file-start-context", no_argument, &file_start_context, 1},
   {"full-contents", no_argument, NULL, 's'},
   {"headers", no_argument, NULL, 'h'},
   {"help", no_argument, NULL, 'H'},
@@ -1076,8 +1079,8 @@ show_line (abfd, section, addr_offset)
 	      else
 		{
 		  l = line - SHOW_PRECEDING_CONTEXT_LINES;
-		  if (l <= 0)
-		    l = 1;
+		  if (l < 0)
+		    l = 0;
 		}
 
 	      if (p->f == NULL)
@@ -1127,9 +1130,12 @@ show_line (abfd, section, addr_offset)
 	      p->next = print_files;
 	      print_files = p;
 
-	      l = line - SHOW_PRECEDING_CONTEXT_LINES;
-	      if (l <= 0)
-		l = 1;
+              if (file_start_context)
+                l = 0;
+              else
+                l = line - SHOW_PRECEDING_CONTEXT_LINES;
+	      if (l < 0)
+		l = 0;
 	      skip_to_line (p, l, false);
 	      if (p->f != NULL)
 		skip_to_line (p, line, true);
