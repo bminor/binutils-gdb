@@ -2788,7 +2788,7 @@ mapping_state (enum mstate state)
 
 /* When we change sections we need to issue a new mapping symbol.  */
 
-static void
+void
 arm_elf_change_section (void)
 {
   flagword flags;

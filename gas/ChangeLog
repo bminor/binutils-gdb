@@ -1,3 +1,7 @@
+2003-11-14  Ben Elliston  <bje@wasabisystems.com>
+
+	* config/tc-arm.c (arm_elf_change_section): Not static.
+
 2003-11-13  Nick Clifton  <nickc@redhat.com>
 
 	* tc-arm.c (mapping_state): New function.  Emit a mapping
