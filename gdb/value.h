@@ -97,7 +97,18 @@ struct value
     /* If zero, contents of this value are in the contents field.
        If nonzero, contents are in inferior memory at address
        in the location.address field plus the offset field
-       (and the lval field should be lval_memory).  */
+       (and the lval field should be lval_memory).
+
+       WARNING: This field is used by the code which handles
+       watchpoints (see breakpoint.c) to decide whether a particular
+       value can be watched by hardware watchpoints.  If the lazy flag
+       is set for some member of a value chain, it is assumed that
+       this member of the chain doesn't need to be watched as part of
+       watching the value itself.  This is how GDB avoids watching the
+       entire struct or array when the user wants to watch a single
+       struct member or array element.  If you ever change the way
+       lazy flag is set and reset, be sure to consider this use as
+       well!  */
     char lazy;
     /* If nonzero, this is the value of a variable which does not
        actually exist in the program.  */

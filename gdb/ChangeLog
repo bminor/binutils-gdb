@@ -1,3 +1,8 @@
+2000-08-16  Eli Zaretskii <eliz@is.elta.co.il>
+
+	* value.h (struct value) <lazy>: Add a comment about its use for
+        watchpoints.
+
 2000-08-12  Kevin Buettner  <kevinb@redhat.com>
 
 	* cxux-nat.c (fetch_inferior_registers): Protoize.
