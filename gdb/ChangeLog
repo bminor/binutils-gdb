@@ -1,3 +1,14 @@
+Wed Jul 31 20:21:24 1996  Fred Fish  <fnf@cygnus.com>
+
+	* rs6000-nat.c (add_vmap): Return 0 to caller rather than random value.
+	(vmap_ldinfo): Ensure got_exec_file is not used uninitialized.
+	(fetch_core_registers): Add prototype.
+	(vmap_symtab): Ditto.
+	(objfile_symbol_add): Ditto.
+	(add_vmap): Ditto.
+	(vmap_ldinfo): Ditto.
+	(vmap_exec): Ditto.
+
 Tue Jul 30 17:57:46 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* stabsread.c (get_substring): Declare second arg as int.

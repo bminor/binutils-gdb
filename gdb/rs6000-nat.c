@@ -52,6 +52,24 @@ extern struct vmap * map_vmap PARAMS ((bfd *bf, bfd *arch));
 extern struct target_ops exec_ops;
 
 static void
+vmap_exec PARAMS ((void));
+
+static void
+vmap_ldinfo PARAMS ((struct ld_info *));
+
+static struct vmap *
+add_vmap PARAMS ((struct ld_info *));
+
+static int
+objfile_symbol_add PARAMS ((char *));
+
+static void
+vmap_symtab PARAMS ((struct vmap *));
+
+static void
+fetch_core_registers PARAMS ((char *, unsigned int, int, unsigned int));
+
+static void
 exec_one_dummy_insn PARAMS ((void));
 
 extern void
@@ -402,7 +420,7 @@ add_vmap (ldi)
 	  bfd_close (abfd);
 	  /* FIXME -- should be error */
 	  warning ("\"%s\": member \"%s\" missing.", abfd->filename, mem);
-	  return;
+	  return 0;
 	}
 
       if (!bfd_check_format(last, bfd_object))
@@ -447,7 +465,7 @@ vmap_ldinfo (ldi)
   struct stat ii, vi;
   register struct vmap *vp;
   int got_one, retried;
-  int got_exec_file;
+  int got_exec_file = 0;
 
   /* For each *ldi, see if we have a corresponding *vp.
      If so, update the mapping, and symbol table.
