@@ -96,8 +96,9 @@ java_value_print (value_ptr val, struct ui_file *stream, int format,
 
 	  while (i < length && things_printed < print_max)
 	    {
-	      char buf[TARGET_PTR_BIT / HOST_CHAR_BIT];
+	      char *buf;
 
+	      buf = alloca (TARGET_PTR_BIT / HOST_CHAR_BIT);
 	      fputs_filtered (", ", stream);
 	      wrap_here (n_spaces (2));
 

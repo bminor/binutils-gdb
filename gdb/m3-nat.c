@@ -2460,11 +2460,12 @@ get_cprocs (void)
   gdb_thread_t cproc_head;
   gdb_thread_t cproc_copy;
   CORE_ADDR their_cprocs;
-  char *buf[TARGET_PTR_BIT / HOST_CHAR_BIT];
+  char *buf;
   char *name;
   cthread_t cthread;
   CORE_ADDR symaddr;
 
+  buf = alloca (TARGET_PTR_BIT / HOST_CHAR_BIT);
   symaddr = lookup_address_of_variable ("cproc_list");
 
   if (!symaddr)

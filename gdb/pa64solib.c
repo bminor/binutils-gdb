@@ -1019,8 +1019,9 @@ read_dynamic_info (asection *dyninfo_sect, dld_cache_t *dld_cache_p)
       Elf64_Dyn *x_dynp = (Elf64_Dyn*)buf;
       Elf64_Sxword dyn_tag;
       CORE_ADDR	dyn_ptr;
-      char pbuf[TARGET_PTR_BIT / HOST_CHAR_BIT];
+      char *pbuf;
 
+      pbuf = alloca (TARGET_PTR_BIT / HOST_CHAR_BIT);
       dyn_tag = bfd_h_get_64 (symfile_objfile->obfd, 
 			      (bfd_byte*) &x_dynp->d_tag);
 

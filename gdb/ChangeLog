@@ -1,3 +1,17 @@
+2000-08-09  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* blockframe.c (sigtramp_saved_pc): Use dynamic allocation, 
+	since TARGET_PTR_BIT is no longer a constant (MULTI_ARCH).
+	* irix4-nat.c (get_longjmp_target): Ditto.
+	* irix5-nat.c (get_longjmp_target): Ditto.
+	* jv-valprint.c (java_value_print): Ditto.
+	* m3-nat.c (get_cprocs):            Ditto.
+	* m68k-tdep.c (get_longjmp_target): Ditto.
+	* mips-nat.c  (get_longjmp_target): Ditto.
+	* mipsv4-nat.c(get_longjmp_target): Ditto.
+	* pa64solib.c (read_dynamic_info):  Ditto.
+	* solib.c (elf_locate_base):        Ditto.
+
 Mon Aug  7 23:21:22 2000  David Taylor  <taylor@texas.cygnus.com>
 
 	* TODO: remove build_parse entry.

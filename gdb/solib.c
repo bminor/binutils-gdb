@@ -762,8 +762,9 @@ elf_locate_base (void)
 #ifdef DT_MIPS_RLD_MAP
 	  else if (dyn_tag == DT_MIPS_RLD_MAP)
 	    {
-	      char pbuf[TARGET_PTR_BIT / HOST_CHAR_BIT];
+	      char *pbuf;
 
+	      pbuf = alloca (TARGET_PTR_BIT / HOST_CHAR_BIT);
 	      /* DT_MIPS_RLD_MAP contains a pointer to the address
 		 of the dynamic link structure.  */
 	      dyn_ptr = bfd_h_get_32 (exec_bfd, 

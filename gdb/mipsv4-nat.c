@@ -143,9 +143,10 @@ fill_fpregset (fpregset_t *fpregsetp, int regno)
 int
 get_longjmp_target (CORE_ADDR *pc)
 {
-  char buf[TARGET_PTR_BIT / TARGET_CHAR_BIT];
+  char *buf;
   CORE_ADDR jb_addr;
 
+  buf = alloca (TARGET_PTR_BIT / TARGET_CHAR_BIT);
   jb_addr = read_register (A0_REGNUM);
 
   if (target_read_memory (jb_addr + _JB_PC * JB_ELEMENT_SIZE, buf,

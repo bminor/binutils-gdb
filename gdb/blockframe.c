@@ -950,10 +950,11 @@ CORE_ADDR
 sigtramp_saved_pc (struct frame_info *frame)
 {
   CORE_ADDR sigcontext_addr;
-  char buf[TARGET_PTR_BIT / TARGET_CHAR_BIT];
+  char *buf;
   int ptrbytes = TARGET_PTR_BIT / TARGET_CHAR_BIT;
   int sigcontext_offs = (2 * TARGET_INT_BIT) / TARGET_CHAR_BIT;
 
+  buf = alloca (ptrbytes);
   /* Get sigcontext address, it is the third parameter on the stack.  */
   if (frame->next)
     sigcontext_addr = read_memory_integer (FRAME_ARGS_ADDRESS (frame->next)
