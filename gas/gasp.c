@@ -3549,6 +3549,8 @@ Usage: %s \n\
   [-Dname=value]                  create preprocessor variable called name, with value\n\
   [-Ipath]                        add to include path list\n\
   [in-file]\n");
+  if (status == 0)
+    printf ("\nReport bugs to bug-gnu-utils@prep.ai.mit.edu\n");
   exit (status);
 }
 
@@ -3634,7 +3636,12 @@ main (argc, argv)
 	  show_help ();
 	  /*NOTREACHED*/
 	case 'v':
-	  printf ("GNU %s version %s\n", program_name, program_version);
+	  /* This output is intended to follow the GNU standards document.  */
+	  printf ("GNU assembler pre-processor %s\n", program_version);
+	  printf ("Copyright 1996 Free Software Foundation, Inc.\n");
+	  printf ("\
+This program is free software; you may redistribute it under the terms of\n\
+the GNU General Public License.  This program has absolutely no warranty.\n");
 	  exit (0);
 	  /*NOTREACHED*/
 	case 0:

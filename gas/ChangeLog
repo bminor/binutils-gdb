@@ -1,5 +1,11 @@
 Tue Oct  1 12:37:48 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* as.c (show_usage): Print bug report address.
+	(parse_args): Change version printing to match current GNU
+	standards.
+	* gasp.c (show_usage): Print bug report address.
+	(main): Change version printing to match current GNU standards.
+
 	* config/tc-m68k.c (init_table): Correct access control unit
 	register numbers.  From Ken Rose <rose@netcom.com>.
 
