@@ -1,3 +1,12 @@
+Thu Feb 16 15:06:12 1995  Per Bothner  <bothner@kalessin.cygnus.com>
+
+	* parse.c (follow_types):  Given (TYPE[]) (i.e. with no length),
+	create a 0-length array type, and set BOUND_CANNOT_BE_DETERMINED.
+	* valops.c (value_cast):  If a cast like (TYPE[])VALUE (i.e. array
+	of unknown length) use sizeof(VALUE)/sizeof(TYPE) as the length.
+	* c-typeprint.c (c_type_print_varspec_suffix):  If array length
+	is 0, print it, but not if upper_bound is BOUND_CANNOT_BE_DETERMINED.
+
 Thu Feb 16 16:06:50 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* dcache.c (insque, remque): Rewrite Linux support.

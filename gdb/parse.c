@@ -875,18 +875,16 @@ follow_types (follow_type)
 	break;
       case tp_array:
 	array_size = pop_type_int ();
-	if (array_size != -1)
-	  {
-	    range_type =
-	      create_range_type ((struct type *) NULL,
-				 builtin_type_int, 0,
-				 array_size - 1);
-	    follow_type =
-	      create_array_type ((struct type *) NULL,
-				 follow_type, range_type);
-	  }
-	else
-	  follow_type = lookup_pointer_type (follow_type);
+	range_type =
+	  create_range_type ((struct type *) NULL,
+			     builtin_type_int, 0,
+			     array_size >= 0 ? array_size - 1 : 0);
+	follow_type =
+	  create_array_type ((struct type *) NULL,
+			     follow_type, range_type);
+	if (array_size < 0)
+	  TYPE_ARRAY_UPPER_BOUND_TYPE(follow_type)
+	    = BOUND_CANNOT_BE_DETERMINED;
 	break;
       case tp_function:
 	follow_type = lookup_function_type (follow_type);
