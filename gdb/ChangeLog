@@ -336,7 +336,6 @@
 	(_initialize_infcmd): Update help string for 'until' command.
 	Add new 'advance' command.
 
->>>>>>> 1.3752
 2003-01-14  David Carlton  <carlton@math.stanford.edu>
 
 	* linespec.c (decode_line_1): Normalize comments.
