@@ -1,7 +1,7 @@
-/* run front end support for H8/500
+/* run front end support for SH
    Copyright (C) 1987, 1992 Free Software Foundation, Inc.
 
-This file is part of H8300 SIM
+This file is part of SH SIM
 
 GNU CC is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -27,6 +27,10 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "sysdep.h"
 #include "remote-sim.h"
 
+void usage();
+extern int optind;
+extern char *optarg;
+
 int target_byte_order;
 
 int
@@ -42,36 +46,35 @@ main (ac, av)
   int trace = 0;
   char *name = "";
 
-  for (i = 1; i < ac; i++)
-    {
-      if (strcmp (av[i], "-v") == 0)
-	{
-	  verbose = 1;
-	}
-      else if (strcmp (av[i], "-t") == 0)
-	{
-	  trace = 1;
-	}
-      else if (strcmp (av[i], "-p") == 0)
-	{
-	  sim_set_profile (atoi (av[i + 1]));
-	  i++;
-	}
-      else if (strcmp (av[i], "-s") == 0)
-	{
-	  sim_set_profile_size (atoi (av[i + 1]));
-	  i++;
-	}
-      else if (strcmp (av[i], "-m") == 0)
-	{
-	  sim_size (atoi (av[i + 1]));
-	  i++;
-	}
-      else
-	{
-	  name = av[i];
-	}
-    }
+  while ((i = getopt (ac, av, "m:p:s:tv")) != EOF) 
+    switch (i)
+      {
+      case 'm':
+	sim_size (atoi (optarg));
+	break;
+      case 'p':
+	sim_set_profile (atoi (optarg));
+	break;
+      case 's':
+	sim_set_profile_size (atoi (optarg));
+	break;
+      case 't':
+	trace = 1;
+	break;
+      case 'v':
+	verbose = 1;
+	break;
+      default:
+	usage();
+      }
+  ac -= optind;
+  av += optind;
+
+  if (ac != 1)
+    usage();
+
+  name = *av;
+
   if (verbose)
     {
       printf ("run %s\n", name);
@@ -126,6 +129,14 @@ main (ac, av)
 
   return 1;
 }
+
+void
+usage()
+{
+  fprintf (stderr, "usage: run [-tv] program\n");
+  exit (1);
+}
+
 
 /* Callbacks used by the simulator proper.  */
 

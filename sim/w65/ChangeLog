@@ -1,3 +1,7 @@
+Mon Mar 27 10:32:34 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* run.c: parse arguments with getopt().
+
 Tue Feb 28 17:31:36 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure.in: Use ../../bfd/hosts/std-host.h if specific

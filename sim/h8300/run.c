@@ -24,6 +24,10 @@
 #include "sysdep.h"
 #include "remote-sim.h"
 
+void usage();
+extern int optind;
+extern char *optarg;
+
 int
 main (ac, av)
      int ac;
@@ -37,25 +41,31 @@ main (ac, av)
   int trace = 0;
   char *name = "";
 
-  for (i = 1; i < ac; i++)
-    {
-      if (strcmp(av[i],"-v") == 0)
-	verbose++;
-      
-      else if (strcmp(av[i],"-t") == 0) 
-	{
-	  trace = 1;
-	}
-      else if (strcmp(av[i],"-c") == 0) 
-	{
-	  sim_csize(atoi(av[i+1]));
-	  i++;
-	}
-      else if (strcmp(av[i],"-h") == 0) 
+  while ((i = getopt (ac, av, "c:htv")) != EOF)
+    switch (i) 
+      {
+      case 'c':
+	sim_csize (atoi (optarg));
+	break;
+      case 'h':
 	set_h8300h (1);
-      else 
-	name = av[i];
-    }
+	break;
+      case 't':
+	trace = 1;
+	break;
+      case 'v':
+	verbose = 1;
+	break;
+      default:
+	usage();
+      }
+  ac -= optind;
+  av += optind;
+
+  if (ac != 1)
+    usage();
+
+  name = *av;
 
   if (verbose)
     printf ("run %s\n", name);
@@ -98,4 +108,11 @@ printf_filtered (va_alist)
   msg = va_arg (args, char *);
   vfprintf (stdout, msg, args);
   va_end (args);
+}
+
+void
+usage()
+{
+  fprintf (stderr, "usage: run [-tv] program\n");
+  exit (1);
 }

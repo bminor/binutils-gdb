@@ -25,7 +25,8 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "bfd.h"
 #include "sysdep.h"
 
-extern printf();
+void usage();
+extern int optind;
 
 int
 main (ac, av)
@@ -39,22 +40,27 @@ main (ac, av)
   int verbose = 0;
   int trace = 0;
   char *name = "";
-  
-  for (i = 1; i < ac; i++)
-    {
-      if (strcmp (av[i], "-v") == 0)
-	{
-	  verbose = 1;
-	}
-      else if (strcmp (av[i], "-t") == 0)
-	{
-	  trace = 1;
-	}
-      else
-	{
-	  name = av[i];
-	}
-    }
+
+  while ((i = getopt (ac, av, "tv")) != EOF)
+    switch (i)
+      {
+      case 't':
+	trace = 1;
+	break;
+      case 'v':
+	verbose = 1;
+	break;
+      default:
+	usage();
+      }
+  ac -= optind;
+  av += optind;
+
+  if (ac != 1) 
+    usage();
+
+  name = *av;
+
   if (verbose)
     {
       printf ("run %s\n", name);
@@ -106,4 +112,11 @@ main (ac, av)
     }
 
   return 1;
+}
+
+void
+usage()
+{
+  fprintf (stderr, "usage: run [-tv] program\n");
+  exit (1);
 }
