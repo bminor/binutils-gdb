@@ -6278,6 +6278,9 @@ get_FORM_name (form)
     }
 }
 
+static const char *debug_str;
+static bfd_vma debug_str_size;
+
 /* FIXME:  There are better and more effiecint ways to handle
    these structures.  For now though, I just want something that
    is simple to implement.  */
@@ -6528,6 +6531,9 @@ display_debug_abbrev (section, start, file)
     {
       start = process_abbrev_section (start, end);
 
+      if (first_abbrev == NULL)
+	continue;
+
       printf (_("  Number TAG\n"));
 
       for (entry = first_abbrev; entry; entry = entry->next)
@@ -6546,6 +6552,8 @@ display_debug_abbrev (section, start, file)
 		      get_FORM_name (attr->form));
 	    }
 	}
+
+      free_abbrevs ();
     }
   while (start);
 
@@ -6921,6 +6929,11 @@ read_and_display_attr (attribute, form, data, cu_offset, pointer_size)
       data += pointer_size;
       break;
 
+    case DW_FORM_strp:
+      uvalue = byte_get (data, /* offset_size */ 4);
+      data += /* offset_size */ 4;
+      break;
+
     case DW_FORM_ref1:
     case DW_FORM_flag:
     case DW_FORM_data1:
@@ -7014,6 +7027,15 @@ read_and_display_attr (attribute, form, data, cu_offset, pointer_size)
       break;
 
     case DW_FORM_strp:
+      if (debug_str == NULL)
+	warn (_("DW_FORM_strp used but no .debug_str section"));
+      else if (uvalue >= debug_str_size)
+	warn (_("DW_FORM_strp %lx points outside of .debug_str section"),
+	      uvalue);
+      else
+        printf (" %s", debug_str + uvalue);
+      break;
+
     case DW_FORM_indirect:
       warn (_("Unable to handle FORM: %d"), form);
       break;
@@ -7189,6 +7211,24 @@ display_debug_info (section, start, file)
 
   printf (_("The section %s contains:\n\n"), SECTION_NAME (section));
 
+  {
+    Elf32_Internal_Shdr * sec;
+    int i;
+
+    /* Locate the .debug_str section and read it.  */
+    for (i = 0, sec = section_headers;
+	 i < elf_header.e_shnum;
+	 i ++, sec ++)
+      if (strcmp (SECTION_NAME (sec), ".debug_str") == 0 && sec->sh_size != 0)
+	{
+	  debug_str = (const char *)
+		      get_data (NULL, file, sec->sh_offset, sec->sh_size,
+				_("debug_str section data"));
+	  debug_str_size = sec->sh_size;
+	  break;
+	}
+  }
+
   while (start < end)
     {
       DWARF2_External_CompUnit * external;
@@ -7306,7 +7346,7 @@ display_debug_info (section, start, file)
 	  if (strcmp (SECTION_NAME (sec), ".debug_abbrev") == 0)
 	    break;
 
-	if (i == -1 || sec->sh_size == 0)
+	if (i == elf_header.e_shnum || sec->sh_size == 0)
 	  {
 	    warn (_("Unable to locate .debug_abbrev section!\n"));
 	    return 0;
@@ -7371,6 +7411,12 @@ display_debug_info (section, start, file)
 	  if (entry->children)
 	    ++level;
 	}
+    }
+
+  if (debug_str != NULL)
+    {
+      free ((char *) debug_str);
+      debug_str = NULL;
     }
 
   printf ("\n");

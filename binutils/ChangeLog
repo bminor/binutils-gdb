@@ -1,3 +1,13 @@
+2001-11-07  Jakub Jelinek  <jakub@redhat.com>
+
+	* readelf.c (debug_str, debug_str_size): New.
+	(display_debug_abbrev): If no abbrevs were read, skip the CU.
+	Call free_abbrevs.
+	(read_and_display_addr): Handle DW_FORM_strp.
+	(display_debug_info): Read .debug_str section if present,
+	so that DW_FORM_strp can be handled.
+	Fix test for non-existant .debug_abbrev section.
+
 2001-11-05  Jakub Jelinek  <jakub@redhat.com>
 
 	* arlex.l: Accept `\' in filenames.  Patch by <earl_chew@agilent.com>.
