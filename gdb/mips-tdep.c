@@ -2426,7 +2426,20 @@ mips_push_arguments (int nargs,
 		     same for integral types.
 
 		     Also don't do this adjustment on EABI and O64
-		     binaries. */
+		     binaries.
+
+		     cagney/2001-07-23: gdb/179: Also, GCC, when
+		     outputting LE O32 with sizeof (struct) <
+		     MIPS_SAVED_REGSIZE, generates a left shift as
+		     part of storing the argument in a register a
+		     register (the left shift isn't generated when
+		     sizeof (struct) >= MIPS_SAVED_REGSIZE).  Since it
+		     is quite possible that this is GCC contradicting
+		     the LE/O32 ABI, GDB has not been adjusted to
+		     accommodate this.  Either someone needs to
+		     demonstrate that the LE/O32 ABI specifies such a
+		     left shift OR this new ABI gets identified as
+		     such and GDB gets tweaked accordingly.  */
 
 		  if (!MIPS_EABI
 		      && MIPS_SAVED_REGSIZE < 8

@@ -1,3 +1,8 @@
+2001-07-23  Andrew Cagney  <ac131313@redhat.com>
+
+	* mips-tdep.c (mips_push_arguments): Add comment explaining
+	problem with LE o32 GCC.
+
 2001-07-23  Elena Zannoni  <ezannoni@redhat.com>
 
 	* config/powerpc/aix.mh (MH_LDFLAGS): Don't set these, the Gnu linker
