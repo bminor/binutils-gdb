@@ -136,6 +136,7 @@ static int
 attach_fields_to_type (struct field_info *, struct type *, struct objfile *);
 
 static struct type *read_struct_type (char **, struct type *,
+                                      enum type_code,
 				      struct objfile *);
 
 static struct type *read_array_type (char **, struct type *,
@@ -2801,18 +2802,21 @@ again:
 
     case 's':			/* Struct type */
     case 'u':			/* Union type */
-      type = dbx_alloc_type (typenums, objfile);
-      switch (type_descriptor)
-	{
-	case 's':
-	  TYPE_CODE (type) = TYPE_CODE_STRUCT;
-	  break;
-	case 'u':
-	  TYPE_CODE (type) = TYPE_CODE_UNION;
-	  break;
-	}
-      type = read_struct_type (pp, type, objfile);
-      break;
+      {
+        enum type_code type_code = TYPE_CODE_UNDEF;
+        type = dbx_alloc_type (typenums, objfile);
+        switch (type_descriptor)
+          {
+          case 's':
+            type_code = TYPE_CODE_STRUCT;
+            break;
+          case 'u':
+            type_code = TYPE_CODE_UNION;
+            break;
+          }
+        type = read_struct_type (pp, type, type_code, objfile);
+        break;
+      }
 
     case 'a':			/* Array type */
       if (**pp != 'r')
@@ -4156,6 +4160,45 @@ attach_fields_to_type (struct field_info *fip, register struct type *type,
   return 1;
 }
 
+
+static struct complaint multiply_defined_struct =
+{"struct/union type gets multiply defined: %s%s", 0, 0};
+
+
+/* Complain that the compiler has emitted more than one definition for the
+   structure type TYPE.  */
+static void 
+complain_about_struct_wipeout (struct type *type)
+{
+  char *name = "";
+  char *kind = "";
+
+  if (TYPE_TAG_NAME (type))
+    {
+      name = TYPE_TAG_NAME (type);
+      switch (TYPE_CODE (type))
+        {
+        case TYPE_CODE_STRUCT: kind = "struct "; break;
+        case TYPE_CODE_UNION:  kind = "union ";  break;
+        case TYPE_CODE_ENUM:   kind = "enum ";   break;
+        default: kind = "";
+        }
+    }
+  else if (TYPE_NAME (type))
+    {
+      name = TYPE_NAME (type);
+      kind = "";
+    }
+  else
+    {
+      name = "<unknown>";
+      kind = "";
+    }
+
+  complain (&multiply_defined_struct, kind, name);
+}
+
+
 /* Read the description of a structure (or union type) and return an object
    describing the type.
 
@@ -4171,7 +4214,8 @@ attach_fields_to_type (struct field_info *fip, register struct type *type,
  */
 
 static struct type *
-read_struct_type (char **pp, struct type *type, struct objfile *objfile)
+read_struct_type (char **pp, struct type *type, enum type_code type_code,
+                  struct objfile *objfile)
 {
   struct cleanup *back_to;
   struct field_info fi;
@@ -4179,9 +4223,30 @@ read_struct_type (char **pp, struct type *type, struct objfile *objfile)
   fi.list = NULL;
   fi.fnlist = NULL;
 
+  /* When describing struct/union/class types in stabs, G++ always drops
+     all qualifications from the name.  So if you've got:
+       struct A { ... struct B { ... }; ... };
+     then G++ will emit stabs for `struct A::B' that call it simply
+     `struct B'.  Obviously, if you've got a real top-level definition for
+     `struct B', or other nested definitions, this is going to cause
+     problems.
+
+     Obviously, GDB can't fix this by itself, but it can at least avoid
+     scribbling on existing structure type objects when new definitions
+     appear.  */
+  if (! (TYPE_CODE (type) == TYPE_CODE_UNDEF
+         || TYPE_STUB (type)))
+    {
+      complain_about_struct_wipeout (type);
+
+      /* It's probably best to return the type unchanged.  */
+      return type;
+    }
+
   back_to = make_cleanup (null_cleanup, 0);
 
   INIT_CPLUS_SPECIFIC (type);
+  TYPE_CODE (type) = type_code;
   TYPE_FLAGS (type) &= ~TYPE_FLAG_STUB;
 
   /* First comes the total size in bytes.  */

@@ -1,3 +1,17 @@
+2002-05-03  Jim Blandy  <jimb@redhat.com>
+
+	* stabsread.c (multiply_defined_struct): New complaint.
+	(read_struct_type): If the type we were passed isn't empty, or
+	incomplete, don't read the new struct type into it; complain,
+	and return the original type unchanged.  Take a new `type_code'
+	argument, which is the type code for the new type.
+	(read_type): Rather than storing the type's type code here, pass
+	it as an argument to read_struct_type, and let that take care of
+	storing it.  That way, we don't overwrite the original type code,
+	so read_struct_type can use it to decide whether we're overwriting
+	something we shouldn't.
+	(complain_about_struct_wipeout): New function.
+
 2002-05-03  Andrew Cagney  <ac131313@redhat.com>
 
 	* gdbarch.sh: Assert that gdbarch is non-NULL.
