@@ -29,7 +29,6 @@ ChangeLog
 Makefile.in
 configure
 configure.in
-h8300.mt
 compile.c
 writecode.c
 run.c
