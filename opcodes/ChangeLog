@@ -1,3 +1,7 @@
+2001-07-03  Zoltan Hidvegi <hzoli@hzoli.2y.net>
+
+	* ppc-opc.c: Fix encoding of 'clf' instruction.
+
 2001-06-30  Geoffrey Keating  <geoffk@redhat.com>
 
 	* cgen-ibld.in (insert_normal): Support CGEN_IFLD_SIGN_OPT.
