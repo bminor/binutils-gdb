@@ -1,3 +1,9 @@
+Tue Mar 31 11:09:08 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	From H.J. Lu <hjl@gnu.org>:
+	* i386-dis.c (dis386): Change 0x8c and 0x8e to movS, and change Ew
+	to Ev for both.
+
 Mon Mar 30 17:32:03 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Branched binutils 2.9.
