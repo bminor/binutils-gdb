@@ -1,5 +1,7 @@
 Sat Oct 16 20:47:30 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* config/m88k/xm-dgux.h: Define NO_PTRACE_H.
+
 	* corelow.c (add_to_thread_list): Need a cast to go from PTR to
 	asection *.
 
