@@ -587,14 +587,14 @@ value_assign (struct value *toval, struct value *fromval)
 	if (!frame)
 	  error ("Value being assigned to is no longer active.");
 	
-	if (CONVERT_REGISTER_P (VALUE_REGNO (toval), VALUE_TYPE (toval)))
+	if (VALUE_LVAL (toval) == lval_reg_frame_relative
+	    && CONVERT_REGISTER_P (VALUE_FRAME_REGNUM (toval),
+				   VALUE_TYPE (toval)))
 	  {
 	    /* If TOVAL is a special machine register requiring
-	       conversion of program values to a special raw format,
-	       convert FROMVAL's contents now, with result in
-	       `raw_buffer', and set USE_BUFFER to the number of bytes
-	       to write.  Let VALUE_TO_REGISTER sort out the mess.  */
-	    VALUE_TO_REGISTER (frame, fromval);
+	       conversion of program values to a special raw format.  */
+	    VALUE_TO_REGISTER (frame, VALUE_FRAME_REGNUM (toval),
+			       VALUE_TYPE (toval), VALUE_CONTENTS (toval));
 	  }
 	else
 	  {

@@ -2140,8 +2140,8 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   /* Macro might contain `[{}]' when not multi-arch */
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
-                      "REGISTER_TO_VALUE(frame, regnum, v)",
-                      XSTRING (REGISTER_TO_VALUE (frame, regnum, v)));
+                      "REGISTER_TO_VALUE(frame, regnum, type, buf)",
+                      XSTRING (REGISTER_TO_VALUE (frame, regnum, type, buf)));
 #endif
   if (GDB_MULTI_ARCH)
     fprintf_unfiltered (file,
@@ -2636,8 +2636,8 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   /* Macro might contain `[{}]' when not multi-arch */
   fprintf_unfiltered (file,
                       "gdbarch_dump: %s # %s\n",
-                      "VALUE_TO_REGISTER(frame, v)",
-                      XSTRING (VALUE_TO_REGISTER (frame, v)));
+                      "VALUE_TO_REGISTER(frame, regnum, type, buf)",
+                      XSTRING (VALUE_TO_REGISTER (frame, regnum, type, buf)));
 #endif
   if (GDB_MULTI_ARCH)
     fprintf_unfiltered (file,
@@ -4133,7 +4133,7 @@ set_gdbarch_convert_register_p (struct gdbarch *gdbarch,
 }
 
 void
-gdbarch_register_to_value (struct gdbarch *gdbarch, struct frame_info *frame, int regnum, struct value *v)
+gdbarch_register_to_value (struct gdbarch *gdbarch, struct frame_info *frame, int regnum, struct type *type, void *buf)
 {
   gdb_assert (gdbarch != NULL);
   if (gdbarch->register_to_value == 0)
@@ -4141,7 +4141,7 @@ gdbarch_register_to_value (struct gdbarch *gdbarch, struct frame_info *frame, in
                     "gdbarch: gdbarch_register_to_value invalid");
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_register_to_value called\n");
-  gdbarch->register_to_value (frame, regnum, v);
+  gdbarch->register_to_value (frame, regnum, type, buf);
 }
 
 void
@@ -4152,7 +4152,7 @@ set_gdbarch_register_to_value (struct gdbarch *gdbarch,
 }
 
 void
-gdbarch_value_to_register (struct gdbarch *gdbarch, struct frame_info *frame, struct value *v)
+gdbarch_value_to_register (struct gdbarch *gdbarch, struct frame_info *frame, int regnum, struct type *type, const void *buf)
 {
   gdb_assert (gdbarch != NULL);
   if (gdbarch->value_to_register == 0)
@@ -4160,7 +4160,7 @@ gdbarch_value_to_register (struct gdbarch *gdbarch, struct frame_info *frame, st
                     "gdbarch: gdbarch_value_to_register invalid");
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_value_to_register called\n");
-  gdbarch->value_to_register (frame, v);
+  gdbarch->value_to_register (frame, regnum, type, buf);
 }
 
 void

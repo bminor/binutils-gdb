@@ -1466,32 +1466,32 @@ extern void set_gdbarch_convert_register_p (struct gdbarch *gdbarch, gdbarch_con
 
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (REGISTER_TO_VALUE)
-#define REGISTER_TO_VALUE(frame, regnum, v) (legacy_register_to_value (frame, regnum, v))
+#define REGISTER_TO_VALUE(frame, regnum, type, buf) (legacy_register_to_value (frame, regnum, type, buf))
 #endif
 
-typedef void (gdbarch_register_to_value_ftype) (struct frame_info *frame, int regnum, struct value *v);
-extern void gdbarch_register_to_value (struct gdbarch *gdbarch, struct frame_info *frame, int regnum, struct value *v);
+typedef void (gdbarch_register_to_value_ftype) (struct frame_info *frame, int regnum, struct type *type, void *buf);
+extern void gdbarch_register_to_value (struct gdbarch *gdbarch, struct frame_info *frame, int regnum, struct type *type, void *buf);
 extern void set_gdbarch_register_to_value (struct gdbarch *gdbarch, gdbarch_register_to_value_ftype *register_to_value);
 #if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_TO_VALUE)
 #error "Non multi-arch definition of REGISTER_TO_VALUE"
 #endif
 #if !defined (REGISTER_TO_VALUE)
-#define REGISTER_TO_VALUE(frame, regnum, v) (gdbarch_register_to_value (current_gdbarch, frame, regnum, v))
+#define REGISTER_TO_VALUE(frame, regnum, type, buf) (gdbarch_register_to_value (current_gdbarch, frame, regnum, type, buf))
 #endif
 
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (VALUE_TO_REGISTER)
-#define VALUE_TO_REGISTER(frame, v) (legacy_value_to_register (frame, v))
+#define VALUE_TO_REGISTER(frame, regnum, type, buf) (legacy_value_to_register (frame, regnum, type, buf))
 #endif
 
-typedef void (gdbarch_value_to_register_ftype) (struct frame_info *frame, struct value *v);
-extern void gdbarch_value_to_register (struct gdbarch *gdbarch, struct frame_info *frame, struct value *v);
+typedef void (gdbarch_value_to_register_ftype) (struct frame_info *frame, int regnum, struct type *type, const void *buf);
+extern void gdbarch_value_to_register (struct gdbarch *gdbarch, struct frame_info *frame, int regnum, struct type *type, const void *buf);
 extern void set_gdbarch_value_to_register (struct gdbarch *gdbarch, gdbarch_value_to_register_ftype *value_to_register);
 #if (GDB_MULTI_ARCH >= GDB_MULTI_ARCH_PARTIAL) && defined (VALUE_TO_REGISTER)
 #error "Non multi-arch definition of VALUE_TO_REGISTER"
 #endif
 #if !defined (VALUE_TO_REGISTER)
-#define VALUE_TO_REGISTER(frame, v) (gdbarch_value_to_register (current_gdbarch, frame, v))
+#define VALUE_TO_REGISTER(frame, regnum, type, buf) (gdbarch_value_to_register (current_gdbarch, frame, regnum, type, buf))
 #endif
 
 /* Default (function) for non- multi-arch platforms. */

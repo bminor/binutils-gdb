@@ -19,8 +19,8 @@
 	"frame" to REGISTER_TO_VALUE.
 
 	* gdbarch.sh (CONVERT_REGISTER_P): Add "type" parameter.
-	(REGISTER_TO_VALUE, VALUE_TO_REGISTER): Replace "type", "from" and
-	"to" parameters with "frame" and "value".
+	(REGISTER_TO_VALUE, VALUE_TO_REGISTER): Replace raw buffer
+	parameter with "frame".
 	* gdbarch.h, gdbarch.c: Re-generate.
 	
 	* mips-tdep.c (mips_convert_register_p): New function.

@@ -646,21 +646,18 @@ mips_convert_register_p (int regnum, struct type *type)
 
 void
 mips_register_to_value (struct frame_info *frame, int regnum,
-			struct value *v)
+			struct type *type, void *to)
 {
-  frame_read_register (frame, regnum + 0, VALUE_CONTENTS_RAW (v) + 4);
-  frame_read_register (frame, regnum + 1, VALUE_CONTENTS_RAW (v) + 0);
-  VALUE_LVAL (v) = lval_reg_frame_relative;
-  VALUE_FRAME_ID (v) = get_frame_id (frame);
-  VALUE_FRAME_REGNUM (v) = regnum;
+  frame_read_register (frame, regnum + 0, (char *) to + 4);
+  frame_read_register (frame, regnum + 1, (char *) to + 0);
 }
 
 void
-mips_value_to_register (struct frame_info *frame, struct value *v)
+mips_value_to_register (struct frame_info *frame, int regnum,
+			struct type *type, const void *from)
 {
-  int regnum = VALUE_FRAME_REGNUM (v);
-  put_frame_register (frame, regnum + 0, VALUE_CONTENTS (v) + 4);
-  put_frame_register (frame, regnum + 1, VALUE_CONTENTS (v) + 0);
+  put_frame_register (frame, regnum + 0, (const char *) + 4);
+  put_frame_register (frame, regnum + 1, (const char *) + 0);
 }
 
 /* Return the GDB type object for the "standard" data type

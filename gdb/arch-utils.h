@@ -166,8 +166,10 @@ extern int legacy_pc_in_sigtramp (CORE_ADDR pc, char *name);
    type of a corresponding variable.  These legacy functions preserve
    that overloaded behavour in existing targets.  */
 extern int legacy_convert_register_p (int regnum, struct type *type);
-extern void legacy_register_to_value (struct frame_info *frame, int regnum, struct value *v);
-extern void legacy_value_to_register (struct frame_info *frame, struct value *v);
+extern void legacy_register_to_value (struct frame_info *frame, int regnum,
+				      struct type *type, void *to);
+extern void legacy_value_to_register (struct frame_info *frame, int regnum,
+				      struct type *type, const void *from);
 
 /* For compatibility with older architectures, returns
    (LEGACY_SIM_REGNO_IGNORE) when the register doesn't have a valid

@@ -630,10 +630,6 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
 
   if (CONVERT_REGISTER_P (regnum, type))
     {
-      int realnum;
-      int optim;
-      enum lval_type lval;
-      CORE_ADDR addr;
       /* The ISA/ABI need to something weird when obtaining the
          specified value from this register.  It might need to
          re-order non-adjacent, starting with REGNUM (see MIPS and
@@ -641,7 +637,10 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
          the corresponding [integer] type (see Alpha).  The assumption
          is that REGISTER_TO_VALUE populates the entire value
          including the location.  */
-      REGISTER_TO_VALUE (frame, regnum, v);
+      REGISTER_TO_VALUE (frame, regnum, type, VALUE_CONTENTS_RAW (v));
+      VALUE_LVAL (v) = lval_reg_frame_relative;
+      VALUE_FRAME_ID (v) = get_frame_id (frame);
+      VALUE_FRAME_REGNUM (v) = regnum;
     }
   else
     {
