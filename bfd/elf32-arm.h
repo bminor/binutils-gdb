@@ -1907,10 +1907,15 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 	  switch (r)
 	    {
 	    case bfd_reloc_overflow:
-	      if (!((*info->callbacks->reloc_overflow)
-		    (info, name, howto->name, (bfd_vma) 0,
-		     input_bfd, input_section, rel->r_offset)))
-		return false;
+	      /* If the overflowing reloc was to an undefined symbol,
+		 we have already printed one error message and there
+		 is no point complaining again.  */
+	      if ((! h ||
+		   h->root.type != bfd_link_hash_undefined)
+		  && (!((*info->callbacks->reloc_overflow)
+			(info, name, howto->name, (bfd_vma) 0,
+			 input_bfd, input_section, rel->r_offset))))
+		  return false;
 	      break;
 
 	    case bfd_reloc_undefined:
@@ -2042,6 +2047,8 @@ elf32_arm_merge_private_bfd_data (ibfd, obfd)
   flagword out_flags;
   flagword in_flags;
   boolean flags_compatible = true;
+  boolean null_input_bfd = true;
+  asection *sec;
 
   /* Check if we have the same endianess.  */
   if (_bfd_generic_verify_endian_match (ibfd, obfd) == false)
@@ -2084,6 +2091,22 @@ elf32_arm_merge_private_bfd_data (ibfd, obfd)
 
   /* Identical flags must be compatible.  */
   if (in_flags == out_flags)
+    return true;
+
+  /* Check to see if the input BFD actually contains any sections.
+     If not, its flags may not have been initialised either, but it cannot
+     actually cause any incompatibility.  */
+  for (sec = ibfd->sections; sec != NULL; sec = sec->next)
+    {
+      /* Ignore synthetic glue sections.  */
+      if (strcmp (sec->name, ".glue_7")
+	  && strcmp (sec->name, ".glue_7t"))
+	{
+	  null_input_bfd = false;
+	  break;
+	}
+    }
+  if (null_input_bfd)
     return true;
 
   /* Complain about various flag mismatches.  */

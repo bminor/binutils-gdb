@@ -1,3 +1,14 @@
+2000-11-05  Philip Blundell  <philb@gnu.org>
+
+	* elf32-arm.h (elf32_arm_merge_private_bfd_data): Always permit
+	BFDs containing no sections to be merged, regardless of their flags.
+
+2000-11-04  Philip Blundell  <philb@gnu.org>
+
+	* elf32-arm.h (elf32_arm_relocate_section): Suppress error message
+	if a relocation for an undefined symbol also results in an
+	overflow.
+
 Mon Nov  6 13:35:07 2000  Christopher Faylor <cgf@cygnus.com>
 
 	* config.bfd: Add support for Sun Chorus.
