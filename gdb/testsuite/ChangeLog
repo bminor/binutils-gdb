@@ -1,5 +1,7 @@
 Wed Jan  3 01:30:41 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* lib/gdb.exp (skip_chill_tests): Skip them on the PA too.
+
 	* gdb.stabs/weird.exp: Use ${target_triplet} to determine
 	which sed script to run.  Expect failure for v_comb test
 	on PA targets too.
