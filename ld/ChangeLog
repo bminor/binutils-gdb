@@ -1,3 +1,11 @@
+2000-10-20  Jakub Jelinek  <jakub@redhat.com>
+
+	* emulparams/elf64_sparc.sh (TEXT_START_ADDR,
+	NONPAGED_TEXT_START_ADDR): Set to 4GB for Solaris targets.
+	Fix sed invocation, so that it coped with '/' in Solaris 64bit
+	library path suffix.
+	Based on patch by Andrew Macleod <amacleod@cygnus.com>.
+
 2000-10-18  Hans-Peter Nilsson  <hp@axis.com>
 
 	* scripttempl/crisaout.sc (.text, .data): Pad, with ALIGN (32),
