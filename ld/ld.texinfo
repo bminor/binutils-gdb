@@ -2704,6 +2704,24 @@ the environment variable @code{GNUTARGET}, if available, to select the
 output file format.  If that variable is also absent, @code{ld} uses
 the default format configured for your machine in the BFD libraries.
 @end ifclear
+
+@cindex cross references
+@kindex NOCROSSREFS ( @var{sections} )
+@item NOCROSSREFS ( @var{section} @var{section} @dots{} )
+This command may be used to tell @code{ld} to issue an error about any
+references among certain sections.
+
+In certain types of programs, particularly on embedded systems, when one
+section is loaded into memory, another section will not be.  Any direct
+references between the two sections would be errors.  For example, it
+would be an error if code in one section called a function defined in
+the other section.
+
+The @code{NOCROSSREFS} command takes a list of section names.  If
+@code{ld} detects any cross references between the sections, it reports
+an error and returns a non-zero exit status.  The @code{NOCROSSREFS}
+command uses output section names, defined in the @code{SECTIONS}
+command.  It does not use the names of input sections.
 @end table
 
 @ifset GENERIC

@@ -1,5 +1,34 @@
 Thu Aug  1 12:52:19 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ld.h (check_nocrossrefs): Declare.
+	* ldlang.h (struct lang_nocrossref): Define.
+	(struct lang_nocrossrefs): Define.
+	(nocrossref_list): Declare.
+	(lang_add_nocrossref): Declare.
+	* ldlex.l: Recognize NOCROSSREFS keyword.
+	* ldgram.y (%union): Add nocrossref field.
+	(NOCROSSREFS): New terminal.
+	(ifile_p1): Recognize NOCROSSREFS.
+	(nocrossref_list): New nonterminal.
+	* ldlang.c (nocrossref_list): Define.
+	(lang_add_nocrossref): New function.
+	* ldmain.c (main): If nocrossref_list is not NULL, call
+	check_nocrossrefs.
+	(warning_callback): Free symbols if there is no place to store
+	them.
+	(notice): Call add_cref if nocrossref_list is not NULL.
+	* ldcref.c: Include "ldexp.h" and "ldlang.h".
+	(check_nocrossrefs): New function.
+	(check_nocrossref): New static function.
+	(struct check_refs_info): Define.
+	(check_refs, check_reloc_refs): New static functions.
+	* Makefile.in: Rebuild dependencies.
+	* ld.texinfo (Option Commands): Document NOCROSSREFS.
+
+	* ld.texinfo (Section Placement): Improve the wording of the
+	wildcard documentation.  Mention that wildcards are only searched
+	for on the command line, not in the file system.
+
 	* emultempl/sunos.em (gld${EMULATION_NAME}_after_open): Move
 	definition of lib_path inside condition where it is used.
 

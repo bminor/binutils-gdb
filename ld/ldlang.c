@@ -142,6 +142,7 @@ boolean lang_has_input_file = false;
 boolean had_output_filename = false;
 boolean lang_float_flag = false;
 boolean delete_output_file_on_failure = false;
+struct lang_nocrossrefs *nocrossref_list;
 
 etree_type *base; /* Relocation base - or null */
 
@@ -3616,4 +3617,21 @@ lang_record_phdrs ()
 	  einfo ("%X%P: section `%s' assigned to non-existent phdr `%s'\n",
 		 u->output_section_statement.name, pl->name);
     }
+}
+
+/* Record a list of sections which may not be cross referenced.  */
+
+void
+lang_add_nocrossref (l)
+     struct lang_nocrossref *l;
+{
+  struct lang_nocrossrefs *n;
+
+  n = (struct lang_nocrossrefs *) xmalloc (sizeof *n);
+  n->next = nocrossref_list;
+  n->list = l;
+  nocrossref_list = n;
+
+  /* Set notice_all so that we get informed about all symbols.  */
+  link_info.notice_all = true;
 }

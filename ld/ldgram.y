@@ -75,6 +75,7 @@ static int error_index;
       union etree_union *at;
       union etree_union *flags;
     } phdr;
+  struct lang_nocrossref *nocrossref;
 }
 
 %type <etree> exp opt_exp_with_type mustbe_exp opt_at phdr_type phdr_val
@@ -82,8 +83,9 @@ static int error_index;
 %type <name> memspec_opt casesymlist
 %token <integer> INT  
 %token <name> NAME LNAME
-%type  <integer> length
+%type <integer> length
 %type <phdr> phdr_qualifiers
+%type <nocrossref> nocrossref_list
 
 %right <token> PLUSEQ MINUSEQ MULTEQ DIVEQ  '=' LSHIFTEQ RSHIFTEQ   ANDEQ OREQ 
 %right <token> '?' ':'
@@ -112,7 +114,7 @@ static int error_index;
 %token NOLOAD DSECT COPY INFO OVERLAY
 %token NAME LNAME DEFINED TARGET_K SEARCH_DIR MAP ENTRY
 %token <integer> SIZEOF NEXT ADDR
-%token STARTUP HLL SYSLIB FLOAT NOFLOAT
+%token STARTUP HLL SYSLIB FLOAT NOFLOAT NOCROSSREFS
 %token ORIGIN FILL
 %token LENGTH CREATE_OBJECT_SYMBOLS INPUT GROUP OUTPUT CONSTRUCTORS
 %token ALIGNMOD AT PROVIDE
@@ -299,6 +301,10 @@ ifile_p1:
 		{ lang_add_map($3); }
 	|	INCLUDE filename 
 		{ ldfile_open_command_file($2); } ifile_list END
+	|	NOCROSSREFS '(' nocrossref_list ')'
+		{
+		  lang_add_nocrossref ($3);
+		}
 	;
 
 input_list:
@@ -569,6 +575,30 @@ floating_point_support:
 			{ lang_float(false); }
 	;
 		
+nocrossref_list:
+		/* empty */
+		{
+		  $$ = NULL;
+		}
+	|	NAME nocrossref_list
+		{
+		  struct lang_nocrossref *n;
+
+		  n = (struct lang_nocrossref *) xmalloc (sizeof *n);
+		  n->name = $1;
+		  n->next = $2;
+		  $$ = n;
+		}
+	|	NAME ',' nocrossref_list
+		{
+		  struct lang_nocrossref *n;
+
+		  n = (struct lang_nocrossref *) xmalloc (sizeof *n);
+		  n->name = $1;
+		  n->next = $3;
+		  $$ = n;
+		}
+	;
 
 mustbe_exp:		 { ldlex_expression(); }
 		exp

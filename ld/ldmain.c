@@ -323,6 +323,8 @@ main (argc, argv)
     lang_map ();
   if (command_line.cref)
     output_cref (config.map_file != NULL ? config.map_file : stdout);
+  if (nocrossref_list != NULL)
+    check_nocrossrefs ();
 
   /* Even if we're producing relocateable output, some non-fatal errors should
      be reported in the exit status.  (What non-fatal errors, if any, do we
@@ -1031,6 +1033,9 @@ warning_callback (info, warning, symbol, abfd, section, address)
 
       if (! info.found)
 	einfo ("%B: %s\n", abfd, warning);
+
+      if (entry == NULL)
+	free (asymbols);
     }
 
   return true;
@@ -1241,7 +1246,7 @@ notice (info, name, abfd, section, value)
 	   bfd_is_und_section (section) ? "reference to" : "definition of",
 	   name);
 
-  if (command_line.cref)
+  if (command_line.cref || nocrossref_list != NULL)
     add_cref (name, abfd, section, value);
 
   return true;
