@@ -44,6 +44,7 @@ acconfig.h
 aclocal.m4
 callback.c
 cgen-cpu.h
+cgen-defs.h
 cgen-engine.h
 cgen-mem.h
 cgen-ops.h

@@ -154,6 +154,7 @@ SIM_COMMON_HW_OBJS = \
 	sim-hw.o \
 
 SIM_NEW_COMMON_OBJS = \
+	sim-arange.o \
 	sim-bits.o \
 	sim-break.o \
 	sim-config.o \
@@ -176,11 +177,11 @@ SIM_NEW_COMMON_OBJS = \
 	$(SIM_HW_OBJS) \
 
 CGEN_INCLUDE_DEPS = \
-	$(srccom)/cgen-types.h \
-	$(srccom)/cgen-sim.h \
-	$(srccom)/cgen-scache.h \
 	$(srccom)/cgen-cpu.h \
+	$(srccom)/cgen-scache.h \
+	$(srccom)/cgen-sim.h \
 	$(srccom)/cgen-trace.h \
+	$(srccom)/cgen-types.h \
 	$(srcdir)/../../include/opcode/cgen.h
 
 ## End COMMON_PRE_CONFIG_FRAG
@@ -310,6 +311,7 @@ sim_main_headers = \
 sim-assert_h = $(srccom)/sim-assert.h
 sim-endian_h = $(srccom)/sim-endian.h
 sim-n-endian_h = $(srccom)/sim-n-endian.h
+sim-arange_h = $(srccom)/sim-arange.h
 sim-bits_h = $(srccom)/sim-bits.h
 sim-config_h = $(srccom)/sim-config.h
 sim-n-bits_h = $(srccom)/sim-n-bits.h
@@ -356,6 +358,9 @@ BUILT_SRC_FROM_COMMON= \
 sim-abort.o: $(srccom)/sim-abort.c \
 	  $(SIM_EXTRA_DEPS)
 	$(CC) -c $(srccom)/sim-abort.c $(ALL_CFLAGS)
+
+sim-arange.o: $(srccom)/sim-arange.c $(sim-arange_h) $(SIM_EXTRA_DEPS)
+	$(CC) -c $(srccom)/sim-arange.c $(ALL_CFLAGS)
 
 sim-bits.o: $(srccom)/sim-bits.c $(sim-bits_h) $(sim-n-bits_h) \
 	  $(SIM_EXTRA_DEPS)
@@ -563,7 +568,7 @@ cgen-trace.o: $(srccom)/cgen-trace.c $(sim_main_headers)
 	$(CC) -c $(srccom)/cgen-trace.c $(ALL_CFLAGS)
 
 cgen-utils.o: $(srccom)/cgen-utils.c $(sim_main_headers) \
-	  $(srccom)/cgen-mem.h $(srccom)/cgen-ops.h
+	  $(srccom)/cgen-mem.h $(srccom)/cgen-ops.h $(srccom)/cgen-engine.h
 	$(CC) -c $(srccom)/cgen-utils.c $(ALL_CFLAGS)
 
 # Support targets.
@@ -650,6 +655,7 @@ CGEN_MAIN_SCM = $(srccgen)/cos.scm $(srccgen)/utils.scm \
 	$(srccgen)/ifield.scm $(srccgen)/iformat.scm \
 	$(srccgen)/operand.scm $(srccgen)/insn.scm \
 	$(srccgen)/rtl.scm $(srccgen)/sim.scm
+CGEN_ARCH_SCM = $(srccgen)/sim-arch.scm
 CGEN_CPU_SCM = $(srccgen)/sim-cpu.scm $(srccgen)/sim-model.scm
 CGEN_DECODE_SCM = $(srccgen)/sim-decode.scm
 

@@ -22,7 +22,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "sim-io.h"
 #include "sim-options.h"
 #include "sim-fpu.h"
+
 #include "bfd.h"
+#include "libiberty.h"
 
 #include "sim-assert.h"
 
@@ -50,6 +52,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define SIZE_LINE_NUMBER 4
 #endif
 
+static MODULE_INIT_FN trace_init;
 static MODULE_UNINSTALL_FN trace_uninstall;
 
 static DECLARE_OPTION_HANDLER (trace_option_handler);
@@ -67,6 +70,8 @@ enum {
   OPTION_TRACE_FPU,
   OPTION_TRACE_BRANCH,
   OPTION_TRACE_SEMANTICS,
+  OPTION_TRACE_RANGE,
+  OPTION_TRACE_FUNCTION,
   OPTION_TRACE_DEBUG,
   OPTION_TRACE_FILE
 };
@@ -113,6 +118,16 @@ static const OPTION trace_options[] =
   { {"trace-events", optional_argument, NULL, OPTION_TRACE_EVENTS},
       '\0', "on|off", "Trace events",
       trace_option_handler },
+#ifdef SIM_HAVE_ADDR_RANGE
+  { {"trace-range", required_argument, NULL, OPTION_TRACE_RANGE},
+      '\0', "START,END", "Specify range of addresses for instruction tracing",
+      trace_option_handler },
+#if 0 /*wip*/
+  { {"trace-function", required_argument, NULL, OPTION_TRACE_FUNCTION},
+      '\0', "FUNCTION", "Specify function to trace",
+      trace_option_handler },
+#endif
+#endif
   { {"trace-debug", optional_argument, NULL, OPTION_TRACE_DEBUG},
       '\0', "on|off", "Add information useful for debugging the simulator to the tracing output",
       trace_option_handler },
@@ -152,6 +167,7 @@ set_trace_option_mask (sd, name, mask, arg)
 	}
     }
 
+  /* update applicable trace bits */
   for (trace_nr = 0; trace_nr < MAX_TRACE_VALUES; ++trace_nr)
     {
       if ((mask & (1 << trace_nr)) == 0)
@@ -175,6 +191,28 @@ set_trace_option_mask (sd, name, mask, arg)
 	}
     }
 
+  /* Re-compute the cpu trace summary.  */
+  if (trace_val)
+    {
+      for (cpu_nr = 0; cpu_nr < MAX_NR_PROCESSORS; cpu_nr++)
+	CPU_TRACE_DATA (STATE_CPU (sd, cpu_nr))->trace_any_p = 1;
+    }
+  else
+    {
+      for (cpu_nr = 0; cpu_nr < MAX_NR_PROCESSORS; cpu_nr++)
+	{
+	  CPU_TRACE_DATA (STATE_CPU (sd, cpu_nr))->trace_any_p = 0;
+	  for (trace_nr = 0; trace_nr < MAX_TRACE_VALUES; ++trace_nr)
+	    {
+	      if (CPU_TRACE_FLAGS (STATE_CPU (sd, cpu_nr))[trace_nr])
+		{
+		  CPU_TRACE_DATA (STATE_CPU (sd, cpu_nr))->trace_any_p = 1;
+		  break;
+		}
+	    }
+	}
+    }  
+
   return SIM_RC_OK;
 }
 
@@ -196,6 +234,7 @@ trace_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
 		      char *arg, int is_command)
 {
   int n;
+  int cpu_nr;
 
   switch (opt)
     {
@@ -303,6 +342,42 @@ trace_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
 	sim_io_eprintf (sd, "Alu, fpu, memory, and/or branch tracing not compiled in, `--trace-semantics' ignored\n");
       break;
 
+#ifdef SIM_HAVE_ADDR_RANGE
+    case OPTION_TRACE_RANGE :
+      if (WITH_TRACE)
+	{
+	  char *chp = arg;
+	  unsigned long start,end;
+	  start = strtoul (chp, &chp, 0);
+	  if (*chp != ',')
+	    {
+	      sim_io_eprintf (sd, "--trace-range missing END argument\n");
+	      return SIM_RC_FAIL;
+	    }
+	  end = strtoul (chp + 1, NULL, 0);
+	  /* FIXME: Argument validation.  */
+	  if (cpu != NULL)
+	    sim_addr_range_add (TRACE_RANGE (CPU_PROFILE_DATA (cpu)),
+				start, end);
+	  else
+	    for (cpu_nr = 0; cpu_nr < MAX_NR_PROCESSORS; ++cpu_nr)
+	      sim_addr_range_add (TRACE_RANGE (CPU_TRACE_DATA (STATE_CPU (sd, cpu_nr))),
+				  start, end);
+	}
+      else
+	sim_io_eprintf (sd, "Tracing not compiled in, `--trace-range' ignored\n");
+      break;
+
+    case OPTION_TRACE_FUNCTION :
+      if (WITH_TRACE)
+	{
+	  /*wip: need to compute function range given name*/
+	}
+      else
+	sim_io_eprintf (sd, "Tracing not compiled in, `--trace-function' ignored\n");
+      break;
+#endif /* SIM_HAVE_ADDR_RANGE */
+
     case OPTION_TRACE_DEBUG :
       if (WITH_TRACE_DEBUG_P)
 	return set_trace_option (sd, "-debug", TRACE_DEBUG_IDX, arg);
@@ -346,7 +421,36 @@ trace_install (SIM_DESC sd)
   for (i = 0; i < MAX_NR_PROCESSORS; ++i)
     memset (CPU_TRACE_DATA (STATE_CPU (sd, i)), 0,
 	    sizeof (* CPU_TRACE_DATA (STATE_CPU (sd, i))));
+  sim_module_add_init_fn (sd, trace_init);
   sim_module_add_uninstall_fn (sd, trace_uninstall);
+  return SIM_RC_OK;
+}
+
+static SIM_RC
+trace_init (SIM_DESC sd)
+{
+#ifdef SIM_HAVE_ADDR_RANGE
+  /* Check if a range has been specified without specifying what to
+     collect.  */
+  {
+    int i;
+
+    for (i = 0; i < MAX_NR_PROCESSORS; ++i)
+      {
+	sim_cpu *cpu = STATE_CPU (sd, i);
+
+	if (ADDR_RANGE_RANGES (TRACE_RANGE (CPU_TRACE_DATA (cpu)))
+	    && ! TRACE_INSN_P (cpu))
+	  {
+	    sim_io_eprintf_cpu (cpu, "Tracing address range specified without --trace-insn.\n");
+	    sim_io_eprintf_cpu (cpu, "Address range ignored.\n");
+	    sim_addr_range_delete (TRACE_RANGE (CPU_TRACE_DATA (cpu)),
+				   0, ~ (address_word) 0);
+	  }
+      }
+  }
+#endif
+
   return SIM_RC_OK;
 }
 
@@ -458,15 +562,29 @@ print_data (SIM_DESC sd,
 	  {
 	    /* FIXME: Assumes sizeof float == 4; sizeof double == 8 */
 	  case 4:
-	    sim_fpu_32to (&fp, * (unsigned32*) data);
+	    sim_fpu_32to (&fp, *(unsigned32*)data);
 	    break;
 	  case 8:
-	    sim_fpu_64to (&fp, * (unsigned32*) data);
+	    sim_fpu_64to (&fp, *(unsigned64*)data);
 	    break;
 	  default:
 	    abort ();
 	  }
 	trace_printf (sd, cpu, " %8g", sim_fpu_2d (&fp));
+	switch (size)
+	  {
+	  case 4:
+	    trace_printf (sd, cpu, " (0x%08lx)",
+			  (long) *(unsigned32*)data);
+	    break;
+	  case 8:
+	    trace_printf (sd, cpu, " (0x%08lx%08lx)",
+			  (long) (*(unsigned64*)data >> 32),
+			  (long) (*(unsigned64*)data));
+	    break;
+	  default:
+	    abort ();
+	  }
 	break;
       }
     case trace_fmt_fpu:
@@ -544,6 +662,7 @@ trace_results (SIM_DESC sd,
 void
 trace_prefix (SIM_DESC sd,
 	      sim_cpu *cpu,
+	      sim_cia cia,
 	      address_word pc,
 	      int line_p,
 	      const char *filename,
@@ -555,9 +674,15 @@ trace_prefix (SIM_DESC sd,
   va_list ap;
   char *prefix = TRACE_PREFIX (data);
   char *chp;
+ /* FIXME: The TRACE_PREFIX_WIDTH should be determined at build time using
+    known information about the disassembled instructions. */
+#ifndef TRACE_PREFIX_WIDTH
+#define TRACE_PREFIX_WIDTH 48
+#endif
+  int width = TRACE_PREFIX_WIDTH;
 
   /* if the previous trace data wasn't flushed, flush it now with a
-     note indicating that this occured. */
+     note indicating that the trace was incomplete. */
   if (TRACE_IDX (data) != 0)
     {
       int last_input = TRACE_INPUT_IDX (data);
@@ -567,12 +692,23 @@ trace_prefix (SIM_DESC sd,
   TRACE_IDX (data) = 0;
   TRACE_INPUT_IDX (data) = 0;
 
+  /* Create the text prefix for this new instruction: */
   if (!line_p)
     {
-      sprintf (prefix, "%s:%-*d 0x%.*lx ",
-	       filename,
-	       SIZE_LINE_NUMBER, linenum,
-	       SIZE_PC, (long)pc);
+      if (filename)
+	{
+	  sprintf (prefix, "%s:%-*d 0x%.*lx ",
+		   filename,
+		   SIZE_LINE_NUMBER, linenum,
+		   SIZE_PC, (long) pc);
+	}
+      else
+	{
+	  sprintf (prefix, "0x%.*lx ",
+		   SIZE_PC, (long) pc);
+	  /* Shrink the width by the amount that we didn't print.  */
+	  width -= SIZE_LINE_NUMBER + SIZE_PC + 8;
+	}
       chp = strchr (prefix, '\0');
       va_start (ap, fmt);
       vsprintf (chp, fmt, ap);
@@ -602,16 +738,17 @@ trace_prefix (SIM_DESC sd,
 	      symsize = bfd_get_symtab_upper_bound (abfd);
 	      if (symsize < 0)
 		{
-		  sim_engine_abort (sd, cpu, 0, "could not read symbols\n");
+		  sim_engine_abort (sd, cpu, cia, "could not read symbols");
 		}
 	      asymbols = (asymbol **) xmalloc (symsize);
 	      symbol_count = bfd_canonicalize_symtab (abfd, asymbols);
 	      if (symbol_count < 0)
 		{
-		  sim_engine_abort (sd, cpu, 0, "could not canonicalize symbols\n");
+		  sim_engine_abort (sd, cpu, cia, "could not canonicalize symbols");
 		}
 	      STATE_PROG_SYMS (CPU_STATE (cpu)) = asymbols;
 	    }
+
 	  if (bfd_find_nearest_line (abfd,
 				     STATE_TEXT_SECTION (CPU_STATE (cpu)),
 				     asymbols,
@@ -656,17 +793,12 @@ trace_prefix (SIM_DESC sd,
       va_end (ap);
     }
 
-  /* pad it out to TRACE_PREFIX_WIDTH.  FIXME: The TRACE_PREFIX_WIDTH
-     should be determined at build time using known information about
-     the disassembled instructions */
-#ifndef TRACE_PREFIX_WIDTH
-#define TRACE_PREFIX_WIDTH 48
-#endif
+  /* Pad it out to TRACE_PREFIX_WIDTH.  */
   chp = strchr (prefix, '\0');
-  if (chp - prefix < TRACE_PREFIX_WIDTH)
+  if (chp - prefix < width)
     {
-      memset (chp, ' ', TRACE_PREFIX_WIDTH - (chp - prefix));
-      chp = &prefix [TRACE_PREFIX_WIDTH];
+      memset (chp, ' ', width - (chp - prefix));
+      chp = &prefix [width];
       *chp = '\0';
     }
   strcpy (chp, " -");
@@ -986,6 +1118,24 @@ trace_result_fp1 (SIM_DESC sd,
 }	      
 
 void
+trace_result_fp2 (SIM_DESC sd,
+		  sim_cpu *cpu,
+		  int trace_idx,
+		  fp_word f0,
+		  fp_word f1)
+{
+  TRACE_DATA *data = CPU_TRACE_DATA (cpu);
+  int last_input;
+
+  /* Append any results to the end of the inputs */
+  last_input = TRACE_INPUT_IDX (data);
+  save_data (sd, data, trace_fmt_fp, sizeof (f0), &f0);
+  save_data (sd, data, trace_fmt_fp, sizeof (f1), &f1);
+
+  trace_results (sd, cpu, trace_idx, last_input);
+}	      
+
+void
 trace_result_fpu1 (SIM_DESC sd,
 		   sim_cpu *cpu,
 		   int trace_idx,
@@ -1056,6 +1206,8 @@ trace_vprintf (SIM_DESC sd, sim_cpu *cpu, const char *fmt, va_list ap)
     }
 }
 
+/* The function trace_one_insn has been replaced by the function pair
+   trace_prefix() + trace_generic().  It is still used. */
 void
 trace_one_insn (SIM_DESC sd, sim_cpu *cpu, address_word pc,
 		int line_p, const char *filename, int linenum,

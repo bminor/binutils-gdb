@@ -1,9 +1,60 @@
 1998-12-04  Doug Evans  <devans@casey.cygnus.com>
 
-	* sim-memopt.c (sim_memory_uninstall): Result type is `void'.
-
+	* cgen-defs.h: New file, old cgen-sim.h.
+	* cgen-sim.h: Simple header that includes others.
 	* sim-arange.c: New file.
 	* sim-arange.h: New file.
+	* sim-basics.h: Include it.
+	* Make-common.in (SIM_NEW_COMMON_OBJS): Add sim-arange.o.
+	(sim-arange.o): Add rule for.
+	* sim-cpu.h (sim_cpu_msg_prefix): Add prototype.
+	(sim_io_eprintf_cpu): Add prototype.
+	* sim-inline.h (HAVE_INLINE): Define if GNUC.
+	(INLINE2): New macro.
+	(EXTERN_INLINE): New macro.
+	* sim-module.c (sim_post_argv_init): Initialize cpu backlink
+	before calling module init fns.
+	* sim-profile.h (OPTION_PROFILE_*): Move into enum.
+	(profile_init): New function.
+	(profile_options): New option --profile-range.
+	(profile_option_handler): Handle --profile-range.
+	(profile_print_insn): Qualify address range specific section titles.
+	(profile_print_addr_ranges): New function.
+	(profile_info): Print address ranges if specified.
+	(profile_install): Set profile_init init fn.
+	* sim-profile.h (PROFILE_DATA): New member `range'.
+	* sim-trace.c (trace_init): New function.
+	(trace_options): New option --trace-range.
+	(trace_option_handler): Handle --trace-range.
+	(trace_install): Set trace_init init fn.
+	* sim-trace.h (TRACE_DATA): New member `range'.
+	* sim-utils.c (sim_cpu_msg_prefix): New function.
+	(sim_io_eprintf_cpu): New function.
+	* cgen-engine.h (PC_IN_TRACE_RANGE_P): New macro.
+	(PC_IN_PROFILE_RANGE_P): New macro.
+	* cgen-trace.c (trace_insn_init): Set current_insn to NULL.
+	(trace_insn_fini): New arg abuf.  All callers updated.
+	Exit early if trace_insn not called.  Check ARGBUF_PROFILE_P before
+	printing cycle counts.
+	* cgen-trace.h (trace_insn_fini): Update prototype.
+	(TRACE_RESULT_P): New macro.
+	(TRACE_INSN_INIT,TRACE_INSN_FINI): New arg abuf.  All callers updated.
+	(TRACE_INSN): Check ARGBUF_TRACE_P.
+	(TRACE_EXTRACT,TRACE_RESULT): New arg abuf.  All callers updated.
+	* cgen-types.h (SIM_INLINE): Delete.
+	(SIM_HAVE_MODEL,SIM_HAVE_ADDR_RANGE): Define.
+	* cgen-utils.c: Don't include cgen-engine.h
+	* genmloop.sh (@cpu@_fill_argbuf): New function.
+	(@cpu@_fill_argbuf_tp): New function.
+	(@cpu@_emit_before,@cpu@_emit_after): New functions.
+	(@cpu@_pbb_begin): Prefix cti_sc,insn_count with '_'.
+	(SET_CTI_VPC,SET_INSN_COUNT): Update.
+	(@cpu@_pbb_before): Check ARGBUF_PROFILE_P before calling
+	doing profiling.  Update call to TRACE_INSN_INIT,TRACE_INSN_FINI.
+	(@cpu@_pbb_after): Check ARGBUF_PROFILE_P before calling
+	doing profiling. Update call to TRACE_INSN_FINI.
+
+	* sim-memopt.c (sim_memory_uninstall): Result type is `void'.
 
 1998-12-03  Frank Ch. Eigler  <fche@cygnus.com>
 
