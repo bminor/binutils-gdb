@@ -1,3 +1,11 @@
+Fri Oct 24 10:26:29 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* d10v_sim.h: Include sim-types.h.
+	(uint8, in816, uiny16, int32, uint32, int64, uint64): Typedef
+ 	using unsigned8 et.al. from sim-types.h.
+	(SEXT32, SEXT40, SEXT44, SEXT60): Replace GCC specific 0x..LL with
+ 	SIGNED64 macro.
+
 Wed Oct 22 14:43:00 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (sim_write_phys): New function, write to physical
