@@ -436,16 +436,28 @@ NAME(aout,some_aout_object_p) (abfd, execp, callback_to_real_object_p)
 
   if (N_MAGIC (*execp) == ZMAGIC)
     {
-      abfd->flags |= D_PAGED|WP_TEXT;
-      adata(abfd).magic = z_magic;
+      abfd->flags |= D_PAGED | WP_TEXT;
+      adata (abfd).magic = z_magic;
+    }
+  else if (N_MAGIC (*execp) == QMAGIC)
+    {
+      abfd->flags |= D_PAGED | WP_TEXT;
+      adata (abfd).magic = z_magic;
+      adata (abfd).subformat = q_magic_format;
     }
   else if (N_MAGIC (*execp) == NMAGIC)
     {
       abfd->flags |= WP_TEXT;
-      adata(abfd).magic = n_magic;
+      adata (abfd).magic = n_magic;
     }
+  else if (N_MAGIC (*execp) == OMAGIC)
+    adata (abfd).magic = o_magic;
   else
-    adata(abfd).magic = o_magic;
+    {
+      /* Should have been checked with N_BADMAG before this routine
+	 was called.  */
+      abort ();
+    }
 
   bfd_get_start_address (abfd) = execp->a_entry;
 
@@ -833,7 +845,10 @@ adjust_z_magic (abfd, execp)
   execp->a_text = obj_textsec(abfd)->_raw_size;
   if (ztih && (!abdp || (abdp && !abdp->exec_header_not_counted)))
     execp->a_text += adata(abfd).exec_bytes_size;
-  N_SET_MAGIC (*execp, ZMAGIC);
+  if (obj_aout_subformat (abfd) == q_magic_format)
+    N_SET_MAGIC (*execp, QMAGIC);
+  else
+    N_SET_MAGIC (*execp, ZMAGIC);
 
   /* Spec says data section should be rounded up to page boundary.  */
   obj_datasec(abfd)->_raw_size
@@ -916,7 +931,8 @@ NAME(aout,adjust_sizes_and_vmas) (abfd, text_size, text_end)
   if (! NAME(aout,make_sections) (abfd))
     return false;
 
-  if (adata(abfd).magic != undecided_magic) return true;
+  if (adata(abfd).magic != undecided_magic)
+    return true;
 
   obj_textsec(abfd)->_raw_size =
     align_power(obj_textsec(abfd)->_raw_size,
@@ -941,7 +957,6 @@ NAME(aout,adjust_sizes_and_vmas) (abfd, text_size, text_end)
 
   if (abfd->flags & D_PAGED)
     /* Whether or not WP_TEXT is set -- let D_PAGED override.  */
-    /* @@ What about QMAGIC?  */
     adata(abfd).magic = z_magic;
   else if (abfd->flags & WP_TEXT)
     adata(abfd).magic = n_magic;
@@ -1425,11 +1440,17 @@ translate_to_native_sym_flags (abfd, cache_ptr, sym_pointer)
 
   if (bfd_get_section (cache_ptr) == &bfd_abs_section)
     sym_pointer->e_type[0] |= N_ABS;
-  else if (bfd_get_section (cache_ptr) == obj_textsec (abfd))
+  else if (bfd_get_section (cache_ptr) == obj_textsec (abfd)
+	   || (bfd_get_section (cache_ptr)->output_section
+	       == obj_textsec (abfd)))
     sym_pointer->e_type[0] |= N_TEXT;
-  else if (bfd_get_section (cache_ptr) == obj_datasec (abfd))
+  else if (bfd_get_section (cache_ptr) == obj_datasec (abfd)
+	   || (bfd_get_section (cache_ptr)->output_section
+	       == obj_datasec (abfd)))
     sym_pointer->e_type[0] |= N_DATA;
-  else if (bfd_get_section (cache_ptr) == obj_bsssec (abfd))
+  else if (bfd_get_section (cache_ptr) == obj_bsssec (abfd)
+	   || (bfd_get_section (cache_ptr)->output_section
+	       == obj_bsssec (abfd)))
     sym_pointer->e_type[0] |= N_BSS;
   else if (bfd_get_section (cache_ptr) == &bfd_und_section)
     sym_pointer->e_type[0] = N_UNDF | N_EXT;

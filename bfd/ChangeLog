@@ -1,5 +1,26 @@
 Tue Jun 14 13:00:04 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* libaout.h (struct aoutdata): Add q_magic_format to subformat
+	enum.
+	* aout-target.h (MY_bfd_copy_private_bfd_data): Define as function
+	if not already defined.  Copy subformat information.
+	(MY_text_includes_header): Define as 0 if not already defined.
+	(MY(backend_data)): Use MY_text_includes_header rather than 0.
+	(MY_final_link_callback): Rename from final_link_callback, and
+	define only if MY_final_link_callback is not already defined.
+	(MY_bfd_final_link): Rename use of final_link_callback to
+	MY_final_link_callback.
+	* aoutx.h (NAME(aout,some_aout_object_p)): Handle QMAGIC like
+	ZMAGIC, but set the subformat to q_magic_format.  Abort if the
+	magic number if not recognized.
+	(adjust_z_magic): Use QMAGIC if q_magic_format.
+	* i386linux.c (MY_text_includes_header): Define as 1.
+	(i386linux_bfd_final_link): New static function.
+	(MY_bfd_final_link): Define as i386linux_bfd_final_link.
+
+	* aoutx.h (translate_to_native_sym_flags): Check both section and
+	output_section against sections of abfd.
+
 	* libecoff.h (struct ecoff_link_hash_entry): Change type of
 	written from boolean to char.  Add new field small.
 	* ecoff.c (ecoff_link_hash_newfunc): Initialize written to 0

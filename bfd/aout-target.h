@@ -1,5 +1,5 @@
 /* Define a target vector and some small routines for a variant of a.out.
-   Copyright (C) 1990, 1991, 1992, 1993 Free Software Foundation, Inc.
+   Copyright (C) 1990, 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -155,6 +155,28 @@ MY(mkobject) (abfd)
 #define MY_mkobject MY(mkobject)
 #endif
 
+#ifndef MY_bfd_copy_private_section_data
+
+/* Copy private section data.  This actually does nothing with the
+   sections.  It copies the subformat field.  We copy it here, because
+   we know whether this is a QMAGIC file before we set the section
+   contents, and copy_private_bfd_data is not called until after the
+   section contents have been set.  */
+
+/*ARGSUSED*/
+static boolean
+MY_bfd_copy_private_section_data (ibfd, isec, obfd, osec)
+     bfd *ibfd;
+     asection *isec;
+     bfd *obfd;
+     asection *osec;
+{
+  obj_aout_subformat (obfd) = obj_aout_subformat (ibfd);
+  return true;
+}
+
+#endif
+
 /* Write an object file.
    Section contents have already been written.  We write the
    file header, symbols, and relocation.  */
@@ -197,37 +219,60 @@ MY(set_sizes) (abfd)
 #define MY_set_sizes MY(set_sizes)
 #endif
 
+#ifndef MY_exec_hdr_flags
+#define MY_exec_hdr_flags 0
+#endif
+
 #ifndef MY_backend_data
 
-#ifndef MY_read_dynamic_symbols
-#define MY_read_dynamic_symbols 0
+#ifndef MY_text_includes_header
+#define MY_text_includes_header 0
 #endif
-#ifndef MY_read_dynamic_relocs
-#define MY_read_dynamic_relocs 0
+#ifndef MY_add_dynamic_symbols
+#define MY_add_dynamic_symbols 0
+#endif
+#ifndef MY_add_one_symbol
+#define MY_add_one_symbol 0
+#endif
+#ifndef MY_link_dynamic_object
+#define MY_link_dynamic_object 0
+#endif
+#ifndef MY_write_dynamic_symbol
+#define MY_write_dynamic_symbol 0
+#endif
+#ifndef MY_check_dynamic_reloc
+#define MY_check_dynamic_reloc 0
+#endif
+#ifndef MY_finish_dynamic_link
+#define MY_finish_dynamic_link 0
 #endif
 
 static CONST struct aout_backend_data MY(backend_data) = {
   0,				/* zmagic contiguous */
-  0,				/* text incl header */
+  MY_text_includes_header,
+  MY_exec_hdr_flags,
   0,				/* text vma? */
   MY_set_sizes,
   0,				/* exec header is counted */
-  MY_read_dynamic_symbols,
-  MY_read_dynamic_relocs
+  MY_add_dynamic_symbols,
+  MY_add_one_symbol,
+  MY_link_dynamic_object,
+  MY_write_dynamic_symbol,
+  MY_check_dynamic_reloc,
+  MY_finish_dynamic_link
 };
 #define MY_backend_data &MY(backend_data)
 #endif
 
-#ifndef MY_bfd_final_link
+#ifndef MY_final_link_callback
 
-/* Final link routine.  We need to use a call back to get the correct
-   offsets in the output file.  */
+/* Callback for the final_link routine to set the section offsets.  */
 
-static void final_link_callback
+static void MY_final_link_callback
   PARAMS ((bfd *, file_ptr *, file_ptr *, file_ptr *));
 
 static void
-final_link_callback (abfd, ptreloff, pdreloff, psymoff)
+MY_final_link_callback (abfd, ptreloff, pdreloff, psymoff)
      bfd *abfd;
      file_ptr *ptreloff;
      file_ptr *pdreloff;
@@ -240,12 +285,19 @@ final_link_callback (abfd, ptreloff, pdreloff, psymoff)
   *psymoff = N_SYMOFF (*execp);
 }
 
+#endif
+
+#ifndef MY_bfd_final_link
+
+/* Final link routine.  We need to use a call back to get the correct
+   offsets in the output file.  */
+
 static boolean
 MY_bfd_final_link (abfd, info)
      bfd *abfd;
      struct bfd_link_info *info;
 {
-  return NAME(aout,final_link) (abfd, info, final_link_callback);
+  return NAME(aout,final_link) (abfd, info, MY_final_link_callback);
 }
 
 #endif
@@ -367,10 +419,6 @@ MY_bfd_final_link (abfd, info)
 #define MY_bfd_link_add_symbols NAME(aout,link_add_symbols)
 #endif
 
-#ifndef MY_bfd_copy_private_section_data
-#define MY_bfd_copy_private_section_data \
-  _bfd_generic_bfd_copy_private_section_data
-#endif
 #ifndef MY_bfd_copy_private_bfd_data
 #define MY_bfd_copy_private_bfd_data _bfd_generic_bfd_copy_private_bfd_data
 #endif
@@ -385,6 +433,23 @@ MY_bfd_final_link (abfd, info)
 
 #ifndef MY_close_and_cleanup
 #define MY_close_and_cleanup MY_bfd_free_cached_info
+#endif
+
+#ifndef MY_get_dynamic_symtab_upper_bound
+#define MY_get_dynamic_symtab_upper_bound \
+  _bfd_nodynamic_get_dynamic_symtab_upper_bound
+#endif
+#ifndef MY_canonicalize_dynamic_symtab
+#define MY_canonicalize_dynamic_symtab \
+  _bfd_nodynamic_canonicalize_dynamic_symtab
+#endif
+#ifndef MY_get_dynamic_reloc_upper_bound
+#define MY_get_dynamic_reloc_upper_bound \
+  _bfd_nodynamic_get_dynamic_reloc_upper_bound
+#endif
+#ifndef MY_canonicalize_dynamic_reloc
+#define MY_canonicalize_dynamic_reloc \
+  _bfd_nodynamic_canonicalize_dynamic_reloc
 #endif
 
 /* Aout symbols normally have leading underscores */
@@ -447,6 +512,7 @@ bfd_target MY(vec) =
      BFD_JUMP_TABLE_RELOCS (MY),
      BFD_JUMP_TABLE_WRITE (MY),
      BFD_JUMP_TABLE_LINK (MY),
+     BFD_JUMP_TABLE_DYNAMIC (MY),
 
   (PTR) MY_backend_data,
 };

@@ -299,15 +299,22 @@ struct aoutdata {
   unsigned vma_adjusted : 1;
 
   /* used when a bfd supports several highly similar formats */
-  enum {
-    default_format = 0,
-    gnu_encap_format } subformat;
+  enum
+    {
+      default_format = 0,
+      /* Used on HP 9000/300 running HP/UX.  See hp300hpux.c.  */
+      gnu_encap_format,
+      /* Used on Linux, 386BSD, etc.  See include/aout/aout64.h.  */
+      q_magic_format
+    } subformat;
 
-  enum {
-    undecided_magic = 0,
-    z_magic,
-    o_magic,
-    n_magic } magic;
+  enum
+    {
+      undecided_magic = 0,
+      z_magic,
+      o_magic,
+      n_magic
+    } magic;
 
   /* The external symbol information.  */
   struct external_nlist *external_syms;
