@@ -2154,13 +2154,20 @@ append_insn (place, ip, address_expr, reloc_type)
 	}
       else
 	{
-	  reloc_howto_type *howto;
-
 	need_reloc:
 	  /* Don't generate a reloc if we are writing into a variant frag.  */
 	  if (place == NULL)
 	    {
-	      howto = bfd_reloc_type_lookup (stdoutput, reloc_type[0]);
+	      reloc_howto_type *howto;
+	      int i;
+
+	      /* In a compound relocation, it is the final (outermost)
+		 operator that determines the relocated field.  */
+	      for (i = 1; i < 3; i++)
+		if (reloc_type[i] == BFD_RELOC_UNUSED)
+		  break;
+
+	      howto = bfd_reloc_type_lookup (stdoutput, reloc_type[i - 1]);
 	      fixp[0] = fix_new_exp (frag_now, f - frag_now->fr_literal,
 				     bfd_get_reloc_size(howto),
 				     address_expr,
@@ -2207,77 +2214,22 @@ append_insn (place, ip, address_expr, reloc_type)
 		  hi_fixup->seg = now_seg;
 		}
 
-	      if (reloc_type[1] != BFD_RELOC_UNUSED)
-		{
-		  /* FIXME: This symbol can be one of
-		     RSS_UNDEF, RSS_GP, RSS_GP0, RSS_LOC.  */
-		  address_expr->X_op = O_absent;
-		  address_expr->X_add_symbol = 0;
-		  address_expr->X_add_number = 0;
+	      /* Add fixups for the second and third relocations, if given.
+		 Note that the ABI allows the second relocation to be
+		 against RSS_UNDEF, RSS_GP, RSS_GP0 or RSS_LOC.  At the
+		 moment we only use RSS_UNDEF, but we could add support
+		 for the others if it ever becomes necessary.  */
+	      for (i = 1; i < 3; i++)
+		if (reloc_type[i] != BFD_RELOC_UNUSED)
+		  {
+		    address_expr->X_op = O_absent;
+		    address_expr->X_add_symbol = 0;
+		    address_expr->X_add_number = 0;
 
-		  howto = bfd_reloc_type_lookup (stdoutput, reloc_type[1]);
-		  fixp[1] = fix_new_exp (frag_now, f - frag_now->fr_literal,
-					 bfd_get_reloc_size(howto),
-					 address_expr, FALSE, reloc_type[1]);
-
-		  /* These relocations can have an addend that won't fit in
-		     4 octets for 64bit assembly.  */
-		  if (HAVE_64BIT_GPRS
-		      && ! howto->partial_inplace
-		      && (reloc_type[1] == BFD_RELOC_16
-			  || reloc_type[1] == BFD_RELOC_32
-			  || reloc_type[1] == BFD_RELOC_MIPS_JMP
-			  || reloc_type[1] == BFD_RELOC_HI16_S
-			  || reloc_type[1] == BFD_RELOC_LO16
-			  || reloc_type[1] == BFD_RELOC_GPREL16
-			  || reloc_type[1] == BFD_RELOC_MIPS_LITERAL
-			  || reloc_type[1] == BFD_RELOC_GPREL32
-			  || reloc_type[1] == BFD_RELOC_64
-			  || reloc_type[1] == BFD_RELOC_CTOR
-			  || reloc_type[1] == BFD_RELOC_MIPS_SUB
-			  || reloc_type[1] == BFD_RELOC_MIPS_HIGHEST
-			  || reloc_type[1] == BFD_RELOC_MIPS_HIGHER
-			  || reloc_type[1] == BFD_RELOC_MIPS_SCN_DISP
-			  || reloc_type[1] == BFD_RELOC_MIPS_REL16
-			  || reloc_type[1] == BFD_RELOC_MIPS_RELGOT))
-		    fixp[1]->fx_no_overflow = 1;
-
-		  if (reloc_type[2] != BFD_RELOC_UNUSED)
-		    {
-		      address_expr->X_op = O_absent;
-		      address_expr->X_add_symbol = 0;
-		      address_expr->X_add_number = 0;
-
-		      howto = bfd_reloc_type_lookup (stdoutput, reloc_type[2]);
-		      fixp[2] = fix_new_exp (frag_now,
-					     f - frag_now->fr_literal,
-					     bfd_get_reloc_size(howto),
-					     address_expr, FALSE,
-					     reloc_type[2]);
-
-		      /* These relocations can have an addend that won't fit in
-			 4 octets for 64bit assembly.  */
-		      if (HAVE_64BIT_GPRS
-			  && ! howto->partial_inplace
-			  && (reloc_type[2] == BFD_RELOC_16
-			      || reloc_type[2] == BFD_RELOC_32
-			      || reloc_type[2] == BFD_RELOC_MIPS_JMP
-			      || reloc_type[2] == BFD_RELOC_HI16_S
-			      || reloc_type[2] == BFD_RELOC_LO16
-			      || reloc_type[2] == BFD_RELOC_GPREL16
-			      || reloc_type[2] == BFD_RELOC_MIPS_LITERAL
-			      || reloc_type[2] == BFD_RELOC_GPREL32
-			      || reloc_type[2] == BFD_RELOC_64
-			      || reloc_type[2] == BFD_RELOC_CTOR
-			      || reloc_type[2] == BFD_RELOC_MIPS_SUB
-			      || reloc_type[2] == BFD_RELOC_MIPS_HIGHEST
-			      || reloc_type[2] == BFD_RELOC_MIPS_HIGHER
-			      || reloc_type[2] == BFD_RELOC_MIPS_SCN_DISP
-			      || reloc_type[2] == BFD_RELOC_MIPS_REL16
-			      || reloc_type[2] == BFD_RELOC_MIPS_RELGOT))
-			fixp[2]->fx_no_overflow = 1;
-		    }
-		}
+		    fixp[i] = fix_new_exp (frag_now, fixp[0]->fx_where,
+					   fixp[0]->fx_size, address_expr,
+					   FALSE, reloc_type[i]);
+		  }
 	    }
 	}
     }
