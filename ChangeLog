@@ -1,5 +1,7 @@
 Wed Oct  9 06:06:46 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* test-build.mk (HOLES): Add "xargs" for gdb.
+
 	* configure: Avoid hpux10.20 sed bug.
 
 Tue Oct  8 08:32:48 1996  Stu Grossman  (grossman@critters.cygnus.com)
