@@ -1,3 +1,8 @@
+Mon Aug 17 18:29:58 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* m68k-pinsn.c:  Minor fix in style of output (don't use
+	range to indicate floating point control registers).
+
 Sat Aug 15 02:58:03 1992  John Gilmore  (gnu@cygnus.com)
 
 	* m68k-pinsn.c:  Surround extended support with #ifdef HAVE_68881.

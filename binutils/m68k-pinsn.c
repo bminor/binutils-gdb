@@ -46,7 +46,7 @@ extern void print_address();
 
 extern char *reg_names[];
 char *fpcr_names[] = { "", "fpiar", "fpsr", "fpiar/fpsr", "fpcr",
-		     "fpiar/fpcr", "fpsr/fpcr", "fpiar-fpcr"};
+		     "fpiar/fpcr", "fpsr/fpcr", "fpiar/fpsr/fpcr"};
 
 char *reg_names[] = {"d0", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "a0", "a1", "a2", "a3", "a4", "a5", "fp", "sp", "ps", "pc"};
 static unsigned char *print_insn_arg ();

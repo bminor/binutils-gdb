@@ -1,3 +1,8 @@
+Mon Aug 17 18:33:41 1992  Per Bothner  (bothner@rtl.cygnus.com)
+
+	* m68k-pinsn.c:  Minor fix in style of output (don't use
+	range to indicate floating point control registers).
+
 Tue Aug 11 23:42:21 1992  Per Bothner  (bothner@cygnus.com)
 
 	* ar.c (main):  Don't *always* set the verbose flag!

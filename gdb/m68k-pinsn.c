@@ -46,7 +46,7 @@ print_insn_arg PARAMS ((char *, unsigned char *, unsigned char *, CORE_ADDR,
 
 const char * const fpcr_names[] = {
   "", "fpiar", "fpsr", "fpiar/fpsr", "fpcr",
-  "fpiar/fpcr", "fpsr/fpcr", "fpiar-fpcr"};
+  "fpiar/fpcr", "fpsr/fpcr", "fpiar/fpsr/fpcr"};
 
 /* Define accessors for 68K's 1, 2, and 4-byte signed quantities.
    The _SHIFT values move the quantity to the high order end of an
