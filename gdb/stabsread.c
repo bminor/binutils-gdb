@@ -290,8 +290,7 @@ os9k_init_type_vector (struct type **tv)
    or for associating a new type with the pair.  */
 
 struct type **
-dbx_lookup_type (typenums)
-     int typenums[2];
+dbx_lookup_type (int typenums[2])
 {
   register int filenum = typenums[0];
   register int index = typenums[1];
@@ -398,9 +397,7 @@ Invalid symbol data: type number (%d,%d) out of range at symtab pos %d.",
    put into the type vector, and so may not be referred to by number. */
 
 static struct type *
-dbx_alloc_type (typenums, objfile)
-     int typenums[2];
-     struct objfile *objfile;
+dbx_alloc_type (int typenums[2], struct objfile *objfile)
 {
   register struct type **type_addr;
 
@@ -4270,10 +4267,7 @@ read_enum_type (register char **pp, register struct type *type,
    FIXME.  */
 
 static struct type *
-read_sun_builtin_type (pp, typenums, objfile)
-     char **pp;
-     int typenums[2];
-     struct objfile *objfile;
+read_sun_builtin_type (char **pp, int typenums[2], struct objfile *objfile)
 {
   int type_bits;
   int nbits;
@@ -4345,10 +4339,7 @@ read_sun_builtin_type (pp, typenums, objfile)
 }
 
 static struct type *
-read_sun_floating_type (pp, typenums, objfile)
-     char **pp;
-     int typenums[2];
-     struct objfile *objfile;
+read_sun_floating_type (char **pp, int typenums[2], struct objfile *objfile)
 {
   int nbits;
   int details;
@@ -4489,10 +4480,7 @@ read_huge_number (char **pp, int end, int *bits)
 }
 
 static struct type *
-read_range_type (pp, typenums, objfile)
-     char **pp;
-     int typenums[2];
-     struct objfile *objfile;
+read_range_type (char **pp, int typenums[2], struct objfile *objfile)
 {
   char *orig_pp = *pp;
   int rangenums[2];

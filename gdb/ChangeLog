@@ -1,3 +1,9 @@
+2000-10-24  Kevin Buettner  <kevinb@redhat.com>
+
+	* stabsread.c (dbx_lookup_type, dbx_alloc_type,
+	read_sun_builtin_type, read_sun_floating_type,
+	read_range_type): Protoize.
+
 Wed Oct 25 01:19:26 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* solib.c (open_symbol_file_object): Update function signature to
