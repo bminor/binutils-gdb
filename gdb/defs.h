@@ -1025,51 +1025,6 @@ extern char *alloca ();
 #define TARGET_CHAR_BIT 8
 #endif
 
-/* Number of bits in a short or unsigned short for the target machine. */
-#if !defined (TARGET_SHORT_BIT)
-#define TARGET_SHORT_BIT (2 * TARGET_CHAR_BIT)
-#endif
-
-/* Number of bits in an int or unsigned int for the target machine. */
-#if !defined (TARGET_INT_BIT)
-#define TARGET_INT_BIT (4 * TARGET_CHAR_BIT)
-#endif
-
-/* Number of bits in a long or unsigned long for the target machine. */
-#if !defined (TARGET_LONG_BIT)
-#define TARGET_LONG_BIT (4 * TARGET_CHAR_BIT)
-#endif
-
-/* Number of bits in a long long or unsigned long long for the target machine. */
-#if !defined (TARGET_LONG_LONG_BIT)
-#define TARGET_LONG_LONG_BIT (2 * TARGET_LONG_BIT)
-#endif
-
-/* Number of bits in a float for the target machine. */
-#if !defined (TARGET_FLOAT_BIT)
-#define TARGET_FLOAT_BIT (4 * TARGET_CHAR_BIT)
-#endif
-
-/* Number of bits in a double for the target machine. */
-#if !defined (TARGET_DOUBLE_BIT)
-#define TARGET_DOUBLE_BIT (8 * TARGET_CHAR_BIT)
-#endif
-
-/* Number of bits in a long double for the target machine.  */
-#if !defined (TARGET_LONG_DOUBLE_BIT)
-#define TARGET_LONG_DOUBLE_BIT (2 * TARGET_DOUBLE_BIT)
-#endif
-
-/* Number of bits in a pointer for the target machine */
-#if !defined (TARGET_PTR_BIT)
-#define TARGET_PTR_BIT TARGET_INT_BIT
-#endif
-
-/* Number of bits in a BFD_VMA for the target object file format. */
-#if !defined (TARGET_BFD_VMA_BIT)
-#define TARGET_BFD_VMA_BIT TARGET_PTR_BIT
-#endif
-
 /* If we picked up a copy of CHAR_BIT from a configuration file
    (which may get it by including <limits.h>) then use it to set
    the number of bits in a host char.  If not, use the same size

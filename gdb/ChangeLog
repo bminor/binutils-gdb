@@ -1,3 +1,13 @@
+Thu Aug 10 18:58:04 2000  Andrew Cagney  <cagney@makita.cygnus.com>
+
+	* defs.h (TARGET_BFD_VMA_BIT, TARGET_SHORT_BIT, TARGET_INT_BIT,
+ 	TARGET_LONG_BIT, TARGET_LONG_LONG_BIT, TARGET_FLOAT_BIT,
+ 	TARGET_DOUBLE_BIT, TARGET_LONG_DOUBLE_BIT, TARGET_PTR_BIT): Move
+ 	non- multi-arch handling from here.
+	* gdbarch.sh: To here. Update printf gdbarch_update_p.  Make more
+ 	portable.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	
 2000-08-10  Andrew Cagney  <cagney@ops1.cygnus.com>
 
 	* partial-stab.h (DBX_READ): Eliminate redundant check for null

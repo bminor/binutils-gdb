@@ -128,8 +128,6 @@ struct gdbarch
 
      */
 
-  int bfd_vma_bit;
-  int ptr_bit;
   int short_bit;
   int int_bit;
   int long_bit;
@@ -137,6 +135,8 @@ struct gdbarch
   int float_bit;
   int double_bit;
   int long_double_bit;
+  int ptr_bit;
+  int bfd_vma_bit;
   int ieee_float;
   gdbarch_read_pc_ftype *read_pc;
   gdbarch_write_pc_ftype *write_pc;
@@ -249,8 +249,6 @@ struct gdbarch startup_gdbarch =
   /*per-architecture data-pointers and swap regions */
   0, NULL, NULL,
   /* Multi-arch values */
-  8 * sizeof (void*),
-  8 * sizeof (void*),
   8 * sizeof (short),
   8 * sizeof (int),
   8 * sizeof (long),
@@ -258,6 +256,8 @@ struct gdbarch startup_gdbarch =
   8 * sizeof (float),
   8 * sizeof (double),
   8 * sizeof (long double),
+  8 * sizeof (void*),
+  8 * sizeof (void*),
   0,
   0,
   0,
@@ -358,7 +358,7 @@ struct gdbarch startup_gdbarch =
 struct gdbarch *current_gdbarch = &startup_gdbarch;
 
 
-/* Create a new ``struct gdbarch'' based in information provided by
+/* Create a new ``struct gdbarch'' based on information provided by
    ``struct gdbarch_info''. */
 
 struct gdbarch *
@@ -374,6 +374,14 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->byte_order = info->byte_order;
 
   /* Force the explicit initialization of these. */
+  gdbarch->short_bit = 2*TARGET_CHAR_BIT;
+  gdbarch->int_bit = 4*TARGET_CHAR_BIT;
+  gdbarch->long_bit = 4*TARGET_CHAR_BIT;
+  gdbarch->long_long_bit = 2*TARGET_LONG_BIT;
+  gdbarch->float_bit = 4*TARGET_CHAR_BIT;
+  gdbarch->double_bit = 8*TARGET_CHAR_BIT;
+  gdbarch->long_double_bit = 2*TARGET_DOUBLE_BIT;
+  gdbarch->ptr_bit = TARGET_INT_BIT;
   gdbarch->bfd_vma_bit = TARGET_ARCHITECTURE->bits_per_address;
   gdbarch->num_regs = -1;
   gdbarch->sp_regnum = -1;
@@ -447,31 +455,15 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if (gdbarch->bfd_arch_info == NULL)
     internal_error ("verify_gdbarch: bfd_arch_info unset");
   /* Check those that need to be defined for the given multi-arch level. */
+  /* Skip verify of short_bit, invalid_p == 0 */
+  /* Skip verify of int_bit, invalid_p == 0 */
+  /* Skip verify of long_bit, invalid_p == 0 */
+  /* Skip verify of long_long_bit, invalid_p == 0 */
+  /* Skip verify of float_bit, invalid_p == 0 */
+  /* Skip verify of double_bit, invalid_p == 0 */
+  /* Skip verify of long_double_bit, invalid_p == 0 */
+  /* Skip verify of ptr_bit, invalid_p == 0 */
   /* Skip verify of bfd_vma_bit, invalid_p == 0 */
-  if ((GDB_MULTI_ARCH >= 1)
-      && (gdbarch->ptr_bit == 0))
-    internal_error ("gdbarch: verify_gdbarch: ptr_bit invalid");
-  if ((GDB_MULTI_ARCH >= 1)
-      && (gdbarch->short_bit == 0))
-    internal_error ("gdbarch: verify_gdbarch: short_bit invalid");
-  if ((GDB_MULTI_ARCH >= 1)
-      && (gdbarch->int_bit == 0))
-    internal_error ("gdbarch: verify_gdbarch: int_bit invalid");
-  if ((GDB_MULTI_ARCH >= 1)
-      && (gdbarch->long_bit == 0))
-    internal_error ("gdbarch: verify_gdbarch: long_bit invalid");
-  if ((GDB_MULTI_ARCH >= 1)
-      && (gdbarch->long_long_bit == 0))
-    internal_error ("gdbarch: verify_gdbarch: long_long_bit invalid");
-  if ((GDB_MULTI_ARCH >= 1)
-      && (gdbarch->float_bit == 0))
-    internal_error ("gdbarch: verify_gdbarch: float_bit invalid");
-  if ((GDB_MULTI_ARCH >= 1)
-      && (gdbarch->double_bit == 0))
-    internal_error ("gdbarch: verify_gdbarch: double_bit invalid");
-  if ((GDB_MULTI_ARCH >= 1)
-      && (gdbarch->long_double_bit == 0))
-    internal_error ("gdbarch: verify_gdbarch: long_double_bit invalid");
   /* Skip verify of ieee_float, invalid_p == 0 */
   if ((GDB_MULTI_ARCH >= 1)
       && (gdbarch->read_pc == 0))
@@ -702,16 +694,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: TARGET_BYTE_ORDER # %s\n",
                       XSTRING (TARGET_BYTE_ORDER));
 #endif
-#ifdef TARGET_BFD_VMA_BIT
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_BFD_VMA_BIT # %s\n",
-                      XSTRING (TARGET_BFD_VMA_BIT));
-#endif
-#ifdef TARGET_PTR_BIT
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_PTR_BIT # %s\n",
-                      XSTRING (TARGET_PTR_BIT));
-#endif
 #ifdef TARGET_SHORT_BIT
   fprintf_unfiltered (file,
                       "gdbarch_dump: TARGET_SHORT_BIT # %s\n",
@@ -746,6 +728,16 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: TARGET_LONG_DOUBLE_BIT # %s\n",
                       XSTRING (TARGET_LONG_DOUBLE_BIT));
+#endif
+#ifdef TARGET_PTR_BIT
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: TARGET_PTR_BIT # %s\n",
+                      XSTRING (TARGET_PTR_BIT));
+#endif
+#ifdef TARGET_BFD_VMA_BIT
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: TARGET_BFD_VMA_BIT # %s\n",
+                      XSTRING (TARGET_BFD_VMA_BIT));
 #endif
 #ifdef IEEE_FLOAT
   fprintf_unfiltered (file,
@@ -1309,16 +1301,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: TARGET_BYTE_ORDER = %ld\n",
                       (long) TARGET_BYTE_ORDER);
 #endif
-#ifdef TARGET_BFD_VMA_BIT
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_BFD_VMA_BIT = %ld\n",
-                      (long) TARGET_BFD_VMA_BIT);
-#endif
-#ifdef TARGET_PTR_BIT
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: TARGET_PTR_BIT = %ld\n",
-                      (long) TARGET_PTR_BIT);
-#endif
 #ifdef TARGET_SHORT_BIT
   fprintf_unfiltered (file,
                       "gdbarch_dump: TARGET_SHORT_BIT = %ld\n",
@@ -1353,6 +1335,16 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: TARGET_LONG_DOUBLE_BIT = %ld\n",
                       (long) TARGET_LONG_DOUBLE_BIT);
+#endif
+#ifdef TARGET_PTR_BIT
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: TARGET_PTR_BIT = %ld\n",
+                      (long) TARGET_PTR_BIT);
+#endif
+#ifdef TARGET_BFD_VMA_BIT
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: TARGET_BFD_VMA_BIT = %ld\n",
+                      (long) TARGET_BFD_VMA_BIT);
 #endif
 #ifdef IEEE_FLOAT
   fprintf_unfiltered (file,
@@ -1979,43 +1971,9 @@ gdbarch_byte_order (struct gdbarch *gdbarch)
 }
 
 int
-gdbarch_bfd_vma_bit (struct gdbarch *gdbarch)
-{
-  /* Skip verify of bfd_vma_bit, invalid_p == 0 */
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_bfd_vma_bit called\n");
-  return gdbarch->bfd_vma_bit;
-}
-
-void
-set_gdbarch_bfd_vma_bit (struct gdbarch *gdbarch,
-                         int bfd_vma_bit)
-{
-  gdbarch->bfd_vma_bit = bfd_vma_bit;
-}
-
-int
-gdbarch_ptr_bit (struct gdbarch *gdbarch)
-{
-  if (gdbarch->ptr_bit == 0)
-    internal_error ("gdbarch: gdbarch_ptr_bit invalid");
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_ptr_bit called\n");
-  return gdbarch->ptr_bit;
-}
-
-void
-set_gdbarch_ptr_bit (struct gdbarch *gdbarch,
-                     int ptr_bit)
-{
-  gdbarch->ptr_bit = ptr_bit;
-}
-
-int
 gdbarch_short_bit (struct gdbarch *gdbarch)
 {
-  if (gdbarch->short_bit == 0)
-    internal_error ("gdbarch: gdbarch_short_bit invalid");
+  /* Skip verify of short_bit, invalid_p == 0 */
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_short_bit called\n");
   return gdbarch->short_bit;
@@ -2031,8 +1989,7 @@ set_gdbarch_short_bit (struct gdbarch *gdbarch,
 int
 gdbarch_int_bit (struct gdbarch *gdbarch)
 {
-  if (gdbarch->int_bit == 0)
-    internal_error ("gdbarch: gdbarch_int_bit invalid");
+  /* Skip verify of int_bit, invalid_p == 0 */
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_int_bit called\n");
   return gdbarch->int_bit;
@@ -2048,8 +2005,7 @@ set_gdbarch_int_bit (struct gdbarch *gdbarch,
 int
 gdbarch_long_bit (struct gdbarch *gdbarch)
 {
-  if (gdbarch->long_bit == 0)
-    internal_error ("gdbarch: gdbarch_long_bit invalid");
+  /* Skip verify of long_bit, invalid_p == 0 */
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_long_bit called\n");
   return gdbarch->long_bit;
@@ -2065,8 +2021,7 @@ set_gdbarch_long_bit (struct gdbarch *gdbarch,
 int
 gdbarch_long_long_bit (struct gdbarch *gdbarch)
 {
-  if (gdbarch->long_long_bit == 0)
-    internal_error ("gdbarch: gdbarch_long_long_bit invalid");
+  /* Skip verify of long_long_bit, invalid_p == 0 */
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_long_long_bit called\n");
   return gdbarch->long_long_bit;
@@ -2082,8 +2037,7 @@ set_gdbarch_long_long_bit (struct gdbarch *gdbarch,
 int
 gdbarch_float_bit (struct gdbarch *gdbarch)
 {
-  if (gdbarch->float_bit == 0)
-    internal_error ("gdbarch: gdbarch_float_bit invalid");
+  /* Skip verify of float_bit, invalid_p == 0 */
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_float_bit called\n");
   return gdbarch->float_bit;
@@ -2099,8 +2053,7 @@ set_gdbarch_float_bit (struct gdbarch *gdbarch,
 int
 gdbarch_double_bit (struct gdbarch *gdbarch)
 {
-  if (gdbarch->double_bit == 0)
-    internal_error ("gdbarch: gdbarch_double_bit invalid");
+  /* Skip verify of double_bit, invalid_p == 0 */
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_double_bit called\n");
   return gdbarch->double_bit;
@@ -2116,8 +2069,7 @@ set_gdbarch_double_bit (struct gdbarch *gdbarch,
 int
 gdbarch_long_double_bit (struct gdbarch *gdbarch)
 {
-  if (gdbarch->long_double_bit == 0)
-    internal_error ("gdbarch: gdbarch_long_double_bit invalid");
+  /* Skip verify of long_double_bit, invalid_p == 0 */
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_long_double_bit called\n");
   return gdbarch->long_double_bit;
@@ -2128,6 +2080,38 @@ set_gdbarch_long_double_bit (struct gdbarch *gdbarch,
                              int long_double_bit)
 {
   gdbarch->long_double_bit = long_double_bit;
+}
+
+int
+gdbarch_ptr_bit (struct gdbarch *gdbarch)
+{
+  /* Skip verify of ptr_bit, invalid_p == 0 */
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_ptr_bit called\n");
+  return gdbarch->ptr_bit;
+}
+
+void
+set_gdbarch_ptr_bit (struct gdbarch *gdbarch,
+                     int ptr_bit)
+{
+  gdbarch->ptr_bit = ptr_bit;
+}
+
+int
+gdbarch_bfd_vma_bit (struct gdbarch *gdbarch)
+{
+  /* Skip verify of bfd_vma_bit, invalid_p == 0 */
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_bfd_vma_bit called\n");
+  return gdbarch->bfd_vma_bit;
+}
+
+void
+set_gdbarch_bfd_vma_bit (struct gdbarch *gdbarch,
+                         int bfd_vma_bit)
+{
+  gdbarch->bfd_vma_bit = bfd_vma_bit;
 }
 
 int

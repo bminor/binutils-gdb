@@ -1,4 +1,4 @@
-#!/usr/local/bin/bash -u
+#!/bin/sh -u
 
 # Architecture commands for GDB, the GNU debugger.
 # Copyright 1998-2000 Free Software Foundation, Inc.
@@ -22,7 +22,7 @@
 compare_new ()
 {
     file=$1
-    if ! test -r ${file}
+    if test ! -r ${file}
     then
 	echo "${file} missing? cp new-${file} ${file}" 1>&2
     elif diff -c ${file} new-${file}
@@ -300,17 +300,30 @@ function_list ()
 i:2:TARGET_ARCHITECTURE:const struct bfd_arch_info *:bfd_arch_info::::&bfd_default_arch_struct::::%s:TARGET_ARCHITECTURE->printable_name:TARGET_ARCHITECTURE != NULL
 #
 i:2:TARGET_BYTE_ORDER:int:byte_order::::BIG_ENDIAN
+# Number of bits in a char or unsigned char for the target machine.
+# Just like CHAR_BIT in <limits.h> but describes the target machine.
+# v::TARGET_CHAR_BIT:int:char_bit::::8 * sizeof (char):8::0:
 #
-v:1:TARGET_BFD_VMA_BIT:int:bfd_vma_bit::::8 * sizeof (void*):TARGET_ARCHITECTURE->bits_per_address::0
-v:1:TARGET_PTR_BIT:int:ptr_bit::::8 * sizeof (void*):0
-#v:1:TARGET_CHAR_BIT:int:char_bit::::8 * sizeof (char):0
-v:1:TARGET_SHORT_BIT:int:short_bit::::8 * sizeof (short):0
-v:1:TARGET_INT_BIT:int:int_bit::::8 * sizeof (int):0
-v:1:TARGET_LONG_BIT:int:long_bit::::8 * sizeof (long):0
-v:1:TARGET_LONG_LONG_BIT:int:long_long_bit::::8 * sizeof (LONGEST):0
-v:1:TARGET_FLOAT_BIT:int:float_bit::::8 * sizeof (float):0
-v:1:TARGET_DOUBLE_BIT:int:double_bit::::8 * sizeof (double):0
-v:1:TARGET_LONG_DOUBLE_BIT:int:long_double_bit::::8 * sizeof (long double):0
+# Number of bits in a short or unsigned short for the target machine.
+v::TARGET_SHORT_BIT:int:short_bit::::8 * sizeof (short):2*TARGET_CHAR_BIT::0
+# Number of bits in an int or unsigned int for the target machine.
+v::TARGET_INT_BIT:int:int_bit::::8 * sizeof (int):4*TARGET_CHAR_BIT::0
+# Number of bits in a long or unsigned long for the target machine.
+v::TARGET_LONG_BIT:int:long_bit::::8 * sizeof (long):4*TARGET_CHAR_BIT::0
+# Number of bits in a long long or unsigned long long for the target
+# machine.
+v::TARGET_LONG_LONG_BIT:int:long_long_bit::::8 * sizeof (LONGEST):2*TARGET_LONG_BIT::0
+# Number of bits in a float for the target machine.
+v::TARGET_FLOAT_BIT:int:float_bit::::8 * sizeof (float):4*TARGET_CHAR_BIT::0
+# Number of bits in a double for the target machine.
+v::TARGET_DOUBLE_BIT:int:double_bit::::8 * sizeof (double):8*TARGET_CHAR_BIT::0
+# Number of bits in a long double for the target machine.
+v::TARGET_LONG_DOUBLE_BIT:int:long_double_bit::::8 * sizeof (long double):2*TARGET_DOUBLE_BIT::0
+# Number of bits in a pointer for the target machine
+v::TARGET_PTR_BIT:int:ptr_bit::::8 * sizeof (void*):TARGET_INT_BIT::0
+# Number of bits in a BFD_VMA for the target object file format.
+v::TARGET_BFD_VMA_BIT:int:bfd_vma_bit::::8 * sizeof (void*):TARGET_ARCHITECTURE->bits_per_address::0
+#
 v:1:IEEE_FLOAT:int:ieee_float::::0:0::0:::
 #
 f:1:TARGET_READ_PC:CORE_ADDR:read_pc:int pid:pid::0:0
@@ -319,6 +332,7 @@ f:1:TARGET_READ_FP:CORE_ADDR:read_fp:void:::0:0
 f:1:TARGET_WRITE_FP:void:write_fp:CORE_ADDR val:val::0:0
 f:1:TARGET_READ_SP:CORE_ADDR:read_sp:void:::0:0
 f:1:TARGET_WRITE_SP:void:write_sp:CORE_ADDR val:val::0:0
+#
 #
 v:2:NUM_REGS:int:num_regs::::0:-1
 # This macro gives the number of pseudo-registers that live in the
@@ -449,9 +463,9 @@ ${class} ${macro}(${actual})
     staticdefault=${staticdefault}
     predefault=${predefault}
     postdefault=${postdefault}
-    fallbackdefault=${fallbackdefault}
+    #fallbackdefault=${fallbackdefault}
     invalid_p=${invalid_p}
-    valid_p=${valid_p}
+    #valid_p=${valid_p}
     fmt=${fmt}
     print=${print}
     print_p=${print_p}
@@ -459,7 +473,7 @@ ${class} ${macro}(${actual})
 EOF
     if class_is_predicate_p && fallback_default_p
     then
-	echo "Error: predicate function can not have a non- multi-arch default" 1>&2
+	echo "Error: predicate function ${macro} can not have a non- multi-arch default" 1>&2
 	kill $$
 	exit 1
     fi
@@ -1134,7 +1148,7 @@ EOF
 echo ""
 echo ""
 cat <<EOF
-/* Create a new \`\`struct gdbarch'' based in information provided by
+/* Create a new \`\`struct gdbarch'' based on information provided by
    \`\`struct gdbarch_info''. */
 EOF
 echo ""
@@ -1273,7 +1287,7 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
 EOF
 function_list | while do_read
 do
-    if [ "${returntype}" == "void" ]
+    if [ "${returntype}" = "void" ]
     then
 	echo "#if defined (${macro}) && GDB_MULTI_ARCH"
 	echo "  /* Macro might contain \`[{}]' when not multi-arch */"

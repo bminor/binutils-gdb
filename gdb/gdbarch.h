@@ -79,28 +79,16 @@ extern int gdbarch_byte_order (struct gdbarch *gdbarch);
 
 /* The following are initialized by the target dependant code. */
 
+/* Number of bits in a char or unsigned char for the target machine.
+   Just like CHAR_BIT in <limits.h> but describes the target machine.
+   v::TARGET_CHAR_BIT:int:char_bit::::8 * sizeof (char):8::0:
+  
+   Number of bits in a short or unsigned short for the target machine. */
+
 /* Default (value) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (TARGET_BFD_VMA_BIT)
-#define TARGET_BFD_VMA_BIT (TARGET_ARCHITECTURE->bits_per_address)
+#if (!GDB_MULTI_ARCH) && !defined (TARGET_SHORT_BIT)
+#define TARGET_SHORT_BIT (2*TARGET_CHAR_BIT)
 #endif
-
-extern int gdbarch_bfd_vma_bit (struct gdbarch *gdbarch);
-extern void set_gdbarch_bfd_vma_bit (struct gdbarch *gdbarch, int bfd_vma_bit);
-#if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_BFD_VMA_BIT)
-#define TARGET_BFD_VMA_BIT (gdbarch_bfd_vma_bit (current_gdbarch))
-#endif
-#endif
-
-extern int gdbarch_ptr_bit (struct gdbarch *gdbarch);
-extern void set_gdbarch_ptr_bit (struct gdbarch *gdbarch, int ptr_bit);
-#if GDB_MULTI_ARCH
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_PTR_BIT)
-#define TARGET_PTR_BIT (gdbarch_ptr_bit (current_gdbarch))
-#endif
-#endif
-
-/*v:1:TARGET_CHAR_BIT:int:char_bit::::8 * sizeof (char):0 */
 
 extern int gdbarch_short_bit (struct gdbarch *gdbarch);
 extern void set_gdbarch_short_bit (struct gdbarch *gdbarch, int short_bit);
@@ -108,6 +96,13 @@ extern void set_gdbarch_short_bit (struct gdbarch *gdbarch, int short_bit);
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_SHORT_BIT)
 #define TARGET_SHORT_BIT (gdbarch_short_bit (current_gdbarch))
 #endif
+#endif
+
+/* Number of bits in an int or unsigned int for the target machine. */
+
+/* Default (value) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (TARGET_INT_BIT)
+#define TARGET_INT_BIT (4*TARGET_CHAR_BIT)
 #endif
 
 extern int gdbarch_int_bit (struct gdbarch *gdbarch);
@@ -118,12 +113,27 @@ extern void set_gdbarch_int_bit (struct gdbarch *gdbarch, int int_bit);
 #endif
 #endif
 
+/* Number of bits in a long or unsigned long for the target machine. */
+
+/* Default (value) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (TARGET_LONG_BIT)
+#define TARGET_LONG_BIT (4*TARGET_CHAR_BIT)
+#endif
+
 extern int gdbarch_long_bit (struct gdbarch *gdbarch);
 extern void set_gdbarch_long_bit (struct gdbarch *gdbarch, int long_bit);
 #if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_LONG_BIT)
 #define TARGET_LONG_BIT (gdbarch_long_bit (current_gdbarch))
 #endif
+#endif
+
+/* Number of bits in a long long or unsigned long long for the target
+   machine. */
+
+/* Default (value) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (TARGET_LONG_LONG_BIT)
+#define TARGET_LONG_LONG_BIT (2*TARGET_LONG_BIT)
 #endif
 
 extern int gdbarch_long_long_bit (struct gdbarch *gdbarch);
@@ -134,12 +144,26 @@ extern void set_gdbarch_long_long_bit (struct gdbarch *gdbarch, int long_long_bi
 #endif
 #endif
 
+/* Number of bits in a float for the target machine. */
+
+/* Default (value) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (TARGET_FLOAT_BIT)
+#define TARGET_FLOAT_BIT (4*TARGET_CHAR_BIT)
+#endif
+
 extern int gdbarch_float_bit (struct gdbarch *gdbarch);
 extern void set_gdbarch_float_bit (struct gdbarch *gdbarch, int float_bit);
 #if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_FLOAT_BIT)
 #define TARGET_FLOAT_BIT (gdbarch_float_bit (current_gdbarch))
 #endif
+#endif
+
+/* Number of bits in a double for the target machine. */
+
+/* Default (value) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (TARGET_DOUBLE_BIT)
+#define TARGET_DOUBLE_BIT (8*TARGET_CHAR_BIT)
 #endif
 
 extern int gdbarch_double_bit (struct gdbarch *gdbarch);
@@ -150,11 +174,48 @@ extern void set_gdbarch_double_bit (struct gdbarch *gdbarch, int double_bit);
 #endif
 #endif
 
+/* Number of bits in a long double for the target machine. */
+
+/* Default (value) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (TARGET_LONG_DOUBLE_BIT)
+#define TARGET_LONG_DOUBLE_BIT (2*TARGET_DOUBLE_BIT)
+#endif
+
 extern int gdbarch_long_double_bit (struct gdbarch *gdbarch);
 extern void set_gdbarch_long_double_bit (struct gdbarch *gdbarch, int long_double_bit);
 #if GDB_MULTI_ARCH
 #if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_LONG_DOUBLE_BIT)
 #define TARGET_LONG_DOUBLE_BIT (gdbarch_long_double_bit (current_gdbarch))
+#endif
+#endif
+
+/* Number of bits in a pointer for the target machine */
+
+/* Default (value) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (TARGET_PTR_BIT)
+#define TARGET_PTR_BIT (TARGET_INT_BIT)
+#endif
+
+extern int gdbarch_ptr_bit (struct gdbarch *gdbarch);
+extern void set_gdbarch_ptr_bit (struct gdbarch *gdbarch, int ptr_bit);
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_PTR_BIT)
+#define TARGET_PTR_BIT (gdbarch_ptr_bit (current_gdbarch))
+#endif
+#endif
+
+/* Number of bits in a BFD_VMA for the target object file format. */
+
+/* Default (value) for non- multi-arch platforms. */
+#if (!GDB_MULTI_ARCH) && !defined (TARGET_BFD_VMA_BIT)
+#define TARGET_BFD_VMA_BIT (TARGET_ARCHITECTURE->bits_per_address)
+#endif
+
+extern int gdbarch_bfd_vma_bit (struct gdbarch *gdbarch);
+extern void set_gdbarch_bfd_vma_bit (struct gdbarch *gdbarch, int bfd_vma_bit);
+#if GDB_MULTI_ARCH
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (TARGET_BFD_VMA_BIT)
+#define TARGET_BFD_VMA_BIT (gdbarch_bfd_vma_bit (current_gdbarch))
 #endif
 #endif
 
