@@ -1555,10 +1555,12 @@ cat >>e${EMULATION_NAME}.c <<EOF
   fprintf (file, _("  -Bgroup\t\tSelects group name lookup rules for DSO\n"));
   fprintf (file, _("  --disable-new-dtags\tDisable new dynamic tags\n"));
   fprintf (file, _("  --enable-new-dtags\tEnable new dynamic tags\n"));
+  fprintf (file, _("  -z combreloc\t\tMerge dynamic relocs into one section and sort\n"));
   fprintf (file, _("  -z defs\t\tDisallows undefined symbols\n"));
   fprintf (file, _("  -z initfirst\t\tMark DSO to be initialized first at runtime\n"));
   fprintf (file, _("  -z interpose\t\tMark object to interpose all DSOs but executable\n"));
   fprintf (file, _("  -z loadfltr\t\tMark object requiring immediate process\n"));
+  fprintf (file, _("  -z nocombreloc\t\tDon't merge dynamic relocs into one section\n"));
   fprintf (file, _("  -z nodefaultlib\tMark object not to use default search paths\n"));
   fprintf (file, _("  -z nodelete\t\tMark DSO non-deletable at runtime\n"));
   fprintf (file, _("  -z nodlopen\t\tMark DSO not available to dlopen\n"));

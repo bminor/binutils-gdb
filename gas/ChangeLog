@@ -1,3 +1,7 @@
+2001-10-05  Jakub Jelinek  <jakub@redhat.com>
+
+	* doc/as.texinfo: Document M and S ELF section flags.
+
 2001-10-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* subsegs.c (subseg_text_p): Return 0 for absolute section.

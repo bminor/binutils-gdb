@@ -4896,7 +4896,7 @@ This is one of the ELF section stack manipulation directives.  The others are
 For ELF targets, the @code{.section} directive is used like this:
 
 @smallexample
-.section @var{name} [, "@var{flags}"[, @@@var{type}]]
+.section @var{name} [, "@var{flags}"[, @@@var{type}[, @@@var{entsize}]]]
 @end smallexample
 
 The optional @var{flags} argument is a quoted string which may contain any
@@ -4908,6 +4908,10 @@ section is allocatable
 section is writable
 @item x
 section is executable
+@item M
+section is mergeable
+@item S
+section contains zero terminated strings
 @end table
 
 The optional @var{type} argument may contain one of the following constants:
@@ -4917,6 +4921,13 @@ section contains data
 @item @@nobits
 section does not contain data (i.e., section only occupies space)
 @end table
+
+If @var{flags} contains @code{M} flag, @var{type} argument must be specified
+as well as @var{entsize} argument. Sections with @code{M} flag but not
+@code{S} flag must contain fixed size constants, each @var{entsize} octets
+long. Sections with both @code{M} and @code{S} must contain zero terminated
+strings where each character is @var{entsize} bytes long. The linker may remove
+duplicates within sections with the same name, same entity size and same flags. 
 
 If no flags are specified, the default flags depend upon the section name.  If
 the section name is not recognized, the default will be for the section to have
