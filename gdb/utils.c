@@ -2606,7 +2606,7 @@ SIGWINCH_HANDLER_BODY
 /* print routines to handle variable size regs, etc. */
 /* temporary storage using circular buffer */
 #define NUMCELLS 16
-#define CELLSIZE 32
+#define CELLSIZE 50
 static char *
 get_cell (void)
 {
@@ -2788,6 +2788,39 @@ phex_nz (ULONGEST l, int sizeof_l)
   return str;
 }
 
+/* Converts a LONGEST to a C-format hexadecimal literal and stores it
+   in a static string.  Returns a pointer to this string.  */
+char *
+hex_string (LONGEST num)
+{
+  char *result = get_cell ();
+  snprintf (result, CELLSIZE, "0x%s", phex_nz (num, sizeof (num)));
+  return result;
+}
+
+/* Converts a LONGEST number to a C-format hexadecimal literal and
+   stores it in a static string.  Returns a pointer to this string
+   that is valid until the next call.  The number is padded on the
+   left with 0s to at least WIDTH characters.  */
+char *
+hex_string_custom (LONGEST num, int width)
+{
+  char *result = get_cell ();
+  char *result_end = result + CELLSIZE - 1;
+  const char *hex = phex_nz (num, sizeof (num));
+  int hex_len = strlen (hex);
+
+  if (hex_len > width)
+    width = hex_len;
+  if (width + 2 >= CELLSIZE)
+    internal_error (__FILE__, __LINE__,
+		    "hex_string_custom: insufficient space to store result");
+
+  strcpy (result_end - width - 2, "0x");
+  memset (result_end - width, '0', width);
+  strcpy (result_end - hex_len, hex);
+  return result_end - width - 2;
+}
 
 /* Convert VAL to a numeral in the given radix.  For
  * radix 10, IS_SIGNED may be true, indicating a signed quantity;

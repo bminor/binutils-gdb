@@ -382,12 +382,6 @@ extern enum language set_language (enum language);
 extern char *longest_raw_hex_string (LONGEST);
 #endif
 
-/* Return a string that contains a number formatted as a hex string */
-
-extern char *hex_string (LONGEST);	        /* language.c */
-
-extern char *hex_string_custom (LONGEST, int);	/* language.c */
-
 /* Type predicates */
 
 extern int simple_type (struct type *);

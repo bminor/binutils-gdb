@@ -578,48 +578,6 @@ binop_result_type (struct value *v1, struct value *v2)
 }
 
 #endif /* 0 */
-
-
-/* This page contains functions that return format strings for
-   printf for printing out numbers in different formats */
-
-#define MAX_NUM_STRING_LEN 50
-
-/* Converts a LONGEST to a C-format hexadecimal literal and stores it in
-   a static string.  Returns a pointer to this string. */
-char *
-hex_string (LONGEST num)
-{
-  static char result[MAX_NUM_STRING_LEN];
-  sprintf (result, "0x%s", phex_nz (num, sizeof (num)));
-  return result;
-}
-
-/* Converts a LONGEST number to a C-format hexadecimal literal and stores 
-   it in a static string.  Returns a pointer to this string that is 
-   valid until the next call.  The number is padded on the left with 
-   0s to at least WIDTH characters. */
-
-char *
-hex_string_custom (LONGEST num, int width)
-{
-  static char result[MAX_NUM_STRING_LEN];
-  char *result_end = result + MAX_NUM_STRING_LEN - 1;
-  const char* hex = phex_nz (num, sizeof (num));
-  int hex_len = strlen (hex);
-
-  if (hex_len > width)
-    width = hex_len;
-  if (width + 2 >= MAX_NUM_STRING_LEN)
-    internal_error (__FILE__, __LINE__,
-		    "hex_string_custom: insufficient space to store result");
-
-  strcpy (result_end - width - 2, "0x");
-  memset (result_end - width, '0', width);
-  strcpy (result_end - hex_len, hex);
-  return result_end - width - 2;
-}
-
 #if 0
 /* This page contains functions that are used in type/range checking.
    They all return zero if the type/range check fails.

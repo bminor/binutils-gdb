@@ -1,3 +1,12 @@
+2004-09-11  Andrew Cagney  <cagney@gnu.org>
+
+	* language.c (hex_string, hex_string_custom): Move from here ...
+	* utils.c (hex_string, hex_string_custom): ... to here, rewrite.
+	(CELLSIZE): Increase to 50.
+	* language.h (hex_string, hex_string_custom): Move from here ...
+	* defs.h: ... to here.
+	* Makefile.in: Update all dependencies.
+	
 2004-09-11  Paul N. Hilfinger  <hilfinger@gnat.com>
 
         * language.c (local_hex_format_custom): Remove.
