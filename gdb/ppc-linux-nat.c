@@ -209,7 +209,7 @@ fetch_register (int tid, int regno)
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   /* This isn't really an address.  But ptrace thinks of it as one.  */
   CORE_ADDR regaddr = ppc_register_u_addr (regno);
-  int i;
+  int bytes_transferred;
   unsigned int offset;         /* Offset of registers within the u area. */
   char buf[MAX_REGISTER_SIZE];
 
@@ -236,19 +236,16 @@ fetch_register (int tid, int regno)
       return;
     }
 
-  /* If the current architecture has no floating-point registers, we
-     should never reach this point: ppc_register_u_addr should have
-     returned -1, and we should have caught that above.  */
-  gdb_assert (ppc_floating_point_unit_p (current_gdbarch));
-
   /* Read the raw register using PTRACE_XFER_TYPE sized chunks.  On a
      32-bit platform, 64-bit floating-point registers will require two
      transfers.  */
-  for (i = 0; i < DEPRECATED_REGISTER_RAW_SIZE (regno); i += sizeof (PTRACE_XFER_TYPE))
+  for (bytes_transferred = 0;
+       bytes_transferred < register_size (regno);
+       bytes_transferred += sizeof (PTRACE_XFER_TYPE))
     {
       errno = 0;
-      *(PTRACE_XFER_TYPE *) & buf[i] = ptrace (PT_READ_U, tid,
-					       (PTRACE_ARG3_TYPE) regaddr, 0);
+      *(PTRACE_XFER_TYPE *) & buf[bytes_transferred]
+        = ptrace (PT_READ_U, tid, (PTRACE_ARG3_TYPE) regaddr, 0);
       regaddr += sizeof (PTRACE_XFER_TYPE);
       if (errno != 0)
 	{
@@ -259,19 +256,25 @@ fetch_register (int tid, int regno)
 	}
     }
 
-  /* Now supply the register.  Be careful to map between ptrace's and
-     the current_regcache's idea of the current wordsize.  */
-  if ((regno >= tdep->ppc_fp0_regnum
-       && regno < tdep->ppc_fp0_regnum + ppc_num_fprs)
-      || gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_LITTLE)
-    /* FPs are always 64 bits.  Little endian values are always found
-       at the left-hand end of the register.  */
-    regcache_raw_supply (current_regcache, regno, buf);
-  else
-    /* Big endian register, need to fetch the right-hand end.  */
-    regcache_raw_supply (current_regcache, regno,
-                        (buf + sizeof (PTRACE_XFER_TYPE)
-                         - register_size (current_gdbarch, regno)));
+  /* Now supply the register.  Keep in mind that the regcache's idea
+     of the register's size may not be a multiple of sizeof
+     (PTRACE_XFER_TYPE).  */
+  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_LITTLE)
+    {
+      /* Little-endian values are always found at the left end of the
+         bytes transferred.  */
+      regcache_raw_supply (current_regcache, regno, buf);
+    }
+  else if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+    {
+      /* Big-endian values are found at the right end of the bytes
+         transferred.  */
+      size_t padding = (bytes_transferred
+                        - register_size (current_gdbarch, regno));
+      regcache_raw_supply (current_regcache, regno, buf + padding);
+    }
+  else 
+    gdb_assert (0);
 }
 
 static void
@@ -407,6 +410,7 @@ store_register (int tid, int regno)
   /* This isn't really an address.  But ptrace thinks of it as one.  */
   CORE_ADDR regaddr = ppc_register_u_addr (regno);
   int i;
+  size_t bytes_to_transfer;
   char buf[MAX_REGISTER_SIZE];
 
   if (altivec_register_p (regno))
@@ -418,28 +422,26 @@ store_register (int tid, int regno)
   if (regaddr == -1)
     return;
 
-  /* If the current architecture has no floating-point registers, we
-     should never reach this point: ppc_register_u_addr should have
-     returned -1, and we should have caught that above.  */
-  gdb_assert (ppc_floating_point_unit_p (current_gdbarch));
-
-  /* First collect the register value from the regcache.  Be careful
-     to to convert the regcache's wordsize into ptrace's wordsize.  */
+  /* First collect the register.  Keep in mind that the regcache's
+     idea of the register's size may not be a multiple of sizeof
+     (PTRACE_XFER_TYPE).  */
   memset (buf, 0, sizeof buf);
-  if ((regno >= tdep->ppc_fp0_regnum
-       && regno < tdep->ppc_fp0_regnum + ppc_num_fprs)
-      || TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
-    /* Floats are always 64-bit.  Little endian registers are always
-       at the left-hand end of the register cache.  */
-    regcache_raw_collect (current_regcache, regno, buf);
-  else
-    /* Big-endian registers belong at the right-hand end of the
-       buffer.  */
-    regcache_raw_collect (current_regcache, regno,
-                         (buf + sizeof (PTRACE_XFER_TYPE)
-                          - register_size (current_gdbarch, regno)));
+  bytes_to_transfer = align_up (register_size (current_gdbarch, regno),
+                                sizeof (PTRACE_XFER_TYPE));
+  if (TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
+    {
+      /* Little-endian values always sit at the left end of the buffer.  */
+      regcache_raw_collect (current_regcache, regno, buf);
+    }
+  else if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
+    {
+      /* Big-endian values sit at the right end of the buffer.  */
+      size_t padding = (bytes_to_transfer
+                        - register_size (current_gdbarch, regno));
+      regcache_raw_collect (current_regcache, regno, buf + padding);
+    }
 
-  for (i = 0; i < DEPRECATED_REGISTER_RAW_SIZE (regno); i += sizeof (PTRACE_XFER_TYPE))
+  for (i = 0; i < bytes_to_transfer; i += sizeof (PTRACE_XFER_TYPE))
     {
       errno = 0;
       ptrace (PT_WRITE_U, tid, (PTRACE_ARG3_TYPE) regaddr,

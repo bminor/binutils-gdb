@@ -1,3 +1,10 @@
+2004-06-04  Jim Blandy  <jimb@redhat.com>
+
+	* ppc-linux-nat.c (store_register, fetch_register): Remove
+	incorrect assertions.  Simplify and generalize handling of
+	transfers whose sizes are not multiples of, or less than, sizeof
+	(PTRACE_XFER_TYPE).
+
 2004-06-04  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* infrun.c (handle_inferior_event): Don't treat an invalid ptid
