@@ -410,56 +410,23 @@ static const char *_bfd_error_program_name;
 
 /* This is the default routine to handle BFD error messages.  */
 
-#ifdef ANSI_PROTOTYPES
-
 static void _bfd_default_error_handler PARAMS ((const char *s, ...));
 
 static void
-_bfd_default_error_handler (const char *s, ...)
+_bfd_default_error_handler VPARAMS ((const char *s, ...))
 {
-  va_list p;
-
   if (_bfd_error_program_name != NULL)
     fprintf (stderr, "%s: ", _bfd_error_program_name);
   else
     fprintf (stderr, "BFD: ");
 
-  va_start (p, s);
-
+  VA_OPEN (p, s);
+  VA_FIXEDARG (p, const char *, s);
   vfprintf (stderr, s, p);
-
-  va_end (p);
+  VA_CLOSE (p);
 
   fprintf (stderr, "\n");
 }
-
-#else /* ! defined (ANSI_PROTOTYPES) */
-
-static void _bfd_default_error_handler ();
-
-static void
-_bfd_default_error_handler (va_alist)
-     va_dcl
-{
-  va_list p;
-  const char *s;
-
-  if (_bfd_error_program_name != NULL)
-    fprintf (stderr, "%s: ", _bfd_error_program_name);
-  else
-    fprintf (stderr, "BFD: ");
-
-  va_start (p);
-
-  s = va_arg (p, const char *);
-  vfprintf (stderr, s, p);
-
-  va_end (p);
-
-  fprintf (stderr, "\n");
-}
-
-#endif /* ! defined (ANSI_PROTOTYPES) */
 
 /* This is a function pointer to the routine which should handle BFD
    error messages.  It is called when a BFD routine encounters an
@@ -560,7 +527,7 @@ bfd_archive_filename (abfd)
 	  if (curr)
 	    free (buf);
 	  curr = needed + (needed >> 1);
-	  buf = bfd_malloc (curr);
+	  buf = bfd_malloc ((bfd_size_type) curr);
 	  /* If we can't malloc, fail safe by returning just the file
 	     name. This function is only used when building error
 	     messages.  */

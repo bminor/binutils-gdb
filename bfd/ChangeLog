@@ -1,3 +1,9 @@
+2001-09-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* bfd.c (_bfd_default_error_handlerl): Define using VPARAMS,
+	VA_OPEN, VA_FIXEDARG, VA_CLOSE.
+	(bfd_archive_filename): Cast bfd_malloc arg to the correct size.
+
 2001-09-25  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf64-sparc.c (sparc64_elf_build_plt): Fix .plt[32768+] slot
