@@ -1,5 +1,5 @@
 /* Matsushita AM33/2.0 support for 32-bit GNU/Linux ELF
-   Copyright 2001
+   Copyright 2003
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.

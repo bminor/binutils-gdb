@@ -1,5 +1,6 @@
 /* BFD library support routines for the H8/500 architecture.
-   Copyright 1993, 1995, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1993, 1995, 2000, 2001, 2002, 2003
+   Free Software Foundation, Inc.
    Hacked by Steve Chamberlain of Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.

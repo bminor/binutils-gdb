@@ -1,5 +1,5 @@
 /* hash.c -- hash table routines for BFD
-   Copyright 1993, 1994, 1995, 1997, 1999, 2001, 2002
+   Copyright 1993, 1994, 1995, 1997, 1999, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Written by Steve Chamberlain <sac@cygnus.com>
 

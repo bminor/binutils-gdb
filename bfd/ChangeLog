@@ -1,5 +1,13 @@
 2003-11-04  Alan Modra  <amodra@bigpond.net.au>
 
+	* aout-target.h, aoutf1.h, bfdio.c, bfdwin.c: Update copyright date.
+	* coff-apollo.c, coff-sparc.c, coff-w65.c, coff-we32k.c: Ditto.
+	* coff-z8k.c, coffgen.c, cpu-frv.c, cpu-h8500.c, cpu-hppa.c: Ditto.
+	* cpu-ia64-opc.c, cpu-m10300.c, cpu-mips.c, cpu-msp430.c: Ditto.
+	* cpu-rs6000.c, cpu-z8k.c, efi-app-ia32.c, elf32-am33lin.c: Ditto.
+	* gen-aout.c, hash.c, hp300hpux.c, init.c, mach-o.c: Ditto.
+	* nlm-target.h, nlm.c, som.h, stabs.c, sysdep.h, xsym.h: Ditto.
+
 	* elf-m10300.c (_bfd_mn10300_elf_create_got_section): Fix
 	"dereferencing type-punned pointer" warnings.
 
