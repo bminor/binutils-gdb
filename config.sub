@@ -109,6 +109,11 @@ delta88)
 	os=m88kbcs
 	;;
 
+ebmon29k)
+	cpu=a29k
+	vendor=amd
+	os=ebmon
+	;;
 gmicro)
 	cpu=tron
 	vendor=gmicro
@@ -120,6 +125,14 @@ h8300hds)
 	vendor=hitachi
 	os=hds
 	;;
+
+# start-sanitize-life
+life)
+	cpu=life
+	vendor=philips
+	os=none
+	;;
+# end-sanitize-life
 
 # start-sanitize-v9
 hal-32 | hal32)
@@ -264,6 +277,11 @@ pn)
 	vendor=gould
 	os=sysv # maybe?
 	;;
+powersys)
+	cpu=rs6000
+	vendor=ibm
+	os=aix
+	;;
 ps2)
 	cpu=i386
 	vendor=ibm
@@ -398,6 +416,10 @@ none | vax | tahoe | i386 | i860 | m68k | m68000 | m88k | sparc \
 	| a29k | romp | rs6000 | i960 | xmp | ymp | cray2 | 580 | h8300)
 	;;
 
+# start-sanitize-life
+life) ;;
+# end-sanitize-life
+
 # start-sanitize-v9
 sparc64) ;;
 # end-sanitize-v9
@@ -411,11 +433,15 @@ esac
 # verify that the vendor is known.
 
 case "${vendor}" in
-	altos | amdahl | aout | apollo | att | bcs | bout |\
+	altos | amd | amdahl | aout | apollo | att | bcs | bout |\
 	cbm | convergent | convex | coff | cray | dec | encore |\
 	gould | hitachi | intel | isi | hp | ibm | little | mips | motorola |\
 	ncr | next | none | nyu | sco | sequent | sgi | sony | sun |\
 	unicom | utek | wrs | bull ) ;; 
+
+# start-sanitize-life
+philips) ;;
+# end-sanitize-life
 
 # start-sanitize-v9
 hal) ;;
