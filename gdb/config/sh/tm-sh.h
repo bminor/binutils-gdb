@@ -169,7 +169,9 @@ extern CORE_ADDR sh_skip_prologue ();
    is a useful bit of info */
 
 #define EXTRA_FRAME_INFO \
-    CORE_ADDR return_pc;
+    CORE_ADDR return_pc; \
+    int leaf_function;   \
+    int f_offset;    
 
 #define INIT_EXTRA_FRAME_INFO(fromleaf, fi) \
     init_extra_frame_info(fromleaf, fi) 
