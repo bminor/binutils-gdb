@@ -32,6 +32,8 @@ filter.c
 filter.h
 filter_host.c
 filter_host.h
+gen.c
+gen.h
 gen-engine.c
 gen-engine.h
 gen-icache.c
