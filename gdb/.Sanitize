@@ -320,7 +320,6 @@ values.c
 vax-pinsn.c
 vx-share
 w89k-rom.c
-xcoffexec.c
 xcoffread.c
 xcoffsolib.c
 xcoffsolib.h
