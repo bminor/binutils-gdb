@@ -1,3 +1,20 @@
+/* Assemble V850 instructions.
+   Copyright (C) 1996 Free Software Foundation, Inc.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+
 #include "ansidecl.h"
 #include "opcode/v850.h"
 
@@ -59,7 +76,7 @@ const struct v850_operand v850_operands[] = {
 
 /* The DISP9 field in a format 3 insn. */
 #define D9	(D7+1)
-  { 9, 0, insert_d9, extract_d9, V850_OPERAND_SIGNED },
+  { 9, 0, insert_d9, extract_d9, V850_OPERAND_SIGNED | V850_OPERAND_DISP },
 
 /* The DISP16 field in a format 6 insn. */
 #define D16_15	(D9+1)
@@ -67,7 +84,7 @@ const struct v850_operand v850_operands[] = {
 
 /* The DISP22 field in a format 4 insn. */
 #define D22	(D16_15+1)
-  { 22, 0, insert_d22, extract_d22, V850_OPERAND_SIGNED },
+  { 22, 0, insert_d22, extract_d22, V850_OPERAND_SIGNED | V850_OPERAND_DISP },
 
 #define B3	(D22+1)
 /* The 3 bit immediate field in format 8 insn.  */
@@ -164,6 +181,7 @@ const struct v850_operand v850_operands[] = {
    sorted by major opcode.  */
 
 const struct v850_opcode v850_opcodes[] = {
+{ "breakpoint",	0xffff,			0xffff,		0,    0 },
 /* load/store instructions */
 { "sld.b",	one(0x0300),		one(0x0780),	IF4A, 1 },
 { "sld.h",	one(0x0400),		one(0x0780),	IF4C, 1 },
@@ -281,7 +299,7 @@ insert_d9 (insn, value, errmsg)
      long value;
      const char **errmsg;
 {
-  if (value > 255 || value <= -256)
+  if (value > 0xff || value < -0x100)
     *errmsg = "branch value out of range";
 
   if ((value % 2) != 0)
@@ -309,7 +327,7 @@ insert_d22 (insn, value, errmsg)
      long value;
      const char **errmsg;
 {
-  if (value > 0xfffff || value <= -0x100000)
+  if (value > 0x1fffff || value < -0x200000)
     *errmsg = "branch value out of range";
 
   if ((value % 2) != 0)
@@ -334,7 +352,7 @@ insert_d16_15 (insn, value, errmsg)
      long value;
      const char **errmsg;
 {
-  if (value > 0x7fff || value <= -0x8000)
+  if (value > 0x7fff || value < -0x8000)
     *errmsg = "value out of range";
 
   if ((value % 2) != 0)
