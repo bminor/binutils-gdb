@@ -334,19 +334,42 @@ static void
 gld${EMULATION_NAME}_check_needed (s)
      lang_input_statement_type *s;
 {
+  if (global_found)
+    return;
+
   if (s->filename != NULL
       && strcmp (s->filename, global_needed->name) == 0)
-    global_found = true;
-  else if (s->search_dirs_flag
-	   && s->filename != NULL
-	   && strchr (global_needed->name, '/') == NULL)
+    {
+      global_found = true;
+      return;
+    }
+
+  if (s->the_bfd != NULL)
+    {
+      const char *soname;
+
+      soname = bfd_elf_get_dt_soname (s->the_bfd);
+      if (soname != NULL
+	  && strcmp (soname, global_needed->name) == 0)
+	{
+	  global_found = true;
+	  return;
+	}
+    }
+	  
+  if (s->search_dirs_flag
+      && s->filename != NULL
+      && strchr (global_needed->name, '/') == NULL)
     {
       const char *f;
 
       f = strrchr (s->filename, '/');
       if (f != NULL
 	  && strcmp (f + 1, global_needed->name) == 0)
-	global_found = true;
+	{
+	  global_found = true;
+	  return;
+	}
     }
 }
 
@@ -358,7 +381,9 @@ gld${EMULATION_NAME}_stat_needed (s)
      lang_input_statement_type *s;
 {
   struct stat st;
-  const char *f, *g;
+  const char *suffix;
+  const char *soname;
+  const char *f;
 
   if (global_found)
     return;
@@ -381,31 +406,32 @@ gld${EMULATION_NAME}_stat_needed (s)
   /* We issue a warning if it looks like we are including two
      different versions of the same shared library.  For example,
      there may be a problem if -lc picks up libc.so.6 but some other
-     shared library has a DT_NEEDED entry of libc.so.5.  */
+     shared library has a DT_NEEDED entry of libc.so.5.  This is a
+     hueristic test, and it will only work if the name looks like
+     NAME.so.VERSION.  FIXME: Depending on file names is error-prone.
+     If we really want to issue warnings about mixing version numbers
+     of shared libraries, we need to find a better way.  */
 
   if (strchr (global_needed->name, '/') != NULL)
     return;
+  suffix = strstr (global_needed->name, ".so.");
+  if (suffix == NULL)
+    return;
+  suffix += sizeof ".so." - 1;
 
-  f = strrchr (s->filename, '/');
+  soname = bfd_elf_get_dt_soname (s->the_bfd);
+  if (soname == NULL)
+    soname = s->filename;
+
+  f = strrchr (soname, '/');
   if (f != NULL)
     ++f;
   else
-    f = s->filename;
-  g = global_needed->name;
+    f = soname;
 
-  while (*f != '\0' && *f == *g)
-    {
-      ++f;
-      ++g;
-    }
-
-  /* We have now skipped past the identical prefixes.  If the
-     remainder of both names is nothing but numbers and dots, we issue
-     a warning.  */
-  if (f[strspn (f, "0123456789.")] == '\0'
-      && g[strspn (g, "0123456789.")] == '\0')
+  if (strncmp (f, global_needed->name, suffix - global_needed->name) == 0)
     einfo ("%P: warning: %s, needed by %B, may conflict with %s\n",
-	   global_needed->name, global_needed->by, s->filename);
+	   global_needed->name, global_needed->by, f);
 }
 
 /* This is called after the sections have been attached to output

@@ -1,5 +1,11 @@
 Mon Feb 19 11:16:44 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* emultempl/elf32.em (gld${EMULATION_NAME}_check_needed): Check
+	the SONAME if it is available.
+	(gld${EMULATION_NAME}_stat_needed): Use the SONAME, not the
+	filename, when checking for conflicting library versions.  Don't
+	assume that the suffix is only numbers and dots.
+
 	* ld.texinfo: Mention that -R can be used for -rpath.
 
 Sun Feb 18 15:05:17 1996  Ian Lance Taylor  <ian@cygnus.com>
