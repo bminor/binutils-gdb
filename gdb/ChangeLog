@@ -1,3 +1,8 @@
+2004-06-15  Andrew Cagney  <cagney@gnu.org>
+
+	* mips-tdep.c (non_heuristic_proc_desc): Delete call to
+	deprecated_pc_in_call_dummy.
+
 2004-06-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* dsrec.c (load_srec, make_srec): Use bfd_get_section_size instead of
