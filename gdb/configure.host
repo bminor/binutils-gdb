@@ -134,8 +134,6 @@ ns32k-*-netbsd*)	gdb_host=nbsd ;;
 # OBSOLETE ns32k-utek-sysv*)	gdb_host=merlin ;;
 
 powerpc-*-aix*)		gdb_host=aix ;;
-# OBSOLETE powerpcle-*-cygwin*)	gdb_host=cygwin ;;
-# OBSOLETE powerpcle-*-solaris*)	gdb_host=solaris ;;
 powerpc-*-linux*)	gdb_host=linux ;;
 powerpc-*-netbsd*)	gdb_host=nbsd ;;
 

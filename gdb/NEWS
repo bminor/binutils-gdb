@@ -11,6 +11,9 @@ x86 OpenBSD					i[3456]86-*-openbsd*
 
 TI TMS320C80					tic80-*-*
 WDC 65816					w65-*-*
+PowerPC Solaris					powerpcle-*-solaris*
+PowerPC Windows NT				powerpcle-*-cygwin32
+PowerPC Netware					powerpc-*-netware*
 
 * Changes to command line processing
 

@@ -1,5 +1,24 @@
 2001-12-01  Andrew Cagney  <ac131313@redhat.com>
 
+	* NEWS: Note that powerpc-*-netware*, powerpcle-*-cygwin* and
+	powerpcle-*-solaris* were deleted.
+	* configure.host: Delete powerpcle-*-cygwin* and
+	powerpcle-*-solaris* hosts.
+	* configure.tgt: Delete powerpc-*-netware*, powerpcle-*-cygwin*
+	and powerpcle-*-solaris* targets.
+	* config/powerpc/cygwin.mh: Delete file.
+	* config/powerpc/cygwin.mt: Delete file.
+	* config/powerpc/nm-solaris.h: Delete.file.
+	* config/powerpc/ppc-nw.mt: Delete file.
+	* config/powerpc/solaris.mh: Delete file.
+	* config/powerpc/solaris.mt: Delete file.
+	* config/powerpc/tm-cygwin.h: Delete file.
+	* config/powerpc/tm-ppc-nw.h: Delete file.
+	* config/powerpc/tm-solaris.h: Delete file.
+	* config/powerpc/xm-cygwin.h: Delete file.
+	* config/powerpc/xm-mpw.h: Delete file.
+	* config/powerpc/xm-solaris.h: Delete file.
+
 	* NEWS, MAINTAINERS: Note that w65-*-* was deleted.
 	* configure.tgt: Delete w65-*-*.
 	* Makefile.in (w65-tdep.o): Delete.
@@ -7,8 +26,6 @@
 	* config/w65/w65.mt: Delete file.
 	* w65-tdep.c: Delete file.
 	
-2001-12-01  Andrew Cagney  <ac131313@redhat.com>
-
 	* NEWS: Mention deleted tic80-*-*.
 	* configure.tgt: Delete tic80-*-*.
 	* Makefile.in (tic80-tdep.o): Delete.
