@@ -1,3 +1,30 @@
+Sat Aug 26 17:24:20 1995  Ian Lance Taylor  (ian@cygnus.com)
+
+	* app.c (scrub_file): Remove.
+	(scrub_from_file, scrub_to_file): Remove.
+	(scrub_string, scrub_last_string): Remove.
+	(scrub_from_string, scrub_to_string): Remove.
+	(saved_input, saved_input_len): New static variables.
+	(struct app_saved): Remove scrub_string, scrub_last_string, and
+	scrub_file fields.  Add saved_input and saved_input_len fields.
+	(app_push): Adjust saved fields for changes in struct app_save.
+	Initialize state and saved_input.
+	(app_pop): Adjust saved fields for changes in struct app_save.
+	(do_scrub_chars): Rename from do_scrub_next_char and rewrite to
+	process a buffer at a time rather than a character at a time.
+	(main, as_warn): Remove obsolete testing code.
+	* as.h (do_scrub_next_char): Don't declare.
+	(do_scrub_chars): Declare.
+	(scrub_from_file, scrub_from_string): Don't declare.
+	(scrub_to_file, scrub_to_string): Don't declare.
+	* input-file.c (input_file_get): New static function.
+	(input_file_give_next_buffer): Call do_scrub_chars rather than
+	do_scrub_next_char.
+	* read.c (scrub_string, scrub_string_end): New static variables.
+	(scrub_from_string): New static function.
+	(read_a_source_file): Call do_scrub_chars rather than
+	do_scrub_next_char.
+
 Thu Aug 24 18:50:19 1995  Ian Lance Taylor  (ian@cygnus.com)
 
 	* gasp.c (as_abort): New function.
