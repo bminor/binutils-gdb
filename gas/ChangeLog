@@ -1,3 +1,8 @@
+Mon Apr 27 15:58:46 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure.in: Change version number to 2.9.4
+	* configure: Rebuild.
+
 Mon Apr 27 12:07:33 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* cgen.c (cgen_asm_finish_insn): New arg relax_p.  All callers updated.
