@@ -1,3 +1,7 @@
+2000-10-31  Bernd Schmidt  <bernds@redhat.co.uk>
+
+	* tc-ia64.c (extra_goodness): Only prefer F in slot 1 and B in slot 2.
+
 2000-10-30  Kazu Hirata  <kazu@hxi.com>
 
 	* expr.c: Fix formatting.

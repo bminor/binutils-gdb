@@ -5711,9 +5711,9 @@ match (int templ, int type, int slot)
 static inline int
 extra_goodness (int templ, int slot)
 {
-  if (match (templ, IA64_TYPE_F, slot))
+  if (slot == 1 && match (templ, IA64_TYPE_F, slot))
     return 2;
-  if (match (templ, IA64_TYPE_B, slot))
+  if (slot == 2 && match (templ, IA64_TYPE_B, slot))
     return 1;
   return 0;
 }
