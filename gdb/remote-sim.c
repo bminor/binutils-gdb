@@ -197,10 +197,7 @@ gdb_os_write_stdout (p, buf, len)
     {
       b[0] = buf[i];
       b[1] = 0;
-      if (target_output_hook)
-	target_output_hook (b);
-      else
-	fputs_filtered (b, gdb_stdout);
+      fputs_unfiltered (b, gdb_stdtarg);
     }
   return len;
 }
@@ -229,10 +226,7 @@ gdb_os_write_stderr (p, buf, len)
     {
       b[0] = buf[i];
       b[1] = 0;
-      if (target_output_hook)
-	target_output_hook (b);
-      else
-	fputs_filtered (b, gdb_stderr);
+      fputs_unfiltered (b, gdb_stdtarg);
     }
   return len;
 }

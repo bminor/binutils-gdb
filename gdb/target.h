@@ -381,6 +381,7 @@ struct target_ops
   int		to_has_registers;
   int		to_has_execution;
   int		to_has_thread_control;	/* control thread execution */
+  int           to_has_async_exec;
   struct section_table
     	       *to_sections;
   struct section_table
@@ -983,6 +984,10 @@ print_section_info PARAMS ((struct target_ops *, bfd *));
 
 #define target_can_switch_threads \
  	(current_target.to_has_thread_control & tc_switch)
+
+/* Does the target support asynchronous execution? */
+#define target_has_async  \
+        (current_target.to_has_async_exec)
 
 extern void target_link PARAMS ((char *, CORE_ADDR *));
 

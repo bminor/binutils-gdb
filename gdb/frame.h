@@ -134,6 +134,7 @@ extern int default_frame_chain_valid PARAMS ((CORE_ADDR, struct frame_info *));
 extern int alternate_frame_chain_valid PARAMS ((CORE_ADDR, struct frame_info *));
 extern int nonnull_frame_chain_valid PARAMS ((CORE_ADDR, struct frame_info *));
 extern int generic_frame_chain_valid PARAMS ((CORE_ADDR, struct frame_info *));
+extern void generic_save_dummy_frame_tos PARAMS ((CORE_ADDR sp));
 
 #if !defined (FRAME_CHAIN_VALID)
 #if !defined (FRAME_CHAIN_VALID_ALTERNATE)

@@ -1,5 +1,5 @@
 /* Memory ops header for CGEN-based simulators.
-   Copyright (C) 1996, 1997, 1998 Free Software Foundation, Inc.
+   Copyright (C) 1996, 1997, 1998, 1999 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions.
 
 This file is part of the GNU Simulators.
@@ -27,7 +27,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define MEMOPS_INLINE extern inline
 #endif
 
-/* Memory read support.  */
+/* Integer memory read support.
+
+   There is no floating point support.  In this context there are no
+   floating point modes, only floating point operations (whose arguments
+   and results are arrays of bits that we treat as integer modes).  */
 
 #if defined (__GNUC__) || defined (MEMOPS_DEFINE_INLINE)
 #define DECLARE_GETMEM(mode, size) \
@@ -53,28 +57,8 @@ DECLARE_GETMEM (DI, 8)
 DECLARE_GETMEM (UDI, 8)
 
 #undef DECLARE_GETMEM
-
-#if defined (__GNUC__) || defined (MEMOPS_DEFINE_INLINE)
-#define DECLARE_GETMEM(mode, size) \
-MEMOPS_INLINE mode \
-XCONCAT2 (GETMEM,mode) (SIM_CPU *cpu, IADDR pc, ADDR a) \
-{ \
-  PROFILE_COUNT_READ (cpu, a, XCONCAT2 (MODE_,mode)); \
-  /* Don't read anything into "unaligned" here.  Bad name choice.  */\
-  return XCONCAT2 (sim_core_read_unaligned_,size) (cpu, pc, read_map, a); \
-}
-#else
-#define DECLARE_GETMEM(mode, size) \
-extern mode XCONCAT2 (GETMEM,mode) (SIM_CPU *, IADDR, ADDR);
-#endif
-
-DECLARE_GETMEM (SF, 4)
-DECLARE_GETMEM (DF, 8)
-/*DECLARE_GETMEM (TF, 16)*/
-
-#undef DECLARE_GETMEM
 
-/* Memory write support.  */
+/* Integer memory write support.  */
 
 #if defined (__GNUC__) || defined (MEMOPS_DEFINE_INLINE)
 #define DECLARE_SETMEM(mode, size) \
@@ -98,12 +82,6 @@ DECLARE_SETMEM (SI, 4)
 DECLARE_SETMEM (USI, 4)
 DECLARE_SETMEM (DI, 8)
 DECLARE_SETMEM (UDI, 8)
-
-/*
-DECLARE_SETMEM (SF, 4)
-DECLARE_SETMEM (DF, 8)
-DECLARE_SETMEM (TF, 16)
-*/
 
 #undef DECLARE_SETMEM
 
@@ -129,6 +107,54 @@ DECLARE_GETIMEM (USI, 4)
 DECLARE_GETIMEM (UDI, 8)
 
 #undef DECLARE_GETIMEM
+
+/* Floating point support.
+
+   ??? One can specify that the integer memory ops should be used instead,
+   and treat fp values as just a series of bits.  One might even bubble
+   that notion up into the description language.  However, that departs from
+   gcc.  One could cross over from gcc's notion and a "series of bits" notion
+   between there and here, and thus still not require these routines.  However,
+   that's a complication of its own (not that having these fns isn't).
+   But for now, we do things this way.  */
+
+#if defined (__GNUC__) || defined (MEMOPS_DEFINE_INLINE)
+#define DECLARE_GETMEM(mode, size) \
+MEMOPS_INLINE mode \
+XCONCAT2 (GETMEM,mode) (SIM_CPU *cpu, IADDR pc, ADDR a) \
+{ \
+  PROFILE_COUNT_READ (cpu, a, XCONCAT2 (MODE_,mode)); \
+  /* Don't read anything into "unaligned" here.  Bad name choice.  */\
+  return XCONCAT2 (sim_core_read_unaligned_,size) (cpu, pc, read_map, a); \
+}
+#else
+#define DECLARE_GETMEM(mode, size) \
+extern mode XCONCAT2 (GETMEM,mode) (SIM_CPU *, IADDR, ADDR);
+#endif
+
+DECLARE_GETMEM (SF, 4)
+DECLARE_GETMEM (DF, 8)
+
+#undef DECLARE_GETMEM
+
+#if defined (__GNUC__) || defined (MEMOPS_DEFINE_INLINE)
+#define DECLARE_SETMEM(mode, size) \
+MEMOPS_INLINE void \
+XCONCAT2 (SETMEM,mode) (SIM_CPU *cpu, IADDR pc, ADDR a, mode val) \
+{ \
+  PROFILE_COUNT_WRITE (cpu, a, XCONCAT2 (MODE_,mode)); \
+  /* Don't read anything into "unaligned" here.  Bad name choice.  */ \
+  XCONCAT2 (sim_core_write_unaligned_,size) (cpu, pc, write_map, a, val); \
+}
+#else
+#define DECLARE_SETMEM(mode, size) \
+extern void XCONCAT2 (SETMEM,mode) (SIM_CPU *, IADDR, ADDR, mode);
+#endif
+
+DECLARE_SETMEM (SF, 4)
+DECLARE_SETMEM (DF, 8)
+
+#undef DECLARE_SETMEM
 
 /* GETT<mode>: translate target value at P to host value.
    This needn't be very efficient (i.e. can call memcpy) as this is
@@ -157,7 +183,7 @@ DECLARE_GETT (USI, 4)
 DECLARE_GETT (DI, 8)
 DECLARE_GETT (UDI, 8)
 
-/*
+/* ??? defered until necessary
 DECLARE_GETT (SF, 4)
 DECLARE_GETT (DF, 8)
 DECLARE_GETT (TF, 16)
@@ -192,7 +218,7 @@ DECLARE_SETT (USI, 4)
 DECLARE_SETT (DI, 8)
 DECLARE_SETT (UDI, 8)
 
-/*
+/* ??? defered until necessary
 DECLARE_SETT (SF, 4)
 DECLARE_SETT (DF, 8)
 DECLARE_SETT (TF, 16)

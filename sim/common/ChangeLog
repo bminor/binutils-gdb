@@ -1,3 +1,16 @@
+1999-07-05  Doug Evans  <devans@casey.cygnus.com>
+
+	* Make-common.in (CGEN_MAIN_CPU_DEPS): Add cgen-fpu.h.
+	(cgen-fpu.o,cgen-accfp.o): Add rules for.
+	* cgen-fpu.c: New file.
+	* cgen-fpu.h: New file.
+	* cgen-accfp.c: New file.
+	* cgen-cpu.h (CGEN_CPU): New member fpu.
+	* cgen-mem.h: Redo fp support.
+	* cgen-ops.h: Delete k&r support.  Redo fp support.
+	* cgen-sim.h: Include cgen-fpu.h.
+	* cgen-types.h (SF,DF,XF,TF): Moved to cgen-fpu.h.
+
 1999-06-23  Doug Evans  <devans@casey.cygnus.com>
 
 	* cgen-engine.h (TARGET_SEM_BRANCH_FINI): Remove cruft at end of

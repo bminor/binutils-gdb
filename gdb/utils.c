@@ -92,6 +92,13 @@ set_width PARAMS ((void));
 static struct cleanup *cleanup_chain; /* cleaned up after a failed command */
 static struct cleanup *final_cleanup_chain; /* cleaned up when gdb exits */
 static struct cleanup *run_cleanup_chain; /* cleaned up on each 'run' */
+static struct cleanup *exec_cleanup_chain; /* cleaned up on each execution command */
+
+/* Pointer to what is left to do for an execution command after the
+   target stops. Used only in asynchronous mode, by targets that
+   support async execution.  The finish and until commands use it. So
+   does the target extended-remote command. */
+struct continuation *cmd_continuation;
 
 /* Nonzero if we have job control. */
 
@@ -175,6 +182,14 @@ make_run_cleanup (function, arg)
     return make_my_cleanup (&run_cleanup_chain, function, arg);
 }
 
+struct cleanup *
+make_exec_cleanup (function, arg)
+     void (*function) PARAMS ((PTR));
+     PTR arg;
+{
+    return make_my_cleanup (&exec_cleanup_chain, function, arg);
+}
+
 static void
 do_freeargv (arg)
      void *arg;
@@ -229,6 +244,13 @@ do_run_cleanups (old_chain)
      register struct cleanup *old_chain;
 {
     do_my_cleanups (&run_cleanup_chain, old_chain);
+}
+
+void
+do_exec_cleanups (old_chain)
+     register struct cleanup *old_chain;
+{
+    do_my_cleanups (&exec_cleanup_chain, old_chain);
 }
 
 void
@@ -348,6 +370,38 @@ void
 null_cleanup (arg)
     PTR arg;
 {
+}
+
+/* Add a continuation to the continuation list, the gloabl list
+   cmd_continuation. */
+void
+add_continuation (continuation_hook, arg_list)
+  void (*continuation_hook) PARAMS ((struct continuation_arg *));
+  struct continuation_arg *arg_list;
+{
+ struct continuation *continuation_ptr;
+
+ continuation_ptr = (struct continuation *) xmalloc (sizeof (struct continuation));
+ continuation_ptr->continuation_hook = continuation_hook;
+ continuation_ptr->arg_list = arg_list;
+ continuation_ptr->next = cmd_continuation;
+ cmd_continuation = continuation_ptr;
+}
+
+/* Walk down the cmd_continuation list, and execute all the
+   continuations. */
+void 
+do_all_continuations ()
+{
+ struct continuation *continuation_ptr;
+
+ while (cmd_continuation)
+   {
+     (cmd_continuation->continuation_hook) (cmd_continuation->arg_list);
+     continuation_ptr = cmd_continuation;
+     cmd_continuation = continuation_ptr->next;
+     free (continuation_ptr);
+   }
 }
 
 

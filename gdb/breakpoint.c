@@ -2418,7 +2418,33 @@ bpstat_what (bs)
      after stopping, the check for whether to step over a breakpoint
      (BPSTAT_WHAT_SINGLE type stuff) is handled in proceed() without
      reference to how we stopped.  We retain separate wp_silent and bp_silent
-     codes in case we want to change that someday.  */
+     codes in case we want to change that someday. 
+
+     Another possibly interesting property of this table is that
+     there's a partial ordering, priority-like, of the actions.  Once
+     you've decided that some action is appropriate, you'll never go
+     back and decide something of a lower priority is better.  The
+     ordering is:
+
+	kc   < clr sgl shl slr sn sr ss ts
+	sgl  < clrs shl shlr slr sn sr ss ts
+	slr  < err shl shlr sn sr ss ts
+	clr  < clrs err shl shlr sn sr ss ts
+	clrs < err shl shlr sn sr ss ts
+	ss   < shl shlr sn sr ts
+	sn   < shl shlr sr ts
+	sr   < shl shlr ts
+	shl  < shlr
+	ts   < 
+	shlr <
+       
+     What I think this means is that we don't need a damned table
+     here.  If you just put the rows and columns in the right order,
+     it'd look awfully regular.  We could simply walk the bpstat list
+     and choose the highest priority action we find, with a little
+     logic to handle the 'err' cases, and the CLEAR_LONGJMP_RESUME/
+     CLEAR_LONGJMP_RESUME_SINGLE distinction (which breakpoint.h says
+     is messy anyway).  */
 
   /* step_resume entries: a step resume breakpoint overrides another
      breakpoint of signal handling (see comment in wait_for_inferior
@@ -4480,8 +4506,22 @@ static void awatch_command (arg, from_tty)
 }
 
 
-/* Helper routine for the until_command routine in infcmd.c.  Here
+/* Helper routines for the until_command routine in infcmd.c.  Here
    because it uses the mechanisms of breakpoints.  */
+
+/* This function is called by fetch_inferior_event via the
+   cmd_continuation pointer, to complete the until command. It takes
+   care of cleaning up the temporary breakpoints set up by the until
+   command. */
+void
+until_break_command_continuation (arg)
+     struct continuation_arg *arg;
+{
+  /* Do all the exec cleanups, which at this point should only be the
+     one set up in the first part of the until_break_command
+     function. */
+  do_exec_cleanups (ALL_CLEANUPS);
+}
 
 /* ARGSUSED */
 void
@@ -4494,6 +4534,7 @@ until_break_command (arg, from_tty)
   struct frame_info *prev_frame = get_prev_frame (selected_frame);
   struct breakpoint *breakpoint;
   struct cleanup *old_chain;
+  struct continuation_arg *arg1, *arg2;
 
   clear_proceed_status ();
 
@@ -4519,7 +4560,26 @@ until_break_command (arg, from_tty)
   
   breakpoint = set_momentary_breakpoint (sal, selected_frame, bp_until);
   
-  old_chain = make_cleanup ((make_cleanup_func) delete_breakpoint, breakpoint);
+  if (!async_p || !target_has_async)
+    old_chain = make_cleanup ((make_cleanup_func) delete_breakpoint, breakpoint);
+  else
+    make_exec_cleanup ((make_cleanup_func) delete_breakpoint, breakpoint);
+
+  /* If we are running asynchronously, and the target supports async
+     execution, we are not waiting for the target to stop, in the call
+     tp proceed, below. This means that we cannot delete the
+     brekpoints until the target has actually stopped. The only place
+     where we get a chance to do that is in fetch_inferior_event, so
+     we must set things up for that. */
+
+  if (async_p && target_has_async)
+    {
+      /* In this case we don't need args for the continuation, because
+	 all it needs to do is do the cleanups in the
+	 exec_cleanup_chain, which will be only those inserted by this
+	 function. We can get away by using ALL_CLEANUPS. */
+      add_continuation (until_break_command_continuation, NULL);
+    }
 
   /* Keep within the current frame */
   
@@ -4528,11 +4588,17 @@ until_break_command (arg, from_tty)
       sal = find_pc_line (prev_frame->pc, 0);
       sal.pc = prev_frame->pc;
       breakpoint = set_momentary_breakpoint (sal, prev_frame, bp_until);
-      make_cleanup ((make_cleanup_func) delete_breakpoint, breakpoint);
+      if (!async_p || !target_has_async)
+	make_cleanup ((make_cleanup_func) delete_breakpoint, breakpoint);
+      else
+	make_exec_cleanup ((make_cleanup_func) delete_breakpoint, breakpoint);
     }
   
   proceed (-1, TARGET_SIGNAL_DEFAULT, 0);
-  do_cleanups(old_chain);
+  /* Do the cleanups now, anly if we are not running asynchronously,
+     of if we are, but the target is still synchronous. */
+  if (!async_p || !target_has_async)
+    do_cleanups(old_chain);
 }
 
 #if 0

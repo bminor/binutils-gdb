@@ -33,6 +33,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "language.h"
 #include "symfile.h"
 #include "objfiles.h"
+#include "event-loop.h"
 
 /* Functions exported for general use: */
 
@@ -45,6 +46,8 @@ void registers_info PARAMS ((char *, int));
 /* Local functions: */
 
 void continue_command PARAMS ((char *, int));
+
+static void finish_command_continuation PARAMS ((struct continuation_arg *));
 
 static void until_next_command PARAMS ((int));
 
@@ -93,6 +96,8 @@ static void run_command PARAMS ((char *, int));
 static void run_no_args_command PARAMS ((char *args, int from_tty));
 
 static void go_command PARAMS ((char *line_no, int from_tty));
+
+static int strip_bg_char PARAMS ((char **));
 
 void _initialize_infcmd PARAMS ((void));
 
@@ -184,6 +189,35 @@ int step_multi;
 struct environ *inferior_environ;
 
 
+/* This function detects whether or not a '&' character (indicating
+   background execution) has been added as *the last* of the arguments ARGS
+   of a command. If it has, it removes it and returns 1. Otherwise it
+   does nothing and returns 0. */
+static int 
+strip_bg_char (args)
+     char **args;
+{
+  char *p = NULL;
+
+  if (p = strchr (*args, '&'))
+    {
+      if (p == (*args + strlen (*args) - 1))
+	{
+	  if (strlen (*args) >1)
+	    {
+	      do
+		p--;
+	      while (*p == ' ' || *p == '\t');
+	      *(p + 1) = '\0';
+	    }
+	  else
+	    *args = 0;
+	  return 1;
+	}
+    }
+  return 0;
+}
+
 /* ARGSUSED */
 void
 tty_command (file, from_tty)
@@ -239,12 +273,33 @@ Start it from the beginning? "))
      the user has to manually nuke all symbols between runs if they
      want them to go away (PR 2207).  This is probably reasonable.  */
 
-  if (args)
+  if (!args)
+    sync_execution = 1;
+  else
     {
       char *cmd;
-      cmd = concat ("set args ", args, NULL);
-      make_cleanup (free, cmd);
-      execute_command (cmd, from_tty);
+      int async_exec = strip_bg_char (&args);
+
+      /* If we get a request for running in the bg but the target
+         doesn't support it, error out. */
+      if (async_p && async_exec && !target_has_async)
+	error ("Asynchronous execution not supported on this target.");
+
+      /* If we don't get a request of running in the bg, then we need
+	 to simulate synchronous (fg) execution. */
+      if (async_p && !async_exec && target_has_async)
+	{
+	  /* Simulate synchronous execution */
+	  sync_execution = 1;
+	}
+
+      /* If there were other args, beside '&', process them. */
+      if (args)
+	{
+	  cmd = concat ("set args ", args, NULL);
+	  make_cleanup (free, cmd);
+	  execute_command (cmd, from_tty);
+	}
     }
 
   if (from_tty)
@@ -278,10 +333,28 @@ continue_command (proc_count_exp, from_tty)
      char *proc_count_exp;
      int from_tty;
 {
+  int async_exec = 0; 
   ERROR_NO_INFERIOR;
 
-  /* If have argument, set proceed count of breakpoint we stopped at.  */
+  /* Find out whether we must run in the background. */
+  if (proc_count_exp != NULL)
+    async_exec = strip_bg_char (&proc_count_exp);
 
+  /* If we must run in the background, but the target can't do it,
+     error out. */
+  if (async_p && async_exec && !target_has_async)
+    error ("Asynchronous execution not supported on this target.");
+
+  /* If we are not asked to run in the bg, then prepare to run in the
+     foreground, synchronously. */
+  if (async_p && !async_exec && target_has_async)
+    { 
+      /* Simulate synchronous execution */
+      sync_execution = 1;
+    }
+
+  /* If have argument (besides '&'), set proceed count of breakpoint
+     we stopped at.  */
   if (proc_count_exp != NULL)
     {
       bpstat bs = stop_bpstat;
@@ -363,8 +436,26 @@ step_1 (skip_subroutines, single_inst, count_string)
   register int count = 1;
   struct frame_info *frame;
   struct cleanup *cleanups = 0;
-
+  int async_exec = 0;
+  
   ERROR_NO_INFERIOR;
+
+  if (count_string)
+    async_exec = strip_bg_char (&count_string);
+      
+  /* If we get a request for running in the bg but the target
+     doesn't support it, error out. */
+  if (async_p && async_exec && !target_has_async)
+    error ("Asynchronous execution not supported on this target.");
+
+  /* If we don't get a request of running in the bg, then we need
+     to simulate synchronous (fg) execution. */
+  if (async_p && !async_exec && target_has_async)
+    {
+      /* Simulate synchronous execution */
+      sync_execution = 1;
+    }
+
   count = count_string ? parse_and_eval_address (count_string) : 1;
 
   if (!single_inst || skip_subroutines) /* leave si command alone */
@@ -443,8 +534,26 @@ jump_command (arg, from_tty)
   struct symtab_and_line sal;
   struct symbol *fn;
   struct symbol *sfn;
-
+  int async_exec = 0;
+ 
   ERROR_NO_INFERIOR;
+
+  /* Find out whether we must run in the background. */
+  if (arg != NULL)
+    async_exec = strip_bg_char (&arg);
+
+  /* If we must run in the background, but the target can't do it,
+     error out. */
+  if (async_p && async_exec && !target_has_async)
+    error ("Asynchronous execution not supported on this target.");
+
+  /* If we are not asked to run in the bg, then prepare to run in the
+     foreground, synchronously. */
+  if (async_p && !async_exec && target_has_async)
+    { 
+      /* Simulate synchronous execution */
+      sync_execution = 1;
+    }
 
   if (!arg)
     error_no_arg ("starting address");
@@ -489,7 +598,6 @@ jump_command (arg, from_tty)
 	    }
 	}
     }
-
 
   addr = sal.pc;
 
@@ -731,14 +839,110 @@ until_command (arg, from_tty)
      char *arg;
      int from_tty;
 {
+  int async_exec = 0;
+
   if (!target_has_execution)
     error ("The program is not running.");
+
+  /* Find out whether we must run in the background. */
+  if (arg != NULL)
+    async_exec = strip_bg_char (&arg);
+
+  /* If we must run in the background, but the target can't do it,
+     error out. */
+  if (async_p && async_exec && !target_has_async)
+    error ("Asynchronous execution not supported on this target.");
+
+  /* If we are not asked to run in the bg, then prepare to run in the
+     foreground, synchronously. */
+  if (async_p && !async_exec && target_has_async)
+    { 
+      /* Simulate synchronous execution */
+      sync_execution = 1;
+    }
+
   if (arg)
     until_break_command (arg, from_tty);
   else
     until_next_command (from_tty);
 }
 
+
+/* Stuff that needs to be done by the finish command after the target
+   has stopped.  In asynchronous mode, we wait for the target to stop in
+   the call to poll or select in the event loop, so it is impossible to
+   do all the stuff as part of the finish_command function itself. The
+   only chance we have to complete this command is in
+   fetch_inferior_event, which is called by the event loop as soon as it
+   detects that the target has stopped. This function is called via the
+   cmd_continaution pointer. */
+void
+finish_command_continuation (arg)
+     struct continuation_arg *arg;
+{
+  register struct symbol *function;
+  struct breakpoint *breakpoint;
+  
+  breakpoint = (struct breakpoint *) arg->data;
+  function = (struct symbol *) (arg->next)->data;
+
+  if (bpstat_find_breakpoint(stop_bpstat, breakpoint) != NULL
+      && function != 0)
+    {
+      struct type *value_type;
+      register value_ptr val;
+      CORE_ADDR funcaddr;
+      int struct_return;
+
+      value_type = TYPE_TARGET_TYPE (SYMBOL_TYPE (function));
+      if (!value_type)
+	fatal ("internal: finish_command: function has no target type");
+      
+      if (TYPE_CODE (value_type) == TYPE_CODE_VOID)
+	{
+	  do_exec_cleanups (ALL_CLEANUPS);
+	  return;
+	}
+
+      funcaddr = BLOCK_START (SYMBOL_BLOCK_VALUE (function));
+
+      struct_return = using_struct_return (value_of_variable (function, NULL),
+
+				   funcaddr,
+				   check_typedef (value_type),
+		BLOCK_GCC_COMPILED (SYMBOL_BLOCK_VALUE (function)));
+
+      if (!struct_return)
+      {
+        val = value_being_returned (value_type, stop_registers, struct_return);
+        printf_filtered ("Value returned is $%d = ", record_latest_value (val));
+        value_print (val, gdb_stdout, 0, Val_no_prettyprint);
+        printf_filtered ("\n");
+      }
+      else
+      {
+       /* We cannot determine the contents of the structure because
+	  it is on the stack, and we don't know where, since we did not
+	  initiate the call, as opposed to the call_function_by_hand case */
+#ifdef VALUE_RETURNED_FROM_STACK
+          val = 0;
+          printf_filtered ("Value returned has type: %s.", 
+			   TYPE_NAME (value_type));
+          printf_filtered (" Cannot determine contents\n");
+#else
+          val = value_being_returned (value_type, stop_registers, 
+				      struct_return);
+          printf_filtered ("Value returned is $%d = ", 
+			   record_latest_value (val));
+          value_print (val, gdb_stdout, 0, Val_no_prettyprint);
+          printf_filtered ("\n");
+#endif
+       
+      }
+    }
+  do_exec_cleanups (ALL_CLEANUPS);
+}
+
 /* "finish": Set a temporary breakpoint at the place
    the selected frame will return to, then continue.  */
 
@@ -752,6 +956,26 @@ finish_command (arg, from_tty)
   register struct symbol *function;
   struct breakpoint *breakpoint;
   struct cleanup *old_chain;
+  struct continuation_arg *arg1, *arg2;
+
+  int async_exec = 0;
+
+  /* Find out whether we must run in the background. */
+  if (arg != NULL)
+    async_exec = strip_bg_char (&arg);
+
+  /* If we must run in the background, but the target can't do it,
+     error out. */
+  if (async_p && async_exec && !target_has_async)
+    error ("Asynchronous execution not supported on this target.");
+
+  /* If we are not asked to run in the bg, then prepare to run in the
+     foreground, synchronously. */
+  if (async_p && !async_exec && target_has_async)
+    { 
+      /* Simulate synchronous execution */
+      sync_execution = 1;
+    }
 
   if (arg)
     error ("The \"finish\" command does not take any arguments.");
@@ -771,7 +995,10 @@ finish_command (arg, from_tty)
 
   breakpoint = set_momentary_breakpoint (sal, frame, bp_finish);
 
-  old_chain = make_cleanup ((make_cleanup_func) delete_breakpoint, breakpoint);
+  if (!async_p || !target_has_async)
+    old_chain = make_cleanup ((make_cleanup_func) delete_breakpoint, breakpoint);
+  else
+    make_exec_cleanup ((make_cleanup_func) delete_breakpoint, breakpoint);
 
   /* Find the function we will return from.  */
 
@@ -785,62 +1012,89 @@ finish_command (arg, from_tty)
       print_stack_frame (selected_frame, selected_frame_level, 0);
     }
 
+  /* If running asynchronously and the target support asynchronous
+     execution, set things up for the rest of the finish command to be
+     completed later on, when gdb has detected that the target has
+     stopped, in fetch_inferior_event. */
+  if (async_p && target_has_async)
+    {
+      arg1 = 
+	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
+      arg2 = 
+	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
+      arg1->next = arg2;
+      arg2->next = NULL;
+      arg1->data = (PTR) breakpoint;
+      arg2->data = (PTR) function;
+      add_continuation (finish_command_continuation, arg1);
+    }
+
   proceed_to_finish = 1;		/* We want stop_registers, please... */
   proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
 
-  /* Did we stop at our breakpoint? */
-  if (bpstat_find_breakpoint(stop_bpstat, breakpoint) != NULL
-      && function != 0)
-    {
-      struct type *value_type;
-      register value_ptr val;
-      CORE_ADDR funcaddr;
-      int struct_return;
+  /* Do this only if not running asynchronously or if the target
+     cannot do async execution. Otherwise, complete this command when
+     the target actually stops, in fetch_inferior_event.*/
+    if (!async_p || !target_has_async)
+      {
 
-      value_type = TYPE_TARGET_TYPE (SYMBOL_TYPE (function));
-      if (!value_type)
-	fatal ("internal: finish_command: function has no target type");
-      
-      if (TYPE_CODE (value_type) == TYPE_CODE_VOID)
-	return;
+	/* Did we stop at our breakpoint? */
+	if (bpstat_find_breakpoint(stop_bpstat, breakpoint) != NULL
+	    && function != 0)
+	  {
+	    struct type *value_type;
+	    register value_ptr val;
+	    CORE_ADDR funcaddr;
+	    int struct_return;
 
-      funcaddr = BLOCK_START (SYMBOL_BLOCK_VALUE (function));
+	    value_type = TYPE_TARGET_TYPE (SYMBOL_TYPE (function));
+	    if (!value_type)
+	      fatal ("internal: finish_command: function has no target type");
 
-      struct_return = using_struct_return (value_of_variable (function, NULL),
+	    /* FIXME: Shouldn't we do the cleanups before returning? */
+	    if (TYPE_CODE (value_type) == TYPE_CODE_VOID)
+	      return;
 
+	    funcaddr = BLOCK_START (SYMBOL_BLOCK_VALUE (function));
+
+	    struct_return = 
+	      using_struct_return (value_of_variable (function, NULL),
 				   funcaddr,
 				   check_typedef (value_type),
-		BLOCK_GCC_COMPILED (SYMBOL_BLOCK_VALUE (function)));
+				   BLOCK_GCC_COMPILED (SYMBOL_BLOCK_VALUE (function)));
 
-      if (!struct_return)
-      {
-        val = value_being_returned (value_type, stop_registers, struct_return);
-        printf_filtered ("Value returned is $%d = ", record_latest_value (val));
-        value_print (val, gdb_stdout, 0, Val_no_prettyprint);
-        printf_filtered ("\n");
-      }
-      else
-      {
-       /* elz: we cannot determine the contents of the structure because
-	  it is on the stack, and we don't know where, since we did not
-	  initiate the call, as opposed to the call_function_by_hand case */
+	    if (!struct_return)
+	      {
+		val = 
+		  value_being_returned (value_type, stop_registers, struct_return);
+		printf_filtered ("Value returned is $%d = ", 
+				 record_latest_value (val));
+		value_print (val, gdb_stdout, 0, Val_no_prettyprint);
+		printf_filtered ("\n");
+	      }
+	    else
+	      {
+		/* We cannot determine the contents of the structure
+		   because it is on the stack, and we don't know
+		   where, since we did not initiate the call, as
+		   opposed to the call_function_by_hand case */
 #ifdef VALUE_RETURNED_FROM_STACK
-          val = 0;
-          printf_filtered ("Value returned has type: %s.", 
-			   TYPE_NAME (value_type));
-          printf_filtered (" Cannot determine contents\n");
+		val = 0;
+		printf_filtered ("Value returned has type: %s.", 
+				 TYPE_NAME (value_type));
+		printf_filtered (" Cannot determine contents\n");
 #else
-          val = value_being_returned (value_type, stop_registers, 
-				      struct_return);
-          printf_filtered ("Value returned is $%d = ", 
-			   record_latest_value (val));
-          value_print (val, gdb_stdout, 0, Val_no_prettyprint);
-          printf_filtered ("\n");
-#endif
-       
+		val = value_being_returned (value_type, stop_registers, 
+					    struct_return);
+		printf_filtered ("Value returned is $%d = ", 
+				 record_latest_value (val));
+		value_print (val, gdb_stdout, 0, Val_no_prettyprint);
+		printf_filtered ("\n");
+#endif       
+	      }
+	  }
+	do_cleanups(old_chain);
       }
-    }
-  do_cleanups(old_chain);
 }
 
 /* ARGSUSED */
@@ -1355,6 +1609,20 @@ detach_command (args, from_tty)
 #endif
 }
 
+/* Stop the execution of the target while running in async mode, in
+   the backgound. */
+static void
+interrupt_target_command (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  if (async_p && target_has_async)
+    {
+      dont_repeat ();			/* Not for the faint of heart */
+      target_stop ();
+    }
+}
+
 /* ARGSUSED */
 static void
 float_info (addr_exp, from_tty)
@@ -1529,6 +1797,9 @@ use \"set args\" without arguments.");
   if (xdb_commands)
     add_com ("R", class_run, run_no_args_command,
          "Start debugged program with no arguments.");
+
+  add_com ("interrupt", class_run, interrupt_target_command,
+	   "Interrupt the execution of the debugged program.");
 
   add_info ("registers", nofp_registers_info,
     "List of integer registers and their contents, for selected stack frame.\n\

@@ -71,6 +71,17 @@ extern char *inferior_io_terminal;
 
 extern int inferior_pid;
 
+/* Is the inferior running right now, as a result of a 'run&',
+   'continue&' etc command? This is used in asycn gdb to determine
+   whether a command that the user enters while the target is running
+   is allowed or not. */
+extern int target_executing;
+
+/* Are we simulating synchronous execution? This is used in async gdb
+   to implement the 'run', 'continue' etc commands, which will not
+   redisplay the prompt until the execution is actually over. */
+extern int sync_execution;
+
 /* This is only valid when inferior_pid is non-zero.
 
    If this is 0, then exec events should be noticed and responded to
@@ -147,6 +158,8 @@ extern void write_fp PARAMS ((CORE_ADDR));
 extern void generic_target_write_fp PARAMS ((CORE_ADDR));
 
 extern void wait_for_inferior PARAMS ((void));
+
+extern void fetch_inferior_event PARAMS ((void));
 
 extern void init_wait_for_inferior PARAMS ((void));
 

@@ -1,3 +1,7 @@
+Tue Jun 29 11:43:55 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbint.texinfo (SAVE_DUMMY_FRAME_TOS): Define.
+
 Fri Jun 25 11:47:06 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* remote.texi (Communication Protocol): ``v'' is in use. Fix

@@ -535,6 +535,7 @@ update_current_target ()
       INHERIT (to_has_registers, t);
       INHERIT (to_has_execution, t);
       INHERIT (to_has_thread_control, t);
+      INHERIT (to_has_async_exec, t);
       INHERIT (to_sections, t);
       INHERIT (to_sections_end, t);
       INHERIT (to_magic, t);

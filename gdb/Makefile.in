@@ -224,7 +224,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 19990628
+VERSION = 19990705
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -1206,7 +1206,7 @@ infptrace.o: infptrace.c $(defs_h) $(gdbcore_h) $(inferior_h) target.h \
 	gdb_string.h $(wait_h) $(command_h)
 
 infrun.o: infrun.c $(wait_h) $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
-	$(inferior_h) target.h gdbthread.h gdb_string.h
+	$(inferior_h) target.h gdbthread.h gdb_string.h $(event_loop_h)
 
 inftarg.o: inftarg.c $(wait_h) $(defs_h) $(gdbcore_h) $(inferior_h) \
 	target.h terminal.h $(command_h)
@@ -1462,7 +1462,8 @@ remote-utils.o: remote-utils.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) $(remote_utils_h) gdb_string.h
 
 remote.o: remote.c $(bfd_h) $(wait_h) $(defs_h) $(gdbcmd_h) \
-	$(inferior_h) $(remote_utils_h) symfile.h terminal.h gdb_string.h
+	$(inferior_h) $(remote_utils_h) symfile.h terminal.h gdb_string.h \
+	$(event_loop_h)
 
 remote-nrom.o: remote-nrom.c $(bfd_h) $(wait_h) $(defs_h) $(gdbcmd_h) \
 	$(inferior_h) $(remote_utils_h) symfile.h terminal.h

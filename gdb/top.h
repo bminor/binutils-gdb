@@ -82,7 +82,6 @@ extern void set_prompt PARAMS ((char *));
 /* From random places.  */
 extern int mapped_symbol_files;
 extern int readnow_symbol_files;
-#define	ALL_CLEANUPS	((struct cleanup *)0)
 
 /* Perform _initialize initialization */
 extern void gdb_init PARAMS ((char *));

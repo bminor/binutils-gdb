@@ -276,7 +276,7 @@ directory_command (dirname, from_tty)
   /* FIXME, this goes to "delete dir"... */
   if (dirname == 0)
     {
-      if (query ("Reinitialize source path to empty? "))
+      if (from_tty && query ("Reinitialize source path to empty? "))
 	{
 	  free (source_path);
 	  init_source_path ();

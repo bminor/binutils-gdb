@@ -1105,37 +1105,43 @@ proc gdb_expect { args } {
 proc gdb_expect_list {test sentinal list} {
     global gdb_prompt
     set index 0
-    while { ${index} >= 0 && ${index} < [llength ${list}] } {
+    set ok 1
+    while { ${index} < [llength ${list}] } {
 	set pattern [lindex ${list} ${index}]
         set index [expr ${index} + 1]
 	if { ${index} == [llength ${list}] } {
-	    gdb_expect {
-		-re "${pattern}${sentinal}" {
-		    pass "${test} (sentinal)"
+	    if { ${ok} } {
+		gdb_expect {
+		    -re "${pattern}${sentinal}" {
+			pass "${test}, pattern ${index} + sentinal"
+		    }
+		    timeout {
+			fail "${test}, pattern ${index} + sentinal (timeout)"
+			set ok 0
+		    }
 		}
-		timeout {
-		    fail "(timeout on sentinal) ${test}"
-		    set index -1
-		}
+	    } else {
+		fail "${test}, pattern ${index} + sentinal"
 	    }
 	} else {
-	    gdb_expect {
-		-re "${pattern}" {
-		    pass "${test} (line ${index})"
+	    if { ${ok} } {
+		gdb_expect {
+		    -re "${pattern}" {
+			pass "${test}, pattern ${index}"
+		    }
+		    -re "${sentinal}" {
+			fail "${test}, pattern ${index}"
+			set ok 0
+		    }
+		    timeout {
+			fail "${test}, pattern ${index} (timeout)"
+			set ok 0
+		    }
 		}
-		-re "${sentinal}" {
-		    fail "${test} (line ${index})"
-		    set index -1
-		}
-		timeout {
-		    fail "(timeout on line ${index}) ${test}"
-		    set index -1
-		}
+	    } else {
+		fail "${test}, pattern ${index}"
 	    }
 	}
-    }
-    if { ${index} >= 0 } {
-	pass "${test}"
     }
 }
 

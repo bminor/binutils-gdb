@@ -1573,6 +1573,12 @@ Deprecated in favor of @var{REGISTER_NAME}.
 Define this to return 1 if the given type will be passed by pointer
 rather than directly.
 
+@item SAVE_DUMMY_FRAME_TOS (sp)
+Used in @samp{call_function_by_hand} to notify the target dependent code
+of the top-of-stack value that will be passed to the the inferior code.
+This is the value of the @var{SP} after both the dummy frame and space
+for parameters/results have been allocated on the stack.
+
 @item SDB_REG_TO_REGNUM
 Define this to convert sdb register numbers into GDB regnums.  If not
 defined, no conversion will be done.

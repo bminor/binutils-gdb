@@ -25,6 +25,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "cgen-defs.h"
 #include "cgen-scache.h"
+#include "cgen-fpu.h"
 #include "cgen-cpu.h"
 #include "cgen-trace.h"
 

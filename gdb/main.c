@@ -62,6 +62,7 @@ int dbx_commands = 0;
 GDB_FILE *gdb_stdout;
 GDB_FILE *gdb_stderr;
 GDB_FILE *gdb_stdlog;
+GDB_FILE *gdb_stdtarg;
 
 /* Whether to enable writing into executable and core files */
 extern int write_files;
@@ -163,10 +164,12 @@ main (argc, argv)
   gdb_stdout = stdio_fileopen (stdout);
   gdb_stderr = stdio_fileopen (stderr);
   gdb_stdlog = gdb_stderr; /* for moment */
+  gdb_stdtarg = gdb_stderr; /* for moment */
 #else
   gdb_stdout = tui_fileopen (stdout);
   gdb_stderr = tui_fileopen (stderr);
   gdb_stdlog = gdb_stdout; /* for moment */
+  gdb_stdtarg = gdb_stderr; /* for moment */
 #endif
 
   /* Parse arguments and options.  */

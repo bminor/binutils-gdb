@@ -42,7 +42,7 @@ arm-*-*)		gdb_host=arm ;;
 hppa*-*-bsd*)		gdb_host=hppabsd ;;
 hppa*-*-hiux*)		gdb_host=hppahpux ;;
 hppa*-*-hpux10.20)	gdb_host=hpux1020 ;;
-hppa*-*-hpux11.0*)	gdb_host=hpux1100 ;;
+hppa*-*-hpux11*)	gdb_host=hpux1100 ;;
 hppa*-*-hpux*)		gdb_host=hppahpux ;;
 hppa*-*-osf*)		gdb_host=hppaosf ;;
 

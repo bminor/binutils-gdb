@@ -556,7 +556,8 @@ CGEN_MAIN_CPU_DEPS = \
 	$(SIM_MAIN_DEPS) \
 	$(CGEN_INCLUDE_DEPS) \
 	$(srccom)/cgen-ops.h \
-	$(srccom)/cgen-mem.h
+	$(srccom)/cgen-mem.h \
+	$(srccom)/cgen-fpu.h
 
 cgen-run.o: $(srccom)/cgen-run.c $(sim_main_headers)
 	$(CC) -c $(srccom)/cgen-run.c $(ALL_CFLAGS)
@@ -566,6 +567,12 @@ cgen-scache.o: $(srccom)/cgen-scache.c $(sim_main_headers)
 
 cgen-trace.o: $(srccom)/cgen-trace.c $(sim_main_headers)
 	$(CC) -c $(srccom)/cgen-trace.c $(ALL_CFLAGS)
+
+cgen-fpu.o: $(srccom)/cgen-fpu.c $(sim_main_headers) $(sim-fpu_h)
+	$(CC) -c $(srccom)/cgen-fpu.c $(ALL_CFLAGS)
+
+cgen-accfp.o: $(srccom)/cgen-accfp.c $(sim_main_headers) $(sim-fpu_h)
+	$(CC) -c $(srccom)/cgen-accfp.c $(ALL_CFLAGS)
 
 cgen-utils.o: $(srccom)/cgen-utils.c $(sim_main_headers) \
 	  $(srccom)/cgen-mem.h $(srccom)/cgen-ops.h $(srccom)/cgen-engine.h

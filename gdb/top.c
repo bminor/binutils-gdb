@@ -322,6 +322,12 @@ int remote_timeout = 20;	/* Set default to 20 */
 
 int remote_debug = 0;
 
+/* Non-zero means the target is running. Note: this is different from
+   saying that there is an active target and we are stopped at a
+   breakpoint, for instance. This is a real indicator whether the
+   target is off and running, which gdb is doing something else. */
+int target_executing = 0;
+
 /* Level of control structure.  */
 static int control_level;
 
@@ -382,11 +388,6 @@ void (*command_loop_hook) PARAMS ((void));
 /* Called instead of fputs for all output.  */
 
 void (*fputs_unfiltered_hook) PARAMS ((const char *linebuffer, GDB_FILE *stream));
-
-/* Called when the target says something to the host, which may
-   want to appear in a different window. */
-
-void (*target_output_hook) PARAMS ((char *));
 
 /* Called from print_frame_info to list the line we stopped in.  */
 
@@ -486,6 +487,8 @@ return_to_top_level (reason)
 
   disable_current_display ();
   do_cleanups (ALL_CLEANUPS);
+  if (async_p && target_has_async)
+    do_exec_cleanups (ALL_CLEANUPS);
 
   if (annotation_level > 1)
     switch (reason)
@@ -1266,6 +1269,16 @@ execute_command (p, from_tty)
       char *arg;
 
       c = lookup_cmd (&p, cmdlist, "", 0, 1);
+
+      /* If the target is running, we allow only a limited set of
+         commands. */
+      if (async_p && target_has_async && target_executing)
+	if (!strcmp (c->name, "help")
+	    && !strcmp (c->name, "pwd")
+	    && !strcmp (c->name, "show")
+	    && !strcmp (c->name, "stop"))
+	  error ("Cannot execute this command while the target is running.");
+
       /* Pass null arg rather than an empty one.  */
       arg = *p ? p : 0;
 

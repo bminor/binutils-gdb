@@ -1,3 +1,8 @@
+Tue Jun 29 11:56:06 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* lib/gdb.exp (gdb_expect_list): Output one message per pattern in
+ 	a consistent format.
+
 1999-06-25  Stan Shebs  <shebs@andros.cygnus.com>
 
 	From Jimmy Guo <guo@cup.hp.com> and others at HP:

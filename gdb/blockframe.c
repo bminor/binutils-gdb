@@ -1121,6 +1121,7 @@ struct dummy_frame
   CORE_ADDR pc;
   CORE_ADDR fp;
   CORE_ADDR sp;
+  CORE_ADDR top;
   char *registers;
 };
 
@@ -1142,7 +1143,9 @@ generic_find_dummy_frame (pc, fp)
 
   for (dummyframe = dummy_frame_stack; dummyframe != NULL;
        dummyframe = dummyframe->next)
-    if (fp == dummyframe->fp || fp == dummyframe->sp)
+    if (fp == dummyframe->fp
+	|| fp == dummyframe->sp
+	|| fp == dummyframe->top)
       /* The frame in question lies between the saved fp and sp, inclusive */
       return dummyframe->registers;
 
@@ -1203,6 +1206,7 @@ generic_push_dummy_frame ()
     if (INNER_THAN (dummy_frame->fp, fp))	/* stale -- destroy! */
       {
 	dummy_frame_stack = dummy_frame->next;
+	free (dummy_frame->registers);
 	free (dummy_frame);
 	dummy_frame = dummy_frame_stack;
       }
@@ -1214,10 +1218,18 @@ generic_push_dummy_frame ()
 
   dummy_frame->pc   = read_register (PC_REGNUM);
   dummy_frame->sp   = read_register (SP_REGNUM);
+  dummy_frame->top  = dummy_frame->sp;
   dummy_frame->fp   = fp;
   read_register_bytes (0, dummy_frame->registers, REGISTER_BYTES);
   dummy_frame->next = dummy_frame_stack;
   dummy_frame_stack = dummy_frame;
+}
+
+void
+generic_save_dummy_frame_tos (sp)
+     CORE_ADDR sp;
+{
+  dummy_frame_stack->top = sp;
 }
 
 /* Function: pop_frame

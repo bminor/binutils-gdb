@@ -32,8 +32,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "annotate.h"
 #include "symfile.h"		/* for overlay functions */
 #include "top.h"
-
 #include <signal.h>
+#include "event-loop.h"
 
 /* Prototypes for local functions */
 
@@ -53,8 +53,13 @@ static void delete_breakpoint_current_contents PARAMS ((PTR));
 
 static void set_follow_fork_mode_command PARAMS ((char *arg, int from_tty, struct cmd_list_element *c));
 
+static void complete_execution PARAMS ((void));
+
 int inferior_ignoring_startup_exec_events = 0;
 int inferior_ignoring_leading_exec_events = 0;
+
+/* In asynchronous mode, but simulating synchronous execution. */
+int sync_execution = 0;
 
 /* wait_for_inferior and normal_stop use this to notify the user
    when the inferior stopped in a different thread than it had been
@@ -1006,9 +1011,13 @@ The same program may be running in another process.");
 
   /* Wait for it to stop (if not standalone)
      and in any case decode why it stopped, and act accordingly.  */
-
-  wait_for_inferior ();
-  normal_stop ();
+  /* Do this only if we are not using the event loop, or if the target
+     does not support asynchronous execution. */
+  if (!async_p || !target_has_async)
+    {
+      wait_for_inferior ();
+      normal_stop ();
+    }
 }
 
 /* Record the pc and sp of the program the last time it stopped.
@@ -1021,7 +1030,6 @@ static char *prev_func_name;
 
 
 /* Start remote-debugging of a machine over a serial link.  */
-
 void
 start_remote ()
 {
@@ -1029,8 +1037,24 @@ start_remote ()
   init_wait_for_inferior ();
   stop_soon_quietly = 1;
   trap_expected = 0;
-  wait_for_inferior ();
-  normal_stop ();
+
+  /* Go on waiting only in case gdb is not started in async mode, or
+     in case the target doesn't support async execution. */
+  if (!async_p || !target_has_async)
+    {
+      wait_for_inferior ();
+      normal_stop ();
+    }
+  else
+    {
+      /* The 'tar rem' command should always look synchronous,
+	 i.e. display the prompt only once it has connected and
+	 started the target. */
+      sync_execution = 1;
+      push_prompt ("", "", "");
+      delete_file_handler (input_fd);
+      target_executing = 1;
+    }
 }
 
 /* Initialize static vars when a new inferior begins.  */
@@ -1177,6 +1201,72 @@ wait_for_inferior ()
 	break;
     }
   do_cleanups (old_cleanups);
+}
+
+/* Asynchronous version of wait_for_inferior. It is called by the
+   event loop whenever a change of state is detected on the file
+   descriptor corresponding to the target. It can be called more than
+   once to complete a single execution command. In such cases we need
+   to keep the state in a global variable ASYNC_ECSS. If it is the
+   last time that this function is called for a single execution
+   command, then report to the user that the inferior has stopped, and
+   do the necessary cleanups. */
+
+struct execution_control_state async_ecss;
+struct execution_control_state *async_ecs;
+
+void
+fetch_inferior_event ()
+{
+  static struct cleanup *old_cleanups;
+
+  async_ecs = &async_ecss;  
+
+  if (!async_ecs->wait_some_more)
+    {
+      old_cleanups = make_exec_cleanup (delete_breakpoint_current_contents,
+				   &step_resume_breakpoint);
+      make_exec_cleanup (delete_breakpoint_current_contents,
+		    &through_sigtramp_breakpoint);
+
+      /* Fill in with reasonable starting values.  */
+      init_execution_control_state (async_ecs);
+
+      thread_step_needed = 0;
+
+      /* We'll update this if & when we switch to a new thread. */
+      if (may_switch_from_inferior_pid)
+	switched_from_inferior_pid = inferior_pid;
+
+      overlay_cache_invalid = 1;
+
+      /* We have to invalidate the registers BEFORE calling target_wait
+	 because they can be loaded from the target while in target_wait.
+	 This makes remote debugging a bit more efficient for those
+	 targets that provide critical registers as part of their normal
+	 status mechanism. */
+
+      registers_changed ();
+    }
+
+  if (target_wait_hook)
+    async_ecs->pid = target_wait_hook (async_ecs->waiton_pid, async_ecs->wp);
+  else
+    async_ecs->pid = target_wait (async_ecs->waiton_pid, async_ecs->wp);
+
+  /* Now figure out what to do with the result of the result.  */
+  handle_inferior_event (async_ecs);
+
+  if (!async_ecs->wait_some_more)
+    {
+      do_exec_cleanups (old_cleanups);
+      normal_stop ();
+      /* Is there anything left to do for the command issued to
+         complete? */
+      do_all_continuations ();
+      /* Reset things after target has stopped for the async commands. */
+      complete_execution ();
+    }
 }
 
 /* Prepare an execution control state for looping through a
@@ -3010,6 +3100,25 @@ stopped_for_shlib_catchpoint (bs, cp_p)
   return 0;
 }
 
+
+/* Reset proper settings after an asynchronous command has finished.
+   If the execution command was in synchronous mode, register stdin
+   with the event loop, and reset the prompt. */
+static void
+complete_execution ()
+{
+extern cleanup_sigint_signal_handler PARAMS ((void));
+
+  if (sync_execution)
+    {
+      add_file_handler (input_fd, (file_handler_func *) call_readline, 0);
+      pop_prompt ();
+      sync_execution = 0;
+      cleanup_sigint_signal_handler ();
+      display_gdb_prompt (0);
+    }
+  target_executing = 0;
+}
 
 /* Here to return control to GDB when the inferior stops for real.
    Print appropriate messages, remove breakpoints, give terminal our modes.

@@ -290,6 +290,7 @@ gdb_do_one_event ()
     }
   return result;
 }
+
 
 /* Start up the event loop. This is the entry point to the event loop
    from the command loop. */
@@ -752,26 +753,27 @@ invoke_async_signal_handler ()
    Free the space allocated for it.  */
 void
 delete_async_signal_handler (async_handler_ptr)
-     async_signal_handler *async_handler_ptr;
+     async_signal_handler **async_handler_ptr;
 {
   async_signal_handler *prev_ptr;
 
-  if (sighandler_list.first_handler == async_handler_ptr)
+  if (sighandler_list.first_handler == (*async_handler_ptr))
     {
-      sighandler_list.first_handler = async_handler_ptr->next_handler;
+      sighandler_list.first_handler = (*async_handler_ptr)->next_handler;
       if (sighandler_list.first_handler == NULL)
 	sighandler_list.last_handler = NULL;
     }
   else
     {
       prev_ptr = sighandler_list.first_handler;
-      while (prev_ptr->next_handler != async_handler_ptr)
+      while (prev_ptr->next_handler != (*async_handler_ptr) && prev_ptr)
 	prev_ptr = prev_ptr->next_handler;
-      prev_ptr->next_handler = async_handler_ptr->next_handler;
-      if (sighandler_list.last_handler == async_handler_ptr)
+      prev_ptr->next_handler = (*async_handler_ptr)->next_handler;
+      if (sighandler_list.last_handler == (*async_handler_ptr))
 	sighandler_list.last_handler = prev_ptr;
     }
-  free ((char *) async_handler_ptr);
+  free ((char *) (*async_handler_ptr));
+  (*async_handler_ptr) = NULL;
 }
 
 /* Is it necessary to call invoke_async_signal_handler? */

@@ -272,6 +272,7 @@ extern void do_cleanups PARAMS ((struct cleanup *));
 extern void do_final_cleanups PARAMS ((struct cleanup *));
 extern void do_my_cleanups PARAMS ((struct cleanup **, struct cleanup *));
 extern void do_run_cleanups PARAMS ((struct cleanup *));
+extern void do_exec_cleanups PARAMS ((struct cleanup *));
 
 extern void discard_cleanups PARAMS ((struct cleanup *));
 extern void discard_final_cleanups PARAMS ((struct cleanup *));
@@ -289,6 +290,8 @@ extern struct cleanup *make_my_cleanup PARAMS ((struct cleanup **,
                                                 make_cleanup_func, void *));
 
 extern struct cleanup *make_run_cleanup PARAMS ((make_cleanup_func, void *));
+
+extern struct cleanup *make_exec_cleanup PARAMS ((make_cleanup_func, void *));
 
 extern struct cleanup *save_cleanups PARAMS ((void));
 extern struct cleanup *save_final_cleanups PARAMS ((void));
@@ -368,6 +371,11 @@ extern GDB_FILE *gdb_stderr;
    *_unfiltered. In the very near future that restriction shall be
    removed - either call shall be unfiltered. (cagney 1999-06-13). */
 extern GDB_FILE *gdb_stdlog;
+/* Target output that should bypass normal stdout/stderr filtering.
+   For momement, always call this stream using *_unfiltered. In the
+   very near future that restriction shall be removed - either call
+   shall be unfiltered. (cagney 1999-07-02). */
+extern GDB_FILE *gdb_stdtarg;
 
 #if defined(TUI)
 #include "tui.h"
@@ -613,6 +621,34 @@ extern struct command_line *read_command_lines PARAMS ((char *, int));
 
 extern void free_command_lines PARAMS ((struct command_line **));
 
+/* To continue the execution commands when running gdb asynchronously. 
+   A continuation structure contains a pointer to a function to be called 
+   to finish the command, once the target has stopped. Such mechanism is
+   used bt the finish and until commands, and in the remote protocol
+   when opening an extended-remote connection. */
+
+struct continuation_arg
+{
+  struct continuation_arg *next;
+  PTR data;
+};
+
+struct continuation
+{
+  void (*continuation_hook) PARAMS ((struct continuation_arg *));
+  struct continuation_arg *arg_list;
+  struct continuation *next;
+}
+continuation;
+
+/* In infrun.c. */
+extern struct continuation *cmd_continuation;
+
+/* From utils.c */
+void add_continuation PARAMS ((void (*) PARAMS ((struct continuation_arg *)), 
+			       struct continuation_arg *));
+void do_all_continuations PARAMS ((void));
+
 /* String containing the current directory (what getwd would return).  */
 
 extern char *current_directory;
@@ -793,6 +829,8 @@ enum return_reason {
   /* Any other error.  */
   RETURN_ERROR
 };
+
+#define	ALL_CLEANUPS	((struct cleanup *)0)
 
 #define RETURN_MASK_QUIT (1 << (int)RETURN_QUIT)
 #define RETURN_MASK_ERROR (1 << (int)RETURN_ERROR)
@@ -1109,7 +1147,6 @@ extern void (*flush_hook) PARAMS ((GDB_FILE *stream));
 extern void (*create_breakpoint_hook) PARAMS ((struct breakpoint *b));
 extern void (*delete_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
 extern void (*modify_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
-extern void (*target_output_hook) PARAMS ((char *));
 extern void (*interactive_hook) PARAMS ((void));
 extern void (*registers_changed_hook) PARAMS ((void));
 extern void (*readline_begin_hook) PARAMS ((char *, ...));

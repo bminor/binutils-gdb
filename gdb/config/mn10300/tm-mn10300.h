@@ -128,10 +128,13 @@ extern void mn10300_pop_frame PARAMS ((struct frame_info *));
 #define FIX_CALL_DUMMY(DUMMY, START, FUNADDR, NARGS, ARGS, TYPE, GCCP)
 #define CALL_DUMMY_ADDRESS()         entry_point_address ()
 
+#define TARGET_READ_FP() read_sp ()
+
 extern CORE_ADDR mn10300_push_return_address PARAMS ((CORE_ADDR, CORE_ADDR));
 #define PUSH_RETURN_ADDRESS(PC, SP)  mn10300_push_return_address (PC, SP)
 
 #define PUSH_DUMMY_FRAME	generic_push_dummy_frame ()
+#define SAVE_DUMMY_FRAME_TOS(SP) generic_save_dummy_frame_tos (SP)
 
 extern CORE_ADDR
 mn10300_push_arguments PARAMS ((int, struct value **, CORE_ADDR,

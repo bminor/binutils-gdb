@@ -1636,6 +1636,10 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
      wouldn't happen.  (See store_inferior_registers in sparc-nat.c.)  */
   write_sp (sp);
 
+#ifdef SAVE_DUMMY_FRAME_TOS
+  SAVE_DUMMY_FRAME_TOS (sp);
+#endif
+
   {
     char retbuf[REGISTER_BYTES];
     char *name;

@@ -1,3 +1,203 @@
+1999-07-05  Jason Molenda  (jsm@bugshack.cygnus.com)
+
+	* remote.c: Include <sys/select.h> if it exists in order to pick up
+	FD_SET et al defns.
+	* remote-os9k.c:  Same.
+	* remote-st.c:  Same.
+	* ser-tcp.c:  Same.
+	* ser-unix.c:  Same.
+	* sparcl-tdep.c:  Same.
+
+Fri Jul  2 19:38:43 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* top.c (target_output_hook): Delete definition.
+	* defs.h (target_output_hook): Delete declaration.
+
+	* remote.c (remote_console_output): Delete call to
+ 	target_output_hook().  Send target output to gdb_stdtarg using an
+ 	unfiltered write. Make more robust.
+
+	* remote-sim.c (gdb_os_write_stdout, gdb_os_write_stderr):
+ 	Ditto. For moment, do not try to separate target stdout and stderr
+ 	streams.
+
+	* defs.h (gdb_stdtarg): New global. Output from target and
+ 	simulators.
+
+1999-07-02  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* top.c (return_to_top_level): Do all the exec_cleanups too.
+
+	* event-top.c (command_handler): Set up for a continuation, if we
+ 	are in the middle of running an execution command which will
+ 	finish later on. Do cleanups, an display of time/space only if not
+ 	running with an async target or not running an execution command.
+	(command_line_handler_continuation): New function. Continuation
+ 	for command_line_handler.
+
+	* utils.c (exec_cleanup_chain): New cleanup chain to be used in
+ 	async mode for the execution commands.
+	(make_exec_cleanup): New function. Add a cleanup to the
+ 	exec_cleanup_chain.
+	(do_exec_cleanups): New Function. Do cleanups on the
+ 	exec_cleanup_chain.
+	(add_continuation): New function. Add a new continuation to the
+ 	cmd_continuation list.
+	(do_all_continuations): New function. Do all the continuations on
+ 	the cmd_continuation list.
+
+	* top.h (ALL_CLEANUPS): Move from here to defs.h.
+
+	* defs.h (struct continuation_arg): New structure. Arg to pass to
+ 	the call to a command continuation.
+	(struct continuation): New structure. Continuation for an
+ 	execution command.
+	(ALL_CLEANUPS): Move here from top.h.
+	
+	* remote.c (remote_async_open_1): Set things up for telling the
+ 	target we are running the extended protocol, only after the target
+ 	has stopped.
+	(set_extended_protocol): New function. Tell the target we are
+ 	using the extended protocol.
+	(remote_async_resume): Set things up for sync execution only if
+ 	this is the first time we are called.
+
+	* breakpoint.c (until_break_command_continuation): New function.
+  	Stuff to be done after the target stops during the 'until'
+ 	command.
+	(until_break_command): Set things up for completing the 'until'
+ 	command later on. Do the final cleanups only if not running
+ 	asynchronously or async execution is not supported by the target.
+
+	* infcmd.c (until_command): Recognize '&' at end of command and
+ 	handle it properly.
+	(finish_command_continuation): New function. Do whatever is needed
+ 	after the target has stopped.
+	(finish_command): Recognize '&' at end of command and handle it
+ 	properly. Don't do stuff needed after target has stopped if
+ 	running asynchronously and target has async. Use exec_cleanup_chain
+	if running asynchronously and target is asynchronous.
+
+	* infrun.c (cmd_continuation): New gloabl variable. Used to
+ 	coplete execution commands in async mode, after the target has
+ 	stoped.
+	(fetch_inferior_event): Use exec_cleanup_chain, instead of
+ 	cleanup_chain. Do all the exec cleanups at the end. Do all the
+ 	continuations at the end. Call complete_execution from here,
+ 	instead of normal_stop.
+	(complete_execution): Cleanup the signals handlers for SIGINT
+ 	before displaying the prompt.
+	(start_remote): Set target_executing to 1.
+	(normal_stop): Don't call complete_execution from here.
+	
+Thu Jul  1 19:14:30 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* blockframe.c (struct dummy_frame): Add member ``top''.
+	(generic_push_dummy_frame): Initialize top to sp.
+	(generic_save_dummy_frame_tos): New function.  Initialize top.
+	(generic_find_dummy_frame): Check for the top of the frame.
+
+	* blockframe.c (generic_push_dummy_frame): Free the dummy_frame
+ 	registers.
+
+	* config/mn10300/tm-mn10300.h (SAVE_DUMMY_FRAME_TOS): Define.
+	(TARGET_READ_FP): Return the SP as a best guess.
+
+Wed Jun 30 15:45:48 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* configure.host (hppa*-*-hpux11*): Accept any version of hpux11
+	instead of hpux11.0*.
+
+1999-06-30  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* source.c (directory_command): Add missing test for from_tty. 
+
+1999-06-29  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* remote.c: Include event-loop.h.
+	(remote_async_ops, extended_async_remote_ops): Define new target
+ 	vector structures for asynchronous debugging.
+	(remote_async_open): New function. Asynchronous version of
+ 	remote_open.
+	(extended_remote_async_open): New function. Asynchronous version
+ 	of extended_remote_open.
+	(remote_async_open_1): New function. Async version of
+ 	remote_open_1.
+	(remote_async_detach): New function. Async version of
+ 	remote_detach.
+	(remote_async_resume): New function. Async version of
+ 	remote_resume.
+	(initialize_sigint_signal_handler, handle_remote_sigint,
+ 	handle_remote_sigint_twice, async_remote_interrupt,
+ 	async_remote_interrupt_twice, cleanup_sigint_signal_handler): New
+ 	functions. Used for handling ^C while target is running.
+	(remote_async_wait): New function. Async version of remote_wait.
+	(remote_async_kill): New function. Async version of remote_kill.
+	(extended_remote_async_create_inferior): New function. Async
+ 	version of extended_remote_create_inferior.
+	(init_remote_async_ops): New function. Initialize target vector
+ 	for target async.
+	(init_extended_async_remote_ops): New function. Initialize target
+ 	vector for target extended-async.
+	(_initialize_remote): Initialize remote_async_ops and
+ 	extended_async_remote_ops.
+
+	* infrun.c: Include "event-loop.h".
+	(sync_execution): new global variable.
+	(proceed): Invoke wait_for_inferior and normal_stop only if not
+ 	running in async mode or if target doesn't support async
+ 	execution.
+	(start_remote): Don't call wait_for_inferior and normal_stop if
+ 	not running in async mode or if target not async. If running async
+ 	and target is async, start the target in simulated synchronous
+ 	mode.
+	(async_ecss, async_ecs): New global vars, for inferior state.
+	(fetch_inferior_event): New function. Async version of
+ 	wait_for_inferior.
+	(complete_execution): New function. Reset of gdb prompt and stdin,
+ 	after inferior execution has completed.
+	(normal_stop): Call complete_execution at end of asynchronous
+ 	execution.
+
+	* infcmd.c (strip_bg_char): New function to detect the background
+ 	execution char '&'.
+	(run_command): Modify to support background and foreground
+ 	execution in async mode.
+	(continue_command): Ditto.
+	(step_1): Ditto.
+	(jump_command): Ditto.
+	(interrupt_target_command): New function. Interrupt the
+ 	target execution.
+	(_initialize_infcmd): Add new command 'interrupt'.
+	
+	* top.c (target_executing): New global variable.
+	(execute_command): Reject commands that cannot be executed while
+	the target is running asynchronously.
+
+	* event-top.c (push_prompt): Make non static.
+	(pop_prompt): Make non static. If the current prompt is empty,
+ 	don't try to copy it over the previous one.
+	(handle_sigint): Make non static.
+	(command_handler): Do the cleanups only when not executing with an
+ 	asynchronous target.
+
+	* event-loop.c (delete_async_signal_handler): Pass a pointer to a
+ 	pointer to a signal handler, so that is can be freed at the end.
+
+	* target.c (update_current_target): Inherit to_has_async_exec.
+
+	* inferior.h: Add global variables target_executing, and
+ 	sync_execution. Export function fetch_inferior_event.
+
+	* event-loop.h: Add push_prompt, pop_prompt, handle_sigint to the
+ 	exported functions. Update prototype for delete_signal_handler.
+
+	* target.h (struct target_ops): New target op: to_has_async_exec.
+	(target_has_async): New macro.
+
+	* Makefile.in (infrun.o): Add dependency on event-loop.h.
+	(remote.o): Ditto.
+
 1999-06-28  Jim Blandy  <jimb@zwingli.cygnus.com>
 
 	* solib.c (clear_solib): Don't disable breakpoints if we're
@@ -136,6 +336,7 @@ Wed Jun 23 15:30:46 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	* Makefile.in (top_h): Define.
 	(event-loop.o): Add dependencies on top.h and defs.h.
 	(event-top.o): Add dependency on terminal.h.
+
 	* event-loop.c: Get rid of #include <readline.h>.
 
 	* event-loop.h: Get rid of nested #include's. 

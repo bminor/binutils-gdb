@@ -98,13 +98,6 @@ extern DI make_struct_di (SI, SI);
 #define MAKEDI(hi, lo) (make_struct_di ((hi), (lo)))
 #endif
 
-/* FIXME: Need to provide libraries if these aren't appropriate for target,
-   or user's needs.  */
-typedef float SF;  /* FIXME: struct */
-typedef double DF; /* FIXME: struct */
-typedef struct { SI parts[3]; } XF; /* FIXME: configure, provide library */
-typedef struct { SI parts[4]; } TF; /* FIXME: configure, provide library */
-
 /* These are used to record extracted raw data from an instruction, among other
    things.  It must be a host data type, and not a target one.  */
 typedef int INT;
@@ -112,5 +105,7 @@ typedef unsigned int UINT;
 
 typedef unsigned_address ADDR;  /* FIXME: wip*/
 typedef unsigned_address IADDR; /* FIXME: wip*/
+
+/* fp types are in cgen-fpu.h */
 
 #endif /* CGEN_TYPES_H */

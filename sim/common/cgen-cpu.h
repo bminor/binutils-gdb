@@ -82,6 +82,10 @@ typedef struct {
   const CGEN_INSN * (*get_idata) (SIM_CPU *, int);
 #define CPU_GET_IDATA(cpu) ((cpu)->cgen_cpu.get_idata)
 
+  /* Floating point support.  */
+  CGEN_FPU fpu;
+#define CGEN_CPU_FPU(cpu) (& (cpu)->cgen_cpu.fpu)
+
   /* Disassembler.  */
   CGEN_DISASSEMBLER *disassembler;
 #define CPU_DISASSEMBLER(cpu) ((cpu)->cgen_cpu.disassembler)

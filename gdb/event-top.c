@@ -35,15 +35,16 @@
 extern void _initialize_event_loop PARAMS ((void));
 
 static void command_line_handler PARAMS ((char *));
+static void command_line_handler_continuation PARAMS ((struct continuation_arg *));
 void gdb_readline2 PARAMS ((void));
-static void pop_prompt PARAMS ((void));
-static void push_prompt PARAMS ((char *, char *, char *));
+void pop_prompt PARAMS ((void));
+void push_prompt PARAMS ((char *, char *, char *));
 static void change_line_handler PARAMS ((void));
 static void change_annotation_level PARAMS ((void));
 static void command_handler PARAMS ((char *));
 
 /* Signal handlers. */
-static void handle_sigint PARAMS ((int));
+void handle_sigint PARAMS ((int));
 static void handle_sigquit PARAMS ((int));
 static void handle_sighup PARAMS ((int));
 static void handle_sigfpe PARAMS ((int));
@@ -331,7 +332,7 @@ change_annotation_level ()
    parts: prefix, prompt, suffix. Usually prefix and suffix are empty
    strings, except when the annotation level is 2. Memory is allocated
    within savestring for the new prompt. */
-static void
+void
 push_prompt (prefix, prompt, suffix)
      char *prefix;
      char *prompt;
@@ -340,6 +341,9 @@ push_prompt (prefix, prompt, suffix)
   the_prompts.top++;
   PREFIX (0) = savestring (prefix, strlen (prefix));
 
+  /* Note that this function is used by the set annotate 2
+     command. This is why we take care of saving the old prompt
+     in case a new one is not specified. */
   if (prompt)
     PROMPT (0) = savestring (prompt, strlen (prompt));
   else
@@ -349,14 +353,21 @@ push_prompt (prefix, prompt, suffix)
 }
 
 /* Pops the top of the prompt stack, and frees the memory allocated for it. */
-static void
+void
 pop_prompt ()
 {
-  if (strcmp (PROMPT (0), PROMPT (-1)))
-    {
-      free (PROMPT (-1));
-      PROMPT (-1) = savestring (PROMPT (0), strlen (PROMPT (0)));
-    }
+  /* If we are not during a 'synchronous' execution command, in which
+     case, the top prompt would be empty. */
+  if (strcmp (PROMPT (0), ""))
+    /* This is for the case in which the prompt is set while the
+       annotation level is 2. The top prompt will be changed, but when
+       we return to annotation level < 2, we want that new prompt to be
+       in effect, until the user does another 'set prompt'. */
+    if (strcmp (PROMPT (0), PROMPT (-1)))
+      {
+	free (PROMPT (-1));
+	PROMPT (-1) = savestring (PROMPT (0), strlen (PROMPT (0)));
+      }
 
   free (PREFIX (0));
   free (PROMPT (0));
@@ -376,6 +387,8 @@ command_handler (command)
 {
   struct cleanup *old_chain;
   int stdin_is_tty = ISATTY (stdin);
+  struct continuation_arg *arg1;
+  struct continuation_arg *arg2;
   long time_at_cmd_start;
 #ifdef HAVE_SBRK
   long space_at_cmd_start = 0;
@@ -416,11 +429,72 @@ command_handler (command)
     }
 
   execute_command (command, instream == stdin);
+ 
+  /* Set things up for this function to be compete later, once the
+     executin has completed, if we are doing an execution command,
+     otherwise, just go ahead and finish. */
+  if (target_has_async && target_executing)
+    {
+      arg1 = 
+	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
+      arg2 = 
+	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
+      arg1->next = arg2;
+      arg2->next = NULL;
+      arg1->data = (PTR) time_at_cmd_start;
+      arg2->data = (PTR) space_at_cmd_start;
+      add_continuation (command_line_handler_continuation, arg1);
+    }
 
-  /* Do any commands attached to breakpoint we stopped at.  */
+  /* Do any commands attached to breakpoint we stopped at. Only if we
+     are always running synchronously. Or if we have just executed a
+     command that doesn't start the target. */
+  if (!target_has_async || !target_executing)
+    {
+      bpstat_do_actions (&stop_bpstat);
+      do_cleanups (old_chain);
+    
+      if (display_time)
+	{
+	  long cmd_time = get_run_time () - time_at_cmd_start;
+
+	  printf_unfiltered ("Command execution time: %ld.%06ld\n",
+			     cmd_time / 1000000, cmd_time % 1000000);
+	}
+
+      if (display_space)
+	{
+#ifdef HAVE_SBRK
+	  extern char **environ;
+	  char *lim = (char *) sbrk (0);
+	  long space_now = lim - (char *) &environ;
+	  long space_diff = space_now - space_at_cmd_start;
+
+	  printf_unfiltered ("Space used: %ld (%c%ld for this command)\n",
+			     space_now,
+			     (space_diff >= 0 ? '+' : '-'),
+			     space_diff);
+#endif
+	}
+    }
+}
+
+/* Do any commands attached to breakpoint we stopped at. Only if we
+   are always running synchronously. Or if we have just executed a
+   command that doesn't start the target. */
+void
+command_line_handler_continuation (arg)
+     struct continuation_arg *arg;
+{ 
+  extern int display_time;
+  extern int display_space;
+
+  long time_at_cmd_start = (long) arg->data;
+  long space_at_cmd_start = (long) arg->next->data;
+
   bpstat_do_actions (&stop_bpstat);
-  do_cleanups (old_chain);
-
+  /*do_cleanups (old_chain);*/  /*?????FIXME?????*/
+    
   if (display_time)
     {
       long cmd_time = get_run_time () - time_at_cmd_start;
@@ -428,7 +502,6 @@ command_handler (command)
       printf_unfiltered ("Command execution time: %ld.%06ld\n",
 			 cmd_time / 1000000, cmd_time % 1000000);
     }
-
   if (display_space)
     {
 #ifdef HAVE_SBRK
@@ -797,7 +870,7 @@ mark_async_signal_handler_wrapper (token)
 
 /* Tell the event loop what to do if SIGINT is received. 
    See event-signal.c. */
-static void 
+void 
 handle_sigint (sig)
      int sig;
 {

@@ -275,7 +275,9 @@ mn10300_analyze_prologue (fi, pc)
   /* Do nothing if we couldn't find the start of this function or if we're
      stopped at the first instruction in the prologue.  */
   if (status == 0)
-    return pc;
+    {
+      return pc;
+    }
 
   /* If we're in start, then give up.  */
   if (strcmp (name, "start") == 0)
