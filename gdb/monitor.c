@@ -71,6 +71,8 @@ static void monitor_command PARAMS ((char *args, int fromtty));
 static void monitor_fetch_register PARAMS ((int regno));
 static void monitor_store_register PARAMS ((int regno));
 
+static int monitor_printable_string PARAMS ((char *newstr, char *oldstr));
+static void monitor_error PARAMS ((char *format, CORE_ADDR memaddr, int len, char *string, int final_char));
 static void monitor_detach PARAMS ((char *args, int from_tty));
 static void monitor_resume PARAMS ((int pid, int step, enum target_signal sig));
 static void monitor_interrupt PARAMS ((int signo));
@@ -122,11 +124,7 @@ static void (*ofunc)();		/* Old SIGINT signal handler */
 #if ! defined(EXTRA_RDEBUG)
 #define EXTRA_RDEBUG 0
 #endif
-#if EXTRA_RDEBUG
-#define RDEBUG(stuff) { if (remote_debug) printf stuff ; }
-#else
-#define RDEBUG(stuff) {}
-#endif
+#define RDEBUG(stuff) { if (EXTRA_RDEBUG && remote_debug) printf stuff ; }
 
 /* Descriptor for I/O to remote machine.  Initialize it to NULL so
    that monitor_open knows that we don't have a file open when the
@@ -148,6 +146,69 @@ static int dump_reg_flag;	/* Non-zero means do a dump_registers cmd when
 static DCACHE *remote_dcache;
 static int first_time=0;	/* is this the first time we're executing after 
 					gaving created the child proccess? */
+
+/* Convert a string into a printable representation, Return # byte in the
+   new string.  */
+
+static int
+monitor_printable_string (newstr, oldstr)
+     char *newstr;
+     char *oldstr;
+{
+  char *save = newstr;
+  int ch;
+
+  while ((ch = *oldstr++) != '\0')
+    {
+      switch (ch)
+        {
+	default:
+	  if (isprint (ch))
+	    *newstr++ = ch;
+
+	  else
+	    {
+	      sprintf (newstr, "\\x%02x", ch & 0xff);
+	      newstr += 4;
+	    }
+	  break;
+
+	case '\\': *newstr++ = '\\'; *newstr++ = '\\';	break;
+	case '\b': *newstr++ = '\\'; *newstr++ = 'b';	break;
+	case '\f': *newstr++ = '\\'; *newstr++ = 't';	break;
+	case '\n': *newstr++ = '\\'; *newstr++ = 'n';	break;
+	case '\r': *newstr++ = '\\'; *newstr++ = 'r';	break;
+	case '\t': *newstr++ = '\\'; *newstr++ = 't';	break;
+	case '\v': *newstr++ = '\\'; *newstr++ = 'v';	break;
+        }
+    }
+
+  *newstr++ = '\0';
+  return newstr - save;
+}
+
+/* Print monitor errors with a string, converting the string to printable
+   representation.  */
+
+static void
+monitor_error (format, memaddr, len, string, final_char)
+     char *format;
+     CORE_ADDR memaddr;
+     int len;
+     char *string;
+     int final_char;
+{
+  int real_len = (len == 0 && string != (char *)0) ? strlen (string) : len;
+  char *safe_string = alloca ((real_len * 4) + 1);
+  char *p, *q;
+  int ch;
+  int safe_len = monitor_printable_string (safe_string, string);
+
+  if (final_char)
+    error (format, (int)memaddr, p - safe_string, safe_string, final_char);
+  else
+    error (format, (int)memaddr, p - safe_string, safe_string);
+}
 
 /* Convert hex digit A to a number.  */
 
@@ -258,17 +319,23 @@ monitor_printf_noecho (va_alist)
 
   monitor_vsprintf (sndbuf, pattern, args);
 
+  len = strlen (sndbuf);
+  if (len + 1 > sizeof sndbuf)
+    abort ();
+
 #if 0
   if (remote_debug > 0)
     puts_debug ("sent -->", sndbuf, "<--");
 #endif
-  RDEBUG(("sent[%s]\n",sndbuf)) ;
+#if EXTRA_RDEBUG
+  if (remote_debug)
+    {
+      char *safe_string = (char *) alloca ((strlen (sndbuf) * 4) + 1);
+      monitor_printable_string (safe_string, sndbuf);
+      printf ("sent[%s]\n", safe_string);
+    }
+#endif
   
-  len = strlen (sndbuf);
-
-  if (len + 1 > sizeof sndbuf)
-    abort ();
-
   monitor_write (sndbuf, len);
 }
 
@@ -297,14 +364,22 @@ monitor_printf (va_alist)
 
   monitor_vsprintf (sndbuf, pattern, args);
 
+  len = strlen (sndbuf);
+  if (len + 1 > sizeof sndbuf)
+    abort ();
+
 #if 0
   if (remote_debug > 0)
     puts_debug ("sent -->", sndbuf, "<--");
 #endif
-  RDEBUG(("sent[%s]\n",sndbuf)) 
-  len = strlen (sndbuf);
-  if (len + 1 > sizeof sndbuf)
-    abort ();
+#if EXTRA_RDEBUG
+  if (remote_debug)
+    {
+      char *safe_string = (char *) alloca ((len * 4) + 1);
+      monitor_printable_string (safe_string, sndbuf);
+      printf ("sent[%s]\n", safe_string);
+    }
+#endif
 
   monitor_write (sndbuf, len);
 
@@ -449,7 +524,15 @@ monitor_expect (string, buf, buflen)
   int obuflen = buflen;
   int c;
   extern struct target_ops *targ_ops;
-  RDEBUG(("MON Expecting '%s'\n",string)) ;
+
+#if EXTRA_RDEBUG
+  if (remote_debug)
+    {
+      char *safe_string = (char *) alloca ((strlen (string) * 4) + 1);
+      monitor_printable_string (safe_string, string);
+      printf ("MON Expecting '%s'\n", safe_string);
+    }
+#endif
 
   immediate_quit = 1;
   while (1)
@@ -1622,8 +1705,8 @@ monitor_read_memory_single (memaddr, myaddr, len)
       if ((c == '0') && ((c = readchar (timeout)) == 'x'))
 	;
       else
-	error ("monitor_read_memory_single (0x%x):  bad response from monitor: %.*s%c.",
-	       memaddr, i, membuf, c);
+	monitor_error ("monitor_read_memory_single (0x%x):  bad response from monitor: %.*s%c.",
+		       memaddr, i, membuf, c);
     }
   for (i = 0; i < len * 2; i++)
     {
@@ -1637,8 +1720,8 @@ monitor_read_memory_single (memaddr, myaddr, len)
 	  if (c == ' ')
 	    continue;
 
-	  error ("monitor_read_memory_single (0x%x):  bad response from monitor: %.*s%c.",
-		 memaddr, i, membuf, c);
+	  monitor_error ("monitor_read_memory_single (0x%x):  bad response from monitor: %.*s%c.",
+			 memaddr, i, membuf, c);
 	}
 
       membuf[i] = c;
@@ -1667,8 +1750,8 @@ monitor_read_memory_single (memaddr, myaddr, len)
   val = strtoul (membuf, &p, 16);
 
   if (val == 0 && membuf == p)
-    error ("monitor_read_memory_single (0x%x):  bad value from monitor: %s.",
-	   memaddr, membuf);
+    monitor_error ("monitor_read_memory_single (0x%x):  bad value from monitor: %s.",
+		   memaddr, 0, membuf, 0);
 
   /* supply register stores in target byte order, so swap here */
 
@@ -1693,6 +1776,12 @@ monitor_read_memory (memaddr, myaddr, len)
   int resp_len;
   int i;
   CORE_ADDR dumpaddr;
+
+  if (len <= 0)
+    {
+      RDEBUG (("Zero length call to monitor_read_memory\n"));
+      return 0;
+    }
 
   if (remote_debug) printf("MON read block ta(%08x) ha(%08x) %d\n",
 	  (unsigned long) memaddr , (unsigned long)myaddr, len);
@@ -1736,8 +1825,8 @@ monitor_read_memory (memaddr, myaddr, len)
       resp_len = monitor_expect (current_monitor->getmem.term, buf, sizeof buf); /* get response */
 
       if (resp_len <= 0)
-	error ("monitor_read_memory (0x%x):  excessive response from monitor: %.*s.",
-	       memaddr, resp_len, buf);
+	monitor_error ("monitor_read_memory (0x%x):  excessive response from monitor: %.*s.",
+		       memaddr, resp_len, buf, 0);
 
       if (current_monitor->getmem.term_cmd)
 	{
@@ -1767,15 +1856,15 @@ monitor_read_memory (memaddr, myaddr, len)
 			  &resp_strings);
 
       if (retval < 0)
-	error ("monitor_read_memory (0x%x):  bad response from monitor: %.*s.",
-	       memaddr, resp_len, buf);
+	monitor_error ("monitor_read_memory (0x%x):  bad response from monitor: %.*s.",
+		       memaddr, resp_len, buf, 0);
 
       p += resp_strings.end[0];
 #if 0
       p = strstr (p, current_monitor->getmem.resp_delim);
       if (!p)
-	error ("monitor_read_memory (0x%x):  bad response from monitor: %.*s.",
-	       memaddr, resp_len, buf);
+	monitor_error ("monitor_read_memory (0x%x):  bad response from monitor: %.*s.",
+		       memaddr, resp_len, buf, 0);
       p += strlen (current_monitor->getmem.resp_delim);
 #endif
     }
@@ -1819,15 +1908,16 @@ monitor_read_memory (memaddr, myaddr, len)
 	    break;
 
 	  if (*p == '\000' || *p == '\n' || *p == '\r')
-	    error ("monitor_read_memory (0x%x):  badly terminated response from monitor: %.*s", memaddr, resp_len, buf);
+	    monitor_error ("monitor_read_memory (0x%x):  badly terminated response from monitor: %.*s",
+			   memaddr, resp_len, buf, 0);
 	  p++;
 	}
 
       val = strtoul (p, &p1, 16);
 
       if (val == 0 && p == p1)
-	error ("monitor_read_memory (0x%x):  bad value from monitor: %.*s.", memaddr,
-	       resp_len, buf);
+	monitor_error ("monitor_read_memory (0x%x):  bad value from monitor: %.*s.",
+		       memaddr, resp_len, buf, 0);
 
       *myaddr++ = val;
 

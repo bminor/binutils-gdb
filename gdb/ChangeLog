@@ -1,3 +1,18 @@
+1998-12-08  Michael Meissner  <meissner@cygnus.com>
+
+	* monitor.c (monitor_printable_string): New function to convert a
+	string into a printable representation.
+	(monitor_error): Call error after converting string into printable
+	format.
+	(monitor_printf{,_noecho}): If EXTRA_RDEBUG is defined, convert
+	string into printable form before printing.
+	(monitor_expect): Ditto.
+	(monitor_read_memory{,_single}): Call monitor_error, not error.
+	(monitor_read_memory): Return immediately if length is 0.
+
+	* ppcbug-rom.c (init_ppc_cmds): Fill in dump_registers field,
+ 	which is now required.
+
 Mon Dec 14 11:01:39 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdbarch.h, gdbarch.c: Consolidate the semi-dynamic target system
