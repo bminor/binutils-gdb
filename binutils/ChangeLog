@@ -1,3 +1,12 @@
+Tue Mar 15 23:04:13 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* objcopy.c (filter_symbols): Use bfd_is_local_label to determine
+	if a symbol represents a compiler-generated local label.
+	(copy_object): Give the BFD backends a chance to copy any private
+	bfd data from the input BFD to the output BFD.
+	(setup_section): Give the BFD backends a chance to copy any private
+	section data from the input section to the output section.
+
 Mon Mar 14 11:15:58 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* objcopy.c (mangle_section): Delete unused function.
