@@ -1131,6 +1131,7 @@ read_dbx_symtab (section_offsets, objfile, text_addr, text_size)
   CORE_ADDR last_function_start = 0;
   struct cleanup *back_to;
   bfd *abfd;
+  int textlow_not_set;
 
   /* Current partial symtab */
   struct partial_symtab *pst;
@@ -1176,6 +1177,7 @@ read_dbx_symtab (section_offsets, objfile, text_addr, text_size)
   abfd = objfile->obfd;
   symbuf_end = symbuf_idx = 0;
   next_symbol_text_func = dbx_next_symbol_text;
+  textlow_not_set = 1;
 
   for (symnum = 0; symnum < DBX_SYMCOUNT (objfile); symnum++)
     {
@@ -1224,8 +1226,8 @@ read_dbx_symtab (section_offsets, objfile, text_addr, text_size)
 #define DBXREAD_ONLY
 #define START_PSYMTAB(ofile,secoff,fname,low,symoff,global_syms,static_syms)\
   start_psymtab(ofile, secoff, fname, low, symoff, global_syms, static_syms)
-#define END_PSYMTAB(pst,ilist,ninc,c_off,c_text,dep_list,n_deps)\
-  end_psymtab(pst,ilist,ninc,c_off,c_text,dep_list,n_deps)
+#define END_PSYMTAB(pst,ilist,ninc,c_off,c_text,dep_list,n_deps,textlow_not_set)\
+  end_psymtab(pst,ilist,ninc,c_off,c_text,dep_list,n_deps,textlow_not_set)
 
 #include "partial-stab.h"
     }
@@ -1249,7 +1251,7 @@ read_dbx_symtab (section_offsets, objfile, text_addr, text_size)
 		    ? (text_addr + section_offsets->offsets[SECT_OFF_TEXT])
 		    : lowest_text_address)
 		   + text_size,
-		   dependency_list, dependencies_used);
+		   dependency_list, dependencies_used, textlow_not_set);
     }
 
   do_cleanups (back_to);
@@ -1306,7 +1308,7 @@ start_psymtab (objfile, section_offsets,
 
 struct partial_symtab *
 end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
-	     capping_text, dependency_list, number_dependencies)
+	     capping_text, dependency_list, number_dependencies, textlow_not_set)
      struct partial_symtab *pst;
      char **include_list;
      int num_includes;
@@ -1314,12 +1316,13 @@ end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
      CORE_ADDR capping_text;
      struct partial_symtab **dependency_list;
      int number_dependencies;
+     int textlow_not_set;
 {
   int i;
   struct objfile *objfile = pst -> objfile;
 
   if (capping_symbol_offset != -1)
-      LDSYMLEN(pst) = capping_symbol_offset - LDSYMOFF(pst);
+    LDSYMLEN(pst) = capping_symbol_offset - LDSYMOFF(pst);
   pst->texthigh = capping_text;
 
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
@@ -1328,8 +1331,8 @@ end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
      we have to do some tricks to fill in texthigh and textlow.
      The first trick is in partial-stab.h: if we see a static
      or global function, and the textlow for the current pst
-     is still 0, then we use that function's address for 
-     the textlow of the pst.  */
+     is not set (ie: textlow_not_set), then we use that function's
+     address for the textlow of the pst.  */
 
   /* Now, to fill in texthigh, we remember the last function seen
      in the .o file (also in partial-stab.h).  Also, there's a hack in
@@ -1338,52 +1341,53 @@ end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
      a reliable texthigh by taking the address plus size of the
      last function in the file.  */
 
-  if (pst->texthigh == 0 && last_function_name) {
-    char *p;
-    int n;
-    struct minimal_symbol *minsym;
+  if (pst->texthigh == 0 && last_function_name)
+    {
+      char *p;
+      int n;
+      struct minimal_symbol *minsym;
 
-    p = strchr (last_function_name, ':');
-    if (p == NULL)
-      p = last_function_name;
-    n = p - last_function_name;
-    p = alloca (n + 1);
-    strncpy (p, last_function_name, n);
-    p[n] = 0;
+      p = strchr (last_function_name, ':');
+      if (p == NULL)
+	p = last_function_name;
+      n = p - last_function_name;
+      p = alloca (n + 1);
+      strncpy (p, last_function_name, n);
+      p[n] = 0;
     
-    minsym = lookup_minimal_symbol (p, pst->filename, objfile);
+      minsym = lookup_minimal_symbol (p, pst->filename, objfile);
 
-    if (minsym)
-      pst->texthigh = SYMBOL_VALUE_ADDRESS (minsym) +
-	(long) MSYMBOL_INFO (minsym);
+      if (minsym)
+	pst->texthigh = SYMBOL_VALUE_ADDRESS (minsym)
+	  + (long) MSYMBOL_INFO (minsym);
 
-    last_function_name = NULL;
-  }
+      last_function_name = NULL;
+    }
 
   /* this test will be true if the last .o file is only data */
-  if (pst->textlow == 0)
-    /* This loses if the text section really starts at address zero
-       (generally true when we are debugging a .o file, for example).
-       That is why this whole thing is inside SOFUN_ADDRESS_MAYBE_MISSING.  */
+  if (textlow_not_set)
     pst->textlow = pst->texthigh;
+  else
+    {
+      struct partial_symtab *p1;
 
-  /* If we know our own starting text address, then walk through all other
-     psymtabs for this objfile, and if any didn't know their ending text
-     address, set it to our starting address.  Take care to not set our
-     own ending address to our starting address, nor to set addresses on
-     `dependency' files that have both textlow and texthigh zero.  */
-  if (pst->textlow) {
-    struct partial_symtab *p1;
+      /* If we know our own starting text address, then walk through all other
+	 psymtabs for this objfile, and if any didn't know their ending text
+	 address, set it to our starting address.  Take care to not set our
+	 own ending address to our starting address, nor to set addresses on
+	 `dependency' files that have both textlow and texthigh zero.  */
 
-    ALL_OBJFILE_PSYMTABS (objfile, p1) {
-      if (p1->texthigh == 0  && p1->textlow != 0 && p1 != pst) {
-	p1->texthigh = pst->textlow;
-	/* if this file has only data, then make textlow match texthigh */
-	if (p1->textlow == 0)
-	  p1->textlow = p1->texthigh;
-      }
+      ALL_OBJFILE_PSYMTABS (objfile, p1)
+	{
+	  if (p1->texthigh == 0  && p1->textlow != 0 && p1 != pst)
+	    {
+	      p1->texthigh = pst->textlow;
+	      /* if this file has only data, then make textlow match texthigh */
+	      if (p1->textlow == 0)
+		p1->textlow = p1->texthigh;
+	    }
+	}
     }
-  }
 
   /* End of kludge for patching Solaris textlow and texthigh.  */
 #endif /* SOFUN_ADDRESS_MAYBE_MISSING.  */

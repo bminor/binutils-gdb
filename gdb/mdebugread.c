@@ -2235,7 +2235,7 @@ parse_partial_symbols (objfile, section_offsets)
   EXTR *ext_in_end;
   SYMR sh;
   struct partial_symtab *pst;
-
+  int textlow_not_set = 1;
   int past_first_source_file = 0;
 
   /* List of current psymtab's include files */
@@ -2631,7 +2631,7 @@ parse_partial_symbols (objfile, section_offsets)
 #define CUR_SYMBOL_VALUE sh.value
 #define START_PSYMTAB(ofile,secoff,fname,low,symoff,global_syms,static_syms)\
   pst = save_pst
-#define END_PSYMTAB(pst,ilist,ninc,c_off,c_text,dep_list,n_deps) (void)0
+#define END_PSYMTAB(pst,ilist,ninc,c_off,c_text,dep_list,n_deps,textlow_not_set) (void)0
 #define HANDLE_RBRAC(val) \
   if ((val) > save_pst->texthigh) save_pst->texthigh = (val);
 #include "partial-stab.h"
@@ -2939,7 +2939,7 @@ parse_partial_symbols (objfile, section_offsets)
       fdr_to_pst[f_idx].pst = end_psymtab (save_pst,
 					   psymtab_include_list, includes_used,
 					   -1, save_pst->texthigh,
-					   dependency_list, dependencies_used);
+					   dependency_list, dependencies_used, textlow_not_set);
       includes_used = 0;
       dependencies_used = 0;
 

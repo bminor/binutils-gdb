@@ -2188,6 +2188,7 @@ scan_xcoff_symtab (section_offsets, objfile)
   CORE_ADDR last_csect_val = 0;
   int last_csect_sec = 0;
   int  misc_func_recorded = 0;		/* true if any misc. function */
+  int textlow_not_set = 1;
 
   pst = (struct partial_symtab *) 0;
 

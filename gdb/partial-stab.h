@@ -106,7 +106,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 			       symnum * symbol_size,
 			       CUR_SYMBOL_VALUE > pst->texthigh
 				 ? CUR_SYMBOL_VALUE : pst->texthigh, 
-			       dependency_list, dependencies_used);
+			       dependency_list, dependencies_used, textlow_not_set);
 		  pst = (struct partial_symtab *) 0;
 		  includes_used = 0;
 		  dependencies_used = 0;
@@ -197,16 +197,27 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 	  static int prev_so_symnum = -10;
 	  static int first_so_symnum;
 	  char *p;
+	  int prev_textlow_not_set;
 
 	  valu = CUR_SYMBOL_VALUE + ANOFFSET (section_offsets, SECT_OFF_TEXT);
+
+	  prev_textlow_not_set = textlow_not_set;
+
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
 	  /* A zero value is probably an indication for the SunPRO 3.0
 	     compiler. end_psymtab explicitly tests for zero, so
 	     don't relocate it.  */
-	  if (CUR_SYMBOL_VALUE == 0)
-	    valu = 0;
-#endif
 
+	  if (CUR_SYMBOL_VALUE == 0)
+	    {
+	      textlow_not_set = 1;
+	      valu = 0;
+	    }
+	  else
+	    textlow_not_set = 0;
+#else
+	  textlow_not_set = 0;
+#endif
 	  past_first_source_file = 1;
 
 	  if (prev_so_symnum != symnum - 1)
@@ -218,7 +229,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 		  END_PSYMTAB (pst, psymtab_include_list, includes_used,
 			       symnum * symbol_size,
 			       valu > pst->texthigh ? valu : pst->texthigh,
-			       dependency_list, dependencies_used);
+			       dependency_list, dependencies_used,
+			       prev_textlow_not_set);
 		  pst = (struct partial_symtab *) 0;
 		  includes_used = 0;
 		  dependencies_used = 0;
@@ -554,9 +566,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
 	      /* Do not fix textlow==0 for .o or NLM files, as 0 is a legit
 		 value for the bottom of the text seg in those cases. */
-	      if (pst && pst->textlow == 0 && !symfile_relocatable)
-		pst->textlow =
-		  find_stab_function_addr (namestring, pst, objfile);
+	      if (pst && textlow_not_set)
+		{
+		  pst->textlow =
+		    find_stab_function_addr (namestring, pst, objfile);
+		  textlow_not_set = 0;
+		}
 #endif
 #if 0
 	      if (startup_file_end == 0)
@@ -568,11 +583,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 		 the bounds created by N_SO symbols.  If that's the case
 		 use the address of this function as the low bound for
 		 the partial symbol table.  */
-	      if (pst->textlow == 0
+	      if (textlow_not_set
 		  || (CUR_SYMBOL_VALUE < pst->textlow
 		      && CUR_SYMBOL_VALUE
 			   != ANOFFSET (section_offsets, SECT_OFF_TEXT)))
-		pst->textlow = CUR_SYMBOL_VALUE;
+		{
+		  pst->textlow = CUR_SYMBOL_VALUE;
+		  textlow_not_set = 0;
+		}
 #endif /* DBXREAD_ONLY */
 	      add_psymbol_to_list (namestring, p - namestring,
 				   VAR_NAMESPACE, LOC_BLOCK,
@@ -594,9 +612,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
 	      /* Do not fix textlow==0 for .o or NLM files, as 0 is a legit
 		 value for the bottom of the text seg in those cases. */
-	      if (pst && pst->textlow == 0 && !symfile_relocatable)
-		pst->textlow =
-		  find_stab_function_addr (namestring, pst, objfile);
+	      if (pst && textlow_not_set)
+		{
+		  pst->textlow =
+		    find_stab_function_addr (namestring, pst, objfile);
+		  textlow_not_set = 0;
+		}
 #endif
 #if 0
 	      if (startup_file_end == 0)
@@ -607,11 +628,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 		 the bounds created by N_SO symbols.  If that's the case
 		 use the address of this function as the low bound for
 		 the partial symbol table.  */
-	      if (pst->textlow == 0
+	      if (textlow_not_set
 		  || (CUR_SYMBOL_VALUE < pst->textlow
 		      && CUR_SYMBOL_VALUE
 			   != ANOFFSET (section_offsets, SECT_OFF_TEXT)))
-		pst->textlow = CUR_SYMBOL_VALUE;
+		{
+		  pst->textlow = CUR_SYMBOL_VALUE;
+		  textlow_not_set = 0;
+		}
 #endif /* DBXREAD_ONLY */
 	      add_psymbol_to_list (namestring, p - namestring,
 				   VAR_NAMESPACE, LOC_BLOCK,
@@ -728,7 +752,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 	      END_PSYMTAB (pst, psymtab_include_list, includes_used,
 			   symnum * symbol_size,
 			   (CORE_ADDR) 0,
-			   dependency_list, dependencies_used);
+			   dependency_list, dependencies_used, textlow_not_set);
 	      pst = (struct partial_symtab *) 0;
 	      includes_used = 0;
 	      dependencies_used = 0;

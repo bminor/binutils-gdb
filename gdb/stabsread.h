@@ -187,8 +187,14 @@ start_psymtab PARAMS ((struct objfile *, struct section_offsets *, char *,
 		       struct partial_symbol **));
 
 extern struct partial_symtab *
-end_psymtab PARAMS ((struct partial_symtab *, char **, int, int, CORE_ADDR,
-		     struct partial_symtab **, int));
+end_psymtab PARAMS ((struct partial_symtab *pst,
+		     char **include_list,
+		     int num_includes,
+		     int capping_symbol_offset,
+		     CORE_ADDR capping_text,
+		     struct partial_symtab **dependency_list,
+		     int number_dependencies,
+		     int textlow_not_set));
 
 extern void
 process_one_symbol PARAMS ((int, int, CORE_ADDR, char *,

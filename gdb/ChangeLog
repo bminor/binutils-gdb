@@ -1,3 +1,14 @@
+Mon Jul 22 18:13:27 1996  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* Makefile.in (os9kread.o):  Remove dependency on partial-stab.h.
+	* dbxread.c (read_dbx_symtab end_psymtab), partial-stab.h:  Don't
+	use partial_symtab->textlow==0 as a flag, as 0 is a legitimate
+	text address.  Use a seperate flag (textlow_not_set) instead.
+	This makes stabs in ELF .o files work a lot better.
+	* mdebugread.c xcoffread.c:  Define textlow_not_set for
+	partial-stab.h.
+	* stabsread.h (end_psymtab):  Add textlow_not_set arg to prototype.
+
 Sat Jul 20 17:46:40 1996  Fred Fish  <fnf@cygnus.com>
 
 	* gdbtk.tcl (files_command): Reorder the binding tags for
