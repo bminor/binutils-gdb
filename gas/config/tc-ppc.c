@@ -86,6 +86,8 @@ static void ppc_toc PARAMS ((int));
 #ifdef OBJ_ELF
 static bfd_reloc_code_real_type ppc_elf_suffix PARAMS ((char **));
 static void ppc_elf_cons PARAMS ((int));
+static void ppc_elf_rdata PARAMS ((int));
+static void ppc_elf_lcomm PARAMS ((int));
 static void ppc_elf_validate_fix PARAMS ((fixS *, segT));
 #endif
 
@@ -108,7 +110,11 @@ static void ppc_pe_tocd PARAMS ((int));
    targets.  */
 
 /* Characters which always start a comment.  */
+#ifdef TARGET_SOLARIS_COMMENT
 const char comment_chars[] = "#!";
+#else
+const char comment_chars[] = "#";
+#endif
 
 /* Characters which start a comment at the beginning of a line.  */
 const char line_comment_chars[] = "#";
@@ -164,6 +170,9 @@ const pseudo_typeS md_pseudo_table[] =
   { "long",	ppc_elf_cons,	4 },
   { "word",	ppc_elf_cons,	2 },
   { "short",	ppc_elf_cons,	2 },
+  { "rdata",	ppc_elf_rdata,	0 },
+  { "rodata",	ppc_elf_rdata,	0 },
+  { "lcomm",	ppc_elf_lcomm,	0 },
 #endif
 
 #ifdef TE_PE
@@ -995,6 +1004,7 @@ ppc_insert_operand (insn, operand, val, file, line)
   return insn;
 }
 
+
 #ifdef OBJ_ELF
 /* Parse @got, etc. and return the desired relocation.  */
 static bfd_reloc_code_real_type
@@ -1066,7 +1076,8 @@ ppc_elf_suffix (str_p)
     return BFD_RELOC_UNUSED;
 
   for (ch = *str, str2 = ident;
-       str2 < ident + sizeof(ident) - 1 && isalnum (ch) || ch == '@';
+       (str2 < ident + sizeof (ident) - 1
+	&& (isalnum (ch) || ch == '@'));
        ch = *++str)
     {
       *str2++ = (islower (ch)) ? ch : tolower (ch);
@@ -1132,6 +1143,130 @@ ppc_elf_cons (nbytes)
   demand_empty_rest_of_line ();
 }
 
+/* Solaris pseduo op to change to the .rodata section.  */
+static void
+ppc_elf_rdata (xxx)
+     int xxx;
+{
+  char *save_line = input_line_pointer;
+  static char section[] = ".rodata\n";
+
+  /* Just pretend this is .section .rodata */
+  input_line_pointer = section;
+  obj_elf_section (xxx);
+
+  input_line_pointer = save_line;
+}
+
+/* Pseudo op to make file scope bss items */
+static void
+ppc_elf_lcomm(xxx)
+     int xxx;
+{
+  register char *name;
+  register char c;
+  register char *p;
+  offsetT size;
+  register symbolS *symbolP;
+  offsetT align;
+  segT old_sec;
+  int old_subsec;
+  char *pfrag;
+  int align2;
+
+  name = input_line_pointer;
+  c = get_symbol_end ();
+
+  /* just after name is now '\0' */
+  p = input_line_pointer;
+  *p = c;
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer != ',')
+    {
+      as_bad ("Expected comma after symbol-name: rest of line ignored.");
+      ignore_rest_of_line ();
+      return;
+    }
+
+  input_line_pointer++;		/* skip ',' */
+  if ((size = get_absolute_expression ()) < 0)
+    {
+      as_warn (".COMMon length (%ld.) <0! Ignored.", (long) size);
+      ignore_rest_of_line ();
+      return;
+    }
+
+  /* The third argument to .lcomm is the alignment.  */
+  if (*input_line_pointer != ',')
+    align = 3;
+  else
+    {
+      ++input_line_pointer;
+      align = get_absolute_expression ();
+      if (align <= 0)
+	{
+	  as_warn ("ignoring bad alignment");
+	  align = 3;
+	}
+    }
+
+  *p = 0;
+  symbolP = symbol_find_or_make (name);
+  *p = c;
+
+  if (S_IS_DEFINED (symbolP))
+    {
+      as_bad ("Ignoring attempt to re-define symbol `%s'.",
+	      S_GET_NAME (symbolP));
+      ignore_rest_of_line ();
+      return;
+    }
+
+  if (S_GET_VALUE (symbolP) && S_GET_VALUE (symbolP) != (valueT) size)
+    {
+      as_bad ("Length of .lcomm \"%s\" is already %ld. Not changed to %ld.",
+	      S_GET_NAME (symbolP),
+	      (long) S_GET_VALUE (symbolP),
+	      (long) size);
+
+      ignore_rest_of_line ();
+      return;
+    }
+
+  /* allocate_bss: */
+  old_sec = now_seg;
+  old_subsec = now_subseg;
+  if (align)
+    {
+      /* convert to a power of 2 alignment */
+      for (align2 = 0; (align & 1) == 0; align >>= 1, ++align2);
+      if (align != 1)
+	{
+	  as_bad ("Common alignment not a power of 2");
+	  ignore_rest_of_line ();
+	  return;
+	}
+    }
+  else
+    align2 = 0;
+
+  record_alignment (bss_section, align2);
+  subseg_set (bss_section, 0);
+  if (align2)
+    frag_align (align2, 0);
+  if (S_GET_SEGMENT (symbolP) == bss_section)
+    symbolP->sy_frag->fr_symbol = 0;
+  symbolP->sy_frag = frag_now;
+  pfrag = frag_var (rs_org, 1, 1, (relax_substateT) 0, symbolP, size,
+		    (char *) 0);
+  *pfrag = 0;
+  S_SET_SIZE (symbolP, size);
+  S_SET_SEGMENT (symbolP, bss_section);
+  S_CLEAR_EXTERNAL (symbolP);
+  subseg_set (old_sec, old_subsec);
+  demand_empty_rest_of_line ();
+}
+
 /* Validate any relocations emitted for -mrelocatable, possibly adding
    fixups for word relocations in writable segments, so we can adjust
    them at runtime.  */
@@ -1168,9 +1303,8 @@ ppc_elf_validate_fix (fixp, seg)
 	}
     }
 }
-
 #endif /* OBJ_ELF */
-
+
 #ifdef TE_PE
 
 /*
@@ -1266,9 +1400,8 @@ parse_toc_entry(toc_kind)
   *toc_kind = t;             /* set return value */
   return 1;
 }
-
 #endif
-
+
 
 /* We need to keep a list of fixups.  We can't simply generate them as
    we go, because that would require us to first create the frag, and
@@ -1568,7 +1701,12 @@ md_assemble (str)
 		break;
 
 	      case BFD_RELOC_LO16:
-		ex.X_add_number = ((ex.X_add_number & 0xffff) ^ 0x8000) - 0x8000;
+		if (ex.X_unsigned)
+		  ex.X_add_number &= 0xffff;
+		else
+		  ex.X_add_number = (((ex.X_add_number & 0xffff)
+				      ^ 0x8000)
+				     - 0x8000);
 		break;
 
 	      case BFD_RELOC_HI16:
@@ -1576,8 +1714,8 @@ md_assemble (str)
 		break;
 
 	      case BFD_RELOC_HI16_S:
-		ex.X_add_number = ((ex.X_add_number >> 16) & 0xffff)
-		  + ((ex.X_add_number >> 15) & 1);
+		ex.X_add_number = (((ex.X_add_number >> 16) & 0xffff)
+				   + ((ex.X_add_number >> 15) & 1));
 		break;
 	      }
 #endif
@@ -1590,13 +1728,25 @@ md_assemble (str)
 	  /* For the absoulte forms of branchs, convert the PC relative form back into
 	     the absolute.  */
 	  if ((operand->flags & PPC_OPERAND_ABSOLUTE) != 0)
-	    switch (reloc)
-	      {
-	      case BFD_RELOC_PPC_B26:		reloc = BFD_RELOC_PPC_BA26;		break;
-	      case BFD_RELOC_PPC_B16:		reloc = BFD_RELOC_PPC_BA16;		break;
-	      case BFD_RELOC_PPC_B16_BRTAKEN:	reloc = BFD_RELOC_PPC_BA16_BRTAKEN;	break;
-	      case BFD_RELOC_PPC_B16_BRNTAKEN:	reloc = BFD_RELOC_PPC_BA16_BRNTAKEN;	break;
-	      }
+	    {
+	      switch (reloc)
+		{
+		case BFD_RELOC_PPC_B26:
+		  reloc = BFD_RELOC_PPC_BA26;
+		  break;
+		case BFD_RELOC_PPC_B16:
+		  reloc = BFD_RELOC_PPC_BA16;
+		  break;
+		case BFD_RELOC_PPC_B16_BRTAKEN:
+		  reloc = BFD_RELOC_PPC_BA16_BRTAKEN;
+		  break;
+		case BFD_RELOC_PPC_B16_BRNTAKEN:
+		  reloc = BFD_RELOC_PPC_BA16_BRNTAKEN;
+		  break;
+		default:
+		  break;
+		}
+	    }
 
 	  /* We need to generate a fixup for this expression.  */
 	  if (fc >= MAX_INSN_FIXUPS)
@@ -4391,7 +4541,13 @@ md_apply_fix3 (fixp, valuep, seg)
 	case BFD_RELOC_PPC_EMB_RELSDA:
 	case BFD_RELOC_PPC_TOC16:
 	  if (fixp->fx_pcrel)
-	    abort ();
+	    as_bad_where (fixp->fx_file, fixp->fx_line,
+			  "cannot emit PC relative %s relocation%s%s",
+			  bfd_get_reloc_code_name (fixp->fx_r_type),
+			  fixp->fx_addsy != NULL ? " against " : "",
+			  (fixp->fx_addsy != NULL
+			   ? S_GET_NAME (fixp->fx_addsy)
+			   : ""));
 
 	  md_number_to_chars (fixp->fx_frag->fr_literal + fixp->fx_where,
 			      value, 2);
