@@ -1,3 +1,8 @@
+2002-07-16  Joel Brobecker  <brobecker@gnat.com>
+
+	* proc-api.c: use HAVE_SYS_PROC_H macro to avoid including
+	<sys/proc.h> when not available.
+
 2002-07-16  Andrew Cagney  <ac131313@redhat.com>
 
 	* NEWS: Mention that the i[34]86-*-os9k has been made obsolete.
