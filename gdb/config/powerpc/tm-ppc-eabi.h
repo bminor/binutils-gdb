@@ -45,4 +45,7 @@
    it shouldn't be. */
 #define SOFUN_ADDRESS_MAYBE_MISSING
 
+/* Use generic shared library machinery.  */
+#include "solib.h"
+
 #endif /* TM_PPC_EABI_H */

@@ -1,3 +1,8 @@
+2001-12-03  Kevin Buettner  <kevinb@redhat.com>
+
+	* config/powerpc/tm-macos.h (solib.h): Include.
+	* config/powerpc/tm-ppc-eabi.h (solib.h): Include.
+
 2001-12-03  Michael Snyder  <msnyder@redhat.com>
 
 	* symtab.c (search_symbols): Make sure alloca size is big enough.

@@ -21,4 +21,7 @@
 /* Use generic RS6000 definitions. */
 #include "rs6000/tm-rs6000.h"
 
+/* Use generic shared library machinery.  */
+#include "solib.h"
+
 #define GDB_TARGET_POWERPC
