@@ -202,10 +202,10 @@ sim_store_register (SIM_DESC sd, int regnr, unsigned char *buf)
     STATE_CPU (sd, 0)->cia.ip = T2H_4 (*(unsigned32*)buf);
   else if (regnr == NPC_REGNUM)
     STATE_CPU (sd, 0)->cia.dp = T2H_4 (*(unsigned32*)buf);
-  else if (regnr == A0_REGNUM && regnr <= An_REGNUM)
+  else if (regnr >= A0_REGNUM && regnr <= An_REGNUM)
     STATE_CPU (sd, 0)->acc[regnr - A0_REGNUM] = T2H_8 (*(unsigned64*)buf);
   else
-    sim_io_error (sd, "sim_fetch_register - unknown register nr %d", regnr);
+    sim_io_error (sd, "sim_store_register - unknown register nr %d", regnr);
   return;
 }
 
