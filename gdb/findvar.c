@@ -305,7 +305,7 @@ value_of_register (int regnum, struct frame_info *frame)
   /* Builtin registers lie completly outside of the range of normal
      registers.  Catch them early so that the target never sees them.  */
   if (regnum >= NUM_REGS + NUM_PSEUDO_REGS)
-    return value_of_builtin_reg (regnum, deprecated_selected_frame);
+    return value_of_builtin_reg (regnum, frame);
 
   get_saved_register (raw_buffer, &optim, &addr,
 		      frame, regnum, &lval);

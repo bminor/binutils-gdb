@@ -1,5 +1,14 @@
 2003-03-12  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.c (get_current_frame): Check target_has_registers before
+	checking target_has_stack.
+	* eval.c (evaluate_subexp_standard): Use get_selected_frame,
+	instead of deprecated_selected_frame.
+	* findvar.c (value_of_register): Pass "frame", not
+	deprecated_selected_frame, to value_of_builtin_reg.
+
+2003-03-12  Andrew Cagney  <cagney@redhat.com>
+
 	* regcache.c (regcache_cooked_write_signed): New function.
 	(regcache_cooked_write_unsigned): New function.
 	(regcache_cooked_read_unsigned): Fix regnum in range assertion.

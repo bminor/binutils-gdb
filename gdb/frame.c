@@ -566,10 +566,15 @@ unwind_to_current_frame (struct ui_out *ui_out, void *args)
 struct frame_info *
 get_current_frame (void)
 {
-  if (!target_has_stack)
-    error ("No stack.");
+  /* First check, and report, the lack of registers.  Having GDB
+     report "No stack!" or "No memory" when the target doesn't even
+     have registers is very confusing.  Besides, "printcmd.exp"
+     explicitly checks that ``print $pc'' with no registers prints "No
+     registers".  */
   if (!target_has_registers)
     error ("No registers.");
+  if (!target_has_stack)
+    error ("No stack.");
   if (!target_has_memory)
     error ("No memory.");
   if (current_frame == NULL)
