@@ -1,12 +1,19 @@
 #
 # makefile for bfd, binutils and gas
 #
-# Created by Klaus K"ampf (kkaempf@progis.de)
+# Created by Klaus K"ampf (kkaempf@rmi.de)
 #
 # You must use Version 3.76 of GNU Make
 #
 #
-CC =
+
+ifeq ($(ARCH),ALPHA)
+CC = gcc
+GASCC = $(CC)
+else
+CC = cc
+GASCC = gcc
+endif
 
 ifeq ($(CC),cc)
   CHECK-COMPILER = check_compiler
@@ -14,7 +21,7 @@ else
   CHECK-COMPILER =
 endif
 
-all:	check_cc $(CHECK-COMPILER)
+all:	check_cc $(CHECK-COMPILER) [.binutils]makefile.vms
 	$(CD) [.bfd]
 	@gmake "CC=$(CC)"
 	$(CD) [-.opcodes]
@@ -24,7 +31,7 @@ all:	check_cc $(CHECK-COMPILER)
 	$(CD) [-.binutils]
 	@gmake "CC=$(CC)"
 	$(CD) [-.gas]
-	@gmake "CC=$(CC)"
+	@gmake "CC=$(GASCC)"
 	$(CD) [-]
 
 check_cc:
@@ -36,16 +43,29 @@ endif
 check_compiler:
 	@$(ECHO) "Perform a '$$ @setup' before starting make"
 
+[.binutils]makefile.vms:
+	$(CD) [.binutils]
+	$$ @configure
+	$(CD) [-]
+
+install: all
+	$(CD) [.binutils]
+	@gmake "CC=$(CC)" install
+	$(CD) [-]
+	$(CD) [.gas]
+	@gmake "CC=$(GASCC)" install
+	$(CD) [-]
+
 clean:
 	$(CD) [.bfd]
-	gmake clean
+	@gmake clean
 	$(CD) [-.opcodes]
-	gmake clean
+	@gmake clean
 	$(CD) [-.libiberty]
-	gmake clean
+	@gmake clean
 	$(CD) [-.binutils]
-	gmake clean
+	@gmake clean
 	$(CD) [-.gas]
-	gmake clean
+	@gmake clean
 	$(CD) [-]
 

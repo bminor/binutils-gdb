@@ -1,3 +1,8 @@
+Thu Jul  2 13:57:36 1998  Klaus Kaempf  <kkaempf@rmi.de>
+
+	* makefile.vms: Update to build binutils/makefile.vms.  Add install
+	target.
+
 start-sanitize-cygnus
 Wed Jul  1 18:52:40 1998  Doug Evans  <devans@seba.cygnus.com>
 
