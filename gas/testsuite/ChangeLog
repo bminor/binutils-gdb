@@ -6,6 +6,9 @@ start-sanitize-m32rx
 	* gas/m32r/fslotx.[sd]: New testcase.
 	* gas/m32r/m32rx.exp: Run it.
 	* gas/m32r/m32rx.[sd]: Update.
+
+	* gas/m32r/error.exp: New error testcase driver.
+	* gas/m32r/wrongsize.s: New testcase.
 end-sanitize-m32rx
 
 start-sanitize-r5900

@@ -1,0 +1,13 @@
+# Test assembler warnings and errors.
+
+if [istarget m32r-*-*] {
+
+    load_lib gas-dg.exp
+
+    dg-init
+
+    dg-runtest "$srcdir/$subdir/wrongsize.s" "" ""
+
+    dg-finish
+
+}
