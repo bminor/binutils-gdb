@@ -1,5 +1,5 @@
 /* Top level stuff for GDB, the GNU debugger.
-   Copyright 1986, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 1997
+   Copyright 1986, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 1998
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -2813,7 +2813,7 @@ print_gdb_version (stream)
 
   /* Second line is a copyright notice. */
 
-  fprintf_filtered (stream, "Copyright 1997 Free Software Foundation, Inc.\n");
+  fprintf_filtered (stream, "Copyright 1998 Free Software Foundation, Inc.\n");
 
   /* Following the copyright is a brief statement that the program is
      free software, that users are free to copy and change it on

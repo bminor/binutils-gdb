@@ -1,3 +1,7 @@
+Wed Apr  8 19:21:42 1998  Jason Molenda  (crash@bugshack.cygnus.com)
+
+	* top.c (print_gdb_version): Print 1998 now.
+
 Wed Apr  8 16:57:22 1998  Philippe De Muyter  <phdm@macqel.be>
 
 	* source.c: Remove obsolete decl of strstr().
