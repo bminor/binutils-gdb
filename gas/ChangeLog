@@ -1,3 +1,7 @@
+Wed Mar 20 18:13:32 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* doc/as.texinfo, doc/c-i960.texi: Fix typos.
+
 Wed Mar 20 17:05:16 1996  David Mosberger-Tang  <davidm@azstarnet.com>
 
 	* config/alpha-opcode.h: Added cvtst instruction.
