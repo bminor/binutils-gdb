@@ -47,6 +47,29 @@ enum
     FROM_TTY = 0
   };
 
+/* Enumerations of the actions that may result from calling
+   captured_mi_execute_command */
+
+enum captured_mi_execute_command_actions
+  {
+    EXECUTE_COMMAND_DISPLAY_PROMPT,
+    EXECUTE_COMMAND_SUPRESS_PROMPT,
+    EXECUTE_COMMAND_DISPLAY_ERROR
+  };
+
+/* This structure is used to pass information from captured_mi_execute_command
+   to mi_execute_command. */
+struct captured_mi_execute_command_args
+{
+  /* This return result of the MI command (output) */
+  enum mi_cmd_result rc;
+
+  /* What action to perform when the call is finished (output) */
+  enum captured_mi_execute_command_actions action;
+
+  /* The command context to be executed (input) */
+  struct mi_parse *command;
+};
 
 int mi_debug_p;
 struct ui_file *raw_stdout;
@@ -1025,15 +1048,19 @@ mi_cmd_data_write_memory (char *command, char **argv, int argc)
   return MI_CMD_DONE;
 }
 
-/* Execute a command within a safe environment.  Return >0 for
-   ok. Return <0 for supress prompt.  Return 0 to have the error
-   extracted from error_last_message(). */
+/* Execute a command within a safe environment.
+   Return <0 for error; >=0 for ok.
+
+   args->action will tell mi_execute_command what action
+   to perfrom after the given command has executed (display/supress
+   prompt, display error). */
 
 static int
-captured_mi_execute_command (void *data)
+captured_mi_execute_command (struct ui_out *uiout, void *data)
 {
-  struct mi_parse *context = data;
-  enum mi_cmd_result rc;
+  struct captured_mi_execute_command_args *args =
+    (struct captured_mi_execute_command_args *) data;
+  struct mi_parse *context = args->command;
 
   switch (context->op)
     {
@@ -1048,11 +1075,13 @@ captured_mi_execute_command (void *data)
          condition expression, each function should return an
          indication of what action is required and then switch on
          that. */
-      rc = mi_cmd_execute (context);
+      args->action = EXECUTE_COMMAND_DISPLAY_PROMPT;
+      args->rc = mi_cmd_execute (context);
+
       if (!target_can_async_p () || !target_executing)
 	{
 	  /* print the result if there were no errors */
-	  if (rc == MI_CMD_DONE)
+	  if (args->rc == MI_CMD_DONE)
 	    {
 	      fputs_unfiltered (context->token, raw_stdout);
 	      fputs_unfiltered ("^done", raw_stdout);
@@ -1060,7 +1089,7 @@ captured_mi_execute_command (void *data)
 	      mi_out_rewind (uiout);
 	      fputs_unfiltered ("\n", raw_stdout);
 	    }
-	  else if (rc == MI_CMD_ERROR)
+	  else if (args->rc == MI_CMD_ERROR)
 	    {
 	      if (mi_error_message)
 		{
@@ -1072,18 +1101,22 @@ captured_mi_execute_command (void *data)
 		}
 	      mi_out_rewind (uiout);
 	    }
-	  else if (rc == MI_CMD_CAUGHT_ERROR)
+	  else if (args->rc == MI_CMD_CAUGHT_ERROR)
 	    {
 	      mi_out_rewind (uiout);
-	      return 0;
+	      args->action = EXECUTE_COMMAND_DISPLAY_ERROR;
+	      return 1;
 	    }
 	  else
 	    mi_out_rewind (uiout);
 	}
       else if (sync_execution)
-	/* Don't print the prompt. We are executing the target in
-	   synchronous mode. */
-	return -1;
+	{
+	  /* Don't print the prompt. We are executing the target in
+	     synchronous mode. */
+	  args->action = EXECUTE_COMMAND_SUPRESS_PROMPT;
+	  return 1;
+	}
       break;
 
     case CLI_COMMAND:
@@ -1102,9 +1135,12 @@ captured_mi_execute_command (void *data)
       mi_out_put (uiout, raw_stdout);
       mi_out_rewind (uiout);
       fputs_unfiltered ("\n", raw_stdout);
+      args->action = EXECUTE_COMMAND_DISPLAY_PROMPT;
+      args->rc = MI_CMD_DONE;
       break;
 
     }
+
   return 1;
 }
 
@@ -1113,6 +1149,9 @@ void
 mi_execute_command (char *cmd, int from_tty)
 {
   struct mi_parse *command;
+  struct captured_mi_execute_command_args args;
+  struct ui_out *saved_uiout = uiout;
+  int result, rc;
 
   /* This is to handle EOF (^D). We just quit gdb. */
   /* FIXME: we should call some API function here. */
@@ -1123,18 +1162,20 @@ mi_execute_command (char *cmd, int from_tty)
 
   if (command != NULL)
     {
-      /* FIXME: cagney/1999-11-04: Can this use of catch_errors either
+      /* FIXME: cagney/1999-11-04: Can this use of catch_exceptions either
          be pushed even further down or even eliminated? */
-      int rc = catch_errors (captured_mi_execute_command, command, "",
-			     RETURN_MASK_ALL);
-      if (rc < 0)
+      args.command = command;
+      result = catch_exceptions (uiout, captured_mi_execute_command, &args, "",
+				 RETURN_MASK_ALL);
+
+      if (args.action == EXECUTE_COMMAND_SUPRESS_PROMPT)
 	{
 	  /* The command is executing synchronously.  Bail out early
 	     suppressing the finished prompt. */
 	  mi_parse_free (command);
 	  return;
 	}
-      if (rc == 0)
+      if (args.action == EXECUTE_COMMAND_DISPLAY_ERROR || result < 0)
 	{
 	  char *msg = error_last_message ();
 	  struct cleanup *cleanup = make_cleanup (xfree, msg);

@@ -1,3 +1,585 @@
+2002-05-28  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* ppcnbsd-nat.c: Rewrite.
+	* ppcnbsd-tdep.c: New file.
+	* ppcnbsd-tdep.h: New file.
+	* config/powerpc/nbsd.mh (NATDEPFILES): Remove corelow.o,
+	solib.o, and solib-svr4.o.
+	* config/powerpc/nbsd.mt (TDEPFILES): Add ppcnbsd-tdep.o,
+	nbsd-tdep.o, and corelow.o.
+
+2002-05-28  Andrew Cagney  <ac131313@redhat.com>
+
+	* MAINTAINERS (--enable-gdb-build-warnings): Rewrite script to use
+	`tr' and `sed'.  Mention that `broken' targets are not expected to
+	build.
+
+2002-05-27  Michal Ludvig  <mludvig@suse.cz>
+
+	* x86-64-tdep.c (x86_64_skip_prologue): Remove obsolete note.
+	Let PC point right after the prologue before looking up symbols.
+	
+2002-05-27  Martin M. Hunt  <hunt@redhat.com>
+
+	* i386-tdep.c (i386_register_virtual_type): Return 
+	builtin_type_vec128i for SSE registers.
+
+	* gdbtypes.h (builtin_type_vec128i): Declare.
+
+	* gdbtypes.c (build_builtin_type_vec128i): New function.
+	(builtin_type_v2_double, builtin_type_v4_int64): New types.
+	(builtin_type_vec128i): New type for SSE2 128-bit registers.
+	(build_gdbtypes): Initialize new builtin vector types.
+	(_initialize_gdbtypes): Register new vector types with gdbarch.
+
+2002-05-26  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* MAINTAINERS: ns32k is not longer an obsolete candidate,
+	since it has been multi-arch'd.
+	* NEWS: Note that ns32k-*-* is now partial multi-arch.
+	Move Alpha and VAX multi-arch news entries to same section
+	as other multi-arch news.
+
+2002-05-26  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* ns32k-tdep.c: include gdbtypes.h, inferior.h, regcache.h,
+	target.s, arch-utils.h, ns32k-tdep.h.  Make many functions
+	static.  Rename some register numbers to put them in ns32k-tdep
+	private namespace.
+	(ns32k_get_saved_register, ns32k_gdbarch_init_32082,
+	ns32k_gdbarch_init_32382, ns32k_gdbarch_init, ns32k_dump_tdep): New
+	functions.
+	(_initialize_ns32k_tdep): Use gdbarch_register.
+	* ns32k-tdep.h: New file.
+	* ns32knbsd-tdep.c: New file.
+	* config/ns32k/nbsdaout.mt (TDEPFILES): Add ns32knbsd-tdep.o.
+	* config/ns32k/tm-nbsd.h: Include "ns32k/tm-ns32k.h".
+	(IN_SOLIB_CALL_TRAMPOLINE, REGISTER_NAME, NUM_REGS,
+	REGISTER_BYTES, REGISTER_BYTE): Remove.
+	* config/ns32k/tm-ns32k.h: New file.
+	* config/ns32k/tm-umax.h: Remove.
+
+2002-05-26  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* ns32k-tdep.c (ns32k_saved_pc_after_call,
+	ns32k_store_struct_return, ns32k_extract_return_value,
+	ns32k_store_return_value, ns32k_extract_struct_value_address): New
+	functions.
+	* config/ns32k/tm-umax.h (SAVED_PC_AFTER_CALL): Define as
+	ns32k_saved_pc_after_call.
+	(STORE_STRUCT_RETURN): Define as ns32k_store_struct_return.
+	(EXTRACT_RETURN_VALUE): Define as ns32k_extract_return_value.
+	(STORE_RETURN_VALUE): Define as ns32k_store_return_value.
+	(EXTRACT_STRUCT_VALUE_ADDRESS): Define as
+	ns32k_extract_struct_value_address.
+
+2002-05-26  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* ns32k-tdep.c (ns32k_call_dummy_words, sizeof_ns32k_call_dummy_words,
+	ns32k_fix_call_dummy): New.
+	* config/ns32k/tm-umax.h (CALL_DUMMY_WORDS): Define as
+	ns32k_call_dummy_words.
+	(SIZEOF_CALL_DUMMY_WORDS): Define as sizeof_ns32k_call_dummy_words.
+	(CALL_DUMMY, CALL_DUMMY_LENGTH, CALL_DUMMY_ADDR,
+	CALL_DUMMY_NARGS): Remove.
+	(FIX_CALL_DUMMY): Define as ns32k_fix_call_dummy.
+
+2002-05-26  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* ns32k-tdep.c (ns32k_breakpoint_from_pc, ns32k_frame_chain,
+	ns32k_frame_saved_pc, ns32k_frame_args_address,
+	ns32k_frame_locals_address, ns32k_frame_init_saved_regs,
+	ns32k_push_dummy_frame, ns32k_pop_frame): New functions.
+	* config/ns32k/tm-nbsd.h (FRAME_SAVED_PC): Remove.
+	* config/ns32k/tm-umax.h (INNER_THAN): Define as core_addr_lessthan.
+	(BREAKPOINT_FROM_PC): Define as ns32k_breakpoint_from_pc.
+	(BREAKPOINT): Remove..
+	(FRAME_CHAIN): Define as ns32k_frame_chain.
+	(FRAME_SAVED_PC): Define as ns32k_frame_saved_pc.
+	(FRAME_ARGS_ADDRESS): Define as ns32k_frame_args_address.
+	(FRAME_LOCALS_ADDRESS): Define as ns32k_frame_locals_address.
+	(FRAME_FIND_SAVED_REGS): Remove.
+	(FRAME_INIT_SAVED_REGS): Define as ns32k_frame_init_saved_regs.
+	(PUSH_DUMMY_FRAME): Define as ns32k_push_dummy_frame.
+	(POP_FRAME): Define as ns32k_pop_frame.
+
+2002-05-26  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* ns32k-tdep.c (ns32k_register_byte_32082,
+	ns32k_register_byte_32382, ns32k_register_raw_size,
+	ns32k_register_virtual_size, ns32k_register_virtual_type): New
+	functions.
+	* config/ns32k/tm-nbsd.h (REGISTER_BYTE): Define as
+	ns32k_register_byte_32382.
+	* config/ns32k/tm-umax.h: Update copyright years.
+	(REGISTER_BYTE): Define as ns32k_register_byte_32082.
+	(REGISTER_RAW_SIZE): Define as ns32k_register_raw_size.
+	(REGISTER_VIRTUAL_SIZE): Define as ns32k_register_virtual_size.
+	(REGISTER_VIRTUAL_TYPE): Define as ns32k_register_virtual_type.
+	(ns32k_get_enter_addr): Fix prototype.
+
+2002-05-26  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* ns32k-tdep.c: Update copyright years.
+	(ns32k_register_name_32082): New function.
+	(ns32k_register_name_32382): Ditto.
+	* config/ns32k/tm-nbsd.h (REGISTER_NAMES): Remove.
+	(REGISTER_NAME): Define as ns32k_register_name_32382.
+	* config/ns32k/tm-umax.h (REGISTER_NAMES): Remove.
+	(REGISTER_NAME): Define as ns32k_register_name_32082.
+
+2002-05-24  Jim Blandy  <jimb@redhat.com>
+
+	* dwarf2read.c (free_line_header): Use xfree, not free.
+
+2002-05-24  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* config/djgpp/fnchange.lst: Add alphabsd-nat.c,
+	alphabsd-tdep.c, mipsnbsd-nat.c, and mipsnbsd-tdep.c
+
+2002-05-23  Andrew Cagney  <ac131313@redhat.com>
+
+	* PROBLEMS: Mention s390 and FreeBSD 4.4 build problems.
+
+2002-05-23  Andrew Cagney  <ac131313@redhat.com>
+
+	From Ross Alexander at NEC Europe:
+	* config/pa/hpux11w.mh (NATDEPFILES): Add solib.o.
+
+2002-05-23  Michael Snyder  <msnyder@redhat.com>
+
+	* cli/cli-dump.c (restore_command): Use parse_and_eval_long
+	for input, rather than parse_and_eval_address.  
+
+2002-05-23  Andrew Cagney  <ac131313@redhat.com>
+
+	* d10v-tdep.c: Include "gdb/sim-d10v.h" instead of "sim-d10v.h".
+	* Makefile.in (sim_d10v_h): Update definition.
+
+2002-05-24  Andrew Cagney  <cagney@redhat.com>
+
+	* d10v-tdep.c (d10v_gdbarch_init): Revert old code included in
+	change `2002-05-22 Michael Snyder' below.
+	(d10v_push_arguments): Ditto.
+	(d10v_extract_return_value): Ditto.
+
+2002-05-23  Jim Blandy  <jimb@redhat.com>
+
+	* macrotab.c (check_for_redefinition): Don't complain if the new
+	definition is the same as the previous one.  Take more arguments
+	to allow the comparison.
+	(macro_define_object, macro_define_function): Pass more arguments
+	to check_for_redefinition.
+
+2002-05-22  Michael Snyder  <msnyder@redhat.com>
+
+	* d10v-tdep.c: Change a few macros to enums for ease of debugging.
+	(d10v_frame_chain_valid): Add PC_IN_CALL_DUMMY clause.
+	(d10v_frame_saved_pc): Add PC_IN_CALL_DUMMY clause.
+	(d10v_frame_chain): Bail immediately if PC_IN_CALL_DUMMY.
+	Don't bail if return_pc is PC_IN_CALL_DUMMY.
+	Add a temp variable to save a call (and a memory read).
+	(d10v_init_extra_frame_info): Get fi->pc from callee's return_pc
+	if possible (so that PC_IN_CALL_DUMMY will work).
+
+2002-05-22  Corinna Vinschen  <vinschen@redhat.com>
+
+	* MAINTAINERS: Remove status `OBSOLETE' from v850.
+
+2002-05-22  Michal Ludvig  <mludvig@suse.cz>
+
+	* dwarf2cfi.c (frame_state_for): Added safety check for a valid
+	fde->cie_ptr.
+	(dwarf2_build_frame_info): Corrected handling of eh_frame.
+	(dwarf2_build_frame_info): Add offset to fde->initial_location 
+	so that frames of shared libraries are mapped correctly.
+	(execute_stack_op): Change type of 'result' from ULONGEST to
+	CORE_ADDR.
+	
+2002-05-22  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* config/alpha/tm-nbsd.h: Include solib.h.
+
+2002-05-22  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* alphanbsd-tdep.c (alphanbsd_sigtramp_offset): Don't make
+	assumptions about the host's byte order.
+
+2002-05-22  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* Makefile.in (alphanbsd-tdep.o, shnbsd-tdep.o): Add solib-svr4.h
+	to dependency list.
+	* alphanbsd-tdep.c: Include solib-svr4.h.
+	* shnbsd-tdep.c: Ditto.
+
+2002-05-22  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* Makefile.in (armnbsd-tdep.o): Add solib-svr4.h and
+	nbsd-tdep.h to dependency list.
+	* configure.host (arm*-*-netbsdelf*, arm*-*-netbsd*,
+	i[3456]86-*-netbsdaout*, i[3456]86-*-netbsd*, m68*-*-netbsd*,
+	ns32k-*-netbsd*, sparc-*-netbsdaout*, sparc-*-netbsd*): Use
+	nbsdaout.mh and nbsdelf.mh consistently.
+	* configure.tgt (i[3456]86-*-netbsd*, m68*-*-netbsd*,
+	ns32k-*-netbsd*, sparc-*-netbsdelf*, sparc-*-netbsd*) Use
+	nbsdaout.mt and nbsdelf.mh consistently.
+	* armnbsd-tdep.c: Include nbsd-tdep.h and solib-svr4.h. 
+	(arm_netbsd_elf_init_abi): Use set_solib_svr4_fetch_link_map_offsets
+	to set nbsd_ilp32_solib_svr4_fetch_link_map_offsets.
+	* config/nm-nbsd.h: Garbage-collect SVR4_SHARED_LIBS.  Move
+	a.out shared library stuff from here...
+	* config/nm-nbsdaout.h: ...to here.
+	* config/tm-nbsd.h: Remove.
+	* config/alpha/nm-nbsd.h (SVR4_SHARED_LIBS): Remove.
+	* config/arm/nbsd.mh: Remove.
+	* config/arm/nbsd.mt (TDEPFILES): Remove solib-sunos.o, add
+	nbsd-tdep.o.
+	* config/arm/nbsdaout.mh: New file. 
+	* config/arm/nbsdelf.mh: New file.
+	* config/arm/nm-nbsdaout.h: New file.
+	* config/i386/nbsd.mh: Remove.
+	* config/i386/nbsd.mt: Remove.
+	* config/i386/nbsdaout.mh: New file.
+	* config/i386/nbsdaout.mt: New file.
+	* config/i386/nbsdelf.mh (NAT_FILE): Use nm-nbsd.h.
+	* config/i386/nbsdelf.mt (TM_FILE): Use tm-nbsd.h.
+	* config/i386/nm-nbsd.h (REGISTER_U_ADDR, 
+	i386_register_u_addr): Remove.
+	* config/i386/nm-nbsdaout.h: New file.
+	* config/i386/nm-nbsdelf.h: Remove.
+	* config/i386/tm-nbsd.h: Don't include config/tm-nbsd.h.
+	(USE_STRUCT_CONVENTION): Remove.
+	* config/i386/tm-nbsdaout.h: New file.
+	* config/i386/tm-nbsdelf.h: Remove.
+	* config/m68k/nbsd.mh: Remove.
+	* config/m68k/nbsd.mt: Remove.
+	* config/m68k/nbsdaout.mh: New file.
+	* config/m68k/nbsdaout.mt: New file. 
+	* config/m68k/nm-nbsd.h: Use config/nm-nbsd.h.
+	* config/m68k/nm-nbsdaout.h: New file.
+	* config/m68k/tm-nbsd.h: Don't include config/tm-nbsd.h.
+	(IN_SOLIB_CALL_TRAMPOLINE): Define.
+	* config/ns32k/nbsd.mh: Remove.
+	* config/ns32k/nbsd.mt: Remove. 
+	* config/ns32k/nbsdaout.mh: New file.
+	* config/ns32k/nbsdaout.mt: New file.
+	* config/ns32k/nm-nbsd.h: Include config/nm-nbsd.h. 
+	* config/ns32k/nm-nbsdaout.h: New file.
+	* config/ns32k/tm-nbsd.h: Don't include config/tm-nbsd.h.  
+	(IN_SOLIB_CALL_TRAMPOLINE): Define.
+	* config/powerpc/nm-nbsd.h: Include config/nm-nbsd.h.
+	(SVR4_SHARED_LIBS): Remove.
+	* config/powerpc/tm-nbsd.h: Dont' include config/tm-nbsd.h.
+	* config/sparc/nbsd.mh: Remove.
+	* config/sparc/nbsd.mt: Remove.
+	* config/sparc/nbsdaout.mh: New file.
+	* config/sparc/nbsdaout.mt: New file.
+	* config/sparc/nbsdelf.mh (NAT_FILE): Use nm-nbsd.h.
+	* config/sparc/nbsdelf.mt: New file.
+	* config/sparc/nm-nbsdaout.h: New file.   
+	* config/sparc/nm-nbsdelf.h: Remove.
+	* config/sparc/tm-nbsd.h: Don't include config/tm-nbsd.h.
+	* config/sparc/tm-nbsdaout.h: New file.
+
+2002-05-21  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* Makefile.in (ALLDEPFILES): Add mipsnbsd-nat.c and
+	mipsnbsd-tdep.c
+	(mipsnbsd-nat.o, mipsnbsd-tdep.o): New dependency lists.
+
+2002-05-21  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* Makefile.in (ALLDEPFILES): Add shnbsd-tdep.c and
+	shnbsd-nat.c.
+	(shnbsd-tdep.o, shnbsd-nat.o): New dependency lists.
+
+2002-05-21  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* NEWS: Note new MIPS NetBSD native configuration. 
+	* configure.host (mips*-*-netbsd*): New host. 
+	* configure.tgt (mips*-*-netbsd*): New target. 
+	* mipsnbsd-nat.c: New file.
+	* mipsnbsd-tdep.c: New file.
+	* mipsnbsd-tdep.h: New file.
+	* config/mips/nbsd.mh: New file.
+	* config/mips/nbsd.mt: New file.
+	* config/mips/nm-nbsd.h: New file.
+	* config/mips/tm-nbsd.h: New file.
+
+2002-05-21  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* Makefile.in (SFILES): Add osabi.c.
+	(COMMON_OBS): Add osabi.o.
+	(osabi.o): New dependency list.
+	* osabi.c: New file.
+	* osabi.h: New file.
+	* doc/gdbint.texinfo: Document new generic OS ABI framework.
+
+	* Makefile.in (alpha_tdep_h): Define and use instead of
+	alpha-tdep.h.
+	* alpha-tdep.c (alpha_abi_names, process_note_abi_tag_sections,
+	get_elfosabi, alpha_abi_handler_list, alpha_gdbarch_register_os_abi):
+	Remove.
+	(alpha_gdbarch_init, alpha_dump_tdep): Use generic OS ABI framework.
+	* alpha-tdep.h: Include osabi.h.
+	(alpha_abi): Remove.
+	(gdbarch_tdep): Use generic OS ABI framework.
+	* alpha-linux-tdep.c (_initialize_alpha_linux_tdep): Use
+	gdbarch_register_osabi.
+	* alpha-osf1-tdep.c (_initialize_alpha_osf1_tdep): Likewise.
+	* alphafbsd-tdep.c (_initialize_alphafbsd_tdep): Likewise.
+	* alphanbsd-tdep.c (_initialize_alphanbsd_tdep): Likewise.
+
+	* Makefile.in (sh_tdep_h): Add osabi.h.
+	* sh-tdep.h (sh_osabi): Remove.
+	(gdbarch_tdep): Use generic OS ABI framework.
+	* sh-tdep.c (sh_osabi_names, process_note_abi_tag_sections,
+	sh_osabi_handler_list, sh_gdbarch_register_os_abi): Remove.
+	(sh_gdbarch_init, sh_dump_tdep): Use generic OS ABI framework.
+	* shnbsd-tdep.c (_initialize_shnbsd_tdep): Use gdbarch_register_osabi.
+
+	* Makefile.in (arm_tdep_h): Define and use instead of arm-tdep.h.
+	* arm-linux-tdep.c (_initialize_arm_linux_tdep): Use
+	gdbarch_register_osabi.
+	* arm-tdep.c (arm_abi_names, process_note_abi_tag_sections,
+	arm_abi_handler_list, arm_gdbarch_register_os_abi): Remove.
+	(get_elfosabi): Rename to...
+	(arm_elf_osabi_sniffer): ...this.  Adjust to use generic OS
+	ABI framework support routines.
+	(arm_gdbarch_init): Use generic OS ABI framework.
+	(arm_dump_tdep): Likewise.
+	(_initialize_arm_tdep): Likewise.
+	* arm-tdep.h: Include osabi.h.
+	(arm_abi): Remove.
+	(gdbarch_tdep): Remove arm_abi and abi_name members.  Add
+	osabi member.
+	(arm_gdbarch_register_os_abi): Remove prototype.
+	* armnbsd-tdep.c (arm_netbsd_aout_osabi_sniffer): New function.
+	(_initialize_arm_netbsd_tdep): Use gdbarch_register_osabi.
+
+	* Makefile.in (mips-tdep.o): Add osabi.h to dependency list.
+	* mips-tdep.c: Include osabi.h.
+	(gdbarch_tdep, mips_gdbarch_init, mips_dump_tdep): Use generic
+	OS ABI framework.
+
+2002-05-20  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* h8300-tdep.c: Fix formatting.
+
+2002-05-20  Elena Zannoni  <ezannoni@redhat.com>
+
+	* rs6000-tdep.c (rs6000_do_registers_info): Simplify code for
+	printing vector registers.
+
+2002-05-19  Andrew Cagney  <ac131313@redhat.com>
+
+	From Fernando Nasser:
+	* remote.c (remote_async_open_1): Re-throw the exception when the
+	connection fails.
+	(remote_cisco_open): Ditto.
+	(remote_open_1): Ditto.
+
+2002-05-19  Andrew Cagney  <ac131313@redhat.com>
+
+	* remote.c (remote_start_remote_dummy): Add uiout parameter.
+	(remote_start_remote): Add uiout parameter.  Pass through to
+	remote_start_remote_dummy.
+	(remote_open_1): Use catch_exception instead of catch_errors.
+	(remote_async_open_1): Ditto.
+	(remote_cisco_open): Ditto.
+
+2002-05-19  Andrew Cagney  <ac131313@redhat.com>
+
+	* remote.c (remote_start_remote): Replace PTR with void pointer.
+	(sigint_remote_twice_token, sigint_remote_token): Ditto.  Make
+	static.
+
+2002-05-18  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb_indent.sh: Allow the script to be run in the sim directory.
+
+2002-05-18  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/i386/nm-cygwin.h (NO_PTRACE_H): Remove define.
+	* config/i386/nm-go32.h (NO_PTRACE_H): Remove define.
+
+	* corelow.c (core_open): Only call set_gdbarch_from_file if
+	exec_bfd is NULL.
+
+2002-05-17  Andrey Volkov <avolkov@transas.com>
+
+	* h8300-tdep.c: Add support of EXR register
+	* config/h8300/tm-h8300.h: Ditto. 
+	
+2002-05-17  Andrey Volkov <avolkov@transas.com>
+
+	* h8300-tdep.c: Add additional CCR flags (I,UI,H,U) 
+	
+2002-05-17  Andrey Volkov <avolkov@transas.com>
+
+	* h8300-tdep.c: Change literal regnums to REGNO.
+	
+2002-05-17  Jim Blandy  <jimb@redhat.com>
+
+	* NEWS: Note addition of macro support.
+
+	Expand preprocessor macros in C expressions.
+	* c-lang.h: #include "macroexp.h", for macro_lookup_ftype.
+	(scan_macro_expansion, scanning_macro_expansion,
+	finished_macro_expansion): New function declarations.
+	(expression_macro_lookup_func, expression_macro_lookup_baton): New
+	variable declarations.
+	* parser-defs.h (expression_context_pc): New declaration.
+	* parse.c (expression_context_pc): New variable.
+	(parse_exp_1): Set expression_context_pc, as well as
+	expression_context_block.
+	* c-exp.y (yylex): If we're not already reading the result of a
+	macro expansion, try to macro-expand the next token.  When we're
+	done scanning a macro expansion, switch back to the mainline text.
+	Commas and `if's in a macro's expansion don't terminate the input.
+	* c-lang.c: #include "macroscope.h" and "gdb_assert.h".
+	(macro_original_text, macro_expanded_text,
+	expression_macro_lookup_func, expression_macro_lookup_baton): New
+	variables.
+	(scan_macro_expansion, scanning_macro_expansion,
+	finished_macro_expansion, scan_macro_cleanup, null_macro_lookup,
+	c_preprocess_and_parse): New functions.
+	(c_language_defn, cplus_language_defn, asm_language_defn): Call
+	c_preprocess_and_parse, instead of c_parse.
+	* Makefile.in (c_lang_h): Note that this #includes macroexp.h.
+	(c-lang.o): Note dependency on macroscope.h and gdb_assert.h.
+
+Fri May 17 14:26:19 2002  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* sh-tdep.c (gdb_print_insn_sh64): Delete.
+	(gdb_print_insn_sh): Just set info->endian and use print_insn_sh.
+	(sh_gdbarch_init): Always use gdb_print_insn_sh.
+
+2002-05-17  Corinna Vinschen  <vinschen@redhat.com>
+
+	* NEWS: Add section for multi-arched targets.  Add v850 to that section.
+
+2002-05-17  Jason Thorpe  <thorpej@wasabisystems.com>
+
+	* Makefile.in (sh_tdep_h): Define and use.
+	* config/sh/tm-sh.h (sh_osabi, sh_abi, gdbarch_tdep,
+	register enum): Move to...
+	* * sh-tdep.h: ...here.
+	* sh-tdep.c: Include sh-tdep.h.
+	* sh3-rom.c: Likewise.
+	* shnbsd-tdep.c: Likewise.
+
+2002-05-16  Michael Snyder  <msnyder@redhat.com>
+
+	* arm-tdep.c: Spelling fix in comment.
+
+2002-05-16  Jim Blandy  <jimb@redhat.com>
+
+	Add commands for manually expanding macros and showing their
+	definitions.
+	* macrocmd.c, macroscope.c, macroscope.h: New files.
+	* Makefile.in (SFILES): Add macrocmd.c, macroscope.c.
+	(macroscope_h): New variable.
+	(HFILES_NO_SRCDIR): Add macroscope.h.
+	(COMMON_OBS): Add macrocmd.o, macroscope.o.
+	(macroscope.o, macrocmd.o): New rules.
+
+	Teach the Dwarf 2 reader to read macro information.
+	* dwarf2read.c: #include "macrotab.h".
+	(dwarf_macinfo_buffer): New variable.
+	(struct dwarf2_pinfo): New members: dwarf_macinfo_buffer, and
+	dwarf_macinfo_size.
+	(DWARF_MACINFO_BUFFER, DWARF_MACINFO_SIZE): New macros.
+	(dwarf2_missing_macinfo_section, dwarf2_macros_too_long,
+	dwarf2_macros_not_terminated, dwarf2_macro_outside_file,
+	dwarf2_macro_unmatched_end_file, dwarf2_macro_malformed_definition,
+	dwarf2_macro_spaces_in_definition): New complaints.
+	(dwarf2_has_info): Initialize dwarf_macinfo_offset.
+	(dwarf2_build_psymtabs): Read the .dwarf_macinfo section.
+	(dwarf2_build_psymtabs_hard): Record the buffer and its size in
+	the partial symbol table.
+	(psymtab_to_symtab_1): Set the macinfo buffer and size globals
+	from what's recorded in the partial symbol table.
+	(read_file_scope): If the compilation unit has a
+	`DW_AT_macro_info' attribute, read its macro information.
+	* Makefile.in (dwarf2read.o): Depend on macrotab.h.
+
+2002-05-16  Daniel Jacobowitz  <drow@mvista.com>
+
+	Fix PR gdb/546
+	* ser-tcp.c: Don't include <netinet/udp.h>.
+
+2002-05-16  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* MAINTAINERS: Update my email address.
+
+2002-05-16  Richard Earnshaw  <rearnsha@arm.com>
+
+	* config/arm/nm-nbsd.h: Use "config/nm-nbsd.h" to include generic
+	include file of the same name.
+
+2002-05-16  Corinna Vinschen  <vinschen@redhat.com>
+
+	* configure.tgt: Mark v850 as multi-arched.
+	* config/v850/tm-v850.h: Remove file.
+	* config/v850/v850.mt: Eliminate TM_FILE.
+
+2002-05-16  Corinna Vinschen  <vinschen@redhat.com>
+
+	* v850-tdep.c: Full multi-arch.
+	* config/v850/tm-v850.h: Eliminate or move to v850-tdep.c everything.
+	Define GDB_MULTI_ARCH to 2.
+
+2002-05-16  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* p-exp.y (current_type): New static variable.
+	Carries the type of the expression at the position that is parsed.
+	(push_current_type, pop_current_type): Two new functions. Used
+	to store/restore current_type in expression on specific tokens.
+	(search_field): New static variable. Set to one after parsing a point
+	as at that point only a FIELDNAME token should be searched.
+	(FIELDNAME): New token. After a point only a token belonging to 
+	current_type type definition is allowed.
+	(all over token rules): reset and change current_type according
+	to rules.
+	(exp '[' rule): insert implicit array index field if
+	exp is a pascal string type.
+
+2002-05-16  Corinna Vinschen  <vinschen@redhat.com>
+
+	* v850-tdep.c: Fix comment for v850_scan_prologue.  Remove extra
+	frame info.  Use frame_info's saved_regs instead of matching member
+	in extra_frame_info throughout.
+	(v850_frame_init_saved_regs): New function.
+	(v850_init_extra_frame_info): Move most functionality into
+	v850_frame_init_saved_regs().
+	* config/v850/tm-v850.h (EXTRA_FRAME_INFO): Remove definition.
+	(v850_frame_find_saved_regs): Remove declaration.
+	(FRAME_FIND_SAVED_REGS): Remove definition.
+	(v850_frame_init_saved_regs): Add declaration.
+	(FRAME_INIT_SAVED_REGS): Add definition.
+
+2002-05-16  Corinna Vinschen  <vinschen@redhat.com>
+
+	* v850-tdep.c: Begin multi-arch'ing v850.
+	(v850_target_architecture_hook): Remove function.
+	(v850_gdbarch_init): New function.  Add code previously in
+	v850_target_architecture_hook().
+	(_initialize_v850_tdep): Don't  set target_architecture_hook.
+	Call register_gdbarch_init() instead.
+
+2002-05-16 Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdbtypes.h (struct cplus_struct_type): Remove args field.
+	* hpread.c (hpread_read_struct_type): Remove assignments to args.
+	(fixup_class_method_type): Likewise.
+
+2002-05-15  Daniel Jacobowitz  <drow@mvista.com>
+
+	From Martin Pool <mbp@samba.org>:
+	* gdbserver/server.c (gdbserver_usage): New function.
+	(main): Call it.
+
 2002-05-15  Jim Blandy  <jimb@redhat.com>
 
 	Add macro structures to GDB's symbol tables.  Nobody puts anything
