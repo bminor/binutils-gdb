@@ -1,6 +1,7 @@
 /* Target-dependent code for Hitachi H8/500, for GDB.
-   Copyright 1993, 1994, 1995, 1998, 2000, 2001
-   Free Software Foundation, Inc.
+
+   Copyright 1993, 1994, 1995, 1998, 2000, 2001, 2002 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -186,7 +187,7 @@ print_register_hook (int regno)
       unsigned char b[2];
       unsigned char l;
 
-      read_relative_register_raw_bytes (regno, b);
+      frame_register_read (selected_frame, regno, b);
       l = b[1];
       printf_unfiltered ("\t");
       printf_unfiltered ("I-%d - ", (l & 0x80) != 0);

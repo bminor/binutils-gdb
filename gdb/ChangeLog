@@ -1,3 +1,21 @@
+2002-04-12  Andrew Cagney  <cagney@redhat.com>
+
+	* defs.h (read_relative_register_raw_bytes): Delete declaration.
+	* frame.c (frame_register_read): New function.  Return non-zero on
+	success.
+	(read_relative_register_raw_bytes_for_frame): Delete.
+	(read_relative_register_raw_bytes): Delete.
+	* frame.h (frame_register_read): Declare.
+	* d30v-tdep.c: Update Copyright.  Use frame_register_read.
+	* sh-tdep.c: Ditto.
+	* infcmd.c (do_registers_info): Ditto.
+	* hppa-tdep.c: Ditto.
+	* rs6000-tdep.c: Ditto.
+	* h8500-tdep.c: Ditto.
+	* mips-tdep.c: Ditto.
+	* h8300-tdep.c: Ditto.
+	* z8k-tdep.c: Ditto.
+
 2002-04-12  Kevin Buettner  <kevinb@redhat.com>
 
 	From Jimi X <jimix@watson.ibm.com>:

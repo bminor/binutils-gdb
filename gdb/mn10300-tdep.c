@@ -1,6 +1,7 @@
 /* Target-dependent code for the Matsushita MN10300 for GDB, the GNU debugger.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001
-   Free Software Foundation, Inc.
+
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software
+   Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1010,7 +1011,7 @@ mn10300_print_register (const char *name, int regnum, int reg_width)
     printf_filtered ("%s: ", name);
 
   /* Get the data */
-  if (read_relative_register_raw_bytes (regnum, raw_buffer))
+  if (!frame_register_read (selected_frame, regnum, raw_buffer))
     {
       printf_filtered ("[invalid]");
       return;

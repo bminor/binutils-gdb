@@ -580,10 +580,6 @@ extern void exec_set_find_memory_regions (int (*) (int (*) (CORE_ADDR,
 							    void *),
 						   void *));
 
-/* From findvar.c */
-
-extern int read_relative_register_raw_bytes (int, char *);
-
 /* Possible lvalue types.  Like enum language, this should be in
    value.h, but needs to be here for the same reason. */
 

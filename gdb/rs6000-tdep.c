@@ -1729,7 +1729,7 @@ rs6000_do_altivec_registers (int regnum)
       print_spaces_filtered (15 - strlen (REGISTER_NAME (i)), gdb_stdout);
 
       /* Get the data in raw format.  */
-      if (read_relative_register_raw_bytes (i, raw_buffer))
+      if (!frame_register_read (selected_frame, i, raw_buffer))
         {
           printf_filtered ("*value not available*\n");
           continue;
@@ -1826,7 +1826,7 @@ rs6000_do_registers_info (int regnum, int fpregs)
       print_spaces_filtered (15 - strlen (REGISTER_NAME (i)), gdb_stdout);
 
       /* Get the data in raw format.  */
-      if (read_relative_register_raw_bytes (i, raw_buffer))
+      if (!frame_register_read (selected_frame, i, raw_buffer))
         {
           printf_filtered ("*value not available*\n");
           continue;

@@ -1,3 +1,9 @@
+2002-04-09  Andrew Cagney  <ac131313@redhat.com>
+
+	* mi-main.c (register_changed_p): Use frame_register_read instead
+	of read_relative_register_raw_bytes.
+	(get_register): Delete out-of-date comment.
+
 2002-04-07  Elena Zannoni  <ezannoni@redhat.com>
 
         * mi-cmd-disas.c: Run through indent.

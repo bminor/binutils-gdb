@@ -1,6 +1,7 @@
 /* Target-dependent code for the HP PA architecture, for GDB.
-   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+
+   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
+   1996, 1998, 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
 
    Contributed by the Center for Software Science at the
    University of Utah (pa-gdb-bugs@cs.utah.edu).
@@ -2488,7 +2489,7 @@ pa_do_registers_info (int regnum, int fpregs)
   /* Make a copy of gdb's save area (may cause actual
      reads from the target). */
   for (i = 0; i < NUM_REGS; i++)
-    read_relative_register_raw_bytes (i, raw_regs + REGISTER_BYTE (i));
+    frame_register_read (selected_frame, i, raw_regs + REGISTER_BYTE (i));
 
   if (regnum == -1)
     pa_print_registers (raw_regs, regnum, fpregs);
@@ -2532,7 +2533,7 @@ pa_do_strcat_registers_info (int regnum, int fpregs, struct ui_file *stream,
   /* Make a copy of gdb's save area (may cause actual
      reads from the target). */
   for (i = 0; i < NUM_REGS; i++)
-    read_relative_register_raw_bytes (i, raw_regs + REGISTER_BYTE (i));
+    frame_register_read (selected_frame, i, raw_regs + REGISTER_BYTE (i));
 
   if (regnum == -1)
     pa_strcat_registers (raw_regs, regnum, fpregs, stream);
@@ -2784,7 +2785,7 @@ pa_print_fp_reg (int i)
   char virtual_buffer[MAX_REGISTER_VIRTUAL_SIZE];
 
   /* Get 32bits of data.  */
-  read_relative_register_raw_bytes (i, raw_buffer);
+  frame_register_read (selected_frame, i, raw_buffer);
 
   /* Put it in the buffer.  No conversions are ever necessary.  */
   memcpy (virtual_buffer, raw_buffer, REGISTER_RAW_SIZE (i));
@@ -2802,7 +2803,7 @@ pa_print_fp_reg (int i)
   if ((i % 2) == 0)
     {
       /* Get the data in raw format for the 2nd half.  */
-      read_relative_register_raw_bytes (i + 1, raw_buffer);
+      frame_register_read (selected_frame, i + 1, raw_buffer);
 
       /* Copy it into the appropriate part of the virtual buffer.  */
       memcpy (virtual_buffer + REGISTER_RAW_SIZE (i), raw_buffer,
@@ -2830,7 +2831,7 @@ pa_strcat_fp_reg (int i, struct ui_file *stream, enum precision_type precision)
   print_spaces_filtered (8 - strlen (REGISTER_NAME (i)), stream);
 
   /* Get 32bits of data.  */
-  read_relative_register_raw_bytes (i, raw_buffer);
+  frame_register_read (selected_frame, i, raw_buffer);
 
   /* Put it in the buffer.  No conversions are ever necessary.  */
   memcpy (virtual_buffer, raw_buffer, REGISTER_RAW_SIZE (i));
@@ -2841,7 +2842,7 @@ pa_strcat_fp_reg (int i, struct ui_file *stream, enum precision_type precision)
       char raw_buf[MAX_REGISTER_RAW_SIZE];
 
       /* Get the data in raw format for the 2nd half.  */
-      read_relative_register_raw_bytes (i + 1, raw_buf);
+      frame_register_read (selected_frame, i + 1, raw_buf);
 
       /* Copy it into the appropriate part of the virtual buffer.  */
       memcpy (virtual_buffer + REGISTER_RAW_SIZE (i), raw_buf, REGISTER_RAW_SIZE (i));

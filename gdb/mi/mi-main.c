@@ -368,7 +368,7 @@ register_changed_p (int regnum)
 {
   char *raw_buffer = alloca (MAX_REGISTER_RAW_SIZE);
 
-  if (read_relative_register_raw_bytes (regnum, raw_buffer))
+  if (! frame_register_read (selected_frame, regnum, raw_buffer))
     return -1;
 
   if (memcmp (&old_regs[REGISTER_BYTE (regnum)], raw_buffer,
@@ -481,10 +481,6 @@ get_register (int regnum, int format)
   if (format == 'N')
     format = 0;
 
-  /* read_relative_register_raw_bytes returns a virtual frame pointer
-     (FRAME_FP (selected_frame)) if regnum == FP_REGNUM instead
-     of the real contents of the register. To get around this,
-     use get_saved_register instead. */
   get_saved_register (raw_buffer, &optim, (CORE_ADDR *) NULL, selected_frame,
 		      regnum, (enum lval_type *) NULL);
   if (optim)

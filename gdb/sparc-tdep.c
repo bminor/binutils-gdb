@@ -1,6 +1,8 @@
 /* Target-dependent code for the SPARC for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
-   1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
+
+   Copyright 1986, 1987, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
+   1996, 1997, 1998, 1999, 2000, 2001, 2002 Free Software Foundation,
+   Inc.
 
    This file is part of GDB.
 
@@ -1829,8 +1831,8 @@ sparc_print_register_hook (int regno)
     {
       char value[16];
 
-      if (!read_relative_register_raw_bytes (regno, value)
-	  && !read_relative_register_raw_bytes (regno + 1, value + 4))
+      if (frame_register_read (selected_frame, regno, value)
+	  && frame_register_read (selected_frame, regno + 1, value + 4))
 	{
 	  printf_unfiltered ("\t");
 	  print_floating (value, builtin_type_double, gdb_stdout);
@@ -1838,8 +1840,8 @@ sparc_print_register_hook (int regno)
 #if 0				/* FIXME: gdb doesn't handle long doubles */
       if ((regno & 3) == 0)
 	{
-	  if (!read_relative_register_raw_bytes (regno + 2, value + 8)
-	      && !read_relative_register_raw_bytes (regno + 3, value + 12))
+	  if (frame_register_read (selected_frame, regno + 2, value + 8)
+	      && frame_register_read (selected_frame, regno + 3, value + 12))
 	    {
 	      printf_unfiltered ("\t");
 	      print_floating (value, builtin_type_long_double, gdb_stdout);
@@ -1858,8 +1860,8 @@ sparc_print_register_hook (int regno)
     {
       char value[16];
 
-      if (!read_relative_register_raw_bytes (regno, value)
-	  && !read_relative_register_raw_bytes (regno + 1, value + 8))
+      if (frame_register_read (selected_frame, regno, value)
+	  && frame_register_read (selected_frame, regno + 1, value + 8))
 	{
 	  printf_unfiltered ("\t");
 	  print_floating (value, builtin_type_long_double, gdb_stdout);

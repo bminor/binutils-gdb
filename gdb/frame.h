@@ -282,4 +282,9 @@ extern void get_saved_register (char *raw_buffer, int *optimized,
 				struct frame_info *frame,
 				int regnum, enum lval_type *lval);
 
+/* Return the register as found on the FRAME.  Return zero if the
+   register could not be found.  */
+extern int frame_register_read (struct frame_info *frame, int regnum,
+				void *buf);
+
 #endif /* !defined (FRAME_H)  */

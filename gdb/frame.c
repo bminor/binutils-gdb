@@ -175,40 +175,26 @@ get_saved_register (char *raw_buffer,
   GET_SAVED_REGISTER (raw_buffer, optimized, addrp, frame, regnum, lval);
 }
 
-/* READ_RELATIVE_REGISTER_RAW_BYTES_FOR_FRAME
+/* frame_register_read ()
 
-   Copy the bytes of register REGNUM, relative to the input stack frame,
-   into our memory at MYADDR, in target byte order.
+   Find and return the value of REGNUM for the specified stack frame.
    The number of bytes copied is REGISTER_RAW_SIZE (REGNUM).
 
-   Returns 1 if could not be read, 0 if could.  */
+   Returns 0 if the register value could not be found.  */
 
-static int
-read_relative_register_raw_bytes_for_frame (int regnum,
-					    char *myaddr,
-					    struct frame_info *frame)
+int
+frame_register_read (struct frame_info *frame, int regnum, void *myaddr)
 {
   int optim;
   get_saved_register (myaddr, &optim, (CORE_ADDR *) NULL, frame,
 		      regnum, (enum lval_type *) NULL);
 
+  /* FIXME: cagney/2002-04-10: This test is just bogus.  It is no
+     indication of the validity of the register.  The value could
+     easily be found (on the stack) even though the corresponding
+     register isn't available.  */
   if (register_cached (regnum) < 0)
-    return 1;			/* register value not available */
+    return 0;			/* register value not available */
 
-  return optim;
-}
-
-/* READ_RELATIVE_REGISTER_RAW_BYTES
-
-   Copy the bytes of register REGNUM, relative to the current stack
-   frame, into our memory at MYADDR, in target byte order.  
-   The number of bytes copied is REGISTER_RAW_SIZE (REGNUM).
-
-   Returns 1 if could not be read, 0 if could.  */
-
-int
-read_relative_register_raw_bytes (int regnum, char *myaddr)
-{
-  return read_relative_register_raw_bytes_for_frame (regnum, myaddr,
-						     selected_frame);
+  return !optim;
 }

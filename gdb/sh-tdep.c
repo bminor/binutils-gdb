@@ -1732,7 +1732,7 @@ sh_do_fp_register (int regnum)
   raw_buffer = (char *) alloca (REGISTER_RAW_SIZE (FP0_REGNUM));
 
   /* Get the data in raw format.  */
-  if (read_relative_register_raw_bytes (regnum, raw_buffer))
+  if (!frame_register_read (selected_frame, regnum, raw_buffer))
     error ("can't read register %d (%s)", regnum, REGISTER_NAME (regnum));
 
   /* Get the register as a number */ 
@@ -1769,7 +1769,7 @@ sh_do_register (int regnum)
   print_spaces_filtered (15 - strlen (REGISTER_NAME (regnum)), gdb_stdout);
 
   /* Get the data in raw format.  */
-  if (read_relative_register_raw_bytes (regnum, raw_buffer))
+  if (!frame_register_read (selected_frame, regnum, raw_buffer))
     printf_filtered ("*value not available*\n");
       
   val_print (REGISTER_VIRTUAL_TYPE (regnum), raw_buffer, 0, 0,
