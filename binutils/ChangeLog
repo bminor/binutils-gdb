@@ -1,3 +1,7 @@
+2005-03-18  Paul Brook  <paul@codesourcery.com>
+
+	* objdump.c (objdump_print_addr): Avoid uninitialized warning.
+
 2005-03-17  Diego Novillo  <dnovillo@redhat.com>
 
 	* MAINTAINERS: Remove self as maintainer of x86 intel

@@ -854,7 +854,7 @@ objdump_print_addr (bfd_vma vma,
 		    bfd_boolean skip_zeroes)
 {
   struct objdump_disasm_info *aux;
-  asymbol *sym;
+  asymbol *sym = NULL; /* Initialize to avoid compiler warning.  */
 #ifdef DISASSEMBLER_NEEDS_RELOCS
   bfd_boolean skip_find = FALSE;
 #endif
