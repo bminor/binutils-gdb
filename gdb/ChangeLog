@@ -1,5 +1,15 @@
 2003-11-12  Michael Snyder  <msnyder@redhat.com>
 
+	* sh64-tdep.c (translate_insn_rn, is_media_pseudo, 
+	sh64_media_reg_base_num, sh64_compact_reg_base_num, 
+	sh64_nofp_frame_init_saved_regs, sh64_push_arguments,
+	sh64_extract_return_value, sh64_show_media_regs, 
+	sh64_show_compact_regs, sh_sh64_register_byte, sh64_register_type, 
+	sh_sh64_register_convert_to_virtual, sh_sh64_register_convert_to_raw,
+	sh64_pseudo_register_read, sh64_pseudo_register_write, 
+	sh64_do_pseudo_register, sh_compact_print_registers_info):
+	Delete unused variable 'tdep'.
+
 	* sh64-tdep.c: Coding standard and spelling comment fixes.
 	(sh64_extract_return_value): Replace deprecated_store_floating
 	with store_typed_floating.

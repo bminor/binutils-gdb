@@ -706,8 +706,6 @@ gdb_print_insn_sh (bfd_vma memaddr, disassemble_info *info)
 static int 
 translate_insn_rn (int rn, int media_mode)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-
   /* FIXME: this assumes that the number rn is for a not pseudo
      register only.  */
   if (media_mode)
@@ -829,10 +827,7 @@ fpp_reg_base_num (int fpp_regnum)
 static int
 is_media_pseudo (int rn)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-
-  return (rn >= DR0_REGNUM 
-	  && rn <= FV_LAST_REGNUM);
+  return (rn >= DR0_REGNUM && rn <= FV_LAST_REGNUM);
 }
 
 static int
@@ -845,7 +840,6 @@ static int
 sh64_media_reg_base_num (int reg_nr)
 {
   int base_regnum = -1;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
   if (reg_nr >= DR0_REGNUM
       && reg_nr <= DR_LAST_REGNUM)
@@ -928,7 +922,6 @@ static int
 sh64_compact_reg_base_num (int reg_nr)
 {
   int base_regnum = -1;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
   /* general register N maps to general register N */
   if (reg_nr >= R0_C_REGNUM 
@@ -1023,7 +1016,8 @@ sh64_nofp_frame_init_saved_regs (struct frame_info *fi)
   int insn_size;
   int gdb_register_number;
   int register_number;
-  char *dummy_regs = deprecated_generic_find_dummy_frame (get_frame_pc (fi), get_frame_base (fi));
+  char *dummy_regs = deprecated_generic_find_dummy_frame (get_frame_pc (fi), 
+							  get_frame_base (fi));
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   
   if (deprecated_get_frame_saved_regs (fi) == NULL)
@@ -1496,7 +1490,6 @@ sh64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   int len;
   int argreg_size;
   int fp_args[12];
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
   memset (fp_args, 0, sizeof (fp_args));
 
@@ -1669,7 +1662,6 @@ sh64_extract_return_value (struct type *type, char *regbuf, char *valbuf)
   int offset;
   int return_register;
   int len = TYPE_LENGTH (type);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
@@ -1769,7 +1761,6 @@ static void
 sh64_show_media_regs (void)
 {
   int i;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
   printf_filtered ("PC=%s SR=%016llx \n",
 		   paddr (read_register (PC_REGNUM)),
@@ -1808,7 +1799,6 @@ static void
 sh64_show_compact_regs (void)
 {
   int i;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
   printf_filtered ("PC=%s \n",
 		   paddr (read_register (PC_C_REGNUM)));
@@ -1930,7 +1920,6 @@ static int
 sh_sh64_register_byte (int reg_nr)
 {
   int base_regnum = -1;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
   /* If it is a pseudo register, get the number of the first floating
      point register that is part of it.  */
@@ -2026,8 +2015,6 @@ sh_sh64_build_float_register_type (int high)
 static struct type *
 sh64_register_type (struct gdbarch *gdbarch, int reg_nr)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-
   if ((reg_nr >= FP0_REGNUM
        && reg_nr <= FP_LAST_REGNUM)
       || (reg_nr >= FP0_C_REGNUM
@@ -2059,8 +2046,6 @@ static void
 sh_sh64_register_convert_to_virtual (int regnum, struct type *type,
 				     char *from, char *to)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-
   if (TARGET_BYTE_ORDER != BFD_ENDIAN_LITTLE)
     {
       /* It is a no-op.  */
@@ -2086,8 +2071,6 @@ static void
 sh_sh64_register_convert_to_raw (struct type *type, int regnum,
 				 const void *from, void *to)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-
   if (TARGET_BYTE_ORDER != BFD_ENDIAN_LITTLE)
     {
       /* It is a no-op.  */
@@ -2116,7 +2099,6 @@ sh64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
   int portion;
   int offset = 0;
   char temp_buffer[MAX_REGISTER_SIZE];
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   if (reg_nr >= DR0_REGNUM 
       && reg_nr <= DR_LAST_REGNUM)
@@ -2285,7 +2267,6 @@ sh64_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
   int base_regnum, portion;
   int offset;
   char temp_buffer[MAX_REGISTER_SIZE];
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   if (reg_nr >= DR0_REGNUM
       && reg_nr <= DR_LAST_REGNUM)
@@ -2600,7 +2581,6 @@ static void
 sh64_do_pseudo_register (int regnum)
 {
   /* All the sh64-compact mode registers are pseudo registers.  */
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
   if (regnum < NUM_REGS 
       || regnum >= NUM_REGS + NUM_PSEUDO_REGS_SH_MEDIA + NUM_PSEUDO_REGS_SH_COMPACT)
@@ -2735,7 +2715,6 @@ sh_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
 static void
 sh_compact_do_registers_info (int regnum, int fpregs)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   if (regnum != -1)		/* do one specified register */
     {
       if (*(REGISTER_NAME (regnum)) == '\0')
