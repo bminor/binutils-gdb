@@ -76,6 +76,7 @@ static int find_line_common (struct linetable *, int, int *);
 char *operator_chars (char *p, char **end);
 
 static struct partial_symbol *lookup_partial_symbol (struct partial_symtab *,
+						     const char *,
 						     const char *, int,
 						     namespace_enum);
 
@@ -1201,7 +1202,8 @@ lookup_symbol_aux_psymtabs (int block_index, const char *name,
   ALL_PSYMTABS (objfile, ps)
   {
     if (!ps->readin
-	&& lookup_partial_symbol (ps, name, psymtab_index, namespace))
+	&& lookup_partial_symbol (ps, name, mangled_name,
+				  psymtab_index, namespace))
       {
 	s = PSYMTAB_TO_SYMTAB (ps);
 	bv = BLOCKVECTOR (s);
@@ -1367,11 +1369,14 @@ lookup_symbol_aux_minsyms (const char *name,
   return NULL;
 }
 
-/* Look, in partial_symtab PST, for symbol NAME.  Check the global
-   symbols if GLOBAL, the static symbols if not */
+/* Look, in partial_symtab PST, for symbol whose natural name is NAME.
+   If LINKAGE_NAME is non-NULL, check in addition that the symbol's
+   linkage name matches it.  Check the global symbols if GLOBAL, the
+   static symbols if not */
 
 static struct partial_symbol *
-lookup_partial_symbol (struct partial_symtab *pst, const char *name, int global,
+lookup_partial_symbol (struct partial_symtab *pst, const char *name,
+		       const char *linkage_name, int global,
 		       namespace_enum namespace)
 {
   struct partial_symbol *temp;
@@ -1423,7 +1428,10 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name, int global,
       if (!(top == bottom))
 	internal_error (__FILE__, __LINE__, "failed internal consistency check");
 
-      while (top <= real_top && SYMBOL_MATCHES_NATURAL_NAME (*top,name))
+      while (top <= real_top
+	     && (linkage_name != NULL
+		 ? strcmp (SYMBOL_LINKAGE_NAME (*top), linkage_name) == 0
+		 : SYMBOL_MATCHES_NATURAL_NAME (*top,name)))
 	{
 	  if (SYMBOL_NAMESPACE (*top) == namespace)
 	    {
@@ -1442,7 +1450,9 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name, int global,
 	{
 	  if (namespace == SYMBOL_NAMESPACE (*psym))
 	    {
-	      if (SYMBOL_MATCHES_NATURAL_NAME (*psym, name))
+	      if (linkage_name != NULL
+		  ? strcmp (SYMBOL_LINKAGE_NAME (*psym), linkage_name) == 0
+		  : SYMBOL_MATCHES_NATURAL_NAME (*psym, name))
 		{
 		  return (*psym);
 		}
@@ -1489,7 +1499,8 @@ lookup_transparent_type (const char *name)
 
   ALL_PSYMTABS (objfile, ps)
   {
-    if (!ps->readin && lookup_partial_symbol (ps, name, 1, STRUCT_NAMESPACE))
+    if (!ps->readin && lookup_partial_symbol (ps, name, NULL,
+					      1, STRUCT_NAMESPACE))
       {
 	s = PSYMTAB_TO_SYMTAB (ps);
 	bv = BLOCKVECTOR (s);
@@ -1536,7 +1547,7 @@ lookup_transparent_type (const char *name)
 
   ALL_PSYMTABS (objfile, ps)
   {
-    if (!ps->readin && lookup_partial_symbol (ps, name, 0, STRUCT_NAMESPACE))
+    if (!ps->readin && lookup_partial_symbol (ps, name, NULL, 0, STRUCT_NAMESPACE))
       {
 	s = PSYMTAB_TO_SYMTAB (ps);
 	bv = BLOCKVECTOR (s);
@@ -1577,7 +1588,7 @@ find_main_psymtab (void)
 
   ALL_PSYMTABS (objfile, pst)
   {
-    if (lookup_partial_symbol (pst, main_name (), 1, VAR_NAMESPACE))
+    if (lookup_partial_symbol (pst, main_name (), NULL, 1, VAR_NAMESPACE))
       {
 	return (pst);
       }
@@ -4027,8 +4038,10 @@ make_symbol_overload_list (struct symbol *fsym)
     if (ps->readin)
       continue;
 
-    if ((lookup_partial_symbol (ps, oload_name, 1, VAR_NAMESPACE) != NULL)
-	|| (lookup_partial_symbol (ps, oload_name, 0, VAR_NAMESPACE) != NULL))
+    if ((lookup_partial_symbol (ps, oload_name, NULL, 1, VAR_NAMESPACE)
+	 != NULL)
+	|| (lookup_partial_symbol (ps, oload_name, NULL, 0, VAR_NAMESPACE)
+	    != NULL))
       PSYMTAB_TO_SYMTAB (ps);
   }
 

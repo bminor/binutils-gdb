@@ -1,3 +1,11 @@
+2003-03-04  David Carlton  <carlton@math.stanford.edu>
+
+	* symtab.c (lookup_partial_symbol): Add linkage_name argument.
+	(lookup_symbol_aux_psymtabs): Update call to
+	lookup_partial_symbol.
+	(lookup_transparent_type, find_main_psymtab)
+	(make_symbol_overload_list): Ditto.
+
 2003-03-04  Kazu Hirata  <kazu@cs.umass.edu>
 
 	* MAINTAINERS (Write after approval): Update my email address.
