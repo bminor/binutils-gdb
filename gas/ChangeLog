@@ -1,5 +1,22 @@
 2005-03-09  Richard Sandiford  <rsandifo@redhat.com>
 
+	* config/tc-mips.c (dummy_opcode): Delete.
+	(nop_insn, mips16_nop_insn): New variables.
+	(NOP_INSN): New macro.
+	(insn_length, create_insn, install_insn, move_insn, add_fixed_insn)
+	(add_relaxed_insn, insert_into_history, emit_nop): New functions.
+	(md_begin): Initialize nop_insn and mips16_nop_insn.
+	(append_insn): Use the new emit_nop function to add nops, recording
+	them in the history buffer.  Use add_fixed_insn or add_relaxed_insn
+	to reserve room for the instruction and install_insn to install the
+	final form.  Use insert_into_history to record the instruction in
+	the history buffer.  Use move_insn to do delay slot filling.
+	(mips_emit_delays): Use add_fixed_insn instead of the emit_nop macro.
+	(macro_build, mips16_macro_build, macro_build_lui, mips_ip)
+	(mips16_ip): Use create_insn to initialize mips_cl_insns.
+
+2005-03-09  Richard Sandiford  <rsandifo@redhat.com>
+
 	* config/tc-mips.c (INSERT_BITS, EXTRACT_BITS, INSERT_OPERAND)
 	(EXTRACT_OPERAND, MIPS16_INSERT_OPERAND, MIPS16_EXTRACT_OPERAND): New.
 	(insn_uses_reg, reg_needs_delay, append_insn, macro_build)
