@@ -1,3 +1,9 @@
+2002-03-05  Paul Koning  <pkoning@equallogic.com>
+
+	* gas/pdp11/pdp11.exp: New file.
+	* gas/pdp11/opcode.s: Ditto.
+	* gas/pdp11/opcode.d: Ditto.
+
 2002-02-22  Bo Thorsen  <bo@suse.de>
 
 	* i386.exp: Add x86-64-opcode (checks valid opcodes) and x86-64-inval
