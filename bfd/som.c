@@ -2339,9 +2339,9 @@ som_write_fixups (abfd, current_offset, total_reloc_sizep)
 	      || !som_is_container (section, subsection))
 	    continue;
 
-	  /* If this subspace had no relocations, then we're finished 
-	     with it.  */
-	  if (subsection->reloc_count <= 0)
+	  /* If this subspace does not have real data, then we are
+	     finised with it.  */
+	  if ((subsection->flags & (SEC_LOAD | SEC_DEBUGGING)) == 0)
 	    {
 	      som_section_data (subsection)->subspace_dict->fixup_request_index
 		= -1;

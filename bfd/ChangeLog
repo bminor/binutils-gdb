@@ -1,3 +1,8 @@
+Tue Apr 12 13:36:20 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* som.c (som_write_fixups): Always emit at least
+        one relocation for any non-bss section.
+
 Mon Apr 11 14:41:44 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* elfcode.h (assign_file_positions_except_relocs): Don't require
