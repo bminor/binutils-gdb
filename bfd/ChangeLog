@@ -1,3 +1,9 @@
+2001-05-21  Andreas Jaeger  <aj@suse.de>
+
+	* dwarf2.c (decode_line_info): Fix error message.
+	(read_abbrevs): Fix test for offset as suggested by Alan Modra and
+	adjust error message.
+
 2001-05-18  H.J. Lu  <hjl@gnu.org>
 
 	* elflink.h (elf_link_add_object_symbols): Revert the last
