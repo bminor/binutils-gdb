@@ -1886,6 +1886,7 @@ proc_wait (statloc)
 	  rtnval = wait (&statval);
 	  if (rtnval != inferior_pid)
 	    {
+	      print_sys_errmsg (pi.pathname, errno);
 	      error ("PIOCWSTOP, wait failed, returned %d", rtnval);
 	      /* NOTREACHED */
 	    }

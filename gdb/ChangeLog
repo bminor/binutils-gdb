@@ -1,5 +1,8 @@
 Mon Sep 14 19:20:43 1992  Stu Grossman  (grossman at cygnus.com)
 
+	* procfs.c (proc_wait):  Call print_sys_errmsg() if we get an
+	error from PIOCSWSTOP.
+
 	* breakpoint.c, core.c, exec.c, language.c, main.c, printcmd.c,
 	symfile.c, target.c, valprint.c:  Use _filtered form of *printf.
 	defs.h, utils.c:  Make vfprintf_filtered global.
