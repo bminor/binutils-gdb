@@ -1262,3 +1262,25 @@ bfd_record_phdr (abfd, type, flags_valid, flags, at_valid, at,
 
   return true;
 }
+
+void
+bfd_sprintf_vma (abfd, buf, value)
+     bfd *abfd;
+     char *buf;
+     bfd_vma value;
+{
+  if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
+    return bfd_elf_sprintf_vma (abfd, buf, value);
+  sprintf_vma (buf, value);
+}
+
+void
+bfd_fprintf_vma (abfd, stream, value)
+     bfd *abfd;
+     PTR stream;
+     bfd_vma value;
+{
+  if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
+    return bfd_elf_fprintf_vma (abfd, stream, value);
+  fprintf_vma ((FILE *) stream, value);
+}
