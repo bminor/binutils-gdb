@@ -29,9 +29,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "defs.h"
 #include "bfd.h"
 
-/* AIX XCOFF names have a preceeding dot `.' */
-#define NAMES_HAVE_DOT 1
-
 #include <sys/types.h>
 #include <fcntl.h>
 #include <ctype.h>
