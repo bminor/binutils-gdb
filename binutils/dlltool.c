@@ -168,7 +168,7 @@
 #include "getopt.h"
 #include <sys/types.h>
 #include "demangle.h"
-
+#include <ctype.h>
 #ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #else
@@ -187,23 +187,26 @@
 #endif
 
 
-char *ar_name = "ar";
+
 char *as_name = "as";
-char *ranlib_name = "ranlib";
 
-char *exp_name;
-char *imp_name;
-char *imp_name_lab;
-char *dll_name;
+static int no_idata4;
+static int no_idata5;
+static char *exp_name;
+static char *imp_name;
+static char *head_label;
+static char *imp_name_lab;
+static char *dll_name;
 
-int add_indirect = 0;
-int add_underscore = 0;
-int dontdeltemps = 0;
+static int add_indirect = 0;
+static int add_underscore = 0;
+static int dontdeltemps = 0;
 
+int yyparse();
 int yydebug;
-char *def_file;
+static char *def_file;
 
-char *program_name;
+static char *program_name;
 char *strrchr ();
 char *strdup ();
 
@@ -221,6 +224,14 @@ static char *mname = "i386";
 #endif
 #define PATHMAX 250		/* What's the right name for this ? */
 
+/* This bit of assemly does jmp * ....
+s set how_jtab_roff to mark where the 32bit abs branch should go */
+unsigned char i386_jtab[] = { 0xff, 0x25, 0x00, 0x00, 0x00, 0x00, 0x90, 0x90};
+
+
+unsigned char arm_jtab[] = { 0x00, 0xc0, 0x9f, 0xe5,
+                             0x00, 0xf0, 0x9c, 0xe5,
+			        0,     0,   0,    0};
 char outfile[PATHMAX];
 struct mac
   {
@@ -235,21 +246,30 @@ struct mac
     char *how_space;
     char *how_align_short;
     char *how_align_long;
+    char *how_bfd_target;
+    enum bfd_architecture how_bfd_arch;
+    unsigned char *how_jtab;
+    int how_jtab_size; /* size of the jtab entry */
+    int how_jtab_roff; /* offset into it for the ind 32 reloc into idata 5 */
   }
 mtable[]
 =
 {
   {
 #define MARM 0
-    "arm", ".byte", ".short", ".long", ".asciz", "@", "ldr\tip,[pc]\n\tldr\tpc,[ip]\n\t.long", ".global", ".space", ".align\t2",".align\t4",
+    "arm", ".byte", ".short", ".long", ".asciz", "@", 
+    "ldr\tip,[pc]\n\tldr\tpc,[ip]\n\t.long",
+    ".global", ".space", ".align\t2",".align\t4","pe-arm-little", bfd_arch_arm,
+    arm_jtab, sizeof(arm_jtab),8
   }
   ,
   {
 #define M386 1
-    "i386", ".byte", ".short", ".long", ".asciz", "#", "jmp *", ".global", ".space", ".align\t2",".align\t4"
+    "i386", ".byte", ".short", ".long", ".asciz", "#", "jmp *", ".global", ".space", ".align\t2",".align\t4","pe-i386",bfd_arch_i386,
+   i386_jtab,sizeof(i386_jtab),2,
   }
   ,
-    0
+{    0}
 };
 
 
@@ -264,6 +284,7 @@ rvaafter (machine)
     case M386:
       return "";
     }
+return "";
 }
 
 char *
@@ -277,10 +298,12 @@ rvabefore (machine)
     case M386:
       return ".rva\t";
     }
+return "";
 }
 
 char *
 asm_prefix (machine)
+int machine;
 {
   switch (machine)
     {
@@ -289,6 +312,7 @@ asm_prefix (machine)
     case M386:
       return "_";
     }
+return "";
 }
 #define ASM_BYTE 	mtable[machine].how_byte
 #define ASM_SHORT 	mtable[machine].how_short
@@ -303,6 +327,11 @@ asm_prefix (machine)
 #define ASM_RVA_AFTER  	rvaafter(machine)
 #define ASM_PREFIX	asm_prefix(machine)
 #define ASM_ALIGN_LONG mtable[machine].how_align_long
+#define HOW_BFD_TARGET  0  /* always default*/
+#define HOW_BFD_ARCH   mtable[machine].how_bfd_arch
+#define HOW_JTAB       mtable[machine].how_jtab
+#define HOW_JTAB_SIZE      mtable[machine].how_jtab_size
+#define HOW_JTAB_ROFF      mtable[machine].how_jtab_roff
 static char **oav;
 
 
@@ -361,10 +390,12 @@ static dlist_type *a_list;	/* Stuff to go in directives */
 static int d_is_dll;
 static int d_is_exe;
 
+int 
 yyerror ()
 {
   fprintf (stderr, "%s: Syntax error in def file %s:%d\n",
 	   program_name, def_file, linenumber);
+  return 0;
 }
 
 void
@@ -477,6 +508,8 @@ def_import (internal, module, entry)
 
 void
 def_version (major, minor)
+int major;
+int minor;
 {
   printf ("VERSION %d.%d\n", major, minor);
 }
@@ -557,6 +590,7 @@ run (what, args)
 
 
   pid = vfork ();
+
   if (pid == 0)
     {
       execvp (what, argv);
@@ -679,8 +713,7 @@ scan_obj_file (filename)
 	  arfile = bfd_openr_next_archived_file (f, arfile);
 	}
     }
-
-  if (bfd_check_format (f, bfd_object))
+  else if (bfd_check_format (f, bfd_object))
     {
       scan_open_obj_file (f);
     }
@@ -691,19 +724,6 @@ scan_obj_file (filename)
 /**********************************************************************/
 
 
-/* return the bit of the name before the last . */
-
-static
-char *
-prefix (name)
-     char *name;
-{
-  char *res = strdup (name);
-  char *p = strrchr (res, '.');
-  if (p)
-    *p = 0;
-  return res;
-}
 
 void
 dump_def_info (f)
@@ -742,8 +762,8 @@ sfunc (a, b)
 static void
 flush_page (f, need, page_addr, on_page)
      FILE *f;
-     long *need;
-     long page_addr;
+     int *need;
+     int page_addr;
      int on_page;
 {
   int i;
@@ -759,7 +779,7 @@ flush_page (f, need, page_addr, on_page)
 	   ASM_C);
   for (i = 0; i < on_page; i++)
     {
-      fprintf (f, "\t%s\t0x%x\n", ASM_SHORT, need[i] - page_addr | 0x3000);
+      fprintf (f, "\t%s\t0x%x\n", ASM_SHORT, (need[i] - page_addr) | 0x3000);
     }
   /* And padding */
   if (on_page & 1)
@@ -773,16 +793,22 @@ gen_def_file ()
 {
   int i;
   export_type *exp;
+
   fprintf (output_def, ";");
   for (i = 0; oav[i]; i++)
     fprintf (output_def, " %s", oav[i]);
 
   fprintf (output_def, "\nEXPORTS\n");
+
   for (i = 0, exp = d_exports; exp; i++, exp = exp->next)
     {
-      fprintf (output_def, "\t%s @ %d; %s\n",
+      char *quote = strchr (exp->name, '.') ? "\"" : "";
+      fprintf (output_def, "\t%s%s%s @ %d%s ; %s\n",
+	       quote,
 	       exp->name,
+	       quote,
 	       exp->ordinal,
+	       exp->noname ? " NONAME" : "",
 	       cplus_demangle (exp->internal_name, DMGL_ANSI | DMGL_PARAMS));
     }
 }
@@ -793,7 +819,7 @@ gen_exp_file ()
   int i;
   export_type *exp;
   dlist_type *dl;
-  int had_noname = 0;
+
 
   sprintf (outfile, "t%s", exp_name);
 
@@ -818,7 +844,7 @@ gen_exp_file ()
     {
       fprintf (f, "\t.section	.edata\n\n");
       fprintf (f, "\t%s	0	%s Allways 0\n", ASM_LONG, ASM_C);
-      fprintf (f, "\t%s	0	%s Time and date\n", ASM_LONG, ASM_C);
+      fprintf (f, "\t%s	0x%x	%s Time and date\n", ASM_LONG, time(0),ASM_C);
       fprintf (f, "\t%s	0	%s Major and Minor version\n", ASM_LONG, ASM_C);
       fprintf (f, "\t%sname%s	%s Ptr to name of dll\n", ASM_RVA_BEFORE, ASM_RVA_AFTER, ASM_C);
       fprintf (f, "\t%s	%d	%s Starting ordinal of exports\n", ASM_LONG, d_low_ord, ASM_C);
@@ -872,7 +898,7 @@ gen_exp_file ()
       fprintf (f,"%s Export Name Pointer Table\n", ASM_C);
       fprintf (f, "anames:\n");
 
-      for (i = 0; exp = d_exports_lexically[i]; i++)
+      for (i = 0; (exp = d_exports_lexically[i]); i++)
 	{
 	  if (!exp->noname || show_allnames)
 	    fprintf (f, "\t%sn%d%s\n", ASM_RVA_BEFORE, exp->ordinal, ASM_RVA_AFTER);
@@ -880,14 +906,14 @@ gen_exp_file ()
 
       fprintf (f,"%s Export Oridinal Table\n", ASM_C);
       fprintf (f, "anords:\n");
-      for (i = 0; exp = d_exports_lexically[i]; i++)
+      for (i = 0; (exp = d_exports_lexically[i]); i++)
 	{
 	  if (!exp->noname || show_allnames)
 	    fprintf (f, "\t%s	%d\n", ASM_SHORT, exp->ordinal - d_low_ord);
 	}
 
       fprintf(f,"%s Export Name Table\n", ASM_C);
-      for (i = 0; exp = d_exports_lexically[i]; i++)
+      for (i = 0; (exp = d_exports_lexically[i]); i++)
 	if (!exp->noname || show_allnames)
 	  fprintf (f, "n%d:	%s	\"%s\"\n", exp->ordinal, ASM_TEXT, exp->name);
 
@@ -974,7 +1000,7 @@ gen_exp_file ()
 	{
 
 	  int src;
-	  int dst;
+	  int dst = 0;
 	  int last = -1;
 	  qsort (copy, num_entries, sizeof (long), sfunc);
 	  /* Delete duplcates */
@@ -1000,7 +1026,7 @@ gen_exp_file ()
 	    }
 	  flush_page (f, need, page_addr, on_page);
 
-	  fprintf (f, "\t%s\t0,0\t%s End\n", ASM_LONG, ASM_C);
+/*	  fprintf (f, "\t%s\t0,0\t%s End\n", ASM_LONG, ASM_C);*/
 	}
     }
 
@@ -1056,65 +1082,88 @@ export_type *exp;
 	       ASM_RVA_AFTER);
     }
 }
-static void
-gen_lib_file ()
+
+
+
+typedef struct 
 {
-  int i;
-  int sol;
-  FILE *f;
-  export_type *exp;
-  char *output_filename;
-  char prefix[PATHMAX];
+  int id;
+  const char *name;
+  int flags;
+  asection *sec;
+  asymbol *sym;
+  asymbol **sympp;
+  int size;
+  unsigned   char *data;
+} sinfo;
 
-  sprintf (outfile, "%s", imp_name);
-  output_filename = strdup (outfile);
 
-  unlink (output_filename);
+#define TEXT 0
+#define DATA 1
+#define BSS 2
+#define IDATA7 3
+#define IDATA5 4
+#define IDATA4 5
+#define IDATA6 6
+#define NSECS 7
 
-  strcpy (prefix, "d");
-  sprintf (outfile, "%sh.s", prefix);
+static sinfo secdata[NSECS] = 
+{
+  { TEXT, ".text", SEC_CODE | SEC_HAS_CONTENTS},
+  { DATA, ".data", SEC_DATA},
+  { BSS,".bss" },
+  { IDATA7, ".idata$7",SEC_HAS_CONTENTS},
+  { IDATA5, ".idata$5",  SEC_HAS_CONTENTS},
+  { IDATA4, ".idata$4",  SEC_HAS_CONTENTS},
+  { IDATA6,".idata$6",  SEC_HAS_CONTENTS}
 
-  f = fopen (outfile, "w");
 
-  fprintf (f, "%s IMAGE_IMPORT_DESCRIPTOR\n", ASM_C);
-  fprintf (f, "\t.section	.idata$2\n");
+};
+/*
+This is what we're trying to make
 
-  fprintf (f, "\t%s\t__%s_head\n", ASM_GLOBAL, imp_name_lab);
-  fprintf (f, "__%s_head:\n", imp_name_lab);
+	.text
+	.global	_GetFileVersionInfoSizeW@8
+	.global	__imp_GetFileVersionInfoSizeW@8
+_GetFileVersionInfoSizeW@8:
+	jmp *	__imp_GetFileVersionInfoSizeW@8
+	.section	.idata$7	# To force loading of head
+	.long	__version_a_head
+# Import Address Table
+	.section	.idata$5
+__imp_GetFileVersionInfoSizeW@8:
+	.rva	ID2
 
-  fprintf (f, "\t%shname%s\t%sPtr to image import by name list\n",
-	   ASM_RVA_BEFORE, ASM_RVA_AFTER, ASM_C);
+# Import Lookup Table
+	.section	.idata$4
+	.rva	ID2
+# Hint/Name table
+	.section	.idata$6
+ID2:	.short	2
+	.asciz	"GetFileVersionInfoSizeW"
 
-  fprintf (f, "\t%sthis should be the timestamp, but NT sometimes\n", ASM_C);
-  fprintf (f, "\t%sdoesn't load DLLs when this is set.\n", ASM_C);
-  fprintf (f, "\t%s\t0\t%s loaded time\n", ASM_LONG, ASM_C);
-  fprintf (f, "\t%s\t0\t%s Forwarder chain\n", ASM_LONG, ASM_C);
-  fprintf (f, "\t%s__%s_iname%s\t%s imported dll's name\n",
-	   ASM_RVA_BEFORE,
-	   imp_name_lab,
-	   ASM_RVA_AFTER,
-	   ASM_C);
-  fprintf (f, "\t%sfthunk%s\t%s pointer to firstthunk\n",
-	   ASM_RVA_BEFORE,
-	   ASM_RVA_AFTER, ASM_C);
+*/
 
-  fprintf (f, "%sStuff for compatibility\n", ASM_C);
-  fprintf (f, "\t.section\t.idata$5\n");
-  fprintf (f, "\t%s\t0\n", ASM_LONG);
-  fprintf (f, "fthunk:\n");
-  fprintf (f, "\t.section\t.idata$4\n");
-
-  fprintf (f, "\t%s\t0\n", ASM_LONG);
-  fprintf (f, "\t.section	.idata$4\n");
-  fprintf (f, "hname:\n");
-
-  fclose (f);
-
-  sprintf (outfile, "-o %sh.o %sh.s", prefix, prefix);
-  run (as_name, outfile);
-
-  for (i = 0; exp = d_exports_lexically[i]; i++)
+static char *make_label (prefix, name)
+const char *prefix;
+const char *name;
+{
+  int len = strlen (ASM_PREFIX) + strlen (prefix) + strlen (name);
+  char *copy = xmalloc (len +1 );
+  strcpy (copy, ASM_PREFIX);
+  strcat (copy, prefix);
+  strcat (copy, name);
+  return copy;
+}
+static bfd *
+make_one_lib_file (exp, i)
+export_type *exp;
+int i;
+{
+  if (0)
     {
+      FILE *f;
+      char *prefix="d";
       sprintf (outfile, "%ss%d.s", prefix, i);
       f = fopen (outfile, "w");
       fprintf (f, "\t.text\n");
@@ -1124,7 +1173,7 @@ gen_lib_file ()
 	       exp->name, ASM_JUMP, exp->name);
 
       fprintf (f, "\t.section\t.idata$7\t%s To force loading of head\n", ASM_C);
-      fprintf (f, "\t%s\t__%s_head\n", ASM_LONG, imp_name_lab);
+      fprintf (f, "\t%s\t%s\n", ASM_LONG, head_label);
 
 
       fprintf (f,"%s Import Address Table\n", ASM_C);
@@ -1151,76 +1200,351 @@ gen_lib_file ()
 
 
       sprintf (outfile, "-o %ss%d.o %ss%d.s", prefix, i, prefix, i);
+
       run (as_name, outfile);
+
+    }
+  else
+    {
+
+      bfd *abfd;
+
+      asymbol *exp_label;
+      asymbol *iname;
+      asymbol *iname_lab;
+      asymbol **iname_lab_pp;
+      asymbol *ptrs[NSECS+3+1]; /* one symbol for each section, 2 extra + a null */
+
+      char *outname = xmalloc (10);
+      int oidx = 0;
+      sprintf (outname, "ds%d.o",  i);
+      abfd = bfd_openw (outname, HOW_BFD_TARGET);
+      if (!abfd)
+	{
+	  fprintf (stderr, "%s: bfd_open failed open output file %s\n", program_name, outname);
+	  exit (1);
+	}
+
+      bfd_set_format (abfd, bfd_object);
+      bfd_set_arch_mach (abfd, HOW_BFD_ARCH, 0);
+
+
+      for (i = 0; i < NSECS; i++)
+	{
+	  sinfo *si = secdata + i;
+	  if (si->id != i)
+	    abort();
+	  si->sec = bfd_make_section_old_way (abfd, si->name);
+	  bfd_set_section_flags (abfd, 
+				 si->sec,
+				 si->flags);
+	  si->sec->output_section = si->sec;
+	  si->sym =  bfd_make_empty_symbol(abfd);
+	  si->sym->name = si->sec->name;
+	  si->sym->section = si->sec;
+	  si->sym->flags = BSF_LOCAL;
+	  si->sym->value = 0;
+	  ptrs[oidx] = si->sym;
+	  si->sympp = ptrs + oidx;
+
+	  oidx++;
+	}
+
+      exp_label = bfd_make_empty_symbol(abfd);
+      exp_label->name = make_label ("",exp->name);
+      exp_label->section = secdata[TEXT].sec;
+      exp_label->flags = BSF_GLOBAL;
+      exp_label->value = 0;
+
+      ptrs[oidx++] = exp_label;
+
+      iname = bfd_make_empty_symbol(abfd);
+
+      iname->name = make_label ("__imp_", exp->name);
+
+      iname->section = secdata[IDATA5].sec;
+      iname->flags = BSF_GLOBAL;
+      iname->value = 0;
+
+
+      iname_lab = bfd_make_empty_symbol(abfd);
+
+      iname_lab->name = head_label;
+      iname_lab->section = (asection *)&bfd_und_section;
+      iname_lab->flags = 0;
+      iname_lab->value = 0;
+
+
+      ptrs[oidx++] = iname;
+      iname_lab_pp = ptrs + oidx;
+      ptrs[oidx++] = iname_lab;
+      ptrs[oidx] = 0;
+
+      for (i = 0; i < NSECS; i++)
+	{
+	  sinfo *si = secdata + i;
+	  asection *sec = si->sec;
+	  arelent *rel;
+	  arelent **rpp;
+
+	  switch (i) 
+	    {
+	    case TEXT:
+	      si->size = HOW_JTAB_SIZE;
+	      si->data = xmalloc (HOW_JTAB_SIZE);
+	      memcpy (si->data, HOW_JTAB, HOW_JTAB_SIZE);
+	      
+	      /* add the reloc into idata$5 */
+	      rel = xmalloc (sizeof (arelent));
+	      rpp = xmalloc (sizeof (arelent *) * 2);
+	      rpp[0] = rel;
+	      rpp[1] = 0;
+	      rel->address = HOW_JTAB_ROFF;
+	      rel->addend = 0;
+	      rel->howto = bfd_reloc_type_lookup (abfd, BFD_RELOC_32);
+	      rel->sym_ptr_ptr = secdata[IDATA5].sympp;
+	      sec->orelocation = rpp;
+	      sec->reloc_count = 1;
+	      break;
+	    case IDATA4:
+	    case IDATA5:
+	      /* An idata$4 or idata$5 is one word long, and has an
+		 rva to idata$6 */
+	  
+
+	      si->data = xmalloc (4);
+	      si->size = 4;
+
+	      if (exp->noname)
+		{
+		  si->data[0] = exp->ordinal ;
+		  si->data[1] = exp->ordinal >> 8;
+		  si->data[2] = exp->ordinal >> 16;
+		  si->data[3] = 0x80;
+		}
+	      else 
+		{
+		  sec->reloc_count = 1;
+		  memset (si->data, 0, si->size);
+		  rel = xmalloc (sizeof (arelent));
+		  rpp = xmalloc (sizeof (arelent *) * 2);
+		  rpp[0] = rel;
+		  rpp[1] = 0;
+		  rel->address = 0;
+		  rel->addend = 0;
+		  rel->howto = bfd_reloc_type_lookup (abfd, BFD_RELOC_RVA);
+		  rel->sym_ptr_ptr = secdata[IDATA6].sympp;
+		  sec->orelocation = rpp;
+		}
+
+	      break;
+
+	    case IDATA6:
+	      if (!exp->noname) 
+		{
+		  int idx = exp->hint + 1;
+		  si->size = strlen (xlate (exp->name)) + 3;
+		  si->data = xmalloc (si->size);
+		  si->data[0] = idx & 0xff;
+		  si->data[1] = idx >> 8;
+		  strcpy (si->data + 2, xlate (exp->name));
+		}
+	      break;
+	    case IDATA7:
+	      si->size = 4;
+	      si->data =xmalloc(4);
+	      memset (si->data, 0, si->size);
+	      rel = xmalloc (sizeof (arelent));
+	      rpp = xmalloc (sizeof (arelent *) * 2);
+	      rpp[0] = rel;
+	      rel->address = 0;
+	      rel->addend = 0;
+	      rel->howto = bfd_reloc_type_lookup (abfd, BFD_RELOC_32);
+	      rel->sym_ptr_ptr = iname_lab_pp;
+	      sec->orelocation = rpp;
+	      sec->reloc_count = 1;
+	      break;
+	    }
+	}
+
+      {
+	bfd_vma vma = 0;
+	/* Size up all the sections */
+	for (i = 0; i < NSECS; i++)
+	  {
+	    sinfo *si = secdata + i;
+	    bfd_set_section_size (abfd, si->sec, si->size);
+	    bfd_set_section_vma (abfd, si->sec, vma);
+/*	    vma += si->size;*/
+	  }
+      }
+      /* Write them out */
+      for (i = 0; i < NSECS; i++)
+	{
+	  sinfo *si = secdata + i;
+	  if (i == IDATA5 && no_idata5)
+	    continue;
+
+	  if (i == IDATA4 && no_idata4)
+	    continue;
+
+	  bfd_set_section_contents (abfd, si->sec, 
+				    si->data, 0,
+				    si->size);
+	}
+
+      bfd_set_symtab (abfd, ptrs, oidx);
+      bfd_close (abfd);
+      abfd = bfd_openr (outname, HOW_BFD_TARGET);
+      return abfd;
     }
 
-  sprintf (outfile, "%st.s", prefix);
-  f = fopen (outfile, "w");
+}
+
+
+static 
+bfd *
+make_head()
+{
+  FILE *  f = fopen ("dh.s", "w");
+
+  fprintf (f, "%s IMAGE_IMPORT_DESCRIPTOR\n", ASM_C);
+  fprintf (f, "\t.section	.idata$2\n");
+
+  fprintf(f,"\t%s\t%s\n", ASM_GLOBAL,head_label);
+
+  fprintf (f, "%s:\n", head_label);
+
+  fprintf (f, "\t%shname%s\t%sPtr to image import by name list\n",
+	   ASM_RVA_BEFORE, ASM_RVA_AFTER, ASM_C);
+
+  fprintf (f, "\t%sthis should be the timestamp, but NT sometimes\n", ASM_C);
+  fprintf (f, "\t%sdoesn't load DLLs when this is set.\n", ASM_C);
+  fprintf (f, "\t%s\t0\t%s loaded time\n", ASM_LONG, ASM_C);
+  fprintf (f, "\t%s\t0\t%s Forwarder chain\n", ASM_LONG, ASM_C);
+  fprintf (f, "\t%s__%s_iname%s\t%s imported dll's name\n",
+	   ASM_RVA_BEFORE,
+	   imp_name_lab,
+	   ASM_RVA_AFTER,
+	   ASM_C);
+  fprintf (f, "\t%sfthunk%s\t%s pointer to firstthunk\n",
+	   ASM_RVA_BEFORE,
+	   ASM_RVA_AFTER, ASM_C);
+
+  fprintf (f, "%sStuff for compatibility\n", ASM_C);
+
+  if (!no_idata5) 
+    {
+      fprintf (f, "\t.section\t.idata$5\n");
+      fprintf (f, "\t%s\t0\n", ASM_LONG);
+      fprintf (f, "fthunk:\n");
+    }
+  if (!no_idata4) 
+    {
+      fprintf (f, "\t.section\t.idata$4\n");
+
+      fprintf (f, "\t%s\t0\n", ASM_LONG);
+      fprintf (f, "\t.section	.idata$4\n");
+      fprintf (f, "hname:\n");
+    }
+  fclose (f);
+
+  sprintf (outfile, "-o dh.o dh.s");
+  run (as_name, outfile);
+
+  return  bfd_openr ("dh.o", HOW_BFD_TARGET);  
+}
+
+static 
+bfd * make_tail()
+{
+  FILE *  f = fopen ("dt.s", "w");
   fprintf (f, "\t.section	.idata$7\n");
   fprintf (f, "\t%s\t__%s_iname\n", ASM_GLOBAL, imp_name_lab);
   fprintf (f, "__%s_iname:\t%s\t\"%s\"\n",
 	   imp_name_lab, ASM_TEXT, dll_name);
 
-
-  fprintf (f, "\t.section	.idata$4\n");
-  fprintf (f, "\t%s\t0\n", ASM_LONG);
-
-  fprintf (f, "\t.section	.idata$5\n");
-  fprintf (f, "\t%s\t0\n", ASM_LONG);
+  if (!no_idata4) 
+    {
+      fprintf (f, "\t.section	.idata$4\n");
+      fprintf (f, "\t%s\t0\n", ASM_LONG);
+    }
+  if (!no_idata5) 
+    {
+      fprintf (f, "\t.section	.idata$5\n");
+      fprintf (f, "\t%s\t0\n", ASM_LONG);
+    }
   fclose (f);
 
-  sprintf (outfile, "-o %st.o %st.s", prefix, prefix);
+  sprintf (outfile, "-o dt.o dt.s");
   run (as_name, outfile);
+  return  bfd_openr ("dt.o", HOW_BFD_TARGET);  
+}
+
+static void
+gen_lib_file ()
+{
+  int i;
+  export_type *exp;
+  bfd *ar_head;
+  bfd *ar_tail;
+  bfd *outarch;
+  bfd * head  = 0;
+
+  unlink (imp_name);
+
+  outarch = bfd_openw (imp_name, HOW_BFD_TARGET);
+
+  if (!outarch)
+    {
+      fprintf (stderr, "%s: Can't open .lib file %s\n", program_name, imp_name);
+      exit (1);
+    }
+  bfd_set_format (outarch, bfd_archive);
+  outarch->has_armap = 1;
+
+  /* Work out a reasonable size of things to put onto one line. */
+
+
+
+  ar_head = make_head ();
+  ar_tail = make_tail();
+
+  for (i = 0; (exp = d_exports_lexically[i]); i++)
+    {
+      bfd *n = make_one_lib_file (exp, i);
+      n->next = head;
+      head = n;
+    }
+
 
   /* Now stick them all into the archive */
 
+  ar_head->next = head;
+  ar_tail->next = ar_head;
+  head = ar_tail;
 
-  sprintf (outfile, "crs %s %sh.o %st.o", output_filename, prefix, prefix);
-  run (ar_name, outfile);
-
-  /* Do the rest in groups of however many fit into a command line */
-  sol = 0;
-  for (i = 0, exp = d_exports; exp; i++, exp = exp->next)
-    {
-      if (sol == 0)
-	{
-	  sprintf (outfile, "crs %s", output_filename);
-	  sol = strlen (outfile);
-	}
-
-      sprintf (outfile + sol, " %ss%d.o", prefix, i);
-      sol = strlen (outfile);
-
-      if (sol > 100)
-	{
-	  run (ar_name, outfile);
-	  sol = 0;
-	}
-
-    }
-  if (sol)
-    run (ar_name, outfile);
+  bfd_set_archive_head (outarch, head);
+  bfd_close (outarch);
 
   /* Delete all the temp files */
 
   if (dontdeltemps == 0)
     {
-      sprintf (outfile, "%sh.o", prefix);
+      sprintf (outfile, "dh.o");
       unlink (outfile);
-      sprintf (outfile, "%sh.s", prefix);
+      sprintf (outfile, "dh.s");
       unlink (outfile);
-      sprintf (outfile, "%st.o", prefix);
+      sprintf (outfile, "dt.o");
       unlink (outfile);
-      sprintf (outfile, "%st.s", prefix);
+      sprintf (outfile, "dt.s");
       unlink (outfile);
     }
 
   if (dontdeltemps < 2)
     for (i = 0, exp = d_exports; exp; i++, exp = exp->next)
       {
-	sprintf (outfile, "%ss%d.o", prefix, i);
-	unlink (outfile);
-	sprintf (outfile, "%ss%d.s", prefix, i);
+	sprintf (outfile, "ds%d.o",i);
 	unlink (outfile);
       }
 
@@ -1362,8 +1686,7 @@ fill_ordinals (d_export_vec)
      export_type **d_export_vec;
 {
   int lowest = 0;
-  int unset = 0;
-  int hint = 0;
+
   int i;
   char *ptr;
   qsort (d_export_vec, d_nfuncs, sizeof (export_type *), pfunc);
@@ -1420,10 +1743,11 @@ fill_ordinals (d_export_vec)
   /* Work out the lowest ordinal number */
   if (d_export_vec[0])
     d_low_ord = d_export_vec[0]->ordinal;
-  if (d_nfuncs) {
-  if (d_export_vec[d_nfuncs-1])
-    d_high_ord = d_export_vec[d_nfuncs-1]->ordinal;
-}
+  if (d_nfuncs) 
+    {
+      if (d_export_vec[d_nfuncs-1])
+	d_high_ord = d_export_vec[d_nfuncs-1]->ordinal;
+    }
 }
 
 int alphafunc(av,bv)
@@ -1442,7 +1766,7 @@ mangle_defs ()
   /* First work out the minimum ordinal chosen */
 
   export_type *exp;
-  int lowest = 0;
+
   int i;
   int hint = 0;
   export_type **d_export_vec
@@ -1487,63 +1811,7 @@ mangle_defs ()
 
 
 
-  /* Work out exec prefix from the name of this file */
-void
-workout_prefix ()
-{
-  char *ps = 0;
-  char *s = 0;
-  char *p;
-  /* See if we're running in a devo tree */
-  for (p = program_name; *p; p++)
-    {
-      if (*p == '/' || *p == '\\')
-	{
-	  ps = s;
-	  s = p;
-	}
-    }
 
-  if (ps && strncmp (ps, "/binutils", 9) == 0)
-    {
-      /* running in the binutils directory, the other
-         executables will be surrounding it in the usual places. */
-      int len = ps - program_name;
-      ar_name = xmalloc (len + strlen ("/binutils/ar") + 1);
-      ranlib_name = xmalloc (len + strlen ("/binutils/ranlib") + 1);
-      as_name = xmalloc (len + strlen ("/gas/as.new") + 1);
-
-      memcpy (ar_name, program_name, len);
-      strcpy (ar_name + len, "/binutils/ar");
-      memcpy (ranlib_name, program_name, len);
-      strcpy (ranlib_name + len, "/binutils/ranlib");
-      memcpy (as_name, program_name, len);
-      strcpy (as_name + len, "/gas/as.new");
-    }
-  else
-    {
-      /* Otherwise chop off any prefix and use it for the rest of the progs,
-         so i386-win32-dll generates i386-win32-ranlib etc etc */
-
-      for (p = program_name; *p; p++)
-	{
-	  if (strncmp (p, "dlltool", 7) == 0)
-	    {
-	      int len = p - program_name;
-	      ar_name = xmalloc (len + strlen ("ar") + 1);
-	      ranlib_name = xmalloc (len + strlen ("ranlib") + 1);
-	      as_name = xmalloc (len + strlen ("as") + 1);
-
-	      memcpy (ar_name, program_name, len);
-	      strcpy (ar_name + len, "ar");
-	      memcpy (ranlib_name, program_name, len);
-	      strcpy (ranlib_name + len, "ranlib");
-	      memcpy (as_name, program_name, len);
-	      strcpy (as_name + len, "as");
-	    }
-	}
-    }
-}
 
 
 /**********************************************************************/
@@ -1562,17 +1830,24 @@ usage (file, status)
   fprintf (file, "   --def <deffile>        Name input .def file\n");
   fprintf (file, "   --output-def <deffile> Name output .def file\n");
   fprintf (file, "   --base-file <basefile> Read linker generated base file\n");
+  fprintf (file, "   --no-idata4           Don't generate idata$4 section\n");
+  fprintf (file, "   --no-idata5           Don't generate idata$5 section\n");
   fprintf (file, "   -v                     Verbose\n");
   fprintf (file, "   -U                     Add underscores to .lib\n");
   fprintf (file, "   -k                     Kill @<n> from exported names\n");
+  fprintf (file, "   --as <name>            Use <name> for assembler\n");
   fprintf (file, "   --nodelete             Keep temp files.\n");
   exit (status);
 }
 
+#define OPTION_NO_IDATA4 'x'
+#define OPTION_NO_IDATA5 'c'
 static struct option long_options[] =
 {
   {"nodelete", no_argument, NULL, 'n'},
   {"dllname", required_argument, NULL, 'D'},
+  {"no-idata4", no_argument, NULL, OPTION_NO_IDATA4},
+  {"no-idata5", no_argument, NULL, OPTION_NO_IDATA5},
   {"output-exp", required_argument, NULL, 'e'},
   {"output-def", required_argument, NULL, 'z'},
   {"output-lib", required_argument, NULL, 'l'},
@@ -1583,7 +1858,8 @@ static struct option long_options[] =
   {"machine", required_argument, NULL, 'm'},
   {"add-indirect", no_argument, NULL, 'a'},
   {"base-file", required_argument, NULL, 'b'},
-  0
+  {"as", required_argument, NULL, 'S'},
+  {0}
 };
 
 
@@ -1599,10 +1875,21 @@ main (ac, av)
   program_name = av[0];
   oav = av;
 
-  while ((c = getopt_long (ac, av, "uaD:l:e:nkvbUh?m:yd:", long_options, 0)) != EOF)
+  while ((c = getopt_long (ac, av, "xcz:S:R:A:puaD:l:e:nkvbUh?m:yd:", long_options, 0)) 
+	 != EOF)
     {
       switch (c)
 	{
+	case OPTION_NO_IDATA4:
+	  no_idata4 = 1;
+	  break;
+	case OPTION_NO_IDATA5:
+	  no_idata5 = 1;
+	  break;
+	case 'S':
+	  as_name = optarg;
+	  break;
+
 	  /* ignored for compatibility */
 	case 'u':
 	  break;
@@ -1683,8 +1970,6 @@ main (ac, av)
       strcpy (dll_name, exp_name);
       strcat (dll_name, ".dll");
     }
-  workout_prefix ();
-
 
   if (def_file)
     {
@@ -1713,6 +1998,7 @@ main (ac, av)
 	  if (!isalpha (*p) && !isdigit (*p))
 	    *p = '_';
 	}
+      head_label = make_label("_head_", imp_name_lab);
       gen_lib_file ();
     }
   if (output_def)

@@ -1,3 +1,9 @@
+Thu Oct 26 10:23:14 1995  steve chamberlain  <sac@slash.cygnus.com>
+
+	* dlltool.c (no_idata4, no_idata5): New.
+	(arm_jtab): Use correct encoding of jump instruction.
+	(usage, main, make_head, make_tail): Act on no_idata4, no_idata5.
+
 Wed Oct 25 12:10:07 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-make.sed: Edit paths to generated y.tab.[ch] files.
