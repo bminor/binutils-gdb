@@ -2159,7 +2159,7 @@ gensim_caselist (p)
 	      s += 2;
 	      break;
 	    case 'y':
-	      printf ("      int n = ((iword >> 8) & 1) + 4;\n");
+	      printf ("      int n = ((iword >> 8) & 1) + 6;\n");
 	      needn = 1;
 	      s += 2;
 	      break;

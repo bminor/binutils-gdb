@@ -4,6 +4,11 @@
 
 2003-06-27  Michael Snyder  <msnyder@redhat.com>
 
+	* gencode.c (gensim_caselist): The movy instructions use
+	registers R6 and R7 (not R4 and R5 like the movx insns).
+
+2003-06-27  Michael Snyder  <msnyder@redhat.com>
+
 	* gencode.c (op movsxy_tab): Fix up some copy/paste errors
 	in name: s/REG_x/REG_y/.
 
