@@ -1,3 +1,11 @@
+1999-11-01  Steve Chamberlain  <sac@pobox.com>
+
+	* ldlang.c (section_already_linked): Rework to use hash table.
+	(already_linked_newfunc): New function.
+	(already_linked_table_init): New function.
+	(already_linked_table_free): New function.
+	(lang_process): Initialize and free the already_linked hash table.
+
 1999-10-27  Andreas Jaeger  <aj@suse.de>
 
 	* ld/configure.host: Added HOSTING_CRT0, HOSTING_LIBS for 
