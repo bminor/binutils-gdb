@@ -1,3 +1,7 @@
+2002-02-11  Alexandre Oliva  <aoliva@redhat.com>
+
+	* config/tc-sh.c (dot): Removed unused function.
+
 2002-02-10  Richard Henderson  <rth@redhat.com>
 
 	* doc/c-alpha.texi: New file.

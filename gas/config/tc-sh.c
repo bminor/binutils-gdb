@@ -59,7 +59,6 @@ static unsigned int assemble_ppi PARAMS ((char *, sh_opcode_info *));
 static void little PARAMS ((int));
 static void big PARAMS ((int));
 static int parse_reg PARAMS ((char *, int *, int *));
-static symbolS *dot PARAMS ((void));
 static char *parse_exp PARAMS ((char *, sh_operand_info *));
 static char *parse_at PARAMS ((char *, sh_operand_info *));
 static void get_operand PARAMS ((char **, sh_operand_info *));
@@ -1256,20 +1255,6 @@ parse_reg (src, mode, reg)
     }
 
   return 0;
-}
-
-static symbolS *
-dot ()
-{
-  const char *fake;
-
-  /* JF: '.' is pseudo symbol with value of current location
-     in current segment.  */
-  fake = FAKE_LABEL_NAME;
-  return  symbol_new (fake,
-		      now_seg,
-		      (valueT) frag_now_fix (),
-		      frag_now);
 }
 
 static char *
