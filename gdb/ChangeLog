@@ -1,3 +1,13 @@
+2002-03-26  Jeff Law (law@redhat.com)
+
+	* somread.c (som_symtab_read): Remove some commented out code and
+	updated related comments.  Do not set the minimal symbol table to
+	mst_solib_trampoline for ST_ENTRY symbols with SS_LOCAL scope
+	in a dynamic executable.
+	* hppa-tdep.c (find_proc_framesize): Sanely handle the case
+	where we are unable to find the minimal symbol for the given
+	PC value.
+
 2002-03-25  Jeff Law (law@redhat.com)
 
 	* linux-proc.c (read_mapping): Scan up to end of line for filename.

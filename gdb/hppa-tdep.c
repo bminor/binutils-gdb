@@ -747,7 +747,9 @@ find_proc_framesize (CORE_ADDR pc)
 
   /* If Save_SP is set, and we're not in an interrupt or signal caller,
      then we have a frame pointer.  Use it.  */
-  if (u->Save_SP && !pc_in_interrupt_handler (pc)
+  if (u->Save_SP
+      && !pc_in_interrupt_handler (pc)
+      && msym_us
       && !IN_SIGTRAMP (pc, SYMBOL_NAME (msym_us)))
     return -1;
 
