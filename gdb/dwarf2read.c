@@ -3963,7 +3963,18 @@ dwarf_decode_lines (unsigned int offset, char *comp_dir, bfd *abfd,
 	{
 	  op_code = read_1_byte (abfd, line_ptr);
 	  line_ptr += 1;
-	  switch (op_code)
+
+	  if (op_code >= lh.opcode_base)
+	    {		/* Special operand.  */
+	      adj_opcode = op_code - lh.opcode_base;
+	      address += (adj_opcode / lh.line_range)
+		* lh.minimum_instruction_length;
+	      line += lh.line_base + (adj_opcode % lh.line_range);
+	      /* append row to matrix using current values */
+	      record_line (current_subfile, line, address);
+	      basic_block = 1;
+	    }
+	  else switch (op_code)
 	    {
 	    case DW_LNS_extended_op:
 	      line_ptr += 1;	/* ignore length */
@@ -4061,14 +4072,15 @@ dwarf_decode_lines (unsigned int offset, char *comp_dir, bfd *abfd,
 	      address += read_2_bytes (abfd, line_ptr);
 	      line_ptr += 2;
 	      break;
-	    default:		/* special operand */
-	      adj_opcode = op_code - lh.opcode_base;
-	      address += (adj_opcode / lh.line_range)
-		* lh.minimum_instruction_length;
-	      line += lh.line_base + (adj_opcode % lh.line_range);
-	      /* append row to matrix using current values */
-	      record_line (current_subfile, line, address);
-	      basic_block = 1;
+	    default:
+	      {  /* Unknown standard opcode, ignore it.  */
+		int i;
+		for (i = 0; i < lh.standard_opcode_lengths[op_code]; i++)
+		  {
+		    (void) read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
+		    line_ptr += bytes_read;
+		  }
+	      }
 	    }
 	}
     }

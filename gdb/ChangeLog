@@ -1,3 +1,8 @@
+2001-11-11  Geoffrey Keating  <geoffk@redhat.com>
+
+	* dwarf2read.c (dwarf_decode_lines): Properly deal with
+	unknown standard opcodes.
+
 2001-11-11  Andrew Cagney  <ac131313@redhat.com>
 
 	* README (alpha-dec-osf5.1): Mention -DUSE_LDR_ROUTINES.
