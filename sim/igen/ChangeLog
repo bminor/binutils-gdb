@@ -1,3 +1,27 @@
+Mon May  5 14:11:46 1997  Mike Meissner  <meissner@cygnus.com>
+
+	* gen-engine.c (engine_switch_leaf): Remove extra %s.
+	(print_engine_floating_point_unavailable): Wrap in #ifdef
+	UNUSED/#endif, until somebody uses it.
+
+	* gen-idecode.c (error_leaf_contains_multiple_insn): Remove unused
+	variable.
+	(print_jump_until_stop_body): Wrap in #ifdef UNUSED/#endif, until
+	somebody uses it.
+	(print_idecode_validate): Use long formats to print long values.
+
+	* gen-semantics.c (print_idecode_invalid): Set name to "unknown"
+	if we get an unexpected type.
+
+Fri May  2 13:28:06 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* igen.c (print_itrace): Pass SD as well as CPU to calls to
+ 	trace_printf.
+
+	* gen-support.c (gen_support_h): Always pass sim_cia cia to
+ 	support functions.
+	(print_support_function_name): Ditto.
+
 Wed Apr 30 17:35:51 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gen-support.c (support_c_function): Remove unnecessary memset of

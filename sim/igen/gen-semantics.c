@@ -98,6 +98,7 @@ print_idecode_invalid(lf *file,
 {
   const char *name;
   switch (type) {
+  default: name = "unknown"; break;
   case invalid_illegal: name = "illegal"; break;
   case invalid_fp_unavailable: name = "fp_unavailable"; break;
   case invalid_wrong_slot: name = "wrong_slot"; break;
@@ -155,7 +156,7 @@ print_semantic_body(lf *file,
     lf_printf(file, "nia = -1;\n");
   else if ((code & generate_with_semantic_delayed_branch)) {
     lf_printf(file, "nia.ip = cia.dp; /* instruction pointer */\n");
-    lf_printf(file, "nia.dp = cia.dp + %d; /* delayed-slot pointer\n",
+    lf_printf(file, "nia.dp = cia.dp + %d; /* delayed-slot pointer */\n",
 	      insn_bit_size / 8);
   }
   else
@@ -191,10 +192,14 @@ print_semantic_body(lf *file,
   else {
     /* abort so it is implemented now */
     table_entry_print_cpp_line_nr(file, instruction->file_entry);
-    lf_printf(file, "engine_error(system, \"%s:%d:0x%%08lx:%%s unimplemented\\n\",\n",
+    lf_printf(file, "engine_error (SD, CPU, cia, \"%s:%d:0x%%08lx:%%s unimplemented\\n\",\n",
 	      filter_filename(instruction->file_entry->file_name),
 	      instruction->file_entry->line_nr);
-    lf_printf(file, "             (long)cia, itable[MY_INDEX].name);\n");
+    if ((code & generate_with_semantic_delayed_branch))
+      lf_printf(file, "              (long)cia.ip,\n");
+    else
+      lf_printf(file, "              (long)cia,\n");
+    lf_printf(file, "              itable[MY_INDEX].name);\n");
     lf_print__internal_reference(file);
   }
 
@@ -230,7 +235,7 @@ print_c_semantic(lf *file,
 		     ? get_values_from_icache
 		     : do_not_use_icache));
 
-  lf_printf(file, "instruction_address nia;\n");
+  lf_printf(file, "%sinstruction_address nia;\n", global_name_prefix);
   print_semantic_body(file,
 		      instruction,
 		      expanded_bits,

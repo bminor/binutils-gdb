@@ -59,7 +59,6 @@ void
 error_leaf_contains_multiple_insn(insn_table *entry)
 {
   insn *i;
-  insn *first;
   ASSERT(entry->opcode == NULL && entry->nr_insn > 1);
   for (i = entry->insns; i != NULL; i = i->next) {
     fprintf(stderr, "%s:%d: %s %s\n",
@@ -732,7 +731,7 @@ print_idecode_issue_function_body(lf *file,
 {
   lf_printf(file, "{\n");
   lf_indent(file, +2);
-  lf_printf(file, "instruction_address nia;\n");
+  lf_printf(file, "%sinstruction_address nia;\n", global_name_prefix);
   if (!(code & generate_with_icache)) {
     print_idecode_body(file, table, "nia =");;
   }
@@ -978,7 +977,6 @@ print_jump_definition(insn_table *entry,
   }
 }
 
-
 static void
 print_jump_internal_function(insn_table *table,
 			     lf *file,
@@ -1008,6 +1006,7 @@ print_jump_internal_function(insn_table *table,
   }
 }
 
+#ifdef UNUSED
 static void
 print_jump_until_stop_body(lf *file,
 			   insn_table *table,
@@ -1103,7 +1102,7 @@ print_jump_until_stop_body(lf *file,
   lf_indent(file, -2);
   lf_printf(file, "}\n");
 }
-
+#endif
 
 /****************************************************************/
 
@@ -1165,14 +1164,14 @@ print_idecode_validate(lf *file,
 		instruction->file_entry->fields[insn_format]);
       lf_printf(file, "if (WITH_RESERVED_BITS\n");
       if (insn_bit_size > 32) {
-	lf_printf(file, "    && (instruction & 0x%08x%08xLL) != 0x%08x%08xLL) {\n",
+	lf_printf(file, "    && (instruction & 0x%08lx%08lxLL) != 0x%08lx%08lxLL) {\n",
 		  (unsigned long)(check_mask >> 32),
 		  (unsigned long)(check_mask),
 		  (unsigned long)(check_val >> 32),
 		  (unsigned long)(check_val));
       }
       else {
-	lf_printf(file, "    && (instruction & 0x%08x) != 0x%08x) {\n",
+	lf_printf(file, "    && (instruction & 0x%08lx) != 0x%08lx) {\n",
 		  (unsigned long)(check_mask),
 		  (unsigned long)(check_val));
       }
@@ -1290,16 +1289,20 @@ gen_idecode_h (lf *file,
 {
   lf_printf(file, "typedef unsigned%d %sinstruction_word;\n",
 	    insn_bit_size, global_name_prefix);
+  
   if ((code & generate_with_semantic_delayed_branch))
     {
-      lf_printf (file, "typedef struct _instruction_address {\n");
+      lf_printf (file, "typedef struct _%sinstruction_address {\n",
+		 global_name_prefix);
       lf_printf (file, "  address_word ip; /* instruction pointer */\n");
       lf_printf (file, "  address_word dp; /* delayed-slot pointer */\n");
-      lf_printf (file, "} instruction_address;\n");
+      lf_printf (file, "} %sinstruction_address;\n", global_name_prefix);
     }
   else
     {
-      lf_printf (file, "typedef address_word instruction_address;\n");
+      lf_printf (file, "typedef address_word %sinstruction_address;\n",
+		 global_name_prefix);
+
     }
   lf_printf(file, "\n");
   print_icache_struct(table, cache_rules, file);
