@@ -1,3 +1,8 @@
+Tue Oct 11 17:12:00 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* lynx-core.c (lynx_core_file_p): SPARC Lynx appears to start
+	dumping the .data section in a core file at a page boundary.
+
 Mon Oct 10 16:24:44 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
 	* cofflink.c (_bfd_coff_final_link): Cast argument to bfd_h_put_32
