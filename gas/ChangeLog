@@ -1,3 +1,8 @@
+2001-02-23  H.J. Lu  <hjl@gnu.org>
+
+	* dwarf2dbg.c (dwarf2_directive_file): Call s_app_file (0) if
+	BFD_ASSEMBLER is not defined.
+
 2001-02-23   Richard Sandiford <rsandifo@redhat.com>
 
 	* config/tc-mn10300.c (md_apply_fix3): Don't mark a fixup as

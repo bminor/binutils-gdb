@@ -1284,7 +1284,7 @@ void
 dwarf2_directive_file (dummy)
      int dummy ATTRIBUTE_UNUSED;
 {
-  as_fatal (_("dwarf2 is not supported for this object file format"));
+  s_app_file (0);
 }
 
 void
