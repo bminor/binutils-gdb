@@ -1,3 +1,12 @@
+2000-11-22  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (get_machine_name): Add EM_JAVELIN, EM_FIREPATH,
+	EM_ZSP, EM_MMIX, EM_HUANY, EM_PRISM.
+	(get_section_type_name): Add SHT_GROUP and SHT_SYMTAB_SHNDX.
+	(get_elf_section_flags: Add SHF_GROUP.
+	(process_section_headers): Adjust output for 32-bit binaries
+	to look nice on an 80 column terminal.
+
 2000-11-20  H.J. Lu  <hjl@gnu.org>
 
 	* readelf.c (get_osabi_name): Change ELFOSABI_MONTEREY to

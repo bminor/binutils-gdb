@@ -1261,6 +1261,13 @@ get_machine_name (e_machine)
     case EM_VAX:      		return "Digital VAX";
     case EM_AVR:                return "Atmel AVR 8-bit microcontroller";
     case EM_CRIS:		return "Axis Communications 32-bit embedded processor";
+    case EM_JAVELIN:     	return "Infineon Technologies 32-bit embedded cpu";
+    case EM_FIREPATH:    	return "Element 14 64-bit DSP processor";
+    case EM_ZSP:         	return "LSI Logic's 16-bit DSP processor";
+    case EM_MMIX:	        return "Donald Knuth's educational 64-bit processor";
+    case EM_HUANY:       	return "Harvard Universitys's machine-independent object format";
+    case EM_PRISM:       	return "SiTera Prism";
+      
     default:
       sprintf (buff, _("<unknown>: %x"), e_machine);
       return buff;
@@ -1742,6 +1749,8 @@ get_section_type_name (sh_type)
     case SHT_INIT_ARRAY:	return "INIT_ARRAY";
     case SHT_FINI_ARRAY:	return "FINI_ARRAY";
     case SHT_PREINIT_ARRAY:	return "PREINIT_ARRAY";
+    case SHT_GROUP:		return "GROUP";
+    case SHT_SYMTAB_SHNDX:	return "SYMTAB SECTION INDICIES";
     case SHT_GNU_verdef:	return "VERDEF";
     case SHT_GNU_verneed:	return "VERNEED";
     case SHT_GNU_versym:	return "VERSYM";
@@ -2622,6 +2631,7 @@ get_elf_section_flags (sh_flags)
 	case SHF_INFO_LINK:        strcat (buff, "I"); break;
 	case SHF_LINK_ORDER:       strcat (buff, "L"); break;
 	case SHF_OS_NONCONFORMING: strcat (buff, "O"); break;
+	case SHF_GROUP:            strcat (buff, "G"); break;
 
 	default:
 	  if (flag & SHF_MASKOS)
@@ -2772,7 +2782,7 @@ process_section_headers (file)
 
 	  printf (" %3s ", get_elf_section_flags (section->sh_flags));
 
-	  printf (" %2ld %3lx %ld\n",
+	  printf ("%2ld %3lx %2ld\n",
 		  (unsigned long) section->sh_link,
 		  (unsigned long) section->sh_info,
 		  (unsigned long) section->sh_addralign);
@@ -2796,9 +2806,10 @@ process_section_headers (file)
 	}
     }
 
-  printf (_("Key to Flags: W (write), A (alloc), X (execute), M (merge), S (strings)\n"));
-  printf (_("              I (info), L (link order), O (extra OS processing required)\n"));
-  printf (_("              o (os specific), p (processor specific) x (unknown)\n"));
+  printf (_("Key to Flags:\n"));
+  printf (_("  W (write), A (alloc), X (execute), M (merge), S (strings)\n"));
+  printf (_("  I (info), L (link order), G (group), x (unknown)\n"));
+  printf (_("  O (extra OS processing required) o (OS specific), p (processor specific)\n"));
 
   return 1;
 }
