@@ -1,3 +1,24 @@
+Mon Jan 17 00:14:23 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* hppa.h: Fix templates for all the sfu and copr instructions.
+
+Wed Dec 15 15:12:42 1993  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* i386.h (push): Permit Imm16 operand too.
+
+Sat Dec 11 16:14:06 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	*  h8300.h (andc): Exists in base arch.
+
+Wed Dec  1 12:15:32 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* From Hisashi MINAMINO <minamino@sramhc.sra.co.jp>     
+	* hppa.h: #undef NONE to avoid conflict with hiux include files.
+
+Sun Nov 21 22:06:57 1993  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* hppa.h: Add FP quadword store instructions.
+
 Wed Nov 17 17:13:16 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* mips.h: (M_J_A): Added.
