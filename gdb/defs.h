@@ -203,8 +203,6 @@ typedef FILE GDB_FILE;
 #define gdb_stdout stdout
 #define gdb_stderr stderr
 
-extern int print_insn PARAMS ((CORE_ADDR, GDB_FILE *));
-
 extern void gdb_flush PARAMS ((GDB_FILE *));
 
 extern GDB_FILE *gdb_fopen PARAMS ((char * name, char * mode));
@@ -704,16 +702,6 @@ extern void set_endian_from_file PARAMS ((bfd *));
 #define TARGET_LONG_DOUBLE_BIT (2 * TARGET_DOUBLE_BIT)
 #endif
 
-/* Number of bits in a "complex" for the target machine. */
-#if !defined (TARGET_COMPLEX_BIT)
-#define TARGET_COMPLEX_BIT (2 * TARGET_FLOAT_BIT)
-#endif
-
-/* Number of bits in a "double complex" for the target machine. */
-#if !defined (TARGET_DOUBLE_COMPLEX_BIT)
-#define TARGET_DOUBLE_COMPLEX_BIT (2 * TARGET_DOUBLE_BIT)
-#endif
-
 /* Number of bits in a pointer for the target machine */
 #if !defined (TARGET_PTR_BIT)
 #define TARGET_PTR_BIT TARGET_INT_BIT
@@ -751,6 +739,25 @@ extern void set_endian_from_file PARAMS ((bfd *));
 
 #endif /* defined (TARGET_BYTE_ORDER_SELECTABLE) */
 #endif /* BITS_BIG_ENDIAN not defined.  */
+
+/* Swap LEN bytes at BUFFER between target and host byte-order.  */
+#if TARGET_BYTE_ORDER == HOST_BYTE_ORDER
+#define SWAP_TARGET_AND_HOST(buffer,len)
+#else /* Target and host byte order differ.  */
+#define SWAP_TARGET_AND_HOST(buffer,len) \
+  {                                                                      \
+    char __tmp_;
+ \
+    char *p = (char *)(buffer);                                          \
+    char *q = ((char *)(buffer)) + len - 1;                              \
+    for (; p < q; p++, q--)                                              \
+      {                                                                  \
+        __tmp_ = *q;                                                     \
+        *q = *p;                                                         \
+        *p = __tmp_;                                                     \
+      }                                                                  \
+  }
+#endif /* Target and host byte order differ.  */
 
 /* In findvar.c.  */
 
@@ -835,13 +842,9 @@ extern int (*query_hook) PARAMS (());
 extern void (*flush_hook) PARAMS ((FILE *stream));
 extern void (*create_breakpoint_hook) PARAMS ((struct breakpoint *b));
 extern void (*delete_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
-extern void (*enable_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
-extern void (*disable_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
+extern void (*modify_breakpoint_hook) PARAMS ((struct breakpoint *bpt));
 extern void (*interactive_hook) PARAMS ((void));
 extern void (*registers_changed_hook) PARAMS ((void));
-extern int (*dis_asm_read_memory_hook) PARAMS ((bfd_vma memaddr,
-						bfd_byte *myaddr, int len,
-						disassemble_info *info));
 
 extern int (*target_wait_hook) PARAMS ((int pid,
 					struct target_waitstatus *status));

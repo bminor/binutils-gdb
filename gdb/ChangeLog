@@ -1,3 +1,9 @@
+Tue Feb 28 14:38:39 1995  Kung Hsu  <kung@mexican.cygnus.com>
+
+	* defs.h: define SWAP_TARGET_AND_HOST macro.
+	* findvar.c, monitor.c, hppa-tdep.c: remove definition of
+	SWAP_TARGET_AND_HOST.
+
 Tue Feb 28 08:31:40 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* alpha-tdep.c (find_proc_desc): Only attempt to set

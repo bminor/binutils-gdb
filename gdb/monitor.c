@@ -61,27 +61,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 static const char hexchars[] = "0123456789abcdef";
 static char *hex2mem ();
 
-#define SWAP_TARGET_AND_HOST(buffer,len) 				\
-  do									\
-    {									\
-      if (TARGET_BYTE_ORDER != HOST_BYTE_ORDER)				\
-	{								\
-	  char tmp;							\
-	  char *p = (char *)(buffer);					\
-	  char *q = ((char *)(buffer)) + len - 1;		   	\
-	  for (; p < q; p++, q--)				 	\
-	    {								\
-	      tmp = *q;							\
-	      *q = *p;							\
-	      *p = tmp;							\
-	    }								\
-	}								\
-    }									\
-  while (0)
-
-static void make_xmodem_packet ();
-static void print_xmodem_packet ();
-static void make_gdb_packet ();
+static void make_xmodem_packet();
+static void print_xmodem_packet();
+static void make_gdb_packet();
+static unsigned long ascii2hexword();
+static char *hexword2ascii();
+static int tohex();
+static int to_hex();
+static int from_hex();
 
 static void monitor_load_ascii_srec PARAMS ((char *file, int fromtty));
 
