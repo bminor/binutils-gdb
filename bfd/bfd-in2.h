@@ -1258,9 +1258,11 @@ enum bfd_architecture
   /* end-sanitize-v850e */
   bfd_arch_arc,        /* Argonaut RISC Core */
 #define bfd_mach_arc_base 0
-  bfd_arch_m32r,       /* Mitsubishi M32R/D/X */
-#define bfd_mach_m32r		0 /* backwards compatibility */
+  bfd_arch_m32r,       /* Mitsubishi M32R/D */
+#define bfd_mach_m32r		0  /* backwards compatibility */
+  /* start-sanitize-m32rx */
 #define bfd_mach_m32rx		'x'
+  /* end-sanitize-m32rx */
   bfd_arch_mn10200,    /* Matsushita MN10200 */
   bfd_arch_mn10300,    /* Matsushita MN10300 */
   bfd_arch_last
