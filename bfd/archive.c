@@ -175,7 +175,7 @@ static char *get_extended_arelt_filename PARAMS ((bfd *arch,
 						  const char *name));
 static boolean do_slurp_bsd_armap PARAMS ((bfd *abfd));
 static boolean do_slurp_coff_armap PARAMS ((bfd *abfd));
-static const char *normalize PARAMS ((const char *file));
+static const char *normalize PARAMS ((bfd *, const char *file));
 static struct areltdata *bfd_ar_hdr_from_filesystem PARAMS ((bfd *abfd,
 							     const char *));
 static boolean compute_and_write_armap PARAMS ((bfd *arch,
@@ -871,8 +871,29 @@ do_slurp_coff_armap (abfd)
   /* Pad to an even boundary if you have to */
   ardata->first_file_filepos += (ardata->first_file_filepos) % 2;
 
+
   bfd_has_map (abfd) = true;
   bfd_release (abfd, (PTR) raw_armap);
+
+
+  /* Check for a second archive header (as used by PE) */
+  {
+    struct areltdata *tmp;
+
+    bfd_seek (abfd,   ardata->first_file_filepos, SEEK_SET);
+    tmp = _bfd_snarf_ar_hdr (abfd);
+    if (tmp != NULL) 
+      {
+	if (tmp->arch_header[0] == '/'
+	    && tmp->arch_header[1] == ' ') 
+	  {
+	    ardata->first_file_filepos +=
+	      (tmp->parsed_size + sizeof(struct ar_hdr) + 1) & ~1;
+	  }
+	bfd_release (abfd, tmp);
+      }
+  }
+
   return true;
 
 release_raw_armap:
@@ -1038,9 +1059,9 @@ _bfd_slurp_extended_name_table (abfd)
 
   /* FIXME:  Formatting sucks here, and in case of failure of BFD_READ,
      we probably don't want to return true.  */
+  bfd_seek (abfd, bfd_ardata (abfd)->first_file_filepos, SEEK_SET);
   if (bfd_read ((PTR) nextname, 1, 16, abfd) == 16)
     {
-
       if (bfd_seek (abfd, (file_ptr) - 16, SEEK_CUR) != 0)
 	return false;
 
@@ -1078,13 +1099,17 @@ _bfd_slurp_extended_name_table (abfd)
       /* Since the archive is supposed to be printable if it contains
 	 text, the entries in the list are newline-padded, not null
 	 padded. In SVR4-style archives, the names also have a
-	 trailing '/'.  We'll fix both problems here..  */
+	 trailing '/'.  DOS/NT created archive often have \ in them
+	 We'll fix all problems here..  */
       {
 	char *temp = bfd_ardata (abfd)->extended_names;
 	char *limit = temp + namedata->parsed_size;
-	for (; temp < limit; ++temp)
+	for (; temp < limit; ++temp) {
 	  if (*temp == '\012')
 	    temp[temp[-1] == '/' ? -1 : 0] = '\0';
+	  if (*temp == '\\')
+	    *temp = '/';
+	}
       }
 
       /* Pad to an even boundary if you have to */
@@ -1104,7 +1129,8 @@ _bfd_slurp_extended_name_table (abfd)
 /* Return a copy of the stuff in the filename between any :]> and a
    semicolon */
 static const char *
-normalize (file)
+normalize (abfd, file)
+     bfd *abfd;
      const char *file;
 {
   CONST char *first;
@@ -1126,10 +1152,12 @@ normalize (file)
       first--;
     }
 
-
-  copy = malloc (last - first + 1);
-  if (!copy)
-    return copy;
+  copy = (char *) bfd_alloc (abfd, last - first + 1);
+  if (copy == NULL)
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return NULL;
+    }
 
   memcpy (copy, first, last - first);
   copy[last - first] = 0;
@@ -1139,10 +1167,11 @@ normalize (file)
 
 #else
 static const char *
-normalize (file)
+normalize (abfd, file)
+     bfd *abfd;
      const char *file;
 {
-  CONST char *filename = strrchr (file, '/');
+  const char *filename = strrchr (file, '/');
 
   if (filename != (char *) NULL)
     filename++;
@@ -1203,14 +1232,13 @@ _bfd_construct_extended_name_table (abfd, trailing_slash, tabloc, tablen)
   /* Figure out how long the table should be */
   for (current = abfd->archive_head; current != NULL; current = current->next)
     {
-      CONST char *normal = normalize (current->filename);
+      const char *normal;
       unsigned int thislen;
 
-      if (!normal)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
+      normal = normalize (current, current->filename);
+      if (normal == NULL)
+	return false;
+
       thislen = strlen (normal);
       if (thislen > maxname)
 	{
@@ -1220,6 +1248,21 @@ _bfd_construct_extended_name_table (abfd, trailing_slash, tabloc, tablen)
 	    {
 	      /* Leave room for trailing slash.  */
 	      ++total_namelen;
+	    }
+	}
+      else
+	{
+	  struct ar_hdr *hdr = arch_hdr (current);
+	  if (strncmp (normal, hdr->ar_name, thislen) != 0
+	      || (thislen < sizeof hdr->ar_name
+		  && hdr->ar_name[thislen] != ar_padchar (current)))
+	    {
+	      /* Must have been using extended format even though it
+	         didn't need to.  Fix it to use normal format.  */
+	      memcpy (hdr->ar_name, normal, thislen);
+	      if (thislen < maxname
+		  || (thislen == maxname && thislen < sizeof hdr->ar_name))
+		hdr->ar_name[thislen] = ar_padchar (current);
 	    }
 	}
     }
@@ -1240,14 +1283,13 @@ _bfd_construct_extended_name_table (abfd, trailing_slash, tabloc, tablen)
   for (current = abfd->archive_head; current != NULL; current =
        current->next)
     {
-      CONST char *normal = normalize (current->filename);
+      const char *normal;
       unsigned int thislen;
 
-      if (!normal)
-	{
-	  bfd_set_error (bfd_error_no_memory);
-	  return false;
-	}
+      normal = normalize (current, current->filename);
+      if (normal == NULL)
+	return false;
+
       thislen = strlen (normal);
       if (thislen > maxname)
 	{
@@ -1404,8 +1446,15 @@ bfd_dont_truncate_arname (abfd, pathname, arhdr)
 
   struct ar_hdr *hdr = (struct ar_hdr *) arhdr;
   int length;
-  CONST char *filename = normalize (pathname);
+  const char *filename;
   int maxlen = ar_maxnamelen (abfd);
+
+  filename = normalize (abfd, pathname);
+  if (filename == NULL)
+    {
+      /* FIXME */
+      abort ();
+    }
 
   length = strlen (filename);
 
@@ -1543,6 +1592,14 @@ _bfd_write_archive_contents (arch)
 	}
     }
 
+  /* @@ This leads to archives that are incompatible with the native
+     AR on many systems, such as HP/UX and SunOS.  [Cygnus PR
+     binutils/6888] It's a nice extension, but unless it can be made
+     optional, we shouldn't use it.  This is a lame fix, but I don't
+     have time to fix it right just now.  KR 1995/06/01 */
+  /* Turning it off is a disaster for the many people who rely upon
+     it.  We should make it optional, but since that is evidently not
+     happening soon it needs to be used by default.  ILT 1995/07/04.  */
   if (!BFD_SEND (arch, _bfd_construct_extended_name_table,
 		 (arch, &etable, &elength, &ename)))
     return false;
@@ -1569,7 +1626,9 @@ _bfd_write_archive_contents (arch)
 
       memset ((char *) (&hdr), 0, sizeof (struct ar_hdr));
       strcpy (hdr.ar_name, ename);
-      sprintf (&(hdr.ar_size[0]), "%-10d", (int) elength);
+      /* Round size up to even number in archive header.  */
+      sprintf (&(hdr.ar_size[0]), "%-10d",
+	       (int) ((elength + 1) & ~1));
       strncpy (hdr.ar_fmag, ARFMAG, 2);
       for (i = 0; i < sizeof (struct ar_hdr); i++)
 	if (((char *) (&hdr))[i] == '\0')
@@ -1824,8 +1883,8 @@ bsd_write_armap (arch, elength, map, orl_count, stridx)
   bfd_ardata (arch)->armap_datepos = (SARMAG
 				      + offsetof (struct ar_hdr, ar_date[0]));
   sprintf (hdr.ar_date, "%ld", bfd_ardata (arch)->armap_timestamp);
-  sprintf (hdr.ar_uid, "%d", getuid ());
-  sprintf (hdr.ar_gid, "%d", getgid ());
+  sprintf (hdr.ar_uid, "%ld", (long) getuid ());
+  sprintf (hdr.ar_gid, "%ld", (long) getgid ());
   sprintf (hdr.ar_size, "%-10d", (int) mapsize);
   strncpy (hdr.ar_fmag, ARFMAG, 2);
   for (i = 0; i < sizeof (struct ar_hdr); i++)

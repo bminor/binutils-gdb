@@ -1,5 +1,7 @@
 Tue Jul  4 12:22:21 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* archive.c (_bfd_write_archive_contents): Revert June 1 change.
+
 	* elfcode.h (NAME(bfd_elf,record_link_assignment)): Add provide
 	argument.
 	* bfd-in.h (bfd_elf32_record_link_assignment): Update prototype.
