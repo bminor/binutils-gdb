@@ -898,7 +898,8 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	remote-hms.c remote-mips.c \
 	remote-mm.c remote-mon.c remote-nindy.c remote-os9k.c remote-sim.c \
 	remote-st.c remote-utils.c dcache.c \
-	remote-udi.c remote-vx.c remote-z8k.c rs6000-nat.c rs6000-pinsn.c \
+	remote-udi.c remote-vx.c remote-vx29k.c remote-z8k.c \
+	rs6000-nat.c rs6000-pinsn.c \
 	rs6000-tdep.c ser-go32.c ser-tcp.c sh-tdep.c solib.c sparc-nat.c \
 	sparc-pinsn.c sparc-tdep.c sparcl-tdep.c sun3-nat.c sun386-nat.c \
 	symm-tdep.c symm-nat.c \
@@ -907,7 +908,7 @@ ALLDEPFILES = 29k-share/udi/udip2soc.c 29k-share/udi/udr.c \
 	vx-share/xdr_ld.c vx-share/xdr_ptrace.c vx-share/xdr_rdb.c \
 	xcoffread.c xcoffsolib.c z8k-tdep.c
 
-ALLCONFIG = config/a29k/a29k-kern.mt config/a29k/a29k-udi.mt \
+ALLCONFIG = config/a29k/a29k-kern.mt config/a29k/a29k-udi.mt config/a29k/vx29k.mt\
 	config/a29k/a29k.mt config/a29k/ultra3.mh config/a29k/ultra3.mt \
 	config/alpha/alpha-osf1.mh config/alpha/alpha-osf2.mh \
 	config/alpha/alpha-osf1.mt config/alpha/alpha-nw.mt \
@@ -1350,6 +1351,11 @@ remote-vx.o: remote-vx.c $(wait_h) complaints.h $(defs_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(inferior_h) target.h vx-share/dbgRpcLib.h \
 	vx-share/ptrace.h vx-share/xdr_ld.h vx-share/xdr_ptrace.h \
 	vx-share/xdr_rdb.h gdb-stabs.h objfiles.h symfile.h $(bfd_h)
+
+remote-vx29k.o: remote-vx29k.c $(wait_h) complaints.h $(defs_h) $(gdbcmd_h) \
+        $(gdbcore_h) $(inferior_h) target.h vx-share/dbgRpcLib.h \
+        vx-share/ptrace.h vx-share/xdr_ld.h vx-share/xdr_ptrace.h \
+        vx-share/xdr_rdb.h
 
 remote-z8k.o: remote-z8k.c $(wait_h) $(srcdir)/../sim/z8k/sim.h \
 	$(defs_h) $(gdbcore_h) $(inferior_h) target.h terminal.h

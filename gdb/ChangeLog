@@ -1,3 +1,13 @@
+Mon Jan 16 15:43:29 1995  Kung Hsu  <kung@mexican.cygnus.com>
+
+	* Makefile.in: add new files remote-vx29k.c, config/a29k/tm-vx29k.h,
+	and config/a29k/vx29k.mt.
+	* configure.in: add new configuration a29k-*-vxworks.
+	* remote-vx29k.c: new file merged from WRS.
+	* remote-vx.c: merge changes from WRS.
+	* config/a29k/vx29k.mt: new file for new configuration.
+	* config/a29k/tm-vx29k.h: new header file for newconfiguration.
+
 Sun Jan 15 14:36:19 1995  Steve Chamberlain  <sac@splat>
 
 	* breakpoint.h (disable_breakpoint, enable_breakpoint):
