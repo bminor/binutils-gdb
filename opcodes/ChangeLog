@@ -1,3 +1,8 @@
+Thu Apr 11 17:30:02 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* sparc-opc.c: Set F_FBR on floating point branch instructions.
+	Set F_FLOAT on other floating point instructions.
+
 Mon Apr  8 17:02:48 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* ppc-opc.c (PPC860): Macro for 860/821 specific instructions and
