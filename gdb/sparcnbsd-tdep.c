@@ -21,11 +21,16 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include "frame.h"
+#include "frame-unwind.h"
 #include "gdbcore.h"
 #include "osabi.h"
 #include "regcache.h"
 #include "solib-svr4.h"
+#include "symtab.h"
+#include "trad-frame.h"
 
+#include "gdb_assert.h"
 #include "gdb_string.h"
 
 #include "sparc-tdep.h"
@@ -92,6 +97,161 @@ static struct core_fns sparcnbsd_elfcore_fns =
   fetch_core_registers,			/* core_read_registers */
   NULL
 };
+
+/* Signal trampolines.  */
+
+/* The following variables describe the location of an on-stack signal
+   trampoline.  The current values correspond to the memory layout for
+   NetBSD 1.3 and up.  These shouldn't be necessary for NetBSD 2.0 and
+   up, since NetBSD uses signal trampolines provided by libc now.  */
+
+static const CORE_ADDR sparc32nbsd_sigtramp_start = 0xeffffef0;
+static const CORE_ADDR sparc32nbsd_sigtramp_end = 0xeffffff0;
+
+static int
+sparc32nbsd_pc_in_sigtramp (CORE_ADDR pc, char *name)
+{
+  if (pc >= sparc32nbsd_sigtramp_start && pc < sparc32nbsd_sigtramp_end)
+    return 1;
+
+  return nbsd_pc_in_sigtramp (pc, name);
+}
+
+static struct sparc_frame_cache *
+sparc32nbsd_sigcontext_frame_cache (struct frame_info *next_frame,
+				    void **this_cache)
+{
+  struct sparc_frame_cache *cache;
+  CORE_ADDR addr, sigcontext_addr;
+  LONGEST psr;
+  int regnum, delta;
+
+  if (*this_cache)
+    return *this_cache;
+
+  cache = sparc_frame_cache (next_frame, this_cache);
+  gdb_assert (cache == *this_cache);
+
+  /* The registers are saved in bits and pieces scattered all over the
+     place.  The code below records their location on the assumption
+     that the part of the signal trampoline that saves the state has
+     been executed.  */
+
+  /* If we couldn't find the frame's function, we're probably dealing
+     with an on-stack signal trampoline.  */
+  if (cache->pc == 0)
+    {
+      cache->pc = sparc32nbsd_sigtramp_start;
+
+      /* Since we couldn't find the frame's function, the cache was
+         initialized under the assumption that we're frameless.  */
+      cache->frameless_p = 0;
+      addr = frame_unwind_register_unsigned (next_frame, SPARC_FP_REGNUM);
+      cache->base = addr;
+    }
+
+  cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
+
+  /* The third argument is a pointer to an instance of `ucontext_t',
+     which has a member `uc_mcontext' that contains the saved
+     registers.  */
+  sigcontext_addr = cache->base + 64 + 16;
+
+  cache->saved_regs[SPARC_SP_REGNUM].addr = sigcontext_addr + 8;
+  cache->saved_regs[SPARC32_PC_REGNUM].addr = sigcontext_addr + 12;
+  cache->saved_regs[SPARC32_NPC_REGNUM].addr = sigcontext_addr + 16;
+  cache->saved_regs[SPARC32_PSR_REGNUM].addr = sigcontext_addr + 20;
+  cache->saved_regs[SPARC_G1_REGNUM].addr = sigcontext_addr + 24;
+  cache->saved_regs[SPARC_O0_REGNUM].addr = sigcontext_addr + 28;
+
+  /* The remaining `global' registers are saved in the `local'
+     registers.  */
+  delta = SPARC_L0_REGNUM - SPARC_G0_REGNUM;
+  for (regnum = SPARC_G2_REGNUM; regnum <= SPARC_G7_REGNUM; regnum++)
+    cache->saved_regs[regnum].realreg = regnum + delta;
+
+  /* The remaining `out' registers can be found in the current frame's
+     `in' registers.  */
+  delta = SPARC_I0_REGNUM - SPARC_O0_REGNUM;
+  for (regnum = SPARC_O1_REGNUM; regnum <= SPARC_O5_REGNUM; regnum++)
+    cache->saved_regs[regnum].realreg = regnum + delta;
+  cache->saved_regs[SPARC_O7_REGNUM].realreg = SPARC_I7_REGNUM;
+
+  /* The `local' and `in' registers have been saved in the register
+     save area.  */
+  addr = cache->saved_regs[SPARC_SP_REGNUM].addr;
+  addr = get_frame_memory_unsigned (next_frame, addr, 4);
+  for (regnum = SPARC_L0_REGNUM;
+       regnum <= SPARC_I7_REGNUM; regnum++, addr += 4)
+    cache->saved_regs[regnum].addr = addr;
+
+  /* The floating-point registers are only saved if the EF bit in %prs
+     has been set.  */
+
+#define PSR_EF	0x00001000
+
+  addr = cache->saved_regs[SPARC32_PSR_REGNUM].addr;
+  psr = get_frame_memory_unsigned (next_frame, addr, 4);
+  if (psr & PSR_EF)
+    {
+      addr = frame_unwind_register_unsigned (next_frame, SPARC_SP_REGNUM);
+      for (regnum = SPARC_F0_REGNUM;
+	   regnum <= SPARC_F31_REGNUM; regnum++, addr += 4)
+	cache->saved_regs[regnum].addr = addr;
+    }
+
+  return cache;
+}
+
+static void
+sparc32nbsd_sigcontext_frame_this_id (struct frame_info *next_frame,
+				      void **this_cache,
+				      struct frame_id *this_id)
+{
+  struct sparc_frame_cache *cache =
+    sparc32nbsd_sigcontext_frame_cache (next_frame, this_cache);
+
+  (*this_id) = frame_id_build (cache->base, cache->pc);
+}
+
+static void
+sparc32nbsd_sigcontext_frame_prev_register (struct frame_info *next_frame,
+					    void **this_cache,
+					    int regnum, int *optimizedp,
+					    enum lval_type *lvalp,
+					    CORE_ADDR *addrp,
+					    int *realnump, void *valuep)
+{
+  struct sparc_frame_cache *cache =
+    sparc32nbsd_sigcontext_frame_cache (next_frame, this_cache);
+
+  trad_frame_prev_register (next_frame, cache->saved_regs, regnum,
+			    optimizedp, lvalp, addrp, realnump, valuep);
+}
+
+static const struct frame_unwind sparc32nbsd_sigcontext_frame_unwind =
+{
+  SIGTRAMP_FRAME,
+  sparc32nbsd_sigcontext_frame_this_id,
+  sparc32nbsd_sigcontext_frame_prev_register
+};
+
+static const struct frame_unwind *
+sparc32nbsd_sigtramp_frame_sniffer (struct frame_info *next_frame)
+{
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  char *name;
+
+  find_pc_partial_function (pc, &name, NULL, NULL);
+  if (sparc32nbsd_pc_in_sigtramp (pc, name))
+    {
+      if (name == NULL || strncmp (name, "__sigtramp_sigcontext", 21))
+	return &sparc32nbsd_sigcontext_frame_unwind;
+    }
+
+  return NULL;
+}
+
 
 /* Return non-zero if we are in a shared library trampoline code stub.  */
 
@@ -106,6 +266,9 @@ sparc32nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   /* NetBSD doesn't support the 128-bit `long double' from the psABI.  */
   set_gdbarch_long_double_bit (gdbarch, 64);
+
+  set_gdbarch_pc_in_sigtramp (gdbarch, sparc32nbsd_pc_in_sigtramp);
+  frame_unwind_append_sniffer (gdbarch, sparc32nbsd_sigtramp_frame_sniffer);
 }
 
 static void
@@ -121,8 +284,6 @@ static void
 sparc32nbsd_elf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   sparc32nbsd_init_abi (info, gdbarch);
-
-  set_gdbarch_pc_in_sigtramp (gdbarch, nbsd_pc_in_sigtramp);
 
   set_solib_svr4_fetch_link_map_offsets
     (gdbarch, nbsd_ilp32_solib_svr4_fetch_link_map_offsets);
