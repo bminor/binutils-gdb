@@ -645,6 +645,8 @@ if { [istarget mips*-*-*] } then {
 	run_dump_test "elf-rel14"
 
 	if $has_newabi {
+	    run_dump_test "elf-rel15"
+
 	    run_dump_test "elf-rel-got-n32"
 	    run_dump_test "elf-rel-xgot-n32"
 	    run_dump_test "elf-rel-got-n64"
