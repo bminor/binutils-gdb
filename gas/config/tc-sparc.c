@@ -28,27 +28,26 @@
 
 static void sparc_ip PARAMS ((char *));
 
-#ifdef SPARC_V9
-/* In a 32 bit environment, don't bump up to v9 unless necessary.  */
+/* Current architecture.  We don't bump up unless necessary.  */
+static enum sparc_opcode_arch_val current_architecture = SPARC_OPCODE_ARCH_V6;
+
+/* The maximum architecture level we can bump up to.
+   In a 32 bit environment, don't allow bumping up to v9 by default.
+   The native assembler works this way. The user is required to pass
+   an explicit argument before we'll create v9 object files.  However, if
+   we don't see any v9 insns, a v9 object file is not created.  */
 #ifdef SPARC_ARCH64
-static enum sparc_architecture initial_architecture = v9;
+static enum sparc_opcode_arch_val max_architecture = SPARC_OPCODE_ARCH_V9;
 #else
-static enum sparc_architecture initial_architecture = v6;
-#endif
-#else
-static enum sparc_architecture initial_architecture = v6;
+static enum sparc_opcode_arch_val max_architecture = SPARC_OPCODE_ARCH_V8;
 #endif
 
-/* If sparc64 was the configured cpu, allow bumping up to v9 by default.  */
-#ifdef SPARC_V9
-static int can_bump_v9_p = 1;
-#else
-static int can_bump_v9_p = 0;
-#endif
-
-static enum sparc_architecture current_architecture;
 static int architecture_requested;
 static int warn_on_bump;
+
+/* If warn_on_bump and the needed architecture is higher than this
+   architecture, issue a warning.  */
+static enum sparc_opcode_arch_val warn_after_architecture;
 
 /* Non-zero if we are generating PIC code.  */
 int sparc_pic_code;
@@ -563,7 +562,7 @@ md_begin ()
 
   op_hash = hash_new ();
 
-  while (i < NUMOPCODES)
+  while (i < sparc_num_opcodes)
     {
       const char *name = sparc_opcodes[i].name;
       retval = hash_insert (op_hash, name, &sparc_opcodes[i]);
@@ -583,7 +582,7 @@ md_begin ()
 	    }
 	  ++i;
 	}
-      while (i < NUMOPCODES
+      while (i < sparc_num_opcodes
 	     && !strcmp (sparc_opcodes[i].name, name));
     }
 
@@ -603,7 +602,15 @@ md_begin ()
 	 sizeof (priv_reg_table[0]), cmp_reg_entry);
 
   target_big_endian = 1;
-  current_architecture = initial_architecture;
+
+  /* If both an architecture and -bump were requested, allow bumping to go
+     as high as needed.  If the requested architecture conflicts with the
+     highest architecture, -bump has no effect.  Note that `max_architecture'
+     records the requested architecture.  */
+  if (architecture_requested && warn_on_bump
+      && !SPARC_OPCODE_CONFLICT_P (max_architecture, SPARC_OPCODE_ARCH_MAX)
+      && !SPARC_OPCODE_CONFLICT_P (SPARC_OPCODE_ARCH_MAX, max_architecture))
+    max_architecture = SPARC_OPCODE_ARCH_MAX;
 }
 
 /* Called after all assembly has been done.  */
@@ -611,30 +618,19 @@ md_begin ()
 void
 sparc_md_end ()
 {
-  /* If we bumped up in architecture, we need to change bfd's mach number.  */
-  /* ??? We could delete this test, I think.  */
-  if (current_architecture != initial_architecture)
-    {
 #ifdef SPARC_ARCH64
-      if (current_architecture < v9)
-	abort ();
-      else if (current_architecture == v9)
-	bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc_v9);
-      else if (current_architecture == v9a)
-	bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc_v9a);
-      else
-	abort ();
+  if (current_architecture == SPARC_OPCODE_ARCH_V9A)
+    bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc_v9a);
+  else
+    bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc_v9);
 #else
-      if (current_architecture < v9)
-	bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc);
-      else if (current_architecture == v9)
-	bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc_v8plus);
-      else if (current_architecture == v9a)
-	bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc_v8plusa);
-      else
-	abort ();
+  if (current_architecture == SPARC_OPCODE_ARCH_V9)
+    bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc_v8plus);
+  else if (current_architecture == SPARC_OPCODE_ARCH_V9A)
+    bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc_v8plusa);
+  else
+    bfd_set_arch_mach (stdoutput, bfd_arch_sparc, bfd_mach_sparc);
 #endif
-    }
 }
 
 void
@@ -1360,7 +1356,7 @@ sparc_ip (str)
 
 		    if (mask >= 64)
 		      {
-			if (can_bump_v9_p)
+			if (max_architecture >= SPARC_OPCODE_ARCH_V9)
 			  error_message = ": There are only 64 f registers; [0-63]";
 			else
 			  error_message = ": There are only 32 f registers; [0-31]";
@@ -1368,7 +1364,7 @@ sparc_ip (str)
 		      }	/* on error */
 		    else if (mask >= 32)
 		      {
-			if (can_bump_v9_p)
+			if (max_architecture >= SPARC_OPCODE_ARCH_V9)
 			  {
 			    v9_arg_p = 1;
 			    mask -= 31;	/* wrap high bit */
@@ -1728,7 +1724,7 @@ sparc_ip (str)
       if (match == 0)
 	{
 	  /* Args don't match. */
-	  if (((unsigned) (&insn[1] - sparc_opcodes)) < NUMOPCODES
+	  if (((unsigned) (&insn[1] - sparc_opcodes)) < sparc_num_opcodes
 	      && (insn->name == insn[1].name
 		  || !strcmp (insn->name, insn[1].name)))
 	    {
@@ -1744,46 +1740,43 @@ sparc_ip (str)
 	}
       else
 	{
-	  if (insn->architecture > current_architecture
-	      || (insn->architecture != current_architecture
-		  && current_architecture > v8)
-	      || (v9_arg_p && current_architecture < v9))
+	  /* We have a match.  Now see if the architecture is ok.  */
+	  enum sparc_opcode_arch_val needed_architecture =
+	    ((v9_arg_p && insn->architecture < SPARC_OPCODE_ARCH_V9)
+	     ? SPARC_OPCODE_ARCH_V9 : insn->architecture);
+
+	  if (needed_architecture == current_architecture)
+	    ; /* ok */
+	  /* Do we have a potential conflict?  */
+	  else if (SPARC_OPCODE_CONFLICT_P (max_architecture,
+					     needed_architecture)
+		   || SPARC_OPCODE_CONFLICT_P (needed_architecture,
+						max_architecture)
+		   || needed_architecture > max_architecture)
 	    {
-	      enum sparc_architecture needed_architecture =
-		((v9_arg_p && insn->architecture < v9)
-		 ? v9 : insn->architecture);
-
-	      if ((!architecture_requested || warn_on_bump)
-		  && !ARCHITECTURES_CONFLICT_P (current_architecture,
-						needed_architecture)
-		  && !ARCHITECTURES_CONFLICT_P (needed_architecture,
-						current_architecture)
-		  && (needed_architecture < v9 || can_bump_v9_p))
+	      as_bad ("Architecture mismatch on \"%s\".", str);
+	      as_tsktsk (" (Requires %s; requested architecture is %s.)",
+			 sparc_opcode_archs[needed_architecture].name,
+			 sparc_opcode_archs[max_architecture].name);
+	      return;
+	    }
+	  /* Do we need to bump?  */
+	  else if (needed_architecture > current_architecture)
+	    {
+	      if (warn_on_bump
+		  && needed_architecture > warn_after_architecture)
 		{
-		  if (warn_on_bump)
-		    {
-		      as_warn ("architecture bumped from \"%s\" to \"%s\" on \"%s\"",
-			       architecture_pname[current_architecture],
-			       architecture_pname[needed_architecture],
-			       str);
-		    }		/* if warning */
-
-		  if (needed_architecture > current_architecture)
-		    current_architecture = needed_architecture;
+		  as_warn ("architecture bumped from \"%s\" to \"%s\" on \"%s\"",
+			   sparc_opcode_archs[current_architecture].name,
+			   sparc_opcode_archs[needed_architecture].name,
+			   str);
 		}
-	      else
-		{
-		  as_bad ("Architecture mismatch on \"%s\".", str);
-		  as_tsktsk (" (Requires %s; current architecture is %s.)",
-			     architecture_pname[needed_architecture],
-			     architecture_pname[current_architecture]);
-		  return;
-		}		/* if bump ok else error */
-	    }			/* if architecture higher */
-	}			/* if no match */
+	      current_architecture = needed_architecture;
+	    }
+	} /* if no match */
 
       break;
-    }				/* forever looking for a match */
+    } /* forever looking for a match */
 
   the_insn.opcode = opcode;
 }
@@ -2307,25 +2300,32 @@ print_insn (insn)
  *	-bump
  *		Warn on architecture bumps.  See also -A.
  *
- *	-Av6, -Av7, -Av8, -Av9, -Asparclite
+ *	-Av6, -Av7, -Av8, -Av9, -Av9a, -Asparclite
+ *	-xarch=v8plus, -xarch=v8plusa
  *		Select the architecture.  Instructions or features not
  *		supported by the selected architecture cause fatal errors.
  *
  *		The default is to start at v6, and bump the architecture up
- *		whenever an instruction is seen at a higher level.  If sparc64
- *		was not the target cpu, v9 is not bumped up to, the user must
- *		pass -Av9.
+ *		whenever an instruction is seen at a higher level.  If 32 bit
+ *		environments, v9 is not bumped up to, the user must pass -Av9.
+ *
+ *		-xarch=v8plus{,a} is for compatibility with the Sun assembler.
  *
  *		If -bump is specified, a warning is printing when bumping to
  *		higher levels.
  *
  *		If an architecture is specified, all instructions must match
  *		that architecture.  Any higher level instructions are flagged
- *		as errors.
+ *		as errors.  Note that in the 32 bit environment specifying
+ *		-Av9 does not automatically create a v9 object file, a v9
+ *		insn must be seen.
  *
  *		If both an architecture and -bump are specified, the
  *		architecture starts at the specified level, but bumps are
- *		warnings.
+ *		warnings.  Note that we can't set `current_architecture' to
+ *		the requested level in this case: in the 32 bit environment,
+ *		we still must avoid creating v9 object files unless v9 insns
+ *		are seen.
  *
  * Note:
  *		Bumping between incompatible architectures is always an
@@ -2346,6 +2346,8 @@ struct option md_longopts[] = {
   {"bump", no_argument, NULL, OPTION_BUMP},
 #define OPTION_SPARC (OPTION_MD_BASE + 1)
   {"sparc", no_argument, NULL, OPTION_SPARC},
+#define OPTION_XARCH (OPTION_MD_BASE + 2)
+  {"xarch", required_argument, NULL, OPTION_XARCH},
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof(md_longopts);
@@ -2359,38 +2361,39 @@ md_parse_option (c, arg)
     {
     case OPTION_BUMP:
       warn_on_bump = 1;
+      warn_after_architecture = SPARC_OPCODE_ARCH_V6;
       break;
+
+    case OPTION_XARCH:
+      /* ??? We could add v8plus and v8plusa to sparc_opcode_archs.
+	 But we might want v8plus to mean something different than v9
+	 someday, and we'd recognize more -xarch options than Sun's
+	 assembler does (which may lead to a conflict someday).  */
+      if (strcmp (arg, "v8plus") == 0)
+	arg = "v9";
+      else if (strcmp (arg, "v8plusa") == 0)
+	arg = "v9a";
+      else
+	{
+	  as_bad ("invalid architecture -xarch=%s", arg);
+	  return 0;
+	}
+
+      /* fall through */
 
     case 'A':
       {
-	char *p = arg;
-	const char **arch;
+	enum sparc_opcode_arch_val new_arch = sparc_opcode_lookup_arch (arg);
 
-	for (arch = architecture_pname; *arch != NULL; ++arch)
+	if (new_arch == SPARC_OPCODE_ARCH_BAD)
 	  {
-	    if (strcmp (p, *arch) == 0)
-	      break;
-	  }
-
-	if (*arch == NULL)
-	  {
-	    as_bad ("invalid architecture -A%s", p);
+	    as_bad ("invalid architecture -A%s", arg);
 	    return 0;
 	  }
 	else
 	  {
-	    enum sparc_architecture new_arch = arch - architecture_pname;
-
-	    initial_architecture = new_arch;
+	    max_architecture = new_arch;
 	    architecture_requested = 1;
-
-	    /* ??? May wish an option to explicitly set `can_bump_v9_p'.  */
-	    /* Set `can_bump_v9_p' if v9: we assume that if the current
-	       architecture is v9, it's set.  */
-	    if (new_arch >= v9)
-	      can_bump_v9_p = 1;
-	    else
-	      can_bump_v9_p = 0;
 	  }
       }
       break;
@@ -2435,22 +2438,24 @@ md_parse_option (c, arg)
       return 0;
     }
 
- return 1;
+  return 1;
 }
 
 void
 md_show_usage (stream)
      FILE *stream;
 {
-  const char **arch;
+  const struct sparc_opcode_arch *arch;
+
   fprintf(stream, "SPARC options:\n");
-  for (arch = architecture_pname; *arch; arch++)
+  for (arch = &sparc_opcode_archs[0]; arch->name; arch++)
     {
-      if (arch != architecture_pname)
+      if (arch != &sparc_opcode_archs[0])
 	fprintf (stream, " | ");
-      fprintf (stream, "-A%s", *arch);
+      fprintf (stream, "-A%s", arch->name);
     }
-  fprintf (stream, "\n\
+  fprintf (stream, "\n-xarch=v8plus | -xarch=v8plusa\n");
+  fprintf (stream, "\
 			specify variant of SPARC architecture\n\
 -bump			warn when assembler switches architectures\n\
 -sparc			ignored\n");

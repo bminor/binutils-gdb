@@ -1,3 +1,17 @@
+Thu Jan 25 03:10:53 1996  Doug Evans  <dje@charmed.cygnus.com>
+
+	* config/tc-sparc.c (initial_architecture,can_bump_v9_p): Deleted.
+	({max,warn_after}_architecture): New static locals.
+	(md_begin): Replace NUMOPCODES with sparc_num_opcodes.
+	If both architecture and -bump requested, set max_architecture to max.
+	(sparc_md_end): Simplify.
+	(sparc_ip): Replace references to can_bump_v9_p with max_architecture.
+	Rewrite code to bump architecture and check for conflicts.
+	(md_longopts): Recognize -xarch={v8plus,v8plusa} for compatibility
+	with Solaris assembler.
+	(md_parse_option): Likewise.  Call sparc_opcode_lookup_arch.
+	(md_show_usage): Update.
+
 Wed Jan 24 22:11:03 1996  Doug Evans  <dje@charmed.cygnus.com>
 
 	* Makefile.in (RUNTEST): Fix reference to $${srcdir}.
