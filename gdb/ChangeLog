@@ -1,5 +1,16 @@
 2004-04-29  Andrew Cagney  <cagney@redhat.com>
 
+	* mips-tdep.c (mips_abi_regsize): Replace tdep parameter with
+	gdbarch, use mips_abi, update callers.
+	(mips_stack_argsize): Replace tdep parameter with gdbarch, use
+	mips_abi_regsize, update callers.
+	(struct gdbarch_tdep): Delete mips_default_stack_argsize and
+	mips_default_abi_regsize.
+	(mips_gdbarch_init): Do not set mips_default_stack_argsize and
+	mips_default_abi_regsize.
+
+2004-04-29  Andrew Cagney  <cagney@redhat.com>
+
 	* mips-tdep.c (mips_abi_regsize): Rename mips_saved_regsize.
 	(mips_abi_regsize_string): Rename mips_saved_regsize_string.
 	(struct gdbarch_tdep): Rename mips_default_saved_regsize to
