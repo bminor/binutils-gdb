@@ -605,11 +605,11 @@ extern boolean bfd_elf64_record_link_assignment
 extern struct bfd_link_needed_list *bfd_elf_get_needed_list
   PARAMS ((bfd *, struct bfd_link_info *));
 extern boolean bfd_elf32_size_dynamic_sections
-  PARAMS ((bfd *, const char *, const char *, boolean,
-	   struct bfd_link_info *, struct sec **));
+  PARAMS ((bfd *, const char *, const char *, boolean, const char *,
+	   const char *, struct bfd_link_info *, struct sec **));
 extern boolean bfd_elf64_size_dynamic_sections
-  PARAMS ((bfd *, const char *, const char *, boolean,
-	   struct bfd_link_info *, struct sec **));
+  PARAMS ((bfd *, const char *, const char *, boolean, const char *,
+	   const char *, struct bfd_link_info *, struct sec **));
 extern void bfd_elf_set_dt_needed_name PARAMS ((bfd *, const char *));
 extern const char *bfd_elf_get_dt_soname PARAMS ((bfd *));
 

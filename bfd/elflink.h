@@ -1352,11 +1352,14 @@ static const size_t elf_buckets[] =
 
 boolean
 NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
-				     export_dynamic, info, sinterpptr)
+				     export_dynamic, filter_shlib,
+				     auxiliary_filter_shlib, info, sinterpptr)
      bfd *output_bfd;
      const char *soname;
      const char *rpath;
      boolean export_dynamic;
+     const char *filter_shlib;
+     const char *auxiliary_filter_shlib;
      struct bfd_link_info *info;
      asection **sinterpptr;
 {
@@ -1423,6 +1426,28 @@ NAME(bfd_elf,size_dynamic_sections) (output_bfd, soname, rpath,
 				     true, true);
 	  if (indx == (bfd_size_type) -1
 	      || ! elf_add_dynamic_entry (info, DT_RPATH, indx))
+	    return false;
+	}
+
+      if (filter_shlib != NULL)
+	{
+	  bfd_size_type indx;
+
+	  indx = _bfd_stringtab_add (elf_hash_table (info)->dynstr,
+				     filter_shlib, true, true);
+	  if (indx == (bfd_size_type) -1
+	      || ! elf_add_dynamic_entry (info, DT_FILTER, indx))
+	    return false;
+	}
+
+      if (auxiliary_filter_shlib != NULL)
+	{
+	  bfd_size_type indx;
+
+	  indx = _bfd_stringtab_add (elf_hash_table (info)->dynstr,
+				     auxiliary_filter_shlib, true, true);
+	  if (indx == (bfd_size_type) -1
+	      || ! elf_add_dynamic_entry (info, DT_AUXILIARY, indx))
 	    return false;
 	}
 

@@ -473,6 +473,8 @@ _bfd_elf_print_private_bfd_data (abfd, farg)
 	    case DT_DEBUG: name = "DEBUG"; break;
 	    case DT_TEXTREL: name = "TEXTREL"; break;
 	    case DT_JMPREL: name = "JMPREL"; break;
+	    case DT_AUXILIARY: name = "AUXILIARY"; stringp = true; break;
+	    case DT_FILTER: name = "FILTER"; stringp = true; break;
 	    }
 
 	  fprintf (f, "  %-11s ", name);
