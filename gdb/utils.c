@@ -50,7 +50,7 @@ static void vfprintf_maybe_filtered PARAMS ((FILE *, const char *, va_list, int)
 
 static void fputs_maybe_filtered PARAMS ((const char *, FILE *, int));
 
-#if !defined (NO_MMALLOC) && !defined (NO_MMCHECK)
+#if defined (USE_MMALLOC) && !defined (NO_MMCHECK)
 static void malloc_botch PARAMS ((void));
 #endif
 
@@ -600,7 +600,7 @@ quit ()
   gdb_flush (gdb_stderr);
 
   /* 3.  The system-level buffer.  */
-  SERIAL_FLUSH_OUTPUT (gdb_stdout_serial);
+  SERIAL_DRAIN_OUTPUT (gdb_stdout_serial);
   SERIAL_UN_FDOPEN (gdb_stdout_serial);
 
   annotate_error_begin ();
@@ -711,7 +711,7 @@ request_quit (signo)
 #endif
 #endif
 
-#if defined (NO_MMALLOC)
+#if !defined (USE_MMALLOC)
 
 PTR
 mmalloc (md, size)
@@ -741,9 +741,9 @@ mfree (md, ptr)
   free (ptr);
 }
 
-#endif	/* NO_MMALLOC */
+#endif	/* USE_MMALLOC */
 
-#if defined (NO_MMALLOC) || defined (NO_MMCHECK)
+#if !defined (USE_MMALLOC) || defined (NO_MMCHECK)
 
 void
 init_malloc (md)
@@ -1208,6 +1208,37 @@ gdb_printchar (c, stream, quoter)
     fprintf_filtered (stream, "%c", c);
   }
 }
+
+
+
+
+static char * hexlate = "0123456789abcdef" ;
+int fmthex(inbuf,outbuff,length,linelength)
+     unsigned char * inbuf ;
+     unsigned char * outbuff;
+     int length;
+     int linelength;
+{
+  unsigned char byte , nib ;
+  int outlength = 0 ;
+
+  while (length)
+    {
+      if (outlength >= linelength) break ;
+      byte = *inbuf ;
+      inbuf++ ;
+      nib = byte >> 4 ;
+      *outbuff++ = hexlate[nib] ;
+      nib = byte &0x0f ;
+      *outbuff++ = hexlate[nib] ;
+      *outbuff++ = ' ' ;
+      length-- ;
+      outlength += 3 ;
+    }
+  *outbuff = '\0' ; /* null terminate our output line */
+  return outlength ;
+}
+
 
 /* Number of lines per page or UINT_MAX if paging is disabled.  */
 static unsigned int lines_per_page;

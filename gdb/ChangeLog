@@ -1,5 +1,7 @@
 Fri Apr 10 10:35:35 1998  John Metzler  <jmetzler@cygnus.com>
 
+	* utils.c (fmthex): A formatting function for hexdumps
+
 	*  mips-tdep.c (unpack_mips16): Fixed instruction decoding, lots of
  	bit pattern interpretations. mips_fetch_instruction does not work
  	for 16 bit instructions. Some confusion remains about sign
