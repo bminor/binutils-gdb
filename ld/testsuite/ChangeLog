@@ -1,5 +1,8 @@
 2005-02-07  Hans-Peter Nilsson  <hp@axis.com>
 
+	* ld-cris/globsymw2.s: New file.
+	* ld-cris/warn3.d, ld-cris/warn4.d: New tests.
+
 	* ld-discard/extern.d, ld-discard/start.d, ld-discard/static.d:
 	Adjust for being identified as warnings.
 
