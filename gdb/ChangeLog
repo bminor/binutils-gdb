@@ -1,3 +1,17 @@
+2002-08-09  Michael Snyder  <msnyder@redhat.com>
+
+	* mips-tdep.c (ROUND_DOWN, ROUND_UP): Move to global scope.
+	(mips_push_arguments): Correct some comments.  Use paddr_nz
+	for printing addresses in debug output.  Replace static
+	allocation using MAX_REGISTER_RAW_SIZE with alloca.
+	(mips_n32n64_push_arguments): New function, cloned from
+	mips_push_arguments and tuned for the n32/n64 ABI.
+	(mips_push_register): Buffer needs dynamic allocation.
+	(mips_print_register): Ditto.
+	(do_gp_register_row): Ditto.
+	(mips_store_return_value): Ditto.
+	(mips_gdbarch_init): Set gdbarch_push_arguments per ABI.
+
 2002-08-09  Don Howard  <dhoward@redhat.com>
 
 	* memattr.c (mem_info_command): Print special case of upper bound
