@@ -1,4 +1,9 @@
 start-sanitize-tic80
+Mon Jan  6 10:51:15 1997  Fred Fish  <fnf@cygnus.com>
+
+	* tic80.h (TIC80_OPERAND_SCALED): Operand may have optional
+	":s" modifier for scaling.
+
 Sun Jan  5 12:12:19 1997  Fred Fish  <fnf@cygnus.com>
 
 	* tic80.h (TIC80_OPERAND_M_SI): Add operand modifier for ":m".

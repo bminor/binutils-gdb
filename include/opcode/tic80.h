@@ -173,6 +173,10 @@ extern const struct tic80_operand tic80_operands[];
    immediate or register form instruction. */
 #define TIC80_OPERAND_M_LI (02000)
 
+/* This operand may have a ":s" modifier specified in bit 11 in a long
+   immediate or register form instruction. */
+#define TIC80_OPERAND_SCALED (04000)
+
 /* Values which go in the struct tic80_opcode format field to distinguish
    between various types of instructions with the same mnemonic.  FIXME: Not
    currently used? */
