@@ -1,5 +1,9 @@
 Tue Aug 17 15:19:41 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* coffgen.c (coff_section_symbol): If section's output_section is
+	not yet set, point to itself.  This is needed because this is
+	called on the output file, not the input file.
+
 	* coff-rs6000.c (dummy_reloc, RTYPE2HOWTO): Set howto field to a
 	dummy value, rather than leaving it NULL.
 
