@@ -1575,8 +1575,8 @@ po/$(PACKAGE).pot: force
 	     -e '/extern.*realloc/d' \
 	     -e '/extern.*free/d' \
 	     -e '/include.*malloc.h/d' \
-	     -e 's/[^x]malloc/xmalloc/g' \
-	     -e 's/[^x]realloc/xrealloc/g' \
+	     -e 's/\([^x]\)malloc/\1xmalloc/g' \
+	     -e 's/\([^x]\)realloc/\1xrealloc/g' \
 	     -e '/^#line.*y.tab.c/d' \
 	  < $@.tmp > $@.new
 	-rm $@.tmp
@@ -1589,8 +1589,8 @@ po/$(PACKAGE).pot: force
 	        -e '/extern.*realloc/d' \
 	        -e '/extern.*free/d' \
 	        -e '/include.*malloc.h/d' \
-	        -e 's/[^x]malloc/xmalloc/g' \
-	        -e 's/[^x]realloc/xrealloc/g' \
+	        -e 's/\([^x]\)malloc/\1xmalloc/g' \
+	        -e 's/\([^x]\)realloc/\1xrealloc/g' \
 		-e 's/yy_flex_xrealloc/yyxrealloc/g' \
 	      < $@ > $@.new && \
 	    rm -f $@ && \

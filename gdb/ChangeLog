@@ -1,3 +1,9 @@
+2004-10-15  Michael Chastain  <mec.gnu@mindspring.com>
+
+	From Andreas Schwab <schwab@suse.de>:
+	* Makefile.in (.y.c, .l.c.): Fix the substitutions for
+	for xmalloc and xrealloc.
+
 2004-10-15  Andrew Cagney  <cagney@gnu.org>
 
 	* ada-exp.y, ada-lex.l: Use xmalloc and xrealloc through out.
