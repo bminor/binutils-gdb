@@ -9,7 +9,7 @@ Thu Jun 11 15:24:53 1998  Doug Evans  <devans@canuck.cygnus.com>
 	(VU0_MEM1_SIZE): New macro.
 
 	* sim/sky/sky-defs.tcl (run_brn_test): Fix `options' arg to
-	sim_compile.
+	sim_compile.  Fix handling of dvpasm_flags.
 
 Wed Jun 10 15:56:10 1998  Frank Ch. Eigler  <fche@cygnus.com>
 
