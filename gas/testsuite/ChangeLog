@@ -8,6 +8,15 @@ Tue Nov 22 23:38:20 1994  Jeff Law  (law@snake.cs.utah.edu)
 	* gas/hppa/reloc/reloc.exp: Minor tweaks to match current PA ELF
 	output. 
 
+Fri Nov 18 17:56:57 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* gas/mips/ld.d: Adjust to work for both big and little endian
+	code.
+	* gas/mips/ld.s, gas/mips/lif-empic.d: Likewise.
+	* gas/mips/lifloat.d, gas/mips/ulh-empic.d: Likewise.
+	* gas/mips/ulh.d, gas/mips/ulw.d, gas/mips/ush.d: Likewise.
+	* gas/mips/usw.d: Likewise.
+
 Tue Nov 15 11:09:57 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 	* gas/hppa/unsorted/align4.s: New test.
