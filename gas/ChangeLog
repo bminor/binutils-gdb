@@ -1,5 +1,7 @@
 Tue Mar 11 01:13:31 1997  Ian Lance Taylor  <ian@cygnus.com>
 
+	* read.c (equals): Always permit register names to be redefined.
+
 	* config/tc-mips.c (mips_fix_adjustable): Permit a reloc against a
 	mips16 symbol to be adjusted if a symbol is being subtracted from
 	it.
