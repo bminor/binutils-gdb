@@ -1,3 +1,10 @@
+Thu Feb 12 03:41:00 1998  J"orn Rennecke  <amylaar@cygnus.co.uk>
+
+Fix rac to accept only a0:
+	* tc-d10v.c (parallel_ok, find_opcode):
+	Split OPERAND_ACC into OPERAND_ACC0 and OPERAND_ACC1.
+	Introduce OPERAND_GPR.
+
 Wed Feb 11 16:28:13 1998  Richard Henderson  <rth@cygnus.com>
 
 	* read.c (s_fill): Handle non-constant repeat counts by creating

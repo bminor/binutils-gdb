@@ -1,3 +1,10 @@
+Thu Feb 12 03:41:00 1998  J"orn Rennecke  <amylaar@cygnus.co.uk>
+
+Fix rac to accept only a0:
+	* d10v.h (OPERAND_ACC): Split into:
+	(OPERAND_ACC0, OPERAND_ACC1) .
+	(OPERAND_GPR): Define.
+
 Wed Feb 11 17:31:53 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* cgen.h (CGEN_FIELDS): Define here.

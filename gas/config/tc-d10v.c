@@ -1,6 +1,6 @@
 /* tc-d10v.c -- Assembler code for the Mitsubishi D10V
 
-   Copyright (C) 1996, 1997 Free Software Foundation.
+   Copyright (C) 1996, 1997, 1998 Free Software Foundation.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -895,7 +895,7 @@ parallel_ok (op1, insn1, op2, insn2, exec_type)
 	  if (flags & OPERAND_REG)
 	    {
 	      regno = (ins >> shift) & mask;
-	      if (flags & OPERAND_ACC)     
+	      if (flags & (OPERAND_ACC0|OPERAND_ACC1))
 		regno += 16;
 	      else if (flags & OPERAND_CONTROL)	/* mvtc or mvfc */
 		{ 
@@ -904,7 +904,7 @@ parallel_ok (op1, insn1, op2, insn2, exec_type)
 		  else
 		    regno = 18; 
 		}
-	      else if (flags & (OPERAND_FFLAG|OPERAND_CFLAG))  
+	      else if (flags & (OPERAND_FFLAG|OPERAND_CFLAG))
 		regno = 19;
 	      
 	      if ( flags & OPERAND_DEST )
@@ -1148,10 +1148,9 @@ find_opcode (opcode, myops)
 	  int num = myops[0].X_add_number;
 
 	  if (X_op != O_register
-	      || (flags & OPERAND_ACC) != (num & OPERAND_ACC)
-	      || (flags & OPERAND_FFLAG) != (num & OPERAND_FFLAG)
-	      || (flags & OPERAND_CFLAG) != (num & OPERAND_CFLAG)
-	      || (flags & OPERAND_CONTROL) != (num & OPERAND_CONTROL))
+	      || (num & ~flags
+		  & (OPERAND_GPR | OPERAND_ACC0 | OPERAND_ACC1
+		     | OPERAND_FFLAG | OPERAND_CFLAG | OPERAND_CONTROL)))
 	    {
 	      as_bad ("bad opcode or operands");
 	      return 0;
@@ -1232,11 +1231,11 @@ find_opcode (opcode, myops)
 	      
 	      if (flags & OPERAND_REG)
 		{
-		  if ((X_op != O_register) ||
-		      ((flags & OPERAND_ACC) != (num & OPERAND_ACC)) ||
-		      ((flags & OPERAND_FFLAG) != (num & OPERAND_FFLAG)) ||
-		      ((flags & OPERAND_CFLAG) != (num & OPERAND_CFLAG)) ||
-		      ((flags & OPERAND_CONTROL) != (num & OPERAND_CONTROL)))
+		  if ((X_op != O_register)
+		      || (num & ~flags
+			  & (OPERAND_GPR | OPERAND_ACC0 | OPERAND_ACC1
+			     | OPERAND_FFLAG | OPERAND_CFLAG
+			     | OPERAND_CONTROL)))
 		    {
 		      match=0;
 		      break;

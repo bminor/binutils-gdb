@@ -1,3 +1,11 @@
+Thu Feb 12 03:41:00 1998  J"orn Rennecke  <amylaar@cygnus.co.uk>
+
+Fix rac to accept only a0:
+	* d10v-opc.c (d10v_predefined_registers, d10v_operands, d10v_opcodes):
+	Split OPERAND_ACC into OPERAND_ACC0 and OPERAND_ACC1.
+	Introduce OPERAND_GPR.
+	* d10v-dis.c (print_operand): Likewise.
+
 Wed Feb 11 18:58:34 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* cgen-opc.in: New file.
