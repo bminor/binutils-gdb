@@ -1,3 +1,10 @@
+Mon Apr  7 14:58:22 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* config/tc-hppa.c (pa_subspace_start): If OBJ_ELF, then always return
+	zero.
+	* config/tc-hppa.h (tc_frob_symbol): Don't reset the value of the
+	symbol for OBJ_ELF anymore.
+
 Mon Apr  7 10:54:59 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* Makefile.in: Regenerate dependencies.
