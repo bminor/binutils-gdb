@@ -1,3 +1,10 @@
+2004-04-23  Nick Clifton  <nickc@redhat.com>
+
+	* gas/symver/symver1.d: Cope with extra symbols inserted by
+	arm-elf toolchains.
+	* gas/symver/symver0.d: Likewise
+	* gas/elf/symver.d: Likewise.
+
 2004-04-22  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* gas/sh/pcrel2.d: Update.
