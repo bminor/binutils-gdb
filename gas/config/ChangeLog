@@ -1,3 +1,8 @@
+Mon Oct  5 09:28:57 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* tc-m68k.c (get_num): make it work for all segments, not just the
+	first three.
+
 Tue Sep 29 12:22:52 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* obj-coffbfd.c (write_object_file): don't fixup for the z8k
