@@ -1,3 +1,16 @@
+2002-03-20  Martin M. Hunt  <hunt@redhat.com>
+
+	* gdbserver/remote-utils.c (remote_open): Don't call
+	getprotobyname, we're all using TCP here so just use
+	IPPROTO_TCP.
+	* gdbserver/gdbreplay.c (remote_open): Ditto.	
+
+2002-03-20  Martin M. Hunt  <hunt@redhat.com>
+	
+	* regcache.c (_initialize_regcache): No need to call
+	build_regcache() at this time; it gets called whenever
+	the gdbarch changes.
+
 2002-03-20  David O'Brien  <obrien@FreeBSD.org>
 
 	* sparc-nat.c:  Include sys/param.h where possible.

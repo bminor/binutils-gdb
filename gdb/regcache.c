@@ -802,8 +802,6 @@ build_regcache (void)
 void
 _initialize_regcache (void)
 {
-  build_regcache ();
-
   register_gdbarch_swap (&registers, sizeof (registers), NULL);
   register_gdbarch_swap (&register_valid, sizeof (register_valid), NULL);
   register_gdbarch_swap (NULL, 0, build_regcache);
