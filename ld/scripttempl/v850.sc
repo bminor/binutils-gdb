@@ -94,13 +94,17 @@ SECTIONS
   .data1	: { *(.data1) }
   .ctors	: {
     ${RELOCATING+___ctors = .;}
-    KEEP (*(.ctors))
+    KEEP (*(EXCLUDE_FILE (*crtend.o) .ctors))
+    KEEP (*(SORT(.ctors.*)))
+    KEEP (*crtend(.ctors))
     ${RELOCATING+___ctors_end = .;}
   }
 
   .dtors	: {
     ${RELOCATING+___dtors = .;}
-    KEEP (*(.dtors))
+    KEEP (*(EXCLUDE_FILE (*crtend.o) .dtors))
+    KEEP (*(SORT(.dtors.*)))
+    KEEP (*crtend.o(.dtors))
     ${RELOCATING+___dtors_end = .;}
   }
 
