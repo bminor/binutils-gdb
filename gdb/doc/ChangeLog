@@ -1,3 +1,8 @@
+2001-11-30  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.texinfo (Overlays): New chapter, documenting GDB's
+        overlay support.  Add to top-level menu.
+
 2001-11-26  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Command Syntax): Document C-o binding.

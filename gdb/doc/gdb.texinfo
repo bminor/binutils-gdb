@@ -127,6 +127,7 @@ Copyright (C) 1988-2001 Free Software Foundation, Inc.
 * Source::                      Examining source files
 * Data::                        Examining data
 * Tracepoints::                 Debugging remote targets non-intrusively
+* Overlays::                    Debugging programs that use overlays
 
 * Languages::                   Using @value{GDBN} with different languages
 
@@ -179,6 +180,7 @@ Copyright (C) 1988-2000 Free Software Foundation, Inc.
 * Source::                      Examining source files
 * Data::                        Examining data
 * Tracepoints::                 Debugging remote targets non-intrusively
+* Overlays::                    Debugging programs that use overlays
 
 * Languages::                   Using @value{GDBN} with different languages
 
@@ -6300,6 +6302,386 @@ data.
 > tfind
 > end
 @end smallexample
+
+@node Overlays
+@chapter Debugging Programs That Use Overlays
+@cindex overlays
+
+If your program is too large to fit completely in your target system's
+memory, you can sometimes use @dfn{overlays} to work around this
+problem.  @value{GDBN} provides some support for debugging programs that
+use overlays.
+
+@menu
+* How Overlays Work::              A general explanation of overlays.
+* Overlay Commands::               Managing overlays in @value{GDBN}.
+* Automatic Overlay Debugging::    @value{GDBN} can find out which overlays are
+                                   mapped by asking the inferior.
+* Overlay Sample Program::         A sample program using overlays.
+@end menu
+
+@node How Overlays Work
+@section How Overlays Work
+@cindex mapped overlays
+@cindex unmapped overlays
+@cindex load address, overlay's
+@cindex mapped address
+@cindex overlay area
+
+Suppose you have a computer whose instruction address space is only 64
+kilobytes long, but which has much more memory which can be accessed by
+other means: special instructions, segment registers, or memory
+management hardware, for example.  Suppose further that you want to
+adapt a program which is larger than 64 kilobytes to run on this system.
+
+One solution is to identify modules of your program which are relatively
+independent, and need not call each other directly; call these modules
+@dfn{overlays}.  Separate the overlays from the main program, and place
+their machine code in the larger memory.  Place your main program in
+instruction memory, but leave at least enough space there to hold the
+largest overlay as well.
+
+Now, to call a function located in an overlay, you must first copy that
+overlay's machine code from the large memory into the space set aside
+for it in the instruction memory, and then jump to its entry point
+there.
+
+@example
+@group
+    Data                   Instruction            Larger
+Address Space             Address Space        Address Space
++-----------+             +-----------+        +-----------+
+|           |             |           |        |           |
++-----------+             +-----------+        +-----------+<-- overlay 1
+| program   |             |   main    |        |           | load address
+| variables |             |  program  |        | overlay 1 |
+| and heap  |             |           |    ,---|           |
++-----------+             |           |    |   |           |
+|           |             +-----------+    |   +-----------+
++-----------+             |           |    |   |           |
+               mapped --->+-----------+    /   +-----------+<-- overlay 2
+               address    |  overlay  | <-'    | overlay 2 | load address
+                          |   area    |  <-----|           |
+                          |           | <---.  +-----------+
+                          |           |     |  |           |
+                          +-----------+     |  |           |
+                          |           |     |  +-----------+<-- overlay 3
+                          +-----------+     `--|           | load address
+                                               | overlay 3 |
+                                               |           |
+                                               +-----------+
+                                               |           |
+                                               +-----------+
+
+    To map an overlay, copy its code from the larger address space
+    to the instruction address space.  Since the overlays shown here
+    all use the same mapped address, only one may be mapped at a time.
+@end group
+@end example
+
+This diagram shows a system with separate data and instruction address
+spaces.  For a system with a single address space for data and
+instructions, the diagram would be similar, except that the program
+variables and heap would share an address space with the main program
+and the overlay area.
+
+An overlay loaded into instruction memory and ready for use is called a
+@dfn{mapped} overlay; its @dfn{mapped address} is its address in the
+instruction memory.  An overlay not present (or only partially present)
+in instruction memory is called @dfn{unmapped}; its @dfn{load address}
+is its address in the larger memory.  The mapped address is also called
+the @dfn{virtual memory address}, or @dfn{VMA}; the load address is also
+called the @dfn{load memory address}, or @dfn{LMA}.
+
+Unfortunately, overlays are not a completely transparent way to adapt a
+program to limited instruction memory.  They introduce a new set of
+global constraints you must keep in mind as you design your program:
+
+@itemize @bullet
+
+@item
+Before calling or returning to a function in an overlay, your program
+must make sure that overlay is actually mapped.  Otherwise, the call or
+return will transfer control to the right address, but in the wrong
+overlay, and your program will probably crash.
+
+@item
+If the process of mapping an overlay is expensive on your system, you
+will need to choose your overlays carefully to minimize their effect on
+your program's performance.
+
+@item
+The executable file you load onto your system must contain each
+overlay's instructions, appearing at the overlay's load address, not its
+mapped address.  However, each overlay's instructions must be relocated
+and its symbols defined as if the overlay were at its mapped address.
+You can use GNU linker scripts to specify different load and relocation
+addresses for pieces of your program; see @ref{Overlay Description,,,
+ld.info, Using ld: the GNU linker}.
+
+@item
+The procedure for loading executable files onto your system must be able
+to load their contents into the larger address space as well as the
+instruction and data spaces.
+
+@end itemize
+
+The overlay system described above is rather simple, and could be
+improved in many ways:
+
+@itemize @bullet
+
+@item
+If your system has suitable bank switch registers or memory management
+hardware, you could use those facilities to make an overlay's load area
+contents simply appear at their mapped address in instruction space.
+This would probably be faster than copying the overlay to its mapped
+area in the usual way.
+
+@item
+If your overlays are small enough, you could set aside more than one
+overlay area, and have more than one overlay mapped at a time.
+
+@item
+You can use overlays to manage data, as well as instructions.  In
+general, data overlays are even less transparent to your design than
+code overlays: whereas code overlays only require care when you call or
+return to functions, data overlays require care every time you access
+the data.  Also, if you change the contents of a data overlay, you
+must copy its contents back out to its load address before you can copy a
+different data overlay into the same mapped area.
+
+@end itemize
+
+
+@node Overlay Commands
+@section Overlay Commands
+
+To use @value{GDBN}'s overlay support, each overlay in your program must
+correspond to a separate section of the executable file.  The section's
+virtual memory address and load memory address must be the overlay's
+mapped and load addresses.  Identifying overlays with sections allows
+@value{GDBN} to determine the appropriate address of a function or
+variable, depending on whether the overlay is mapped or not.
+
+@value{GDBN}'s overlay commands all start with the word @code{overlay};
+you can abbreviate this as @code{ov} or @code{ovly}.  The commands are:
+
+@table @code
+@item overlay off
+@kindex overlay off
+Disable @value{GDBN}'s overlay support.  When overlay support is
+disabled, @value{GDBN} assumes that all functions and variables are
+always present at their mapped addresses.  By default, @value{GDBN}'s
+overlay support is disabled.
+
+@item overlay manual
+@kindex overlay manual
+@cindex manual overlay debugging
+Enable @dfn{manual} overlay debugging.  In this mode, @value{GDBN}
+relies on you to tell it which overlays are mapped, and which are not,
+using the @code{overlay map-overlay} and @code{overlay unmap-overlay}
+commands described below.
+
+@item overlay map-overlay @var{overlay}
+@itemx overlay map @var{overlay}
+@kindex overlay map-overlay
+@cindex map an overlay
+Tell @value{GDBN} that @var{overlay} is now mapped; @var{overlay} must
+be the name of the object file section containing the overlay.  When an
+overlay is mapped, @value{GDBN} assumes it can find the overlay's
+functions and variables at their mapped addresses.  @value{GDBN} assumes
+that any other overlays whose mapped ranges overlap that of
+@var{overlay} are now unmapped.
+
+@item overlay unmap-overlay @var{overlay}
+@itemx overlay unmap @var{overlay}
+@kindex overlay unmap-overlay
+@cindex unmap an overlay
+Tell @value{GDBN} that @var{overlay} is no longer mapped; @var{overlay}
+must be the name of the object file section containing the overlay.
+When an overlay is unmapped, @value{GDBN} assumes it can find the
+overlay's functions and variables at their load addresses.
+
+@item overlay auto
+@kindex overlay auto
+Enable @dfn{automatic} overlay debugging.  In this mode, @value{GDBN}
+consults a data structure the overlay manager maintains in the inferior
+to see which overlays are mapped.  For details, see @ref{Automatic
+Overlay Debugging}.
+
+@item overlay load-target
+@itemx overlay load
+@kindex overlay load-target
+@cindex reloading the overlay table
+Re-read the overlay table from the inferior.  Normally, @value{GDBN}
+re-reads the table @value{GDBN} automatically each time the inferior
+stops, so this command should only be necessary if you have changed the
+overlay mapping yourself using @value{GDBN}.  This command is only
+useful when using automatic overlay debugging.
+
+@item overlay list-overlays
+@itemx overlay list
+@cindex listing mapped overlays
+Display a list of the overlays currently mapped, along with their mapped
+addresses, load addresses, and sizes.
+
+@end table
+
+Normally, when @value{GDBN} prints a code address, it includes the name
+of the function the address falls in:
+
+@example
+(gdb) print main
+$3 = @{int ()@} 0x11a0 <main>
+@end example
+@noindent
+When overlay debugging is enabled, @value{GDBN} recognizes code in
+unmapped overlays, and prints the names of unmapped functions with
+asterisks around them.  For example, if @code{foo} is a function in an
+unmapped overlay, @value{GDBN} prints it this way:
+
+@example
+(gdb) overlay list
+No sections are mapped.
+(gdb) print foo
+$5 = @{int (int)@} 0x100000 <*foo*>
+@end example
+@noindent
+When @code{foo}'s overlay is mapped, @value{GDBN} prints the function's
+name normally:
+
+@example
+(gdb) overlay list
+Section .ov.foo.text, loaded at 0x100000 - 0x100034, 
+        mapped at 0x1016 - 0x104a
+(gdb) print foo
+$6 = @{int (int)@} 0x1016 <foo>
+@end example
+
+When overlay debugging is enabled, @value{GDBN} can find the correct
+address for functions and variables in an overlay, whether or not the
+overlay is mapped.  This allows most @value{GDBN} commands, like
+@code{break} and @code{disassemble}, to work normally, even on unmapped
+code.  However, @value{GDBN}'s breakpoint support has some limitations:
+
+@itemize @bullet
+@item
+@cindex breakpoints in overlays
+@cindex overlays, setting breakpoints in
+You can set breakpoints in functions in unmapped overlays, as long as
+@value{GDBN} can write to the overlay at its load address.
+@item
+@value{GDBN} can not set hardware or simulator-based breakpoints in
+unmapped overlays.  However, if you set a breakpoint at the end of your
+overlay manager (and tell @value{GDBN} which overlays are now mapped, if
+you are using manual overlay management), @value{GDBN} will re-set its
+breakpoints properly.
+@end itemize
+
+
+@node Automatic Overlay Debugging
+@section Automatic Overlay Debugging
+@cindex automatic overlay debugging
+
+@value{GDBN} can automatically track which overlays are mapped and which
+are not, given some simple co-operation from the overlay manager in the
+inferior.  If you enable automatic overlay debugging with the
+@code{overlay auto} command (@pxref{Overlay Commands}), @value{GDBN}
+looks in the inferior's memory for certain variables describing the
+current state of the overlays.
+
+Here are the variables your overlay manager must define to support
+@value{GDBN}'s automatic overlay debugging:
+
+@table @asis
+
+@item @code{_ovly_table}:
+This variable must be an array of the following structures:
+
+@example
+struct
+@{
+  /* The overlay's mapped address.  */
+  unsigned long vma;
+
+  /* The size of the overlay, in bytes.  */
+  unsigned long size;
+
+  /* The overlay's load address.  */
+  unsigned long lma;
+
+  /* Non-zero if the overlay is currently mapped;
+     zero otherwise.  */
+  unsigned long mapped;
+@}
+@end example
+
+@item @code{_novlys}:
+This variable must be a four-byte signed integer, holding the total
+number of elements in @code{_ovly_table}.
+
+@end table
+
+To decide whether a particular overlay is mapped or not, @value{GDBN}
+looks for an entry in @w{@code{_ovly_table}} whose @code{vma} and
+@code{lma} members equal the VMA and LMA of the overlay's section in the
+executable file.  When @value{GDBN} finds a matching entry, it consults
+the entry's @code{mapped} member to determine whether the overlay is
+currently mapped.
+
+
+@node Overlay Sample Program
+@section Overlay Sample Program
+@cindex overlay example program
+
+When linking a program which uses overlays, you must place the overlays
+at their load addresses, while relocating them to run at their mapped
+addresses.  To do this, you must write a linker script (@pxref{Overlay
+Description,,, ld.info, Using ld: the GNU linker}).  Unfortunately,
+since linker scripts are specific to a particular host system, target
+architecture, and target memory layout, this manual cannot provide
+portable sample code demonstrating @value{GDBN}'s overlay support.
+
+However, the @value{GDBN} source distribution does contain an overlaid
+program, with linker scripts for a few systems, as part of its test
+suite.  The program consists of the following files from
+@file{gdb/testsuite/gdb.base}:
+
+@table @file
+@item overlays.c
+The main program file.
+@item ovlymgr.c
+A simple overlay manager, used by @file{overlays.c}.
+@item foo.c
+@itemx bar.c
+@itemx baz.c
+@itemx grbx.c
+Overlay modules, loaded and used by @file{overlays.c}.
+@item d10v.ld
+@itemx m32r.ld
+Linker scripts for linking the test program on the @code{d10v-elf}
+and @code{m32r-elf} targets.
+@end table
+
+You can build the test program using the @code{d10v-elf} GCC
+cross-compiler like this:
+
+@example
+$ d10v-elf-gcc -g -c overlays.c
+$ d10v-elf-gcc -g -c ovlymgr.c
+$ d10v-elf-gcc -g -c foo.c
+$ d10v-elf-gcc -g -c bar.c
+$ d10v-elf-gcc -g -c baz.c
+$ d10v-elf-gcc -g -c grbx.c
+$ d10v-elf-gcc -g overlays.o ovlymgr.o foo.o bar.o \
+                  baz.o grbx.o -Wl,-Td10v.ld -o overlays
+@end example
+
+The build process is identical for any other architecture, except that
+you must substitute the appropriate compiler and linker script for the
+target system for @code{d10v-elf-gcc} and @code{d10v.ld}.
+
 
 @node Languages
 @chapter Using @value{GDBN} with Different Languages
