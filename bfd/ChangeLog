@@ -1,3 +1,11 @@
+Sun Oct 31 09:35:49 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* som.c: Add comment about how abort() on corrupt executable is evil.
+
+Fri Oct 29 16:04:33 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* gen-aout.c, libbfd.c: exit(1) instead of exit(-1).
+
 Fri Oct 29 13:17:21 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* bfd-in.h: Added commands for object file flag values.
