@@ -2380,6 +2380,9 @@ struct ppc64_elf_obj_tdata
     bfd_signed_vma refcount;
     bfd_vma offset;
   } tlsld_got;
+
+  /* A copy of relocs before they are modified for --emit-relocs.  */
+  Elf_Internal_Rela *opd_relocs;
 };
 
 #define ppc64_elf_tdata(bfd) \
@@ -4696,7 +4699,7 @@ opd_entry_value (asection *opd_sec,
 		 bfd_vma *code_off)
 {
   bfd *opd_bfd = opd_sec->owner;
-  Elf_Internal_Rela *relocs, *save_relocs = NULL;
+  Elf_Internal_Rela *relocs;
   Elf_Internal_Rela *lo, *hi, *look;
   bfd_vma val;
 
@@ -4726,17 +4729,12 @@ opd_entry_value (asection *opd_sec,
       return val;
     }
 
-  /* If the .opd relocs have been adjusted for output, then we need to
-     re-read the original relocs rather than use the cached ones.  */
-  if (opd_sec->reloc_done)
-    {
-      save_relocs = elf_section_data (opd_sec)->relocs;
-      elf_section_data (opd_sec)->relocs = NULL;
-    }
+  relocs = ppc64_elf_tdata (opd_bfd)->opd_relocs;
+  if (relocs == NULL)
+    relocs = _bfd_elf_link_read_relocs (opd_bfd, opd_sec, NULL, NULL, TRUE);
 
   /* Go find the opd reloc at the sym address.  */
-  lo = relocs = _bfd_elf_link_read_relocs (opd_bfd, opd_sec, NULL, NULL,
-					   !opd_sec->reloc_done);
+  lo = relocs;
   BFD_ASSERT (lo != NULL);
   hi = lo + opd_sec->reloc_count - 1; /* ignore last reloc */
   val = (bfd_vma) -1;
@@ -4807,11 +4805,6 @@ opd_entry_value (asection *opd_sec,
 	}
     }
 
-  if (opd_sec->reloc_done)
-    {
-      elf_section_data (opd_sec)->relocs = save_relocs;
-      free (relocs);
-    }
   return val;
 }
 
@@ -6996,6 +6989,9 @@ ppc64_elf_edit_toc (bfd *obfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 		++wrel;
 	      }
 	  toc->reloc_count = wrel - relstart;
+	  elf_section_data (toc)->rel_hdr.sh_size
+	    = toc->reloc_count * elf_section_data (toc)->rel_hdr.sh_entsize;
+	  BFD_ASSERT (elf_section_data (toc)->rel_hdr2 == NULL);
 
 	  /* Adjust addends for relocs against the toc section sym.  */
 	  for (sec = ibfd->sections; sec != NULL; sec = sec->next)
@@ -10440,8 +10436,19 @@ ppc64_elf_relocate_section (bfd *output_bfd,
   /* If we're emitting relocations, then shortly after this function
      returns, reloc offsets and addends for this section will be
      adjusted.  Worse, reloc symbol indices will be for the output
-     file rather than the input.  Let opd_entry_value know.  */
-  input_section->reloc_done = info->emitrelocations;
+     file rather than the input.  Save a copy of the relocs for
+     opd_entry_value.  */
+  if (is_opd && info->emitrelocations)
+    {
+      bfd_size_type amt;
+      amt = input_section->reloc_count * sizeof (Elf_Internal_Rela);
+      rel = bfd_alloc (input_bfd, amt);
+      BFD_ASSERT (ppc64_elf_tdata (input_bfd)->opd_relocs == NULL);
+      ppc64_elf_tdata (input_bfd)->opd_relocs = rel;
+      if (rel == NULL)
+	return FALSE;
+      memcpy (rel, relocs, amt);
+    }
   return ret;
 }
 
