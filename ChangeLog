@@ -1,3 +1,7 @@
+Thu Jan 28 15:09:59 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* test-build.mk (HOLES): Added tar, cpio and uudecode.
+
 Wed Jan 27 16:50:32 1993  Jim Wilson  (wilson@sphagnum.cygnus.com)
 
 	* config.sub (h8500):  Recognize this as a cpu type.

@@ -43,7 +43,7 @@ CVS_TAG :=
 CVS_MODULE := latest
 
 ### Historically, this was identical to CVS_TAG.  This is changing.
-RELEASE_TAG := latest-921229
+RELEASE_TAG := latest-930121
 
 ### Historically, binaries were installed here.  This is changing.
 release_root := $(ROOTING)/$(RELEASE_TAG)
@@ -64,6 +64,7 @@ override MFLAGS 	:=
 SHELL := /bin/sh
 
 FLAGS_TO_PASS := \
+	"CC=$(CC)" \
 	"GCC=$(GCC)" \
 	"CFLAGS=$(CFLAGS)" \
 	"TIME=$(TIME)" \
@@ -71,7 +72,7 @@ FLAGS_TO_PASS := \
 	"host=$(host)"
 
 
-prefixes	= -prefix=$(release_root) -exec-prefix=$(release_root)/H-$(host)
+prefixes	= --prefix=$(release_root) --exec_prefix=$(release_root)/H-$(host)
 relbindir	= $(release_root)/H-$(host)/bin
 
 
@@ -82,6 +83,12 @@ STAGE2DIR 	:= $(WORKING_DIR).2
 STAGE3DIR 	:= $(WORKING_DIR).3
 INPLACEDIR 	:= $(host)-in-place
 HOLESDIR 	:= $(host)-holes
+
+SET_HOLES	:= SHELL=sh ; PATH=`pwd`/$(HOLESDIR) ; export PATH ; export SHELL ;
+SET_CYGNUS_PATH := SHELL=sh ; PATH=$(relbindir):`pwd`/$(HOLESDIR) ; export PATH ; export SHELL ;
+SET_LATEST_PATH := SHELL=sh ; PATH=/usr/latest/bin:`pwd`/$(HOLESDIR) ; export PATH ; export SHELL ;
+
+
 
 .PHONY: all
 ifdef target
@@ -115,33 +122,28 @@ do-native-config: $(arch)-stamp-native-configured
 build-native: $(host)-stamp-holes $(arch)-stamp-native-checked
 config-native: $(host)-stamp-holes $(arch)-stamp-native-configured
 
-$(arch)-stamp-native:
-	PATH=`pwd`/$(HOLESDIR) ; \
-	  export PATH ; \
-	  SHELL=sh ; export SHELL ; \
-	  $(TIME) $(GNU_MAKE) -f test-build.mk  $(arch)-stamp-native-installed $(FLAGS_TO_PASS) 
+$(arch)-stamp-native: $(host)-stamp-holes
+	$(SET_HOLES) $(TIME) $(GNU_MAKE) -f test-build.mk  $(arch)-stamp-native-installed $(FLAGS_TO_PASS) 
 	if [ -f CLEAN_ALL ] ; then rm -rf $(NATIVEDIR) ; else true ; fi
 	touch $(arch)-stamp-native
 
-$(arch)-stamp-native-installed: $(arch)-stamp-native-checked
-	cd $(NATIVEDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) install 
-	cd $(NATIVEDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) install-info 
+$(arch)-stamp-native-installed: $(host)-stamp-holes $(arch)-stamp-native-checked
+	$(SET_HOLES) cd $(NATIVEDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) install 
+	$(SET_HOLES) cd $(NATIVEDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) install-info 
 	touch $@
 
 $(arch)-stamp-native-checked: $(arch)-stamp-native-built
 #	cd $(NATIVEDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) check 
 	touch $@
 
-$(arch)-stamp-native-built: $(arch)-stamp-native-configured
-	cd $(NATIVEDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) all 
-	cd $(NATIVEDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) info 
+$(arch)-stamp-native-built: $(host)-stamp-holes $(arch)-stamp-native-configured
+	$(SET_HOLES) cd $(NATIVEDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) all 
+	$(SET_HOLES) cd $(NATIVEDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) info 
 	touch $@
 
-$(arch)-stamp-native-configured:
+$(arch)-stamp-native-configured: $(host)-stamp-holes
 	[ -d $(NATIVEDIR) ] || mkdir $(NATIVEDIR)
-	(cd $(NATIVEDIR) ; \
-		$(TIME) ../$(TREE)/configure $(config) -v -srcdir=../$(TREE) \
-			$(prefixes))
+	$(SET_HOLES) cd $(NATIVEDIR) ; $(TIME) ../$(TREE)/configure $(config) -v --srcdir=../$(TREE) $(prefixes)
 	touch $@
 
 
@@ -152,32 +154,27 @@ config-cygnus: $(host)-stamp-holes $(arch)-stamp-cygnus-configured
 
 $(arch)-stamp-cygnus: 
 	[ -f $(relbindir)/gcc ] || (echo "must have gcc available"; exit 1)
-	PATH=$(relbindir):`pwd`/$(HOLESDIR) ; \
-	  export PATH ; \
-	  SHELL=sh ; export SHELL ; \
-	  echo ;  gcc -v ; echo ; \
-	  $(TIME) $(GNU_MAKE) -f test-build.mk $(arch)-stamp-cygnus-installed  $(FLAGS_TO_PASS)
+	$(SET_CYGNUS_PATH) $(TIME) $(GNU_MAKE) -f test-build.mk $(arch)-stamp-cygnus-installed  $(FLAGS_TO_PASS)
 	if [ -f CLEAN_ALL ] ; then rm -rf $(CYGNUSDIR) ; else true ; fi
 	touch $(arch)-stamp-cygnus
 
-$(arch)-stamp-cygnus-installed: $(arch)-stamp-cygnus-checked
-	cd $(CYGNUSDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) $(GNUC) install 
-	cd $(CYGNUSDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) $(GNUC) install-info
+$(arch)-stamp-cygnus-installed:  $(host)-stamp-holes $(arch)-stamp-cygnus-checked
+	$(SET_CYGNUS_PATH) cd $(CYGNUSDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) $(GNUC) install 
+	$(SET_CYGNUS_PATH) cd $(CYGNUSDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) $(GNUC) install-info
 	touch $@
 
-$(arch)-stamp-cygnus-checked: $(arch)-stamp-cygnus-built
+$(arch)-stamp-cygnus-checked: $(host)-stamp-holes $(arch)-stamp-cygnus-built
 #	cd $(CYGNUSDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) $(GNUC) check 
 	touch $@
 
-$(arch)-stamp-cygnus-built: $(arch)-stamp-cygnus-configured
-	cd $(CYGNUSDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) $(GNUC) all 
-	cd $(CYGNUSDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) $(GNUC) info 
+$(arch)-stamp-cygnus-built:  $(host)-stamp-holes $(arch)-stamp-cygnus-configured
+	$(SET_CYGNUS_PATH) cd $(CYGNUSDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) $(GNUC) all 
+	$(SET_CYGNUS_PATH) cd $(CYGNUSDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) $(GNUC) info 
 	touch $@
 
-$(arch)-stamp-cygnus-configured:
+$(arch)-stamp-cygnus-configured:  $(host)-stamp-holes
 	[ -d $(CYGNUSDIR) ] || mkdir $(CYGNUSDIR)
-	cd $(CYGNUSDIR) ; \
-	  $(TIME) ../$(TREE)/configure $(config) -v -srcdir=../$(TREE) $(prefixes)
+	$(SET_CYGNUS_PATH) cd $(CYGNUSDIR) ; $(TIME) ../$(TREE)/configure $(config) -v --srcdir=../$(TREE) $(prefixes)
 	touch $@
 
 .PHONY: do-latest
@@ -185,30 +182,27 @@ do-latest: $(host)-stamp-holes $(arch)-stamp-latest
 build-latest: $(host)-stamp-holes $(arch)-stamp-latest-checked
 
 $(arch)-stamp-latest:
-	PATH=/usr/latest/bin:`pwd`/$(HOLESDIR) ; \
-	  export PATH ; \
-	  SHELL=sh ; export SHELL ; \
-	  $(TIME) $(GNU_MAKE) -f test-build.mk $(arch)-stamp-latest-installed  $(FLAGS_TO_PASS)
+	$(SET_LATEST_PATH) $(TIME) $(GNU_MAKE) -f test-build.mk $(arch)-stamp-latest-installed  $(FLAGS_TO_PASS)
 	touch $(arch)-stamp-latest
 
 $(arch)-stamp-latest-installed: $(arch)-stamp-latest-checked
-	cd $(LATESTDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) $(GNUC) install 
-	cd $(LATESTDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) $(GNUC) install-info 
+	$(SET_LATEST_PATH) cd $(LATESTDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) $(GNUC) install 
+	$(SET_LATEST_PATH) cd $(LATESTDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) $(GNUC) install-info 
 	touch $@
 
 $(arch)-stamp-latest-checked: $(arch)-stamp-latest-built
-#	cd $(LATESTDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) $(GNUC) check 
+#	$(SET_LATEST_PATH) cd $(LATESTDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) $(GNUC) check 
 	touch $@
 
 $(arch)-stamp-latest-built: $(arch)-stamp-latest-configured
-	cd $(LATESTDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) $(GNUC) all 
-	cd $(LATESTDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) $(GNUC) info 
+	$(SET_LATEST_PATH) cd $(LATESTDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) $(GNUC) all 
+	$(SET_LATEST_PATH) cd $(LATESTDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) $(GNUC) info 
 	touch $@
 
 $(arch)-stamp-latest-configured:
 	[ -d $(LATESTDIR) ] || mkdir $(LATESTDIR)
-	cd $(LATESTDIR) ; \
-	  $(TIME) ../$(TREE)/configure $(config) -v -srcdir=../$(TREE) $(prefixes)
+	$(SET_LATEST_PATH) cd $(LATESTDIR) ; \
+	  $(TIME) ../$(TREE)/configure $(config) -v --srcdir=../$(TREE) $(prefixes)
 	touch $@
 
 
@@ -228,17 +222,17 @@ $(host)-stamp-in-place:
 	fi
 
 $(host)-stamp-in-place-installed: $(host)-stamp-in-place-checked
-	cd $(INPLACEDIR) ; $(TIME) $(MAKE) $(MF) "CFLAGS=$(CFLAGS)" install host=$(host)
-	cd $(INPLACEDIR) ; $(TIME) $(MAKE) $(MF) "CFLAGS=$(CFLAGS)" install-info host=$(host)
+	cd $(INPLACEDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) "CFLAGS=$(CFLAGS)" install host=$(host)
+	cd $(INPLACEDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) "CFLAGS=$(CFLAGS)" install-info host=$(host)
 	touch $@
 
 $(host)-stamp-in-place-checked: $(host)-stamp-in-place-built
-#	cd $(INPLACEDIR) ; $(TIME) $(MAKE) $(MF) "CFLAGS=$(CFLAGS)" check host=$(host)
+#	cd $(INPLACEDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) "CFLAGS=$(CFLAGS)" check host=$(host)
 	touch $@
 
 $(host)-stamp-in-place-built: $(host)-stamp-in-place-configured
-	cd $(INPLACEDIR) ; $(TIME) $(MAKE) $(MF) "CFLAGS=$(CFLAGS)" all host=$(host)
-	cd $(INPLACEDIR) ; $(TIME) $(MAKE) $(MF) "CFLAGS=$(CFLAGS)" info host=$(host)
+	cd $(INPLACEDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) "CFLAGS=$(CFLAGS)" all host=$(host)
+	cd $(INPLACEDIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) "CFLAGS=$(CFLAGS)" info host=$(host)
 	touch $@
 
 $(host)-stamp-in-place-configured: $(host)-stamp-in-place-cp
@@ -256,9 +250,9 @@ $(host)-stamp-3stage-done: do1 do2 do3 comparison
 
 
 .PHONY: do1
-do1:	$(host)-stamp-holes $(host)-stamp-stage1
-do1-config: $(host)-stamp-stage1-configured
-do1-build: $(host)-stamp-stage1-checked
+do1:	    $(host)-stamp-holes $(host)-stamp-stage1
+do1-config: $(host)-stamp-holes $(host)-stamp-stage1-configured
+do1-build:  $(host)-stamp-holes $(host)-stamp-stage1-checked
 
 $(host)-stamp-stage1:
 	if [ -d $(STAGE1DIR) ] ; then \
@@ -266,10 +260,7 @@ $(host)-stamp-stage1:
 	else \
 		true ; \
 	fi
-	PATH=`pwd`/$(HOLESDIR) ; \
-	  export PATH ; \
-	  SHELL=sh ; export SHELL ; \
-	  $(TIME) $(GNU_MAKE) -f test-build.mk $(host)-stamp-stage1-installed host=$(host) $(FLAGS_TO_PASS) $(NATIVEC)
+	$(SET_HOLES) $(TIME) $(GNU_MAKE) -f test-build.mk $(FLAGS_TO_PASS) host=$(host) $(host)-stamp-stage1-installed
 	touch $@
 	if [ -f CLEAN_ALL ] ; then \
 	  rm -rf $(WORKING_DIR) ; \
@@ -278,26 +269,26 @@ $(host)-stamp-stage1:
 	fi
 
 $(host)-stamp-stage1-installed: $(host)-stamp-stage1-checked
-	cd $(WORKING_DIR) ; $(TIME) $(MAKE) $(MF) "CFLAGS=$(CFLAGS)" install host=$(host)
-	cd $(WORKING_DIR) ; $(TIME) $(MAKE) $(MF) "CFLAGS=$(CFLAGS)" install-info host=$(host)
+	$(SET_HOLES) cd $(WORKING_DIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) "CFLAGS=$(CFLAGS)" install host=$(host)
+	$(SET_HOLES) cd $(WORKING_DIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) "CFLAGS=$(CFLAGS)" install-info host=$(host)
 ifeq ($(host),rs6000-ibm-aix)
 	rm $(relbindir)/make
 endif
 	touch $@
 
 $(host)-stamp-stage1-checked: $(host)-stamp-stage1-built
-#	cd $(WORKING_DIR) ; $(TIME) $(MAKE) $(MF) "CFLAGS=$(CFLAGS)" check host=$(host)
+#	$(SET_HOLES) cd $(WORKING_DIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) "CFLAGS=$(CFLAGS)" check host=$(host)
 	touch $@
 
 $(host)-stamp-stage1-built: $(host)-stamp-stage1-configured
-	cd $(WORKING_DIR) ; $(TIME) $(MAKE) $(MF) "CFLAGS=$(CFLAGS)" all host=$(host)
-	cd $(WORKING_DIR) ; $(TIME) $(MAKE) $(MF) "CFLAGS=$(CFLAGS)" info host=$(host)
+	$(SET_HOLES) cd $(WORKING_DIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) "CFLAGS=$(CFLAGS)" all host=$(host)
+	$(SET_HOLES) cd $(WORKING_DIR) ; $(TIME) $(MAKE) $(FLAGS_TO_PASS) "CFLAGS=$(CFLAGS)" info host=$(host)
 	touch $@
 
 $(host)-stamp-stage1-configured:
 	[ -d $(WORKING_DIR) ] || mkdir $(WORKING_DIR)
-	cd $(WORKING_DIR) ; \
-	  $(TIME) ../$(TREE)/configure $(host) -v -srcdir=../$(TREE) $(prefixes)
+	$(SET_HOLES) cd $(WORKING_DIR) ; \
+	  $(TIME) ../$(TREE)/configure $(host) -v --srcdir=../$(TREE) $(prefixes)
 	touch $@
 
 .PHONY: do2
@@ -309,32 +300,29 @@ $(host)-stamp-stage2:
 	else \
 		true ; \
 	fi
-	PATH=$(relbindir):`pwd`/$(HOLESDIR) ; \
-	  export PATH ; \
-	  SHELL=sh ; export SHELL ; \
-	  $(TIME) $(GNU_MAKE) $(FLAGS_TO_PASS) -f test-build.mk -w $(host)-stamp-stage2-installed
+	$(SET_CYGNUS_PATH) $(TIME) $(GNU_MAKE) $(FLAGS_TO_PASS) -f test-build.mk -w $(host)-stamp-stage2-installed
 	mv $(WORKING_DIR) $(STAGE2DIR)
 	touch $@
 
 
 $(host)-stamp-stage2-installed: $(host)-stamp-stage2-checked
-	cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(MF) $(GNUC) "CFLAGS=$(CFLAGS)" install host=$(host)
-	cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(MF) $(GNUC) "CFLAGS=$(CFLAGS)" install-info host=$(host)
+	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" install host=$(host)
+	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" install-info host=$(host)
 	touch $@
 
 $(host)-stamp-stage2-checked: $(host)-stamp-stage2-built
-#	cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(MF) $(GNUC) "CFLAGS=$(CFLAGS)" check host=$(host)
+#	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" check host=$(host)
 	touch $@
 
 $(host)-stamp-stage2-built: $(host)-stamp-stage2-configured
-	cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(MF) $(GNUC) "CFLAGS=$(CFLAGS)" all host=$(host)
-	cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(MF) $(GNUC) "CFLAGS=$(CFLAGS)" info host=$(host)
+	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" all host=$(host)
+	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" info host=$(host)
 	touch $@
 
 $(host)-stamp-stage2-configured:
 	[ -d $(WORKING_DIR) ] || mkdir $(WORKING_DIR)
-	cd $(WORKING_DIR) ; \
-	  $(TIME) ../$(TREE)/configure $(host) -v -srcdir=../$(TREE) $(prefixes)
+	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; \
+	  $(TIME) ../$(TREE)/configure $(host) -v --srcdir=../$(TREE) $(prefixes)
 	touch $@
 
 .PHONY: do3
@@ -346,32 +334,29 @@ $(host)-stamp-stage3:
 	else \
 		true ; \
 	fi
-	PATH=$(relbindir):`pwd`/$(HOLESDIR) ; \
-	  export PATH ; \
-	  SHELL=sh ; export SHELL ; \
-	  $(TIME) $(GNU_MAKE) $(FLAGS_TO_PASS) -f test-build.mk -w $(host)-stamp-stage3-checked 
+	$(SET_CYGNUS_PATH) $(TIME) $(GNU_MAKE) $(FLAGS_TO_PASS) -f test-build.mk -w $(host)-stamp-stage3-checked 
 	mv $(WORKING_DIR) $(STAGE3DIR) 
 	touch $@
 
 
 $(host)-stamp-stage3-installed: $(host)-stamp-stage3-checked
-	cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(MF) $(GNUC) "CFLAGS=$(CFLAGS)" install host=$(host)
-	cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(MF) $(GNUC) "CFLAGS=$(CFLAGS)" install-info host=$(host)
+	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" install host=$(host)
+	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" install-info host=$(host)
 	touch $@
 
 $(host)-stamp-stage3-checked: $(host)-stamp-stage3-built
-#	cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(MF) $(GNUC) "CFLAGS=$(CFLAGS)" check host=$(host)
+#	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" check host=$(host)
 	touch $@
 
 $(host)-stamp-stage3-built: $(host)-stamp-stage3-configured
-	cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(MF) $(GNUC) "CFLAGS=$(CFLAGS)" all host=$(host)
-	cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(MF) $(GNUC) "CFLAGS=$(CFLAGS)" info host=$(host)
+	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" all host=$(host)
+	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; $(TIME) $(MAKE) -w $(FLAGS_TO_PASS) $(GNUC) "CFLAGS=$(CFLAGS)" info host=$(host)
 	touch $@
 
 $(host)-stamp-stage3-configured:
 	[ -d $(WORKING_DIR) ] || mkdir $(WORKING_DIR)
-	cd $(WORKING_DIR) ; \
-	  $(TIME) ../$(TREE)/configure $(host) -v -srcdir=../$(TREE) $(prefixes)
+	$(SET_CYGNUS_PATH) cd $(WORKING_DIR) ; \
+	  $(TIME) ../$(TREE)/configure $(host) -v --srcdir=../$(TREE) $(prefixes)
 	touch $@
 
 # These things are needed by a three-stage, but are not included locally.
@@ -387,6 +372,7 @@ HOLES := \
 	chmod \
 	cmp \
 	cp \
+	cpio \
 	date \
 	diff \
 	echo \
@@ -413,11 +399,13 @@ HOLES := \
 	sed \
 	sh \
 	sort \
+	tar \
 	test \
 	time \
 	touch \
 	tr \
 	true \
+	uudecode \
 	wc \
 	whoami
 
