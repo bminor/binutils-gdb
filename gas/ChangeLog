@@ -1,3 +1,8 @@
+Thu Jan 26 19:03:42 1995  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* config/tc-h8300.c (get_specific): Add parens around | inside &.
+	(skip_colonthing): Set L_8 if ":8" is specified.
+
 Thu Jan 26 18:38:01 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config/tc-ppc.c (md_begin): Permit mfdec to be duplicated on the
