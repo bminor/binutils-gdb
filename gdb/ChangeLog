@@ -1,3 +1,31 @@
+2004-03-25  Daniel Jacobowitz  <drow@mvista.com>
+
+	* arm-linux-tdep.c (ARM_LINUX_JB_ELEMENT_SIZE): Define to
+	INT_REGISTER_SIZE.
+	(arm_linux_push_arguments): Use TARGET_DOUBLE_BIT instead of
+	FP_REGISTER_VIRTUAL_SIZE.
+	* arm-tdep.c (arm_make_sigtramp_cache): Use register_size instead
+	of DEPRECATED_REGISTER_RAW_SIZE.
+	(arm_register_type): Add gdbarch argument.
+	(arm_register_raw_size, arm_register_virtual_size): Delete.
+	(arm_register_byte, arm_extract_return_value)
+	(arm_store_return_value, arm_get_longjmp_target): Update references
+	to INT_REGISTER_RAW_SIZE and FP_REGISTER_RAW_SIZE.
+	(arm_gdbarch_init): Likewise.  Don't set
+	deprecated_register_raw_size, deprecated_register_virtual_size,
+	deprecated_max_register_raw_size,
+	deprecated_max_register_virtual_size, or
+	deprecated_max_register_virtual_type.  Do set register_type.
+	* arm-tdep.h (ARM_MAX_REGISTER_RAW_SIZE)
+	(ARM_MAX_REGISTER_VIRTUAL_SIZE, INT_REGISTER_VIRTUAL_SIZE)
+	(FP_REGISTER_VIRTUAL_SIZE): Delete.
+	(INT_REGISTER_RAW_SIZE): Rename to INT_REGISTER_SIZE.
+	(FP_REGISTER_RAW_SIZE): Rename to FP_REGISTER_SIZE.
+	* arm-linux-tdep.c (ARM_NBSD_JB_ELEMENT_SIZE): Define to
+	INT_REGISTER_SIZE.
+	* remote-rdp.c (remote_rdp_fetch_register): Use MAX_REGISTER_SIZE.
+	(remote_rdp_store_register): Likewise.
+
 2004-03-24  Daniel Jacobowitz  <drow@mvista.com>
 
 	* Makefile.in (mips-linux-tdep.o): Update dependencies.

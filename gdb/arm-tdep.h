@@ -45,24 +45,13 @@ enum gdb_regnum {
   ARM_LAST_FP_ARG_REGNUM = ARM_F3_REGNUM
 };
 
-/* Used in target-specific code when we need to know the size of the
-   largest type of register we need to handle.  */
-#define ARM_MAX_REGISTER_RAW_SIZE	12
-#define ARM_MAX_REGISTER_VIRTUAL_SIZE	8
-
 /* Size of integer registers.  */
-#define INT_REGISTER_RAW_SIZE		4
-#define INT_REGISTER_VIRTUAL_SIZE	4
+#define INT_REGISTER_SIZE		4
 
 /* Say how long FP registers are.  Used for documentation purposes and
    code readability in this header.  IEEE extended doubles are 80
    bits.  DWORD aligned they use 96 bits.  */
-#define FP_REGISTER_RAW_SIZE	12
-
-/* GCC doesn't support long doubles (extended IEEE values).  The FP
-   register virtual size is therefore 64 bits.  Used for documentation
-   purposes and code readability in this header.  */
-#define FP_REGISTER_VIRTUAL_SIZE	8
+#define FP_REGISTER_SIZE	12
 
 /* Status registers are the same size as general purpose registers.
    Used for documentation purposes and code readability in this
