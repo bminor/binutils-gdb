@@ -1,3 +1,8 @@
+Mon Feb 19 11:45:30 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* Makefile.in: Make everything which depends upon all-bfd also
+	depend upon all-opcodes, in case --with-commonbfdlib is used.
+
 Thu Feb 15 19:50:50 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* configure.in (host *-*-cygwin32): Don't build gdb if we are
