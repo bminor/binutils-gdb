@@ -1,5 +1,6 @@
 2003-07-09  Michael Snyder  <msnyder@redhat.com>
 
+	* gencode.c (prnd): Clear LSW of result to zeros.
 	* gencode.c (pmuls): Expression is mis-parenthesized.
 	* gencode.c (ppi_gensim): For a conditional ppi insn, if the
 	condition is false, we want to return (not break).  A break
