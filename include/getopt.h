@@ -70,15 +70,6 @@ extern int opterr;
    one).  For long options that have a zero `flag' field, `getopt'
    returns the contents of the `val' field.  */
 
-/* Names for the values of the `has_arg' field of `struct option'.  */
-
-enum _argtype
-{
-  no_argument,
-  required_argument,
-  optional_argument
-};
-
 struct option
 {
 #if	__STDC__
@@ -88,10 +79,25 @@ struct option
 #endif
   /* has_arg can't be an enum because some compilers complain about
      type mismatches in all the code that assumes it is an int.  */
-  enum _argtype has_arg;
+  int has_arg;
   int *flag;
   int val;
 };
+
+/* Names for the values of the `has_arg' field of `struct option'.
+   We wouldn't mind doing this:
+      enum _argtype
+      {
+	no_argument,
+	required_argument,
+	optional_argument
+      };
+   ...if we could also change the "int has_arg" above.  For now, use
+   defines.  */
+
+#define	no_argument 0
+#define	required_argument 1
+#define	optional_argument 2
 
 #if __STDC__
 extern int getopt (int argc, char *const *argv, const char *shortopts);

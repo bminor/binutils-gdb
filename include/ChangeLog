@@ -1,3 +1,8 @@
+Fri Oct 16 03:17:08 1992  John Gilmore  (gnu@cygnus.com)
+
+	* getopt.h (struct option):  RMS decided we should do it the
+	other way.
+
 Thu Oct 15 21:43:22 1992  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 	* getopt.h (struct option): use the provided enum for has_arg.
