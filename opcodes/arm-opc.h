@@ -55,6 +55,7 @@ struct arm_opcode {
 
 static struct arm_opcode arm_opcodes[] = {
     /* ARM instructions */
+    {0x012FFF10, 0x0ffffff0, "bx%c\t%0-3r"},
     {0x00000090, 0x0fe000f0, "mul%c%20's\t%16-19r, %0-3r, %8-11r"},
     {0x00200090, 0x0fe000f0, "mla%c%20's\t%16-19r, %0-3r, %8-11r, %12-15r"},
     {0x01000090, 0x0fb00ff0, "swp%c%22'b\t%12-15r, %0-3r, [%16-19r]"},
