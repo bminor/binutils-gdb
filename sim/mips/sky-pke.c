@@ -532,7 +532,8 @@ pke_io_write_buffer(device *me_,
 
 
 
-/* Reset the PKE */
+/* Reset the simulated PKE hardware state.  Preserve other internal
+   state. */
 void
 pke_reset(struct pke_device* me)
 {
@@ -542,14 +543,24 @@ pke_reset(struct pke_device* me)
   /* clear registers, flag, other state */
   memset(me->regs, 0, sizeof(me->regs));
   me->fifo_qw_done = 0;
-  if ( me->trace_file != NULL ) 
-    {
-      fclose (me->trace_file);
-      me->trace_file = NULL;
-    }
   /* Command options will remain alive over the reset.  */
   me->flags &= PKE_FLAG_TRACE_ON;
-}
+
+  /* NOTE: Since disassembly / trace logs remain open across ordinary
+     simulated hardware resets, there may be a problem of producing a
+     trace file that has only partial results from the prior
+     operation.  For the current PKE model, however, this cannot
+     happen as stalls & interrupts only occur *between* simulated
+     PKEcode executions.  This means that our trace files ought remain
+     syntactically valid, despite resets. */
+  
+  if(me->trace_file != NULL)
+    {
+      fprintf(me->trace_file,
+	      "\n;%s RESET\n",
+	      me->dev.name);
+    }
+ }
 
 
 
@@ -653,12 +664,45 @@ pke_issue(SIM_DESC sd, struct pke_device* me)
         }
     }
 
+  /* open trace file if necessary */
+  if(me->trace_file == NULL &&
+     me->trace_file_name != NULL)
+    {
+      sky_open_file(& (me->trace_file),
+		    me->trace_file_name,
+		    (char *) NULL, _IOFBF );
+      
+      /* print disassembly header */
+      fprintf(me->trace_file,
+	      "\t.global %s_disassembly_tag\n"
+	      "%s_disassembly_tag:\n",
+	       me->dev.name, me->dev.name);
+    }
 
   /* decode & execute */
+  /* order tests in decreasing order of frequency */
   if(IS_PKE_CMD(cmd, PKENOP))
     pke_code_nop(me, fw);
+  else if(IS_PKE_CMD(cmd, PKEMSCAL))
+    pke_code_pkemscal(me, fw);
+  else if(IS_PKE_CMD(cmd, PKEMSCNT))
+    pke_code_pkemscnt(me, fw);
+  else if(me->pke_number == 1 && IS_PKE_CMD(cmd, PKEMSCALF))
+    pke_code_pkemscalf(me, fw);
+  else if(IS_PKE_CMD(cmd, UNPACK))
+    pke_code_unpack(me, fw);
   else if(IS_PKE_CMD(cmd, STCYCL))
     pke_code_stcycl(me, fw);
+  else if(IS_PKE_CMD(cmd, FLUSHE))
+    pke_code_flushe(me, fw);
+  else if(me->pke_number == 1 && IS_PKE_CMD(cmd, FLUSH))
+    pke_code_flush(me, fw);
+  else if(me->pke_number == 1 && IS_PKE_CMD(cmd, FLUSHA))
+    pke_code_flusha(me, fw);
+  else if(IS_PKE_CMD(cmd, DIRECT))
+    pke_code_direct(me, fw);
+  else if(IS_PKE_CMD(cmd, DIRECTHL))
+    pke_code_directhl(me, fw);
   else if(me->pke_number == 1 && IS_PKE_CMD(cmd, OFFSET))
     pke_code_offset(me, fw);
   else if(me->pke_number == 1 && IS_PKE_CMD(cmd, BASE))
@@ -667,22 +711,8 @@ pke_issue(SIM_DESC sd, struct pke_device* me)
     pke_code_itop(me, fw);
   else if(IS_PKE_CMD(cmd, STMOD))
     pke_code_stmod(me, fw);
-  else if(me->pke_number == 1 && IS_PKE_CMD(cmd, MSKPATH3))
-    pke_code_mskpath3(me, fw);
   else if(IS_PKE_CMD(cmd, PKEMARK))
     pke_code_pkemark(me, fw);
-  else if(IS_PKE_CMD(cmd, FLUSHE))
-    pke_code_flushe(me, fw);
-  else if(me->pke_number == 1 && IS_PKE_CMD(cmd, FLUSH))
-    pke_code_flush(me, fw);
-  else if(me->pke_number == 1 && IS_PKE_CMD(cmd, FLUSHA))
-    pke_code_flusha(me, fw);
-  else if(IS_PKE_CMD(cmd, PKEMSCAL))
-    pke_code_pkemscal(me, fw);
-  else if(IS_PKE_CMD(cmd, PKEMSCNT))
-    pke_code_pkemscnt(me, fw);
-  else if(me->pke_number == 1 && IS_PKE_CMD(cmd, PKEMSCALF))
-    pke_code_pkemscalf(me, fw);
   else if(IS_PKE_CMD(cmd, STMASK))
     pke_code_stmask(me, fw);
   else if(IS_PKE_CMD(cmd, STROW))
@@ -691,12 +721,8 @@ pke_issue(SIM_DESC sd, struct pke_device* me)
     pke_code_stcol(me, fw);
   else if(IS_PKE_CMD(cmd, MPG))
     pke_code_mpg(me, fw);
-  else if(IS_PKE_CMD(cmd, DIRECT))
-    pke_code_direct(me, fw);
-  else if(IS_PKE_CMD(cmd, DIRECTHL))
-    pke_code_directhl(me, fw);
-  else if(IS_PKE_CMD(cmd, UNPACK))
-    pke_code_unpack(me, fw);
+  else if(me->pke_number == 1 && IS_PKE_CMD(cmd, MSKPATH3))
+    pke_code_mskpath3(me, fw);
   else if(cmd == TXVU_VIF_BRK_MASK)
     {
       sim_cpu *cpu = STATE_CPU (sd, 0);
@@ -1194,6 +1220,16 @@ void
 pke_code_nop(struct pke_device* me, unsigned_4 pkecode)
 {
   /* done */
+  if(me->trace_file != NULL)
+    {
+      fprintf(me->trace_file, 
+	      "\n; %s PC %d/%d\n"
+	      "\tDmaCnt *\n"
+	      "\tVIFNOP%s\n"
+	      "\t.EndDmaData\n",
+	      me->dev.name, me->fifo_pc, me->qw_pc,
+	      (BIT_MASK_GET(pkecode, PKE_OPCODE_I_B, PKE_OPCODE_I_E) ? "[i]" : ""));
+    }
   pke_pc_advance(me, 1);
   PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_IDLE);
 }
@@ -1208,6 +1244,17 @@ pke_code_stcycl(struct pke_device* me, unsigned_4 pkecode)
   PKE_REG_MASK_SET(me, CYCLE, WL, BIT_MASK_GET(imm, 8, 15));
   PKE_REG_MASK_SET(me, CYCLE, CL, BIT_MASK_GET(imm, 0, 7));
   /* done */
+  if(me->trace_file != NULL)
+    {
+      fprintf(me->trace_file, 
+	      "\n; %s PC %d/%d\n"
+	      "\tDmaCnt *\n"
+	      "\tSTCYCL%s %d,%d\n"
+	      "\t.EndDmaData\n",
+	      me->dev.name, me->fifo_pc, me->qw_pc,
+	      (BIT_MASK_GET(pkecode, PKE_OPCODE_I_B, PKE_OPCODE_I_E) ? "[i]" : ""),
+	      BIT_MASK_GET(imm, 8, 15), BIT_MASK_GET(imm, 0, 7));
+    }
   pke_pc_advance(me, 1);
   PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_IDLE);
 }
@@ -1227,6 +1274,17 @@ pke_code_offset(struct pke_device* me, unsigned_4 pkecode)
   /* set TOPS = BASE */
   PKE_REG_MASK_SET(me, TOPS, TOPS, PKE_REG_MASK_GET(me, BASE, BASE));
   /* done */
+  if(me->trace_file != NULL)
+    {
+      fprintf(me->trace_file, 
+	      "\n; %s PC %d/%d\n"
+	      "\tDmaCnt *\n"
+	      "\tOFFSET%s 0x%x\n"
+	      "\t.EndDmaData\n",
+	      me->dev.name, me->fifo_pc, me->qw_pc,
+	      (BIT_MASK_GET(pkecode, PKE_OPCODE_I_B, PKE_OPCODE_I_E) ? "[i]" : ""),
+	      imm);
+    }
   pke_pc_advance(me, 1);
   PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_IDLE);
 }
@@ -1240,6 +1298,17 @@ pke_code_base(struct pke_device* me, unsigned_4 pkecode)
   /* copy 10 bits to BASE field */
   PKE_REG_MASK_SET(me, BASE, BASE, BIT_MASK_GET(imm, 0, 9));
   /* done */
+  if(me->trace_file != NULL)
+    {
+      fprintf(me->trace_file, 
+	      "\n; %s PC %d/%d\n"
+	      "\tDmaCnt *\n"
+	      "\tBASE%s 0x%x\n"
+	      "\t.EndDmaData\n",
+	      me->dev.name, me->fifo_pc, me->qw_pc,
+	      (BIT_MASK_GET(pkecode, PKE_OPCODE_I_B, PKE_OPCODE_I_E) ? "[i]" : ""),
+	      imm);
+    }
   pke_pc_advance(me, 1);
   PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_IDLE);
 }
@@ -1253,6 +1322,17 @@ pke_code_itop(struct pke_device* me, unsigned_4 pkecode)
   /* copy 10 bits to ITOPS field */
   PKE_REG_MASK_SET(me, ITOPS, ITOPS, BIT_MASK_GET(imm, 0, 9));
   /* done */
+  if(me->trace_file != NULL)
+    {
+      fprintf(me->trace_file, 
+	      "\n; %s PC %d/%d\n"
+	      "\tDmaCnt *\n"
+	      "\tITOP%s 0x%x\n"
+	      "\t.EndDmaData\n",
+	      me->dev.name, me->fifo_pc, me->qw_pc,
+	      (BIT_MASK_GET(pkecode, PKE_OPCODE_I_B, PKE_OPCODE_I_E) ? "[i]" : ""),
+	      imm);
+    }
   pke_pc_advance(me, 1);
   PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_IDLE);
 }
@@ -1264,8 +1344,25 @@ pke_code_stmod(struct pke_device* me, unsigned_4 pkecode)
   int imm = BIT_MASK_GET(pkecode, PKE_OPCODE_IMM_B, PKE_OPCODE_IMM_E);
 
   /* copy 2 bits to MODE register */
-  PKE_REG_MASK_SET(me, MODE, MDE, BIT_MASK_GET(imm, 0, 2));
+  PKE_REG_MASK_SET(me, MODE, MDE, BIT_MASK_GET(imm, 0, 1));
   /* done */
+  if(me->trace_file != NULL)
+    {
+      char* mode;
+      if(BIT_MASK_GET(imm, 0, 1) == 0) mode = "direct";
+      else if(BIT_MASK_GET(imm, 0, 1) == 1) mode = "add";
+      else if(BIT_MASK_GET(imm, 0, 1) == 2) mode = "addrow";
+      else mode = "3"; /* invalid mode */
+
+      fprintf(me->trace_file, 
+	      "\n; %s PC %d/%d\n"
+	      "\tDmaCnt *\n"
+	      "\tSTMOD%s %s\n"
+	      "\t.EndDmaData\n",
+	      me->dev.name, me->fifo_pc, me->qw_pc,
+	      (BIT_MASK_GET(pkecode, PKE_OPCODE_I_B, PKE_OPCODE_I_E) ? "[i]" : ""),
+	      mode);
+    }
   pke_pc_advance(me, 1);
   PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_IDLE);
 }
@@ -1287,6 +1384,17 @@ pke_code_mskpath3(struct pke_device* me, unsigned_4 pkecode)
   PKE_MEM_WRITE(me, GIF_REG_VIF_M3P, & gif_mode, 4);
 
   /* done */
+  if(me->trace_file != NULL)
+    {
+      fprintf(me->trace_file, 
+	      "\n; %s PC %d/%d\n"
+	      "\tDmaCnt *\n"
+	      "\tMSKPATH3%s %s\n"
+	      "\t.EndDmaData\n",
+	      me->dev.name, me->fifo_pc, me->qw_pc,
+	      (BIT_MASK_GET(pkecode, PKE_OPCODE_I_B, PKE_OPCODE_I_E) ? "[i]" : ""),
+	      (gif_mode ? "disable" : "enable"));
+    }
   pke_pc_advance(me, 1);
   PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_IDLE);
 }
@@ -1301,6 +1409,17 @@ pke_code_pkemark(struct pke_device* me, unsigned_4 pkecode)
   /* set MRK bit in STAT register - CPU2 v2.1 docs incorrect */
   PKE_REG_MASK_SET(me, STAT, MRK, 1);
   /* done */
+  if(me->trace_file != NULL)
+    {
+      fprintf(me->trace_file, 
+	      "\n; %s PC %d/%d\n"
+	      "\tDmaCnt *\n"
+	      "\tMARK%s 0x%x\n"
+	      "\t.EndDmaData\n",
+	      me->dev.name, me->fifo_pc, me->qw_pc,
+	      (BIT_MASK_GET(pkecode, PKE_OPCODE_I_B, PKE_OPCODE_I_E) ? "[i]" : ""),
+	      imm);
+    }
   pke_pc_advance(me, 1);
   PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_IDLE);
 }
@@ -1322,6 +1441,16 @@ pke_code_flushe(struct pke_device* me, unsigned_4 pkecode)
       /* VU idle */
       PKE_REG_MASK_SET(me, STAT, PEW, 0);
       PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_IDLE);
+      if(me->trace_file != NULL)
+	{
+	  fprintf(me->trace_file, 
+		  "\n; %s PC %d/%d\n"
+		  "\tDmaCnt *\n"
+		  "\tFLUSHE%s\n"
+		  "\t.EndDmaData\n",
+		  me->dev.name, me->fifo_pc, me->qw_pc,
+		  (BIT_MASK_GET(pkecode, PKE_OPCODE_I_B, PKE_OPCODE_I_E) ? "[i]" : ""));
+	}
       pke_pc_advance(me, 1);
     }
 }
@@ -1361,6 +1490,16 @@ pke_code_flush(struct pke_device* me, unsigned_4 pkecode)
     {
       /* all idle */
       PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_IDLE);
+      if(me->trace_file != NULL)
+	{
+	  fprintf(me->trace_file, 
+		  "\n; %s PC %d/%d\n"
+		  "\tDmaCnt *\n"
+		  "\tFLUSH%s\n"
+		  "\t.EndDmaData\n",
+		  me->dev.name, me->fifo_pc, me->qw_pc,
+		  (BIT_MASK_GET(pkecode, PKE_OPCODE_I_B, PKE_OPCODE_I_E) ? "[i]" : ""));
+	}
       pke_pc_advance(me, 1);
     }
 }
@@ -1400,6 +1539,16 @@ pke_code_flusha(struct pke_device* me, unsigned_4 pkecode)
     {
       /* all idle */
       PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_IDLE);
+      if(me->trace_file != NULL)
+	{
+	  fprintf(me->trace_file, 
+		  "\n; %s PC %d/%d\n"
+		  "\tDmaCnt *\n"
+		  "\tFLUSHA%s\n"
+		  "\t.EndDmaData\n",
+		  me->dev.name, me->fifo_pc, me->qw_pc,
+		  (BIT_MASK_GET(pkecode, PKE_OPCODE_I_B, PKE_OPCODE_I_E) ? "[i]" : ""));
+	}
       pke_pc_advance(me, 1);
     }
 }
@@ -1443,6 +1592,17 @@ pke_code_pkemscal(struct pke_device* me, unsigned_4 pkecode)
 
       /* done */
       PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_IDLE);
+      if(me->trace_file != NULL)
+	{
+	  fprintf(me->trace_file, 
+		  "\n; %s PC %d/%d\n"
+		  "\tDmaCnt *\n"
+		  "\tMSCAL%s 0x%x\n"
+		  "\t.EndDmaData\n",
+		  me->dev.name, me->fifo_pc, me->qw_pc,
+		  (BIT_MASK_GET(pkecode, PKE_OPCODE_I_B, PKE_OPCODE_I_E) ? "[i]" : ""),
+		  imm);
+	}
       pke_pc_advance(me, 1);
     }
 }
@@ -1488,6 +1648,15 @@ pke_code_pkemscnt(struct pke_device* me, unsigned_4 pkecode)
 
       /* done */
       PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_IDLE);
+      if(me->trace_file != NULL)
+	{
+	  fprintf(me->trace_file, 
+		  "\n; %s PC %d/%d\n"
+		  "\tDmaCnt *\n"
+		  "\tMSCNT\n"
+		  "\t.EndDmaData\n",
+		  me->dev.name, me->fifo_pc, me->qw_pc);
+	}
       pke_pc_advance(me, 1);
     }
 }
@@ -1548,6 +1717,16 @@ pke_code_pkemscalf(struct pke_device* me, unsigned_4 pkecode)
 
       /* done */
       PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_IDLE);
+      if(me->trace_file != NULL)
+	{
+	  fprintf(me->trace_file, 
+		  "\n; %s PC %d/%d\n"
+		  "\tDmaCnt *\n"
+		  "\tMSCALF 0x%x\n"
+		  "\t.EndDmaData\n",
+		  me->dev.name, me->fifo_pc, me->qw_pc,
+		  imm);
+	}
       pke_pc_advance(me, 1);
     }
 }
@@ -1576,6 +1755,16 @@ pke_code_stmask(struct pke_device* me, unsigned_4 pkecode)
 
       /* done */
       PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_IDLE);
+      if(me->trace_file != NULL)
+	{
+	  fprintf(me->trace_file, 
+		  "\n; %s PC %d/%d\n"
+		  "\tDmaCnt *\n"
+		  "\tSTMASK 0x%x\n"
+		  "\t.EndDmaData\n",
+		  me->dev.name, me->fifo_pc, me->qw_pc,
+		  *mask);
+	}
       pke_pc_advance(me, 2);
     }
   else
@@ -1613,6 +1802,19 @@ pke_code_strow(struct pke_device* me, unsigned_4 pkecode)
 
       /* done */
       PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_IDLE);
+      if(me->trace_file != NULL)
+	{
+	  fprintf(me->trace_file, 
+		  "\n; %s PC %d/%d\n"
+		  "\tDmaCnt *\n"
+		  "\tSTROW 0x%x,0x%x,0x%x,0x%x\n"
+		  "\t.EndDmaData\n",
+		  me->dev.name, me->fifo_pc, me->qw_pc,
+		  * pke_pcrel_operand(me, 1),
+		  * pke_pcrel_operand(me, 2),
+		  * pke_pcrel_operand(me, 3),
+		  * pke_pcrel_operand(me, 4));
+	}
       pke_pc_advance(me, 5);
     }
   else
@@ -1650,6 +1852,19 @@ pke_code_stcol(struct pke_device* me, unsigned_4 pkecode)
 
       /* done */
       PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_IDLE);
+      if(me->trace_file != NULL)
+	{
+	  fprintf(me->trace_file, 
+		  "\n; %s PC %d/%d\n"
+		  "\tDmaCnt *\n"
+		  "\tSTCOL 0x%x,0x%x,0x%x,0x%x\n"
+		  "\t.EndDmaData\n",
+		  me->dev.name, me->fifo_pc, me->qw_pc,
+		  * pke_pcrel_operand(me, 1),
+		  * pke_pcrel_operand(me, 2),
+		  * pke_pcrel_operand(me, 3),
+		  * pke_pcrel_operand(me, 4));
+	}
       pke_pc_advance(me, 5);
     }
   else
@@ -1696,6 +1911,17 @@ pke_code_mpg(struct pke_device* me, unsigned_4 pkecode)
           
           /* set NUM */
           PKE_REG_MASK_SET(me, NUM, NUM, num);
+
+	  /* disassembly */
+	  if(me->trace_file != NULL)
+	    {
+	      fprintf(me->trace_file, 
+		      "\n; %s PC %d/%d\n"
+		      "\tDmaCnt *\n"
+		      "\tMPG 0x%x,0x%x\n",
+		      me->dev.name, me->fifo_pc, me->qw_pc,
+		      imm, num);
+	    }
 
           /* transfer VU instructions, one word-pair per iteration */
           for(i=0; i<num; i++)
@@ -1761,6 +1987,15 @@ pke_code_mpg(struct pke_device* me, unsigned_4 pkecode)
               PKE_MEM_WRITE(me, vutrack_addr,
                             & source_addr,
                             4);
+
+	      /* disassembly */
+	      if(me->trace_file != NULL)
+		{
+		  unsigned long opcodes[2] = { vu_upper_opcode, vu_lower_opcode };
+		  fprintf(me->trace_file, "\t");
+		  opcode_analyze(me->trace_file, opcodes);
+		  fprintf(me->trace_file, "\n");
+		}
             } /* VU xfer loop */
 
           /* check NUM */
@@ -1768,6 +2003,12 @@ pke_code_mpg(struct pke_device* me, unsigned_4 pkecode)
           
           /* done */
           PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_IDLE);
+	  if(me->trace_file != NULL)
+	    {
+	      fprintf(me->trace_file, 
+		      "\t.EndMpg\n"
+		      "\t.EndDmaData\n");
+	    }
           pke_pc_advance(me, 1 + num*2);
         }
     } /* if FIFO full enough */
@@ -1803,6 +2044,18 @@ pke_code_direct(struct pke_device* me, unsigned_4 pkecode)
       
       /* "transferring" operand */
       PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_XFER);
+
+      /* disassembly */
+      if(me->trace_file != NULL)
+	{
+	  fprintf(me->trace_file, 
+		  "\n; %s PC %d/%d\n"
+		  "\tDmaCnt *\n"
+		  "\t%s 0x%x\n",
+		  me->dev.name, me->fifo_pc, me->qw_pc,
+		  (IS_PKE_CMD(pkecode, DIRECT) ? "DIRECT" : "DIRECTHL"),
+		  imm);
+	}
       
       /* transfer GPUIF quadwords, one word per iteration */
       for(i=0; i<imm*4; i++)
@@ -1819,11 +2072,25 @@ pke_code_direct(struct pke_device* me, unsigned_4 pkecode)
               PKE_MEM_WRITE(me, GIF_PATH2_FIFO_ADDR,
                             & fifo_data,
                             16);
+	      
+	      /* disassembly */
+	      if(me->trace_file != NULL)
+		{
+		  char buffer[200]; /* one line of disassembly */
+		  gif_disassemble_pke_data(buffer, (quadword*) &fifo_data);
+		  fprintf(me->trace_file, "\t%s\n", buffer);
+		}
             } /* write collected quadword */
         } /* GPUIF xfer loop */
       
       /* done */
       PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_IDLE);
+      if(me->trace_file != NULL)
+	{
+	  fprintf(me->trace_file, 
+		  "\t.EndDirect\n"
+		  "\t.EndDmaData\n");
+	}
       pke_pc_advance(me, 1 + imm*4);
     } /* if FIFO full enough */
   else
@@ -1838,8 +2105,9 @@ pke_code_direct(struct pke_device* me, unsigned_4 pkecode)
 void
 pke_code_directhl(struct pke_device* me, unsigned_4 pkecode)
 {
-  /* treat the same as DIRECTH */
+  /* treat the same as DIRECT */
   pke_code_direct(me, pkecode);
+  /* dissassembly code handles DIRECT/DIRECTHL overloading */
 }
 
 
@@ -1887,6 +2155,32 @@ pke_code_unpack(struct pke_device* me, unsigned_4 pkecode)
       
       /* "transferring" operand */
       PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_XFER);
+
+      /* disassembly */
+      if(me->trace_file != NULL)
+	{
+	  char unpack_type[8];
+	  char flags[8];
+	  sprintf(flags,"[%s%s%s%s]",
+		  (m ? "m" : ""),
+		  (usn ? "u" : ""),		  
+		  (r ? "r" : ""),		  
+		  (BIT_MASK_GET(pkecode, PKE_OPCODE_I_B, PKE_OPCODE_I_E) ? "i" : ""));
+	  if(vn > 0)
+	    sprintf(unpack_type, "V%d_%d",
+		    (vn + 1),
+		    (vl == 3 ? 5 : (32 >> vl)));
+	  else
+	    sprintf(unpack_type, "S_%d",
+		    (vl == 3 ? 5 : (32 >> vl)));
+	    
+	  fprintf(me->trace_file, 
+		  "\n; %s PC %d/%d\n"
+		  "\tDmaCnt *\n"
+		  "\tUNPACK%s %s,0x%x,0x%x\n",
+		  me->dev.name, me->fifo_pc, me->qw_pc,
+		  flags, unpack_type, imm, num);
+	}
       
       /* don't check whether VU is idle */
 
@@ -1975,6 +2269,12 @@ pke_code_unpack(struct pke_device* me, unsigned_4 pkecode)
               /* compute packed vector dimensions */
               int vectorbits = 0, unitbits = 0;
 
+	      /* disassembly */
+	      if(me->trace_file != NULL)
+		 {
+		   fprintf(me->trace_file, "\t; unpack input row %d\n", vector_num_in);
+		 }
+
               if(vl < 3) /* PKE_UNPACK_*_{32,16,8} */
                 {
                   unitbits = (32 >> vl);
@@ -2018,12 +2318,36 @@ pke_code_unpack(struct pke_device* me, unsigned_4 pkecode)
                   /* fetch bitfield operand */
                   operand = pke_pcrel_operand_bits(me, bitoffset, unitbits, & source_addr);
 
+		  /* disassemble */
+		  if(me->trace_file != NULL && vl < 3) /* not for V4_5 */
+		    {
+		      char* data_size;
+		      if(vl == 0) data_size=".word";
+		      else if(vl == 1) data_size=".short";
+		      else if(vl == 2) data_size=".byte";
+		      else data_size = "<invalid>";
+
+		      fprintf(me->trace_file, "\t%s 0x%x\n", data_size, operand);
+		    }
+
                   /* selectively sign-extend; not for V4_5 1-bit value */
                   if(usn || unitbits == 1)
                     unpacked_data[i] = operand;
                   else
                     unpacked_data[i] = SEXT32(operand, unitbits-1);
                 }
+
+	      /* disassemble */
+	      if(me->trace_file != NULL && vl == 3) /* only for V4_5 */
+		{
+		  unsigned short operand =
+		    ((unpacked_data[0] & 0x1f) << 0) |
+		    ((unpacked_data[1] & 0x1f) << 5) |
+		    ((unpacked_data[2] & 0x1f) << 10) |		    
+		    ((unpacked_data[3] & 0x1) << 15);
+		  
+		  fprintf(me->trace_file, "\t.short 0x%x\n", operand);
+		}
 
               /* set remaining top words in vector */
               for(i=vn+1; i<4; i++)
@@ -2136,6 +2460,12 @@ pke_code_unpack(struct pke_device* me, unsigned_4 pkecode)
 
       /* done */
       PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_IDLE);
+      if(me->trace_file != NULL)
+	{
+	  fprintf(me->trace_file, 
+		  "\t.EndUnpack\n"
+		  "\t.EndDmaData\n");
+	}
       pke_pc_advance(me, 1 + num_operands);
     } /* PKE FIFO full enough */
   else
@@ -2161,6 +2491,17 @@ pke_code_error(struct pke_device* me, unsigned_4 pkecode)
   else
     {
       PKE_REG_MASK_SET(me, STAT, PPS, PKE_REG_STAT_PPS_IDLE);
+    }
+
+  if(me->trace_file != NULL)
+    {
+      fprintf(me->trace_file, 
+	      "\n; %s PC %d/%d\n"
+	      "\tDmaCnt *\n"
+	      "\t.word 0x%x\n"
+	      "\t.EndDmaData\n",
+	      me->dev.name, me->fifo_pc, me->qw_pc,
+	      (long) pkecode);
     }
 
   /* advance over faulty word */
@@ -2189,6 +2530,9 @@ pke_options(struct pke_device *me, unsigned_4 option, char *option_string)
     case SKY_OPT_TRACE_NAME:
       if ( me->trace_file != NULL ) 
         {
+	  fprintf(me->trace_file,
+		  "\n\n\tDmaEnd 0\n"
+		  "\t.EndDmaData\n");
           fclose (me->trace_file);
           me->trace_file = NULL;
         }
@@ -2202,9 +2546,16 @@ pke_options(struct pke_device *me, unsigned_4 option, char *option_string)
    
     case SKY_OPT_CLOSE:
       if (me->trace_file != NULL) 
-        fclose (me->trace_file);
+	{
+	  fprintf(me->trace_file,
+		  "\n\n\tDmaEnd 0\n"
+		  "\t.EndDmaData\n");
+	  fclose(me->trace_file);
+	  me->trace_file = NULL;
+	}
       if (me->fifo_trace_file != NULL ) 
         fclose (me->fifo_trace_file);
+      me->fifo_trace_file = NULL;
       break;
 
     default: 

@@ -9,17 +9,22 @@
 
 /* External functions */
 
+struct pke_fifo;
+struct fifo_quadword;
+struct pke_device;
+
 void pke0_attach(SIM_DESC sd);
 void pke0_issue(SIM_DESC sd);
 void pke1_attach(SIM_DESC sd);
 void pke1_issue(SIM_DESC sd);
 
-
-/* structs declared below */
-struct pke_fifo;
-struct fifo_quadword;
-
+void pke_options(struct pke_device *device, unsigned_4 option, char *option_string);
+int read_pke_reg (struct pke_device *device, int regno, void *buf);
+int write_pke_reg (struct pke_device *device, int regno, const void *buf);
+int read_pke_pc (struct pke_device *device, void *buf);
+int read_pke_pcx (struct pke_device *device, void *buf);
 struct fifo_quadword* pke_fifo_access(struct pke_fifo*, unsigned_4 qwnum);
+
 
 /* Quadword data type */
 
@@ -391,6 +396,7 @@ typedef struct pke_fifo
 #define PKE_FIFO_ARCHEOLOGY 1000 /* number of old quadwords to keep as history */
 
 
+
 /* PKE internal state: FIFOs, registers, handle to VU friend */
 struct pke_device
 {
@@ -424,19 +430,15 @@ struct pke_device
   int fifo_pc;  /* 0 .. (fifo_num_elements-1): quadword index of next instruction */
   int qw_pc;    /* 0 .. 3:                     word index of next instruction */
 
-  /* Disassembly - file name and descriptor  */
+  /* Disassembly state */
   FILE *trace_file;
   char *trace_file_name;
-  
 };
+
 
 extern struct pke_device pke0_device;
 extern struct pke_device pke1_device;
 
-int read_pke_reg (struct pke_device *device, int regno, void *buf);
-int write_pke_reg (struct pke_device *device, int regno, const void *buf);
-int read_pke_pc (struct pke_device *device, void *buf);
-int read_pke_pcx (struct pke_device *device, void *buf);
 
 
 /* Flags for PKE.flags */
@@ -489,6 +491,5 @@ int read_pke_pcx (struct pke_device *device, void *buf);
            } \
         } while(0)      
 
-void pke_options (struct pke_device *device, unsigned_4 option, char *option_string);
 
 #endif /* H_PKE_H */
