@@ -4933,12 +4933,12 @@ There are cases where it may make sense to use this in objects to be bound
 into an application itself so as to override a versioned symbol from a
 shared library.
 
-For ELF targets, the @code{.symver} directive is used like this:
+For ELF targets, the @code{.symver} directive can be used like this:
 @smallexample
 .symver @var{name}, @var{name2@@nodename}
 @end smallexample
 If the symbol @var{name} is defined within the file
-being assembled, the @code{.versym} directive effectively creates a symbol
+being assembled, the @code{.symver} directive effectively creates a symbol
 alias with the name @var{name2@@nodename}, and in fact the main reason that we
 just don't try and create a regular alias is that the @var{@@} character isn't
 permitted in symbol names.  The @var{name2} part of the name is the actual name
@@ -4956,6 +4956,24 @@ If the symbol @var{name} is not defined within the file being assembled, all
 references to @var{name} will be changed to @var{name2@@nodename}.  If no
 reference to @var{name} is made, @var{name2@@nodename} will be removed from the
 symbol table.
+
+Another usage of the @code{.symver} directive is:
+@smallexample
+.symver @var{name}, @var{name2@@@@nodename}
+@end smallexample
+In this case, the symbol @var{name} must exist and be defined within
+the file being assembled. It is similiar to @var{name2@@nodename}. The
+difference is @var{name2@@@@nodename} will also be used to resolve
+references to @var{name2} by the linker.
+
+The third usage of the @code{.symver} directive is:
+@smallexample
+.symver @var{name}, @var{name2@@@@@@nodename}
+@end smallexample
+When @var{name} is not defined within the
+file being assembled, it is treated as @var{name2@@nodename}. When
+@var{name} is defined within the file being assembled, the symbol
+name, @var{name}, will be changed to @var{name2@@@@nodename}.
 @end ifset
 
 @ifset COFF

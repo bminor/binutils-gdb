@@ -1,3 +1,13 @@
+2000-11-13  H.J. Lu  <hjl@gnu.org>
+
+	* config/obj-elf.c (elf_frob_symbol): Support
+	".symver name,name2@@@nodename".
+	(elf_frob_file_before_adjust): Likewise.
+
+	* doc/as.texinfo: Updated for ".symver name,name2@@@nodename"
+	and ".symver name,name2@@@nodename".
+	Fix a typo.
+
 2000-11-12  H.J. Lu  (hjl@gnu.org)
 
 	* config/obj-elf.c (obj_elf_symver): Check missing version

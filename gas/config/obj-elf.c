@@ -1658,6 +1658,11 @@ elf_frob_symbol (symp, puntp)
 
   if (sy_obj->versioned_name != NULL)
     {
+      char *p;
+
+      p = strchr (sy_obj->versioned_name, ELF_VER_CHR);
+      know (p != NULL);
+
       /* This symbol was given a new name with the .symver directive.
 
          If this is an external reference, just rename the symbol to
@@ -1671,13 +1676,9 @@ elf_frob_symbol (symp, puntp)
 
       if (! S_IS_DEFINED (symp))
 	{
-	  char *p;
-
 	  /* Verify that the name isn't using the @@ syntax--this is
              reserved for definitions of the default version to link
              against.  */
-	  p = strchr (sy_obj->versioned_name, ELF_VER_CHR);
-	  know (p != NULL);
 	  if (p[1] == ELF_VER_CHR)
 	    {
 	      as_bad (_("invalid attempt to declare external version name as default in symbol `%s'"),
@@ -1688,36 +1689,50 @@ elf_frob_symbol (symp, puntp)
 	}
       else
 	{
-	  symbolS *symp2;
+	  if (p [1] == ELF_VER_CHR && p [2] == ELF_VER_CHR)
+	    {
+	      size_t l;
 
-	  /* FIXME: Creating a new symbol here is risky.  We're in the
-             final loop over the symbol table.  We can get away with
-             it only because the symbol goes to the end of the list,
-             where the loop will still see it.  It would probably be
-             better to do this in obj_frob_file_before_adjust.  */
+	      /* The @@@ syntax is a special case. It renames the
+		 symbol name to versioned_name with one `@' removed.  */
+	      l = strlen (&p[3]) + 1;
+	      memmove (&p [2], &p[3], l);
+	      S_SET_NAME (symp, sy_obj->versioned_name);
+	    }
+	  else
+	    {
+	      symbolS *symp2;
 
-	  symp2 = symbol_find_or_make (sy_obj->versioned_name);
+	      /* FIXME: Creating a new symbol here is risky.  We're
+		 in the final loop over the symbol table.  We can
+		 get away with it only because the symbol goes to
+		 the end of the list, where the loop will still see
+		 it.  It would probably be better to do this in
+		 obj_frob_file_before_adjust.  */
 
-	  /* Now we act as though we saw symp2 = sym.  */
+	      symp2 = symbol_find_or_make (sy_obj->versioned_name);
 
-	  S_SET_SEGMENT (symp2, S_GET_SEGMENT (symp));
+	      /* Now we act as though we saw symp2 = sym.  */
 
-	  /* Subtracting out the frag address here is a hack because
-             we are in the middle of the final loop.  */
-	  S_SET_VALUE (symp2,
-		       (S_GET_VALUE (symp)
-			- symbol_get_frag (symp)->fr_address));
+	      S_SET_SEGMENT (symp2, S_GET_SEGMENT (symp));
 
-	  symbol_set_frag (symp2, symbol_get_frag (symp));
+	      /* Subtracting out the frag address here is a hack
+		 because we are in the middle of the final loop.  */
+	      S_SET_VALUE (symp2,
+			   (S_GET_VALUE (symp)
+			    - symbol_get_frag (symp)->fr_address));
 
-	  /* This will copy over the size information.  */
-	  copy_symbol_attributes (symp2, symp);
+	      symbol_set_frag (symp2, symbol_get_frag (symp));
 
-	  if (S_IS_WEAK (symp))
-	    S_SET_WEAK (symp2);
+	      /* This will copy over the size information.  */
+	      copy_symbol_attributes (symp2, symp);
 
-	  if (S_IS_EXTERNAL (symp))
-	    S_SET_EXTERNAL (symp2);
+	      if (S_IS_WEAK (symp))
+		S_SET_WEAK (symp2);
+
+	      if (S_IS_EXTERNAL (symp))
+		S_SET_EXTERNAL (symp2);
+	    }
 	}
     }
 
@@ -1778,11 +1793,29 @@ elf_frob_file_before_adjust ()
       symbolS *symp;
 
       for (symp = symbol_rootP; symp; symp = symbol_next (symp))
-	if (symbol_get_obj (symp)->versioned_name
-	    && !S_IS_DEFINED (symp)
-	    && symbol_used_p (symp) == 0
-	    && symbol_used_in_reloc_p (symp) == 0)
-	  symbol_remove (symp, &symbol_rootP, &symbol_lastP);
+	if (symbol_get_obj (symp)->versioned_name)
+	  {
+	    if (!S_IS_DEFINED (symp))
+	      {
+		char *p;
+
+		/* The @@@ syntax is a special case. If the symbol is
+		   not defined, 2 `@'s will be removed from the
+		   versioned_name.  */
+
+		p = strchr (symbol_get_obj (symp)->versioned_name,
+			    ELF_VER_CHR);
+		know (p != NULL);
+		if (p [1] == ELF_VER_CHR && p [2] == ELF_VER_CHR)
+		  {
+		    size_t l = strlen (&p[3]) + 1;
+		    memmove (&p [1], &p[3], l);
+		  }
+		if (symbol_used_p (symp) == 0
+		    && symbol_used_in_reloc_p (symp) == 0)
+		  symbol_remove (symp, &symbol_rootP, &symbol_lastP);
+	      }
+	  }
     }
 }
 
