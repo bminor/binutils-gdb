@@ -1,3 +1,10 @@
+2000-06-12  Bill Nottingham <notting@redhat.com>
+
+	Patch applied by Kevin Buettner <kevinb@redhat.com>:
+
+	* ia64-linux-nat.c, gdbserver/low-linux.c (u_offsets):  PT_CR_IFS
+	is deprecated.  Use PT_CFM instead.
+
 2000-06-12  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* breakpoint.c (breakpoint_thread_match): Fix comment.

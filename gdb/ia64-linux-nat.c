@@ -236,7 +236,7 @@ static int u_offsets[] =
     PT_PR,
     PT_CR_IIP,	/* ip */
     PT_CR_IPSR, /* psr */
-    PT_CR_IFS,	/* cfm */
+    PT_CFM,	/* cfm */
     /* kernel registers not visible via ptrace interface (?) */
     -1, -1, -1, -1, -1, -1, -1, -1,
     /* hole */
