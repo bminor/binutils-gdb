@@ -16,7 +16,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #if !defined (TARGET_H)
 #define TARGET_H
@@ -291,6 +291,7 @@ struct target_ops
   void 	      (*to_mourn_inferior) PARAMS ((void));
   int	      (*to_can_run) PARAMS ((void));
   void	      (*to_notice_signals) PARAMS ((int pid));
+  int	      (*to_thread_alive) PARAMS ((int pid));
   void	      (*to_stop) PARAMS ((void));
   enum strata   to_stratum;
   struct target_ops
@@ -549,6 +550,11 @@ print_section_info PARAMS ((struct target_ops *, bfd *));
 #define target_notice_signals(pid) \
   	(*current_target.to_notice_signals) (pid)
 
+/* Check to see if a thread is still alive.  */
+
+#define target_thread_alive(pid) \
+	(*current_target.to_thread_alive) (pid)
+
 /* Make target stop in a continuable fashion.  (For instance, under Unix, this
    should act like SIGSTOP).  This function is normally used by GUIs to
    implement a stop button.  */
@@ -605,6 +611,23 @@ extern void target_link PARAMS ((char *, CORE_ADDR *));
 extern char *normal_pid_to_str PARAMS ((int pid));
 #endif
 
+#ifndef target_new_objfile
+#define target_new_objfile(OBJFILE)
+#endif
+
+/* Hook to call target-dependant code after reading in a new symbol table. */
+
+#ifndef TARGET_SYMFILE_POSTREAD
+#define TARGET_SYMFILE_POSTREAD(OBJFILE)
+#endif
+
+/* Hook to call target dependant code just after inferior target process has
+   started.  */
+
+#ifndef TARGET_CREATE_INFERIOR_HOOK
+#define TARGET_CREATE_INFERIOR_HOOK(PID)
+#endif
+
 /* Hardware watchpoint interfaces.  */
 
 /* Returns non-zero if we were stopped by a hardware watchpoint (memory read or
@@ -612,6 +635,42 @@ extern char *normal_pid_to_str PARAMS ((int pid));
 
 #ifndef STOPPED_BY_WATCHPOINT
 #define STOPPED_BY_WATCHPOINT(w) 0
+#endif
+
+/* Provide defaults for systems that don't support hardware watchpoints. */
+
+#ifndef TARGET_HAS_HARDWARE_WATCHPOINTS
+
+/* Returns non-zero if we can set a hardware watchpoint of type TYPE.  TYPE is
+   one of bp_hardware_watchpoint, bp_read_watchpoint, bp_write_watchpoint, or
+   bp_hardware_breakpoint.  CNT is the number of such watchpoints used so far
+   (including this one?).  OTHERTYPE is who knows what...  */
+
+#define TARGET_CAN_USE_HARDWARE_WATCHPOINT(TYPE,CNT,OTHERTYPE) 0
+
+/* Set/clear a hardware watchpoint starting at ADDR, for LEN bytes.  TYPE is 1
+   for read and 2 for read/write accesses.  Returns 0 for success, non-zero for
+   failure.  */
+
+#define target_remove_watchpoint(ADDR,LEN,TYPE) -1
+#define target_insert_watchpoint(ADDR,LEN,TYPE) -1
+
+#endif /* TARGET_HAS_HARDWARE_WATCHPOINTS */
+
+#ifndef target_insert_hw_breakpoint
+#define target_remove_hw_breakpoint(ADDR,SHADOW) -1
+#define target_insert_hw_breakpoint(ADDR,SHADOW) -1
+#endif
+
+#ifndef target_stopped_data_address
+#define target_stopped_data_address() 0
+#endif
+
+/* If defined, then we need to decr pc by this much after a hardware break-
+   point.  Presumably this overrides DECR_PC_AFTER_BREAK...  */
+
+#ifndef DECR_PC_AFTER_HW_BREAK
+#define DECR_PC_AFTER_HW_BREAK 0
 #endif
 
 /* Routines for maintenance of the target structures...
@@ -694,6 +753,8 @@ extern int remote_debug;
 
 /* Speed in bits per second, or -1 which means don't mess with the speed.  */
 extern int baud_rate;
+/* Timeout limit for response from target. */
+extern int remote_timeout;
 
 /* Functions for helping to write a native target.  */
 

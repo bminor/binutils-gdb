@@ -319,6 +319,10 @@ int server_command;
 
 int baud_rate = -1;
 
+/* Timeout limit for response from target. */
+
+int remote_timeout = 20;	/* Set default to 20 */
+
 /* Non-zero tells remote* modules to output debugging info.  */
 
 int remote_debug = 0;
@@ -3588,5 +3592,12 @@ using remote targets.", &setlist),
 		   "Set debugging of remote protocol.\n\
 When enabled, each packet sent or received with the remote target\n\
 is displayed.", &setlist),
+		     &showlist);
+
+  add_show_from_set (
+    add_set_cmd ("remotetimeout", no_class, var_integer, (char *)&remote_timeout,
+		   "Set timeout limit to wait for target to respond.\n\
+This value is used to set the time limit for gdb to wait for a response\n\
+from he target.", &setlist),
 		     &showlist);
 }

@@ -188,7 +188,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "gdbcmd.h"
 #include "objfiles.h"
 #include "gdb-stabs.h"
-#include "thread.h"
+#include "gdbthread.h"
 
 #include "dcache.h"
 
@@ -274,7 +274,9 @@ extern struct target_ops extended_remote_ops;	/* Forward decl */
    other form of hairy serial connection, I would think 2 seconds would
    be plenty.  */
 
-static int remote_timeout = 2;
+/* Changed to allow option to set timeout value.
+   was static int remote_timeout = 2; */
+extern int remote_timeout;
 
 /* This variable chooses whether to send a ^C or a break when the user
    requests program interruption.  Although ^C is usually what remote

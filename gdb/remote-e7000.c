@@ -40,15 +40,16 @@
 #include "command.h"
 #include <signal.h>
 #include "gdb_string.h"
+#include "gdbcmd.h"
 #include <sys/types.h>
 #include "serial.h"
 #include "remote-utils.h"
 #include "symfile.h"
 #include <time.h>
 
-#if 0
-#define HARD_BREAKPOINTS
-#define BC_BREAKPOINTS 0
+#if 1
+#define HARD_BREAKPOINTS	/* Now handled by set option. */
+#define BC_BREAKPOINTS use_hard_breakpoints
 #endif
 
 #define CTRLC 0x03
@@ -89,6 +90,9 @@ static void expect_prompt PARAMS ((void));
 
 static serial_t e7000_desc;
 
+/* Allow user to chose between using hardware breakpoints or memory. */
+static int use_hard_breakpoints = 0; /* use sw breakpoints by default */
+
 /* Nonzero if using the tcp serial driver.  */
 
 static int using_tcp;	/* direct tcp connection to target */
@@ -110,7 +114,7 @@ static int echo;
 
 static int ctrl_c;
 
-static int timeout = 5;
+static int timeout = 20;
 
 /* Send data to e7000debug.  */
 
@@ -469,7 +473,7 @@ e7000_ftp_command (args, from_tty)
   char buf[200];
 
   int oldtimeout = timeout;
-  timeout = 10;
+  timeout = remote_timeout;
 
   sprintf (buf, "ftp %s\r", machine);
   puts_e7000debug (buf);
@@ -1460,6 +1464,9 @@ e7000_load (args, from_tty)
   int nostart;
   time_t start_time, end_time;	/* Start and end times of download */
   unsigned long data_count;	/* Number of bytes transferred to memory */
+  int oldtimeout = timeout;	
+
+  timeout = remote_timeout;
 
 
   /* FIXME! change test to test for type of download */
@@ -1618,6 +1625,7 @@ e7000_load (args, from_tty)
   report_transfer_performance (data_count, start_time, end_time);
 
   do_cleanups (old_chain);
+  timeout = oldtimeout;
 }
 
 /* Clean up when a program exits.
@@ -1634,15 +1642,18 @@ e7000_mourn_inferior ()
   generic_mourn_inferior ();	/* Do all the proper things now */
 }
 
+#define MAX_BREAKPOINTS 200
 #ifdef  HARD_BREAKPOINTS
-#define MAX_E7000DEBUG_BREAKPOINTS (BC_BREAKPOINTS ? 5 :  200)
+#define MAX_E7000DEBUG_BREAKPOINTS (BC_BREAKPOINTS ? 5 :  MAX_BREAKPOINTS)
 #else
-#define MAX_E7000DEBUG_BREAKPOINTS 200
+#define MAX_E7000DEBUG_BREAKPOINTS MAX_BREAKPOINTS
 #endif
 
 extern int memory_breakpoint_size;
 
-static CORE_ADDR breakaddr[MAX_E7000DEBUG_BREAKPOINTS] = {0};
+/* Since we can change to soft breakpoints dynamically, we must define 
+   more than enough.  Was breakaddr[MAX_E7000DEBUG_BREAKPOINTS]. */
+static CORE_ADDR breakaddr[MAX_BREAKPOINTS] = {0};
 
 static int
 e7000_insert_breakpoint (addr, shadow)
@@ -2134,4 +2145,9 @@ _initialize_remote_e7000 ()
 
   add_com ("drain", class_obscure, e7000_drain_command,
 	   "Drain pending e7000 text buffers.");
+
+  add_show_from_set (add_set_cmd ("usehardbreakpoints", no_class,
+				  var_integer, (char *)&use_hard_breakpoints,
+				  "Set use of hardware breakpoints for all breakpoints.\n", &setlist),
+		     &showlist);
 }
