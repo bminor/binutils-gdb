@@ -1,3 +1,8 @@
+2001-05-03  Alan Modra  <amodra@one.net.au>
+
+	* config/tc-i386.c (i386_displacement): Call as_bad for bad GOTOFF
+	expressions rather than triggering an assert.
+
 2001-05-02  Johan Rydberg  <jrydberg@opencores.org>
 
         * config/tc-openrisc.c: New file.

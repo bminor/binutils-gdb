@@ -3466,26 +3466,6 @@ i386_displacement (disp_start, disp_end)
 
   exp_seg = expression (exp);
 
-#ifdef BFD_ASSEMBLER
-  /* We do this to make sure that the section symbol is in
-     the symbol table.  We will ultimately change the relocation
-     to be relative to the beginning of the section.  */
-  if (i.reloc[this_operand] == BFD_RELOC_386_GOTOFF
-      || i.reloc[this_operand] == BFD_RELOC_X86_64_GOTPCREL)
-    {
-      if (S_IS_LOCAL (exp->X_add_symbol)
-	  && S_GET_SEGMENT (exp->X_add_symbol) != undefined_section)
-	section_symbol (S_GET_SEGMENT (exp->X_add_symbol));
-      assert (exp->X_op == O_symbol);
-      exp->X_op = O_subtract;
-      exp->X_op_symbol = GOT_symbol;
-      if (i.reloc[this_operand] == BFD_RELOC_X86_64_GOTPCREL)
-        i.reloc[this_operand] = BFD_RELOC_32_PCREL;
-      else
-        i.reloc[this_operand] = BFD_RELOC_32;
-    }
-#endif
-
   SKIP_WHITESPACE ();
   if (*input_line_pointer)
     as_bad (_("junk `%s' after expression"), input_line_pointer);
@@ -3497,6 +3477,34 @@ i386_displacement (disp_start, disp_end)
 #ifndef LEX_AT
   if (gotfree_input_line)
     free (gotfree_input_line);
+#endif
+
+#ifdef BFD_ASSEMBLER
+  /* We do this to make sure that the section symbol is in
+     the symbol table.  We will ultimately change the relocation
+     to be relative to the beginning of the section.  */
+  if (i.reloc[this_operand] == BFD_RELOC_386_GOTOFF
+      || i.reloc[this_operand] == BFD_RELOC_X86_64_GOTPCREL)
+    {
+      if (exp->X_op != O_symbol)
+	{
+	  as_bad (_("bad expression used with @%s"),
+		  (i.reloc[this_operand] == BFD_RELOC_X86_64_GOTPCREL
+		   ? "GOTPCREL"
+		   : "GOTOFF"));
+	  return 0;
+	}
+
+      if (S_IS_LOCAL (exp->X_add_symbol)
+	  && S_GET_SEGMENT (exp->X_add_symbol) != undefined_section)
+	section_symbol (S_GET_SEGMENT (exp->X_add_symbol));
+      exp->X_op = O_subtract;
+      exp->X_op_symbol = GOT_symbol;
+      if (i.reloc[this_operand] == BFD_RELOC_X86_64_GOTPCREL)
+        i.reloc[this_operand] = BFD_RELOC_32_PCREL;
+      else
+        i.reloc[this_operand] = BFD_RELOC_32;
+    }
 #endif
 
   if (exp->X_op == O_absent || exp->X_op == O_big)
