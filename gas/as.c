@@ -546,7 +546,7 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
 	case OPTION_DEFSYM:
 	  {
 	    char *s;
-	    long i;
+	    valueT i;
 	    struct defsym_list *n;
 
 	    for (s = optarg; *s != '\0' && *s != '='; s++)
@@ -554,7 +554,11 @@ the GNU General Public License.  This program has absolutely no warranty.\n"));
 	    if (*s == '\0')
 	      as_fatal (_("bad defsym; format is --defsym name=value"));
 	    *s++ = '\0';
+#ifdef BFD_ASSEMBLER
+	    i = bfd_scan_vma (s, (const char **) NULL, 0);
+#else
 	    i = strtol (s, (char **) NULL, 0);
+#endif
 	    n = (struct defsym_list *) xmalloc (sizeof *n);
 	    n->next = defsyms;
 	    n->name = optarg;

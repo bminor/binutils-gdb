@@ -4,6 +4,12 @@ Changes in 2.11:
 
 Support for IA-64.
 
+x86 gas has a new .arch pseudo op to specify the target CPU architecture.
+
+x86 gas -q command line option quietens warnings about register size changes
+due to suffix, indirect jmp/call without `*', stand-alone prefixes, and
+translating various deprecated floating point instructions.
+
 Changes in 2.10:
 
 Support for ATMEL AVR.

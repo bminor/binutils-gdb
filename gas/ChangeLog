@@ -1,4 +1,20 @@
 2000-05-13  Alan Modra  <alan@linuxcare.com.au>
+
+	* NEWS: Mention x86 .arch and -q.
+
+	* config/tc-i386.c (quiet_warnings): New.
+	(md_assemble): Use quiet_warnings.
+	(md_parse_option): Set quiet_warnings from -q.
+	(md_show_usage): Mention -q, delete -m.
+	(flag_do_long_jump): Delete.
+	(md_parse_option): Remove -m.
+	(md_show_usage): Remove -m.
+	(md_create_long_jump): Remove useless flag_do_long_jump code.
+
+	* as.c (parse_args): In case OPTION_DEFSYM, use a valueT to hold
+	the symbol value, and use bfd_scan_vma if BFD_ASSEMBLER.
+
+2000-05-13  Alan Modra  <alan@linuxcare.com.au>
 	    Alexander Sokolov <robocop@netlink.ru>
 
 	* doc/c-i386.texi (i386-Arch): New section.
