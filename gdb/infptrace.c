@@ -107,7 +107,7 @@ void _initialize_infptrace (void);
    It exists so that all calls to ptrace are isolated in this 
    machine-dependent file. */
 int
-call_ptrace (int request, int pid, PTRACE_ARG3_TYPE addr, int data)
+call_ptrace (int request, int pid, PTRACE_TYPE_ARG3 addr, int data)
 {
   int pt_status = 0;
 
@@ -215,7 +215,7 @@ kill_inferior (void)
 
      The kill call causes problems under hpux10, so it's been removed;
      if this causes problems we'll deal with them as they arise.  */
-  ptrace (PT_KILL, pid, (PTRACE_ARG3_TYPE) 0, 0);
+  ptrace (PT_KILL, pid, (PTRACE_TYPE_ARG3) 0, 0);
   ptrace_wait (null_ptid, &status);
   target_mourn_inferior ();
 }
@@ -240,7 +240,7 @@ child_resume (ptid_t ptid, int step, enum target_signal signal)
        all threads" and "resume inferior_ptid" are the same.  */
     pid = PIDGET (inferior_ptid);
 
-  /* An address of (PTRACE_ARG3_TYPE)1 tells ptrace to continue from where
+  /* An address of (PTRACE_TYPE_ARG3)1 tells ptrace to continue from where
      it was.  (If GDB wanted it to start some other way, we have already
      written a new PC value to the child.)
 
@@ -254,11 +254,11 @@ child_resume (ptid_t ptid, int step, enum target_signal signal)
       if (SOFTWARE_SINGLE_STEP_P ())
 	internal_error (__FILE__, __LINE__, "failed internal consistency check");		/* Make sure this doesn't happen. */
       else
-	ptrace (PT_STEP, pid, (PTRACE_ARG3_TYPE) 1,
+	ptrace (PT_STEP, pid, (PTRACE_TYPE_ARG3) 1,
 		target_signal_to_host (signal));
     }
   else
-    ptrace (PT_CONTINUE, pid, (PTRACE_ARG3_TYPE) 1,
+    ptrace (PT_CONTINUE, pid, (PTRACE_TYPE_ARG3) 1,
 	    target_signal_to_host (signal));
 
   if (errno)
@@ -279,7 +279,7 @@ attach (int pid)
 #endif
 #endif
 #ifdef PT_ATTACH
-  ptrace (PT_ATTACH, pid, (PTRACE_ARG3_TYPE) 0, 0);
+  ptrace (PT_ATTACH, pid, (PTRACE_TYPE_ARG3) 0, 0);
   if (errno)
     perror_with_name ("ptrace");
   attach_flag = 1;
@@ -303,7 +303,7 @@ detach (int signal)
 #endif
 #endif
 #ifdef PT_DETACH
-  ptrace (PT_DETACH, PIDGET (inferior_ptid), (PTRACE_ARG3_TYPE) 1,
+  ptrace (PT_DETACH, PIDGET (inferior_ptid), (PTRACE_TYPE_ARG3) 1,
           signal);
   if (errno)
     print_sys_errmsg ("ptrace", errno);
@@ -328,7 +328,7 @@ detach (int signal)
 #if !defined (U_REGS_OFFSET)
 #define U_REGS_OFFSET \
   ptrace (PT_READ_U, PIDGET (inferior_ptid), \
-	  (PTRACE_ARG3_TYPE) (offsetof (struct user, u_ar0)), 0) \
+	  (PTRACE_TYPE_ARG3) (offsetof (struct user, u_ar0)), 0) \
     - KERNEL_U_ADDR
 #endif
 
@@ -362,7 +362,7 @@ fetch_register (int regno)
     {
       errno = 0;
       *(PTRACE_XFER_TYPE *) & buf[i] = ptrace (PT_READ_U, tid,
-					       (PTRACE_ARG3_TYPE) regaddr, 0);
+					       (PTRACE_TYPE_ARG3) regaddr, 0);
       regaddr += sizeof (PTRACE_XFER_TYPE);
       if (errno != 0)
 	{
@@ -428,7 +428,7 @@ store_register (int regno)
   for (i = 0; i < register_size (current_gdbarch, regno); i += sizeof (PTRACE_XFER_TYPE))
     {
       errno = 0;
-      ptrace (PT_WRITE_U, tid, (PTRACE_ARG3_TYPE) regaddr,
+      ptrace (PT_WRITE_U, tid, (PTRACE_TYPE_ARG3) regaddr,
 	      *(PTRACE_XFER_TYPE *) (buf + i));
       regaddr += sizeof (PTRACE_XFER_TYPE);
       if (errno != 0)
@@ -546,14 +546,14 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 	{
 	  /* Need part of initial word -- fetch it.  */
 	  buffer[0] = ptrace (PT_READ_I, PIDGET (inferior_ptid), 
-			      (PTRACE_ARG3_TYPE) addr, 0);
+			      (PTRACE_TYPE_ARG3) addr, 0);
 	}
 
       if (count > 1)		/* FIXME, avoid if even boundary.  */
 	{
 	  buffer[count - 1] =
 	    ptrace (PT_READ_I, PIDGET (inferior_ptid),
-		    ((PTRACE_ARG3_TYPE)
+		    ((PTRACE_TYPE_ARG3)
 		     (addr + (count - 1) * sizeof (PTRACE_XFER_TYPE))), 0);
 	}
 
@@ -566,14 +566,14 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 	{
 	  errno = 0;
 	  ptrace (PT_WRITE_D, PIDGET (inferior_ptid), 
-		  (PTRACE_ARG3_TYPE) addr, buffer[i]);
+		  (PTRACE_TYPE_ARG3) addr, buffer[i]);
 	  if (errno)
 	    {
 	      /* Using the appropriate one (I or D) is necessary for
 	         Gould NP1, at least.  */
 	      errno = 0;
 	      ptrace (PT_WRITE_I, PIDGET (inferior_ptid), 
-		      (PTRACE_ARG3_TYPE) addr, buffer[i]);
+		      (PTRACE_TYPE_ARG3) addr, buffer[i]);
 	    }
 	  if (errno)
 	    return 0;
@@ -586,7 +586,7 @@ child_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 	{
 	  errno = 0;
 	  buffer[i] = ptrace (PT_READ_I, PIDGET (inferior_ptid),
-			      (PTRACE_ARG3_TYPE) addr, 0);
+			      (PTRACE_TYPE_ARG3) addr, 0);
 	  if (errno)
 	    return 0;
 	  QUIT;
@@ -638,7 +638,7 @@ udot_info (char *dummy1, int dummy2)
 	    }
 	  printf_filtered ("%s:", paddr (udot_off));
 	}
-      udot_val = ptrace (PT_READ_U, PIDGET (inferior_ptid), (PTRACE_ARG3_TYPE) udot_off, 0);
+      udot_val = ptrace (PT_READ_U, PIDGET (inferior_ptid), (PTRACE_TYPE_ARG3) udot_off, 0);
       if (errno != 0)
 	{
 	  sprintf (mess, "\nreading user struct at offset 0x%s",

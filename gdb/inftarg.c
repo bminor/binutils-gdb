@@ -307,7 +307,7 @@ static void
 ptrace_me (void)
 {
   /* "Trace me, Dr. Memory!" */
-  call_ptrace (0, 0, (PTRACE_ARG3_TYPE) 0, 0);
+  call_ptrace (0, 0, (PTRACE_TYPE_ARG3) 0, 0);
 }
 
 /* Stub function which causes the GDB that runs it, to start ptrace-ing

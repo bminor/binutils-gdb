@@ -240,7 +240,7 @@ extern void child_resume (ptid_t, int, enum target_signal);
 #define PTRACE_ARG3_TYPE int	/* Correct definition for most systems. */
 #endif
 
-extern int call_ptrace (int, int, PTRACE_ARG3_TYPE, int);
+extern int call_ptrace (int, int, PTRACE_TYPE_ARG3, int);
 
 extern void pre_fork_inferior (void);
 

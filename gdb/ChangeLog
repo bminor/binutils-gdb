@@ -1,3 +1,13 @@
+2004-08-15  Mark Kettenis  <kettenis@gnu.org>
+
+	* inferior.h (call_ptrace): Replace PTRACE_ARG3_TYPE with
+	PTRACE_TYPE_ARG3.
+	* infptrace.c (call_ptrace, child_resume, attach, detach)
+	(U_REGS_OFFSET, fetch_register, store_register, child_xfer_memory)
+	(udot_info): Replace PTRACE_ARG3_TYPE with PTRACE_TYPE_ARG3.
+	* inftarg.c (ptrace_me): Replace PTRACE_ARG3_TYPE with
+	PTRACE_TYPE_ARG3.
+
 2004-08-14  Mark Kettenis  <kettenis@gnu.org>
 
 	* defs.h: Remove out-of-date comment.
