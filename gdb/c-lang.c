@@ -30,6 +30,7 @@
 #include "macroscope.h"
 #include "gdb_assert.h"
 #include "charset.h"
+#include "gdb_string.h"
 
 extern void _initialize_c_language (void);
 static void c_emit_char (int c, struct ui_file * stream, int quoter);
