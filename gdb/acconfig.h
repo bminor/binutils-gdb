@@ -1,6 +1,3 @@
-/* Define if compiling on Solaris 7. */
-#undef _MSE_INT_H
-
 /* Define if your struct reg has r_fs.  */
 #undef HAVE_STRUCT_REG_R_FS
 

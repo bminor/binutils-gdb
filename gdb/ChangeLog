@@ -1,5 +1,14 @@
 2003-01-02  Mark Kettenis  <kettenis@gnu.org>
 
+	* acconfig.h (_MSE_INT_H): Remove.
+	* configure.in: Create "Checks for header files" section, and move
+	appropriate tests there.  Don't check for objlist.h, wchar.h,
+	wctype.h and asm/debugreg.h.  Rewrite Solaris 2.[78] <curses.h>
+	misdetection fix.  Also add "Checks for types", "Checks for
+	compiler characteristics" and "Checks for library functions"
+	sections.
+	* config.in, configure: Regenerated.
+
 	* configure.in: Create "Checks for programs" section, and move
 	appropriate tests there.
 

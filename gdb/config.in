@@ -71,9 +71,6 @@
 /* Define vfork as fork if vfork does not work.  */
 #undef vfork
 
-/* Define if compiling on Solaris 7. */
-#undef _MSE_INT_H
-
 /* Define if your struct reg has r_fs.  */
 #undef HAVE_STRUCT_REG_R_FS
 
@@ -271,9 +268,6 @@
 /* Define if you have the <argz.h> header file.  */
 #undef HAVE_ARGZ_H
 
-/* Define if you have the <asm/debugreg.h> header file.  */
-#undef HAVE_ASM_DEBUGREG_H
-
 /* Define if you have the <ctype.h> header file.  */
 #undef HAVE_CTYPE_H
 
@@ -310,9 +304,6 @@
 /* Define if you have the <nlist.h> header file.  */
 #undef HAVE_NLIST_H
 
-/* Define if you have the <objlist.h> header file.  */
-#undef HAVE_OBJLIST_H
-
 /* Define if you have the <poll.h> header file.  */
 #undef HAVE_POLL_H
 
@@ -336,6 +327,9 @@
 
 /* Define if you have the <string.h> header file.  */
 #undef HAVE_STRING_H
+
+/* Define if you have the <strings.h> header file.  */
+#undef HAVE_STRINGS_H
 
 /* Define if you have the <sys/debugreg.h> header file.  */
 #undef HAVE_SYS_DEBUGREG_H
@@ -412,20 +406,11 @@
 /* Define if you have the <wait.h> header file.  */
 #undef HAVE_WAIT_H
 
-/* Define if you have the <wchar.h> header file.  */
-#undef HAVE_WCHAR_H
-
-/* Define if you have the <wctype.h> header file.  */
-#undef HAVE_WCTYPE_H
-
 /* Define if you have the dl library (-ldl).  */
 #undef HAVE_LIBDL
 
 /* Define if you have the m library (-lm).  */
 #undef HAVE_LIBM
-
-/* Define if you have the socket library (-lsocket).  */
-#undef HAVE_LIBSOCKET
 
 /* Define if you have the w library (-lw).  */
 #undef HAVE_LIBW
@@ -444,6 +429,10 @@
 
 /* Name of this package.  */
 #undef PACKAGE
+
+/* Define to 1 to avoid a clash between <widec.h> and <wchar.h> on
+   Solaris 2.[78] when using GCC.  */
+#undef _MSE_INT_H
 
 /* Define if sigsetjmp is available.  */
 #undef HAVE_SIGSETJMP
