@@ -10267,7 +10267,7 @@ xtensa_switch_section_emit_state (emit_state *state,
   state->now_subseg = now_subseg;
   state->generating_literals = generating_literals;
   generating_literals++;
-  subseg_new (segment_name (new_now_seg), new_now_subseg);
+  subseg_set (new_now_seg, new_now_subseg);
 }
 
 
@@ -10277,7 +10277,7 @@ static void
 xtensa_restore_emit_state (emit_state *state)
 {
   generating_literals = state->generating_literals;
-  subseg_new (state->name, state->now_subseg);
+  subseg_set (state->now_seg, state->now_subseg);
 }
 
 

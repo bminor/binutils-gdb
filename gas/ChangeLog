@@ -1,3 +1,8 @@
+2004-12-02  Bob Wilson  <bob.wilson@acm.org>
+
+	* config/tc-xtensa.c (xtensa_switch_section_emit_state): Use subseg_set.
+	(xtensa_restore_emit_state): Likewise.
+
 2004-12-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* read.c (ALIGN_LIMIT): Define, increasing limit for BFD_ASSEMBLER.
