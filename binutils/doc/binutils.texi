@@ -1479,6 +1479,8 @@ for more information on demangling.
 Display debugging information.  This attempts to parse debugging
 information stored in the file and print it out using a C like syntax.
 Only certain types of debugging information have been implemented.
+Some other types are supported by @command{readelf -w}.
+@xref{readelf}.
 
 @item -d
 @itemx --disassemble

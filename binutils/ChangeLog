@@ -1,3 +1,8 @@
+2003-04-09  Alexandre Oliva  <aoliva@redhat.com>
+
+	* doc/binutils.texi (objdump) [--debugging]: Suggest readelf -w
+	for debugging information types not supported by objdump.
+
 2003-04-09  Bernd Jendrissek <berndj@prism.co.za>
 
 	* configure.in: Recognize canonical form of i[3-6]86-pe*.
