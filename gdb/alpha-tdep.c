@@ -401,6 +401,11 @@ alpha_extract_return_value (struct type *valtype, struct regcache *regcache,
 	  regcache_cooked_read (regcache, ALPHA_FP0_REGNUM, valbuf);
 	  break;
 
+	case 16:
+	  regcache_cooked_read_unsigned (regcache, ALPHA_V0_REGNUM, &l);
+	  read_memory (l, valbuf, 16);
+	  break;
+
 	default:
 	  abort ();
 	}
@@ -449,6 +454,12 @@ alpha_store_return_value (struct type *valtype, struct regcache *regcache,
 	case 8:
 	  regcache_cooked_write (regcache, ALPHA_FP0_REGNUM, valbuf);
 	  break;
+
+	case 16:
+	  /* FIXME: 128-bit long doubles are returned like structures:
+	     by writing into indirect storage provided by the caller
+	     as the first argument.  */
+	  error ("Cannot set a 128-bit long double return value.");
 
 	default:
 	  abort ();
