@@ -160,7 +160,7 @@ sds_close (int quitting)
 static int
 sds_start_remote (PTR dummy)
 {
-  char c;
+  int c;
   unsigned char buf[200];
 
   immediate_quit++;		/* Allow user to interrupt it */
