@@ -1,5 +1,9 @@
 2005-01-15  Andrew Cagney  <cagney@gnu.org>
 
+	* acinclude.m4: Include ../bfd/bfd.m4 instead of
+	../bfd/acinclude.m4.  Include ../gettext.m4.
+	* aclocal.m4, configure: Re-generate.
+
 	* exceptions.c (do_captured_command)
 	(struct captured_command_args): Delete.
 	(catch_command_errors): Simplify by inlining call to catch_errors.

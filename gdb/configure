@@ -858,8 +858,8 @@ if test -n "$ac_init_help"; then
 Optional Features:
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
-  --enable-maintainer-mode enable make rules and dependencies not useful
-                          (and sometimes confusing) to the casual installer
+  --enable-maintainer-mode  enable make rules and dependencies not useful
+			  (and sometimes confusing) to the casual installer
   --disable-nls           do not use Native Language Support
   --disable-gdbcli        disable command-line interface (CLI)
   --disable-gdbmi         disable machine-interface (MI)
@@ -1359,6 +1359,7 @@ else
   MAINTAINER_MODE_TRUE='#'
   MAINTAINER_MODE_FALSE=
 fi
+
   MAINT=$MAINTAINER_MODE_TRUE
 
 
@@ -21747,6 +21748,13 @@ LIBOBJS=$ac_libobjs
 LTLIBOBJS=$ac_ltlibobjs
 
 
+if test -z "${MAINTAINER_MODE_TRUE}" && test -z "${MAINTAINER_MODE_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"MAINTAINER_MODE\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"MAINTAINER_MODE\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
 
 : ${CONFIG_STATUS=./config.status}
 ac_clean_files_save=$ac_clean_files
