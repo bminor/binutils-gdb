@@ -1,3 +1,18 @@
+2000-09-05  Alan Modra  <alan@linuxcare.com.au>
+
+	* elf-hppa.h (elf_hppa_howto_table): Restructure into groups of
+	eight entries.  Replace NULL with bfd_elf_generic_reloc.  Add
+	R_PARISC_GNU_VTENTRY, R_PARISC_GNU_VTINHERIT and R_PARISC_PCREL12F.
+	(_bfd_elf_hppa_gen_reloc_type): Handle R_PARISC_GNU_VT*.  Add some
+	comments.  Handle format == 12 for R_HPPA_PCREL_CALL.
+	(elf_hppa_final_link_relocate): Handle R_PARISC_PCREL12F.
+	(elf_hppa_relocate_insn): Likewise.  Reformat some comments.
+	(elf_hppa_final_write_processing): Expose it for ARCH_SIZE == 32.
+
+	From David Huggins-Daines  <dhd@linuxcare.com>
+	* elf-hppa.h (elf_hppa_is_local_label_name): Accept the SysV/ELF
+	style of local labels as well.
+
 2000-09-03  Philip Blundell  <philb@gnu.org>
 
 	* elf32-arm.h (elf32_arm_relocate_section): Don't try to relocate
