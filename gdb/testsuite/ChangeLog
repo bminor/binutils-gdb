@@ -1,3 +1,10 @@
+Tue Apr 13 23:18:07 1993  Per Bothner  (bothner@cygnus.com)
+
+	* gdb.t31/chillvars.exp:  Add and remove initial dummy
+	breakpoint, so that symbol table is forced in.
+	(Needed at least on Sunos4, though it seems not SVR4.)
+	* gdb.t31/chillvars.exp:  Update for changed output format.
+
 Sun Apr 11 17:21:45 1993  Rob Savoye  (rob at darkstar.cygnus.com)
 
         * config/unix-gdb.exp: Gracefully exits if $GDB is a bogus path.
