@@ -2,10 +2,19 @@
 
 #define PAGE_SIZE	0x2000		/* 8K.  aka NBPG in <sys/param.h> */
 /* Note that some SPARCs have 4K pages, some 8K, some others.  */
-#define SEGMENT_SIZE	PAGE_SIZE
+
+#define SEG_SIZE_SPARC	PAGE_SIZE
+#define	SEG_SIZE_SUN3	0x80000		/* Resolution of r/w protection hw */
+
 #define TEXT_START_ADDR	PAGE_SIZE	/* Location 0 is not accessible */
 
 /* Non-default definitions of the accessor macros... */
+
+/* Segment size varies on Sun-3 versus Sun-4.  */
+
+#define N_SEGSIZE(x)	(N_MACHTYPE(x) == M_SPARC?	SEG_SIZE_SPARC:	\
+			 N_MACHTYPE(x) == M_68020?	SEG_SIZE_SUN3:	\
+			/* Guess? */			PAGE_SIZE)
 
 /* Offset in a.out file of the text section.  For ZMAGIC, the text section
    actually includes the a.out header.  */

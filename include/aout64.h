@@ -72,7 +72,13 @@ enum machine_type {
 ((exec).a_info = \
  ((exec).a_info&0x00ffffff) | (((flags) & 0xff) << 24))
 
-#define _N_HDROFF(x)	(SEGMENT_SIZE - EXEC_BYTES_SIZE)
+/* By default, segment size is constant.  But on some machines, it can
+   be a function of the a.out header (e.g. machine type).  */
+#ifndef	N_SEGSIZE
+#define	N_SEGSIZE(x)	SEGMENT_SIZE
+#endif
+
+#define _N_HDROFF(x)	(N_SEGSIZE(x) - EXEC_BYTES_SIZE)
 /* address in an a.out of the text section. When demand paged, it's
  set up a bit to make nothing at 0, when an object file it's 0.
  There's a special hack case when the entry point is < TEXT_START_ADDR
@@ -111,7 +117,7 @@ enum machine_type {
 
 #define N_DATADDR(x) \
     (N_MAGIC(x)==OMAGIC? (N_TXTADDR(x)+(x).a_text) \
-     :  (SEGMENT_SIZE + ((N_TXTADDR(x)+(x).a_text-1) & ~(SEGMENT_SIZE-1))))
+     :  (N_SEGSIZE(x) + ((N_TXTADDR(x)+(x).a_text-1) & ~(N_SEGSIZE(x)-1))))
 
 #define N_BSSADDR(x) (N_DATADDR(x) + (x).a_data)
 

@@ -100,9 +100,15 @@ enum machine_type {
   			&& N_MAGIC(x) != ZMAGIC)
 #endif
 
+/* By default, segment size is constant.  But on some machines, it can
+   be a function of the a.out header (e.g. machine type).  */
+#ifndef	N_SEGSIZE
+#define	N_SEGSIZE(x)	SEGMENT_SIZE
+#endif
+
 /* This complexity is for encapsulated COFF support */
 #ifndef _N_HDROFF
-#define _N_HDROFF(x)	(SEGMENT_SIZE - sizeof (struct exec))
+#define _N_HDROFF(x)	(N_SEGSIZE(x) - sizeof (struct exec))
 #endif
 
 #ifndef N_TXTOFF
@@ -140,7 +146,7 @@ enum machine_type {
 #ifndef N_DATADDR
 #define N_DATADDR(x) \
     (N_MAGIC(x)==OMAGIC? (N_TXTADDR(x)+(x).a_text) \
-     :  (SEGMENT_SIZE + ((N_TXTADDR(x)+(x).a_text-1) & ~(SEGMENT_SIZE-1))))
+     :  (N_SEGSIZE(x) + ((N_TXTADDR(x)+(x).a_text-1) & ~(N_SEGSIZE(x)-1))))
 #endif
 
 /* Address of bss segment in memory after it is loaded.  */
