@@ -5608,8 +5608,7 @@ md_apply_fix3 (fixP, val, seg)
       value += SEXT24 (newval);
       
       if ((value & 0xff000000UL) != 0
-	  && (fixP->fx_done == 0
-	      || ((value & 0xff000000UL) != 0xff000000UL)))
+	  && ((value & 0xff000000UL) != 0xff000000UL))
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("out of range branch"));
       

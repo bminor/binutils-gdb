@@ -1,3 +1,8 @@
+2000-03-19  Nick Clifton  <nickc@cygnus.com>
+
+	* config/tc-arm.c (md_apply_fix3): Fix bug detectng overflow of pc
+	relative branches.
+
 2000-03-17 Thomas de Lellis <tdel@windriver.com>
 
         * config/tc-arm.c (do_t_adr): Flag "adr Rd,label"
