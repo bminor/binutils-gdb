@@ -624,7 +624,8 @@ coff_fix_symbol_name (abfd, symbol, native, string_size_p,
     }
   name_length = strlen (name);
 
-  if (native->u.syment.n_sclass == C_FILE)
+  if (native->u.syment.n_sclass == C_FILE
+      && native->u.syment.n_numaux > 0)
     {
       strncpy (native->u.syment._n._n_name, ".file", SYMNMLEN);
       auxent = &(native + 1)->u.auxent;
@@ -652,7 +653,7 @@ coff_fix_symbol_name (abfd, symbol, native, string_size_p,
 	}
     }
   else
-    {				/* NOT A C_FILE SYMBOL */
+    {
       if (name_length <= SYMNMLEN)
 	{
 	  /* This name will fit into the symbol neatly */
@@ -1024,7 +1025,8 @@ coff_write_symbols (abfd)
 	         Don't write it into the string table.  */
 	      maxlen = name_length;
 	    }
-	  else if (c_symbol->native->u.syment.n_sclass == C_FILE)
+	  else if (c_symbol->native->u.syment.n_sclass == C_FILE
+		   && c_symbol->native->u.syment.n_numaux > 0)
 	    maxlen = FILNMLEN;
 	  else
 	    maxlen = SYMNMLEN;
