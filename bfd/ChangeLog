@@ -1,3 +1,13 @@
+Wed Jun 15 18:02:21 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	Enable sparc v9 support for release.  Note that this is still a
+	work in progress, pending release of an ABI specification.
+	* config.bfd, configure.in: Include sparc v9 elf config.
+	* elfcode.h (prep_headers): Handle sparc v9 (64 bit).
+	* reloc.c (bfd_reloc_code_real): New reloc types.
+	* elf64-sparc.c: Implement elf64-sparc target.
+	* Makefile.in, targets.c: Updated.
+
 Wed Jun 15 01:34:07 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* elfcode.h (NAME(bfd_elf,size_dynamic_sections)): Add sinterpptr
