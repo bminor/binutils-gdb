@@ -2,7 +2,7 @@
 
 	* elf32-ppc.c (ppc_elf_merge_private_bfd_data): Fix logic to
 	decide whether the output file is -mrelocatable-lib,
-	-mrelocatable, or neither.
+	-mrelocatable, or neither.  (gdb.base/nodebug.exp)
 
 1998-12-03  Nick Clifton  <nickc@cygnus.com>
 
