@@ -1,6 +1,7 @@
 2000-05-29  Philip Blundell  <philb@gnu.org>
 
 	* doc/as.texinfo: Update copyright dates.
+	(Local Labels): Delete misplaced mention of ARM.
 	* NEWS: Mention ARM ELF support.
 
 2000-05-27  Alexandre Oliva  <aoliva@cygnus.com>

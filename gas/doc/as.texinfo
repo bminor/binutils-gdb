@@ -1194,9 +1194,6 @@ target is allowed to redefine the local label prefix.
 @ifset HPPA
 On the HPPA local labels begin with @samp{L$}.
 @end ifset
-@ifset ARM
-@samp{;} for the ARM family;
-@end ifset
 
 @node M
 @section Assemble in MRI Compatibility Mode: @code{-M}
