@@ -1,3 +1,7 @@
+Fri May  6 13:24:04 1994  Steve Chamberlain  (sac@cygnus.com)
+
+	* config/i386/go32.mh: Define CC.
+
 Fri May  6 11:56:54 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* gdbserver/Makefile.in: Remove irrelevant definitions and
