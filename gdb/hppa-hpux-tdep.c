@@ -1415,6 +1415,52 @@ hppa_hpux_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
 
   return sp;
 }
+
+
+/* Bit in the `ss_flag' member of `struct save_state' that indicates
+   the state was saved from a system call.  From
+   <machine/save_state.h>.  */
+#define HPPA_HPUX_SS_INSYSCALL	0x02
+
+static CORE_ADDR
+hppa_hpux_read_pc (ptid_t ptid)
+{
+  ULONGEST flags;
+
+  /* If we're currently in a system call return the contents of %r31.  */
+  flags = read_register_pid (HPPA_FLAGS_REGNUM, ptid);
+  if (flags & HPPA_HPUX_SS_INSYSCALL)
+    return read_register_pid (HPPA_R31_REGNUM, ptid) & ~0x3;
+
+  return hppa_read_pc (ptid);
+}
+
+static void
+hppa_hpux_write_pc (CORE_ADDR pc, ptid_t ptid)
+{
+  ULONGEST flags;
+
+  /* If we're currently in a system call also write PC into %r31.  */
+  flags = read_register_pid (HPPA_FLAGS_REGNUM, ptid);
+  if (flags & HPPA_HPUX_SS_INSYSCALL)
+    write_register_pid (HPPA_R31_REGNUM, pc | 0x3, ptid);
+
+  return hppa_write_pc (pc, ptid);
+}
+
+static CORE_ADDR
+hppa_hpux_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
+{
+  ULONGEST flags;
+
+  /* If we're currently in a system call return the contents of %r31.  */
+  flags = frame_unwind_register_unsigned (next_frame, HPPA_FLAGS_REGNUM);
+  if (flags & HPPA_HPUX_SS_INSYSCALL)
+    return frame_unwind_register_unsigned (next_frame, HPPA_R31_REGNUM) & ~0x3;
+
+  return hppa_unwind_pc (gdbarch, next_frame);
+}
+
 
 static void
 hppa_hpux_inferior_created (struct target_ops *objfile, int from_tty)
@@ -1441,6 +1487,10 @@ hppa_hpux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_gdbarch_push_dummy_code (gdbarch, hppa_hpux_push_dummy_code);
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
+
+  set_gdbarch_read_pc (gdbarch, hppa_hpux_read_pc);
+  set_gdbarch_write_pc (gdbarch, hppa_hpux_write_pc);
+  set_gdbarch_unwind_pc (gdbarch, hppa_hpux_unwind_pc);
 
   frame_unwind_append_sniffer (gdbarch, hppa_hpux_sigtramp_unwind_sniffer);
 

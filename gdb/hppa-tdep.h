@@ -209,4 +209,9 @@ hppa_frame_prev_register_helper (struct frame_info *next_frame,
 				 enum lval_type *lvalp, CORE_ADDR *addrp,
 				 int *realnump, void *valuep);
 
+extern CORE_ADDR hppa_read_pc (ptid_t ptid);
+extern void hppa_write_pc (CORE_ADDR pc, ptid_t ptid);
+extern CORE_ADDR hppa_unwind_pc (struct gdbarch *gdbarch,
+				 struct frame_info *next_frame);
+
 #endif  /* HPPA_TDEP_H */

@@ -1034,54 +1034,31 @@ hppa64_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
   return align_up (addr, 16);
 }
 
-
-/* Get the PC from %r31 if currently in a syscall.  Also mask out privilege
-   bits.  */
-
-static CORE_ADDR
-hppa_target_read_pc (ptid_t ptid)
+CORE_ADDR
+hppa_read_pc (ptid_t ptid)
 {
-  int flags = read_register_pid (HPPA_FLAGS_REGNUM, ptid);
-  ULONGEST ipsw = read_register_pid (HPPA_IPSW_REGNUM, ptid);
+  ULONGEST ipsw;
   CORE_ADDR pc;
 
-  /* The following test does not belong here.  It is OS-specific, and belongs
-     in native code.  */
-  /* Test SS_INSYSCALL */
-  if (flags & 2)
-    return read_register_pid (31, ptid) & ~0x3;
-
-  pc = read_register_pid (HPPA_PCOQ_HEAD_REGNUM, ptid) & ~0x3;
+  ipsw = read_register_pid (HPPA_IPSW_REGNUM, ptid);
+  pc = read_register_pid (HPPA_PCOQ_HEAD_REGNUM, ptid);
 
   /* If the current instruction is nullified, then we are effectively
      still executing the previous instruction.  Pretend we are still
-     there.  This is needed when single stepping; if the nullified instruction
-     is on a different line, we don't want gdb to think we've stepped onto
-     that line.  */
+     there.  This is needed when single stepping; if the nullified
+     instruction is on a different line, we don't want GDB to think
+     we've stepped onto that line.  */
   if (ipsw & 0x00200000)
     pc -= 4;
 
-  return pc;
+  return pc & ~0x3;
 }
 
-/* Write out the PC.  If currently in a syscall, then also write the new
-   PC value into %r31.  */
-
-static void
-hppa_target_write_pc (CORE_ADDR v, ptid_t ptid)
+void
+hppa_write_pc (CORE_ADDR pc, ptid_t ptid)
 {
-  int flags = read_register_pid (HPPA_FLAGS_REGNUM, ptid);
-
-  /* The following test does not belong here.  It is OS-specific, and belongs
-     in native code.  */
-  /* If in a syscall, then set %r31.  Also make sure to get the 
-     privilege bits set correctly.  */
-  /* Test SS_INSYSCALL */
-  if (flags & 2)
-    write_register_pid (31, v | 0x3, ptid);
-
-  write_register_pid (HPPA_PCOQ_HEAD_REGNUM, v, ptid);
-  write_register_pid (HPPA_PCOQ_TAIL_REGNUM, v + 4, ptid);
+  write_register_pid (HPPA_PCOQ_HEAD_REGNUM, pc, ptid);
+  write_register_pid (HPPA_PCOQ_TAIL_REGNUM, pc + 4, ptid);
 }
 
 /* return the alignment of a type in bytes. Structures have the maximum
@@ -2194,24 +2171,24 @@ hppa_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
 			 frame_pc_unwind (next_frame));
 }
 
-static CORE_ADDR
+CORE_ADDR
 hppa_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
   ULONGEST ipsw;
   CORE_ADDR pc;
 
-  ipsw = frame_unwind_register_signed (next_frame, HPPA_IPSW_REGNUM);
-  pc = frame_unwind_register_signed (next_frame, HPPA_PCOQ_HEAD_REGNUM) & ~3;
+  ipsw = frame_unwind_register_unsigned (next_frame, HPPA_IPSW_REGNUM);
+  pc = frame_unwind_register_unsigned (next_frame, HPPA_PCOQ_HEAD_REGNUM);
 
   /* If the current instruction is nullified, then we are effectively
      still executing the previous instruction.  Pretend we are still
-     there.  This is needed when single stepping; if the nullified instruction
-     is on a different line, we don't want gdb to think we've stepped onto
-     that line.  */
+     there.  This is needed when single stepping; if the nullified
+     instruction is on a different line, we don't want GDB to think
+     we've stepped onto that line.  */
   if (ipsw & 0x00200000)
     pc -= 4;
 
-  return pc;
+  return pc & ~0x3;
 }
 
 /* Instead of this nasty cast, add a method pvoid() that prints out a
@@ -2449,6 +2426,24 @@ hppa_frame_prev_register_helper (struct frame_info *next_frame,
       return;
     }
 
+  /* Make sure the "flags" register is zero in all unwound frames.
+     The "flags" registers is a HP-UX specific wart, and only the code
+     in hppa-hpux-tdep.c depends on it.  However, it is easier to deal
+     with it here.  This shouldn't affect other systems since those
+     should provide zero for the "flags" register anyway.  */
+  if (regnum == HPPA_FLAGS_REGNUM)
+    {
+      if (valuep)
+	store_unsigned_integer (valuep, 4, 0);
+
+      /* It's a computed value.  */
+      *optimizedp = 0;
+      *lvalp = not_lval;
+      *addrp = 0;
+      *realnump = -1;
+      return;
+    }
+
   trad_frame_get_prev_register (next_frame, saved_regs, regnum,
 				optimizedp, lvalp, addrp, realnump, valuep);
 }
@@ -2562,8 +2557,8 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_addr_bits_remove (gdbarch, hppa_smash_text_address);
   set_gdbarch_smash_text_address (gdbarch, hppa_smash_text_address);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
-  set_gdbarch_read_pc (gdbarch, hppa_target_read_pc);
-  set_gdbarch_write_pc (gdbarch, hppa_target_write_pc);
+  set_gdbarch_read_pc (gdbarch, hppa_read_pc);
+  set_gdbarch_write_pc (gdbarch, hppa_write_pc);
 
   /* Helper for function argument information.  */
   set_gdbarch_fetch_pointer_argument (gdbarch, hppa_fetch_pointer_argument);
