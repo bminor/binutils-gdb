@@ -5036,6 +5036,7 @@ md_apply_fix3 (fixP, val, seg)
 {
   offsetT value = *val;
   offsetT newval;
+  unsigned int newimm;
   unsigned long temp;
   int sign;
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
@@ -5072,21 +5073,21 @@ md_apply_fix3 (fixP, val, seg)
   switch (fixP->fx_r_type)
     {
     case BFD_RELOC_ARM_IMMEDIATE:
-      newval = (offsetT) validate_immediate (value);
+      newimm = (offsetT) validate_immediate (value);
       temp = md_chars_to_number (buf, INSN_SIZE);
 
       /* If the instruction will fail, see if we can fix things up by
 	 changing the opcode.  */
-      if (newval == (offsetT) FAIL
-	  && (newval = negate_data_op (&temp, value)) == (offsetT) FAIL)
+      if (newimm == (unsigned int) FAIL
+	  && (newimm = negate_data_op (&temp, value)) == (unsigned int) FAIL)
 	{
 	  as_bad_where (fixP->fx_file, fixP->fx_line,
 			"invalid constant after fixup\n");
 	  break;
 	}
 
-      newval |= (temp & 0xfffff000);
-      md_number_to_chars (buf, newval, INSN_SIZE);
+      newimm |= (temp & 0xfffff000);
+      md_number_to_chars (buf, (valueT) newimm, INSN_SIZE);
       break;
 
      case BFD_RELOC_ARM_OFFSET_IMM:

@@ -1,7 +1,8 @@
 Tue Jan 27 12:24:32 1998  Ian Lance Taylor  <ian@cygnus.com>
 
-	* config/tc-arm.c (md_apply_fix3): Add casts before comparing
-	offsetT variable set to unsigned int value with FAIL.
+	* config/tc-arm.c (md_apply_fix3): Add new variable newimm to hold
+	validate_immediate return value in the right type for comparisons
+	to FAIL.
 
 Tue Jan 27 06:51:59 1998  Richard Henderson  <rth@cygnus.com>
 
