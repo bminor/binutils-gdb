@@ -91,5 +91,7 @@ if [istarget sh*-*-*] then {
     # Test DSP instructions
     run_dump_test "dsp"
 
+    run_dump_test "pic"
+
     run_dump_test "pcrel"
 }
