@@ -1,3 +1,7 @@
+2001-05-07  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* readelf.c (process_unwind): Remove const specifier.
+
 2001-04-27  Michal Svec <rebel@atrey.karlin.mff.cuni.cz>
 
 	* strings.c (isgraphic): Do not use isascii() unless it is needed

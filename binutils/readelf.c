@@ -3434,7 +3434,7 @@ process_unwind (file)
 	  strsec = section_headers + sec->sh_link;
 	  aux.strtab_size = strsec->sh_size;
 	  GET_DATA_ALLOC (strsec->sh_offset, aux.strtab_size,
-			  aux.strtab, const char *, "string table");
+			  aux.strtab, char *, "string table");
 	}
       else if (sec->sh_type == SHT_IA_64_UNWIND)
 	unwsec = sec;
