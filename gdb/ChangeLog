@@ -1,3 +1,7 @@
+2004-09-30  Mark Kettenis  <kettenis@chello.nl>
+
+	* fork-child.c: Update copyright year.  Fix coding style.
+
 2004-09-29  Mark Kettenis  <kettenis@gnu.org>
 
 	* defs.h (msavestring, mstrsave): Remove prototypes.
