@@ -1450,8 +1450,9 @@ use a new negative type number.
 @code{integer}.  32 bit signed integral type.
 
 @item -16
-@code{boolean}.  Only one bit is used, not sure about the actual size of the
-type.
+@code{boolean}.  32 bit type.  How is the truth value encoded?  Is it
+the least significant bit or is it a question of whether the whole value
+is zero or non-zero?
 
 @item -17
 @code{short real}.  IEEE single precision.
