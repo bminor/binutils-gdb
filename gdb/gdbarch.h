@@ -47,6 +47,7 @@ struct value;
 struct objfile;
 struct minimal_symbol;
 struct regcache;
+struct reggroup;
 
 extern struct gdbarch *current_gdbarch;
 
@@ -2659,6 +2660,12 @@ extern int gdbarch_address_class_name_to_type_flags_p (struct gdbarch *gdbarch);
 typedef int (gdbarch_address_class_name_to_type_flags_ftype) (struct gdbarch *gdbarch, char *name, int *type_flags_ptr);
 extern int gdbarch_address_class_name_to_type_flags (struct gdbarch *gdbarch, char *name, int *type_flags_ptr);
 extern void set_gdbarch_address_class_name_to_type_flags (struct gdbarch *gdbarch, gdbarch_address_class_name_to_type_flags_ftype *address_class_name_to_type_flags);
+
+/* Is a register in a group */
+
+typedef int (gdbarch_register_reggroup_p_ftype) (struct gdbarch *gdbarch, int regnum, struct reggroup *reggroup);
+extern int gdbarch_register_reggroup_p (struct gdbarch *gdbarch, int regnum, struct reggroup *reggroup);
+extern void set_gdbarch_register_reggroup_p (struct gdbarch *gdbarch, gdbarch_register_reggroup_p_ftype *register_reggroup_p);
 
 extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 

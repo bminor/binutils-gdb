@@ -26,6 +26,7 @@
 #include "gdbarch.h"
 #include "gdbcmd.h"
 #include "regcache.h"
+#include "reggroups.h"
 #include "gdb_assert.h"
 #include "gdb_string.h"
 #include "gdbcmd.h"		/* For maintenanceprintlist.  */
@@ -1479,7 +1480,7 @@ dump_endian_bytes (struct ui_file *file, enum bfd_endian endian,
 
 enum regcache_dump_what
 {
-  regcache_dump_none, regcache_dump_raw, regcache_dump_cooked
+  regcache_dump_none, regcache_dump_raw, regcache_dump_cooked, regcache_dump_groups
 };
 
 static void
@@ -1487,6 +1488,8 @@ regcache_dump (struct regcache *regcache, struct ui_file *file,
 	       enum regcache_dump_what what_to_dump)
 {
   struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
+  struct gdbarch *gdbarch = regcache->descr->gdbarch;
+  struct reggroup *const *groups = reggroups (gdbarch);
   int regnum;
   int footnote_nr = 0;
   int footnote_register_size = 0;
@@ -1593,27 +1596,32 @@ regcache_dump (struct regcache *regcache, struct ui_file *file,
 	}
 
       /* Type.  */
-      if (regnum < 0)
-	fprintf_unfiltered (file, " %-20s", "Type");
-      else
-	{
-	  static const char blt[] = "builtin_type";
-	  const char *t = TYPE_NAME (register_type (regcache->descr->gdbarch,
-						    regnum));
-	  if (t == NULL)
-	    {
-	      char *n;
-	      if (!footnote_register_type_name_null)
-		footnote_register_type_name_null = ++footnote_nr;
-	      xasprintf (&n, "*%d", footnote_register_type_name_null);
-	      make_cleanup (xfree, n);
-	      t = n;
-	    }
-	  /* Chop a leading builtin_type.  */
-	  if (strncmp (t, blt, strlen (blt)) == 0)
-	    t += strlen (blt);
-	  fprintf_unfiltered (file, " %-20s", t);
-	}
+      {
+	const char *t;
+	if (regnum < 0)
+	  t = "Type";
+	else
+	  {
+	    static const char blt[] = "builtin_type";
+	    t = TYPE_NAME (register_type (regcache->descr->gdbarch, regnum));
+	    if (t == NULL)
+	      {
+		char *n;
+		if (!footnote_register_type_name_null)
+		  footnote_register_type_name_null = ++footnote_nr;
+		xasprintf (&n, "*%d", footnote_register_type_name_null);
+		make_cleanup (xfree, n);
+		t = n;
+	      }
+	    /* Chop a leading builtin_type.  */
+	    if (strncmp (t, blt, strlen (blt)) == 0)
+	      t += strlen (blt);
+	  }
+	fprintf_unfiltered (file, " %-15s", t);
+      }
+
+      /* Leading space always present.  */
+      fprintf_unfiltered (file, " ");
 
       /* Value, raw.  */
       if (what_to_dump == regcache_dump_raw)
@@ -1644,6 +1652,26 @@ regcache_dump (struct regcache *regcache, struct ui_file *file,
 	      fprintf_unfiltered (file, "0x");
 	      dump_endian_bytes (file, TARGET_BYTE_ORDER, buf,
 				 REGISTER_VIRTUAL_SIZE (regnum));
+	    }
+	}
+
+      /* Group members.  */
+      if (what_to_dump == regcache_dump_groups)
+	{
+	  if (regnum < 0)
+	    fprintf_unfiltered (file, "Groups");
+	  else
+	    {
+	      int i;
+	      const char *sep = "";
+	      for (i = 0; groups[i] != NULL; i++)
+		{
+		  if (gdbarch_register_reggroup_p (gdbarch, regnum, groups[i]))
+		    {
+		      fprintf_unfiltered (file, "%s%s", sep, reggroup_name (groups[i]));
+		      sep = ",";
+		    }
+		}
 	    }
 	}
 
@@ -1696,6 +1724,12 @@ maintenance_print_cooked_registers (char *args, int from_tty)
   regcache_print (args, regcache_dump_cooked);
 }
 
+static void
+maintenance_print_register_groups (char *args, int from_tty)
+{
+  regcache_print (args, regcache_dump_groups);
+}
+
 void
 _initialize_regcache (void)
 {
@@ -1726,6 +1760,11 @@ Takes an optional file parameter.",
   add_cmd ("cooked-registers", class_maintenance,
 	   maintenance_print_cooked_registers,
 	   "Print the internal register configuration including cooked values.\
+Takes an optional file parameter.",
+	   &maintenanceprintlist);
+  add_cmd ("register-groups", class_maintenance,
+	   maintenance_print_register_groups,
+	   "Print the internal register configuration including each register's group.\
 Takes an optional file parameter.",
 	   &maintenanceprintlist);
 

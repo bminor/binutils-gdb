@@ -1,5 +1,24 @@
 2002-11-02  Andrew Cagney  <cagney@redhat.com>
 
+	* reggroups.h, reggroups.c: New files.
+	* regcache.c: Include "reggroups.h".
+	(enum regcache_dump_what): Add `regcache_dump_groups'.
+	(regcache_dump): Contract size of the "Type" column.  When
+	specified, dump the register's groups.
+	(maintenance_print_register_groups): New function.
+	(_initialize_regcache): Add command `maint print register-groups'.
+	* Makefile.in (COMMON_OBS): Add reggroups.o
+	(SFILES): Add reggroups.c.
+	(reggroups_h): Define.
+	(regcache.o, gdbarch.o): Update dependencies.
+	(reggroups.o): Specify dependencies.
+	* gdbarch.sh (register_reggroup_p): Add pure multi-arch method.
+	Add opaque declaration for `struct reggroup' in generated .h file.
+	Include "reggroups.h" in generated .c file.
+	gdbarch.h, gdbarch.c: Re-generate.
+
+2002-11-02  Andrew Cagney  <cagney@redhat.com>
+
 	* regcache.h (deprecated_read_register_gen): Rename
 	read_register_gen.
 	(deprecated_write_register_gen): Rename write_register_gen.
