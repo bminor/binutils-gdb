@@ -1,3 +1,8 @@
+2003-12-04  J. Brobecker  <brobecker@gnat.com>
+
+	* stabsread.c (read_type): Save a reference to types that are defined
+	as cross references to other types.
+
 2003-12-02  Roland McGrath  <roland@redhat.com>
 
 	* thread-db.c (enable_thread_event): Change return type to

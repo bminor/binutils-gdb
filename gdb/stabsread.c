@@ -1564,11 +1564,9 @@ again:
 	  *pp = from + 1;
 	}
 
-	/* Now check to see whether the type has already been
-	   declared.  This was written for arrays of cross-referenced
-	   types before we had TYPE_CODE_TARGET_STUBBED, so I'm pretty
-	   sure it is not necessary anymore.  But it might be a good
-	   idea, to save a little memory.  */
+        /* If this type has already been declared, then reuse the same
+           type, rather than allocating a new one.  This saves some
+           memory.  */
 
 	for (ppt = file_symbols; ppt; ppt = ppt->next)
 	  for (i = 0; i < ppt->nsyms; i++)
@@ -1582,6 +1580,8 @@ again:
 		{
 		  obstack_free (&objfile->type_obstack, type_name);
 		  type = SYMBOL_TYPE (sym);
+	          if (typenums[0] != -1)
+	            *dbx_lookup_type (typenums) = type;
 		  return type;
 		}
 	    }
