@@ -1,3 +1,25 @@
+Wed May 24 14:07:11 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* gencode.c (tab): Add bsrf and braf.
+
+Mon Apr 24 15:09:49 1995  Jason Molenda  (crash@cygnus.com)
+
+	* configure.in: use ../../bfd/hosts/std-host.h, not 
+	../bfd/hosts/std-host.h (which doesn't exist).
+
+Mon Mar 27 10:32:34 1995  J.T. Conklin  <jtc@rtl.cygnus.com>
+
+	* run.c: parse arguments with getopt().
+
+Sun Feb 26 15:27:24 1995  Steve Chamberlain  <sac@cygnus.com>
+
+	* configure.in: Use ../../bfd/hosts/std-host.h if specific
+	host unavailable.
+
+Mon Jan 23 16:10:58 1995  Torbjorn Granlund  <tege@rtl.cygnus.com>
+
+	* interp.c (macw): Sign extend MACH at bit 10 for non-saturating case.
+
 Sun Jan 22 13:55:36 1995  Torbjorn Granlund  <tege@rtl.cygnus.com>
 
 	* gencode.c (op_tab): Make MAC.W call macw, not abort.
