@@ -1,3 +1,8 @@
+2002-11-11  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* macro.c (get_any_string): Correct logic for not going beyond end
+	of in->ptr[].
+
 2002-11-10  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* config/tc-mmix.c (get_putget_operands): Mark both possible

@@ -366,7 +366,7 @@ get_any_string (idx, in, out, expand, pretend_quoted)
 
   if (idx < in->len)
     {
-      if (in->len > 2 && in->ptr[idx + 1] == '\'' && ISBASE (in->ptr[idx]))
+      if (in->len > idx + 2 && in->ptr[idx + 1] == '\'' && ISBASE (in->ptr[idx]))
 	{
 	  while (!ISSEP (in->ptr[idx]))
 	    sb_add_char (out, in->ptr[idx++]);
