@@ -9,3 +9,13 @@
 extern char *alloca ();
 #endif
 #endif
+
+#if defined (USG) && defined (TIOCGWINSZ)
+#include <sys/stream.h>
+#if defined (USGr4) || defined (USGr3)
+#include <sys/ptem.h>
+#endif /* USGr4 */
+#endif /* USG && TIOCGWINSZ */
+
+#include <dirent.h>
+typedef struct dirent dirent;
