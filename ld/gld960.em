@@ -131,7 +131,7 @@ struct ld_emulation_xfer_struct ld_gld960_emulation =
   gld960_choose_target,
   before_allocation_default,
   gld960_get_script,
-  "lnk960",
+  "960",
   ""
 };
 EOF

@@ -7,12 +7,12 @@ SECTIONS
 	*(.text) 
 	${RELOCATING+ _etext = .};
     }  
-    .data :
+    .data SIZEOF(.text) + ADDR(.text):
     { 
  	*(.data) 
 	${RELOCATING+ _edata = .};
     }  
-    .bss :
+    .bss SIZEOF(.data) + ADDR(.data):
     { 
 	${RELOCATING+ _bss_start = .};
 	*(.bss)	 
