@@ -1,3 +1,9 @@
+Fri Dec 15 16:13:03 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-configure: If an mpw-config.in generated a file mk.sed,
+	use it as input to sedit the generated MPW makefile.
+	* mpw-README: Add a suggestion about Gestalt.h.
+
 Wed Dec 13 16:43:51 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* config.sub: Accept *-*-ieee*.
