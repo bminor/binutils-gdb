@@ -1,5 +1,8 @@
 Thu Aug 19 18:18:59 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* gdb.t20/gdbme.cc: Do some calculation with v.x, to confound
+	optimizers.
+
 	* scope.exp: Change "bad value for localval" messages so each one
 	is unique.
 
