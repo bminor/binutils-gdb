@@ -1,3 +1,10 @@
+2004-01-11  Kazu Hirata  <kazu@cs.umass.edu>
+
+	* elf32-cris.c (cris_elf_gc_sweep_hook): Return early if no
+	dynamic object is present.  Declare r_symndx and h in an inner
+	scope.
+	* elf32-vax.c (elf_vax_gc_sweep_hook): Likewise.
+
 2004-01-09  Daniel Jacobowitz  <drow@mvista.com>
 
 	* elf32-arm.h (struct elf32_arm_relocs_copied): Remove pc_count.
@@ -32,7 +39,7 @@
 
 2004-01-08  Kazu Hirata  <kazu@cs.umass.edu>
 
-	* elf32-m68k.c (elf_m68k_gc_sweep_hook): Terminate early
+	* elf32-m68k.c (elf_m68k_gc_sweep_hook): Return early
 	if no dynamic object is present.  Declare r_symndx and h in an
 	inner scope.
 
