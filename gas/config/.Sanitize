@@ -171,6 +171,9 @@ else
 		fi
 		mv new $f
 	done
+	if [ -n "${verbose}" ]; then
+		echo ""
+	fi
 fi
 
 sh3e_files="tc-sh.c"
@@ -192,6 +195,9 @@ else
 		fi
 		mv new $f
 	done
+	if [ -n "${verbose}" ]; then
+		echo ""
+	fi
 fi
 
 # End of file.

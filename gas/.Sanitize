@@ -124,6 +124,9 @@ else
 		fi
 		mv new $f
 	done
+	if [ -n "${verbose}" ]; then
+		echo ""
+	fi
 fi
 
 sh3e_files="ChangeLog"
@@ -145,6 +148,9 @@ else
 		fi
 		mv new $f
 	done
+	if [ -n "${verbose}" ]; then
+		echo ""
+	fi
 fi
 
 rce_files="configure.in as.c configure ChangeLog Makefile.in"
