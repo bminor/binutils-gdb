@@ -1,3 +1,8 @@
+2003-07-22  Nick Clifton  <nickc@redhat.com>
+
+	* coffcode.h (coff_slurp_symbol_table): Add C_TCSYM and C_ECOML to
+	expected RS6000 storage classes.
+
 2003-07-21  H.J. Lu <hongjiu.lu@intel.com>
 
 	* elfxx-ia64.c (elfNN_ia64_size_dynamic_sections): Mark
