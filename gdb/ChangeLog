@@ -1,3 +1,10 @@
+2002-07-24  Daniel Jacobowitz  <drow@mvista.com>
+
+	* ui-file.c (struct tee_file, tee_file_new, tee_file_delete)
+	(tee_file_flush, tee_file_write, tee_file_fputs)
+	(tee_file_isatty): New.
+	* ui-file.h (tee_file_new): Add prototype.
+
 2002-07-24  Aidan Skinner <aidan@velvet.net>
 
 	* ada-lang.c: Change k&r style function definitions to prototyped

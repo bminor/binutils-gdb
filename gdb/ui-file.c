@@ -483,3 +483,97 @@ gdb_fopen (char *name, char *mode)
     return NULL;
   return stdio_file_new (f, 1);
 }
+
+/* ``struct ui_file'' implementation that maps onto two ui-file objects.  */
+
+static ui_file_write_ftype tee_file_write;
+static ui_file_fputs_ftype tee_file_fputs;
+static ui_file_isatty_ftype tee_file_isatty;
+static ui_file_delete_ftype tee_file_delete;
+static ui_file_flush_ftype tee_file_flush;
+
+static int tee_file_magic;
+
+struct tee_file
+  {
+    int *magic;
+    struct ui_file *one, *two;
+    int close_one, close_two;
+  };
+
+struct ui_file *
+tee_file_new (struct ui_file *one, int close_one,
+	      struct ui_file *two, int close_two)
+{
+  struct ui_file *ui_file = ui_file_new ();
+  struct tee_file *tee = xmalloc (sizeof (struct tee_file));
+  tee->magic = &tee_file_magic;
+  tee->one = one;
+  tee->two = two;
+  tee->close_one = close_one;
+  tee->close_two = close_two;
+  set_ui_file_data (ui_file, tee, tee_file_delete);
+  set_ui_file_flush (ui_file, tee_file_flush);
+  set_ui_file_write (ui_file, tee_file_write);
+  set_ui_file_fputs (ui_file, tee_file_fputs);
+  set_ui_file_isatty (ui_file, tee_file_isatty);
+  return ui_file;
+}
+
+static void
+tee_file_delete (struct ui_file *file)
+{
+  struct tee_file *tee = ui_file_data (file);
+  if (tee->magic != &tee_file_magic)
+    internal_error (__FILE__, __LINE__,
+		    "tee_file_delete: bad magic number");
+  if (tee->close_one)
+    ui_file_delete (tee->one);
+  if (tee->close_two)
+    ui_file_delete (tee->two);
+
+  xfree (tee);
+}
+
+static void
+tee_file_flush (struct ui_file *file)
+{
+  struct tee_file *tee = ui_file_data (file);
+  if (tee->magic != &tee_file_magic)
+    internal_error (__FILE__, __LINE__,
+		    "tee_file_flush: bad magic number");
+  tee->one->to_flush (tee->one);
+  tee->two->to_flush (tee->two);
+}
+
+static void
+tee_file_write (struct ui_file *file, const char *buf, long length_buf)
+{
+  struct tee_file *tee = ui_file_data (file);
+  if (tee->magic != &tee_file_magic)
+    internal_error (__FILE__, __LINE__,
+		    "tee_file_write: bad magic number");
+  ui_file_write (tee->one, buf, length_buf);
+  ui_file_write (tee->two, buf, length_buf);
+}
+
+static void
+tee_file_fputs (const char *linebuffer, struct ui_file *file)
+{
+  struct tee_file *tee = ui_file_data (file);
+  if (tee->magic != &tee_file_magic)
+    internal_error (__FILE__, __LINE__,
+		    "tee_file_fputs: bad magic number");
+  tee->one->to_fputs (linebuffer, tee->one);
+  tee->two->to_fputs (linebuffer, tee->two);
+}
+
+static int
+tee_file_isatty (struct ui_file *file)
+{
+  struct tee_file *tee = ui_file_data (file);
+  if (tee->magic != &tee_file_magic)
+    internal_error (__FILE__, __LINE__,
+		    "tee_file_isatty: bad magic number");
+  return (0);
+}
