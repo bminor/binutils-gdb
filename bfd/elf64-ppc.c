@@ -6354,13 +6354,16 @@ static bfd_boolean
 ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 {
   struct ppc_stub_hash_entry *stub_entry;
+  struct bfd_link_info *info;
   struct ppc_link_hash_table *htab;
   bfd_vma off;
   int size;
 
   /* Massage our args to the form they really have.  */
   stub_entry = (struct ppc_stub_hash_entry *) gen_entry;
-  htab = in_arg;
+  info = in_arg;
+
+  htab = ppc_hash_table (info);
 
   if (stub_entry->stub_type == ppc_stub_plt_call)
     {
@@ -6427,6 +6430,9 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	      br_entry->iter = htab->stub_iteration;
 	      br_entry->offset = htab->brlt->_raw_size;
 	      htab->brlt->_raw_size += 8;
+
+	      if (info->shared)
+		htab->relbrlt->_raw_size += sizeof (Elf64_External_Rela);
 	    }
 
 	  stub_entry->stub_type += ppc_stub_plt_branch - ppc_stub_long_branch;
@@ -7007,8 +7013,13 @@ ppc64_elf_size_stubs (bfd *output_bfd,
 	  }
       htab->brlt->_raw_size = 0;
       htab->brlt->_cooked_size = 0;
+      if (info->shared)
+	{
+	  htab->relbrlt->_raw_size = 0;
+	  htab->relbrlt->_cooked_size = 0;
+	}
 
-      bfd_hash_traverse (&htab->stub_hash_table, ppc_size_one_stub, htab);
+      bfd_hash_traverse (&htab->stub_hash_table, ppc_size_one_stub, info);
 
       /* Ask the linker to do its stuff.  */
       (*htab->layout_sections_again) ();
@@ -7209,6 +7220,13 @@ ppc64_elf_build_stubs (bfd_boolean emit_stub_syms,
       htab->brlt->contents = bfd_zalloc (htab->brlt->owner,
 					 htab->brlt->_raw_size);
       if (htab->brlt->contents == NULL)
+	return FALSE;
+    }
+  if (info->shared && htab->relbrlt->_raw_size != 0)
+    {
+      htab->relbrlt->contents = bfd_zalloc (htab->relbrlt->owner,
+					    htab->relbrlt->_raw_size);
+      if (htab->relbrlt->contents == NULL)
 	return FALSE;
     }
 

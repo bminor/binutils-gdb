@@ -1,5 +1,13 @@
 2003-11-04  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-ppc.c (ppc_size_one_stub): Size relbrlt.  Accept info arg
+	rather than htab.
+	(ppc64_elf_size_stubs): Adjust ppc_size_one_stub traversal.  Zero
+	relbrlt size.
+	(ppc64_elf_build_stubs): Allocate space for relbrlt.
+
+2003-11-04  Alan Modra  <amodra@bigpond.net.au>
+
 	* bfd-in.h (_bfd_elf_tls_setup): Declare.
 	* bfd-in2.h: Regenerate.
 	* elf-bfd.h (struct elf_link_tls_segment): Delete.
