@@ -27,6 +27,7 @@
 #include "gdbcore.h"
 #include "floatformat.h"
 #include "regcache.h"
+#include "gdb_assert.h"
 
 
 /* FIXME: Eliminate the next two functions when we have the time to
@@ -160,22 +161,25 @@ static void
 print_i387_value (char *raw)
 {
   DOUBLEST value;
+  int len = TARGET_LONG_DOUBLE_BIT / TARGET_CHAR_BIT;
+  char *tmp = alloca (len);
 
-  /* Avoid call to floatformat_to_doublest if possible to preserve as
-     much information as possible.  */
+  /* This code only works on targets where ... */
+  gdb_assert (TARGET_LONG_DOUBLE_FORMAT == &floatformat_i387_ext);
 
-#ifdef HAVE_LONG_DOUBLE
-  if (sizeof (value) == sizeof (long double)
-      && HOST_LONG_DOUBLE_FORMAT == &floatformat_i387_ext)
-    {
-      /* Copy straight over, but take care of the padding.  */
-      memcpy (&value, raw, FPU_REG_RAW_SIZE);
-      memset ((char *) &value + FPU_REG_RAW_SIZE, 0,
-	      sizeof (value) - FPU_REG_RAW_SIZE);
-    }
-  else
-#endif
-    floatformat_to_doublest (&floatformat_i387_ext, raw, &value);
+  /* Take care of the padding.  FP reg is 80 bits.  The same value in
+     memory is 96 bits. */
+  gdb_assert (FPU_REG_RAW_SIZE < len);
+  memcpy (&tmp, raw, FPU_REG_RAW_SIZE);
+  memset (&tmp + FPU_REG_RAW_SIZE, 0, len - FPU_REG_RAW_SIZE);
+  
+  /* Extract the value as a DOUBLEST.  */
+  /* Use extract_floating() rather than floatformat_to_doublest().
+     The latter is lossy in nature.  Once GDB gets a host/target
+     independent and non-lossy FP it will become possible to bypass
+     extract_floating() and call floatformat*() directly.  Note also
+     the assumptions about TARGET_LONG_DOUBLE above.  */
+  value = extract_floating (tmp, len);
 
   /* We try to print 19 digits.  The last digit may or may not contain
      garbage, but we'd better print one too many.  We need enough room
