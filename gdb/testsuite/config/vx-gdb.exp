@@ -49,7 +49,7 @@ proc gdb_load { arg } {
 #    spawn_vxgdb
     set result 0
 
-    if [vxworks_ld $shell_id $arg]<0 then {
+    if { [vxworks_ld $shell_id $arg] != 0 } {
 	perror "Couldn't load $arg"
 	return -1
     }
