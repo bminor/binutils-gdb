@@ -1,5 +1,20 @@
 2003-01-20  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
+	* config/tc-s390.c (elf_suffix_type): Add suffix enums for gotoff,
+	gotplt and pltoff relocations.
+	(s390_elf_suffix): Add suffix strings for gotoff, gotplt and pltoff.
+	(s390_elf_cons): Map new lenght/elf suffix combinations for gotoff,
+	gotplt and pltoff to bfd relocations.
+	(md_gather_operands): Map new instruction operand/elf suffix
+	combinations to bfd relocations.
+	(tc_s390_fix_adjustable): Add new gotoff, gotplt and pltoff relocations
+	to the list of unadjustable relocations.
+	(tc_s390_force_relocation): Always emit relocations for gotoff, gotplt
+	and pltoff relocations.
+	(md_apply_fix3): Add the new relocations.
+
+2003-01-20  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
 	* config/tc-s390.c (md_apply_fix3): Emit error message for relocations
 	with a subsy symbol.
 
