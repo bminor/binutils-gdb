@@ -179,7 +179,8 @@ ld [ -o @var{output} ]  @var{objfile}@dots{}
   [ -r | -Ur ]  [ -S ]  [ -s ]  [ -sort-common ] [ -stats ]
   [ -T @var{commandfile} ]
   [ -Ttext @var{org} ]  [ -Tdata @var{org} ]
-  [ -Tbss @var{org} ]  [ -t ]  [ -u @var{symbol}]  [-V]  [-v]  [ -version ]
+  [ -Tbss @var{org} ]  [ -t ] [ -traditional-format ]
+  [ -u @var{symbol}]  [-V]  [-v]  [ -version ]
   [ -warn-common ]  [ -y @var{symbol} ]  [ -X ]  [-x ]
 @end smallexample
 
@@ -596,6 +597,21 @@ preceding @samp{-L} options.  Multiple @samp{-T} options accumulate.
 @cindex input files, displaying
 @item -t 
 Print the names of the input files as @code{ld} processes them.
+
+@kindex -traditional-format
+@cindex traditional format
+@item -traditional-format
+For some targets, the output of @code{ld} is different in some ways from
+the output of some existing linker.  This switch requests @code{ld} to
+use the traditional format instead.
+
+@cindex dbx
+For example, on SunOS, @code{ld} combines duplicate entries in the
+symbol string table.  This can reduce the size of an output file with
+full debugging information by over 30 percent.  Unfortunately, the SunOS
+@code{dbx} program can not read the resulting program (@code{gdb} has no
+trouble).  The @samp{-traditional-format} switch tells @code{ld} to not
+combine duplicate entries.
 
 @item -u @var{symbol}
 @kindex -u @var{symbol}

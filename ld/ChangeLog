@@ -1,3 +1,13 @@
+Wed Jun 15 01:54:54 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ld.h (ld_config_type): Add new field traditional_format.
+	* lexsup.c (parse_args): Add traditional_format to longopts, and
+	handle it.
+	* ldmain.c (main): Initialize config.traditional_format to false.
+	* ldlang.c (ldlang_open_output): Set BFD_TRADITIONAL_FORMAT in BFD
+	flags of output_bfd according to config.traditional_format.
+	* ld.texinfo: Document -traditional-format.
+
 Tue Jun 14 23:10:07 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* ldctor.c (ldctor_add_entry): Add entries to a set in the order

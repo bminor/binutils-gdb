@@ -889,6 +889,10 @@ ldlang_open_output (statement)
 	output_bfd->flags |= WP_TEXT;
       else
 	output_bfd->flags &= ~WP_TEXT;
+      if (config.traditional_format)
+	output_bfd->flags |= BFD_TRADITIONAL_FORMAT;
+      else
+	output_bfd->flags &= ~BFD_TRADITIONAL_FORMAT;
       break;
 
     case lang_target_statement_enum:

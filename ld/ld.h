@@ -61,6 +61,9 @@ typedef struct
   boolean magic_demand_paged;
   boolean make_executable;
 
+  /* If true, request BFD to use the traditional format.  */
+  boolean traditional_format;
+
   /* If true, doing a dynamic link.  */
   boolean dynamic_link;
 

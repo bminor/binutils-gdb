@@ -99,11 +99,13 @@ parse_args (argc, argv)
     {"Tdata", required_argument, NULL, OPTION_TDATA},
 #define OPTION_TTEXT 167
     {"Ttext", required_argument, NULL, OPTION_TTEXT},
-#define OPTION_UR 168
+#define OPTION_TRADITIONAL_FORMAT 168
+    {"traditional-format", no_argument, NULL, OPTION_TRADITIONAL_FORMAT},
+#define OPTION_UR 169
     {"Ur", no_argument, NULL, OPTION_UR},
-#define OPTION_VERSION 169
+#define OPTION_VERSION 170
     {"version", no_argument, NULL, OPTION_VERSION},
-#define OPTION_WARN_COMMON 170
+#define OPTION_WARN_COMMON 171
     {"warn-common", no_argument, NULL, OPTION_WARN_COMMON},
     {NULL, no_argument, NULL, 0}
   };
@@ -278,6 +280,9 @@ parse_args (argc, argv)
 	  break;
 	case OPTION_TTEXT:
 	  set_section_start (".text", optarg);
+	  break;
+	case OPTION_TRADITIONAL_FORMAT:
+	  config.traditional_format = true;
 	  break;
 	case OPTION_UR:
 	  link_info.relocateable = true;

@@ -158,6 +158,7 @@ main (argc, argv)
 
   /* Initialize the data about options.  */
   trace_files = trace_file_tries = version_printed = false;
+  config.traditional_format = false;
   config.build_constructors = true;
   config.dynamic_link = false;
   command_line.force_common_definition = false;
