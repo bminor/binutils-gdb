@@ -1,3 +1,23 @@
+2001-05-07  Andrew Cagney  <ac131313@redhat.com>
+
+	* ui-out.h (list_begin_ftype, list_end_ftype): Rename argument
+	``list_flag'' to ``depth''.
+	* ui-out.c (default_list_begin, default_list_end): Update.
+	(uo_list_begin, uo_list_end): Update.
+	(MAX_UI_OUT_LEVELS): Define.
+	(struct ui_out_level): Define.
+	(top-level): Include "gdb_assert.h".
+	(struct ui_out): Add fields ``level'' and ``levels''.  Delete
+ 	fields ``list_flag'' and ``field_count''.
+	(ui_out_new): Update.
+	(verify_field_proper_position): Update.
+	(current_level, push_level, pop_level): New functions.
+	(ui_out_list_begin): Use push_level.
+	(ui_out_list_end): Use pop_level.
+	(ui_out_field_int): Use current_level.
+	(ui_out_field_skip): Ditto.
+	(ui_out_field_fmt): Ditto.
+
 2001-05-08  Michael Snyder  <msnyder@redhat.com>
 
 	* language.c (longest_local_hex_string_custom): Strlen test is 

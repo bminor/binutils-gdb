@@ -162,9 +162,11 @@ typedef void (table_body_ftype) (struct ui_out * uiout);
 typedef void (table_end_ftype) (struct ui_out * uiout);
 typedef void (table_header_ftype) (struct ui_out * uiout, int width,
 				   enum ui_align align, char *colhdr);
+/* Note: level 0 is the top-level so LEVEL is always greater than
+   zero. */
 typedef void (list_begin_ftype) (struct ui_out * uiout,
-				 int list_flag, char *lstid);
-typedef void (list_end_ftype) (struct ui_out * uiout, int list_flag);
+				 int level, char *lstid);
+typedef void (list_end_ftype) (struct ui_out * uiout, int level);
 typedef void (field_int_ftype) (struct ui_out * uiout, int fldno, int width,
 			     enum ui_align align, char *fldname, int value);
 typedef void (field_skip_ftype) (struct ui_out * uiout, int fldno, int width,
