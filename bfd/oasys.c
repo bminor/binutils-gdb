@@ -21,7 +21,9 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* $Id$ */
 
 #define UNDERSCORE_HACK 1
-#define offsetof(type, identifier) (size_t) &(((type *) 0)->identifier) 
+/* I had to prepend o_ b/c this name conflicts with a macro in 
+   the iris 3.3 stddef.h... */
+#define o_offsetof(type, identifier) (size_t) &(((type *) 0)->identifier) 
 #include <ansidecl.h>
 #include <sysdep.h>
 
@@ -874,13 +876,13 @@ DEFUN(oasys_write_syms, (abfd),
       oasys_write_record(abfd, 	
 			 oasys_record_is_local_enum,
 			 (oasys_record_union_type *) &symbol,
-			 offsetof(oasys_symbol_record_type, name[0]) + l);
+			 o_offsetof(oasys_symbol_record_type, name[0]) + l);
     }
     else {
       oasys_write_record(abfd, 	
 			 oasys_record_is_symbol_enum,
 			 (oasys_record_union_type *) &symbol,
-			 offsetof(oasys_symbol_record_type, name[0]) + l);
+			 o_offsetof(oasys_symbol_record_type, name[0]) + l);
     }
     g->value = index-1;
   }
@@ -935,7 +937,7 @@ DEFUN(oasys_write_header, (abfd),
   oasys_write_record(abfd,
 		     oasys_record_is_header_enum,
 		     (oasys_record_union_type *)&r,
-		     offsetof(oasys_header_record_type, description[0]));
+		     o_offsetof(oasys_header_record_type, description[0]));
 
 
 
@@ -1057,7 +1059,7 @@ DEFUN(oasys_write_data, (abfd),
 		       relative relocation ? */
 		    if (r->section != (asection*)NULL) 
 			{
-			  /* The relent has a section attatched, so it must be section
+			  /* The relent has a section attached, so it must be section
 			     relative */
 			  rel_byte |= RELOCATION_TYPE_REL;
 			  rel_byte |= r->section->output_section->target_index;
@@ -1067,7 +1069,7 @@ DEFUN(oasys_write_data, (abfd),
 			{
 			  asymbol *p = *(r->sym_ptr_ptr);
 
-			  /* If this symbol has a section attatched, then it
+			  /* If this symbol has a section attached, then it
 			     has already been resolved.  Change from a symbol
 			     ref to a section ref */
 			  if(p->section != (asection *)NULL) {

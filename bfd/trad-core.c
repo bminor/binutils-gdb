@@ -1,9 +1,33 @@
-/* BFD back end for traditional Unix core files (U-area and sections, raw)
-   Copyright (C) 1988, 1989, 1991 Free Software Foundation, Inc.  */
+/* BFD back end for traditional Unix core files (U-area and raw sections)
+   Copyright (C) 1988, 1989, 1991 Free Software Foundation, Inc.
+   Written by John Gilmore of Cygnus Support.
+
+This file is part of BFD, the Binary File Descriptor library.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* This file does not define a particular back-end, but it defines routines
    that can be used by other back-ends.  */
+
 #include <sysdep.h>
+
+/* No core file support yet on any iris, so dump all this code.
+   We don't appear to grok foreign core files on any system, since u
+   will have different sizes on different machines anyway. */
+#if (HOST_SYS != IRIX3_SYS) && (HOST_SYS != IRIX4_SYS)
+
 #include "bfd.h"
 #include <stdio.h>
 #include "libbfd.h"
@@ -18,7 +42,6 @@
 
 #include <sys/user.h>		/* After a.out.h  */
 #include <sys/file.h>
-#include <sys/stat.h>
 
 #include <errno.h>
 
@@ -42,7 +65,7 @@ bfd_target *
 trad_unix_core_file_p (abfd)
      bfd *abfd;
 {
-#if HOST_SYS == SUN_SYS
+#if HOST_SYS == SUN4_SYS
   return 0;
 #else
   int val;
@@ -113,8 +136,12 @@ loser2:
 
   /* What a hack... we'd like to steal it from the exec file,
      since the upage does not seem to provide it.  FIXME.  */
-  core_datasec (abfd)->vma = TEXT_START_ADDR + (NBPG * u.u_tsize);
-  core_stacksec (abfd)->vma = STACK_END_ADDR - (NBPG * u.u_ssize);
+#ifdef HOST_DATA_START_ADDR
+  core_datasec (abfd)->vma = HOST_DATA_START_ADDR;
+#else
+  core_datasec (abfd)->vma = HOST_TEXT_START_ADDR + (NBPG * u.u_tsize);
+#endif
+  core_stacksec (abfd)->vma = HOST_STACK_END_ADDR - (NBPG * u.u_ssize);
   core_regsec (abfd)->vma = -1;
 
   core_datasec (abfd)->filepos = NBPG * UPAGES;
@@ -160,3 +187,5 @@ trad_unix_core_file_matches_executable_p  (core_bfd, exec_bfd)
 {
   return true;		/* FIXME, We have no way of telling at this point */
 }
+
+#endif /* (HOST_SYS != IRIX3_SYS) && (HOST_SYS != IRIX4_SYS) */
