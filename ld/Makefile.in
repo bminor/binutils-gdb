@@ -424,10 +424,15 @@ site.exp: ./config.status Makefile
 	-@rm -f ./tmp?
 
 check: ld.new site.exp
-	$(RUNTEST) --tool ld \
-	--srcdir $(srcdir)/testsuite $(RUNTESTFLAGS) \
-	CC="$(RUNTEST_CC)" CFLAGS="$(RUNTEST_CFLAGS)" \
-	CXX="$(RUNTEST_CXX)" CXXFLAGS="$(RUNTEST_CXXFLAGS)"
+	@if [ $(host_canonical) = $(target_canonical) ]; then \
+		$(RUNTEST) --tool ld \
+		--srcdir $(srcdir)/testsuite $(RUNTESTFLAGS) \
+		CC="$(RUNTEST_CC)" CFLAGS="$(RUNTEST_CFLAGS)" \
+		CXX="$(RUNTEST_CXX)" CXXFLAGS="$(RUNTEST_CXXFLAGS)" ;\
+		if [ $$? != 0 ]; then exit 1; else true; fi ;\
+	else \
+		echo No cross-linker tests yet. ;\
+	fi
 
 installcheck:
 .PHONY: check installcheck

@@ -1,3 +1,8 @@
+Fri Jan 28 12:58:45 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* Makefile.in (check): Don't bother running any tests of
+	cross-linker until the test suite no longer assumes native mode.
+
 Thu Jan 27 17:19:54 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 	* ldlang.c (print_one_symbol, print_input_section):  Print
