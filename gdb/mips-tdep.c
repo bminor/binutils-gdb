@@ -1259,7 +1259,7 @@ mips_next_pc (CORE_ADDR pc)
 /* Guaranteed to set fci->saved_regs to some values (it never leaves it
    NULL).  */
 
-void
+static void
 mips_find_saved_regs (struct frame_info *fci)
 {
   int ireg;
@@ -1435,6 +1435,23 @@ mips_find_saved_regs (struct frame_info *fci)
       }
 
   fci->saved_regs[PC_REGNUM] = fci->saved_regs[RA_REGNUM];
+}
+
+/* Set up the 'saved_regs' array.  This is a data structure containing
+   the addresses on the stack where each register has been saved, for
+   each stack frame.  Registers that have not been saved will have
+   zero here.  The stack pointer register is special:  rather than the
+   address where the stack register has been saved, saved_regs[SP_REGNUM]
+   will have the actual value of the previous frame's stack register.  */
+
+static void
+mips_frame_init_saved_regs (struct frame_info *frame)
+{
+  if (frame->saved_regs == NULL)
+    {
+      mips_find_saved_regs (frame);
+    }
+  frame->saved_regs[SP_REGNUM] = frame->frame;
 }
 
 static CORE_ADDR
@@ -4715,6 +4732,7 @@ mips_gdbarch_init (struct gdbarch_info info,
 
   /* Initialize a frame */
   set_gdbarch_init_extra_frame_info (gdbarch, mips_init_extra_frame_info);
+  set_gdbarch_frame_init_saved_regs (gdbarch, mips_frame_init_saved_regs);
 
   /* MIPS version of CALL_DUMMY */
 
