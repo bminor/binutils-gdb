@@ -38,7 +38,7 @@ host_tools="texinfo byacc flex bison binutils ld gas gcc gdb make patch
 # these libraries are built for the target environment, and are built after
 # the host libraries and the host tools (which may be a cross compiler)
 #
-target_libs="libm xiberty newlib libio librx libg++"
+target_libs="libm xiberty libgloss newlib libio librx libg++"
 
 
 # these tools are built using the target libs, and are intended to run only
@@ -66,7 +66,7 @@ native_only="autoconf cvs emacs emacs19 fileutils find grep groff gzip hello ind
 
 # directories to be built in a cross environment only
 #
-cross_only="xiberty newlib"
+cross_only="xiberty libgloss newlib"
 
 ## All tools belong in one of the four categories, and are assigned above
 ## We assign ${configdirs} this way to remove all embedded newlines.  This
