@@ -1,5 +1,5 @@
 /* input_scrub.c - Break up input buffers into whole numbers of lines.
-   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 96, 1997
+   Copyright (C) 1987, 90, 91, 92, 93, 94, 95, 96, 97, 2000
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -17,7 +17,7 @@
    You should have received a copy of the GNU General Public License
    along with GAS; see the file COPYING.  If not, write to the Free
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA. */
+   02111-1307, USA.  */
 
 #include <errno.h>		/* Need this to make errno declaration right */
 #include "as.h"
@@ -52,18 +52,18 @@
  */
 
 #define BEFORE_STRING ("\n")
-#define AFTER_STRING ("\0")	/* memcpy of 0 chars might choke. */
+#define AFTER_STRING ("\0")	/* memcpy of 0 chars might choke.  */
 #define BEFORE_SIZE (1)
 #define AFTER_SIZE  (1)
 
-static char *buffer_start;	/*->1st char of full buffer area. */
-static char *partial_where;	/*->after last full line in buffer. */
-static int partial_size;	/* >=0. Number of chars in partial line in buffer. */
+static char *buffer_start;	/*->1st char of full buffer area.  */
+static char *partial_where;	/*->after last full line in buffer.  */
+static int partial_size;	/* >=0. Number of chars in partial line in buffer.  */
 static char save_source[AFTER_SIZE];
 /* Because we need AFTER_STRING just after last */
 /* full line, it clobbers 1st part of partial */
 /* line. So we preserve 1st part of partial */
-/* line here. */
+/* line here.  */
 static unsigned int buffer_length;	/* What is the largest size buffer that */
 /* input_file_give_next_buffer() could */
 /* return to us? */
@@ -84,18 +84,18 @@ int macro_nest;
    but the latest one are saved off in a struct input_save.  These files remain
    open, so we are limited by the number of open files allowed by the
    underlying OS. We may also sequentially read more than one source file in an
-   assembly. */
+   assembly.  */
 
 /* We must track the physical file and line number for error messages. We also
    track a "logical" file and line number corresponding to (C?)  compiler
    source line numbers.  Whenever we open a file we must fill in
-   physical_input_file. So if it is NULL we have not opened any files yet. */
+   physical_input_file. So if it is NULL we have not opened any files yet.  */
 
 static char *physical_input_file;
 static char *logical_input_file;
 
-typedef unsigned int line_numberT;	/* 1-origin line number in a source file. */
-/* A line ends in '\n' or eof. */
+typedef unsigned int line_numberT;	/* 1-origin line number in a source file.  */
+/* A line ends in '\n' or eof.  */
 
 static line_numberT physical_input_line;
 static int logical_input_line;
@@ -125,13 +125,13 @@ static char *input_scrub_pop PARAMS ((struct input_save *arg));
 static void as_1_char PARAMS ((unsigned int c, FILE * stream));
 
 /* Saved information about the file that .include'd this one.  When we hit EOF,
-   we automatically pop to that file. */
+   we automatically pop to that file.  */
 
 static struct input_save *next_saved_file;
 
 /* Push the state of input reading and scrubbing so that we can #include.
    The return value is a 'void *' (fudged for old compilers) to a save
-   area, which can be restored by passing it to input_scrub_pop(). */
+   area, which can be restored by passing it to input_scrub_pop().  */
 static struct input_save *
 input_scrub_push (saved_position)
      char *saved_position;
@@ -210,10 +210,10 @@ input_scrub_begin ()
   buffer_start = xmalloc ((BEFORE_SIZE + buffer_length + buffer_length + AFTER_SIZE));
   memcpy (buffer_start, BEFORE_STRING, (int) BEFORE_SIZE);
 
-  /* Line number things. */
+  /* Line number things.  */
   logical_input_line = -1;
   logical_input_file = (char *) NULL;
-  physical_input_file = NULL;	/* No file read yet. */
+  physical_input_file = NULL;	/* No file read yet.  */
   next_saved_file = NULL;	/* At EOF, don't pop to any other file */
   do_scrub_begin (flag_m68k_mri);
 }
@@ -229,9 +229,9 @@ input_scrub_end ()
     }
 }
 
-/* Start reading input from a new file. */
+/* Start reading input from a new file.  */
 
-char *				/* Return start of caller's part of buffer. */
+char *				/* Return start of caller's part of buffer.  */
 input_scrub_new_file (filename)
      char *filename;
 {
@@ -243,10 +243,9 @@ input_scrub_new_file (filename)
   return (buffer_start + BEFORE_SIZE);
 }
 
-
 /* Include a file from the current file.  Save our state, cause it to
    be restored on EOF, and begin handling a new file.  Same result as
-   input_scrub_new_file. */
+   input_scrub_new_file.  */
 
 char *
 input_scrub_include_file (filename, position)
@@ -305,7 +304,7 @@ char *
 input_scrub_next_buffer (bufp)
      char **bufp;
 {
-  register char *limit;		/*->just after last char of buffer. */
+  register char *limit;		/*->just after last char of buffer.  */
 
   if (sb_index >= 0)
     {
@@ -348,7 +347,7 @@ input_scrub_next_buffer (bufp)
 				       + partial_size);
   if (limit)
     {
-      register char *p;		/* Find last newline. */
+      register char *p;		/* Find last newline.  */
 
       for (p = limit - 1; *p != '\n'; --p)
 	;
@@ -397,11 +396,11 @@ input_scrub_next_buffer (bufp)
       /* Tell the listing we've finished the file.  */
       LISTING_EOF ();
 
-      /* If we should pop to another file at EOF, do it. */
+      /* If we should pop to another file at EOF, do it.  */
       if (next_saved_file)
 	{
 	  *bufp = input_scrub_pop (next_saved_file);	/* Pop state */
-	  /* partial_where is now correct to return, since we popped it. */
+	  /* partial_where is now correct to return, since we popped it.  */
 	}
     }
   return (partial_where);
@@ -412,9 +411,8 @@ input_scrub_next_buffer (bufp)
  * messages and so on.
  */
 
-
 int
-seen_at_least_1_file ()		/* TRUE if we opened any file. */
+seen_at_least_1_file ()		/* TRUE if we opened any file.  */
 {
   return (physical_input_file != NULL);
 }
@@ -469,7 +467,7 @@ new_logical_line (fname, line_number)
  * namep should be char * const *, but there are compilers which screw
  * up declarations like that, and it's easier to avoid it.
  */
-void 
+void
 as_where (namep, linep)
      char **namep;
      unsigned int *linep;
@@ -496,8 +494,6 @@ as_where (namep, linep)
 }				/* as_where() */
 
 
-
-
 /*
  *			a s _ h o w m u c h ()
  *
@@ -507,23 +503,23 @@ as_where (namep, linep)
  */
 void
 as_howmuch (stream)
-     FILE *stream;		/* Opened for write please. */
+     FILE *stream;		/* Opened for write please.  */
 {
-  register char *p;		/* Scan input line. */
+  register char *p;		/* Scan input line.  */
   /* register char c; JF unused */
 
   for (p = input_line_pointer - 1; *p != '\n'; --p)
     {
     }
-  ++p;				/* p->1st char of line. */
+  ++p;				/* p->1st char of line.  */
   for (; p <= input_line_pointer; p++)
     {
-      /* Assume ASCII. EBCDIC & other micro-computer char sets ignored. */
+      /* Assume ASCII. EBCDIC & other micro-computer char sets ignored.  */
       as_1_char ((unsigned char) *p, stream);
     }
 }
 
-static void 
+static void
 as_1_char (c, stream)
      unsigned int c;
      FILE *stream;

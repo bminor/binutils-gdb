@@ -1,6 +1,8 @@
 2000-09-07  Kazu Hirata  <kazu@hxi.com>
 
 	* config/tc-mips.c: Fix formatting.
+	* config/tc-vax.c: Likewise.
+	* input-scrub.c: Likewise.
 
 2000-09-07  Alexandre Oliva  <aoliva@redhat.com>
 
