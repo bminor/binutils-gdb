@@ -2027,6 +2027,9 @@ The 24-bit relocation is used in some Intel 960 configurations.  */
   BFD_RELOC_12_PCREL,
   BFD_RELOC_8_PCREL,
 
+/* Section relative relocations.  Some targets need this for DWARF2.  */
+  BFD_RELOC_32_SECREL,
+
 /* For ELF.  */
   BFD_RELOC_32_GOT_PCREL,
   BFD_RELOC_16_GOT_PCREL,

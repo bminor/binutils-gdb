@@ -1,3 +1,12 @@
+2004-04-20  DJ Delorie  <dj@redhat.com>
+
+	* reloc.c: Add BFD_RELOC_32_SECREL.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Likewise.
+	* coff-i386.c (howto_table) [COFF_WITH_PE]: Add R_SECREL32.
+	(coff_i386_rtype_to_howto) [COFF_WITH_PE]: Handle it.
+	(coff_i386_reloc_type_lookup) [COFF_WITH_PE]: Likewise.
+
 2004-04-19  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf32-sparc.c (elf32_sparc_relocate_section): Handle

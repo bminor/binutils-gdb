@@ -1,3 +1,10 @@
+2004-04-20  Brian Ford  <ford@vss.fsi.com>
+	    DJ Delorie  <dj@redhat.com>
+
+	* gas/i386/secrel.s: New test for .secrel32.
+	* gas/i386/secrel.d: Likewise.
+	* gas/i386/i386.exp: Call it for PE targets.
+
 2004-04-19  Jakub Jelinek  <jakub@redhat.com>
 
 	* gas/cfi/cfi-sparc64-1.d: Update.

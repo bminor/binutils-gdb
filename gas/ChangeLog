@@ -1,3 +1,12 @@
+2004-04-20  DJ Delorie  <dj@redhat.com>
+
+	* config/tc-i386.h [TE_PE] (TC_CONS_FIX_NEW): Define.
+	* config/tc-i386.c (md_pseudo_table) [TE_PE]: Add "secrel32".
+	[TE_PE] (O_secrel): Define.
+	[TE_PE] (x86_pe_cons_fix_new): New.
+	[TE_PE] (pe_directive_secrel): Likewise.
+	(tc_gen_reloc) [TE_PE]: Support BFD_RELOC_32_SECREL.
+
 2004-04-19  Eric Christopher  <echristo@redhat.com>
 
         * config/tc-mips.c (mips_dwarf2_addr_size): Revert part
