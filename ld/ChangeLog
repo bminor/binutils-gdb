@@ -1,3 +1,7 @@
+2002-11-18  Svein E. Seldal  <Svein.Seldal@solidas.com>
+
+	* testsuite/ld-scripts/script.exp: Setup for tic4x testcase
+
 2002-11-14  Egor Duda  <deo@logos-m.ru>
 
 	* ldmain.c (main): Make runtime relocs disabled by default. Remove

@@ -1,3 +1,28 @@
+2002-11-18  Svein E. Seldal  <Svein.Seldal@solidas.com>
+
+	* testsuite/gas/all/gas.exp: Setup for tic4x testcase
+	* testsuite/gas/macros/macros.exp: Ditto
+	* testsuite/gas/tic4x: New tic4x gas testsuite directory
+	* testsuite/gas/tic4x/addressing.s: Create
+	* testsuite/gas/tic4x/addressing_c3x.d: Create
+	* testsuite/gas/tic4x/addressing_c4x.d: Create
+	* testsuite/gas/tic4x/allopcodes.S: Create
+	* testsuite/gas/tic4x/data.d: Create
+	* testsuite/gas/tic4x/data.s: Create
+	* testsuite/gas/tic4x/float.d: Create
+	* testsuite/gas/tic4x/float.s: Create
+	* testsuite/gas/tic4x/opclasses.h: Create
+	* testsuite/gas/tic4x/opcodes.s: Create
+	* testsuite/gas/tic4x/opcodes_c3x.d: Create
+	* testsuite/gas/tic4x/opcodes_c4x.d: Create
+	* testsuite/gas/tic4x/rebuild.sh: Create
+	* testsuite/gas/tic4x/registers.s: Create
+	* testsuite/gas/tic4x/registers_c3x.d: Create
+	* testsuite/gas/tic4x/registers_c4x.d: Create
+	* testsuite/gas/tic4x/tic4x.exp: Create
+	* testsuite/gas/tic4x/zeros.d: Create
+	* testsuite/gas/tic4x/zeros.s: Create 
+
 2002-11-16  Svein E. Seldal  <Svein.Seldal@solidas.com>
 
 	* config/tc-tic4x.c: Remove c4x_pseudo_ignore function.

@@ -90,8 +90,10 @@ proc do_930509a {} {
 # C54x assembler (for compatibility) does not allow differences between
 # forward references
 # C30 counts a four byte offset as a difference of one.
-if { ![istarget hppa*-*-*]
-     && ![istarget *c30*-*-*] && ![istarget *c54x*-*-*] } then {
+if { ![istarget hppa*-*-*] &&
+     ![istarget *c30*-*-*] &&
+     ![istarget *c4x*-*-*] &&
+     ![istarget *c54x*-*-*] } then {
     # the vax fails because VMS can apparently actually handle this
     # case in relocs, so gas doesn't handle it itself.
     setup_xfail "h8300*-*-elf*" "mn10200*-*-*" "mn10300*-*-*" "vax*-*-vms*"
@@ -102,6 +104,7 @@ if { ![istarget hppa*-*-*]
 # These directives are done in the c54x-specific tests instead
 case $target_triplet in {
     { hppa*-*-* } { }
+    { *c4x*-*-* } { }
     { *c54x*-*-* } { }
     default {
 	run_dump_test struct
@@ -115,7 +118,7 @@ case $target_triplet in {
 # We omit the ARM toolchains because they define locals to
 #  start with '.', which eliminates .eos, .text etc from the output.
 # Omit c54x, since .tag and .def mean something different on that target
-if {   ([istarget *-*-coff*] && ![istarget m88*-*-*] && ![istarget *arm*-*-coff] && ![istarget thumb*-*-coff] && ![istarget xscale-*-coff] && ![istarget *c54x*-*-coff]) \
+if {   ([istarget *-*-coff*] && ![istarget m88*-*-*] && ![istarget *arm*-*-coff] && ![istarget thumb*-*-coff] && ![istarget xscale-*-coff] && ![istarget *c4x*-*-coff] && ![istarget *c54x*-*-coff]) \
      ||([istarget *-*-pe*] && ![istarget arm*-*-pe*] && ![istarget thumb*-*-pe*]) \
      || [istarget a29k-*-udi*] \
      || [istarget a29k-*-ebmon*] \
@@ -158,6 +161,7 @@ proc test_cond {} {
 # again, p2align doesn't work on c54x target
 case $target_triplet in {
     { hppa*-*-* } { }
+    { *c4x*-*-* } { }
     { *c54x*-*-* } { }
     default {
         test_cond

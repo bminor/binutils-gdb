@@ -42,6 +42,10 @@ proc check_script { } {
 	} else {
 	    set text_end 0x104
 	    set data_end 0x1004
+            if [istarget *c4x*-*-*] then {
+                set text_end 0x101
+                set data_end 0x1001
+            }
 	    if [istarget *c54x*-*-*] then {
 		set text_end 0x102
 		set data_end 0x1002

@@ -96,6 +96,11 @@ if ![regexp $want $got all text_name text_size data_name data_size] then {
     verbose "data name is $data_name size is $data_size"
     set ets 8
     set eds 4
+    # The [ti]c4x target has the property sizeof(char)=sizeof(long)=1
+    if [istarget *c4x*-*-*] then {
+        set ets 2
+        set eds 1
+    }
     # c54x section sizes are in bytes, not octets; adjust accordingly
     if [istarget *c54x*-*-*] then {
 	set ets 4

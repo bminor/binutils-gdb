@@ -1,3 +1,9 @@
+2002-11-18  Svein E. Seldal  <Svein.Seldal@solidas.com>
+
+	* testsuite/binutils-all/objcopy.exp: Disable tic4x from test
+	* testsuite/binutils-all/objdump.exp: Setup proper values for tic4x
+	testcase
+
 2002-11-14  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (process_program_headers): Add comment about return
