@@ -163,7 +163,7 @@ else
 	done
 fi
 
-am33_files="ChangeLog m10300-opc.c"
+am33_files="ChangeLog m10300-opc.c m10300-dis.c"
 if ( echo $* | grep keep\-am33 > /dev/null ) ; then
 	for i in $am33_files ; do
 		if test ! -d $i && (grep sanitize-am33 $i > /dev/null) ; then
