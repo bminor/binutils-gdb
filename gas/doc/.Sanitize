@@ -1,5 +1,4 @@
 # Sanitize.in for devo.
-# $Id$
 #
 
 # Each directory to survive it's way into a release will need a file
@@ -35,55 +34,5 @@ h8.texi
 Things-to-lose:
 
 Do-last:
-
-#
-#
-# $Log$
-# Revision 1.14  1993/05/27 06:21:59  rich
-# added things-to-lose sections
-#
-# Revision 1.13  1993/05/17  20:10:15  raeburn
-# Steve sez SH stuff is public now
-#
-# Revision 1.12  1993/04/21  01:00:59  pesch
-# adhere to "start-sanitize-FOO" and "end-sanitize-FOO" convention
-#
-# Revision 1.11  1993/04/15  23:55:45  pesch
-# Add h8.texi to things-to-keep
-#
-# Revision 1.10  1993/04/15  23:06:08  pesch
-# Arrange to clean out references to Hitachi SH.
-#
-# Revision 1.9  1993/04/08  03:12:53  pesch
-# Converted to Texinfo conditionals; no longer need M4.
-# Checked makeinfo output for "all" config; other old M4 configs now sanitized
-# out, will be replaced by .texi configs as each config is tested.
-#
-# Revision 1.8  1993/03/02  17:57:05  raeburn
-# ChangeLog is gone
-#
-# Revision 1.7  1993/02/13  10:12:26  zoo
-# removing excess verbosity
-#
-# Revision 1.6  1992/12/08  09:39:03  raeburn
-# as-m680x0.texinfo does not exist
-#
-# Revision 1.5  1992/11/19  19:48:43  sac
-#     	z8000 documentation
-# 	* Makefile.in, all.m4, as-all.texinfo as.texinfo: all modified
-#
-# Revision 1.4  1992/03/10  00:50:59  rich
-# keep ChangeLog and as-all.texinfo
-#
-# Revision 1.3  1992/02/24  13:54:45  tiemann
-# Keep Makefile.in and configure.in.  Don't keep Makefile.
-#
-# Revision 1.2  1992/02/21  09:08:37  rich
-# don't keep *.dvi
-#
-# Revision 1.1  1992/02/14  00:28:22  pesch
-# Might as well keep the contents of the gas/doc subdir, as well as the
-# dir itself.
-#
 
 # End of file.
