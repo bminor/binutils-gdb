@@ -125,6 +125,11 @@ extern void clear_proceed_status (void);
 
 extern void proceed (CORE_ADDR, enum target_signal, int);
 
+/* When set, stop the 'step' command if we enter a function which has
+   no line number information.  The normal behavior is that we step
+   over such function.  */
+extern int step_stop_if_no_debug;
+
 extern void kill_inferior (void);
 
 extern void generic_mourn_inferior (void);
@@ -335,7 +340,12 @@ extern CORE_ADDR step_sp;
 /* 1 means step over all subroutine calls.
    -1 means step over calls to undebuggable functions.  */
 
-extern int step_over_calls;
+enum step_over_calls_kind
+  {
+    STEP_OVER_NONE,
+    STEP_OVER_ALL,
+    STEP_OVER_UNDEBUGGABLE,
+  } step_over_calls;
 
 /* If stepping, nonzero means step count is > 1
    so don't print frame next time inferior stops

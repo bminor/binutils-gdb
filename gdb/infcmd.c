@@ -178,11 +178,7 @@ CORE_ADDR step_frame_address;
 
 CORE_ADDR step_sp;
 
-/* 1 means step over all subroutine calls.
-   0 means don't step over calls (used by stepi).
-   -1 means step over calls to undebuggable functions.  */
-
-int step_over_calls;
+enum step_over_calls_kind step_over_calls;
 
 /* If stepping, nonzero means step count is > 1
    so don't print frame next time inferior stops
@@ -513,11 +509,11 @@ which has no line number information.\n", name);
 		/* It is stepi.
 		   Don't step over function calls, not even to functions lacking
 		   line numbers.  */
-		step_over_calls = 0;
+		step_over_calls = STEP_OVER_NONE;
 	    }
 
 	  if (skip_subroutines)
-	    step_over_calls = 1;
+	    step_over_calls = STEP_OVER_ALL;
 
 	  step_multi = (count > 1);
 	  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 1);
@@ -607,7 +603,13 @@ step_once (int skip_subroutines, int single_inst, int count)
       if (!single_inst)
 	{
 	  find_pc_line_pc_range (stop_pc, &step_range_start, &step_range_end);
-	  if (step_range_end == 0)
+
+	  /* If we have no line info, switch to stepi mode.  */
+	  if (step_range_end == 0 && step_stop_if_no_debug)
+	    {
+	      step_range_start = step_range_end = 1;
+	    }
+	  else if (step_range_end == 0)
 	    {
 	      char *name;
 	      if (find_pc_partial_function (stop_pc, &name, &step_range_start,
@@ -628,11 +630,11 @@ which has no line number information.\n", name);
 	    /* It is stepi.
 	       Don't step over function calls, not even to functions lacking
 	       line numbers.  */
-	    step_over_calls = 0;
+	    step_over_calls = STEP_OVER_NONE;
 	}
 
       if (skip_subroutines)
-	step_over_calls = 1;
+	step_over_calls = STEP_OVER_ALL;
 
       step_multi = (count > 1);
       arg1 =
@@ -958,7 +960,7 @@ until_next_command (int from_tty)
       step_range_end = sal.end;
     }
 
-  step_over_calls = 1;
+  step_over_calls = STEP_OVER_ALL;
   step_frame_address = FRAME_FP (frame);
   step_sp = read_sp ();
 

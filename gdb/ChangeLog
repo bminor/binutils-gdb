@@ -1,3 +1,25 @@
+2000-11-10  Christopher Faylor <cgf@cygnus.com>
+
+	* inferior.h (step_over_calls_kind): New enum to clarify values in
+	step_over_calls.
+	* infcmd.c (step_over_calls): Change definition.
+	(step_1): Use new enum values in relation to step_over_calls.
+	(step_once): Ditto.
+	(until_next_command): Ditto.
+	* infrun.c (clear_proceed_status): Ditto.
+	(handle_inferior_event): Ditto.
+
+2000-11-10  Stephane Carrez  <Stephane.Carrez@sun.com>
+
+	* inferior.h (step_stop_if_no_debug): New variable.
+	* infrun.c (step_stop_if_no_debug): Declare.
+	(handle_inferior_event): Stop the step command if we entered a function
+	without line info.
+	(_initialize_infrun): New command 'set step-mode' to control the step
+	command.
+	* infcmd.c (step_once): Switch to stepi mode if there is no line info
+	(and switching is enabled).
+
 2000-11-10  J.T. Conklin  <jtc@redback.com>
 
 	* target.c (do_xfer_memory): Only perform a single memory transfer

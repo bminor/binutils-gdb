@@ -84,6 +84,11 @@ void _initialize_infrun (void);
 int inferior_ignoring_startup_exec_events = 0;
 int inferior_ignoring_leading_exec_events = 0;
 
+/* When set, stop the 'step' command if we enter a function which has
+   no line number information.  The normal behavior is that we step
+   over such function.  */
+int step_stop_if_no_debug = 0;
+
 /* In asynchronous mode, but simulating synchronous execution. */
 
 int sync_execution = 0;
@@ -940,7 +945,7 @@ clear_proceed_status (void)
   step_range_start = 0;
   step_range_end = 0;
   step_frame_address = 0;
-  step_over_calls = -1;
+  step_over_calls = STEP_OVER_UNDEBUGGABLE;
   stop_after_trap = 0;
   stop_soon_quietly = 0;
   proceed_to_finish = 0;
@@ -2612,7 +2617,7 @@ handle_inferior_event (struct execution_control_state *ecs)
        loader dynamic symbol resolution code, we keep on single stepping
        until we exit the run time loader code and reach the callee's
        address.  */
-    if (step_over_calls < 0 && IN_SOLIB_DYNSYM_RESOLVE_CODE (stop_pc))
+    if (step_over_calls == STEP_OVER_UNDEBUGGABLE && IN_SOLIB_DYNSYM_RESOLVE_CODE (stop_pc))
       {
 	CORE_ADDR pc_after_resolver = SKIP_SOLIB_RESOLVER (stop_pc);
 
@@ -2733,7 +2738,7 @@ handle_inferior_event (struct execution_control_state *ecs)
       {
 	/* It's a subroutine call.  */
 
-	if (step_over_calls == 0)
+	if (step_over_calls == STEP_OVER_NONE)
 	  {
 	    /* I presume that step_over_calls is only 0 when we're
 	       supposed to be stepping at the assembly language level
@@ -2744,7 +2749,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	    return;
 	  }
 
-	if (step_over_calls > 0 || IGNORE_HELPER_CALL (stop_pc))
+	if (step_over_calls == STEP_OVER_ALL || IGNORE_HELPER_CALL (stop_pc))
 	  {
 	    /* We're doing a "next".  */
 
@@ -2810,6 +2815,18 @@ handle_inferior_event (struct execution_control_state *ecs)
 	      return;
 	    }
 	}
+
+	/* If we have no line number and the step-stop-if-no-debug
+	   is set, we stop the step so that the user has a chance to
+	   switch in assembly mode.  */
+	if (step_over_calls == STEP_OVER_UNDEBUGGABLE && step_stop_if_no_debug)
+	  {
+	    stop_step = 1;
+	    print_stop_reason (END_STEPPING_RANGE, 0);
+	    stop_stepping (ecs);
+	    return;
+	  }
+
 	step_over_function (ecs);
 	keep_going (ecs);
 	return;
@@ -3934,7 +3951,7 @@ struct inferior_status
   CORE_ADDR step_range_start;
   CORE_ADDR step_range_end;
   CORE_ADDR step_frame_address;
-  int step_over_calls;
+  enum step_over_calls_kind step_over_calls;
   CORE_ADDR step_resume_break_address;
   int stop_after_trap;
   int stop_soon_quietly;
@@ -4308,5 +4325,14 @@ step == scheduler locked during every single-step operation.\n\
 			&setlist);
 
   c->function.sfunc = set_schedlock_func;	/* traps on target vector */
+  add_show_from_set (c, &showlist);
+
+  c = add_set_cmd ("step-mode", class_run,
+		   var_boolean, (char*) &step_stop_if_no_debug,
+"Set mode of the step operation. When set, doing a step over a\n\
+function without debug line information will stop at the first\n\
+instruction of that function. Otherwise, the function is skipped and\n\
+the step command stops at a different source line.",
+			&setlist);
   add_show_from_set (c, &showlist);
 }
