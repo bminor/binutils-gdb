@@ -685,6 +685,11 @@ case "${target}" in
     esac
     noconfigdirs="$noconfigdirs ld shellutils"
     ;;
+  i[3456]86-*-coff | i[3456]86-*-elf)
+    if [ x${is_cross_compiler} != xno ] ; then
+         target_configdirs="${target_configdirs} target-libstub target-cygmon"
+    fi
+    ;;
   i[3456]86-*-go32* | i[3456]-*-msdosdjgpp*)
     # but don't build gdb
     noconfigdirs="$noconfigdirs gdb target-libg++ target-libstdc++ target-libio target-librx"
@@ -875,7 +880,7 @@ case "${target}" in
 	   target_configdirs="${target_configdirs} target-libstub target-cygmon"
     fi
     ;;
-  sparclite-*-aout*)
+  sparclite-*-*)
     if [ x${is_cross_compiler} != xno ] ; then
 	   target_configdirs="${target_configdirs} target-libstub target-cygmon"
     fi
