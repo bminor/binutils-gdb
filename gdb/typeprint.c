@@ -73,7 +73,7 @@ whatis_exp (exp, show)
 {
   struct expression *expr;
   register value val;
-  register struct cleanup *old_chain;
+  register struct cleanup *old_chain = NULL;
 
   if (exp)
     {

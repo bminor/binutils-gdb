@@ -160,7 +160,6 @@ print_frame_info (fi, level, source, args)
   struct symbol *func;
   register char *funname = 0;
   enum language funlang = language_unknown;
-  int numargs;
   char buf[MAX_REGISTER_RAW_SIZE];
   CORE_ADDR sp;
 
@@ -202,8 +201,16 @@ print_frame_info (fi, level, source, args)
       return;
     }
 
-  sal = find_pc_line (fi->pc,
-		      fi->next != NULL && fi->next->signal_handler_caller == 0);
+  /* If fi is not the innermost frame, that normally means that fi->pc
+     points to *after* the call instruction, and we want to get the line
+     containing the call, never the next line.  But if the next frame is
+     a signal_handler_caller frame, then the next frame was not entered
+     as the result of a call, and we want to get the line containing
+     fi->pc.  */
+  sal =
+    find_pc_line (fi->pc,
+		  fi->next != NULL && fi->next->signal_handler_caller == 0);
+
   func = find_pc_function (fi->pc);
   if (func)
     {
@@ -321,7 +328,6 @@ parse_frame_specification (frame_exp)
      char *frame_exp;
 {
   int numargs = 0;
-  int arg1, arg2, arg3;
 #define	MAXARGS	4
   int args[MAXARGS];
   
@@ -927,12 +933,14 @@ print_frame_arg_vars (frame, stream)
   for (i = 0; i < nsyms; i++)
     {
       sym = BLOCK_SYM (b, i);
-      if (SYMBOL_CLASS (sym) == LOC_ARG
-	  || SYMBOL_CLASS (sym) == LOC_LOCAL_ARG
-	  || SYMBOL_CLASS (sym) == LOC_REF_ARG
-	  || SYMBOL_CLASS (sym) == LOC_REGPARM
-	  || SYMBOL_CLASS (sym) == LOC_REGPARM_ADDR)
+      switch (SYMBOL_CLASS (sym))
 	{
+	case LOC_ARG:
+	case LOC_LOCAL_ARG:
+	case LOC_REF_ARG:
+	case LOC_REGPARM:
+	case LOC_REGPARM_ADDR:
+	case LOC_BASEREG_ARG:
 	  values_printed = 1;
 	  fputs_filtered (SYMBOL_SOURCE_NAME (sym), stream);
 	  fputs_filtered (" = ", stream);
@@ -952,6 +960,11 @@ print_frame_arg_vars (frame, stream)
 			b, VAR_NAMESPACE, (int *)NULL, (struct symtab **)NULL);
 	  print_variable_value (sym2, frame, stream);
 	  fprintf_filtered (stream, "\n");
+	  break;
+
+	default:
+	  /* Don't worry about things which aren't arguments.  */
+	  break;
 	}
     }
 
@@ -1190,7 +1203,7 @@ return_command (retval_exp, from_tty)
   FRAME_ADDR selected_frame_addr;
   CORE_ADDR selected_frame_pc;
   FRAME frame;
-  value return_value;
+  value return_value = NULL;
 
   if (selected_frame == NULL)
     error ("No selected frame.");

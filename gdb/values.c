@@ -334,11 +334,9 @@ show_values (num_exp, from_tty)
 
   if (num_exp)
     {
-      if (num_exp[0] == '+' && num_exp[1] == '\0')
-	/* "info history +" should print from the stored position.  */
-	;
-      else
-	/* "info history <exp>" should print around value number <exp>.  */
+	/* "info history +" should print from the stored position.
+	   "info history <exp>" should print around value number <exp>.  */
+      if (num_exp[0] != '+' || num_exp[1] != '\0')
 	num = parse_and_eval_address (num_exp) - 5;
     }
   else
@@ -1008,7 +1006,6 @@ vb_match (type, index, basetype)
      struct type *basetype;
 {
   struct type *fieldtype;
-  struct type *fieldtype_target_type;
   char *name = TYPE_FIELD_NAME (type, index);
   char *field_class_name = NULL;
 

@@ -28,6 +28,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "value.h"
 #include "target.h"
 #include "thread.h"
+#include "command.h"
 
 #include <sys/types.h>
 #include <signal.h>
@@ -43,8 +44,6 @@ struct thread_info
 
 static struct thread_info *thread_list = NULL;
 static int highest_thread_num;
-
-static void thread_info PARAMS ((void));
 
 static void thread_command PARAMS ((char * tidstr, int from_tty));
 
@@ -159,7 +158,7 @@ info_threads_command (arg, from_tty)
       if (target_has_execution
 	  && kill (tp->pid, 0) == -1)
  	{
-	  tp->pid == -1;	/* Mark it as dead */
+	  tp->pid = -1;	/* Mark it as dead */
 	  continue;
  	}
 

@@ -1195,7 +1195,7 @@ static void
 cashier_psymtab (pst)
      struct partial_symtab *pst;
 {
-  struct partial_symtab *ps, *pprev;
+  struct partial_symtab *ps, *pprev = NULL;
   int i;
 
   /* Find its previous psymtab in the chain */

@@ -1,3 +1,25 @@
+Wed Sep  8 13:01:10 1993  K. Richard Pixley  (rich@cygnus.com)
+
+	Gcc lint.
+	* stack.c (print_frame_info): remove unused variable numargs.
+	  (parse_frame_specification): remove unused variables arg1, arg2,
+	  arg3.
+	  (return_command): initialize return_value.
+	* symfile.c (cashier_psymtab): initialize pprev.
+	* symtab.c (find_pc_psymbol): initialize best.
+	  (lookup_symbol): initialize s.
+	  (make_symbol_completion_list): initialize quote_pos.
+	* thread.c: include command.h.
+	  (thread_info): static declaration removed; unused.
+	  (info_threads_command): fix == vs = typo.
+	* typeprint.c (whatis_exp): initialize old_chain.
+	* valprint.c (val_print_string): remove unused variable
+	  first_addr_err.  Initialize old_chain.
+	  (_initialize_valprint): white space comment change.
+	* values.c (show_values): rewrite if statement to avoid empty
+	  body.
+	  (vb_match): remove unused variable fieldtype_target_type.
+
 Wed Sep  8 10:21:33 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* Makefile.in (mipsread.o): Depend on $(bfd_h).

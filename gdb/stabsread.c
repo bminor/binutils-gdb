@@ -1544,7 +1544,7 @@ rs6000_builtin_type (typenum)
 #define NUMBER_RECOGNIZED 30
   /* This includes an empty slot for type number -0.  */
   static struct type *negative_types[NUMBER_RECOGNIZED + 1];
-  struct type *rettype;
+  struct type *rettype = NULL;
 
   if (typenum >= 0 || typenum < -NUMBER_RECOGNIZED)
     {
@@ -3182,7 +3182,7 @@ read_range_type (pp, typenums, objfile)
       char got_signed = 0;
       char got_unsigned = 0;
       /* Number of bits in the type.  */
-      int nbits;
+      int nbits = 0;
 
       /* Range from 0 to <large number> is an unsigned large integral type.  */
       if ((n2bits == 0 && n2 == 0) && n3bits != 0)
