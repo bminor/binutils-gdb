@@ -39,7 +39,7 @@ CONST char *architecture_pname[] = {
 	NULL,
 };
 
-/* v9: This file is correct for SPARC Version 9 Draft 1.2.  */
+/* v9: This file is correct for SPARC Version 9 Draft 1.2.4.  */
 
 /* Branch condition field.  */
 #define COND(x)		(((x)&0xf)<<25)
@@ -93,7 +93,7 @@ CONST char *architecture_pname[] = {
 #define FCONDZ	FCONDE
 
 #define ICC (0)	/* v9 */
-#define XCC (1<<11) /* v9 */
+#define XCC (1<<12) /* v9 */
 #define FCC(x)	(((x)&0x3)<<11) /* v9 */
 #define FBFCC(x)	(((x)&0x3)<<20)	/* v9 */
 
@@ -360,28 +360,12 @@ struct sparc_opcode sparc_opcodes[] = {
 { "st",	F3(3, 0x25, 1), F3(~3, ~0x25, ~1)|RD_G0|RS1_G0,		"F,[i]", 0, v6 },
 { "st",	F3(3, 0x25, 1), F3(~3, ~0x25, ~1)|RD_G0|SIMM13(~0),	"F,[1]", 0, v6 }, /* st d,[rs1+0] */
 
-  /* The v9 STW/STUW/STSW are the same as the old 'st' opcode, they are not
-     the same as the 'st' psuedo-op in v9.  */
 { "stw",	F3(3, 0x04, 0), F3(~3, ~0x04, ~0)|ASI(~0),	"d,[1+2]", F_ALIAS, v9 },
 { "stw",	F3(3, 0x04, 0), F3(~3, ~0x04, ~0)|ASI_RS2(~0),	"d,[1]", F_ALIAS, v9 }, /* st d,[rs1+%g0] */
 { "stw",	F3(3, 0x04, 1), F3(~3, ~0x04, ~1),		"d,[1+i]", F_ALIAS, v9 },
 { "stw",	F3(3, 0x04, 1), F3(~3, ~0x04, ~1),		"d,[i+1]", F_ALIAS, v9 },
 { "stw",	F3(3, 0x04, 1), F3(~3, ~0x04, ~1)|RS1_G0,	"d,[i]", F_ALIAS, v9 },
 { "stw",	F3(3, 0x04, 1), F3(~3, ~0x04, ~1)|SIMM13(~0),	"d,[1]", F_ALIAS, v9 }, /* st d,[rs1+0] */
-
-{ "stuw",	F3(3, 0x04, 0), F3(~3, ~0x04, ~0)|ASI(~0),	"d,[1+2]", F_ALIAS, v9 },
-{ "stuw",	F3(3, 0x04, 0), F3(~3, ~0x04, ~0)|ASI_RS2(~0),	"d,[1]", F_ALIAS, v9 }, /* st d,[rs1+%g0] */
-{ "stuw",	F3(3, 0x04, 1), F3(~3, ~0x04, ~1),		"d,[1+i]", F_ALIAS, v9 },
-{ "stuw",	F3(3, 0x04, 1), F3(~3, ~0x04, ~1),		"d,[i+1]", F_ALIAS, v9 },
-{ "stuw",	F3(3, 0x04, 1), F3(~3, ~0x04, ~1)|RS1_G0,	"d,[i]", F_ALIAS, v9 },
-{ "stuw",	F3(3, 0x04, 1), F3(~3, ~0x04, ~1)|SIMM13(~0),	"d,[1]", F_ALIAS, v9 }, /* st d,[rs1+0] */
-
-{ "stsw",	F3(3, 0x04, 0), F3(~3, ~0x04, ~0)|ASI(~0),	"d,[1+2]", F_ALIAS, v9 }, /* stsw === st */
-{ "stsw",	F3(3, 0x04, 0), F3(~3, ~0x04, ~0)|ASI_RS2(~0),	"d,[1]", F_ALIAS, v9 }, /* st d,[rs1+%g0] */
-{ "stsw",	F3(3, 0x04, 1), F3(~3, ~0x04, ~1),		"d,[1+i]", F_ALIAS, v9 },
-{ "stsw",	F3(3, 0x04, 1), F3(~3, ~0x04, ~1),		"d,[i+1]", F_ALIAS, v9 },
-{ "stsw",	F3(3, 0x04, 1), F3(~3, ~0x04, ~1)|RS1_G0,	"d,[i]", F_ALIAS, v9 },
-{ "stsw",	F3(3, 0x04, 1), F3(~3, ~0x04, ~1)|SIMM13(~0),	"d,[1]", F_ALIAS, v9 }, /* st d,[rs1+0] */
 
 { "sta",	F3(3, 0x14, 0), F3(~3, ~0x14, ~0),		"d,[1+2]A", 0, v6 },
 { "sta",	F3(3, 0x14, 0), F3(~3, ~0x14, ~0)|RS2(~0),	"d,[1]A", 0, v6 }, /* sta d,[rs1+%g0] */
@@ -404,20 +388,6 @@ struct sparc_opcode sparc_opcodes[] = {
 { "stwa",	F3(3, 0x14, 1), F3(~3, ~0x14, ~1)|RS1_G0,	"d,[i]o", F_ALIAS, v9 },
 { "stwa",	F3(3, 0x14, 1), F3(~3, ~0x14, ~1)|SIMM13(~0),	"d,[1]o", F_ALIAS, v9 }, /* st d,[rs1+0] */
 
-{ "stswa",	F3(3, 0x14, 0), F3(~3, ~0x14, ~0),		"d,[1+2]A", F_ALIAS, v9 },
-{ "stswa",	F3(3, 0x14, 0), F3(~3, ~0x14, ~0)|RS2(~0),	"d,[1]A", F_ALIAS, v9 }, /* sta d,[rs1+%g0] */
-{ "stswa",	F3(3, 0x14, 1), F3(~3, ~0x14, ~1),		"d,[1+i]o", F_ALIAS, v9 },
-{ "stswa",	F3(3, 0x14, 1), F3(~3, ~0x14, ~1),		"d,[i+1]o", F_ALIAS, v9 },
-{ "stswa",	F3(3, 0x14, 1), F3(~3, ~0x14, ~1)|RS1_G0,	"d,[i]o", F_ALIAS, v9 },
-{ "stswa",	F3(3, 0x14, 1), F3(~3, ~0x14, ~1)|SIMM13(~0),	"d,[1]o", F_ALIAS, v9 }, /* st d,[rs1+0] */
-
-{ "stuwa",	F3(3, 0x14, 0), F3(~3, ~0x14, ~0),		"d,[1+2]A", F_ALIAS, v9 },
-{ "stuwa",	F3(3, 0x14, 0), F3(~3, ~0x14, ~0)|RS2(~0),	"d,[1]A", F_ALIAS, v9 }, /* sta d,[rs1+%g0] */
-{ "stuwa",	F3(3, 0x14, 1), F3(~3, ~0x14, ~1),		"d,[1+i]o", F_ALIAS, v9 },
-{ "stuwa",	F3(3, 0x14, 1), F3(~3, ~0x14, ~1),		"d,[i+1]o", F_ALIAS, v9 },
-{ "stuwa",	F3(3, 0x14, 1), F3(~3, ~0x14, ~1)|RS1_G0,	"d,[i]o", F_ALIAS, v9 },
-{ "stuwa",	F3(3, 0x14, 1), F3(~3, ~0x14, ~1)|SIMM13(~0),	"d,[1]o", F_ALIAS, v9 }, /* st d,[rs1+0] */
-
 { "stb",	F3(3, 0x05, 0), F3(~3, ~0x05, ~0)|ASI(~0),	"d,[1+2]", 0, v6 },
 { "stb",	F3(3, 0x05, 0), F3(~3, ~0x05, ~0)|ASI_RS2(~0),	"d,[1]", 0, v6 }, /* stb d,[rs1+%g0] */
 { "stb",	F3(3, 0x05, 1), F3(~3, ~0x05, ~1),		"d,[1+i]", 0, v6 },
@@ -425,40 +395,12 @@ struct sparc_opcode sparc_opcodes[] = {
 { "stb",	F3(3, 0x05, 1), F3(~3, ~0x05, ~1)|RS1_G0,	"d,[i]", 0, v6 },
 { "stb",	F3(3, 0x05, 1), F3(~3, ~0x05, ~1)|SIMM13(~0),	"d,[1]", 0, v6 }, /* stb d,[rs1+0] */
 
-{ "stub",	F3(3, 0x05, 0), F3(~3, ~0x05, ~0)|ASI(~0),	"d,[1+2]", F_ALIAS, v9 },
-{ "stub",	F3(3, 0x05, 0), F3(~3, ~0x05, ~0)|ASI_RS2(~0),	"d,[1]", F_ALIAS, v9 }, /* stb d,[rs1+%g0] */
-{ "stub",	F3(3, 0x05, 1), F3(~3, ~0x05, ~1),		"d,[1+i]", F_ALIAS, v9 },
-{ "stub",	F3(3, 0x05, 1), F3(~3, ~0x05, ~1),		"d,[i+1]", F_ALIAS, v9 },
-{ "stub",	F3(3, 0x05, 1), F3(~3, ~0x05, ~1)|RS1_G0,	"d,[i]", F_ALIAS, v9 },
-{ "stub",	F3(3, 0x05, 1), F3(~3, ~0x05, ~1)|SIMM13(~0),	"d,[1]", F_ALIAS, v9 }, /* stb d,[rs1+0] */
-
-{ "stsb",	F3(3, 0x05, 0), F3(~3, ~0x05, ~0)|ASI(~0),	"d,[1+2]", F_ALIAS, v9 },
-{ "stsb",	F3(3, 0x05, 0), F3(~3, ~0x05, ~0)|ASI_RS2(~0),	"d,[1]", F_ALIAS, v9 }, /* stb d,[rs1+%g0] */
-{ "stsb",	F3(3, 0x05, 1), F3(~3, ~0x05, ~1),		"d,[1+i]", F_ALIAS, v9 },
-{ "stsb",	F3(3, 0x05, 1), F3(~3, ~0x05, ~1),		"d,[i+1]", F_ALIAS, v9 },
-{ "stsb",	F3(3, 0x05, 1), F3(~3, ~0x05, ~1)|RS1_G0,	"d,[i]", F_ALIAS, v9 },
-{ "stsb",	F3(3, 0x05, 1), F3(~3, ~0x05, ~1)|SIMM13(~0),	"d,[1]", F_ALIAS, v9 }, /* stb d,[rs1+0] */
-
 { "stba",	F3(3, 0x15, 0), F3(~3, ~0x15, ~0),		"d,[1+2]A", 0, v6 },
 { "stba",	F3(3, 0x15, 0), F3(~3, ~0x15, ~0)|RS2(~0),	"d,[1]A", 0, v6 }, /* stba d,[rs1+%g0] */
 { "stba",	F3(3, 0x15, 1), F3(~3, ~0x15, ~1),		"d,[1+i]o", 0, v9 },
 { "stba",	F3(3, 0x15, 1), F3(~3, ~0x15, ~1),		"d,[i+1]o", 0, v9 },
 { "stba",	F3(3, 0x15, 1), F3(~3, ~0x15, ~1)|RS1_G0,	"d,[i]o", 0, v9 },
 { "stba",	F3(3, 0x15, 1), F3(~3, ~0x15, ~1)|SIMM13(~0),	"d,[1]o", 0, v9 }, /* stb d,[rs1+0] */
-
-{ "stsba",	F3(3, 0x15, 0), F3(~3, ~0x15, ~0),		"d,[1+2]A", F_ALIAS, v9 },
-{ "stsba",	F3(3, 0x15, 0), F3(~3, ~0x15, ~0)|RS2(~0),	"d,[1]A", F_ALIAS, v9 }, /* stba d,[rs1+%g0] */
-{ "stsba",	F3(3, 0x15, 1), F3(~3, ~0x15, ~1),		"d,[1+i]o", F_ALIAS, v9 },
-{ "stsba",	F3(3, 0x15, 1), F3(~3, ~0x15, ~1),		"d,[i+1]o", F_ALIAS, v9 },
-{ "stsba",	F3(3, 0x15, 1), F3(~3, ~0x15, ~1)|RS1_G0,	"d,[i]o", F_ALIAS, v9 },
-{ "stsba",	F3(3, 0x15, 1), F3(~3, ~0x15, ~1)|SIMM13(~0),	"d,[1]o", F_ALIAS, v9 }, /* stb d,[rs1+0] */
-
-{ "stuba",	F3(3, 0x15, 0), F3(~3, ~0x15, ~0),		"d,[1+2]A", F_ALIAS, v9 },
-{ "stuba",	F3(3, 0x15, 0), F3(~3, ~0x15, ~0)|RS2(~0),	"d,[1]A", F_ALIAS, v9 }, /* stba d,[rs1+%g0] */
-{ "stuba",	F3(3, 0x15, 1), F3(~3, ~0x15, ~1),		"d,[1+i]o", F_ALIAS, v9 },
-{ "stuba",	F3(3, 0x15, 1), F3(~3, ~0x15, ~1),		"d,[i+1]o", F_ALIAS, v9 },
-{ "stuba",	F3(3, 0x15, 1), F3(~3, ~0x15, ~1)|RS1_G0,	"d,[i]o", F_ALIAS, v9 },
-{ "stuba",	F3(3, 0x15, 1), F3(~3, ~0x15, ~1)|SIMM13(~0),	"d,[1]o", F_ALIAS, v9 }, /* stb d,[rs1+0] */
 
 { "std",	F3(3, 0x07, 0), F3(~3, ~0x07, ~0)|ASI(~0),	"d,[1+2]", 0, v6 },
 { "std",	F3(3, 0x07, 0), F3(~3, ~0x07, ~0)|ASI_RS2(~0),	"d,[1]", 0, v6 }, /* std d,[rs1+%g0] */
@@ -517,40 +459,12 @@ struct sparc_opcode sparc_opcodes[] = {
 { "sth",	F3(3, 0x06, 1), F3(~3, ~0x06, ~1)|RS1_G0,	"d,[i]", 0, v6 },
 { "sth",	F3(3, 0x06, 1), F3(~3, ~0x06, ~1)|SIMM13(~0),	"d,[1]", 0, v6 }, /* sth d,[+] */
 
-{ "stsh",	F3(3, 0x06, 0), F3(~3, ~0x06, ~0)|ASI(~0),	"d,[1+2]", F_ALIAS, v9 },
-{ "stsh",	F3(3, 0x06, 0), F3(~3, ~0x06, ~0)|ASI_RS2(~0),	"d,[1]", F_ALIAS, v9 }, /* sth d,[rs1+%g0] */
-{ "stsh",	F3(3, 0x06, 1), F3(~3, ~0x06, ~1),		"d,[1+i]", F_ALIAS, v9 },
-{ "stsh",	F3(3, 0x06, 1), F3(~3, ~0x06, ~1),		"d,[i+1]", F_ALIAS, v9 },
-{ "stsh",	F3(3, 0x06, 1), F3(~3, ~0x06, ~1)|RS1_G0,	"d,[i]", F_ALIAS, v9 },
-{ "stsh",	F3(3, 0x06, 1), F3(~3, ~0x06, ~1)|SIMM13(~0),	"d,[1]", F_ALIAS, v9 }, /* sth d,[rs1+0] */
-
-{ "stuh",	F3(3, 0x06, 0), F3(~3, ~0x06, ~0)|ASI(~0),	"d,[1+2]", F_ALIAS, v9 },
-{ "stuh",	F3(3, 0x06, 0), F3(~3, ~0x06, ~0)|ASI_RS2(~0),	"d,[1]", F_ALIAS, v9 }, /* sth d,[rs1+%g0] */
-{ "stuh",	F3(3, 0x06, 1), F3(~3, ~0x06, ~1),		"d,[1+i]", F_ALIAS, v9 },
-{ "stuh",	F3(3, 0x06, 1), F3(~3, ~0x06, ~1),		"d,[i+1]", F_ALIAS, v9 },
-{ "stuh",	F3(3, 0x06, 1), F3(~3, ~0x06, ~1)|RS1_G0,	"d,[i]", F_ALIAS, v9 },
-{ "stuh",	F3(3, 0x06, 1), F3(~3, ~0x06, ~1)|SIMM13(~0),	"d,[1]", F_ALIAS, v9 }, /* sth d,[rs1+0] */
-
 { "stha",	F3(3, 0x16, 0), F3(~3, ~0x16, ~0),		"d,[1+2]A", 0, v6 },
 { "stha",	F3(3, 0x16, 0), F3(~3, ~0x16, ~0)|RS2(~0),	"d,[1]A", 0, v6 }, /* stha ,[+%] */
 { "stha",	F3(3, 0x16, 1), F3(~3, ~0x16, ~1),		"d,[1+i]o", 0, v9 },
 { "stha",	F3(3, 0x16, 1), F3(~3, ~0x16, ~1),		"d,[i+1]o", 0, v9 },
 { "stha",	F3(3, 0x16, 1), F3(~3, ~0x16, ~1)|RS1_G0,	"d,[i]o", 0, v9 },
 { "stha",	F3(3, 0x16, 1), F3(~3, ~0x16, ~1)|SIMM13(~0),	"d,[1]o", 0, v9 }, /* sth d,[+] */
-
-{ "stsha",	F3(3, 0x16, 0), F3(~3, ~0x16, ~0),		"d,[1+2]A", F_ALIAS, v9 },
-{ "stsha",	F3(3, 0x16, 0), F3(~3, ~0x16, ~0)|RS2(~0),	"d,[1]A", F_ALIAS, v9 }, /* stha d,[rs1+%g0] */
-{ "stsha",	F3(3, 0x16, 1), F3(~3, ~0x16, ~1),		"d,[1+i]o", F_ALIAS, v9 },
-{ "stsha",	F3(3, 0x16, 1), F3(~3, ~0x16, ~1),		"d,[i+1]o", F_ALIAS, v9 },
-{ "stsha",	F3(3, 0x16, 1), F3(~3, ~0x16, ~1)|RS1_G0,	"d,[i]o", F_ALIAS, v9 },
-{ "stsha",	F3(3, 0x16, 1), F3(~3, ~0x16, ~1)|SIMM13(~0),	"d,[1]o", F_ALIAS, v9 }, /* sth d,[+] */
-
-{ "stuha",	F3(3, 0x16, 0), F3(~3, ~0x16, ~0),		"d,[1+2]A", F_ALIAS, v9 },
-{ "stuha",	F3(3, 0x16, 0), F3(~3, ~0x16, ~0)|RS2(~0),	"d,[1]A", F_ALIAS, v9 }, /* stha d,[rs1+%g0] */
-{ "stuha",	F3(3, 0x16, 1), F3(~3, ~0x16, ~1),		"d,[1+i]o", F_ALIAS, v9 },
-{ "stuha",	F3(3, 0x16, 1), F3(~3, ~0x16, ~1),		"d,[i+1]o", F_ALIAS, v9 },
-{ "stuha",	F3(3, 0x16, 1), F3(~3, ~0x16, ~1)|RS1_G0,	"d,[i]o", F_ALIAS, v9 },
-{ "stuha",	F3(3, 0x16, 1), F3(~3, ~0x16, ~1)|SIMM13(~0),	"d,[1]o", F_ALIAS, v9 }, /* sth d,[+] */
 
 { "stx",	F3(3, 0x0e, 0), F3(~3, ~0x0e, ~0)|ASI(~0),	"d,[1+2]", 0, v9 },
 { "stx",	F3(3, 0x0e, 0), F3(~3, ~0x0e, ~0)|ASI_RS2(~0),	"d,[1]", 0, v9 }, /* stx d,[rs1+%g0] */
@@ -606,33 +520,33 @@ struct sparc_opcode sparc_opcodes[] = {
 { "restore",	F3(2, 0x3d, 1), F3(~2, ~0x3d, ~1),				"1,i,d", 0, v6 },
 { "restore",	F3(2, 0x3d, 1), F3(~2, ~0x3d, ~1)|RD_G0|RS1_G0|SIMM13(~0),	"", 0, v6 }, /* restore %g0,0,%g0 */
 
-{ "rett",	F3(2, 0x39, 0), F3(~2, ~0x39, ~0)|RD_G0|ASI(~0),	"1+2", F_DELAYED, v6 }, /* rett rs1+rs2 */
-{ "rett",	F3(2, 0x39, 0), F3(~2, ~0x39, ~0)|RD_G0|ASI_RS2(~0),	"1", F_DELAYED, v6 },	/* rett rs1,%g0 */
-{ "rett",	F3(2, 0x39, 1), F3(~2, ~0x39, ~1)|RD_G0,	"1+i", F_DELAYED, v6 }, /* rett rs1+X */
-{ "rett",	F3(2, 0x39, 1), F3(~2, ~0x39, ~1)|RD_G0,	"i+1", F_DELAYED, v6 }, /* rett X+rs1 */
-{ "rett",	F3(2, 0x39, 1), F3(~2, ~0x39, ~1)|RD_G0|RS1_G0,"i", F_DELAYED, v6 }, /* rett X+rs1 */
-{ "rett",	F3(2, 0x39, 1), F3(~2, ~0x39, ~1)|RD_G0|RS1_G0,	"i", F_DELAYED, v6 },	/* rett X */
-{ "rett",	F3(2, 0x39, 1), F3(~2, ~0x39, ~1)|RD_G0|SIMM13(~0),	"1", F_DELAYED, v6 },	/* rett rs1+0 */
+{ "rett",	F3(2, 0x39, 0), F3(~2, ~0x39, ~0)|RD_G0|ASI(~0),	"1+2", F_UNBR|F_DELAYED, v6 }, /* rett rs1+rs2 */
+{ "rett",	F3(2, 0x39, 0), F3(~2, ~0x39, ~0)|RD_G0|ASI_RS2(~0),	"1", F_UNBR|F_DELAYED, v6 },	/* rett rs1,%g0 */
+{ "rett",	F3(2, 0x39, 1), F3(~2, ~0x39, ~1)|RD_G0,	"1+i", F_UNBR|F_DELAYED, v6 }, /* rett rs1+X */
+{ "rett",	F3(2, 0x39, 1), F3(~2, ~0x39, ~1)|RD_G0,	"i+1", F_UNBR|F_DELAYED, v6 }, /* rett X+rs1 */
+{ "rett",	F3(2, 0x39, 1), F3(~2, ~0x39, ~1)|RD_G0|RS1_G0,"i", F_UNBR|F_DELAYED, v6 }, /* rett X+rs1 */
+{ "rett",	F3(2, 0x39, 1), F3(~2, ~0x39, ~1)|RD_G0|RS1_G0,	"i", F_UNBR|F_DELAYED, v6 },	/* rett X */
+{ "rett",	F3(2, 0x39, 1), F3(~2, ~0x39, ~1)|RD_G0|SIMM13(~0),	"1", F_UNBR|F_DELAYED, v6 },	/* rett rs1+0 */
 
 { "save",	F3(2, 0x3c, 0), F3(~2, ~0x3c, ~0)|ASI(~0),	"1,2,d", 0, v6 },
 { "save",	F3(2, 0x3c, 1), F3(~2, ~0x3c, ~1),		"1,i,d", 0, v6 },
 { "save",	0x81e00000,	~0x81e00000,	"", F_ALIAS, v6 },
 
-{ "ret",  F3(2, 0x38, 1)|RS1(0x1f)|SIMM13(8), F3(~2, ~0x38, ~1)|SIMM13(~8),	       "", F_DELAYED, v6 }, /* jmpl %i7+8,%g0 */
-{ "retl", F3(2, 0x38, 1)|RS1(0x0f)|SIMM13(8), F3(~2, ~0x38, ~1)|RS1(~0x0f)|SIMM13(~8), "", F_DELAYED, v6 }, /* jmpl %o7+8,%g0 */
+{ "ret",  F3(2, 0x38, 1)|RS1(0x1f)|SIMM13(8), F3(~2, ~0x38, ~1)|SIMM13(~8),	       "", F_UNBR|F_DELAYED, v6 }, /* jmpl %i7+8,%g0 */
+{ "retl", F3(2, 0x38, 1)|RS1(0x0f)|SIMM13(8), F3(~2, ~0x38, ~1)|RS1(~0x0f)|SIMM13(~8), "", F_UNBR|F_DELAYED, v6 }, /* jmpl %o7+8,%g0 */
 
-{ "jmpl",	F3(2, 0x38, 0), F3(~2, ~0x38, ~0)|ASI(~0),	"1+2,d", F_DELAYED, v6 },
-{ "jmpl",	F3(2, 0x38, 0), F3(~2, ~0x38, ~0)|ASI_RS2(~0),	"1,d", F_DELAYED, v6 }, /* jmpl rs1+%g0,d */
-{ "jmpl",	F3(2, 0x38, 1), F3(~2, ~0x38, ~1)|SIMM13(~0),	"1,d", F_DELAYED, v6 }, /* jmpl rs1+0,d */
-{ "jmpl",	F3(2, 0x38, 1), F3(~2, ~0x38, ~1)|RS1_G0,	"i,d", F_DELAYED, v6 }, /* jmpl %g0+i,d */
-{ "jmpl",	F3(2, 0x38, 1), F3(~2, ~0x38, ~1),		"1+i,d", F_DELAYED, v6 },
-{ "jmpl",	F3(2, 0x38, 1), F3(~2, ~0x38, ~1),		"i+1,d", F_DELAYED, v6 },
+{ "jmpl",	F3(2, 0x38, 0), F3(~2, ~0x38, ~0)|ASI(~0),	"1+2,d", F_JSR|F_DELAYED, v6 },
+{ "jmpl",	F3(2, 0x38, 0), F3(~2, ~0x38, ~0)|ASI_RS2(~0),	"1,d", F_JSR|F_DELAYED, v6 }, /* jmpl rs1+%g0,d */
+{ "jmpl",	F3(2, 0x38, 1), F3(~2, ~0x38, ~1)|SIMM13(~0),	"1,d", F_JSR|F_DELAYED, v6 }, /* jmpl rs1+0,d */
+{ "jmpl",	F3(2, 0x38, 1), F3(~2, ~0x38, ~1)|RS1_G0,	"i,d", F_JSR|F_DELAYED, v6 }, /* jmpl %g0+i,d */
+{ "jmpl",	F3(2, 0x38, 1), F3(~2, ~0x38, ~1),		"1+i,d", F_JSR|F_DELAYED, v6 },
+{ "jmpl",	F3(2, 0x38, 1), F3(~2, ~0x38, ~1),		"i+1,d", F_JSR|F_DELAYED, v6 },
 
 { "done",	F3(2, 0x3e, 1)|RD(0), F3(~2, ~0x3e, ~1)|RD(~0)|RS1_G0|SIMM13(~0),	"", 0, v9 },
 { "retry",	F3(2, 0x3e, 1)|RD(1), F3(~2, ~0x3e, ~1)|RD(~1)|RS1_G0|SIMM13(~0),	"", 0, v9 },
 { "saved",	F3(2, 0x31, 1)|RD(0), F3(~2, ~0x31, ~1)|RD(~0)|RS1_G0|SIMM13(~0),	"", 0, v9 },
 { "restored",	F3(2, 0x31, 1)|RD(1), F3(~2, ~0x31, ~1)|RD(~1)|RS1_G0|SIMM13(~0),	"", 0, v9 },
-{ "sigm",	F3(2, 0x30, 0)|RD(0xf), F3(~2, ~0x30, ~0)|RD(~0xf)|RS1_G0|SIMM13(~0),	"", 0, v9 },
+{ "sir",	F3(2, 0x30, 0)|RD(0xf), F3(~2, ~0x30, ~0)|RD(~0xf)|RS1_G0|SIMM13(~0),	"", 0, v9 },
 
 { "flush",	F3(2, 0x3b, 0), F3(~2, ~0x3b, ~0)|ASI(~0),	"1+2", 0, v8 },
 { "flush",	F3(2, 0x3b, 0), F3(~2, ~0x3b, ~0)|ASI_RS2(~0),	"1", 0, v8 }, /* flush rs1+%g0 */
@@ -740,33 +654,35 @@ struct sparc_opcode sparc_opcodes[] = {
 { "tst",	F3(2, 0x12, 0), F3(~2, ~0x12, ~0)|RD_G0|RS1_G0|ASI(~0),	"2", 0, v6 }, /* orcc %g0, rs2, %g0 */
 { "tst",	F3(2, 0x12, 1), F3(~2, ~0x12, ~1)|RD_G0|SIMM13(~0),	"1", 0, v6 }, /* orcc rs1, 0, %g0 */
 
+/* FIXME These are marked F_ALIAS, so that they won't conflict with new v9
+   insns when v9 is present.  Otherwise, the F_ALIAS flag is ignored.  */
 { "wr",	F3(2, 0x30, 0),		F3(~2, ~0x30, ~0)|ASI(~0),		"1,2,m", 0, v8 }, /* wr r,r,%asrX */
 { "wr",	F3(2, 0x30, 0),		F3(~2, ~0x30, ~0)|RD_G0|ASI(~0),	"1,2,y", 0, v6 }, /* wr r,r,%y */
 { "wr",	F3(2, 0x30, 1),		F3(~2, ~0x30, ~1),			"1,i,m", 0, v8 }, /* wr r,i,%asrX */
 { "wr",	F3(2, 0x30, 1),		F3(~2, ~0x30, ~1)|RD_G0,		"1,i,y", 0, v6 }, /* wr r,i,%y */
-{ "wr",	F3(2, 0x31, 0),		F3(~2, ~0x31, ~0)|RD_G0|ASI(~0),	"1,2,p", 0, v6 }, /* wr r,r,%psr */
-{ "wr",	F3(2, 0x31, 1),		F3(~2, ~0x31, ~1)|RD_G0,		"1,i,p", 0, v6 }, /* wr r,i,%psr */
-{ "wr",	F3(2, 0x32, 0),		F3(~2, ~0x32, ~0)|RD_G0|ASI(~0),	"1,2,w", 0, v6 }, /* wr r,r,%wim */
-{ "wr",	F3(2, 0x32, 1),		F3(~2, ~0x32, ~1)|RD_G0,		"1,i,w", 0, v6 }, /* wr r,i,%wim */
-{ "wr",	F3(2, 0x33, 0),		F3(~2, ~0x33, ~0)|RD_G0|ASI(~0),	"1,2,t", 0, v6 }, /* wr r,r,%tbr */
-{ "wr",	F3(2, 0x33, 0),		F3(~2, ~0x33, ~0)|RD_G0|ASI(~0),	"1,2,o", 0, v9 }, /* wr r,r,%asi */
-{ "wr",	F3(2, 0x33, 1),		F3(~2, ~0x33, ~1)|RD_G0,		"1,i,t", 0, v6 }, /* wr r,i,%tbr */
-{ "wr",	F3(2, 0x33, 1),		F3(~2, ~0x33, ~1)|RD_G0,		"1,i,o", 0, v9 }, /* wr r,i,%asi */
+{ "wr",	F3(2, 0x31, 0),		F3(~2, ~0x31, ~0)|RD_G0|ASI(~0),	"1,2,p", F_ALIAS, v6 }, /* wr r,r,%psr */
+{ "wr",	F3(2, 0x31, 1),		F3(~2, ~0x31, ~1)|RD_G0,		"1,i,p", F_ALIAS, v6 }, /* wr r,i,%psr */
+{ "wr",	F3(2, 0x32, 0),		F3(~2, ~0x32, ~0)|RD_G0|ASI(~0),	"1,2,w", F_ALIAS, v6 }, /* wr r,r,%wim */
+{ "wr",	F3(2, 0x32, 1),		F3(~2, ~0x32, ~1)|RD_G0,		"1,i,w", F_ALIAS, v6 }, /* wr r,i,%wim */
+{ "wr",	F3(2, 0x33, 0),		F3(~2, ~0x33, ~0)|RD_G0|ASI(~0),	"1,2,t", F_ALIAS, v6 }, /* wr r,r,%tbr */
+{ "wr",	F3(2, 0x33, 1),		F3(~2, ~0x33, ~1)|RD_G0,		"1,i,t", F_ALIAS, v6 }, /* wr r,i,%tbr */
 
-{ "wr", F3(2, 0x30, 0)|RD(0), F3(~2, ~0x30, ~0)|RD(~0)|ASI(~0), "1,2,y", 0, v9 },
-{ "wr", F3(2, 0x30, 1)|RD(0), F3(~2, ~0x30, ~1)|RD(~0),		"1,i,y", 0, v9 },
-{ "wr", F3(2, 0x30, 0)|RD(2), F3(~2, ~0x30, ~0)|RD(~2)|ASI(~0), "1,2,E", 0, v9 },
-{ "wr", F3(2, 0x30, 1)|RD(2), F3(~2, ~0x30, ~1)|RD(~2),		"1,i,E", 0, v9 },
-{ "wr", F3(2, 0x30, 0)|RD(3), F3(~2, ~0x30, ~0)|RD(~3)|ASI(~0), "1,2,o", 0, v9 },
-{ "wr", F3(2, 0x30, 1)|RD(3), F3(~2, ~0x30, ~1)|RD(~3),		"1,i,o", 0, v9 },
-{ "wr", F3(2, 0x30, 0)|RD(6), F3(~2, ~0x30, ~0)|RD(~6)|ASI(~0), "1,2,s", 0, v9 },
-{ "wr", F3(2, 0x30, 1)|RD(6), F3(~2, ~0x30, ~1)|RD(~6),		"1,i,s", 0, v9 },
+{ "wr", F3(2, 0x30, 0)|RD(0), F3(~2, ~0x30, ~0)|RD(~0)|ASI(~0), "1,2,y", 0, v9 }, /* wr r,r,%y */
+{ "wr", F3(2, 0x30, 1)|RD(0), F3(~2, ~0x30, ~1)|RD(~0),		"1,i,y", 0, v9 }, /* wr r,i,%y */
+{ "wr", F3(2, 0x30, 0)|RD(2), F3(~2, ~0x30, ~0)|RD(~2)|ASI(~0), "1,2,E", 0, v9 }, /* wr r,r,%ccr */
+{ "wr", F3(2, 0x30, 1)|RD(2), F3(~2, ~0x30, ~1)|RD(~2),		"1,i,E", 0, v9 }, /* wr r,i,%ccr */
+{ "wr", F3(2, 0x30, 0)|RD(3), F3(~2, ~0x30, ~0)|RD(~3)|ASI(~0), "1,2,o", 0, v9 }, /* wr r,r,%asi */
+{ "wr", F3(2, 0x30, 1)|RD(3), F3(~2, ~0x30, ~1)|RD(~3),		"1,i,o", 0, v9 }, /* wr r,i,%asi */
+{ "wr", F3(2, 0x30, 0)|RD(6), F3(~2, ~0x30, ~0)|RD(~6)|ASI(~0), "1,2,s", 0, v9 }, /* wr r,i,%fprs */
+{ "wr", F3(2, 0x30, 1)|RD(6), F3(~2, ~0x30, ~1)|RD(~6),		"1,i,s", 0, v9 }, /* wr r,i,%fprs */
 
-{ "rd",	F3(2, 0x28, 0),			F3(~2, ~0x28, ~0)|SIMM13(~0),		"M,d", 0, v8 }, /* rd %asr1,r */
+/* FIXME These are marked F_ALIAS, so that they won't conflict with new v9
+   insns when v9 is present.  Otherwise, the F_ALIAS flag is ignored.  */
+{ "rd",	F3(2, 0x28, 0),			F3(~2, ~0x28, ~0)|SIMM13(~0),		"M,d", 0, v8 }, /* rd %asrX,r */
 { "rd",	F3(2, 0x28, 0),			F3(~2, ~0x28, ~0)|RS1_G0|SIMM13(~0),	"y,d", 0, v6 }, /* rd %y,r */
-{ "rd",	F3(2, 0x29, 0),			F3(~2, ~0x29, ~0)|RS1_G0|SIMM13(~0),	"p,d", 0, v6 }, /* rd %psr,r */
-{ "rd",	F3(2, 0x2a, 0),			F3(~2, ~0x2a, ~0)|RS1_G0|SIMM13(~0),	"w,d", 0, v6 }, /* rd %wim,r */
-{ "rd",	F3(2, 0x2b, 0),			F3(~2, ~0x2b, ~0)|RS1_G0|SIMM13(~0),	"t,d", 0, v6 }, /* rd %tbr,r */
+{ "rd",	F3(2, 0x29, 0),			F3(~2, ~0x29, ~0)|RS1_G0|SIMM13(~0),	"p,d", F_ALIAS, v6 }, /* rd %psr,r */
+{ "rd",	F3(2, 0x2a, 0),			F3(~2, ~0x2a, ~0)|RS1_G0|SIMM13(~0),	"w,d", F_ALIAS, v6 }, /* rd %wim,r */
+{ "rd",	F3(2, 0x2b, 0),			F3(~2, ~0x2b, ~0)|RS1_G0|SIMM13(~0),	"t,d", F_ALIAS, v6 }, /* rd %tbr,r */
 
 { "rd",	F3(2, 0x28, 0)|RS1(2),		F3(~2, ~0x28, ~0)|RS1(~2)|SIMM13(~0),	"E,d", 0, v9 }, /* rd %ccr,r */
 { "rd",	F3(2, 0x28, 0)|RS1(3),		F3(~2, ~0x28, ~0)|RS1(~3)|SIMM13(~0),	"o,d", 0, v9 }, /* rd %asi,r */
@@ -774,13 +690,12 @@ struct sparc_opcode sparc_opcodes[] = {
 { "rd",	F3(2, 0x28, 0)|RS1(5),		F3(~2, ~0x28, ~0)|RS1(~5)|SIMM13(~0),	"P,d", 0, v9 }, /* rd %pc,r */
 { "rd",	F3(2, 0x2b, 0)|RS1(6),		F3(~2, ~0x2b, ~0)|RS1(~6)|SIMM13(~0),	"s,d", 0, v9 }, /* rd %fprs,r */
 
-{ "rdpr",	F3(2, 0x2a, 0),		F3(~2, ~0x2a, ~0)|SIMM13(~0),	"?,d", 0, v9 }, /* rdpr %priv_reg,r */
-{ "wrpr",	F3(2, 0x32, 0),		F3(~2, ~0x32, ~0)|SIMM13(~0),	"1,2,!", 0, v9 },
-{ "wrpr",	F3(2, 0x32, 0),		F3(~2, ~0x32, ~0)|SIMM13(~0),	"1,!", 0, v9 },
-{ "wrpr",	F3(2, 0x32, 0),		F3(~2, ~0x32, ~0)|SIMM13(~0),	"!", 0, v9 },
-{ "wrpr",	F3(2, 0x32, 1),		F3(~2, ~0x32, ~1),	"1,i,!", 0, v9 },
-{ "wrpr",	F3(2, 0x32, 1),		F3(~2, ~0x32, ~1),	"i,1,!", 0, v9 },
-{ "wrpr",	F3(2, 0x32, 1),		F3(~2, ~0x32, ~1),	"i,!", 0, v9 },
+{ "rdpr",	F3(2, 0x2a, 0),		F3(~2, ~0x2a, ~0)|SIMM13(~0),	"?,d", 0, v9 },   /* rdpr %priv,r */
+{ "wrpr",	F3(2, 0x32, 0),		F3(~2, ~0x32, ~0),		"1,2,!", 0, v9 }, /* wrpr r1,r2,%priv */
+{ "wrpr",	F3(2, 0x32, 0),		F3(~2, ~0x32, ~0)|SIMM13(~0),	"1,!", 0, v9 },   /* wrpr r1,%priv */
+{ "wrpr",	F3(2, 0x32, 1),		F3(~2, ~0x32, ~1),		"1,i,!", 0, v9 }, /* wrpr r1,i,%priv */
+{ "wrpr",	F3(2, 0x32, 1),		F3(~2, ~0x32, ~1),		"i,1,!", F_ALIAS, v9 }, /* wrpr i,r1,%priv */
+{ "wrpr",	F3(2, 0x32, 1),		F3(~2, ~0x32, ~1)|RS1(~0),	"i,!", 0, v9 },   /* wrpr i,%priv */
 
 { "mov",	F3(2, 0x30, 0),		F3(~2, ~0x30, ~0)|ASI(~0),		"1,2,m", F_ALIAS, v8 }, /* wr r,r,%asrX */
 { "mov",	F3(2, 0x30, 0),		F3(~2, ~0x30, ~0)|RD_G0|ASI(~0),	"1,2,y", F_ALIAS, v6 }, /* wr r,r,%y */
@@ -793,6 +708,10 @@ struct sparc_opcode sparc_opcodes[] = {
 { "mov",	F3(2, 0x33, 0),		F3(~2, ~0x33, ~0)|RD_G0|ASI(~0),	"1,2,t", F_ALIAS, v6 }, /* wr r,r,%tbr */
 { "mov",	F3(2, 0x33, 1),		F3(~2, ~0x33, ~1)|RD_G0,		"1,i,t", F_ALIAS, v6 }, /* wr r,i,%tbr */
 
+/* v9: FIXME: On disassembly, rd %wim,r still gets preferred to rdpr %tpc,r.
+   v9: This is because the former is stricter in which bits can be set and
+   v9: compare_opcodes() will prefer it, even though F_ALIAS is set.
+   v9: Methinks we will need some sort of F_NOTFORV9 flag.  */
 { "mov",	F3(2, 0x28, 0),		 F3(~2, ~0x28, ~0)|SIMM13(~0),			"M,d", F_ALIAS, v8 }, /* rd %asr1,r */
 { "mov",	F3(2, 0x28, 0),		 F3(~2, ~0x28, ~0)|RS1_G0|SIMM13(~0),		"y,d", F_ALIAS, v6 }, /* rd %y,r */
 { "mov",	F3(2, 0x29, 0),		 F3(~2, ~0x29, ~0)|RS1_G0|SIMM13(~0),		"p,d", F_ALIAS, v6 }, /* rd %psr,r */
@@ -936,10 +855,22 @@ struct sparc_opcode sparc_opcodes[] = {
 { "udivx",	F3(2, 0x0d, 0), F3(~2, ~0x0d, ~0)|ASI(~0),	"1,2,d", 0, v9 },
 { "udivx",	F3(2, 0x0d, 1), F3(~2, ~0x0d, ~1),		"1,i,d", 0, v9 },
 
-{ "call",	F1(0x1), F1(~0x1), "L", F_DELAYED, v6 },
-{ "call",	F1(0x1), F1(~0x1), "L,#", F_DELAYED, v6 },
-{ "call",	F3(2, 0x38, 0)|RD(0xf), F3(~2, ~0x38, ~0)|RD(~0xf)|ASI_RS2(~0), "1", F_DELAYED, v6 }, /* jmpl rs1+%g0, %o7 */
-{ "call",	F3(2, 0x38, 0)|RD(0xf), F3(~2, ~0x38, ~0)|RD(~0xf)|ASI_RS2(~0), "1,#", F_DELAYED, v6 },
+{ "call",	F1(0x1), F1(~0x1), "L", F_JSR|F_DELAYED, v6 },
+{ "call",	F1(0x1), F1(~0x1), "L,#", F_JSR|F_DELAYED, v6 },
+
+{ "call",	F3(2, 0x38, 0)|RD(0xf), F3(~2, ~0x38, ~0)|RD(~0xf)|ASI(~0),	"1+2", F_JSR|F_DELAYED, v6 }, /* jmpl rs1+rs2,%o7 */
+{ "call",	F3(2, 0x38, 0)|RD(0xf), F3(~2, ~0x38, ~0)|RD(~0xf)|ASI(~0),	"1+2,#", F_JSR|F_DELAYED, v6 },
+{ "call",	F3(2, 0x38, 0)|RD(0xf), F3(~2, ~0x38, ~0)|RD(~0xf)|ASI_RS2(~0),	"1", F_JSR|F_DELAYED, v6 }, /* jmpl rs1+%g0,%o7 */
+{ "call",	F3(2, 0x38, 0)|RD(0xf), F3(~2, ~0x38, ~0)|RD(~0xf)|ASI_RS2(~0),	"1,#", F_JSR|F_DELAYED, v6 },
+{ "call",	F3(2, 0x38, 1)|RD(0xf), F3(~2, ~0x38, ~1)|RD(~0xf),		"1+i", F_JSR|F_DELAYED, v6 }, /* jmpl rs1+i,%o7 */
+{ "call",	F3(2, 0x38, 1)|RD(0xf), F3(~2, ~0x38, ~1)|RD(~0xf),		"1+i,#", F_JSR|F_DELAYED, v6 },
+{ "call",	F3(2, 0x38, 1)|RD(0xf), F3(~2, ~0x38, ~1)|RD(~0xf),		"i+1", F_JSR|F_DELAYED, v6 }, /* jmpl i+rs1,%o7 */
+{ "call",	F3(2, 0x38, 1)|RD(0xf), F3(~2, ~0x38, ~1)|RD(~0xf),		"i+1,#", F_JSR|F_DELAYED, v6 },
+{ "call",	F3(2, 0x38, 1)|RD(0xf), F3(~2, ~0x38, ~1)|RD(~0xf)|RS1_G0,	"i", F_JSR|F_DELAYED, v6 }, /* jmpl %g0+i,%o7 */
+{ "call",	F3(2, 0x38, 1)|RD(0xf), F3(~2, ~0x38, ~1)|RD(~0xf)|RS1_G0,	"i,#", F_JSR|F_DELAYED, v6 },
+{ "call",	F3(2, 0x38, 1)|RD(0xf), F3(~2, ~0x38, ~1)|RD(~0xf)|SIMM13(~0),	"1", F_JSR|F_DELAYED, v6 }, /* jmpl rs1+0,%o7 */
+{ "call",	F3(2, 0x38, 1)|RD(0xf), F3(~2, ~0x38, ~1)|RD(~0xf)|SIMM13(~0),	"1,#", F_JSR|F_DELAYED, v6 },
+
 
 /* Conditional instructions.
 
@@ -953,18 +884,18 @@ struct sparc_opcode sparc_opcodes[] = {
  { opcode, (mask)      , (lose)|ANNUL, "l",     (flags), v6 }
 
 #define brx(opcode, mask, lose, flags) /* v9 */ \
- { opcode, (mask)|(2<<20), (lose)|ANNUL|BPRED, "Z,G",   (flags), v9 }, \
- { opcode, (mask)|(2<<20), (lose)|ANNUL|BPRED, ",N Z,G",   (flags), v9 }, \
- { opcode, (mask)|(2<<20)|ANNUL, (lose)|BPRED, ",a Z,G", (flags), v9 }, \
- { opcode, (mask)|(2<<20)|ANNUL, (lose)|BPRED, ",a,N Z,G", (flags), v9 }, \
- { opcode, (mask)|(2<<20)|BPRED, (lose)|ANNUL, ",T Z,G",   (flags), v9 }, \
- { opcode, (mask)|(2<<20)|ANNUL|BPRED, (lose), ",a,T Z,G", (flags), v9 }, \
- { opcode, (mask), (lose)|(2<<20)|ANNUL|BPRED, "z,G",   (flags), v9 }, \
- { opcode, (mask), (lose)|(2<<20)|ANNUL|BPRED, ",N z,G",   (flags), v9 }, \
- { opcode, (mask)|ANNUL, (lose)|(2<<20)|BPRED, ",a z,G", (flags), v9 }, \
- { opcode, (mask)|ANNUL, (lose)|(2<<20)|BPRED, ",a,N z,G", (flags), v9 }, \
- { opcode, (mask)|BPRED, (lose)|(2<<20)|ANNUL, ",T z,G",   (flags), v9 }, \
- { opcode, (mask)|ANNUL|BPRED, (lose)|(2<<20), ",a,T z,G", (flags), v9 }
+ { opcode, (mask)|(2<<20)|BPRED, ANNUL|(lose), "Z,G",      (flags), v9 }, \
+ { opcode, (mask)|(2<<20)|BPRED, ANNUL|(lose), ",T Z,G",   (flags), v9 }, \
+ { opcode, (mask)|(2<<20)|BPRED|ANNUL, (lose), ",a Z,G",   (flags), v9 }, \
+ { opcode, (mask)|(2<<20)|BPRED|ANNUL, (lose), ",a,T Z,G", (flags), v9 }, \
+ { opcode, (mask)|(2<<20), ANNUL|BPRED|(lose), ",N Z,G",   (flags), v9 }, \
+ { opcode, (mask)|(2<<20)|ANNUL, BPRED|(lose), ",a,N Z,G", (flags), v9 }, \
+ { opcode, (mask)|BPRED, ANNUL|(lose)|(2<<20), "z,G",      (flags), v9 }, \
+ { opcode, (mask)|BPRED, ANNUL|(lose)|(2<<20), ",T z,G",   (flags), v9 }, \
+ { opcode, (mask)|BPRED|ANNUL, (lose)|(2<<20), ",a z,G",   (flags), v9 }, \
+ { opcode, (mask)|BPRED|ANNUL, (lose)|(2<<20), ",a,T z,G", (flags), v9 }, \
+ { opcode, (mask), ANNUL|BPRED|(lose)|(2<<20), ",N z,G",   (flags), v9 }, \
+ { opcode, (mask)|ANNUL, BPRED|(lose)|(2<<20), ",a,N z,G", (flags), v9 }
 
 /* Define four traps: reg+reg, reg + immediate, immediate alone, reg alone. */
 #define tr(opcode, mask, lose, flags) \
@@ -990,33 +921,36 @@ struct sparc_opcode sparc_opcodes[] = {
 #define cond(bop, top, mask, flags) \
   brx(bop, F2(0, 1)|(mask), F2(~0, ~1)|((~mask)&COND(~0)), F_DELAYED|(flags)), /* v9 */ \
   br(bop,  F2(0, 2)|(mask), F2(~0, ~2)|((~mask)&COND(~0)), F_DELAYED|(flags)), \
-  tr(top,  F3(2, 0x3a, 0)|(mask), F3(~2, ~0x3a, 0)|((~mask)&COND(~0)), (flags))
+  tr(top,  F3(2, 0x3a, 0)|(mask), F3(~2, ~0x3a, 0)|((~mask)&COND(~0)), ((flags) & ~(F_UNBR|F_CONDBR)))
 
 /* Define all the conditions, all the branches, all the traps.  */
 
-cond ("b",	"ta",   CONDA, 0),	/* Standard branch, trap mnemonics */
-cond ("ba",	"t",    CONDA, F_ALIAS), /* Alternative forms (not for disas) */
-cond ("bcc",	"tcc",  CONDCC, 0),
-cond ("bcs",	"tcs",  CONDCS, 0),
-cond ("be",	"te",   CONDE, 0),
-cond ("bg",	"tg",   CONDG, 0),
-cond ("bgt",	"tgt",   CONDG, F_ALIAS),
-cond ("bge",	"tge",  CONDGE, 0),
-cond ("bgeu",	"tgeu", CONDGEU, F_ALIAS), /* for cc */
-cond ("bgu",	"tgu",  CONDGU, 0),
-cond ("bl",	"tl",   CONDL, 0),
-cond ("blt",	"tlt",   CONDL, F_ALIAS),
-cond ("ble",	"tle",  CONDLE, 0),
-cond ("bleu",	"tleu", CONDLEU, 0),
-cond ("blu",	"tlu",  CONDLU, F_ALIAS), /* for cs */
-cond ("bn",	"tn",   CONDN, 0),
-cond ("bne",	"tne",  CONDNE, 0),
-cond ("bneg",	"tneg", CONDNEG, 0),
-cond ("bnz",	"tnz",  CONDNZ, F_ALIAS), /* for ne */
-cond ("bpos",	"tpos", CONDPOS, 0),
-cond ("bvc",	"tvc",  CONDVC, 0),
-cond ("bvs",	"tvs",  CONDVS, 0),
-cond ("bz",	"tz",   CONDZ, F_ALIAS), /* for e */
+/* Standard branch, trap mnemonics */
+cond ("b",	"ta",   CONDA, F_UNBR),
+/* Alternative form (just for assembly, not for disassembly) */
+cond ("ba",	"t",    CONDA, F_UNBR|F_ALIAS),
+
+cond ("bcc",	"tcc",  CONDCC, F_CONDBR),
+cond ("bcs",	"tcs",  CONDCS, F_CONDBR),
+cond ("be",	"te",   CONDE, F_CONDBR),
+cond ("bg",	"tg",   CONDG, F_CONDBR),
+cond ("bgt",	"tgt",   CONDG, F_CONDBR|F_ALIAS),
+cond ("bge",	"tge",  CONDGE, F_CONDBR),
+cond ("bgeu",	"tgeu", CONDGEU, F_CONDBR|F_ALIAS), /* for cc */
+cond ("bgu",	"tgu",  CONDGU, F_CONDBR),
+cond ("bl",	"tl",   CONDL, F_CONDBR),
+cond ("blt",	"tlt",   CONDL, F_CONDBR|F_ALIAS),
+cond ("ble",	"tle",  CONDLE, F_CONDBR),
+cond ("bleu",	"tleu", CONDLEU, F_CONDBR),
+cond ("blu",	"tlu",  CONDLU, F_CONDBR|F_ALIAS), /* for cs */
+cond ("bn",	"tn",   CONDN, F_CONDBR),
+cond ("bne",	"tne",  CONDNE, F_CONDBR),
+cond ("bneg",	"tneg", CONDNEG, F_CONDBR),
+cond ("bnz",	"tnz",  CONDNZ, F_CONDBR|F_ALIAS), /* for ne */
+cond ("bpos",	"tpos", CONDPOS, F_CONDBR),
+cond ("bvc",	"tvc",  CONDVC, F_CONDBR),
+cond ("bvs",	"tvs",  CONDVS, F_CONDBR),
+cond ("bz",	"tz",   CONDZ, F_CONDBR|F_ALIAS), /* for e */
 
 #undef cond
 #undef br
@@ -1024,22 +958,22 @@ cond ("bz",	"tz",   CONDZ, F_ALIAS), /* for e */
 #undef tr
 
 #define brr(opcode, mask, lose, flags) /* v9 */ \
- { opcode, (mask), (lose)|ANNUL|BPRED, "1,k",   F_DELAYED|(flags), v9 }, \
- { opcode, (mask), (lose)|ANNUL|BPRED, ",N 1,k", F_DELAYED|(flags), v9 }, \
- { opcode, (mask)|ANNUL, (lose)|BPRED, ",a 1,k", F_DELAYED|(flags), v9 }, \
- { opcode, (mask)|ANNUL, (lose)|BPRED, ",a,N 1,k", F_DELAYED|(flags), v9 }, \
- { opcode, (mask)|BPRED, (lose)|ANNUL, ",T 1,k",   F_DELAYED|(flags), v9 }, \
- { opcode, (mask)|ANNUL|BPRED, (lose), ",a,T 1,k", F_DELAYED|(flags), v9 }
+ { opcode, (mask)|BPRED, ANNUL|(lose), "1,k",      F_DELAYED|(flags), v9 }, \
+ { opcode, (mask)|BPRED, ANNUL|(lose), ",T 1,k",   F_DELAYED|(flags), v9 }, \
+ { opcode, (mask)|BPRED|ANNUL, (lose), ",a 1,k",   F_DELAYED|(flags), v9 }, \
+ { opcode, (mask)|BPRED|ANNUL, (lose), ",a,T 1,k", F_DELAYED|(flags), v9 }, \
+ { opcode, (mask), ANNUL|BPRED|(lose), ",N 1,k",   F_DELAYED|(flags), v9 }, \
+ { opcode, (mask)|ANNUL, BPRED|(lose), ",a,N 1,k", F_DELAYED|(flags), v9 }
 
 #define condr(bop, mask, flags) /* v9 */ \
   brr(bop, F2(0, 3)|COND(mask), F2(~0, ~3)|COND(~(mask)), (flags)) /* v9 */
 
-/* v9 */ condr("brnz", 0x5, 0),
-/* v9 */ condr("brz", 0x1, 0),
-/* v9 */ condr("brgez", 0x7, 0),
-/* v9 */ condr("brlz", 0x3, 0),
-/* v9 */ condr("brlez", 0x2, 0),
-/* v9 */ condr("brgz", 0x6, 0),
+/* v9 */ condr("brnz", 0x5, F_CONDBR),
+/* v9 */ condr("brz", 0x1, F_CONDBR),
+/* v9 */ condr("brgez", 0x7, F_CONDBR),
+/* v9 */ condr("brlz", 0x3, F_CONDBR),
+/* v9 */ condr("brlez", 0x2, F_CONDBR),
+/* v9 */ condr("brgz", 0x6, F_CONDBR),
 
 #undef condr /* v9 */
 #undef brr /* v9 */
@@ -1103,10 +1037,10 @@ cond ("bz",	"tz",   CONDZ, F_ALIAS), /* for e */
 #undef fmrr /* v9 */
 
 #define movicc(opcode, cond, flags) /* v9 */ \
-  { opcode, F3(2, 0x2c, 0)|MCOND(cond,1)|ICC, F3(~2, ~0x2c, ~0)|MCOND(~cond,~1)|XCC|(1<<12), "z,2,d", flags, v9 }, \
-  { opcode, F3(2, 0x2c, 1)|MCOND(cond,1)|ICC, F3(~2, ~0x2c, ~1)|MCOND(~cond,~1)|XCC|(1<<12), "z,I,d", flags, v9 }, \
-  { opcode, F3(2, 0x2c, 0)|MCOND(cond,1)|XCC, F3(~2, ~0x2c, ~0)|MCOND(~cond,~1)|(1<<12),     "Z,2,d", flags, v9 }, \
-  { opcode, F3(2, 0x2c, 1)|MCOND(cond,1)|XCC, F3(~2, ~0x2c, ~1)|MCOND(~cond,~1)|(1<<12),     "Z,I,d", flags, v9 }
+  { opcode, F3(2, 0x2c, 0)|MCOND(cond,1)|ICC, F3(~2, ~0x2c, ~0)|MCOND(~cond,~1)|XCC|(1<<11), "z,2,d", flags, v9 }, \
+  { opcode, F3(2, 0x2c, 1)|MCOND(cond,1)|ICC, F3(~2, ~0x2c, ~1)|MCOND(~cond,~1)|XCC|(1<<11), "z,I,d", flags, v9 }, \
+  { opcode, F3(2, 0x2c, 0)|MCOND(cond,1)|XCC, F3(~2, ~0x2c, ~0)|MCOND(~cond,~1)|(1<<11),     "Z,2,d", flags, v9 }, \
+  { opcode, F3(2, 0x2c, 1)|MCOND(cond,1)|XCC, F3(~2, ~0x2c, ~1)|MCOND(~cond,~1)|(1<<11),     "Z,I,d", flags, v9 }
 
 #define movfcc(opcode, fcond, flags) /* v9 */ \
   { opcode, F3(2, 0x2c, 0)|FCC(0)|MCOND(fcond,0), MCOND(~fcond,~0)|FCC(~0)|F3(~2, ~0x2c, ~0), "6,2,d", flags, v9 }, \
@@ -1120,7 +1054,7 @@ cond ("bz",	"tz",   CONDZ, F_ALIAS), /* for e */
 
 #define movcc(opcode, cond, fcond, flags) /* v9 */ \
   movfcc (opcode, fcond, flags), /* v9 */ \
-  movicc (opcode, cond, flags)
+  movicc (opcode, cond, flags) /* v9 */
 
 /* v9 */ movcc  ("mova",	CONDA, FCONDA, 0),
 /* v9 */ movicc ("movcc",	CONDCC, 0),
@@ -1169,7 +1103,7 @@ cond ("bz",	"tz",   CONDZ, F_ALIAS), /* for e */
 { opcode, F3F(2, 0x35, 0x080+fpsize)|MCOND(fcond,0), F3F(~2, ~0x35, ~(0x080+fpsize))|MCOND(~fcond,~0), "8,f,g", flags, v9 }, \
 { opcode, F3F(2, 0x35, 0x0c0+fpsize)|MCOND(fcond,0), F3F(~2, ~0x35, ~(0x0c0+fpsize))|MCOND(~fcond,~0), "9,f,g", flags, v9 }
 
-/* FIXME: use fmovicc/fmovfcc? */
+/* FIXME: use fmovicc/fmovfcc? */ /* v9 */
 #define fmovcc(opcode, fpsize, cond, fcond, flags) /* v9 */ \
 { opcode, F3F(2, 0x35, 0x100+fpsize)|MCOND(cond,0),  F3F(~2, ~0x35, ~(0x100+fpsize))|MCOND(~cond,~0),  "z,f,g", flags, v9 }, \
 { opcode, F3F(2, 0x35, 0x000+fpsize)|MCOND(fcond,0), F3F(~2, ~0x35, ~(0x000+fpsize))|MCOND(~fcond,~0), "6,f,g", flags, v9 }, \
@@ -1275,30 +1209,30 @@ cond ("bz",	"tz",   CONDZ, F_ALIAS), /* for e */
  { opcode, (mask)|ANNUL, (lose), ",a l", flags|F_DELAYED, v6 }
 
 #define brfcx(opcode, mask, lose, flags) /* v9 */ \
- { opcode, FBFCC(0)|(mask), ANNUL|BPRED|FBFCC(~0)|(lose), "6,G",   flags|F_DELAYED, v9 }, \
- { opcode, FBFCC(0)|(mask)|ANNUL, BPRED|FBFCC(~0)|(lose), ",a 6,G",   flags|F_DELAYED, v9 }, \
+ { opcode, FBFCC(0)|(mask)|BPRED, ANNUL|FBFCC(~0)|(lose), "6,G",      flags|F_DELAYED, v9 }, \
+ { opcode, FBFCC(0)|(mask)|BPRED, ANNUL|FBFCC(~0)|(lose), ",T 6,G",   flags|F_DELAYED, v9 }, \
+ { opcode, FBFCC(0)|(mask)|BPRED|ANNUL, FBFCC(~0)|(lose), ",a 6,G",   flags|F_DELAYED, v9 }, \
+ { opcode, FBFCC(0)|(mask)|BPRED|ANNUL, FBFCC(~0)|(lose), ",a,T 6,G", flags|F_DELAYED, v9 }, \
  { opcode, FBFCC(0)|(mask), ANNUL|BPRED|FBFCC(~0)|(lose), ",N 6,G",   flags|F_DELAYED, v9 }, \
  { opcode, FBFCC(0)|(mask)|ANNUL, BPRED|FBFCC(~0)|(lose), ",a,N 6,G", flags|F_DELAYED, v9 }, \
- { opcode, FBFCC(0)|(mask)|BPRED, ANNUL|FBFCC(~0)|(lose), ",T 6,G",   flags|F_DELAYED, v9 }, \
- { opcode, FBFCC(0)|(mask)|BPRED|ANNUL, FBFCC(~0)|(lose), ",a,T 6,G", flags|F_DELAYED, v9 }, \
- { opcode, FBFCC(1)|(mask), ANNUL|BPRED|FBFCC(~1)|(lose), "7,G",   flags|F_DELAYED, v9 }, \
- { opcode, FBFCC(1)|(mask)|ANNUL, BPRED|FBFCC(~1)|(lose), ",a 7,G",   flags|F_DELAYED, v9 }, \
+ { opcode, FBFCC(1)|(mask)|BPRED, ANNUL|FBFCC(~1)|(lose), "7,G",      flags|F_DELAYED, v9 }, \
+ { opcode, FBFCC(1)|(mask)|BPRED, ANNUL|FBFCC(~1)|(lose), ",T 7,G",   flags|F_DELAYED, v9 }, \
+ { opcode, FBFCC(1)|(mask)|BPRED|ANNUL, FBFCC(~1)|(lose), ",a 7,G",   flags|F_DELAYED, v9 }, \
+ { opcode, FBFCC(1)|(mask)|BPRED|ANNUL, FBFCC(~1)|(lose), ",a,T 7,G", flags|F_DELAYED, v9 }, \
  { opcode, FBFCC(1)|(mask), ANNUL|BPRED|FBFCC(~1)|(lose), ",N 7,G",   flags|F_DELAYED, v9 }, \
  { opcode, FBFCC(1)|(mask)|ANNUL, BPRED|FBFCC(~1)|(lose), ",a,N 7,G", flags|F_DELAYED, v9 }, \
- { opcode, FBFCC(1)|(mask)|BPRED, ANNUL|FBFCC(~1)|(lose), ",T 7,G",   flags|F_DELAYED, v9 }, \
- { opcode, FBFCC(1)|(mask)|BPRED|ANNUL, FBFCC(~1)|(lose), ",a,T 7,G", flags|F_DELAYED, v9 }, \
- { opcode, FBFCC(2)|(mask), ANNUL|BPRED|FBFCC(~2)|(lose), "8,G",   flags|F_DELAYED, v9 }, \
- { opcode, FBFCC(2)|(mask)|ANNUL, BPRED|FBFCC(~2)|(lose), ",a 8,G",   flags|F_DELAYED, v9 }, \
+ { opcode, FBFCC(2)|(mask)|BPRED, ANNUL|FBFCC(~2)|(lose), "8,G",      flags|F_DELAYED, v9 }, \
+ { opcode, FBFCC(2)|(mask)|BPRED, ANNUL|FBFCC(~2)|(lose), ",T 8,G",   flags|F_DELAYED, v9 }, \
+ { opcode, FBFCC(2)|(mask)|BPRED|ANNUL, FBFCC(~2)|(lose), ",a 8,G",   flags|F_DELAYED, v9 }, \
+ { opcode, FBFCC(2)|(mask)|BPRED|ANNUL, FBFCC(~2)|(lose), ",a,T 8,G", flags|F_DELAYED, v9 }, \
  { opcode, FBFCC(2)|(mask), ANNUL|BPRED|FBFCC(~2)|(lose), ",N 8,G",   flags|F_DELAYED, v9 }, \
  { opcode, FBFCC(2)|(mask)|ANNUL, BPRED|FBFCC(~2)|(lose), ",a,N 8,G", flags|F_DELAYED, v9 }, \
- { opcode, FBFCC(2)|(mask)|BPRED, ANNUL|FBFCC(~2)|(lose), ",T 8,G",   flags|F_DELAYED, v9 }, \
- { opcode, FBFCC(2)|(mask)|BPRED|ANNUL, FBFCC(~2)|(lose), ",a,T 8,G", flags|F_DELAYED, v9 }, \
- { opcode, FBFCC(3)|(mask), ANNUL|BPRED|FBFCC(~3)|(lose), "9,G",   flags|F_DELAYED, v9 }, \
- { opcode, FBFCC(3)|(mask)|ANNUL, BPRED|FBFCC(~3)|(lose), ",a 9,G",   flags|F_DELAYED, v9 }, \
- { opcode, FBFCC(3)|(mask), ANNUL|BPRED|FBFCC(~3)|(lose), ",N 9,G",   flags|F_DELAYED, v9 }, \
- { opcode, FBFCC(3)|(mask)|ANNUL, BPRED|FBFCC(~3)|(lose), ",a,N  9,G", flags|F_DELAYED, v9 }, \
+ { opcode, FBFCC(3)|(mask)|BPRED, ANNUL|FBFCC(~3)|(lose), "9,G",      flags|F_DELAYED, v9 }, \
  { opcode, FBFCC(3)|(mask)|BPRED, ANNUL|FBFCC(~3)|(lose), ",T 9,G",   flags|F_DELAYED, v9 }, \
- { opcode, FBFCC(3)|(mask)|BPRED|ANNUL, FBFCC(~3)|(lose), ",a,T 9,G", flags|F_DELAYED, v9 }
+ { opcode, FBFCC(3)|(mask)|BPRED|ANNUL, FBFCC(~3)|(lose), ",a 9,G",   flags|F_DELAYED, v9 }, \
+ { opcode, FBFCC(3)|(mask)|BPRED|ANNUL, FBFCC(~3)|(lose), ",a,T 9,G", flags|F_DELAYED, v9 }, \
+ { opcode, FBFCC(3)|(mask), ANNUL|BPRED|FBFCC(~3)|(lose), ",N 9,G",   flags|F_DELAYED, v9 }, \
+ { opcode, FBFCC(3)|(mask)|ANNUL, BPRED|FBFCC(~3)|(lose), ",a,N  9,G", flags|F_DELAYED, v9 }
 
 /* v9: We must put `brfcx' before `brfc', to ensure that we never match
    v9: something against an expression unless it is an expression.  Otherwise,
@@ -1338,12 +1272,12 @@ condfc("fbule",	"cb013", 0xe, 0),
 #undef brfc
 #undef brfcx	/* v9 */
 
-{ "jmp",	F3(2, 0x38, 0), F3(~2, ~0x38, ~0)|RD_G0|ASI(~0),	"1+2", F_DELAYED, v6 }, /* jmpl rs1+rs2,%g0 */
-{ "jmp",	F3(2, 0x38, 0), F3(~2, ~0x38, ~0)|RD_G0|ASI_RS2(~0),	"1", F_DELAYED, v6 }, /* jmpl rs1+%g0,%g0 */
-{ "jmp",	F3(2, 0x38, 1), F3(~2, ~0x38, ~1)|RD_G0,		"1+i", F_DELAYED, v6 }, /* jmpl rs1+i,%g0 */
-{ "jmp",	F3(2, 0x38, 1), F3(~2, ~0x38, ~1)|RD_G0,		"i+1", F_DELAYED, v6 }, /* jmpl i+rs1,%g0 */
-{ "jmp",	F3(2, 0x38, 1), F3(~2, ~0x38, ~1)|RD_G0|RS1_G0,		"i", F_DELAYED, v6 }, /* jmpl %g0+i,%g0 */
-{ "jmp",	F3(2, 0x38, 1), F3(~2, ~0x38, ~1)|RD_G0|SIMM13(~0),	"1", F_DELAYED, v6 }, /* jmpl rs1+0,%g0 */
+{ "jmp",	F3(2, 0x38, 0), F3(~2, ~0x38, ~0)|RD_G0|ASI(~0),	"1+2", F_UNBR|F_DELAYED, v6 }, /* jmpl rs1+rs2,%g0 */
+{ "jmp",	F3(2, 0x38, 0), F3(~2, ~0x38, ~0)|RD_G0|ASI_RS2(~0),	"1", F_UNBR|F_DELAYED, v6 }, /* jmpl rs1+%g0,%g0 */
+{ "jmp",	F3(2, 0x38, 1), F3(~2, ~0x38, ~1)|RD_G0,		"1+i", F_UNBR|F_DELAYED, v6 }, /* jmpl rs1+i,%g0 */
+{ "jmp",	F3(2, 0x38, 1), F3(~2, ~0x38, ~1)|RD_G0,		"i+1", F_UNBR|F_DELAYED, v6 }, /* jmpl i+rs1,%g0 */
+{ "jmp",	F3(2, 0x38, 1), F3(~2, ~0x38, ~1)|RD_G0|RS1_G0,		"i", F_UNBR|F_DELAYED, v6 }, /* jmpl %g0+i,%g0 */
+{ "jmp",	F3(2, 0x38, 1), F3(~2, ~0x38, ~1)|RD_G0|SIMM13(~0),	"1", F_UNBR|F_DELAYED, v6 }, /* jmpl rs1+0,%g0 */
 
 { "nop",	F2(0, 4), 0xfeffffff, "", 0, v6 }, /* sethi 0, %g0 */
 
@@ -1482,8 +1416,11 @@ condfc("fbule",	"cb013", 0xe, 0),
    insns when v9 is present.  Otherwise, the F_ALIAS flag is ignored.  */
 { "cpop1",	F3(2, 0x36, 0), F3(~2, ~0x36, ~1), "[1+2],d", F_ALIAS, v6 },
 { "cpop2",	F3(2, 0x37, 0), F3(~2, ~0x37, ~1), "[1+2],d", F_ALIAS, v6 },
-{ "impdep1",	F3(2, 0x36, 0), F3(~2, ~0x36, ~1), "[1+2],d", 0, v9 },
-{ "impdep2",	F3(2, 0x37, 0), F3(~2, ~0x37, ~1), "[1+2],d", 0, v9 },
+
+{ "impdep1",	F3(2, 0x36, 0), F3(~2, ~0x36, ~0)|ASI(~0), "1,2,d", 0, v9 },
+{ "impdep1",	F3(2, 0x36, 1), F3(~2, ~0x36, ~1),	   "1,i,d", 0, v9 },
+{ "impdep2",	F3(2, 0x37, 0), F3(~2, ~0x37, ~0)|ASI(~0), "1,2,d", 0, v9 },
+{ "impdep2",	F3(2, 0x37, 1), F3(~2, ~0x37, ~1),	   "1,i,d", 0, v9 },
     
 { "casa",	F3(3, 0x3c, 0), F3(~3, ~0x3c, ~0), "[1]A,2,d", 0, v9 },
 { "casa",	F3(3, 0x3c, 1), F3(~3, ~0x3c, ~1), "[1]o,2,d", 0, v9 },
