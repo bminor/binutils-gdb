@@ -1,3 +1,7 @@
+Wed Apr 13 10:52:50 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* objdump.c: Do an ifdef on __GO32__, not unix.
+
 Wed Apr  6 21:54:49 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	Added -D (--dynamic) option to nm and -T (--dynamic-syms) and -R

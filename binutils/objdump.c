@@ -1323,10 +1323,10 @@ dump_reloc_set (abfd, relpp, relcount)
 }
 
 /* A file to open each BFD on.  It will never actually be written to.  */
-#ifdef unix
-#define _DUMMY_NAME_ "/dev/null"
-#else
+#ifdef __GO32__
 #define _DUMMY_NAME_ "##dummy"
+#else
+#define _DUMMY_NAME_ "/dev/null"
 #endif
 
 /* The length of the longest architecture name + 1.  */
