@@ -37,6 +37,7 @@ code on the hardware.
 #include "sim-utils.h"
 #include "sim-options.h"
 #include "sim-assert.h"
+#include "sim-hw.h"
 
 /* start-sanitize-sky */
 #ifdef TARGET_SKY
@@ -113,6 +114,7 @@ char* pr_uword64 PARAMS ((uword64 addr));
    halt is required.  NOTE: Care must be taken, since this value may
    be used in later revisions of the MIPS ISA. */
 #define HALT_INSTRUCTION       (0x03ff000d)
+#define HALT_INSTRUCTION2      (0x0000ffcd)
 #define HALT_INSTRUCTION_MASK  (0x03FFFFC0)
 
 
@@ -180,6 +182,10 @@ FILE *tracefh = NULL;
 static void open_trace PARAMS((SIM_DESC sd));
 #endif /* TRACE */
 
+/* simulation target board.  NULL=canonical */
+static char* board = NULL;
+
+
 static DECLARE_OPTION_HANDLER (mips_option_handler);
 
 enum {
@@ -195,7 +201,9 @@ enum {
   ,OPTION_GS_REFRESH2
 #endif
 /* end-sanitize-sky */
+  ,OPTION_BOARD
 };
+
 
 static SIM_RC
 mips_option_handler (sd, cpu, opt, arg, is_command)
@@ -265,10 +273,10 @@ Re-compile simulator with \"-DTRACE\" to enable this option.\n");
 #ifdef SKY_FUNIT
     case OPTION_FLOAT_TYPE:
       /* Use host (fast) or target (accurate) floating point implementation. */
-      if (arg && strcmp (arg, "host") == 0)
-	STATE_FP_TYPE_OPT (sd) &= ~STATE_FP_TYPE_OPT_TARGET;
-      else if (arg && strcmp (arg, "target") == 0)
-	STATE_FP_TYPE_OPT (sd) |= STATE_FP_TYPE_OPT_TARGET;
+      if (arg && strcmp (arg, "fast") == 0)
+	STATE_FP_TYPE_OPT (sd) &= ~STATE_FP_TYPE_OPT_ACCURATE;
+      else if (arg && strcmp (arg, "accurate") == 0)
+	STATE_FP_TYPE_OPT (sd) |= STATE_FP_TYPE_OPT_ACCURATE;
       else
 	{
 	  fprintf (stderr, "Unrecognized float-type option `%s'\n", arg);
@@ -318,10 +326,21 @@ Re-compile simulator with \"-DTRACE\" to enable this option.\n");
    
 #endif
 /* end-sanitize-sky */
+      
+    case OPTION_BOARD:
+      {
+	if (arg)
+	  {
+	    board = zalloc(strlen(arg) + 1);
+	    strcpy(board, arg);
+	  }
+	return SIM_RC_OK;
+      }
     }
-
+  
   return SIM_RC_OK;
 }
+
 
 static const OPTION mips_options[] =
 {
@@ -335,7 +354,7 @@ static const OPTION mips_options[] =
 #ifdef TARGET_SKY
 #ifdef SKY_FUNIT
   { {"float-type", required_argument, NULL, OPTION_FLOAT_TYPE},
-      '\0', "host|target", "Use host (fast) or target (accurate) floating point",
+      '\0', "fast|accurate", "Use fast (host) or accurate (target) floating point",
       mips_option_handler },
 #endif
   { {"enable-gs", required_argument, NULL, OPTION_GS_ENABLE},
@@ -349,6 +368,19 @@ static const OPTION mips_options[] =
      mips_option_handler },
 #endif
 /* end-sanitize-sky */
+
+  { {"board", required_argument, NULL, OPTION_BOARD},
+     '\0', "none" /* rely on compile-time string concatenation for other options */
+
+/* start-sanitize-tx3904 */
+#define BOARD_JMR3904 "jmr3904"
+           "|" BOARD_JMR3904
+#define BOARD_JMR3904_DEBUG "jmr3904debug"
+           "|" BOARD_JMR3904_DEBUG
+/* end-sanitize-tx3904 */
+
+    , "Customize simulation for a particular board.", mips_option_handler },
+
   { {NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL }
 };
 
@@ -359,6 +391,7 @@ static void
 interrupt_event (SIM_DESC sd, void *data)
 {
   sim_cpu *cpu = STATE_CPU (sd, 0); /* FIXME */
+  address_word cia = CIA_GET (cpu);
   if (SR & status_IE)
     {
       interrupt_pending = 0;
@@ -397,8 +430,8 @@ sim_open (kind, cb, abfd, argv)
 /* start-sanitize-sky */
 
 #if defined(TARGET_SKY) && defined(SKY_FUNIT)
-  /* Set "--float-type host" as the default. */
-  STATE_FP_TYPE_OPT (sd) &= ~STATE_FP_TYPE_OPT_TARGET;
+  /* Set "--float-type fast" as the default. */
+  STATE_FP_TYPE_OPT (sd) &= ~STATE_FP_TYPE_OPT_ACCURATE;
 #endif
 /* end-sanitize-sky */
 
@@ -413,33 +446,6 @@ sim_open (kind, cb, abfd, argv)
     return 0;
   sim_add_option_table (sd, NULL, mips_options);
 
-  /* Allocate core managed memory */
-
-  /* the monitor  */
-  sim_do_commandf (sd, "memory region 0x%lx,0x%lx", MONITOR_BASE, MONITOR_SIZE);
-  /* For compatibility with the old code - under this (at level one)
-     are the kernel spaces K0 & K1.  Both of these map to a single
-     smaller sub region */
-  sim_do_command(sd," memory region 0x7fff8000,0x8000") ; /* MTZ- 32 k stack */
-/* start-sanitize-sky */
-#ifndef TARGET_SKY
-/* end-sanitize-sky */
-  sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx%%0x%lx,0x%0x",
-		   K1BASE, K0SIZE,
-		   MEM_SIZE, /* actual size */
-		   K0BASE);
-/* start-sanitize-sky */
-#else
-  sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx%%0x%lx,0x%0x,0x%0x",
-		   K1BASE, K0SIZE,
-		   MEM_SIZE, /* actual size */
-		   K0BASE, 
-		   0); /* add alias at 0x0000 */
-#endif
-/* end-sanitize-sky */
-
-  device_init(sd);
-
   /* getopt will print the error message so we just have to exit if this fails.
      FIXME: Hmmm...  in the case of gdb we need getopt to call
      print_filtered.  */
@@ -450,6 +456,99 @@ sim_open (kind, cb, abfd, argv)
       sim_module_uninstall (sd);
       return 0;
     }
+
+  /* handle board-specific memory maps */
+  if (board == NULL)
+    {
+      /* Allocate core managed memory */
+      
+      /* the monitor  */
+      sim_do_commandf (sd, "memory region 0x%lx,0x%lx", MONITOR_BASE, MONITOR_SIZE);
+      /* For compatibility with the old code - under this (at level one)
+	 are the kernel spaces K0 & K1.  Both of these map to a single
+	 smaller sub region */
+      sim_do_command(sd," memory region 0x7fff8000,0x8000") ; /* MTZ- 32 k stack */
+      /* start-sanitize-sky */
+#ifndef TARGET_SKY
+      /* end-sanitize-sky */
+      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx%%0x%lx,0x%0x",
+		       K1BASE, K0SIZE,
+		       MEM_SIZE, /* actual size */
+		       K0BASE);
+      /* start-sanitize-sky */
+#else
+      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx%%0x%lx,0x%0x,0x%0x",
+		       K1BASE, K0SIZE,
+		       MEM_SIZE, /* actual size */
+		       K0BASE, 
+		       0); /* add alias at 0x0000 */
+#endif
+      /* end-sanitize-sky */
+      
+      device_init(sd);
+    }
+  
+  /* start-sanitize-tx3904 */
+  else if(! strcmp(board, BOARD_JMR3904) ||
+	  (! strcmp(board, BOARD_JMR3904_DEBUG)))
+    {
+      /* match VIRTUAL memory layout of JMR-TX3904 board */
+
+      /* --- memory --- */
+
+      /* ROM: 0x9FC0_0000 - 0x9FFF_FFFF and 0xBFC0_0000 - 0xBFFF_FFFF */
+      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx,0x%0x",
+		       0x9FC00000, 
+		       4 * 1024 * 1024, /* 4 MB */
+		       0xBFC00000);
+
+      /* SRAM: 0x8000_0000 - 0x803F_FFFF and 0xA000_0000 - 0xA03F_FFFF */
+      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx,0x%0x",
+		       0x80000000, 
+		       4 * 1024 * 1024, /* 4 MB */
+		       0xA0000000);
+
+      /* DRAM: 0x8800_0000 - 0x89FF_FFFF and 0xA800_0000 - 0xA9FF_FFFF */
+      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx,0x%0x",
+		       0x88000000, 
+		       32 * 1024 * 1024, /* 32 MB */
+		       0xA8000000);
+
+      /* --- simulated devices --- */
+      sim_hw_parse (sd, "/tx3904irc@0xffffc00/reg 0xffffc000 0x20");
+      sim_hw_parse (sd, "/tx3904cpu");
+      
+      /* -- device connections --- */
+      sim_hw_parse (sd, "/tx3904irc > ip level /tx3904cpu");
+
+      if(! strcmp(board, BOARD_JMR3904_DEBUG))
+	{
+	  /* -- DEBUG: glue interrupt generators --- */
+	  sim_hw_parse (sd, "/glue@0xffff0000/reg 0xffff0000 0x50");
+	  sim_hw_parse (sd, "/glue@0xffff0000 > int0 int0 /tx3904irc");
+	  sim_hw_parse (sd, "/glue@0xffff0000 > int1 int1 /tx3904irc");
+	  sim_hw_parse (sd, "/glue@0xffff0000 > int2 int2 /tx3904irc");
+	  sim_hw_parse (sd, "/glue@0xffff0000 > int3 int3 /tx3904irc");
+	  sim_hw_parse (sd, "/glue@0xffff0000 > int4 int4 /tx3904irc");
+	  sim_hw_parse (sd, "/glue@0xffff0000 > int5 int5 /tx3904irc");
+	  sim_hw_parse (sd, "/glue@0xffff0000 > int6 int6 /tx3904irc");
+	  sim_hw_parse (sd, "/glue@0xffff0000 > int7 int7 /tx3904irc");
+	  sim_hw_parse (sd, "/glue@0xffff0000 > int8 dmac0 /tx3904irc");
+	  sim_hw_parse (sd, "/glue@0xffff0000 > int9 dmac1 /tx3904irc");
+	  sim_hw_parse (sd, "/glue@0xffff0000 > int10 dmac2 /tx3904irc");
+	  sim_hw_parse (sd, "/glue@0xffff0000 > int11 dmac3 /tx3904irc");
+	  sim_hw_parse (sd, "/glue@0xffff0000 > int12 sio0 /tx3904irc");
+	  sim_hw_parse (sd, "/glue@0xffff0000 > int13 sio1 /tx3904irc");
+	  sim_hw_parse (sd, "/glue@0xffff0000 > int14 tmr0 /tx3904irc");
+	  sim_hw_parse (sd, "/glue@0xffff0000 > int15 tmr1 /tx3904irc");
+	  sim_hw_parse (sd, "/glue@0xffff0000 > int16 tmr2 /tx3904irc");
+	  sim_hw_parse (sd, "/glue@0xffff0000 > int17 nmi /tx3904cpu");
+	}
+
+      device_init(sd);
+    }
+  /* end-sanitize-tx3904 */
+
 
   /* check for/establish the a reference program image */
   if (sim_analyze_program (sd,
@@ -1275,7 +1374,7 @@ sim_monitor (SIM_DESC sd,
 		int width = 0, trunc = 0, haddot = 0, longlong = 0;
 		while (sim_read (sd, s++, &c, 1) && c != '\0')
 		  {
-		    if (strchr ("dobxXulscefg%", s))
+		    if (strchr ("dobxXulscefg%", c))
 		      break;
 		    else if (c == '-')
 		      fmt = FMT_LJUST;
@@ -1622,7 +1721,7 @@ ColdReset (SIM_DESC sd)
     {
       sim_cpu *cpu = STATE_CPU (sd, cpu_nr);
       /* RESET: Fixed PC address: */
-      PC = UNSIGNED64 (0xFFFFFFFFBFC00000);
+      PC = (unsigned_word) UNSIGNED64 (0xFFFFFFFFBFC00000);
       /* The reset vector address is in the unmapped, uncached memory space. */
       
       SR &= ~(status_SR | status_TS | status_RP);
@@ -1760,8 +1859,8 @@ signal_exception (SIM_DESC sd,
 	instruction = va_arg(ap,unsigned int);
 	va_end(ap);
 	/* Check for our special terminating BREAK: */
-	if ((instruction & HALT_INSTRUCTION_MASK)
-	    == (HALT_INSTRUCTION & HALT_INSTRUCTION_MASK))
+	if ((instruction & HALT_INSTRUCTION_MASK) == (HALT_INSTRUCTION & HALT_INSTRUCTION_MASK) ||
+	    (instruction & HALT_INSTRUCTION_MASK) == (HALT_INSTRUCTION2 & HALT_INSTRUCTION_MASK))
 	  {
 	    sim_engine_halt (SD, CPU, NULL, cia,
 			     sim_exited, (unsigned int)(A0 & 0xFFFFFFFF));
@@ -1781,6 +1880,28 @@ signal_exception (SIM_DESC sd,
      /* TODO: If not simulating exceptions then stop the simulator
         execution. At the moment we always stop the simulation. */
 
+#ifdef SUBTARGET_R3900
+      /* update interrupt-related registers */
+
+      /* insert exception code in bits 6:2 */
+      CAUSE = LSMASKED32(CAUSE, 31, 7) | LSINSERTED32(exception, 6, 2);
+      /* shift IE/KU history bits left */
+      SR = LSMASKED32(SR, 31, 4) | LSINSERTED32(LSEXTRACTED32(SR, 3, 0), 5, 2);
+
+      if (STATE & simDELAYSLOT)
+	{
+	  STATE &= ~simDELAYSLOT;
+	  CAUSE |= cause_BD;
+	  EPC = (cia - 4); /* reference the branch instruction */
+	}
+      else
+	EPC = cia;
+
+     if (SR & status_BEV)
+       PC = (signed)0xBFC00000 + 0x180;
+     else
+       PC = (signed)0x80000000 + 0x080;
+#else
      /* See figure 5-17 for an outline of the code below */
      if (! (SR & status_EXL))
        {
@@ -1804,10 +1925,12 @@ signal_exception (SIM_DESC sd,
      SR |= status_EXL;
      /* Store exception code into current exception id variable (used
         by exit code): */
+
      if (SR & status_BEV)
        PC = (signed)0xBFC00200 + 0x180;
      else
        PC = (signed)0x80000000 + 0x180;
+#endif
 
      switch ((CAUSE >> 2) & 0x1F)
        {
@@ -1815,7 +1938,15 @@ signal_exception (SIM_DESC sd,
 	 /* Interrupts arrive during event processing, no need to
             restart */
 	 return;
-	 
+
+       case NMIReset:
+	 /* Ditto */
+#ifdef SUBTARGET_3900
+	 /* Exception vector: BEV=0 BFC00000 / BEF=1 BFC00000  */
+	 PC = (signed)0xBFC00000;
+#endif SUBTARGET_3900
+	 return;
+
        case TLBModification:
        case TLBLoad:
        case TLBStore:
@@ -3304,6 +3435,14 @@ decode_coproc (SIM_DESC sd,
         else if (code == 0x10 && (instruction & 0x3f) == 0x10)
           {
             /* RFE */
+#ifdef SUBTARGET_R3900
+	    /* TX39: Copy IEp/KUp -> IEc/KUc, and IEo/KUo -> IEp/KUp */
+
+	    /* shift IE/KU history bits right */
+	    SR = LSMASKED32(SR, 31, 4) | LSINSERTED32(LSEXTRACTED32(SR, 5, 2), 3, 0);
+
+	    /* TODO: CACHE register */
+#endif /* SUBTARGET_R3900 */
           }
         else if (code == 0x10 && (instruction & 0x3f) == 0x1F)
           {

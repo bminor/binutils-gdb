@@ -11,7 +11,6 @@ SIM_AC_OPTION_ALIGNMENT(NONSTRICT_ALIGNMENT)
 SIM_AC_OPTION_HOSTENDIAN
 SIM_AC_OPTION_WARNINGS
 
-
 # Ensure a reasonable default simulator is constructed: (DEPRECATED)
 case "${target}" in
 # start-sanitize-tx19
@@ -41,7 +40,7 @@ case "${target}" in
 # start-sanitize-tx19
   mipstx19*-*-*)        SIM_SUBTARGET="-DSUBTARGET_R3900=1";;
 # end-sanitize-tx19
-  mipstx39*-*-*)        SIM_SUBTARGET="-DSUBTARGET_R3900=1";;
+  mips*tx39*)           SIM_SUBTARGET="-DSUBTARGET_R3900=1";;
   *)                    SIM_SUBTARGET="";;
 esac
 AC_SUBST(SIM_SUBTARGET)
@@ -98,7 +97,7 @@ case "${target}" in
 # start-sanitize-tx19
   mipstx19*-*-*)        mips_fpu=SOFT_FLOATING_POINT ;;
 # end-sanitize-tx19
-  mipstx39*-*-*)	mips_fpu=HARD_FLOATING_POINT
+  mips*tx39*)		mips_fpu=HARD_FLOATING_POINT
 			mips_fpu_bitsize=32
 			;;
 # start-sanitize-r5900
@@ -144,7 +143,7 @@ case "${target}" in
 			sim_m16_filter="16"
 			;;
 # end-sanitize-tx19
-  mipstx39*-*-*)	sim_default_gen=IGEN
+  mipst*tx39*)		sim_default_gen=IGEN
 			sim_use_gen=IGEN
 			sim_igen_filter="32,f"
 			sim_igen_machine="-M r3900"
@@ -237,6 +236,18 @@ case "${target}" in
   *)                 mips_extra_objs="" ;;
 esac
 AC_SUBST(mips_extra_objs)
+
+
+
+# Add simulated hardware devices
+#
+SIM_AC_OPTION_HARDWARE()
+case "${target}" in
+# start-sanitize-tx3904
+  mips*tx39*) SIM_AC_OPTION_HARDWARE(,tx3904cpu tx3904irc) ;;
+# end-sanitize-tx3904
+  *) ;;
+esac
 
 
 AC_PATH_X

@@ -561,7 +561,6 @@ struct _sim_cpu {
 /* start-sanitize-sky */
 #ifdef TARGET_SKY
 #ifndef TM_TXVU_H
-
 /* Number of machine registers */
 #define NUM_VU_REGS	153
 #define NUM_VU_INTEGER_REGS 16
@@ -574,7 +573,8 @@ struct _sim_cpu {
 #undef NUM_REGS
 #define NUM_REGS (NUM_R5900_REGS + 2*(NUM_VU_REGS) + 2*(NUM_VIF_REGS))
 #endif /* no tm-txvu.h */
-#endif
+#endif /* TARGET_SKY */
+/* end-sanitize-sky */
 
 enum float_operation
 /* start-sanitize-sky */
@@ -665,7 +665,6 @@ enum float_operation
   hilo_history lo_history;
 #define LOHISTORY (&(CPU)->lo_history)
 
-
   /* start-sanitize-r5900 */
   sim_r5900_cpu r5900;
 
@@ -675,7 +674,13 @@ enum float_operation
   /* The MDMX ISA has a very very large accumulator */
   unsigned8 acc[3 * 8];
   /* end-sanitize-vr5400 */
+  /* start-sanitize-sky */
 
+#ifdef TARGET_SKY
+  /* Device on which instruction issue last occured.  */
+  char cur_device;
+#endif
+  /* end-sanitize-sky */
   sim_cpu_base base;
 };
 
@@ -709,7 +714,7 @@ struct sim_state {
   /* Record of option for floating point implementation type. */
   int fp_type_opt;
 #define STATE_FP_TYPE_OPT(sd) ((sd)->fp_type_opt)
-#define STATE_FP_TYPE_OPT_TARGET 0x80000000
+#define STATE_FP_TYPE_OPT_ACCURATE 0x80000000
 #endif
 #endif
 /* end-sanitize-sky */
@@ -746,7 +751,29 @@ struct sim_state {
 #define status_CU2       (1 << 30)      /* COP2 usable */
 /* end-sanitize-r5900 */
 
-#define cause_BD        ((unsigned)1 << 31)     /* Exception in branch delay slot */
+/* Specializations for TX39 family */
+#define status_IEc       (1 << 0)       /* Interrupt enable (current) */
+#define status_KUc       (1 << 1)       /* Kernel/User mode */
+#define status_IEp       (1 << 2)       /* Interrupt enable (previous) */
+#define status_KUp       (1 << 3)       /* Kernel/User mode */
+#define status_IEo       (1 << 4)       /* Interrupt enable (old) */
+#define status_KUo       (1 << 5)       /* Kernel/User mode */
+#define status_IM_mask   (0xff)         /* Interrupt mask */
+#define status_IM_shift  (8)
+#define status_NMI       (1 << 20)      /* NMI */
+#define status_NMI       (1 << 20)      /* NMI */
+
+#define cause_EXC_mask  (0x1f)          /* Exception code */
+#define cause_EXC_shift (2)
+#define cause_SW0       (1 << 8)        /* Software interrupt 0 */
+#define cause_SW1       (1 << 9)        /* Software interrupt 1 */
+#define cause_IP_mask   (0x3f)          /* Interrupt pending field */
+#define cause_IP_shift  (10)
+#define cause_CE_mask   (0x3)           /* Coprocessor error */
+#define cause_CE_shift  (28)
+
+#define cause_BD  ((unsigned)1 << 31)   /* Exception in branch delay slot */
+
 
 /* NOTE: We keep the following status flags as bit values (1 for true,
    0 for false). This allows them to be used in binary boolean
@@ -754,7 +781,11 @@ struct sim_state {
    value is. */
 
 /* UserMode */
+#ifdef SUBTARGET_R3900
+#define UserMode        ((SR & status_KUc) ? 1 : 0)
+#else
 #define UserMode        ((((SR & status_KSU_mask) >> status_KSU_shift) == ksu_user) ? 1 : 0)
+#endif /* SUBTARGET_R3900 */
 
 /* BigEndianMem */
 /* Hardware configuration. Affects endianness of LoadMemory and
@@ -799,6 +830,8 @@ struct sim_state {
 #define FPE                     (15)
 #define DebugBreakPoint         (16)
 #define Watch                   (23)
+#define NMIReset                (31)
+
 
 /* The following exception code is actually private to the simulator
    world. It is *NOT* a processor feature, and is used to signal
@@ -807,7 +840,7 @@ struct sim_state {
 
 void signal_exception (SIM_DESC sd, sim_cpu *cpu, address_word cia, int exception, ...);
 #define SignalException(exc,instruction)     signal_exception (SD, CPU, cia, (exc), (instruction))
-#define SignalExceptionInterrupt()           signal_exception (SD, CPU, NULL_CIA, Interrupt)
+#define SignalExceptionInterrupt()           signal_exception (SD, CPU, cia, Interrupt)
 #define SignalExceptionInstructionFetch()    signal_exception (SD, CPU, cia, InstructionFetch)
 #define SignalExceptionAddressStore()        signal_exception (SD, CPU, cia, AddressStore)
 #define SignalExceptionAddressLoad()         signal_exception (SD, CPU, cia, AddressLoad)
@@ -815,7 +848,7 @@ void signal_exception (SIM_DESC sd, sim_cpu *cpu, address_word cia, int exceptio
 #define SignalExceptionFPE()                 signal_exception (SD, CPU, cia, FPE)
 #define SignalExceptionIntegerOverflow()     signal_exception (SD, CPU, cia, IntegerOverflow)
 #define SignalExceptionCoProcessorUnusable() signal_exception (SD, CPU, cia, CoProcessorUnusable)
-
+#define SignalExceptionNMIReset()            signal_exception (SD, CPU, cia, NMIReset)
 
 /* Co-processor accesses */
 
@@ -931,6 +964,38 @@ INLINE_SIM_MAIN (void) pending_tick PARAMS ((SIM_DESC sd, sim_cpu *cpu, address_
 char* pr_addr PARAMS ((SIM_ADDR addr));
 char* pr_uword64 PARAMS ((uword64 addr));
 
+/* start-sanitize-sky */
+#ifdef TARGET_SKY
+#ifdef SIM_ENGINE_HALT_HOOK
+#undef SIM_ENGINE_HALT_HOOK
+#endif
+
+void sky_sim_engine_halt PARAMS ((SIM_DESC sd, sim_cpu *last, sim_cia cia));
+#define SIM_ENGINE_HALT_HOOK(sd, last, cia) sky_sim_engine_halt(sd, last, cia);
+
+#ifndef TM_TXVU_H /* In case GDB hasn't been configured yet */
+enum txvu_cpu_context
+{
+  TXVU_CPU_AUTO = -1,	/* context-sensitive context */
+  TXVU_CPU_MASTER,	/* R5900 core */
+  TXVU_CPU_VU0,		/* Vector units */
+  TXVU_CPU_VU1,
+  TXVU_CPU_VIF0,	/* FIFO's */
+  TXVU_CPU_VIF1,
+  TXVU_CPU_LAST		/* Count of context types */
+};
+
+/* memory segment for communication with GDB */
+#define GDB_COMM_AREA	0x21010000
+#define GDB_COMM_SIZE	0x4000
+
+/* Memory address containing last device to execute */
+#define LAST_DEVICE	GDB_COMM_AREA
+
+#define BREAK_MASK 0x02 /* Breakpoint bit is #57 */
+#endif /* !TM_TXVU_H */
+#endif /* TARGET_SKY */
+/* end-sanitize-sky */
 
 #if H_REVEALS_MODULE_P (SIM_MAIN_INLINE)
 #include "sim-main.c"

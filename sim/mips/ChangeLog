@@ -1,3 +1,34 @@
+Mon May 18 18:22:42 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* configure.in (SIM_AC_OPTION_HARDWARE): Added common hardware
+ 	modules.  Recognize TX39 target with "mips*tx39" pattern.
+	* configure: Rebuilt.
+	* sim-main.h (*): Added many macros defining bits in
+ 	TX39 control registers.
+	(SignalInterrupt): Send actual PC instead of NULL.
+	(SignalNMIReset): New exception type.
+	* interp.c (board): New variable for future use to identify
+	a particular board being simulated.
+	(mips_option_handler,mips_options): Added "--board" option.
+	(interrupt_event): Send actual PC.
+	(sim_open): Make memory layout conditional on board setting.
+	(signal_exception): Initial implementation of hardware interrupt
+ 	handling.  Accept another break instruction variant for simulator
+ 	exit.
+	(decode_coproc): Implement RFE instruction for TX39.
+	(mips.igen): Decode RFE instruction as such.
+start-sanitize-tx3904
+	* configure.in (tx3904cpu,tx3904irc): Added devices for tx3904.
+	* interp.c: Define "jmr3904" and "jmr3904debug" board types and
+	bbegin to implement memory map.
+	* dv-tx3904cpu.c: New file.
+	* dv-tx3904irc.c: New file.
+end-sanitize-tx3904
+
+Wed May 13 14:40:11 1998  Gavin Koch  <gavin@cygnus.com>
+
+	* mips.igen (check_mt_hilo): Create a separate r3900 version.
+
 Wed May 13 14:27:53 1998  Gavin Koch  <gavin@cygnus.com>
 
 	* r5900.igen: Replace the calls and the definition of the
