@@ -1,3 +1,11 @@
+2003-06-29  Michael Chastain  <mec@shout.net>
+	    Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/selftest.exp (do_steps_and_nexts): Increase maximum
+	initial line count of 'captured_main' from 26 to 32.
+	(test_with_self): Allow xmalloc call to be interleaved with the
+	preceding two lines.
+
 2003-06-23  Joel Brobecker  <brobecker@gnat.com>
 
 	* gdb.base/langs.exp: Add some tests for the "minimal" language
