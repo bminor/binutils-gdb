@@ -650,7 +650,6 @@ enum bfd_architecture
   bfd_arch_hppa,       /* HP PA RISC */
   bfd_arch_last
   };
-typedef int bfd_reloc_code_type;
 
 typedef struct bfd_arch_info 
 {
@@ -913,7 +912,7 @@ typedef enum bfd_reloc_code_real
   BFD_RELOC_UNUSED
  } bfd_reloc_code_real_type;
 CONST struct reloc_howto_struct *
-EXFUN(bfd_reloc_type_lookup , (bfd *abfd, bfd_reloc_code_type code));
+EXFUN(bfd_reloc_type_lookup , (bfd *abfd, bfd_reloc_code_real_type code));
 typedef struct symbol_cache_entry 
 {
 	 /* A pointer to the BFD which owns the symbol. This information
@@ -1149,8 +1148,6 @@ struct _bfd
       struct elf_obj_tdata *elf_obj_data;
       struct bout_data_struct *bout_data;
       struct sun_core_struct *sun_core_data;
-      struct hppa_data_struct *hppa_data;
-      struct hppa_core_struct *hppa_core_data;
       struct trad_core_struct *trad_core_data;
       PTR any;
       } tdata;
@@ -1390,7 +1387,7 @@ typedef struct bfd_target
   /* See documentation on reloc types.  */
  SDEF (CONST struct reloc_howto_struct *,
        reloc_type_lookup,
-       (bfd *abfd, bfd_reloc_code_type code));
+       (bfd *abfd, bfd_reloc_code_real_type code));
 
   /* Complete and utter crock, currently used for the assembler
     when creating COFF files.  */
