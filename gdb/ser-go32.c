@@ -613,15 +613,13 @@ dos_close (scb)
 
 
 static int
-dos_noop (scb)
-     serial_t scb;
+dos_noop (serial_t scb ATTRIBUTE_UNUSED)
 {
   return 0;
 }
 
 static void
-dos_raw (scb)
-     serial_t scb;
+dos_raw (serial_t scb ATTRIBUTE_UNUSED)
 {
   /* Always in raw mode */
 }
@@ -685,10 +683,8 @@ dos_set_tty_state (scb, ttystate)
 }
 
 static int
-dos_noflush_set_tty_state (scb, new_ttystate, old_ttystate)
-     serial_t scb;
-     serial_ttystate new_ttystate;
-     serial_ttystate old_ttystate;
+dos_noflush_set_tty_state (serial_t scb, serial_ttystate new_ttystate,
+			   serial_ttystate old_ttystate ATTRIBUTE_UNUSED)
 {
   struct dos_ttystate *state;
 
@@ -711,9 +707,9 @@ dos_flush_input (scb)
 }
 
 static void
-dos_print_tty_state (serial_t scb,
-		     serial_ttystate ttystate,
-		     struct ui_file *stream)
+dos_print_tty_state (serial_t scb ATTRIBUTE_UNUSED,
+		     serial_ttystate ttystate ATTRIBUTE_UNUSED,
+		     struct ui_file *stream ATTRIBUTE_UNUSED)
 {
   /* Nothing to print */
   return;
@@ -887,18 +883,18 @@ static struct serial_ops dos_ops =
 
 
 static void
-dos_info (arg, from_tty)
-     char *arg;
-     int from_tty;
+dos_info (char *arg ATTRIBUTE_UNUSED, int from_tty ATTRIBUTE_UNUSED)
 {
   struct dos_ttystate *port;
+#ifdef DOS_STATS
   int i;
+#endif
 
   for (port = ports; port < &ports[4]; port++)
     {
       if (port->baudrate == 0)
 	continue;
-      printf_filtered ("Port:\tCOM%d (%sactive)\n", port - ports + 1,
+      printf_filtered ("Port:\tCOM%ld (%sactive)\n", (long)(port - ports) + 1,
 		       port->intrupt ? "" : "not ");
       printf_filtered ("Addr:\t0x%03x (irq %d)\n", port->base, port->irq);
       printf_filtered ("16550:\t%s\n", port->fifo ? "yes" : "no");
@@ -919,8 +915,6 @@ dos_info (arg, from_tty)
 void
 _initialize_ser_dos ()
 {
-  struct cmd_list_element *c;
-
   serial_add_interface (&dos_ops);
 
   /* Save original interrupt mask register. */
