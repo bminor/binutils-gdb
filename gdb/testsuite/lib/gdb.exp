@@ -15,7 +15,7 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 # Please email any bugs, comments, and/or additions to this file to:
-# DejaGnu@cygnus.com
+# bug-gdb@prep.ai.mit.edu
 
 # This file was written by Fred Fish. (fnf@cygnus.com)
 
@@ -49,7 +49,7 @@ proc gdb_unload {} {
 	-re "$prompt $" {}
 	timeout {
 	    error "couldn't unload file in $GDB (timed out)."
-	    alldone
+	    return -1
 	}
     }
 }
@@ -108,19 +108,26 @@ proc runto { function } {
     }
 
     send "break $function\n"
+    # The first regexp is what we get with -g, the second without -g.
     expect {
 	-re "Break.* at .*: file .*, line $decimal.\r\n$prompt $" {}
+	-re "Breakpoint \[0-9\]* at 0x\[0-9a-f\]*.*$prompt $" {}
 	-re "$prompt $" { fail "setting breakpoint at $function" ; return 0 }
 	timeout { fail "setting breakpoint at $function (timeout)" ; return 0 }
     }
 
     send "run\n"
+    # the "at foo.c:36" output we get with -g.
+    # the "in func" output we get without -g.
     expect {
 	-re "The program .* has been started already.* \(y or n\) $" {
 	    send "y\n"
 	    continue -expect
 	}
-	-re "Starting.*Break.*\(\) at .*:$decimal.*$prompt $" { return 1 }
+	-re "Starting.*Break.* at .*:$decimal.*$prompt $" { return 1 }
+	-re "Breakpoint \[0-9\]*, \[0-9xa-f\]* in $function.*$prompt $" { 
+	    return 1
+	}
 	-re "$prompt $" { fail "running to $function" ; return 0 }
 	timeout { fail "running to $function (timeout)" ; return 0 }
     }
@@ -163,8 +170,10 @@ proc gdb_test { args } {
     set errmess ""
     # trap the send so any problems don't crash things
     catch "send \"$command\n\"" errmess
-    if ![string match "" $errmess] then {
-	error "send \"$command\" got expect error \"$errmess\""
+    if [string match "write\(spawn_id=\[0-9\]+\):" $errmess] then {
+	error "sent \"$command\" got expect error \"$errmess\""
+	catch "close"
+	gdb_start
 	return -1
     }
 
@@ -185,9 +194,11 @@ proc gdb_test { args } {
 	}
 	-re "Undefined command:.*$prompt" {
 	    error "Undefined command \"$command\"."
+	    set result 1
 	}
 	-re "Ambiguous command.*$prompt $" {
 	    error "\"$command\" is not a unique command name."
+	    set result 1
 	}
 	-re ".*$prompt $" {
 	    if ![string match "" $message] then {
@@ -203,11 +214,12 @@ proc gdb_test { args } {
 	    send "n\n"
 	    error "Got interactive prompt."
 	}
+	eof {
+	    error "Process no longer exists"
+	    return -1
+	}
 	buffer_full {
 	    error "internal buffer is full."
-	}
-	eof {
-	    error "eof -- pty is hosed."
 	}
 	timeout	{
 	    fail "(timeout) $message"
@@ -216,10 +228,6 @@ proc gdb_test { args } {
     }
     return $result
 }
-
-#	"virtual memory exhausted" {
-#	    error "virtual memory exhausted."
-#	}
 
 proc gdb_reinitialize_dir { subdir } {
     global prompt
@@ -253,3 +261,58 @@ proc gdb_reinitialize_dir { subdir } {
 	}
     }
 }
+
+
+#
+# gdb_exit -- exit the GDB, killing the target program if necessary
+#
+proc default_gdb_exit {} {
+    global GDB
+    global GDBFLAGS
+    global verbose
+
+    verbose "Quitting $GDB $GDBFLAGS" 1
+
+    # This used to be 1 for unix-gdb.exp
+    set timeout 5
+
+    catch "send \"quit\n\"" result
+    # If the process has gone away (e.g. gdb dumped core), deal with it.
+    if [string match "write\(spawn_id=\[0-9\]+\):" $result] then {
+	catch "close"
+	# FIXME:  Shouldn't we call "wait" too?
+	return -1
+    }
+    # FIXME: What is this catch statement doing here?  Won't it prevent us
+    # from getting errors that we'd rather see?
+    catch {
+    expect {
+	eof { 
+	    verbose "Got EOF from $GDB" 2
+	}
+	timeout { 
+	    verbose "Got TIMEOUT from $GDB" 2
+	}
+	-re "The program is running.  Quit anyway.*(y or n) $" {
+	    send "y\n"
+	    verbose "Killing program being debugged" 2
+	}
+    }
+    }
+
+    # FIXME: Does the catch prevent us from getting errors that we'd rather
+    # see?  the old gdb_exit in unix-gdb.exp had "close" without catch
+    # in the above expect statement (for the timeout and -re "The
+    # program... cases) (as well as a catch "close" here).
+    catch "close"
+
+    # Before this was here sometimes "uit" would get sent to the next GDB
+    # (assuming this is immediately followed by gdb_start), which would
+    # cause a loss of syncronization (i.e. all the stuff that swallows a
+    # prompt would swallow the wrong one).
+    wait
+}
+
+
+
+
