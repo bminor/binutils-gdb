@@ -187,13 +187,13 @@ unsigned64 convert PARAMS ((SIM_DESC sd, int rm, unsigned64 op, FP_formats from,
 #define ALU32_END(ANS) \
   if (ALU32_HAD_OVERFLOW) \
     SignalExceptionIntegerOverflow (); \
-  (ANS) = alu_overflow_val;
+  (ANS) = ALU32_OVERFLOW_RESULT
 
 
 #define ALU64_END(ANS) \
   if (ALU64_HAD_OVERFLOW) \
     SignalExceptionIntegerOverflow (); \
-  (ANS) = alu_val;
+  (ANS) = ALU64_OVERFLOW_RESULT;
 
 /* start-sanitize-r5900 */
 

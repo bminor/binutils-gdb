@@ -1,3 +1,8 @@
+Mon Oct 20 15:29:04 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* sim-main.h (ALU64_END, ALU32_END): Use ALU*_OVERFLOW_RESULT
+ 	macro to obtain result of ALU op.
+
 Tue Oct 21 17:39:14 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* interp.c (sim_info): Call profile_print.
