@@ -1,3 +1,7 @@
+2002-04-22  Michael Chastain  <mec@shout.net>
+
+	* gdb.c++/method.exp: Fix syntax of reference to gdb/277.
+
 2002-04-17  David S. Miller  <davem@redhat.com>
 
 	* gdb.asm/sparc64.inc: New file.

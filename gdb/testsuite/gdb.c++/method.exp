@@ -124,8 +124,8 @@ gdb_expect {
     # gcc versions gcc-3_1-branch%20020404 and HEAD%20020404 with -gstabs+
     # produce good stabs, but gdb prints "const class {...} *" const.
     # This is PR gdb/277.
-    # setup_kfail "gnats:gdb/277"
-    fail "print this in A::bar (gnats:gdb/277)"
+    # setup_kfail "gdb/277"
+    fail "print this in A::bar (gdb/277)"
   }
   -re ".*$gdb_prompt $" { fail "print this in A::bar" }
   timeout { fail "(timeout) print this in A::bar" }
