@@ -54,13 +54,13 @@ INSERT_FN (dotdest);
 EXTRACT_FN (dotdest);
 PRINT_FN (dotdest);
 
-PARSE_FN (dotsdest);
+PARSE_FN (dotdest1);
+
+PARSE_FN (bc);
+PRINT_FN (sdest);
 
 PARSE_FN (vfreg);
 PRINT_FN (vfreg);
-
-PARSE_FN (bc);
-PRINT_FN (bc);
 
 PARSE_FN (bcftreg);
 PRINT_FN (bcftreg);
@@ -84,8 +84,8 @@ PRINT_FN (ffstreg);
 PARSE_FN (vi01);
 PRINT_FN (vi01);
 
-INSERT_FN (limm12);
-EXTRACT_FN (limm12);
+INSERT_FN (luimm12);
+EXTRACT_FN (luimm12);
 
 INSERT_FN (luimm15);
 EXTRACT_FN (luimm15);
@@ -106,7 +106,8 @@ const struct txvu_operand txvu_operands[] =
   { 0 },
 
   /* Operands that exist in the same place for essentially the same purpose
-     in both upper and lower instructions.  */
+     in both upper and lower instructions.  These don't have a U or L prefix.
+     Operands specific to the upper or lower instruction are so prefixed.  */
 
   /* Destination indicator attached to mnemonic, with leading '.'.
      After parsing this, the value is stored in global `dest' so that the
@@ -131,7 +132,7 @@ const struct txvu_operand txvu_operands[] =
 
   /* broadcast */
 #define UBC (VFDREG + 1)
-  { 2, 0, 0, parse_bc, 0, 0, print_bc },
+  { 2, 0, 0, parse_bc, 0, 0, print_sdest },
 
   /* ftreg in broadcast case */
 #define UBCFTREG (UBC + 1)
@@ -192,20 +193,20 @@ const struct txvu_operand txvu_operands[] =
 #define LIMM24 (LVI01 + 1)
   { 24, 0, 0, 0, 0, 0, 0 },
 
-  /* 12 bit immediate, split into 1 and 11 bit pieces.  */
-#define LIMM12 (LIMM24 + 1)
-  { 12, 0, 0, 0, insert_limm12, extract_limm12, 0 },
+  /* 12 bit unsigned immediate, split into 1 and 11 bit pieces.  */
+#define LUIMM12 (LIMM24 + 1)
+  { 12, 0, 0, 0, insert_luimm12, extract_luimm12, 0 },
 
   /* 11 bit pc-releative immediate.  */
-#define LPCREL11 (LIMM12 + 1)
+#define LPCREL11 (LUIMM12 + 1)
   { 11, 0, TXVU_OPERAND_RELATIVE_BRANCH, 0, 0, 0, 0 },
 
-  /* Destination indicator, with leading '.'.  */
-#define LDOTSDEST (DOTDEST + 1)
+  /* Destination indicator, single letter only, with leading '.'.  */
+#define LDOTDEST1 (LPCREL11 + 1)
   { 4, TXVU_SHIFT_DEST, TXVU_OPERAND_SUFFIX,
       /* Note that we borrow the insert/extract/print functions from the
 	 vector case.  */
-      parse_dotsdest, insert_dotdest, extract_dotdest, print_dotdest },
+      parse_dotdest1, insert_dotdest, extract_dotdest, print_dotdest },
 
 /* end of list place holder */
   { 0 }
@@ -373,6 +374,10 @@ const int txvu_upper_opcodes_count = sizeof (txvu_upper_opcodes) / sizeof (txvu_
 #define VLFTF(x) R ((x), 2, 23)
 /* FSF field.  */
 #define VLFSF(x) R ((x), 2, 21)
+/* Upper bit of 12 bit unsigned immediate.  */
+#define VLUIMM12TOP(x) R ((x), 1, 21)
+/* Upper 4 bits of 15 bit unsigned immediate.  */
+#define VLUIMM15TOP(x) VDEST (x)
 
 /* Lower instruction field masks.  */
 #define MLOP6 VLOP6 (~0)
@@ -380,10 +385,12 @@ const int txvu_upper_opcodes_count = sizeof (txvu_upper_opcodes) / sizeof (txvu_
 #define MLOP11 VLOP11 (~0)
 #define MLIMM11 VLIMM11 (~0)
 #define MLB24 R (1, 1, 24)
-/* 12 bit immediates are split into two parts, 1 bit and 11 bits.
+#define MLUIMM12TOP VLUIMM12TOP (~0)
+/* 12 bit unsigned immediates are split into two parts, 1 bit and 11 bits.
    The upper 1 bit is part of the `dest' field.  This mask is for the
    other 3 bits of the dest field.  */
-#define MLIMM12TOP R (7, 3, 22)
+#define MLUIMM12UNUSED R (7, 3, 22)
+#define MLUIMM15TOP MDEST
 
 struct txvu_opcode txvu_lower_opcodes[] = {
 
@@ -415,10 +422,10 @@ struct txvu_opcode txvu_lower_opcodes[] = {
   { "fmand", { SP, LITREG, LISREG }, MLOP7 + MDEST + MLIMM11, VLOP7 (0x1a) },
   { "fmeq", { SP, LITREG, LISREG }, MLOP7 + MDEST + MLIMM11, VLOP7 (0x18) },
   { "fmor", { SP, LITREG, LISREG }, MLOP7 + MDEST + MLIMM11, VLOP7 (0x1b) },
-  { "fsand", { SP, LITREG, LIMM12 }, MLOP7 + MLIMM12TOP + MS, VLOP7 (0x16) },
-  { "fseq", { SP, LITREG, LIMM12 }, MLOP7 + MLIMM12TOP + MS, VLOP7 (0x14) },
-  { "fsor", { SP, LITREG, LIMM12 }, MLOP7 + MLIMM12TOP + MS, VLOP7 (0x17) },
-  { "fsset", { SP, LITREG, LIMM12 }, MLOP7 + MLIMM12TOP + MS, VLOP7 (0x15) },
+  { "fsand", { SP, LITREG, LUIMM12 }, MLOP7 + MLUIMM12UNUSED + MS, VLOP7 (0x16) },
+  { "fseq", { SP, LITREG, LUIMM12 }, MLOP7 + MLUIMM12UNUSED + MS, VLOP7 (0x14) },
+  { "fsor", { SP, LITREG, LUIMM12 }, MLOP7 + MLUIMM12UNUSED + MS, VLOP7 (0x17) },
+  { "fsset", { SP, LITREG, LUIMM12 }, MLOP7 + MLUIMM12UNUSED + MS, VLOP7 (0x15) },
   { "iadd", { SP, LIDREG, LISREG, LITREG }, MLOP7 + MDEST + MLOP6, VLOP7 (0x40) + VLOP6 (0x30) },
   { "iaddi", { SP, LITREG, LISREG, LIMM5 }, MLOP7 + MDEST + MLOP6, VLOP7 (0x40) + VLOP6 (0x32) },
   { "iaddiu", { SP, LITREG, LISREG, LUIMM15 }, MLOP7, VLOP7 (0x08) },
@@ -429,26 +436,26 @@ struct txvu_opcode txvu_lower_opcodes[] = {
   { "ibltz", { SP, LISREG, LPCREL11 }, MLOP7 + MDEST + MT, VLOP7 (0x2c) },
   { "ibne", { SP, LITREG, LISREG, LPCREL11 }, MLOP7 + MDEST, VLOP7 (0x29) },
   /* FIXME: Need to not require commas around parens.  */
-  { "ilw", { LDOTSDEST, SP, LITREG, LIMM11, '(', LISREG, ')' }, MLOP7, VLOP7 (0x04) },
-  { "ilwr", { LDOTSDEST, SP, LITREG, '(', LISREG, ')' }, MLOP7, VLOP7 (0x40) + VLIMM11 (0x3fe) },
+  { "ilw", { LDOTDEST1, SP, LITREG, LIMM11, '(', LISREG, ')' }, MLOP7, VLOP7 (0x04) },
+  { "ilwr", { LDOTDEST1, SP, LITREG, '(', LISREG, ')' }, MLOP7, VLOP7 (0x40) + VLIMM11 (0x3fe) },
   { "ior", { SP, LIDREG, LISREG, LITREG }, MLOP7 + MDEST + MLOP6, VLOP7 (0x40) + VLOP6 (0x34) },
   { "isub", { SP, LIDREG, LISREG, LITREG }, MLOP7 + MDEST + MLOP6, VLOP7 (0x40) + VLOP6 (0x31) },
   { "isubiu", { SP, LITREG, LISREG, LUIMM15 }, MLOP7, VLOP7 (0x09) },
-  { "isw", { LDOTSDEST, SP, LITREG, LIMM11, '(', LISREG, ')' }, MLOP7, VLOP7 (0x05) },
-  { "iswr", { LDOTSDEST, SP, LITREG, '(', LISREG, ')' }, MLOP7, VLOP7 (0x40) + VLIMM11 (0x3ff) },
+  { "isw", { LDOTDEST1, SP, LITREG, LIMM11, '(', LISREG, ')' }, MLOP7, VLOP7 (0x05) },
+  { "iswr", { LDOTDEST1, SP, LITREG, '(', LISREG, ')' }, MLOP7, VLOP7 (0x40) + VLIMM11 (0x3ff) },
   { "jalr", { SP, LITREG, LISREG }, MLOP7 + MDEST + MLIMM11, VLOP7 (0x25) },
   { "jr", { SP, LISREG }, MLOP7 + MDEST + MT + MLIMM11, VLOP7 (0x24) },
   { "lq", { DOTDEST, SP, VFTREG, LIMM11, '(', LISREG, ')' }, MLOP7, VLOP7 (0x00) },
   /* FIXME: No commas around -/+.  */
   { "lqd", { DOTDEST, SP, VFTREG, LIMM11, '(', '-', '-', LISREG, ')' }, MLOP7, VLOP7 (0x40) + VLIMM11 (0x37e) },
   { "lqi", { DOTDEST, SP, VFTREG, LIMM11, '(', LISREG, '+', '+', ')' }, MLOP7, VLOP7 (0x40) + VLIMM11 (0x37c) },
-  /* Only a single VF reg is allowed here.  We can use VFTREG because LDOTSDEST
+  /* Only a single VF reg is allowed here.  We can use VFTREG because LDOTDEST1
      handles verifying only a single choice of xyzw is present.  */
-  { "mfir", { LDOTSDEST, SP, VFTREG, LISREG }, MLOP7 + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x3fc) },
+  { "mfir", { LDOTDEST1, SP, VFTREG, LISREG }, MLOP7 + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x3fc) },
   { "mfp", { DOTDEST, SP, VFTREG, 'p' }, MLOP7 + MS + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x67c) },
   { "move", { DOTDEST, SP, VFTREG, VFSREG }, MLOP7 + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x33c) },
   { "mr32", { DOTDEST, SP, VFTREG, VFSREG }, MLOP7 + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x33d) },
-  { "mtir", { LDOTSDEST, SP, LITREG, LFSREG }, MLOP7 + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x3fd) },
+  { "mtir", { LDOTDEST1, SP, LITREG, LFSREG }, MLOP7 + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x3fd) },
   { "rget", { DOTDEST, SP, VFTREG, 'r' }, MLOP7 + MS + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x43d) },
   { "rinit", { SP, 'r', LFSFFSREG }, MLOP7 + VLFTF (~0) + MT + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x43e) },
   { "rnext", { DOTDEST, SP, VFTREG, 'r' }, MLOP7 + MS + MLIMM11, VLOP7 (0x40) + VLIMM11 (0x43c) },
@@ -604,13 +611,13 @@ txvu_opcode_init_print ()
    The "dest" string selects any combination of x,y,z,w.
    [The letters are ordered that way to follow the manual's style.]  */
 
-/* Parse a `dest' spec.
+/* Utility to parse a `dest' spec.
    Return the found value.
    *PSTR is set to the character that terminated the parsing.
    It is up to the caller to do any error checking.  */
 
 static long
-parse_dest (pstr)
+_parse_dest (pstr)
      char **pstr;
 {
   long dest = 0;
@@ -645,23 +652,26 @@ parse_dotdest (pstr, errmsg)
     }
 
   ++*pstr;
-  dest = parse_dest (pstr);
+  dest = _parse_dest (pstr);
   if (dest == 0 || isalnum (**pstr))
     {
       *errmsg = "invalid `dest'";
       return 0;
     }
+
   *errmsg = NULL;
   return dest;
 }
 
-/* Parse a `dest' spec where only a single letter is allowed.  */
+/* Parse a `dest' spec where only a single letter is allowed,
+   but the encoding handles all four.  */
 
 static long
-parse_dotsdest (pstr, errmsg)
+parse_dotdest1 (pstr, errmsg)
      char **pstr;
      const char **errmsg;
 {
+  char c;
   long dest;
 
   if (**pstr != '.')
@@ -673,12 +683,25 @@ parse_dotsdest (pstr, errmsg)
   ++*pstr;
   switch (**pstr)
     {
-    case 'x' : case 'X' : dest = TXVU_BC_X; break;
-    case 'y' : case 'Y' : dest = TXVU_BC_Y; break;
-    case 'z' : case 'Z' : dest = TXVU_BC_Z; break;
-    case 'w' : case 'W' : dest = TXVU_BC_W; break;
+    case 'x' : case 'X' : dest |= TXVU_DEST_X; break;
+    case 'y' : case 'Y' : dest |= TXVU_DEST_Y; break;
+    case 'z' : case 'Z' : dest |= TXVU_DEST_Z; break;
+    case 'w' : case 'W' : dest |= TXVU_DEST_W; break;
     default : *errmsg = "invalid `dest'"; return 0;
     }
+  ++*pstr;
+  c == tolower (**pstr);
+  if (c == 'x' || c == 'y' || c == 'z' || c == 'w')
+    {
+      *errmsg = "only one of x,y,z,w can be specified";
+      return 0;
+    }
+  if (isalnum (**pstr))
+    {
+      *errmsg = "invalid `dest'";
+      return 0;
+    }
+
   *errmsg = NULL;
   return dest;
 }
@@ -710,8 +733,10 @@ extract_dotdest (insn, operand, mods, pinvalid)
   return dest;
 }
 
+/* Utility to print a multiple dest spec.  */
+
 static void
-print_dest (info, insn, value)
+_print_dest (info, insn, value)
      disassemble_info *info;
      TXVU_INSN insn;
      long value;
@@ -733,7 +758,91 @@ print_dotdest (info, insn, value)
      long value;
 {
   (*info->fprintf_func) (info->stream, ".");
-  print_dest (info, insn, value);
+  _print_dest (info, insn, value);
+}
+
+/* Utilities for single destination choice handling.  */
+
+static long
+_parse_sdest (pstr, errmsg)
+     char **pstr;
+     const char **errmsg;
+{
+  char c;
+  long dest = 0;
+
+  switch (**pstr)
+    {
+    case 'x' : case 'X' : dest = TXVU_SDEST_X; break;
+    case 'y' : case 'Y' : dest = TXVU_SDEST_Y; break;
+    case 'z' : case 'Z' : dest = TXVU_SDEST_Z; break;
+    case 'w' : case 'W' : dest = TXVU_SDEST_W; break;
+    default : *errmsg = "only one of x,y,z,w can be specified"; return 0;
+    }
+  ++*pstr;
+  c == tolower (**pstr);
+  if (c == 'x' || c == 'y' || c == 'z' || c == 'w')
+    {
+      *errmsg = "only one of x,y,z,w can be specified";
+      return 0;
+    }
+  if (isalnum (**pstr))
+    {
+      *errmsg = "invalid `dest'";
+      return 0;
+    }
+
+  *errmsg = NULL;
+  return dest;
+}
+
+static void
+print_sdest (info, insn, value)
+     disassemble_info *info;
+     TXVU_INSN insn;
+     long value;
+{
+  char c;
+
+  switch (value)
+    {
+    case TXVU_SDEST_X : c = 'x'; break;
+    case TXVU_SDEST_Y : c = 'y'; break;
+    case TXVU_SDEST_Z : c = 'z'; break;
+    case TXVU_SDEST_W : c = 'w'; break;
+    }
+
+  (*info->fprintf_func) (info->stream, "%c", c);
+}
+
+/* Broadcase field.  */
+
+static long
+parse_bc (pstr, errmsg)
+     char **pstr;
+     const char **errmsg;
+{
+  long value = _parse_sdest (pstr, errmsg);
+
+  if (*errmsg)
+    return 0;
+  /* Save value for later verification in register parsing.  */
+  bc = value;
+  return value;
+}
+
+/* During the extraction process, save the bc field for use in
+   printing the bc register.  */
+
+static long
+extract_bc (insn, operand, mods, pinvalid)
+     TXVU_INSN insn;
+     const struct txvu_operand *operand;
+     int mods;
+     int *pinvalid;
+{
+  bc = insn & 3;
+  return bc;
 }
 
 static long
@@ -758,7 +867,12 @@ parse_vfreg (pstr, errmsg)
   while (*str && isdigit (*str))
     ++str;
   reg = atoi (start);
-  reg_dest = parse_dest (&str);
+  if (reg < 0 || reg > 31)
+    {
+      *errmsg = "invalid register number";
+      return 0;
+    }
+  reg_dest = _parse_dest (&str);
   if (reg_dest == 0 || isalnum (*str))
     {
       *errmsg = "invalid `dest'";
@@ -781,49 +895,7 @@ print_vfreg (info, insn, value)
      long value;
 {
   (*info->fprintf_func) (info->stream, "vf%ld", value);
-  print_dest (info, insn, dest);
-}
-
-/* Broadcast handling.  */
-
-static long
-parse_bc (pstr, errmsg)
-     char **pstr;
-     const char **errmsg;
-{
-  long dest = 0;
-
-  switch (**pstr)
-    {
-    case 'x' : case 'X' : dest = TXVU_BC_X; break;
-    case 'y' : case 'Y' : dest = TXVU_BC_Y; break;
-    case 'z' : case 'Z' : dest = TXVU_BC_Z; break;
-    case 'w' : case 'W' : dest = TXVU_BC_W; break;
-    default : *errmsg = "invalid `bc'"; return 0;
-    }
-  ++*pstr;
-
-  *errmsg = NULL;
-  return dest;
-}
-
-static void
-print_bc (info, insn, value)
-     disassemble_info *info;
-     TXVU_INSN insn;
-     long value;
-{
-  char c;
-
-  switch (value)
-    {
-    case TXVU_BC_X : c = 'x' ; break;
-    case TXVU_BC_Y : c = 'y' ; break;
-    case TXVU_BC_Z : c = 'z' ; break;
-    case TXVU_BC_W : c = 'w' ; break;
-    }
-
-  (*info->fprintf_func) (info->stream, "%c", c);
+  _print_dest (info, insn, dest);
 }
 
 /* FT register in broadcast case.  */
@@ -850,7 +922,12 @@ parse_bcftreg (pstr, errmsg)
   while (*str && isdigit (*str))
     ++str;
   reg = atoi (start);
-  reg_bc = parse_bc (&str, errmsg);
+  if (reg < 0 || reg > 31)
+    {
+      *errmsg = "invalid register number";
+      return 0;
+    }
+  reg_bc = _parse_sdest (&str, errmsg);
   if (*errmsg)
     return 0;
   if (reg_bc != bc)
@@ -870,7 +947,7 @@ print_bcftreg (info, insn, value)
      long value;
 {
   (*info->fprintf_func) (info->stream, "vf%ld", value);
-  print_bc (info, insn, bc);
+  print_sdest (info, insn, bc);
 }
 
 /* ACC handling.  */
@@ -889,7 +966,7 @@ parse_accdest (pstr, errmsg)
       return 0;
     }
   str += 3;
-  acc_dest = parse_dest (&str);
+  acc_dest = _parse_dest (&str);
   if (acc_dest == 0 || isalnum (*str))
     {
       *errmsg = "invalid `dest'";
@@ -913,7 +990,7 @@ print_accdest (info, insn, value)
      long value;
 {
   (*info->fprintf_func) (info->stream, "acc");
-  print_dest (info, insn, value);
+  _print_dest (info, insn, value);
 }
 
 /* XYZ operand handling.
@@ -933,7 +1010,9 @@ parse_xyz (pstr, errmsg)
   return 0;
 }
 
-/* F[ST] register using selector in F[ST]F field.  */
+/* F[ST] register using selector in F[ST]F field.
+   Internally, the value is encoded in 7 bits: the 2 bit xyzw indicator
+   followed by the 5 bit register number.  */
 
 static long
 parse_ffstreg (pstr, errmsg)
@@ -942,8 +1021,7 @@ parse_ffstreg (pstr, errmsg)
 {
   char *str = *pstr;
   char *start;
-  long reg;
-  int reg_bc;
+  int reg, xyzw;
 
   if (tolower (str[0]) != 'v'
       || tolower (str[1]) != 'f')
@@ -957,17 +1035,17 @@ parse_ffstreg (pstr, errmsg)
   while (*str && isdigit (*str))
     ++str;
   reg = atoi (start);
-  reg_bc = parse_bc (&str, errmsg);
-  if (*errmsg)
-    return 0;
-  if (reg_bc != bc)
+  if (reg < 0 || reg > 31)
     {
-      *errmsg = "register `bc' does not match instruction `bc'";
+      *errmsg = "invalid register number";
       return 0;
     }
+  xyzw = _parse_sdest (&str, errmsg);
+  if (*errmsg)
+    return 0;
   *pstr = str;
   *errmsg = NULL;
-  return reg;
+  return reg | (xyzw << 5);
 }
 
 static void
@@ -976,18 +1054,9 @@ print_ffstreg (info, insn, value)
      TXVU_INSN insn;
      long value;
 {
-  (*info->fprintf_func) (info->stream, "vf%ld", value);
-  print_bc (info, insn, bc);
+  (*info->fprintf_func) (info->stream, "vf%ld", value & TXVU_MASK_REG);
+  print_sdest (info, insn, (value >> 5) & 3);
 }
-
-#define INSERT_FN(fn) \
-static TXVU_INSN CONCAT2 (insert_,fn) \
-     PARAMS ((TXVU_INSN, const struct txvu_operand *, \
-	      int, long, const char **))
-#define EXTRACT_FN(fn) \
-static long CONCAT2 (extract_,fn) \
-     PARAMS ((TXVU_INSN, const struct txvu_operand *, \
-	      int, int *))
 
 static TXVU_INSN
 insert_ffstreg (insn, operand, mods, value, errmsg)
@@ -997,6 +1066,10 @@ insert_ffstreg (insn, operand, mods, value, errmsg)
      long value;
      const char **errmsg;
 {
+  if (operand->shift == TXVU_SHIFT_SREG)
+    return insn | VLFSF (value >> 5) | VS (value);
+  else
+    return insn | VLFTF (value >> 5) | VT (value);
 }
 
 static long
@@ -1006,6 +1079,10 @@ extract_ffstreg (insn, operand, mods, pinvalid)
      int mods;
      int *pinvalid;
 {
+  if (operand->shift == TXVU_SHIFT_SREG)
+    return (((insn & VLFSF (~0)) >> 21) << 5) | VS (insn);
+  else
+    return (((insn & VLFTF (~0)) >> 21) << 5) | VT (insn);
 }
 
 /* F register.  */
@@ -1032,12 +1109,9 @@ parse_freg (pstr, errmsg)
   while (*str && isdigit (*str))
     ++str;
   reg = atoi (start);
-  reg_bc = parse_bc (&str, errmsg);
-  if (*errmsg)
-    return 0;
-  if (reg_bc != bc)
+  if (reg < 0 || reg > 31)
     {
-      *errmsg = "register `bc' does not match instruction `bc'";
+      *errmsg = "invalid register number";
       return 0;
     }
   *pstr = str;
@@ -1052,7 +1126,6 @@ print_freg (info, insn, value)
      long value;
 {
   (*info->fprintf_func) (info->stream, "vf%ld", value);
-  print_bc (info, insn, bc);
 }
 
 /* I register.  */
@@ -1068,7 +1141,7 @@ parse_ireg (pstr, errmsg)
   int reg_bc;
 
   if (tolower (str[0]) != 'v'
-      || tolower (str[1]) != 'f')
+      || tolower (str[1]) != 'i')
     {
       *errmsg = "unknown register";
       return 0;
@@ -1079,12 +1152,9 @@ parse_ireg (pstr, errmsg)
   while (*str && isdigit (*str))
     ++str;
   reg = atoi (start);
-  reg_bc = parse_bc (&str, errmsg);
-  if (*errmsg)
-    return 0;
-  if (reg_bc != bc)
+  if (reg < 0 || reg > 31)
     {
-      *errmsg = "register `bc' does not match instruction `bc'";
+      *errmsg = "invalid register number";
       return 0;
     }
   *pstr = str;
@@ -1098,8 +1168,7 @@ print_ireg (info, insn, value)
      TXVU_INSN insn;
      long value;
 {
-  (*info->fprintf_func) (info->stream, "vf%ld", value);
-  print_bc (info, insn, bc);
+  (*info->fprintf_func) (info->stream, "vi%ld", value);
 }
 
 /* VI01 register.  */
@@ -1115,7 +1184,7 @@ parse_vi01 (pstr, errmsg)
   int reg_bc;
 
   if (tolower (str[0]) != 'v'
-      || tolower (str[1]) != 'f')
+      || tolower (str[1]) != 'i')
     {
       *errmsg = "unknown register";
       return 0;
@@ -1126,12 +1195,9 @@ parse_vi01 (pstr, errmsg)
   while (*str && isdigit (*str))
     ++str;
   reg = atoi (start);
-  reg_bc = parse_bc (&str, errmsg);
-  if (*errmsg)
-    return 0;
-  if (reg_bc != bc)
+  if (reg != 1)
     {
-      *errmsg = "register `bc' does not match instruction `bc'";
+      *errmsg = "vi01 required here";
       return 0;
     }
   *pstr = str;
@@ -1145,29 +1211,30 @@ print_vi01 (info, insn, value)
      TXVU_INSN insn;
      long value;
 {
-  (*info->fprintf_func) (info->stream, "vf%ld", value);
-  print_bc (info, insn, bc);
+  (*info->fprintf_func) (info->stream, "vi01");
 }
 
-/* Lower instruction 12 bit immediate.  */
+/* Lower instruction 12 bit unsigned immediate.  */
 
 static TXVU_INSN
-insert_limm12 (insn, operand, mods, value, errmsg)
+insert_luimm12 (insn, operand, mods, value, errmsg)
      TXVU_INSN insn;
      const struct txvu_operand *operand;
      int mods;
      long value;
      const char **errmsg;
 {
+  return insn | VLUIMM12TOP ((value & (1 << 11)) != 0) | VLIMM11 (value);
 }
 
 static long
-extract_limm12 (insn, operand, mods, pinvalid)
+extract_luimm12 (insn, operand, mods, pinvalid)
      TXVU_INSN insn;
      const struct txvu_operand *operand;
      int mods;
      int *pinvalid;
 {
+  return (((insn & MLUIMM12TOP) != 0) << 11) | VLIMM11 (insn);
 }
 
 /* Lower instruction 15 bit unsigned immediate.  */
@@ -1180,6 +1247,7 @@ insert_luimm15 (insn, operand, mods, value, errmsg)
      long value;
      const char **errmsg;
 {
+  return insn | VLUIMM15TOP (value >> 11) | VLIMM11 (value);
 }
 
 static long
@@ -1189,4 +1257,5 @@ extract_luimm15 (insn, operand, mods, pinvalid)
      int mods;
      int *pinvalid;
 {
+  return (((insn & MLUIMM15TOP) >> 21) << 11) | VLIMM11 (insn);
 }
