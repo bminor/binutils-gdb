@@ -63,17 +63,22 @@ store_inferior_registers (regno)
 
 #else
 
-/* Map gdb internal register number to ptrace address. */
+/* DECstation native... */
+
+#include <sys/ptrace.h>
+
+/* Map gdb internal register number to ptrace ``address''.
+   These ``addresses'' are defined in DECstation <sys/ptrace.h> */
 
 #define REGISTER_PTRACE_ADDR(regno) \
- (regno < 32 ? regno 		\
-  : regno == PC_REGNUM ? 96	\
-  : regno == CAUSE_REGNUM ? 97	\
-  : regno == HI_REGNUM ? 98	\
-  : regno == LO_REGNUM ? 99	\
-  : regno == FCRCS_REGNUM ? 100	\
-  : regno == FCRIR_REGNUM ? 101	\
-  : regno >= FP0_REGNUM ? regno - (FP0_REGNUM-32)\
+   (regno < 32 ? 		GPR_BASE + regno \
+  : regno == PC_REGNUM ?	PC	\
+  : regno == CAUSE_REGNUM ?	CAUSE	\
+  : regno == HI_REGNUM ?	MMHI	\
+  : regno == LO_REGNUM ?	MMLO	\
+  : regno == FCRCS_REGNUM ?	FPC_CSR	\
+  : regno == FCRIR_REGNUM ?	FPC_EIR	\
+  : regno >= FP0_REGNUM ?	FPR_BASE + (regno - FP0_REGNUM) \
   : 0)
 
 /* Get all registers from the inferior */
@@ -93,7 +98,7 @@ fetch_inferior_registers (regno)
       regaddr = REGISTER_PTRACE_ADDR (regno);
       for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (int))
  	{
- 	  *(int *) &buf[i] = ptrace (3, inferior_pid,
+ 	  *(int *) &buf[i] = ptrace (PT_READ_U, inferior_pid,
 				     (PTRACE_ARG3_TYPE) regaddr, 0);
  	  regaddr += sizeof (int);
  	}
@@ -119,7 +124,7 @@ store_inferior_registers (regno)
     {
       regaddr = REGISTER_PTRACE_ADDR (regno);
       errno = 0;
-      ptrace (6, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
+      ptrace (PT_WRITE_U, inferior_pid, (PTRACE_ARG3_TYPE) regaddr,
 	      read_register (regno));
       if (errno != 0)
 	{
