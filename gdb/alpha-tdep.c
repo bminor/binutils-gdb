@@ -173,38 +173,50 @@ alpha_register_convert_to_raw (struct type *valtype, int regnum,
 
 
 /* The alpha passes the first six arguments in the registers, the rest on
-   the stack. The register arguments are eventually transferred to the
-   argument transfer area immediately below the stack by the called function
-   anyway. So we `push' at least six arguments on the stack, `reload' the
-   argument registers and then adjust the stack pointer to point past the
-   sixth argument. This algorithm simplifies the passing of a large struct
-   which extends from the registers to the stack.
+   the stack.  The register arguments are stored in ARG_REG_BUFFER, and
+   then moved into the register file; this simplifies the passing of a
+   large struct which extends from the registers to the stack, plus avoids
+   three ptrace invocations per word.
+
+   We don't bother tracking which register values should go in integer
+   regs or fp regs; we load the same values into both.
+
    If the called function is returning a structure, the address of the
    structure to be returned is passed as a hidden first argument.  */
 
 static CORE_ADDR
-alpha_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
-		      int struct_return, CORE_ADDR struct_addr)
+alpha_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
+		       struct regcache *regcache, CORE_ADDR bp_addr,
+		       int nargs, struct value **args, CORE_ADDR sp,
+		       int struct_return, CORE_ADDR struct_addr)
 {
   int i;
   int accumulate_size = struct_return ? 8 : 0;
-  int arg_regs_size = ALPHA_NUM_ARG_REGS * 8;
   struct alpha_arg
     {
       char *contents;
       int len;
       int offset;
     };
-  struct alpha_arg *alpha_args =
-  (struct alpha_arg *) alloca (nargs * sizeof (struct alpha_arg));
+  struct alpha_arg *alpha_args
+    = (struct alpha_arg *) alloca (nargs * sizeof (struct alpha_arg));
   register struct alpha_arg *m_arg;
-  char raw_buffer[ALPHA_REGISTER_BYTES];
+  char arg_reg_buffer[ALPHA_REGISTER_SIZE * ALPHA_NUM_ARG_REGS];
   int required_arg_regs;
 
+  /* The ABI places the address of the called function in T12.  */
+  regcache_cooked_write_signed (regcache, ALPHA_T12_REGNUM, func_addr);
+
+  /* Set the return address register to point to the entry point
+     of the program, where a breakpoint lies in wait.  */
+  regcache_cooked_write_signed (regcache, ALPHA_RA_REGNUM, bp_addr);
+
+  /* Lay out the arguments in memory.  */
   for (i = 0, m_arg = alpha_args; i < nargs; i++, m_arg++)
     {
       struct value *arg = args[i];
       struct type *arg_type = check_typedef (VALUE_TYPE (arg));
+
       /* Cast argument to long if necessary as the compiler does it too.  */
       switch (TYPE_CODE (arg_type))
 	{
@@ -217,6 +229,30 @@ alpha_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	    {
 	      arg_type = builtin_type_long;
 	      arg = value_cast (arg_type, arg);
+	    }
+	  break;
+	case TYPE_CODE_FLT:
+	  /* "float" arguments loaded in registers must be passed in
+	     register format, aka "double".  */
+	  if (accumulate_size < sizeof (arg_reg_buffer)
+	      && TYPE_LENGTH (arg_type) == 4)
+	    {
+	      arg_type = builtin_type_double;
+	      arg = value_cast (arg_type, arg);
+	    }
+	  /* Tru64 5.1 has a 128-bit long double, and passes this by
+	     invisible reference.  No one else uses this data type.  */
+	  else if (TYPE_LENGTH (arg_type) == 16)
+	    {
+	      /* Allocate aligned storage.  */
+	      sp = (sp & -16) - 16;
+
+	      /* Write the real data into the stack.  */
+	      write_memory (sp, VALUE_CONTENTS (arg), 16);
+
+	      /* Construct the indirection.  */
+	      arg_type = lookup_pointer_type (arg_type);
+	      arg = value_from_pointer (arg_type, sp);
 	    }
 	  break;
 	default:
@@ -235,33 +271,58 @@ alpha_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
     required_arg_regs = ALPHA_NUM_ARG_REGS;
 
   /* Make room for the arguments on the stack.  */
-  if (accumulate_size < arg_regs_size)
-    accumulate_size = arg_regs_size;
+  if (accumulate_size < sizeof(arg_reg_buffer))
+    accumulate_size = 0;
+  else
+    accumulate_size -= sizeof(arg_reg_buffer);
   sp -= accumulate_size;
 
-  /* Keep sp aligned to a multiple of 16 as the compiler does it too.  */
+  /* Keep sp aligned to a multiple of 16 as the ABI requires.  */
   sp &= ~15;
 
   /* `Push' arguments on the stack.  */
   for (i = nargs; m_arg--, --i >= 0;)
-    write_memory (sp + m_arg->offset, m_arg->contents, m_arg->len);
-  if (struct_return)
     {
-      store_unsigned_integer (raw_buffer, ALPHA_REGISTER_BYTES, struct_addr);
-      write_memory (sp, raw_buffer, ALPHA_REGISTER_BYTES);
+      char *contents = m_arg->contents;
+      int offset = m_arg->offset;
+      int len = m_arg->len;
+
+      /* Copy the bytes destined for registers into arg_reg_buffer.  */
+      if (offset < sizeof(arg_reg_buffer))
+	{
+	  if (offset + len <= sizeof(arg_reg_buffer))
+	    {
+	      memcpy (arg_reg_buffer + offset, contents, len);
+	      continue;
+	    }
+	  else
+	    {
+	      int tlen = sizeof(arg_reg_buffer) - offset;
+	      memcpy (arg_reg_buffer + offset, contents, tlen);
+	      offset += tlen;
+	      contents += tlen;
+	      len -= tlen;
+	    }
+	}
+
+      /* Everything else goes to the stack.  */
+      write_memory (sp + offset - sizeof(arg_reg_buffer), contents, len);
     }
+  if (struct_return)
+    store_unsigned_integer (arg_reg_buffer, ALPHA_REGISTER_SIZE, struct_addr);
 
   /* Load the argument registers.  */
   for (i = 0; i < required_arg_regs; i++)
     {
       LONGEST val;
 
-      val = read_memory_integer (sp + i * 8, ALPHA_REGISTER_BYTES);
-      write_register (ALPHA_A0_REGNUM + i, val);
-      write_register (ALPHA_FPA0_REGNUM + i, val);
+      val = extract_unsigned_integer (arg_reg_buffer + i*ALPHA_REGISTER_SIZE,
+				      ALPHA_REGISTER_SIZE);
+      regcache_cooked_write_signed (regcache, ALPHA_A0_REGNUM + i, val);
+      regcache_cooked_write_signed (regcache, ALPHA_FPA0_REGNUM + i, val);
     }
 
-  return sp + arg_regs_size;
+  return sp;
 }
 
 /* Given a return value in `regbuf' with a type `valtype', 
@@ -436,28 +497,6 @@ alpha_skip_prologue (CORE_ADDR pc)
     }
   return pc + offset;
 }
-
-
-/* Construct an inferior call to FUN.  For Alpha this is as simple as
-   initializing the RA and T12 registers; everything else is set up by
-   generic code.  */
-
-static void
-alpha_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
-                      struct value **args, struct type *type, int gcc_p)
-{
-  CORE_ADDR bp_address = CALL_DUMMY_ADDRESS ();
-
-  if (bp_address == 0)
-    error ("no place to put call");
-  write_register (ALPHA_RA_REGNUM, bp_address);
-  write_register (ALPHA_T12_REGNUM, fun);
-}
-
-/* On the Alpha, the call dummy code is never copied to user space
-   (see alpha_fix_call_dummy() above).  The contents of this do not
-   matter.  */
-LONGEST alpha_call_dummy_words[] = { 0 };
 
 
 /* Figure out where the longjmp will land.
@@ -1242,11 +1281,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 					    alpha_extract_struct_value_address);
 
   /* Settings for calling functions in the inferior.  */
-  set_gdbarch_deprecated_push_arguments (gdbarch, alpha_push_arguments);
-  set_gdbarch_deprecated_call_dummy_words (gdbarch, alpha_call_dummy_words);
-  set_gdbarch_deprecated_sizeof_call_dummy_words (gdbarch, 0);
-  set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);
-  set_gdbarch_deprecated_fix_call_dummy (gdbarch, alpha_fix_call_dummy);
+  set_gdbarch_push_dummy_call (gdbarch, alpha_push_dummy_call);
 
   /* Methods for saving / extracting a dummy frame's ID.  */
   set_gdbarch_unwind_dummy_id (gdbarch, alpha_unwind_dummy_id);

@@ -1,5 +1,15 @@
 2003-06-01  Richard Henderson  <rth@redhat.com>
 
+        * alpha-tdep.c (alpha_push_dummy_call): Transmography from
+        alpha_push_arguments.  Don't dump argument register data to
+        the target stack.  Fix float and 128-bit long double semantics.
+        Store $t12 and $ra as specified by the ABI.  Use regcache everywhere.
+        (alpha_fix_call_dummy): Remove.
+        (alpha_call_dummy_words): Remove.
+        (alpha_gdbarch_init): Kill deprecated call hooks; add push_dummy_call.
+
+2003-06-01  Richard Henderson  <rth@redhat.com>
+
 	* alpha-linux-tdep.c (alpha_linux_init_abi): Install dwarf2 unwinder.
 
 2003-06-01  Andrew Cagney  <cagney@redhat.com>
