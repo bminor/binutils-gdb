@@ -1,3 +1,12 @@
+Wed Mar 24 09:48:03 1993  Fred Fish  (fnf@cygnus.com)
+
+	**** start-sanitize-chill ****
+	* gdb.t31/gdbme.ch:  Re-enable code that previously caused
+	compiler to coredump.
+	* gdb.t31/chillvars.exp:  Re-enable tests that depend on that
+	code.
+	**** end-sanitize-chill ****
+
 Tue Mar 23 08:53:42 1993  Fred Fish  (fnf@cygnus.com)
 
 	**** start-sanitize-chill ****
