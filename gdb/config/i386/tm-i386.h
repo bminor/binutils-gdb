@@ -195,6 +195,22 @@ extern CORE_ADDR i386_saved_pc_after_call (struct frame_info *frame);
 
 #define FPU_REG_RAW_SIZE (10)
 
+/* Use the "default" register numbering scheme for stabs and COFF.  */
+
+#define STAB_REG_TO_REGNUM(reg) i386_stab_reg_to_regnum ((reg))
+#define SDB_REG_TO_REGNUM(reg) i386_stab_reg_to_regnum ((reg))
+extern int i386_stab_reg_to_regnum (int reg);
+
+/* Use the DWARF register numbering scheme for DWARF and DWARF 2.  */
+
+#define DWARF_REG_TO_REGNUM(reg) i386_dwarf_reg_to_regnum ((reg))
+#define DWARF2_REG_TO_REGNUM(reg) i386_dwarf_reg_to_regnum ((reg))
+extern int i386_dwarf_reg_to_regnum (int reg);
+
+/* We don't define ECOFF_REG_TO_REGNUM, since ECOFF doesn't seem to be
+   in use on any of the supported i386 targets.  */
+
+
 /* Sizes of individual register sets.  These cover the entire register
    file, so summing up the sizes of those portions actually present
    yields REGISTER_BYTES.  */
