@@ -9,14 +9,6 @@ start-sanitize-tx3904
  	interchange of configuration values for external vs. internal
  	clock dividers.
 end-sanitize-tx3904
-start-sanitize-sky
-
-	* sky-device.c (sky_signal_interrupt): New function to generate
-	interrupt event.
-	* sky-device.h: Declare it.
-	* sky-dma.c (check_int1): Call it.
-	* sky-pke.c (pke_begin_interrupt_stall): Call it.
-end-sanitize-sky
 	
 Tue Jun  9 12:46:24 1998  Ian Carmichael  <iancarm@cygnus.com>
 
