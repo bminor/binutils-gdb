@@ -219,7 +219,7 @@ Here is a brief summary of how to invoke @code{@value{AS}}.  For details,
  [ -l ] [ -m68000 | -m68010 | -m68020 | ... ]
 @end ifset
 @ifset MIPS
- [ -nocpp ] [ -EL ] [ -EB ] [ -G @var{num} ]
+ [ -nocpp ] [ -EL ] [ -EB ] [ -G @var{num} ] [ -mips1 ] [ -mips2 ] [ -mips3 ]
 @end ifset
  [ -- | @var{files} @dots{} ]
 @end smallexample
@@ -356,7 +356,7 @@ Warn when the assembler switches to another architecture.
 
 @ifset MIPS
 The following options are available when @value{AS} is configured for
-the MIPS R2000/R3000 processors.
+the MIPS R2000/R3000/R4000/R6000 processors.
 
 @table @code
 @item -G @var{num}
@@ -374,6 +374,14 @@ Generate ``big endian'' format output.
 @item -EL
 @cindex little endian output, MIPS
 Generate ``little endian'' format output.
+
+@cindex MIPS ISA
+@item -mips1
+@item -mips2
+@item -mips3
+Generate code for a particular MIPS Instruction Set Architecture level.  -mips1
+corresponds to the @sc{r2000} and @sc{r3000} processors, -mips2 to the
+@sc{r6000} processor, and -mips3 to the @sc{r4000} processor.
 
 @item -nocpp
 This option is ignored.  It is accepted for compatibility with the native
@@ -7116,15 +7124,18 @@ set addr(rd),imm4       subl rrd,addr(rs)
 
 @cindex MIPS R2000
 @cindex MIPS R3000
+@cindex MIPS R4000
+@cindex MIPS R6000
 @sc{gnu} @code{@value{AS}} for @sc{mips} architectures supports the @sc{mips}
-@sc{r2000} and @sc{r3000} processors.  For information about the @sc{mips}
-instruction set, see @cite{MIPS RISC Architecture}, by Kane and Heindrich
-(Prentice-Hall).
+@sc{r2000}, @sc{r3000}, @sc{r4000} and @sc{r6000} processors.  For information
+about the @sc{mips} instruction set, see @cite{MIPS RISC Architecture}, by Kane
+and Heindrich (Prentice-Hall).
 
 @menu
 * MIPS Opts::	Assembler options
 * MIPS Object::	ECOFF object code
 * MIPS Stabs::	Directives for debugging information
+* MIPS ISA:: Directives to override the ISA level
 @end menu
 
 @node MIPS Opts
@@ -7208,6 +7219,21 @@ not by traditional @sc{mips} debuggers (this enhancement is required to fully
 support C++ debugging).  These directives are primarily used by compilers, not
 assembly language programmers!
 
+@node MIPS ISA
+@section Directives to override the ISA level
+
+@cindex MIPS ISA override
+@sc{mips} @code{@value{AS}} supports an additional directive to change the
+@sc{mips} Instruction Set Architecture level on the fly.  This is not supported
+by traditional @sc{mips} assemblers.  The directive is @code{.set mips@var{N}}.
+@var{N} should be a number from 0 to 3.  A value from 1 to 3 will cause gas to
+start accepting instructions for the given ISA level; this affects not only
+which instructions are permitted, but also how certain macros are expanded.
+@code{.set mips0} will set the ISA level back to that set by the command line
+options, if any, or otherwise to the default for the configuration.  This
+feature may be used to permit specific r4000 instructions while assembling in
+32 bit mode.  It must be used with care.
+
 @end ifset
 
 @ifset GENERIC
@@ -7275,7 +7301,8 @@ required the proverbial one-bit fix.
 
 Ian Lance Taylor of Cygnus Support merged the Motorola and MIT syntax for the
 68k, completed support for some COFF targets (68k, i386 SVR3, and SCO Unix),
-and made a few other minor patches.
+added support for MIPS ECOFF and ELF targets, and made a few other minor
+patches.
 
 Steve Chamberlain made @code{@value{AS}} able to generate listings.
 

@@ -1,3 +1,11 @@
+Wed Feb  2 11:40:11 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-mips.c (file_mips_isa): New static variable.
+	(md_begin): Set it.
+	(s_mipsset): Add support for .set mipN to set the ISA level.
+
+	* gasp.c (kinfo): Fully bracket initializer.
+
 Tue Feb  1 19:28:12 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
 
 	* gasp.c (malloc): Don't declare, since host.h or system header

@@ -96,8 +96,12 @@ const char *mips_target_format = DEFAULT_TARGET_FORMAT;
 unsigned long mips_gprmask;
 unsigned long mips_cprmask[4];
 
-/* MIPS ISA (Instruction Set Architecture) level.  */
+/* MIPS ISA (Instruction Set Architecture) level (may be changed
+   temporarily using .set mipsN).  */
 static int mips_isa = -1;
+
+/* MIPS ISA we are using for this output file.  */
+static int file_mips_isa;
 
 /* MIPS PIC level.  0 is normal, non-PIC code.  2 means to generate
    SVR4 ABI PIC calls.  1 doesn't mean anything.  */
@@ -489,6 +493,8 @@ md_begin ()
     }
   if (! ok)
     as_warn ("Could not set architecture and machine");
+
+  file_mips_isa = mips_isa;
 
   op_hash = hash_new ();
 
@@ -5197,6 +5203,20 @@ s_mipsset (x)
   else if (strcmp (name, "nobopt") == 0)
     {
       mips_nobopt = 1;
+    }
+  else if (strncmp (name, "mips", 4) == 0)
+    {
+      int isa;
+
+      /* Permit the user to change the ISA on the fly.  Needless to
+	 say, misuse can cause serious problems.  */
+      isa = atoi (name + 4);
+      if (isa == 0)
+	mips_isa = file_mips_isa;
+      else if (isa < 1 || isa > 3)
+	as_bad ("unknown ISA level");
+      else
+	mips_isa = isa;
     }
   else
     {
