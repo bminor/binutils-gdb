@@ -25,12 +25,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define	HOST_BYTE_ORDER	BIG_ENDIAN
 
-/* Avoid "INT_MIN redefined" preprocessor warnings -- by defining them here,
-   exactly the same as in the system <limits.h> file.  */
-#define	UINT_MAX	4294967295	/* max value for an unsigned int */
-#define	INT_MAX		2147483647	/* max value for an int */
-#define	INT_MIN		(-2147483647-1)	/* min value for an int */
-#define	LONG_MAX	2147483647	/* max value for a long */
+/* Avoid "INT_MIN redefined" preprocessor warnings by defining them here.  */
+#include <sys/param.h>
 
 /* Get rid of any system-imposed stack limit if possible.  */
 
