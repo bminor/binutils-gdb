@@ -1,5 +1,9 @@
 2001-05-24  H.J. Lu  <hjl@gnu.org>
 
+	* gas/m68k/pcrel.d: Support 64bit BFD.
+
+2001-05-24  H.J. Lu  <hjl@gnu.org>
+
 	* gas/arm/adrl.d: Support 64bit BFD.
 	* gas/arm/arm7t.d: Likewise.
 	* gas/arm/inst.d: Likewise.
