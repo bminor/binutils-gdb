@@ -141,6 +141,7 @@ HFILES = \
 	ia64-asmtab.h \
 	ia64-opc.h \
 	ip2k-desc.h ip2k-opc.h \
+	iq2000-desc.h iq2000-opc.h \
 	m32r-desc.h m32r-opc.h \
 	mcore-opc.h \
 	openrisc-desc.h openrisc-opc.h \
@@ -207,6 +208,11 @@ CFILES = \
 	ip2k-dis.c \
 	ip2k-ibld.c \
 	ip2k-opc.c \
+	iq2000-asm.c \
+	iq2000-desc.c \
+	iq2000-dis.c \
+	iq2000-ibld.c \
+	iq2000-opc.c \
 	m32r-asm.c \
 	m32r-desc.c \
 	m32r-dis.c \
@@ -313,6 +319,11 @@ ALL_MACHINES = \
 	ip2k-dis.lo \
 	ip2k-ibld.lo \
 	ip2k-opc.lo \
+	iq2000-asm.lo \
+	iq2000-desc.lo \
+	iq2000-dis.lo \
+	iq2000-ibld.lo \
+	iq2000-opc.lo \
 	m32r-asm.lo \
 	m32r-desc.lo \
 	m32r-dis.lo \
@@ -392,7 +403,7 @@ noinst_LIBRARIES = libopcodes.a
 POTFILES = $(HFILES) $(CFILES)
 
 CLEANFILES = \
-	stamp-ip2k stamp-m32r stamp-fr30 stamp-frv stamp-openrisc \
+	stamp-ip2k stamp-iq2000 stamp-m32r stamp-fr30 stamp-frv stamp-openrisc \
 	stamp-xstormy16 \
 	libopcodes.a stamp-lib dep.sed DEP DEPA DEP1 DEP2
 
@@ -413,6 +424,8 @@ CGENDEPS = \
 CGEN_CPUS = fr30 frv ip2k m32r openrisc xstormy16
 @CGEN_MAINT_TRUE@IP2K_DEPS = @CGEN_MAINT_TRUE@stamp-ip2k
 @CGEN_MAINT_FALSE@IP2K_DEPS = 
+@CGEN_MAINT_TRUE@IQ2000_DEPS = @CGEN_MAINT_TRUE@stamp-ip2000
+@CGEN_MAINT_FALSE@IQ2000_DEPS = 
 @CGEN_MAINT_TRUE@M32R_DEPS = @CGEN_MAINT_TRUE@stamp-m32r
 @CGEN_MAINT_FALSE@M32R_DEPS = 
 @CGEN_MAINT_TRUE@FR30_DEPS = @CGEN_MAINT_TRUE@stamp-fr30
@@ -877,6 +890,12 @@ $(srcdir)/ip2k-desc.h $(srcdir)/ip2k-desc.c $(srcdir)/ip2k-opc.h $(srcdir)/ip2k-
 stamp-ip2k: $(CGENDEPS) $(CPUDIR)/ip2k.cpu $(CPUDIR)/ip2k.opc
 	$(MAKE) run-cgen arch=ip2k prefix=ip2k options= extrafiles=
 
+$(srcdir)/iq2000-desc.h $(srcdir)/iq2000-desc.c $(srcdir)/iq2000-opc.h $(srcdir)/iq2000-opc.c $(srcdir)/iq2000-ibld.c $(srcdir)/iq2000-asm.c $(srcdir)/iq2000-dis.c: $(IQ2000_DEPS)
+	@true
+stamp-iq2000: $(CGENDEPS) $(CPUDIR)/iq2000.cpu $(CPUDIR)/iq2000.opc \
+	$(CPUDIR)/iq2000m.cpu $(CPUDIR)/iq10.cpu
+	$(MAKE) run-cgen arch=iq2000 prefix=iq2000 options= extrafiles=
+
 $(srcdir)/m32r-desc.h $(srcdir)/m32r-desc.c $(srcdir)/m32r-opc.h $(srcdir)/m32r-opc.c $(srcdir)/m32r-ibld.c $(srcdir)/m32r-opinst.c $(srcdir)/m32r-asm.c $(srcdir)/m32r-dis.c: $(M32R_DEPS)
 	@true
 stamp-m32r: $(CGENDEPS) $(CPUDIR)/m32r.cpu $(CPUDIR)/m32r.opc
@@ -1114,6 +1133,23 @@ ip2k-ibld.lo: ip2k-ibld.c sysdep.h config.h $(INCDIR)/ansidecl.h \
 ip2k-opc.lo: ip2k-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(BFD_H) $(INCDIR)/symcat.h ip2k-desc.h $(INCDIR)/opcode/cgen.h \
   ip2k-opc.h $(INCDIR)/libiberty.h
+iq2000-asm.lo: iq2000-asm.c sysdep.h config.h $(BFD_H) \
+  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h iq2000-desc.h \
+  $(INCDIR)/opcode/cgen.h iq2000-opc.h opintl.h
+iq2000-desc.lo: iq2000-desc.c sysdep.h config.h $(BFD_H) \
+  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h iq2000-desc.h \
+  $(INCDIR)/opcode/cgen.h iq2000-opc.h opintl.h
+iq2000-dis.lo: iq2000-dis.c sysdep.h config.h $(INCDIR)/dis-asm.h \
+  $(BFD_H) $(INCDIR)/ansidecl.h \
+  $(INCDIR)/symcat.h iq2000-desc.h $(INCDIR)/opcode/cgen.h \
+  iq2000-opc.h opintl.h
+iq2000-ibld.lo: iq2000-ibld.c sysdep.h config.h $(INCDIR)/dis-asm.h \
+  $(BFD_H) $(INCDIR)/ansidecl.h \
+  $(INCDIR)/symcat.h iq2000-desc.h $(INCDIR)/opcode/cgen.h \
+  iq2000-opc.h opintl.h
+iq2000-opc.lo: iq2000-opc.c sysdep.h config.h $(BFD_H) \
+  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h iq2000-desc.h \
+  $(INCDIR)/opcode/cgen.h iq2000-opc.h
 m32r-asm.lo: m32r-asm.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(BFD_H) $(INCDIR)/symcat.h m32r-desc.h $(INCDIR)/opcode/cgen.h \
   m32r-opc.h opintl.h $(INCDIR)/xregex.h $(INCDIR)/xregex2.h \

@@ -1,3 +1,25 @@
+2002-01-02  Ben Elliston  <bje@redhat.com>
+	    Jeff Johnston  <jjohnstn@redhat.com>
+
+        * iq2000-asm.c: New file.
+        * iq2000-desc.c: Likewise.
+        * iq2000-desc.h: Likewise.
+        * iq2000-dis.c: Likewise.
+        * iq2000-ibld.c: Likewise.
+        * iq2000-opc.c: Likewise.
+        * iq2000-opc.h: Likewise.
+        * Makefile.am (HFILES): Add iq2000-desc.h, iq2000-opc.h.
+        (CFILES): Add iq2000-asm.c, iq2000-desc.c, iq2000-dis.c,
+        iq2000-ibld.c, iq2000-opc.c.
+        (ALL_MACHINES): Add iq2000-asm.lo, iq2000-desc.lo, iq2000-dis.lo,
+        iq2000-ibld.lo, iq2000-opc.lo.
+        (CLEANFILES): Add stamp-iq2000.
+        (IQ2000_DEPS): New macro.
+        (stamp-iq2000): New target.
+        * Makefile.in: Regenerate.
+        * configure.in: Handle bfd_iq2000_arch.
+        * configure: Regenerate.
+
 2003-01-02  Chris Demetriou  <cgd@broadcom.com>
 
 	* mips-dis.c (print_insn_args): Use position extracted by "+A"

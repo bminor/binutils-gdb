@@ -70,6 +70,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define ARCH_xstormy16
 #define ARCH_z8k
 #define ARCH_frv
+#define ARCH_iq2000
 #define INCLUDE_SHMEDIA
 #endif
 
@@ -358,6 +359,11 @@ disassembler (abfd)
 #ifdef ARCH_frv
     case bfd_arch_frv:
       disassemble = print_insn_frv;
+      break;
+#endif
+#ifdef ARCH_iq2000
+    case bfd_arch_iq2000:
+      disassemble = print_insn_iq2000;
       break;
 #endif
     default:

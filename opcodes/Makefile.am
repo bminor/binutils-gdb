@@ -31,6 +31,7 @@ HFILES = \
 	ia64-asmtab.h \
 	ia64-opc.h \
 	ip2k-desc.h ip2k-opc.h \
+	iq2000-desc.h iq2000-opc.h \
 	m32r-desc.h m32r-opc.h \
 	mcore-opc.h \
 	openrisc-desc.h openrisc-opc.h \
@@ -96,6 +97,11 @@ CFILES = \
 	ip2k-dis.c \
 	ip2k-ibld.c \
 	ip2k-opc.c \
+	iq2000-asm.c \
+	iq2000-desc.c \
+	iq2000-dis.c \
+	iq2000-ibld.c \
+	iq2000-opc.c \
 	m32r-asm.c \
 	m32r-desc.c \
 	m32r-dis.c \
@@ -201,6 +207,11 @@ ALL_MACHINES = \
 	ip2k-dis.lo \
 	ip2k-ibld.lo \
 	ip2k-opc.lo \
+	iq2000-asm.lo \
+	iq2000-desc.lo \
+	iq2000-dis.lo \
+	iq2000-ibld.lo \
+	iq2000-opc.lo \
 	m32r-asm.lo \
 	m32r-desc.lo \
 	m32r-dis.lo \
@@ -326,7 +337,7 @@ uninstall_libopcodes:
 
 CLEANFILES = \
 	stamp-ip2k stamp-m32r stamp-fr30 stamp-frv stamp-openrisc \
-	stamp-xstormy16 \
+	stamp-iq2000 stamp-xstormy16 \
 	libopcodes.a stamp-lib dep.sed DEP DEPA DEP1 DEP2
 
 
@@ -350,6 +361,7 @@ M32R_DEPS = stamp-m32r
 FR30_DEPS = stamp-fr30
 FRV_DEPS = stamp-frv
 OPENRISC_DEPS = stamp-openrisc
+IQ2000_DEPS = stamp-iq2000
 XSTORMY16_DEPS = stamp-xstormy16
 else
 IP2K_DEPS =
@@ -357,6 +369,7 @@ M32R_DEPS =
 FR30_DEPS =
 FRV_DEPS =
 OPENRISC_DEPS = 
+IQ2000_DEPS = 
 XSTORMY16_DEPS = 
 endif
 
@@ -400,6 +413,12 @@ $(srcdir)/openrisc-desc.h $(srcdir)/openrisc-desc.c $(srcdir)/openrisc-opc.h $(s
 	@true
 stamp-openrisc: $(CGENDEPS) $(CPUDIR)/openrisc.cpu $(CPUDIR)/openrisc.opc
 	$(MAKE) run-cgen arch=openrisc prefix=openrisc options= extrafiles=
+
+$(srcdir)/iq2000-desc.h $(srcdir)/iq2000-desc.c $(srcdir)/iq2000-opc.h $(srcdir)/iq2000-opc.c $(srcdir)/iq2000-ibld.c $(srcdir)/iq2000-asm.c $(srcdir)/iq2000-dis.c: $(IQ2000_DEPS)
+	@true
+stamp-iq2000: $(CGENDEPS) $(CPUDIR)/iq2000.cpu $(CPUDIR)/iq2000.opc \
+	$(CPUDIR)/iq2000m.cpu $(CPUDIR)/iq10.cpu
+	$(MAKE) run-cgen arch=iq2000 prefix=iq2000 options= extrafiles=
 
 $(srcdir)/xstormy16-desc.h $(srcdir)/xstormy16-desc.c $(srcdir)/xstormy16-opc.h $(srcdir)/xstormy16-opc.c $(srcdir)/xstormy16-ibld.c $(srcdir)/xstormy16-asm.c $(srcdir)/xstormy16-dis.c: $(XSTORMY16_DEPS)
 	@true
