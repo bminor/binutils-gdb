@@ -1,3 +1,8 @@
+Tue Sep 14 09:12:17 1993  Jim Kingdon  (kingdon@cirdan.cygnus.com)
+
+	* stabsread.c (read_type): Process "s" (size) type attribute.
+	If type is defined to another type, copy the type.
+
 Tue Sep 14 18:37:17 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* config/i386/i386v4.mh (NATDEPFILES): Move exec.o from here...
@@ -23,7 +28,8 @@ Tue Sep 14 12:21:49 1993  K. Richard Pixley  (rich@sendai.cygnus.com)
 
 Tue Sep 14 09:12:17 1993  Jim Kingdon  (kingdon@cirdan.cygnus.com)
 
-	* paread.c, coffread.c, elfread.c: Include <time.h> before libbfd.h.
+	* paread.c, coffread.c, elfread.c, dwarfread.c:
+	Include <time.h> before libbfd.h.
 
 	* paread.c: Define BYTES_IN_WORD before including aout/aout64.h.
 

@@ -1211,6 +1211,10 @@ read_type (pp, objfile)
   int xtypenums[2];
   char type_descriptor;
 
+  /* Size in bits of type if specified by a type attribute, or -1 if
+     there is no size attribute.  */
+  int type_size = -1;
+
   /* Read type number if present.  The type number may be omitted.
      for instance in a two-dimensional array declared with type
      "ar1;1;10;ar1;1;10;4".  */
@@ -1239,7 +1243,10 @@ read_type (pp, objfile)
 	    break;
 	  else
 	    {
-	      /* Type attributes; skip to the semicolon.  */
+	      /* Type attributes.  */
+	      char *attr = p;
+
+	      /* Skip to the semicolon.  */
 	      while (*p != ';' && *p != '\0')
 		++p;
 	      *pp = p;
@@ -1248,6 +1255,19 @@ read_type (pp, objfile)
 	      else
 		/* Skip the semicolon.  */
 		++*pp;
+
+	      switch (*attr)
+		{
+		case 's':
+		  type_size = atoi (attr + 1);
+		  if (type_size <= 0)
+		    type_size = -1;
+		  break;
+		default:
+		  /* Ignore unrecognized type attributes, so future compilers
+		     can invent new ones.  */
+		  break;
+		}
 	    }
 	}
       /* Skip the type descriptor, we get it below with (*pp)[-1].  */
@@ -1359,27 +1379,40 @@ read_type (pp, objfile)
     case '9':
     case '(':
 
-      /* The type is being defined to another type.  When we support
-	 Ada (and arguably for C, so "whatis foo" can give "size_t",
-	 "wchar_t", or whatever it was declared as) we'll need to
-	 allocate a distinct type here rather than returning the
-	 existing one.  GCC is currently (deliberately) incapable of
-	 putting out the debugging information to do that, however.  */
-
       (*pp)--;
       if (read_type_number (pp, xtypenums) != 0)
 	return error_type (pp);
+
       if (typenums[0] == xtypenums[0] && typenums[1] == xtypenums[1])
 	/* It's being defined as itself.  That means it is "void".  */
 	type = init_type (TYPE_CODE_VOID, 0, 0, NULL, objfile);
       else
-	type = *dbx_lookup_type (xtypenums);
+	{
+	  struct type *xtype = *dbx_lookup_type (xtypenums);
+
+	  /* This can happen if we had '-' followed by a garbage character,
+	     for example.  */
+	  if (xtype == NULL)
+	    return error_type (pp);
+
+	  /* The type is being defined to another type.  So we copy the type.
+	     This loses if we copy a C++ class and so we lose track of how
+	     the names are mangled (but g++ doesn't output stabs like this
+	     now anyway).  */
+
+	  type = alloc_type (objfile);
+	  memcpy (type, xtype, sizeof (struct type));
+
+	  /* The idea behind clearing the names is that the only purpose
+	     for defining a type to another type is so that the name of
+	     one can be different.  So we probably don't need to worry much
+	     about the case where the compiler doesn't give a name to the
+	     new type.  */
+	  TYPE_NAME (type) = NULL;
+	  TYPE_TAG_NAME (type) = NULL;
+	}
       if (typenums[0] != -1)
 	*dbx_lookup_type (typenums) = type;
-      /* This can happen if we had '-' followed by a garbage character,
-	 for example.  */
-      if (type == NULL)
-	return error_type (pp);
       break;
 
     /* In the following types, we must be sure to overwrite any existing
@@ -1529,6 +1562,10 @@ read_type (pp, objfile)
       warning ("GDB internal error, type is NULL in stabsread.c\n");
       return error_type (pp);
     }
+
+  /* Size specified in a type attribute overrides any other size.  */
+  if (type_size != -1)
+    TYPE_LENGTH (type) = type_size / TARGET_CHAR_BIT;
 
   return type;
 }
