@@ -963,8 +963,7 @@ bug_clear_breakpoints ()
 struct target_ops bug_ops =
 {
   "bug", "Remote BUG monitor",
-  "Use the mvme187 board running the BUG monitor connected\n\
-by a serial line.",
+  "Use the mvme187 board running the BUG monitor connected by a serial line.",
 
   bug_open, gr_close,
   0, gr_detach, bug_resume, bug_wait,	/* attach */
