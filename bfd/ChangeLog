@@ -5,6 +5,13 @@ Tue Dec 27 14:03:47 1994  Jeff Law  (law@snake.cs.utah.edu)
 
 Tue Dec 20 15:30:12 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
 
+	* coffgen.c (bfd_debug_section): Deleted.
+	(coff_section_from_bfd_index): Return absolute section for debug
+	symbol.
+	(coff_write_symbol): Set BSF_DEBUGGING for C_FILE symbols.  If
+	BSF_DEBUGGING is set, set section to N_DEBUG.
+	(coff_bfd_make_debug_symbol): Use absolute section.
+
 	* elfcode.h (assign_file_positions_except_relocs): In assertion,
 	force all values to the same type.
 
