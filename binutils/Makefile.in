@@ -161,7 +161,7 @@ $(NM_PROG): $(ADDL_LIBS) nm.o $(BFD)
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $(NM_PROG) nm.o $(ADDL_LIBS) $(LOADLIBES)
 
 $(OBJDUMP_PROG): $(ADDL_LIBS) size.o objdump.o $(DISASMS) $(BFD) $(OPCODES)
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(OBJDUMP_PROG) objdump.o $(DISASMS) $(ADDL_LIBS) $(LOADLIBES)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $(OBJDUMP_PROG) objdump.o $(DISASMS) $(ADDL_LIBS) $(OPCODES) $(LOADLIBES)
 
 arparse.c:arparse.y
 	$(BISON) $(BISONFLAGS)  $(srcdir)/arparse.y
