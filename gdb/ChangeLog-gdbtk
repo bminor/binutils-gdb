@@ -1,3 +1,13 @@
+Mon Apr 13 12:58:26 1998  Keith Seitz  <keiths@onions.cygnus.com>
+
+	* gdbtk.c (gdbtk_start_timer): Include on all platforms. Decrease
+	timer interval a little.
+	(gdbtk_stop_timer): Include on all platforms.
+	(gdbtk_wait): No more signals! Use a timer on all platforms to keep the
+	GUI alive.
+	(gdbtk_init): Remove FIOASYNC and all x_fd references. Now using timers
+	on all platforms.
+	
 Fri Apr 10 15:48:10 1998  Jason Molenda  (crash@bugshack.cygnus.com)
 
         * gdbtk.c (gdb_listfiles): Allocate space for 'files' dynamically.

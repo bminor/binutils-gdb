@@ -65,16 +65,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include <stdio.h>
 #include "gdbcmd.h"
 
-#ifndef WINNT
-#ifndef FIOASYNC
-#include <sys/stropts.h>
-#endif
-#endif
-
-#ifdef __CYGWIN32__
 #include "annotate.h"
 #include <sys/time.h>
-#endif
 
 #ifdef WINNT
 #define GDBTK_PATH_SEP ";"
@@ -96,14 +88,6 @@ int gdbtk_load_hash PARAMS ((char *, unsigned long));
 int (*ui_load_progress_hook) PARAMS ((char *, unsigned long));
 void (*pre_add_symbol_hook) PARAMS ((char *));
 void (*post_add_symbol_hook) PARAMS ((void));
-
-/* This is a disgusting hack. Unfortunately, the UI will lock up if we
-   are doing something like blocking in a system call, waiting for serial I/O,
-   or what have you.
-
-   This hook should be used whenever we might block. This means adding appropriate
-   timeouts to code and what not to allow this hook to be called. */
-void (*ui_loop_hook) PARAMS ((int));
 
 char * get_prompt PARAMS ((void));
 
@@ -175,32 +159,13 @@ static int gdb_loadfile PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST o
 static int gdb_set_bp PARAMS ((ClientData, Tcl_Interp *, int, Tcl_Obj *CONST objv[]));
 static struct symtab *full_lookup_symtab PARAMS ((char *file));
 static int gdb_get_mem PARAMS ((ClientData, Tcl_Interp *, int, char *[]));
-#ifdef __CYGWIN32__
-static void gdbtk_annotate_starting PARAMS ((void));
-static void gdbtk_annotate_stopped PARAMS ((void));
-static void gdbtk_annotate_signalled PARAMS ((void));
-static void gdbtk_annotate_exited PARAMS ((void));
-#endif
 
 /* Handle for TCL interpreter */
 static Tcl_Interp *interp = NULL;
 
-#ifndef WINNT
-static int x_fd;		/* X network socket */
-#endif
-
-#ifdef __CYGWIN32__
-
-/* On Windows we use timer interrupts when gdb might otherwise hang
-   for a long time.  See the comment above gdbtk_start_timer.  This
-   variable is true when timer interrupts are being used.  */
-
 static int gdbtk_timer_going = 0;
-
 static void gdbtk_start_timer PARAMS ((void));
 static void gdbtk_stop_timer PARAMS ((void));
-
-#endif
 
 /* This variable is true when the inferior is running.  Although it's
    possible to disable most input from widgets and thus prevent
@@ -1130,23 +1095,17 @@ gdb_cmd (clientData, interp, argc, argv)
       save_ptr = result_ptr;
       result_ptr = NULL;
       load_in_progress = 1;
-      
-      /* On Windows, use timer interrupts so that the user can cancel
-	 the download.  FIXME: We may have to do something on other
-	 systems.  */
-#ifdef __CYGWIN32__
       gdbtk_start_timer ();
-#endif
     }
 
   execute_command (argv[1], 1);
 
-#ifdef __CYGWIN32__
   if (load_in_progress)
-    gdbtk_stop_timer ();
-#endif
+    {
+      gdbtk_stop_timer ();
+      load_in_progress = 0;
+    }
 
-  load_in_progress = 0;
   bpstat_do_actions (&stop_bpstat);
   
   if (save_ptr) 
@@ -1211,11 +1170,9 @@ call_wrapper (clientData, interp, argc, argv)
     {
       wrapped_args.val = TCL_ERROR;	/* Flag an error for TCL */
 
-#ifdef __CYGWIN32__
       /* Make sure the timer interrupts are turned off.  */
       if (gdbtk_timer_going)
-	gdbtk_stop_timer ();
-#endif
+        gdbtk_stop_timer ();
 
       gdb_flush (gdb_stderr);	/* Flush error output */
       gdb_flush (gdb_stdout);	/* Sometimes error output comes here as well */
@@ -1789,7 +1746,6 @@ x_event (signo)
 {
   static int in_x_event = 0;
   static Tcl_Obj *varname = NULL;
-
   if (in_x_event || in_fputs)
     return; 
 
@@ -1821,8 +1777,6 @@ x_event (signo)
   in_x_event = 0;
 }
 
-#ifdef __CYGWIN32__
-
 /* For Cygwin32, we use a timer to periodically check for Windows
    messages.  FIXME: It would be better to not poll, but to instead
    rewrite the target_wait routines to serve as input sources.
@@ -1851,30 +1805,35 @@ gdbtk_start_timer ()
       act2.sa_flags = 0;
 
       it_on.it_interval.tv_sec = 0;
-      it_on.it_interval.tv_usec = 500000; /* .5 sec */
+      it_on.it_interval.tv_usec = 250000; /* .25 sec */
       it_on.it_value.tv_sec = 0;
-      it_on.it_value.tv_usec = 500000;
+      it_on.it_value.tv_usec = 250000;
 
       it_off.it_interval.tv_sec = 0;
       it_off.it_interval.tv_usec = 0;
       it_off.it_value.tv_sec = 0;
       it_off.it_value.tv_usec = 0;
     }
-  sigaction (SIGALRM, &act1, NULL);
-  setitimer (ITIMER_REAL, &it_on, NULL);
-  gdbtk_timer_going = 1;
+  
+  if (!gdbtk_timer_going)
+    {
+      sigaction (SIGALRM, &act1, NULL);
+      setitimer (ITIMER_REAL, &it_on, NULL);
+      gdbtk_timer_going = 1;
+    }
 }
 
 static void
 gdbtk_stop_timer ()
 {
-  gdbtk_timer_going = 0;
-  /*TclDebug ("Stopping timer.");*/
-  setitimer (ITIMER_REAL, &it_off, NULL);
-  sigaction (SIGALRM, &act2, NULL);
+  if (gdbtk_timer_going)
+    {
+      gdbtk_timer_going = 0;
+      /*TclDebug ("Stopping timer.");*/
+      setitimer (ITIMER_REAL, &it_off, NULL);
+      sigaction (SIGALRM, &act2, NULL);
+    }
 }
-
-#endif
 
 /* This hook function is called whenever we want to wait for the
    target.  */
@@ -1884,29 +1843,9 @@ gdbtk_wait (pid, ourstatus)
      int pid;
      struct target_waitstatus *ourstatus;
 {
-#ifndef WINNT
-  struct sigaction action;
-  static sigset_t nullsigmask = {0};
-
-
-#ifndef SA_RESTART
-  /* Needed for SunOS 4.1.x */
-#define SA_RESTART 0
-#endif
-
-  action.sa_handler = x_event;
-  action.sa_mask = nullsigmask;
-  action.sa_flags = SA_RESTART;
-  sigaction(SIGIO, &action, NULL);
-#endif /* WINNT */
-
+  gdbtk_start_timer ();
   pid = target_wait (pid, ourstatus);
-
-#ifndef WINNT
-  action.sa_handler = SIG_IGN;
-  sigaction(SIGIO, &action, NULL); 
-#endif
-
+  gdbtk_stop_timer ();
   return pid;
 }
 
@@ -2213,50 +2152,6 @@ gdbtk_init ( argv0 )
   delete_tracepoint_hook = gdbtk_delete_tracepoint;
   modify_tracepoint_hook = gdbtk_modify_tracepoint;
   pc_changed_hook = pc_changed;
-#ifdef __CYGWIN32__
-  annotate_starting_hook  = gdbtk_annotate_starting;
-  annotate_stopped_hook   = gdbtk_annotate_stopped;
-  annotate_signalled_hook = gdbtk_annotate_signalled;
-  annotate_exited_hook    = gdbtk_annotate_exited;
-  ui_loop_hook            = x_event;
-#endif
-#ifndef WINNT
-  /* Get the file descriptor for the X server */
-
-  x_fd = ConnectionNumber (Tk_Display (Tk_MainWindow (interp)));
-
-  /* Setup for I/O interrupts */
-
-  action.sa_mask = nullsigmask;
-  action.sa_flags = 0;
-  action.sa_handler = SIG_IGN;
-  sigaction(SIGIO, &action, NULL);
-
-#ifdef FIOASYNC
-  i = 1;
-  if (ioctl (x_fd, FIOASYNC, &i))
-    perror_with_name ("gdbtk_init: ioctl FIOASYNC failed");
-
-#ifdef SIOCSPGRP
-  i = getpid();
-  if (ioctl (x_fd, SIOCSPGRP, &i))
-    perror_with_name ("gdbtk_init: ioctl SIOCSPGRP failed");
-
-#else
-#ifdef F_SETOWN
-  i = getpid();
-  if (fcntl (x_fd, F_SETOWN, i))
-    perror_with_name ("gdbtk_init: fcntl F_SETOWN failed");
-#endif	/* F_SETOWN */
-#endif	/* !SIOCSPGRP */
-#else
-#ifndef WINNT
-  if (ioctl (x_fd,  I_SETSIG, S_INPUT|S_RDNORM) < 0)
-    perror_with_name ("gdbtk_init: ioctl I_SETSIG failed");
-#endif
-
-#endif /* ifndef FIOASYNC */
-#endif /* WINNT */
 
   add_com ("tk", class_obscure, tk_command,
 	   "Send a command directly into tk.");
@@ -3333,40 +3228,6 @@ gdb_set_bp (clientData, interp, objc, objv)
   Tcl_DecrRefCount (cmd);
   return ret;
 }
-
-#ifdef __CYGWIN32__
-/* The whole timer idea is an easy one, but POSIX does not appear to have
-   some sort of interval timer requirement. Consequently, we cannot rely
-   on cygwin32 to always deliver the timer's signal. This is especially
-   painful given that all serial I/O will block the timer right now. */
-static void
-gdbtk_annotate_starting ()
-{
-  /* TclDebug ("### STARTING ###"); */
-  gdbtk_start_timer ();
-}
-
-static void
-gdbtk_annotate_stopped ()
-{
-  /* TclDebug ("### STOPPED ###"); */
-  gdbtk_stop_timer ();
-}
-
-static void
-gdbtk_annotate_exited ()
-{
-  /* TclDebug ("### EXITED ###"); */
-  gdbtk_stop_timer ();
-}
-
-static void
-gdbtk_annotate_signalled ()
-{
-  /* TclDebug ("### SIGNALLED ###"); */
-  gdbtk_stop_timer ();
-}
-#endif
 
 /* Come here during initialize_all_files () */
 
