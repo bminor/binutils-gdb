@@ -817,7 +817,11 @@ s_data ()
   register int temp;
 
   temp = get_absolute_expression ();
+#ifdef BFD_ASSEMBLER
   subseg_set (data_section, (subsegT) temp);
+#else
+  subseg_change (data_section, (subsegT) temp);
+#endif
 
 #ifdef VMS
   const_flag = 0;
