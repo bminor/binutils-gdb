@@ -123,6 +123,10 @@
 static void
 add_bfd_to_link PARAMS ((bfd *, const char *, struct bfd_link_info *));
 
+/* Defined in emultempl/pe.em.  */
+extern char *
+pe_get_data_import_dll_name PARAMS ((void));
+
 /* For emultempl/pe.em.  */
 
 def_file * pe_def_file = 0;
@@ -2065,9 +2069,8 @@ pe_create_import_fixup (rel)
     }
 
   {
-    extern char * pe_data_import_dll;  /* Defined in emultempl/pe.em.  */
-    
-    bfd *b = make_import_fixup_entry (name, fixup_name, pe_data_import_dll,
+    bfd *b = make_import_fixup_entry (name, fixup_name,
+				      pe_get_data_import_dll_name (),
 				      output_bfd);
     add_bfd_to_link (b, b->filename, &link_info);
   }

@@ -1,3 +1,11 @@
+2001-09-24  Charles Wilson  <cwilson@ece.gatech.edu>
+ 
+	* emultempl/pe.em(pe_data_import_dll): Make static.
+	(pe_get_data_import_dll_name): New accessor function.
+	* pe-dll.c(pe_create_import_fixup): call 
+	pe_get_data_import_dll_name() from pe.em, instead of
+	directly accessing pe_data_import_dll variable from pe.em.
+
 2001-09-18  Bruno Haible  <haible@clisp.cons.org>
 
 	* deffilep.y: Include "safe-ctype.h" instead of <ctype.h>.
