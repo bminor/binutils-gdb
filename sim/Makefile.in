@@ -93,10 +93,11 @@ clean:  $(CLEAN)
 
 install: $(INSTALL)
 
+### build endian.h via a temporary so that interrupted builds will not
+### leave an incomplete endian.h lying around.
 endian.h: endian
-	./endian > endian.h
-
-
+	./endian > e.h
+	mv -f e.h endian.h
 
 ### none
 
