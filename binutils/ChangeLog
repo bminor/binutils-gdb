@@ -1,3 +1,12 @@
+2004-03-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Regenerate.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* po/binutils.pot: Regenerate.
+
 2004-03-15  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* objdump.c (struct SFILE): Replace current pointer with pos
