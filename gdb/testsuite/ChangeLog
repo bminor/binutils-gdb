@@ -1,3 +1,7 @@
+Tue Mar 30 09:58:16 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* config/unix-gdb.exp:  Add missing return 0.
+
 Tue Mar 30 08:34:25 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* gdb.t16/printcmds.exp:  Remove misplaced xfail that caused an early

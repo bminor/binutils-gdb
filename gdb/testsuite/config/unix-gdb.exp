@@ -95,6 +95,7 @@ proc gdb_load { arg } {
 	    if $verbose>1 then {
 		send_user "\t\tLoaded $arg into the $GDB\n"
 	    }
+	    return 0
 	    }
 	-re "has no symbol-table.*$prompt $" {
 	    error "$arg wasn't compiled with \"-g\""
