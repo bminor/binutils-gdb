@@ -890,13 +890,11 @@ read_dbx_dynamic_symtab (section_offsets, objfile)
 	  asection *sec;
 	  int type;
 
-	  sym = *symptr;
-	  sym_value = sym->value;
-
 	  sec = bfd_get_section (sym);
 
 	  /* BFD symbols are section relative.  */
-	  sym_value += sec->vma;
+	  sym_value = sym->value + sec->vma;
+
 	  if (bfd_get_section_flags (abfd, sec) & SEC_CODE)
 	    {
 	      sym_value += ANOFFSET (section_offsets, SECT_OFF_TEXT);
@@ -921,15 +919,6 @@ read_dbx_dynamic_symtab (section_offsets, objfile)
 	  record_minimal_symbol ((char *) bfd_asymbol_name (sym), sym_value,
 				 type, objfile);
 	}
-    }
-
-  /* FIXME: Reading the dynamic relocs currently causes a bfd_assertion
-     for sun3 executables. Do not read dynamic relocs till BFD is prepared
-     to handle them.  */
-  if (bfd_get_arch (abfd) != bfd_arch_sparc)
-    {
-      do_cleanups (back_to);
-      return;
     }
 
   /* Symbols from shared libraries have a dynamic relocation entry
@@ -957,16 +946,30 @@ read_dbx_dynamic_symtab (section_offsets, objfile)
        counter < dynrel_count;
        counter++, relptr++)
     {
-      arelent *rel;
+      arelent *rel = *relptr;
+      CORE_ADDR address = rel->address;
 
-      /* FIXME: This probably doesn't work on a Sun3.  */
+      switch (bfd_get_arch (abfd))
+	{
+	case bfd_arch_sparc:
+	  if (rel->howto->type != RELOC_JMP_SLOT)
+	    continue;
+	  break;
+	case bfd_arch_m68k:
+	  /* `16' is the type BFD produces for a jump table relocation.  */
+	  if (rel->howto->type != 16)
+	    continue;
 
-      rel = *relptr;
-      if (rel->howto->type != RELOC_JMP_SLOT)
-	continue;
+	  /* Adjust address in the jump table to point to
+	     the start of the bsr instruction.  */
+	  address -= 2;
+	  break;
+	default:
+	  continue;
+	}
 
       prim_record_minimal_symbol (bfd_asymbol_name (*rel->sym_ptr_ptr),
-				  rel->address,
+				  address,
 				  mst_solib_trampoline,
 				  objfile);
     }

@@ -1,3 +1,10 @@
+Thu Apr 21 09:29:37 1994  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* dbxread.c (read_dbx_dynamic_symtab):  Reinstall support for sun3,
+	BFD handles sun3 dynamic relocations now.
+	* elfread.c (elf_symtab_read, elf_symfile_read):  Handle dynamic
+	symbol table.
+
 Wed Apr 20 19:41:21 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* printcmd.c (print_command_1): Annotate the top-level expressions

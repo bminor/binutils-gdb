@@ -1,5 +1,5 @@
 /* Read ELF (Executable and Linking Format) object files for GDB.
-   Copyright 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support.
 
 This file is part of GDB.
@@ -24,6 +24,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/types.h> /* For time_t, if not in time.h.  */
 #include "libbfd.h"		/* For bfd_elf_find_section */
 #include "libelf.h"
+#include "elf/mips.h"
 #include "symtab.h"
 #include "symfile.h"
 #include "objfiles.h"
@@ -75,7 +76,7 @@ static void
 elf_symfile_finish PARAMS ((struct objfile *));
 
 static void
-elf_symtab_read PARAMS ((bfd *,  CORE_ADDR, struct objfile *));
+elf_symtab_read PARAMS ((bfd *,  CORE_ADDR, struct objfile *, int));
 
 static void
 free_elfinfo PARAMS ((void *));
@@ -239,10 +240,11 @@ DESCRIPTION
 */
 
 static void
-elf_symtab_read (abfd, addr, objfile)
+elf_symtab_read (abfd, addr, objfile, dynamic)
      bfd *abfd;
      CORE_ADDR addr;
      struct objfile *objfile;
+     int dynamic;
 {
   long storage_needed;
   asymbol *sym;
@@ -262,8 +264,12 @@ elf_symtab_read (abfd, addr, objfile)
   struct dbx_symfile_info *dbx = (struct dbx_symfile_info *)
 				 objfile->sym_stab_info;
   unsigned long size;
-  
-  storage_needed = bfd_get_symtab_upper_bound (abfd);
+  int stripped = (bfd_get_symcount (abfd) == 0);
+ 
+  if (dynamic)
+    storage_needed = bfd_get_dynamic_symtab_upper_bound (abfd);
+  else
+    storage_needed = bfd_get_symtab_upper_bound (abfd);
   if (storage_needed < 0)
     error ("Can't read symbols from %s: %s", bfd_get_filename (abfd),
 	   bfd_errmsg (bfd_get_error ()));
@@ -271,7 +277,11 @@ elf_symtab_read (abfd, addr, objfile)
     {
       symbol_table = (asymbol **) xmalloc (storage_needed);
       back_to = make_cleanup (free, symbol_table);
-      number_of_symbols = bfd_canonicalize_symtab (abfd, symbol_table);
+      if (dynamic)
+        number_of_symbols = bfd_canonicalize_dynamic_symtab (abfd,
+							     symbol_table);
+      else
+        number_of_symbols = bfd_canonicalize_symtab (abfd, symbol_table);
       if (number_of_symbols < 0)
 	error ("Can't read symbols from %s: %s", bfd_get_filename (abfd),
 	       bfd_errmsg (bfd_get_error ()));
@@ -284,6 +294,15 @@ elf_symtab_read (abfd, addr, objfile)
 		 that are null strings (may happen). */
 	      continue;
 	    }
+
+	  /* If it is a nonstripped executable, do not enter dynamic
+	     symbols, as the dynamic symbol table is usually a subset
+	     of the main symbol table.
+	     On Irix 5 however, the symbols for the procedure linkage
+	     table entries have meaningful values only in the dynamic
+	     symbol table, so we always examine undefined symbols.  */
+	  if (dynamic && !stripped && sym -> section != &bfd_und_section)
+	    continue;
 	  if (sym -> flags & BSF_FILE)
 	    {
 	      /* STT_FILE debugging symbol that helps stabs-in-elf debugging.
@@ -325,9 +344,8 @@ elf_symtab_read (abfd, addr, objfile)
 		     meaningful address for this symbol in the
 		     executable file, so we skip it.
 		     Irix 5 has a zero value for all shared library functions
-		     in the main symbol table. The dynamic symbol table
-		     would provide the right values, but BFD currently
-		     cannot handle dynamic ELF symbol tables.  */
+		     in the main symbol table, but the dynamic symbol table
+		     provides the right values.  */
 		  ms_type = mst_solib_trampoline;
 		  symaddr = sym -> value;
 		  if (symaddr == 0)
@@ -335,7 +353,26 @@ elf_symtab_read (abfd, addr, objfile)
 		}
 	      else if (sym -> section == &bfd_abs_section)
 		{
-		  ms_type = mst_abs;
+		  /* This is a hack to get the minimal symbol type
+		     right for Irix 5, which has absolute adresses
+		     with special section indices for dynamic symbols. */
+		  unsigned short shndx =
+		    ((elf_symbol_type *) sym)->internal_elf_sym.st_shndx;
+
+		  switch (shndx)
+		    {
+		    case SHN_MIPS_TEXT:
+		      ms_type = mst_text;
+		      break;
+		    case SHN_MIPS_DATA:
+		      ms_type = mst_data;
+		      break;
+		    case SHN_MIPS_ACOMMON:
+		      ms_type = mst_bss;
+		      break;
+		    default:
+		      ms_type = mst_abs;
+		    }
 		}
 	      else if (sym -> section -> flags & SEC_CODE)
 		{
@@ -521,7 +558,12 @@ elf_symfile_read (objfile, section_offsets, mainline)
 
   /* FIXME, should take a section_offsets param, not just an offset.  */
   offset = ANOFFSET (section_offsets, 0);
-  elf_symtab_read (abfd, offset, objfile);
+  elf_symtab_read (abfd, offset, objfile, 0);
+
+  /* Add the dynamic symbols if we are reading the main symbol table.  */
+
+  if (mainline)
+    elf_symtab_read (abfd, offset, objfile, 1);
 
   /* Now process debugging information, which is contained in
      special ELF sections.  We first have to find them... */
