@@ -826,7 +826,6 @@ elf_hppa_final_link (abfd, info)
   /* Make sure we've got ourselves a suitable __gp value.  */
   if (!info->relocateable)
     {
-      bfd_vma min_short_vma = (bfd_vma) -1, max_short_vma = 0;
       struct elf_link_hash_entry *gp;
       bfd_vma gp_val = 0;
       asection *os;
@@ -835,8 +834,6 @@ elf_hppa_final_link (abfd, info)
 	 the start of .PARISC.global section.  */
       for (os = abfd->sections; os ; os = os->next)
 	{
-	  bfd_vma lo, hi;
-
 	  /* This would be cleaner if we marked sections with an attribute
 	     indicating they are short sections.  */
 	  if (strcmp (os->name, ".PARISC.global") == 0)
@@ -904,7 +901,7 @@ elf_hppa_relocate_section (output_bfd, info, input_bfd, input_section,
   for (; rel < relend; rel++)
     {
       int r_type;
-      reloc_howto_type *howto;
+      reloc_howto_type *howto = elf_hppa_howto_table + ELF_R_TYPE (rel->r_info);
       unsigned long r_symndx;
       struct elf_link_hash_entry *h;
       Elf_Internal_Sym *sym;
@@ -1094,7 +1091,6 @@ elf_hppa_final_link_relocate (rel, input_bfd, output_bfd,
   bfd_vma addend = rel->r_addend;
   reloc_howto_type *howto = elf_hppa_howto_table + ELF_R_TYPE (rel->r_info);
   unsigned long r_type = howto->type;
-  unsigned long r_format = howto->bitsize;
   unsigned long r_field = e_fsel;
   bfd_byte *hit_data = contents + offset;
   struct elf64_hppa_link_hash_table *hppa_info = elf64_hppa_hash_table (info);
@@ -1562,8 +1558,6 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
      long sym_value;
      unsigned long r_type;
 {
-  long constant_value;
-
   switch (r_type)
     {
     /* This is any 22bit branch.  In PA2.0 syntax it corresponds to
@@ -1689,8 +1683,6 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
     case R_PARISC_DIR16DF:
     case R_PARISC_LTOFF16DF:
       {
-        int w;
-
 	/* Mask off bits in INSN we do not want.  */
 	insn &= 0xffffc00e;
 
@@ -1724,8 +1716,6 @@ elf_hppa_relocate_insn (insn, sym_value, r_type)
     case R_PARISC_DIR14WR:
     case R_PARISC_LTOFF16WF:
       {
-        int w;
-
 	/* Mask off bits in INSN we do not want.  */
 	insn &= 0xffffc006;
 
