@@ -33,6 +33,7 @@ fi
 
 sky_files="ChangeLog.sky sky-device.c sky-device.h sky-dma.c sky-dma.h sky-bits.h"
 sky_files="$sky_files sky-engine.c sky-gpuif.c sky-gpuif.h"
+sky_files="$sky_files sky-gs.c sky-gs.h"
 sky_files="$sky_files sky-hardware.c sky-hardware.h sky-gdb.c"
 sky_files="$sky_files sky-libvpe.c sky-libvpe.h sky-pke.c sky-pke.h"
 sky_files="$sky_files sky-vpe.h sky-vu.h sky-vu.c"
