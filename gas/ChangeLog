@@ -1,5 +1,14 @@
 Thu Sep  7 12:33:58 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* expr.c (operand): Handle 08 and 09 in MRI mode.
+	* macro.c (ISSEP): Remove duplicated `"' character.
+ 	(get_any_string): Copy some characters for which ISSEP is true:
+	';', '>', '(', ')'.  Otherwise we can get in an infinite loop.
+	* read.c (s_space): In MRI mode, the expressions stop at the first
+	unquoted space.
+	(cons_worker): In MRI mode, restore the terminating character at
+	the end of the function.
+
 	* read.c (cons_worker): Don't use #elif; old compilers don't
 	support it.
 

@@ -2030,10 +2030,31 @@ s_space (mult)
   expressionS exp;
   long temp_fill;
   char *p = 0;
+  char *stop = NULL;
+  char stopc;
 
 #ifdef md_flush_pending_output
   md_flush_pending_output ();
 #endif
+
+  /* In MRI mode, the operands end at the first unquoted space.  */
+  if (flag_mri)
+    {
+      char *s;
+      int inquote = 0;
+
+      for (s = input_line_pointer;
+	   ((! is_end_of_line[(unsigned char) *s] && *s != ' ' && *s != '\t')
+	    || inquote);
+	   s++)
+	{
+	  if (*s == '\'')
+	    inquote = ! inquote;
+	}
+      stop = s;
+      stopc = *stop;
+      *stop = '\0';
+    }
 
   /* Just like .fill, but temp_size = 1 */
   expression (&exp);
@@ -2049,16 +2070,14 @@ s_space (mult)
 	  if (! flag_mri || repeat < 0)
 	    as_warn (".space repeat count is %s, ignored",
 		     repeat ? "negative" : "zero");
-	  ignore_rest_of_line ();
-	  return;
+	  goto getout;
 	}
 
       /* If we are in the absolute section, just bump the offset.  */
       if (now_seg == absolute_section)
 	{
 	  abs_section_offset += repeat;
-	  demand_empty_rest_of_line ();
-	  return;
+	  goto getout;
 	}
 
       /* If we are secretly in an MRI common section, then creating
@@ -2067,8 +2086,7 @@ s_space (mult)
 	{
 	  S_SET_VALUE (mri_common_symbol,
 		       S_GET_VALUE (mri_common_symbol) + repeat);
-	  demand_empty_rest_of_line ();
-	  return;
+	  goto getout;
 	}
 
       if (!need_pass_2)
@@ -2105,6 +2123,16 @@ s_space (mult)
     {
       *p = temp_fill;
     }
+
+ getout:
+  if (flag_mri)
+    {
+      input_line_pointer = stop;
+      *stop = stopc;
+      while (! is_end_of_line[(unsigned char) *input_line_pointer])
+	++input_line_pointer;
+    }
+
   demand_empty_rest_of_line ();
 }
 
@@ -2394,6 +2422,7 @@ cons_worker (nbytes, rva)
   int c;
   expressionS exp;
   char *stop = NULL;
+  char stopc;
 
 #ifdef md_flush_pending_output
   md_flush_pending_output ();
@@ -2420,6 +2449,8 @@ cons_worker (nbytes, rva)
 	    inquote = ! inquote;
 	}
       stop = s;
+      stopc = *stop;
+      *stop = '\0';
     }
 
   c = 0;
@@ -2467,6 +2498,7 @@ cons_worker (nbytes, rva)
   if (flag_mri)
     {
       input_line_pointer = stop;
+      *stop = stopc;
       while (! is_end_of_line[(unsigned char) *input_line_pointer])
 	++input_line_pointer;
     }

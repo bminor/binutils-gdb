@@ -561,6 +561,14 @@ operand (expressionP)
       c = *input_line_pointer;
       switch (c)
 	{
+	case '8':
+	case '9':
+	  if (flag_mri)
+	    {
+	      integer_constant (0, expressionP);
+	      break;
+	    }
+	  /* Fall through.  */
 	default:
 	default_case:
 	  if (c && strchr (FLT_CHARS, c))
@@ -821,6 +829,49 @@ operand (expressionP)
 	  expressionP->X_add_number = 0;
 	  break;
 	}
+      else if ((strncasecmp (input_line_pointer, "startof.", 8) == 0
+		&& ! is_part_of_name (input_line_pointer[8]))
+	       || (strncasecmp (input_line_pointer, "sizeof.", 7) == 0
+		   && ! is_part_of_name (input_line_pointer[7])))
+	{
+	  int start;
+
+	  start = (input_line_pointer[1] == 't'
+		   || input_line_pointer[1] == 'T');
+	  input_line_pointer += start ? 8 : 7;
+	  SKIP_WHITESPACE ();
+	  if (*input_line_pointer != '(')
+	    as_bad ("syntax error in .startof. or .sizeof.");
+	  else
+	    {
+	      char *buf;
+
+	      ++input_line_pointer;
+	      SKIP_WHITESPACE ();
+	      name = input_line_pointer;
+	      c = get_symbol_end ();
+
+	      buf = (char *) xmalloc (strlen (name) + 10);
+	      if (start)
+		sprintf (buf, ".startof.%s", name);
+	      else
+		sprintf (buf, ".sizeof.%s", name);
+	      symbolP = symbol_make (buf);
+	      free (buf);
+
+	      expressionP->X_op = O_symbol;
+	      expressionP->X_add_symbol = symbolP;
+	      expressionP->X_add_number = 0;
+
+	      *input_line_pointer = c;
+	      SKIP_WHITESPACE ();
+	      if (*input_line_pointer != ')')
+		as_bad ("syntax error in .startof. or .sizeof.");
+	      else
+		++input_line_pointer;
+	    }
+	  break;
+	}
       else
 	{
 	  goto isname;
@@ -1016,13 +1067,13 @@ clean_up_expression (expressionP)
 #undef __
 #define __ O_illegal
 
-static const operatorT op_encoding[256] =
+static operatorT op_encoding[256] =
 {				/* maps ASCII->operators */
 
   __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __,
   __, __, __, __, __, __, __, __, __, __, __, __, __, __, __, __,
 
-  __, O_bit_or_not, O_bit_not, __, __, O_modulus, O_bit_and, __,
+  __, O_bit_or_not, __, __, __, O_modulus, O_bit_and, __,
   __, __, O_multiply, O_add, __, O_subtract, __, O_divide,
   __, __, __, __, __, __, __, __,
   __, __, __, __, O_lt, __, O_gt, __,
@@ -1097,6 +1148,7 @@ expr_begin ()
       op_rank[O_multiply] = 3;
       op_rank[O_divide] = 3;
       op_rank[O_modulus] = 3;
+      op_encoding['"'] = O_bit_not;
     }
 }
 
@@ -1385,7 +1437,10 @@ get_symbol_end ()
 {
   char c;
 
-  while (is_part_of_name (c = *input_line_pointer++))
+  /* We accept \001 in a name in case this is being called with a
+     constructed string.  */
+  while (is_part_of_name (c = *input_line_pointer++)
+	 || c == '\001')
     ;
   *--input_line_pointer = 0;
   return (c);
