@@ -7,10 +7,13 @@ Tue Dec 16 08:09:56 1997  Gavin Koch  <gavin@cygnus.com>
 
 Mon Dec 15 16:08:52 1997  Nick Clifton  <nickc@cygnus.com>
 
+start-sanitize-m32rx
 	* elf32-m32r.c (m32r_elf_merge_private_bfd_data): Allow M32R
 	object files to be merged into a M32RX executable.
-
-	* archures.c: Add bfd_mach_m32r and bfd_mach_m32rx.
+	
+	* archures.c: Add bfd_mach_m32rx.
+end-sanitize-m32rx
+	* archures.c: Add bfd_mach_m32r.
 
 Mon Dec 15 16:11:22 1997  Fred Fish  <fnf@cygnus.com>
 
@@ -41,10 +44,14 @@ Mon Dec 15 15:01:15 1997  Nick Clifton  <nickc@cygnus.com>
 	(bfd_elf32_bfd_print_private_bfd_data): Point to
 	m32r_elf_print_private_bfd_data. 
 
+start-sanitize-m32rx
 	* cpu-m32r.c: Add m32rx cpu architecture.
+	* bfd-in2.h (bfd_mach_m32r, bfd_mach_m32rx): Add identifiers for
+	M32RX architecture machines.
+end-sanitize-m32rx
 
 	* bfd-in2.h (bfd_mach_m32r, bfd_mach_m32rx): Add identifiers for
-	M32R and M32RX architecture machines.
+	M32R architecture machines.
 
 Fri Dec 12 11:30:28 1997  Brendan Kehoe  <brendan@canuck.cygnus.com>
 
