@@ -659,6 +659,7 @@ wrong:
     break;
   case ELFDATA2LSB:			/* Little-endian */
     abfd->xvec = &elf_little_vec;
+    break;
   case ELFDATANONE:			/* No data encoding specified */
   default:				/* Unknown data encoding specified */
     goto wrong;
@@ -831,6 +832,7 @@ wrong:
     break;
   case ELFDATA2LSB:			/* Little-endian */
     abfd->xvec = &elf_little_vec;
+    break;
   case ELFDATANONE:			/* No data encoding specified */
   default:				/* Unknown data encoding specified */
     goto wrong;

@@ -1,3 +1,13 @@
+Fri Nov 29 20:04:49 1991  Fred Fish  (fnf at cygnus.com)
+
+	* config/mh-i386v4, config/mh-i386-elf, hosts/h-i386v4.h:  New files.
+
+	* configure.in:  Add vendor "ncr" as supported per-target vendor.
+	Add svr4 case for i386 per-host case.
+
+	* elf.c (elf_object_p, elf_core_file_p):  Add missing "break" to
+	ELFDATA2LSB cases.
+
 Fri Nov 29 12:16:51 1991  Per Bothner  (bothner at cygnus.com)
 
 	* syms.c (bfd_decode_symclass):  Return 'A'
