@@ -457,7 +457,6 @@ xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
   int res;
   struct section_table *p;
   CORE_ADDR nextsectaddr, memend;
-  int (*xfer_fn) (bfd *, sec_ptr, void *, file_ptr, bfd_size_type);
   asection *section = NULL;
 
   if (len <= 0)
@@ -471,7 +470,6 @@ xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
     }
 
   memend = memaddr + len;
-  xfer_fn = write ? bfd_set_section_contents : bfd_get_section_contents;
   nextsectaddr = memend;
 
   for (p = target->to_sections; p < target->to_sections_end; p++)
@@ -484,8 +482,14 @@ xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 	  if (memend <= p->endaddr)
 	    {
 	      /* Entire transfer is within this section.  */
-	      res = xfer_fn (p->bfd, p->the_bfd_section, myaddr,
-	  		     memaddr - p->addr, len);
+	      if (write)
+		res = bfd_set_section_contents (p->bfd, p->the_bfd_section,
+						myaddr, memaddr - p->addr,
+						len);
+	      else
+		res = bfd_get_section_contents (p->bfd, p->the_bfd_section,
+						myaddr, memaddr - p->addr,
+						len);
 	      return (res != 0) ? len : 0;
 	    }
 	  else if (memaddr >= p->endaddr)
@@ -497,8 +501,14 @@ xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 	    {
 	      /* This section overlaps the transfer.  Just do half.  */
 	      len = p->endaddr - memaddr;
-	      res = xfer_fn (p->bfd, p->the_bfd_section, myaddr,
-	  		     memaddr - p->addr, len);
+	      if (write)
+		res = bfd_set_section_contents (p->bfd, p->the_bfd_section,
+						myaddr, memaddr - p->addr,
+						len);
+	      else
+		res = bfd_get_section_contents (p->bfd, p->the_bfd_section,
+						myaddr, memaddr - p->addr,
+						len);
 	      return (res != 0) ? len : 0;
 	    }
         }

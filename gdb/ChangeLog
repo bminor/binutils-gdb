@@ -1,3 +1,7 @@
+2003-11-03  Andrew Cagney  <cagney@redhat.com>
+
+	* exec.c (xfer_memory): Eliminate xfer_fn.
+
 2003-10-31  Kevin Buettner  <kevinb@redhat.com>
 
 	* frv-tdep.c (gdb_assert.h, sim-regno.h, gdb/sim-frv.h)

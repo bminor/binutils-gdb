@@ -1483,8 +1483,8 @@ bfd_boolean bfd_set_section_size
    (bfd *abfd, asection *sec, bfd_size_type val);
 
 bfd_boolean bfd_set_section_contents
-   (bfd *abfd, asection *section, void *data, file_ptr offset,
-    bfd_size_type count);
+   (bfd *abfd, asection *section, const void *data,
+    file_ptr offset, bfd_size_type count);
 
 bfd_boolean bfd_get_section_contents
    (bfd *abfd, asection *section, void *location, file_ptr offset,

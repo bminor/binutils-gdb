@@ -1132,8 +1132,8 @@ FUNCTION
 
 SYNOPSIS
 	bfd_boolean bfd_set_section_contents
-	  (bfd *abfd, asection *section, void *data, file_ptr offset,
-	   bfd_size_type count);
+	  (bfd *abfd, asection *section, const void *data,
+	   file_ptr offset, bfd_size_type count);
 
 DESCRIPTION
 	Sets the contents of the section @var{section} in BFD
@@ -1161,7 +1161,7 @@ DESCRIPTION
 bfd_boolean
 bfd_set_section_contents (bfd *abfd,
 			  sec_ptr section,
-			  void *location,
+			  const void *location,
 			  file_ptr offset,
 			  bfd_size_type count)
 {

@@ -1,3 +1,9 @@
+2003-11-03  Andrew Cagney  <cagney@redhat.com>
+
+	* section.c (bfd_set_section_contents): Make the "location" buffer
+	constant.
+	* bfd-in2.h: Re-generate.
+	
 2003-10-30  Andrew Cagney  <cagney@redhat.com>
 
 	* syms.c: Replace "struct symbol_cache_entry" with "struct
