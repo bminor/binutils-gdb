@@ -1,5 +1,7 @@
 2001-10-13  Nick Clifton  <nickc@cambridge.redhat.com>
 
+	* config/tc-arm.c: Replace CONST with const.
+
 	* cgen.c: Tidy up formatting.
 
 2001-10-12  matthew green  <mrg@redhat.com>

@@ -117,7 +117,7 @@ static boolean pic_code          = false;
 
 /* This array holds the chars that always start a comment.  If the
    pre-processor is disabled, these aren't very useful.  */
-CONST char comment_chars[] = "@";
+const char comment_chars[] = "@;";
 
 /* This array holds the chars that only start a comment at the beginning of
    a line.  If the line seems to have the form '# 123 filename'
@@ -126,19 +126,19 @@ CONST char comment_chars[] = "@";
    first line of the input file.  This is because the compiler outputs
    #NO_APP at the beginning of its output.  */
 /* Also note that comments like this one will always work.  */
-CONST char line_comment_chars[] = "#";
+const char line_comment_chars[] = "#";
 
-CONST char line_separator_chars[] = ";";
+const char line_separator_chars[] = "|";
 
 /* Chars that can be used to separate mant
    from exp in floating point numbers.  */
-CONST char EXP_CHARS[] = "eE";
+const char EXP_CHARS[] = "eE";
 
 /* Chars that mean this number is a floating point constant.  */
 /* As in 0f12.456  */
 /* or    0d1.2345e12  */
 
-CONST char FLT_CHARS[] = "rRsSfFdDxXeEpP";
+const char FLT_CHARS[] = "rRsSfFdDxXeEpP";
 
 /* Prefix characters that indicate the start of an immediate
    value.  */
@@ -150,7 +150,7 @@ symbolS * GOT_symbol;
 #endif
 
 /* Size of relocation record.  */
-CONST int md_reloc_size = 8;
+const int md_reloc_size = 8;
 
 /* 0: assemble for ARM,
    1: assemble for Thumb,
@@ -165,7 +165,7 @@ typedef struct arm_fix
 
 struct arm_it
 {
-  CONST char *  error;
+  const char *  error;
   unsigned long instruction;
   int           suffix;
   int           size;
@@ -232,7 +232,7 @@ static const struct asm_shift_name shift_names [] =
 
 #define NUM_FLOAT_VALS 8
 
-CONST char * fp_const[] =
+const char * fp_const[] =
 {
   "0.0", "1.0", "2.0", "3.0", "4.0", "5.0", "0.5", "10.0", 0
 };
@@ -264,14 +264,14 @@ LITTLENUM_TYPE fp_values[NUM_FLOAT_VALS][MAX_LITTLENUMS];
 
 struct asm_cond
 {
-  CONST char *  template;
+  const char *  template;
   unsigned long value;
 };
 
 /* This is to save a hash look-up in the common case.  */
 #define COND_ALWAYS 0xe0000000
 
-static CONST struct asm_cond conds[] =
+static const struct asm_cond conds[] =
 {
   {"eq", 0x00000000},
   {"ne", 0x10000000},
@@ -296,17 +296,17 @@ static CONST struct asm_cond conds[] =
    the set_bits:  */
 struct asm_flg
 {
-  CONST char *  template;	/* Basic flag string.  */
+  const char *  template;	/* Basic flag string.  */
   unsigned long set_bits;	/* Bits to set.  */
 };
 
-static CONST struct asm_flg s_flag[] =
+static const struct asm_flg s_flag[] =
 {
   {"s", CONDS_BIT},
   {NULL, 0}
 };
 
-static CONST struct asm_flg ldr_flags[] =
+static const struct asm_flg ldr_flags[] =
 {
   {"d",  DOUBLE_LOAD_FLAG},
   {"b",  0x00400000},
@@ -318,7 +318,7 @@ static CONST struct asm_flg ldr_flags[] =
   {NULL, 0}
 };
 
-static CONST struct asm_flg str_flags[] =
+static const struct asm_flg str_flags[] =
 {
   {"d",  DOUBLE_LOAD_FLAG},
   {"b",  0x00400000},
@@ -328,20 +328,20 @@ static CONST struct asm_flg str_flags[] =
   {NULL, 0}
 };
 
-static CONST struct asm_flg byte_flag[] =
+static const struct asm_flg byte_flag[] =
 {
   {"b", 0x00400000},
   {NULL, 0}
 };
 
-static CONST struct asm_flg cmp_flags[] =
+static const struct asm_flg cmp_flags[] =
 {
   {"s", CONDS_BIT},
   {"p", 0x0010f000},
   {NULL, 0}
 };
 
-static CONST struct asm_flg ldm_flags[] =
+static const struct asm_flg ldm_flags[] =
 {
   {"ed", 0x01800000},
   {"fd", 0x00800000},
@@ -354,7 +354,7 @@ static CONST struct asm_flg ldm_flags[] =
   {NULL, 0}
 };
 
-static CONST struct asm_flg stm_flags[] =
+static const struct asm_flg stm_flags[] =
 {
   {"ed", 0x00000000},
   {"fd", 0x01000000},
@@ -367,21 +367,21 @@ static CONST struct asm_flg stm_flags[] =
   {NULL, 0}
 };
 
-static CONST struct asm_flg lfm_flags[] =
+static const struct asm_flg lfm_flags[] =
 {
   {"fd", 0x00800000},
   {"ea", 0x01000000},
   {NULL, 0}
 };
 
-static CONST struct asm_flg sfm_flags[] =
+static const struct asm_flg sfm_flags[] =
 {
   {"fd", 0x01000000},
   {"ea", 0x00800000},
   {NULL, 0}
 };
 
-static CONST struct asm_flg round_flags[] =
+static const struct asm_flg round_flags[] =
 {
   {"p", 0x00000020},
   {"m", 0x00000040},
@@ -393,7 +393,7 @@ static CONST struct asm_flg round_flags[] =
    in that it accepts a precision specifier as well as a rounding specifier,
    despite the fact that this is meaningless.  To be more compatible, we
    accept it as well, though of course it does not set any bits.  */
-static CONST struct asm_flg fix_flags[] =
+static const struct asm_flg fix_flags[] =
 {
   {"p", 0x00000020},
   {"m", 0x00000040},
@@ -410,13 +410,13 @@ static CONST struct asm_flg fix_flags[] =
   {NULL, 0}
 };
 
-static CONST struct asm_flg except_flag[] =
+static const struct asm_flg except_flag[] =
 {
   {"e", 0x00400000},
   {NULL, 0}
 };
 
-static CONST struct asm_flg long_flag[] =
+static const struct asm_flg long_flag[] =
 {
   {"l", 0x00400000},
   {NULL, 0}
@@ -424,7 +424,7 @@ static CONST struct asm_flg long_flag[] =
 
 struct asm_psr
 {
-  CONST char *  template;
+  const char *  template;
   boolean       cpsr;
   unsigned long field;
 };
@@ -440,7 +440,7 @@ struct asm_psr
 #define PSR_s   (1 << 2)
 #define PSR_f   (1 << 3)
 
-static CONST struct asm_psr psrs[] =
+static const struct asm_psr psrs[] =
 {
   {"CPSR",	true,  PSR_c | PSR_f},
   {"CPSR_all",	true,  PSR_c | PSR_f},
@@ -682,8 +682,8 @@ static int cirrus_parse_offset	PARAMS ((char **, int *));
 
 static void fix_new_arm		PARAMS ((fragS *, int, short, expressionS *, int, int));
 static int arm_reg_parse	PARAMS ((char **));
-static CONST struct asm_psr * arm_psr_parse PARAMS ((char **));
-static void symbol_locate	PARAMS ((symbolS *, CONST char *, segT, valueT, fragS *));
+static const struct asm_psr * arm_psr_parse PARAMS ((char **));
+static void symbol_locate	PARAMS ((symbolS *, const char *, segT, valueT, fragS *));
 static int add_to_lit_pool	PARAMS ((void));
 static unsigned validate_immediate PARAMS ((unsigned));
 static unsigned validate_immediate_twopart PARAMS ((unsigned int, unsigned int *));
@@ -754,17 +754,17 @@ static bfd_reloc_code_real_type	arm_parse_reloc PARAMS ((void));
 struct asm_opcode
 {
   /* Basic string to match.  */
-  CONST char * template;
+  const char * template;
 
   /* Basic instruction code.  */
   unsigned long value;
 
   /* Compulsory suffix that must follow conds.  If "", then the
      instruction is not conditional and must have no suffix.  */
-  CONST char * comp_suffix;
+  const char * comp_suffix;
 
   /* Bits to toggle if flag 'n' set.  */
-  CONST struct asm_flg * flags;
+  const struct asm_flg * flags;
 
   /* Which CPU variants this exists for.  */
   unsigned long variants;
@@ -773,7 +773,7 @@ struct asm_opcode
   void (* parms) PARAMS ((char *, unsigned long));
 };
 
-static CONST struct asm_opcode insns[] =
+static const struct asm_opcode insns[] =
 {
 /* Intel XScale extensions to ARM V5 ISA.  */
   {"mia",   0x0e200010, NULL,   NULL,        ARM_EXT_XSCALE, do_mia},
@@ -1161,7 +1161,7 @@ static int thumb_reg		PARAMS ((char ** str, int hi_lo));
 struct thumb_opcode
 {
   /* Basic string to match.  */
-  CONST char * template;
+  const char * template;
 
   /* Basic instruction code.  */
   unsigned long value;
@@ -1175,7 +1175,7 @@ struct thumb_opcode
   void (* parms) PARAMS ((char *));
 };
 
-static CONST struct thumb_opcode tinsns[] =
+static const struct thumb_opcode tinsns[] =
 {
   {"adc",	0x4140,		2,	ARM_EXT_THUMB, do_t_arit},
   {"add",	0x0000,		2,	ARM_EXT_THUMB, do_t_add},
@@ -1241,7 +1241,7 @@ static CONST struct thumb_opcode tinsns[] =
 
 struct reg_entry
 {
-  CONST char * name;
+  const char * name;
   int          number;
 };
 
@@ -1264,7 +1264,7 @@ struct reg_entry
 #define REG_SP  13
 
 /* These are the standard names.  Users can add aliases with .req.  */
-static CONST struct reg_entry reg_table[] =
+static const struct reg_entry reg_table[] =
 {
   /* Processor Register Numbers.  */
   {"r0", 0},    {"r1", 1},      {"r2", 2},      {"r3", 3},
@@ -1357,7 +1357,7 @@ static void s_arm_elf_cons PARAMS ((int));
 
 static int my_get_expression PARAMS ((expressionS *, char **));
 
-CONST pseudo_typeS md_pseudo_table[] =
+const pseudo_typeS md_pseudo_table[] =
 {
   /* Never called becasue '.req' does not start line.  */
   { "req",         s_req,         0 },
@@ -1483,7 +1483,7 @@ add_to_lit_pool ()
 static void
 symbol_locate (symbolP, name, segment, valu, frag)
      symbolS *    symbolP;
-     CONST char * name;		/* It is copied, the caller can modify.  */
+     const char * name;		/* It is copied, the caller can modify.  */
      segT         segment;	/* Segment identifier (SEG_<something>).  */
      valueT       valu;		/* Symbol value.  */
      fragS *      frag;		/* Associated fragment.  */
@@ -2014,14 +2014,14 @@ reg_required_here (str, shift)
   return FAIL;
 }
 
-static CONST struct asm_psr *
+static const struct asm_psr *
 arm_psr_parse (ccp)
      register char ** ccp;
 {
   char * start = * ccp;
   char   c;
   char * p;
-  CONST struct asm_psr * psr;
+  const struct asm_psr * psr;
 
   p = start;
 
@@ -2043,7 +2043,7 @@ arm_psr_parse (ccp)
     strncpy (start, "SPSR", 4);
 
   /* Now locate the word in the psr hash table.  */
-  psr = (CONST struct asm_psr *) hash_find (arm_psr_hsh, start);
+  psr = (const struct asm_psr *) hash_find (arm_psr_hsh, start);
 
   /* Restore the input stream.  */
   *p = c;
@@ -2062,7 +2062,7 @@ psr_required_here (str)
      char ** str;
 {
   char * start = * str;
-  CONST struct asm_psr * psr;
+  const struct asm_psr * psr;
 
   psr = arm_psr_parse (str);
 
@@ -8388,11 +8388,11 @@ md_assemble (str)
 
   if (thumb_mode)
     {
-      CONST struct thumb_opcode * opcode;
+      const struct thumb_opcode * opcode;
 
       c = *p;
       *p = '\0';
-      opcode = (CONST struct thumb_opcode *) hash_find (arm_tops_hsh, str);
+      opcode = (const struct thumb_opcode *) hash_find (arm_tops_hsh, str);
       *p = c;
 
       if (opcode)
@@ -8413,7 +8413,7 @@ md_assemble (str)
     }
   else
     {
-      CONST struct asm_opcode * opcode;
+      const struct asm_opcode * opcode;
       unsigned long cond_code;
 
       inst.size = INSN_SIZE;
@@ -8428,7 +8428,7 @@ md_assemble (str)
 	  c = *q;
 	  *q = '\0';
 
-	  opcode = (CONST struct asm_opcode *) hash_find (arm_ops_hsh, str);
+	  opcode = (const struct asm_opcode *) hash_find (arm_ops_hsh, str);
 	  *q = c;
 
 	  if (opcode && opcode->template)
@@ -8467,11 +8467,11 @@ md_assemble (str)
 	      r = q;
 	      if (p - r >= 2)
 		{
-		  CONST struct asm_cond *cond;
+		  const struct asm_cond *cond;
 		  char d = *(r + 2);
 
 		  *(r + 2) = '\0';
-		  cond = (CONST struct asm_cond *) hash_find (arm_cond_hsh, r);
+		  cond = (const struct asm_cond *) hash_find (arm_cond_hsh, r);
 		  *(r + 2) = d;
 		  if (cond)
 		    {
@@ -8506,7 +8506,7 @@ _("Warning: Use of the 'nv' conditional is deprecated\n"));
 		 before any optional flags.  */
 	      if (opcode->comp_suffix && *opcode->comp_suffix != '\0')
 		{
-		  CONST char *s = opcode->comp_suffix;
+		  const char *s = opcode->comp_suffix;
 
 		  while (*s)
 		    {
@@ -8531,7 +8531,7 @@ _("Warning: Use of the 'nv' conditional is deprecated\n"));
 	      if (r != p)
 		{
 		  char d;
-		  CONST struct asm_flg *flag = opcode->flags;
+		  const struct asm_flg *flag = opcode->flags;
 
 		  if (flag)
 		    {
@@ -8666,7 +8666,7 @@ _("Warning: Use of the 'nv' conditional is deprecated\n"));
               -matpcs                 ARM/Thumb Procedure Call Standard
               -moabi                  Old ELF ABI  */
 
-CONST char * md_shortopts = "m:k";
+const char * md_shortopts = "m:k";
 
 struct option md_longopts[] =
 {
