@@ -1,3 +1,7 @@
+2000-08-28  Kazu Hirata  <kazu@hxi.com>
+
+	* tic30-dis.c: Fix formatting.
+
 2000-08-27  Kazu Hirata  <kazu@hxi.com>
 
 	* sh-dis.c: Fix formatting.
