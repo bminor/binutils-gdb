@@ -1,3 +1,12 @@
+2002-05-08  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdbarch.sh (init_gdbarch_swap): Do not clear the swap section.
+	(clear_gdbarch_swap): New function.
+	(initialize_non_multiarch): Call.
+	(gdbarch_update_p): Before calling init(), swap out and clear the
+	existing architecture.
+	* gdbarch.c: Regenerate.
+
 2002-05-08  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* config/djgpp/fnchange.lst: Add alphanbsd-nat.c and

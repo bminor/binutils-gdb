@@ -71,6 +71,7 @@ static void alloc_gdbarch_data (struct gdbarch *);
 static void init_gdbarch_data (struct gdbarch *);
 static void free_gdbarch_data (struct gdbarch *);
 static void init_gdbarch_swap (struct gdbarch *);
+static void clear_gdbarch_swap (struct gdbarch *);
 static void swapout_gdbarch_swap (struct gdbarch *);
 static void swapin_gdbarch_swap (struct gdbarch *);
 
@@ -414,6 +415,9 @@ void
 initialize_non_multiarch ()
 {
   alloc_gdbarch_data (&startup_gdbarch);
+  /* Ensure that all swap areas are zeroed so that they again think
+     they are starting from scratch.  */
+  clear_gdbarch_swap (&startup_gdbarch);
   init_gdbarch_swap (&startup_gdbarch);
   init_gdbarch_data (&startup_gdbarch);
 }
@@ -4851,6 +4855,17 @@ register_gdbarch_swap (void *data,
   (*rego)->sizeof_data = sizeof_data;
 }
 
+static void
+clear_gdbarch_swap (struct gdbarch *gdbarch)
+{
+  struct gdbarch_swap *curr;
+  for (curr = gdbarch->swap;
+       curr != NULL;
+       curr = curr->next)
+    {
+      memset (curr->source->data, 0, curr->source->sizeof_data);
+    }
+}
 
 static void
 init_gdbarch_swap (struct gdbarch *gdbarch)
@@ -4867,7 +4882,6 @@ init_gdbarch_swap (struct gdbarch *gdbarch)
 	  (*curr)->source = rego;
 	  (*curr)->swap = xmalloc (rego->sizeof_data);
 	  (*curr)->next = NULL;
-	  memset (rego->data, 0, rego->sizeof_data);
 	  curr = &(*curr)->next;
 	}
       if (rego->init != NULL)
@@ -5033,6 +5047,7 @@ int
 gdbarch_update_p (struct gdbarch_info info)
 {
   struct gdbarch *new_gdbarch;
+  struct gdbarch *old_gdbarch;
   struct gdbarch_registration *rego;
 
   /* Fill in missing parts of the INFO struct using a number of
@@ -5101,29 +5116,47 @@ gdbarch_update_p (struct gdbarch_info info)
       return 0;
     }
 
+  /* Swap the data belonging to the old target out setting the
+     installed data to zero.  This stops the ->init() function trying
+     to refer to the previous architecture's global data structures.  */
+  swapout_gdbarch_swap (current_gdbarch);
+  clear_gdbarch_swap (current_gdbarch);
+
+  /* Save the previously selected architecture, setting the global to
+     NULL.  This stops ->init() trying to use the previous
+     architecture's configuration.  The previous architecture may not
+     even be of the same architecture family.  The most recent
+     architecture of the same family is found at the head of the
+     rego->arches list.  */
+  old_gdbarch = current_gdbarch;
+  current_gdbarch = NULL;
+
   /* Ask the target for a replacement architecture. */
   new_gdbarch = rego->init (info, rego->arches);
 
-  /* Did the target like it?  No. Reject the change. */
+  /* Did the target like it?  No. Reject the change and revert to the
+     old architecture.  */
   if (new_gdbarch == NULL)
     {
       if (gdbarch_debug)
 	fprintf_unfiltered (gdb_stdlog, "gdbarch_update: Target rejected architecture\n");
+      swapin_gdbarch_swap (old_gdbarch);
+      current_gdbarch = old_gdbarch;
       return 0;
     }
 
-  /* Did the architecture change?  No. Do nothing. */
-  if (current_gdbarch == new_gdbarch)
+  /* Did the architecture change?  No.  Oops, put the old architecture
+     back.  */
+  if (old_gdbarch == new_gdbarch)
     {
       if (gdbarch_debug)
 	fprintf_unfiltered (gdb_stdlog, "gdbarch_update: Architecture 0x%08lx (%s) unchanged\n",
 			    (long) new_gdbarch,
 			    new_gdbarch->bfd_arch_info->printable_name);
+      swapin_gdbarch_swap (old_gdbarch);
+      current_gdbarch = old_gdbarch;
       return 1;
     }
-
-  /* Swap all data belonging to the old target out */
-  swapout_gdbarch_swap (current_gdbarch);
 
   /* Is this a pre-existing architecture?  Yes. Move it to the front
      of the list of architectures (keeping the list sorted Most
