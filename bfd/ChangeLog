@@ -1,5 +1,61 @@
 2003-02-18  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-ppc.h: New file.
+	* elf32-ppc.c: Include elf32-ppc.h.
+	(NOP, CROR_151515, CROR_313131, TP_OFFSET, DTP_OFFSET): Define.
+	(struct ppc_elf_link_hash_entry): Rename "root" to "elf".  Adjust uses.
+	Add "tls_mask" field.
+	(TLS_GD, TLS_LD, TLS_TPREL, TLS_DTPREL, TLS_TLS, TLS_TPRELGD): Define.
+	(struct ppc_elf_link_hash_table): Rename "root" to "elf".  Adjust uses.
+	Add got, relgot, plt, relplt, dynbss, relbss, dynsbss, relsbss,
+	sdata, sdata2, tls_sec, tls_get_addr, tlsld_got fields.
+	Make use of htab shortcuts throughout file.
+	(ppc_elf_link_hash_newfunc): Init tls_mask field.
+	(ppc_elf_link_hash_table_create): Init new fields.
+	(ppc_elf_copy_indirect_symbol): Copy tls_mask.
+	(ppc_elf_howto_raw): Add tls relocs.
+	(ppc_elf_reloc_type_lookup): Handle them.
+	(ppc_elf_unhandled_reloc): New function.
+	(ppc_elf_create_got): Stash got section pointer in hash table,
+	return status.  Make .rela.got too.
+	(ppc_elf_create_dynamic_sections): Stash section pointers in htab.
+	(ppc_elf_adjust_dynamic_symbol): Only set up copy relocs when
+	NON_GOT_REF set.  Don't allocate space in .plt here..
+	(allocate_dynrelocs): ..do so here instead, properly ref-counting and
+	not allocating plt entries unnecessarily.  Allocate got entries here.
+	(WILL_CALL_FINISH_DYNAMIC_SYMBOL): Define.
+	(ppc_elf_size_dynamic_sections): Allocate local got entries.  Pass
+	"info" during allocate_dynrelocs hash traversal.  Use htab section
+	shortcuts rather than searching for named sections.  Get rid of
+	"plt" and "strip" booleans.
+	(update_local_sym_info, bad_shared_reloc): New functions.
+	(ppc_elf_check_relocs): Handle TLS relocs.  Move .rela.got creation to
+	ppc_elf_create_got.  Don't mark got or plt reloc syms dynamic, do so
+	in allocate_dynreloc.  Use update_local_sym_info and bad_shared_reloc.
+	Disallow R_PPC_EMB_RELSDA, R_PPC_EMB_NADDR32, R_PPC_EMB_NADDR16,
+	R_PPC_EMB_NADDR16_LO, R_PPC_EMB_NADDR16_HI and R_PPC_EMB_NADDR16_HA
+	in shared libs.  R_PPC_PLTREL32 is a plt reloc too.  Refcount all
+	relocs that might use a plt entry.  Set NON_GOT_REF too.
+	Enumerate all do-nothing relocs.
+	(ppc_elf_gc_sweep_hook): Simplify removal of dynrelocs.  Handle
+	tls relocs and all plt relocs.
+	(ppc_elf_tls_setup, ppc_elf_tls_optimize): New functions.
+	(ppc_elf_finish_dynamic_symbol): Don't build got entries here.
+	(ppc_elf_finish_dynamic_sections): Rewrite tag code using htab
+	shortcuts.
+	(ppc_elf_relocate_section): Tidy.  Handle TLS relocs.  Use
+	bfd_elf_local_sym_name.  Simplify unresolved reloc code.  Build got
+	entries and got relocs here.  Warn on non-zero got reloc addend.
+	Split out branch taken/not taken reloc code into a separate switch
+	and correct offset calculation. Allow BRTAKEN/BRNTAKEN dynamic relocs.
+	Split out HA reloc adjustments to separate switch statement.  Don't
+	warn on reloc overflow if we've already warned about undefined.
+	Don't rebuild sym name when reporting errors.  Report all possible
+	errors from _bfd_final_link_relocate.
+	(bfd_elf32_bfd_final_link): Don't define.
+
+2003-02-18  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf64-ppc.c (ppc64_elf_relocate_section): Don't init "r".  Don't
 	rebuild sym name when reporting errors.
 
