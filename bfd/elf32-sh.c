@@ -4764,7 +4764,7 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	    }
 	  else if (h->root.type == bfd_link_hash_undefweak)
 	    relocation = 0;
-	  else if (info->shared
+	  else if (! info->executable
 		   && ! info->no_undefined
 		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
 	    relocation = 0;
@@ -4773,7 +4773,7 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, h->root.root.string, input_bfd,
 		      input_section, rel->r_offset,
-		      (!info->shared || info->no_undefined
+		      (info->executable || info->no_undefined
 		       || ELF_ST_VISIBILITY (h->other)))))
 		return FALSE;
 	      relocation = 0;

@@ -2106,7 +2106,7 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, h->root.root.string, input_bfd,
 		      input_section, rel->r_offset,
-		      (!info->shared || info->no_undefined
+		      (info->executable || info->no_undefined
 		       || ELF_ST_VISIBILITY (h->other)))))
 		return FALSE;
 

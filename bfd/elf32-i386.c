@@ -2186,7 +2186,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 	      if (! ((*info->callbacks->undefined_symbol)
 		     (info, h->root.root.string, input_bfd,
 		      input_section, rel->r_offset,
-		      (!info->shared || info->no_undefined
+		      (info->executable || info->no_undefined
 		       || ELF_ST_VISIBILITY (h->other)))))
 		return FALSE;
 	    }
