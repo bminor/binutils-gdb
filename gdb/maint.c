@@ -355,7 +355,7 @@ maintenance_translate_address (char *arg, int from_tty)
 }
 
 
-/* When a comamnd is deprecated the user will be warned the first time
+/* When a command is deprecated the user will be warned the first time
    the command is used.  If possible, a replacement will be
    offered. */
 
