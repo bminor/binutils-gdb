@@ -1,3 +1,15 @@
+2002-04-22  J. Brobecker  <brobecker@gnat.com>
+  
+	* symfile.h (get_section_index): Define.
+	* symfile.c (get_section_index): New function.
+	* mdebugread.c (SC_IS_SBSS): New macro.
+	(SC_IS_BSS): Return true for the scBss storage class only, as
+	the scSBss storage class refers to the .sbss section.
+	(parse_partial_symbols): Discard the symbols which associated
+	section does not exist.
+	Make sure to use the .sbss section index for symbols which
+	storage class is scBss, rather than using the .bss section index.
+
 2002-04-22  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* vax-tdep.c: Update copyright years.
@@ -34,6 +46,7 @@
 	* sparc-tdep.c (sparc_prologue_frameless_p): Implement.
 	(sparc_gdbarch_init): Pass it to
 	set_gdbarch_prologue_frameless_p.
+
 2002-04-21  Jason Thorpe  <thorpej@wasabisystems.com>
 
 	* Makefile.in (ALLDEPFILES): Add alphabsd-nat.c.
