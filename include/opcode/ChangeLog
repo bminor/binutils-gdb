@@ -1,3 +1,7 @@
+Wed Jul 21 11:55:31 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* hppa.h: New argument type 'y'.  Use in various float instructions.
+
 Mon Jul 19 17:17:03 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
 	* hppa.h (break): First immediate field is unsigned.
