@@ -1,3 +1,12 @@
+start-sanitize-gdbtk
+Fri Jan 29 06:32:16 1999  Keith Seitz  <keiths@cygnus.com>
+
+	* gdb.gdbtk/cpp_variable.test (cpp_variable-1.1): Fix
+	function name error.
+
+	* gdb.gdbtk/cpp_variable.h (class VC): Fix compiler warning.
+
+end-sanitize-gdbtk
 Thu Jan 21 15:46:49 1999  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* gdb.base/Makefile.in, gdb.c++/Makefile.in,
@@ -373,12 +382,14 @@ Thu Oct  1 20:56:14 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 	* lib/gdb.exp, gdb.base/default.exp, config/monitor.exp,
  	gdb.base/default.exp: Replace "exec" with "executable".
 
+start-sanitize-gdbtk
 1998-09-29  Keith Seitz  <keiths@cygnus.com>
 
         * gdb.gdbtk/browser.test: Fix tests which incorrectly assume
         that gdb knows _exactly_ which files belong to the user
         and which come from libraries.
 
+end-sanitize-gdbtk
 Tue Sep 29 15:06:29 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* gdb.base/default.exp: Change else if to elseif from previous
