@@ -1,5 +1,18 @@
 2004-11-13  Andrew Cagney  <cagney@gnu.org>
 
+	* regcache.h (deprecated_register_valid): Delete.
+	(deprecated_registers): Delete.
+	* regcache.c (deprecated_register_valid): Delete.
+	(deprecated_registers): Delete.
+	(deprecated_read_register_byte, _initialize_regcache)
+	(deprecated_write_register_bytes, build_regcache): Update.
+	* config/powerpc/ppc-sim.mt (TDEPFILES): Remove ppc-bdm.o and
+	remote-sds.o.
+	* config/powerpc/ppc-eabi.mt (TDEPFILES): Ditto.
+	* config/mips/embed.mt (TDEPFILES): Remove remote-mips.o.
+
+2004-11-13  Andrew Cagney  <cagney@gnu.org>
+
 	* NEWS: List h8300*-*-*, mcore-*-*, mn10300-*-*, ns32k-*-*, and
 	v850-*-* under removed.
 	* configure.host: Delete ns32k-*-netbsd*.

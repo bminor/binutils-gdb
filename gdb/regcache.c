@@ -400,23 +400,6 @@ struct regcache *current_regcache;
    user).  Therefore all registers must be written back to the
    target when appropriate.  */
 
-/* REGISTERS contains the cached register values (in target byte order). */
-
-char *deprecated_registers;
-
-/* DEPRECATED_REGISTER_VALID is 0 if the register needs to be fetched,
-                     1 if it has been fetched, and
-		    -1 if the register value was not available.  
-
-   "Not available" indicates that the target is not not able to supply
-   the register at this state.  The register may become available at a
-   later time (after the next resume).  This often occures when GDB is
-   manipulating a target that contains only a snapshot of the entire
-   system being debugged - some of the registers in such a system may
-   not have been saved.  */
-
-signed char *deprecated_register_valid;
-
 /* The thread/process associated with the current set of registers. */
 
 static ptid_t registers_ptid;
@@ -434,7 +417,7 @@ static ptid_t registers_ptid;
 int
 register_cached (int regnum)
 {
-  return deprecated_register_valid[regnum];
+  return current_regcache->register_valid_p[regnum];
 }
 
 /* Record that REGNUM's value is cached if STATE is >0, uncached but
@@ -559,15 +542,6 @@ deprecated_read_register_bytes (int in_start, char *in_buf, int in_len)
       if (REGISTER_NAME (regnum) != NULL && *REGISTER_NAME (regnum) != '\0')
 	/* Force the cache to fetch the entire register.  */
 	deprecated_read_register_gen (regnum, reg_buf);
-      else
-	/* Legacy note: even though this register is ``invalid'' we
-           still need to return something.  It would appear that some
-           code relies on apparent gaps in the register array also
-           being returned.  */
-	/* FIXME: cagney/2001-08-18: This is just silly.  It defeats
-           the entire register read/write flow of control.  Must
-           resist temptation to return 0xdeadbeef.  */
-	memcpy (reg_buf, &deprecated_registers[reg_start], reg_len);
 
       /* Legacy note: This function, for some reason, allows a NULL
          input buffer.  If the buffer is NULL, the registers are still
@@ -850,10 +824,6 @@ deprecated_write_register_bytes (int myregstart, char *myaddr, int inlen)
 	  /* We may be doing a partial update of an invalid register.
 	     Update it from the target before scribbling on it.  */
 	  deprecated_read_register_gen (regnum, regbuf);
-
-	  memcpy (&deprecated_registers[overlapstart],
-		  myaddr + (overlapstart - myregstart),
-		  overlapend - overlapstart);
 
 	  target_store_registers (regnum);
 	}
@@ -1178,8 +1148,6 @@ build_regcache (void)
 {
   current_regcache = regcache_xmalloc (current_gdbarch);
   current_regcache->readonly_p = 0;
-  deprecated_registers = deprecated_grub_regcache_for_registers (current_regcache);
-  deprecated_register_valid = current_regcache->register_valid_p;
 }
 
 static void
@@ -1442,8 +1410,6 @@ _initialize_regcache (void)
 {
   regcache_descr_handle = gdbarch_data_register_post_init (init_regcache_descr);
   DEPRECATED_REGISTER_GDBARCH_SWAP (current_regcache);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (deprecated_registers);
-  DEPRECATED_REGISTER_GDBARCH_SWAP (deprecated_register_valid);
   deprecated_register_gdbarch_swap (NULL, 0, build_regcache);
 
   observer_attach_target_changed (regcache_observer_target_changed);

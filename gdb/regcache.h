@@ -181,28 +181,7 @@ extern void deprecated_read_register_bytes (int regbyte, char *myaddr,
 extern void deprecated_write_register_bytes (int regbyte, char *myaddr,
 					     int len);
 
-/* Character array containing the current state of each register
-   (unavailable<0, invalid=0, valid>0) for the most recently
-   referenced thread.  This global is often found in close proximity
-   to code that is directly manipulating the deprecated_registers[]
-   array.  In such cases, it should be possible to replace the lot
-   with a call to regcache_raw_supply().  If you find yourself in dire
-   straits, still needing access to the cache status bit, the
-   regcache_valid_p() and set_register_cached() functions are
-   available.  */
-extern signed char *deprecated_register_valid;
-
-/* Character array containing an image of the inferior programs'
-   registers for the most recently referenced thread.
-
-   NOTE: cagney/2002-11-14: Target side code should be using
-   regcache_raw_supply() and/or regcache_collect() while architecture
-   side code should use the more generic regcache methods.  */
-
-extern char *deprecated_registers;
-
-/* NOTE: cagney/2002-11-05: This function, and its co-conspirator
-   deprecated_registers[], have been superseeded by
+/* NOTE: cagney/2002-11-05: This function has been superseeded by
    regcache_raw_supply().  */
 extern void deprecated_registers_fetched (void);
 
