@@ -222,10 +222,14 @@ if { [istarget mips*-*-*] } then {
 	}
 	run_dump_test "elf-rel5"
 	run_dump_test "elf-rel6"
+	setup_xfail "mips*-*-*linux*"
 	run_dump_test "${tmips}${el}empic"
+	setup_xfail "mips*-*-*linux*"
 	run_dump_test "empic2"
 	run_dump_test "empic3_e"
+	setup_xfail "mips*-*-*linux*"
 	run_dump_test "empic3_g1"
+	setup_xfail "mips*-*-*linux*"
 	run_dump_test "empic3_g2"
 	if { !$no_mips16 } {
 	    run_dump_test "${tmips}mips${el}16-e"

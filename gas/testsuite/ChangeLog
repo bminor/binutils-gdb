@@ -1,5 +1,10 @@
 2002-09-30  H.J. Lu <hjl@gnu.org>
 
+	* gas/mips/mips.exp: Set xfail on empic, empic2, empic3_g1 and
+	empic3_g2 on Linux/mips.
+
+2002-09-30  H.J. Lu <hjl@gnu.org>
+
 	* gas/mips/vr4120.d: Pass -m mips:4120 to objdump.
 
 2002-09-30  Gavin Romig-Koch  <gavin@redhat.com>
