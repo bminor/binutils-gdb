@@ -27,7 +27,7 @@ if $tracelevel then {
 
 if { [skip_cplus_tests] } { continue }
 
-set testfile "misc"
+set testfile "classes"
 set srcfile ${testfile}.cc
 set binfile ${objdir}/${subdir}/${testfile}
 
@@ -632,11 +632,6 @@ proc test_enums {} {
     # advance one line
 
     gdb_test "next" ""
-
-    # TODO: with gcc HEAD 2003-12-28 21:08:30 UTC -gdwarf-2,
-    # gdb says that obj_with_enum is out of scope here and the
-    # tests after this FAIL.  This needs investigation.
-    # -- chastain 2003-12-30
 
     # print the object again
 
