@@ -802,6 +802,7 @@ clear_solib (void)
 	}
       if (so_list_head->abfd)
 	{
+	  remove_target_sections (so_list_head->abfd);
 	  bfd_filename = bfd_get_filename (so_list_head->abfd);
 	  if (!bfd_close (so_list_head->abfd))
 	    warning ("cannot close \"%s\": %s",

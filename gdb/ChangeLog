@@ -1,3 +1,11 @@
+2001-09-26  Kevin Buettner  <kevinb@redhat.com>
+
+	From Ilya Golubev <gin@mo.msk.ru>:
+	* solib.c (clear_solib): Call `remove_target_sections' to fix
+	stale pointers in `struct target_ops'.
+	* irix5-nat.c (clear_solib): Likewise.
+	* osfsolib.c (clear_solib): Likewise.
+
 2001-09-26  Andrew Cagney  <ac131313@redhat.com>
 
 	* CONTRIBUTE: Update.
