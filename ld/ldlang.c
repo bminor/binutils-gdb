@@ -2441,10 +2441,10 @@ lang_process ()
     {
       /* Read the emulation's appropriate default script.  */
       char *scriptname = ldemul_get_script ();
-      size_t size = strlen (scriptname) + 3;
+      size_t size = strlen (scriptname) + 13;
       char *buf = (char *) ldmalloc(size);
 
-      sprintf (buf, "-T%s", scriptname);
+      sprintf (buf, "-Tldscripts/%s", scriptname);
       parse_line (buf, 0);
       free (buf);
     }
@@ -2788,11 +2788,12 @@ lang_statement_append (list, element, field)
   list->tail = field;
 }
 
-/* Set the output format type */
+/* Set the output format type.  -oformat overrides scripts.  */
 void
-lang_add_output_format (format)
+lang_add_output_format (format, from_script)
      CONST char *format;
+     int from_script;
 {
-  output_target = format;
+  if (!from_script || output_target == NULL)
+    output_target = format;
 }
-

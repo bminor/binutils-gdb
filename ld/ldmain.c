@@ -60,6 +60,9 @@ int had_y;
 /* The local symbol prefix */
 char lprefix = 'L';
 
+/* Set by -G argument, for MIPS ECOFF target.  */
+int g_switch_value = 8;
+
 /* Count the number of global symbols multiply defined.  */
 int multiple_def_count;
 
@@ -92,9 +95,6 @@ boolean trace_files;
 /* 1 => write load map.  */
 boolean write_map;
 
-
-int unix_relocate;
-
 #ifdef GNU960
 /* Indicates whether output file will be b.out (default) or coff */
 enum target_flavour output_flavor = BFD_BOUT_FORMAT;
@@ -115,40 +115,65 @@ unsigned int total_symbols_seen;
  */
 unsigned int total_files_seen;
 
-/* IMPORTS */
 args_type command_line;
+
 ld_config_type config;
+
 void
 main (argc, argv)
      char **argv;
      int argc;
 {
   char *emulation;
+  int i;
 
   program_name = argv[0];
-  output_filename = "a.out";
 
   bfd_init ();
 
-#ifdef GNU960
-  {
-    int i;
+  /* We need to find any explicitly given emulation before we initialize the
+     state that's needed by the lex&yacc argument parser (parse_args).  */
 
-    check_v960 (argc, argv);
-    emulation = "gld960";
-    for (i = 1; i < argc; i++)
-      {
-	if (!strcmp (argv[i], "-Fcoff"))
-	  {
-	    emulation = "lnk960";
-	    output_flavor = BFD_COFF_FORMAT;
-	    break;
-	  }
-      }
-  }
+#ifdef GNU960
+  check_v960 (argc, argv);
+  emulation = "gld960";
+  for (i = 1; i < argc; i++)
+    {
+      if (!strcmp (argv[i], "-Fcoff"))
+	{
+	  emulation = "lnk960";
+	  output_flavor = BFD_COFF_FORMAT;
+	  break;
+	}
+    }
 #else
   emulation = (char *) getenv (EMULATION_ENVIRON);
 #endif
+
+  for (i = 1; i < argc; i++)
+    {
+      if (!strncmp (argv[i], "-m", 2))
+	{
+	  if (argv[i][2] == '\0')
+	    {
+	      /* -m EMUL */
+	      if (i < argc - 1)
+		{
+		  emulation = argv[i + 1];
+		  i++;
+		}
+	      else
+		{
+		  einfo("%P%F missing argument to -m\n");
+		}
+	    }
+	  else
+	    {
+	      /* -mEMUL */
+	      emulation = &argv[i][2];
+	    }
+	}
+    }
 
   /* Initialize the data about options.  */
 
@@ -156,7 +181,6 @@ main (argc, argv)
   trace_files = false;
   write_map = false;
   config.relocateable_output = false;
-  unix_relocate = 0;
   command_line.force_common_definition = false;
 
   init_bfd_error_vector ();
@@ -331,9 +355,9 @@ definitions seen, undefined global symbols and pending commons.
 extern boolean relaxing;
 
 void
-DEFUN (Q_enter_global_ref, (nlist_p, name),
-       asymbol ** nlist_p AND	/* pointer into symbol table from incoming bfd */
-       CONST char *name /* name of symbol in linker table */ )
+Q_enter_global_ref (nlist_p, name)
+     asymbol ** nlist_p;	/* pointer into symbol table from incoming bfd */
+     CONST char *name; /* name of symbol in linker table */
 {
   asymbol *sym = *nlist_p;
   ldsym_type *sp;
@@ -931,6 +955,9 @@ subfile_wanted_p (entry)
      struct lang_input_statement_struct *entry;
 {
   asymbol **q;
+
+  if (entry->symbol_count == 0)
+    return false;
 
   for (q = entry->asymbols; *q; q++)
     {

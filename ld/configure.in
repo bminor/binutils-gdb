@@ -79,10 +79,8 @@ case "${target}" in
 			;;
   h8500-*-hms)		my_target=coff-h8500
 			;;
-# start-sanitize-sh
   sh-*-*)		my_target=coff-sh	
 			;;
-# end-sanitize-sh
   m68k-sony-*)		my_target=news
 			;;
   m68k-hp-bsd*)		my_target=hp300bsd
@@ -125,4 +123,4 @@ if [ ! -r ${srcdir}/${target_makefile_frag} ]; then
 	exit 1
 fi
 
-mkdir emulations 2>/dev/null
+mkdir ldscripts 2>/dev/null
