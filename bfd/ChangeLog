@@ -1,3 +1,8 @@
+Wed Feb 12 18:10:30 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* sunos.c (sunos_create_dynamic_sections): We need the dynamic
+	sections if we are creating a shared library.
+
 Tue Feb 11 15:45:43 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* configure.host (i386-windows): Don't set host64=true.
