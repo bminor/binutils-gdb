@@ -130,7 +130,9 @@ object_headers *headers;
 	
 	headers->header.a_tload = 0;
 	headers->header.a_dload = md_section_align(SEG_DATA, H_GET_TEXT_SIZE(headers));
-	
+
+	headers->header.a_relaxable = linkrelax;
+
 	append(where, (char *) &headers->header, sizeof(headers->header));
 } /* a_header_append() */
 

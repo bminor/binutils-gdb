@@ -1,3 +1,23 @@
+Thu Jul 16 08:20:17 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* write.c (fixup_segment): if relaxing, don't do anything.
+	* config/obj-bout.[ch] : maintain the a_relaxable file header info
+	* config/tc-i960.c: new option -linkrelax
+
+Mon Jul 13 14:11:36 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* expr.c (expr): allow SEG_BSS in expressions
+	* read.c (potable): align should be nbytes, not ptwo!
+	* write.c (write_object_file): extra glue for new bss attributes
+	(relax_segment): SEG_BSS is ok now
+	* config/tc-m68k.c (m68k_ip_op): can now parse more @( modes
+
+Mon Jun  1 16:20:22 1992  Michael Tiemann  (tiemann@cygnus.com)
+
+	* configure.in: recognize m680x0 as having sun3 emulation mode for
+	vxworks environment.
+
+
 Tue Jun 30 20:25:54 1992  D. V. Henkel-Wallace  (gumby@cygnus.com)
 
 	* Makefile.in: Add program_suffix (parallel to program_prefix)
@@ -19,7 +39,26 @@ Tue Jun  9 07:54:54 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 	* write.c (write_object_file): various changes to handle data in
 	the BSS segment in much the same was as stuff in the DATA segment. 
 
-	* subsegs.c (subseg_change): allow and handle a change into SEG_BSS.
+
+Thu Jun  4 11:59:13 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* expr.c(expr): allow SEG_REGISTER in expressions.
+	* read.c(pseudo_set): register expressions can be the source of a
+	set.
+	* subsegs.c (subseg_new): Now -R forces all changes to SEG_DATA to
+	goto SEG_TEXT (if a.out)
+	* write.c (write_object_file): If a.out don't use the old way for
+	-R.
+	* config/obj-a.out (s_sect): complain if the user tries to use a
+	subsegment with a value which might interfere with out -R hackery.
+	* config/tc-m68k.c (m68k_reg_parse): lookup names in symbol table
+	rather than use ugly if tree. (init_regtable): insert register
+	names into symbol table.
+
+Tue Jun  2 16:47:09 1992  Steve Chamberlain (sac@cygnus.com)
+
+	* write.c (write_object_file): keep the fix_tail clean, which
+	fixes a bug in -R where relocations were being lost.
 
 Thu Jun  4 11:59:13 1992  Steve Chamberlain  (sac@thepub.cygnus.com)
 
@@ -46,6 +85,7 @@ Mon Jun  1 16:20:22 1992  Michael Tiemann  (tiemann@cygnus.com)
 	* configure.in: recognize m680x0 as having sun3 emulation mode for
 	vxworks environment.
 
+>>>>>>> 1.62
 Sun May 31 05:33:00 1992  david d `zoo' zuhn (zoo@cygnus.com)
 
  	* configure.in: recognize m680x0 as an m68k

@@ -100,12 +100,12 @@ struct exec {
 	unsigned long a_drsize;	/* Length of data relocation info	*/
 	
 	/* Added for i960 */
-	unsigned long a_tload;	/* Text runtime load address		*/
-	unsigned long a_dload;	/* Data runtime load address		*/
-	unsigned char a_talign;	/* Alignment of text segment		*/
-	unsigned char a_dalign;	/* Alignment of data segment		*/
-	unsigned char a_balign;	/* Alignment of bss segment		*/
-	unsigned char unused;	/* (Just to make struct size a multiple of 4) */
+	unsigned long a_tload;	   /* Text runtime load address		*/
+	unsigned long a_dload;	   /* Data runtime load address		*/
+	unsigned char a_talign;	   /* Alignment of text segment		*/
+	unsigned char a_dalign;	   /* Alignment of data segment		*/
+	unsigned char a_balign;	   /* Alignment of bss segment		*/
+	unsigned char a_relaxable; /* Contains enough info to relax     */
 };
 
 #define N_BADMAG(x)	(((x).a_magic)!=BMAGIC)
