@@ -939,12 +939,6 @@ i386_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   return sp;
 }
 
-static void
-i386_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
-{
-  /* Do nothing.  Everything was already done by i386_push_arguments.  */
-}
-
 /* These registers are used for returning integers (and on some
    targets also for returning `struct' and `union' values when their
    size and alignment match an integer type).  */
@@ -1589,7 +1583,6 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_push_arguments (gdbarch, i386_push_arguments);
   set_gdbarch_deprecated_push_return_address (gdbarch, i386_push_return_address);
   set_gdbarch_deprecated_pop_frame (gdbarch, i386_pop_frame);
-  set_gdbarch_deprecated_store_struct_return (gdbarch, i386_store_struct_return);
   set_gdbarch_store_return_value (gdbarch, i386_store_return_value);
   set_gdbarch_extract_struct_value_address (gdbarch,
 					    i386_extract_struct_value_address);

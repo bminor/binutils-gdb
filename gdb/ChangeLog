@@ -1,3 +1,8 @@
+2003-03-30  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386-tdep.c (i386_store_struct_return): Removed.
+	(i386_gdbarch_init): Don't set deprecated_store_struct_return.
+
 2003-03-30  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh (DEPRECATED_DUMMY_WRITE_SP): Replace TARGET_WRITE_SP.
