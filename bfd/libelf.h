@@ -35,6 +35,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif
 #endif
 
+#ifndef NAME
+#define NAME(x,y) CAT4(x,NOSIZE,_,y)
+#endif
+
 #define ElfNAME(X)	NAME(Elf,X)
 #define elfNAME(X)	NAME(elf,X)
 
@@ -170,7 +174,7 @@ extern char * elf_get_str_section PARAMS ((bfd *, unsigned));
 #define bfd_elf64_mkobject	bfd_elf_mkobject
 #define elf_mkobject		bfd_elf_mkobject
 
-extern unsigned long elf_hash PARAMS ((CONST unsigned char *));
+extern unsigned long bfd_elf_hash PARAMS ((CONST unsigned char *));
 
 extern bfd_reloc_status_type bfd_elf_generic_reloc PARAMS ((bfd *,
 							    arelent *,

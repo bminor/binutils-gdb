@@ -1,3 +1,13 @@
+Fri Aug  6 15:13:22 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* libelf.h (NAME): Provide a default definition, that's neither
+	for 32 bits nor for 64.
+
+	Tue Jun 15 14:38:32 1993  Michael Meissner  (meissner@osf.org)
+
+	* libelf.h (elf_hash): Change declaration to bfd_elf_hash, since
+	that is what is in elf.c.
+
 Fri Aug  6 12:28:38 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* Makefile.in (coff-mips.o, coff-alpha.o): Don't depend on
@@ -14,6 +24,8 @@ Fri Aug  6 09:59:45 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 	* hpux-core.c: Cast return value from bfd_zalloc.
 
 Thu Aug  5 13:22:44 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
+
+	* aoutx.h (log2): Delete i387-specific code.
 
 	* Makefile.in (BFD_LIBS): Always include elf.o.
 	(BFD32_BACKENDS): Don't include elf.o here.
@@ -44,6 +56,9 @@ Thu Aug  5 13:22:44 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 	* elfcode.h (elf_hash): Delete macro mapping elf_hash to
 	bfd_elf32_hash, since the hash table is independent of the 32/64
 	bit system.
+
+	* libelf.h (elf_hash): Change declaration to bfd_elf_hash, since
+	that is what is in elf.c.
 
 	Sat Jun 19 10:12:27 1993  Michael Meissner  (meissner@osf.org)
 
