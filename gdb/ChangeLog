@@ -1,3 +1,8 @@
+Fri Mar 11 08:08:50 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* breakpoint.c (_initialize_breakpoint): Update docstring for
+	tbreak to match what the code actually does.
+
 Thu Mar 10 08:52:38 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* symfile.h (ADD_PSYMBOL_VT_TO_LIST): Don't put a semicolon after

@@ -3151,9 +3151,9 @@ breakpoint N is reached.  ");
 
   add_com ("tbreak", class_breakpoint, tbreak_command,
 	   "Set a temporary breakpoint.  Args like \"break\" command.\n\
-Like \"break\" except the breakpoint is only enabled temporarily,\n\
-so it will be disabled when hit.  Equivalent to \"break\" followed\n\
-by using \"enable once\" on the breakpoint number.");
+Like \"break\" except the breakpoint is only temporary,\n\
+so it will be deleted when hit.  Equivalent to \"break\" followed\n\
+by using \"enable delete\" on the breakpoint number.");
 
   add_prefix_cmd ("enable", class_breakpoint, enable_command,
 		  "Enable some breakpoints.\n\
