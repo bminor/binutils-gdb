@@ -1,5 +1,15 @@
 Mon Nov  1 14:30:09 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* reloc.c (enum bfd_reloc_code_real): Added
+	BFD_RELOC_MIPS_LITERAL, BFD_RELOC_MIPS_GOT16,
+	BFD_RELOC_MIPS_CALL16, BFD_RELOC_MIPS_GPREL32.
+	* bfd-in2.h: Rebuilt.
+	* coff-mips.c (mips_bfd_reloc_type_lookup): Handle
+	BFD_RELOC_MIPS_LITERAL.
+	* elf32-mips.c (mips_reloc_map): Handle new relocs.
+	(mips_elf_hi16_reloc, mips_elf_lo16_reloc): Rearrange _gp_disp
+	checks slightly.
+
 	* aout-target.h (MY_bfd_debug_info_start, MY_bfd_debug_info_end,
 	MY_bfd_debug_info_accumulat [sic]): Remove unused definitions.
 	(MY_bfd_get_relocated_section_contents, MY_bfd_relax_section,
