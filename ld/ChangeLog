@@ -1,3 +1,10 @@
+2001-08-13  Richard Henderson  <rth@redhat.com>
+
+	* emultempl/needrelax.em: New file.
+	* emulparams/elf64_ia64.sh (EXTRA_EM_FILE): Reference it.
+	* Makefile.am (eelf64_ia64.c): Depend on it.
+	* Makefile.in: Rebuild.
+
 2001-08-13  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/elf32.em: For SEC_EXCLUDE sections, ensure that

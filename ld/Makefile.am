@@ -514,7 +514,8 @@ eelf64_aix.c: $(srcdir)/emulparams/elf64_aix.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64_aix "$(tdir_elf64_aix)"
 eelf64_ia64.c: $(srcdir)/emulparams/elf64_ia64.sh \
-  $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+  $(srcdir)/emultempl/elf32.em $(srcdir)/emultempl/needrelax.em \
+  $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf64_ia64 "$(tdir_elf64_ia64)"
 eelf64_s390.c: $(srcdir)/emulparams/elf64_s390.sh \
   $(srcdir)/emultempl/elf32.em $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
