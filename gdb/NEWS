@@ -60,6 +60,8 @@ been commented out.  Unless there is activity to revive these
 configurations, the next release of GDB will have their sources
 permanently REMOVED.
 
+Mitsubishi D30V					d30v-*-*
+
 * REMOVED configurations and files
 
 AMD 29k family via UDI				a29k-amd-udi, udi29k
