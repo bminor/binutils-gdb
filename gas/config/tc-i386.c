@@ -2981,7 +2981,21 @@ md_section_align (segment, size)
      segT segment;
      valueT size;
 {
-  return size;			/* Byte alignment is fine */
+#ifdef OBJ_AOUT
+#ifdef BFD_ASSEMBLER
+  /* For a.out, force the section size to be aligned.  If we don't do
+     this, BFD will align it for us, but it will not write out the
+     final bytes of the section.  This may be a bug in BFD, but it is
+     easier to fix it here since that is how the other a.out targets
+     work.  */
+  int align;
+
+  align = bfd_get_section_alignment (stdoutput, segment);
+  size = ((size + (1 << align) - 1) & ((valueT) -1 << align));
+#endif
+#endif
+
+  return size;
 }
 
 /* Exactly what point is a PC-relative offset relative TO?  On the

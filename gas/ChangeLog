@@ -1,3 +1,8 @@
+Tue May  6 12:18:09 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-i386.c (md_section_align): If a.out and BFD, force
+	section size to be aligned.
+
 Mon May  5 17:16:55 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* cond.c: Include "macro.h".
