@@ -56,7 +56,7 @@ const char FLT_CHARS[] = "dD";
 static unsigned long v850_insert_operand
   PARAMS ((unsigned long insn, const struct v850_operand *operand,
 	   offsetT val, char *file, unsigned int line));
-static int reg_name_search PARAMS ((char *name, const struct reg_name *, int));
+static int reg_name_search PARAMS ((const struct reg_name *, int, const char *));
 static boolean register_name PARAMS ((expressionS *expressionP));
 static boolean system_register_name PARAMS ((expressionS *expressionP));
 static boolean cc_name PARAMS ((expressionS *expressionP));
@@ -186,25 +186,27 @@ static const struct reg_name cc_names[] =
    number from the array on success, or -1 on failure. */
 
 static int
-reg_name_search (name, table, high)
-     char *name;
-     const struct reg_name *table;
-     int high;
+reg_name_search (regs, regcount, name)
+     const struct reg_name *regs;
+     int regcount;
+     const char *name;
 {
-  int middle, low;
+  int middle, low, high;
   int cmp;
 
   low = 0;
+  high = regcount - 1;
+
   do
     {
       middle = (low + high) / 2;
-      cmp = strcasecmp (name, table[middle].name);
+      cmp = strcasecmp (name, regs[middle].name);
       if (cmp < 0)
 	high = middle - 1;
       else if (cmp > 0)
 	low = middle + 1;
       else 
-	  return table[middle].value;
+	  return regs[middle].value;
     }
   while (low <= high);
   return -1;
@@ -234,7 +236,7 @@ register_name (expressionP)
   start = name = input_line_pointer;
 
   c = get_symbol_end ();
-  reg_number = reg_name_search (name, pre_defined_registers, REG_NAME_CNT - 1);
+  reg_number = reg_name_search (pre_defined_registers, REG_NAME_CNT, name);
 
   /* look to see if it's in the register table */
   if (reg_number >= 0) 
@@ -280,7 +282,7 @@ system_register_name (expressionP)
   start = name = input_line_pointer;
 
   c = get_symbol_end ();
-  reg_number = reg_name_search (name, system_registers, SYSREG_NAME_CNT - 1);
+  reg_number = reg_name_search (system_registers, SYSREG_NAME_CNT, name);
 
   /* look to see if it's in the register table */
   if (reg_number >= 0) 
@@ -326,7 +328,7 @@ cc_name (expressionP)
   start = name = input_line_pointer;
 
   c = get_symbol_end ();
-  reg_number = reg_name_search (name, cc_names, CC_NAME_CNT - 1);
+  reg_number = reg_name_search (cc_names, CC_NAME_CNT, name);
 
   /* look to see if it's in the register table */
   if (reg_number >= 0) 
@@ -460,13 +462,29 @@ md_begin ()
 }
 
 
-static bfd_reloc_code_real_type 
-get_reloc (op) 
-     struct v850_operand *op;
+static bfd_reloc_code_real_type
+v850_reloc_prefix()
 {
-  abort ();
-}
+  if (strncmp(input_line_pointer, "hi0(", 4) == 0)
+    {
+      input_line_pointer += 4;
+      return BFD_RELOC_HI16;
+    }
+  if (strncmp(input_line_pointer, "hi(", 3) == 0)
+    {
+      input_line_pointer += 3;
+      return BFD_RELOC_HI16_S;
+    }
+  if (strncmp (input_line_pointer, "lo(", 3) == 0)
+    {
+      input_line_pointer += 3;
+      return BFD_RELOC_LO16;
+    }
 
+  /* FIXME: implement sda, tda, zda here */
+
+  return BFD_RELOC_UNUSED;
+}
 
 void
 md_assemble (str) 
@@ -482,6 +500,7 @@ md_assemble (str)
   int i;
   int numops;
   int match;
+  bfd_reloc_code_real_type reloc;
 
   int numopts;
   expressionS myops[5];
@@ -540,6 +559,52 @@ md_assemble (str)
 	  hold = input_line_pointer;
 	  input_line_pointer = str;
 
+
+	  /* lo(), hi(), hi0(), etc... */
+	  if ((reloc = v850_reloc_prefix()) != BFD_RELOC_UNUSED)
+	    {
+	      expression(&ex);
+
+	      if (*input_line_pointer++ != ')')
+		{
+		  errmsg = "syntax error: expected `)'";
+		  goto error;
+		}
+	      
+	      if (ex.X_op == O_constant)
+		{
+		  switch (reloc)
+		    {
+		    case BFD_RELOC_LO16:
+		      ex.X_add_number &= 0xffff;
+		      break;
+
+		    case BFD_RELOC_HI16:
+		      ex.X_add_number = ((ex.X_add_number >> 16) & 0xffff);
+		      break;
+
+		    case BFD_RELOC_HI16_S:
+		      ex.X_add_number = ((ex.X_add_number >> 16) & 0xffff)
+			+ ((ex.X_add_number >> 15) & 1);
+		      break;
+		    }
+
+		  insn = v850_insert_operand (insn, operand, ex.X_add_number,
+					      (char *) NULL, 0);
+		}
+	      else
+		{
+		  if (fc > MAX_INSN_FIXUPS)
+		    as_fatal ("too many fixups");
+
+		  fixups[fc].exp = ex;
+		  fixups[fc].opindex = *opindex_ptr;
+		  fixups[fc].reloc = reloc;
+		  fc++;
+		}
+	    }
+	  else
+	    {
 	  if ((operand->flags & V850_OPERAND_REG) != 0) 
 	    {
 	      if (!register_name(&ex))
@@ -560,8 +625,7 @@ md_assemble (str)
 	    {
 	      char *start = input_line_pointer;
 	      char c = get_symbol_end ();
-	      if (strcmp (start, "ep") != 0
-		  && strcmp (start, "r30") != 0)
+	      if (strcmp (start, "ep") != 0 && strcmp (start, "r30") != 0)
 		{
 		  /* Put things back the way we found them.  */
 		  *input_line_pointer = c;
@@ -572,7 +636,7 @@ md_assemble (str)
 	      *input_line_pointer = c;
 	      str = input_line_pointer;
 	      input_line_pointer = hold;
-
+	      
 	      while (*str == ' ' || *str == ',' || *str == '[' || *str == ']')
 		++str;
 	      continue;
@@ -583,86 +647,6 @@ md_assemble (str)
 		{
 		  errmsg = "invalid condition code name";
 		  goto error;
-		}
-	    }
-	  else if (strncmp(input_line_pointer, "lo(", 3) == 0) 
-	    {
-	      input_line_pointer += 3;
-	      expression(&ex);
-
-	      if (*input_line_pointer++ != ')')
-		{
-		  errmsg = "syntax error: expected `)'";
-		  goto error;
-		}
-	      
-	      if (ex.X_op == O_constant) 
-		ex.X_add_number = (signed)((ex.X_add_number & 0xffff) << 16) >> 16;
-	      else
-		{
-		  if (fc > MAX_INSN_FIXUPS)
-		    as_fatal ("too many fixups");
-		  
-		  fixups[fc].exp = ex;
-		  fixups[fc].opindex = *opindex_ptr;
-		  fixups[fc].reloc = BFD_RELOC_LO16;
-		  fc++;
-		}
-	    }
-	  else if (strncmp(input_line_pointer, "hi(", 3) == 0) 
-	    {
-	      input_line_pointer += 3;
-	      expression(&ex);
-
-	      if (*input_line_pointer++ != ')')
-		{
-		  errmsg = "syntax error: expected `)'";
-		  goto error;
-		}
-	      
-	      if (ex.X_op == O_constant)
-		{
-		  unsigned long temp = ex.X_add_number;
-		  ex.X_add_number = (signed)(temp & 0xffff0000) >> 16;
-
-		  /* If the would be on for the low part, then we have
-		     to add it into the high part.  */
-		  if (temp & 0x8000)
-		    ex.X_add_number += 1;
-		}
-	      else 
-		{
-		  if (fc > MAX_INSN_FIXUPS)
-		    as_fatal ("too many fixups");
-		  
-		  fixups[fc].exp = ex;
-		  fixups[fc].opindex = *opindex_ptr;
-		  fixups[fc].reloc = BFD_RELOC_HI16_S;
-		  fc++;
-		}
-	    }
-	  else if (strncmp(input_line_pointer, "hi0(", 4) == 0) 
-	    {
-	      input_line_pointer += 4;
-	      expression(&ex);
-
-	      if (*input_line_pointer++ != ')')
-		{
-		  errmsg = "syntax error: expected `)'";
-		  goto error;
-		}
-	      
-	      if (ex.X_op == O_constant)
-		ex.X_add_number = (signed)(ex.X_add_number & 0xffff0000) >> 16;
-	      else 
-		{
-		  if (fc > MAX_INSN_FIXUPS)
-		    as_fatal ("too many fixups");
-		  
-		  fixups[fc].exp = ex;
-		  fixups[fc].opindex = *opindex_ptr;
-		  fixups[fc].reloc = BFD_RELOC_HI16;
-		  fc++;
 		}
 	    }
 	  else if (register_name (&ex)
@@ -685,11 +669,8 @@ md_assemble (str)
 	    }
 	  else
 	    {
-		expression(&ex);
+	      expression(&ex);
 	    }
-
-	  str = input_line_pointer;
-	  input_line_pointer = hold;
 
 	  switch (ex.X_op) 
 	    {
@@ -726,6 +707,11 @@ md_assemble (str)
 	      break;
 	    }
 
+	    }
+
+	  str = input_line_pointer;
+	  input_line_pointer = hold;
+
 	  while (*str == ' ' || *str == ',' || *str == '[' || *str == ']')
 	    ++str;
 	}
@@ -755,8 +741,54 @@ md_assemble (str)
 
   input_line_pointer = str;
 
+  /* Write out the instruction 
+     FIXME: we can determine the size of the opcode by the instruction
+     pattern, it does not have to be stored in the opcode table. */
   f = frag_more (opcode->size);
   md_number_to_chars (f, insn, opcode->size);
+
+
+  /* Create any fixups.  At this point we do not use a
+     bfd_reloc_code_real_type, but instead just use the
+     BFD_RELOC_UNUSED plus the operand index.  This lets us easily
+     handle fixups for any operand type, although that is admittedly
+     not a very exciting feature.  We pick a BFD reloc type in
+     md_apply_fix.  */
+  for (i = 0; i < fc; i++)
+    {
+      const struct v850_operand *operand;
+
+      operand = &v850_operands[fixups[i].opindex];
+      if (fixups[i].reloc != BFD_RELOC_UNUSED)
+	{
+	  reloc_howto_type *reloc_howto = bfd_reloc_type_lookup (stdoutput, fixups[i].reloc);
+	  int size;
+	  int offset;
+	  fixS *fixP;
+
+	  if (!reloc_howto)
+	    abort();
+	  
+	  size = bfd_get_reloc_size (reloc_howto);
+	  offset = 4 - size;
+
+	  if (size < 1 || size > 4)
+	    abort();
+
+	  fixP = fix_new_exp (frag_now, f - frag_now->fr_literal + offset, size,
+			      &fixups[i].exp, 
+			      reloc_howto->pc_relative,
+			      fixups[i].reloc);
+	}
+      else
+	{
+	  fix_new_exp (frag_now, f - frag_now->fr_literal, 4,
+		       &fixups[i].exp,
+		       1 /* FIXME: V850_OPERAND_RELATIVE ??? */,
+		       ((bfd_reloc_code_real_type)
+			(fixups[i].opindex + (int) BFD_RELOC_UNUSED)));
+	}
+    }
 }
 
 
@@ -789,17 +821,19 @@ md_estimate_size_before_relax (fragp, seg)
      fragS *fragp;
      asection *seg;
 {
-  abort ();
   return 0;
 } 
 
 long
-md_pcrel_from_section (fixp, sec)
+md_pcrel_from (fixp)
      fixS *fixp;
-     segT sec;
 {
-    return 0;
-    /*  return fixp->fx_frag->fr_address + fixp->fx_where; */
+  if (fixp->fx_addsy != (symbolS *) NULL && ! S_IS_DEFINED (fixp->fx_addsy))
+    {
+      /* The symbol is undefined.  Let the linker figure it out.  */
+      return 0;
+    }
+  return fixp->fx_frag->fr_address + fixp->fx_where;
 }
 
 int
@@ -808,11 +842,6 @@ md_apply_fix3 (fixp, valuep, seg)
      valueT *valuep;
      segT seg;
 {
-  as_tsktsk ("relocations not supported yet.\n");
-  fixp->fx_done = 1;
-  return 1;
-  abort();
-#if 0
   valueT value;
   char *where;
   unsigned long insn;
@@ -840,32 +869,51 @@ md_apply_fix3 (fixp, valuep, seg)
 	    }
 	}
     }
-  
-  /*   printf("md_apply_fix: value=0x%x  type=%d\n",  value, fixp->fx_r_type); */
 
-  op_type = fixp->fx_r_type;
-  fixp->fx_r_type = get_reloc((struct v850_operand *)&v850_operands[op_type]); 
+  /* printf("md_apply_fix: value=0x%x  type=%d\n",  value, fixp->fx_r_type); */
 
-  /*  printf("reloc=%d\n",fixp->fx_r_type); */
+  if ((int) fixp->fx_r_type >= (int) BFD_RELOC_UNUSED)
+    {
+      int opindex;
+      const struct v850_operand *operand;
+      char *where;
+      unsigned long insn;
 
-  /* Fetch the instruction, insert the fully resolved operand
-     value, and stuff the instruction back again.  */
-  where = fixp->fx_frag->fr_literal + fixp->fx_where;
-  insn = bfd_getb32 ((unsigned char *) where);
-  /* printf("   insn=%x  value=%x\n",insn,value); */
+      opindex = (int) fixp->fx_r_type - (int) BFD_RELOC_UNUSED;
+      operand = &v850_operands[opindex];
 
-  insn = v850_insert_operand (insn, op_type, (offsetT) value);
-  
-  /* printf("   new insn=%x\n",insn); */
-  
-  bfd_putb32 ((bfd_vma) insn, (unsigned char *) where);
-  
-  if (fixp->fx_done)
-    return 1;
+      /* Fetch the instruction, insert the fully resolved operand
+         value, and stuff the instruction back again. */
+      where = fixp->fx_frag->fr_literal + fixp->fx_where;
+      insn = bfd_getb32((unsigned char *) where);
+      insn = v850_insert_operand (insn, operand, (offsetT) value,
+				  fixp->fx_file, fixp->fx_line);
+      bfd_putb32((bfd_vma) insn, (unsigned char *) where);
+
+      if (fixp->fx_done)
+	{
+	  /* Nothing else to do here. */
+	  return 1;
+	}
+
+      /* Determine a BFD reloc value based on the operand information.  
+	 We are only prepared to turn a few of the operands into relocs. */
+
+      if (operand->bits == 22)
+	fixp->fx_r_type = BFD_RELOC_V850_22_PCREL;
+      else if (operand->bits == 9)
+	fixp->fx_r_type = BFD_RELOC_V850_9_PCREL;
+      else
+	{
+	  as_bad_where(fixp->fx_file, fixp->fx_line,
+		       "unresolved expression that must be resolved");
+	  fixp->fx_done = 1;
+	  return 1;
+	}
+    }
 
   fixp->fx_addnumber = value;
   return 1;
-#endif
 }
 
 
@@ -879,7 +927,7 @@ v850_insert_operand (insn, operand, val, file, line)
      char *file;
      unsigned int line;
 {
-  if (operand->bits != 32)
+  if (operand->bits != 16)
     {
       long min, max;
       offsetT test;

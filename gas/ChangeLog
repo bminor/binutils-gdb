@@ -1,3 +1,17 @@
+start-sanitize-v850
+Fri Aug 30 18:35:26 1996  J.T. Conklin  <jtc@hippo.cygnus.com>
+
+	* config/tc-v850.c (reg_name_search): Align calling convention to
+ 	be like identical function found in tc-ppc.c.
+	(get_reloc): Removed.
+	(v850_reloc_prefix): New function, parse lo(), hi() and hi0().
+	(md_assemble): emit fixups.
+	(md_pcrel_from): renamed from md_pcrel_from_section, emit proper
+ 	displacement.
+	(md_apply_fix3): handle fixups/relocs.
+	* config/tc-v850.h (MD_PCREL_FROM_SECTION): Removed definition.
+	
+end-sanitize-v850
 Fri Aug 30 18:12:00 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	Add SH ELF support.
