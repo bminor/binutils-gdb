@@ -766,9 +766,6 @@ reg_flush_command (char *command, int from_tty)
     printf_filtered ("Register cache flushed.\n");
 }
 
-#undef XCALLOC
-#define XCALLOC(NR,TYPE) ((TYPE*) xcalloc ((NR), sizeof (TYPE)))
-
 static void
 build_regcache (void)
 {

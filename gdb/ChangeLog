@@ -1,3 +1,8 @@
+2001-12-06  Andrew Cagney  <ac131313@redhat.com>
+
+	* regcache.c (XCALLOC): Delete macro that should not have been
+	added.
+
 2001-12-07  Jiri Smid  <smid@suse.cz>
 
 	* dwarf2cfi.c: New file.
