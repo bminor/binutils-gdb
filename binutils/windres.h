@@ -184,6 +184,8 @@ struct res_resource
   struct res_coff_info coff_info;
 };
 
+#define SUBLANG_SHIFT 10
+
 /* Memory flags in the memflags field of a struct res_resource.  */
 
 #define MEMFLAG_MOVEABLE	0x10

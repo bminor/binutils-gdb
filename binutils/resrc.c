@@ -1889,8 +1889,8 @@ write_rc_resource (e, type, name, res, language)
       if (res->res_info.language != 0 && res->res_info.language != *language)
 	fprintf (e, "%sLANGUAGE %d, %d\n",
 		 modifiers ? "// " : "",
-		 res->res_info.language & 0xff,
-		 (res->res_info.language >> 8) & 0xff);
+		 res->res_info.language & ((1<<SUBLANG_SHIFT)-1),
+		 (res->res_info.language >> SUBLANG_SHIFT) & 0xff);
       if (res->res_info.characteristics != 0)
 	fprintf (e, "%sCHARACTERISTICS %lu\n",
 		 modifiers ? "// " : "",

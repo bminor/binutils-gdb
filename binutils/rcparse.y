@@ -455,7 +455,7 @@ styles:
 	  }
 	| styles LANGUAGE numexpr cnumexpr
 	  {
-	    sub_res_info.language = $3 | ($4 << 8);
+	    sub_res_info.language = $3 | ($4 << SUBLANG_SHIFT);
 	  }
 	| styles VERSIONK numexpr
 	  {
@@ -874,7 +874,7 @@ icon:
 language:
 	  LANGUAGE numexpr cnumexpr
 	  {
-	    language = $2 | ($3 << 8);
+	    language = $2 | ($3 << SUBLANG_SHIFT);
 	  }
 	;
 
@@ -1329,7 +1329,7 @@ suboptions:
 	| suboptions LANGUAGE numexpr cnumexpr
 	  {
 	    $$ = $1;
-	    $$.language = $3 | ($4 << 8);
+	    $$.language = $3 | ($4 << SUBLANG_SHIFT);
 	  }
 	| suboptions VERSIONK numexpr
 	  {

@@ -1,3 +1,10 @@
+2001-07-16  DJ Delorie  <dj@redhat.com>
+
+	* rcparse.y (styles): use SUBLANG_SHIFT instead of 8 (or the more
+	correct 10).
+	* resrc.c (write_rc_resource): Likewise.
+	* windres.h (SUBLANG_SHIFT): Define - as 10.
+
 2001-07-15  Nick Clifton  <nickc@cambridge.redhat.com>
 
 	* MAINTAINERS: Add Christian Groessler as maintainer for z8k port.
