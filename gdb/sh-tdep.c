@@ -1194,8 +1194,8 @@ sh_push_dummy_call_nofpu (struct gdbarch *gdbarch,
    containing the (raw) register state a function return value of type
    TYPE, and copy that, in virtual format, into VALBUF.  */
 static void
-sh_default_extract_return_value (struct type *type, struct regcache *regcache,
-				 void *valbuf)
+sh_extract_return_value_nofpu (struct type *type, struct regcache *regcache,
+			       void *valbuf)
 {
   int len = TYPE_LENGTH (type);
   int return_register = R0_REGNUM;
@@ -1219,8 +1219,8 @@ sh_default_extract_return_value (struct type *type, struct regcache *regcache,
 }
 
 static void
-sh3e_sh4_extract_return_value (struct type *type, struct regcache *regcache,
-			       void *valbuf)
+sh_extract_return_value_fpu (struct type *type, struct regcache *regcache,
+			     void *valbuf)
 {
   if (sh_treat_as_flt_p (type))
     {
@@ -1233,7 +1233,7 @@ sh3e_sh4_extract_return_value (struct type *type, struct regcache *regcache,
 	  regcache_raw_read (regcache, regnum++, (char *) valbuf + i);
     }
   else
-    sh_default_extract_return_value (type, regcache, valbuf);
+    sh_extract_return_value_nofpu (type, regcache, valbuf);
 }
 
 /* Write into appropriate registers a function return value
@@ -1243,8 +1243,8 @@ sh3e_sh4_extract_return_value (struct type *type, struct regcache *regcache,
    depending on the type of the return value. In all the other cases
    the result is stored in r0, left-justified. */
 static void
-sh_default_store_return_value (struct type *type, struct regcache *regcache,
-			       const void *valbuf)
+sh_store_return_value_nofpu (struct type *type, struct regcache *regcache,
+			     const void *valbuf)
 {
   ULONGEST val;
   int len = TYPE_LENGTH (type);
@@ -1263,8 +1263,8 @@ sh_default_store_return_value (struct type *type, struct regcache *regcache,
 }
 
 static void
-sh3e_sh4_store_return_value (struct type *type, struct regcache *regcache,
-			     const void *valbuf)
+sh_store_return_value_fpu (struct type *type, struct regcache *regcache,
+			   const void *valbuf)
 {
   if (sh_treat_as_flt_p (type))
     {
@@ -1278,7 +1278,7 @@ sh3e_sh4_store_return_value (struct type *type, struct regcache *regcache,
 	  regcache_raw_write (regcache, regnum++, (char *) valbuf + i);
     }
   else
-    sh_default_store_return_value (type, regcache, valbuf);
+    sh_store_return_value_nofpu (type, regcache, valbuf);
 }
 
 static enum return_value_convention
@@ -1289,9 +1289,9 @@ sh_return_value_nofpu (struct gdbarch *gdbarch, struct type *type,
   if (sh_use_struct_convention (0, type))
     return RETURN_VALUE_STRUCT_CONVENTION;
   if (writebuf)
-    sh_default_store_return_value (type, regcache, writebuf);
+    sh_store_return_value_nofpu (type, regcache, writebuf);
   else if (readbuf)
-    sh_default_extract_return_value (type, regcache, readbuf);
+    sh_extract_return_value_nofpu (type, regcache, readbuf);
   return RETURN_VALUE_REGISTER_CONVENTION;
 }
 
@@ -1303,9 +1303,9 @@ sh_return_value_fpu (struct gdbarch *gdbarch, struct type *type,
   if (sh_use_struct_convention (0, type))
     return RETURN_VALUE_STRUCT_CONVENTION;
   if (writebuf)
-    sh3e_sh4_store_return_value (type, regcache, writebuf);
+    sh_store_return_value_fpu (type, regcache, writebuf);
   else if (readbuf)
-    sh3e_sh4_extract_return_value (type, regcache, readbuf);
+    sh_extract_return_value_fpu (type, regcache, readbuf);
   return RETURN_VALUE_REGISTER_CONVENTION;
 }
 

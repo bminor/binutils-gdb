@@ -1,3 +1,15 @@
+2004-12-14  Corinna Vinschen  <vinschen@redhat.com>
+
+	* sh-tdep.c (sh_extract_return_value_nofpu): Rename from
+	sh_default_extract_return_value.
+	(sh_extract_return_value_fpu): Rename from
+	sh3e_sh4_extract_return_value.
+	(sh_store_return_value_nofpu): Rename from
+	sh_default_store_return_value.
+	(sh_store_return_value_fpu): Rename from sh3e_sh4_store_return_value.
+	(sh_return_value_nofpu): Accomodate above changes.
+	(sh_return_value_fpu): Ditto.
+
 2004-12-13  Jerome Guitton  <guitton@gnat.com>
 
 	* stabsread.c (read_huge_number): Add support for reading octal
