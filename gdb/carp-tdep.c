@@ -514,6 +514,8 @@ Define this to be either @code{<} if the targets stack grows downward
 in memory, or @code{>} is the stack grows upwards.
 #endif
 /* #define INNER_THAN < */
+extern int carp_inner_than (int, int);
+#define INNER_THAN(x,y) carp_inner_than(x,y)
 
 
 #if 0

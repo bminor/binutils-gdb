@@ -83,7 +83,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define DECR_PC_AFTER_BREAK 0
 
 /* mvs_check  INNER_THAN */
-#define INNER_THAN <
+#define INNER_THAN(lhs,rhs) ((lhs) < (rhs))
 
 /* mvs_check  SAVED_PC_AFTER_CALL */
 #define SAVED_PC_AFTER_CALL(fi) read_register (RP_REGNUM)

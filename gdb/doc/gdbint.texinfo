@@ -1346,9 +1346,11 @@ If defined, this should be a C expression or statement that fills in the
 This is a C statement that sets the pc of the frame pointed to by
 @var{prev}.  [By default...]
 
-@item INNER_THAN
-Define this to be either @code{<} if the target's stack grows downward
-in memory, or @code{>} is the stack grows upwards.
+@item INNER_THAN (lhs,rhs)
+Returns non-zero if stack address @var{lhs} is inner than (nearer to the
+stack top) stack address @var{rhs}. Define this as @code{lhs < rhs} if
+the target's stack grows downward in memory, or @code{lhs > rsh} if the
+stack grows upward.
 
 @item IN_SIGTRAMP (pc, name)
 Define this to return true if the given @var{pc} and/or @var{name}

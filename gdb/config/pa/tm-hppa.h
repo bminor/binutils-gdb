@@ -103,7 +103,7 @@ extern CORE_ADDR saved_pc_after_call PARAMS ((struct frame_info *));
 
 /* Stack grows upward */
 
-#define INNER_THAN >
+#define INNER_THAN(lhs,rhs) ((lhs) > (rhs))
 
 /* Sequence of bytes for breakpoint instruction.  */
 

@@ -56,7 +56,7 @@ extern CORE_ADDR saved_pc_after_call PARAMS ((void));
 
 /* Stack grows downward.  */
 
-#define INNER_THAN <
+#define INNER_THAN(lhs,rhs) ((lhs) < (rhs))
 
 /* Illegal instruction - used by the simulator for breakpoint
    detection */

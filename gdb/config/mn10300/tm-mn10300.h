@@ -69,7 +69,7 @@ extern breakpoint_from_pc_fn mn10300_breakpoint_from_pc;
 
 #define DECR_PC_AFTER_BREAK 0
 
-#define INNER_THAN <
+#define INNER_THAN(lhs,rhs) ((lhs) < (rhs))
 
 #define SAVED_PC_AFTER_CALL(frame) \
   read_memory_integer (read_register (SP_REGNUM), 4)

@@ -120,7 +120,7 @@ extern int in_sigtramp PARAMS ((CORE_ADDR, char *));
 
 /* Stack grows downward.  */
 
-#define INNER_THAN <
+#define INNER_THAN(lhs,rhs) ((lhs) < (rhs))
 
 #define BIG_ENDIAN 4321
 

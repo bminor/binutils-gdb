@@ -82,7 +82,7 @@ extern CORE_ADDR h8300_skip_prologue ();
 
 /* Stack grows downward.  */
 
-#define INNER_THAN <
+#define INNER_THAN(lhs,rhs) ((lhs) < (rhs))
 
 /*#define BREAKPOINT {0x7A, 0xFF}*/
 #define BREAKPOINT {0x01, 0x80}  /* Sleep */

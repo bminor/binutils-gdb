@@ -83,7 +83,7 @@ extern void arc_software_single_step PARAMS ((unsigned int, int));
 
 /* Stack grows upward */
 
-#define INNER_THAN <
+#define INNER_THAN(lhs,rhs) ((lhs) < (rhs))
 
 /* Say how long (ordinary) registers are.  This is a piece of bogosity
    used in push_word and a few other places; REGISTER_RAW_SIZE is the

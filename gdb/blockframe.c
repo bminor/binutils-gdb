@@ -31,6 +31,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "inferior.h"		/* for read_pc */
 #include "annotate.h"
 
+/* Prototypes for exported functions. */
+
+void _initialize_blockframe PARAMS ((void));
+
 /* Is ADDR inside the startup file?  Note that if your machine
    has a way to detect the bottom of the stack, there is no need
    to call this function from FRAME_CHAIN_VALID; the reason for
@@ -1049,7 +1053,7 @@ generic_push_dummy_frame ()
 
   dummy_frame = dummy_frame_stack;
   while (dummy_frame)
-    if (dummy_frame->fp INNER_THAN fp)	/* stale -- destroy! */
+    if (INNER_THAN (dummy_frame->fp, fp))	/* stale -- destroy! */
       {
 	dummy_frame_stack = dummy_frame->next;
 	free (dummy_frame);
@@ -1114,7 +1118,7 @@ generic_frame_chain_valid (fp, fi)
     return 1;   /* don't prune CALL_DUMMY frames */
   else          /* fall back to default algorithm (see frame.h) */
     return (fp != 0
-	    && (fi->frame INNER_THAN fp || fi->frame == fp)
+	    && (INNER_THAN (fi->frame, fp) || fi->frame == fp)
 	    && !inside_entry_file (FRAME_SAVED_PC(fi)));
 }
  

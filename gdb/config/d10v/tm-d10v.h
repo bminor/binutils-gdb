@@ -53,7 +53,7 @@ extern CORE_ADDR d10v_skip_prologue ();
 
 
 /* Stack grows downward.  */
-#define INNER_THAN <
+#define INNER_THAN(lhs,rhs) ((lhs) < (rhs))
 
 /* for a breakpoint, use "dbt || nop" */
 #define BREAKPOINT {0x2f, 0x90, 0x5e, 0x00} 

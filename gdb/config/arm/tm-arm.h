@@ -77,7 +77,7 @@ extern CORE_ADDR arm_saved_pc_after_call PARAMS ((struct frame_info *));
 
 /* Stack grows downward.  */
 
-#define INNER_THAN <
+#define INNER_THAN(lhs,rhs) ((lhs) < (rhs))
 
 /* !!!! if we're using RDP, then we're inserting breakpoints and storing
    their handles instread of what was in memory.  It is nice that

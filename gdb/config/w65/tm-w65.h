@@ -55,7 +55,7 @@ extern CORE_ADDR w65_skip_prologue ();
 
 /* Stack grows downward.  */
 
-#define INNER_THAN <
+#define INNER_THAN(lhs,rhs) ((lhs) < (rhs))
 
 /* Illegal instruction - used by the simulator for breakpoint
    detection */

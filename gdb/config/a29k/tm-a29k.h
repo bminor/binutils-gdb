@@ -58,7 +58,7 @@ CORE_ADDR skip_prologue ();
 
 /* Stack grows downward.  */
 
-#define INNER_THAN <
+#define INNER_THAN(lhs,rhs) ((lhs) < (rhs))
 
 /* Stack must be aligned on 32-bit boundaries when synthesizing
    function calls. */

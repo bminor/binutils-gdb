@@ -1,3 +1,27 @@
+Sat Nov 28 12:24:31 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* config/z8k/tm-z8k.h, config/w65/tm-w65.h, config/vax/tm-vax.h,
+ 	config/v850/tm-v850.h, config/tahoe/tm-tahoe.h,
+ 	config/sparc/tm-sparc.h, config/sh/tm-sh.h,
+ 	config/rs6000/tm-rs6000.h, config/pyr/tm-pyr.h,
+ 	config/pa/tm-hppa.h, config/ns32k/tm-umax.h,
+ 	config/ns32k/tm-merlin.h, config/none/tm-none.h,
+ 	config/mn10300/tm-mn10300.h, config/mn10200/tm-mn10200.h,
+ 	config/mips/tm-mips.h, config/m88k/tm-m88k.h,
+ 	config/m68k/tm-m68k.h, config/m32r/tm-m32r.h,
+ 	config/i960/tm-i960.h, config/i386/tm-i386.h,
+ 	config/h8500/tm-h8500.h, config/h8300/tm-h8300.h,
+ 	config/gould/tm-pn.h, config/gould/tm-np1.h, config/arm/tm-arm.h,
+ 	config/convex/tm-convex.h, config/d10v/tm-d10v.h,
+ 	config/alpha/tm-alpha.h, config/a29k/tm-a29k.h: Add parameters to
+ 	macro INNER_THAN.
+
+	* valops.c (push_word, value_push, call_function_by_hand),
+ 	breakpoint.c (bpstat_stop_status), blockframe.c
+ 	(generic_push_dummy_frame, generic_frame_chain_valid), inferior.h
+ 	(PC_IN_CALL_DUMMY), infrun.c (wait_for_inferior): Update use of
+ 	INNER_THAN.
+
 Fri Nov 27 11:00:25 1998  Andrew Cagney  <cagney@chook>
 
 	* target.h (one_stepped): Move global from here.

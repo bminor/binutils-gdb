@@ -55,7 +55,7 @@ extern void m68k_find_saved_regs PARAMS ((struct frame_info *, struct frame_save
 
 /* Stack grows downward.  */
 
-#define INNER_THAN <
+#define INNER_THAN(lhs,rhs) ((lhs) < (rhs))
 
 /* Stack must be kept short aligned when doing function calls.  */
 

@@ -1,3 +1,7 @@
+Sat Nov 28 13:45:53 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbint.texinfo (INNER_THAN): Update, now takes parameters.
+
 Fri Nov 27 12:39:45 1998  Andrew Cagney  <cagney@chook>
 
 	* gdbint.texinfo (NO_SINGLE_STEP): Replace with
