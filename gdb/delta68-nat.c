@@ -43,7 +43,7 @@ register_addr (regno, blockend)
   if (regno >= 0 && regno < sizeof(sysv68reg) / sizeof(sysv68reg[0]))
     return blockend + sysv68reg[regno] * 4; 
   else if (regno < FPC_REGNUM)
-    return offsetof (struct user, u_fpu.regs.reg[regno - FP0_REGNUM]
+    return offsetof (struct user, u_fpu.regs.reg[regno - FP0_REGNUM][0]
   else if (regno == FPC_REGNUM)
     return offsetof (struct user, u_fpu.regs.control);
   else if (regno == FPS_REGNUM)
@@ -60,12 +60,15 @@ Internal error: invalid register number %d in REGISTER_U_ADDR\n",
 }
 
 CORE_ADDR kernel_u_addr;
-static struct nlist nl[] = {{ "_u", -1, }, { (char *) 0, }};
 
 /* Read the value of the u area from the kernel.  */
 void _initialize_kernel_u_addr ()
 {
-  if (nlist ("/sysV68", nl) == 0)
+  stuct nlist nl[2];
+
+  nl[0].n_name = "u";
+  nl[1].n_name = NULL;
+  if (nlist ("/sysV68", nl) == 0 && nl[0].n_scnum != 0)
     kernel_u_addr = nl[0].n_value;
   else
     {

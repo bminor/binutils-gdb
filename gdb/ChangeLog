@@ -1,3 +1,13 @@
+Thu Aug 19 17:58:39 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* config/m68k/delta68.m{t,h}: Use nm-delta68.h, etc. not
+	non-existent files nm-delta.h, etc.
+	* config/m68k/tm-delta68.h: Define CANNOT_STORE_REGISTER.
+	* delta68-nat.c: Add "[0]" in offsetof argument.
+	* delta68-nat.c (_initialize_kernel_u_addr): Don't try to set up
+	nl with initializer, just assign to it.  Check n_scnum field on
+	return. 
+
 Wed Aug 18 12:03:00 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* printcmd.c (print_address), values.c (value_as_pointer): Don't
