@@ -302,22 +302,6 @@ tuiEraseSourceContent (TuiWinInfoPtr winInfo, int displayPrompt)
 }				/* tuiEraseSourceContent */
 
 
-/*
-   ** tuiEraseAllSourceContent().
- */
-void
-tuiEraseAllSourceWinsContent (int displayPrompt)
-{
-  int i;
-
-  for (i = 0; i < (sourceWindows ())->count; i++)
-    tuiEraseSourceContent ((TuiWinInfoPtr) (sourceWindows ())->list[i],
-			   displayPrompt);
-
-  return;
-}				/* tuiEraseAllSourceWinsContent */
-
-
 /* Redraw the complete line of a source or disassembly window.  */
 static void
 tui_show_source_line (TuiWinInfoPtr winInfo, int lineno)
@@ -607,21 +591,6 @@ tuiShowExecInfoContent (TuiWinInfoPtr winInfo)
 
 
 /*
-   ** tuiShowAllExecInfosContent()
- */
-void
-tuiShowAllExecInfosContent (void)
-{
-  int i;
-
-  for (i = 0; i < (sourceWindows ())->count; i++)
-    tuiShowExecInfoContent ((TuiWinInfoPtr) (sourceWindows ())->list[i]);
-
-  return;
-}				/* tuiShowAllExecInfosContent */
-
-
-/*
    ** tuiEraseExecInfoContent().
  */
 void
@@ -676,8 +645,8 @@ tuiUpdateAllExecInfos (void)
 TuiStatus
 tuiAllocSourceBuffer (TuiWinInfoPtr winInfo)
 {
-  register char *srcLine, *srcLineBuf;
-  register int i, lineWidth, c, maxLines;
+  register char *srcLineBuf;
+  register int i, lineWidth, maxLines;
   TuiStatus ret = TUI_FAILURE;
 
   maxLines = winInfo->generic.height;	/* less the highlight box */
