@@ -4784,6 +4784,23 @@ elfNN_hpux_backend_section_from_bfd_section (abfd, sec, retval)
     }
   return FALSE;
 }
+
+static void
+elfNN_hpux_backend_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED,
+				      asymbol *asym)
+{
+  elf_symbol_type *elfsym = (elf_symbol_type *) asym;;
+
+  switch (elfsym->internal_elf_sym.st_shndx)
+    {
+    case SHN_IA_64_ANSI_COMMON:
+      asym->section = bfd_com_section_ptr;
+      asym->value = elfsym->internal_elf_sym.st_size;
+      asym->flags &= ~BSF_GLOBAL;
+      break;
+    }
+}
+
 
 #define TARGET_LITTLE_SYM		bfd_elfNN_ia64_little_vec
 #define TARGET_LITTLE_NAME		"elfNN-ia64-little"
@@ -4880,6 +4897,9 @@ elfNN_hpux_backend_section_from_bfd_section (abfd, sec, retval)
 
 #undef  elf_backend_section_from_bfd_section
 #define elf_backend_section_from_bfd_section elfNN_hpux_backend_section_from_bfd_section
+
+#undef elf_backend_symbol_processing
+#define elf_backend_symbol_processing elfNN_hpux_backend_symbol_processing
 
 #undef  elf_backend_want_p_paddr_set_to_zero
 #define elf_backend_want_p_paddr_set_to_zero 1
