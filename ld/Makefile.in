@@ -520,8 +520,10 @@ objdump:objdump.c
 install: 
 	$(INSTALL_XFORM) ld.new $(bindir)/ld
 	$(INSTALL_XFORM1) $(srcdir)/ld.1 $(man1dir)/ld.1
-	cd emulations; for f in *; do $(INSTALL_DATA) $$f $(scriptdir)/$$f; done
-	-n=`t='$(program_transform_name)'; echo ld | sed -e "" $$t`; \
+	for f in emulations/*; do \
+	  $(INSTALL_DATA) $$f $(scriptdir)/`basename $$f` ; \
+	done
+	-n=`t=$(program_transform_name); echo ld | sed -e "" $$t`; \
 	  rm -f $(tooldir)/bin/ld; \
 	  ln $(bindir)/$$n $(tooldir)/bin/ld \
 	   || $(INSTALL_PROGRAM) ld.new $(tooldir)/bin/ld; \
