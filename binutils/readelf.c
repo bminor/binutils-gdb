@@ -562,7 +562,7 @@ guess_is_rela (e_machine)
     case EM_CYGNUS_M32R:
     case EM_CYGNUS_D10V:
     case EM_MIPS:
-    case EM_MIPS_RS4_BE:
+    case EM_MIPS_RS3_LE:
       return FALSE;
 
       /* Targets that use RELA relocations.  */
@@ -902,7 +902,7 @@ dump_relocations (file, rel_offset, rel_size, symtab, nsyms, strtab, is_rela)
 	  break;
 
 	case EM_MIPS:
-	case EM_MIPS_RS4_BE:
+	case EM_MIPS_RS3_LE:
 	  rtype = elf_mips_reloc_type (type);
 	  break;
 
@@ -1179,7 +1179,7 @@ get_dynamic_type (type)
 	  switch (elf_header.e_machine)
 	    {
 	    case EM_MIPS:
-	    case EM_MIPS_RS4_BE:
+	    case EM_MIPS_RS3_LE:
 	      result = get_mips_dynamic_type (type);
 	      break;
 	    case EM_SPARCV9:
@@ -1264,7 +1264,7 @@ get_machine_name (e_machine)
     case EM_860:         	return "Intel 80860";
     case EM_MIPS:        	return "MIPS R3000";
     case EM_S370:        	return "IBM System/370";
-    case EM_MIPS_RS4_BE: 	return "MIPS R4000 big-endian";
+    case EM_MIPS_RS3_LE: 	return "MIPS R4000 big-endian";
     case EM_OLD_SPARCV9:	return "Sparc v9 (old)";
     case EM_PARISC:      	return "HPPA";
     case EM_PPC_OLD:		return "Power PC (old)";
@@ -1537,7 +1537,7 @@ get_machine_flags (e_flags, e_machine)
 	  break;
 
 	case EM_MIPS:
-	case EM_MIPS_RS4_BE:
+	case EM_MIPS_RS3_LE:
 	  if (e_flags & EF_MIPS_NOREORDER)
 	    strcat (buf, ", noreorder");
 
@@ -1752,7 +1752,7 @@ get_segment_type (p_type)
 	  switch (elf_header.e_machine)
 	    {
 	    case EM_MIPS:
-	    case EM_MIPS_RS4_BE:
+	    case EM_MIPS_RS3_LE:
 	      result = get_mips_segment_type (p_type);
 	      break;
 	    case EM_PARISC:
@@ -1918,7 +1918,7 @@ get_section_type_name (sh_type)
 	  switch (elf_header.e_machine)
 	    {
 	    case EM_MIPS:
-	    case EM_MIPS_RS4_BE:
+	    case EM_MIPS_RS3_LE:
 	      result = get_mips_section_type_name (sh_type);
 	      break;
 	    case EM_PARISC:
@@ -4273,7 +4273,7 @@ process_dynamic_segment (file)
 	      switch (elf_header.e_machine)
 		{
 		case EM_MIPS:
-		case EM_MIPS_RS4_BE:
+		case EM_MIPS_RS3_LE:
 		  dynamic_segment_mips_val (entry);
 		  break;
 		case EM_PARISC:
@@ -8318,7 +8318,7 @@ process_arch_specific (file)
   switch (elf_header.e_machine)
     {
     case EM_MIPS:
-    case EM_MIPS_RS4_BE:
+    case EM_MIPS_RS3_LE:
       return process_mips_specific (file);
       break;
     default:

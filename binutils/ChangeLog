@@ -1,3 +1,9 @@
+2001-05-15  Ralf Baechle  <ralf@gnu.org>
+
+	* readelf.c: Replace uses of EM_MIPS_RS4_BE with EM_MIPS_RS3_LE.
+	The former constant was never in active use and is used otherwise
+	by the ABI.
+
 2001-05-11  Jakub Jelinek  <jakub@redhat.com>
 
 	* readelf.c (process_unwind): Print all unwind sections, not just
