@@ -171,7 +171,7 @@ srec_init ()
 /* The maximum number of bytes on a line is FF */
 #define MAXCHUNK 0xff
 /* The number of bytes we fit onto a line on output */
-#define CHUNK 21
+#define CHUNK 16
 
 /* When writing an S-record file, the S-records can not be output as
    they are seen.  This structure is used to hold them in memory.  */

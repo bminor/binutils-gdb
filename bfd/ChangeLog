@@ -1,3 +1,9 @@
+2000-03-31  Thomas de Lellis  <tdel@wrs.com>
+
+	* srec.c : Set CHUNK size to 16 bytes to prevent download failures
+	on some targets.
+	* ihex.c : Ditto.
+
 Wed Mar 30 15:28:00 2000  Donald Lindsay  <dlindsay@cygnus.com>
 
 	* elf32-m32r.c (m32r_elf_generic_reloc): new function.  All

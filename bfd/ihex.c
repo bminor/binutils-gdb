@@ -146,7 +146,7 @@ static int ihex_sizeof_headers PARAMS ((bfd *, boolean));
 
 /* The number of bytes we put on one line during output.  */
 
-#define CHUNK (21)
+#define CHUNK 16
 
 /* Macros for converting between hex and binary. */
 
