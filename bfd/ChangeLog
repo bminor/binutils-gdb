@@ -1,5 +1,15 @@
 Thu Dec 14 13:45:37 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* ieee.c: Lots of minor cleanups.  Make many functions return
+	errors rather than calling abort.  Also:
+	(ieee_write_twobyte): Remove; change callers to call existing
+	ieee_write_2bytes function.
+	(ieee_write_expression): Don't output the section twice when
+	outputting a local symbol.  Don't emit an extraneous zero if there
+	is only one term.
+	(ieee_slurp_sections): Set the lma as well as the vma.
+	(ieee_archive_p): Use bfd_alloc_grow rather than an obstack.
+
 	* ihex.c (ihex_set_arch_mach): Don't accept any architecture, just
 	a recognized one or bfd_arch_unknown.
 	(ihex_get_symtab_upper_bound): Define as bfd_0l, to permit objcopy
