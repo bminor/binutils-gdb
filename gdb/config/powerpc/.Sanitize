@@ -55,6 +55,7 @@ tm-solaris.h
 xm-aix.h
 xm-cygwin32.h
 xm-mpw.h
+xm-solaris.h
 
 Things-to-lose:
 
