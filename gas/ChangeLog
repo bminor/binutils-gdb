@@ -1,5 +1,8 @@
 Tue Nov  1 16:10:59 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
+	* config/tc-mips.c (s_change_sec): If not GPOPT, don't permit
+	switching to the readonly data section.
+
 	* ecoff.c (ecoff_directive_type): Fix warning message.
 
 Sun Oct 30 00:57:35 1994  Jeff Law  (law@snake.cs.utah.edu)

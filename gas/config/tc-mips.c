@@ -5684,6 +5684,7 @@ s_change_sec (sec)
       break;
 
     case 'r':
+#ifdef GPOPT
       seg = subseg_new (RDATA_SECTION_NAME,
 			(subsegT) get_absolute_expression ());
 #ifdef OBJ_ELF
@@ -5696,6 +5697,11 @@ s_change_sec (sec)
       bfd_set_section_alignment (stdoutput, seg, 4);
 #endif
       demand_empty_rest_of_line ();
+#else /* ! defined (GPOPT) */
+      as_bad ("No read only data section in this object file format");
+      demand_empty_rest_of_line ();
+      return;
+#endif /* ! defined (GPOPT) */
       break;
 
     case 's':
