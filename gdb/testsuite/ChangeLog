@@ -1,3 +1,8 @@
+Thu Jun  2 16:02:41 1994  Per Bothner  (bothner@kalessin.cygnus.com)
+
+	* lib/gdb.exp (string_to_regexp, gdb_test_exact):  New procedures.
+	* Makefile.in (CHILL_LIB):  Remove bogus redundant definitions.
+
 Sun May 29 22:31:42 1994  Per Bothner  (bothner@kalessin.cygnus.com)
 
 	* Makefile.in:  Fix bit-rot in definitions of CHILL,

@@ -52,7 +52,6 @@ INSTALL_DATA = $(INSTALL)
 CFLAGS = -g
 # start-sanitize-chill
 CHILLFLAGS = $(CFLAGS)
-CHILL_LIB = -lchill
 # end-sanitize-chill
 # This should probably be consistent with the top-level Makefile.in,
 # gdb/Makefile.in, and gdb/testsuite/gdb.t2*/Makefile.in, so that "make check"
@@ -124,8 +123,6 @@ CHILL_LIB = ` \
   else \
       echo -lchill; \
   fi`
-
-CHILL_LIB = -lchill
 # end-sanitize-chill
 
 GDB = ` \
