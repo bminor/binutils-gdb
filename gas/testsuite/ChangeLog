@@ -1,4 +1,24 @@
+Mon Oct 25 09:40:59 1993  Ken Raeburn  (raeburn@cygnus.com)
+
+	* gas/sun4: New directory.
+	* gas/sun4/addend.s,addend.exp: New test case.
+	* gas/sparc-solaris/addend.s,addend.exp: Solaris version of same
+	test case.
+
+	* gas/all/gas.exp: Check `*' in C comments.
+
+	* lib/gas-defs.exp (all_ones): New procedure, for a predicate to
+	simplify some tests.
+	(want_no_output): Return zero or nonzero, depending on success or
+	failure.
+	(gas_test_old): Return value from want_no_output.
+	(objdump_start_common): Split off from objdump_start.
+	(objdump_start_no_subdir): New procedure.
+
 Wed Oct 20 07:25:48 1993  Ken Raeburn  (raeburn@rover.cygnus.com)
+
+	* gas/all/diff1.s, gas/m68k/pic1.s: New tests.
+	* gas/all/gas.exp, gas/m68k/all.exp: Run them.
 
 	* Makefile.in (OBJDUMP_FOR_TARGET): Define similar to
 	AS_FOR_TARGET.
