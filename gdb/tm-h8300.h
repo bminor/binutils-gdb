@@ -23,14 +23,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Define the bit, byte, and word ordering of the machine.  */
 #define TARGET_BYTE_ORDER BIG_ENDIAN
-
-#define TARGET_CHAR_BIT 8
-#define TARGET_SHORT_BIT 16
+#undef TARGET_INT_BIT
 #define TARGET_INT_BIT 16
-#define TARGET_LONG_BIT 32
-#define TARGET_LONG_LONG_BIT 64
-#define TARGET_FLOAT_BIT 32
-#define TARGET_DOUBLE_BIT 64
 
 
 /* Offset from address of function to start of its code.
@@ -90,7 +84,7 @@ read_memory_integer (read_register (SP_REGNUM), 2)
 
 /* Say how long registers are.  */
 
-#define REGISTER_TYPE unsigned short
+#define REGISTER_TYPE  unsigned short
 
 #  define NUM_REGS 10 
 #  define REGISTER_BYTES (10*2)
@@ -122,22 +116,22 @@ read_memory_integer (read_register (SP_REGNUM), 2)
 /* Nonzero if register N requires conversion
    from raw format to virtual format.  */
 
-#define REGISTER_CONVERTIBLE(N) 0
+#define REGISTER_CONVERTIBLE(N) 1
 
 /* Convert data from raw format for register REGNUM
    to virtual format for register REGNUM.  */
 
-#define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,FROM,TO)  bcopy ((FROM), (TO), 2);
+/*#define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,FROM,TO)  */
 
 /* Convert data from virtual format for register REGNUM
    to raw format for register REGNUM.  */
 
-#define REGISTER_CONVERT_TO_RAW(REGNUM,FROM,TO)  bcopy ((FROM), (TO), 2);
+/*#define REGISTER_CONVERT_TO_RAW(REGNUM,FROM,TO)  */
 
 /* Return the GDB type object for the "standard" data type
    of data in register N.  */
 
-#define REGISTER_VIRTUAL_TYPE(N)  builtin_type_int
+#define REGISTER_VIRTUAL_TYPE(N)  builtin_type_unsigned_short
 
 
 /* Initializer for an array of names of registers.
@@ -262,6 +256,14 @@ read_memory_integer (read_register (SP_REGNUM), 2)
 
 #define POP_FRAME		{ h8300_pop_frame (); }
 
+#define SHORT_INT_MAX 32767
+#define SHORT_INT_MIN -32768
 
-#define	BEFORE_MAIN_LOOP_HOOK	\
-  hms_before_main_loop();
+#undef longest_to_int
+#define longest_to_int(x) (x & 0xffff)
+
+
+#define REGISTER_CONVERT_TO_VIRTUAL(REGNUM,FROM,TO) \
+{ bcopy ((FROM), (TO), 2); }
+#define REGISTER_CONVERT_TO_RAW(REGNUM,FROM,TO)	\
+{ bcopy ((FROM), (TO), 4); }
