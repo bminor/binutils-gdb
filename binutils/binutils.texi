@@ -279,8 +279,8 @@ Since the point of this operation is speed, the archive's symbol table
 index is not updated, even if it already existed; you can use @samp{ar s} or
 @code{ranlib} explicitly to update the symbol table index.
 
-However, too many different system assume quick append rebuilds the
-index, so GNU ar treats @code{q} to same way its treats @code{r}.
+However, too many different systems assume quick append rebuilds the
+index, so GNU ar implements @code{q} as a synonym for @code{r}.
 
 @item r
 @cindex replacement in archive
@@ -387,6 +387,14 @@ Write an object-file index into the archive, or update an existing one,
 even if no other change is made to the archive.  You may use this modifier
 flag either with any operation, or alone.  Running @samp{ar s} on an
 archive is equivalent to running @samp{ranlib} on it.
+
+@item S
+@cindex not writing archive index
+Do not generate an archive symbol table.  This can speed up building a
+large library in several steps.  The resulting archive can not be used
+with the linker.  In order to build a symbol table, you must omit the
+@samp{S} modifier on the last execution of @samp{ar}, or you must run
+@samp{ranlib} on the archive.
 
 @item u
 @cindex updating an archive
