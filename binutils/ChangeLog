@@ -1,3 +1,12 @@
+Thu Apr 21 12:12:26 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* nlmconv.c (secsec): New static variable.
+	(main): Create .nlmsections section in output BFD.  Store
+	information about it in sections header.
+	(setup_sections): Allocate space in sections header.
+	(copy_sections): Copy zero sized sections.  Put information about
+	each section in the sections header.
+
 Wed Apr 20 14:34:51 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 start-sanitize-powerpc-netware
 

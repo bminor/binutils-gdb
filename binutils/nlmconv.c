@@ -87,6 +87,20 @@ static int debug;
 /* The symbol table.  */
 static asymbol **symbols;
 
+/* A section we create in the output file to hold pointers to where
+   the sections of the input file end up.  We will put a pointer to
+   this section in the NLM header.  These is an entry for each input
+   section.  The format is
+       null terminated section name
+       zeroes to adjust to 4 byte boundary
+       4 byte section data file pointer
+       4 byte section size
+   We don't need a version number.  The way we find this information
+   is by finding a stamp in the NLM header information.  If we need to
+   change the format of this information, we can simply change the
+   stamp.  */
+static asection *secsec;
+
 /* A temporary file name to be unlinked on exit.  Actually, for most
    errors, we leave it around.  It's not clear whether that is helpful
    or not.  */
@@ -376,6 +390,16 @@ main (argc, argv)
 	  || ! bfd_set_section_alignment (outbfd, bss_sec, 1))
 	bfd_fatal ("make .bss section");
     }
+
+  /* We store the original section names in the .nlmsections section,
+     so that programs which understand it can resurrect the original
+     sections from the NLM.  We will put a pointer to .nlmsections in
+     the NLM header area.  */
+  secsec = bfd_make_section (outbfd, ".nlmsections");
+  if (secsec == NULL)
+    bfd_fatal ("make .nlmsections section");
+  if (! bfd_set_section_flags (outbfd, secsec, SEC_HAS_CONTENTS))
+    bfd_fatal ("set .nlmsections flags");
 /* start-sanitize-powerpc-netware */
 
   /* For PowerPC NetWare we need to build stubs for calls to undefined
@@ -840,6 +864,8 @@ main (argc, argv)
      is what NLMLINK does.  */
   strncpy (nlm_extended_header (outbfd)->stamp, "MeSsAgEs", 8);
 
+  strncpy (nlm_cygnus_section_header (outbfd)->stamp, "CyGnUsSeCs", 10);
+
   /* If the date was not given, force it in.  */
   if (nlm_version_header (outbfd)->month == 0
       && nlm_version_header (outbfd)->day == 0
@@ -1052,6 +1078,10 @@ main (argc, argv)
   strncpy (nlm_variable_header (outbfd)->oldThreadName, " LONG",
 	   NLM_OLD_THREAD_NAME_LENGTH);
 
+  nlm_cygnus_section_header (outbfd)->offset = secsec->filepos;
+  nlm_cygnus_section_header (outbfd)->length =
+    bfd_section_size (outbfd, secsec);
+
   if (! bfd_close (outbfd))
     bfd_fatal (output_file);
   if (! bfd_close (inbfd))
@@ -1138,6 +1168,7 @@ setup_sections (inbfd, insec, data_ptr)
   bfd_vma offset;
   bfd_size_type align;
   bfd_size_type add;
+  bfd_size_type secsecsize;
 
   /* FIXME: We don't want to copy the .reginfo section of an ECOFF
      file.  However, I don't have a good way to describe this section.
@@ -1187,6 +1218,15 @@ setup_sections (inbfd, insec, data_ptr)
     bfd_fatal ("set section flags");
 
   bfd_set_reloc (outbfd, outsec, (arelent **) NULL, 0);
+
+  /* For each input section we allocate space for an entry in
+     .nlmsections.  */
+  secsecsize = bfd_section_size (outbfd, secsec);
+  secsecsize += strlen (bfd_section_name (inbfd, insec)) + 1;
+  secsecsize = (secsecsize + 3) &~ 3;
+  secsecsize += 8;
+  if (! bfd_set_section_size (outbfd, secsec, secsecsize))
+    bfd_fatal ("set .nlmsections size");
 }
 
 /* Copy the section contents.  */
@@ -1197,25 +1237,29 @@ copy_sections (inbfd, insec, data_ptr)
      asection *insec;
      PTR data_ptr;
 {
+  static bfd_size_type secsecoff = 0;
   bfd *outbfd = (bfd *) data_ptr;
+  const char *inname;
   asection *outsec;
   bfd_size_type size;
   PTR contents;
   long reloc_size;
+  bfd_byte buf[4];
+  bfd_size_type add;
+
+  inname = bfd_section_name (inbfd, insec);
 
   /* FIXME: We don't want to copy the .reginfo section of an ECOFF
      file.  However, I don't have a good way to describe this section.
      We do want to copy the section when using objcopy.  */
   if (bfd_get_flavour (inbfd) == bfd_target_ecoff_flavour
-      && strcmp (bfd_section_name (inbfd, insec), ".reginfo") == 0)
+      && strcmp (inname, ".reginfo") == 0)
     return;
 
   outsec = insec->output_section;
   assert (outsec != NULL);
 
   size = bfd_get_section_size_before_reloc (insec);
-  if (size == 0)
-    return;
 
   /* FIXME: Why are these necessary?  */
   insec->_cooked_size = insec->_raw_size;
@@ -1273,6 +1317,34 @@ copy_sections (inbfd, insec, data_ptr)
 	bfd_fatal (bfd_get_filename (outbfd));
       free (contents);
     }
+
+  /* Add this section to .nlmsections.  */
+  if (! bfd_set_section_contents (outbfd, secsec, (PTR) inname, secsecoff,
+				  strlen (inname) + 1))
+    bfd_fatal ("set .nlmsection contents");
+  secsecoff += strlen (inname) + 1;
+
+  add = ((secsecoff + 3) &~ 3) - secsecoff;
+  if (add != 0)
+    {
+      bfd_h_put_32 (outbfd, (bfd_vma) 0, buf);
+      if (! bfd_set_section_contents (outbfd, secsec, buf, secsecoff, add))
+	bfd_fatal ("set .nlmsection contents");
+      secsecoff += add;
+    }
+
+  if (contents != NULL)
+    bfd_h_put_32 (outbfd, (bfd_vma) outsec->filepos, buf);
+  else
+    bfd_h_put_32 (outbfd, (bfd_vma) 0, buf);
+  if (! bfd_set_section_contents (outbfd, secsec, buf, secsecoff, 4))
+    bfd_fatal ("set .nlmsection contents");
+  secsecoff += 4;
+
+  bfd_h_put_32 (outbfd, (bfd_vma) size, buf);
+  if (! bfd_set_section_contents (outbfd, secsec, buf, secsecoff, 4))
+    bfd_fatal ("set .nlmsection contents");
+  secsecoff += 4;
 }
 
 /* Some, perhaps all, NetWare targets require changing the relocs used
