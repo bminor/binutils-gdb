@@ -1,5 +1,8 @@
 Wed Jun  2 11:51:12 1999  Andreas Schwab  <schwab@issan.cs.uni-dortmund.de>
 
+	* vms-misc.c (_bfd_vms_hash_newfunc): Fix use of uninitialized
+	variable.
+
 	* elf32-m68k.c (elf_m68k_adjust_dynamic_symbol): Avoid ambigous
 	`else'. 
 
