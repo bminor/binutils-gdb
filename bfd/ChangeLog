@@ -1,6 +1,13 @@
 start-sanitize-v850
 Tue Oct 22 19:20:38 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* elf32-v850.c (elf_v850_howto_table): Fix ordering of
+	R_V850_ZDAOFFSET and R_V850_TDAOFFSET.  Fix various
+	fields in R_V850_TDAOFFSET.
+	(elf32_v850_bfd_final_link_relocate): Tweak pc-relative
+	relocs to work more like other relocs.  Handle R_V850_TDAOFF
+	relocations.
+
 	* elf32-v850.c: Include bfdlink.h.
 	(bfd_elf32_v850_reloc): Return an error if we get a reloc
 	we can't handle.

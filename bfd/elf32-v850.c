@@ -193,28 +193,13 @@ static reloc_howto_type elf_v850_howto_table[] =
   /* Offset from the short data area pointer.  */
   HOWTO (R_V850_SDA_OFFSET,     /* type */
          0,                     /* rightshift */
-         1,                     /* size (0 = byte, 1 = short, 2 = long) */
+         0,                     /* size (0 = byte, 1 = short, 2 = long) */
          16,                    /* bitsize */
          false,                 /* pc_relative */
          0,                     /* bitpos */
          complain_overflow_dont,/* complain_on_overflow */
          bfd_elf_generic_reloc, /* special_function */
          "R_V850_SDA_OFFSET",   /* name */
-         true,                  /* partial_inplace */
-         0xffff,                /* src_mask */
-         0xffff,                /* dst_mask */
-         false),                /* pcrel_offset */
-
-  /* Offset from the tiny data area pointer.  */
-  HOWTO (R_V850_TDA_OFFSET,     /* type */
-         0,                     /* rightshift */
-         1,                     /* size (0 = byte, 1 = short, 2 = long) */
-         16,                    /* bitsize */
-         false,                 /* pc_relative */
-         0,                     /* bitpos */
-         complain_overflow_dont,/* complain_on_overflow */
-         bfd_elf_generic_reloc, /* special_function */
-         "R_V850_TDA_OFFSET",   /* name */
          true,                  /* partial_inplace */
          0xffff,                /* src_mask */
          0xffff,                /* dst_mask */
@@ -233,6 +218,21 @@ static reloc_howto_type elf_v850_howto_table[] =
          true,                  /* partial_inplace */
          0xffff,                /* src_mask */
          0xffff,                /* dst_mask */
+         false),                /* pcrel_offset */
+
+  /* Offset from the tiny data area pointer.  */
+  HOWTO (R_V850_TDA_OFFSET,     /* type */
+         0,                     /* rightshift */
+         2,                     /* size (0 = byte, 1 = short, 2 = long) */
+         8,                    /* bitsize */
+         false,                 /* pc_relative */
+         0,                     /* bitpos */
+         complain_overflow_dont,/* complain_on_overflow */
+         bfd_elf_generic_reloc, /* special_function */
+         "R_V850_TDA_OFFSET",   /* name */
+         true,                  /* partial_inplace */
+         0xff,                /* src_mask */
+         0xff,                /* dst_mask */
          false),                /* pcrel_offset */
 
 };
@@ -458,7 +458,7 @@ elf32_v850_bfd_final_link_relocate (howto, input_bfd, output_bfd,
 	return bfd_reloc_dangerous;
 
       insn = bfd_get_16 (input_bfd, hit_data);
-      insn &= 0xf870;
+      insn &= 0x078f;
       insn |= ((value & 0x1f0) << 7) | ((value & 0x0e) << 3);
       bfd_put_16 (input_bfd, insn, hit_data);
       return bfd_reloc_ok;
@@ -475,7 +475,7 @@ elf32_v850_bfd_final_link_relocate (howto, input_bfd, output_bfd,
 	return bfd_reloc_dangerous;
 
       insn = bfd_get_32 (input_bfd, hit_data);
-      insn &= ~0xfffe003f;
+      insn &= 0x1ffc0;
       insn |= (((value & 0xfffe) << 16) | ((value & 0x3f0000) >> 16));
       bfd_put_32 (input_bfd, insn, hit_data);
       return bfd_reloc_ok;
@@ -562,7 +562,7 @@ elf32_v850_bfd_final_link_relocate (howto, input_bfd, output_bfd,
 	unsigned long ep;
 	struct bfd_link_hash_entry *h;
 
-	value += bfd_get_16 (input_bfd, hit_data);
+	insn = bfd_get_16 (input_bfd, hit_data);
 
 	/* Get the value of __ep.  */
 	h = bfd_link_hash_lookup (info->hash, "__ep", false,
@@ -577,11 +577,64 @@ elf32_v850_bfd_final_link_relocate (howto, input_bfd, output_bfd,
 	value -= ep;
 
 
-	if ((long)value > 0x7fff || (long)value < -0x8000)
-	  return bfd_reloc_overflow;
+	/* Overflow computation and operand insertion is complicated
+	   by valid offsets and insertions changing depending on the
+	   instruction being used!  */
+	if ((insn & 0x0780) == 0x0500)
+	  {
+	    value += ((insn & 0x7f) << 2);
 
-	bfd_put_16 (input_bfd, value, hit_data);
-	return bfd_reloc_ok;
+	    /* Handle sld.w and sst.w -- 8 bit unsigned offset */
+	    if ((long) value > 0xff || (long) value < 0)
+	      return bfd_reloc_overflow;
+
+	    if ((value % 4) != 0)
+	      return bfd_reloc_dangerous;
+
+	    insn &= 0xff81;
+	    insn |= (value >> 1);
+	    bfd_put_16 (input_bfd, insn, hit_data);
+	    return bfd_reloc_ok;
+	  }
+
+	if ((insn & 0x0780) == 0x0400 || (insn & 0x0780) == 0x0480)
+	  {
+	    value += ((insn & 0x7f) << 1);
+
+	    /* Handle sld.h and sst.h -- 8 bit unsigned offset */
+	    if ((long) value > 0xff || (long) value < 0)
+	      return bfd_reloc_overflow;
+
+	    if ((value % 2) != 0)
+	      return bfd_reloc_dangerous;
+
+	    insn &= 0xff80;
+	    insn |= (value >> 1);
+	    bfd_put_16 (input_bfd, insn, hit_data);
+	    return bfd_reloc_ok;
+	  }
+
+	if ((insn & 0x0780) == 0x0300 || (insn & 0x0780) == 0x0380)
+	  {
+	    value += (insn & 0x7f);
+
+	    /* Handle sld.b and sst.b -- 7 bit unsigned offset */
+	    if ((long) value > 0x7f || (long) value < 0)
+	      return bfd_reloc_overflow;
+	    insn &= 0xff80;
+	    insn |= value;
+	    bfd_put_16 (input_bfd, insn, hit_data);
+	    return bfd_reloc_ok;
+	  }
+
+	/* Guess (XXX) that it's a movea instruction or something
+	   similar.  */
+	value += insn;
+        if ((long)value > 0x7fff || (long)value < -0x8000)
+          return bfd_reloc_overflow;
+
+        bfd_put_16 (input_bfd, value, hit_data);
+        return bfd_reloc_ok;
       }
     
     case R_V850_NONE:
