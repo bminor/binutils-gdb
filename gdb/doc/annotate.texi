@@ -71,6 +71,7 @@ This is Edition @value{EDITION}, @value{DATE}.
 * Invalidation::        Some annotations describe things now invalid.
 * Running::             Whether the program is running, how it stopped, etc.
 * Source::              Annotations describing source code.
+* TODO::                Annotations which might be added in the future.
 * Index::               Index
 @end menu
 @end ifinfo
@@ -681,6 +682,23 @@ debug formats this will necessarily point to the beginning of a line),
 line, or @samp{beg} if @var{addr} is at the beginning of the line, and
 @var{addr} is the address in the target program associated with the
 source which is being displayed.
+
+@node TODO
+@chapter Annotations We Might Want in the Future
+
+@format
+    - target-invalid
+      the target might have changed (registers, heap contents, or
+      execution status).  For performance, we might eventually want
+      to hit `registers-invalid' and `all-registers-invalid' with
+      greater precision
+
+    - systematic annotation for set/show parameters (including
+      invalidation notices).
+
+    - similarly, `info' returns a list of candidates for invalidation
+      notices.
+@end format
 
 @node Index
 @unnumbered Index
