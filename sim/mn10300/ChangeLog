@@ -1,5 +1,7 @@
 Wed Nov 27 09:20:42 1996  Jeffrey A Law  (law@cygnus.com)
 
+	* simops.c Implement remaining 3 byte instructions.
+
 	* simops.c: Implement remaining 2 byte instructions.  Call
 	abort for instructions we're not implementing now.
 
