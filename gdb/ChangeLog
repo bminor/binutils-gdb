@@ -1,3 +1,11 @@
+2001-10-16  Christopher Faylor  <cgf@redhat.com>
+
+	* win32-nat.c (safe_symbol_file_add_stub): Improve logic for avoiding
+	load of already loaded DLL.
+	(register_loaded_dll): Convert loaded DLL name to "posix" format or it
+	will confuse subsequent opening of the filename due to dos paths.
+	(dll_symbol_command): Pass from_tty parameter to safe_symbol_file_add.
+
 202001-10-15  Jim Ingham  <jingham@inghji.apple.com>
 
         * valarith.c (value_sub): Don't pass a raw type to

@@ -440,9 +440,9 @@ struct so_stuff
 {
   struct so_stuff *next, **last;
   DWORD load_addr;
-  char name[0];
-}
-solib_start, *solib_end;
+  int loaded;
+  char name[1];
+} solib_start, *solib_end;
 
 /* Call symbol_file_add with stderr redirected.  We don't care if there
    are errors. */
@@ -453,7 +453,7 @@ safe_symbol_file_add_stub (void *argv)
   struct so_stuff *so = &solib_start;
 
   while ((so = so->next))
-    if (strcasecmp (so->name, p->name) == 0)
+    if (so->loaded && strcasecmp (so->name, p->name) == 0)
       return 0;
   p->ret = symbol_file_add (p->name, p->from_tty, p->addrs, p->mainline, p->flags);
   return !!p->ret;
@@ -509,9 +509,12 @@ static void
 register_loaded_dll (const char *name, DWORD load_addr)
 {
   struct so_stuff *so;
-  so = (struct so_stuff *) xmalloc (sizeof (struct so_stuff) + strlen (name) + 8 + 2);
+  char ppath[MAX_PATH + 1];
+  cygwin_conv_to_posix_path (name, ppath);
+  so = (struct so_stuff *) xmalloc (sizeof (struct so_stuff) + strlen (ppath) + 8 + 1);
+  so->loaded = 0;
   so->load_addr = load_addr;
-  strcpy (so->name, name);
+  strcpy (so->name, ppath);
 
   solib_end->next = so;
   solib_end = so;
@@ -650,14 +653,14 @@ solib_symbols_add (char *name, int from_tty, CORE_ADDR load_addr)
   memset (&section_addrs, 0, sizeof (section_addrs));
   section_addrs.other[0].name = ".text";
   section_addrs.other[0].addr = load_addr;
-  safe_symbol_file_add (name, from_tty, 0, 0, OBJF_SHARED);
+  safe_symbol_file_add (name, from_tty, NULL, 0, OBJF_SHARED);
 
   return;
 }
 
 /* Load DLL symbol info. */
 void
-dll_symbol_command (char *args, int from_tty ATTRIBUTE_UNUSED)
+dll_symbol_command (char *args, int from_tty)
 {
   int n;
   dont_repeat ();
@@ -674,7 +677,7 @@ dll_symbol_command (char *args, int from_tty ATTRIBUTE_UNUSED)
       args = newargs;
     }
 
-  safe_symbol_file_add (args, 0, NULL, 0, OBJF_SHARED | OBJF_USERLOADED);
+  safe_symbol_file_add (args, from_tty, NULL, 0, OBJF_SHARED | OBJF_USERLOADED);
 }
 
 /* List currently loaded DLLs. */
