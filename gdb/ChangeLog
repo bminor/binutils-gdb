@@ -1,3 +1,10 @@
+2004-04-02  Joel Brobecker  <brobecker@gnat.com>
+	
+	Committed by Andrew Cagney <cagney@redhat.com>.
+        * alpha-tdep.c (alpha_heuristic_frame_unwind_cache): Do not take
+        into account an instruction saving a register if we have already
+        seen an earlier instruction saving that same register.
+
 2004-04-02  Andrew Cagney  <cagney@redhat.com>
 
 	* gdbarch.sh (DEPRECATED_INIT_FRAME_PC_FIRST): Delete.
