@@ -1,5 +1,8 @@
 2005-03-01  Alan Modra  <amodra@bigpond.net.au>
 
+	* targets.h: Typo fix.
+	* bfd-in2.h: Regenerate.
+
 	* bout.c (b_out_write_object_contents): Don't use sizeof on host
 	structs to size on-disk structures.
 	(b_out_set_section_contents): Size the external struct, not the

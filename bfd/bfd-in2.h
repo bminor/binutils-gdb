@@ -4370,7 +4370,7 @@ typedef struct bfd_target
   unsigned short ar_max_namelen;
 
   /* Entries for byte swapping for data. These are different from the
-     other entry points, since they don't take a BFD asthe first argument.
+     other entry points, since they don't take a BFD as the first argument.
      Certain other handlers could do the same.  */
   bfd_uint64_t   (*bfd_getx64) (const void *);
   bfd_int64_t    (*bfd_getx_signed_64) (const void *);
