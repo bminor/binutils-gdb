@@ -1,5 +1,9 @@
 Tue Jul  4 14:48:42 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* objcopy.c (copy_archive): Record all output BFD's, and close
+	them before unlinking them and removing the temporary directory,
+	to avoid NFS problems.
+
 	* ar.c (replace_members): In verbose messages, use 'r' when
         replacing a member, and 'a' when adding one.
 

@@ -820,6 +820,7 @@ copy_archive (ibfd, obfd, output_target)
     {
       struct name_list *next;
       char *name;
+      bfd *obfd;
     } *list, *l;
   bfd **ptr = &obfd->archive_head;
   bfd *this_element;
@@ -867,6 +868,8 @@ copy_archive (ibfd, obfd, output_target)
       /* Open the newly output file and attach to our list.  */
       output_bfd = bfd_openr (output_name, output_target);
 
+      l->obfd = output_bfd;
+
       *ptr = output_bfd;
       ptr = &output_bfd->next;
 
@@ -883,15 +886,18 @@ copy_archive (ibfd, obfd, output_target)
       nonfatal (bfd_get_filename (obfd));
     }
 
-  /* Delete all the files that we opened.  */
-  for (l = list; l != NULL; l = l->next)
-    unlink (l->name);
-  rmdir (dir);
-
   if (!bfd_close (ibfd))
     {
       nonfatal (bfd_get_filename (ibfd));
     }
+
+  /* Delete all the files that we opened.  */
+  for (l = list; l != NULL; l = l->next)
+    {
+      bfd_close (l->obfd);
+      unlink (l->name);
+    }
+  rmdir (dir);
 }
 
 /* The top-level control.  */
