@@ -180,10 +180,11 @@ NEXT_PROLOGUE_INSN (addr, lim, pword1)
      CORE_ADDR lim;
      short *pword1;
 {
+  char buf[2];
   if (addr < lim + 8)
     {
-      read_memory (addr, pword1, sizeof (*pword1));
-      SWAP_TARGET_AND_HOST (pword1, sizeof (short));
+      read_memory (addr, buf, 2);
+      *pword1 = extract_signed_integer (buf, 2);
 
       return addr + 2;
     }

@@ -627,13 +627,14 @@ value_ind (arg1)
 /* Push one word (the size of object that a register holds).  */
 
 CORE_ADDR
-push_word (sp, buffer)
+push_word (sp, word)
      CORE_ADDR sp;
-     REGISTER_TYPE buffer;
+     REGISTER_TYPE word;
 {
   register int len = sizeof (REGISTER_TYPE);
+  REGISTER_TYPE buffer;
 
-  SWAP_TARGET_AND_HOST (&buffer, len);
+  store_unsigned_integer (&buffer, len, word);
 #if 1 INNER_THAN 2
   sp -= len;
   write_memory (sp, (char *)&buffer, len);
@@ -854,9 +855,9 @@ call_function_by_hand (function, nargs, args)
 
   /* Create a call sequence customized for this function
      and the number of arguments for it.  */
-  memcpy (dummy1, dummy, sizeof dummy);
   for (i = 0; i < sizeof dummy / sizeof (REGISTER_TYPE); i++)
-    SWAP_TARGET_AND_HOST (&dummy1[i], sizeof (REGISTER_TYPE));
+    store_unsigned_integer (&dummy1[i], sizeof (REGISTER_TYPE),
+			    (unsigned LONGEST)dummy[i]);
 
 #ifdef GDB_TARGET_IS_HPPA
   real_pc = FIX_CALL_DUMMY (dummy1, start_sp, funaddr, nargs, args,

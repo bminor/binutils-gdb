@@ -135,17 +135,16 @@ next_insn (memaddr, pword1, pword2)
      CORE_ADDR memaddr;
 {
   int len;
-  unsigned long buf[2];
+  char buf[8];
 
   /* Read the two (potential) words of the instruction at once,
      to eliminate the overhead of two calls to read_memory ().
-     TODO: read more instructions at once and cache them.  */
+     FIXME: Loses if the first one is readable but the second is not
+     (e.g. last word of the segment).  */
 
-  read_memory (memaddr, buf, sizeof (buf));
-  *pword1 = buf[0];
-  SWAP_TARGET_AND_HOST (pword1, sizeof (long));
-  *pword2 = buf[1];
-  SWAP_TARGET_AND_HOST (pword2, sizeof (long));
+  read_memory (memaddr, buf, 8);
+  *pword1 = extract_unsigned_integer (buf, 4);
+  *pword2 = extract_unsigned_integer (buf + 4, 4);
 
   /* Divide instruction set into classes based on high 4 bits of opcode*/
 

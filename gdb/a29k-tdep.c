@@ -570,10 +570,9 @@ read_register_stack_integer (memaddr, len)
      CORE_ADDR memaddr;
      int len;
 {
-  long buf;
-  read_register_stack (memaddr, &buf, NULL, NULL);
-  SWAP_TARGET_AND_HOST (&buf, 4);
-  return buf;
+  char buf[4];
+  read_register_stack (memaddr, buf, NULL, NULL);
+  return extract_signed_integer (buf, 4);
 }
 
 /* Copy 4 bytes from GDB memory at MYADDR into inferior memory
@@ -647,9 +646,7 @@ get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lvalp)
     {
       if (raw_buffer != NULL)
 	{
-	  *(CORE_ADDR *)raw_buffer = fi->frame;
-	  /* Put it back in target byte order.  */
-	  SWAP_TARGET_AND_HOST (raw_buffer, sizeof (CORE_ADDR));
+	  store_address (raw_buffer, REGISTER_RAW_BYTES (regnum), fi->frame);
 	}
       if (lvalp != NULL)
 	*lvalp = not_lval;
@@ -659,9 +656,7 @@ get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lvalp)
     {
       if (raw_buffer != NULL)
 	{
-	  *(CORE_ADDR *)raw_buffer = fi->pc;
-	  /* Put it back in target byte order.  */
-	  SWAP_TARGET_AND_HOST (raw_buffer, sizeof (CORE_ADDR));
+	  store_address (raw_buffer, REGISTER_RAW_BYTES (regnum), fi->pc);
 	}
 
       /* Not sure we have to do this.  */
@@ -676,9 +671,8 @@ get_saved_register (raw_buffer, optimized, addrp, frame, regnum, lvalp)
 	{
 	  if (fi->next != NULL)
 	    {
-	      *(CORE_ADDR *)raw_buffer = fi->next->saved_msp;
-	      /* Put it back in target byte order.  */
-	      SWAP_TARGET_AND_HOST (raw_buffer, sizeof (CORE_ADDR));
+	      store_address (raw_buffer, REGISTER_RAW_BYTES (regnum),
+			     fi->next->saved_msp);
 	    }
 	  else
 	    read_register_gen (MSP_REGNUM, raw_buffer);

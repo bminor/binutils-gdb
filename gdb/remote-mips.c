@@ -1061,10 +1061,14 @@ mips_fetch_registers (regno)
   if (err)
     error ("Can't read register %d: %s", regno, safe_strerror (errno));
 
-  /* We got the number the register holds, but gdb expects to see a
-     value in the target byte ordering.  */
-  SWAP_TARGET_AND_HOST (&val, sizeof (REGISTER_TYPE));
-  supply_register (regno, (char *) &val);
+  {
+    char buf[MAX_REGISTER_RAW_SIZE];
+
+    /* We got the number the register holds, but gdb expects to see a
+       value in the target byte ordering.  */
+    store_unsigned_integer (buf, REGISTER_RAW_SIZE (regno), val);
+    supply_register (regno, buf);
+  }
 }
 
 /* Prepare to store registers.  The MIPS protocol can store individual
@@ -1157,7 +1161,7 @@ mips_xfer_memory (memaddr, myaddr, len, write, ignore)
   /* Round ending address up; get number of longwords that makes.  */
   register int count = (((memaddr + len) - addr) + 3) / 4;
   /* Allocate buffer of that many longwords.  */
-  register unsigned int *buffer = (unsigned int *) alloca (count * 4);
+  register char *buffer = alloca (count * 4);
 
   if (write)
     {
@@ -1165,14 +1169,15 @@ mips_xfer_memory (memaddr, myaddr, len, write, ignore)
       if (addr != memaddr || len < 4)
 	{
 	  /* Need part of initial word -- fetch it.  */
-	  buffer[0] = mips_fetch_word (addr);
-	  SWAP_TARGET_AND_HOST (buffer, 4);
+	  store_unsigned_integer (&buffer[0], 4, mips_fetch_word (addr));
 	}
 
-      if (count > 1)		/* FIXME, avoid if even boundary */
+      if (count > 1)
 	{
-	  buffer[count - 1] = mips_fetch_word (addr + (count - 1) * 4);
-	  SWAP_TARGET_AND_HOST (buffer + (count - 1) * 4, 4);
+	  /* Need part of last word -- fetch it.  FIXME: we do this even
+	     if we don't need it.  */
+	  store_unsigned_integer (&buffer[(count - 1) * 4], 4,
+				  mips_fetch_word (addr + (count - 1) * 4));
 	}
 
       /* Copy data to be written over corresponding part of buffer */
@@ -1183,8 +1188,8 @@ mips_xfer_memory (memaddr, myaddr, len, write, ignore)
 
       for (i = 0; i < count; i++, addr += 4)
 	{
-	  SWAP_TARGET_AND_HOST (buffer + i, 4);
-	  mips_store_word (addr, buffer[i]);
+	  mips_store_word (addr, extract_unsigned_integer (&buffer[i*4], 4));
+	  /* FIXME: Do we want a QUIT here?  */
 	}
     }
   else
@@ -1192,13 +1197,12 @@ mips_xfer_memory (memaddr, myaddr, len, write, ignore)
       /* Read all the longwords */
       for (i = 0; i < count; i++, addr += 4)
 	{
-	  buffer[i] = mips_fetch_word (addr);
-	  SWAP_TARGET_AND_HOST (buffer + i, 4);
+	  store_unsigned_integer (&buffer[i*4], 4, mips_fetch_word (addr));
 	  QUIT;
 	}
 
       /* Copy appropriate bytes out of the buffer.  */
-      memcpy (myaddr, (char *) buffer + (memaddr & (sizeof (int) - 1)), len);
+      memcpy (myaddr, buffer + (memaddr & 3), len);
     }
   return len;
 }

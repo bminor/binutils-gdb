@@ -1,5 +1,10 @@
 Fri Jul  9 12:36:46 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* findvar.c, defs.h
+	({extract,store}_{signed_integer,unsigned_integer,address}):
+	New routines to replace SWAP_TARGET_AND_HOST.
+	All over: All uses of SWAP_TARGET_AND_HOST on integers replaced.
+
 	* config/sparc/tm-sparc.h: Add comment suggesting that removing
 	ins and locals from the registers array might clean things up.
 

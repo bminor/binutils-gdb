@@ -209,79 +209,28 @@ write_memory (memaddr, myaddr, len)
 
 /* Read an integer from debugged memory, given address and number of bytes.  */
 
-long
+LONGEST
 read_memory_integer (memaddr, len)
      CORE_ADDR memaddr;
      int len;
 {
-  char cbuf;
-  short sbuf;
-  int ibuf;
-  long lbuf;
+  char *buf;
 
-  if (len == sizeof (char))
-    {
-      read_memory (memaddr, &cbuf, len);
-      return cbuf;
-    }
-  if (len == sizeof (short))
-    {
-      read_memory (memaddr, (char *)&sbuf, len);
-      SWAP_TARGET_AND_HOST (&sbuf, sizeof (short));
-      return sbuf;
-    }
-  if (len == sizeof (int))
-    {
-      read_memory (memaddr, (char *)&ibuf, len);
-      SWAP_TARGET_AND_HOST (&ibuf, sizeof (int));
-      return ibuf;
-    }
-  if (len == sizeof (lbuf))
-    {
-      read_memory (memaddr, (char *)&lbuf, len);
-      SWAP_TARGET_AND_HOST (&lbuf, sizeof (lbuf));
-      return lbuf;
-    }
-  error ("Cannot handle integers of %d bytes.", len);
-  return -1;	/* for lint */
+  buf = alloca (len);
+  read_memory (memaddr, buf, len);
+  return extract_signed_integer (buf, len);
 }
 
-
-unsigned long
+unsigned LONGEST
 read_memory_unsigned_integer (memaddr, len)
      CORE_ADDR memaddr;
      int len;
 {
-  unsigned char cbuf;
-  unsigned short sbuf;
-  unsigned int ibuf;
-  unsigned long lbuf;
+  char *buf;
 
-  if (len == sizeof (char))
-    {
-      read_memory (memaddr, &cbuf, len);
-      return cbuf;
-    }
-  if (len == sizeof (short))
-    {
-      read_memory (memaddr, (char *)&sbuf, len);
-      SWAP_TARGET_AND_HOST (&sbuf, sizeof (short));
-      return sbuf;
-    }
-  if (len == sizeof (int))
-    {
-      read_memory (memaddr, (char *)&ibuf, len);
-      SWAP_TARGET_AND_HOST (&ibuf, sizeof (int));
-      return ibuf;
-    }
-  if (len == sizeof (lbuf))
-    {
-      read_memory (memaddr, (char *)&lbuf, len);
-      SWAP_TARGET_AND_HOST (&lbuf, sizeof (lbuf));
-      return lbuf;
-    }
-  error ("Cannot handle unsigned integers of %d bytes.", len);
-  return -1;	/* for lint */
+  buf = alloca (len);
+  read_memory (memaddr, buf, len);
+  return extract_unsigned_integer (buf, len);
 }
 
 void

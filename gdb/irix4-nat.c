@@ -133,18 +133,19 @@ fill_fpregset (fpregsetp, regno)
    This routine returns true on success. */
 
 int
-get_longjmp_target(pc)
+get_longjmp_target (pc)
      CORE_ADDR *pc;
 {
+  char buf[TARGET_PTR_BIT / TARGET_CHAR_BIT];
   CORE_ADDR jb_addr;
 
-  jb_addr = read_register(A0_REGNUM);
+  jb_addr = read_register (A0_REGNUM);
 
-  if (target_read_memory(jb_addr + JB_PC * JB_ELEMENT_SIZE, pc,
-			 sizeof(CORE_ADDR)))
+  if (target_read_memory (jb_addr + JB_PC * JB_ELEMENT_SIZE, buf,
+			  TARGET_PTR_BIT / TARGET_CHAR_BIT))
     return 0;
 
-  SWAP_TARGET_AND_HOST(pc, sizeof(CORE_ADDR));
+  *pc = extract_address (buf, TARGET_PTR_BIT / TARGET_CHAR_BIT);
 
   return 1;
 }

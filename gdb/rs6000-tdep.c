@@ -187,12 +187,13 @@ single_step (signal)
 skip_prologue (pc)
 CORE_ADDR pc;
 {
+  char buf[4];
   unsigned int tmp;
-  unsigned int op;    /* FIXME, assumes instruction size matches host int!!! */
+  unsigned long op;
 
-  if (target_read_memory (pc, (char *)&op, sizeof (op)))
+  if (target_read_memory (pc, buf, 4))
     return pc;			/* Can't access it -- assume no prologue. */
-  SWAP_TARGET_AND_HOST (&op, sizeof (op));
+  op = extract_unsigned_integer (buf, 4);
 
   /* Assume that subsequent fetches can fail with low probability.  */
 

@@ -23,10 +23,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcore.h"
 #include "target.h"
 
-#ifdef USE_PROC_FS	/* Target dependent support for /proc */
-#include <sys/procfs.h>
-#endif
-
 static long
 i386_get_frame_setup PARAMS ((int));
 
@@ -82,9 +78,7 @@ codestream_fill (peek_flag)
   codestream_next_addr += CODESTREAM_BUFSIZ;
   codestream_off = 0;
   codestream_cnt = CODESTREAM_BUFSIZ;
-  read_memory (codestream_addr,
-	       (unsigned char *)codestream_buf,
-	       CODESTREAM_BUFSIZ);
+  read_memory (codestream_addr, (char *) codestream_buf, CODESTREAM_BUFSIZ);
   
   if (peek_flag)
     return (codestream_peek());
@@ -255,8 +249,8 @@ i386_get_frame_setup (pc)
 	}
       else if (op == 0x81)
 	{
-	  /* subl with 32 bit immed */
-	  int locals;
+	  char buf[4];
+	  /* Maybe it is subl with 32 bit immedediate.  */
 	  codestream_get();
 	  if (codestream_get () != 0xec)
 	    /* Some instruction starting with 0x81 other than subl.  */
@@ -264,10 +258,9 @@ i386_get_frame_setup (pc)
 	      codestream_seek (codestream_tell () - 2);
 	      return 0;
 	    }
-	  /* subl with 32 bit immediate */
-	  codestream_read ((unsigned char *)&locals, 4);
-	  SWAP_TARGET_AND_HOST (&locals, 4);
-	  return (locals);
+	  /* It is subl with 32 bit immediate.  */
+	  codestream_read ((unsigned char *)buf, 4);
+	  return extract_signed_integer (buf, 4);
 	}
       else
 	{
@@ -276,12 +269,11 @@ i386_get_frame_setup (pc)
     }
   else if (op == 0xc8)
     {
+      char buf[2];
       /* enter instruction: arg is 16 bit unsigned immed */
-      unsigned short slocals;
-      codestream_read ((unsigned char *)&slocals, 2);
-      SWAP_TARGET_AND_HOST (&slocals, 2);
+      codestream_read ((unsigned char *)buf, 2);
       codestream_get (); /* flush final byte of enter instruction */
-      return (slocals);
+      return extract_unsigned_integer (buf, 2);
     }
   return (-1);
 }
@@ -289,19 +281,26 @@ i386_get_frame_setup (pc)
 /* Return number of args passed to a frame.
    Can return -1, meaning no way to tell.  */
 
-/* on the 386, the instruction following the call could be:
- *  popl %ecx        -  one arg
- *  addl $imm, %esp  -  imm/4 args; imm may be 8 or 32 bits
- *  anything else    -  zero args
- */
-
 int
 i386_frame_num_args (fi)
      struct frame_info *fi;
 {
+#if 1
+  return -1;
+#else
+  /* This loses because not only might the compiler not be popping the
+     args right after the function call, it might be popping args from both
+     this call and a previous one, and we would say there are more args
+     than there really are.  */
+
   int retpc;						
   unsigned char op;					
   struct frame_info *pfi;
+
+  /* on the 386, the instruction following the call could be:
+     popl %ecx        -  one arg
+     addl $imm, %esp  -  imm/4 args; imm may be 8 or 32 bits
+     anything else    -  zero args  */
 
   int frameless;
 
@@ -352,6 +351,7 @@ i386_frame_num_args (fi)
 	  return 0;
 	}
     }
+#endif
 }
 
 /*
@@ -394,7 +394,7 @@ i386_frame_find_saved_regs (fip, fsrp)
   CORE_ADDR adr;
   int i;
   
-  (void) memset (fsrp, 0, sizeof *fsrp);
+  memset (fsrp, 0, sizeof *fsrp);
   
   /* if frame is the end of a dummy, compute where the
    * beginning would be
@@ -514,137 +514,6 @@ i386_pop_frame ()
 					read_pc ()));
 }
 
-#ifdef USE_PROC_FS	/* Target dependent support for /proc */
-
-/*  The /proc interface divides the target machine's register set up into
-    two different sets, the general register set (gregset) and the floating
-    point register set (fpregset).  For each set, there is an ioctl to get
-    the current register set and another ioctl to set the current values.
-
-    The actual structure passed through the ioctl interface is, of course,
-    naturally machine dependent, and is different for each set of registers.
-    For the i386 for example, the general register set is typically defined
-    by:
-
-	typedef int gregset_t[19];		(in <sys/regset.h>)
-
-	#define GS	0			(in <sys/reg.h>)
-	#define FS	1
-	...
-	#define UESP	17
-	#define SS	18
-
-    and the floating point set by:
-
-	typedef struct fpregset
-	  {
-	    union
-	      {
-		struct fpchip_state	// fp extension state //
-		{
-		  int state[27];	// 287/387 saved state //
-		  int status;		// status word saved at exception //
-		} fpchip_state;
-		struct fp_emul_space	// for emulators //
-		{
-		  char fp_emul[246];
-		  char fp_epad[2];
-		} fp_emul_space;
-		int f_fpregs[62];	// union of the above //
-	      } fp_reg_set;
-	    long f_wregs[33];		// saved weitek state //
-	} fpregset_t;
-
-    These routines provide the packing and unpacking of gregset_t and
-    fpregset_t formatted data.
-
- */
-
-/* This is a duplicate of the table in i386-xdep.c. */
-
-static int regmap[] = 
-{
-  EAX, ECX, EDX, EBX,
-  UESP, EBP, ESI, EDI,
-  EIP, EFL, CS, SS,
-  DS, ES, FS, GS,
-};
-
-
-/*  Given a pointer to a general register set in /proc format (gregset_t *),
-    unpack the register contents and supply them as gdb's idea of the current
-    register values. */
-
-void
-supply_gregset (gregsetp)
-     gregset_t *gregsetp;
-{
-  register int regno;
-  register greg_t *regp = (greg_t *) gregsetp;
-  extern int regmap[];
-
-  for (regno = 0 ; regno < NUM_REGS ; regno++)
-    {
-      supply_register (regno, (char *) (regp + regmap[regno]));
-    }
-}
-
-void
-fill_gregset (gregsetp, regno)
-     gregset_t *gregsetp;
-     int regno;
-{
-  int regi;
-  register greg_t *regp = (greg_t *) gregsetp;
-  extern char registers[];
-  extern int regmap[];
-
-  for (regi = 0 ; regi < NUM_REGS ; regi++)
-    {
-      if ((regno == -1) || (regno == regi))
-	{
-	  *(regp + regmap[regno]) = *(int *) &registers[REGISTER_BYTE (regi)];
-	}
-    }
-}
-
-#if defined (FP0_REGNUM)
-
-/*  Given a pointer to a floating point register set in /proc format
-    (fpregset_t *), unpack the register contents and supply them as gdb's
-    idea of the current floating point register values. */
-
-void 
-supply_fpregset (fpregsetp)
-     fpregset_t *fpregsetp;
-{
-  register int regno;
-  
-  /* FIXME: see m68k-tdep.c for an example, for the m68k. */
-}
-
-/*  Given a pointer to a floating point register set in /proc format
-    (fpregset_t *), update the register specified by REGNO from gdb's idea
-    of the current floating point register set.  If REGNO is -1, update
-    them all. */
-
-void
-fill_fpregset (fpregsetp, regno)
-     fpregset_t *fpregsetp;
-     int regno;
-{
-  int regi;
-  char *to;
-  char *from;
-  extern char registers[];
-
-  /* FIXME: see m68k-tdep.c for an example, for the m68k. */
-}
-
-#endif	/* defined (FP0_REGNUM) */
-
-#endif  /* USE_PROC_FS */
-
 #ifdef GET_LONGJMP_TARGET
 
 /* Figure out where the longjmp will land.  Slurp the args out of the stack.
@@ -656,25 +525,65 @@ int
 get_longjmp_target(pc)
      CORE_ADDR *pc;
 {
+  char buf[TARGET_PTR_BIT / TARGET_CHAR_BIT];
   CORE_ADDR sp, jb_addr;
 
-  sp = read_register(SP_REGNUM);
+  sp = read_register (SP_REGNUM);
 
-  if (target_read_memory(sp + SP_ARG0, /* Offset of first arg on stack */
-			 (char *) &jb_addr,
-			 sizeof(CORE_ADDR)))
+  if (target_read_memory (sp + SP_ARG0, /* Offset of first arg on stack */
+			  buf,
+			  TARGET_PTR_BIT / TARGET_CHAR_BIT))
     return 0;
 
+  jb_addr = extract_address (buf, TARGET_PTR_BIT / TARGET_CHAR_BIT);
 
-  SWAP_TARGET_AND_HOST(&jb_addr, sizeof(CORE_ADDR));
-
-  if (target_read_memory(jb_addr + JB_PC * JB_ELEMENT_SIZE, (char *) pc,
-			 sizeof(CORE_ADDR)))
+  if (target_read_memory (jb_addr + JB_PC * JB_ELEMENT_SIZE, buf,
+			  TARGET_PTR_BIT / TARGET_CHAR_BIT))
     return 0;
 
-  SWAP_TARGET_AND_HOST(pc, sizeof(CORE_ADDR));
+  *pc = extract_address (buf, TARGET_PTR_BIT / TARGET_CHAR_BIT);
 
   return 1;
 }
 
 #endif /* GET_LONGJMP_TARGET */
+
+#ifdef I386_AIX_TARGET
+/* On AIX, floating point values are returned in floating point registers.  */
+
+void
+i386_extract_return_value(type, regbuf, valbuf)
+     struct type *type;
+     char regbuf[REGISTER_BYTES];
+     char *valbuf;
+{
+  if (TYPE_CODE_FLT == TYPE_CODE(type))
+    {
+      extern struct ext_format ext_format_i387;
+      double d;
+      /* 387 %st(0), gcc uses this */
+      ieee_extended_to_double (&ext_format_i387,
+			       &regbuf[REGISTER_BYTE(FP0_REGNUM)],
+			       &d);
+      switch (TYPE_LENGTH(type))
+	{
+	case 4:			/* float */
+	  {
+	    float f = (float) d;
+	    memcpy (valbuf, &f, 4); 
+	    break;
+	  }
+	case 8:			/* double */
+	  memcpy (valbuf, &d, 8);
+	  break;
+	default:
+	  error("Unknown floating point size");
+	  break;
+	}
+    }
+  else
+    { 
+      memcpy (valbuf, regbuf, TYPE_LENGTH (type)); 
+    }
+}
+#endif /* I386_AIX_TARGET */

@@ -605,139 +605,22 @@ unpack_long (type, valaddr)
 	  error ("Unexpected type of floating point number.");
 	}
     }
-  else if (code == TYPE_CODE_INT && nosign)
+  else if ((code == TYPE_CODE_INT || code == TYPE_CODE_CHAR) && nosign)
     {
-      if (len == sizeof (char))
-	{
-	  unsigned char retval = * (unsigned char *) valaddr;
-	  /* SWAP_TARGET_AND_HOST (&retval, sizeof (unsigned char)); */
-	  return retval;
-	}
-
-      if (len == sizeof (short))
-	{
-	  unsigned short retval;
-	  memcpy (&retval, valaddr, sizeof (retval));
-	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
-	  return retval;
-	}
-
-      if (len == sizeof (int))
-	{
-	  unsigned int retval;
-	  memcpy (&retval, valaddr, sizeof (retval));
-	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
-	  return retval;
-	}
-
-      if (len == sizeof (long))
-	{
-	  unsigned long retval;
-	  memcpy (&retval, valaddr, sizeof (retval));
-	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
-	  return retval;
-	}
-#ifdef CC_HAS_LONG_LONG
-      if (len == sizeof (long long))
-	{
-	  unsigned long long retval;
-	  memcpy (&retval, valaddr, sizeof (retval));
-	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
-	  return retval;
-	}
-#endif
-      else
-	{
-	  error ("That operation is not possible on an integer of that size.");
-	}
+      return extract_unsigned_integer (valaddr, len);
     }
-  else if (code == TYPE_CODE_INT)
+  else if (code == TYPE_CODE_INT || code == TYPE_CODE_CHAR)
     {
-      if (len == sizeof (char))
-	{
-	  SIGNED char retval;	/* plain chars might be unsigned on host */
-	  memcpy (&retval, valaddr, sizeof (retval));
-	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
-	  return retval;
-	}
-
-      if (len == sizeof (short))
-	{
-	  short retval;
-	  memcpy (&retval, valaddr, sizeof (retval));
-	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
-	  return retval;
-	}
-
-      if (len == sizeof (int))
-	{
-	  int retval;
-	  memcpy (&retval, valaddr, sizeof (retval));
-	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
-	  return retval;
-	}
-
-      if (len == sizeof (long))
-	{
-	  long retval;
-	  memcpy (&retval, valaddr, sizeof (retval));
-	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
-	  return retval;
-	}
-
-#ifdef CC_HAS_LONG_LONG
-      if (len == sizeof (long long))
-	{
-	  long long retval;
-	  memcpy (&retval, valaddr, sizeof (retval));
-	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
-	  return retval;
-	}
-#endif
-      else
-	{
-	  error ("That operation is not possible on an integer of that size.");
-	}
+      return extract_signed_integer (valaddr, len);
     }
   /* Assume a CORE_ADDR can fit in a LONGEST (for now).  Not sure
      whether we want this to be true eventually.  */
   else if (code == TYPE_CODE_PTR || code == TYPE_CODE_REF)
     {
-      if (len == sizeof(long))
-      {
-	unsigned long retval;
-	memcpy (&retval, valaddr, sizeof(retval));
-	SWAP_TARGET_AND_HOST (&retval, sizeof(retval));
-	return retval;
-      }
-      else if (len == sizeof(short))
-      {
-	unsigned short retval;
-	memcpy (&retval, valaddr, len);
-	SWAP_TARGET_AND_HOST (&retval, len);
-	return retval;
-      }
-      else if (len == sizeof(int))
-      {
-	unsigned int retval;
-	memcpy (&retval, valaddr, len);
-	SWAP_TARGET_AND_HOST (&retval, len);
-	return retval;
-      }
-#ifdef CC_HAS_LONG_LONG
-      else if (len == sizeof(long long))
-      {
-	unsigned long long retval;
-	memcpy (&retval, valaddr, len);
-	SWAP_TARGET_AND_HOST (&retval, len);
-	return retval;
-      }
-#endif
+      return extract_address (valaddr, len);
     }
   else if (code == TYPE_CODE_MEMBER)
     error ("not implemented: member types in unpack_long");
-  else if (code == TYPE_CODE_CHAR)
-    return *(unsigned char *)valaddr;
 
   error ("Value not integer or pointer.");
   return 0; 	/* For lint -- never reached */
@@ -816,34 +699,9 @@ unpack_pointer (type, valaddr)
      struct type *type;
      char *valaddr;
 {
-#if 0
-  /* The user should be able to use an int (e.g. 0x7892) in contexts
-     where a pointer is expected.  So this doesn't do enough.  */
-  register enum type_code code = TYPE_CODE (type);
-  register int len = TYPE_LENGTH (type);
-
-  if (code == TYPE_CODE_PTR
-      || code == TYPE_CODE_REF)
-    {
-      if (len == sizeof (CORE_ADDR))
-	{
-	  CORE_ADDR retval;
-	  memcpy (&retval, valaddr, sizeof (retval));
-	  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
-	  return retval;
-	}
-      error ("Unrecognized pointer size.");
-    }
-  else if (code == TYPE_CODE_MEMBER)
-    error ("not implemented: member types in unpack_pointer");
-
-  error ("Value is not a pointer.");
-  return 0; 	/* For lint -- never reached */
-#else
   /* Assume a CORE_ADDR can fit in a LONGEST (for now).  Not sure
      whether we want this to be true eventually.  */
   return unpack_long (type, valaddr);
-#endif
 }
 
 /* Given a value ARG1 (offset by OFFSET bytes)
@@ -1312,8 +1170,7 @@ unpack_field_as_long (type, valaddr, fieldno)
   int bitsize = TYPE_FIELD_BITSIZE (type, fieldno);
   int lsbcount;
 
-  memcpy (&val, valaddr + bitpos / 8, sizeof (val));
-  SWAP_TARGET_AND_HOST (&val, sizeof (val));
+  val = extract_unsigned_integer (valaddr + bitpos / 8, sizeof (val));
 
   /* Extract bits.  See comment above. */
 
@@ -1360,9 +1217,8 @@ modify_field (addr, fieldval, bitpos, bitsize)
   if (bitsize < (8 * sizeof (fieldval))
       && 0 != (fieldval & ~((1<<bitsize)-1)))
     error ("Value %d does not fit in %d bits.", fieldval, bitsize);
-  
-  memcpy (&oword, addr, sizeof oword);
-  SWAP_TARGET_AND_HOST (&oword, sizeof oword);		/* To host format */
+
+  oword = extract_signed_integer (addr, sizeof oword);
 
   /* Shifting for bit field depends on endianness of the target machine.  */
 #if BITS_BIG_ENDIAN
@@ -1376,8 +1232,7 @@ modify_field (addr, fieldval, bitpos, bitsize)
     oword &= ~((-1) << bitpos);
   oword |= fieldval << bitpos;
 
-  SWAP_TARGET_AND_HOST (&oword, sizeof oword);		/* To target format */
-  memcpy (addr, &oword, sizeof oword);
+  store_signed_integer (addr, sizeof oword, oword);
 }
 
 /* Convert C numbers into newly allocated values */
@@ -1391,32 +1246,25 @@ value_from_longest (type, num)
   register enum type_code code = TYPE_CODE (type);
   register int len = TYPE_LENGTH (type);
 
-  /* FIXME, we assume that pointers have the same form and byte order as
-     integers, and that all pointers have the same form.  */
-  if (code == TYPE_CODE_INT  || code == TYPE_CODE_ENUM || 
-      code == TYPE_CODE_CHAR || code == TYPE_CODE_PTR ||
-      code == TYPE_CODE_REF  || code == TYPE_CODE_BOOL)
+  switch (code)
     {
-      if (len == sizeof (char))
-	* (char *) VALUE_CONTENTS_RAW (val) = num;
-      else if (len == sizeof (short))
-	* (short *) VALUE_CONTENTS_RAW (val) = num;
-      else if (len == sizeof (int))
-	* (int *) VALUE_CONTENTS_RAW (val) = num;
-      else if (len == sizeof (long))
-	* (long *) VALUE_CONTENTS_RAW (val) = num;
-      else if (len == sizeof (LONGEST))
-	* (LONGEST *) VALUE_CONTENTS_RAW (val) = num;
-      else
-	error ("Integer type encountered with unexpected data length.");
+    case TYPE_CODE_INT:
+    case TYPE_CODE_CHAR:
+    case TYPE_CODE_ENUM:
+    case TYPE_CODE_BOOL:
+      store_signed_integer (VALUE_CONTENTS_RAW (val), len, num);
+      break;
+      
+    case TYPE_CODE_REF:
+    case TYPE_CODE_PTR:
+      /* This assumes that all pointers of a given length
+	 have the same form.  */
+      store_address (VALUE_CONTENTS_RAW (val), len, (CORE_ADDR) num);
+      break;
+
+    default:
+      error ("Unexpected type encountered for integer constant.");
     }
-  else
-    error ("Unexpected type encountered for integer constant.");
-
-  /* num was in host byte order.  So now put the value's contents
-     into target byte order.  */
-  SWAP_TARGET_AND_HOST (VALUE_CONTENTS_RAW (val), len);
-
   return val;
 }
 

@@ -178,12 +178,14 @@ heuristic_proc_desc(start_pc, limit_pc, next_frame)
   restart:
     frame_size = 0;
     for (cur_pc = start_pc; cur_pc < limit_pc; cur_pc += 4) {
+        char buf[4];
 	unsigned long word;
 	int status;
 
-	status = read_memory_nobpt (cur_pc, (char *)&word, 4); 
-	if (status) memory_error (status, cur_pc); 
-	SWAP_TARGET_AND_HOST (&word, sizeof (word));
+	status = read_memory_nobpt (cur_pc, buf, 4); 
+	if (status) memory_error (status, cur_pc);
+	word = extract_unsigned_integer (buf, 4);
+
 	if ((word & 0xFFFF0000) == 0x27bd0000) /* addiu $sp,$sp,-i */
 	    frame_size += (-word) & 0xFFFF;
 	else if ((word & 0xFFFF0000) == 0x23bd0000) /* addu $sp,$sp,-i */
@@ -636,8 +638,9 @@ mips_print_register (regnum, all)
 	{
 	  long val;
 
-	  bcopy (raw_buffer, &val, sizeof (long));
-	  SWAP_TARGET_AND_HOST ((char *)&val, sizeof (long));
+	  val = extract_signed_integer (raw_buffer,
+					REGISTER_RAW_SIZE (regnum));
+
 	  if (val == 0)
 	    printf_filtered ("0");
 	  else if (all)

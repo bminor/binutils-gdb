@@ -147,8 +147,7 @@ sparc_frame_chain (thisframe)
   err = target_read_memory (addr, (char *) &retval, sizeof (REGISTER_TYPE));
   if (err)
     return 0;
-  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
-  return retval;
+  return extract_address (&retval, sizeof (retval));
 }
 
 CORE_ADDR
@@ -167,22 +166,12 @@ frame_saved_pc (frame)
      FRAME frame;
 {
   REGISTER_TYPE retval;
-  CORE_ADDR addr,prev_pc;
-
-  if (get_current_frame () == frame)  /* FIXME, debug check. Remove >=gdb-4.6 */
-    {
-      if (read_register (SP_REGNUM) != frame->bottom) abort();
-    }
+  CORE_ADDR addr;
 
   addr = (frame->bottom + FRAME_SAVED_I0 +
 	  REGISTER_RAW_SIZE (I7_REGNUM) * (I7_REGNUM - I0_REGNUM));
   read_memory (addr, (char *) &retval, sizeof (REGISTER_TYPE));
-  SWAP_TARGET_AND_HOST (&retval, sizeof (retval));
-
-  /* CORE_ADDR isn't always the same size as REGISTER_TYPE, so convert.  */
-
-  prev_pc = (CORE_ADDR) retval;
-  return PC_ADJUST (prev_pc);
+  return PC_ADJUST (extract_address (&retval, sizeof (REGISTER_TYPE)));
 }
 
 /*
@@ -582,11 +571,12 @@ CORE_ADDR
 sparc_pc_adjust(pc)
      CORE_ADDR pc;
 {
-  long insn;
+  unsigned long insn;
+  char buf[4];
   int err;
 
-  err = target_read_memory (pc + 8, (char *)&insn, sizeof(long));
-  SWAP_TARGET_AND_HOST (&insn, sizeof(long));
+  err = target_read_memory (pc + 8, buf, sizeof(long));
+  insn = extract_unsigned_integer (buf, 4);
   if ((err == 0) && (insn & 0xfffffe00) == 0)
     return pc+12;
   else
@@ -769,14 +759,16 @@ get_longjmp_target(pc)
      CORE_ADDR *pc;
 {
   CORE_ADDR jb_addr;
+#define LONGJMP_TARGET_SIZE 4
+  char buf[LONGJMP_TARGET_SIZE];
 
   jb_addr = read_register(O0_REGNUM);
 
-  if (target_read_memory(jb_addr + JB_PC * JB_ELEMENT_SIZE, (char *) pc,
-			 sizeof(CORE_ADDR)))
+  if (target_read_memory(jb_addr + JB_PC * JB_ELEMENT_SIZE, buf,
+			 LONGJMP_TARGET_SIZE))
     return 0;
 
-  SWAP_TARGET_AND_HOST(pc, sizeof(CORE_ADDR));
+  *pc = extract_address (buf, LONGJMP_TARGET_SIZE);
 
   return 1;
 }

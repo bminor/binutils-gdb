@@ -897,11 +897,12 @@ CORE_ADDR
 skip_prologue(pc)
      CORE_ADDR pc;
 {
-  int inst;
+  char buf[4];
+  unsigned long inst;
   int status;
 
-  status = target_read_memory (pc, (char *)&inst, 4);
-  SWAP_TARGET_AND_HOST (&inst, sizeof (inst));
+  status = target_read_memory (pc, buf, 4);
+  inst = extract_unsigned_integer (buf, 4);
   if (status != 0)
     return pc;
 
