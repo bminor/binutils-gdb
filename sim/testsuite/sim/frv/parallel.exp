@@ -4,7 +4,7 @@ if [istarget frv*-*] {
     # load support procs (none yet)
     # load_lib cgen.exp
     # all machines
-    set all_machs "frv fr500 fr400"
+    set all_machs "frv fr500 fr550 fr400"
     set cpu_option -mcpu
 
     # The .pcgs suffix is for "parallel cgen .s".

@@ -1,5 +1,5 @@
 # frv parallel testcase for branching
-# mach: fr500 frv
+# mach: fr500 fr550 frv
 
 	.include "testutils.inc"
 

@@ -1,5 +1,5 @@
 # frv testcase for mdcutssi $ACC40i,$s6,$FRk
-# mach: fr400
+# mach: fr400 fr550
 
 	.include "testutils.inc"
 

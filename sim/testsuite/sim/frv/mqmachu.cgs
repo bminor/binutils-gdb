@@ -1,5 +1,5 @@
 # frv testcase for mqmachu $GRi,$GRj,$GRk
-# mach: all
+# mach: frv fr500 fr400
 
 	.include "testutils.inc"
 

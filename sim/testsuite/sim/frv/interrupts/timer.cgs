@@ -1,5 +1,5 @@
 # frv testcase to generate timer interrupt for st $GRk,@($GRi,$GRj)
-# mach: fr500 fr400
+# mach: fr500 fr550 fr400
 # sim: --timer 200,14
 	.include "testutils.inc"
 

@@ -1,5 +1,5 @@
 # frv testcase for udiv $GRi,$GRj,$GRk
-# mach: all
+# mach: fr400
 
 	.include "../testutils.inc"
 

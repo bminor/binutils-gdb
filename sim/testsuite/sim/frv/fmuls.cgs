@@ -1,5 +1,5 @@
 # frv testcase for fmuls $GRi,$GRj,$GRk
-# mach: fr500 frv
+# mach: fr500 fr550 frv
 
 	.include "testutils.inc"
 

@@ -1,3 +1,11 @@
+2003-10-06  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/fr550: New subdirectory.
+	* sim/frv/fr400/*.cgs: Add fr550 as appropriate.
+	* sim/frv/fr500/*.cgs: Add fr550 as appropriate.
+	* sim/frv/interrupts/*.cgs: Add fr550 as appropriate.
+	* sim/frv/interrupts/*-fr550.cgs: New test cases for fr550.
+
 2003-09-19  Michael Snyder  <msnyder@redhat.com>
 
 	* sim/frv/nldqi.cgs: Remove.  This insn was never implemented

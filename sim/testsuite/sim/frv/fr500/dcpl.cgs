@@ -1,5 +1,5 @@
 # FRV testcase for dcpl GRi,GRj,lock
-# mach: all
+# mach: frv fr500
 
 	.include "../testutils.inc"
 

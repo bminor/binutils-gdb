@@ -1,5 +1,5 @@
 # frv testcase for fcmps $GRi,$GRj,$FCCi_2
-# mach: fr500 frv
+# mach: fr500 fr550 frv
 
 	.include "testutils.inc"
 

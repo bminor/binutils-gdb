@@ -1,5 +1,5 @@
 # FRV testcase
-# mach: fr500 fr400
+# mach: fr500 fr550 fr400
 
 	.include "testutils.inc"
 
@@ -29,6 +29,10 @@ bad0:	fail
 ok0:	test_spr_addr	ill1,pcsr
 	test_spr_immed	1,esfr1		; esr0 active
 	test_spr_bits	0x3f,0,0xb,esr0
+	movsg		psr,gr28
+	srli		gr28,28,gr28
+	subicc 		gr28,0x3,gr0,icc3 ; is fr550?
+	beq 		icc3,0,no_epcr
 	test_spr_addr	ill1,epcr0
-
+no_epcr:
 	pass

@@ -1,5 +1,5 @@
 # frv testcase for cmsubhus $FRi,$FRj,$FRj,$CCi,$cond
-# mach: all
+# mach: frv fr500 fr400
 
 	.include "testutils.inc"
 

@@ -1,5 +1,5 @@
 # FRV testcase for dcul GRi
-# mach: all
+# mach: frv fr500
 
 	.include "../testutils.inc"
 

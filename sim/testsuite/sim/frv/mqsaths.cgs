@@ -1,5 +1,5 @@
 # frv testcase for mqsaths $FRi,$FRj,$FRj
-# mach: fr400
+# mach: fr400 fr550
 
 	.include "testutils.inc"
 

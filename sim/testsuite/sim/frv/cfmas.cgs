@@ -1,5 +1,5 @@
 # frv testcase for cfmas $FRi,$FRj,$FRk,$CCi,$cond
-# mach: fr500 frv
+# mach: fr500 fr550 frv
 
 	.include "testutils.inc"
 
