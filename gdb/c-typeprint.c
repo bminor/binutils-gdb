@@ -492,19 +492,66 @@ c_type_print_base (type, stream, show, level)
       break;
 
     case TYPE_CODE_STRUCT:
-      fprintf_filtered (stream,
-			HAVE_CPLUS_STRUCT (type) ? "class " : "struct ");
+      if (HAVE_CPLUS_STRUCT (type))
+	{
+	  /* Always print it as "class foo" even if foo is a typedef'd
+	     name, not a tag.  */
+	  fprintf_filtered (stream, "class ");
+	  name = type_name_no_tag (type);
+	  if (name != NULL)
+	    {
+	      fputs_filtered (name, stream);
+	      fputs_filtered (" ", stream);
+	      wrap_here ("    ");
+	    }
+	}
+      else
+	{
+	  fprintf_filtered (stream, "struct ");
+	  name = TYPE_NAME (type);
+	  /* If the name does not start with "struct " it means that the
+	     type was defined without a tag, so don't print a tag.  It is
+	     possible that we should have a better way of distinguising
+	     tag names from typedef'd names.  (e.g. a new tagname field in
+	     the struct type).  */
+	  if (strncmp (name, "struct ", 7) == 0)
+	    {
+	      fputs_filtered (name + 7, stream);
+	      fputs_filtered (" ", stream);
+	    }
+	}
       goto struct_union;
 
     case TYPE_CODE_UNION:
       fprintf_filtered (stream, "union ");
-    struct_union:
-      if ((name = type_name_no_tag (type)) != NULL)
+      if (HAVE_CPLUS_STRUCT (type))
 	{
-	  fputs_filtered (name, stream);
-	  fputs_filtered (" ", stream);
-	  wrap_here ("    ");
+	  /* Always print it as "union foo" even if foo is a typedef'd
+	     name, not a tag.  */
+	  name = type_name_no_tag (type);
+	  if (name != NULL)
+	    {
+	      fputs_filtered (name, stream);
+	      fputs_filtered (" ", stream);
+	      wrap_here ("    ");
+	    }
 	}
+      else
+	{
+	  name = TYPE_NAME (type);
+	  /* If the name does not start with "union " it means that the
+	     type was defined without a tag, so don't print a tag.  It is
+	     possible that we should have a better way of distinguising
+	     tag names from typedef'd names.  (e.g. a new tagname field in
+	     the struct type).  */
+	  if (strncmp (name, "union ", 6) == 0)
+	    {
+	      fputs_filtered (name + 6, stream);
+	      fputs_filtered (" ", stream);
+	    }
+	}
+    struct_union:
+      wrap_here ("    ");
       if (show < 0)
 	fprintf_filtered (stream, "{...}");
       else
@@ -692,11 +739,19 @@ c_type_print_base (type, stream, show, level)
 
     case TYPE_CODE_ENUM:
       fprintf_filtered (stream, "enum ");
-      if ((name = type_name_no_tag (type)) != NULL)
+      name = TYPE_NAME (type);
+
+      /* If the name does not start with "enum " it means that the
+	 type was defined without a tag, so don't print a tag.  It is
+	 possible that we should have a better way of distinguising
+	 tag names from typedef'd names.  (e.g. a new tagname field in
+	 the struct type).  */
+      if (name != NULL && strncmp (name, "enum ", 5) == 0)
 	{
-	  fputs_filtered (name, stream);
+	  fputs_filtered (name + 5, stream);
 	  fputs_filtered (" ", stream);
 	}
+
       wrap_here ("    ");
       if (show < 0)
 	fprintf_filtered (stream, "{...}");
