@@ -1,22 +1,22 @@
 /* SEC_MERGE support.
-   Copyright 2001 Free Software Foundation, Inc.
+   Copyright 2001, 2002 Free Software Foundation, Inc.
    Written by Jakub Jelinek <jakub@redhat.com>.
 
-This file is part of BFD, the Binary File Descriptor library.
+   This file is part of BFD, the Binary File Descriptor library.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* This file contains support for merging duplicate entities within sections,
    as used in ELF SHF_MERGE.  */
@@ -25,6 +25,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #include "sysdep.h"
 #include "libbfd.h"
 #include "hashtab.h"
+#include "libiberty.h"
 
 struct sec_merge_sec_info;
 
@@ -38,7 +39,8 @@ struct sec_merge_hash_entry
   /* Start of this string needs to be aligned to
      alignment octets (not 1 << align).  */
   unsigned int alignment;
-  union {
+  union
+  {
     /* Index within the merged section.  */
     bfd_size_type index;
     /* Entity size (if present in suffix hash tables).  */
@@ -144,7 +146,7 @@ sec_merge_hash_newfunc (entry, table, string)
       ret->next = NULL;
     }
 
-  return (struct bfd_hash_entry *)ret;
+  return (struct bfd_hash_entry *) ret;
 }
 
 /* Look up an entry in a section merge hash table.  */
