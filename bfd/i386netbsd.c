@@ -1,4 +1,4 @@
-/* BFD back-end for NetBSD/ns32k a.out-ish binaries.
+/* BFD back-end for NetBSD/386 a.out-ish binaries.
    Copyright (C) 1990, 1991, 1992 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -24,11 +24,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. */
 #define	PAGE_SIZE	__LDPGSZ
 #define	SEGMENT_SIZE	__LDPGSZ
 
-#define	DEFAULT_ARCH	bfd_arch_ns32k
-#define MACHTYPE_OK(mtype) ((mtype) == M_532_NETBSD || (mtype) == M_UNKNOWN)
+#define	DEFAULT_ARCH	bfd_arch_i386
+#define MACHTYPE_OK(mtype) ((mtype) == M_386 || (mtype) == M_386_NETBSD || (mtype) == M_UNKNOWN)
 
-#define MY(OP) CAT(pc532netbsd_,OP)
+#define MY(OP) CAT(i386netbsd_,OP)
 /* This needs to start with a.out so GDB knows it is an a.out variant.  */
-#define TARGETNAME "a.out-ns32k-netbsd"
+#define TARGETNAME "a.out-i386-netbsd"
 
 #include "netbsd.h"

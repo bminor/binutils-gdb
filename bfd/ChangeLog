@@ -1,3 +1,12 @@
+Fri Oct 21 16:43:13 1994  J.T. Conklin  (jtc@phishhead.cygnus.com)
+
+	* libaout.h (machine_type): added M_68K_NETBSD and M_SPARC_NETBSD.
+	* i386netbsd.c, ns32knetbsd.c, sparcnetbsd.c: removed RCS Id's.
+	  changed how PAGE_SIZE and SEGMENT_SIZE are defined so they are
+	  consistant with each other.
+	* netbsd.h (N_HEADER_IN_TEXT, TEXT_START_ADDR): NetBSD fits its
+	  header into the start of its text segment.
+
 Fri Oct 21 17:13:07 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
 
 	* targets.c (BFD_JUMP_TABLE_ARCHIVE): Add case for

@@ -1,4 +1,4 @@
-/* BFD back-end for NetBSD/ns32k a.out-ish binaries.
+/* BFD back-end for NetBSD/sparc a.out-ish binaries.
    Copyright (C) 1990, 1991, 1992 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -15,20 +15,20 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. */
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-#define	BYTES_IN_WORD	4
-#undef TARGET_IS_BIG_ENDIAN_P
+#define BYTES_IN_WORD	4
+#define TARGET_IS_BIG_ENDIAN_P
 
-#define __LDPGSZ	4096
+#define __LDPGSZ	8192
 #define	PAGE_SIZE	__LDPGSZ
 #define	SEGMENT_SIZE	__LDPGSZ
 
-#define	DEFAULT_ARCH	bfd_arch_ns32k
-#define MACHTYPE_OK(mtype) ((mtype) == M_532_NETBSD || (mtype) == M_UNKNOWN)
+#define DEFAULT_ARCH	bfd_arch_sparc
+#define MACHTYPE_OK(mtype) ((mtype) == M_SPARC_NETBSD || (mtype) == M_UNKNOWN)
 
-#define MY(OP) CAT(pc532netbsd_,OP)
+#define MY(OP) CAT(sparcnetbsd_,OP)
 /* This needs to start with a.out so GDB knows it is an a.out variant.  */
-#define TARGETNAME "a.out-ns32k-netbsd"
+#define TARGETNAME "a.out-sparc-netbsd"
 
 #include "netbsd.h"
