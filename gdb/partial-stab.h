@@ -1,5 +1,5 @@
 /* Shared code to pre-read a stab (dbx-style), when building a psymtab.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994
+   Copyright 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995
    Free Software Foundation, Inc.
 
 This file is part of GDB.
@@ -200,6 +200,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 	  char *p;
 
 	  valu = CUR_SYMBOL_VALUE + ANOFFSET (section_offsets, SECT_OFF_TEXT);
+#ifdef SOFUN_ADDRESS_MAYBE_MISSING
+	  /* A zero value is probably an indication for the SunPRO 3.0
+	     compiler. end_psymtab explicitly tests for zero, so
+	     don't relocate it.  */
+	  if (CUR_SYMBOL_VALUE == 0)
+	    valu = 0;
+#endif
 
 	  past_first_source_file = 1;
 

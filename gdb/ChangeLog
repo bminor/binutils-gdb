@@ -1,3 +1,10 @@
+Sat Apr  1 03:22:20 1995  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* dbxread.c (process_one_symbol) [SOFUN_ADDRESS_MAYBE_MISSING]:
+	Handle relocated symbol address.
+	* partial-stab.h, case N_SO, SOFUN_ADDRESS_MAYBE_MISSING:
+	Do not relocate a zero address.
+
 Thu Mar 30 19:46:36 1995  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config/a29k/tm-a29k.h: Nuke obsolete define CONTROL_END_ADDR; it
