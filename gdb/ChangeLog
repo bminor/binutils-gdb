@@ -1,3 +1,8 @@
+2001-10-08  Nicholas Duffek  <nsd@redhat.com>
+
+	* MAINTAINERS (powerpc, SCO/Unixware, Solaris/x86): Remove my
+	entries.
+
 2001-10-06  Mark Kettenis  <kettenis@beast.freebsd.org>
 
 	* config/alpha/tm-fbsd.h (FRAME_CHAIN_VALID): Define.

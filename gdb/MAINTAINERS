@@ -124,7 +124,6 @@ maintainer works with the native maintainer when resolving API issues.
 
 	powerpc		--target=powerpc-eabi,powerpcle-eabi ,-Werror
 			Kevin Buettner		kevinb@redhat.com
-			Nick Duffek		nsd@redhat.com
 
 	rs6000		--target=rs6000-ibm-aix3.2,rs6000-ibm-aix4.1 ,-Werror
 			(see rs6000 native and ppc target)
@@ -202,11 +201,9 @@ FreeBSD native & host	Mark Kettenis		kettenis@gnu.org
 			David O'Brien		obrien@freebsd.org
 hurd native		Mark Kettenis		kettenis@gnu.org
 NetBSD native & host	J.T. Conklin		jtc@redback.com
-SCO/Unixware		Nick Duffek		nsd@redhat.com
-			Robert Lipe		rjl@sco.com
+SCO/Unixware		Robert Lipe		rjl@sco.com
 GNU/Linux ARM native	Scott Bambrough		scottb@netwinder.org
 Solaris/x86 native & host (devolved)
-			Nick Duffek		nsd@redhat.com
 			Peter Schauer		Peter.Schauer@regent.e-technik.tu-muenchen.de
 Solaris/SPARC native & host (devolved)
                         David Taylor            taylor@redhat.com
