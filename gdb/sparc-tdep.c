@@ -1113,7 +1113,7 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   frame_unwind_append_sniffer (gdbarch, sparc32_frame_sniffer);
 
   /* If we have register sets, enable the generic core file support.  */
-  if (tdep->gregset && tdep->fpregset)
+  if (tdep->gregset)
     set_gdbarch_regset_from_core_section (gdbarch,
 					  sparc_regset_from_core_section);
 

@@ -1,3 +1,9 @@
+2004-01-25  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparc-tdep.c (sparc32_gdbarch_init): Don't require
+	TDEP->fpregset to be initialized to enable core file register
+	sets.
+
 2004-01-24  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparc64-tdep.h (stryct_frame_info, struct trad_frame_saved_reg):
