@@ -576,4 +576,21 @@
 (p27)	br.cond.sptk	b1	// no DV here
 	;;
 	
-L:	
+// postinc
+	st8	[r6] = r8, 16
+	add	r7 = 8, r6	// impliedf
+	;;
+	ldfd	f14 = [r6], 16
+	add	r7 = 8, r6	// impliedf
+	;;
+	stfd	[r6] = f14, 16
+	add	r7 = r8, r6
+	;;
+	add	r6 = 8, r7
+	ld8	r8 = [r6], 16	// impliedf, WAW
+	;;
+	add	r6 = 8, r7
+	ldfd	f14 = [r6], 16	// impliedf, WAW
+	;;
+
+L:

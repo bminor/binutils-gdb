@@ -1,3 +1,9 @@
+2004-06-08  Jakub Jelinek  <jakub@redhat.com>
+
+	* ia64-gen.c (in_iclass): Handle more postinc st
+	and ld variants.
+	* ia64-asmtab.c: Rebuilt.
+
 2004-06-01  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* s390-opc.txt: Correct architecture mask for some opcodes.

@@ -277,3 +277,17 @@
 .*:569: Warning: This is the location of the conflicting usage
 .*:573: Warning: Use of 'br.cond.sptk' may violate RAW dependency 'PR%, % in 16 - 62' \(impliedf\), specific resource number is 25
 .*:572: Warning: This is the location of the conflicting usage
+.*:581: Warning: Use of 'adds' .* RAW dependency 'GR%, % in 1 - 127' \(impliedf\), specific resource number is 6
+.*:580: Warning: This is the location of the conflicting usage
+.*:584: Warning: Use of 'adds' .* RAW dependency 'GR%, % in 1 - 127' \(impliedf\), specific resource number is 6
+.*:583: Warning: This is the location of the conflicting usage
+.*:587: Warning: Use of 'add' .* RAW dependency 'GR%, % in 1 - 127' \(impliedf\), specific resource number is 6
+.*:586: Warning: This is the location of the conflicting usage
+.*:590: Warning: Use of 'ld8' .* RAW dependency 'GR%, % in 1 - 127' \(impliedf\), specific resource number is 6
+.*:589: Warning: This is the location of the conflicting usage
+.*:590: Warning: Use of 'ld8' .* WAW dependency 'GR%, % in 1 - 127' \(impliedf\), specific resource number is 6
+.*:589: Warning: This is the location of the conflicting usage
+.*:593: Warning: Use of 'ldfd' .* RAW dependency 'GR%, % in 1 - 127' \(impliedf\), specific resource number is 6
+.*:592: Warning: This is the location of the conflicting usage
+.*:593: Warning: Use of 'ldfd' .* WAW dependency 'GR%, % in 1 - 127' \(impliedf\), specific resource number is 6
+.*:592: Warning: This is the location of the conflicting usage
