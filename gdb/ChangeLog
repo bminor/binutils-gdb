@@ -1,3 +1,9 @@
+2005-01-23  Christopher Faylor  <cgf@timesys.com>
+
+	* win32-nat.c: Update copyright year.
+	(child_init_thread_list): Set thread linked list point to NULL so that
+	it won't be reused after clearing.
+
 2005-01-21  Mark Kettenis  <kettenis@gnu.org>
 
 	* acconfig.h (HAVE_STRUCT_REG_R_FS, HAVE_STRUCT_R_GS): Remove

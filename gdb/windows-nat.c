@@ -1,6 +1,6 @@
 /* Target-vector operations for controlling win32 child processes, for GDB.
 
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005
    Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions, A Red Hat Company.
@@ -300,6 +300,7 @@ child_init_thread_list (void)
       (void) CloseHandle (here->h);
       xfree (here);
     }
+  thread_head.next = NULL;
 }
 
 /* Delete a thread from the list of threads */
