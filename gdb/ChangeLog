@@ -1,3 +1,18 @@
+2004-04-14  Mark Kettenis  <kettenis@gnu.org>
+
+	* vax-tdep.h (vax_regnum): Add VAX_R0_REGNUM and VAX_R1_REGNUM.
+	* vax-tdep.c (vax_store_arguments): Remove struct_return and
+	struct_addr arguments.  Don't push return value address.
+	(vax_push_dummy_call): Don't pass STRUCT_RETURN and STRUCT_ADDR as
+	arguments to vax_store_arguments.  Store return value address in
+	R1.
+	(vax_store_struct_return, vax_extract_return_value)
+	(vax_store_return_value): Remove functions.
+	(vax_return_value): New function.
+	(vax_gdbarch_init): Set return value.  Don't set
+	deprecated_store_struct_return, deprecated_extract_struct_return
+	and deprecated_store_return_value.
+
 2004-04-14  Andreas Schwab  <schwab@suse.de>
 
 	* ia64-tdep.c (ia64_libunwind_frame_prev_register): Handle null

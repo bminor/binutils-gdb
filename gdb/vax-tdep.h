@@ -26,6 +26,8 @@
 
 enum vax_regnum
 {
+  VAX_R0_REGNUM,
+  VAX_R1_REGNUM,
   VAX_AP_REGNUM = 12,		/* Argument pointer on user stack.  */
   VAX_FP_REGNUM,		/* Address of executing stack frame.  */
   VAX_SP_REGNUM,		/* Address of top of stack.  */

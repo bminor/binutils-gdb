@@ -66,10 +66,13 @@ vax_register_type (struct gdbarch *gdbarch, int regnum)
 }
 
 
+/* The VAX Unix calling convention uses R1 to pass a structure return
+   value address instead of passing it as a first (hidden) argument as
+   the VMS calling convention suggests.  */
+
 static CORE_ADDR
 vax_store_arguments (struct regcache *regcache, int nargs,
-		     struct value **args, CORE_ADDR sp,
-		     int struct_return, CORE_ADDR struct_addr)
+		     struct value **args, CORE_ADDR sp)
 {
   char buf[4];
   int count = 0;
@@ -86,15 +89,6 @@ vax_store_arguments (struct regcache *regcache, int nargs,
       sp -= (len + 3) & ~3;
       count += (len + 3) / 4;
       write_memory (sp, VALUE_CONTENTS_ALL (args[i]), len);
-    }
-
-  /* Push value address.  */
-  if (struct_return)
-    {
-      sp -= 4;
-      count++;
-      store_unsigned_integer (buf, 4, struct_addr);
-      write_memory (sp, buf, 4);
     }
 
   /* Push argument count.  */
@@ -119,8 +113,11 @@ vax_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
   char buf[4];
 
   /* Set up the function arguments.  */
-  sp = vax_store_arguments (regcache, nargs, args, sp,
-			    struct_return, struct_addr);
+  sp = vax_store_arguments (regcache, nargs, args, sp);
+
+  /* Store return value address.  */
+  if (struct_return)
+    regcache_cooked_write_unsigned (regcache, VAX_R1_REGNUM, struct_addr);
 
   /* Store return address in the PC slot.  */
   sp -= 4;
@@ -164,22 +161,37 @@ vax_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
 }
 
 
-static void
-vax_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
+static enum return_value_convention
+vax_return_value (struct gdbarch *gdbarch, struct type *type,
+		  struct regcache *regcache, void *readbuf,
+		  const void *writebuf)
 {
-  write_register (1, addr);
-}
+  int len = TYPE_LENGTH (type);
+  char buf[8];
 
-static void
-vax_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
-{
-  memcpy (valbuf, regbuf + DEPRECATED_REGISTER_BYTE (0), TYPE_LENGTH (valtype));
-}
+  if (TYPE_CODE (type) == TYPE_CODE_STRUCT
+      || TYPE_CODE (type) == TYPE_CODE_STRUCT
+      || TYPE_CODE (type) == TYPE_CODE_ARRAY)
+    return RETURN_VALUE_STRUCT_CONVENTION;
 
-static void
-vax_store_return_value (struct type *valtype, char *valbuf)
-{
-  deprecated_write_register_bytes (0, valbuf, TYPE_LENGTH (valtype));
+  if (readbuf)
+    {
+      /* Read the contents of R0 and (if necessary) R1.  */
+      regcache_cooked_read (regcache, VAX_R0_REGNUM, buf);
+      if (len > 4)
+	regcache_cooked_read (regcache, VAX_R1_REGNUM, buf + 4);
+      memcpy (readbuf, buf, len);
+    }
+  if (writebuf)
+    {
+      /* Read the contents to R0 and (if necessary) R1.  */
+      memcpy (buf, writebuf, len);
+      regcache_cooked_write (regcache, VAX_R0_REGNUM, buf);
+      if (len > 4)
+	regcache_cooked_write (regcache, VAX_R1_REGNUM, buf + 4);
+    }
+
+  return RETURN_VALUE_REGISTER_CONVENTION;
 }
 
 
@@ -426,9 +438,7 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
 
   /* Return value info */
-  set_gdbarch_deprecated_store_struct_return (gdbarch, vax_store_struct_return);
-  set_gdbarch_deprecated_extract_return_value (gdbarch, vax_extract_return_value);
-  set_gdbarch_deprecated_store_return_value (gdbarch, vax_store_return_value);
+  set_gdbarch_return_value (gdbarch, vax_return_value);
 
   /* Call dummy code.  */
   set_gdbarch_push_dummy_call (gdbarch, vax_push_dummy_call);
