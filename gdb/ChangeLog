@@ -1,3 +1,7 @@
+2004-02-25  Andrew Cagney  <cagney@redhat.com>
+
+	* hppa-tdep.c (hppa32_push_dummy_call): Rewrite.
+
 2004-02-25  Mark Kettenis  <kettenis@gnu.org>
 
 	* config/i386/tm-x86-64linux.h: Tweak comments.

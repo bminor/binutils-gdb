@@ -2174,6 +2174,121 @@ hppa_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 /* This function pushes a stack frame with arguments as part of the
    inferior function calling mechanism.
 
+   This is the version of the function for the 32-bit PA machines, in
+   which later arguments appear at lower addresses.  (The stack always
+   grows towards higher addresses.)
+
+   We simply allocate the appropriate amount of stack space and put
+   arguments into their proper slots.  */
+   
+CORE_ADDR
+hppa32_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
+			struct regcache *regcache, CORE_ADDR bp_addr,
+			int nargs, struct value **args, CORE_ADDR sp,
+			int struct_return, CORE_ADDR struct_addr)
+{
+  /* NOTE: cagney/2004-02-27: This is a guess - its implemented by
+     reverse engineering testsuite failures.  */
+
+  /* Stack base address at which any pass-by-reference parameters are
+     stored.  */
+  CORE_ADDR struct_end = 0;
+  /* Stack base address at which the first parameter is stored.  */
+  CORE_ADDR param_end = 0;
+
+  /* The inner most end of the stack after all the parameters have
+     been pushed.  */
+  CORE_ADDR new_sp = 0;
+
+  /* Two passes.  First pass computes the location of everything,
+     second pass writes the bytes out.  */
+  int write_pass;
+  for (write_pass = 0; write_pass < 2; write_pass++)
+    {
+      CORE_ADDR struct_ptr = struct_end;
+      CORE_ADDR param_ptr = param_end;
+      int reg = 27;	      /* NOTE: Registers go down.  */
+      int i;
+      for (i = 0; i < nargs; i++)
+	{
+	  struct value *arg = args[i];
+	  struct type *type = check_typedef (VALUE_TYPE (arg));
+	  /* The corresponding parameter that is pushed onto the
+	     stack, and [possibly] passed in a register.  */
+	  char param_val[8];
+	  int param_len;
+	  memset (param_val, 0, sizeof param_val);
+	  if (TYPE_LENGTH (type) > 8)
+	    {
+	      /* Large parameter, pass by reference.  Store the value
+		 in "struct" area and then pass its address.  */
+	      param_len = 4;
+	      struct_ptr -= align_up (TYPE_LENGTH (type), 8);
+	      if (write_pass)
+		write_memory (struct_ptr, VALUE_CONTENTS (arg),
+			      TYPE_LENGTH (type));
+	      store_unsigned_integer (param_val, 4, struct_ptr);
+	    }
+	  else if (TYPE_CODE (type) == TYPE_CODE_INT
+		   || TYPE_CODE (type) == TYPE_CODE_ENUM)
+	    {
+	      /* Integer value store, right aligned.  "unpack_long"
+		 takes care of any sign-extension problems.  */
+	      param_len = align_up (TYPE_LENGTH (type), 4);
+	      store_unsigned_integer (param_val, param_len,
+				      unpack_long (type,
+						   VALUE_CONTENTS (arg)));
+	    }
+	  else
+	    {
+	      /* Small struct value, store right aligned?  */
+	      param_len = align_up (TYPE_LENGTH (type), 4);
+	      memcpy (param_val + param_len - TYPE_LENGTH (type),
+		      VALUE_CONTENTS (arg), TYPE_LENGTH (type));
+	    }
+	  param_ptr -= param_len;
+	  reg -= param_len / 4;
+	  if (write_pass)
+	    {
+	      write_memory (param_ptr, param_val, param_len);
+	      if (reg >= 23)
+		{
+		  regcache_cooked_write (regcache, reg, param_val);
+		  if (param_len > 4)
+		    regcache_cooked_write (regcache, reg + 1, param_val + 4);
+		}
+	    }
+	}
+
+      /* Update the various stack pointers.  */
+      if (!write_pass)
+	{
+	  struct_end = sp + struct_ptr;
+	  /* PARAM_PTR already accounts for all the arguments passed
+	     by the user.  However, the ABI mandates minimum stack
+	     space allocations for outgoing arguments.  The ABI also
+	     mandates minimum stack alignments which we must
+	     preserve.  */
+	  param_end = struct_end + max (align_up (param_ptr, 8),
+					REG_PARM_STACK_SPACE);
+	}
+    }
+
+  /* If a structure has to be returned, set up register 28 to hold its
+     address */
+  if (struct_return)
+    write_register (28, struct_addr);
+
+  /* Set the return address.  */
+  regcache_cooked_write_unsigned (regcache, RP_REGNUM, bp_addr);
+
+  /* The stack will have 32 bytes of additional space for a frame marker.  */
+  return param_end + 32;
+}
+
+/* This function pushes a stack frame with arguments as part of the
+   inferior function calling mechanism.
+
    This is the version for the PA64, in which later arguments appear
    at higher addresses.  (The stack always grows towards higher
    addresses.)
@@ -2295,105 +2410,6 @@ hppa64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
      marker.  */
   return sp + 64;
 
-}
-
-/* This function pushes a stack frame with arguments as part of the
-   inferior function calling mechanism.
-
-   This is the version of the function for the 32-bit PA machines, in
-   which later arguments appear at lower addresses.  (The stack always
-   grows towards higher addresses.)
-
-   We simply allocate the appropriate amount of stack space and put
-   arguments into their proper slots.  */
-   
-CORE_ADDR
-hppa32_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
-			struct regcache *regcache, CORE_ADDR bp_addr,
-			int nargs, struct value **args, CORE_ADDR sp,
-			int struct_return, CORE_ADDR struct_addr)
-{
-  struct tdep *tdep = gdbarch_tdep (gdbarch);
-
-  /* array of arguments' offsets */
-  int *offset = (int *) alloca (nargs * sizeof (int));
-
-  /* array of arguments' lengths: real lengths in bytes, not aligned to
-     word size */
-  int *lengths = (int *) alloca (nargs * sizeof (int));
-
-  /* The number of stack bytes occupied by the current argument.  */
-  int bytes_reserved;
-
-  /* The total number of bytes reserved for the arguments.  */
-  int cum_bytes_reserved = 0;
-
-  /* Similarly, but aligned.  */
-  int cum_bytes_aligned = 0;
-  int i;
-
-  /* Iterate over each argument provided by the user.  */
-  for (i = 0; i < nargs; i++)
-    {
-      lengths[i] = TYPE_LENGTH (VALUE_TYPE (args[i]));
-
-      /* Align the size of the argument to the word size for this
-	 target.  */
-      bytes_reserved = (lengths[i] + 4 - 1) & -4;
-
-      offset[i] = (cum_bytes_reserved + (lengths[i] > 4
-					 ? bytes_reserved : lengths[i]));
-
-      /* If the argument is a double word argument, then it needs to be
-	 double word aligned.  */
-      if ((bytes_reserved == 2 * 4)
-	  && (offset[i] % 2 * 4))
-	{
-	  int new_offset = 0;
-	  /* BYTES_RESERVED is already aligned to the word, so we put
-	     the argument at one word more down the stack.
-
-	     This will leave one empty word on the stack, and one
-	     unused register as mandated by the ABI.  */
-	  new_offset = ((offset[i] + 2 * 4 - 1)
-			& -(2 * 4));
-
-	  if ((new_offset - offset[i]) >= 2 * 4)
-	    {
-	      bytes_reserved += 4;
-	      offset[i] += 4;
-	    }
-	}
-
-      cum_bytes_reserved += bytes_reserved;
-
-    }
-
-  /* CUM_BYTES_RESERVED already accounts for all the arguments passed
-     by the user.  However, the ABI mandates minimum stack space
-     allocations for outgoing arguments.
-
-     The ABI also mandates minimum stack alignments which we must
-     preserve.  */
-  cum_bytes_aligned = align_up (cum_bytes_reserved, 8);
-  sp += max (cum_bytes_aligned, REG_PARM_STACK_SPACE);
-
-  /* Now write each of the args at the proper offset down the stack.
-     ?!? We need to promote values to a full register instead of skipping
-     words in the stack.  */
-  for (i = 0; i < nargs; i++)
-    write_memory (sp - offset[i], VALUE_CONTENTS (args[i]), lengths[i]);
-
-  /* If a structure has to be returned, set up register 28 to hold its
-     address */
-  if (struct_return)
-    write_register (28, struct_addr);
-
-  /* Set the return address.  */
-  regcache_cooked_write_unsigned (regcache, RP_REGNUM, bp_addr);
-
-  /* The stack will have 32 bytes of additional space for a frame marker.  */
-  return sp + 32;
 }
 
 /* Force all frames to 16-byte alignment.  Better safe than sorry.  */
