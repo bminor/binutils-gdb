@@ -1,5 +1,5 @@
 /* Motorola 68k series support for 32-bit ELF
-   Copyright 1993, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1993, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -689,9 +689,15 @@ elf_m68k_check_relocs (abfd, info, sec, relocs)
 			  || !bfd_set_section_alignment (dynobj, sreloc, 2))
 			return FALSE;
 		    }
-		  if (sec->flags & SEC_READONLY)
-		    info->flags |= DF_TEXTREL;
 		}
+
+	      if (sec->flags & SEC_READONLY
+		  /* Don't set DF_TEXTREL yet for PC relative
+		     relocations, they might be discarded later.  */
+		  && !(ELF32_R_TYPE (rel->r_info) == R_68K_PC8
+		       || ELF32_R_TYPE (rel->r_info) == R_68K_PC16
+		       || ELF32_R_TYPE (rel->r_info) == R_68K_PC32))
+		    info->flags |= DF_TEXTREL;
 
 	      sreloc->_raw_size += sizeof (Elf32_External_Rela);
 
@@ -1285,11 +1291,15 @@ elf_m68k_size_dynamic_sections (output_bfd, info)
 /* This function is called via elf_m68k_link_hash_traverse if we are
    creating a shared object.  In the -Bsymbolic case it discards the
    space allocated to copy PC relative relocs against symbols which
-   are defined in regular objects.  For the normal shared case, if
+   are defined in regular objects.  For the normal shared case, it
    discards space for pc-relative relocs that have become local due to
    symbol visibility changes.  We allocated space for them in the
    check_relocs routine, but we won't fill them in in the
-   relocate_section routine.  */
+   relocate_section routine.
+
+   We also check whether any of the remaining relocations apply
+   against a readonly section, and set the DF_TEXTREL flag in this
+   case.  */
 
 static bfd_boolean
 elf_m68k_discard_copies (h, inf)
@@ -1305,7 +1315,19 @@ elf_m68k_discard_copies (h, inf)
   if ((h->root.elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0
       || (!info->symbolic
 	  && (h->root.elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0))
-    return TRUE;
+    {
+      if ((info->flags & DF_TEXTREL) == 0)
+	{
+	  /* Look for relocations against read-only sections.  */
+	  for (s = h->pcrel_relocs_copied; s != NULL; s = s->next)
+	    if ((s->section->flags & SEC_READONLY) != 0)
+	      {
+		info->flags |= DF_TEXTREL;
+		break;
+	      }
+	}
+      return TRUE;
+    }
 
   for (s = h->pcrel_relocs_copied; s != NULL; s = s->next)
     s->section->_raw_size -= s->count * sizeof (Elf32_External_Rela);

@@ -1,3 +1,9 @@
+2003-01-07  Andreas Schwab  <schwab@suse.de>
+
+	* elf32-m68k.c (elf_m68k_check_relocs): Don't set DF_TEXTREL for
+	PC relative relocations.
+	(elf_m68k_discard_copies): Set it here instead.
+
 2002-01-02  Ben Elliston  <bje@redhat.com>
 	    Jeff Johnston  <jjohnstn@redhat.com>
 
