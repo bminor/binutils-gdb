@@ -675,7 +675,7 @@ arm_rdi_insert_breakpoint (CORE_ADDR addr, char *contents_cache)
   struct local_bp_list_entry *entry;
   int type = RDIPoint_EQ;
 
-  if (arm_pc_is_thumb (addr) || arm_pc_is_thumb_dummy (addr))
+  if (arm_pc_is_thumb (addr))
     type |= RDIPoint_16Bit;
   rslt = angel_RDI_setbreak (addr, type, 0, &point);
   if (rslt != RDIError_NoError)
