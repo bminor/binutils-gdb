@@ -90,6 +90,8 @@
 @V@/bfd/ChangeLog-9495 @V@/bfd/ChangeLog.9495
 @V@/bfd/ChangeLog-9697 @V@/bfd/ChangeLog.9697
 @V@/bfd/coff-tic80.c @V@/bfd/coff-tc80.c
+@V@/bfd/coff-tic54x.c @V@/bfd/coff-tc54x.c
+@V@/bfd/elf32-i370.c @V@/bfd/elf32-i7.c
 @V@/sim/mips/dv-tx3904irc.c @V@/sim/mips/dv-tx3irc.c
 @V@/sim/mips/dv-tx3904sio.c @V@/sim/mips/dv-tx3sio.c
 @V@/sim/mips/dv-tx3904tmr.c @V@/sim/mips/dv-tx3tmr.c
@@ -176,5 +178,6 @@
 @V@/gdb/testsuite/gdb.c++/userdef.exp @V@/gdb/testsuite/gdb.cxx/userdef.exp
 @V@/gdb/testsuite/gdb.c++/virtfunc.cc @V@/gdb/testsuite/gdb.cxx/virtfunc.cc
 @V@/gdb/testsuite/gdb.c++/virtfunc.exp @V@/gdb/testsuite/gdb.cxx/virtfunc.exp
+@V@/gdb/testsuite/gdb.mi/mi-var-cmd.exp @V@/gdb/testsuite/gdb.mi/mi-varcmd.exp
 @V@/gdb/testsuite/.gdbinit @V@/gdb/testsuite/gdb.ini
 @V@/sim/ppc/.gdbinit @V@/sim/ppc/gdb.ini
