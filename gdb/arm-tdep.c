@@ -2173,6 +2173,8 @@ arm_use_struct_convention (int gcc_p, struct type *type)
   int nRc;
   enum type_code code;
 
+  CHECK_TYPEDEF (type);
+
   /* In the ARM ABI, "integer" like aggregate types are returned in
      registers.  For an aggregate type to be integer like, its size
      must be less than or equal to DEPRECATED_REGISTER_SIZE and the
@@ -2230,7 +2232,7 @@ arm_use_struct_convention (int gcc_p, struct type *type)
       for (i = 0; i < TYPE_NFIELDS (type); i++)
 	{
 	  enum type_code field_type_code;
-	  field_type_code = TYPE_CODE (TYPE_FIELD_TYPE (type, i));
+	  field_type_code = TYPE_CODE (check_typedef (TYPE_FIELD_TYPE (type, i)));
 
 	  /* Is it a floating point type field?  */
 	  if (field_type_code == TYPE_CODE_FLT)

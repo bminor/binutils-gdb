@@ -1,5 +1,10 @@
 2004-03-09  Daniel Jacobowitz  <drow@mvista.com>
 
+	* arm-tdep.c (arm_use_struct_convention): Look through typedefs.
+	* gdbtypes.c (check_typedef): Update comments.
+
+2004-03-09  Daniel Jacobowitz  <drow@mvista.com>
+
 	* dwarf2read.c (struct comp_unit_head): Remove dwarf2_abbrevs array.
 	(struct dwarf2_cu): Add abbrev_obstack and dwarf2_abbrevs
 	pointer.  Update comment about comp_unit_head.
