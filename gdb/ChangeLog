@@ -1,3 +1,10 @@
+2001-05-22  Michael Snyder  <msnyder@redhat.com>
+
+	* thread-db.c: Allow for defunct zombie threads.	
+	(attach_thread): Do not attempt to attach zombie thread.
+	(thread_db_thread_alive): Return false for defunct zombie thread.
+	(find_new_threads_callback): Don't add defunct zombie thread to list.
+
 2001-05-22  Jim Blandy  <jimb@redhat.com>
 
 	Add support for the GNU V3 C++ ABI.
