@@ -3123,7 +3123,7 @@ child_acknowledge_created_inferior (int pid)
    *    the process safely to ask what it is.  Anyway, we'll
    *    add it when it gets the EXEC event.
    */
-  add_thread (pid);		/* in thread.c */
+  add_thread (pid_to_ptid (pid));		/* in thread.c */
 
   /* We can now set the child's ttrace event mask.
    */
@@ -4764,7 +4764,7 @@ update_thread_state_after_attach (int pid, attach_continue_t kind_of_go)
 	    }
 	}
 
-      add_thread (tid);		/* in thread.c */
+      add_thread (pid_to_ptid (pid));		/* in thread.c */
     }
 
 #ifdef PARANOIA

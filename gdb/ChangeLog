@@ -1,3 +1,9 @@
+Wed Dec 19 12:18:57 2001  Jeffrey A Law  (law@redhat.com)
+
+	* infttrate.c (child_acknowledge_created_inferior): Pass
+	correct argument to add_thread.
+	(update_thread_state_after_attach): Likewise.
+
 2001-12-19  Fernando Nasser  <fnasser@redhat.com>
 
 	* config/arm/tm-arm.h: Properly define SOFTWARE_SINGLE_STEP_P.
