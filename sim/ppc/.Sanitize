@@ -50,7 +50,6 @@ debug.c
 debug.h
 device.c
 device.h
-device.maybe
 device_table.c
 device_table.h
 dgen.c
@@ -96,9 +95,6 @@ hw_iobus.c
 hw_memory.c
 hw_nvram.c
 hw_pal.c
-hw_pci_ide.c
-hw_phb.c
-hw_phb.h
 hw_pic.c
 hw_register.c
 hw_trace.c
