@@ -1,3 +1,10 @@
+2001-10-08  J. Brobecker <brobecker@gnat.com>
+
+	* hpux-thread.c: rewrite find_active_thread() and find_tcb()
+	to use ptid_t, instead of overloading the thread and the pid
+	into the same 32-bit value. Make associated necessary adaptations.
+	Also remove unused variable cached_active_thread.
+
 2001-09-26  Kevin Buettner  <kevinb@redhat.com>
 
 	From Ilya Golubev <gin@mo.msk.ru>:
