@@ -1696,8 +1696,17 @@ do_setshow_command (arg, from_tty, c)
 	    for (i = 0; c->enums[i]; i++)
 	      if (strncmp (arg, c->enums[i], len) == 0)
 		{
-		  match = c->enums[i];
-		  nmatches++;
+		  if (c->enums[i][len] == '\0')
+		    {
+		      match = c->enums[i];
+		      nmatches = 1;
+		      break; /* exact match. */
+		    }
+		  else
+		    {
+		      match = c->enums[i];
+		      nmatches++;
+		    }
 		}
 
 	    if (nmatches <= 0)
