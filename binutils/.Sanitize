@@ -43,7 +43,6 @@ bucomm.h
 configure.bat
 configure.in
 config
-copy.c
 filemode.c
 gmalloc.c
 is-ranlib.c
@@ -54,6 +53,7 @@ nm.1
 nm.c
 not-ranlib.c
 not-strip.c
+objcopy.c
 objdump.1
 objdump.c
 objdump.h

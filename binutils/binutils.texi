@@ -4,7 +4,7 @@
 @ifinfo
 @format
 START-INFO-DIR-ENTRY
-* Binutils: (binutils).		The GNU binary utilities "ar", "ld", "copy",
+* Binutils: (binutils).		The GNU binary utilities "ar", "ld", "objcopy",
 				"objdump", "nm", "size", "strip", and "ranlib".
 END-INFO-DIR-ENTRY
 @end format
@@ -36,8 +36,8 @@ into another language, under the above conditions for modified versions.
 
 @synindex ky cp
 @c
-@c This file documents the GNU binary utilities "ar", "ld", "copy", "objdump",
-@c  "nm", "size", "strip", and "ranlib".
+@c This file documents the GNU binary utilities "ar", "ld", "objcopy",
+@c  "objdump", "nm", "size", "strip", and "ranlib".
 @c
 @c Copyright (C) 1991 Free Software Foundation, Inc.
 @c 
@@ -94,7 +94,7 @@ utilities (collectively version 2.1):
 @item ar
 Create, modify, and extract from archives
 
-@item copy
+@item objcopy
 Copy and translate object files
 
 @item nm
@@ -116,7 +116,7 @@ Discard symbols
 
 @menu
 * ar::                          Create, modify, and extract from archives
-* copy::			Copy and translate object files
+* objcopy::			Copy and translate object files
 * ld:(ld)Overview.              Combine object and archive files
 * nm::                          List symbols from object files
 * objdump::                     Display information from object files
@@ -126,7 +126,7 @@ Discard symbols
 * Index::                       
 @end menu
 
-@node ar, copy, Top, Top
+@node ar, objcopy, Top, Top
 @chapter ar
 
 @kindex ar
@@ -540,27 +540,27 @@ Requires prior use of @code{OPEN} or @code{CREATE}.
 
 @end table
 
-@node copy, nm, ar, Top
-@chapter copy
+@node objcopy, nm, ar, Top
+@chapter objcopy
 
 @smallexample
-copy [ -F @var{format} | --format=@var{format} ]
-     [ -I @var{format} | --input-format=@var{format} ]
-     [ -O @var{format} | --output-format=@var{format} ]
-     [ -S | --strip-all ]  [ -g | --strip-debug ]
-     [ -x | --discard-all ]  [ -X | --discard-locals ]
-     [ -v | --verbose ]  [ -V | --version ]
-     @var{infile} [@var{outfile}]
+objcopy [ -F @var{format} | --format=@var{format} ]
+        [ -I @var{format} | --input-format=@var{format} ]
+        [ -O @var{format} | --output-format=@var{format} ]
+        [ -S | --strip-all ]  [ -g | --strip-debug ]
+        [ -x | --discard-all ]  [ -X | --discard-locals ]
+        [ -v | --verbose ]  [ -V | --version ]
+        @var{infile} [@var{outfile}]
 @end smallexample
 
-The GNU @code{copy} utility copies the contents of an object file to
-another.  @code{copy} uses the GNU BFD Library to read and write the
+The GNU @code{objcopy} utility copies the contents of an object file to
+another.  @code{objcopy} uses the GNU BFD Library to read and write the
 object files.  It can write the destination object file in a format
 different from that of the source object file.  The exact behavior of
-@code{copy} is controlled by command-line options.
+@code{objcopy} is controlled by command-line options.
 
-@code{copy} creates temporary files to do its translations and
-deletes them afterward.  @code{copy} uses BFD to do all its
+@code{objcopy} creates temporary files to do its translations and
+deletes them afterward.  @code{objcopy} uses BFD to do all its
 translation work; it knows about all the formats BFD knows about, and
 thus is able to recognize most formats without being told explicitly.
 @xref{BFD,,BFD,ld.info,Using LD, the GNU linker}.
@@ -569,7 +569,7 @@ thus is able to recognize most formats without being told explicitly.
 @item @var{infile}
 @itemx @var{outfile}
 The source and output files respectively.
-If you do not specify @var{outfile}, @code{copy} creates a
+If you do not specify @var{outfile}, @code{objcopy} creates a
 temporary file and destructively renames the result with
 the name of the input file.
 
@@ -608,12 +608,12 @@ Do not copy compiler-generated local symbols.
 
 @item -V
 @itemx --version
-Show the version number of @code{copy}.
+Show the version number of @code{objcopy}.
 
 @item -v
 @itemx --verbose
 Verbose output: list all object files modified.  In the case of
-archives, @samp{copy -V} lists all members of the archive.
+archives, @samp{objcopy -V} lists all members of the archive.
 @end table
 
 @iftex
@@ -625,7 +625,7 @@ The GNU linker @code{ld} is now described in a separate manual.
 @xref{Top,, Overview,, Using LD: the GNU linker}.
 @end iftex
 
-@node nm, objdump, copy, Top
+@node nm, objdump, objcopy, Top
 @chapter nm
 @cindex symbols
 @kindex nm

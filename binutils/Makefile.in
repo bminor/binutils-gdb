@@ -81,8 +81,8 @@ MANPAGES= ar nm objdump ranlib size strip
 AR_PROG=ar
 RANLIB_PROG=ranlib
 
-# copy and strip should be the same program
-COPY_PROG=copy
+# objcopy and strip should be the same program
+OBJCOPY_PROG=objcopy
 STRIP_PROG=strip
 
 # These should all be the same program too.
@@ -91,9 +91,9 @@ NM_PROG=nm
 OBJDUMP_PROG=objdump
 
 # This is the demangler, as a standalone program.
-DEMANGLER_PROG=demangle
+DEMANGLER_PROG=c++filt
 
-PROGS = $(SIZE_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRIP_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG)
+PROGS = $(SIZE_PROG) $(OBJDUMP_PROG) $(NM_PROG) $(AR_PROG) $(STRIP_PROG) $(RANLIB_PROG) $(DEMANGLER_PROG) $(OBJCOPY_PROG)
 STAGESTUFF = $(PROGS) *.o
 # Files that can be generated, but should be in the distribution.
 DISTSTUFF=arparse.c arlex.c binutils.mm
@@ -138,11 +138,13 @@ ADDL_LIBS = $(MALLOC) $(BULIBS) $(BFD) $(LIBIBERTY)
 BFD = $(LIBDIR)/libbfd.a
 OPCODES = $(OPCODEDIR)/libopcodes.a
 
+RUNTEST = runtest
 RUNTESTFLAGS = 
 FLAGS_TO_PASS = \
+	"RUNTEST=$(RUNTEST)" \
 	"RUNTESTFLAGS=$(RUNTESTFLAGS) \
 	SIZE=`if [ -f $$rootme/$(SIZE_PROG) ] ; then echo $$rootme/$(SIZE_PROG) ; else echo $(SIZE_PROG); fi` \
-	COPY=`if [ -f $$rootme/$(COPY_PROG) ] ; then echo $$rootme/$(COPY_PROG) ; else echo $(COPY_PROG); fi` \
+	OBJCOPY=`if [ -f $$rootme/$(OBJCOPY_PROG) ] ; then echo $$rootme/$(OBJCOPY_PROG) ; else echo $(OBJCOPY_PROG); fi` \
 	NM=`if [ -f $$rootme/$(NM_PROG) ] ; then echo $$rootme/$(NM_PROG) ; else echo $(NM_PROG); fi` \
 	AR=`if [ -f $$rootme/$(AR_PROG) ] ; then echo $$rootme/$(AR_PROG) ; else echo $(AR_PROG); fi` \
 	OBJDUMP=`if [ -f $$rootme/$(OBJDUMP_PROG) ] ; then echo $$rootme/$(OBJDUMP_PROG) ; else echo $(OBJDUMP_PROG); fi` \
@@ -180,11 +182,11 @@ dvi: binutils.dvi
 $(SIZE_PROG): $(ADDL_LIBS) size.o $(BFD)
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $(SIZE_PROG) size.o $(ADDL_LIBS) $(LOADLIBES)
 
-$(COPY_PROG): $(ADDL_LIBS) copy.o not-strip.o $(BFD)
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(COPY_PROG) copy.o not-strip.o $(ADDL_LIBS) $(LOADLIBES)
+$(OBJCOPY_PROG): $(ADDL_LIBS) objcopy.o not-strip.o $(BFD)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $(OBJCOPY_PROG) objcopy.o not-strip.o $(ADDL_LIBS) $(LOADLIBES)
 
-$(STRIP_PROG): $(ADDL_LIBS) copy.o is-strip.o $(BFD)
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(STRIP_PROG) copy.o is-strip.o $(ADDL_LIBS) $(LOADLIBES)
+$(STRIP_PROG): $(ADDL_LIBS) objcopy.o is-strip.o $(BFD)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $(STRIP_PROG) objcopy.o is-strip.o $(ADDL_LIBS) $(LOADLIBES)
 
 $(NM_PROG): $(ADDL_LIBS) nm.o $(BFD)
 	$(CC) $(LDFLAGS) $(CFLAGS) -o $(NM_PROG) nm.o $(ADDL_LIBS) $(LOADLIBES)
@@ -223,12 +225,12 @@ ar_with_ranlib: $(ADDL_LIBS) ar.o maybe-ranlib.o $(BFD)
 	-rm -f $(RANLIB_PROG)
 	-ln $(AR_PROG) $(RANLIB_PROG)
 
-# copy and strip in one binary that uses argv[0] to decide its action.
+# objcopy and strip in one binary that uses argv[0] to decide its action.
 
-copy_with_strip: $(ADDL_LIBS) copy.o maybe-strip.o $(BFD)
-	$(CC) $(LDFLAGS) $(CFLAGS) -o $(COPY_PROG) copy.o maybe-strip.o $(ADDL_LIBS) $(LOADLIBES)
+objcopy_with_strip: $(ADDL_LIBS) objcopy.o maybe-strip.o $(BFD)
+	$(CC) $(LDFLAGS) $(CFLAGS) -o $(OBJCOPY_PROG) objcopy.o maybe-strip.o $(ADDL_LIBS) $(LOADLIBES)
 	-rm -f $(STRIP_PROG)
-	-ln $(COPY_PROG) $(STRIP_PROG)
+	-ln $(OBJCOPY_PROG) $(STRIP_PROG)
 
 stage1: force
 	- mkdir stage1
@@ -406,7 +408,7 @@ alloca.o:alloca.c
 ar.o: ar.c
 arsup.o: arsup.c
 bucomm.o: bucomm.c
-copy.o: copy.c
+objcopy.o: objcopy.c
 filemode.o:filemode.c
 getopt.o:getopt.c
 getopt1.o:getopt1.c

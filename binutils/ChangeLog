@@ -1,3 +1,14 @@
+Wed May 12 12:05:36 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* objcopy.c: Renamed from copy.c, updated comments accordingly.
+	* Makefile.in, binutils.texi: Renamed copy to objcopy.
+	* is-strip.c, maybe-strip.c, not-strip.c: Updated comments for
+	rename of copy to objcopy.
+
+Mon May 10 17:20:18 1993  Per Bothner  (bothner@cygnus.com)
+
+	* binutils.texi (strip, -v option):  Fix typo.
+
 Fri May  7 13:57:50 1993  Ian Lance Taylor  (ian@cygnus.com)
 
 	* Makefile.in (RUNTEST): Define.
