@@ -32,7 +32,8 @@ if ![isnative] {
 # really test -r.  Use ld1 to link a fresh ld, ld2.  Use ld2 to link a
 # new ld, ld3.  ld2 and ld3 should be identical.
 
-foreach flags {"" "strip" "--static" "--traditional-format" "--no-keep-memory"} {
+foreach flags {"" "strip" "--static" "--traditional-format"
+	       "--no-keep-memory" "--relax"} {
     set do_strip "no"
     if {"$flags" == "strip"} { 
 	set testname "bootstrap with $flags"
@@ -43,6 +44,12 @@ foreach flags {"" "strip" "--static" "--traditional-format" "--no-keep-memory"} 
     } else {
 	set testname "bootstrap"
     }}
+
+    # --static is meaningless and --relax is incompatible with -r.
+    set partial_flags "$flags"
+    if { "$flags" == "--static" || "$flags" == "--relax" } {
+	set partial_flags ""
+    }
 
     # This test can only be run if we have the ld build directory,
     # since we need the object files.
@@ -58,7 +65,7 @@ foreach flags {"" "strip" "--static" "--traditional-format" "--no-keep-memory"} 
 	continue
     }
 
-    if ![ld_relocate $ld tmpdir/ld-partial.o "$flags $OFILES"] {
+    if ![ld_relocate $ld tmpdir/ld-partial.o "$partial_flags $OFILES"] {
 	fail $testname
 	continue
     }

@@ -1,3 +1,7 @@
+2002-05-30  Richard Henderson  <rth@redhat.com>
+
+	* ld-bootstrap/bootstrap.exp: Test --relax.
+
 2002-05-28  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-cris/libdso-2.d: Tweak for combreloc now default on.
