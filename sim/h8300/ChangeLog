@@ -1,3 +1,14 @@
+Tue Sep  9 22:17:26 1997  Felix Lee  <flee@cygnus.com>
+
+	* inst.h (sim_state): rename to h8300_sim_state, to avoid conflict
+ 	with sim/common.
+	* configure.in: check for sys/param.h
+	* compile.c: #ifdef HAVE_SYS_PARAM_H.
+	#define SIGTRAP for wingdb.
+	(sim_resume): poll keyboard at least once per call.
+	(sim_resume): use host_callback instead of printf for syscall
+ 	output.
+
 Thu Sep  4 17:21:23 1997  Doug Evans  <dje@seba>
 
 	* configure: Regenerated to track ../common/aclocal.m4 changes.

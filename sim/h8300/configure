@@ -1287,7 +1287,7 @@ sim_link_links="${sim_link_links} targ-vals.def"
 
 
 
-for ac_hdr in stdlib.h time.h
+for ac_hdr in stdlib.h time.h sys/param.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
