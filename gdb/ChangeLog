@@ -1,3 +1,7 @@
+Sat Mar 25 18:55:57 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* maint.c: Re-indent.
+
 Sat Mar 25 18:51:50 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* maint.c (_initialize_maint_cmds): Remove quoted trailing space.
