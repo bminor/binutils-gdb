@@ -1,3 +1,8 @@
+2001-12-19  Jim Blandy  <jimb@redhat.com>
+
+	* s390-tdep.c (s390_register_raw_size): Replace unnecessarily
+	obscure range comparison with legible equivalent.
+
 Wed Dec 19 12:18:57 2001  Jeffrey A Law  (law@redhat.com)
 
 	* config/pa/tm-hppa.h (STORE_RETURN_VALUE): Use hppa_store_return_value.

@@ -42,14 +42,15 @@
 
 
 /* Number of bytes of storage in the actual machine representation
-   for register N. 
-   Note that the unsigned cast here forces the result of the
-   subtraction to very high positive values if N < S390_FP0_REGNUM */
+   for register N.  */
 int
 s390_register_raw_size (int reg_nr)
 {
-  return ((unsigned) reg_nr - S390_FP0_REGNUM) <
-    S390_NUM_FPRS ? S390_FPR_SIZE : 4;
+  if (S390_FP0_REGNUM <= reg_nr
+      && reg_nr < S390_FP0_REGNUM + S390_NUM_FPRS)
+    return S390_FPR_SIZE;
+  else
+    return 4;
 }
 
 int
@@ -1759,6 +1760,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   gdbarch = gdbarch_alloc (&info, NULL);
 
   set_gdbarch_believe_pcc_promotion (gdbarch, 0);
+  set_gdbarch_char_signed (gdbarch, 0);
 
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frame_args_address (gdbarch, s390_frame_args_address);
