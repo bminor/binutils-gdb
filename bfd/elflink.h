@@ -299,8 +299,6 @@ elf_merge_symbol (abfd, info, name, sym, psec, pvalue, sym_hash,
   boolean newdyn, olddyn, olddef, newdef, newdyncommon, olddyncommon;
 
   *override = false;
-  *type_change_ok = false;
-  *size_change_ok = false;
 
   sec = *psec;
   bind = ELF_ST_BIND (sym->st_info);
@@ -1372,6 +1370,8 @@ elf_link_add_object_symbols (abfd, info)
                      purposes of the merge, act as though we were
                      defining the symbol we just defined, although we
                      actually going to define an indirect symbol.  */
+		  type_change_ok = false;
+		  size_change_ok = false;
 		  if (! elf_merge_symbol (abfd, info, shortname, &sym, &sec,
 					  &value, &hi, &override,
 					  &type_change_ok, &size_change_ok))
@@ -1510,6 +1510,8 @@ elf_link_add_object_symbols (abfd, info)
 		  strcpy (shortname + (p - name), p + 1);
 
 		  /* Once again, merge with any existing symbol.  */
+		  type_change_ok = false;
+		  size_change_ok = false;
 		  if (! elf_merge_symbol (abfd, info, shortname, &sym, &sec,
 					  &value, &hi, &override,
 					  &type_change_ok, &size_change_ok))

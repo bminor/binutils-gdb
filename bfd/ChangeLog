@@ -1,5 +1,10 @@
 Tue Jun  2 15:29:35 1998  Ian Lance Taylor  <ian@cygnus.com>
 
+	* elflink.h (elf_merge_symbol): Don't always set type_change_ok
+	and size_change_ok.
+ 	(elf_link_add_object_symbols): Set type_change_ok and
+	size_change_ok before calling elf_merge_symbol.
+
 	* elf32-mips.c (mips_elf_relocate_section): If we issue an
 	undefined symbol error, don't also issue an overflow error.
 
