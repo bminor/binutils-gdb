@@ -1,3 +1,32 @@
+Thu Apr 14 13:05:10 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* coff-mips.c (mips_howto_table): Add dummy entries to account for
+	numbering changes in include/coff/mips.h.  Add entries for
+	MIPS_R_RELHI and MIPS_R_RELLO.
+	(mips_ecoff_swap_reloc_in): Handle an extra bit for the reloc type
+	when little endian.  Treat internal MIPS_R_RELLO or MIPS_R_RELHI
+	relocs like MIPS_R_SWITCH, and convert r_offset from 24 to 32
+	bits.
+	(mips_ecoff_swap_reloc_out): Likewise.
+	(mips_adjust_reloc_in): Handle internal MIPS_R_RELLO or
+	MIPS_R_RELHI relocs like MIPS_R_SWITCH.
+	(mips_adjust_reloc_out): Likewise.
+	(mips_relhi_addr, mips_relhi_addend): New static variables.
+	(mips_relhi_reloc, mips_rello_reloc): New functions.
+	(mips_bfd_reloc_type_lookup): Turn BFD_RELOC_PCREL_HI16_S into
+	MIPS_R_RELHI and turn BFD_RELOC_PCREL_LO16 into MIPS_R_RELLO.
+	(mips_relocate_hi): Rename from mips_relocate_refhi, and add pcrel
+	argument.  Changed all callers.
+	(mips_relocate_section): Rename got_reflo to got_lo and
+	reflo_int_rel to lo_int_rel.  Handle MIPS_R_RELLO and MIPS_R_RELHI
+	relocs.
+	(mips_relax_section): Adjust MIPS_R_RELHI/MIPS_R_RELLO pairs when
+	expanding a PC relative call.
+
+	* reloc.c (bfd_reloc_code_real_type): Add BFD_RELOC_PCREL_HI16_S
+	and BFD_RELOC_PCREL_LO16.
+	* bfd-in2.h: Rebuilt.
+
 Tue Apr 12 13:36:20 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* som.c (som_write_fixups): Always emit at least

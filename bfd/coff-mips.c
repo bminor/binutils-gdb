@@ -72,6 +72,20 @@ static bfd_reloc_status_type mips_gprel_reloc PARAMS ((bfd *abfd,
 						       asection *section,
 						       bfd *output_bfd,
 						       char **error));
+static bfd_reloc_status_type mips_relhi_reloc PARAMS ((bfd *abfd,
+						       arelent *reloc,
+						       asymbol *symbol,
+						       PTR data,
+						       asection *section,
+						       bfd *output_bfd,
+						       char **error));
+static bfd_reloc_status_type mips_rello_reloc PARAMS ((bfd *abfd,
+						       arelent *reloc,
+						       asymbol *symbol,
+						       PTR data,
+						       asection *section,
+						       bfd *output_bfd,
+						       char **error));
 static bfd_reloc_status_type mips_switch_reloc PARAMS ((bfd *abfd,
 							arelent *reloc,
 							asymbol *symbol,
@@ -79,13 +93,14 @@ static bfd_reloc_status_type mips_switch_reloc PARAMS ((bfd *abfd,
 							asection *section,
 							bfd *output_bfd,
 							char **error));
-static void mips_relocate_refhi PARAMS ((struct internal_reloc *refhi,
-					 struct internal_reloc *reflo,
-					 bfd *input_bfd,
-					 asection *input_section,
-					 bfd_byte *contents,
-					 size_t adjust,
-					 bfd_vma relocation));
+static void mips_relocate_hi PARAMS ((struct internal_reloc *refhi,
+				      struct internal_reloc *reflo,
+				      bfd *input_bfd,
+				      asection *input_section,
+				      bfd_byte *contents,
+				      size_t adjust,
+				      bfd_vma relocation,
+				      boolean pcrel));
 static boolean mips_relocate_section PARAMS ((bfd *, struct bfd_link_info *,
 					      bfd *, asection *,
 					      bfd_byte *, PTR));
@@ -253,6 +268,11 @@ static reloc_howto_type mips_howto_table[] =
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
+  { 8 },
+  { 9 },
+  { 10 },
+  { 11 },
+
   /* This reloc is a Cygnus extension used when generating position
      independent code for embedded systems.  It represents a 16 bit PC
      relative reloc rightshifted twice as used in the MIPS branch
@@ -270,6 +290,52 @@ static reloc_howto_type mips_howto_table[] =
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
+
+  /* This reloc is a Cygnus extension used when generating position
+     independent code for embedded systems.  It represents the high 16
+     bits of a PC relative reloc.  The next reloc must be
+     MIPS_R_RELLO, and the addend is formed from the addends of the
+     two instructions, just as in MIPS_R_REFHI and MIPS_R_REFLO.  The
+     final value is actually PC relative to the location of the
+     MIPS_R_RELLO reloc, not the MIPS_R_RELHI reloc.  */
+  HOWTO (MIPS_R_RELHI,		/* type */
+	 16,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 true,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 mips_relhi_reloc,	/* special_function */
+	 "RELHI",		/* name */
+	 true,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 true),			/* pcrel_offset */
+
+  /* This reloc is a Cygnus extension used when generating position
+     independent code for embedded systems.  It represents the low 16
+     bits of a PC relative reloc.  */
+  HOWTO (MIPS_R_RELLO,		/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 true,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 mips_rello_reloc,	/* special_function */
+	 "RELLO",		/* name */
+	 true,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 true),			/* pcrel_offset */
+
+  { 15 },
+  { 16 },
+  { 17 },
+  { 18 },
+  { 19 },
+  { 20 },
+  { 21 },
 
   /* This reloc is a Cygnus extension used when generating position
      independent code for embedded systems.  It represents an entry in
@@ -376,21 +442,29 @@ mips_ecoff_swap_reloc_in (abfd, ext_ptr, intern)
 			     << RELOC_BITS1_SYMNDX_SH_LEFT_LITTLE)
 			  | ((int) ext->r_bits[2]
 			     << RELOC_BITS2_SYMNDX_SH_LEFT_LITTLE));
-      intern->r_type = ((ext->r_bits[3] & RELOC_BITS3_TYPE_LITTLE)
-			>> RELOC_BITS3_TYPE_SH_LITTLE);
+      intern->r_type = (((ext->r_bits[3] & RELOC_BITS3_TYPE_LITTLE)
+			 >> RELOC_BITS3_TYPE_SH_LITTLE)
+			| ((ext->r_bits[3] & RELOC_BITS3_TYPEHI_LITTLE)
+			   << RELOC_BITS3_TYPEHI_SH_LITTLE));
       intern->r_extern = (ext->r_bits[3] & RELOC_BITS3_EXTERN_LITTLE) != 0;
     }
 
-  /* If this is a MIPS_R_SWITCH reloc, r_symndx is actually the offset
-     from the reloc address to the base of the difference (see
+  /* If this is a MIPS_R_SWITCH reloc, or an internal MIPS_R_RELHI or
+     MIPS_R_RELLO reloc, r_symndx is actually the offset from the
+     reloc address to the base of the difference (see
      include/coff/mips.h for more details).  We copy symndx into the
      r_offset field so as not to confuse ecoff_slurp_reloc_table in
      ecoff.c.  In adjust_reloc_in we then copy r_offset into the reloc
      addend.  */
-  if (intern->r_type == MIPS_R_SWITCH)
+  if (intern->r_type == MIPS_R_SWITCH
+      || (! intern->r_extern
+	  && (intern->r_type == MIPS_R_RELLO
+	      || intern->r_type == MIPS_R_RELHI)))
     {
       BFD_ASSERT (! intern->r_extern);
       intern->r_offset = intern->r_symndx;
+      if (intern->r_offset & 0x800000)
+	intern->r_offset -= 0x1000000;
       intern->r_symndx = RELOC_SECTION_TEXT;
     }
 }
@@ -409,15 +483,19 @@ mips_ecoff_swap_reloc_out (abfd, intern, dst)
   BFD_ASSERT (intern->r_extern
 	      || (intern->r_symndx >= 0 && intern->r_symndx <= 12));
 
-  /* If this is a MIPS_R_SWITCH reloc, we actually want to write the
-     contents of r_offset out as the symbol index.  This undoes the
-     change made by mips_ecoff_swap_reloc_in.  */
-  if (intern->r_type != MIPS_R_SWITCH)
+  /* If this is a MIPS_R_SWITCH reloc, or an internal MIPS_R_RELLO or
+     MIPS_R_RELHI reloc, we actually want to write the contents of
+     r_offset out as the symbol index.  This undoes the change made by
+     mips_ecoff_swap_reloc_in.  */
+  if (intern->r_type != MIPS_R_SWITCH
+      && (intern->r_extern
+	  || (intern->r_type != MIPS_R_RELHI
+	      && intern->r_type != MIPS_R_RELLO)))
     r_symndx = intern->r_symndx;
   else
     {
       BFD_ASSERT (intern->r_symndx == RELOC_SECTION_TEXT);
-      r_symndx = intern->r_offset;
+      r_symndx = intern->r_offset & 0xffffff;
     }
 
   bfd_h_put_32 (abfd, intern->r_vaddr, (bfd_byte *) ext->r_vaddr);
@@ -437,6 +515,8 @@ mips_ecoff_swap_reloc_out (abfd, intern, dst)
       ext->r_bits[2] = r_symndx >> RELOC_BITS2_SYMNDX_SH_LEFT_LITTLE;
       ext->r_bits[3] = (((intern->r_type << RELOC_BITS3_TYPE_SH_LITTLE)
 			 & RELOC_BITS3_TYPE_LITTLE)
+			| ((intern->r_type >> RELOC_BITS3_TYPEHI_SH_LITTLE
+			    & RELOC_BITS3_TYPEHI_LITTLE))
 			| (intern->r_extern ? RELOC_BITS3_EXTERN_LITTLE : 0));
     }
 }
@@ -464,12 +544,16 @@ mips_adjust_reloc_in (abfd, intern, rptr)
   if (intern->r_type == MIPS_R_IGNORE)
     rptr->sym_ptr_ptr = bfd_abs_section.symbol_ptr_ptr;
 
-  /* If this is a MIPS_R_SWITCH reloc, we want the addend field of the
-     BFD relocto hold the value which was originally in the symndx
-     field of the internal MIPS ECOFF reloc.  This value was copied
-     into intern->r_offset by mips_swap_reloc_in, and here we copy it
-     into the addend field.  */
-  if (intern->r_type == MIPS_R_SWITCH)
+  /* If this is a MIPS_R_SWITCH reloc, or an internal MIPS_R_RELHI or
+     MIPS_R_RELLO reloc, we want the addend field of the BFD relocto
+     hold the value which was originally in the symndx field of the
+     internal MIPS ECOFF reloc.  This value was copied into
+     intern->r_offset by mips_swap_reloc_in, and here we copy it into
+     the addend field.  */
+  if (intern->r_type == MIPS_R_SWITCH
+      || (! intern->r_extern
+	  && (intern->r_type == MIPS_R_RELHI
+	      || intern->r_type == MIPS_R_RELLO)))
     rptr->addend = intern->r_offset;
 
   rptr->howto = &mips_howto_table[intern->r_type];
@@ -484,11 +568,15 @@ mips_adjust_reloc_out (abfd, rel, intern)
      const arelent *rel;
      struct internal_reloc *intern;
 {
-  /* For a MIPS_R_SWITCH reloc we must copy rel->addend into
+  /* For a MIPS_R_SWITCH reloc, or an internal MIPS_R_RELHI or
+     MIPS_R_RELLO reloc, we must copy rel->addend into
      intern->r_offset.  This will then be written out as the symbol
      index by mips_ecoff_swap_reloc_out.  This operation parallels the
      action of mips_adjust_reloc_in.  */
-  if (intern->r_type == MIPS_R_SWITCH)
+  if (intern->r_type == MIPS_R_SWITCH
+      || (! intern->r_extern
+	  && (intern->r_type == MIPS_R_RELHI
+	      || intern->r_type == MIPS_R_RELLO)))
     intern->r_offset = rel->addend;
 }
 
@@ -790,6 +878,166 @@ mips_gprel_reloc (abfd,
   return bfd_reloc_ok;
 }
 
+/* Do a RELHI relocation.  We do this in conjunction with a RELLO
+   reloc, just as REFHI and REFLO are done together.  RELHI and RELLO
+   are Cygnus extensions used when generating position independent
+   code for embedded systems.  */
+
+static bfd_byte *mips_relhi_addr;
+static bfd_vma mips_relhi_addend;
+
+static bfd_reloc_status_type
+mips_relhi_reloc (abfd,
+		  reloc_entry,
+		  symbol,
+		  data,
+		  input_section,
+		  output_bfd,
+		  error_message)
+     bfd *abfd;
+     arelent *reloc_entry;
+     asymbol *symbol;
+     PTR data;
+     asection *input_section;
+     bfd *output_bfd;
+     char **error_message;
+{
+  bfd_reloc_status_type ret;
+  bfd_vma relocation;
+
+  /* If this is a reloc against a section symbol, then it is correct
+     in the object file.  The only time we want to change this case is
+     when we are relaxing, and that is handled entirely by
+     mips_relocate_section and never calls this function.  */
+  if ((symbol->flags & BSF_SECTION_SYM) != 0)
+    {
+      if (output_bfd != (bfd *) NULL)
+	reloc_entry->address += input_section->output_offset;
+      return bfd_reloc_ok;
+    }
+
+  /* This is an external symbol.  If we're relocating, we don't want
+     to change anything.  */
+  if (output_bfd != (bfd *) NULL)
+    {
+      reloc_entry->address += input_section->output_offset;
+      return bfd_reloc_ok;
+    }
+
+  ret = bfd_reloc_ok;
+  if (symbol->section == &bfd_und_section
+      && output_bfd == (bfd *) NULL)
+    ret = bfd_reloc_undefined;
+
+  if (bfd_is_com_section (symbol->section))
+    relocation = 0;
+  else
+    relocation = symbol->value;
+
+  relocation += symbol->section->output_section->vma;
+  relocation += symbol->section->output_offset;
+  relocation += reloc_entry->addend;
+
+  if (reloc_entry->address > input_section->_cooked_size)
+    return bfd_reloc_outofrange;
+
+  /* Save the information, and let RELLO do the actual relocation.  */
+  mips_relhi_addr = (bfd_byte *) data + reloc_entry->address;
+  mips_relhi_addend = relocation;
+
+  if (output_bfd != (bfd *) NULL)
+    reloc_entry->address += input_section->output_offset;
+
+  return ret;
+}
+
+/* Do a RELLO relocation.  This is a straightforward 16 bit PC
+   relative relocation; this function exists in order to do the RELHI
+   relocation described above.  */
+
+static bfd_reloc_status_type
+mips_rello_reloc (abfd,
+		  reloc_entry,
+		  symbol,
+		  data,
+		  input_section,
+		  output_bfd,
+		  error_message)
+     bfd *abfd;
+     arelent *reloc_entry;
+     asymbol *symbol;
+     PTR data;
+     asection *input_section;
+     bfd *output_bfd;
+     char **error_message;
+{
+  if (mips_relhi_addr != (bfd_byte *) NULL)
+    {
+      unsigned long insn;
+      unsigned long val;
+      unsigned long vallo;
+
+      /* Do the RELHI relocation.  Note that we actually don't need to
+	 know anything about the RELLO itself, except where to find
+	 the low 16 bits of the addend needed by the RELHI.  */
+      insn = bfd_get_32 (abfd, mips_relhi_addr);
+      vallo = (bfd_get_32 (abfd, (bfd_byte *) data + reloc_entry->address)
+	       & 0xffff);
+      val = ((insn & 0xffff) << 16) + vallo;
+      val += mips_relhi_addend;
+
+      /* If the symbol is defined, make val PC relative.  If the
+	 symbol is not defined we don't want to do this, because we
+	 don't want the value in the object file to incorporate the
+	 address of the reloc.  */
+      if (bfd_get_section (symbol) != &bfd_und_section
+	  && ! bfd_is_com_section (bfd_get_section (symbol)))
+	val -= (input_section->output_section->vma
+		+ input_section->output_offset
+		+ reloc_entry->address);
+
+      /* The low order 16 bits are always treated as a signed value.
+	 Therefore, a negative value in the low order bits requires an
+	 adjustment in the high order bits.  We need to make this
+	 adjustment in two ways: once for the bits we took from the
+	 data, and once for the bits we are putting back in to the
+	 data.  */
+      if ((vallo & 0x8000) != 0)
+	val -= 0x10000;
+      if ((val & 0x8000) != 0)
+	val += 0x10000;
+
+      insn = (insn &~ 0xffff) | ((val >> 16) & 0xffff);
+      bfd_put_32 (abfd, insn, mips_relhi_addr);
+
+      mips_relhi_addr = (bfd_byte *) NULL;
+    }
+
+  /* If this is a reloc against a section symbol, then it is correct
+     in the object file.  The only time we want to change this case is
+     when we are relaxing, and that is handled entirely by
+     mips_relocate_section and never calls this function.  */
+  if ((symbol->flags & BSF_SECTION_SYM) != 0)
+    {
+      if (output_bfd != (bfd *) NULL)
+	reloc_entry->address += input_section->output_offset;
+      return bfd_reloc_ok;
+    }
+
+  /* bfd_perform_relocation does not handle pcrel_offset relocations
+     correctly when generating a relocateable file, so handle them
+     directly here.  */
+  if (output_bfd != (bfd *) NULL)
+    {
+      reloc_entry->address += input_section->output_offset;
+      return bfd_reloc_ok;
+    }
+
+  /* Now do the RELLO reloc in the usual way.  */
+  return mips_generic_reloc (abfd, reloc_entry, symbol, data,
+			      input_section, output_bfd, error_message);
+}
+
 /* This is the special function for the MIPS_R_SWITCH reloc.  This
    special reloc is normally correct in the object file, and only
    requires special handling when relaxing.  We don't want
@@ -851,6 +1099,12 @@ mips_bfd_reloc_type_lookup (abfd, code)
     case BFD_RELOC_16_PCREL_S2:
       mips_type = MIPS_R_PCREL16;
       break;
+    case BFD_RELOC_PCREL_HI16_S:
+      mips_type = MIPS_R_RELHI;
+      break;
+    case BFD_RELOC_PCREL_LO16:
+      mips_type = MIPS_R_RELLO;
+      break;
     case BFD_RELOC_GPREL32:
       mips_type = MIPS_R_SWITCH;
       break;
@@ -862,13 +1116,13 @@ mips_bfd_reloc_type_lookup (abfd, code)
 }
 
 /* A helper routine for mips_relocate_section which handles the REFHI
-   relocation.  The REFHI relocation must be followed by a REFLO
-   relocation, and the addend used is formed from the addends of both
-   instructions.  */
+   and RELHI relocations.  The REFHI relocation must be followed by a
+   REFLO relocation (and RELHI by a RELLO), and the addend used is
+   formed from the addends of both instructions.  */
 
 static void
-mips_relocate_refhi (refhi, reflo, input_bfd, input_section, contents,
-		     adjust, relocation)
+mips_relocate_hi (refhi, reflo, input_bfd, input_section, contents, adjust,
+		  relocation, pcrel)
      struct internal_reloc *refhi;
      struct internal_reloc *reflo;
      bfd *input_bfd;
@@ -876,6 +1130,7 @@ mips_relocate_refhi (refhi, reflo, input_bfd, input_section, contents,
      bfd_byte *contents;
      size_t adjust;
      bfd_vma relocation;
+     boolean pcrel;
 {
   unsigned long insn;
   unsigned long val;
@@ -896,6 +1151,12 @@ mips_relocate_refhi (refhi, reflo, input_bfd, input_section, contents,
      and once for the bits we are putting back in to the data.  */
   if ((vallo & 0x8000) != 0)
     val -= 0x10000;
+
+  if (pcrel)
+    val -= (input_section->output_section->vma
+	    + input_section->output_offset
+	    + (reflo->r_vaddr - input_section->vma + adjust));
+
   if ((val & 0x8000) != 0)
     val += 0x10000;
 
@@ -925,8 +1186,8 @@ mips_relocate_section (output_bfd, info, input_bfd, input_section,
   struct external_reloc *ext_rel;
   struct external_reloc *ext_rel_end;
   unsigned int i;
-  boolean got_reflo;
-  struct internal_reloc reflo_int_rel;
+  boolean got_lo;
+  struct internal_reloc lo_int_rel;
 
   BFD_ASSERT (input_bfd->xvec->header_byteorder_big_p
 	      == output_bfd->xvec->header_byteorder_big_p);
@@ -984,7 +1245,7 @@ mips_relocate_section (output_bfd, info, input_bfd, input_section,
   else
     gp_undefined = false;
 
-  got_reflo = false;
+  got_lo = false;
 
   adjust = 0;
 
@@ -1005,29 +1266,33 @@ mips_relocate_section (output_bfd, info, input_bfd, input_section,
       bfd_vma relocation;
       bfd_reloc_status_type r;
 
-      if (! got_reflo)
+      if (! got_lo)
 	mips_ecoff_swap_reloc_in (input_bfd, (PTR) ext_rel, &int_rel);
       else
 	{
-	  int_rel = reflo_int_rel;
-	  got_reflo = false;
+	  int_rel = lo_int_rel;
+	  got_lo = false;
 	}
 
       BFD_ASSERT (int_rel.r_type
 		  < sizeof mips_howto_table / sizeof mips_howto_table[0]);
 
-      /* The REFHI reloc requires special handling.  It must be
-	 followed by a REFLO reloc, and the addend is formed from both
-	 fields.  */
-      if (int_rel.r_type == MIPS_R_REFHI)
+      /* The REFHI and RELHI relocs requires special handling.  they
+	 must be followed by a REFLO or RELLO reloc, respectively, and
+	 the addend is formed from both relocs.  */
+      if (int_rel.r_type == MIPS_R_REFHI
+	  || int_rel.r_type == MIPS_R_RELHI)
 	{
 	  BFD_ASSERT ((ext_rel + 1) < ext_rel_end);
 	  mips_ecoff_swap_reloc_in (input_bfd, (PTR) (ext_rel + 1),
-				    &reflo_int_rel);
-	  BFD_ASSERT (reflo_int_rel.r_type == MIPS_R_REFLO
-		      && int_rel.r_extern == reflo_int_rel.r_extern
-		      && int_rel.r_symndx == reflo_int_rel.r_symndx);
-	  got_reflo = true;
+				    &lo_int_rel);
+	  BFD_ASSERT ((lo_int_rel.r_type
+		       == (int_rel.r_type == MIPS_R_REFHI
+			   ? MIPS_R_REFLO
+			   : MIPS_R_RELLO))
+		      && int_rel.r_extern == lo_int_rel.r_extern
+		      && int_rel.r_symndx == lo_int_rel.r_symndx);
+	  got_lo = true;
 	}
 
       howto = &mips_howto_table[int_rel.r_type];
@@ -1139,17 +1404,17 @@ mips_relocate_section (output_bfd, info, input_bfd, input_section,
 	  && offsets[i] != 0)
 	{
 	  BFD_ASSERT (! info->relocateable);
-	  BFD_ASSERT (int_rel.r_type == MIPS_R_PCREL16);
+	  BFD_ASSERT (int_rel.r_type == MIPS_R_PCREL16
+		      || int_rel.r_type == MIPS_R_RELHI
+		      || int_rel.r_type == MIPS_R_RELLO);
 	  if (offsets[i] != 1)
-	    {
-	      BFD_ASSERT (! int_rel.r_extern);
-	      addend += offsets[i];
-	    }
+	    addend += offsets[i];
 	  else
 	    {
 	      bfd_byte *here;
 
-	      BFD_ASSERT (int_rel.r_extern);
+	      BFD_ASSERT (int_rel.r_extern
+			  && int_rel.r_type == MIPS_R_PCREL16);
 
 	      /* Move the rest of the instructions up.  */
 	      here = (contents
@@ -1254,7 +1519,43 @@ mips_relocate_section (output_bfd, info, input_bfd, input_section,
 		     currently holds just the addend.  We must adjust
 		     by the address to get the right value.  */
 		  if (howto->pc_relative)
-		    relocation -= int_rel.r_vaddr - input_section->vma;
+		    {
+		      relocation -= int_rel.r_vaddr - input_section->vma;
+
+		      /* If we are converting a RELHI or RELLO reloc
+			 from being against an external symbol to
+			 being against a section, we must put a
+			 special value into the r_offset field.  This
+			 value is the old addend.  The r_offset for
+			 both the RELOHI and RELLO relocs are the
+			 same, and we set both when we see RELHI.  */
+		      if (int_rel.r_type == MIPS_R_RELHI)
+			{
+			  long addhi, addlo;
+
+			  addhi = bfd_get_32 (input_bfd,
+					      (contents
+					       + adjust
+					       + int_rel.r_vaddr
+					       - input_section->vma));
+			  addhi &= 0xffff;
+			  if (addhi & 0x8000)
+			    addhi -= 0x10000;
+			  addhi <<= 16;
+
+			  addlo = bfd_get_32 (input_bfd,
+					      (contents
+					       + adjust
+					       + lo_int_rel.r_vaddr
+					       - input_section->vma));
+			  addlo &= 0xffff;
+			  if (addlo & 0x8000)
+			    addlo -= 0x10000;
+
+			  int_rel.r_offset = addhi + addlo;
+			  lo_int_rel.r_offset = int_rel.r_offset;
+			}
+		    }
 
 		  h = NULL;
 		}
@@ -1289,8 +1590,14 @@ mips_relocate_section (output_bfd, info, input_bfd, input_section,
 
 	  /* Adjust a PC relative relocation by removing the reference
 	     to the original address in the section and including the
-	     reference to the new address.  */
-	  if (howto->pc_relative)
+	     reference to the new address.  However, external RELHI
+	     and RELLO relocs are PC relative, but don't include any
+	     reference to the address.  The addend is merely an
+	     addend.  */
+	  if (howto->pc_relative
+	      && (! int_rel.r_extern
+		  || (int_rel.r_type != MIPS_R_RELHI
+		      && int_rel.r_type != MIPS_R_RELLO)))
 	    relocation -= (input_section->output_section->vma
 			   + input_section->output_offset
 			   - input_section->vma);
@@ -1300,7 +1607,8 @@ mips_relocate_section (output_bfd, info, input_bfd, input_section,
 	    r = bfd_reloc_ok;
 	  else
 	    {
-	      if (int_rel.r_type != MIPS_R_REFHI)
+	      if (int_rel.r_type != MIPS_R_REFHI
+		  && int_rel.r_type != MIPS_R_RELHI)
 		r = _bfd_relocate_contents (howto, input_bfd, relocation,
 					    (contents
 					     + adjust
@@ -1308,9 +1616,10 @@ mips_relocate_section (output_bfd, info, input_bfd, input_section,
 					     - input_section->vma));
 	      else
 		{
-		  mips_relocate_refhi (&int_rel, &reflo_int_rel,
-				       input_bfd, input_section, contents,
-				       adjust, relocation);
+		  mips_relocate_hi (&int_rel, &lo_int_rel,
+				    input_bfd, input_section, contents,
+				    adjust, relocation,
+				    int_rel.r_type == MIPS_R_RELHI);
 		  r = bfd_reloc_ok;
 		}
 	    }
@@ -1359,10 +1668,16 @@ mips_relocate_section (output_bfd, info, input_bfd, input_section,
 		 file.  Make it look like a pcrel_offset relocation by
 		 adding in the start address.  */
 	      if (howto->pc_relative)
-		relocation += int_rel.r_vaddr + adjust;
+		{
+		  if (int_rel.r_type != MIPS_R_RELHI)
+		    relocation += int_rel.r_vaddr + adjust;
+		  else
+		    relocation += lo_int_rel.r_vaddr + adjust;
+		}
 	    }
 
-	  if (int_rel.r_type != MIPS_R_REFHI)
+	  if (int_rel.r_type != MIPS_R_REFHI
+	      && int_rel.r_type != MIPS_R_RELHI)
 	    r = _bfd_final_link_relocate (howto,
 					  input_bfd,
 					  input_section,
@@ -1374,9 +1689,10 @@ mips_relocate_section (output_bfd, info, input_bfd, input_section,
 					  addend);
 	  else
 	    {
-	      mips_relocate_refhi (&int_rel, &reflo_int_rel, input_bfd,
-				   input_section, contents, adjust,
-				   relocation);
+	      mips_relocate_hi (&int_rel, &lo_int_rel, input_bfd,
+				input_section, contents, adjust,
+				relocation,
+				int_rel.r_type == MIPS_R_RELHI);
 	      r = bfd_reloc_ok;
 	    }
 	}
@@ -1652,46 +1968,25 @@ mips_relax_section (abfd, sec, info, again)
 
       offsets[i] = 1;
 
-      /* Now look for all PC relative branches or switch table entries
-	 that cross this reloc and adjust their offsets.  We will turn
-	 the single branch instruction into a four instruction
-	 sequence.  In this loop we are only interested in local PC
-	 relative branches.  */
+      /* Now look for all PC relative references that cross this reloc
+	 and adjust their offsets.  */
       adj_ext_rel = (struct external_reloc *) section_tdata->external_relocs;
       for (adj_i = 0; adj_ext_rel < ext_rel_end; adj_ext_rel++, adj_i++)
 	{
-	  int r_type;
 	  struct internal_reloc adj_int_rel;
-
-	  /* Quickly check that this reloc is internal PCREL16 or
-	     SWITCH.  */
-	  if (abfd->xvec->header_byteorder_big_p)
-	    {
-	      if ((adj_ext_rel->r_bits[3] & RELOC_BITS3_EXTERN_BIG) != 0)
-		continue;
-	      r_type = ((adj_ext_rel->r_bits[3] & RELOC_BITS3_TYPE_BIG)
-			>> RELOC_BITS3_TYPE_SH_BIG);
-	      if (r_type != MIPS_R_PCREL16
-		  && r_type != MIPS_R_SWITCH)
-		continue;
-	    }
-	  else
-	    {
-	      if ((adj_ext_rel->r_bits[3] & RELOC_BITS3_EXTERN_LITTLE) != 0)
-		continue;
-	      r_type = ((adj_ext_rel->r_bits[3] & RELOC_BITS3_TYPE_LITTLE)
-			>> RELOC_BITS3_TYPE_SH_LITTLE);
-	      if (r_type != MIPS_R_PCREL16
-		  && r_type != MIPS_R_SWITCH)
-		continue;
-	    }
+	  bfd_vma start, stop;
+	  int change;
 
 	  mips_ecoff_swap_reloc_in (abfd, (PTR) adj_ext_rel, &adj_int_rel);
 
-	  if (r_type == MIPS_R_PCREL16)
+	  if (adj_int_rel.r_type == MIPS_R_PCREL16)
 	    {
 	      unsigned long insn;
-	      bfd_vma dst;
+
+	      /* We only care about local references.  External ones
+		 will be relocated correctly anyhow.  */
+	      if (adj_int_rel.r_extern)
+		continue;
 
 	      /* We are only interested in a PC relative reloc within
 		 this section.  FIXME: Cross section PC relative
@@ -1700,29 +1995,76 @@ mips_relax_section (abfd, sec, info, again)
 	      if (adj_int_rel.r_symndx != RELOC_SECTION_TEXT)
 		continue;
 
-	      /* Fetch the branch instruction.  */
+	      start = adj_int_rel.r_vaddr;
+
 	      insn = bfd_get_32 (abfd,
 				 contents + adj_int_rel.r_vaddr - sec->vma);
 
-	      /* Work out the destination address.  */
-	      dst = (insn & 0xffff) << 2;
-	      if ((dst & 0x20000) != 0)
-		dst -= 0x40000;
-	      dst += adj_int_rel.r_vaddr + 4;
-
-	      /* If this branch crosses the branch we just decided to
-		 expand, adjust the offset appropriately.  */
-	      if (adj_int_rel.r_vaddr <= int_rel.r_vaddr
-		  && dst > int_rel.r_vaddr)
-		offsets[adj_i] += PCREL16_EXPANSION_ADJUSTMENT;
-	      else if (adj_int_rel.r_vaddr > int_rel.r_vaddr
-		       && dst <= int_rel.r_vaddr)
-		offsets[adj_i] -= PCREL16_EXPANSION_ADJUSTMENT;
+	      stop = (insn & 0xffff) << 2;
+	      if ((stop & 0x20000) != 0)
+		stop -= 0x40000;
+	      stop += adj_int_rel.r_vaddr + 4;
 	    }
-	  else
+	  else if (adj_int_rel.r_type == MIPS_R_RELHI)
 	    {
-	      bfd_vma start, stop;
+	      struct internal_reloc rello;
+	      long addhi, addlo;
 
+	      /* The next reloc must be MIPS_R_RELLO, and we handle
+		 them together.  */
+	      BFD_ASSERT (adj_ext_rel + 1 < ext_rel_end);
+
+	      mips_ecoff_swap_reloc_in (abfd, (PTR) (adj_ext_rel + 1), &rello);
+
+	      BFD_ASSERT (rello.r_type == MIPS_R_RELLO);
+	      
+	      addhi = bfd_get_32 (abfd,
+				   contents + adj_int_rel.r_vaddr - sec->vma);
+	      addhi &= 0xffff;
+	      if (addhi & 0x8000)
+		addhi -= 0x10000;
+	      addhi <<= 16;
+
+	      addlo = bfd_get_32 (abfd, contents + rello.r_vaddr - sec->vma);
+	      addlo &= 0xffff;
+	      if (addlo & 0x8000)
+		addlo -= 0x10000;
+
+	      if (adj_int_rel.r_extern)
+		{
+		  /* The value we want here is
+		       sym - RELLOaddr + addend
+		     which we can express as
+		       sym - (RELLOaddr - addend)
+		     Therefore if we are expanding the area between
+		     RELLOaddr and RELLOaddr - addend we must adjust
+		     the addend.  This is admittedly ambiguous, since
+		     we might mean (sym + addend) - RELLOaddr, but in
+		     practice we don't, and there is no way to handle
+		     that case correctly since at this point we have
+		     no idea whether any reloc is being expanded
+		     between sym and sym + addend.  */
+		  start = rello.r_vaddr - (addhi + addlo);
+		  stop = rello.r_vaddr;
+		}
+	      else
+		{
+		  /* An internal RELHI/RELLO pair represents the
+		     difference between two addresses, $LC0 - foo.
+		     The symndx value is actually the difference
+		     between the reloc address and $LC0.  This lets us
+		     compute $LC0, and, by considering the addend,
+		     foo.  If the reloc we are expanding falls between
+		     those two relocs, we must adjust the addend.  At
+		     this point, the symndx value is actually in the
+		     r_offset field, where it was put by
+		     mips_ecoff_swap_reloc_in.  */
+		  start = rello.r_vaddr - adj_int_rel.r_offset;
+		  stop = start + addhi + addlo;
+		}
+	    }
+	  else if (adj_int_rel.r_type == MIPS_R_SWITCH)
+	    {
 	      /* A MIPS_R_SWITCH reloc represents a word of the form
 		   .word $L3-$LS12
 		 The value in the object file is correct, assuming the
@@ -1736,20 +2078,34 @@ mips_relax_section (abfd, sec, info, again)
 		 this point, the symndx value is actually found in the
 		 r_offset field, since it was moved by
 		 mips_ecoff_swap_reloc_in.  */
-
 	      start = adj_int_rel.r_vaddr - adj_int_rel.r_offset;
 	      stop = start + bfd_get_32 (abfd,
 					 (contents
 					  + adj_int_rel.r_vaddr
 					  - sec->vma));
+	    }
+	  else
+	    continue;
 
-	      /* The value we want in the object file is stop - start.
-		 If the expanded branch lies between start and stop,
-		 we must adjust the offset.  */
-	      if (start <= int_rel.r_vaddr && stop > int_rel.r_vaddr)
-		offsets[adj_i] += PCREL16_EXPANSION_ADJUSTMENT;
-	      else if (start > int_rel.r_vaddr && stop <= int_rel.r_vaddr)
-		offsets[adj_i] -= PCREL16_EXPANSION_ADJUSTMENT;
+	  /* If the range expressed by this reloc, which is the
+	     distance between START and STOP crosses the reloc we are
+	     expanding, we must adjust the offset.  The sign of the
+	     adjustment depends upon the direction in which the range
+	     crosses the reloc being expanded.  */
+	  if (start <= int_rel.r_vaddr && stop > int_rel.r_vaddr)
+	    change = PCREL16_EXPANSION_ADJUSTMENT;
+	  else if (start > int_rel.r_vaddr && stop <= int_rel.r_vaddr)
+	    change = - PCREL16_EXPANSION_ADJUSTMENT;
+	  else
+	    change = 0;
+
+	  offsets[adj_i] += change;
+
+	  if (adj_int_rel.r_type == MIPS_R_RELHI)
+	    {
+	      adj_ext_rel++;
+	      adj_i++;
+	      offsets[adj_i] += change;
 	    }
 	}
 
