@@ -1,3 +1,8 @@
+Wed Oct 30 20:15:35 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* doc/internals.texi: Rewrite, and add a lot of documentation.
+	* doc/Makefile.in (internals.info): New target.
+
 start-sanitize-v850
 Wed Oct 30 14:55:57 1996  Jeffrey A Law  (law@cygnus.com)
 
