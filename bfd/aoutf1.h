@@ -259,7 +259,7 @@ sunos_write_object_contents (abfd)
 
   N_SET_FLAGS (*execp, aout_backend_info (abfd)->exec_hdr_flags);
 
-  N_SET_DYNAMIC (*execp, bfd_get_file_flags (abfd) & DYNAMIC);
+  N_SET_DYNAMIC (*execp, (long)(bfd_get_file_flags (abfd) & DYNAMIC));
 
   WRITE_HEADERS (abfd, execp);
 

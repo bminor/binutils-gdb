@@ -290,7 +290,7 @@ enum machine_type {
 
 #ifndef N_SET_DYNAMIC
 # define N_SET_DYNAMIC(exec, dynamic) \
-((exec).a_info = (dynamic) ? ((exec).a_info | 0x80000000) : \
+((exec).a_info = (dynamic) ? (long) ((exec).a_info | 0x80000000) : \
 ((exec).a_info & 0x7fffffff))
 #endif
 

@@ -1,5 +1,6 @@
 /* BFD back-end for Motorola 68000 COFF binaries.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999, 2000
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
+   2000, 2001
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -67,6 +68,18 @@ static reloc_howto_type *m68kcoff_common_addend_rtype_to_howto
 #endif
 
 static boolean m68k_coff_is_local_label_name PARAMS ((bfd *, const char *));
+#ifdef STATIC_RELOCS
+static
+#endif
+reloc_howto_type * m68k_reloc_type_lookup PARAMS ((bfd *, bfd_reloc_code_real_type));
+#ifdef STATIC_RELOCS
+static
+#endif
+int m68k_howto2rtype PARAMS ((reloc_howto_type *));
+#ifdef STATIC_RELOCS
+static
+#endif
+void m68k_rtype2howto PARAMS ((arelent *, int));
 
 /* On the delta, a symbol starting with L% is local.  We won't see
    such a symbol on other platforms, so it should be safe to always
@@ -98,15 +111,15 @@ extern reloc_howto_type m68kcoff_howto_table[];
 static
 #endif
 reloc_howto_type m68kcoff_howto_table[] =
-{
-  HOWTO(R_RELBYTE,	       0,  0,  	8,  false, 0, complain_overflow_bitfield, RELOC_SPECIAL_FN, "8",	true, 0x000000ff,0x000000ff, false),
-  HOWTO(R_RELWORD,	       0,  1, 	16, false, 0, complain_overflow_bitfield, RELOC_SPECIAL_FN, "16",	true, 0x0000ffff,0x0000ffff, false),
-  HOWTO(R_RELLONG,	       0,  2, 	32, false, 0, complain_overflow_bitfield, RELOC_SPECIAL_FN, "32",	true, 0xffffffff,0xffffffff, false),
-  HOWTO(R_PCRBYTE,	       0,  0, 	8,  true,  0, complain_overflow_signed, RELOC_SPECIAL_FN, "DISP8",    true, 0x000000ff,0x000000ff, false),
-  HOWTO(R_PCRWORD,	       0,  1, 	16, true,  0, complain_overflow_signed, RELOC_SPECIAL_FN, "DISP16",   true, 0x0000ffff,0x0000ffff, false),
-  HOWTO(R_PCRLONG,	       0,  2, 	32, true,  0, complain_overflow_signed, RELOC_SPECIAL_FN, "DISP32",   true, 0xffffffff,0xffffffff, false),
-  HOWTO(R_RELLONG_NEG,	       0,  -2, 	32, false, 0, complain_overflow_bitfield, RELOC_SPECIAL_FN, "-32",	true, 0xffffffff,0xffffffff, false),
-};
+  {
+    HOWTO (R_RELBYTE,	       0,  0,  	8,  false, 0, complain_overflow_bitfield, RELOC_SPECIAL_FN, "8",	true, 0x000000ff,0x000000ff, false),
+    HOWTO (R_RELWORD,	       0,  1, 	16, false, 0, complain_overflow_bitfield, RELOC_SPECIAL_FN, "16",	true, 0x0000ffff,0x0000ffff, false),
+    HOWTO (R_RELLONG,	       0,  2, 	32, false, 0, complain_overflow_bitfield, RELOC_SPECIAL_FN, "32",	true, 0xffffffff,0xffffffff, false),
+    HOWTO (R_PCRBYTE,	       0,  0, 	8,  true,  0, complain_overflow_signed,   RELOC_SPECIAL_FN, "DISP8",    true, 0x000000ff,0x000000ff, false),
+    HOWTO (R_PCRWORD,	       0,  1, 	16, true,  0, complain_overflow_signed,   RELOC_SPECIAL_FN, "DISP16",   true, 0x0000ffff,0x0000ffff, false),
+    HOWTO (R_PCRLONG,	       0,  2, 	32, true,  0, complain_overflow_signed,   RELOC_SPECIAL_FN, "DISP32",   true, 0xffffffff,0xffffffff, false),
+    HOWTO (R_RELLONG_NEG,      0, -2, 	32, false, 0, complain_overflow_bitfield, RELOC_SPECIAL_FN, "-32",	true, 0xffffffff,0xffffffff, false),
+  };
 #endif /* not ONLY_DECLARE_RELOCS */
 
 #ifndef BADMAG
@@ -131,15 +144,15 @@ m68k_rtype2howto(internal, relocentry)
      int relocentry;
 {
   switch (relocentry)
-  {
-   case R_RELBYTE:	internal->howto = m68kcoff_howto_table + 0; break;
-   case R_RELWORD:	internal->howto = m68kcoff_howto_table + 1; break;
-   case R_RELLONG:	internal->howto = m68kcoff_howto_table + 2; break;
-   case R_PCRBYTE:	internal->howto = m68kcoff_howto_table + 3; break;
-   case R_PCRWORD:	internal->howto = m68kcoff_howto_table + 4; break;
-   case R_PCRLONG:	internal->howto = m68kcoff_howto_table + 5; break;
-   case R_RELLONG_NEG:	internal->howto = m68kcoff_howto_table + 6; break;
-  }
+    {
+    case R_RELBYTE:	internal->howto = m68kcoff_howto_table + 0; break;
+    case R_RELWORD:	internal->howto = m68kcoff_howto_table + 1; break;
+    case R_RELLONG:	internal->howto = m68kcoff_howto_table + 2; break;
+    case R_PCRBYTE:	internal->howto = m68kcoff_howto_table + 3; break;
+    case R_PCRWORD:	internal->howto = m68kcoff_howto_table + 4; break;
+    case R_PCRLONG:	internal->howto = m68kcoff_howto_table + 5; break;
+    case R_RELLONG_NEG:	internal->howto = m68kcoff_howto_table + 6; break;
+    }
 }
 
 #ifdef STATIC_RELOCS
@@ -150,23 +163,23 @@ m68k_howto2rtype (internal)
      reloc_howto_type *internal;
 {
   if (internal->pc_relative)
-  {
-    switch (internal->bitsize)
     {
-     case 32: return R_PCRLONG;
-     case 16: return R_PCRWORD;
-     case 8: return R_PCRBYTE;
+      switch (internal->bitsize)
+	{
+	case 32: return R_PCRLONG;
+	case 16: return R_PCRWORD;
+	case 8: return R_PCRBYTE;
+	}
     }
-  }
   else
-  {
-    switch (internal->bitsize)
-     {
-      case 32: return R_RELLONG;
-      case 16: return R_RELWORD;
-      case 8: return R_RELBYTE;
-     }
-  }
+    {
+      switch (internal->bitsize)
+	{
+	case 32: return R_RELLONG;
+	case 16: return R_RELWORD;
+	case 8: return R_RELBYTE;
+	}
+    }
   return R_RELLONG;
 }
 

@@ -1,3 +1,11 @@
+2001-08-23  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* aoutf1.h (sunos_write_object_contents): Silence compile time
+	warning.
+        * libaout.h (N_SET_DYNAMIC): Silence compile time warning.
+
+	* bout.c: Add missing function prototypes.  Fix formatting.
+
 2001-08-23  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf-bfd.h (enum elf_reloc_type_class): New.
