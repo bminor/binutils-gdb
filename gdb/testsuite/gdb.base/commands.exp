@@ -184,7 +184,7 @@ proc infrun_breakpoint_command_test {} {
         return
     }
 
-    gdb_test "set args 6" "" "set args in progvar_simple_while_test"
+    gdb_test "set args 6" "" "set args in infrun_breakpoint_command_test"
     if { ![runto factorial] } then { gdb_suppress_tests }
     # Don't depend upon argument passing, since most simulators don't
     # currently support it.  Bash value variable to be what we want.
@@ -326,8 +326,8 @@ proc watchpoint_command_test {} {
     }
     send_gdb "end\n"
     gdb_expect {
-	-re "$gdb_prompt $"   {pass "begin commands on watch"}
-	timeout               {fail "(timeout) begin commands on watch"}
+	-re "$gdb_prompt $"   {pass "end commands on watch"}
+	timeout               {fail "(timeout) end commands on watch"}
     }
     send_gdb "continue\n"
     gdb_expect {
@@ -351,7 +351,7 @@ proc test_command_prompt_position {} {
     # Don't depend upon argument passing, since most simulators don't
     # currently support it.  Bash value variable to be what we want.
     delete_breakpoints
-    gdb_test "break factorial" "Breakpoint.*at.*" "break factorial #2"
+    gdb_test "break factorial" "Breakpoint.*at.*" "break factorial #3"
     gdb_test "p value=5" "" "set value to 5 in test_command_prompt_position"
     # All this test should do is print 0xdeadbeef once.
     gdb_test "if value == 1\np/x 0xfeedface\nelse\np/x 0xdeadbeef\nend" \
@@ -406,34 +406,34 @@ proc test_command_prompt_position {} {
 
 proc deprecated_command_test {} {
     gdb_test "maintenance deprecate blah" "Can't find command.*" \
-          "tried to deprecate non-existsing command"
+          "tried to deprecate non-existing command"
 
-    gdb_test "maintenance deprecate p \"new_p\"" ""
+    gdb_test "maintenance deprecate p \"new_p\"" "" "maintenance deprecate p \"new_p\" /1/"
     gdb_test "p 5" \
 	    "Warning: 'p', an alias for the command 'print' is deprecated.*Use 'new_p'.*" \
 	    "p deprecated warning, with replacement"
-    gdb_test "p 5" ".\[0-9\]* = 5.*" "Deprecated warning goes away"
+    gdb_test "p 5" ".\[0-9\]* = 5.*" "Deprecated warning goes away /1/"
 
-    gdb_test "maintenance deprecate p \"new_p\"" ""
+    gdb_test "maintenance deprecate p \"new_p\"" "" "maintenance deprecate p \"new_p\" /2/"
     gdb_test "maintenance deprecate print \"new_print\"" ""
     gdb_test "p 5" \
 	    "Warning: command 'print' \\(p\\) is deprecated.*Use 'new_print'.*" \
 	    "both alias and command are deprecated"
-    gdb_test "p 5" ".\[0-9\]* = 5.*" "Deprecated warning goes away"
+    gdb_test "p 5" ".\[0-9\]* = 5.*" "Deprecated warning goes away /2/"
 
     gdb_test "maintenance deprecate set remote memory-read-packet-size \"srm\" " \
 	    "" \
-	    "deprecate long comamnd"
+	    "deprecate long command /1/"
     gdb_test "set remote memory-read-packet-size" \
 	    "Warning: command 'set remote memory-read-packet-size' is deprecated.*Use 'srm'.*" \
-	    "long command deprecated"
+	    "long command deprecated /1/"
 
     gdb_test "maintenance deprecate set remote memory-read-packet-size" \
 	    "" \
-	    "deprecate long comamnd"
+	    "deprecate long command /2/"
     gdb_test "set remote memory-read-packet-size" \
 	    "Warning: command 'set remote memory-read-packet-size' is deprecated.*No alternative known.*" \
-	    "long command deprecated with no alternative."
+	    "long command deprecated with no alternative /2/"
 
     gdb_test "maintenance deprecate" \
 	    "\"maintenance deprecate\".*" \

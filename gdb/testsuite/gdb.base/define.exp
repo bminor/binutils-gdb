@@ -1,4 +1,4 @@
-# Copyright 1998, 1999 Free Software Foundation, Inc.
+# Copyright 1998, 1999, 2001 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -160,8 +160,8 @@ gdb_expect {
            }
           }
   -re "$gdb_prompt $"\
-          {fail "documenting user command: nextwhere"}
-  timeout {fail "(timeout) documenting user command: nextwhere"}
+          {fail "document user command: nextwhere"}
+  timeout {fail "(timeout) document user command: nextwhere"}
 }
 
 send_gdb "document nextwhere\n"
@@ -170,13 +170,13 @@ gdb_expect {
           {send_gdb "A next command that first shows you where you're stepping from.\nend\n"
            gdb_expect {
              -re "$gdb_prompt $"\
-                     {pass "document user command: nextwhere"}
-             timeout {fail "(timeout) document user command: nextwhere"}
+                     {pass "re-document user command: nextwhere"}
+             timeout {fail "(timeout) re-document user command: nextwhere"}
            }
           }
   -re "$gdb_prompt $"\
-          {fail "documenting user command: nextwhere"}
-  timeout {fail "(timeout) documenting user command: nextwhere"}
+          {fail "re-document user command: nextwhere"}
+  timeout {fail "(timeout) re-document user command: nextwhere"}
 }
 
 send_gdb "help nextwhere\n"

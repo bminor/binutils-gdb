@@ -1,3 +1,15 @@
+2001-05-19  Michael Chastain  <chastain@redhat.com>
+
+	* gdb.base/callfuncs.exp: Make all test names unique.
+	* gdb.base/commands.exp: Make all test names unique.
+	* gdb.base/condbreak.exp: Make all test names unique.
+	* gdb.base/dbx.exp: Make all test names unique.
+	* gdb.base/default.exp: Make all test names unique.
+	* gdb.base/define.exp: Make all test names unique.  Conform some FAIL
+	and TIMEOUT messages to their corresponding PASS message.
+	* gdb.base/ending-run.exp: Make all test names unique.
+	* gdb.base/long_long.exp: Remove duplicate test.
+
 2001-05-21  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdb.base/finish.exp (finish_void): Allow "finish" command to

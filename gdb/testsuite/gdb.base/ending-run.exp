@@ -56,7 +56,8 @@ gdb_test "b ending-run.c:1" ".*Breakpoint.*ending-run.c, line 1.*" \
 	"bpt at line before routine"
 
 gdb_test "b ending-run.c:13" \
-	".*Note.*also.*Breakpoint 2.*ending-run.c, line 13.*"
+	".*Note.*also.*Breakpoint 2.*ending-run.c, line 13.*" \
+	"b ending-run.c:13, one"
 
 # Set up to go to the next-to-last line of the program
 #
@@ -81,7 +82,7 @@ gdb_expect {
 # Test some other "clear" combinations
 #
 gdb_test "b ending-run.c:1" ".*Breakpoint.*4.*"
-gdb_test "b ending-run.c:13" ".*Note.*also.*Breakpoint.*5.*"
+gdb_test "b ending-run.c:13" ".*Note.*also.*Breakpoint.*5.*" "b ending-run.c:13, two"
 gdb_test "cle ending-run.c:13" \
 	".*Deleted breakpoint 5.*" "Only cleared 1 by line"
 

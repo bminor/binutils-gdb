@@ -178,7 +178,6 @@ if { $target_bigendian_p } {
     gdb_test "p/t *(short *)&oct" ".*1010011100101110.*"
     gdb_test "p/a *(short *)&oct" ".*0xf*ffffa72e.*"
     gdb_test "p/c *(short *)&oct" ".* 46 '.'.*"
-    gdb_test "p/a *(short *)&oct" ".*0xf*ffffa72e.*"
     gdb_test "p/f *(short *)&oct" ".*-22738.*"
 
     gdb_test "x/x &oct" ".*0xa72ee539.*"

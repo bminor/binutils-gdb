@@ -1,5 +1,5 @@
 #   Copyright 1988, 1990, 1991, 1992, 1994, 1995, 1996, 1997, 1998, 1999,
-#   2000
+#   2000, 2001
 #   Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -328,6 +328,8 @@ setup_xfail "a29k-*-udi"
 gdb_test "info stack" "No stack." "info stack"
 #test info set
 # FIXME -- needs to match the entire output
+# FIXME -- on native solaris 2.8, this test fails due to this line:
+#  prompt:  Gdb's prompt is "(gdb) ".^M
 gdb_test "info set" "confirm:  Whether to confirm potentially dangerous operations is o\[a-z\]*..*\[\r\n\]+history filename:  The filename in which to record the command history is .*\[\r\n\]+listsize:  Number of source lines gdb will list by default is 10.*" "info set"
 gdb_test "info symbol" "Argument required .address.."
 #test info source
@@ -387,7 +389,7 @@ gdb_test "overlay auto"   ""
 gdb_test "overlay off"    ""
 gdb_test "overlay list"   "No sections are mapped."
 gdb_test "overlay map"    "Overlay debugging not enabled.*" "overlay map #1"
-gdb_test "overlay unmap"  "Overlay debugging not enabled.*" "overlay unmap #2"
+gdb_test "overlay unmap"  "Overlay debugging not enabled.*" "overlay unmap #1"
 gdb_test "overlay manual" "" "overlay manual #2"
 gdb_test "overlay map"    "Argument required: name of an overlay section." "overlay map #2"
 gdb_test "overlay unmap"  "Argument required: name of an overlay section." "overlay unmap #2"

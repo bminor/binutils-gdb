@@ -292,8 +292,10 @@ if { $hp_aCC_compiler } {
 
 # Make sure that malloc gets called and that the floating point unit
 # is initialized via a call to t_double_values.
-gdb_test "next" "t_double_values\\(double_val1, double_val2\\);.*"
-gdb_test "next" "t_structs_c\\(struct_val1\\);.*"
+gdb_test "next" "t_double_values\\(double_val1, double_val2\\);.*" \
+  "next to t_double_values"
+gdb_test "next" "t_structs_c\\(struct_val1\\);.*" \
+  "next to t_structs_c"
 
 # Save all register contents.
 do_get_all_registers

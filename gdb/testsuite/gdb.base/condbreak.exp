@@ -1,4 +1,4 @@
-# Copyright 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
+# Copyright 1997, 1998, 1999, 2000, 2001 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -66,41 +66,32 @@ gdb_test "break main" \
 # test conditional break at function
 #
 gdb_test "break marker1 if 1==1" \
-    "Breakpoint.*at.* file .*$srcfile, line.*" \
-    "break function if condition"
+    "Breakpoint.*at.* file .*$srcfile, line.*"
 
-gdb_test "delete 2" \
-    "" \
-    "delete break"
+gdb_test "delete 2" ""
 
 #
 # test conditional break at line number
 #
 gdb_test "break 79 if 1==1" \
-    "Breakpoint.*at.* file .*$srcfile, line 79\\." \
-    "break line if condition"
+    "Breakpoint.*at.* file .*$srcfile, line 79\\."
 
-gdb_test "delete 3" \
-    "" \
-    "delete break"
+gdb_test "delete 3" ""
 
 # 
 # test conditional break at function
 #
 gdb_test "break marker1 if (1==1)" \
-    "Breakpoint.*at.* file .*$srcfile, line.*" \
-    "break function if (condition)"
+    "Breakpoint.*at.* file .*$srcfile, line.*"
 
 #
 # test conditional break at line number
 #
 gdb_test "break 79 if (1==1)" \
-    "Breakpoint.*at.* file .*$srcfile, line 79\\." \
-    "break line if (condition)"
+    "Breakpoint.*at.* file .*$srcfile, line 79\\."
 
 gdb_test "break marker2 if (a==43)" \
-    "Breakpoint.*at.* file .*$srcfile, line.*" \
-    "break function if (condition)"
+    "Breakpoint.*at.* file .*$srcfile, line.*"
 
 #
 # check to see what breakpoints are set
