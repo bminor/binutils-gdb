@@ -1,3 +1,8 @@
+Thu Jun 22 15:06:35 1995  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* scripttempl/elfppc.sc (.fixup): Add support for a .fixup section
+	that contains pointers to be relocated.
+
 Tue Jun 20 17:47:20 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-esh.c: New file, modified for MPW from esh.c.

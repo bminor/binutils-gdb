@@ -105,7 +105,7 @@ SECTIONS
   ${RELOCATING+_GOT1_END_ = .;}
 
   /* Put .ctors and .dtors next to the .got2 section, so that the pointers
-     get relocated with -mrelocatable. */
+     get relocated with -mrelocatable. Also put in the .fixup pointers.  */
 
   ${RELOCATING+_GOT2_START_ = .;}
   .got2  ${RELOCATING-0} :  { *(.got2) }
@@ -118,6 +118,9 @@ SECTIONS
   .dtors ${RELOCATING-0} : { *(.dtors) }
   ${RELOCATING+__DTOR_END__ = .;}
 
+  ${RELOCATING+_FIXUP_START_ = .;}
+  .fixup ${RELOCATING-0} : { *(.fixup) }
+  ${RELOCATING+_FIXUP_END_ = .;}
   ${RELOCATING+_GOT2_END_ = .;}
 
   ${RELOCATING+_GOT_START_ = .;}
