@@ -1,3 +1,7 @@
+2000-09-04  Todd Vierling  <tv@wasabisystems.com>
+
+	* strip.1: Fix stray '\' in -o formatting.
+
 2000-09-02  Nick Clifton  <nickc@redhat.com>
 
 	* configure.in: Increase version number to 2.10.91.
