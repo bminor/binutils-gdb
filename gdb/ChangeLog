@@ -1,5 +1,14 @@
 Tue Oct  5 15:26:04 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* Makefile.in (install, uninstall): Remove $$n.1 stuff; I don't
+	understand what it is trying to do, but I suspect it's not doing
+	it.
+
+	* config/ns32k/merlin.mh: Add comment about M_INSTALL.
+	* config/m88k/{delta88.mh,delta88v4.mh}: Remove M_INSTALL and
+	M_UNINSTALL; it tries to install a non-existent file gdb.z.
+	* Makefile.in: Remove M_INSTALL stuff; the above were the only uses.
+
 	* stabsread.c (read_range_type): Remove comment which recommends
 	distinguishing float from complex by the name.
 

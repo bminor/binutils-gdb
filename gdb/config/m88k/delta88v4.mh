@@ -8,5 +8,3 @@ REGEX=regex.o
 REGEX1=regex.o
 # Have to use /bin/nm because a bfd nm won't do the right thing
 MUNCH_DEFINE=MUNCH_NM=/bin/nm
-M_INSTALL=cp gdb.z $(ddestdir)/man/man1
-M_UNINSTALL = rm -f $(ddestdir)/man/man1

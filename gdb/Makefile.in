@@ -461,13 +461,10 @@ install: all install-only
 install-only: 
 	$(INSTALL_XFORM) gdb $(bindir)/gdb
 	$(INSTALL_XFORM1) $(srcdir)/gdb.1 $(man1dir)/gdb.1
-	$(INSTALL_DATA) $(srcdir)/gdb.1 $(man1dir)/$$n.1
-	$(M_INSTALL)
 	@$(MAKE) DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do 
 
 uninstall: force
-	rm -f $(bindir)/gdb $(man1dir)/gdb.1 $(man1dir)/$$n.1
-	$(M_UNINSTALL)
+	rm -f $(bindir)/gdb $(man1dir)/gdb.1
 	@$(MAKE) DO=uninstall "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do 
 
 init.c: munch $(OBS) $(TSOBS)
