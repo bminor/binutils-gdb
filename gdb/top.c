@@ -434,8 +434,13 @@ void (*interactive_hook) PARAMS ((void));
 
 void (*registers_changed_hook) PARAMS ((void));
 
-/* tell the GUI someone changed the PC */
-void (*pc_changed_hook) PARAMS ((void));
+/* Tell the GUI someone changed the register REGNO. -1 means
+   that the caller does not know which register changed or
+   that several registers have changed (see value_assign).*/
+void (*register_changed_hook) PARAMS ((int regno));
+
+/* Tell the GUI someone changed LEN bytes of memory at ADDR */
+void (*memory_changed_hook) PARAMS ((CORE_ADDR addr, int len));
 
 /* Called when going to wait for the target.  Usually allows the GUI to run
    while waiting for target events.  */

@@ -1,3 +1,15 @@
+1999-01-29  Martin Hunt  <hunt@cygnus.com>
+	Changes from Keith Seitz  <keiths@cygnus.com>
+	
+        * valops.c (value_assign): Add calls to register_changed_hook and
+        memory_changed_hook to inform UIs that the user has changed
+        the target's registers/memory.
+        * findvar.c (write_register_gen): Remove call to pc_changed_hook.
+        * defs.h: Remove declaration for pc_changed_hook and
+        add declarations for register_changed_hook and
+        memory_changed_hook.
+        * top.c: Ditto.
+
 Thu Jan 28 18:16:07 1999  Mark Alexander  <marka@cygnus.com>
 
 	* procfs.c (wait_fd): Handle deleted threads correctly.
