@@ -11845,34 +11845,11 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
 
       /* Permit the user to change the ISA and architecture on the fly.
 	 Needless to say, misuse can cause serious problems.  */
-      if (strcmp (name, "mips0") == 0)
+      if (strcmp (name, "mips0") == 0 || strcmp (name, "arch=default") == 0)
 	{
 	  reset = 1;
 	  mips_opts.isa = file_mips_isa;
-	}
-      else if (strcmp (name, "mips1") == 0)
-	mips_opts.isa = ISA_MIPS1;
-      else if (strcmp (name, "mips2") == 0)
-	mips_opts.isa = ISA_MIPS2;
-      else if (strcmp (name, "mips3") == 0)
-	mips_opts.isa = ISA_MIPS3;
-      else if (strcmp (name, "mips4") == 0)
-	mips_opts.isa = ISA_MIPS4;
-      else if (strcmp (name, "mips5") == 0)
-	mips_opts.isa = ISA_MIPS5;
-      else if (strcmp (name, "mips32") == 0)
-	mips_opts.isa = ISA_MIPS32;
-      else if (strcmp (name, "mips32r2") == 0)
-	mips_opts.isa = ISA_MIPS32R2;
-      else if (strcmp (name, "mips64") == 0)
-	mips_opts.isa = ISA_MIPS64;
-      else if (strcmp (name, "mips64r2") == 0)
-	mips_opts.isa = ISA_MIPS64R2;
-      else if (strcmp (name, "arch=default") == 0)
-	{
-	  reset = 1;
 	  mips_opts.arch = file_mips_arch;
-	  mips_opts.isa = file_mips_isa;
 	}
       else if (strncmp (name, "arch=", 5) == 0)
 	{
@@ -11887,8 +11864,21 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
 	      mips_opts.isa = p->isa;
 	    }
 	}
+      else if (strncmp (name, "mips", 4) == 0)
+	{
+	  const struct mips_cpu_info *p;
+
+	  p = mips_parse_cpu("internal use", name);
+	  if (!p)
+	    as_bad (_("unknown ISA level %s"), name + 4);
+	  else
+	    {
+	      mips_opts.arch = p->cpu;
+	      mips_opts.isa = p->isa;
+	    }
+	}
       else
-	as_bad (_("unknown ISA level %s"), name + 4);
+	as_bad (_("unknown ISA or architecture %s"), name);
 
       switch (mips_opts.isa)
 	{

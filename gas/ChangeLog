@@ -1,4 +1,8 @@
-2004-04-22  Chris Demetriou  <cgd@broadcom.com>
+2004-04-23  Thiemo Seufer  <seufer@csv.ica.uni-stuttgart.de>
+
+	* config/tc-mips.c (s_mipsset): Set default CPU type for .set mipsN.
+
+2004-04-23  Chris Demetriou  <cgd@broadcom.com>
 
 	* config/tc-mips.c (md_longopts): Remove -membedded-pic option.
 	(OPTION_MEMBEDDED_PIC): Remove.
