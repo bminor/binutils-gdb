@@ -1,5 +1,9 @@
 Wed Mar 30 11:43:29 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* xcoffread.c (xcoff_next_symbol_text): New function.
+	(read_xcoff_symtab): Set next_symbol_text_func to it.
+	Move raw_symbol outside of read_xcoff_symtab.
+
 	* remote.c (getpkt): Remove unused "out" label.
 
 Wed Mar 30 09:15:42 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)

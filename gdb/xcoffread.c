@@ -971,6 +971,30 @@ static int static_block_section = -1;
 
 static int symname_alloced = 0;
 
+/* Next symbol to read.  Pointer into raw seething symbol table.  */
+
+static char *raw_symbol;
+
+/* This is the function which stabsread.c calls to get symbol
+   continuations.  */
+static char *
+xcoff_next_symbol_text ()
+{
+  struct internal_syment symbol;
+  static struct complaint msg =
+    {"Unexpected symbol continuation", 0, 0};
+
+  bfd_coff_swap_sym_in (current_objfile->obfd, raw_symbol, &symbol);
+  if (symbol->n_zeroes)
+    complain (&msg);
+  else if (symbol->n_sclass & 0x80)
+    return debugsec + symbol->n_offset;
+  else
+    complain (&msg);
+  raw_symbol += coff_data (current_objfile->obfd)->local_symesz;
+  ++symnum;
+}
+
 /* read the whole symbol table of a given bfd. */
 
 static void
@@ -979,7 +1003,6 @@ read_xcoff_symtab (objfile, nsyms)
      int nsyms;			/* # of symbols */
 {
   bfd *abfd = objfile->obfd;
-  char *raw_symbol;		/* Pointer into raw seething symbol table */
   char *raw_auxptr;		/* Pointer to first raw aux entry for sym */
   sec_ptr  textsec;		/* Pointer to text section */
   TracebackInfo *ptb;		/* Pointer to traceback table */
@@ -1049,6 +1072,8 @@ read_xcoff_symtab (objfile, nsyms)
   if (!textsec) {
     printf_unfiltered ("Unable to locate text section!\n");
   }
+
+  next_symbol_text_func = xcoff_next_symbol_text;
 
   while (symnum < nsyms) {
 
@@ -1863,18 +1888,6 @@ free_linetab ()
   linetab = NULL;
 }
 
-/* dbx allows the text of a symbol name to be continued into the
-   next symbol name!  When such a continuation is encountered
-   (a \ at the end of the text of a name)
-   call this function to get the continuation.  */
-/* So far, I haven't seen this happenning xlc output. I doubt we'll need this
-   for xcoff. */
-
-#undef next_symbol_text
-#define	next_symbol_text() \
-  printf_unfiltered ("Gdb Error: symbol names on multiple lines not implemented.\n")
-
-
 static void
 xcoff_new_init (objfile)
      struct objfile *objfile;
