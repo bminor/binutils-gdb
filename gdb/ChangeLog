@@ -1,3 +1,8 @@
+Sat Jul 10 09:54:17 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* infrun.c [TDESC]: Remove remaining tdesc code (see ChangeLog
+	for Wed Nov 13 16:45:13 1991).
+
 Fri Jul  9 12:36:46 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* values.c, value.h (modify_field), callers: Make fieldval a LONGEST.

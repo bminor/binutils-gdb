@@ -181,12 +181,6 @@ hook_stop_stub PARAMS ((char *));
 #define INSTRUCTION_NULLIFIED 0
 #endif
 
-#ifdef TDESC
-#include "tdesc.h"
-int safe_to_init_tdesc_context = 0;
-extern dc_dcontext_t current_context;
-#endif
-
 /* Tables of how to react to signals; the user sets them.  */
 
 static unsigned char *signal_stop;
@@ -539,6 +533,8 @@ wait_for_inferior ()
 	}
       else if (!WIFSTOPPED (w))
 	{
+	  char *signame;
+	  
 	  stop_print_frame = 0;
 	  stop_signal = WTERMSIG (w);
 	  target_terminal_ours ();	/* Must do this before mourn anyway */
@@ -547,10 +543,16 @@ wait_for_inferior ()
 	  printf_filtered ("\nProgram terminated: ");
 	  PRINT_RANDOM_SIGNAL (stop_signal);
 #else
-	  printf_filtered ("\nProgram terminated with signal %d, %s\n",
-			   stop_signal, safe_strsignal (stop_signal));
+	  printf_filtered ("\nProgram terminated with signal ");
+	  signame = strsigno (stop_signal);
+	  if (signame == NULL)
+	    printf_filtered ("%d", stop_signal);
+	  else
+	    /* Do we need to print the number in addition to the name?  */
+	    printf_filtered ("%s (%d)", signame, stop_signal);
+	  printf_filtered (", %s\n", safe_strsignal (stop_signal));
 #endif
-	  printf_filtered ("The inferior process no longer exists.\n");
+	  printf_filtered ("The program no longer exists.\n");
 	  fflush (stdout);
 #ifdef NO_SINGLE_STEP
 	  one_stepped = 0;
@@ -573,15 +575,11 @@ wait_for_inferior ()
 	}
 
       stop_pc = read_pc ();
-      set_current_frame ( create_new_frame (read_register (FP_REGNUM),
+      set_current_frame ( create_new_frame (read_fp (),
 					    read_pc ()));
       
       stop_frame_address = FRAME_FP (get_current_frame ());
-      stop_sp = read_register (SP_REGNUM);
-/* XXX - FIXME.  Need to figure out a better way to grab the stack seg reg. */
-#ifdef GDB_TARGET_IS_H8500
-      stop_sp |= read_register (SEG_T_REGNUM) << 16;
-#endif
+      stop_sp = read_sp ();
       stop_func_start = 0;
       stop_func_name = 0;
       /* Don't care about return value; stop_func_start and stop_func_name
@@ -720,13 +718,20 @@ wait_for_inferior ()
 	  if (stop_signal >= NSIG
 	      || signal_print[stop_signal])
 	    {
+	      char *signame;
 	      printed = 1;
 	      target_terminal_ours_for_output ();
 #ifdef PRINT_RANDOM_SIGNAL
 	      PRINT_RANDOM_SIGNAL (stop_signal);
 #else
-	      printf_filtered ("\nProgram received signal %d, %s\n",
-			       stop_signal, safe_strsignal (stop_signal));
+	      printf_filtered ("\nProgram received signal ");
+	      signame = strsigno (stop_signal);
+	      if (signame == NULL)
+		printf_filtered ("%d", stop_signal);
+	      else
+		/* Do we need to print the number as well as the name?  */
+		printf_filtered ("%s (%d)", signame, stop_signal);
+	      printf_filtered (", %s\n", safe_strsignal (stop_signal));
 #endif /* PRINT_RANDOM_SIGNAL */
 	      fflush (stdout);
 	    }
@@ -981,9 +986,19 @@ wait_for_inferior ()
 	      if (tmp != 0)
 		stop_func_start = tmp;
 
-	      symtab = find_pc_symtab (stop_func_start);
-	      if (symtab && LINETABLE (symtab))
-		goto step_into_function;
+	      /* If we have line number information for the function we
+		 are thinking of stepping into, step into it.
+
+		 If there are several symtabs at that PC (e.g. with include
+		 files), just want to know whether *any* of them have line
+		 numbers.  find_pc_line handles this.  */
+	      {
+		struct symtab_and_line tmp_sal;
+
+		tmp_sal = find_pc_line (stop_func_start, 0);
+		if (tmp_sal.line != 0)
+		  goto step_into_function;
+	      }
 
 step_over_function:
 	      /* A subroutine call has happened.  */
@@ -1257,7 +1272,7 @@ Further execution is probably impossible.\n");
   if (stop_command->hook)
     {
       catch_errors (hook_stop_stub, (char *)stop_command->hook,
-		    "Error while running hook_stop:\n");
+		    "Error while running hook_stop:\n", RETURN_MASK_ALL);
     }
 
   if (!target_has_stack)
@@ -1706,7 +1721,7 @@ Pass and Stop may be combined.");
   stop_command = add_cmd ("stop", class_obscure, not_just_help_class_command,
 	   "There is no `stop' command, but you can set a hook on `stop'.\n\
 This allows you to set a list of commands to be run each time execution\n\
-of the inferior program stops.", &cmdlist);
+of the program stops.", &cmdlist);
 
   numsigs = signo_max () + 1;
   signal_stop    = (unsigned char *)    
