@@ -85,7 +85,6 @@
 	* sparc-tdep.c (gregset.h): Don't include unless USE_PROC_FS is
 	defined.
 
-
 2000-10-24  Kevin Buettner  <kevinb@redhat.com>
 
 	* stabsread.c (dbx_lookup_type, dbx_alloc_type,
