@@ -1,4 +1,12 @@
+Mon Feb 14 09:58:23 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
+
+	* gdb.disasm/hppa.s (fmemLRbug_tests): New tests.
+	* gdb.disasm/hppa.exp (fmemLRbug_tests): Run them.
+
 Sun Feb  6 15:36:13 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* gdb.t06/break.exp (test_next_with_recursion): Remove no longer
+	necessary gdb_target_udi.
 
 	* gdb.t03/ptype.exp: For UDI, skip tests which call malloc.
 
@@ -20,7 +28,8 @@ Sun Feb  6 15:36:13 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* config/udi-gdb.exp (gdb_start): Don't send "set args main" to
 	GDB.  GDB doesn't work that way (not anymore at least) on UDI.
-	* gdb.t01/run.exp: Don't pass extra first argument for UDI.
+	* gdb.t01/run.exp, gdb.t06/break.exp: Don't pass extra first
+	argument for UDI.
 
 Fri Feb  4 12:19:32 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
 
