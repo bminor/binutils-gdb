@@ -1282,11 +1282,12 @@ read_xcoff_symtab (objfile, nsyms)
 	  break;			/* switch CSECT_SCLAS() */
 
 	case XTY_LD :
-	  
-	  /* a function entry point. */
-	  if (CSECT_SCLAS (&main_aux) == XMC_PR) {
 
-function_entry_point:
+	  switch (CSECT_SCLAS (&main_aux))
+	    {
+	    case XMC_PR:
+	      /* a function entry point. */
+	    function_entry_point:
 	    RECORD_MINIMAL_SYMBOL (cs->c_name, cs->c_value, mst_text, 
 				   symname_alloced, cs->c_secnum, objfile);
 
@@ -1357,9 +1358,9 @@ function_entry_point:
 			   cs->c_value + ptb->fsize, objfile);
 	    }
 	    continue;
-	  }
-	  /* shared library function trampoline code entry point. */
-	  else if (CSECT_SCLAS (&main_aux) == XMC_GL) {
+
+	  case XMC_GL:
+	    /* shared library function trampoline code entry point. */
 
 	    /* record trampoline code entries as mst_solib_trampoline symbol.
 	       When we lookup mst symbols, we will choose mst_text over
@@ -1397,8 +1398,22 @@ function_entry_point:
 				   symname_alloced, objfile);
 #endif
 	    continue;
+
+	  case XMC_DS:
+	    /* The symbols often have the same names as debug symbols for
+	       functions, and confuse lookup_symbol.  */
+	    continue;
+
+	  default:
+	    /* xlc and old versions of gcc put each variable in a
+	       separate csect, so we get an XTY_SD.  But new (2.5?
+	       2.6? something like that) gcc's put several variables
+	       in a csect, so that each variable only gets an XTY_LD.
+	       We still need to record them.  This will typically be
+	       XMC_RW; I suspect XMC_RO and XMC_BS might be possible
+	       too.  */
+	    break;
 	  }
-	  continue;
 
 	default :		/* all other XTY_XXXs */
 	  break;
