@@ -1,3 +1,7 @@
+2002-11-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* dwarf2.c: Revert last change.
+
 2002-11-07  Michal Ludvig  <mludvig@suse.cz>
 
 	* dwarf2.c (read_indirect_string, read_abbrevs,	decode_line_info,
