@@ -1,3 +1,7 @@
+Mon Jul 19 17:17:03 1993  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* hppa.h: Add rfir instruction.
+
 Sun Jul 18 16:28:08 1993  Jim Kingdon  (kingdon@rtl.cygnus.com)
 
 	* mips.h: Split the actual table out into ../../opcodes/mips-opc.c.
