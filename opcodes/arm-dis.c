@@ -714,7 +714,7 @@ print_insn_big_arm (pc, info)
   int                is_thumb;
   
   cs = coffsymbol (info->symbol);
-  is_thumb = 
+  is_thumb = (cs != NULL) &&
      (   cs->native->u.syment.n_sclass == C_THUMBEXT
       || cs->native->u.syment.n_sclass == C_THUMBSTAT
       || cs->native->u.syment.n_sclass == C_THUMBLABEL
@@ -758,6 +758,8 @@ print_insn_big_arm (pc, info)
       given = (b[0] << 24) | (b[1] << 16) | (b[2] << 8) | (b[3]);
     }
 
+  saved_symbol = info->symbol;
+  
   if (is_thumb)
     {
       status = print_insn_thumb (pc, info, given);
@@ -785,7 +787,7 @@ print_insn_little_arm (pc, info)
   int                is_thumb;
   
   cs = coffsymbol (info->symbol);
-  is_thumb = 
+  is_thumb = (cs != NULL) && 
      (   cs->native->u.syment.n_sclass == C_THUMBEXT
       || cs->native->u.syment.n_sclass == C_THUMBSTAT
       || cs->native->u.syment.n_sclass == C_THUMBLABEL

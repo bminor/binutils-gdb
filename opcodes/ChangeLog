@@ -1,3 +1,8 @@
+Tue Feb 24 11:06:18 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* arm-dis.c (print_insn_big_arm): Save the current symbol before
+	displaying a disassembled line.
+
 Mon Feb 23 13:16:17 1998  Doug Evans  <devans@seba.cygnus.com>
 
 	* cgen-asm.c: Include symcat.h.
