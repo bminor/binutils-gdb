@@ -936,9 +936,10 @@ elf_m68k_adjust_dynamic_symbol (info, h)
   if (h->type == STT_FUNC
       || h->needs_plt)
     {
-      if (! info->shared
-	  && !h->def_dynamic
-	  && !h->ref_dynamic
+      if ((h->plt.refcount <= 0
+           || SYMBOL_CALLS_LOCAL (info, h)
+	   || (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+	       && h->root.type == bfd_link_hash_undefweak))
 	  /* We must always create the plt entry if it was referenced
 	     by a PLTxxO relocation.  In this case we already recorded
 	     it as a dynamic symbol.  */
@@ -946,19 +947,11 @@ elf_m68k_adjust_dynamic_symbol (info, h)
 	{
 	  /* This case can occur if we saw a PLTxx reloc in an input
 	     file, but the symbol was never referred to by a dynamic
-	     object.  In such a case, we don't actually need to build
-	     a procedure linkage table, and we can just do a PCxx
-	     reloc instead.  */
-	  BFD_ASSERT (h->needs_plt);
+	     object, or if all references were garbage collected.  In
+	     such a case, we don't actually need to build a procedure
+	     linkage table, and we can just do a PCxx reloc instead.  */
 	  h->plt.offset = (bfd_vma) -1;
-	  return TRUE;
-	}
-
-      /* GC may have rendered this entry unused.  */
-      if (h->plt.refcount <= 0)
-	{
 	  h->needs_plt = 0;
-	  h->plt.offset = (bfd_vma) -1;
 	  return TRUE;
 	}
 

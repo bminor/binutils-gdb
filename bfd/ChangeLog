@@ -1,3 +1,9 @@
+2004-11-07  Andreas Schwab  <schwab@suse.de>
+
+	* elf32-m68k.c (elf_m68k_adjust_dynamic_symbol): Use
+	SYMBOL_CALLS_LOCAL and check for undefweak symbols with
+	non-default visibility.
+
 2004-11-01  Mark Mitchell  <mark@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_symbian_begin_write_processing): Clear
