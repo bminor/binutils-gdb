@@ -1,3 +1,7 @@
+2004-05-19  Adam Nemet  <anemet@lnxw.com> 
+
+	* scripttempl/i386lynx.sc: Remove file.
+
 2004-05-17  Bob Wilson  <bob.wilson@acm.org>
 
 	* ld.texinfo (Output Section Address): Correct subsection name.
