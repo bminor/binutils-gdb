@@ -37,7 +37,7 @@
 TREE	= devo
 include $(TREE)/release-info
 
-TEST_INSTALL_DISK = /galt
+TEST_INSTALL_DISK = /tug
 
 INSTALLDIR = $(TEST_INSTALL_DISK)/$(TREE)-test/$(RELEASE_TAG)
 
@@ -95,10 +95,10 @@ ifeq ($(canonhost),i386-unknown-sysv4.2)
 canonhost := i386-sysv4.2
 endif
 ifeq ($(canonhost),i386-lynx-lynxos)
-canonhost := i386-lynxos
+canonhost := i386-lynx
 endif
 ifeq ($(canonhost),m68k-lynx-lynxos)
-canonhost := m68k-lynxos
+canonhost := m68k-lynx
 endif
 
 ifeq ($(canonhost),sparc-sun-sunos4.1.3)
@@ -108,15 +108,14 @@ TARGETS = $(NATIVE) \
 	h8300-hms 	\
 	i386-aout	\
 	i386-lynx 	\
-	i386-netware 	\
-	i960-vxworks 	i960-intel-nindy \
+	i960-vxworks 	\
 	mips-idt-ecoff	\
 	m68k-aout	m68k-vxworks 	m68k-coff \
 	m68k-lynx 	\
 	sh-hms 		\
 	sparc-aout	sparc-vxworks	\
 	sparclite-aout  sparclite-vxworks \
-	z8k-coff
+	sparclite-coff  z8k-coff
 GCC = gcc -O -pipe
 all: all-cygnus
 endif
@@ -133,8 +132,8 @@ ifeq ($(canonhost),sparc-sun-solaris2)
 TARGETS = $(NATIVE) \
 	a29k-amd-udi \
 	i960-vxworks \
-	m68k-aout	m68k-coff \
-	m88k-coff	\
+	m68k-aout	m68k-coff 	m68k-vxworks \
+	m88k-coff     \
 	mipsel-idt-ecoff \
 	sparclite-aout
 CC = cc -Xs
@@ -210,20 +209,19 @@ CC = cc
 all: all-cygnus
 endif
 
-ifeq ($(canonhost),i386-lynxos)
+ifeq ($(canonhost),i386-lynx)
 TARGETS = $(NATIVE)
 CC = /bin/gcc
 all: all-cygnus
 SHELL=/bin/bash
 endif
 
-ifeq ($(canonhost),m68k-lynxos)
+ifeq ($(canonhost),m68k-lynx)
 TARGETS = $(NATIVE)
 CC = /bin/gcc
 all: all-cygnus
 SHELL=/bin/bash
 endif
-
 
 FLAGS_TO_PASS := \
 	"GCC=$(GCC)" \
@@ -332,6 +330,16 @@ all-cross:
             $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) target=$$i build=$(build) do-cygnus $(cyglog) && \
 	       echo "     completed successfully" ; \
 	done
+
+do-dos:
+        $(MAKE) -f build-all.mk build=$(host) host=i386-go32 all-dos
+all-dos:
+        @for i in $(TARGETS) ; do \
+            echo "building $(canonhost) cross to $$i" ; \
+            $(MAKE) -f test-build.mk $(FLAGS_TO_PASS) host=$(host) target=$$i do-dos $
+(cyglog) && \
+               echo "     completed successfully at `date`" ; \
+        done
 
 config:
 	@for i in $(TARGETS) ; do \

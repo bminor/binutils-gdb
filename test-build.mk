@@ -56,6 +56,12 @@ ifndef target
 target := $(host)
 endif
 
+ifeq ($(patsubst %-lynx,lynx,$(host)),lynx)
+SHELL := /bin/bash
+GNU_MAKE := $(MAKE)
+CONFIG_SHELL 	:= /bin/bash
+endif
+
 ifneq ($(build),$(host))
 
 # We are building on a machine other than the host.  We rely upon
@@ -80,14 +86,15 @@ HOST_PREFIX	:= $(build)-
 HOST_PREFIX_1	:= $(build)-
 LEX		:= flex
 MAKEINFO	:= makeinfo
+MUNCH_NM	:= $(host)-nm
 NM		:= $(host)-nm
 NM_FOR_TARGET	:= $(target)-nm
 RANLIB		:= $(host)-ranlib
 RANLIB_FOR_TARGET	:= $(target)-ranlib
 YACC		:= $(BISON)
 
-ifeq ($(build),hppa1.1-hp-hpux)
-CC_FOR_BUILD	:= cc
+ifeq ($(host),i386-go32)
+MAKEINFOFLAGS = --no-split
 endif
 
 FLAGS_TO_PASS := \
@@ -110,6 +117,7 @@ FLAGS_TO_PASS := \
 	"MAKEINFO=$(MAKEINFO)" \
 	"MAKEINFOFLAGS=$(MAKEINFOFLAGS)" \
 	"MF=$(MF)" \
+	"MUNCH_NM=$(MUNCH_NM)" \
 	"NM=$(NM)" \
 	"NM_FOR_TARGET=$(NM_FOR_TARGET)" \
 	"RANLIB=$(RANLIB)" \
@@ -137,9 +145,9 @@ FLAGS_TO_PASS := \
 	"TIME=$(TIME)" \
 	"MAKEINFOFLAGS=$(MAKEINFOFLAGS)" \
 	"MF=$(MF)" \
-	"SHELL=$(SHELL)" \
 	"host=$(host)" \
-	"RELEASE_TAG=$(RELEASE_TAG)"
+	"RELEASE_TAG=$(RELEASE_TAG)" \
+	"SHELL=$(SHELL)" 
 
 configenv :=
 
@@ -685,6 +693,7 @@ HOLES := \
 	rmdir \
 	sed \
 	sh \
+	sleep \
 	sort \
 	tar \
 	test \
@@ -717,6 +726,14 @@ ifeq ($(host),i386-go32)
 DOS_HOLES := aout2exe doschk file
 endif
 
+ifeq ($(host),i386-lynx)
+MAKE_HOLE := make
+endif
+
+ifeq ($(host),m68k-lynx)
+MAKE_HOLE := make
+endif
+
 ### These things are also needed by a three-stage, but in this case, the GNU version of the tool is required.
 PARTIAL_HOLES := \
 	$(MAKE_HOLE) \
@@ -739,7 +756,8 @@ PARTIAL_HOLE_DIRS := \
 	/usr/progressive/bin \
 	$(PARTIAL_HOLE_DIRS) \
 	/usr/vintage/bin \
-	/usr/unsupported/bin
+	/usr/unsupported/bin \
+	$(HOLE_DIRS)
 
 $(HOLESDIR): $(holesys)-stamp-holes
 
@@ -870,7 +888,7 @@ comparison-stage3to4: $(host)-stamp-4stage-compared
 
 $(host)-stamp-3stage-compared:
 	rm -f .bad-compare
-ifeq ($(patsubst %-lynxos,mips-sgi-irix4,$(subst i386-sco3.2v4,mips-sgi-irix4,$(subst rs6000-ibm-aix,mips-sgi-irix4,$(subst mips-dec-ultrix,mips-sgi-irix4,$(host))))),mips-sgi-irix4)
+ifeq ($(patsubst %-lynx,mips-sgi-irix4,$(subst i386-sco3.2v4,mips-sgi-irix4,$(subst rs6000-ibm-aix,mips-sgi-irix4,$(subst mips-dec-ultrix,mips-sgi-irix4,$(host))))),mips-sgi-irix4)
 	for i in `cd $(STAGE3DIR) ; find . -name \*.o -print` ; do \
 		tail +10c $(STAGE2DIR)/$$i > foo1 ; \
 		tail +10c $(STAGE3DIR)/$$i > foo2 ; \
@@ -903,7 +921,7 @@ endif
 
 $(host)-stamp-4stage-compared:
 	rm -f .bad-compare
-ifeq ($(patsubst %-lynxos,mips-sgi-irix4,$(subst i386-sco3.2v4,mips-sgi-irix4,$(subst rs6000-ibm-aix,mips-sgi-irix4,$(subst mips-dec-ultrix,mips-sgi-irix4,$(host))))),mips-sgi-irix4)
+ifeq ($(patsubst %-lynx,mips-sgi-irix4,$(subst i386-sco3.2v4,mips-sgi-irix4,$(subst rs6000-ibm-aix,mips-sgi-irix4,$(subst mips-dec-ultrix,mips-sgi-irix4,$(host))))),mips-sgi-irix4)
 	for i in `cd $(STAGE4DIR) ; find . -name \*.o -print` ; do \
 		tail +10c $(STAGE3DIR)/$$i > foo1 ; \
 		tail +10c $(STAGE4DIR)/$$i > foo2 ; \
