@@ -46,11 +46,19 @@ typedef struct {
 #define SET_H_GR(a1, x) (CPU (h_gr)[a1] = (x))
   /* control registers */
   USI h_cr[16];
+/* GET_H_CR macro user-written */
+/* SET_H_CR macro user-written */
   /* accumulator */
   DI h_accum;
+/* GET_H_ACCUM macro user-written */
+/* SET_H_ACCUM macro user-written */
 /* start-sanitize-m32rx */
   /* accumulators */
   DI h_accums[2];
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
+/* GET_H_ACCUMS macro user-written */
+/* SET_H_ACCUMS macro user-written */
 /* end-sanitize-m32rx */
   /* condition bit */
   BI h_cond;
@@ -58,6 +66,8 @@ typedef struct {
 #define SET_H_COND(x) (CPU (h_cond) = (x))
   /* psw part of psw */
   UQI h_psw;
+/* GET_H_PSW macro user-written */
+/* SET_H_PSW macro user-written */
   /* backup psw */
   UQI h_bpsw;
 #define GET_H_BPSW() CPU (h_bpsw)

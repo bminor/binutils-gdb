@@ -1,3 +1,10 @@
+1999-01-06  Doug Evans  <devans@casey.cygnus.com>
+
+	* cpu.h: Regenerate.
+start-sanitize-m32rx
+	* cpux.h: Regenerate.
+end-sanitize-m32rx
+
 1999-01-05  Doug Evans  <devans@casey.cygnus.com>
 
 	* Makefile.in (MAIN_INCLUDE_DEPS): Delete.
