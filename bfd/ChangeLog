@@ -1,3 +1,7 @@
+Wed Jul 14 15:23:19 1999  Jim Wilson  <wilson@cygnus.com>
+
+	* elfxx-target.h (elfNN_bed): Add elf_backend_want_dynbss.
+
 1999-07-14  Richard Henderson  <rth@cygnus.com>
 
 	* elf32-mips.c (struct mips_got_info): Add global_gotno.

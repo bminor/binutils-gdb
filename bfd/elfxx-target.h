@@ -384,7 +384,8 @@ static CONST struct elf_backend_data elfNN_bed =
   elf_backend_want_plt_sym,
   elf_backend_plt_not_loaded,
   elf_backend_plt_alignment,
-  elf_backend_can_gc_sections
+  elf_backend_can_gc_sections,
+  elf_backend_want_dynbss
 };
 
 #ifdef TARGET_BIG_SYM
