@@ -1,3 +1,7 @@
+2005-03-25  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* config/tc-mmix.c, config/tc-mmix.h: Convert to ISO C90.
+
 2005-03-25  Hans-Peter Nilsson  <hp@axis.com>
 
 	* config/tc-cris.h: Convert to ISO C90.
