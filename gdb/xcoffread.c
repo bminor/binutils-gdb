@@ -959,7 +959,7 @@ read_symbol_lineno (symtable, symno)
 			     symtable + (symno*local_symesz), symbol);
     if (symbol->n_sclass == C_FCN && 0 == strcmp (symbol->n_name, ".bf"))
       goto gotit;
-    symno += 1 + symbol->n_numaux+1;
+    symno += symbol->n_numaux+1;
   }
 
   printf ("GDB Error: `.bf' not found.\n");

@@ -1,3 +1,8 @@
+Fri Dec 20 16:33:39 1991  John Gilmore  (gnu at cygnus.com)
+
+	* xcoffread.c (read_symbol_lineno):  Logic error in incrementing
+	symbol table entry number.  (From Metin Ozisik.)
+
 Fri Dec 20 11:36:38 1991  Fred Fish  (fnf at cygnus.com)
 
 	* config/mh-i386v4:  Change XM_CLIBS to "-lc /usr/ucblib/libucb.a"
