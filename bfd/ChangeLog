@@ -1,5 +1,8 @@
 Fri Sep 10 12:56:36 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* config.bfd (i[34]86-*-netbsd*): New target; use i386-netbsd.
+	* configure.in: Remove bogus netbsd386 handling.
+
 	* coff-mips.c: Don't warn about overflow for MIPS_R_JMPADDR reloc.
 	Correct overflow detection requires matching the upper four bits
 	of the destination against the PC.

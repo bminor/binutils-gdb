@@ -36,6 +36,7 @@ case "${canon}" in
   i[34]86-*-coff)	bfd_name=i386-coff ;;
   i[34]86-*-aix*)	bfd_name=i386-coff ;;
   i[34]86-*-elf)	bfd_name=i386-elf ;;
+  i[34]86-*-netbsd*)	bfd_name=i386-netbsd ;;
   i[34]86-*-netware*)	bfd_name=i386-nlm ;;
   i[34]86-*-linux*)	bfd_name=i386-linux ;;
   i[34]86-*-lynx*)	bfd_name=i386-lynx ;;
@@ -58,6 +59,7 @@ case "${canon}" in
   m68*-netx-*)		bfd_name=m68k-aout ;;
   m88*-*-sysv4*)	bfd_name=m88k-elf ;;
   m88k-*-*)		bfd_name=m88k-coff ;;
+  m88110-*-*)		bfd_name=m88k-coff ;;
   mips-big-*)		bfd_name=bigmips ;;
   mips-dec-bsd*)        bfd_name=mipsdecbsd ;;
   mips-dec-*)		bfd_name=decstation ;;
