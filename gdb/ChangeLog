@@ -1,3 +1,12 @@
+Mon Nov 22 11:03:45 1993  Fred Fish  (fnf@cygnus.com)
+
+	Merged changes from kev@spuds.geg.mot.com (Kevin A. Buettner):
+	* gdb/config/m88k/delta88.mh (NATDEPFILES): Added corelow.o and
+	coredep.o to this list.
+	* gdb/m88k-nat.c (m88k_register_u_addr):  Avoid error when passed
+	the number for an M88110 extended register by just returning the
+	address of r0.
+
 Sat Nov 20 09:20:51 1993  Fred Fish  (fnf@rtl.cygnus.com)
 
 	* go32-xdep.c (re_comp, re_exec):  Remove stubs now that gdb

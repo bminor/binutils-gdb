@@ -218,7 +218,13 @@ m88k_register_u_addr (blockend, regnum)
     case SXIP_REGNUM: return (ustart + SXIP_OFFSET); 
     case SNIP_REGNUM: return (ustart + SNIP_OFFSET);
     case SFIP_REGNUM: return (ustart + SFIP_OFFSET); 
-    default: return (blockend + sizeof (REGISTER_TYPE) * regnum);
+    default: 
+	if (regnum < NUM_REGS)
+	    /* The register is one of those which is not defined...
+	       give it zero */
+	    return (ustart + ((int) &u.pt_r0 - (int) &u));
+	else
+	    return (blockend + sizeof (REGISTER_TYPE) * regnum);
     }
 }
 
