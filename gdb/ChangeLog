@@ -1,3 +1,31 @@
+2004-01-27  Daniel Jacobowitz  <drow@mvista.com>
+
+	* dwarf2read.c: Update calls to changed and renamed functions, and
+	references to moved variables.
+
+	(struct dwarf2_cu): Add first_fn, last_fn, cached_fn,
+	language, language_defn, list_in_scope, and ftypes members.
+	(cu_first_fn, cu_last_fn, cu_cached_fn, cu_language)
+	(cu_language_defn, list_in_scope, ftypes, cu_header_offset)
+	(baseaddr): Remove globals.
+
+	(dwarf_attr): Renamed to dwarf2_attr.  Add CU argument.
+	(set_cu_language, die_is_declaration, die_specification)
+	(determine_prefix, determin_prefix_aux, class_name, namespace_name)
+	(dwarf2_linkage_name, dwarf2_name, dwarf2_extension)
+	(dwarf2_get_ref_die_offset, dwarf2_fundamental_type)
+	(initialize_cu_func_list, add_to_cu_func_list): Add CU argument.
+
+	(dwarf2_build_psymtabs_hard): Add local baseaddr.  Initialize
+	cu.list_in_scope.  Don't initialize cu_header_offset.
+	(add_partial_symbol): Add local baseaddr.
+	(psymtab_to_symtab_1): Add local baseaddr.  Use
+	objfile->section_offsets for consistency.  Don't initialize
+	cu_header_offset; do initialize cu.header.offset and
+	cu.list_in_scope.
+	(read_file_scope, read_func_scope, read_lexical_block_scope)
+	(dwarf_decode_lines, new_symbol): Add local baseaddr.
+
 2004-01-27  Michael Chastain  <mec.gnu@mindspring.com>
 
 	* PROBLEMS: Add gdb/1516.
