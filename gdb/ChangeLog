@@ -1,3 +1,15 @@
+2002-08-18  Andrew Cagney  <ac131313@redhat.com>
+
+	* regcache.c (regcache_xfer_part): New function.
+	(regcache_raw_read_part): New function.
+	(regcache_raw_write_part): New function.
+	(regcache_cooked_read_part): New function.
+	(regcache_cooked_write_part): New function.
+	* regcache.h (regcache_raw_read_part): Declare.
+	(regcache_raw_write_part): Declare.
+	(regcache_cooked_read_part): Declare.
+	(regcache_cooked_write_part): Declare.
+
 2002-08-18  Daniel Jacobowitz  <drow@mvista.com>
 
 	* remote.c (remote_open_1): Add async_p.

@@ -916,6 +916,86 @@ write_register_bytes (int myregstart, char *myaddr, int inlen)
     }
 }
 
+/* Perform a partial register transfer using a read, modify, write
+   operation.  */
+
+typedef void (regcache_read_ftype) (struct regcache *regcache, int regnum,
+				    void *buf);
+typedef void (regcache_write_ftype) (struct regcache *regcache, int regnum,
+				     const void *buf);
+
+void
+regcache_xfer_part (struct regcache *regcache, int regnum,
+		    int offset, int len, void *in, const void *out,
+		    regcache_read_ftype *read, regcache_write_ftype *write)
+{
+  struct regcache_descr *descr = regcache->descr;
+  bfd_byte *reg = alloca (descr->max_register_size);
+  gdb_assert (offset >= 0 && offset <= descr->sizeof_register[regnum]);
+  gdb_assert (len >= 0 && offset + len <= descr->sizeof_register[regnum]);
+  /* Something to do?  */
+  if (offset + len == 0)
+    return;
+  /* Read (when needed) ... */
+  if (in != NULL
+      || offset > 0
+      || offset + len < descr->sizeof_register[regnum])
+    {
+      gdb_assert (read != NULL);
+      read (regcache, regnum, reg);
+    }
+  /* ... modify ... */
+  if (in != NULL)
+    memcpy (in, reg + offset, len);
+  if (out != NULL)
+    memcpy (reg + offset, out, len);
+  /* ... write (when needed).  */
+  if (out != NULL)
+    {
+      gdb_assert (write != NULL);
+      write (regcache, regnum, reg);
+    }
+}
+
+void
+regcache_raw_read_part (struct regcache *regcache, int regnum,
+			int offset, int len, void *buf)
+{
+  struct regcache_descr *descr = regcache->descr;
+  gdb_assert (regnum >= 0 && regnum < descr->nr_raw_registers);
+  regcache_xfer_part (regcache, regnum, offset, len, buf, NULL,
+		      regcache_raw_read, regcache_raw_write);
+}
+
+void
+regcache_raw_write_part (struct regcache *regcache, int regnum,
+			 int offset, int len, const void *buf)
+{
+  struct regcache_descr *descr = regcache->descr;
+  gdb_assert (regnum >= 0 && regnum < descr->nr_raw_registers);
+  regcache_xfer_part (regcache, regnum, offset, len, NULL, buf,
+		      regcache_raw_read, regcache_raw_write);
+}
+
+void
+regcache_cooked_read_part (struct regcache *regcache, int regnum,
+			   int offset, int len, void *buf)
+{
+  struct regcache_descr *descr = regcache->descr;
+  gdb_assert (regnum >= 0 && regnum < descr->nr_cooked_registers);
+  regcache_xfer_part (regcache, regnum, offset, len, buf, NULL,
+		      regcache_cooked_read, regcache_cooked_write);
+}
+
+void
+regcache_cooked_write_part (struct regcache *regcache, int regnum,
+			    int offset, int len, const void *buf)
+{
+  struct regcache_descr *descr = regcache->descr;
+  gdb_assert (regnum >= 0 && regnum < descr->nr_cooked_registers);
+  regcache_xfer_part (regcache, regnum, offset, len, NULL, buf,
+		      regcache_cooked_read, regcache_cooked_write);
+}
 
 /* Return the contents of register REGNUM as an unsigned integer.  */
 

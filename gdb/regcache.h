@@ -42,6 +42,15 @@ extern void regcache_raw_read_signed (struct regcache *regcache,
 				      int regnum, LONGEST *val);
 extern void regcache_raw_read_unsigned (struct regcache *regcache,
 					int regnum, ULONGEST *val);
+
+/* Partial transfer of a raw registers.  These perform read, modify,
+   write style operations.  */
+
+void regcache_raw_read_part (struct regcache *regcache, int regnum,
+			     int offset, int len, void *buf);
+void regcache_raw_write_part (struct regcache *regcache, int regnum,
+			      int offset, int len, const void *buf);
+
 int regcache_valid_p (struct regcache *regcache, int regnum);
 
 /* Transfer a cooked register [0..NUM_REGS+NUM_PSEUDO_REGS).  */
@@ -62,6 +71,14 @@ extern void regcache_cooked_read_signed (struct regcache *regcache,
 					 int regnum, LONGEST *val);
 extern void regcache_cooked_read_unsigned (struct regcache *regcache,
 					   int regnum, ULONGEST *val);
+
+/* Partial transfer of a cooked register.  These perform read, modify,
+   write style operations.  */
+
+void regcache_cooked_read_part (struct regcache *regcache, int regnum,
+				int offset, int len, void *buf);
+void regcache_cooked_write_part (struct regcache *regcache, int regnum,
+				 int offset, int len, const void *buf);
 
 /* Transfer a raw register [0..NUM_REGS) between the regcache and the
    target.  These functions are called by the target in response to a
