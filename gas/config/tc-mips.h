@@ -149,8 +149,8 @@ extern void md_mips_end (void);
 extern void mips_pop_insert (void);
 #define md_pop_insert()		mips_pop_insert()
 
-extern void mips_flush_pending_output (void);
-#define md_flush_pending_output mips_flush_pending_output
+extern void mips_emit_delays (void);
+#define md_flush_pending_output mips_emit_delays
 
 extern void mips_enable_auto_align (void);
 #define md_elf_section_change_hook()	mips_enable_auto_align()
