@@ -1,3 +1,8 @@
+Thu Jun  2 00:12:44 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* Makefile.in (CROSS_CHECK_MODULES): Remove check-flex, since it's
+	in NATIVE_CHECK_MODULES.
+
 Wed Jun  1 10:49:41 1994  Bill Cox  (bill@rtl.cygnus.com)
 
 	* Makefile.in: Rename HOST_ONLY to NATIVE.

@@ -388,7 +388,6 @@ CROSS_CHECK_MODULES = \
 	check-etc \
 	check-fileutils \
 	check-find \
-	check-flex \
 	check-gas \
 	check-gawk \
 	check-gdb \
