@@ -1,5 +1,12 @@
 Thu Mar  9 15:06:25 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* coffswap.h (coff_swap_scnhdr_out): If the line number count or
+	the reloc count does not fit, print an error and return 0.
+	* coffcode.h (coff_write_object_contents): Check return value of
+	coff_swap_scnhdr_out.
+	* ecoff.c (_bfd_ecoff_write_object_contents): Check return value
+	of bfd_coff_swap_scnhdr_out.
+
 	* bfd.c: Include <stdarg.h> or <varargs.h>, depending upon
 	ANSI_PROTOTYPES.
 	(bfd_error_handler_type): New global type.
