@@ -129,6 +129,7 @@ struct symloc
   EXTR *extern_tab;		/* Pointer to external symbols for this file. */
   int extern_count;		/* Size of extern_tab. */
   struct mips_pending **pending_list;
+  enum language pst_language;
 };
 
 /* Things we import explicitly from other modules */
@@ -162,7 +163,7 @@ struct complaint block_overflow_complaint =
 {"block containing %s overfilled", 0, 0};
 
 struct complaint basic_type_complaint =
-{"cannot map MIPS basic type 0x%x", 0, 0};
+{"cannot map MIPS basic type 0x%x for %s", 0, 0};
 
 struct complaint unknown_type_qual_complaint =
 {"unknown type qualifier 0x%x", 0, 0};
@@ -195,10 +196,10 @@ struct complaint bad_setjmp_pdr_complaint =
 {"fixing bad setjmp PDR from libc", 0, 0};
 
 struct complaint bad_fbitfield_complaint =
-{"can't handle TIR fBitfield", 0, 0};
+{"can't handle TIR fBitfield for %s", 0, 0};
 
 struct complaint bad_rfd_entry_complaint =
-{"bad rfd entry for file %d, index %d", 0, 0};
+{"bad rfd entry for %s: file %d, index %d", 0, 0};
 
 struct complaint unexpected_type_code_complaint =
 {"unexpected type code for %s", 0, 0};
@@ -274,7 +275,7 @@ parse_partial_symbols PARAMS ((struct objfile *,
 
 static int
 cross_ref PARAMS ((union aux_ext *, struct type **, enum type_code, char **,
-		   int));
+		   int, char *));
 
 static void
 fixup_sigtramp PARAMS ((void));
@@ -298,7 +299,7 @@ static struct blockvector *
 new_bvect PARAMS ((int));
 
 static struct type *
-parse_type PARAMS ((union aux_ext *, int *, int));
+parse_type PARAMS ((union aux_ext *, int *, int, char *));
 
 static struct symbol *
 mylookup_symbol PARAMS ((char *, struct block *, enum namespace,
@@ -318,11 +319,6 @@ compare_blocks PARAMS ((const void *, const void *));
 
 static struct partial_symtab *
 new_psymtab PARAMS ((char *, struct objfile *));
-
-#if 0
-static struct partial_symtab *
-parse_fdr PARAMS ((int, int, struct objfile *));
-#endif
 
 static void
 psymtab_to_symtab_1 PARAMS ((struct partial_symtab *, char *));
@@ -780,7 +776,7 @@ parse_symbol (sh, ax, ext_sh, bigend)
 	  sh->index == 0xfffff)
 	SYMBOL_TYPE (s) = builtin_type_int;	/* undefined? */
       else
-	SYMBOL_TYPE (s) = parse_type (ax + sh->index, 0, bigend);
+	SYMBOL_TYPE (s) = parse_type (ax + sh->index, 0, bigend, name);
       /* Value of a data symbol is its memory address */
       break;
 
@@ -816,7 +812,7 @@ parse_symbol (sh, ax, ext_sh, bigend)
 	  break;
 	}
       SYMBOL_VALUE (s) = sh->value;
-      SYMBOL_TYPE (s) = parse_type (ax + sh->index, 0, bigend);
+      SYMBOL_TYPE (s) = parse_type (ax + sh->index, 0, bigend, name);
       add_symbol (s, top_stack->cur_block);
 #if 0
       /* FIXME:  This has not been tested.  See dbxread.c */
@@ -844,7 +840,7 @@ parse_symbol (sh, ax, ext_sh, bigend)
       if (sh->sc == scUndefined || sh->sc == scNil)
 	t = builtin_type_int;
       else
-	t = parse_type (ax + sh->index + 1, 0, bigend);
+	t = parse_type (ax + sh->index + 1, 0, bigend, name);
       b = top_stack->cur_block;
       if (sh->st == stProc)
 	{
@@ -1202,7 +1198,7 @@ parse_symbol (sh, ax, ext_sh, bigend)
       f->name = name;
       f->bitpos = sh->value;
       f->bitsize = 0;
-      f->type = parse_type (ax + sh->index, &f->bitsize, bigend);
+      f->type = parse_type (ax + sh->index, &f->bitsize, bigend, name);
       break;
 
     case stTypedef:		/* type definition */
@@ -1211,7 +1207,7 @@ parse_symbol (sh, ax, ext_sh, bigend)
       SYMBOL_CLASS (s) = LOC_TYPEDEF;
       SYMBOL_BLOCK_VALUE (s) = top_stack->cur_block;
       add_symbol (s, top_stack->cur_block);
-      SYMBOL_TYPE (s) = parse_type (ax + sh->index, 0, bigend);
+      SYMBOL_TYPE (s) = parse_type (ax + sh->index, 0, bigend, name);
       sh->value = (long) SYMBOL_TYPE (s);
       sh->st = stParsed;
       if (TYPE_TAG_NAME (SYMBOL_TYPE (s)) != NULL
@@ -1279,10 +1275,11 @@ parse_symbol (sh, ax, ext_sh, bigend)
    they are big-endian or little-endian (from fh->fBigendian).  */
 
 static struct type *
-parse_type (ax, bs, bigend)
+parse_type (ax, bs, bigend, sym_name)
      union aux_ext *ax;
      int *bs;
      int bigend;
+     char *sym_name;
 {
   /* Null entries in this map are treated specially */
   static struct type **map_bt[] =
@@ -1326,9 +1323,9 @@ parse_type (ax, bs, bigend)
   /* Use aux as a type information record, map its basic type.  */
   tax = ax;
   ecoff_swap_tir_in (bigend, &tax->a_ti, t);
-  if (t->bt > (sizeof (map_bt) / sizeof (*map_bt)))
+  if (t->bt >= (sizeof (map_bt) / sizeof (*map_bt)))
     {
-      complain (&basic_type_complaint, t->bt);
+      complain (&basic_type_complaint, t->bt, sym_name);
       return builtin_type_int;
     }
   if (map_bt[t->bt])
@@ -1361,7 +1358,7 @@ parse_type (ax, bs, bigend)
 	  break;
 	case btTypedef:
 	default:
-	  complain (&basic_type_complaint, t->bt);
+	  complain (&basic_type_complaint, t->bt, sym_name);
 	  return builtin_type_int;
 	}
     }
@@ -1388,7 +1385,7 @@ parse_type (ax, bs, bigend)
 	 corrupt the TIR.  */
       if (bs == (int *)NULL)
 	{
-	  complain (&bad_fbitfield_complaint, t->bt);
+	  complain (&bad_fbitfield_complaint, sym_name);
 	  return builtin_type_int;
 	}
       *bs = AUX_GET_WIDTH (bigend, ax);
@@ -1409,7 +1406,7 @@ parse_type (ax, bs, bigend)
       char *name;
 
       /* Try to cross reference this type */
-      ax += cross_ref (ax, &tp, type_code, &name, bigend);
+      ax += cross_ref (ax, &tp, type_code, &name, bigend, sym_name);
       /* reading .o file ? */
       if (tp == (struct type *) NULL)
 	tp = init_type (type_code, 0, 0, (char *) NULL,
@@ -1422,7 +1419,7 @@ parse_type (ax, bs, bigend)
 	  && TYPE_CODE (tp) != TYPE_CODE_UNION
 	  && TYPE_CODE (tp) != TYPE_CODE_ENUM)
 	{
-	  complain (&unexpected_type_code_complaint, name);
+	  complain (&unexpected_type_code_complaint, sym_name);
 	}
       else
 	{
@@ -1431,7 +1428,7 @@ parse_type (ax, bs, bigend)
 	     exception is if we guessed wrong re struct/union/enum. */
 	  if (TYPE_CODE (tp) != type_code)
 	    {
-	      complain (&bad_tag_guess_complaint, name);
+	      complain (&bad_tag_guess_complaint, sym_name);
 	      TYPE_CODE (tp) = type_code;
 	    }
 	  /* Do not set the tag name if it is a compiler generated tag name
@@ -1456,7 +1453,7 @@ parse_type (ax, bs, bigend)
       char *name;
 
       /* Try to cross reference this type */
-      ax += cross_ref (ax, &tp, type_code, &name, bigend);
+      ax += cross_ref (ax, &tp, type_code, &name, bigend, sym_name);
       /* reading .o file ? */
       if (tp == (struct type *) NULL)
 	tp = init_type (type_code, 0, 0, (char *) NULL,
@@ -1467,7 +1464,7 @@ parse_type (ax, bs, bigend)
 	 are corrupted.  */
       if (TYPE_CODE (tp) != TYPE_CODE_RANGE)
 	{
-	  complain (&unexpected_type_code_complaint, name);
+	  complain (&unexpected_type_code_complaint, sym_name);
 	}
       else
 	{
@@ -1475,7 +1472,7 @@ parse_type (ax, bs, bigend)
 	     exception is if we guessed wrong re struct/union/enum. */
 	  if (TYPE_CODE (tp) != type_code)
 	    {
-	      complain (&bad_tag_guess_complaint, name);
+	      complain (&bad_tag_guess_complaint, sym_name);
 	      TYPE_CODE (tp) = type_code;
 	    }
 	  if (TYPE_NAME (tp) == NULL || !STREQ (TYPE_NAME (tp), name))
@@ -1578,7 +1575,7 @@ upgrade_type (tpp, tq, ax, bigend)
       indx = parse_type ((ecoff_data (cur_bfd)->external_aux
 			  + fh->iauxBase
 			  + id),
-			 (int *) NULL, bigend);
+			 (int *) NULL, bigend, "<array index>");
 
       /* Get the bounds, and create the array type.  */
       ax++;
@@ -1864,7 +1861,7 @@ parse_lines (fh, pr, lt)
   int delta, count, lineno = 0;
   unsigned long first_off = pr->adr;
 
-  if (fh->cbLineOffset == 0)
+  if (fh->cbLine == 0)
     return;
 
   base = ecoff_data (cur_bfd)->line + fh->cbLineOffset;
@@ -1962,6 +1959,7 @@ parse_partial_symbols (objfile, section_offsets)
   int dependencies_used, dependencies_allocated;
   struct cleanup *old_chain;
   char *name;
+  enum language prev_language;
 
   extern_tab = (EXTR *) obstack_alloc (&objfile->psymbol_obstack,
 				       sizeof (EXTR) * hdr->iextMax);
@@ -2098,19 +2096,24 @@ parse_partial_symbols (objfile, section_offsets)
       memset ((PTR) pst->read_symtab_private, 0, sizeof (struct symloc));
 
       save_pst = pst;
-      /* Make everything point to everything. */
       FDR_IDX (pst) = f_idx;
-      fdr_to_pst[f_idx].pst = pst;
-
-      /* FIXME: This tampers with data from BFD.  */
-      fh->ioptBase = (int) pst;
-
       CUR_BFD (pst) = cur_bfd;
 
       /* The way to turn this into a symtab is to call... */
       pst->read_symtab = mipscoff_psymtab_to_symtab;
 
+      /* Set up language for the pst. Native ecoff has every header file in
+	 a separate FDR. deduce_language_from_filename will return
+	 language_unknown for a header file, which is not what we want.
+	 But the FDRs for the header files are after the FDR for the source
+	 file, so we can assign the language of the source file to the
+	 following header files. Then we save the language in the private
+	 pst data so that we can reuse it when building symtabs.  */
+      prev_language = psymtab_language;
       psymtab_language = deduce_language_from_filename (fdr_name (fh));
+      if (psymtab_language == language_unknown)
+	psymtab_language = prev_language;
+      PST_PRIVATE (pst)->pst_language = psymtab_language;
 
       pst->texthigh = pst->textlow;
 
@@ -2372,9 +2375,12 @@ parse_partial_symbols (objfile, section_offsets)
 	    }
 	}
 
-      end_psymtab (save_pst, psymtab_include_list, includes_used,
-		   -1, save_pst->texthigh,
-		   dependency_list, dependencies_used);
+      /* Link pst to FDR. end_psymtab returns NULL if the psymtab was
+	 empty and put on the free list.  */
+      fdr_to_pst[f_idx].pst = end_psymtab (save_pst,
+					   psymtab_include_list, includes_used,
+					   -1, save_pst->texthigh,
+					   dependency_list, dependencies_used);
       if (objfile->ei.entry_point >= save_pst->textlow &&
 	  objfile->ei.entry_point < save_pst->texthigh)
 	{
@@ -2389,6 +2395,9 @@ parse_partial_symbols (objfile, section_offsets)
       int s_id0 = 0;
       fh = f_idx + ecoff_data (cur_bfd)->fdr;
       pst = fdr_to_pst[f_idx].pst;
+
+      if (pst == (struct partial_symtab *)NULL)
+	continue;
 
       /* This should catch stabs-in-ecoff. */
       if (fh->crfd <= 1)
@@ -2412,11 +2421,11 @@ parse_partial_symbols (objfile, section_offsets)
 		}
 	    }
 	}
-      pst->number_of_dependencies = fh->crfd - s_id0;
+      pst->number_of_dependencies = 0;
       pst->dependencies =
 	((struct partial_symtab **)
 	 obstack_alloc (&objfile->psymbol_obstack,
-			(pst->number_of_dependencies
+			((fh->crfd - s_id0)
 			 * sizeof (struct partial_symtab *))));
       for (s_idx = s_id0; s_idx < fh->crfd; s_idx++)
 	{
@@ -2427,106 +2436,24 @@ parse_partial_symbols (objfile, section_offsets)
 			   + (fh->rfdBase + s_idx) * external_rfd_size),
 			  &rh);
 	  if (rh < 0 || rh >= hdr->ifdMax)
-	    complain (&bad_file_number_complaint, rh);
-	  else
-	    pst->dependencies[s_idx - s_id0] = fdr_to_pst[rh].pst;
+	    {
+	      complain (&bad_file_number_complaint, rh);
+	      continue;
+	    }
+
+	  /* Skip self-dependency.  */
+	  if (rh == f_idx)
+	    continue;
+
+	  /* Do not add to dependeny list if psymtab was empty.  */
+	  if (fdr_to_pst[rh].pst == (struct partial_symtab *)NULL)
+	    continue;
+	  pst->dependencies[pst->number_of_dependencies++] = fdr_to_pst[rh].pst;
 	}
     }
   do_cleanups (old_chain);
 }
 
-
-#if 0
-/* Do the initial analisys of the F_IDX-th file descriptor.
-   Allocates a partial symtab for it, and builds the list
-   of dependent files by recursion. LEV says at which level
-   of recursion we are called (to pretty up debug traces) */
-
-static struct partial_symtab *
-parse_fdr (f_idx, lev, objfile)
-     int f_idx;
-     int lev;
-     struct objfile *objfile;
-{
-  const bfd_size_type external_rfd_size
-    = ecoff_backend (cur_bfd)->external_rfd_size;
-  void (* const swap_rfd_in) PARAMS ((bfd *, PTR, RFDT *))
-    = ecoff_backend (cur_bfd)->swap_rfd_in;
-  register FDR *fh;
-  register struct partial_symtab *pst;
-  int s_idx, s_id0;
-
-  fh = ecoff_data (cur_bfd)->fdr + f_idx;
-
-  /* Use this to indicate into which symtab this file was parsed */
-  if (fh->ioptBase)
-    return (struct partial_symtab *) fh->ioptBase;
-
-  /* Debuggability level */
-  if (compare_glevel (max_glevel, fh->glevel) < 0)
-    max_glevel = fh->glevel;
-
-  /* Make a new partial_symtab */
-  pst = new_psymtab (fdr_name (fh), objfile);
-  if (fh->cpd == 0)
-    {
-      pst->textlow = 0;
-      pst->texthigh = 0;
-    }
-  else
-    {
-      pst->textlow = fh->adr;
-      pst->texthigh = fh->cpd;	/* To be fixed later */
-    }
-
-  /* Make everything point to everything. */
-  FDR_IDX (pst) = f_idx;
-  fdr_to_pst[f_idx].pst = pst;
-  fh->ioptBase = (int) pst;
-
-  /* Analyze its dependencies */
-  if (fh->crfd <= 1)
-    return pst;
-
-  s_id0 = 0;
-  if (fh->cpd == 0)
-    {				/* If there are no functions defined here ... */
-      /* ...then presumably a .h file: drop reverse depends .h->.c */
-      for (; s_id0 < fh->crfd; s_id0++)
-	{
-	  RFDT rh;
-
-	  (*swap_rfd_in) (cur_bfd,
-			  ((char *) ecoff_data (cur_bfd)->external_rfd
-			   + (fh->rfdBase + s_id0) * external_rfd_size),
-			  &rh);
-	  if (rh == f_idx)
-	    {
-	      s_id0++;		/* Skip self-dependency */
-	      break;
-	    }
-	}
-    }
-  pst->number_of_dependencies = fh->crfd - s_id0;
-  pst->dependencies = ((struct partial_symtab **)
-		       obstack_alloc (&objfile->psymbol_obstack,
-				      (pst->number_of_dependencies
-				       * sizeof (struct partial_symtab *))));
-  for (s_idx = s_id0; s_idx < fh->crfd; s_idx++)
-    {
-      RFDT rh;
-
-      (*swap_rfd_in) (cur_bfd,
-		      ((char *) ecoff_data (cur_bfd)->external_rfd
-		       + (fh->rfdBase + s_idx) * external_rfd_size),
-		      &rh);
-      pst->dependencies[s_idx - s_id0] = parse_fdr (rh, lev + 1, objfile);
-    }
-
-  return pst;
-}
-
-#endif
 
 static char *
 mips_next_symbol_text ()
@@ -2745,6 +2672,10 @@ psymtab_to_symtab_1 (pst, filename)
 	  f_max += fh->csym + fh->cpd;
 	  maxlines = 2 * fh->cline;
 	  st = new_symtab (pst->filename, 2 * f_max, maxlines, pst->objfile);
+
+	  /* The proper language was already determined when building
+	     the psymtab, use it.  */
+	  st->language = PST_PRIVATE (pst)->pst_language;
 	}
 
       psymtab_language = st->language;
@@ -2886,12 +2817,13 @@ psymtab_to_symtab_1 (pst, filename)
    Return value says how many aux symbols we ate. */
 
 static int
-cross_ref (ax, tpp, type_code, pname, bigend)
+cross_ref (ax, tpp, type_code, pname, bigend, sym_name)
      union aux_ext *ax;
      struct type **tpp;
      enum type_code type_code;	/* Use to alloc new type if none is found. */
      char **pname;
      int bigend;
+     char *sym_name;
 {
   RNDXR rn[1];
   unsigned int rf;
@@ -2931,7 +2863,7 @@ cross_ref (ax, tpp, type_code, pname, bigend)
 	  *tpp = (struct type *)NULL;
 	  *pname = "<illegal>";
 	  complain (&bad_rfd_entry_complaint,
-		    fh - ecoff_data (cur_bfd)->fdr, rn->index);
+		    sym_name, fh - ecoff_data (cur_bfd)->fdr, rn->index);
 	  return result;
 	}
 
@@ -2967,7 +2899,7 @@ cross_ref (ax, tpp, type_code, pname, bigend)
 	  *tpp = (struct type *)NULL;
 	  *pname = "<illegal>";
 	  complain (&bad_rfd_entry_complaint,
-		    fh - ecoff_data (cur_bfd)->fdr, rn->index);
+		    sym_name, fh - ecoff_data (cur_bfd)->fdr, rn->index);
 	  return result;
 	}
       else

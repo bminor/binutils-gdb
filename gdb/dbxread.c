@@ -1049,19 +1049,12 @@ start_psymtab (objfile, section_offsets,
   return result;
 }
 
-/* Close off the current usage of a partial_symbol table entry.  This
-   involves setting the correct number of includes (with a realloc),
-   setting the high text mark, setting the symbol length in the
-   executable, and setting the length of the global and static lists
-   of psymbols.
+/* Close off the current usage of PST.  
+   Returns PST or NULL if the partial symtab was empty and thrown away.
 
-   The global symbols and static symbols are then seperately sorted.
+   FIXME:  List variables and peculiarities of same.  */
 
-   Then the partial symtab is put on the global list.
-   *** List variables and peculiarities of same. ***
-   */
-
-void
+struct partial_symtab *
 end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
 	     capping_text, dependency_list, number_dependencies)
      struct partial_symtab *pst;
@@ -1245,7 +1238,11 @@ end_psymtab (pst, include_list, num_includes, capping_symbol_offset,
 
     pst->next = pst->objfile->free_psymtabs;
     pst->objfile->free_psymtabs = pst;
+
+    /* Indicate that psymtab was thrown away.  */
+    pst = (struct partial_symtab *)NULL;
   }
+  return pst;
 }
 
 static void

@@ -177,7 +177,7 @@ start_psymtab PARAMS ((struct objfile *, struct section_offsets *, char *,
 		       CORE_ADDR, int, struct partial_symbol *,
 		       struct partial_symbol *));
 
-extern void
+extern struct partial_symtab *
 end_psymtab PARAMS ((struct partial_symtab *, char **, int, int, CORE_ADDR,
 		     struct partial_symtab **, int));
 
