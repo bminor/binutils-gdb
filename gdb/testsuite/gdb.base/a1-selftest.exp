@@ -94,7 +94,7 @@ proc test_with_self {} {
 
     # run yourself
     set description "run until breakpoint at main"
-    send "run\n"
+    send "run -nw\n"
     expect {
 	-re "Starting program.*Breakpoint \[0-9\]+,.*main .argc.*argv.* at .*main.c:.*$prompt $" {
 	    pass "$description"

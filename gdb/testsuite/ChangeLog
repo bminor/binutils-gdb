@@ -1,3 +1,14 @@
+Fri Dec 29 16:09:20 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdb.base/a1-selftest.exp (test_with_self): Run without windows.
+
+Wed Dec  6 10:45:42 1995  Jeffrey A. Law  <law@sethra.cygnus.com>
+
+	* gdb.base/*.exp: Make ${srcfile} only be the basename of the
+	input source file; fix code to compile test to deal with this
+	convention.
+	* gdb.c++/*.exp: Likewise.
+
 Mon Nov 27 11:40:16 1995  Fred Fish  <fnf@cygnus.com>
 
 	* gdb.base/signals.exp: Setup "alpha-*-osf2*" xfail for
