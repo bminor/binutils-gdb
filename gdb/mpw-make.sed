@@ -34,6 +34,7 @@
 
 # Whack out various autoconf vars that we don't need.
 /@CONFIG_LDFLAGS@/s/@CONFIG_LDFLAGS@//g
+/@HLDFLAGS@/s/@HLDFLAGS@//g
 /@DEFS@/s/@DEFS@//g
 /@YACC@/s/@YACC@/byacc/g
 /@ENABLE_OBS@/s/@ENABLE_OBS@//g
@@ -115,8 +116,9 @@ readline_headers =\
 	open-brace >> "{o}"init.c-tmp
 
 # Replace the whole sed bit for init.c; it's simpler that way...
-/filename=`echo $i | sed/,/esac/c\
-          set filename "`Echo {i} | sed \\Option-d\
+/echo {OBS} {TSOBS}/,/echo '}'/c\
+	For i in {OBS} {TSOBS}\
+          Set filename "`Echo {i} | sed \\Option-d\
             -e '/^Onindy.c.o/d' \\Option-d\
             -e '/^nindy.c.o/d' \\Option-d\
             -e '/ttyflush.c.o/d' \\Option-d\
@@ -133,7 +135,9 @@ readline_headers =\
           If "{filename}" != ""\
             sed <"{s}""{filename}" >>"{o}"init.c-tmp -n \\Option-d\
             -e '/^_initialize_[a-z_0-9A-Z]* *(/s/^\\([a-z_0-9A-Z]*\\).*/  {extern void \\1 (); \\1 ();}/p'\
-          End If
+          End If\
+	End For\
+	Echo '}' >>"{o}"init.c-tmp
 
 # Fix the main compile/link command.
 /{CC_LD} {INTERNAL_LDFLAGS} -o gdb/,/"{o}"init.c.o {OBS} {TSOBS} {ADD_FILES} {CLIBS} {LOADLIBES}/c\

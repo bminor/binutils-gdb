@@ -1,3 +1,8 @@
+Tue Oct 22 10:32:46 1996  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-make.sed: Update init.c editing to work with Oct 8 change.
+	(@HLDFLAGS@): Always edit out.
+
 Mon Oct 21 18:17:08 1996  Mark Alexander  <marka@cygnus.com>
 
 	* mdebugread.c (parse_partial_symbols): Fix 64-bit
@@ -7,8 +12,6 @@ Mon Oct 21 18:17:08 1996  Mark Alexander  <marka@cygnus.com>
 Mon Oct 21 14:40:50 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* v850-tdep.c:  Cleanup lots of things.  Add many comments.
-	* testsuite/gdb.base/nodebug.exp:  Whack out -g options by hand so
-	that cflags can contains -gstabs, and work correctly for other tests.
 
 Mon Oct 21 14:01:38 1996  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
@@ -37,13 +40,6 @@ Thu Oct 17 18:18:20 1996  Stan Shebs  <shebs@andros.cygnus.com>
 	* configure.tgt: New file, target configuration mapping.
 	* configure.in: Remove host and target mapping.
 	* configure: Rebuild.
-
-Wed Oct 16 19:03:54 1996  Stu Grossman  (grossman@critters.cygnus.com)
-
-	* testsuite/gdb.base/break.exp:  Make backtrace from factorial
-	errors unique.
-	* testsuite/gdb.base/nodebug.exp:  Whack out all -g options
-	explicitly.
 
 start-sanitize-v850
 	* v850-tdep.c (v850_init_extra_frame_info v850_frame_chain):  Fix
