@@ -1,4 +1,9 @@
 start-sanitize-am30
+Sun June 14 17:04:00 1998  Joyce Janczyn  <janczyn@cygnus.com>
+	* dv-mn103iop.c (write_*_reg): Check for attempt to write r/o register bits.
+	* dv-mn103ser.c: Fill in methods for reading and writing to serial device registers.
+	* interp.c (sim_open): Make the serial device a polling device.
+	
 Fri June 12 16:24:00 1998  Joyce Janczyn  <janczyn@cygnus.com>
 	* dv-mn103iop.c: New file for handling am32 io ports.
 	* configure.in: Add mn103iop to hw_device list.
