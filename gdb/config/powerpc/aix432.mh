@@ -1,7 +1,5 @@
 # Host: IBM PowerPC running AIX 4.3.2+
 
-XM_FILE= xm-aix.h
-
 NAT_FILE= nm-aix.h
 
 # aix-thread.o is not listed in NATDEPFILES as it is pulled in by configure.
