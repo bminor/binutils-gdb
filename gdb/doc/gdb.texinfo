@@ -7717,6 +7717,11 @@ If a source file name ends in one of the following extensions, then
 @value{GDBN} infers that its language is the one indicated.
 
 @table @file
+@item .ada
+@itemx .ads
+@itemx .adb
+@itemx .a
+Ada source file.
 
 @item .c
 C source file
@@ -8005,7 +8010,7 @@ being set automatically by @value{GDBN}.
 @node Support
 @section Supported languages
 
-@value{GDBN} supports C, C@t{++}, Objective-C, Fortran, Java, assembly, and Modula-2.
+@value{GDBN} supports C, C@t{++}, Objective-C, Fortran, Java, assembly, Modula-2, and Ada.
 @c This is false ...
 Some @value{GDBN} features may be used in expressions regardless of the
 language you use: the @value{GDBN} @code{@@} and @code{::} operators,
@@ -8025,6 +8030,7 @@ language reference or tutorial.
 * C::                           C and C@t{++}
 * Objective-C::                 Objective-C
 * Modula-2::                    Modula-2
+* Ada::                         Ada
 @end menu
 
 @node C
@@ -8640,7 +8646,7 @@ the description of an object.  However, this command may only work
 with certain Objective-C libraries that have a particular hook
 function, @code{_NSPrintForDebugger}, defined.
 
-@node Modula-2,  , Objective-C, Support
+@node Modula-2, Ada, Objective-C, Support
 @subsection Modula-2
 
 @cindex Modula-2, @value{GDBN} support
@@ -9082,6 +9088,341 @@ address can be specified by an integral constant, the construct
 @cindex @code{#} in Modula-2
 In @value{GDBN} scripts, the Modula-2 inequality operator @code{#} is
 interpreted as the beginning of a comment.  Use @code{<>} instead.
+
+@node Ada
+@subsection Ada
+@cindex Ada
+
+The extensions made to @value{GDBN} for Ada only support
+output from the @sc{gnu} Ada (GNAT) compiler.
+Other Ada compilers are not currently supported, and
+attempting to debug executables produced by them is most likely
+to be difficult.
+
+
+@cindex expressions in Ada
+@menu
+* Ada Mode Intro::              General remarks on the Ada syntax 
+                                   and semantics supported by Ada mode 
+                                   in @value{GDBN}.
+* Omissions from Ada::          Restrictions on the Ada expression syntax.
+* Additions to Ada::            Extensions of the Ada expression syntax.
+* Stopping Before Main Program:: Debugging the program during elaboration.
+* Ada Glitches::                Known peculiarities of Ada mode.
+@end menu
+
+@node Ada Mode Intro
+@subsubsection Introduction
+@cindex Ada mode, general
+
+The Ada mode of @value{GDBN} supports a fairly large subset of Ada expression 
+syntax, with some extensions.
+The philosophy behind the design of this subset is 
+
+@itemize @bullet
+@item
+That @value{GDBN} should provide basic literals and access to operations for 
+arithmetic, dereferencing, field selection, indexing, and subprogram calls, 
+leaving more sophisticated computations to subprograms written into the
+program (which therefore may be called from @value{GDBN}).
+
+@item 
+That type safety and strict adherence to Ada language restrictions
+are not particularly important to the @value{GDBN} user.
+
+@item 
+That brevity is important to the @value{GDBN} user.
+@end itemize
+
+Thus, for brevity, the debugger acts as if there were 
+implicit @code{with} and @code{use} clauses in effect for all user-written 
+packages, making it unnecessary to fully qualify most names with 
+their packages, regardless of context.  Where this causes ambiguity, 
+@value{GDBN} asks the user's intent.
+
+The debugger will start in Ada mode if it detects an Ada main program. 
+As for other languages, it will enter Ada mode when stopped in a program that
+was translated from an Ada source file.
+
+While in Ada mode, you may use `@t{--}' for comments.  This is useful 
+mostly for documenting command files.  The standard @value{GDBN} comment 
+(@samp{#}) still works at the beginning of a line in Ada mode, but not in the 
+middle (to allow based literals).
+
+The debugger supports limited overloading.  Given a subprogram call in which
+the function symbol has multiple definitions, it will use the number of 
+actual parameters and some information about their types to attempt to narrow
+the set of definitions.  It also makes very limited use of context, preferring
+procedures to functions in the context of the @code{call} command, and
+functions to procedures elsewhere. 
+
+@node Omissions from Ada
+@subsubsection Omissions from Ada
+@cindex Ada, omissions from
+
+Here are the notable omissions from the subset:
+
+@itemize @bullet
+@item
+Only a subset of the attributes are supported:
+
+@itemize @minus
+@item
+@t{'First}, @t{'Last}, and @t{'Length}
+ on array objects (not on types and subtypes).
+
+@item
+@t{'Min} and @t{'Max}.  
+
+@item 
+@t{'Pos} and @t{'Val}. 
+
+@item
+@t{'Tag}.
+
+@item
+@t{'Range} on array objects (not subtypes), but only as the right
+operand of the membership (@code{in}) operator.
+
+@item 
+@t{'Access}, @t{'Unchecked_Access}, and 
+@t{'Unrestricted_Access} (a GNAT extension).
+
+@item
+@t{'Address}.
+@end itemize
+
+@item
+The names in
+@code{Characters.Latin_1} are not available and
+concatenation is not implemented.  Thus, escape characters in strings are 
+not currently available.
+
+@item
+Equality tests (@samp{=} and @samp{/=}) on arrays test for bitwise
+equality of representations.  They will generally work correctly
+for strings and arrays whose elements have integer or enumeration types.
+They may not work correctly for arrays whose element
+types have user-defined equality, for arrays of real values 
+(in particular, IEEE-conformant floating point, because of negative
+zeroes and NaNs), and for arrays whose elements contain unused bits with
+indeterminate values.  
+
+@item
+The other component-by-component array operations (@code{and}, @code{or}, 
+@code{xor}, @code{not}, and relational tests other than equality)
+are not implemented. 
+
+@item 
+There are no record or array aggregates.
+
+@item
+Calls to dispatching subprograms are not implemented.
+
+@item
+The overloading algorithm is much more limited (i.e., less selective)
+than that of real Ada.  It makes only limited use of the context in which a subexpression
+appears to resolve its meaning, and it is much looser in its rules for allowing
+type matches.  As a result, some function calls will be ambiguous, and the user
+will be asked to choose the proper resolution.
+
+@item
+The @code{new} operator is not implemented.
+
+@item
+Entry calls are not implemented.
+
+@item 
+Aside from printing, arithmetic operations on the native VAX floating-point 
+formats are not supported.
+
+@item
+It is not possible to slice a packed array.
+@end itemize
+
+@node Additions to Ada
+@subsubsection Additions to Ada
+@cindex Ada, deviations from 
+
+As it does for other languages, @value{GDBN} makes certain generic
+extensions to Ada (@pxref{Expressions}):
+
+@itemize @bullet
+@item
+If the expression @var{E} is a variable residing in memory 
+(typically a local variable or array element) and @var{N} is 
+a positive integer, then @code{@var{E}@@@var{N}} displays the values of
+@var{E} and the @var{N}-1 adjacent variables following it in memory as an array.  
+In Ada, this operator is generally not necessary, since its prime use
+is in displaying parts of an array, and slicing will usually do this in Ada.
+However, there are occasional uses when debugging programs
+in which certain debugging information has been optimized away.
+
+@item
+@code{@var{B}::@var{var}} means ``the variable named @var{var} that appears
+in function or file @var{B}.''  When @var{B} is a file name, you must typically
+surround it in single quotes.
+
+@item 
+The expression @code{@{@var{type}@} @var{addr}} means ``the variable of type
+@var{type} that appears at address @var{addr}.''
+
+@item
+A name starting with @samp{$} is a convenience variable 
+(@pxref{Convenience Vars}) or a machine register (@pxref{Registers}).
+@end itemize
+
+In addition, @value{GDBN} provides a few other shortcuts and outright additions specific 
+to Ada:
+
+@itemize @bullet
+@item 
+The assignment statement is allowed as an expression, returning
+its right-hand operand as its value.  Thus, you may enter
+
+@smallexample
+set x := y + 3
+print A(tmp := y + 1)
+@end smallexample
+
+@item 
+The semicolon is allowed as an ``operator,''  returning as its value 
+the value of its right-hand operand.
+This allows, for example,
+complex conditional breaks:
+
+@smallexample
+break f
+condition 1 (report(i); k += 1; A(k) > 100)
+@end smallexample
+
+@item 
+Rather than use catenation and symbolic character names to introduce special 
+characters into strings, one may instead use a special bracket notation, 
+which is also used to print strings.  A sequence of characters of the form 
+@samp{["@var{XX}"]} within a string or character literal denotes the 
+(single) character whose numeric encoding is @var{XX} in hexadecimal.  The
+sequence of characters @samp{["""]} also denotes a single quotation mark 
+in strings.   For example,
+@smallexample
+   "One line.["0a"]Next line.["0a"]"
+@end smallexample
+@noindent
+contains an ASCII newline character (@code{Ada.Characters.Latin_1.LF}) after each
+period.
+
+@item
+The subtype used as a prefix for the attributes @t{'Pos}, @t{'Min}, and
+@t{'Max} is optional (and is ignored in any case).  For example, it is valid
+to write
+
+@smallexample
+print 'max(x, y)
+@end smallexample
+
+@item
+When printing arrays, @value{GDBN} uses positional notation when the 
+array has a lower bound of 1, and uses a modified named notation otherwise.
+For example, a one-dimensional array of three integers with a lower bound of 3 might print as
+
+@smallexample
+(3 => 10, 17, 1)
+@end smallexample
+
+@noindent
+That is, in contrast to valid Ada, only the first component has a @code{=>} 
+clause.
+
+@item
+You may abbreviate attributes in expressions with any unique,
+multi-character subsequence of 
+their names (an exact match gets preference).
+For example, you may use @t{a'len}, @t{a'gth}, or @t{a'lh}
+in place of  @t{a'length}.
+
+@item
+@cindex quoting Ada internal identifiers
+Since Ada is case-insensitive, the debugger normally maps identifiers you type 
+to lower case.  The GNAT compiler uses upper-case characters for 
+some of its internal identifiers, which are normally of no interest to users.
+For the rare occasions when you actually have to look at them,
+enclose them in angle brackets to avoid the lower-case mapping. 
+For example,
+@smallexample
+@value{GDBP} print <JMPBUF_SAVE>[0]
+@end smallexample
+
+@item
+Printing an object of class-wide type or dereferencing an 
+access-to-class-wide value will display all the components of the object's
+specific type (as indicated by its run-time tag).  Likewise, component
+selection on such a value will operate on the specific type of the
+object.
+
+@end itemize
+
+@node Stopping Before Main Program
+@subsubsection Stopping at the Very Beginning
+
+@cindex breakpointing Ada elaboration code
+It is sometimes necessary to debug the program during elaboration, and
+before reaching the main procedure.
+As defined in the Ada Reference
+Manual, the elaboration code is invoked from a procedure called
+@code{adainit}.  To run your program up to the beginning of
+elaboration, simply use the following two commands:
+@code{tbreak adainit} and @code{run}.
+
+@node Ada Glitches
+@subsubsection Known Peculiarities of Ada Mode
+@cindex Ada, problems
+
+Besides the omissions listed previously (@pxref{Omissions from Ada}),
+we know of several problems with and limitations of Ada mode in
+@value{GDBN},
+some of which will be fixed with planned future releases of the debugger 
+and the GNU Ada compiler.
+
+@itemize @bullet
+@item
+Currently, the debugger 
+has insufficient information to determine whether certain pointers represent
+pointers to objects or the objects themselves.
+Thus, the user may have to tack an extra @code{.all} after an expression
+to get it printed properly.
+
+@item 
+Static constants that the compiler chooses not to materialize as objects in 
+storage are invisible to the debugger.
+
+@item
+Named parameter associations in function argument lists are ignored (the
+argument lists are treated as positional).
+
+@item
+Many useful library packages are currently invisible to the debugger.
+
+@item
+Fixed-point arithmetic, conversions, input, and output is carried out using 
+floating-point arithmetic, and may give results that only approximate those on 
+the host machine.
+
+@item
+The type of the @t{'Address} attribute may not be @code{System.Address}.
+
+@item
+The GNAT compiler never generates the prefix @code{Standard} for any of 
+the standard symbols defined by the Ada language.  @value{GDBN} knows about 
+this: it will strip the prefix from names when you use it, and will never
+look for a name you have so qualified among local symbols, nor match against
+symbols in other packages or subprograms.  If you have 
+defined entities anywhere in your program other than parameters and 
+local variables whose simple names match names in @code{Standard}, 
+GNAT's lack of qualification here can cause confusion.  When this happens,
+you can usually resolve the confusion 
+by qualifying the problematic names with package
+@code{Standard} explicitly.  
+@end itemize
 
 @node Unsupported languages
 @section Unsupported languages

@@ -1,3 +1,8 @@
+2004-10-03  Paul N. Hilfinger  <hilfinger@gnat.com>
+
+	* gdb.texinfo (Filenames): Add Ada suffixes.
+	(Ada) New section.
+
 2004-09-27  Andrew Cagney  <cagney@gnu.org>
 	    Robert Picco  <Robert.Picco@hp.com>
 
