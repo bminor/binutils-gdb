@@ -25,18 +25,19 @@
 /* is deleted.                                                      */
 /********************************************************************/
 
-typedef enum {
+typedef enum
+{
   NO_ERROR,
   DELETED_OLD_PAIR,
   NO_SUCH_PAIR,
-} Bag_error;
+}
+Bag_error;
 
-void BAG_putpair(long first, long second);
+void BAG_putpair (long first, long second);
 
-void BAG_newbag(void);
-Bag_error BAG_killpair_byfirst(long first);
-Bag_error BAG_killpair_bysecond(long second);
+void BAG_newbag (void);
+Bag_error BAG_killpair_byfirst (long first);
+Bag_error BAG_killpair_bysecond (long second);
 
-Bag_error BAG_getfirst(long *first, long second);
-Bag_error BAG_getsecond(long first, long *second);
-
+Bag_error BAG_getfirst (long *first, long second);
+Bag_error BAG_getsecond (long first, long *second);

@@ -65,7 +65,7 @@ extern ARMword isize;
 #define POS(i) ( (~(i)) >> 31 )
 #define NEG(i) ( (i) >> 31 )
 
-#ifdef MODET /* Thumb support */
+#ifdef MODET			/* Thumb support */
 /* ??? This bit is actually in the low order bit of the PC in the hardware.
    It isn't clear if the simulator needs to model that or not.  */
 #define TBIT (1L << 5)
@@ -215,7 +215,7 @@ extern ARMword isize;
 #define RESUME 8
 
 #define NORMALCYCLE state->NextInstr = 0
-#define BUSUSEDN state->NextInstr |= 1 /* the next fetch will be an N cycle */
+#define BUSUSEDN state->NextInstr |= 1	/* the next fetch will be an N cycle */
 #define BUSUSEDINCPCS state->Reg[15] += isize ; /* a standard PC inc and an S cycle */ \
                       state->NextInstr = (state->NextInstr & 0xff) | 2
 #define BUSUSEDINCPCN state->Reg[15] += isize ; /* a standard PC inc and an N cycle */ \
@@ -348,53 +348,62 @@ extern ARMword isize;
 *                          Values for Emulate                               *
 \***************************************************************************/
 
-#define STOP            0 /* stop */
-#define CHANGEMODE      1 /* change mode */
-#define ONCE            2 /* execute just one interation */
-#define RUN             3 /* continuous execution */
+#define STOP            0	/* stop */
+#define CHANGEMODE      1	/* change mode */
+#define ONCE            2	/* execute just one interation */
+#define RUN             3	/* continuous execution */
 
 /***************************************************************************\
 *                      Stuff that is shared across modes                    *
 \***************************************************************************/
 
-extern ARMword ARMul_Emulate26(ARMul_State *state) ;
-extern ARMword ARMul_Emulate32(ARMul_State *state) ;
-extern unsigned ARMul_MultTable[] ; /* Number of I cycles for a mult */
-extern ARMword ARMul_ImmedTable[] ; /* immediate DP LHS values */
-extern char ARMul_BitList[] ; /* number of bits in a byte table */
-extern void ARMul_Abort26(ARMul_State *state, ARMword) ;
-extern void ARMul_Abort32(ARMul_State *state, ARMword) ;
-extern unsigned ARMul_NthReg(ARMword instr,unsigned number) ;
-extern void ARMul_MSRCpsr(ARMul_State *state, ARMword instr, ARMword rhs) ;
-extern void ARMul_NegZero(ARMul_State *state, ARMword result) ;
-extern void ARMul_AddCarry(ARMul_State *state, ARMword a, ARMword b, ARMword result) ;
-extern int AddOverflow(ARMword a, ARMword b, ARMword result) ;
-extern int SubOverflow(ARMword a, ARMword b, ARMword result) ;
-extern void ARMul_AddOverflow(ARMul_State *state, ARMword a, ARMword b, ARMword result) ;
-extern void ARMul_SubCarry(ARMul_State *state, ARMword a, ARMword b, ARMword result) ;
-extern void ARMul_SubOverflow(ARMul_State *state, ARMword a, ARMword b, ARMword result) ;
-extern void ARMul_CPSRAltered(ARMul_State *state) ;
-extern void ARMul_R15Altered(ARMul_State *state) ;
-extern ARMword ARMul_SwitchMode(ARMul_State *state,ARMword oldmode, ARMword newmode) ;
-extern unsigned ARMul_NthReg(ARMword instr, unsigned number) ;
-extern void ARMul_LDC(ARMul_State *state,ARMword instr,ARMword address) ;
-extern void ARMul_STC(ARMul_State *state,ARMword instr,ARMword address) ;
-extern void ARMul_MCR(ARMul_State *state,ARMword instr, ARMword source) ;
-extern ARMword ARMul_MRC(ARMul_State *state,ARMword instr) ;
-extern void ARMul_CDP(ARMul_State *state,ARMword instr) ;
-extern unsigned IntPending(ARMul_State *state) ;
-extern ARMword ARMul_Align(ARMul_State *state, ARMword address, ARMword data) ;
+extern ARMword ARMul_Emulate26 (ARMul_State * state);
+extern ARMword ARMul_Emulate32 (ARMul_State * state);
+extern unsigned ARMul_MultTable[];	/* Number of I cycles for a mult */
+extern ARMword ARMul_ImmedTable[];	/* immediate DP LHS values */
+extern char ARMul_BitList[];	/* number of bits in a byte table */
+extern void ARMul_Abort26 (ARMul_State * state, ARMword);
+extern void ARMul_Abort32 (ARMul_State * state, ARMword);
+extern unsigned ARMul_NthReg (ARMword instr, unsigned number);
+extern void ARMul_MSRCpsr (ARMul_State * state, ARMword instr, ARMword rhs);
+extern void ARMul_NegZero (ARMul_State * state, ARMword result);
+extern void ARMul_AddCarry (ARMul_State * state, ARMword a, ARMword b,
+			    ARMword result);
+extern int AddOverflow (ARMword a, ARMword b, ARMword result);
+extern int SubOverflow (ARMword a, ARMword b, ARMword result);
+extern void ARMul_AddOverflow (ARMul_State * state, ARMword a, ARMword b,
+			       ARMword result);
+extern void ARMul_SubCarry (ARMul_State * state, ARMword a, ARMword b,
+			    ARMword result);
+extern void ARMul_SubOverflow (ARMul_State * state, ARMword a, ARMword b,
+			       ARMword result);
+extern void ARMul_CPSRAltered (ARMul_State * state);
+extern void ARMul_R15Altered (ARMul_State * state);
+extern ARMword ARMul_SwitchMode (ARMul_State * state, ARMword oldmode,
+				 ARMword newmode);
+extern unsigned ARMul_NthReg (ARMword instr, unsigned number);
+extern void ARMul_LDC (ARMul_State * state, ARMword instr, ARMword address);
+extern void ARMul_STC (ARMul_State * state, ARMword instr, ARMword address);
+extern void ARMul_MCR (ARMul_State * state, ARMword instr, ARMword source);
+extern ARMword ARMul_MRC (ARMul_State * state, ARMword instr);
+extern void ARMul_CDP (ARMul_State * state, ARMword instr);
+extern unsigned IntPending (ARMul_State * state);
+extern ARMword ARMul_Align (ARMul_State * state, ARMword address,
+			    ARMword data);
 #define EVENTLISTSIZE 1024L
 
 /* Thumb support: */
 
-typedef enum {
-  t_undefined,  /* undefined Thumb instruction */
-  t_decoded,    /* instruction decoded to ARM equivalent */
-  t_branch      /* Thumb branch (already processed) */
-} tdstate;
+typedef enum
+{
+  t_undefined,			/* undefined Thumb instruction */
+  t_decoded,			/* instruction decoded to ARM equivalent */
+  t_branch			/* Thumb branch (already processed) */
+}
+tdstate;
 
-extern tdstate ARMul_ThumbDecode(ARMul_State *state,ARMword pc,ARMword tinstr, ARMword *ainstr);
+extern tdstate ARMul_ThumbDecode (ARMul_State * state, ARMword pc,
+				  ARMword tinstr, ARMword * ainstr);
 
 /***************************************************************************\
 *                      Macros to scrutinize instructions                    *
@@ -425,4 +434,3 @@ extern tdstate ARMul_ThumbDecode(ARMul_State *state,ARMword pc,ARMword tinstr, A
 #define UNDEF_IllegalMode
 #define UNDEF_Prog32SigChange
 #define UNDEF_Data32SigChange
-

@@ -75,5 +75,8 @@ extern CORE_ADDR ppc_push_return_address PARAMS ((CORE_ADDR, CORE_ADDR));
 #undef CALL_DUMMY_START_OFFSET
 #define CALL_DUMMY_START_OFFSET      0
 
+/* The value of symbols of type N_SO and N_FUN maybe null when 
+   it shouldn't be. */
+#define SOFUN_ADDRESS_MAYBE_MISSING
 
 #endif /* TM_PPC_EABI_H */

@@ -270,9 +270,15 @@ int
 arm_pc_is_thumb_dummy (bfd_vma memaddr)
 {
   CORE_ADDR sp = read_sp ();
-  CORE_ADDR fp = read_fp ();
 
-  if (PC_IN_CALL_DUMMY (memaddr, sp, fp))
+  /* FIXME: Until we switch for the new call dummy macros, this heuristic
+     is the best we can do.  We are trying to determine if the pc is on
+     the stack, which (hopefully) will only happen in a call dummy.
+     We hope the current stack pointer is not so far alway from the dummy
+     frame location (true if we have not pushed large data structures or
+     gone too many levels deep) and that our 1024 is not enough to consider
+     code regions as part of the stack (true for most practical purposes) */
+  if (PC_IN_CALL_DUMMY (memaddr, sp, sp + 1024))
     return caller_is_thumb;
   else
     return 0;

@@ -19,19 +19,21 @@
 
 #define Dbg_Conf__h
 
-typedef struct Dbg_ConfigBlock {
-    int bytesex;
-    long memorysize;
-    int serialport;        /*) remote connection parameters */
-    int seriallinespeed;   /*) (serial connection) */
-    int parallelport;      /*) ditto */
-    int parallellinespeed; /*) (parallel connection) */
-    int processor;         /* processor the armulator is to emulate (eg ARM60) */
-    int rditype;           /* armulator / remote processor */
-    int drivertype;        /* parallel / serial / etc */
-    char const *configtoload;
-    int flags;
-} Dbg_ConfigBlock;
+typedef struct Dbg_ConfigBlock
+{
+  int bytesex;
+  long memorysize;
+  int serialport;		/*) remote connection parameters */
+  int seriallinespeed;		/*) (serial connection) */
+  int parallelport;		/*) ditto */
+  int parallellinespeed;	/*) (parallel connection) */
+  int processor;		/* processor the armulator is to emulate (eg ARM60) */
+  int rditype;			/* armulator / remote processor */
+  int drivertype;		/* parallel / serial / etc */
+  char const *configtoload;
+  int flags;
+}
+Dbg_ConfigBlock;
 
 #define Dbg_ConfigFlag_Reset 1
 

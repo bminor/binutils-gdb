@@ -132,6 +132,9 @@ if {!$gcc_compiled && !$hp_aCC_compiler} {
     setup_xfail "rs6000-*-*" "i*86-*-sysv4*"
     setup_xfail "hppa*-*-*" CLLbs14773
 }
+
+# For get_debug_format to do its job, we need to have a current source file.
+gdb_test "list main" ""
 get_debug_format
 setup_xfail_format "DWARF 1"
 gdb_test "whatis v_boolean" "type = (enum |)boolean" \

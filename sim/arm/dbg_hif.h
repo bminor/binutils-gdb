@@ -21,27 +21,28 @@
 #  include <varargs.h>
 #endif
 
-typedef void Hif_DbgPrint(void *arg, const char *format, va_list ap);
-typedef void Hif_DbgPause(void *arg);
+typedef void Hif_DbgPrint (void *arg, const char *format, va_list ap);
+typedef void Hif_DbgPause (void *arg);
 
-typedef void Hif_WriteC(void *arg, int c);
-typedef int Hif_ReadC(void *arg);
-typedef int Hif_Write(void *arg, char const *buffer, int len);
-typedef char *Hif_GetS(void *arg, char *buffer, int len);
+typedef void Hif_WriteC (void *arg, int c);
+typedef int Hif_ReadC (void *arg);
+typedef int Hif_Write (void *arg, char const *buffer, int len);
+typedef char *Hif_GetS (void *arg, char *buffer, int len);
 
-typedef void Hif_RDIResetProc(void *arg);
+typedef void Hif_RDIResetProc (void *arg);
 
-struct Dbg_HostosInterface {
-    Hif_DbgPrint *dbgprint;
-    Hif_DbgPause *dbgpause;
-    void *dbgarg;
+struct Dbg_HostosInterface
+{
+  Hif_DbgPrint *dbgprint;
+  Hif_DbgPause *dbgpause;
+  void *dbgarg;
 
-    Hif_WriteC *writec;
-    Hif_ReadC *readc;
-    Hif_Write *write;
-    Hif_GetS *gets;
-    void *hostosarg;
+  Hif_WriteC *writec;
+  Hif_ReadC *readc;
+  Hif_Write *write;
+  Hif_GetS *gets;
+  void *hostosarg;
 
-    Hif_RDIResetProc *reset;
-    void *resetarg;
+  Hif_RDIResetProc *reset;
+  void *resetarg;
 };

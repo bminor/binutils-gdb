@@ -861,6 +861,8 @@ resume (int step, enum target_signal sig)
 
   if (should_resume)
     {
+      int resume_pid;
+
       if (use_thread_step_needed && thread_step_needed)
 	{
 	  /* We stopped on a BPT instruction;
@@ -872,7 +874,7 @@ resume (int step, enum target_signal sig)
 	    {
 	      /* Breakpoint deleted: ok to do regular resume
 	         where all the threads either step or continue. */
-	      target_resume (-1, step, sig);
+	      resume_pid = -1;
 	    }
 	  else
 	    {
@@ -884,20 +886,19 @@ resume (int step, enum target_signal sig)
 		  trap_expected = 1;
 		  step = 1;
 		}
-
-	      target_resume (inferior_pid, step, sig);
+	      resume_pid = inferior_pid;
 	    }
 	}
       else
 	{
 	  /* Vanilla resume. */
-
 	  if ((scheduler_mode == schedlock_on) ||
 	      (scheduler_mode == schedlock_step && step != 0))
-	    target_resume (inferior_pid, step, sig);
+	    resume_pid = inferior_pid;
 	  else
-	    target_resume (-1, step, sig);
+	    resume_pid = -1;
 	}
+      target_resume (resume_pid, step, sig);
     }
 
   discard_cleanups (old_cleanups);

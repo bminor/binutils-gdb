@@ -229,7 +229,7 @@ CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 20000202
+VERSION = 20000204
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -633,7 +633,7 @@ uninstall: force
 # of the functions might change, so this files needs to depend on all the
 # object files that will be linked into gdb.
 
-INIT_FILES = $(OBS) $(TSOBS) $(SUBDIR_INIT_FILES)
+INIT_FILES = $(OBS) $(TSOBS) $(SUBDIR_INIT_FILES) @CONFIG_INITS@
 init.c: $(INIT_FILES)
 	@echo Making init.c
 	@rm -f init.c-tmp init.l-tmp

@@ -1,3 +1,11 @@
+2000-02-04  Kevin Buettner  (kevinb@cygnus.com)
+
+	* acinclude.m4, aclocal.m4: New files.
+	* configure.in (sbrk): Use BFD_NEED_DECLARATION to test for
+	presence of a suitable declaration in the system headers.
+	* configure: Regenerated.
+	* sbrk-sup.c (sbrk): Ifdef'd with NEED_DECLARATION_SBRK.
+
 1999-01-04  Jason Molenda  (jsm@bugshack.cygnus.com)
 
 	* configure.in: Requires autoconf 2.12.1 or higher.

@@ -32,7 +32,7 @@
 #define OS_SendString 0x3
 
 /* Defined in kid.c */
-extern int wait_for_osreply(ARMword *reply);
+extern int wait_for_osreply (ARMword * reply);
 
 /* A pipe for handling SWI return values that goes straight from the */
 /* parent to the ARMulator host interface, bypassing the childs RDP */
@@ -43,7 +43,8 @@ int DebuggerARMul[2];
 int mumkid[2];
 int kidmum[2];
 
-void myprint (void *arg, const char *format, va_list ap)
+void
+myprint (void *arg, const char *format, va_list ap)
 {
 #ifdef DEBUG
   fprintf (stderr, "Host: myprint\n");
@@ -53,55 +54,60 @@ void myprint (void *arg, const char *format, va_list ap)
 
 
 /* Waits for a keypress on the debuggers' keyboard */
-void mypause (void *arg)
+void
+mypause (void *arg)
 {
 #ifdef DEBUG
   fprintf (stderr, "Host: mypause\n");
 #endif
-}  /* I do love exciting functions */
+}				/* I do love exciting functions */
 
-void mywritec(void *arg, int c)
+void
+mywritec (void *arg, int c)
 {
 #ifdef DEBUG
-  fprintf(stderr, "Mywrite : %c\n", c);
+  fprintf (stderr, "Mywrite : %c\n", c);
 #endif
-  MYwrite_char(kidmum[1], RDP_OSOp);     /* OS Operation Request Message */
-  MYwrite_word(kidmum[1], SWI_WriteC);   /* Print... */
-  MYwrite_char(kidmum[1], OS_SendChar);  /*  ...a single character */ 
-  MYwrite_char(kidmum[1], (unsigned char) c);
-  
-  wait_for_osreply((ARMword *) 0);
+  MYwrite_char (kidmum[1], RDP_OSOp);	/* OS Operation Request Message */
+  MYwrite_word (kidmum[1], SWI_WriteC);	/* Print... */
+  MYwrite_char (kidmum[1], OS_SendChar);	/*  ...a single character */
+  MYwrite_char (kidmum[1], (unsigned char) c);
+
+  wait_for_osreply ((ARMword *) 0);
 }
 
-int myreadc(void *arg)
+int
+myreadc (void *arg)
 {
   char c;
   ARMword x;
-  
+
 #ifdef DEBUG
-  fprintf(stderr, "Host: myreadc\n");
+  fprintf (stderr, "Host: myreadc\n");
 #endif
-  MYwrite_char(kidmum[1], RDP_OSOp);  /* OS Operation Request Message */
-  MYwrite_word(kidmum[1], SWI_ReadC); /* Read... */
-  MYwrite_char(kidmum[1], OS_SendNothing);
-  
-  c = wait_for_osreply(&x);
+  MYwrite_char (kidmum[1], RDP_OSOp);	/* OS Operation Request Message */
+  MYwrite_word (kidmum[1], SWI_ReadC);	/* Read... */
+  MYwrite_char (kidmum[1], OS_SendNothing);
+
+  c = wait_for_osreply (&x);
   return (x);
 }
 
 
-int mywrite(void *arg, char const *buffer, int len)
+int
+mywrite (void *arg, char const *buffer, int len)
 {
 #ifdef DEBUG
-  fprintf(stderr, "Host: mywrite\n");
+  fprintf (stderr, "Host: mywrite\n");
 #endif
   return 0;
 }
 
-char *mygets(void *arg, char *buffer, int len)
+char *
+mygets (void *arg, char *buffer, int len)
 {
 #ifdef DEBUG
-  fprintf(stderr, "Host: mygets\n");
+  fprintf (stderr, "Host: mygets\n");
 #endif
   return buffer;
 }

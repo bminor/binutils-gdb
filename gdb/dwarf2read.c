@@ -5749,6 +5749,14 @@ decode_locdesc (blk, objfile)
 	  i += bytes_read;
 	  break;
 
+	case DW_OP_bregx:
+	  offreg = 1;
+	  basereg = read_unsigned_leb128 (NULL, (data + i), &bytes_read);
+	  i += bytes_read;
+	  stack[++stacki] = read_signed_leb128 (NULL, (data + i), &bytes_read);
+	  i += bytes_read;
+	  break;
+
 	case DW_OP_fbreg:
 	  stack[++stacki] = read_signed_leb128 (NULL, (data + i), &bytes_read);
 	  i += bytes_read;

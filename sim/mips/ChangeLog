@@ -1,3 +1,8 @@
+Fri Feb  4 09:45:15 2000  Donald Lindsay  <dlindsay@cygnus.com>
+
+	* sim-main.c (cache_op): Added case arm so that CACHE ops to a secondary
+	cache don't get ReservedInstruction traps.
+
 1999-11-29  Mark Salter  <msalter@cygnus.com>
 
 	* dv-tx3904sio.c (tx3904sio_io_write_buffer): Use write value as a mask

@@ -52,19 +52,19 @@ static int big_endian;
 
 int stop_simulator;
 
-static void 
+static void
 init ()
 {
   static int done;
 
   if (!done)
     {
-      ARMul_EmulateInit();
+      ARMul_EmulateInit ();
       state = ARMul_NewState ();
       state->bigendSig = (big_endian ? HIGH : LOW);
-      ARMul_MemoryInit(state, mem_size);
-      ARMul_OSInit(state);
-      ARMul_CoProInit(state); 
+      ARMul_MemoryInit (state, mem_size);
+      ARMul_OSInit (state);
+      ARMul_CoProInit (state);
       state->verbose = verbosity;
       done = 1;
     }
@@ -83,18 +83,18 @@ sim_set_verbose (v)
 }
 
 /* Set the memory size to SIZE bytes.
-   Must be called before initializing simulator.  */   
+   Must be called before initializing simulator.  */
 /* FIXME: Rename to sim_set_mem_size.  */
 
-void 
+void
 sim_size (size)
      int size;
 {
   mem_size = size;
 }
 
-void 
-ARMul_ConsolePrint (ARMul_State * state, const char *format,...)
+void
+ARMul_ConsolePrint (ARMul_State * state, const char *format, ...)
 {
   va_list ap;
 
@@ -106,8 +106,7 @@ ARMul_ConsolePrint (ARMul_State * state, const char *format,...)
     }
 }
 
-ARMword 
-ARMul_Debug (ARMul_State * state, ARMword pc, ARMword instr)
+ARMword ARMul_Debug (ARMul_State * state, ARMword pc, ARMword instr)
 {
 
 }
@@ -123,7 +122,7 @@ sim_write (sd, addr, buffer, size)
   init ();
   for (i = 0; i < size; i++)
     {
-      ARMul_WriteByte (state, addr+i, buffer[i]);
+      ARMul_WriteByte (state, addr + i, buffer[i]);
     }
   return size;
 }
@@ -147,8 +146,9 @@ sim_read (sd, addr, buffer, size)
 int
 sim_trace (sd)
      SIM_DESC sd;
-{
-  (*sim_callback->printf_filtered) (sim_callback, "This simulator does not support tracing\n");
+{  
+  (*sim_callback->printf_filtered) (sim_callback,
+				    "This simulator does not support tracing\n");
   return 1;
 }
 
@@ -177,8 +177,8 @@ sim_resume (sd, step, siggnal)
     }
   else
     {
-#if 1 /* JGS */
-      state->NextInstr = RESUME; /* treat as PC change */
+#if 1				/* JGS */
+      state->NextInstr = RESUME;	/* treat as PC change */
 #endif
       state->Reg[15] = ARMul_DoProg (state);
     }
@@ -193,49 +193,49 @@ sim_create_inferior (sd, abfd, argv, env)
      char **argv;
      char **env;
 {
-  int argvlen=0;
+  int argvlen = 0;
   char **arg;
 
   if (abfd != NULL)
     ARMul_SetPC (state, bfd_get_start_address (abfd));
   else
-    ARMul_SetPC (state, 0); /* ??? */
+    ARMul_SetPC (state, 0);	/* ??? */
 
-#if 1 /* JGS */
+#if 1				/* JGS */
   /* We explicitly select a processor capable of supporting the ARM
      32bit mode, and then we force the simulated CPU into the 32bit
      User mode: */
-  ARMul_SelectProcessor(state, ARM600);
-  ARMul_SetCPSR(state, USER32MODE);
+  ARMul_SelectProcessor (state, ARM600);
+  ARMul_SetCPSR (state, USER32MODE);
 #endif
 
   if (argv != NULL)
     {
       /*
-      ** Set up the command line (by laboriously stringing together the
-      ** environment carefully picked apart by our caller...)
-      */
+         ** Set up the command line (by laboriously stringing together the
+         ** environment carefully picked apart by our caller...)
+       */
       /* Free any old stuff */
       if (state->CommandLine != NULL)
 	{
-	  free(state->CommandLine);
+	  free (state->CommandLine);
 	  state->CommandLine = NULL;
 	}
-      
+
       /* See how much we need */
       for (arg = argv; *arg != NULL; arg++)
-	argvlen += strlen(*arg)+1;
-      
+	argvlen += strlen (*arg) + 1;
+
       /* allocate it... */
-      state->CommandLine = malloc(argvlen+1);
+      state->CommandLine = malloc (argvlen + 1);
       if (state->CommandLine != NULL)
 	{
 	  arg = argv;
-	  state->CommandLine[0]='\0';
+	  state->CommandLine[0] = '\0';
 	  for (arg = argv; *arg != NULL; arg++)
 	    {
-	      strcat(state->CommandLine, *arg);
-	      strcat(state->CommandLine, " ");
+	      strcat (state->CommandLine, *arg);
+	      strcat (state->CommandLine, " ");
 	    }
 	}
     }
@@ -245,13 +245,14 @@ sim_create_inferior (sd, abfd, argv, env)
       /* Now see if there's a MEMSIZE spec in the environment */
       while (*env)
 	{
-	  if (strncmp(*env, "MEMSIZE=", sizeof("MEMSIZE=")-1)==0)
+	  if (strncmp (*env, "MEMSIZE=", sizeof ("MEMSIZE=") - 1) == 0)
 	    {
 	      unsigned long top_of_memory;
 	      char *end_of_num;
-	      
+
 	      /* Set up memory limit */
-	      state->MemSize = strtoul(*env + sizeof("MEMSIZE=")-1, &end_of_num, 0);
+	      state->MemSize =
+		strtoul (*env + sizeof ("MEMSIZE=") - 1, &end_of_num, 0);
 	    }
 	  env++;
 	}
@@ -268,7 +269,7 @@ sim_info (sd, verbose)
 }
 
 
-static int 
+static int
 frommem (state, memory)
      struct ARMul_State *state;
      unsigned char *memory;
@@ -276,22 +277,18 @@ frommem (state, memory)
   if (state->bigendSig == HIGH)
     {
       return (memory[0] << 24)
-	| (memory[1] << 16)
-	| (memory[2] << 8)
-	| (memory[3] << 0);
+	| (memory[1] << 16) | (memory[2] << 8) | (memory[3] << 0);
     }
   else
     {
       return (memory[3] << 24)
-	| (memory[2] << 16)
-	| (memory[1] << 8)
-	| (memory[0] << 0);
+	| (memory[2] << 16) | (memory[1] << 8) | (memory[0] << 0);
     }
 }
 
 
 static void
-tomem (state, memory,  val)
+tomem (state, memory, val)
      struct ARMul_State *state;
      unsigned char *memory;
      int val;
@@ -320,7 +317,7 @@ sim_store_register (sd, rn, memory, length)
      int length;
 {
   init ();
-  ARMul_SetReg(state, state->Mode, rn, frommem (state, memory));
+  ARMul_SetReg (state, state->Mode, rn, frommem (state, memory));
   return -1;
 }
 
@@ -335,11 +332,11 @@ sim_fetch_register (sd, rn, memory, length)
 
   init ();
   if (rn < 16)
-    regval = ARMul_GetReg(state, state->Mode, rn);
-  else if (rn == 25)	/* FIXME: use PS_REGNUM from gdb/config/arm/tm-arm.h */
-    regval = ARMul_GetCPSR(state);
+    regval = ARMul_GetReg (state, state->Mode, rn);
+  else if (rn == 25)		/* FIXME: use PS_REGNUM from gdb/config/arm/tm-arm.h */
+    regval = ARMul_GetCPSR (state);
   else
-    regval = 0;		/* FIXME: should report an error */
+    regval = 0;			/* FIXME: should report an error */
   tomem (state, memory, regval);
   return -1;
 }
@@ -354,7 +351,7 @@ sim_open (kind, ptr, abfd, argv)
   sim_kind = kind;
   myname = argv[0];
   sim_callback = ptr;
-  
+
   /* Decide upon the endian-ness of the processor.
      If we can, get the information from the bfd itself.
      Otherwise look to see if we have been given a command
@@ -364,42 +361,42 @@ sim_open (kind, ptr, abfd, argv)
   else if (argv[1] != NULL)
     {
       int i;
-      
+
       /* Scan for endian-ness switch.  */
       for (i = 0; (argv[i] != NULL) && (argv[i][0] != 0); i++)
-      if (argv[i][0] == '-' && argv[i][1] == 'E')
-        {
-          char c;
-          
-          if ((c = argv[i][2]) == 0)
-            {
-              ++i;
-              c = argv[i][0];
-            }
+	if (argv[i][0] == '-' && argv[i][1] == 'E')
+	  {
+	    char c;
 
-          switch (c)
-            {
-            case 0:
-              sim_callback->printf_filtered
-                (sim_callback, "No argument to -E option provided\n");
-              break;
+	    if ((c = argv[i][2]) == 0)
+	      {
+		++i;
+		c = argv[i][0];
+	      }
 
-            case 'b':
-            case 'B':
-              big_endian = 1;
-              break;
+	    switch (c)
+	      {
+	      case 0:
+		sim_callback->printf_filtered
+		  (sim_callback, "No argument to -E option provided\n");
+		break;
 
-            case 'l':
-            case 'L':
-              big_endian = 0;
-              break;
+	      case 'b':
+	      case 'B':
+		big_endian = 1;
+		break;
 
-            default:
-              sim_callback->printf_filtered
-                (sim_callback, "Unrecognised argument to -E option\n");
-              break;
-            }
-        }
+	      case 'l':
+	      case 'L':
+		big_endian = 0;
+		break;
+
+	      default:
+		sim_callback->printf_filtered
+		  (sim_callback, "Unrecognised argument to -E option\n");
+		break;
+	      }
+	  }
     }
 
   return (SIM_DESC) 1;
@@ -420,12 +417,11 @@ sim_load (sd, prog, abfd, from_tty)
      bfd *abfd;
      int from_tty;
 {
-  extern bfd *sim_load_file (); /* ??? Don't know where this should live.  */
+  extern bfd *sim_load_file ();	/* ??? Don't know where this should live.  */
   bfd *prog_bfd;
 
   prog_bfd = sim_load_file (sd, myname, sim_callback, prog, abfd,
-			    sim_kind == SIM_OPEN_DEBUG,
-			    0, sim_write);
+			    sim_kind == SIM_OPEN_DEBUG, 0, sim_write);
   if (prog_bfd == NULL)
     return SIM_RC_FAIL;
   ARMul_SetPC (state, bfd_get_start_address (prog_bfd));
@@ -464,8 +460,9 @@ void
 sim_do_command (sd, cmd)
      SIM_DESC sd;
      char *cmd;
-{
-  (*sim_callback->printf_filtered) (sim_callback, "This simulator does not accept any commands.\n");
+{  
+  (*sim_callback->printf_filtered) (sim_callback,
+				    "This simulator does not accept any commands.\n");
 }
 
 

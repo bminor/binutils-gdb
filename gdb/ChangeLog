@@ -1,3 +1,43 @@
+2000-02-04  Nick Clifton  <nickc@cygnus.com>
+
+	* config/arm/tm-arm.h (LOWEST_PC): Define.
+
+2000-02-04  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* infrun.c (resume): Make just one call to target_resume(), instead
+ 	of four: set up correct parameters in all the cases ahead of time,
+ 	and do call at the end.
+
+2000-02-04  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* config/powerpc/tm-ppc-eabi.h: Define
+ 	SOFUN_ADDRESS_MAYBE_MISSING.
+
+2000-02-04  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* arm-tdep.c (arm_pc_is_thumb_dummy): Account for large dummy
+	frames (revisited).
+
+Fri Feb  4 22:42:36 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in (INIT_FILES): Append CONFIG_INITS
+	* configure.in (CONFIG_INIT): Initialize.
+
+2000-02-03  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* printcmd.c (build_address_symbolic): New function. Returns all
+ 	the parts that are necessary to print an address in a symbolic
+ 	form.
+	(print_address_symbolic): Split into a printing part and an
+ 	information building part, build_address_symbolic().
+
+	* defs.h (build_address_symbolic): Export.
+
+2000-02-03  Jim Blandy  <jimb@redhat.com>
+
+	* dwarf2read.c (decode_locdesc): Add support for the DW_OP_bregx
+	opcode.
+
 2000-02-02  Fernando Nasser  <fnasser@totem.to.cygnus.com>
 
 	* arm-tdep.c (arm_push_arguments): Fix passing of floating point

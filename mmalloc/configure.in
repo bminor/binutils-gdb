@@ -10,4 +10,6 @@ AC_CHECK_TOOL(RANLIB, ranlib, :)
 AC_FUNC_MMAP
 AC_CHECK_HEADERS(limits.h stddef.h)
 
+BFD_NEED_DECLARATION(sbrk)
+
 AC_OUTPUT(Makefile)

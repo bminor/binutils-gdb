@@ -19,12 +19,12 @@
 *                   Define the initial layout of memory                     *
 \***************************************************************************/
 
-#define ADDRSUPERSTACK          0x800L   /* supervisor stack space */
-#define ADDRUSERSTACK           0x80000L /* default user stack start */
-#define ADDRSOFTVECTORS         0x840L   /* soft vectors are here */
-#define ADDRCMDLINE             0xf00L   /* command line is here after a SWI GetEnv */
-#define ADDRSOFHANDLERS         0xad0L   /* address and workspace for installed handlers */
-#define SOFTVECTORCODE          0xb80L   /* default handlers */
+#define ADDRSUPERSTACK          0x800L	/* supervisor stack space */
+#define ADDRUSERSTACK           0x80000L	/* default user stack start */
+#define ADDRSOFTVECTORS         0x840L	/* soft vectors are here */
+#define ADDRCMDLINE             0xf00L	/* command line is here after a SWI GetEnv */
+#define ADDRSOFHANDLERS         0xad0L	/* address and workspace for installed handlers */
+#define SOFTVECTORCODE          0xb80L	/* default handlers */
 
 /***************************************************************************\
 *                               SWI numbers                                 *
@@ -56,7 +56,7 @@
 #define SWI_InstallHandler         0x70
 #define SWI_GenerateError          0x71
 
-#define SWI_Breakpoint             0x180000 /* see gdb's tm-arm.h */
+#define SWI_Breakpoint             0x180000	/* see gdb's tm-arm.h */
 
 #define AngelSWI_ARM		   0x123456
 #define AngelSWI_Thumb		   0xAB
@@ -88,8 +88,8 @@
 
 #define FPESTART 0x2000L
 #define FPEEND 0x8000L
-#define FPEOLDVECT FPESTART + 0x100L + 8L * 16L + 4L /* stack + 8 regs + fpsr */
-#define FPENEWVECT(addr) 0xea000000L + ((addr) >> 2) - 3L /* branch from 4 to 0x2400 */
+#define FPEOLDVECT FPESTART + 0x100L + 8L * 16L + 4L	/* stack + 8 regs + fpsr */
+#define FPENEWVECT(addr) 0xea000000L + ((addr) >> 2) - 3L	/* branch from 4 to 0x2400 */
 
-extern unsigned long fpecode[] ;
-extern unsigned long fpesize ;
+extern unsigned long fpecode[];
+extern unsigned long fpesize;

@@ -196,23 +196,21 @@ gdb_expect {
     }
 }
 
-#
 # run until the breakpoint at marker2
-#
+# Same issues here as above.
 setup_xfail hppa2.0w-*-* 11512CLLbs
-gdb_test "continue" "Continuing\\..*Breakpoint \[0-9\]+, marker2 \\(a=43\\) at .*$srcfile:4\[49\].*4\[49\]\[\t \]+.*" \
-			"run until breakpoint at marker2"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+send_gdb "continue\n"
+gdb_expect {
+    -re "Continuing\\..*Breakpoint \[0-9\]+, marker2 \\(a=43\\) at .*$srcfile:4\[49\].*4\[49\]\[\t \]+.*" {
+	pass "run until breakpoint at marker2"
+    }
+    -re "Continuing\\..*Breakpoint \[0-9\]+, $hex in marker2 \\(a=43\\) at .*$srcfile:4\[49\].*4\[49\]\[\t \]+.*" {
+	xfail "run until breakpoint at marker2"
+    }
+    -re "$gdb_prompt $" {
+	fail "run until breakpoint at marker2"
+    }
+    timeout {
+	fail "(timeout) run until breakpoint at marker2"
+    }
+}

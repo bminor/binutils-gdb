@@ -1,3 +1,7 @@
+2000-02-02  Bernd Schmidt  <bernds@cygnus.co.uk>
+
+	* *.[ch]: Use indent to make readable.
+
 1999-11-22  Nick Clifton  <nickc@cygnus.com>
 
 	* armos.c (SWIread): Generate an error message if a huge read is

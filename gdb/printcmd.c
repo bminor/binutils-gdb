@@ -546,21 +546,78 @@ print_address_symbolic (addr, stream, do_demangle, leadin)
      int do_demangle;
      char *leadin;
 {
+  char *name = NULL;
+  char *filename = NULL;
+  int unmapped = 0;
+  int offset = 0;
+  int line = 0;
+
+  struct cleanup *cleanup_chain = make_cleanup (free, name);
+  if (print_symbol_filename)
+    make_cleanup (free, filename);
+
+  if (build_address_symbolic (addr, do_demangle, &name, &offset, &filename, &line, &unmapped))
+    return;
+
+  fputs_filtered (leadin, stream);
+  if (unmapped)
+    fputs_filtered ("<*", stream);
+  else
+    fputs_filtered ("<", stream);
+  fputs_filtered (name, stream);
+  if (offset != 0)
+    fprintf_filtered (stream, "+%u", (unsigned int) offset);
+
+  /* Append source filename and line number if desired.  Give specific
+     line # of this addr, if we have it; else line # of the nearest symbol.  */
+  if (print_symbol_filename && filename != NULL)
+    {
+      if (line != -1)
+	fprintf_filtered (stream, " at %s:%d", filename, line);
+      else
+	fprintf_filtered (stream, " in %s", filename);
+    }
+  if (unmapped)
+    fputs_filtered ("*>", stream);
+  else
+    fputs_filtered (">", stream);
+
+  do_cleanups (cleanup_chain);
+}
+
+/* Given an address ADDR return all the elements needed to print the
+   address in a symbolic form. NAME can be mangled or not depending
+   on DO_DEMANGLE (and also on the asm_demangle global variable,
+   manipulated via ''set print asm-demangle''). Return 0 in case of
+   success, when all the info in the OUT paramters is valid. Return 1
+   otherwise. */
+int
+build_address_symbolic (CORE_ADDR addr,  /* IN */
+			int do_demangle, /* IN */
+			char **name,     /* OUT */
+			int *offset,     /* OUT */
+			char **filename, /* OUT */
+			int *line,       /* OUT */
+			int *unmapped)   /* OUT */
+{
   struct minimal_symbol *msymbol;
   struct symbol *symbol;
   struct symtab *symtab = 0;
   CORE_ADDR name_location = 0;
-  char *name = "";
   asection *section = 0;
-  int unmapped = 0;
+  char *name_temp = "";
+  
+  /* Let's say it is unmapped. */
+  *unmapped = 0;
 
-  /* Determine if the address is in an overlay, and whether it is mapped. */
+  /* Determine if the address is in an overlay, and whether it is
+     mapped. */
   if (overlay_debugging)
     {
       section = find_pc_overlay (addr);
       if (pc_in_unmapped_range (addr, section))
 	{
-	  unmapped = 1;
+	  *unmapped = 1;
 	  addr = overlay_mapped_address (addr, section);
 	}
     }
@@ -590,9 +647,9 @@ print_address_symbolic (addr, stream, do_demangle, leadin)
     {
       name_location = BLOCK_START (SYMBOL_BLOCK_VALUE (symbol));
       if (do_demangle)
-	name = SYMBOL_SOURCE_NAME (symbol);
+	name_temp = SYMBOL_SOURCE_NAME (symbol);
       else
-	name = SYMBOL_LINKAGE_NAME (symbol);
+	name_temp = SYMBOL_LINKAGE_NAME (symbol);
     }
 
   if (msymbol != NULL)
@@ -605,13 +662,13 @@ print_address_symbolic (addr, stream, do_demangle, leadin)
 	  symtab = 0;
 	  name_location = SYMBOL_VALUE_ADDRESS (msymbol);
 	  if (do_demangle)
-	    name = SYMBOL_SOURCE_NAME (msymbol);
+	    name_temp = SYMBOL_SOURCE_NAME (msymbol);
 	  else
-	    name = SYMBOL_LINKAGE_NAME (msymbol);
+	    name_temp = SYMBOL_LINKAGE_NAME (msymbol);
 	}
     }
   if (symbol == NULL && msymbol == NULL)
-    return;
+    return 1;
 
   /* On some targets, mask out extra "flag" bits from PC for handsome
      disassembly. */
@@ -630,19 +687,12 @@ print_address_symbolic (addr, stream, do_demangle, leadin)
      of the address space back to the beginning, giving bogus comparison.  */
   if (addr > name_location + max_symbolic_offset
       && name_location + max_symbolic_offset > name_location)
-    return;
+    return 1;
 
-  fputs_filtered (leadin, stream);
-  if (unmapped)
-    fputs_filtered ("<*", stream);
-  else
-    fputs_filtered ("<", stream);
-  fputs_filtered (name, stream);
-  if (addr != name_location)
-    fprintf_filtered (stream, "+%u", (unsigned int) (addr - name_location));
+  *offset = addr - name_location;
 
-  /* Append source filename and line number if desired.  Give specific
-     line # of this addr, if we have it; else line # of the nearest symbol.  */
+  *name = xstrdup (name_temp);
+
   if (print_symbol_filename)
     {
       struct symtab_and_line sal;
@@ -650,18 +700,23 @@ print_address_symbolic (addr, stream, do_demangle, leadin)
       sal = find_pc_sect_line (addr, section, 0);
 
       if (sal.symtab)
-	fprintf_filtered (stream, " at %s:%d", sal.symtab->filename, sal.line);
+	{
+	  *filename = xstrdup (sal.symtab->filename);
+	  *line = sal.line;
+	}
       else if (symtab && symbol && symbol->line)
-	fprintf_filtered (stream, " at %s:%d", symtab->filename, symbol->line);
+	{
+	  *filename = xstrdup (symtab->filename);
+	  *line = symbol->line;
+	}
       else if (symtab)
-	fprintf_filtered (stream, " in %s", symtab->filename);
+	{
+	  *filename = xstrdup (symtab->filename);
+	  *line = -1;
+	}
     }
-  if (unmapped)
-    fputs_filtered ("*>", stream);
-  else
-    fputs_filtered (">", stream);
+  return 0;
 }
-
 
 /* Print address ADDR on STREAM.  USE_LOCAL means the same thing as for
    print_longest.  */

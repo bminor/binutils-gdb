@@ -1,3 +1,28 @@
+2000-02-04  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.c++/templates.exp: ("ptype T5<int>"): Remove extraneous
+	backslash from regexp pattern.
+
+	* gdb.c++/ovldbreak.exp (continue_to_bp_overloaded): New
+	procedure.  Use it to run all the "continue to bp overloaded"
+	tests.  Note that this changes the names of the tests slightly.
+	If the breakpoint hit message includes a hex PC value, because
+	GCC's Dwarf 2 line info doesn't help us distinguish the prologue
+	from the real source code, still consider that a pass.
+
+	* gdb.base/condbreak.exp ("run until breakpoint at marker2"):
+	XFAIL here if the breakpoint message contains a hex address.  Note
+	similar change on 1999-11-02.
+
+	* gdb.base/step-test.exp: Comment Fernando's change of 2000-02-02.
+
+	* gdb.base/ptype.exp: Establish a default source file before
+	calling get_debug_format.
+
+2000-02-03  Fernando Nasser  <fnasser@totem.to.cygnus.com>
+
+	* gdb.base/watchpoint.exp: Remove duplication of test messages.
+
 2000-02-02  Fernando Nasser  <fnasser@totem.to.cygnus.com>
 
 	* gdb.base/step-test.exp: Fix the steps to enter a callee by means

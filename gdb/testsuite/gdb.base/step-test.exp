@@ -142,13 +142,17 @@ test_i "stepi to next line" "stepi" \
 test_i "stepi into function" "stepi" \
        ".*${decimal}.*callee.*STEPI" \
        ".*callee \\(\\) at .*step-test\\.c" 
-test_i "stepi to function first line" "stepi" \
-       ".*int callee\\(\\) .*\\{" \
-       ".*myglob.*" 
+
+# Continue to step until we reach the function's body.  This makes it
+# more likely that we've actually completed the prologue, so "finish"
+# will work.
+test_i "stepi into function's first source line" "stepi" \
+	".*${decimal}.*int callee" \
+	".*${decimal}.*myglob.*; return 0;"
+
 # Have to be careful here, if the finish does not work, 
 # then we may run to the end of the program, which
 # will cause erroneous failures in the rest of the tests
-
 send_gdb "finish\n"
 gdb_expect {
   -re ".*(Program received|Program exited).*$gdb_prompt $" {

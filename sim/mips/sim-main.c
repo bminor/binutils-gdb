@@ -463,6 +463,7 @@ cache_op (SIM_DESC SD,
       break;
 
     case 1: /* data cache */
+    case 3: /* secondary data cache */
       switch (op >> 2) {
         case 0: /* Index Writeback Invalidate */
         case 1: /* Index Load Tag */

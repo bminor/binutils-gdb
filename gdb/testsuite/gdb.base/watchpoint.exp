@@ -406,7 +406,7 @@ proc test_stepping {} {
 	    -re "Run.*exit from.*marker1.* at" {
 		pass "finish from marker1"
 	    }
-	    default { fail "finish from marker1" ; return }
+	    default { fail "finish from marker1 (timeout)" ; return }
 	}
 
 	gdb_expect {
@@ -415,12 +415,12 @@ proc test_stepping {} {
 		exp_continue
 	    }
 	    -re "func1 \\(\\);.*$gdb_prompt $" {
-		pass "finish from marker1"
+		pass "back at main from marker1"
 	    }
 	    -re ".*$gdb_prompt $" {
-		fail "finish from marker1"
+		fail "back at main from marker1"
 	    }
-	    default { fail "finish from marker1 (timeout)" ; return }
+	    default { fail "back at main from marker1 (timeout)" ; return }
 	}
 
 	gdb_test "next" "for \\(count = 0.*" "next to `for' in watchpoint.exp"

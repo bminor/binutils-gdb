@@ -433,6 +433,135 @@ c_type_print_args (type, stream)
   fprintf_filtered (stream, ")");
 }
 
+
+/* Return true iff the j'th overloading of the i'th method of TYPE
+   is a type conversion operator, like `operator int () { ... }'.
+   When listing a class's methods, we don't print the return type of
+   such operators.  */
+static int
+is_type_conversion_operator (struct type *type, int i, int j)
+{
+  /* I think the whole idea of recognizing type conversion operators
+     by their name is pretty terrible.  But I don't think our present
+     data structure gives us any other way to tell.  If you know of
+     some other way, feel free to rewrite this function.  */
+  char *name = TYPE_FN_FIELDLIST_NAME (type, i);
+
+  if (strncmp (name, "operator", 8) != 0)
+    return 0;
+
+  name += 8;
+  if (! strchr (" \t\f\n\r", *name))
+    return 0;
+
+  while (strchr (" \t\f\n\r", *name))
+    name++;
+
+  if (strncmp (name, "new", 3) == 0)
+    name += 3;
+  else if (strncmp (name, "delete", 6) == 0)
+    name += 6;
+  else
+    return 0;
+
+  /* Is that really the end of the name?  */
+  if (('a' <= *name && *name <= 'z')
+      || ('A' <= *name && *name <= 'Z')
+      || ('0' <= *name && *name <= '9')
+      || *name == '_')
+    /* No, so the identifier following "operator" must be a type name,
+       and this is a type conversion operator.  */
+    return 1;
+
+  /* That was indeed the end of the name, so it was `operator new' or
+     `operator delete', neither of which are type conversion operators.  */
+  return 0;
+}
+
+
+/* Given a C++ qualified identifier QID, strip off the qualifiers,
+   yielding the unqualified name.  The return value is a pointer into
+   the original string.
+
+   It's a pity we don't have this information in some more structured
+   form.  Even the author of this function feels that writing little
+   parsers like this everywhere is stupid.  */
+static char *
+remove_qualifiers (char *qid)
+{
+  int quoted = 0;		/* zero if we're not in quotes;
+				   '"' if we're in a double-quoted string;
+				   '\'' if we're in a single-quoted string.  */
+  int depth = 0;		/* number of unclosed parens we've seen */
+  char *parenstack = (char *) alloca (strlen (qid));
+  char *scan;
+  char *last = 0;		/* The character after the rightmost
+				   `::' token we've seen so far.  */
+
+  for (scan = qid; *scan; scan++)
+    {
+      if (quoted)
+	{
+	  if (*scan == quoted)
+	    quoted = 0;
+	  else if (*scan == '\\' && *(scan + 1))
+	    scan++;
+	}
+      else if (scan[0] == ':' && scan[1] == ':')
+	{
+	  /* If we're inside parenthesis (i.e., an argument list) or
+	     angle brackets (i.e., a list of template arguments), then
+	     we don't record the position of this :: token, since it's
+	     not relevant to the top-level structure we're trying
+	     to operate on.  */
+	  if (depth == 0)
+	    {
+	      last = scan + 2;
+	      scan++;
+	    }
+	}
+      else if (*scan == '"' || *scan == '\'')
+	quoted = *scan;
+      else if (*scan == '(')
+	parenstack[depth++] = ')';
+      else if (*scan == '[')
+	parenstack[depth++] = ']';
+      /* We're going to treat <> as a pair of matching characters,
+	 since we're more likely to see those in template id's than
+	 real less-than characters.  What a crock.  */
+      else if (*scan == '<')
+	parenstack[depth++] = '>';
+      else if (*scan == ')' || *scan == ']' || *scan == '>')
+	{
+	  if (depth > 0 && parenstack[depth - 1] == *scan)
+	    depth--;
+	  else
+	    {
+	      /* We're going to do a little error recovery here.  If we
+		 don't find a match for *scan on the paren stack, but
+		 there is something lower on the stack that does match, we
+		 pop the stack to that point.  */
+	      int i;
+
+	      for (i = depth - 1; i >= 0; i--)
+		if (parenstack[i] == *scan)
+		  {
+		    depth = i;
+		    break;
+		  }
+	    }
+	}
+    }
+
+  if (last)
+    return last;
+  else
+    /* We didn't find any :: tokens at the top level, so declare the
+       whole thing an unqualified identifier.  */
+    return qid;
+}
+
+
 /* Print any array sizes, function arguments or close parentheses
    needed after the variable name (to describe its type).
    Args work like c_type_print_varspec_prefix.  */
@@ -896,8 +1025,7 @@ c_type_print_base (type, stream, show, level)
 		    }
 		  else if (!is_constructor &&	/* constructors don't have declared types */
 			   !is_full_physname_constructor &&	/*    " "  */
-			   !strstr (method_name, "operator "))	/* Not a type conversion operator */
-		    /* (note space -- other operators don't have it) */
+			   !is_type_conversion_operator (type, i, j))
 		    {
 		      type_print (TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE (f, j)),
 				  "", stream, -1);
@@ -931,15 +1059,10 @@ c_type_print_base (type, stream, show, level)
 		  else
 		    {
 		      char *p;
-		      char *demangled_no_class = strrchr (demangled_name, ':');
+		      char *demangled_no_class
+			= remove_qualifiers (demangled_name);
 
-                      if (demangled_no_class == NULL)
-                        demangled_no_class = demangled_name;
-                      else
-                        {
-                          ++demangled_no_class; /* skip over last ':' */
-			}
-		      /* get rid of the static word appended by the demangler */
+		      /* get rid of the `static' appended by the demangler */
 		      p = strstr (demangled_no_class, " static");
 		      if (p != NULL)
 			{
