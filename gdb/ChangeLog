@@ -1,5 +1,13 @@
 Wed Aug 31 09:17:02 1994  Jim Kingdon  (kingdon@cygnus.com)
 
+	* inflow.c (set_sigint_trap, clear_sigint_trap): Check for
+	attach_flag (this check was performed by the callers).  Also check
+	inferior_thisrun_terminal.
+	* inftarg.c (child_wait), lynx-nat.c (child_wait),
+	procfs.c (wait_fd), symm-nat.c (child_wait): Don't check
+	attach_flag in deciding whether to call set_sigint_trap and
+	clear_sigint_trap. 
+
 	* value.h (struct value): Change literal_data from PTR to char *,
 	since that is the way it is used.
 

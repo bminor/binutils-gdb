@@ -402,9 +402,8 @@ child_wait(pid, status)
 #endif
 
   do {
-    if (attach_flag)
-      set_sigint_trap();	/* Causes SIGINT to be passed on to the
-				   attached process. */
+    set_sigint_trap();	/* Causes SIGINT to be passed on to the
+			   attached process. */
     save_errno = errno;
 
     got_sigchld = 0;
@@ -415,8 +414,7 @@ child_wait(pid, status)
 	    sigsuspend(&set);
     }
     
-    if (attach_flag)
-      clear_sigint_trap();
+    clear_sigint_trap();
 
     rv = mptrace(XPT_STOPSTAT, 0, (char *)&pt, 0);
     if (-1 == rv) {

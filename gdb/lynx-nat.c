@@ -603,8 +603,7 @@ child_wait (pid, ourstatus)
     {
       int sig;
 
-      if (attach_flag)
-	set_sigint_trap();	/* Causes SIGINT to be passed on to the
+      set_sigint_trap();	/* Causes SIGINT to be passed on to the
 				   attached process. */
       pid = wait (&status);
 #ifdef SPARC
@@ -614,8 +613,7 @@ child_wait (pid, ourstatus)
 
       save_errno = errno;
 
-      if (attach_flag)
-	clear_sigint_trap();
+      clear_sigint_trap();
 
       if (pid == -1)
 	{

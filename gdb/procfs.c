@@ -570,8 +570,7 @@ wait_fd ()
   int num_fds;
   int i;
 
-  if (attach_flag)
-    set_sigint_trap ();	/* Causes SIGINT to be passed on to the
+  set_sigint_trap ();	/* Causes SIGINT to be passed on to the
 			   attached process. */
   set_sigio_trap ();
 
@@ -597,8 +596,7 @@ wait_fd ()
   pi->had_event = 1;
 #endif  
   
-  if (attach_flag)
-    clear_sigint_trap();
+  clear_sigint_trap ();
   clear_sigio_trap ();
 
 #ifndef LOSING_POLL
