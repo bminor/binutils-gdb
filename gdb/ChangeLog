@@ -1,3 +1,7 @@
+2002-12-15  Mark Kettenis  <kettenis@gnu.org>
+
+	* ui-out.c (MAX_UI_OUT_LEVELS): Raise to 6.  Fixes PR cli/654.
+
 2002-12-14  Richard Earnshaw  <rearnsha@arm.com>
 
 	* arm-tdep.c (convert_from_extended): New argument to hold the
