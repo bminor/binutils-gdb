@@ -38,14 +38,6 @@
 /* Offset to saved PC in sigcontext, from <machine/signal.h>.  */
 #define SIGCONTEXT_PC_OFFSET 20
 
-#undef FRAME_SAVED_PC(FRAME)
-#define FRAME_SAVED_PC(FRAME) \
-  (((FRAME)->signal_handler_caller \
-    ? sigtramp_saved_pc (FRAME) \
-    : read_memory_integer ((FRAME)->frame + 4, 4)) \
-   )
-
-
 /* tm-umax.h assumes a 32082 fpu. We have a 32382 fpu. */
 
 #undef REGISTER_NAME

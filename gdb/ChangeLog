@@ -1,5 +1,24 @@
 2002-05-26  Jason Thorpe  <thorpej@wasabisystems.com>
 
+	* ns32k-tdep.c (ns32k_breakpoint_from_pc, ns32k_frame_chain,
+	ns32k_frame_saved_pc, ns32k_frame_args_address,
+	ns32k_frame_locals_address, ns32k_frame_init_saved_regs,
+	ns32k_push_dummy_frame, ns32k_pop_frame): New functions.
+	* config/ns32k/tm-nbsd.h (FRAME_SAVED_PC): Remove.
+	* config/ns32k/tm-umax.h (INNER_THAN): Define as core_addr_lessthan.
+	(BREAKPOINT_FROM_PC): Define as ns32k_breakpoint_from_pc.
+	(BREAKPOINT): Remove..
+	(FRAME_CHAIN): Define as ns32k_frame_chain.
+	(FRAME_SAVED_PC): Define as ns32k_frame_saved_pc.
+	(FRAME_ARGS_ADDRESS): Define as ns32k_frame_args_address.
+	(FRAME_LOCALS_ADDRESS): Define as ns32k_frame_locals_address.
+	(FRAME_FIND_SAVED_REGS): Remove.
+	(FRAME_INIT_SAVED_REGS): Define as ns32k_frame_init_saved_regs.
+	(PUSH_DUMMY_FRAME): Define as ns32k_push_dummy_frame.
+	(POP_FRAME): Define as ns32k_pop_frame.
+
+2002-05-26  Jason Thorpe  <thorpej@wasabisystems.com>
+
 	* ns32k-tdep.c (ns32k_register_byte_32082,
 	ns32k_register_byte_32382, ns32k_register_raw_size,
 	ns32k_register_virtual_size, ns32k_register_virtual_type): New

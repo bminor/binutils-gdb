@@ -24,6 +24,8 @@
 #include "gdbcore.h"
 
 static int sign_extend (int value, int bits);
+static CORE_ADDR ns32k_get_enter_addr (CORE_ADDR);
+static int ns32k_localcount (CORE_ADDR enter_pc);
 
 char *
 ns32k_register_name_32082 (int regno)
@@ -136,6 +138,15 @@ umax_skip_prologue (CORE_ADDR pc)
     }
   return pc;
 }
+
+const unsigned char *
+ns32k_breakpoint_from_pc (CORE_ADDR *pcp, int *lenp)
+{
+  static const unsigned char breakpoint_insn[] = { 0xf2 };
+
+  *lenp = sizeof (breakpoint_insn);
+  return breakpoint_insn;
+}
 
 /* Return number of args passed to a frame.
    Can return -1, meaning no way to tell.
@@ -208,11 +219,11 @@ flip_bytes (void *p, int count)
     }
 }
 
-/* Return the number of locals in the current frame given a pc
-   pointing to the enter instruction.  This is used in the macro
-   FRAME_FIND_SAVED_REGS.  */
+/* Return the number of locals in the current frame given a
+   pc pointing to the enter instruction.  This is used by
+   ns32k_frame_init_saved_regs.  */
 
-int
+static int
 ns32k_localcount (CORE_ADDR enter_pc)
 {
   unsigned char localtype;
@@ -241,16 +252,10 @@ ns32k_about_to_return (CORE_ADDR pc)
   return (read_memory_integer (pc, 1) == 0x12);
 }
 
-
-/*
- * Get the address of the enter opcode for the function
- * containing PC, if there is an enter for the function,
- * and if the pc is between the enter and exit.
- * Returns positive address if pc is between enter/exit,
- * 1 if pc before enter or after exit, 0 otherwise.
- */
-
-CORE_ADDR
+/* Get the address of the enter opcode for this function, if it is active.
+   Returns positive address > 1 if pc is between enter/exit, 
+   1 if pc before enter or after exit, 0 otherwise. */
+static CORE_ADDR
 ns32k_get_enter_addr (CORE_ADDR pc)
 {
   CORE_ADDR enter_addr;
@@ -273,6 +278,122 @@ ns32k_get_enter_addr (CORE_ADDR pc)
     return 0;			/* function has no enter/exit */
 
   return enter_addr;		/* pc is between enter and exit */
+}
+
+CORE_ADDR
+ns32k_frame_chain (struct frame_info *frame)
+{
+  /* In the case of the NS32000 series, the frame's nominal address is the
+     FP value, and that address is saved at the previous FP value as a
+     4-byte word.  */
+
+  if (inside_entry_file (frame->pc))
+    return 0;
+
+  return (read_memory_integer (frame->frame, 4));
+}
+
+CORE_ADDR
+ns32k_frame_saved_pc (struct frame_info *frame)
+{
+  if (frame->signal_handler_caller)
+    return (sigtramp_saved_pc (frame)); /* XXXJRT */
+
+  return (read_memory_integer (frame->frame + 4, 4));
+}
+
+CORE_ADDR
+ns32k_frame_args_address (struct frame_info *frame)
+{
+  if (ns32k_get_enter_addr (frame->pc) > 1)
+    return (frame->frame);
+
+  return (read_register (SP_REGNUM) - 4);
+}
+
+CORE_ADDR
+ns32k_frame_locals_address (struct frame_info *frame)
+{
+  return (frame->frame);
+}
+
+/* Code to initialize the addresses of the saved registers of frame described
+   by FRAME_INFO.  This includes special registers such as pc and fp saved in
+   special ways in the stack frame.  sp is even more special: the address we
+   return for it IS the sp for the next frame.  */
+
+void
+ns32k_frame_init_saved_regs (struct frame_info *frame)
+{
+  int regmask, regnum;
+  int localcount;
+  CORE_ADDR enter_addr, next_addr;
+
+  if (frame->saved_regs)
+    return;
+
+  frame_saved_regs_zalloc (frame);
+
+  enter_addr = ns32k_get_enter_addr (frame->pc);
+  if (enter_addr > 1)
+    {
+      regmask = read_memory_integer (enter_addr + 1, 1) & 0xff;
+      localcount = ns32k_localcount (enter_addr);
+      next_addr = frame->frame + localcount;
+
+      for (regnum = 0; regnum < 8; regnum++)
+	{
+          if (regmask & (1 << regnum))
+	    frame->saved_regs[regnum] = next_addr -= 4;
+	}
+
+      frame->saved_regs[SP_REGNUM] = frame->frame + 4;
+      frame->saved_regs[PC_REGNUM] = frame->frame + 4;
+      frame->saved_regs[FP_REGNUM] = read_memory_integer (frame->frame, 4);
+    }
+  else if (enter_addr == 1)
+    {
+      CORE_ADDR sp = read_register (SP_REGNUM);
+      frame->saved_regs[PC_REGNUM] = sp;
+      frame->saved_regs[SP_REGNUM] = sp + 4;
+    }
+}
+
+void
+ns32k_push_dummy_frame (void)
+{
+  CORE_ADDR sp = read_register (SP_REGNUM);
+  int regnum;
+
+  sp = push_word (sp, read_register (PC_REGNUM));
+  sp = push_word (sp, read_register (FP_REGNUM));
+  write_register (FP_REGNUM, sp);
+
+  for (regnum = 0; regnum < 8; regnum++)
+    sp = push_word (sp, read_register (regnum));
+
+  write_register (SP_REGNUM, sp);
+}
+
+void
+ns32k_pop_frame (void)
+{
+  struct frame_info *frame = get_current_frame ();
+  CORE_ADDR fp;
+  int regnum;
+
+  fp = frame->frame;
+  FRAME_INIT_SAVED_REGS (frame);
+
+  for (regnum = 0; regnum < 8; regnum++)
+    if (frame->saved_regs[regnum])
+      write_register (regnum,
+		      read_memory_integer (frame->saved_regs[regnum], 4));
+
+  write_register (FP_REGNUM, read_memory_integer (fp, 4));
+  write_register (PC_REGNUM, read_memory_integer (fp + 4, 4));
+  write_register (SP_REGNUM, fp + 8);
+  flush_cached_frames ();
 }
 
 void
