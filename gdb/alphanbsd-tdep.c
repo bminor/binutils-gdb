@@ -1,5 +1,6 @@
 /* Target-dependent code for NetBSD/Alpha.
-   Copyright 2002, 2003 Free Software Foundation, Inc.
+
+   Copyright 2002, 2003, 2004 Free Software Foundation, Inc.
    Contributed by Wasabi Systems, Inc.
 
    This file is part of GDB.
@@ -224,6 +225,8 @@ void
 _initialize_alphanbsd_tdep (void)
 {
   gdbarch_register_osabi (bfd_arch_alpha, 0, GDB_OSABI_NETBSD_ELF,
+                          alphanbsd_init_abi);
+  gdbarch_register_osabi (bfd_arch_alpha, 0, GDB_OSABI_OPENBSD_ELF,
                           alphanbsd_init_abi);
 
   add_core_fns (&alphanbsd_core_fns);

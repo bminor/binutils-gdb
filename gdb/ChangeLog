@@ -1,3 +1,11 @@
+2004-02-20  Mark Kettenis  <kettenis@gnu.org>
+
+	* NEWS (New native configurations): Mention OpenBSD/alpha.
+	* configure.tgt: Add alpha*-*-openbsd*.
+	* configure.host: Add alpha*-*-openbsd*.
+	* alphanbsd-tdep.c: Update copyright year.
+	(_initialize_alphanbsd_tdep): Register OS ABI for OpenBSD ELF.
+
 2004-02-20  Andrew Cagney  <cagney@redhat.com>
 
 	Fix PR tdep/1372.
