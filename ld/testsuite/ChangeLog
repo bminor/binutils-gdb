@@ -1,3 +1,8 @@
+Tue May 17 15:06:49 1994  Bill Cox  (bill@rtl.cygnus.com)
+
+	* ld.bootstrap/bootstrap.exp, lib/ld.exp: Replace error proc
+	  calls with perror calls.
+
 Wed May 11 16:47:46 1994  Ken Raeburn  (raeburn@rtl.cygnus.com)
 
 	* ld.cdtest/cdtest-bar.cc: Renamed from cdtest-func.cc.

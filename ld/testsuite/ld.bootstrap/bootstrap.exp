@@ -84,7 +84,7 @@ for { set stage 0 } { $stage < 9 } { incr stage } {
 	    fail "$tmptarget aborted" 
 	}
 	"-1" { 
-	    error "Couldn't load $tmptarget." 
+	    perror "Couldn't load $tmptarget." 
 	}
     }
 
