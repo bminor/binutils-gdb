@@ -1,3 +1,15 @@
+Tue Aug  3 10:57:41 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* ldgram.y, ldlex.l, mri.c, ldwrite.c: Change multiple commons
+	into externs.
+
+	* ldmisc.c (multiple_warn): New function.
+	* ldmisc.h: Declare it.
+	* ldmain.c (enter_global_ref): Call it.
+	* ld.h (ld_config_type): Add warn_common.
+	* ldlex.l, ldgram.y: Set it with -warn-common option.
+	* ldver.c (help): Document it.
+
 Mon Aug  2 12:04:36 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* scripttempl/elf.sc: Add hooks for .sdata, .sbss, and

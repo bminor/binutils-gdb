@@ -172,10 +172,10 @@ ld [ -o @var{output} ]  @var{objfile}@dots{}
   [ -l@var{archive} ]  [ -L@var{searchdir} ]  [ -M ]  [ -Map @var{mapfile} ]
   [ -m @var{emulation} ]  [ -N | -n ]  [ -noinhibit-exec ]
   [ -oformat @var{output-format} ]  [ -R @var{filename} ]  [ -relax ]
-  [ -r | -Ur ]  [ -S ]  [ -s ]  [ -T @var{commandfile} ]
+  [ -r | -Ur ]  [ -S ]  [ -s ]  [ -sort-common ]  [ -T @var{commandfile} ]
   [ -Ttext @var{textorg} ]  [ -Tdata @var{dataorg} ]
   [ -Tbss @var{bssorg} ]  [ -t ]  [ -u @var{symbol}]  [-V]  [-v]  [ --version ]
-  [ -y@var{symbol} ]  [ -X ]  [-x ]
+  [ -warn-common ]  [ -y@var{symbol} ]  [ -X ]  [-x ]
 @end smallexample
 
 This plethora of command-line options may seem intimidating, but in
@@ -508,6 +508,12 @@ Omit debugger symbol information (but not all symbols) from the output file.
 @cindex strip all symbols
 Omit all symbol information from the output file.
 
+@item -sort-common
+Normally, when @code{ld} places the global common symbols in the
+appropriate output sections, it sorts them by size.  First come all the
+one byte symbols, then all the two bytes, then all the four bytes, and
+then everything else.  This option disables that sorting.
+
 @item -Tbss @var{bssorg}
 @kindex -Tbss @var{bssorg}
 @itemx -Tdata @var{dataorg}
@@ -574,6 +580,81 @@ Display the version number for @code{ld}.
 @item --version
 @kindex --version
 Display the version number for @code{ld} and exit.
+
+@item -warn-common
+Warn when a common symbol is combined with another common symbol or with
+a symbol definition.  Unix linkers allow this somewhat sloppy practice,
+but linkers on some other operating systems do not.  This option allows
+you to find potential problems from combining global symbols.
+
+There are three kinds of global symbols, illustrated here by C examples:
+
+@table @samp
+@item int i = 1;
+A definition, which goes in the initialized data section of the output
+file.
+
+@item extern int i;
+An undefined reference, which does not allocate space.
+There must be either a definition or a common symbol for the
+variable somewhere.
+
+@item int i;
+A common symbol.  If there are only (one or more) common symbols for a
+variable, it goes in the uninitialized data area of the output file.
+The linker merges multiple common symbols for the same variable into a
+single symbol.  If they are of different sizes, it picks the largest
+size.  The linker turns a common symbol into a declaration, if there is
+a definition of the same variable.
+@end table
+
+The @samp{-warn-common} option can produce five kinds of warnings.  Each
+warning consists of a pair of lines: the first describes the symbol just
+encountered, and the second describes the previous symbol encountered
+with the same name.  One or both of the two symbols will be a common
+symbol.
+
+@enumerate
+@item
+Turning a common symbol into a reference, because there is already a
+definition for the symbol.
+@smallexample
+@var{file}(@var{section}): warning: common of `@var{symbol}' overridden by definition
+@var{file}(@var{section}): warning: defined here
+@end smallexample
+
+@item
+Turning a common symbol into a reference, because a later definition for
+the symbol is encountered.  This is the same as the previous case,
+except that the symbols are encountered in a different order.
+@smallexample
+@var{file}(@var{section}): warning: definition of `@var{symbol}' overriding common
+@var{file}(@var{section}): warning: common is here
+@end smallexample
+
+@item
+Merging a common symbol with a previous same-sized common symbol.
+@smallexample
+@var{file}(@var{section}): warning: multiple common of `@var{symbol}'
+@var{file}(@var{section}): warning: previous common is here
+@end smallexample
+
+@item
+Merging a common symbol with a previous larger common symbol.
+@smallexample
+@var{file}(@var{section}): warning: common of `@var{symbol}' overridden by larger common
+@var{file}(@var{section}): warning: larger common is here
+@end smallexample
+
+@item
+Merging a common symbol with a previous smaller common symbol.  This is
+the same as the previous case, except that the symbols are
+encountered in a different order.
+@smallexample
+@var{file}(@var{section}): warning: common of `@var{symbol}' overriding smaller common
+@var{file}(@var{section}): warning: smaller common is here
+@end smallexample
+@end enumerate
 
 @item -X 
 @kindex -X

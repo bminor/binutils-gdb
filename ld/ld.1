@@ -80,6 +80,7 @@ ld \- the GNU linker
 .RB "[\|" \-r | \-Ur "\|]" 
 .RB "[\|" \-S "\|]" 
 .RB "[\|" \-s "\|]" 
+.RB "[\|" \-sort\-common "\|]" 
 .RB "[\|" "\-T\ "\c
 .I commandfile\c
 \&\|]  
@@ -99,6 +100,7 @@ ld \- the GNU linker
 .RB "[\|" \-V "\|]"
 .RB "[\|" \-v "\|]"
 .RB "[\|" \-\-version "\|]"
+.RB "[\|" \-warn\-common "\|]" 
 .RB "[\|" \-X "\|]" 
 .RB "[\|" \-x "\|]" 
 .ad b
@@ -304,7 +306,7 @@ use will add another pair of name variants to search for when \c
 specifies a library.
 
 .TP
-.BI "-b " "input-format"\c
+.BI "\-b " "input-format"\c
 \&
 Specify the binary format for input object files that follow this option
 on the command line.  You don't usually need to specify this, as
@@ -349,7 +351,7 @@ but has no effect on \c
 \&.
 
 .TP
-.BI "-c " "commandfile"\c
+.BI "\-c " "commandfile"\c
 \&
 Directs \c
 .B ld\c
@@ -448,12 +450,12 @@ but it accepts (and ignores) the \c
 with scripts written to call the old linker.
 
 .TP
-.BI "-format " "input-format"\c
+.BI "\-format " "input\-format"\c
 \&
 Synonym for \c
 .B \-b\c
 \& \c
-.I input-format\c
+.I input\-format\c
 \&.
 
 .TP
@@ -483,7 +485,7 @@ Perform an incremental link (same as option \c
 \&).
 
 .TP
-.BI "-l" "ar"\c
+.BI "\-l" "ar"\c
 \& 
 Add an archive file \c
 .I ar\c
@@ -501,7 +503,7 @@ path-list for occurrences of \c
 specified.
 
 .TP
-.BI "-L" "searchdir"\c
+.BI "\-L" "searchdir"\c
 \& 
 This command adds path \c
 .I searchdir\c
@@ -576,13 +578,13 @@ sets the text segment to be read only, and \c
 if possible.
 
 .TP
-.B \-noinhibit-exec
+.B \-noinhibit\-exec
 Normally, the linker will not produce an output file if it encounters
 errors during the link process.  With this flag, you can specify that
 you wish the output file retained even after non-fatal errors.
 
 .TP
-.BI "-o " "output"\c
+.BI "\-o " "output"\c
 \&
 .I output\c
 \&
@@ -599,7 +601,7 @@ script command \c
 \& can also specify the output file name.
 
 .TP
-.BI "-oformat " "output-format"\c
+.BI "\-oformat " "output\-format"\c
 \&
 Specify the binary format for the output object file.
 You don't usually need to specify this, as
@@ -615,7 +617,7 @@ The script command
 can also specify the output format, but this option overrides it.
 
 .TP
-.BI "-R " "filename"\c
+.BI "\-R " "filename"\c
 \&
 .I file\c
 \&
@@ -674,11 +676,20 @@ Omits debugger symbol information (but not all symbols) from the output file.
 Omits all symbol information from the output file.
 
 .TP
-.BI "-Tbss " "org"\c
+.B \-sort\-common
+Normally, when
+.B ld
+places the global common symbols in the appropriate output sections,
+it sorts them by size.  First come all the one byte symbols, then all
+the two bytes, then all the four bytes, and then everything else.
+This option disables that sorting.
+
 .TP
-.BI "-Tdata " "org"\c
+.BI "\-Tbss " "org"\c
 .TP
-.BI "-Ttext " "org"\c
+.BI "\-Tdata " "org"\c
+.TP
+.BI "\-Ttext " "org"\c
 Use \c
 .I org\c
 \& as the starting address for\(em\&respectively\(em\&the
@@ -694,10 +705,10 @@ Use \c
 \& must be a hexadecimal integer.
 
 .TP
-.BI "-T " "commandfile"\c
+.BI "\-T " "commandfile"\c
 \&
 .TP
-.BI "-T" "commandfile"\c
+.BI "\-T" "commandfile"\c
 Equivalent to \c
 .B \-c \c
 .I commandfile\c
@@ -712,7 +723,7 @@ Prints names of input files as \c
 \& processes them.
 
 .TP
-.BI "-u " "sym"
+.BI "\-u " "sym"
 Forces \c
 .I sym\c
 \& to be entered in the output file as an undefined symbol.
@@ -757,6 +768,13 @@ Display the version number for \c
 Display the version number for \c
 .B ld
 and exit.
+
+.TP
+.B \-warn\-common
+Warn when a common symbol is combined with another common symbol or with
+a symbol definition.  Unix linkers allow this somewhat sloppy practice,
+but linkers on some other operating systems do not.  This option allows
+you to find potential problems from combining global symbols.
 
 .TP
 .B \-X 

@@ -29,8 +29,8 @@ This was written by steve chamberlain
 #include "ldgram.h"
 
 int ldgram_in_defsym;
-int ldgram_had_equals;
-int ldgram_in_script;
+extern int ldgram_had_equals;
+extern int ldgram_in_script;
 
 int hex_mode;
 extern int fgetc();
@@ -107,6 +107,7 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 <COMMAND>"-oformat"		{ return OPTION_oformat; }
 <COMMAND>"-sort-common"		{ return OPTION_sort_common;}
 <COMMAND>"-sort_common"		{ return OPTION_sort_common;}
+<COMMAND>"-warn-common"		{ return OPTION_warn_common;}
 <COMMAND>"-n"			{ return OPTION_n; }
 <COMMAND>"-N"			{ return OPTION_N; }
 <COMMAND>"-r"			{ return OPTION_r; }
@@ -143,8 +144,9 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 
 <COMMAND>"-L"{FILENAME} 	{ 
 					yylval.name = buystring(yytext+2);
-					return OPTION_L; 
+					return OPTION_Lfile;
 				}
+<COMMAND>"-L"			{ return OPTION_L; }
 <COMMAND>"-Ttext" 	        {
 				 yylval.name = ".text";
 				 return OPTION_Texp;
@@ -202,6 +204,15 @@ NOCFILENAMECHAR	[_a-zA-Z0-9\/\.\-\_\+\$\:\[\]\\\~]
 					yylval.integer = atoi (yytext + 2);
 					return OPTION_Gval;
 				}
+
+<COMMAND>"-Qy"			{	return OPTION_Qy; }
+<COMMAND>"-dn"			{	return OPTION_dn; }
+<COMMAND>"-Y"			{	return OPTION_Y;  }
+<COMMAND>"-YP,"{FILENAME}	{
+					yylval.name = buystring (yytext+4);
+					return OPTION_YP;
+				}
+
 <MRI,EXPRESSION>"$"([0-9A-Fa-f])+ {
   				yylval.integer = strtoul(yytext+1, 0,16);
 				return INT;

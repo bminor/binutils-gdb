@@ -170,14 +170,20 @@ main (argc, argv)
   if (had_script == false)
     {
       /* Read the emulation's appropriate default script.  */
-      char *scriptname = ldemul_get_script ();
-      /* sizeof counts the terminating NUL.  */
-      size_t size = strlen (scriptname) + sizeof ("-T /ldscripts/");
-      char *buf = (char *) ldmalloc(size);
-      /* The initial slash prevents finding the script in `.' first.  */
-      sprintf (buf, "-T /ldscripts/%s", scriptname);
-      parse_line (buf, 0);
-      free (buf);
+      int isfile;
+      char *s = ldemul_get_script (&isfile);
+
+      if (isfile)
+	{
+	  /* sizeof counts the terminating NUL.  */
+	  size_t size = strlen (s) + sizeof ("-T ");
+	  char *buf = (char *) ldmalloc(size);
+	  sprintf (buf, "-T %s", s);
+	  parse_line (buf, 0);
+	  free (buf);
+	}
+      else
+	parse_line (s, 1);
     }
 
   if (config.relocateable_output && command_line.relax)
@@ -490,23 +496,26 @@ enter_global_ref (nlist_p, name)
 	  refize (sp, sp->scoms_chain);
 	  sp->scoms_chain = 0;
 	}
-
-
     }
   else
     {
       if (bfd_is_com_section (sym->section))
 	{
 	  /* If we have a definition of this symbol already then
-	 this common turns into a reference. Also we only
-	 ever point to the largest common, so if we
-	 have a common, but it's bigger that the new symbol
-	 the turn this into a reference too. */
+	     this common turns into a reference. Also we only
+	     ever point to the largest common, so if we
+	     have a common, but it's bigger that the new symbol
+	     the turn this into a reference too. */
 	  if (sp->sdefs_chain)
 	    {
 	      /* This is a common symbol, but we already have a definition
-	   for it, so just link it into the ref chain as if
-	   it were a reference  */
+		 for it, so just link it into the ref chain as if
+		 it were a reference  */
+	      if (config.warn_common)
+		multiple_warn("%C: warning: common of `%s' overridden by definition\n",
+			      sym,
+			      "%C: warning: defined here\n",
+			      *(sp->sdefs_chain));
 	      refize (sp, nlist_p);
 	    }
 	  else if (sp->scoms_chain)
@@ -515,11 +524,29 @@ enter_global_ref (nlist_p, name)
 	      if ((*(sp->scoms_chain))->value > sym->value)
 		{
 		  /* other common is bigger, throw this one away */
+		  if (config.warn_common)
+		    multiple_warn("%C: warning: common of `%s' overridden by larger common\n",
+				  sym,
+				  "%C: warning: larger common is here\n",
+				  *(sp->scoms_chain));
 		  refize (sp, nlist_p);
 		}
 	      else if (sp->scoms_chain != nlist_p)
 		{
 		  /* other common is smaller, throw that away */
+		  if (config.warn_common)
+		    {
+		      if ((*(sp->scoms_chain))->value < sym->value)
+			multiple_warn("%C: warning: common of `%s' overriding smaller common\n",
+				      sym,
+				      "%C: warning: smaller common is here\n",
+				      *(sp->scoms_chain));
+		      else
+			multiple_warn("%C: warning: multiple common of `%s'\n",
+				      sym,
+				      "%C: warning: previous common is here\n",
+				      *(sp->scoms_chain));
+		    }
 		  refize (sp, sp->scoms_chain);
 		  sp->scoms_chain = nlist_p;
 		}
@@ -527,10 +554,9 @@ enter_global_ref (nlist_p, name)
 	  else
 	    {
 	      /* This is the first time we've seen a common, so remember it
-	   - if it was undefined before, we know it's defined now. If
-	   the symbol has been marked as really being a constructor,
-	   then treat this as a ref
-	   */
+		 - if it was undefined before, we know it's defined now. If
+		 the symbol has been marked as really being a constructor,
+		 then treat this as a ref.  */
 	      if (sp->flags & SYM_CONSTRUCTOR)
 		{
 		  /* Turn this into a ref */
@@ -547,27 +573,17 @@ enter_global_ref (nlist_p, name)
 		}
 	    }
 	}
-
       else if (sym->section != &bfd_und_section)
 	{
 	  /* This is the definition of a symbol, add to def chain */
 	  if (sp->sdefs_chain && (*(sp->sdefs_chain))->section != sym->section)
 	    {
 	      /* Multiple definition */
-	      asymbol *sy = *(sp->sdefs_chain);
-	      lang_input_statement_type *stat =
-	      (lang_input_statement_type *) bfd_asymbol_bfd (sy)->usrdata;
-	      lang_input_statement_type *stat1 =
-	      (lang_input_statement_type *) bfd_asymbol_bfd (sym)->usrdata;
-	      asymbol **stat1_symbols = stat1 ? stat1->asymbols : 0;
-	      asymbol **stat_symbols = stat ? stat->asymbols : 0;
-
+	      multiple_warn("%X%C: multiple definition of `%s'\n",
+			    sym,
+			    "%X%C: first defined here\n",
+			    *(sp->sdefs_chain));
 	      multiple_def_count++;
-	      einfo ("%X%C: multiple definition of `%T'\n",
-		     bfd_asymbol_bfd (sym), sym->section, stat1_symbols, sym->value, sym);
-
-	      einfo ("%X%C: first seen here\n",
-		bfd_asymbol_bfd (sy), sy->section, stat_symbols, sy->value);
 	    }
 	  else
 	    {
@@ -577,6 +593,11 @@ enter_global_ref (nlist_p, name)
 	  /* A definition overrides a common symbol */
 	  if (sp->scoms_chain)
 	    {
+	      if (config.warn_common)
+		multiple_warn("%C: warning: definition of `%s' overriding common\n",
+			      sym,
+			      "%C: warning: common is here\n",
+			      *(sp->scoms_chain));
 	      refize (sp, sp->scoms_chain);
 	      sp->scoms_chain = 0;
 	      commons_pending--;
@@ -595,7 +616,6 @@ enter_global_ref (nlist_p, name)
 	    {
 	      /* And it's the first time we've seen it */
 	      undefined_global_sym_count++;
-
 	    }
 
 	  refize (sp, nlist_p);

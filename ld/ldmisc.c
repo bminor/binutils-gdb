@@ -87,6 +87,7 @@ vfinfo(fp, fmt, arg)
      va_list arg;
 {
   boolean fatal = false;
+
   while (*fmt) 
   {
     while (*fmt != '%' && *fmt != '\0') 
@@ -94,6 +95,7 @@ vfinfo(fp, fmt, arg)
       putc(*fmt, fp);
       fmt++;
     }
+
     if (*fmt == '%') 
     {
       fmt ++;
@@ -102,12 +104,14 @@ vfinfo(fp, fmt, arg)
        case 'X':
 	config.make_executable = false;
 	break;
+
        case 'V':
-       {
-	 bfd_vma value = va_arg(arg, bfd_vma);
-	 fprintf_vma(fp, value);
-       }
+	{
+	  bfd_vma value = va_arg(arg, bfd_vma);
+	  fprintf_vma(fp, value);
+	}
 	break;
+
       case 'v':
 	{
 	  char buf[100];
@@ -121,13 +125,12 @@ vfinfo(fp, fmt, arg)
 	  fputs (p, fp);
 	}
 	break;
+
        case 'T':
        {
 	 asymbol *symbol = va_arg(arg, asymbol *);
 	 if (symbol) 
 	 {
-
-	    
 	   asection *section = symbol->section;
 	   char *cplusname =   demangle(symbol->name, 1);
 	   CONST char *section_name =  section->name;
@@ -146,6 +149,7 @@ vfinfo(fp, fmt, arg)
 	 }
        }
 	break;
+
        case 'B':
        { 
 	 bfd *abfd = va_arg(arg, bfd *);
@@ -155,24 +159,23 @@ vfinfo(fp, fmt, arg)
 	 }
 	 else {
 	   fprintf(fp,"%s", abfd->filename);
-
 	 }
        }
 	break;
+
        case 'F':
 	fatal = true;
 	break;
+
        case 'P':
 	fprintf(fp,"%s", program_name);
 	break;
+
        case 'E':
 	/* Replace with the most recent errno explanation */
-
-
 	fprintf(fp, bfd_errmsg(bfd_error));
-
-
 	break;
+
        case 'I':
        {
 	 lang_input_statement_type *i =
@@ -181,12 +184,10 @@ vfinfo(fp, fmt, arg)
 	 fprintf(fp,"%s", i->local_sym_name);
        }
 	break;
+
        case 'S':
 	/* Print source script file and line number */
-
        {
-	
-	 
 	 extern unsigned int lineno;
 	 if (ldfile_input_filename == (char *)NULL) {
 	   fprintf(fp,"command line");
@@ -195,7 +196,6 @@ vfinfo(fp, fmt, arg)
 	   fprintf(fp,"%s:%u", ldfile_input_filename, lineno );
 	 }
        }
-	
 	break;
 
        case 'R':
@@ -209,9 +209,6 @@ vfinfo(fp, fmt, arg)
 		relent->howto->name);
        }
 	break;
-	
-
-
 	
        case 'C':
        {
@@ -237,8 +234,7 @@ vfinfo(fp, fmt, arg)
 	    filename = abfd->filename;
 	   if (functionname != (char *)NULL) 
 	   {
-	     /* There is no initial '_' to remove here. */
-	     cplus_name = demangle(functionname, 0);
+	     cplus_name = demangle(functionname, 1);
 	     fprintf(fp,"%s:%u: (%s)", filename, linenumber, cplus_name);
 	   }
 		
@@ -256,15 +252,18 @@ vfinfo(fp, fmt, arg)
        case 's':
 	fprintf(fp,"%s", va_arg(arg, char *));
 	break;
+
        case 'd':
 	fprintf(fp,"%d", va_arg(arg, int));
 	break;
+
        default:
 	fprintf(fp,"%s", va_arg(arg, char *));
 	break;
       }
     }
   }
+
   if (fatal == true) 
   {
     extern char *output_filename;
@@ -308,10 +307,39 @@ va_dcl
   va_end(arg);
 }
 
+/* Warn about a symbol NEWSYM being multiply defined with another symbol OLDSYM.
+   MESSAGE1 and MESSAGE2 should look something like:
+   "%C: warning: multiple commons of `%s'\n"
+   "%C: warning: previous common here\n"  */
+
+void
+multiple_warn (message1, newsym, message2, oldsym)
+     char *message1;
+     asymbol *newsym;
+     char *message2;
+     asymbol *oldsym;
+{
+  lang_input_statement_type *stat;
+  asymbol **stat_symbols;
+
+  stat = (lang_input_statement_type *) bfd_asymbol_bfd (newsym)->usrdata;
+  stat_symbols = stat ? stat->asymbols : 0;
+
+  einfo (message1,
+	 bfd_asymbol_bfd (newsym), newsym->section, stat_symbols, newsym->value,
+	 demangle (newsym->name, 1));
+
+  stat = (lang_input_statement_type *) bfd_asymbol_bfd (oldsym)->usrdata;
+  stat_symbols = stat ? stat->asymbols : 0;
+
+  einfo (message2,
+	 bfd_asymbol_bfd (oldsym), oldsym->section, stat_symbols, oldsym->value);
+}
+
 void 
 info_assert(file, line)
-char *file;
-unsigned int line;
+     char *file;
+     unsigned int line;
 {
   einfo("%F%P internal error %s %d\n", file,line);
 }
