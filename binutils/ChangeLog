@@ -1,5 +1,21 @@
 Wed Jun  3 12:09:40 1998  Nick Clifton  <nickc@cygnus.com>
 
+	* objcopy.c: Add new command line options: --change-section-lma
+	and --change-section-vma.  Rename old command line option
+	--adjust-section-vma to --change-section-address.  Rename
+	--adjust-vma to --change-addresses and --adjust-start to
+	--change-start.  Provide aliases to support the old versions of
+	these command line options.
+
+	Change the names of macros and enum elements to upper case to
+	match the GNU coding standard.
+
+	Replace calls to fprintf (stderr,...) with calls to fatal () or
+	non_fatal () as appropriate.
+	
+	* objcopy.1: Document command line option changes.
+	* binutils.texi: Document command line option changes.
+
 	* bucomm.h: New exported funtion from bucomm.c: non_fatal().
 	* bucomm.c (non_fatal): New exported function.  Just like fatal()
 	except that it returns rather than calling xexit().

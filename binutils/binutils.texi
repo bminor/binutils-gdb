@@ -837,9 +837,11 @@ objcopy [ -F @var{bfdname} | --target=@var{bfdname} ]
         [ -p | --preserve-dates ] [ --debugging ]
         [ --gap-fill=@var{val} ] [ --pad-to=@var{address} ]
         [ --set-start=@var{val} ] [ --adjust-start=@var{incr} ]
-        [ --adjust-vma=@var{incr} ]
-        [ --adjust-section-vma=@var{section}@{=,+,-@}@var{val} ]
-        [ --adjust-warnings ] [ --no-adjust-warnings ]
+        [ --change-addresses=@var{incr} ]
+        [ --change-section-address=@var{section}@{=,+,-@}@var{val} ]
+        [ --change-section-lma=@var{section}@{=,+,-@}@var{val} ]
+        [ --change-section-vma=@var{section}@{=,+,-@}@var{val} ]
+        [ --change-warnings ] [ --no-change-warnings ]
         [ --set-section-flags=@var{section}=@var{flags} ]
         [ --add-section=@var{sectionname}=@var{filename} ]
         [ --change-leading-char ] [ --remove-leading-char ]
@@ -986,33 +988,70 @@ filled in with the value specified by @samp{--gap-fill} (default zero).
 Set the address of the new file to @var{val}.  Not all object file
 formats support setting the start address.
 
-@item --adjust-start @var{incr}
-Adjust the start address by adding @var{incr}.  Not all object file
+@item --change-start @var{incr}
+@itemx --adjust-start @var{incr}
+@cindex changing start address
+Change the start address by adding @var{incr}.  Not all object file
 formats support setting the start address.
 
-@item --adjust-vma @var{incr}
-Adjust the address of all sections, as well as the start address, by
-adding @var{incr}.  Some object file formats do not permit section
-addresses to be changed arbitrarily.  Note that this does not relocate
-the sections; if the program expects sections to be loaded at a certain
-address, and this option is used to change the sections such that they
-are loaded at a different address, the program may fail.
+@item --change-addresses @var{incr}
+@itemx --adjust-vma @var{incr}
+@cindex changing object addresses
+Change the VMA and LMA addresses of all sections, as well as the start
+address, by adding @var{incr}.  Some object file formats do not permit
+section addresses to be changed arbitrarily.  Note that this does not
+relocate the sections; if the program expects sections to be loaded at a
+certain address, and this option is used to change the sections such
+that they are loaded at a different address, the program may fail. 
 
-@item --adjust-section-vma @var{section}@{=,+,-@}@var{val}
-Set or adjust the address of the named @var{section}.  If @samp{=} is
-used, the section address is set to @var{val}.  Otherwise, @var{val} is
-added to or subtracted from the section address.  See the comments under
-@samp{--adjust-vma}, above.  If @var{section} does not exist in the
-input file, a warning will be issued, unless @samp{--no-adjust-warnings}
-is used.
+@item --change-section-address @var{section}@{=,+,-@}@var{val}
+@itemx --adjust-section-vma @var{section}@{=,+,-@}@var{val}
+@cindex changing section address
+Set or change both the VMA address and the LMA address of the named
+@var{section}.  If @samp{=} is used, the section address is set to
+@var{val}.  Otherwise, @var{val} is added to or subtracted from the
+section address.  See the comments under @samp{--change-addresses},
+above. If @var{section} does not exist in the input file, a warning will
+be issued, unless @samp{--no-change-warnings} is used.
 
-@item --adjust-warnings
-If @samp{--adjust-section-vma} is used, and the named section does not
-exist, issue a warning.  This is the default.
+@item --change-section-lma @var{section}@{=,+,-@}@var{val}
+@cindex changing section LMA
+Set or change the LMA address of the named @var{section}.  The LMA
+address is the address where the section will be loaded into memory at
+program load time.  Normally this is the same as the VMA address, which
+is the address of the section at program run time, but on some systems,
+especially those where a program is held in ROM, the two can be
+different.  If @samp{=} is used, the section address is set to
+@var{val}.  Otherwise, @var{val} is added to or subtracted from the
+section address.  See the comments under @samp{--change-addresses},
+above.  If @var{section} does not exist in the input file, a warning
+will be issued, unless @samp{--no-change-warnings} is used.  
 
-@item --no-adjust-warnings
-Do not issue a warning if @samp{--adjust-section-vma} is used, even if
-the named section does not exist.
+@item --change-section-vma @var{section}@{=,+,-@}@var{val}
+@cindex changing section VMA
+Set or change the VMA address of the named @var{section}.  The VMA
+address is the address where the section will be located once the
+program has started executing.  Normally this is the same as the LMA
+address, which is the address where the section will be loaded into
+memory, but on some systems, especially those where a program is held in
+ROM, the two can be different.  If @samp{=} is used, the section address
+is set to @var{val}.  Otherwise, @var{val} is added to or subtracted
+from the section address.  See the comments under
+@samp{--change-addresses}, above.  If @var{section} does not exist in
+the input file, a warning will be issued, unless
+@samp{--no-change-warnings} is used.   
+
+@item --change-warnings
+@itemx --adjust-warnings
+If @samp{--change-section-address} or @samp{--change-section-lma} or
+@samp{--change-section-vma} is used, and the named section does not
+exist, issue a warning.  This is the default. 
+
+@item --no-change-warnings
+@itemx --no-adjust-warnings
+Do not issue a warning if @samp{--change-section-address} or
+@samp{--adjust-section-lma} or @samp{--adjust-section-vma} is used, even
+if the named section does not exist. 
 
 @item --set-section-flags @var{section}=@var{flags}
 Set the flags for the named section.  The @var{flags} argument is a

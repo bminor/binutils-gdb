@@ -35,11 +35,13 @@ objcopy \- copy and translate object files
 .RB "[\|" \-\-gap\-fill=\fIval\fR "\|]"
 .RB "[\|" \-\-pad\-to=\fIaddress\fR "\|]"
 .RB "[\|" \-\-set\-start=\fIval\fR "\|]"
-.RB "[\|" \-\-adjust\-start=\fIincr\fR "\|]"
-.RB "[\|" \-\-adjust\-vma=\fIincr\fR "\|]"
-.RB "[\|" \-\-adjust\-section\-vma=\fIsection{=,+,-}val\fR "\|]"
-.RB "[\|" \-\-adjust\-warnings\fR "\|]"
-.RB "[\|" \-\-no\-adjust\-warnings\fR "\|]"
+.RB "[\|" \-\-change\-start=\fIincr\fR "\|]"
+.RB "[\|" \-\-change\-addresses=\fIincr\fR "\|]"
+.RB "[\|" \-\-change\-section\-address=\fIsection{=,+,-}val\fR "\|]"
+.RB "[\|" \-\-change\-section\-lma=\fIsection{=,+,-}val\fR "\|]"
+.RB "[\|" \-\-change\-section\-vma=\fIsection{=,+,-}val\fR "\|]"
+.RB "[\|" \-\-change\-warnings\fR "\|]"
+.RB "[\|" \-\-no\-change\-warnings\fR "\|]"
 .RB "[\|" \-\-set\-section\-flags=\fIsection=flags\fR "\|]"
 .RB "[\|" \-\-add\-section=\fIsectionname=filename\fR "\|]"
 .RB "[\|" \-\-change\-leading\-char\fR "\|]"
@@ -193,32 +195,48 @@ zero).
 Set the start address of the new file to \fIval\fP.  Not all object
 file formats support setting the start address.
 .TP
-.B \fB\-\-adjust\-start=\fIincr
-Adjust the start address by adding \fIincr\fP.  Not all object file
+.B \fB\-\-change\-start=\fIincr\fR, \fB\-\-adjust\-start=\fIincr
+Changes the start address by adding \fIincr\fP.  Not all object file
 formats support setting the start address.
 .TP
-.B \fB\-\-adjust\-vma=\fIincr
-Adjust the address of all sections, as well as the start address, by
+.B \fB\-\-change\-addresses=\fIincr\fR, \fB\-\-adjust\-vma=\fIincr
+Changes the address of all sections, as well as the start address, by
 adding \fIincr\fP.  Some object file formats do not permit section
 addresses to be changed arbitrarily.  Note that this does not relocate
 the sections; if the program expects sections to be loaded at a
 certain address, and this option is used to change the sections such
 that they are loaded at a different address, the program may fail.
 .TP
-.B \fB\-\-adjust\-section\-vma=\fIsection{=,+,-}val
-Set or adjust the address of the named \fIsection\fP.  If \fI=\fP is
+.B \fB\-\-change\-section\-address=\fIsection{=,+,-}val\fR, \fB\-\-adjust\-section\-vma=\fIsection{=,+,-}val
+Set or changes the VMA and LMA addresses of the named \fIsection\fP.
+If \fI=\fP is used, the section address is set to \fIval\fP.
+Otherwise, \fIval\fP is added to or subtracted from the section
+address.  See the comments under \fB\-\-change\-addresses\fP, above.  If
+\fIsection\fP does not exist in the input file, a warning will be
+issued, unless \fB\-\-no\-change\-warnings\fP is used.
+.TP
+.B \fB\-\-change\-section\-lma=\fIsection{=,+,-}val
+Set or change the LMA address of the named \fIsection\fP.  If \fI=\fP is
 used, the section address is set to \fIval\fP.  Otherwise, \fIval\fP
 is added to or subtracted from the section address.  See the comments
-under \fB\-\-adjust\-vma\fP, above.  If \fIsection\fP does not exist
+under \fB\-\-change\-addresses\fP, above.  If \fIsection\fP does not exist
 in the input file, a warning will be issued, unless
-\fB\-\-no\-adjust\-warnings\fP is used.
+\fB\-\-no\-change\-warnings\fP is used.
 .TP
-.B \fB\-\-adjust\-warnings
-If \fB\-\-adjust\-section\-vma\fP is used, and the named section does
+.B \fB\-\-change\-section\-vma=\fIsection{=,+,-}val
+Set or change the VMA address of the named \fIsection\fP.  If \fI=\fP is
+used, the section address is set to \fIval\fP.  Otherwise, \fIval\fP
+is added to or subtracted from the section address.  See the comments
+under \fB\-\-change\-addresses\fP, above.  If \fIsection\fP does not exist
+in the input file, a warning will be issued, unless
+\fB\-\-no\-change\-warnings\fP is used.
+.TP
+.B \fB\-\-change\-warnings\fR, \fB\-\-adjust\-warnings
+If \fB\-\-change\-section\-XXX\fP is used, and the named section does
 not exist, issue a warning.  This is the default.
 .TP
-.B \fB\-\-no\-adjust\-warnings
-Do not issue a warning if \fB\-\-adjust\-section\-vma\fP is used, even
+.B \fB\-\-no\-change\-warnings\fR, \fB\-\-no\-adjust\-warnings
+Do not issue a warning if \fB\-\-change\-section\-XXX\fP is used, even
 if the named section does not exist.
 .TP
 .B \fB\-\-set\-section\-flags=\fIsection=flags
