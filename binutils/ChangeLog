@@ -1,3 +1,10 @@
+Mon Jul  8 15:28:05 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* ar.c (open_inarch): Add file parameter.  Change all callers.  If
+	this is a newly created archive, set the target based on the
+	file.
+	* arsup.h (open_inarch): Update declaration.
+
 Thu Jul  4 12:00:55 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.in (VERSION): Set to cygnus-2.7.1.
