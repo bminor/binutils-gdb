@@ -1,3 +1,21 @@
+1999-01-14  Nick Clifton  <nickc@cygnus.com>
+
+	* readelf.c (process_section_headers): Omit trailing space at end
+	of section header contents line.
+
+Wed Dec 16 17:20:05 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+start-sanitize-sky
+	* link.c.in (main): crt0.o renamed to crt0b.o.
+
+end-sanitize-sky
+	* aclocal.m4: Regenerate.
+
+Mon Dec 14 12:55:36 1998  Jim Wilson  <wilson@cygnus.com>
+
+	* dllwrap.c: Include bfd.h and bucomm.h.  Move getopt.h include
+	after libiberty.h include.
+
 start-sanitize-sky
 Sat Dec 12 11:24:23 1998  Doug Evans  <devans@canuck.cygnus.com>
 
