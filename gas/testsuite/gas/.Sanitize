@@ -24,21 +24,16 @@ Do-first:
 # called.  Directories not listed will be removed in their entirety
 # with rm -rf.
 
-# Currently, p2411.s and p2425a.s should be sanitized away.
-# All else should stay.
-
 Things-to-keep:
 
-gas.exp
-p2389.s
-p2389a.s
-p2425.s
-p2430.s
-p2430a.s
-sol-cc.s
-sol-gcc.s
-t1.s
-t2.s
+all
+i386-bsd
+ieee.fp
+m68k
+m68k-coff
+sparc
+sparc-solaris
+template
 
 Do-last:
 

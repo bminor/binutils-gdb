@@ -1,1 +1,3 @@
 load_lib gas-defs.exp
+
+gas_init

@@ -76,6 +76,8 @@ site.exp: ./Makefile
 	@echo "set target_alias ${target_alias}" >> ./tmp0
 	@echo "set target_cpu ${target_cpu}" >> ./tmp0
 	@echo "set target_vendor ${target_vendor}" >> ./tmp0
+	@echo "set host_triplet ${host_canonical}" >> ./tmp0
+	@echo "set target_triplet ${target_canonical}" >> ./tmp0
 	@echo "set target_canonical ${target_canonical}" >> ./tmp0
 	@echo "set srcdir ${srcdir}" >> ./tmp0
 	@echo "set exec_prefix ${exec_prefix}" >> ./tmp0
@@ -87,7 +89,7 @@ site.exp: ./Makefile
 	@rm -f ./tmp1 ./tmp0
 
 check:  site.exp
-	$(RUNTEST) $(RUNTESTFLAGS) --tool gas AS=$(AS_FOR_TARGET)
+	$(RUNTEST) $(RUNTESTFLAGS) --tool gas AS=$(AS_FOR_TARGET) ASFLAGS=
 
 force:
 

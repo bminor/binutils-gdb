@@ -24,16 +24,11 @@ Do-first:
 # called.  Directories not listed will be removed in their entirety
 # with rm -rf.
 
-# The entire "gas.confidential" directory should get deleted.
-
 Things-to-keep:
 
-ChangeLog
-Makefile.in
-config
-configure.in
-gas
-lib
+all.exp
+p2663.s
+t2.s
 
 Do-last:
 
