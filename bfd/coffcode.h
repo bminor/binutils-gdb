@@ -313,7 +313,8 @@ CODE_FRAGMENT
 #define STRING_SIZE_SIZE (4)
 
 static long sec_to_styp_flags PARAMS ((const char *, flagword));
-static flagword styp_to_sec_flags PARAMS ((bfd *, PTR, const char *));
+static flagword styp_to_sec_flags
+  PARAMS ((bfd *, PTR, const char *, asection *));
 static boolean coff_bad_format_hook PARAMS ((bfd *, PTR));
 static void coff_set_custom_section_alignment
   PARAMS ((bfd *, asection *, const struct coff_section_alignment_entry *,
@@ -343,12 +344,13 @@ static PTR coff_mkobject_hook PARAMS ((bfd *, PTR,  PTR));
 
 /* void warning(); */
 
-/*
- * Return a word with STYP_* (scnhdr.s_flags) flags set to represent the
- * incoming SEC_* flags.  The inverse of this function is styp_to_sec_flags().
- * NOTE: If you add to/change this routine, you should mirror the changes
- * 	in styp_to_sec_flags().
- */
+/* Return a word with STYP_* (scnhdr.s_flags) flags set to represent
+   the incoming SEC_* flags.  The inverse of this function is
+   styp_to_sec_flags().  NOTE: If you add to/change this routine, you
+   should probably mirror the changes in styp_to_sec_flags().  */
+
+#ifndef COFF_WITH_PE
+
 static long
 sec_to_styp_flags (sec_name, sec_flags)
      CONST char *sec_name;
@@ -398,12 +400,6 @@ sec_to_styp_flags (sec_name, sec_flags)
     {
       styp_flags = STYP_INFO;
     }
-#ifdef COFF_WITH_PE
-  else if (!strcmp (sec_name, ".edata"))
-    {
-      styp_flags = STYP_DATA;
-    }
-#endif
 #ifdef RS6000COFF_C
   else if (!strcmp (sec_name, _PAD))
     {
@@ -445,27 +441,93 @@ sec_to_styp_flags (sec_name, sec_flags)
     styp_flags |= STYP_NOLOAD;
 #endif
 
-#ifdef COFF_WITH_PE
-  if (sec_flags & SEC_LINK_ONCE)
-    styp_flags |= IMAGE_SCN_LNK_COMDAT;
-  if (sec_flags & SEC_SHARED)
-    styp_flags |= IMAGE_SCN_MEM_SHARED;
-#endif
-
-  return (styp_flags);
+  return styp_flags;
 }
-/*
- * Return a word with SEC_* flags set to represent the incoming
- * STYP_* flags (from scnhdr.s_flags).   The inverse of this
- * function is sec_to_styp_flags().
- * NOTE: If you add to/change this routine, you should mirror the changes
- *      in sec_to_styp_flags().
- */
+
+#else /* COFF_WITH_PE */
+
+/* The PE version; see above for the general comments.  The non-PE
+   case seems to be more guessing, and breaks PE format; specifically,
+   .rdata is readonly, but it sure ain't text.  Really, all this
+   should be set up properly in gas (or whatever assembler is in use),
+   and honor whatever objcopy/strip, etc. sent us as input.  */
+
+static long
+sec_to_styp_flags (sec_name, sec_flags)
+     const char *sec_name ATTRIBUTE_UNUSED;
+     flagword sec_flags;
+{
+  long styp_flags = 0;
+
+  /* caution: there are at least three groups of symbols that have
+     very similar bits and meanings: IMAGE_SCN*, SEC_*, and STYP_*.
+     SEC_* are the BFD internal flags, used for generic BFD
+     information.  STYP_* are the COFF section flags which appear in
+     COFF files.  IMAGE_SCN_* are the PE section flags which appear in
+     PE files.  The STYP_* flags and the IMAGE_SCN_* flags overlap,
+     but there are more IMAGE_SCN_* flags.  */
+
+  /* skip LOAD */
+  /* READONLY later */
+  /* skip RELOC */
+  if ((sec_flags & SEC_CODE) != 0)
+    styp_flags |= IMAGE_SCN_CNT_CODE;
+  if ((sec_flags & SEC_DATA) != 0)
+    styp_flags |= IMAGE_SCN_CNT_INITIALIZED_DATA;
+  if ((sec_flags & SEC_ALLOC) != 0 && (sec_flags & SEC_LOAD) == 0)
+    styp_flags |= IMAGE_SCN_CNT_UNINITIALIZED_DATA;  /* ==STYP_BSS */
+  /* skip ROM */
+  /* skip CONSTRUCTOR */
+  /* skip CONTENTS */
+#ifdef STYP_NOLOAD
+  if ((sec_flags & (SEC_NEVER_LOAD | SEC_COFF_SHARED_LIBRARY)) != 0)
+    styp_flags |= STYP_NOLOAD;
+#endif
+  if ((sec_flags & SEC_IS_COMMON) != 0)
+    styp_flags |= IMAGE_SCN_LNK_COMDAT;
+  if ((sec_flags & SEC_DEBUGGING) != 0)
+    styp_flags |= IMAGE_SCN_MEM_DISCARDABLE;
+  if ((sec_flags & SEC_EXCLUDE) != 0)
+    styp_flags |= IMAGE_SCN_LNK_REMOVE;
+  if ((sec_flags & SEC_NEVER_LOAD) != 0)
+    styp_flags |= IMAGE_SCN_LNK_REMOVE;
+  /* skip IN_MEMORY */
+  /* skip SORT */
+  if (sec_flags & SEC_LINK_ONCE) 
+    styp_flags |= IMAGE_SCN_LNK_COMDAT; 
+  /* skip LINK_DUPLICATES */
+  /* skip LINKER_CREATED */
+
+  /* For now, the read/write bits are mapped onto SEC_READONLY, even
+     though the semantics don't quite match.  The bits from the input
+     are retained in pei_section_data(abfd, section)->pe_flags */
+
+  styp_flags |= IMAGE_SCN_MEM_READ;       /* always readable. */
+  if ((sec_flags & SEC_READONLY) == 0)
+    styp_flags |= IMAGE_SCN_MEM_WRITE;    /* Invert READONLY for write */
+  if (sec_flags & SEC_CODE)
+    styp_flags |= IMAGE_SCN_MEM_EXECUTE;  /* CODE->EXECUTE */
+  if (sec_flags & SEC_SHARED)
+    styp_flags |= IMAGE_SCN_MEM_SHARED;   /* Shared remains meaningful */
+
+  return styp_flags; 
+}
+
+#endif /* COFF_WITH_PE */
+
+/* Return a word with SEC_* flags set to represent the incoming STYP_*
+   flags (from scnhdr.s_flags).  The inverse of this function is
+   sec_to_styp_flags().  NOTE: If you add to/change this routine, you
+   should probably mirror the changes in sec_to_styp_flags().  */
+
+#ifndef COFF_WITH_PE
+
 static flagword
-styp_to_sec_flags (abfd, hdr, name)
+styp_to_sec_flags (abfd, hdr, name, section)
      bfd *abfd ATTRIBUTE_UNUSED;
      PTR hdr;
      const char *name;
+     asection *section ATTRIBUTE_UNUSED;
 {
   struct internal_scnhdr *internal_s = (struct internal_scnhdr *) hdr;
   long styp_flags = internal_s->s_flags;
@@ -580,13 +642,99 @@ styp_to_sec_flags (abfd, hdr, name)
     }
 #endif /* STYP_SDATA */
 
-#ifdef COFF_WITH_PE
+#if defined (COFF_LONG_SECTION_NAMES) && defined (COFF_SUPPORT_GNU_LINKONCE)
+  /* As a GNU extension, if the name begins with .gnu.linkonce, we
+     only link a single copy of the section.  This is used to support
+     g++.  g++ will emit each template expansion in its own section.
+     The symbols will be defined as weak, so that multiple definitions
+     are permitted.  The GNU linker extension is to actually discard
+     all but one of the sections.  */
+  if (strncmp (name, ".gnu.linkonce", sizeof ".gnu.linkonce" - 1) == 0)
+    sec_flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
+#endif
+
+  return sec_flags;
+}
+
+#else /* COFF_WITH_PE */
+
+/* The PE version; see above for the general comments.
+
+   Since to set the SEC_LINK_ONCE and associated flags, we have to
+   look at the symbol table anyway, we return the symbol table index
+   of the symbol being used as the COMDAT symbol.  This is admittedly
+   ugly, but there's really nowhere else that we have access to the
+   required information.  FIXME: Is the COMDAT symbol index used for
+   any purpose other than objdump?  */
+
+static flagword
+styp_to_sec_flags (abfd, hdr, name, section)
+     bfd *abfd ATTRIBUTE_UNUSED;
+     PTR hdr;
+     const char *name;
+     asection *section;
+{
+  struct internal_scnhdr *internal_s = (struct internal_scnhdr *) hdr;
+  long styp_flags = internal_s->s_flags;
+  flagword sec_flags = 0;
+
+  if (styp_flags & STYP_DSECT)
+    abort ();  /* Don't know what to do */
+#ifdef SEC_NEVER_LOAD
+  if (styp_flags & STYP_NOLOAD)
+    sec_flags |= SEC_NEVER_LOAD;
+#endif
+  if (styp_flags & STYP_GROUP)
+    abort ();  /* Don't know what to do */
+  /* skip IMAGE_SCN_TYPE_NO_PAD */
+  if (styp_flags & STYP_COPY)
+    abort ();  /* Don't know what to do */
+  if (styp_flags & IMAGE_SCN_CNT_CODE)
+    sec_flags |= SEC_CODE | SEC_ALLOC | SEC_LOAD;
+  if (styp_flags & IMAGE_SCN_CNT_INITIALIZED_DATA)
+    sec_flags |= SEC_DATA | SEC_ALLOC | SEC_LOAD;
+  if (styp_flags & IMAGE_SCN_CNT_UNINITIALIZED_DATA)
+    sec_flags |= SEC_ALLOC;
+  if (styp_flags & IMAGE_SCN_LNK_OTHER)
+    abort ();  /* Don't know what to do */
+  if (styp_flags & IMAGE_SCN_LNK_INFO)
+    {
+      /* We mark these as SEC_DEBUGGING, but only if COFF_PAGE_SIZE is
+	 defined.  coff_compute_section_file_positions uses
+	 COFF_PAGE_SIZE to ensure that the low order bits of the
+	 section VMA and the file offset match.  If we don't know
+	 COFF_PAGE_SIZE, we can't ensure the correct correspondence,
+	 and demand page loading of the file will fail.  */
+#ifdef COFF_PAGE_SIZE
+      sec_flags |= SEC_DEBUGGING;
+#endif
+    }
+  if (styp_flags & STYP_OVER)
+    abort ();  /* Don't know what to do */
   if (styp_flags & IMAGE_SCN_LNK_REMOVE)
     sec_flags |= SEC_EXCLUDE;
 
   if (styp_flags & IMAGE_SCN_MEM_SHARED)
     sec_flags |= SEC_SHARED;
+  /* COMDAT: see below */
+  if (styp_flags & IMAGE_SCN_MEM_DISCARDABLE)
+    sec_flags |= SEC_DEBUGGING;
+  if (styp_flags & IMAGE_SCN_MEM_NOT_CACHED)
+    abort ();/* Don't know what to do */
+  if (styp_flags & IMAGE_SCN_MEM_NOT_PAGED)
+    abort (); /* Don't know what to do */
 
+  /* We infer from the distinct read/write/execute bits the settings
+     of some of the bfd flags; the actual values, should we need them,
+     are also in pei_section_data (abfd, section)->pe_flags.  */
+
+  if (styp_flags & IMAGE_SCN_MEM_EXECUTE)
+    sec_flags |= SEC_CODE;   /* Probably redundant */
+  /* IMAGE_SCN_MEM_READ is simply ignored, assuming it always to be true. */
+  if ((styp_flags & IMAGE_SCN_MEM_WRITE) == 0)
+    sec_flags |= SEC_READONLY;
+
+  /* COMDAT gets very special treatment.  */
   if (styp_flags & IMAGE_SCN_LNK_COMDAT)
     {
       sec_flags |= SEC_LINK_ONCE;
@@ -600,20 +748,26 @@ styp_to_sec_flags (abfd, hdr, name)
 
       /* COMDAT sections are special.  The first symbol is the section
 	 symbol, which tells what kind of COMDAT section it is.  The
-	 *second* symbol is the "comdat symbol" - the one with the
+	 second symbol is the "comdat symbol" - the one with the
 	 unique name.  GNU uses the section symbol for the unique
 	 name; MS uses ".text" for every comdat section.  Sigh.  - DJ */
 
+      /* This is not mirrored in sec_to_styp_flags(), but there
+	 doesn't seem to be a need to, either, and it would at best be
+	 rather messy.  */
+
       if (_bfd_coff_get_external_symbols (abfd))
 	{
-	  bfd_byte *esym, *esymend;
+	  bfd_byte *esymstart, *esym, *esymend;
 
-	  esym = (bfd_byte *) obj_coff_external_syms (abfd);
+	  esymstart = esym = (bfd_byte *) obj_coff_external_syms (abfd);
 	  esymend = esym + obj_raw_syment_count (abfd) * SYMESZ;
 
 	  while (esym < esymend)
 	    {
 	      struct internal_syment isym;
+	      char buf[SYMNMLEN + 1];
+	      const char *symname;
 
 	      bfd_coff_swap_sym_in (abfd, (PTR) esym, (PTR) &isym);
 
@@ -624,20 +778,36 @@ styp_to_sec_flags (abfd, hdr, name)
 		  abort ();
 		}
 
-	      if (isym.n_sclass == C_STAT
+	      /* The MS documentation is vague, but it appears to
+		 require that n_sclass be C_STAT for both entries;
+		 However, the Alpha compiler uses C_EXT for the one
+		 with the "real" name, at least for string-pooled
+		 constants.  */
+	      if (isym.n_scnum == section->target_index
+		  && (isym.n_sclass == C_STAT || isym.n_sclass == C_EXT)
 		  && isym.n_type == T_NULL
-		  && isym.n_numaux == 1)
+		  && isym.n_value == 0)
 		{
-		  char buf[SYMNMLEN + 1];
-		  const char *symname;
-
-		  symname = _bfd_coff_internal_syment_name (abfd, &isym, buf);
-		  if (symname == NULL)
-		    abort ();
-
-		  if (strcmp (name, symname) == 0)
+		  /* The first TWO entries with the section # are both
+		     of interest to us.  The first one is the "section
+		     symbol" (section name).  The second is the comdat
+		     symbol name.  'value' must be zero for it to
+		     apply.  Here, we've found a qualifying entry; we
+		     distinguish the first from the second by numaux
+		     (which should be 0 for the second).  FIXME: We
+		     should use the first one first rather than
+		     counting on numaux.  */
+		  if (isym.n_numaux == 1)
 		    {
 		      union internal_auxent aux;
+
+		      symname = _bfd_coff_internal_syment_name (abfd, &isym,
+								buf);
+		      if (symname == NULL)
+			abort ();
+
+		      if (strcmp (name, symname) != 0)
+			abort ();
 
 		      /* This is the section symbol.  */
 
@@ -652,19 +822,19 @@ styp_to_sec_flags (abfd, hdr, name)
 			 the right thing, we are temporarily disabling
 			 comdats for the MS types (they're used in
 			 DLLs and C++, but we don't support *their*
-			 C++ libraries anyway - DJ */
+			 C++ libraries anyway - DJ.  */
 
 		      switch (aux.x_scn.x_comdat)
 			{
 			case IMAGE_COMDAT_SELECT_NODUPLICATES:
-#if 0
+/* FIXME: This is bogus.  It breaks cross-compilers.  */
+#ifdef __INTERIX
 			  sec_flags |= SEC_LINK_DUPLICATES_ONE_ONLY;
 #else
 			  sec_flags &= ~SEC_LINK_ONCE;
 #endif
 			  break;
 
-			default:
 			case IMAGE_COMDAT_SELECT_ANY:
 			  sec_flags |= SEC_LINK_DUPLICATES_DISCARD;
 			  break;
@@ -674,18 +844,51 @@ styp_to_sec_flags (abfd, hdr, name)
 			  break;
 
 			case IMAGE_COMDAT_SELECT_EXACT_MATCH:
+			  /* Not yet fully implemented in the linker.  */
 			  sec_flags |= SEC_LINK_DUPLICATES_SAME_CONTENTS;
 			  break;
 
 			case IMAGE_COMDAT_SELECT_ASSOCIATIVE:
-#if 0
+/* FIXME: This is bogus.  It breaks cross-compilers.  */
+#ifdef __INTERIX
 			  /* FIXME: This is not currently implemented.  */
 			  sec_flags |= SEC_LINK_DUPLICATES_DISCARD;
 #else
 			  sec_flags &= ~SEC_LINK_ONCE;
 #endif
 			  break;
+
+			default:
+			  /* FIXME: Shouldn't this be at least a
+                             warning?  */
+			  sec_flags |= SEC_LINK_DUPLICATES_DISCARD;
+			  break;
 			}
+		    }
+		  else 
+		    {
+		      char *newname;
+
+		      /* This should be the the second symbol with the
+			 section #.  It is the actual symbol name.
+			 Intel puts the two adjacent, but Alpha (at
+			 least) spreads them out.  */
+
+		      section->comdat =
+			bfd_alloc (abfd, sizeof (struct bfd_comdat_info));
+		      if (section->comdat == NULL)
+			abort ();
+		      section->comdat->symbol = (esym - esymstart) / SYMESZ;
+		      symname = _bfd_coff_internal_syment_name (abfd, &isym,
+								buf);
+		      if (symname == NULL)
+			abort ();
+
+		      newname = bfd_alloc (abfd, strlen (symname) + 1);
+		      if (newname == NULL)
+			abort ();
+		      strcpy (newname, symname);
+		      section->comdat->name = newname;
 
 		      break;
 		    }
@@ -695,7 +898,6 @@ styp_to_sec_flags (abfd, hdr, name)
 	    }
 	}
     }
-#endif
 
 #if defined (COFF_LONG_SECTION_NAMES) && defined (COFF_SUPPORT_GNU_LINKONCE)
   /* As a GNU extension, if the name begins with .gnu.linkonce, we
@@ -708,8 +910,10 @@ styp_to_sec_flags (abfd, hdr, name)
     sec_flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
 #endif
 
-  return (sec_flags);
+  return sec_flags;
 }
+
+#endif /* COFF_WITH_PE */
 
 #define	get_index(symbol)	((symbol)->udata.i)
 
@@ -842,7 +1046,8 @@ dependent COFF routines:
 . flagword (*_bfd_styp_to_sec_flags_hook) PARAMS ((
 .       bfd     *abfd,
 .       PTR     internal_scnhdr,
-.       const char *name));
+.       const char *name,
+.       asection *section));
 . void (*_bfd_set_alignment_hook) PARAMS ((
 .       bfd     *abfd,
 .       asection *sec,
@@ -995,8 +1200,9 @@ dependent COFF routines:
 .#define bfd_coff_mkobject_hook(abfd, filehdr, aouthdr)\
 .        ((coff_backend_info (abfd)->_bfd_coff_mkobject_hook) (abfd, filehdr, aouthdr))
 .
-.#define bfd_coff_styp_to_sec_flags_hook(abfd, scnhdr, name)\
-.        ((coff_backend_info (abfd)->_bfd_styp_to_sec_flags_hook) (abfd, scnhdr, name))
+.#define bfd_coff_styp_to_sec_flags_hook(abfd, scnhdr, name, section)\
+.        ((coff_backend_info (abfd)->_bfd_styp_to_sec_flags_hook)\
+.         (abfd, scnhdr, name, section))
 .
 .#define bfd_coff_set_alignment_hook(abfd, sec, scnhdr)\
 .        ((coff_backend_info (abfd)->_bfd_set_alignment_hook) (abfd, sec, scnhdr))

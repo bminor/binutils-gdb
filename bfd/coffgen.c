@@ -140,9 +140,9 @@ make_a_section_from_file (abfd, hdr, target_index)
   return_section->lineno_count = hdr->s_nlnno;
   return_section->userdata = NULL;
   return_section->next = (asection *) NULL;
-  return_section->flags = bfd_coff_styp_to_sec_flags_hook (abfd, hdr, name);
-
   return_section->target_index = target_index;
+  return_section->flags = bfd_coff_styp_to_sec_flags_hook (abfd, hdr, name,
+							   return_section);
 
   /* At least on i386-coff, the line number count for a shared library
      section must be ignored.  */

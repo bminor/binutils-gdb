@@ -1,5 +1,12 @@
 1999-09-06  Donn Terry  <donn@interix.com>
 
+	* coffcode.h (sec_to_styp_flags): Write separate COFF_WITH_PE
+	version.  Move COFF_WITH_PE specific code to new version.
+	(stype_to_sec_flags): Likewise.  Add section parameter.
+	* coffgen.c (make_a_section_from_file): Set target_index before
+	calling styp_to_sec_flags.  Pass section to styp_to_sec_flags.
+	* libcoff.h: Rebuild.
+
 	* syms.c (stt): Add some PE/PEI section names.
 	(bfd_decode_symclass): Return 'w', not 'U', for a weak undefined
 	symbol.
