@@ -1,5 +1,14 @@
 2003-12-27  Mark Kettenis  <kettenis@gnu.org>
 
+	Merge from mainline:
+
+	2003-10-31  Jim Blandy  <jimb@redhat.com>
+
+	* elfread.c (elf_symtab_read): Allocate correct number of tail
+	elements to sectinfo structure.  (Fix from Woody LaRue.)
+
+2003-12-27  Mark Kettenis  <kettenis@gnu.org>
+
 	* config/sparc/nbsd64.mh (NATDEPFILES): Add sparc64-nat.o.
 
 	* Makefile.in (sparc64fbsd-tdep.o): Update dependencies.

@@ -398,9 +398,17 @@ elf_symtab_read (struct objfile *objfile, int dynamic)
 				= max (SECT_OFF_BSS (objfile),
 				       max (SECT_OFF_DATA (objfile),
 					    SECT_OFF_RODATA (objfile)));
+
+                              /* max_index is the largest index we'll
+                                 use into this array, so we must
+                                 allocate max_index+1 elements for it.
+                                 However, 'struct stab_section_info'
+                                 already includes one element, so we
+                                 need to allocate max_index aadditional
+                                 elements.  */
 			      size = (sizeof (struct stab_section_info) 
 				      + (sizeof (CORE_ADDR)
-					 * (max_index - 1)));
+					 * max_index));
 			      sectinfo = (struct stab_section_info *)
 				xmmalloc (objfile->md, size);
 			      memset (sectinfo, 0, size);
