@@ -1,3 +1,9 @@
+start-sanitize-v850e
+Fri Sep 19 11:45:49 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* v850-opc.c ("cmov"): Order reg param r1, r2 not r2, r2.
+
+end-sanitize-v850e
 Thu Sep 18 11:21:43 1997  Doug Evans  <dje@canuck.cygnus.com>
 
 	* sparc-opc.c (sparclet_cpreg_table): Add %ccsr2, %cccrr, %ccrstr.

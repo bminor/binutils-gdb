@@ -638,7 +638,7 @@ const struct v850_opcode v850_opcodes[] =
 /* arithmetic operation instructions */
 { "setf",	two (0x07e0, 0x0000),	two (0x07f0, 0xffff), 	{CCCC, R2}, 		0, PROCESSOR_ALL },
 /* start-sanitize-v850e */
-{ "cmov",	two (0x07e0, 0x0320),	two (0x07e0, 0x07e1), 	{MOVCC, R2, R1, R3}, 	0, PROCESSOR_NOT_V850 },
+{ "cmov",	two (0x07e0, 0x0320),	two (0x07e0, 0x07e1), 	{MOVCC, R1, R2, R3}, 	0, PROCESSOR_NOT_V850 },
 { "cmov",	two (0x07e0, 0x0300),	two (0x07e0, 0x07e1), 	{MOVCC, I5, R2, R3}, 	0, PROCESSOR_NOT_V850 },
 
 { "mul",	two (0x07e0, 0x0220),	two (0x07e0, 0x07ff), 	{R1, R2, R3}, 		0, PROCESSOR_NOT_V850 },
