@@ -503,6 +503,6 @@ if [ -n "${safe}" -a ! -f po/.Recover/opcodes.pot ]; then
 fi
 
 # If this fails, Sanitization must fail.
-xgettext -c -k_ -kN_ -f po/POTFILES.in -o po/opcodes.pot || exit 1
+xgettext -C -c -k_ -kN_ -f po/POTFILES.in -o po/opcodes.pot || exit 1
 
 # End of file.
