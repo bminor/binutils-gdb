@@ -1,3 +1,29 @@
+Wed Jul  1 14:23:48 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	* rclex.l: Add casts and change types to avoid warnings.
+	* rcparse.y: Likewise.
+	* resbin.c: Likewise.
+	* rescoff.c: Likewise.
+	* resrc.c: Likewise.
+
+	* Makefile.am: Rebuild dependencies.
+ 	(HFILES): Remove readelf.h.
+	* Makefile.in: Rebuild.
+
+	Based on patches from Andrew Kozin
+	<Andrew.Kozin@p14.f960.n5020.z2.fidonet.org>:
+	* winduni.h: New file, from windres.h.
+	* winduni.c: New file, from windres.c.
+	* windres.c: Move Unicode functions into winduni.c.
+	* windres.h: Move Unicode declarations into winduni.h.  Include
+	winduni.h.
+ 	(RT_ACCELERATOR): Rename from RT_ACCELERATORS to match Windows
+	macro.  Change all uses.
+	(RT_PLUGPLAY, RT_VXD): Correct values.
+	* Makefile.am (HFILES): Add windres.h.
+	(CFILES): Add winduni.c.
+	(windres_SOURCES): Add winduni.c.
+
 Mon Jun 29 17:01:21 1998  Nick Clifton  <nickc@cygnus.com>
 
 	* readelf.c: Use BFD Internal and External Elf structures.
