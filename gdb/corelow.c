@@ -169,10 +169,10 @@ gdb_check_format (bfd *abfd)
     {
       if (cf->check_format (abfd))
 	{
-	  return (true);
+	  return (1);
 	}
     }
-  return (false);
+  return (0);
 }
 
 /* Discard all vestiges of any previous core file and mark data and stack

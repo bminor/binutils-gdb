@@ -434,7 +434,7 @@ solib_map_sections (void *arg)
     }
   /* Leave bfd open, core_xfer_memory and "info files" need it.  */
   so->abfd = abfd;
-  abfd->cacheable = true;
+  abfd->cacheable = 1;
 
   if (!bfd_check_format (abfd, bfd_object))
     {

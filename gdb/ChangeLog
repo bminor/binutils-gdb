@@ -1,5 +1,15 @@
 2002-02-26  Andrew Cagney  <ac131313@redhat.com>
 
+	* memattr.c (mem_command): Eliminate ``true'' and ``false''.
+	* osfsolib.c (solib_map_sections): Ditto.
+	* irix5-nat.c (solib_map_sections): Ditto.
+	* corelow.c (gdb_check_format): Ditto.
+	* symfile.c (symfile_bfd_open): Ditto.
+	* solib.c (solib_map_sections): Ditto.
+	Fix PR gdb/354.
+	
+2002-02-26  Andrew Cagney  <ac131313@redhat.com>
+
 	* remote.c (_initialize_remote): By default, disable ``e'' and
 	``E'' step out-of-range packets.
 

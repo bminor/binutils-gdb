@@ -237,7 +237,7 @@ solib_map_sections (PTR arg)
 
   /* Leave bfd open, core_xfer_memory and "info files" need it.  */
   so->abfd = abfd;
-  abfd->cacheable = true;
+  abfd->cacheable = 1;
 
   /* copy full path name into so_name, so that later symbol_file_add
      can find it */

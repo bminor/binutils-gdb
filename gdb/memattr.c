@@ -31,9 +31,9 @@ const struct mem_attrib default_mem_attrib =
 {
   MEM_RW,			/* mode */
   MEM_WIDTH_UNSPECIFIED,
-  false,			/* hwbreak */
-  false,			/* cache */
-  false				/* verify */
+  0,				/* hwbreak */
+  0,				/* cache */
+  0				/* verify */
 };
 
 static struct mem_region *mem_region_chain = NULL;
@@ -183,21 +183,21 @@ mem_command (char *args, int from_tty)
 
 #if 0
       else if (strcmp (tok, "hwbreak") == 0)
-	attrib.hwbreak = true;
+	attrib.hwbreak = 1;
       else if (strcmp (tok, "swbreak") == 0)
-	attrib.hwbreak = false;
+	attrib.hwbreak = 0;
 #endif
 
       else if (strcmp (tok, "cache") == 0)
-	attrib.cache = true;
+	attrib.cache = 1;
       else if (strcmp (tok, "nocache") == 0)
-	attrib.cache = false;
+	attrib.cache = 0;
 
 #if 0
       else if (strcmp (tok, "verify") == 0)
-	attrib.verify = true;
+	attrib.verify = 1;
       else if (strcmp (tok, "noverify") == 0)
-	attrib.verify = false;
+	attrib.verify = 0;
 #endif
 
       else
