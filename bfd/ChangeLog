@@ -1,3 +1,21 @@
+Fri Jul 24 12:36:04 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+start-sanitize-r5900
+	The value of R_MIPS15_S3 has changed:
+	* elf32-mips.c (elf_mips15_s3_howto): New static variable.
+	(mips_reloc_map): Remove BFD_RELOC_MIPS15_S3.
+	(bfd_elf32_bfd_reloc_type_lookup): Handle BFD_RELOC_MIPS15_S3
+	specially.
+	(mips_info_to_howto_rel): Handle R_MIPS15_S3 specially.
+	(mips_elf_relocate_section): Check for R_MIPS15_S3.
+
+end-sanitize-r5900
+	* elf32-mips.c (elf_mips_howto_table): Add reloc types used on
+	Irix 6.
+	(bfd_elf32_bfd_reloc_type_lookup): Add default case.
+	* elf64-mips.c: Replace all uses of mips_elf64_reloc_type with
+	elf_mips_reloc_type defined in elf/mips.h.
+
 1998-07-24  Ulrich Drepper  <drepper@cygnus.com>
 
 	* elf64-mips.c: Remove reloc_type definition completely.  It's now
