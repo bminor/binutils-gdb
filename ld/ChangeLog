@@ -1,3 +1,10 @@
+2000-10-13  Nick Clifton  <nickc@redhat.com>
+
+	* emultempl/pe.em (_after_open): Delete 'is2' and 'nsyms'
+	local variables - they are not used.
+	(_open_dynamic_archive): Add #ifdef DLL_SUPPORT around use of
+	pe_dll_search_prefix.
+
 2000-10-12  Charles Wilson  <cwilson@ece.gatech.edu>
   
 	* emultempl/pe.em (pe_dll_search_prefix): New variable,

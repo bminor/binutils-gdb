@@ -823,8 +823,6 @@ gld_${EMULATION_NAME}_after_open ()
 #endif
 
   {
-    lang_input_statement_type *is2;
-
     /* This next chunk of code tries to detect the case where you have
        two import libraries for the same DLL (specifically,
        symbolically linking libm.a and libc.a in cygwin to
@@ -859,8 +857,6 @@ gld_${EMULATION_NAME}_after_open ()
 		    int i;
 		    int symsize = bfd_get_symtab_upper_bound (is->the_bfd);
 		    asymbol **symbols = (asymbol **) xmalloc (symsize);
-		    int nsyms = bfd_canonicalize_symtab (is->the_bfd, symbols);
-
 		    int relsize = bfd_get_reloc_upper_bound (is->the_bfd, sec);
 		    arelent **relocs = (arelent **) xmalloc ((size_t) relsize);
 		    int nrelocs = bfd_canonicalize_reloc (is->the_bfd, sec,
@@ -1461,7 +1457,9 @@ gld_${EMULATION_NAME}_open_dynamic_archive (arch, search, entry)
   string = (char *) xmalloc (strlen (search->name)
                              + strlen (filename) 
                              + sizeof "/lib.a.dll"
-                             + ( pe_dll_search_prefix ? strlen (pe_dll_search_prefix) : 0 )
+#ifdef DLL_SUPPORT
+                             + (pe_dll_search_prefix ? strlen (pe_dll_search_prefix) : 0)
+#endif
                              + 1);
 
   /* Try "libfoo.dll.a" first (preferred explicit import library for dll's */
@@ -1489,8 +1487,8 @@ gld_${EMULATION_NAME}_open_dynamic_archive (arch, search, entry)
           sprintf (string, "%s/lib%s.a", search->name, filename);
           if (! ldfile_try_open_bfd (string, entry))
             {
-
-              if ( pe_dll_search_prefix )
+#ifdef DLL_SUPPORT
+              if (pe_dll_search_prefix)
                 {  
                   /* Try "<prefix>foo.dll" (preferred dll name, if specified) */
                   sprintf (string, "%s/%s%s.dll", search->name, pe_dll_search_prefix, filename);
@@ -1511,6 +1509,7 @@ gld_${EMULATION_NAME}_open_dynamic_archive (arch, search, entry)
                     }
                 }
               else /* pe_dll_search_prefix not specified */
+#endif		
                 {
                   /* Try "libfoo.dll" (preferred dll name) */
                   sprintf (string, "%s/lib%s.dll", search->name, filename);
@@ -1524,8 +1523,7 @@ gld_${EMULATION_NAME}_open_dynamic_archive (arch, search, entry)
                           return false;
                         }
                     }
-                } /* if (pe_dll_search_prefix) */
-					 
+                }
             }
         }
     }
