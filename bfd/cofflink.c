@@ -277,6 +277,16 @@ coff_link_check_ar_symbols (abfd, info, pneeded)
 	    return false;
 	  h = bfd_link_hash_lookup (info->hash, name, false, false, true);
 
+	  /* auto import */
+	  if (!h && info->pei386_auto_import)
+	    {
+	      if (!strncmp (name,"__imp_", 6))
+		{
+		  h =
+                    bfd_link_hash_lookup (info->hash, name + 6, false, false,
+                                          true);
+		}
+	    }
 	  /* We are only interested in symbols that are currently
 	     undefined.  If a symbol is currently known to be common,
 	     COFF linkers do not bring in an object file which defines

@@ -1,3 +1,10 @@
+2001-08-02  Paul Sokolovsky  <paul.sokolovsky@technologist.com>
+
+	* cofflink.c (coff_link_check_ar_symbols): also search for
+	__imp__symbol as well as _symbol.
+	* linker.c (_bfd_generic_link_add_archive_symbols): also
+	search for __imp__symbol as well as _symbol.
+
 2001-08-01  Adam Nemet  <anemet@lnxw.com>
 
 	* elf.c (elf_sort_sections): Return zero only as the last step.

@@ -1003,10 +1003,20 @@ _bfd_generic_link_add_archive_symbols (abfd, info, checkfn)
       arh = archive_hash_lookup (&arsym_hash, h->root.string, false, false);
       if (arh == (struct archive_hash_entry *) NULL)
 	{
-	  pundef = &(*pundef)->next;
-	  continue;
+	  /* If we haven't found the exact symbol we're looking for, 
+	     let's look for its import thunk */
+	  if (info->pei386_auto_import)
+	    {
+	      char *buf = alloca (strlen (h->root.string) + 10);
+	      sprintf (buf, "__imp_%s", h->root.string);
+	      arh = archive_hash_lookup (&arsym_hash, buf, false, false);
+	    }
+	  if (arh == (struct archive_hash_entry *) NULL)
+	    {
+	      pundef = &(*pundef)->next;
+	      continue;
+	    }
 	}
-
       /* Look at all the objects which define this symbol.  */
       for (l = arh->defs; l != (struct archive_list *) NULL; l = l->next)
 	{
