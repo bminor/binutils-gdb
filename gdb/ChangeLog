@@ -1,3 +1,9 @@
+2003-12-29  Robert Millan  <robertmh@gnu.org>
+
+	Patch committed by Andrw Cagney.
+	* configure.host: Match knetbsd*-gnu and kfreebsd*-gnu.
+	* configure.tgt: Match knetbsd*-gnu.
+
 2004-01-26  Andrew Cagney  <cagney@redhat.com>
 
 	* breakpoint.c (catch_command_1): Delete #ifdef code.
