@@ -1,3 +1,8 @@
+2000-07-03  Ulf Carlsson  <ulfc@engr.sgi.com>
+
+	* elf32-mips.c: Include elf32-target.h again for the traditional
+	MIPS targets.
+
 2000-07-03  Marek Michalkiewicz  <marekm@linux.org.pl>
 
 	* elf32-avr.c (bfd_elf32_bfd_reloc_type_lookup):
