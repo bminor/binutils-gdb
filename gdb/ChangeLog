@@ -1,5 +1,9 @@
 2002-06-19  Daniel Jacobowitz  <drow@mvista.com>
 
+	* ada-lang.c (fill_in_ada_prototype): Update comment.
+
+2002-06-19  Daniel Jacobowitz  <drow@mvista.com>
+
 	* mips-tdep.c (enum mips_abi): Explicitly start at 0.  Add
 	MIPS_ABI_LAST.
 	(mips_abi_string, mips_abi_strings): New.
