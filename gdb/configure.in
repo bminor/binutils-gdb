@@ -91,7 +91,7 @@ ns32k)
 	esac
 	;;
 
-rtpc)
+romp)
 	gdb_host=rtbsd
 	;;
 
