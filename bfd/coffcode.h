@@ -2511,6 +2511,30 @@ coff_set_arch_mach (abfd, arch, machine)
   return true;			/* We're easy ... */
 }
 
+#ifdef COFF_IMAGE_WITH_PE
+
+/* This is used to sort sections by VMA, as required by PE image
+   files.  */
+
+static int sort_by_secaddr PARAMS ((const PTR, const PTR));
+
+static int
+sort_by_secaddr (arg1, arg2)
+     const PTR arg1;
+     const PTR arg2;
+{
+  const asection *a = *(const asection **) arg1;
+  const asection *b = *(const asection **) arg2;
+
+  if (a->vma < b->vma)
+    return -1;
+  else if (a->vma > b->vma)
+    return 1;
+  else
+    return 0;
+}
+
+#endif /* COFF_IMAGE_WITH_PE */
 
 /* Calculate the file position for each section. */
 
@@ -2529,7 +2553,6 @@ coff_compute_section_file_positions (abfd)
   asection *previous = (asection *) NULL;
   file_ptr sofar = FILHSZ;
   boolean align_adjust;
-  unsigned int count;
 #ifdef ALIGN_SECTIONS_IN_FILE
   file_ptr old_sofar;
 #endif
@@ -2613,29 +2636,113 @@ coff_compute_section_file_positions (abfd)
       sofar += SCNHSZ;
 #endif
 
+#ifdef COFF_IMAGE_WITH_PE
+  {
+    /* PE requires the sections to be in memory order when listed in
+       the section headers.  It also does not like empty loadable
+       sections.  The sections apparently do not have to be in the
+       right order in the image file itself, but we do need to get the
+       target_index values right.  */
+
+    int count;
+    asection **section_list;
+    int i;
+    int target_index;
+
+    count = 0;
+    for (current = abfd->sections; current != NULL; current = current->next)
+      ++count;
+
+    /* We allocate an extra cell to simplify the final loop.  */
+    section_list = bfd_malloc (sizeof (struct asection *) * (count + 1));
+    if (section_list == NULL)
+      return false;
+
+    i = 0;
+    for (current = abfd->sections; current != NULL; current = current->next)
+      {
+	section_list[i] = current;
+	++i;
+      }
+    section_list[i] = NULL;
+
+    qsort (section_list, count, sizeof (asection *), sort_by_secaddr);
+
+    /* Rethread the linked list into sorted order; at the same time,
+       assign target_index values.  */
+    target_index = 1;
+    abfd->sections = section_list[0];
+    for (i = 0; i < count; i++)
+      {
+	current = section_list[i];
+	current->next = section_list[i + 1];
+
+	/* Later, if the section has zero size, we'll be throwing it
+	   away, so we don't want to number it now.  Note that having
+	   a zero size and having real contents are different
+	   concepts: .bss has no contents, but (usually) non-zero
+	   size.  */
+	if (current->_raw_size == 0)
+	  {
+	    /* Discard.  However, it still might have (valid) symbols
+	       in it, so arbitrarily set it to section 1 (indexing is
+	       1-based here; usually .text).  __end__ and other
+	       contents of .endsection really have this happen.
+	       FIXME: This seems somewhat dubious.  */
+	    current->target_index = 1;
+	  }
+	else
+	  current->target_index = target_index++;
+      }
+
+    free (section_list);
+  }
+#else /* ! COFF_IMAGE_WITH_PE */
+  {
+    /* Set the target_index field.  */
+    int target_index;
+
+    target_index = 1;
+    for (current = abfd->sections; current != NULL; current = current->next)
+      current->target_index = target_index++;
+  }
+#endif /* ! COFF_IMAGE_WITH_PE */
+
   align_adjust = false;
-  for (current = abfd->sections, count = 1;
+  for (current = abfd->sections;
        current != (asection *) NULL;
-       current = current->next, ++count)
+       current = current->next)
     {
 #ifdef COFF_IMAGE_WITH_PE
-      /* The NT loader does not want empty section headers, so we omit
-         them.  We don't actually remove the section from the BFD,
-         although we probably should.  This matches code in
-         coff_write_object_contents.  */
-      if (current->_raw_size == 0)
+      /* With PE we have to pad each section to be a multiple of its
+	 page size too, and remember both sizes.  */
+      if (coff_section_data (abfd, current) == NULL)
 	{
-	  current->target_index = -1;
-	  --count;
-	  continue;
+	  current->used_by_bfd =
+	    (PTR) bfd_zalloc (abfd, sizeof (struct coff_section_tdata));
+	  if (current->used_by_bfd == NULL)
+	    return false;
 	}
+      if (pei_section_data (abfd, current) == NULL)
+	{
+	  coff_section_data (abfd, current)->tdata =
+	    (PTR) bfd_zalloc (abfd, sizeof (struct pei_section_tdata));
+	  if (coff_section_data (abfd, current)->tdata == NULL)
+	    return false;
+	}
+      if (pei_section_data (abfd, current)->virt_size == 0)
+	pei_section_data (abfd, current)->virt_size = current->_raw_size;
 #endif
 
-      current->target_index = count;
-
-      /* Only deal with sections which have contents */
+      /* Only deal with sections which have contents.  */
       if (!(current->flags & SEC_HAS_CONTENTS))
 	continue;
+
+#ifdef COFF_IMAGE_WITH_PE
+      /* Make sure we skip empty sections in a PE image.  */
+      if (current->_raw_size == 0)
+	continue;
+#endif
 
       /* Align the sections in the file to the same boundary on
 	 which they are aligned in virtual memory.  I960 doesn't
@@ -2667,26 +2774,7 @@ coff_compute_section_file_positions (abfd)
       current->filepos = sofar;
 
 #ifdef COFF_IMAGE_WITH_PE
-      /* With PE we have to pad each section to be a multiple of its
-	 page size too, and remember both sizes.  */
-
-      if (coff_section_data (abfd, current) == NULL)
-	{
-	  current->used_by_bfd =
-	    (PTR) bfd_zalloc (abfd, sizeof (struct coff_section_tdata));
-	  if (current->used_by_bfd == NULL)
-	    return false;
-	}
-      if (pei_section_data (abfd, current) == NULL)
-	{
-	  coff_section_data (abfd, current)->tdata =
-	    (PTR) bfd_zalloc (abfd, sizeof (struct pei_section_tdata));
-	  if (coff_section_data (abfd, current)->tdata == NULL)
-	    return false;
-	}
-      if (pei_section_data (abfd, current)->virt_size == 0)
-	pei_section_data (abfd, current)->virt_size = current->_raw_size;
-
+      /* Set the padded size.  */
       current->_raw_size = (current->_raw_size + page_size -1) & -page_size;
 #endif
 
