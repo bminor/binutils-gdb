@@ -24,6 +24,12 @@
  * another type of IPC (Mach? SysV?) is implemented.
  */
 
+#if 0
+
+/* We don't seem to have a copy of udiphdos.h.  Furthermore, all the
+   things in udiphunix.h are pretty much generic 32-bit machine defines
+   which don't have anything to do with IPC.  */
+
 #ifdef DOS_IPC
 #include "udiphdos.h"
 #else
@@ -31,3 +37,8 @@
 #include "udiphunix.h"
 #endif
 
+#else
+
+#include "udiphunix.h"
+
+#endif

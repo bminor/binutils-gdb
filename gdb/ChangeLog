@@ -1,5 +1,7 @@
 Tue Aug 17 11:14:25 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* 29k-share/udi/udiphcfg.h: Always include udiphunix.h not udiphdos.h.
+
 	* complaints.c (complain): fflush (stdout) after output.
 
 Tue Aug 17 01:43:55 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
