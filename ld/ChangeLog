@@ -1,3 +1,8 @@
+2003-05-26  Maciej W. Rozycki  <macro@ds2.pg.gda.pl>
+
+	* emulparams/elf64btsmip.sh: Set TEXT_START_ADDR to 0x120000000 to
+	trap on pointer crops.
+
 2003-05-21  Marcus Comstedt  <marcus@mc.pp.se>
 
 	* configure.tgt: Check for a target triplet of shl-...-netbsdelf
