@@ -19,10 +19,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #include "mips/tm-irix3.h"
 
-/* A function call in Irix 5 will sometimes skip the three initial
-   instructions which set the GP.  */
-#define AT_FUNCTION_START(pc,func_name,func_addr) ((pc) == (func_addr) + 12)
-
 /* When calling functions on Irix 5 (or any MIPS SVR4 ABI compliant
    platform) $25 must hold the function address.  Dest_Reg is a macro
    used in CALL_DUMMY in tm-mips.h.  */

@@ -1,3 +1,7 @@
+Tue Jan 11 06:59:10 1994  Jim Kingdon  (kingdon@deneb.cygnus.com)
+
+	* infrun.c, config/mips/tm-irix5.h: Remove #if 0'd AT_FUNCTION_START.
+
 Tue Jan 11 14:27:03 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* remote-udi.c (udi_resume): Correct prototype.
