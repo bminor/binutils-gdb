@@ -1261,7 +1261,7 @@ This was written by steve chamberlain
 #include "ldmisc.h"
 #include "ldexp.h"
 #include "ldlang.h"
-#include "ldgram.h"
+#include <ldgram.h>
 #include "ldfile.h"
 #include "ldlex.h"
 #include "ldmain.h"
