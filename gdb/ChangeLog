@@ -1,3 +1,7 @@
+Tue Jun  8 14:42:10 1993  Jim Kingdon  (kingdon@rtl.cygnus.com)
+
+	* symtab.h, dwarfread.c: Doc fix re dependencies.
+
 Tue Jun  8 17:54:09 1993  Rob Savoye  (rob@rtl.cygnus.com)
 
 	* serial.c (serial_close): If scb is NULL, don't try to close

@@ -24,7 +24,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 FIXME: Figure out how to get the frame pointer register number in the
 execution environment of the target.  Remove R_FP kludge
 
-FIXME: Add generation of dependencies list to partial symtab code.
+FIXME: Do we need to generate dependencies in partial symtabs?
+(Perhaps we don't need to).
 
 FIXME: Resolve minor differences between what information we put in the
 partial symbol table and what dbxread puts in.  For example, we don't yet
