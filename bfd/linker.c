@@ -975,6 +975,7 @@ generic_link_check_archive_element (abfd, info, pneeded)
 	  else
 	    h->u.c.section = bfd_make_section_old_way (symbfd,
 						       p->section->name);
+	  h->u.c.section->flags = SEC_ALLOC;
 	}
       else
 	{
@@ -1287,9 +1288,15 @@ _bfd_generic_link_add_one_symbol (info, abfd, name, flags, section, value,
 	  h->type = bfd_link_hash_common;
 	  h->u.c.size = value;
 	  if (section == &bfd_com_section)
-	    h->u.c.section = bfd_make_section_old_way (abfd, "COMMON");
+	    {
+	      h->u.c.section = bfd_make_section_old_way (abfd, "COMMON");
+	      h->u.c.section->flags = SEC_ALLOC;
+	    }
 	  else if (section->owner != abfd)
-	    h->u.c.section = bfd_make_section_old_way (abfd, section->name);
+	    {
+	      h->u.c.section = bfd_make_section_old_way (abfd, section->name);
+	      h->u.c.section->flags = SEC_ALLOC;
+	    }
 	  else
 	    h->u.c.section = section;
 	  break;

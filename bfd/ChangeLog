@@ -9,6 +9,14 @@ Mon Jan 24 14:41:23 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
 
 Mon Jan 24 12:38:54 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
+	* linker.c (generic_link_check_achive_element): Set SEC_ALLOC flag
+	for a created common section.
+	(_bfd_generic_link_add_one_symbol): Likewise.
+
+	* elfcode.h (swap_out_syms): Use elf_section_from_bfd_section to
+	get the index of a common section, rather than always using
+	SHN_COMMON (MIPS has multiple common sections).
+
 	* elf32-hppa.c (hppa_elf_gen_reloc_type): Typo (== for =).
 
 	* bfd/aoutx.h (aout_link_input_section_std,
