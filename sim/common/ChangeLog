@@ -1,3 +1,8 @@
+Thu Feb  5 13:27:04 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* cgen-sim.h (EX_FN_NAME): _exc_ -> _ex_.
+	(SEM_INSN): New macro.
+
 Tue Feb  3 16:31:56 1998  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-run.c (sim_engine_run): Assume IMEM is 32 bit.
