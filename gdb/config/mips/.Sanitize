@@ -121,10 +121,6 @@ xm-news-mips.h
 xm-riscos.h
 
 Things-to-lose:
-r3900.mt
-r3900l.mt
-tm-r3900.h
-tm-r3900l.h
 
 Do-last:
 

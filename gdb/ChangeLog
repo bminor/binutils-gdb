@@ -1,3 +1,8 @@
+Wed Jan 14 19:27:02 1998  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* config/mips/{r3900.mt,r3900l.mt,tm-r3900.h,tm-r3900l.h}:
+	Remove, no longer used.
+
 start-sanitize-d30v
 Wed Jan 14 18:11:26 1998  Michael Meissner  <meissner@cygnus.com>
 
