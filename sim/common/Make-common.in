@@ -684,26 +684,26 @@ CGEN_FLAGS_TO_PASS = \
 cgen-arch: force
 	$(SHELL) $(srccom)/cgen.sh arch $(srcdir) \
 		$(CGEN) $(CGENDIR) "$(CGENFLAGS)" \
-		$(arch) "$(FLAGS)" ignored $(mach) ignored ignored
-
+		$(arch) "$(FLAGS)" ignored "$(isa)" $(mach) ignored ignored
+	
 cgen-cpu: force
 	$(SHELL) $(srccom)/cgen.sh cpu $(srcdir) \
 		$(CGEN) $(CGENDIR) "$(CGENFLAGS)" \
-		$(arch) "$(FLAGS)" $(cpu) $(mach) "$(SUFFIX)" "$(EXTRAFILES)"
+		$(arch) "$(FLAGS)" $(cpu) "$(isa)" $(mach) "$(SUFFIX)" "$(EXTRAFILES)"
 
 cgen-decode: force
 	$(SHELL) $(srccom)/cgen.sh decode $(srcdir) \
 		$(CGEN) $(CGENDIR) "$(CGENFLAGS)" \
-		$(arch) "$(FLAGS)" $(cpu) $(mach) "$(SUFFIX)" ignored
+		$(arch) "$(FLAGS)" $(cpu) "$(isa)" $(mach) "$(SUFFIX)" ignored
 
 cgen-cpu-decode: force
 	$(SHELL) $(srccom)/cgen.sh cpu-decode $(srcdir) \
 		$(CGEN) $(CGENDIR) "$(CGENFLAGS)" \
-		$(arch) "$(FLAGS)" $(cpu) $(mach) "$(SUFFIX)" "$(EXTRAFILES)"
+		$(arch) "$(FLAGS)" $(cpu) "$(isa)" $(mach) "$(SUFFIX)" "$(EXTRAFILES)"
 
 cgen-desc: force
 	$(SHELL) $(srccom)/cgen.sh desc $(srcdir) \
 		$(CGEN) $(CGENDIR) "$(CGENFLAGS)" \
-		$(arch) "$(FLAGS)" $(cpu) $(mach) "$(SUFFIX)" ignored
+		$(arch) "$(FLAGS)" $(cpu) "$(isa)" $(mach) "$(SUFFIX)" ignored
 
 ## End COMMON_POST_CONFIG_FRAG

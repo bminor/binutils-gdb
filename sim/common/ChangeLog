@@ -1,3 +1,10 @@
+2000-10-26  Ben Elliston  <bje@redhat.com>
+
+        * cgen.sh: Handle an isa argument between cpu and mach. Default to
+        `all'. Pass `-i' options to cgen applications.
+        * Make-common.in (cgen-arch, cgen-cpu, cgen-decode, cgen-cpu-decode,
+        cgen-desc): Pass $(isa) to cgen.sh.
+
 2000-10-08  Ben Elliston  <bje@redhat.com>
 
 	* cgen-utils.c (cgen_rtx_error): New function.

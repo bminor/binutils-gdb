@@ -20,8 +20,9 @@ cgenflags=$5
 arch=$6
 archflags=$7
 cpu=$8
-mach=$9
+isa=$9
 # bring parms past 9 portably into view
+shift ; mach=$9
 shift ; suffix=$9
 shift ; extrafiles=$9
 
@@ -31,6 +32,10 @@ lowercase='abcdefghijklmnopqrstuvwxyz'
 uppercase='ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 ARCH=`echo ${arch} | tr "${lowercase}" "${uppercase}"`
 CPU=`echo ${cpu} | tr "${lowercase}" "${uppercase}"`
+
+if test -z "$isa" ; then
+  isa=all
+fi
 
 case $action in
 arch)
@@ -44,6 +49,7 @@ arch)
 		-f "${archflags}" \
 		-m ${mach} \
 		-a ${arch} \
+		-i ${isa} \
 		-A tmp-arch.h1 \
 		-B tmp-arch.c1 \
 		-N tmp-all.h1
@@ -91,6 +97,7 @@ cpu | decode | cpu-decode)
 		-f "${archflags}" \
 		-m ${mach} \
 		-a ${arch} \
+		-i ${isa} \
 		${fileopts}
 
 	case $action in
@@ -152,6 +159,7 @@ desc)
 		-f "${archflags}" \
 		-m ${mach} \
 		-a ${arch} \
+		-i ${isa} \
 		-H tmp-desc.h1 \
 		-C tmp-desc.c1 \
 		-O tmp-opc.h1
