@@ -956,7 +956,7 @@ gdb.z:gdb.1
 install: all install-only
 install-only: $(CONFIG_INSTALL)
 	transformed_name=`t='$(program_transform_name)'; \
-			  echo gdb | sed -e $$t` ; \
+			  echo gdb | sed -e "$$t"` ; \
 		if test "x$$transformed_name" = x; then \
 		  transformed_name=gdb ; \
 		else \

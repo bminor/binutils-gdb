@@ -1,3 +1,7 @@
+2003-07-11  Theodore A. Roth  <troth@openavr.org>
+
+	* Makefile.in: Quote sed expression when generating transformed_name.
+
 2003-07-11  Richard Henderson  <rth@redhat.com>
 
         * Makefile.in (dwarf2-frame.o): Add complaints_h.
