@@ -72,8 +72,6 @@ static void init_exec_ops (void);
 
 void _initialize_exec (void);
 
-extern int info_verbose;
-
 /* The target vector for executable files.  */
 
 struct target_ops exec_ops;

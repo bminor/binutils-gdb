@@ -51,9 +51,6 @@ static unsigned int stop_whining = 0;
 
 static int complaint_series = 0;
 
-/* External variables and functions referenced. */
-
-extern int info_verbose;
 
 
 /* Functions to handle complaints during symbol reading.  */

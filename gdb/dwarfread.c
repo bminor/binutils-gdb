@@ -241,7 +241,6 @@ typedef unsigned int DIE_REF;	/* Reference to a DIE */
 
 /* External variables referenced. */
 
-extern int info_verbose;	/* From main.c; nonzero => verbose */
 extern char *warning_pre_print;	/* From utils.c */
 
 /* The DWARF debugging information consists of two major pieces,

@@ -61,7 +61,6 @@
 #define MAX_AGENT_EXPR_LEN	184
 
 
-extern int info_verbose;
 extern void (*readline_begin_hook) (char *, ...);
 extern char *(*readline_hook) (char *);
 extern void (*readline_end_hook) (void);

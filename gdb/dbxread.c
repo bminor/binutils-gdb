@@ -124,10 +124,6 @@ struct symloc
 
 static enum language psymtab_language = language_unknown;
 
-/* Nonzero means give verbose info on gdb action.  From main.c.  */
-
-extern int info_verbose;
-
 /* The BFD for this file -- implicit parameter to next_symbol_text.  */
 
 static bfd *symfile_bfd;

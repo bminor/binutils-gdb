@@ -95,8 +95,6 @@ struct complaint unknown_option_complaint =
 
 /* External variables and functions referenced. */
 
-extern int info_verbose;
-
 extern void report_transfer_performance (unsigned long, time_t, time_t);
 
 /* Functions this file defines */

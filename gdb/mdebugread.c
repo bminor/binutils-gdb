@@ -146,11 +146,6 @@ struct symloc
 #define SC_IS_BSS(sc) ((sc) == scBss || (sc) == scSBss)
 #define SC_IS_UNDEF(sc) ((sc) == scUndefined || (sc) == scSUndefined)
 
-
-/* Things we import explicitly from other modules */
-
-extern int info_verbose;
-
 /* Various complaints about symbol reading that don't abort the process */
 
 static struct complaint bad_file_number_complaint =

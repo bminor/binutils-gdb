@@ -1,3 +1,18 @@
+2001-11-06  Fred Fish  <fnf@redhat.com>
+
+	* complaints.c (info_verbose): Remove unneeded decl, is in defs.h.
+	* dbxread.c: Ditto
+	* dwarf2read.c: Ditto.
+	* dwarfread.c: Ditto.
+	* exec.c: Ditto.
+	* hpread.c: Ditto.
+	* hpread.h: Ditto.
+	* mdebugread.c: Ditto.
+	* os9kread.c: Ditto.
+	* stack.c: Ditto.
+	* symfile.c: Ditto.
+	* tracepoint.c: Ditto.
+
 2001-11-06  Andrew Cagney  <ac131313@redhat.com>
 
 	* MAINTAINERS: Update Andrew Cagney's responsibilities.  Mention

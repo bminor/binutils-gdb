@@ -554,9 +554,6 @@ static struct complaint dwarf2_unsupported_const_value_attr =
   "unsupported const value attribute form: '%s'", 0, 0
 };
 
-/* Externals references.  */
-extern int info_verbose;	/* From main.c; nonzero => verbose */
-
 /* local function prototypes */
 
 static void dwarf2_locate_sections (bfd *, asection *, PTR);

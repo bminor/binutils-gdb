@@ -95,9 +95,6 @@ static int psymfile_depth = 0;
 /* keep symbol table file nested depth */
 static int symfile_depth = 0;
 
-/* Nonzero means give verbose info on gdb action.  From main.c.  */
-extern int info_verbose;
-
 extern int previous_stab_code;
 
 /* Name of last function encountered.  Used in Solaris to approximate

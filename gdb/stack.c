@@ -108,7 +108,6 @@ struct frame_info *parse_frame_specification (char *);
 static void frame_info (char *, int);
 
 extern int addressprint;	/* Print addresses, or stay symbolic only? */
-extern int info_verbose;	/* Verbosity of symbol reading msgs */
 extern int lines_to_list;	/* # of lines "list" command shows by default */
 
 /* The "selected" stack frame is used by default for local and arg access.
