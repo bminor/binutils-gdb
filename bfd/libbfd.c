@@ -1,5 +1,5 @@
-/* libbfd.c -- random BFD support routines, only used internally.
-   Copyright (C) 1990-1991 Free Software Foundation, Inc.
+/* Assorted BFD support routines, only used internally.
+   Copyright 1990, 1991, 1992 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
 This file is part of BFD, the Binary File Descriptor library.
@@ -188,7 +188,13 @@ DEFUN(bfd_read,(ptr, size, nitems, abfd),
       bfd_size_type nitems AND
       bfd *abfd)
 {
-  return (bfd_size_type)real_read (ptr, 1, (int)(size*nitems), bfd_cache_lookup(abfd));
+  int nread;
+  nread = real_read (ptr, 1, (int)(size*nitems), bfd_cache_lookup(abfd));
+#ifdef FILE_OFFSET_IS_CHAR_INDEX
+  if (nread > 0)
+    abfd->where += nread;
+#endif
+  return nread;
 }
 
 bfd_size_type
@@ -198,7 +204,12 @@ DEFUN(bfd_write,(ptr, size, nitems, abfd),
       bfd_size_type nitems AND
       bfd *abfd)
 {
-  return fwrite (ptr, 1, (int)(size*nitems), bfd_cache_lookup(abfd));
+  int nwrote = fwrite (ptr, 1, (int)(size*nitems), bfd_cache_lookup(abfd));
+#ifdef FILE_OFFSET_IS_CHAR_INDEX
+  if (nwrote > 0)
+    abfd->where += nwrote;
+#endif
+  return nwrote;
 }
 
 /*
@@ -224,44 +235,54 @@ DEFUN(bfd_write_bigendian_4byte_int,(abfd, i),
   bfd_write((PTR)buffer, 4, 1, abfd);
 }
 
+long
+DEFUN(bfd_tell,(abfd),
+      bfd *abfd)
+{
+  file_ptr ptr;
+
+  ptr = ftell (bfd_cache_lookup(abfd));
+
+  if (abfd->my_archive)
+    ptr -= abfd->origin;
+  abfd->where = ptr;
+  return ptr;
+}
+
 int
 DEFUN(bfd_seek,(abfd, position, direction),
       bfd * CONST abfd AND
       CONST file_ptr position AND
       CONST int direction)
 {
-        /* For the time being, a BFD may not seek to it's end.  The
-           problem is that we don't easily have a way to recognize
-           the end of an element in an archive. */
+  int result;
+  FILE *f;
+  /* For the time being, a BFD may not seek to it's end.  The problem
+     is that we don't easily have a way to recognize the end of an
+     element in an archive. */
 
-        BFD_ASSERT(direction == SEEK_SET
-                   || direction == SEEK_CUR);
-        
-        if (direction == SEEK_SET && abfd->my_archive != NULL) 
-            {
-                    /* This is a set within an archive, so we need to
-                       add the base of the object within the archive */
-                    return(fseek(bfd_cache_lookup(abfd),
-                                 position + abfd->origin,
-                                 direction));
-            }
-        else 
-            {
-                    return(fseek(bfd_cache_lookup(abfd),  position, direction));
-            }   
-}
+  BFD_ASSERT (direction == SEEK_SET || direction == SEEK_CUR);
 
-long
-DEFUN(bfd_tell,(abfd),
-      bfd *abfd)
-{
-        file_ptr ptr;
+  if (direction == SEEK_SET && position == 0)
+    return 0;
+#ifdef FILE_OFFSET_IS_CHAR_INDEX
+  if (x > 0 && direction == SEEK_SET && position == abfd->where)
+    return 0;
+#endif
 
-        ptr = ftell (bfd_cache_lookup(abfd));
-
-        if (abfd->my_archive)
-            ptr -= abfd->origin;
-        return ptr;
+  f = bfd_cache_lookup (abfd);
+  if (direction == SEEK_SET && abfd->my_archive != NULL)
+    {
+      /* This is a set within an archive, so we need to
+	 add the base of the object within the archive */
+      result = fseek (f, position + abfd->origin, direction);
+    }
+  else
+    {
+      result = fseek (f, position, direction);
+    }
+  /* Force redetermination of `where' field.  */
+  bfd_tell (abfd);
 }
 
 /** Make a string table */
