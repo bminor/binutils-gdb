@@ -1,3 +1,10 @@
+Tue Jun 20 12:03:36 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* monitor.c (monitor_wait): Don't use the watchdog timeout
+	if its value is 0.
+	* w89k-rom.c (w89k_open): Define to be static.
+
+start-sanitize-gdbtk
 Tue Jun 20 10:19:40 1995  Stu Grossman  (grossman@cygnus.com)
 
 	* gdbtk.c:  Add functions Tcl_Malloc, Tcl_Realloc, and Tcl_Free.
@@ -12,6 +19,7 @@ Tue Jun 20 10:19:40 1995  Stu Grossman  (grossman@cygnus.com)
 	* (build_framework):  Turn on breakpoint menu.
 	* (create_command_window):  Implement tab completion.  Add binding
 	for ^C to stop target.
+end-sanitize-gdbtk
 
 Sat Jun 17 10:17:16 1995  Jeff Law  (law@snake.cs.utah.edu)
 

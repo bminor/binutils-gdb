@@ -298,7 +298,7 @@ static struct monitor_ops w89k_cmds =
   MONITOR_OPS_MAGIC		/* magic */
   };
 
-void
+static void
 w89k_open(args, from_tty)
      char *args;
      int from_tty;

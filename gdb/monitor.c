@@ -32,7 +32,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcore.h"
 #include "target.h"
 #include "wait.h"
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
 #include <stdarg.h>
 #else
 #include <varargs.h>
@@ -89,6 +89,8 @@ static int hashmark;		/* flag set by "set hash" */
 
 static int timeout = 30;
 
+static int in_monitor_wait = 0;	/* Non-zero means we are in monitor_wait() */
+
 static void (*ofunc)();		/* Old SIGINT signal handler */
 
 /* Descriptor for I/O to remote machine.  Initialize it to NULL so
@@ -115,7 +117,7 @@ static int dump_reg_flag;	/* Non-zero means do a dump_registers cmd when
    Works just like printf.  */
 
 void
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
 monitor_printf_noecho (char *pattern, ...)
 #else
 monitor_printf_noecho (va_alist)
@@ -126,7 +128,7 @@ monitor_printf_noecho (va_alist)
   char sndbuf[2000];
   int len;
 
-#if __STDC__
+#if ANSI_PROTOTYPES
   va_start (args, pattern);
 #else
   char *pattern;
@@ -152,7 +154,7 @@ monitor_printf_noecho (va_alist)
    printf.  */
 
 void
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
 monitor_printf (char *pattern, ...)
 #else
 monitor_printf (va_alist)
@@ -164,7 +166,7 @@ monitor_printf (va_alist)
   int len;
   int i, c;
 
-#ifdef __STDC__
+#ifdef ANSI_PROTOTYPES
   va_start (args, pattern);
 #else
   char *pattern;
@@ -221,7 +223,15 @@ readchar (timeout)
     return c & 0x7f;
 
   if (c == SERIAL_TIMEOUT)
-    error ("Timeout reading from remote system.");
+#ifdef MAINTENANCE_CMDS
+    if (in_monitor_wait)	/* Watchdog went off */
+      {
+	target_mourn_inferior ();
+	error ("Watchdog has expired.  Target detached.\n");
+      }
+    else
+#endif
+      error ("Timeout reading from remote system.");
 
   perror_with_name ("remote-monitor");
 }
@@ -603,6 +613,7 @@ monitor_wait_cleanup (old_timeout)
 {
   timeout = old_timeout;
   signal (SIGINT, ofunc);
+  in_monitor_wait = 0;
 }
 
 /* Wait until the remote machine stops, then return, storing status in
@@ -623,7 +634,12 @@ monitor_wait (pid, status)
 
   old_chain = make_cleanup (monitor_wait_cleanup, old_timeout);
 
+#ifdef MAINTENANCE_CMDS
+  in_monitor_wait = 1;
+  timeout = watchdog > 0 ? watchdog : -1;
+#else
   timeout = -1;		/* Don't time out -- user program is running. */
+#endif
 
   ofunc = (void (*)()) signal (SIGINT, monitor_interrupt);
 
@@ -655,6 +671,8 @@ monitor_wait (pid, status)
   status->value.sig = TARGET_SIGNAL_TRAP;
 
   discard_cleanups (old_chain);
+
+  in_monitor_wait = 0;
 
   return inferior_pid;
 }
