@@ -22,6 +22,14 @@ Tools.  It also discusses common usage..
 Copyright @copyright{} 1991 Cygnus Support
 @end ifinfo
 
+@ifinfo
+@format
+START-INFO-DIR-ENTRY
+* configuration: (cfg-paper.info).	Some theory on configuring source.
+END-INFO-DIR-ENTRY
+@end format
+@end ifinfo
+
 @node top, Some Basic Terms, (dir), (dir)
 
 @ifinfo

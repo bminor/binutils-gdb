@@ -75,17 +75,18 @@ INSTALL_TARGET = install.all
 
 all:	$(ALL)
 
-info: configure.info doc.info
+info:	cfg-paper.info
 	$(MAKE) subdir_do DO=info "DODIRS=$(SUBDIRS)"
+
+cfg-paper.info: cfg-paper.texi
+	$(MAKEINFO) -o cfg-paper.info $(srcdir)/cfg-paper.texi
 
 configure.info: configure.texi
 	$(MAKEINFO) -o configure.info $(srcdir)/configure.texi
 
-doc.info: doc.texi
-	$(MAKEINFO) -o doc.info $(srcdir)/doc.texi
-
 install-info: install-info-dirs force
 	$(MAKE) subdir_do DO=install-info "DODIRS=$(SUBDIRS)"
+	$(INSTALL_DATA) cfg-paper.info $(infodir)/cfg-paper.info
 	$(MAKE) dir.info install-dir.info
 
 install-dir.info:
@@ -459,7 +460,7 @@ install-bison: force
 ### gcc
 .PHONY: all-gcc just-gcc
 all-gcc: just-gcc
-just-gcc: just-libiberty just-bison force
+just-gcc: just-libiberty just-bison just-gnulib1 force
 	if [ -d $(unsubdir)/gcc ] ; then \
 		(cd $(unsubdir)/gcc$(subdir); \
 		$(MAKE) \
@@ -741,8 +742,47 @@ install-ld: force
 		true ; \
 	fi
 
-### gnulib
-.PHONY: all-gnulib just-gnulib
+### gnulib (and gnulib1)
+.PHONY: all-gnulib just-gnulib1 just-gnulib
+just-gnulib1: all-gas all-binutils force
+	if [ -d $(unsubdir)/gnulib ] ; then \
+		(cd $(unsubdir)/gnulib$(subdir); \
+		$(MAKE) \
+			"against=$(against)" \
+			"AR=$(AR)" \
+			"AR_FLAGS=$(AR_FLAGS)" \
+			"CC=$(CC)" \
+			"RANLIB=$(RANLIB)" \
+			"LOADLIBES=$(LOADLIBES)" \
+			"LDFLAGS=$(LDFLAGS)" \
+			"BISON=$(BISON)" \
+			"MAKEINFO=$(MAKEINFO)" \
+			gnulib1.a) ; \
+	else \
+		true ; \
+	fi
+
+clean-gnulib1: force
+	if [ -d $(unsubdir)/gnulib ] ; then \
+		(cd $(unsubdir)/gnulib$(subdir); \
+		$(MAKE) \
+			"against=$(against)" \
+			"AR=$(AR)" \
+			"AR_FLAGS=$(AR_FLAGS)" \
+			"CC=$(CC)" \
+			"RANLIB=$(RANLIB)" \
+			"LOADLIBES=$(LOADLIBES)" \
+			"LDFLAGS=$(LDFLAGS)" \
+			"BISON=$(BISON)" \
+			"MAKEINFO=$(MAKEINFO)" \
+			clean-gnulib1) ; \
+	else \
+		true ; \
+	fi
+
+install-gnulib1: force
+	echo gnulib1 is a component, not an installable target
+
 all-gnulib: just-gnulib
 just-gnulib: all-gcc all-gas all-binutils force
 	if [ -d $(unsubdir)/gnulib ] ; then \
