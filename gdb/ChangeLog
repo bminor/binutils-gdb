@@ -1,3 +1,7 @@
+2004-12-27  Mark Kettenis  <kettenis@gnu.org>
+
+	* config/mips/obsd64.mh (NATDEPFILES): Unwrap line.
+
 2004-12-26  Mark Kettenis  <kettenis@gnu.org>
 
 	* inftarg.c (child_xfer_partial): Remove code that handles
