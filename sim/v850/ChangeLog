@@ -1,0 +1,5 @@
+Wed Aug 28 13:53:22 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* ChangeLog, Makefile.in, configure, configure.in, v850_sim.h, 
+	gencode.c, interp.c, simops.c: Created.
+
