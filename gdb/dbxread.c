@@ -1409,7 +1409,7 @@ read_dbx_symtab (struct objfile *objfile)
 
 	  case N_DATA | N_EXT:
 	  case N_NBDATA | N_EXT:
-	  nlist.n_value += ANOFFSET (objfile->section_offsets, data_sect_index);
+	  nlist.n_value += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA (objfile));
 	  goto record_it;
 
 	  case N_BSS:
@@ -1476,7 +1476,7 @@ read_dbx_symtab (struct objfile *objfile)
 	  continue;
 
 	  case N_DATA:
-	  nlist.n_value += ANOFFSET (objfile->section_offsets, data_sect_index);
+	  nlist.n_value += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA (objfile));
 	  goto record_it;
 
 	  case N_UNDF | N_EXT:
