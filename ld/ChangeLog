@@ -1,3 +1,18 @@
+Tue Apr 21 09:55:06 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* emultempl/pe.em: Rename external arm interworking functions
+	to conform to BFD naming conventions.  Add code to _after_open()
+	function to obtain a bfd for use by the interworking code.
+
+	* emultempl/armcoff.em: Rename external arm interworking functions
+	to conform to BFD naming conventions.  Add new _after_open()
+	function to obtain a bfd for use by the interworking code.
+
+Sun Apr 19 19:23:09 1998  Richard Henderson  <rth@cygnus.com>
+
+	* ldlang.c (lang_size_sections) [case lang_assignment_statement_enum]:
+	Update dot and the default memory section even when relaxing.
+
 Sat Apr 18 18:41:12 1998  Richard Henderson  <rth@cygnus.com>
 
 	* ldlang.c (lang_one_common): Manipulate the section's cooked size
