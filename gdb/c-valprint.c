@@ -231,9 +231,10 @@ c_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 	        }
 	      }
 
-	  /* Return number of characters printed, plus one for the
-	     terminating null if we have "reached the end".  */
-	  return (i + (print_max && i != print_max));
+	  /* Return number of characters printed, including the terminating
+	     '\0' if we reached the end.  val_print_string takes care including
+	     the terminating '\0' if necessary.  */
+	  return i;
 	}
       break;
 

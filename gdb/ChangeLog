@@ -1,5 +1,11 @@
 Sun Mar 13 09:45:51 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* valprint.c (val_print_string): Ignore error if the error
+	happened after a terminating '\0'.
+
+	* c-valprint.c (c_val_print): Never add 1 to return value from
+	val_print_string; just return what it returns.
+
 	* target.h (enum target_signal): Add TARGET_SIGNAL_FIRST, for
 	looping through all of the enums.
 	* infrun.c (signals_info): Use it.
