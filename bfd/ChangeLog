@@ -1,5 +1,12 @@
 2003-10-04  Stephane Carrez  <stcarrez@nerim.fr>
 
+	* elf32-m68hc1x.c: Update to ISO C90; replace PTR with void*.
+	* elf32-m68hc11.c: Likewise.
+	* elf32-m68hc12.c: Likewise.
+	* elf32-m68hc1x.h: Likewise.
+
+2003-10-04  Stephane Carrez  <stcarrez@nerim.fr>
+
 	* elf32-m68hc1x.c (_bfd_m68hc11_elf_merge_private_bfd_data): Fix merge
 	of flags between HC12 and HCS12.
 
