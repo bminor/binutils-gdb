@@ -1,3 +1,10 @@
+2002-10-10  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/elf32.em (output_rel_find): Prefer .rel script sections
+	when orphan is .rel, .rela when orphan is .rela.
+	(gld${EMULATION_NAME}_place_orphan): Handle combreloc .rel* case
+	first.  Remove outsecname var.
+
 2002-10-09  Richard Shann <richard.shann@superh.com>
 	    Stephen Clarke <stephen.clarke@superh.com>
 
