@@ -1,3 +1,8 @@
+2001-11-20  Jim Blandy  <jimb@redhat.com>
+
+	* target.h (TARGET_RANGE_PROFITABLE_FOR_HW_WATCHPOINT): Delete
+	default definition; this is never used.
+
 2001-11-20  Keith Seitz  <keiths@redhat.com>
 
 	* varobj.c (c_value_of_child): Release memory for "name" when

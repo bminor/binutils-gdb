@@ -1049,17 +1049,6 @@ extern void (*target_new_objfile_hook) (struct objfile *);
      ((LONGEST)(byte_count) <= REGISTER_SIZE)
 #endif
 
-/* However, some addresses may not be profitable to use hardware to watch,
-   or may be difficult to understand when the addressed object is out of
-   scope, and hence should be unwatched.  On some targets, this may have
-   severe performance penalties, such that we might as well use regular
-   watchpoints, and save (possibly precious) hardware watchpoints for other
-   locations.  */
-
-#if !defined(TARGET_RANGE_PROFITABLE_FOR_HW_WATCHPOINT)
-#define TARGET_RANGE_PROFITABLE_FOR_HW_WATCHPOINT(pid,start,len) 0
-#endif
-
 
 /* Set/clear a hardware watchpoint starting at ADDR, for LEN bytes.  TYPE is 0
    for write, 1 for read, and 2 for read/write accesses.  Returns 0 for
