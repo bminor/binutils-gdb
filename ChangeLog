@@ -1,3 +1,7 @@
+Thu Sep  5 13:52:47 1996  Tom Tromey  <tromey@creche.cygnus.com>
+
+	* Makefile.in (inet-install): Don't run install-gzip.
+
 Wed Sep  4 17:26:13 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* configure.in:  Don't config lots of things for *-*-windows*.
