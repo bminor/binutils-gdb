@@ -46,7 +46,7 @@ i386_sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_pc_in_sigtramp (gdbarch, i386_sol2_pc_in_sigtramp);
   tdep->sigcontext_addr = i386bsd_sigcontext_addr;
   tdep->sc_pc_offset = 36 + 14 * 4;
-  tdep->sc_sp_offset = 36 + 7 * 4;
+  tdep->sc_sp_offset = 36 + 17 * 4;
 
   /* Assume that the prototype flag can be trusted.  */
   set_gdbarch_coerce_float_to_double (gdbarch,

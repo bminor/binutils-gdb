@@ -1,3 +1,9 @@
+2002-07-07  Mark Kettenis  <kettenis@gnu.org>
+
+	From Peter Schauer <Peter.Schauer@regent.e-technik.tu-muenchen.de>:
+	* i386-sol2-tdep.c (i386_sol2_init_abi): Correct value for
+	tdep->sc_sp_offset.
+
 2002-07-05  Daniel Jacobowitz  <drow@mvista.com>
 
 	Fix PR gdb/595, gdb/602
