@@ -298,7 +298,7 @@ CODE_FRAGMENT
 
 */
 
-#ifdef COFF_IMAGE_WITH_PE
+#if defined(COFF_IMAGE_WITH_PE) || (defined(COFF_OBJ_WITH_PE) && defined(PPC))
 #include "peicode.h"
 #else
 #include "coffswap.h"
@@ -968,6 +968,12 @@ coff_set_arch_mach_hook (abfd, filehdr)
   machine = 0;
   switch (internal_f->f_magic)
     {
+#ifdef PPCMAGIC
+    case PPCMAGIC:
+      arch = bfd_arch_powerpc;
+      machine = 0; /* what does this mean? (krk) */
+      break; 
+#endif
 #ifdef I386MAGIC
     case I386MAGIC:
     case I386PTXMAGIC:
@@ -1334,6 +1340,12 @@ coff_set_flags (abfd, magicp, flagsp)
       *magicp = ARMMAGIC;
       return true;
 #endif
+#ifdef PPCMAGIC
+    case bfd_arch_powerpc:
+      *magicp = PPCMAGIC;
+      return true;
+      break;
+#endif
 #ifdef I386MAGIC
     case bfd_arch_i386:
       *magicp = I386MAGIC;
@@ -1425,7 +1437,9 @@ coff_set_flags (abfd, magicp, flagsp)
 
 #ifdef U802TOCMAGIC
     case bfd_arch_rs6000:
+#ifndef PPCMAGIC
     case bfd_arch_powerpc:
+#endif
       *magicp = U802TOCMAGIC;
       return true;
       break;
@@ -1920,6 +1934,10 @@ coff_write_object_contents (abfd)
 #define __A_MAGIC_SET__
     internal_a.magic = ZMAGIC;
 #endif 
+#if defined(PPC)
+#define __A_MAGIC_SET__
+    internal_a.magic = PPCMAGIC;
+#endif
 #if defined(I386)
 #define __A_MAGIC_SET__
 #if defined(LYNXOS)
