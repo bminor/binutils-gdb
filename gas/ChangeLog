@@ -1,3 +1,14 @@
+Fri Oct  6 16:24:27 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	Mon Sep 25 22:49:32 1995  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* configure.in (AC_ARG_WITH(bfd-assembler)): Fix help message.
+
+	* config/obj-elf.c (obj_elf_common): Convert specified byte
+	alignment to power of two.  Set size of local bss symbol.
+
+	* config/tc-m68k.c (tc_gen_reloc): Fix typo in variable name.
+
 Fri Oct  6 15:22:25 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* sb.c, macro.c: Decide whether to include <string.h> or
