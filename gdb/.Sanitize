@@ -267,6 +267,8 @@ z8k-tdep.c
 # energize-patches	- Part of Lucid support.
 # energize.c		- Part of Lucid support.
 # energize.h		- Part of Lucid support.
+# i386-nlmstub.c	- i386 NLM stub, not yet distributable because
+#			  it contains Novell proprietary code.
 # infrun.hacked.c	- An old version of infrun.c that had some 
 #			  wait_for_inferior improvements by gnu,
 #			  which were never fully debugged.
@@ -287,6 +289,7 @@ energize
 energize-patches
 energize.c
 energize.h
+i386-nlmstub.c
 infrun.hacked.c
 remote-sa.sparc.c
 state.c
