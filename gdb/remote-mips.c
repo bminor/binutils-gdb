@@ -36,6 +36,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include <ctype.h>
+
 /* Microsoft C's stat.h doesn't define all the POSIX file modes.  */
 #ifndef S_IROTH
 #define S_IROTH S_IREAD
@@ -356,7 +358,7 @@ static int mips_send_retries = 10;
 
 /* The number of garbage characters to accept when looking for an
    SYN for the next packet.  */
-static int mips_syn_garbage = 1050;
+static int mips_syn_garbage = 10;
 
 /* The time to wait for a packet, in seconds.  */
 static int mips_receive_wait = 5;
@@ -753,15 +755,26 @@ mips_receive_header (hdr, pgarbage, ch, timeout)
 	    {
 	      /* Printing the character here lets the user of gdb see
 	         what the program is outputting, if the debugging is
-	         being done on the console port.  Don't use _filtered;
-	         we can't deal with a QUIT out of target_wait.  */
-	      if (!mips_initializing || remote_debug > 0)
-		{
-		  fputc_readable (ch, gdb_stdlog);
-		  gdb_flush (gdb_stdlog);
-		}
+	         being done on the console port.  Don't use _filtered:
+	         we can't deal with a QUIT out of target_wait and
+	         buffered target output confuses the user. */
+ 	      if (!mips_initializing || remote_debug > 0)
+  		{
+		  if (isprint (ch) || isspace (ch))
+		    {
+		      fputc_unfiltered (ch, gdb_stdtarg);
+		    }
+		  else
+		    {
+		      fputc_readable (ch, gdb_stdtarg);
+		    }
+		  gdb_flush (gdb_stdtarg);
+  		}
+	      
+	      /* Only count unprintable characters. */
+	      if (! (isprint (ch) || isspace (ch)))
+		(*pgarbage) += 1;
 
-	      ++*pgarbage;
 	      if (mips_syn_garbage > 0
 		  && *pgarbage > mips_syn_garbage)
 		mips_error ("Debug protocol failure:  more than %d characters before a sync.",

@@ -1,3 +1,10 @@
+Sat Jun 17 16:00:56 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* remote-mips.c: Include <ctype.h>
+ 	(mips_receive_header): Write printable characters to gdb_stdtarg
+ 	instead of gdb_stdlog.  Only count non-printables as invalid.
+	(mips_syn_garbage): Reduce to 10.
+
 Sat Jun 17 15:39:28 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* mips-tdep.c (mips_gdbarch_init): When the object file header
