@@ -1,3 +1,7 @@
+Wed Jul 17 00:30:13 CEST 2002  Jan Hubicka  <jh@suse.cz>
+
+	* tc-i386.c (i386_align_code): Implement x86_64 neutral code fillers.
+
 2002-07-16  Moritz Jodeit  <moritz@jodeit.org>
 
 	* config/tc-z8k.c (build_bytes): Correct order of memset args.
