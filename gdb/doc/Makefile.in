@@ -45,8 +45,7 @@ READLINE_DIR = $(srcdir)/${gdbdir}/../readline
 # Main GDB manual's source files
 SFILES_DOCDIR = \
 	$(srcdir)/gdb.texinfo $(srcdir)/pretex.m4 $(srcdir)/none.m4 \
-	$(srcdir)/all.m4 $(srcdir)/gdbinv-m.m4 $(srcdir)/gdbinv-s.m4 \
-	gdbVN.m4
+	$(srcdir)/all.m4 gdbinv-m.m4 gdbinv-s.m4 gdbVN.m4
 
 all install:
 
@@ -95,7 +94,7 @@ gdbVN.m4 : ${gdbdir}/Makefile.in
 # Be sure to not create a bad gdb-all.texi if ${M4} is missing or aborts...
 gdb-all.texi: ${SFILES_DOCDIR}
 	rm -f foobus.texinfo
-	(cd $(srcdir) ; ${M4} pretex.m4 none.m4 all.m4 gdb.texinfo)  >foobus.texinfo
+	${M4} $(srcdir)/pretex.m4 $(srcdir)/none.m4 $(srcdir)/all.m4 $(srcdir)/gdb.texinfo  >foobus.texinfo
 	rm -f gdb-all.texi
 	mv foobus.texinfo gdb-all.texi
 
