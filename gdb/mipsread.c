@@ -2110,6 +2110,8 @@ parse_partial_symbols (objfile, section_offsets)
       /* The way to turn this into a symtab is to call... */
       pst->read_symtab = mipscoff_psymtab_to_symtab;
 
+      psymtab_language = deduce_language_from_filename (fdr_name (fh));
+
       pst->texthigh = pst->textlow;
 
       /* For stabs-in-ecoff files, the second symbol must be @stab.
@@ -2745,6 +2747,8 @@ psymtab_to_symtab_1 (pst, filename)
 	  st = new_symtab (pst->filename, 2 * f_max, maxlines, pst->objfile);
 	}
 
+      psymtab_language = st->language;
+
       lines = LINETABLE (st);
       pending_list = PST_PRIVATE (pst)->pending_list;
       if (pending_list == 0)
@@ -3344,6 +3348,8 @@ new_symbol (name)
 
   memset ((PTR) s, 0, sizeof (*s));
   SYMBOL_NAME (s) = name;
+  SYMBOL_LANGUAGE (s) = psymtab_language;
+  SYMBOL_INIT_DEMANGLED_NAME (s, &current_objfile->symbol_obstack);
   return s;
 }
 

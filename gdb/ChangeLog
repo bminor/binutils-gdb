@@ -1,3 +1,13 @@
+Fri Aug 20 15:07:05 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* mipsread.c (parse_partial_symbols, psymtab_to_symtab_1):
+	Set language for psymtab and symtab.
+	* mipsread.c (new_symbol):  Set language and initialize demangled
+	name for symbol.
+	* symmisc.c (print_symbol):  Use SYMBOL_SOURCE_NAME when printing
+	the symbol type.
+	* symtab.c (decode_line_1):  Inhibit coredumps with cfront executables.
+
 Fri Aug 20 14:01:39 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* Move KERNEL_U_ADDR from xm-hp300bsd.h to nm-hp300bsd.h and make

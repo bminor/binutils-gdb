@@ -1,5 +1,5 @@
 /* Do various things to symbol tables (other than lookup), for GDB.
-   Copyright 1986, 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
+   Copyright 1986, 1987, 1989, 1991, 1992, 1993 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -34,12 +34,15 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define DEV_TTY "/dev/tty"
 #endif
 
-/* Unfortunately for debugging, stderr is usually a macro.  Better if we
-   make a variable which has the same value and which is accessible when
-   debugging GDB with itself.  */
-FILE *std_in  = stdin;
-FILE *std_out = stdout;
-FILE *std_err = stderr;
+/* Unfortunately for debugging, stderr is usually a macro.  This is painful
+   when calling functions that take FILE *'s from the debugger.
+   So we make a variable which has the same value and which is accessible when
+   debugging GDB with itself.  Because stdin et al need not be constants,
+   we initialize them in the _initialize_symmisc function at the bottom
+   of the file.  */
+FILE *std_in;
+FILE *std_out;
+FILE *std_err;
 
 /* Prototypes for local functions */
 
@@ -201,6 +204,11 @@ dump_msymbols (objfile, outfile)
   char ms_type;
   
   fprintf_filtered (outfile, "\nObject file %s:\n\n", objfile -> name);
+  if (objfile -> minimal_symbol_count == 0)
+    {
+      fprintf_filtered (outfile, "No minimal symbols found.\n");
+      return;
+    }
   for (index = 0, msymbol = objfile -> msymbols;
        SYMBOL_NAME (msymbol) != NULL; msymbol++, index++)
     {
@@ -210,16 +218,25 @@ dump_msymbols (objfile, outfile)
 	    ms_type = 'u';
 	    break;
 	  case mst_text:
-	    ms_type = 't';
+	    ms_type = 'T';
 	    break;
 	  case mst_data:
-	    ms_type = 'd';
+	    ms_type = 'D';
 	    break;
 	  case mst_bss:
-	    ms_type = 'b';
+	    ms_type = 'B';
 	    break;
 	  case mst_abs:
-	    ms_type = 'a';
+	    ms_type = 'A';
+	    break;
+	  case mst_file_text:
+	    ms_type = 't';
+	    break;
+	  case mst_file_data:
+	    ms_type = 'd';
+	    break;
+	  case mst_file_bss:
+	    ms_type = 'b';
 	    break;
 	  default:
 	    ms_type = '?';
@@ -388,7 +405,7 @@ maintenance_print_symbols (args, from_tty)
   filename = tilde_expand (filename);
   make_cleanup (free, filename);
   
-  outfile = fopen (filename, "w");
+  outfile = fopen (filename, FOPEN_WT);
   if (outfile == 0)
     perror_with_name (filename);
   make_cleanup (fclose, (char *) outfile);
@@ -439,7 +456,8 @@ print_symbol (symbol, depth, outfile)
       if (SYMBOL_TYPE (symbol))
 	{
 	  /* Print details of types, except for enums where it's clutter.  */
-	  LA_PRINT_TYPE (SYMBOL_TYPE (symbol), SYMBOL_NAME (symbol), outfile,
+	  LA_PRINT_TYPE (SYMBOL_TYPE (symbol), SYMBOL_SOURCE_NAME (symbol),
+			 outfile,
 			 TYPE_CODE (SYMBOL_TYPE (symbol)) != TYPE_CODE_ENUM,
 			 depth);
 	  fprintf (outfile, "; ");
@@ -506,6 +524,10 @@ print_symbol (symbol, depth, outfile)
 	  fprintf (outfile, "parameter register %ld,", SYMBOL_VALUE (symbol));
 	  break;
 
+	case LOC_REGPARM_ADDR:
+	  fprintf (outfile, "address parameter register %ld,", SYMBOL_VALUE (symbol));
+	  break;
+
 	case LOC_LOCAL:
 	  if (SYMBOL_BASEREG_VALID (symbol))
 	    {
@@ -529,6 +551,10 @@ print_symbol (symbol, depth, outfile)
 	  fprintf (outfile, "block (object 0x%x) starting at 0x%x,",
 		   (unsigned int) SYMBOL_BLOCK_VALUE (symbol),
 		   BLOCK_START (SYMBOL_BLOCK_VALUE (symbol)));
+	  break;
+
+	case LOC_OPTIMIZED_OUT:
+	  fprintf (outfile, "optimized out");
 	  break;
 
         default:
@@ -577,7 +603,7 @@ maintenance_print_psymbols (args, from_tty)
   filename = tilde_expand (filename);
   make_cleanup (free, filename);
   
-  outfile = fopen (filename, "w");
+  outfile = fopen (filename, FOPEN_WT);
   if (outfile == 0)
     perror_with_name (filename);
   make_cleanup (fclose, outfile);
@@ -648,6 +674,9 @@ print_partial_symbol (p, count, what, outfile)
 	case LOC_REGPARM:
 	  fputs_filtered ("register parameter", outfile);
 	  break;
+	case LOC_REGPARM_ADDR:
+	  fputs_filtered ("register address parameter", outfile);
+	  break;
 	case LOC_LOCAL:
 	  fputs_filtered ("stack parameter", outfile);
 	  break;
@@ -665,6 +694,9 @@ print_partial_symbol (p, count, what, outfile)
 	  break;
 	case LOC_LOCAL_ARG:
 	  fputs_filtered ("shuffled arg", outfile);
+	  break;
+	case LOC_OPTIMIZED_OUT:
+	  fputs_filtered ("optimized out", outfile);
 	  break;
 	default:
 	  fputs_filtered ("<invalid location>", outfile);
@@ -713,7 +745,7 @@ maintenance_print_msymbols (args, from_tty)
   filename = tilde_expand (filename);
   make_cleanup (free, filename);
   
-  outfile = fopen (filename, "w");
+  outfile = fopen (filename, FOPEN_WT);
   if (outfile == 0)
     perror_with_name (filename);
   make_cleanup (fclose, outfile);
@@ -787,4 +819,14 @@ extend_psymbol_list (listp, objfile)
      program works correctly */
   listp->next = listp->list + listp->size;
   listp->size = new_size;
+}
+
+
+/* Do early runtime initializations. */
+void
+_initialize_symmisc ()
+{
+  std_in  = stdin;
+  std_out = stdout;
+  std_err = stderr;
 }

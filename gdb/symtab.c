@@ -81,8 +81,7 @@ output_source_filename PARAMS ((char *, int *));
 static char *
 operator_chars PARAMS ((char *, char **));
 
-static int
-find_line_common PARAMS ((struct linetable *, int, int *));
+static int find_line_common PARAMS ((struct linetable *, int, int *));
 
 static struct partial_symbol *
 lookup_partial_symbol PARAMS ((struct partial_symtab *, const char *,
@@ -259,14 +258,14 @@ gdb_mangle_name (type, i, j)
   char *field_name = TYPE_FN_FIELDLIST_NAME (type, i);
   char *physname = TYPE_FN_FIELD_PHYSNAME (f, j);
   char *newname = type_name_no_tag (type);
-  int is_constructor = STREQ (field_name, newname);
+  int is_constructor = newname != NULL && STREQ (field_name, newname);
   int is_destructor = is_constructor && DESTRUCTOR_PREFIX_P (physname);
   /* Need a new type prefix.  */
   char *const_prefix = method->is_const ? "C" : "";
   char *volatile_prefix = method->is_volatile ? "V" : "";
   char buf[20];
 #ifndef GCC_MANGLE_BUG
-  int len = strlen (newname);
+  int len = newname == NULL ? 0 : strlen (newname);
 
   if (is_destructor)
     {
@@ -304,7 +303,11 @@ gdb_mangle_name (type, i, j)
 	strcpy (mangled_name, field_name);
     }
   strcat (mangled_name, buf);
-  strcat (mangled_name, newname);
+  /* If the class doesn't have a name, i.e. newname NULL, then we just
+     mangle it using 0 for the length of the class.  Thus it gets mangled
+     as something starting with `::' rather than `classname::'.  */
+  if (newname != NULL)
+    strcat (mangled_name, newname);
 #else
   char *opname;
 
@@ -934,10 +937,15 @@ find_pc_symtab (pc)
   register struct symtab *best_s = NULL;
   register struct partial_symtab *ps;
   register struct objfile *objfile;
-  int distance = 0;;
+  int distance = 0;
 
-
-  /* Search all symtabs for one whose file contains our pc */
+  /* Search all symtabs for the one whose file contains our address, and which
+     is the smallest of all the ones containing the address.  This is designed
+     to deal with a case like symtab a is at 0x1000-0x2000 and 0x3000-0x4000
+     and symtab b is at 0x2000-0x3000.  So the GLOBAL_BLOCK for a is from
+     0x1000-0x4000, but for address 0x2345 we want to return symtab b.
+     This is said to happen for the mips; it might be swifter to create
+     several symtabs with the same name like xcoff does (I'm not sure).  */
 
   ALL_SYMTABS (objfile, s)
     {
@@ -1133,6 +1141,99 @@ find_pc_line (pc, notcurrent)
   return val;
 }
 
+static int find_line_symtab PARAMS ((struct symtab *, int, struct linetable **,
+				     int *, int *));
+
+/* Find line number LINE in any symtab whose name is the same as
+   SYMTAB.
+
+   If found, return 1, set *LINETABLE to the linetable in which it was
+   found, set *INDEX to the index in the linetable of the best entry
+   found, and set *EXACT_MATCH nonzero if the value returned is an
+   exact match.
+
+   If not found, return 0.  */
+
+static int
+find_line_symtab (symtab, line, linetable, index, exact_match)
+     struct symtab *symtab;
+     int line;
+     struct linetable **linetable;
+     int *index;
+     int *exact_match;
+{
+  int exact;
+
+  /* BEST_INDEX and BEST_LINETABLE identify the smallest linenumber > LINE
+     so far seen.  */
+
+  int best_index;
+  struct linetable *best_linetable;
+
+  /* First try looking it up in the given symtab.  */
+  best_linetable = LINETABLE (symtab);
+  best_index = find_line_common (best_linetable, line, &exact);
+  if (best_index < 0 || !exact)
+    {
+      /* Didn't find an exact match.  So we better keep looking for
+	 another symtab with the same name.  In the case of xcoff,
+	 multiple csects for one source file (produced by IBM's FORTRAN
+	 compiler) produce multiple symtabs (this is unavoidable
+	 assuming csects can be at arbitrary places in memory and that
+	 the GLOBAL_BLOCK of a symtab has a begin and end address).  */
+
+      /* BEST is the smallest linenumber > LINE so far seen,
+	 or 0 if none has been seen so far.
+	 BEST_INDEX and BEST_LINETABLE identify the item for it.  */
+      int best;
+
+      struct objfile *objfile;
+      struct symtab *s;
+
+      if (best_index >= 0)
+	best = best_linetable->item[best_index].line;
+      else
+	best = 0;
+
+      ALL_SYMTABS (objfile, s)
+	{
+	  struct linetable *l;
+	  int ind;
+
+	  if (!STREQ (symtab->filename, s->filename))
+	    continue;
+	  l = LINETABLE (s);
+	  ind = find_line_common (l, line, &exact);
+	  if (ind >= 0)
+	    {
+	      if (exact)
+		{
+		  best_index = ind;
+		  best_linetable = l;
+		  goto done;
+		}
+	      if (best == 0 || l->item[ind].line < best)
+		{
+		  best = l->item[ind].line;
+		  best_index = ind;
+		  best_linetable = l;
+		}
+	    }
+	}
+    }
+ done:
+  if (best_index < 0)
+    return 0;
+
+  if (index)
+    *index = best_index;
+  if (linetable)
+    *linetable = best_linetable;
+  if (exact_match)
+    *exact_match = exact;
+  return 1;
+}
+
 /* Find the PC value for a given source file and line number.
    Returns zero for invalid line number.
    The source file is specified with a struct symtab.  */
@@ -1142,15 +1243,15 @@ find_line_pc (symtab, line)
      struct symtab *symtab;
      int line;
 {
-  register struct linetable *l;
-  register int ind;
-  int dummy;
+  struct linetable *l;
+  int ind;
 
   if (symtab == 0)
     return 0;
-  l = LINETABLE (symtab);
-  ind = find_line_common(l, line, &dummy);
-  return (ind >= 0) ? l->item[ind].pc : 0;
+  if (find_line_symtab (symtab, line, &l, &ind, NULL))
+    return l->item[ind].pc;
+  else
+    return 0;
 }
 
 /* Find the range of pc values in a line.
@@ -1165,16 +1266,14 @@ find_line_pc_range (symtab, thisline, startptr, endptr)
      int thisline;
      CORE_ADDR *startptr, *endptr;
 {
-  register struct linetable *l;
-  register int ind;
+  struct linetable *l;
+  int ind;
   int exact_match;		/* did we get an exact linenumber match */
 
   if (symtab == 0)
     return 0;
 
-  l = LINETABLE (symtab);
-  ind = find_line_common (l, thisline, &exact_match);
-  if (ind >= 0)
+  if (find_line_symtab (symtab, thisline, &l, &ind, &exact_match))
     {
       *startptr = l->item[ind].pc;
       /* If we have not seen an entry for the specified line,
@@ -1671,7 +1770,8 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
 	      t = SYMBOL_TYPE (sym_class);
 	      sym_arr = (struct symbol **) alloca(TYPE_NFN_FIELDS_TOTAL (t) * sizeof(struct symbol*));
 
-	      if (destructor_name_p (copy, t))
+	      /* Cfront objects don't have fieldlists.  */
+	      if (destructor_name_p (copy, t) && TYPE_FN_FIELDLISTS (t) != NULL)
 		{
 		  /* destructors are a special case.  */
 		  struct fn_field *f = TYPE_FN_FIELDLIST1 (t, 0);
@@ -1849,6 +1949,8 @@ decode_line_1 (argptr, funfirstline, default_symtab, default_line, canonical)
      Find the next token (everything up to end or next whitespace).  */
 
   p = skip_quoted (*argptr);
+  if (is_quoted && p[-1] != '\'')
+    error ("Unmatched single quote.");
   copy = (char *) alloca (p - *argptr + 1);
   memcpy (copy, *argptr, p - *argptr);
   copy[p - *argptr] = '\0';
