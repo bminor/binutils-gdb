@@ -1,5 +1,9 @@
 Fri Sep 20 16:10:52 1991  John Gilmore  (gnu at cygnus.com)
 
+	* language.c (set_language_command):  Print useful help message,
+	and restore the language string after giving help.
+	* valprint.c (typedef_print):  Print typedef in C or M2.
+	* symtab.c (list_symbols):  Use it.
 	* main.c (main):  Avoid any output before (gdb) prompt when -q.
 	* language.c (set_language_command):  Handle errors by restoring
 	the language string to its current state (fix from A. Beers).

@@ -121,8 +121,10 @@ set_language_command (str, from_tty)
   if (!language || !language[0]) {
     printf("The currently understood settings are:\n\n\
 local or auto    Automatic setting based on source file\n\
-c or cc          Always parse in C syntax\n\
-mod or m2        Always parse in Modula-2 syntax\n");
+c                Use the C language\n\
+modula-2         Use the Modula-2 language\n");
+    /* Restore the silly string. */
+    set_language(current_language->la_language);
     return;
   }
 
@@ -1056,7 +1058,7 @@ _initialize_language()
 
    set = add_set_cmd ("language", class_support, var_string_noescape,
 		      (char *)&language,
-		      "Set the current working language.",
+		      "Set the current source language.",
 		      &setlist);
    show = add_show_from_set (set, &showlist);
    set->function = set_language_command;
