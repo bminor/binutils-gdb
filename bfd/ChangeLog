@@ -1,3 +1,10 @@
+start-sanitize-m32r
+Mon Feb 10 23:25:00 1997  Doug Evans  <dje@seba.ricochet.net>
+
+	* elf32-m32r.c (elf_m32r_howto_table): Change partial_inplace to true
+	for R_M32R_{16,32,24,HI16_ULO,HI16_SLO,LO16}.
+
+end-sanitize-m32r
 start-sanitize-r5900
         Fri Feb  7 16:20:17 1997  Gavin Koch   <gavin@cygnus.com>
         

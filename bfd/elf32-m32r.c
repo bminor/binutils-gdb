@@ -62,7 +62,7 @@ static reloc_howto_type elf_m32r_howto_table[] =
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_M32R_16",		/* name */
-	 false,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
@@ -77,7 +77,7 @@ static reloc_howto_type elf_m32r_howto_table[] =
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_M32R_32",		/* name */
-	 false,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0xffffffff,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
@@ -92,7 +92,7 @@ static reloc_howto_type elf_m32r_howto_table[] =
 	 complain_overflow_unsigned, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_M32R_24",		/* name */
-	 false,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0xffffff,		/* src_mask */
 	 0xffffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
@@ -155,7 +155,7 @@ static reloc_howto_type elf_m32r_howto_table[] =
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_M32R_HI16_ULO",	/* name */
-	 false,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0x0000ffff,		/* src_mask */
 	 0x0000ffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
@@ -170,7 +170,7 @@ static reloc_howto_type elf_m32r_howto_table[] =
 	 complain_overflow_dont, /* complain_on_overflow */
 	 m32r_elf_hi16_slo_reloc, /* special_function */
 	 "R_M32R_HI16_SLO",	/* name */
-	 false,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0x0000ffff,		/* src_mask */
 	 0x0000ffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
@@ -185,7 +185,7 @@ static reloc_howto_type elf_m32r_howto_table[] =
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_M32R_LO16",		/* name */
-	 false,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0x0000ffff,		/* src_mask */
 	 0x0000ffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
