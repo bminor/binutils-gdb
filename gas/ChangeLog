@@ -1,3 +1,18 @@
+2001-08-04  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	/gas/ChangeLog
+	* tc-mips.c (mips_abi_string): Initialize with NULL instead of 0.
+	(RELAX_ENCODE): Replace bfd_vma by valueT.
+	(load_address): Formatting.
+	(macro): Likewise. Code cleanup. Typo.
+	(macro2): Formatting.
+	(md_parse_option): Typo.
+	(s_mipsset): Reorder cases to look nicer.
+	(md_estimate_size_before_relax): Formatting. Code cleanup.
+	(mips_elf_final_processing): Check against NULL instead of 0.
+	(md_obj_end): Remove ugly `' in message string.
+	(s_mips_ent): Remove ugly `' in message string.
+
 2001-07-30  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
 
 	* config/tc-mips.c (md_begin): Take -mcpu value into account even when

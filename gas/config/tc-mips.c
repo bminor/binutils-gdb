@@ -217,7 +217,7 @@ static int mips_arch = CPU_UNKNOWN;
 static int mips_tune = CPU_UNKNOWN;
 
 /* The argument of the -mabi= flag.  */
-static char * mips_abi_string = 0;
+static char * mips_abi_string = NULL;
 
 /* Whether we should mark the file EABI64 or EABI32.  */
 static int mips_eabi64 = 0;
@@ -601,8 +601,8 @@ static const unsigned int mips16_to_32_reg_map[] =
     | ((warn) ? 1 : 0)))
 #define RELAX_OLD(i) (((i) >> 23) & 0x7f)
 #define RELAX_NEW(i) (((i) >> 16) & 0x7f)
-#define RELAX_RELOC1(i) ((bfd_vma) (((i) >> 9) & 0x7f) - 64)
-#define RELAX_RELOC2(i) ((bfd_vma) (((i) >> 2) & 0x7f) - 64)
+#define RELAX_RELOC1(i) ((valueT) (((i) >> 9) & 0x7f) - 64)
+#define RELAX_RELOC2(i) ((valueT) (((i) >> 2) & 0x7f) - 64)
 #define RELAX_RELOC3(i) (((i) >> 1) & 1)
 #define RELAX_WARN(i) ((i) & 1)
 
@@ -3397,14 +3397,12 @@ load_address (counter, reg, ep)
 	  macro_build (p, counter, (expressionS *) NULL, "nop", "");
 	  p += 4;
 	}
-      macro_build (p, counter, ep,
-		   HAVE_32BIT_ADDRESSES ? "lw" : "ld",
+      macro_build (p, counter, ep, HAVE_32BIT_ADDRESSES ? "lw" : "ld",
 		   "t,o(b)", reg, (int) BFD_RELOC_MIPS_GOT16, GP);
       p += 4;
       macro_build (p, counter, (expressionS *) NULL, "nop", "");
       p += 4;
-      macro_build (p, counter, ep,
-		   HAVE_32BIT_ADDRESSES ? "addiu" : "daddiu",
+      macro_build (p, counter, ep, HAVE_32BIT_ADDRESSES ? "addiu" : "daddiu",
 		   "t,r,j", reg, reg, (int) BFD_RELOC_LO16);
       if (ex.X_add_number != 0)
 	{
@@ -3504,8 +3502,7 @@ macro (ip)
       else
 	macro_build ((char *) NULL, &icnt, NULL, "move", "d,s", dreg, sreg, 0);
       macro_build ((char *) NULL, &icnt, NULL,
-		   dbl ? "dsub" : "sub",
-		   "d,v,t", dreg, 0, sreg);
+		   dbl ? "dsub" : "sub", "d,v,t", dreg, 0, sreg);
 
       --mips_opts.noreorder;
       return;
@@ -3620,8 +3617,7 @@ macro (ip)
 	}
       macro_build ((char *) NULL, &icnt, NULL, "slt", "d,v,t", AT, sreg, treg);
       macro_build ((char *) NULL, &icnt, &offset_expr,
-		   likely ? "beql" : "beq",
-		   "s,t,p", AT, 0);
+		   likely ? "beql" : "beq", "s,t,p", AT, 0);
       break;
 
     case M_BGTL_I:
@@ -3670,15 +3666,13 @@ macro (ip)
       if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 0)
 	{
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
-		       likely ? "bgezl" : "bgez",
-		       "s,p", sreg);
+		       likely ? "bgezl" : "bgez", "s,p", sreg);
 	  return;
 	}
       if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 1)
 	{
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
-		       likely ? "bgtzl" : "bgtz",
-		       "s,p", sreg);
+		       likely ? "bgtzl" : "bgtz", "s,p", sreg);
 	  return;
 	}
       maxnum = 0x7fffffff;
@@ -3702,8 +3696,7 @@ macro (ip)
 	}
       set_at (&icnt, sreg, 0);
       macro_build ((char *) NULL, &icnt, &offset_expr,
-		   likely ? "beql" : "beq",
-		   "s,t,p", AT, 0);
+		   likely ? "beql" : "beq", "s,t,p", AT, 0);
       break;
 
     case M_BGEUL:
@@ -3714,15 +3707,13 @@ macro (ip)
       if (sreg == 0)
 	{
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
-		       likely ? "beql" : "beq",
-		       "s,t,p", 0, treg);
+		       likely ? "beql" : "beq", "s,t,p", 0, treg);
 	  return;
 	}
       macro_build ((char *) NULL, &icnt, NULL, "sltu", "d,v,t", AT, sreg,
 		   treg);
       macro_build ((char *) NULL, &icnt, &offset_expr,
-		   likely ? "beql" : "beq",
-		   "s,t,p", AT, 0);
+		   likely ? "beql" : "beq", "s,t,p", AT, 0);
       break;
 
     case M_BGTUL_I:
@@ -3746,14 +3737,12 @@ macro (ip)
       if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 1)
 	{
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
-		       likely ? "bnel" : "bne",
-		       "s,t,p", sreg, 0);
+		       likely ? "bnel" : "bne", "s,t,p", sreg, 0);
 	  return;
 	}
       set_at (&icnt, sreg, 1);
       macro_build ((char *) NULL, &icnt, &offset_expr,
-		   likely ? "beql" : "beq",
-		   "s,t,p", AT, 0);
+		   likely ? "beql" : "beq", "s,t,p", AT, 0);
       break;
 
     case M_BGTL:
@@ -3762,21 +3751,18 @@ macro (ip)
       if (treg == 0)
 	{
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
-		       likely ? "bgtzl" : "bgtz",
-		       "s,p", sreg);
+		       likely ? "bgtzl" : "bgtz", "s,p", sreg);
 	  return;
 	}
       if (sreg == 0)
 	{
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
-		       likely ? "bltzl" : "bltz",
-		       "s,p", treg);
+		       likely ? "bltzl" : "bltz", "s,p", treg);
 	  return;
 	}
       macro_build ((char *) NULL, &icnt, NULL, "slt", "d,v,t", AT, treg, sreg);
       macro_build ((char *) NULL, &icnt, &offset_expr,
-		   likely ? "bnel" : "bne",
-		   "s,t,p", AT, 0);
+		   likely ? "bnel" : "bne", "s,t,p", AT, 0);
       break;
 
     case M_BGTUL:
@@ -3785,8 +3771,7 @@ macro (ip)
       if (treg == 0)
 	{
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
-		       likely ? "bnel" : "bne",
-		       "s,t,p", sreg, 0);
+		       likely ? "bnel" : "bne", "s,t,p", sreg, 0);
 	  return;
 	}
       if (sreg == 0)
@@ -3794,8 +3779,7 @@ macro (ip)
       macro_build ((char *) NULL, &icnt, NULL, "sltu", "d,v,t", AT, treg,
 		   sreg);
       macro_build ((char *) NULL, &icnt, &offset_expr,
-		   likely ? "bnel" : "bne",
-		   "s,t,p", AT, 0);
+		   likely ? "bnel" : "bne", "s,t,p", AT, 0);
       break;
 
     case M_BLEL:
@@ -3804,21 +3788,18 @@ macro (ip)
       if (treg == 0)
 	{
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
-		       likely ? "blezl" : "blez",
-		       "s,p", sreg);
+		       likely ? "blezl" : "blez", "s,p", sreg);
 	  return;
 	}
       if (sreg == 0)
 	{
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
-		       likely ? "bgezl" : "bgez",
-		       "s,p", treg);
+		       likely ? "bgezl" : "bgez", "s,p", treg);
 	  return;
 	}
       macro_build ((char *) NULL, &icnt, NULL, "slt", "d,v,t", AT, treg, sreg);
       macro_build ((char *) NULL, &icnt, &offset_expr,
-		   likely ? "beql" : "beq",
-		   "s,t,p", AT, 0);
+		   likely ? "beql" : "beq", "s,t,p", AT, 0);
       break;
 
     case M_BLEL_I:
@@ -3847,21 +3828,18 @@ macro (ip)
       if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 0)
 	{
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
-		       likely ? "bltzl" : "bltz",
-		       "s,p", sreg);
+		       likely ? "bltzl" : "bltz", "s,p", sreg);
 	  return;
 	}
       if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 1)
 	{
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
-		       likely ? "blezl" : "blez",
-		       "s,p", sreg);
+		       likely ? "blezl" : "blez", "s,p", sreg);
 	  return;
 	}
       set_at (&icnt, sreg, 0);
       macro_build ((char *) NULL, &icnt, &offset_expr,
-		   likely ? "bnel" : "bne",
-		   "s,t,p", AT, 0);
+		   likely ? "bnel" : "bne", "s,t,p", AT, 0);
       break;
 
     case M_BLEUL:
@@ -3870,8 +3848,7 @@ macro (ip)
       if (treg == 0)
 	{
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
-		       likely ? "beql" : "beq",
-		       "s,t,p", sreg, 0);
+		       likely ? "beql" : "beq", "s,t,p", sreg, 0);
 	  return;
 	}
       if (sreg == 0)
@@ -3879,8 +3856,7 @@ macro (ip)
       macro_build ((char *) NULL, &icnt, NULL, "sltu", "d,v,t", AT, treg,
 		   sreg);
       macro_build ((char *) NULL, &icnt, &offset_expr,
-		   likely ? "beql" : "beq",
-		   "s,t,p", AT, 0);
+		   likely ? "beql" : "beq", "s,t,p", AT, 0);
       break;
 
     case M_BLEUL_I:
@@ -3910,8 +3886,7 @@ macro (ip)
 	}
       set_at (&icnt, sreg, 1);
       macro_build ((char *) NULL, &icnt, &offset_expr,
-		   likely ? "bnel" : "bne",
-		   "s,t,p", AT, 0);
+		   likely ? "bnel" : "bne", "s,t,p", AT, 0);
       break;
 
     case M_BLTL:
@@ -3920,21 +3895,18 @@ macro (ip)
       if (treg == 0)
 	{
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
-		       likely ? "bltzl" : "bltz",
-		       "s,p", sreg);
+		       likely ? "bltzl" : "bltz", "s,p", sreg);
 	  return;
 	}
       if (sreg == 0)
 	{
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
-		       likely ? "bgtzl" : "bgtz",
-		       "s,p", treg);
+		       likely ? "bgtzl" : "bgtz", "s,p", treg);
 	  return;
 	}
       macro_build ((char *) NULL, &icnt, NULL, "slt", "d,v,t", AT, sreg, treg);
       macro_build ((char *) NULL, &icnt, &offset_expr,
-		   likely ? "bnel" : "bne",
-		   "s,t,p", AT, 0);
+		   likely ? "bnel" : "bne", "s,t,p", AT, 0);
       break;
 
     case M_BLTUL:
@@ -3945,15 +3917,13 @@ macro (ip)
       if (sreg == 0)
 	{
 	  macro_build ((char *) NULL, &icnt, &offset_expr,
-		       likely ? "bnel" : "bne",
-		       "s,t,p", 0, treg);
+		       likely ? "bnel" : "bne", "s,t,p", 0, treg);
 	  return;
 	}
       macro_build ((char *) NULL, &icnt, NULL, "sltu", "d,v,t", AT, sreg,
 		   treg);
       macro_build ((char *) NULL, &icnt, &offset_expr,
-		   likely ? "bnel" : "bne",
-		   "s,t,p", AT, 0);
+		   likely ? "bnel" : "bne", "s,t,p", AT, 0);
       break;
 
     case M_DDIV_3:
@@ -3983,16 +3953,14 @@ macro (ip)
 	{
 	  macro_build ((char *) NULL, &icnt, NULL, "teq", "s,t", treg, 0);
 	  macro_build ((char *) NULL, &icnt, NULL,
-		       dbl ? "ddiv" : "div",
-		       "z,s,t", sreg, treg);
+		       dbl ? "ddiv" : "div", "z,s,t", sreg, treg);
 	}
       else
 	{
 	  expr1.X_add_number = 8;
 	  macro_build ((char *) NULL, &icnt, &expr1, "bne", "s,t,p", treg, 0);
 	  macro_build ((char *) NULL, &icnt, NULL,
-		       dbl ? "ddiv" : "div",
-		       "z,s,t", sreg, treg);
+		       dbl ? "ddiv" : "div", "z,s,t", sreg, treg);
 	  macro_build ((char *) NULL, &icnt, NULL, "break", "c", 7);
 	}
       expr1.X_add_number = -1;
@@ -4097,12 +4065,8 @@ macro (ip)
 	{
 	  if (strcmp (s2, "mflo") == 0)
 	    {
-	      if (dbl)
-		macro_build ((char *) NULL, &icnt, NULL, "dneg", "d,w", dreg,
-			     sreg);
-	      else
-		macro_build ((char *) NULL, &icnt, NULL, "neg", "d,w", dreg,
-			     sreg);
+	      macro_build ((char *) NULL, &icnt, NULL, dbl ? "dneg" : "neg",
+			   "d,w", dreg, sreg);
 	    }
 	  else
 	    macro_build ((char *) NULL, &icnt, NULL, "move", "d,s", dreg, 0);
@@ -5811,7 +5775,7 @@ macro (ip)
       R4000 uses interlocks to handle coproc delays.
       Other chips (like the R3000) require nops to be inserted for delays.
 
-      FIXME: Currently, we require that the user handle delays.
+      FIXME: Currently, we require that the user handles delays.
       In order to fill delay slots for non-interlocked chips,
       we must have a way to specify delays based on the coprocessor.
       Eg. 4 cycles if load coproc reg from memory, 1 if in cache, etc.
@@ -5921,8 +5885,7 @@ macro2 (ip)
 	 anyway.  */
       load_register (&icnt, AT, &imm_expr, dbl);
       macro_build ((char *) NULL, &icnt, NULL,
-		   dbl ? "dmult" : "mult",
-		   "s,t", sreg, AT);
+		   dbl ? "dmult" : "mult", "s,t", sreg, AT);
       macro_build ((char *) NULL, &icnt, NULL, "mflo", "d", dreg);
       break;
 
@@ -5942,12 +5905,10 @@ macro2 (ip)
       if (imm)
 	load_register (&icnt, AT, &imm_expr, dbl);
       macro_build ((char *) NULL, &icnt, NULL,
-		   dbl ? "dmult" : "mult",
-		   "s,t", sreg, imm ? AT : treg);
+		   dbl ? "dmult" : "mult", "s,t", sreg, imm ? AT : treg);
       macro_build ((char *) NULL, &icnt, NULL, "mflo", "d", dreg);
       macro_build ((char *) NULL, &icnt, NULL,
-		   dbl ? "dsra32" : "sra",
-		   "d,w,<", dreg, dreg, 31);
+		   dbl ? "dsra32" : "sra", "d,w,<", dreg, dreg, 31);
       macro_build ((char *) NULL, &icnt, NULL, "mfhi", "d", AT);
       if (mips_trap)
 	macro_build ((char *) NULL, &icnt, NULL, "tne", "s,t", dreg, AT);
@@ -6292,8 +6253,7 @@ macro2 (ip)
 	}
       load_register (&icnt, AT, &imm_expr, dbl);
       macro_build ((char *) NULL, &icnt, NULL,
-		   dbl ? "dsub" : "sub",
-		   "d,v,t", dreg, sreg, AT);
+		   dbl ? "dsub" : "sub", "d,v,t", dreg, sreg, AT);
       break;
 
     case M_DSUBU_I:
@@ -6311,8 +6271,7 @@ macro2 (ip)
 	}
       load_register (&icnt, AT, &imm_expr, dbl);
       macro_build ((char *) NULL, &icnt, NULL,
-		   dbl ? "dsubu" : "subu",
-		   "d,v,t", dreg, sreg, AT);
+		   dbl ? "dsubu" : "subu", "d,v,t", dreg, sreg, AT);
       break;
 
     case M_TEQ_I:
@@ -6669,8 +6628,7 @@ mips16_macro (ip)
       dbl = 1;
     case M_MUL:
       macro_build ((char *) NULL, &icnt, NULL,
-		   dbl ? "dmultu" : "multu",
-		   "x,y", xreg, yreg);
+		   dbl ? "dmultu" : "multu", "x,y", xreg, yreg);
       macro_build ((char *) NULL, &icnt, NULL, "mflo", "x", zreg);
       return;
 
@@ -6683,8 +6641,7 @@ mips16_macro (ip)
 	as_bad (_("Unsupported large constant"));
       imm_expr.X_add_number = -imm_expr.X_add_number;
       macro_build ((char *) NULL, &icnt, &imm_expr,
-		   dbl ? "daddiu" : "addiu",
-		   "y,x,4", yreg, xreg);
+		   dbl ? "daddiu" : "addiu", "y,x,4", yreg, xreg);
       break;
 
     case M_SUBU_I_2:
@@ -9263,7 +9220,7 @@ MIPS options:\n\
 -membedded-pic		generate embedded position independent code\n\
 -EB			generate big endian output\n\
 -EL			generate little endian output\n\
--g, -g2			do not remove uneeded NOPs or swap branches\n\
+-g, -g2			do not remove unneeded NOPs or swap branches\n\
 -G NUM			allow referencing objects up to NUM bytes\n\
 			implicitly with the gp register [default 8]\n"));
   fprintf (stream, _("\
@@ -10355,8 +10312,8 @@ s_mipsset (x)
       case  1: mips_opts.isa = ISA_MIPS1;       break;
       case  2: mips_opts.isa = ISA_MIPS2;       break;
       case  3: mips_opts.isa = ISA_MIPS3;       break;
-      case  5: mips_opts.isa = ISA_MIPS5;       break;
       case  4: mips_opts.isa = ISA_MIPS4;       break;
+      case  5: mips_opts.isa = ISA_MIPS5;       break;
       case 32: mips_opts.isa = ISA_MIPS32;      break;
       case 64: mips_opts.isa = ISA_MIPS64;      break;
       default: as_bad (_("unknown ISA level")); break;
@@ -11093,13 +11050,13 @@ md_estimate_size_before_relax (fragp, segtype)
 			  + RELAX_RELOC1 (fragp->fr_subtype));
       /* FIXME: This really needs as_warn_where.  */
       if (RELAX_WARN (fragp->fr_subtype))
-	as_warn (_("AT used after \".set noat\" or macro used after \".set nomacro\""));
+	as_warn (_("AT used after \".set noat\" or macro used after "
+		   "\".set nomacro\""));
+
+      return RELAX_NEW (fragp->fr_subtype) - RELAX_OLD (fragp->fr_subtype);
     }
 
-  if (! change)
-    return 0;
-  else
-    return RELAX_NEW (fragp->fr_subtype) - RELAX_OLD (fragp->fr_subtype);
+  return 0;
 }
 
 /* This is called to see whether a reloc against a defined symbol
@@ -11597,7 +11554,7 @@ mips_elf_final_processing ()
     elf_elfheader (stdoutput)->e_flags |= EF_MIPS_PIC;
 
   /* Set the MIPS ELF ABI flags.  */
-  if (mips_abi_string == 0)
+  if (mips_abi_string == NULL)
     ;
   else if (strcmp (mips_abi_string, "32") == 0)
     elf_elfheader (stdoutput)->e_flags |= E_MIPS_ABI_O32;
@@ -11675,7 +11632,7 @@ md_obj_end ()
 {
   /* check for premature end, nesting errors, etc */
   if (cur_proc_ptr)
-    as_warn (_("missing `.end' at end of assembly"));
+    as_warn (_("missing .end at end of assembly"));
 }
 
 static long
@@ -11864,7 +11821,7 @@ s_mips_ent (aent)
     as_warn (_(".ent or .aent not in text section."));
 
   if (!aent && cur_proc_ptr)
-    as_warn (_("missing `.end'"));
+    as_warn (_("missing .end"));
 
   if (!aent)
     {
