@@ -93,7 +93,7 @@ NINDY ROM monitor at the other end of the line.
  * SEE THE FILE "stop.h" IN THE NINDY MONITOR SOURCE CODE FOR A LIST
  * OF STOP CODES.
  *
- ******************************************************************************/
+ ***************************************************************************/
 
 #include "defs.h"
 #include <signal.h>
@@ -110,14 +110,9 @@ NINDY ROM monitor at the other end of the line.
 #include "ieee-float.h"
 
 #include "wait.h"
-#include <sys/ioctl.h>
 #include <sys/file.h>
 #include <ctype.h>
 #include "serial.h"
-#if 0
-#include "nindy-share/ttycntl.h"
-#include "nindy-share/demux.h"
-#endif
 #include "nindy-share/env.h"
 #include "nindy-share/stop.h"
 

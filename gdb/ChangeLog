@@ -1,5 +1,7 @@
 Fri Aug 20 14:01:39 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* remote-nindy.c: Remove unused include of sys/ioctl.h.
+
 	* frame.h, symtab.h: Revise comments regarding baseregs.
 
 Fri Aug 20 15:07:05 1993  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
