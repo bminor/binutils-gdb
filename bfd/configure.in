@@ -57,8 +57,15 @@ else
 		esac
 		;;
 
-	rtpc)	bfd_host=rtbsd ;;
-	tahoe | vax)	bfd_host=${host_cpu} ;;
+	rtpc)	bfd_host=rtbsd
+		;;
+
+	a29k)	bfd_host=ultra3
+		;;
+
+	tahoe | vax)
+		bfd_host=${host_cpu}
+		;;
 	esac
 fi
 
@@ -105,6 +112,12 @@ hp)
 none)
 	case "${target_cpu}" in
 	i386) bfd_target=i386-coff ;;
+	a29k) case "${target_os} in
+		aout) bfd_target=a29k-aout ;;
+		coff) bfd_target=a29k-coff ;;
+		sym1) bfd_target=a29k-coff ;;
+	       esac
+	       ;;
 	esac
 	;;
 *)
