@@ -1,3 +1,8 @@
+Tue Aug 10 09:31:18 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* configure.in: Replace calls to sort with shell code
+	to uniq the lists.
+
 Tue Aug 10 06:23:16 1993  Ken Raeburn  (raeburn@cambridge.cygnus.com)
 
 	* configure.in: Include aout32.o for any a.out/b.out formats.
