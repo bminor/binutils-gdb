@@ -1428,7 +1428,6 @@ _bfd_elf_link_hash_newfunc (entry, table, string)
       ret->dynstr_index = 0;
       ret->elf_hash_value = 0;
       ret->weakdef = NULL;
-      ret->linker_section_pointer = NULL;
       ret->verinfo.verdef = NULL;
       ret->vtable_entries_size = 0;
       ret->vtable_entries_used = NULL;

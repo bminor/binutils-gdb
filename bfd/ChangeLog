@@ -1,3 +1,36 @@
+2003-07-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (struct elf_link_hash_entry): Remove linker_section_pointer
+	field.
+	(enum elf_linker_section_enum): Delete.
+	(struct elf_linker_section): Delete.
+	(struct elf_linker_section_pointers): Delete.
+	(struct elf_obj_tdata): Remove #if 0 chunk.  Remove linker_section.
+	Make linker_section_pointers a void**.
+	(elf_local_ptr_offsets, elf_linker_section): Don't define.
+	* elf32-ppc.c (enum elf_linker_section_enum): New, cut-down version
+	of old item in elf-bfd.h.
+	(struct elf_linker_section): Likewise.
+	(struct elf_linker_section_pointers): Likewise.
+	(elf_local_ptr_offsets): Define.
+	(struct ppc_elf_link_hash_entry): Add linker_section_pointer.
+	(ppc_elf_link_hash_newfunc): Init it.
+	(struct ppc_elf_link_hash_table): Add sbss.
+	(ppc_elf_link_hash_table_create): zmalloc rather than clearing
+	individual fields.
+	(elf_create_linker_section): Fold into..
+	(ppc_elf_create_linker_section): ..here.  Remove hole_size code.
+	Make rela section here if shared.
+	(elf_find_pointer_linker_section): Pass lsect rather than enum.
+	(elf_create_pointer_linker_section): Adjust.  zalloc rather than
+	clearing in a loop.
+	(elf_finish_pointer_linker_section): Adjust.  Don't make rela
+	section here.
+	(ppc_elf_check_relocs): Adjust.
+	(ppc_elf_add_symbol_hook): Tighten hash creator test.  Remove code
+	creating .sbss by hand.
+	* elf.c (_bfd_elf_link_hash_newfunc): Adjust.
+
 2003-07-04  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf32-s390.c (elf_howto_table): Change R_390_GOT12 to
