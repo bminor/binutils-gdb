@@ -1,3 +1,9 @@
+2004-11-05  Felix Lee  <felix+log1@specifixinc.com>
+
+	* stack.c (set_current_sal_from_frame): New function.
+	(print_args_stub): Use it.
+	(print_frame_info): Don't set sal here.
+
 2004-11-04  Mark Kettenis  <kettenis@gnu.org>
 
 	* dwarf2-frame.c (read_encoded_value): Change type of third

@@ -100,6 +100,8 @@ static void print_frame (struct frame_info *fi,
 			 int print_args, 
 			 struct symtab_and_line sal);
 
+static void set_current_sal_from_frame (struct frame_info *, int);
+
 static void backtrace_command (char *, int);
 
 static void frame_info (char *, int);
@@ -128,9 +130,12 @@ struct print_stack_frame_args
 static int
 print_stack_frame_stub (void *args)
 {
-  struct print_stack_frame_args *p = (struct print_stack_frame_args *) args;
+  struct print_stack_frame_args *p = args;
+  int center = (p->print_what == SRC_LINE
+                || p->print_what == SRC_AND_LOC);
 
   print_frame_info (p->fi, p->print_level, p->print_what, p->print_args);
+  set_current_sal_from_frame (p->fi, center);
   return 0;
 }
 
@@ -401,6 +406,24 @@ print_args_stub (void *args)
   return 0;
 }
 
+/* Set the current source and line to the location of the given
+   frame, if possible.  When CENTER is true, adjust so the
+   relevant line is in the center of the next 'list'. */
+
+static void
+set_current_sal_from_frame (struct frame_info *fi, int center)
+{
+  struct symtab_and_line sal;
+
+  find_frame_sal (fi, &sal);
+  if (sal.symtab)
+    {
+      if (center)
+        sal.line = max (sal.line - get_lines_to_list () / 2, 1);
+      set_current_source_symtab_and_line (&sal);
+    }
+}
+
 /* Print information about a frame for frame "fi" at level "level".
    Used in "where" output, also used to emit breakpoint or step
    messages.  
@@ -477,12 +500,8 @@ print_frame_info (struct frame_info *fi, int print_level,
 
   source_print = (print_what == SRC_LINE || print_what == SRC_AND_LOC);
 
-  if (sal.symtab)
-    set_current_source_symtab_and_line (&sal);
-
   if (source_print && sal.symtab)
     {
-      struct symtab_and_line cursal;
       int done = 0;
       int mid_statement = ((print_what == SRC_LINE)
 			   && (get_frame_pc (fi) != sal.pc));
@@ -513,11 +532,6 @@ print_frame_info (struct frame_info *fi, int print_level,
 	      print_source_lines (sal.symtab, sal.line, sal.line + 1, 0);
 	    }
 	}
-      /* Make sure we have at least a default source file */
-      set_default_source_symtab_and_line ();
-      cursal = get_current_source_symtab_and_line ();
-      cursal.line = max (sal.line - get_lines_to_list () / 2, 1);
-      set_current_source_symtab_and_line (&cursal);
     }
 
   if (print_what != LOCATION)

@@ -1,3 +1,8 @@
+2004-11-05  Felix Lee  <felix+log1@specifixinc.com>
+
+	* gdb.base/cursal.exp: New file.
+	* gdb.base/cursal.c: New file.
+
 2004-11-03  Andrew Cagney  <cagney@gnu.org>
 
 	* gdb.base/savedregs.exp, gdb.base/savedregs.c: New files.
