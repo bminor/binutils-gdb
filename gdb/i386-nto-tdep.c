@@ -240,7 +240,7 @@ static CORE_ADDR
 i386nto_sigcontext_addr (struct frame_info *next_frame)
 {
   char buf[4];
-  unsigned sp;
+  CORE_ADDR sp;
 
   frame_unwind_register (next_frame, SP_REGNUM, buf);
   sp = extract_unsigned_integer (buf, 4);

@@ -1,5 +1,9 @@
 2003-06-17  Kris Warkentin  <kewarken@qnx.com>
 
+	* i386-nto-tdep.c (i386nto_sigcontext_addr): Make sp a CORE_ADDR.
+
+2003-06-17  Kris Warkentin  <kewarken@qnx.com>
+
 	* i386-nto-tdep.c (i386nto_sigcontext_addr): Declare sp before using.
 
 2003-06-17  Jim Blandy  <jimb@redhat.com>
