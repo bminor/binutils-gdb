@@ -1713,13 +1713,13 @@ lin_lwp_thread_alive (ptid_t ptid)
   gdb_assert (is_lwp (ptid));
 
   errno = 0;
-  ptrace (PTRACE_PEEKUSER, GET_LWP (ptid), 0, 0);
+  ptrace (PTRACE_PEEKDATA, GET_LWP (ptid), 0, 0);
   if (debug_lin_lwp)
     fprintf_unfiltered (gdb_stdlog,
-			"LLTA: PTRACE_PEEKUSER %s, 0, 0 (%s)\n",
+			"LLTA: PTRACE_PEEKDATA %s, 0, 0 (%s)\n",
 			target_pid_to_str (ptid),
 			errno ? safe_strerror (errno) : "OK");
-  if (errno)
+  if (errno == ESRCH)
     return 0;
 
   return 1;

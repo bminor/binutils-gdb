@@ -1,5 +1,10 @@
 2003-11-02  Mark Kettenis  <kettenis@gnu.org>
 
+	* lin-lwp.c (lin_lwp_thread_alive): Use PTRACE_PEEKDATA instead of
+	PTRACE_PEEKUSER.  Return zero if the call failed with ESRCH.
+
+2003-11-02  Mark Kettenis  <kettenis@gnu.org>
+
 	Merge from mailine:
 
 	2003-10-27  Andrew Cagney  <cagney@redhat.com>
