@@ -1,3 +1,9 @@
+2002-09-04  Keith Seitz  <keiths@redhat.com>
+
+	* lib/mi-support.exp: Update copyright.
+	(mi_gdb_test): Increase the priority of the expected pattern
+	so that it matches gdb_test.
+
 2002-09-03  Keith Seitz  <keiths@redhat.com>
 
 	* lib/gdb.exp (gdb_compile_pthreads): Fix "build_bin" typo.

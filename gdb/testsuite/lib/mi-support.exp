@@ -1,4 +1,4 @@
-# Copyright 1999, 2000 Free Software Foundation, Inc.
+# Copyright 1999, 2000, 2002 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -471,6 +471,12 @@ proc mi_gdb_test { args } {
 	    gdb_start
 	    set result -1
 	}
+	 -re "\[\r\n\]*($pattern)\[\r\n\]+$mi_gdb_prompt\[ \]*$" {
+	    if ![string match "" $message] then {
+		pass "$message"
+	    }
+	    set result 0
+	}
 	 -re "(${question_string})$" {
 	    send_gdb "$response_string\n";
 	    exp_continue;
@@ -484,12 +490,6 @@ proc mi_gdb_test { args } {
 	    perror "\"$command\" is not a unique command name."
             fail "$message"
 	    set result 1
-	}
-	 -re "\[\r\n\]*($pattern)\[\r\n\]+$mi_gdb_prompt\[ \]*$" {
-	    if ![string match "" $message] then {
-		pass "$message"
-	    }
-	    set result 0
 	}
 	 -re "Program exited with code \[0-9\]+.*$mi_gdb_prompt\[ \]*$" {
 	    if ![string match "" $message] then {
