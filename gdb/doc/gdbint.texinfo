@@ -1163,13 +1163,17 @@ line options to GDB.  They are currently used only for the unsupported
 i960 Nindy target, and should not be used in any other configuration.
 
 @item ADDR_BITS_REMOVE (addr)
-If a raw machine address includes any bits that are not really part of
-the address, then define this macro to expand into an expression that
-zeros those bits in @var{addr}.  For example, the two low-order bits of
-a Motorola 88K address may be used by some kernels for their own
-purposes, since addresses must always be 4-byte aligned, and so are of
-no use for addressing.  Those bits should be filtered out with an
-expression such as @code{((addr) & ~3)}.
+If a raw machine instruction address includes any bits that are not
+really part of the address, then define this macro to expand into an
+expression that zeros those bits in @var{addr}.  This is only used for
+addresses of instructions, and even then not in all contexts.
+
+For example, the two low-order bits of the PC on the Hewlett-Packard PA
+2.0 architecture contain the privilege level of the corresponding
+instruction.  Since instructions must always be aligned on four-byte
+boundaries, the processor masks out these bits to generate the actual
+address of the instruction.  ADDR_BITS_REMOVE should filter out these
+bits with an expression such as @code{((addr) & ~3)}.
 
 @item BEFORE_MAIN_LOOP_HOOK
 Define this to expand into any code that you want to execute before the
@@ -2042,6 +2046,22 @@ root directory.
 @item ONE_PROCESS_WRITETEXT
 Define this to be able to, when a breakpoint insertion fails, warn the
 user that another process may be running with the same executable.
+
+@item PREPARE_TO_PROCEED @var{select_it}
+This (ugly) macro allows a native configuration to customize the way the
+@code{proceed} function in @file{infrun.c} deals with switching between
+threads.
+
+In a multi-threaded task we may select another thread and then continue
+or step.  But if the old thread was stopped at a breakpoint, it will
+immediately cause another breakpoint stop without any execution (i.e. it
+will report a breakpoint hit incorrectly).  So GDB must step over it
+first.
+
+If defined, @code{PREPARE_TO_PROCEED} should check the current thread
+against the thread that reported the most recent event.  If a step-over
+is required, it returns TRUE.  If @var{select_it} is non-zero, it should
+reselect the old thread.
 
 @item PROC_NAME_FMT
 Defines the format for the name of a @file{/proc} device.  Should be

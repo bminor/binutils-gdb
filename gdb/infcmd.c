@@ -244,8 +244,8 @@ run_command (args, from_tty)
 
   if (inferior_pid != 0 && target_has_execution)
     {
-      if (
-	   !query ("The program being debugged has been started already.\n\
+      if (from_tty
+	  && !query ("The program being debugged has been started already.\n\
 Start it from the beginning? "))
 	error ("Program not restarted.");
       target_kill ();

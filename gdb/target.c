@@ -962,7 +962,8 @@ target_preopen (from_tty)
 
   if (target_has_execution)
     {
-      if (query ("A program is being debugged already.  Kill it? "))
+      if (!from_tty
+          || query ("A program is being debugged already.  Kill it? "))
 	target_kill ();
       else
 	error ("Program not killed.");

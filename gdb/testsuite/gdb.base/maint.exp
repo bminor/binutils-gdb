@@ -176,28 +176,40 @@ gdb_expect  {
         }
 
 send_gdb "maint print objfiles\n"
+
 # To avoid timeouts, we avoid expects with many .* patterns that match
-# many lines.
-gdb_expect  {
-    -re ".*Object file.*break:  Objfile at $hex, bfd at $hex, \[0-9\]* minsyms\[\r\t \]+\n"
-                            { pass "maint print objfiles: header" }
-    -re ".*$gdb_prompt $"   { fail "maint print objfiles: header" }
-    timeout                 { fail "(timeout) maint print objfiles: header" }
+# many lines.  Instead, we keep track of which milestones we've seen
+# in the output, and stop when we've seen all of them.
+
+set header 0
+set psymtabs 0
+set symtabs 0
+set keep_looking 1
+
+while {$keep_looking} {
+    gdb_expect  {
+
+	-re ".*Object file.*break:  Objfile at $hex, bfd at $hex, \[0-9\]* minsyms\[\r\t \]+\n" { set header 1 }
+	-re ".*Psymtabs:\[\r\t \]+\n" { set psymtabs 1 }
+	-re ".*Symtabs:\[\r\t \]+\n" { set symtabs 1 }
+
+	-re ".*$gdb_prompt $" { 
+	    set keep_looking 0
+	}
+	timeout { 
+	    fail "(timeout) maint print objfiles" 
+	    set keep_looking 0
+	}
+    }
 }
-gdb_expect {
-    -re ".*Psymtabs:\[\r\t \]+\n" { pass "maint print objfiles: psymtabs" }
-    -re ".*$gdb_prompt $"         { fail "maint print objfiles: psymtabs" }
-    timeout                { fail "(timeout) maint print objfiles: psymtabs" }
+
+proc maint_pass_if {val name} {
+    if $val { pass $name } else { fail $name }
 }
-gdb_expect {
-    -re ".*Symtabs:\[\r\t \]+\n"  { pass "maint print objfiles: symtabs" }
-    -re ".*$gdb_prompt $"         { fail "maint print objfiles: symtabs" }
-    timeout                { fail "(timeout) maint print objfiles: symtabs" }
-}
-gdb_expect {
-    -re ".*$gdb_prompt $"   { pass "maint print objfiles: prompt" }
-    timeout                 { fail "(timeout) maint print objfiles: prompt" }
-}
+
+maint_pass_if $header   "maint print objfiles: header"
+maint_pass_if $psymtabs "maint print objfiles: psymtabs"
+maint_pass_if $symtabs  "maint print objfiles: symtabs"
 
 send_gdb "maint print psymbols\n"
 gdb_expect  {
@@ -282,6 +294,13 @@ gdb_expect  {
         timeout         { fail "(timeout) maint print symbols w/o args" }
         }
 
+# This command can legitimately take many minutes to execute.  If the
+# executable is dynamically linked, then you get all the debugging
+# info for the entire library --- 89Mb on my system.  -jimb
+
+set old_timeout $timeout
+set timeout 600
+
 send_gdb "maint print symbols symbols_output\n"
 gdb_expect  {
         -re "^maint print symbols symbols_output\r\n$gdb_prompt $"\
@@ -291,7 +310,7 @@ gdb_expect  {
                 -re "symbols_output\r\n$gdb_prompt $"\
                  {
 	          # See comments for `maint print psymbols'.
-                  send_gdb "shell grep 'main.*block' symbols_output\n"
+                  send_gdb "shell grep 'main(.*block' symbols_output\n"
                   gdb_expect {
                         -re "int main\\(int, char \\*\\*, char \\*\\*\\); block.*$gdb_prompt $"\
                                                { pass "maint print symbols" }
@@ -309,6 +328,7 @@ gdb_expect  {
         timeout         { fail "(timeout) maint print symbols" }
         }
 
+set timeout $old_timeout
 
 send_gdb "maint print type argc\n"
 gdb_expect  {
@@ -356,7 +376,9 @@ gdb_expect {
 }
 
 # Try it again, and check for shlib event info.  Not supported everywhere.
-if {! [istarget "hppa*-*-hpux*"]} then {
+if {! ([istarget "hppa*-*-hpux*"] 
+       || [istarget "*-*-linux*"]
+       || [istarget "*-*-solaris*"])} then {
     setup_xfail "*-*-*"
 }
 send_gdb "maint info breakpoints\n"

@@ -1616,6 +1616,20 @@ can_dereference (t)
      && TYPE_CODE (TYPE_TARGET_TYPE (t)) != TYPE_CODE_VOID);
 }
 
+int
+is_integral_type (t)
+     struct type *t;
+{
+  CHECK_TYPEDEF (t);
+  return
+    ((t != NULL)
+     && ((TYPE_CODE(t) == TYPE_CODE_INT)
+         || (TYPE_CODE(t) == TYPE_CODE_ENUM)
+         || (TYPE_CODE(t) == TYPE_CODE_CHAR)
+         || (TYPE_CODE(t) == TYPE_CODE_RANGE)
+         || (TYPE_CODE(t) == TYPE_CODE_BOOL)));
+}
+
 /* Chill varying string and arrays are represented as follows:
 
    struct { int __var_length; ELEMENT_TYPE[MAX_SIZE] __var_data};

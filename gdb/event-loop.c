@@ -38,7 +38,7 @@
    Events can be inserted at the front of the queue or at the end of
    the queue.  Events will be extracted from the queue for processing
    starting from the head.  Therefore, events inserted at the head of
-   the queue will be processed in a last in first out fashoin, while
+   the queue will be processed in a last in first out fashion, while
    those inserted at the tail of the queue will be processed in a first
    in first out manner.  All the fields are NULL if the queue is
    empty. */

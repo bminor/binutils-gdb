@@ -1,3 +1,19 @@
+Tue Jul 13 23:37:18 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdb.base/configure.in: Check for gdbvars.exp instead of
+ 	a1-selftest.exp.
+	* gdb.base/configure: Re-generate.
+
+1999-07-12  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* gdb.base/selftest.exp: Rename from a1-selftest.exp, no point
+	in trying to run first and name is too long.
+
+	* gdb.base/pointers.c, gdb.base/pointers.exp: Add contents of
+	pointers2.c and pointers2.exp, respectively.
+	* gdb.base/pointers2.c, gdb.base/pointers2.exp: Remove, makes
+	doschk happier.
+
 1999-07-08  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* gdb.base/callfwmall.c, gdb.base/callfwmall.exp: Renamed from

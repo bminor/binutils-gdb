@@ -245,6 +245,28 @@ display_gdb_prompt (new_prompt)
   int prompt_length = 0;
   char *gdb_prompt = get_prompt ();
 
+
+  if (target_executing && sync_execution) 
+    {
+      /* This is to trick readline into not trying to display the
+	 prompt.  Even though we display the prompt using this
+	 function, readline still tries to do its own display if we
+	 don't call rl_callback_handler_install and
+	 rl_callback_handler_remove (which readline detects because a
+	 global variable is not set). If readline did that, it could
+	 mess up gdb signal handlers for SIGINT.  Readline assumes
+	 that between calls to rl_set_signals and rl_clear_signals gdb
+	 doesn't do anything with the signal handlers. Well, that's
+	 not the case, because when the target executes we change the
+	 SIGINT signal handler. If we allowed readline to display the
+	 prompt, the signal handler change would happen exactly
+	 between the calls to the above two functions.
+	 Calling rl_callback_handler_remove(), does the job. */
+
+      rl_callback_handler_remove ();
+      return;
+    }
+
   if (!new_prompt)
     {
       /* Just use the top of the prompt stack. */
@@ -267,6 +289,7 @@ display_gdb_prompt (new_prompt)
       rl_callback_handler_remove ();
       rl_callback_handler_install (new_prompt, input_handler);
     }
+  /* new_prompt at this point can be the top of the stack or the one passed in */
   else if (new_prompt)
     {
       /* Don't use a _filtered function here.  It causes the assumed
@@ -287,7 +310,7 @@ display_gdb_prompt (new_prompt)
    'set annotate'. It pushes a new prompt (with prefix and suffix) on top
    of the prompt stack, if the annotation level desired is 2, otherwise
    it pops the top of the prompt stack when we want the annotation level
-   to be the normal ones (1 or 2). */
+   to be the normal ones (1 or 0). */
 static void
 change_annotation_level ()
 {
@@ -535,7 +558,6 @@ command_line_handler (rl)
   static unsigned linelength = 0;
   register char *p;
   char *p1;
-  int change_prompt = 0;
   extern char *line;
   extern int linesize;
   char *nline;
@@ -565,7 +587,7 @@ command_line_handler (rl)
       p = readline_input_state.linebuffer_ptr;
       free (readline_input_state.linebuffer);
       more_to_come = 0;
-      change_prompt = 1;
+      pop_prompt ();
     }
 
 #ifdef STOP_SIGNAL
@@ -626,8 +648,10 @@ command_line_handler (rl)
 	  /* We will not invoke a execute_command if there is more
 	     input expected to complete the command. So, we need to
 	     print an empty prompt here. */
-	  display_gdb_prompt ("");
 	  more_to_come = 1;
+	  push_prompt ("", "", "");
+	  display_gdb_prompt (0);
+	  return;
 	}
     }
 

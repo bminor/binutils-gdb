@@ -103,8 +103,8 @@ tags etags: TAGS
 # And the sim-n-foo.h files create functions that can't be found either.
 TAGS: force
 	cd $(srcdir) && \
-	etags --regex '/^\([a-z_]+\) (/\1/' --regex '/^\/[*] TAGS: .*/' \
-		*.[ch]
+	etags --regex '/^\([a-z_]+\) (/\1/' --regex '/^.*\/[*] TAGS: .*/' \
+		*.c *.h
 
 clean:
 	rm -f *.[oa] *~ core

@@ -54,6 +54,15 @@ static void pipe_print_tty_state PARAMS ((serial_t, serial_ttystate));
 
 extern void _initialize_ser_pipe PARAMS ((void));
 
+#undef XMALLOC
+#define XMALLOC(T) ((T*) xmalloc (sizeof (T)))
+
+
+struct pipe_state
+  {
+    int pid;
+  };
+
 /* Open up a raw pipe */
 
 static int
@@ -64,23 +73,8 @@ pipe_open (scb, name)
 #if !defined(O_NONBLOCK) || !defined(F_GETFL) || !defined(F_SETFL)
   return -1;
 #else
-#if defined (__NetBSD__) || defined (__FreeBSD__)
-
-  /* check the BSD popen sources for where "r+" comes from :-) */
-  FILE *stream;
-  stream = popen (name + 1, "r+");
-  if (stream == NULL)
-    {
-      fprintf_unfiltered (gdb_stderr, "%s: popen failed\n", name + 1);
-      return -1;
-    }
-  scb->ttystate = stream;	/* borrow that space */
-  scb->fd = fileno (stream);
-
-#else
-
+  struct pipe_state *state;
   /* This chunk: */
-
   /* Copyright (c) 1988, 1993
    *      The Regents of the University of California.  All rights reserved.
    *
@@ -92,20 +86,20 @@ pipe_open (scb, name)
   if (socketpair (AF_UNIX, SOCK_STREAM, 0, pdes) < 0)
     return -1;
 
-  switch (pid = vfork ())
+  pid = vfork ();
+  
+  /* Error. */
+  if (pid == -1)
     {
-    case -1:			/* Error. */
       close (pdes[0]);
       close (pdes[1]);
       return -1;
-    case 0:			/* Child. */
-#if 0
-      /* POSIX.2 B.3.2.2 "popen() shall ensure that any streams
-         from previous popen() calls that remain open in the 
-         parent process are closed in the new child process. */
-      for (old = pidlist; old; old = old->next)
-	close (fileno (old->fp));	/* don't allow a flush */
-#endif
+    }
+
+  /* Child. */
+  if (pid == 0)
+    {
+      /* re-wire pdes[1] to stdin/stdout */
       close (pdes[0]);
       if (pdes[1] != STDOUT_FILENO)
 	{
@@ -113,15 +107,25 @@ pipe_open (scb, name)
 	  close (pdes[1]);
 	}
       dup2 (STDOUT_FILENO, STDIN_FILENO);
+#if 0
+      /* close any stray FD's - FIXME - how? */
+      /* POSIX.2 B.3.2.2 "popen() shall ensure that any streams
+         from previous popen() calls that remain open in the 
+         parent process are closed in the new child process. */
+      for (old = pidlist; old; old = old->next)
+	close (fileno (old->fp));	/* don't allow a flush */
+#endif
       execl ("/bin/sh", "sh", "-c", name + 1, NULL);
       _exit (127);
     }
 
-  /* Parent; assume fdopen can't fail. */
+  /* Parent. */
   close (pdes[1]);
+  /* :end chunk */
+  state = XMALLOC (struct pipe_state);
+  state->pid = pid;
   scb->fd = pdes[0];
-  scb->ttystate = NULL;
-#endif
+  scb->state = state;
 
   /* Make it non-blocking */
   {
@@ -359,14 +363,17 @@ static void
 pipe_close (scb)
      serial_t scb;
 {
-  if (scb->fd < 0)
-    return;
-  if (scb->ttystate != NULL)
-    pclose ((FILE *) scb->ttystate);
-  else
-    close (scb->fd);
-  scb->ttystate = NULL;
-  scb->fd = -1;
+  struct pipe_state *state = scb->state;
+  if (state != NULL)
+    {
+      int pid = state->pid;
+      close (scb->fd);
+      scb->fd = -1;
+      free (state);
+      scb->state = NULL;
+      kill (pid, SIGTERM);
+      /* Might be useful to check that the child does die. */
+    }
 }
 
 static struct serial_ops pipe_ops =

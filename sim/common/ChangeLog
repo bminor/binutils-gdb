@@ -1,3 +1,13 @@
+Fri Jul 16 14:47:53 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* cgen-utils.c (RORSI): New function.
+	(ROLSI): New function.
+
+1999-07-14  Doug Evans  <devans@casey.cygnus.com>
+
+	* Makefile.in (TAGS): Tweak TAGS regex.
+	* cgen-mem.h (*): Add TAGS markers.
+
 Sun Jul 11 23:47:20 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* sim-resume.c (sim_resume): Ensure that the siggnal [sic] is only

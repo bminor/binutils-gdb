@@ -1138,6 +1138,8 @@ print_scalar_formatted PARAMS ((char *, struct type *, int, int, GDB_FILE *));
 
 extern int can_dereference PARAMS ((struct type *));
 
+extern int is_integral_type PARAMS ((struct type *));
+
 extern void maintenance_print_type PARAMS ((char *, int));
 
 /* typeprint.c */

@@ -1,3 +1,10 @@
+1999-07-13  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* acconfig.h: Fix typo: it's GWINSZ_IN_SYS_IOCTL, not
+	TIOCGWINSZ_IN_SYS_IOCTL.
+
+	* config.h.in: Regenerate with autoheader.
+
 1999-04-27  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
 
 	* ChangeLog.Cygnus: new file. It is the old Changelog.

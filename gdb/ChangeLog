@@ -1,3 +1,78 @@
+1999-07-16  Keith Seitz  <keiths@cygnus.com>
+
+	* remote.c (_initialize_remote): "remotebreak" should be a var_boolean.
+
+1999-07-15  Jim Blandy  <jimb@cris.red-bean.com>
+	
+	Make the output from "info registers" fit withinin 80 columns.
+	* hppa-tdep.c: Make it easy to change row and column counts.
+	Switch to three columns, instead of four, and adjust spacing.
+
+	First cut at supporting HPPA2.0 in "wide" (64-bit) mode.
+	* configure.tgt: Add hppa2.0w target.
+	* config/pa/hppa64.mt, config/pa/tm-hppa64.h: New files.
+	* hppa-tdep.c (hppa_fix_call_dummy): Dyke out code to tweak the
+	call dummy, if target is PA2.0w.  This is temporary, until I get
+	function calls working.
+	* hppah-nat.c (fetch_register): Rewritten to handle both narrow
+	and wide register requests.
+	(HPPAH_OFFSETOF): New macro.
+
+	* gdbtypes.c (is_integral_type): New function.
+	* gdbtypes.h: Prototype for above.
+
+1999-07-15  J.T. Conklin  <jtc@redback.com>
+
+	* configure.tgt (i[3456]86-*-vxworks*): New target.
+	* config/i386/vxworks.mt: New file, x86 VxWorks target
+	* config/i386/tm-vxworks.h: New file.
+
+	* configure.tgt (powerpc-*-vxworks*): New target.
+	* config/powerpc/vxworks.mt: New file, PowerPC VxWorks target
+	* config/powerpc/tm-vxworks.h: New file.
+
+	* NEWS: Mention the new configs.
+
+1999-07-15  Fernando Nasser  <fnasser@cygnus.com>
+
+	* target.c (target_preopen): Prevent query when not from_tty.
+	* infcmd.c (run_command): Prevent query when not from_tty.
+
+1999-07-15  Fernando Nasser  <fnasser@cygnus.com>
+
+	* event-loop.c: Fix typo in comment.
+
+Wed Jul 14 17:29:31 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* ser-pipe.c (struct pipe_state): Define.
+ 	(pipe_close): Retain the PID of the sub-process using ``struct
+ 	pipe_state''.  Delete #ifdef code that used popen().
+	(pipe_close): Kill of the sub-process as part of the cleanup.
+
+	* serial.h (struct _serial_t): Add field ``state''.
+
+1999-07-13  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* event-top.c (display_gdb_prompt): Don't display the prompt if we
+ 	are in the middle of an execution command. Also trick readline so
+ 	it doesn't try to display the prompt.
+	(command_line_handler): Get rid of change_prompt, unused variable.
+	Use {push, pop}_prompt mechanism in case of multiline commands.
+
+	* infrun.c (complete_execution): Set target_executing to 0 as
+ 	first thing, so that display_gdb_prompt does the right thing.
+
+Tue Jul 13 20:29:46 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* parse.c (build_parse): Fix conditional increment of num_std_regs
+ 	for SP_REGNUM. Was conditional on FP_REGNUM.
+
+Tue Jul 13 16:44:58 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* gdbarch.h, gdbarch.c: Revert 1999-07-07 Stan Shebs
+ 	<shebs@andros.cygnus.com> indentation change.  Don't let indent
+ 	mess with these files.
+
 Mon Jul 12 11:15:09 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* config/mips/tm-mips.h (REGISTER_CONVERT_TO_RAW,
@@ -16,6 +91,13 @@ Mon Jul 12 11:15:09 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	(do_gp_register_row): Extract register values from raw buffer.
 
 	* NEWS: Document protocol change.
+
+1999-07-12  Keith Seitz  <keiths@cygnus.com>
+
+        * rdi-share/unixcomm.c (Unix_ResetSerial): Remove CYGWIN32
+	conditional.  It's no longer needed.
+        (SERPORT1, SERPORT2): Linux serial ports are "/dev/ttyX", not
+        "/dev/cuaX" (X=0,1,2,3,...).
 
 Mon Jul 12 02:02:00 1999  Andrew Cagney  <cagney@amy.cygnus.com>
 

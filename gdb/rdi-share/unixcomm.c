@@ -82,8 +82,8 @@
 #endif
 
 #ifdef __linux__
-#define SERPORT1   "/dev/cua0"
-#define SERPORT2   "/dev/cua1"
+#define SERPORT1   "/dev/ttyS0"
+#define SERPORT2   "/dev/ttyS1"
 #define PARPORT1   "/dev/par0"
 #define PARPORT2   "/dev/par1"
 #endif
@@ -305,15 +305,6 @@ extern void Unix_ResetSerial(void)
     struct termios terminfo;
 
     tcgetattr(serpfd, &terminfo);
-#ifdef __CYGWIN32__
-    /* Expedient, but it works.  */
-    terminfo.c_iflag = 0;
-    terminfo.c_oflag = 0;
-    terminfo.c_cflag = 48;
-    terminfo.c_lflag = 0;
-    terminfo.c_cc[VMIN] = 0;
-    terminfo.c_cc[VTIME] = 1;
-#else
     terminfo.c_lflag &= ~(ICANON | ISIG | ECHO | IEXTEN);
     terminfo.c_iflag &= ~(IGNCR | INPCK | ISTRIP | ICRNL | BRKINT);
     terminfo.c_iflag |= (IXON | IXOFF | IGNBRK);
@@ -322,7 +313,6 @@ extern void Unix_ResetSerial(void)
     terminfo.c_cc[VMIN] = 1;
     terminfo.c_cc[VTIME] = 0;
     terminfo.c_oflag &= ~OPOST;
-#endif
     tcsetattr(serpfd, TCSAFLUSH, &terminfo);
 }
 

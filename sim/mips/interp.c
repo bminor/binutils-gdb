@@ -132,12 +132,33 @@ static void ColdReset PARAMS((SIM_DESC sd));
 #define INDELAYSLOT()	((STATE & simDELAYSLOT) != 0)
 #define INJALDELAYSLOT() ((STATE & simJALDELAYSLOT) != 0)
 
+/* Note that the monitor code essentially assumes this layout of memory.
+   If you change these, change the monitor code, too.  */
 #define K0BASE  (0x80000000)
 #define K0SIZE  (0x20000000)
 #define K1BASE  (0xA0000000)
 #define K1SIZE  (0x20000000)
-#define MONITOR_BASE (0xBFC00000)
-#define MONITOR_SIZE (1 << 11)
+
+/* Simple run-time monitor support.
+   
+   We emulate the monitor by placing magic reserved instructions at
+   the monitor's entry points; when we hit these instructions, instead
+   of raising an exception (as we would normally), we look at the
+   instruction and perform the appropriate monitory operation.
+   
+   `*_monitor_base' are the physical addresses at which the corresponding 
+        monitor vectors are located.  `0' means none.  By default,
+        install all three.
+    The RSVD_INSTRUCTION... macros specify the magic instructions we
+    use at the monitor entry points.  */
+static int firmware_option_p = 0;
+static SIM_ADDR idt_monitor_base =     0xBFC00000;
+static SIM_ADDR pmon_monitor_base =    0xBFC00500;
+static SIM_ADDR lsipmon_monitor_base = 0xBFC00200;
+
+static SIM_RC sim_firmware_command (SIM_DESC sd, char* arg);
+
+
 #define MEM_SIZE (2 << 20)
 
 
@@ -158,6 +179,7 @@ static DECLARE_OPTION_HANDLER (mips_option_handler);
 enum {
   OPTION_DINERO_TRACE = OPTION_START,
   OPTION_DINERO_FILE,
+  OPTION_FIRMWARE,
   OPTION_BOARD
 };
 
@@ -225,6 +247,9 @@ Re-compile simulator with \"-DTRACE\" to enable this option.\n");
 #endif /* TRACE */
       return SIM_RC_OK;
 
+    case OPTION_FIRMWARE:
+      return sim_firmware_command (sd, arg);
+
     case OPTION_BOARD:
       {
 	if (arg)
@@ -248,6 +273,9 @@ static const OPTION mips_options[] =
   { {"dinero-file", required_argument, NULL, OPTION_DINERO_FILE},
       '\0', "FILE", "Write dinero trace to FILE",
       mips_option_handler },
+  { {"firmware", required_argument, NULL, OPTION_FIRMWARE},
+    '\0', "[idt|pmon|lsipmon|none][@ADDRESS]", "Emulate ROM monitor",
+    mips_option_handler },
   { {"board", required_argument, NULL, OPTION_BOARD},
      '\0', "none" /* rely on compile-time string concatenation for other options */
 
@@ -341,8 +369,7 @@ sim_open (kind, cb, abfd, argv)
     {
       /* Allocate core managed memory */
       
-      /* the monitor  */
-      sim_do_commandf (sd, "memory region 0x%lx,0x%lx", MONITOR_BASE, MONITOR_SIZE);
+
       /* For compatibility with the old code - under this (at level one)
 	 are the kernel spaces K0 & K1.  Both of these map to a single
 	 smaller sub region */
@@ -391,6 +418,15 @@ sim_open (kind, cb, abfd, argv)
     {
       /* match VIRTUAL memory layout of JMR-TX3904 board */
       int i;
+
+      /* --- disable monitor unless forced on by user --- */
+
+      if (! firmware_option_p)
+	{
+	  idt_monitor_base = 0;
+	  pmon_monitor_base = 0;
+	  lsipmon_monitor_base = 0;
+	}
 
       /* --- environment --- */
 
@@ -556,51 +592,54 @@ sim_open (kind, cb, abfd, argv)
     open_trace(sd);
 #endif /* TRACE */
 
-  /* Write an abort sequence into the TRAP (common) exception vector
-     addresses.  This is to catch code executing a TRAP (et.al.)
-     instruction without installing a trap handler. */
-  {
-    unsigned32 halt[2] = { 0x2404002f /* addiu r4, r0, 47 */,
-			   HALT_INSTRUCTION /* BREAK */ };
-    H2T (halt[0]);
-    H2T (halt[1]);
-    sim_write (sd, 0x80000000, (char *) halt, sizeof (halt));
-    sim_write (sd, 0x80000180, (char *) halt, sizeof (halt));
-    sim_write (sd, 0x80000200, (char *) halt, sizeof (halt));
-    sim_write (sd, 0xBFC00200, (char *) halt, sizeof (halt));
-    sim_write (sd, 0xBFC00380, (char *) halt, sizeof (halt));
-    sim_write (sd, 0xBFC00400, (char *) halt, sizeof (halt));
-  }
-
+  /*
+  sim_io_eprintf (sd, "idt@%x pmon@%x lsipmon@%x\n", 
+		  idt_monitor_base,
+		  pmon_monitor_base, 
+		  lsipmon_monitor_base);
+  */
 
   /* Write the monitor trap address handlers into the monitor (eeprom)
      address space.  This can only be done once the target endianness
      has been determined. */
-  {
-    unsigned loop;
-    /* Entry into the IDT monitor is via fixed address vectors, and
-       not using machine instructions. To avoid clashing with use of
-       the MIPS TRAP system, we place our own (simulator specific)
-       "undefined" instructions into the relevant vector slots. */
-    for (loop = 0; (loop < MONITOR_SIZE); loop += 4)
-      {
-	address_word vaddr = (MONITOR_BASE + loop);
-	unsigned32 insn = (RSVD_INSTRUCTION | (((loop >> 2) & RSVD_INSTRUCTION_ARG_MASK) << RSVD_INSTRUCTION_ARG_SHIFT));
-	H2T (insn);
-	sim_write (sd, vaddr, (char *)&insn, sizeof (insn));
-      }
+  if (idt_monitor_base != 0)
+    {
+      unsigned loop;
+      unsigned idt_monitor_size = 1 << 11;
+
+      /* the default monitor region */
+      sim_do_commandf (sd, "memory region 0x%x,0x%x",
+		       idt_monitor_base, idt_monitor_size);
+
+      /* Entry into the IDT monitor is via fixed address vectors, and
+	 not using machine instructions. To avoid clashing with use of
+	 the MIPS TRAP system, we place our own (simulator specific)
+	 "undefined" instructions into the relevant vector slots. */
+      for (loop = 0; (loop < idt_monitor_size); loop += 4)
+	{
+	  address_word vaddr = (idt_monitor_base + loop);
+	  unsigned32 insn = (RSVD_INSTRUCTION |
+			     (((loop >> 2) & RSVD_INSTRUCTION_ARG_MASK)
+			      << RSVD_INSTRUCTION_ARG_SHIFT));
+	  H2T (insn);
+	  sim_write (sd, vaddr, (char *)&insn, sizeof (insn));
+	}
+    }
+
+  if ((pmon_monitor_base != 0) || (lsipmon_monitor_base != 0))
+    {
     /* The PMON monitor uses the same address space, but rather than
        branching into it the address of a routine is loaded. We can
        cheat for the moment, and direct the PMON routine to IDT style
        instructions within the monitor space. This relies on the IDT
        monitor not using the locations from 0xBFC00500 onwards as its
        entry points.*/
-    for (loop = 0; (loop < 24); loop++)
-      {
-        address_word vaddr = (MONITOR_BASE + 0x500 + (loop * 4));
-        unsigned32 value = ((0x500 - 8) / 8); /* default UNDEFINED reason code */
-        switch (loop)
-          {
+      unsigned loop;
+      for (loop = 0; (loop < 24); loop++)
+	{
+	  unsigned32 value = ((0x500 - 8) / 8); /* default UNDEFINED reason code */
+	  switch (loop)
+	    {
             case 0: /* read */
               value = 7;
               break;
@@ -623,15 +662,43 @@ sim_open (kind, cb, abfd, argv)
               value = 28;
               break;
           }
-	/* FIXME - should monitor_base be SIM_ADDR?? */
-        value = ((unsigned int)MONITOR_BASE + (value * 8));
-	H2T (value);
-	sim_write (sd, vaddr, (char *)&value, sizeof (value));
 
-	/* The LSI MiniRISC PMON has its vectors at 0x200, not 0x500.  */
-	vaddr -= 0x300;
-	sim_write (sd, vaddr, (char *)&value, sizeof (value));
+	SIM_ASSERT (idt_monitor_base != 0);
+        value = ((unsigned int) idt_monitor_base + (value * 8));
+	H2T (value);
+
+	if (pmon_monitor_base != 0)
+	  {
+	    address_word vaddr = (pmon_monitor_base + (loop * 4));
+	    sim_write (sd, vaddr, (char *)&value, sizeof (value));
+	  }
+
+	if (lsipmon_monitor_base != 0)
+	  {
+	    address_word vaddr = (lsipmon_monitor_base + (loop * 4));
+	    sim_write (sd, vaddr, (char *)&value, sizeof (value));
+	  }
       }
+
+  /* Write an abort sequence into the TRAP (common) exception vector
+     addresses.  This is to catch code executing a TRAP (et.al.)
+     instruction without installing a trap handler. */
+  if ((idt_monitor_base != 0) || 
+      (pmon_monitor_base != 0) || 
+      (lsipmon_monitor_base != 0))
+    {
+      unsigned32 halt[2] = { 0x2404002f /* addiu r4, r0, 47 */,
+			     HALT_INSTRUCTION /* BREAK */ };
+      H2T (halt[0]);
+      H2T (halt[1]);
+      sim_write (sd, 0x80000000, (char *) halt, sizeof (halt));
+      sim_write (sd, 0x80000180, (char *) halt, sizeof (halt));
+      sim_write (sd, 0x80000200, (char *) halt, sizeof (halt));
+      /* XXX: Write here unconditionally? */
+      sim_write (sd, 0xBFC00200, (char *) halt, sizeof (halt));
+      sim_write (sd, 0xBFC00380, (char *) halt, sizeof (halt));
+      sim_write (sd, 0xBFC00400, (char *) halt, sizeof (halt));
+    }
   }
 
 
@@ -934,6 +1001,91 @@ fetch_str (SIM_DESC sd,
   sim_read (sd, addr, buf, nr);
   return buf;
 }
+
+
+/* Implements the "sim firmware" command:
+	sim firmware NAME[@ADDRESS] --- emulate ROM monitor named NAME.
+		NAME can be idt, pmon, or lsipmon.  If omitted, ADDRESS
+		defaults to the normal address for that monitor.
+	sim firmware none --- don't emulate any ROM monitor.  Useful
+		if you need a clean address space.  */
+static SIM_RC
+sim_firmware_command (SIM_DESC sd, char *arg)
+{
+  int address_present = 0;
+  SIM_ADDR address;
+
+  /* Signal occurrence of this option. */
+  firmware_option_p = 1;
+
+  /* Parse out the address, if present.  */
+  {
+    char *p = strchr (arg, '@');
+    if (p)
+      {
+	char *q;
+	address_present = 1;
+	p ++; /* skip over @ */
+
+	address = strtoul (p, &q, 0);
+	if (*q != '\0') 
+	  {
+	    sim_io_printf (sd, "Invalid address given to the"
+			   "`sim firmware NAME@ADDRESS' command: %s\n",
+			   p);
+	    return SIM_RC_FAIL;
+	  }
+      }
+    else
+      address_present = 0;
+  }
+
+  if (! strncmp (arg, "idt", 3))
+    {
+      idt_monitor_base = address_present ? address : 0xBFC00000;
+      pmon_monitor_base = 0;
+      lsipmon_monitor_base = 0;
+    }
+  else if (! strncmp (arg, "pmon", 4))
+    {
+      /* pmon uses indirect calls.  Hook into implied idt. */
+      pmon_monitor_base = address_present ? address : 0xBFC00500;
+      idt_monitor_base = pmon_monitor_base - 0x500;
+      lsipmon_monitor_base = 0;
+    }
+  else if (! strncmp (arg, "lsipmon", 7))
+    {
+      /* lsipmon uses indirect calls.  Hook into implied idt. */
+      pmon_monitor_base = 0;
+      lsipmon_monitor_base = address_present ? address : 0xBFC00200;
+      idt_monitor_base = lsipmon_monitor_base - 0x200;
+    }
+  else if (! strncmp (arg, "none", 4))
+    {
+      if (address_present)
+	{
+	  sim_io_printf (sd,
+			 "The `sim firmware none' command does "
+			 "not take an `ADDRESS' argument.\n");
+	  return SIM_RC_FAIL;
+	}
+      idt_monitor_base = 0;
+      pmon_monitor_base = 0;
+      lsipmon_monitor_base = 0;
+    }
+  else
+    {
+      sim_io_printf (sd, "\
+Unrecognized name given to the `sim firmware NAME' command: %s\n\
+Recognized firmware names are: `idt', `pmon', `lsipmon', and `none'.\n",
+		     arg);
+      return SIM_RC_FAIL;
+    }
+  
+  return SIM_RC_OK;
+}
+
+
 
 /* Simple monitor interface (currently setup for the IDT and PMON monitors) */
 void

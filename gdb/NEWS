@@ -3,6 +3,18 @@
 
 *** Changes since GDB-4.18:
 
+* New targets
+
+x86 VxWorks					i[3456]86-*-vxworks*
+PowerPC VxWorks					powerpc-*-vxworks*
+TI TMS320C80					tic80-*-*
+
+* OBSOLETE configurations
+
+Altos 3068					m68*-altos-*
+Convex						c1-*-*, c2-*-*
+Pyramid						pyramid-*-*
+
 * Remote targets can connect to a sub-program
 
 A popen(3) style serial-device has been added.  This device starts a
@@ -12,16 +24,6 @@ with that.  The sub-program to run is specified using the syntax
 
 	(gdb) set remotedebug 1
 	(gdb) target extended-remote |mn10300-elf-sim program-args
-
-* New targets
-
-TI TMS320C80					tic80-*-*
-
-* OBSOLETE configurations
-
-Altos 3068					m68*-altos-*
-Convex						c1-*-*, c2-*-*
-Pyramid						pyramid-*-*
 
 * MIPS 64 remote protocol
 

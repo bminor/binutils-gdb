@@ -63,8 +63,10 @@ h8500-*-*)		gdb_target=h8500 ;;
 
 fr30-*-elf*)		gdb_target=fr30 ;;
 
+
 hppa*-*-bsd*)		gdb_target=hppabsd ;;
 hppa*-*-pro*)		gdb_target=hppapro ;;
+hppa2.0w-*-hpux11*)	gdb_target=hppa64 ;;
 hppa*-*-hpux*)		gdb_target=hppahpux ;;
 hppa*-*-hiux*)		gdb_target=hppahpux ;;
 hppa*-*-osf*)		gdb_target=hppaosf ;;
@@ -107,6 +109,7 @@ i[3456]86-*-netware*)	gdb_target=i386nw
 		configdirs="${configdirs} nlm" ;;
 i[3456]86-*-osf1mk*)	gdb_target=i386mk ;;
 i[3456]86-*-cygwin*)	gdb_target=cygwin  ;;
+i[3456]86-*-vxworks*)	gdb_target=vxworks ;;
 
 i960-*-bout*)		gdb_target=vxworks960 ;;
 i960-nindy-coff*)	gdb_target=nindy960 ;;
@@ -223,6 +226,7 @@ powerpcle-*-eabi* | powerpcle-*-sysv* | powerpcle-*-elf*)
 			else
 			  gdb_target=ppcle-eabi
 			fi ;;
+powerpc-*-vxworks*)	gdb_target=vxworks ;;
 
 # OBSOLETE pyramid-*-*)		gdb_target=pyramid ;;
 

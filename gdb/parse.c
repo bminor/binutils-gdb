@@ -1324,7 +1324,7 @@ build_parse ()
   if (FP_REGNUM >= 0)
     num_std_regs++;
 #endif
-#ifdef FP_REGNUM
+#ifdef SP_REGNUM
   if (SP_REGNUM >= 0)
     num_std_regs++;
 #endif

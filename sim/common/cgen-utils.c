@@ -320,3 +320,38 @@ CONVDISI (val)
 }
 
 #endif /* DI_FN_SUPPORT */
+
+SI
+RORSI (val, shift)
+     SI  val;
+     int shift;
+{
+  if (shift != 0)
+    {
+      int remain = 32 - shift;
+      int mask = (1 << shift) - 1;
+      SI result = (val & mask) << remain;
+      mask = (1 << remain) - 1;
+      result |= (val >> shift) & mask;
+      return result;
+    }
+  return val;
+}
+
+SI
+ROLSI (val, shift)
+     SI  val;
+     int shift;
+{
+  if (shift != 0)
+    {
+      int remain = 32 - shift;
+      int mask = (1 << remain) - 1;
+      SI result = (val & mask) << shift;
+      mask = (1 << shift) - 1;
+      result |= (val >> remain) & mask;
+      return result;
+    }
+
+  return val;
+}

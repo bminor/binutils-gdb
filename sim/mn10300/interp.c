@@ -1114,10 +1114,10 @@ sim_open (kind, cb, abfd, argv)
     }
   else
     {
-      if ( NULL != board )
-	{
-	  printf("Error: invalid --board option.\n");
-	  return 0;
+      if (board != NULL)
+        {
+	  sim_io_eprintf (sd, "Error: Board `%s' unknown.\n", board);
+          return 0;
 	}
     }
   

@@ -29,6 +29,7 @@ struct _serial_t
   {
     int fd;			/* File descriptor */
     struct serial_ops *ops;	/* Function vector */
+    void *state;       		/* Local context info for open FD */
     serial_ttystate ttystate;	/* Not used (yet) */
     int bufcnt;			/* Amount of data in receive buffer */
     unsigned char *bufp;	/* Current byte */

@@ -2127,6 +2127,7 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
 	}
     }
 
+#ifndef GDB_TARGET_IS_HPPA_20W
   /* Store upper 21 bits of function address into ldil.  fun will either be
      the final target (most cases) or __d_plt_call when calling into a shared
      library and __gcc_plt_call is not available.  */
@@ -2144,6 +2145,7 @@ hppa_fix_call_dummy (dummy, pc, fun, nargs, args, type, gcc_p)
      deposit_14 (fun & MASK_11,
 		 extract_unsigned_integer (&dummy[FUNC_LDO_OFFSET],
 					   INSTRUCTION_SIZE)));
+#endif /* GDB_TARGET_IS_HPPA_20W */
 #ifdef SR4EXPORT_LDIL_OFFSET
 
   {
@@ -2514,17 +2516,22 @@ pa_print_registers (raw_regs, regnum, fpregs)
      int fpregs;
 {
   int i, j;
-  long raw_val[2];		/* Alas, we are compiled so that "long long" is 32 bits */
+  /* Alas, we are compiled so that "long long" is 32 bits */
+  long raw_val[2];
   long long_val;
+  int rows = 24, columns = 3;
 
-  for (i = 0; i < 18; i++)
+  for (i = 0; i < rows; i++)
     {
-      for (j = 0; j < 4; j++)
+      for (j = 0; j < columns; j++)
 	{
+	  /* We display registers in column-major order.  */
+	  int regnum = i + j * rows;
+
 	  /* Q: Why is the value passed through "extract_signed_integer",
 	     while above, in "pa_do_registers_info" it isn't?
 	     A: ? */
-	  pa_register_look_aside (raw_regs, i + (j * 18), &raw_val[0]);
+	  pa_register_look_aside (raw_regs, regnum, &raw_val[0]);
 
 	  /* Even fancier % formats to prevent leading zeros
 	     and still maintain the output in columns. */
@@ -2533,17 +2540,17 @@ pa_print_registers (raw_regs, regnum, fpregs)
 	      /* Being big-endian, on this machine the low bits
 	         (the ones we want to look at) are in the second longword. */
 	      long_val = extract_signed_integer (&raw_val[1], 4);
-	      printf_filtered ("%8.8s: %8x  ",
-			       REGISTER_NAME (i + (j * 18)), long_val);
+	      printf_filtered ("%8.8s: %8x",
+			       REGISTER_NAME (regnum), long_val);
 	    }
 	  else
 	    {
 	      /* raw_val = extract_signed_integer(&raw_val, 8); */
 	      if (raw_val[0] == 0)
-		printf_filtered ("%8.8s:         %8x  ",
-				 REGISTER_NAME (i + (j * 18)), raw_val[1]);
+		printf_filtered ("%8.8s:         %8x",
+				 REGISTER_NAME (regnum), raw_val[1]);
 	      else
-		printf_filtered ("%8.8s: %8x%8.8x  ", REGISTER_NAME (i + (j * 18)),
+		printf_filtered ("%8.8s: %8x%8.8x", REGISTER_NAME (regnum),
 				 raw_val[0], raw_val[1]);
 	    }
 	}

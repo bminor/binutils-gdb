@@ -1262,6 +1262,9 @@ fetch_inferior_event ()
 
   if (!async_ecs->wait_some_more)
     {
+      /* Do only the cleanups that have been added by this
+	 function. Let the continuations for the commands do the rest,
+	 if there are any. */
       do_exec_cleanups (old_cleanups);
       normal_stop ();
       /* Is there anything left to do for the command issued to
@@ -3112,6 +3115,7 @@ complete_execution ()
 {
   extern cleanup_sigint_signal_handler PARAMS ((void));
 
+  target_executing = 0;
   if (sync_execution)
     {
       add_file_handler (input_fd, (file_handler_func *) call_readline, 0);
@@ -3120,7 +3124,6 @@ complete_execution ()
       cleanup_sigint_signal_handler ();
       display_gdb_prompt (0);
     }
-  target_executing = 0;
 }
 
 /* Here to return control to GDB when the inferior stops for real.

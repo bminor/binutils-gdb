@@ -1,3 +1,13 @@
+1999-07-16  Ben Elliston  <bje@cygnus.com>
+
+	* sim/arm/misaligned1.ms: New test case.
+	* sim/arm/misaligned2.ms: Likewise.
+	* sim/arm/misaligned3.ms: Likewise.
+
+1999-07-16  Ben Elliston  <bje@cygnus.com>
+
+	* sim/arm/misc.exp: Enable basic tests.
+
 1999-04-21  Doug Evans  <devans@casey.cygnus.com>
 
 	* sim/m32r/nop.cgs: Add missing nop insn.

@@ -4832,7 +4832,7 @@ terminating `#' character and checksum.",
 
   add_show_from_set
     (add_set_cmd ("remotebreak", no_class,
-		  var_integer, (char *) &remote_break,
+		  var_boolean, (char *) &remote_break,
 		  "Set whether to send break if interrupted.\n",
 		  &setlist),
      &showlist);

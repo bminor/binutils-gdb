@@ -104,44 +104,91 @@ store_inferior_registers (regno)
       store_inferior_registers (regno);
 }
 
-/* Fetch one register.  */
 
+/* Our own version of the offsetof macro, since we can't assume ANSI C.  */
+#define HPPAH_OFFSETOF(type, member) ((int) (&((type *) 0)->member))
+
+/* Fetch a register's value from the process's U area.  */
 static void
 fetch_register (regno)
      int regno;
 {
-  register unsigned int regaddr;
   char buf[MAX_REGISTER_RAW_SIZE];
-  register int i;
+  unsigned int addr, len, offset;
+  int i;
 
-  /* Offset of registers within the u area.  */
-  unsigned int offset;
+  offset = 0;
+  len = REGISTER_RAW_SIZE (regno);
 
-  offset = U_REGS_OFFSET;
+  /* Requests for register zero actually want the save_state's
+     ss_flags member.  As RM says: "Oh, what a hack!"  */
+  if (regno == 0)
+    {
+      save_state_t ss;
+      addr = HPPAH_OFFSETOF (save_state_t, ss_flags);
+      len = sizeof (ss.ss_flags);
 
-  regaddr = register_addr (regno, offset);
-  for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (int))
+      /* Note that ss_flags is always an int, no matter what
+	 REGISTER_RAW_SIZE(0) says.  Assuming all HP-UX PA machines
+	 are big-endian, put it at the least significant end of the
+	 value, and zap the rest of the buffer.  */
+      offset = REGISTER_RAW_SIZE (0) - len;
+      memset (buf, 0, sizeof (buf));
+    }
+
+  /* Floating-point registers come from the ss_fpblock area.  */
+  else if (regno >= FP0_REGNUM)
+    addr = (HPPAH_OFFSETOF (save_state_t, ss_fpblock) 
+	    + (REGISTER_BYTE (regno) - REGISTER_BYTE (FP0_REGNUM)));
+
+  /* Wide registers come from the ss_wide area.
+     I think it's more PC to test (ss_flags & SS_WIDEREGS) to select
+     between ss_wide and ss_narrow than to use the raw register size.
+     But checking ss_flags would require an extra ptrace call for
+     every register reference.  Bleah.  */
+  else if (len == 8)
+    addr = (HPPAH_OFFSETOF (save_state_t, ss_wide) 
+	    + REGISTER_BYTE (regno));
+
+  /* Narrow registers come from the ss_narrow area.  Note that
+     ss_narrow starts with gr1, not gr0.  */
+  else if (len == 4)
+    addr = (HPPAH_OFFSETOF (save_state_t, ss_narrow)
+	    + (REGISTER_BYTE (regno) - REGISTER_BYTE (1)));
+
+  else
+    fatal ("hppa-nat.c (fetch_register): unexpected register size");
+
+  for (i = 0; i < len; i += sizeof (int))
     {
       errno = 0;
-      *(int *) &buf[i] = call_ptrace (PT_RUREGS, inferior_pid,
-				      (PTRACE_ARG3_TYPE) regaddr, 0);
-      regaddr += sizeof (int);
+      /* Copy an int from the U area to buf.  Fill the least
+         significant end if len != raw_size.  */
+      * (int *) &buf[offset + i] =
+	  call_ptrace (PT_RUREGS, inferior_pid,
+		       (PTRACE_ARG3_TYPE) addr + i, 0);
       if (errno != 0)
 	{
-	  /* Warning, not error, in case we are attached; sometimes the
-	     kernel doesn't let us at the registers.  */
+	  /* Warning, not error, in case we are attached; sometimes
+	     the kernel doesn't let us at the registers. */
 	  char *err = safe_strerror (errno);
 	  char *msg = alloca (strlen (err) + 128);
-	  sprintf (msg, "reading register %s: %s", REGISTER_NAME (regno), err);
+	  sprintf (msg, "reading `%s' register: %s",
+		   REGISTER_NAME (regno), err);
 	  warning (msg);
-	  goto error_exit;
+	  return;
 	}
     }
+
+  /* If we're reading an address from the instruction address queue,
+     mask out the bottom two bits --- they contain the privilege
+     level.  */
   if (regno == PCOQ_HEAD_REGNUM || regno == PCOQ_TAIL_REGNUM)
-    buf[3] &= ~0x3;
+    buf[len - 1] &= ~0x3;
+
   supply_register (regno, buf);
-error_exit:;
 }
+
 
 /* Copy LEN bytes to or from inferior's memory starting at MEMADDR
    to debugger memory starting at MYADDR.   Copy to inferior if

@@ -1,4 +1,4 @@
-# Copyright (C) 1998 Free Software Foundation, Inc.
+# Copyright (C) 1998, 1999 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -265,6 +265,10 @@ gdb_expect {
 
 send_gdb "print g_instance.a\n"
 gdb_expect {
+    -re "warning.*$gdb_prompt $" {
+	# The compiler doesn't think this is ambiguous.
+	fail "print value of g_instance.a"
+    }
     -re ".\[0-9\]* = 15.*$gdb_prompt $" {
         pass "print value of g_instance.a"
       }
@@ -274,6 +278,10 @@ gdb_expect {
 
 send_gdb "print g_instance.b\n"
 gdb_expect {
+    -re "warning.*$gdb_prompt $" {
+	# The compiler doesn't think this is ambiguous.
+	fail "print value of g_instance.b"
+    }
     -re ".\[0-9\]* = 16.*$gdb_prompt $" {
         pass "print value of g_instance.b"
       }
@@ -283,6 +291,10 @@ gdb_expect {
 
 send_gdb "print g_instance.c\n"
 gdb_expect {
+    -re "warning.*$gdb_prompt $" {
+	# The compiler doesn't think this is ambiguous.
+	fail "print value of g_instance.c"
+    }
     -re ".\[0-9\]* = 17.*$gdb_prompt $" {
         pass "print value of g_instance.c"
       }
