@@ -1,5 +1,5 @@
 /* Read ELF (Executable and Linking Format) object files for GDB.
-   Copyright 1991, 1992, 1993, 1994 Free Software Foundation, Inc.
+   Copyright 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
    Written by Fred Fish at Cygnus Support.
 
 This file is part of GDB.
@@ -300,13 +300,34 @@ elf_symtab_read (abfd, addr, objfile, dynamic)
 	      continue;
 	    }
 
+	  if (sym -> section == &bfd_und_section
+	      && (sym -> flags & BSF_FUNCTION))
+	    {
+	      /* Symbol is a reference to a function defined in
+		 a shared library.
+		 If its value is non zero then it is usually the address
+		 of the corresponding entry in the procedure linkage table,
+		 relative to the base address.
+		 If its value is zero then the dynamic linker has to resolve
+		 the symbol. We are unable to find any meaningful address
+		 for this symbol in the executable file, so we skip it.
+		 Irix 5 has a zero value for all shared library functions
+		 in the main symbol table, but the dynamic symbol table
+		 provides the right values.  */
+	      symaddr = sym -> value;
+	      if (symaddr == 0)
+		continue;
+	      symaddr += addr;
+	      record_minimal_symbol_and_info ((char *) sym -> name, symaddr,
+					      mst_solib_trampoline, NULL,
+					      objfile);
+	      continue;
+	    }
+
 	  /* If it is a nonstripped executable, do not enter dynamic
 	     symbols, as the dynamic symbol table is usually a subset
-	     of the main symbol table.
-	     On Irix 5 however, the symbols for the procedure linkage
-	     table entries have meaningful values only in the dynamic
-	     symbol table, so we always examine undefined symbols.  */
-	  if (dynamic && !stripped && sym -> section != &bfd_und_section)
+	     of the main symbol table.  */
+	  if (dynamic && !stripped)
 	    continue;
 	  if (sym -> flags & BSF_FILE)
 	    {
@@ -335,29 +356,7 @@ elf_symtab_read (abfd, addr, objfile, dynamic)
 	      /* For non-absolute symbols, use the type of the section
 		 they are relative to, to intuit text/data.  Bfd provides
 		 no way of figuring this out for absolute symbols. */
-	      if (sym -> section == &bfd_und_section
-		  && (sym -> flags & BSF_GLOBAL)
-		  && (sym -> flags & BSF_FUNCTION))
-		{
-		  /* Symbol is a reference to a function defined in
-		     a shared library.
-		     If its value is non zero then it is usually the
-		     absolute address of the corresponding entry in
-		     the procedure linkage table.
-		     If its value is zero then the dynamic linker has to
-		     resolve the symbol. We are unable to find any
-		     meaningful address for this symbol in the
-		     executable file, so we skip it.
-		     Irix 5 has a zero value for all shared library functions
-		     in the main symbol table, but the dynamic symbol table
-		     provides the right values.  */
-		  ms_type = mst_solib_trampoline;
-		  symaddr = sym -> value;
-		  if (symaddr == 0)
-		    continue;
-		  symaddr += addr;
-		}
-	      else if (sym -> section == &bfd_abs_section)
+	      if (sym -> section == &bfd_abs_section)
 		{
 		  /* This is a hack to get the minimal symbol type
 		     right for Irix 5, which has absolute adresses

@@ -1,3 +1,9 @@
+Sat Jan 28 13:40:46 1995 Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
+
+	* elfread.c (elf_symtab_read):  Do not test BSF_GLOBAL for
+	procedure linkage table symbols, it is no longer set due to the
+	Jan 6 BFD change in bfd/elfcode.h.
+
 Fri Jan 27 17:08:06 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* top.c (use_windows): Clarify comments.
