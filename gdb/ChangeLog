@@ -1,3 +1,8 @@
+Mon Jan 17 11:15:57 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* i960-tdep.c (i960_fault_to_signal): Return TARGET_SIGNAL_ILL
+	for operation fault, constraint fault, and type fault.
+
 Sun Jan 16 12:46:01 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* Makefile.in (init.c): Add comment explaining formatting conventions.
