@@ -1,3 +1,8 @@
+2003-11-27  Alexandre Oliva  <aoliva@redhat.com>
+
+	* config/tc-frv.c (md_pcrel_from_section): Don't adjust when
+	referencing symbol in a different section.
+
 2003-11-26  Christian Groessler  <chris@groessler.org>
 
 	* config/tc-z8k.c (s_segm): Fix indentation.

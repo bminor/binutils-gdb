@@ -1265,11 +1265,18 @@ md_convert_frag (abfd, sec, fragP)
 long
 md_pcrel_from_section (fixP, sec)
      fixS * fixP;
-     segT   sec ATTRIBUTE_UNUSED;
+     segT   sec;
 {
-  /* Make no adjustment for relocations that will be written out.  */
-  if (TC_FORCE_RELOCATION (fixP))
-    return 0;
+  if (TC_FORCE_RELOCATION (fixP)
+      || (fixP->fx_addsy != (symbolS *) NULL
+	  && S_GET_SEGMENT (fixP->fx_addsy) != sec))
+    {
+      /* If we can't adjust this relocation, or if it references a
+	 local symbol in a different section (which
+	 TC_FORCE_RELOCATION can't check), let the linker figure it
+	 out.  */
+      return 0;
+    }
 
   return (fixP->fx_frag->fr_address + fixP->fx_where) & ~1;
 }
