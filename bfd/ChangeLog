@@ -1,3 +1,12 @@
+2003-02-10  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c: Rename assorted occurrences of tls_type and similar
+	variables, structure fields or function params to tls_mask or
+	similar to better reflect usage.
+	(struct got_entry): Comment.
+	(struct ppc_link_hash_entry):  Expand comment, and renumber TLS_*.
+	(get_tls_mask): Rename from get_tls_type.
+
 2003-02-09  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (TLS_GD_LD): Don't define..

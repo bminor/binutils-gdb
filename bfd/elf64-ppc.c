@@ -2503,14 +2503,18 @@ struct got_entry
 {
   struct got_entry *next;
 
+  /* The symbol addend that we'll be placing in the GOT.  */
   bfd_vma addend;
 
+  /* Reference count until size_dynamic_sections, GOT offset thereafter.  */
   union
     {
       bfd_signed_vma refcount;
       bfd_vma offset;
     } got;
 
+  /* Zero for non-tls entries, or TLS_TLS and one of TLS_GD, TLS_LD,
+     TLS_TPREL or TLS_DTPREL for tls entries.  */
   char tls_type;
 };
 
@@ -2633,15 +2637,21 @@ struct ppc_link_hash_entry
   unsigned int is_entry:1;
 
   /* Contexts in which symbol is used in the GOT (or TOC).
-     Linker optimization will result in various transformations.  */
-#define TLS_TLS		1	/* Any TLS reloc.  */
-#define TLS_GD		2	/* GD reloc. */
-#define TLS_LD		4	/* LD reloc. */
-#define TLS_TPREL	8	/* TPREL reloc, => IE. */
-#define TLS_DTPREL     16	/* DTPREL reloc, => LD. */
-#define TLS_EXPLICIT   32	/* Marks TOC section relocs. */
-#define TLS_TPRELGD    64	/* TPREL reloc resulting from GD->IE. */
-  char tls_type;
+     TLS_GD .. TLS_EXPLICIT bits are or'd into the mask as the
+     corresponding relocs are encountered during check_relocs.
+     tls_optimize clears TLS_GD .. TLS_TPREL when optimizing to
+     indicate the corresponding GOT entry type is not needed.
+     tls_optimize may also set TLS_TPRELGD when a GD reloc turns into
+     a TPREL one.  We use a separate flag rather than setting TPREL
+     just for convenience in distinguishing the two cases.  */
+#define TLS_GD		 1	/* GD reloc. */
+#define TLS_LD		 2	/* LD reloc. */
+#define TLS_TPREL	 4	/* TPREL reloc, => IE. */
+#define TLS_DTPREL	 8	/* DTPREL reloc, => LD. */
+#define TLS_TLS		16	/* Any TLS reloc.  */
+#define TLS_EXPLICIT	32	/* Marks TOC section TLS relocs. */
+#define TLS_TPRELGD	64	/* TPREL reloc resulting from GD->IE. */
+  char tls_mask;
 };
 
 /* ppc64 ELF linker hash table.  */
@@ -2768,7 +2778,7 @@ static void ppc64_elf_hide_symbol
 static bfd_boolean get_sym_h
   PARAMS ((struct elf_link_hash_entry **, Elf_Internal_Sym **, asection **,
 	   char **, Elf_Internal_Sym **, unsigned long, bfd *));
-static int get_tls_type
+static int get_tls_mask
   PARAMS ((char **, Elf_Internal_Sym **, const Elf_Internal_Rela *, bfd *));
 static bfd_boolean allocate_dynrelocs
   PARAMS ((struct elf_link_hash_entry *, PTR));
@@ -2910,7 +2920,7 @@ link_hash_newfunc (entry, table, string)
       eh->is_func = 0;
       eh->is_func_descriptor = 0;
       eh->is_entry = 0;
-      eh->tls_type = 0;
+      eh->tls_mask = 0;
     }
 
   return entry;
@@ -3411,13 +3421,13 @@ update_local_sym_info (abfd, symtab_hdr, r_symndx, r_addend, tls_type)
      int tls_type;
 {
   struct got_entry **local_got_ents = elf_local_got_ents (abfd);
-  char *local_got_tls_types;
+  char *local_got_tls_masks;
 
   if (local_got_ents == NULL)
     {
       bfd_size_type size = symtab_hdr->sh_info;
 
-      size *= sizeof (*local_got_ents) + sizeof (char);
+      size *= sizeof (*local_got_ents) + sizeof (*local_got_tls_masks);
       local_got_ents = (struct got_entry **) bfd_zalloc (abfd, size);
       if (local_got_ents == NULL)
 	return FALSE;
@@ -3446,8 +3456,8 @@ update_local_sym_info (abfd, symtab_hdr, r_symndx, r_addend, tls_type)
       ent->got.refcount += 1;
     }
 
-  local_got_tls_types = (char *) (local_got_ents + symtab_hdr->sh_info);
-  local_got_tls_types[r_symndx] |= tls_type;
+  local_got_tls_masks = (char *) (local_got_ents + symtab_hdr->sh_info);
+  local_got_tls_masks[r_symndx] |= tls_type;
   return TRUE;
 }
 
@@ -3625,7 +3635,7 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
 		  eh->elf.got.glist = ent;
 		}
 	      ent->got.refcount += 1;
-	      eh->tls_type |= tls_type;
+	      eh->tls_mask |= tls_type;
 	    }
 	  else
 	    /* This is a global offset table entry for a local symbol.  */
@@ -3754,7 +3764,7 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
 	    {
 	      struct ppc_link_hash_entry *eh;
 	      eh = (struct ppc_link_hash_entry *) h;
-	      eh->tls_type |= tls_type;
+	      eh->tls_mask |= tls_type;
 	    }
 	  else
 	    if (!update_local_sym_info (abfd, symtab_hdr, r_symndx,
@@ -3763,7 +3773,7 @@ ppc64_elf_check_relocs (abfd, info, sec, relocs)
 
 	  if (ppc64_elf_section_data (sec)->t_symndx == NULL)
 	    {
-	      /* One extra to simplify get_tls_type.  */
+	      /* One extra to simplify get_tls_mask.  */
 	      bfd_size_type amt = sec->_raw_size * sizeof (unsigned) / 8 + 1;
 	      ppc64_elf_section_data (sec)->t_symndx
 		= (unsigned *) bfd_zalloc (abfd, amt);
@@ -4687,11 +4697,11 @@ ppc64_elf_hide_symbol (info, h, force_local)
 }
 
 static bfd_boolean
-get_sym_h (hp, symp, symsecp, tlstypep, locsymsp, r_symndx, ibfd)
+get_sym_h (hp, symp, symsecp, tls_maskp, locsymsp, r_symndx, ibfd)
      struct elf_link_hash_entry **hp;
      Elf_Internal_Sym **symp;
      asection **symsecp;
-     char **tlstypep;
+     char **tls_maskp;
      Elf_Internal_Sym **locsymsp;
      unsigned long r_symndx;
      bfd *ibfd;
@@ -4723,12 +4733,12 @@ get_sym_h (hp, symp, symsecp, tlstypep, locsymsp, r_symndx, ibfd)
 	  *symsecp = symsec;
 	}
 
-      if (tlstypep != NULL)
+      if (tls_maskp != NULL)
 	{
 	  struct ppc_link_hash_entry *eh;
 
 	  eh = (struct ppc_link_hash_entry *) h;
-	  *tlstypep = &eh->tls_type;
+	  *tls_maskp = &eh->tls_mask;
 	}
     }
   else
@@ -4765,31 +4775,31 @@ get_sym_h (hp, symp, symsecp, tlstypep, locsymsp, r_symndx, ibfd)
 	  *symsecp = symsec;
 	}
 
-      if (tlstypep != NULL)
+      if (tls_maskp != NULL)
 	{
 	  struct got_entry **lgot_ents;
-	  char *tlstype;
+	  char *tls_mask;
 
-	  tlstype = NULL;
+	  tls_mask = NULL;
 	  lgot_ents = elf_local_got_ents (ibfd);
 	  if (lgot_ents != NULL)
 	    {
-	      char *lgot_types = (char *) (lgot_ents + symtab_hdr->sh_info);
-	      tlstype = &lgot_types[r_symndx];
+	      char *lgot_masks = (char *) (lgot_ents + symtab_hdr->sh_info);
+	      tls_mask = &lgot_masks[r_symndx];
 	    }
-	  *tlstypep = tlstype;
+	  *tls_maskp = tls_mask;
 	}
     }
   return TRUE;
 }
 
-/* Returns TLS_TYPE for the given REL symbol.  Function return is 0 on
+/* Returns TLS_MASKP for the given REL symbol.  Function return is 0 on
    error, 2 on a toc GD type suitable for optimization, 3 on a toc LD
    type suitable for optimization, and 1 otherwise.  */  
 
 static int
-get_tls_type (tls_type, locsymsp, rel, ibfd)
-     char **tls_type;
+get_tls_mask (tls_maskp, locsymsp, rel, ibfd)
+     char **tls_maskp;
      Elf_Internal_Sym **locsymsp;
      const Elf_Internal_Rela *rel;
      bfd *ibfd;
@@ -4802,10 +4812,10 @@ get_tls_type (tls_type, locsymsp, rel, ibfd)
   bfd_vma off;
 
   r_symndx = ELF64_R_SYM (rel->r_info);
-  if (!get_sym_h (&h, &sym, &sec, tls_type, locsymsp, r_symndx, ibfd))
+  if (!get_sym_h (&h, &sym, &sec, tls_maskp, locsymsp, r_symndx, ibfd))
     return 0;
 
-  if ((*tls_type != NULL && **tls_type != 0)
+  if ((*tls_maskp != NULL && **tls_maskp != 0)
       || sec == NULL
       || ppc64_elf_section_data (sec)->t_symndx == NULL)
     return 1;
@@ -4822,7 +4832,7 @@ get_tls_type (tls_type, locsymsp, rel, ibfd)
   BFD_ASSERT (off % 8 == 0);
   r_symndx = ppc64_elf_section_data (sec)->t_symndx[off / 8];
   next_r = ppc64_elf_section_data (sec)->t_symndx[off / 8 + 1];
-  if (!get_sym_h (&h, &sym, &sec, tls_type, locsymsp, r_symndx, ibfd))
+  if (!get_sym_h (&h, &sym, &sec, tls_maskp, locsymsp, r_symndx, ibfd))
     return 0;
   if (h == NULL
       || h->root.type == bfd_link_hash_defined
@@ -5210,13 +5220,13 @@ ppc64_elf_tls_optimize (obfd, info)
 		struct elf_link_hash_entry *h;
 		Elf_Internal_Sym *sym;
 		asection *sym_sec;
-		char *tls_type;
-		char tls_set, tls_clear, got_tls_type = 0;
+		char *tls_mask;
+		char tls_set, tls_clear, tls_type = 0;
 		bfd_vma value;
 		bfd_boolean ok_tprel, is_local;
 
 		r_symndx = ELF64_R_SYM (rel->r_info);
-		if (!get_sym_h (&h, &sym, &sym_sec, &tls_type, &locsyms,
+		if (!get_sym_h (&h, &sym, &sym_sec, &tls_mask, &locsyms,
 				r_symndx, ibfd))
 		  {
 		  err_free_rel:
@@ -5270,7 +5280,7 @@ ppc64_elf_tls_optimize (obfd, info)
 		    /* LD -> LE */
 		    tls_set = 0;
 		    tls_clear = TLS_LD;
-		    got_tls_type = TLS_TLS | TLS_LD;
+		    tls_type = TLS_TLS | TLS_LD;
 		    expecting_tls_get_addr = 1;
 		    break;
 
@@ -5285,7 +5295,7 @@ ppc64_elf_tls_optimize (obfd, info)
 		      /* GD -> IE */
 		      tls_set = TLS_TLS | TLS_TPRELGD;
 		    tls_clear = TLS_GD;
-		    got_tls_type = TLS_TLS | TLS_GD;
+		    tls_type = TLS_TLS | TLS_GD;
 		    expecting_tls_get_addr = 1;
 		    break;
 
@@ -5299,7 +5309,7 @@ ppc64_elf_tls_optimize (obfd, info)
 			/* IE -> LE */
 			tls_set = 0;
 			tls_clear = TLS_TPREL;
-			got_tls_type = TLS_TLS | TLS_TPREL;
+			tls_type = TLS_TLS | TLS_TPREL;
 			break;
 		      }
 		    else
@@ -5323,7 +5333,7 @@ ppc64_elf_tls_optimize (obfd, info)
 			    char *toc_tls;
 			    int retval;
 
-			    retval = get_tls_type (&toc_tls, &locsyms,
+			    retval = get_tls_mask (&toc_tls, &locsyms,
 						   rel - 1, ibfd);
 			    if (retval == 0)
 			      goto err_free_rel;
@@ -5401,7 +5411,7 @@ ppc64_elf_tls_optimize (obfd, info)
 
 		    for (; ent != NULL; ent = ent->next)
 		      if (ent->addend == rel->r_addend
-			  && ent->tls_type == got_tls_type)
+			  && ent->tls_type == tls_type)
 			break;
 		    if (ent == NULL)
 		      abort ();
@@ -5438,8 +5448,8 @@ ppc64_elf_tls_optimize (obfd, info)
 			}
 		  }
 
-		*tls_type |= tls_set;
-		*tls_type &= ~tls_clear;
+		*tls_mask |= tls_set;
+		*tls_mask &= ~tls_clear;
 	      }
 
 	    if (elf_section_data (sec)->relocs != relstart)
@@ -5547,7 +5557,7 @@ allocate_dynrelocs (h, inf)
   eh = (struct ppc_link_hash_entry *) h;
   /* Run through the TLS GD got entries first if we're changing them
      to TPREL.  */
-  if ((eh->tls_type & TLS_TPRELGD) != 0)
+  if ((eh->tls_mask & TLS_TPRELGD) != 0)
     for (gent = h->got.glist; gent != NULL; gent = gent->next)
       if (gent->got.refcount > 0
 	  && (gent->tls_type & TLS_GD) != 0)
@@ -5592,11 +5602,11 @@ allocate_dynrelocs (h, inf)
 
 	s = htab->sgot;
 	gent->got.offset = s->_raw_size;
-	s->_raw_size += (gent->tls_type & eh->tls_type & TLS_GD) ? 16 : 8;
+	s->_raw_size += (gent->tls_type & eh->tls_mask & TLS_GD) ? 16 : 8;
 	dyn = htab->elf.dynamic_sections_created;
 	if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info, h))
 	  htab->srelgot->_raw_size
-	    += (gent->tls_type & eh->tls_type & TLS_GD
+	    += (gent->tls_type & eh->tls_mask & TLS_GD
 		? 2 * sizeof (Elf64_External_Rela)
 		: sizeof (Elf64_External_Rela));
       }
@@ -5752,7 +5762,7 @@ ppc64_elf_size_dynamic_sections (output_bfd, info)
     {
       struct got_entry **lgot_ents;
       struct got_entry **end_lgot_ents;
-      char *lgot_types;
+      char *lgot_masks;
       bfd_size_type locsymcount;
       Elf_Internal_Shdr *symtab_hdr;
       asection *srel;
@@ -5794,17 +5804,17 @@ ppc64_elf_size_dynamic_sections (output_bfd, info)
       symtab_hdr = &elf_tdata (ibfd)->symtab_hdr;
       locsymcount = symtab_hdr->sh_info;
       end_lgot_ents = lgot_ents + locsymcount;
-      lgot_types = (char *) end_lgot_ents;
+      lgot_masks = (char *) end_lgot_ents;
       s = htab->sgot;
       srel = htab->srelgot;
-      for (; lgot_ents < end_lgot_ents; ++lgot_ents, ++lgot_types)
+      for (; lgot_ents < end_lgot_ents; ++lgot_ents, ++lgot_masks)
 	{
 	  struct got_entry *ent;
 
 	  for (ent = *lgot_ents; ent != NULL; ent = ent->next)
 	    if (ent->got.refcount > 0)
 	      {
-		if ((ent->tls_type & *lgot_types & TLS_LD) != 0)
+		if ((ent->tls_type & *lgot_masks & TLS_LD) != 0)
 		  {
 		    if (htab->tlsld_got.offset == (bfd_vma) -1)
 		      {
@@ -5818,7 +5828,7 @@ ppc64_elf_size_dynamic_sections (output_bfd, info)
 		else
 		  {
 		    ent->got.offset = s->_raw_size;
-		    if ((ent->tls_type & *lgot_types & TLS_GD) != 0)
+		    if ((ent->tls_type & *lgot_masks & TLS_GD) != 0)
 		      {
 			s->_raw_size += 16;
 			if (info->shared)
@@ -6660,12 +6670,12 @@ ppc64_elf_size_stubs (output_bfd, stub_bfd, info, group_size,
 		      && irela != internal_relocs)
 		    {
 		      /* Get tls info.  */
-		      char *tls_type;
+		      char *tls_mask;
 
-		      if (!get_tls_type (&tls_type, &local_syms,
+		      if (!get_tls_mask (&tls_mask, &local_syms,
 					 irela - 1, input_bfd))
 			goto error_ret_free_internal;
-		      if (*tls_type != 0)
+		      if (*tls_mask != 0)
 			continue;
 		    }
 
@@ -7098,12 +7108,12 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
       if (IS_TLS_RELOC (r_type))
 	{
 	  if (h != NULL)
-	    tls_mask = ((struct ppc_link_hash_entry *) h)->tls_type;
+	    tls_mask = ((struct ppc_link_hash_entry *) h)->tls_mask;
 	  else if (local_got_ents != NULL)
 	    {
-	      char *lgot_types;
-	      lgot_types = (char *) (local_got_ents + symtab_hdr->sh_info);
-	      tls_mask = lgot_types[r_symndx];
+	      char *lgot_masks;
+	      lgot_masks = (char *) (local_got_ents + symtab_hdr->sh_info);
+	      tls_mask = lgot_masks[r_symndx];
 	    }
 	}
 
@@ -7133,7 +7143,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	    char *toc_tls;
 	    int retval;
 
-	    retval = get_tls_type (&toc_tls, &local_syms, rel, input_bfd);
+	    retval = get_tls_mask (&toc_tls, &local_syms, rel, input_bfd);
 	    if (retval == 0)
 	      return FALSE;
 
@@ -7185,7 +7195,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      /* Check for toc tls entries.  */
 	      char *toc_tls;
 
-	      if (!get_tls_type (&toc_tls, &local_syms, rel, input_bfd))
+	      if (!get_tls_mask (&toc_tls, &local_syms, rel, input_bfd))
 		return FALSE;
 
 	      if (toc_tls)
@@ -7671,7 +7681,7 @@ ppc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 		  {
 
 		    relocation += ent->addend;
-		    if ((tls_type & TLS_TLS) != 0)
+		    if (tls_type != 0)
 		      {
 			relocation -= htab->tls_sec->vma + DTP_OFFSET;
 			if ((tls_type & TLS_TPREL) != 0)
