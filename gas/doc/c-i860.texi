@@ -136,10 +136,10 @@ or large_imm@@l,%rn,%rn
 @end smallexample
 @item Load/store with relocatable address expression:
 
-For example, the pseudo-instruction @code{ld.b addr,%rn} 
+For example, the pseudo-instruction @code{ld.b addr_exp(%rx),%rn} 
 will be expanded into:
 @smallexample
-orh addr_exp@@ha,%r0,%r31
+orh addr_exp@@ha,%rx,%r31
 ld.l addr_exp@@l(%r31),%rn
 @end smallexample
 
