@@ -158,7 +158,7 @@ operate on characters while meta keystrokes operate on words.
 
 The act of @dfn{cutting} text means to delete the text from the line, and
 to save away the deleted text for later use, just as if you had cut the
-text out of the line with a pair of scissors.  There is a
+text out of the line with a pair of scissors.  
 
 @dfn{Killing} text means to delete the text from the line, but to save
 it away for later use, usually by @dfn{yanking} it back into the line.
