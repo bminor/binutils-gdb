@@ -47,7 +47,6 @@ into another language, under the above conditions for modified versions.
 @c This text may be freely distributed under the terms of the GNU
 @c General Public License.
 @c
-@c $Id$
 
 @setchapternewpage odd
 @settitle GNU Binary Utilities

@@ -17,8 +17,6 @@ You should have received a copy of the GNU General Public License
 along with BFD; see the file COPYING.  If not, write to
 the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
-/* $Id$ */
-
 #include "bfd.h"
 #include "sysdep.h"
 #include "bucomm.h"

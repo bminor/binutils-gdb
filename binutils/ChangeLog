@@ -1,3 +1,8 @@
+Fri Jul 17 18:39:44 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
+
+	* ar.1, binutils.texi, i960-pinsn.c, nm.1, objdump.1, ranlib.1,
+	  size.1, sparc-pinsn.c, strip.1: removed rcsid's.
+
 Thu Jul 16 16:55:24 1992  K. Richard Pixley  (rich@rtl.cygnus.com)
 
 	* Makefile.dos: removed rcsid.
