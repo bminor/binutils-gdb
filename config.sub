@@ -1,6 +1,6 @@
 #!/bin/sh
 # Configuration validation subroutine script, version 1.1.
-#   Copyright (C) 1991, 1992 Free Software Foundation, Inc.
+#   Copyright (C) 1991-1993 Free Software Foundation, Inc.
 # This file is (in principle) common to ALL GNU software.
 # The presence of a machine in this file suggests that SOME GNU software
 # can handle that machine.  It does not imply ALL GNU software can. 
@@ -65,7 +65,7 @@ else os=; fi
 
 ### Let's recognize common machines as not being operating systems so
 ### that things like config.sub decstation-3100 work.  We also
-### recognize some manufacturers as not being operatin systems, so we
+### recognize some manufacturers as not being operating systems, so we
 ### can provide default operating systems below.
 case $os in
 	-dec* | -mips* | -sequent* | -encore* | -pc532* | -sgi* | -sony* | \
@@ -80,41 +80,25 @@ case $os in
 		;;
 	-scout)						# CYGNUS LOCAL
 		;;
-	-wrs)
+	-wrs)						# CYGNUS LOCAL
 		os=vxworks
 		basic_machine=$1
 		;;
 	-sco3.2v[4-9]*)
 		# Don't forget version if it is 3.2v4 or newer.
-		os=-sco3.2v4
-		basic_machine=i386-unknown
+		basic_machine=`echo $1 | sed -e 's/86-.*/86-unknown/'`
 		;;
 	-sco*)
 		os=-sco3.2v2
-		basic_machine=i386-unknown
+		basic_machine=`echo $1 | sed -e 's/86-.*/86-unknown/'`
 		;;
 	-isc)
 		os=-isc2.2
-		basic_machine=i386-unknown
+		basic_machine=`echo $1 | sed -e 's/86-.*/86-unknown/'`
 		;;
 	-isc*)
-		os=-isc
-		basic_machine=i386-unknown
+		basic_machine=`echo $1 | sed -e 's/86-.*/86-unknown/'`
 		;;
-# start-sanitize-v9
-	-32)						# CYGNUS LOCAL
-		basic_machine=sparc64-hal
-		os=-hal32
-		;;
-	-64)						# CYGNUS LOCAL
-		basic_machine=sparc64-hal
-		os=-hal64
-		;;
-	-v7)						# CYGNUS LOCAL
-		basic_machine=sparc64-sun
-		os=-v7
-		;;
-# end-sanitize-v9	
 esac
 
 # Decode aliases for certain CPU-COMPANY combinations.
@@ -123,7 +107,7 @@ case $basic_machine in
 	# Some are omitted here because they have special meanings below.
 	tahoe | i[34]86 | i860 | m68k | m68000 | m88k | ns32k | arm | pyramid \
 		| tron | a29k | 580 | i960 | h8300 | hppa1.0 | hppa1.1 \
-		| alpha | we32k | ns16k | clipper \
+		| alpha | we32k | ns16k | clipper | sparclite \
 		| sparc | m680[01234]0 | m683?2 | z8k | v70 | h8500)# CYGNUS LOCAL
 		basic_machine=$basic_machine-unknown
 		;;
@@ -133,28 +117,17 @@ case $basic_machine in
 	      | mips-* | pyramid-* | tron-* | a29k-* | romp-* | rs6000-* \
 	      | none-* | 580-* | cray2-* | h8300-* | i960-* | xmp-* | ymp-* \
 	      | hppa1.0-* | hppa1.1-* | alpha-* | we32k-* | cydra-* | ns16k-* \
-	      | pn-* | np1-* | xps100-* | clipper-* | orion-* \
+	      | pn-* | np1-* | xps100-* | clipper-* | orion-* | sparclite-* \
 	      | m680[01234]0-* | m683?2-* | z8k-*)	# CYGNUS LOCAL
 		;;
 	# Recognize the various machine names and aliases which stand
 	# for a CPU type and a company and sometimes even an OS.
 # start-sanitize-v9
-	sparc64-*) ;;					# CYGNUS LOCAL
-	hal-32 | hal32)					# CYGNUS LOCAL
-		basic_machine=sparc64-hal
-		os=-hal32
-		;;
-	hal-64 | hal64)					# CYGNUS LOCAL
-		basic_machine=sparc64-hal
-		os=-hal64
-		;;
 	sparc64)					# CYGNUS LOCAL
 		basic_machine=sparc64-sun
-		os=-v9		# 32 bit pointers
+		os=-elf64i64p
 		;;
-	sparc64-v7 | sparc64v7)				# CYGNUS LOCAL
-		basic_machine=sparc64-sun
-		os=-v7
+	sparc64-*)					# CYGNUS LOCAL
 		;;
 # end-sanitize-v9
 
@@ -174,61 +147,30 @@ case $basic_machine in
 		basic_machine=i386-mach
 		os=-mach
 		;;
-	i386v32)
-		basic_machine=i386-unknown
+# I'm not sure what "Sysv32" means.  Should this be sysv3.2?
+	i[34]86v32)
+		basic_machine=`echo $1 | sed -e 's/86.*/86-unknown/'`
 		os=-sysv32
 		;;
-	i386-sco* | i386sco | sco)
-		basic_machine=i386-unknown
-		os=-sco3.2v2
+	i[34]86v4*)
+		basic_machine=`echo $1 | sed -e 's/86.*/86-unknown/'`
+		os=-sysv4
+		;;
+	i[34]86v)
+		basic_machine=`echo $1 | sed -e 's/86.*/86-unknown/'`
+		os=-sysv
+		;;
+	i[34]86sol2)
+		basic_machine=`echo $1 | sed -e 's/86.*/86-unknown/'`
+		os=-solaris2
 		;;
 	go32 | i386-go32)				# CYGNUS LOCAL
 		basic_machine=i386-unknown
 		os=-go32
 		;;
-	i386-isc* | isc)
-		basic_machine=i386-unknown
-		os=-isc
-		;;
 	i386-linux* | linux)				# CYGNUS LOCAL
 		basic_machine=i386-unknown
 		os=-linux
-		;;
-	i486v32)
-		basic_machine=i486-unknown
-		os=-sysv32
-		;;
-	i486-sco* | i486sco | sco)
-		basic_machine=i486-unknown
-		os=-sco3.2v2
-		;;
-	i486-isc* | isc)
-		basic_machine=i486-unknown
-		os=-isc
-		;;
-	i386sol2)					# CYGNUS LOCAL
-		basic_machine=i386-unknown
-		os=-solaris2
-		;;
-	i486sol2)					# CYGNUS LOCAL
-		basic_machine=i486-unknown
-		os=-solaris2
-		;;
-	i386v4*)
-		basic_machine=i386-unknown
-		os=-sysv4
-		;;
-	i486v4*)
-		basic_machine=i486-unknown
-		os=-sysv4
-		;;
-	i386v)
-		basic_machine=i386-unknown
-		os=-sysv
-		;;
-	i486v)
-		basic_machine=i486-unknown
-		os=-sysv
 		;;
 	386bsd)						# CYGNUS LOCAL
 		basic_machine=i386-unknown
@@ -471,7 +413,7 @@ case $basic_machine in
 		;;
 	delta88)
 		basic_machine=m88k-motorola
-		os=-m88kbcs
+		os=-sysv3
 		;;
 	dpx2)
 		basic_machine=m68k-bull
@@ -481,7 +423,6 @@ case $basic_machine in
 		basic_machine=a29k-amd
 		os=-ebmon
 		;;
-
 	h8300hms)					# CYGNUS LOCAL
 		basic_machine=h8300-hitachi
 		os=-hms
@@ -508,7 +449,7 @@ case $basic_machine in
 		;;
 	harris)
 		basic_machine=m88k-harris
-		os=-m88kbcs
+		os=-sysv3
 		;;
 	hp300bsd)
 		basic_machine=m68k-hp
@@ -572,10 +513,6 @@ case $basic_machine in
 		basic_machine=m68k-none
 		os=-os68k
 		;;
-	sparclite)					# CYGNUS LOCAL
-		basic_machine=sparclite-fujitsu
-		os=-none
-		;;
 	sparclite-wrs)					# CYGNUS LOCAL
 		basic_machine=sparclite-wrs
 		os=-vxworks
@@ -626,6 +563,9 @@ case $basic_machine in
 	we32k)
 		basic_machine=we32k-att
 		;;
+	sparc)
+		basic_machine=sparc-sun
+		;;
         cydra)
 		basic_machine=cydra-cydrome
 		;;
@@ -658,14 +598,18 @@ esac
 if [ "$os" ]
 then
 case $os in
+	# -solaris* is a basic system type, with this one exception.
+	-solaris1 | -solaris1.*)
+		os=`echo $os | sed -e 's|solaris1|sunos4|'`
+		;;
 	# First accept the basic system types.
 	# The portable systems comes first.
 	# Each alternative must end in a *, to match a version number.
 	-bsd* | -sysv* | -mach* | -minix* | -genix* | -ultrix* | -irix* \
-	      | -vms* | -sco* | -esix* | -isc* | -aix* | -sunos* | -hpux* \
+	      | -vms* | -sco* | -esix* | -isc* | -aix* | -sunos | -sunos[34]* | -hpux* \
 	      | -unos* | -osf* | -luna* | -dgux* | -solaris* | -sym* \
 	      | -amigados* | -msdos* | -newsos* | -unicos* | -aos* \
-	      | -nindy* | -vxworks* | -ebmon* | -hds* | -m88kbcs* \
+	      | -nindy* | -vxworks* | -ebmon* | -hds*  \
 	      | -riscos* | -linux* | -uniplus* | -iris* | -rtu* | -xenix* \
 	      | -go32 | -sim | -es1800* | -udi | -hms* | -xray \
 	      | -os68k* | -none* | -v88r* | -aout | -coff | -elf | -bosx* \
@@ -673,9 +617,14 @@ case $os in
 				# The last three lines above are CYGNUS LOCAL
 	;;
 # start-sanitize-v9
-	-v7 | -v9 | -v9p64 | -hal32 | -hal64) ;;	# CYGNUS LOCAL
+	-v7 | -old* | -aout* | -elf*) ;;		# CYGNUS LOCAL
 # end-sanitize-v9
-
+	-sunos5*)
+		os=`echo $os | sed -e 's|sunos5|solaris2|'`
+		;;
+	-sunos6*)
+		os=`echo $os | sed -e 's|sunos6|solaris3|'`
+		;;
 	-osfrose*)
 		os=-osfrose
 		;;
@@ -821,7 +770,7 @@ case $basic_machine in
 			-sunos*)
 				vendor=sun
 				;;
-			-bosx*)
+			-bosx*)			# CYGNUS LOCAL
 				vendor=bull
 				;;
 			-aix*)

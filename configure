@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Configuration script
-#   Copyright (C) 1988, 1990, 1991, 1992 Free Software Foundation, Inc.
+#   Copyright (C) 1988, 1990-1993 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -258,12 +258,12 @@ do
 			withopt=`echo ${arg} | sed 's:^-*\(with[^=]*\)=.*$:\1:;s/-/_/g'`
 			withval=`echo ${arg} | sed 's:^-*with[^=]*=\(.*\)$:\1:'`
 			eval $withopt="$withval"
-			withoptions="$withoptions -$withopt=\"$withval\""
+			withoptions="$withoptions $arg"
 			;;
 		-with* | --with*)
 			withopt=`echo ${arg} | sed 's:^-*with:with:;s/-/_/g'`
 			eval $withopt=yes
-			withoptions="$withoptions -$withopt"
+			withoptions="$withoptions $arg"
 			;;
 		-x | --x) ;;
 		-* | --*)
@@ -551,7 +551,7 @@ for subdir in . ${subdirs} ; do
 	*) # otherwise relative
 		case "${subdir}" in
 		.) makesrcdir=${srcdir} ;;
-		*) makesrcdir=`echo ${subdir} | sed -e 's:[^./][^./]*:..:g'`/${srcdir}/${subdir} ;;
+		*) makesrcdir=${invsubdir}${srcdir}/${subdir} ;;
 		esac
 		;;
     esac
@@ -592,7 +592,7 @@ for subdir in . ${subdirs} ; do
 
 		if [ ! -r ${srcdir}/${file} ] ; then
 			echo '***' "${progname}: cannot create a link \"${link}\"," 1>&2
-			echo '***' "since the file \"${file}\" does not exist." 1>&2
+			echo '***' "since the file \"${srcdir}/${file}\" does not exist." 1>&2
 			exit 1
 		fi
 
