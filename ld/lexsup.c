@@ -516,6 +516,9 @@ parse_args (argc, argv)
       switch (optc)
 	{
 	default:
+	  fprintf (stderr,
+		   _("%s: use the --help option for usage information\n"),
+		   program_name);
 	  xexit (1);
 	case 1:			/* File name.  */
 	  lang_add_input_file (optarg, lang_input_file_is_file_enum,
