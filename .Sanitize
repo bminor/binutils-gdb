@@ -33,7 +33,7 @@ bfd
 binutils
 clib
 config
-config.sub
+config.subr
 configdos.bat
 configure
 configure.in
