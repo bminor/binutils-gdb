@@ -1,3 +1,14 @@
+2001-06-11  Andrew Cagney  <ac131313@redhat.com>
+
+	* symtab.c (lookup_symtab_1): Replace basename with lbasename.
+	(lookup_partial_symtab, file_matches): Ditto.
+	(make_source_files_completion_list): Ditto.
+	(make_file_symbol_completion_list): Ditto.  Make local char*
+	variable ``tail'' constant.
+	(make_source_files_completion_list): Ditto with ``base_name''.
+	* source.c (open_source_file): Use lbasename. Make ``p'' const
+	char *.
+
 2001-06-13  Eli Zaretskii  <eliz@is.elta.co.il>
 
 	* config/i386/xm-go32.h (SLASH_P, ROOTED_P, SLASH_CHAR)

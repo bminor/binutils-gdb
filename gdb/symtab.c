@@ -157,7 +157,7 @@ got_symtab:
   if (lbasename (name) == name)
     ALL_SYMTABS (objfile, s)
     {
-      if (FILENAME_CMP (basename (s->filename), name) == 0)
+      if (FILENAME_CMP (lbasename (s->filename), name) == 0)
 	return s;
     }
 
@@ -247,7 +247,7 @@ lookup_partial_symtab (const char *name)
   if (lbasename (name) == name)
     ALL_PSYMTABS (objfile, pst)
     {
-      if (FILENAME_CMP (basename (pst->filename), name) == 0)
+      if (FILENAME_CMP (lbasename (pst->filename), name) == 0)
 	return (pst);
     }
 
@@ -2276,7 +2276,7 @@ file_matches (char *file, char *files[], int nfiles)
     {
       for (i = 0; i < nfiles; i++)
 	{
-	  if (strcmp (files[i], basename (file)) == 0)
+	  if (strcmp (files[i], lbasename (file)) == 0)
 	    return 1;
 	}
     }
@@ -3167,7 +3167,7 @@ make_file_symbol_completion_list (char *text, char *word, char *srcfile)
     {
       /* Maybe they typed the file with leading directories, while the
 	 symbol tables record only its basename.  */
-      char *tail = basename (srcfile);
+      const char *tail = lbasename (srcfile);
 
       if (tail > srcfile)
 	s = lookup_symtab (tail);
@@ -3272,7 +3272,7 @@ make_source_files_completion_list (char *text, char *word)
   int list_used = 0;
   size_t text_len = strlen (text);
   char **list = (char **) xmalloc (list_alloced * sizeof (char *));
-  char *base_name;
+  const char *base_name;
 
   list[0] = NULL;
 
@@ -3302,7 +3302,7 @@ make_source_files_completion_list (char *text, char *word)
 	     debug info records leading directories, but not the other
 	     way around.  This is what subroutines of breakpoint
 	     command do when they parse file names.  */
-	  base_name = basename (s->filename);
+	  base_name = lbasename (s->filename);
 	  if (base_name != s->filename
 	      && !filename_seen (base_name, 1, &first)
 #if HAVE_DOS_BASED_FILE_SYSTEM
@@ -3338,7 +3338,7 @@ make_source_files_completion_list (char *text, char *word)
 	    }
 	  else
 	    {
-	      base_name = basename (ps->filename);
+	      base_name = lbasename (ps->filename);
 	      if (base_name != ps->filename
 		  && !filename_seen (base_name, 1, &first)
 #if HAVE_DOS_BASED_FILE_SYSTEM

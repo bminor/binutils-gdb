@@ -670,7 +670,7 @@ int
 open_source_file (struct symtab *s)
 {
   char *path = source_path;
-  char *p;
+  const char *p;
   int result;
   char *fullname;
 
@@ -710,7 +710,7 @@ open_source_file (struct symtab *s)
   if (result < 0)
     {
       /* Didn't work.  Try using just the basename. */
-      p = basename (s->filename);
+      p = lbasename (s->filename);
       if (p != s->filename)
 	result = openp (path, 0, p, OPEN_MODE, 0, &s->fullname);
     }
