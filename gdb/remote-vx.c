@@ -235,7 +235,7 @@ vx_create_inferior (exec_file, args, env)
   stop_soon_quietly = 0;
 
   /* insert_step_breakpoint ();  FIXME, do we need this?  */
-  proceed(-1, -1, 0);
+  proceed (-1, TARGET_SIGNAL_DEFAULT, 0);
 }
 
 /* Fill ARGSTRUCT in argc/argv form with the arguments from the

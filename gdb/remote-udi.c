@@ -167,7 +167,7 @@ udi_create_inferior (execfile, args, env)
 
   init_wait_for_inferior ();
   clear_proceed_status ();
-  proceed(-1,-1,0);
+  proceed (-1, TARGET_SIGNAL_DEFAULT, 0);
 }
 
 static void

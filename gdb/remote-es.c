@@ -1616,7 +1616,8 @@ es1800_create_inferior (execfile, args, env)
   /* trap_expected = 0; */
   /* insert_step_breakpoint ();  FIXME, do we need this?  */
 
-  proceed ((CORE_ADDR) entry_pt, -1, 0);		/* Let 'er rip... */
+  /* Let 'er rip... */
+  proceed ((CORE_ADDR) entry_pt, TARGET_SIGNAL_DEFAULT, 0);
 
 }
 

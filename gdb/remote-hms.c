@@ -485,7 +485,7 @@ hms_create_inferior (execfile, args, env)
   expect_prompt ();
 
   insert_breakpoints ();	/* Needed to get correct instruction in cache */
-  proceed (entry_pt, -1, 0);
+  proceed (entry_pt, TARGET_SIGNAL_DEFAULT, 0);
 }
 
 /* Open a connection to a remote debugger.

@@ -1339,7 +1339,7 @@ mips_create_inferior (execfile, args, env)
 
   /* FIXME: Should we set inferior_pid here?  */
 
-  proceed (entry_pt, -1, 0);
+  proceed (entry_pt, TARGET_SIGNAL_DEFAULT, 0);
 }
 
 /* Clean up after a process.  Actually nothing to do.  */

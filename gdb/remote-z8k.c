@@ -158,7 +158,7 @@ sim_create_inferior (execfile, args, env)
   sim_clear_breakpoints ();
   init_wait_for_inferior ();
   insert_breakpoints ();
-  proceed (entry_pt, -1, 0);
+  proceed (entry_pt, TARGET_SIGNAL_DEFAULT, 0);
 }
 #if 0
 static void

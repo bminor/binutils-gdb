@@ -2174,48 +2174,33 @@ do_detach (signal)
   attach_flag = 0;
 }
 
-/*
+/*  emulate wait() as much as possible.
+    Wait for child to do something.  Return pid of child, or -1 in case
+    of error; store status in *OURSTATUS.
 
-LOCAL FUNCTION
+    Not sure why we can't
+    just use wait(), but it seems to have problems when applied to a
+    process being controlled with the /proc interface.
 
-	procfs_wait -- emulate wait() as much as possible
-	Wait for child to do something.  Return pid of child, or -1 in case
-	of error; store status through argument pointer STATUS.
+    We have a race problem here with no obvious solution.  We need to let
+    the inferior run until it stops on an event of interest, which means
+    that we need to use the PIOCWSTOP ioctl.  However, we cannot use this
+    ioctl if the process is already stopped on something that is not an
+    event of interest, or the call will hang indefinitely.  Thus we first
+    use PIOCSTATUS to see if the process is not stopped.  If not, then we
+    use PIOCWSTOP.  But during the window between the two, if the process
+    stops for any reason that is not an event of interest (such as a job
+    control signal) then gdb will hang.  One possible workaround is to set
+    an alarm to wake up every minute of so and check to see if the process
+    is still running, and if so, then reissue the PIOCWSTOP.  But this is
+    a real kludge, so has not been implemented.  FIXME: investigate
+    alternatives.
 
-
-SYNOPSIS
-
-	int procfs_wait (int pid, int *statloc)
-
-DESCRIPTION
-
-	Try to emulate wait() as much as possible.  Not sure why we can't
-	just use wait(), but it seems to have problems when applied to a
-	process being controlled with the /proc interface.
-
-NOTES
-
-	We have a race problem here with no obvious solution.  We need to let
-	the inferior run until it stops on an event of interest, which means
-	that we need to use the PIOCWSTOP ioctl.  However, we cannot use this
-	ioctl if the process is already stopped on something that is not an
-	event of interest, or the call will hang indefinitely.  Thus we first
-	use PIOCSTATUS to see if the process is not stopped.  If not, then we
-	use PIOCWSTOP.  But during the window between the two, if the process
-	stops for any reason that is not an event of interest (such as a job
-	control signal) then gdb will hang.  One possible workaround is to set
-	an alarm to wake up every minute of so and check to see if the process
-	is still running, and if so, then reissue the PIOCWSTOP.  But this is
-	a real kludge, so has not been implemented.  FIXME: investigate
-	alternatives.
-
-	FIXME:  Investigate why wait() seems to have problems with programs
-	being control by /proc routines.
-
- */
+    FIXME:  Investigate why wait() seems to have problems with programs
+    being control by /proc routines.  */
 
 static int
-procfs_wait (pid, statloc)
+procfs_wait (pid, ourstatus)
      int pid;
      struct target_waitstatus *ourstatus;
 {

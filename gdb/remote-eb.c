@@ -285,7 +285,7 @@ eb_create_inferior (execfile, args, env)
   target_terminal_inferior ();
 
   /* insert_step_breakpoint ();  FIXME, do we need this?  */
-  proceed ((CORE_ADDR)entry_pt, -1, 0);		/* Let 'er rip... */
+  proceed ((CORE_ADDR)entry_pt, TARGET_SIGNAL_DEFAULT, 0);		/* Let 'er rip... */
 }
 
 /* Translate baud rates from integers to damn B_codes.  Unix should

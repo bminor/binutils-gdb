@@ -180,7 +180,7 @@ Assuming you are at NYU debuging a kernel, i.e., no need to download.\n\n");
   init_wait_for_inferior ();
   clear_proceed_status ();
   stop_soon_quietly = 1;
-  proceed(-1,-1,0);
+  proceed (-1, TARGET_SIGNAL_DEFAULT, 0);
   normal_stop ();
 }
 /**************************************************** REMOTE_MOURN_INFERIOR */

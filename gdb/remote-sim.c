@@ -196,7 +196,7 @@ gdbsim_create_inferior (exec_file, args, env)
 
   inferior_pid = 42;
   insert_breakpoints ();	/* Needed to get correct instruction in cache */
-  proceed (entry_pt, -1, 0);
+  proceed (entry_pt, TARGET_SIGNAL_DEFAULT, 0);
 }
 
 /* The open routine takes the rest of the parameters from the command,
