@@ -648,7 +648,7 @@ case "${targ}" in
     ;;
   sparc-*-linux-gnu*)
     targ_defvec=bfd_elf32_sparc_vec
-    targ_selvecs="sparclinux_vec sunos_big_vec"
+    targ_selvecs="sparclinux_vec bfd_elf64_sparc_vec sunos_big_vec"
     ;;
   sparc-*-lynxos*)
     targ_defvec=sparclynx_coff_vec
