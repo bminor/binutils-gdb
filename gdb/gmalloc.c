@@ -559,7 +559,7 @@ DEFUN(__free, (ptr), PTR ptr)
 	  prev = (struct list *) ptr;
 	  _heapinfo[block].busy.info.frag.nfree = 1;
 	  _heapinfo[block].busy.info.frag.first = (unsigned int)
-	    (((char *) ptr - (char *) NULL) % BLOCKSIZE >> type);
+	    (((unsigned int)((char *) ptr - (char *) NULL)) % BLOCKSIZE >> type);
 	  prev->next = _fraghead[type].next;
 	  prev->prev = &_fraghead[type];
 	  prev->prev->next = prev;
@@ -656,7 +656,7 @@ DEFUN(align, (size), size_t size)
   unsigned int adj;
 
   result = (*__morecore)(size);
-  adj = (unsigned int) ((char *) result - (char *) NULL) % BLOCKSIZE;
+  adj = (unsigned int) ((unsigned int)((char *) result - (char *) NULL)) % BLOCKSIZE;
   if (adj != 0)
     {
       adj = BLOCKSIZE - adj;
@@ -770,7 +770,7 @@ DEFUN(malloc, (size), size_t size)
 	  block = BLOCK(result);
 	  if (--_heapinfo[block].busy.info.frag.nfree != 0)
 	    _heapinfo[block].busy.info.frag.first = (unsigned int)
-	      (((char *) next->next - (char *) NULL) % BLOCKSIZE) >> log;
+	      (((unsigned int)((char *) next->next - (char *) NULL)) % BLOCKSIZE) >> log;
 
 	  /* Update the statistics.  */
 	  ++_chunks_used;
@@ -1145,7 +1145,7 @@ DEFUN(valloc, (size), size_t size)
   result = malloc(size + pagesize);
   if (result == NULL)
     return NULL;
-  adj = (unsigned int) ((char *) result - (char *) NULL) % pagesize;
+  adj = (unsigned int) ((unsigned int)((char *) result - (char *) NULL)) % pagesize;
   if (adj != 0)
     result = (char *) result + pagesize - adj;
   return result;
