@@ -693,4 +693,12 @@ extern struct frame_info *deprecated_frame_xmalloc (void);
 extern struct frame_info *deprecated_frame_xmalloc_with_cleanup (long sizeof_saved_regs,
 								 long sizeof_extra_info);
 
+/* FIXME: cagney/2003-01-07: These are just nasty.  Code shouldn't be
+   doing this.  I suspect it dates back to the days when every field
+   of an allocated structure was explicitly initialized.  */
+extern void deprecated_set_frame_next_hack (struct frame_info *fi,
+					    struct frame_info *next);
+extern void deprecated_set_frame_prev_hack (struct frame_info *fi,
+					    struct frame_info *prev);
+
 #endif /* !defined (FRAME_H)  */

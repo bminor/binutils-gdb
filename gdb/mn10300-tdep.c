@@ -159,8 +159,8 @@ analyze_dummy_frame (CORE_ADDR pc, CORE_ADDR frame)
       extra_info = XMALLOC (struct frame_extra_info);
       deprecated_set_frame_extra_info_hack (dummy, extra_info);
     }
-  dummy->next = NULL;
-  dummy->prev = NULL;
+  deprecated_set_frame_next_hack (dummy, NULL);
+  deprecated_set_frame_prev_hack (dummy, NULL);
   deprecated_update_frame_pc_hack (dummy, pc);
   deprecated_update_frame_base_hack (dummy, frame);
   dummy->extra_info->status = 0;

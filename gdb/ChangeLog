@@ -1,3 +1,13 @@
+2003-01-07  Andrew Cagney  <cagney@redhat.com>
+
+	* frame.c (deprecated_set_frame_next_hack): New function.
+	(deprecated_set_frame_prev_hack): New function.
+	* frame.h (deprecated_set_frame_next_hack): Declare.
+	(deprecated_set_frame_prev_hack): Declare.
+	* mcore-tdep.c (analyze_dummy_frame): Use
+	deprecated_set_frame_next_hack and deprecated_set_frame_prev_hack.
+	* mn10300-tdep.c (analyze_dummy_frame): Ditto.
+
 2003-01-07  David Carlton  <carlton@math.stanford.edu>
 
 	* linespec.c (decode_line_1): Move code into decode_dollar.
