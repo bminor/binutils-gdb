@@ -24,7 +24,7 @@
 # targets.  This is for compatibility with Irix 5, and with old MIPS
 # ELF toolchains.
 if [ -z "$ENTRY" ]; then
-  case "${target_alias}" in
+  case "${target}" in
   mips*-*-irix5*) ENTRY=__start ;;
   *) ENTRY=_start ;;
   esac

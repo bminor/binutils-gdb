@@ -1,3 +1,11 @@
+Mon Jan 22 13:01:35 1996  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* Makefile.in (GENSCRIPTS): Pass @host@ @target@ @target_alias@.
+	* genscripts.sh: Set host, target and target_alias variables.
+	Check for native compile by comparing ${target} and ${host}.
+	* emultempl/elf32.em: Likewise.
+	* scripttempl/elfmips.sc: Test ${target}, not ${target_alias}.
+
 Mon Jan 22 11:03:23 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* scripttempl/elfppc.sc: Refine eabi support to better support
