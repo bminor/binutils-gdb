@@ -49,8 +49,41 @@ indirect_t;
 static int c4x_version = 0;
 static int c4x_dp = 0;
 
+static int c4x_pc_offset
+    PARAMS ((unsigned int));
+static int c4x_print_char
+    PARAMS ((struct disassemble_info *, char));
+static int c4x_print_str
+    PARAMS ((struct disassemble_info *, char *));
+static int c4x_print_register
+    PARAMS ((struct disassemble_info *, unsigned long));
+static int c4x_print_addr
+    PARAMS ((struct disassemble_info *, unsigned long));
+static int c4x_print_relative
+    PARAMS ((struct disassemble_info *, unsigned long, long, unsigned long));
+void c4x_print_ftoa
+    PARAMS ((unsigned int, FILE *, fprintf_ftype));
+static int c4x_print_direct
+    PARAMS ((struct disassemble_info *, unsigned long));
+static int c4x_print_immed
+    PARAMS ((struct disassemble_info *, immed_t, unsigned long));
+static int c4x_print_cond
+    PARAMS ((struct disassemble_info *, unsigned int));
+static int c4x_print_indirect
+    PARAMS ((struct disassemble_info *, indirect_t, unsigned long));
+static int c4x_print_op
+    PARAMS ((struct disassemble_info *, unsigned long, c4x_inst_t *, unsigned long));
+static void c4x_hash_opcode
+    PARAMS ((c4x_inst_t **, const c4x_inst_t *));
+static int c4x_disassemble
+    PARAMS ((unsigned long, unsigned long, struct disassemble_info *));
+int print_insn_tic4x
+    PARAMS ((bfd_vma, struct disassemble_info *));
+
+
 static int
-c4x_pc_offset (unsigned int op)
+c4x_pc_offset (op)
+     unsigned int op;
 {
   /* Determine the PC offset for a C[34]x instruction.
      This could be simplified using some boolean algebra
@@ -107,7 +140,9 @@ c4x_pc_offset (unsigned int op)
 }
 
 static int
-c4x_print_char (struct disassemble_info * info, char ch)
+c4x_print_char (info, ch)
+     struct disassemble_info * info;
+     char ch;
 {
   if (info != NULL)
     (*info->fprintf_func) (info->stream, "%c", ch);
@@ -115,7 +150,9 @@ c4x_print_char (struct disassemble_info * info, char ch)
 }
 
 static int
-c4x_print_str (struct disassemble_info *info, char *str)
+c4x_print_str (info, str)
+     struct disassemble_info *info;
+     char *str;
 {
   if (info != NULL)
     (*info->fprintf_func) (info->stream, "%s", str);
@@ -123,8 +160,9 @@ c4x_print_str (struct disassemble_info *info, char *str)
 }
 
 static int
-c4x_print_register (struct disassemble_info *info,
-		    unsigned long regno)
+c4x_print_register (info, regno)
+     struct disassemble_info *info;
+     unsigned long regno;
 {
   static c4x_register_t **registertable = NULL;
   unsigned int i;
@@ -151,8 +189,9 @@ c4x_print_register (struct disassemble_info *info,
 }
 
 static int
-c4x_print_addr (struct disassemble_info *info,
-		unsigned long addr)
+c4x_print_addr (info, addr)
+     struct disassemble_info *info;
+     unsigned long addr;
 {
   if (info != NULL)
     (*info->print_address_func)(addr, info);
@@ -160,17 +199,19 @@ c4x_print_addr (struct disassemble_info *info,
 }
 
 static int
-c4x_print_relative (struct disassemble_info *info,
-		    unsigned long pc,
-		    long offset,
-		    unsigned long opcode)
+c4x_print_relative (info, pc, offset, opcode)
+     struct disassemble_info *info;
+     unsigned long pc;
+     long offset;
+     unsigned long opcode;
 {
   return c4x_print_addr (info, pc + offset + c4x_pc_offset (opcode));
 }
 
 static int
-c4x_print_direct (struct disassemble_info *info,
-		  unsigned long arg)
+c4x_print_direct (info, arg)
+     struct disassemble_info *info;
+     unsigned long arg;
 {
   if (info != NULL)
     {
@@ -183,9 +224,10 @@ c4x_print_direct (struct disassemble_info *info,
 /* FIXME: make the floating point stuff not rely on host
    floating point arithmetic.  */
 void
-c4x_print_ftoa (unsigned int val,
-		FILE *stream,
-		int (*pfunc)())
+c4x_print_ftoa (val, stream, pfunc)
+     unsigned int val;
+     FILE *stream;
+     fprintf_ftype pfunc;
 {
   int e;
   int s;
@@ -208,9 +250,10 @@ c4x_print_ftoa (unsigned int val,
 }
 
 static int
-c4x_print_immed (struct disassemble_info *info,
-		 immed_t type,
-		 unsigned long arg)
+c4x_print_immed (info, type, arg)
+     struct disassemble_info *info;
+     immed_t type;
+     unsigned long arg;
 {
   int s;
   int f;
@@ -266,8 +309,9 @@ c4x_print_immed (struct disassemble_info *info,
 }
 
 static int
-c4x_print_cond (struct disassemble_info *info,
-		unsigned int cond)
+c4x_print_cond (info, cond)
+     struct disassemble_info *info;
+     unsigned int cond;
 {
   static c4x_cond_t **condtable = NULL;
   unsigned int i;
@@ -286,9 +330,10 @@ c4x_print_cond (struct disassemble_info *info,
 }
 
 static int
-c4x_print_indirect (struct disassemble_info *info,
-		    indirect_t type,
-		    unsigned long arg)
+c4x_print_indirect (info, type, arg)
+     struct disassemble_info *info;
+     indirect_t type;
+     unsigned long arg;
 {
   unsigned int aregno;
   unsigned int modn;
@@ -349,9 +394,11 @@ c4x_print_indirect (struct disassemble_info *info,
 }
 
 static int
-c4x_print_op (struct disassemble_info *info,
-	      unsigned long instruction,
-	      c4x_inst_t *p, unsigned long pc)
+c4x_print_op (info, instruction, p, pc)
+     struct disassemble_info *info;
+     unsigned long instruction;
+     c4x_inst_t *p;
+     unsigned long pc;
 {
   int val;
   char *s;
@@ -578,8 +625,9 @@ c4x_print_op (struct disassemble_info *info,
 }
 
 static void
-c4x_hash_opcode (c4x_inst_t **optable,
-		 const c4x_inst_t *inst)
+c4x_hash_opcode (optable, inst)
+     c4x_inst_t **optable;
+     const c4x_inst_t *inst;
 {
   int j;
   int opcode = inst->opcode >> (32 - C4X_HASH_SIZE);
@@ -609,9 +657,10 @@ c4x_hash_opcode (c4x_inst_t **optable,
    The function returns the length of this instruction in words.  */
 
 static int
-c4x_disassemble (unsigned long pc,
-		 unsigned long instruction,
-		 struct disassemble_info *info)
+c4x_disassemble (pc, instruction, info)
+     unsigned long pc;
+     unsigned long instruction;
+     struct disassemble_info *info;
 {
   static c4x_inst_t **optable = NULL;
   c4x_inst_t *p;
