@@ -1,3 +1,21 @@
+2003-11-09  Mark Kettenis  <kettenis@gnu.org>
+            David S. Miller  <davem@redhat.com>
+
+	* glibc-tdep.c, glibc-tdep.h: New files.
+	* config/arm/linux.mt (TDEPFILES): Add glibc-tdep.o
+	* config/i386/linux.mt (TDEPFILES): Likewise.
+	* i386-linux-tdep.c (glibc-tdep.h): Include.
+	(find_minsym_and_objfile, skip_hurd_resolver): Delete.
+	(i386_linux_skip_solib_resolver): Call glibc_skip_solib_resolver.
+	* arm-linux-tdep.c (glibc-tdep.h): Include.
+	(find_minsym_and_objfile, skip_hurd_resolver): Delete.
+	(arm_linux_skip_solib_resolver): Call glibc_skip_solib_resolver.
+	* Makefile.in (ALLDEPFILES): Add glibc-tdep.c
+	(glibc_tdep_h): Define.
+	(glibc-tdep.o): Add dependencies.
+	(arm-linux-tdep.o): Update dependencies.
+	(i386-linux-tdep.o): Likewise.
+
 2003-11-09  Andrew Cagney  <cagney@redhat.com>
 
 	* config/mips/irix6.mh (NAT_FILE): Set to "nm-irix5.h".

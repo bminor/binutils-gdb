@@ -692,6 +692,7 @@ gdbthread_h = gdbthread.h $(breakpoint_h) $(frame_h)
 gdbtypes_h = gdbtypes.h
 gdb_vfork_h = gdb_vfork.h
 gdb_wait_h = gdb_wait.h
+glibc_tdep_h = glibc-tdep.h
 gnu_nat_h = gnu-nat.h
 gregset_h = gregset.h
 hppa_tdep_h = hppa-tdep.h
@@ -1268,6 +1269,7 @@ ALLDEPFILES = \
 	coff-solib.c \
 	core-sol2.c core-regset.c core-aout.c corelow.c \
 	dcache.c delta68-nat.c dpx2-nat.c exec.c fork-child.c \
+	glibc-tdep.c \
 	go32-nat.c h8300-tdep.c \
 	hppa-tdep.c hppa-hpux-tdep.c \
 	hppab-nat.c hppah-nat.c hpread.c \
@@ -1582,7 +1584,7 @@ arch-utils.o: arch-utils.c $(defs_h) $(arch_utils_h) $(buildsym_h) \
 	$(gdbcmd_h) $(inferior_h) $(gdb_string_h) $(regcache_h) \
 	$(gdb_assert_h) $(sim_regno_h) $(version_h) $(floatformat_h)
 arm-linux-nat.o: arm-linux-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
-	$(gdb_string_h) $(regcache_h) $(arm_tdep_h) $(gregset_h)
+	$(gdb_string_h) $(regcache_h) $(arm_tdep_h) $(glibc_tdep_h) $(gregset_h)
 arm-linux-tdep.o: arm-linux-tdep.c $(defs_h) $(target_h) $(value_h) \
 	$(gdbtypes_h) $(floatformat_h) $(gdbcore_h) $(frame_h) $(regcache_h) \
 	$(doublest_h) $(solib_svr4_h) $(osabi_h) $(arm_tdep_h) $(symtab_h) \
@@ -1868,7 +1870,7 @@ i386-linux-nat.o: i386-linux-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
 i386-linux-tdep.o: i386-linux-tdep.c $(defs_h) $(gdbcore_h) $(frame_h) \
 	$(value_h) $(regcache_h) $(inferior_h) $(reggroups_h) $(symtab_h) \
 	$(symfile_h) $(objfiles_h) $(solib_svr4_h) $(osabi_h) $(i386_tdep_h) \
-	$(i386_linux_tdep_h)
+	$(i386_linux_tdep_h) $(glibc_tdep_h)
 i386ly-tdep.o: i386ly-tdep.c $(defs_h) $(gdbcore_h) $(inferior_h) \
 	$(regcache_h) $(target_h) $(osabi_h) $(i386_tdep_h)
 i386-nat.o: i386-nat.c $(defs_h) $(breakpoint_h) $(command_h) $(gdbcmd_h)
@@ -2417,6 +2419,8 @@ utils.o: utils.c $(defs_h) $(gdb_assert_h) $(gdb_string_h) $(event_top_h) \
 	$(filenames_h) $(inferior_h) $(mmalloc_h)
 uw-thread.o: uw-thread.c $(defs_h) $(gdbthread_h) $(target_h) $(inferior_h) \
 	$(regcache_h) $(gregset_h)
+glibc-tdep.o: glibc-tdep.c $(defs_h) $(frame_h) $(symtab_h) \
+	$(symfile_h) $(objfiles_h) $(glibc_tdep_h)
 v850ice.o: v850ice.c $(defs_h) $(gdb_string_h) $(frame_h) $(symtab_h) \
 	$(inferior_h) $(breakpoint_h) $(symfile_h) $(target_h) $(objfiles_h) \
 	$(gdbcore_h) $(value_h) $(command_h) $(regcache_h)
