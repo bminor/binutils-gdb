@@ -115,6 +115,7 @@ obj_aout_frob_symbol (sym, punt)
 	sym->bsym->section = sec = &bfd_und_section;
 
       if ((type & N_TYPE) != N_INDR
+	  && type != N_WARNING
 	  && (sec == &bfd_abs_section
 	      || sec == &bfd_und_section))
 	return;
@@ -135,6 +136,10 @@ obj_aout_frob_symbol (sym, punt)
 	  /* Put indirect symbols in the indirect section.  */
 	  sym->bsym->section = &bfd_ind_section;
 	  sym->bsym->flags |= BSF_INDIRECT;
+	  break;
+	case N_WARNING:
+	  /* Mark warning symbols.  */
+	  sym->bsym->flags |= BSF_WARNING;
 	  break;
 	}
     }

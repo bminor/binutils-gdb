@@ -20,7 +20,8 @@ Tue Jan 18 17:23:52 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 	with explicitly marked stabs through BFD: if a symbol marked
 	N_UNDF | N_EXT is in the absolute section, move it to the
 	undefined section; move a symbol marked N_INDR into
-	bfd_ind_section and set the BSF_INDIRECT flag.
+	bfd_ind_section and set the BSF_INDIRECT flag; set the
+	BSF_WARNING flag for a symbol makred N_WARNING.
 
 Mon Jan 17 15:40:23 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
