@@ -92,6 +92,8 @@ tc-d10v.c
 tc-d10v.h
 tc-d30v.c
 tc-d30v.h
+tc-fr30.c
+tc-fr30.h
 tc-generic.c
 tc-generic.h
 tc-h8300.c
@@ -173,9 +175,6 @@ vms-a-conf.h
 vms-conf.h
 
 Things-to-lose:
-
-tc-fr30.c
-tc-fr30.h
 
 # The lines between the "Do-last:" line and the end of the file
 # are executed as a /bin/sh shell script after everything else is
