@@ -1,3 +1,8 @@
+Tue Oct 25 11:47:10 1994  Ian Lance Taylor  <ian@sanguine.cygnus.com>
+
+	* ldmain.c (multiple_common): One of the types may now be
+	bfd_link_hash_indirect.  The old BFD argument may be NULL.
+
 Thu Oct 20 22:01:39 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* configure.in: Add * at the end of m68k-hp-hpux.
