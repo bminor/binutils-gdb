@@ -2087,6 +2087,7 @@ read_dbx_symtab (struct objfile *objfile)
 
 	  case N_OBJ:			/* useless types from Solaris */
 	  case N_OPT:
+	  case N_PATCH:
 	  /* These symbols aren't interesting; don't worry about them */
 
 	  continue;
@@ -3253,6 +3254,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 
       /* The following symbol types can be ignored.  */
     case N_OBJ:		/* Solaris 2:  Object file dir and name */
+    case N_PATCH:	/* Solaris2: Patch Run Time Checker.  */
       /*   N_UNDF:                   Solaris 2:  file separator mark */
       /*   N_UNDF: -- we will never encounter it, since we only process one
          file's symbols at once.  */

@@ -1,3 +1,9 @@
+2004-01-09  Mark Kettenis  <kettenis@gnu.org>
+
+	* dbxread.c (read_dbx_symtab): Ignore N_PATCH stabs instead of
+	complaining.
+	(process_one_symbol): Deal with N_PATCH stabs.
+
 2004-01-09  Elena Zannoni  <ezannoni@redhat.com>
 
 	* dwarf2read.c (read_array_type): Discard FORTRAN_HACK macro and
