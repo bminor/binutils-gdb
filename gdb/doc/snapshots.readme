@@ -150,6 +150,28 @@ Here are some simple guidelines for submitting patches:
 	like.  The emacs command ^X4A will create a ChangeLog entry header
 	for you.
 
+BISON and BYACC
+
+For various reasons, Cygnus uses byacc rather than bison by default.  When
+a general gdb distribution is made, this default is switched back to bison.
+The snapshots follow the Cygnus default.  Your options, if you do not already
+have byacc installed, include:
+
+    o	Hack the upper level Makefile.in lines that look like:
+
+	BISON = `if [ -f $${rootme}/byacc/byacc ] ; \
+		    then echo $${rootme}/byacc/byacc ; \
+		    else echo byacc ; \				<== change
+		fi`
+
+	to replace byacc with yacc.
+
+    o	Fetch the byacc snapshot from the same location as the gdb snapshots
+	and install byacc.
+
+    o	Specify BISON=yacc on the make command line to override the default.
+
+
 Thanks for your help and support.
 
 -Fred Fish
