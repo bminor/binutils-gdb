@@ -27,4 +27,4 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define FUNCTION_EPILOGUE_SIZE 4
 
 #include <sys/types.h>
-#include "m68k/tm-68k.h"
+#include "m68k/tm-m68k.h"
