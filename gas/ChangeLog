@@ -1,3 +1,8 @@
+Wed Oct 27 16:50:44 1999  Don Lindsay  <dlindsay@cygnus.com>
+
+	* tc-arm.c (bad_args, bad_pc): Renamed to BAD_ARGS and BAD_PC
+	respectively.
+
 1999-10-27  Scott Bambrough  <scottb@netwinder.org>
 
 	* config/tc-arm.c (reloc_map[]): Fix compiler warning.

@@ -875,8 +875,8 @@ static CONST struct reg_entry reg_table[] =
   {NULL, 0}
 };
 
-#define bad_args 	_("Bad arguments to instruction");
-#define bad_pc 		_("r15 not allowed here");
+#define BAD_ARGS 	_("Bad arguments to instruction");
+#define BAD_PC 		_("r15 not allowed here");
 
 static struct hash_control * arm_ops_hsh = NULL;
 static struct hash_control * arm_tops_hsh = NULL;
@@ -1840,7 +1840,7 @@ do_mrs (str, flags)
 
   if (reg_required_here (&str, 12) == FAIL)
     {
-      inst.error = bad_args;
+      inst.error = BAD_ARGS;
       return;
     }
 
@@ -1874,7 +1874,7 @@ do_msr (str, flags)
       if (skip_past_comma (&str) == FAIL
 	  || (reg = reg_required_here (&str, 0)) == FAIL)
 	{
-	  inst.error = bad_args;
+	  inst.error = BAD_ARGS;
 	  return;
 	}
     }
@@ -1886,13 +1886,13 @@ do_msr (str, flags)
 	inst.instruction |= PSR_CONTROL;
       else
 	{
-	  inst.error = bad_args;
+	  inst.error = BAD_ARGS;
 	  return;
 	}
       
       if (skip_past_comma (&str) == FAIL)
 	{
-	  inst.error = bad_args;
+	  inst.error = BAD_ARGS;
 	  return;
 	}
       
@@ -1962,21 +1962,21 @@ do_mull (str, flags)
 
   if ((rdlo = reg_required_here (&str, 12)) == FAIL)
     {
-      inst.error = bad_args;
+      inst.error = BAD_ARGS;
       return;
     }
 
   if (skip_past_comma (&str) == FAIL
       || (rdhi = reg_required_here (&str, 16)) == FAIL)
     {
-      inst.error = bad_args;
+      inst.error = BAD_ARGS;
       return;
     }
 
   if (skip_past_comma (&str) == FAIL
       || (rm = reg_required_here (&str, 0)) == FAIL)
     {
-      inst.error = bad_args;
+      inst.error = BAD_ARGS;
       return;
     }
 
@@ -1987,13 +1987,13 @@ do_mull (str, flags)
   if (skip_past_comma (&str) == FAIL
       || (rs = reg_required_here (&str, 8)) == FAIL)
     {
-      inst.error = bad_args;
+      inst.error = BAD_ARGS;
       return;
     }
 
   if (rdhi == REG_PC || rdhi == REG_PC || rdhi == REG_PC || rdhi == REG_PC)
     {
-      inst.error = bad_pc;
+      inst.error = BAD_PC;
       return;
     }
    
@@ -2014,26 +2014,26 @@ do_mul (str, flags)
 
   if ((rd = reg_required_here (&str, 16)) == FAIL)
     {
-      inst.error = bad_args;
+      inst.error = BAD_ARGS;
       return;
     }
 
   if (rd == REG_PC)
     {
-      inst.error = bad_pc;
+      inst.error = BAD_PC;
       return;
     }
 
   if (skip_past_comma (&str) == FAIL
       || (rm = reg_required_here (&str, 0)) == FAIL)
     {
-      inst.error = bad_args;
+      inst.error = BAD_ARGS;
       return;
     }
 
   if (rm == REG_PC)
     {
-      inst.error = bad_pc;
+      inst.error = BAD_PC;
       return;
     }
 
@@ -2043,13 +2043,13 @@ do_mul (str, flags)
   if (skip_past_comma (&str) == FAIL
       || (rm = reg_required_here (&str, 8)) == FAIL)
     {
-      inst.error = bad_args;
+      inst.error = BAD_ARGS;
       return;
     }
 
   if (rm == REG_PC)
     {
-      inst.error = bad_pc;
+      inst.error = BAD_PC;
       return;
     }
 
@@ -2070,26 +2070,26 @@ do_mla (str, flags)
 
   if ((rd = reg_required_here (&str, 16)) == FAIL)
     {
-      inst.error = bad_args;
+      inst.error = BAD_ARGS;
       return;
     }
 
   if (rd == REG_PC)
     {
-      inst.error = bad_pc;
+      inst.error = BAD_PC;
       return;
     }
 
   if (skip_past_comma (&str) == FAIL
       || (rm = reg_required_here (&str, 0)) == FAIL)
     {
-      inst.error = bad_args;
+      inst.error = BAD_ARGS;
       return;
     }
 
   if (rm == REG_PC)
     {
-      inst.error = bad_pc;
+      inst.error = BAD_PC;
       return;
     }
 
@@ -2101,13 +2101,13 @@ do_mla (str, flags)
       || skip_past_comma (&str) == FAIL
       || (rm = reg_required_here (&str, 12)) == FAIL)
     {
-      inst.error = bad_args;
+      inst.error = BAD_ARGS;
       return;
     }
 
   if (rd == REG_PC || rm == REG_PC)
     {
-      inst.error = bad_pc;
+      inst.error = BAD_PC;
       return;
     }
 
@@ -2597,7 +2597,7 @@ do_arit (str, flags)
       || data_op2 (&str) == FAIL)
     {
       if (!inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -2621,7 +2621,7 @@ do_adr (str, flags)
       || my_get_expression (&inst.reloc.exp, &str))
     {
       if (!inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
   /* Frag hacking will turn this into a sub instruction if the offset turns
@@ -2651,7 +2651,7 @@ do_adrl (str, flags)
       || my_get_expression (& inst.reloc.exp, & str))
     {
       if (!inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
   
@@ -2678,7 +2678,7 @@ do_cmp (str, flags)
   if (reg_required_here (&str, 16) == FAIL)
     {
       if (!inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -2686,7 +2686,7 @@ do_cmp (str, flags)
       || data_op2 (&str) == FAIL)
     {
       if (!inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -2708,7 +2708,7 @@ do_mov (str, flags)
   if (reg_required_here (&str, 12) == FAIL)
     {
       if (!inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -2716,7 +2716,7 @@ do_mov (str, flags)
       || data_op2 (&str) == FAIL)
     {
       if (!inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -2834,7 +2834,7 @@ do_ldst (str, flags)
   if ((conflict_reg = reg_required_here (& str, 12)) == FAIL)
     {
       if (!inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -3160,7 +3160,7 @@ do_ldmstm (str, flags)
       || (range = reg_list (&str)) == FAIL)
     {
       if (! inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -3220,7 +3220,7 @@ do_swap (str, flags)
       || (reg = reg_required_here (&str, 0)) == FAIL)
     {
       if (!inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -3233,7 +3233,7 @@ do_swap (str, flags)
   if (skip_past_comma (&str) == FAIL
       || *str++ != '[')
     {
-      inst.error = bad_args;
+      inst.error = BAD_ARGS;
       return;
     }
 
@@ -3244,7 +3244,7 @@ do_swap (str, flags)
 
   if (reg == REG_PC)
     {
-      inst.error = bad_pc;
+      inst.error = BAD_PC;
       return;
     }
 
@@ -3338,7 +3338,7 @@ do_cdp (str, flags)
   if (co_proc_number (&str) == FAIL)
     {
       if (!inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -3346,7 +3346,7 @@ do_cdp (str, flags)
       || cp_opc_expr (&str, 20,4) == FAIL)
     {
       if (!inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -3354,7 +3354,7 @@ do_cdp (str, flags)
       || cp_reg_required_here (&str, 12) == FAIL)
     {
       if (!inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -3362,7 +3362,7 @@ do_cdp (str, flags)
       || cp_reg_required_here (&str, 16) == FAIL)
     {
       if (!inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -3370,7 +3370,7 @@ do_cdp (str, flags)
       || cp_reg_required_here (&str, 0) == FAIL)
     {
       if (!inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -3379,7 +3379,7 @@ do_cdp (str, flags)
       if (cp_opc_expr (&str, 5, 3) == FAIL)
 	{
 	  if (!inst.error)
-	    inst.error = bad_args;
+	    inst.error = BAD_ARGS;
 	  return;
 	}
     }
@@ -3401,7 +3401,7 @@ do_lstc (str, flags)
   if (co_proc_number (&str) == FAIL)
     {
       if (!inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -3409,7 +3409,7 @@ do_lstc (str, flags)
       || cp_reg_required_here (&str, 12) == FAIL)
     {
       if (!inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -3417,7 +3417,7 @@ do_lstc (str, flags)
       || cp_address_required_here (&str) == FAIL)
     {
       if (! inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -3439,7 +3439,7 @@ do_co_reg (str, flags)
   if (co_proc_number (&str) == FAIL)
     {
       if (!inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -3447,7 +3447,7 @@ do_co_reg (str, flags)
       || cp_opc_expr (&str, 21, 3) == FAIL)
     {
       if (!inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -3455,7 +3455,7 @@ do_co_reg (str, flags)
       || reg_required_here (&str, 12) == FAIL)
     {
       if (!inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -3463,7 +3463,7 @@ do_co_reg (str, flags)
       || cp_reg_required_here (&str, 16) == FAIL)
     {
       if (!inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -3471,7 +3471,7 @@ do_co_reg (str, flags)
       || cp_reg_required_here (&str, 0) == FAIL)
     {
       if (!inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -3480,7 +3480,7 @@ do_co_reg (str, flags)
       if (cp_opc_expr (&str, 5, 3) == FAIL)
 	{
 	  if (!inst.error)
-	    inst.error = bad_args;
+	    inst.error = BAD_ARGS;
 	  return;
 	}
     }
@@ -3502,7 +3502,7 @@ do_fp_ctrl (str, flags)
   if (reg_required_here (&str, 12) == FAIL)
     {
       if (!inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -3537,7 +3537,7 @@ do_fp_ldst (str, flags)
   if (fp_reg_required_here (&str, 12) == FAIL)
     {
       if (!inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -3545,7 +3545,7 @@ do_fp_ldst (str, flags)
       || cp_address_required_here (&str) == FAIL)
     {
       if (!inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -3564,7 +3564,7 @@ do_fp_ldmstm (str, flags)
   if (fp_reg_required_here (&str, 12) == FAIL)
     {
       if (! inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -3622,7 +3622,7 @@ do_fp_ldmstm (str, flags)
 	  || *str != '[')
 	{
 	  if (! inst.error)
-	    inst.error = bad_args;
+	    inst.error = BAD_ARGS;
 	  return;
 	}
 
@@ -3636,7 +3636,7 @@ do_fp_ldmstm (str, flags)
 
       if (*str != ']')
 	{
-	  inst.error = bad_args;
+	  inst.error = BAD_ARGS;
 	  return;
 	}
 
@@ -3684,7 +3684,7 @@ do_fp_ldmstm (str, flags)
 	   || cp_address_required_here (&str) == FAIL)
     {
       if (! inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -3715,7 +3715,7 @@ do_fp_dyadic (str, flags)
   if (fp_reg_required_here (&str, 12) == FAIL)
     {
       if (! inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -3723,7 +3723,7 @@ do_fp_dyadic (str, flags)
       || fp_reg_required_here (&str, 16) == FAIL)
     {
       if (! inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -3731,7 +3731,7 @@ do_fp_dyadic (str, flags)
       || fp_op2 (&str) == FAIL)
     {
       if (! inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -3764,7 +3764,7 @@ do_fp_monadic (str, flags)
   if (fp_reg_required_here (&str, 12) == FAIL)
     {
       if (! inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -3772,7 +3772,7 @@ do_fp_monadic (str, flags)
       || fp_op2 (&str) == FAIL)
     {
       if (! inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -3791,7 +3791,7 @@ do_fp_cmp (str, flags)
   if (fp_reg_required_here (&str, 16) == FAIL)
     {
       if (! inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -3799,7 +3799,7 @@ do_fp_cmp (str, flags)
       || fp_op2 (&str) == FAIL)
     {
       if (! inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -3832,7 +3832,7 @@ do_fp_from_reg (str, flags)
   if (fp_reg_required_here (&str, 16) == FAIL)
     {
       if (! inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -3840,7 +3840,7 @@ do_fp_from_reg (str, flags)
       || reg_required_here (&str, 12) == FAIL)
     {
       if (! inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -3863,7 +3863,7 @@ do_fp_to_reg (str, flags)
       || fp_reg_required_here (&str, 0) == FAIL)
     {
       if (! inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -3929,7 +3929,7 @@ thumb_add_sub (str, subtract)
       || skip_past_comma (&str) == FAIL)
     {
       if (! inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -4096,7 +4096,7 @@ thumb_shift (str, shift)
       || skip_past_comma (&str) == FAIL)
     {
       if (! inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -4205,7 +4205,7 @@ thumb_mov_compare (str, move)
       || skip_past_comma (&str) == FAIL)
     {
       if (! inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -4294,7 +4294,7 @@ thumb_load_store (str, load_store, size)
       || skip_past_comma (&str) == FAIL)
     {
       if (! inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -4506,7 +4506,7 @@ do_t_arit (str)
       || (Rs = thumb_reg (&str, THUMB_REG_LO)) == FAIL)
     {
       if (! inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -4520,7 +4520,7 @@ do_t_arit (str)
 	  || inst.instruction == T_OPCODE_NEG
  	  || inst.instruction == T_OPCODE_MVN)
 	{
-	  inst.error = bad_args;
+	  inst.error = BAD_ARGS;
 	  return;
 	}
 
@@ -4689,7 +4689,7 @@ do_t_ldmstm (str)
       || (range = reg_list (&str)) == FAIL)
     {
       if (! inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -4789,7 +4789,7 @@ do_t_push_pop (str)
   if ((range = reg_list (&str)) == FAIL)
     {
       if (! inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
@@ -4877,7 +4877,7 @@ do_t_adr (str)
       || my_get_expression (&inst.reloc.exp, &str))
     {
       if (!inst.error)
-	inst.error = bad_args;
+	inst.error = BAD_ARGS;
       return;
     }
 
