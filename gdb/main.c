@@ -412,6 +412,9 @@ main (argc, argv)
   /* Number of elements used.  */
   int ndir;
   
+  struct stat homebuf, cwdbuf;
+  char *homedir, *homeinit;
+
   register int i;
 
   /* This needs to happen before the first use of malloc.  */
@@ -653,6 +656,40 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
   /* We may get more than one warning, don't double space all of them... */
   warning_pre_print = "\nwarning: ";
 
+  /* Read and execute $HOME/.gdbinit file, if it exists.  This is done
+     *before* all the command line arguments are processed; it sets
+     global parameters, which are independent of what file you are
+     debugging or what directory you are in.  */
+  homedir = getenv ("HOME");
+  if (homedir)
+    {
+      homeinit = (char *) alloca (strlen (getenv ("HOME")) +
+				  strlen (gdbinit) + 10);
+      strcpy (homeinit, getenv ("HOME"));
+      strcat (homeinit, "/");
+      strcat (homeinit, gdbinit);
+      if (!inhibit_gdbinit && access (homeinit, R_OK) == 0)
+	{
+	  /* The official language of expressions in $HOME/.gdbinit is C. */
+	  set_language (language_c);
+	  if (!setjmp (to_top_level))
+	    source_command (homeinit, 0);
+	}
+      do_cleanups (ALL_CLEANUPS);
+
+      /* Do stats; no need to do them elsewhere since we'll only
+	 need them if homedir is set.  Make sure that they are
+	 zero in case one of them fails (this guarantees that they
+	 won't match if either exists).  */
+      
+      memset (&homebuf, 0, sizeof (struct stat));
+      memset (&cwdbuf, 0, sizeof (struct stat));
+      
+      stat (homeinit, &homebuf);
+      stat (gdbinit, &cwdbuf); /* We'll only need this if
+				       homedir was set.  */
+    }
+  
   /* Now perform all the actions indicated by the arguments.  */
   if (cdarg != NULL)
     {
@@ -740,47 +777,15 @@ GDB manual (available as on-line info or a printed manual).\n", stderr);
   error_pre_print = 0;
   warning_pre_print = "warning: ";
 
-  {
-    struct stat homebuf, cwdbuf;
-    char *homedir, *homeinit;
-
-    /* Read init file, if it exists in home directory  */
-    homedir = getenv ("HOME");
-    if (homedir)
-      {
-	homeinit = (char *) alloca (strlen (getenv ("HOME")) +
-				    strlen (gdbinit) + 10);
-	strcpy (homeinit, getenv ("HOME"));
-	strcat (homeinit, "/");
-	strcat (homeinit, gdbinit);
-	if (!inhibit_gdbinit && access (homeinit, R_OK) == 0)
-	  if (!setjmp (to_top_level))
-	    source_command (homeinit, 0);
-	do_cleanups (ALL_CLEANUPS);
-
-	/* Do stats; no need to do them elsewhere since we'll only
-	   need them if homedir is set.  Make sure that they are
-	   zero in case one of them fails (this guarantees that they
-	   won't match if either exists).  */
-	
-	memset (&homebuf, 0, sizeof (struct stat));
-	memset (&cwdbuf, 0, sizeof (struct stat));
-	
-	stat (homeinit, &homebuf);
-	stat (gdbinit, &cwdbuf); /* We'll only need this if
-					 homedir was set.  */
-      }
-    
-    /* Read the input file in the current directory, *if* it isn't
-       the same file (it should exist, also).  */
-
-    if (!homedir
-	|| memcmp ((char *) &homebuf, (char *) &cwdbuf, sizeof (struct stat)))
-      if (!inhibit_gdbinit && access (gdbinit, R_OK) == 0)
-	if (!setjmp (to_top_level))
-	  source_command (gdbinit, 0);
-	do_cleanups (ALL_CLEANUPS);
-  }
+  /* Read the .gdbinit file in the current directory, *if* it isn't
+     the same as the $HOME/.gdbinit file (it should exist, also).  */
+  
+  if (!homedir
+      || memcmp ((char *) &homebuf, (char *) &cwdbuf, sizeof (struct stat)))
+    if (!inhibit_gdbinit && access (gdbinit, R_OK) == 0)
+      if (!setjmp (to_top_level))
+	source_command (gdbinit, 0);
+      do_cleanups (ALL_CLEANUPS);
 
   for (i = 0; i < ncmd; i++)
     if (!setjmp (to_top_level))

@@ -2043,7 +2043,8 @@ name_match (name)
 #define NAME_MATCH(NAME) name_match(NAME)
 
 /* List all symbols (if REGEXP is 0) or all symbols matching REGEXP.
-   If CLASS is zero, list all symbols except functions and type names.
+   If CLASS is zero, list all symbols except functions, type names, and
+		     constants (enums).
    If CLASS is 1, list only functions.
    If CLASS is 2, list only type names.
    If CLASS is 3, list only method names.
@@ -2221,7 +2222,8 @@ list_symbols (regexp, class, bpt)
 		sym = BLOCK_SYM (b, j);
 		if ((regexp == 0 || NAME_MATCH (SYMBOL_NAME (sym)))
 		    && ((class == 0 && SYMBOL_CLASS (sym) != LOC_TYPEDEF
-			 && SYMBOL_CLASS (sym) != LOC_BLOCK)
+			 && SYMBOL_CLASS (sym) != LOC_BLOCK
+			 && SYMBOL_CLASS (sym) != LOC_CONST)
 			|| (class == 1 && SYMBOL_CLASS (sym) == LOC_BLOCK)
 			|| (class == 2 && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
 			|| (class == 3 && SYMBOL_CLASS (sym) == LOC_BLOCK)))
