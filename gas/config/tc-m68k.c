@@ -238,7 +238,7 @@ enum _register {
 	FPS,
 	FPC,
 
-	DRP,
+	DRP,			/* 68851 or 68030 MMU regs */
 	CRP,
 	CAL,
 	VAL,
@@ -262,7 +262,8 @@ enum _register {
 	BAC5,
 	BAC6,
 	BAC7,
-	PSR,
+	PSR,	/* aka MMUSR on 68030 (but not MMUSR on 68040)
+		   and ACUSR on 68ec030 */
 	PCSR,
 
 	IC,	/* instruction cache token */
@@ -270,6 +271,8 @@ enum _register {
 	NC,	/* no cache token */
 	BC,	/* both caches token */
 
+	TT0,	/* 68030 access control unit regs */
+	TT1,
 };
 
 /* Internal form of an operand.  */
@@ -1176,6 +1179,11 @@ void m68k_ip (instring)
 	    losing++;
 	  break;
 
+	case '3':
+	  if (opP->mode != MSCR || (opP->reg != TT0 && opP->reg != TT1))
+	    losing++;
+	  break;
+
 	case 'A':
 	  if(opP->mode!=AREG)
 	    losing++;
@@ -1316,6 +1324,17 @@ void m68k_ip (instring)
 	    losing++;
 	  break;
 
+	case 't':
+	  if (opP->mode != IMMED)
+	    losing++;
+	  else
+	    {
+	      long t = get_num (opP->con1, 80);
+	      if (t < 0 || t > 7 || isvar (opP->con1))
+		losing++;
+	    }
+	  break;
+
 	case 'U':
 	  if(opP->mode!=MSCR || opP->reg!=USP)
 	    losing++;
@@ -1323,7 +1342,10 @@ void m68k_ip (instring)
 
 	  /* JF these are out of order.  We could put them
 	     in order if we were willing to put up with
-	     bunches of #ifdef m68851s in the code */
+	     bunches of #ifdef m68851s in the code.
+
+	     Don't forget that you need these operands
+	     to use 68030 MMU instructions.  */
 #ifndef NO_68851
 	  /* Memory addressing mode used by pflushr */
 	case '|':
@@ -1338,8 +1360,9 @@ void m68k_ip (instring)
 	  break;
 
 	case 'P':
-	  if (opP->mode != MSCR || (opP->reg != TC && opP->reg != CAL &&
-				    opP->reg != VAL && opP->reg != SCC && opP->reg != AC))
+	  if (opP->mode != MSCR
+	      || (opP->reg != TC && opP->reg != CAL
+		  && opP->reg != VAL && opP->reg != SCC && opP->reg != AC))
 	    losing++;
 	  break;
 
@@ -1349,8 +1372,9 @@ void m68k_ip (instring)
 	  break;
 
 	case 'W':
-	  if (opP->mode != MSCR || (opP->reg != DRP && opP->reg != SRP &&
-				    opP->reg != CRP))
+	  if (opP->mode != MSCR
+	      || (opP->reg != DRP && opP->reg != SRP
+		  && opP->reg != CRP))
 	    losing++;
 	  break;
 
@@ -1387,7 +1411,7 @@ void m68k_ip (instring)
 	  break;
 
 	default:
-	  as_fatal("Internal error:  Operand mode %c unknown in line %s of file \"%s\"",
+	  as_fatal("Internal error:  Operand mode %c unknown in line %d of file \"%s\"",
 		   *s, __LINE__, __FILE__);
 	} /* switch on type of operand */
 
@@ -1403,7 +1427,8 @@ void m68k_ip (instring)
     opcode = opcode->m_next;
 
     if (!opcode) {
-      if (ok_arch)
+      if (ok_arch
+	  && !(ok_arch & current_architecture))
 	{
 	  char buf[200], *cp;
 	  int len;
@@ -1412,10 +1437,10 @@ void m68k_ip (instring)
 	  switch (ok_arch)
 	    {
 	    case mfloat:
-	      strcpy (cp, "fpu");
+	      strcpy (cp, "fpu (68040 or 68881/68882)");
 	      break;
 	    case mmmu:
-	      strcpy (cp, "mmu");
+	      strcpy (cp, "mmu (68030 or 68851)");
 	      break;
 	    case m68020up:
 	      strcpy (cp, "68020 or higher");
@@ -2227,12 +2252,32 @@ void m68k_ip (instring)
       know(opP->reg == PCSR);
       break;
 #endif /* m68851 */
-    case '_':
+    case '3':
+      switch (opP->reg)
+	{
+	case TT0:
+	  tmpreg = 2;
+	  break;
+	case TT1:
+	  tmpreg = 3;
+	  break;
+	default:
+	  as_fatal ("failed sanity check");
+	}
+      install_operand (s[1], tmpreg);
+      break;
+    case 't':
+      tmpreg = get_num (opP->con1, 20);
+      install_operand (s[1], tmpreg);
+      break;
+    case '_':		/* used only for move16 absolute 32-bit address */
       tmpreg=get_num(opP->con1,80);
-      install_operand(s[1], tmpreg);
+      addword (tmpreg >> 16);
+      addword (tmpreg & 0xFFFF);
       break;
     default:
-      as_fatal("Internal error:  Operand type %c unknown in line %s of file \"%s\"", s[0], __LINE__, __FILE__);
+      as_fatal("Internal error:  Operand type %c unknown in line %d of file \"%s\"",
+	       s[0], __LINE__, __FILE__);
     }
   }
   /* By the time whe get here (FINALLY) the_ins contains the complete
@@ -2537,11 +2582,10 @@ int regnum;
   symbol_table_insert(symbol_new(buf, SEG_REGISTER, regnum, &zero_address_frag));
 }
 
-static struct {
+static const struct {
 char *name;
 int number;
-} init_table[] =
-{
+} init_table[] = {
   "d0",	    	DATA0,
   "d1",		DATA1,
   "d2",		DATA2,
@@ -2610,7 +2654,6 @@ int number;
   "srp",	SRP,
   "urp",	URP,
 
-#ifndef NO_68851
   "ac",	        AC,
   "bc",	        BC,
   "cal",	CAL,
@@ -2636,11 +2679,18 @@ int number;
   "bac5",	BAC5,
   "bac6",	BAC6,
   "bac7",	BAC7,
-#endif
 
   "ic",	        IC,
   "dc",	        DC,
   "nc",	        NC,
+
+  "tt0",	TT0,
+  "tt1",	TT1,
+  /* 68ec030 versions of same */
+  "ac0",	TT0,
+  "ac1",	TT1,
+  /* 68ec030 access control unit, identical to 030 MMU status reg */
+  "acusr",	PSR,
 
   0,
 
@@ -2652,9 +2702,7 @@ init_regtable()
 {
   int i;
   for (i = 0; init_table[i].name; i++)
-  {
     insert_reg(init_table[i].name, init_table[i].number);
-  }
 }
 
 
@@ -2668,47 +2716,58 @@ md_assemble(str)
 	int	m,n = 0;
 	char	*to_beg_P;
 	int	shorts_this_frag;
+	static int done_first_time;
 
-
-	if (cpu_of_arch (current_architecture) == 0)
+	if (!done_first_time)
 	  {
-	    enum m68k_architecture cpu_type;
+	    done_first_time = 1;
+
+	    if (cpu_of_arch (current_architecture) == 0)
+	      {
+		enum m68k_architecture cpu_type;
 
 #ifndef TARGET_CPU
-	    cpu_type = m68020;
+		cpu_type = m68020;
 #else
-	    if (strcmp (TARGET_CPU, "m68000") == 0)
-	      cpu_type = m68000;
-	    else if (strcmp (TARGET_CPU, "m68010") == 0)
-	      cpu_type = m68010;	    
-	    else if (strcmp (TARGET_CPU, "m68020") == 0
-		     || strcmp (TARGET_CPU, "m68k") == 0)
-	      cpu_type = m68020;
-	    else if (strcmp (TARGET_CPU, "m68030") == 0)
-	      cpu_type = m68030;
-	    else if (strcmp (TARGET_CPU, "m68040") == 0)
-	      cpu_type = m68040;
-	    else
-	      cpu_type = m68020;
+		if (strcmp (TARGET_CPU, "m68000") == 0)
+		  cpu_type = m68000;
+		else if (strcmp (TARGET_CPU, "m68010") == 0)
+		  cpu_type = m68010;	    
+		else if (strcmp (TARGET_CPU, "m68020") == 0
+			 || strcmp (TARGET_CPU, "m68k") == 0)
+		  cpu_type = m68020;
+		else if (strcmp (TARGET_CPU, "m68030") == 0)
+		  cpu_type = m68030;
+		else if (strcmp (TARGET_CPU, "m68040") == 0)
+		  cpu_type = m68040;
+		else
+		  cpu_type = m68020;
 #endif
 
-	    /* If float or mmu were specified, just default cpu.  */
-	    if (current_architecture != 0)
-	      current_architecture |= cpu_type;
-	    else
-	      {
-		if ((cpu_type & m68020up) != 0)
-		  current_architecture = (cpu_type
+		/* If float or mmu were specified, just default cpu.  */
+		if (current_architecture != 0)
+		  current_architecture |= cpu_type;
+		else
+		  {
+		    if ((cpu_type & m68020up) != 0)
+		      current_architecture = (cpu_type
 #ifndef NO_68881
-					  | m68881
+					      | m68881
 #endif
 #ifndef NO_68851
-					  | m68851
+					      | m68851
 #endif
-					  );
-		else
-		  current_architecture = cpu_type;
+					      );
+		    else
+		      current_architecture = cpu_type;
+		  }
 	      }
+	    if (cpu_of_arch (current_architecture) == m68000
+		&& (current_architecture & m68881) != 0)
+	      {
+		as_bad ("incompatible processors 68000 and 68881 specified");
+	      }
+	    done_first_time = 1;
 	  }
 
 	memset((char *)(&the_ins), '\0', sizeof(the_ins));	/* JF for paranoia sake */
