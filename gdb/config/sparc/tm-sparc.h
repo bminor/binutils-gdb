@@ -578,13 +578,14 @@ arguments.  */
    can assume it is operating on a pristine CALL_DUMMY, not one that
    has already been customized for a different function).  */
 
-#define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p)     \
+#define FIX_CALL_DUMMY(dummyname, pc, fun, nargs, args, type, gcc_p)	\
 {									\
-  *(int *)((char *) dummyname+168) = (0x40000000|((fun-(pc+168))>>2));	\
-  if (!gcc_p                                                            \
+  store_unsigned_integer (dummyname + 168, 4,				\
+			  0x40000000 | ((fun - (pc + 168)) >> 2));	\
+  if (!gcc_p								\
       && (TYPE_CODE (type) == TYPE_CODE_STRUCT				\
-	  || TYPE_CODE (type) == TYPE_CODE_UNION))	                \
-    *(int *)((char *) dummyname+176) = (TYPE_LENGTH (type) & 0x1fff);	\
+	  || TYPE_CODE (type) == TYPE_CODE_UNION))			\
+    store_unsigned_integer (dummyname + 176, 4, TYPE_LENGTH (type) & 0x1fff); \
 }
 
 

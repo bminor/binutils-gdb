@@ -81,6 +81,7 @@ struct monitor_ops
   char **init;			/* List of init commands.  NULL terminated. */
   char *cont;			/* continue command */
   char *step;			/* single step */
+  char *stop;			/* Interrupt program string */
   char *set_break;		/* set a breakpoint */
   char *clr_break;		/* clear a breakpoint */
   char *clr_all_break;		/* Clear all breakpoints */

@@ -104,6 +104,7 @@ static struct monitor_ops est_cmds =
   est_inits,			/* Init strings */
   "go\r",			/* continue command */
   "sidr\r",			/* single step */
+  "\003",			/* ^C interrupts the program */
   "sb %x\r",			/* set a breakpoint */
   "rb %x\r",			/* clear a breakpoint */
   "rb\r",			/* clear all breakpoints */

@@ -99,24 +99,33 @@ static struct target_ops rom68k_ops;
 static char *rom68k_loadtypes[] = {"none", "srec", "default", NULL};
 static char *rom68k_loadprotos[] = {"none", NULL};
 
+static char *rom68k_inits[] = {".\r\r", NULL}; /* Exits pm/pr & download cmds */
+
 static struct monitor_ops rom68k_cmds =
 {
-  1,				/* 1 for ASCII, 0 for binary */
-  ".\r\r",			/* monitor init string */
-  "go \r",			/* execute or usually GO command */
-  "go \r",			/* continue command */
-  "st \r",			/* single step */
+  0,				/* flags */
+  rom68k_inits,			/* monitor init string */
+  "go\r",			/* continue command */
+  "st\r",			/* single step */
+  NULL,				/* No way to interrupt program */
   "db %x\r",			/* set a breakpoint */
   "cb %x\r",			/* clear a breakpoint */
-  0,				/* 0 for number, 1 for address */
+  "cb *\r",			/* clear all breakpoints */
+  "fm %x %x %x\r",		/* fill (start len val) */
   {
-    "pm %x %x\r",		/* setmem.cmd (addr, value) */
+    "pm %x %x\r",		/* setmem.cmdb (addr, value) */
+    "pm.w %x %x\r",		/* setmem.cmdw (addr, value) */
+    "pm.l %x %x\r",		/* setmem.cmdl (addr, value) */
+    NULL,			/* setmem.cmdll (addr, value) */
     NULL,			/* setreg.resp_delim */
     NULL,			/* setreg.term */
     NULL,			/* setreg.term_cmd */
   },
   {
-    "dm %x %x\r",		/* getmem.cmd (addr, len) */
+    "dm %x %x\r",		/* getmem.cmdb (addr, len) */
+    "dm.w %x %x\r",		/* getmem.cmdw (addr, len) */
+    "dm.l %x %x\r",		/* getmem.cmdl (addr, len) */
+    NULL,			/* getmem.cmdll (addr, len) */
     "  ",			/* getmem.resp_delim */
     NULL,			/* getmem.term */
     NULL,			/* getmem.term_cmd */
@@ -133,10 +142,12 @@ static struct monitor_ops rom68k_cmds =
     "= ",			/* getreg.term */
     ".\r"			/* getreg.term_cmd */
   },
+  "dr\r",			/* dump_registers */
 				/* register_pattern */
   "\\(\\w+\\)=\\([0-9a-fA-F]+\\( +[0-9a-fA-F]+\\b\\)*\\)",
   rom68k_supply_register,	/* supply_register */
   "dc\r",			/* download command */
+  "Waiting for S-records from host... ", /* Load response */
   "ROM68K :->",			/* monitor command prompt */
   "=",				/* end-of-command delimitor */
   ".\r",			/* optional command terminator */
@@ -145,7 +156,8 @@ static struct monitor_ops rom68k_cmds =
   rom68k_loadprotos,		/* loadprotos */
   "9600",			/* supported baud rates */
   SERIAL_1_STOPBITS,		/* number of stop bits */
-  rom68k_regnames		/* registers names */
+  rom68k_regnames,		/* registers names */
+  MONITOR_OPS_MAGIC		/* magic */
   };
 
 void

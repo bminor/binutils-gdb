@@ -4,6 +4,9 @@ TERMCAP = -lcurses
 
 XM_FILE= xm-hppah.h
 XDEPFILES= ser-tcp.o
+XM_CLIBS= -L/usr/lib/X11R5
+
+X11_CFLAGS= -I/usr/include/X11R5
 
 NAT_FILE= nm-hppah.h
 NATDEPFILES= hppah-nat.o coredep.o corelow.o inftarg.o fork-child.o somread.o infptrace.o hpread.o somsolib.o
