@@ -1,3 +1,7 @@
+2001-08-10  Orjan Friberg  <orjanf@axis.com>
+
+	* remote.c (read_frame): Correct off-by-one error in condition.
+
 2001-08-02  Daniel Jacobowitz  <drow@mvista.com>
 
 	* core-regset.c (fetch_core_registers):  Remove HAVE_GREGSET_T
