@@ -703,10 +703,19 @@ saved_pc_after_call (frame)
      FRAME frame;
 {
   int ret_regnum;
+  CORE_ADDR pc;
+  struct unwind_table_entry *u;
 
   ret_regnum = find_return_regnum (get_frame_pc (frame));
-
-  return read_register (ret_regnum) & ~0x3;
+  pc = read_register (ret_regnum) & ~0x3;
+  
+  /* If PC is in a linker stub, then we need to dig the address
+     the stub will return to out of the stack.  */
+  u = find_unwind_entry (pc);
+  if (u && u->stub_type != 0)
+    return frame_saved_pc (frame);
+  else
+    return pc;
 }
 
 CORE_ADDR
@@ -731,7 +740,6 @@ frame_saved_pc (frame)
       return rp;
     }
 
-restart:
   if (frameless_function_invocation (frame))
     {
       int ret_regnum;
@@ -761,8 +769,10 @@ restart:
     }
   else
     {
-      int rp_offset = rp_saved (pc);
+      int rp_offset;
 
+restart:
+      rp_offset = rp_saved (pc);
       /* Similar to code in frameless function case.  If the next
 	 frame is a signal or interrupt handler, then dig the right
 	 information out of the saved register info.  */
@@ -1741,10 +1751,7 @@ is_branch (inst)
 }
 
 /* Return the register number for a GR which is saved by INST or
-   zero it INST does not save a GR.
-
-   Note we only care about full 32bit register stores (that's the only
-   kind of stores the prologue will use).  */
+   zero it INST does not save a GR.  */
 
 static int
 inst_saves_gr (inst)
@@ -1754,10 +1761,15 @@ inst_saves_gr (inst)
   if ((inst >> 26) == 0x1a)
     return extract_5R_store (inst);
 
-  /* Does it look like a stwm?  */
+  /* Does it look like a stwm?  GCC & HPC may use this in prologues. */
   if ((inst >> 26) == 0x1b)
     return extract_5R_store (inst);
 
+  /* Does it look like sth or stb?  HPC versions 9.0 and later use these
+     too.  */
+  if ((inst >> 26) == 0x19 || (inst >> 26) == 0x18)
+    return extract_5R_store (inst);
+      
   return 0;
 }
 
@@ -1765,13 +1777,15 @@ inst_saves_gr (inst)
    zero it INST does not save a FR.
 
    Note we only care about full 64bit register stores (that's the only
-   kind of stores the prologue will use).  */
+   kind of stores the prologue will use).
+
+   FIXME: What about argument stores with the HP compiler in ANSI mode? */
 
 static int
 inst_saves_fr (inst)
      unsigned long inst;
 {
-  if ((inst & 0xfc1fffe0) == 0x2c101220)
+  if ((inst & 0xfc00dfc0) == 0x2c001200)
     return extract_5r_store (inst);
   return 0;
 }
@@ -1788,7 +1802,7 @@ skip_prologue (pc)
 {
   char buf[4];
   unsigned long inst, stack_remaining, save_gr, save_fr, save_rp, save_sp;
-  int status, i;
+  unsigned long args_stored, status, i;
   struct unwind_table_entry *u;
 
   u = find_unwind_entry (pc);
@@ -1805,6 +1819,11 @@ skip_prologue (pc)
   /* Magic register saves we want to know about.  */
   save_rp = u->Save_RP;
   save_sp = u->Save_SP;
+
+  /* An indication that args may be stored into the stack.  Unfortunately
+     the HPUX compilers tend to set this in cases where no args were
+     stored too!.  */
+  args_stored = u->Args_stored;
 
   /* Turn the Entry_GR field into a bitmask.  */
   save_gr = 0;
@@ -1836,11 +1855,24 @@ skip_prologue (pc)
      Some unexpected things are expected with debugging optimized code, so
      we allow this routine to walk past user instructions in optimized
      GCC code.  */
-  while (save_gr || save_fr || save_rp || save_sp || stack_remaining > 0)
+  while (save_gr || save_fr || save_rp || save_sp || stack_remaining > 0
+	 || args_stored)
     {
+      unsigned int reg_num;
+      unsigned long old_stack_remaining, old_save_gr, old_save_fr;
+      unsigned long old_save_rp, old_save_sp, old_args_stored, next_inst;
+
+      /* Save copies of all the triggers so we can compare them later
+	 (only for HPC).  */
+      old_save_gr = save_gr;
+      old_save_fr = save_fr;
+      old_save_rp = save_rp;
+      old_save_sp = save_sp;
+      old_stack_remaining = stack_remaining;
+
       status = target_read_memory (pc, buf, 4);
       inst = extract_unsigned_integer (buf, 4);
-
+       
       /* Yow! */
       if (status != 0)
 	return pc;
@@ -1858,14 +1890,101 @@ skip_prologue (pc)
 	save_sp = 0;
 
       /* Account for general and floating-point register saves.  */
-      save_gr &= ~(1 << inst_saves_gr (inst));
-      save_fr &= ~(1 << inst_saves_fr (inst));
+      reg_num = inst_saves_gr (inst);
+      save_gr &= ~(1 << reg_num);
+
+      /* Ugh.  Also account for argument stores into the stack.
+	 Unfortunately args_stored only tells us that some arguments
+	 where stored into the stack.  Not how many or what kind!
+
+	 This is a kludge as on the HP compiler sets this bit and it
+	 never does prologue scheduling.  So once we see one, skip past
+	 all of them.   We have similar code for the fp arg stores below.
+
+	 FIXME.  Can still die if we have a mix of GR and FR argument
+	 stores!  */
+      if (reg_num >= 23 && reg_num <= 26)
+	{
+	  while (reg_num >= 23 && reg_num <= 26)
+	    {
+	      pc += 4;
+	      status = target_read_memory (pc, buf, 4);
+	      inst = extract_unsigned_integer (buf, 4);
+	      if (status != 0)
+		return pc;
+	      reg_num = inst_saves_gr (inst);
+	    }
+	  args_stored = 0;
+	  continue;
+	}
+
+      reg_num = inst_saves_fr (inst);
+      save_fr &= ~(1 << reg_num);
+
+      status = target_read_memory (pc + 4, buf, 4);
+      next_inst = extract_unsigned_integer (buf, 4);
+       
+      /* Yow! */
+      if (status != 0)
+	return pc;
+
+      /* We've got to be read to handle the ldo before the fp register
+	 save.  */
+      if ((inst & 0xfc000000) == 0x34000000
+	  && inst_saves_fr (next_inst) >= 4
+	  && inst_saves_fr (next_inst) <= 7)
+	{
+	  /* So we drop into the code below in a reasonable state.  */
+	  reg_num = inst_saves_fr (next_inst);
+	  pc -= 4;
+	}
+
+      /* Ugh.  Also account for argument stores into the stack.
+	 This is a kludge as on the HP compiler sets this bit and it
+	 never does prologue scheduling.  So once we see one, skip past
+	 all of them.  */
+      if (reg_num >= 4 && reg_num <= 7)
+	{
+	  while (reg_num >= 4 && reg_num <= 7)
+	    {
+	      pc += 8;
+	      status = target_read_memory (pc, buf, 4);
+	      inst = extract_unsigned_integer (buf, 4);
+	      if (status != 0)
+		return pc;
+	      if ((inst & 0xfc000000) != 0x34000000)
+		break;
+	      status = target_read_memory (pc + 4, buf, 4);
+	      next_inst = extract_unsigned_integer (buf, 4);
+	      if (status != 0)
+		return pc;
+	      reg_num = inst_saves_fr (next_inst);
+	    }
+	  args_stored = 0;
+	  continue;
+	}
 
       /* Quit if we hit any kind of branch.  This can happen if a prologue
 	 instruction is in the delay slot of the first call/branch.  */
       if (is_branch (inst))
 	break;
 
+      /* What a crock.  The HP compilers set args_stored even if no
+	 arguments were stored into the stack (boo hiss).  This could
+	 cause this code to then skip a bunch of user insns (up to the
+	 first branch).
+
+	 To combat this we try to identify when args_stored was bogusly
+	 set and clear it.   We only do this when args_stored is nonzero,
+	 all other resources are accounted for, and nothing changed on
+	 this pass.  */
+      if (args_stored
+	  && ! (save_gr || save_fr || save_rp || save_sp || stack_remaining > 0)
+	  && old_save_gr == save_gr && old_save_fr == save_fr
+	  && old_save_rp == save_rp && old_save_sp == save_sp
+	  && old_stack_remaining == stack_remaining)
+	break;
+      
       /* Bump the PC.  */
       pc += 4;
     }

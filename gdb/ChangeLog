@@ -1,3 +1,17 @@
+Mon Aug  1 01:36:13 1994  Jeff Law  (law@snake.cs.utah.edu)
+
+	* hppa-tdep.c (saved_pc_after_call): If the saved PC is in a
+	linker stub, then return the address the stub will return to.
+	(frame_saved_pc): Correctly restart the search for the saved
+	pc when a linker stub is encountered.
+
+	* hppa-tdep.c (inst_saves_gr): Handle 16 and 8 bit instruction
+	register stores emitted by the version 9 HP compilers.
+	(inst_saves_fr): Relax test for a specific base register (%r1);
+	this avoids losing with the version 9 HP compilers.
+	(skip_prologue): Try to skip argument stores emitted by the HP
+	compilers.  It's not perfect, but it's better than before.
+
 Fri Jul 29 23:20:30 1994  Stu Grossman  (grossman@cygnus.com)
 
 	* findvar.c (write_pc write_pc_pid):  Remove casts to long when
