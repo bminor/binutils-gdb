@@ -1,3 +1,8 @@
+Fri Jan 24 10:37:17 1997  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* aclocal.m4 (COMMON_MAKEFILE_FRAG):  Quote a couple of $'s in
+	comments and single quotes.  Fixes a problem found on hpux.
+
 Thu Jan 23 13:35:03 1997  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* aclocal.m4:  Remove Make-common.in from dependencies.

@@ -145,7 +145,7 @@ SHELL = /bin/sh
 INSTALL = \$(srcroot)/install.sh -c
 INSTALL_PROGRAM = ${INSTALL_PROGRAM}
 INSTALL_DATA = ${INSTALL_DATA}
-INSTALL_XFORM = \$(INSTALL) -t='$(program_transform_name)'
+INSTALL_XFORM = \$(INSTALL) -t='\$(program_transform_name)'
 INSTALL_XFORM1= \$(INSTALL_XFORM) -b=.1
 
 CC = ${CC}
@@ -170,7 +170,7 @@ MAKEINFO = makeinfo
 
 # List of object files, less common parts.
 #SIM_OBJS =
-# List of flags to always pass to $(CC).
+# List of flags to always pass to \$(CC).
 #SIM_EXTRA_CFLAGS =
 # List of extra libraries to link with.
 #SIM_EXTRA_LIBS =
