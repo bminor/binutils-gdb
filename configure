@@ -186,7 +186,7 @@ fi
 # script appropriate for this directory.  For more information, check
 # any existing configure script.
 
-configdirs="libiberty bfd binutils ld gas readline gcc gnulib ${clib}"
+configdirs="libiberty bfd binutils gcc ld gas readline gnulib ${clib}"
 srctrigger=README.configure
 srcname="gnu development package"
 
@@ -602,7 +602,11 @@ exit 0
 
 #
 # $Log$
-# Revision 1.18  1991/06/12 21:23:05  rich
+# Revision 1.19  1991/06/13 04:21:14  rich
+# Re-arrange so that gcc, which creates directories, gets installed
+# first.
+#
+# Revision 1.18  1991/06/12  21:23:05  rich
 # correctly propogate destdir
 #
 # Revision 1.17  1991/06/09  20:39:58  rich
