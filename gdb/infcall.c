@@ -182,7 +182,9 @@ find_function_addr (struct value *function, struct type **retval_type)
       if (TYPE_CODE (ftype) == TYPE_CODE_FUNC
 	  || TYPE_CODE (ftype) == TYPE_CODE_METHOD)
 	{
-	  funaddr = CONVERT_FROM_FUNC_PTR_ADDR (funaddr);
+	  funaddr = gdbarch_convert_from_func_ptr_addr (current_gdbarch,
+							funaddr,
+							&current_target);
 	  value_type = TYPE_TARGET_TYPE (ftype);
 	}
       else
@@ -562,7 +564,9 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 	dummy_addr = DEPRECATED_CALL_DUMMY_ADDRESS ();
       /* Make certain that the address points at real code, and not a
          function descriptor.  */
-      dummy_addr = CONVERT_FROM_FUNC_PTR_ADDR (dummy_addr);
+      dummy_addr = gdbarch_convert_from_func_ptr_addr (current_gdbarch,
+						       dummy_addr,
+						       &current_target);
       /* A call dummy always consists of just a single breakpoint, so
          it's address is the same as the address of the dummy.  */
       bp_addr = dummy_addr;
@@ -583,7 +587,9 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 	  dummy_addr = entry_point_address ();
 	/* Make certain that the address points at real code, and not
 	   a function descriptor.  */
-	dummy_addr = CONVERT_FROM_FUNC_PTR_ADDR (dummy_addr);
+	dummy_addr = gdbarch_convert_from_func_ptr_addr (current_gdbarch,
+							 dummy_addr,
+							 &current_target);
 	/* A call dummy always consists of just a single breakpoint,
 	   so it's address is the same as the address of the dummy.  */
 	bp_addr = dummy_addr;
@@ -903,7 +909,7 @@ You must use a pointer to function type variable. Command ignored.", arg_name);
     else
       {
 	/* The assumption here is that push_dummy_call() returned the
-	   stack part of the frame ID.  Unfortunatly, many older
+	   stack part of the frame ID.  Unfortunately, many older
 	   architectures were, via a convoluted mess, relying on the
 	   poorly defined and greatly overloaded
 	   DEPRECATED_TARGET_READ_FP or DEPRECATED_FP_REGNUM to supply
@@ -1076,30 +1082,34 @@ the function call).", name);
      address of the returned structure. Usually this will be
      overwritten by the callee.  I don't know about other
      architectures, so I defined this macro */
-#ifdef VALUE_RETURNED_FROM_STACK
+  /* FIXME: cagney/2003-09-27: This is no longer needed.  The problem
+     is now handled directly be by the code below.  */
+#ifdef DEPRECATED_VALUE_RETURNED_FROM_STACK
   if (struct_return)
     {
       do_cleanups (retbuf_cleanup);
-      return VALUE_RETURNED_FROM_STACK (value_type, struct_addr);
+      return DEPRECATED_VALUE_RETURNED_FROM_STACK (value_type, struct_addr);
     }
 #endif
-  /* NOTE: cagney/2002-09-10: Only when the stack has been correctly
-     aligned (using frame_align()) do we can trust STRUCT_ADDR and
-     fetch the return value direct from the stack.  This lack of trust
-     comes about because legacy targets have a nasty habit of
-     silently, and local to PUSH_ARGUMENTS(), moving STRUCT_ADDR.  For
-     such targets, just hope that value_being_returned() can find the
-     adjusted value.  */
-  if (struct_return && gdbarch_frame_align_p (current_gdbarch))
+  if (struct_return)
     {
+      /* NOTE: cagney/2003-09-27: This assumes that PUSH_DUMMY_CALL
+	 has correctly stored STRUCT_ADDR in the target.  In the past
+	 that hasn't been the case, the old MIPS PUSH_ARGUMENTS
+	 (PUSH_DUMMY_CALL precursor) would silently move the location
+	 of the struct return value making STRUCT_ADDR bogus.  If
+	 you're seeing problems with values being returned using the
+	 "struct return convention", check that PUSH_DUMMY_CALL isn't
+	 playing tricks.  */
       struct value *retval = value_at (value_type, struct_addr, NULL);
       do_cleanups (retbuf_cleanup);
       return retval;
     }
   else
     {
-      struct value *retval = value_being_returned (value_type, retbuf,
-						   struct_return);
+      /* The non-register case was handled above.  */
+      struct value *retval = register_value_being_returned (value_type,
+							    retbuf);
       do_cleanups (retbuf_cleanup);
       return retval;
     }

@@ -415,9 +415,9 @@ const struct language_defn m2_language_defn =
   range_check_on,
   type_check_on,
   case_sensitive_on,
+  &exp_descriptor_standard,
   m2_parse,			/* parser */
   m2_error,			/* parser error function */
-  evaluate_subexp_standard,
   m2_printchar,			/* Print character constant */
   m2_printstr,			/* function to print string constant */
   m2_emit_char,			/* Function to print a single character */
@@ -437,6 +437,7 @@ const struct language_defn m2_language_defn =
   0,				/* arrays are first-class (not c-style) */
   0,				/* String lower bound */
   &builtin_type_m2_char,	/* Type of string elements */
+  default_word_break_characters,
   LANG_MAGIC
 };
 

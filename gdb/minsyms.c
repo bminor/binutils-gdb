@@ -253,8 +253,9 @@ lookup_minimal_symbol_aux (const char *name, int linkage,
 		    case mst_file_data:
 		    case mst_file_bss:
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
-		      if (sfile == NULL || STREQ (msymbol->filename, sfile))
-			found_file_symbol = msymbol;
+                        if (sfile == NULL
+			    || strcmp (msymbol->filename, sfile) == 0)
+                          found_file_symbol = msymbol;
 #else
 		      /* We have neither the ability nor the need to
 			 deal with the SFILE parameter.  If we find
@@ -308,16 +309,13 @@ lookup_minimal_symbol_aux (const char *name, int linkage,
 
 /* Look through all the current minimal symbol tables and find the
    first minimal symbol that matches NAME and has text type.  If OBJF
-   is non-NULL, limit the search to that objfile.  If SFILE is non-NULL,
-   the only file-scope symbols considered will be from that source file
-   (global symbols are still preferred).  Returns a pointer to the minimal
-   symbol that matches, or NULL if no match is found.
+   is non-NULL, limit the search to that objfile.  Returns a pointer
+   to the minimal symbol that matches, or NULL if no match is found.
 
    This function only searches the mangled (linkage) names.  */
 
 struct minimal_symbol *
-lookup_minimal_symbol_text (const char *name, const char *sfile,
-			    struct objfile *objf)
+lookup_minimal_symbol_text (const char *name, struct objfile *objf)
 {
   struct objfile *objfile;
   struct minimal_symbol *msymbol;
@@ -325,15 +323,6 @@ lookup_minimal_symbol_text (const char *name, const char *sfile,
   struct minimal_symbol *found_file_symbol = NULL;
 
   unsigned int hash = msymbol_hash (name) % MINIMAL_SYMBOL_HASH_SIZE;
-
-#ifdef SOFUN_ADDRESS_MAYBE_MISSING
-  if (sfile != NULL)
-    {
-      char *p = strrchr (sfile, '/');
-      if (p != NULL)
-	sfile = p + 1;
-    }
-#endif
 
   for (objfile = object_files;
        objfile != NULL && found_symbol == NULL;
@@ -352,17 +341,7 @@ lookup_minimal_symbol_text (const char *name, const char *sfile,
 		  switch (MSYMBOL_TYPE (msymbol))
 		    {
 		    case mst_file_text:
-#ifdef SOFUN_ADDRESS_MAYBE_MISSING
-		      if (sfile == NULL || STREQ (msymbol->filename, sfile))
-			found_file_symbol = msymbol;
-#else
-		      /* We have neither the ability nor the need to
-		         deal with the SFILE parameter.  If we find
-		         more than one symbol, just return the latest
-		         one (the user can't expect useful behavior in
-		         that case).  */
 		      found_file_symbol = msymbol;
-#endif
 		      break;
 		    default:
 		      found_symbol = msymbol;
@@ -384,17 +363,15 @@ lookup_minimal_symbol_text (const char *name, const char *sfile,
 }
 
 /* Look through all the current minimal symbol tables and find the
-   first minimal symbol that matches NAME and is a solib trampoline.  If OBJF
-   is non-NULL, limit the search to that objfile.  If SFILE is non-NULL,
-   the only file-scope symbols considered will be from that source file
-   (global symbols are still preferred).  Returns a pointer to the minimal
-   symbol that matches, or NULL if no match is found.
+   first minimal symbol that matches NAME and is a solib trampoline.
+   If OBJF is non-NULL, limit the search to that objfile.  Returns a
+   pointer to the minimal symbol that matches, or NULL if no match is
+   found.
 
    This function only searches the mangled (linkage) names.  */
 
 struct minimal_symbol *
 lookup_minimal_symbol_solib_trampoline (const char *name,
-					const char *sfile,
 					struct objfile *objf)
 {
   struct objfile *objfile;
@@ -402,15 +379,6 @@ lookup_minimal_symbol_solib_trampoline (const char *name,
   struct minimal_symbol *found_symbol = NULL;
 
   unsigned int hash = msymbol_hash (name) % MINIMAL_SYMBOL_HASH_SIZE;
-
-#ifdef SOFUN_ADDRESS_MAYBE_MISSING
-  if (sfile != NULL)
-    {
-      char *p = strrchr (sfile, '/');
-      if (p != NULL)
-	sfile = p + 1;
-    }
-#endif
 
   for (objfile = object_files;
        objfile != NULL && found_symbol == NULL;
@@ -667,7 +635,7 @@ prim_record_minimal_symbol_and_info (const char *name, CORE_ADDR address,
 	const char *tempstring = name;
 	if (tempstring[0] == get_symbol_leading_char (objfile->obfd))
 	  ++tempstring;
-	if (STREQN (tempstring, "__gnu_compiled", 14))
+	if (strncmp (tempstring, "__gnu_compiled", 14) == 0)
 	  return (NULL);
       }
     }
@@ -818,10 +786,10 @@ compact_minimal_symbols (struct minimal_symbol *msymbol, int mcount,
       copyfrom = copyto = msymbol;
       while (copyfrom < msymbol + mcount - 1)
 	{
-	  if (SYMBOL_VALUE_ADDRESS (copyfrom) ==
-	      SYMBOL_VALUE_ADDRESS ((copyfrom + 1)) &&
-	      (STREQ (SYMBOL_LINKAGE_NAME (copyfrom),
-		      SYMBOL_LINKAGE_NAME ((copyfrom + 1)))))
+	  if (SYMBOL_VALUE_ADDRESS (copyfrom)
+	      == SYMBOL_VALUE_ADDRESS ((copyfrom + 1))
+	      && strcmp (SYMBOL_LINKAGE_NAME (copyfrom),
+			 SYMBOL_LINKAGE_NAME ((copyfrom + 1))) == 0)
 	    {
 	      if (MSYMBOL_TYPE ((copyfrom + 1)) == mst_unknown)
 		{
@@ -1056,8 +1024,8 @@ find_solib_trampoline_target (CORE_ADDR pc)
       ALL_MSYMBOLS (objfile, msymbol)
       {
 	if (MSYMBOL_TYPE (msymbol) == mst_text
-	    && STREQ (SYMBOL_LINKAGE_NAME (msymbol),
-		      SYMBOL_LINKAGE_NAME (tsymbol)))
+	    && strcmp (SYMBOL_LINKAGE_NAME (msymbol),
+		       SYMBOL_LINKAGE_NAME (tsymbol)) == 0)
 	  return SYMBOL_VALUE_ADDRESS (msymbol);
       }
     }

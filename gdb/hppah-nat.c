@@ -34,13 +34,33 @@
 #include "gdb_string.h"
 #include <signal.h>
 
-extern CORE_ADDR text_end;
-
 extern int hpux_has_forked (int pid, int *childpid);
 extern int hpux_has_vforked (int pid, int *childpid);
 extern int hpux_has_execd (int pid, char **execd_pathname);
 extern int hpux_has_syscall_event (int pid, enum target_waitkind *kind,
 				   int *syscall_id);
+
+static CORE_ADDR text_end;
+
+void
+deprecated_hpux_text_end (struct target_ops *exec_ops)
+{
+  struct section_table *p;
+
+  /* Set text_end to the highest address of the end of any readonly
+     code section.  */
+  /* FIXME: The comment above does not match the code.  The code
+     checks for sections with are either code *or* readonly.  */
+  text_end = (CORE_ADDR) 0;
+  for (p = exec_ops->to_sections; p < exec_ops->to_sections_end; p++)
+    if (bfd_get_section_flags (p->bfd, p->the_bfd_section)
+	& (SEC_CODE | SEC_READONLY))
+      {
+	if (text_end < p->endaddr)
+	  text_end = p->endaddr;
+      }
+}
+
 
 static void fetch_register (int);
 
@@ -78,7 +98,7 @@ store_inferior_registers (int regno)
 	return;
 
       offset = 0;
-      len = REGISTER_RAW_SIZE (regno);
+      len = DEPRECATED_REGISTER_RAW_SIZE (regno);
 
       /* Requests for register zero actually want the save_state's
 	 ss_flags member.  As RM says: "Oh, what a hack!"  */
@@ -89,10 +109,11 @@ store_inferior_registers (int regno)
 	  len = sizeof (ss.ss_flags);
 
 	  /* Note that ss_flags is always an int, no matter what
-	     REGISTER_RAW_SIZE(0) says.  Assuming all HP-UX PA machines
-	     are big-endian, put it at the least significant end of the
-	     value, and zap the rest of the buffer.  */
-	  offset = REGISTER_RAW_SIZE (0) - len;
+	     DEPRECATED_REGISTER_RAW_SIZE(0) says.  Assuming all HP-UX
+	     PA machines are big-endian, put it at the least
+	     significant end of the value, and zap the rest of the
+	     buffer.  */
+	  offset = DEPRECATED_REGISTER_RAW_SIZE (0) - len;
 	}
 
       /* Floating-point registers come from the ss_fpblock area.  */
@@ -195,7 +216,7 @@ fetch_register (int regno)
   int i;
 
   offset = 0;
-  len = REGISTER_RAW_SIZE (regno);
+  len = DEPRECATED_REGISTER_RAW_SIZE (regno);
 
   /* Requests for register zero actually want the save_state's
      ss_flags member.  As RM says: "Oh, what a hack!"  */
@@ -206,10 +227,10 @@ fetch_register (int regno)
       len = sizeof (ss.ss_flags);
 
       /* Note that ss_flags is always an int, no matter what
-	 REGISTER_RAW_SIZE(0) says.  Assuming all HP-UX PA machines
-	 are big-endian, put it at the least significant end of the
-	 value, and zap the rest of the buffer.  */
-      offset = REGISTER_RAW_SIZE (0) - len;
+	 DEPRECATED_REGISTER_RAW_SIZE(0) says.  Assuming all HP-UX PA
+	 machines are big-endian, put it at the least significant end
+	 of the value, and zap the rest of the buffer.  */
+      offset = DEPRECATED_REGISTER_RAW_SIZE (0) - len;
       memset (buf, 0, sizeof (buf));
     }
 

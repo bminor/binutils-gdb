@@ -30,6 +30,10 @@
 #include "frame-base.h"
 #include "trad-frame.h"
 #include "dis-asm.h"
+#include "gdb_assert.h"
+#include "sim-regno.h"
+#include "gdb/sim-frv.h"
+#include "opcodes/frv-desc.h"	/* for the H_SPR_... enums */
 
 extern void _initialize_frv_tdep (void);
 
@@ -37,19 +41,15 @@ static gdbarch_init_ftype frv_gdbarch_init;
 
 static gdbarch_register_name_ftype frv_register_name;
 static gdbarch_breakpoint_from_pc_ftype frv_breakpoint_from_pc;
+static gdbarch_adjust_breakpoint_address_ftype frv_gdbarch_adjust_breakpoint_address;
 static gdbarch_skip_prologue_ftype frv_skip_prologue;
-static gdbarch_deprecated_extract_return_value_ftype frv_extract_return_value;
-static gdbarch_deprecated_extract_struct_value_address_ftype frv_extract_struct_value_address;
 static gdbarch_frameless_function_invocation_ftype frv_frameless_function_invocation;
 static gdbarch_deprecated_push_arguments_ftype frv_push_arguments;
 static gdbarch_deprecated_saved_pc_after_call_ftype frv_saved_pc_after_call;
 
-/* Register numbers.  You can change these as needed, but don't forget
-   to update the simulator accordingly.  */
+/* Register numbers.  The order in which these appear define the
+   remote protocol, so take care in changing them.  */
 enum {
-  /* The total number of registers we know exist.  */
-  frv_num_regs = 147,
-
   /* Register numbers 0 -- 63 are always reserved for general-purpose
      registers.  The chip at hand may have less.  */
   first_gpr_regnum = 0,
@@ -63,10 +63,12 @@ enum {
   first_fpr_regnum = 64,
   last_fpr_regnum = 127,
 
-  /* Register numbers 128 on up are always reserved for special-purpose
-     registers.  */
-  first_spr_regnum = 128,
+  /* The PC register.  */
   pc_regnum = 128,
+
+  /* Register numbers 129 on up are always reserved for special-purpose
+     registers.  */
+  first_spr_regnum = 129,
   psr_regnum = 129,
   ccr_regnum = 130,
   cccr_regnum = 131,
@@ -78,7 +80,21 @@ enum {
   dbar3_regnum = 140,
   lr_regnum = 145,
   lcr_regnum = 146,
-  last_spr_regnum = 146
+  iacc0h_regnum = 147,
+  iacc0l_regnum = 148,
+  last_spr_regnum = 148,
+
+  /* The total number of registers we know exist.  */
+  frv_num_regs = last_spr_regnum + 1,
+
+  /* Pseudo registers */
+  first_pseudo_regnum = frv_num_regs,
+
+  /* iacc0 - the 64-bit concatenation of iacc0h and iacc0l.  */
+  iacc0_regnum = first_pseudo_regnum + 0,
+
+  last_pseudo_regnum = iacc0_regnum,
+  frv_num_pseudo_regs = last_pseudo_regnum - first_pseudo_regnum + 1,
 };
 
 static LONGEST frv_call_dummy_words[] =
@@ -154,17 +170,14 @@ new_variant (void)
 
   /* By default, don't supply any general-purpose or floating-point
      register names.  */
-  var->register_names = (char **) xmalloc (frv_num_regs * sizeof (char *));
-  for (r = 0; r < frv_num_regs; r++)
+  var->register_names 
+    = (char **) xmalloc ((frv_num_regs + frv_num_pseudo_regs)
+                         * sizeof (char *));
+  for (r = 0; r < frv_num_regs + frv_num_pseudo_regs; r++)
     var->register_names[r] = "";
 
-  /* Do, however, supply default names for the special-purpose
+  /* Do, however, supply default names for the known special-purpose
      registers.  */
-  for (r = first_spr_regnum; r <= last_spr_regnum; ++r)
-    {
-      sprintf (buf, "x%d", r);
-      var->register_names[r] = xstrdup (buf);
-    }
 
   var->register_names[pc_regnum] = "pc";
   var->register_names[lr_regnum] = "lr";
@@ -181,6 +194,11 @@ new_variant (void)
   var->register_names[dbar1_regnum] = "dbar1";
   var->register_names[dbar2_regnum] = "dbar2";
   var->register_names[dbar3_regnum] = "dbar3";
+
+  /* iacc0 (Only found on MB93405.)  */
+  var->register_names[iacc0h_regnum] = "iacc0h";
+  var->register_names[iacc0l_regnum] = "iacc0l";
+  var->register_names[iacc0_regnum] = "iacc0";
 
   return var;
 }
@@ -229,38 +247,93 @@ frv_register_name (int reg)
 {
   if (reg < 0)
     return "?toosmall?";
-  if (reg >= frv_num_regs)
+  if (reg >= frv_num_regs + frv_num_pseudo_regs)
     return "?toolarge?";
 
   return CURRENT_VARIANT->register_names[reg];
 }
 
 
-static int
-frv_register_raw_size (int reg)
-{
-  return 4;
-}
-
-static int
-frv_register_virtual_size (int reg)
-{
-  return 4;
-}
-
 static struct type *
-frv_register_virtual_type (int reg)
+frv_register_type (struct gdbarch *gdbarch, int reg)
 {
-  if (reg >= 64 && reg <= 127)
+  if (reg >= first_fpr_regnum && reg <= last_fpr_regnum)
     return builtin_type_float;
+  else if (reg == iacc0_regnum)
+    return builtin_type_int64;
   else
-    return builtin_type_int;
+    return builtin_type_int32;
+}
+
+static void
+frv_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
+                          int reg, void *buffer)
+{
+  if (reg == iacc0_regnum)
+    {
+      regcache_raw_read (regcache, iacc0h_regnum, buffer);
+      regcache_raw_read (regcache, iacc0l_regnum, (bfd_byte *) buffer + 4);
+    }
+}
+
+static void
+frv_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
+                          int reg, const void *buffer)
+{
+  if (reg == iacc0_regnum)
+    {
+      regcache_raw_write (regcache, iacc0h_regnum, buffer);
+      regcache_raw_write (regcache, iacc0l_regnum, (bfd_byte *) buffer + 4);
+    }
 }
 
 static int
-frv_register_byte (int reg)
+frv_register_sim_regno (int reg)
 {
-  return (reg * 4);
+  static const int spr_map[] =
+    {
+      H_SPR_PSR,		/* psr_regnum */
+      H_SPR_CCR,		/* ccr_regnum */
+      H_SPR_CCCR,		/* cccr_regnum */
+      -1,			/* 132 */
+      -1,			/* 133 */
+      -1,			/* 134 */
+      H_SPR_TBR,		/* tbr_regnum */
+      H_SPR_BRR,		/* brr_regnum */
+      H_SPR_DBAR0,		/* dbar0_regnum */
+      H_SPR_DBAR1,		/* dbar1_regnum */
+      H_SPR_DBAR2,		/* dbar2_regnum */
+      H_SPR_DBAR3,		/* dbar3_regnum */
+      -1,			/* 141 */
+      -1,			/* 142 */
+      -1,			/* 143 */
+      -1,			/* 144 */
+      H_SPR_LR,			/* lr_regnum */
+      H_SPR_LCR,		/* lcr_regnum */
+      H_SPR_IACC0H,		/* iacc0h_regnum */
+      H_SPR_IACC0L		/* iacc0l_regnum */
+    };
+
+  gdb_assert (reg >= 0 && reg < NUM_REGS);
+
+  if (first_gpr_regnum <= reg && reg <= last_gpr_regnum)
+    return reg - first_gpr_regnum + SIM_FRV_GR0_REGNUM;
+  else if (first_fpr_regnum <= reg && reg <= last_fpr_regnum)
+    return reg - first_fpr_regnum + SIM_FRV_FR0_REGNUM;
+  else if (pc_regnum == reg)
+    return SIM_FRV_PC_REGNUM;
+  else if (reg >= first_spr_regnum
+           && reg < first_spr_regnum + sizeof (spr_map) / sizeof (spr_map[0]))
+    {
+      int spr_reg_offset = spr_map[reg - first_spr_regnum];
+
+      if (spr_reg_offset < 0)
+	return SIM_REGNO_DOES_NOT_EXIST;
+      else
+	return SIM_FRV_SPR0_REGNUM + spr_reg_offset;
+    }
+
+  internal_error (__FILE__, __LINE__, "Bad register number %d", reg);
 }
 
 static const unsigned char *
@@ -269,6 +342,51 @@ frv_breakpoint_from_pc (CORE_ADDR *pcptr, int *lenp)
   static unsigned char breakpoint[] = {0xc0, 0x70, 0x00, 0x01};
   *lenp = sizeof (breakpoint);
   return breakpoint;
+}
+
+/* Define the maximum number of instructions which may be packed into a
+   bundle (VLIW instruction).  */
+static const int max_instrs_per_bundle = 8;
+
+/* Define the size (in bytes) of an FR-V instruction.  */
+static const int frv_instr_size = 4;
+
+/* Adjust a breakpoint's address to account for the FR-V architecture's
+   constraint that a break instruction must not appear as any but the
+   first instruction in the bundle.  */
+static CORE_ADDR
+frv_gdbarch_adjust_breakpoint_address (struct gdbarch *gdbarch, CORE_ADDR bpaddr)
+{
+  int count = max_instrs_per_bundle;
+  CORE_ADDR addr = bpaddr - frv_instr_size;
+  CORE_ADDR func_start = get_pc_function_start (bpaddr);
+
+  /* Find the end of the previous packing sequence.  This will be indicated
+     by either attempting to access some inaccessible memory or by finding
+     an instruction word whose packing bit is set to one. */
+  while (count-- > 0 && addr >= func_start)
+    {
+      char instr[frv_instr_size];
+      int status;
+
+      status = read_memory_nobpt (addr, instr, sizeof instr);
+
+      if (status != 0)
+	break;
+
+      /* This is a big endian architecture, so byte zero will have most
+         significant byte.  The most significant bit of this byte is the
+         packing bit.  */
+      if (instr[0] & 0x80)
+	break;
+
+      addr -= frv_instr_size;
+    }
+
+  if (count > 0)
+    bpaddr = addr + frv_instr_size;
+
+  return bpaddr;
 }
 
 
@@ -732,20 +850,35 @@ frv_frame_unwind_cache (struct frame_info *next_frame,
 }
 
 static void
-frv_extract_return_value (struct type *type, char *regbuf, char *valbuf)
+frv_extract_return_value (struct type *type, struct regcache *regcache,
+                          void *valbuf)
 {
-  memcpy (valbuf, (regbuf
-		   + frv_register_byte (8)
-		   + (TYPE_LENGTH (type) < 4 ? 4 - TYPE_LENGTH (type) : 0)),
-		   TYPE_LENGTH (type));
+  int len = TYPE_LENGTH (type);
+
+  if (len <= 4)
+    {
+      ULONGEST gpr8_val;
+      regcache_cooked_read_unsigned (regcache, 8, &gpr8_val);
+      store_unsigned_integer (valbuf, len, gpr8_val);
+    }
+  else if (len == 8)
+    {
+      ULONGEST regval;
+      regcache_cooked_read_unsigned (regcache, 8, &regval);
+      store_unsigned_integer (valbuf, 4, regval);
+      regcache_cooked_read_unsigned (regcache, 9, &regval);
+      store_unsigned_integer ((bfd_byte *) valbuf + 4, 4, regval);
+    }
+  else
+    internal_error (__FILE__, __LINE__, "Illegal return value length: %d", len);
 }
 
 static CORE_ADDR
-frv_extract_struct_value_address (char *regbuf)
+frv_extract_struct_value_address (struct regcache *regcache)
 {
-  return extract_unsigned_integer (regbuf + 
-				   frv_register_byte (struct_return_regnum),
-				   4);
+  ULONGEST addr;
+  regcache_cooked_read_unsigned (regcache, struct_return_regnum, &addr);
+  return addr;
 }
 
 static void
@@ -760,14 +893,11 @@ frv_frameless_function_invocation (struct frame_info *frame)
   return frameless_look_for_prologue (frame);
 }
 
-#define ROUND_UP(n,a) (((n)+(a)-1) & ~((a)-1))
-#define ROUND_DOWN(n,a) ((n) & ~((a)-1))
-
 static CORE_ADDR
 frv_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
 {
   /* Require dword alignment.  */
-  return ROUND_DOWN (sp, 8);
+  return align_down (sp, 8);
 }
 
 static CORE_ADDR
@@ -795,14 +925,14 @@ frv_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 
   stack_space = 0;
   for (argnum = 0; argnum < nargs; ++argnum)
-    stack_space += ROUND_UP (TYPE_LENGTH (VALUE_TYPE (args[argnum])), 4);
+    stack_space += align_up (TYPE_LENGTH (VALUE_TYPE (args[argnum])), 4);
 
   stack_space -= (6 * 4);
   if (stack_space > 0)
     sp -= stack_space;
 
   /* Make sure stack is dword aligned. */
-  sp = ROUND_DOWN (sp, 8);
+  sp = align_down (sp, 8);
 
   stack_offset = 0;
 
@@ -852,7 +982,7 @@ frv_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 		     argnum, *((int *)val), stack_offset, (int) (sp + stack_offset));
 #endif
 	      write_memory (sp + stack_offset, val, partial_len);
-	      stack_offset += ROUND_UP(partial_len, 4);
+	      stack_offset += align_up (partial_len, 4);
 	    }
 	  len -= partial_len;
 	  val += partial_len;
@@ -870,19 +1000,26 @@ frv_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 }
 
 static void
-frv_store_return_value (struct type *type, char *valbuf)
+frv_store_return_value (struct type *type, struct regcache *regcache,
+                        const void *valbuf)
 {
-  int length = TYPE_LENGTH (type);
-  int reg8_offset = frv_register_byte (8);
+  int len = TYPE_LENGTH (type);
 
-  if (length <= 4)
-    deprecated_write_register_bytes (reg8_offset + (4 - length), valbuf,
-				     length);
-  else if (length == 8)
-    deprecated_write_register_bytes (reg8_offset, valbuf, length);
+  if (len <= 4)
+    {
+      bfd_byte val[4];
+      memset (val, 0, sizeof (val));
+      memcpy (val + (4 - len), valbuf, len);
+      regcache_cooked_write (regcache, 8, val);
+    }
+  else if (len == 8)
+    {
+      regcache_cooked_write (regcache, 8, valbuf);
+      regcache_cooked_write (regcache, 9, (bfd_byte *) valbuf + 4);
+    }
   else
     internal_error (__FILE__, __LINE__,
-                    "Don't know how to return a %d-byte value.", length);
+                    "Don't know how to return a %d-byte value.", len);
 }
 
 
@@ -966,7 +1103,7 @@ frv_frame_this_id (struct frame_info *next_frame,
 
   /* This is meant to halt the backtrace at "_start".  Make sure we
      don't halt it at a generic dummy frame. */
-  if (deprecated_inside_entry_file (func))
+  if (inside_entry_func (func))
     return;
 
   /* Check if the stack is empty.  */
@@ -1101,32 +1238,32 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_ptr_bit (gdbarch, 32);
 
   set_gdbarch_num_regs (gdbarch, frv_num_regs);
+  set_gdbarch_num_pseudo_regs (gdbarch, frv_num_pseudo_regs);
+
   set_gdbarch_sp_regnum (gdbarch, sp_regnum);
   set_gdbarch_deprecated_fp_regnum (gdbarch, fp_regnum);
   set_gdbarch_pc_regnum (gdbarch, pc_regnum);
 
   set_gdbarch_register_name (gdbarch, frv_register_name);
-  set_gdbarch_deprecated_register_size (gdbarch, 4);
-  set_gdbarch_deprecated_register_bytes (gdbarch, frv_num_regs * 4);
-  set_gdbarch_deprecated_register_byte (gdbarch, frv_register_byte);
-  set_gdbarch_deprecated_register_raw_size (gdbarch, frv_register_raw_size);
-  set_gdbarch_deprecated_max_register_raw_size (gdbarch, 4);
-  set_gdbarch_deprecated_register_virtual_size (gdbarch, frv_register_virtual_size);
-  set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 4);
-  set_gdbarch_deprecated_register_virtual_type (gdbarch, frv_register_virtual_type);
+  set_gdbarch_register_type (gdbarch, frv_register_type);
+  set_gdbarch_register_sim_regno (gdbarch, frv_register_sim_regno);
+
+  set_gdbarch_pseudo_register_read (gdbarch, frv_pseudo_register_read);
+  set_gdbarch_pseudo_register_write (gdbarch, frv_pseudo_register_write);
 
   set_gdbarch_skip_prologue (gdbarch, frv_skip_prologue);
   set_gdbarch_breakpoint_from_pc (gdbarch, frv_breakpoint_from_pc);
+  set_gdbarch_adjust_breakpoint_address (gdbarch, frv_gdbarch_adjust_breakpoint_address);
 
   set_gdbarch_frame_args_skip (gdbarch, 0);
   set_gdbarch_frameless_function_invocation (gdbarch, frv_frameless_function_invocation);
 
   set_gdbarch_use_struct_convention (gdbarch, always_use_struct_convention);
-  set_gdbarch_deprecated_extract_return_value (gdbarch, frv_extract_return_value);
+  set_gdbarch_extract_return_value (gdbarch, frv_extract_return_value);
 
   set_gdbarch_deprecated_store_struct_return (gdbarch, frv_store_struct_return);
-  set_gdbarch_deprecated_store_return_value (gdbarch, frv_store_return_value);
-  set_gdbarch_deprecated_extract_struct_value_address (gdbarch, frv_extract_struct_value_address);
+  set_gdbarch_store_return_value (gdbarch, frv_store_return_value);
+  set_gdbarch_extract_struct_value_address (gdbarch, frv_extract_struct_value_address);
 
   /* Frame stuff.  */
   set_gdbarch_unwind_pc (gdbarch, frv_unwind_pc);

@@ -255,7 +255,7 @@ do_restore_user_call_depth (void * call_depth)
 void
 execute_user_command (struct cmd_list_element *c, char *args)
 {
-  register struct command_line *cmdlines;
+  struct command_line *cmdlines;
   struct cleanup *old_chain;
   enum command_control_type ret;
   static int user_call_depth = 0;
@@ -974,8 +974,8 @@ read_command_lines (char *prompt_arg, int from_tty)
 void
 free_command_lines (struct command_line **lptr)
 {
-  register struct command_line *l = *lptr;
-  register struct command_line *next;
+  struct command_line *l = *lptr;
+  struct command_line *next;
   struct command_line **blist;
   int i;
 
@@ -1040,7 +1040,7 @@ copy_command_lines (struct command_line *cmds)
 static void
 validate_comname (char *comname)
 {
-  register char *p;
+  char *p;
 
   if (comname == 0)
     error_no_arg ("name of command to define");
@@ -1070,8 +1070,8 @@ define_command (char *comname, int from_tty)
       CMD_PRE_HOOK,
       CMD_POST_HOOK
     };
-  register struct command_line *cmds;
-  register struct cmd_list_element *c, *newc, *oldc, *hookc = 0;
+  struct command_line *cmds;
+  struct cmd_list_element *c, *newc, *oldc, *hookc = 0;
   char *tem = comname;
   char *tem2; 
   char tmpbuf[MAX_TMPBUF];
@@ -1176,7 +1176,7 @@ void
 document_command (char *comname, int from_tty)
 {
   struct command_line *doclines;
-  register struct cmd_list_element *c;
+  struct cmd_list_element *c;
   char *tem = comname;
   char tmpbuf[128];
 
@@ -1194,8 +1194,8 @@ document_command (char *comname, int from_tty)
     xfree (c->doc);
 
   {
-    register struct command_line *cl1;
-    register int len = 0;
+    struct command_line *cl1;
+    int len = 0;
 
     for (cl1 = doclines; cl1; cl1 = cl1->next)
       len += strlen (cl1->line) + 1;
@@ -1233,7 +1233,6 @@ source_cleanup_lines (void *args)
   error_pre_print = p->old_error_pre_print;
 }
 
-/* ARGSUSED */
 static void
 do_fclose_cleanup (void *stream)
 {
@@ -1290,7 +1289,7 @@ script_from_file (FILE *stream, char *file)
 void
 show_user_1 (struct cmd_list_element *c, struct ui_file *stream)
 {
-  register struct command_line *cmdlines;
+  struct command_line *cmdlines;
 
   cmdlines = c->user_commands;
   if (!cmdlines)

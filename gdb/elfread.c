@@ -80,58 +80,29 @@ elf_locate_sections (bfd *ignore_abfd, asection *sectp, void *eip)
   struct elfinfo *ei;
 
   ei = (struct elfinfo *) eip;
-  if (STREQ (sectp->name, ".debug"))
+  if (strcmp (sectp->name, ".debug") == 0)
     {
       ei->dboffset = sectp->filepos;
       ei->dbsize = bfd_get_section_size_before_reloc (sectp);
     }
-  else if (STREQ (sectp->name, ".line"))
+  else if (strcmp (sectp->name, ".line") == 0)
     {
       ei->lnoffset = sectp->filepos;
       ei->lnsize = bfd_get_section_size_before_reloc (sectp);
     }
-  else if (STREQ (sectp->name, ".stab"))
+  else if (strcmp (sectp->name, ".stab") == 0)
     {
       ei->stabsect = sectp;
     }
-  else if (STREQ (sectp->name, ".stab.index"))
+  else if (strcmp (sectp->name, ".stab.index") == 0)
     {
       ei->stabindexsect = sectp;
     }
-  else if (STREQ (sectp->name, ".mdebug"))
+  else if (strcmp (sectp->name, ".mdebug") == 0)
     {
       ei->mdebugsect = sectp;
     }
 }
-
-#if 0				/* Currently unused */
-
-char *
-elf_interpreter (bfd *abfd)
-{
-  sec_ptr interp_sec;
-  unsigned size;
-  char *interp = NULL;
-
-  interp_sec = bfd_get_section_by_name (abfd, ".interp");
-  if (interp_sec)
-    {
-      size = bfd_section_size (abfd, interp_sec);
-      interp = alloca (size);
-      if (bfd_get_section_contents (abfd, interp_sec, interp, (file_ptr) 0,
-				    size))
-	{
-	  interp = savestring (interp, size - 1);
-	}
-      else
-	{
-	  interp = NULL;
-	}
-    }
-  return (interp);
-}
-
-#endif
 
 static struct minimal_symbol *
 record_minimal_symbol_and_info (char *name, CORE_ADDR address,
@@ -398,9 +369,17 @@ elf_symtab_read (struct objfile *objfile, int dynamic)
 				= max (SECT_OFF_BSS (objfile),
 				       max (SECT_OFF_DATA (objfile),
 					    SECT_OFF_RODATA (objfile)));
+
+                              /* max_index is the largest index we'll
+                                 use into this array, so we must
+                                 allocate max_index+1 elements for it.
+                                 However, 'struct stab_section_info'
+                                 already includes one element, so we
+                                 need to allocate max_index aadditional
+                                 elements.  */
 			      size = (sizeof (struct stab_section_info) 
 				      + (sizeof (CORE_ADDR)
-					 * (max_index - 1)));
+					 * max_index));
 			      sectinfo = (struct stab_section_info *)
 				xmmalloc (objfile->md, size);
 			      memset (sectinfo, 0, size);
@@ -711,7 +690,7 @@ elfstab_offset_sections (struct objfile *objfile, struct partial_symtab *pst)
   for (; maybe; maybe = maybe->next)
     {
       if (filename[0] == maybe->filename[0]
-	  && STREQ (filename, maybe->filename))
+	  && strcmp (filename, maybe->filename) == 0)
 	{
 	  /* We found a match.  But there might be several source files
 	     (from different directories) with the same name.  */

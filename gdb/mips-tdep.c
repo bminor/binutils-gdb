@@ -181,9 +181,9 @@ unmake_mips16_addr (CORE_ADDR addr)
 static LONGEST
 read_signed_register (int regnum)
 {
-  void *buf = alloca (REGISTER_RAW_SIZE (regnum));
+  void *buf = alloca (DEPRECATED_REGISTER_RAW_SIZE (regnum));
   deprecated_read_register_gen (regnum, buf);
-  return (extract_signed_integer (buf, REGISTER_RAW_SIZE (regnum)));
+  return (extract_signed_integer (buf, DEPRECATED_REGISTER_RAW_SIZE (regnum)));
 }
 
 static LONGEST
@@ -279,7 +279,7 @@ mips_xfer_register (struct regcache *regcache, int reg_num, int length,
   switch (endian)
     {
     case BFD_ENDIAN_BIG:
-      reg_offset = REGISTER_RAW_SIZE (reg_num) - length;
+      reg_offset = DEPRECATED_REGISTER_RAW_SIZE (reg_num) - length;
       break;
     case BFD_ENDIAN_LITTLE:
       reg_offset = 0;
@@ -325,7 +325,7 @@ mips2_fp_compat (void)
 {
   /* MIPS1 and MIPS2 have only 32 bit FPRs, and the FR bit is not
      meaningful.  */
-  if (REGISTER_RAW_SIZE (FP0_REGNUM) == 4)
+  if (DEPRECATED_REGISTER_RAW_SIZE (FP0_REGNUM) == 4)
     return 0;
 
 #if 0
@@ -624,18 +624,6 @@ struct linked_proc_info
   }
  *linked_proc_desc_table = NULL;
 
-void
-mips_print_extra_frame_info (struct frame_info *fi)
-{
-  if (fi
-      && get_frame_extra_info (fi)
-      && get_frame_extra_info (fi)->proc_desc
-      && get_frame_extra_info (fi)->proc_desc->pdr.framereg < NUM_REGS)
-    printf_filtered (" frame pointer is at %s+%s\n",
-		     REGISTER_NAME (get_frame_extra_info (fi)->proc_desc->pdr.framereg),
-		     paddr_d (get_frame_extra_info (fi)->proc_desc->pdr.frameoffset));
-}
-
 /* Number of bytes of storage in the actual machine representation for
    register N.  NOTE: This indirectly defines the register size
    transfered by the GDB protocol.  */
@@ -654,9 +642,9 @@ mips_register_raw_size (int regnum)
 	 NOTE: cagney/2003-06-15: This is so bogus.  The register's
 	 raw size is changing according to the ABI
 	 (FP_REGISTER_DOUBLE).  Also, GDB's protocol is defined by a
-	 combination of REGISTER_RAW_SIZE and DEPRECATED_REGISTER_BYTE.  */
+	 combination of DEPRECATED_REGISTER_RAW_SIZE and DEPRECATED_REGISTER_BYTE.  */
       if (mips64_transfers_32bit_regs_p)
-	return REGISTER_VIRTUAL_SIZE (regnum);
+	return DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum);
       else if (regnum >= FP0_REGNUM && regnum < FP0_REGNUM + 32
 	       && FP_REGISTER_DOUBLE)
 	/* For MIPS_ABI_N32 (for example) we need 8 byte floating point
@@ -679,7 +667,7 @@ mips_register_raw_size (int regnum)
 /* Register offset in a buffer for each register.
 
    FIXME: cagney/2003-06-15: This is so bogus.  Instead REGISTER_TYPE
-   should strictly return the layout of the buffer.  Unfortunatly
+   should strictly return the layout of the buffer.  Unfortunately
    remote.c and the MIPS have come to rely on a custom layout that
    doesn't 1:1 map onto the register type.  */
 
@@ -717,7 +705,7 @@ mips_register_convertible (int reg_nr)
   if (mips64_transfers_32bit_regs_p)
     return 0;
   else
-    return (REGISTER_RAW_SIZE (reg_nr) > REGISTER_VIRTUAL_SIZE (reg_nr));
+    return (DEPRECATED_REGISTER_RAW_SIZE (reg_nr) > DEPRECATED_REGISTER_VIRTUAL_SIZE (reg_nr));
 }
 
 static void
@@ -726,7 +714,7 @@ mips_register_convert_to_virtual (int n, struct type *virtual_type,
 {
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     memcpy (virt_buf,
-	    raw_buf + (REGISTER_RAW_SIZE (n) - TYPE_LENGTH (virtual_type)),
+	    raw_buf + (DEPRECATED_REGISTER_RAW_SIZE (n) - TYPE_LENGTH (virtual_type)),
 	    TYPE_LENGTH (virtual_type));
   else
     memcpy (virt_buf,
@@ -738,9 +726,9 @@ static void
 mips_register_convert_to_raw (struct type *virtual_type, int n,
 			      const char *virt_buf, char *raw_buf)
 {
-  memset (raw_buf, 0, REGISTER_RAW_SIZE (n));
+  memset (raw_buf, 0, DEPRECATED_REGISTER_RAW_SIZE (n));
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-    memcpy (raw_buf + (REGISTER_RAW_SIZE (n) - TYPE_LENGTH (virtual_type)),
+    memcpy (raw_buf + (DEPRECATED_REGISTER_RAW_SIZE (n) - TYPE_LENGTH (virtual_type)),
 	    virt_buf,
 	    TYPE_LENGTH (virtual_type));
   else
@@ -753,7 +741,7 @@ static int
 mips_convert_register_p (int regnum, struct type *type)
 {
   return (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
-	  && REGISTER_RAW_SIZE (regnum) == 4
+	  && DEPRECATED_REGISTER_RAW_SIZE (regnum) == 4
 	  && (regnum) >= FP0_REGNUM && (regnum) < FP0_REGNUM + 32
 	  && TYPE_CODE(type) == TYPE_CODE_FLT
 	  && TYPE_LENGTH(type) == 8);
@@ -763,8 +751,8 @@ static void
 mips_register_to_value (struct frame_info *frame, int regnum,
 			struct type *type, void *to)
 {
-  frame_read_register (frame, regnum + 0, (char *) to + 4);
-  frame_read_register (frame, regnum + 1, (char *) to + 0);
+  get_frame_register (frame, regnum + 0, (char *) to + 4);
+  get_frame_register (frame, regnum + 1, (char *) to + 0);
 }
 
 static void
@@ -1570,7 +1558,7 @@ mips_find_saved_regs (struct frame_info *fci)
   t_inst inst;
   CORE_ADDR *saved_regs;
 
-  if (get_frame_saved_regs (fci) != NULL)
+  if (deprecated_get_frame_saved_regs (fci) != NULL)
     return;
   saved_regs = frame_saved_regs_zalloc (fci);
 
@@ -1741,7 +1729,7 @@ mips_find_saved_regs (struct frame_info *fci)
 	         stored first leading to the memory order $f[N] and
 	         then $f[N+1].
 
-		 Unfortunatly, when big-endian the most significant
+		 Unfortunately, when big-endian the most significant
 		 part of the double is stored first, and the least
 		 significant is stored second.  This leads to the
 		 registers being ordered in memory as firt $f[N+1] and
@@ -2733,7 +2721,7 @@ mips_init_extra_frame_info (int fromleaf, struct frame_info *fci)
 			      get_frame_base (fci));
 	      set_reg_offset (temp_saved_regs, PC_REGNUM,
 			      temp_saved_regs[RA_REGNUM]);
-	      memcpy (get_frame_saved_regs (fci), temp_saved_regs,
+	      memcpy (deprecated_get_frame_saved_regs (fci), temp_saved_regs,
 		      SIZEOF_FRAME_SAVED_REGS);
 	    }
 	}
@@ -2822,18 +2810,12 @@ mips_type_needs_double_align (struct type *type)
   return 0;
 }
 
-/* Macros to round N up or down to the next A boundary; 
-   A must be a power of two.  */
-
-#define ROUND_DOWN(n,a) ((n) & ~((a)-1))
-#define ROUND_UP(n,a) (((n)+(a)-1) & ~((a)-1))
-
 /* Adjust the address downward (direction of stack growth) so that it
    is correctly aligned for a new stack frame.  */
 static CORE_ADDR
 mips_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
 {
-  return ROUND_DOWN (addr, 16);
+  return align_down (addr, 16);
 }
 
 static CORE_ADDR
@@ -2862,21 +2844,21 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
      aligned.  For n32 and n64, stack frames need to be 128-bit
      aligned, so we round to this widest known alignment.  */
 
-  sp = ROUND_DOWN (sp, 16);
-  struct_addr = ROUND_DOWN (struct_addr, 16);
+  sp = align_down (sp, 16);
+  struct_addr = align_down (struct_addr, 16);
 
   /* Now make space on the stack for the args.  We allocate more
      than necessary for EABI, because the first few arguments are
      passed in registers, but that's OK.  */
   for (argnum = 0; argnum < nargs; argnum++)
-    len += ROUND_UP (TYPE_LENGTH (VALUE_TYPE (args[argnum])), 
+    len += align_up (TYPE_LENGTH (VALUE_TYPE (args[argnum])), 
 		     MIPS_STACK_ARGSIZE);
-  sp -= ROUND_UP (len, 16);
+  sp -= align_up (len, 16);
 
   if (mips_debug)
     fprintf_unfiltered (gdb_stdlog, 
-			"mips_eabi_push_dummy_call: sp=0x%s allocated %d\n",
-			paddr_nz (sp), ROUND_UP (len, 16));
+			"mips_eabi_push_dummy_call: sp=0x%s allocated %ld\n",
+			paddr_nz (sp), (long) align_up (len, 16));
 
   /* Initialize the integer and float register pointers.  */
   argreg = A0_REGNUM;
@@ -3083,7 +3065,7 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 	         only needs to be adjusted when it has been used.  */
 
 	      if (stack_used_p)
-		stack_offset += ROUND_UP (partial_len, MIPS_STACK_ARGSIZE);
+		stack_offset += align_up (partial_len, MIPS_STACK_ARGSIZE);
 	    }
 	}
       if (mips_debug)
@@ -3124,19 +3106,19 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
      aligned.  For n32 and n64, stack frames need to be 128-bit
      aligned, so we round to this widest known alignment.  */
 
-  sp = ROUND_DOWN (sp, 16);
-  struct_addr = ROUND_DOWN (struct_addr, 16);
+  sp = align_down (sp, 16);
+  struct_addr = align_down (struct_addr, 16);
 
   /* Now make space on the stack for the args.  */
   for (argnum = 0; argnum < nargs; argnum++)
-    len += ROUND_UP (TYPE_LENGTH (VALUE_TYPE (args[argnum])), 
+    len += align_up (TYPE_LENGTH (VALUE_TYPE (args[argnum])), 
 		     MIPS_STACK_ARGSIZE);
-  sp -= ROUND_UP (len, 16);
+  sp -= align_up (len, 16);
 
   if (mips_debug)
     fprintf_unfiltered (gdb_stdlog, 
-			"mips_n32n64_push_dummy_call: sp=0x%s allocated %d\n",
-			paddr_nz (sp), ROUND_UP (len, 16));
+			"mips_n32n64_push_dummy_call: sp=0x%s allocated %ld\n",
+			paddr_nz (sp), (long) align_up (len, 16));
 
   /* Initialize the integer and float register pointers.  */
   argreg = A0_REGNUM;
@@ -3314,7 +3296,7 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 	         adjusted when it has been used.  */
 
 	      if (stack_used_p)
-		stack_offset += ROUND_UP (partial_len, MIPS_STACK_ARGSIZE);
+		stack_offset += align_up (partial_len, MIPS_STACK_ARGSIZE);
 	    }
 	}
       if (mips_debug)
@@ -3355,19 +3337,19 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
      aligned.  For n32 and n64, stack frames need to be 128-bit
      aligned, so we round to this widest known alignment.  */
 
-  sp = ROUND_DOWN (sp, 16);
-  struct_addr = ROUND_DOWN (struct_addr, 16);
+  sp = align_down (sp, 16);
+  struct_addr = align_down (struct_addr, 16);
 
   /* Now make space on the stack for the args.  */
   for (argnum = 0; argnum < nargs; argnum++)
-    len += ROUND_UP (TYPE_LENGTH (VALUE_TYPE (args[argnum])), 
+    len += align_up (TYPE_LENGTH (VALUE_TYPE (args[argnum])), 
 		     MIPS_STACK_ARGSIZE);
-  sp -= ROUND_UP (len, 16);
+  sp -= align_up (len, 16);
 
   if (mips_debug)
     fprintf_unfiltered (gdb_stdlog, 
-			"mips_o32_push_dummy_call: sp=0x%s allocated %d\n",
-			paddr_nz (sp), ROUND_UP (len, 16));
+			"mips_o32_push_dummy_call: sp=0x%s allocated %ld\n",
+			paddr_nz (sp), (long) align_up (len, 16));
 
   /* Initialize the integer and float register pointers.  */
   argreg = A0_REGNUM;
@@ -3478,7 +3460,7 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 	      argreg += FP_REGISTER_DOUBLE ? 1 : 2;
 	    }
 	  /* Reserve space for the FP register.  */
-	  stack_offset += ROUND_UP (len, MIPS_STACK_ARGSIZE);
+	  stack_offset += align_up (len, MIPS_STACK_ARGSIZE);
 	}
       else
 	{
@@ -3622,7 +3604,7 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 		 refered to as their "home".  Consequently, space is
 		 always allocated.  */
 
-	      stack_offset += ROUND_UP (partial_len, MIPS_STACK_ARGSIZE);
+	      stack_offset += align_up (partial_len, MIPS_STACK_ARGSIZE);
 	    }
 	}
       if (mips_debug)
@@ -3663,19 +3645,19 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
      aligned.  For n32 and n64, stack frames need to be 128-bit
      aligned, so we round to this widest known alignment.  */
 
-  sp = ROUND_DOWN (sp, 16);
-  struct_addr = ROUND_DOWN (struct_addr, 16);
+  sp = align_down (sp, 16);
+  struct_addr = align_down (struct_addr, 16);
 
   /* Now make space on the stack for the args.  */
   for (argnum = 0; argnum < nargs; argnum++)
-    len += ROUND_UP (TYPE_LENGTH (VALUE_TYPE (args[argnum])), 
+    len += align_up (TYPE_LENGTH (VALUE_TYPE (args[argnum])), 
 		     MIPS_STACK_ARGSIZE);
-  sp -= ROUND_UP (len, 16);
+  sp -= align_up (len, 16);
 
   if (mips_debug)
     fprintf_unfiltered (gdb_stdlog, 
-			"mips_o64_push_dummy_call: sp=0x%s allocated %d\n",
-			paddr_nz (sp), ROUND_UP (len, 16));
+			"mips_o64_push_dummy_call: sp=0x%s allocated %ld\n",
+			paddr_nz (sp), (long) align_up (len, 16));
 
   /* Initialize the integer and float register pointers.  */
   argreg = A0_REGNUM;
@@ -3786,7 +3768,7 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 	      argreg += FP_REGISTER_DOUBLE ? 1 : 2;
 	    }
 	  /* Reserve space for the FP register.  */
-	  stack_offset += ROUND_UP (len, MIPS_STACK_ARGSIZE);
+	  stack_offset += align_up (len, MIPS_STACK_ARGSIZE);
 	}
       else
 	{
@@ -3930,7 +3912,7 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 		 refered to as their "home".  Consequently, space is
 		 always allocated.  */
 
-	      stack_offset += ROUND_UP (partial_len, MIPS_STACK_ARGSIZE);
+	      stack_offset += align_up (partial_len, MIPS_STACK_ARGSIZE);
 	    }
 	}
       if (mips_debug)
@@ -3963,18 +3945,18 @@ mips_pop_frame (void)
   mips_find_saved_regs (frame);
   for (regnum = 0; regnum < NUM_REGS; regnum++)
     if (regnum != SP_REGNUM && regnum != PC_REGNUM
-	&& get_frame_saved_regs (frame)[regnum])
+	&& deprecated_get_frame_saved_regs (frame)[regnum])
       {
 	/* Floating point registers must not be sign extended, 
 	   in case MIPS_SAVED_REGSIZE = 4 but sizeof (FP0_REGNUM) == 8.  */
 
 	if (FP0_REGNUM <= regnum && regnum < FP0_REGNUM + 32)
 	  write_register (regnum,
-			  read_memory_unsigned_integer (get_frame_saved_regs (frame)[regnum],
+			  read_memory_unsigned_integer (deprecated_get_frame_saved_regs (frame)[regnum],
 							MIPS_SAVED_REGSIZE));
 	else
 	  write_register (regnum,
-			  read_memory_integer (get_frame_saved_regs (frame)[regnum],
+			  read_memory_integer (deprecated_get_frame_saved_regs (frame)[regnum],
 					       MIPS_SAVED_REGSIZE));
       }
 
@@ -4071,7 +4053,7 @@ static void
 mips_read_fp_register_single (struct frame_info *frame, int regno,
 			      char *rare_buffer)
 {
-  int raw_size = REGISTER_RAW_SIZE (regno);
+  int raw_size = DEPRECATED_REGISTER_RAW_SIZE (regno);
   char *raw_buffer = alloca (raw_size);
 
   if (!frame_register_read (frame, regno, raw_buffer))
@@ -4103,7 +4085,7 @@ static void
 mips_read_fp_register_double (struct frame_info *frame, int regno,
 			      char *rare_buffer)
 {
-  int raw_size = REGISTER_RAW_SIZE (regno);
+  int raw_size = DEPRECATED_REGISTER_RAW_SIZE (regno);
 
   if (raw_size == 8 && !mips2_fp_compat ())
     {
@@ -4142,13 +4124,13 @@ mips_print_fp_register (struct ui_file *file, struct frame_info *frame,
   double doub, flt1, flt2;	/* doubles extracted from raw hex data */
   int inv1, inv2, namelen;
 
-  raw_buffer = (char *) alloca (2 * REGISTER_RAW_SIZE (FP0_REGNUM));
+  raw_buffer = (char *) alloca (2 * DEPRECATED_REGISTER_RAW_SIZE (FP0_REGNUM));
 
   fprintf_filtered (file, "%s:", REGISTER_NAME (regnum));
   fprintf_filtered (file, "%*s", 4 - (int) strlen (REGISTER_NAME (regnum)),
 		    "");
 
-  if (REGISTER_RAW_SIZE (regnum) == 4 || mips2_fp_compat ())
+  if (DEPRECATED_REGISTER_RAW_SIZE (regnum) == 4 || mips2_fp_compat ())
     {
       /* 4-byte registers: Print hex and floating.  Also print even
          numbered registers as doubles.  */
@@ -4235,7 +4217,7 @@ mips_print_register (struct ui_file *file, struct frame_info *frame,
     fprintf_filtered (file, ": ");
 
   if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-    offset = REGISTER_RAW_SIZE (regnum) - REGISTER_VIRTUAL_SIZE (regnum);
+    offset = DEPRECATED_REGISTER_RAW_SIZE (regnum) - DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum);
   else
     offset = 0;
 
@@ -4303,16 +4285,16 @@ print_gp_register_row (struct ui_file *file, struct frame_info *frame,
       if (!frame_register_read (frame, regnum, raw_buffer))
 	error ("can't read register %d (%s)", regnum, REGISTER_NAME (regnum));
       /* pad small registers */
-      for (byte = 0; byte < (MIPS_REGSIZE - REGISTER_VIRTUAL_SIZE (regnum)); byte++)
+      for (byte = 0; byte < (MIPS_REGSIZE - DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum)); byte++)
 	printf_filtered ("  ");
       /* Now print the register value in hex, endian order. */
       if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-	for (byte = REGISTER_RAW_SIZE (regnum) - REGISTER_VIRTUAL_SIZE (regnum);
-	     byte < REGISTER_RAW_SIZE (regnum);
+	for (byte = DEPRECATED_REGISTER_RAW_SIZE (regnum) - DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum);
+	     byte < DEPRECATED_REGISTER_RAW_SIZE (regnum);
 	     byte++)
 	  fprintf_filtered (file, "%02x", (unsigned char) raw_buffer[byte]);
       else
-	for (byte = REGISTER_VIRTUAL_SIZE (regnum) - 1;
+	for (byte = DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum) - 1;
 	     byte >= 0;
 	     byte--)
 	  fprintf_filtered (file, "%02x", (unsigned char) raw_buffer[byte]);
@@ -4647,7 +4629,7 @@ return_value_location (struct type *valtype,
 	  lo->buf_offset = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? 4 : 0;
 	  hi->buf_offset = TARGET_BYTE_ORDER == BFD_ENDIAN_BIG ? 0 : 4;
 	  lo->reg_offset = ((TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
-			     && REGISTER_RAW_SIZE (FP0_REGNUM) == 8)
+			     && DEPRECATED_REGISTER_RAW_SIZE (FP0_REGNUM) == 8)
 			    ? 4 : 0);
 	  hi->reg_offset = lo->reg_offset;
 	  lo->reg = FP0_REGNUM + 0;
@@ -4660,7 +4642,7 @@ return_value_location (struct type *valtype,
 	  /* The floating point value fits in a single floating-point
 	     register. */
 	  lo->reg_offset = ((TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
-			     && REGISTER_RAW_SIZE (FP0_REGNUM) == 8
+			     && DEPRECATED_REGISTER_RAW_SIZE (FP0_REGNUM) == 8
 			     && len == 4)
 			    ? 4 : 0);
 	  lo->reg = FP0_REGNUM;
@@ -4716,7 +4698,7 @@ return_value_location (struct type *valtype,
 	    }
 	}
       if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
-	  && REGISTER_RAW_SIZE (regnum) == 8
+	  && DEPRECATED_REGISTER_RAW_SIZE (regnum) == 8
 	  && MIPS_SAVED_REGSIZE == 4)
 	{
 	  /* Account for the fact that only the least-signficant part
@@ -4784,14 +4766,14 @@ mips_eabi_store_return_value (struct type *valtype, char *valbuf)
   memset (raw_buffer, 0, sizeof (raw_buffer));
   memcpy (raw_buffer + lo.reg_offset, valbuf + lo.buf_offset, lo.len);
   deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (lo.reg), raw_buffer,
-				   REGISTER_RAW_SIZE (lo.reg));
+				   DEPRECATED_REGISTER_RAW_SIZE (lo.reg));
 
   if (hi.len > 0)
     {
       memset (raw_buffer, 0, sizeof (raw_buffer));
       memcpy (raw_buffer + hi.reg_offset, valbuf + hi.buf_offset, hi.len);
       deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (hi.reg), raw_buffer,
-				       REGISTER_RAW_SIZE (hi.reg));
+				       DEPRECATED_REGISTER_RAW_SIZE (hi.reg));
     }
 }
 
@@ -4806,14 +4788,14 @@ mips_o64_store_return_value (struct type *valtype, char *valbuf)
   memset (raw_buffer, 0, sizeof (raw_buffer));
   memcpy (raw_buffer + lo.reg_offset, valbuf + lo.buf_offset, lo.len);
   deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (lo.reg), raw_buffer,
-				   REGISTER_RAW_SIZE (lo.reg));
+				   DEPRECATED_REGISTER_RAW_SIZE (lo.reg));
 
   if (hi.len > 0)
     {
       memset (raw_buffer, 0, sizeof (raw_buffer));
       memcpy (raw_buffer + hi.reg_offset, valbuf + hi.buf_offset, hi.len);
       deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (hi.reg), raw_buffer,
-				       REGISTER_RAW_SIZE (hi.reg));
+				       DEPRECATED_REGISTER_RAW_SIZE (hi.reg));
     }
 }
 
@@ -4908,9 +4890,9 @@ mips_o32_xfer_return_value (struct type *type,
       int regnum;
       for (offset = 0, regnum = V0_REGNUM;
 	   offset < TYPE_LENGTH (type);
-	   offset += REGISTER_RAW_SIZE (regnum), regnum++)
+	   offset += DEPRECATED_REGISTER_RAW_SIZE (regnum), regnum++)
 	{
-	  int xfer = REGISTER_RAW_SIZE (regnum);
+	  int xfer = DEPRECATED_REGISTER_RAW_SIZE (regnum);
 	  if (offset + xfer > TYPE_LENGTH (type))
 	    xfer = TYPE_LENGTH (type) - offset;
 	  if (mips_debug)
@@ -5019,9 +5001,9 @@ mips_n32n64_xfer_return_value (struct type *type,
       int regnum;
       for (offset = 0, regnum = V0_REGNUM;
 	   offset < TYPE_LENGTH (type);
-	   offset += REGISTER_RAW_SIZE (regnum), regnum++)
+	   offset += DEPRECATED_REGISTER_RAW_SIZE (regnum), regnum++)
 	{
-	  int xfer = REGISTER_RAW_SIZE (regnum);
+	  int xfer = DEPRECATED_REGISTER_RAW_SIZE (regnum);
 	  if (offset + xfer > TYPE_LENGTH (type))
 	    xfer = TYPE_LENGTH (type) - offset;
 	  if (mips_debug)
@@ -5039,9 +5021,9 @@ mips_n32n64_xfer_return_value (struct type *type,
       int regnum;
       for (offset = 0, regnum = V0_REGNUM;
 	   offset < TYPE_LENGTH (type);
-	   offset += REGISTER_RAW_SIZE (regnum), regnum++)
+	   offset += DEPRECATED_REGISTER_RAW_SIZE (regnum), regnum++)
 	{
-	  int xfer = REGISTER_RAW_SIZE (regnum);
+	  int xfer = DEPRECATED_REGISTER_RAW_SIZE (regnum);
 	  int pos = 0;
 	  if (offset + xfer > TYPE_LENGTH (type))
 	    xfer = TYPE_LENGTH (type) - offset;
@@ -6047,11 +6029,8 @@ mips_gdbarch_init (struct gdbarch_info info,
 
   /* MIPS version of register names.  NOTE: At present the MIPS
      register name management is part way between the old -
-     #undef/#define REGISTER_NAMES and the new REGISTER_NAME(nr).
+     #undef/#define MIPS_REGISTER_NAMES and the new REGISTER_NAME(nr).
      Further work on it is required.  */
-  /* NOTE: many targets (esp. embedded) do not go thru the
-     gdbarch_register_name vector at all, instead bypassing it
-     by defining REGISTER_NAMES.  */
   set_gdbarch_register_name (gdbarch, mips_register_name);
   set_gdbarch_read_pc (gdbarch, mips_read_pc);
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
@@ -6065,7 +6044,6 @@ mips_gdbarch_init (struct gdbarch_info info,
   /* There's a mess in stack frame creation.  See comments in
      blockframe.c near reference to DEPRECATED_INIT_FRAME_PC_FIRST.  */
   set_gdbarch_deprecated_init_frame_pc_first (gdbarch, mips_init_frame_pc_first);
-  set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_noop);
 
   /* Map debug register numbers onto internal register numbers.  */
   set_gdbarch_stab_reg_to_regnum (gdbarch, mips_stab_reg_to_regnum);
@@ -6370,9 +6348,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
 		      "mips_dump_tdep: PRID_REGNUM = %d\n",
 		      PRID_REGNUM);
   fprintf_unfiltered (file,
-		      "mips_dump_tdep: PRINT_EXTRA_FRAME_INFO # %s\n",
-		      XSTRING (PRINT_EXTRA_FRAME_INFO (FRAME)));
-  fprintf_unfiltered (file,
 		      "mips_dump_tdep: PROC_DESC_IS_DUMMY = function?\n");
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: PROC_FRAME_ADJUST = function?\n");
@@ -6402,12 +6377,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: RA_REGNUM = %d\n",
 		      RA_REGNUM);
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: REGISTER_NAMES = delete?\n");
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: ROUND_DOWN = function?\n");
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: ROUND_UP = function?\n");
 #ifdef SAVED_BYTES
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: SAVED_BYTES = %d\n",
@@ -6511,11 +6480,6 @@ mips_dump_tdep (struct gdbarch *current_gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: VM_MIN_ADDRESS = %ld\n",
 		      (long) VM_MIN_ADDRESS);
-#ifdef VX_NUM_REGS
-  fprintf_unfiltered (file,
-		      "mips_dump_tdep: VX_NUM_REGS = %d (used?)\n",
-		      VX_NUM_REGS);
-#endif
   fprintf_unfiltered (file,
 		      "mips_dump_tdep: ZERO_REGNUM = %d\n",
 		      ZERO_REGNUM);

@@ -230,7 +230,7 @@ xstormy16_extract_return_value (struct type *type, char *regbuf, char *valbuf)
          pointed to by R2. */
       return_buffer =
 	extract_unsigned_integer (regbuf + DEPRECATED_REGISTER_BYTE (E_PTR_RET_REGNUM),
-				  REGISTER_RAW_SIZE (E_PTR_RET_REGNUM));
+				  DEPRECATED_REGISTER_RAW_SIZE (E_PTR_RET_REGNUM));
 
       read_memory (return_buffer, valbuf, TYPE_LENGTH (type));
     }
@@ -343,15 +343,15 @@ xstormy16_pop_frame (void)
     {
       /* Restore the saved regs. */
       for (i = 0; i < NUM_REGS; i++)
-	if (get_frame_saved_regs (fi)[i])
+	if (deprecated_get_frame_saved_regs (fi)[i])
 	  {
 	    if (i == SP_REGNUM)
-	      write_register (i, get_frame_saved_regs (fi)[i]);
+	      write_register (i, deprecated_get_frame_saved_regs (fi)[i]);
 	    else if (i == E_PC_REGNUM)
-	      write_register (i, read_memory_integer (get_frame_saved_regs (fi)[i],
+	      write_register (i, read_memory_integer (deprecated_get_frame_saved_regs (fi)[i],
 						      xstormy16_pc_size));
 	    else
-	      write_register (i, read_memory_integer (get_frame_saved_regs (fi)[i],
+	      write_register (i, read_memory_integer (deprecated_get_frame_saved_regs (fi)[i],
 						      xstormy16_reg_size));
 	  }
       /* Restore the PC */
@@ -492,7 +492,7 @@ xstormy16_scan_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
 	  if (fi)
 	    {
 	      regnum = inst & 0x000f;
-	      get_frame_saved_regs (fi)[regnum] = get_frame_extra_info (fi)->framesize;
+	      deprecated_get_frame_saved_regs (fi)[regnum] = get_frame_extra_info (fi)->framesize;
 	      get_frame_extra_info (fi)->framesize += xstormy16_reg_size;
 	    }
 	}
@@ -548,7 +548,7 @@ xstormy16_scan_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
 	      if (offset & 0x0800)
 		offset -= 0x1000;
 
-	      get_frame_saved_regs (fi)[regnum] = get_frame_extra_info (fi)->framesize + offset;
+	      deprecated_get_frame_saved_regs (fi)[regnum] = get_frame_extra_info (fi)->framesize + offset;
 	    }
 	  next_addr += xstormy16_inst_size;
 	}
@@ -595,12 +595,12 @@ xstormy16_scan_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
          previous value would have been pushed).  */
       if (get_frame_extra_info (fi)->frameless_p)
 	{
-	  get_frame_saved_regs (fi)[E_SP_REGNUM] = sp - get_frame_extra_info (fi)->framesize;
+	  deprecated_get_frame_saved_regs (fi)[E_SP_REGNUM] = sp - get_frame_extra_info (fi)->framesize;
 	  deprecated_update_frame_base_hack (fi, sp);
 	}
       else
 	{
-	  get_frame_saved_regs (fi)[E_SP_REGNUM] = fp - get_frame_extra_info (fi)->framesize;
+	  deprecated_get_frame_saved_regs (fi)[E_SP_REGNUM] = fp - get_frame_extra_info (fi)->framesize;
 	  deprecated_update_frame_base_hack (fi, fp);
 	}
 
@@ -609,11 +609,11 @@ xstormy16_scan_prologue (CORE_ADDR start_addr, CORE_ADDR end_addr,
          sp, fp and framesize. We know the beginning of the frame
          so we can translate the register offsets to real addresses. */
       for (regnum = 0; regnum < E_SP_REGNUM; ++regnum)
-	if (get_frame_saved_regs (fi)[regnum])
-	  get_frame_saved_regs (fi)[regnum] += get_frame_saved_regs (fi)[E_SP_REGNUM];
+	if (deprecated_get_frame_saved_regs (fi)[regnum])
+	  deprecated_get_frame_saved_regs (fi)[regnum] += deprecated_get_frame_saved_regs (fi)[E_SP_REGNUM];
 
       /* Save address of PC on stack. */
-      get_frame_saved_regs (fi)[E_PC_REGNUM] = get_frame_saved_regs (fi)[E_SP_REGNUM];
+      deprecated_get_frame_saved_regs (fi)[E_PC_REGNUM] = deprecated_get_frame_saved_regs (fi)[E_SP_REGNUM];
     }
 
   return next_addr;
@@ -733,7 +733,7 @@ xstormy16_frame_init_saved_regs (struct frame_info *fi)
 {
   CORE_ADDR func_addr, func_end;
 
-  if (!get_frame_saved_regs (fi))
+  if (!deprecated_get_frame_saved_regs (fi))
     {
       frame_saved_regs_zalloc (fi);
 
@@ -765,7 +765,7 @@ xstormy16_frame_saved_pc (struct frame_info *fi)
     }
   else
     {
-      saved_pc = read_memory_unsigned_integer (get_frame_saved_regs (fi)[E_PC_REGNUM],
+      saved_pc = read_memory_unsigned_integer (deprecated_get_frame_saved_regs (fi)[E_PC_REGNUM],
 					       xstormy16_pc_size);
     }
 
@@ -1026,7 +1026,7 @@ xstormy16_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* NOTE: cagney/2002-12-06: This can be deleted when this arch is
      ready to unwind the PC first (see frame.c:get_prev_frame()).  */
-  set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_default);
+  set_gdbarch_deprecated_init_frame_pc (gdbarch, deprecated_init_frame_pc_default);
 
   /*
    * Basic register fields and methods.

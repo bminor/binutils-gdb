@@ -130,10 +130,6 @@ typedef struct mips_extra_func_info
   }
  *mips_extra_func_info_t;
 
-extern void mips_print_extra_frame_info (struct frame_info *frame);
-#define	PRINT_EXTRA_FRAME_INFO(fi) \
-  mips_print_extra_frame_info (fi)
-
 /* It takes two values to specify a frame on the MIPS.
 
    In fact, the *PC* is the primary value that sets up a frame.  The

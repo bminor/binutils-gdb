@@ -111,7 +111,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
 
   /* A 16 bit pc-relative relocation.  */
   HOWTO (R_FRV_LABEL16,	        /* type */
-	 0,			/* rightshift */
+	 2,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
 	 TRUE,			/* pc_relative */
@@ -724,7 +724,7 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 	{
 	  sym = local_syms + r_symndx;
 	  sec = local_sections [r_symndx];
-	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, sec, rel);
+	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
 
 	  name = bfd_elf_string_from_elf_section
 	    (input_bfd, symtab_hdr->sh_link, sym->st_name);
@@ -997,6 +997,7 @@ elf32_frv_machine (abfd)
   switch (elf_elfheader (abfd)->e_flags & EF_FRV_CPU_MASK)
     {
     default:		    break;
+    case EF_FRV_CPU_FR550:  return bfd_mach_fr550;
     case EF_FRV_CPU_FR500:  return bfd_mach_fr500;
     case EF_FRV_CPU_FR400:  return bfd_mach_fr400;
     case EF_FRV_CPU_FR300:  return bfd_mach_fr300;
@@ -1245,6 +1246,7 @@ frv_elf_merge_private_bfd_data (ibfd, obfd)
 	    default:		     strcat (new_opt, " -mcpu=?");      break;
 	    case EF_FRV_CPU_GENERIC: strcat (new_opt, " -mcpu=frv");    break;
 	    case EF_FRV_CPU_SIMPLE:  strcat (new_opt, " -mcpu=simple"); break;
+	    case EF_FRV_CPU_FR550:   strcat (new_opt, " -mcpu=fr550");  break;
 	    case EF_FRV_CPU_FR500:   strcat (new_opt, " -mcpu=fr500");  break;
 	    case EF_FRV_CPU_FR400:   strcat (new_opt, " -mcpu=fr400");  break;
 	    case EF_FRV_CPU_FR300:   strcat (new_opt, " -mcpu=fr300");  break;
@@ -1256,6 +1258,7 @@ frv_elf_merge_private_bfd_data (ibfd, obfd)
 	    default:		     strcat (old_opt, " -mcpu=?");      break;
 	    case EF_FRV_CPU_GENERIC: strcat (old_opt, " -mcpu=frv");    break;
 	    case EF_FRV_CPU_SIMPLE:  strcat (old_opt, " -mcpu=simple"); break;
+	    case EF_FRV_CPU_FR550:   strcat (old_opt, " -mcpu=fr550");  break;
 	    case EF_FRV_CPU_FR500:   strcat (old_opt, " -mcpu=fr500");  break;
 	    case EF_FRV_CPU_FR400:   strcat (old_opt, " -mcpu=fr400");  break;
 	    case EF_FRV_CPU_FR300:   strcat (old_opt, " -mcpu=fr300");  break;
@@ -1322,6 +1325,7 @@ frv_elf_print_private_bfd_data (abfd, ptr)
     {
     default:							break;
     case EF_FRV_CPU_SIMPLE: fprintf (file, " -mcpu=simple");	break;
+    case EF_FRV_CPU_FR550:  fprintf (file, " -mcpu=fr550");	break;
     case EF_FRV_CPU_FR500:  fprintf (file, " -mcpu=fr500");	break;
     case EF_FRV_CPU_FR400:  fprintf (file, " -mcpu=fr400");	break;
     case EF_FRV_CPU_FR300:  fprintf (file, " -mcpu=fr300");	break;

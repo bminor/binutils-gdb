@@ -370,7 +370,7 @@ ns32k_frame_init_saved_regs (struct frame_info *frame)
   int localcount;
   CORE_ADDR enter_addr, next_addr;
 
-  if (get_frame_saved_regs (frame))
+  if (deprecated_get_frame_saved_regs (frame))
     return;
 
   frame_saved_regs_zalloc (frame);
@@ -385,18 +385,18 @@ ns32k_frame_init_saved_regs (struct frame_info *frame)
       for (regnum = 0; regnum < 8; regnum++)
 	{
           if (regmask & (1 << regnum))
-	    get_frame_saved_regs (frame)[regnum] = next_addr -= 4;
+	    deprecated_get_frame_saved_regs (frame)[regnum] = next_addr -= 4;
 	}
 
-      get_frame_saved_regs (frame)[SP_REGNUM] = get_frame_base (frame) + 4;
-      get_frame_saved_regs (frame)[PC_REGNUM] = get_frame_base (frame) + 4;
-      get_frame_saved_regs (frame)[DEPRECATED_FP_REGNUM] = read_memory_integer (get_frame_base (frame), 4);
+      deprecated_get_frame_saved_regs (frame)[SP_REGNUM] = get_frame_base (frame) + 4;
+      deprecated_get_frame_saved_regs (frame)[PC_REGNUM] = get_frame_base (frame) + 4;
+      deprecated_get_frame_saved_regs (frame)[DEPRECATED_FP_REGNUM] = read_memory_integer (get_frame_base (frame), 4);
     }
   else if (enter_addr == 1)
     {
       CORE_ADDR sp = read_register (SP_REGNUM);
-      get_frame_saved_regs (frame)[PC_REGNUM] = sp;
-      get_frame_saved_regs (frame)[SP_REGNUM] = sp + 4;
+      deprecated_get_frame_saved_regs (frame)[PC_REGNUM] = sp;
+      deprecated_get_frame_saved_regs (frame)[SP_REGNUM] = sp + 4;
     }
 }
 
@@ -427,9 +427,9 @@ ns32k_pop_frame (void)
   DEPRECATED_FRAME_INIT_SAVED_REGS (frame);
 
   for (regnum = 0; regnum < 8; regnum++)
-    if (get_frame_saved_regs (frame)[regnum])
+    if (deprecated_get_frame_saved_regs (frame)[regnum])
       write_register (regnum,
-		      read_memory_integer (get_frame_saved_regs (frame)[regnum], 4));
+		      read_memory_integer (deprecated_get_frame_saved_regs (frame)[regnum], 4));
 
   write_register (DEPRECATED_FP_REGNUM, read_memory_integer (fp, 4));
   write_register (PC_REGNUM, read_memory_integer (fp + 4, 4));
@@ -498,7 +498,7 @@ ns32k_store_return_value (struct type *valtype, char *valbuf)
 static CORE_ADDR
 ns32k_extract_struct_value_address (char *regbuf)
 {
-  return (extract_unsigned_integer (regbuf + DEPRECATED_REGISTER_BYTE (0), REGISTER_RAW_SIZE (0)));
+  return (extract_unsigned_integer (regbuf + DEPRECATED_REGISTER_BYTE (0), DEPRECATED_REGISTER_RAW_SIZE (0)));
 }
 
 void
@@ -542,7 +542,7 @@ ns32k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* NOTE: cagney/2002-12-06: This can be deleted when this arch is
      ready to unwind the PC first (see frame.c:get_prev_frame()).  */
-  set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_default);
+  set_gdbarch_deprecated_init_frame_pc (gdbarch, deprecated_init_frame_pc_default);
 
   /* Register info */
   ns32k_gdbarch_init_32082 (gdbarch);

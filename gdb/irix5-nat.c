@@ -84,27 +84,27 @@ fill_gregset (gregset_t *gregsetp, int regno)
     if ((regno == -1) || (regno == regi))
       *(regp + regi) =
 	extract_signed_integer (&deprecated_registers[DEPRECATED_REGISTER_BYTE (regi)],
-				REGISTER_RAW_SIZE (regi));
+				DEPRECATED_REGISTER_RAW_SIZE (regi));
 
   if ((regno == -1) || (regno == PC_REGNUM))
     *(regp + CTX_EPC) =
       extract_signed_integer (&deprecated_registers[DEPRECATED_REGISTER_BYTE (PC_REGNUM)],
-			      REGISTER_RAW_SIZE (PC_REGNUM));
+			      DEPRECATED_REGISTER_RAW_SIZE (PC_REGNUM));
 
   if ((regno == -1) || (regno == CAUSE_REGNUM))
     *(regp + CTX_CAUSE) =
       extract_signed_integer (&deprecated_registers[DEPRECATED_REGISTER_BYTE (CAUSE_REGNUM)],
-			      REGISTER_RAW_SIZE (CAUSE_REGNUM));
+			      DEPRECATED_REGISTER_RAW_SIZE (CAUSE_REGNUM));
 
   if ((regno == -1) || (regno == HI_REGNUM))
     *(regp + CTX_MDHI) =
       extract_signed_integer (&deprecated_registers[DEPRECATED_REGISTER_BYTE (HI_REGNUM)],
-			      REGISTER_RAW_SIZE (HI_REGNUM));
+			      DEPRECATED_REGISTER_RAW_SIZE (HI_REGNUM));
 
   if ((regno == -1) || (regno == LO_REGNUM))
     *(regp + CTX_MDLO) =
       extract_signed_integer (&deprecated_registers[DEPRECATED_REGISTER_BYTE (LO_REGNUM)],
-			      REGISTER_RAW_SIZE (LO_REGNUM));
+			      DEPRECATED_REGISTER_RAW_SIZE (LO_REGNUM));
 }
 
 /*
@@ -147,7 +147,7 @@ fill_fpregset (fpregset_t *fpregsetp, int regno)
 	{
 	  from = (char *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (regi)];
 	  to = (char *) &(fpregsetp->fp_r.fp_regs[regi - FP0_REGNUM]);
-	  memcpy (to, from, REGISTER_RAW_SIZE (regi));
+	  memcpy (to, from, DEPRECATED_REGISTER_RAW_SIZE (regi));
 	}
     }
 
@@ -219,7 +219,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
 	      *dstp++ = *srcp++;
 	      *dstp++ = *srcp++;
 	      *dstp++ = *srcp++;
-	      if (REGISTER_RAW_SIZE (regno) == 4)
+	      if (DEPRECATED_REGISTER_RAW_SIZE (regno) == 4)
 		{
 		  /* copying 4 bytes from eight bytes?
 		     I don't see how this can be right...  */

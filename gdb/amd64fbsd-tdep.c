@@ -1,4 +1,5 @@
 /* Target-dependent code for FreeBSD/amd64.
+
    Copyright 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -48,6 +49,26 @@ amd64fbsd_sigcontext_addr (struct frame_info *next_frame)
 
 /* FreeBSD 5.1-RELEASE or later.  */
 
+/* Mapping between the general-purpose registers in `struct reg'
+   format and GDB's register cache layout.
+
+   Note that some registers are 32-bit, but since we're little-endian
+   we get away with that.  */
+
+/* From <machine/reg.h>.  */
+static int amd64fbsd_r_reg_offset[] =
+{
+  14 * 8, 11 * 8,		/* %rax, %rbx */
+  13 * 8, 12 * 8,		/* %rcx, %rdx */
+  9 * 8, 8 * 8,			/* %rsi, %rdi */
+  10 * 8, 20 * 8,		/* %rbp, %rsp */
+  7 * 8, 6 * 8, 5 * 8, 4 * 8,	/* %r8 ... */
+  3 * 8, 2 * 8, 1 * 8, 0 * 8,	/* ... %r15 */
+  17 * 8, 19 * 8,		/* %rip, %eflags */
+  -1, -1,			/* %ds, %es */
+  -1, -1			/* %fs, %gs */
+};
+
 /* Location of the signal trampoline.  */
 CORE_ADDR amd64fbsd_sigtramp_start = 0x7fffffffffc0;
 CORE_ADDR amd64fbsd_sigtramp_end = 0x7fffffffffe0;
@@ -62,7 +83,7 @@ int amd64fbsd_sc_reg_offset[X86_64_NUM_GREGS] =
   24 + 1 * 8,			/* %rsi */
   24 + 0 * 8,			/* %rdi */
   24 + 8 * 8,			/* %rbp */
-  24 + 21 * 8,			/* %rsp */
+  24 + 22 * 8,			/* %rsp */
   24 + 4 * 8,			/* %r8 */
   24 + 5 * 8,			/* %r9 */
   24 + 9 * 8,			/* %r10 */
@@ -71,8 +92,8 @@ int amd64fbsd_sc_reg_offset[X86_64_NUM_GREGS] =
   24 + 12 * 8,			/* %r13 */
   24 + 13 * 8,			/* %r14 */
   24 + 14 * 8,			/* %r15 */
-  24 + 18 * 8,			/* %rip */
-  24 + 20 * 8,			/* %eflags */
+  24 + 19 * 8,			/* %rip */
+  24 + 21 * 8,			/* %eflags */
   -1,				/* %ds */
   -1,				/* %es */
   -1,				/* %fs */
@@ -87,13 +108,17 @@ amd64fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* Obviously FreeBSD is BSD-based.  */
   i386bsd_init_abi (info, gdbarch);
 
+  tdep->gregset_reg_offset = amd64fbsd_r_reg_offset;
+  tdep->gregset_num_regs = ARRAY_SIZE (amd64fbsd_r_reg_offset);
+  tdep->sizeof_gregset = 22 * 8;
+
   x86_64_init_abi (info, gdbarch);
 
   tdep->sigtramp_start = amd64fbsd_sigtramp_start;
   tdep->sigtramp_end = amd64fbsd_sigtramp_end;
   tdep->sigcontext_addr = amd64fbsd_sigcontext_addr;
   tdep->sc_reg_offset = amd64fbsd_sc_reg_offset;
-  tdep->sc_num_regs = X86_64_NUM_GREGS;
+  tdep->sc_num_regs = ARRAY_SIZE (amd64fbsd_sc_reg_offset);
 }
 
 

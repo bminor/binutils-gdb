@@ -331,7 +331,7 @@ ppc_linux_skip_trampoline_code (CORE_ADDR pc)
   /* This might not work right if we have multiple symbols with the
      same name; the only way to really get it right is to perform
      the same sort of lookup as the dynamic linker. */
-  msymbol = lookup_minimal_symbol_text (symname, NULL, NULL);
+  msymbol = lookup_minimal_symbol_text (symname, NULL);
   if (!msymbol)
     return 0;
 
@@ -402,7 +402,7 @@ ppc_linux_frame_init_saved_regs (struct frame_info *fi)
     {
       CORE_ADDR regs_addr;
       int i;
-      if (get_frame_saved_regs (fi))
+      if (deprecated_get_frame_saved_regs (fi))
 	return;
 
       frame_saved_regs_zalloc (fi);
@@ -410,24 +410,24 @@ ppc_linux_frame_init_saved_regs (struct frame_info *fi)
       regs_addr =
 	read_memory_integer (get_frame_base (fi)
 			     + PPC_LINUX_REGS_PTR_OFFSET, 4);
-      get_frame_saved_regs (fi)[PC_REGNUM] = regs_addr + 4 * PPC_LINUX_PT_NIP;
-      get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_ps_regnum] =
+      deprecated_get_frame_saved_regs (fi)[PC_REGNUM] = regs_addr + 4 * PPC_LINUX_PT_NIP;
+      deprecated_get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_ps_regnum] =
         regs_addr + 4 * PPC_LINUX_PT_MSR;
-      get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_cr_regnum] =
+      deprecated_get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_cr_regnum] =
         regs_addr + 4 * PPC_LINUX_PT_CCR;
-      get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_lr_regnum] =
+      deprecated_get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_lr_regnum] =
         regs_addr + 4 * PPC_LINUX_PT_LNK;
-      get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_ctr_regnum] =
+      deprecated_get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_ctr_regnum] =
         regs_addr + 4 * PPC_LINUX_PT_CTR;
-      get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_xer_regnum] =
+      deprecated_get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_xer_regnum] =
         regs_addr + 4 * PPC_LINUX_PT_XER;
-      get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_mq_regnum] =
+      deprecated_get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_mq_regnum] =
 	regs_addr + 4 * PPC_LINUX_PT_MQ;
       for (i = 0; i < 32; i++)
-	get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_gp0_regnum + i] =
+	deprecated_get_frame_saved_regs (fi)[gdbarch_tdep (current_gdbarch)->ppc_gp0_regnum + i] =
 	  regs_addr + 4 * PPC_LINUX_PT_R0 + 4 * i;
       for (i = 0; i < 32; i++)
-	get_frame_saved_regs (fi)[FP0_REGNUM + i] = regs_addr + 4 * PPC_LINUX_PT_FPR0 + 8 * i;
+	deprecated_get_frame_saved_regs (fi)[FP0_REGNUM + i] = regs_addr + 4 * PPC_LINUX_PT_FPR0 + 8 * i;
     }
   else
     rs6000_frame_init_saved_regs (fi);
@@ -596,13 +596,17 @@ ppc_linux_memory_remove_breakpoint (CORE_ADDR addr, char *contents_cache)
    structures, no matter their size, are put in memory.  Vectors,
    which were added later, do get returned in a register though.  */
 
-static int     
-ppc_linux_use_struct_convention (int gcc_p, struct type *value_type)
+static enum return_value_convention
+ppc_linux_return_value (struct gdbarch *gdbarch, struct type *valtype,
+			struct regcache *regcache, const void *inval, void *outval)
 {  
-  if ((TYPE_LENGTH (value_type) == 16 || TYPE_LENGTH (value_type) == 8)
-      && TYPE_VECTOR (value_type))
-    return 0;                            
-  return 1;
+  if ((TYPE_CODE (valtype) == TYPE_CODE_STRUCT
+       || TYPE_CODE (valtype) == TYPE_CODE_UNION)
+      && !((TYPE_LENGTH (valtype) == 16 || TYPE_LENGTH (valtype) == 8)
+	   && TYPE_VECTOR (valtype)))
+    return RETURN_VALUE_STRUCT_CONVENTION;
+  else
+    return ppc_sysv_abi_return_value (gdbarch, valtype, regcache, inval, outval);
 }
 
 /* Fetch (and possibly build) an appropriate link_map_offsets
@@ -908,7 +912,8 @@ ppc64_skip_trampoline_code (CORE_ADDR pc)
 }
 
 
-/* Support for CONVERT_FROM_FUNC_PTR_ADDR(ADDR) on PPC64 GNU/Linux.
+/* Support for CONVERT_FROM_FUNC_PTR_ADDR (ARCH, ADDR, TARG) on PPC64
+   GNU/Linux.
 
    Usually a function pointer's representation is simply the address
    of the function. On GNU/Linux on the 64-bit PowerPC however, a
@@ -925,21 +930,23 @@ ppc64_skip_trampoline_code (CORE_ADDR pc)
    find_function_addr uses this function to get the function address
    from a function pointer.  */
 
-/* Return real function address if ADDR (a function pointer) is in the data
-   space and is therefore a special function pointer.  */
+/* If ADDR points at what is clearly a function descriptor, transform
+   it into the address of the corresponding function.  Be
+   conservative, otherwize GDB will do the transformation on any
+   random addresses such as occures when there is no symbol table.  */
 
 static CORE_ADDR
-ppc64_linux_convert_from_func_ptr_addr (CORE_ADDR addr)
+ppc64_linux_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
+					CORE_ADDR addr,
+					struct target_ops *targ)
 {
-  struct obj_section *s;
+  struct section_table *s = target_section_by_addr (targ, addr);
 
-  s = find_pc_section (addr);
-  if (s && s->the_bfd_section->flags & SEC_CODE)
-    return addr;
+  /* Check if ADDR points to a function descriptor.  */
+  if (s && strcmp (s->the_bfd_section->name, ".opd") == 0)
+    return get_target_memory_unsigned (targ, addr, 8);
 
-  /* ADDR is in the data space, so it's a pointer to a descriptor, not
-     the entry point.  */
-  return ppc64_desc_entry_point (addr);
+  return addr;
 }
 
 
@@ -1040,7 +1047,7 @@ ppc_linux_init_abi (struct gdbarch_info info,
 	 (well ignoring vectors that is).  When this was corrected, it
 	 wasn't fixed for GNU/Linux native platform.  Use the
 	 PowerOpen struct convention.  */
-      set_gdbarch_use_struct_convention (gdbarch, ppc_linux_use_struct_convention);
+      set_gdbarch_return_value (gdbarch, ppc_linux_return_value);
 
       /* Note: kevinb/2002-04-12: See note in rs6000_gdbarch_init regarding
 	 *_push_arguments().  The same remarks hold for the methods below.  */
@@ -1080,7 +1087,13 @@ ppc_linux_init_abi (struct gdbarch_info info,
 void
 _initialize_ppc_linux_tdep (void)
 {
-  gdbarch_register_osabi (bfd_arch_powerpc, 0, GDB_OSABI_LINUX,
-			  ppc_linux_init_abi);
+  /* Register for all sub-familes of the POWER/PowerPC: 32-bit and
+     64-bit PowerPC, and the older rs6k.  */
+  gdbarch_register_osabi (bfd_arch_powerpc, bfd_mach_ppc, GDB_OSABI_LINUX,
+                         ppc_linux_init_abi);
+  gdbarch_register_osabi (bfd_arch_powerpc, bfd_mach_ppc64, GDB_OSABI_LINUX,
+                         ppc_linux_init_abi);
+  gdbarch_register_osabi (bfd_arch_rs6000, bfd_mach_rs6k, GDB_OSABI_LINUX,
+                         ppc_linux_init_abi);
   add_core_fns (&ppc_linux_regset_core_fns);
 }

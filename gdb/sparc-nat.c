@@ -103,7 +103,7 @@ fetch_inferior_registers (int regno)
 
       deprecated_registers[DEPRECATED_REGISTER_BYTE (0)] = 0;
       memcpy (&deprecated_registers[DEPRECATED_REGISTER_BYTE (1)],
-	      &inferior_registers.r_g1, 15 * REGISTER_RAW_SIZE (G0_REGNUM));
+	      &inferior_registers.r_g1, 15 * DEPRECATED_REGISTER_RAW_SIZE (G0_REGNUM));
       *(int *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (PS_REGNUM)]
 	= inferior_registers.r_ps;
       *(int *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (PC_REGNUM)]
@@ -149,7 +149,7 @@ fetch_inferior_registers (int regno)
     {
       CORE_ADDR sp = *(unsigned int *) & deprecated_registers[DEPRECATED_REGISTER_BYTE (SP_REGNUM)];
       target_read_memory (sp, &deprecated_registers[DEPRECATED_REGISTER_BYTE (L0_REGNUM)],
-			  16 * REGISTER_RAW_SIZE (L0_REGNUM));
+			  16 * DEPRECATED_REGISTER_RAW_SIZE (L0_REGNUM));
       for (i = L0_REGNUM; i <= I7_REGNUM; i++)
 	deprecated_register_valid[i] = 1;
     }
@@ -160,7 +160,7 @@ fetch_inferior_registers (int regno)
       if (deprecated_register_valid[regno])
 	printf_unfiltered ("register %d valid and read\n", regno);
       target_read_memory (sp + i - DEPRECATED_REGISTER_BYTE (L0_REGNUM),
-			  &deprecated_registers[i], REGISTER_RAW_SIZE (regno));
+			  &deprecated_registers[i], DEPRECATED_REGISTER_RAW_SIZE (regno));
       deprecated_register_valid[regno] = 1;
     }
 }
@@ -234,7 +234,7 @@ store_inferior_registers (int regno)
 	    internal_error (__FILE__, __LINE__, "failed internal consistency check");
 	  target_write_memory (sp,
 			       &deprecated_registers[DEPRECATED_REGISTER_BYTE (L0_REGNUM)],
-			       16 * REGISTER_RAW_SIZE (L0_REGNUM));
+			       16 * DEPRECATED_REGISTER_RAW_SIZE (L0_REGNUM));
 	}
       else
 	{
@@ -242,7 +242,7 @@ store_inferior_registers (int regno)
 	    internal_error (__FILE__, __LINE__, "failed internal consistency check");
 	  target_write_memory (sp + DEPRECATED_REGISTER_BYTE (regno) - DEPRECATED_REGISTER_BYTE (L0_REGNUM),
 			       &deprecated_registers[DEPRECATED_REGISTER_BYTE (regno)],
-			       REGISTER_RAW_SIZE (regno));
+			       DEPRECATED_REGISTER_RAW_SIZE (regno));
 	}
 
     }
@@ -254,7 +254,7 @@ store_inferior_registers (int regno)
 
       memcpy (&inferior_registers.r_g1,
 	      &deprecated_registers[DEPRECATED_REGISTER_BYTE (G1_REGNUM)],
-	      15 * REGISTER_RAW_SIZE (G1_REGNUM));
+	      15 * DEPRECATED_REGISTER_RAW_SIZE (G1_REGNUM));
 
       inferior_registers.r_ps =
 	*(int *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (PS_REGNUM)];
@@ -315,7 +315,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
 
       /* The globals and output registers.  */
       memcpy (&deprecated_registers[DEPRECATED_REGISTER_BYTE (G1_REGNUM)], &gregs->r_g1,
-	      15 * REGISTER_RAW_SIZE (G1_REGNUM));
+	      15 * DEPRECATED_REGISTER_RAW_SIZE (G1_REGNUM));
       *(int *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (PS_REGNUM)] = gregs->r_ps;
       *(int *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (PC_REGNUM)] = gregs->r_pc;
       *(int *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (DEPRECATED_NPC_REGNUM)] = gregs->r_npc;
@@ -332,7 +332,7 @@ fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
 	sp = *(int *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (SP_REGNUM)];
 	if (0 != target_read_memory (sp,
 				     &deprecated_registers[DEPRECATED_REGISTER_BYTE (L0_REGNUM)],
-				     16 * REGISTER_RAW_SIZE (L0_REGNUM)))
+				     16 * DEPRECATED_REGISTER_RAW_SIZE (L0_REGNUM)))
 	  {
 	    /* fprintf_unfiltered so user can still use gdb */
 	    fprintf_unfiltered (gdb_stderr,

@@ -1090,7 +1090,7 @@ hppa_frame_saved_pc (struct frame_info *frame)
 	{
 	  CORE_ADDR *saved_regs;
 	  hppa_frame_init_saved_regs (get_next_frame (frame));
-	  saved_regs = get_frame_saved_regs (get_next_frame (frame));
+	  saved_regs = deprecated_get_frame_saved_regs (get_next_frame (frame));
 	  if (read_memory_integer (saved_regs[FLAGS_REGNUM],
 				   TARGET_PTR_BIT / 8) & 0x2)
 	    {
@@ -1130,7 +1130,7 @@ hppa_frame_saved_pc (struct frame_info *frame)
 	{
 	  CORE_ADDR *saved_regs;
 	  hppa_frame_init_saved_regs (get_next_frame (frame));
-	  saved_regs = get_frame_saved_regs (get_next_frame (frame));
+	  saved_regs = deprecated_get_frame_saved_regs (get_next_frame (frame));
 	  if (read_memory_integer (saved_regs[FLAGS_REGNUM],
 				   TARGET_PTR_BIT / 8) & 0x2)
 	    {
@@ -1404,7 +1404,7 @@ hppa_frame_chain (struct frame_info *frame)
 	     in optimized code, GCC often doesn't actually save r3.
 	     We'll discover this if we look at the prologue.  */
 	  hppa_frame_init_saved_regs (tmp_frame);
-	  saved_regs = get_frame_saved_regs (tmp_frame);
+	  saved_regs = deprecated_get_frame_saved_regs (tmp_frame);
 	  saved_regs_frame = tmp_frame;
 
 	  /* If we have an address for r3, that's good.  */
@@ -1455,7 +1455,7 @@ hppa_frame_chain (struct frame_info *frame)
 	  if (tmp_frame != saved_regs_frame)
 	    {
 	      hppa_frame_init_saved_regs (tmp_frame);
-	      saved_regs = get_frame_saved_regs (tmp_frame);
+	      saved_regs = deprecated_get_frame_saved_regs (tmp_frame);
 	    }
 
 	  /* Abominable hack.  */
@@ -1493,7 +1493,7 @@ hppa_frame_chain (struct frame_info *frame)
       if (tmp_frame != saved_regs_frame)
 	{
 	  hppa_frame_init_saved_regs (tmp_frame);
-	  saved_regs = get_frame_saved_regs (tmp_frame);
+	  saved_regs = deprecated_get_frame_saved_regs (tmp_frame);
 	}
 
       /* Abominable hack.  See above.  */
@@ -1698,7 +1698,7 @@ hppa_pop_frame (void)
 
   fp = get_frame_base (frame);
   hppa_frame_init_saved_regs (frame);
-  fsr = get_frame_saved_regs (frame);
+  fsr = deprecated_get_frame_saved_regs (frame);
 
 #ifndef NO_PC_SPACE_QUEUE_RESTORE
   if (fsr[IPSW_REGNUM])	/* Restoring a call dummy frame */
@@ -2067,6 +2067,9 @@ hppa_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
    This function does the same stuff as value_being_returned in values.c, but
    gets the value from the stack rather than from the buffer where all the
    registers were saved when the function called completed. */
+/* FIXME: cagney/2003-09-27: This function is no longer needed.  The
+   inferior function call code now directly handles the case described
+   above.  */
 struct value *
 hppa_value_returned_from_stack (struct type *valtype, CORE_ADDR addr)
 {
@@ -2372,7 +2375,7 @@ hppa_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun, int nargs,
 	  {
 	    stub_symbol
 	      = lookup_minimal_symbol_solib_trampoline
-	      (SYMBOL_LINKAGE_NAME (funsymbol), NULL, objfile);
+	      (SYMBOL_LINKAGE_NAME (funsymbol), objfile);
 
 	    if (!stub_symbol)
 	      stub_symbol = lookup_minimal_symbol (SYMBOL_LINKAGE_NAME (funsymbol),
@@ -2979,13 +2982,13 @@ pa_print_fp_reg (int i)
   frame_register_read (deprecated_selected_frame, i, raw_buffer);
 
   /* Put it in the buffer.  No conversions are ever necessary.  */
-  memcpy (virtual_buffer, raw_buffer, REGISTER_RAW_SIZE (i));
+  memcpy (virtual_buffer, raw_buffer, DEPRECATED_REGISTER_RAW_SIZE (i));
 
   fputs_filtered (REGISTER_NAME (i), gdb_stdout);
   print_spaces_filtered (8 - strlen (REGISTER_NAME (i)), gdb_stdout);
   fputs_filtered ("(single precision)     ", gdb_stdout);
 
-  val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0, gdb_stdout, 0,
+  val_print (DEPRECATED_REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0, gdb_stdout, 0,
 	     1, 0, Val_pretty_default);
   printf_filtered ("\n");
 
@@ -2997,8 +3000,8 @@ pa_print_fp_reg (int i)
       frame_register_read (deprecated_selected_frame, i + 1, raw_buffer);
 
       /* Copy it into the appropriate part of the virtual buffer.  */
-      memcpy (virtual_buffer + REGISTER_RAW_SIZE (i), raw_buffer,
-	      REGISTER_RAW_SIZE (i));
+      memcpy (virtual_buffer + DEPRECATED_REGISTER_RAW_SIZE (i), raw_buffer,
+	      DEPRECATED_REGISTER_RAW_SIZE (i));
 
       /* Dump it as a double.  */
       fputs_filtered (REGISTER_NAME (i), gdb_stdout);
@@ -3025,7 +3028,7 @@ pa_strcat_fp_reg (int i, struct ui_file *stream, enum precision_type precision)
   frame_register_read (deprecated_selected_frame, i, raw_buffer);
 
   /* Put it in the buffer.  No conversions are ever necessary.  */
-  memcpy (virtual_buffer, raw_buffer, REGISTER_RAW_SIZE (i));
+  memcpy (virtual_buffer, raw_buffer, DEPRECATED_REGISTER_RAW_SIZE (i));
 
   if (precision == double_precision && (i % 2) == 0)
     {
@@ -3036,7 +3039,8 @@ pa_strcat_fp_reg (int i, struct ui_file *stream, enum precision_type precision)
       frame_register_read (deprecated_selected_frame, i + 1, raw_buf);
 
       /* Copy it into the appropriate part of the virtual buffer.  */
-      memcpy (virtual_buffer + REGISTER_RAW_SIZE (i), raw_buf, REGISTER_RAW_SIZE (i));
+      memcpy (virtual_buffer + DEPRECATED_REGISTER_RAW_SIZE (i), raw_buf,
+	      DEPRECATED_REGISTER_RAW_SIZE (i));
 
       val_print (builtin_type_double, virtual_buffer, 0, 0, stream, 0,
 		 1, 0, Val_pretty_default);
@@ -3044,7 +3048,7 @@ pa_strcat_fp_reg (int i, struct ui_file *stream, enum precision_type precision)
     }
   else
     {
-      val_print (REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0, stream, 0,
+      val_print (DEPRECATED_REGISTER_VIRTUAL_TYPE (i), virtual_buffer, 0, 0, stream, 0,
 		 1, 0, Val_pretty_default);
     }
 
@@ -3090,8 +3094,9 @@ hppa_in_solib_call_trampoline (CORE_ADDR pc, char *name)
 
     sec = SYMBOL_BFD_SECTION (minsym);
 
-    if (sec->vma <= pc
-	&& sec->vma + sec->_cooked_size < pc)
+    if (bfd_get_section_vma (sec->owner, sec) <= pc
+	&& pc < (bfd_get_section_vma (sec->owner, sec)
+		 + bfd_section_size (sec->owner, sec)))
       return 0;
 
     /* We might be in a stub.  Peek at the instructions.  Stubs are 3
@@ -4247,9 +4252,9 @@ hppa_frame_find_saved_regs (struct frame_info *frame_info,
 void
 hppa_frame_init_saved_regs (struct frame_info *frame)
 {
-  if (get_frame_saved_regs (frame) == NULL)
+  if (deprecated_get_frame_saved_regs (frame) == NULL)
     frame_saved_regs_zalloc (frame);
-  hppa_frame_find_saved_regs (frame, get_frame_saved_regs (frame));
+  hppa_frame_find_saved_regs (frame, deprecated_get_frame_saved_regs (frame));
 }
 
 /* Exception handling support for the HP-UX ANSI C++ compiler.
@@ -5037,6 +5042,10 @@ hppa_extract_struct_value_address (char *regbuf)
      the address size is equal to the size of an int* _on the host_...
      One possible implementation that crossed my mind is to use
      extract_address.  */
+  /* FIXME: cagney/2003-09-27: This function can probably go.  ELZ
+     writes: We cannot assume on the pa that r28 still contains the
+     address of the returned structure. Usually this will be
+     overwritten by the callee.  */
   return (*(int *)(regbuf + DEPRECATED_REGISTER_BYTE (28)));
 }
 
@@ -5072,7 +5081,7 @@ hppa_fetch_pointer_argument (struct frame_info *frame, int argi,
 			     struct type *type)
 {
   CORE_ADDR addr;
-  frame_read_register (frame, R0_REGNUM + 26 - argi, &addr);
+  get_frame_register (frame, R0_REGNUM + 26 - argi, &addr);
   return addr;
 }
 

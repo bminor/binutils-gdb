@@ -2070,7 +2070,7 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	{
 	  sym = local_syms + r_symndx;
 	  sec = local_sections[r_symndx];
-	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, sec, rel);
+	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
 	}
       else
 	{
@@ -2247,16 +2247,8 @@ sparc64_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 
 			if (is_plt)
 			  sec = splt;
-			else if (h == NULL)
-			  sec = local_sections[r_symndx];
-			else
-			  {
-			    BFD_ASSERT (h->root.type == bfd_link_hash_defined
-					|| (h->root.type
-					    == bfd_link_hash_defweak));
-			    sec = h->root.u.def.section;
-			  }
-			if (sec != NULL && bfd_is_abs_section (sec))
+
+			if (bfd_is_abs_section (sec))
 			  indx = 0;
 			else if (sec == NULL || sec->owner == NULL)
 			  {
@@ -3236,6 +3228,5 @@ const struct elf_size_info sparc64_elf_size_info =
 #define elf_backend_plt_alignment 8
 
 #define elf_backend_got_header_size 8
-#define elf_backend_plt_header_size PLT_HEADER_SIZE
 
 #include "elf64-target.h"

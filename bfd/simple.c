@@ -185,7 +185,7 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
   memset (&link_info, 0, sizeof (link_info));
   link_info.input_bfds = abfd;
 
-  link_info.hash = bfd_link_hash_table_create (abfd);
+  link_info.hash = _bfd_generic_link_hash_table_create (abfd);
   link_info.callbacks = &callbacks;
   callbacks.warning = simple_dummy_warning;
   callbacks.undefined_symbol = simple_dummy_undefined_symbol;
@@ -265,7 +265,7 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
   bfd_map_over_sections (abfd, simple_restore_output_info, saved_offsets);
   free (saved_offsets);
 
-  bfd_link_hash_table_free (abfd, link_info.hash);
+  _bfd_generic_link_hash_table_free (link_info.hash);
 
   RETURN (contents);
 }

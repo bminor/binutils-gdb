@@ -664,7 +664,7 @@ value_assign (struct value *toval, struct value *fromval)
 	    {
 	      int offset;
 	      for (reg_offset = value_reg, offset = 0;
-		   offset + REGISTER_RAW_SIZE (reg_offset) <= VALUE_OFFSET (toval);
+		   offset + DEPRECATED_REGISTER_RAW_SIZE (reg_offset) <= VALUE_OFFSET (toval);
 		   reg_offset++);
 	      byte_offset = VALUE_OFFSET (toval) - offset;
 	    }
@@ -682,7 +682,7 @@ value_assign (struct value *toval, struct value *fromval)
 	    /* Copy it in.  */
 	    for (regno = reg_offset, amount_copied = 0;
 		 amount_copied < amount_to_copy;
-		 amount_copied += REGISTER_RAW_SIZE (regno), regno++)
+		 amount_copied += DEPRECATED_REGISTER_RAW_SIZE (regno), regno++)
 	      frame_register_read (frame, regno, buffer + amount_copied);
 	    
 	    /* Modify what needs to be modified.  */
@@ -699,7 +699,7 @@ value_assign (struct value *toval, struct value *fromval)
 	    /* Copy it out.  */
 	    for (regno = reg_offset, amount_copied = 0;
 		 amount_copied < amount_to_copy;
-		 amount_copied += REGISTER_RAW_SIZE (regno), regno++)
+		 amount_copied += DEPRECATED_REGISTER_RAW_SIZE (regno), regno++)
 	      put_frame_register (frame, regno, buffer + amount_copied);
 
 	  }
@@ -2371,7 +2371,7 @@ destructor_name_p (const char *name, const struct type *type)
 	len = strlen (dname);
       else
 	len = cp - dname;
-      if (strlen (name + 1) != len || !STREQN (dname, name + 1, len))
+      if (strlen (name + 1) != len || strncmp (dname, name + 1, len) != 0)
 	error ("name of destructor must equal name of class");
       else
 	return 1;
@@ -2498,7 +2498,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
     {
       char *t_field_name = TYPE_FIELD_NAME (t, i);
 
-      if (t_field_name && STREQ (t_field_name, name))
+      if (t_field_name && strcmp (t_field_name, name) == 0)
 	{
 	  if (TYPE_FIELD_STATIC (t, i))
 	    {
@@ -2545,7 +2545,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	  else if (cplus_demangle_opname (t_field_name, dem_opname, 0))
 	    t_field_name = dem_opname;
 	}
-      if (t_field_name && STREQ (t_field_name, name))
+      if (t_field_name && strcmp (t_field_name, name) == 0)
 	{
 	  int j = TYPE_FN_FIELDLIST_LENGTH (t, i);
 	  struct fn_field *f = TYPE_FN_FIELDLIST1 (t, i);

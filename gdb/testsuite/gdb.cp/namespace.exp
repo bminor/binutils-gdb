@@ -89,6 +89,11 @@ gdb_test "up" ".*main.*" "up from marker1"
 # I'm including versions both with and without quotes; for tests that
 # shouldn't work with quotes, I'm only including one version.
 
+# NOTE: carlton/2003-09-24: the quotes are becoming less necessary (or
+# even desirable.)  For tests where it should still work with quotes,
+# I'm including versions both with and without quotes; for tests that
+# shouldn't work with quotes, I'm only including one version.
+
 send_gdb "print 'AAA::c'\n"
 gdb_expect {
    -re "\\$\[0-9\]* = 0 '\\\\(0|000)'\r\n$gdb_prompt $" { pass "print 'AAA::c'" }

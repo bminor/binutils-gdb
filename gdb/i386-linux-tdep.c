@@ -25,19 +25,15 @@
 #include "value.h"
 #include "regcache.h"
 #include "inferior.h"
-#include "reggroups.h"
-
-/* For i386_linux_skip_solib_resolver.  */
-#include "symtab.h"
-#include "symfile.h"
-#include "objfiles.h"
-
-#include "solib-svr4.h"		/* For struct link_map_offsets.  */
-
 #include "osabi.h"
+#include "reggroups.h"
+#include "solib-svr4.h"
+
+#include "gdb_string.h"
 
 #include "i386-tdep.h"
 #include "i386-linux-tdep.h"
+#include "glibc-tdep.h"
 
 /* Return the name of register REG.  */
 
@@ -312,89 +308,10 @@ i386_linux_write_pc (CORE_ADDR pc, ptid_t ptid)
 
 /* Calling functions in shared libraries.  */
 
-/* Find the minimal symbol named NAME, and return both the minsym
-   struct and its objfile.  This probably ought to be in minsym.c, but
-   everything there is trying to deal with things like C++ and
-   SOFUN_ADDRESS_MAYBE_TURQUOISE, ...  Since this is so simple, it may
-   be considered too special-purpose for general consumption.  */
-
-static struct minimal_symbol *
-find_minsym_and_objfile (char *name, struct objfile **objfilep)
-{
-  struct objfile *objfile;
-
-  ALL_OBJFILES (objfile)
-    {
-      struct minimal_symbol *msym;
-
-      ALL_OBJFILE_MSYMBOLS (objfile, msym)
-	{
-	  if (SYMBOL_LINKAGE_NAME (msym)
-	      && strcmp (SYMBOL_LINKAGE_NAME (msym), name) == 0)
-	    {
-	      *objfilep = objfile;
-	      return msym;
-	    }
-	}
-    }
-
-  return 0;
-}
-
-static CORE_ADDR
-skip_gnu_resolver (CORE_ADDR pc)
-{
-  /* The GNU dynamic linker is part of the GNU C library, so many
-     GNU/Linux distributions use it.  (All ELF versions, as far as I
-     know.)  An unresolved PLT entry points to "_dl_runtime_resolve",
-     which calls "fixup" to patch the PLT, and then passes control to
-     the function.
-
-     We look for the symbol `_dl_runtime_resolve', and find `fixup' in
-     the same objfile.  If we are at the entry point of `fixup', then
-     we set a breakpoint at the return address (at the top of the
-     stack), and continue.
-  
-     It's kind of gross to do all these checks every time we're
-     called, since they don't change once the executable has gotten
-     started.  But this is only a temporary hack --- upcoming versions
-     of GNU/Linux will provide a portable, efficient interface for
-     debugging programs that use shared libraries.  */
-
-  struct objfile *objfile;
-  struct minimal_symbol *resolver 
-    = find_minsym_and_objfile ("_dl_runtime_resolve", &objfile);
-
-  if (resolver)
-    {
-      struct minimal_symbol *fixup
-	= lookup_minimal_symbol ("fixup", NULL, objfile);
-
-      if (fixup && SYMBOL_VALUE_ADDRESS (fixup) == pc)
-	return frame_pc_unwind (get_current_frame ()); 
-    }
-
-  return 0;
-}      
-
-/* See the comments for SKIP_SOLIB_RESOLVER at the top of infrun.c.
-   This function:
-   1) decides whether a PLT has sent us into the linker to resolve
-      a function reference, and 
-   2) if so, tells us where to set a temporary breakpoint that will
-      trigger when the dynamic linker is done.  */
-
 CORE_ADDR
 i386_linux_skip_solib_resolver (CORE_ADDR pc)
 {
-  CORE_ADDR result;
-
-  /* Plug in functions for other kinds of resolvers here.  */
-  result = skip_gnu_resolver (pc);
-  if (result)
-    return result;
-
-  return 0;
+  return glibc_skip_solib_resolver (pc);
 }
 
 /* Fetch (and possibly build) an appropriate link_map_offsets
@@ -439,8 +356,52 @@ i386_linux_svr4_fetch_link_map_offsets (void)
 }
 
 
+/* The register sets used in GNU/Linux ELF core-dumps are identical to
+   the register sets in `struct user' that are used for a.out
+   core-dumps.  These are also used by ptrace(2).  The corresponding
+   types are `elf_gregset_t' for the general-purpose registers (with
+   `elf_greg_t' the type of a single GP register) and `elf_fpregset_t'
+   for the floating-point registers.
+
+   Those types used to be available under the names `gregset_t' and
+   `fpregset_t' too, and GDB used those names in the past.  But those
+   names are now used for the register sets used in the `mcontext_t'
+   type, which have a different size and layout.  */
+
+/* Mapping between the general-purpose registers in `struct user'
+   format and GDB's register cache layout.  */
+
+/* From <sys/reg.h>.  */
+static int i386_linux_gregset_reg_offset[] =
+{
+  6 * 4,			/* %eax */
+  1 * 4,			/* %ecx */
+  2 * 4,			/* %edx */
+  0 * 4,			/* %ebx */
+  15 * 4,			/* %esp */
+  5 * 4,			/* %ebp */
+  3 * 4,			/* %esi */
+  4 * 4,			/* %edi */
+  12 * 4,			/* %eip */
+  14 * 4,			/* %eflags */
+  13 * 4,			/* %cs */
+  16 * 4,			/* %ss */
+  7 * 4,			/* %ds */
+  8 * 4,			/* %es */
+  9 * 4,			/* %fs */
+  10 * 4,			/* %gs */
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1,
+  11 * 4			/* "orig_eax" */
+};
+
+/* Mapping between the general-purpose registers in `struct
+   sigcontext' format and GDB's register cache layout.  */
+
 /* From <asm/sigcontext.h>.  */
-static int i386_linux_sc_reg_offset[I386_NUM_GREGS] =
+static int i386_linux_sc_reg_offset[] =
 {
   11 * 4,			/* %eax */
   10 * 4,			/* %ecx */
@@ -468,23 +429,23 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* GNU/Linux uses ELF.  */
   i386_elf_init_abi (info, gdbarch);
 
-  /* We support the SSE registers on GNU/Linux.  */
-  tdep->num_xmm_regs = I386_NUM_XREGS - 1;
-  /* set_gdbarch_num_regs (gdbarch, I386_SSE_NUM_REGS); */
-
   /* Since we have the extra "orig_eax" register on GNU/Linux, we have
      to adjust a few things.  */
 
   set_gdbarch_write_pc (gdbarch, i386_linux_write_pc);
-  set_gdbarch_num_regs (gdbarch, I386_SSE_NUM_REGS + 1);
+  set_gdbarch_num_regs (gdbarch, I386_LINUX_NUM_REGS);
   set_gdbarch_register_name (gdbarch, i386_linux_register_name);
   set_gdbarch_register_reggroup_p (gdbarch, i386_linux_register_reggroup_p);
+
+  tdep->gregset_reg_offset = i386_linux_gregset_reg_offset;
+  tdep->gregset_num_regs = ARRAY_SIZE (i386_linux_gregset_reg_offset);
+  tdep->sizeof_gregset = 17 * 4;
 
   tdep->jb_pc_offset = 20;	/* From <bits/setjmp.h>.  */
 
   tdep->sigcontext_addr = i386_linux_sigcontext_addr;
   tdep->sc_reg_offset = i386_linux_sc_reg_offset;
-  tdep->sc_num_regs = I386_NUM_GREGS;
+  tdep->sc_num_regs = ARRAY_SIZE (i386_linux_sc_reg_offset);
 
   /* When the i386 Linux kernel calls a signal handler, the return
      address points to a bit of code on the stack.  This function is

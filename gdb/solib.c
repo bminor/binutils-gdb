@@ -40,7 +40,7 @@
 #include "gdbcmd.h"
 #include "completer.h"
 #include "filenames.h"		/* for DOSish file names */
-
+#include "exec.h"
 #include "solist.h"
 #include <readline/readline.h>
 
@@ -275,7 +275,7 @@ solib_map_sections (void *arg)
          object's file by the base address to which the object was actually
          mapped. */
       TARGET_SO_RELOCATE_SECTION_ADDRESSES (so, p);
-      if (STREQ (p->the_bfd_section->name, ".text"))
+      if (strcmp (p->the_bfd_section->name, ".text") == 0)
 	{
 	  so->textsection = p;
 	}

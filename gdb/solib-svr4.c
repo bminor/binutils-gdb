@@ -1,7 +1,7 @@
 /* Handle SVR4 shared libraries for GDB, the GNU Debugger.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999, 2000,
-   2001
-   Free Software Foundation, Inc.
+
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999,
+   2000, 2001, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -36,6 +36,9 @@
 
 #include "solist.h"
 #include "solib-svr4.h"
+
+#include "bfd-target.h"
+#include "exec.h"
 
 #ifndef SVR4_FETCH_LINK_MAP_OFFSETS
 #define SVR4_FETCH_LINK_MAP_OFFSETS() svr4_fetch_link_map_offsets ()
@@ -225,7 +228,7 @@ bfd_lookup_symbol (bfd *abfd, char *symname, flagword sect_flags)
       for (i = 0; i < number_of_symbols; i++)
 	{
 	  sym = *symbol_table++;
-	  if (STREQ (sym->name, symname)
+	  if (strcmp (sym->name, symname) == 0
               && (sym->section->flags & sect_flags) == sect_flags)
 	    {
 	      /* Bfd symbols are section relative. */
@@ -254,7 +257,7 @@ bfd_lookup_symbol (bfd *abfd, char *symname, flagword sect_flags)
 	{
 	  sym = *symbol_table++;
 
-	  if (STREQ (sym->name, symname)
+	  if (strcmp (sym->name, symname) == 0
               && (sym->section->flags & sect_flags) == sect_flags)
 	    {
 	      /* Bfd symbols are section relative. */
@@ -422,7 +425,7 @@ look_for_base (int fd, CORE_ADDR baseaddr)
 static CORE_ADDR
 elf_locate_base (void)
 {
-  sec_ptr dyninfo_sect;
+  struct bfd_section *dyninfo_sect;
   int dyninfo_sect_size;
   CORE_ADDR dyninfo_addr;
   char *buf;
@@ -911,6 +914,24 @@ svr4_in_dynsym_resolve_code (CORE_ADDR pc)
 	  || in_plt_section (pc, NULL));
 }
 
+/* Given an executable's ABFD and target, compute the entry-point
+   address.  */
+
+static CORE_ADDR
+exec_entry_point (struct bfd *abfd, struct target_ops *targ)
+{
+  /* KevinB wrote ... for most targets, the address returned by
+     bfd_get_start_address() is the entry point for the start
+     function.  But, for some targets, bfd_get_start_address() returns
+     the address of a function descriptor from which the entry point
+     address may be extracted.  This address is extracted by
+     gdbarch_convert_from_func_ptr_addr().  The method
+     gdbarch_convert_from_func_ptr_addr() is the merely the identify
+     function for targets which don't use function descriptors.  */
+  return gdbarch_convert_from_func_ptr_addr (current_gdbarch,
+					     bfd_get_start_address (abfd),
+					     targ);
+}
 
 /*
 
@@ -984,6 +1005,7 @@ enable_break (void)
       int load_addr_found = 0;
       struct so_list *inferior_sos;
       bfd *tmp_bfd = NULL;
+      struct target_ops *tmp_bfd_target;
       int tmp_fd = -1;
       char *tmp_pathname = NULL;
       CORE_ADDR sym_addr = 0;
@@ -1019,6 +1041,11 @@ enable_break (void)
 	  goto bkpt_at_symbol;
 	}
 
+      /* Now convert the TMP_BFD into a target.  That way target, as
+         well as BFD operations can be used.  Note that closing the
+         target will also close the underlying bfd.  */
+      tmp_bfd_target = target_bfd_reopen (tmp_bfd);
+
       /* If the entry in _DYNAMIC for the dynamic linker has already
          been filled in, we can read its base address from there. */
       inferior_sos = svr4_current_sos ();
@@ -1042,7 +1069,8 @@ enable_break (void)
 	 the current pc (which should point at the entry point for the
 	 dynamic linker) and subtracting the offset of the entry point.  */
       if (!load_addr_found)
-	load_addr = read_pc () - tmp_bfd->start_address;
+	load_addr = (read_pc ()
+		     - exec_entry_point (tmp_bfd, tmp_bfd_target));
 
       /* Record the relocated start and end address of the dynamic linker
          text and plt section for svr4_in_dynsym_resolve_code.  */
@@ -1080,8 +1108,9 @@ enable_break (void)
 	    break;
 	}
 
-      /* We're done with the temporary bfd.  */
-      bfd_close (tmp_bfd);
+      /* We're done with both the temporary bfd and target.  Remember,
+         closing the target closes the underlying bfd.  */
+      target_close (tmp_bfd_target, 0);
 
       if (sym_addr != 0)
 	{
@@ -1200,7 +1229,7 @@ svr4_relocate_main_executable (void)
   interp_sect = bfd_get_section_by_name (exec_bfd, ".interp");
   if (interp_sect == NULL 
       && (bfd_get_file_flags (exec_bfd) & DYNAMIC) != 0
-      && bfd_get_start_address (exec_bfd) != pc)
+      && (exec_entry_point (exec_bfd, &exec_ops) != pc))
     {
       struct cleanup *old_chain;
       struct section_offsets *new_offsets;
@@ -1232,7 +1261,7 @@ svr4_relocate_main_executable (void)
 	 The same language also appears in Edition 4.0 of the System V
 	 ABI and is left unspecified in some of the earlier editions.  */
 
-      displacement = pc - bfd_get_start_address (exec_bfd);
+      displacement = pc - exec_entry_point (exec_bfd, &exec_ops);
       changed = 0;
 
       new_offsets = xcalloc (symfile_objfile->num_sections,

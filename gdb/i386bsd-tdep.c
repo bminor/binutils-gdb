@@ -1,4 +1,5 @@
 /* Target-dependent code for i386 BSD's.
+
    Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -86,7 +87,7 @@ i386bsd_aout_in_solib_call_trampoline (CORE_ADDR pc, char *name)
 /* Traditional BSD (4.3 BSD, still used for BSDI and 386BSD).  */
 
 /* From <machine/signal.h>.  */
-int i386bsd_sc_reg_offset[I386_NUM_GREGS] =
+int i386bsd_sc_reg_offset[] =
 {
   -1,				/* %eax */
   -1,				/* %ecx */
@@ -127,104 +128,7 @@ i386bsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->sigtramp_end = 0xfdbfe000;
   tdep->sigcontext_addr = i386bsd_sigcontext_addr;
   tdep->sc_reg_offset = i386bsd_sc_reg_offset;
-  tdep->sc_num_regs = I386_NUM_GREGS;
-}
-
-/* FreeBSD 3.0-RELEASE or later.  */
-
-CORE_ADDR i386fbsd_sigtramp_start = 0xbfbfdf20;
-CORE_ADDR i386fbsd_sigtramp_end = 0xbfbfdff0;
-
-/* From <machine/signal.h>.  */
-int i386fbsd_sc_reg_offset[I386_NUM_GREGS] =
-{
-  8 + 14 * 4,			/* %eax */
-  8 + 13 * 4,			/* %ecx */
-  8 + 12 * 4,			/* %edx */
-  8 + 11 * 4,			/* %ebx */
-  8 + 0 * 4,                    /* %esp */
-  8 + 1 * 4,                    /* %ebp */
-  8 + 10 * 4,                   /* %esi */
-  8 + 9 * 4,                    /* %edi */
-  8 + 3 * 4,                    /* %eip */
-  8 + 4 * 4,                    /* %eflags */
-  8 + 7 * 4,                    /* %cs */
-  8 + 8 * 4,                    /* %ss */
-  8 + 6 * 4,                    /* %ds */
-  8 + 5 * 4,                    /* %es */
-  8 + 15 * 4,			/* %fs */
-  8 + 16 * 4			/* %gs */
-};
-
-static void
-i386fbsdaout_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
-  /* Obviously FreeBSD is BSD-based.  */
-  i386bsd_init_abi (info, gdbarch);
-
-  /* FreeBSD uses -freg-struct-return by default.  */
-  tdep->struct_return = reg_struct_return;
-
-  /* FreeBSD uses a different memory layout.  */
-  tdep->sigtramp_start = i386fbsd_sigtramp_start;
-  tdep->sigtramp_end = i386fbsd_sigtramp_end;
-
-  /* FreeBSD has a more complete `struct sigcontext'.  */
-  tdep->sc_reg_offset = i386fbsd_sc_reg_offset;
-  tdep->sc_num_regs = I386_NUM_GREGS;
-}
-
-static void
-i386fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
-{
-  /* It's almost identical to FreeBSD a.out.  */
-  i386fbsdaout_init_abi (info, gdbarch);
-
-  /* Except that it uses ELF.  */
-  i386_elf_init_abi (info, gdbarch);
-
-  /* FreeBSD ELF uses SVR4-style shared libraries.  */
-  set_gdbarch_in_solib_call_trampoline (gdbarch,
-					generic_in_solib_call_trampoline);
-}
-
-/* FreeBSD 4.0-RELEASE or later.  */
-
-/* From <machine/signal.h>.  */
-int i386fbsd4_sc_reg_offset[I386_NUM_GREGS] =
-{
-  20 + 11 * 4,			/* %eax */
-  20 + 10 * 4,			/* %ecx */
-  20 + 9 * 4,			/* %edx */
-  20 + 8 * 4,			/* %ebx */
-  20 + 17 * 4,			/* %esp */
-  20 + 6 * 4,			/* %ebp */
-  20 + 5 * 4,			/* %esi */
-  20 + 4 * 4,			/* %edi */
-  20 + 14 * 4,			/* %eip */
-  20 + 16 * 4,			/* %eflags */
-  20 + 15 * 4,			/* %cs */
-  20 + 18 * 4,			/* %ss */
-  20 + 3 * 4,			/* %ds */
-  20 + 2 * 4,			/* %es */
-  20 + 1 * 4,			/* %fs */
-  20 + 0 * 4			/* %gs */
-};
-
-static void
-i386fbsd4_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
-  /* Inherit stuff from older releases.  We assume that FreeBSD
-     4.0-RELEASE always uses ELF.  */
-  i386fbsd_init_abi (info, gdbarch);
-
-  /* FreeBSD 4.0 introduced a new `struct sigcontext'.  */
-  tdep->sc_reg_offset = i386fbsd4_sc_reg_offset;
-  tdep->sc_num_regs = I386_NUM_GREGS;
+  tdep->sc_num_regs = ARRAY_SIZE (i386bsd_sc_reg_offset);
 }
 
 
@@ -249,9 +153,4 @@ _initialize_i386bsd_tdep (void)
 {
   gdbarch_register_osabi_sniffer (bfd_arch_i386, bfd_target_aout_flavour,
 				  i386bsd_aout_osabi_sniffer);
-
-  gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_FREEBSD_AOUT,
-			  i386fbsdaout_init_abi);
-  gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_FREEBSD_ELF,
-			  i386fbsd4_init_abi);
 }

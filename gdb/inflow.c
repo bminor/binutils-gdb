@@ -412,14 +412,12 @@ terminal_ours_1 (int output_only)
     }
 }
 
-/* ARGSUSED */
 void
 term_info (char *arg, int from_tty)
 {
   target_terminal_info (arg, from_tty);
 }
 
-/* ARGSUSED */
 void
 child_terminal_info (char *args, int from_tty)
 {
@@ -572,7 +570,6 @@ new_tty (void)
 
 /* Kill the inferior process.  Make us have no inferior.  */
 
-/* ARGSUSED */
 static void
 kill_command (char *arg, int from_tty)
 {
@@ -604,7 +601,6 @@ kill_command (char *arg, int from_tty)
 /* Call set_sigint_trap when you need to pass a signal on to an attached
    process when handling SIGINT */
 
-/* ARGSUSED */
 static void
 pass_signal (int signo)
 {

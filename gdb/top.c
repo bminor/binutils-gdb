@@ -147,7 +147,7 @@ int baud_rate = -1;
    In mid-1996, remote_timeout was moved from remote.c to top.c and 
    it began being used in other remote-* targets.  It appears that the
    default was changed to 20 seconds at that time, perhaps because the
-   Hitachi E7000 ICE didn't always respond in a timely manner.
+   Renesas E7000 ICE didn't always respond in a timely manner.
 
    But if 5 seconds is a long time to sit and wait for retransmissions,
    20 seconds is far worse.  This demonstrates the difficulty of using 
@@ -669,10 +669,10 @@ execute_command (char *p, int from_tty)
       /* If the target is running, we allow only a limited set of
          commands. */
       if (event_loop_p && target_can_async_p () && target_executing)
-	if (!strcmp (c->name, "help")
-	    && !strcmp (c->name, "pwd")
-	    && !strcmp (c->name, "show")
-	    && !strcmp (c->name, "stop"))
+	if (strcmp (c->name, "help") != 0
+	    && strcmp (c->name, "pwd") != 0
+	    && strcmp (c->name, "show") != 0
+	    && strcmp (c->name, "stop") != 0)
 	  error ("Cannot execute this command while the target is running.");
 
       /* Pass null arg rather than an empty one.  */
@@ -1266,7 +1266,7 @@ command_line_input (char *prompt_arg, int repeat, char *annotation_suffix)
 #define SERVER_COMMAND_LENGTH 7
   server_command =
     (p - linebuffer > SERVER_COMMAND_LENGTH)
-    && STREQN (linebuffer, "server ", SERVER_COMMAND_LENGTH);
+    && strncmp (linebuffer, "server ", SERVER_COMMAND_LENGTH) == 0;
   if (server_command)
     {
       /* Note that we don't set `line'.  Between this and the check in
@@ -1375,7 +1375,7 @@ There is absolutely no warranty for GDB.  Type \"show warranty\" for details.\n"
   /* After the required info we print the configuration information. */
 
   fprintf_filtered (stream, "This GDB was configured as \"");
-  if (!STREQ (host_name, target_name))
+  if (strcmp (host_name, target_name) != 0)
     {
       fprintf_filtered (stream, "--host=%s --target=%s", host_name, target_name);
     }
@@ -1461,7 +1461,7 @@ quit_target (void *arg)
     }
 
   /* UDI wants this, to kill the TIP.  */
-  target_close (1);
+  target_close (&current_target, 1);
 
   /* Save the history information if it is appropriate to do so.  */
   if (write_history_p && history_filename)
@@ -1478,6 +1478,7 @@ void
 quit_force (char *args, int from_tty)
 {
   int exit_code = 0;
+  struct qt_args qt;
 
   /* An optional expression may be used to cause gdb to terminate with the 
      value of that expression. */
@@ -1488,8 +1489,11 @@ quit_force (char *args, int from_tty)
       exit_code = (int) value_as_long (val);
     }
 
+  qt.args = args;
+  qt.from_tty = from_tty;
+
   /* We want to handle any quit errors and exit regardless.  */
-  catch_errors (quit_target, args,
+  catch_errors (quit_target, &qt,
 	        "Quitting: ", RETURN_MASK_ALL);
 
   exit (exit_code);
@@ -1504,7 +1508,6 @@ input_from_terminal_p (void)
   return gdb_has_a_terminal () && (instream == stdin) & caution;
 }
 
-/* ARGSUSED */
 static void
 dont_repeat_command (char *ignored, int from_tty)
 {
@@ -1590,7 +1593,6 @@ show_commands (char *args, int from_tty)
 }
 
 /* Called by do_setshow_command.  */
-/* ARGSUSED */
 static void
 set_history_size_command (char *args, int from_tty, struct cmd_list_element *c)
 {
@@ -1605,7 +1607,6 @@ set_history_size_command (char *args, int from_tty, struct cmd_list_element *c)
     }
 }
 
-/* ARGSUSED */
 void
 set_history (char *args, int from_tty)
 {
@@ -1613,7 +1614,6 @@ set_history (char *args, int from_tty)
   help_list (sethistlist, "set history ", -1, gdb_stdout);
 }
 
-/* ARGSUSED */
 void
 show_history (char *args, int from_tty)
 {
@@ -1623,7 +1623,6 @@ show_history (char *args, int from_tty)
 int info_verbose = 0;		/* Default verbose msgs off */
 
 /* Called by do_setshow_command.  An elaborate joke.  */
-/* ARGSUSED */
 void
 set_verbose (char *args, int from_tty, struct cmd_list_element *c)
 {
@@ -1720,8 +1719,7 @@ init_main (void)
 
   /* Setup important stuff for command line editing.  */
   rl_completion_entry_function = readline_line_completion_function;
-  rl_completer_word_break_characters =
-				 get_gdb_completer_word_break_characters ();
+  rl_completer_word_break_characters = default_word_break_characters ();
   rl_completer_quote_characters = get_gdb_completer_quote_characters ();
   rl_readline_name = "gdb";
   rl_terminal_name = getenv ("TERM");

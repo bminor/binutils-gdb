@@ -467,7 +467,7 @@ mcore_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	{
 	  sym = local_syms + r_symndx;
 	  sec = local_sections [r_symndx];
-	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, sec, rel);
+	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
 	  addend = rel->r_addend;
 	}
       else
@@ -683,12 +683,9 @@ mcore_elf_check_relocs (abfd, info, sec, relocs)
 
 static struct bfd_elf_special_section const mcore_elf_special_sections[]=
 {
-  { ".ctors",		0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },
-  { ".dtors",		0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },
-  { NULL,		0,	NULL,	0,
-    0,			0 }
+  { ".ctors",   6, -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
+  { ".dtors",   6, -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
+  { NULL,       0,  0, 0,            0 }
 };
 
 #define TARGET_BIG_SYM		bfd_elf32_mcore_big_vec

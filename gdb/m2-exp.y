@@ -617,7 +617,7 @@ variable:	NAME
 			  else
 			    {
 			      struct minimal_symbol *msymbol;
-			      register char *arg = copy_name ($1);
+			      char *arg = copy_name ($1);
 
 			      msymbol =
 				lookup_minimal_symbol_linkage_or_natural (arg);
@@ -672,12 +672,12 @@ static int
 parse_number (olen)
      int olen;
 {
-  register char *p = lexptr;
-  register LONGEST n = 0;
-  register LONGEST prevn = 0;
-  register int c,i,ischar=0;
-  register int base = input_radix;
-  register int len = olen;
+  char *p = lexptr;
+  LONGEST n = 0;
+  LONGEST prevn = 0;
+  int c,i,ischar=0;
+  int base = input_radix;
+  int len = olen;
   int unsigned_p = number_sign == 1 ? 1 : 0;
 
   if(p[len-1] == 'H')
@@ -820,11 +820,11 @@ static struct keyword keytab[] =
 static int
 yylex ()
 {
-  register int c;
-  register int namelen;
-  register int i;
-  register char *tokstart;
-  register char quote;
+  int c;
+  int namelen;
+  int i;
+  char *tokstart;
+  char quote;
 
  retry:
 
@@ -936,7 +936,7 @@ yylex ()
     {
       /* It's a number.  */
       int got_dot = 0, got_e = 0;
-      register char *p = tokstart;
+      char *p = tokstart;
       int toktype;
 
       for (++p ;; ++p)

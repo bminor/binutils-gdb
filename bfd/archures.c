@@ -84,6 +84,7 @@ DESCRIPTION
 .#define bfd_mach_mcf5206e 10
 .#define bfd_mach_mcf5307  11
 .#define bfd_mach_mcf5407  12
+.#define bfd_mach_mcf528x  13
 .  bfd_arch_vax,       {* DEC Vax *}
 .  bfd_arch_i960,      {* Intel 960 *}
 .    {* The order of the following is important.
@@ -148,6 +149,7 @@ DESCRIPTION
 .#define bfd_mach_mipsisa32             32
 .#define bfd_mach_mipsisa32r2           33
 .#define bfd_mach_mipsisa64             64
+.#define bfd_mach_mipsisa64r2           65
 .  bfd_arch_i386,      {* Intel 386 *}
 .#define bfd_mach_i386_i386 1
 .#define bfd_mach_i386_i8086 2
@@ -227,6 +229,10 @@ DESCRIPTION
 .#define bfd_mach_sh3_dsp    0x3d
 .#define bfd_mach_sh3e       0x3e
 .#define bfd_mach_sh4        0x40
+.#define bfd_mach_sh4_nofpu  0x41
+.#define bfd_mach_sh4a       0x4a
+.#define bfd_mach_sh4a_nofpu 0x4b
+.#define bfd_mach_sh4al_dsp  0x4d
 .#define bfd_mach_sh5        0x50
 .  bfd_arch_alpha,     {* Dec Alpha *}
 .#define bfd_mach_alpha_ev4  0x10
@@ -280,6 +286,7 @@ DESCRIPTION
 .#define bfd_mach_fr400		400
 .#define bfd_mach_frvtomcat	499	{* fr500 prototype *}
 .#define bfd_mach_fr500		500
+.#define bfd_mach_fr550		550
 .  bfd_arch_mcore,
 .  bfd_arch_ia64,      {* HP/Intel ia64 *}
 .#define bfd_mach_ia64_elf64	64
@@ -956,6 +963,10 @@ bfd_default_scan (const bfd_arch_info_type *info, const char *string)
     case 5407:
       arch = bfd_arch_m68k;
       number = bfd_mach_mcf5407;
+      break;
+    case 5282:
+      arch = bfd_arch_m68k;
+      number = bfd_mach_mcf528x;
       break;
 
     case 32000:

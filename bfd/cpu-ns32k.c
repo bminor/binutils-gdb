@@ -37,7 +37,7 @@ const bfd_arch_info_type bfd_ns32k_arch =
   N(32032,"ns32k:32032",FALSE, &arch_info_struct[0]);
 
 static bfd_reloc_status_type do_ns32k_reloc
-  PARAMS ((bfd *, arelent *, struct symbol_cache_entry *, PTR, asection *,
+  PARAMS ((bfd *, arelent *, struct bfd_symbol *, PTR, asection *,
 	   bfd *, char **,
 	   bfd_vma (*) (bfd_byte *, int),
 	   void (*) (bfd_vma, bfd_byte *, int)));
@@ -158,7 +158,7 @@ do_ns32k_reloc (abfd, reloc_entry, symbol, data, input_section, output_bfd,
 		error_message, get_data, put_data)
      bfd *abfd;
      arelent *reloc_entry;
-     struct symbol_cache_entry *symbol;
+     struct bfd_symbol *symbol;
      PTR data;
      asection *input_section;
      bfd *output_bfd;
@@ -762,7 +762,7 @@ _bfd_ns32k_reloc_disp (abfd, reloc_entry, symbol, data, input_section,
 		       output_bfd, error_message)
      bfd *abfd;
      arelent *reloc_entry;
-     struct symbol_cache_entry *symbol;
+     struct bfd_symbol *symbol;
      PTR data;
      asection *input_section;
      bfd *output_bfd;
@@ -779,7 +779,7 @@ _bfd_ns32k_reloc_imm (abfd, reloc_entry, symbol, data, input_section,
 		      output_bfd, error_message)
      bfd *abfd;
      arelent *reloc_entry;
-     struct symbol_cache_entry *symbol;
+     struct bfd_symbol *symbol;
      PTR data;
      asection *input_section;
      bfd *output_bfd;

@@ -1,3 +1,67 @@
+2003-10-31  Andreas Jaeger  <aj@suse.de>
+
+	* floatformat.c (floatformat_always_valid): Add unused attribute.
+
+2003-10-30  Josef Zlomek  <zlomekj@suse.cz>
+
+	* hashtab.c (htab_find_slot_with_hash): Decrease n_deleted
+	instead of increasing n_elements when inserting to deleted slot.
+
+2003-10-20  J. Brobecker  <brobecker@gnat.com>
+
+	* cplus-dem.c (demangle_template): Register a new Btype only
+	when needed.
+	* testsuite/demangle-expected: Add a new test.
+
+2003-10-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/demangle-expected: Update the expected output of
+	_GLOBAL__I__Z2fnv.
+
+2003-10-02  Daniel Jacobowitz  <drow@mvista.com>
+
+	* strerror.c: Revert last change.  Declare static sys_nerr
+	and sys_errlist using different names.
+
+2003-10-01  Daniel Jacobowitz  <drow@mvista.com>
+
+	* strerror.c: Don't provide or reference sys_errlist if
+	strerror is available.
+
+2003-10-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.in: Check if $MAKEINFO is missing.
+	* configure: Regenerated.
+
+2003-09-24  Daniel Jacobowitz  <drow@mvista.com>
+
+	* configure.in: Use AC_PROG_CPP_WERROR.
+	* configure: Regenerated.
+
+2003-09-22  Andrew Cagney  <cagney@redhat.com>
+
+	* floatformat.c (floatformat_i387_ext_is_valid): New function.
+	(floatformat_always_valid): New function.
+	(floatformat_i387_ext): Initialize new "is_valid" field to
+	"floatformat_i387_ext_is_valid".
+	(floatformat_ieee_single_little): Initialize "is_valid" field to
+	floatformat_always_valid.
+	(floatformat_ieee_double_big): Ditto.
+	(floatformat_ieee_double_little): Ditto.
+	(floatformat_ieee_double_little): Ditto.
+	(floatformat_ieee_double_littlebyte_bigword): Ditto.
+	(floatformat_i960_ext): Ditto.
+	(floatformat_m88110_ext): Ditto.
+	(floatformat_m88110_harris_ext): Ditto.
+	(floatformat_arm_ext_big): Ditto.
+	(floatformat_arm_ext_littlebyte_bigword): Ditto.
+	(floatformat_ia64_spill_big): Ditto.
+	(floatformat_ia64_spill_little): Ditto.
+	(floatformat_ia64_quad_big): Ditto.
+	(floatformat_ia64_quad_little): Ditto.
+	(floatformat_ia64_quad_little): Ditto.
+	(floatformat_is_valid): Call "is_valid".
+
 2003-09-15  Andrew Cagney  <cagney@redhat.com>
 
 	* floatformat.c (get_field): Make "data" constant.

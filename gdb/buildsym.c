@@ -164,7 +164,6 @@ find_symbol_in_list (struct pending *list, char *name, int length)
 /* At end of reading syms, or in case of quit, really free as many
    `struct pending's as we can easily find. */
 
-/* ARGSUSED */
 void
 really_free_pendings (void *dummy)
 {
@@ -593,17 +592,9 @@ start_subfile (const char *name, char *dirname)
      later via a call to record_debugformat. */
   subfile->debugformat = NULL;
 
-#if 0 /* OBSOLETE CFront */
-// OBSOLETE   /* cfront output is a C program, so in most ways it looks like a C
-// OBSOLETE      program.  But to demangle we need to set the language to C++.  We
-// OBSOLETE      can distinguish cfront code by the fact that it has #line
-// OBSOLETE      directives which specify a file name ending in .C. */
-#endif /* OBSOLETE CFront */
-     
   /* If the filename of this subfile ends in .C, then change the
      language of any pending subfiles from C to C++.  We also accept
      any other C++ suffixes accepted by deduce_language_from_filename.  */
-  /* OBSOLETE     (in particular, some people use .cxx with cfront).  */
   /* Likewise for f2c.  */
 
   if (subfile->name)

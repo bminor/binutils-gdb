@@ -930,7 +930,7 @@ status_callback (struct lwp_info *lp, void *data)
 static int
 running_callback (struct lwp_info *lp, void *data)
 {
-  return (lp->stopped == 0);
+  return (lp->stopped == 0 || (lp->status != 0 && lp->resumed));
 }
 
 /* Count the LWP's that have had events.  */
@@ -1183,7 +1183,10 @@ stop_and_resume_callback (struct lwp_info *lp, void *data)
       /* Resume if the lwp still exists.  */
       for (ptr = lwp_list; ptr; ptr = ptr->next)
 	if (lp == ptr)
-	  resume_callback (lp, NULL);
+	  {
+	    resume_callback (lp, NULL);
+	    resume_set_callback (lp, NULL);
+	  }
     }
   return 0;
 }

@@ -1,5 +1,5 @@
 /* alpha-opc.c -- Alpha AXP opcode list
-   Copyright 1996, 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 1999, 2000, 2003 Free Software Foundation, Inc.
    Contributed by Richard Henderson <rth@cygnus.com>,
    patterned after the PPC opcode handling written by Ian Lance Taylor.
 
@@ -1105,7 +1105,8 @@ const struct alpha_opcode alpha_opcodes[] = {
   { "wmb",		MFC(0x18,0x4400), BASE, ARG_NONE },
   { "fetch",		MFC(0x18,0x8000), BASE, { ZA, PRB } },
   { "fetch_m",		MFC(0x18,0xA000), BASE, { ZA, PRB } },
-  { "rpcc",		MFC(0x18,0xC000), BASE, { RA } },
+  { "rpcc",		MFC(0x18,0xC000), BASE, { RA, ZB } },
+  { "rpcc",		MFC(0x18,0xC000), BASE, { RA, RB } },	/* ev6 una */
   { "rc",		MFC(0x18,0xE000), BASE, { RA } },
   { "ecb",		MFC(0x18,0xE800), BASE, { ZA, PRB } },	/* ev56 una */
   { "rs",		MFC(0x18,0xF000), BASE, { RA } },

@@ -1,7 +1,8 @@
 /* Work with executable files, for GDB. 
-   Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000, 2001, 2002
-   Free Software Foundation, Inc.
+
+   Copyright 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
+   1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation,
+   Inc.
 
    This file is part of GDB.
 
@@ -30,6 +31,7 @@
 #include "objfiles.h"
 #include "completer.h"
 #include "value.h"
+#include "exec.h"
 
 #ifdef USG
 #include <sys/types.h>
@@ -55,8 +57,6 @@ void (*file_changed_hook) (char *);
 
 /* Prototypes for local functions */
 
-static void add_to_section_table (bfd *, sec_ptr, void *);
-
 static void exec_close (int);
 
 static void file_command (char *, int);
@@ -64,8 +64,6 @@ static void file_command (char *, int);
 static void set_section_command (char *, int);
 
 static void exec_files_info (struct target_ops *);
-
-static void bfdsec_to_vmap (bfd *, sec_ptr, void *);
 
 static int ignore (CORE_ADDR, char *);
 
@@ -85,13 +83,6 @@ bfd *exec_bfd = NULL;
 
 int write_files = 0;
 
-/* Text start and end addresses (KLUDGE) if needed */
-
-#ifndef NEED_TEXT_START_END
-#define NEED_TEXT_START_END (0)
-#endif
-CORE_ADDR text_end = 0;
-
 struct vmap *vmap;
 
 void
@@ -101,7 +92,6 @@ exec_open (char *args, int from_tty)
   exec_file_attach (args, from_tty);
 }
 
-/* ARGSUSED */
 static void
 exec_close (int quitting)
 {
@@ -266,30 +256,9 @@ exec_file_attach (char *filename, int from_tty)
 		 scratch_pathname, bfd_errmsg (bfd_get_error ()));
 	}
 
-      /* text_end is sometimes used for where to put call dummies.  A
-         few ports use these for other purposes too.  */
-      if (NEED_TEXT_START_END)
-	{
-	  struct section_table *p;
-
-	  /* Set text_start to the lowest address of the start of any
-	     readonly code section and set text_end to the highest
-	     address of the end of any readonly code section.  */
-	  /* FIXME: The comment above does not match the code.  The
-	     code checks for sections with are either code *or*
-	     readonly.  */
-	  CORE_ADDR text_start = ~(CORE_ADDR) 0;
-	  text_end = (CORE_ADDR) 0;
-	  for (p = exec_ops.to_sections; p < exec_ops.to_sections_end; p++)
-	    if (bfd_get_section_flags (p->bfd, p->the_bfd_section)
-		& (SEC_CODE | SEC_READONLY))
-	      {
-		if (text_start > p->addr)
-		  text_start = p->addr;
-		if (text_end < p->endaddr)
-		  text_end = p->endaddr;
-	      }
-	}
+#ifdef DEPRECATED_HPUX_TEXT_END
+      DEPRECATED_HPUX_TEXT_END (&exec_ops);
+#endif
 
       validate_files ();
 
@@ -365,7 +334,8 @@ file_command (char *arg, int from_tty)
    we cast it back to its proper type.  */
 
 static void
-add_to_section_table (bfd *abfd, sec_ptr asect, void *table_pp_char)
+add_to_section_table (bfd *abfd, struct bfd_section *asect,
+		      void *table_pp_char)
 {
   struct section_table **table_pp = (struct section_table **) table_pp_char;
   flagword aflag;
@@ -386,7 +356,7 @@ add_to_section_table (bfd *abfd, sec_ptr asect, void *table_pp_char)
    Returns 0 if OK, 1 on error.  */
 
 int
-build_section_table (bfd *some_bfd, struct section_table **start,
+build_section_table (struct bfd *some_bfd, struct section_table **start,
 		     struct section_table **end)
 {
   unsigned count;
@@ -404,7 +374,7 @@ build_section_table (bfd *some_bfd, struct section_table **start,
 }
 
 static void
-bfdsec_to_vmap (bfd *abfd, sec_ptr sect, void *arg3)
+bfdsec_to_vmap (struct bfd *abfd, struct bfd_section *sect, void *arg3)
 {
   struct vmap_and_bfd *vmap_bfd = (struct vmap_and_bfd *) arg3;
   struct vmap *vp;
@@ -484,7 +454,6 @@ xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
   int res;
   struct section_table *p;
   CORE_ADDR nextsectaddr, memend;
-  int (*xfer_fn) (bfd *, sec_ptr, void *, file_ptr, bfd_size_type);
   asection *section = NULL;
 
   if (len <= 0)
@@ -498,7 +467,6 @@ xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
     }
 
   memend = memaddr + len;
-  xfer_fn = write ? bfd_set_section_contents : bfd_get_section_contents;
   nextsectaddr = memend;
 
   for (p = target->to_sections; p < target->to_sections_end; p++)
@@ -511,8 +479,14 @@ xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 	  if (memend <= p->endaddr)
 	    {
 	      /* Entire transfer is within this section.  */
-	      res = xfer_fn (p->bfd, p->the_bfd_section, myaddr,
-	  		     memaddr - p->addr, len);
+	      if (write)
+		res = bfd_set_section_contents (p->bfd, p->the_bfd_section,
+						myaddr, memaddr - p->addr,
+						len);
+	      else
+		res = bfd_get_section_contents (p->bfd, p->the_bfd_section,
+						myaddr, memaddr - p->addr,
+						len);
 	      return (res != 0) ? len : 0;
 	    }
 	  else if (memaddr >= p->endaddr)
@@ -524,8 +498,14 @@ xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
 	    {
 	      /* This section overlaps the transfer.  Just do half.  */
 	      len = p->endaddr - memaddr;
-	      res = xfer_fn (p->bfd, p->the_bfd_section, myaddr,
-	  		     memaddr - p->addr, len);
+	      if (write)
+		res = bfd_set_section_contents (p->bfd, p->the_bfd_section,
+						myaddr, memaddr - p->addr,
+						len);
+	      else
+		res = bfd_get_section_contents (p->bfd, p->the_bfd_section,
+						myaddr, memaddr - p->addr,
+						len);
 	      return (res != 0) ? len : 0;
 	    }
         }

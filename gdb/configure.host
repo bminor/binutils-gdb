@@ -41,18 +41,13 @@ arm*-*-linux*)		gdb_host=linux ;;
 arm*-*-netbsdelf*)	gdb_host=nbsdelf ;;
 arm*-*-netbsd*)		gdb_host=nbsdaout ;;
 
-# OBSOLETE hppa*-*-bsd*)		gdb_host=hppabsd ;;
 hppa*-*-hiux*)		gdb_host=hppahpux ;;
 hppa*-*-hpux10.20)	gdb_host=hpux1020 ;;
 hppa*64*-*-hpux11*)	gdb_host=hpux11w ;;
 hppa*-*-hpux11*)	gdb_host=hpux11 ;;
 hppa*-*-hpux*)		gdb_host=hppahpux ;;
-# OBSOLETE hppa*-*-osf*)		gdb_host=hppaosf ;;
 
 i[34567]86-ncr-*)	gdb_host=ncr3000 ;;
-# OBSOLETE i[3456]86-sequent-bsd*)	gdb_host=symmetry ;;  # dynix
-# OBSOLETE i[3456]86-sequent-sysv4*) gdb_host=ptx4 ;;
-# OBSOLETE i[3456]86-sequent-sysv*) gdb_host=ptx ;;
 i[34567]86-*-bsd*)	gdb_host=i386bsd ;;
 i[34567]86-*-dgux*)	gdb_host=i386v4 ;;
 i[34567]86-*-freebsd*)	gdb_host=fbsd ;;
@@ -96,7 +91,6 @@ m68*-sun-sunos3*)	gdb_host=sun3os3 ;;
 m68*-sun-sunos4*)	gdb_host=sun3os4 ;;
 m68*-sun-*)		gdb_host=sun3os4 ;;
 
-# OBSOLETE mips-dec-mach3*)	gdb_host=mipsm3 ;;
 mips-dec-*)		gdb_host=decstation ;;
 mips-little-*)		gdb_host=littlemips ;;
 mips-sgi-irix5*)	gdb_host=irix5 ;;
@@ -151,5 +145,6 @@ vax-*-ultrix*)		gdb_host=vaxult ;;
 
 x86_64-*-linux*)	gdb_host=x86-64linux ;;
 x86_64-*-freebsd*)	gdb_host=fbsd64 ;;
+x86_64-*-netbsd*)	gdb_host=nbsd64 ;;
 
 esac

@@ -1040,6 +1040,15 @@ const struct op_print java_op_print_tab[] =
   {NULL, 0, 0, 0}
 };
 
+const struct exp_descriptor exp_descriptor_java = 
+{
+  print_subexp_standard,
+  operator_length_standard,
+  op_name_standard,
+  dump_subexp_body_standard,
+  evaluate_subexp_java
+};
+
 const struct language_defn java_language_defn =
 {
   "java",			/* Language name */
@@ -1048,9 +1057,9 @@ const struct language_defn java_language_defn =
   range_check_off,
   type_check_off,
   case_sensitive_on,
+  &exp_descriptor_java,
   java_parse,
   java_error,
-  evaluate_subexp_java,
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
   java_emit_char,		/* Function to print a single character */
@@ -1070,6 +1079,7 @@ const struct language_defn java_language_defn =
   0,				/* not c-style arrays */
   0,				/* String lower bound */
   &builtin_type_char,		/* Type of string elements */
+  default_word_break_characters,
   LANG_MAGIC
 };
 

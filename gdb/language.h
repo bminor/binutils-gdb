@@ -167,6 +167,11 @@ struct language_defn
     /* Default case sensitivity */
     enum case_sensitivity la_case_sensitivity;
 
+    /* Definitions related to expression printing, prefixifying, and
+       dumping */
+
+    const struct exp_descriptor *la_exp_desc;
+
     /* Parser function. */
 
     int (*la_parser) (void);
@@ -174,10 +179,6 @@ struct language_defn
     /* Parser error function */
 
     void (*la_error) (char *);
-
-    /* Evaluate an expression. */
-    struct value *(*evaluate_exp) (struct type *, struct expression *,
-				   int *, enum noside);
 
     void (*la_printchar) (int ch, struct ui_file * stream);
 
@@ -265,6 +266,9 @@ struct language_defn
 
     /* Type of elements of strings. */
     struct type **string_char_type;
+
+    /* The list of characters forming word boundaries.  */
+    char *(*la_word_break_characters) (void);
 
     /* Add fields above this point, so the magic number is always last. */
     /* Magic number for compat checking */
@@ -500,5 +504,8 @@ extern CORE_ADDR skip_language_trampoline (CORE_ADDR pc);
 /* Return demangled language symbol, or NULL.  */
 extern char *language_demangle (const struct language_defn *current_language, 
 				const char *mangled, int options);
+
+/* Splitting strings into words.  */
+extern char *default_word_break_characters (void);
 
 #endif /* defined (LANGUAGE_H) */

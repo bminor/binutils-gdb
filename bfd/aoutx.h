@@ -801,6 +801,7 @@ NAME(aout,machine_type) (arch, machine, unknown)
 	case bfd_mach_mipsisa32r2:
 	case bfd_mach_mips5:
 	case bfd_mach_mipsisa64:
+	case bfd_mach_mipsisa64r2:
 	case bfd_mach_mips_sb1:
 	  /* FIXME: These should be MIPS3, MIPS4, MIPS16, MIPS32, etc.  */
 	  arch_flags = M_MIPS2;
@@ -1264,7 +1265,7 @@ bfd_boolean
 NAME(aout,set_section_contents) (abfd, section, location, offset, count)
      bfd *abfd;
      sec_ptr section;
-     PTR location;
+     const PTR location;
      file_ptr offset;
      bfd_size_type count;
 {
@@ -2025,7 +2026,7 @@ error_return:
 }
 
 long
-NAME(aout,get_symtab) (abfd, location)
+NAME(aout,canonicalize_symtab) (abfd, location)
      bfd *abfd;
      asymbol **location;
 {

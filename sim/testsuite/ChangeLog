@@ -1,3 +1,30 @@
+2003-10-10  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/testutils.inc (or_gr_immed): New macro.
+	* sim/frv/fp_exception-fr550.cgs: Write insns using
+	unaligned registers into the program in order to
+	cause the required exceptions.
+	* sim/frv/fp_exception.cgs: Ditto.
+	* sim/frv/regalign.cgs: Ditto.
+
+2003-10-06  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/fr550: New subdirectory.
+	* sim/frv/fr400/*.cgs: Add fr550 as appropriate.
+	* sim/frv/fr500/*.cgs: Add fr550 as appropriate.
+	* sim/frv/interrupts/*.cgs: Add fr550 as appropriate.
+	* sim/frv/interrupts/*-fr550.cgs: New test cases for fr550.
+
+2003-09-19  Michael Snyder  <msnyder@redhat.com>
+
+	* sim/frv/nldqi.cgs: Remove.  This insn was never implemented
+	by Fujitsu.
+
+2003-09-19  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/rstqf.cgs: Use nldq instead of nldqi.
+	* sim/frv/rstq.cgs: Use nldq instead of nldqi.
+
 2003-09-11  Michael Snyder  <msnyder@redhat.com>
 
 	* sim/testsuite/sim/frv/movgs.cgs: Change lcr to spr[273],

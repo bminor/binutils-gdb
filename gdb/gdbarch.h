@@ -43,7 +43,9 @@ struct objfile;
 struct minimal_symbol;
 struct regcache;
 struct reggroup;
+struct regset;
 struct disassemble_info;
+struct target_ops;
 
 extern struct gdbarch *current_gdbarch;
 
@@ -422,9 +424,7 @@ extern void set_gdbarch_dwarf_reg_to_regnum (struct gdbarch *gdbarch, gdbarch_dw
 #define DWARF_REG_TO_REGNUM(dwarf_regnr) (gdbarch_dwarf_reg_to_regnum (current_gdbarch, dwarf_regnr))
 #endif
 
-/* Convert from an sdb register number to an internal gdb register number.
-   This should be defined in tm.h, if REGISTER_NAMES is not set up
-   to map one to one onto the sdb register numbers. */
+/* Convert from an sdb register number to an internal gdb register number. */
 
 typedef int (gdbarch_sdb_reg_to_regnum_ftype) (int sdb_regnr);
 extern int gdbarch_sdb_reg_to_regnum (struct gdbarch *gdbarch, int sdb_regnr);
@@ -456,7 +456,7 @@ extern void set_gdbarch_register_name (struct gdbarch *gdbarch, gdbarch_register
 #define REGISTER_NAME(regnr) (gdbarch_register_name (current_gdbarch, regnr))
 #endif
 
-/* REGISTER_TYPE is a direct replacement for REGISTER_VIRTUAL_TYPE. */
+/* REGISTER_TYPE is a direct replacement for DEPRECATED_REGISTER_VIRTUAL_TYPE. */
 
 extern int gdbarch_register_type_p (struct gdbarch *gdbarch);
 
@@ -464,31 +464,31 @@ typedef struct type * (gdbarch_register_type_ftype) (struct gdbarch *gdbarch, in
 extern struct type * gdbarch_register_type (struct gdbarch *gdbarch, int reg_nr);
 extern void set_gdbarch_register_type (struct gdbarch *gdbarch, gdbarch_register_type_ftype *register_type);
 
-/* REGISTER_TYPE is a direct replacement for REGISTER_VIRTUAL_TYPE. */
+/* REGISTER_TYPE is a direct replacement for DEPRECATED_REGISTER_VIRTUAL_TYPE. */
 
-#if defined (REGISTER_VIRTUAL_TYPE)
-/* Legacy for systems yet to multi-arch REGISTER_VIRTUAL_TYPE */
-#if !defined (REGISTER_VIRTUAL_TYPE_P)
-#define REGISTER_VIRTUAL_TYPE_P() (1)
+#if defined (DEPRECATED_REGISTER_VIRTUAL_TYPE)
+/* Legacy for systems yet to multi-arch DEPRECATED_REGISTER_VIRTUAL_TYPE */
+#if !defined (DEPRECATED_REGISTER_VIRTUAL_TYPE_P)
+#define DEPRECATED_REGISTER_VIRTUAL_TYPE_P() (1)
 #endif
 #endif
 
 extern int gdbarch_deprecated_register_virtual_type_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_VIRTUAL_TYPE_P)
-#error "Non multi-arch definition of REGISTER_VIRTUAL_TYPE"
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_REGISTER_VIRTUAL_TYPE_P)
+#error "Non multi-arch definition of DEPRECATED_REGISTER_VIRTUAL_TYPE"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (REGISTER_VIRTUAL_TYPE_P)
-#define REGISTER_VIRTUAL_TYPE_P() (gdbarch_deprecated_register_virtual_type_p (current_gdbarch))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_REGISTER_VIRTUAL_TYPE_P)
+#define DEPRECATED_REGISTER_VIRTUAL_TYPE_P() (gdbarch_deprecated_register_virtual_type_p (current_gdbarch))
 #endif
 
 typedef struct type * (gdbarch_deprecated_register_virtual_type_ftype) (int reg_nr);
 extern struct type * gdbarch_deprecated_register_virtual_type (struct gdbarch *gdbarch, int reg_nr);
 extern void set_gdbarch_deprecated_register_virtual_type (struct gdbarch *gdbarch, gdbarch_deprecated_register_virtual_type_ftype *deprecated_register_virtual_type);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_VIRTUAL_TYPE)
-#error "Non multi-arch definition of REGISTER_VIRTUAL_TYPE"
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_REGISTER_VIRTUAL_TYPE)
+#error "Non multi-arch definition of DEPRECATED_REGISTER_VIRTUAL_TYPE"
 #endif
-#if !defined (REGISTER_VIRTUAL_TYPE)
-#define REGISTER_VIRTUAL_TYPE(reg_nr) (gdbarch_deprecated_register_virtual_type (current_gdbarch, reg_nr))
+#if !defined (DEPRECATED_REGISTER_VIRTUAL_TYPE)
+#define DEPRECATED_REGISTER_VIRTUAL_TYPE(reg_nr) (gdbarch_deprecated_register_virtual_type (current_gdbarch, reg_nr))
 #endif
 
 /* DEPRECATED_REGISTER_BYTES can be deleted.  The value is computed
@@ -541,29 +541,29 @@ extern void set_gdbarch_deprecated_register_byte (struct gdbarch *gdbarch, gdbar
    DEPRECATED_REGISTER_RAW_SIZE can be deleted.  See: maint print
    registers. */
 
-#if defined (REGISTER_RAW_SIZE)
-/* Legacy for systems yet to multi-arch REGISTER_RAW_SIZE */
-#if !defined (REGISTER_RAW_SIZE_P)
-#define REGISTER_RAW_SIZE_P() (1)
+#if defined (DEPRECATED_REGISTER_RAW_SIZE)
+/* Legacy for systems yet to multi-arch DEPRECATED_REGISTER_RAW_SIZE */
+#if !defined (DEPRECATED_REGISTER_RAW_SIZE_P)
+#define DEPRECATED_REGISTER_RAW_SIZE_P() (1)
 #endif
 #endif
 
 extern int gdbarch_deprecated_register_raw_size_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_RAW_SIZE_P)
-#error "Non multi-arch definition of REGISTER_RAW_SIZE"
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_REGISTER_RAW_SIZE_P)
+#error "Non multi-arch definition of DEPRECATED_REGISTER_RAW_SIZE"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (REGISTER_RAW_SIZE_P)
-#define REGISTER_RAW_SIZE_P() (gdbarch_deprecated_register_raw_size_p (current_gdbarch))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_REGISTER_RAW_SIZE_P)
+#define DEPRECATED_REGISTER_RAW_SIZE_P() (gdbarch_deprecated_register_raw_size_p (current_gdbarch))
 #endif
 
 typedef int (gdbarch_deprecated_register_raw_size_ftype) (int reg_nr);
 extern int gdbarch_deprecated_register_raw_size (struct gdbarch *gdbarch, int reg_nr);
 extern void set_gdbarch_deprecated_register_raw_size (struct gdbarch *gdbarch, gdbarch_deprecated_register_raw_size_ftype *deprecated_register_raw_size);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_RAW_SIZE)
-#error "Non multi-arch definition of REGISTER_RAW_SIZE"
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_REGISTER_RAW_SIZE)
+#error "Non multi-arch definition of DEPRECATED_REGISTER_RAW_SIZE"
 #endif
-#if !defined (REGISTER_RAW_SIZE)
-#define REGISTER_RAW_SIZE(reg_nr) (gdbarch_deprecated_register_raw_size (current_gdbarch, reg_nr))
+#if !defined (DEPRECATED_REGISTER_RAW_SIZE)
+#define DEPRECATED_REGISTER_RAW_SIZE(reg_nr) (gdbarch_deprecated_register_raw_size (current_gdbarch, reg_nr))
 #endif
 
 /* If all registers have identical raw and virtual sizes and those
@@ -571,29 +571,29 @@ extern void set_gdbarch_deprecated_register_raw_size (struct gdbarch *gdbarch, g
    DEPRECATED_REGISTER_VIRTUAL_SIZE can be deleted.  See: maint print
    registers. */
 
-#if defined (REGISTER_VIRTUAL_SIZE)
-/* Legacy for systems yet to multi-arch REGISTER_VIRTUAL_SIZE */
-#if !defined (REGISTER_VIRTUAL_SIZE_P)
-#define REGISTER_VIRTUAL_SIZE_P() (1)
+#if defined (DEPRECATED_REGISTER_VIRTUAL_SIZE)
+/* Legacy for systems yet to multi-arch DEPRECATED_REGISTER_VIRTUAL_SIZE */
+#if !defined (DEPRECATED_REGISTER_VIRTUAL_SIZE_P)
+#define DEPRECATED_REGISTER_VIRTUAL_SIZE_P() (1)
 #endif
 #endif
 
 extern int gdbarch_deprecated_register_virtual_size_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_VIRTUAL_SIZE_P)
-#error "Non multi-arch definition of REGISTER_VIRTUAL_SIZE"
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_REGISTER_VIRTUAL_SIZE_P)
+#error "Non multi-arch definition of DEPRECATED_REGISTER_VIRTUAL_SIZE"
 #endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (REGISTER_VIRTUAL_SIZE_P)
-#define REGISTER_VIRTUAL_SIZE_P() (gdbarch_deprecated_register_virtual_size_p (current_gdbarch))
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DEPRECATED_REGISTER_VIRTUAL_SIZE_P)
+#define DEPRECATED_REGISTER_VIRTUAL_SIZE_P() (gdbarch_deprecated_register_virtual_size_p (current_gdbarch))
 #endif
 
 typedef int (gdbarch_deprecated_register_virtual_size_ftype) (int reg_nr);
 extern int gdbarch_deprecated_register_virtual_size (struct gdbarch *gdbarch, int reg_nr);
 extern void set_gdbarch_deprecated_register_virtual_size (struct gdbarch *gdbarch, gdbarch_deprecated_register_virtual_size_ftype *deprecated_register_virtual_size);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_VIRTUAL_SIZE)
-#error "Non multi-arch definition of REGISTER_VIRTUAL_SIZE"
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DEPRECATED_REGISTER_VIRTUAL_SIZE)
+#error "Non multi-arch definition of DEPRECATED_REGISTER_VIRTUAL_SIZE"
 #endif
-#if !defined (REGISTER_VIRTUAL_SIZE)
-#define REGISTER_VIRTUAL_SIZE(reg_nr) (gdbarch_deprecated_register_virtual_size (current_gdbarch, reg_nr))
+#if !defined (DEPRECATED_REGISTER_VIRTUAL_SIZE)
+#define DEPRECATED_REGISTER_VIRTUAL_SIZE(reg_nr) (gdbarch_deprecated_register_virtual_size (current_gdbarch, reg_nr))
 #endif
 
 /* DEPRECATED_MAX_REGISTER_RAW_SIZE can be deleted.  It has been
@@ -1393,16 +1393,6 @@ extern void set_gdbarch_integer_to_address (struct gdbarch *gdbarch, gdbarch_int
 #define INTEGER_TO_ADDRESS(type, buf) (gdbarch_integer_to_address (current_gdbarch, type, buf))
 #endif
 
-typedef int (gdbarch_return_value_on_stack_ftype) (struct type *type);
-extern int gdbarch_return_value_on_stack (struct gdbarch *gdbarch, struct type *type);
-extern void set_gdbarch_return_value_on_stack (struct gdbarch *gdbarch, gdbarch_return_value_on_stack_ftype *return_value_on_stack);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (RETURN_VALUE_ON_STACK)
-#error "Non multi-arch definition of RETURN_VALUE_ON_STACK"
-#endif
-#if !defined (RETURN_VALUE_ON_STACK)
-#define RETURN_VALUE_ON_STACK(type) (gdbarch_return_value_on_stack (current_gdbarch, type))
-#endif
-
 #if defined (DEPRECATED_POP_FRAME)
 /* Legacy for systems yet to multi-arch DEPRECATED_POP_FRAME */
 #if !defined (DEPRECATED_POP_FRAME_P)
@@ -1455,6 +1445,34 @@ extern void set_gdbarch_deprecated_store_struct_return (struct gdbarch *gdbarch,
 #define DEPRECATED_STORE_STRUCT_RETURN(addr, sp) (gdbarch_deprecated_store_struct_return (current_gdbarch, addr, sp))
 #endif
 
+/* It has been suggested that this, well actually its predecessor,
+   should take the type/value of the function to be called and not the
+   return type.  This is left as an exercise for the reader. */
+
+extern int gdbarch_return_value_p (struct gdbarch *gdbarch);
+
+typedef enum return_value_convention (gdbarch_return_value_ftype) (struct gdbarch *gdbarch, struct type *valtype, struct regcache *regcache, void *readbuf, const void *writebuf);
+extern enum return_value_convention gdbarch_return_value (struct gdbarch *gdbarch, struct type *valtype, struct regcache *regcache, void *readbuf, const void *writebuf);
+extern void set_gdbarch_return_value (struct gdbarch *gdbarch, gdbarch_return_value_ftype *return_value);
+
+/* The deprecated methods RETURN_VALUE_ON_STACK, EXTRACT_RETURN_VALUE,
+   STORE_RETURN_VALUE and USE_STRUCT_CONVENTION have all been folded
+   into RETURN_VALUE.  For the moment do not try to fold in
+   EXTRACT_STRUCT_VALUE_ADDRESS as, dependant on the ABI, the debug
+   info, and the level of effort, it may well be possible to find the
+   address of a structure being return on the stack.  Someone else can
+   make that change. */
+
+typedef int (gdbarch_return_value_on_stack_ftype) (struct type *type);
+extern int gdbarch_return_value_on_stack (struct gdbarch *gdbarch, struct type *type);
+extern void set_gdbarch_return_value_on_stack (struct gdbarch *gdbarch, gdbarch_return_value_on_stack_ftype *return_value_on_stack);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (RETURN_VALUE_ON_STACK)
+#error "Non multi-arch definition of RETURN_VALUE_ON_STACK"
+#endif
+#if !defined (RETURN_VALUE_ON_STACK)
+#define RETURN_VALUE_ON_STACK(type) (gdbarch_return_value_on_stack (current_gdbarch, type))
+#endif
+
 typedef void (gdbarch_extract_return_value_ftype) (struct type *type, struct regcache *regcache, void *valbuf);
 extern void gdbarch_extract_return_value (struct gdbarch *gdbarch, struct type *type, struct regcache *regcache, void *valbuf);
 extern void set_gdbarch_extract_return_value (struct gdbarch *gdbarch, gdbarch_extract_return_value_ftype *extract_return_value);
@@ -1493,6 +1511,16 @@ extern void set_gdbarch_deprecated_store_return_value (struct gdbarch *gdbarch, 
 #endif
 #if !defined (DEPRECATED_STORE_RETURN_VALUE)
 #define DEPRECATED_STORE_RETURN_VALUE(type, valbuf) (gdbarch_deprecated_store_return_value (current_gdbarch, type, valbuf))
+#endif
+
+typedef int (gdbarch_use_struct_convention_ftype) (int gcc_p, struct type *value_type);
+extern int gdbarch_use_struct_convention (struct gdbarch *gdbarch, int gcc_p, struct type *value_type);
+extern void set_gdbarch_use_struct_convention (struct gdbarch *gdbarch, gdbarch_use_struct_convention_ftype *use_struct_convention);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (USE_STRUCT_CONVENTION)
+#error "Non multi-arch definition of USE_STRUCT_CONVENTION"
+#endif
+#if !defined (USE_STRUCT_CONVENTION)
+#define USE_STRUCT_CONVENTION(gcc_p, value_type) (gdbarch_use_struct_convention (current_gdbarch, gcc_p, value_type))
 #endif
 
 #if defined (EXTRACT_STRUCT_VALUE_ADDRESS)
@@ -1543,16 +1571,6 @@ extern void set_gdbarch_deprecated_extract_struct_value_address (struct gdbarch 
 #endif
 #if !defined (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS)
 #define DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS(regbuf) (gdbarch_deprecated_extract_struct_value_address (current_gdbarch, regbuf))
-#endif
-
-typedef int (gdbarch_use_struct_convention_ftype) (int gcc_p, struct type *value_type);
-extern int gdbarch_use_struct_convention (struct gdbarch *gdbarch, int gcc_p, struct type *value_type);
-extern void set_gdbarch_use_struct_convention (struct gdbarch *gdbarch, gdbarch_use_struct_convention_ftype *use_struct_convention);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (USE_STRUCT_CONVENTION)
-#error "Non multi-arch definition of USE_STRUCT_CONVENTION"
-#endif
-#if !defined (USE_STRUCT_CONVENTION)
-#define USE_STRUCT_CONVENTION(gcc_p, value_type) (gdbarch_use_struct_convention (current_gdbarch, gcc_p, value_type))
 #endif
 
 #if defined (DEPRECATED_FRAME_INIT_SAVED_REGS)
@@ -1644,6 +1662,12 @@ extern void set_gdbarch_breakpoint_from_pc (struct gdbarch *gdbarch, gdbarch_bre
 #if !defined (BREAKPOINT_FROM_PC)
 #define BREAKPOINT_FROM_PC(pcptr, lenptr) (gdbarch_breakpoint_from_pc (current_gdbarch, pcptr, lenptr))
 #endif
+
+extern int gdbarch_adjust_breakpoint_address_p (struct gdbarch *gdbarch);
+
+typedef CORE_ADDR (gdbarch_adjust_breakpoint_address_ftype) (struct gdbarch *gdbarch, CORE_ADDR bpaddr);
+extern CORE_ADDR gdbarch_adjust_breakpoint_address (struct gdbarch *gdbarch, CORE_ADDR bpaddr);
+extern void set_gdbarch_adjust_breakpoint_address (struct gdbarch *gdbarch, gdbarch_adjust_breakpoint_address_ftype *adjust_breakpoint_address);
 
 typedef int (gdbarch_memory_insert_breakpoint_ftype) (CORE_ADDR addr, char *contents_cache);
 extern int gdbarch_memory_insert_breakpoint (struct gdbarch *gdbarch, CORE_ADDR addr, char *contents_cache);
@@ -1939,6 +1963,9 @@ typedef CORE_ADDR (gdbarch_frame_align_ftype) (struct gdbarch *gdbarch, CORE_ADD
 extern CORE_ADDR gdbarch_frame_align (struct gdbarch *gdbarch, CORE_ADDR address);
 extern void set_gdbarch_frame_align (struct gdbarch *gdbarch, gdbarch_frame_align_ftype *frame_align);
 
+/* DEPRECATED_REG_STRUCT_HAS_ADDR has been replaced by
+   stabs_argument_has_addr. */
+
 #if defined (DEPRECATED_REG_STRUCT_HAS_ADDR)
 /* Legacy for systems yet to multi-arch DEPRECATED_REG_STRUCT_HAS_ADDR */
 #if !defined (DEPRECATED_REG_STRUCT_HAS_ADDR_P)
@@ -1963,6 +1990,10 @@ extern void set_gdbarch_deprecated_reg_struct_has_addr (struct gdbarch *gdbarch,
 #if !defined (DEPRECATED_REG_STRUCT_HAS_ADDR)
 #define DEPRECATED_REG_STRUCT_HAS_ADDR(gcc_p, type) (gdbarch_deprecated_reg_struct_has_addr (current_gdbarch, gcc_p, type))
 #endif
+
+typedef int (gdbarch_stabs_argument_has_addr_ftype) (struct gdbarch *gdbarch, struct type *type);
+extern int gdbarch_stabs_argument_has_addr (struct gdbarch *gdbarch, struct type *type);
+extern void set_gdbarch_stabs_argument_has_addr (struct gdbarch *gdbarch, gdbarch_stabs_argument_has_addr_ftype *stabs_argument_has_addr);
 
 extern int gdbarch_frame_red_zone_size (struct gdbarch *gdbarch);
 extern void set_gdbarch_frame_red_zone_size (struct gdbarch *gdbarch, int frame_red_zone_size);
@@ -2009,15 +2040,9 @@ extern void set_gdbarch_long_double_format (struct gdbarch *gdbarch, const struc
 #define TARGET_LONG_DOUBLE_FORMAT (gdbarch_long_double_format (current_gdbarch))
 #endif
 
-typedef CORE_ADDR (gdbarch_convert_from_func_ptr_addr_ftype) (CORE_ADDR addr);
-extern CORE_ADDR gdbarch_convert_from_func_ptr_addr (struct gdbarch *gdbarch, CORE_ADDR addr);
+typedef CORE_ADDR (gdbarch_convert_from_func_ptr_addr_ftype) (struct gdbarch *gdbarch, CORE_ADDR addr, struct target_ops *targ);
+extern CORE_ADDR gdbarch_convert_from_func_ptr_addr (struct gdbarch *gdbarch, CORE_ADDR addr, struct target_ops *targ);
 extern void set_gdbarch_convert_from_func_ptr_addr (struct gdbarch *gdbarch, gdbarch_convert_from_func_ptr_addr_ftype *convert_from_func_ptr_addr);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (CONVERT_FROM_FUNC_PTR_ADDR)
-#error "Non multi-arch definition of CONVERT_FROM_FUNC_PTR_ADDR"
-#endif
-#if !defined (CONVERT_FROM_FUNC_PTR_ADDR)
-#define CONVERT_FROM_FUNC_PTR_ADDR(addr) (gdbarch_convert_from_func_ptr_addr (current_gdbarch, addr))
-#endif
 
 /* On some machines there are bits in addresses which are not really
    part of the address, but are used by the kernel, the hardware, etc.
@@ -2107,6 +2132,20 @@ extern void set_gdbarch_skip_trampoline_code (struct gdbarch *gdbarch, gdbarch_s
 #endif
 #if !defined (SKIP_TRAMPOLINE_CODE)
 #define SKIP_TRAMPOLINE_CODE(pc) (gdbarch_skip_trampoline_code (current_gdbarch, pc))
+#endif
+
+/* If IN_SOLIB_DYNSYM_RESOLVE_CODE returns true, and SKIP_SOLIB_RESOLVER
+   evaluates non-zero, this is the address where the debugger will place
+   a step-resume breakpoint to get us past the dynamic linker. */
+
+typedef CORE_ADDR (gdbarch_skip_solib_resolver_ftype) (CORE_ADDR pc);
+extern CORE_ADDR gdbarch_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc);
+extern void set_gdbarch_skip_solib_resolver (struct gdbarch *gdbarch, gdbarch_skip_solib_resolver_ftype *skip_solib_resolver);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (SKIP_SOLIB_RESOLVER)
+#error "Non multi-arch definition of SKIP_SOLIB_RESOLVER"
+#endif
+#if !defined (SKIP_SOLIB_RESOLVER)
+#define SKIP_SOLIB_RESOLVER(pc) (gdbarch_skip_solib_resolver (current_gdbarch, pc))
 #endif
 
 /* For SVR4 shared libraries, each call goes through a small piece of
@@ -2360,6 +2399,15 @@ extern void set_gdbarch_fetch_pointer_argument (struct gdbarch *gdbarch, gdbarch
 #define FETCH_POINTER_ARGUMENT(frame, argi, type) (gdbarch_fetch_pointer_argument (current_gdbarch, frame, argi, type))
 #endif
 
+/* Return the appropriate register set for a core file section with
+   name SECT_NAME and size SECT_SIZE. */
+
+extern int gdbarch_regset_from_core_section_p (struct gdbarch *gdbarch);
+
+typedef const struct regset * (gdbarch_regset_from_core_section_ftype) (struct gdbarch *gdbarch, const char *sect_name, size_t sect_size);
+extern const struct regset * gdbarch_regset_from_core_section (struct gdbarch *gdbarch, const char *sect_name, size_t sect_size);
+extern void set_gdbarch_regset_from_core_section (struct gdbarch *gdbarch, gdbarch_regset_from_core_section_ftype *regset_from_core_section);
+
 extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 
 
@@ -2507,6 +2555,27 @@ extern void *gdbarch_obstack_zalloc (struct gdbarch *gdbarch, long size);
 extern int gdbarch_update_p (struct gdbarch_info info);
 
 
+/* Helper function.  Find an architecture matching info.
+
+   INFO should be initialized using gdbarch_info_init, relevant fields
+   set, and then finished using gdbarch_info_fill.
+
+   Returns the corresponding architecture, or NULL if no matching
+   architecture was found.  "current_gdbarch" is not updated.  */
+
+extern struct gdbarch *gdbarch_find_by_info (struct gdbarch_info info);
+
+
+/* Helper function.  Set the global "current_gdbarch" to "gdbarch".
+
+   FIXME: kettenis/20031124: Of the functions that follow, only
+   gdbarch_from_bfd is supposed to survive.  The others will
+   dissappear since in the future GDB will (hopefully) be truly
+   multi-arch.  However, for now we're still stuck with the concept of
+   a single active architecture.  */
+
+extern void deprecated_current_gdbarch_select_hack (struct gdbarch *gdbarch);
+
 
 /* Register per-architecture data-pointer.
 
@@ -2595,11 +2664,6 @@ extern void set_gdbarch_from_file (bfd *);
    our list.  */
 
 extern void initialize_current_architecture (void);
-
-/* For non-multiarched targets, do any initialization of the default
-   gdbarch object necessary after the _initialize_MODULE functions
-   have run.  */
-extern void initialize_non_multiarch (void);
 
 /* gdbarch trace variable */
 extern int gdbarch_debug;

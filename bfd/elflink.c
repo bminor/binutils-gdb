@@ -353,9 +353,8 @@ _bfd_elf_link_record_dynamic_symbol (struct bfd_link_info *info,
   if (h->dynindx == -1)
     {
       struct elf_strtab_hash *dynstr;
-      char *p, *alc;
+      char *p;
       const char *name;
-      bfd_boolean copy;
       bfd_size_type indx;
 
       /* XXX: The ABI draft says the linker must turn hidden and
@@ -393,28 +392,18 @@ _bfd_elf_link_record_dynamic_symbol (struct bfd_link_info *info,
 	 table.  */
       name = h->root.root.string;
       p = strchr (name, ELF_VER_CHR);
-      if (p == NULL)
-	{
-	  alc = NULL;
-	  copy = FALSE;
-	}
-      else
-	{
-	  size_t len = p - name + 1;
+      if (p != NULL)
+	/* We know that the p points into writable memory.  In fact,
+	   there are only a few symbols that have read-only names, being
+	   those like _GLOBAL_OFFSET_TABLE_ that are created specially
+	   by the backends.  Most symbols will have names pointing into
+	   an ELF string table read from a file, or to objalloc memory.  */
+	*p = 0;
 
-	  alc = bfd_malloc (len);
-	  if (alc == NULL)
-	    return FALSE;
-	  memcpy (alc, name, len - 1);
-	  alc[len - 1] = '\0';
-	  name = alc;
-	  copy = TRUE;
-	}
+      indx = _bfd_elf_strtab_add (dynstr, name, p != NULL);
 
-      indx = _bfd_elf_strtab_add (dynstr, name, copy);
-
-      if (alc != NULL)
-	free (alc);
+      if (p != NULL)
+	*p = ELF_VER_CHR;
 
       if (indx == (bfd_size_type) -1)
 	return FALSE;
@@ -962,12 +951,16 @@ _bfd_elf_merge_symbol (bfd *abfd,
   /* It's OK to change the type if either the existing symbol or the
      new symbol is weak unless it comes from a DT_NEEDED entry of
      a shared object, in which case, the DT_NEEDED entry may not be
-     required at the run time.  */
+     required at the run time. The type change is also OK if the
+     old symbol is undefined and the new symbol is defined.  */
 
   if ((! dt_needed && oldweakdef)
       || oldweakundef
       || newweakdef
-      || newweakundef)
+      || newweakundef
+      || (newdef
+	  && (h->root.type == bfd_link_hash_undefined
+	      || h->root.type == bfd_link_hash_undefweak)))
     *type_change_ok = TRUE;
 
   /* It's OK to change the size if either the existing symbol or the
@@ -1501,22 +1494,18 @@ _bfd_elf_export_symbol (struct elf_link_hash_entry *h, void *data)
 
       for (t = eif->verdefs; t != NULL; t = t->next)
 	{
-	  if (t->globals != NULL)
+	  if (t->globals.list != NULL)
 	    {
-	      for (d = t->globals; d != NULL; d = d->next)
-		{
-		  if ((*d->match) (d, h->root.root.string))
-		    goto doit;
-		}
+	      d = (*t->match) (&t->globals, NULL, h->root.root.string);
+	      if (d != NULL)
+		goto doit;
 	    }
 
-	  if (t->locals != NULL)
+	  if (t->locals.list != NULL)
 	    {
-	      for (d = t->locals ; d != NULL; d = d->next)
-		{
-		  if ((*d->match) (d, h->root.root.string))
-		    return TRUE;
-		}
+	      d = (*t->match) (&t->locals, NULL, h->root.root.string);
+	      if (d != NULL)
+		return TRUE;
 	    }
 	}
 
@@ -1695,31 +1684,19 @@ _bfd_elf_link_assign_sym_version (struct elf_link_hash_entry *h, void *data)
 	      t->used = TRUE;
 	      d = NULL;
 
-	      if (t->globals != NULL)
-		{
-		  for (d = t->globals; d != NULL; d = d->next)
-		    if ((*d->match) (d, alc))
-		      break;
-		}
+	      if (t->globals.list != NULL)
+		d = (*t->match) (&t->globals, NULL, alc);
 
 	      /* See if there is anything to force this symbol to
 		 local scope.  */
-	      if (d == NULL && t->locals != NULL)
+	      if (d == NULL && t->locals.list != NULL)
 		{
-		  for (d = t->locals; d != NULL; d = d->next)
-		    {
-		      if ((*d->match) (d, alc))
-			{
-			  if (h->dynindx != -1
-			      && info->shared
-			      && ! info->export_dynamic)
-			    {
-			      (*bed->elf_backend_hide_symbol) (info, h, TRUE);
-			    }
-
-			  break;
-			}
-		    }
+		  d = (*t->match) (&t->locals, NULL, alc);
+		  if (d != NULL
+		      && h->dynindx != -1
+		      && info->shared
+		      && ! info->export_dynamic)
+		    (*bed->elf_backend_hide_symbol) (info, h, TRUE);
 		}
 
 	      free (alc);
@@ -1740,18 +1717,14 @@ _bfd_elf_link_assign_sym_version (struct elf_link_hash_entry *h, void *data)
 	    return TRUE;
 
 	  amt = sizeof *t;
-	  t = bfd_alloc (sinfo->output_bfd, amt);
+	  t = bfd_zalloc (sinfo->output_bfd, amt);
 	  if (t == NULL)
 	    {
 	      sinfo->failed = TRUE;
 	      return FALSE;
 	    }
 
-	  t->next = NULL;
 	  t->name = p;
-	  t->globals = NULL;
-	  t->locals = NULL;
-	  t->deps = NULL;
 	  t->name_indx = (unsigned int) -1;
 	  t->used = TRUE;
 
@@ -1797,30 +1770,26 @@ _bfd_elf_link_assign_sym_version (struct elf_link_hash_entry *h, void *data)
       local_ver = NULL;
       for (t = sinfo->verdefs; t != NULL; t = t->next)
 	{
-	  if (t->globals != NULL)
+	  if (t->globals.list != NULL)
 	    {
 	      bfd_boolean matched;
 
 	      matched = FALSE;
-	      for (d = t->globals; d != NULL; d = d->next)
-		{
-		  if ((*d->match) (d, h->root.root.string))
-		    {
-		      if (d->symver)
-			matched = TRUE;
-		      else
-			{
-			  /* There is a version without definition.  Make
-			     the symbol the default definition for this
-			     version.  */
-			  h->verinfo.vertree = t;
-			  local_ver = NULL;
-			  d->script = 1;
-			  break;
-			}
-		    }
-		}
-
+	      d = NULL;
+	      while ((d = (*t->match) (&t->globals, d,
+				       h->root.root.string)) != NULL)
+		if (d->symver)
+		  matched = TRUE;
+		else
+		  {
+		    /* There is a version without definition.  Make
+		       the symbol the default definition for this
+		       version.  */
+		    h->verinfo.vertree = t;
+		    local_ver = NULL;
+		    d->script = 1;
+		    break;
+		  }
 	      if (d != NULL)
 		break;
 	      else if (matched)
@@ -1829,19 +1798,18 @@ _bfd_elf_link_assign_sym_version (struct elf_link_hash_entry *h, void *data)
 		(*bed->elf_backend_hide_symbol) (info, h, TRUE);
 	    }
 
-	  if (t->locals != NULL)
+	  if (t->locals.list != NULL)
 	    {
-	      for (d = t->locals; d != NULL; d = d->next)
+	      d = NULL;
+	      while ((d = (*t->match) (&t->locals, d,
+				       h->root.root.string)) != NULL)
 		{
+		  local_ver = t;
 		  /* If the match is "*", keep looking for a more
-		     explicit, perhaps even global, match.  */
-		  if (d->pattern[0] == '*' && d->pattern[1] == '\0')
-		    local_ver = t;
-		  else if ((*d->match) (d, h->root.root.string))
-		    {
-		      local_ver = t;
-		      break;
-		    }
+		     explicit, perhaps even global, match.
+		     XXX: Shouldn't this be !d->wildcard instead?  */
+		  if (d->pattern[0] != '*' || d->pattern[1] != '\0')
+		    break;
 		}
 
 	      if (d != NULL)
@@ -1875,6 +1843,7 @@ _bfd_elf_link_assign_sym_version (struct elf_link_hash_entry *h, void *data)
 
 static bfd_boolean
 elf_link_read_relocs_from_section (bfd *abfd,
+				   asection *sec,
 				   Elf_Internal_Shdr *shdr,
 				   void *external_relocs,
 				   Elf_Internal_Rela *internal_relocs)
@@ -1884,6 +1853,8 @@ elf_link_read_relocs_from_section (bfd *abfd,
   const bfd_byte *erela;
   const bfd_byte *erelaend;
   Elf_Internal_Rela *irela;
+  Elf_Internal_Shdr *symtab_hdr;
+  size_t nsyms;
 
   /* If there aren't any relocations, that's OK.  */
   if (!shdr)
@@ -1896,6 +1867,9 @@ elf_link_read_relocs_from_section (bfd *abfd,
   /* Read the relocations.  */
   if (bfd_bread (external_relocs, shdr->sh_size, abfd) != shdr->sh_size)
     return FALSE;
+
+  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+  nsyms = symtab_hdr->sh_size / symtab_hdr->sh_entsize;
 
   bed = get_elf_backend_data (abfd);
 
@@ -1915,7 +1889,21 @@ elf_link_read_relocs_from_section (bfd *abfd,
   irela = internal_relocs;
   while (erela < erelaend)
     {
+      bfd_vma r_symndx;
+
       (*swap_in) (abfd, erela, irela);
+      r_symndx = ELF32_R_SYM (irela->r_info);
+      if (bed->s->arch_size == 64)
+	r_symndx >>= 24;
+      if ((size_t) r_symndx >= nsyms)
+	{
+	  (*_bfd_error_handler)
+	    (_("%s: bad reloc symbol index (0x%lx >= 0x%lx) for offset 0x%lx in section `%s'"),
+	     bfd_archive_filename (abfd), (unsigned long) r_symndx,
+	     (unsigned long) nsyms, irela->r_offset, sec->name);
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
+	}
       irela += bed->s->int_rels_per_ext_rel;
       erela += shdr->sh_entsize;
     }
@@ -1979,12 +1967,12 @@ _bfd_elf_link_read_relocs (bfd *abfd,
       external_relocs = alloc1;
     }
 
-  if (!elf_link_read_relocs_from_section (abfd, rel_hdr,
+  if (!elf_link_read_relocs_from_section (abfd, o, rel_hdr,
 					  external_relocs,
 					  internal_relocs))
     goto error_return;
   if (!elf_link_read_relocs_from_section
-      (abfd,
+      (abfd, o,
        elf_section_data (o)->rel_hdr2,
        ((bfd_byte *) external_relocs) + rel_hdr->sh_size,
        internal_relocs + (NUM_SHDR_ENTRIES (rel_hdr)
@@ -2530,4 +2518,32 @@ _bfd_elf_symbol_refs_local_p (struct elf_link_hash_entry *h,
      symbols be treated as dynamic symbols, even when we know that the
      dynamic linker will resolve them locally.  */
   return local_protected;
+}
+
+/* Caches some TLS segment info, and ensures that the TLS segment vma is
+   aligned.  Returns the first TLS output section.  */
+
+struct bfd_section *
+_bfd_elf_tls_setup (bfd *obfd, struct bfd_link_info *info)
+{
+  struct bfd_section *sec, *tls;
+  unsigned int align = 0;
+
+  for (sec = obfd->sections; sec != NULL; sec = sec->next)
+    if ((sec->flags & SEC_THREAD_LOCAL) != 0)
+      break;
+  tls = sec;
+
+  for (; sec != NULL && (sec->flags & SEC_THREAD_LOCAL) != 0; sec = sec->next)
+    if (sec->alignment_power > align)
+      align = sec->alignment_power;
+
+  elf_hash_table (info)->tls_sec = tls;
+
+  /* Ensure the alignment of the first section is the largest alignment,
+     so that the tls segment starts aligned.  */
+  if (tls != NULL)
+    tls->alignment_power = align;
+
+  return tls;
 }

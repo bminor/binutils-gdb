@@ -225,7 +225,7 @@ struct elf_reloc_map {
   unsigned char howto_index;
 };
 
-/* An array mapping BFD reloc codes to SH ELF relocs.  */
+/* An array mapping BFD reloc codes to H8 ELF relocs.  */
 
 static const struct elf_reloc_map h8_reloc_map[] = {
   { BFD_RELOC_NONE, R_H8_NONE_X },
@@ -435,7 +435,7 @@ elf32_h8_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	{
 	  sym = local_syms + r_symndx;
 	  sec = local_sections[r_symndx];
-	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, sec, rel);
+	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
 	}
       else
 	{

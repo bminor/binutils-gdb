@@ -43,6 +43,8 @@
 #include "stack.h"
 #include "gdb_assert.h"
 #include "dictionary.h"
+#include "reggroups.h"
+#include "regcache.h"
 
 /* Prototypes for exported functions. */
 
@@ -53,8 +55,6 @@ void locals_info (char *, int);
 void (*selected_frame_level_changed_hook) (int);
 
 void _initialize_stack (void);
-
-void return_command (char *, int);
 
 /* Prototypes for local functions. */
 
@@ -968,8 +968,8 @@ frame_info (char *addr_exp, int from_tty)
     printf_filtered (" source language %s.\n",
 		     language_str (s->language));
 
-#ifdef PRINT_EXTRA_FRAME_INFO
-  PRINT_EXTRA_FRAME_INFO (fi);
+#ifdef DEPRECATED_PRINT_EXTRA_FRAME_INFO
+  DEPRECATED_PRINT_EXTRA_FRAME_INFO (fi);
 #endif
 
   {
@@ -1021,7 +1021,7 @@ frame_info (char *addr_exp, int from_tty)
   }
 
   if (DEPRECATED_FRAME_INIT_SAVED_REGS_P ()
-      && get_frame_saved_regs (fi) == NULL)
+      && deprecated_get_frame_saved_regs (fi) == NULL)
     DEPRECATED_FRAME_INIT_SAVED_REGS (fi);
   /* Print as much information as possible on the location of all the
      registers.  */
@@ -1054,7 +1054,7 @@ frame_info (char *addr_exp, int from_tty)
 	    /* NOTE: cagney/2003-05-22: This is assuming that the
                stack pointer was packed as an unsigned integer.  That
                may or may not be valid.  */
-	    sp = extract_unsigned_integer (value, REGISTER_RAW_SIZE (SP_REGNUM));
+	    sp = extract_unsigned_integer (value, DEPRECATED_REGISTER_RAW_SIZE (SP_REGNUM));
 	    printf_filtered (" Previous frame's sp is ");
 	    print_address_numeric (sp, 1, gdb_stdout);
 	    printf_filtered ("\n");
@@ -1079,7 +1079,8 @@ frame_info (char *addr_exp, int from_tty)
     count = 0;
     numregs = NUM_REGS + NUM_PSEUDO_REGS;
     for (i = 0; i < numregs; i++)
-      if (i != SP_REGNUM)
+      if (i != SP_REGNUM
+	  && gdbarch_register_reggroup_p (current_gdbarch, i, all_reggroup))
 	{
 	  /* Find out the location of the saved register without
              fetching the corresponding value.  */
@@ -1488,7 +1489,6 @@ print_frame_label_vars (struct frame_info *fi, int this_level_only,
     }
 }
 
-/* ARGSUSED */
 void
 locals_info (char *args, int from_tty)
 {
@@ -1736,7 +1736,6 @@ current_frame_command (char *level_exp, int from_tty)
 /* Select the frame up one or COUNT stack levels
    from the previously selected frame, and print it briefly.  */
 
-/* ARGSUSED */
 static void
 up_silently_base (char *count_exp)
 {
@@ -1773,7 +1772,6 @@ up_command (char *count_exp, int from_tty)
 /* Select the frame down one or COUNT stack levels
    from the previously selected frame, and print it briefly.  */
 
-/* ARGSUSED */
 static void
 down_silently_base (char *count_exp)
 {
@@ -1802,7 +1800,6 @@ down_silently_base (char *count_exp)
   selected_frame_level_changed_event (frame_relative_level (deprecated_selected_frame));
 }
 
-/* ARGSUSED */
 static void
 down_silently_command (char *count_exp, int from_tty)
 {
@@ -1821,94 +1818,147 @@ void
 return_command (char *retval_exp, int from_tty)
 {
   struct symbol *thisfun;
-  CORE_ADDR selected_frame_addr;
-  CORE_ADDR selected_frame_pc;
-  struct frame_info *frame;
   struct value *return_value = NULL;
+  const char *query_prefix = "";
 
-  if (deprecated_selected_frame == NULL)
+  /* FIXME: cagney/2003-10-20: Perform a minimal existance test on the
+     target.  If that fails, error out.  For the moment don't rely on
+     get_selected_frame as it's error message is the the singularly
+     obscure "No registers".  */
+  if (!target_has_registers)
     error ("No selected frame.");
-  thisfun = get_frame_function (deprecated_selected_frame);
-  selected_frame_addr = get_frame_base (deprecated_selected_frame);
-  selected_frame_pc = get_frame_pc (deprecated_selected_frame);
+  thisfun = get_frame_function (get_selected_frame ());
 
-  /* Compute the return value (if any -- possibly getting errors here).  */
-
+  /* Compute the return value.  If the computation triggers an error,
+     let it bail.  If the return type can't be handled, set
+     RETURN_VALUE to NULL, and QUERY_PREFIX to an informational
+     message.  */
   if (retval_exp)
     {
       struct type *return_type = NULL;
 
+      /* Compute the return value.  Should the computation fail, this
+         call throws an error.  */
       return_value = parse_and_eval (retval_exp);
 
-      /* Cast return value to the return type of the function.  */
+      /* Cast return value to the return type of the function.  Should
+         the cast fail, this call throws an error.  */
       if (thisfun != NULL)
 	return_type = TYPE_TARGET_TYPE (SYMBOL_TYPE (thisfun));
       if (return_type == NULL)
 	return_type = builtin_type_int;
       return_value = value_cast (return_type, return_value);
 
-      /* Make sure we have fully evaluated it, since
-         it might live in the stack frame we're about to pop.  */
+      /* Make sure the value is fully evaluated.  It may live in the
+         stack frame we're about to pop.  */
       if (VALUE_LAZY (return_value))
 	value_fetch_lazy (return_value);
+
+      /* Check that this architecture can handle the function's return
+         type.  In the case of "struct convention", still do the
+         "return", just also warn the user.  */
+      if (gdbarch_return_value_p (current_gdbarch))
+	{
+	  if (gdbarch_return_value (current_gdbarch, return_type,
+				    NULL, NULL, NULL)
+	      == RETURN_VALUE_STRUCT_CONVENTION)
+	    return_value = NULL;
+	}
+      else
+	{
+	  /* NOTE: cagney/2003-10-20: The double check is to ensure
+	     that the STORE_RETURN_VALUE call, further down, is not
+	     applied to a struct or union return-value.  It wasn't
+	     allowed previously, so don't start allowing it now.  An
+	     ABI that uses "register convention" to return small
+	     structures and should implement the "return_value"
+	     architecture method.  */
+	  if (using_struct_return (return_type, 0)
+	      || TYPE_CODE (return_type) == TYPE_CODE_STRUCT
+	      || TYPE_CODE (return_type) == TYPE_CODE_UNION)
+	    return_value = NULL;
+	}
+      if (return_value == NULL)
+	query_prefix = "\
+The location at which to store the function's return value is unknown.\n";
     }
 
-  /* If interactive, require confirmation.  */
-
+  /* Does an interactive user really want to do this?  Include
+     information, such as how well GDB can handle the return value, in
+     the query message.  */
   if (from_tty)
     {
-      if (thisfun != 0)
-	{
-	  if (!query ("Make %s return now? ", SYMBOL_PRINT_NAME (thisfun)))
-	    {
-	      error ("Not confirmed.");
-	      /* NOTREACHED */
-	    }
-	}
-      else if (!query ("Make selected stack frame return now? "))
-	error ("Not confirmed.");
+      int confirmed;
+      if (thisfun == NULL)
+	confirmed = query ("%sMake selected stack frame return now? ",
+			   query_prefix);
+      else
+	confirmed = query ("%sMake %s return now? ", query_prefix,
+			   SYMBOL_PRINT_NAME (thisfun));
+      if (!confirmed)
+	error ("Not confirmed");
     }
 
-  /* FIXME: cagney/2003-01-18: Rather than pop each frame in turn,
-     this code should just go straight to the relevant frame and pop
-     that.  */
+  /* NOTE: cagney/2003-01-18: Is this silly?  Rather than pop each
+     frame in turn, should this code just go straight to the relevant
+     frame and pop that?  */
 
-  /* Do the real work.  Pop until the specified frame is current.  We
-     use this method because the deprecated_selected_frame is not
-     valid after a frame_pop().  The pc comparison makes this work
-     even if the selected frame shares its fp with another frame.  */
+  /* First discard all frames inner-to the selected frame (making the
+     selected frame current).  */
+  {
+    struct frame_id selected_id = get_frame_id (get_selected_frame ());
+    while (!frame_id_eq (selected_id, get_frame_id (get_current_frame ())))
+      {
+	if (frame_id_inner (selected_id, get_frame_id (get_current_frame ())))
+	  /* Caught in the safety net, oops!  We've gone way past the
+             selected frame.  */
+	  error ("Problem while popping stack frames (corrupt stack?)");
+	frame_pop (get_current_frame ());
+      }
+  }
 
-  /* FIXME: cagney/32003-03-12: This code should use frame_id_eq().
-     Unfortunatly, that function doesn't yet include the PC in any
-     frame ID comparison.  */
-
-  while (selected_frame_addr != get_frame_base (frame = get_current_frame ())
-	 || selected_frame_pc != get_frame_pc (frame))
-    frame_pop (get_current_frame ());
-
-  /* Then pop that frame.  */
-
+  /* Second discard the selected frame (which is now also the current
+     frame).  */
   frame_pop (get_current_frame ());
 
-  /* Compute the return value (if any) and store in the place
-     for return values.  */
+  /* Store RETURN_VAUE in the just-returned register set.  */
+  if (return_value != NULL)
+    {
+      struct type *return_type = VALUE_TYPE (return_value);
+      if (!gdbarch_return_value_p (current_gdbarch))
+	{
+	  STORE_RETURN_VALUE (return_type, current_regcache,
+			      VALUE_CONTENTS (return_value));
+	}
+      else
+	{
+	  gdb_assert (gdbarch_return_value (current_gdbarch, return_type,
+					    NULL, NULL, NULL)
+		      == RETURN_VALUE_REGISTER_CONVENTION);
+	  gdbarch_return_value (current_gdbarch, return_type,
+				current_regcache, NULL /*read*/,
+				VALUE_CONTENTS (return_value) /*write*/);
+	}
+    }
 
-  if (retval_exp)
-    set_return_value (return_value);
-
-  /* If we are at the end of a call dummy now, pop the dummy frame too.  */
-
-  /* FIXME: cagney/2003-01-18: This is silly.  Instead of popping all
-     the frames except the dummy, and then, as an afterthought,
-     popping the dummy frame, this code should just pop through to the
-     dummy frame.  */
-  
-  if (CALL_DUMMY_HAS_COMPLETED (read_pc(), read_sp (),
-				get_frame_base (get_current_frame ())))
+  /* If we are at the end of a call dummy now, pop the dummy frame
+     too.  */
+  /* NOTE: cagney/2003-01-18: Is this silly?  Instead of popping all
+     the frames in sequence, should this code just pop the dummy frame
+     directly?  */
+#ifdef DEPRECATED_CALL_DUMMY_HAS_COMPLETED
+  /* Since all up-to-date architectures return direct to the dummy
+     breakpoint address, a dummy frame has, by definition, always
+     completed.  Hence this method is no longer needed.  */
+  if (DEPRECATED_CALL_DUMMY_HAS_COMPLETED (read_pc(), read_sp (),
+					   get_frame_base (get_current_frame ())))
     frame_pop (get_current_frame ());
+#else
+  if (get_frame_type (get_current_frame ()) == DUMMY_FRAME)
+    frame_pop (get_current_frame ());
+#endif
 
   /* If interactive, print the frame that is now current.  */
-
   if (from_tty)
     frame_command ("0", 1);
   else

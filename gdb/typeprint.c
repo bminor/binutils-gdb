@@ -173,7 +173,6 @@ whatis_exp (char *exp, int show)
     do_cleanups (old_chain);
 }
 
-/* ARGSUSED */
 static void
 whatis_command (char *exp, int from_tty)
 {
@@ -200,7 +199,6 @@ ptype_eval (struct expression *exp)
 
 /* TYPENAME is either the name of a type, or an expression.  */
 
-/* ARGSUSED */
 static void
 ptype_command (char *typename, int from_tty)
 {

@@ -65,7 +65,7 @@ struct frame_info
 
   /* The frame's type.  */
   /* FIXME: cagney/2003-04-02: Should instead be returning
-     ->unwind->type.  Unfortunatly, legacy code is still explicitly
+     ->unwind->type.  Unfortunately, legacy code is still explicitly
      setting the type using the method deprecated_set_frame_type.
      Eliminate that method and this field can be eliminated.  */
   enum frame_type type;
@@ -144,9 +144,10 @@ static unsigned int backtrace_limit = UINT_MAX;
 void
 fprint_frame_id (struct ui_file *file, struct frame_id id)
 {
-  fprintf_unfiltered (file, "{stack=0x%s,code=0x%s}",
+  fprintf_unfiltered (file, "{stack=0x%s,code=0x%s,special=0x%s}",
 		      paddr_nz (id.stack_addr),
-		      paddr_nz (id.code_addr));
+		      paddr_nz (id.code_addr),
+		      paddr_nz (id.special_addr));
 }
 
 static void
@@ -234,7 +235,7 @@ get_frame_id (struct frame_info *fi)
 	  fi->unwind = frame_unwind_find_by_frame (fi->next);
 	  /* FIXME: cagney/2003-04-02: Rather than storing the frame's
 	     type in the frame, the unwinder's type should be returned
-	     directly.  Unfortunatly, legacy code, called by
+	     directly.  Unfortunately, legacy code, called by
 	     legacy_get_prev_frame, explicitly set the frames type
 	     using the method deprecated_set_frame_type().  */
 	  gdb_assert (fi->unwind->type != UNKNOWN_FRAME);
@@ -256,12 +257,20 @@ get_frame_id (struct frame_info *fi)
 const struct frame_id null_frame_id; /* All zeros.  */
 
 struct frame_id
-frame_id_build (CORE_ADDR stack_addr, CORE_ADDR code_addr)
+frame_id_build_special (CORE_ADDR stack_addr, CORE_ADDR code_addr,
+                        CORE_ADDR special_addr)
 {
   struct frame_id id;
   id.stack_addr = stack_addr;
   id.code_addr = code_addr;
+  id.special_addr = special_addr;
   return id;
+}
+
+struct frame_id
+frame_id_build (CORE_ADDR stack_addr, CORE_ADDR code_addr)
+{
+  return frame_id_build_special (stack_addr, code_addr, 0);
 }
 
 int
@@ -292,8 +301,14 @@ frame_id_eq (struct frame_id l, struct frame_id r)
   else if (l.code_addr == 0 || r.code_addr == 0)
     /* A zero code addr is a wild card, always succeed.  */
     eq = 1;
-  else if (l.code_addr == r.code_addr)
-    /* The .stack and .code are identical, the ID's are identical.  */
+  else if (l.code_addr != r.code_addr)
+    /* If .code addresses are different, the frames are different.  */
+    eq = 0;
+  else if (l.special_addr == 0 || r.special_addr == 0)
+    /* A zero special addr is a wild card (or unused), always succeed.  */
+    eq = 1;
+  else if (l.special_addr == r.special_addr)
+    /* Frames are equal.  */
     eq = 1;
   else
     /* No luck.  */
@@ -320,7 +335,7 @@ frame_id_inner (struct frame_id l, struct frame_id r)
     /* Only return non-zero when strictly inner than.  Note that, per
        comment in "frame.h", there is some fuzz here.  Frameless
        functions are not strictly inner than (same .stack but
-       different .code).  */
+       different .code and/or .special address).  */
     inner = INNER_THAN (l.stack_addr, r.stack_addr);
   if (frame_debug)
     {
@@ -477,7 +492,7 @@ frame_pop (struct frame_info *this_frame)
          burst register transfer and that the sequence of register
          writes should be batched.  The pair target_prepare_to_store()
          and target_store_registers() kind of suggest this
-         functionality.  Unfortunatly, they don't implement it.  Their
+         functionality.  Unfortunately, they don't implement it.  Their
          lack of a formal definition can lead to targets writing back
          bogus values (arguably a bug in the target code mind).  */
       /* Now copy those saved registers into the current regcache.
@@ -524,7 +539,7 @@ frame_register_unwind (struct frame_info *frame, int regnum,
       frame->unwind = frame_unwind_find_by_frame (frame->next);
       /* FIXME: cagney/2003-04-02: Rather than storing the frame's
 	 type in the frame, the unwinder's type should be returned
-	 directly.  Unfortunatly, legacy code, called by
+	 directly.  Unfortunately, legacy code, called by
 	 legacy_get_prev_frame, explicitly set the frames type using
 	 the method deprecated_set_frame_type().  */
       gdb_assert (frame->unwind->type != UNKNOWN_FRAME);
@@ -629,7 +644,7 @@ frame_unwind_register_signed (struct frame_info *frame, int regnum)
 {
   char buf[MAX_REGISTER_SIZE];
   frame_unwind_register (frame, regnum, buf);
-  return extract_signed_integer (buf, REGISTER_VIRTUAL_SIZE (regnum));
+  return extract_signed_integer (buf, DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum));
 }
 
 LONGEST
@@ -643,7 +658,7 @@ frame_unwind_register_unsigned (struct frame_info *frame, int regnum)
 {
   char buf[MAX_REGISTER_SIZE];
   frame_unwind_register (frame, regnum, buf);
-  return extract_unsigned_integer (buf, REGISTER_VIRTUAL_SIZE (regnum));
+  return extract_unsigned_integer (buf, DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum));
 }
 
 ULONGEST
@@ -658,7 +673,7 @@ frame_unwind_signed_register (struct frame_info *frame, int regnum,
 {
   char buf[MAX_REGISTER_SIZE];
   frame_unwind_register (frame, regnum, buf);
-  (*val) = extract_signed_integer (buf, REGISTER_VIRTUAL_SIZE (regnum));
+  (*val) = extract_signed_integer (buf, DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum));
 }
 
 void
@@ -667,48 +682,7 @@ frame_unwind_unsigned_register (struct frame_info *frame, int regnum,
 {
   char buf[MAX_REGISTER_SIZE];
   frame_unwind_register (frame, regnum, buf);
-  (*val) = extract_unsigned_integer (buf, REGISTER_VIRTUAL_SIZE (regnum));
-}
-
-void
-frame_read_register (struct frame_info *frame, int regnum, void *buf)
-{
-  gdb_assert (frame != NULL && frame->next != NULL);
-  frame_unwind_register (frame->next, regnum, buf);
-}
-
-void
-frame_read_unsigned_register (struct frame_info *frame, int regnum,
-			      ULONGEST *val)
-{
-  /* NOTE: cagney/2002-10-31: There is a bit of dogma here - there is
-     always a frame.  Both this, and the equivalent
-     frame_read_signed_register() function, can only be called with a
-     valid frame.  If, for some reason, this function is called
-     without a frame then the problem isn't here, but rather in the
-     caller.  It should of first created a frame and then passed that
-     in.  */
-  /* NOTE: cagney/2002-10-31: As a side bar, keep in mind that the
-     ``current_frame'' should not be treated as a special case.  While
-     ``get_next_frame (current_frame) == NULL'' currently holds, it
-     should, as far as possible, not be relied upon.  In the future,
-     ``get_next_frame (current_frame)'' may instead simply return a
-     normal frame object that simply always gets register values from
-     the register cache.  Consequently, frame code should try to avoid
-     tests like ``if get_next_frame() == NULL'' and instead just rely
-     on recursive frame calls (like the below code) when manipulating
-     a frame chain.  */
-  gdb_assert (frame != NULL && frame->next != NULL);
-  frame_unwind_unsigned_register (frame->next, regnum, val);
-}
-
-void
-frame_read_signed_register (struct frame_info *frame, int regnum,
-			    LONGEST *val)
-{
-  /* See note above in frame_read_unsigned_register().  */
-  gdb_assert (frame != NULL && frame->next != NULL);
-  frame_unwind_signed_register (frame->next, regnum, val);
+  (*val) = extract_unsigned_integer (buf, DEPRECATED_REGISTER_VIRTUAL_SIZE (regnum));
 }
 
 void
@@ -744,7 +718,8 @@ put_frame_register (struct frame_info *frame, int regnum, const void *buf)
 /* frame_register_read ()
 
    Find and return the value of REGNUM for the specified stack frame.
-   The number of bytes copied is REGISTER_RAW_SIZE (REGNUM).
+   The number of bytes copied is DEPRECATED_REGISTER_RAW_SIZE
+   (REGNUM).
 
    Returns 0 if the register value could not be found.  */
 
@@ -844,7 +819,7 @@ frame_saved_regs_zalloc (struct frame_info *fi)
 }
 
 CORE_ADDR *
-get_frame_saved_regs (struct frame_info *fi)
+deprecated_get_frame_saved_regs (struct frame_info *fi)
 {
   return fi->saved_regs;
 }
@@ -978,7 +953,7 @@ legacy_saved_regs_prev_register (struct frame_info *next_frame,
 				 int *realnump, void *bufferp)
 {
   /* HACK: New code is passed the next frame and this cache.
-     Unfortunatly, old code expects this frame.  Since this is a
+     Unfortunately, old code expects this frame.  Since this is a
      backward compatibility hack, cheat by walking one level along the
      prologue chain to the frame the old code expects.
 
@@ -986,16 +961,16 @@ legacy_saved_regs_prev_register (struct frame_info *next_frame,
   struct frame_info *frame = next_frame->prev;
   gdb_assert (frame != NULL);
 
-  if (get_frame_saved_regs (frame) == NULL)
+  if (deprecated_get_frame_saved_regs (frame) == NULL)
     {
       /* If nothing's initialized the saved regs, do it now.  */
       gdb_assert (DEPRECATED_FRAME_INIT_SAVED_REGS_P ());
       DEPRECATED_FRAME_INIT_SAVED_REGS (frame);
-      gdb_assert (get_frame_saved_regs (frame) != NULL);
+      gdb_assert (deprecated_get_frame_saved_regs (frame) != NULL);
     }
 
-  if (get_frame_saved_regs (frame) != NULL
-      && get_frame_saved_regs (frame)[regnum] != 0)
+  if (deprecated_get_frame_saved_regs (frame) != NULL
+      && deprecated_get_frame_saved_regs (frame)[regnum] != 0)
     {
       if (regnum == SP_REGNUM)
 	{
@@ -1007,8 +982,8 @@ legacy_saved_regs_prev_register (struct frame_info *next_frame,
 	  if (bufferp != NULL)
 	    /* NOTE: cagney/2003-05-09: In-lined store_address with
                it's body - store_unsigned_integer.  */
-	    store_unsigned_integer (bufferp, REGISTER_RAW_SIZE (regnum),
-				    get_frame_saved_regs (frame)[regnum]);
+	    store_unsigned_integer (bufferp, DEPRECATED_REGISTER_RAW_SIZE (regnum),
+				    deprecated_get_frame_saved_regs (frame)[regnum]);
 	}
       else
 	{
@@ -1016,7 +991,7 @@ legacy_saved_regs_prev_register (struct frame_info *next_frame,
              a local copy of its value.  */
 	  *optimizedp = 0;
 	  *lvalp = lval_memory;
-	  *addrp = get_frame_saved_regs (frame)[regnum];
+	  *addrp = deprecated_get_frame_saved_regs (frame)[regnum];
 	  *realnump = -1;
 	  if (bufferp != NULL)
 	    {
@@ -1034,15 +1009,15 @@ legacy_saved_regs_prev_register (struct frame_info *next_frame,
 	      if (regs[regnum] == NULL)
 		{
 		  regs[regnum]
-		    = frame_obstack_zalloc (REGISTER_RAW_SIZE (regnum));
-		  read_memory (get_frame_saved_regs (frame)[regnum], regs[regnum],
-			       REGISTER_RAW_SIZE (regnum));
+		    = frame_obstack_zalloc (DEPRECATED_REGISTER_RAW_SIZE (regnum));
+		  read_memory (deprecated_get_frame_saved_regs (frame)[regnum], regs[regnum],
+			       DEPRECATED_REGISTER_RAW_SIZE (regnum));
 		}
-	      memcpy (bufferp, regs[regnum], REGISTER_RAW_SIZE (regnum));
+	      memcpy (bufferp, regs[regnum], DEPRECATED_REGISTER_RAW_SIZE (regnum));
 #else
 	      /* Read the value in from memory.  */
-	      read_memory (get_frame_saved_regs (frame)[regnum], bufferp,
-			   REGISTER_RAW_SIZE (regnum));
+	      read_memory (deprecated_get_frame_saved_regs (frame)[regnum], bufferp,
+			   DEPRECATED_REGISTER_RAW_SIZE (regnum));
 #endif
 	    }
 	}
@@ -1139,8 +1114,8 @@ deprecated_generic_get_saved_register (char *raw_buffer, int *optimized,
 	    }
 
 	  DEPRECATED_FRAME_INIT_SAVED_REGS (frame);
-	  if (get_frame_saved_regs (frame) != NULL
-	      && get_frame_saved_regs (frame)[regnum] != 0)
+	  if (deprecated_get_frame_saved_regs (frame) != NULL
+	      && deprecated_get_frame_saved_regs (frame)[regnum] != 0)
 	    {
 	      if (lval)		/* found it saved on the stack */
 		*lval = lval_memory;
@@ -1150,16 +1125,16 @@ deprecated_generic_get_saved_register (char *raw_buffer, int *optimized,
 		    /* NOTE: cagney/2003-05-09: In-line store_address
                        with it's body - store_unsigned_integer.  */
 		    store_unsigned_integer (raw_buffer,
-					    REGISTER_RAW_SIZE (regnum),
-					    get_frame_saved_regs (frame)[regnum]);
+					    DEPRECATED_REGISTER_RAW_SIZE (regnum),
+					    deprecated_get_frame_saved_regs (frame)[regnum]);
 		}
 	      else
 		{
 		  if (addrp)	/* any other register */
-		    *addrp = get_frame_saved_regs (frame)[regnum];
+		    *addrp = deprecated_get_frame_saved_regs (frame)[regnum];
 		  if (raw_buffer)
-		    read_memory (get_frame_saved_regs (frame)[regnum], raw_buffer,
-				 REGISTER_RAW_SIZE (regnum));
+		    read_memory (deprecated_get_frame_saved_regs (frame)[regnum], raw_buffer,
+				 DEPRECATED_REGISTER_RAW_SIZE (regnum));
 		}
 	      return;
 	    }
@@ -1334,7 +1309,7 @@ legacy_get_prev_frame (struct frame_info *this_frame)
      DEPRECATED_INIT_FRAME_PC_FIRST and
      DEPRECATED_FRAME_INIT_SAVED_REGS methods are full of work-arounds
      that handle the frame not being correctly set from the start.
-     Unfortunatly those same work-arounds rely on the type defaulting
+     Unfortunately those same work-arounds rely on the type defaulting
      to NORMAL_FRAME.  Ulgh!  The new frame code does not have this
      problem.  */
   prev->type = UNKNOWN_FRAME;
@@ -1444,7 +1419,7 @@ legacy_get_prev_frame (struct frame_info *this_frame)
       /* FIXME: cagney/2002-01-19: This call will go away.  Instead of
 	 initializing extra info, all frames will use the frame_cache
 	 (passed to the unwind functions) to store additional frame
-	 info.  Unfortunatly legacy targets can't use
+	 info.  Unfortunately legacy targets can't use
 	 legacy_get_prev_frame() to unwind the sentinel frame and,
 	 consequently, are forced to take this code path and rely on
 	 the below call to DEPRECATED_INIT_EXTRA_FRAME_INFO to
@@ -1531,7 +1506,7 @@ legacy_get_prev_frame (struct frame_info *this_frame)
 	  prev->unwind = frame_unwind_find_by_frame (this_frame->next);
 	  /* FIXME: cagney/2003-04-02: Rather than storing the frame's
 	     type in the frame, the unwinder's type should be returned
-	     directly.  Unfortunatly, legacy code, called by
+	     directly.  Unfortunately, legacy code, called by
 	     legacy_get_prev_frame, explicitly set the frames type
 	     using the method deprecated_set_frame_type().  */
 	  prev->type = prev->unwind->type;
@@ -2184,7 +2159,7 @@ get_frame_type (struct frame_info *frame)
       frame->unwind = frame_unwind_find_by_frame (frame->next);
       /* FIXME: cagney/2003-04-02: Rather than storing the frame's
 	 type in the frame, the unwinder's type should be returned
-	 directly.  Unfortunatly, legacy code, called by
+	 directly.  Unfortunately, legacy code, called by
 	 legacy_get_prev_frame, explicitly set the frames type using
 	 the method deprecated_set_frame_type().  */
       gdb_assert (frame->unwind->type != UNKNOWN_FRAME);

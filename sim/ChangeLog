@@ -1,3 +1,20 @@
+2003-10-17  Shrinivas Atre  <shrinivasa@KPITCummins.com>
+     * h8300/compile.c : Addition of extern variable h8300_normal_mode 
+        (SP) : Handle normal mode 
+        (bitfrom) : Use normal mode flag to return suitable value
+        (lvalue) : Use normal mode flag to return command line location
+        (decode) : Decode instruction correctly for normal mode
+        (init_pointers) : Initialise memory correctly for normal mode
+        (sim_resume) : Handle cases for normal mode using h8300_normal_mode flag
+        (sim_store_register) : Handle 2 byte PC for normal mode 
+        (sim_fetch_register) : Handle 2 byte PC for normal mode
+        (set_h8300h) : Set normal mode flag as per architechture
+        (sim_load) : Allocate 64K for normal mode instead of bigger memory
+
+2003-10-08  Dave Brolley  <brolley@redhat.com>
+
+	* configure.in: Move frv handling to alphabetically correct placement.
+
 2003-09-03  Andreas Schwab  <schwab@suse.de>
 
 	* Makefile.in (FLAGS_TO_PASS): Pass down $(bindir) and $(mandir).

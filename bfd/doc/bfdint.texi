@@ -694,7 +694,7 @@ information in BFD private data.  This is called via
 @samp{bfd_get_symtab_upper_bound}.  The corresponding field in the
 target vector is named @samp{_bfd_get_symtab_upper_bound}.
 
-@item _get_symtab
+@item _canonicalize_symtab
 Read in the symbol table.  This is called via
 @samp{bfd_canonicalize_symtab}.  The corresponding field in the target
 vector is named @samp{_bfd_canonicalize_symtab}.

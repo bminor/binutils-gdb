@@ -1097,7 +1097,7 @@ coff-z8k.lo: coff-z8k.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/coff/z8k.h $(INCDIR)/coff/external.h $(INCDIR)/coff/internal.h \
   libcoff.h coffcode.h coffswap.h
 cofflink.lo: cofflink.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/coff/internal.h libcoff.h
+  $(INCDIR)/coff/internal.h libcoff.h $(INCDIR)/safe-ctype.h
 dwarf1.lo: dwarf1.c $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/dwarf.h
@@ -1310,7 +1310,7 @@ elf32-xtensa.lo: elf32-xtensa.c $(INCDIR)/filenames.h \
 elf32.lo: elf32.c elfcode.h $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
   $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h elfcore.h \
-  elflink.h
+  elflink.h $(INCDIR)/safe-ctype.h
 elflink.lo: elflink.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/external.h
@@ -1592,7 +1592,7 @@ elf64-sparc.lo: elf64-sparc.c $(INCDIR)/filenames.h \
 elf64.lo: elf64.c elfcode.h $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
   $(INCDIR)/bfdlink.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h elfcore.h \
-  elflink.h
+  elflink.h $(INCDIR)/safe-ctype.h
 mmo.lo: mmo.c $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
   $(INCDIR)/elf/mmix.h $(INCDIR)/elf/reloc-macros.h $(INCDIR)/opcode/mmix.h
 nlm32-alpha.lo: nlm32-alpha.c $(INCDIR)/filenames.h \

@@ -561,6 +561,7 @@ _bfd_mn10300_elf_create_got_section (abfd, info)
   flagword   flags;
   flagword   pltflags;
   asection * s;
+  struct bfd_link_hash_entry * bh;
   struct elf_link_hash_entry * h;
   const struct elf_backend_data * bed = get_elf_backend_data (abfd);
   int ptralign;
@@ -604,13 +605,13 @@ _bfd_mn10300_elf_create_got_section (abfd, info)
     {
       /* Define the symbol _PROCEDURE_LINKAGE_TABLE_ at the start of the
 	 .plt section.  */
-      struct elf_link_hash_entry *h = NULL;
+      bh = NULL;
       if (! (_bfd_generic_link_add_one_symbol
 	     (info, abfd, "_PROCEDURE_LINKAGE_TABLE_", BSF_GLOBAL, s,
 	      (bfd_vma) 0, (const char *) NULL, FALSE,
-	      get_elf_backend_data (abfd)->collect,
-	      (struct bfd_link_hash_entry **) &h)))
+	      get_elf_backend_data (abfd)->collect, &bh)))
 	return FALSE;
+      h = (struct elf_link_hash_entry *) bh;
       h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
       h->type = STT_OBJECT;
 
@@ -638,12 +639,13 @@ _bfd_mn10300_elf_create_got_section (abfd, info)
      (or .got.plt) section.  We don't do this in the linker script
      because we don't want to define the symbol if we are not creating
      a global offset table.  */
-  h = NULL;
+  bh = NULL;
   if (!(_bfd_generic_link_add_one_symbol
 	(info, abfd, "_GLOBAL_OFFSET_TABLE_", BSF_GLOBAL, s,
 	 bed->got_symbol_offset, (const char *) NULL, FALSE,
-	 bed->collect, (struct bfd_link_hash_entry **) &h)))
+	 bed->collect, &bh)))
     return FALSE;
+  h = (struct elf_link_hash_entry *) bh;
   h->elf_link_hash_flags |= ELF_LINK_HASH_DEF_REGULAR;
   h->type = STT_OBJECT;
 
@@ -1574,7 +1576,7 @@ mn10300_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	{
 	  sym = local_syms + r_symndx;
 	  sec = local_sections[r_symndx];
-	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, sec, rel);
+	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
 	}
       else
 	{
@@ -4349,7 +4351,7 @@ _bfd_mn10300_elf_size_dynamic_sections (output_bfd, info)
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       /* Set the contents of the .interp section to the interpreter.  */
-      if (! info->shared)
+      if (info->executable)
 	{
 	  s = bfd_get_section_by_name (dynobj, ".interp");
 	  BFD_ASSERT (s != NULL);
@@ -4874,6 +4876,5 @@ _bfd_mn10300_elf_finish_dynamic_sections (output_bfd, info)
 #define elf_backend_plt_readonly	1
 #define elf_backend_want_plt_sym	0
 #define elf_backend_got_header_size	12
-#define elf_backend_plt_header_size	PLT0_ENTRY_SIZE
 
 #include "elf32-target.h"

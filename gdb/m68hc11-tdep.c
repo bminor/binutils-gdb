@@ -894,11 +894,6 @@ m68hc11_frame_this_id (struct frame_info *next_frame,
   /* The FUNC is easy.  */
   func = frame_func_unwind (next_frame);
 
-  /* This is meant to halt the backtrace at "_start".  Make sure we
-     don't halt it at a generic dummy frame. */
-  if (deprecated_inside_entry_file (func))
-    return;
-
   /* Hopefully the prologue analysis either correctly determined the
      frame's base (which is the SP from the previous frame), or set
      that base to "NULL".  */
@@ -1032,9 +1027,9 @@ m68hc11_print_register (struct gdbarch *gdbarch, struct ui_file *file,
 
   if (regno == HARD_PC_REGNUM || regno == HARD_SP_REGNUM
       || regno == SOFT_FP_REGNUM || regno == M68HC12_HARD_PC_REGNUM)
-    frame_read_unsigned_register (frame, regno, &rval);
+    rval = get_frame_register_unsigned (frame, regno);
   else
-    frame_read_signed_register (frame, regno, &rval);
+    rval = get_frame_register_signed (frame, regno);
 
   if (regno == HARD_A_REGNUM || regno == HARD_B_REGNUM
       || regno == HARD_CCR_REGNUM || regno == HARD_PAGE_REGNUM)
@@ -1049,7 +1044,7 @@ m68hc11_print_register (struct gdbarch *gdbarch, struct ui_file *file,
         {
           ULONGEST page;
 
-          frame_read_unsigned_register (frame, HARD_PAGE_REGNUM, &page);
+          page = get_frame_register_unsigned (frame, HARD_PAGE_REGNUM);
           fprintf_filtered (file, "0x%02x:%04x ", (unsigned) page,
                             (unsigned) rval);
         }

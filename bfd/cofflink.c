@@ -27,6 +27,7 @@
 #include "libbfd.h"
 #include "coff/internal.h"
 #include "libcoff.h"
+#include "safe-ctype.h"
 
 static bfd_boolean coff_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info);
 static bfd_boolean coff_link_check_archive_element (bfd *abfd, struct bfd_link_info *info, bfd_boolean *pneeded);
@@ -570,19 +571,24 @@ coff_link_add_symbols (bfd *abfd,
       && info->hash->creator->flavour == bfd_get_flavour (abfd)
       && (info->strip != strip_all && info->strip != strip_debugger))
     {
-      asection *stab, *stabstr;
+      asection *stabstr;
 
-      stab = bfd_get_section_by_name (abfd, ".stab");
-      if (stab != NULL)
+      stabstr = bfd_get_section_by_name (abfd, ".stabstr");
+
+      if (stabstr != NULL)
 	{
-	  stabstr = bfd_get_section_by_name (abfd, ".stabstr");
-
-	  if (stabstr != NULL)
+	  bfd_size_type string_offset = 0;
+	  asection *stab;
+	  
+	  for (stab = abfd->sections; stab; stab = stab->next)
+	    if (strncmp (".stab", stab->name, 5) == 0
+		&& (!stab->name[5]
+		    || (stab->name[5] == '.' && ISDIGIT (stab->name[6]))))
 	    {
 	      struct coff_link_hash_table *table;
-	      struct coff_section_tdata *secdata;
-
-	      secdata = coff_section_data (abfd, stab);
+	      struct coff_section_tdata *secdata
+		= coff_section_data (abfd, stab);
+	      
 	      if (secdata == NULL)
 		{
 		  amt = sizeof (struct coff_section_tdata);
@@ -596,7 +602,8 @@ coff_link_add_symbols (bfd *abfd,
 
 	      if (! _bfd_link_section_stabs (abfd, &table->stab_info,
 					     stab, stabstr,
-					     &secdata->stab_info))
+					     &secdata->stab_info,
+					     &string_offset))
 		goto error_return;
 	    }
 	}
@@ -1028,10 +1035,27 @@ _bfd_coff_final_link (bfd *abfd,
 	      bfd_coff_swap_reloc_out (abfd, irel, erel);
 	    }
 
-	  if (bfd_seek (abfd, o->rel_filepos, SEEK_SET) != 0
-	      || (bfd_bwrite (external_relocs,
-			     (bfd_size_type) relsz * o->reloc_count, abfd)
-		  != (bfd_size_type) relsz * o->reloc_count))
+	  if (bfd_seek (abfd, o->rel_filepos, SEEK_SET) != 0)
+	    goto error_return;
+	  if (obj_pe (abfd) && o->reloc_count >= 0xffff)
+	    {
+	      /* In PE COFF, write the count of relocs as the first
+		 reloc.  The header overflow bit will be set
+		 elsewhere. */
+	      struct internal_reloc incount;
+	      bfd_byte *excount = (bfd_byte *)bfd_malloc (relsz);
+	      
+	      memset (&incount, 0, sizeof (incount));
+	      incount.r_vaddr = o->reloc_count + 1;
+	      bfd_coff_swap_reloc_out (abfd, (PTR) &incount, (PTR) excount);
+	      if (bfd_bwrite (excount, relsz, abfd) != relsz)
+		/* We'll leak, but it's an error anyway. */
+		goto error_return;
+	      free (excount);
+	    }
+	  if (bfd_bwrite (external_relocs,
+			  (bfd_size_type) relsz * o->reloc_count, abfd)
+	      != (bfd_size_type) relsz * o->reloc_count)
 	    goto error_return;
 	}
 

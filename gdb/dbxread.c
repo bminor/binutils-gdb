@@ -258,10 +258,6 @@ static int bincls_allocated;
 
 extern void _initialize_dbxread (void);
 
-#if 0 /* OBSOLETE CFront */
-// OBSOLETE static void process_now (struct objfile *);
-#endif /* OBSOLETE CFront */
-
 static void read_ofile_symtab (struct partial_symtab *);
 
 static void dbx_psymtab_to_symtab (struct partial_symtab *);
@@ -356,7 +352,7 @@ add_old_header_file (char *name, int instance)
   int i;
 
   for (i = 0; i < N_HEADER_FILES (current_objfile); i++)
-    if (STREQ (p[i].name, name) && instance == p[i].instance)
+    if (strcmp (p[i].name, name) == 0 && instance == p[i].instance)
       {
 	add_this_object_header_file (i);
 	return;
@@ -773,107 +769,6 @@ static struct external_nlist symbuf[4096];
 static int symbuf_idx;
 static int symbuf_end;
 
-#if 0 /* OBSOLETE CFront */
-// OBSOLETE  /* cont_elem is used for continuing information in cfront.
-// OBSOLETE     It saves information about which types need to be fixed up and 
-// OBSOLETE     completed after all the stabs are read.  */
-// OBSOLETE  struct cont_elem
-// OBSOLETE    {
-// OBSOLETE      /* sym and stabstring for continuing information in cfront */
-// OBSOLETE      struct symbol *sym;
-// OBSOLETE      char *stabs;
-// OBSOLETE      /* state dependencies (statics that must be preserved) */
-// OBSOLETE      int sym_idx;
-// OBSOLETE      int sym_end;
-// OBSOLETE      int symnum;
-// OBSOLETE      int (*func) (struct objfile *, struct symbol *, char *);
-// OBSOLETE      /* other state dependencies include:
-// OBSOLETE         (assumption is that these will not change since process_now FIXME!!)
-// OBSOLETE         stringtab_global
-// OBSOLETE         n_stabs
-// OBSOLETE         objfile
-// OBSOLETE         symfile_bfd */
-// OBSOLETE    };
-
-// OBSOLETE  static struct cont_elem *cont_list = 0;
-// OBSOLETE  static int cont_limit = 0;
-// OBSOLETE  static int cont_count = 0;
-
-// OBSOLETE  /* Arrange for function F to be called with arguments SYM and P later
-// OBSOLETE     in the stabs reading process.  */
-// OBSOLETE  void
-// OBSOLETE  process_later (struct symbol *sym, char *p,
-// OBSOLETE  	       int (*f) (struct objfile *, struct symbol *, char *))
-// OBSOLETE  {
-
-// OBSOLETE    /* Allocate more space for the deferred list.  */
-// OBSOLETE    if (cont_count >= cont_limit - 1)
-// OBSOLETE      {
-// OBSOLETE        cont_limit += 32;		/* chunk size */
-
-// OBSOLETE        cont_list
-// OBSOLETE  	= (struct cont_elem *) xrealloc (cont_list,
-// OBSOLETE  					 (cont_limit
-// OBSOLETE  					  * sizeof (struct cont_elem)));
-// OBSOLETE        if (!cont_list)
-// OBSOLETE  	error ("Virtual memory exhausted\n");
-// OBSOLETE      }
-
-// OBSOLETE    /* Save state variables so we can process these stabs later.  */
-// OBSOLETE    cont_list[cont_count].sym_idx = symbuf_idx;
-// OBSOLETE    cont_list[cont_count].sym_end = symbuf_end;
-// OBSOLETE    cont_list[cont_count].symnum = symnum;
-// OBSOLETE    cont_list[cont_count].sym = sym;
-// OBSOLETE    cont_list[cont_count].stabs = p;
-// OBSOLETE    cont_list[cont_count].func = f;
-// OBSOLETE    cont_count++;
-// OBSOLETE  }
-
-// OBSOLETE  /* Call deferred funtions in CONT_LIST.  */
-
-// OBSOLETE  static void
-// OBSOLETE  process_now (struct objfile *objfile)
-// OBSOLETE  {
-// OBSOLETE    int i;
-// OBSOLETE    int save_symbuf_idx;
-// OBSOLETE    int save_symbuf_end;
-// OBSOLETE    int save_symnum;
-// OBSOLETE    struct symbol *sym;
-// OBSOLETE    char *stabs;
-// OBSOLETE    int err;
-// OBSOLETE    int (*func) (struct objfile *, struct symbol *, char *);
-
-// OBSOLETE    /* Save the state of our caller, we'll want to restore it before
-// OBSOLETE       returning.  */
-// OBSOLETE    save_symbuf_idx = symbuf_idx;
-// OBSOLETE    save_symbuf_end = symbuf_end;
-// OBSOLETE    save_symnum = symnum;
-
-// OBSOLETE    /* Iterate over all the deferred stabs.  */
-// OBSOLETE    for (i = 0; i < cont_count; i++)
-// OBSOLETE      {
-// OBSOLETE        /* Restore the state for this deferred stab.  */
-// OBSOLETE        symbuf_idx = cont_list[i].sym_idx;
-// OBSOLETE        symbuf_end = cont_list[i].sym_end;
-// OBSOLETE        symnum = cont_list[i].symnum;
-// OBSOLETE        sym = cont_list[i].sym;
-// OBSOLETE        stabs = cont_list[i].stabs;
-// OBSOLETE        func = cont_list[i].func;
-
-// OBSOLETE        /* Call the function to handle this deferrd stab.  */
-// OBSOLETE        err = (*func) (objfile, sym, stabs);
-// OBSOLETE        if (err)
-// OBSOLETE  	error ("Internal error: unable to resolve stab.\n");
-// OBSOLETE      }
-
-// OBSOLETE    /* Restore our caller's state.  */
-// OBSOLETE    symbuf_idx = save_symbuf_idx;
-// OBSOLETE    symbuf_end = save_symbuf_end;
-// OBSOLETE    symnum = save_symnum;
-// OBSOLETE    cont_count = 0;
-// OBSOLETE  }
-#endif /* OBSOLETE CFront */
-
 /* Name of last function encountered.  Used in Solaris to approximate
    object file boundaries.  */
 static char *last_function_name;
@@ -1040,7 +935,7 @@ find_corresponding_bincl_psymtab (char *name, int instance)
 
   for (bincl = bincl_list; bincl < next_bincl; bincl++)
     if (bincl->instance == instance
-	&& STREQ (name, bincl->name))
+	&& strcmp (name, bincl->name) == 0)
       return bincl->pst;
 
   repeated_header_complaint (name, symnum);
@@ -1712,12 +1607,12 @@ read_dbx_symtab (struct objfile *objfile)
 	       things like "break c-exp.y:435" need to work (I
 	       suppose the psymtab_include_list could be hashed or put
 	       in a binary tree, if profiling shows this is a major hog).  */
-	    if (pst && STREQ (namestring, pst->filename))
+	    if (pst && strcmp (namestring, pst->filename) == 0)
 	    continue;
 	    {
 	      int i;
 	      for (i = 0; i < includes_used; i++)
-		if (STREQ (namestring, psymtab_include_list[i]))
+		if (strcmp (namestring, psymtab_include_list[i]) == 0)
 		  {
 		    i = -1;
 		    break;
@@ -1838,22 +1733,6 @@ read_dbx_symtab (struct objfile *objfile)
 					 psymtab_language, objfile);
 		    p += 1;
 		  }
-#if 0 /* OBSOLETE CFront */
-// OBSOLETE  		/* The semantics of C++ state that "struct foo { ... }"
-// OBSOLETE  		   also defines a typedef for "foo".  Unfortuantely, cfront
-// OBSOLETE  		   never makes the typedef when translating from C++ to C.
-// OBSOLETE  		   We make the typedef here so that "ptype foo" works as
-// OBSOLETE  		   expected for cfront translated code.  */
-// OBSOLETE  		else if (psymtab_language == language_cplus)
-// OBSOLETE  		  {
-// OBSOLETE  		    /* Also a typedef with the same name.  */
-// OBSOLETE  		    add_psymbol_to_list (namestring, p - namestring,
-// OBSOLETE  					 VAR_DOMAIN, LOC_TYPEDEF,
-// OBSOLETE  					 &objfile->static_psymbols,
-// OBSOLETE  					 nlist.n_value, 0,
-// OBSOLETE  					 psymtab_language, objfile);
-// OBSOLETE  		  }
-#endif /* OBSOLETE CFront */
 	      }
 	    goto check_enum;
 	  case 't':
@@ -2088,11 +1967,6 @@ read_dbx_symtab (struct objfile *objfile)
 	  case '9':
 	  case '-':
 	  case '#':		/* for symbol identification (used in live ranges) */
-#if 0 /* OBSOLETE CFront */
-// OBSOLETE  	    /* added to support cfront stabs strings */
-// OBSOLETE  	  case 'Z':		/* for definition continuations */
-// OBSOLETE  	  case 'P':		/* for prototypes */
-#endif /* OBSOLETE CFront */
 	    continue;
 
 	  case ':':
@@ -2764,11 +2638,6 @@ read_ofile_symtab (struct partial_symtab *pst)
 
   pst->symtab = end_symtab (text_offset + text_size, objfile, SECT_OFF_TEXT (objfile));
 
-#if 0 /* OBSOLETE CFront */
-// OBSOLETE    /* Process items which we had to "process_later" due to dependencies 
-// OBSOLETE       on other stabs.  */
-// OBSOLETE    process_now (objfile);
-#endif /* OBSOLETE CFront */
   end_stabs ();
 }
 
@@ -3300,12 +3169,12 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 		  int l = colon_pos - name;
 
 		  m = lookup_minimal_symbol_by_pc (last_pc_address);
-		  if (m && STREQN (DEPRECATED_SYMBOL_NAME (m), name, l)
+		  if (m && strncmp (DEPRECATED_SYMBOL_NAME (m), name, l) == 0
 		      && DEPRECATED_SYMBOL_NAME (m)[l] == '\0')
 		    /* last_pc_address was in this function */
 		    valu = SYMBOL_VALUE (m);
 		  else if (m && DEPRECATED_SYMBOL_NAME (m + 1)
-			   && STREQN (DEPRECATED_SYMBOL_NAME (m + 1), name, l)
+			   && strncmp (DEPRECATED_SYMBOL_NAME (m + 1), name, l) == 0
 			   && DEPRECATED_SYMBOL_NAME (m + 1)[l] == '\0')
 		    /* last_pc_address was in last function */
 		    valu = SYMBOL_VALUE (m + 1);
@@ -3360,7 +3229,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
     case N_OPT:		/* Solaris 2:  Compiler options */
       if (name)
 	{
-	  if (STREQ (name, GCC2_COMPILED_FLAG_SYMBOL))
+	  if (strcmp (name, GCC2_COMPILED_FLAG_SYMBOL) == 0)
 	    {
 	      processing_gcc_compilation = 2;
 #if 0				/* Works, but is experimental.  -fnf */

@@ -95,7 +95,7 @@ static int vms_generic_stat_arch_elt
   PARAMS ((bfd *, struct stat *));
 static long vms_get_symtab_upper_bound
   PARAMS ((bfd *abfd));
-static long vms_get_symtab
+static long vms_canonicalize_symtab
   PARAMS ((bfd *abfd, asymbol **symbols));
 static void vms_print_symbol
   PARAMS ((bfd *abfd, PTR file, asymbol *symbol, bfd_print_symbol_type how));
@@ -125,7 +125,7 @@ static const struct reloc_howto_struct *vms_bfd_reloc_type_lookup
 static bfd_boolean vms_set_arch_mach
   PARAMS ((bfd *abfd, enum bfd_architecture arch, unsigned long mach));
 static bfd_boolean vms_set_section_contents
-  PARAMS ((bfd *abfd, asection *section, PTR location, file_ptr offset,
+  PARAMS ((bfd *abfd, asection *section, const PTR location, file_ptr offset,
 	   bfd_size_type count));
 static int vms_sizeof_headers
   PARAMS ((bfd *abfd, bfd_boolean reloc));
@@ -1065,7 +1065,7 @@ vms_get_symtab_upper_bound (abfd)
 
 /* Copy symbols from hash table to symbol vector
 
-   called from bfd_hash_traverse in vms_get_symtab
+   called from bfd_hash_traverse in vms_canonicalize_symtab
    init counter to 0 if entry == 0  */
 
 static bfd_boolean
@@ -1089,12 +1089,12 @@ copy_symbols (entry, arg)
    return # of symbols read  */
 
 static long
-vms_get_symtab (abfd, symbols)
+vms_canonicalize_symtab (abfd, symbols)
      bfd *abfd;
      asymbol **symbols;
 {
 #if VMS_DEBUG
-  vms_debug (1, "vms_get_symtab(%p, <ret>)\n", abfd);
+  vms_debug (1, "vms_canonicalize_symtab(%p, <ret>)\n", abfd);
 #endif
 
 	/* init counter */
@@ -1659,7 +1659,7 @@ static bfd_boolean
 vms_set_section_contents (abfd, section, location, offset, count)
      bfd *abfd;
      asection *section;
-     PTR location;
+     const PTR location;
      file_ptr offset;
      bfd_size_type count;
 {

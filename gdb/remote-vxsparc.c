@@ -102,9 +102,9 @@ vx_read_register (int regno)
      automatically; it greatly simplifies debugging.  */
 
   sp = extract_unsigned_integer (&deprecated_registers[DEPRECATED_REGISTER_BYTE (SP_REGNUM)],
-				 REGISTER_RAW_SIZE (SP_REGNUM));
+				 DEPRECATED_REGISTER_RAW_SIZE (SP_REGNUM));
   write_memory (sp, &deprecated_registers[DEPRECATED_REGISTER_BYTE (L0_REGNUM)],
-		16 * REGISTER_RAW_SIZE (L0_REGNUM));
+		16 * DEPRECATED_REGISTER_RAW_SIZE (L0_REGNUM));
 
   /* If the target has floating point registers, fetch them.
      Otherwise, zero the floating point register values in
@@ -124,10 +124,10 @@ vx_read_register (int regno)
     }
   else
     {
-      bzero (&deprecated_registers[DEPRECATED_REGISTER_BYTE (FP0_REGNUM)],
-	     32 * SPARC_FPREG_SIZE);
-      bzero (&deprecated_registers[DEPRECATED_REGISTER_BYTE (FPS_REGNUM)],
-	     1 * SPARC_FPREG_SIZE);
+      memset (&deprecated_registers[DEPRECATED_REGISTER_BYTE (FP0_REGNUM)],
+	      0, 32 * SPARC_FPREG_SIZE);
+      memset (&deprecated_registers[DEPRECATED_REGISTER_BYTE (FPS_REGNUM)],
+	      0, 1 * SPARC_FPREG_SIZE);
     }
 
   /* Mark the register cache valid.  */
@@ -177,9 +177,9 @@ vx_write_register (int regno)
       if (regno < 0 || (L0_REGNUM <= regno && regno <= I7_REGNUM))
 	{
 	  sp = extract_unsigned_integer (&deprecated_registers[DEPRECATED_REGISTER_BYTE (SP_REGNUM)],
-					 REGISTER_RAW_SIZE (SP_REGNUM));
+					 DEPRECATED_REGISTER_RAW_SIZE (SP_REGNUM));
 	  write_memory (sp, &deprecated_registers[DEPRECATED_REGISTER_BYTE (L0_REGNUM)],
-			16 * REGISTER_RAW_SIZE (L0_REGNUM));
+			16 * DEPRECATED_REGISTER_RAW_SIZE (L0_REGNUM));
 	}
     }
 

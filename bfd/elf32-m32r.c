@@ -1107,7 +1107,7 @@ m32r_elf_relocate_section (output_bfd, info, input_bfd, input_section,
 	      sec = local_sections[r_symndx];
 	      sym_name = "<local symbol>";
 #if !USE_REL
-	      relocation = _bfd_elf_rela_local_sym (output_bfd, sym, sec, rel);
+	      relocation = _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
 	      addend = rel->r_addend;
 #else
 	      /* FIXME: This won't handle local relocations against SEC_MERGE
@@ -2094,12 +2094,9 @@ m32r_elf_check_relocs (abfd, info, sec, relocs)
 
 static struct bfd_elf_special_section const m32r_elf_special_sections[]=
 {
-  { ".sdata",	0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },
-  { ".sbss",	0,	NULL,	0,
-    SHT_NOBITS,	SHF_ALLOC + SHF_WRITE },
-  { NULL,	0,	NULL,	0,
-    0,		0 }
+  { ".sdata",   6, -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
+  { ".sbss",    5, -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE },
+  { NULL,       0,  0, 0,            0 }
 };
 
 #define ELF_ARCH		bfd_arch_m32r

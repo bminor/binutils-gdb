@@ -157,7 +157,7 @@ extern void execute_cmd_post_hook (struct cmd_list_element *cmd);
    the set command passed as a parameter.  The clone operation will
    include (BUG?) any ``set'' command callback, if present.  Commands
    like ``info set'' call all the ``show'' command callbacks.
-   Unfortunatly, for ``show'' commands cloned from ``set'', this
+   Unfortunately, for ``show'' commands cloned from ``set'', this
    includes callbacks belonging to ``set'' commands.  Making this
    worse, this only occures if add_show_from_set() is called after
    add_cmd_sfunc() (BUG?).  */

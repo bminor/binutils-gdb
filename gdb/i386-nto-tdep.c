@@ -87,9 +87,9 @@ static void
 i386nto_supply_fpregset (char *fpregs)
 {
   if (nto_cpuinfo_valid && nto_cpuinfo_flags | X86_CPU_FXSR)
-    i387_supply_fxsave (fpregs, -1);
+    i387_supply_fxsave (current_regcache, -1, fpregs);
   else
-    i387_supply_fsave (fpregs, -1);
+    i387_supply_fsave (current_regcache, -1, fpregs);
 }
 
 static void

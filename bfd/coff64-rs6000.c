@@ -2706,7 +2706,7 @@ const bfd_target rs6000coff64_vec =
 
     /* Symbols */
     coff_get_symtab_upper_bound,
-    coff_get_symtab,
+    coff_canonicalize_symtab,
     coff_make_empty_symbol,
     coff_print_symbol,
     coff_get_symbol_info,
@@ -2949,7 +2949,7 @@ const bfd_target aix5coff64_vec =
 
     /* Symbols */
     coff_get_symtab_upper_bound,
-    coff_get_symtab,
+    coff_canonicalize_symtab,
     coff_make_empty_symbol,
     coff_print_symbol,
     coff_get_symbol_info,

@@ -1,6 +1,7 @@
 /* Dynamic architecture support for GDB, the GNU debugger.
 
-   Copyright 1998, 1999, 2000, 2002 Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2002, 2003 Free Software Foundation,
+   Inc.
 
    This file is part of GDB.
 
@@ -75,9 +76,10 @@ extern int core_addr_greaterthan (CORE_ADDR lhs, CORE_ADDR rhs);
 extern const struct floatformat *default_float_format (struct gdbarch *gdbarch);
 extern const struct floatformat *default_double_format (struct gdbarch *gdbarch);
 
-/* Identity function on a CORE_ADDR.  Just returns its parameter.  */
+/* Identity functions on a CORE_ADDR.  Just return the "addr".  */
 
 extern CORE_ADDR core_addr_identity (CORE_ADDR addr);
+extern gdbarch_convert_from_func_ptr_addr_ftype convert_from_func_ptr_addr_identity;
 
 /* No-op conversion of reg to regnum. */
 
@@ -85,9 +87,7 @@ extern int no_op_reg_to_regnum (int reg);
 
 /* Versions of init_frame_pc().  Do nothing; do the default. */
 
-extern CORE_ADDR init_frame_pc_noop (int fromleaf, struct frame_info *prev);
-
-extern CORE_ADDR init_frame_pc_default (int fromleaf, struct frame_info *prev);
+extern CORE_ADDR deprecated_init_frame_pc_default (int fromleaf, struct frame_info *prev);
 
 /* Do nothing version of elf_make_msymbol_special. */
 
@@ -109,6 +109,8 @@ int cannot_register_not (int regnum);
 extern gdbarch_virtual_frame_pointer_ftype legacy_virtual_frame_pointer;
 
 extern CORE_ADDR generic_skip_trampoline_code (CORE_ADDR pc);
+
+extern CORE_ADDR generic_skip_solib_resolver (CORE_ADDR pc);
 
 extern int generic_in_solib_call_trampoline (CORE_ADDR pc, char *name);
 
@@ -138,6 +140,9 @@ extern void legacy_register_to_value (struct frame_info *frame, int regnum,
 extern void legacy_value_to_register (struct frame_info *frame, int regnum,
 				      struct type *type, const void *from);
 
+extern int default_stabs_argument_has_addr (struct gdbarch *gdbarch,
+					    struct type *type);
+
 /* For compatibility with older architectures, returns
    (LEGACY_SIM_REGNO_IGNORE) when the register doesn't have a valid
    name.  */
@@ -147,5 +152,16 @@ extern int legacy_register_sim_regno (int regnum);
 /* Initialize a ``struct info''.  Can't use memset(0) since some
    default values are not zero.  */
 extern void gdbarch_info_init (struct gdbarch_info *info);
+
+/* Similar to init, but this time fill in the blanks.  Information is
+   obtained from the specified architecture, global "set ..." options,
+   and explicitly initialized INFO fields.  */
+extern void gdbarch_info_fill (struct gdbarch *gdbarch,
+			       struct gdbarch_info *info);
+
+/* Return the architecture for ABFD.  If no suitable architecture
+   could be find, return NULL.  */
+
+extern struct gdbarch *gdbarch_from_bfd (bfd *abfd);
 
 #endif

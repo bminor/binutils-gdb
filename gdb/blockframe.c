@@ -83,22 +83,35 @@ deprecated_inside_entry_file (CORE_ADDR addr)
 int
 inside_main_func (CORE_ADDR pc)
 {
+  struct minimal_symbol *msymbol;
+
   if (pc == 0)
     return 1;
   if (symfile_objfile == 0)
     return 0;
+
+  msymbol = lookup_minimal_symbol (main_name (), NULL, symfile_objfile);
 
   /* If the addr range is not set up at symbol reading time, set it up
      now.  This is for DEPRECATED_FRAME_CHAIN_VALID_ALTERNATE. I do
      this for coff, because it is unable to set it up and symbol
      reading time. */
 
-  if (symfile_objfile->ei.main_func_lowpc == INVALID_ENTRY_LOWPC &&
-      symfile_objfile->ei.main_func_highpc == INVALID_ENTRY_HIGHPC)
+  if (msymbol != NULL
+      && symfile_objfile->ei.main_func_lowpc == INVALID_ENTRY_LOWPC
+      && symfile_objfile->ei.main_func_highpc == INVALID_ENTRY_HIGHPC)
     {
-      struct symbol *mainsym;
+      /* brobecker/2003-10-10: We used to rely on lookup_symbol() to search
+         the symbol associated to the main function.  Unfortunately,
+         lookup_symbol() uses the current-language la_lookup_symbol_nonlocal
+         function to do the global symbol search.  Depending on the language,
+         this can introduce certain side-effects, because certain languages
+         such as Ada for instance may find more than one match.  So we prefer
+         to search the main function symbol using its address rather than
+         its name.  */
+      struct symbol *mainsym
+        = find_pc_function (SYMBOL_VALUE_ADDRESS (msymbol));
 
-      mainsym = lookup_symbol_linkage (main_name ());
       if (mainsym && SYMBOL_CLASS (mainsym) == LOC_BLOCK)
 	{
 	  symfile_objfile->ei.main_func_lowpc =
@@ -111,8 +124,6 @@ inside_main_func (CORE_ADDR pc)
   /* Not in the normal symbol tables, see if "main" is in the partial
      symbol table.  If it's not, then give up.  */
   {
-    struct minimal_symbol *msymbol
-      = lookup_minimal_symbol (main_name (), NULL, symfile_objfile);
     if (msymbol != NULL && MSYMBOL_TYPE (msymbol) == mst_text)
       {
 	struct obj_section *osect
@@ -283,7 +294,7 @@ get_frame_function (struct frame_info *frame)
    Returns 0 if function is not known.  */
 
 struct symbol *
-find_pc_sect_function (CORE_ADDR pc, struct sec *section)
+find_pc_sect_function (CORE_ADDR pc, struct bfd_section *section)
 {
   struct block *b = block_for_pc_sect (pc, section);
   if (b == 0)
@@ -306,7 +317,7 @@ find_pc_function (CORE_ADDR pc)
 static CORE_ADDR cache_pc_function_low = 0;
 static CORE_ADDR cache_pc_function_high = 0;
 static char *cache_pc_function_name = 0;
-static struct sec *cache_pc_function_section = NULL;
+static struct bfd_section *cache_pc_function_section = NULL;
 
 /* Clear cache, e.g. when symbol table is discarded. */
 

@@ -145,7 +145,8 @@ disassembler (abfd)
 	  || bfd_get_mach (abfd) == bfd_mach_h8300hn)
 	disassemble = print_insn_h8300h;
       else if (bfd_get_mach (abfd) == bfd_mach_h8300s
-	       || bfd_get_mach (abfd) == bfd_mach_h8300sn)
+	       || bfd_get_mach (abfd) == bfd_mach_h8300sn
+	       || bfd_get_mach (abfd) == bfd_mach_h8300sx)
 	disassemble = print_insn_h8300s;
       else
 	disassemble = print_insn_h8300;

@@ -371,7 +371,6 @@ v850ice_open (char *name, int from_tty)
 
 /* Clean up connection to a remote debugger.  */
 
-/* ARGSUSED */
 static void
 v850ice_close (int quitting)
 {
@@ -535,7 +534,7 @@ v850ice_fetch_registers (int regno)
     error ("v850ice_fetch_registers (%d):  bad value from ICE: %s.",
 	   regno, val);
 
-  store_unsigned_integer (val, REGISTER_RAW_SIZE (regno), regval);
+  store_unsigned_integer (val, DEPRECATED_REGISTER_RAW_SIZE (regno), regval);
   supply_register (regno, val);
 }
 
@@ -561,7 +560,7 @@ v850ice_store_registers (int regno)
     }
 
   regval = extract_unsigned_integer (&deprecated_registers[DEPRECATED_REGISTER_BYTE (regno)],
-				     REGISTER_RAW_SIZE (regno));
+				     DEPRECATED_REGISTER_RAW_SIZE (regno));
   strcpy (cmd, "reg ");
   if (!convert_register (regno, &cmd[4]))
     return;
@@ -587,7 +586,6 @@ v850ice_prepare_to_store (void)
 
    We can only read/write MAX_BLOCK_SIZE bytes at a time, though, or the DLL
    dies.  */
-/* ARGSUSED */
 static int
 v850ice_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
 		     int should_write, struct target_ops *target)

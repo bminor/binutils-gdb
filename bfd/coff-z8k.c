@@ -1,5 +1,5 @@
 /* BFD back-end for Zilog Z800n COFF binaries.
-   Copyright 1992, 1993, 1994, 1995, 1997, 1999, 2000, 2001, 2002
+   Copyright 1992, 1993, 1994, 1995, 1997, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Contributed by Cygnus Support.
    Written by Steve Chamberlain, <sac@cygnus.com>.
@@ -268,7 +268,7 @@ extra_case (in_abfd, link_info, link_order, reloc, data, src_ptr, dst_ptr)
 	  abort ();
 	gap /= 2;
 
-	if (gap > 0 || gap < -128)
+	if (gap > 0 || gap < -127)
 	  {
 	    if (! ((*link_info->callbacks->reloc_overflow)
 		   (link_info, bfd_asymbol_name (*reloc->sym_ptr_ptr),
@@ -295,8 +295,7 @@ extra_case (in_abfd, link_info, link_order, reloc, data, src_ptr, dst_ptr)
 
 	if (gap & 1)
 	  abort ();
-	gap /= 2;
-	if (gap > 8191 || gap < -8192)
+	if (gap > 4096 || gap < -4095)
 	  {
 	    if (! ((*link_info->callbacks->reloc_overflow)
 		   (link_info, bfd_asymbol_name (*reloc->sym_ptr_ptr),
@@ -304,6 +303,7 @@ extra_case (in_abfd, link_info, link_order, reloc, data, src_ptr, dst_ptr)
 		    input_section, reloc->address)))
 	      abort ();
 	  }
+	gap /= 2;
 	bfd_put_16 (in_abfd,
                     (bfd_get_16 ( in_abfd, data + *dst_ptr) & 0xf000) | (-gap & 0x0fff),
                     data + *dst_ptr);

@@ -303,7 +303,7 @@ typedef struct lineno_cache_entry
   unsigned int line_number;	/* Linenumber from start of function.  */
   union
   {
-    struct symbol_cache_entry *sym;	/* Function name.  */
+    struct bfd_symbol *sym;	/* Function name.  */
     bfd_vma offset;	    		/* Offset into section.  */
   } u;
 }
@@ -314,7 +314,7 @@ alent;
 #define	align_power(addr, align)	\
   (((addr) + ((bfd_vma) 1 << (align)) - 1) & ((bfd_vma) -1 << (align)))
 
-typedef struct sec *sec_ptr;
+typedef struct bfd_section *sec_ptr;
 
 #define bfd_get_section_name(bfd, ptr) ((ptr)->name + 0)
 #define bfd_get_section_vma(bfd, ptr) ((ptr)->vma + 0)
@@ -520,7 +520,7 @@ extern bfd_boolean bfd_cache_close
 
 extern bfd_boolean bfd_record_phdr
   (bfd *, unsigned long, bfd_boolean, flagword, bfd_boolean, bfd_vma,
-	   bfd_boolean, bfd_boolean, unsigned int, struct sec **);
+   bfd_boolean, bfd_boolean, unsigned int, struct bfd_section **);
 
 /* Byte swapping routines.  */
 
@@ -554,7 +554,7 @@ void bfd_put_bits (bfd_vma, bfd_byte *, int, bfd_boolean);
 struct ecoff_debug_info;
 struct ecoff_debug_swap;
 struct ecoff_extr;
-struct symbol_cache_entry;
+struct bfd_symbol;
 struct bfd_link_info;
 struct bfd_link_hash_entry;
 struct bfd_elf_version_tree;
@@ -584,8 +584,8 @@ extern bfd_boolean bfd_ecoff_debug_accumulate_other
 extern bfd_boolean bfd_ecoff_debug_externals
   (bfd *abfd, struct ecoff_debug_info *debug,
    const struct ecoff_debug_swap *swap, bfd_boolean relocatable,
-   bfd_boolean (*get_extr) (struct symbol_cache_entry *, struct ecoff_extr *),
-   void (*set_index) (struct symbol_cache_entry *, bfd_size_type));
+   bfd_boolean (*get_extr) (struct bfd_symbol *, struct ecoff_extr *),
+   void (*set_index) (struct bfd_symbol *, bfd_size_type));
 extern bfd_boolean bfd_ecoff_debug_one_external
   (bfd *abfd, struct ecoff_debug_info *debug,
    const struct ecoff_debug_swap *swap, const char *name,
@@ -601,7 +601,7 @@ extern bfd_boolean bfd_ecoff_write_accumulated_debug
    const struct ecoff_debug_swap *swap,
    struct bfd_link_info *info, file_ptr where);
 extern bfd_boolean bfd_mips_ecoff_create_embedded_relocs
-  (bfd *, struct bfd_link_info *, struct sec *, struct sec *, char **);
+  (bfd *, struct bfd_link_info *, struct bfd_section *, struct bfd_section *, char **);
 
 /* Externally visible ELF routines.  */
 
@@ -620,10 +620,10 @@ extern bfd_boolean bfd_elf_get_bfd_needed_list
   (bfd *, struct bfd_link_needed_list **);
 extern bfd_boolean bfd_elf32_size_dynamic_sections
   (bfd *, const char *, const char *, const char *, const char * const *,
-   struct bfd_link_info *, struct sec **, struct bfd_elf_version_tree *);
+   struct bfd_link_info *, struct bfd_section **, struct bfd_elf_version_tree *);
 extern bfd_boolean bfd_elf64_size_dynamic_sections
   (bfd *, const char *, const char *, const char *, const char * const *,
-   struct bfd_link_info *, struct sec **, struct bfd_elf_version_tree *);
+   struct bfd_link_info *, struct bfd_section **, struct bfd_elf_version_tree *);
 extern void bfd_elf_set_dt_needed_name
   (bfd *, const char *);
 extern void bfd_elf_set_dt_needed_soname
@@ -677,10 +677,13 @@ extern int bfd_get_arch_size
 extern int bfd_get_sign_extend_vma
   (bfd *);
 
+extern struct bfd_section *_bfd_elf_tls_setup
+  (bfd *, struct bfd_link_info *);
+
 extern bfd_boolean bfd_m68k_elf32_create_embedded_relocs
-  (bfd *, struct bfd_link_info *, struct sec *, struct sec *, char **);
+  (bfd *, struct bfd_link_info *, struct bfd_section *, struct bfd_section *, char **);
 extern bfd_boolean bfd_mips_elf32_create_embedded_relocs
-  (bfd *, struct bfd_link_info *, struct sec *, struct sec *, char **);
+  (bfd *, struct bfd_link_info *, struct bfd_section *, struct bfd_section *, char **);
 
 /* SunOS shared library support routines for the linker.  */
 
@@ -689,7 +692,7 @@ extern struct bfd_link_needed_list *bfd_sunos_get_needed_list
 extern bfd_boolean bfd_sunos_record_link_assignment
   (bfd *, struct bfd_link_info *, const char *);
 extern bfd_boolean bfd_sunos_size_dynamic_sections
-  (bfd *, struct bfd_link_info *, struct sec **, struct sec **, struct sec **);
+  (bfd *, struct bfd_link_info *, struct bfd_section **, struct bfd_section **, struct bfd_section **);
 
 /* Linux shared library support routines for the linker.  */
 
@@ -743,7 +746,7 @@ extern bfd_boolean bfd_xcoff_record_link_assignment
 extern bfd_boolean bfd_xcoff_size_dynamic_sections
   (bfd *, struct bfd_link_info *, const char *, const char *,
    unsigned long, unsigned long, unsigned long, bfd_boolean,
-   int, bfd_boolean, bfd_boolean, struct sec **, bfd_boolean);
+   int, bfd_boolean, bfd_boolean, struct bfd_section **, bfd_boolean);
 extern bfd_boolean bfd_xcoff_link_generate_rtinit
   (bfd *, const char *, const char *, bfd_boolean);
 
@@ -759,16 +762,16 @@ union internal_auxent;
 #endif
 
 extern bfd_boolean bfd_coff_get_syment
-  (bfd *, struct symbol_cache_entry *, struct internal_syment *);
+  (bfd *, struct bfd_symbol *, struct internal_syment *);
 
 extern bfd_boolean bfd_coff_get_auxent
-  (bfd *, struct symbol_cache_entry *, int, union internal_auxent *);
+  (bfd *, struct bfd_symbol *, int, union internal_auxent *);
 
 extern bfd_boolean bfd_coff_set_symbol_class
-  (bfd *, struct symbol_cache_entry *, unsigned int);
+  (bfd *, struct bfd_symbol *, unsigned int);
 
 extern bfd_boolean bfd_m68k_coff_create_embedded_relocs
-  (bfd *, struct bfd_link_info *, struct sec *, struct sec *, char **);
+  (bfd *, struct bfd_link_info *, struct bfd_section *, struct bfd_section *, char **);
 
 /* ARM Interworking support.  Called from linker.  */
 extern bfd_boolean bfd_arm_allocate_interworking_sections
@@ -815,12 +818,19 @@ extern unsigned int bfd_arm_get_mach_from_notes
 
 /* TI COFF load page support.  */
 extern void bfd_ticoff_set_section_load_page
-  (struct sec *, int);
+  (struct bfd_section *, int);
 
 extern int bfd_ticoff_get_section_load_page
-  (struct sec *);
+  (struct bfd_section *);
 
 /* H8/300 functions.  */
 extern bfd_vma bfd_h8300_pad_address
   (bfd *, bfd_vma);
+
+/* IA64 Itanium code generation.  Called from linker.  */
+extern void bfd_elf32_ia64_after_parse
+  (int);
+
+extern void bfd_elf64_ia64_after_parse
+  (int);
 

@@ -1347,7 +1347,6 @@ line_info (char *arg, int from_tty)
 
 /* Commands to search the source file for a regexp.  */
 
-/* ARGSUSED */
 static void
 forward_search_command (char *regex, int from_tty)
 {
@@ -1443,7 +1442,6 @@ forward_search_command (char *regex, int from_tty)
   fclose (stream);
 }
 
-/* ARGSUSED */
 static void
 reverse_search_command (char *regex, int from_tty)
 {

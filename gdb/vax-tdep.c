@@ -93,7 +93,7 @@ vax_frame_init_saved_regs (struct frame_info *frame)
   int regnum, regmask;
   CORE_ADDR next_addr;
 
-  if (get_frame_saved_regs (frame))
+  if (deprecated_get_frame_saved_regs (frame))
     return;
 
   frame_saved_regs_zalloc (frame);
@@ -107,18 +107,18 @@ vax_frame_init_saved_regs (struct frame_info *frame)
   for (regnum = 0; regnum < VAX_AP_REGNUM; regnum++)
     {
       if (regmask & (1 << regnum))
-        get_frame_saved_regs (frame)[regnum] = next_addr += 4;
+        deprecated_get_frame_saved_regs (frame)[regnum] = next_addr += 4;
     }
 
-  get_frame_saved_regs (frame)[SP_REGNUM] = next_addr + 4;
+  deprecated_get_frame_saved_regs (frame)[SP_REGNUM] = next_addr + 4;
   if (regmask & (1 << DEPRECATED_FP_REGNUM))
-    get_frame_saved_regs (frame)[SP_REGNUM] +=
+    deprecated_get_frame_saved_regs (frame)[SP_REGNUM] +=
       4 + (4 * read_memory_integer (next_addr + 4, 4));
 
-  get_frame_saved_regs (frame)[PC_REGNUM] = get_frame_base (frame) + 16;
-  get_frame_saved_regs (frame)[DEPRECATED_FP_REGNUM] = get_frame_base (frame) + 12;
-  get_frame_saved_regs (frame)[VAX_AP_REGNUM] = get_frame_base (frame) + 8;
-  get_frame_saved_regs (frame)[PS_REGNUM] = get_frame_base (frame) + 4;
+  deprecated_get_frame_saved_regs (frame)[PC_REGNUM] = get_frame_base (frame) + 16;
+  deprecated_get_frame_saved_regs (frame)[DEPRECATED_FP_REGNUM] = get_frame_base (frame) + 12;
+  deprecated_get_frame_saved_regs (frame)[VAX_AP_REGNUM] = get_frame_base (frame) + 8;
+  deprecated_get_frame_saved_regs (frame)[PS_REGNUM] = get_frame_base (frame) + 4;
 }
 
 /* Get saved user PC for sigtramp from sigcontext for BSD style sigtramp.  */
@@ -280,7 +280,7 @@ static CORE_ADDR
 vax_extract_struct_value_address (char *regbuf)
 {
   return (extract_unsigned_integer (regbuf + DEPRECATED_REGISTER_BYTE (0),
-				    REGISTER_RAW_SIZE (0)));
+				    DEPRECATED_REGISTER_RAW_SIZE (0)));
 }
 
 static const unsigned char *
@@ -348,7 +348,7 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* NOTE: cagney/2002-12-06: This can be deleted when this arch is
      ready to unwind the PC first (see frame.c:get_prev_frame()).  */
-  set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_default);
+  set_gdbarch_deprecated_init_frame_pc (gdbarch, deprecated_init_frame_pc_default);
 
   /* Register info */
   set_gdbarch_num_regs (gdbarch, VAX_NUM_REGS);

@@ -148,7 +148,6 @@ static int message_pending;
 
 /* Clean up connection to a remote debugger.  */
 
-/* ARGSUSED */
 static void
 sds_close (int quitting)
 {
@@ -467,7 +466,6 @@ static unsigned char sprs[16];
 /* Read the remote registers into the block REGS.  */
 /* Currently we just read all the registers, so we don't use regno.  */
 
-/* ARGSUSED */
 static void
 sds_fetch_registers (int regno)
 {
@@ -657,7 +655,6 @@ sds_read_bytes (CORE_ADDR memaddr, char *myaddr, int len)
    if SHOULD_WRITE is nonzero.  Returns length of data written or
    read; 0 for error.  TARGET is unused.  */
 
-/* ARGSUSED */
 static int
 sds_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int should_write,
 		 struct mem_attrib *attrib, struct target_ops *target)

@@ -901,7 +901,7 @@ s390_get_signal_frame_info (struct frame_info *fi)
       && get_frame_extra_info (next_frame)->sigcontext)
     {
       /* We're definitely backtracing from a signal handler.  */
-      CORE_ADDR *saved_regs = get_frame_saved_regs (fi);
+      CORE_ADDR *saved_regs = deprecated_get_frame_saved_regs (fi);
       CORE_ADDR save_reg_addr = (get_frame_extra_info (next_frame)->sigcontext
                                  + DEPRECATED_REGISTER_BYTE (S390_GP0_REGNUM));
       int reg;
@@ -1428,12 +1428,12 @@ s390_get_frame_info (CORE_ADDR start_pc,
        - the analysis gave us enough information to actually figure it
          out.  */
     if (fi
-        && get_frame_saved_regs (fi)
+        && deprecated_get_frame_saved_regs (fi)
         && original_sp != -1)
       {
         int slot_num;
         CORE_ADDR slot_addr;
-        CORE_ADDR *saved_regs = get_frame_saved_regs (fi);
+        CORE_ADDR *saved_regs = deprecated_get_frame_saved_regs (fi);
 
         /* Scan the spill array; if a spill slot says it holds the
            original value of some register, then record that slot's
@@ -1719,7 +1719,7 @@ s390_frame_init_saved_regs (struct frame_info *fi)
 
   int quick;
 
-  if (get_frame_saved_regs (fi) == NULL)
+  if (deprecated_get_frame_saved_regs (fi) == NULL)
     {
       /* zalloc memsets the saved regs */
       frame_saved_regs_zalloc (fi);
@@ -1754,10 +1754,10 @@ s390_frame_saved_pc_nofix (struct frame_info *fi)
     {
       get_frame_extra_info (fi)->saved_pc_valid = 1;
       if (get_frame_extra_info (fi)->good_prologue
-          && get_frame_saved_regs (fi)[S390_RETADDR_REGNUM])
+          && deprecated_get_frame_saved_regs (fi)[S390_RETADDR_REGNUM])
         get_frame_extra_info (fi)->saved_pc
           = ADDR_BITS_REMOVE (read_memory_integer
-                              (get_frame_saved_regs (fi)[S390_RETADDR_REGNUM],
+                              (deprecated_get_frame_saved_regs (fi)[S390_RETADDR_REGNUM],
                                S390_GPR_SIZE));
       else
         get_frame_extra_info (fi)->saved_pc
@@ -1841,24 +1841,24 @@ s390_frame_chain (struct frame_info *thisframe)
 	}
       else
 	{
-	  if (get_frame_saved_regs (thisframe))
+	  if (deprecated_get_frame_saved_regs (thisframe))
 	    {
 	      int regno;
 
               if (prev_fextra_info.frame_pointer_saved_pc
-                  && get_frame_saved_regs (thisframe)[S390_FRAME_REGNUM])
+                  && deprecated_get_frame_saved_regs (thisframe)[S390_FRAME_REGNUM])
                 regno = S390_FRAME_REGNUM;
               else
                 regno = S390_SP_REGNUM;
 
-	      if (get_frame_saved_regs (thisframe)[regno])
+	      if (deprecated_get_frame_saved_regs (thisframe)[regno])
                 {
                   /* The SP's entry of `saved_regs' is special.  */
                   if (regno == S390_SP_REGNUM)
-                    prev_fp = get_frame_saved_regs (thisframe)[regno];
+                    prev_fp = deprecated_get_frame_saved_regs (thisframe)[regno];
                   else
                     prev_fp =
-                      read_memory_integer (get_frame_saved_regs (thisframe)[regno],
+                      read_memory_integer (deprecated_get_frame_saved_regs (thisframe)[regno],
                                            S390_GPR_SIZE);
                 }
 	    }
@@ -1873,6 +1873,15 @@ s390_frame_chain (struct frame_info *thisframe)
   i386 dosen't need it. */
 
 
+
+/* NOTE: cagney/2003-10-31: "return_value" makes
+   "extract_struct_value_address", "extract_return_value", and
+   "use_struct_convention" redundant.  */
+static CORE_ADDR
+s390_cannot_extract_struct_value_address (struct regcache *regcache)
+{
+  return 0;
+}
 
 /* a given return value in `regbuf' with a type `valtype', extract and copy its
    value into `valbuf' */
@@ -1992,22 +2001,22 @@ s390_pop_frame_regular (struct frame_info *frame)
   write_register (S390_PC_REGNUM, DEPRECATED_FRAME_SAVED_PC (frame));
 
   /* Restore any saved registers.  */
-  if (get_frame_saved_regs (frame))
+  if (deprecated_get_frame_saved_regs (frame))
     {
       for (regnum = 0; regnum < NUM_REGS; regnum++)
-        if (get_frame_saved_regs (frame)[regnum] != 0)
+        if (deprecated_get_frame_saved_regs (frame)[regnum] != 0)
           {
             ULONGEST value;
             
-            value = read_memory_unsigned_integer (get_frame_saved_regs (frame)[regnum],
-                                                  REGISTER_RAW_SIZE (regnum));
+            value = read_memory_unsigned_integer (deprecated_get_frame_saved_regs (frame)[regnum],
+                                                  DEPRECATED_REGISTER_RAW_SIZE (regnum));
             write_register (regnum, value);
           }
 
       /* Actually cut back the stack.  Remember that the SP's element of
          saved_regs is the old SP itself, not the address at which it is
          saved.  */
-      write_register (S390_SP_REGNUM, get_frame_saved_regs (frame)[S390_SP_REGNUM]);
+      write_register (S390_SP_REGNUM, deprecated_get_frame_saved_regs (frame)[S390_SP_REGNUM]);
     }
 
   /* Throw away any cached frame information.  */
@@ -2206,28 +2215,6 @@ extend_simple_arg (struct value *arg)
 }
 
 
-/* Round ADDR up to the next N-byte boundary.  N must be a power of
-   two.  */
-static CORE_ADDR
-round_up (CORE_ADDR addr, int n)
-{
-  /* Check that N is really a power of two.  */
-  gdb_assert (n && (n & (n-1)) == 0);
-  return ((addr + n - 1) & -n);
-}
-
-
-/* Round ADDR down to the next N-byte boundary.  N must be a power of
-   two.  */
-static CORE_ADDR
-round_down (CORE_ADDR addr, int n)
-{
-  /* Check that N is really a power of two.  */
-  gdb_assert (n && (n & (n-1)) == 0);
-  return (addr & -n);
-}
-
-
 /* Return the alignment required by TYPE.  */
 static int
 alignment_of (struct type *type)
@@ -2304,7 +2291,7 @@ s390_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
           && pass_by_copy_ref (type))
         {
           sp -= length;
-          sp = round_down (sp, alignment_of (type));
+          sp = align_down (sp, alignment_of (type));
           write_memory (sp, VALUE_CONTENTS (arg), length);
           copy_addr[i] = sp;
           num_copies++;
@@ -2323,7 +2310,7 @@ s390_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
         struct type *type = VALUE_TYPE (arg);
         int length = TYPE_LENGTH (type);
         
-        sp = round_down (sp, alignment_of (type));
+        sp = align_down (sp, alignment_of (type));
 
         /* SIMPLE_ARG values get extended to DEPRECATED_REGISTER_SIZE bytes. 
            Assume every argument is.  */
@@ -2333,12 +2320,12 @@ s390_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   }
 
   /* Include space for any reference-to-copy pointers.  */
-  sp = round_down (sp, pointer_size);
+  sp = align_down (sp, pointer_size);
   sp -= num_copies * pointer_size;
     
   /* After all that, make sure it's still aligned on an eight-byte
      boundary.  */
-  sp = round_down (sp, 8);
+  sp = align_down (sp, 8);
 
   /* Finally, place the actual parameters, working from SP towards
      higher addresses.  The code above is supposed to reserve enough
@@ -2403,7 +2390,7 @@ s390_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
               {
                 /* Simple args are always extended to 
                    DEPRECATED_REGISTER_SIZE bytes.  */
-                starg = round_up (starg, DEPRECATED_REGISTER_SIZE);
+                starg = align_up (starg, DEPRECATED_REGISTER_SIZE);
 
                 /* Do we need to pass a pointer to our copy of this
                    argument?  */
@@ -2420,10 +2407,10 @@ s390_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
             else
               {
                 /* You'd think we should say:
-                   starg = round_up (starg, alignment_of (type));
+                   starg = align_up (starg, alignment_of (type));
                    Unfortunately, GCC seems to simply align the stack on
                    a four/eight-byte boundary, even when passing doubles. */
-                starg = round_up (starg, S390_STACK_PARAMETER_ALIGNMENT);
+                starg = align_up (starg, S390_STACK_PARAMETER_ALIGNMENT);
                 write_memory (starg, VALUE_CONTENTS (arg), length);
                 starg += length;
               }
@@ -2592,7 +2579,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* NOTE: cagney/2002-12-06: This can be deleted when this arch is
      ready to unwind the PC first (see frame.c:get_prev_frame()).  */
-  set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_default);
+  set_gdbarch_deprecated_init_frame_pc (gdbarch, deprecated_init_frame_pc_default);
 
   set_gdbarch_believe_pcc_promotion (gdbarch, 0);
   set_gdbarch_char_signed (gdbarch, 0);
@@ -2644,8 +2631,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_stab_reg_to_regnum (gdbarch, s390_stab_reg_to_regnum);
   set_gdbarch_dwarf_reg_to_regnum (gdbarch, s390_stab_reg_to_regnum);
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, s390_stab_reg_to_regnum);
-  set_gdbarch_deprecated_extract_struct_value_address
-    (gdbarch, generic_cannot_extract_struct_value_address);
+  set_gdbarch_extract_struct_value_address (gdbarch, s390_cannot_extract_struct_value_address);
 
   /* Parameters for inferior function calls.  */
   set_gdbarch_deprecated_pc_in_call_dummy (gdbarch, deprecated_pc_in_call_dummy_at_entry_point);

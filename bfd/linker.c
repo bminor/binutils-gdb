@@ -786,7 +786,7 @@ generic_link_add_object_symbols (bfd *abfd,
 				 bfd_boolean collect)
 {
   bfd_size_type symcount;
-  struct symbol_cache_entry **outsyms;
+  struct bfd_symbol **outsyms;
 
   if (! generic_link_read_symbols (abfd))
     return FALSE;

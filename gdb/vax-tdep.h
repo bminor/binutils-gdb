@@ -22,7 +22,7 @@
 #define VAX_TDEP_H
 
 /* Say how long (ordinary) registers are.  This is a piece of bogosity
-   used in push_word and a few other places;  REGISTER_RAW_SIZE is the
+   used in push_word and a few other places;  DEPRECATED_REGISTER_RAW_SIZE is the
    real way to know how big a register is.  */
 #define VAX_REGISTER_SIZE 4
 
@@ -33,10 +33,10 @@
    register state.  */
 #define VAX_REGISTER_BYTES (VAX_NUM_REGS * 4)
 
-/* Largest value REGISTER_RAW_SIZE can have.  */
+/* Largest value DEPRECATED_REGISTER_RAW_SIZE can have.  */
 #define VAX_MAX_REGISTER_RAW_SIZE 4
 
-/* Largest value REGISTER_VIRTUAL_SIZE can have.  */
+/* Largest value DEPRECATED_REGISTER_VIRTUAL_SIZE can have.  */
 #define VAX_MAX_REGISTER_VIRTUAL_SIZE 4
 
 /* Register numbers of various important registers.

@@ -1,3 +1,11 @@
+2003-10-16  Michael Snyder  <msnyder@redhat.com>
+
+	* emul_netbsd.c: Only a comment may follow an #endif.
+
+2003-10-15  Michael Snyder  <msnyder@redhat.com>
+
+	* Makefile.in (sim_calls.o): No longer depends on gdb/tm.h.
+
 2003-06-22  Andrew Cagney  <cagney@redhat.com>
 
 	Written by matthew green <mrg@redhat.com>, with fixes from Aldy

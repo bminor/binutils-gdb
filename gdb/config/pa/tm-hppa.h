@@ -35,8 +35,8 @@
 #define DEPRECATED_PC_IN_CALL_DUMMY(pc, sp, frame_address) deprecated_pc_in_call_dummy_on_stack (pc, sp, frame_address)
 /* Hack, get around problem with including "arch-utils.h".  */
 struct frame_info;
-extern CORE_ADDR init_frame_pc_default (int fromleaf, struct frame_info *prev);
-#define DEPRECATED_INIT_FRAME_PC(l,f) (init_frame_pc_default (l, f))
+extern CORE_ADDR deprecated_init_frame_pc_default (int fromleaf, struct frame_info *prev);
+#define DEPRECATED_INIT_FRAME_PC(l,f) (deprecated_init_frame_pc_default (l, f))
 
 /* Forward declarations of some types we use in prototypes */
 
@@ -119,9 +119,12 @@ extern int hppa_instruction_nullified (void);
    specified in the calling convention doc. As far as I know, the only
    way to get the return value is to have the caller tell us where it
    told the callee to put it, rather than have the callee tell us.  */
-struct value *hppa_value_returned_from_stack (register struct type *valtype,
+struct value *hppa_value_returned_from_stack (struct type *valtype,
 					      CORE_ADDR addr);
-#define VALUE_RETURNED_FROM_STACK(valtype,addr) \
+/* FIXME: cagney/2003-09-27: This method should now be redundant.
+   Instead, when "struct return convention", the inferior function
+   call code always saves and uses the struct return's stack address.  */
+#define DEPRECATED_VALUE_RETURNED_FROM_STACK(valtype,addr) \
   hppa_value_returned_from_stack (valtype, addr)
 
 extern void hppa_frame_init_saved_regs (struct frame_info *);
@@ -205,7 +208,7 @@ extern void hppa_frame_init_saved_regs (struct frame_info *);
 /* If we've reached a trap instruction within the call dummy, then
    we'll consider that to mean that we've reached the call dummy's
    end after its successful completion. */
-#define CALL_DUMMY_HAS_COMPLETED(pc, sp, frame_address) \
+#define DEPRECATED_CALL_DUMMY_HAS_COMPLETED(pc, sp, frame_address) \
   (DEPRECATED_PC_IN_CALL_DUMMY((pc), (sp), (frame_address)) && \
    (read_memory_integer((pc), 4) == BREAKPOINT32))
 

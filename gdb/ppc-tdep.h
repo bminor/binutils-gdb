@@ -26,6 +26,7 @@ struct gdbarch;
 struct frame_info;
 struct value;
 struct regcache;
+struct type;
 
 /* From ppc-linux-tdep.c... */
 CORE_ADDR ppc_linux_frame_saved_pc (struct frame_info *fi);
@@ -33,8 +34,16 @@ void ppc_linux_init_extra_frame_info (int fromleaf, struct frame_info *);
 int ppc_linux_frameless_function_invocation (struct frame_info *);
 void ppc_linux_frame_init_saved_regs (struct frame_info *);
 CORE_ADDR ppc_linux_frame_chain (struct frame_info *);
-int ppc_sysv_abi_use_struct_convention (int, struct type *);
-int ppc_sysv_abi_broken_use_struct_convention (int, struct type *);
+enum return_value_convention ppc_sysv_abi_return_value (struct gdbarch *gdbarch,
+							struct type *valtype,
+							struct regcache *regcache,
+							void *readbuf,
+							const void *writebuf);
+enum return_value_convention ppc_sysv_abi_broken_return_value (struct gdbarch *gdbarch,
+							       struct type *valtype,
+							       struct regcache *regcache,
+							       void *readbuf,
+							       const void *writebuf);
 CORE_ADDR ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
 					CORE_ADDR func_addr,
 					struct regcache *regcache,
@@ -42,11 +51,25 @@ CORE_ADDR ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
 					struct value **args, CORE_ADDR sp,
 					int struct_return,
 					CORE_ADDR struct_addr);
+CORE_ADDR ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
+					  CORE_ADDR func_addr,
+					  struct regcache *regcache,
+					  CORE_ADDR bp_addr, int nargs,
+					  struct value **args, CORE_ADDR sp,
+					  int struct_return,
+					  CORE_ADDR struct_addr);
+CORE_ADDR ppc64_sysv_abi_adjust_breakpoint_address (struct gdbarch *gdbarch,
+						    CORE_ADDR bpaddr);
 int ppc_linux_memory_remove_breakpoint (CORE_ADDR addr, char *contents_cache);
 struct link_map_offsets *ppc_linux_svr4_fetch_link_map_offsets (void);
 void ppc_linux_supply_gregset (char *buf);
 void ppc_linux_supply_fpregset (char *buf);
 
+enum return_value_convention ppc64_sysv_abi_return_value (struct gdbarch *gdbarch,
+							  struct type *valtype,
+							  struct regcache *regcache,
+							  void *readbuf,
+							  const void *writebuf);
 
 /* From rs6000-tdep.c... */
 CORE_ADDR rs6000_frame_saved_pc (struct frame_info *fi);

@@ -501,10 +501,10 @@ cris_examine (CORE_ADDR ip, CORE_ADDR limit, struct frame_info *fi,
 
   /* We only want to know the end of the prologue when fi->saved_regs == 0.
      When the saved registers are allocated full information is required.  */
-  if (get_frame_saved_regs (fi))
+  if (deprecated_get_frame_saved_regs (fi))
     {
       for (regno = 0; regno < NUM_REGS; regno++)
-        get_frame_saved_regs (fi)[regno] = 0;
+        deprecated_get_frame_saved_regs (fi)[regno] = 0;
     }
  
   /* Find the prologue instructions.  */
@@ -676,34 +676,34 @@ cris_examine (CORE_ADDR ip, CORE_ADDR limit, struct frame_info *fi,
 
   /* We only want to know the end of the prologue when
      fi->saved_regs == 0.  */ 
-  if (!get_frame_saved_regs (fi))
+  if (!deprecated_get_frame_saved_regs (fi))
     return ip;
 
   if (have_fp)
     {
-      get_frame_saved_regs (fi)[DEPRECATED_FP_REGNUM] = get_frame_base (fi);
+      deprecated_get_frame_saved_regs (fi)[DEPRECATED_FP_REGNUM] = get_frame_base (fi);
       
       /* Calculate the addresses.  */
       for (regno = regsave; regno >= 0; regno--)
         {
-          get_frame_saved_regs (fi)[regno] = get_frame_base (fi) - val;
+          deprecated_get_frame_saved_regs (fi)[regno] = get_frame_base (fi) - val;
           val -= 4;
         }
       if (get_frame_extra_info (fi)->leaf_function)
         {
           /* Set the register SP to contain the stack pointer of 
              the caller.  */
-          get_frame_saved_regs (fi)[SP_REGNUM] = get_frame_base (fi) + 4;
+          deprecated_get_frame_saved_regs (fi)[SP_REGNUM] = get_frame_base (fi) + 4;
         }
       else
         {
           /* Set the register SP to contain the stack pointer of 
              the caller.  */
-          get_frame_saved_regs (fi)[SP_REGNUM] = get_frame_base (fi) + 8;
+          deprecated_get_frame_saved_regs (fi)[SP_REGNUM] = get_frame_base (fi) + 8;
       
           /* Set the register SRP to contain the return address of 
              the caller.  */
-          get_frame_saved_regs (fi)[SRP_REGNUM] = get_frame_base (fi) + 4;
+          deprecated_get_frame_saved_regs (fi)[SRP_REGNUM] = get_frame_base (fi) + 4;
         }
     }
   return ip;
@@ -1151,7 +1151,7 @@ cris_frame_init_saved_regs (struct frame_info *fi)
   int frameless_p = 0; 
 
   /* Has this frame's registers already been initialized?  */
-  if (get_frame_saved_regs (fi))
+  if (deprecated_get_frame_saved_regs (fi))
     return;
 
   frame_saved_regs_zalloc (fi);
@@ -1161,7 +1161,7 @@ cris_frame_init_saved_regs (struct frame_info *fi)
       /* I don't see this ever happening, considering the context in which
          cris_frame_init_saved_regs is called (always when we're not in
          a dummy frame).  */
-      memcpy (get_frame_saved_regs (fi), dummy_regs, SIZEOF_FRAME_SAVED_REGS);
+      memcpy (deprecated_get_frame_saved_regs (fi), dummy_regs, SIZEOF_FRAME_SAVED_REGS);
     }
   else
     {    
@@ -1219,12 +1219,12 @@ cris_init_extra_frame_info (int fromleaf, struct frame_info *fi)
 
       /* Check fromleaf/frameless_function_invocation.  (FIXME)  */
 
-      if (get_frame_saved_regs (fi)[SRP_REGNUM] != 0)
+      if (deprecated_get_frame_saved_regs (fi)[SRP_REGNUM] != 0)
         {
           /* SRP was saved on the stack; non-leaf function.  */
           get_frame_extra_info (fi)->return_pc =
-            read_memory_integer (get_frame_saved_regs (fi)[SRP_REGNUM], 
-                                 REGISTER_RAW_SIZE (SRP_REGNUM));
+            read_memory_integer (deprecated_get_frame_saved_regs (fi)[SRP_REGNUM], 
+                                 DEPRECATED_REGISTER_RAW_SIZE (SRP_REGNUM));
         }
       else
         {
@@ -1527,30 +1527,30 @@ cris_pop_frame (void)
          after SP was saved.  */
       for (regno = 0; regno < DEPRECATED_FP_REGNUM; regno++)
         {
-          if (get_frame_saved_regs (fi)[regno])
+          if (deprecated_get_frame_saved_regs (fi)[regno])
             {
               write_register (regno, 
-                              read_memory_integer (get_frame_saved_regs (fi)[regno], 4));
+                              read_memory_integer (deprecated_get_frame_saved_regs (fi)[regno], 4));
             }
         }
      
-      if (get_frame_saved_regs (fi)[DEPRECATED_FP_REGNUM])
+      if (deprecated_get_frame_saved_regs (fi)[DEPRECATED_FP_REGNUM])
         {
           /* Pop the frame pointer (R8).  It was pushed before SP 
              was saved.  */
           write_register (DEPRECATED_FP_REGNUM, 
-                          read_memory_integer (get_frame_saved_regs (fi)[DEPRECATED_FP_REGNUM], 4));
+                          read_memory_integer (deprecated_get_frame_saved_regs (fi)[DEPRECATED_FP_REGNUM], 4));
           stack_offset += 4;
 
           /* Not a leaf function.  */
-          if (get_frame_saved_regs (fi)[SRP_REGNUM])
+          if (deprecated_get_frame_saved_regs (fi)[SRP_REGNUM])
             {     
               /* SRP was pushed before SP was saved.  */
               stack_offset += 4;
             }
       
           /* Restore the SP and adjust for R8 and (possibly) SRP.  */
-          write_register (SP_REGNUM, get_frame_saved_regs (fi)[DEPRECATED_FP_REGNUM] + stack_offset);
+          write_register (SP_REGNUM, deprecated_get_frame_saved_regs (fi)[DEPRECATED_FP_REGNUM] + stack_offset);
         } 
       else
         {
@@ -3916,7 +3916,7 @@ cris_version_update (char *ignore_args, int from_tty,
      the set command passed as a parameter.  The clone operation will
      include (BUG?) any ``set'' command callback, if present.
      Commands like ``info set'' call all the ``show'' command
-     callbacks.  Unfortunatly, for ``show'' commands cloned from
+     callbacks.  Unfortunately, for ``show'' commands cloned from
      ``set'', this includes callbacks belonging to ``set'' commands.
      Making this worse, this only occures if add_show_from_set() is
      called after add_cmd_sfunc() (BUG?).  */
@@ -3943,7 +3943,7 @@ cris_mode_update (char *ignore_args, int from_tty,
      the set command passed as a parameter.  The clone operation will
      include (BUG?) any ``set'' command callback, if present.
      Commands like ``info set'' call all the ``show'' command
-     callbacks.  Unfortunatly, for ``show'' commands cloned from
+     callbacks.  Unfortunately, for ``show'' commands cloned from
      ``set'', this includes callbacks belonging to ``set'' commands.
      Making this worse, this only occures if add_show_from_set() is
      called after add_cmd_sfunc() (BUG?).  */
@@ -3970,7 +3970,7 @@ cris_abi_update (char *ignore_args, int from_tty,
      the set command passed as a parameter.  The clone operation will
      include (BUG?) any ``set'' command callback, if present.
      Commands like ``info set'' call all the ``show'' command
-     callbacks.  Unfortunatly, for ``show'' commands cloned from
+     callbacks.  Unfortunately, for ``show'' commands cloned from
      ``set'', this includes callbacks belonging to ``set'' commands.
      Making this worse, this only occures if add_show_from_set() is
      called after add_cmd_sfunc() (BUG?).  */
@@ -4126,7 +4126,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* NOTE: cagney/2002-12-06: This can be deleted when this arch is
      ready to unwind the PC first (see frame.c:get_prev_frame()).  */
-  set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_default);
+  set_gdbarch_deprecated_init_frame_pc (gdbarch, deprecated_init_frame_pc_default);
 
   tdep->cris_version = cris_version;
   tdep->cris_mode = cris_mode;
@@ -4184,8 +4184,9 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_register_name (gdbarch, cris_register_name);
   
-  /* Length of ordinary registers used in push_word and a few other places. 
-     REGISTER_RAW_SIZE is the real way to know how big a register is.  */
+  /* Length of ordinary registers used in push_word and a few other
+     places.  DEPRECATED_REGISTER_RAW_SIZE is the real way to know how
+     big a register is.  */
   set_gdbarch_deprecated_register_size (gdbarch, 4);
   
   /* NEW */
@@ -4239,13 +4240,13 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* The length of the registers in the actual machine representation.  */
   set_gdbarch_deprecated_register_raw_size (gdbarch, cris_register_size);
   
-  /* The largest value REGISTER_RAW_SIZE can have.  */
+  /* The largest value DEPRECATED_REGISTER_RAW_SIZE can have.  */
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, 32);
   
   /* The length of the registers in the program's representation.  */
   set_gdbarch_deprecated_register_virtual_size (gdbarch, cris_register_size);
   
-  /* The largest value REGISTER_VIRTUAL_SIZE can have.  */
+  /* The largest value DEPRECATED_REGISTER_VIRTUAL_SIZE can have.  */
   set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 32);
 
   set_gdbarch_deprecated_register_virtual_type (gdbarch, cris_register_virtual_type);

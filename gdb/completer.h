@@ -31,8 +31,6 @@ extern char **location_completer (char *, char *);
 
 extern char **command_completer (char *, char *);
 
-extern char *get_gdb_completer_word_break_characters (void); 
-
 extern char *get_gdb_completer_quote_characters (void);
 
 /* Exported to linespec.c */

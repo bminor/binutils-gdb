@@ -1642,7 +1642,7 @@ elf64_hppa_size_dynamic_sections (output_bfd, info)
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       /* Set the contents of the .interp section to the interpreter.  */
-      if (! info->shared)
+      if (info->executable)
 	{
 	  s = bfd_get_section_by_name (dynobj, ".interp");
 	  BFD_ASSERT (s != NULL);
@@ -2675,12 +2675,9 @@ elf64_hppa_elf_get_symbol_type (elf_sym, type)
 
 static struct bfd_elf_special_section const elf64_hppa_special_sections[]=
 {
-  { ".fini",		0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },
-  { ".init",		0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },
-  { NULL,		0,	NULL,	0,
-    0,			0 }
+  { ".fini",    5, 0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
+  { ".init",    5, 0, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
+  { NULL,       0, 0, 0,            0 }
 };
 
 /* The hash bucket size is the standard one, namely 4.  */
@@ -2775,7 +2772,6 @@ const struct elf_size_info hppa64_elf_size_info =
 #define elf_backend_plt_readonly	0
 #define elf_backend_want_plt_sym	0
 #define elf_backend_got_header_size     0
-#define elf_backend_plt_header_size     0
 #define elf_backend_type_change_ok	TRUE
 #define elf_backend_get_symbol_type	elf64_hppa_elf_get_symbol_type
 #define elf_backend_reloc_type_class	elf64_hppa_reloc_type_class

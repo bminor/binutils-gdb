@@ -1202,55 +1202,48 @@ value_from_double (struct type *type, DOUBLEST num)
   return val;
 }
 
-/* Deal with the value that is "about to be returned".  */
+/* Deal with the return-value of a function that has "just returned".
 
-/* Return the value that a function returning now
-   would be returning to its caller, assuming its type is VALTYPE.
-   RETBUF is where we look for what ought to be the contents
-   of the registers (in raw form).  This is because it is often
-   desirable to restore old values to those registers
-   after saving the contents of interest, and then call
-   this function using the saved values.
-   struct_return is non-zero when the function in question is
-   using the structure return conventions on the machine in question;
-   0 when it is using the value returning conventions (this often
-   means returning pointer to where structure is vs. returning value). */
+   Extract the return-value (as a "struct value") that a function,
+   using register convention, has just returned to its caller.  Assume
+   that the type of the function is VALTYPE, and that the "just
+   returned" register state is found in RETBUF.
 
-/* ARGSUSED */
+   The function has "just returned" because GDB halts a returning
+   function by setting a breakpoint at the return address (in the
+   caller), and not the return instruction (in the callee).
+
+   Because, in the case of a return from an inferior function call,
+   GDB needs to restore the inferiors registers, RETBUF is normally a
+   copy of the inferior's registers.  */
+
 struct value *
-value_being_returned (struct type *valtype, struct regcache *retbuf,
-		      int struct_return)
+register_value_being_returned (struct type *valtype, struct regcache *retbuf)
 {
-  struct value *val;
-  CORE_ADDR addr;
+  struct value *val = allocate_value (valtype);
 
-  /* If this is not defined, just use EXTRACT_RETURN_VALUE instead.  */
-  if (EXTRACT_STRUCT_VALUE_ADDRESS_P ())
-    if (struct_return)
-      {
-	addr = EXTRACT_STRUCT_VALUE_ADDRESS (retbuf);
-	if (!addr)
-	  error ("Function return value unknown.");
-	return value_at (valtype, addr, NULL);
-      }
+  /* If the function returns void, don't bother fetching the return
+     value.  */
+  if (TYPE_CODE (valtype) == TYPE_CODE_VOID)
+    return val;
 
-  /* If this is not defined, just use EXTRACT_RETURN_VALUE instead.  */
-  if (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P ())
-    if (struct_return)
-      {
-	char *buf = deprecated_grub_regcache_for_registers (retbuf);
-	addr = DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS (buf);
-	if (!addr)
-	  error ("Function return value unknown.");
-	return value_at (valtype, addr, NULL);
-      }
+  if (!gdbarch_return_value_p (current_gdbarch))
+    {
+      /* NOTE: cagney/2003-10-20: Unlike "gdbarch_return_value", the
+         EXTRACT_RETURN_VALUE and USE_STRUCT_CONVENTION methods do not
+         handle the edge case of a function returning a small
+         structure / union in registers.  */
+      CHECK_TYPEDEF (valtype);
+      EXTRACT_RETURN_VALUE (valtype, retbuf, VALUE_CONTENTS_RAW (val));
+      return val;
+    }
 
-  val = allocate_value (valtype);
-  CHECK_TYPEDEF (valtype);
-  /* If the function returns void, don't bother fetching the return value.  */
-  if (TYPE_CODE (valtype) != TYPE_CODE_VOID)
-    EXTRACT_RETURN_VALUE (valtype, retbuf, VALUE_CONTENTS_RAW (val));
-
+  /* This function only handles "register convention".  */
+  gdb_assert (gdbarch_return_value (current_gdbarch, valtype,
+				    NULL, NULL, NULL)
+	      == RETURN_VALUE_REGISTER_CONVENTION);
+  gdbarch_return_value (current_gdbarch, valtype, retbuf,
+			VALUE_CONTENTS_RAW (val) /*read*/, NULL /*write*/);
   return val;
 }
 
@@ -1292,35 +1285,27 @@ using_struct_return (struct type *value_type, int gcc_p)
   if (code == TYPE_CODE_ERROR)
     error ("Function return type unknown.");
 
-  if (code == TYPE_CODE_STRUCT
-      || code == TYPE_CODE_UNION
-      || code == TYPE_CODE_ARRAY
-      || RETURN_VALUE_ON_STACK (value_type))
-    return USE_STRUCT_CONVENTION (gcc_p, value_type);
+  if (!gdbarch_return_value_p (current_gdbarch))
+    {
+      /* FIXME: cagney/2003-10-01: The below is dead.  Instead an
+	 architecture should implement "gdbarch_return_value".  Using
+	 that new function it is possible to exactly specify the ABIs
+	 "struct return" vs "register return" conventions.  */
+      if (code == TYPE_CODE_STRUCT
+	  || code == TYPE_CODE_UNION
+	  || code == TYPE_CODE_ARRAY
+	  || RETURN_VALUE_ON_STACK (value_type))
+	return USE_STRUCT_CONVENTION (gcc_p, value_type);
+      else
+	return 0;
+    }
 
-  return 0;
+  /* Probe the architecture for the return-value convention.  */
+  return (gdbarch_return_value (current_gdbarch, value_type,
+				NULL, NULL, NULL)
+	  == RETURN_VALUE_STRUCT_CONVENTION);
 }
 
-/* Store VAL so it will be returned if a function returns now.
-   Does not verify that VAL's type matches what the current
-   function wants to return.  */
-
-void
-set_return_value (struct value *val)
-{
-  struct type *type = check_typedef (VALUE_TYPE (val));
-  enum type_code code = TYPE_CODE (type);
-
-  if (code == TYPE_CODE_ERROR)
-    error ("Function return type unknown.");
-
-  if (code == TYPE_CODE_STRUCT
-      || code == TYPE_CODE_UNION)	/* FIXME, implement struct return.  */
-    error ("GDB does not support specifying a struct or union return value.");
-
-  STORE_RETURN_VALUE (type, current_regcache, VALUE_CONTENTS (val));
-}
-
 void
 _initialize_values (void)
 {

@@ -127,7 +127,7 @@ fill_fpregset (fpregset_t *fpregsetp, int regno)
 	{
 	  from = (char *) &deprecated_registers[DEPRECATED_REGISTER_BYTE (regi)];
 	  to = (char *) &(fpregsetp->fp_r.fp_regs[regi - FP0_REGNUM]);
-	  memcpy (to, from, REGISTER_RAW_SIZE (regi));
+	  memcpy (to, from, DEPRECATED_REGISTER_RAW_SIZE (regi));
 	}
     }
 

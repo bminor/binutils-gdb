@@ -42,6 +42,7 @@
 #include "language.h"
 #include "regcache.h"
 #include "gdb_assert.h"
+#include "exec.h"
 
 #include <fcntl.h>
 
@@ -54,10 +55,6 @@
 
 /* #define SOLIB_DEBUG
  */
-
-/* Defined in exec.c; used to prevent dangling pointer bug.
- */
-extern struct target_ops exec_ops;
 
 /* This lives in hppa-tdep.c. */
 extern struct unwind_table_entry *find_unwind_entry (CORE_ADDR pc);
@@ -937,7 +934,7 @@ som_solib_create_inferior_hook (void)
 
     /* What a crock.  */
     msymbol2 = lookup_minimal_symbol_solib_trampoline (DEPRECATED_SYMBOL_NAME (msymbol),
-						       NULL, objfile);
+						       objfile);
     /* Found a symbol with the right name.  */
     if (msymbol2)
       {
@@ -1225,7 +1222,6 @@ som_solib_desire_dynamic_linker_symbols (void)
       }
 
     dld_msymbol = lookup_minimal_symbol_solib_trampoline ("shl_load",
-							  NULL,
 							  objfile);
     if (dld_msymbol != NULL)
       {
@@ -1265,7 +1261,6 @@ som_solib_desire_dynamic_linker_symbols (void)
       }
 
     dld_msymbol = lookup_minimal_symbol_solib_trampoline ("shl_unload",
-							  NULL,
 							  objfile);
     if (dld_msymbol != NULL)
       {

@@ -85,7 +85,7 @@ maintainer works with the native maintainer when resolving API issues.
 	h8300		--target=h8300hms ,-Werror
 			Maintenance only
 
-	h8500		(--target=h8500hms OBSOLETE)
+	h8500		Deleted.
 
 	i386		--target=i386-elf ,-Werror
 			Mark Kettenis           kettenis@gnu.org
@@ -96,7 +96,7 @@ maintainer works with the native maintainer when resolving API issues.
 			(--target=ia64-elf broken)
 			Kevin Buettner		kevinb@redhat.com
 
-	m32r		(--target=m32r-elf OBSOLETE)
+	m32r		--target=m32r-elf ,-Werror
 
 	m68hc11		--target=m68hc11-elf ,-Werror ,
 			Stephane Carrez		stcarrez@nerim.fr
@@ -112,7 +112,7 @@ maintainer works with the native maintainer when resolving API issues.
 	mips		--target=mips-elf ,-Werror
 			Andrew Cagney		cagney@redhat.com
 
-	mn10200		(--target=mn10200-elf OBSOLETE)
+	mn10200		Deleted.
 
 	mn10300		--target=mn10300-elf ,-Werror
 			Maintenance only
@@ -122,7 +122,6 @@ maintainer works with the native maintainer when resolving API issues.
 
 	pa		(--target=hppa-elf broken)
 			Maintenance only
-			OBSOLETE candidate, not multi-arch
 
 	powerpc		--target=powerpc-eabi ,-Werror
 			Kevin Buettner		kevinb@redhat.com
@@ -152,7 +151,7 @@ maintainer works with the native maintainer when resolving API issues.
 	xstormy16	--target=xstormy16-elf ,-Werror
 			Corinna Vinschen	vinschen@redhat.com
 
-	z8k		(--target=z8k-coff OBSOLETE)
+	z8k		Deleted.
 
 All developers recognized by this file can make arbitrary changes to
 OBSOLETE targets.
@@ -200,7 +199,7 @@ GNU/Linux ARM native	Scott Bambrough		scottb@netwinder.org
 Solaris/x86 native & host (devolved)
 			Peter Schauer		Peter.Schauer@regent.e-technik.tu-muenchen.de
 Solaris/SPARC native & host (devolved)
-                        Michael Snyder          msnyder@redhat.com
+                        (Global Maintainers)
 
 
 
@@ -234,7 +233,7 @@ tracing bytecode stuff  Jim Blandy              jimb@redhat.com
 tracing			Michael Snyder		msnyder@redhat.com
 threads			Michael Snyder		msnyder@redhat.com
 			Mark Kettenis		kettenis@gnu.org
-breakpoints		Michael Snyder		msnyder@redhat.com
+breakpoints		(Global Maintainers)
 language support	(Blanket Write Privs Maintainers)
   C++			Daniel Jacobowitz	dan@debian.org
   Java support		(Global Maintainers)
@@ -254,7 +253,7 @@ testsuite		(Global Maintainers)
   lib                   Fernando Nasser         fnasser@redhat.com
                         Mark Salter             msalter@redhat.com
   gdbtk (gdb.gdbtk)     Keith Seitz             keiths@redhat.com
-  c++ (gdb.c++)		Michael Chastain	mec@shout.net
+  c++ (gdb.cp) 		Michael Chastain	mec.gnu@mindspring.com
 			David Carlton		carlton@kealia.com
   mi tests (gdb.mi)     Elena Zannoni           ezannoni@redhat.com
                         Andrew Cagney           cagney@redhat.com
@@ -321,7 +320,7 @@ Kevin Buettner					kevinb@redhat.com
 Andrew Cagney					ac131313@redhat.com
 David Carlton					carlton@kealia.com
 Stephane Carrez					stcarrez@nerim.fr
-Michael Chastain				mec@shout.net
+Michael Chastain				mec.gnu@mindspring.com
 Eric Christopher				echristo@redhat.com
 Nick Clifton					nickc@redhat.com
 Brendan Conoboy					blc@redhat.com
@@ -335,6 +334,7 @@ Ben Elliston					bje@wasabisystems.com
 Raoul Gough					RaoulGough@yahoo.co.uk
 Anthony Green			 		green@redhat.com
 Matthew Green					mrg@eterna.com.au
+Jerome Guitton					guitton@act-europe.fr
 Chris Faylor					cgf@redhat.com
 Adam Fedor					fedor@gnu.org
 Fred Fish					fnf@ninemoons.com
@@ -399,6 +399,7 @@ D Venkatasubramanian				dvenkat@noida.hcltech.com
 Corinna Vinschen				vinschen@redhat.com
 Keith Walker					keith.walker@arm.com
 Kris Warkentin					kewarken@qnx.com
+Jim Wilson					wilson@specifixinc.com
 Elena Zannoni					ezannoni@redhat.com
 Eli Zaretskii					eliz@gnu.org
 
@@ -422,7 +423,6 @@ Anthony Green (Java)				green at redhat dot com
 Folks that have been caught up in a paper trail:
 
 Jim Kingdon					jkingdon@engr.sgi.com
-Jim Wilson					wilson@specifixinc.com
 
 --
 

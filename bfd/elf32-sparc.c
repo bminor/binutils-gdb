@@ -2082,10 +2082,10 @@ static bfd_vma
 dtpoff_base (info)
      struct bfd_link_info *info;
 {
-  /* If tls_segment is NULL, we should have signalled an error already.  */
-  if (elf_hash_table (info)->tls_segment == NULL)
+  /* If tls_sec is NULL, we should have signalled an error already.  */
+  if (elf_hash_table (info)->tls_sec == NULL)
     return 0;
-  return elf_hash_table (info)->tls_segment->start;
+  return elf_hash_table (info)->tls_sec->vma;
 }
 
 /* Return the relocation value for @tpoff relocation
@@ -2096,14 +2096,12 @@ tpoff (info, address)
      struct bfd_link_info *info;
      bfd_vma address;
 {
-  struct elf_link_tls_segment *tls_segment
-    = elf_hash_table (info)->tls_segment;
+  struct elf_link_hash_table *htab = elf_hash_table (info);
 
-  /* If tls_segment is NULL, we should have signalled an error already.  */
-  if (tls_segment == NULL)
+  /* If tls_sec is NULL, we should have signalled an error already.  */
+  if (htab->tls_sec == NULL)
     return 0;
-  return -(align_power (tls_segment->size, tls_segment->align)
-	   + tls_segment->start - address);
+  return address - htab->tls_size - htab->tls_sec->vma;
 }
 
 /* Relocate a SPARC ELF section.  */
@@ -2182,7 +2180,7 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 	{
 	  sym = local_syms + r_symndx;
 	  sec = local_sections[r_symndx];
-	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, sec, rel);
+	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
 	}
       else
 	{
@@ -2459,16 +2457,8 @@ elf32_sparc_relocate_section (output_bfd, info, input_bfd, input_section,
 
 		      if (is_plt)
 			sec = htab->splt;
-		      else if (h == NULL)
-			sec = local_sections[r_symndx];
-		      else
-			{
-			  BFD_ASSERT (h->root.type == bfd_link_hash_defined
-				      || (h->root.type
-					  == bfd_link_hash_defweak));
-			  sec = h->root.u.def.section;
-			}
-		      if (sec != NULL && bfd_is_abs_section (sec))
+
+		      if (bfd_is_abs_section (sec))
 			indx = 0;
 		      else if (sec == NULL || sec->owner == NULL)
 			{
@@ -3478,7 +3468,6 @@ elf32_sparc_reloc_type_class (rela)
 #define elf_backend_plt_readonly 0
 #define elf_backend_want_plt_sym 1
 #define elf_backend_got_header_size 4
-#define elf_backend_plt_header_size (4*PLT_ENTRY_SIZE)
 #define elf_backend_rela_normal 1
 
 #include "elf32-target.h"

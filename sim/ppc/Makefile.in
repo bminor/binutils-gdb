@@ -379,7 +379,7 @@ model.o: model.c $(CPU_H)
 
 events.o: events.c events.h $(BASICS_H) 
 
-sim_calls.o: sim_calls.c $(PSIM_H) itable.h ../../gdb/tm.h options.h
+sim_calls.o: sim_calls.c $(PSIM_H) itable.h options.h
 
 spreg.o: spreg.c spreg.h spreg.c $(BASICS_H)
 

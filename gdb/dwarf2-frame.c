@@ -383,6 +383,7 @@ execute_cfa_program (unsigned char *insn_ptr, unsigned char *insn_end,
 	      insn_ptr = read_uleb128 (insn_ptr, insn_end, &reg);
 	      insn_ptr = read_uleb128 (insn_ptr, insn_end, &utmp);
 	      dwarf2_frame_state_alloc_regs (&fs->regs, reg + 1);
+	      fs->regs.reg[reg].how = REG_SAVED_REG;
 	      fs->regs.reg[reg].loc.reg = utmp;
 	      break;
 
@@ -770,7 +771,7 @@ dwarf2_frame_prev_register (struct frame_info *next_frame, void **this_cache,
              either a register and a signed offset that are added
              together or a DWARF expression that is evaluated.  */
 	  /* NOTE: cagney/2003-09-05: Should issue a complain.
-             Unfortunatly it turns out that DWARF2 CFI has a problem.
+             Unfortunately it turns out that DWARF2 CFI has a problem.
              Since CFI specifies the location at which a register was
              saved (not its value) it isn't possible to specify
              something like "unwound(REG) == REG + constant" using CFI
@@ -885,6 +886,9 @@ struct comp_unit
 
   /* Base for DW_EH_PE_datarel encodings.  */
   bfd_vma dbase;
+
+  /* Base for DW_EH_PE_textrel encodings.  */
+  bfd_vma tbase;
 };
 
 const struct objfile_data *dwarf2_frame_data;
@@ -1062,6 +1066,9 @@ read_encoded_value (struct comp_unit *unit, unsigned char encoding,
       break;
     case DW_EH_PE_datarel:
       base = unit->dbase;
+      break;
+    case DW_EH_PE_textrel:
+      base = unit->tbase;
       break;
     case DW_EH_PE_aligned:
       base = 0;
@@ -1523,12 +1530,13 @@ dwarf2_build_frame_info (struct objfile *objfile)
   unit.objfile = objfile;
   unit.addr_size = objfile->obfd->arch_info->bits_per_address / 8;
   unit.dbase = 0;
+  unit.tbase = 0;
 
   /* First add the information from the .eh_frame section.  That way,
      the FDEs from that section are searched last.  */
   if (dwarf_eh_frame_offset)
     {
-      asection *got;
+      asection *got, *txt;
 
       unit.cie = NULL;
       unit.dwarf_frame_buffer = dwarf2_read_section (objfile,
@@ -1540,12 +1548,18 @@ dwarf2_build_frame_info (struct objfile *objfile)
       unit.dwarf_frame_section = dwarf_eh_frame_section;
 
       /* FIXME: kettenis/20030602: This is the DW_EH_PE_datarel base
-	 that for the i386/amd64 target, which currently is the only
-	 target in GCC that supports/uses the DW_EH_PE_datarel
-	 encoding.  */
+	 that is used for the i386/amd64 target, which currently is
+	 the only target in GCC that supports/uses the
+	 DW_EH_PE_datarel encoding.  */
       got = bfd_get_section_by_name (unit.abfd, ".got");
       if (got)
 	unit.dbase = got->vma;
+
+      /* GCC emits the DW_EH_PE_textrel encoding type on sh and ia64
+         so far.  */
+      txt = bfd_get_section_by_name (unit.abfd, ".text");
+      if (txt)
+	unit.tbase = txt->vma;
 
       frame_ptr = unit.dwarf_frame_buffer;
       while (frame_ptr < unit.dwarf_frame_buffer + unit.dwarf_frame_size)

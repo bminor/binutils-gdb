@@ -204,18 +204,13 @@ extern const unsigned char *sparc_breakpoint_from_pc (CORE_ADDR *pc, int *len);
 
 #define CANNOT_STORE_REGISTER(regno) ((regno) == G0_REGNUM)
 
-#define	PRINT_EXTRA_FRAME_INFO(FI) \
+#define	DEPRECATED_PRINT_EXTRA_FRAME_INFO(FI) \
      sparc_print_extra_frame_info (FI)
 extern void sparc_print_extra_frame_info (struct frame_info *);
 
 /* DEPRECATED_INIT_EXTRA_FRAME_INFO needs the PC to detect flat
    frames.  */
 
-/* NOTE: cagney/2002-12-08: Add local declaration of
-   init_frame_pc_noop() because it isn't possible to include
-   "arch-utils.h" here.  */
-extern CORE_ADDR init_frame_pc_noop (int fromleaf, struct frame_info *prev);
-#define	DEPRECATED_INIT_FRAME_PC(FROMLEAF, PREV)	(init_frame_pc_noop (FROMLEAF, PREV))
 #define DEPRECATED_INIT_FRAME_PC_FIRST(FROMLEAF, PREV) \
   ((FROMLEAF) ? DEPRECATED_SAVED_PC_AFTER_CALL ((PREV)->next) : \
 	      (PREV)->next ? DEPRECATED_FRAME_SAVED_PC ((PREV)->next) : read_pc ())
@@ -228,9 +223,7 @@ extern CORE_ADDR init_frame_pc_noop (int fromleaf, struct frame_info *prev);
    address).  Some vendors get it wrong.  */
 
 #define	FRAME_SAVED_L0	0
-#define	FRAME_SAVED_I0	(8 * REGISTER_RAW_SIZE (L0_REGNUM))
-
-#define FRAME_STRUCT_ARGS_ADDRESS(FI) (get_frame_base (FI))
+#define	FRAME_SAVED_I0	(8 * DEPRECATED_REGISTER_RAW_SIZE (L0_REGNUM))
 
 /* Things needed for making the inferior call functions.  */
 /*

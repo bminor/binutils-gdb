@@ -237,7 +237,7 @@ rs6000_fetch_pointer_argument (struct frame_info *frame, int argi,
 			       struct type *type)
 {
   CORE_ADDR addr;
-  frame_read_register (frame, 3 + argi, &addr);
+  get_frame_register (frame, 3 + argi, &addr);
   return addr;
 }
 
@@ -985,7 +985,8 @@ skip_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct rs6000_framedata *fdata)
 	     initializer function as well.  */
 
 	  tmp = find_pc_misc_function (pc);
-	  if (tmp >= 0 && STREQ (misc_function_vector[tmp].name, main_name ()))
+	  if (tmp >= 0
+	      && strcmp (misc_function_vector[tmp].name, main_name ()) == 0)
 	    return pc + 8;
 	}
     }
@@ -1154,7 +1155,7 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
 
   for (argno = 0, argbytes = 0; argno < nargs && ii < 8; ++ii)
     {
-      int reg_size = REGISTER_RAW_SIZE (ii + 3);
+      int reg_size = DEPRECATED_REGISTER_RAW_SIZE (ii + 3);
 
       arg = args[argno];
       type = check_typedef (VALUE_TYPE (arg));
@@ -1313,65 +1314,6 @@ ran_out_of_registers_for_arguments:
   return sp;
 }
 
-/* Extract a function return value of type TYPE from raw register array
-   REGBUF, and copy that return value into VALBUF in virtual format.  */
-static void
-e500_extract_return_value (struct type *valtype, struct regcache *regbuf, void *valbuf)
-{
-  int offset = 0;
-  int vallen = TYPE_LENGTH (valtype);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-
-  if (TYPE_CODE (valtype) == TYPE_CODE_ARRAY
-      && vallen == 8
-      && TYPE_VECTOR (valtype))
-    {
-      regcache_raw_read (regbuf, tdep->ppc_ev0_regnum + 3, valbuf);
-    }
-  else
-    {
-      /* Return value is copied starting from r3.  Note that r3 for us
-         is a pseudo register.  */
-      int offset = 0;
-      int return_regnum = tdep->ppc_gp0_regnum + 3;
-      int reg_size = REGISTER_RAW_SIZE (return_regnum);
-      int reg_part_size;
-      char *val_buffer;
-      int copied = 0;
-      int i = 0;
-
-      /* Compute where we will start storing the value from.  */ 
-      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
-        {
-	  if (vallen <= reg_size)
-	    offset = reg_size - vallen;
-	  else
-	    offset = reg_size + (reg_size - vallen);
-        }
-
-      /* How big does the local buffer need to be?  */
-      if (vallen <= reg_size)
-	val_buffer = alloca (reg_size);
-      else
-	val_buffer = alloca (vallen);
-
-      /* Read all we need into our private buffer.  We copy it in
-         chunks that are as long as one register, never shorter, even
-         if the value is smaller than the register.  */
-      while (copied < vallen)
-        {
-          reg_part_size = REGISTER_RAW_SIZE (return_regnum + i);
-	  /* It is a pseudo/cooked register.  */
-          regcache_cooked_read (regbuf, return_regnum + i,
-				val_buffer + copied);
-          copied += reg_part_size;
-          i++;
-        }
-      /* Put the stuff in the return buffer.  */
-      memcpy (valbuf, val_buffer + offset, vallen);
-    }
-}
-
 /* PowerOpen always puts structures in memory.  Vectors, which were
    added later, do get returned in a register though.  */
 
@@ -1421,8 +1363,8 @@ rs6000_extract_return_value (struct type *valtype, char *regbuf, char *valbuf)
     {
       /* return value is copied starting from r3. */
       if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG
-	  && TYPE_LENGTH (valtype) < REGISTER_RAW_SIZE (3))
-	offset = REGISTER_RAW_SIZE (3) - TYPE_LENGTH (valtype);
+	  && TYPE_LENGTH (valtype) < DEPRECATED_REGISTER_RAW_SIZE (3))
+	offset = DEPRECATED_REGISTER_RAW_SIZE (3) - TYPE_LENGTH (valtype);
 
       memcpy (valbuf,
 	      regbuf + DEPRECATED_REGISTER_BYTE (3) + offset,
@@ -1628,7 +1570,7 @@ frame_get_saved_regs (struct frame_info *fi, struct rs6000_framedata *fdatap)
   struct gdbarch_tdep * tdep = gdbarch_tdep (current_gdbarch);
   int wordsize = tdep->wordsize;
 
-  if (get_frame_saved_regs (fi))
+  if (deprecated_get_frame_saved_regs (fi))
     return;
 
   if (fdatap == NULL)
@@ -1670,7 +1612,7 @@ frame_get_saved_regs (struct frame_info *fi, struct rs6000_framedata *fdatap)
       CORE_ADDR fpr_addr = frame_addr + fdatap->fpr_offset;
       for (i = fdatap->saved_fpr; i < 32; i++)
 	{
-	  get_frame_saved_regs (fi)[FP0_REGNUM + i] = fpr_addr;
+	  deprecated_get_frame_saved_regs (fi)[FP0_REGNUM + i] = fpr_addr;
 	  fpr_addr += 8;
 	}
     }
@@ -1684,7 +1626,7 @@ frame_get_saved_regs (struct frame_info *fi, struct rs6000_framedata *fdatap)
       CORE_ADDR gpr_addr = frame_addr + fdatap->gpr_offset;
       for (i = fdatap->saved_gpr; i < 32; i++)
 	{
-	  get_frame_saved_regs (fi)[tdep->ppc_gp0_regnum + i] = gpr_addr;
+	  deprecated_get_frame_saved_regs (fi)[tdep->ppc_gp0_regnum + i] = gpr_addr;
 	  gpr_addr += wordsize;
 	}
     }
@@ -1699,8 +1641,8 @@ frame_get_saved_regs (struct frame_info *fi, struct rs6000_framedata *fdatap)
 	  CORE_ADDR vr_addr = frame_addr + fdatap->vr_offset;
 	  for (i = fdatap->saved_vr; i < 32; i++)
 	    {
-	      get_frame_saved_regs (fi)[tdep->ppc_vr0_regnum + i] = vr_addr;
-	      vr_addr += REGISTER_RAW_SIZE (tdep->ppc_vr0_regnum);
+	      deprecated_get_frame_saved_regs (fi)[tdep->ppc_vr0_regnum + i] = vr_addr;
+	      vr_addr += DEPRECATED_REGISTER_RAW_SIZE (tdep->ppc_vr0_regnum);
 	    }
 	}
     }
@@ -1715,9 +1657,9 @@ frame_get_saved_regs (struct frame_info *fi, struct rs6000_framedata *fdatap)
 	  CORE_ADDR ev_addr = frame_addr + fdatap->ev_offset;
 	  for (i = fdatap->saved_ev; i < 32; i++)
 	    {
-	      get_frame_saved_regs (fi)[tdep->ppc_ev0_regnum + i] = ev_addr;
-              get_frame_saved_regs (fi)[tdep->ppc_gp0_regnum + i] = ev_addr + 4;
-	      ev_addr += REGISTER_RAW_SIZE (tdep->ppc_ev0_regnum);
+	      deprecated_get_frame_saved_regs (fi)[tdep->ppc_ev0_regnum + i] = ev_addr;
+              deprecated_get_frame_saved_regs (fi)[tdep->ppc_gp0_regnum + i] = ev_addr + 4;
+	      ev_addr += DEPRECATED_REGISTER_RAW_SIZE (tdep->ppc_ev0_regnum);
             }
 	}
     }
@@ -1725,17 +1667,17 @@ frame_get_saved_regs (struct frame_info *fi, struct rs6000_framedata *fdatap)
   /* If != 0, fdatap->cr_offset is the offset from the frame that holds
      the CR.  */
   if (fdatap->cr_offset != 0)
-    get_frame_saved_regs (fi)[tdep->ppc_cr_regnum] = frame_addr + fdatap->cr_offset;
+    deprecated_get_frame_saved_regs (fi)[tdep->ppc_cr_regnum] = frame_addr + fdatap->cr_offset;
 
   /* If != 0, fdatap->lr_offset is the offset from the frame that holds
      the LR.  */
   if (fdatap->lr_offset != 0)
-    get_frame_saved_regs (fi)[tdep->ppc_lr_regnum] = frame_addr + fdatap->lr_offset;
+    deprecated_get_frame_saved_regs (fi)[tdep->ppc_lr_regnum] = frame_addr + fdatap->lr_offset;
 
   /* If != 0, fdatap->vrsave_offset is the offset from the frame that holds
      the VRSAVE.  */
   if (fdatap->vrsave_offset != 0)
-    get_frame_saved_regs (fi)[tdep->ppc_vrsave_regnum] = frame_addr + fdatap->vrsave_offset;
+    deprecated_get_frame_saved_regs (fi)[tdep->ppc_vrsave_regnum] = frame_addr + fdatap->vrsave_offset;
 }
 
 /* Return the address of a frame. This is the inital %sp value when the frame
@@ -1762,7 +1704,7 @@ frame_initial_stack_address (struct frame_info *fi)
   /* If saved registers of this frame are not known yet, read and
      cache them.  */
 
-  if (!get_frame_saved_regs (fi))
+  if (!deprecated_get_frame_saved_regs (fi))
     frame_get_saved_regs (fi, &fdata);
 
   /* If no alloca register used, then fi->frame is the value of the %sp for
@@ -1782,7 +1724,7 @@ frame_initial_stack_address (struct frame_info *fi)
       {
 	get_frame_extra_info (fi)->initial_sp
 	  = extract_unsigned_integer (tmpbuf,
-				      REGISTER_RAW_SIZE (fdata.alloca_reg));
+				      DEPRECATED_REGISTER_RAW_SIZE (fdata.alloca_reg));
       }
     else
       /* NOTE: cagney/2002-04-17: At present the only time
@@ -1932,13 +1874,13 @@ static void
 rs6000_register_convert_to_virtual (int n, struct type *type,
 				    char *from, char *to)
 {
-  if (TYPE_LENGTH (type) != REGISTER_RAW_SIZE (n))
+  if (TYPE_LENGTH (type) != DEPRECATED_REGISTER_RAW_SIZE (n))
     {
-      double val = deprecated_extract_floating (from, REGISTER_RAW_SIZE (n));
+      double val = deprecated_extract_floating (from, DEPRECATED_REGISTER_RAW_SIZE (n));
       deprecated_store_floating (to, TYPE_LENGTH (type), val);
     }
   else
-    memcpy (to, from, REGISTER_RAW_SIZE (n));
+    memcpy (to, from, DEPRECATED_REGISTER_RAW_SIZE (n));
 }
 
 /* Convert data from virtual format with type TYPE in buffer FROM
@@ -1948,13 +1890,13 @@ static void
 rs6000_register_convert_to_raw (struct type *type, int n,
 				const char *from, char *to)
 {
-  if (TYPE_LENGTH (type) != REGISTER_RAW_SIZE (n))
+  if (TYPE_LENGTH (type) != DEPRECATED_REGISTER_RAW_SIZE (n))
     {
       double val = deprecated_extract_floating (from, TYPE_LENGTH (type));
-      deprecated_store_floating (to, REGISTER_RAW_SIZE (n), val);
+      deprecated_store_floating (to, DEPRECATED_REGISTER_RAW_SIZE (n), val);
     }
   else
-    memcpy (to, from, REGISTER_RAW_SIZE (n));
+    memcpy (to, from, DEPRECATED_REGISTER_RAW_SIZE (n));
 }
 
 static void
@@ -2046,30 +1988,6 @@ rs6000_stab_reg_to_regnum (int num)
   return regnum;
 }
 
-/* Write into appropriate registers a function return value
-   of type TYPE, given in virtual format.  */
-static void
-e500_store_return_value (struct type *type, char *valbuf)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-
-  /* Everything is returned in GPR3 and up.  */
-  int copied = 0;
-  int i = 0;
-  int len = TYPE_LENGTH (type);
-  while (copied < len)
-    {
-      int regnum = gdbarch_tdep (current_gdbarch)->ppc_gp0_regnum + 3 + i;
-      int reg_size = REGISTER_RAW_SIZE (regnum);
-      char *reg_val_buf = alloca (reg_size);
-
-      memcpy (reg_val_buf, valbuf + copied, reg_size);
-      copied += reg_size;
-      deprecated_write_register_gen (regnum, reg_val_buf);
-      i++;
-    }
-}
-
 static void
 rs6000_store_return_value (struct type *type, char *valbuf)
 {
@@ -2137,7 +2055,7 @@ rs6000_create_inferior (int pid)
     rs6000_set_host_arch_hook (pid);
 }
 
-/* Support for CONVERT_FROM_FUNC_PTR_ADDR(ADDR).
+/* Support for CONVERT_FROM_FUNC_PTR_ADDR (ARCH, ADDR, TARG).
 
    Usually a function pointer's representation is simply the address
    of the function. On the RS/6000 however, a function pointer is
@@ -2157,7 +2075,9 @@ rs6000_create_inferior (int pid)
    space and is therefore a special function pointer.  */
 
 static CORE_ADDR
-rs6000_convert_from_func_ptr_addr (CORE_ADDR addr)
+rs6000_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
+				   CORE_ADDR addr,
+				   struct target_ops *targ)
 {
   struct obj_section *s;
 
@@ -2830,9 +2750,15 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pc_regnum (gdbarch, 64);
   set_gdbarch_sp_regnum (gdbarch, 1);
   set_gdbarch_deprecated_fp_regnum (gdbarch, 1);
-  set_gdbarch_deprecated_extract_return_value (gdbarch,
-					       rs6000_extract_return_value);
-  set_gdbarch_deprecated_store_return_value (gdbarch, rs6000_store_return_value);
+  if (sysv_abi && wordsize == 8)
+    set_gdbarch_return_value (gdbarch, ppc64_sysv_abi_return_value);
+  else if (sysv_abi && wordsize == 4)
+    set_gdbarch_return_value (gdbarch, ppc_sysv_abi_return_value);
+  else
+    {
+      set_gdbarch_deprecated_extract_return_value (gdbarch, rs6000_extract_return_value);
+      set_gdbarch_deprecated_store_return_value (gdbarch, rs6000_store_return_value);
+    }
 
   if (v->arch == bfd_arch_powerpc)
     switch (v->mach)
@@ -2866,8 +2792,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
         set_gdbarch_dwarf2_reg_to_regnum (gdbarch, e500_dwarf2_reg_to_regnum);
         set_gdbarch_pseudo_register_read (gdbarch, e500_pseudo_register_read);
         set_gdbarch_pseudo_register_write (gdbarch, e500_pseudo_register_write);
-        set_gdbarch_extract_return_value (gdbarch, e500_extract_return_value);
-        set_gdbarch_deprecated_store_return_value (gdbarch, e500_store_return_value);
 	break;
       default:
 	tdep->ppc_vr0_regnum = -1;
@@ -2931,8 +2855,11 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     /* PPC64 SYSV.  */
     set_gdbarch_frame_red_zone_size (gdbarch, 288);
   else if (!sysv_abi && wordsize == 4)
-    /* PowerOpen / AIX 32 bit.  */
-    set_gdbarch_frame_red_zone_size (gdbarch, 220);
+    /* PowerOpen / AIX 32 bit.  The saved area or red zone consists of
+       19 4 byte GPRS + 18 8 byte FPRs giving a total of 220 bytes.
+       Problem is, 220 isn't frame (16 byte) aligned.  Round it up to
+       224.  */
+    set_gdbarch_frame_red_zone_size (gdbarch, 224);
   set_gdbarch_deprecated_save_dummy_frame_tos (gdbarch, generic_save_dummy_frame_tos);
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
 
@@ -2949,6 +2876,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      revisited.  */
   if (sysv_abi && wordsize == 4)
     set_gdbarch_push_dummy_call (gdbarch, ppc_sysv_abi_push_dummy_call);
+  else if (sysv_abi && wordsize == 8)
+    set_gdbarch_push_dummy_call (gdbarch, ppc64_sysv_abi_push_dummy_call);
   else
     set_gdbarch_push_dummy_call (gdbarch, rs6000_push_dummy_call);
 
@@ -2961,13 +2890,19 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_function_start_offset (gdbarch, 0);
   set_gdbarch_breakpoint_from_pc (gdbarch, rs6000_breakpoint_from_pc);
 
+  /* Handle the 64-bit SVR4 minimal-symbol convention of using "FN"
+     for the descriptor and ".FN" for the entry-point -- a user
+     specifying "break FN" will unexpectedly end up with a breakpoint
+     on the descriptor and not the function.  This architecture method
+     transforms any breakpoints on descriptors into breakpoints on the
+     corresponding entry point.  */
+  if (sysv_abi && wordsize == 8)
+    set_gdbarch_adjust_breakpoint_address (gdbarch, ppc64_sysv_abi_adjust_breakpoint_address);
+
   /* Not sure on this. FIXMEmgo */
   set_gdbarch_frame_args_skip (gdbarch, 8);
 
-  if (sysv_abi)
-    set_gdbarch_use_struct_convention (gdbarch,
-    				       ppc_sysv_abi_use_struct_convention);
-  else
+  if (!sysv_abi)
     set_gdbarch_use_struct_convention (gdbarch,
 				       rs6000_use_struct_convention);
 
@@ -2995,6 +2930,16 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
+
+  if (from_xcoff_exec)
+    {
+      /* NOTE: jimix/2003-06-09: This test should really check for
+	 GDB_OSABI_AIX when that is defined and becomes
+	 available. (Actually, once things are properly split apart,
+	 the test goes away.) */
+       /* RS6000/AIX does not support PT_STEP.  Has to be simulated.  */
+       set_gdbarch_software_single_step (gdbarch, rs6000_software_single_step);
+    }
 
   return gdbarch;
 }

@@ -1183,14 +1183,12 @@ val_print_string (CORE_ADDR addr, int len, int width, struct ui_file *stream)
    knows what they really did here.  Radix setting is confusing, e.g.
    setting the input radix to "10" never changes it!  */
 
-/* ARGSUSED */
 static void
 set_input_radix (char *args, int from_tty, struct cmd_list_element *c)
 {
   set_input_radix_1 (from_tty, input_radix);
 }
 
-/* ARGSUSED */
 static void
 set_input_radix_1 (int from_tty, unsigned radix)
 {
@@ -1216,7 +1214,6 @@ set_input_radix_1 (int from_tty, unsigned radix)
     }
 }
 
-/* ARGSUSED */
 static void
 set_output_radix (char *args, int from_tty, struct cmd_list_element *c)
 {
@@ -1278,7 +1275,6 @@ set_radix (char *arg, int from_tty)
 
 /* Show both the input and output radices. */
 
-/*ARGSUSED */
 static void
 show_radix (char *arg, int from_tty)
 {
@@ -1300,7 +1296,6 @@ show_radix (char *arg, int from_tty)
 }
 
 
-/*ARGSUSED */
 static void
 set_print (char *arg, int from_tty)
 {
@@ -1309,7 +1304,6 @@ set_print (char *arg, int from_tty)
   help_list (setprintlist, "set print ", -1, gdb_stdout);
 }
 
-/*ARGSUSED */
 static void
 show_print (char *args, int from_tty)
 {

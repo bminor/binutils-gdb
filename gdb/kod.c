@@ -87,11 +87,13 @@ gdb_kod_display (char *arg)
 static void
 gdb_kod_query (char *arg, char *result, int *maxsiz)
 {
-  int bufsiz = 0;
+  LONGEST bufsiz = 0;
 
-  /* Check if current target has remote_query capabilities.
-     If not, it does not have kod either.  */
-  if (! current_target.to_query)
+  /* Check if current target has remote_query capabilities.  If not,
+     it does not have kod either.  */
+  bufsiz = target_read_partial (&current_target, TARGET_OBJECT_KOD,
+				NULL, NULL, 0, 0);
+  if (bufsiz < 0)
     {
       strcpy (result,
               "ERR: Kernel Object Display not supported by current target\n");
@@ -99,7 +101,6 @@ gdb_kod_query (char *arg, char *result, int *maxsiz)
     }
 
   /* Just get the maximum buffer size.  */
-  target_query ((int) 'K', 0, 0, &bufsiz);
 
   /* Check if *we* were called just for getting the buffer size.  */
   if (*maxsiz == 0)
@@ -119,7 +120,8 @@ gdb_kod_query (char *arg, char *result, int *maxsiz)
     error ("kod: query argument too long");
 
   /* Send actual request.  */
-  if (target_query ((int) 'K', arg, result, &bufsiz))
+  if (target_read_partial (&current_target, TARGET_OBJECT_KOD,
+			   arg, result, 0, bufsiz) < 0)
     strcpy (result, "ERR: remote query failed");
 }
 
@@ -136,7 +138,7 @@ kod_set_os (char *arg, int from_tty, struct cmd_list_element *command)
      the set command passed as a parameter.  The clone operation will
      include (BUG?) any ``set'' command callback, if present.
      Commands like ``info set'' call all the ``show'' command
-     callbacks.  Unfortunatly, for ``show'' commands cloned from
+     callbacks.  Unfortunately, for ``show'' commands cloned from
      ``set'', this includes callbacks belonging to ``set'' commands.
      Making this worse, this only occures if add_show_from_set() is
      called after add_cmd_sfunc() (BUG?).  */

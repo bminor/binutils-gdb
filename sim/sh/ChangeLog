@@ -1,3 +1,14 @@
+2003-11-03  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* interp.c (fsca_s, fsrra_s): New functions.
+	* gencode.c (tab): Add entries for fsca and fsrra.
+	(expand_opcode): Allow variable length n / m fields.
+
+2003-10-15  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* syscall.h (SYS_truncate, SYS_ftruncate): Define.
+	* interp.c (trap): Add support for SYS_ftruncate and SYS_truncate.
+
 2003-08-11  Shrinivas Atre  <shrinivasa@KPITCummins.com>	
 	* sim/sh/gencode.c ( tab[] ): Addition of MAC.L handler and 
 	correction for MAC.W handler

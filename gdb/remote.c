@@ -161,8 +161,6 @@ static int ishex (int ch, int *val);
 
 static int stubhex (int ch);
 
-static int remote_query (int /*char */ , char *, char *, int *);
-
 static int hexnumstr (char *, ULONGEST);
 
 static int hexnumnstr (char *, ULONGEST, int);
@@ -206,7 +204,7 @@ void _initialize_remote (void);
 /* Description of the remote protocol.  Strictly speaking, when the
    target is open()ed, remote.c should create a per-target description
    of the remote protocol using that target's architecture.
-   Unfortunatly, the target stack doesn't include local state.  For
+   Unfortunately, the target stack doesn't include local state.  For
    the moment keep the information in the target's architecture
    object.  Sigh..  */
 
@@ -216,7 +214,7 @@ struct packet_reg
   long regnum; /* GDB's internal register number.  */
   LONGEST pnum; /* Remote protocol register number.  */
   int in_g_packet; /* Always part of G packet.  */
-  /* long size in bytes;  == REGISTER_RAW_SIZE (regnum); at present.  */
+  /* long size in bytes;  == DEPRECATED_REGISTER_RAW_SIZE (regnum); at present.  */
   /* char *name; == REGISTER_NAME (regnum); at present.  */
 };
 
@@ -747,6 +745,23 @@ packet_ok (const char *buf, struct packet_config *config)
 	}
       return PACKET_UNKNOWN;
     }
+}
+
+/* Should we try the 'vCont' (descriptive resume) request? */
+static struct packet_config remote_protocol_vcont;
+
+static void
+set_remote_protocol_vcont_packet_cmd (char *args, int from_tty,
+				      struct cmd_list_element *c)
+{
+  update_packet_config (&remote_protocol_vcont);
+}
+
+static void
+show_remote_protocol_vcont_packet_cmd (char *args, int from_tty,
+				       struct cmd_list_element *c)
+{
+  show_packet_config_cmd (&remote_protocol_vcont);
 }
 
 /* Should we try the 'qSymbol' (target symbol lookup service) request? */
@@ -1903,7 +1918,6 @@ extended_remote_restart (void)
 
 /* Clean up connection to a remote debugger.  */
 
-/* ARGSUSED */
 static void
 remote_close (int quitting)
 {
@@ -2191,6 +2205,7 @@ init_all_packet_configs (void)
   update_packet_config (&remote_protocol_E);
   update_packet_config (&remote_protocol_P);
   update_packet_config (&remote_protocol_qSymbol);
+  update_packet_config (&remote_protocol_vcont);
   for (i = 0; i < NR_Z_PACKET_TYPES; i++)
     update_packet_config (&remote_protocol_Z[i]);
   /* Force remote_write_bytes to check whether target supports binary
@@ -2353,7 +2368,7 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
 
      FIXME: cagney/2002-05-19: Instead of re-throwing the exception,
      this function should return an error indication letting the
-     caller restore the previous state.  Unfortunatly the command
+     caller restore the previous state.  Unfortunately the command
      ``target remote'' is directly wired to this function making that
      impossible.  On a positive note, the CLI side of this problem has
      been fixed - the function set_cmd_context() makes it possible for
@@ -2507,6 +2522,130 @@ bin2hex (const char *bin, char *hex, int count)
   return i;
 }
 
+/* Check for the availability of vCont.  This function should also check
+   the response.  */
+
+static void
+remote_vcont_probe (struct remote_state *rs, char *buf)
+{
+  strcpy (buf, "vCont?");
+  putpkt (buf);
+  getpkt (buf, rs->remote_packet_size, 0);
+
+  /* Make sure that the features we assume are supported.  */
+  if (strncmp (buf, "vCont", 5) == 0)
+    {
+      char *p = &buf[5];
+      int support_s, support_S, support_c, support_C;
+
+      support_s = 0;
+      support_S = 0;
+      support_c = 0;
+      support_C = 0;
+      while (p && *p == ';')
+	{
+	  p++;
+	  if (*p == 's' && (*(p + 1) == ';' || *(p + 1) == 0))
+	    support_s = 1;
+	  else if (*p == 'S' && (*(p + 1) == ';' || *(p + 1) == 0))
+	    support_S = 1;
+	  else if (*p == 'c' && (*(p + 1) == ';' || *(p + 1) == 0))
+	    support_c = 1;
+	  else if (*p == 'C' && (*(p + 1) == ';' || *(p + 1) == 0))
+	    support_C = 1;
+
+	  p = strchr (p, ';');
+	}
+
+      /* If s, S, c, and C are not all supported, we can't use vCont.  Clearing
+         BUF will make packet_ok disable the packet.  */
+      if (!support_s || !support_S || !support_c || !support_C)
+	buf[0] = 0;
+    }
+
+  packet_ok (buf, &remote_protocol_vcont);
+}
+
+/* Resume the remote inferior by using a "vCont" packet.  The thread
+   to be resumed is PTID; STEP and SIGGNAL indicate whether the
+   resumed thread should be single-stepped and/or signalled.  If PTID's
+   PID is -1, then all threads are resumed; the thread to be stepped and/or
+   signalled is given in the global INFERIOR_PTID.  This function returns
+   non-zero iff it resumes the inferior.
+
+   This function issues a strict subset of all possible vCont commands at the
+   moment.  */
+
+static int
+remote_vcont_resume (ptid_t ptid, int step, enum target_signal siggnal)
+{
+  struct remote_state *rs = get_remote_state ();
+  int pid = PIDGET (ptid);
+  char *buf = NULL;
+  struct cleanup *old_cleanup;
+
+  buf = xmalloc (rs->remote_packet_size);
+  old_cleanup = make_cleanup (xfree, buf);
+
+  if (remote_protocol_vcont.support == PACKET_SUPPORT_UNKNOWN)
+    remote_vcont_probe (rs, buf);
+
+  if (remote_protocol_vcont.support == PACKET_DISABLE)
+    {
+      do_cleanups (old_cleanup);
+      return 0;
+    }
+
+  /* If we could generate a wider range of packets, we'd have to worry
+     about overflowing BUF.  Should there be a generic
+     "multi-part-packet" packet?  */
+
+  if (PIDGET (inferior_ptid) == MAGIC_NULL_PID)
+    {
+      /* MAGIC_NULL_PTID means that we don't have any active threads, so we
+	 don't have any PID numbers the inferior will understand.  Make sure
+	 to only send forms that do not specify a PID.  */
+      if (step && siggnal != TARGET_SIGNAL_0)
+	sprintf (buf, "vCont;S%02x", siggnal);
+      else if (step)
+	sprintf (buf, "vCont;s");
+      else if (siggnal != TARGET_SIGNAL_0)
+	sprintf (buf, "vCont;C%02x", siggnal);
+      else
+	sprintf (buf, "vCont;c");
+    }
+  else if (pid == -1)
+    {
+      /* Resume all threads, with preference for INFERIOR_PTID.  */
+      if (step && siggnal != TARGET_SIGNAL_0)
+	sprintf (buf, "vCont;S%02x:%x;c", siggnal, PIDGET (inferior_ptid));
+      else if (step)
+	sprintf (buf, "vCont;s:%x;c", PIDGET (inferior_ptid));
+      else if (siggnal != TARGET_SIGNAL_0)
+	sprintf (buf, "vCont;C%02x:%x;c", siggnal, PIDGET (inferior_ptid));
+      else
+	sprintf (buf, "vCont;c");
+    }
+  else
+    {
+      /* Scheduler locking; resume only PTID.  */
+      if (step && siggnal != TARGET_SIGNAL_0)
+	sprintf (buf, "vCont;S%02x:%x", siggnal, pid);
+      else if (step)
+	sprintf (buf, "vCont;s:%x", pid);
+      else if (siggnal != TARGET_SIGNAL_0)
+	sprintf (buf, "vCont;C%02x:%x", siggnal, pid);
+      else
+	sprintf (buf, "vCont;c:%x", pid);
+    }
+
+  putpkt (buf);
+
+  do_cleanups (old_cleanup);
+
+  return 1;
+}
+
 /* Tell the remote machine to resume.  */
 
 static enum target_signal last_sent_signal = TARGET_SIGNAL_0;
@@ -2521,11 +2660,6 @@ remote_resume (ptid_t ptid, int step, enum target_signal siggnal)
   int pid = PIDGET (ptid);
   char *p;
 
-  if (pid == -1)
-    set_thread (0, 0);		/* run any thread */
-  else
-    set_thread (pid, 0);	/* run this thread */
-
   last_sent_signal = siggnal;
   last_sent_step = step;
 
@@ -2534,6 +2668,15 @@ remote_resume (ptid_t ptid, int step, enum target_signal siggnal)
   if (target_resume_hook)
     (*target_resume_hook) ();
 
+  /* The vCont packet doesn't need to specify threads via Hc.  */
+  if (remote_vcont_resume (ptid, step, siggnal))
+    return;
+
+  /* All other supported resume packets do use Hc, so call set_thread.  */
+  if (pid == -1)
+    set_thread (0, 0);		/* run any thread */
+  else
+    set_thread (pid, 0);	/* run this thread */
 
   /* The s/S/c/C packets do not return status.  So if the target does
      not support the S or C packets, the debug agent returns an empty
@@ -2606,91 +2749,8 @@ remote_resume (ptid_t ptid, int step, enum target_signal siggnal)
 static void
 remote_async_resume (ptid_t ptid, int step, enum target_signal siggnal)
 {
-  struct remote_state *rs = get_remote_state ();
-  char *buf = alloca (rs->remote_packet_size);
-  int pid = PIDGET (ptid);
-  char *p;
+  remote_resume (ptid, step, siggnal);
 
-  if (pid == -1)
-    set_thread (0, 0);		/* run any thread */
-  else
-    set_thread (pid, 0);	/* run this thread */
-
-  last_sent_signal = siggnal;
-  last_sent_step = step;
-
-  /* A hook for when we need to do something at the last moment before
-     resumption.  */
-  if (target_resume_hook)
-    (*target_resume_hook) ();
-
-  /* The s/S/c/C packets do not return status.  So if the target does
-     not support the S or C packets, the debug agent returns an empty
-     string which is detected in remote_wait().  This protocol defect
-     is fixed in the e/E packets. */
-
-  if (step && step_range_end)
-    {
-      /* If the target does not support the 'E' packet, we try the 'S'
-	 packet.  Ideally we would fall back to the 'e' packet if that
-	 too is not supported.  But that would require another copy of
-	 the code to issue the 'e' packet (and fall back to 's' if not
-	 supported) in remote_wait().  */
-      
-      if (siggnal != TARGET_SIGNAL_0)
-	{
-	  if (remote_protocol_E.support != PACKET_DISABLE)
-	    {
-	      p = buf;
-	      *p++ = 'E';
-	      *p++ = tohex (((int) siggnal >> 4) & 0xf);
-	      *p++ = tohex (((int) siggnal) & 0xf);
-	      *p++ = ',';
-	      p += hexnumstr (p, (ULONGEST) step_range_start);
-	      *p++ = ',';
-	      p += hexnumstr (p, (ULONGEST) step_range_end);
-	      *p++ = 0;
-
-	      putpkt (buf);
-	      getpkt (buf, (rs->remote_packet_size), 0);
-
-	      if (packet_ok (buf, &remote_protocol_E) == PACKET_OK)
-		goto register_event_loop;
-	    }
-	}
-      else
-	{
-	  if (remote_protocol_e.support != PACKET_DISABLE)
-	    {
-	      p = buf;
-	      *p++ = 'e';
-	      p += hexnumstr (p, (ULONGEST) step_range_start);
-	      *p++ = ',';
-	      p += hexnumstr (p, (ULONGEST) step_range_end);
-	      *p++ = 0;
-
-	      putpkt (buf);
-	      getpkt (buf, (rs->remote_packet_size), 0);
-
-	      if (packet_ok (buf, &remote_protocol_e) == PACKET_OK)
-		goto register_event_loop;
-	    }
-	}
-    }
-
-  if (siggnal != TARGET_SIGNAL_0)
-    {
-      buf[0] = step ? 'S' : 'C';
-      buf[1] = tohex (((int) siggnal >> 4) & 0xf);
-      buf[2] = tohex ((int) siggnal & 0xf);
-      buf[3] = '\0';
-    }
-  else
-    strcpy (buf, step ? "s" : "c");
-  
-  putpkt (buf);
-
-register_event_loop:
   /* We are about to start executing the inferior, let's register it
      with the event loop. NOTE: this is the one place where all the
      execution commands end up. We could alternatively do this in each
@@ -3027,9 +3087,9 @@ Packet: '%s'\n",
 		      error ("Remote sent bad register number %s: %s\nPacket: '%s'\n",
 			     phex_nz (pnum, 0), p, buf);
 
-		    fieldsize = hex2bin (p, regs, REGISTER_RAW_SIZE (reg->regnum));
+		    fieldsize = hex2bin (p, regs, DEPRECATED_REGISTER_RAW_SIZE (reg->regnum));
 		    p += 2 * fieldsize;
-		    if (fieldsize < REGISTER_RAW_SIZE (reg->regnum))
+		    if (fieldsize < DEPRECATED_REGISTER_RAW_SIZE (reg->regnum))
 		      warning ("Remote reply is too short: %s", buf);
 		    supply_register (reg->regnum, regs);
 		  }
@@ -3275,9 +3335,9 @@ remote_async_wait (ptid_t ptid, struct target_waitstatus *status)
 		      error ("Remote sent bad register number %ld: %s\nPacket: '%s'\n",
 			     pnum, p, buf);
 
-		    fieldsize = hex2bin (p, regs, REGISTER_RAW_SIZE (reg->regnum));
+		    fieldsize = hex2bin (p, regs, DEPRECATED_REGISTER_RAW_SIZE (reg->regnum));
 		    p += 2 * fieldsize;
-		    if (fieldsize < REGISTER_RAW_SIZE (reg->regnum))
+		    if (fieldsize < DEPRECATED_REGISTER_RAW_SIZE (reg->regnum))
 		      warning ("Remote reply is too short: %s", buf);
 		    supply_register (reg->regnum, regs);
 		  }
@@ -3416,7 +3476,6 @@ static int register_bytes_found;
 /* Read the remote registers into the block REGS.  */
 /* Currently we just read all the registers, so we don't use regnum.  */
 
-/* ARGSUSED */
 static void
 remote_fetch_registers (int regnum)
 {
@@ -3553,7 +3612,7 @@ store_register_using_P (int regnum)
   sprintf (buf, "P%s=", phex_nz (reg->pnum, 0));
   p = buf + strlen (buf);
   regcache_collect (reg->regnum, regp);
-  bin2hex (regp, p, REGISTER_RAW_SIZE (reg->regnum));
+  bin2hex (regp, p, DEPRECATED_REGISTER_RAW_SIZE (reg->regnum));
   remote_send (buf, rs->remote_packet_size);
 
   return buf[0] != '\0';
@@ -3970,7 +4029,6 @@ remote_read_bytes (CORE_ADDR memaddr, char *myaddr, int len)
    SHOULD_WRITE is nonzero.  Returns length of data written or read; 0
    for error.  TARGET is unused.  */
 
-/* ARGSUSED */
 static int
 remote_xfer_memory (CORE_ADDR mem_addr, char *buffer, int mem_len,
 		    int should_write, struct mem_attrib *attrib,
@@ -3995,73 +4053,6 @@ remote_xfer_memory (CORE_ADDR mem_addr, char *buffer, int mem_len,
   return res;
 }
 
-
-#if 0
-/* Enable after 4.12.  */
-
-void
-remote_search (int len, char *data, char *mask, CORE_ADDR startaddr,
-	       int increment, CORE_ADDR lorange, CORE_ADDR hirange,
-	       CORE_ADDR *addr_found, char *data_found)
-{
-  if (increment == -4 && len == 4)
-    {
-      long mask_long, data_long;
-      long data_found_long;
-      CORE_ADDR addr_we_found;
-      char *buf = alloca (rs->remote_packet_size);
-      long returned_long[2];
-      char *p;
-
-      mask_long = extract_unsigned_integer (mask, len);
-      data_long = extract_unsigned_integer (data, len);
-      sprintf (buf, "t%x:%x,%x", startaddr, data_long, mask_long);
-      putpkt (buf);
-      getpkt (buf, (rs->remote_packet_size), 0);
-      if (buf[0] == '\0')
-	{
-	  /* The stub doesn't support the 't' request.  We might want to
-	     remember this fact, but on the other hand the stub could be
-	     switched on us.  Maybe we should remember it only until
-	     the next "target remote".  */
-	  generic_search (len, data, mask, startaddr, increment, lorange,
-			  hirange, addr_found, data_found);
-	  return;
-	}
-
-      if (buf[0] == 'E')
-	/* There is no correspondance between what the remote protocol uses
-	   for errors and errno codes.  We would like a cleaner way of
-	   representing errors (big enough to include errno codes, bfd_error
-	   codes, and others).  But for now just use EIO.  */
-	memory_error (EIO, startaddr);
-      p = buf;
-      addr_we_found = 0;
-      while (*p != '\0' && *p != ',')
-	addr_we_found = (addr_we_found << 4) + fromhex (*p++);
-      if (*p == '\0')
-	error ("Protocol error: short return for search");
-
-      data_found_long = 0;
-      while (*p != '\0' && *p != ',')
-	data_found_long = (data_found_long << 4) + fromhex (*p++);
-      /* Ignore anything after this comma, for future extensions.  */
-
-      if (addr_we_found < lorange || addr_we_found >= hirange)
-	{
-	  *addr_found = 0;
-	  return;
-	}
-
-      *addr_found = addr_we_found;
-      *data_found = store_unsigned_integer (data_we_found, len);
-      return;
-    }
-  generic_search (len, data, mask, startaddr, increment, lorange,
-		  hirange, addr_found, data_found);
-}
-#endif /* 0 */
-
 static void
 remote_files_info (struct target_ops *ignore)
 {
@@ -5113,41 +5104,51 @@ the loaded file\n");
     printf_filtered ("No loaded section named '%s'.\n", args);
 }
 
-static int
-remote_query (int query_type, char *buf, char *outbuf, int *bufsiz)
+static LONGEST
+remote_xfer_partial (struct target_ops *ops, enum target_object object,
+		     const char *annex, void *readbuf, const void *writebuf,
+		     ULONGEST offset, LONGEST len)
 {
   struct remote_state *rs = get_remote_state ();
   int i;
   char *buf2 = alloca (rs->remote_packet_size);
   char *p2 = &buf2[0];
+  char query_type;
 
-  if (!bufsiz)
-    error ("null pointer to remote bufer size specified");
+  /* Only handle reads.  */
+  if (writebuf != NULL || readbuf == NULL)
+    return -1;
 
-  /* minimum outbuf size is (rs->remote_packet_size) - if bufsiz is not large enough let 
-     the caller know and return what the minimum size is   */
-  /* Note: a zero bufsiz can be used to query the minimum buffer size */
-  if (*bufsiz < (rs->remote_packet_size))
+  /* Map pre-existing objects onto letters.  DO NOT do this for new
+     objects!!!  Instead specify new query packets.  */
+  switch (object)
     {
-      *bufsiz = (rs->remote_packet_size);
+    case TARGET_OBJECT_KOD:
+      query_type = 'K';
+      break;
+    case TARGET_OBJECT_AVR:
+      query_type = 'R';
+      break;
+    default:
       return -1;
     }
+
+  /* Note: a zero OFFSET and LEN can be used to query the minimum
+     buffer size.  */
+  if (offset == 0 && len == 0)
+    return (rs->remote_packet_size);
+  /* Minimum outbuf size is (rs->remote_packet_size) - if bufsiz is
+     not large enough let the caller.  */
+  if (len < (rs->remote_packet_size))
+    return -1;
+  len = rs->remote_packet_size;
 
   /* except for querying the minimum buffer size, target must be open */
   if (!remote_desc)
     error ("remote query is only available after target open");
 
-  /* we only take uppercase letters as query types, at least for now */
-  if ((query_type < 'A') || (query_type > 'Z'))
-    error ("invalid remote query type");
-
-  if (!buf)
-    error ("null remote query specified");
-
-  if (!outbuf)
-    error ("remote query requires a buffer to receive data");
-
-  outbuf[0] = '\0';
+  gdb_assert (annex != NULL);
+  gdb_assert (readbuf != NULL);
 
   *p2++ = 'q';
   *p2++ = query_type;
@@ -5157,27 +5158,23 @@ remote_query (int query_type, char *buf, char *outbuf, int *bufsiz)
      plus one extra in case we are debugging (remote_debug),
      we have PBUFZIZ - 7 left to pack the query string */
   i = 0;
-  while (buf[i] && (i < ((rs->remote_packet_size) - 8)))
+  while (annex[i] && (i < ((rs->remote_packet_size) - 8)))
     {
-      /* bad caller may have sent forbidden characters */
-      if ((!isprint (buf[i])) || (buf[i] == '$') || (buf[i] == '#'))
-	error ("illegal characters in query string");
-
-      *p2++ = buf[i];
+      /* Bad caller may have sent forbidden characters.  */
+      gdb_assert (isprint (annex[i]) && annex[i] != '$' && annex[i] != '#');
+      *p2++ = annex[i];
       i++;
     }
-  *p2 = buf[i];
-
-  if (buf[i])
-    error ("query larger than available buffer");
+  *p2 = '\0';
+  gdb_assert (annex[i] == '\0');
 
   i = putpkt (buf2);
   if (i < 0)
     return i;
 
-  getpkt (outbuf, *bufsiz, 0);
+  getpkt (readbuf, len, 0);
 
-  return 0;
+  return strlen (readbuf);
 }
 
 static void
@@ -5455,7 +5452,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_pid_to_str = remote_pid_to_str;
   remote_ops.to_extra_thread_info = remote_threads_extra_info;
   remote_ops.to_stop = remote_stop;
-  remote_ops.to_query = remote_query;
+  remote_ops.to_xfer_partial = remote_xfer_partial;
   remote_ops.to_rcmd = remote_rcmd;
   remote_ops.to_stratum = process_stratum;
   remote_ops.to_has_all_memory = 1;
@@ -5975,7 +5972,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   remote_async_ops.to_pid_to_str = remote_pid_to_str;
   remote_async_ops.to_extra_thread_info = remote_threads_extra_info;
   remote_async_ops.to_stop = remote_stop;
-  remote_async_ops.to_query = remote_query;
+  remote_async_ops.to_xfer_partial = remote_xfer_partial;
   remote_async_ops.to_rcmd = remote_rcmd;
   remote_async_ops.to_stratum = process_stratum;
   remote_async_ops.to_has_all_memory = 1;
@@ -6025,6 +6022,7 @@ show_remote_cmd (char *args, int from_tty)
   show_remote_protocol_E_packet_cmd (args, from_tty, NULL);
   show_remote_protocol_P_packet_cmd (args, from_tty, NULL);
   show_remote_protocol_qSymbol_packet_cmd (args, from_tty, NULL);
+  show_remote_protocol_vcont_packet_cmd (args, from_tty, NULL);
   show_remote_protocol_binary_download_cmd (args, from_tty, NULL);
 }
 
@@ -6197,6 +6195,13 @@ in a memory packet.\n",
 
   add_info ("remote-process", remote_info_process,
 	    "Query the remote system for process info.");
+
+  add_packet_config_cmd (&remote_protocol_vcont,
+			 "vCont", "verbose-resume",
+			 set_remote_protocol_vcont_packet_cmd,
+			 show_remote_protocol_vcont_packet_cmd,
+			 &remote_set_cmdlist, &remote_show_cmdlist,
+			 0);
 
   add_packet_config_cmd (&remote_protocol_qSymbol,
 			 "qSymbol", "symbol-lookup",

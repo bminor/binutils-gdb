@@ -1,5 +1,5 @@
 /* BFD support for the FRV processor.
-   Copyright 2002 Free Software Foundation, Inc.
+   Copyright 2002, 2003 Free Software Foundation, Inc.
 
 This file is part of BFD, the Binary File Descriptor library.
 
@@ -46,8 +46,11 @@ static const bfd_arch_info_type arch_info_400
 static const bfd_arch_info_type arch_info_500
   = FRV_ARCH (bfd_mach_fr500, "fr500", FALSE, &arch_info_400);
 
+static const bfd_arch_info_type arch_info_550
+  = FRV_ARCH (bfd_mach_fr550, "fr550", FALSE, &arch_info_500);
+
 static const bfd_arch_info_type arch_info_simple
-  = FRV_ARCH (bfd_mach_frvsimple, "simple", FALSE, &arch_info_500);
+  = FRV_ARCH (bfd_mach_frvsimple, "simple", FALSE, &arch_info_550);
 
 static const bfd_arch_info_type arch_info_tomcat
   = FRV_ARCH (bfd_mach_frvtomcat, "tomcat", FALSE, &arch_info_simple);

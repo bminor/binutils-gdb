@@ -1335,7 +1335,6 @@ vx_close (int quitting)
 }
 
 /* A vxprocess target should be started via "run" not "target".  */
-/*ARGSUSED */
 static void
 vx_proc_open (char *name, int from_tty)
 {

@@ -2853,7 +2853,7 @@ std::_Alloc_traits<std::basic_string<char, std::string_char_traits<char>, libcw:
 #
 --format=gnu-v3
 _GLOBAL__I__Z2fnv
-global constructors keyed to fn()
+global constructors keyed to _Z2fnv
 #
 --format=gnu-v3
 _Z1rM1GFivEMS_KFivES_M1HFivES1_4whatIKS_E5what2IS8_ES3_
@@ -2864,3 +2864,9 @@ r(int (G::*)(), int (G::*)() const, G, int (H::*)(), int (G::*)(), what<G const>
 --format=auto
 __CPR212____ct__Q3_3std141list__tm__128_Q2_3edm41THandle__tm__26_Q2_4emid15EMparticleChunkQ2_3std68allocator__tm__51_Q2_3edmJ37J14const_iteratorFRCQ3_3std18list__tm__7_Z1ZZ2Z8iterator
 __CPR212____ct__Q3_3std141list__tm__128_Q2_3edm41THandle__tm__26_Q2_4emid15EMparticleChunkQ2_3std68allocator__tm__51_Q2_3edmJ37J14const_iteratorFRCQ3_3std18list__tm__7_Z1ZZ2Z8iterator
+#
+# This used to cause a crash. It doesn't follow the C++ encoding so
+# the demangled name should be identical to the original symbol name.
+--format=auto
+_test_array__L_1__B23b___clean.6
+_test_array__L_1__B23b___clean.6

@@ -1,4 +1,4 @@
-/* Target-dependent code for Hitachi Super-H, for GDB.
+/* Target-dependent code for Renesas Super-H, for GDB.
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
 
@@ -753,7 +753,7 @@ sh64_frame_chain (struct frame_info *frame)
       if (gdbarch_tdep (current_gdbarch)->sh_abi == SH_ABI_32)
 	size = 4;
       else
-	size = REGISTER_RAW_SIZE (translate_insn_rn (DEPRECATED_FP_REGNUM, media_mode));
+	size = DEPRECATED_REGISTER_RAW_SIZE (translate_insn_rn (DEPRECATED_FP_REGNUM, media_mode));
       return read_memory_integer (get_frame_base (frame)
 				  + get_frame_extra_info (frame)->f_offset,
 				  size);
@@ -782,13 +782,13 @@ sh64_get_saved_pr (struct frame_info *fi, int pr_regnum)
 
 	media_mode = pc_is_isa32 (get_frame_pc (fi));
 
-	if (get_frame_saved_regs (fi)[pr_regnum] != 0)
+	if (deprecated_get_frame_saved_regs (fi)[pr_regnum] != 0)
 	  {
 	    int gdb_reg_num = translate_insn_rn (pr_regnum, media_mode);
 	    int size = ((gdbarch_tdep (current_gdbarch)->sh_abi == SH_ABI_32)
 			? 4
-			: REGISTER_RAW_SIZE (gdb_reg_num));
-	    return read_memory_integer (get_frame_saved_regs (fi)[pr_regnum], size);
+			: DEPRECATED_REGISTER_RAW_SIZE (gdb_reg_num));
+	    return read_memory_integer (deprecated_get_frame_saved_regs (fi)[pr_regnum], size);
 	  }
       }
   return read_register (pr_regnum);
@@ -1027,17 +1027,17 @@ sh64_nofp_frame_init_saved_regs (struct frame_info *fi)
   char *dummy_regs = deprecated_generic_find_dummy_frame (get_frame_pc (fi), get_frame_base (fi));
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch); 
   
-  if (get_frame_saved_regs (fi) == NULL)
+  if (deprecated_get_frame_saved_regs (fi) == NULL)
     frame_saved_regs_zalloc (fi);
   else
-    memset (get_frame_saved_regs (fi), 0, SIZEOF_FRAME_SAVED_REGS);
+    memset (deprecated_get_frame_saved_regs (fi), 0, SIZEOF_FRAME_SAVED_REGS);
   
   if (dummy_regs)
     {
       /* DANGER!  This is ONLY going to work if the char buffer format of
          the saved registers is byte-for-byte identical to the 
          CORE_ADDR regs[NUM_REGS] format used by struct frame_saved_regs! */
-      memcpy (get_frame_saved_regs (fi), dummy_regs, SIZEOF_FRAME_SAVED_REGS);
+      memcpy (deprecated_get_frame_saved_regs (fi), dummy_regs, SIZEOF_FRAME_SAVED_REGS);
       return;
     }
 
@@ -1185,11 +1185,11 @@ sh64_nofp_frame_init_saved_regs (struct frame_info *fi)
 
 	  /* Watch out! saved_regs is only for the real registers, and
 	     doesn't include space for the pseudo registers. */
-	  get_frame_saved_regs (fi)[register_number]= get_frame_base (fi) - where[rn] + depth; 
+	  deprecated_get_frame_saved_regs (fi)[register_number]= get_frame_base (fi) - where[rn] + depth; 
 	    
 	} 
       else 
-	get_frame_saved_regs (fi)[register_number] = 0; 
+	deprecated_get_frame_saved_regs (fi)[register_number] = 0; 
     }
 
   if (have_fp)
@@ -1205,11 +1205,11 @@ sh64_nofp_frame_init_saved_regs (struct frame_info *fi)
       if (tdep->sh_abi == SH_ABI_32)
 	size = 4;
       else
-	size = REGISTER_RAW_SIZE (fp_regnum);
-      get_frame_saved_regs (fi)[sp_regnum] = read_memory_integer (get_frame_saved_regs (fi)[fp_regnum], size);
+	size = DEPRECATED_REGISTER_RAW_SIZE (fp_regnum);
+      deprecated_get_frame_saved_regs (fi)[sp_regnum] = read_memory_integer (deprecated_get_frame_saved_regs (fi)[fp_regnum], size);
     }
   else
-    get_frame_saved_regs (fi)[sp_regnum] = get_frame_base (fi);
+    deprecated_get_frame_saved_regs (fi)[sp_regnum] = get_frame_base (fi);
 
   get_frame_extra_info (fi)->f_offset = depth - where[fp_regnum]; 
 }
@@ -1293,27 +1293,27 @@ sh64_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 	    memcpy (raw_buffer,
 		    (deprecated_generic_find_dummy_frame (get_frame_pc (frame), get_frame_base (frame))
 		     + DEPRECATED_REGISTER_BYTE (regnum)),
-		    REGISTER_RAW_SIZE (regnum));
+		    DEPRECATED_REGISTER_RAW_SIZE (regnum));
 	  return;
 	}
 
       DEPRECATED_FRAME_INIT_SAVED_REGS (frame);
-      if (get_frame_saved_regs (frame) != NULL
-	  && get_frame_saved_regs (frame)[regnum] != 0)
+      if (deprecated_get_frame_saved_regs (frame) != NULL
+	  && deprecated_get_frame_saved_regs (frame)[regnum] != 0)
 	{
 	  if (lval)		/* found it saved on the stack */
 	    *lval = lval_memory;
 	  if (regnum == SP_REGNUM)
 	    {
 	      if (raw_buffer)	/* SP register treated specially */
-		store_unsigned_integer (raw_buffer, REGISTER_RAW_SIZE (regnum),
-					get_frame_saved_regs (frame)[regnum]);
+		store_unsigned_integer (raw_buffer, DEPRECATED_REGISTER_RAW_SIZE (regnum),
+					deprecated_get_frame_saved_regs (frame)[regnum]);
 	    }
 	  else
 	    { /* any other register */
 	      
 	      if (addrp)
-		*addrp = get_frame_saved_regs (frame)[regnum];
+		*addrp = deprecated_get_frame_saved_regs (frame)[regnum];
 	      if (raw_buffer)
 		{
 		  int size;
@@ -1322,13 +1322,13 @@ sh64_get_saved_register (char *raw_buffer, int *optimized, CORE_ADDR *addrp,
 			  || live_regnum == PR_REGNUM))
 		    size = 4;
 		  else
-		    size = REGISTER_RAW_SIZE (live_regnum);
+		    size = DEPRECATED_REGISTER_RAW_SIZE (live_regnum);
 		  if (TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
-		    read_memory (get_frame_saved_regs (frame)[regnum], raw_buffer, size);
+		    read_memory (deprecated_get_frame_saved_regs (frame)[regnum], raw_buffer, size);
 		  else
-		    read_memory (get_frame_saved_regs (frame)[regnum],
+		    read_memory (deprecated_get_frame_saved_regs (frame)[regnum],
 				 raw_buffer
-				 + REGISTER_RAW_SIZE (live_regnum)
+				 + DEPRECATED_REGISTER_RAW_SIZE (live_regnum)
 				 - size,
 				 size);
 		}
@@ -1352,7 +1352,7 @@ static CORE_ADDR
 sh64_extract_struct_value_address (char *regbuf)
 {
   return (extract_unsigned_integer ((regbuf + DEPRECATED_REGISTER_BYTE (STRUCT_RETURN_REGNUM)), 
-				    REGISTER_RAW_SIZE (STRUCT_RETURN_REGNUM)));
+				    DEPRECATED_REGISTER_RAW_SIZE (STRUCT_RETURN_REGNUM)));
 }
 
 static CORE_ADDR
@@ -1384,7 +1384,7 @@ sh64_pop_frame (void)
 
       /* Copy regs from where they were saved in the frame */
       for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
-	if (get_frame_saved_regs (frame)[regnum])
+	if (deprecated_get_frame_saved_regs (frame)[regnum])
 	  {
 	    int size;
 	    if (tdep->sh_abi == SH_ABI_32
@@ -1392,10 +1392,10 @@ sh64_pop_frame (void)
 		    || regnum ==  PR_REGNUM))
 	      size = 4;
 	    else
-	      size = REGISTER_RAW_SIZE (translate_insn_rn (regnum,
+	      size = DEPRECATED_REGISTER_RAW_SIZE (translate_insn_rn (regnum,
 							   media_mode));
 	    write_register (regnum,
-			    read_memory_integer (get_frame_saved_regs (frame)[regnum],
+			    read_memory_integer (deprecated_get_frame_saved_regs (frame)[regnum],
 						 size));
 	  }
 
@@ -1414,7 +1414,7 @@ sh_frame_align (struct gdbarch *ignore, CORE_ADDR sp)
 /* Function: push_arguments
    Setup the function arguments for calling a function in the inferior.
 
-   On the Hitachi SH architecture, there are four registers (R4 to R7)
+   On the Renesas SH architecture, there are four registers (R4 to R7)
    which are dedicated for passing function arguments.  Up to the first
    four arguments (depending on size) may go into these registers.
    The rest go on the stack.
@@ -1526,7 +1526,7 @@ sh64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
       
       if (TYPE_CODE (type) != TYPE_CODE_FLT)
 	{
-	  argreg_size = REGISTER_RAW_SIZE (int_argreg);
+	  argreg_size = DEPRECATED_REGISTER_RAW_SIZE (int_argreg);
 
 	  if (len < argreg_size)
 	    {
@@ -1702,7 +1702,7 @@ sh64_extract_return_value (struct type *type, char *regbuf, char *valbuf)
 	  return_register = DEFAULT_RETURN_REGNUM;
 	  if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 	    offset = DEPRECATED_REGISTER_BYTE (return_register) +
-	      REGISTER_RAW_SIZE (return_register) - len;
+	      DEPRECATED_REGISTER_RAW_SIZE (return_register) - len;
 	  else
 	    offset = DEPRECATED_REGISTER_BYTE (return_register);
 	  memcpy (valbuf, (char *) regbuf + offset, len);
@@ -1743,14 +1743,14 @@ sh64_store_return_value (struct type *type, char *valbuf)
       int return_register = DEFAULT_RETURN_REGNUM;
       int offset = 0;
 
-      if (len <= REGISTER_RAW_SIZE (return_register))
+      if (len <= DEPRECATED_REGISTER_RAW_SIZE (return_register))
 	{
 	  /* Pad with zeros. */
-	  memset (buf, 0, REGISTER_RAW_SIZE (return_register));
+	  memset (buf, 0, DEPRECATED_REGISTER_RAW_SIZE (return_register));
 	  if (TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
-	    offset = 0; /*REGISTER_RAW_SIZE (return_register) - len;*/
+	    offset = 0; /*DEPRECATED_REGISTER_RAW_SIZE (return_register) - len;*/
 	  else
-	    offset = REGISTER_RAW_SIZE (return_register) - len;
+	    offset = DEPRECATED_REGISTER_RAW_SIZE (return_register) - len;
 
 	  memcpy (buf + offset, valbuf, len);
 	  deprecated_write_register_gen (return_register, buf);
@@ -2092,7 +2092,7 @@ sh_sh64_register_convert_to_virtual (int regnum, struct type *type,
   if (TARGET_BYTE_ORDER != BFD_ENDIAN_LITTLE)
     {
       /* It is a no-op. */
-      memcpy (to, from, REGISTER_RAW_SIZE (regnum));
+      memcpy (to, from, DEPRECATED_REGISTER_RAW_SIZE (regnum));
       return;
     }
 
@@ -2118,7 +2118,7 @@ sh_sh64_register_convert_to_raw (struct type *type, int regnum,
   if (TARGET_BYTE_ORDER != BFD_ENDIAN_LITTLE)
     {
       /* It is a no-op. */
-      memcpy (to, from, REGISTER_RAW_SIZE (regnum));
+      memcpy (to, from, DEPRECATED_REGISTER_RAW_SIZE (regnum));
       return;
     }
 
@@ -2155,10 +2155,10 @@ sh64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
       for (portion = 0; portion < 2; portion++)
 	regcache_raw_read (regcache, base_regnum + portion, 
 			   (temp_buffer
-			    + REGISTER_RAW_SIZE (base_regnum) * portion));
+			    + DEPRECATED_REGISTER_RAW_SIZE (base_regnum) * portion));
 
       /* We must pay attention to the endiannes. */
-      sh_sh64_register_convert_to_virtual (reg_nr, REGISTER_VIRTUAL_TYPE (reg_nr),
+      sh_sh64_register_convert_to_virtual (reg_nr, DEPRECATED_REGISTER_VIRTUAL_TYPE (reg_nr),
 					   temp_buffer, buffer);
 
     }
@@ -2174,7 +2174,7 @@ sh64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
       for (portion = 0; portion < 2; portion++)
 	regcache_raw_read (regcache, base_regnum + portion, 
 			   ((char *) buffer
-			    + REGISTER_RAW_SIZE (base_regnum) * portion));
+			    + DEPRECATED_REGISTER_RAW_SIZE (base_regnum) * portion));
     }
 
   else if (reg_nr >= FV0_REGNUM 
@@ -2188,7 +2188,7 @@ sh64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
       for (portion = 0; portion < 4; portion++)
 	regcache_raw_read (regcache, base_regnum + portion, 
 			   ((char *) buffer
-			    + REGISTER_RAW_SIZE (base_regnum) * portion));
+			    + DEPRECATED_REGISTER_RAW_SIZE (base_regnum) * portion));
     }
 
   /* sh compact pseudo registers. 1-to-1 with a shmedia register */
@@ -2225,10 +2225,10 @@ sh64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
       for (portion = 0; portion < 2; portion++)
 	regcache_raw_read (regcache, base_regnum + portion, 
 			   (temp_buffer
-			    + REGISTER_RAW_SIZE (base_regnum) * portion));
+			    + DEPRECATED_REGISTER_RAW_SIZE (base_regnum) * portion));
 
       /* We must pay attention to the endiannes. */
-      sh_sh64_register_convert_to_virtual (reg_nr, REGISTER_VIRTUAL_TYPE (reg_nr),
+      sh_sh64_register_convert_to_virtual (reg_nr, DEPRECATED_REGISTER_VIRTUAL_TYPE (reg_nr),
 					   temp_buffer, buffer);
     }
 
@@ -2243,7 +2243,7 @@ sh64_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
       for (portion = 0; portion < 4; portion++)
 	regcache_raw_read (regcache, base_regnum + portion, 
 			   ((char *) buffer
-			    + REGISTER_RAW_SIZE (base_regnum) * portion));
+			    + DEPRECATED_REGISTER_RAW_SIZE (base_regnum) * portion));
     }
 
   else if (reg_nr == FPSCR_C_REGNUM)
@@ -2314,7 +2314,7 @@ sh64_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
     {
       base_regnum = dr_reg_base_num (reg_nr);
       /* We must pay attention to the endiannes. */
-      sh_sh64_register_convert_to_raw (REGISTER_VIRTUAL_TYPE (reg_nr), reg_nr,
+      sh_sh64_register_convert_to_raw (DEPRECATED_REGISTER_VIRTUAL_TYPE (reg_nr), reg_nr,
 				       buffer, temp_buffer);
 	  
 
@@ -2322,7 +2322,7 @@ sh64_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
       for (portion = 0; portion < 2; portion++)
 	regcache_raw_write (regcache, base_regnum + portion, 
 			    (temp_buffer
-			     + REGISTER_RAW_SIZE (base_regnum) * portion));
+			     + DEPRECATED_REGISTER_RAW_SIZE (base_regnum) * portion));
     }
 
   else if (reg_nr >= FPP0_REGNUM 
@@ -2334,7 +2334,7 @@ sh64_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
       for (portion = 0; portion < 2; portion++)
 	regcache_raw_write (regcache, base_regnum + portion,
 			    ((char *) buffer
-			     + REGISTER_RAW_SIZE (base_regnum) * portion));
+			     + DEPRECATED_REGISTER_RAW_SIZE (base_regnum) * portion));
     }
 
   else if (reg_nr >= FV0_REGNUM
@@ -2346,7 +2346,7 @@ sh64_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
       for (portion = 0; portion < 4; portion++)
 	regcache_raw_write (regcache, base_regnum + portion,
 			    ((char *) buffer
-			     + REGISTER_RAW_SIZE (base_regnum) * portion));
+			     + DEPRECATED_REGISTER_RAW_SIZE (base_regnum) * portion));
     }
 
   /* sh compact general pseudo registers. 1-to-1 with a shmedia
@@ -2385,12 +2385,12 @@ sh64_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
       for (portion = 0; portion < 2; portion++)
 	{
 	  /* We must pay attention to the endiannes. */
-	  sh_sh64_register_convert_to_raw (REGISTER_VIRTUAL_TYPE (reg_nr), reg_nr,
+	  sh_sh64_register_convert_to_raw (DEPRECATED_REGISTER_VIRTUAL_TYPE (reg_nr), reg_nr,
 					   buffer, temp_buffer);
 
 	  regcache_raw_write (regcache, base_regnum + portion,
 			      (temp_buffer
-			       + REGISTER_RAW_SIZE (base_regnum) * portion));
+			       + DEPRECATED_REGISTER_RAW_SIZE (base_regnum) * portion));
 	}
     }
 
@@ -2403,7 +2403,7 @@ sh64_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 	{
 	  regcache_raw_write (regcache, base_regnum + portion,
 			      ((char *) buffer
-			       + REGISTER_RAW_SIZE (base_regnum) * portion));
+			       + DEPRECATED_REGISTER_RAW_SIZE (base_regnum) * portion));
 	}
     }
 
@@ -2848,7 +2848,7 @@ sh64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* NOTE: cagney/2002-12-06: This can be deleted when this arch is
      ready to unwind the PC first (see frame.c:get_prev_frame()).  */
-  set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_default);
+  set_gdbarch_deprecated_init_frame_pc (gdbarch, deprecated_init_frame_pc_default);
 
   /* Determine the ABI */
   if (info.abfd && bfd_get_arch_size (info.abfd) == 64)

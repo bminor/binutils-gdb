@@ -1,5 +1,5 @@
 /* BFD back-end for TMS320C54X coff binaries.
-   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
    Contributed by Timothy Wall (twall@cygnus.com)
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -35,7 +35,7 @@ static void tic54x_reloc_processing
 static bfd_reloc_status_type tic54x_relocation
   PARAMS ((bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **));
 static bfd_boolean tic54x_set_section_contents
-  PARAMS ((bfd *, sec_ptr, PTR, file_ptr, bfd_size_type));
+  PARAMS ((bfd *, sec_ptr, const PTR, file_ptr, bfd_size_type));
 static reloc_howto_type *coff_tic54x_rtype_to_howto
   PARAMS ((bfd *, asection *, struct internal_reloc *, struct coff_link_hash_entry *, struct internal_syment *, bfd_vma *));
 static bfd_vma tic54x_getl32
@@ -345,7 +345,7 @@ static bfd_boolean
 tic54x_set_section_contents (abfd, section, location, offset, bytes_to_do)
      bfd *abfd;
      sec_ptr section;
-     PTR location;
+     const PTR location;
      file_ptr offset;
      bfd_size_type bytes_to_do;
 {

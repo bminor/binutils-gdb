@@ -30,6 +30,7 @@
 #include "language.h"
 #include "c-lang.h"
 #include "cp-abi.h"
+#include "target.h"
 
 
 /* Print function pointer with inferior address ADDRESS onto stdio
@@ -38,7 +39,9 @@
 static void
 print_function_pointer_address (CORE_ADDR address, struct ui_file *stream)
 {
-  CORE_ADDR func_addr = CONVERT_FROM_FUNC_PTR_ADDR (address);
+  CORE_ADDR func_addr = gdbarch_convert_from_func_ptr_addr (current_gdbarch,
+							    address,
+							    &current_target);
 
   /* If the function pointer is represented by a description, print the
      address of the description.  */

@@ -89,7 +89,7 @@ fetch_fpregs (struct proc *thread)
     }
 
   /* Supply the floating-point registers.  */
-  i387_supply_fsave (state.hw_state, -1);
+  i387_supply_fsave (current_regcache, -1, state.hw_state);
 }
 
 #ifdef HAVE_SYS_PROCFS_H
@@ -106,7 +106,7 @@ supply_gregset (gdb_gregset_t *gregs)
 void
 supply_fpregset (gdb_fpregset_t *fpregs)
 {
-  i387_supply_fsave ((const char *) fpregs, -1);
+  i387_supply_fsave (current_regcache, -1, fpregs);
 }
 #endif
 
@@ -242,7 +242,7 @@ gnu_store_registers (int regno)
 	    if ((thread->fetched_regs & (1 << check_regno))
 		&& memcpy (REG_ADDR (&old_state, check_regno),
 			   REG_ADDR (state, check_regno),
-			   REGISTER_RAW_SIZE (check_regno)))
+			   DEPRECATED_REGISTER_RAW_SIZE (check_regno)))
 	      /* Register CHECK_REGNO has changed!  Ack!  */
 	      {
 		warning ("Register %s changed after the thread was aborted",
@@ -257,7 +257,7 @@ gnu_store_registers (int regno)
 
 #define fill(state, regno)                                               \
   memcpy (REG_ADDR(state, regno), &deprecated_registers[DEPRECATED_REGISTER_BYTE (regno)],     \
-          REGISTER_RAW_SIZE (regno))
+          DEPRECATED_REGISTER_RAW_SIZE (regno))
 
       if (regno == -1)
 	{

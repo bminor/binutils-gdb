@@ -500,7 +500,7 @@ tuiCheckRegisterValues (struct frame_info *frame)
 		{
                   int size;
 
-                  size = REGISTER_RAW_SIZE (dataElementPtr->itemNo);
+                  size = DEPRECATED_REGISTER_RAW_SIZE (dataElementPtr->itemNo);
 		  for (j = 0; j < size; j++)
 		    ((char *) dataElementPtr->value)[j] = rawBuf[j];
 		  _tuiDisplayRegister (
@@ -763,7 +763,7 @@ _tuiRegValueHasChanged (TuiDataElementPtr dataElement,
       if (_tuiGetRegisterRawValue (
 			 dataElement->itemNo, rawBuf, frame) == TUI_SUCCESS)
 	{
-          int size = REGISTER_RAW_SIZE (dataElement->itemNo);
+          int size = DEPRECATED_REGISTER_RAW_SIZE (dataElement->itemNo);
           
 	  for (i = 0; (i < size && !hasChanged); i++)
 	    hasChanged = (((char *) dataElement->value)[i] != rawBuf[i]);
@@ -790,7 +790,7 @@ _tuiGetRegisterRawValue (int regNum, char *regValue, struct frame_info *frame)
 
   if (target_has_registers)
     {
-      frame_read_register (frame, regNum, regValue);
+      get_frame_register (frame, regNum, regValue);
       /* NOTE: cagney/2003-03-13: This is bogus.  It is refering to
          the register cache and not the frame which could have pulled
          the register value off the stack.  */

@@ -418,12 +418,13 @@ Fred Fish wrote most of the support for Unix System Vr4.
 He also enhanced the command-completion support to cover C@t{++} overloaded
 symbols.
 
-Hitachi America, Ltd. sponsored the support for H8/300, H8/500, and
-Super-H processors.
+Hitachi America (now Renesas America), Ltd. sponsored the support for
+H8/300, H8/500, and Super-H processors.
 
 NEC sponsored the support for the v850, Vr4xxx, and Vr5xxx processors.
 
-Mitsubishi sponsored the support for D10V, D30V, and M32R/D processors.
+Mitsubishi (now Renesas) sponsored the support for D10V, D30V, and M32R/D
+processors.
 
 Toshiba sponsored the support for the TX39 Mips processor.
 
@@ -2441,6 +2442,7 @@ all breakpoint in that range are operated on.
 * Break Commands::              Breakpoint command lists
 * Breakpoint Menus::            Breakpoint menus
 * Error in Breakpoints::        ``Cannot insert breakpoints''
+* Breakpoint related warnings:: ``Breakpoint address adjusted...''
 @end menu
 
 @node Set Breaks
@@ -3309,6 +3311,58 @@ watchpoints it needs to insert.
 When this message is printed, you need to disable or remove some of the
 hardware-assisted breakpoints and watchpoints, and then continue.
 
+@node Breakpoint related warnings
+@subsection ``Breakpoint address adjusted...''
+@cindex breakpoint address adjusted
+
+Some processor architectures place constraints on the addresses at
+which breakpoints may be placed.  For architectures thus constrained,
+@value{GDBN} will attempt to adjust the breakpoint's address to comply
+with the constraints dictated by the architecture.
+
+One example of such an architecture is the Fujitsu FR-V.  The FR-V is
+a VLIW architecture in which a number of RISC-like instructions may be
+bundled together for parallel execution.  The FR-V architecture
+constrains the location of a breakpoint instruction within such a
+bundle to the instruction with the lowest address.  @value{GDBN}
+honors this constraint by adjusting a breakpoint's address to the
+first in the bundle.
+
+It is not uncommon for optimized code to have bundles which contain
+instructions from different source statements, thus it may happen that
+a breakpoint's address will be adjusted from one source statement to
+another.  Since this adjustment may significantly alter @value{GDBN}'s
+breakpoint related behavior from what the user expects, a warning is
+printed when the breakpoint is first set and also when the breakpoint
+is hit.
+
+A warning like the one below is printed when setting a breakpoint
+that's been subject to address adjustment:
+
+@smallexample
+warning: Breakpoint address adjusted from 0x00010414 to 0x00010410.
+@end smallexample
+
+Such warnings are printed both for user settable and @value{GDBN}'s
+internal breakpoints.  If you see one of these warnings, you should
+verify that a breakpoint set at the adjusted address will have the
+desired affect.  If not, the breakpoint in question may be removed and
+other breakpoints may be set which will have the desired behavior. 
+E.g., it may be sufficient to place the breakpoint at a later
+instruction.  A conditional breakpoint may also be useful in some
+cases to prevent the breakpoint from triggering too often.
+
+@value{GDBN} will also issue a warning when stopping at one of these
+adjusted breakpoints:
+
+@smallexample
+warning: Breakpoint 1 address previously adjusted from 0x00010414
+to 0x00010410.
+@end smallexample
+
+When this warning is encountered, it may be too late to take remedial
+action except in cases where the breakpoint is hit earlier or more
+frequently than expected.
 
 @node Continuing and Stepping
 @section Continuing and stepping
@@ -3706,6 +3760,47 @@ Whenever your program stops under @value{GDBN} for any reason,
 allows you to examine the overall state of the program, including
 switching between threads, without worrying that things may change
 underfoot.
+
+@cindex thread breakpoints and system calls
+@cindex system calls and thread breakpoints
+@cindex premature return from system calls
+There is an unfortunate side effect.  If one thread stops for a
+breakpoint, or for some other reason, and another thread is blocked in a
+system call, then the system call may return prematurely.  This is a
+consequence of the interaction between multiple threads and the signals
+that @value{GDBN} uses to implement breakpoints and other events that
+stop execution.
+
+To handle this problem, your program should check the return value of
+each system call and react appropriately.  This is good programming
+style anyways.
+
+For example, do not write code like this:
+
+@smallexample
+  sleep (10);
+@end smallexample
+
+The call to @code{sleep} will return early if a different thread stops
+at a breakpoint or for some other reason.
+
+Instead, write this:
+
+@smallexample
+  int unslept = 10;
+  while (unslept > 0)
+    unslept = sleep (unslept);
+@end smallexample
+
+A system call is allowed to return early, so the system is still
+conforming to its specification.  But @value{GDBN} does cause your
+multi-threaded program to behave differently than it would without
+@value{GDBN}.
+
+Also, @value{GDBN} uses internal breakpoints in the thread library to
+monitor certain events such as thread creation and thread destruction.
+When such an event happens, a system call in another thread may return
+prematurely, even though your program does not appear to stop.
 
 @cindex continuing threads
 @cindex threads, continuing
@@ -10481,7 +10576,7 @@ specifies a fixed address.
 @cindex choosing target byte order
 @cindex target byte order
 
-Some types of processors, such as the MIPS, PowerPC, and Hitachi SH,
+Some types of processors, such as the MIPS, PowerPC, and Renesas SH,
 offer the ability to run either big-endian or little-endian byte
 orders.  Usually the executable or symbol will include a bit to
 designate the endian-ness, and you will not need to worry about
@@ -10928,9 +11023,9 @@ For Motorola 680x0 architectures.
 
 @item sh-stub.c
 @cindex @file{sh-stub.c}
-@cindex Hitachi
+@cindex Renesas
 @cindex SH
-For Hitachi SH architectures.
+For Renesas SH architectures.
 
 @item sparc-stub.c
 @cindex @file{sparc-stub.c}
@@ -11782,15 +11877,15 @@ configurations.
 
 @menu
 * ARM::                         ARM
-* H8/300::                      Hitachi H8/300
-* H8/500::                      Hitachi H8/500
-* M32R/D::                      Mitsubishi M32R/D
+* H8/300::                      Renesas H8/300
+* H8/500::                      Renesas H8/500
+* M32R/D::                      Renesas M32R/D
 * M68K::                        Motorola M68K
 * MIPS Embedded::               MIPS Embedded
 * OpenRISC 1000::               OpenRisc 1000
 * PA::                          HP PA Embedded
 * PowerPC:                      PowerPC
-* SH::                          Hitachi SH
+* SH::                          Renesas SH
 * Sparclet::                    Tsqware Sparclet
 * Sparclite::                   Fujitsu Sparclite
 * ST2000::                      Tandem ST2000
@@ -11815,50 +11910,50 @@ ARM Demon monitor.
 @end table
 
 @node H8/300
-@subsection Hitachi H8/300
+@subsection Renesas H8/300
 
 @table @code
 
 @kindex target hms@r{, with H8/300}
 @item target hms @var{dev}
-A Hitachi SH, H8/300, or H8/500 board, attached via serial line to your host.
+A Renesas SH, H8/300, or H8/500 board, attached via serial line to your host.
 Use special commands @code{device} and @code{speed} to control the serial
 line and the communications speed used.
 
 @kindex target e7000@r{, with H8/300}
 @item target e7000 @var{dev}
-E7000 emulator for Hitachi H8 and SH.
+E7000 emulator for Renesas H8 and SH.
 
 @kindex target sh3@r{, with H8/300}
 @kindex target sh3e@r{, with H8/300}
 @item target sh3 @var{dev}
 @itemx target sh3e @var{dev}
-Hitachi SH-3 and SH-3E target systems.
+Renesas SH-3 and SH-3E target systems.
 
 @end table
 
 @cindex download to H8/300 or H8/500
 @cindex H8/300 or H8/500 download
-@cindex download to Hitachi SH
-@cindex Hitachi SH download
-When you select remote debugging to a Hitachi SH, H8/300, or H8/500
-board, the @code{load} command downloads your program to the Hitachi
+@cindex download to Renesas SH
+@cindex Renesas SH download
+When you select remote debugging to a Renesas SH, H8/300, or H8/500
+board, the @code{load} command downloads your program to the Renesas
 board and also opens it as the current executable target for
 @value{GDBN} on your host (like the @code{file} command).
 
 @value{GDBN} needs to know these things to talk to your
-Hitachi SH, H8/300, or H8/500:
+Renesas SH, H8/300, or H8/500:
 
 @enumerate
 @item
 that you want to use @samp{target hms}, the remote debugging interface
-for Hitachi microprocessors, or @samp{target e7000}, the in-circuit
-emulator for the Hitachi SH and the Hitachi 300H.  (@samp{target hms} is
-the default when @value{GDBN} is configured specifically for the Hitachi SH,
+for Renesas microprocessors, or @samp{target e7000}, the in-circuit
+emulator for the Renesas SH and the Renesas 300H.  (@samp{target hms} is
+the default when @value{GDBN} is configured specifically for the Renesas SH,
 H8/300, or H8/500.)
 
 @item
-what serial device connects your host to your Hitachi board (the first
+what serial device connects your host to your Renesas board (the first
 serial device available on your host is the default).
 
 @item
@@ -11866,24 +11961,24 @@ what speed to use over the serial device.
 @end enumerate
 
 @menu
-* Hitachi Boards::      Connecting to Hitachi boards.
-* Hitachi ICE::         Using the E7000 In-Circuit Emulator.
-* Hitachi Special::     Special @value{GDBN} commands for Hitachi micros.
+* Renesas Boards::      Connecting to Renesas boards.
+* Renesas ICE::         Using the E7000 In-Circuit Emulator.
+* Renesas Special::     Special @value{GDBN} commands for Renesas micros.
 @end menu
 
-@node Hitachi Boards
-@subsubsection Connecting to Hitachi boards
+@node Renesas Boards
+@subsubsection Connecting to Renesas boards
 
 @c only for Unix hosts
 @kindex device
-@cindex serial device, Hitachi micros
+@cindex serial device, Renesas micros
 Use the special @code{@value{GDBN}} command @samp{device @var{port}} if you
 need to explicitly set the serial device.  The default @var{port} is the
 first available port on your host.  This is only necessary on Unix
 hosts, where it is typically something like @file{/dev/ttya}.
 
 @kindex speed
-@cindex serial line speed, Hitachi micros
+@cindex serial line speed, Renesas micros
 @code{@value{GDBN}} has another special command to set the communications
 speed: @samp{speed @var{bps}}.  This command also is only used from Unix
 hosts; on DOS hosts, set the line speed as usual from outside @value{GDBN} with
@@ -11891,7 +11986,7 @@ the DOS @code{mode} command (for instance,
 @w{@kbd{mode com2:9600,n,8,1,p}} for a 9600@dmn{bps} connection).
 
 The @samp{device} and @samp{speed} commands are available only when you
-use a Unix host to debug your Hitachi microprocessor programs.  If you
+use a Unix host to debug your Renesas microprocessor programs.  If you
 use a DOS host,
 @value{GDBN} depends on an auxiliary terminate-and-stay-resident program
 called @code{asynctsr} to communicate with the development board
@@ -11901,7 +11996,7 @@ to set up the serial port on the DOS side.
 The following sample session illustrates the steps needed to start a
 program under @value{GDBN} control on an H8/300.  The example uses a
 sample H8/300 program called @file{t.x}.  The procedure is the same for
-the Hitachi SH and the H8/500.
+the Renesas SH and the H8/500.
 
 First hook up your development board.  In this example, we use a
 board attached to serial port @code{COM2}; if you use a different serial
@@ -11934,7 +12029,7 @@ connected, you can start up @value{GDBN}.  Call @code{@value{GDBP}} with
 the name of your program as the argument.  @code{@value{GDBN}} prompts
 you, as usual, with the prompt @samp{(@value{GDBP})}.  Use two special
 commands to begin your debugging session: @samp{target hms} to specify
-cross-debugging to the Hitachi board, and the @code{load} command to
+cross-debugging to the Renesas board, and the @code{load} command to
 download your program to the board.  @code{load} displays the names of
 the program's sections, and a @samp{*} for each 2K of data downloaded.
 (If you want to refresh @value{GDBN} data on symbols or on the
@@ -11984,12 +12079,12 @@ to detect program completion.
 In either case, @value{GDBN} sees the effect of a @sc{reset} on the
 development board as a ``normal exit'' of your program.
 
-@node Hitachi ICE
+@node Renesas ICE
 @subsubsection Using the E7000 in-circuit emulator
 
-@kindex target e7000@r{, with Hitachi ICE}
+@kindex target e7000@r{, with Renesas ICE}
 You can use the E7000 in-circuit emulator to develop code for either the
-Hitachi SH or the H8/300H.  Use one of these forms of the @samp{target
+Renesas SH or the H8/300H.  Use one of these forms of the @samp{target
 e7000} command to connect @value{GDBN} to your E7000:
 
 @table @code
@@ -12004,8 +12099,8 @@ If your E7000 is installed as a host on a TCP/IP network, you can just
 specify its hostname; @value{GDBN} uses @code{telnet} to connect.
 @end table
 
-@node Hitachi Special
-@subsubsection Special @value{GDBN} commands for Hitachi micros
+@node Renesas Special
+@subsubsection Special @value{GDBN} commands for Renesas micros
 
 Some @value{GDBN} commands are available only for the H8/300:
 
@@ -12038,13 +12133,17 @@ memory}.  The accepted values for @var{mod} are @code{small},
 @end table
 
 @node M32R/D
-@subsection Mitsubishi M32R/D
+@subsection Renesas M32R/D
 
 @table @code
 
 @kindex target m32r
 @item target m32r @var{dev}
-Mitsubishi M32R/D ROM monitor.
+Renesas M32R/D ROM monitor.
+
+@kindex target m32rsdi
+@item target m32rsdi @var{dev}
+Renesas M32R SDI server, connected via parallel port to the board.
 
 @end table
 
@@ -12391,25 +12490,25 @@ W89K monitor, running on a Winbond HPPA board.
 @end table
 
 @node SH
-@subsection Hitachi SH
+@subsection Renesas SH
 
 @table @code
 
-@kindex target hms@r{, with Hitachi SH}
+@kindex target hms@r{, with Renesas SH}
 @item target hms @var{dev}
-A Hitachi SH board attached via serial line to your host.  Use special
+A Renesas SH board attached via serial line to your host.  Use special
 commands @code{device} and @code{speed} to control the serial line and
 the communications speed used.
 
-@kindex target e7000@r{, with Hitachi SH}
+@kindex target e7000@r{, with Renesas SH}
 @item target e7000 @var{dev}
-E7000 emulator for Hitachi SH.
+E7000 emulator for Renesas SH.
 
 @kindex target sh3@r{, with SH}
 @kindex target sh3e@r{, with SH}
 @item target sh3 @var{dev}
 @item target sh3e @var{dev}
-Hitachi SH-3 and SH-3E target systems.
+Renesas SH-3 and SH-3E target systems.
 
 @end table
 
@@ -17226,7 +17325,7 @@ Show the core addresses of the code for a source line.
 
 @subsubheading @value{GDBN} Command
 
-The corresponding @value{GDBN} comamnd is @samp{info line}.
+The corresponding @value{GDBN} command is @samp{info line}.
 @code{gdbtk} has the @samp{gdb_get_line} and @samp{gdb_get_file} commands.
 
 @subsubheading Example
@@ -19517,9 +19616,9 @@ Reply:
 Each byte of register data is described by two hex digits.  The bytes
 with the register are transmitted in target byte order.  The size of
 each register and their position within the @samp{g} @var{packet} are
-determined by the @value{GDBN} internal macros @var{REGISTER_RAW_SIZE}
-and @var{REGISTER_NAME} macros.  The specification of several standard
-@code{g} packets is specified below.
+determined by the @value{GDBN} internal macros
+@var{DEPRECATED_REGISTER_RAW_SIZE} and @var{REGISTER_NAME} macros.  The
+specification of several standard @code{g} packets is specified below.
 @item E@var{NN}
 for an error.
 @end table
@@ -19781,9 +19880,51 @@ Reserved for future use.
 
 Reserved for future use.
 
-@item @code{v} --- reserved
+@item @code{v} --- verbose packet prefix
 
-Reserved for future use.
+Packets starting with @code{v} are identified by a multi-letter name,
+up to the first @code{;} or @code{?} (or the end of the packet).
+
+@item @code{vCont}[;@var{action}[@code{:}@var{tid}]]... --- extended resume
+@cindex @code{vCont} packet
+
+Resume the inferior.  Different actions may be specified for each thread.
+If an action is specified with no @var{tid}, then it is applied to any
+threads that don't have a specific action specified; if no default action is
+specified then other threads should remain stopped.  Specifying multiple
+default actions is an error; specifying no actions is also an error.
+Thread IDs are specified in hexadecimal.  Currently supported actions are:
+
+@table @code
+@item c
+Continue.
+@item C@var{sig}
+Continue with signal @var{sig}.  @var{sig} should be two hex digits.
+@item s
+Step.
+@item S@var{sig}
+Step with signal @var{sig}.  @var{sig} should be two hex digits.
+@end table
+
+The optional @var{addr} argument normally associated with these packets is
+not supported in @code{vCont}.
+
+Reply:
+@xref{Stop Reply Packets}, for the reply specifications.
+
+@item @code{vCont?} --- extended resume query
+@cindex @code{vCont?} packet
+
+Query support for the @code{vCont} packet.
+
+Reply:
+@table @samp
+@item @code{vCont}[;@var{action}]...
+The @code{vCont} packet is supported.  Each @var{action} is a supported
+command in the @code{vCont} packet.
+@item
+The @code{vCont} packet is not supported.
+@end table
 
 @item @code{V} --- reserved
 
@@ -19971,12 +20112,13 @@ conventions is used.
 
 @var{AA} = two hex digit signal number; @var{n...} = register number
 (hex), @var{r...}  = target byte ordered register contents, size defined
-by @code{REGISTER_RAW_SIZE}; @var{n...} = @samp{thread}, @var{r...} =
-thread process ID, this is a hex integer; @var{n...} = (@samp{watch} | 
-@samp{rwatch} | @samp{awatch}, @var{r...} = data address, this is a hex
-integer; @var{n...} = other string not starting with valid hex digit.
-@value{GDBN} should ignore this @var{n...}, @var{r...} pair and go on
-to the next.  This way we can extend the protocol.
+by @code{DEPRECATED_REGISTER_RAW_SIZE}; @var{n...} = @samp{thread},
+@var{r...} = thread process ID, this is a hex integer; @var{n...} =
+(@samp{watch} | @samp{rwatch} | @samp{awatch}, @var{r...} = data
+address, this is a hex integer; @var{n...} = other string not starting
+with valid hex digit.  @value{GDBN} should ignore this @var{n...},
+@var{r...} pair and go on to the next.  This way we can extend the
+protocol.
 
 @item W@var{AA}
 
@@ -20269,8 +20411,8 @@ Example sequence of a target being stepped by a single instruction:
 @menu
 * File-I/O Overview::
 * Protocol basics::
-* The `F' request packet::
-* The `F' reply packet::
+* The F request packet::
+* The F reply packet::
 * Memory transfer::
 * The Ctrl-C message::
 * Console I/O::
@@ -20397,7 +20539,7 @@ Return value.
 After having done the needed type and value coercion, the target continues
 the latest continue or step action.
 
-@node The `F' request packet
+@node The F request packet
 @subsection The @code{F} request packet
 @cindex file-i/o request packet
 @cindex @code{F} request packet
@@ -20424,7 +20566,7 @@ of string parameters.  These are appended to the call-id, each separated
 from its predecessor by a comma.  All values are transmitted in ASCII
 string representation, pointer/length pairs separated by a slash.
 
-@node The `F' reply packet
+@node The F reply packet
 @subsection The @code{F} reply packet
 @cindex file-i/o reply packet
 @cindex @code{F} reply packet

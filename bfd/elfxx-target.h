@@ -51,7 +51,7 @@
 #ifndef bfd_elfNN_get_symbol_info
 #define bfd_elfNN_get_symbol_info	_bfd_elf_get_symbol_info
 #endif
-#define bfd_elfNN_get_symtab		_bfd_elf_get_symtab
+#define bfd_elfNN_canonicalize_symtab	_bfd_elf_canonicalize_symtab
 #define bfd_elfNN_get_symtab_upper_bound _bfd_elf_get_symtab_upper_bound
 #define bfd_elfNN_make_empty_symbol	_bfd_elf_make_empty_symbol
 #ifndef bfd_elfNN_new_section_hook
@@ -99,7 +99,7 @@
 #define bfd_elfNN_bfd_debug_info_start	bfd_void
 #define bfd_elfNN_bfd_debug_info_end	bfd_void
 #define bfd_elfNN_bfd_debug_info_accumulate \
-  ((void (*) (bfd*, struct sec *)) bfd_void)
+  ((void (*) (bfd*, struct bfd_section *)) bfd_void)
 
 #ifndef bfd_elfNN_bfd_get_relocated_section_contents
 #define bfd_elfNN_bfd_get_relocated_section_contents \
@@ -343,9 +343,6 @@
 #ifndef elf_backend_got_header_size
 #define elf_backend_got_header_size	0
 #endif
-#ifndef elf_backend_plt_header_size
-#define elf_backend_plt_header_size	0
-#endif
 #ifndef elf_backend_post_process_headers
 #define elf_backend_post_process_headers	NULL
 #endif
@@ -360,6 +357,9 @@
 #endif
 #ifndef elf_backend_hide_symbol
 #define elf_backend_hide_symbol		_bfd_elf_link_hash_hide_symbol
+#endif
+#ifndef elf_backend_merge_symbol_attribute
+#define elf_backend_merge_symbol_attribute	NULL
 #endif
 #ifndef elf_backend_emit_relocs
 #define elf_backend_emit_relocs			NULL
@@ -483,6 +483,7 @@ static const struct elf_backend_data elfNN_bed =
   elf_backend_output_arch_syms,
   elf_backend_copy_indirect_symbol,
   elf_backend_hide_symbol,
+  elf_backend_merge_symbol_attribute,
   elf_backend_emit_relocs,
   elf_backend_count_relocs,
   elf_backend_grok_prstatus,
@@ -503,7 +504,6 @@ static const struct elf_backend_data elfNN_bed =
   elf_backend_special_sections,
   elf_backend_got_symbol_offset,
   elf_backend_got_header_size,
-  elf_backend_plt_header_size,
   elf_backend_collect,
   elf_backend_type_change_ok,
   elf_backend_may_use_rel_p,

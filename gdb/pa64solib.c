@@ -1,6 +1,7 @@
 /* Handle HP ELF shared libraries for GDB, the GNU Debugger.
 
-   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation,
+   Inc.
 
    This file is part of GDB.
 
@@ -50,15 +51,13 @@
 #include "gdbcmd.h"
 #include "language.h"
 #include "regcache.h"
+#include "exec.h"
 
 #include <fcntl.h>
 
 #ifndef O_BINARY
 #define O_BINARY 0
 #endif
-
-/* Defined in exec.c; used to prevent dangling pointer bug.  */
-extern struct target_ops exec_ops;
 
 static CORE_ADDR bfd_lookup_symbol (bfd *, char *);
 /* This lives in hppa-tdep.c. */
@@ -110,7 +109,7 @@ typedef struct
   {
     CORE_ADDR dld_flags_addr;
     LONGEST dld_flags;
-    sec_ptr dyninfo_sect;
+    struct bfd_section *dyninfo_sect;
     int have_read_dld_descriptor;
     int is_valid;
     CORE_ADDR load_map;

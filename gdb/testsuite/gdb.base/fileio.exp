@@ -1,4 +1,4 @@
-#   Copyright 2002
+#   Copyright 2002, 2003
 #   Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -20,14 +20,9 @@
 
 # This file was written by Corinna Vinschen <vinschen@redhat.com>
 
-if [target_info exists gdb,nointerrupts] {
-    verbose "Skipping interrupt.exp because of nointerrupts."
+if [target_info exists gdb,nofileio] {
+    verbose "Skipping fileio.exp because of no fileio capabilities."
     continue
-}
-
-if [target_info exists gdb,noinferiorio] {
-    verbose "Skipping interrupt.exp because of noinferiorio."
-    return
 }
 
 if $tracelevel then {

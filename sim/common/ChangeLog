@@ -1,3 +1,21 @@
+2003-10-30  Andrew Cagney  <cagney@redhat.com>
+
+	* sim-trace.c, sim-base.h: Replace "struct symbol_cache_entry"
+	with "struct bfd_symbol".
+
+2003-10-21  Andrew Cagney  <cagney@redhat.com>
+
+	* callback.c (os_truncate): Call "truncate", and not "stat".
+
+2003-10-20  Andrew Cagney  <cagney@redhat.com>
+
+	* sim-base.h: Replace "struct sec" with "struct bfd_section".
+
+2003-10-15  J"orn Rennecke <joern.rennecke@superh.com>
+
+	* callback.c (os_ftruncate, os_truncate): New functions.
+	(default_callback): Initialize ftruncate and truncate members.
+
 2003-09-08  Dave Brolley  <brolley@redhat.com>
 
 	On behalf of Doug Evans <dje@sebabeach.org>

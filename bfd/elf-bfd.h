@@ -309,14 +309,6 @@ struct eh_frame_hdr_info
   bfd_boolean table;
 };
 
-/* Cached start, size and alignment of PT_TLS segment.  */
-struct elf_link_tls_segment
-{
-  bfd_vma start;
-  bfd_size_type size;
-  unsigned int align;
-};
-
 /* ELF linker hash table.  */
 
 struct elf_link_hash_table
@@ -377,8 +369,9 @@ struct elf_link_hash_table
      objects included in the link.  */
   struct bfd_link_needed_list *runpath;
 
-  /* Cached start, size and alignment of PT_TLS segment.  */
-  struct elf_link_tls_segment *tls_segment;
+  /* Cached first output tls section and size of PT_TLS segment.  */
+  asection *tls_sec;
+  bfd_size_type tls_size;
 
   /* A linked list of BFD's loaded in the link.  */
   struct elf_link_loaded_list *loaded;
@@ -511,11 +504,16 @@ typedef enum {
 struct bfd_elf_special_section
 {
   const char *prefix;
-  size_t prefix_length;
-  const char *suffix;
-  size_t suffix_length;
+  int prefix_length;
+  /* 0 means name must match PREFIX exactly.
+     -1 means name must start with PREFIX followed by an arbitrary string.
+     -2 means name must match PREFIX exactly or consist of PREFIX followed
+     by a dot then anything.
+     > 0 means name must start with the first PREFIX_LENGTH chars of
+     PREFIX and finish with the last SUFFIX_LENGTH chars of PREFIX.  */
+  int suffix_length;
   int type;
-  int attributes;
+  int attr;
 };
 
 struct elf_backend_data
@@ -808,6 +806,11 @@ struct elf_backend_data
   void (*elf_backend_hide_symbol)
     (struct bfd_link_info *, struct elf_link_hash_entry *, bfd_boolean);
 
+  /* Merge the backend specific symbol attribute.  */
+  void (*elf_backend_merge_symbol_attribute)
+    (struct elf_link_hash_entry *, const Elf_Internal_Sym *, bfd_boolean,
+     bfd_boolean);
+
   /* Emit relocations.  Overrides default routine for emitting relocs,
      except during a relocatable link, or if all relocs are being emitted.  */
   bfd_boolean (*elf_backend_emit_relocs)
@@ -884,10 +887,9 @@ struct elf_backend_data
      .got section */
   bfd_vma got_symbol_offset;
 
-  /* The size in bytes of the headers for the GOT and PLT.  This includes
-     the so-called reserved entries on some systems.  */
+  /* The size in bytes of the header for the GOT.  This includes the
+     so-called reserved entries on some systems.  */
   bfd_vma got_header_size;
-  bfd_vma plt_header_size;
 
   /* This is TRUE if the linker should act like collect and gather
      global constructors and destructors by name.  This is TRUE for
@@ -1003,7 +1005,7 @@ struct bfd_elf_section_data
     const char *name;
 
     /* Group signature sym, if this is the SHT_GROUP section.  */
-    struct symbol_cache_entry *id;
+    struct bfd_symbol *id;
   } group;
 
   /* A linked list of sections in the group.  Circular when used by
@@ -1293,7 +1295,7 @@ extern void _bfd_elf_fprintf_vma
 extern enum elf_reloc_type_class _bfd_elf_reloc_type_class
   (const Elf_Internal_Rela *);
 extern bfd_vma _bfd_elf_rela_local_sym
-  (bfd *, Elf_Internal_Sym *, asection *, Elf_Internal_Rela *);
+  (bfd *, Elf_Internal_Sym *, asection **, Elf_Internal_Rela *);
 extern bfd_vma _bfd_elf_rel_local_sym
   (bfd *, Elf_Internal_Sym *, asection **, bfd_vma);
 extern bfd_vma _bfd_elf_section_offset
@@ -1332,7 +1334,7 @@ extern bfd_boolean _bfd_elf_slurp_version_tables
 extern bfd_boolean _bfd_elf_merge_sections
   (bfd *, struct bfd_link_info *);
 extern bfd_boolean bfd_elf_discard_group
-  (bfd *, struct sec *);
+  (bfd *, struct bfd_section *);
 extern void bfd_elf_set_group_contents
   (bfd *, asection *, void *);
 extern void _bfd_elf_link_just_syms
@@ -1346,10 +1348,10 @@ extern bfd_boolean _bfd_elf_write_object_contents
 extern bfd_boolean _bfd_elf_write_corefile_contents
   (bfd *);
 extern bfd_boolean _bfd_elf_set_section_contents
-  (bfd *, sec_ptr, void *, file_ptr, bfd_size_type);
+  (bfd *, sec_ptr, const void *, file_ptr, bfd_size_type);
 extern long _bfd_elf_get_symtab_upper_bound
   (bfd *);
-extern long _bfd_elf_get_symtab
+extern long _bfd_elf_canonicalize_symtab
   (bfd *, asymbol **);
 extern long _bfd_elf_get_dynamic_symtab_upper_bound
   (bfd *);
@@ -1384,8 +1386,8 @@ extern bfd_boolean _bfd_elf_new_section_hook
   (bfd *, asection *);
 extern bfd_boolean _bfd_elf_init_reloc_shdr
   (bfd *, Elf_Internal_Shdr *, asection *, bfd_boolean);
-extern bfd_boolean _bfd_elf_get_sec_type_attr
-  (bfd *, const char *, int *, int *);
+extern const struct bfd_elf_special_section *_bfd_elf_get_sec_type_attr
+  (bfd *, const char *);
 
 /* If the target doesn't have reloc handling written yet:  */
 extern void _bfd_elf_no_info_to_howto
@@ -1624,7 +1626,7 @@ extern int elf_link_record_local_dynamic_symbol
 extern bfd_boolean _bfd_elf_close_and_cleanup
   (bfd *);
 extern bfd_reloc_status_type _bfd_elf_rel_vtable_reloc_fn
-  (bfd *, arelent *, struct symbol_cache_entry *, void *,
+  (bfd *, arelent *, struct bfd_symbol *, void *,
    asection *, bfd *, char **);
 
 extern bfd_boolean _bfd_elf32_gc_sections

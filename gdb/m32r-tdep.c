@@ -37,6 +37,7 @@
 #include "arch-utils.h"
 #include "regcache.h"
 #include "trad-frame.h"
+#include "dis-asm.h"
 
 #include "gdb_assert.h"
 
@@ -829,11 +830,6 @@ m32r_frame_this_id (struct frame_info *next_frame,
 
   /* The FUNC is easy.  */
   func = frame_func_unwind (next_frame);
-
-  /* This is meant to halt the backtrace at "_start".  Make sure we
-     don't halt it at a generic dummy frame. */
-  if (deprecated_inside_entry_file (func))
-    return;
 
   /* Check if the stack is empty.  */
   msym_stack = lookup_minimal_symbol ("_stack", NULL, NULL);

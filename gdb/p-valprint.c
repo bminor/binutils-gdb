@@ -553,8 +553,8 @@ pascal_value_print (struct value *val, struct ui_file *stream, int format,
          type is indicated by the quoted string anyway. */
       if (TYPE_CODE (type) == TYPE_CODE_PTR &&
 	  TYPE_NAME (type) == NULL &&
-	  TYPE_NAME (TYPE_TARGET_TYPE (type)) != NULL &&
-	  STREQ (TYPE_NAME (TYPE_TARGET_TYPE (type)), "char"))
+	  TYPE_NAME (TYPE_TARGET_TYPE (type)) != NULL
+	  && strcmp (TYPE_NAME (TYPE_TARGET_TYPE (type)), "char") == 0)
 	{
 	  /* Print nothing */
 	}
@@ -694,7 +694,7 @@ pascal_object_is_vtbl_ptr_type (struct type *type)
   const char *typename = type_name_no_tag (type);
 
   return (typename != NULL
-	  && (STREQ (typename, pascal_vtbl_ptr_name)));
+	  && strcmp (typename, pascal_vtbl_ptr_name) == 0);
 }
 
 /* Return truth value for the assertion that TYPE is of the type

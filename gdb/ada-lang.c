@@ -8036,6 +8036,7 @@ const struct language_defn ada_language_defn = {
   1,				/* c-style arrays (FIXME?) */
   0,				/* String lower bound (FIXME?) */
   &builtin_type_ada_char,
+  default_word_break_characters,
   LANG_MAGIC
 };
 

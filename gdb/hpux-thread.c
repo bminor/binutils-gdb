@@ -131,7 +131,6 @@ find_tcb (ptid_t ptid)
 /* Most target vector functions from here on actually just pass through to
    inftarg.c, as they don't need to do anything specific for threads.  */
 
-/* ARGSUSED */
 static void
 hpux_thread_open (char *arg, int from_tty)
 {
@@ -292,13 +291,13 @@ hpux_thread_fetch_registers (int regno)
 
 	  if (regno == FLAGS_REGNUM)
 	    /* Flags must be 0 to avoid bogus value for SS_INSYSCALL */
-	    memset (buf, '\000', REGISTER_RAW_SIZE (regno));
+	    memset (buf, '\000', DEPRECATED_REGISTER_RAW_SIZE (regno));
 	  else if (regno == SP_REGNUM)
 	    store_unsigned_integer (buf, sizeof sp, sp);
 	  else if (regno == PC_REGNUM)
-	    read_memory (sp - 20, buf, REGISTER_RAW_SIZE (regno));
+	    read_memory (sp - 20, buf, DEPRECATED_REGISTER_RAW_SIZE (regno));
 	  else
-	    read_memory (sp + regmap[regno], buf, REGISTER_RAW_SIZE (regno));
+	    read_memory (sp + regmap[regno], buf, DEPRECATED_REGISTER_RAW_SIZE (regno));
 
 	  supply_register (regno, buf);
 	}
@@ -358,19 +357,19 @@ hpux_thread_store_registers (int regno)
 	    {
 	      write_memory ((CORE_ADDR) & tcb_ptr->static_ctx.sp,
 			    &deprecated_registers[DEPRECATED_REGISTER_BYTE (regno)],
-			    REGISTER_RAW_SIZE (regno));
+			    DEPRECATED_REGISTER_RAW_SIZE (regno));
 	      tcb_ptr->static_ctx.sp = (cma__t_hppa_regs *)
 		(extract_unsigned_integer (&deprecated_registers[DEPRECATED_REGISTER_BYTE (regno)],
-					   REGISTER_RAW_SIZE (regno)) + 160);
+					   DEPRECATED_REGISTER_RAW_SIZE (regno)) + 160);
 	    }
 	  else if (regno == PC_REGNUM)
 	    write_memory (sp - 20,
 			  &deprecated_registers[DEPRECATED_REGISTER_BYTE (regno)],
-			  REGISTER_RAW_SIZE (regno));
+			  DEPRECATED_REGISTER_RAW_SIZE (regno));
 	  else
 	    write_memory (sp + regmap[regno],
 			  &deprecated_registers[DEPRECATED_REGISTER_BYTE (regno)],
-			  REGISTER_RAW_SIZE (regno));
+			  DEPRECATED_REGISTER_RAW_SIZE (regno));
 	}
     }
 

@@ -204,12 +204,37 @@ ppcnbsd_pc_in_sigtramp (CORE_ADDR pc, char *func_name)
   return (nbsd_pc_in_sigtramp (pc, func_name));
 }
 
+/* NetBSD is confused.  It appears that 1.5 was using the correct SVr4
+   convention but, 1.6 switched to the below broken convention.  For
+   the moment use the broken convention.  Ulgh!.  */
+
+static enum return_value_convention
+ppcnbsd_return_value (struct gdbarch *gdbarch, struct type *valtype,
+		      struct regcache *regcache, void *readbuf,
+		      const void *writebuf)
+{
+  if ((TYPE_CODE (valtype) == TYPE_CODE_STRUCT
+       || TYPE_CODE (valtype) == TYPE_CODE_UNION)
+      && !((TYPE_LENGTH (valtype) == 16 || TYPE_LENGTH (valtype) == 8)
+	    && TYPE_VECTOR (valtype))
+      && !(TYPE_LENGTH (valtype) == 1
+	   || TYPE_LENGTH (valtype) == 2
+	   || TYPE_LENGTH (valtype) == 4
+	   || TYPE_LENGTH (valtype) == 8))
+    return RETURN_VALUE_STRUCT_CONVENTION;
+  else
+    return ppc_sysv_abi_broken_return_value (gdbarch, valtype, regcache,
+					     readbuf, writebuf);
+}
+
 static void
 ppcnbsd_init_abi (struct gdbarch_info info,
                   struct gdbarch *gdbarch)
 {
   set_gdbarch_pc_in_sigtramp (gdbarch, ppcnbsd_pc_in_sigtramp);
-
+  /* For NetBSD, this is an on again, off again thing.  Some systems
+     do use the broken struct convention, and some don't.  */
+  set_gdbarch_return_value (gdbarch, ppcnbsd_return_value);
   set_solib_svr4_fetch_link_map_offsets (gdbarch,
                                 nbsd_ilp32_solib_svr4_fetch_link_map_offsets);
 }

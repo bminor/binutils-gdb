@@ -455,6 +455,12 @@ arm_skip_prologue (CORE_ADDR pc)
       if (inst == 0xe1a0c00d)			/* mov ip, sp */
 	continue;
 
+      if ((inst & 0xfffff000) == 0xe28dc000)    /* add ip, sp #n */
+	continue;
+
+      if ((inst & 0xfffff000) == 0xe24dc000)    /* sub ip, sp #n */
+	continue;
+
       /* Some prologues begin with "str lr, [sp, #-4]!".  */
       if (inst == 0xe52de004)			/* str lr, [sp, #-4]! */
 	continue;
@@ -707,7 +713,7 @@ thumb_scan_prologue (CORE_ADDR prev_pc, struct arm_prologue_cache *cache)
 static void
 arm_scan_prologue (struct frame_info *next_frame, struct arm_prologue_cache *cache)
 {
-  int regno, sp_offset, fp_offset;
+  int regno, sp_offset, fp_offset, ip_offset;
   CORE_ADDR prologue_start, prologue_end, current_pc;
   CORE_ADDR prev_pc = frame_pc_unwind (next_frame);
 
@@ -808,7 +814,7 @@ arm_scan_prologue (struct frame_info *next_frame, struct arm_prologue_cache *cac
      in which case it is often (but not always) replaced by
      "str lr, [sp, #-4]!".  - Michael Snyder, 2002-04-23]  */
 
-  sp_offset = fp_offset = 0;
+  sp_offset = fp_offset = ip_offset = 0;
 
   for (current_pc = prologue_start;
        current_pc < prologue_end;
@@ -818,11 +824,29 @@ arm_scan_prologue (struct frame_info *next_frame, struct arm_prologue_cache *cac
 
       if (insn == 0xe1a0c00d)		/* mov ip, sp */
 	{
+	  ip_offset = 0;
+	  continue;
+	}
+      else if ((insn & 0xfffff000) == 0xe28dc000) /* add ip, sp #n */
+	{
+	  unsigned imm = insn & 0xff;                   /* immediate value */
+	  unsigned rot = (insn & 0xf00) >> 7;           /* rotate amount */
+	  imm = (imm >> rot) | (imm << (32 - rot));
+	  ip_offset = imm;
+	  continue;
+	}
+      else if ((insn & 0xfffff000) == 0xe24dc000) /* sub ip, sp #n */
+	{
+	  unsigned imm = insn & 0xff;                   /* immediate value */
+	  unsigned rot = (insn & 0xf00) >> 7;           /* rotate amount */
+	  imm = (imm >> rot) | (imm << (32 - rot));
+	  ip_offset = -imm;
 	  continue;
 	}
       else if (insn == 0xe52de004)	/* str lr, [sp, #-4]! */
 	{
-	  /* Function is frameless: extra_info defaults OK?  */
+	  sp_offset -= 4;
+	  cache->saved_regs[ARM_LR_REGNUM].addr = sp_offset;
 	  continue;
 	}
       else if ((insn & 0xffff0000) == 0xe92d0000)
@@ -859,7 +883,7 @@ arm_scan_prologue (struct frame_info *next_frame, struct arm_prologue_cache *cac
 	  unsigned imm = insn & 0xff;			/* immediate value */
 	  unsigned rot = (insn & 0xf00) >> 7;		/* rotate amount */
 	  imm = (imm >> rot) | (imm << (32 - rot));
-	  fp_offset = -imm;
+	  fp_offset = -imm + ip_offset;
 	  cache->framereg = ARM_FP_REGNUM;
 	}
       else if ((insn & 0xfffff000) == 0xe24dd000)	/* sub sp, sp #n */
@@ -944,7 +968,7 @@ arm_make_prologue_cache (struct frame_info *next_frame)
   /* Calculate actual addresses of saved registers using offsets
      determined by arm_scan_prologue.  */
   for (reg = 0; reg < NUM_REGS; reg++)
-    if (cache->saved_regs[reg].addr != 0)
+    if (trad_frame_addr_p (cache->saved_regs, reg))
       cache->saved_regs[reg].addr += cache->prev_sp;
 
   return cache;
@@ -970,7 +994,7 @@ arm_prologue_this_id (struct frame_info *next_frame,
 
   /* This is meant to halt the backtrace at "_start".  Make sure we
      don't halt it at a generic dummy frame. */
-  if (func <= LOWEST_PC || deprecated_inside_entry_file (func))
+  if (func <= LOWEST_PC)
     return;
 
   /* If we've hit a wall, stop.  */
@@ -1079,7 +1103,7 @@ arm_make_sigtramp_cache (struct frame_info *next_frame)
   cache->framereg = ARM_SP_REGNUM;
   cache->prev_sp
     = read_memory_integer (cache->saved_regs[cache->framereg].addr,
-			   REGISTER_RAW_SIZE (cache->framereg));
+			   DEPRECATED_REGISTER_RAW_SIZE (cache->framereg));
 
   return cache;
 }

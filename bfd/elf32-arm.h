@@ -84,6 +84,12 @@ static struct bfd_hash_entry * elf32_arm_link_hash_newfunc
 static void arm_add_to_rel
   PARAMS ((bfd *, bfd_byte *, reloc_howto_type *, bfd_signed_vma));
 #endif
+static bfd_boolean allocate_dynrelocs 
+  PARAMS ((struct elf_link_hash_entry *h, PTR inf));
+static bfd_boolean create_got_section 
+  PARAMS ((bfd * dynobj, struct bfd_link_info * info));
+static bfd_boolean elf32_arm_create_dynamic_sections 
+  PARAMS ((bfd * dynobj, struct bfd_link_info * info));
 static enum elf_reloc_type_class elf32_arm_reloc_type_class
   PARAMS ((const Elf_Internal_Rela *));
 static bfd_boolean elf32_arm_object_p
@@ -119,6 +125,12 @@ bfd_boolean bfd_elf32_arm_process_before_allocation
    section.  */
 #define ELF_DYNAMIC_INTERPRETER     "/usr/lib/ld.so.1"
 
+#ifdef FOUR_WORD_PLT
+
+/* The size in bytes of the special first entry in the procedure
+   linkage table.  */
+#define PLT_HEADER_SIZE 16
+
 /* The size in bytes of an entry in the procedure linkage table.  */
 #define PLT_ENTRY_SIZE 16
 
@@ -126,23 +138,56 @@ bfd_boolean bfd_elf32_arm_process_before_allocation
    this.  It is set up so that any shared library function that is
    called before the relocation has been set up calls the dynamic
    linker first.  */
-static const bfd_vma elf32_arm_plt0_entry [PLT_ENTRY_SIZE / 4] =
+static const bfd_vma elf32_arm_plt0_entry [PLT_HEADER_SIZE / 4] =
   {
-    0xe52de004,	/* str   lr, [sp, #-4]!     */
-    0xe59fe010,	/* ldr   lr, [pc, #16]      */
-    0xe08fe00e,	/* add   lr, pc, lr         */
-    0xe5bef008	/* ldr   pc, [lr, #8]!      */
+    0xe52de004,		/* str   lr, [sp, #-4]! */
+    0xe59fe010,		/* ldr   lr, [pc, #16]  */
+    0xe08fe00e,		/* add   lr, pc, lr     */
+    0xe5bef008,		/* ldr   pc, [lr, #8]!  */
   };
 
 /* Subsequent entries in a procedure linkage table look like
    this.  */
 static const bfd_vma elf32_arm_plt_entry [PLT_ENTRY_SIZE / 4] =
- {
-   0xe59fc004,	/* ldr   ip, [pc, #4]       */
-   0xe08fc00c,	/* add   ip, pc, ip         */
-   0xe59cf000,	/* ldr   pc, [ip]           */
-   0x00000000	/* offset to symbol in got  */
- };
+  {
+    0xe28fc600,		/* add   ip, pc, #NN	*/
+    0xe28cca00,		/* add	 ip, ip, #NN	*/
+    0xe5bcf000,		/* ldr	 pc, [ip, #NN]! */
+    0x00000000,		/* unused		*/
+  };
+
+#else
+
+/* The size in bytes of the special first entry in the procedure
+   linkage table.  */
+#define PLT_HEADER_SIZE 20
+
+/* The size in bytes of an entry in the procedure linkage table.  */
+#define PLT_ENTRY_SIZE 12
+
+/* The first entry in a procedure linkage table looks like
+   this.  It is set up so that any shared library function that is
+   called before the relocation has been set up calls the dynamic
+   linker first.  */
+static const bfd_vma elf32_arm_plt0_entry [PLT_HEADER_SIZE / 4] =
+  {
+    0xe52de004,		/* str   lr, [sp, #-4]! */
+    0xe59fe004,		/* ldr   lr, [pc, #4]   */
+    0xe08fe00e,		/* add   lr, pc, lr     */
+    0xe5bef008,		/* ldr   pc, [lr, #8]!  */
+    0x00000000,		/* &GOT[0] - .          */
+  };
+
+/* Subsequent entries in a procedure linkage table look like
+   this.  */
+static const bfd_vma elf32_arm_plt_entry [PLT_ENTRY_SIZE / 4] =
+  {
+    0xe28fc600,		/* add   ip, pc, #0xNN00000 */
+    0xe28cca00,		/* add	 ip, ip, #0xNN000   */
+    0xe5bcf000,		/* ldr	 pc, [ip, #0xNNN]!  */
+  };
+
+#endif
 
 /* The ARM linker needs to keep track of the number of relocs that it
    decides to copy in check_relocs for each symbol.  This is so that
@@ -152,14 +197,16 @@ static const bfd_vma elf32_arm_plt_entry [PLT_ENTRY_SIZE / 4] =
 
 /* This structure keeps track of the number of PC relative relocs we
    have copied for a given symbol.  */
-struct elf32_arm_pcrel_relocs_copied
+struct elf32_arm_relocs_copied
   {
     /* Next section.  */
-    struct elf32_arm_pcrel_relocs_copied * next;
+    struct elf32_arm_relocs_copied * next;
     /* A section in dynobj.  */
     asection * section;
     /* Number of relocs copied in this section.  */
     bfd_size_type count;
+    /* Number of relocs copied in this section.  */
+    bfd_size_type pc_count;
   };
 
 /* Arm ELF linker hash entry.  */
@@ -168,12 +215,8 @@ struct elf32_arm_link_hash_entry
     struct elf_link_hash_entry root;
 
     /* Number of PC relative relocs copied for this symbol.  */
-    struct elf32_arm_pcrel_relocs_copied * pcrel_relocs_copied;
+    struct elf32_arm_relocs_copied * relocs_copied;
   };
-
-/* Declare this now that the above structures are defined.  */
-static bfd_boolean elf32_arm_discard_copies
-  PARAMS ((struct elf32_arm_link_hash_entry *, PTR));
 
 /* Traverse an arm ELF linker hash table.  */
 #define elf32_arm_link_hash_traverse(table, func, info)			\
@@ -204,6 +247,18 @@ struct elf32_arm_link_hash_table
     /* A boolean indicating whether knowledge of the ARM's pipeline
        length should be applied by the linker.  */
     int no_pipeline_knowledge;
+
+    /* Short-cuts to get to dynamic linker sections.  */
+    asection *sgot;
+    asection *sgotplt;
+    asection *srelgot;
+    asection *splt;
+    asection *srelplt;
+    asection *sdynbss;
+    asection *srelbss;
+
+    /* Small local sym to section mapping cache.  */
+    struct sym_sec_cache sym_sec;
   };
 
 /* Create an entry in an ARM ELF linker hash table.  */
@@ -231,9 +286,119 @@ elf32_arm_link_hash_newfunc (entry, table, string)
 	 _bfd_elf_link_hash_newfunc ((struct bfd_hash_entry *) ret,
 				     table, string));
   if (ret != (struct elf32_arm_link_hash_entry *) NULL)
-    ret->pcrel_relocs_copied = NULL;
+    ret->relocs_copied = NULL;
 
   return (struct bfd_hash_entry *) ret;
+}
+
+/* Create .got, .gotplt, and .rel.got sections in DYNOBJ, and set up
+   shortcuts to them in our hash table.  */
+
+static bfd_boolean
+create_got_section (dynobj, info)
+     bfd *dynobj;
+     struct bfd_link_info *info;
+{
+  struct elf32_arm_link_hash_table *htab;
+
+  if (! _bfd_elf_create_got_section (dynobj, info))
+    return FALSE;
+
+  htab = elf32_arm_hash_table (info);
+  htab->sgot = bfd_get_section_by_name (dynobj, ".got");
+  htab->sgotplt = bfd_get_section_by_name (dynobj, ".got.plt");
+  if (!htab->sgot || !htab->sgotplt)
+    abort ();
+
+  htab->srelgot = bfd_make_section (dynobj, ".rel.got");
+  if (htab->srelgot == NULL
+      || ! bfd_set_section_flags (dynobj, htab->srelgot,
+				  (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS
+				   | SEC_IN_MEMORY | SEC_LINKER_CREATED
+				   | SEC_READONLY))
+      || ! bfd_set_section_alignment (dynobj, htab->srelgot, 2))
+    return FALSE;
+  return TRUE;
+}
+
+/* Create .plt, .rel.plt, .got, .got.plt, .rel.got, .dynbss, and
+   .rel.bss sections in DYNOBJ, and set up shortcuts to them in our
+   hash table.  */
+
+static bfd_boolean
+elf32_arm_create_dynamic_sections (dynobj, info)
+     bfd *dynobj;
+     struct bfd_link_info *info;
+{
+  struct elf32_arm_link_hash_table *htab;
+
+  htab = elf32_arm_hash_table (info);
+  if (!htab->sgot && !create_got_section (dynobj, info))
+    return FALSE;
+
+  if (!_bfd_elf_create_dynamic_sections (dynobj, info))
+    return FALSE;
+
+  htab->splt = bfd_get_section_by_name (dynobj, ".plt");
+  htab->srelplt = bfd_get_section_by_name (dynobj, ".rel.plt");
+  htab->sdynbss = bfd_get_section_by_name (dynobj, ".dynbss");
+  if (!info->shared)
+    htab->srelbss = bfd_get_section_by_name (dynobj, ".rel.bss");
+
+  if (!htab->splt || !htab->srelplt || !htab->sdynbss
+      || (!info->shared && !htab->srelbss))
+    abort ();
+
+  return TRUE;
+}
+
+/* Copy the extra info we tack onto an elf_link_hash_entry.  */
+
+static void
+elf32_arm_copy_indirect_symbol (const struct elf_backend_data *bed,
+				struct elf_link_hash_entry *dir,
+				struct elf_link_hash_entry *ind)
+{
+  struct elf32_arm_link_hash_entry *edir, *eind;
+
+  edir = (struct elf32_arm_link_hash_entry *) dir;
+  eind = (struct elf32_arm_link_hash_entry *) ind;
+
+  if (eind->relocs_copied != NULL)
+    {
+      if (edir->relocs_copied != NULL)
+	{
+	  struct elf32_arm_relocs_copied **pp;
+	  struct elf32_arm_relocs_copied *p;
+
+	  if (ind->root.type == bfd_link_hash_indirect)
+	    abort ();
+
+	  /* Add reloc counts against the weak sym to the strong sym
+	     list.  Merge any entries against the same section.  */
+	  for (pp = &eind->relocs_copied; (p = *pp) != NULL; )
+	    {
+	      struct elf32_arm_relocs_copied *q;
+
+	      for (q = edir->relocs_copied; q != NULL; q = q->next)
+		if (q->section == p->section)
+		  {
+		    q->pc_count += p->pc_count;
+		    q->count += p->count;
+		    *pp = p->next;
+		    break;
+		  }
+	      if (q == NULL)
+		pp = &p->next;
+	    }
+	  *pp = edir->relocs_copied;
+	}
+
+      edir->relocs_copied = eind->relocs_copied;
+      eind->relocs_copied = NULL;
+    }
+
+  _bfd_elf_link_hash_copy_indirect (bed, dir, ind);
 }
 
 /* Create an ARM elf linker hash table.  */
@@ -256,10 +421,18 @@ elf32_arm_link_hash_table_create (abfd)
       return NULL;
     }
 
+  ret->sgot = NULL;
+  ret->sgotplt = NULL;
+  ret->srelgot = NULL;
+  ret->splt = NULL;
+  ret->srelplt = NULL;
+  ret->sdynbss = NULL;
+  ret->srelbss = NULL;
   ret->thumb_glue_size = 0;
   ret->arm_glue_size = 0;
   ret->bfd_of_glue_owner = NULL;
   ret->no_pipeline_knowledge = 0;
+  ret->sym_sec.abfd = NULL;
 
   return &ret->root.root;
 }
@@ -1134,16 +1307,21 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 #ifndef OLD_ARM_ABI
     case R_ARM_XPC25:
 #endif
+      /* r_symndx will be zero only for relocs against symbols
+	 from removed linkonce sections, or sections discarded by
+	 a linker script.  */
+      if (r_symndx == 0)
+	return bfd_reloc_ok;
+
       /* When generating a shared object, these relocations are copied
 	 into the output file to be resolved at run time.  */
-      if (info->shared
-	  && r_symndx != 0
-	  && (r_type != R_ARM_PC24
-	      || (h != NULL
-	          && h->dynindx != -1
-		  && (! info->symbolic
-		      || (h->elf_link_hash_flags
-			  & ELF_LINK_HASH_DEF_REGULAR) == 0))))
+      if ((info->shared
+	   && (input_section->flags & SEC_ALLOC)
+	   && (h == NULL
+	       || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+	       || h->root.type != bfd_link_hash_undefweak)
+	   && (r_type != R_ARM_PC24
+	       || !SYMBOL_CALLS_LOCAL (info, h))))
 	{
 	  Elf_Internal_Rela outrel;
 	  bfd_byte *loc;
@@ -1184,30 +1362,19 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 
 	  if (skip)
 	    memset (&outrel, 0, sizeof outrel);
-	  else if (r_type == R_ARM_PC24)
-	    {
-	      BFD_ASSERT (h != NULL && h->dynindx != -1);
-	      if ((input_section->flags & SEC_ALLOC) == 0)
-		relocate = TRUE;
-	      outrel.r_info = ELF32_R_INFO (h->dynindx, R_ARM_PC24);
-	    }
+	  else if (h != NULL
+		   && h->dynindx != -1
+		   && (r_type == R_ARM_PC24
+		       || !info->shared
+		       || !info->symbolic
+		       || (h->elf_link_hash_flags
+			   & ELF_LINK_HASH_DEF_REGULAR) == 0))
+	    outrel.r_info = ELF32_R_INFO (h->dynindx, r_type);
 	  else
 	    {
-	      if (h == NULL
-		  || ((info->symbolic || h->dynindx == -1)
-		      && (h->elf_link_hash_flags
-			  & ELF_LINK_HASH_DEF_REGULAR) != 0))
-		{
-		  relocate = TRUE;
-		  outrel.r_info = ELF32_R_INFO (0, R_ARM_RELATIVE);
-		}
-	      else
-		{
-		  BFD_ASSERT (h->dynindx != -1);
-		  if ((input_section->flags & SEC_ALLOC) == 0)
-		    relocate = TRUE;
-		  outrel.r_info = ELF32_R_INFO (h->dynindx, R_ARM_ABS32);
-		}
+	      /* This symbol is local, or marked to become local.  */
+	      relocate = TRUE;
+	      outrel.r_info = ELF32_R_INFO (0, R_ARM_RELATIVE);
 	    }
 
 	  loc = sreloc->contents;
@@ -1617,16 +1784,17 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
       if (h != NULL)
 	{
 	  bfd_vma off;
-	  bfd_boolean dyn = elf_hash_table (info)->dynamic_sections_created;
+	  bfd_boolean dyn;
 
 	  off = h->got.offset;
 	  BFD_ASSERT (off != (bfd_vma) -1);
+	  dyn = globals->root.dynamic_sections_created;
 
-	  if (!WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info->shared, h)
+	  if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info->shared, h)
 	      || (info->shared
-		  && (info->symbolic || h->dynindx == -1
-		      || (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL))
-		  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR)))
+		  && SYMBOL_REFERENCES_LOCAL (info, h))
+	      || (ELF_ST_VISIBILITY (h->other)
+		  && h->root.type == bfd_link_hash_undefweak))
 	    {
 	      /* This is actually a static link, or it is a -Bsymbolic link
 		 and the symbol is defined locally.  We must initialize this
@@ -1712,7 +1880,8 @@ elf32_arm_final_link_relocate (howto, input_bfd, output_bfd,
 				 contents, rel->r_offset, value,
 				 (bfd_vma) 0);
 
-      if (h->plt.offset == (bfd_vma) -1)
+      if (h->plt.offset == (bfd_vma) -1
+	  || globals->splt == NULL)
         /* We didn't make a PLT entry for this symbol.  This
            happens when statically linking PIC code, or when
            using -Bsymbolic.  */
@@ -1958,7 +2127,7 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 	      bfd_put_32 (input_bfd, value, contents + rel->r_offset);
 	    }
 #else
-	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, sec, rel);
+	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
 #endif
 	}
       else
@@ -1983,9 +2152,10 @@ elf32_arm_relocate_section (output_bfd, info, input_bfd, input_section,
 		case R_ARM_THM_PC22:
 	          if (info->shared
 	              && (
-		  (!info->symbolic && h->dynindx != -1)
+			  (!info->symbolic && h->dynindx != -1)
 	                  || (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0
 			  )
+		      && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 	              && ((input_section->flags & SEC_ALLOC) != 0
 			  /* DWARF will emit R_ARM_ABS32 relocations in its
 			     sections against symbols defined externally
@@ -2217,7 +2387,6 @@ elf32_arm_merge_private_bfd_data (ibfd, obfd)
   flagword out_flags;
   flagword in_flags;
   bfd_boolean flags_compatible = TRUE;
-  bfd_boolean null_input_bfd = TRUE;
   asection *sec;
 
   /* Check if we have the same endianess.  */
@@ -2268,21 +2437,29 @@ elf32_arm_merge_private_bfd_data (ibfd, obfd)
   if (in_flags == out_flags)
     return TRUE;
 
-  /* Check to see if the input BFD actually contains any sections.
-     If not, its flags may not have been initialised either, but it cannot
-     actually cause any incompatibility.  */
-  for (sec = ibfd->sections; sec != NULL; sec = sec->next)
+  /* Check to see if the input BFD actually contains any sections.  If
+     not, its flags may not have been initialised either, but it
+     cannot actually cause any incompatibility.  Do not short-circuit
+     dynamic objects; their section list may be emptied by
+     elf_link_add_object_symbols.  */
+
+  if (!(ibfd->flags & DYNAMIC))
     {
-      /* Ignore synthetic glue sections.  */
-      if (strcmp (sec->name, ".glue_7")
-	  && strcmp (sec->name, ".glue_7t"))
+      bfd_boolean null_input_bfd = TRUE;
+
+      for (sec = ibfd->sections; sec != NULL; sec = sec->next)
 	{
-	  null_input_bfd = FALSE;
-	  break;
+	  /* Ignore synthetic glue sections.  */
+	  if (strcmp (sec->name, ".glue_7")
+	      && strcmp (sec->name, ".glue_7t"))
+	    {
+	      null_input_bfd = FALSE;
+	      break;
+	    }
 	}
+      if (null_input_bfd)
+	return TRUE;
     }
-  if (null_input_bfd)
-    return TRUE;
 
   /* Complain about various flag mismatches.  */
   if (EF_ARM_EABI_VERSION (in_flags) != EF_ARM_EABI_VERSION (out_flags))
@@ -2351,7 +2528,7 @@ ERROR: %s uses Maverick instructions, whereas %s does not"),
 				bfd_get_filename (obfd));
 	  else
 	    _bfd_error_handler (_("\
-ERROR: %s uses Maverick instructions, whereas %s does not"),
+ERROR: %s does not use Maverick instructions, whereas %s does"),
 				bfd_archive_filename (ibfd),
 				bfd_get_filename (obfd));
 
@@ -2596,7 +2773,82 @@ elf32_arm_gc_sweep_hook (abfd, info, sec, relocs)
      asection *sec ATTRIBUTE_UNUSED;
      const Elf_Internal_Rela *relocs ATTRIBUTE_UNUSED;
 {
-  /* We don't support garbage collection of GOT and PLT relocs yet.  */
+  Elf_Internal_Shdr *symtab_hdr;
+  struct elf_link_hash_entry **sym_hashes;
+  bfd_signed_vma *local_got_refcounts;
+  const Elf_Internal_Rela *rel, *relend;
+  unsigned long r_symndx;
+  struct elf_link_hash_entry *h;
+
+  elf_section_data (sec)->local_dynrel = NULL;
+
+  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+  sym_hashes = elf_sym_hashes (abfd);
+  local_got_refcounts = elf_local_got_refcounts (abfd);
+
+  relend = relocs + sec->reloc_count;
+  for (rel = relocs; rel < relend; rel++)
+    switch (ELF32_R_TYPE (rel->r_info))
+      {
+      case R_ARM_GOT32:
+	r_symndx = ELF32_R_SYM (rel->r_info);
+	if (r_symndx >= symtab_hdr->sh_info)
+	  {
+	    h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	    if (h->got.refcount > 0)
+	      h->got.refcount -= 1;
+	  }
+	else if (local_got_refcounts != NULL)
+	  {
+	    if (local_got_refcounts[r_symndx] > 0)
+	      local_got_refcounts[r_symndx] -= 1;
+	  }
+	break;
+
+      case R_ARM_ABS32:
+      case R_ARM_REL32:
+      case R_ARM_PC24:
+	r_symndx = ELF32_R_SYM (rel->r_info);
+	if (r_symndx >= symtab_hdr->sh_info)
+	  {
+	    struct elf32_arm_link_hash_entry *eh;
+	    struct elf32_arm_relocs_copied **pp;
+	    struct elf32_arm_relocs_copied *p;
+
+	    h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+
+	    if (!info->shared && h->plt.refcount > 0)
+	      h->plt.refcount -= 1;
+
+	    eh = (struct elf32_arm_link_hash_entry *) h;
+
+	    for (pp = &eh->relocs_copied; (p = *pp) != NULL; pp = &p->next)
+	      if (p->section == sec)
+		{
+		  if (ELF32_R_TYPE (rel->r_info) == R_ARM_PC24)
+		    p->pc_count -= 1;
+		  p->count -= 1;
+		  if (p->count == 0)
+		    *pp = p->next;
+		  break;
+		}
+	  }
+	break;
+
+      case R_ARM_PLT32:
+	r_symndx = ELF32_R_SYM (rel->r_info);
+	if (r_symndx >= symtab_hdr->sh_info)
+	  {
+	    h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	    if (h->plt.refcount > 0)
+	      h->plt.refcount -= 1;
+	  }
+	break;
+
+      default:
+	break;
+      }
+
   return TRUE;
 }
 
@@ -2615,13 +2867,15 @@ elf32_arm_check_relocs (abfd, info, sec, relocs)
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
   bfd *dynobj;
-  asection *sgot, *srelgot, *sreloc;
+  asection *sreloc;
   bfd_vma *local_got_offsets;
+  struct elf32_arm_link_hash_table *htab;
 
   if (info->relocatable)
     return TRUE;
 
-  sgot = srelgot = sreloc = NULL;
+  htab = elf32_arm_hash_table (info);
+  sreloc = NULL;
 
   dynobj = elf_hash_table (info)->dynobj;
   local_got_offsets = elf_local_got_offsets (abfd);
@@ -2646,107 +2900,8 @@ elf32_arm_check_relocs (abfd, info, sec, relocs)
       else
         h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 
-      /* Some relocs require a global offset table.  */
-      if (dynobj == NULL)
-	{
-	  switch (ELF32_R_TYPE (rel->r_info))
-	    {
-	    case R_ARM_GOT32:
-	    case R_ARM_GOTOFF:
-	    case R_ARM_GOTPC:
-	      elf_hash_table (info)->dynobj = dynobj = abfd;
-	      if (! _bfd_elf_create_got_section (dynobj, info))
-		return FALSE;
-	      break;
-
-	    default:
-	      break;
-	    }
-	}
-
       switch (ELF32_R_TYPE (rel->r_info))
         {
-	  case R_ARM_GOT32:
-	    /* This symbol requires a global offset table entry.  */
-	    if (sgot == NULL)
-	      {
-	        sgot = bfd_get_section_by_name (dynobj, ".got");
-	        BFD_ASSERT (sgot != NULL);
-	      }
-
-	    /* Get the got relocation section if necessary.  */
-	    if (srelgot == NULL
-	        && (h != NULL || info->shared))
-	      {
-	        srelgot = bfd_get_section_by_name (dynobj, ".rel.got");
-
-	        /* If no got relocation section, make one and initialize.  */
-	        if (srelgot == NULL)
-		  {
-		    srelgot = bfd_make_section (dynobj, ".rel.got");
-		    if (srelgot == NULL
-		        || ! bfd_set_section_flags (dynobj, srelgot,
-						    (SEC_ALLOC
-						     | SEC_LOAD
-						     | SEC_HAS_CONTENTS
-						     | SEC_IN_MEMORY
-						     | SEC_LINKER_CREATED
-						     | SEC_READONLY))
-		        || ! bfd_set_section_alignment (dynobj, srelgot, 2))
-		      return FALSE;
-		  }
-	      }
-
-	    if (h != NULL)
-	      {
-	        if (h->got.offset != (bfd_vma) -1)
-		  /* We have already allocated space in the .got.  */
-		  break;
-
-	        h->got.offset = sgot->_raw_size;
-
-	        /* Make sure this symbol is output as a dynamic symbol.  */
-	        if (h->dynindx == -1)
-		  if (! bfd_elf32_link_record_dynamic_symbol (info, h))
-		    return FALSE;
-
-	        srelgot->_raw_size += sizeof (Elf32_External_Rel);
-	      }
-	    else
-	      {
-	        /* This is a global offset table entry for a local
-                   symbol.  */
-	        if (local_got_offsets == NULL)
-		  {
-		    bfd_size_type size;
-		    unsigned int i;
-
-		    size = symtab_hdr->sh_info;
-		    size *= sizeof (bfd_vma);
-		    local_got_offsets = (bfd_vma *) bfd_alloc (abfd, size);
-		    if (local_got_offsets == NULL)
-		      return FALSE;
-		    elf_local_got_offsets (abfd) = local_got_offsets;
-		    for (i = 0; i < symtab_hdr->sh_info; i++)
-		      local_got_offsets[i] = (bfd_vma) -1;
-		  }
-
-	        if (local_got_offsets[r_symndx] != (bfd_vma) -1)
-		  /* We have already allocated space in the .got.  */
-		  break;
-
-	        local_got_offsets[r_symndx] = sgot->_raw_size;
-
-	        if (info->shared)
-		  /* If we are generating a shared object, we need to
-		     output a R_ARM_RELATIVE reloc so that the dynamic
-		     linker can adjust this GOT entry.  */
-		  srelgot->_raw_size += sizeof (Elf32_External_Rel);
-	      }
-
-	    sgot->_raw_size += 4;
-	    break;
-
 	  case R_ARM_PLT32:
 	    /* This symbol requires a procedure linkage table entry.  We
                actually build the entry in adjust_dynamic_symbol,
@@ -2761,11 +2916,66 @@ elf32_arm_check_relocs (abfd, info, sec, relocs)
 	      continue;
 
 	    h->elf_link_hash_flags |= ELF_LINK_HASH_NEEDS_PLT;
+	    h->plt.refcount++;
+	    break;
+
+	  case R_ARM_GOT32:
+	    /* This symbol requires a global offset table entry.  */
+	    if (h != NULL)
+	      {
+		h->got.refcount++;
+	      }
+	    else
+	      {
+		bfd_signed_vma *local_got_refcounts;
+
+		/* This is a global offset table entry for a local symbol.  */
+		local_got_refcounts = elf_local_got_refcounts (abfd);
+		if (local_got_refcounts == NULL)
+		  {
+		    bfd_size_type size;
+
+		    size = symtab_hdr->sh_info;
+		    size *= (sizeof (bfd_signed_vma) + sizeof(char));
+		    local_got_refcounts = ((bfd_signed_vma *)
+					   bfd_zalloc (abfd, size));
+		    if (local_got_refcounts == NULL)
+		      return FALSE;
+		    elf_local_got_refcounts (abfd) = local_got_refcounts;
+		  }
+		local_got_refcounts[r_symndx] += 1;
+	      }
+	    break;
+
+	  case R_ARM_GOTOFF:
+	  case R_ARM_GOTPC:
+	    if (htab->sgot == NULL)
+	      {
+		if (htab->root.dynobj == NULL)
+		  htab->root.dynobj = abfd;
+		if (!create_got_section (htab->root.dynobj, info))
+		  return FALSE;
+	      }
 	    break;
 
 	  case R_ARM_ABS32:
 	  case R_ARM_REL32:
 	  case R_ARM_PC24:
+	    if (h != NULL && !info->shared)
+	      {
+		/* If this reloc is in a read-only section, we might
+		   need a copy reloc.  We can't check reliably at this
+		   stage whether the section is read-only, as input
+		   sections have not yet been mapped to output sections.
+		   Tentatively set the flag for now, and correct in
+		   adjust_dynamic_symbol.  */
+		h->elf_link_hash_flags |= ELF_LINK_NON_GOT_REF;
+		
+		/* We may need a .plt entry if the function this reloc
+		   refers to is in a shared lib.  */
+		h->plt.refcount += 1;
+	      }
+
 	    /* If we are creating a shared library, and this is a reloc
                against a global symbol, or a non PC relative reloc
                against a local symbol, then we need to copy the reloc
@@ -2777,14 +2987,17 @@ elf32_arm_check_relocs (abfd, info, sec, relocs)
                possible that DEF_REGULAR is not set now but will be set
                later (it is never cleared).  We account for that
                possibility below by storing information in the
-               pcrel_relocs_copied field of the hash table entry.  */
+               relocs_copied field of the hash table entry.  */
 	    if (info->shared
-	      && (ELF32_R_TYPE (rel->r_info) != R_ARM_PC24
-	        || (h != NULL
-		  && (! info->symbolic
-		    || (h->elf_link_hash_flags
-		      & ELF_LINK_HASH_DEF_REGULAR) == 0))))
+		&& (sec->flags & SEC_ALLOC) != 0
+		&& (ELF32_R_TYPE (rel->r_info) != R_ARM_PC24
+		    || (h != NULL
+			&& (! info->symbolic
+			    || (h->elf_link_hash_flags
+				& ELF_LINK_HASH_DEF_REGULAR) == 0))))
 	      {
+		struct elf32_arm_relocs_copied *p, **head;
+
 	        /* When creating a shared object, we must copy these
                    reloc types into the output file.  We create a reloc
                    section in dynobj and make room for this reloc.  */
@@ -2818,45 +3031,49 @@ elf32_arm_check_relocs (abfd, info, sec, relocs)
 			    || ! bfd_set_section_alignment (dynobj, sreloc, 2))
 			  return FALSE;
 		      }
-		  if (sec->flags & SEC_READONLY)
-		    info->flags |= DF_TEXTREL;
+
+		    elf_section_data (sec)->sreloc = sreloc;
 		  }
 
-	        sreloc->_raw_size += sizeof (Elf32_External_Rel);
-	        /* If we are linking with -Bsymbolic, and this is a
-                   global symbol, we count the number of PC relative
-                   relocations we have entered for this symbol, so that
-                   we can discard them again if the symbol is later
-                   defined by a regular object.  Note that this function
-                   is only called if we are using an elf_i386 linker
-                   hash table, which means that h is really a pointer to
-                   an elf_i386_link_hash_entry.  */
-	        if (h != NULL && info->symbolic
-		    && ELF32_R_TYPE (rel->r_info) == R_ARM_PC24)
+		/* If this is a global symbol, we count the number of
+		   relocations we need for this symbol.  */
+		if (h != NULL)
 		  {
-		    struct elf32_arm_link_hash_entry * eh;
-		    struct elf32_arm_pcrel_relocs_copied * p;
-
-		    eh = (struct elf32_arm_link_hash_entry *) h;
-
-		    for (p = eh->pcrel_relocs_copied; p != NULL; p = p->next)
-		      if (p->section == sreloc)
-		        break;
-
-		    if (p == NULL)
-		      {
-		        p = ((struct elf32_arm_pcrel_relocs_copied *)
-			     bfd_alloc (dynobj, (bfd_size_type) sizeof * p));
-		        if (p == NULL)
-			  return FALSE;
-		        p->next = eh->pcrel_relocs_copied;
-		        eh->pcrel_relocs_copied = p;
-		        p->section = sreloc;
-		        p->count = 0;
-		      }
-
-		    ++p->count;
+		    head = &((struct elf32_arm_link_hash_entry *) h)->relocs_copied;
 		  }
+		else
+		  {
+		    /* Track dynamic relocs needed for local syms too.
+		       We really need local syms available to do this
+		       easily.  Oh well.  */
+		    
+		    asection *s;
+		    s = bfd_section_from_r_symndx (abfd, &htab->sym_sec,
+						   sec, r_symndx);
+		    if (s == NULL)
+		      return FALSE;
+		    
+		    head = ((struct elf32_arm_relocs_copied **)
+			    &elf_section_data (s)->local_dynrel);
+		  }
+		
+		p = *head;
+		if (p == NULL || p->section != sec)
+		  {
+		    bfd_size_type amt = sizeof *p;
+		    p = bfd_alloc (htab->root.dynobj, amt);
+		    if (p == NULL)
+		      return FALSE;
+		    p->next = *head;
+		    *head = p;
+		    p->section = sec;
+		    p->count = 0;
+		    p->pc_count = 0;
+		  }
+		
+		p->count += 1;
+		if (ELF32_R_TYPE (rel->r_info) == R_ARM_PC24)
+		  p->pc_count += 1;
 	      }
 	    break;
 
@@ -2996,71 +3213,29 @@ elf32_arm_adjust_dynamic_symbol (info, h)
   if (h->type == STT_FUNC
       || (h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0)
     {
-      /* If we link a program (not a DSO), we'll get rid of unnecessary
-	 PLT entries; we point to the actual symbols -- even for pic
-	 relocs, because a program built with -fpic should have the same
-	 result as one built without -fpic, specifically considering weak
-	 symbols.
-	 FIXME: m68k and i386 differ here, for unclear reasons.  */
-      if (! info->shared
-	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) == 0)
+      if (h->plt.refcount <= 0
+	  || SYMBOL_CALLS_LOCAL (info, h)
+	  || (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+	      && h->root.type == bfd_link_hash_undefweak))
 	{
 	  /* This case can occur if we saw a PLT32 reloc in an input
-	     file, but the symbol was not defined by a dynamic object.
-	     In such a case, we don't actually need to build a
-	     procedure linkage table, and we can just do a PC32 reloc
-	     instead.  */
-	  BFD_ASSERT ((h->elf_link_hash_flags & ELF_LINK_HASH_NEEDS_PLT) != 0);
+	     file, but the symbol was never referred to by a dynamic
+	     object, or if all references were garbage collected.  In
+	     such a case, we don't actually need to build a procedure
+	     linkage table, and we can just do a PC24 reloc instead.  */
+	  h->plt.offset = (bfd_vma) -1;
 	  h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
-	  return TRUE;
 	}
-
-      /* Make sure this symbol is output as a dynamic symbol.  */
-      if (h->dynindx == -1)
-	{
-	  if (! bfd_elf32_link_record_dynamic_symbol (info, h))
-	    return FALSE;
-	}
-
-      s = bfd_get_section_by_name (dynobj, ".plt");
-      BFD_ASSERT (s != NULL);
-
-      /* If this is the first .plt entry, make room for the special
-	 first entry.  */
-      if (s->_raw_size == 0)
-	s->_raw_size += PLT_ENTRY_SIZE;
-
-      /* If this symbol is not defined in a regular file, and we are
-	 not generating a shared library, then set the symbol to this
-	 location in the .plt.  This is required to make function
-	 pointers compare as equal between the normal executable and
-	 the shared library.  */
-      if (! info->shared
-	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
-	{
-	  h->root.u.def.section = s;
-	  h->root.u.def.value = s->_raw_size;
-	}
-
-      h->plt.offset = s->_raw_size;
-
-      /* Make room for this entry.  */
-      s->_raw_size += PLT_ENTRY_SIZE;
-
-      /* We also need to make an entry in the .got.plt section, which
-	 will be placed in the .got section by the linker script.  */
-      s = bfd_get_section_by_name (dynobj, ".got.plt");
-      BFD_ASSERT (s != NULL);
-      s->_raw_size += 4;
-
-      /* We also need to make an entry in the .rel.plt section.  */
-
-      s = bfd_get_section_by_name (dynobj, ".rel.plt");
-      BFD_ASSERT (s != NULL);
-      s->_raw_size += sizeof (Elf32_External_Rel);
 
       return TRUE;
     }
+  else
+    /* It's possible that we incorrectly decided a .plt reloc was
+       needed for an R_ARM_PC24 reloc to a non-function sym in
+       check_relocs.  We can't decide accurately between function and
+       non-function syms in check-relocs;  Objects loaded later in
+       the link may change h->type.  So fix it now.  */
+    h->plt.offset = (bfd_vma) -1;
 
   /* If this is a weak symbol, and there is a real definition, the
      processor independent code will have arranged for us to see the
@@ -3135,6 +3310,198 @@ elf32_arm_adjust_dynamic_symbol (info, h)
   return TRUE;
 }
 
+/* Allocate space in .plt, .got and associated reloc sections for
+   dynamic relocs.  */
+
+static bfd_boolean
+allocate_dynrelocs (h, inf)
+     struct elf_link_hash_entry *h;
+     PTR inf;
+{
+  struct bfd_link_info *info;
+  struct elf32_arm_link_hash_table *htab;
+  struct elf32_arm_link_hash_entry *eh;
+  struct elf32_arm_relocs_copied *p;
+
+  if (h->root.type == bfd_link_hash_indirect)
+    return TRUE;
+
+  if (h->root.type == bfd_link_hash_warning)
+    /* When warning symbols are created, they **replace** the "real"
+       entry in the hash table, thus we never get to see the real
+       symbol in a hash traversal.  So look at it now.  */
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+  info = (struct bfd_link_info *) inf;
+  htab = elf32_arm_hash_table (info);
+
+  if (htab->root.dynamic_sections_created
+      && h->plt.refcount > 0)
+    {
+      /* Make sure this symbol is output as a dynamic symbol.
+	 Undefined weak syms won't yet be marked as dynamic.  */
+      if (h->dynindx == -1
+	  && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
+	{
+	  if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+	    return FALSE;
+	}
+
+      if (info->shared
+	  || WILL_CALL_FINISH_DYNAMIC_SYMBOL (1, info, h))
+	{
+	  asection *s = htab->splt;
+
+	  /* If this is the first .plt entry, make room for the special
+	     first entry.  */
+	  if (s->_raw_size == 0)
+	    s->_raw_size += PLT_HEADER_SIZE;
+
+	  h->plt.offset = s->_raw_size;
+
+	  /* If this symbol is not defined in a regular file, and we are
+	     not generating a shared library, then set the symbol to this
+	     location in the .plt.  This is required to make function
+	     pointers compare as equal between the normal executable and
+	     the shared library.  */
+	  if (! info->shared
+	      && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
+	    {
+	      h->root.u.def.section = s;
+	      h->root.u.def.value = h->plt.offset;
+	    }
+
+	  /* Make room for this entry.  */
+	  s->_raw_size += PLT_ENTRY_SIZE;
+
+	  /* We also need to make an entry in the .got.plt section, which
+	     will be placed in the .got section by the linker script.  */
+	  htab->sgotplt->_raw_size += 4;
+
+	  /* We also need to make an entry in the .rel.plt section.  */
+	  htab->srelplt->_raw_size += sizeof (Elf32_External_Rel);
+	}
+      else
+	{
+	  h->plt.offset = (bfd_vma) -1;
+	  h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
+	}
+    }
+  else
+    {
+      h->plt.offset = (bfd_vma) -1;
+      h->elf_link_hash_flags &= ~ELF_LINK_HASH_NEEDS_PLT;
+    }
+
+  if (h->got.refcount > 0)
+    {
+      asection *s;
+      bfd_boolean dyn;
+
+      /* Make sure this symbol is output as a dynamic symbol.
+	 Undefined weak syms won't yet be marked as dynamic.  */
+      if (h->dynindx == -1
+	  && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
+	{
+	  if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+	    return FALSE;
+	}
+
+      s = htab->sgot;
+      h->got.offset = s->_raw_size;
+      s->_raw_size += 4;
+      dyn = htab->root.dynamic_sections_created;
+      if ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+	   || h->root.type != bfd_link_hash_undefweak)
+	  && (info->shared
+	      || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h)))
+	htab->srelgot->_raw_size += sizeof (Elf32_External_Rel);
+    }
+  else
+    h->got.offset = (bfd_vma) -1;
+
+  eh = (struct elf32_arm_link_hash_entry *) h;
+  if (eh->relocs_copied == NULL)
+    return TRUE;
+
+  /* In the shared -Bsymbolic case, discard space allocated for
+     dynamic pc-relative relocs against symbols which turn out to be
+     defined in regular objects.  For the normal shared case, discard
+     space for pc-relative relocs that have become local due to symbol
+     visibility changes.  */
+
+  if (info->shared)
+    {
+      /* The only reloc that uses pc_count is R_ARM_PC24, which will
+	 appear on a call or on something like ".long foo - .".  We
+	 want calls to protected symbols to resolve directly to the
+	 function rather than going via the plt.  If people want
+	 function pointer comparisons to work as expected then they
+	 should avoid writing assembly like ".long foo - .".  */
+      if (SYMBOL_CALLS_LOCAL (info, h))
+	{
+	  struct elf32_arm_relocs_copied **pp;
+
+	  for (pp = &eh->relocs_copied; (p = *pp) != NULL; )
+	    {
+	      p->count -= p->pc_count;
+	      p->pc_count = 0;
+	      if (p->count == 0)
+		*pp = p->next;
+	      else
+		pp = &p->next;
+	    }
+	}
+
+      /* Also discard relocs on undefined weak syms with non-default
+	 visibility.  */
+      if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+	  && h->root.type == bfd_link_hash_undefweak)
+	eh->relocs_copied = NULL;
+    }
+  else
+    {
+      /* For the non-shared case, discard space for relocs against
+	 symbols which turn out to need copy relocs or are not
+	 dynamic.  */
+
+      if ((h->elf_link_hash_flags & ELF_LINK_NON_GOT_REF) == 0
+	  && (((h->elf_link_hash_flags & ELF_LINK_HASH_DEF_DYNAMIC) != 0
+	       && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
+	      || (htab->root.dynamic_sections_created
+		  && (h->root.type == bfd_link_hash_undefweak
+		      || h->root.type == bfd_link_hash_undefined))))
+	{
+	  /* Make sure this symbol is output as a dynamic symbol.
+	     Undefined weak syms won't yet be marked as dynamic.  */
+	  if (h->dynindx == -1
+	      && (h->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) == 0)
+	    {
+	      if (! bfd_elf32_link_record_dynamic_symbol (info, h))
+		return FALSE;
+	    }
+
+	  /* If that succeeded, we know we'll be keeping all the
+	     relocs.  */
+	  if (h->dynindx != -1)
+	    goto keep;
+	}
+
+      eh->relocs_copied = NULL;
+
+    keep: ;
+    }
+
+  /* Finally, allocate space.  */
+  for (p = eh->relocs_copied; p != NULL; p = p->next)
+    {
+      asection *sreloc = elf_section_data (p->section)->sreloc;
+      sreloc->_raw_size += p->count * sizeof (Elf32_External_Rel);
+    }
+
+  return TRUE;
+}
+
 /* Set the sizes of the dynamic sections.  */
 
 static bfd_boolean
@@ -3146,14 +3513,17 @@ elf32_arm_size_dynamic_sections (output_bfd, info)
   asection * s;
   bfd_boolean plt;
   bfd_boolean relocs;
+  bfd *ibfd;
+  struct elf32_arm_link_hash_table *htab;
 
+  htab = elf32_arm_hash_table (info);
   dynobj = elf_hash_table (info)->dynobj;
   BFD_ASSERT (dynobj != NULL);
 
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       /* Set the contents of the .interp section to the interpreter.  */
-      if (! info->shared)
+      if (info->executable)
 	{
 	  s = bfd_get_section_by_name (dynobj, ".interp");
 	  BFD_ASSERT (s != NULL);
@@ -3161,26 +3531,74 @@ elf32_arm_size_dynamic_sections (output_bfd, info)
 	  s->contents = (unsigned char *) ELF_DYNAMIC_INTERPRETER;
 	}
     }
-  else
+
+  /* Set up .got offsets for local syms, and space for local dynamic
+     relocs.  */
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
     {
-      /* We may have created entries in the .rel.got section.
-         However, if we are not creating the dynamic sections, we will
-         not actually use these entries.  Reset the size of .rel.got,
-         which will cause it to get stripped from the output file
-         below.  */
-      s = bfd_get_section_by_name (dynobj, ".rel.got");
-      if (s != NULL)
-	s->_raw_size = 0;
+      bfd_signed_vma *local_got;
+      bfd_signed_vma *end_local_got;
+      char *local_tls_type;
+      bfd_size_type locsymcount;
+      Elf_Internal_Shdr *symtab_hdr;
+      asection *srel;
+
+      if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour)
+	continue;
+
+      for (s = ibfd->sections; s != NULL; s = s->next)
+	{
+	  struct elf32_arm_relocs_copied *p;
+
+	  for (p = *((struct elf32_arm_relocs_copied **)
+		     &elf_section_data (s)->local_dynrel);
+	       p != NULL;
+	       p = p->next)
+	    {
+	      if (!bfd_is_abs_section (p->section)
+		  && bfd_is_abs_section (p->section->output_section))
+		{
+		  /* Input section has been discarded, either because
+		     it is a copy of a linkonce section or due to
+		     linker script /DISCARD/, so we'll be discarding
+		     the relocs too.  */
+		}
+	      else if (p->count != 0)
+		{
+		  srel = elf_section_data (p->section)->sreloc;
+		  srel->_raw_size += p->count * sizeof (Elf32_External_Rel);
+		  if ((p->section->output_section->flags & SEC_READONLY) != 0)
+		    info->flags |= DF_TEXTREL;
+		}
+	    }
+	}
+
+      local_got = elf_local_got_refcounts (ibfd);
+      if (!local_got)
+	continue;
+
+      symtab_hdr = &elf_tdata (ibfd)->symtab_hdr;
+      locsymcount = symtab_hdr->sh_info;
+      end_local_got = local_got + locsymcount;
+      s = htab->sgot;
+      srel = htab->srelgot;
+      for (; local_got < end_local_got; ++local_got, ++local_tls_type)
+	{
+	  if (*local_got > 0)
+	    {
+	      *local_got = s->_raw_size;
+	      s->_raw_size += 4;
+	      if (info->shared)
+		srel->_raw_size += sizeof (Elf32_External_Rel);
+	    }
+	  else
+	    *local_got = (bfd_vma) -1;
+	}
     }
 
-  /* If this is a -Bsymbolic shared link, then we need to discard all
-     PC relative relocs against symbols defined in a regular object.
-     We allocated space for them in the check_relocs routine, but we
-     will not fill them in in the relocate_section routine.  */
-  if (info->shared && info->symbolic)
-    elf32_arm_link_hash_traverse (elf32_arm_hash_table (info),
-				  elf32_arm_discard_copies,
-				  (PTR) NULL);
+  /* Allocate global sym .plt and .got entries, and space for global
+     sym dynamic relocs.  */
+  elf_link_hash_traverse (&htab->root, allocate_dynrelocs, (PTR) info);
 
   /* The check_relocs and adjust_dynamic_symbol entry points have
      determined the sizes of the various dynamic sections.  Allocate
@@ -3305,33 +3723,6 @@ elf32_arm_size_dynamic_sections (output_bfd, info)
   return TRUE;
 }
 
-/* This function is called via elf32_arm_link_hash_traverse if we are
-   creating a shared object with -Bsymbolic.  It discards the space
-   allocated to copy PC relative relocs against symbols which are
-   defined in regular objects.  We allocated space for them in the
-   check_relocs routine, but we won't fill them in in the
-   relocate_section routine.  */
-
-static bfd_boolean
-elf32_arm_discard_copies (h, ignore)
-     struct elf32_arm_link_hash_entry * h;
-     PTR ignore ATTRIBUTE_UNUSED;
-{
-  struct elf32_arm_pcrel_relocs_copied * s;
-
-  if (h->root.root.type == bfd_link_hash_warning)
-    h = (struct elf32_arm_link_hash_entry *) h->root.root.u.i.link;
-
-  /* We only discard relocs for symbols defined in a regular object.  */
-  if ((h->root.elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) == 0)
-    return TRUE;
-
-  for (s = h->pcrel_relocs_copied; s != NULL; s = s->next)
-    s->section->_raw_size -= s->count * sizeof (Elf32_External_Rel);
-
-  return TRUE;
-}
-
 /* Finish up dynamic symbol handling.  We set the contents of various
    dynamic sections here.  */
 
@@ -3355,6 +3746,7 @@ elf32_arm_finish_dynamic_symbol (output_bfd, info, h, sym)
       bfd_vma got_offset;
       Elf_Internal_Rela rel;
       bfd_byte *loc;
+      bfd_vma got_displacement;
 
       /* This symbol has an entry in the procedure linkage table.  Set
 	 it up.  */
@@ -3370,35 +3762,43 @@ elf32_arm_finish_dynamic_symbol (output_bfd, info, h, sym)
 	 corresponds to this symbol.  This is the index of this symbol
 	 in all the symbols for which we are making plt entries.  The
 	 first entry in the procedure linkage table is reserved.  */
-      plt_index = h->plt.offset / PLT_ENTRY_SIZE - 1;
+      plt_index = (h->plt.offset - PLT_HEADER_SIZE) / PLT_ENTRY_SIZE;
 
       /* Get the offset into the .got table of the entry that
 	 corresponds to this function.  Each .got entry is 4 bytes.
 	 The first three are reserved.  */
       got_offset = (plt_index + 3) * 4;
 
+      /* Calculate the displacement between the PLT slot and the
+	 entry in the GOT.  */
+      got_displacement = (sgot->output_section->vma
+			  + sgot->output_offset
+			  + got_offset
+			  - splt->output_section->vma
+			  - splt->output_offset
+			  - h->plt.offset
+			  - 8);
+
+      BFD_ASSERT ((got_displacement & 0xf0000000) == 0);
+
       /* Fill in the entry in the procedure linkage table.  */
-      bfd_put_32 (output_bfd, elf32_arm_plt_entry[0],
+      bfd_put_32 (output_bfd, elf32_arm_plt_entry[0] | ((got_displacement & 0x0ff00000) >> 20),
 		  splt->contents + h->plt.offset + 0);
-      bfd_put_32 (output_bfd, elf32_arm_plt_entry[1],
+      bfd_put_32 (output_bfd, elf32_arm_plt_entry[1] | ((got_displacement & 0x000ff000) >> 12),
 		  splt->contents + h->plt.offset + 4);
-      bfd_put_32 (output_bfd, elf32_arm_plt_entry[2],
+      bfd_put_32 (output_bfd, elf32_arm_plt_entry[2] | (got_displacement & 0x00000fff),
 		  splt->contents + h->plt.offset + 8);
-      bfd_put_32 (output_bfd,
-		      (sgot->output_section->vma
-		       + sgot->output_offset
-		       + got_offset
-		       - splt->output_section->vma
-		       - splt->output_offset
-		       - h->plt.offset - 12),
-		      splt->contents + h->plt.offset + 12);
+#ifdef FOUR_WORD_PLT
+      bfd_put_32 (output_bfd, elf32_arm_plt_entry[3],
+		  splt->contents + h->plt.offset + 12);
+#endif
 
       /* Fill in the entry in the global offset table.  */
       bfd_put_32 (output_bfd,
 		  (splt->output_section->vma
 		   + splt->output_offset),
 		  sgot->contents + got_offset);
-
+      
       /* Fill in the entry in the .rel.plt section.  */
       rel.r_offset = (sgot->output_section->vma
 		      + sgot->output_offset
@@ -3439,16 +3839,20 @@ elf32_arm_finish_dynamic_symbol (output_bfd, info, h, sym)
 		      + sgot->output_offset
 		      + (h->got.offset &~ (bfd_vma) 1));
 
-      /* If this is a -Bsymbolic link, and the symbol is defined
-	 locally, we just want to emit a RELATIVE reloc.  The entry in
-	 the global offset table will already have been initialized in
-	 the relocate_section function.  */
+      /* If this is a static link, or it is a -Bsymbolic link and the
+	 symbol is defined locally or was forced to be local because
+	 of a version file, we just want to emit a RELATIVE reloc.
+	 The entry in the global offset table will already have been
+	 initialized in the relocate_section function.  */
       if (info->shared
-	  && (info->symbolic || h->dynindx == -1)
-	  && (h->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR))
-	rel.r_info = ELF32_R_INFO (0, R_ARM_RELATIVE);
+	  && SYMBOL_REFERENCES_LOCAL (info, h))
+	{
+	  BFD_ASSERT((h->got.offset & 1) != 0);
+	  rel.r_info = ELF32_R_INFO (0, R_ARM_RELATIVE);
+	}
       else
 	{
+	  BFD_ASSERT((h->got.offset & 1) == 0);
 	  bfd_put_32 (output_bfd, (bfd_vma) 0, sgot->contents + h->got.offset);
 	  rel.r_info = ELF32_R_INFO (h->dynindx, R_ARM_GLOB_DAT);
 	}
@@ -3602,10 +4006,26 @@ elf32_arm_finish_dynamic_sections (output_bfd, info)
       /* Fill in the first entry in the procedure linkage table.  */
       if (splt->_raw_size > 0)
 	{
+	  bfd_vma got_displacement;
+
+	  /* Calculate the displacement between the PLT slot and &GOT[0].  */
+	  got_displacement = (sgot->output_section->vma
+			      + sgot->output_offset
+			      - splt->output_section->vma
+			      - splt->output_offset
+			      - 16);
+
 	  bfd_put_32 (output_bfd, elf32_arm_plt0_entry[0], splt->contents +  0);
 	  bfd_put_32 (output_bfd, elf32_arm_plt0_entry[1], splt->contents +  4);
 	  bfd_put_32 (output_bfd, elf32_arm_plt0_entry[2], splt->contents +  8);
 	  bfd_put_32 (output_bfd, elf32_arm_plt0_entry[3], splt->contents + 12);
+#ifdef FOUR_WORD_PLT
+	  /* The displacement value goes in the otherwise-unused last word of
+	     the second entry.  */
+	  bfd_put_32 (output_bfd, got_displacement,        splt->contents + 28);
+#else
+	  bfd_put_32 (output_bfd, got_displacement,        splt->contents + 16);
+#endif
 	}
 
       /* UnixWare sets the entsize of .plt to 4, although that doesn't
@@ -3707,7 +4127,7 @@ elf32_arm_final_write_processing (abfd, linker)
 #define elf_backend_check_relocs                elf32_arm_check_relocs
 #define elf_backend_relocate_section		elf32_arm_relocate_section
 #define elf_backend_adjust_dynamic_symbol	elf32_arm_adjust_dynamic_symbol
-#define elf_backend_create_dynamic_sections	_bfd_elf_create_dynamic_sections
+#define elf_backend_create_dynamic_sections     elf32_arm_create_dynamic_sections
 #define elf_backend_finish_dynamic_symbol	elf32_arm_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_sections	elf32_arm_finish_dynamic_sections
 #define elf_backend_size_dynamic_sections	elf32_arm_size_dynamic_sections
@@ -3716,7 +4136,9 @@ elf32_arm_final_write_processing (abfd, linker)
 #define elf_backend_object_p			elf32_arm_object_p
 #define elf_backend_section_flags		elf32_arm_section_flags
 #define elf_backend_final_write_processing      elf32_arm_final_write_processing
+#define elf_backend_copy_indirect_symbol        elf32_arm_copy_indirect_symbol
 
+#define elf_backend_can_refcount    1
 #define elf_backend_can_gc_sections 1
 #define elf_backend_plt_readonly    1
 #define elf_backend_want_got_plt    1
@@ -3726,7 +4148,6 @@ elf32_arm_final_write_processing (abfd, linker)
 #endif
 
 #define elf_backend_got_header_size	12
-#define elf_backend_plt_header_size	PLT_ENTRY_SIZE
 
 #include "elf32-target.h"
 

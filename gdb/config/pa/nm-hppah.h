@@ -19,6 +19,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+struct target_ops;
+
 #define U_REGS_OFFSET 0
 
 #define KERNEL_U_ADDR 0
@@ -44,9 +46,10 @@
 #define FIVE_ARG_PTRACE
 
 /* We need to figure out where the text region is so that we use the
-   appropriate ptrace operator to manipulate text.  Simply reading/writing
-   user space will crap out HPUX.  */
-#define NEED_TEXT_START_END 1
+   appropriate ptrace operator to manipulate text.  Simply
+   reading/writing user space will crap out HPUX.  */
+#define DEPRECATED_HPUX_TEXT_END deprecated_hpux_text_end
+extern void deprecated_hpux_text_end (struct target_ops *exec_ops);
 
 /* In hppah-nat.c: */
 #define FETCH_INFERIOR_REGISTERS

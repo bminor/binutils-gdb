@@ -50,6 +50,17 @@
 #include "gdb_assert.h"
 #include "block.h"
 
+/* Standard set of definitions for printing, dumping, prefixifying,
+ * and evaluating expressions.  */
+
+const struct exp_descriptor exp_descriptor_standard = 
+  {
+    print_subexp_standard,
+    operator_length_standard,
+    op_name_standard,
+    dump_subexp_body_standard,
+    evaluate_subexp_standard
+  };
 
 /* Symbols which architectures can redefine.  */
 
@@ -783,18 +794,48 @@ prefixify_expression (struct expression *expr)
   prefixify_subexp (temp, expr, inpos, outpos);
 }
 
-/* Return the number of exp_elements in the subexpression of EXPR
-   whose last exp_element is at index ENDPOS - 1 in EXPR.  */
+/* Return the number of exp_elements in the postfix subexpression 
+   of EXPR whose operator is at index ENDPOS - 1 in EXPR.  */
 
 int
 length_of_subexp (struct expression *expr, int endpos)
+{
+  int oplen, args, i;
+
+  operator_length (expr, endpos, &oplen, &args);
+
+  while (args > 0)
+    {
+      oplen += length_of_subexp (expr, endpos - oplen);
+      args--;
+    }
+
+  return oplen;
+}
+
+/* Sets *OPLENP to the length of the operator whose (last) index is 
+   ENDPOS - 1 in EXPR, and sets *ARGSP to the number of arguments that
+   operator takes.  */
+
+void
+operator_length (struct expression *expr, int endpos, int *oplenp, int *argsp)
+{
+  expr->language_defn->la_exp_desc->operator_length (expr, endpos,
+						     oplenp, argsp);
+}
+
+/* Default value for operator_length in exp_descriptor vectors.  */
+
+void
+operator_length_standard (struct expression *expr, int endpos,
+			  int *oplenp, int *argsp)
 {
   int oplen = 1;
   int args = 0;
   int i;
 
   if (endpos < 1)
-    error ("?error in length_of_subexp");
+    error ("?error in operator_length_standard");
 
   i = (int) expr->elts[endpos - 1].opcode;
 
@@ -915,13 +956,8 @@ length_of_subexp (struct expression *expr, int endpos)
       args = 1 + (i < (int) BINOP_END);
     }
 
-  while (args > 0)
-    {
-      oplen += length_of_subexp (expr, endpos - oplen);
-      args--;
-    }
-
-  return oplen;
+  *oplenp = oplen;
+  *argsp = args;
 }
 
 /* Copy the subexpression ending just before index INEND in INEXPR
@@ -932,132 +968,13 @@ static void
 prefixify_subexp (struct expression *inexpr,
 		  struct expression *outexpr, int inend, int outbeg)
 {
-  int oplen = 1;
-  int args = 0;
+  int oplen;
+  int args;
   int i;
   int *arglens;
   enum exp_opcode opcode;
 
-  /* Compute how long the last operation is (in OPLEN),
-     and also how many preceding subexpressions serve as
-     arguments for it (in ARGS).  */
-
-  opcode = inexpr->elts[inend - 1].opcode;
-  switch (opcode)
-    {
-      /* C++  */
-    case OP_SCOPE:
-      oplen = longest_to_int (inexpr->elts[inend - 2].longconst);
-      oplen = 5 + BYTES_TO_EXP_ELEM (oplen + 1);
-      break;
-
-    case OP_LONG:
-    case OP_DOUBLE:
-    case OP_VAR_VALUE:
-      oplen = 4;
-      break;
-
-    case OP_TYPE:
-    case OP_BOOL:
-    case OP_LAST:
-    case OP_REGISTER:
-    case OP_INTERNALVAR:
-      oplen = 3;
-      break;
-
-    case OP_COMPLEX:
-      oplen = 1;
-      args = 2;
-      break;
-
-    case OP_FUNCALL:
-    case OP_F77_UNDETERMINED_ARGLIST:
-      oplen = 3;
-      args = 1 + longest_to_int (inexpr->elts[inend - 2].longconst);
-      break;
-
-    case OP_OBJC_MSGCALL:	/* Objective C message (method) call */
-      oplen = 4;
-      args = 1 + longest_to_int (inexpr->elts[inend - 2].longconst);
-      break;
-
-    case UNOP_MIN:
-    case UNOP_MAX:
-      oplen = 3;
-      break;
-
-    case UNOP_CAST:
-    case UNOP_MEMVAL:
-      oplen = 3;
-      args = 1;
-      break;
-
-    case UNOP_ABS:
-    case UNOP_CAP:
-    case UNOP_CHR:
-    case UNOP_FLOAT:
-    case UNOP_HIGH:
-    case UNOP_ODD:
-    case UNOP_ORD:
-    case UNOP_TRUNC:
-      oplen = 1;
-      args = 1;
-      break;
-
-    case STRUCTOP_STRUCT:
-    case STRUCTOP_PTR:
-    case OP_LABELED:
-      args = 1;
-      /* fall through */
-    case OP_M2_STRING:
-    case OP_STRING:
-    case OP_OBJC_NSSTRING:	/* Objective C Foundation Class NSString constant */
-    case OP_OBJC_SELECTOR:	/* Objective C "@selector" pseudo-op */
-    case OP_NAME:
-    case OP_EXPRSTRING:
-      oplen = longest_to_int (inexpr->elts[inend - 2].longconst);
-      oplen = 4 + BYTES_TO_EXP_ELEM (oplen + 1);
-      break;
-
-    case OP_BITSTRING:
-      oplen = longest_to_int (inexpr->elts[inend - 2].longconst);
-      oplen = (oplen + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT;
-      oplen = 4 + BYTES_TO_EXP_ELEM (oplen);
-      break;
-
-    case OP_ARRAY:
-      oplen = 4;
-      args = longest_to_int (inexpr->elts[inend - 2].longconst);
-      args -= longest_to_int (inexpr->elts[inend - 3].longconst);
-      args += 1;
-      break;
-
-    case TERNOP_COND:
-    case TERNOP_SLICE:
-    case TERNOP_SLICE_COUNT:
-      args = 3;
-      break;
-
-    case BINOP_ASSIGN_MODIFY:
-      oplen = 3;
-      args = 2;
-      break;
-
-      /* Modula-2 */
-    case MULTI_SUBSCRIPT:
-      oplen = 3;
-      args = 1 + longest_to_int (inexpr->elts[inend - 2].longconst);
-      break;
-
-      /* C++ */
-    case OP_THIS:
-    case OP_OBJC_SELF:
-      oplen = 2;
-      break;
-
-    default:
-      args = 1 + ((int) opcode < (int) BINOP_END);
-    }
+  operator_length (inexpr, inend, &oplen, &args);
 
   /* Copy the final operator itself, from the end of the input
      to the beginning of the output.  */
@@ -1155,14 +1072,13 @@ parse_exp_1 (char **stringptr, struct block *block, int comma)
      parser, to a prefix form. */
 
   if (expressiondebug)
-    dump_prefix_expression (expout, gdb_stdlog,
-			    "before conversion to prefix form");
+    dump_raw_expression (expout, gdb_stdlog,
+			 "before conversion to prefix form");
 
   prefixify_expression (expout);
 
   if (expressiondebug)
-    dump_postfix_expression (expout, gdb_stdlog,
-			     "after conversion to prefix form");
+    dump_prefix_expression (expout, gdb_stdlog);
 
   *stringptr = lexptr;
   return expout;

@@ -21,6 +21,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
+#include "dwarf2-frame.h"
 #include "frame.h"
 #include "frame-base.h"
 #include "frame-unwind.h"
@@ -1153,6 +1154,10 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Frame unwinder.  */
   set_gdbarch_unwind_dummy_id (gdbarch, m68k_unwind_dummy_id);
   set_gdbarch_unwind_pc (gdbarch, m68k_unwind_pc);
+
+  /* Hook in the DWARF CFI frame unwinder.  */
+  frame_unwind_append_sniffer (gdbarch, dwarf2_frame_sniffer);
+
   frame_base_set_default (gdbarch, &m68k_frame_base);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */

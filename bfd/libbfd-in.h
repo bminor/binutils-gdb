@@ -286,7 +286,7 @@ extern bfd_boolean _bfd_archive_coff_construct_extended_name_table
    support.  Use BFD_JUMP_TABLE_SYMBOLS (_bfd_nosymbols).  */
 
 #define _bfd_nosymbols_get_symtab_upper_bound _bfd_n1
-#define _bfd_nosymbols_get_symtab \
+#define _bfd_nosymbols_canonicalize_symtab \
   ((long (*) (bfd *, asymbol **)) _bfd_n1)
 #define _bfd_nosymbols_make_empty_symbol _bfd_generic_make_empty_symbol
 #define _bfd_nosymbols_print_symbol \
@@ -326,7 +326,7 @@ extern bfd_boolean _bfd_archive_coff_construct_extended_name_table
   ((bfd_boolean (*) (bfd *, enum bfd_architecture, unsigned long)) \
    bfd_false)
 #define _bfd_nowrite_set_section_contents \
-  ((bfd_boolean (*) (bfd *, asection *, void *, file_ptr, bfd_size_type)) \
+  ((bfd_boolean (*) (bfd *, asection *, const void *, file_ptr, bfd_size_type)) \
    bfd_false)
 
 /* Generic routines to use for BFD_JUMP_TABLE_WRITE.  Use
@@ -334,7 +334,7 @@ extern bfd_boolean _bfd_archive_coff_construct_extended_name_table
 
 #define _bfd_generic_set_arch_mach bfd_default_set_arch_mach
 extern bfd_boolean _bfd_generic_set_section_contents
-  (bfd *, asection *, void *, file_ptr, bfd_size_type);
+  (bfd *, asection *, const void *, file_ptr, bfd_size_type);
 
 /* Routines to use for BFD_JUMP_TABLE_LINK for targets which do not
    support linking.  Use BFD_JUMP_TABLE_LINK (_bfd_nolink).  */
@@ -355,7 +355,7 @@ extern bfd_boolean _bfd_generic_set_section_contents
   ((bfd_boolean (*) (bfd *, struct bfd_link_info *)) \
    bfd_false)
 #define _bfd_nolink_bfd_discard_group \
-  ((bfd_boolean (*) (bfd *, struct sec *)) \
+  ((bfd_boolean (*) (bfd *, struct bfd_section *)) \
    bfd_false)
 #define _bfd_nolink_bfd_link_hash_table_create \
   ((struct bfd_link_hash_table *(*) (bfd *)) bfd_nullvoidptr)
@@ -368,7 +368,7 @@ extern bfd_boolean _bfd_generic_set_section_contents
 #define _bfd_nolink_bfd_final_link \
   ((bfd_boolean (*) (bfd *, struct bfd_link_info *)) bfd_false)
 #define _bfd_nolink_bfd_link_split_section \
-  ((bfd_boolean (*) (bfd *, struct sec *)) bfd_false)
+  ((bfd_boolean (*) (bfd *, struct bfd_section *)) bfd_false)
 
 /* Routines to use for BFD_JUMP_TABLE_DYNAMIC for targets which do not
    have dynamic symbols or relocs.  Use BFD_JUMP_TABLE_DYNAMIC
@@ -464,7 +464,7 @@ extern bfd_boolean _bfd_generic_final_link
   (bfd *, struct bfd_link_info *);
 
 extern bfd_boolean _bfd_generic_link_split_section
-  (bfd *, struct sec *);
+  (bfd *, struct bfd_section *);
 
 /* Generic reloc_link_order processing routine.  */
 extern bfd_boolean _bfd_generic_reloc_link_order
@@ -490,7 +490,7 @@ extern bfd_reloc_status_type _bfd_relocate_contents
 /* Link stabs in sections in the first pass.  */
 
 extern bfd_boolean _bfd_link_section_stabs
-  (bfd *, void **, asection *, asection *, void **);
+  (bfd *, void **, asection *, asection *, void **, bfd_size_type *);
 
 /* Eliminate stabs for discarded functions and symbols.  */
 extern bfd_boolean _bfd_discard_section_stabs

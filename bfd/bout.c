@@ -61,7 +61,7 @@ static int b_out_sizeof_headers
 static bfd_boolean b_out_set_arch_mach
   PARAMS ((bfd *, enum bfd_architecture, unsigned long));
 static bfd_boolean b_out_set_section_contents
-  PARAMS ((bfd *, asection *, PTR, file_ptr, bfd_size_type));
+  PARAMS ((bfd *, asection *, const PTR, file_ptr, bfd_size_type));
 static long b_out_get_reloc_upper_bound
   PARAMS ((bfd *, sec_ptr));
 static long b_out_canonicalize_reloc
@@ -983,7 +983,7 @@ static bfd_boolean
 b_out_set_section_contents (abfd, section, location, offset, count)
      bfd *abfd;
      asection *section;
-     PTR location;
+     const PTR location;
      file_ptr offset;
      bfd_size_type count;
 {

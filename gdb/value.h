@@ -417,17 +417,14 @@ extern struct value *value_repeat (struct value *arg1, int count);
 
 extern struct value *value_subscript (struct value *array, struct value *idx);
 
-extern struct value *value_being_returned (struct type *valtype,
-					   struct regcache *retbuf,
-					   int struct_return);
+extern struct value *register_value_being_returned (struct type *valtype,
+						    struct regcache *retbuf);
 
 extern struct value *value_in (struct value *element, struct value *set);
 
 extern int value_bit_index (struct type *type, char *addr, int index);
 
 extern int using_struct_return (struct type *value_type, int gcc_p);
-
-extern void set_return_value (struct value *val);
 
 extern struct value *evaluate_expression (struct expression *exp);
 

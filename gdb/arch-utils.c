@@ -23,12 +23,15 @@
 #include "defs.h"
 
 #include "arch-utils.h"
+#include "buildsym.h"
 #include "gdbcmd.h"
 #include "inferior.h"		/* enum CALL_DUMMY_LOCATION et.al. */
 #include "gdb_string.h"
 #include "regcache.h"
 #include "gdb_assert.h"
 #include "sim-regno.h"
+
+#include "osabi.h"
 
 #include "version.h"
 
@@ -95,6 +98,12 @@ generic_return_value_on_stack_not (struct type *type)
 
 CORE_ADDR
 generic_skip_trampoline_code (CORE_ADDR pc)
+{
+  return 0;
+}
+
+CORE_ADDR
+generic_skip_solib_resolver (CORE_ADDR pc)
 {
   return 0;
 }
@@ -199,23 +208,15 @@ deprecated_register_convertible_not (int num)
 }
   
 
-/* Under some ABI's that specify the `struct convention' for returning
-   structures by value, by the time we've returned from the function,
-   the return value is sitting there in the caller's buffer, but GDB
-   has no way to find the address of that buffer.
-
-   On such architectures, use this function as your
-   extract_struct_value_address method.  When asked to a struct
-   returned by value in this fashion, GDB will print a nice error
-   message, instead of garbage.  */
 CORE_ADDR
-generic_cannot_extract_struct_value_address (char *dummy)
+core_addr_identity (CORE_ADDR addr)
 {
-  return 0;
+  return addr;
 }
 
 CORE_ADDR
-core_addr_identity (CORE_ADDR addr)
+convert_from_func_ptr_addr_identity (struct gdbarch *gdbarch, CORE_ADDR addr,
+				     struct target_ops *targ)
 {
   return addr;
 }
@@ -227,14 +228,7 @@ no_op_reg_to_regnum (int reg)
 }
 
 CORE_ADDR
-init_frame_pc_noop (int fromleaf, struct frame_info *prev)
-{
-  /* Do nothing, implies return the same PC value.  */
-  return get_frame_pc (prev);
-}
-
-CORE_ADDR
-init_frame_pc_default (int fromleaf, struct frame_info *prev)
+deprecated_init_frame_pc_default (int fromleaf, struct frame_info *prev)
 {
   if (fromleaf && DEPRECATED_SAVED_PC_AFTER_CALL_P ())
     return DEPRECATED_SAVED_PC_AFTER_CALL (get_next_frame (prev));
@@ -300,7 +294,7 @@ generic_register_size (int regnum)
     /* FIXME: cagney/2003-03-01: Once all architectures implement
        gdbarch_register_type(), this entire function can go away.  It
        is made obsolete by register_size().  */
-    return TYPE_LENGTH (REGISTER_VIRTUAL_TYPE (regnum)); /* OK */
+    return TYPE_LENGTH (DEPRECATED_REGISTER_VIRTUAL_TYPE (regnum)); /* OK */
 }
 
 /* Assume all registers are adjacent.  */
@@ -344,7 +338,7 @@ legacy_register_to_value (struct frame_info *frame, int regnum,
 			  struct type *type, void *to)
 {
   char from[MAX_REGISTER_SIZE];
-  frame_read_register (frame, regnum, from);
+  get_frame_register (frame, regnum, from);
   DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL (regnum, type, from, to);
 }
 
@@ -357,6 +351,23 @@ legacy_value_to_register (struct frame_info *frame, int regnum,
   memcpy (from, from, TYPE_LENGTH (type));
   DEPRECATED_REGISTER_CONVERT_TO_RAW (type, regnum, from, to);
   put_frame_register (frame, regnum, to);
+}
+
+int
+default_stabs_argument_has_addr (struct gdbarch *gdbarch, struct type *type)
+{
+  if (DEPRECATED_REG_STRUCT_HAS_ADDR_P ()
+      && DEPRECATED_REG_STRUCT_HAS_ADDR (processing_gcc_compilation, type))
+    {
+      CHECK_TYPEDEF (type);
+
+      return (TYPE_CODE (type) == TYPE_CODE_STRUCT
+	      || TYPE_CODE (type) == TYPE_CODE_UNION
+	      || TYPE_CODE (type) == TYPE_CODE_SET
+	      || TYPE_CODE (type) == TYPE_CODE_BITSTRING);
+    }
+
+  return 0;
 }
 
 
@@ -478,17 +489,72 @@ set_architecture (char *ignore_args, int from_tty, struct cmd_list_element *c)
   show_architecture (NULL, from_tty);
 }
 
+/* Try to select a global architecture that matches "info".  Return
+   non-zero if the attempt succeds.  */
+int
+gdbarch_update_p (struct gdbarch_info info)
+{
+  struct gdbarch *new_gdbarch = gdbarch_find_by_info (info);
+
+  /* If there no architecture by that name, reject the request.  */
+  if (new_gdbarch == NULL)
+    {
+      if (gdbarch_debug)
+	fprintf_unfiltered (gdb_stdlog, "gdbarch_update_p: "
+			    "Architecture not found\n");
+      return 0;
+    }
+
+  /* If it is the same old architecture, accept the request (but don't
+     swap anything).  */
+  if (new_gdbarch == current_gdbarch)
+    {
+      if (gdbarch_debug)
+	fprintf_unfiltered (gdb_stdlog, "gdbarch_update_p: "
+			    "Architecture 0x%08lx (%s) unchanged\n",
+			    (long) new_gdbarch,
+			    gdbarch_bfd_arch_info (new_gdbarch)->printable_name);
+      return 1;
+    }
+
+  /* It's a new architecture, swap it in.  */
+  if (gdbarch_debug)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_update_p: "
+			"New architecture 0x%08lx (%s) selected\n",
+			(long) new_gdbarch,
+			gdbarch_bfd_arch_info (new_gdbarch)->printable_name);
+  deprecated_current_gdbarch_select_hack (new_gdbarch);
+
+  return 1;
+}
+
+/* Return the architecture for ABFD.  If no suitable architecture
+   could be find, return NULL.  */
+
+struct gdbarch *
+gdbarch_from_bfd (bfd *abfd)
+{
+  struct gdbarch *old_gdbarch = current_gdbarch;
+  struct gdbarch *new_gdbarch;
+  struct gdbarch_info info;
+
+  gdbarch_info_init (&info);
+  info.abfd = abfd;
+  return gdbarch_find_by_info (info);
+}
+
 /* Set the dynamic target-system-dependent parameters (architecture,
    byte-order) using information found in the BFD */
 
 void
 set_gdbarch_from_file (bfd *abfd)
 {
-  struct gdbarch_info info;
-  gdbarch_info_init (&info);
-  info.abfd = abfd;
-  if (! gdbarch_update_p (info))
+  struct gdbarch *gdbarch;
+
+  gdbarch = gdbarch_from_bfd (abfd);
+  if (gdbarch == NULL)
     error ("Architecture of file not recognized.\n");
+  deprecated_current_gdbarch_select_hack (gdbarch);
 }
 
 /* Initialize the current architecture.  Update the ``set
@@ -608,7 +674,7 @@ initialize_current_architecture (void)
 
 /* Initialize a gdbarch info to values that will be automatically
    overridden.  Note: Originally, this ``struct info'' was initialized
-   using memset(0).  Unfortunatly, that ran into problems, namely
+   using memset(0).  Unfortunately, that ran into problems, namely
    BFD_ENDIAN_BIG is zero.  An explicit initialization function that
    can explicitly set each field to a well defined value is used.  */
 
@@ -618,6 +684,54 @@ gdbarch_info_init (struct gdbarch_info *info)
   memset (info, 0, sizeof (struct gdbarch_info));
   info->byte_order = BFD_ENDIAN_UNKNOWN;
   info->osabi = GDB_OSABI_UNINITIALIZED;
+}
+
+/* Similar to init, but this time fill in the blanks.  Information is
+   obtained from the specified architecture, global "set ..." options,
+   and explicitly initialized INFO fields.  */
+
+void
+gdbarch_info_fill (struct gdbarch *gdbarch, struct gdbarch_info *info)
+{
+  /* "(gdb) set architecture ...".  */
+  if (info->bfd_arch_info == NULL
+      && !target_architecture_auto
+      && gdbarch != NULL)
+    info->bfd_arch_info = gdbarch_bfd_arch_info (gdbarch);
+  if (info->bfd_arch_info == NULL
+      && info->abfd != NULL
+      && bfd_get_arch (info->abfd) != bfd_arch_unknown
+      && bfd_get_arch (info->abfd) != bfd_arch_obscure)
+    info->bfd_arch_info = bfd_get_arch_info (info->abfd);
+  if (info->bfd_arch_info == NULL
+      && gdbarch != NULL)
+    info->bfd_arch_info = gdbarch_bfd_arch_info (gdbarch);
+
+  /* "(gdb) set byte-order ...".  */
+  if (info->byte_order == BFD_ENDIAN_UNKNOWN
+      && !target_byte_order_auto
+      && gdbarch != NULL)
+    info->byte_order = gdbarch_byte_order (gdbarch);
+  /* From the INFO struct.  */
+  if (info->byte_order == BFD_ENDIAN_UNKNOWN
+      && info->abfd != NULL)
+    info->byte_order = (bfd_big_endian (info->abfd) ? BFD_ENDIAN_BIG
+		       : bfd_little_endian (info->abfd) ? BFD_ENDIAN_LITTLE
+		       : BFD_ENDIAN_UNKNOWN);
+  /* From the current target.  */
+  if (info->byte_order == BFD_ENDIAN_UNKNOWN
+      && gdbarch != NULL)
+    info->byte_order = gdbarch_byte_order (gdbarch);
+
+  /* "(gdb) set osabi ...".  Handled by gdbarch_lookup_osabi.  */
+  if (info->osabi == GDB_OSABI_UNINITIALIZED)
+    info->osabi = gdbarch_lookup_osabi (info->abfd);
+  if (info->osabi == GDB_OSABI_UNINITIALIZED
+      && gdbarch != NULL)
+    info->osabi = gdbarch_osabi (gdbarch);
+
+  /* Must have at least filled in the architecture.  */
+  gdb_assert (info->bfd_arch_info != NULL);
 }
 
 /* */

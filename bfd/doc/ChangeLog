@@ -1,3 +1,12 @@
+2003-10-15  Andrew Cagney  <cagney@redhat.com>
+
+	* bfdint.texi (BFD target vector symbols): Rename _get_symtab to
+	_canonicalize_symtab.
+
+2003-10-08  David Taylor <dtaylor@emc.com>
+
+	* bfd.texinfo: Remove spurious backslash.
+
 2003-07-04  Josh Baratz  <baratz@intersystems.com>
 
 	* Makefile.am (MKDOC rule): Add $(CFLAGS) in case it contains

@@ -157,7 +157,7 @@ fill_gregset (gregset_t *gregsetp, int regno)
 void
 supply_fpregset (fpregset_t *fpregsetp)
 {
-  i387_supply_fsave ((const char *) fpregsetp, -1);
+  i387_supply_fsave (current_regcache, -1, fpregsetp);
 }
 
 /* Fill register REGNO (if it is a floating-point register) in
@@ -200,7 +200,7 @@ fetch_inferior_registers (int regno)
 		    (PTRACE_ARG3_TYPE) xmmregs, 0) == 0)
 	{
 	  have_ptrace_xmmregs = 1;
-	  i387_supply_fxsave (xmmregs, -1);
+	  i387_supply_fxsave (current_regcache, -1, xmmregs);
 	}
       else
 	{
@@ -208,14 +208,14 @@ fetch_inferior_registers (int regno)
 		      (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
 	    perror_with_name ("Couldn't get floating point status");
 
-	  i387_supply_fsave ((const char *) &fpregs, -1);
+	  i387_supply_fsave (current_regcache, -1, &fpregs);
 	}
 #else
       if (ptrace (PT_GETFPREGS, PIDGET (inferior_ptid),
 		  (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
 	perror_with_name ("Couldn't get floating point status");
 
-      i387_supply_fsave ((const char *) &fpregs, -1);
+      i387_supply_fsave (current_regcache, -1, &fpregs);
 #endif
     }
 }

@@ -320,9 +320,16 @@ struct die_info
     unsigned int num_attrs;	/* Number of attributes */
     struct attribute *attrs;	/* An array of attributes */
     struct die_info *next_ref;	/* Next die in ref hash table */
+
+    /* The dies in a compilation unit form an n-ary tree.  PARENT
+       points to this die's parent; CHILD points to the first child of
+       this node; and all the children of a given node are chained
+       together via their SIBLING fields, terminated by a die whose
+       tag is zero.  */
     struct die_info *child;	/* Its first child, if any.  */
     struct die_info *sibling;	/* Its next sibling, if any.  */
     struct die_info *parent;	/* Its parent, if any.  */
+
     struct type *type;		/* Cached type information */
   };
 
@@ -1009,61 +1016,61 @@ dwarf2_has_info (bfd *abfd)
 static void
 dwarf2_locate_sections (bfd *ignore_abfd, asection *sectp, void *ignore_ptr)
 {
-  if (STREQ (sectp->name, INFO_SECTION))
+  if (strcmp (sectp->name, INFO_SECTION) == 0)
     {
       dwarf_info_offset = sectp->filepos;
       dwarf_info_size = bfd_get_section_size_before_reloc (sectp);
       dwarf_info_section = sectp;
     }
-  else if (STREQ (sectp->name, ABBREV_SECTION))
+  else if (strcmp (sectp->name, ABBREV_SECTION) == 0)
     {
       dwarf_abbrev_offset = sectp->filepos;
       dwarf_abbrev_size = bfd_get_section_size_before_reloc (sectp);
       dwarf_abbrev_section = sectp;
     }
-  else if (STREQ (sectp->name, LINE_SECTION))
+  else if (strcmp (sectp->name, LINE_SECTION) == 0)
     {
       dwarf_line_offset = sectp->filepos;
       dwarf_line_size = bfd_get_section_size_before_reloc (sectp);
       dwarf_line_section = sectp;
     }
-  else if (STREQ (sectp->name, PUBNAMES_SECTION))
+  else if (strcmp (sectp->name, PUBNAMES_SECTION) == 0)
     {
       dwarf_pubnames_offset = sectp->filepos;
       dwarf_pubnames_size = bfd_get_section_size_before_reloc (sectp);
       dwarf_pubnames_section = sectp;
     }
-  else if (STREQ (sectp->name, ARANGES_SECTION))
+  else if (strcmp (sectp->name, ARANGES_SECTION) == 0)
     {
       dwarf_aranges_offset = sectp->filepos;
       dwarf_aranges_size = bfd_get_section_size_before_reloc (sectp);
       dwarf_aranges_section = sectp;
     }
-  else if (STREQ (sectp->name, LOC_SECTION))
+  else if (strcmp (sectp->name, LOC_SECTION) == 0)
     {
       dwarf_loc_offset = sectp->filepos;
       dwarf_loc_size = bfd_get_section_size_before_reloc (sectp);
       dwarf_loc_section = sectp;
     }
-  else if (STREQ (sectp->name, MACINFO_SECTION))
+  else if (strcmp (sectp->name, MACINFO_SECTION) == 0)
     {
       dwarf_macinfo_offset = sectp->filepos;
       dwarf_macinfo_size = bfd_get_section_size_before_reloc (sectp);
       dwarf_macinfo_section = sectp;
     }
-  else if (STREQ (sectp->name, STR_SECTION))
+  else if (strcmp (sectp->name, STR_SECTION) == 0)
     {
       dwarf_str_offset = sectp->filepos;
       dwarf_str_size = bfd_get_section_size_before_reloc (sectp);
       dwarf_str_section = sectp;
     }
-  else if (STREQ (sectp->name, FRAME_SECTION))
+  else if (strcmp (sectp->name, FRAME_SECTION) == 0)
     {
       dwarf_frame_offset = sectp->filepos;
       dwarf_frame_size = bfd_get_section_size_before_reloc (sectp);
       dwarf_frame_section = sectp;
     }
-  else if (STREQ (sectp->name, EH_FRAME_SECTION))
+  else if (strcmp (sectp->name, EH_FRAME_SECTION) == 0)
     {
       flagword aflag = bfd_get_section_flags (ignore_abfd, sectp);
       if (aflag & SEC_HAS_CONTENTS)
@@ -1073,7 +1080,7 @@ dwarf2_locate_sections (bfd *ignore_abfd, asection *sectp, void *ignore_ptr)
           dwarf_eh_frame_section = sectp;
         }
     }
-  else if (STREQ (sectp->name, RANGES_SECTION))
+  else if (strcmp (sectp->name, RANGES_SECTION) == 0)
     {
       dwarf_ranges_offset = sectp->filepos;
       dwarf_ranges_size = bfd_get_section_size_before_reloc (sectp);
@@ -3443,8 +3450,14 @@ read_array_type (struct die_info *die, struct objfile *objfile,
 		     with a DW_FORM_block1 attribute.
 		     FIXME: GDB does not yet know how to handle dynamic
 		     arrays properly, treat them as arrays with unspecified
-		     length for now.  */
-		  high = -1;
+		     length for now.
+
+                     FIXME: jimb/2003-09-22: GDB does not really know
+                     how to handle arrays of unspecified length
+                     either; we just represent them as zero-length
+                     arrays.  Choose an appropriate upper bound given
+                     the lower bound we've computed above.  */
+		  high = low - 1;
 		}
 	      else
 		{
@@ -4240,7 +4253,6 @@ dwarf2_read_abbrevs (bfd *abfd, struct comp_unit_head *cu_header)
 
 /* Empty the abbrev table for a new compilation unit.  */
 
-/* ARGSUSED */
 static void
 dwarf2_empty_abbrev_table (void *ptr_to_abbrevs_table)
 {
@@ -7590,7 +7602,6 @@ decode_locdesc (struct dwarf_block *blk, struct objfile *objfile,
 
 /* memory allocation interface */
 
-/* ARGSUSED */
 static void
 dwarf2_free_tmp_obstack (void *ignore)
 {

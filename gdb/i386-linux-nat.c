@@ -1,6 +1,6 @@
 /* Native-dependent code for GNU/Linux x86.
 
-   Copyright 1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -320,7 +320,7 @@ static void store_regs (int tid, int regno) {}
 void 
 supply_fpregset (elf_fpregset_t *fpregsetp)
 {
-  i387_supply_fsave ((const char *) fpregsetp, -1);
+  i387_supply_fsave (current_regcache, -1, fpregsetp);
   dummy_sse_values ();
 }
 
@@ -385,7 +385,7 @@ static void store_fpregs (int tid, int regno) {}
 void
 supply_fpxregset (elf_fpxregset_t *fpxregsetp)
 {
-  i387_supply_fxsave ((const char *) fpxregsetp, -1);
+  i387_supply_fxsave (current_regcache, -1, fpxregsetp);
 }
 
 /* Fill register REGNO (if it is a floating-point or SSE register) in
@@ -756,80 +756,6 @@ ps_get_thread_area (const struct ps_prochandle *ph,
 }
 
 
-/* Interpreting register set info found in core files.  */
-
-/* Provide registers to GDB from a core file.
-
-   (We can't use the generic version of this function in
-   core-regset.c, because GNU/Linux has *three* different kinds of
-   register set notes.  core-regset.c would have to call
-   supply_fpxregset, which most platforms don't have.)
-
-   CORE_REG_SECT points to an array of bytes, which are the contents
-   of a `note' from a core file which BFD thinks might contain
-   register contents.  CORE_REG_SIZE is its size.
-
-   WHICH says which register set corelow suspects this is:
-     0 --- the general-purpose register set, in elf_gregset_t format
-     2 --- the floating-point register set, in elf_fpregset_t format
-     3 --- the extended floating-point register set, in elf_fpxregset_t format
-
-   REG_ADDR isn't used on GNU/Linux.  */
-
-static void
-fetch_core_registers (char *core_reg_sect, unsigned core_reg_size,
-		      int which, CORE_ADDR reg_addr)
-{
-  elf_gregset_t gregset;
-  elf_fpregset_t fpregset;
-
-  switch (which)
-    {
-    case 0:
-      if (core_reg_size != sizeof (gregset))
-	warning ("Wrong size gregset in core file.");
-      else
-	{
-	  memcpy (&gregset, core_reg_sect, sizeof (gregset));
-	  supply_gregset (&gregset);
-	}
-      break;
-
-    case 2:
-      if (core_reg_size != sizeof (fpregset))
-	warning ("Wrong size fpregset in core file.");
-      else
-	{
-	  memcpy (&fpregset, core_reg_sect, sizeof (fpregset));
-	  supply_fpregset (&fpregset);
-	}
-      break;
-
-#ifdef HAVE_PTRACE_GETFPXREGS
-      {
-	elf_fpxregset_t fpxregset;
-
-      case 3:
-	if (core_reg_size != sizeof (fpxregset))
-	  warning ("Wrong size fpxregset in core file.");
-	else
-	  {
-	    memcpy (&fpxregset, core_reg_sect, sizeof (fpxregset));
-	    supply_fpxregset (&fpxregset);
-	  }
-	break;
-      }
-#endif
-
-    default:
-      /* We've covered all the kinds of registers we know about here,
-         so this must be something we wouldn't know what to do with
-         anyway.  Just ignore it.  */
-      break;
-    }
-}
-
-
 /* The instruction for a GNU/Linux system call is:
        int $0x80
    or 0xcd 0x80.  */
@@ -922,23 +848,4 @@ child_post_startup_inferior (ptid_t ptid)
 {
   i386_cleanup_dregs ();
   linux_child_post_startup_inferior (ptid);
-}
-
-
-/* Register that we are able to handle GNU/Linux ELF core file
-   formats.  */
-
-static struct core_fns linux_elf_core_fns =
-{
-  bfd_target_elf_flavour,		/* core_flavour */
-  default_check_format,			/* check_format */
-  default_core_sniffer,			/* core_sniffer */
-  fetch_core_registers,			/* core_read_registers */
-  NULL					/* next */
-};
-
-void
-_initialize_i386_linux_nat (void)
-{
-  add_core_fns (&linux_elf_core_fns);
 }

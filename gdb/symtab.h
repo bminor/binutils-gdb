@@ -586,22 +586,6 @@ struct location_funcs
 			      struct axs_value * value);
 };
 
-/* Linked list of symbol's live ranges. */
-
-struct range_list
-{
-  CORE_ADDR start;
-  CORE_ADDR end;
-  struct range_list *next;
-};
-
-/* Linked list of aliases for a particular main/primary symbol.  */
-struct alias_list
-{
-  struct symbol *sym;
-  struct alias_list *next;
-};
-
 /* This structure is space critical.  See space comments at the top. */
 
 struct symbol
@@ -654,15 +638,6 @@ struct symbol
   }
   aux_value;
 
-
-  /* Link to a list of aliases for this symbol.
-     Only a "primary/main symbol may have aliases.  */
-  struct alias_list *aliases;
-
-  /* List of ranges where this symbol is active.  This is only
-     used by alias symbols at the current time.  */
-  struct range_list *ranges;
-
   struct symbol *hash_next;
 };
 
@@ -673,8 +648,6 @@ struct symbol
 #define SYMBOL_LINE(symbol)		(symbol)->line
 #define SYMBOL_BASEREG(symbol)		(symbol)->aux_value.basereg
 #define SYMBOL_OBJFILE(symbol)          (symbol)->aux_value.objfile
-#define SYMBOL_ALIASES(symbol)		(symbol)->aliases
-#define SYMBOL_RANGES(symbol)		(symbol)->ranges
 #define SYMBOL_LOCATION_BATON(symbol)   (symbol)->aux_value.loc.baton
 #define SYMBOL_LOCATION_FUNCS(symbol)   (symbol)->aux_value.loc.funcs
 
@@ -1184,11 +1157,9 @@ extern struct
 minimal_symbol *lookup_minimal_symbol_linkage_or_natural (const char *);
 
 extern struct minimal_symbol *lookup_minimal_symbol_text (const char *,
-							  const char *,
 							  struct objfile *);
 
 struct minimal_symbol *lookup_minimal_symbol_solib_trampoline (const char *,
-							       const char *,
 							       struct objfile
 							       *);
 

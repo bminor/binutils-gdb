@@ -1,4 +1,4 @@
-/* Target-machine dependent code for Hitachi H8/300, for GDB.
+/* Target-machine dependent code for Renesas H8/300, for GDB.
 
    Copyright 1988, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998,
    1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
@@ -49,7 +49,7 @@ enum
   h8300h_reg_size = 4,
   h8300_max_reg_size = 4,
 };
-#define BINWORD (h8300hmode ? h8300h_reg_size : h8300_reg_size)
+#define BINWORD (h8300hmode && !h8300_normal_mode ? h8300h_reg_size : h8300_reg_size)
 
 enum gdb_regnum
 {
@@ -350,7 +350,7 @@ h8300_examine_prologue (CORE_ADDR ip, CORE_ADDR limit,
     }
 
   /* If the PC isn't valid, quit now.  */
-  if (ip == 0 || ip & (h8300hmode ? ~0xffffff : ~0xffff))
+  if (ip == 0 || ip & (h8300hmode && !h8300_normal_mode ? ~0xffffff : ~0xffff))
     return 0;
 
   next_ip = h8300_next_prologue_insn (ip, limit, &insn_word);
@@ -478,7 +478,7 @@ h8300_frame_init_saved_regs (struct frame_info *fi)
 {
   CORE_ADDR func_addr, func_end;
 
-  if (!get_frame_saved_regs (fi))
+  if (!deprecated_get_frame_saved_regs (fi))
     {
       frame_saved_regs_zalloc (fi);
 
@@ -492,7 +492,7 @@ h8300_frame_init_saved_regs (struct frame_info *fi)
 	    ? sal.end : get_frame_pc (fi);
 	  /* This will fill in fields in fi. */
 	  h8300_examine_prologue (func_addr, limit, get_frame_base (fi),
-				  get_frame_saved_regs (fi), fi);
+				  deprecated_get_frame_saved_regs (fi), fi);
 	}
       /* Else we're out of luck (can't debug completely stripped code). 
 	 FIXME. */
@@ -521,7 +521,7 @@ h8300_frame_chain (struct frame_info *thisframe)
 					E_PC_REGNUM);
       return get_frame_base (thisframe);
     }
-  return get_frame_saved_regs (thisframe)[E_SP_REGNUM];
+  return deprecated_get_frame_saved_regs (thisframe)[E_SP_REGNUM];
 }
 
 /* Return the saved PC from this frame.
@@ -558,12 +558,6 @@ h8300_init_extra_frame_info (int fromleaf, struct frame_info *fi)
       h8300_frame_init_saved_regs (fi);
     }
 }
-
-/* Round N up or down to the nearest multiple of UNIT.
-   Evaluate N only once, UNIT several times.
-   UNIT must be a power of two.  */
-#define round_up(n, unit)   (((n) + (unit) - 1) & -(unit))
-#define round_down(n, unit) ((n) & -(unit))
 
 /* Function: push_dummy_call
    Setup the function arguments for calling a function in the inferior.
@@ -641,12 +635,12 @@ h8300_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
   int argument;
 
   /* First, make sure the stack is properly aligned.  */
-  sp = round_down (sp, wordsize);
+  sp = align_down (sp, wordsize);
 
   /* Now make sure there's space on the stack for the arguments.  We
      may over-allocate a little here, but that won't hurt anything.  */
   for (argument = 0; argument < nargs; argument++)
-    stack_alloc += round_up (TYPE_LENGTH (VALUE_TYPE (args[argument])),
+    stack_alloc += align_up (TYPE_LENGTH (VALUE_TYPE (args[argument])),
                              wordsize);
   sp -= stack_alloc;
 
@@ -665,7 +659,7 @@ h8300_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
       char *contents = (char *) VALUE_CONTENTS (args[argument]);
 
       /* Pad the argument appropriately.  */
-      int padded_len = round_up (len, wordsize);
+      int padded_len = align_up (len, wordsize);
       char *padded = alloca (padded_len);
 
       memset (padded, 0, padded_len);
@@ -749,11 +743,11 @@ h8300_pop_frame (void)
 	{
 	  /* Don't forget E_SP_REGNUM is a frame_saved_regs struct is the
 	     actual value we want, not the address of the value we want.  */
-	  if (get_frame_saved_regs (frame)[regno] && regno != E_SP_REGNUM)
+	  if (deprecated_get_frame_saved_regs (frame)[regno] && regno != E_SP_REGNUM)
 	    write_register (regno,
 			    read_memory_integer 
-			    (get_frame_saved_regs (frame)[regno], BINWORD));
-	  else if (get_frame_saved_regs (frame)[regno] && regno == E_SP_REGNUM)
+			    (deprecated_get_frame_saved_regs (frame)[regno], BINWORD));
+	  else if (deprecated_get_frame_saved_regs (frame)[regno] && regno == E_SP_REGNUM)
 	    write_register (regno, get_frame_base (frame) + 2 * BINWORD);
 	}
 
@@ -950,7 +944,7 @@ h8300_print_register (struct gdbarch *gdbarch, struct ui_file *file,
   if (!name || !*name)
     return;
 
-  frame_read_signed_register (frame, regno, &rval);
+  rval = get_frame_register_signed (frame, regno);
 
   fprintf_filtered (file, "%-14s ", name);
   if (regno == E_PSEUDO_CCR_REGNUM || (regno == E_PSEUDO_EXR_REGNUM && h8300smode))
@@ -1226,8 +1220,18 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_dwarf2_reg_to_regnum (gdbarch, h8300_dbg_reg_to_regnum);
       set_gdbarch_stab_reg_to_regnum (gdbarch, h8300_dbg_reg_to_regnum);
       set_gdbarch_register_name (gdbarch, h8300_register_name);
-      set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
-      set_gdbarch_addr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
+      if(info.bfd_arch_info->mach != bfd_mach_h8300hn)
+        {
+          h8300_normal_mode = 0;
+          set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
+          set_gdbarch_addr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
+        }
+      else
+        {
+          h8300_normal_mode = 1;
+          set_gdbarch_ptr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
+          set_gdbarch_addr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
+        }
       set_gdbarch_extract_return_value (gdbarch, h8300h_extract_return_value);
       set_gdbarch_store_return_value (gdbarch, h8300h_store_return_value);
       set_gdbarch_print_insn (gdbarch, print_insn_h8300h);
@@ -1244,8 +1248,18 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_dwarf2_reg_to_regnum (gdbarch, h8300s_dbg_reg_to_regnum);
       set_gdbarch_stab_reg_to_regnum (gdbarch, h8300s_dbg_reg_to_regnum);
       set_gdbarch_register_name (gdbarch, h8300s_register_name);
-      set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
-      set_gdbarch_addr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
+      if(info.bfd_arch_info->mach != bfd_mach_h8300sn)
+        {
+          h8300_normal_mode = 0;
+          set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
+          set_gdbarch_addr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
+        }
+      else
+        {
+          h8300_normal_mode = 1;
+          set_gdbarch_ptr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
+          set_gdbarch_addr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
+        }
       set_gdbarch_extract_return_value (gdbarch, h8300h_extract_return_value);
       set_gdbarch_store_return_value (gdbarch, h8300h_store_return_value);
       set_gdbarch_print_insn (gdbarch, print_insn_h8300s);
@@ -1262,8 +1276,18 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_dwarf2_reg_to_regnum (gdbarch, h8300s_dbg_reg_to_regnum);
       set_gdbarch_stab_reg_to_regnum (gdbarch, h8300s_dbg_reg_to_regnum);
       set_gdbarch_register_name (gdbarch, h8300sx_register_name);
-      set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
-      set_gdbarch_addr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
+      if(info.bfd_arch_info->mach != bfd_mach_h8300sxn)
+        {
+          h8300_normal_mode = 0;
+          set_gdbarch_ptr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
+          set_gdbarch_addr_bit (gdbarch, 4 * TARGET_CHAR_BIT);
+        }
+      else
+        {
+          h8300_normal_mode = 1;
+          set_gdbarch_ptr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
+          set_gdbarch_addr_bit (gdbarch, 2 * TARGET_CHAR_BIT);
+        }
       set_gdbarch_extract_return_value (gdbarch, h8300h_extract_return_value);
       set_gdbarch_store_return_value (gdbarch, h8300h_store_return_value);
       set_gdbarch_print_insn (gdbarch, print_insn_h8300s);
@@ -1275,7 +1299,7 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* NOTE: cagney/2002-12-06: This can be deleted when this arch is
      ready to unwind the PC first (see frame.c:get_prev_frame()).  */
-  set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_default);
+  set_gdbarch_deprecated_init_frame_pc (gdbarch, deprecated_init_frame_pc_default);
 
   /*
    * Basic register fields and methods.

@@ -102,7 +102,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #define elf_get_reloc_upper_bound	NAME(bfd_elf,get_reloc_upper_bound)
 #define elf_canonicalize_reloc		NAME(bfd_elf,canonicalize_reloc)
 #define elf_slurp_symbol_table		NAME(bfd_elf,slurp_symbol_table)
-#define elf_get_symtab			NAME(bfd_elf,get_symtab)
+#define elf_canonicalize_symtab		NAME(bfd_elf,canonicalize_symtab)
 #define elf_canonicalize_dynamic_symtab \
   NAME(bfd_elf,canonicalize_dynamic_symtab)
 #define elf_make_empty_symbol		NAME(bfd_elf,make_empty_symbol)

@@ -1158,13 +1158,15 @@ elf64_alpha_info_to_howto (abfd, cache_ptr, dst)
   (r_type == R_ALPHA_TLSGD || r_type == R_ALPHA_TLSLDM ? 16 : 8)
 
 /* This is PT_TLS segment p_vaddr.  */
-#define alpha_get_dtprel_base(tlss) \
-  ((tlss)->start)
+#define alpha_get_dtprel_base(info) \
+  (elf_hash_table (info)->tls_sec->vma)
 
 /* Main program TLS (whose template starts at PT_TLS p_vaddr)
    is assigned offset round(16, PT_TLS p_align).  */
-#define alpha_get_tprel_base(tlss) \
-  ((tlss)->start - align_power ((bfd_vma) 16, (tlss)->align))
+#define alpha_get_tprel_base(info) \
+  (elf_hash_table (info)->tls_sec->vma					\
+   - align_power ((bfd_vma) 16,						\
+		  elf_hash_table (info)->tls_sec->alignment_power))
 
 /* These functions do relaxation for Alpha ELF.
 
@@ -1198,7 +1200,6 @@ struct alpha_relax_info
   Elf_Internal_Shdr *symtab_hdr;
   Elf_Internal_Rela *relocs, *relend;
   struct bfd_link_info *link_info;
-  struct elf_link_tls_segment *tls_segment;
   bfd_vma gp;
   bfd *gotobj;
   asection *tsec;
@@ -1224,8 +1225,6 @@ static bfd_boolean elf64_alpha_relax_gprelhilo
 static bfd_boolean elf64_alpha_relax_tls_get_addr
   PARAMS((struct alpha_relax_info *info, bfd_vma symval,
           Elf_Internal_Rela *irel, bfd_boolean));
-static struct elf_link_tls_segment *elf64_alpha_relax_find_tls_segment
-  PARAMS((struct alpha_relax_info *, struct elf_link_tls_segment *));
 static bfd_boolean elf64_alpha_relax_section
   PARAMS((bfd *abfd, asection *sec, struct bfd_link_info *link_info,
 	  bfd_boolean *again));
@@ -1598,9 +1597,9 @@ elf64_alpha_relax_got_load (info, symval, irel, r_type)
     {
       bfd_vma dtp_base, tp_base;
 
-      BFD_ASSERT (info->tls_segment != NULL);
-      dtp_base = alpha_get_dtprel_base (info->tls_segment);
-      tp_base = alpha_get_tprel_base (info->tls_segment);
+      BFD_ASSERT (elf_hash_table (info->link_info)->tls_sec != NULL);
+      dtp_base = alpha_get_dtprel_base (info->link_info);
+      tp_base = alpha_get_tprel_base (info->link_info);
       disp = symval - (r_type == R_ALPHA_GOTDTPREL ? dtp_base : tp_base);
     }
 
@@ -1845,8 +1844,8 @@ elf64_alpha_relax_tls_get_addr (info, symval, irel, is_gd)
 	bfd_vma tp_base;
 	bfd_signed_vma disp;
 
-	BFD_ASSERT (info->tls_segment != NULL);
-	tp_base = alpha_get_tprel_base (info->tls_segment);
+	BFD_ASSERT (elf_hash_table (info->link_info)->tls_sec != NULL);
+	tp_base = alpha_get_tprel_base (info->link_info);
 	disp = symval - tp_base;
 
 	if (disp >= -0x8000 && disp < 0x8000)
@@ -1961,53 +1960,6 @@ elf64_alpha_relax_tls_get_addr (info, symval, irel, is_gd)
   return TRUE;
 }
 
-static struct elf_link_tls_segment *
-elf64_alpha_relax_find_tls_segment (info, seg)
-     struct alpha_relax_info *info;
-     struct elf_link_tls_segment *seg;
-{
-  bfd *output_bfd = info->sec->output_section->owner;
-  asection *o;
-  unsigned int align;
-  bfd_vma base, end;
-
-  for (o = output_bfd->sections; o ; o = o->next)
-    if ((o->flags & SEC_THREAD_LOCAL) != 0
-        && (o->flags & SEC_LOAD) != 0)
-      break;
-  if (!o)
-    return NULL;
-
-  base = o->vma;
-  align = 0;
-
-  do
-    {
-      bfd_vma size;
-
-      if (bfd_get_section_alignment (output_bfd, o) > align)
-	align = bfd_get_section_alignment (output_bfd, o);
-
-      size = o->_raw_size;
-      if (size == 0 && (o->flags & SEC_HAS_CONTENTS) == 0)
-	{
-	  struct bfd_link_order *lo;
-	  for (lo = o->link_order_head; lo ; lo = lo->next)
-	    if (size < lo->offset + lo->size)
-	      size = lo->offset + lo->size;
-	}
-      end = o->vma + size;
-      o = o->next;
-    }
-  while (o && (o->flags & SEC_THREAD_LOCAL));
-
-  seg->start = base;
-  seg->size = end - base;
-  seg->align = align;
-
-  return seg;
-}
-
 static bfd_boolean
 elf64_alpha_relax_section (abfd, sec, link_info, again)
      bfd *abfd;
@@ -2021,7 +1973,6 @@ elf64_alpha_relax_section (abfd, sec, link_info, again)
   Elf_Internal_Sym *isymbuf = NULL;
   struct alpha_elf_got_entry **local_got_entries;
   struct alpha_relax_info info;
-  struct elf_link_tls_segment tls_segment;
 
   /* We are not currently changing any sizes, so only one pass.  */
   *again = FALSE;
@@ -2079,11 +2030,6 @@ elf64_alpha_relax_section (abfd, sec, link_info, again)
 	goto error_return;
     }
 
-  /* Compute the TLS segment information.  The version normally found in
-     elf_hash_table (link_info)->tls_segment isn't built until final_link.
-     ??? Probably should look into extracting this into a common function.  */
-  info.tls_segment = elf64_alpha_relax_find_tls_segment (&info, &tls_segment);
-
   for (irel = internal_relocs; irel < irelend; irel++)
     {
       bfd_vma symval;
@@ -2137,7 +2083,7 @@ elf64_alpha_relax_section (abfd, sec, link_info, again)
 	  if (r_type == R_ALPHA_TLSLDM)
 	    {
 	      info.tsec = bfd_abs_section_ptr;
-	      symval = alpha_get_tprel_base (info.tls_segment);
+	      symval = alpha_get_tprel_base (info.link_info);
 	    }
 	  else
 	    {
@@ -2467,8 +2413,13 @@ elf64_alpha_create_got_section(abfd, info)
 {
   asection *s;
 
-  if (bfd_get_section_by_name (abfd, ".got"))
-    return TRUE;
+  if ((s = bfd_get_section_by_name (abfd, ".got")))
+    {
+      /* Check for a non-linker created .got?  */
+      if (alpha_elf_tdata (abfd)->got == NULL)
+	alpha_elf_tdata (abfd)->got = s;
+      return TRUE;
+    }
 
   s = bfd_make_section (abfd, ".got");
   if (s == NULL
@@ -4289,7 +4240,6 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Shdr *symtab_hdr;
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
-  struct elf_link_tls_segment *tls_segment;
   asection *sgot, *srel, *srelgot;
   bfd *dynobj, *gotobj;
   bfd_vma gp, tp_base, dtp_base;
@@ -4343,11 +4293,10 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 
   local_got_entries = alpha_elf_tdata(input_bfd)->local_got_entries;
 
-  tls_segment = elf_hash_table (info)->tls_segment;
-  if (tls_segment)
+  if (elf_hash_table (info)->tls_sec != NULL)
     {
-      dtp_base = alpha_get_dtprel_base (tls_segment);
-      tp_base = alpha_get_tprel_base (tls_segment);
+      dtp_base = alpha_get_dtprel_base (info);
+      tp_base = alpha_get_tprel_base (info);
     }
   else
     dtp_base = tp_base = 0;
@@ -4389,9 +4338,11 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 
       if (r_symndx < symtab_hdr->sh_info)
 	{
+	  asection *msec;
 	  sym = local_syms + r_symndx;
 	  sec = local_sections[r_symndx];
-	  value = _bfd_elf_rela_local_sym (output_bfd, sym, sec, rel);
+	  msec = sec;
+	  value = _bfd_elf_rela_local_sym (output_bfd, sym, &msec, rel);
 
 	  /* If this is a tp-relative relocation against sym 0,
 	     this is hackery from relax_section.  Force the value to
@@ -4419,7 +4370,6 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	      && !gotent->reloc_xlated)
 	    {
 	      struct alpha_elf_got_entry *ent;
-	      asection *msec;
 
 	      for (ent = gotent; ent; ent = ent->next)
 		{
@@ -4669,13 +4619,13 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 	      }
 	    else if (r_type == R_ALPHA_DTPREL64)
 	      {
-		BFD_ASSERT(tls_segment != NULL);
+		BFD_ASSERT (elf_hash_table (info)->tls_sec != NULL);
 		value -= dtp_base;
 		goto default_reloc;
 	      }
 	    else if (r_type == R_ALPHA_TPREL64)
 	      {
-		BFD_ASSERT(tls_segment != NULL);
+		BFD_ASSERT (elf_hash_table (info)->tls_sec != NULL);
 		if (!info->shared)
 		  {
 		    value -= tp_base;
@@ -4755,7 +4705,7 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 		value = 0;
 	      else
 		{
-		  BFD_ASSERT(tls_segment != NULL);
+		  BFD_ASSERT (elf_hash_table (info)->tls_sec != NULL);
 	          value -= dtp_base;
 		}
 	      bfd_put_64 (output_bfd, value,
@@ -4778,7 +4728,7 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
                  bfd_archive_filename (input_bfd), h->root.root.root.string);
               ret_val = FALSE;
             }
-	  BFD_ASSERT(tls_segment != NULL);
+	  BFD_ASSERT (elf_hash_table (info)->tls_sec != NULL);
 	  value -= dtp_base;
 	  if (r_type == R_ALPHA_DTPRELHI)
 	    value = ((bfd_signed_vma) value >> 16) + ((value >> 15) & 1);
@@ -4801,7 +4751,7 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
                  bfd_archive_filename (input_bfd), h->root.root.root.string);
               ret_val = FALSE;
             }
-	  BFD_ASSERT(tls_segment != NULL);
+	  BFD_ASSERT (elf_hash_table (info)->tls_sec != NULL);
 	  value -= tp_base;
 	  if (r_type == R_ALPHA_TPRELHI)
 	    value = ((bfd_signed_vma) value >> 16) + ((value >> 15) & 1);
@@ -4822,7 +4772,7 @@ elf64_alpha_relocate_section (output_bfd, info, input_bfd, input_section,
 		value = 0;
 	      else
 		{
-		  BFD_ASSERT(tls_segment != NULL);
+		  BFD_ASSERT (elf_hash_table (info)->tls_sec != NULL);
 		  if (r_type == R_ALPHA_GOTDTPREL)
 		    value -= dtp_base;
 		  else if (!info->shared)
@@ -5444,12 +5394,9 @@ elf64_alpha_reloc_type_class (rela)
 
 static struct bfd_elf_special_section const elf64_alpha_special_sections[]=
 {
-  { ".sdata",		0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_ALPHA_GPREL },
-  { ".sbss",		0,	NULL,	0,
-    SHT_NOBITS,		SHF_ALLOC + SHF_WRITE + SHF_ALPHA_GPREL },
-  { NULL,		0,	NULL,	0,
-    0,			0 }
+  { ".sdata", 6, -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE + SHF_ALPHA_GPREL },
+  { ".sbss",  5, -2, SHT_NOBITS,   SHF_ALLOC + SHF_WRITE + SHF_ALPHA_GPREL },
+  { NULL,     0,  0, 0,            0 }
 };
 
 /* ECOFF swapping routines.  These are used when dealing with the
@@ -5598,7 +5545,6 @@ static const struct elf_size_info alpha_elf_size_info =
 #define elf_backend_plt_readonly 0
 #define elf_backend_want_plt_sym 1
 #define elf_backend_got_header_size 0
-#define elf_backend_plt_header_size PLT_HEADER_SIZE
 
 #include "elf64-target.h"
 

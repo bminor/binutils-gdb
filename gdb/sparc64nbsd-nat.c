@@ -40,7 +40,7 @@ getregs_supplies (int regno)
   /* FIXME: PS_REGNUM for 32-bit code.  */
   return (regno == TSTATE_REGNUM
 	  || regno == PC_REGNUM
-	  || regno == NPC_REGNUM
+	  || regno == DEPRECATED_NPC_REGNUM
 	  || regno == Y_REGNUM
 	  || (regno >= G0_REGNUM && regno <= G7_REGNUM)
 	  || (regno >= O0_REGNUM && regno <= O7_REGNUM)

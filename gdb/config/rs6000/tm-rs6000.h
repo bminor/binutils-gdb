@@ -83,18 +83,6 @@ extern void aix_process_linenos (void);
 #define DEPRECATED_INIT_FRAME_PC_FIRST(fromleaf, prev) \
   (fromleaf ? DEPRECATED_SAVED_PC_AFTER_CALL (prev->next) : \
 	      prev->next ? DEPRECATED_FRAME_SAVED_PC (prev->next) : read_pc ())
-/* NOTE: cagney/2002-12-08: Add local declaration of
-   init_frame_pc_noop() because it isn't possible to include
-   "arch-utils.h" here.  Not too bad as this entire file is going away
-   anyway.  */
-extern CORE_ADDR init_frame_pc_noop (int fromleaf, struct frame_info *prev);
-#define DEPRECATED_INIT_FRAME_PC(fromleaf, prev) (init_frame_pc_noop (fromleaf, prev))
-
-/* RS6000/AIX does not support PT_STEP.  Has to be simulated.  */
-
-#define SOFTWARE_SINGLE_STEP_P() 1
-extern void rs6000_software_single_step (enum target_signal, int);
-#define SOFTWARE_SINGLE_STEP(sig,bp_p) rs6000_software_single_step (sig, bp_p)
 
 /* Notice when a new child process is started. */
 

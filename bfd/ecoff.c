@@ -100,9 +100,9 @@ static asection bfd_debug_section =
   /* target_index, used_by_bfd, constructor_chain, owner,          */
      0,            NULL,        NULL,              NULL,
   /* symbol,                                                       */
-     (struct symbol_cache_entry *) NULL,
+     (struct bfd_symbol *) NULL,
   /* symbol_ptr_ptr,                                               */
-     (struct symbol_cache_entry **) NULL,
+     (struct bfd_symbol **) NULL,
   /* link_order_head, link_order_tail                              */
      NULL,            NULL
 };
@@ -1062,7 +1062,7 @@ _bfd_ecoff_get_symtab_upper_bound (abfd)
 /* Get the canonical symbols.  */
 
 long
-_bfd_ecoff_get_symtab (abfd, alocation)
+_bfd_ecoff_canonicalize_symtab (abfd, alocation)
      bfd *abfd;
      asymbol **alocation;
 {
@@ -2262,7 +2262,7 @@ bfd_boolean
 _bfd_ecoff_set_section_contents (abfd, section, location, offset, count)
      bfd *abfd;
      asection *section;
-     PTR location;
+     const PTR location;
      file_ptr offset;
      bfd_size_type count;
 {

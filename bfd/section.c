@@ -166,7 +166,7 @@ CODE_FRAGMENT
 .  long symbol;
 .};
 .
-.typedef struct sec
+.typedef struct bfd_section
 .{
 .  {* The name of the section; the name isn't a copy, the pointer is
 .     the same as that passed to bfd_make_section.  *}
@@ -179,7 +179,7 @@ CODE_FRAGMENT
 .  int index;
 .
 .  {* The next section in the list belonging to the BFD, or NULL.  *}
-.  struct sec *next;
+.  struct bfd_section *next;
 .
 .  {* The field flags contains attributes of the section. Some
 .     flags are read in from the object file, and some are
@@ -402,7 +402,7 @@ CODE_FRAGMENT
 .  {* Nonzero if this section has a gp reloc.  *}
 .  unsigned int has_gp_reloc:1;
 .
-.  {* Usused bits.  *}
+.  {* Unused bits.  *}
 .  unsigned int flag13:1;
 .  unsigned int flag14:1;
 .  unsigned int flag15:1;
@@ -445,7 +445,7 @@ CODE_FRAGMENT
 .  bfd_vma output_offset;
 .
 .  {* The output section through which to map on output.  *}
-.  struct sec *output_section;
+.  struct bfd_section *output_section;
 .
 .  {* The alignment requirement of the section, as an exponent of 2 -
 .     e.g., 3 aligns to 2^3 (or 8).  *}
@@ -495,7 +495,7 @@ CODE_FRAGMENT
 .
 .  {* Points to the kept section if this section is a link-once section,
 .     and is discarded.  *}
-.  struct sec *kept_section;
+.  struct bfd_section *kept_section;
 .
 .  {* When a section is being output, this value changes as more
 .     linenumbers are written out.  *}
@@ -514,8 +514,8 @@ CODE_FRAGMENT
 .  bfd *owner;
 .
 .  {* A symbol which points at this section only.  *}
-.  struct symbol_cache_entry *symbol;
-.  struct symbol_cache_entry **symbol_ptr_ptr;
+.  struct bfd_symbol *symbol;
+.  struct bfd_symbol **symbol_ptr_ptr;
 .
 .  struct bfd_link_order *link_order_head;
 .  struct bfd_link_order *link_order_tail;
@@ -553,13 +553,12 @@ CODE_FRAGMENT
 .  || ((SEC) == bfd_com_section_ptr)		\
 .  || ((SEC) == bfd_ind_section_ptr))
 .
-.extern const struct symbol_cache_entry * const bfd_abs_symbol;
-.extern const struct symbol_cache_entry * const bfd_com_symbol;
-.extern const struct symbol_cache_entry * const bfd_und_symbol;
-.extern const struct symbol_cache_entry * const bfd_ind_symbol;
+.extern const struct bfd_symbol * const bfd_abs_symbol;
+.extern const struct bfd_symbol * const bfd_com_symbol;
+.extern const struct bfd_symbol * const bfd_und_symbol;
+.extern const struct bfd_symbol * const bfd_ind_symbol;
 .#define bfd_get_section_size_before_reloc(section) \
-.     ((section)->reloc_done ? (abort (), (bfd_size_type) 1) \
-.                            : (section)->_raw_size)
+.     ((section)->_raw_size)
 .#define bfd_get_section_size_after_reloc(section) \
 .     ((section)->reloc_done ? (section)->_cooked_size \
 .                            : (abort (), (bfd_size_type) 1))
@@ -636,7 +635,7 @@ static const asymbol global_syms[] =
        0,   0,   0,            0,					\
 									\
     /* output_offset, output_section,      alignment_power,          */	\
-       0,             (struct sec *) &SEC, 0,				\
+       0,             (struct bfd_section *) &SEC, 0,			\
 									\
     /* relocation, orelocation, reloc_count, filepos, rel_filepos,   */	\
        NULL,       NULL,        0,           0,       0,		\
@@ -651,10 +650,10 @@ static const asymbol global_syms[] =
        0,            NULL,        NULL,              NULL,		\
 									\
     /* symbol,                                                       */	\
-       (struct symbol_cache_entry *) &global_syms[IDX],			\
+       (struct bfd_symbol *) &global_syms[IDX],				\
 									\
     /* symbol_ptr_ptr,                                               */	\
-       (struct symbol_cache_entry **) &SYM,				\
+       (struct bfd_symbol **) &SYM,					\
 									\
     /* link_order_head, link_order_tail                              */	\
        NULL,            NULL						\
@@ -1133,8 +1132,8 @@ FUNCTION
 
 SYNOPSIS
 	bfd_boolean bfd_set_section_contents
-	  (bfd *abfd, asection *section, void *data, file_ptr offset,
-	   bfd_size_type count);
+	  (bfd *abfd, asection *section, const void *data,
+	   file_ptr offset, bfd_size_type count);
 
 DESCRIPTION
 	Sets the contents of the section @var{section} in BFD
@@ -1162,7 +1161,7 @@ DESCRIPTION
 bfd_boolean
 bfd_set_section_contents (bfd *abfd,
 			  sec_ptr section,
-			  void *location,
+			  const void *location,
 			  file_ptr offset,
 			  bfd_size_type count)
 {

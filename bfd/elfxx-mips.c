@@ -587,17 +587,20 @@ static bfd *reldyn_sorting_bfd;
    offsets from $gp.  */
 #define MIPS_ELF_GOT_MAX_SIZE(abfd) (ELF_MIPS_GP_OFFSET(abfd) + 0x7fff)
 
-/* Instructions which appear in a stub.  For some reason the stub is
-   slightly different on an SGI system.  */
+/* Instructions which appear in a stub.  */
 #define STUB_LW(abfd)						\
   ((ABI_64_P (abfd)  						\
     ? 0xdf998010		/* ld t9,0x8010(gp) */		\
     : 0x8f998010))              /* lw t9,0x8010(gp) */
 #define STUB_MOVE(abfd)                                         \
-  (SGI_COMPAT (abfd) ? 0x03e07825 : 0x03e07821)         /* move t7,ra */
-#define STUB_JALR 0x0320f809				/* jal t9 */
+   ((ABI_64_P (abfd)						\
+     ? 0x03e0782d		/* daddu t7,ra */		\
+     : 0x03e07821))		/* addu t7,ra */
+#define STUB_JALR 0x0320f809	/* jalr t9,ra */
 #define STUB_LI16(abfd)                                         \
-  (SGI_COMPAT (abfd) ? 0x34180000 : 0x24180000)         /* ori t8,zero,0 */
+  ((ABI_64_P (abfd)						\
+   ? 0x64180000			/* daddiu t8,zero,0 */		\
+   : 0x24180000))		/* addiu t8,zero,0 */
 #define MIPS_FUNCTION_STUB_SIZE (16)
 
 /* The name of the dynamic interpreter.  This is put in the .interp
@@ -2864,6 +2867,7 @@ mips_elf_create_got_section (abfd, info, maybe_exclude)
   if (g == NULL)
     return FALSE;
   g->global_gotsym = NULL;
+  g->global_gotno = 0;
   g->local_gotno = MIPS_RESERVED_GOTNO;
   g->assigned_gotno = MIPS_RESERVED_GOTNO;
   g->bfd2got = NULL;
@@ -4055,6 +4059,10 @@ _bfd_elf_mips_mach (flags)
 
 	case E_MIPS_ARCH_32R2:
 	  return bfd_mach_mipsisa32r2;
+	  break;
+
+	case E_MIPS_ARCH_64R2:
+	  return bfd_mach_mipsisa64r2;
 	  break;
 	}
     }
@@ -5863,7 +5871,7 @@ _bfd_mips_elf_size_dynamic_sections (output_bfd, info)
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       /* Set the contents of the .interp section to the interpreter.  */
-      if (! info->shared)
+      if (info->executable)
 	{
 	  s = bfd_get_section_by_name (dynobj, ".interp");
 	  BFD_ASSERT (s != NULL);
@@ -6078,30 +6086,6 @@ _bfd_mips_elf_size_dynamic_sections (output_bfd, info)
 	    return FALSE;
 
 	  if (! MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_RELENT, 0))
-	    return FALSE;
-	}
-
-      if (SGI_COMPAT (output_bfd))
-	{
-	  if (!MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_MIPS_CONFLICTNO, 0))
-	    return FALSE;
-	}
-
-      if (SGI_COMPAT (output_bfd))
-	{
-	  if (!MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_MIPS_LIBLISTNO, 0))
-	    return FALSE;
-	}
-
-      if (bfd_get_section_by_name (dynobj, ".conflict") != NULL)
-	{
-	  if (! MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_MIPS_CONFLICT, 0))
-	    return FALSE;
-
-	  s = bfd_get_section_by_name (dynobj, ".liblist");
-	  BFD_ASSERT (s != NULL);
-
-	  if (! MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_MIPS_LIBLIST, 0))
 	    return FALSE;
 	}
 
@@ -6874,13 +6858,6 @@ _bfd_mips_elf_finish_dynamic_sections (output_bfd, info)
 
 	    case DT_PLTGOT:
 	      name = ".got";
-	      goto get_vma;
-	    case DT_MIPS_CONFLICT:
-	      name = ".conflict";
-	      goto get_vma;
-	    case DT_MIPS_LIBLIST:
-	      name = ".liblist";
-	    get_vma:
 	      s = bfd_get_section_by_name (output_bfd, name);
 	      BFD_ASSERT (s != NULL);
 	      dyn.d_un.d_ptr = s->vma;
@@ -6892,27 +6869,6 @@ _bfd_mips_elf_finish_dynamic_sections (output_bfd, info)
 
 	    case DT_MIPS_FLAGS:
 	      dyn.d_un.d_val = RHF_NOTPOT; /* XXX */
-	      break;
-
-	    case DT_MIPS_CONFLICTNO:
-	      name = ".conflict";
-	      elemsize = sizeof (Elf32_Conflict);
-	      goto set_elemno;
-
-	    case DT_MIPS_LIBLISTNO:
-	      name = ".liblist";
-	      elemsize = sizeof (Elf32_Lib);
-	    set_elemno:
-	      s = bfd_get_section_by_name (output_bfd, name);
-	      if (s != NULL)
-		{
-		  if (s->_cooked_size != 0)
-		    dyn.d_un.d_val = s->_cooked_size / elemsize;
-		  else
-		    dyn.d_un.d_val = s->_raw_size / elemsize;
-		}
-	      else
-		dyn.d_un.d_val = 0;
 	      break;
 
 	    case DT_MIPS_TIME_STAMP:
@@ -6982,9 +6938,16 @@ _bfd_mips_elf_finish_dynamic_sections (output_bfd, info)
 	      dyn.d_un.d_ptr = s->vma;
 	      break;
 
-	    case DT_MIPS_MSYM:
-	      s = (bfd_get_section_by_name (output_bfd, ".msym"));
-	      dyn.d_un.d_ptr = s->vma;
+	    case DT_RELSZ:
+	      /* Reduce DT_RELSZ to account for any relocations we
+		 decided not to make.  This is for the n64 irix rld,
+		 which doesn't seem to apply any relocations if there
+		 are trailing null entries.  */
+	      s = mips_elf_rel_dyn_section (dynobj, FALSE);
+	      dyn.d_un.d_val = (s->reloc_count
+				* (ABI_64_P (output_bfd)
+				   ? sizeof (Elf64_Mips_External_Rel)
+				   : sizeof (Elf32_External_Rel)));
 	      break;
 
 	    default:
@@ -7192,6 +7155,10 @@ mips_set_isa_flags (abfd)
     case bfd_mach_mipsisa32r2:
       val = E_MIPS_ARCH_32R2;
       break;
+
+    case bfd_mach_mipsisa64r2:
+      val = E_MIPS_ARCH_64R2;
+      break;
     }
   elf_elfheader (abfd)->e_flags &= ~(EF_MIPS_ARCH | EF_MIPS_MACH);
   elf_elfheader (abfd)->e_flags |= val;
@@ -7361,7 +7328,7 @@ _bfd_mips_elf_modify_segment_map (abfd)
 
   /* For IRIX 6, we don't have .mdebug sections, nor does anything but
      .dynamic end up in PT_DYNAMIC.  However, we do have to insert a
-     PT_OPTIONS segment immediately following the program header
+     PT_MIPS_OPTIONS segment immediately following the program header
      table.  */
   if (NEWABI_P (abfd)
       /* On non-IRIX6 new abi, we'll have already created a segment
@@ -7378,15 +7345,11 @@ _bfd_mips_elf_modify_segment_map (abfd)
 	{
 	  struct elf_segment_map *options_segment;
 
-	  /* Usually, there's a program header table.  But, sometimes
-	     there's not (like when running the `ld' testsuite).  So,
-	     if there's no program header table, we just put the
-	     options segment at the end.  */
-	  for (pm = &elf_tdata (abfd)->segment_map;
-	       *pm != NULL;
-	       pm = &(*pm)->next)
-	    if ((*pm)->p_type == PT_PHDR)
-	      break;
+	  pm = &elf_tdata (abfd)->segment_map;
+	  while (*pm != NULL
+		 && ((*pm)->p_type == PT_PHDR
+		     || (*pm)->p_type == PT_INTERP))
+	    pm = &(*pm)->next;
 
 	  amt = sizeof (struct elf_segment_map);
 	  options_segment = bfd_zalloc (abfd, amt);
@@ -7950,7 +7913,7 @@ bfd_boolean
 _bfd_mips_elf_set_section_contents (abfd, section, location, offset, count)
      bfd *abfd;
      sec_ptr section;
-     PTR location;
+     const PTR location;
      file_ptr offset;
      bfd_size_type count;
 {
@@ -8929,6 +8892,7 @@ struct mips_mach_extension {
 
 static const struct mips_mach_extension mips_mach_extensions[] = {
   /* MIPS64 extensions.  */
+  { bfd_mach_mipsisa64r2, bfd_mach_mipsisa64 },
   { bfd_mach_mips_sb1, bfd_mach_mipsisa64 },
 
   /* MIPS V extensions.  */
@@ -9075,6 +9039,11 @@ _bfd_mips_elf_merge_private_bfd_data (ibfd, obfd)
      doesn't seem to matter.  */
   new_flags &= ~EF_MIPS_XGOT;
   old_flags &= ~EF_MIPS_XGOT;
+
+  /* MIPSpro generates ucode info in n64 objects.  Again, we should
+     just be able to ignore this.  */
+  new_flags &= ~EF_MIPS_UCODE;
+  old_flags &= ~EF_MIPS_UCODE;
 
   if (new_flags == old_flags)
     return TRUE;
@@ -9275,6 +9244,8 @@ _bfd_mips_elf_print_private_bfd_data (abfd, ptr)
     fprintf (file, _(" [mips64]"));
   else if ((elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_32R2)
     fprintf (file, _(" [mips32r2]"));
+  else if ((elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_64R2)
+    fprintf (file, _(" [mips64r2]"));
   else
     fprintf (file, _(" [unknown ISA]"));
 
@@ -9296,18 +9267,11 @@ _bfd_mips_elf_print_private_bfd_data (abfd, ptr)
 
 struct bfd_elf_special_section const _bfd_mips_elf_special_sections[]=
 {
-  { ".sdata",		0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_MIPS_GPREL },
-  { ".sbss",		0,	NULL,	0,
-    SHT_NOBITS,		SHF_ALLOC + SHF_WRITE + SHF_MIPS_GPREL },
-  { ".lit4",		0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_MIPS_GPREL },
-  { ".lit8",		0,	NULL,	0,
-    SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE + SHF_MIPS_GPREL },
-  { ".ucode",		0,	NULL,	0,
-    SHT_MIPS_UCODE,	0 },
-  { ".mdebug",		0,	NULL,	0,
-    SHT_MIPS_DEBUG,	0 },
-  { NULL,		0,	NULL,	0,
-    0,			0 }
+  { ".sdata",  6, -2, SHT_PROGBITS,   SHF_ALLOC + SHF_WRITE + SHF_MIPS_GPREL },
+  { ".sbss",   5, -2, SHT_NOBITS,     SHF_ALLOC + SHF_WRITE + SHF_MIPS_GPREL },
+  { ".lit4",   5,  0, SHT_PROGBITS,   SHF_ALLOC + SHF_WRITE + SHF_MIPS_GPREL },
+  { ".lit8",   5,  0, SHT_PROGBITS,   SHF_ALLOC + SHF_WRITE + SHF_MIPS_GPREL },
+  { ".ucode",  6,  0, SHT_MIPS_UCODE, 0 },
+  { ".mdebug", 7,  0, SHT_MIPS_DEBUG, 0 },
+  { NULL,      0,  0, 0,              0 }
 };

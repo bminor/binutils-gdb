@@ -113,10 +113,10 @@ CODE_FRAGMENT
 .  struct bfd_hash_table section_htab;
 .
 .  {* Pointer to linked list of sections.  *}
-.  struct sec *sections;
+.  struct bfd_section *sections;
 .
 .  {* The place where we add to the section list.  *}
-.  struct sec **section_tail;
+.  struct bfd_section **section_tail;
 .
 .  {* The number of sections.  *}
 .  unsigned int section_count;
@@ -129,7 +129,7 @@ CODE_FRAGMENT
 .  unsigned int symcount;
 .
 .  {* Symbol table for output BFD (with symcount entries).  *}
-.  struct symbol_cache_entry  **outsymbols;
+.  struct bfd_symbol  **outsymbols;
 .
 .  {* Used for slurped dynamic symbol tables.  *}
 .  unsigned int dynsymcount;
@@ -1276,8 +1276,8 @@ CODE_FRAGMENT
 .  void *tdata;
 .  flagword flags;
 .  const struct bfd_arch_info *arch_info;
-.  struct sec *sections;
-.  struct sec **section_tail;
+.  struct bfd_section *sections;
+.  struct bfd_section **section_tail;
 .  unsigned int section_count;
 .  struct bfd_hash_table section_htab;
 .};

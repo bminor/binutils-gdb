@@ -330,6 +330,11 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
       f_type_print_base (TYPE_TARGET_TYPE (type), stream, 0, level);
       break;
 
+    case TYPE_CODE_REF:
+      fprintf_filtered (stream, "REF TO -> ( ");
+      f_type_print_base (TYPE_TARGET_TYPE (type), stream, 0, level);
+      break;
+
     case TYPE_CODE_VOID:
       fprintf_filtered (stream, "VOID");
       break;

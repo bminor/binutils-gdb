@@ -1,5 +1,5 @@
 /* ELF strtab with GC and suffix merging support.
-   Copyright 2001, 2002 Free Software Foundation, Inc.
+   Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
    Written by Jakub Jelinek <jakub@redhat.com>.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -30,15 +30,14 @@
 struct elf_strtab_hash_entry
 {
   struct bfd_hash_entry root;
-  /* Length of this entry.  */
-  unsigned int len;
+  /* Length of this entry.  This includes the zero terminator.  */
+  int len;
   unsigned int refcount;
   union {
     /* Index within the merged section.  */
     bfd_size_type index;
-    /* Entry this is a suffix of (if len is 0).  */
+    /* Entry this is a suffix of (if len < 0).  */
     struct elf_strtab_hash_entry *suffix;
-    struct elf_strtab_hash_entry *next;
   } u;
 };
 
@@ -158,6 +157,8 @@ _bfd_elf_strtab_add (struct elf_strtab_hash *tab,
   if (entry->len == 0)
     {
       entry->len = strlen (str) + 1;
+      /* 2G strings lose.  */
+      BFD_ASSERT (entry->len > 0);
       if (tab->size == tab->alloced)
 	{
 	  bfd_size_type amt = sizeof (struct elf_strtab_hash_entry *);
@@ -235,14 +236,14 @@ _bfd_elf_strtab_emit (register bfd *abfd, struct elf_strtab_hash *tab)
   for (i = 1; i < tab->size; ++i)
     {
       register const char *str;
-      register size_t len;
+      register unsigned int len;
 
-      str = tab->array[i]->root.string;
-      len = tab->array[i]->len;
       BFD_ASSERT (tab->array[i]->refcount == 0);
-      if (len == 0)
+      len = tab->array[i]->len;
+      if ((int) len < 0)
 	continue;
 
+      str = tab->array[i]->root.string;
       if (bfd_bwrite (str, len, abfd) != len)
 	return FALSE;
 
@@ -253,40 +254,41 @@ _bfd_elf_strtab_emit (register bfd *abfd, struct elf_strtab_hash *tab)
   return TRUE;
 }
 
-/* Compare two elf_strtab_hash_entry structures.  This is called via qsort.  */
+/* Compare two elf_strtab_hash_entry structures.  Called via qsort.  */
 
 static int
-cmplengthentry (const void *a, const void *b)
+strrevcmp (const void *a, const void *b)
 {
   struct elf_strtab_hash_entry *A = *(struct elf_strtab_hash_entry **) a;
   struct elf_strtab_hash_entry *B = *(struct elf_strtab_hash_entry **) b;
+  unsigned int lenA = A->len;
+  unsigned int lenB = B->len;
+  const unsigned char *s = A->root.string + lenA - 1;
+  const unsigned char *t = B->root.string + lenB - 1;
+  int l = lenA < lenB ? lenA : lenB;
 
-  if (A->len < B->len)
-    return 1;
-  else if (A->len > B->len)
-    return -1;
-
-  return memcmp (A->root.string, B->root.string, A->len);
+  while (l)
+    {
+      if (*s != *t)
+	return (int) *s - (int) *t;
+      s--;
+      t--;
+      l--;
+    }
+  return lenA - lenB;
 }
 
-static int
-last4_eq (const void *a, const void *b)
+static inline int
+is_suffix (const struct elf_strtab_hash_entry *A,
+	   const struct elf_strtab_hash_entry *B)
 {
-  const struct elf_strtab_hash_entry *A = a;
-  const struct elf_strtab_hash_entry *B = b;
-
-  if (memcmp (A->root.string + A->len - 5, B->root.string + B->len - 5, 4)
-      != 0)
-    /* This was a hashtable collision.  */
-    return 0;
-
   if (A->len <= B->len)
     /* B cannot be a suffix of A unless A is equal to B, which is guaranteed
        not to be equal by the hash table.  */
     return 0;
 
   return memcmp (A->root.string + (A->len - B->len),
-		 B->root.string, B->len - 5) == 0;
+		 B->root.string, B->len - 1) == 0;
 }
 
 /* This function assigns final string table offsets for used strings,
@@ -295,10 +297,8 @@ last4_eq (const void *a, const void *b)
 void
 _bfd_elf_strtab_finalize (struct elf_strtab_hash *tab)
 {
-  struct elf_strtab_hash_entry **array, **a, **end, *e;
-  htab_t last4tab = NULL;
+  struct elf_strtab_hash_entry **array, **a, *e;
   bfd_size_type size, amt;
-  struct elf_strtab_hash_entry *last[256], **last_ptr[256];
 
   /* GCC 2.91.66 (egcs-1.1.2) on i386 miscompiles this function when i is
      a 64-bit bfd_size_type: a 64-bit target or --enable-64-bit-bfd.
@@ -306,105 +306,71 @@ _bfd_elf_strtab_finalize (struct elf_strtab_hash *tab)
      cycles.  */
   size_t i;
 
-  /* Now sort the strings by length, longest first.  */
-  array = NULL;
+  /* Sort the strings by suffix and length.  */
   amt = tab->size * sizeof (struct elf_strtab_hash_entry *);
   array = bfd_malloc (amt);
   if (array == NULL)
     goto alloc_failure;
 
-  memset (last, 0, sizeof (last));
-  for (i = 0; i < 256; ++i)
-    last_ptr[i] = &last[i];
   for (i = 1, a = array; i < tab->size; ++i)
-    if (tab->array[i]->refcount)
-      *a++ = tab->array[i];
-    else
-      tab->array[i]->len = 0;
-
-  size = a - array;
-
-  qsort (array, size, sizeof (struct elf_strtab_hash_entry *), cmplengthentry);
-
-  last4tab = htab_create_alloc (size * 4, NULL, last4_eq, NULL, calloc, free);
-  if (last4tab == NULL)
-    goto alloc_failure;
-
-  /* Now insert the strings into hash tables (strings with last 4 characters
-     and strings with last character equal), look for longer strings which
-     we're suffix of.  */
-  for (a = array, end = array + size; a < end; a++)
     {
-      register hashval_t hash;
-      unsigned int c;
-      unsigned int j;
-      const unsigned char *s;
-      void **p;
-
-      e = *a;
-      if (e->len > 4)
+      e = tab->array[i];
+      if (e->refcount)
 	{
-	  s = e->root.string + e->len - 1;
-	  hash = 0;
-	  for (j = 0; j < 4; j++)
-	    {
-	      c = *--s;
-	      hash += c + (c << 17);
-	      hash ^= hash >> 2;
-	    }
-	  p = htab_find_slot_with_hash (last4tab, e, hash, INSERT);
-	  if (p == NULL)
-	    goto alloc_failure;
-	  if (*p)
-	    {
-	      struct elf_strtab_hash_entry *ent;
-
-	      ent = *p;
-	      e->u.suffix = ent;
-	      e->len = 0;
-	      continue;
-	    }
-	  else
-	    *p = e;
+	  *a++ = e;
+	  /* Adjust the length to not include the zero terminator.  */
+	  e->len -= 1;
 	}
       else
+	e->len = 0;
+    }
+
+  size = a - array;
+  if (size != 0)
+    {
+      qsort (array, size, sizeof (struct elf_strtab_hash_entry *), strrevcmp);
+
+      /* Loop over the sorted array and merge suffixes.  Start from the
+	 end because we want eg.
+
+	 s1 -> "d"
+	 s2 -> "bcd"
+	 s3 -> "abcd"
+
+	 to end up as
+
+	 s3 -> "abcd"
+	 s2 _____^
+	 s1 _______^
+
+	 ie. we don't want s1 pointing into the old s2.  */
+      e = *--a;
+      e->len += 1;
+      while (--a >= array)
 	{
-	  struct elf_strtab_hash_entry *tem;
+	  struct elf_strtab_hash_entry *cmp = *a;
 
-	  c = e->root.string[e->len - 2] & 0xff;
-
-	  for (tem = last[c]; tem; tem = tem->u.next)
-	    if (tem->len > e->len
-		&& memcmp (tem->root.string + (tem->len - e->len),
-			   e->root.string, e->len - 1) == 0)
-	      break;
-	  if (tem)
+	  cmp->len += 1;
+	  if (is_suffix (e, cmp))
 	    {
-	      e->u.suffix = tem;
-	      e->len = 0;
-	      continue;
+	      cmp->u.suffix = e;
+	      cmp->len = -cmp->len;
 	    }
+	  else
+	    e = cmp;
 	}
-
-      c = e->root.string[e->len - 2] & 0xff;
-      /* Put longest strings first.  */
-      *last_ptr[c] = e;
-      last_ptr[c] = &e->u.next;
-      e->u.next = NULL;
     }
 
 alloc_failure:
   if (array)
     free (array);
-  if (last4tab)
-    htab_delete (last4tab);
 
-  /* Now assign positions to the strings we want to keep.  */
+  /* Assign positions to the strings we want to keep.  */
   size = 1;
   for (i = 1; i < tab->size; ++i)
     {
       e = tab->array[i];
-      if (e->refcount && e->len)
+      if (e->refcount && e->len > 0)
 	{
 	  e->u.index = size;
 	  size += e->len;
@@ -413,12 +379,11 @@ alloc_failure:
 
   tab->sec_size = size;
 
-  /* And now adjust the rest.  */
+  /* Adjust the rest.  */
   for (i = 1; i < tab->size; ++i)
     {
       e = tab->array[i];
-      if (e->refcount && ! e->len)
-	e->u.index = e->u.suffix->u.index
-		     + (e->u.suffix->len - strlen (e->root.string) - 1);
+      if (e->refcount && e->len < 0)
+	e->u.index = e->u.suffix->u.index + (e->u.suffix->len + e->len);
     }
 }

@@ -27,6 +27,7 @@
 
 struct gdbarch;
 struct frame_info;
+struct regcache;
 
 #include "i386-tdep.h"
 
@@ -48,12 +49,13 @@ struct frame_info;
 
 void x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch);
 
-/* Fill register REGNUM in GDB's register cache with the appropriate
+/* Fill register REGNUM in REGCACHE with the appropriate
    floating-point or SSE register value from *FXSAVE.  If REGNUM is
    -1, do this for all registers.  This function masks off any of the
    reserved bits in *FXSAVE.  */
 
-void x86_64_supply_fxsave (const char *fxsave, int regnum);
+extern void x86_64_supply_fxsave (struct regcache *regcache, int regnum,
+				  const void *fxsave);
 
 /* Fill register REGNUM (if it is a floating-point or SSE register) in
    *FXSAVE with the value in GDB's register cache.  If REGNUM is -1, do
@@ -62,6 +64,9 @@ void x86_64_supply_fxsave (const char *fxsave, int regnum);
 
 void x86_64_fill_fxsave (char *fxsave, int regnum);
 
+
+/* Variables exported from amd64nbsd-tdep.c.  */
+extern int amd64nbsd_r_reg_offset[];
 
 /* Variables exported from amd64fbsd-tdep.c.  */
 extern CORE_ADDR amd64fbsd_sigtramp_start;

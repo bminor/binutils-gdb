@@ -337,7 +337,7 @@ gdb_disassemble_info (struct gdbarch *gdbarch, struct ui_file *file)
   /* NOTE: cagney/2003-04-28: The original code, from the old Insight
      disassembler had a local optomization here.  By default it would
      access the executable file, instead of the target memory (there
-     was a growing list of exceptions though).  Unfortunatly, the
+     was a growing list of exceptions though).  Unfortunately, the
      heuristic was flawed.  Commands like "disassemble &variable"
      didn't work as they relied on the access going to the target.
      Further, it has been supperseeded by trust-read-only-sections

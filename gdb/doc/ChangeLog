@@ -1,3 +1,124 @@
+2003-11-11  Elena Zannoni  <ezannoni@redhat.com>
+
+	* stabs.texinfo: Add dircategory and direntry commands.
+	* annotate.texinfo: Ditto.
+
+2003-11-10  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Replace the
+	return_value method's "inval" and "outval" parameters with
+	"readbuf" and "writebuf".
+
+2003-10-28  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.texinfo (The F request packet, The F reply packet): Renamed
+	from "The `F' request packet" and "The `F' reply packet", to make
+	texi2dvi happy.
+	(File-I/O remote protocol extension): Update menu entries, too.
+
+2003-10-26  Michael Chastain  <mec@shout.net>
+
+	* gdb.texinfo (Thread Stops): Document the issue with
+	premature return from system calls in multi-threaded programs.
+
+2003-10-24  Andrew Cagney  <cagney@redhat.com>
+
+	* annotate.texinfo: Fix "fortunatly"[sic].
+
+2003-10-23  Kei Sakamoto  <sakamoto.kei@renesas.com>
+
+	* gdb.texinfo (Contributors to GDB): Replace "Renesas"
+	with "Hitachi" and "Mitsubishi".
+
+2003-10-20  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Document
+	gdbarch_return_value.  Add cross references from
+	USE_STRUCT_CONVENTION, EXTRACT_RETURN_VALUE, and
+	STORE_RETURN_VALUE, and from/to EXTRACT_STRUCT_VALUE_ADDRESS.
+
+2003-10-18  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdbint.texinfo (Target Architecture Definition): Document
+	regset_from_core_section.
+
+2003-10-16  Kei Sakamot Sakamoto  <sakamoto.kei@renesas.com>
+
+	* gdb.texinfo (M32R/D): Mention m32rsdi target.
+
+2003-10-15  Kevin Buettner  <kevinb@redhat.com> 
+
+	From Anthony Green  <green@redhat.com>:
+        * gdb.texinfo (Breakpoints related warnings): Insert into menu.
+
+2003-10-14  Kevin Buettner  <kevinb@redhat.com>
+
+ 	* gdb.texinfo (Breakpoint related warnings): New node.
+ 	* gdbint.texinfo (ADJUST_BREAKPOINT_ADDRESS): Document.
+	
+2003-10-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.texinfo (Remote Protocol): Document v and vCont.
+
+2003-10-10  Kei Sakamoto  <sakamoto.kei@renesas.com>
+
+	* gdb.texinfo: Replace "Hitachi" and "Mitsubishi" with "Renesas".
+	* gdbint.texinfo: Ditto.
+
+2003-10-09  Andrew Cagney  <cagney@redhat.com>
+
+	From 2003-09-18 David Anderson <davea@sgi.com>:
+	* gdb.texinfo (GDB/MI Symbol Query): Replace "comamnd" with
+	"command".
+
+2003-10-03  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Deprecate
+	IBM6000_TARGET.  Mention that it implies an RS/6000 system and not
+	just target.
+
+2003-10-02  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Rename
+	REGISTER_RAW_SIZE to DEPRECATED_REGISTER_RAW_SIZE.
+	* gdb.texinfo (Packets, Stop Reply Packets): Ditto.
+	* gdbint.texinfo (Target Architecture Definition): Rename
+
+2003-09-30  Andrew Cagney  <cagney@redhat.com>
+
+	REGISTER_VIRTUAL_SIZE to DEPRECATED_REGISTER_VIRTUAL_SIZE.
+	(Target Architecture Definition): 
+
+	* gdbint.texinfo (Target Architecture Definition): Rename
+	REGISTER_VIRTUAL_TYPE to DEPRECATED_REGISTER_VIRTUAL_TYPE.
+
+2003-09-29  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	documentation for NEED_TEXT_START_END.
+
+	* gdbint.texinfo (Target Architecture Definition): Rename
+	NPC_REGNUM to DEPRECATED_NPC_REGNUM.  Add cross reference to
+	TARGET_WRITE_PC.
+	
+2003-09-22  Michael Chastain  <mec@shout.net>
+
+	* gdbint.texinfo (Testsuite Organization): Change gdb.c++ to gdb.cp.
+
+2003-09-21  Anthony Green  <green@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Fix typos.
+
+2003-09-21  Mark Kettenis  <kettenis@gnu.org>
+
+	* gdbint.texinfo (Target Architecture Definition): Document
+	stabs_argument_has_addr.
+
+2003-09-18  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Target Architecture Definition): Delete
+	documentation on REGISTER_NAMES.
+
 2003-09-13  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdbint.texinfo (Target Architecture Definition): Replace

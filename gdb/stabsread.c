@@ -153,42 +153,12 @@ static void add_undefined_type (struct type *);
 static int
 read_cpp_abbrev (struct field_info *, char **, struct type *,
 		 struct objfile *);
-#if 0 /* OBSOLETE CFront */
-// OBSOLETE  /* new functions added for cfront support */
-
-// OBSOLETE  static int
-// OBSOLETE  copy_cfront_struct_fields (struct field_info *, struct type *,
-// OBSOLETE  			   struct objfile *);
-
-// OBSOLETE  static char *get_cfront_method_physname (char *);
-
-// OBSOLETE  static int
-// OBSOLETE  read_cfront_baseclasses (struct field_info *, char **,
-// OBSOLETE  			 struct type *, struct objfile *);
-
-// OBSOLETE  static int
-// OBSOLETE  read_cfront_static_fields (struct field_info *, char **,
-// OBSOLETE  			   struct type *, struct objfile *);
-// OBSOLETE  static int
-// OBSOLETE  read_cfront_member_functions (struct field_info *, char **,
-// OBSOLETE  			      struct type *, struct objfile *);
-
-// OBSOLETE  /* end new functions added for cfront support */
-#endif /* OBSOLETE CFront */
 
 static char *find_name_end (char *name);
-
-static void add_live_range (struct objfile *, struct symbol *, CORE_ADDR,
-			    CORE_ADDR);
-
-static int resolve_live_range (struct objfile *, struct symbol *, char *);
 
 static int process_reference (char **string);
 
 static CORE_ADDR ref_search_value (int refnum);
-
-static int resolve_symbol_reference (struct objfile *, struct symbol *,
-				     char *);
 
 void stabsread_clear_cache (void);
 
@@ -497,592 +467,6 @@ read_type_number (char **pp, int *typenums)
 #define VISIBILITY_PUBLIC	'2'	/* Stabs character for public field */
 #define VISIBILITY_IGNORE	'9'	/* Optimized out or zero length */
 
-#if 0 /* OBSOLETE CFront */
-// OBSOLETE  #define CFRONT_VISIBILITY_PRIVATE	'2'	/* Stabs character for private field */
-// OBSOLETE  #define CFRONT_VISIBILITY_PUBLIC	'1'	/* Stabs character for public field */
-
-// OBSOLETE  /* This code added to support parsing of ARM/Cfront stabs strings */
-
-// OBSOLETE  /* Get substring from string up to char c, advance string pointer past
-// OBSOLETE     suibstring. */
-
-// OBSOLETE  static char *
-// OBSOLETE  get_substring (char **p, int c)
-// OBSOLETE  {
-// OBSOLETE    char *str;
-// OBSOLETE    str = *p;
-// OBSOLETE    *p = strchr (*p, c);
-// OBSOLETE    if (*p)
-// OBSOLETE      {
-// OBSOLETE        **p = 0;
-// OBSOLETE        (*p)++;
-// OBSOLETE      }
-// OBSOLETE    else
-// OBSOLETE      str = 0;
-// OBSOLETE    return str;
-// OBSOLETE  }
-
-// OBSOLETE  /* Physname gets strcat'd onto sname in order to recreate the mangled
-// OBSOLETE     name (see funtion gdb_mangle_name in gdbtypes.c).  For cfront, make
-// OBSOLETE     the physname look like that of g++ - take out the initial mangling
-// OBSOLETE     eg: for sname="a" and fname="foo__1aFPFs_i" return "FPFs_i" */
-
-// OBSOLETE  static char *
-// OBSOLETE  get_cfront_method_physname (char *fname)
-// OBSOLETE  {
-// OBSOLETE    int len = 0;
-// OBSOLETE    /* FIXME would like to make this generic for g++ too, but 
-// OBSOLETE       that is already handled in read_member_funcctions */
-// OBSOLETE    char *p = fname;
-
-// OBSOLETE    /* search ahead to find the start of the mangled suffix */
-// OBSOLETE    if (*p == '_' && *(p + 1) == '_')	/* compiler generated; probably a ctor/dtor */
-// OBSOLETE      p += 2;
-// OBSOLETE    while (p && (unsigned) ((p + 1) - fname) < strlen (fname) && *(p + 1) != '_')
-// OBSOLETE      p = strchr (p, '_');
-// OBSOLETE    if (!(p && *p == '_' && *(p + 1) == '_'))
-// OBSOLETE      error ("Invalid mangled function name %s", fname);
-// OBSOLETE    p += 2;			/* advance past '__' */
-
-// OBSOLETE    /* struct name length and name of type should come next; advance past it */
-// OBSOLETE    while (isdigit (*p))
-// OBSOLETE      {
-// OBSOLETE        len = len * 10 + (*p - '0');
-// OBSOLETE        p++;
-// OBSOLETE      }
-// OBSOLETE    p += len;
-
-// OBSOLETE    return p;
-// OBSOLETE  }
-
-// OBSOLETE  static void
-// OBSOLETE  msg_unknown_complaint (const char *arg1)
-// OBSOLETE  {
-// OBSOLETE    complaint (&symfile_complaints, "Unsupported token in stabs string %s", arg1);
-// OBSOLETE  }
-
-// OBSOLETE  /* Read base classes within cfront class definition.
-// OBSOLETE     eg: A:ZcA;1@Bpub v2@Bvirpri;__ct__1AFv func__1AFv *sfunc__1AFv ;as__1A ;;
-// OBSOLETE     ^^^^^^^^^^^^^^^^^^
-
-// OBSOLETE     A:ZcA;;foopri__1AFv foopro__1AFv __ct__1AFv __ct__1AFRC1A foopub__1AFv ;;;
-// OBSOLETE     ^
-// OBSOLETE   */
-
-// OBSOLETE  static int
-// OBSOLETE  read_cfront_baseclasses (struct field_info *fip, char **pp, struct type *type,
-// OBSOLETE  			 struct objfile *objfile)
-// OBSOLETE  {
-// OBSOLETE    int bnum = 0;
-// OBSOLETE    char *p;
-// OBSOLETE    int i;
-// OBSOLETE    struct nextfield *new;
-
-// OBSOLETE    if (**pp == ';')		/* no base classes; return */
-// OBSOLETE      {
-// OBSOLETE        ++(*pp);
-// OBSOLETE        return 1;
-// OBSOLETE      }
-
-// OBSOLETE    /* first count base classes so we can allocate space before parsing */
-// OBSOLETE    for (p = *pp; p && *p && *p != ';'; p++)
-// OBSOLETE      {
-// OBSOLETE        if (*p == ' ')
-// OBSOLETE  	bnum++;
-// OBSOLETE      }
-// OBSOLETE    bnum++;			/* add one more for last one */
-
-// OBSOLETE    /* now parse the base classes until we get to the start of the methods 
-// OBSOLETE       (code extracted and munged from read_baseclasses) */
-// OBSOLETE    ALLOCATE_CPLUS_STRUCT_TYPE (type);
-// OBSOLETE    TYPE_N_BASECLASSES (type) = bnum;
-
-// OBSOLETE    /* allocate space */
-// OBSOLETE    {
-// OBSOLETE      int num_bytes = B_BYTES (TYPE_N_BASECLASSES (type));
-// OBSOLETE      char *pointer;
-
-// OBSOLETE      pointer = (char *) TYPE_ALLOC (type, num_bytes);
-// OBSOLETE      TYPE_FIELD_VIRTUAL_BITS (type) = (B_TYPE *) pointer;
-// OBSOLETE    }
-// OBSOLETE    B_CLRALL (TYPE_FIELD_VIRTUAL_BITS (type), TYPE_N_BASECLASSES (type));
-
-// OBSOLETE    for (i = 0; i < TYPE_N_BASECLASSES (type); i++)
-// OBSOLETE      {
-// OBSOLETE        new = (struct nextfield *) xmalloc (sizeof (struct nextfield));
-// OBSOLETE        make_cleanup (xfree, new);
-// OBSOLETE        memset (new, 0, sizeof (struct nextfield));
-// OBSOLETE        new->next = fip->list;
-// OBSOLETE        fip->list = new;
-// OBSOLETE        FIELD_BITSIZE (new->field) = 0;	/* this should be an unpacked field! */
-
-// OBSOLETE        STABS_CONTINUE (pp, objfile);
-
-// OBSOLETE        /* virtual?  eg: v2@Bvir */
-// OBSOLETE        if (**pp == 'v')
-// OBSOLETE  	{
-// OBSOLETE  	  SET_TYPE_FIELD_VIRTUAL (type, i);
-// OBSOLETE  	  ++(*pp);
-// OBSOLETE  	}
-
-// OBSOLETE        /* access?  eg: 2@Bvir */
-// OBSOLETE        /* Note: protected inheritance not supported in cfront */
-// OBSOLETE        switch (*(*pp)++)
-// OBSOLETE  	{
-// OBSOLETE  	case CFRONT_VISIBILITY_PRIVATE:
-// OBSOLETE  	  new->visibility = VISIBILITY_PRIVATE;
-// OBSOLETE  	  break;
-// OBSOLETE  	case CFRONT_VISIBILITY_PUBLIC:
-// OBSOLETE  	  new->visibility = VISIBILITY_PUBLIC;
-// OBSOLETE  	  break;
-// OBSOLETE  	default:
-// OBSOLETE  	  /* Bad visibility format.  Complain and treat it as
-// OBSOLETE  	     public.  */
-// OBSOLETE  	  {
-// OBSOLETE  	    complaint (&symfile_complaints,
-// OBSOLETE  		       "Unknown visibility `%c' for baseclass",
-// OBSOLETE  		       new->visibility);
-// OBSOLETE  	    new->visibility = VISIBILITY_PUBLIC;
-// OBSOLETE  	  }
-// OBSOLETE  	}
-
-// OBSOLETE        /* "@" comes next - eg: @Bvir */
-// OBSOLETE        if (**pp != '@')
-// OBSOLETE  	{
-// OBSOLETE  	  msg_unknown_complaint (*pp);
-// OBSOLETE  	  return 1;
-// OBSOLETE  	}
-// OBSOLETE        ++(*pp);
-
-
-// OBSOLETE        /* Set the bit offset of the portion of the object corresponding 
-// OBSOLETE           to this baseclass.  Always zero in the absence of
-// OBSOLETE           multiple inheritance.  */
-// OBSOLETE        /* Unable to read bit position from stabs;
-// OBSOLETE           Assuming no multiple inheritance for now FIXME! */
-// OBSOLETE        /* We may have read this in the structure definition;
-// OBSOLETE           now we should fixup the members to be the actual base classes */
-// OBSOLETE        FIELD_BITPOS (new->field) = 0;
-
-// OBSOLETE        /* Get the base class name and type */
-// OBSOLETE        {
-// OBSOLETE  	char *bname;		/* base class name */
-// OBSOLETE  	struct symbol *bsym;	/* base class */
-// OBSOLETE  	char *p1, *p2;
-// OBSOLETE  	p1 = strchr (*pp, ' ');
-// OBSOLETE  	p2 = strchr (*pp, ';');
-// OBSOLETE  	if (p1 < p2)
-// OBSOLETE  	  bname = get_substring (pp, ' ');
-// OBSOLETE  	else
-// OBSOLETE  	  bname = get_substring (pp, ';');
-// OBSOLETE  	if (!bname || !*bname)
-// OBSOLETE  	  {
-// OBSOLETE  	    msg_unknown_complaint (*pp);
-// OBSOLETE  	    return 1;
-// OBSOLETE  	  }
-// OBSOLETE  	/* FIXME! attach base info to type */
-// OBSOLETE  	bsym = lookup_symbol (bname, 0, STRUCT_DOMAIN, 0, 0);	/*demangled_name */
-// OBSOLETE  	if (bsym)
-// OBSOLETE  	  {
-// OBSOLETE  	    new->field.type = SYMBOL_TYPE (bsym);
-// OBSOLETE  	    new->field.name = type_name_no_tag (new->field.type);
-// OBSOLETE  	  }
-// OBSOLETE  	else
-// OBSOLETE  	  {
-// OBSOLETE  	    complaint (&symfile_complaints, "Unable to find base type for %s",
-// OBSOLETE  		       *pp);
-// OBSOLETE  	    return 1;
-// OBSOLETE  	  }
-// OBSOLETE        }
-
-// OBSOLETE        /* If more base classes to parse, loop again.
-// OBSOLETE           We ate the last ' ' or ';' in get_substring,
-// OBSOLETE           so on exit we will have skipped the trailing ';' */
-// OBSOLETE        /* if invalid, return 0; add code to detect  - FIXME! */
-// OBSOLETE      }
-// OBSOLETE    return 1;
-// OBSOLETE  }
-
-// OBSOLETE  /* read cfront member functions.
-// OBSOLETE     pp points to string starting with list of functions
-// OBSOLETE     eg: A:ZcA;1@Bpub v2@Bvirpri;__ct__1AFv func__1AFv *sfunc__1AFv ;as__1A ;;
-// OBSOLETE     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
-// OBSOLETE     A:ZcA;;foopri__1AFv foopro__1AFv __ct__1AFv __ct__1AFRC1A foopub__1AFv ;;;
-// OBSOLETE     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 
-// OBSOLETE   */
-
-// OBSOLETE  static int
-// OBSOLETE  read_cfront_member_functions (struct field_info *fip, char **pp,
-// OBSOLETE  			      struct type *type, struct objfile *objfile)
-// OBSOLETE  {
-// OBSOLETE    /* This code extracted from read_member_functions 
-// OBSOLETE       so as to do the similar thing for our funcs */
-
-// OBSOLETE    int nfn_fields = 0;
-// OBSOLETE    int length = 0;
-// OBSOLETE    /* Total number of member functions defined in this class.  If the class
-// OBSOLETE       defines two `f' functions, and one `g' function, then this will have
-// OBSOLETE       the value 3.  */
-// OBSOLETE    int total_length = 0;
-// OBSOLETE    int i;
-// OBSOLETE    struct next_fnfield
-// OBSOLETE      {
-// OBSOLETE        struct next_fnfield *next;
-// OBSOLETE        struct fn_field fn_field;
-// OBSOLETE      }
-// OBSOLETE     *sublist;
-// OBSOLETE    struct type *look_ahead_type;
-// OBSOLETE    struct next_fnfieldlist *new_fnlist;
-// OBSOLETE    struct next_fnfield *new_sublist;
-// OBSOLETE    char *main_fn_name;
-// OBSOLETE    char *fname;
-// OBSOLETE    struct symbol *ref_func = 0;
-
-// OBSOLETE    /* Process each list until we find the end of the member functions.
-// OBSOLETE       eg: p = "__ct__1AFv foo__1AFv ;;;" */
-
-// OBSOLETE    STABS_CONTINUE (pp, objfile);	/* handle \\ */
-
-// OBSOLETE    while (**pp != ';' && (fname = get_substring (pp, ' '), fname))
-// OBSOLETE      {
-// OBSOLETE        int is_static = 0;
-// OBSOLETE        int sublist_count = 0;
-// OBSOLETE        char *pname;
-// OBSOLETE        if (fname[0] == '*')	/* static member */
-// OBSOLETE  	{
-// OBSOLETE  	  is_static = 1;
-// OBSOLETE  	  sublist_count++;
-// OBSOLETE  	  fname++;
-// OBSOLETE  	}
-// OBSOLETE        ref_func = lookup_symbol (fname, 0, VAR_DOMAIN, 0, 0);		/* demangled name */
-// OBSOLETE        if (!ref_func)
-// OBSOLETE  	{
-// OBSOLETE  	  complaint (&symfile_complaints,
-// OBSOLETE  		     "Unable to find function symbol for %s", fname);
-// OBSOLETE  	  continue;
-// OBSOLETE  	}
-// OBSOLETE        sublist = NULL;
-// OBSOLETE        look_ahead_type = NULL;
-// OBSOLETE        length = 0;
-
-// OBSOLETE        new_fnlist = (struct next_fnfieldlist *)
-// OBSOLETE  	xmalloc (sizeof (struct next_fnfieldlist));
-// OBSOLETE        make_cleanup (xfree, new_fnlist);
-// OBSOLETE        memset (new_fnlist, 0, sizeof (struct next_fnfieldlist));
-
-// OBSOLETE        /* The following is code to work around cfront generated stabs.
-// OBSOLETE           The stabs contains full mangled name for each field.
-// OBSOLETE           We try to demangle the name and extract the field name out of it.  */
-// OBSOLETE        {
-// OBSOLETE  	char *dem, *dem_p, *dem_args;
-// OBSOLETE  	int dem_len;
-// OBSOLETE  	dem = cplus_demangle (fname, DMGL_ANSI | DMGL_PARAMS);
-// OBSOLETE  	if (dem != NULL)
-// OBSOLETE  	  {
-// OBSOLETE  	    dem_p = strrchr (dem, ':');
-// OBSOLETE  	    if (dem_p != 0 && *(dem_p - 1) == ':')
-// OBSOLETE  	      dem_p++;
-// OBSOLETE  	    /* get rid of args */
-// OBSOLETE  	    dem_args = strchr (dem_p, '(');
-// OBSOLETE  	    if (dem_args == NULL)
-// OBSOLETE  	      dem_len = strlen (dem_p);
-// OBSOLETE  	    else
-// OBSOLETE  	      dem_len = dem_args - dem_p;
-// OBSOLETE  	    main_fn_name =
-// OBSOLETE  	      obsavestring (dem_p, dem_len, &objfile->type_obstack);
-// OBSOLETE  	  }
-// OBSOLETE  	else
-// OBSOLETE  	  {
-// OBSOLETE  	    main_fn_name =
-// OBSOLETE  	      obsavestring (fname, strlen (fname), &objfile->type_obstack);
-// OBSOLETE  	  }
-// OBSOLETE        }				/* end of code for cfront work around */
-
-// OBSOLETE        new_fnlist->fn_fieldlist.name = main_fn_name;
-
-// OBSOLETE  /*-------------------------------------------------*/
-// OBSOLETE        /* Set up the sublists
-// OBSOLETE           Sublists are stuff like args, static, visibility, etc.
-// OBSOLETE           so in ARM, we have to set that info some other way.
-// OBSOLETE           Multiple sublists happen if overloading
-// OBSOLETE           eg: foo::26=##1;:;2A.;
-// OBSOLETE           In g++, we'd loop here thru all the sublists...  */
-
-// OBSOLETE        new_sublist =
-// OBSOLETE  	(struct next_fnfield *) xmalloc (sizeof (struct next_fnfield));
-// OBSOLETE        make_cleanup (xfree, new_sublist);
-// OBSOLETE        memset (new_sublist, 0, sizeof (struct next_fnfield));
-
-// OBSOLETE        /* eat 1; from :;2A.; */
-// OBSOLETE        new_sublist->fn_field.type = SYMBOL_TYPE (ref_func);	/* normally takes a read_type */
-// OBSOLETE        /* Make this type look like a method stub for gdb */
-// OBSOLETE        TYPE_FLAGS (new_sublist->fn_field.type) |= TYPE_FLAG_STUB;
-// OBSOLETE        TYPE_CODE (new_sublist->fn_field.type) = TYPE_CODE_METHOD;
-
-// OBSOLETE        /* If this is just a stub, then we don't have the real name here. */
-// OBSOLETE        if (TYPE_STUB (new_sublist->fn_field.type))
-// OBSOLETE  	{
-// OBSOLETE  	  if (!TYPE_DOMAIN_TYPE (new_sublist->fn_field.type))
-// OBSOLETE  	    TYPE_DOMAIN_TYPE (new_sublist->fn_field.type) = type;
-// OBSOLETE  	  new_sublist->fn_field.is_stub = 1;
-// OBSOLETE  	}
-
-// OBSOLETE        /* physname used later in mangling; eg PFs_i,5 for foo__1aFPFs_i 
-// OBSOLETE           physname gets strcat'd in order to recreate the onto mangled name */
-// OBSOLETE        pname = get_cfront_method_physname (fname);
-// OBSOLETE        new_sublist->fn_field.physname = savestring (pname, strlen (pname));
-
-
-// OBSOLETE        /* Set this member function's visibility fields. 
-// OBSOLETE           Unable to distinguish access from stabs definition!
-// OBSOLETE           Assuming public for now.  FIXME!
-// OBSOLETE           (for private, set new_sublist->fn_field.is_private = 1,
-// OBSOLETE           for public, set new_sublist->fn_field.is_protected = 1) */
-
-// OBSOLETE        /* Unable to distinguish const/volatile from stabs definition!
-// OBSOLETE           Assuming normal for now.  FIXME! */
-
-// OBSOLETE        new_sublist->fn_field.is_const = 0;
-// OBSOLETE        new_sublist->fn_field.is_volatile = 0;	/* volatile not implemented in cfront */
-
-// OBSOLETE        /* Set virtual/static function info
-// OBSOLETE           How to get vtable offsets ? 
-// OBSOLETE           Assuming normal for now FIXME!! 
-// OBSOLETE           For vtables, figure out from whence this virtual function came.
-// OBSOLETE           It may belong to virtual function table of
-// OBSOLETE           one of its baseclasses.
-// OBSOLETE           set:
-// OBSOLETE           new_sublist -> fn_field.voffset = vtable offset,
-// OBSOLETE           new_sublist -> fn_field.fcontext = look_ahead_type;
-// OBSOLETE           where look_ahead_type is type of baseclass */
-// OBSOLETE        if (is_static)
-// OBSOLETE  	new_sublist->fn_field.voffset = VOFFSET_STATIC;
-// OBSOLETE        else			/* normal member function.  */
-// OBSOLETE  	new_sublist->fn_field.voffset = 0;
-// OBSOLETE        new_sublist->fn_field.fcontext = 0;
-
-
-// OBSOLETE        /* Prepare new sublist */
-// OBSOLETE        new_sublist->next = sublist;
-// OBSOLETE        sublist = new_sublist;
-// OBSOLETE        length++;
-
-// OBSOLETE        /* In g++, we loop thu sublists - now we set from functions. */
-// OBSOLETE        new_fnlist->fn_fieldlist.fn_fields = (struct fn_field *)
-// OBSOLETE  	obstack_alloc (&objfile->type_obstack,
-// OBSOLETE  		       sizeof (struct fn_field) * length);
-// OBSOLETE        memset (new_fnlist->fn_fieldlist.fn_fields, 0,
-// OBSOLETE  	      sizeof (struct fn_field) * length);
-// OBSOLETE        for (i = length; (i--, sublist); sublist = sublist->next)
-// OBSOLETE  	{
-// OBSOLETE  	  new_fnlist->fn_fieldlist.fn_fields[i] = sublist->fn_field;
-// OBSOLETE  	}
-
-// OBSOLETE        new_fnlist->fn_fieldlist.length = length;
-// OBSOLETE        new_fnlist->next = fip->fnlist;
-// OBSOLETE        fip->fnlist = new_fnlist;
-// OBSOLETE        nfn_fields++;
-// OBSOLETE        total_length += length;
-// OBSOLETE        STABS_CONTINUE (pp, objfile);	/* handle \\ */
-// OBSOLETE      }				/* end of loop */
-
-// OBSOLETE    if (nfn_fields)
-// OBSOLETE      {
-// OBSOLETE        /* type should already have space */
-// OBSOLETE        TYPE_FN_FIELDLISTS (type) = (struct fn_fieldlist *)
-// OBSOLETE  	TYPE_ALLOC (type, sizeof (struct fn_fieldlist) * nfn_fields);
-// OBSOLETE        memset (TYPE_FN_FIELDLISTS (type), 0,
-// OBSOLETE  	      sizeof (struct fn_fieldlist) * nfn_fields);
-// OBSOLETE        TYPE_NFN_FIELDS (type) = nfn_fields;
-// OBSOLETE        TYPE_NFN_FIELDS_TOTAL (type) = total_length;
-// OBSOLETE      }
-
-// OBSOLETE    /* end of scope for reading member func */
-
-// OBSOLETE    /* eg: ";;" */
-
-// OBSOLETE    /* Skip trailing ';' and bump count of number of fields seen */
-// OBSOLETE    if (**pp == ';')
-// OBSOLETE      (*pp)++;
-// OBSOLETE    else
-// OBSOLETE      return 0;
-// OBSOLETE    return 1;
-// OBSOLETE  }
-
-// OBSOLETE  /* This routine fixes up partial cfront types that were created
-// OBSOLETE     while parsing the stabs.  The main need for this function is
-// OBSOLETE     to add information such as methods to classes.
-// OBSOLETE     Examples of "p": "sA;;__ct__1AFv foo__1AFv ;;;" */
-// OBSOLETE  int
-// OBSOLETE  resolve_cfront_continuation (struct objfile *objfile, struct symbol *sym,
-// OBSOLETE  			     char *p)
-// OBSOLETE  {
-// OBSOLETE    struct symbol *ref_sym = 0;
-// OBSOLETE    char *sname;
-// OBSOLETE    /* snarfed from read_struct_type */
-// OBSOLETE    struct field_info fi;
-// OBSOLETE    struct type *type;
-// OBSOLETE    struct cleanup *back_to;
-
-// OBSOLETE    /* Need to make sure that fi isn't gunna conflict with struct 
-// OBSOLETE       in case struct already had some fnfs */
-// OBSOLETE    fi.list = NULL;
-// OBSOLETE    fi.fnlist = NULL;
-// OBSOLETE    back_to = make_cleanup (null_cleanup, 0);
-
-// OBSOLETE    /* We only accept structs, classes and unions at the moment. 
-// OBSOLETE       Other continuation types include t (typedef), r (long dbl), ... 
-// OBSOLETE       We may want to add support for them as well; 
-// OBSOLETE       right now they are handled by duplicating the symbol information 
-// OBSOLETE       into the type information (see define_symbol) */
-// OBSOLETE    if (*p != 's'			/* structs */
-// OBSOLETE        && *p != 'c'		/* class */
-// OBSOLETE        && *p != 'u')		/* union */
-// OBSOLETE      return 0;			/* only handle C++ types */
-// OBSOLETE    p++;
-
-// OBSOLETE    /* Get symbol typs name and validate 
-// OBSOLETE       eg: p = "A;;__ct__1AFv foo__1AFv ;;;" */
-// OBSOLETE    sname = get_substring (&p, ';');
-// OBSOLETE    if (!sname || strcmp (sname, DEPRECATED_SYMBOL_NAME (sym)))
-// OBSOLETE      error ("Internal error: base symbol type name does not match\n");
-
-// OBSOLETE    /* Find symbol's internal gdb reference using demangled_name.
-// OBSOLETE       This is the real sym that we want; 
-// OBSOLETE       sym was a temp hack to make debugger happy */
-// OBSOLETE    ref_sym = lookup_symbol (DEPRECATED_SYMBOL_NAME (sym), 0, STRUCT_DOMAIN, 0, 0);
-// OBSOLETE    type = SYMBOL_TYPE (ref_sym);
-
-
-// OBSOLETE    /* Now read the baseclasses, if any, read the regular C struct or C++
-// OBSOLETE       class member fields, attach the fields to the type, read the C++
-// OBSOLETE       member functions, attach them to the type, and then read any tilde
-// OBSOLETE       field (baseclass specifier for the class holding the main vtable). */
-
-// OBSOLETE    if (!read_cfront_baseclasses (&fi, &p, type, objfile)
-// OBSOLETE    /* g++ does this next, but cfront already did this: 
-// OBSOLETE       || !read_struct_fields (&fi, &p, type, objfile) */
-// OBSOLETE        || !copy_cfront_struct_fields (&fi, type, objfile)
-// OBSOLETE        || !read_cfront_member_functions (&fi, &p, type, objfile)
-// OBSOLETE        || !read_cfront_static_fields (&fi, &p, type, objfile)
-// OBSOLETE        || !attach_fields_to_type (&fi, type, objfile)
-// OBSOLETE        || !attach_fn_fields_to_type (&fi, type)
-// OBSOLETE    /* g++ does this next, but cfront doesn't seem to have this: 
-// OBSOLETE       || !read_tilde_fields (&fi, &p, type, objfile) */
-// OBSOLETE      )
-// OBSOLETE      {
-// OBSOLETE        type = error_type (&p, objfile);
-// OBSOLETE      }
-
-// OBSOLETE    do_cleanups (back_to);
-// OBSOLETE    return 0;
-// OBSOLETE  }
-// OBSOLETE  /* End of code added to support parsing of ARM/Cfront stabs strings */
-#endif /* OBSOLETE CFront */
-
-/* This routine fixes up symbol references/aliases to point to the original
-   symbol definition.  Returns 0 on failure, non-zero on success.  */
-
-static int
-resolve_symbol_reference (struct objfile *objfile, struct symbol *sym, char *p)
-{
-  int refnum;
-  struct symbol *ref_sym = 0;
-  struct alias_list *alias;
-
-  /* If this is not a symbol reference return now.  */
-  if (*p != '#')
-    return 0;
-
-  /* Use "#<num>" as the name; we'll fix the name later.
-     We stored the original symbol name as "#<id>=<name>"
-     so we can now search for "#<id>" to resolving the reference.
-     We'll fix the names later by removing the "#<id>" or "#<id>=" */
-
-/*---------------------------------------------------------*/
-  /* Get the reference id number, and 
-     advance p past the names so we can parse the rest. 
-     eg: id=2 for p : "2=", "2=z:r(0,1)" "2:r(0,1);l(#5,#6),l(#7,#4)" */
-/*---------------------------------------------------------*/
-
-  /* This gets reference name from string.  sym may not have a name. */
-
-  /* Get the reference number associated with the reference id in the
-     gdb stab string.  From that reference number, get the main/primary
-     symbol for this alias.  */
-  refnum = process_reference (&p);
-  ref_sym = ref_search (refnum);
-  if (!ref_sym)
-    {
-      lrs_general_complaint ("symbol for reference not found");
-      return 0;
-    }
-
-  /* Parse the stab of the referencing symbol
-     now that we have the referenced symbol.
-     Add it as a new symbol and a link back to the referenced symbol.
-     eg: p : "=", "=z:r(0,1)" ":r(0,1);l(#5,#6),l(#7,#4)" */
-
-
-  /* If the stab symbol table and string contain:
-     RSYM   0      5      00000000 868    #15=z:r(0,1)
-     LBRAC  0      0      00000000 899    #5=
-     SLINE  0      16     00000003 923    #6=
-     Then the same symbols can be later referenced by:
-     RSYM   0      5      00000000 927    #15:r(0,1);l(#5,#6)
-     This is used in live range splitting to:
-     1) specify that a symbol (#15) is actually just a new storage 
-     class for a symbol (#15=z) which was previously defined.
-     2) specify that the beginning and ending ranges for a symbol 
-     (#15) are the values of the beginning (#5) and ending (#6) 
-     symbols. */
-
-  /* Read number as reference id.
-     eg: p : "=", "=z:r(0,1)" ":r(0,1);l(#5,#6),l(#7,#4)" */
-  /* FIXME! Might I want to use SYMBOL_CLASS (sym) = LOC_OPTIMIZED_OUT;
-     in case of "l(0,0)"? */
-
-/*--------------------------------------------------*/
-  /* Add this symbol to the reference list.           */
-/*--------------------------------------------------*/
-
-  alias = (struct alias_list *) obstack_alloc (&objfile->type_obstack,
-					       sizeof (struct alias_list));
-  if (!alias)
-    {
-      lrs_general_complaint ("Unable to allocate alias list memory");
-      return 0;
-    }
-
-  alias->next = 0;
-  alias->sym = sym;
-
-  if (!SYMBOL_ALIASES (ref_sym))
-    {
-      SYMBOL_ALIASES (ref_sym) = alias;
-    }
-  else
-    {
-      struct alias_list *temp;
-
-      /* Get to the end of the list.  */
-      for (temp = SYMBOL_ALIASES (ref_sym);
-	   temp->next;
-	   temp = temp->next)
-	;
-      temp->next = alias;
-    }
-
-  /* Want to fix up name so that other functions (eg. valops)
-     will correctly print the name.
-     Don't add_symbol_to_list so that lookup_symbol won't find it.
-     nope... needed for fixups. */
-  DEPRECATED_SYMBOL_NAME (sym) = DEPRECATED_SYMBOL_NAME (ref_sym);
-
-  /* Done!  */
-  return 1;
-}
-
 /* Structure for storing pointers to reference definitions for fast lookup 
    during "process_later". */
 
@@ -1211,7 +595,6 @@ symbol_reference_defined (char **string)
     }
 }
 
-/* ARGSUSED */
 struct symbol *
 define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	       struct objfile *objfile)
@@ -1309,41 +692,6 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 		     string);
 	  goto normal;		/* Do *something* with it */
 	}
-    }
-  else if (string[0] == '#')
-    {
-      /* Special GNU C extension for referencing symbols.  */
-      char *s;
-      int refnum, nlen;
-
-      /* If STRING defines a new reference id, then add it to the
-         reference map.  Else it must be referring to a previously
-         defined symbol, so add it to the alias list of the previously
-         defined symbol.  */
-      s = string;
-      refnum = symbol_reference_defined (&s);
-      if (refnum >= 0)
-	ref_add (refnum, sym, string, SYMBOL_VALUE (sym));
-      else if (!resolve_symbol_reference (objfile, sym, string))
-	return NULL;
-
-      /* S..P contains the name of the symbol.  We need to store
-         the correct name into DEPRECATED_SYMBOL_NAME.  */
-      nlen = p - s;
-      if (refnum >= 0)
-	{
-	  if (nlen > 0)
-	    SYMBOL_SET_NAMES (sym, s, nlen, objfile);
-	  else
-	    /* FIXME! Want DEPRECATED_SYMBOL_NAME (sym) = 0;
-	       Get error if leave name 0.  So give it something. */
-	    {
-	      nlen = p - string;
-	      SYMBOL_SET_NAMES (sym, string, nlen, objfile);
-	    }
-	}
-      /* Advance STRING beyond the reference id.  */
-      string = s;
     }
   else
     {
@@ -1748,17 +1096,20 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       if (within_function)
 	{
-	  /* Sun cc uses a pair of symbols, one 'p' and one 'r' with the same
-	     name to represent an argument passed in a register.
-	     GCC uses 'P' for the same case.  So if we find such a symbol pair
-	     we combine it into one 'P' symbol.  For Sun cc we need to do this
-	     regardless of DEPRECATED_REG_STRUCT_HAS_ADDR, because the compiler puts out
-	     the 'p' symbol even if it never saves the argument onto the stack.
+	  /* Sun cc uses a pair of symbols, one 'p' and one 'r', with
+	     the same name to represent an argument passed in a
+	     register.  GCC uses 'P' for the same case.  So if we find
+	     such a symbol pair we combine it into one 'P' symbol.
+	     For Sun cc we need to do this regardless of
+	     stabs_argument_has_addr, because the compiler puts out
+	     the 'p' symbol even if it never saves the argument onto
+	     the stack.
 
-	     On most machines, we want to preserve both symbols, so that
-	     we can still get information about what is going on with the
-	     stack (VAX for computing args_printed, using stack slots instead
-	     of saved registers in backtraces, etc.).
+	     On most machines, we want to preserve both symbols, so
+	     that we can still get information about what is going on
+	     with the stack (VAX for computing args_printed, using
+	     stack slots instead of saved registers in backtraces,
+	     etc.).
 
 	     Note that this code illegally combines
 	     main(argc) struct foo argc; { register struct foo argc; }
@@ -1768,13 +1119,8 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	  if (local_symbols
 	      && local_symbols->nsyms > 0
 #ifndef USE_REGISTER_NOT_ARG
-	      && DEPRECATED_REG_STRUCT_HAS_ADDR_P ()
-	      && DEPRECATED_REG_STRUCT_HAS_ADDR (processing_gcc_compilation,
-				      SYMBOL_TYPE (sym))
-	      && (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_STRUCT
-		  || TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_UNION
-		  || TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_SET
-		  || TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_BITSTRING)
+	      && gdbarch_stabs_argument_has_addr (current_gdbarch,
+						  SYMBOL_TYPE (sym))
 #endif
 	    )
 	    {
@@ -1782,7 +1128,8 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	      prev_sym = local_symbols->symbol[local_symbols->nsyms - 1];
 	      if ((SYMBOL_CLASS (prev_sym) == LOC_REF_ARG
 		   || SYMBOL_CLASS (prev_sym) == LOC_ARG)
-		  && STREQ (DEPRECATED_SYMBOL_NAME (prev_sym), DEPRECATED_SYMBOL_NAME (sym)))
+		  && strcmp (DEPRECATED_SYMBOL_NAME (prev_sym),
+			     DEPRECATED_SYMBOL_NAME (sym)) == 0)
 		{
 		  SYMBOL_CLASS (prev_sym) = LOC_REGPARM;
 		  /* Use the type from the LOC_REGISTER; that is the type
@@ -1913,15 +1260,6 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 
       if (synonym)
 	p++;
-#if 0 /* OBSOLETE CFront */
-// OBSOLETE      /* The semantics of C++ state that "struct foo { ... }" also defines 
-// OBSOLETE         a typedef for "foo".  Unfortunately, cfront never makes the typedef
-// OBSOLETE         when translating C++ into C.  We make the typedef here so that
-// OBSOLETE         "ptype foo" works as expected for cfront translated code.  */
-// OBSOLETE       else if ((current_subfile->language == language_cplus)
-// OBSOLETE 	       || (current_subfile->language == language_objc))
-// OBSOLETE 	synonym = 1;
-#endif /* OBSOLETE CFront */
 
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
  
@@ -2011,32 +1349,6 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       add_symbol_to_list (sym, &local_symbols);
       break;
-#if 0 /* OBSOLETE CFront */
-// OBSOLETE        /* New code added to support cfront stabs strings.
-// OBSOLETE           Note: case 'P' already handled above */
-// OBSOLETE      case 'Z':
-// OBSOLETE        /* Cfront type continuation coming up!
-// OBSOLETE           Find the original definition and add to it.
-// OBSOLETE           We'll have to do this for the typedef too,
-// OBSOLETE           since we cloned the symbol to define a type in read_type.
-// OBSOLETE           Stabs info examples:
-// OBSOLETE           __1C :Ztl 
-// OBSOLETE           foo__1CFv :ZtF (first def foo__1CFv:F(0,3);(0,24))
-// OBSOLETE           C:ZsC;;__ct__1CFv func1__1CFv func2__1CFv ... ;;;
-// OBSOLETE           where C is the name of the class.
-// OBSOLETE           Unfortunately, we can't lookup the original symbol yet 'cuz 
-// OBSOLETE           we haven't finished reading all the symbols.
-// OBSOLETE           Instead, we save it for processing later */
-// OBSOLETE        process_later (sym, p, resolve_cfront_continuation);
-// OBSOLETE        SYMBOL_TYPE (sym) = error_type (&p, objfile);	/* FIXME! change later */
-// OBSOLETE        SYMBOL_CLASS (sym) = LOC_CONST;
-// OBSOLETE        SYMBOL_VALUE (sym) = 0;
-// OBSOLETE        SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
-// OBSOLETE        /* Don't add to list - we'll delete it later when 
-// OBSOLETE           we add the continuation to the real sym */
-// OBSOLETE        return sym;
-// OBSOLETE        /* End of new code added to support cfront stabs strings */
-#endif /* OBSOLETE CFront */
 
     default:
       SYMBOL_TYPE (sym) = error_type (&p, objfile);
@@ -2047,160 +1359,25 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       break;
     }
 
-  /* When passing structures to a function, some systems sometimes pass
-     the address in a register, not the structure itself. */
+  /* Some systems pass variables of certain types by reference instead
+     of by value, i.e. they will pass the address of a structure (in a
+     register or on the stack) instead of the structure itself.  */
 
-  if (DEPRECATED_REG_STRUCT_HAS_ADDR_P ()
-      && DEPRECATED_REG_STRUCT_HAS_ADDR (processing_gcc_compilation, SYMBOL_TYPE (sym))
+  if (gdbarch_stabs_argument_has_addr (current_gdbarch, SYMBOL_TYPE (sym))
       && (SYMBOL_CLASS (sym) == LOC_REGPARM || SYMBOL_CLASS (sym) == LOC_ARG))
     {
-      struct type *symbol_type = check_typedef (SYMBOL_TYPE (sym));
-
-      if ((TYPE_CODE (symbol_type) == TYPE_CODE_STRUCT)
-	  || (TYPE_CODE (symbol_type) == TYPE_CODE_UNION)
-	  || (TYPE_CODE (symbol_type) == TYPE_CODE_BITSTRING)
-	  || (TYPE_CODE (symbol_type) == TYPE_CODE_SET))
-	{
-	  /* If DEPRECATED_REG_STRUCT_HAS_ADDR yields non-zero we have to convert
-	     LOC_REGPARM to LOC_REGPARM_ADDR for structures and unions. */
-	  if (SYMBOL_CLASS (sym) == LOC_REGPARM)
-	    SYMBOL_CLASS (sym) = LOC_REGPARM_ADDR;
-	  /* Likewise for converting LOC_ARG to LOC_REF_ARG (for the 7th
-	     and subsequent arguments on the sparc, for example).  */
-	  else if (SYMBOL_CLASS (sym) == LOC_ARG)
-	    SYMBOL_CLASS (sym) = LOC_REF_ARG;
-	}
+      /* We have to convert LOC_REGPARM to LOC_REGPARM_ADDR (for
+         variables passed in a register).  */
+      if (SYMBOL_CLASS (sym) == LOC_REGPARM)
+	SYMBOL_CLASS (sym) = LOC_REGPARM_ADDR;
+      /* Likewise for converting LOC_ARG to LOC_REF_ARG (for the 7th
+	 and subsequent arguments on SPARC, for example).  */
+      else if (SYMBOL_CLASS (sym) == LOC_ARG)
+	SYMBOL_CLASS (sym) = LOC_REF_ARG;
     }
 
-  /* Is there more to parse?  For example LRS/alias information?  */
-  while (*p && *p == ';')
-    {
-      p++;
-      if (*p && p[0] == 'l' && p[1] == '(')
-	{
-	  /* GNU extensions for live range splitting may be appended to 
-	     the end of the stab string.  eg. "l(#1,#2);l(#3,#5)" */
-
-	  /* Resolve the live range and add it to SYM's live range list.  */
-	  if (!resolve_live_range (objfile, sym, p))
-	    return NULL;
-
-	  /* Find end of live range info. */
-	  p = strchr (p, ')');
-	  if (!*p || *p != ')')
-	    {
-	      lrs_general_complaint ("live range format not recognized");
-	      return NULL;
-	    }
-	  p++;
-	}
-    }
   return sym;
 }
-
-/* Add the live range found in P to the symbol SYM in objfile OBJFILE.  Returns
-   non-zero on success, zero otherwise.  */
-
-static int
-resolve_live_range (struct objfile *objfile, struct symbol *sym, char *p)
-{
-  int refnum;
-  CORE_ADDR start, end;
-
-  /* Sanity check the beginning of the stabs string.  */
-  if (!*p || *p != 'l')
-    {
-      lrs_general_complaint ("live range string 1");
-      return 0;
-    }
-  p++;
-
-  if (!*p || *p != '(')
-    {
-      lrs_general_complaint ("live range string 2");
-      return 0;
-    }
-  p++;
-
-  /* Get starting value of range and advance P past the reference id.
-
-     ?!? In theory, the process_reference should never fail, but we should
-     catch that case just in case the compiler scrogged the stabs.  */
-  refnum = process_reference (&p);
-  start = ref_search_value (refnum);
-  if (!start)
-    {
-      lrs_general_complaint ("Live range symbol not found 1");
-      return 0;
-    }
-
-  if (!*p || *p != ',')
-    {
-      lrs_general_complaint ("live range string 3");
-      return 0;
-    }
-  p++;
-
-  /* Get ending value of range and advance P past the reference id.
-
-     ?!? In theory, the process_reference should never fail, but we should
-     catch that case just in case the compiler scrogged the stabs.  */
-  refnum = process_reference (&p);
-  end = ref_search_value (refnum);
-  if (!end)
-    {
-      lrs_general_complaint ("Live range symbol not found 2");
-      return 0;
-    }
-
-  if (!*p || *p != ')')
-    {
-      lrs_general_complaint ("live range string 4");
-      return 0;
-    }
-
-  /* Now that we know the bounds of the range, add it to the
-     symbol.  */
-  add_live_range (objfile, sym, start, end);
-
-  return 1;
-}
-
-/* Add a new live range defined by START and END to the symbol SYM
-   in objfile OBJFILE.  */
-
-static void
-add_live_range (struct objfile *objfile, struct symbol *sym, CORE_ADDR start,
-		CORE_ADDR end)
-{
-  struct range_list *r, *rs;
-
-  if (start >= end)
-    {
-      lrs_general_complaint ("end of live range follows start");
-      return;
-    }
-
-  /* Alloc new live range structure. */
-  r = (struct range_list *)
-    obstack_alloc (&objfile->type_obstack,
-		   sizeof (struct range_list));
-  r->start = start;
-  r->end = end;
-  r->next = 0;
-
-  /* Append this range to the symbol's range list. */
-  if (!SYMBOL_RANGES (sym))
-    SYMBOL_RANGES (sym) = r;
-  else
-    {
-      /* Get the last range for the symbol. */
-      for (rs = SYMBOL_RANGES (sym); rs->next; rs = rs->next)
-	;
-      rs->next = r;
-    }
-}
-
 
 /* Skip rest of this symbol and return an error type.
 
@@ -2399,7 +1576,7 @@ again:
 	      if (SYMBOL_CLASS (sym) == LOC_TYPEDEF
 		  && SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN
 		  && (TYPE_CODE (SYMBOL_TYPE (sym)) == code)
-		  && STREQ (DEPRECATED_SYMBOL_NAME (sym), type_name))
+		  && strcmp (DEPRECATED_SYMBOL_NAME (sym), type_name) == 0)
 		{
 		  obstack_free (&objfile->type_obstack, type_name);
 		  type = SYMBOL_TYPE (sym);
@@ -3558,39 +2735,8 @@ static void
 read_one_struct_field (struct field_info *fip, char **pp, char *p,
 		       struct type *type, struct objfile *objfile)
 {
-#if 0 /* OBSOLETE CFront */
-// OBSOLETE    /* The following is code to work around cfront generated stabs.
-// OBSOLETE       The stabs contains full mangled name for each field.
-// OBSOLETE       We try to demangle the name and extract the field name out of it.
-// OBSOLETE     */
-// OBSOLETE    if (ARM_DEMANGLING && current_subfile->language == language_cplus)
-// OBSOLETE      {
-// OBSOLETE        char save_p;
-// OBSOLETE        char *dem, *dem_p;
-// OBSOLETE        save_p = *p;
-// OBSOLETE        *p = '\0';
-// OBSOLETE        dem = cplus_demangle (*pp, DMGL_ANSI | DMGL_PARAMS);
-// OBSOLETE        if (dem != NULL)
-// OBSOLETE  	{
-// OBSOLETE  	  dem_p = strrchr (dem, ':');
-// OBSOLETE  	  if (dem_p != 0 && *(dem_p - 1) == ':')
-// OBSOLETE  	    dem_p++;
-// OBSOLETE  	  FIELD_NAME (fip->list->field) =
-// OBSOLETE  	    obsavestring (dem_p, strlen (dem_p), &objfile->type_obstack);
-// OBSOLETE  	}
-// OBSOLETE        else
-// OBSOLETE  	{
-// OBSOLETE  	  FIELD_NAME (fip->list->field) =
-// OBSOLETE  	    obsavestring (*pp, p - *pp, &objfile->type_obstack);
-// OBSOLETE  	}
-// OBSOLETE        *p = save_p;
-// OBSOLETE      }
-// OBSOLETE    /* end of code for cfront work around */
-
-// OBSOLETE   else
-#endif /* OBSOLETE CFront */
-    fip->list->field.name =
-      obsavestring (*pp, p - *pp, &objfile->type_obstack);
+  fip->list->field.name =
+    obsavestring (*pp, p - *pp, &objfile->type_obstack);
   *pp = p + 1;
 
   /* This means we have a visibility for a field coming. */
@@ -4040,138 +3186,6 @@ attach_fn_fields_to_type (struct field_info *fip, struct type *type)
     }
   return 1;
 }
-
-#if 0 /* OBSOLETE CFront */
-// OBSOLETE  /* read cfront class static data.
-// OBSOLETE     pp points to string starting with the list of static data
-// OBSOLETE     eg: A:ZcA;1@Bpub v2@Bvirpri;__ct__1AFv func__1AFv *sfunc__1AFv ;as__1A ;;
-// OBSOLETE     ^^^^^^^^
-
-// OBSOLETE     A:ZcA;;foopri__1AFv foopro__1AFv __ct__1AFv __ct__1AFRC1A foopub__1AFv ;;;
-// OBSOLETE     ^
-// OBSOLETE   */
-
-// OBSOLETE  static int
-// OBSOLETE  read_cfront_static_fields (struct field_info *fip, char **pp, struct type *type,
-// OBSOLETE  			   struct objfile *objfile)
-// OBSOLETE  {
-// OBSOLETE    struct nextfield *new;
-// OBSOLETE    struct type *stype;
-// OBSOLETE    char *sname;
-// OBSOLETE    struct symbol *ref_static = 0;
-
-// OBSOLETE    if (**pp == ';')		/* no static data; return */
-// OBSOLETE      {
-// OBSOLETE        ++(*pp);
-// OBSOLETE        return 1;
-// OBSOLETE      }
-
-// OBSOLETE    /* Process each field in the list until we find the terminating ";" */
-
-// OBSOLETE    /* eg: p = "as__1A ;;;" */
-// OBSOLETE    STABS_CONTINUE (pp, objfile);	/* handle \\ */
-// OBSOLETE    while (**pp != ';' && (sname = get_substring (pp, ' '), sname))
-// OBSOLETE      {
-// OBSOLETE        ref_static = lookup_symbol (sname, 0, VAR_DOMAIN, 0, 0);	/*demangled_name */
-// OBSOLETE        if (!ref_static)
-// OBSOLETE  	{
-// OBSOLETE  	  complaint (&symfile_complaints,
-// OBSOLETE  		     "Unable to find symbol for static data field %s", sname);
-// OBSOLETE  	  continue;
-// OBSOLETE  	}
-// OBSOLETE        stype = SYMBOL_TYPE (ref_static);
-
-// OBSOLETE        /* allocate a new fip */
-// OBSOLETE        new = (struct nextfield *) xmalloc (sizeof (struct nextfield));
-// OBSOLETE        make_cleanup (xfree, new);
-// OBSOLETE        memset (new, 0, sizeof (struct nextfield));
-// OBSOLETE        new->next = fip->list;
-// OBSOLETE        fip->list = new;
-
-// OBSOLETE        /* set visibility */
-// OBSOLETE        /* FIXME! no way to tell visibility from stabs??? */
-// OBSOLETE        new->visibility = VISIBILITY_PUBLIC;
-
-// OBSOLETE        /* set field info into fip */
-// OBSOLETE        fip->list->field.type = stype;
-
-// OBSOLETE        /* set bitpos & bitsize */
-// OBSOLETE        SET_FIELD_PHYSNAME (fip->list->field, savestring (sname, strlen (sname)));
-
-// OBSOLETE        /* set name field */
-// OBSOLETE        /* The following is code to work around cfront generated stabs.
-// OBSOLETE           The stabs contains full mangled name for each field.
-// OBSOLETE           We try to demangle the name and extract the field name out of it.
-// OBSOLETE         */
-// OBSOLETE        if (ARM_DEMANGLING)
-// OBSOLETE  	{
-// OBSOLETE  	  char *dem, *dem_p;
-// OBSOLETE  	  dem = cplus_demangle (sname, DMGL_ANSI | DMGL_PARAMS);
-// OBSOLETE  	  if (dem != NULL)
-// OBSOLETE  	    {
-// OBSOLETE  	      dem_p = strrchr (dem, ':');
-// OBSOLETE  	      if (dem_p != 0 && *(dem_p - 1) == ':')
-// OBSOLETE  		dem_p++;
-// OBSOLETE  	      fip->list->field.name =
-// OBSOLETE  		obsavestring (dem_p, strlen (dem_p), &objfile->type_obstack);
-// OBSOLETE  	    }
-// OBSOLETE  	  else
-// OBSOLETE  	    {
-// OBSOLETE  	      fip->list->field.name =
-// OBSOLETE  		obsavestring (sname, strlen (sname), &objfile->type_obstack);
-// OBSOLETE  	    }
-// OBSOLETE  	}			/* end of code for cfront work around */
-// OBSOLETE      }				/* loop again for next static field */
-// OBSOLETE    return 1;
-// OBSOLETE  }
-
-// OBSOLETE  /* Copy structure fields to fip so attach_fields_to_type will work.
-// OBSOLETE     type has already been created with the initial instance data fields.
-// OBSOLETE     Now we want to be able to add the other members to the class,
-// OBSOLETE     so we want to add them back to the fip and reattach them again
-// OBSOLETE     once we have collected all the class members. */
-
-// OBSOLETE  static int
-// OBSOLETE  copy_cfront_struct_fields (struct field_info *fip, struct type *type,
-// OBSOLETE  			   struct objfile *objfile)
-// OBSOLETE  {
-// OBSOLETE    int nfields = TYPE_NFIELDS (type);
-// OBSOLETE    int i;
-// OBSOLETE    struct nextfield *new;
-
-// OBSOLETE    /* Copy the fields into the list of fips and reset the types 
-// OBSOLETE       to remove the old fields */
-
-// OBSOLETE    for (i = 0; i < nfields; i++)
-// OBSOLETE      {
-// OBSOLETE        /* allocate a new fip */
-// OBSOLETE        new = (struct nextfield *) xmalloc (sizeof (struct nextfield));
-// OBSOLETE        make_cleanup (xfree, new);
-// OBSOLETE        memset (new, 0, sizeof (struct nextfield));
-// OBSOLETE        new->next = fip->list;
-// OBSOLETE        fip->list = new;
-
-// OBSOLETE        /* copy field info into fip */
-// OBSOLETE        new->field = TYPE_FIELD (type, i);
-// OBSOLETE        /* set visibility */
-// OBSOLETE        if (TYPE_FIELD_PROTECTED (type, i))
-// OBSOLETE  	new->visibility = VISIBILITY_PROTECTED;
-// OBSOLETE        else if (TYPE_FIELD_PRIVATE (type, i))
-// OBSOLETE  	new->visibility = VISIBILITY_PRIVATE;
-// OBSOLETE        else
-// OBSOLETE  	new->visibility = VISIBILITY_PUBLIC;
-// OBSOLETE      }
-// OBSOLETE    /* Now delete the fields from the type since we will be 
-// OBSOLETE       allocing new space once we get the rest of the fields 
-// OBSOLETE       in attach_fields_to_type.
-// OBSOLETE       The pointer TYPE_FIELDS(type) is left dangling but should 
-// OBSOLETE       be freed later by objstack_free */
-// OBSOLETE    TYPE_FIELDS (type) = 0;
-// OBSOLETE    TYPE_NFIELDS (type) = 0;
-
-// OBSOLETE    return 1;
-// OBSOLETE  }
-#endif /* OBSOLETE CFront */
 
 /* Create the vector of fields, and record how big it is.
    We need this info to record proper virtual function table information
@@ -5194,7 +4208,7 @@ cleanup_undefined_types (void)
 			    && SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN
 			    && (TYPE_CODE (SYMBOL_TYPE (sym)) ==
 				TYPE_CODE (*type))
-			    && STREQ (DEPRECATED_SYMBOL_NAME (sym), typename))
+			    && strcmp (DEPRECATED_SYMBOL_NAME (sym), typename) == 0)
                           replace_type (*type, SYMBOL_TYPE (sym));
 		      }
 		  }
@@ -5224,7 +4238,7 @@ scan_file_globals (struct objfile *objfile)
 {
   int hash;
   struct minimal_symbol *msymbol;
-  struct symbol *sym, *prev, *rsym;
+  struct symbol *sym, *prev;
   struct objfile *resolve_objfile;
 
   /* SVR4 based linkers copy referenced global symbols from shared
@@ -5276,11 +4290,8 @@ scan_file_globals (struct objfile *objfile)
 	  for (sym = global_sym_chain[hash]; sym;)
 	    {
 	      if (DEPRECATED_SYMBOL_NAME (msymbol)[0] == DEPRECATED_SYMBOL_NAME (sym)[0] &&
-		  STREQ (DEPRECATED_SYMBOL_NAME (msymbol) + 1, DEPRECATED_SYMBOL_NAME (sym) + 1))
+		  strcmp (DEPRECATED_SYMBOL_NAME (msymbol) + 1, DEPRECATED_SYMBOL_NAME (sym) + 1) == 0)
 		{
-
-		  struct alias_list *aliases;
-
 		  /* Splice this symbol out of the hash chain and
 		     assign the value we have to it. */
 		  if (prev)
@@ -5295,37 +4306,20 @@ scan_file_globals (struct objfile *objfile)
 		  /* Check to see whether we need to fix up a common block.  */
 		  /* Note: this code might be executed several times for
 		     the same symbol if there are multiple references.  */
-
-		  /* If symbol has aliases, do minimal symbol fixups for each.
-		     These live aliases/references weren't added to 
-		     global_sym_chain hash but may also need to be fixed up. */
-		  /* FIXME: Maybe should have added aliases to the global chain,                     resolved symbol name, then treated aliases as normal 
-		     symbols?  Still, we wouldn't want to add_to_list. */
-		  /* Now do the same for each alias of this symbol */
-		  rsym = sym;
-		  aliases = SYMBOL_ALIASES (sym);
-		  while (rsym)
+		  if (sym)
 		    {
-		      if (SYMBOL_CLASS (rsym) == LOC_BLOCK)
+		      if (SYMBOL_CLASS (sym) == LOC_BLOCK)
 			{
-			  fix_common_block (rsym,
+			  fix_common_block (sym,
 					    SYMBOL_VALUE_ADDRESS (msymbol));
 			}
 		      else
 			{
-			  SYMBOL_VALUE_ADDRESS (rsym)
+			  SYMBOL_VALUE_ADDRESS (sym)
 			    = SYMBOL_VALUE_ADDRESS (msymbol);
 			}
-		      SYMBOL_SECTION (rsym) = SYMBOL_SECTION (msymbol);
-		      if (aliases)
-			{
-			  rsym = aliases->sym;
-			  aliases = aliases->next;
-			}
-		      else
-			rsym = NULL;
+		      SYMBOL_SECTION (sym) = SYMBOL_SECTION (msymbol);
 		    }
-
 
 		  if (prev)
 		    {

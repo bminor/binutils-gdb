@@ -384,6 +384,12 @@ const struct mips_arch_choice mips_arch_choices[] = {
     mips_cp0sel_names_mips3264, ARRAY_SIZE (mips_cp0sel_names_mips3264),
     mips_hwr_names_numeric },
 
+  { "mips64r2",	1, bfd_mach_mipsisa64r2, CPU_MIPS64R2,
+    ISA_MIPS64R2 | INSN_MIPS16 | INSN_MIPS3D | INSN_MDMX,
+    mips_cp0_names_mips3264r2,
+    mips_cp0sel_names_mips3264r2, ARRAY_SIZE (mips_cp0sel_names_mips3264r2),
+    mips_hwr_names_mips3264r2 },
+
   { "sb1",	1, bfd_mach_mips_sb1, CPU_SB1,
     ISA_MIPS64 | INSN_MIPS3D | INSN_SB1,
     mips_cp0_names_sb1,
@@ -714,6 +720,7 @@ print_insn_args (d, l, pc, info)
 	      break;
 
 	    case 'C':
+	    case 'H':
 	      msbd = (l >> OP_SH_EXTMSBD) & OP_MASK_EXTMSBD;
 	      (*info->fprintf_func) (info->stream, "0x%x", msbd + 1);
 	      break;
@@ -739,6 +746,21 @@ print_insn_args (d, l, pc, info)
 		  (*info->fprintf_func) (info->stream, "$%d,%d", cp0reg, sel);
 		break;
 	      }
+
+	    case 'E':
+	      lsb = ((l >> OP_SH_SHAMT) & OP_MASK_SHAMT) + 32;
+	      (*info->fprintf_func) (info->stream, "0x%x", lsb);
+	      break;
+	
+	    case 'F':
+	      msb = ((l >> OP_SH_INSMSB) & OP_MASK_INSMSB) + 32;
+	      (*info->fprintf_func) (info->stream, "0x%x", msb - lsb + 1);
+	      break;
+
+	    case 'G':
+	      msbd = ((l >> OP_SH_EXTMSBD) & OP_MASK_EXTMSBD) + 32;
+	      (*info->fprintf_func) (info->stream, "0x%x", msbd + 1);
+	      break;
 
 	    default:
 	      /* xgettext:c-format */

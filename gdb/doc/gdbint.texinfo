@@ -2505,7 +2505,7 @@ However, architectures with smaller word sizes are often cramped for
 address space, so they may choose a pointer representation that breaks this
 identity, and allows a larger code address space.
 
-For example, the Mitsubishi D10V is a 16-bit VLIW processor whose
+For example, the Renesas D10V is a 16-bit VLIW processor whose
 instructions are 32 bits long@footnote{Some D10V instructions are
 actually pairs of 16-bit sub-instructions.  However, since you can't
 jump into the middle of such a pair, code addresses can only refer to
@@ -2766,19 +2766,19 @@ You should not use @code{REGISTER_CONVERT_TO_VIRTUAL} for a register
 unless this macro returns a non-zero value for that register.
 @end deftypefn
 
-@deftypefn {Target Macro} int REGISTER_RAW_SIZE (int @var{reg})
+@deftypefn {Target Macro} int DEPRECATED_REGISTER_RAW_SIZE (int @var{reg})
 The size of register number @var{reg}'s raw value.  This is the number
 of bytes the register will occupy in @code{registers}, or in a @value{GDBN}
 remote protocol packet.
 @end deftypefn
 
-@deftypefn {Target Macro} int REGISTER_VIRTUAL_SIZE (int @var{reg})
+@deftypefn {Target Macro} int DEPRECATED_REGISTER_VIRTUAL_SIZE (int @var{reg})
 The size of register number @var{reg}'s value, in its virtual format.
 This is the size a @code{struct value}'s buffer will have, holding that
 register's value.
 @end deftypefn
 
-@deftypefn {Target Macro} struct type *REGISTER_VIRTUAL_TYPE (int @var{reg})
+@deftypefn {Target Macro} struct type *DEPRECATED_REGISTER_VIRTUAL_TYPE (int @var{reg})
 This is the type of the virtual representation of register number
 @var{reg}.  Note that there is no need for a macro giving a type for the
 register's raw form; once the register's value has been obtained, @value{GDBN}
@@ -2787,7 +2787,7 @@ always uses the virtual form.
 
 @deftypefn {Target Macro} void REGISTER_CONVERT_TO_VIRTUAL (int @var{reg}, struct type *@var{type}, char *@var{from}, char *@var{to})
 Convert the value of register number @var{reg} to @var{type}, which
-should always be @code{REGISTER_VIRTUAL_TYPE (@var{reg})}.  The buffer
+should always be @code{DEPRECATED_REGISTER_VIRTUAL_TYPE (@var{reg})}.  The buffer
 at @var{from} holds the register's value in raw format; the macro should
 convert the value to virtual format, and place it at @var{to}.
 
@@ -2802,7 +2802,7 @@ value.
 
 @deftypefn {Target Macro} void REGISTER_CONVERT_TO_RAW (struct type *@var{type}, int @var{reg}, char *@var{from}, char *@var{to})
 Convert the value of register number @var{reg} to @var{type}, which
-should always be @code{REGISTER_VIRTUAL_TYPE (@var{reg})}.  The buffer
+should always be @code{DEPRECATED_REGISTER_VIRTUAL_TYPE (@var{reg})}.  The buffer
 at @var{from} holds the register's value in raw format; the macro should
 convert the value to virtual format, and place it at @var{to}.
 
@@ -3052,6 +3052,39 @@ custom breakpoint insertion and removal routines if
 @code{BREAKPOINT_FROM_PC} needs to read the target's memory for some
 reason.
 
+@item ADJUST_BREAKPOINT_ADDRESS (@var{address})
+@findex ADJUST_BREAKPOINT_ADDRESS
+@cindex breakpoint address adjusted
+Given an address at which a breakpoint is desired, return a breakpoint
+address adjusted to account for architectural constraints on
+breakpoint placement.  This method is not needed by most targets.
+
+The FR-V target (see @file{frv-tdep.c}) requires this method.
+The FR-V is a VLIW architecture in which a number of RISC-like
+instructions are grouped (packed) together into an aggregate
+instruction or instruction bundle.  When the processor executes
+one of these bundles, the component instructions are executed
+in parallel.
+
+In the course of optimization, the compiler may group instructions
+from distinct source statements into the same bundle.  The line number
+information associated with one of the latter statements will likely
+refer to some instruction other than the first one in the bundle.  So,
+if the user attempts to place a breakpoint on one of these latter
+statements, @value{GDBN} must be careful to @emph{not} place the break
+instruction on any instruction other than the first one in the bundle.
+(Remember though that the instructions within a bundle execute
+in parallel, so the @emph{first} instruction is the instruction
+at the lowest address and has nothing to do with execution order.)
+
+The FR-V's @code{ADJUST_BREAKPOINT_ADDRESS} method will adjust a
+breakpoint's address by scanning backwards for the beginning of
+the bundle, returning the address of the bundle.
+
+Since the adjustment of a breakpoint may significantly alter a user's
+expectation, @value{GDBN} prints a warning when an adjusted breakpoint
+is initially set and each time that that breakpoint is hit.
+
 @item DEPRECATED_CALL_DUMMY_WORDS
 @findex DEPRECATED_CALL_DUMMY_WORDS
 Pointer to an array of @code{LONGEST} words of data containing
@@ -3186,13 +3219,17 @@ Define this to extract a function's return value of type @var{type} from
 the raw register state @var{regbuf} and copy that, in virtual format,
 into @var{valbuf}.
  
+This method has been deprecated in favour of @code{gdbarch_return_value}
+(@pxref{gdbarch_return_value}).
+
 @item EXTRACT_STRUCT_VALUE_ADDRESS(@var{regbuf})
 @findex EXTRACT_STRUCT_VALUE_ADDRESS
+@anchor{EXTRACT_STRUCT_VALUE_ADDRESS}
 When defined, extract from the array @var{regbuf} (containing the raw
 register state) the @code{CORE_ADDR} at which a function should return
 its structure value.
 
-If not defined, @code{EXTRACT_RETURN_VALUE} is used.
+@xref{gdbarch_return_value}.
 
 @item EXTRACT_STRUCT_VALUE_ADDRESS_P()
 @findex EXTRACT_STRUCT_VALUE_ADDRESS_P
@@ -3382,9 +3419,9 @@ pointer.  It examines the current state of the machine as needed.
 Define this if you need to supply your own definition for the function
 @code{DEPRECATED_GET_SAVED_REGISTER}.
 
-@item IBM6000_TARGET
-@findex IBM6000_TARGET
-Shows that we are configured for an IBM RS/6000 target.  This
+@item DEPRECATED_IBM6000_TARGET
+@findex DEPRECATED_IBM6000_TARGET
+Shows that we are configured for an IBM RS/6000 system.  This
 conditional should be eliminated (FIXME) and replaced by
 feature-specific macros.  It was introduced in a haste and we are
 repenting at leisure.
@@ -3483,11 +3520,6 @@ method like @code{INTEGER_TO_ADDRESS} certainly makes it possible for
 @xref{Target Architecture Definition, , Pointers Are Not Always
 Addresses}.
 
-@item NEED_TEXT_START_END
-@findex NEED_TEXT_START_END
-Define this if @value{GDBN} should determine the start and end addresses of the
-text section.  (Seems dubious.)
-
 @item NO_HIF_SUPPORT
 @findex NO_HIF_SUPPORT
 (Specific to the a29k.)
@@ -3510,8 +3542,8 @@ Convert the raw contents of register @var{regnum} into a value of type
 @var{type}.
 @xref{Target Architecture Definition, , Using Different Register and Memory Data Representations}.
 
-@item REGISTER_RAW_SIZE (@var{reg})
-@findex REGISTER_RAW_SIZE
+@item DEPRECATED_REGISTER_RAW_SIZE (@var{reg})
+@findex DEPRECATED_REGISTER_RAW_SIZE
 Return the raw size of @var{reg}; defaults to the size of the register's
 virtual type.
 @xref{Target Architecture Definition, , Raw and Virtual Register Representations}.
@@ -3538,14 +3570,14 @@ floating-point.  @samp{float_reggroup}.
 Any register with a valid name.
 @end table
 
-@item REGISTER_VIRTUAL_SIZE (@var{reg})
-@findex REGISTER_VIRTUAL_SIZE
+@item DEPRECATED_REGISTER_VIRTUAL_SIZE (@var{reg})
+@findex DEPRECATED_REGISTER_VIRTUAL_SIZE
 Return the virtual size of @var{reg}; defaults to the size of the
 register's virtual type.
 Return the virtual size of @var{reg}.
 @xref{Target Architecture Definition, , Raw and Virtual Register Representations}.
 
-@item REGISTER_VIRTUAL_TYPE (@var{reg})
+@item DEPRECATED_REGISTER_VIRTUAL_TYPE (@var{reg})
 @findex REGISTER_VIRTUAL_TYPE
 Return the virtual type of @var{reg}.
 @xref{Target Architecture Definition, , Raw and Virtual Register Representations}.
@@ -3553,7 +3585,7 @@ Return the virtual type of @var{reg}.
 @item struct type *register_type (@var{gdbarch}, @var{reg})
 @findex register_type
 If defined, return the type of register @var{reg}.  This function
-superseeds @code{REGISTER_VIRTUAL_TYPE}.  @xref{Target Architecture
+superseeds @code{DEPRECATED_REGISTER_VIRTUAL_TYPE}.  @xref{Target Architecture
 Definition, , Raw and Virtual Register Representations}.
 
 @item REGISTER_CONVERT_TO_VIRTUAL(@var{reg}, @var{type}, @var{from}, @var{to})
@@ -3567,6 +3599,12 @@ form.
 Convert the value of register @var{reg} from its virtual form to its raw
 form.
 @xref{Target Architecture Definition, , Raw and Virtual Register Representations}.
+
+@item const struct regset *regset_from_core_section (struct gdbarch * @var{gdbarch}, const char * @var{sect_name}, size_t @var{sect_size})
+@findex regset_from_core_section
+Return the appropriate register set for a core file section with name
+@var{sect_name} and size @var{sect_size}.
+
 
 @item RETURN_VALUE_ON_STACK(@var{type})
 @findex RETURN_VALUE_ON_STACK
@@ -3677,14 +3715,27 @@ be the number (greater than or equal to zero) of that register.
 This should only need to be defined if @code{TARGET_READ_PC} and
 @code{TARGET_WRITE_PC} are not defined.
 
-@item NPC_REGNUM
-@findex NPC_REGNUM
+@item DEPRECATED_NPC_REGNUM
+@findex DEPRECATED_NPC_REGNUM
 The number of the ``next program counter'' register, if defined.
+
+@code{DEPRECATED_NPC_REGNUM} has been replaced by @code{TARGET_WRITE_PC}
+(@pxref{TARGET_WRITE_PC}).
 
 @item PARM_BOUNDARY
 @findex PARM_BOUNDARY
 If non-zero, round arguments to a boundary of this many bits before
 pushing them on the stack.
+
+@item stabs_argument_has_addr (@var{gdbarch}, @var{type})
+@findex stabs_argument_has_addr
+@findex DEPRECATED_REG_STRUCT_HAS_ADDR
+@anchor{stabs_argument_has_addr} Define this to return nonzero if a
+function argument of type @var{type} is passed by reference instead of
+value.
+
+This method replaces @code{DEPRECATED_REG_STRUCT_HAS_ADDR}
+(@pxref{DEPRECATED_REG_STRUCT_HAS_ADDR}).
 
 @item PROCESS_LINENUMBER_HOOK
 @findex PROCESS_LINENUMBER_HOOK
@@ -3756,14 +3807,13 @@ register buffer at run-time.
 Return the name of register @var{i} as a string.  May return @code{NULL}
 or @code{NUL} to indicate that register @var{i} is not valid.
 
-@item REGISTER_NAMES
-@findex REGISTER_NAMES
-Deprecated in favor of @code{REGISTER_NAME}.
-
 @item DEPRECATED_REG_STRUCT_HAS_ADDR (@var{gcc_p}, @var{type})
 @findex DEPRECATED_REG_STRUCT_HAS_ADDR
-Define this to return 1 if the given type will be passed by pointer
-rather than directly.
+@anchor{DEPRECATED_REG_STRUCT_HAS_ADDR}Define this to return 1 if the
+given type will be passed by pointer rather than directly.
+
+This method has been replaced by @code{stabs_argument_has_addr}
+(@pxref{stabs_argument_has_addr}).
 
 @item SAVE_DUMMY_FRAME_TOS (@var{sp})
 @findex SAVE_DUMMY_FRAME_TOS
@@ -3777,6 +3827,48 @@ allocated on the stack.  @xref{unwind_dummy_id}.
 @findex SDB_REG_TO_REGNUM
 Define this to convert sdb register numbers into @value{GDBN} regnums.  If not
 defined, no conversion will be done.
+
+@item enum return_value_convention gdbarch_return_value (struct gdbarch *@var{gdbarch}, struct type *@var{valtype}, struct regcache *@var{regcache}, void *@var{readbuf}, const void *@var{writebuf})
+@findex gdbarch_return_value
+@anchor{gdbarch_return_value} Given a function with a return-value of
+type @var{rettype}, return which return-value convention that function
+would use.
+
+@value{GDBN} currently recognizes two function return-value conventions:
+@code{RETURN_VALUE_REGISTER_CONVENTION} where the return value is found
+in registers; and @code{RETURN_VALUE_STRUCT_CONVENTION} where the return
+value is found in memory and the address of that memory location is
+passed in as the function's first parameter.
+
+If the register convention is being used, and @var{writebuf} is
+non-@code{NULL}, also copy the return-value in @var{writebuf} into
+@var{regcache}.
+
+If the register convention is being used, and @var{readbuf} is
+non-@code{NULL}, also copy the return value from @var{regcache} into
+@var{readbuf} (@var{regcache} contains a copy of the registers from the
+just returned function).
+
+@xref{EXTRACT_STRUCT_VALUE_ADDRESS}, for a description of how
+return-values that use the struct convention are handled.
+
+@emph{Maintainer note: This method replaces separate predicate, extract,
+store methods.  By having only one method, the logic needed to determine
+the return-value convention need only be implemented in one place.  If
+@value{GDBN} were written in an @sc{oo} language, this method would
+instead return an object that knew how to perform the register
+return-value extract and store.}
+
+@emph{Maintainer note: This method does not take a @var{gcc_p}
+parameter, and such a parameter should not be added.  If an architecture
+that requires per-compiler or per-function information be identified,
+then the replacement of @var{rettype} with @code{struct value}
+@var{function} should be persued.}
+
+@emph{Maintainer note: The @var{regcache} parameter limits this methods
+to the inner most frame.  While replacing @var{regcache} with a
+@code{struct frame_info} @var{frame} parameter would remove that
+limitation there has yet to be a demonstrated need for such a change.}
 
 @item SKIP_PERMANENT_BREAKPOINT
 @findex SKIP_PERMANENT_BREAKPOINT
@@ -3835,6 +3927,9 @@ normally.  Currently only defined for the Mips.
 A C expression that writes the function return value, found in
 @var{valbuf}, into the @var{regcache}.  @var{type} is the type of the
 value that is to be returned.
+
+This method has been deprecated in favour of @code{gdbarch_return_value}
+(@pxref{gdbarch_return_value}).
 
 @item SUN_FIXED_LBRAC_BUG
 @findex SUN_FIXED_LBRAC_BUG
@@ -3909,6 +4004,7 @@ Number of bits in a short integer; defaults to @code{2 * TARGET_CHAR_BIT}.
 @findex TARGET_READ_PC
 @itemx TARGET_WRITE_PC (@var{val}, @var{pid})
 @findex TARGET_WRITE_PC
+@anchor{TARGET_WRITE_PC}
 @itemx TARGET_READ_SP
 @findex TARGET_READ_SP
 @itemx TARGET_READ_FP
@@ -3969,6 +4065,9 @@ allocated for it on the stack.  @var{gcc_p} is true if the function
 being considered is known to have been compiled by GCC; this is helpful
 for systems where GCC is known to use different calling convention than
 other compilers.
+
+This method has been deprecated in favour of @code{gdbarch_return_value}
+(@pxref{gdbarch_return_value}).
 
 @item VALUE_TO_REGISTER(@var{type}, @var{regnum}, @var{from}, @var{to})
 @findex VALUE_TO_REGISTER
@@ -6381,7 +6480,7 @@ for prototypes).
 
 @item gdb.@var{lang}
 Language-specific tests for any language @var{lang} besides C.  Examples are
-@file{gdb.c++} and @file{gdb.java}.
+@file{gdb.cp} and @file{gdb.java}.
 
 @item gdb.@var{platform}
 Non-portable tests.  The tests are specific to a specific configuration

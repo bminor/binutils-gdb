@@ -189,15 +189,15 @@ mi_cmd_var_set_format (char *command, char **argv, int argc)
 
   len = strlen (formspec);
 
-  if (STREQN (formspec, "natural", len))
+  if (strncmp (formspec, "natural", len) == 0)
     format = FORMAT_NATURAL;
-  else if (STREQN (formspec, "binary", len))
+  else if (strncmp (formspec, "binary", len) == 0)
     format = FORMAT_BINARY;
-  else if (STREQN (formspec, "decimal", len))
+  else if (strncmp (formspec, "decimal", len) == 0)
     format = FORMAT_DECIMAL;
-  else if (STREQN (formspec, "hexadecimal", len))
+  else if (strncmp (formspec, "hexadecimal", len) == 0)
     format = FORMAT_HEXADECIMAL;
-  else if (STREQN (formspec, "octal", len))
+  else if (strncmp (formspec, "octal", len) == 0)
     format = FORMAT_OCTAL;
   else
     error ("mi_cmd_var_set_format: Unknown display format: must be: \"natural\", \"binary\", \"decimal\", \"hexadecimal\", or \"octal\"");

@@ -1,3 +1,52 @@
+2003-11-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* m68k-opc.c (m68k_opcodes): Reorder "fmovel".
+
+2003-11-03  Daniel Jacobowitz  <drow@mvista.com>
+
+	* arm-dis.c (print_arm_insn): Print "-" after "#".
+
+2003-10-30  Falk Hueffner  <falk.hueffner@student.uni-tuebingen.de>
+
+	* alpha-opc.c: Add support for a second argument to RPCC.
+
+2003-10-27  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* m68hc11-dis.c: Convert to ISO C90 prototypes.
+
+2003-10-21  Peter Barada  <pbarada@mail.wm.sps.mot.com>
+            Bernardo Innocenti  <bernie@develer.com>
+
+	* m68k-dis.c: Add MCFv4/MCF5528x support.
+	* m68k-opc.c: Likewise.
+
+2003-10-10  Dave Brolley  <brolley@redhat.com>
+
+	* frv-asm.c,frv-desc.c,frv-opc.c: Regenerated.
+
+2003-10-08  Dave Brolley  <brolley@redhat.com>
+
+	* frv-desc.[ch], frv-opc.[ch]: Regenerated.
+
+2003-09-30  Bob Wilson  <bob.wilson@acm.org>
+
+	* xtensa-dis.c (fetch_data): Remove numBytes parameter.
+	(print_insn_xtensa): Fix call to fetch_data.
+
+2003-09-30  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips-dis.c (mips_arch_choices): Add entry for "mips64r2"
+	(print_insn_args): Add handing for +E, +F, +G, and +H.
+	* mips-opc.c (I65): New define for MIPS64r2.
+	(mips_builtin_opcodes): Add "dext", "dextm", "dextu", "dins",
+	"dinsm", "dinsu", "drotl", "drotr", "drotr32", "drotrv", "dsbh",
+	and "dshd" for MIPS64r2.  Adjust "dror", "dror32", and "drorv" to
+	be supported on MIPS64r2.
+
+2003-09-24  Dave Brolley  <brolley@redhat.com>
+
+	* frv-desc.c, frv-opc.c, frv-opc.h: Regenerated.
+
 2003-09-14  Andreas Jaeger  <aj@suse.de>
 
 	* i386-dis.c: Convert to ISO C90 prototypes.

@@ -35,7 +35,6 @@
 #include "completer.h"
 #include "regcache.h"
 #include "top.h"
-#include "i386-tdep.h"
 #include <signal.h>
 #include <sys/types.h>
 #include <fcntl.h>
@@ -52,6 +51,10 @@
 #include "gdbcmd.h"
 #include <sys/param.h>
 #include <unistd.h>
+#include "exec.h"
+
+#include "i386-tdep.h"
+#include "i387-tdep.h"
 
 /* The ui's event loop. */
 extern int (*ui_loop_hook) (int signo);
@@ -182,7 +185,6 @@ static const int mappings[] =
   context_offset (FloatSave.DataSelector),
   context_offset (FloatSave.DataOffset),
   context_offset (FloatSave.ErrorSelector)
-#ifdef HAVE_SSE_REGS
   /* XMM0-7 */ ,
   context_offset (ExtendedRegisters[10*16]),
   context_offset (ExtendedRegisters[11*16]),
@@ -194,7 +196,6 @@ static const int mappings[] =
   context_offset (ExtendedRegisters[17*16]),
   /* MXCSR */
   context_offset (ExtendedRegisters[24])
-#endif
 };
 
 #undef context_offset
@@ -347,12 +348,15 @@ do_child_fetch_inferior_registers (int r)
 {
   char *context_offset = ((char *) &current_thread->context) + mappings[r];
   long l;
-  if (r == FCS_REGNUM)
+
+#define I387_ST0_REGNUM I386_ST0_REGNUM
+
+  if (r == I387_FISEG_REGNUM)
     {
       l = *((long *) context_offset) & 0xffff;
       supply_register (r, (char *) &l);
     }
-  else if (r == FOP_REGNUM)
+  else if (r == I387_FOP_REGNUM)
     {
       l = (*((long *) context_offset) >> 16) & ((1 << 11) - 1);
       supply_register (r, (char *) &l);
@@ -364,6 +368,8 @@ do_child_fetch_inferior_registers (int r)
       for (r = 0; r < NUM_REGS; r++)
 	do_child_fetch_inferior_registers (r);
     }
+
+#undef I387_ST0_REGNUM
 }
 
 static void
@@ -1625,7 +1631,6 @@ child_files_info (struct target_ops *ignore)
       attach_flag ? "attached" : "child", target_pid_to_str (inferior_ptid));
 }
 
-/* ARGSUSED */
 static void
 child_open (char *arg, int from_tty)
 {

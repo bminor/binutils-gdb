@@ -60,8 +60,6 @@ static void *map_to_file (int);
 
 #endif /* defined(USE_MMALLOC) && defined(HAVE_MMAP) */
 
-static void add_to_objfile_sections (bfd *, sec_ptr, void *);
-
 static void objfile_alloc_data (struct objfile *objfile);
 static void objfile_free_data (struct objfile *objfile);
 
@@ -89,7 +87,8 @@ int mapped_symbol_files;	/* Try to use mapped symbol files */
    the end of the table (objfile->sections_end). */
 
 static void
-add_to_objfile_sections (bfd *abfd, sec_ptr asect, void *objfile_p_char)
+add_to_objfile_sections (struct bfd *abfd, struct bfd_section *asect,
+			 void *objfile_p_char)
 {
   struct objfile *objfile = (struct objfile *) objfile_p_char;
   struct obj_section section;
@@ -1044,14 +1043,14 @@ map_to_file (int fd)
 
 #endif /* defined(USE_MMALLOC) && defined(HAVE_MMAP) */
 
-/* Returns a section whose range includes PC and SECTION, 
-   or NULL if none found.  Note the distinction between the return type, 
-   struct obj_section (which is defined in gdb), and the input type
-   struct sec (which is a bfd-defined data type).  The obj_section
-   contains a pointer to the bfd struct sec section.  */
+/* Returns a section whose range includes PC and SECTION, or NULL if
+   none found.  Note the distinction between the return type, struct
+   obj_section (which is defined in gdb), and the input type "struct
+   bfd_section" (which is a bfd-defined data type).  The obj_section
+   contains a pointer to the "struct bfd_section".  */
 
 struct obj_section *
-find_pc_sect_section (CORE_ADDR pc, struct sec *section)
+find_pc_sect_section (CORE_ADDR pc, struct bfd_section *section)
 {
   struct obj_section *s;
   struct objfile *objfile;
@@ -1088,7 +1087,7 @@ in_plt_section (CORE_ADDR pc, char *name)
 
   retval = (s != NULL
 	    && s->the_bfd_section->name != NULL
-	    && STREQ (s->the_bfd_section->name, ".plt"));
+	    && strcmp (s->the_bfd_section->name, ".plt") == 0);
   return (retval);
 }
 
@@ -1163,6 +1162,13 @@ objfile_free_data (struct objfile *objfile)
   gdb_assert (objfile->data != NULL);
   xfree (objfile->data);
   objfile->data = NULL;
+}
+
+void
+clear_objfile_data (struct objfile *objfile)
+{
+  gdb_assert (objfile->data != NULL);
+  memset (objfile->data, 0, objfile->num_data * sizeof (void *));
 }
 
 void

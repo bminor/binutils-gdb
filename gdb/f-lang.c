@@ -462,9 +462,9 @@ const struct language_defn f_language_defn =
   range_check_on,
   type_check_on,
   case_sensitive_off,
+  &exp_descriptor_standard,
   f_parse,			/* parser */
   f_error,			/* parser error function */
-  evaluate_subexp_standard,
   f_printchar,			/* Print character constant */
   f_printstr,			/* function to print string constant */
   f_emit_char,			/* Function to print a single character */
@@ -484,6 +484,7 @@ const struct language_defn f_language_defn =
   0,				/* arrays are first-class (not c-style) */
   1,				/* String lower bound */
   &builtin_type_f_character,	/* Type of string elements */
+  default_word_break_characters,
   LANG_MAGIC
 };
 
@@ -672,8 +673,8 @@ add_common_block (char *name, CORE_ADDR offset, int secnum, char *func_stab)
      parser have fits. */
 
 
-  if (STREQ (name, BLANK_COMMON_NAME_ORIGINAL) ||
-      STREQ (name, BLANK_COMMON_NAME_MF77))
+  if (strcmp (name, BLANK_COMMON_NAME_ORIGINAL) == 0
+      || strcmp (name, BLANK_COMMON_NAME_MF77) == 0)
     {
 
       xfree (name);
@@ -776,7 +777,7 @@ find_first_common_named (char *name)
 
   while (tmp != NULL)
     {
-      if (STREQ (tmp->name, name))
+      if (strcmp (tmp->name, name) == 0)
 	return (tmp);
       else
 	tmp = tmp->next;
@@ -847,8 +848,8 @@ patch_all_commons_by_name (char *name, CORE_ADDR offset, int secnum)
   /* For blank common blocks, change the canonical reprsentation 
      of a blank name */
 
-  if ((STREQ (name, BLANK_COMMON_NAME_ORIGINAL)) ||
-      (STREQ (name, BLANK_COMMON_NAME_MF77)))
+  if (strcmp (name, BLANK_COMMON_NAME_ORIGINAL) == 0
+      || strcmp (name, BLANK_COMMON_NAME_MF77) == 0)
     {
       xfree (name);
       name = alloca (strlen (BLANK_COMMON_NAME_LOCAL) + 1);
@@ -860,7 +861,7 @@ patch_all_commons_by_name (char *name, CORE_ADDR offset, int secnum)
   while (tmp != NULL)
     {
       if (COMMON_NEEDS_PATCHING (tmp))
-	if (STREQ (tmp->name, name))
+	if (strcmp (tmp->name, name) == 0)
 	  patch_common_entries (tmp, offset, secnum);
 
       tmp = tmp->next;

@@ -233,6 +233,15 @@ nosideret:
   return value_from_longest (builtin_type_long, (LONGEST) 1);
 }
 
+const struct exp_descriptor exp_descriptor_scm = 
+{
+  print_subexp_standard,
+  operator_length_standard,
+  op_name_standard,
+  dump_subexp_body_standard,
+  evaluate_subexp_scm
+};
+
 const struct language_defn scm_language_defn =
 {
   "scheme",			/* Language name */
@@ -241,9 +250,9 @@ const struct language_defn scm_language_defn =
   range_check_off,
   type_check_off,
   case_sensitive_off,
+  &exp_descriptor_scm,
   scm_parse,
   c_error,
-  evaluate_subexp_scm,
   scm_printchar,		/* Print a character constant */
   scm_printstr,			/* Function to print string constant */
   NULL,				/* Function to print a single character */
@@ -263,6 +272,7 @@ const struct language_defn scm_language_defn =
   1,				/* c-style arrays */
   0,				/* String lower bound */
   &builtin_type_char,		/* Type of string elements */
+  default_word_break_characters,
   LANG_MAGIC
 };
 

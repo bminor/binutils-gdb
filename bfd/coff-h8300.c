@@ -154,13 +154,20 @@ funcvec_hash_newfunc (struct bfd_hash_entry *entry,
   /* Bump the offset at which we store entries in the function
      vector.  We'd like to bump up the size of the vectors section,
      but it's not easily available here.  */
-  if (bfd_get_mach (table->abfd) == bfd_mach_h8300)
-    table->offset += 2;
-  else if (bfd_get_mach (table->abfd) == bfd_mach_h8300h
-	   || bfd_get_mach (table->abfd) == bfd_mach_h8300s)
-    table->offset += 4;
-  else
-    return NULL;
+ switch (bfd_get_mach (table->abfd))
+   {
+   case bfd_mach_h8300:
+   case bfd_mach_h8300hn:
+   case bfd_mach_h8300sn:
+     table->offset += 2;
+     break;
+   case bfd_mach_h8300h:
+   case bfd_mach_h8300s:
+     table->offset += 4;
+     break;
+   default:
+     return NULL;
+   }
 
   /* Everything went OK.  */
   return (struct bfd_hash_entry *) ret;
@@ -1096,6 +1103,7 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
 	if (symbol->flags & BSF_LOCAL)
 	  {
 	    char *new_name = bfd_malloc ((bfd_size_type) strlen (name) + 9);
+
 	    if (new_name == NULL)
 	      abort ();
 
@@ -1124,21 +1132,28 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
 	src_address++;
 
 	/* Now create an entry in the function vector itself.  */
-	if (bfd_get_mach (input_section->owner) == bfd_mach_h8300)
-	  bfd_put_16 (abfd,
-		      bfd_coff_reloc16_get_value (reloc,
-						  link_info,
-						  input_section),
-		      vectors_sec->contents + h->offset);
-	else if (bfd_get_mach (input_section->owner) == bfd_mach_h8300h
-		 || bfd_get_mach (input_section->owner) == bfd_mach_h8300s)
-	  bfd_put_32 (abfd,
-		      bfd_coff_reloc16_get_value (reloc,
-						  link_info,
-						  input_section),
-		      vectors_sec->contents + h->offset);
-	else
-	  abort ();
+	switch (bfd_get_mach (input_section->owner))
+	  {
+	  case bfd_mach_h8300:
+	  case bfd_mach_h8300hn:
+	  case bfd_mach_h8300sn:
+	    bfd_put_16 (abfd,
+			bfd_coff_reloc16_get_value (reloc,
+						    link_info,
+						    input_section),
+			vectors_sec->contents + h->offset);
+	    break;
+	  case bfd_mach_h8300h:
+	  case bfd_mach_h8300s:
+	    bfd_put_32 (abfd,
+			bfd_coff_reloc16_get_value (reloc,
+						    link_info,
+						    input_section),
+			vectors_sec->contents + h->offset);
+	    break;
+	  default:
+	    abort ();
+	  }
 
 	/* Gross.  We've already written the contents of the vector section
 	   before we get here...  So we write it again with the new data.  */
@@ -1304,11 +1319,20 @@ h8300_bfd_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 
 		  /* Bump the size of the vectors section.  Each vector
 		     takes 2 bytes on the h8300 and 4 bytes on the h8300h.  */
-		  if (bfd_get_mach (abfd) == bfd_mach_h8300)
-		    htab->vectors_sec->_raw_size += 2;
-		  else if (bfd_get_mach (abfd) == bfd_mach_h8300h
-			   || bfd_get_mach (abfd) == bfd_mach_h8300s)
-		    htab->vectors_sec->_raw_size += 4;
+		  switch (bfd_get_mach (abfd))
+		    {
+		    case bfd_mach_h8300:
+		    case bfd_mach_h8300hn:
+		    case bfd_mach_h8300sn:
+		      htab->vectors_sec->_raw_size += 2;
+		      break;
+		    case bfd_mach_h8300h:
+		    case bfd_mach_h8300s:
+		      htab->vectors_sec->_raw_size += 4;
+		      break;
+		    default:
+		      abort ();
+		    }
 		}
 	    }
 	}

@@ -1532,8 +1532,10 @@ sh_elf64_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  || (r_type >= (int) R_SH_FIRST_INVALID_RELOC
 	      && r_type <= (int) R_SH_LAST_INVALID_RELOC)
 	  || (r_type >= (int) R_SH_DIR8WPN
-	      && r_type <= (int) R_SH_LAST_INVALID_RELOC_2)
-	  || (r_type >= (int) R_SH_FIRST_INVALID_RELOC_3
+	      && r_type <= (int) R_SH_LAST_INVALID_RELOC)
+	  || (r_type >= (int) R_SH_GNU_VTINHERIT
+	      && r_type <= (int) R_SH_PSHL)
+	  || (r_type >= (int) R_SH_FIRST_INVALID_RELOC_2
 	      && r_type <= R_SH_GOTPLT32)
 	  || (r_type >= (int) R_SH_FIRST_INVALID_RELOC_4
 	      && r_type <= (int) R_SH_LAST_INVALID_RELOC_4))
@@ -1580,7 +1582,7 @@ sh_elf64_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	    }
 	  else if (! howto->partial_inplace)
 	    {
-	      relocation = _bfd_elf_rela_local_sym (output_bfd, sym, sec, rel);
+	      relocation = _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
 	      relocation |= ((sym->st_other & STO_SH5_ISA32) != 0);
 	    }
 	  else if ((sec->flags & SEC_MERGE)
@@ -4116,12 +4118,31 @@ sh64_elf64_finish_dynamic_sections (bfd *output_bfd,
   return TRUE;
 }
 
+/* Merge non visibility st_other attribute when the symbol comes from
+   a dynamic object.  */
+static void
+sh64_elf64_merge_symbol_attribute (struct elf_link_hash_entry *h,
+				   const Elf_Internal_Sym *isym,
+				   bfd_boolean definition,
+				   bfd_boolean dynamic)
+{
+  if (isym->st_other != 0 && dynamic)
+    {
+      unsigned char other;
+
+      /* Take the balance of OTHER from the definition.  */
+      other = (definition ? isym->st_other : h->other);
+      other &= ~ ELF_ST_VISIBILITY (-1);
+      h->other = other | ELF_ST_VISIBILITY (h->other);
+    }
+
+  return;
+}
+
 static struct bfd_elf_special_section const sh64_elf64_special_sections[]=
 {
-  { ".cranges",		0,	NULL,	0,
-    SHT_PROGBITS,	0 },
-  { NULL,		0,	NULL,	0,
-    0,			0 }
+  { ".cranges", 8, 0, SHT_PROGBITS, 0 },
+  { NULL,       0, 0, 0,            0 }
 };
 
 #define TARGET_BIG_SYM		bfd_elf64_sh64_vec
@@ -4164,6 +4185,9 @@ static struct bfd_elf_special_section const sh64_elf64_special_sections[]=
 #define elf_backend_link_output_symbol_hook \
 	sh64_elf64_link_output_symbol_hook
 
+#define	elf_backend_merge_symbol_attribute \
+	sh64_elf64_merge_symbol_attribute
+
 #define elf_backend_final_write_processing \
  	sh64_elf64_final_write_processing
 
@@ -4185,7 +4209,6 @@ static struct bfd_elf_special_section const sh64_elf64_special_sections[]=
 #define elf_backend_plt_readonly	1
 #define elf_backend_want_plt_sym	0
 #define elf_backend_got_header_size	24
-#define elf_backend_plt_header_size	PLT_ENTRY_SIZE
 
 #include "elf64-target.h"
 

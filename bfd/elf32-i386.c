@@ -1953,10 +1953,10 @@ elf_i386_fake_sections (bfd *abfd ATTRIBUTE_UNUSED,
 static bfd_vma
 dtpoff_base (struct bfd_link_info *info)
 {
-  /* If tls_segment is NULL, we should have signalled an error already.  */
-  if (elf_hash_table (info)->tls_segment == NULL)
+  /* If tls_sec is NULL, we should have signalled an error already.  */
+  if (elf_hash_table (info)->tls_sec == NULL)
     return 0;
-  return elf_hash_table (info)->tls_segment->start;
+  return elf_hash_table (info)->tls_sec->vma;
 }
 
 /* Return the relocation value for @tpoff relocation
@@ -1965,14 +1965,12 @@ dtpoff_base (struct bfd_link_info *info)
 static bfd_vma
 tpoff (struct bfd_link_info *info, bfd_vma address)
 {
-  struct elf_link_tls_segment *tls_segment
-    = elf_hash_table (info)->tls_segment;
+  struct elf_link_hash_table *htab = elf_hash_table (info);
 
-  /* If tls_segment is NULL, we should have signalled an error already.  */
-  if (tls_segment == NULL)
+  /* If tls_sec is NULL, we should have signalled an error already.  */
+  if (htab->tls_sec == NULL)
     return 0;
-  return (align_power (tls_segment->size, tls_segment->align)
-	  + tls_segment->start - address);
+  return htab->tls_size + htab->tls_sec->vma - address;
 }
 
 /* Relocate an i386 ELF section.  */
@@ -3240,7 +3238,6 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
 #define elf_backend_plt_readonly	1
 #define elf_backend_want_plt_sym	0
 #define elf_backend_got_header_size	12
-#define elf_backend_plt_header_size	PLT_ENTRY_SIZE
 
 /* Support RELA for objdump of prelink objects.  */
 #define elf_info_to_howto		      elf_i386_info_to_howto_rel

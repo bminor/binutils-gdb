@@ -129,7 +129,7 @@ fill_gregset (gregset_t *gregsetp, int regnum)
 void
 supply_fpregset (fpregset_t *fpregsetp)
 {
-  x86_64_supply_fxsave ((const char *) fpregsetp, -1);
+  x86_64_supply_fxsave (current_regcache, -1, fpregsetp);
 }
 
 /* Fill register REGNUM (if it is a floating-point register) in
@@ -140,77 +140,6 @@ void
 fill_fpregset (fpregset_t *fpregsetp, int regnum)
 {
   x86_64_fill_fxsave ((char *) fpregsetp, regnum);
-}
-
-/* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
-   for all registers (including the floating point registers).  */
-
-void
-fetch_inferior_registers (int regnum)
-{
-  if (regnum == -1 || amd64_native_gregset_supplies_p (regnum))
-    {
-      struct reg regs;
-
-      if (ptrace (PT_GETREGS, PIDGET (inferior_ptid),
-		  (PTRACE_ARG3_TYPE) &regs, 0) == -1)
-	perror_with_name ("Couldn't get registers");
-
-      amd64_supply_native_gregset (current_regcache, &regs, -1);
-      if (regnum != -1)
-	return;
-    }
-
-  if (regnum == -1 || regnum >= FP0_REGNUM)
-    {
-      struct fpreg fpregs;
-
-      if (ptrace (PT_GETFPREGS, PIDGET (inferior_ptid),
-		  (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
-	perror_with_name ("Couldn't get floating point status");
-
-      x86_64_supply_fxsave ((const char *) &fpregs, -1);
-    }
-}
-
-/* Store register REGNUM back into the inferior.  If REGNUM is -1, do
-   this for all registers (including the floating point registers).  */
-
-void
-store_inferior_registers (int regnum)
-{
-  if (regnum == -1 || amd64_native_gregset_supplies_p (regnum))
-    {
-      struct reg regs;
-
-      if (ptrace (PT_GETREGS, PIDGET (inferior_ptid),
-                  (PTRACE_ARG3_TYPE) &regs, 0) == -1)
-        perror_with_name ("Couldn't get registers");
-
-      amd64_collect_native_gregset (current_regcache, &regs, regnum);
-
-      if (ptrace (PT_SETREGS, PIDGET (inferior_ptid),
-	          (PTRACE_ARG3_TYPE) &regs, 0) == -1)
-        perror_with_name ("Couldn't write registers");
-
-      if (regnum != -1)
-	return;
-    }
-
-  if (regnum == -1 || regnum >= FP0_REGNUM)
-    {
-      struct fpreg fpregs;
-
-      if (ptrace (PT_GETFPREGS, PIDGET (inferior_ptid),
-		  (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
-	perror_with_name ("Couldn't get floating point status");
-
-      x86_64_fill_fxsave ((char *) &fpregs, regnum);
-
-      if (ptrace (PT_SETFPREGS, PIDGET (inferior_ptid),
-		  (PTRACE_ARG3_TYPE) &fpregs, 0) == -1)
-	perror_with_name ("Couldn't write floating point status");
-    }
 }
 
 

@@ -194,22 +194,12 @@ extern void stabsect_build_psymtabs
 
 extern void elfstab_offset_sections (struct objfile *,
 				     struct partial_symtab *);
-#if 0 /* OBSOLETE CFront */
-// OBSOLETE extern void process_later
-// OBSOLETE   (struct symbol *, char *,
-// OBSOLETE    int (*f) (struct objfile *, struct symbol *, char *));
-#endif /* OBSOLETE CFront */
-
 extern int symbol_reference_defined (char **);
 
 extern void ref_add (int, struct symbol *, char *, CORE_ADDR);
 
 extern struct symbol *ref_search (int);
 
-#if 0 /* OBSOLETE CFront */
-// OBSOLETE extern int resolve_cfront_continuation
-// OBSOLETE   (struct objfile *objfile, struct symbol *sym, char *p);
-#endif /* OBSOLETE CFront */
 extern void free_header_files (void);
 
 extern void init_header_files (void);

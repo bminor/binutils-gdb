@@ -306,7 +306,6 @@ child_files_info (struct target_ops *ignore)
       attach_flag ? "attached" : "child", target_pid_to_str (inferior_ptid));
 }
 
-/* ARGSUSED */
 static void
 child_open (char *arg, int from_tty)
 {
@@ -552,7 +551,45 @@ child_core_file_to_sym_file (char *core)
    */
   return NULL;
 }
-
+
+/* Perform a partial transfer to/from the specified object.  For
+   memory transfers, fall back to the old memory xfer functions.  */
+
+static LONGEST
+child_xfer_partial (struct target_ops *ops, enum target_object object,
+		    const char *annex, void *readbuf,
+		    const void *writebuf, ULONGEST offset, LONGEST len)
+{
+  switch (object)
+    {
+    case TARGET_OBJECT_MEMORY:
+      if (readbuf)
+	return child_xfer_memory (offset, readbuf, len, 0/*write*/,
+				  NULL, ops);
+      if (writebuf)
+	return child_xfer_memory (offset, readbuf, len, 1/*write*/,
+				  NULL, ops);
+      return -1;
+
+#if 0
+    case TARGET_OBJECT_UNWIND_TABLE:
+#ifndef NATIVE_XFER_UNWIND_TABLE
+#define NATIVE_XFER_UNWIND_TABLE(OPS,OBJECT,ANNEX,WRITEBUF,READBUF,OFFSET,LEN) (-1)
+#endif
+      return NATIVE_XFER_UNWIND_TABLE (ops, object, annex, readbuf, writebuf,
+				       offset, len);
+#endif
+
+#if 0
+    case TARGET_OBJECT_AUXV:
+      return native_xfer_auxv (PIDGET (inferior_ptid), readbuf, writebuf,
+			       offset, len);
+#endif
+
+    default:
+      return -1;
+    }
+}
 
 #if !defined(CHILD_PID_TO_STR)
 char *
@@ -579,6 +616,7 @@ init_child_ops (void)
   child_ops.to_store_registers = store_inferior_registers;
   child_ops.to_prepare_to_store = child_prepare_to_store;
   child_ops.to_xfer_memory = child_xfer_memory;
+  child_ops.to_xfer_partial = child_xfer_partial;
   child_ops.to_files_info = child_files_info;
   child_ops.to_insert_breakpoint = memory_insert_breakpoint;
   child_ops.to_remove_breakpoint = memory_remove_breakpoint;

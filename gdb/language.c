@@ -205,7 +205,7 @@ set_language_command (char *ignore, int from_tty)
   /* Search the list of languages for a match.  */
   for (i = 0; i < languages_size; i++)
     {
-      if (STREQ (languages[i]->la_name, language))
+      if (strcmp (languages[i]->la_name, language) == 0)
 	{
 	  /* Found it!  Go into manual mode, and use this language.  */
 	  if (languages[i]->la_language == language_auto)
@@ -253,22 +253,22 @@ show_type_command (char *ignore, int from_tty)
 static void
 set_type_command (char *ignore, int from_tty)
 {
-  if (STREQ (type, "on"))
+  if (strcmp (type, "on") == 0)
     {
       type_check = type_check_on;
       type_mode = type_mode_manual;
     }
-  else if (STREQ (type, "warn"))
+  else if (strcmp (type, "warn") == 0)
     {
       type_check = type_check_warn;
       type_mode = type_mode_manual;
     }
-  else if (STREQ (type, "off"))
+  else if (strcmp (type, "off") == 0)
     {
       type_check = type_check_off;
       type_mode = type_mode_manual;
     }
-  else if (STREQ (type, "auto"))
+  else if (strcmp (type, "auto") == 0)
     {
       type_mode = type_mode_auto;
       set_type_range_case ();
@@ -299,22 +299,22 @@ show_range_command (char *ignore, int from_tty)
 static void
 set_range_command (char *ignore, int from_tty)
 {
-  if (STREQ (range, "on"))
+  if (strcmp (range, "on") == 0)
     {
       range_check = range_check_on;
       range_mode = range_mode_manual;
     }
-  else if (STREQ (range, "warn"))
+  else if (strcmp (range, "warn") == 0)
     {
       range_check = range_check_warn;
       range_mode = range_mode_manual;
     }
-  else if (STREQ (range, "off"))
+  else if (strcmp (range, "off") == 0)
     {
       range_check = range_check_off;
       range_mode = range_mode_manual;
     }
-  else if (STREQ (range, "auto"))
+  else if (strcmp (range, "auto") == 0)
     {
       range_mode = range_mode_auto;
       set_type_range_case ();
@@ -1177,6 +1177,15 @@ language_demangle (const struct language_defn *current_language,
   return NULL;
 }
 
+/* Return the default string containing the list of characters
+   delimiting words.  This is a reasonable default value that
+   most languages should be able to use.  */
+
+char *
+default_word_break_characters (void)
+{
+  return " \t\n!@#$%^&*()+=|~`}{[]\"';:?/>.<,-";
+}
 
 /* Define the language that is no language.  */
 
@@ -1268,9 +1277,9 @@ const struct language_defn unknown_language_defn =
   range_check_off,
   type_check_off,
   case_sensitive_on,
+  &exp_descriptor_standard,
   unk_lang_parser,
   unk_lang_error,
-  evaluate_subexp_standard,
   unk_lang_printchar,		/* Print character constant */
   unk_lang_printstr,
   unk_lang_emit_char,
@@ -1290,6 +1299,7 @@ const struct language_defn unknown_language_defn =
   1,				/* c-style arrays */
   0,				/* String lower bound */
   &builtin_type_char,		/* Type of string elements */
+  default_word_break_characters,
   LANG_MAGIC
 };
 
@@ -1302,9 +1312,9 @@ const struct language_defn auto_language_defn =
   range_check_off,
   type_check_off,
   case_sensitive_on,
+  &exp_descriptor_standard,
   unk_lang_parser,
   unk_lang_error,
-  evaluate_subexp_standard,
   unk_lang_printchar,		/* Print character constant */
   unk_lang_printstr,
   unk_lang_emit_char,
@@ -1324,6 +1334,7 @@ const struct language_defn auto_language_defn =
   1,				/* c-style arrays */
   0,				/* String lower bound */
   &builtin_type_char,		/* Type of string elements */
+  default_word_break_characters,
   LANG_MAGIC
 };
 
@@ -1335,9 +1346,9 @@ const struct language_defn local_language_defn =
   range_check_off,
   type_check_off,
   case_sensitive_on,
+  &exp_descriptor_standard,
   unk_lang_parser,
   unk_lang_error,
-  evaluate_subexp_standard,
   unk_lang_printchar,		/* Print character constant */
   unk_lang_printstr,
   unk_lang_emit_char,
@@ -1357,6 +1368,7 @@ const struct language_defn local_language_defn =
   1,				/* c-style arrays */
   0,				/* String lower bound */
   &builtin_type_char,		/* Type of string elements */
+  default_word_break_characters,
   LANG_MAGIC
 };
 

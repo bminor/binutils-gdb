@@ -54,7 +54,7 @@
 
 #include "target.h"
 
-/* This table must line up with REGISTER_NAMES in tm-m68k.h */
+/* This table must line up with REGISTER_NAME in "m68k-tdep.c".  */
 static const int regmap[] =
 {
   PT_D0, PT_D1, PT_D2, PT_D3, PT_D4, PT_D5, PT_D6, PT_D7,

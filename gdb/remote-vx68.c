@@ -111,10 +111,10 @@ vx_read_register (int regno)
     }
   else
     {
-      bzero (&deprecated_registers[DEPRECATED_REGISTER_BYTE (FP0_REGNUM)],
-	     MC68K_FPREG_SIZE * 8);
-      bzero (&deprecated_registers[DEPRECATED_REGISTER_BYTE (FPC_REGNUM)],
-	     MC68K_FPREG_PLEN - (MC68K_FPREG_SIZE * 8));
+      memset (&deprecated_registers[DEPRECATED_REGISTER_BYTE (FP0_REGNUM)],
+	      0, MC68K_FPREG_SIZE * 8);
+      memset (&deprecated_registers[DEPRECATED_REGISTER_BYTE (FPC_REGNUM)],
+	      0, MC68K_FPREG_PLEN - (MC68K_FPREG_SIZE * 8));
     }
 
   /* Mark the register cache valid.  */

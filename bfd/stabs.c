@@ -1,5 +1,5 @@
 /* Stabs in sections linking support.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
@@ -169,12 +169,13 @@ stab_link_includes_newfunc (entry, table, string)
    pass of the linker.  */
 
 bfd_boolean
-_bfd_link_section_stabs (abfd, psinfo, stabsec, stabstrsec, psecinfo)
+_bfd_link_section_stabs (abfd, psinfo, stabsec, stabstrsec, psecinfo, pstring_offset)
      bfd *abfd;
      PTR *psinfo;
      asection *stabsec;
      asection *stabstrsec;
      PTR *psecinfo;
+     bfd_size_type *pstring_offset;
 {
   bfd_boolean first;
   struct stab_info *sinfo;
@@ -276,7 +277,11 @@ _bfd_link_section_stabs (abfd, psinfo, stabsec, stabstrsec, psecinfo)
      and identify N_BINCL symbols which can be eliminated.  */
 
   stroff = 0;
-  next_stroff = 0;
+  /* The stabs sections can be split when
+     -split-by-reloc/-split-by-file is used.  We must keep track of
+     each stab section's place in the single concatenated string
+     table.  */
+  next_stroff = pstring_offset ? *pstring_offset : 0;
   skip = 0;
 
   symend = stabbuf + stabsec->_raw_size;
@@ -302,6 +307,8 @@ _bfd_link_section_stabs (abfd, psinfo, stabsec, stabstrsec, psecinfo)
 	     string table.  We only copy the very first one.  */
 	  stroff = next_stroff;
 	  next_stroff += bfd_get_32 (abfd, sym + 8);
+	  if (pstring_offset)
+	    *pstring_offset = next_stroff;
 	  if (! first)
 	    {
 	      *pstridx = (bfd_size_type) -1;

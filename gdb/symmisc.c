@@ -579,7 +579,7 @@ Arguments missing: an output file name and an optional symbol file name");
 
   immediate_quit++;
   ALL_SYMTABS (objfile, s)
-    if (symname == NULL || (STREQ (symname, s->filename)))
+    if (symname == NULL || strcmp (symname, s->filename) == 0)
     dump_symtab (objfile, s, outfile);
   immediate_quit--;
   do_cleanups (cleanups);
@@ -818,7 +818,7 @@ maintenance_print_psymbols (char *args, int from_tty)
 
   immediate_quit++;
   ALL_PSYMTABS (objfile, ps)
-    if (symname == NULL || (STREQ (symname, ps->filename)))
+    if (symname == NULL || strcmp (symname, ps->filename) == 0)
     dump_psymtab (objfile, ps, outfile);
   immediate_quit--;
   do_cleanups (cleanups);
@@ -965,7 +965,7 @@ maintenance_print_msymbols (char *args, int from_tty)
 
   immediate_quit++;
   ALL_OBJFILES (objfile)
-    if (symname == NULL || (STREQ (symname, objfile->name)))
+    if (symname == NULL || strcmp (symname, objfile->name) == 0)
     dump_msymbols (objfile, outfile);
   immediate_quit--;
   fprintf_filtered (outfile, "\n\n");

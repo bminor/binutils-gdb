@@ -68,10 +68,10 @@ struct frame_info;
 #define DEPRECATED_STORE_RETURN_VALUE(TYPE,VALBUF) \
   if (TYPE_CODE (TYPE) == TYPE_CODE_FLT)				\
       {									\
-	char raw_buf[REGISTER_RAW_SIZE (FP0_REGNUM)];			\
+	char raw_buf[DEPRECATED_REGISTER_RAW_SIZE (FP0_REGNUM)];			\
 	DEPRECATED_REGISTER_CONVERT_TO_RAW (TYPE, FP0_REGNUM, VALBUF, raw_buf);	\
 	deprecated_write_register_bytes (DEPRECATED_REGISTER_BYTE (FP0_REGNUM),		\
-			      raw_buf, REGISTER_RAW_SIZE (FP0_REGNUM)); \
+			      raw_buf, DEPRECATED_REGISTER_RAW_SIZE (FP0_REGNUM)); \
       }									\
   else									\
     deprecated_write_register_bytes ((TYPE_CODE(TYPE) == TYPE_CODE_PTR ? 8 * 4 : 0), \

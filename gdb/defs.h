@@ -230,6 +230,21 @@ enum auto_boolean
   AUTO_BOOLEAN_AUTO
 };
 
+/* Potential ways that a function can return a value of a given type.  */
+enum return_value_convention
+{
+  /* Where the return value has been squeezed into one or more
+     registers.  */
+  RETURN_VALUE_REGISTER_CONVENTION,
+  /* Commonly known as the "struct return convention".  The caller
+     passes an additional hidden first parameter to the caller.  That
+     parameter contains the address at which the value being returned
+     should be stored.  While typically, and historically, used for
+     large structs, this is convention is applied to values of many
+     different types.  */
+  RETURN_VALUE_STRUCT_CONVENTION
+};
+
 /* the cleanup list records things that have to be undone
    if an error happens (descriptors to be closed, memory to be freed, etc.)
    Each link in the chain records a function to call and an
@@ -853,9 +868,10 @@ extern void xmfree (void *md, void *ptr);
    "libiberty.h". */
 extern void xfree (void *);
 
-/* Utility macros to allocate typed memory.  Avoids errors like
-   ``struct foo *foo = xmalloc (sizeof bar)'' and ``struct foo *foo =
-   (struct foo *) xmalloc (sizeof bar)''.  */
+/* Utility macros to allocate typed memory.  Avoids errors like:
+   struct foo *foo = xmalloc (sizeof struct bar); and memset (foo,
+   sizeof (struct foo), 0).  */
+#define XZALLOC(TYPE) ((TYPE*) memset (xmalloc (sizeof (TYPE)), 0, sizeof (TYPE)))
 #define XMALLOC(TYPE) ((TYPE*) xmalloc (sizeof (TYPE)))
 #define XCALLOC(NMEMB, TYPE) ((TYPE*) xcalloc ((NMEMB), sizeof (TYPE)))
 
@@ -1263,5 +1279,37 @@ extern int use_windows;
 #ifndef ISATTY
 #define ISATTY(FP)	(isatty (fileno (FP)))
 #endif
+
+/* Ensure that V is aligned to an N byte boundary (B's assumed to be a
+   power of 2).  Round up/down when necessary.  Examples of correct
+   use include:
+
+   addr = align_up (addr, 8); -- VALUE needs 8 byte alignment
+   write_memory (addr, value, len);
+   addr += len;
+
+   and:
+
+   sp = align_down (sp - len, 16); -- Keep SP 16 byte aligned
+   write_memory (sp, value, len);
+
+   Note that uses such as:
+
+   write_memory (addr, value, len);
+   addr += align_up (len, 8);
+
+   and:
+
+   sp -= align_up (len, 8);
+   write_memory (sp, value, len);
+
+   are typically not correct as they don't ensure that the address (SP
+   or ADDR) is correctly aligned (relying on previous alignment to
+   keep things right).  This is also why the methods are called
+   "align_..." instead of "round_..." as the latter reads better with
+   this incorrect coding style.  */
+
+extern ULONGEST align_up (ULONGEST v, int n);
+extern ULONGEST align_down (ULONGEST v, int n);
 
 #endif /* #ifndef DEFS_H */

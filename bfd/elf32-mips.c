@@ -1940,7 +1940,6 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
 #define elf_backend_ecoff_debug_swap	&mips_elf32_ecoff_debug_swap
 
 #define elf_backend_got_header_size	(4 * MIPS_RESERVED_GOTNO)
-#define elf_backend_plt_header_size	0
 #define elf_backend_may_use_rel_p	1
 #define elf_backend_may_use_rela_p	0
 #define elf_backend_default_use_rela_p	0

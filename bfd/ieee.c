@@ -80,7 +80,7 @@ static bfd_boolean ieee_slurp_symbol_table
   PARAMS ((bfd *));
 static long ieee_get_symtab_upper_bound
   PARAMS ((bfd *));
-static long ieee_get_symtab
+static long ieee_canonicalize_symtab
   PARAMS ((bfd *, asymbol **));
 static asection *get_section_entry
   PARAMS ((bfd *, ieee_data_type *i, unsigned int));
@@ -160,7 +160,7 @@ static bfd_boolean ieee_write_data_part
 static bfd_boolean init_for_output
   PARAMS ((bfd *));
 static bfd_boolean ieee_set_section_contents
-  PARAMS ((bfd *, sec_ptr, PTR, file_ptr, bfd_size_type));
+  PARAMS ((bfd *, sec_ptr, const PTR, file_ptr, bfd_size_type));
 static bfd_boolean ieee_write_external_part
   PARAMS ((bfd *));
 static bfd_boolean ieee_write_me_part
@@ -1145,7 +1145,7 @@ ieee_get_symtab_upper_bound (abfd)
 extern const bfd_target ieee_vec;
 
 static long
-ieee_get_symtab (abfd, location)
+ieee_canonicalize_symtab (abfd, location)
      bfd *abfd;
      asymbol **location;
 {
@@ -3440,7 +3440,7 @@ static bfd_boolean
 ieee_set_section_contents (abfd, section, location, offset, count)
      bfd *abfd;
      sec_ptr section;
-     PTR location;
+     const PTR location;
      file_ptr offset;
      bfd_size_type count;
 {
@@ -3704,6 +3704,7 @@ ieee_write_processor (abfd)
 	  case bfd_mach_mcf5206e:id = "5206e"; break;
 	  case bfd_mach_mcf5307:id = "5307";  break;
 	  case bfd_mach_mcf5407:id = "5407";  break;
+	  case bfd_mach_mcf528x:id = "5282";  break;
 	  }
 
 	if (! ieee_write_id (abfd, id))
@@ -4097,10 +4098,11 @@ const bfd_target ieee_vec =
      ieee_update_armap_timestamp  */
   BFD_JUMP_TABLE_ARCHIVE (ieee),
 
-  /* ieee_get_symtab_upper_bound, ieee_get_symtab, ieee_make_empty_symbol,
-     ieee_print_symbol, ieee_get_symbol_info, ieee_bfd_is_local_label_name,
-     ieee_get_lineno, ieee_find_nearest_line, ieee_bfd_make_debug_symbol,
-     ieee_read_minisymbols, ieee_minisymbol_to_symbol  */
+  /* ieee_get_symtab_upper_bound, ieee_canonicalize_symtab,
+     ieee_make_empty_symbol, ieee_print_symbol, ieee_get_symbol_info,
+     ieee_bfd_is_local_label_name, ieee_get_lineno,
+     ieee_find_nearest_line, ieee_bfd_make_debug_symbol,
+     ieee_read_minisymbols, ieee_minisymbol_to_symbol */
   BFD_JUMP_TABLE_SYMBOLS (ieee),
 
   /* ieee_get_reloc_upper_bound, ieee_canonicalize_reloc,

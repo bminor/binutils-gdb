@@ -44,6 +44,7 @@
 #include "reggroups.h"
 #include "block.h"
 #include <ctype.h>
+#include "gdb_assert.h"
 
 /* Functions exported for general use, in inferior.h: */
 
@@ -261,7 +262,6 @@ notice_args_read (char *args, int from_tty, struct cmd_list_element *c)
 
 /* Compute command-line string given argument vector.  This does the
    same shell processing as fork_inferior.  */
-/* ARGSUSED */
 char *
 construct_inferior_arguments (struct gdbarch *gdbarch, int argc, char **argv)
 {
@@ -370,7 +370,6 @@ strip_bg_char (char **args)
   return 0;
 }
 
-/* ARGSUSED */
 void
 tty_command (char *file, int from_tty)
 {
@@ -543,7 +542,6 @@ continue_command (char *proc_count_exp, int from_tty)
 
 /* Step until outside of current statement.  */
 
-/* ARGSUSED */
 static void
 step_command (char *count_string, int from_tty)
 {
@@ -552,7 +550,6 @@ step_command (char *count_string, int from_tty)
 
 /* Likewise, but skip over subroutine calls as if single instructions.  */
 
-/* ARGSUSED */
 static void
 next_command (char *count_string, int from_tty)
 {
@@ -561,14 +558,12 @@ next_command (char *count_string, int from_tty)
 
 /* Likewise, but step only one instruction.  */
 
-/* ARGSUSED */
 void
 stepi_command (char *count_string, int from_tty)
 {
   step_1 (0, 1, count_string);
 }
 
-/* ARGSUSED */
 void
 nexti_command (char *count_string, int from_tty)
 {
@@ -958,7 +953,6 @@ signal_command (char *signum_exp, int from_tty)
    we set.  This may involve changes to wait_for_inferior and the
    proceed status code.  */
 
-/* ARGSUSED */
 static void
 until_next_command (int from_tty)
 {
@@ -1077,7 +1071,7 @@ print_return_value (int structure_return, struct type *value_type)
 
   if (!structure_return)
     {
-      value = value_being_returned (value_type, stop_registers, structure_return);
+      value = register_value_being_returned (value_type, stop_registers);
       stb = ui_out_stream_new (uiout);
       ui_out_text (uiout, "Value returned is ");
       ui_out_field_fmt (uiout, "gdb-result-var", "$%d", record_latest_value (value));
@@ -1086,19 +1080,62 @@ print_return_value (int structure_return, struct type *value_type)
       ui_out_field_stream (uiout, "return-value", stb);
       ui_out_text (uiout, "\n");
     }
-  else
+  /* FIXME: 2003-09-27: When returning from a nested inferior function
+     call, it's possible (with no help from the architecture vector)
+     to locate and return/print a "struct return" value.  This is just
+     a more complicated case of what is already being done in in the
+     inferior function call code.  In fact, when inferior function
+     calls are made async, this will likely be made the norm.  */
+#ifdef DEPRECATED_VALUE_RETURNED_FROM_STACK
+#define DEPRECATED_VALUE_RETURNED_FROM_STACK_P 1
+#else
+#define DEPRECATED_VALUE_RETURNED_FROM_STACK_P 0
+#endif
+  else if (gdbarch_return_value_p (current_gdbarch)
+	   || DEPRECATED_VALUE_RETURNED_FROM_STACK_P)
+    /* We cannot determine the contents of the structure because it is
+       on the stack, and we don't know where, since we did not
+       initiate the call, as opposed to the call_function_by_hand
+       case.  */
     {
-      /* We cannot determine the contents of the structure because
-	 it is on the stack, and we don't know where, since we did not
-	 initiate the call, as opposed to the call_function_by_hand case */
-#ifdef VALUE_RETURNED_FROM_STACK
-      value = 0;
+      gdb_assert (gdbarch_return_value (current_gdbarch, value_type, NULL, NULL, NULL)
+		  == RETURN_VALUE_STRUCT_CONVENTION);
       ui_out_text (uiout, "Value returned has type: ");
       ui_out_field_string (uiout, "return-type", TYPE_NAME (value_type));
       ui_out_text (uiout, ".");
       ui_out_text (uiout, " Cannot determine contents\n");
-#else
-      value = value_being_returned (value_type, stop_registers, structure_return);
+      return;
+    }
+  else
+    {
+      if (EXTRACT_STRUCT_VALUE_ADDRESS_P ())
+	{
+	  CORE_ADDR addr = EXTRACT_STRUCT_VALUE_ADDRESS (stop_registers);
+	  if (!addr)
+	    error ("Function return value unknown.");
+	  value = value_at (value_type, addr, NULL);
+	}
+      else if (DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS_P ())
+	{
+	  char *buf = deprecated_grub_regcache_for_registers (stop_registers);
+	  CORE_ADDR addr = DEPRECATED_EXTRACT_STRUCT_VALUE_ADDRESS (buf);
+	  if (!addr)
+	    error ("Function return value unknown.");
+	  value = value_at (value_type, addr, NULL);
+	}
+      else
+	{
+	  /* It is "struct return" yet the value is being extracted,
+             presumably from registers, using EXTRACT_RETURN_VALUE.
+             This doesn't make sense.  Unfortunately, the legacy
+             interfaces allowed this behavior.  Sigh!  */
+	  value = allocate_value (value_type);
+	  CHECK_TYPEDEF (value_type);
+	  /* If the function returns void, don't bother fetching the
+	     return value.  */
+	  EXTRACT_RETURN_VALUE (value_type, stop_registers,
+				VALUE_CONTENTS_RAW (value));
+	}
       stb = ui_out_stream_new (uiout);
       ui_out_text (uiout, "Value returned is ");
       ui_out_field_fmt (uiout, "gdb-result-var", "$%d", record_latest_value (value));
@@ -1106,7 +1143,6 @@ print_return_value (int structure_return, struct type *value_type)
       value_print (value, stb->stream, 0, Val_no_prettyprint);
       ui_out_field_stream (uiout, "return-value", stb);
       ui_out_text (uiout, "\n");
-#endif
     }
 }
 
@@ -1284,7 +1320,6 @@ finish_command (char *arg, int from_tty)
     }
 }
 
-/* ARGSUSED */
 static void
 program_info (char *args, int from_tty)
 {
@@ -1446,7 +1481,6 @@ unset_environment_command (char *var, int from_tty)
 
 static const char path_var_name[] = "PATH";
 
-/* ARGSUSED */
 static void
 path_info (char *args, int from_tty)
 {
@@ -1476,9 +1510,6 @@ path_command (char *dirname, int from_tty)
 }
 
 
-#ifdef REGISTER_NAMES
-char *gdb_register_names[] = REGISTER_NAMES;
-#endif
 /* Print out the machine register regnum. If regnum is -1, print all
    registers (print_all == 1) or all non-float and non-vector
    registers (print_all == 0).
@@ -1557,7 +1588,7 @@ default_print_registers_info (struct gdbarch *gdbarch,
       else
 	{
 	  memcpy (virtual_buffer, raw_buffer,
-		  REGISTER_VIRTUAL_SIZE (i));
+		  DEPRECATED_REGISTER_VIRTUAL_SIZE (i));
 	}
 
       /* If virtual format is floating, print it that way, and in raw
@@ -1570,13 +1601,13 @@ default_print_registers_info (struct gdbarch *gdbarch,
 		     file, 0, 1, 0, Val_pretty_default);
 
 	  fprintf_filtered (file, "\t(raw 0x");
-	  for (j = 0; j < REGISTER_RAW_SIZE (i); j++)
+	  for (j = 0; j < DEPRECATED_REGISTER_RAW_SIZE (i); j++)
 	    {
 	      int idx;
 	      if (TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 		idx = j;
 	      else
-		idx = REGISTER_RAW_SIZE (i) - 1 - j;
+		idx = DEPRECATED_REGISTER_RAW_SIZE (i) - 1 - j;
 	      fprintf_filtered (file, "%02x", (unsigned char) raw_buffer[idx]);
 	    }
 	  fprintf_filtered (file, ")");
@@ -1907,7 +1938,6 @@ interrupt_target_command (char *args, int from_tty)
     }
 }
 
-/* ARGSUSED */
 static void
 print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 		  struct frame_info *frame, const char *args)
@@ -1944,7 +1974,6 @@ float_info (char *args, int from_tty)
   print_float_info (current_gdbarch, gdb_stdout, deprecated_selected_frame, args);
 }
 
-/* ARGSUSED */
 static void
 unset_command (char *args, int from_tty)
 {

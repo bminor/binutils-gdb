@@ -32,6 +32,7 @@
 #include "gdbcore.h"
 #include "objfiles.h"
 #include "regcache.h"
+#include "regset.h"
 #include "symfile.h"
 
 #include "gdb_assert.h"
@@ -757,10 +758,10 @@ x86_64_store_return_value (struct type *type, struct regcache *regcache,
   int len = TYPE_LENGTH (type);
 
   /* First handle long doubles.  */
-  if (TYPE_CODE_FLT == TYPE_CODE (type)  && len == 16)
+  if (TYPE_CODE_FLT == TYPE_CODE (type) && len == 16)
     {
       ULONGEST fstat;
-      char buf[FPU_REG_RAW_SIZE];
+      char buf[I386_MAX_REGISTER_SIZE];
 
       /* Returning floating-point values is a bit tricky.  Apart from
          storing the return value in %st(0), we have to simulate the
@@ -795,8 +796,8 @@ x86_64_store_return_value (struct type *type, struct regcache *regcache,
   /* XXX: What about complex floating point types?  */
   else
     {
-      int low_size = REGISTER_RAW_SIZE (0);
-      int high_size = REGISTER_RAW_SIZE (1);
+      int low_size = register_size (current_gdbarch, X86_64_RAX_REGNUM);
+      int high_size = register_size (current_gdbarch, X86_64_RDX_REGNUM);
 
       if (len <= low_size)
         regcache_cooked_write_part (regcache, 0, 0, len, valbuf);
@@ -1203,13 +1204,58 @@ x86_64_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
 {
   return sp & -(CORE_ADDR)16;
 }
+
+
+/* Supply register REGNUM from the floating-point register set REGSET
+   to register cache REGCACHE.  If REGNUM is -1, do this for all
+   registers in REGSET.  */
+
+static void
+x86_64_supply_fpregset (const struct regset *regset, struct regcache *regcache,
+			int regnum, const void *fpregs, size_t len)
+{
+  const struct gdbarch_tdep *tdep = regset->descr;
+
+  gdb_assert (len == tdep->sizeof_fpregset);
+  x86_64_supply_fxsave (regcache, regnum, fpregs);
+}
+
+/* Return the appropriate register set for the core section identified
+   by SECT_NAME and SECT_SIZE.  */
+
+static const struct regset *
+x86_64_regset_from_core_section (struct gdbarch *gdbarch,
+				 const char *sect_name, size_t sect_size)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (strcmp (sect_name, ".reg2") == 0 && sect_size == tdep->sizeof_fpregset)
+    {
+      if (tdep->fpregset == NULL)
+	{
+	  tdep->fpregset = XMALLOC (struct regset);
+	  tdep->fpregset->descr = tdep;
+	  tdep->fpregset->supply_regset = x86_64_supply_fpregset;
+	}
+
+      return tdep->fpregset;
+    }
+
+  return i386_regset_from_core_section (gdbarch, sect_name, sect_size);
+}
+
 
 void
 x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  /* The x86-64 has 16 SSE registers.  */
+  /* AMD64 generally uses `fxsave' instead of `fsave' for saving its
+     floating-point registers.  */
+  tdep->sizeof_fpregset = I387_SIZEOF_FXSAVE;
+
+  /* AMD64 has an FPU and 16 SSE registers.  */
+  tdep->st0_regnum = X86_64_ST0_REGNUM;
   tdep->num_xmm_regs = 16;
 
   /* This is what all the fuss is about.  */
@@ -1264,6 +1310,7 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Avoid wiring in the MMX registers for now.  */
   set_gdbarch_num_pseudo_regs (gdbarch, 0);
+  tdep->mm0_regnum = -1;
 
   set_gdbarch_unwind_dummy_id (gdbarch, x86_64_unwind_dummy_id);
 
@@ -1275,11 +1322,15 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   frame_unwind_append_sniffer (gdbarch, x86_64_sigtramp_frame_sniffer);
   frame_unwind_append_sniffer (gdbarch, x86_64_frame_sniffer);
   frame_base_set_default (gdbarch, &x86_64_frame_base);
+
+  /* If we have a register mapping, enable the generic core file support.  */
+  if (tdep->gregset_reg_offset)
+    set_gdbarch_regset_from_core_section (gdbarch,
+					  x86_64_regset_from_core_section);
 }
 
 
-#define I387_FISEG_REGNUM FISEG_REGNUM
-#define I387_FOSEG_REGNUM FOSEG_REGNUM
+#define I387_ST0_REGNUM X86_64_ST0_REGNUM
 
 /* The 64-bit FXSAVE format differs from the 32-bit format in the
    sense that the instruction pointer and data pointer are simply
@@ -1288,22 +1339,25 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
    bits of these pointers (instead of just the 16-bits of the segment
    selector).  */
 
-/* Fill register REGNUM in GDB's register cache with the appropriate
+/* Fill register REGNUM in REGCACHE with the appropriate
    floating-point or SSE register value from *FXSAVE.  If REGNUM is
    -1, do this for all registers.  This function masks off any of the
    reserved bits in *FXSAVE.  */
 
 void
-x86_64_supply_fxsave (const char *fxsave, int regnum)
+x86_64_supply_fxsave (struct regcache *regcache, int regnum,
+		      const void *fxsave)
 {
-  i387_supply_fxsave (fxsave, regnum);
+  i387_supply_fxsave (regcache, regnum, fxsave);
 
   if (fxsave)
     {
+      const char *regs = fxsave;
+
       if (regnum == -1 || regnum == I387_FISEG_REGNUM)
-	supply_register (I387_FISEG_REGNUM, fxsave + 12);
+	regcache_raw_supply (regcache, I387_FISEG_REGNUM, regs + 12);
       if (regnum == -1 || regnum == I387_FOSEG_REGNUM)
-      supply_register (I387_FOSEG_REGNUM, fxsave + 20);
+	regcache_raw_supply (regcache, I387_FOSEG_REGNUM, regs + 20);
     }
 }
 

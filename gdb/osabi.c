@@ -283,11 +283,28 @@ gdbarch_lookup_osabi (bfd *abfd)
     return match;
 }
 
+
+/* Return non-zero if architecture A can run code written for
+   architecture B.  */
+static int
+can_run_code_for (const struct bfd_arch_info *a, const struct bfd_arch_info *b)
+{
+  /* BFD's 'A->compatible (A, B)' functions return zero if A and B are
+     incompatible.  But if they are compatible, it returns the 'more
+     featureful' of the two arches.  That is, if A can run code
+     written for B, but B can't run code written for A, then it'll
+     return A.
+
+     struct bfd_arch_info objects are singletons: that is, there's
+     supposed to be exactly one instance for a given machine.  So you
+     can tell whether two are equivalent by comparing pointers.  */
+  return (a == b || a->compatible (a, b) == a);
+}
+
+
 void
 gdbarch_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  const struct bfd_arch_info *arch_info = gdbarch_bfd_arch_info (gdbarch);
-  const struct bfd_arch_info *compatible;
   struct gdb_osabi_handler *handler;
 
   if (info.osabi == GDB_OSABI_UNKNOWN)
@@ -303,29 +320,38 @@ gdbarch_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
       if (handler->osabi != info.osabi)
 	continue;
 
-      /* Check whether the machine type and architecture of the
-         handler are compatible with the desired machine type and
-         architecture.
+      /* If the architecture described by ARCH_INFO can run code for
+         the architcture we registered the handler for, then the
+         handler is applicable.  Note, though, that if the handler is
+         for an architecture that is a superset of ARCH_INFO, we can't
+         use that --- it would be perfectly correct for it to install
+         gdbarch methods that refer to registers / instructions /
+         other facilities ARCH_INFO doesn't have.
 
-	 NOTE: kettenis/20021027: There may be more than one machine
+         NOTE: kettenis/20021027: There may be more than one machine
 	 type that is compatible with the desired machine type.  Right
 	 now we simply return the first match, which is fine for now.
 	 However, we might want to do something smarter in the future.  */
-      compatible = arch_info->compatible (arch_info, handler->arch_info);
-      if (compatible == handler->arch_info)
+      /* NOTE: cagney/2003-10-23: The code for "a can_run_code_for b"
+         is implemented using BFD's compatible method (a->compatible
+         (b) == a -- the lowest common denominator between a and b is
+         a).  That method's definition of compatible may not be as you
+         expect.  For instance the test "amd64 can run code for i386"
+         (or more generally "64-bit ISA can run code for the 32-bit
+         ISA").  BFD doesn't normally consider 32-bit and 64-bit
+         "compatible" so it doesn't succeed.  */
+      if (can_run_code_for (info.bfd_arch_info, handler->arch_info))
 	{
 	  (*handler->init_osabi) (info, gdbarch);
 	  return;
 	}
     }
 
-  fprintf_filtered
-    (gdb_stderr,
-     "A handler for the OS ABI \"%s\" is not built into this "
-     "configuration of GDB.  "
-     "Attempting to continue with the default %s settings",
-     gdbarch_osabi_name (info.osabi),
-     bfd_printable_arch_mach (arch_info->arch, arch_info->mach));
+  warning ("A handler for the OS ABI \"%s\" is not built into this "
+	   "configuration of GDB.  "
+	   "Attempting to continue with the default %s settings",
+	   gdbarch_osabi_name (info.osabi),
+	   info.bfd_arch_info->printable_name);
 }
 
 

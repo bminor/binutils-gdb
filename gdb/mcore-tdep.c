@@ -265,7 +265,7 @@ analyze_dummy_frame (CORE_ADDR pc, CORE_ADDR frame)
   deprecated_update_frame_base_hack (dummy, frame);
   get_frame_extra_info (dummy)->status = 0;
   get_frame_extra_info (dummy)->framesize = 0;
-  memset (get_frame_saved_regs (dummy), '\000', SIZEOF_FRAME_SAVED_REGS);
+  memset (deprecated_get_frame_saved_regs (dummy), '\000', SIZEOF_FRAME_SAVED_REGS);
   mcore_analyze_prologue (dummy, 0, 0);
   return dummy;
 }
@@ -590,7 +590,7 @@ mcore_analyze_prologue (struct frame_info *fi, CORE_ADDR pc, int skip_prologue)
 	{
 	  if (register_offsets[rn] >= 0)
 	    {
-	      get_frame_saved_regs (fi)[rn] = get_frame_base (fi) - register_offsets[rn];
+	      deprecated_get_frame_saved_regs (fi)[rn] = get_frame_base (fi) - register_offsets[rn];
 	      mcore_insn_debug (("Saved register %s stored at 0x%08x, value=0x%08x\n",
 			       mcore_register_names[rn], fi->saved_regs[rn],
 			      read_memory_integer (fi->saved_regs[rn], 4)));
@@ -639,11 +639,11 @@ mcore_frame_chain (struct frame_info * fi)
       int fp = get_frame_extra_info (dummy)->fp_regnum;
 
       /* Our caller has a frame pointer. */
-      if (get_frame_saved_regs (fi)[fp] != 0)
+      if (deprecated_get_frame_saved_regs (fi)[fp] != 0)
 	{
 	  /* The "FP" was saved on the stack.  Don't forget to adjust
 	     the "FP" with the framesize to get a real FP. */
-	  callers_addr = read_memory_integer (get_frame_saved_regs (fi)[fp],
+	  callers_addr = read_memory_integer (deprecated_get_frame_saved_regs (fi)[fp],
 					      DEPRECATED_REGISTER_SIZE)
 	    + get_frame_extra_info (dummy)->framesize;
 	}
@@ -726,8 +726,8 @@ mcore_find_callers_reg (struct frame_info *fi, int regnum)
 				       get_frame_base (fi)))
 	return deprecated_read_register_dummy (get_frame_pc (fi),
 					       get_frame_base (fi), regnum);
-      else if (get_frame_saved_regs (fi)[regnum] != 0)
-	return read_memory_integer (get_frame_saved_regs (fi)[regnum],
+      else if (deprecated_get_frame_saved_regs (fi)[regnum] != 0)
+	return read_memory_integer (deprecated_get_frame_saved_regs (fi)[regnum],
 				    DEPRECATED_REGISTER_SIZE);
     }
 
@@ -770,11 +770,11 @@ mcore_pop_frame (void)
       /* Restore any saved registers. */
       for (rn = 0; rn < NUM_REGS; rn++)
 	{
-	  if (get_frame_saved_regs (fi)[rn] != 0)
+	  if (deprecated_get_frame_saved_regs (fi)[rn] != 0)
 	    {
 	      ULONGEST value;
 
-	      value = read_memory_unsigned_integer (get_frame_saved_regs (fi)[rn],
+	      value = read_memory_unsigned_integer (deprecated_get_frame_saved_regs (fi)[rn],
 						    DEPRECATED_REGISTER_SIZE);
 	      write_register (rn, value);
 	    }
@@ -1057,7 +1057,7 @@ mcore_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* NOTE: cagney/2002-12-06: This can be deleted when this arch is
      ready to unwind the PC first (see frame.c:get_prev_frame()).  */
-  set_gdbarch_deprecated_init_frame_pc (gdbarch, init_frame_pc_default);
+  set_gdbarch_deprecated_init_frame_pc (gdbarch, deprecated_init_frame_pc_default);
 
   /* Registers: */
 

@@ -427,7 +427,6 @@ free_current_contents (void *ptr)
    In such cases, we may not be certain where the first cleanup is, unless
    we have a do-nothing one to always use as the base. */
 
-/* ARGSUSED */
 void
 null_cleanup (void *arg)
 {
@@ -1684,7 +1683,6 @@ set_width (void)
   wrap_pointer = wrap_buffer;	/* Start it at the beginning.  */
 }
 
-/* ARGSUSED */
 static void
 set_width_command (char *args, int from_tty, struct cmd_list_element *c)
 {
@@ -1692,7 +1690,6 @@ set_width_command (char *args, int from_tty, struct cmd_list_element *c)
   set_width ();
 }
 
-/* ARGSUSED */
 static void
 set_height_command (char *args, int from_tty, struct cmd_list_element *c)
 {
@@ -2929,4 +2926,20 @@ gnu_debuglink_crc32 (unsigned long crc, unsigned char *buf, size_t len)
   for (end = buf + len; buf < end; ++buf)
     crc = crc32_table[(crc ^ *buf) & 0xff] ^ (crc >> 8);
   return ~crc & 0xffffffff;;
+}
+
+ULONGEST
+align_up (ULONGEST v, int n)
+{
+  /* Check that N is really a power of two.  */
+  gdb_assert (n && (n & (n-1)) == 0);
+  return (v + n - 1) & -n;
+}
+
+ULONGEST
+align_down (ULONGEST v, int n)
+{
+  /* Check that N is really a power of two.  */
+  gdb_assert (n && (n & (n-1)) == 0);
+  return (v & -n);
 }

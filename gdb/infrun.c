@@ -153,10 +153,6 @@ static int may_follow_exec = MAY_FOLLOW_EXEC;
 #define IN_SOLIB_DYNSYM_RESOLVE_CODE(pc) 0
 #endif
 
-#ifndef SKIP_SOLIB_RESOLVER
-#define SKIP_SOLIB_RESOLVER(pc) 0
-#endif
-
 /* This function returns TRUE if pc is the address of an instruction
    that lies within the dynamic linker (such as the event hook, or the
    dld itself).
@@ -495,7 +491,6 @@ static int singlestep_breakpoints_inserted_p = 0;
 
 
 /* Things to clean up if we QUIT out of resume ().  */
-/* ARGSUSED */
 static void
 resume_cleanups (void *ignore)
 {
@@ -520,7 +515,7 @@ set_schedlock_func (char *args, int from_tty, struct cmd_list_element *c)
      the set command passed as a parameter.  The clone operation will
      include (BUG?) any ``set'' command callback, if present.
      Commands like ``info set'' call all the ``show'' command
-     callbacks.  Unfortunatly, for ``show'' commands cloned from
+     callbacks.  Unfortunately, for ``show'' commands cloned from
      ``set'', this includes callbacks belonging to ``set'' commands.
      Making this worse, this only occures if add_show_from_set() is
      called after add_cmd_sfunc() (BUG?).  */
@@ -2637,6 +2632,22 @@ process_event_stop_test:
   /* In the case where we just stepped out of a function into the
      middle of a line of the caller, continue stepping, but
      step_frame_id must be modified to current frame */
+#if 0
+  /* NOTE: cagney/2003-10-16: I think this frame ID inner test is too
+     generous.  It will trigger on things like a step into a frameless
+     stackless leaf function.  I think the logic should instead look
+     at the unwound frame ID has that should give a more robust
+     indication of what happened.  */
+     if (step-ID == current-ID)
+       still stepping in same function;
+     else if (step-ID == unwind (current-ID))
+       stepped into a function;
+     else
+       stepped out of a function;
+     /* Of course this assumes that the frame ID unwind code is robust
+        and we're willing to introduce frame unwind logic into this
+        function.  Fortunately, those days are nearly upon us.  */
+#endif
   {
     struct frame_id current_frame = get_frame_id (get_current_frame ());
     if (!(frame_id_inner (current_frame, step_frame_id)))
@@ -2792,7 +2803,7 @@ step_over_function (struct execution_control_state *ecs)
      - avoid handling the case where the PC hasn't been saved in the
      prologue analyzer
 
-     Unfortunatly, not five lines further down, is a call to
+     Unfortunately, not five lines further down, is a call to
      get_frame_id() and that is guarenteed to trigger the prologue
      analyzer.
      
@@ -3623,7 +3634,7 @@ void
 write_inferior_status_register (struct inferior_status *inf_status, int regno,
 				LONGEST val)
 {
-  int size = REGISTER_RAW_SIZE (regno);
+  int size = DEPRECATED_REGISTER_RAW_SIZE (regno);
   void *buf = alloca (size);
   store_signed_integer (buf, size, val);
   regcache_raw_write (inf_status->registers, regno, buf);

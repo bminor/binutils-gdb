@@ -98,7 +98,7 @@ CODE_FRAGMENT
 .typedef struct reloc_cache_entry
 .{
 .  {* A pointer into the canonical table of pointers.  *}
-.  struct symbol_cache_entry **sym_ptr_ptr;
+.  struct bfd_symbol **sym_ptr_ptr;
 .
 .  {* offset in section.  *}
 .  bfd_size_type address;
@@ -122,15 +122,16 @@ DESCRIPTION
         o <<sym_ptr_ptr>>
 
         The symbol table pointer points to a pointer to the symbol
-        associated with the relocation request.  It is
-        the pointer into the table returned by the back end's
-        <<get_symtab>> action. @xref{Symbols}. The symbol is referenced
-        through a pointer to a pointer so that tools like the linker
-        can fix up all the symbols of the same name by modifying only
-        one pointer. The relocation routine looks in the symbol and
-        uses the base of the section the symbol is attached to and the
-        value of the symbol as the initial relocation offset. If the
-        symbol pointer is zero, then the section provided is looked up.
+        associated with the relocation request.  It is the pointer
+        into the table returned by the back end's
+        <<canonicalize_symtab>> action. @xref{Symbols}. The symbol is
+        referenced through a pointer to a pointer so that tools like
+        the linker can fix up all the symbols of the same name by
+        modifying only one pointer. The relocation routine looks in
+        the symbol and uses the base of the section the symbol is
+        attached to and the value of the symbol as the initial
+        relocation offset. If the symbol pointer is zero, then the
+        section provided is looked up.
 
         o <<address>>
 
@@ -277,7 +278,7 @@ SUBSUBSECTION
         information that libbfd needs to know to tie up a back end's data.
 
 CODE_FRAGMENT
-.struct symbol_cache_entry;		{* Forward declaration.  *}
+.struct bfd_symbol;		{* Forward declaration.  *}
 .
 .struct reloc_howto_struct
 .{
@@ -321,7 +322,7 @@ CODE_FRAGMENT
 .     strange relocation methods to be accomodated (e.g., i960 callj
 .     instructions).  *}
 .  bfd_reloc_status_type (*special_function)
-.    (bfd *, arelent *, struct symbol_cache_entry *, void *, asection *,
+.    (bfd *, arelent *, struct bfd_symbol *, void *, asection *,
 .     bfd *, char **);
 .
 .  {* The textual name of the relocation type.  *}
@@ -3132,6 +3133,8 @@ ENUMX
   BFD_RELOC_MMIX_PUSHJ_2
 ENUMX
   BFD_RELOC_MMIX_PUSHJ_3
+ENUMX
+  BFD_RELOC_MMIX_PUSHJ_STUBBABLE
 ENUMDOC
   These are relocations for the PUSHJ instruction.
 ENUM
@@ -4029,7 +4032,8 @@ SYNOPSIS
 
 DESCRIPTION
 	Provides default handling for relaxing for back ends which
-	don't do relaxing -- i.e., does nothing.
+	don't do relaxing -- i.e., does nothing except make sure that the
+	final size of the section is set.
 */
 
 bfd_boolean
@@ -4038,6 +4042,11 @@ bfd_generic_relax_section (bfd *abfd ATTRIBUTE_UNUSED,
 			   struct bfd_link_info *link_info ATTRIBUTE_UNUSED,
 			   bfd_boolean *again)
 {
+  /* We're not relaxing the section, so just copy the size info if it's
+     zero.  Someone else, like bfd_merge_sections, might have set it, so
+     don't overwrite a non-zero value.  */
+  if (section->_cooked_size == 0)
+    section->_cooked_size = section->_raw_size;
   *again = FALSE;
   return TRUE;
 }
@@ -4132,8 +4141,13 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
 				 input_section->_raw_size))
     goto error_return;
 
-  /* We're not relaxing the section, so just copy the size info.  */
-  input_section->_cooked_size = input_section->_raw_size;
+  /* Don't set input_section->_cooked_size here.  The caller has set
+     _cooked_size or called bfd_relax_section, which sets _cooked_size.
+     Despite using this generic relocation function, some targets perform
+     target-specific relaxation or string merging, which happens before
+     this function is called.  We do not want to clobber the _cooked_size
+     they computed.  */
+
   input_section->reloc_done = TRUE;
 
   reloc_count = bfd_canonicalize_reloc (input_bfd,

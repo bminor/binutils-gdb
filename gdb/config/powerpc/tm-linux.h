@@ -31,18 +31,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 #undef IN_SOLIB_CALL_TRAMPOLINE
 #undef SKIP_TRAMPOLINE_CODE
 
-/* We can single step on linux */
-#undef  SOFTWARE_SINGLE_STEP
-#define SOFTWARE_SINGLE_STEP(p,q) internal_error (__FILE__, __LINE__, "Will never execute!")
-#undef  SOFTWARE_SINGLE_STEP_P
-#define SOFTWARE_SINGLE_STEP_P() 0
-
 /* Make sure nexti gets the help it needs for debugging assembly code
    without symbols */
-
-#define AT_SUBROUTINE_CALL_INSTRUCTION_TARGET(prevpc,stoppc) \
-   at_subroutine_call_instruction_target(prevpc,stoppc)
-extern int at_subroutine_call_instruction_target();
 
 extern int ppc_linux_in_sigtramp (CORE_ADDR pc, char *func_name);
 #undef IN_SIGTRAMP

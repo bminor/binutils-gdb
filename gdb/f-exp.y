@@ -476,7 +476,7 @@ variable:	name_not_typename
 			  else
 			    {
 			      struct minimal_symbol *msymbol;
-			      register char *arg = copy_name ($1.stoken);
+			      char *arg = copy_name ($1.stoken);
 
 			      msymbol =
 				lookup_minimal_symbol_linkage_or_natural (arg);
@@ -641,15 +641,15 @@ name_not_typename :	NAME
 
 static int
 parse_number (p, len, parsed_float, putithere)
-     register char *p;
-     register int len;
+     char *p;
+     int len;
      int parsed_float;
      YYSTYPE *putithere;
 {
-  register LONGEST n = 0;
-  register LONGEST prevn = 0;
-  register int c;
-  register int base = input_radix;
+  LONGEST n = 0;
+  LONGEST prevn = 0;
+  int c;
+  int base = input_radix;
   int unsigned_p = 0;
   int long_p = 0;
   ULONGEST high_bit;
@@ -944,8 +944,8 @@ yylex ()
     { 
       for (i = 0; boolean_values[i].name != NULL; i++)
 	{
-	  if STREQN (tokstart, boolean_values[i].name,
-		    strlen (boolean_values[i].name))
+	  if (strncmp (tokstart, boolean_values[i].name,
+		       strlen (boolean_values[i].name)) == 0)
 	    {
 	      lexptr += strlen (boolean_values[i].name); 
 	      yylval.lval = boolean_values[i].value; 
@@ -957,7 +957,7 @@ yylex ()
   /* See if it is a special .foo. operator */
   
   for (i = 0; dot_ops[i].operator != NULL; i++)
-    if (STREQN (tokstart, dot_ops[i].operator, strlen (dot_ops[i].operator)))
+    if (strncmp (tokstart, dot_ops[i].operator, strlen (dot_ops[i].operator)) == 0)
       {
 	lexptr += strlen (dot_ops[i].operator);
 	yylval.opcode = dot_ops[i].opcode;
@@ -1018,7 +1018,7 @@ yylex ()
       {
         /* It's a number.  */
 	int got_dot = 0, got_e = 0, got_d = 0, toktype;
-	register char *p = tokstart;
+	char *p = tokstart;
 	int hex = input_radix > 10;
 	
 	if (c == '0' && (p[1] == 'x' || p[1] == 'X'))
@@ -1114,8 +1114,8 @@ yylex ()
   /* Catch specific keywords.  */
   
   for (i = 0; f77_keywords[i].operator != NULL; i++)
-    if (STREQN(tokstart, f77_keywords[i].operator,
-               strlen(f77_keywords[i].operator)))
+    if (strncmp (tokstart, f77_keywords[i].operator,
+		 strlen(f77_keywords[i].operator)) == 0)
       {
 	/* 	lexptr += strlen(f77_keywords[i].operator); */ 
 	yylval.opcode = f77_keywords[i].opcode;

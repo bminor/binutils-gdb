@@ -35,6 +35,7 @@
 #include "infcall.h"
 #include "objc-lang.h"
 #include "block.h"
+#include "parser-defs.h"
 
 /* Defined in symtab.c */
 extern int hp_som_som_object_present;
@@ -70,7 +71,8 @@ static struct value *
 evaluate_subexp (struct type *expect_type, struct expression *exp,
 		 int *pos, enum noside noside)
 {
-  return (*exp->language_defn->evaluate_exp) (expect_type, exp, pos, noside);
+  return (*exp->language_defn->la_exp_desc->evaluate_exp) 
+    (expect_type, exp, pos, noside);
 }
 
 /* Parse the string EXP as a C expression, evaluate it,

@@ -943,7 +943,6 @@ print_command_1 (char *exp, int inspect, int voidprint)
   inspect_it = 0;		/* Reset print routines to normal */
 }
 
-/* ARGSUSED */
 static void
 print_command (char *exp, int from_tty)
 {
@@ -951,7 +950,6 @@ print_command (char *exp, int from_tty)
 }
 
 /* Same as print, except in epoch, it gets its own window */
-/* ARGSUSED */
 static void
 inspect_command (char *exp, int from_tty)
 {
@@ -961,14 +959,12 @@ inspect_command (char *exp, int from_tty)
 }
 
 /* Same as print, except it doesn't print void results. */
-/* ARGSUSED */
 static void
 call_command (char *exp, int from_tty)
 {
   print_command_1 (exp, 0, 0);
 }
 
-/* ARGSUSED */
 void
 output_command (char *exp, int from_tty)
 {
@@ -1003,7 +999,6 @@ output_command (char *exp, int from_tty)
   do_cleanups (old_chain);
 }
 
-/* ARGSUSED */
 static void
 set_command (char *exp, int from_tty)
 {
@@ -1014,7 +1009,6 @@ set_command (char *exp, int from_tty)
   do_cleanups (old_chain);
 }
 
-/* ARGSUSED */
 static void
 sym_info (char *arg, int from_tty)
 {
@@ -1059,7 +1053,6 @@ sym_info (char *arg, int from_tty)
     printf_filtered ("No symbol matches %s.\n", arg);
 }
 
-/* ARGSUSED */
 static void
 address_info (char *exp, int from_tty)
 {
@@ -1695,7 +1688,6 @@ enable_display (char *args, int from_tty)
       }
 }
 
-/* ARGSUSED */
 static void
 disable_display_command (char *args, int from_tty)
 {
@@ -1738,7 +1730,6 @@ print_variable_value (struct symbol *var, struct frame_info *frame,
   value_print (val, stream, 0, Val_pretty_default);
 }
 
-/* ARGSUSED */
 static void
 printf_command (char *arg, int from_tty)
 {

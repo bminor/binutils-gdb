@@ -451,9 +451,9 @@ const struct language_defn pascal_language_defn =
   range_check_on,
   type_check_on,
   case_sensitive_on,
+  &exp_descriptor_standard,
   pascal_parse,
   pascal_error,
-  evaluate_subexp_standard,
   pascal_printchar,		/* Print a character constant */
   pascal_printstr,		/* Function to print string constant */
   pascal_emit_char,		/* Print a single char */
@@ -473,6 +473,7 @@ const struct language_defn pascal_language_defn =
   1,				/* c-style arrays */
   0,				/* String lower bound */
   &builtin_type_char,		/* Type of string elements */
+  default_word_break_characters,
   LANG_MAGIC
 };
 

@@ -1,4 +1,5 @@
-/* Target-dependent code for GDB, the GNU debugger.
+/* Target-dependent code for the i386.
+
    Copyright 2001, 2002, 2003
    Free Software Foundation, Inc.
 
@@ -22,9 +23,10 @@
 #ifndef I386_TDEP_H
 #define I386_TDEP_H
 
-struct reggroup;
-struct gdbarch;
 struct frame_info;
+struct gdbarch;
+struct reggroup;
+struct regset;
 
 /* GDB's i386 target supports both the 32-bit Intel Architecture
    (IA-32) and the 64-bit AMD x86-64 architecture.  Internally it uses
@@ -55,6 +57,25 @@ enum struct_return
 /* i386 architecture specific information.  */
 struct gdbarch_tdep
 {
+  /* General-purpose registers.  */
+  struct regset *gregset;
+  int *gregset_reg_offset;
+  int gregset_num_regs;
+  size_t sizeof_gregset;
+
+  /* Floating-point registers.  */
+  struct regset *fpregset;
+  size_t sizeof_fpregset;
+
+  /* Register number for %st(0).  The register numbers for the other
+     registers follow from this one.  Set this to -1 to indicate the
+     absence of an FPU.  */
+  int st0_regnum;
+
+  /* Register number for %mm0.  Set this to -1 to indicate the absence
+     of MMX support.  */
+  int mm0_regnum;
+
   /* Number of SSE registers.  */
   int num_xmm_regs;
 
@@ -82,8 +103,6 @@ struct gdbarch_tdep
 };
 
 /* Floating-point registers.  */
-
-#define FPU_REG_RAW_SIZE 10
 
 /* All FPU control regusters (except for FIOFF and FOOFF) are 16-bit
    (at most) in the FPU, but are zero-extended to 32 bits in GDB's
@@ -131,26 +150,22 @@ extern int i386_fpc_regnum_p (int regnum);
 #define MXCSR_REGNUM \
   (XMM0_REGNUM + gdbarch_tdep (current_gdbarch)->num_xmm_regs)
 
-/* Return non-zero if REGNUM matches the SSE register and the SSE
-   register set is active.  */
-extern int i386_sse_regnum_p (int regnum);
-extern int i386_mxcsr_regnum_p (int regnum);
-
-/* FIXME: kettenis/2001-11-24: Obsolete macro's.  */
-#define FCS_REGNUM FISEG_REGNUM
-#define FCOFF_REGNUM FIOFF_REGNUM
-#define FDS_REGNUM FOSEG_REGNUM
-#define FDOFF_REGNUM FOOFF_REGNUM
-
 /* Register numbers of various important registers.  */
 
-#define I386_EAX_REGNUM		0 /* %eax */
-#define I386_EDX_REGNUM		2 /* %edx */
-#define I386_ESP_REGNUM		4 /* %esp */
-#define I386_EBP_REGNUM		5 /* %ebp */
-#define I386_EIP_REGNUM		8 /* %eip */
-#define I386_EFLAGS_REGNUM	9 /* %eflags */
-#define I386_ST0_REGNUM		16 /* %st(0) */
+enum i386_regnum
+{
+  I386_EAX_REGNUM,		/* %eax */
+  I386_ECX_REGNUM,		/* %ecx */
+  I386_EDX_REGNUM,		/* %edx */
+  I386_EBX_REGNUM,		/* %ebx */
+  I386_ESP_REGNUM,		/* %esp */
+  I386_EBP_REGNUM,		/* %ebp */
+  I386_ESI_REGNUM,		/* %esi */
+  I386_EDI_REGNUM,		/* %edi */
+  I386_EIP_REGNUM,		/* %eip */
+  I386_EFLAGS_REGNUM,		/* %eflags */
+  I386_ST0_REGNUM = 16,		/* %st(0) */
+};
 
 #define I386_NUM_GREGS	16
 #define I386_NUM_FREGS	16
@@ -173,6 +188,12 @@ extern char const *i386_register_name (int reg);
 extern int i386_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 				     struct reggroup *group);
 
+/* Return the appropriate register set for the core section identified
+   by SECT_NAME and SECT_SIZE.  */
+extern const struct regset *
+  i386_regset_from_core_section (struct gdbarch *gdbarch,
+				 const char *sect_name, size_t sect_size);
+
 /* Initialize a basic ELF architecture variant.  */
 extern void i386_elf_init_abi (struct gdbarch_info, struct gdbarch *);
 
@@ -194,4 +215,3 @@ extern int i386obsd_sc_reg_offset[];
 extern int i386bsd_sc_reg_offset[];
 
 #endif /* i386-tdep.h */
-

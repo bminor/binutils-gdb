@@ -23,6 +23,11 @@
 # them gets relocated at load-time. Check that gdb gets the right
 # values for the debugging and minimal symbols.
 
+if {[istarget *-elf*] || [istarget *-coff] || [istarget *-aout]} then {
+    verbose "test skipped - shared object files not supported by this target."
+    return 0
+}
+
 if $tracelevel then {
     strace $tracelevel
 }

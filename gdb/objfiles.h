@@ -178,7 +178,7 @@ struct obj_section
        addresses.  */
     CORE_ADDR offset;
 
-    sec_ptr the_bfd_section;	/* BFD section pointer */
+    struct bfd_section *the_bfd_section;	/* BFD section pointer */
 
     /* Objfile this section is part of.  */
     struct objfile *objfile;
@@ -599,6 +599,7 @@ extern int is_in_import_list (char *, struct objfile *);
    modules.  */
 
 extern const struct objfile_data *register_objfile_data (void);
+extern void clear_objfile_data (struct objfile *objfile);
 extern void set_objfile_data (struct objfile *objfile,
 			      const struct objfile_data *data, void *value);
 extern void *objfile_data (struct objfile *objfile,

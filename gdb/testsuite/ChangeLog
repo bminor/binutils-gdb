@@ -1,3 +1,127 @@
+2003-11-11  Nick Clifton  <nickc@redhat.com>
+
+	* gdb.base/shreloc.exp: Do not run for targets which do not
+	support shared objects.
+
+2003-11-10  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/fileio.exp: Drop tests for nointerrupts and noinferiorio.
+	Don't run tests if nofileio flag is given.
+
+2003-11-07  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.cp/annota3.exp: Make sure we can match 'Hardware watchpoint'
+        as well as 'Watchpoint'.
+
+2003-11-06  Elena Zannoni  <ezannoni@redhat.com>
+
+	Reported by Jim Ingham <jingham@apple.com>:
+	* gdb.base/annota1.exp: Match at least one occurrence of the
+	signal handler annotation.
+
+2003-11-06  Elena Zannoni  <ezannoni@redhat.com>
+
+        * gdb.cp/annota2.exp: Make sure we can match 'Hardware watchpoint'
+        as well as 'Watchpoint'.
+
+2003-11-05  Michael Chastain  <mec@shout.net>
+
+	* gdb.mi/pthreads.c (routine): Handle early return from sleep.
+
+2003-11-03  Kris Warkentin  <kewarken@qnx.com>
+
+	* gdb.arch/gdb1291.c: New test file.
+	* gdb.arch/gdb1291.exp: New test script.
+	* gdb.arch/gdb1431.c: New test file.
+	* gdb.arch/gdb1431.exp: New test script.
+
+2003-10-22  Michael Chastain  <mec@shout.net>
+
+	* gdb.mi/pthreads.c: Add copyright notice.
+
+2003-10-22  Michael Chastain  <mec@shout.net>
+
+	* gdb.threads/pthreads.c: Add copyright notice.
+
+2003-10-20  Michael Chastain  <mec@shout.net>
+
+	* gdb.base/gdb1056.exp: New test script.
+
+2003-10-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.threads/killed.exp: Use gdb_run_cmd.
+
+2003-10-13  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/gcore.exp: Issue an UNSUPPORTED and exit if we can't
+	create a core file.
+	* gdb.threads/gcore-thread.exp: Likewise.
+
+2003-10-13  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/call-rt-st.c (struct bit_flags_char_t): New bitfield
+	type, based on char type.
+	(struct bit_flags_short_t): New bitfield type, based on short type.
+	(init_bit_flags_char): New fuction.
+	(init_bit_flags_short): Ditto.
+	(print_bit_flags_char): Ditto.
+	(print_bit_flags_short): Ditto.
+	(main): Add handling for bit_flags_char_t and bit_flags_short_t.
+
+2003-10-11  Michael Chastain  <mec@shout.net>
+
+	* gdb.base/call-rt-st.exp: Update copyright year.
+
+2003-10-10  Kei Sakamoto  <sakamoto.kei@renesas.com>
+
+	* config/hmsirom.exp: Replace "Hitachi" with "Renesas".
+	* gdb.disasm/sh3.s: Ditto.
+
+2003-10-07  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.threads/switch-threads.exp: New test.
+	* gdb.threads/switch-threads.c: New source file.
+
+2003-10-07  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/ending-run.exp: Add sh specific case.
+
+2003-10-06  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/watchpoint.exp: Delete obsolete clear_xfail.
+	* gdb.disasm/mn10200.exp: Delete obsolete file.
+
+2003-09-29  Daniel Jacobowitz  <drow@mvista.com>
+
+	* ChangeLog: Correct an entry command.exp -> commands.exp.
+	* gdb.base/commands.exp (bp_deleted_in_command_test)
+	(temporary_breakpoint_commands): Check noargs.
+
+2003-09-25  David Carlton  <carlton@kealia.com>
+
+	* gdb.cp/namespace.exp: Tweak comments.  Add non-quoted versions
+	of some print tests, where appropriate.  Add tests for C::D::cd,
+	E::ce, F::cXfX, G::XgX.
+	* gdb.cp/namespace.cc: Add XgX, cXfX, ce.
+
+2003-09-25  Richard Earnshaw  <rearnsha@arm.com>
+
+	* lib/java.exp (java_init): Import target_alias before using it.
+
+2003-09-25  David Carlton  <carlton@kealia.com>
+
+	* gdb.base/corefile.exp: Delete obsolete setup_xfail.
+
+2003-09-23  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.base/selftest.exp: Accomodate more instruction reordering 
+        weirdness.
+
+2003-09-17  Michael Chastain  <mec@shout.net>
+
+	* gdb.cp/gdb1355.exp: New file.
+	* gdb.cp/gdb1355.c: New file.
+
 2003-09-15  Corinna Vinschen  <vinschen@redhat.com>
 
 	* gdb.asm/asm-source.exp: Add sh*-*-* as supported target.
@@ -5,8 +129,8 @@
 
 2003-09-11  David Carlton  <carlton@kealia.com>
 
-	* gdb.c++/namespace.exp: Add tests for namespace types.
-	* gdb.c++/maint.exp (test_help): Test 'help maint cp namespace'.
+	* gdb.cp/namespace.exp: Add tests for namespace types.
+	* gdb.cp/maint.exp (test_help): Test 'help maint cp namespace'.
 	(test_namespace): New.
 
 2003-09-11  Elena Zannoni  <ezannoni@redhat.com>
@@ -1556,7 +1680,7 @@
 
 2002-09-14  Corinna Vinschen  <vinschen@redhat.com>
 
-	* gdb.base/command.exp: Don't expect a "Program exited normally"
+	* gdb.base/commands.exp: Don't expect a "Program exited normally"
 	string after running the commands execution on breakpoint tests.
 
 2002-09-13  Corinna Vinschen  <vinschen@redhat.com>

@@ -449,6 +449,17 @@ op tab[] =
   },
 
   /* sh4 */
+  { "", "", "fsca", "1111nnn011111101",
+    "if (FPSCR_PR)",
+    "  RAISE_EXCEPTION (SIGILL);",
+    "else",
+    "  {",
+    "    SET_FR (n, fsca_s (FPUL, &sin));",
+    "    SET_FR (n+1, fsca_s (FPUL, &cos));",
+    "  }",
+  },
+
+  /* sh4 */
   { "", "", "fschg", "1111001111111101",
     "SET_FPSCR (GET_FPSCR() ^ FPSCR_MASK_SZ);",
   },
@@ -456,6 +467,14 @@ op tab[] =
   /* sh3e */
   { "", "", "fsqrt <FREG_N>", "1111nnnn01101101",
     "FP_UNARY(n, sqrt);",
+  },
+
+  /* sh4 */
+  { "", "", "fsrra", "1111nnnn01111101",
+    "if (FPSCR_PR)",
+    "  RAISE_EXCEPTION (SIGILL);",
+    "else",
+    "  SET_FR (n, fsrra_s (FR (n)));",
   },
 
   /* sh2e */
@@ -1979,6 +1998,8 @@ expand_opcode (shift, val, i, s)
 	  {
 	    int m, mv;
 
+	    if (s[1] - '0' > 1U || !s[2] || ! s[3])
+	      expand_opcode (shift - 1, val + s[0] - '0', i, s + 1);
 	    val |= bton (s) << shift;
 	    if (s[2] == '0' || s[2] == '1')
 	      expand_opcode (shift - 4, val, i, s + 4);
@@ -2003,12 +2024,17 @@ expand_opcode (shift, val, i, s)
 	  }
 	case 'n':
 	case 'm':
-	  for (j = 0; j < 16; j++)
-	    {
-	      expand_opcode (shift - 4, val | (j << shift), i, s + 4);
-
-	    }
-	  break;
+	  {
+	    int digits = 1;
+	    while (s[digits] == s[0])
+	      digits++;
+	    for (j = 0; j < (1 << digits); j++)
+	      {
+		expand_opcode (shift - digits, val | (j << shift), i,
+			       s + digits);
+	      }
+	    break;
+	  }
 	case 'M':
 	  /* A1, A0,X0,X1,Y0,Y1,M0,A1G,M1,M1G */
 	  for (j = 5; j < 16; j++)

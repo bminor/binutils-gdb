@@ -1,6 +1,8 @@
 /* Interface between GDB and target environments, including files and processes
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002 Free Software Foundation, Inc.
+
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
+   1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
+
    Contributed by Cygnus Support.  Written by John Gilmore.
 
    This file is part of GDB.
@@ -26,6 +28,7 @@
 struct objfile;
 struct ui_file;
 struct mem_attrib;
+struct target_ops;
 
 /* This include file defines the interface between the main part
    of the debugger, and the part which is target-specific, or
@@ -175,6 +178,89 @@ extern char *target_signal_to_name (enum target_signal);
 /* Given a name (SIGHUP, etc.), return its signal.  */
 enum target_signal target_signal_from_name (char *);
 
+/* Request the transfer of up to LEN 8-bit bytes of the target's
+   OBJECT.  The OFFSET, for a seekable object, specifies the starting
+   point.  The ANNEX can be used to provide additional data-specific
+   information to the target.
+
+   Return the number of bytes actually transfered, zero when no
+   further transfer is possible, and -1 when the transfer is not
+   supported.
+   
+   NOTE: cagney/2003-10-17: The current interface does not support a
+   "retry" mechanism.  Instead it assumes that at least one byte will
+   be transfered on each call.
+
+   NOTE: cagney/2003-10-17: The current interface can lead to
+   fragmented transfers.  Lower target levels should not implement
+   hacks, such as enlarging the transfer, in an attempt to compensate
+   for this.  Instead, the target stack should be extended so that it
+   implements supply/collect methods and a look-aside object cache.
+   With that available, the lowest target can safely and freely "push"
+   data up the stack.
+
+   NOTE: cagney/2003-10-17: Unlike the old query and the memory
+   transfer mechanisms, these methods are explicitly parameterized by
+   the target that it should be applied to.
+
+   NOTE: cagney/2003-10-17: Just like the old query and memory xfer
+   methods, these new methods perform partial transfers.  The only
+   difference is that these new methods thought to include "partial"
+   in the name.  The old code's failure to do this lead to much
+   confusion and duplication of effort as each target object attempted
+   to locally take responsibility for something it didn't have to
+   worry about.
+
+   NOTE: cagney/2003-10-17: With a TARGET_OBJECT_KOD object, for
+   backward compatibility with the "target_query" method that this
+   replaced, when OFFSET and LEN are both zero, return the "minimum"
+   buffer size.  See "remote.c" for further information.  */
+
+enum target_object
+{
+  /* Kernel Object Display transfer.  See "kod.c" and "remote.c".  */
+  TARGET_OBJECT_KOD,
+  /* AVR target specific transfer.  See "avr-tdep.c" and "remote.c".  */
+  TARGET_OBJECT_AVR,
+  /* Transfer up-to LEN bytes of memory starting at OFFSET.  */
+  TARGET_OBJECT_MEMORY
+  /* Possible future ojbects: TARGET_OJBECT_FILE, TARGET_OBJECT_PROC,
+     TARGET_OBJECT_AUXV, ...  */
+};
+
+extern LONGEST target_read_partial (struct target_ops *ops,
+				    enum target_object object,
+				    const char *annex, void *buf,
+				    ULONGEST offset, LONGEST len);
+
+extern LONGEST target_write_partial (struct target_ops *ops,
+				     enum target_object object,
+				     const char *annex, const void *buf,
+				     ULONGEST offset, LONGEST len);
+
+/* Wrappers to perform the full transfer.  */
+extern LONGEST target_read (struct target_ops *ops,
+			    enum target_object object,
+			    const char *annex, void *buf,
+			    ULONGEST offset, LONGEST len);
+
+extern LONGEST target_write (struct target_ops *ops,
+			     enum target_object object,
+			     const char *annex, const void *buf,
+			     ULONGEST offset, LONGEST len);
+
+/* Wrappers to target read/write that perform memory transfers.  They
+   throw an error if the memory transfer fails.
+
+   NOTE: cagney/2003-10-23: The naming schema is lifted from
+   "frame.h".  The parameter order is lifted from get_frame_memory,
+   which in turn lifted it from read_memory.  */
+
+extern void get_target_memory (struct target_ops *ops, CORE_ADDR addr,
+			       void *buf, LONGEST len);
+extern ULONGEST get_target_memory_unsigned (struct target_ops *ops,
+					    CORE_ADDR addr, int len);
+
 
 /* If certain kinds of activity happen, target_wait should perform
    callbacks.  */
@@ -188,12 +274,23 @@ struct thread_info;		/* fwd decl for parameter list below: */
 
 struct target_ops
   {
+    struct target_ops *beneath;	/* To the target under this one.  */
     char *to_shortname;		/* Name this target type */
     char *to_longname;		/* Name for printing */
     char *to_doc;		/* Documentation.  Does not include trailing
 				   newline, and starts with a one-line descrip-
 				   tion (probably similar to to_longname).  */
+    /* Per-target scratch pad.  */
+    void *to_data;
+    /* The open routine takes the rest of the parameters from the
+       command, and (if successful) pushes a new target onto the
+       stack.  Targets should supply this routine, if only to provide
+       an error message.  */
     void (*to_open) (char *, int);
+    /* Old targets with a static target vector provide "to_close".
+       New re-entrant targets provide "to_xclose" and that is expected
+       to xfree everything (including the "struct target_ops").  */
+    void (*to_xclose) (struct target_ops *targ, int quitting);
     void (*to_close) (int);
     void (*to_attach) (char *, int);
     void (*to_post_attach) (int);
@@ -228,29 +325,6 @@ struct target_ops
 			   int len, int write, 
 			   struct mem_attrib *attrib,
 			   struct target_ops *target);
-
-#if 0
-    /* Enable this after 4.12.  */
-
-    /* Search target memory.  Start at STARTADDR and take LEN bytes of
-       target memory, and them with MASK, and compare to DATA.  If they
-       match, set *ADDR_FOUND to the address we found it at, store the data
-       we found at LEN bytes starting at DATA_FOUND, and return.  If
-       not, add INCREMENT to the search address and keep trying until
-       the search address is outside of the range [LORANGE,HIRANGE).
-
-       If we don't find anything, set *ADDR_FOUND to (CORE_ADDR)0 and
-       return.  */
-
-    void (*to_search) (int len, char *data, char *mask,
-		       CORE_ADDR startaddr, int increment,
-		       CORE_ADDR lorange, CORE_ADDR hirange,
-		       CORE_ADDR * addr_found, char *data_found);
-
-#define	target_search(len, data, mask, startaddr, increment, lorange, hirange, addr_found, data_found)	\
-    (*current_target.to_search) (len, data, mask, startaddr, increment, \
-				 lorange, hirange, addr_found, data_found)
-#endif				/* 0 */
 
     void (*to_files_info) (struct target_ops *);
     int (*to_insert_breakpoint) (CORE_ADDR, char *);
@@ -293,7 +367,6 @@ struct target_ops
     char *(*to_pid_to_str) (ptid_t);
     char *(*to_extra_thread_info) (struct thread_info *);
     void (*to_stop) (void);
-    int (*to_query) (int /*char */ , char *, char *, int *);
     void (*to_rcmd) (char *command, struct ui_file *output);
     struct symtab_and_line *(*to_enable_exception_callback) (enum
 							     exception_event_kind,
@@ -333,6 +406,14 @@ struct target_ops
 					      struct objfile *objfile,
 					      CORE_ADDR offset);
 
+    /* Perform partial transfers on OBJECT.  See target_read_partial
+       and target_write_partial for details of each variant.  One, and
+       only one, of readbuf or writebuf must be non-NULL.  */
+    LONGEST (*to_xfer_partial) (struct target_ops *ops,
+				enum target_object object, const char *annex,
+				void *readbuf, const void *writebuf, 
+				ULONGEST offset, LONGEST len);
+
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?
      */
@@ -349,43 +430,21 @@ struct target_ops
 
 extern struct target_ops current_target;
 
-/* An item on the target stack.  */
-
-struct target_stack_item
-  {
-    struct target_stack_item *next;
-    struct target_ops *target_ops;
-  };
-
-/* The target stack.  */
-
-extern struct target_stack_item *target_stack;
-
 /* Define easy words for doing these operations on our current target.  */
 
 #define	target_shortname	(current_target.to_shortname)
 #define	target_longname		(current_target.to_longname)
 
-/* The open routine takes the rest of the parameters from the command,
-   and (if successful) pushes a new target onto the stack.
-   Targets should supply this routine, if only to provide an error message.  */
+/* Does whatever cleanup is required for a target that we are no
+   longer going to be calling.  QUITTING indicates that GDB is exiting
+   and should not get hung on an error (otherwise it is important to
+   perform clean termination, even if it takes a while).  This routine
+   is automatically always called when popping the target off the
+   target stack (to_beneath is undefined).  Closing file descriptors
+   and freeing all memory allocated memory are typical things it
+   should do.  */
 
-#define	target_open(name, from_tty)					\
-  do {									\
-    dcache_invalidate (target_dcache);					\
-    (*current_target.to_open) (name, from_tty);				\
-  } while (0)
-
-/* Does whatever cleanup is required for a target that we are no longer
-   going to be calling.  Argument says whether we are quitting gdb and
-   should not get hung in case of errors, or whether we want a clean
-   termination even if it takes a while.  This routine is automatically
-   always called just before a routine is popped off the target stack.
-   Closing file descriptors and freeing memory are typical things it should
-   do.  */
-
-#define	target_close(quitting)	\
-     (*current_target.to_close) (quitting)
+void target_close (struct target_ops *targ, int quitting);
 
 /* Attaches to a process on the target side.  Arguments are as passed
    to the `attach' command by the user.  This routine can be called
@@ -756,16 +815,6 @@ extern void target_load (char *arg, int from_tty);
 
 #define target_stop current_target.to_stop
 
-/* Queries the target side for some information.  The first argument is a
-   letter specifying the type of the query, which is used to determine who
-   should process it.  The second argument is a string that specifies which 
-   information is desired and the third is a buffer that carries back the 
-   response from the target side. The fourth parameter is the size of the
-   output buffer supplied.  */
-
-#define	target_query(query_type, query, resp_buffer, bufffer_size)	\
-     (*current_target.to_query) (query_type, query, resp_buffer, bufffer_size)
-
 /* Send the specified COMMAND to the target's monitor
    (shell,interpreter) for execution.  The result of the query is
    placed in OUTBUF.  */
@@ -1105,16 +1154,15 @@ struct section_table
     CORE_ADDR addr;		/* Lowest address in section */
     CORE_ADDR endaddr;		/* 1+highest address in section */
 
-    sec_ptr the_bfd_section;
+    struct bfd_section *the_bfd_section;
 
     bfd *bfd;			/* BFD file pointer */
   };
 
-/* Builds a section table, given args BFD, SECTABLE_PTR, SECEND_PTR.
-   Returns 0 if OK, 1 on error.  */
+/* Return the "section" containing the specified address.  */
+struct section_table *target_section_by_addr (struct target_ops *target,
+					      CORE_ADDR addr);
 
-extern int build_section_table (bfd *, struct section_table **,
-				struct section_table **);
 
 /* From mem-break.c */
 

@@ -95,8 +95,6 @@ struct frame_id
      is used.  Watch out for all the legacy targets that still use the
      function pointer register or stack pointer register.  They are
      wrong.  */
-  /* NOTE: cagney/2002-11-16: The ia64 has two stacks and hence two
-     frame bases.  This will need to be expanded to accomodate that.  */
   CORE_ADDR stack_addr;
   /* The frame's code address.  This shall be constant through out the
      lifetime of the frame.  While the PC (a.k.a. resume address)
@@ -104,15 +102,33 @@ struct frame_id
      Typically, it is set to the address of the entry point of the
      frame's function (as returned by frame_func_unwind().  */
   CORE_ADDR code_addr;
+  /* The frame's special address.  This shall be constant through out the
+     lifetime of the frame.  This is used for architectures that may have
+     frames that do not change the stack but are still distinct and have 
+     some form of distinct identifier (e.g. the ia64 which uses a 2nd 
+     stack for registers).  This field is treated as unordered - i.e. will
+     not be used in frame ordering comparisons such as frame_id_inner().
+     A zero in this field will be treated as a wild-card when comparing
+     frames for equality.  */
+  CORE_ADDR special_addr;
 };
 
 /* Methods for constructing and comparing Frame IDs.
 
-   NOTE: Given frameless functions A and B, where A calls B (and hence
+   NOTE: Given stackless functions A and B, where A calls B (and hence
    B is inner-to A).  The relationships: !eq(A,B); !eq(B,A);
-   !inner(A,B); !inner(B,A); all hold.  This is because, while B is
-   inner to A, B is not strictly inner to A (being frameless, they
-   have the same .base value).  */
+   !inner(A,B); !inner(B,A); all hold.
+
+   This is because, while B is inner-to A, B is not strictly inner-to A.  
+   Being stackless, they have an identical .stack_addr value, and differ 
+   only by their unordered .code_addr and/or .special_addr values.
+
+   Because frame_id_inner is only used as a safety net (e.g.,
+   detect a corrupt stack) the lack of strictness is not a problem.
+   Code needing to determine an exact relationship between two frames
+   must instead use frame_id_eq and frame_id_unwind.  For instance,
+   in the above, to determine that A stepped-into B, the equation
+   "A.id != B.id && A.id == id_unwind (B)" can be used.  */
 
 /* For convenience.  All fields are zero.  */
 extern const struct frame_id null_frame_id;
@@ -120,9 +136,20 @@ extern const struct frame_id null_frame_id;
 /* Construct a frame ID.  The first parameter is the frame's constant
    stack address (typically the outer-bound), and the second the
    frame's constant code address (typically the entry point) (or zero,
-   to indicate a wild card).  */
+   to indicate a wild card).  The special identifier address is
+   defaulted to zero.  */
 extern struct frame_id frame_id_build (CORE_ADDR stack_addr,
 				       CORE_ADDR code_addr);
+
+/* Construct a special frame ID.  The first parameter is the frame's constant
+   stack address (typically the outer-bound), the second is the
+   frame's constant code address (typically the entry point) (or zero,
+   to indicate a wild card), and the third parameter is the frame's
+   special identifier address (or zero to indicate a wild card or 
+   unused default).  */
+extern struct frame_id frame_id_build_special (CORE_ADDR stack_addr,
+					       CORE_ADDR code_addr,
+					       CORE_ADDR special_addr);
 
 /* Returns non-zero when L is a valid frame (a valid frame has a
    non-zero .base).  */
@@ -398,22 +425,6 @@ extern void frame_register (struct frame_info *frame, int regnum,
 			    CORE_ADDR *addrp, int *realnump,
 			    void *valuep);
 
-/* More convenient interface to frame_register().  */
-/* NOTE: cagney/2002-09-13: Return void as one day these functions may
-   be changed to return an indication that the read succeeded.  */
-
-/* Use get_frame_register.  */
-extern void frame_read_register (struct frame_info *frame, int regnum,
-				 void *buf);
-
-/* Use get_frame_register_signed.  */
-extern void frame_read_signed_register (struct frame_info *frame,
-					int regnum, LONGEST *val);
-
-/* Use get_frame_register_unsigned.  */
-extern void frame_read_unsigned_register (struct frame_info *frame,
-					  int regnum, ULONGEST *val);
-
 /* The reverse.  Store a register value relative to the specified
    frame.  Note: this call makes the frame's state undefined.  The
    register and frame caches must be flushed.  */
@@ -591,11 +602,11 @@ extern void deprecated_generic_get_saved_register (char *, int *, CORE_ADDR *,
 extern void generic_save_call_dummy_addr (CORE_ADDR lo, CORE_ADDR hi);
 
 /* FIXME: cagney/2003-02-02: Should be deprecated or replaced with a
-   function called frame_read_register_p().  This slightly weird (and
-   older) variant of frame_read_register() returns zero (indicating
-   the register is unavailable) if either: the register isn't cached;
-   or the register has been optimized out.  Problem is, neither check
-   is exactly correct.  A register can't be optimized out (it may not
+   function called get_frame_register_p().  This slightly weird (and
+   older) variant of get_frame_register() returns zero (indicating the
+   register is unavailable) if either: the register isn't cached; or
+   the register has been optimized out.  Problem is, neither check is
+   exactly correct.  A register can't be optimized out (it may not
    have been saved as part of a function call); The fact that a
    register isn't in the register cache doesn't mean that the register
    isn't available (it could have been fetched from memory).  */
@@ -618,7 +629,7 @@ extern void return_command (char *, int);
    You might think that the below global can simply be replaced by a
    call to either get_selected_frame() or select_frame().
 
-   Unfortunatly, it isn't that easy.
+   Unfortunately, it isn't that easy.
 
    The relevant code needs to be audited to determine if it is
    possible (or pratical) to instead pass the applicable frame in as a
@@ -671,7 +682,7 @@ extern struct frame_extra_info *get_frame_extra_info (struct frame_info *fi);
    SP_REGNUM where the value of the register in the previous frame is
    stored).  */
 extern CORE_ADDR *frame_saved_regs_zalloc (struct frame_info *);
-extern CORE_ADDR *get_frame_saved_regs (struct frame_info *);
+extern CORE_ADDR *deprecated_get_frame_saved_regs (struct frame_info *);
 
 /* FIXME: cagney/2002-12-06: Has the PC in the current frame changed?
    "infrun.c", Thanks to DECR_PC_AFTER_BREAK, can change the PC after
@@ -682,8 +693,8 @@ extern void deprecated_update_frame_pc_hack (struct frame_info *frame,
 					     CORE_ADDR pc);
 
 /* FIXME: cagney/2002-12-18: Has the frame's base changed?  Or to be
-   more exact, whas that initial guess at the frame's base as returned
-   by deprecated_read_fp() wrong.  If it was, fix it.  This shouldn't
+   more exact, was that initial guess at the frame's base as returned
+   by deprecated_read_fp() wrong?  If it was, fix it.  This shouldn't
    be necessary since the code should be getting the frame's base
    correct from the outset.
 

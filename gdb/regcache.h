@@ -32,6 +32,10 @@ void regcache_xfree (struct regcache *regcache);
 struct cleanup *make_cleanup_regcache_xfree (struct regcache *regcache);
 struct regcache *regcache_xmalloc (struct gdbarch *gdbarch);
 
+/* Return REGCACHE's architecture.  */
+
+extern struct gdbarch *get_regcache_arch (const struct regcache *regcache);
+
 /* Transfer a raw register [0..NUM_REGS) between core-gdb and the
    regcache. */
 
@@ -117,9 +121,9 @@ extern int register_offset_hack (struct gdbarch *gdbarch, int regnum);
    value stored in a table.
 
    NOTE: cagney/2002-08-17: The original macro was called
-   REGISTER_VIRTUAL_TYPE.  This was because the register could have
-   different raw and cooked (nee virtual) representations.  The
-   CONVERTABLE methods being used to convert between the two
+   DEPRECATED_REGISTER_VIRTUAL_TYPE.  This was because the register
+   could have different raw and cooked (nee virtual) representations.
+   The CONVERTABLE methods being used to convert between the two
    representations.  Current code does not do this.  Instead, the
    first [0..NUM_REGS) registers are 1:1 raw:cooked, and the type
    exactly describes the register's representation.  Consequently, the
@@ -136,15 +140,15 @@ extern struct type *register_type (struct gdbarch *gdbarch, int regnum);
 
    FIXME: cagney/2003-02-28:
 
-   Unfortunatly, thanks to some legacy architectures, this doesn't
+   Unfortunately, thanks to some legacy architectures, this doesn't
    hold.  A register's cooked (nee virtual) and raw size can differ
    (see MIPS).  Such architectures should be using different register
    numbers for the different sized views of identical registers.
 
    Anyway, the up-shot is that, until that mess is fixed, core code
    can end up being very confused - should the RAW or VIRTUAL size be
-   used?  As a rule of thumb, use REGISTER_VIRTUAL_SIZE in cooked
-   code, but with the comment:
+   used?  As a rule of thumb, use DEPRECATED_REGISTER_VIRTUAL_SIZE in
+   cooked code, but with the comment:
 
    OK: REGISTER_VIRTUAL_SIZE
 

@@ -193,8 +193,6 @@ static void xcoff_symfile_finish (struct objfile *);
 static void xcoff_symfile_offsets (struct objfile *,
 				   struct section_addr_info *addrs);
 
-static void find_linenos (bfd *, sec_ptr, void *);
-
 static char *coff_getfilename (union internal_auxent *, struct objfile *);
 
 static void read_symbol (struct internal_syment *, int);
@@ -1699,7 +1697,7 @@ gotit:
  * mainline code can read the whole thing for efficiency.
  */
 static void
-find_linenos (bfd *abfd, sec_ptr asect, void *vpinfo)
+find_linenos (struct bfd *abfd, struct bfd_section *asect, void *vpinfo)
 {
   struct coff_symfile_info *info;
   int size, count;
@@ -2635,22 +2633,6 @@ scan_xcoff_symtab (struct objfile *objfile)
 					     psymtab_language, objfile);
 			p += 1;
 		      }
-#if 0 /* OBSOLETE CFront */
-// OBSOLETE  		    /* The semantics of C++ state that "struct foo { ... }"
-// OBSOLETE  		       also defines a typedef for "foo".  Unfortuantely, cfront
-// OBSOLETE  		       never makes the typedef when translating from C++ to C.
-// OBSOLETE  		       We make the typedef here so that "ptype foo" works as
-// OBSOLETE  		       expected for cfront translated code.  */
-// OBSOLETE  		    else if (psymtab_language == language_cplus)
-// OBSOLETE  		      {
-// OBSOLETE  			/* Also a typedef with the same name.  */
-// OBSOLETE  			add_psymbol_to_list (namestring, p - namestring,
-// OBSOLETE  					     VAR_DOMAIN, LOC_TYPEDEF,
-// OBSOLETE  					     &objfile->static_psymbols,
-// OBSOLETE  					     symbol.n_value, 0,
-// OBSOLETE  					     psymtab_language, objfile);
-// OBSOLETE  		      }
-#endif /* OBSOLETE CFront */
 		  }
 		goto check_enum;
 
@@ -2799,11 +2781,6 @@ scan_xcoff_symtab (struct objfile *objfile)
 	      case '9':
 	      case '-':
 	      case '#':		/* for symbol identification (used in live ranges) */
-#if 0 /* OBSOLETE CFront */
-// OBSOLETE 		/* added to support cfront stabs strings */
-// OBSOLETE 	      case 'Z':		/* for definition continuations */
-// OBSOLETE 	      case 'P':		/* for prototypes */
-#endif /* OBSOLETE CFront */
 		continue;
 
 	      case ':':
@@ -2902,7 +2879,7 @@ xcoff_initial_scan (struct objfile *objfile, int mainline)
 
       /* Read the .debug section, if present.  */
       {
-	sec_ptr secp;
+	struct bfd_section *secp;
 	bfd_size_type length;
 	char *debugsec = NULL;
 

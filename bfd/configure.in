@@ -117,13 +117,6 @@ BFD_HOST_LONG_LONG=0
 BFD_HOST_64_BIT_DEFINED=0
 BFD_HOST_64_BIT=
 BFD_HOST_U_64_BIT=
-if test "x${HOST_64BIT_TYPE}" = "xlong"; then
-  BFD_HOST_64BIT_LONG=1
-elif test "x${HOST_64BIT_TYPE}" != "x"; then
-  BFD_HOST_64_BIT_DEFINED=1
-  BFD_HOST_64_BIT=${HOST_64BIT_TYPE}
-  BFD_HOST_U_64_BIT=${HOST_U_64BIT_TYPE}
-fi
 
 AC_MSG_CHECKING([for long long])
 AC_CACHE_VAL(bfd_cv_has_long_long,
@@ -133,6 +126,24 @@ bfd_cv_has_long_long=yes, bfd_cv_has_long_long=no)])
 AC_MSG_RESULT($bfd_cv_has_long_long)
 if test $bfd_cv_has_long_long = yes; then
   BFD_HOST_LONG_LONG=1
+  AC_COMPILE_CHECK_SIZEOF(long long)
+fi
+
+AC_COMPILE_CHECK_SIZEOF(long)
+if test "x${ac_cv_sizeof_long}" = "x8"; then
+  host64=true
+  HOST_64BIT_TYPE="long"
+elif test "x${ac_cv_sizeof_long_long}" = "x8"; then
+  HOST_64BIT_TYPE="long long"
+  HOST_U_64BIT_TYPE="unsigned long long"
+fi
+
+if test "x${HOST_64BIT_TYPE}" = "xlong"; then
+  BFD_HOST_64BIT_LONG=1
+elif test "x${HOST_64BIT_TYPE}" != "x"; then
+  BFD_HOST_64_BIT_DEFINED=1
+  BFD_HOST_64_BIT=${HOST_64BIT_TYPE}
+  BFD_HOST_U_64_BIT=${HOST_U_64BIT_TYPE}
 fi
 
 AC_SUBST(BFD_HOST_64BIT_LONG)
@@ -220,7 +231,7 @@ changequote([,])dnl
 	TRAD_HEADER='"hosts/i386bsd.h"'
 	;;
 changequote(,)dnl
-  i[3-7]86-*-netbsd* | i[3-7]86-*-openbsd*)
+  i[3-7]86-*-netbsd* | i[3-7]86-*-knetbsd*-gnu | i[3-7]86-*-openbsd*)
 changequote([,])dnl
 	COREFILE=netbsd-core.lo
 	;;

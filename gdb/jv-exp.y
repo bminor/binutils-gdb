@@ -682,16 +682,16 @@ Expression:
 
 static int
 parse_number (p, len, parsed_float, putithere)
-     register char *p;
-     register int len;
+     char *p;
+     int len;
      int parsed_float;
      YYSTYPE *putithere;
 {
-  register ULONGEST n = 0;
+  ULONGEST n = 0;
   ULONGEST limit, limit_div_base;
 
-  register int c;
-  register int base = input_radix;
+  int c;
+  int base = input_radix;
 
   struct type *type;
 
@@ -872,7 +872,7 @@ yylex ()
   tokstart = lexptr;
   /* See if it is a special token of length 3.  */
   for (i = 0; i < sizeof tokentab3 / sizeof tokentab3[0]; i++)
-    if (STREQN (tokstart, tokentab3[i].operator, 3))
+    if (strncmp (tokstart, tokentab3[i].operator, 3) == 0)
       {
 	lexptr += 3;
 	yylval.opcode = tokentab3[i].opcode;
@@ -881,7 +881,7 @@ yylex ()
 
   /* See if it is a special token of length 2.  */
   for (i = 0; i < sizeof tokentab2 / sizeof tokentab2[0]; i++)
-    if (STREQN (tokstart, tokentab2[i].operator, 2))
+    if (strncmp (tokstart, tokentab2[i].operator, 2) == 0)
       {
 	lexptr += 2;
 	yylval.opcode = tokentab2[i].opcode;
@@ -967,7 +967,7 @@ yylex ()
       {
 	/* It's a number.  */
 	int got_dot = 0, got_e = 0, toktype;
-	register char *p = tokstart;
+	char *p = tokstart;
 	int hex = input_radix > 10;
 
 	if (c == '0' && (p[1] == 'x' || p[1] == 'X'))
@@ -1167,9 +1167,9 @@ yylex ()
 	}
       break;
     case 3:
-      if (STREQN (tokstart, "int", 3))
+      if (strncmp (tokstart, "int", 3) == 0)
 	return INT;
-      if (STREQN (tokstart, "new", 3))
+      if (strncmp (tokstart, "new", 3) == 0)
 	return NEW;
       break;
     default:

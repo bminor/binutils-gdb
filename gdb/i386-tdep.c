@@ -37,6 +37,7 @@
 #include "osabi.h"
 #include "regcache.h"
 #include "reggroups.h"
+#include "regset.h"
 #include "symfile.h"
 #include "symtab.h"
 #include "target.h"
@@ -67,8 +68,7 @@ static char *i386_register_names[] =
   "mxcsr"
 };
 
-static const int i386_num_register_names =
-  (sizeof (i386_register_names) / sizeof (*i386_register_names));
+static const int i386_num_register_names = ARRAY_SIZE (i386_register_names);
 
 /* MMX registers.  */
 
@@ -78,48 +78,77 @@ static char *i386_mmx_names[] =
   "mm4", "mm5", "mm6", "mm7"
 };
 
-static const int i386_num_mmx_regs =
-  (sizeof (i386_mmx_names) / sizeof (i386_mmx_names[0]));
-
-#define MM0_REGNUM NUM_REGS
+static const int i386_num_mmx_regs = ARRAY_SIZE (i386_mmx_names);
 
 static int
-i386_mmx_regnum_p (int regnum)
+i386_mmx_regnum_p (struct gdbarch *gdbarch, int regnum)
 {
-  return (regnum >= MM0_REGNUM
-	  && regnum < MM0_REGNUM + i386_num_mmx_regs);
+  int mm0_regnum = gdbarch_tdep (gdbarch)->mm0_regnum;
+
+  if (mm0_regnum < 0)
+    return 0;
+
+  return (regnum >= mm0_regnum && regnum < mm0_regnum + i386_num_mmx_regs);
 }
+
+/* SSE register?  */
+
+static int
+i386_sse_regnum_p (struct gdbarch *gdbarch, int regnum)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+#define I387_ST0_REGNUM tdep->st0_regnum
+#define I387_NUM_XMM_REGS tdep->num_xmm_regs
+
+  if (I387_NUM_XMM_REGS == 0)
+    return 0;
+
+  return (I387_XMM0_REGNUM <= regnum && regnum < I387_MXCSR_REGNUM);
+
+#undef I387_ST0_REGNUM
+#undef I387_NUM_XMM_REGS
+}
+
+static int
+i386_mxcsr_regnum_p (struct gdbarch *gdbarch, int regnum)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+#define I387_ST0_REGNUM tdep->st0_regnum
+#define I387_NUM_XMM_REGS tdep->num_xmm_regs
+
+  if (I387_NUM_XMM_REGS == 0)
+    return 0;
+
+  return (regnum == I387_MXCSR_REGNUM);
+
+#undef I387_ST0_REGNUM
+#undef I387_NUM_XMM_REGS
+}
+
+#define I387_ST0_REGNUM (gdbarch_tdep (current_gdbarch)->st0_regnum)
+#define I387_MM0_REGNUM (gdbarch_tdep (current_gdbarch)->mm0_regnum)
+#define I387_NUM_XMM_REGS (gdbarch_tdep (current_gdbarch)->num_xmm_regs)
 
 /* FP register?  */
 
 int
 i386_fp_regnum_p (int regnum)
 {
-  return (regnum < NUM_REGS
-	  && (FP0_REGNUM && FP0_REGNUM <= regnum && regnum < FPC_REGNUM));
+  if (I387_ST0_REGNUM < 0)
+    return 0;
+
+  return (I387_ST0_REGNUM <= regnum && regnum < I387_FCTRL_REGNUM);
 }
 
 int
 i386_fpc_regnum_p (int regnum)
 {
-  return (regnum < NUM_REGS
-	  && (FPC_REGNUM <= regnum && regnum < XMM0_REGNUM));
-}
+  if (I387_ST0_REGNUM < 0)
+    return 0;
 
-/* SSE register?  */
-
-int
-i386_sse_regnum_p (int regnum)
-{
-  return (regnum < NUM_REGS
-	  && (XMM0_REGNUM <= regnum && regnum < MXCSR_REGNUM));
-}
-
-int
-i386_mxcsr_regnum_p (int regnum)
-{
-  return (regnum < NUM_REGS
-	  && regnum == MXCSR_REGNUM);
+  return (I387_FCTRL_REGNUM <= regnum && regnum < I387_XMM0_REGNUM);
 }
 
 /* Return the name of register REG.  */
@@ -127,8 +156,8 @@ i386_mxcsr_regnum_p (int regnum)
 const char *
 i386_register_name (int reg)
 {
-  if (i386_mmx_regnum_p (reg))
-    return i386_mmx_names[reg - MM0_REGNUM];
+  if (i386_mmx_regnum_p (current_gdbarch, reg))
+    return i386_mmx_names[reg - I387_MM0_REGNUM];
 
   if (reg >= 0 && reg < i386_num_register_names)
     return i386_register_names[reg];
@@ -151,17 +180,17 @@ i386_stab_reg_to_regnum (int reg)
   else if (reg >= 12 && reg <= 19)
     {
       /* Floating-point registers.  */
-      return reg - 12 + FP0_REGNUM;
+      return reg - 12 + I387_ST0_REGNUM;
     }
   else if (reg >= 21 && reg <= 28)
     {
       /* SSE registers.  */
-      return reg - 21 + XMM0_REGNUM;
+      return reg - 21 + I387_XMM0_REGNUM;
     }
   else if (reg >= 29 && reg <= 36)
     {
       /* MMX registers.  */
-      return reg - 29 + MM0_REGNUM;
+      return reg - 29 + I387_MM0_REGNUM;
     }
 
   /* This will hopefully provoke a warning.  */
@@ -184,7 +213,7 @@ i386_dwarf_reg_to_regnum (int reg)
   else if (reg >= 11 && reg <= 18)
     {
       /* Floating-point registers.  */
-      return reg - 11 + FP0_REGNUM;
+      return reg - 11 + I387_ST0_REGNUM;
     }
   else if (reg >= 21)
     {
@@ -195,6 +224,10 @@ i386_dwarf_reg_to_regnum (int reg)
   /* This will hopefully provoke a warning.  */
   return NUM_REGS + NUM_PSEUDO_REGS;
 }
+
+#undef I387_ST0_REGNUM
+#undef I387_MM0_REGNUM
+#undef I387_NUM_XMM_REGS
 
 
 /* This is the variable that is set with "set disassembly-flavor", and
@@ -466,12 +499,14 @@ i386_analyze_frame_setup (CORE_ADDR pc, CORE_ADDR current_pc,
 	    xorl %ebx, %ebx
 	    xorl %ecx, %ecx
 	    xorl %edx, %edx
+	    xorl %eax, %eax
 
 	 and the equivalent
 
 	    subl %ebx, %ebx
 	    subl %ecx, %ecx
 	    subl %edx, %edx
+	    subl %eax, %eax
 
 	 Make sure we only skip these instructions if we later see the
 	 `movl %esp, %ebp' that actually sets up the frame.  */
@@ -483,6 +518,7 @@ i386_analyze_frame_setup (CORE_ADDR pc, CORE_ADDR current_pc,
 	    case 0xdb:	/* %ebx */
 	    case 0xc9:	/* %ecx */
 	    case 0xd2:	/* %edx */
+	    case 0xc0:	/* %eax */
 	      skip += 2;
 	      break;
 	    default:
@@ -1123,6 +1159,7 @@ static void
 i386_extract_return_value (struct type *type, struct regcache *regcache,
 			   void *dst)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (get_regcache_arch (regcache));
   bfd_byte *valbuf = dst;
   int len = TYPE_LENGTH (type);
   char buf[I386_MAX_REGISTER_SIZE];
@@ -1136,7 +1173,7 @@ i386_extract_return_value (struct type *type, struct regcache *regcache,
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
-      if (FP0_REGNUM < 0)
+      if (tdep->st0_regnum < 0)
 	{
 	  warning ("Cannot find floating-point return value.");
 	  memset (valbuf, 0, len);
@@ -1180,7 +1217,12 @@ static void
 i386_store_return_value (struct type *type, struct regcache *regcache,
 			 const void *valbuf)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (get_regcache_arch (regcache));
   int len = TYPE_LENGTH (type);
+
+  /* Define I387_ST0_REGNUM such that we use the proper definitions
+     for the architecture.  */
+#define I387_ST0_REGNUM I386_ST0_REGNUM
 
   if (TYPE_CODE (type) == TYPE_CODE_STRUCT
       && TYPE_NFIELDS (type) == 1)
@@ -1192,9 +1234,9 @@ i386_store_return_value (struct type *type, struct regcache *regcache,
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
       ULONGEST fstat;
-      char buf[FPU_REG_RAW_SIZE];
+      char buf[I386_MAX_REGISTER_SIZE];
 
-      if (FP0_REGNUM < 0)
+      if (tdep->st0_regnum < 0)
 	{
 	  warning ("Cannot set floating-point return value.");
 	  return;
@@ -1215,14 +1257,14 @@ i386_store_return_value (struct type *type, struct regcache *regcache,
          actual value doesn't really matter, but 7 is what a normal
          function return would end up with if the program started out
          with a freshly initialized FPU.  */
-      regcache_raw_read_unsigned (regcache, FSTAT_REGNUM, &fstat);
+      regcache_raw_read_unsigned (regcache, I387_FSTAT_REGNUM, &fstat);
       fstat |= (7 << 11);
-      regcache_raw_write_unsigned (regcache, FSTAT_REGNUM, fstat);
+      regcache_raw_write_unsigned (regcache, I387_FSTAT_REGNUM, fstat);
 
       /* Mark %st(1) through %st(7) as empty.  Since we set the top of
          the floating-point register stack to 7, the appropriate value
          for the tag word is 0x3fff.  */
-      regcache_raw_write_unsigned (regcache, FTAG_REGNUM, 0x3fff);
+      regcache_raw_write_unsigned (regcache, I387_FTAG_REGNUM, 0x3fff);
     }
   else
     {
@@ -1241,6 +1283,8 @@ i386_store_return_value (struct type *type, struct regcache *regcache,
 	internal_error (__FILE__, __LINE__,
 			"Cannot store return value of %d bytes long.", len);
     }
+
+#undef I387_ST0_REGNUM
 }
 
 /* Extract from REGCACHE, which contains the (raw) register state, the
@@ -1302,10 +1346,10 @@ i386_register_type (struct gdbarch *gdbarch, int regnum)
   if (i386_fp_regnum_p (regnum))
     return builtin_type_i387_ext;
 
-  if (i386_sse_regnum_p (regnum))
+  if (i386_sse_regnum_p (gdbarch, regnum))
     return builtin_type_vec128i;
 
-  if (i386_mmx_regnum_p (regnum))
+  if (i386_mmx_regnum_p (gdbarch, regnum))
     return builtin_type_vec64i;
 
   return builtin_type_int;
@@ -1317,24 +1361,30 @@ i386_register_type (struct gdbarch *gdbarch, int regnum)
 static int
 i386_mmx_regnum_to_fp_regnum (struct regcache *regcache, int regnum)
 {
-  int mmxi;
+  struct gdbarch_tdep *tdep = gdbarch_tdep (get_regcache_arch (regcache));
+  int mmxreg, fpreg;
   ULONGEST fstat;
   int tos;
-  int fpi;
 
-  mmxi = regnum - MM0_REGNUM;
-  regcache_raw_read_unsigned (regcache, FSTAT_REGNUM, &fstat);
+  /* Define I387_ST0_REGNUM such that we use the proper definitions
+     for REGCACHE's architecture.  */
+#define I387_ST0_REGNUM tdep->st0_regnum
+
+  mmxreg = regnum - tdep->mm0_regnum;
+  regcache_raw_read_unsigned (regcache, I387_FSTAT_REGNUM, &fstat);
   tos = (fstat >> 11) & 0x7;
-  fpi = (mmxi + tos) % 8;
+  fpreg = (mmxreg + tos) % 8;
 
-  return (FP0_REGNUM + fpi);
+  return (I387_ST0_REGNUM + fpreg);
+
+#undef I387_ST0_REGNUM
 }
 
 static void
 i386_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 			   int regnum, void *buf)
 {
-  if (i386_mmx_regnum_p (regnum))
+  if (i386_mmx_regnum_p (gdbarch, regnum))
     {
       char mmx_buf[MAX_REGISTER_SIZE];
       int fpnum = i386_mmx_regnum_to_fp_regnum (regcache, regnum);
@@ -1351,7 +1401,7 @@ static void
 i386_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 			    int regnum, const void *buf)
 {
-  if (i386_mmx_regnum_p (regnum))
+  if (i386_mmx_regnum_p (gdbarch, regnum))
     {
       char mmx_buf[MAX_REGISTER_SIZE];
       int fpnum = i386_mmx_regnum_to_fp_regnum (regcache, regnum);
@@ -1367,14 +1417,6 @@ i386_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
     regcache_raw_write (regcache, regnum, buf);
 }
 
-
-/* These registers don't have pervasive standard uses.  Move them to
-   i386-tdep.h if necessary.  */
-
-#define I386_EBX_REGNUM		3 /* %ebx */
-#define I386_ECX_REGNUM		1 /* %ecx */
-#define I386_ESI_REGNUM		6 /* %esi */
-#define I386_EDI_REGNUM		7 /* %edi */
 
 /* Return the register number of the register allocated by GCC after
    REGNUM, or -1 if there is no such register.  */
@@ -1502,7 +1544,84 @@ i386_value_to_register (struct frame_info *frame, int regnum,
     }
 }
 
+/* Supply register REGNUM from the general-purpose register set REGSET
+   to register cache REGCACHE.  If REGNUM is -1, do this for all
+   registers in REGSET.  */
 
+static void
+i386_supply_gregset (const struct regset *regset, struct regcache *regcache,
+		     int regnum, const void *gregs, size_t len)
+{
+  const struct gdbarch_tdep *tdep = regset->descr;
+  const char *regs = gregs;
+  int i;
+
+  gdb_assert (len == tdep->sizeof_gregset);
+
+  for (i = 0; i < tdep->gregset_num_regs; i++)
+    {
+      if ((regnum == i || regnum == -1)
+	  && tdep->gregset_reg_offset[i] != -1)
+	regcache_raw_supply (regcache, i, regs + tdep->gregset_reg_offset[i]);
+    }
+}
+
+/* Supply register REGNUM from the floating-point register set REGSET
+   to register cache REGCACHE.  If REGNUM is -1, do this for all
+   registers in REGSET.  */
+
+static void
+i386_supply_fpregset (const struct regset *regset, struct regcache *regcache,
+		      int regnum, const void *fpregs, size_t len)
+{
+  const struct gdbarch_tdep *tdep = regset->descr;
+
+  if (len == I387_SIZEOF_FXSAVE)
+    {
+      i387_supply_fxsave (regcache, regnum, fpregs);
+      return;
+    }
+
+  gdb_assert (len == tdep->sizeof_fpregset);
+  i387_supply_fsave (regcache, regnum, fpregs);
+}
+
+/* Return the appropriate register set for the core section identified
+   by SECT_NAME and SECT_SIZE.  */
+
+const struct regset *
+i386_regset_from_core_section (struct gdbarch *gdbarch,
+			       const char *sect_name, size_t sect_size)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (strcmp (sect_name, ".reg") == 0 && sect_size == tdep->sizeof_gregset)
+    {
+      if (tdep->gregset == NULL)
+	{
+	  tdep->gregset = XMALLOC (struct regset);
+	  tdep->gregset->descr = tdep;
+	  tdep->gregset->supply_regset = i386_supply_gregset;
+	}
+      return tdep->gregset;
+    }
+
+  if ((strcmp (sect_name, ".reg2") == 0 && sect_size == tdep->sizeof_fpregset)
+      || (strcmp (sect_name, ".reg-xfp") == 0
+	  && sect_size == I387_SIZEOF_FXSAVE))
+    {
+      if (tdep->fpregset == NULL)
+	{
+	  tdep->fpregset = XMALLOC (struct regset);
+	  tdep->fpregset->descr = tdep;
+	  tdep->fpregset->supply_regset = i386_supply_fpregset;
+	}
+      return tdep->fpregset;
+    }
+
+  return NULL;
+}
+
 
 #ifdef STATIC_TRANSFORM_NAME
 /* SunPRO encodes the static variables.  This is not related to C++
@@ -1710,11 +1829,11 @@ int
 i386_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 			  struct reggroup *group)
 {
-  int sse_regnum_p = (i386_sse_regnum_p (regnum)
-		      || i386_mxcsr_regnum_p (regnum));
+  int sse_regnum_p = (i386_sse_regnum_p (gdbarch, regnum)
+		      || i386_mxcsr_regnum_p (gdbarch, regnum));
   int fp_regnum_p = (i386_fp_regnum_p (regnum)
 		     || i386_fpc_regnum_p (regnum));
-  int mmx_regnum_p = (i386_mmx_regnum_p (regnum));
+  int mmx_regnum_p = (i386_mmx_regnum_p (gdbarch, regnum));
 
   if (group == i386_mmx_reggroup)
     return mmx_regnum_p;
@@ -1757,22 +1876,38 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep = XMALLOC (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
 
-  /* The i386 default settings now include the SSE registers.
-     I386_NUM_XREGS includes mxcsr, and we don't want to count
-     this as one of the xmm regs -- which is why we subtract one.
+  /* General-purpose registers.  */
+  tdep->gregset = NULL;
+  tdep->gregset_reg_offset = NULL;
+  tdep->gregset_num_regs = I386_NUM_GREGS;
+  tdep->sizeof_gregset = 0;
 
-     Note: kevinb/2003-07-14: Whatever Mark's concerns are about the
-     FPU registers in the FIXME below apply to the SSE registers as well.
-     The only problem that I see is that these registers will show up
-     in "info all-registers" even on CPUs where they don't exist.  IMO,
-     however, if it's a choice between printing them always (even when
-     they don't exist) or never showing them to the user (even when they
-     do exist), I prefer the former over the latter.  Ideally, of course,
-     we'd somehow autodetect that we have them (or not) and display them
-     when we have them and suppress them when we don't.
+  /* Floating-point registers.  */
+  tdep->fpregset = NULL;
+  tdep->sizeof_fpregset = I387_SIZEOF_FSAVE;
 
-     FIXME: kettenis/20020614: They do include the FPU registers for
-     now, which probably is not quite right.  */
+  /* The default settings include the FPU registers, the MMX registers
+     and the SSE registers.  This can be overidden for a specific ABI
+     by adjusting the members `st0_regnum', `mm0_regnum' and
+     `num_xmm_regs' of `struct gdbarch_tdep', otherwise the registers
+     will show up in the output of "info all-registers".  Ideally we
+     should try to autodetect whether they are available, such that we
+     can prevent "info all-registers" from displaying registers that
+     aren't available.
+
+     NOTE: kevinb/2003-07-13: ... if it's a choice between printing
+     [the SSE registers] always (even when they don't exist) or never
+     showing them to the user (even when they do exist), I prefer the
+     former over the latter.  */
+
+  tdep->st0_regnum = I386_ST0_REGNUM;
+
+  /* The MMX registers are implemented as pseudo-registers.  Put off
+     caclulating the register number for %mm0 until we know the number
+     of raw registers.  */
+  tdep->mm0_regnum = 0;
+
+  /* I386_NUM_XREGS includes %mxcsr, so substract one.  */
   tdep->num_xmm_regs = I386_NUM_XREGS - 1;
 
   tdep->jb_pc_offset = -1;
@@ -1875,6 +2010,18 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   frame_unwind_append_sniffer (gdbarch, i386_sigtramp_frame_sniffer);
   frame_unwind_append_sniffer (gdbarch, i386_frame_sniffer);
+
+  /* If we have a register mapping, enable the generic core file
+     support, unless it has already been enabled.  */
+  if (tdep->gregset_reg_offset
+      && !gdbarch_regset_from_core_section_p (gdbarch))
+    set_gdbarch_regset_from_core_section (gdbarch,
+					  i386_regset_from_core_section);
+
+  /* Unless support for MMX has been disabled, make %mm0 the first
+     pseudo-register.  */
+  if (tdep->mm0_regnum == 0)
+    tdep->mm0_regnum = gdbarch_num_regs (gdbarch);
 
   return gdbarch;
 }

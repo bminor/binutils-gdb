@@ -477,9 +477,8 @@ coff_symfile_init (struct objfile *objfile)
    of the line table (minimum and maximum file offset) so that the
    mainline code can read the whole thing for efficiency.  */
 
-/* ARGSUSED */
 static void
-find_linenos (bfd *abfd, sec_ptr asect, void *vpinfo)
+find_linenos (bfd *abfd, struct bfd_section *asect, void *vpinfo)
 {
   struct coff_symfile_info *info;
   int size, count;
@@ -514,7 +513,6 @@ static bfd *symfile_bfd;
 
 /* Read a symbol file, after initialization by coff_symfile_init.  */
 
-/* ARGSUSED */
 static void
 coff_symfile_read (struct objfile *objfile, int mainline)
 {
@@ -937,15 +935,8 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 	    if (cs->c_name[0] != '@' /* Skip tdesc symbols */ )
 	      {
 		struct minimal_symbol *msym;
-
- 		/* FIXME: cagney/2001-02-01: The nasty (int) -> (long)
-                   -> (void*) cast is to ensure that that the value of
-                   cs->c_sclass can be correctly stored in a void
-                   pointer in MSYMBOL_INFO.  Better solutions
-                   welcome. */
-		gdb_assert (sizeof (void *) >= sizeof (cs->c_sclass));
 		msym = prim_record_minimal_symbol_and_info
-		  (cs->c_name, tmpaddr, ms_type, (void *) (long) cs->c_sclass,
+		  (cs->c_name, tmpaddr, ms_type, NULL,
 		   sec, NULL, objfile);
 		if (msym)
 		  COFF_MAKE_MSYMBOL_SPECIAL (cs->c_sclass, msym);
@@ -1448,7 +1439,7 @@ patch_opaque_types (struct symtab *s)
 	  for (sym = opaque_type_chain[hash]; sym;)
 	    {
 	      if (name[0] == DEPRECATED_SYMBOL_NAME (sym)[0] &&
-		  STREQ (name + 1, DEPRECATED_SYMBOL_NAME (sym) + 1))
+		  strcmp (name + 1, DEPRECATED_SYMBOL_NAME (sym) + 1) == 0)
 		{
 		  if (prev)
 		    {
@@ -1652,11 +1643,6 @@ process_coff_symbol (struct coff_symbol *cs,
 		TYPE_NAME (SYMBOL_TYPE (sym)) =
 		  concat (DEPRECATED_SYMBOL_NAME (sym), NULL);
 	    }
-#ifdef CXUX_TARGET
-	  /* Ignore vendor section for Harris CX/UX targets. */
-	  else if (cs->c_name[0] == '$')
-	    break;
-#endif /* CXUX_TARGET */
 
 	  /* Keep track of any type which points to empty structured type,
 	     so it can be filled from a definition from another file.  A
@@ -1808,15 +1794,6 @@ decode_base_type (struct coff_symbol *cs, unsigned int c_type,
     case T_NULL:
       /* shows up with "void (*foo)();" structure members */
       return lookup_fundamental_type (current_objfile, FT_VOID);
-
-#if 0
-/* DGUX actually defines both T_ARG and T_VOID to the same value.  */
-#ifdef T_ARG
-    case T_ARG:
-      /* Shows up in DGUX, I think.  Not sure where.  */
-      return lookup_fundamental_type (current_objfile, FT_VOID);	/* shouldn't show up here */
-#endif
-#endif /* 0 */
 
 #ifdef T_VOID
     case T_VOID:
@@ -2045,7 +2022,6 @@ coff_read_struct_type (int index, int length, int lastsym)
    and create and return a suitable type object.
    Also defines the symbols that represent the values of the type.  */
 
-/* ARGSUSED */
 static struct type *
 coff_read_enum_type (int index, int length, int lastsym)
 {

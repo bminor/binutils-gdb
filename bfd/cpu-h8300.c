@@ -23,11 +23,6 @@
 #include "sysdep.h"
 #include "libbfd.h"
 
-static bfd_boolean h8300_scan
-  (const struct bfd_arch_info *, const char *);
-static const bfd_arch_info_type * compatible
-  (const bfd_arch_info_type *, const bfd_arch_info_type *);
-
 static bfd_boolean
 h8300_scan (const struct bfd_arch_info *info, const char *string)
 {
@@ -111,7 +106,7 @@ compatible (const bfd_arch_info_type *in, const bfd_arch_info_type *out)
 static const bfd_arch_info_type h8300sxn_info_struct =
 {
   32,				/* 32 bits in a word */
-  32,				/* 32 bits in an address */
+  16,				/* 16 bits in an address */
   8,				/* 8 bits in a byte */
   bfd_arch_h8300,
   bfd_mach_h8300sxn,
@@ -143,7 +138,7 @@ static const bfd_arch_info_type h8300sx_info_struct =
 static const bfd_arch_info_type h8300sn_info_struct =
 {
   32,				/* 32 bits in a word.  */
-  32,				/* 32 bits in an address.  */
+  16,				/* 16 bits in an address.  */
   8,				/* 8 bits in a byte.  */
   bfd_arch_h8300,
   bfd_mach_h8300sn,
@@ -156,11 +151,10 @@ static const bfd_arch_info_type h8300sn_info_struct =
   &h8300sx_info_struct
 };
 
-
 static const bfd_arch_info_type h8300hn_info_struct =
 {
   32,				/* 32 bits in a word.  */
-  32,				/* 32 bits in an address.  */
+  16,				/* 16 bits in an address.  */
   8,				/* 8 bits in a byte.  */
   bfd_arch_h8300,
   bfd_mach_h8300hn,

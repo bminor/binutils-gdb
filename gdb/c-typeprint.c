@@ -859,10 +859,11 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
 	      QUIT;
 	      /* Don't print out virtual function table.  */
 	      /* HP ANSI C++ case */
-	      if (TYPE_HAS_VTABLE (type) && (STREQN (TYPE_FIELD_NAME (type, i), "__vfp", 5)))
+	      if (TYPE_HAS_VTABLE (type)
+		  && (strncmp (TYPE_FIELD_NAME (type, i), "__vfp", 5) == 0))
 		continue;
 	      /* Other compilers */
-	      if (STREQN (TYPE_FIELD_NAME (type, i), "_vptr", 5)
+	      if (strncmp (TYPE_FIELD_NAME (type, i), "_vptr", 5) == 0
 		  && is_cplus_marker ((TYPE_FIELD_NAME (type, i))[5]))
 		continue;
 
@@ -944,7 +945,7 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
 	      int j, len2 = TYPE_FN_FIELDLIST_LENGTH (type, i);
 	      char *method_name = TYPE_FN_FIELDLIST_NAME (type, i);
 	      const char *name = type_name_no_tag (type);
-	      int is_constructor = name && STREQ (method_name, name);
+	      int is_constructor = name && strcmp (method_name, name) == 0;
 	      for (j = 0; j < len2; j++)
 		{
 		  char *physname = TYPE_FN_FIELD_PHYSNAME (f, j);

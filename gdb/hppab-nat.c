@@ -64,7 +64,7 @@ fetch_register (int regno)
   offset = U_REGS_OFFSET;
 
   regaddr = register_addr (regno, offset);
-  for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (int))
+  for (i = 0; i < DEPRECATED_REGISTER_RAW_SIZE (regno); i += sizeof (int))
     {
       errno = 0;
       *(int *) &buf[i] = ptrace (PT_RUREGS, PIDGET (inferior_ptid),
@@ -130,7 +130,7 @@ store_inferior_registers (int regno)
 	    }
 	}
       else
-	for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (int))
+	for (i = 0; i < DEPRECATED_REGISTER_RAW_SIZE (regno); i += sizeof (int))
 	  {
 	    errno = 0;
 	    ptrace (PT_WUREGS, PIDGET (inferior_ptid),

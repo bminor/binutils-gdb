@@ -1263,7 +1263,7 @@ trace_one_insn (SIM_DESC sd, sim_cpu *cpu, address_word pc,
 
 	  if (bfd_find_nearest_line (STATE_PROG_BFD (CPU_STATE (cpu)),
 				     STATE_TEXT_SECTION (CPU_STATE (cpu)),
-				     (struct symbol_cache_entry **) 0,
+				     (struct bfd_symbol **) 0,
 				     pc - STATE_TEXT_START (CPU_STATE (cpu)),
 				     &pc_filename, &pc_function, &pc_linenum))
 	    {

@@ -92,7 +92,6 @@ maintenance_command (char *args, int from_tty)
 }
 
 #ifndef _WIN32
-/* ARGSUSED */
 static void
 maintenance_dump_me (char *args, int from_tty)
 {
@@ -191,7 +190,6 @@ maintenance_space_display (char *args, int from_tty)
    allow_unknown 0.  Therefore, its own definition is called only for
    "maintenance info" with no args.  */
 
-/* ARGSUSED */
 static void
 maintenance_info_command (char *arg, int from_tty)
 {
@@ -353,7 +351,6 @@ print_objfile_section_info (bfd *abfd,
     }
 }
 
-/* ARGSUSED */
 static void
 maintenance_info_sections (char *arg, int from_tty)
 {
@@ -399,7 +396,6 @@ maintenance_info_sections (char *arg, int from_tty)
     }
 }
 
-/* ARGSUSED */
 void
 maintenance_print_statistics (char *args, int from_tty)
 {
@@ -426,7 +422,6 @@ maintenance_print_architecture (char *args, int from_tty)
    allow_unknown 0.  Therefore, its own definition is called only for
    "maintenance print" with no args.  */
 
-/* ARGSUSED */
 static void
 maintenance_print_command (char *arg, int from_tty)
 {

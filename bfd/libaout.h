@@ -1,6 +1,6 @@
 /* BFD back-end data structures for a.out (and similar) files.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002
+   2000, 2001, 2002, 2003
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -513,7 +513,7 @@ extern bfd_boolean NAME(aout,new_section_hook)
   PARAMS ((bfd *, asection *));
 
 extern bfd_boolean NAME(aout,set_section_contents)
-  PARAMS ((bfd *, sec_ptr, PTR, file_ptr, bfd_size_type));
+  PARAMS ((bfd *, sec_ptr, const PTR, file_ptr, bfd_size_type));
 
 extern asymbol * NAME(aout,make_empty_symbol)
   PARAMS ((bfd *));
@@ -534,7 +534,7 @@ extern void NAME(aout,reclaim_symbol_table)
 extern long NAME(aout,get_symtab_upper_bound)
   PARAMS ((bfd *));
 
-extern long NAME(aout,get_symtab)
+extern long NAME(aout,canonicalize_symtab)
   PARAMS ((bfd *, asymbol **));
 
 extern void NAME(aout,swap_ext_reloc_in)
