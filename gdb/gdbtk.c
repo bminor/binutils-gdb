@@ -794,8 +794,8 @@ gdb_disassemble (clientData, interp, argc, argv)
 
   if (! di_initialized)
     {
-      INIT_DISASSEMBLE_INFO (di, gdb_stdout);
-      di.fprintf_func = (fprintf_ftype) fprintf_unfiltered;
+      INIT_DISASSEMBLE_INFO (di, gdb_stdout,
+			     (fprintf_ftype) fprintf_unfiltered);
       di.memory_error_func = dis_asm_memory_error;
       di.print_address_func = dis_asm_print_address;
       di_initialized = 1;
