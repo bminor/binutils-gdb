@@ -2082,8 +2082,16 @@ mips_elf_calculate_relocation (abfd, input_bfd, input_section, info,
       sec = local_sections[r_symndx];
 
       symbol = sec->output_section->vma + sec->output_offset;
-      if (ELF_ST_TYPE (sym->st_info) != STT_SECTION)
+      if (ELF_ST_TYPE (sym->st_info) != STT_SECTION
+	  || (sec->flags & SEC_MERGE))
 	symbol += sym->st_value;
+      if ((sec->flags & SEC_MERGE)
+	  && ELF_ST_TYPE (sym->st_info) == STT_SECTION)
+	{
+	  addend = _bfd_elf_rel_local_sym (abfd, sym, &sec, addend);
+	  addend -= symbol;
+	  addend += sec->output_section->vma + sec->output_offset;
+	}
 
       /* MIPS16 text labels should be treated as odd.  */
       if (sym->st_other == STO_MIPS16)

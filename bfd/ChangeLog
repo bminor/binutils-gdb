@@ -1,3 +1,9 @@
+2002-06-05  H.J. Lu <hjl@gnu.org>
+
+	* elfxx-mips.c (mips_elf_calculate_relocation): Call
+	_bfd_elf_rel_local_sym for STT_SECTION relocations against
+	the SEC_MERGE section.
+
 2002-06-05  Alan Modra  <amodra@bigpond.net.au>
 
 	* coff-alpha.c: Update copyright date.
