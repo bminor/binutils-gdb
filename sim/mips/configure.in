@@ -19,11 +19,12 @@ SIM_AC_OPTION_WARNINGS
 #
 case "${target}" in
 # start-sanitize-vr4xxx
-  mips64vr4xxx-*-*)	SIM_SUBTARGET="-DTARGET_ENABLE_FR=1" ;;
+  mips64vr4xxx*-*-*)	SIM_SUBTARGET="-DTARGET_ENABLE_FR=1" ;;
 # end-sanitize-vr4xxx
 # start-sanitize-tx19
-  mips*tx19*)        SIM_SUBTARGET="-DSUBTARGET_R3900=1";;
+  mips*tx19*)		SIM_SUBTARGET="-DSUBTARGET_R3900=1";;
 # end-sanitize-tx19
+  mips64vr5xxx*-*-*)	SIM_SUBTARGET="-DTARGET_ENABLE_FR=1" ;;
   mips*tx39*)           SIM_SUBTARGET="-DSUBTARGET_R3900=1";;
   *)                    SIM_SUBTARGET="";;
 esac
@@ -89,7 +90,7 @@ case "${target}" in
 			mips_fpu_bitsize=32
 			;;
 # start-sanitize-vr4xxx
-  mips64vr4xxx-*-*)	mips_fpu=HARD_FLOATING_POINT ; mips_fpu_bitsize=64 ;;
+  mips64vr4xxx*-*-*)	mips_fpu=HARD_FLOATING_POINT ; mips_fpu_bitsize=64 ;;
 # end-sanitize-vr4xxx
 # start-sanitize-r5900
   mips64r59*-*-*)       mips_fpu=HARD_FLOATING_POINT ; mips_fpu_bitsize=32 ;;
@@ -168,7 +169,7 @@ case "${target}" in
 			;;
 # end-sanitize-cygnus
 # start-sanitize-vr4xxx
-  mips64vr4xxx-*-*)	sim_gen=IGEN
+  mips64vr4xxx*-*-*)	sim_gen=IGEN
 			sim_igen_machine="-M mipsIV,vr4100,vr4121 -G gen-multi-sim=mipsIV"
                         ;;
 # end-sanitize-vr4xxx
