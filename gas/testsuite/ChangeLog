@@ -1,3 +1,8 @@
+2002-07-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* lib/gas-defs.exp (run_dump_test): Run objdump/nm/objcopy/readelf
+	with LC_ALL=C to ensure consistent sorting.
+
 2002-06-18  Dave Brolley  <brolley@redhat.com>
 
 	* gas/frv: New testsuite.
