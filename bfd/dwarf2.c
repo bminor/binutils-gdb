@@ -75,7 +75,7 @@ struct attribute
 #define DW_SND(attr)       ((attr)->u.snd)
 #define DW_ADDR(attr)	   ((attr)->u.addr)
 
-/* Blocks are a bunch of untyped bytes. */
+/* Blocks are a bunch of untyped bytes.  */
 struct dwarf_block
 {
   unsigned int size;
@@ -144,7 +144,7 @@ struct comp_unit
 
   /* True if there is a line number table associated with this comp. unit.  */
   int stmtlist;
-  
+
   /* The offset into .debug_line of the line number table.  */
   unsigned long line_offset;
 
@@ -158,14 +158,14 @@ struct comp_unit
   struct line_info_table* line_table;
 
   /* A list of the functions found in this comp. unit.  */
-  struct funcinfo* function_table; 
+  struct funcinfo* function_table;
 
   /* Address size for this unit - from unit header.  */
   unsigned char addr_size;
 };
 
-/* VERBATIM 
-   The following function up to the END VERBATIM mark are 
+/* VERBATIM
+   The following function up to the END VERBATIM mark are
    copied directly from dwarf2read.c.  */
 
 /* Read dwarf information from a buffer.  */
@@ -260,7 +260,7 @@ read_string (abfd, buf, bytes_read_ptr)
       *bytes_read_ptr = 1;
       return NULL;
     }
-  
+
   *bytes_read_ptr = strlen (buf) + 1;
   return buf;
 }
@@ -279,7 +279,7 @@ read_unsigned_leb128 (abfd, buf, bytes_read_ptr)
   result   = 0;
   shift    = 0;
   num_read = 0;
-  
+
   do
     {
       byte = bfd_get_8 (abfd, (bfd_byte *) buf);
@@ -289,9 +289,9 @@ read_unsigned_leb128 (abfd, buf, bytes_read_ptr)
       shift += 7;
     }
   while (byte & 0x80);
-  
+
   * bytes_read_ptr = num_read;
-  
+
   return result;
 }
 
@@ -319,12 +319,12 @@ read_signed_leb128 (abfd, buf, bytes_read_ptr)
       shift += 7;
     }
   while (byte & 0x80);
-  
+
   if ((shift < 32) && (byte & 0x40))
     result |= -(1 << shift);
 
   * bytes_read_ptr = num_read;
-  
+
   return result;
 }
 
@@ -348,7 +348,7 @@ read_address (unit, buf)
     }
 }
 
-/* This data structure holds the information of an abbrev. */
+/* This data structure holds the information of an abbrev.  */
 struct abbrev_info
 {
   unsigned int number;		/* Number identifying abbrev.  */
@@ -392,7 +392,7 @@ lookup_abbrev (number,abbrevs)
       else
 	abbrev = abbrev->next;
     }
-  
+
   return NULL;
 }
 
@@ -426,13 +426,13 @@ read_abbrevs (abfd, offset)
 	  bfd_set_error (bfd_error_bad_value);
 	  return 0;
 	}
-      
+
       stash->dwarf_abbrev_size = msec->_raw_size;
       stash->dwarf_abbrev_buffer = (char*) bfd_alloc (abfd, stash->dwarf_abbrev_size);
       if (! stash->dwarf_abbrev_buffer)
 	  return 0;
-      
-      if (! bfd_get_section_contents (abfd, msec, 
+
+      if (! bfd_get_section_contents (abfd, msec,
 				      stash->dwarf_abbrev_buffer, 0,
 				      stash->dwarf_abbrev_size))
 	return 0;
@@ -440,13 +440,13 @@ read_abbrevs (abfd, offset)
 
   if (offset > stash->dwarf_abbrev_size)
     {
-      (*_bfd_error_handler) (_("Dwarf Error: Abbrev offset (%u) bigger than abbrev size (%u)."), 
+      (*_bfd_error_handler) (_("Dwarf Error: Abbrev offset (%u) bigger than abbrev size (%u)."),
 			     offset, stash->dwarf_abbrev_size );
       bfd_set_error (bfd_error_bad_value);
       return 0;
     }
 
-  abbrevs = (struct abbrev_info**) bfd_zalloc (abfd, sizeof(struct abbrev_info*) * ABBREV_HASH_SIZE);
+  abbrevs = (struct abbrev_info**) bfd_zalloc (abfd, sizeof (struct abbrev_info*) * ABBREV_HASH_SIZE);
 
   abbrev_ptr = stash->dwarf_abbrev_buffer + offset;
   abbrev_number = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
@@ -469,7 +469,7 @@ read_abbrevs (abfd, offset)
       abbrev_ptr += bytes_read;
       abbrev_form = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
       abbrev_ptr += bytes_read;
-      
+
       while (abbrev_name)
 	{
 	  if ((cur_abbrev->num_attrs % ATTR_ALLOC_CHUNK) == 0)
@@ -481,7 +481,7 @@ read_abbrevs (abfd, offset)
 	      if (! cur_abbrev->attrs)
 		return 0;
 	    }
-	  
+
 	  cur_abbrev->attrs[cur_abbrev->num_attrs].name = abbrev_name;
 	  cur_abbrev->attrs[cur_abbrev->num_attrs++].form = abbrev_form;
 	  abbrev_name = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
@@ -528,7 +528,7 @@ read_attribute (attr, abbrev, unit, info_ptr)
 
   attr->name = abbrev->name;
   attr->form = abbrev->form;
-  
+
   switch (abbrev->form)
     {
     case DW_FORM_addr:
@@ -664,7 +664,7 @@ struct line_info_table
   struct line_info* last_line;
 };
 
-static void 
+static void
 add_line_info (table, address, filename, line, column, end_sequence)
      struct line_info_table* table;
      bfd_vma address;
@@ -723,7 +723,7 @@ arange_add (unit, low_pc, high_pc)
 
   /* First see if we can cheaply extend an existing range.  */
   arange = &unit->arange;
-  
+
   do
     {
       if (low_pc == arange->high)
@@ -787,13 +787,13 @@ decode_line_info (unit)
 	  bfd_set_error (bfd_error_bad_value);
 	  return 0;
 	}
-      
+
       stash->dwarf_line_size = msec->_raw_size;
       stash->dwarf_line_buffer = (char *) bfd_alloc (abfd, stash->dwarf_line_size);
       if (! stash->dwarf_line_buffer)
 	return 0;
 
-      if (! bfd_get_section_contents (abfd, msec, 
+      if (! bfd_get_section_contents (abfd, msec,
 				      stash->dwarf_line_buffer, 0,
 				      stash->dwarf_line_size))
 	return 0;
@@ -813,7 +813,7 @@ decode_line_info (unit)
       return 0;
     }
 
-  table = (struct line_info_table*) bfd_alloc (abfd, 
+  table = (struct line_info_table*) bfd_alloc (abfd,
 					       sizeof (struct line_info_table));
   table->abfd = abfd;
   table->comp_dir = unit->comp_dir;
@@ -851,7 +851,7 @@ decode_line_info (unit)
     bfd_alloc (abfd, lh.opcode_base * sizeof (unsigned char));
 
   lh.standard_opcode_lengths[0] = 1;
-  
+
   for (i = 1; i < lh.opcode_base; ++i)
     {
       lh.standard_opcode_lengths[i] = read_1_byte (abfd, line_ptr);
@@ -862,7 +862,7 @@ decode_line_info (unit)
   while ((cur_dir = read_string (abfd, line_ptr, &bytes_read)) != NULL)
     {
       line_ptr += bytes_read;
-      
+
       if ((table->num_dirs % DIR_ALLOC_CHUNK) == 0)
 	{
 	  table->dirs = (char **)
@@ -871,17 +871,17 @@ decode_line_info (unit)
 	  if (! table->dirs)
 	    return 0;
 	}
-      
+
       table->dirs[table->num_dirs++] = cur_dir;
     }
-  
+
   line_ptr += bytes_read;
 
   /* Read file name table.  */
   while ((cur_file = read_string (abfd, line_ptr, &bytes_read)) != NULL)
     {
       line_ptr += bytes_read;
-      
+
       if ((table->num_files % FILE_ALLOC_CHUNK) == 0)
 	{
 	  table->files = (struct fileinfo *)
@@ -891,7 +891,7 @@ decode_line_info (unit)
 	  if (! table->files)
 	    return 0;
 	}
-      
+
       table->files[table->num_files].name = cur_file;
       table->files[table->num_files].dir =
 	read_unsigned_leb128 (abfd, line_ptr, &bytes_read);
@@ -904,7 +904,7 @@ decode_line_info (unit)
       line_ptr += bytes_read;
       table->num_files++;
     }
-  
+
   line_ptr += bytes_read;
 
   /* Read the statement sequences until there's nothing left.  */
@@ -925,7 +925,7 @@ decode_line_info (unit)
 	{
 	  op_code = read_1_byte (abfd, line_ptr);
 	  line_ptr += 1;
-	  
+
 	  switch (op_code)
 	    {
 	    case DW_LNS_extended_op:
@@ -1051,9 +1051,9 @@ decode_line_info (unit)
    LINENUMBER_PTR, are pointers to the objects to be filled in.  */
 
 static boolean
-lookup_address_in_line_info_table (table, 
+lookup_address_in_line_info_table (table,
 				   addr,
-				   filename_ptr, 
+				   filename_ptr,
 				   linenumber_ptr)
      struct line_info_table* table;
      bfd_vma addr;
@@ -1062,7 +1062,7 @@ lookup_address_in_line_info_table (table,
 {
   struct line_info* next_line = table->last_line;
   struct line_info* each_line;
-  
+
   if (!next_line)
     return false;
 
@@ -1080,10 +1080,10 @@ lookup_address_in_line_info_table (table,
       next_line = each_line;
       each_line = each_line->prev_line;
     }
-  
+
   return false;
 }
-  
+
 /* Function table functions.  */
 
 struct funcinfo
@@ -1094,10 +1094,10 @@ struct funcinfo
   bfd_vma high;
 };
 
-/* If ADDR is within TABLE, set FUNCTIONNAME_PTR, and return true. */
+/* If ADDR is within TABLE, set FUNCTIONNAME_PTR, and return true.  */
 
 static boolean
-lookup_address_in_function_table (table, 
+lookup_address_in_function_table (table,
 				  addr,
 				  functionname_ptr)
      struct funcinfo* table;
@@ -1116,7 +1116,7 @@ lookup_address_in_function_table (table,
 	  return true;
 	}
     }
-  
+
   return false;
 }
 
@@ -1149,16 +1149,16 @@ scan_unit_for_functions (unit)
 	  nesting_level--;
 	  continue;
 	}
-      
+
       abbrev = lookup_abbrev (abbrev_number,unit->abbrevs);
       if (! abbrev)
 	{
-	  (*_bfd_error_handler) (_("Dwarf Error: Could not find abbrev number %d."), 
+	  (*_bfd_error_handler) (_("Dwarf Error: Could not find abbrev number %d."),
 			     abbrev_number);
 	  bfd_set_error (bfd_error_bad_value);
 	  return false;
 	}
-      
+
       if (abbrev->tag == DW_TAG_subprogram)
 	{
 	  func = (struct funcinfo*) bfd_zalloc (abfd, sizeof (struct funcinfo));
@@ -1167,24 +1167,24 @@ scan_unit_for_functions (unit)
 	}
       else
 	func = NULL;
-  
+
       for (i = 0; i < abbrev->num_attrs; ++i)
 	{
 	  info_ptr = read_attribute (&attr, &abbrev->attrs[i], unit, info_ptr);
-	  
+
 	  if (func)
 	    {
 	      switch (attr.name)
 		{
 		case DW_AT_name:
-		  
+
 		  name = DW_STRING (&attr);
 
 		  /* Prefer DW_AT_MIPS_linkage_name over DW_AT_name.  */
 		  if (func->name == NULL)
 		    func->name = DW_STRING (&attr);
 		  break;
-		  
+
 		case DW_AT_MIPS_linkage_name:
 		  func->name = DW_STRING (&attr);
 		  break;
@@ -1208,7 +1208,7 @@ scan_unit_for_functions (unit)
 		case DW_AT_name:
 		  name = DW_STRING (&attr);
 		  break;
-		  
+
 		default:
 		  break;
 		}
@@ -1309,10 +1309,10 @@ parse_comp_unit (abfd, info_ptr, end_ptr, abbrev_length)
       bfd_set_error (bfd_error_bad_value);
       return 0;
     }
-  
+
   unit = (struct comp_unit*) bfd_zalloc (abfd, sizeof (struct comp_unit));
   unit->abfd = abfd;
-  unit->addr_size = addr_size; 
+  unit->addr_size = addr_size;
   unit->abbrevs = abbrevs;
   unit->end_ptr = end_ptr;
 
@@ -1386,14 +1386,14 @@ comp_unit_contains_address (unit, addr)
       arange = arange->next;
     }
   while (arange);
-  
+
   return 0;
 }
 
 /* If UNIT contains ADDR, set the output parameters to the values for
    the line containing ADDR.  The output parameters, FILENAME_PTR,
    FUNCTIONNAME_PTR, and LINENUMBER_PTR, are pointers to the objects
-   to be filled in.  
+   to be filled in.
 
    Return true of UNIT contains ADDR, and no errors were encountered;
    false otherwise.  */
@@ -1409,7 +1409,7 @@ comp_unit_find_nearest_line (unit, addr,
 {
   boolean line_p;
   boolean func_p;
-  
+
   if (unit->error)
     return false;
 
@@ -1420,7 +1420,7 @@ comp_unit_find_nearest_line (unit, addr,
 	  unit->error = 1;
 	  return false;
 	}
-  
+
       unit->line_table = decode_line_info (unit);
 
       if (! unit->line_table)
@@ -1428,7 +1428,7 @@ comp_unit_find_nearest_line (unit, addr,
 	  unit->error = 1;
 	  return false;
 	}
-      
+
       if (! scan_unit_for_functions (unit))
 	{
 	  unit->error = 1;
@@ -1438,9 +1438,9 @@ comp_unit_find_nearest_line (unit, addr,
 
   line_p = lookup_address_in_line_info_table (unit->line_table,
 					      addr,
-					      filename_ptr, 
+					      filename_ptr,
 					      linenumber_ptr);
-  func_p = lookup_address_in_function_table (unit->function_table, 
+  func_p = lookup_address_in_function_table (unit->function_table,
 					     addr,
 					     functionname_ptr);
   return line_p || func_p;
@@ -1506,10 +1506,10 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
   /* Read each compilation unit from the section .debug_info, and check
      to see if it contains the address we are searching for.  If yes,
      lookup the address, and return the line number info.  If no, go
-     on to the next compilation unit.  
+     on to the next compilation unit.
 
      We keep a list of all the previously read compilation units, and
-     a pointer to the next un-read compilation unit.  Check the 
+     a pointer to the next un-read compilation unit.  Check the
      previously read units before reading more.  */
   struct dwarf2_debug *stash = elf_tdata (abfd)->dwarf2_find_line_info;
 
@@ -1517,7 +1517,7 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
   bfd_vma addr = offset + section->vma;
 
   struct comp_unit* each;
-  
+
   *filename_ptr = NULL;
   *functionname_ptr = NULL;
   *linenumber_ptr = 0;
@@ -1528,7 +1528,7 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
   if (addr_size == 0)
     addr_size = 4;
   BFD_ASSERT (addr_size == 4 || addr_size == 8);
-    
+
   if (! stash)
     {
       unsigned long total_size;
@@ -1553,7 +1553,7 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
 	 us to avoid reallocing the data as we add sections to the stash.  */
       for (total_size = 0; msec; msec = find_debug_info (abfd, msec))
 	total_size += msec->_raw_size;
-      
+
       stash->info_ptr = (char *) bfd_alloc (abfd, total_size);
       if (stash->info_ptr == NULL)
 	return false;
@@ -1590,14 +1590,14 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
      relocs.  There is a similar problem when the .debug_line
      section is processed as well (e.g., there may be relocs
      against the operand of the DW_LNE_set_address operator).
-     
+
      Unfortunately getting hold of the reloc information is hard...
-     
+
      For now, this means that disassembling object files (as
      opposed to fully executables) does not always work as well as
      we would like.  */
-  
-  /* A null info_ptr indicates that there is no dwarf2 info 
+
+  /* A null info_ptr indicates that there is no dwarf2 info
      (or that an error occured while setting up the stash).  */
   if (! stash->info_ptr)
     return false;
@@ -1605,7 +1605,7 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
   /* Check the previously read comp. units first.  */
   for (each = stash->all_comp_units; each; each = each->next_unit)
     if (comp_unit_contains_address (each, addr))
-      return comp_unit_find_nearest_line (each, addr, filename_ptr, 
+      return comp_unit_find_nearest_line (each, addr, filename_ptr,
 					  functionname_ptr, linenumber_ptr);
 
   /* Read each remaining comp. units checking each as they are read.  */
@@ -1623,7 +1623,7 @@ _bfd_dwarf2_find_nearest_line (abfd, section, symbols, offset,
 
       if (length > 0)
         {
-	  each = parse_comp_unit (abfd, stash->info_ptr, 
+	  each = parse_comp_unit (abfd, stash->info_ptr,
 				  stash->info_ptr + length,
 				  addr_size);
 	  stash->info_ptr += length;

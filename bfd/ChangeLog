@@ -1,3 +1,8 @@
+2000-11-16  Kazu Hirata  <kazu@hxi.com>
+
+	* dwarf1.c: Fix formatting.
+	* dwarf2.c: Likewise.
+
 2000-11-15  Kazu Hirata  <kazu@hxi.com>
 
 	* coff-arm.c: Fix formatting.
