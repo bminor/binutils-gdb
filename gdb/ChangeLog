@@ -1,3 +1,23 @@
+Tue Nov 23 17:29:28 1993  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	* ser-go32.c: Lint. (strncasecmp): Removed, now in libiberty.
+	(go32_readchar): Special handling for faster polling. (async
+	structure): Volatile.
+	* h8300-tdep.c (print_register_hook): Allocate and use the right
+	number bytes for the raw register.
+	* h8500-tdep.c (regoff, frame_find_saved_reg, examine_prologue):
+	deleted. (h8500_register_size, h8500_register_virtual_type, ):
+	Use new way of counting registers.
+	* remote-e7000.c (echo_index): deleted. (expect): Better handling
+	of user interrupts. (expect_prompt): Remove never used log file
+	support. (want, want_nopc): Add support for H8/300H.
+	(fetch_regs_from_dump): Treat \r and \n as whitespace.
+	(e7000_drain): Send an "end" command before waiting for output to
+	stop.  (e7000_wait): Cope with H8/300H, better handling of user
+	interrupts.  (why_stop, expect_n, sub2_from_pc): New function.
+	* remote-utils.c (gr_load_image): call fflush and QUIT more regularly.
+	* utils.c (notice_quit): New function for polling for user interrupts.
+
 Fri Dec 10 15:53:56 1993  Per Bothner  (bothner@kalessin.cygnus.com)
 
 	* stabsread.c (read_array_type):  Allow negative array bounds,
@@ -101,6 +121,7 @@ Mon Nov 29 11:36:57 1993  Stu Grossman  (grossman at cygnus.com)
 	* i386ly-tdep.c (i386lynx_saved_pc_after_call):  Change call_inst
 	to unsigned char to avoid domain warning for some values.
 
+>>>>>>> 1.2024
 Mon Nov 22 23:42:59 1993  Steve Chamberlain  (sac@jonny.cygnus.com)
 
 	* remote-e7000.c (e7000_wait): Cope with H8/300 register dump.

@@ -441,13 +441,11 @@ print_register_hook (regno)
   if (regno == 8)
     {
       /* CCR register */
-
       int C, Z, N, V;
-      unsigned char b[2];
+      unsigned char b[4];
       unsigned char l;
-
       read_relative_register_raw_bytes (regno, b);
-      l = b[1];
+      l = b[REGISTER_VIRTUAL_SIZE(8) -1];
       printf_unfiltered ("\t");
       printf_unfiltered ("I-%d - ", (l & 0x80) != 0);
       printf_unfiltered ("H-%d - ", (l & 0x20) != 0);

@@ -641,24 +641,24 @@ gr_load_image (args, fromtty)
   old_cleanups = make_cleanup (bfd_close, abfd);
 
   QUIT;
-  immediate_quit++;
 
   if (!bfd_check_format (abfd, bfd_object))
     error ("It doesn't seem to be an object file.\n");
 
-  for (s = abfd->sections; s; s = s->next)
+  for (s = abfd->sections; s && !quit_flag; s = s->next)
     {
       if (bfd_get_section_flags (abfd, s) & SEC_LOAD)
 	{
 	  int i;
 	  printf_filtered ("%s\t: 0x%4x .. 0x%4x  ",
 			   s->name, s->vma, s->vma + s->_raw_size);
-	  for (i = 0; i < s->_raw_size; i += delta)
+	  fflush (stdout);
+	  for (i = 0; i < s->_raw_size && !quit_flag; i += delta)
 	    {
 	      int sub_delta = delta;
 	      if (sub_delta > s->_raw_size - i)
 		sub_delta = s->_raw_size - i;
-
+	      QUIT;
 	      bfd_get_section_contents (abfd, s, buffer, i, sub_delta);
 	      target_write_memory (s->vma + i, buffer, sub_delta);
 	      printf_filtered ("*");
@@ -667,7 +667,7 @@ gr_load_image (args, fromtty)
 	  printf_filtered ("\n");
 	}
     }
-  immediate_quit--;
+
   free (buffer);
   write_pc (bfd_get_start_address (abfd));
   bfd_close (abfd);
