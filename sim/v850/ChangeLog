@@ -1,3 +1,14 @@
+Mon Jan 20 16:05:34 1997  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* simops.c (OP_{E0,2E0,6E0}): The multiply operations sign extend,
+	not zero extend.
+
+Tue Jan 14 17:06:03 1997  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* simops.c:  Put ifdefs around things to make MSVC happy.  Get rid
+	of unistd.h.  Disable SYS_stat, SYS_chown, SYS_time, SYS_times,
+	SYS_gettimeofday and SYS_utime from MSVC.
+
 Tue Dec 31 18:11:13 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
 
 	* simops.c (OP_10007E0): Know that kill encodes the signal number
