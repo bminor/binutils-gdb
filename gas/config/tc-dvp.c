@@ -49,7 +49,7 @@ static struct symbol * create_colon_label PARAMS ((const char *, const char *));
 static char * unique_name PARAMS ((void));
 static long eval_expr PARAMS ((int, int, const char *, ...));
 static long parse_dma_addr_autocount ();
-static void inline_dmadata PARAMS ((int, DVP_INSN *));
+static void inline_dma_data PARAMS ((int, DVP_INSN *));
 static void setup_autocount PARAMS ((const char *, DVP_INSN *));
 
 static void insert_operand 
@@ -76,14 +76,21 @@ const char FLT_CHARS[] = "dD";
    be provided.  (e.g. mpg is followed by vu insns until a .EndMpg is
    seen).  */
 typedef enum {
-  ASM_INIT, ASM_MPG, ASM_DIRECT, ASM_UNPACK, ASM_VU
+  ASM_INIT, ASM_MPG, ASM_DIRECT, ASM_UNPACK, ASM_VU, ASM_GIF
 } asm_state;
 static asm_state cur_asm_state = ASM_INIT;
 
 /* Nonzero if inside .DmaData.  */
-static int dmadata_state = 0;
+static int dma_data_state = 0;
 /* Label of .DmaData (internally generated for inline data).  */
-static const char *dmadata_name;
+static const char *dma_data_name;
+
+/* Type of gif tag.  */
+static gif_type gif_insn_type;
+/* Name of label of current gif<foo> insn's data.  */
+static const char *gif_data_name;
+/* Pointer to current gif insn in fragment.  */
+static char *gif_insn_frag;
 
 /* For variable length instructions, pointer to the initial frag
    and pointer into that frag.  These only hold valid values if
@@ -154,6 +161,7 @@ static void s_dmadata PARAMS ((int));
 static void s_enddmadata PARAMS ((int));
 static void s_dmapackvif PARAMS ((int));
 static void s_enddirect PARAMS ((int));
+static void s_endgif PARAMS ((int));
 static void s_endmpg PARAMS ((int));
 static void s_endunpack PARAMS ((int));
 static void s_state PARAMS ((int));
@@ -166,6 +174,7 @@ const pseudo_typeS md_pseudo_table[] =
   { "dmapackvif", s_dmapackvif, 0 },
   { "enddirect", s_enddirect, 0 },
   { "enddmadata", s_enddmadata, 0 },
+  { "endgif", s_endgif, 0 },
   { "endmpg", s_endmpg, 0 },
   { "endunpack", s_endunpack, 0 },
   /* .vu added to simplify debugging and creation of input files */
@@ -242,6 +251,13 @@ md_assemble (str)
   /* Skip leading white space.  */
   while (isspace (*str))
     str++;
+
+  /* After a gif tag, no insns can appear until a .endgif is seen.  */
+  if (cur_asm_state == ASM_GIF)
+    {
+      as_bad ("missing .endgif");
+      cur_asm_state = ASM_INIT;
+    }
 
   if (cur_asm_state == ASM_INIT)
     {
@@ -446,12 +462,40 @@ assemble_gif (str)
 {
   DVP_INSN insn_buf[4];
   const dvp_opcode *opcode;
+  char *f;
+  int i;
+
+  insn_buf[0] = insn_buf[1] = insn_buf[2] = insn_buf[3] = 0;
 
   opcode = assemble_one_insn (DVP_GIF,
 			      gif_opcode_lookup_asm (str), gif_operands,
 			      &str, insn_buf);
   if (opcode == NULL)
     return;
+
+  /* Do an implicit alignment to a 16 byte boundary.  */
+  frag_align (4, 0, 0);
+  record_alignment (now_seg, 4);
+
+  gif_insn_frag = f = frag_more (16);
+  for (i = 0; i < 4; ++i)
+    md_number_to_chars (f + i * 4, insn_buf[i], 4);
+
+  /* Insert a label so we can compute the number of quadwords when the
+     .endgif is seen.  */
+  gif_data_name = S_GET_NAME (create_colon_label ("", unique_name ()));
+
+  /* Record the type of the gif tag so we know how to compute nloop
+     in s_endgif.  */
+  if (strcmp (opcode->mnemonic, "gifpacked") == 0)
+    gif_insn_type = GIF_PACKED;
+  else if (strcmp (opcode->mnemonic, "gifreglist") == 0)
+    gif_insn_type = GIF_REGLIST;
+  else if (strcmp (opcode->mnemonic, "gifimage") == 0)
+    gif_insn_type = GIF_IMAGE;
+  else
+    abort ();
+  cur_asm_state = ASM_GIF;
 }
 
 /* Subroutine of md_assemble to assemble VU instructions.  */
@@ -636,7 +680,7 @@ assemble_one_insn (cpu, opcode, operand_table, pstr, insn_buf)
 
 	      if (operand->flags & DVP_OPERAND_DMA_INLINE)
 		{
-		  inline_dmadata ((mods & DVP_OPERAND_AUTOCOUNT) != 0,
+		  inline_dma_data ((mods & DVP_OPERAND_AUTOCOUNT) != 0,
 				  insn_buf);
 		  ++syn;
 		  continue;
@@ -1196,7 +1240,9 @@ scan_symbol (sym)
 /* Evaluate an expression.
    The result is the value of the expression if it can be evaluated,
    or 0 if it cannot (say because some symbols haven't been defined yet)
-   in which case a fixup is queued.  */
+   in which case a fixup is queued.
+
+   If OPINDEX is 0, don't queue any fixups, just return 0.  */
 
 static long
 #ifdef USE_STDARG
@@ -1230,10 +1276,13 @@ eval_expr (opindex, offset, fmt, va_alist)
     value = exp.X_add_number;
   else
     {
-      fixups[fixup_count].exp = exp;
-      fixups[fixup_count].opindex = opindex;
-      fixups[fixup_count].offset = offset;
-      ++fixup_count;
+      if (opindex != 0)
+	{
+	  fixups[fixup_count].exp = exp;
+	  fixups[fixup_count].opindex = opindex;
+	  fixups[fixup_count].offset = offset;
+	  ++fixup_count;
+	}
       value = 0;
     }
   return value;
@@ -1315,25 +1364,25 @@ setup_autocount (name, insn_buf)
 /* Record that inline data follows.  */
 
 static void
-inline_dmadata (autocount_p, insn_buf)
+inline_dma_data (autocount_p, insn_buf)
     int autocount_p;
     DVP_INSN *insn_buf;
 {
-  if (dmadata_state != 0 )
+  if (dma_data_state != 0 )
     {
       as_bad ("DmaData blocks cannot be nested.");
       return;
     }
 
-  dmadata_state = 1;
+  dma_data_state = 1;
 
   if (autocount_p)
     {
-      dmadata_name = S_GET_NAME (create_colon_label ("", unique_name ()));
-      setup_autocount (dmadata_name, insn_buf);
+      dma_data_name = S_GET_NAME (create_colon_label ("", unique_name ()));
+      setup_autocount (dma_data_name, insn_buf);
     }
   else
-    dmadata_name = 0;
+    dma_data_name = 0;
 }
 
 /* Compute the auto-count value for a DMA tag with out-of-line data.  */
@@ -1514,26 +1563,30 @@ insert_operand (cpu, opcode, operand, mods, insn_buf, val, errmsg)
       int shift = ((mods & DVP_MOD_THIS_WORD)
 		   ? (operand->shift & 31)
 		   : operand->shift);
-      int word = (mods & DVP_MOD_THIS_WORD) ? 0 : operand->word;
-#if 0 /* FIXME: revisit */
-      DVP_INSN *p = insn_buf + (shift / 32);
-      if (operand->bits == 32)
-	*p = val;
-      else
+      /* FIXME: revisit */
+      if (operand->word == 0)
 	{
-	  shift = shift % 32;
-	  *p |= ((long) val & ((1 << operand->bits) - 1)) << shift;
+	  int word = (mods & DVP_MOD_THIS_WORD) ? 0 : (shift / 32);
+	  if (operand->bits == 32)
+	    insn_buf[word] = val;
+	  else
+	    {
+	      shift = shift % 32;
+	      insn_buf[word] |= ((long) val & ((1 << operand->bits) - 1)) << shift;
+	    }
 	}
-#else
-      if (operand->bits == 32)
-	insn_buf[word] = val;
       else
 	{
-	  long temp = (long) val & ((1 << operand->bits) - 1);
-	  insn_buf[word] |= temp << operand->shift;
+	  int word = (mods & DVP_MOD_THIS_WORD) ? 0 : operand->word;
+	  if (operand->bits == 32)
+	    insn_buf[word] = val;
+	  else
+	    {
+	      long temp = (long) val & ((1 << operand->bits) - 1);
+	      insn_buf[word] |= temp << operand->shift;
+	    }
 	}
     }
-#endif
 }
 
 /* Insert an operand's final value into an instruction.
@@ -1614,15 +1667,15 @@ s_dmadata (ignore)
 {
   char *name, c;
 
-  dmadata_name = 0;
+  dma_data_name = 0;
 
-  if (dmadata_state != 0)
+  if (dma_data_state != 0)
     {
       as_bad ("DmaData blocks cannot be nested.");
       ignore_rest_of_line ();
       return;
     }
-  dmadata_state = 1;
+  dma_data_state = 1;
 
   SKIP_WHITESPACE ();		/* Leading whitespace is part of operand. */
   name = input_line_pointer;
@@ -1636,7 +1689,7 @@ s_dmadata (ignore)
 
   c = get_symbol_end ();
   line_label = colon (name);	/* user-defined label */
-  dmadata_name = S_GET_NAME (line_label);
+  dma_data_name = S_GET_NAME (line_label);
   *input_line_pointer = c;
 
   demand_empty_rest_of_line ();
@@ -1646,23 +1699,23 @@ static void
 s_enddmadata (ignore)
     int ignore;
 {
-  if (dmadata_state != 1)
+  if (dma_data_state != 1)
     {
       as_warn (".EndDmaData encountered outside a DmaData block -- ignored.");
       ignore_rest_of_line ();
-      dmadata_name = 0;
+      dma_data_name = 0;
     }
-  dmadata_state = 0;
+  dma_data_state = 0;
   demand_empty_rest_of_line ();
 
   /* "label" points to beginning of block.
      Create a name for the final label like _$<name>.  */
-  if (dmadata_name)
+  if (dma_data_name)
     {
       /* Fill the data out to a multiple of 16 bytes.  */
       /* FIXME: Does the fill contents matter?  */
       frag_align (4, 0, 0);
-      create_colon_label (END_LABEL_PREFIX, dmadata_name);
+      create_colon_label (END_LABEL_PREFIX, dma_data_name);
     }
 }
 
@@ -1716,6 +1769,70 @@ s_enddirect (ignore)
   cur_varlen_insn = NULL;
   cur_varlen_value = 0;
 
+  demand_empty_rest_of_line ();
+}
+
+static void
+s_endgif (ignore)
+     int ignore;
+{
+  long count;
+  int nloop = gif_nloop ();
+
+  if (cur_asm_state != ASM_GIF)
+    {
+      as_bad (".endgif doesn't follow a gif tag");
+      return;
+    }
+  cur_asm_state = ASM_INIT;
+
+  if (gif_insn_type == GIF_PACKED)
+    count = eval_expr (0, 0, "(. - %s) >> 4", gif_data_name);
+  else
+    count = eval_expr (0, 0, "(. - %s) >> 3", gif_data_name);
+
+  if (count < 0
+      || fixup_count != 0)
+    {
+      as_bad ("bad data count");
+      return;
+    }
+
+  /* Validate nloop if specified.  Otherwise write the computed value into
+     the insn.  */
+  if (nloop != -1)
+    {
+      int ok_p;
+
+      switch (gif_insn_type)
+	{
+	case GIF_PACKED : 
+	case GIF_REGLIST :
+	  ok_p = count == nloop * gif_nregs ();
+	  break;
+	case GIF_IMAGE :
+	  ok_p = count == nloop;
+	  break;
+	}
+      if (! ok_p)
+	{
+	  as_bad ("nloop value does not match size of data");
+	  return;
+	}
+    }
+  else
+    {
+      DVP_INSN insn = bfd_getl32 (gif_insn_frag + 12);
+      char *file;
+      unsigned int line;
+      as_where (&file, &line);
+      insert_operand_final (DVP_GIF, &gif_operands[gif_operand_nloop],
+			    DVP_MOD_THIS_WORD, &insn,
+			    (offsetT) nloop, file, line);
+      bfd_putl32 ((bfd_vma) insn, gif_insn_frag + 12);
+    }
+
+  gif_data_name = NULL;
   demand_empty_rest_of_line ();
 }
 

@@ -5,6 +5,11 @@ Fri Feb 20 12:43:02 1998  Doug Evans  <devans@canuck.cygnus.com>
 	(dvp_parse_done): Comment out contents.
 	(s_enddirect,s_endmpg,s_endunpack): Call demand_empty_rest_of_line.
 	(s_state): Handle .vu in included file.
+	(asm_state): New state ASM_GIF.
+	(gif_{insn_type,data_name,insn_frag}): New static locals.
+	(md_assemble): Watch for .endgif if in ASM_GIF state.
+	(assemble_gif): Complete.
+	(s_endgif): Complete.
 
 end-sanitize-sky
 Fri Feb 20 15:03:13 1998  Ian Lance Taylor  <ian@cygnus.com>
