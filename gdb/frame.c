@@ -145,17 +145,6 @@ frame_pc_unwind (struct frame_info *frame)
   return frame->pc_unwind_cache;
 }
 
-struct frame_id
-frame_id_unwind (struct frame_info *frame)
-{
-  if (!frame->id_unwind_cache_p)
-    {
-      frame->unwind->id (frame, &frame->unwind_cache, &frame->id_unwind_cache);
-      frame->id_unwind_cache_p = 1;
-    }
-  return frame->id_unwind_cache;
-}
-
 void
 frame_pop (struct frame_info *frame)
 {
@@ -1347,7 +1336,8 @@ get_prev_frame (struct frame_info *next_frame)
   {
     /* FIXME: cagney/2002-12-18: Instead of this hack, should just
        save the frame ID directly.  */
-    struct frame_id id = frame_id_unwind (next_frame);
+    struct frame_id id = prev_frame->unwind->id (next_frame,
+						 &prev_frame->unwind_cache);
     /* Check that the unwound ID is valid.  As of 2003-02-24 the
        x86-64 was returning an invalid frame ID when trying to do an
        unwind a sentinel frame that belonged to a frame dummy.  */

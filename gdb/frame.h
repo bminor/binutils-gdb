@@ -310,10 +310,6 @@ extern const char *frame_map_regnum_to_name (int regnum);
 
 extern CORE_ADDR frame_pc_unwind (struct frame_info *frame);
 
-/* Unwind the frame ID.  Return an ID that uniquely identifies the
-   caller's frame.  */
-extern struct frame_id frame_id_unwind (struct frame_info *frame);
-
 /* Discard the specified frame.  Restoring the registers to the state
    of the caller.  */
 extern void frame_pop (struct frame_info *frame);

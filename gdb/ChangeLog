@@ -1,5 +1,11 @@
 2003-03-03  Andrew Cagney  <cagney@redhat.com>
 
+	* frame.c (frame_id_unwind): Delete function.
+	(get_prev_frame): Use prev's unwinder to unwind the frame ID.
+	* frame.h (frame_id_unwind): Delete declaration.
+
+2003-03-03  Andrew Cagney  <cagney@redhat.com>
+
 	Make MAX_REGISTER_RAW_SIZE and MAX_REGISTER_VIRTUAL_SIZE optional.
 	* gdbarch.sh (DEPRECATED_MAX_REGISTER_RAW_SIZE): Variable with
 	predicate.  Replace MAX_REGISTER_RAW_SIZE.
