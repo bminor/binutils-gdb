@@ -506,7 +506,10 @@ _initialize_mem ()
 {
   add_com ("mem", class_vars, mem_command,
 	   "Define attributes for memory region.\n\
-Usage: mem <lo addr> <hi addr> [<mode> <width> <cache>]");
+Usage: mem <lo addr> <hi addr> [<mode> <width> <cache>], \n\
+where <mode>  may be rw (read/write), ro (read-only) or wo (write-only), \n\
+      <width> may be 8, 16, 32, or 64, and \n\
+      <cache> may be cache or nocache");
 
   add_cmd ("mem", class_vars, mem_enable_command,
 	   "Enable memory region.\n\

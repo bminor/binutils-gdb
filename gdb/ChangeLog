@@ -1,3 +1,7 @@
+2002-02-04  Michael Snyder  <msnyder@redhat.com>
+
+	* memattr.c (_initialize_mem): Elaborate the help for 'mem' command.
+
 2002-02-04  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdbserver/Makefile.in: Add regformats directory to INCLUDE_CFLAGS.
