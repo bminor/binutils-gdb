@@ -86,9 +86,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 #define EM_PARISC      15	/* HPPA */
 
-/* start-sanitize-v8plus */
 #define EM_SPARC32PLUS 18	/* Sun's "v8plus" */
-/* end-sanitize-v8plus */
 
 #define EM_PPC	       20	/* PowerPC */
 
@@ -104,8 +102,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 /* start-sanitize-arc */
 /* Cygnus ARC ELF backend.  Written in the absence of an ABI.  */
-#define EM_CYGNUS_ARC 0x9026
+#define EM_CYGNUS_ARC 0x9040
 /* end-sanitize-arc */
+
+/* Alpha backend magic number.  Written in the absence of an ABI.  */
+#define EM_ALPHA	0x9026
+
+/* start-sanitize-d10v */
+/* D10V backend magic number.  Written in the absence of an ABI.  */
+#define EM_CYGNUS_D10V	0x9027
+/* end-sanitize-d10v */
 
 /* Values for e_version */
 
