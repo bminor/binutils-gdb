@@ -1,3 +1,13 @@
+Tue Feb 13 22:56:46 1996  Fred Fish  <fnf@cygnus.com>
+
+	* symfile.c (add_psymbol_to_list, add_psymbol_addr_to_list):
+ 	Use n_psyms in OBJSTAT, not psyms.
+
+Mon Feb 12 15:59:31 1996  Doug Evans  <dje@charmed.cygnus.com>
+
+	* configure.in (sparclet-*-aout*): New config.
+	* configure: Regenerated.
+
 Mon Feb 12 14:17:52 1996  Fred Fish  <fnf@cygnus.com>
 
 	* somsolib.c (som_solib_add): Use xmalloc rather than bare

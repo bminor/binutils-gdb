@@ -1,5 +1,6 @@
 /* Generic symbol file reading for the GNU debugger, GDB.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995 Free Software Foundation, Inc.
+   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996
+   Free Software Foundation, Inc.
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
 This file is part of GDB.
@@ -110,7 +111,8 @@ int symbol_reloading = 0;
 #endif
 
 /* If true, then shared library symbols will be added automatically
-   when the inferior is created.  This is almost always what users
+   when the inferior is created, new libraries are loaded, or when
+   attaching to the inferior.  This is almost always what users
    will want to have happen; but for very large programs, the startup
    time will be excessive, and so if this is a problem, the user can
    clear this flag and then add the shared library symbols as needed.
@@ -118,7 +120,7 @@ int symbol_reloading = 0;
    library symbols are not loaded, commands like "info fun" will *not*
    report all the functions that are actually present.  */
 
-int auto_solib_add_at_startup = 1;
+int auto_solib_add = 1;
 
 
 /* Since this function is called from within qsort, in an ANSI environment
@@ -1667,7 +1669,7 @@ add_psymbol_to_list (name, namelength, namespace, class, list, val, language,
   PSYMBOL_NAMESPACE (psym) = namespace;
   PSYMBOL_CLASS (psym) = class;
   SYMBOL_INIT_LANGUAGE_SPECIFIC (psym, language);
-  OBJSTAT (objfile, psyms++);
+  OBJSTAT (objfile, n_psyms++);
 }
 
 /* Add a symbol with a CORE_ADDR value to a psymtab. */
@@ -1703,7 +1705,7 @@ add_psymbol_addr_to_list (name, namelength, namespace, class, list, val,
   PSYMBOL_NAMESPACE (psym) = namespace;
   PSYMBOL_CLASS (psym) = class;
   SYMBOL_INIT_LANGUAGE_SPECIFIC (psym, language);
-  OBJSTAT (objfile, psyms++);
+  OBJSTAT (objfile, n_psyms++);
 }
 
 #endif /* !INLINE_ADD_PSYMBOL */
