@@ -1,3 +1,9 @@
+Mon Sep  8 14:05:45 1997  Doug Evans  <dje@canuck.cygnus.com>
+
+	* cgen.h: Move assembler interface section
+	up so cgen_parse_operand_result is defined for cgen_parse_address.
+	(cgen_parse_address): Update prototype.
+
 Tue Sep  2 15:32:32 1997  Nick Clifton  <nickc@cygnus.com>
 
 	* v850.h (V850_OPREAND_ADJUST_SHORT_MEMORY): Removed. 
