@@ -555,7 +555,7 @@ mi_gdb_test "-var-info-num-children struct_declarations.int_ptr_ptr.*int_ptr_ptr
 
 
 # Step to "struct_declarations.integer = 123;"
-set line 193
+set line 192
 mi_step_to do_children_tests {} {.*var-cmd.c} $line "step to line $line"
 
 # Test: c_variable-4.81
@@ -754,7 +754,7 @@ mi_gdb_test "-var-update *" \
 	"update all vars. None changed"
 
 # Step over "struct_declarations.integer = 123;"
-set line 194
+set line 193
 mi_step_to do_children_tests {} {.*var-cmd.c} $line "step $line"
 
 # Test: c_variable-5.2
@@ -767,7 +767,7 @@ mi_gdb_test "-var-update *" \
 #    weird->char_ptr = "hello";
 #    bar = 2121;
 #    foo = &bar;
-set line 197
+set line 196
 mi_execute_to "exec-step 3" "end-stepping-range" do_children_tests {} {.*var-cmd.c} $line {} "step $line"
 
 # Test: c_variable-5.3
@@ -777,7 +777,7 @@ mi_gdb_test "-var-update *" \
 	"update all vars struct_declarations.char_ptr"
 
 # Step over "struct_declarations.int_ptr_ptr = &foo;"
-set line 198
+set line 197
 mi_step_to do_children_tests {} {.*var-cmd.c} $line "step $line"
 
 # Test: c_variable-5.4
@@ -787,7 +787,7 @@ mi_gdb_test "-var-update *" \
 	"update all vars int_ptr_ptr and children changed"
 
 # Step over "weird->long_array[0] = 1234;"
-set line 199
+set line 198
 mi_step_to do_children_tests {} {.*var-cmd.c} $line "step $line"
 
 # Test: c_variable-5.5
@@ -797,7 +797,7 @@ mi_gdb_test "-var-update *" \
 	"update all vars struct_declarations.long_array.0 changed"
 
 # Step over "struct_declarations.long_array[1] = 2345;"
-set line 200
+set line 199
 mi_step_to do_children_tests {} {.*var-cmd.c} $line "step $line"
 
 # Test: c_variable-5.6
@@ -807,7 +807,7 @@ mi_gdb_test "-var-update *" \
 	"update all vars struct_declarations.long_array.1 changed"
 
 # Step over "weird->long_array[2] = 3456;"
-set line 201
+set line 200
 mi_step_to do_children_tests {} {.*var-cmd.c} $line "step $line"
 
 # Test: c_variable-5.7
@@ -824,7 +824,7 @@ mi_gdb_test "-var-update *" \
 #    struct_declarations.long_array[7] = 8901;
 #    weird->long_array[8] = 9012;
 #    struct_declarations.long_array[9] = 1234;
-set line 209
+set line 208
 mi_execute_to "exec-step 7" "end-stepping-range" do_children_tests {} {.*var-cmd.c} $line {} "step $line"
 
 # Test: c_variable-5.8
@@ -835,7 +835,7 @@ mi_gdb_test "-var-update *" \
 
 
 # Step over "weird->func_ptr = nothing;"
-set line 212
+set line 211
 mi_step_to do_children_tests {} {.*var-cmd.c} $line "step $line"
 
 # Test: c_variable-5.9
@@ -856,7 +856,7 @@ mi_gdb_test "-var-delete weird->int_ptr_ptr" \
 # Step over all lines:
 # ...
 #   psnp = &snp0;
-set line 255
+set line 254
 mi_execute_to "exec-step 43" "end-stepping-range" do_children_tests {} {.*var-cmd.c} $line {} "step $line"
 
 # Test: c_variable-5.10
@@ -1127,7 +1127,7 @@ mi_gdb_test "-var-list-children psnp->ptrs.0.next.next.ptrs" \
 	"get children of psnp->ptrs.0.next.next.ptrs"
 
 #  Step over "snp0.char_ptr = &b3;"
-set line 256
+set line 255
 mi_step_to do_children_tests {} {.*var-cmd.c} $line "step $line"
 
 # Test: c_variable-5.47
@@ -1137,7 +1137,7 @@ mi_gdb_test "-var-update *" \
 	"update all vars psnp->char_ptr (and 0.char_ptr) changed"
 
 #  Step over "snp1.char_ptr = &c3;"
-set line 257
+set line 256
 mi_step_to do_children_tests {} {.*var-cmd.c} $line "step $line"
 
 # Test: c_variable-5.48
@@ -1148,7 +1148,7 @@ mi_gdb_test "-var-update *" \
 
 
 #  Step over "snp2.char_ptr = &a3;"
-set line 258
+set line 257
 mi_step_to do_children_tests {} {.*var-cmd.c} $line "step $line"
 
 # Test: c_variable-5.49
@@ -1159,7 +1159,7 @@ mi_gdb_test "-var-update *" \
 
 
 #  Step over "snp0.long_ptr = &y3;"
-set line 259
+set line 258
 mi_step_to do_children_tests {} {.*var-cmd.c} $line "step $line"
 
 # Test: c_variable-5.50
@@ -1170,7 +1170,7 @@ mi_gdb_test "-var-update *" \
 
 
 #  Step over "snp1.long_ptr = &x3;"
-set line 260
+set line 259
 mi_step_to do_children_tests {} {.*var-cmd.c} $line "step $line"
 
 # Test: c_variable-5.51
@@ -1187,7 +1187,7 @@ clear_xfail *-*-*
 #
 
 #  Step over "snp2.long_ptr = &z3;"
-set line 261
+set line 260
 mi_step_to do_children_tests {} {.*var-cmd.c} $line "step $line"
 
 # Test: c_variable-5.52
