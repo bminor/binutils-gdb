@@ -243,7 +243,7 @@ Descriptors,,Table D: Type Descriptors}, for a list of
 There is an AIX extension for type attributes.  Following the @samp{=}
 is any number of type attributes.  Each one starts with @samp{@@} and
 ends with @samp{;}.  Debuggers, including AIX's dbx, skip any type
-attributes they do not recognize.  GDB 4.9 does not do this--it will
+attributes they do not recognize.  GDB 4.9 does not do this---it will
 ignore the entire symbol containing a type attribute.  Hopefully this
 will be fixed in the next GDB release.  Because of a conflict with C++
 (@pxref{Cplusplus}), new attributes should not be defined which begin
@@ -921,7 +921,7 @@ number of the register where the variable data will be stored.
 The value is the register number.
 
 AIX defines a separate symbol descriptor @samp{d} for floating point
-registers.  This seems incredibly stupid--why not just just give
+registers.  This seems incredibly stupid---why not just just give
 floating point registers different register numbers?  I have not
 verified whether the compiler actually uses @samp{d}.
 
