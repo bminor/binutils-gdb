@@ -1,3 +1,9 @@
+2005-03-03  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* arm-tdep.c (arm_make_stub_cache, arm_stub_this_id)
+	(arm_stub_unwind, arm_stub_unwind_sniffer): New.
+	(arm_gdbarch_init): Add arm_stub_unwind_sniffer.
+
 2005-03-02  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* linux-nat.c (linux_supports_tracevforkdone, child_follow_fork):

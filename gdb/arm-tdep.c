@@ -1013,6 +1013,56 @@ arm_prologue_unwind_sniffer (struct frame_info *next_frame)
   return &arm_prologue_unwind;
 }
 
+static struct arm_prologue_cache *
+arm_make_stub_cache (struct frame_info *next_frame)
+{
+  int reg;
+  struct arm_prologue_cache *cache;
+  CORE_ADDR unwound_fp;
+
+  cache = frame_obstack_zalloc (sizeof (struct arm_prologue_cache));
+  cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
+
+  cache->prev_sp = frame_unwind_register_unsigned (next_frame, ARM_SP_REGNUM);
+
+  return cache;
+}
+
+/* Our frame ID for a stub frame is the current SP and LR.  */
+
+static void
+arm_stub_this_id (struct frame_info *next_frame,
+		  void **this_cache,
+		  struct frame_id *this_id)
+{
+  struct arm_prologue_cache *cache;
+
+  if (*this_cache == NULL)
+    *this_cache = arm_make_stub_cache (next_frame);
+  cache = *this_cache;
+
+  *this_id = frame_id_build (cache->prev_sp,
+			     frame_pc_unwind (next_frame));
+}
+
+struct frame_unwind arm_stub_unwind = {
+  NORMAL_FRAME,
+  arm_stub_this_id,
+  arm_prologue_prev_register
+};
+
+static const struct frame_unwind *
+arm_stub_unwind_sniffer (struct frame_info *next_frame)
+{
+  char dummy[4];
+
+  if (in_plt_section (frame_unwind_address_in_block (next_frame), NULL)
+      || target_read_memory (frame_pc_unwind (next_frame), dummy, 4) != 0)
+    return &arm_stub_unwind;
+
+  return NULL;
+}
+
 static CORE_ADDR
 arm_normal_frame_base (struct frame_info *next_frame, void **this_cache)
 {
@@ -2737,6 +2787,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   gdbarch_init_osabi (info, gdbarch);
 
   /* Add some default predicates.  */
+  frame_unwind_append_sniffer (gdbarch, arm_stub_unwind_sniffer);
   frame_unwind_append_sniffer (gdbarch, arm_sigtramp_unwind_sniffer);
   frame_unwind_append_sniffer (gdbarch, arm_prologue_unwind_sniffer);
 
