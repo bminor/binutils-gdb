@@ -1,3 +1,9 @@
+Fri Oct  6 09:55:33 1995  Doug Evans  <dje@canuck.cygnus.com>
+
+	* Makefile.in (site.exp): Fix setting of $srcdir.
+
+	* config/tc-arm.c (md_atof): Fix little-endian output.
+
 Thu Oct  5 20:17:30 1995  Ken Raeburn  <raeburn@cygnus.com>
 
 	* doc/as.texinfo: Split out the NS32k family documentation,
