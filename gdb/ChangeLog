@@ -1,5 +1,10 @@
 2004-06-24  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc64-tdep.c (sparc64_store_arguments): Fix passing
+	quad-precision floating point arguments in registers.
+
+2004-06-24  Mark Kettenis  <kettenis@gnu.org>
+
 	From Michael Mueller <m.mueller99@kay-mueller.de>:
 	* sparc64-tdep.c (sparc64_frame_base_address): Take BIAS into
 	account.

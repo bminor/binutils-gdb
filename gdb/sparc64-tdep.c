@@ -931,7 +931,7 @@ sparc64_store_arguments (struct regcache *regcache, int nargs,
 	      gdb_assert (element < 6);
 	      regnum = SPARC_O0_REGNUM + element;
 	      regcache_cooked_write (regcache, regnum, valbuf);
-	      regcache_cooked_write (regcache, regnum + 1, valbuf);
+	      regcache_cooked_write (regcache, regnum + 1, valbuf + 8);
 	    }
 	}
 
