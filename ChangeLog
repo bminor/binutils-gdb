@@ -1,3 +1,15 @@
+Thu Aug 14 14:42:17 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* configure: When handling a Canadian Cross, handle YACC as well as
+	BISON.  Just set BISON to bison.  When setting YACC, prefer bison.
+
+Tue Aug 12 20:09:48 1997  Jason Merrill  <jason@yorick.cygnus.com>
+
+	* Makefile.in (BISON): bison, not byacc or bison -y.
+	(YACC): bison -y or byacc or yacc.
+	(various): Add *-bison as appropriate.
+	(taz): No need to mess with BISON anymore.
+
 Tue Aug 12 22:33:08 1997  Ian Lance Taylor  <ian@cygnus.com>
 
 	* configure: If OSTYPE matches *win32*, try to find a good value for
