@@ -1,3 +1,8 @@
+2003-01-10  Ben Elliston  <bje@redhat.com>
+
+	* README.Cygnus: Rename from this ..
+	* README: .. to this.
+
 2002-09-27  Andrew Cagney  <ac131313@redhat.com>
 
 	* wrapper.c (sim_open): Add support for -m<mem-size>.
