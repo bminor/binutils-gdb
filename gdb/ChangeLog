@@ -1,5 +1,11 @@
 2004-08-07  Nathan J. Williams  <nathanw@wasabisystems.com>
 
+	* configure.in: Test for struct lwp in <sys/lwp.h>.
+	* bsd-kvm.c (bsd_kvm_proc_cmd): If HAVE_STRUCT_LWP is defined, use
+	the offset of l_addr in struct lwp.
+
+2004-08-07  Nathan J. Williams  <nathanw@wasabisystems.com>
+
 	* bsd-kvm.c: Include "gdbcore.h"
 	(bsd_kvm_open): Use get_exec_file() to set 'execfile'.
 

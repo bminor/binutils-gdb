@@ -230,7 +230,11 @@ bsd_kvm_proc_cmd (char *arg, int fromtty)
     error ("No kernel memory image.");
 
   addr = parse_and_eval_address (arg);
+#ifdef HAVE_STRUCT_LWP
+  addr += offsetof (struct lwp, l_addr);
+#else
   addr += offsetof (struct proc, p_addr);
+#endif
 
   if (kvm_read (core_kd, addr, &bsd_kvm_paddr, sizeof bsd_kvm_paddr) == -1)
     error ("%s", kvm_geterr (core_kd));

@@ -553,6 +553,16 @@ if test $gdb_cv_struct_thread_td_pcb = yes; then
             [Define to 1 if your system has td_pcb in struct thread.])
 fi
 
+# See if <sys/lwp.h> defines `struct lwp`.
+AC_CACHE_CHECK([for struct lwp], gdb_cv_struct_lwp,
+[AC_TRY_COMPILE([#include <sys/param.h>
+#include <sys/lwp.h>], [struct lwp l;],
+gdb_cv_struct_lwp=yes, gdb_cv_struct_lwp=no)])
+if test $gdb_cv_struct_lwp = yes; then
+  AC_DEFINE(HAVE_STRUCT_LWP, 1,
+            [Define to 1 if your system has struct lwp.])
+fi
+
 # See if <machine/reg.h> degines `struct reg'.
 AC_CACHE_CHECK([for struct reg in machine/reg.h], gdb_cv_struct_reg,
 [AC_TRY_COMPILE([#include <sys/types.h>
