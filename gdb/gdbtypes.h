@@ -136,7 +136,7 @@ enum type_code
     TYPE_CODE_TEMPLATE,		/* C++ template */
     TYPE_CODE_TEMPLATE_ARG,	/* C++ template arg */
 
-    TYPE_CODE_NAMESPACE,	/* C++ namespace.  */
+    TYPE_CODE_NAMESPACE		/* C++ namespace.  */
   };
 
 /* For now allow source to use TYPE_CODE_CLASS for C++ classes, as an

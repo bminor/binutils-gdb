@@ -1,3 +1,10 @@
+2004-06-02  Albert Chin-A-Young  <china@thewrittenword.com>
+
+	Committed by Andrew Cagney.
+	* gdb/dictionary.c, gdb/gdbtypes.h: Remove trailing comma
+	after last enum constant to avoid error from IBM C
+	compiler.
+
 2004-06-02  Jim Blandy  <jimb@redhat.com>
 
 	* ppc-linux-nat.c (store_register, fetch_register): Rename 'mess'
