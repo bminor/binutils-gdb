@@ -1,5 +1,8 @@
 Thu Nov  9 13:01:31 1995  Ian Lance Taylor  <ian@cygnus.com>
 
+	* coffcode.h (coff_write_object_contents): Set a.out vstamp to 1
+	if RS6000COFF_C.
+
 	* xcofflink.c (XCOFF_DESCRIPTOR): Define.
 	(struct xcoff_link_hash_table): Add descriptor_section and
 	special_sections fields.

@@ -2391,6 +2391,8 @@ coff_write_object_contents (abfd)
       bfd_vma toc;
       asection *loader_sec;
 
+      internal_a.vstamp = 1;
+
       if (xcoff_data (abfd)->entry_section != NULL)
 	internal_a.o_snentry = xcoff_data (abfd)->entry_section->target_index;
       else
