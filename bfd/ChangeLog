@@ -1,3 +1,9 @@
+Mon Dec 30 18:48:52 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* xcofflink.c (xcoff_build_ldsyms): When exporting all defined
+	symbols, don't export a symbol which is defined by an object in an
+	archive which contains shared objects.
+
 start-sanitize-tic80
 Mon Dec 30 16:12:58 1996  Fred Fish  <fnf@cygnus.com>
 
