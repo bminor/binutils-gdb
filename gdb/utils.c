@@ -2490,3 +2490,47 @@ address_to_host_pointer (CORE_ADDR addr)
   ADDRESS_TO_POINTER (builtin_type_void_data_ptr, &ptr, addr);
   return ptr;
 }
+
+/* Convert a CORE_ADDR into a string.  */
+const char *
+core_addr_to_string (const CORE_ADDR addr)
+{
+  char *str = get_cell ();
+  strcpy (str, "0x");
+  strcat (str, phex_nz (addr, sizeof (addr)));
+  return str;
+}
+
+/* Convert a string back into a CORE_ADDR.  */
+CORE_ADDR
+string_to_core_addr (const char *my_string)
+{
+  CORE_ADDR addr = 0;
+  if (my_string[0] == '0' && tolower (my_string[1]) == 'x')
+    {
+      /* Assume that it is in decimal.  */
+      int i;
+      for (i = 2; my_string[i] != '\0'; i++)
+	{
+	  if (isdigit (my_string[i]))
+	    addr = (my_string[i] - '0') + (addr * 16);
+	  else if (isxdigit (my_string[i])) 
+	    addr = (tolower (my_string[i]) - 'a' + 0xa) + (addr * 16);
+	  else
+	    internal_error (__FILE__, __LINE__, "invalid hex");
+	}
+    }
+  else
+    {
+      /* Assume that it is in decimal.  */
+      int i;
+      for (i = 0; my_string[i] != '\0'; i++)
+	{
+	  if (isdigit (my_string[i]))
+	    addr = (my_string[i] - '0') + (addr * 10);
+	  else
+	    internal_error (__FILE__, __LINE__, "invalid decimal");
+	}
+    }
+  return addr;
+}

@@ -690,6 +690,12 @@ extern char *paddr_d (LONGEST addr);
 extern char *phex (ULONGEST l, int sizeof_l);
 extern char *phex_nz (ULONGEST l, int sizeof_l);
 
+/* Like paddr() only print/scan raw CORE_ADDR.  The output from
+   core_addr_to_string() can be passed direct to
+   string_to_core_addr().  */
+extern const char *core_addr_to_string (const CORE_ADDR addr);
+extern CORE_ADDR string_to_core_addr (const char *my_string);
+
 extern void fprintf_symbol_filtered (struct ui_file *, char *,
 				     enum language, int);
 

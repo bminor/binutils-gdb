@@ -1,3 +1,13 @@
+2001-10-16  Andrew Cagney  <ac131313@redhat.com>
+
+	Based on code by John Moore <jmore@redhat.com>:
+	
+	* utils.c (core_addr_to_string): New function for conversion of
+	CORE_ADDR to string.
+	(string_to_core_addr): New function to convert from string to
+	CORE_ADDR.
+	* defs.h: Added extern statements for the above.
+
 2001-10-17  Jason Molenda  (jason-cl@molenda.com)
 
 	* symtab.c (lookup_block_symbol):  Break out of linear search
