@@ -1,3 +1,7 @@
+Fri May 23 13:28:29 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* config/i386-bozo.exp: New file.
+
 Thu May 22 18:51:32 1997  Bob Manson  <manson@charmed.cygnus.com>
 
 	* lib/gdb.exp(gdb_expect): Look for gdb,timeout target
