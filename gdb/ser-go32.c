@@ -24,6 +24,7 @@
 #define disable() asm("cli")
 #define enable() asm("sti")
 
+
 struct go32_ttystate
   {
     int bogus;
@@ -82,6 +83,10 @@ static int dosasync_write PARAMS ((int fd, const char *buf, int len));
 #define VERSION 1
 #define OFFSET 0x104
 
+char packet[50];
+int packet_len;
+int packet_idx;
+
 unsigned char bb;
 unsigned short sb;
 unsigned long sl;
@@ -94,7 +99,7 @@ unsigned long sl;
 #define GET_LONG(x)     ( dosmemget((x),4,&sl), sl)
 
 static
-unsigned short 
+unsigned short
 GET_WORD (x)
 {
   unsigned short sb;
@@ -185,6 +190,9 @@ dos_async_ready ()
 {
   int ret;
 
+  if (packet_idx < packet_len)
+    return 1;
+
   disable ();
 #if RDY_CNT
   ret = GET_WORD (aindex + AOFF_COUNT);
@@ -203,24 +211,70 @@ dos_async_rx ()
   char rv;
   short idx;
 
-  while (!dos_async_ready ())
+  while (1)
     {
-      if (kbhit ())
+      if (packet_idx < packet_len)
 	{
-	  printf_unfiltered ("abort!\n");
-	  return 0;
+	  char x = packet[packet_idx++];
+	  return x;
 	}
+      while (!dos_async_ready ())
+	{
+	  if (kbhit ())
+	    {
+	      printf_unfiltered ("abort!\n");
+	      return 0;
+	    }
+	}
+      disable ();
+      {
+	/* Sometimes we can read more than one char at a time
+	 from the buffer, which is good, cause it'll mean
+	 less time with interrupts turned off, which means
+	 less dropped characters */
+
+	/* We only do the simplest case here - not bothering with
+ 	   wrap around */
+	int len;
+
+	int getp = GET_WORD (aindex + AOFF_GETP);
+	int putp = GET_WORD (aindex + AOFF_PUTP);
+	int endb = GET_WORD (aindex + AOFF_BUFFER_END);
+	int startb = GET_WORD (aindex + AOFF_BUFFER_START);
+
+	/* We'd like to grab to the end of the the input,
+	 but it may have wrapped, so max is to the end
+	 of the buffer */
+
+	if (putp > endb || putp < getp)
+	  putp = endb;
+
+	/* Work out the length of the suck */
+	len = putp - getp;
+
+	/* But only suck as many as we can hold in one go */
+	if (len > sizeof (packet))
+	  len = sizeof (packet);
+
+	dosmemget (aindex - OFFSET + getp, len, packet);
+
+	packet_len = len;
+	packet_idx = 0;
+
+	if (getp + len >= endb)
+	  {
+	    getp = startb;
+	  }
+	else
+	  {
+	    getp = getp + len;
+	  }
+
+	SET_WORD (aindex + AOFF_GETP, getp);
+	SET_WORD (aindex + AOFF_COUNT, GET_WORD (aindex + AOFF_COUNT) - len);
+      }
+      enable ();
     }
-  disable ();
-  idx = GET_WORD (aindex + AOFF_GETP);
-  idx++;
-  SET_WORD (aindex + AOFF_GETP, idx);
-  rv = aptr (idx - 1);
-  SET_WORD (aindex + AOFF_COUNT, GET_WORD (aindex + AOFF_COUNT) - 1);
-  if (GET_WORD (aindex + AOFF_GETP) > GET_WORD (aindex + AOFF_BUFFER_END))
-    SET_WORD (aindex + AOFF_GETP, GET_WORD (aindex + AOFF_BUFFER_START));
-  enable ();
-  return rv;
 }
 
 
@@ -233,7 +287,7 @@ dosasync_read (fd, buf, len, timeout)
 {
   long now, then;
   int i;
-
+  int its = 0;
   time (&now);
   then = now + timeout;
 
@@ -244,8 +298,9 @@ dosasync_read (fd, buf, len, timeout)
 	  while (!dos_async_ready ())
 	    {
 	      time (&now);
-	      if (now >= then && timeout > 0)
+	      if (now >= then && timeout > 0 && its > 1000)
 		return i;
+	      its++;
 	    }
 	}
       *buf++ = dos_async_rx ();

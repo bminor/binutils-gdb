@@ -1,3 +1,10 @@
+Mon Aug 22 10:42:15 1994  Steve Chamberlain  (sac@jonny.cygnus.com)
+
+	Work to reduce the interrupts-off duration when running in DOS.
+	* ser-go32.c:  (dos_async_ready): See if anything is in the buffer.
+	(dos_async_rx): rewrite to unpack as many characters from the
+	asynctsr as possible into a local buffer.
+	
 Fri Aug 19 14:55:45 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	Initial Fortran language support, adapted from work by Farooq Butt
