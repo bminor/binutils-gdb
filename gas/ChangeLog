@@ -1,3 +1,22 @@
+Mon May  5 17:16:55 1997  Ian Lance Taylor  <ian@cygnus.com>
+
+	* config/tc-i386.h (RegMMX): Define.
+	* config/tc-i386.c (pi): Check for all register types.
+	(type_names): Add RegMMX.
+	(md_assemble): Handle RegMMX.
+
+Wed Apr 30 12:47:00 1997  Manfred Hollstein  <manfred@s-direktnet.de>
+
+	* config/obj-coff.c (c_section_symbol): Clear the LOCAL bit #ifdef
+	TE_DELTA.
+
+Tue Apr 29 20:23:10 1997  Jim Wilson  <wilson@cygnus.com>
+
+	* config/tc-mips.c (nopic_need_relax): Add new parameter
+	before_relaxing.  Use it when testing ecoff_extern_size.
+	(load_address, macro, md_estimate_size_before_relax): Fix all
+	callers.
+
 Tue Apr 29 19:54:36 1997  Richard Henderson  <rth@tamu.edu>
 
 	* config/obj-elf.c (elf_pseudo_table): Add "subsection".

@@ -638,7 +638,7 @@ pi (line, x)
       fprintf (stdout, "    #%d:  ", i + 1);
       pt (x->types[i]);
       fprintf (stdout, "\n");
-      if (x->types[i] & Reg)
+      if (x->types[i] & (Reg | SReg2 | SReg3 | Control | Debug | Test))
 	fprintf (stdout, "%s\n", x->regs[i]->reg_name);
       if (x->types[i] & Imm)
 	pe (x->imms[i]);
@@ -737,6 +737,7 @@ type_names[] =
   { FloatReg, "FReg" },
   { FloatAcc, "FAcc" },
   { JumpAbsolute, "Jump Absolute" },
+  { RegMMX, "rMMX" },
   { 0, "" }
 };
 
@@ -789,14 +790,6 @@ reloc (size, pcrel, other)
 	  pcrel ? "pc-relative " : "");
   return BFD_RELOC_NONE;
 }
-#else
-#define reloc(SIZE,PCREL,OTHER)	0
-#define BFD_RELOC_32		0
-#define BFD_RELOC_32_PCREL	0
-#define BFD_RELOC_386_PLT32	0
-#define BFD_RELOC_386_GOT32	0
-#define BFD_RELOC_386_GOTOFF	0
-#endif
 
 /*
  * Here we decide which fixups can be adjusted to make them relative to
@@ -812,20 +805,24 @@ tc_i386_fix_adjustable(fixP)
   /* Prevent all adjustments to global symbols. */
   if (S_IS_EXTERN (fixP->fx_addsy))
     return 0;
-#ifdef BFD_ASSEMBLER
   if (S_IS_WEAK (fixP->fx_addsy))
     return 0;
-#endif /* BFD_ASSEMBLER */
 #endif /* ! defined (OBJ_AOUT) */
-#ifdef BFD_ASSEMBLER
   /* adjust_reloc_syms doesn't know about the GOT */
   if (fixP->fx_r_type == BFD_RELOC_386_GOTOFF
       || fixP->fx_r_type == BFD_RELOC_386_PLT32
       || fixP->fx_r_type == BFD_RELOC_386_GOT32)
     return 0;
-#endif
   return 1;
 }
+#else
+#define reloc(SIZE,PCREL,OTHER)	0
+#define BFD_RELOC_32		0
+#define BFD_RELOC_32_PCREL	0
+#define BFD_RELOC_386_PLT32	0
+#define BFD_RELOC_386_GOT32	0
+#define BFD_RELOC_386_GOTOFF	0
+#endif
 
 /* This is the guts of the machine-dependent assembler.  LINE points to a
    machine dependent instruction.  This function is supposed to emit
@@ -1419,14 +1416,23 @@ md_assemble (line)
 	    if (i.reg_operands == 2)
 	      {
 		unsigned int source, dest;
-		source = (i.types[0] & (Reg | SReg2 | SReg3 | Control | Debug | Test)) ? 0 : 1;
+		source = ((i.types[0]
+			   & (Reg
+			      | SReg2
+			      | SReg3
+			      | Control
+			      | Debug
+			      | Test
+			      | RegMMX))
+			  ? 0 : 1);
 		dest = source + 1;
 		i.rm.mode = 3;
 		/* We must be careful to make sure that all
-		   segment/control/test/debug registers go into the i.rm.reg
-		   field (despite the whether they are source or destination
-		   operands). */
-		if (i.regs[dest]->reg_type & (SReg2 | SReg3 | Control | Debug | Test))
+		   segment/control/test/debug/MMX registers go into
+		   the i.rm.reg field (despite the whether they are
+		   source or destination operands). */
+		if (i.regs[dest]->reg_type
+		    & (SReg2 | SReg3 | Control | Debug | Test | RegMMX))
 		  {
 		    i.rm.reg = i.regs[dest]->reg_num;
 		    i.rm.regmem = i.regs[source]->reg_num;
@@ -1554,15 +1560,23 @@ md_assemble (line)
 		      }
 		  }
 
-		/* Fill in i.rm.reg or i.rm.regmem field with register operand
-		   (if any) based on t->extension_opcode. Again, we must be
-		   careful to make sure that segment/control/debug/test
+		/* Fill in i.rm.reg or i.rm.regmem field with register
+		   operand (if any) based on
+		   t->extension_opcode. Again, we must be careful to
+		   make sure that segment/control/debug/test/MMX
 		   registers are coded into the i.rm.reg field. */
 		if (i.reg_operands)
 		  {
 		    unsigned int op =
-		    (i.types[0] & (Reg | SReg2 | SReg3 | Control | Debug | Test)) ? 0 :
-		    (i.types[1] & (Reg | SReg2 | SReg3 | Control | Debug | Test)) ? 1 : 2;
+		      ((i.types[0]
+			& (Reg | SReg2 | SReg3 | Control | Debug
+			   | Test | RegMMX))
+		       ? 0
+		       : ((i.types[1]
+			   & (Reg | SReg2 | SReg3 | Control | Debug
+			      | Test | RegMMX))
+			  ? 1
+			  : 2));
 		    /* If there is an extension opcode to put here, the
 		       register number must be put into the regmem field. */
 		    if (t->extension_opcode != None)
