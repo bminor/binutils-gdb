@@ -33,13 +33,9 @@ struct fix;
 
 #define TARGET_BYTES_BIG_ENDIAN	0
 
-#ifdef TE_LYNX
-#define TARGET_FORMAT		"coff-i386-lynx"
-#endif
-
 #define TARGET_ARCH		bfd_arch_i386
 #define TARGET_MACH		(i386_mach ())
-extern unsigned long i386_mach PARAMS ((void));
+extern unsigned long i386_mach (void);
 
 #ifdef TE_FreeBSD
 #define AOUT_TARGET_FORMAT	"a.out-i386-freebsd"

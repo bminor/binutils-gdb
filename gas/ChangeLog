@@ -1,3 +1,7 @@
+2004-10-01  Adam Nemet  <anemet@lnxw.com>
+
+	* (TARGET_FORMAT): Remove LynxOS COFF definition.
+
 2004-10-01  Ravi Ramaseshan  <ravi.ramaseshan@codito.com>
 
 	* config/tc-arc.c (tc_gen_reloc): Don't assume fixP->fx_addsy is an
