@@ -1,3 +1,27 @@
+1998-12-01  Frank Ch. Eigler  <fche@elastic.org>
+
+	* Makefile.in (SIM_OBJS): Don't build sim-core.o.  
+	* configure.in:	Added --enable-sim-inline support.  
+	Look for "getenv()" function.
+	* configure: Rebuilt.  
+	* config.in: Rebuilt.
+	* gx-translate.c: Include "sim-inline.c" for sim-core inlining.
+	(m32r_gx_{load,store}*): Update signature.
+	(tgx_emit_pre_function): Emit new "tgx_info" struct, update
+	callback function signatures.
+	(m32r_emit_*_insn): Use new callback signatures.  For all short
+	branches in optimized mode, emit direct "goto gx_label_NNNN".
+	(tgx_optimize_test): If the GX_OPTIMIZE environment variable is
+	set, allow its integer value to override the optimization heuristic.
+	* m32r-sim.h: New empty placeholder file.
+	* sim-main.c: New empty placeholder file.
+	* sim-if.c (sim_create_inferior): Use NULL instead of &abort
+	for unimplemented register fondling functions.
+	* sim-main.h: Add multiple inclusion guard.  Update callback
+	function signatures. 
+	(tgx_info): New struct for collecting gx block invocation
+	arguments.
+	
 1998-11-13  Frank Ch. Eigler  <fche@elastic.org>
 
 	* (*): New files: snapshot of gx simulator prototype.

@@ -92,8 +92,8 @@ typedef struct sim_gx_block_list
 
 
 /* actual gx function pointer type */
-struct tgx_cpu_regs;
-typedef int (*sim_gx_function)(struct tgx_cpu_regs* cpu, char* pc_flags, struct tgx_callbacks* callbacks);
+struct tgx_info;
+typedef int (*sim_gx_function)(struct tgx_info* info);
 
 
 /* return values from gx function */

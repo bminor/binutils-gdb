@@ -1,4 +1,7 @@
-/* Main header for the m32r.  */
+/* Main header for the m32r-gx.  */
+
+#ifndef SIM_MAIN_H
+#define SIM_MAIN_H
 
 #define USING_SIM_BASE_H /* FIXME: quick hack */
 
@@ -56,18 +59,27 @@ typedef struct tgx_syscall_data
 } tgx_syscall_data;
 
 
+struct tgx_info;
+
 /* match with definition in gx-translate.c! */
 typedef struct tgx_callbacks 
 {
-  unsigned (*load)(unsigned pc, unsigned addr);
-  void (*store)(unsigned pc, unsigned addr, unsigned data);
-  signed char (*load1)(unsigned pc, unsigned addr);
-  void (*store1)(unsigned pc, unsigned addr, signed char data);
-  signed short (*load2)(unsigned pc, unsigned addr);
-  void (*store2)(unsigned pc, unsigned addr, signed short data);
-  void (*syscall)(tgx_syscall_data* data);
+  unsigned (*load)(struct tgx_info* info, unsigned pc, unsigned addr);
+  void (*store)(struct tgx_info* info, unsigned pc, unsigned addr, unsigned data);
+  signed char (*load1)(struct tgx_info* info, unsigned pc, unsigned addr);
+  void (*store1)(struct tgx_info* info, unsigned pc, unsigned addr, signed char data);
+  signed short (*load2)(struct tgx_info* info, unsigned pc, unsigned addr);
+  void (*store2)(struct tgx_info* info, unsigned pc, unsigned addr, signed short data);
+  void (*syscall)(struct tgx_info* info, tgx_syscall_data* data);
 } tgx_callbacks;
 
+
+typedef struct tgx_info
+{
+  struct tgx_cpu_regs* regs;
+  char* pc_flags;
+  struct tgx_callbacks* callbacks;
+} tgx_info;
 
 
 struct _sim_cpu 
@@ -92,3 +104,6 @@ struct sim_state {
    appropriate handler.  */
 SI h_gr_get (SIM_CPU *, UINT);
 void h_gr_set (SIM_CPU *, UINT, SI);
+
+
+#endif /* SIM_MAIN_H */

@@ -10,6 +10,7 @@
 #include "sim-main.h"
 #include "sim-base.h"
 #include "sim-core.h"
+#include "sim-inline.c"
 #include "sim-gx.h"
 #include "sim-assert.h"
 #include "targ-vals.h"
@@ -20,13 +21,13 @@ void m32r_emit_long_insn(sim_gx_block* block, PCADDR pc, unsigned insn, int opti
 void m32r_emit_short_insn(sim_gx_block* block, PCADDR pc, unsigned insn, int optimized);
 
 /* callback functions */
-unsigned m32r_gx_load(unsigned pc, unsigned addr);
-void m32r_gx_store(unsigned pc, unsigned addr, unsigned data);
-signed char m32r_gx_load1(unsigned pc, unsigned addr);
-void m32r_gx_store1(unsigned pc, unsigned addr, signed char data);
-signed short m32r_gx_load2(unsigned pc, unsigned addr);
-void m32r_gx_store2(unsigned pc, unsigned addr, signed short data);
-void m32r_gx_syscall(tgx_syscall_data* data);
+unsigned m32r_gx_load(tgx_info* info, unsigned pc, unsigned addr);
+void m32r_gx_store(tgx_info* info, unsigned pc, unsigned addr, unsigned data);
+signed char m32r_gx_load1(tgx_info* info, unsigned pc, unsigned addr);
+void m32r_gx_store1(tgx_info* info, unsigned pc, unsigned addr, signed char data);
+signed short m32r_gx_load2(tgx_info* info, unsigned pc, unsigned addr);
+void m32r_gx_store2(tgx_info* info, unsigned pc, unsigned addr, signed short data);
+void m32r_gx_syscall(tgx_info* info, tgx_syscall_data* data);
 
 
 
@@ -106,16 +107,33 @@ tgx_emit_pre_function(sim_gx_block* gx, int optimized)
 	  "} tgx_syscall_data;\n");
 
   fprintf(block->source_file, /* match with definition in sim-main.h! */
+	  "struct tgx_info;\n"
 	  "typedef struct tgx_callbacks\n"
 	  "{\n"
-	  "  unsigned (*load)(unsigned pc, unsigned addr);\n"
-	  "  void (*store)(unsigned pc, unsigned addr, unsigned data);\n"
-	  "  signed char (*load1)(unsigned pc, unsigned addr);\n"
-	  "  void (*store1)(unsigned pc, unsigned addr, signed char data);\n"
-	  "  signed short (*load2)(unsigned pc, unsigned addr);\n"
-	  "  void (*store2)(unsigned pc, unsigned addr, signed short data);\n"
-	  "  void (*syscall)(tgx_syscall_data* data);\n"
+	  "  unsigned (*load)(struct tgx_info* info, unsigned pc, unsigned addr);\n"
+	  "  void (*store)(struct tgx_info* info, unsigned pc, unsigned addr, unsigned data);\n"
+	  "  signed char (*load1)(struct tgx_info* info, unsigned pc, unsigned addr);\n"
+	  "  void (*store1)(struct tgx_info* info, unsigned pc, unsigned addr, signed char data);\n"
+	  "  signed short (*load2)(struct tgx_info* info, unsigned pc, unsigned addr);\n"
+	  "  void (*store2)(struct tgx_info* info, unsigned pc, unsigned addr, signed short data);\n"
+	  "  void (*syscall)(struct tgx_info* info, tgx_syscall_data* data);\n"
 	  "} tgx_callbacks;\n");
+
+  fprintf(block->source_file, /* match with definition in sim-main.h! */
+          "typedef struct tgx_mapping_cache\n"
+          "{\n"
+          "  unsigned base;\n"
+          "  unsigned bound;\n"
+          "  void* buffer;\n"
+          "} tgx_mapping_cache;\n");
+
+  fprintf(block->source_file, /* match with definition in sim-main.h! */
+	  "typedef struct tgx_info\n"
+	  "{\n"
+	  "  struct tgx_cpu_regs* regs;\n"
+	  "  char* pc_flags;\n"
+	  "  struct tgx_callbacks* callbacks;\n"
+	  "} tgx_info;\n");
 }
 
 
@@ -127,6 +145,10 @@ tgx_emit_load_block(sim_gx_block* gx, int optimized)
 
   ASSERT(block->source_file != NULL);
   fprintf(block->source_file, /* match with definition above */
+	  "  tgx_cpu_regs* regs = info->regs;\n"
+	  "  tgx_callbacks* callbacks = info->callbacks;\n"
+	  "  char* pc_flags = info->pc_flags;\n"
+	  "\n"
 	  "  unsigned int pc = regs->h_pc;\n"
 	  "  unsigned int npc = pc;\n"
 	  "  signed int temp;\n"
@@ -252,11 +274,19 @@ tgx_optimize_test(sim_gx_block* block)
   unsigned_4 current_time = time(NULL);
   unsigned_4 constant_time = current_time - block->learn_last_change;
   int opt;
+  char* env;
 
   /* try another optimize run if the system has settled down */
   opt = (block->compile_time != 0
 	 && block->learn_last_change != 0
 	 && constant_time > block->compile_time);
+
+  /* allow override by environment variable */
+#ifdef HAVE_GETENV
+  env = getenv("GX_OPTIMIZE");
+  if(env)
+    opt = atoi(env);
+#endif
 
   /*
   if(opt)
@@ -271,7 +301,7 @@ tgx_optimize_test(sim_gx_block* block)
 
 
 unsigned
-m32r_gx_load(unsigned pc, unsigned addr)
+m32r_gx_load(struct tgx_info* info, unsigned pc, unsigned addr)
 {
   SIM_DESC sd = CURRENT_STATE;
   sim_cpu* cpu = STATE_CPU (sd, 0);
@@ -282,7 +312,7 @@ m32r_gx_load(unsigned pc, unsigned addr)
 
 
 void
-m32r_gx_store(unsigned pc, unsigned addr, unsigned data)
+m32r_gx_store(struct tgx_info* info, unsigned pc, unsigned addr, unsigned data)
 {
   SIM_DESC sd = CURRENT_STATE;
   sim_cpu* cpu = STATE_CPU (sd, 0);
@@ -292,18 +322,19 @@ m32r_gx_store(unsigned pc, unsigned addr, unsigned data)
 
 
 signed char
-m32r_gx_load1(unsigned pc, unsigned addr)
+m32r_gx_load1(struct tgx_info* info, unsigned pc, unsigned addr)
 {
   SIM_DESC sd = CURRENT_STATE;
   sim_cpu* cpu = STATE_CPU (sd, 0);
+  signed char data = 0;
 
-  signed char data = sim_core_read_unaligned_1 (cpu, pc, read_map, addr);
+  data = sim_core_read_unaligned_1 (cpu, pc, read_map, addr);
   return data;
 }
 
 
 void
-m32r_gx_store1(unsigned pc, unsigned addr, signed char data)
+m32r_gx_store1(struct tgx_info* info, unsigned pc, unsigned addr, signed char data)
 {
   SIM_DESC sd = CURRENT_STATE;
   sim_cpu* cpu = STATE_CPU (sd, 0);
@@ -313,7 +344,7 @@ m32r_gx_store1(unsigned pc, unsigned addr, signed char data)
 
 
 signed short
-m32r_gx_load2(unsigned pc, unsigned addr)
+m32r_gx_load2(struct tgx_info* info, unsigned pc, unsigned addr)
 {
   SIM_DESC sd = CURRENT_STATE;
   sim_cpu* cpu = STATE_CPU (sd, 0);
@@ -324,7 +355,7 @@ m32r_gx_load2(unsigned pc, unsigned addr)
 
 
 void
-m32r_gx_store2(unsigned pc, unsigned addr, signed short data)
+m32r_gx_store2(struct tgx_info* info, unsigned pc, unsigned addr, signed short data)
 {
   SIM_DESC sd = CURRENT_STATE;
   sim_cpu* cpu = STATE_CPU (sd, 0);
@@ -356,7 +387,7 @@ syscall_write_mem (host_callback *cb, struct cb_syscall *sc,
 
 
 void
-m32r_gx_syscall(tgx_syscall_data* data)
+m32r_gx_syscall(struct tgx_info* info, tgx_syscall_data* data)
 {
   SIM_DESC sd = CURRENT_STATE;
   sim_cpu* cpu = STATE_CPU (sd, 0);
@@ -384,6 +415,8 @@ m32r_gx_syscall(tgx_syscall_data* data)
   data->errcode = s.errcode;
   data->result = s.result;
   data->result2 = s.result2;
+
+  /* XXX: clear read/write cache in info */
 }
 
 
@@ -488,42 +521,42 @@ m32r_emit_long_insn(sim_gx_block* gx, PCADDR pc, unsigned insn, int optimized)
   else if(op1 == 0xa && op2 == 0x0)
     {
       fprintf(f, "      /* STB R%d,@(%d,R%d) */\n", r1, lit2, r2);
-      fprintf(f, "      (*(callbacks->store1))(0x%08x, gr%d + %d, gr%d & 0xff);\n", (unsigned)pc, r2, lit2, r1);
+      fprintf(f, "      (*(callbacks->store1))(info, 0x%08x, gr%d + %d, gr%d & 0xff);\n", (unsigned)pc, r2, lit2, r1);
     }
   else if(op1 == 0xa && op2 == 0x2)
     {
       fprintf(f, "      /* STH R%d,@(%d,R%d) */\n", r1, lit2, r2);
-      fprintf(f, "      (*(callbacks->store2))(0x%08x, gr%d + %d, gr%d & 0xffff);\n", (unsigned)pc, r2, lit2, r1);
+      fprintf(f, "      (*(callbacks->store2))(info, 0x%08x, gr%d + %d, gr%d & 0xffff);\n", (unsigned)pc, r2, lit2, r1);
     }
   else if(op1 == 0xa && op2 == 0x4)
     {
       fprintf(f, "      /* ST R%d,@(%d,R%d) */\n", r1, lit2, r2);
-      fprintf(f, "      (*(callbacks->store))(0x%08x, gr%d + %d, gr%d);\n", (unsigned)pc, r2, lit2, r1);
+      fprintf(f, "      (*(callbacks->store))(info, 0x%08x, gr%d + %d, gr%d);\n", (unsigned)pc, r2, lit2, r1);
     }
   else if(op1 == 0xa && op2 == 0x8)
     {
       fprintf(f, "      /* LDB R%d,@(%d,R%d) */\n", r1, lit2, r2);
-      fprintf(f, "      gr%d = (*(callbacks->load1))(0x%08x, gr%d + %d);\n", r1, (unsigned)pc, r2, lit2);
+      fprintf(f, "      gr%d = (*(callbacks->load1))(info, 0x%08x, gr%d + %d);\n", r1, (unsigned)pc, r2, lit2);
     }
   else if(op1 == 0xa && op2 == 0x9)
     {
       fprintf(f, "      /* LDUB R%d,@(%d,R%d) */\n", r1, lit2, r2);
-      fprintf(f, "      gr%d = (unsigned char)(*(callbacks->load1))(0x%08x, gr%d + %d);\n", r1, (unsigned)pc, r2, lit2);
+      fprintf(f, "      gr%d = (unsigned char)(*(callbacks->load1))(info, 0x%08x, gr%d + %d);\n", r1, (unsigned)pc, r2, lit2);
     }
   else if(op1 == 0xa && op2 == 0xa)
     {
       fprintf(f, "      /* LDH R%d,@(%d,R%d) */\n", r1, lit2, r2);
-      fprintf(f, "      gr%d = (*(callbacks->load2))(0x%08x, gr%d + %d);\n", r1, (unsigned)pc, r2, lit2);
+      fprintf(f, "      gr%d = (*(callbacks->load2))(info, 0x%08x, gr%d + %d);\n", r1, (unsigned)pc, r2, lit2);
     }
   else if(op1 == 0xa && op2 == 0xb)
     {
       fprintf(f, "      /* LDUH R%d,@(%d,R%d) */\n", r1, lit2, r2);
-      fprintf(f, "      gr%d = (unsigned short)(*(callbacks->load2))(0x%08x, gr%d + %d);\n", r1, (unsigned)pc, r2, lit2);
+      fprintf(f, "      gr%d = (unsigned short)(*(callbacks->load2))(info, 0x%08x, gr%d + %d);\n", r1, (unsigned)pc, r2, lit2);
     }
   else if(op1 == 0xa && op2 == 0xc)
     {
       fprintf(f, "      /* LD R%d,@(%d,R%d) */\n", r1, lit2, r2);
-      fprintf(f, "      gr%d = (*(callbacks->load))(0x%08x, gr%d + %d);\n", r1, (unsigned)pc, r2, lit2);
+      fprintf(f, "      gr%d = (*(callbacks->load))(info, 0x%08x, gr%d + %d);\n", r1, (unsigned)pc, r2, lit2);
     }
 
   else if(op1 == 0xb && op2 == 0x0)
@@ -532,8 +565,18 @@ m32r_emit_long_insn(sim_gx_block* gx, PCADDR pc, unsigned insn, int optimized)
       fprintf(f, "      /* BEQ R%d,R%d,%d */\n", r1, r2, lit2);
       fprintf(f, "      if (gr%d == gr%d)\n", r1, r2);
       fprintf(f, "        {\n");
-      fprintf(f, "          npc = 0x%08x;\n", newpc);
-      fprintf(f, "          goto %s;\n", (GX_PC_INCLUDES(gx,newpc)) ? "shortjump" : "longjump");
+      if (optimized &&
+	  (GX_PC_INCLUDES(gx,newpc)) &&
+	  (GX_PC_FLAGS(gx, newpc) & GX_PCF_JUMPTARGET))
+	{
+	  fprintf(f, "          goto gx_label_%ld;\n",
+		  ((newpc - gx->origin) / gx->divisor));
+	}
+      else
+	{
+	  fprintf(f, "          npc = 0x%08x;\n", newpc);
+	  fprintf(f, "          goto %s;\n", (GX_PC_INCLUDES(gx,newpc)) ? "shortjump" : "longjump");
+	}
       fprintf(f, "        }\n");
     }
   else if(op1 == 0xb && op2 == 0x1)
@@ -542,8 +585,18 @@ m32r_emit_long_insn(sim_gx_block* gx, PCADDR pc, unsigned insn, int optimized)
       fprintf(f, "      /* BNE R%d,R%d,%d */\n", r1, r2, lit2);
       fprintf(f, "      if (gr%d != gr%d)\n", r1, r2);
       fprintf(f, "        {\n");
-      fprintf(f, "          npc = 0x%08x;\n", newpc);
-      fprintf(f, "          goto %s;\n", (GX_PC_INCLUDES(gx,newpc)) ? "shortjump" : "longjump");
+      if (optimized &&
+	  (GX_PC_INCLUDES(gx,newpc)) &&
+	  (GX_PC_FLAGS(gx, newpc) & GX_PCF_JUMPTARGET))
+	{
+	  fprintf(f, "          goto gx_label_%ld;\n",
+		  ((newpc - gx->origin) / gx->divisor));
+	}
+      else
+	{
+	  fprintf(f, "          npc = 0x%08x;\n", newpc);
+	  fprintf(f, "          goto %s;\n", (GX_PC_INCLUDES(gx,newpc)) ? "shortjump" : "longjump");
+	}
       fprintf(f, "        }\n");
     }
   else if(op1 == 0xb && op2 == 0x8 && r1 == 0)
@@ -552,8 +605,18 @@ m32r_emit_long_insn(sim_gx_block* gx, PCADDR pc, unsigned insn, int optimized)
       fprintf(f, "      /* BEQZ R%d,%d */\n", r2, lit2);
       fprintf(f, "      if (gr%d == 0)\n", r2);
       fprintf(f, "        {\n");
-      fprintf(f, "          npc = 0x%08x;\n", newpc);
-      fprintf(f, "          goto %s;\n", (GX_PC_INCLUDES(gx,newpc)) ? "shortjump" : "longjump");
+      if (optimized &&
+	  (GX_PC_INCLUDES(gx,newpc)) &&
+	  (GX_PC_FLAGS(gx, newpc) & GX_PCF_JUMPTARGET))
+	{
+	  fprintf(f, "          goto gx_label_%ld;\n",
+		  ((newpc - gx->origin) / gx->divisor));
+	}
+      else
+	{
+	  fprintf(f, "          npc = 0x%08x;\n", newpc);
+	  fprintf(f, "          goto %s;\n", (GX_PC_INCLUDES(gx,newpc)) ? "shortjump" : "longjump");
+	}
       fprintf(f, "        }\n");
     }
   else if(op1 == 0xb && op2 == 0x9 && r1 == 0)
@@ -562,8 +625,18 @@ m32r_emit_long_insn(sim_gx_block* gx, PCADDR pc, unsigned insn, int optimized)
       fprintf(f, "      /* BNEZ R%d,%d */\n", r2, lit2);
       fprintf(f, "      if (gr%d != 0)\n", r2);
       fprintf(f, "        {\n");
-      fprintf(f, "          npc = 0x%08x;\n", newpc);
-      fprintf(f, "          goto %s;\n", (GX_PC_INCLUDES(gx,newpc)) ? "shortjump" : "longjump");
+      if (optimized &&
+	  (GX_PC_INCLUDES(gx,newpc)) &&
+	  (GX_PC_FLAGS(gx, newpc) & GX_PCF_JUMPTARGET))
+	{
+	  fprintf(f, "          goto gx_label_%ld;\n",
+		  ((newpc - gx->origin) / gx->divisor));
+	}
+      else
+	{
+	  fprintf(f, "          npc = 0x%08x;\n", newpc);
+	  fprintf(f, "          goto %s;\n", (GX_PC_INCLUDES(gx,newpc)) ? "shortjump" : "longjump");
+	}
       fprintf(f, "        }\n");
     }
   else if(op1 == 0xb && op2 == 0xa && r1 == 0x0)
@@ -572,8 +645,18 @@ m32r_emit_long_insn(sim_gx_block* gx, PCADDR pc, unsigned insn, int optimized)
       fprintf(f, "      /* BLTZ R%d,%d */\n", r2, lit2);
       fprintf(f, "      if (gr%d < 0)\n", r2);
       fprintf(f, "        {\n");
-      fprintf(f, "          npc = 0x%08x;\n", newpc);
-      fprintf(f, "          goto %s;\n", (GX_PC_INCLUDES(gx,newpc)) ? "shortjump" : "longjump");
+      if (optimized &&
+	  (GX_PC_INCLUDES(gx,newpc)) &&
+	  (GX_PC_FLAGS(gx, newpc) & GX_PCF_JUMPTARGET))
+	{
+	  fprintf(f, "          goto gx_label_%ld;\n",
+		  ((newpc - gx->origin) / gx->divisor));
+	}
+      else
+	{
+	  fprintf(f, "          npc = 0x%08x;\n", newpc);
+	  fprintf(f, "          goto %s;\n", (GX_PC_INCLUDES(gx,newpc)) ? "shortjump" : "longjump");
+	}
       fprintf(f, "        }\n");
     }
   else if(op1 == 0xb && op2 == 0xb && r1 == 0x0)
@@ -582,8 +665,18 @@ m32r_emit_long_insn(sim_gx_block* gx, PCADDR pc, unsigned insn, int optimized)
       fprintf(f, "      /* BGEZ R%d,%d */\n", r2, lit2);
       fprintf(f, "      if (gr%d >= 0)\n", r2);
       fprintf(f, "        {\n");
-      fprintf(f, "          npc = 0x%08x;\n", newpc);
-      fprintf(f, "          goto %s;\n", (GX_PC_INCLUDES(gx,newpc)) ? "shortjump" : "longjump");
+      if (optimized &&
+	  (GX_PC_INCLUDES(gx,newpc)) &&
+	  (GX_PC_FLAGS(gx, newpc) & GX_PCF_JUMPTARGET))
+	{
+	  fprintf(f, "          goto gx_label_%ld;\n",
+		  ((newpc - gx->origin) / gx->divisor));
+	}
+      else
+	{
+	  fprintf(f, "          npc = 0x%08x;\n", newpc);
+	  fprintf(f, "          goto %s;\n", (GX_PC_INCLUDES(gx,newpc)) ? "shortjump" : "longjump");
+	}
       fprintf(f, "        }\n");
     }
   else if(op1 == 0xb && op2 == 0xc && r1 == 0x0)
@@ -592,8 +685,18 @@ m32r_emit_long_insn(sim_gx_block* gx, PCADDR pc, unsigned insn, int optimized)
       fprintf(f, "      /* BLEZ R%d,%d */\n", r2, lit2);
       fprintf(f, "      if (gr%d <= 0)\n", r2);
       fprintf(f, "        {\n");
-      fprintf(f, "          npc = 0x%08x;\n", newpc);
-      fprintf(f, "          goto %s;\n", (GX_PC_INCLUDES(gx,newpc)) ? "shortjump" : "longjump");
+      if (optimized &&
+	  (GX_PC_INCLUDES(gx,newpc)) &&
+	  (GX_PC_FLAGS(gx, newpc) & GX_PCF_JUMPTARGET))
+	{
+	  fprintf(f, "          goto gx_label_%ld;\n",
+		  ((newpc - gx->origin) / gx->divisor));
+	}
+      else
+	{
+	  fprintf(f, "          npc = 0x%08x;\n", newpc);
+	  fprintf(f, "          goto %s;\n", (GX_PC_INCLUDES(gx,newpc)) ? "shortjump" : "longjump");
+	}
       fprintf(f, "        }\n");
     }
   else if(op1 == 0xb && op2 == 0xd && r1 == 0x0)
@@ -602,8 +705,18 @@ m32r_emit_long_insn(sim_gx_block* gx, PCADDR pc, unsigned insn, int optimized)
       fprintf(f, "      /* BGTZ R%d,%d */\n", r2, lit2);
       fprintf(f, "      if (gr%d > 0)\n", r2);
       fprintf(f, "        {\n");
-      fprintf(f, "          npc = 0x%08x;\n", newpc);
-      fprintf(f, "          goto %s;\n", (GX_PC_INCLUDES(gx,newpc)) ? "shortjump" : "longjump");
+      if (optimized &&
+	  (GX_PC_INCLUDES(gx,newpc)) &&
+	  (GX_PC_FLAGS(gx, newpc) & GX_PCF_JUMPTARGET))
+	{
+	  fprintf(f, "          goto gx_label_%ld;\n",
+		  ((newpc - gx->origin) / gx->divisor));
+	}
+      else
+	{
+	  fprintf(f, "          npc = 0x%08x;\n", newpc);
+	  fprintf(f, "          goto %s;\n", (GX_PC_INCLUDES(gx,newpc)) ? "shortjump" : "longjump");
+	}
       fprintf(f, "        }\n");
     }
 
@@ -625,8 +738,18 @@ m32r_emit_long_insn(sim_gx_block* gx, PCADDR pc, unsigned insn, int optimized)
       fprintf(f, "      /* BC %d */\n", lit3);
       fprintf(f, "      if (cond)\n");
       fprintf(f, "        {\n");
-      fprintf(f, "          npc = 0x%08x;\n", newpc);
-      fprintf(f, "          goto %s;\n", (GX_PC_INCLUDES(gx,newpc)) ? "shortjump" : "longjump");
+      if (optimized &&
+	  (GX_PC_INCLUDES(gx,newpc)) &&
+	  (GX_PC_FLAGS(gx, newpc) & GX_PCF_JUMPTARGET))
+	{
+	  fprintf(f, "          goto gx_label_%ld;\n",
+		  ((newpc - gx->origin) / gx->divisor));
+	}
+      else
+	{
+	  fprintf(f, "          npc = 0x%08x;\n", newpc);
+	  fprintf(f, "          goto %s;\n", (GX_PC_INCLUDES(gx,newpc)) ? "shortjump" : "longjump");
+	}
       fprintf(f, "        }\n");
     }
   else if(op1 == 0xf && r1 == 0xd)
@@ -635,8 +758,18 @@ m32r_emit_long_insn(sim_gx_block* gx, PCADDR pc, unsigned insn, int optimized)
       fprintf(f, "      /* BNC %d */\n", lit3);
       fprintf(f, "      if (! cond)\n");
       fprintf(f, "        {\n");
-      fprintf(f, "          npc = 0x%08x;\n", newpc);
-      fprintf(f, "          goto %s;\n", (GX_PC_INCLUDES(gx,newpc)) ? "shortjump" : "longjump");
+      if (optimized &&
+	  (GX_PC_INCLUDES(gx,newpc)) &&
+	  (GX_PC_FLAGS(gx, newpc) & GX_PCF_JUMPTARGET))
+	{
+	  fprintf(f, "          goto gx_label_%ld;\n",
+		  ((newpc - gx->origin) / gx->divisor));
+	}
+      else
+	{
+	  fprintf(f, "          npc = 0x%08x;\n", newpc);
+	  fprintf(f, "          goto %s;\n", (GX_PC_INCLUDES(gx,newpc)) ? "shortjump" : "longjump");
+	}
       fprintf(f, "        }\n");
     }
   else if(op1 == 0xf && r1 == 0xe)
@@ -645,15 +778,35 @@ m32r_emit_long_insn(sim_gx_block* gx, PCADDR pc, unsigned insn, int optimized)
       unsigned retpc = (pc & 0xfffffffc) + 4;
       fprintf(f, "      /* BL %d */\n", lit3);
       fprintf(f, "      gr14 = 0x%08x;\n", retpc);
-      fprintf(f, "      npc = 0x%08x;\n", newpc);
-      fprintf(f, "      goto %s;\n", (GX_PC_INCLUDES(gx,newpc)) ? "shortjump" : "longjump");
+      if (optimized &&
+	  (GX_PC_INCLUDES(gx,newpc)) &&
+	  (GX_PC_FLAGS(gx, newpc) & GX_PCF_JUMPTARGET))
+	{
+	  fprintf(f, "      goto gx_label_%ld;\n",
+		  ((newpc - gx->origin) / gx->divisor));
+	}
+      else
+	{
+	  fprintf(f, "      npc = 0x%08x;\n", newpc);
+	  fprintf(f, "      goto %s;\n", (GX_PC_INCLUDES(gx,newpc)) ? "shortjump" : "longjump");
+	}
     }
   else if(op1 == 0xf && r1 == 0xf)
     {
       unsigned newpc = (pc & 0xfffffffc) + (((lit3 << 8) >> 8) << 2);
       fprintf(f, "      /* BRA %d */\n", lit3);
-      fprintf(f, "      npc = 0x%08x;\n", newpc);
-      fprintf(f, "      goto %s;\n", (GX_PC_INCLUDES(gx,newpc)) ? "shortjump" : "longjump");
+      if (optimized &&
+	  (GX_PC_INCLUDES(gx,newpc)) &&
+	  (GX_PC_FLAGS(gx, newpc) & GX_PCF_JUMPTARGET))
+	{
+	  fprintf(f, "      goto gx_label_%ld;\n",
+		  ((newpc - gx->origin) / gx->divisor));
+	}
+      else
+	{
+	  fprintf(f, "      npc = 0x%08x;\n", newpc);
+	  fprintf(f, "      goto %s;\n", (GX_PC_INCLUDES(gx,newpc)) ? "shortjump" : "longjump");
+	}
     }
 
   else
@@ -862,7 +1015,7 @@ m32r_emit_short_insn(sim_gx_block* gx, PCADDR pc, unsigned insn, int optimized)
 	{
 	  fprintf(f, "        {\n");
 	  fprintf(f, "          tgx_syscall_data d = { 0x%08x, gr0, gr1, gr2, gr3 };\n", (unsigned) pc);
-	  fprintf(f, "          (*(callbacks->syscall))(&d);\n");
+	  fprintf(f, "          (*(callbacks->syscall))(info, &d);\n");
 	  fprintf(f, "          gr2 = d.errcode;\n");
 	  fprintf(f, "          gr1 = d.result;\n");
 	  fprintf(f, "          gr0 = d.result2;\n");
@@ -886,17 +1039,17 @@ m32r_emit_short_insn(sim_gx_block* gx, PCADDR pc, unsigned insn, int optimized)
   else if(op1 == 0x2 && op2 == 0x0)
     {
       fprintf(f, "      /* STB R%d,@R%d */\n", r1, r2);
-      fprintf(f, "      (*(callbacks->store1))(0x%08x, gr%d, gr%d & 0xff);\n", (unsigned)pc, r2, r1);
+      fprintf(f, "      (*(callbacks->store1))(info, 0x%08x, gr%d, gr%d & 0xff);\n", (unsigned)pc, r2, r1);
     }
   else if(op1 == 0x2 && op2 == 0x2)
     {
       fprintf(f, "      /* STH R%d,@R%d */\n", r1, r2);
-      fprintf(f, "      (*(callbacks->store2))(0x%08x, gr%d, gr%d & 0x0000ffff);\n", (unsigned)pc, r2, r1);
+      fprintf(f, "      (*(callbacks->store2))(info, 0x%08x, gr%d, gr%d & 0x0000ffff);\n", (unsigned)pc, r2, r1);
     }
   else if(op1 == 0x2 && op2 == 0x4)
     {
       fprintf(f, "      /* ST R%d,@R%d */\n", r1, r2);
-      fprintf(f, "      (*(callbacks->store))(0x%08x, gr%d, gr%d);\n", (unsigned)pc, r2, r1);
+      fprintf(f, "      (*(callbacks->store))(info, 0x%08x, gr%d, gr%d);\n", (unsigned)pc, r2, r1);
     }
   else if(op1 == 0x2 && op2 == 0x5)
     {
@@ -904,56 +1057,56 @@ m32r_emit_short_insn(sim_gx_block* gx, PCADDR pc, unsigned insn, int optimized)
       fprintf(f, "      if(lock)\n");
       fprintf(f, "        {\n");
       fprintf(f, "          lock = 0;\n");
-      fprintf(f, "          (*(callbacks->store))(0x%08x, gr%d, gr%d);\n", (unsigned)pc, r2, r1);
+      fprintf(f, "          (*(callbacks->store))(info, 0x%08x, gr%d, gr%d);\n", (unsigned)pc, r2, r1);
       fprintf(f, "        }\n");
     }
   else if(op1 == 0x2 && op2 == 0x6)
     {
       fprintf(f, "      /* ST R%d,@+R%d */\n", r1, r2);
       fprintf(f, "      gr%d = gr%d + 4;\n", r2, r2);
-      fprintf(f, "      (*(callbacks->store))(0x%08x, gr%d, gr%d);\n", (unsigned)pc, r2, r1);
+      fprintf(f, "      (*(callbacks->store))(info, 0x%08x, gr%d, gr%d);\n", (unsigned)pc, r2, r1);
     }
   else if(op1 == 0x2 && op2 == 0x7)
     {
       fprintf(f, "      /* ST R%d,@-R%d */\n", r1, r2);
       fprintf(f, "      gr%d = gr%d - 4;\n", r2, r2);
-      fprintf(f, "      (*(callbacks->store))(0x%08x, gr%d, gr%d);\n", (unsigned)pc, r2, r1);
+      fprintf(f, "      (*(callbacks->store))(info, 0x%08x, gr%d, gr%d);\n", (unsigned)pc, r2, r1);
     }
   else if(op1 == 0x2 && op2 == 0x8)
     {
       fprintf(f, "      /* LDB R%d,@R%d */\n", r1, r2);
-      fprintf(f, "      gr%d = (*(callbacks->load1))(0x%08x, gr%d);\n", r1, (unsigned)pc, r2);
+      fprintf(f, "      gr%d = (*(callbacks->load1))(info, 0x%08x, gr%d);\n", r1, (unsigned)pc, r2);
     }
   else if(op1 == 0x2 && op2 == 0x9)
     {
       fprintf(f, "      /* LDUB R%d,@R%d */\n", r1, r2);
-      fprintf(f, "      gr%d = (unsigned char)(*(callbacks->load1))(0x%08x, gr%d);\n", r1, (unsigned)pc, r2);
+      fprintf(f, "      gr%d = (unsigned char)(*(callbacks->load1))(info, 0x%08x, gr%d);\n", r1, (unsigned)pc, r2);
     }
   else if(op1 == 0x2 && op2 == 0xa)
     {
       fprintf(f, "      /* LDH R%d,@R%d */\n", r1, r2);
-      fprintf(f, "      gr%d = (*(callbacks->load2))(0x%08x, gr%d);\n", r1, (unsigned)pc, r2);
+      fprintf(f, "      gr%d = (*(callbacks->load2))(info, 0x%08x, gr%d);\n", r1, (unsigned)pc, r2);
     }
   else if(op1 == 0x2 && op2 == 0xb)
     {
       fprintf(f, "      /* LDUH R%d,@R%d */\n", r1, r2);
-      fprintf(f, "      gr%d = (unsigned short)(*(callbacks->load2))(0x%08x, gr%d);\n", r1, (unsigned)pc, r2);
+      fprintf(f, "      gr%d = (unsigned short)(*(callbacks->load2))(info, 0x%08x, gr%d);\n", r1, (unsigned)pc, r2);
     }
   else if(op1 == 0x2 && op2 == 0xc)
     {
       fprintf(f, "      /* LD R%d,@R%d */\n", r1, r2);
-      fprintf(f, "      gr%d = (*(callbacks->load))(0x%08x, gr%d);\n", r1, (unsigned)pc, r2);
+      fprintf(f, "      gr%d = (*(callbacks->load))(info, 0x%08x, gr%d);\n", r1, (unsigned)pc, r2);
     }
   else if(op1 == 0x2 && op2 == 0xd)
     {
       fprintf(f, "      /* LOCK R%d,@R%d */\n", r1, r2);
       fprintf(f, "      lock = 1;\n");
-      fprintf(f, "      gr%d = (*(callbacks->load))(0x%08x, gr%d);\n", r1, (unsigned)pc, r2);
+      fprintf(f, "      gr%d = (*(callbacks->load))(info, 0x%08x, gr%d);\n", r1, (unsigned)pc, r2);
     }
   else if(op1 == 0x2 && op2 == 0xe)
     {
       fprintf(f, "      /* LD R%d,@R%d+ */\n", r1, r2);
-      fprintf(f, "      gr%d = (*(callbacks->load))(0x%08x, gr%d);\n", r1, (unsigned)pc, r2);
+      fprintf(f, "      gr%d = (*(callbacks->load))(info, 0x%08x, gr%d);\n", r1, (unsigned)pc, r2);
       fprintf(f, "      gr%d = gr%d + 4;\n", r2, r2);
     }
 
@@ -991,8 +1144,18 @@ m32r_emit_short_insn(sim_gx_block* gx, PCADDR pc, unsigned insn, int optimized)
       fprintf(f, "      /* BC %d */\n", c);
       fprintf(f, "      if (cond)\n");
       fprintf(f, "        {\n");
-      fprintf(f, "          npc = 0x%08x;\n", newpc);
-      fprintf(f, "          goto %s;\n", (GX_PC_INCLUDES(gx,newpc)) ? "shortjump" : "longjump");
+      if (optimized &&
+	  (GX_PC_INCLUDES(gx,newpc)) &&
+	  (GX_PC_FLAGS(gx, newpc) & GX_PCF_JUMPTARGET))
+	{
+	  fprintf(f, "          goto gx_label_%ld;\n",
+		  ((newpc - gx->origin) / gx->divisor));
+	}
+      else
+	{
+	  fprintf(f, "          npc = 0x%08x;\n", newpc);
+	  fprintf(f, "          goto %s;\n", (GX_PC_INCLUDES(gx,newpc)) ? "shortjump" : "longjump");
+	}
       fprintf(f, "        }\n");
     }
   else if(op1 == 0x7 && r1 == 0xd)
@@ -1001,8 +1164,18 @@ m32r_emit_short_insn(sim_gx_block* gx, PCADDR pc, unsigned insn, int optimized)
       fprintf(f, "      /* BNC %d */\n", c);
       fprintf(f, "      if (! cond)\n");
       fprintf(f, "        {\n");
-      fprintf(f, "          npc = 0x%08x;\n", newpc);
-      fprintf(f, "          goto %s;\n", (GX_PC_INCLUDES(gx,newpc)) ? "shortjump" : "longjump");
+      if (optimized &&
+	  (GX_PC_INCLUDES(gx,newpc)) &&
+	  (GX_PC_FLAGS(gx, newpc) & GX_PCF_JUMPTARGET))
+	{
+	  fprintf(f, "          goto gx_label_%ld;\n",
+		  ((newpc - gx->origin) / gx->divisor));
+	}
+      else
+	{
+	  fprintf(f, "          npc = 0x%08x;\n", newpc);
+	  fprintf(f, "          goto %s;\n", (GX_PC_INCLUDES(gx,newpc)) ? "shortjump" : "longjump");
+	}
       fprintf(f, "        }\n");
     }
   else if(op1 == 0x7 && r1 == 0xe)
@@ -1011,15 +1184,35 @@ m32r_emit_short_insn(sim_gx_block* gx, PCADDR pc, unsigned insn, int optimized)
       unsigned retpc = (pc & 0xfffffffc) + 4;
       fprintf(f, "      /* BL %d */\n", c);
       fprintf(f, "      gr14 = 0x%08x;\n", retpc);
-      fprintf(f, "      npc = 0x%08x;\n", newpc);
-      fprintf(f, "      goto %s;\n", (GX_PC_INCLUDES(gx,newpc)) ? "shortjump" : "longjump");
+      if (optimized &&
+	  (GX_PC_INCLUDES(gx,newpc)) &&
+	  (GX_PC_FLAGS(gx, newpc) & GX_PCF_JUMPTARGET))
+	{
+	  fprintf(f, "      goto gx_label_%ld;\n",
+		  ((newpc - gx->origin) / gx->divisor));
+	}
+      else
+	{
+	  fprintf(f, "      npc = 0x%08x;\n", newpc);
+	  fprintf(f, "      goto %s;\n", (GX_PC_INCLUDES(gx,newpc)) ? "shortjump" : "longjump");
+	}
     }
   else if(op1 == 0x7 && r1 == 0xf)
     {
       unsigned newpc = (pc & 0xfffffffc) + (((int) c) << 2);
       fprintf(f, "      /* BRA %d */\n", c);
-      fprintf(f, "      npc = 0x%08x;\n", newpc);
-      fprintf(f, "      goto %s;\n", (GX_PC_INCLUDES(gx,newpc)) ? "shortjump" : "longjump");
+      if (optimized &&
+	  (GX_PC_INCLUDES(gx,newpc)) &&
+	  (GX_PC_FLAGS(gx, newpc) & GX_PCF_JUMPTARGET))
+	{
+	  fprintf(f, "      goto gx_label_%ld;\n",
+		  ((newpc - gx->origin) / gx->divisor));
+	}
+      else
+	{
+	  fprintf(f, "      npc = 0x%08x;\n", newpc);
+	  fprintf(f, "      goto %s;\n", (GX_PC_INCLUDES(gx,newpc)) ? "shortjump" : "longjump");
+	}
     }
 
   else if(op1 == 0x7 && op2 == 0x0 && r1 == 0x0 && r1 == 0x0)

@@ -80,6 +80,9 @@
 /* Define if you have the getcwd function.  */
 #undef HAVE_GETCWD
 
+/* Define if you have the getenv function.  */
+#undef HAVE_GETENV
+
 /* Define if you have the getpagesize function.  */
 #undef HAVE_GETPAGESIZE
 

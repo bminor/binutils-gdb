@@ -1,3 +1,18 @@
+start-sanitize-gxsim
+1998-12-01  Frank Ch. Eigler  <fche@elastic.org>
+
+	* sim-gx-run.c (sim_engine_run): Use new tgx_info struct to
+	collect run-time arguments to gx block.
+	* sim-gx.h (sim_gx_function): Corresponding signature change.
+	
+	* sim-gx.c (sim_gx_compiled_block_f): Remove nonfunctional code to
+	again compile a gx block source file.
+	(sim_gx_compiled_block_dispose): Uninstall obsoleted gx block
+	shared libraries.
+	(sim_gx_block_translate): Always emit new "gx_label_NNNN" labels,
+	for basic block entry points, even if !__GNUC__.
+
+end-sanitize-gxsim
 1998-11-30  Doug Evans  <devans@casey.cygnus.com>
 
 	* cgen-utils.c (cgen_virtual_opcode_table): Update.

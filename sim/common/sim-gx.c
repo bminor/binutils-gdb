@@ -54,33 +54,6 @@ sim_gx_compiled_block_f(sim_gx_compiled_block* gx)
 
   if(f == NULL)
     {
-      /* compile object */
-      if(gx->object_name == NULL && gx->source_name != NULL)
-	{
-	  char compile_command[2000];
-
-	  gx->object_name = strdup(gx->source_name);
-	  /* turn *.c into *.o */
-	  gx->object_name[strlen(gx->object_name)]='o';
-
-	  /* compute command string to compile object */
-	  sprintf(compile_command,
-		  "make -f %s OBJ=%s SRC=%s gx",
-#define GX_MAKEFILE "--no-makefile-yet--"
-		  GX_MAKEFILE,
-		  gx->object_name,
-		  gx->source_name);
-
-	  rc = system(compile_command);
-	  if(rc != 0)
-	    {
-	      sim_io_error(sd, "Compile error rc %d for GX source %s: %s", 
-			rc,
-			gx->source_name,
-			strerror(errno));
-	    }
-	}
-      
       /* load object */
       if(gx->object_dlhandle == NULL && gx->object_name != NULL)
 	{
@@ -119,6 +92,8 @@ sim_gx_compiled_block_dispose(sim_gx_compiled_block* gx)
 {
   SIM_DESC sd = current_state;
   int rc;
+  char compile_command[2000];
+  char la_name[2000];
 
   /* forget dl information */
   gx->function_dlhandle = NULL;
@@ -135,6 +110,23 @@ sim_gx_compiled_block_dispose(sim_gx_compiled_block* gx)
 	}
       gx->object_dlhandle = NULL;
     }
+
+  /* uninstall shared object */
+
+  strcpy(la_name, gx->object_name);
+  strcpy(strstr(la_name, ".so.0"), ".la");
+  sprintf(compile_command, "gxtool --mode=uninstall rm -f %s", la_name);
+
+  rc = system(compile_command);
+  if(rc != 0)
+    {
+      sim_io_error(sd, "Error during finish: `%s' rc %d",
+		   compile_command, rc);
+    }
+
+
+  /* erase source */
+  /* sprintf(compile_command, "rm -f %s", block->source_name); */
 
   /* final gasps */
   zfree(gx->source_name);
@@ -363,7 +355,7 @@ sim_gx_read_block_list()
       sim_gx_block_add(gx);
     }
 
-  print_gx_blocks(STATE_BLOCKS(sd), "after restoring state");
+  /* print_gx_blocks(STATE_BLOCKS(sd), "after restoring state"); */
 }
 
 
@@ -569,7 +561,7 @@ sim_gx_block_translate(sim_gx_block* gx, int optimized)
   fprintf(block->source_file, "\n\n");
   fprintf(block->source_file, "extern int\n");
   fprintf(block->source_file, "%s", block->symbol_name);
-  fprintf(block->source_file, "(struct tgx_cpu_regs* regs, char* pc_flags, struct tgx_callbacks* callbacks)\n");
+  fprintf(block->source_file, "(struct tgx_info* info)\n");
   fprintf(block->source_file, "{\n");
   fprintf(block->source_file, "  int rc = 0;\n");
   if(! optimized)
@@ -684,13 +676,12 @@ sim_gx_block_translate(sim_gx_block* gx, int optimized)
       if((! optimized) ||
 	 (GX_PC_FLAGS(gx, gx_cia) & GX_PCF_JUMPTARGET))
 	{
-	  fprintf(block->source_file, "#ifdef __GNUC__\n");
 	  fprintf(block->source_file, "    gx_label_%ld:\n",
 		  ((gx_cia - gx->origin) / gx->divisor));
-	  fprintf(block->source_file, "#else /* ! __GNUC__*/\n");
+	  fprintf(block->source_file, "#ifndef __GNUC__\n");
 	  fprintf(block->source_file, "    case %ld:\n",
 		  ((gx_cia - gx->origin) / gx->divisor));
-	  fprintf(block->source_file, "#endif /*__GNUC__*/\n");
+	  fprintf(block->source_file, "#endif /* !__GNUC__ */\n");
 	}
 
       /* translate breakpoint check & exit */
@@ -821,7 +812,7 @@ sim_gx_block_translate(sim_gx_block* gx, int optimized)
 
   /* clean up */
 
-  sprintf(compile_command, "rm -f lib%s.la %s.lo", base_name, base_name);
+  sprintf(compile_command, "gxtool --silent --mode=uninstall rm -f lib%s.la %s.lo", base_name, base_name);
   rc = system(compile_command);
   if(rc != 0)
     {

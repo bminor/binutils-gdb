@@ -142,8 +142,8 @@ sim_create_inferior (sd, abfd, argv, envp)
 
   CPU_PC_STORE (current_cpu) = m32r_h_pc_set;
   CPU_PC_FETCH (current_cpu) = m32r_h_pc_get;
-  CPU_REG_STORE (current_cpu) = & abort;
-  CPU_REG_FETCH (current_cpu) = & abort;
+  CPU_REG_STORE (current_cpu) = NULL;
+  CPU_REG_FETCH (current_cpu) = NULL;
 
   if (abfd != NULL)
     addr = bfd_get_start_address (abfd);

@@ -88,7 +88,12 @@ sim_engine_run (SIM_DESC sd,
 	}
 
       /* call into gx function */
-      rc = (*f)(& cpu->regs, block->pc_flags, block->callbacks);
+      {
+	struct tgx_info info = {& cpu->regs,
+				block->pc_flags, 
+				block->callbacks };
+	rc = (*f)(& info);
+      }
 
       /* compute pc_flags checksum */
       if(! optimized)
