@@ -1,0 +1,5 @@
+srcname="GDB doc"
+srctrigger=gdb.texinfo
+# per-host:
+
+# per-target:
