@@ -1,3 +1,7 @@
+Sun Mar 20 14:43:14 1994  Ken Raeburn  (raeburn@cujo.cygnus.com)
+
+	* write.c (set_symtab): Define only if BFD_ASSEMBLER.
+
 Sun Mar 20 12:06:05 1994  Jeffrey A. Law  (law@snake.cs.utah.edu)
 
 	* Makefile.in (STAGESTUFF): Add gasp.new.
