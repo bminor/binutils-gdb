@@ -1,3 +1,12 @@
+2004-07-07  Bob Rossi  <bob_rossi@cox.net>
+
+	* gdb.mi/mi2-file.exp: Revert to version 1.1, except changed name of
+	test from test_tbreak_creation_and_listing to
+	test_file_list_exec_source_file
+	* gdb.mi/mi-file.exp: Add test for -file-list-exec-source-files
+	Changed name of test from test_tbreak_creation_and_listing to
+	test_file_list_exec_source_file
+
 2004-07-07  Jeff Johnston  <jjohnstn@redhat.com>
 
 	* gdb.java/jmisc.exp: Fix expected output of ptype to look for
