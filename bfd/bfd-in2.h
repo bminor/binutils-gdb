@@ -1028,8 +1028,11 @@ enum bfd_architecture
   bfd_arch_arm,        /* Advanced Risc Machines ARM */
   bfd_arch_ns32k,      /* National Semiconductors ns32000 */
   /* start-sanitize-rce */
-  bfd_arch_rce,	       /* Experimental Motorola RCE */
+  bfd_arch_rce,        /* Motorola RCE */
   /* end-sanitize-rce */
+  /* start-sanitize-arc */
+  bfd_arch_arc,        /* Argonaut RISC Core */
+  /* end-sanitize-arc */
   bfd_arch_last
   };
 
@@ -1510,6 +1513,15 @@ not stored in the instruction. */
   BFD_RELOC_ARM_SWI,
   BFD_RELOC_ARM_MULTI,
   BFD_RELOC_ARM_CP_OFF_IMM,
+/* start-sanitize-arc */
+
+/* Argonaut RISC Core (ARC) relocs.
+ARC 22 bit pc-relative branch.  The lowest two bits must be zero and are
+not stored in the instruction.  High 20 bits installed in bits 7 through 26
+of instruction. */
+  BFD_RELOC_ARC_B22_PCREL,
+/* end-sanitize-arc */
+
   BFD_RELOC_UNUSED };
 typedef enum bfd_reloc_code_real bfd_reloc_code_real_type;
 const struct reloc_howto_struct *

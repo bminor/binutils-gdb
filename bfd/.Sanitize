@@ -31,6 +31,14 @@ else
 	lose_these_too="${rce_files} ${lose_these_too}"
 fi
 
+arc_files="cpu-arc.c elf32-arc.c"
+
+if ( echo $* | grep keep\-arc > /dev/null ) ; then
+	keep_these_too="${arc_files} ${keep_these_too}"
+else
+	lose_these_too="${arc_files} ${lose_these_too}"
+fi
+
 # All files listed between the "Things-to-keep:" line and the
 # "Files-to-sed:" line will be kept.  All other files will be removed.
 # Directories listed in this section will have their own Sanitize
@@ -280,6 +288,34 @@ else
 			fi
 			cp $i new
 			sed '/start\-sanitize\-rce/,/end-\sanitize\-rce/d' < $i > new
+			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
+				if [ -n "${verbose}" ] ; then
+					echo Caching $i in .Recover...
+				fi
+				mv $i .Recover
+			fi
+			mv new $i
+		fi
+	done
+fi
+
+arc_files="ChangeLog archures.c reloc.c targets.c config.bfd configure.in bfd-in2.h elfcode.h libbfd.h"
+if ( echo $* | grep keep\-arc > /dev/null ) ; then
+	for i in $arc_files ; do
+		if test ! -d $i && (grep sanitize-arc $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Keeping arc stuff in $i
+			fi
+		fi
+	done
+else
+	for i in $arc_files ; do
+		if test ! -d $i && (grep sanitize-arc $i > /dev/null) ; then
+			if [ -n "${verbose}" ] ; then
+				echo Removing traces of \"arc\" from $i...
+			fi
+			cp $i new
+			sed '/start\-sanitize\-arc/,/end-\sanitize\-arc/d' < $i > new
 			if [ -n "${safe}" -a ! -f .Recover/$i ] ; then
 				if [ -n "${verbose}" ] ; then
 					echo Caching $i in .Recover...
