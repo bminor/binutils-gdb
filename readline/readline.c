@@ -1,7 +1,7 @@
 /* readline.c -- a general facility for reading lines of input
-   with emacs style editing and completion. */
+   with emacs style editing and completion.  */
 
-/* Copyright (C) 1987, 1989, 1991 Free Software Foundation, Inc.
+/* Copyright 1987, 1989, 1991, 1992 Free Software Foundation, Inc.
 
    This file contains the Readline Library (the Library), a set of
    routines for providing Emacs style line input to programs that ask
@@ -97,6 +97,72 @@ static char *xmalloc (), *xrealloc ();
 #    define _POSIX_VDISABLE -1
 #  endif /* !_POSIX_VERSION */
 #endif /* !NEW_TTY_DRIVER && !_POSIX_VDISABLE */
+
+/* Define some macros for dealing with assorted signalling disciplines.
+
+   These macros provide a way to use signal blocking and disabling
+   without smothering your code in a pile of #ifdef's.
+
+   SIGNALS_UNBLOCK;			Stop blocking all signals.
+
+   {
+     SIGNALS_DECLARE_SAVED (name);	Declare a variable to save the 
+					signal blocking state.
+	...
+     SIGNALS_BLOCK (SIGSTOP, name);	Block a signal, and save the previous
+					state for restoration later.
+	...
+     SIGNALS_RESTORE (name);		Restore previous signals.
+   }
+
+*/
+
+#ifdef HAVE_POSIX_SIGNALS
+							/* POSIX signals */
+
+#define	SIGNALS_UNBLOCK \
+      do { sigset_t set;	\
+	sigemptyset (&set);	\
+	sigprocmask (SIG_SETMASK, &set, (sigset_t *)NULL);	\
+      } while (0)
+
+#define	SIGNALS_DECLARE_SAVED(name)	sigset_t name
+
+#define	SIGNALS_BLOCK(SIG, saved)	\
+	do { sigset_t set;		\
+	  sigemptyset (&set);		\
+	  sigaddset (&set, SIG);	\
+	  sigprocmask (SIG_BLOCK, &set, &saved);	\
+	} while (0)
+
+#define	SIGNALS_RESTORE(saved)		\
+  sigprocmask (SIG_SETMASK, &saved, (sigset_t *)NULL)
+
+
+#else	/* HAVE_POSIX_SIGNALS */
+#ifdef HAVE_BSD_SIGNALS
+							/* BSD signals */
+
+#define	SIGNALS_UNBLOCK			sigsetmask (0)
+#define	SIGNALS_DECLARE_SAVED(name)	int name
+#define	SIGNALS_BLOCK(SIG, saved)	saved = sigblock (sigmask (SIG))
+#define	SIGNALS_RESTORE(saved)		sigsetmask (saved)
+
+
+#else  /* HAVE_BSD_SIGNALS */
+							/* None of the Above */
+
+#define	SIGNALS_UNBLOCK			/* nothing */
+#define	SIGNALS_DECLARE_SAVED(name)	/* nothing */
+#define	SIGNALS_BLOCK(SIG, saved)	/* nothing */
+#define	SIGNALS_RESTORE(saved)		/* nothing */
+
+
+#endif /* HAVE_BSD_SIGNALS */
+#endif /* HAVE_POSIX_SIGNALS */
+
+/*  End of signal handling definitions.  */
+
 
 #include <errno.h>
 extern int errno;
@@ -305,6 +371,7 @@ static int defining_kbd_macro = 0;
 /* **************************************************************** */
 
 static void rl_prep_terminal (), rl_deprep_terminal ();
+static void clear_to_eol (), rl_generic_bind ();
 
 /* Read a line of input.  Prompt with PROMPT.  A NULL PROMPT means
    none.  A return value of NULL means that EOF was encountered. */
@@ -540,18 +607,7 @@ rl_signal_handler (sig)
 
       kill (getpid (), sig);
 
-#if defined (HAVE_POSIX_SIGNALS)
-      {
-	sigset_t set;
-
-	sigemptyset (&set);
-	sigprocmask (SIG_SETMASK, &set, (sigset_t *)NULL);
-      }
-#else
-#if defined (HAVE_BSD_SIGNALS)
-      sigsetmask (0);
-#endif /* HAVE_BSD_SIGNALS */
-#endif /* HAVE_POSIX_SIGNALS */
+      SIGNALS_UNBLOCK;
 
       rl_prep_terminal ();
       rl_set_signals ();
@@ -1300,7 +1356,7 @@ rl_digit_loop ()
   int key, c;
   while (1)
     {
-      rl_message ("(arg: %d) ", rl_arg_sign * rl_numeric_arg);
+      rl_message ("(arg: %d) ", rl_arg_sign * rl_numeric_arg, 0);
       key = c = rl_read_key ();
 
       if (keymap[c].type == ISFUNC &&
@@ -2246,6 +2302,7 @@ crlf ()
 
 /* Clear to the end of the line.  COUNT is the minimum
    number of character spaces to clear, */
+static void
 clear_to_eol (count)
      int count;
 {
@@ -2304,14 +2361,12 @@ rl_prep_terminal ()
 {
 #ifndef __GO32__
   int tty = fileno (rl_instream);
-#if defined (HAVE_BSD_SIGNALS)
-  int oldmask;
-#endif /* HAVE_BSD_SIGNALS */
+  SIGNALS_DECLARE_SAVED (saved_signals);
 
   if (terminal_prepped)
     return;
 
-  oldmask = sigblock (sigmask (SIGINT));
+  SIGNALS_BLOCK (SIGINT, saved_signals);
 
   /* We always get the latest tty values.  Maybe stty changed them. */
   ioctl (tty, TIOCGETP, &the_ttybuff);
@@ -2401,9 +2456,7 @@ rl_prep_terminal ()
 
   terminal_prepped = 1;
 
-#if defined (HAVE_BSD_SIGNALS)
-  sigsetmask (oldmask);
-#endif
+  SIGNALS_RESTORE (saved_signals);
 #endif /* !__GO32__ */
 }
 
@@ -2413,14 +2466,12 @@ rl_deprep_terminal ()
 {
 #ifndef __GO32__
   int tty = fileno (rl_instream);
-#if defined (HAVE_BSD_SIGNALS)
-  int oldmask;
-#endif
+  SIGNALS_DECLARE_SAVED (saved_signals);
 
   if (!terminal_prepped)
     return;
 
-  oldmask = sigblock (sigmask (SIGINT));
+  SIGNALS_BLOCK (SIGINT, saved_signals);
 
   the_ttybuff.sg_flags = original_tty_flags;
   ioctl (tty, TIOCSETN, &the_ttybuff);
@@ -2439,9 +2490,7 @@ rl_deprep_terminal ()
 #endif
   terminal_prepped = 0;
 
-#if defined (HAVE_BSD_SIGNALS)
-  sigsetmask (oldmask);
-#endif
+  SIGNALS_RESTORE (saved_signals);
 #endif /* !__GO32 */
 }
 
@@ -2474,28 +2523,14 @@ rl_prep_terminal ()
   struct termio tio;
 #endif /* !TERMIOS_TTY_DRIVER */
 
-#if defined (HAVE_POSIX_SIGNALS)
-  sigset_t set, oset;
-#else
-#  if defined (HAVE_BSD_SIGNALS)
-  int oldmask;
-#  endif /* HAVE_BSD_SIGNALS */
-#endif /* !HAVE_POSIX_SIGNALS */
+  SIGNALS_DECLARE_SAVED (saved_signals);
 
   if (terminal_prepped)
     return;
 
   /* Try to keep this function from being INTerrupted.  We can do it
      on POSIX and systems with BSD-like signal handling. */
-#if defined (HAVE_POSIX_SIGNALS)
-  sigemptyset (&set);
-  sigaddset (&set, SIGINT);
-  sigprocmask (SIG_BLOCK, &set, &oset);
-#else /* !HAVE_POSIX_SIGNALS */
-#  if defined (HAVE_BSD_SIGNALS)
-  oldmask = sigblock (sigmask (SIGINT));
-#  endif /* HAVE_BSD_SIGNALS */
-#endif /* !HAVE_POSIX_SIGNALS */
+  SIGNALS_BLOCK (SIGINT, saved_signals);
 
 #if defined (TERMIOS_TTY_DRIVER)
   tcgetattr (tty, &tio);
@@ -2562,13 +2597,7 @@ rl_prep_terminal ()
 
   terminal_prepped = 1;
 
-#if defined (HAVE_POSIX_SIGNALS)
-  sigprocmask (SIG_SETMASK, &oset, (sigset_t *)NULL);
-#else
-#  if defined (HAVE_BSD_SIGNALS)
-  sigsetmask (oldmask);
-#  endif /* HAVE_BSD_SIGNALS */
-#endif /* !HAVE_POSIX_SIGNALS */
+  SIGNALS_RESTORE (saved_signals);
 #endif /* !__GO32__ */
 }
 
@@ -2580,26 +2609,12 @@ rl_deprep_terminal ()
 
   /* Try to keep this function from being INTerrupted.  We can do it
      on POSIX and systems with BSD-like signal handling. */
-#if defined (HAVE_POSIX_SIGNALS)
-  sigset_t set, oset;
-#else /* !HAVE_POSIX_SIGNALS */
-#  if defined (HAVE_BSD_SIGNALS)
-  int oldmask;
-#  endif /* HAVE_BSD_SIGNALS */
-#endif /* !HAVE_POSIX_SIGNALS */
+  SIGNALS_DECLARE_SAVED (saved_signals);
 
   if (!terminal_prepped)
     return;
 
-#if defined (HAVE_POSIX_SIGNALS)
-  sigemptyset (&set);
-  sigaddset (&set, SIGINT);
-  sigprocmask (SIG_BLOCK, &set, &oset);
-#else /* !HAVE_POSIX_SIGNALS */
-#  if defined (HAVE_BSD_SIGNALS)
-  oldmask = sigblock (sigmask (SIGINT));
-#  endif /* HAVE_BSD_SIGNALS */
-#endif /* !HAVE_POSIX_SIGNALS */
+  SIGNALS_BLOCK (SIGINT, saved_signals);
 
 #if defined (TERMIOS_TTY_DRIVER)
   tcsetattr (tty, TCSADRAIN, &otio);
@@ -2611,13 +2626,7 @@ rl_deprep_terminal ()
 
   terminal_prepped = 0;
 
-#if defined (HAVE_POSIX_SIGNALS)
-  sigprocmask (SIG_SETMASK, &oset, (sigset_t *)NULL);
-#else /* !HAVE_POSIX_SIGNALS */
-#  if defined (HAVE_BSD_SIGNALS)
-  sigsetmask (oldmask);
-#  endif /* HAVE_BSD_SIGNALS */
-#endif /* !HAVE_POSIX_SIGNALS */
+  SIGNALS_RESTORE (saved_signals);
 #endif /* !__GO32__ */
 }
 #endif  /* NEW_TTY_DRIVER */
@@ -5514,6 +5523,8 @@ rl_macro_bind (keyseq, macro, map)
    pointed to by DATA, right now this can be a function (ISFUNC),
    a macro (ISMACR), or a keymap (ISKMAP).  This makes new keymaps
    as necessary.  The initial place to do bindings is in MAP. */
+
+static void
 rl_generic_bind (type, keyseq, data, map)
      int type;
      char *keyseq, *data;
@@ -5649,7 +5660,7 @@ rl_named_function (string)
 /* Don't know what to do, but this is a guess */
 static char *last_readline_init_file = "/INPUTRC";
 #else
-static char *last_readline_init_file = "~/inputrc";
+static char *last_readline_init_file = "~/.inputrc";
 #endif
 
 /* Re-read the current keybindings file. */
