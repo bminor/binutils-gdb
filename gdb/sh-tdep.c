@@ -2028,6 +2028,12 @@ sh64_pop_frame (void)
   flush_cached_frames ();
 }
 
+static CORE_ADDR
+sh_frame_align (struct gdbarch *ignore, CORE_ADDR sp)
+{
+  return sp & ~3;
+}
+
 /* Function: push_arguments
    Setup the function arguments for calling a function in the inferior.
 
@@ -2090,7 +2096,7 @@ sh_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch); 
 
   /* first force sp to a 4-byte alignment */
-  sp = sp & ~3;
+  sp = sh_frame_align (gdbarch, sp);
 
   /* The "struct return pointer" pseudo-argument has its own dedicated 
      register */
@@ -4356,6 +4362,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_pop_frame (gdbarch, sh_pop_frame);
   set_gdbarch_deprecated_frame_saved_pc (gdbarch, sh_frame_saved_pc);
   set_gdbarch_deprecated_saved_pc_after_call (gdbarch, sh_saved_pc_after_call);
+  set_gdbarch_frame_align (gdbarch, sh_frame_align);
 
   switch (info.bfd_arch_info->mach)
     {

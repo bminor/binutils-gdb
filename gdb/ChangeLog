@@ -1,3 +1,8 @@
+2003-08-01  Michael Snyder  <msnyder@redhat.com>
+
+	* sh-tdep.c (sh_frame_align): New gdbarch method.
+	(sh_gdbarch_init): Set up frame_align method.
+
 2003-07-31  Michael Snyder  <msnyder@redhat.com>
 
 	* value.h, values.c, infcall.c, infcmd.c: Revert 07-30 change,
