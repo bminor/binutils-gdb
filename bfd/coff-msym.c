@@ -158,7 +158,6 @@ DEFUN (ecoff_swap_fdr_in, (abfd, ext_copy, intern),
     intern->fBigendian  = 0 != (ext->f_bits1[0] & FDR_BITS1_FBIGENDIAN_BIG);
     intern->glevel      = (ext->f_bits2[0] & FDR_BITS2_GLEVEL_BIG)
 					>> FDR_BITS2_GLEVEL_SH_BIG;
- /* intern->reserved  we ignore.  */
   } else {
     intern->lang        = (ext->f_bits1[0] & FDR_BITS1_LANG_LITTLE)
 					>> FDR_BITS1_LANG_SH_LITTLE;
@@ -167,8 +166,8 @@ DEFUN (ecoff_swap_fdr_in, (abfd, ext_copy, intern),
     intern->fBigendian  = 0 != (ext->f_bits1[0] & FDR_BITS1_FBIGENDIAN_LITTLE);
     intern->glevel      = (ext->f_bits2[0] & FDR_BITS2_GLEVEL_LITTLE)
 					>> FDR_BITS2_GLEVEL_SH_LITTLE;
- /* intern->reserved  we ignore.  */
   }
+  intern->reserved = 0;
 
   intern->cbLineOffset  = bfd_h_get_32 (abfd, (bfd_byte *)ext->f_cbLineOffset);
   intern->cbLine        = bfd_h_get_32 (abfd, (bfd_byte *)ext->f_cbLine);
@@ -424,6 +423,7 @@ DEFUN (ecoff_swap_ext_in, (abfd, ext_copy, intern),
     intern->cobol_main  = 0 != (ext->es_bits1[0] & EXT_BITS1_COBOL_MAIN_LITTLE);
     intern->weakext     = 0 != (ext->es_bits1[0] & EXT_BITS1_WEAKEXT_LITTLE);
   }
+  intern->reserved = 0;
 
   intern->ifd           = bfd_h_get_16 (abfd, (bfd_byte *)ext->es_ifd);
   ecoff_swap_sym_in (abfd, &ext->es_asym, &intern->asym);

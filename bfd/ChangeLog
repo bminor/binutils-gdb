@@ -1,3 +1,11 @@
+Wed Feb  3 09:14:36 1993  Ian Lance Taylor  (ian@cygnus.com)
+
+	* coff-msym.c (ecoff_swap_fdr_in, ecoff_swap_ext_in): Set reserved
+	bits to 0 to make comparison test useful.
+
+	* config/irix3.mh, config/irix4.mh (HDEFINES): Set to -G 4 to
+	avoid overflowing GP accessible sections in binutils/objdump.
+
 Tue Feb  2 15:36:55 1993  Per Bothner  (bothner@cygnus.com)
 
 	* aoutx.h (NAME(aout,slurp_symbol_table)):  Made symbol
