@@ -1,5 +1,5 @@
 /* Target definitions for delta68.
-   Copyright 1993 Free Software Foundation, Inc.
+   Copyright 1993, 1994 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -23,7 +23,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #define BPT_VECTOR 0x1
 
 #undef CPLUS_MARKER
-#define CPLUS_MARKER	'%'
+#define CPLUS_MARKER '%'
+
 #define GCC_COMPILED_FLAG_SYMBOL "gcc_compiled%"
 #define GCC2_COMPILED_FLAG_SYMBOL "gcc2_compiled%"
 
@@ -34,6 +35,30 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 /* Not sure what happens if we try to store this register, but
    phdm@info.ucl.ac.be says we need this define.  */
+
 #define CANNOT_STORE_REGISTER(regno)	(regno == FPI_REGNUM)
+
+/* Extract from an array REGBUF containing the (raw) register state
+   a function return value of type TYPE, and copy that, in virtual format,
+   into VALBUF.  */
+
+/* When it returns a pointer value, use a0 in sysV68.  */
+
+#define EXTRACT_RETURN_VALUE(TYPE,REGBUF,VALBUF) \
+  memcpy ((VALBUF),							\
+	  (char *) ((REGBUF) +						\
+		    (TYPE_CODE(TYPE) == TYPE_CODE_PTR ? 8 * 4 :		\
+		     (TYPE_LENGTH(TYPE) >= 4 ? 0 : 4 - TYPE_LENGTH(TYPE)))), \
+	  TYPE_LENGTH(TYPE))
+
+/* Write into appropriate registers a function return value
+   of type TYPE, given in virtual format.  */
+
+/* When it returns a pointer value, use a0 in sysV68.  */
+
+#define STORE_RETURN_VALUE(TYPE,VALBUF) \
+  write_register_bytes ((TYPE_CODE(TYPE) == TYPE_CODE_PTR ? 8 * 4 : 0),	\
+			VALBUF, TYPE_LENGTH (TYPE))
+
 
 #include "m68k/tm-m68k.h"

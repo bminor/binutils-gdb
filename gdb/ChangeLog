@@ -1,3 +1,8 @@
+Wed Aug 17 13:19:52 1994  Stan Shebs  (shebs@andros.cygnus.com)
+
+	* config/m68k/tm-delta68.h (EXTRACT_RETURN_VALUE,
+	STORE_RETURN_VALUE): Define to use %a0 for pointers.
+
 Wed Aug 17 07:43:06 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* remote-mips.c: Remove unused declaration of mips_load.
