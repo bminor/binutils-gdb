@@ -1,5 +1,12 @@
 2004-10-10  Joel Brobecker  <brobecker@gnat.com>
 
+	* mips-tdep.c (mips16_scan_prologue): Renames
+	mips16_heuristic_proc_desc. Update comment.
+	(mips32_scan_prologue): Renames mips32_heuristic_proc_desc.
+	(heuristic_proc_desc): Update calls to the 2 functions above.
+
+2004-10-10  Joel Brobecker  <brobecker@gnat.com>
+
 	* mips-tdep.c (mips_insn16_frame_cache): Remove unused variables.
 	Update comments. Also immediately return empty cache when the start
 	address of our function could not be found.

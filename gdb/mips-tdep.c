@@ -2221,7 +2221,7 @@ heuristic-fence-post' command.\n", paddr_nz (pc), paddr_nz (pc));
 /* Fetch the immediate value from a MIPS16 instruction.
    If the previous instruction was an EXTEND, use it to extend
    the upper bits of the immediate value.  This is a helper function
-   for mips16_heuristic_proc_desc.  */
+   for mips16_scan_prologue.  */
 
 static int
 mips16_get_imm (unsigned short prev_inst,	/* previous instruction */
@@ -2253,14 +2253,13 @@ mips16_get_imm (unsigned short prev_inst,	/* previous instruction */
 }
 
 
-/* Fill in values in temp_proc_desc based on the MIPS16 instruction
-   stream from start_pc to limit_pc.  */
+/* Analyze the function prologue from START_PC to LIMIT_PC. Builds
+   the associated FRAME_CACHE if not null.  */
 
 static void
-mips16_heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
-			    CORE_ADDR sp,
-			    struct frame_info *next_frame,
-			    struct mips_frame_cache *this_cache)
+mips16_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc, CORE_ADDR sp,
+                      struct frame_info *next_frame,
+                      struct mips_frame_cache *this_cache)
 {
   CORE_ADDR cur_pc;
   CORE_ADDR frame_addr = 0;	/* Value of $r17, used as frame pointer */
@@ -2449,13 +2448,16 @@ reset_saved_regs (struct mips_frame_cache *this_cache)
   }
 }
 
+/* Analyze the function prologue from START_PC to LIMIT_PC. Builds
+   the associated FRAME_CACHE if not null.  */
+
 static void
-mips32_heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
-			    CORE_ADDR sp, struct frame_info *next_frame,
-			    struct mips_frame_cache *this_cache)
+mips32_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc, CORE_ADDR sp,
+                      struct frame_info *next_frame,
+                      struct mips_frame_cache *this_cache)
 {
   CORE_ADDR cur_pc;
-  CORE_ADDR frame_addr = 0;	/* Value of $r30. Used by gcc for frame-pointer */
+  CORE_ADDR frame_addr = 0; /* Value of $r30. Used by gcc for frame-pointer */
   long frame_offset;
   int  frame_reg = MIPS_SP_REGNUM;
 
@@ -2595,11 +2597,9 @@ heuristic_proc_desc (CORE_ADDR start_pc, CORE_ADDR limit_pc,
   if (start_pc + 200 < limit_pc)
     limit_pc = start_pc + 200;
   if (pc_is_mips16 (start_pc))
-    mips16_heuristic_proc_desc (start_pc, limit_pc, sp,
-				next_frame, this_cache);
+    mips16_scan_prologue (start_pc, limit_pc, sp, next_frame, this_cache);
   else
-    mips32_heuristic_proc_desc (start_pc, limit_pc, sp,
-				next_frame, this_cache);
+    mips32_scan_prologue (start_pc, limit_pc, sp, next_frame, this_cache);
   return &temp_proc_desc;
 }
 
