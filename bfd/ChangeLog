@@ -1,3 +1,8 @@
+1999-11-25  Nick Clifton  <nickc@cygnus.com>
+
+	* elf32-arm.h (bfd_elf32_arm_get_bfd_for_interworking): Add
+	SEC_CODE and SEC_READONLY flags to glue sections.
+
 1999-11-20  Nick Clifton  <nickc@cygnus.com>
 
 	* coff-mcore.c (coff_mcore_relocate_section): Fix typo in previous

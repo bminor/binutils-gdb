@@ -548,7 +548,7 @@ bfd_elf32_arm_get_bfd_for_interworking (abfd, info)
       /* Note: we do not include the flag SEC_LINKER_CREATED, as this
 	 will prevent elf_link_input_bfd() from processing the contents
 	 of this section.  */
-      flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY;
+      flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_CODE | SEC_READONLY;
 
       sec = bfd_make_section (abfd, ARM2THUMB_GLUE_SECTION_NAME);
 
@@ -566,7 +566,7 @@ bfd_elf32_arm_get_bfd_for_interworking (abfd, info)
 
   if (sec == NULL)
     {
-      flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY;
+      flags = SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_CODE | SEC_READONLY;
 
       sec = bfd_make_section (abfd, THUMB2ARM_GLUE_SECTION_NAME);
 
@@ -2810,6 +2810,7 @@ elf32_arm_size_dynamic_sections (output_bfd, info)
 		  outname = bfd_get_section_name (output_bfd,
 						  s->output_section);
 		  target = bfd_get_section_by_name (output_bfd, outname + 4);
+		  
 		  if (target != NULL
 		      && (target->flags & SEC_READONLY) != 0
 		      && (target->flags & SEC_ALLOC) != 0)
