@@ -1,3 +1,10 @@
+2002-08-22  Adam Nemet  <anemet@lnxw.com>
+
+	* emultempl/armelf.em: Include elf-bfd.h and elf/arm.h.
+	(arm_elf_finish): Set the last bit of DT_INIT and DT_FINI
+	depending on the type of the function.
+	(arm_elf_convert_thumb_symbol_to_address): New function.
+
 2002-08-22  Graeme Peterson  <gp@qnx.com>
 
 	* Makefile.am: Add esh{l}elf_nto.o files.
