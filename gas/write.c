@@ -1435,6 +1435,10 @@ write_object_file ()
 	}
     }
 
+#ifdef tc_frob_file
+  tc_frob_file ();
+#endif
+
 #ifdef obj_frob_file
   /* If obj_frob_file changes the symbol value at this point, it is
      responsible for moving the changed value into symp->bsym->value

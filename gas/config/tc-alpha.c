@@ -50,17 +50,6 @@
  *  5-Oct-93  Alessandro Forin (af) at Carnegie-Mellon University
  *	First Checkin
  *
- * $Log$
- * Revision 1.1  1994/01/28 01:36:53  raeburn
- * New Alpha support files, based on files from CMU.
- * Still to do:
- *  - fix floating-point handling
- *  - figure out if we can adapt to using ../opcodes/alpha-opc.h
- *  - gcc bootstrap testing
- *  - 32-bit mode support?
- *  - test cross-assembly
- *
- *
  *    Author:	Alessandro Forin, Carnegie Mellon University
  *    Date:	Jan 1993
  */
@@ -85,7 +74,7 @@ static segT lita_sec, rdata, sdata;
 static int at_ok = 1, macro_ok = 1;
 
 /* Keep track of global pointer.  */
-static valueT gp_value;
+valueT alpha_gp_value;
 static symbolS *gp;
 
 /* We'll probably be using this relocation frequently, and we
@@ -104,6 +93,7 @@ extern PTR bfd_alloc_by_size_t ();
 extern void s_globl (), s_long (), s_short (), s_space (), cons (), s_text (),
   s_data (), float_cons ();
 
+/* Static functions, needing forward declarations.  */
 static void s_mask (), s_base (), s_proc (), s_alpha_set ();
 static void s_gprel32 (), s_rdata (), s_sdata (), s_alpha_comm ();
 static int alpha_ip ();
@@ -210,7 +200,7 @@ struct alpha_it {
   struct reloc_data reloc[MAX_RELOCS];
 };
 
-static int getExpression (char *str, struct alpha_it *insn);
+static void getExpression (char *str, struct alpha_it *insn);
 static char *expr_end;
 
 #define note_gpreg(R)		(alpha_gprmask |= (1 << (R)))
@@ -331,15 +321,6 @@ s_alpha_comm (ignore)
 
   know (symbolP->sy_frag == &zero_address_frag);
   demand_empty_rest_of_line ();
-}
-
-int
-alpha_local_label (name)
-     const char *name;
-{
-  if (name[0] == 'L' /* || name[0] == '$' */)
-    return 1;
-  return 0;
 }
 
 arelent *
@@ -596,37 +577,36 @@ md_assemble (str)
 static void
 select_gp_value ()
 {
-  if (gp_value == 0)
-    /* Must be first time through -- pick a GP to use for this file.  */
-    {
-      bfd_vma lita_vma, sdata_vma;
-      if (lita_sec)
-	lita_vma = bfd_get_section_vma (abfd, lita_sec);
-      else
-	lita_vma = 0;
+  bfd_vma lita_vma, sdata_vma;
+
+  if (alpha_gp_value != 0)
+    abort ();
+
+  if (lita_sec)
+    lita_vma = bfd_get_section_vma (abfd, lita_sec);
+  else
+    lita_vma = 0;
 #if 0
-      if (sdata)
-	sdata_vma = bfd_get_section_vma (abfd, sdata);
-      else
+  if (sdata)
+    sdata_vma = bfd_get_section_vma (abfd, sdata);
+  else
 #endif
-	sdata = 0;
+    sdata = 0;
 
-      if (lita_vma == 0
+  if (lita_vma == 0
       /* Who knows which order they'll get laid out in?  */
-	  || (sdata_vma != 0 && sdata_vma < lita_vma))
-	gp_value = sdata_vma;
-      else
-	gp_value = lita_vma;
+      || (sdata_vma != 0 && sdata_vma < lita_vma))
+    alpha_gp_value = sdata_vma;
+  else
+    alpha_gp_value = lita_vma;
 
-      gp_value += GP_ADJUSTMENT;
+  alpha_gp_value += GP_ADJUSTMENT;
 
-      S_SET_VALUE (gp, gp_value);
+  S_SET_VALUE (gp, alpha_gp_value);
 
 #ifdef DEBUG1
-      printf ("Chose GP value of %lx\n", gp_value);
+  printf ("Chose GP value of %lx\n", alpha_gp_value);
 #endif
-      bfd_set_gp_value (stdoutput, gp_value);
-    }
 }
 
 int
@@ -670,25 +650,6 @@ alpha_fix_adjustable (f)
       return 1;
     }
   return !alpha_force_relocation (f);
-}
-
-int 
-alpha_validate_fix (fixp, seg)
-     fixS *fixp;
-     segT seg;
-{
-  /* We must make sure we've got a good GP value if any relocations might
-     use it...  */
-  if (gp_value == 0)
-    select_gp_value ();
-  return 0;
-}
-
-int 
-alpha_frob_symbol (s)
-     symbolS *s;
-{
-  return 0;
 }
 
 unsigned long
@@ -804,7 +765,7 @@ load_expression (reg, insn)
   return num_insns;
 }
 
-static inline int
+static inline void
 getExpression (str, this_insn)
      char *str;
      struct alpha_it *this_insn;
@@ -861,14 +822,12 @@ getExpression (str, this_insn)
   /* XXX validate seg and exp, make sure they're reasonable */
   expr_end = input_line_pointer;
   input_line_pointer = save_in;
-
-  return 0;
 }
 
-/* Note that for now, this function is called recursively.  Some of the
-   macros defined as part of the assembly language are currently
-   rewritten as sequences of strings to be assembled.  See, for example,
-   the handling of "divq".
+/* Note that for now, this function is called recursively (by way of
+   calling md_assemble again).  Some of the macros defined as part of
+   the assembly language are currently rewritten as sequences of
+   strings to be assembled.  See, for example, the handling of "divq".
 
    For efficiency, this should be fixed someday.  */
 static int
@@ -1150,7 +1109,7 @@ alpha_ip (str, insns)
 	    immediate:
 	      if (*s == ' ')
 		s++;
-	      (void) getExpression (s, &insns[0]);
+	      getExpression (s, &insns[0]);
 	      s = expr_end;
 	      /* Handle overflow in certain instructions by converting
 		 to other instructions.  */
@@ -1220,7 +1179,7 @@ alpha_ip (str, insns)
 
 	      if (*s == ' ')
 		s++;
-	      (void) getExpression (s, &insns[0]);
+	      getExpression (s, &insns[0]);
 	      s = expr_end;
 
 	      /* Must check for "lda ..,number" too */
@@ -1239,8 +1198,6 @@ alpha_ip (str, insns)
 		  insns[1].reloc[0].code = BFD_RELOC_NONE;
 
 		  sval = val;
-		  if (0)
-		    fprintf (stderr, "val %lx sval %lx\n", val, sval);
 		  if ((sval != val) && (val & 0x8000))
 		    {
 		      val += 0x10000;
@@ -1390,7 +1347,7 @@ alpha_ip (str, insns)
 		    /* We still have to parse the function name */
 		    if (*s == ' ')
 		      s++;
-		    (void) getExpression (s, &insns[0]);
+		    getExpression (s, &insns[0]);
 		    etmp = insns[0].reloc[0].exp;
 		    s = expr_end;
 		    num_gen = load_expression (PV, &insns[0]);
@@ -1558,6 +1515,7 @@ md_atof (type, litP, sizeP)
     {
       /* VAX floats */
     case 'G':
+      /* VAX md_atof doesn't like "G" for some reason.  */
       type = 'g';
     case 'F':
     case 'D':
@@ -1874,7 +1832,7 @@ md_apply_fix (fixP, valueP)
 
     case BFD_RELOC_GPREL32:
       assert (fixP->fx_subsy == gp);
-      value = - gp_value;	/* huh?  this works... */
+      value = - alpha_gp_value;	/* huh?  this works... */
       fixP->fx_subsy = 0;
       md_number_to_chars (p, value, 4);
       break;
@@ -1904,11 +1862,14 @@ md_apply_fix (fixP, valueP)
 }
 
 void
-alpha_end ()
+alpha_frob_file ()
 {
+  /* This bit only works because tc_frob_file gets called before
+     obj_frob_file does.  Sigh.  */
+  select_gp_value ();
   /* $zero and $f31 are read-only */
-  alpha_gprmask &= ~(1L << 31);
-  alpha_fprmask &= ~(1L << 31);
+  alpha_gprmask &= ~1;
+  alpha_fprmask &= ~1;
 }
 
 /* The Alpha has support for some VAX floating point types, as well as for
