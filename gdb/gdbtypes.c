@@ -521,10 +521,16 @@ finish_cv_type (struct type *type)
 
 /* Replace the contents of ntype with the type *type.
 
-   When building recursive types, it is necessary to update a type's
-   definition after people already have references to it.  The C
-   language's concept of an `incomplete type' is an acknowledgement of
-   this.  */
+   In order to build recursive types, it's inevitable that we'll need
+   to update types in place --- but this sort of indiscriminate
+   smashing is ugly, and needs to be replaced with something more
+   controlled.  For example, Daniel Jacobowitz has suggested moving
+   the fields common to a set of c/v variants into their own object,
+   which the variants would share.
+
+   This function does not handle the replacement type being
+   cv-qualified; it could be easily fixed to, but it would be better
+   to just change the whole approach.  */
 void
 replace_type (struct type *ntype, struct type *type)
 {
