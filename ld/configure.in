@@ -85,7 +85,6 @@ case "${targ}" in
   sh-*-*)		ld_target=coff-sh ;;
   m68k-sony-*)		ld_target=news ;;
   m68k-hp-bsd*)		ld_target=hp300bsd ;;
-  m68k-motorola-sysv*)	ld_target=delta68 ;;
   m68*-*-aout)		ld_target=m68k ;;
   m68*-*-coff)		ld_target=m68k-coff ;;
   m68*-*-hpux)		ld_target=hp300hpux ;;
@@ -106,9 +105,7 @@ case "${targ}" in
   alpha-*-netware*)	ld_target=alpha ;;
   z8k-*-sim | z8k-*-coff) ld_target=z8ksim ;;
   powerpc-*-elf*)	ld_target=ppc-elf32 ;;
-#	start-sanitize-powerpc-netware
   powerpc-*-netware*)	ld_target=ppc-elf32 ;;
-#	end-sanitize-powerpc-netware
   *-*-aout)		ld_target=${target_cpu}-${target_vendor} ;;
   *-*-coff)		ld_target=${target_cpu}-${target_vendor} ;;
   *-*-netware)		ld_target=${target_cpu}-elf ;;
@@ -147,7 +144,7 @@ if [ x${all_targets} = xfalse ]; then
 
     # The emulations in all the configured targets.
     tb=`sed -n '
-    s/EMUL[ 	]*=[ 	]*\([^ 	]*\)/em_\1.o/p
+    s/EMUL[ 	]*=[ 	]*\([^ 	]*\)/e\1.o/p
     ' $allfrags`
     # uniq the list.
     f=""

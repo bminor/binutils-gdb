@@ -144,26 +144,4 @@ else
 	done
 fi
 
-echo Looking for PowerPC NetWare...
-ppcfiles="configure.in"
-if ( echo $* | grep keep\-powerpc\-netware > /dev/null ) ; then
-	if [ -n "${verbose}" ] ; then
-		echo Keeping PowerPC NetWare stuff in $ppcfiles.
-	fi
-else
-	if [ -n "${verbose}" ]; then
-		echo -n Removing PowerPC NetWare in `pwd`:
-	fi
-	for f in $ppcfiles ; do
-		if [ -n "${verbose}" ] ; then
-			echo -n " " $f
-		fi
-		sed '/start\-sanitize\-powerpc\-netware/,/end\-sanitize\-powerpc\-netware/d' < $f > new
-		if [ -n "${safe}" ] ; then
-			mv $f .Recover
-		fi
-		mv new $f
-	done
-fi
-
 # End of file.
