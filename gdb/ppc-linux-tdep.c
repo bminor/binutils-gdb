@@ -861,7 +861,9 @@ ppc_linux_supply_gregset (struct regcache *regcache,
   const bfd_byte *buf = gregs;
 
   for (regi = 0; regi < 32; regi++)
-    right_supply_register (regcache, wordsize, regi, buf + wordsize * regi);
+    right_supply_register (regcache, wordsize,
+                           regcache_tdep->ppc_gp0_regnum + regi,
+                           buf + wordsize * regi);
 
   right_supply_register (regcache, wordsize, gdbarch_pc_regnum (regcache_arch),
 			 buf + wordsize * PPC_LINUX_PT_NIP);

@@ -1,3 +1,15 @@
+2004-05-13  Jim Blandy  <jimb@redhat.com>
+
+	* aix-thread.c (supply_gprs64, fetch_regs_user_thread)
+	(store_regs_user_thread): Use tdep->ppc_gp0_regnum, instead
+	of assuming that the gprs are numbered starting with zero.
+	* ppc-linux-nat.c (fill_gregset): Same.
+	* ppc-linux-tdep.c (ppc_linux_supply_gregset): Same.
+	* ppcnbsd-nat.c (getregs_supplies): Same.
+	* ppcnbsd-tdep.c (ppcnbsd_supply_reg, ppcnbsd_fill_reg): Same.
+	* rs6000-nat.c (fetch_core_registers): Same.
+	* rs6000-tdep.c (ppc_supply_gregset, ppc_collect_gregset): Same.
+
 2004-05-07  Michael Snyder  <msnyder@redhat.com>
 
 	* tracepoint.c (scope_info): Add handling for LOC_COMPUTED,

@@ -1001,10 +1001,11 @@ aix_thread_wait (ptid_t ptid, struct target_waitstatus *status)
 static void
 supply_gprs64 (uint64_t *vals)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   int regno;
 
   for (regno = 0; regno < 32; regno++)
-    supply_register (regno, (char *) (vals + regno));
+    supply_register (tdep->ppc_gp0_regnum + regno, (char *) (vals + regno));
 }
 
 /* Record that 32-bit register REGNO contains VAL.  */
@@ -1098,6 +1099,7 @@ supply_sprs32 (uint32_t iar, uint32_t msr, uint32_t cr,
 static void
 fetch_regs_user_thread (pthdb_pthread_t pdtid)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   int status, i;
   pthdb_context_t ctx;
 
@@ -1115,7 +1117,7 @@ fetch_regs_user_thread (pthdb_pthread_t pdtid)
     supply_gprs64 (ctx.gpr);
   else
     for (i = 0; i < 32; i++)
-      supply_reg32 (i, ctx.gpr[i]);
+      supply_reg32 (tdep->ppc_gp0_regnum + i, ctx.gpr[i]);
 
   /* Floating-point registers.  */
 
@@ -1180,7 +1182,7 @@ fetch_regs_kernel_thread (int regno, pthdb_tid_t tid)
 	  if (!ptrace32 (PTT_READ_GPRS, tid, gprs32, 0, NULL))
 	    memset (gprs32, 0, sizeof (gprs32));
 	  for (i = 0; i < 32; i++)
-	    supply_reg32 (i, gprs32[i]);
+	    supply_reg32 (tdep->ppc_gp0_regnum + i, gprs32[i]);
 	}
     }
 
@@ -1369,6 +1371,7 @@ fill_sprs32 (unsigned long *iar, unsigned long *msr, unsigned long *cr,
 static void
 store_regs_user_thread (pthdb_pthread_t pdtid)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
   int status, i;
   pthdb_context_t ctx;
   uint32_t int32;
@@ -1389,16 +1392,16 @@ store_regs_user_thread (pthdb_pthread_t pdtid)
   /* Collect general-purpose register values from the regcache.  */
 
   for (i = 0; i < 32; i++)
-    if (register_cached (i))
+    if (register_cached (tdep->ppc_gp0_regnum + i))
       {
 	if (arch64)
 	  {
-	    regcache_collect (i, (void *) &int64);
+	    regcache_collect (tdep->ppc_gp0_regnum + i, (void *) &int64);
 	    ctx.gpr[i] = int64;
 	  }
 	else
 	  {
-	    regcache_collect (i, (void *) &int32);
+	    regcache_collect (tdep->ppc_gp0_regnum + i, (void *) &int32);
 	    ctx.gpr[i] = int32;
 	  }
       }
@@ -1421,7 +1424,6 @@ store_regs_user_thread (pthdb_pthread_t pdtid)
 	 happens, GDB needs to be reconfigured so that longs are 32-bits.)  */
       unsigned long tmp_iar, tmp_msr, tmp_cr, tmp_lr, tmp_ctr, tmp_xer,
                     tmp_fpscr;
-      struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
       fill_sprs32 (&tmp_iar, &tmp_msr, &tmp_cr, &tmp_lr, &tmp_ctr, &tmp_xer,
                    &tmp_fpscr);

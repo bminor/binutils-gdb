@@ -36,7 +36,8 @@ getregs_supplies (int regno)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
 
-  return ((regno >= 0 && regno <= 31)
+  return ((regno >= tdep->ppc_gp0_regnum
+           && regno < tdep->ppc_gp0_regnum + ppc_num_gprs)
           || regno == tdep->ppc_lr_regnum
           || regno == tdep->ppc_cr_regnum
           || regno == tdep->ppc_xer_regnum

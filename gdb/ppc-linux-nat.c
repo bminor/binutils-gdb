@@ -592,8 +592,8 @@ fill_gregset (gdb_gregset_t *gregsetp, int regno)
 
   for (regi = 0; regi < 32; regi++)
     {
-      if ((regno == -1) || regno == regi)
-	right_fill_reg (regi, (regp + PT_R0 + regi));
+      if ((regno == -1) || regno == tdep->ppc_gp0_regnum + regi)
+	right_fill_reg (tdep->ppc_gp0_regnum + regi, (regp + PT_R0 + regi));
     }
 
   if ((regno == -1) || regno == PC_REGNUM)

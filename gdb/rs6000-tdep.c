@@ -185,7 +185,9 @@ ppc_supply_gregset (const struct regset *regset, struct regcache *regcache,
   size_t offset;
   int i;
 
-  for (i = 0, offset = offsets->r0_offset; i < 32; i++, offset += 4)
+  for (i = tdep->ppc_gp0_regnum, offset = offsets->r0_offset;
+       i < tdep->ppc_gp0_regnum + 32;
+       i++, offset += 4)
     {
       if (regnum == -1 || regnum == i)
 	ppc_supply_reg (regcache, i, gregs, offset);
@@ -259,7 +261,9 @@ ppc_collect_gregset (const struct regset *regset,
   int i;
 
   offset = offsets->r0_offset;
-  for (i = 0; i < 32; i++, offset += 4)
+  for (i = tdep->ppc_gp0_regnum;
+       i < tdep->ppc_gp0_regnum + 32;
+       i++, offset += 4)
     {
       if (regnum == -1 || regnum == i)
 	ppc_collect_reg (regcache, i, gregs, offset);

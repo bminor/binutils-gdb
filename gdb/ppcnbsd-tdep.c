@@ -57,8 +57,9 @@ ppcnbsd_supply_reg (char *regs, int regno)
 
   for (i = 0; i <= 31; i++)
     {
-      if (regno == i || regno == -1)
-	supply_register (i, regs + REG_FIXREG_OFFSET (i));
+      if (regno == tdep->ppc_gp0_regnum + i || regno == -1)
+	supply_register (tdep->ppc_gp0_regnum + i,
+                         regs + REG_FIXREG_OFFSET (i));
     }
 
   if (regno == tdep->ppc_lr_regnum || regno == -1)
@@ -85,8 +86,9 @@ ppcnbsd_fill_reg (char *regs, int regno)
 
   for (i = 0; i <= 31; i++)
     {
-      if (regno == i || regno == -1)
-	regcache_collect (i, regs + REG_FIXREG_OFFSET (i));
+      if (regno == tdep->ppc_gp0_regnum + i || regno == -1)
+	regcache_collect (tdep->ppc_gp0_regnum + i,
+                          regs + REG_FIXREG_OFFSET (i));
     }
 
   if (regno == tdep->ppc_lr_regnum || regno == -1)
