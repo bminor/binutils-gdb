@@ -178,7 +178,7 @@ fi
 # script appropriate for this directory.  For more information, check
 # any existing configure script.
 
-configdirs="libiberty bfd binutils ld gas readline gdb gcc gnulib clib"
+configdirs="libiberty bfd binutils ld gas readline gcc gnulib clib"
 srctrigger=README.configure
 srcname="gnu development package"
 
@@ -599,7 +599,10 @@ exit 0
 
 #
 # $Log$
-# Revision 1.13  1991/05/19 08:00:09  rich
+# Revision 1.14  1991/05/22 01:44:04  rich
+# remove gdb until config issues resolve.
+#
+# Revision 1.13  1991/05/19  08:00:09  rich
 # Added gdb.
 #
 # Revision 1.12  1991/05/19  00:32:13  rich
