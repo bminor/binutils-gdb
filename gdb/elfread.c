@@ -77,7 +77,7 @@ static void
 elf_symtab_read PARAMS ((bfd *,  CORE_ADDR, struct objfile *));
 
 static void
-free_elfinfo PARAMS ((PTR));
+free_elfinfo PARAMS ((void *));
 
 static struct section_offsets *
 elf_symfile_offsets PARAMS ((struct objfile *, CORE_ADDR));
@@ -88,7 +88,7 @@ record_minimal_symbol_and_info PARAMS ((char *, CORE_ADDR,
 					struct objfile *));
 
 static void
-elf_locate_sections PARAMS ((bfd *, asection *, PTR));
+elf_locate_sections PARAMS ((bfd *, asection *, void *));
 
 /* We are called once per section from elf_symfile_read.  We
    need to examine each section we are passed, check to see

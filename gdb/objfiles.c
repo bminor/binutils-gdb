@@ -121,7 +121,7 @@ allocate_objfile (abfd, mapped)
 {
   struct objfile *objfile = NULL;
   int fd;
-  void *md;
+  PTR md;
   CORE_ADDR mapto;
 
   mapped |= mapped_symbol_files;
@@ -142,7 +142,7 @@ allocate_objfile (abfd, mapped)
   if (fd >= 0)
     {
       if (((mapto = map_to_address ()) == 0) ||
-	  ((md = mmalloc_attach (fd, (void *) mapto)) == NULL))
+	  ((md = mmalloc_attach (fd, (PTR) mapto)) == NULL))
 	{
 	  close (fd);
 	}

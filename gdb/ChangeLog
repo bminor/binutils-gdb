@@ -1,5 +1,9 @@
 Sat Oct  2 19:28:35 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* mipsread.c, objfiles.c, utils.c: Use PTR not void *.  RISC/OS
+	4.02 lacks void *.
+	* elfread.c: Use void * not PTR inside PARAMS.
+
 	* config/mips/news-mips.mh: Remove coredep.o; mips-nat.o does it.
 	* config/mips/news-mips.mh: Define NAT_FILE not NM_FILE.
 	* config/mips/nm-news-mips.h: Include mips/nm-mips.h not nm-mips.h.
