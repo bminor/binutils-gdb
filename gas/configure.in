@@ -287,7 +287,7 @@ case ${with_bfd_assembler}-${bfd_gas} in
     ;;
 esac
 
-reject_dev_configs=no
+reject_dev_configs=yes
 
 case ${reject_dev_configs}-${dev} in
   yes-yes) # Oops.
