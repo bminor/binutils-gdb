@@ -15,6 +15,13 @@
 
 Do-first:
 
+am33_files="am33.igen"
+if ( echo $* | grep keep\-am30 > /dev/null ) ; then
+        keep_these_too="${am30_files} ${keep_these_too}"
+else
+        lose_these_too="${am30_files} ${lose_these_too}"
+fi
+
 am30_files="dv-mn103cpu.c dv-mn103int.c dv-mn103tim.c dv-mn103ser.c dv-mn103iop.c"
 if ( echo $* | grep keep\-am30 > /dev/null ) ; then
         keep_these_too="${am30_files} ${keep_these_too}"
@@ -78,7 +85,7 @@ else
         done
 fi
 
-am33_files="ChangeLog mn10300_sim.h"
+am33_files="ChangeLog mn10300_sim.h mn10300.igen"
 if ( echo $* | grep keep\-am33 > /dev/null ) ; then
         for i in $am33_files ; do
                 if test ! -d $i && (grep sanitize-am33 $i > /dev/null) ; then

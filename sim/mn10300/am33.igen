@@ -1,0 +1,2334 @@
+// 1111 0000 0010 00An; mov USP,An
+8.0xf0+4.0x2,00,2.AN0:D0m:::mov
+"mov"
+*am33
+{
+  PC = cia;
+  State.regs[REG_A0 + AN0] = State.regs[REG_USP];
+}
+
+
+// 1111 0000 0010 01An; mov SSP,An
+8.0xf0+4.0x2,01,2.AN0:D0n:::mov
+"mov"
+*am33
+{
+  PC = cia;
+  State.regs[REG_A0 + AN0] = State.regs[REG_SSP];
+}
+
+
+// 1111 0000 0010 10An; mov MSP,An
+8.0xf0+4.0x2,10,2.AN0:D0o:::mov
+"mov"
+*am33
+{
+  PC = cia;
+  State.regs[REG_A0 + AN0] = State.regs[REG_MSP];
+}
+
+
+// 1111 0000 0010 11An; mov PC,An
+8.0xf0+4.0x2,11,2.AN0:D0p:::mov
+"mov"
+*am33
+{
+  PC = cia;
+  State.regs[REG_A0 + AN0] = PC;
+}
+
+
+// 1111 0000 0011 Am00; mov Am,USP
+8.0xf0+4.0x3,2.AM1,00:D0q:::mov
+"mov"
+// end-sanitize-am33
+{
+  PC = cia;
+  State.regs[REG_USP] = State.regs[REG_A0 + AM1];
+}
+
+// 1111 0000 0011 Am01; mov Am,SSP
+8.0xf0+4.0x3,2.AM1,01:D0r:::mov
+"mov"
+// end-sanitize-am33
+{
+  PC = cia;
+  State.regs[REG_SSP] = State.regs[REG_A0 + AM1];
+}
+
+// 1111 0000 0011 Am10; mov Am,MSP
+8.0xf0+4.0x3,2.AM1,10:D0s:::mov
+"mov"
+// end-sanitize-am33
+{
+  PC = cia;
+  State.regs[REG_MSP] = State.regs[REG_A0 + AM1];
+}
+
+
+// 1111 0000 1110 imm4; syscall
+8.0xf0+4.0xe,IMM4:D0t:::syscall
+"syscall"
+*am33
+{
+  unsigned int sp, next_pc;
+
+  PC = cia;
+  sp = State.regs[REG_SP];
+  next_pc = State.regs[REG_PC] + 2;
+  store_word (sp - 4, next_pc);
+  store_word (sp - 8, PSW);
+  State.regs[REG_PC] = 0x40000000 + IMM4 * 8;
+  nia = PC;
+}
+
+
+// 1111 0010 1110 11Dn; mov EPSW,Dn
+8.0xf2+4.0xe,11,2.DN0:D0u:::mov
+"mov"
+*am33
+{
+  PC = cia;
+  State.regs[REG_D0 + DN0] = PSW;
+}
+
+
+// 1111 0010 1111 Dm01; mov Dm,EPSW
+8.0xf2+4.0xf,2.DM1,01:D0v:::mov
+"mov"
+*am33
+{
+  PC = cia;
+  PSW = State.regs[REG_D0 + DM1];
+}
+
+// 1111 0101 00Am Rn; mov Am,Rn
+8.0xf5+00,2.AM1,4.RN0:D0w:::mov
+"mov"
+*am33
+{
+  PC = cia;
+  /* The higher register numbers actually correspond to the
+     basic machine's address and data registers.  */
+  if (RN0 > 7 && RN0 < 12)
+    State.regs[REG_A0 + RN0 - 8] = State.regs[REG_A0 + AM1];
+  else if (RN0 > 11 && RN0 < 16)
+    State.regs[REG_D0 + RN0 - 12] = State.regs[REG_A0 + AM1];
+  else
+    State.regs[REG_E0 + RN0] = State.regs[REG_A0 + AM1] ;
+}
+
+// 1111 0101 01Dm Rn; mov Dm,Rn
+8.0xf5+01,2.DM1,4.RN0:D0x:::mov
+"mov"
+*am33
+{
+  PC = cia;
+  /* The higher register numbers actually correspond to the
+     basic machine's address and data registers.  */
+  if (RN0 > 7 && RN0 < 12)
+    State.regs[REG_A0 + RN0 - 8] = State.regs[REG_D0 + DM1];
+  else if (RN0 > 11 && RN0 < 16)
+    State.regs[REG_D0 + RN0 - 12] = State.regs[REG_D0 + DM1];
+  else
+    State.regs[REG_E0 + RN0] = State.regs[REG_D0 + DM1] ;
+}
+
+// 1111 0101 10Rm An; mov Rm,An
+8.0xf5+10,4.RM1,2.AN0:D0y:::mov
+"mov"
+*am33
+{
+  PC = cia;
+  /* The higher register numbers actually correspond to the
+     basic machine's address and data registers.  */
+  if (RM1 > 7 && RM1 < 12)
+    State.regs[REG_A0 + AN0] = State.regs[REG_A0 + RM1 - 8];
+  else if (RM1 > 11 && RM1 < 16)
+    State.regs[REG_A0 + AN0] = State.regs[REG_D0 + RM1 - 12];
+  else
+    State.regs[REG_A0 + AN0] = State.regs[REG_E0 + RM1];
+}
+
+// 1111 0101 11Rm Dn; mov Rm,Dn
+8.0xf5+11,4.RM1,2.DN0:D0z:::mov
+"mov"
+*am33
+{
+  PC = cia;
+  /* The higher register numbers actually correspond to the
+     basic machine's address and data registers.  */
+  if (RM1 > 7 && RM1 < 12)
+    State.regs[REG_D0 + DN0] = State.regs[REG_A0 + RM1 - 8];
+  else if (RM1 > 11 && RM1 < 16)
+    State.regs[REG_D0 + DN0] = State.regs[REG_D0 + RM1 - 12];
+  else
+    State.regs[REG_D0 + DN0] = State.regs[REG_E0 + RM1];
+}
+
+
+// 1111 1000 1100 1110 regs....; movm (USP),regs
+8.0xf8+8.0xce+8.REGS:D1a:::movm
+"movm"
+{
+  unsigned long usp = State.regs[REG_USP];
+  unsigned long mask;
+
+  PC = cia;
+  mask = REGS;
+
+  if (mask & 0x8)
+    {
+      usp += 4;
+      State.regs[REG_LAR] = load_word (usp);
+      usp += 4;
+      State.regs[REG_LIR] = load_word (usp);
+      usp += 4;
+      State.regs[REG_MDR] = load_word (usp);
+      usp += 4;
+      State.regs[REG_A0 + 1] = load_word (usp);
+      usp += 4;
+      State.regs[REG_A0] = load_word (usp);
+      usp += 4;
+      State.regs[REG_D0 + 1] = load_word (usp);
+      usp += 4;
+      State.regs[REG_D0] = load_word (usp);
+      usp += 4;
+    }
+
+  if (mask & 0x10)
+    {
+      State.regs[REG_A0 + 3] = load_word (usp);
+      usp += 4;
+    }
+
+  if (mask & 0x20)
+    {
+      State.regs[REG_A0 + 2] = load_word (usp);
+      usp += 4;
+    }
+
+  if (mask & 0x40)
+    {
+      State.regs[REG_D0 + 3] = load_word (usp);
+      usp += 4;
+    }
+
+  if (mask & 0x80)
+    {
+      State.regs[REG_D0 + 2] = load_word (usp);
+      usp += 4;
+    }
+
+  /* start-sanitize-am33 */
+  if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_am33)
+    {
+      if (mask & 0x1)
+	{
+	  /* Need to restore MDQR, MCRH, MCRL, and MCVF */
+	  usp += 16;
+	  State.regs[REG_E0 + 1] = load_word (usp);
+	  usp += 4;
+	  State.regs[REG_E0 + 0] = load_word (usp);
+	  usp += 4;
+	}
+
+      if (mask & 0x2)
+        {
+	  State.regs[REG_E0 + 7] = load_word (usp);
+	  usp += 4;
+	  State.regs[REG_E0 + 6] = load_word (usp);
+	  usp += 4;
+	  State.regs[REG_E0 + 5] = load_word (usp);
+	  usp += 4;
+	  State.regs[REG_E0 + 4] = load_word (usp);
+	  usp += 4;
+	}
+
+      if (mask & 0x4)
+	{
+	  State.regs[REG_E0 + 3] = load_word (usp);
+	  usp += 4;
+	  State.regs[REG_E0 + 2] = load_word (usp);
+	  usp += 4;
+	}
+    }
+  /* end-sanitize-am33 */
+
+  /* And make sure to update the stack pointer.  */
+  State.regs[REG_USP] = usp;
+}
+
+// 1111 1000 1100 1111 regs....; movm (USP),regs
+8.0xf8+8.0xcf+8.REGS:D1b:::movm
+"movm"
+{
+  unsigned long usp = State.regs[REG_USP];
+  unsigned long mask;
+
+  if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_am33)
+    {
+      if (mask & 0x4)
+	{
+	  usp -= 4;
+	  store_word (usp, State.regs[REG_E0 + 2]);
+	  usp -= 4;
+	  store_word (usp, State.regs[REG_E0 + 3]);
+	}
+
+      if (mask & 0x2)
+        {
+	  usp -= 4;
+	  store_word (usp, State.regs[REG_E0 + 4]);
+	  usp -= 4;
+	  store_word (usp, State.regs[REG_E0 + 5]);
+	  usp -= 4;
+	  store_word (usp, State.regs[REG_E0 + 6]);
+	  usp -= 4;
+	  store_word (usp, State.regs[REG_E0 + 7]);
+	}
+
+      if (mask & 0x1)
+	{
+	  usp -= 4;
+	  store_word (usp, State.regs[REG_E0 + 0]);
+	  usp -= 4;
+	  store_word (usp, State.regs[REG_E0 + 1]);
+	  usp -= 16;
+	  /* Need to save MDQR, MCRH, MCRL, and MCVF */
+	}
+    }
+  /* end-sanitize-am33 */
+
+  if (mask & 0x80)
+    {
+      usp -= 4;
+      store_word (usp, State.regs[REG_D0 + 2]);
+    }
+
+  if (mask & 0x40)
+    {
+      usp -= 4;
+      store_word (usp, State.regs[REG_D0 + 3]);
+    }
+
+  if (mask & 0x20)
+    {
+      usp -= 4;
+      store_word (usp, State.regs[REG_A0 + 2]);
+    }
+
+  if (mask & 0x10)
+    {
+      usp -= 4;
+      store_word (usp, State.regs[REG_A0 + 3]);
+    }
+
+  if (mask & 0x8)
+    {
+      usp -= 4;
+      store_word (usp, State.regs[REG_D0]);
+      usp -= 4;
+      store_word (usp, State.regs[REG_D0 + 1]);
+      usp -= 4;
+      store_word (usp, State.regs[REG_A0]);
+      usp -= 4;
+      store_word (usp, State.regs[REG_A0 + 1]);
+      usp -= 4;
+      store_word (usp, State.regs[REG_MDR]);
+      usp -= 4;
+      store_word (usp, State.regs[REG_LIR]);
+      usp -= 4;
+      store_word (usp, State.regs[REG_LAR]);
+      usp -= 4;
+    }
+
+  /* And make sure to update the stack pointer.  */
+  State.regs[REG_USP] = usp;
+}
+
+// 1111 1100 1111 1100 imm32...; and imm32,EPSW 
+8.0xfc+8.0xfc+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:4a:::and
+"and"
+*am33
+{
+  PC = cia;
+  PSW &= FETCH32(IMM32A, IMM32B, IMM32C, IMM32D);
+}
+
+// 1111 1100 1111 1101 imm32...; or imm32,EPSW 
+8.0xfc+8.0xfd+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D4a:::or
+"or"
+*am33
+{
+  PC = cia;
+  PSW |= FETCH32(IMM32A, IMM32B, IMM32C, IMM32D);
+}
+
+// 1111 1001 0000 1000 Rm Rn; mov Rm,Rn (Rm != Rn)
+8.0xf9+8.0x08+4.RM2,4.RN0!RM2:D1g:::mov
+"mov"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  State.regs[dstreg] = State.regs[srcreg];
+}
+
+// 1111 1001 0001 1000 Rn Rn; ext Rn
+8.0xf9+8.0x18+4.RN0,4.RN2=RN0:D1:::ext
+"mov"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    srcreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    srcreg = REG_D0 + RN0 - 12;
+  else
+    srcreg = REG_E0 + RN0;
+
+  if (State.regs[srcreg] & 0x80000000)
+    State.regs[REG_MDR] = -1;
+  else
+    State.regs[REG_MDR] = 0;
+}
+
+// 1111 1001 0010 1000 Rm Rn; extb Rm,Rn
+8.0xf9+8.0x28+4.RM2,4.RN0!RM2:D1:::extb
+"extb"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  State.regs[dstreg] = EXTEND8 (State.regs[srcreg]);
+}
+
+// 1111 1001 0011 1000 Rm Rn; extbu Rm,Rn
+8.0xf9+8.0x38+4.RM2,4.RN0!RM2:D1:::extbu
+"extbu"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  State.regs[dstreg] = State.regs[srcreg] & 0xff;
+}
+
+// 1111 1001 0100 1000 Rm Rn; exth Rm,Rn
+8.0xf9+8.0x48+4.RM2,4.RN0!RM2:D1:::exth
+"exth"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  State.regs[dstreg] = EXTEND16 (State.regs[srcreg]);
+}
+
+// 1111 1001 0101 1000 Rm Rn; exthu Rm,Rn
+8.0xf9+8.0x58+4.RM2,4.RN0!RM2:D1:::exthu
+"exthu"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  State.regs[dstreg] = State.regs[srcreg] & 0xffff;
+}
+
+// 1111 1001 0110 1000 Rn Rn; clr Rn
+8.0xf9+8.0x68+4.RM2,4.RN0=RM2:D1:::clr
+"clr"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  State.regs[dstreg] = 0;
+
+  PSW |= PSW_Z;
+  PSW &= ~(PSW_V | PSW_C | PSW_N);
+}
+
+// 1111 1001 0111 1000 Rm Rn; add Rm,Rn
+8.0xf9+8.0x78+4.RM2,4.RN0:D1b:::add
+"add"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  genericAdd (State.regs[srcreg], dstreg);
+}
+
+// 1111 1001 1000 1000 Rm Rn; addc Rm,Rn
+8.0xf9+8.0x88+4.RM2,4.RN0:D1b:::addc
+"addc"
+*am33
+{
+  int srcreg, dstreg;
+  int z, c, n, v;
+  unsigned long reg1, reg2, sum;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  reg1 = State.regs[srcreg];
+  reg2 = State.regs[dstreg];
+  sum = reg1 + reg2 + ((PSW & PSW_C) != 0);
+  State.regs[dstreg] = sum;
+
+  z = (sum == 0);
+  n = (sum & 0x80000000);
+  c = (sum < reg1) || (sum < reg2);
+  v = ((reg2 & 0x80000000) == (reg1 & 0x80000000)
+       && (reg2 & 0x80000000) != (sum & 0x80000000));
+
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
+          | (c ? PSW_C : 0) | (v ? PSW_V : 0));
+}
+
+// 1111 1001 1001 1000 Rm Rn; sub Rm,Rn
+8.0xf9+8.0x98+4.RM2,4.RN0:D1b:::sub
+"sub"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  genericSub (State.regs[srcreg], dstreg);
+}
+
+// 1111 1001 1010 1000 Rm Rn; subc Rm,Rn
+8.0xf9+8.0xa8+4.RM2,4.RN0:D1b:::subc
+"subc"
+*am33
+{
+  int srcreg, dstreg;
+  int z, c, n, v;
+  unsigned long reg1, reg2, difference;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  reg1 = State.regs[srcreg];
+  reg2 = State.regs[dstreg];
+  difference = reg2 - reg1 - ((PSW & PSW_C) != 0);
+  State.regs[dstreg] = difference;
+
+  z = (difference == 0);
+  n = (difference & 0x80000000);
+  c = (reg1 > reg2);
+  v = ((reg2 & 0x80000000) == (reg1 & 0x80000000)
+       && (reg2 & 0x80000000) != (difference & 0x80000000));
+
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
+          | (c ? PSW_C : 0) | (v ? PSW_V : 0));
+}
+
+// 1111 1001 1011 1000 Rn Rn; inc Rn
+8.0xf9+8.0xb8+4.RN0,4.RN2=RN0:D1:::inc
+"inc"
+*am33
+{
+  int dstreg;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  genericAdd (1, dstreg);
+}
+
+// 1111 1001 1101 1000 Rn Rn; inc Rn
+8.0xf9+8.0xc8+4.RN0,4.RN2=RN0:D1:::inc4
+"inc4"
+*am33
+{
+  int dstreg;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+  State.regs[dstreg] += 4;
+}
+
+// 1111 1001 1101 1000 Rm Rn; cmp Rm,Rn
+8.0xf9+8.0xd8+4.RM2,4.RN0:D1:::cmp
+"cmp"
+*am33
+{
+  int srcreg1, srcreg2;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    srcreg1 = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    srcreg1 = REG_D0 + RN0 - 12;
+  else
+    srcreg1 = REG_E0 + RN0;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg2 = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg2 = REG_D0 + RM2 - 12;
+  else
+    srcreg2 = REG_E0 + RM2;
+  genericCmp (State.regs[srcreg2], State.regs[srcreg1]);
+}
+
+// 1111 1001 1110 1000 XRm Rn; mov XRm,Rn
+8.0xf9+8.0xe8+4.XRM2,4.RN0:D1l:::mov
+"mov"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  if (XRM2 == 0)
+    {
+      State.regs[dstreg] = State.regs[REG_SP];
+    }
+  else
+    abort ();
+}
+
+// 1111 1001 1111 1000 Rm XRn; mov Rm,XRn
+8.0xf9+8.0xf8+4.RM2,4.XRN0:D1m:::mov
+"mov"
+*am33
+{
+  int srcreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (XRN0 == 0)
+    {
+      State.regs[REG_SP] = State.regs[srcreg];
+    }
+  else
+    abort ();
+}
+
+// 1111 1001 0000 1001 Rm Rn; and Rm,Rn
+8.0xf9+8.0x09+4.RM2,4.RN0:D1a:::and
+"and"
+*am33
+{
+  int srcreg, dstreg;
+  int z, n;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  State.regs[dstreg] &= State.regs[srcreg];
+  z = (State.regs[dstreg] == 0);
+  n = (State.regs[dstreg] & 0x80000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
+}
+
+// 1111 1001 0001 1001 Rm Rn; or Rm,Rn
+8.0xf9+8.0x19+4.RM2,4.RN0:D1a:::or
+"or"
+*am33
+{
+  int srcreg, dstreg;
+  int z, n;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  State.regs[dstreg] |= State.regs[srcreg];
+  z = (State.regs[dstreg] == 0);
+  n = (State.regs[dstreg] & 0x80000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
+}
+
+// 1111 1001 0010 1001 Rm Rn; xor Rm,Rn
+8.0xf9+8.0x29+4.RM2,4.RN0:D1a:::xor
+"xor"
+*am33
+{
+  int srcreg, dstreg;
+  int z, n;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  State.regs[dstreg] ^= State.regs[srcreg];
+  z = (State.regs[dstreg] == 0);
+  n = (State.regs[dstreg] & 0x80000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
+}
+
+// 1111 1001 0011 1001 Rn Rn; not Rn
+8.0xf9+8.0x39+4.RM2,4.RN0=RM2:D1:::not
+"not"
+*am33
+{
+  int dstreg;
+  int z, n;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  State.regs[dstreg] = ~State.regs[dstreg];
+  z = (State.regs[dstreg] == 0);
+  n = (State.regs[dstreg] & 0x80000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
+}
+
+// 1111 1001 0100 1001 Rm Rn; asr Rm,Rn
+8.0xf9+8.0x49+4.RM2,4.RN0:D1a:::asr
+"asr"
+*am33
+{
+  int srcreg, dstreg;
+  long temp;
+  int c, z, n;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  temp = State.regs[dstreg];
+  c = temp & 1;
+  temp >>= State.regs[srcreg];
+  State.regs[dstreg] = temp;
+  z = (State.regs[dstreg] == 0);
+  n = (State.regs[dstreg] & 0x80000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0) | (c ? PSW_C : 0));
+}
+
+// 1111 1001 0101 1001 Rm Rn; lsr Rm,Rn
+8.0xf9+8.0x59+4.RM2,4.RN0:D1a:::lsr
+"lsr"
+*am33
+{
+  int srcreg, dstreg;
+  int z, n, c;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  c = State.regs[dstreg] & 1;
+  State.regs[dstreg] >>= State.regs[srcreg];
+  z = (State.regs[dstreg] == 0);
+  n = (State.regs[dstreg] & 0x80000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0) | (c ? PSW_C : 0));
+}
+
+// 1111 1001 0110 1001 Rm Rn; asl Rm,Rn
+8.0xf9+8.0x69+4.RM2,4.RN0:D1a:::asl
+"asl"
+*am33
+{
+  int srcreg, dstreg;
+  int z, n;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  State.regs[dstreg] <<= State.regs[srcreg];
+  z = (State.regs[dstreg] == 0);
+  n = (State.regs[dstreg] & 0x80000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
+}
+
+// 1111 1001 0111 1001 Rn Rn; asl2 Rn
+8.0xf9+8.0x79+4.RM2,4.RN0=RM2:D1:::asl2
+"asl2"
+*am33
+{
+  int dstreg;
+  int n, z;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  State.regs[dstreg] <<= 2;
+  z = (State.regs[dstreg] == 0);
+  n = (State.regs[dstreg] & 0x80000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
+}
+
+// 1111 1001 1000 1001 Rn Rn; ror Rn
+8.0xf9+8.0x89+4.RM2,4.RN0=RM2:D1:::ror
+"ror"
+*am33
+{
+  int dstreg;
+  int c, n, z;
+  unsigned long value;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  value = State.regs[dstreg];
+  c = (value & 0x1);
+
+  value >>= 1;
+  value |= ((PSW & PSW_C) != 0) ? 0x80000000 : 0;
+  State.regs[dstreg] = value;
+  z = (value == 0);
+  n = (value & 0x80000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0) | (c ? PSW_C : 0));
+}
+
+// 1111 1001 1001 1001 Rn Rn; rol Rn
+8.0xf9+8.0x99+4.RM2,4.RN0=RM2:D1:::rol
+"rol"
+*am33
+{
+  int dstreg;
+  int c, n, z;
+  unsigned long value;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  value = State.regs[dstreg];
+  c = (value & 0x80000000) ? 1 : 0;
+
+  value <<= 1;
+  value |= ((PSW & PSW_C) != 0);
+  State.regs[dstreg] = value;
+  z = (value == 0);
+  n = (value & 0x80000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0) | (c ? PSW_C : 0));
+}
+
+// 1111 1001 1010 1001 Rm Rn; mul Rm,Rn
+8.0xf9+8.0xa9+4.RM2,4.RN0:D1b:::mul
+"mul"
+*am33
+{
+  int srcreg, dstreg;
+  unsigned long long temp;
+  int n, z;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  temp = ((signed64)(signed32)State.regs[dstreg]
+          *  (signed64)(signed32)State.regs[srcreg]);
+  State.regs[dstreg] = temp & 0xffffffff;
+  State.regs[REG_MDR] = (temp & 0xffffffff00000000LL) >> 32;;
+  z = (State.regs[dstreg] == 0);
+  n = (State.regs[dstreg] & 0x80000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
+}
+
+// 1111 1001 1011 1001 Rm Rn; mulu Rm,Rn
+8.0xf9+8.0xb9+4.RM2,4.RN0:D1b:::mulu
+"mulu"
+*am33
+{
+  int srcreg, dstreg;
+  unsigned long long temp;
+  int n, z;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  temp = ((unsigned64)State.regs[dstreg]
+          * (unsigned64)State.regs[srcreg]);
+  State.regs[dstreg] = temp & 0xffffffff;
+  State.regs[REG_MDR] = (temp & 0xffffffff00000000LL) >> 32;
+  z = (State.regs[dstreg] == 0);
+  n = (State.regs[dstreg] & 0x80000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
+}
+
+// 1111 1001 1100 1001 Rm Rn; div Rm,Rn
+8.0xf9+8.0xc9+4.RM2,4.RN0:D1b:::div
+"div"
+*am33
+{
+  int srcreg, dstreg;
+  unsigned long long temp;
+  int n, z;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  temp = State.regs[REG_MDR];
+  temp <<= 32;
+  temp |= State.regs[dstreg];
+  State.regs[REG_MDR] = temp % (long)State.regs[srcreg];
+  temp /= (long)State.regs[srcreg];
+  State.regs[dstreg] = temp & 0xffffffff;
+  z = (State.regs[dstreg] == 0);
+  n = (State.regs[dstreg] & 0x80000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
+}
+
+// 1111 1001 1101 1001 Rm Rn; divu Rm,Rn
+8.0xf9+8.0xd9+4.RM2,4.RN0:D1b:::divu
+"divu"
+*am33
+{
+  int srcreg, dstreg;
+  unsigned long long temp;
+  int n, z;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  temp = State.regs[REG_MDR];
+  temp <<= 32;
+  temp |= State.regs[dstreg];
+  State.regs[REG_MDR] = temp % State.regs[srcreg];
+  temp /= State.regs[srcreg];
+  State.regs[dstreg] = temp & 0xffffffff;
+  z = (State.regs[dstreg] == 0);
+  n = (State.regs[dstreg] & 0x80000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
+}
+
+
+// 1111 1001 0000 1010 Rm Rn; mov (Rm),Rn
+8.0xf9+8.0x0a+4.RM2,4.RN0:D1h:::mov
+"mov"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  State.regs[dstreg] = load_word (State.regs[srcreg]);
+}
+
+// 1111 1001 0001 1010 Rm Rn; mov Rm,(Rn)
+8.0xf9+8.0x1a+4.RM2,4.RN0:D1i:::mov
+"mov"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  store_word (State.regs[dstreg], State.regs[srcreg]);
+}
+
+// 1111 1001 0010 1010 Rm Rn; movbu (Rm),Rn
+8.0xf9+8.0x2a+4.RM2,4.RN0:D1g:::movbu
+"movbu"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  State.regs[dstreg] = load_byte (State.regs[srcreg]);
+}
+
+// 1111 1001 0011 1010 Rm Rn; movbu Rm,(Rn)
+8.0xf9+8.0x3a+4.RM2,4.RN0:D1i:::movbu
+"movbu"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  store_byte (State.regs[dstreg], State.regs[srcreg]);
+}
+
+// 1111 1001 0100 1010 Rm Rn; movhu (Rm),Rn
+8.0xf9+8.0x4a+4.RM2,4.RN0:D1g:::movhu
+"movhu"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  State.regs[dstreg] = load_half (State.regs[srcreg]);
+}
+
+// 1111 1001 0101 1010 Rm Rn; movhu Rm,(Rn)
+8.0xf9+8.0x5a+4.RM2,4.RN0:D1i:::movhu
+"movhu"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  store_half (State.regs[dstreg], State.regs[srcreg]);
+}
+
+// ??? mov
+// ??? mov
+
+// 1111 1001 1000 1010 Rn 0000; mov (sp),Rn
+8.0xf9+8.0x8a+4.RN2,4.0000:D1j:::mov
+"mov"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
+  else
+    dstreg = REG_E0 + RN2;
+
+  State.regs[dstreg] = load_word (State.regs[REG_SP]);
+}
+
+// 1111 1001 1001 1010 Rm 0000; mov Rm, (sp)
+8.0xf9+8.0x9a+4.RM2,4.0000:D1k:::mov
+"mov"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    dstreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    dstreg = REG_D0 + RM2 - 12;
+  else
+    dstreg = REG_E0 + RM2;
+
+  store_word (State.regs[REG_SP], State.regs[dstreg]);
+}
+
+// 1111 1001 1010 1010 Rn 0000; mobvu (sp),Rn
+8.0xf9+8.0xaa+4.RN2,4.0000:D1j:::movbu
+"movbu"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
+  else
+    dstreg = REG_E0 + RN2;
+
+  State.regs[dstreg] = load_byte (State.regs[REG_SP]);
+}
+
+// 1111 1001 1011 1010 Rm 0000; movbu Rm, (sp)
+8.0xf9+8.0xba+4.RM2,4.0000:D1k:::movbu
+"movbu"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    dstreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    dstreg = REG_D0 + RM2 - 12;
+  else
+    dstreg = REG_E0 + RM2;
+
+  store_byte (State.regs[REG_SP], State.regs[dstreg]);
+}
+
+// 1111 1001 1000 1100 Rn 0000; movhu (sp),Rn
+8.0xf9+8.0xca+4.RN2,4.0000:D1j:::movhu
+"movhu"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
+  else
+    dstreg = REG_E0 + RN2;
+
+  State.regs[dstreg] = load_half (State.regs[REG_SP]);
+}
+
+// 1111 1001 1001 1101 Rm 0000; movhu Rm, (sp)
+8.0xf9+8.0xda+4.RM2,4.0000:D1k:::movhu
+"movhu"
+*am33
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    dstreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    dstreg = REG_D0 + RM2 - 12;
+  else
+    dstreg = REG_E0 + RM2;
+
+  store_half (State.regs[REG_SP], State.regs[dstreg]);
+}
+
+// ??? movhu
+// ??? movhu
+// ??? mac
+// ??? macu
+// ??? macb
+// ??? macbu
+// ??? mach
+// ??? machu
+// ??? dmach
+// ??? dmachu
+// ??? dmulh
+// ??? dmulhu
+// ??? sat16
+// ??? mcste
+// ??? swap
+// ??? bsch
+
+// 1111 1011 0000 1000 Rn Rn IMM8; mov IMM8,Rn
+8.0xfb+8.0x08+4.RM2,4.RN0=RM2+8.IMM8:D2j:::mov
+"mov"
+*am33
+{
+  int dstreg;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  State.regs[dstreg] = EXTEND8 (IMM8);
+}
+
+// 1111 1011 0001 1000 Rn Rn IMM8; movu IMM8,Rn
+8.0xfb+8.0x18+4.RM2,4.RN0=RM2+8.IMM8:D2:::movu
+"movu"
+*am33
+{
+  int dstreg;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  State.regs[dstreg] = IMM8 & 0xff;
+}
+
+// 1111 1011 0111 1000 Rn Rn IMM8; add IMM8,Rn
+8.0xfb+8.0x78+4.RM2,4.RN0=RM2+8.IMM8:D2d:::add
+"add"
+*am33
+{
+  int dstreg;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  genericAdd (EXTEND8 (IMM8), dstreg);
+}
+
+// 1111 1011 1000 1000 Rn Rn IMM8; addc IMM8,Rn
+8.0xfb+8.0x88+4.RM2,4.RN0=RM2+8.IMM8:D2d:::addc
+"addc"
+*am33
+{
+  int dstreg, imm;
+  int z, c, n, v;
+  unsigned long reg1, reg2, sum;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  imm = EXTEND8 (IMM8);
+  reg2 = State.regs[dstreg];
+  sum = imm + reg2 + ((PSW & PSW_C) != 0);
+  State.regs[dstreg] = sum;
+
+  z = (sum == 0);
+  n = (sum & 0x80000000);
+  c = (sum < imm) || (sum < reg2);
+  v = ((reg2 & 0x80000000) == (imm & 0x80000000)
+       && (reg2 & 0x80000000) != (sum & 0x80000000));
+
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
+          | (c ? PSW_C : 0) | (v ? PSW_V : 0));
+}
+
+// 1111 1011 1001 1000 Rn Rn IMM8; sub IMM8,Rn
+8.0xfb+8.0x98+4.RM2,4.RN0=RM2+8.IMM8:D2d:::sub
+"sub"
+*am33
+{
+  int dstreg;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  genericSub (EXTEND8 (IMM8), dstreg);
+}
+
+// 1111 1011 1010 1000 Rn Rn IMM8; subc IMM8,Rn
+8.0xfb+8.0xa8+4.RM2,4.RN0=RM2+8.IMM8:D2d:::subc
+"subc"
+*am33
+{
+  int imm, dstreg;
+  int z, c, n, v;
+  unsigned long reg1, reg2, difference;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  imm = EXTEND8 (IMM8);
+  reg2 = State.regs[dstreg];
+  difference = reg2 - imm - ((PSW & PSW_C) != 0);
+  State.regs[dstreg] = difference;
+
+  z = (difference == 0);
+  n = (difference & 0x80000000);
+  c = (imm > reg2);
+  v = ((reg2 & 0x80000000) == (imm & 0x80000000)
+       && (reg2 & 0x80000000) != (difference & 0x80000000));
+
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | ( n ? PSW_N : 0)
+          | (c ? PSW_C : 0) | (v ? PSW_V : 0));
+}
+
+// 1111 1011 1101 1000 Rn Rn IMM8; cmp IMM8,Rn
+8.0xfb+8.0xd8+4.RM2,4.RN0=RM2+8.IMM8:D2b:::cmp
+"cmp"
+*am33
+{
+  int srcreg;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    srcreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    srcreg = REG_D0 + RN0 - 12;
+  else
+    srcreg = REG_E0 + RN0;
+
+  genericCmp (EXTEND8 (IMM8), State.regs[srcreg]);
+}
+
+// 1111 1011 1111 1000 XRn XRn IMM8; mov IMM8,XRn
+8.0xfb+8.0xf8+4.XRM2,4.XRN0=XRM2+8.IMM8:D2k:::mov
+"mov"
+*am33
+{
+  int dstreg;
+
+  PC = cia;
+
+  if (XRN0 == 0)
+    State.regs[REG_SP] = EXTEND8 (IMM8);
+  else
+    abort ();
+}
+
+// 1111 1011 0000 1001 Rn Rn IMM8; and IMM8,Rn
+8.0xfb+8.0x09+4.RM2,4.RN0=RM2+8.IMM8:D2d:::and
+"and"
+*am33
+{
+  int dstreg;
+  int z, n;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  State.regs[dstreg] &= (IMM8 & 0xff);
+  z = (State.regs[dstreg] == 0);
+  n = (State.regs[dstreg] & 0x80000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
+}
+
+// 1111 1011 0001 1001 Rn Rn IMM8; or IMM8,Rn
+8.0xfb+8.0x19+4.RM2,4.RN0=RM2+8.IMM8:D2d:::or
+"or"
+*am33
+{
+  int dstreg;
+  int z, n;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  State.regs[dstreg] |= (IMM8 & 0xff);
+  z = (State.regs[dstreg] == 0);
+  n = (State.regs[dstreg] & 0x80000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
+}
+
+// 1111 1011 0010 1001 Rn Rn IMM8; xor IMM8,Rn
+8.0xfb+8.0x29+4.RM2,4.RN0=RM2+8.IMM8:D2d:::xor
+"xor"
+*am33
+{
+  int dstreg;
+  int z, n;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  State.regs[dstreg] ^= (IMM8 & 0xff);
+  z = (State.regs[dstreg] == 0);
+  n = (State.regs[dstreg] & 0x80000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
+}
+
+// 1111 1011 0100 1001 Rn Rn IMM8; asr IMM8,Rn
+8.0xfb+8.0x49+4.RM2,4.RN0=RM2+8.IMM8:D2a:::asr
+"asr"
+*am33
+{
+  int dstreg;
+  long temp;
+  int c, z, n;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  temp = State.regs[dstreg];
+  c = temp & 1;
+  temp >>= (IMM8 & 0xff);
+  State.regs[dstreg] = temp;
+  z = (State.regs[dstreg] == 0);
+  n = (State.regs[dstreg] & 0x80000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0) | (c ? PSW_C : 0));
+}
+
+// 1111 1011 0101 1001 Rn Rn IMM8; lsr IMM8,Rn
+8.0xfb+8.0x59+4.RM2,4.RN0=RM2+8.IMM8:D2a:::lsr
+"lsr"
+*am33
+{
+  int dstreg;
+  int z, n, c;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  c = State.regs[dstreg] & 1;
+  State.regs[dstreg] >>= (IMM8 & 0xff);
+  z = (State.regs[dstreg] == 0);
+  n = (State.regs[dstreg] & 0x80000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0) | (c ? PSW_C : 0));
+}
+
+// 1111 1011 0110 1001 Rn Rn IMM8; asl IMM8,Rn
+8.0xfb+8.0x69+4.RM2,4.RN0=RM2+8.IMM8:D2a:::asl
+"asl"
+*am33
+{
+  int srcreg, dstreg;
+  int z, n;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  State.regs[dstreg] <<= (IMM8 & 0xff);
+  z = (State.regs[dstreg] == 0);
+  n = (State.regs[dstreg] & 0x80000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
+}
+
+// 1111 1011 1010 1001 Rn Rn IMM8; mul IMM8,Rn
+8.0xfb+8.0xa9+4.RM2,4.RN0=RM2+8.IMM8:D2a:::mul
+"mul"
+*am33
+{
+  int dstreg;
+  unsigned long long temp;
+  int z, n;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  temp = ((signed64)(signed32)State.regs[dstreg]
+          *  (signed64)(signed32)EXTEND8 (IMM8));
+  State.regs[dstreg] = temp & 0xffffffff;
+  State.regs[REG_MDR] = (temp & 0xffffffff00000000LL) >> 32;;
+  z = (State.regs[dstreg] == 0);
+  n = (State.regs[dstreg] & 0x80000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
+}
+
+// 1111 1011 1011 1001 Rn Rn IMM8; mulu IMM8,Rn
+8.0xfb+8.0xb9+4.RM2,4.RN0=RM2+8.IMM8:D2a:::mulu
+"mulu"
+*am33
+{
+  int dstreg;
+  unsigned long long temp;
+  int z, n;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  temp = ((unsigned64)State.regs[dstreg]
+          * (unsigned64)(IMM8 & 0xff));
+  State.regs[dstreg] = temp & 0xffffffff;
+  State.regs[REG_MDR] = (temp & 0xffffffff00000000LL) >> 32;
+  z = (State.regs[dstreg] == 0);
+  n = (State.regs[dstreg] & 0x80000000) != 0;
+  PSW &= ~(PSW_Z | PSW_N | PSW_C | PSW_V);
+  PSW |= ((z ? PSW_Z : 0) | (n ? PSW_N : 0));
+}
+
+// ??? btst
+
+// 1111 1011 0000 1010 Rn Rm IMM8; mov (d8,Rm),Rn
+8.0xfb+8.0x0a+4.RN2,4.RM0+8.IMM8:D2l:::mov
+"mov"
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM0 > 7 && RM0 < 12)
+    srcreg = REG_A0 + RM0 - 8;
+  else if (RM0 > 11 && RM0 < 16)
+    srcreg = REG_D0 + RM0 - 12;
+  else
+    srcreg = REG_E0 + RM0;
+
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
+  else
+    dstreg = REG_E0 + RN2;
+
+  State.regs[dstreg] = load_word (State.regs[srcreg] + EXTEND8 (IMM8));
+}
+
+// 1111 1011 0001 1010 Rn Rm IMM8; mov Rm,(d8,Rn)
+8.0xfb+8.0x1a+4.RM2,4.RN0+8.IMM8:D2m:::mov
+"mov"
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  store_word (State.regs[dstreg] + EXTEND8 (IMM8), State.regs[srcreg]);
+}
+
+// 1111 1011 0010 1010 Rn Rm IMM8; movbu (d8,Rm),Rn
+8.0xfb+8.0x2a+4.RN2,4.RM0+8.IMM8:D2l:::movbu
+"movbu"
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM0 > 7 && RM0 < 12)
+    srcreg = REG_A0 + RM0 - 8;
+  else if (RM0 > 11 && RM0 < 16)
+    srcreg = REG_D0 + RM0 - 12;
+  else
+    srcreg = REG_E0 + RM0;
+
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
+  else
+    dstreg = REG_E0 + RN2;
+
+  State.regs[dstreg] = load_byte (State.regs[srcreg] + EXTEND8 (IMM8));
+}
+
+// 1111 1011 0011 1010 Rn Rm IMM8; movbu Rm,(d8,Rn)
+8.0xfb+8.0x3a+4.RM2,4.RN0+8.IMM8:D2m:::movbu
+"movbu"
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  store_byte (State.regs[dstreg] + EXTEND8 (IMM8), State.regs[srcreg]);
+}
+
+// 1111 1011 0100 1010 Rn Rm IMM8; movhu (d8,Rm),Rn
+8.0xfb+8.0x4a+4.RN2,4.RM0+8.IMM8:D2l:::movhu
+"movhu"
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM0 > 7 && RM0 < 12)
+    srcreg = REG_A0 + RM0 - 8;
+  else if (RM0 > 11 && RM0 < 16)
+    srcreg = REG_D0 + RM0 - 12;
+  else
+    srcreg = REG_E0 + RM0;
+
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
+  else
+    dstreg = REG_E0 + RN2;
+
+  State.regs[dstreg] = load_half (State.regs[srcreg] + EXTEND8 (IMM8));
+}
+
+// 1111 1011 0101 1010 Rn Rm IMM8; movhu Rm,(d8,Rn)
+8.0xfb+8.0x5a+4.RM2,4.RN0+8.IMM8:D2m:::movhu
+"movhu"
+{
+  int srcreg, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  store_half (State.regs[dstreg] + EXTEND8 (IMM8), State.regs[srcreg]);
+}
+
+// ??? mov
+// ??? mov
+
+// 1111 1011 1000 1010 Rn 0000 IMM8; mov (d8,sp),Rn
+8.0xfb+8.0x8a+4.RN2,4.0x0+8.IMM8:D2n:::mov
+"mov"
+{
+  int dstreg;
+
+  PC = cia;
+
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
+  else
+    dstreg = REG_E0 + RN2;
+
+  State.regs[dstreg] = load_word (State.regs[REG_SP] + EXTEND8 (IMM8));
+}
+
+// 1111 1011 1001 1010 Rm 0000 IMM8; mov Rm,(d8,Rn)
+8.0xfb+8.0x9a+4.RM2,4.0x0+8.IMM8:D2o:::mov
+"mov"
+{
+  int srcreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  store_word (State.regs[REG_SP] + EXTEND8 (IMM8), State.regs[srcreg]);
+}
+
+// 1111 1011 1010 1010 Rn Rm IMM8; movbu (d8,sp),Rn
+8.0xfb+8.0xaa+4.RN2,4.0x0+8.IMM8:D2n:::movbu
+"movbu"
+{
+  int dstreg;
+
+  PC = cia;
+
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
+  else
+    dstreg = REG_E0 + RN2;
+
+  State.regs[dstreg] = load_byte (State.regs[REG_SP] + EXTEND8 (IMM8));
+}
+
+// 1111 1011 1011 1010 Rn Rm IMM8; movbu Rm,(sp,Rn)
+8.0xfb+8.0xba+4.RM2,4.0x0+8.IMM8:D2o:::movbu
+"movbu"
+{
+  int srcreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  store_byte (State.regs[REG_SP] + EXTEND8 (IMM8), State.regs[srcreg]);
+}
+
+// 1111 1011 1100 1010 Rn Rm IMM8; movhu (d8,sp),Rn
+8.0xfb+8.0xca+4.RN2,4.0x0+8.IMM8:D2n:::movhu
+"movhu"
+{
+  int dstreg;
+
+  PC = cia;
+
+  if (RN2 > 7 && RN2 < 12)
+    dstreg = REG_A0 + RN2 - 8;
+  else if (RN2 > 11 && RN2 < 16)
+    dstreg = REG_D0 + RN2 - 12;
+  else
+    dstreg = REG_E0 + RN2;
+
+  State.regs[dstreg] = load_half (State.regs[REG_SP] + EXTEND8 (IMM8));
+}
+
+// 1111 1011 1101 1010 Rn Rm IMM8; movhu Rm,(d8,sp)
+8.0xfb+8.0xda+4.RM2,4.0x0+8.IMM8:D2o:::movhu
+"movhu"
+{
+  int srcreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg = REG_D0 + RM2 - 12;
+  else
+    srcreg = REG_E0 + RM2;
+
+  store_half (State.regs[REG_SP] + EXTEND8 (IMM8), State.regs[srcreg]);
+}
+
+// 1111 1011 0111 1100 Rm Rn Rd; add Rm,Rn,Rd
+8.0xfb+8.0x7c+4.RM2,4.RN0+4.RD0,4.0x0:D2c:::add
+"add"
+*am33
+{
+  int srcreg1, srcreg2, dstreg;
+
+  PC = cia;
+
+  if (RM2 > 7 && RM2 < 12)
+    srcreg1 = REG_A0 + RM2 - 8;
+  else if (RM2 > 11 && RM2 < 16)
+    srcreg1 = REG_D0 + RM2 - 12;
+  else
+    srcreg1 = REG_E0 + RM2;
+
+  if (RN0 > 7 && RN0 < 12)
+    srcreg2 = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    srcreg2 = REG_D0 + RN0 - 12;
+  else
+    srcreg2 = REG_E0 + RN0;
+
+  if (RD0 > 7 && RD0 < 12)
+    dstreg = REG_A0 + RD0 - 8;
+  else if (RD0 > 11 && RD0 < 16)
+    dstreg = REG_D0 + RD0 - 12;
+  else
+    dstreg = REG_E0 + RD0;
+
+  genericAdd3 (State.regs[srcreg1], State.regs[srcreg2], dstreg);
+}
+
+// 1111 1101 1101 1000 Rn Rn IMM32; cmp imm24,Rn
+8.0xfd+8.0xd8+4.RM2,4.RN0=RM2+8.IMM24A+8.IMM24B+8.IMM24C:D4b:::cmp
+"cmp"
+*am33
+{
+  int srcreg;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    srcreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    srcreg = REG_D0 + RN0 - 12;
+  else
+    srcreg = REG_E0 + RN0;
+
+  genericCmp (FETCH24(IMM24A, IMM24B, IMM24C), State.regs[srcreg]);
+}
+
+// 1111 1110 0000 1000 Rn Rn IMM32; mov imm32,Rn
+8.0xfe+8.0x08+4.RM2,4.RN0=RM2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::mov
+"mov"
+*am33
+{
+  int dstreg;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  State.regs[dstreg] = FETCH32(IMM32A, IMM32B, IMM32C, IMM32D);
+}
+
+// 1111 1110 0001 1000 Rn Rn IMM32; movu imm32,Rn
+8.0xfe+8.0x18+4.RM2,4.RN0=RM2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::movu
+"movu"
+*am33
+{
+  int dstreg;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  State.regs[dstreg] = FETCH32(IMM32A, IMM32B, IMM32C, IMM32D);
+}
+
+// 1111 1110 0000 1000 Rn Rn IMM32; add imm32,Rn
+8.0xfe+8.0x78+4.RM2,4.RN0=RM2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::add
+"mov"
+*am33
+{
+  int dstreg;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    dstreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    dstreg = REG_D0 + RN0 - 12;
+  else
+    dstreg = REG_E0 + RN0;
+
+  genericAdd (FETCH32(IMM32A, IMM32B, IMM32C, IMM32D), dstreg);
+}
+
+// 1111 1110 0111 1000 Rn Rn IMM32; cmp imm32,Rn
+8.0xfe+8.0xd8+4.RM2,4.RN0=RM2+8.IMM32A+8.IMM32B+8.IMM32C+8.IMM32D:D5:::cmp
+"cmp"
+*am33
+{
+  int srcreg;
+
+  PC = cia;
+
+  if (RN0 > 7 && RN0 < 12)
+    srcreg = REG_A0 + RN0 - 8;
+  else if (RN0 > 11 && RN0 < 16)
+    srcreg = REG_D0 + RN0 - 12;
+  else
+    srcreg = REG_E0 + RN0;
+
+  genericCmp (FETCH32(IMM32A, IMM32B, IMM32C, IMM32D), State.regs[srcreg]);
+}
+
