@@ -31,11 +31,6 @@ fi
 
 # per-target:
 
-if [ "x$target" = "xall" ]; then
-	echo "*** 'all' can not be the default target" 1>&2
-	exit 1
-fi
-
 # WHEN ADDING ENTRIES TO THIS MATRIX:
 #  Make sure that the left side always has two dashes.  Otherwise you
 #  can get spurious matches.  Even for unambiguous cases, do this as a

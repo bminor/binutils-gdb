@@ -1,3 +1,7 @@
+Sun Aug  8 12:21:13 1993  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* configure.in: Remove unneeded test.
+
 Sun Aug  8 12:41:22 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* Makefile.in ({dist,real}clean): Use $(MAKE), not make.
