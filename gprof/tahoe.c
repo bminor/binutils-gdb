@@ -202,11 +202,11 @@ tahoe_reladdr (modep)
     case byterel:
       return (bfd_vma) (cp + sizeof *cp + *cp);
     case wordrel:
-      for (i = 0; i < sizeof *sp; i++)
+      for (i = 0; (size_t) i < sizeof *sp; i++)
 	value = (value << 8) + (cp[i] & 0xff);
       return (bfd_vma) (cp + sizeof *sp + value);
     case longrel:
-      for (i = 0; i < sizeof *lp; i++)
+      for (i = 0; (size_t) i < sizeof *lp; i++)
 	value = (value << 8) + (cp[i] & 0xff);
       return (bfd_vma) (cp + sizeof *lp + value);
     }

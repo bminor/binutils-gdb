@@ -94,7 +94,7 @@ Sym;
  */
 typedef struct
   {
-    int len;			/* # of symbols in this table */
+    unsigned int len;		/* # of symbols in this table */
     Sym *base;			/* first element in symbol table */
     Sym *limit;			/* limit = base + len */
   }

@@ -1,3 +1,28 @@
+Sat Mar 28 23:09:08 1998  Ian Lance Taylor  <ian@cygnus.com>
+
+	Fix some gcc -Wall warnings:
+	* cg_arcs.c (num_cycles): Change to unsigned int.
+	(numarcs): Likewise.
+	(arc_add): Change maxarcs to unsigned int.
+	(cg_assemble): Change index to unsigned int.
+	* cg_arcs.h (num_cycles, numarcs): Update declarations.
+	* cg_print.c (cg_print): Change index to unsigned int.
+	(cg_print_index): Change index, nnames, todo, i, and j to unsigned
+	int.
+	(cg_print_file_ordering): Change symbol_count and index2 to
+	unsigned int.
+	* core.c (symbol_map_count): Change to unsigned int.
+	(core_create_function_syms): Change j to unsigned int.
+	(core_create_line_syms): Add cast to avoid warning.
+	* hist.c (hist_assign_samples): Change j to unsigned int.
+	(hist_print): Change index to unsigned i nt.  Add cast to avoid
+	warning.
+	* sym_ids.c (parse_spec): Add casts to avoid warning.
+	* symtab.c (symtab_finalize): Change j to unsigned int.
+	(sym_lookup): Update printf format strings.
+	* symtab.h (Sym_Table): Change len to unsigned int.
+	* tahoe.c (tahoe_reladdr): Add casts to avoid warnings.
+
 Tue Mar 24 19:00:11 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	Add --demangle and --no-demangle options:

@@ -19,7 +19,7 @@ struct function_map {
 };
 
 struct function_map *symbol_map;
-int symbol_map_count;
+unsigned int symbol_map_count;
 
 extern void i386_find_call PARAMS ((Sym *, bfd_vma, bfd_vma));
 extern void alpha_find_call PARAMS ((Sym *, bfd_vma, bfd_vma));
@@ -396,7 +396,8 @@ DEFUN (core_create_function_syms, (core_bfd), bfd * core_bfd)
 {
   bfd_vma min_vma = ~0, max_vma = 0;
   int class;
-  long i, j, found, skip;
+  long i, found, skip;
+  unsigned int j;
 
   /* pass 1 - determine upper bound on number of function names: */
   symtab.len = 0;
@@ -719,7 +720,7 @@ DEFUN (core_create_line_syms, (core_bfd), bfd * core_bfd)
   memcpy (ltab.limit, symtab.base, symtab.len * sizeof (Sym));
   ltab.limit += symtab.len;
 
-  if (ltab.limit - ltab.base != ltab.len)
+  if ((unsigned int) (ltab.limit - ltab.base) != ltab.len)
     {
       fprintf (stderr,
 	       "%s: somebody miscounted: ltab.len=%d instead of %ld\n",

@@ -150,7 +150,7 @@ DEFUN (symtab_finalize, (tab), Sym_Table * tab)
   tab->len = tab->limit - tab->base;
 
   DBG (AOUTDEBUG | IDDEBUG,
-       int j;
+       unsigned int j;
 
        for (j = 0; j < tab->len; ++j)
        {
@@ -237,7 +237,7 @@ DEFUN (sym_lookup, (symtab, address), Sym_Table * symtab AND bfd_vma address)
 	  else
 	    {
 	      DBG (LOOKUPDEBUG,
-		   printf ("[sym_lookup] %d probes (symtab->len=%d)\n",
+		   printf ("[sym_lookup] %d probes (symtab->len=%u)\n",
 			   probes, symtab->len - 1));
 	      return &sym[mid];
 	    }
@@ -260,7 +260,7 @@ DEFUN (sym_lookup, (symtab, address), Sym_Table * symtab AND bfd_vma address)
 	}
       else
 	{
-	  DBG (LOOKUPDEBUG, printf ("[sym_lookup] %d (%d) probes, fall off\n",
+	  DBG (LOOKUPDEBUG, printf ("[sym_lookup] %d (%u) probes, fall off\n",
 				    probes, symtab->len - 1));
 	  return &sym[mid + 1];
 	}
