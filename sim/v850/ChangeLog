@@ -1,3 +1,7 @@
+Thu Sep  4 17:21:23 1997  Doug Evans  <dje@seba>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
 Thu Sep  4 18:11:37 1997  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* simops.c (fetch_argv): New function, fetch a arg vector from
