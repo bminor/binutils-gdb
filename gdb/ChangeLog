@@ -1,3 +1,33 @@
+Tue Dec 15 04:14:24 1992  Fred Fish  (fnf@cygnus.com)
+
+	* complaints.c:  New file, code moved from utils.c.
+	* complaints.c (complain):  Made into a varargs function.
+	* complaints.h:  New file, code moved from symfile.h.
+	* Makefile.in (SFILES_MAINDIR):  Add complaints.c.
+	* Makefile.in (HFILES):  Add complaints.h.
+	* Makefile.in (OBS):  Add complaints.o.
+	* symfile.c (complaint_root, stop_whining, complaint_series,
+	complain, clear_complaints, add_show_from_set for stop_whining):
+	Moved to complaints.c.
+	* symfile.h (struct complaint, complaint_root decl, complain
+	prototype, clear_complaints prototype):  Moved to complaints.h.
+	* buildsym.c, coffread.c, dbxread.c, dwarfread.c, elfread.c,
+	gdbtypes.c, mipsread.c, stbsread.c, symfile.c:  Include
+	complaints.h.  Remove casts from arguments to complain(),
+	which is now a varargs function, and remove unnecessary
+	placeholder zero args.
+	* defs.h (begin_line):  Add prototype.
+	* defs.h (vprintf_filtered):  Add prototype.
+	* dwarfread.c (varargs.h):  Remove, no longer needed.
+	* dwarfread.c (dwarfwarn):  Remove prototype and function.
+	* dwarfread.c (complaints):  Define a bunch of complaints.
+	* dwarfread.c (SQUAWK):  Remove macro defs, convert all
+	usages to standard complain() calls.
+	* utils.c (begin_line):  New function that ensures that
+	whatever gets filter-printed next starts on its own line.
+	* utils.c (vprintf_filtered):  New func, like vfprintf_filtered,
+	but to stdout (calls vfprintf_filtered internally).
+
 Tue Dec 15 02:01:00 1992  John Gilmore  (gnu@cygnus.com)
 
 	* remote.c:  Avoid printf_filtered line limit.  Suggested by

@@ -26,6 +26,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symfile.h"
 #include "objfiles.h"
 #include "buildsym.h"
+#include "complaints.h"
 #include <obstack.h>
 
 #include <string.h>
@@ -614,8 +615,7 @@ coff_end_symtab (objfile)
 
 	  if (BLOCK_START(pb->block) < BLOCK_START(pbnext->block)) {
 	    struct block *tmp = pb->block;
-	    complain (&misordered_blocks_complaint,
-		      (char *) BLOCK_START (pb->block));
+	    complain (&misordered_blocks_complaint, BLOCK_START (pb->block));
 	    pb->block = pbnext->block;
 	    pbnext->block = tmp;
 	    swapped = 1;
@@ -1069,7 +1069,7 @@ read_coff_symtab (symtab_offset, nsyms, objfile)
 		/* main_aux.x_sym.x_misc.x_lnsz.x_lnno
 			    contains line number of '{' } */
 		if (cs->c_naux != 1)
-		  complain (&bf_no_aux_complaint, (char *) cs->c_symnum);
+		  complain (&bf_no_aux_complaint, cs->c_symnum);
 		fcn_first_line = main_aux.x_sym.x_misc.x_lnsz.x_lnno;
 
 		new = (struct coff_context_stack *)
@@ -1094,12 +1094,12 @@ read_coff_symtab (symtab_offset, nsyms, objfile)
 		new = coff_context_stack;
 		if (new == 0)
 		  {
-		    complain (&ef_complaint, (char *) cs->c_symnum);
+		    complain (&ef_complaint, cs->c_symnum);
 		    within_function = 0;
 		    break;
 		  }
 		if (cs->c_naux != 1) {
-		  complain (&ef_no_aux_complaint, (char *) cs->c_symnum);
+		  complain (&ef_no_aux_complaint, cs->c_symnum);
 		  fcn_last_line = 0x7FFFFFFF;
 		} else {
 		  fcn_last_line = main_aux.x_sym.x_misc.x_lnsz.x_lnno;
@@ -1446,7 +1446,7 @@ enter_linenos (file_offset, first_line, last_line)
 
   if (file_offset < linetab_offset)
     {
-      complain (&lineno_complaint, (char *) file_offset);
+      complain (&lineno_complaint, file_offset);
       if (file_offset > linetab_size)	/* Too big to be an offset? */
 	return;
       file_offset += linetab_offset;  /* Try reading at that linetab offset */

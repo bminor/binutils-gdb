@@ -31,6 +31,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symtab.h"
 #include "symfile.h"		/* Needed for "struct complaint" */
 #include "objfiles.h"
+#include "complaints.h"
 #include <string.h>
 
 /* Ask buildsym.h to define the vars it normally declares `extern'.  */
@@ -260,7 +261,7 @@ finish_block (symbol, listhead, old_blocks, start, end, objfile)
 		}
 	      else
 		{
-		  complain (&innerblock_anon_complaint, 0);
+		  complain (&innerblock_anon_complaint);
 		}
 	      BLOCK_START (pblock->block) = BLOCK_START (block);
 	      BLOCK_END   (pblock->block) = BLOCK_END   (block);
@@ -345,7 +346,7 @@ make_blockvector (objfile)
 	      > BLOCK_START(BLOCKVECTOR_BLOCK (blockvector, i)))
 	    {
 	      complain (&blockvector_complaint, 
-			(char *) BLOCK_START(BLOCKVECTOR_BLOCK (blockvector, i)));
+			BLOCK_START(BLOCKVECTOR_BLOCK (blockvector, i)));
 	    }
 	}
     }

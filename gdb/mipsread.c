@@ -58,6 +58,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "obstack.h"
 #include "buildsym.h"
 #include "stabsread.h"
+#include "complaints.h"
 
 #ifdef USG
 #include <sys/types.h>
@@ -1135,7 +1136,7 @@ data:		/* Common code for symbols describing data */
 			    tsym = ((SYMR*)cur_fdr->isymBase)
 				+ tsym->index-1;
 		    }
-		    else complain (&block_member_complaint, (char *)tsym->st);
+		    else complain (&block_member_complaint, tsym->st);
 		  }
 
 		/* In an stBlock, there is no way to distinguish structs,
@@ -1292,7 +1293,7 @@ data:		/* Common code for symbols describing data */
 			/* End of file.  Pop parse stack and ignore.  Higher
 			   level code deals with this.  */
 			;
-		} else complain (&stEnd_complaint, (char *)sh->sc);
+		} else complain (&stEnd_complaint, sh->sc);
 
 		pop_parse_stack();	/* restore previous lexical context */
 		break;
@@ -1328,7 +1329,7 @@ data:		/* Common code for symbols describing data */
 	    case stConstant:
 		break;		/* constant */
 	    default:
-		complain(&unknown_mips_symtype_complaint, (char *)sh->st);
+		complain(&unknown_mips_symtype_complaint, sh->st);
 		break;
 	}
 	sh->st = stParsed;
@@ -1390,7 +1391,7 @@ parse_type(ax, bs, bigend)
 	tax = ax;
 	ecoff_swap_tir_in (bigend, &tax->a_ti, t);
 	if (t->bt > (sizeof (map_bt)/sizeof (*map_bt))) {
-		complain (&basic_type_complaint, (char *)t->bt);
+		complain (&basic_type_complaint, t->bt);
 		return builtin_type_int;
 	}
 	if (map_bt[t->bt]) {
@@ -1426,7 +1427,7 @@ parse_type(ax, bs, bigend)
 			break;
 		    case btTypedef:
 		    default:
-			complain (&basic_type_complaint, (char *)t->bt);
+			complain (&basic_type_complaint, t->bt);
 			return builtin_type_int;
 		}
 	}
@@ -1606,7 +1607,7 @@ upgrade_type(tpp, tq, ax, bigend)
 			TYPE_LENGTH(TYPE_TARGET_TYPE(t)) = id >> 3;
 		}
 		if (id != rf)
-			complain (&array_bitsize_complaint, (char *)rf);
+			complain (&array_bitsize_complaint, rf);
 
 		TYPE_LENGTH(t) = (upper < 0) ? 0 :
 			(upper - lower + 1) * (rf >> 3);
@@ -1622,7 +1623,7 @@ upgrade_type(tpp, tq, ax, bigend)
 		return 0;
 
 	default:
-		complain (&unknown_type_qual_complaint, (char *)tq);
+		complain (&unknown_type_qual_complaint, tq);
 		return 0;
 	}
 }
@@ -1650,7 +1651,7 @@ parse_procedure (pr, bound, have_stabs)
 
     /* Static procedure at address pr->adr.  Sigh. */
     if (sh == (SYMR*)-1) {
-	complain (&pdr_static_symbol_complaint, (char *)pr->adr);
+	complain (&pdr_static_symbol_complaint, pr->adr);
 	return;
     }
     sh_name = (char*)sh->iss;
@@ -1937,7 +1938,7 @@ parse_partial_symbols (end_of_text_seg, objfile, section_offsets)
 		break;
 	default:
 		ms_type = mst_unknown;
-		complain (&unknown_ext_complaint, (char *)esh->asym.iss);
+		complain (&unknown_ext_complaint, esh->asym.iss);
 	}
 	prim_record_minimal_symbol ((char *)esh->asym.iss,
 				    esh->asym.value,
@@ -2114,8 +2115,8 @@ parse_partial_symbols (end_of_text_seg, objfile, section_offsets)
 		  default:
 		    /* Both complaints are valid:  one gives symbol name,
 		       the other the offending symbol type.  */
-		    complain (&unknown_sym_complaint, (char *)sh->iss);
-		    complain (&unknown_st_complaint, (char *)sh->st);
+		    complain (&unknown_sym_complaint, sh->iss);
+		    complain (&unknown_st_complaint, sh->st);
 		    cur_sdx++;
 		    continue;
 		}
@@ -2147,7 +2148,7 @@ parse_partial_symbols (end_of_text_seg, objfile, section_offsets)
 		    class = LOC_LABEL;
 		    break;
 		  default:
-		    complain (&unknown_ext_complaint, (char *)sh->iss);
+		    complain (&unknown_ext_complaint, sh->iss);
 		    /* Fall through, pretend it's global.  */
 		  case stGlobal:
 		    class = LOC_STATIC;
@@ -2206,7 +2207,7 @@ parse_partial_symbols (end_of_text_seg, objfile, section_offsets)
 	for (s_idx = s_id0; s_idx < fh->crfd; s_idx++) {
 	    RFDT *rh = (RFDT *) (fh->rfdBase) + s_idx;
 	    if (*rh < 0 || *rh >= hdr->ifdMax)
-		complain(&bad_file_number_complaint, (char *)*rh);
+		complain(&bad_file_number_complaint, *rh);
 	    else
 		pst->dependencies[s_idx-s_id0] = fdr_to_pst[*rh].pst;
 	}
@@ -2401,7 +2402,7 @@ psymtab_to_symtab_1(pst, filename)
 		/* Handle encoded stab line number. */
 		record_line (current_subfile, sh->index, valu);
 	    }
-	    else complain (&stab_unknown_complaint, (char *)sh->iss);
+	    else complain (&stab_unknown_complaint, sh->iss);
 	}
 	st = end_symtab (pst->texthigh, 0, 0, pst->objfile);
 	end_stabs ();

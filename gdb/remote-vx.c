@@ -809,7 +809,7 @@ vx_lookup_symbol (name, pAddr)
   status = net_clnt_call (VX_SYMBOL_INQ, xdr_wrapstring, &name,
 			  xdr_SYMBOL_ADDR, &symbolAddr);
   if (status != RPC_SUCCESS) {
-      complain (&cant_contact_target, 0);
+      complain (&cant_contact_target);
       return -1;
   }
 

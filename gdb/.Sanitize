@@ -61,6 +61,8 @@ call-cmds.h
 coffread.c
 command.c
 command.h
+complaints.c
+complaints.h
 config
 configure.in
 convex-pinsn.c

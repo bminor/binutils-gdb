@@ -30,6 +30,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "gdbcmd.h"
 #include "breakpoint.h"
 #include "language.h"
+#include "complaints.h"
 
 #include <obstack.h>
 #include <assert.h>
@@ -43,6 +44,14 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* Global variables owned by this file */
 
 int readnow_symbol_files;		/* Read full symbols immediately */
+
+struct complaint oldsyms_complaint = {
+  "Replacing old symbols for `%s'", 0, 0
+};
+
+struct complaint empty_symtab_complaint = {
+  "Empty symbol table found for `%s'", 0, 0
+};
 
 /* External variables and functions referenced. */
 
@@ -95,20 +104,6 @@ int symbol_reloading = SYMBOL_RELOADING_DEFAULT;
 #else
 int symbol_reloading = 0;
 #endif
-
-/* Structure to manage complaints about symbol file contents.  */
-
-struct complaint complaint_root[1] = {
-  {(char *) 0, 0, complaint_root},
-};
-
-/* Some actual complaints.  */
-
-struct complaint oldsyms_complaint = {
-	"Replacing old symbols for `%s'", 0, 0 };
-
-struct complaint empty_symtab_complaint = {
-	"Empty symbol table found for `%s'", 0, 0 };
 
 
 /* In the following sort, we always make sure that
@@ -949,95 +944,7 @@ the_big_top:
   if (reread_one)
     breakpoint_re_set ();
 }
-
-/* Functions to handle complaints during symbol reading.  */
 
-/* How many complaints about a particular thing should be printed before
-   we stop whining about it?  Default is no whining at all, since so many
-   systems have ill-constructed symbol files.  */
-
-static unsigned stop_whining = 0;
-
-/* Should each complaint be self explanatory, or should we assume that
-   a series of complaints is being produced? 
-   case 0:  self explanatory message.
-   case 1:  First message of a series that must start off with explanation.
-   case 2:  Subsequent message, when user already knows we are reading
-            symbols and we can just state our piece.  */
-
-static int complaint_series = 0;
-
-/* Print a complaint about the input symbols, and link the complaint block
-   into a chain for later handling.  */
-
-void
-complain (complaint, val)
-     struct complaint *complaint;
-     char *val;
-{
-  complaint->counter++;
-  if (complaint->next == 0) {
-    complaint->next = complaint_root->next;
-    complaint_root->next = complaint;
-  }
-  if (complaint->counter > stop_whining)
-    return;
-  wrap_here ("");
-
-  switch (complaint_series + (info_verbose << 1)) {
-
-  /* Isolated messages, must be self-explanatory.  */
-  case 0:
-    puts_filtered ("During symbol reading, ");
-    wrap_here("");
-    printf_filtered (complaint->message, val);
-    puts_filtered (".\n");
-    break;
-
-  /* First of a series, without `set verbose'.  */
-  case 1:
-    puts_filtered ("During symbol reading...");
-    printf_filtered (complaint->message, val);
-    puts_filtered ("...");
-    wrap_here("");
-    complaint_series++;
-    break;
-
-  /* Subsequent messages of a series, or messages under `set verbose'.
-     (We'll already have produced a "Reading in symbols for XXX..." message
-      and will clean up at the end with a newline.)  */
-  default:
-    printf_filtered (complaint->message, val);
-    puts_filtered ("...");
-    wrap_here("");
-  }
-}
-
-/* Clear out all complaint counters that have ever been incremented.
-   If sym_reading is 1, be less verbose about successive complaints,
-   since the messages are appearing all together during a command that
-   reads symbols (rather than scattered around as psymtabs get fleshed
-   out into symtabs at random times).  If noisy is 1, we are in a
-   noisy symbol reading command, and our caller will print enough
-   context for the user to figure it out.  */
-
-void
-clear_complaints (sym_reading, noisy)
-     int sym_reading;
-     int noisy;
-{
-  struct complaint *p;
-
-  for (p = complaint_root->next; p != complaint_root; p = p->next)
-    p->counter = 0;
-
-  if (!sym_reading && !noisy && complaint_series > 1) {
-    /* Terminate previous series, since caller won't.  */
-    puts_filtered ("\n");
-  }
-
-  complaint_series = sym_reading? 1 + noisy: 0;
-}
 
 enum language
 deduce_language_from_filename (filename)
@@ -1052,8 +959,10 @@ deduce_language_from_filename (filename)
      return language_c;
   else if(!strcmp(c,".cc") || !strcmp(c,".C"))
      return language_cplus;
+  /* start-sanitize-chill */
   else if(!strcmp(c,".chill") || !strcmp(c,".c186") || !strcmp(c,".c286"))
      return language_chill;
+  /* end-sanitize-chill */
 
   return language_unknown;		/* default */
 }
@@ -1417,13 +1326,6 @@ The second argument provides the starting address of the file's text.");
   add_com ("load", class_files, load_command,
    "Dynamically load FILE into the running program, and record its symbols\n\
 for access from GDB.");
-
-  add_show_from_set
-    (add_set_cmd ("complaints", class_support, var_zinteger,
-		  (char *)&stop_whining,
-	  "Set max number of complaints about incorrect symbols.",
-		  &setlist),
-     &showlist);
 
   add_show_from_set
     (add_set_cmd ("symbol-reloading", class_support, var_boolean,

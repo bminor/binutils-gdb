@@ -201,7 +201,8 @@ SFILES_MAINDIR = \
 	 mem-break.c target.c \
 	 dbxread.c coffread.c elfread.c dwarfread.c xcoffread.c stabsread.c \
 	 ieee-float.c language.c parse.c buildsym.c objfiles.c \
-	 minsyms.c mipsread.c maint.c ch-exp.y c-lang.c ch-lang.c m2-lang.c
+	 minsyms.c mipsread.c maint.c ch-exp.y c-lang.c ch-lang.c m2-lang.c \
+	 complaints.c
 
 # Source files in subdirectories (which will be handled separately by
 #  'make gdb.tar.Z').
@@ -210,14 +211,12 @@ SFILES_MAINDIR = \
 SFILES_SUBDIR = \
 	 ${srcdir}/vx-share/dbgRpcLib.h \
 	 ${srcdir}/vx-share/ptrace.h \
-	 ${srcdir}/vx-share/reg.h \
 	 ${srcdir}/vx-share/vxTypes.h \
 	 ${srcdir}/vx-share/vxWorks.h \
 	 ${srcdir}/vx-share/wait.h \
 	 ${srcdir}/vx-share/xdr_ld.h \
 	 ${srcdir}/vx-share/xdr_ptrace.h \
 	 ${srcdir}/vx-share/xdr_rdb.h \
-	 ${srcdir}/vx-share/xdr_regs.h \
 	 ${srcdir}/nindy-share/b.out.h \
 	 ${srcdir}/nindy-share/block_io.h \
 	 ${srcdir}/nindy-share/coff.h \
@@ -225,12 +224,6 @@ SFILES_SUBDIR = \
 	 ${srcdir}/nindy-share/env.h \
 	 ${srcdir}/nindy-share/stop.h \
 	 ${srcdir}/nindy-share/ttycntl.h \
-	 ${srcdir}/29k-share/include/coff.h \
-	 ${srcdir}/29k-share/include/error.h \
-	 ${srcdir}/29k-share/include/macros.h \
-	 ${srcdir}/29k-share/include/main.h \
-	 ${srcdir}/29k-share/include/memspcs.h \
-	 ${srcdir}/29k-share/include/miniint.h \
 	 ${srcdir}/29k-share/udi/udiphcfg.h \
 	 ${srcdir}/29k-share/udi/udiphsun.h \
 	 ${srcdir}/29k-share/udi/udiproc.h \
@@ -270,7 +263,7 @@ HFILES=	breakpoint.h buildsym.h call-cmds.h command.h defs.h \
 	nm-sun2.h nm-sun3.h nm-sun386.h nm-sun4os4.h nm-trash.h \
 	nm-ultra3.h nm-hppab.h nm-hppah.h nm-umax.h nm-sysv4.h \
 	nm-apollo68b.h nm-apollo68v.h nm-vax.h nm-hp300bsd.h \
-	nm-hp300hpux.h c-lang.h ch-lang.h m2-lang.h
+	nm-hp300hpux.h c-lang.h ch-lang.h m2-lang.h complaints.h
 
 REMOTE_EXAMPLES = m68k-stub.c i386-stub.c sparc-stub.c rem-multi.shar
 
@@ -310,7 +303,7 @@ OBS = version.o main.o blockframe.o breakpoint.o findvar.o stack.o source.o \
     ieee-float.o putenv.o parse.o language.o $(YYOBJ) \
     buildsym.o objfiles.o minsyms.o maint.o demangle.o \
     dbxread.o coffread.o elfread.o dwarfread.o xcoffread.o mipsread.o \
-    stabsread.o core.o c-lang.o ch-lang.o m2-lang.o
+    stabsread.o core.o c-lang.o ch-lang.o m2-lang.o complaints.o
 
 RAPP_OBS = rgdb.o rudp.o rserial.o serial.o udp.o $(XDEPFILES)
 
@@ -431,7 +424,6 @@ alldeps.mak: ${srcdir}/config
 	      -e 's!xdr_ld.o!vx-share/xdr_ld.c!' \
 	      -e 's!xdr_ptrace.o!vx-share/xdr_ptrace.c!' \
 	      -e 's!xdr_rdb.o!vx-share/xdr_rdb.c!' \
-	      -e 's!xdr_regs.o!vx-share/xdr_regs.c!' \
 	      -e 's!udr.o!29k-share/udi/udr.c!' \
 	      -e 's!udip2soc.o!29k-share/udi/udip2soc.c!' \
 	      -e 's/\.o/.c/' \
@@ -610,8 +602,7 @@ make-proto-gdb-1: ${TARFILES} ${TARDIRS} gdb.info
 	  for i in $(ALLCONFIG) ; do ln -s ../../$$i ../$$i ; done
 	mkdir proto-gdb.dir/vx-share proto-gdb.dir/nindy-share \
 		proto-gdb.dir/29k-share
-	mkdir proto-gdb.dir/29k-share/include proto-gdb.dir/29k-share/udi
-	mkdir proto-gdb.dir/29k-share/dfe
+	mkdir proto-gdb.dir/29k-share/udi
 	cd proto-gdb.dir/config ; \
 	  for i in $(SFILES_SUBDIR) $(NONSRC_SUBDIR) $(ALLDEPFILES_SUBDIR); \
 	    do ln -s ../../$$i ../$$i ; done
@@ -774,9 +765,6 @@ xdr_ptrace.o: ${srcdir}/vx-share/xdr_ptrace.c
 
 xdr_rdb.o: ${srcdir}/vx-share/xdr_rdb.c
 	${CC} -c ${INTERNAL_CFLAGS} ${srcdir}/vx-share/xdr_rdb.c
-
-xdr_regs.o: ${srcdir}/vx-share/xdr_regs.c
-	${CC} -c ${INTERNAL_CFLAGS} ${srcdir}/vx-share/xdr_regs.c
 
 nindy.o: ${srcdir}/nindy-share/nindy.c
 	${CC} -c ${INTERNAL_CFLAGS} -DSTRIP='"$(tooldir)/bin/strip"' \

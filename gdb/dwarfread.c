@@ -52,11 +52,12 @@ other things to work on, if you get bored. :-)
 #include "demangle.h"
 #include "expression.h"	/* Needed for enum exp_opcode in language.h, sigh... */
 #include "language.h"
+#include "complaints.h"
 
-#include <varargs.h>
 #include <fcntl.h>
 #include <string.h>
 #include <sys/types.h>
+
 #ifndef	NO_SYS_FILE
 #include <sys/file.h>
 #endif
@@ -66,11 +67,117 @@ other things to work on, if you get bored. :-)
 #define L_SET 0
 #endif
 
-#ifdef MAINTENANCE	/* Define to 1 to compile in some maintenance stuff */
-#define SQUAWK(stuff) dwarfwarn stuff
-#else
-#define SQUAWK(stuff)
-#endif
+/* Some macros to provide DIE info for complaints. */
+
+#define DIE_ID (curdie!=NULL ? curdie->die_ref : 0)
+#define DIE_NAME (curdie!=NULL && curdie->at_name!=NULL) ? curdie->at_name : ""
+
+/* Complaints that can be issued during DWARF debug info reading. */
+
+struct complaint no_bfd_get_N =
+{
+  "DIE @ 0x%x \"%s\", no bfd support for %d byte data object", 0, 0
+};
+
+struct complaint malformed_die =
+{
+  "DIE @ 0x%x \"%s\", malformed DIE, bad length (%d bytes)", 0, 0
+};
+
+struct complaint bad_die_ref =
+{
+  "DIE @ 0x%x \"%s\", reference to DIE (0x%x) outside compilation unit", 0, 0
+};
+
+struct complaint unknown_attribute_form =
+{
+  "DIE @ 0x%x \"%s\", unknown attribute form (0x%x)", 0, 0
+};
+
+struct complaint unknown_attribute_length =
+{
+  "DIE @ 0x%x \"%s\", unknown attribute length, skipped remaining attributes", 0, 0
+};
+
+struct complaint unexpected_fund_type =
+{
+  "DIE @ 0x%x \"%s\", unexpected fundamental type 0x%x", 0, 0
+};
+
+struct complaint unknown_type_modifier =
+{
+  "DIE @ 0x%x \"%s\", unknown type modifier %u", 0, 0
+};
+
+struct complaint volatile_ignored =
+{
+  "DIE @ 0x%x \"%s\", type modifier 'volatile' ignored", 0, 0
+};
+
+struct complaint const_ignored =
+{
+  "DIE @ 0x%x \"%s\", type modifier 'const' ignored", 0, 0
+};
+
+struct complaint botched_modified_type =
+{
+  "DIE @ 0x%x \"%s\", botched modified type decoding (mtype 0x%x)", 0, 0
+};
+
+struct complaint op_deref2 =
+{
+  "DIE @ 0x%x \"%s\", OP_DEREF2 address 0x%x not handled", 0, 0
+};
+
+struct complaint op_deref4 =
+{
+  "DIE @ 0x%x \"%s\", OP_DEREF4 address 0x%x not handled", 0, 0
+};
+
+struct complaint basereg_not_handled =
+{
+  "DIE @ 0x%x \"%s\", BASEREG %d not handled", 0, 0
+};
+
+struct complaint dup_user_type_allocation =
+{
+  "DIE @ 0x%x \"%s\", internal error: duplicate user type allocation", 0, 0
+};
+
+struct complaint dup_user_type_definition =
+{
+  "DIE @ 0x%x \"%s\", internal error: duplicate user type definition", 0, 0
+};
+
+struct complaint missing_tag =
+{
+  "DIE @ 0x%x \"%s\", missing class, structure, or union tag", 0, 0
+};
+
+struct complaint bad_array_element_type =
+{
+  "DIE @ 0x%x \"%s\", bad array element type attribute 0x%x", 0, 0
+};
+
+struct complaint subscript_data_items =
+{
+  "DIE @ 0x%x \"%s\", can't decode subscript data items", 0, 0
+};
+
+struct complaint unhandled_array_subscript_format =
+{
+  "DIE @ 0x%x \"%s\", array subscript format 0x%x not handled yet", 0, 0
+};
+
+struct complaint unknown_array_subscript_format =
+{
+  "DIE @ 0x%x \"%s\", unknown array subscript format %x", 0, 0
+};
+
+struct complaint not_row_major =
+{
+  "DIE @ 0x%x \"%s\", array not row major; not handled correctly", 0, 0
+};
 
 #ifndef R_FP		/* FIXME */
 #define R_FP 14		/* Kludge to get frame pointer register number */
@@ -370,9 +477,6 @@ read_func_scope PARAMS ((struct dieinfo *, char *, char *, struct objfile *));
 static void
 read_lexical_block_scope PARAMS ((struct dieinfo *, char *, char *,
 				  struct objfile *));
-
-static void
-dwarfwarn ();
 
 static void
 scan_partial_symbols PARAMS ((char *, char *, struct objfile *));
@@ -714,55 +818,6 @@ record_minimal_symbol (name, address, ms_type, objfile)
 
 LOCAL FUNCTION
 
-	dwarfwarn -- issue a DWARF related warning
-
-DESCRIPTION
-
-	Issue warnings about DWARF related things that aren't serious enough
-	to warrant aborting with an error, but should not be ignored either.
-	This includes things like detectable corruption in DIE's, missing
-	DIE's, unimplemented features, etc.
-
-	In general, running across tags or attributes that we don't recognize
-	is not considered to be a problem and we should not issue warnings
-	about such.
-
-NOTES
-
-	We mostly follow the example of the error() routine, but without
-	returning to command level.  It is arguable about whether warnings
-	should be issued at all, and if so, where they should go (stdout or
-	stderr).
-
-	We assume that curdie is valid and contains at least the basic
-	information for the DIE where the problem was noticed.
-*/
-
-static void
-dwarfwarn (va_alist)
-     va_dcl
-{
-  va_list ap;
-  char *fmt;
-  
-  va_start (ap);
-  fmt = va_arg (ap, char *);
-  warning_setup ();
-  fprintf (stderr, "warning: DWARF ref 0x%x: ", curdie -> die_ref);
-  if (curdie -> at_name)
-    {
-      fprintf (stderr, "'%s': ", curdie -> at_name);
-    }
-  vfprintf (stderr, fmt, ap);
-  fprintf (stderr, "\n");
-  fflush (stderr);
-  va_end (ap);
-}
-
-/*
-
-LOCAL FUNCTION
-
 	read_lexical_block_scope -- process all dies in a lexical block
 
 SYNOPSIS
@@ -826,7 +881,7 @@ lookup_utype (die_ref)
   utypeidx = (die_ref - dbroff) / 4;
   if ((utypeidx < 0) || (utypeidx >= numutypes))
     {
-      dwarfwarn ("reference to DIE (0x%x) outside compilation unit", die_ref);
+      complain (&bad_die_ref, DIE_ID, DIE_NAME);
     }
   else
     {
@@ -870,12 +925,12 @@ alloc_utype (die_ref, utypep)
   if ((utypeidx < 0) || (utypeidx >= numutypes))
     {
       utypep = dwarf_fundamental_type (current_objfile, FT_INTEGER);
-      dwarfwarn ("reference to DIE (0x%x) outside compilation unit", die_ref);
+      complain (&bad_die_ref, DIE_ID, DIE_NAME);
     }
   else if (*typep != NULL)
     {
       utypep = *typep;
-      SQUAWK (("internal error: dup user type allocation"));
+      complain (&dup_user_type_allocation, DIE_ID, DIE_NAME);
     }
   else
     {
@@ -1002,7 +1057,7 @@ struct_type (dip, thisdie, enddie, objfile)
 	/* Should never happen */
 	TYPE_CODE (type) = TYPE_CODE_UNDEF;
 	tpart1 = "???";
-	SQUAWK (("missing class, structure, or union tag"));
+	complain (&missing_tag, DIE_ID, DIE_NAME);
 	break;
     }
   /* Some compilers try to be helpful by inventing "fake" names for
@@ -1210,7 +1265,7 @@ decode_array_element_type (scan)
   scan += SIZEOF_ATTRIBUTE;
   if ((nbytes = attribute_size (attribute)) == -1)
     {
-      SQUAWK (("bad array element type attribute 0x%x", attribute));
+      complain (&bad_array_element_type, DIE_ID, DIE_NAME, attribute);
       typep = dwarf_fundamental_type (current_objfile, FT_INTEGER);
     }
   else
@@ -1237,7 +1292,7 @@ decode_array_element_type (scan)
 	    typep = decode_mod_u_d_type (scan);
 	    break;
 	  default:
-	    SQUAWK (("bad array element type attribute 0x%x", attribute));
+	    complain (&bad_array_element_type, DIE_ID, DIE_NAME, attribute);
 	    typep = dwarf_fundamental_type (current_objfile, FT_INTEGER);
 	    break;
 	  }
@@ -1326,7 +1381,7 @@ decode_subscript_data_item (scan, end)
       if (nexttype == NULL)
 	{
 	  /* Munged subscript data or other problem, fake it. */
-	  SQUAWK (("can't decode subscript data items"));
+	  complain (&subscript_data_items, DIE_ID, DIE_NAME);
 	  nexttype = dwarf_fundamental_type (current_objfile, FT_INTEGER);
 	}
       typep = create_array_type ((struct type *) NULL, nexttype, indextype,
@@ -1339,12 +1394,12 @@ decode_subscript_data_item (scan, end)
     case FMT_UT_C_X:
     case FMT_UT_X_C:
     case FMT_UT_X_X:
-      SQUAWK (("array subscript format 0x%x not handled yet", format));
+      complain (&unhandled_array_subscript_format, DIE_ID, DIE_NAME, format);
       typep = dwarf_fundamental_type (current_objfile, FT_INTEGER);
       typep = create_array_type ((struct type *) NULL, typep, typep, 0, 1);
       break;
     default:
-      SQUAWK (("unknown array subscript format %x", format));
+      complain (&unknown_array_subscript_format, DIE_ID, DIE_NAME, format);
       typep = dwarf_fundamental_type (current_objfile, FT_INTEGER);
       typep = create_array_type ((struct type *) NULL, typep, typep, 0, 1);
       break;
@@ -1382,7 +1437,7 @@ dwarf_read_array_type (dip)
   if (dip -> at_ordering != ORD_row_major)
     {
       /* FIXME:  Can gdb even handle column major arrays? */
-      SQUAWK (("array not row major; not handled correctly"));
+      complain (&not_row_major, DIE_ID, DIE_NAME);
     }
   if ((sub = dip -> at_subscr_data) != NULL)
     {
@@ -1412,7 +1467,7 @@ dwarf_read_array_type (dip)
 	{
 	  /* Double ick!  Not only is a type already in our slot, but
 	     someone has decorated it.  Complain and leave it alone. */
-	  SQUAWK (("duplicate user defined array type definition"));
+	  complain (&dup_user_type_definition, DIE_ID, DIE_NAME);
 	}
     }
 }
@@ -1521,7 +1576,7 @@ read_subroutine_type (dip, thisdie, enddie)
     }
   else
     {
-      SQUAWK (("duplicate user defined function type definition"));
+      complain (&dup_user_type_definition, DIE_ID, DIE_NAME);
     }
 }
 
@@ -2142,7 +2197,8 @@ locval (loc)
 	    else
 	      {
 		stack[++stacki] = 0;
-		SQUAWK (("BASEREG %d not handled!", regno));
+
+		complain (&basereg_not_handled, DIE_ID, DIE_NAME, regno);
 	      }
 	    break;
 	  case OP_ADDR:
@@ -2159,10 +2215,10 @@ locval (loc)
 	    break;
 	  case OP_DEREF2:
 	    /* pop, deref and push 2 bytes (as a long) */
-	    SQUAWK (("OP_DEREF2 address 0x%x not handled", stack[stacki]));
+	    complain (&op_deref2, DIE_ID, DIE_NAME, stack[stacki]);
 	    break;
 	  case OP_DEREF4:	/* pop, deref and push 4 bytes (as a long) */
-	    SQUAWK (("OP_DEREF4 address 0x%x not handled", stack[stacki]));
+	    complain (&op_deref4, DIE_ID, DIE_NAME, stack[stacki]);
 	    break;
 	  case OP_ADD:	/* pop top 2 items, add, push result */
 	    stack[stacki - 1] += stack[stacki];
@@ -2668,7 +2724,8 @@ scan_partial_symbols (thisdie, enddie, objfile)
 		      temp = dbbase + di.at_sibling - dbroff;
 		      if ((temp < thisdie) || (temp >= enddie))
 			{
-			  dwarfwarn ("reference to DIE (0x%x) outside compilation unit", di.at_sibling);
+			  complain (&bad_die_ref, DIE_ID, DIE_NAME,
+				    di.at_sibling);
 			}
 		      else
 			{
@@ -3166,7 +3223,7 @@ decode_modified_type (modifiers, modcount, mtype)
 	    }
 	  break;
 	default:
-	  SQUAWK (("botched modified type decoding (mtype 0x%x)", mtype));
+	  complain (&botched_modified_type, DIE_ID, DIE_NAME, mtype);
 	  typep = dwarf_fundamental_type (current_objfile, FT_INTEGER);
 	  break;
 	}
@@ -3184,17 +3241,16 @@ decode_modified_type (modifiers, modcount, mtype)
 	    typep = lookup_reference_type (typep);
 	    break;
 	  case MOD_const:
-	    SQUAWK (("type modifier 'const' ignored"));		/* FIXME */
+	    complain (&const_ignored, DIE_ID, DIE_NAME);  /* FIXME */
 	    break;
 	  case MOD_volatile:
-	    SQUAWK (("type modifier 'volatile' ignored"));	/* FIXME */
+	    complain (&volatile_ignored, DIE_ID, DIE_NAME); /* FIXME */
 	    break;
 	  default:
 	    if (!(MOD_lo_user <= (unsigned char) modifier
 		  && (unsigned char) modifier <= MOD_hi_user))
 	      {
-		SQUAWK (("unknown type modifier %u",
-			 (unsigned char) modifier));
+		complain (&unknown_type_modifier, DIE_ID, DIE_NAME, modifier);
 	      }
 	    break;
 	}
@@ -3337,7 +3393,7 @@ decode_fund_type (fundtype)
       typep = dwarf_fundamental_type (current_objfile, FT_INTEGER);
       if (!(FT_lo_user <= fundtype && fundtype <= FT_hi_user))
 	{
-	  SQUAWK (("unexpected fundamental type 0x%x", fundtype));
+	  complain (&unexpected_fund_type, DIE_ID, DIE_NAME, fundtype);
 	}
     }
     
@@ -3440,7 +3496,7 @@ basicdieinfo (dip, diep, objfile)
   if ((dip -> die_length < SIZEOF_DIE_LENGTH) ||
       ((diep + dip -> die_length) > (dbbase + dbsize)))
     {
-      dwarfwarn ("malformed DIE, bad length (%d bytes)", dip -> die_length);
+      complain (&malformed_die, DIE_ID, DIE_NAME, dip -> die_length);
       dip -> die_length = 0;
     }
   else if (dip -> die_length < (SIZEOF_DIE_LENGTH + SIZEOF_DIE_TAG))
@@ -3508,7 +3564,7 @@ completedieinfo (dip, objfile)
       diep += SIZEOF_ATTRIBUTE;
       if ((nbytes = attribute_size (attr)) == -1)
 	{
-	  SQUAWK (("unknown attribute length, skipped remaining attributes"));;
+	  complain (&unknown_attribute_length, DIE_ID, DIE_NAME);
 	  diep = end;
 	  continue;
 	}
@@ -3665,8 +3721,7 @@ completedieinfo (dip, objfile)
 	  diep += strlen (diep) + 1;
 	  break;
 	default:
-	  SQUAWK (("unknown attribute form (0x%x)", form));
-	  SQUAWK (("unknown attribute length, skipped remaining attributes"));;
+	  complain (&unknown_attribute_form, DIE_ID, DIE_NAME, form);
 	  diep = end;
 	  break;
 	}
@@ -3724,7 +3779,7 @@ target_to_host (from, nbytes, signextend, objfile)
 	rtnval = bfd_get_8 (objfile -> obfd, (bfd_byte *) from);
 	break;
       default:
-	dwarfwarn ("no bfd support for %d byte data object", nbytes);
+	complain (&no_bfd_get_N, DIE_ID, DIE_NAME, nbytes);
 	rtnval = 0;
 	break;
     }
@@ -3780,7 +3835,7 @@ attribute_size (attr)
 	nbytes = TARGET_FT_POINTER_SIZE (objfile);
 	break;
       default:
-	SQUAWK (("unknown attribute form (0x%x)", form));
+	complain (&unknown_attribute_form, DIE_ID, DIE_NAME, form);
 	nbytes = -1;
 	break;
       }

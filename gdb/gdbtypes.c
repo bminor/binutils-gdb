@@ -30,6 +30,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "target.h"
 #include "value.h"
 #include "demangle.h"
+#include "complaints.h"
 
 /* Alloc a new type structure and fill it with some defaults.  If
    OBJFILE is non-NULL, then allocate the space for the type structure
@@ -733,7 +734,7 @@ check_stub_type (type)
       struct symbol *sym;
       if (name == NULL)
 	{
-	  complain (&stub_noname_complaint, 0);
+	  complain (&stub_noname_complaint);
 	  return;
 	}
       sym = lookup_symbol (name, 0, STRUCT_NAMESPACE, 0, 

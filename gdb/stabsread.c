@@ -29,10 +29,11 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "obstack.h"
 #include "symtab.h"
 #include "gdbtypes.h"
-#include "symfile.h"		/* Needed for "struct complaint" */
+#include "symfile.h"
 #include "objfiles.h"
 #include "aout/stab_gnu.h"	/* We always use GNU stabs, not native */
 #include "buildsym.h"
+#include "complaints.h"
 
 /* Ask stabsread.h to define the vars it normally declares `extern'.  */
 #define	EXTERN	/**/
@@ -943,7 +944,7 @@ struct type *
 error_type (pp)
      char **pp;
 {
-  complain (&error_type_complaint, 0);
+  complain (&error_type_complaint);
   while (1)
     {
       /* Skip to end of symbol.  */
@@ -1229,7 +1230,7 @@ read_type (pp, objfile)
 	  (*pp)++;
 	  return_type = read_type (pp, objfile);
 	  if (*(*pp)++ != ';')
-	    complain (&invalid_member_complaint, (char *) symnum);
+	    complain (&invalid_member_complaint, symnum);
 	  type = allocate_stub_method (return_type);
 	  if (typenums[0] != -1)
 	    *dbx_lookup_type (typenums) = type;
@@ -1504,7 +1505,7 @@ read_member_functions (fip, pp, type, objfile)
 	      case '.':
 		break;
 	      default:
-		complain (&const_vol_complaint, (char *) (long) **pp);
+		complain (&const_vol_complaint, **pp);
 		break;
 	    }
 	  
@@ -1565,7 +1566,7 @@ read_member_functions (fip, pp, type, objfile)
 	      
 	      default:
 		/* error */
-		complain (&member_fn_complaint, (char *) (long) (*pp)[-1]);
+		complain (&member_fn_complaint, (*pp)[-1]);
 		/* Fall through into normal member function.  */
 	      
 	      case '.':
@@ -1659,7 +1660,7 @@ read_cpp_abbrev (fip, pp, type, objfile)
       name = type_name_no_tag (context);
       if (name == NULL)
 	{
-	  complain (&invalid_cpp_type_complaint, (char *) symnum);
+	  complain (&invalid_cpp_type_complaint, symnum);
 	  name = "FOO";
 	}
       fip -> list -> field.name =
@@ -1791,7 +1792,7 @@ read_one_struct_field (fip, pp, p, type, objfile)
      stuff.  */
   if (fip -> list -> field.bitpos == 0 && fip -> list -> field.bitsize == 0)
     {
-      complain (&dbx_class_complaint, 0);
+      complain (&dbx_class_complaint);
       /* Ignore this field.  */
       fip -> list = fip -> list -> next;
     }
@@ -2908,7 +2909,7 @@ read_range_type (pp, typenums, objfile)
 
   TYPE_TARGET_TYPE (result_type) = *dbx_lookup_type(rangenums);
   if (TYPE_TARGET_TYPE (result_type) == 0) {
-    complain (&range_type_base_complaint, (char *) rangenums[1]);
+    complain (&range_type_base_complaint, rangenums[1]);
     TYPE_TARGET_TYPE (result_type) = lookup_fundamental_type (objfile, FT_INTEGER);
   }
 

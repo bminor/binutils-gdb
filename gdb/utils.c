@@ -808,11 +808,13 @@ parse_escape (string_ptr)
     }
 }
 
-/* Print the character C on STREAM as part of the contents
-   of a literal string whose delimiter is QUOTER.  */
+/* Print the character C on STREAM as part of the contents of a literal
+   string whose delimiter is QUOTER.  Note that this routine should only
+   be call for printing things which are independent of the language
+   of the program being debugged. */
 
 void
-printchar (c, stream, quoter)
+gdb_printchar (c, stream, quoter)
      register int c;
      FILE *stream;
      int quoter;
@@ -977,6 +979,20 @@ wrap_here(indent)
     {
       wrap_column = chars_printed;
       wrap_indent = indent;
+    }
+}
+
+/* Ensure that whatever gets printed next, using the filtered output
+   commands, starts at the beginning of the line.  I.E. if there is
+   any pending output for the current line, flush it and start a new
+   line.  Otherwise do nothing. */
+
+void
+begin_line ()
+{
+  if (chars_printed > 0)
+    {
+      puts_filtered ("\n");
     }
 }
 
@@ -1211,6 +1227,14 @@ vfprintf_filtered (stream, format, args)
   fputs_filtered (linebuffer, stream);
 }
 
+void
+vprintf_filtered (format, args)
+     char *format;
+     va_list args;
+{
+  vfprintf_filtered (stdout, format, args);
+}
+
 /* VARARGS */
 void
 fprintf_filtered (va_alist)
@@ -1290,7 +1314,10 @@ printfi_filtered (va_alist)
   va_end (args);
 }
 
-/* Easy */
+/* Easy -- but watch out!
+
+   This routine is *not* a replacement for puts()!  puts() appends a newline.
+   This one doesn't, and had better not!  */
 
 void
 puts_filtered (string)
@@ -1378,7 +1405,7 @@ fprint_symbol (stream, name)
    when searching for matching C++ function names (such as if the
    user types 'break FOO', where FOO is a mangled C++ function). */
 
-static int
+int
 strcmp_iw (string1, string2)
      const char *string1;
      const char *string2;

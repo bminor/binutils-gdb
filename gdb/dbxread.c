@@ -71,6 +71,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "stabsread.h"
 #include "gdb-stabs.h"
 #include "demangle.h"
+#include "language.h"		/* Needed inside partial-stab.h */
+#include "complaints.h"
 
 #include "aout/aout64.h"
 #include "aout/stab_gnu.h"	/* We always use GNU stabs, not native, now */
@@ -348,7 +350,7 @@ add_old_header_file (name, instance)
 	add_this_object_header_file (i);
 	return;
       }
-  complain (&repeated_header_complaint, (char *)symnum);
+  complain (&repeated_header_complaint, symnum);
   complain (&repeated_header_name_complaint, name);
 }
 
@@ -919,7 +921,7 @@ read_dbx_symtab (section_offsets, objfile, text_addr, text_size)
      symbol table. Read them in first. */
 
   hp_symbuf_end = hp_symbuf_idx = 0;
-  bfd_seek (abfd, HP_SYMTAB_OFFSET (objfile), 0);
+  bfd_seek (abfd, HP_SYMTAB_OFFSET (objfile), L_SET);
 
   for (hp_symnum = 0; hp_symnum < HP_SYMCOUNT (objfile); hp_symnum++)
     {
@@ -980,7 +982,7 @@ read_dbx_symtab (section_offsets, objfile, text_addr, text_size)
 				 objfile);
         }
     }
-  bfd_seek (abfd, DBX_SYMTAB_OFFSET (objfile), 0);
+  bfd_seek (abfd, DBX_SYMTAB_OFFSET (objfile), L_SET);
 #endif
 
   for (symnum = 0; symnum < DBX_SYMCOUNT (objfile); symnum++)
@@ -1018,7 +1020,7 @@ read_dbx_symtab (section_offsets, objfile, text_addr, text_size)
 #define SET_NAMESTRING()\
   if (((unsigned)bufp->n_strx + file_string_table_offset) >=		\
       DBX_STRINGTAB_SIZE (objfile)) {					\
-    complain (&string_table_offset_complaint, (char *) symnum);		\
+    complain (&string_table_offset_complaint, symnum);			\
     namestring = "foo";							\
   } else								\
     namestring = bufp->n_strx + file_string_table_offset +		\
@@ -1535,7 +1537,6 @@ read_ofile_symtab (objfile, sym_offset, sym_size, text_offset, text_size,
 	     However, there is no reason not to accept
 	     the GCC_COMPILED_FLAG_SYMBOL anywhere.  */
 
-	  processing_gcc_compilation = 0;
 	  if (strcmp (namestring, GCC_COMPILED_FLAG_SYMBOL) == 0)
 	    processing_gcc_compilation = 1;
 	  else if (strcmp (namestring, GCC2_COMPILED_FLAG_SYMBOL) == 0)
@@ -1614,6 +1615,12 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
   static CORE_ADDR function_start_offset;
   char *colon_pos;
 
+#ifndef	BLOCK_ADDRESS_FUNCTION_RELATIVE
+  /* N_LBRAC, N_RBRAC and N_SLINE entries are not relative to the
+     function start address, so just use the text offset.  */
+  function_start_offset = ANOFFSET (section_offsets, SECT_OFF_TEXT);
+#endif
+
   /* Something is wrong if we see real data before
      seeing a source file name.  */
 
@@ -1671,9 +1678,6 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 	 absolute, or relative to the N_SO, depending on
 	 BLOCK_ADDRESS_ABSOLUTE.  */
       function_start_offset = valu;	
-#else
-      /* Default on ordinary systems */
-      function_start_offset = ANOFFSET (section_offsets, SECT_OFF_TEXT);
 #endif
 
       within_function = 1;
@@ -1686,7 +1690,7 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 	}
       /* Stack must be empty now.  */
       if (context_stack_depth != 0)
-	complain (&lbrac_unmatched_complaint, (char *) symnum);
+	complain (&lbrac_unmatched_complaint, symnum);
 
       new = push_context (0, valu);
       new->name = define_symbol (valu, name, desc, type, objfile);
@@ -1708,7 +1712,7 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 #ifndef SUN_FIXED_LBRAC_BUG
       if (valu < last_pc_address) {
 	/* Patch current LBRAC pc value to match last handy pc value */
- 	complain (&lbrac_complaint, 0);
+ 	complain (&lbrac_complaint);
 	valu = last_pc_address;
       }
 #endif
@@ -1730,7 +1734,7 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 
       new = pop_context();
       if (desc != new->depth)
-	complain (&lbrac_mismatch_complaint, (char *) symnum);
+	complain (&lbrac_mismatch_complaint, symnum);
 
       /* Some compilers put the variable decls inside of an
          LBRAC/RBRAC block.  This macro should be nonzero if this
@@ -1762,7 +1766,7 @@ process_one_symbol (type, desc, valu, name, section_offsets, objfile)
 	  /* FIXME Muzzle a compiler bug that makes end < start.  */
 	  if (new->start_addr > valu)
 	    {
-	      complain(&lbrac_rbrac_complaint, 0);
+	      complain (&lbrac_rbrac_complaint);
 	      new->start_addr = valu;
 	    }
 	  /* Make a block for the local symbols within.  */
@@ -2059,9 +2063,9 @@ elfstab_build_psymtabs (objfile, section_offsets, mainline,
       struct objfile *objfile;
       struct section_offsets *section_offsets;
       int mainline;
-      unsigned int staboffset;
+      file_ptr staboffset;
       unsigned int stabsize;
-      unsigned int stabstroffset;
+      file_ptr stabstroffset;
       unsigned int stabstrsize;
 {
   int val;

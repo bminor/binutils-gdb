@@ -43,6 +43,7 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "objfiles.h"
 #include "buildsym.h"
 #include "gdb-stabs.h"
+#include "complaints.h"
 #include <string.h>
 
 #define STREQ(a,b) (strcmp((a),(b))==0)
@@ -373,13 +374,12 @@ elf_symtab_read (abfd, addr, objfile)
 					   sizeof (*sectinfo));
 		      memset ((PTR) sectinfo, 0, sizeof (*sectinfo));
 		      if (!filesym)
-			complain (&section_info_complaint, (char *)sym->name);
+			complain (&section_info_complaint, sym->name);
 		      else
 			sectinfo->filename = (char *)filesym->name;
 		    }
 		  if (sectinfo->sections[index])
-		    complain (&section_info_dup_complaint,
-			      (char *)sectinfo->filename);
+		    complain (&section_info_dup_complaint, sectinfo->filename);
 
 		  symaddr = sym -> value;
 		  /* Relocate all non-absolute symbols by base address.  */
