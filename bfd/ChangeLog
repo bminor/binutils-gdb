@@ -1,3 +1,10 @@
+Tue Jul 11 17:21:52 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* elf.c (bfd_elf_get_sign_extend_vma): Return tendency of VMA
+ 	addresses to be "naturally" sign extended.  Return -1 if unknown.
+	* bfd-in.h (bfd_elf_get_sign_extend_vma): : Add declaration.
+	* bfd-in2.h: Regenerate.
+
 Tue Jul 11 16:25:52 2000  Andrew Cagney  <cagney@b1.cygnus.com>
 
 	* ecoffswap.h (ecoff_get_off, ecoff_put_off): Add ECOFF_SIGNED_32
