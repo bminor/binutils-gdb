@@ -440,14 +440,14 @@ static off_t lseek_offset;
 int
 write_with_trace (fd, arg, len, file, line)
      int  fd;
-     int *arg;
+     long *arg;
      size_t len;
      char *file;
      int  line;
 {
   int  i;
   int ret;
-  int opcode = arg[0];
+  long opcode = arg[0];
 
   if (procfs_trace)
     {

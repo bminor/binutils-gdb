@@ -1391,7 +1391,7 @@ proc_stop_process (pi)
   else
     {
 #ifdef NEW_PROC_API
-      int cmd = PCSTOP;
+      long cmd = PCSTOP;
       win = (write (pi->ctl_fd, (char *) &cmd, sizeof (cmd)) == sizeof (cmd));
 #else	/* ioctl method */
       win = (ioctl (pi->ctl_fd, PIOCSTOP, &pi->prstatus) >= 0);
@@ -1435,7 +1435,7 @@ proc_wait_for_stop (pi)
 
 #ifdef NEW_PROC_API
   {
-    int cmd = PCWSTOP;
+    long cmd = PCWSTOP;
     win = (write (pi->ctl_fd, (char *) &cmd, sizeof (cmd)) == sizeof (cmd));
     /* We been runnin' and we stopped -- need to update status.  */
     pi->status_valid = 0;
@@ -1512,7 +1512,7 @@ proc_run_process (pi, step, signo)
 
 #ifdef NEW_PROC_API
   {
-    int cmd[2];
+    long cmd[2];
 
     cmd[0]  = PCRUN;
     cmd[1]  = runflags;
@@ -1558,7 +1558,7 @@ proc_set_traced_signals (pi, sigset)
 #ifdef NEW_PROC_API
   {
     struct {
-      int cmd;
+      long cmd;
       /* Use char array to avoid alignment issues.  */
       char sigset[sizeof (sigset_t)];
     } arg;
@@ -1606,7 +1606,7 @@ proc_set_traced_faults (pi, fltset)
 #ifdef NEW_PROC_API
   {
     struct {
-      int cmd;
+      long cmd;
       /* Use char array to avoid alignment issues.  */
       char fltset[sizeof (fltset_t)];
     } arg;
@@ -1652,7 +1652,7 @@ proc_set_traced_sysentry (pi, sysset)
 #ifdef NEW_PROC_API
   {
     struct {
-      int cmd;
+      long cmd;
       /* Use char array to avoid alignment issues.  */
       char sysset[sizeof (sysset_t)];
     } arg;
@@ -1698,7 +1698,7 @@ proc_set_traced_sysexit (pi, sysset)
 #ifdef NEW_PROC_API
   {
     struct {
-      int cmd;
+      long cmd;
       /* Use char array to avoid alignment issues.  */
       char sysset[sizeof (sysset_t)];
     } arg;
@@ -1744,7 +1744,7 @@ proc_set_held_signals (pi, sighold)
 #ifdef NEW_PROC_API
   {
     struct {
-      int cmd;
+      long cmd;
       /* Use char array to avoid alignment issues.  */
       char hold[sizeof (sigset_t)];
     } arg;
@@ -2162,7 +2162,7 @@ proc_clear_current_fault (pi)
 
 #ifdef NEW_PROC_API
   {
-    int cmd = PCCFAULT;
+    long cmd = PCCFAULT;
     win = (write (pi->ctl_fd, (void *) &cmd, sizeof (cmd)) == sizeof (cmd));
   }
 #else
@@ -2192,7 +2192,7 @@ proc_set_current_signal (pi, signo)
 {
   int win;
   struct {
-    int cmd;
+    long cmd;
     /* Use char array to avoid alignment issues.  */
     char sinfo[sizeof (struct siginfo)];
   } arg;
@@ -2262,7 +2262,7 @@ proc_clear_current_signal (pi)
 #ifdef NEW_PROC_API
   {
     struct {
-      int cmd;
+      long cmd;
       /* Use char array to avoid alignment issues.  */
       char sinfo[sizeof (struct siginfo)];
     } arg;
@@ -2422,7 +2422,7 @@ proc_set_gregs (pi)
     {
 #ifdef NEW_PROC_API
       struct {
-	int cmd;
+	long cmd;
 	/* Use char array to avoid alignment issues.  */
 	char gregs[sizeof (gdb_gregset_t)];
       } arg;
@@ -2466,7 +2466,7 @@ proc_set_fpregs (pi)
     {
 #ifdef NEW_PROC_API
       struct {
-	int cmd;
+	long cmd;
 	/* Use char array to avoid alignment issues.  */
 	char fpregs[sizeof (gdb_fpregset_t)];
       } arg;
@@ -2530,7 +2530,7 @@ proc_kill (pi, signo)
   else
     {
 #ifdef NEW_PROC_API
-      int cmd[2];
+      long cmd[2];
 
       cmd[0] = PCKILL;
       cmd[1] = signo;
@@ -2594,7 +2594,7 @@ proc_set_watchpoint (pi, addr, len, wflags)
   return 0;
 #else
   struct {
-    int cmd;
+    long cmd;
     char watch[sizeof (prwatch_t)];
   } arg;
   prwatch_t *pwatch;

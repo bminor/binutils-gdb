@@ -1,3 +1,13 @@
+2000-05-05  Michael Snyder  <msnyder@seadog.cygnus.com>
+
+	* procfs.c (many functions): change int cmd; to long cmd;
+	Solaris /proc API calls this parameter a long, and requires it
+	for 64-bit hosts (where sizeof(long) != sizeof(int)).  UnixWare
+	calls it an int, but on existing UnixWare hosts, int and long
+	are the same size.  So long it must be.  If a future UnixWare
+	version has problems with this, we'll have to use autoconf.
+	* proc-api.c (write_with_trace): use long instead of int.
+
 2000-05-04  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386-linux-nat.c: Define PT_READ_U and PT_WRITE_U if they're not
