@@ -811,8 +811,7 @@ end_symtab (end_addr, objfile, section)
 
   if (context_stack_depth > 0)
     {
-      context_stack_depth--;
-      cstk = &context_stack[context_stack_depth];
+      cstk = pop_context();
       /* Make a block for the local symbols within.  */
       finish_block (cstk->name, &local_symbols, cstk->old_blocks,
 		    cstk->start_addr, end_addr, objfile);

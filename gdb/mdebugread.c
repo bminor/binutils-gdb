@@ -2567,7 +2567,7 @@ parse_partial_symbols (objfile, section_offsets)
 		{
 		  if (sh.st == stProc || sh.st == stStaticProc)
 		    {
-		      long procaddr;
+		      CORE_ADDR procaddr;
 		      long isym;
 	
 		      sh.value += ANOFFSET (section_offsets, SECT_OFF_TEXT);
@@ -2594,7 +2594,7 @@ parse_partial_symbols (objfile, section_offsets)
 				      &sh);
 		      if (sh.st == stEnd)
 			{
-			  long high = procaddr + sh.value;
+			  CORE_ADDR high = procaddr + sh.value;
 
 	      		  /* Kludge for Irix 5.2 zero fh->adr.  */
 			  if (!relocatable
@@ -2708,8 +2708,8 @@ parse_partial_symbols (objfile, section_offsets)
 
 	      switch (sh.st)
 		{
-		  long high;
-		  long procaddr;
+		  CORE_ADDR high;
+		  CORE_ADDR procaddr;
 		  int new_sdx;
 
 		case stStaticProc:

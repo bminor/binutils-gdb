@@ -1,3 +1,9 @@
+Mon Oct 21 18:17:08 1996  Mark Alexander  <marka@cygnus.com>
+
+	* mdebugread.c (parse_partial_symbols): Fix 64-bit
+	sign-extension problems in calculating psymtab addresses.
+	* buildsym.c (end_symtab): Use macro to pop context.
+
 Mon Oct 21 14:40:50 1996  Stu Grossman  (grossman@critters.cygnus.com)
 
 	* v850-tdep.c:  Cleanup lots of things.  Add many comments.
