@@ -46,23 +46,23 @@ ldindr.c
 ldindr.h
 ldfile.h
 ldgld.c
-ldgld.script
+ldgld.sc
 ldgld68k.c
-ldgld68k.script
-ldgld68kUr.script
-ldgld68kr.script
+ldgld68k.sc
+ldgld68kUr.sc
+ldgld68kr.sc
 ldgld960.c
-ldgld960.script
-ldgldUr.script
+ldgld960.sc
+ldgldUr.sc
 ldgldm88kbcs.c
-ldgldm88kbcs.script
-ldgldm88kbcsUr.script
-ldgldm88kbcsr.script
+ldgldm88kbcs.sc
+ldgldm88kbcsUr.sc
+ldgldm88kbcsr.sc
 ldglda29k.c
-ldglda29k.script
-ldglda29kUr.script
-ldglda29kr.script
-ldgldr.script
+ldglda29k.sc
+ldglda29kUr.sc
+ldglda29kr.sc
+ldgldr.sc
 ldgram.h
 ldgram.y
 ldlang.c
@@ -70,8 +70,8 @@ ldlang.h
 ldlex.h
 ldlex.l
 ldlnk960.c
-ldlnk960.script
-ldlnk960r.script
+ldlnk960.sc
+ldlnk960r.sc
 ldmain.c
 ldmain.h
 ldmisc.c
@@ -93,7 +93,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.5  1991/08/27 00:21:34  steve
+# Revision 1.6  1991/09/03 21:04:00  steve
+# *** empty log message ***
+#
+# Revision 1.5  1991/08/27  00:21:34  steve
 # Added config.sub
 #
 # Revision 1.4  1991/08/06  21:28:21  steve

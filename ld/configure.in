@@ -57,12 +57,12 @@ else
 	esac
 fi
 
-if [ ! -f config/hmake-${my_host} ] ; then
+if [ ! -f config/h-${my_host} ] ; then
 	echo '***' The linker do not support host ${host}
 	exit 1
 fi
 
-host_makefile_frag=config/hmake-${my_host}
+host_makefile_frag=config/h-${my_host}
 
 # per-target:
 
@@ -76,7 +76,7 @@ m88k)	my_target=m88k-bcs ;;
 a29k)	my_target=coff-a29k ;;
 esac
 
-target_makefile_frag=config/tmake-${my_target}
+target_makefile_frag=config/t-${my_target}
 
 files=
 links=

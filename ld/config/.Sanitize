@@ -20,7 +20,7 @@ Do-first:
 echo Sanitizing `pwd`...
 
 if ( echo $* | grep keep\-v9 > /dev/null ) ; then
-	keep_these_too=hmake-sun4-64
+	keep_these_too=h-sun4-64
 fi
 
 # All files listed between the "Things-to-keep:" line and the
@@ -30,14 +30,14 @@ fi
 # with rm -rf.
 
 Things-to-keep:
-hmake-rtbsd
-hmake-dgux
-hmake-sun3
-hmake-sun4
-hmake-dec3100
-tmake-sun4
-tmake-m88k-bcs
-tmake-coff-a29k
+h-rtbsd
+h-dgux
+h-sun3
+h-sun4
+h-dec3100
+t-sun4
+t-m88k-bcs
+t-coff-a29k
 Do-last:
 
 echo Done in `pwd`.
@@ -45,7 +45,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.4  1991/07/15 23:41:06  steve
+# Revision 1.5  1991/09/03 21:04:24  steve
+# *** empty log message ***
+#
+# Revision 1.4  1991/07/15  23:41:06  steve
 # *** empty log message ***
 #
 # Revision 1.3  1991/06/14  22:11:24  steve

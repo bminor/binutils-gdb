@@ -26,11 +26,11 @@ DEBUG	= -g
 BISON = bison
 BISONFLAGS = -v
 
-SCRIPTS = ldgld68k.script ldgld68kUr.script ldgld68kr.script \
-	ldgld.script ldgldUr.script ldgldr.script ldlnk960.script \
-	ldlnk960r.script ldgld960.script \
-	ldgldm88kbcs.script ldgldm88kbcsUr.script ldgldm88kbcsr.script \
-	ldglda29k.script ldglda29kUr.script ldglda29kr.script
+SCRIPTS = ldgld68k.sc ldgld68kUr.sc ldgld68kr.sc \
+	ldgld.sc ldgldUr.sc ldgldr.sc ldlnk960.sc \
+	ldlnk960r.sc ldgld960.sc \
+	ldgldm88kbcs.sc ldgldm88kbcsUr.sc ldgldm88kbcsr.sc \
+	ldglda29k.sc ldglda29kUr.sc ldglda29kr.sc
 
 PROCESSED_SCRIPTS = ldgld68k.x ldgld68kUr.x ldgld68kr.x ldgld.x \
 	ldgldUr.x ldgldr.x ldlnk960.x ldlnk960r.x ldgld960.x \
@@ -43,7 +43,7 @@ PROCESSED_SCRIPTS = ldgld68k.x ldgld68kUr.x ldgld68kr.x ldgld.x \
 CFLAGS	= $(INCLUDES) $(DEBUG) $(HDEFINES) $(TDEFINES) $(CDEFINES)
 LINTFLAGS =  $(INCLUDES) $(EXTRA_DEF) 
 
-.SUFFIXES: .y .x .script $(SUFFIXES)
+.SUFFIXES: .y .x .sc $(SUFFIXES)
 
 
 # go directly to ld.new in case this ld isn't capable of
@@ -51,7 +51,7 @@ LINTFLAGS =  $(INCLUDES) $(EXTRA_DEF)
 # install.
 LD_PROG	= ld.new
 
-.script.x:
+.sc.x:
 	./mkscript < $< >$*.x
 
 # for self hosting
@@ -122,7 +122,7 @@ ld.dvi:ld.tex
 	tex ld.tex
 
 mkscript: $(srcdir)/mkscript.c
-	$(CC) $(CFLAGS) -o mkscript $(srcdir)/mkscript.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o mkscript $(srcdir)/mkscript.c $(LOADLIBES)
 
 ldgld.o: $(PROCESSED_SCRIPTS) ldgld.c 
 
@@ -131,22 +131,22 @@ ldlex.o: ldlex.c ldgram.h
 ldgram.o: ldgram.c
 ldgram.c:ldgram.y
 
-ldgld68k.x :ldgld68k.script 
-ldgld68kUr.x :ldgld68kUr.script 
-ldgld68kr.x :ldgld68kr.script 
-ldgld.x :ldgld.script 
-ldgldUr.x :ldgldUr.script 
-ldgldr.x :ldgldr.script 
-ldlnk960.x :ldlnk960.script 
-ldlnk960r.x :ldlnk960r.script 
-ldgld960.x :ldgld960.script 
-ldgldm88kbcs.x :ldgldm88kbcs.script 
-ldgldm88kbcsUr.x :ldgldm88kbcsUr.script 
-ldgldm88kbcsr.x:ldgldm88kbcsr.script
-ldgld68k.x:ldgld68k.script
-ldglda29k.x :ldglda29k.script 
-ldglda29kr.x :ldglda29kr.script 
-ldglda29kUr.x :ldglda29kUr.script 
+ldgld68k.x :ldgld68k.sc 
+ldgld68kUr.x :ldgld68kUr.sc 
+ldgld68kr.x :ldgld68kr.sc 
+ldgld.x :ldgld.sc 
+ldgldUr.x :ldgldUr.sc 
+ldgldr.x :ldgldr.sc 
+ldlnk960.x :ldlnk960.sc 
+ldlnk960r.x :ldlnk960r.sc 
+ldgld960.x :ldgld960.sc 
+ldgldm88kbcs.x :ldgldm88kbcs.sc 
+ldgldm88kbcsUr.x :ldgldm88kbcsUr.sc 
+ldgldm88kbcsr.x:ldgldm88kbcsr.sc
+ldgld68k.x:ldgld68k.sc
+ldglda29k.x :ldglda29k.sc 
+ldglda29kr.x :ldglda29kr.sc 
+ldglda29kUr.x :ldglda29kUr.sc 
 
 stage1:	force
 	- mkdir stage1
