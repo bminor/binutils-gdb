@@ -49,22 +49,23 @@ gdb_load ${binfile}
 
 # Some coverage stuff
 #
-gdb_test "kill" ".*The program is not being run.*"
-gdb_test "detach" ".*"
-gdb_test "run" ".*"
+if ![target_info exists use_gdb_stub] {
+    gdb_test "kill" ".*The program is not being run.*"
+    gdb_test "detach" ".*"
+    gdb_test "run" ".*"
 
-gdb_load ${binfile}
-gdb_test "kill" ".*"
-gdb_test "detach" ".*"
+    gdb_load ${binfile}
+    gdb_test "kill" ".*" "kill again"
+    gdb_test "detach" ".*" "detach again"
+
+    gdb_exit
+    gdb_start
+    gdb_reinitialize_dir $srcdir/$subdir
+    gdb_load ${binfile}
+}
 
 # Ok, on to real life
 #
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
-
 if ![runto_main] then {
     fail "Could not run to main - other tests will fail."
     continue
