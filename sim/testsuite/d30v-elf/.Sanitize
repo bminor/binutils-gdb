@@ -38,6 +38,9 @@ em-e0.S
 em-e47.S
 em-pchr.S
 em-pstr.S
+exit47.s
+hello.s
+loop.s
 ls-ld2h.S
 ls-ld2w.S
 ls-ld4bh.S
@@ -57,6 +60,8 @@ ls-stb.S
 ls-sth.S
 ls-sthh.S
 ls-stw.S
+os-dbt.S
+tick.s
 
 Things-to-lose:
 

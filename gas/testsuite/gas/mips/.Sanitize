@@ -70,6 +70,7 @@ lb.s
 ld.d
 ld.s
 ld-empic.d
+ld-ilocks.d
 ld-pic.s
 ld-svr4pic.d
 ld-xgot.d

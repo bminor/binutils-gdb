@@ -22,7 +22,7 @@ else
         lose_these_too="${d30v_files} ${lose_these_too}"
 fi
 
-r5900_files="mips64r5900el-elf"
+r5900_files="mips64vr5900el-elf"
 if ( echo $* | grep keep\-r5900 > /dev/null ) ; then
         keep_these_too="${r5900_files} ${keep_these_too}"
 else
@@ -47,6 +47,7 @@ ChangeLog
 Makefile.in
 configure
 configure.in
+d10v-elf
 
 Things-to-lose:
 

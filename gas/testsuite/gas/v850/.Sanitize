@@ -39,6 +39,8 @@ mem.s
 misc.s
 move.s
 range.s
+reloc.s
+
 Things-to-lose:
 
 Do-last:
