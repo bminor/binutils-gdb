@@ -663,7 +663,7 @@ static void set_at PARAMS ((int *counter, int reg, int unsignedp));
 static void check_absolute_expr PARAMS ((struct mips_cl_insn * ip,
 					 expressionS *));
 static void load_register PARAMS ((int *, int, expressionS *, int));
-static void load_address PARAMS ((int *counter, int reg, expressionS *ep));
+static void load_address PARAMS ((int *, int, expressionS *, int, int *));
 static void move_register PARAMS ((int *, int, int));
 static void macro PARAMS ((struct mips_cl_insn * ip));
 static void mips16_macro PARAMS ((struct mips_cl_insn * ip));
@@ -3489,10 +3489,12 @@ load_register (counter, reg, ep, dbl)
 /* Load an address into a register.  */
 
 static void
-load_address (counter, reg, ep)
+load_address (counter, reg, ep, dbl, used_at)
      int *counter;
      int reg;
      expressionS *ep;
+     int dbl;
+     int *used_at;
 {
   char *p;
 
@@ -3505,7 +3507,7 @@ load_address (counter, reg, ep)
 
   if (ep->X_op == O_constant)
     {
-      load_register (counter, reg, ep, 0);
+      load_register (counter, reg, ep, dbl);
       return;
     }
 
@@ -3516,27 +3518,86 @@ load_address (counter, reg, ep)
 	 Otherwise we want
 	   lui		$reg,<sym>		(BFD_RELOC_HI16_S)
 	   addiu	$reg,$reg,<sym>		(BFD_RELOC_LO16)
-	 If we have an addend, we always use the latter form.  */
-      if ((valueT) ep->X_add_number > MAX_GPREL_OFFSET
-	  || nopic_need_relax (ep->X_add_symbol, 1))
-	p = NULL;
+	 If we have an addend, we always use the latter form.
+	 
+	 With 64bit address space and a usable $at we want
+	   lui		$reg,<sym>		(BFD_RELOC_MIPS_HIGHEST)
+	   lui		$at,<sym>		(BFD_RELOC_HI16_S)
+	   daddiu	$reg,<sym>		(BFD_RELOC_MIPS_HIGHER)
+	   daddiu	$at,<sym>		(BFD_RELOC_LO16)
+	   dsll32	$reg,0
+	   dadd		$reg,$reg,$at
+       
+	 If $at is already in use, we use an path which is suboptimal
+	 on superscalar processors.
+	   lui		$reg,<sym>		(BFD_RELOC_MIPS_HIGHEST)
+	   daddiu	$reg,<sym>		(BFD_RELOC_MIPS_HIGHER)
+	   dsll		$reg,16
+	   daddiu	$reg,<sym>		(BFD_RELOC_HI16_S)
+	   dsll		$reg,16
+	   daddiu	$reg,<sym>		(BFD_RELOC_LO16)
+       */
+      if (HAVE_64BIT_ADDRESSES)
+	{
+	  p = NULL;
+
+	  /* We don't do GP optimization for now because RELAX_ENCODE can't
+	     hold the data for such large chunks.  */
+
+	  if (*used_at == 0)
+	    {
+	      macro_build (p, counter, ep, "lui", "t,u",
+			   reg, (int) BFD_RELOC_MIPS_HIGHEST);
+	      macro_build (p, counter, ep, "lui", "t,u",
+			   AT, (int) BFD_RELOC_HI16_S);
+	      macro_build (p, counter, ep, "daddiu", "t,r,j",
+			   reg, reg, (int) BFD_RELOC_MIPS_HIGHER);
+	      macro_build (p, counter, ep, "daddiu", "t,r,j",
+			   AT, AT, (int) BFD_RELOC_LO16);
+	      macro_build (p, counter, NULL, "dsll32", "d,w,<",
+			   reg, reg, 0);
+	      macro_build (p, counter, NULL, "dadd", "d,v,t",
+			   reg, reg, AT);
+	      *used_at = 1;
+	    }
+	  else
+	    {
+	      macro_build (p, counter, ep, "lui", "t,u",
+			   reg, (int) BFD_RELOC_MIPS_HIGHEST);
+	      macro_build (p, counter, ep, "daddiu", "t,r,j",
+			   reg, reg, (int) BFD_RELOC_MIPS_HIGHER);
+	      macro_build (p, counter, NULL, "dsll", "d,w,<",
+			   reg, reg, 16);
+	      macro_build (p, counter, ep, "daddiu", "t,r,j",
+			   reg, reg, (int) BFD_RELOC_HI16_S);
+	      macro_build (p, counter, NULL, "dsll", "d,w,<",
+			   reg, reg, 16);
+	      macro_build (p, counter, ep, "daddiu", "t,r,j",
+			   reg, reg, (int) BFD_RELOC_LO16);
+	    }
+	}
       else
 	{
-	  frag_grow (20);
-	  macro_build ((char *) NULL, counter, ep,
+	  p = NULL;
+	  if ((valueT) ep->X_add_number <= MAX_GPREL_OFFSET
+	      && ! nopic_need_relax (ep->X_add_symbol, 1))
+	    {
+	      frag_grow (20);
+	      macro_build ((char *) NULL, counter, ep,
+			   HAVE_32BIT_ADDRESSES ? "addiu" : "daddiu",
+			   "t,r,j", reg, GP, (int) BFD_RELOC_MIPS_GPREL);
+	      p = frag_var (rs_machine_dependent, 8, 0,
+			    RELAX_ENCODE (4, 8, 0, 4, 0,
+					  mips_opts.warn_about_macros),
+			    ep->X_add_symbol, (offsetT) 0, (char *) NULL);
+	    }
+	  macro_build_lui (p, counter, ep, reg);
+	  if (p != NULL)
+	    p += 4;
+	  macro_build (p, counter, ep,
 		       HAVE_32BIT_ADDRESSES ? "addiu" : "daddiu",
-		       "t,r,j", reg, GP, (int) BFD_RELOC_MIPS_GPREL);
-	  p = frag_var (rs_machine_dependent, 8, 0,
-			RELAX_ENCODE (4, 8, 0, 4, 0,
-				      mips_opts.warn_about_macros),
-			ep->X_add_symbol, (offsetT) 0, (char *) NULL);
+		       "t,r,j", reg, reg, (int) BFD_RELOC_LO16);
 	}
-      macro_build_lui (p, counter, ep, reg);
-      if (p != NULL)
-	p += 4;
-      macro_build (p, counter, ep,
-		   HAVE_32BIT_ADDRESSES ? "addiu" : "daddiu",
-		   "t,r,j", reg, reg, (int) BFD_RELOC_LO16);
     }
   else if (mips_pic == SVR4_PIC && ! mips_big_got)
     {
@@ -3801,7 +3862,7 @@ macro (ip)
 	  return;
 	}
 
-      load_register (&icnt, AT, &imm_expr, 0);
+      load_register (&icnt, AT, &imm_expr, HAVE_64BIT_GPRS);
       macro_build ((char *) NULL, &icnt, NULL, s2, "d,v,t", treg, sreg, AT);
       break;
 
@@ -4406,34 +4467,91 @@ macro (ip)
 	load_register (&icnt, tempreg, &offset_expr, dbl);
       else if (mips_pic == NO_PIC)
 	{
-	  /* If this is a reference to an GP relative symbol, we want
+	  /* If this is a reference to a GP relative symbol, we want
 	       addiu	$tempreg,$gp,<sym>	(BFD_RELOC_MIPS_GPREL)
 	     Otherwise we want
 	       lui	$tempreg,<sym>		(BFD_RELOC_HI16_S)
 	       addiu	$tempreg,$tempreg,<sym>	(BFD_RELOC_LO16)
 	     If we have a constant, we need two instructions anyhow,
-	     so we may as well always use the latter form.  */
-	  if ((valueT) offset_expr.X_add_number > MAX_GPREL_OFFSET
-	      || nopic_need_relax (offset_expr.X_add_symbol, 1))
-	    p = NULL;
-	  else
+	     so we may as well always use the latter form.
+	 
+	    With 64bit address space and a usable $at we want
+	      lui	$tempreg,<sym>		(BFD_RELOC_MIPS_HIGHEST)
+	      lui	$at,<sym>		(BFD_RELOC_HI16_S)
+	      daddiu	$tempreg,<sym>		(BFD_RELOC_MIPS_HIGHER)
+	      daddiu	$at,<sym>		(BFD_RELOC_LO16)
+	      dsll32	$tempreg,0
+	      dadd	$tempreg,$tempreg,$at
+       
+	    If $at is already in use, we use an path which is suboptimal
+	    on superscalar processors.
+	      lui	$tempreg,<sym>		(BFD_RELOC_MIPS_HIGHEST)
+	      daddiu	$tempreg,<sym>		(BFD_RELOC_MIPS_HIGHER)
+	      dsll	$tempreg,16
+	      daddiu	$tempreg,<sym>		(BFD_RELOC_HI16_S)
+	      dsll	$tempreg,16
+	      daddiu	$tempreg,<sym>		(BFD_RELOC_LO16)
+	  */
+	  p = NULL;
+	  if (HAVE_64BIT_ADDRESSES)
 	    {
-	      frag_grow (20);
-	      macro_build ((char *) NULL, &icnt, &offset_expr,
-			   HAVE_32BIT_ADDRESSES ? "addiu" : "daddiu",
-			   "t,r,j", tempreg, GP, (int) BFD_RELOC_MIPS_GPREL);
-	      p = frag_var (rs_machine_dependent, 8, 0,
-			    RELAX_ENCODE (4, 8, 0, 4, 0,
-					  mips_opts.warn_about_macros),
-			    offset_expr.X_add_symbol, (offsetT) 0,
-			    (char *) NULL);
-	    }
-	  macro_build_lui (p, &icnt, &offset_expr, tempreg);
-	  if (p != NULL)
-	    p += 4;
-	  macro_build (p, &icnt, &offset_expr,
-		       HAVE_32BIT_ADDRESSES ? "addiu" : "daddiu",
-		       "t,r,j", tempreg, tempreg, (int) BFD_RELOC_LO16);
+	      /* We don't do GP optimization for now because RELAX_ENCODE can't
+		 hold the data for such large chunks.  */
+
+	    if (used_at == 0)
+	      {
+		macro_build (p, &icnt, &offset_expr, "lui", "t,u",
+			     tempreg, (int) BFD_RELOC_MIPS_HIGHEST);
+		macro_build (p, &icnt, &offset_expr, "lui", "t,u",
+			     AT, (int) BFD_RELOC_HI16_S);
+		macro_build (p, &icnt, &offset_expr, "daddiu", "t,r,j",
+			     tempreg, tempreg, (int) BFD_RELOC_MIPS_HIGHER);
+		macro_build (p, &icnt, &offset_expr, "daddiu", "t,r,j",
+			     AT, AT, (int) BFD_RELOC_LO16);
+		macro_build (p, &icnt, NULL, "dsll32", "d,w,<",
+			     tempreg, tempreg, 0);
+		macro_build (p, &icnt, NULL, "dadd", "d,v,t",
+			     tempreg, tempreg, AT);
+		used_at = 1;
+	      }
+	    else
+	      {
+		macro_build (p, &icnt, &offset_expr, "lui", "t,u",
+			     tempreg, (int) BFD_RELOC_MIPS_HIGHEST);
+		macro_build (p, &icnt, &offset_expr, "daddiu", "t,r,j",
+			     tempreg, tempreg, (int) BFD_RELOC_MIPS_HIGHER);
+		macro_build (p, &icnt, NULL, "dsll", "d,w,<",
+			     tempreg, tempreg, 16);
+		macro_build (p, &icnt, &offset_expr, "daddiu", "t,r,j",
+			     tempreg, tempreg, (int) BFD_RELOC_HI16_S);
+		macro_build (p, &icnt, NULL, "dsll", "d,w,<",
+			     tempreg, tempreg, 16);
+		macro_build (p, &icnt, &offset_expr, "daddiu", "t,r,j",
+			     tempreg, tempreg, (int) BFD_RELOC_LO16);
+	      }
+	  }
+	else
+	  {
+	    if ((valueT) offset_expr.X_add_number <= MAX_GPREL_OFFSET
+		&& ! nopic_need_relax (offset_expr.X_add_symbol, 1))
+	      {
+		frag_grow (20);
+		macro_build ((char *) NULL, &icnt, &offset_expr,
+			     HAVE_32BIT_ADDRESSES ? "addiu" : "daddiu",
+			     "t,r,j", tempreg, GP, (int) BFD_RELOC_MIPS_GPREL);
+		p = frag_var (rs_machine_dependent, 8, 0,
+			      RELAX_ENCODE (4, 8, 0, 4, 0,
+					    mips_opts.warn_about_macros),
+			      offset_expr.X_add_symbol, (offsetT) 0,
+			      (char *) NULL);
+	      }
+	    macro_build_lui (p, &icnt, &offset_expr, tempreg);
+	    if (p != NULL)
+	      p += 4;
+	    macro_build (p, &icnt, &offset_expr,
+			 HAVE_32BIT_ADDRESSES ? "addiu" : "daddiu",
+			 "t,r,j", tempreg, tempreg, (int) BFD_RELOC_LO16);
+	  }
 	}
       else if (mips_pic == SVR4_PIC && ! mips_big_got)
 	{
@@ -5164,7 +5282,90 @@ macro (ip)
 	       lui	$tempreg,<sym>		(BFD_RELOC_HI16_S)
 	       addu	$tempreg,$tempreg,$breg
 	       <op>	$treg,<sym>($tempreg)	(BFD_RELOC_LO16)
-	     With a constant we always use the latter case.  */
+	     With a constant we always use the latter case.
+	   
+	     With 64bit address space and no base register and $at usable,
+	     we want
+	       lui	$tempreg,<sym>		(BFD_RELOC_MIPS_HIGHEST)
+	       lui	$at,<sym>		(BFD_RELOC_HI16_S)
+	       daddiu	$tempreg,<sym>		(BFD_RELOC_MIPS_HIGHER)
+	       dsll32	$tempreg,0
+	       daddu	$tempreg,$at
+	       <op>	$treg,<sym>($tempreg)	(BFD_RELOC_LO16)
+	     If we have a base register, we want
+	       lui	$tempreg,<sym>		(BFD_RELOC_MIPS_HIGHEST)
+	       lui	$at,<sym>		(BFD_RELOC_HI16_S)
+	       daddiu	$tempreg,<sym>		(BFD_RELOC_MIPS_HIGHER)
+	       daddu	$at,$breg
+	       dsll32	$tempreg,0
+	       daddu	$tempreg,$at
+	       <op>	$treg,<sym>($tempreg)	(BFD_RELOC_LO16)
+
+	     Without $at we can't generate the optimal path for superscalar
+	     processors here since this would require two temporary registers.
+	       lui	$tempreg,<sym>		(BFD_RELOC_MIPS_HIGHEST)
+	       daddiu	$tempreg,<sym>		(BFD_RELOC_MIPS_HIGHER)
+	       dsll	$tempreg,16
+	       daddiu	$tempreg,<sym>		(BFD_RELOC_HI16_S)
+	       dsll	$tempreg,16
+	       <op>	$treg,<sym>($tempreg)	(BFD_RELOC_LO16)
+	     If we have a base register, we want
+	       lui	$tempreg,<sym>		(BFD_RELOC_MIPS_HIGHEST)
+	       daddiu	$tempreg,<sym>		(BFD_RELOC_MIPS_HIGHER)
+	       dsll	$tempreg,16
+	       daddiu	$tempreg,<sym>		(BFD_RELOC_HI16_S)
+	       dsll	$tempreg,16
+	       daddu	$tempreg,$tempreg,$breg
+	       <op>	$treg,<sym>($tempreg)	(BFD_RELOC_LO16)
+	   */
+	  if (HAVE_64BIT_ADDRESSES)
+	    {
+	      p = NULL;
+
+	      /* We don't do GP optimization for now because RELAX_ENCODE can't
+		 hold the data for such large chunks.  */
+
+	      if (used_at == 0)
+		{
+		  macro_build (p, &icnt, &offset_expr, "lui", "t,u",
+			       tempreg, (int) BFD_RELOC_MIPS_HIGHEST);
+		  macro_build (p, &icnt, &offset_expr, "lui", "t,u",
+			       AT, (int) BFD_RELOC_HI16_S);
+		  macro_build (p, &icnt, &offset_expr, "daddiu", "t,r,j",
+			       tempreg, tempreg, (int) BFD_RELOC_MIPS_HIGHER);
+		  if (breg != 0)
+		    macro_build (p, &icnt, NULL, "daddu", "d,v,t",
+				 AT, AT, breg);
+		  macro_build (p, &icnt, NULL, "dsll32", "d,w,<",
+			       tempreg, tempreg, 0);
+		  macro_build (p, &icnt, NULL, "daddu", "d,v,t",
+			       tempreg, tempreg, AT);
+		  macro_build (p, &icnt, &offset_expr, s,
+			       fmt, treg, (int) BFD_RELOC_LO16, tempreg);
+		  used_at = 1;
+		}
+	      else
+		{
+		  macro_build (p, &icnt, &offset_expr, "lui", "t,u",
+			       tempreg, (int) BFD_RELOC_MIPS_HIGHEST);
+		  macro_build (p, &icnt, &offset_expr, "daddiu", "t,r,j",
+			       tempreg, tempreg, (int) BFD_RELOC_MIPS_HIGHER);
+		  macro_build (p, &icnt, NULL, "dsll", "d,w,<",
+			       tempreg, tempreg, 16);
+		  macro_build (p, &icnt, &offset_expr, "daddiu", "t,r,j",
+			       tempreg, tempreg, (int) BFD_RELOC_HI16_S);
+		  macro_build (p, &icnt, NULL, "dsll", "d,w,<",
+			       tempreg, tempreg, 16);
+		  if (breg != 0)
+		    macro_build (p, &icnt, NULL, "daddu", "d,v,t",
+				 tempreg, tempreg, breg);
+		  macro_build (p, &icnt, &offset_expr, s,
+			       fmt, treg, (int) BFD_RELOC_LO16, tempreg);
+		}
+
+	      return;
+	    }
+		  
 	  if (breg == 0)
 	    {
 	      if ((valueT) offset_expr.X_add_number > MAX_GPREL_OFFSET
@@ -6617,7 +6818,8 @@ macro2 (ip)
       s2 = "lwr";
       off = 3;
     ulwa:
-      load_address (&icnt, AT, &offset_expr);
+      used_at = 1;
+      load_address (&icnt, AT, &offset_expr, HAVE_64BIT_ADDRESSES, &used_at);
       if (breg != 0)
 	macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 		     HAVE_32BIT_ADDRESSES ? "addu" : "daddu",
@@ -6638,7 +6840,8 @@ macro2 (ip)
 
     case M_ULH_A:
     case M_ULHU_A:
-      load_address (&icnt, AT, &offset_expr);
+      used_at = 1;
+      load_address (&icnt, AT, &offset_expr, HAVE_64BIT_ADDRESSES, &used_at);
       if (breg != 0)
 	macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 		     HAVE_32BIT_ADDRESSES ? "addu" : "daddu",
@@ -6710,7 +6913,8 @@ macro2 (ip)
       s2 = "swr";
       off = 3;
     uswa:
-      load_address (&icnt, AT, &offset_expr);
+      used_at = 1;
+      load_address (&icnt, AT, &offset_expr, HAVE_64BIT_ADDRESSES, &used_at);
       if (breg != 0)
 	macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 		     HAVE_32BIT_ADDRESSES ? "addu" : "daddu",
@@ -6730,7 +6934,8 @@ macro2 (ip)
       break;
 
     case M_USH_A:
-      load_address (&icnt, AT, &offset_expr);
+      used_at = 1;
+      load_address (&icnt, AT, &offset_expr, HAVE_64BIT_ADDRESSES, &used_at);
       if (breg != 0)
 	macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
 		     HAVE_32BIT_ADDRESSES ? "addu" : "daddu",

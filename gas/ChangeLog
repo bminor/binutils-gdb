@@ -1,3 +1,10 @@
+2001-10-10  Thiemo Seufer <seufer@csv.ica.uni-stuttgart.de>
+
+	* config/tc-mips.c
+	(load_address): Support both 32- and 64-bit addresses.
+	(macro): Call load_register correctly. Expand 64-bit loads ans stores.
+	(macro2): Call load_address correctly.
+
 2001-10-09  Christian Groessler <cpg@aladdin.de>
 
 	* config/tc-z8k.c: Include opcodes/z8k-opc.h after bfd.h
