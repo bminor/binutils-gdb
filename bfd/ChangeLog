@@ -1,3 +1,7 @@
+Sat Jan  1 10:18:54 1994  David J. Mackenzie  (djm@thepub.cygnus.com)
+
+	* i386mach3.c (SEGMENT_SIZE): Fix value.
+
 Fri Dec 31 16:23:43 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	Minor cleanups suggested by CodeCenter.
