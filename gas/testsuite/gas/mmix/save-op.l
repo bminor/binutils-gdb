@@ -7,7 +7,6 @@ GAS for MMIX .*/save-op.s 			page 1
    4 0008 FA000000 	 SAVE X0,0
    5              	X IS \$31
    6              	X0 IS \$0
-   7              	
 GAS for MMIX .*/save-op.s 			page 2
 
 

@@ -8,7 +8,6 @@ GAS for MMIX .*/resume-op\.s 			page 1
    5 000c F9000000 	 RESUME XX
    6              	X IS 1
    7              	XX IS 0
-   8              	
 GAS for MMIX .*/resume-op\.s 			page 2
 
 

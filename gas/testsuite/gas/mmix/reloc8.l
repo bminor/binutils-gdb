@@ -8,7 +8,6 @@ GAS for MMIX .*/reloc8\.s 			page 1
    5 000c FF000000 		TRIP fee-1,fie\+1,foe\+3
    6 0010 F9000000 		RESUME foobar\+8
    7              	localsym IS 42
-   8              	
 GAS for MMIX .*/reloc8\.s 			page 2
 
 

@@ -1,3 +1,11 @@
+2001-10-31  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* gas/mmix/pop-op.l: Update to match latest listing behaviour.
+	* gas/mmix/reloc8.l: Update to match latest listing behaviour.
+	* gas/mmix/resume-op.l: Update to match latest listing behaviour.
+	* gas/mmix/save-op.l: Update to match latest listing behaviour.
+	* gas/mmix/unsave-op.l: Update to match latest listing behaviour.
+
 2001-10-31  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* gas/mmix/tst.s: Delete unused file.

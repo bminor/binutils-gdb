@@ -9,7 +9,6 @@ GAS for MMIX .*/pop-op\.s 			page 1
    6 000c F8175678 		POP X,YZ
    7              	X IS 23
    8              	YZ IS #5678
-   9              	
 GAS for MMIX .*/pop-op\.s 			page 2
 
 

@@ -7,7 +7,6 @@ GAS for MMIX .*/unsave-op.s 			page 1
    4 0008 FB000000 	 UNSAVE 0,X0
    5              	X IS \$31
    6              	X0 IS \$0
-   7              	
 GAS for MMIX .*/unsave-op\.s 			page 2
 
 
