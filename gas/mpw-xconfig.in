@@ -1,31 +1,21 @@
 # Extra configuration fragment for GAS.
 
-forward-include "{srcdir}"config:atof-ieee.c atof-targ.c
-forward-include "{srcdir}"config:obj-ecoff.c obj-format.c
-forward-include "{srcdir}"config:obj-ecoff.h obj-format.h
-forward-include "{srcdir}"config:tc-mips.c targ-cpu.c
-forward-include "{srcdir}"config:tc-mips.h targ-cpu.h
-forward-include "{srcdir}"config:te-generic.h targ-env.h
+If "{target_canonical}" =~ /mips-idt-ecoff/
+	forward-include "{srcdir}"config:atof-ieee.c atof-targ.c
+	forward-include "{srcdir}"config:obj-ecoff.c obj-format.c
+	forward-include "{srcdir}"config:obj-ecoff.h obj-format.h
+	forward-include "{srcdir}"config:tc-mips.c targ-cpu.c
+	forward-include "{srcdir}"config:tc-mips.h targ-cpu.h
+	forward-include "{srcdir}"config:te-generic.h targ-env.h
 
-forward-include "{srcroot}"include:aout:stab.def 'aout/stab.def'
-forward-include "{srcroot}"include:aout:stab_gnu.h 'aout/stab_gnu.h'
-forward-include "{srcroot}"include:coff:ecoff.h 'coff/ecoff.h'
-forward-include "{srcroot}"include:coff:internal.h 'coff/internal.h'
-forward-include "{srcroot}"include:coff:mips.h 'coff/mips.h'
-forward-include "{srcroot}"include:coff:sym.h 'coff/sym.h'
-forward-include "{srcroot}"include:coff:symconst.h 'coff/symconst.h'
-forward-include "{srcroot}"bfd:libcoff.h 'bfd/libcoff.h'
-forward-include "{srcroot}"bfd:libecoff.h 'bfd/libecoff.h'
+	echo '#define TARGET_CPU "mips"' >config.new
+	echo '#define TARGET_ALIAS "mips-idt-ecoff"' >>config.new
+	echo '#define TARGET_CANONICAL "mips-idt-ecoff"' >>config.new
+	echo '#define GAS_VERSION "cygnus-2.2.1"' >>config.new
 
-forward-include "{srcroot}"include:opcode:mips.h 'opcode/mips.h'
+	MoveIfChange config.new config.h
+End If
 
-echo '#define TARGET_CPU "mips"' >config.new
-echo '#define TARGET_ALIAS "mips-idt-ecoff"' >>config.new
-echo '#define TARGET_CANONICAL "mips-idt-ecoff"' >>config.new
-echo '#define GAS_VERSION "cygnus-2.2.1"' >>config.new
 
-MoveIfChange config.new config.h
-
-Delete -i config.new
 
 
