@@ -39,7 +39,10 @@ extern void cd_command PARAMS ((char *, int));
 extern void read_command_file PARAMS ((FILE *));
 extern void init_history PARAMS ((void));
 extern void command_loop PARAMS ((void));
+extern int quit_confirm PARAMS ((void));
+extern void quit_force PARAMS ((char *, int));
 extern void quit_command PARAMS ((char *, int));
+extern char *get_prompt PARAMS((void));
 
 /* From random places.  */
 extern int mapped_symbol_files;

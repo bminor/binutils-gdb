@@ -292,10 +292,16 @@ set_raw_tracepoint (sal)
     t->source_file = NULL;
   else
     {
+      char *p;
+
       t->source_file = (char *) xmalloc (strlen (sal.symtab->filename) +
-                                         strlen (sal.symtab->dirname) + 1);
+                                         strlen (sal.symtab->dirname) + 2);
 
       strcpy (t->source_file, sal.symtab->dirname);
+      p = t->source_file;
+      while (*p++) ;
+      if (*p != '/')            /* Will this work on Windows? */
+        strcat (t->source_file, "/");
       strcat (t->source_file, sal.symtab->filename);
     }
 

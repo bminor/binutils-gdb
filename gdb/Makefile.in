@@ -41,7 +41,7 @@ man9dir = $(mandir)/man9
 infodir = @infodir@
 includedir = @includedir@
 
-SHELL = @SHELL@
+SHELL = /bin/sh
 EXEEXT = # @EXEEXT@ # This isn't getting substituted in correctly :-(
 
 INSTALL = @INSTALL@
@@ -136,18 +136,22 @@ LIB_INSTALL_DIR = $(libdir)
 LIB_RUNTIME_DIR = $(libdir)
 TCL = @TCL_LD_SEARCH_FLAGS@ @TCL_BUILD_LIB_SPEC@
 TCL_CFLAGS = @TCLHDIR@
+TCL_DEPS =
 
 # Where is the TK library?  Typically in ../tk.
 TK = @TK_BUILD_LIB_SPEC@
 TK_CFLAGS = @TKHDIR@ @TK_BUILD_INCLUDES@
+TK_DEPS =
 
 # Where is Itcl?  Typically in ../itcl.
 ITCL_CFLAGS = @ITCLHDIR@
 ITCL = @ITCLLIB@
+ITCL_DEPS = $(ITCL)
 
 # Where is Tix?  Typically in ../tix.
 TIX_CFLAGS = @TIXHDIR@
 TIX = @TIXLIB@
+TIX_DEPS = @TIX_DEPS@
 
 X11_CFLAGS = @TK_XINCLUDES@
 X11_LDFLAGS =
@@ -159,15 +163,20 @@ WIN32LIBS = @WIN32LIBS@
 ENABLE_GDBTK= @ENABLE_GDBTK@
 ENABLE_IDE= @ENABLE_IDE@
 
-IDE_CFLAGS_X = ` \
-  if [ x"$(ENABLE_IDE)" != x ] ; then \
-    echo -DIDE -I$(srcdir)/../libide/src -I$(srcdir)/../ilu/runtime/mainloop;\
+IDE_CFLAGS_X = -I$(srcdir)/../libide/src \
+  `if [ x"$(ENABLE_IDE)" != x ] ; then \
+    echo -DIDE -I$(srcdir)/../ilu/runtime/mainloop;\
   fi`
+
+LIBIDE = ../libide/src/libide.a
 
 IDE_X = ` \
   if [ x"$(ENABLE_IDE)" != x ] ; then \
-    echo -L../libide/src -lide -L../ilu/runtime/mainloop -lilu-Tk -L../ilu/runtime/c -lilu-c -L../ilu/runtime/kernel -lilu;\
+    echo -L../ilu/runtime/mainloop -lilu-Tk -L../ilu/runtime/c -lilu-c -L../ilu/runtime/kernel -lilu;\
   fi`
+
+IDE_DEPS = ../ilu/runtime/mainloop/libilu-Tk.a \
+	../ilu/runtime/c/libilu-c.a ../ilu/runtime/kernel/libilu.a
 
 IDE=$(IDE_X) 
 IDE_CFLAGS=$(IDE_CFLAGS_X)
@@ -235,12 +244,12 @@ CLIBS = $(SIM) $(BFD) $(READLINE) $(OPCODES) $(LIBIBERTY) \
 	$(TERMCAP) $(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS) @LIBS@ \
 	$(MMALLOC) $(LIBIBERTY) $(WIN32LIBS)
 CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
-	$(OPCODES) $(MMALLOC) $(LIBIBERTY)
+	$(OPCODES) $(MMALLOC) $(LIBIBERTY) @CONFIG_DEPS@
 
 ADD_FILES = $(REGEX) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(REGEX1) $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 
-VERSION = 4.16.1
+VERSION=4.16-foundry-971110
 DIST=gdb
 
 LINT=/usr/5bin/lint
@@ -574,25 +583,17 @@ install-only:
 		fi ; \
 		$(INSTALL_PROGRAM) gdb$(EXEEXT) $(bindir)/$$transformed_name$(EXEEXT) ; \
 		$(INSTALL_DATA) $(srcdir)/gdb.1 $(man1dir)/$$transformed_name.1
-	# start-sanitize-gdbtk
-	if [ x"$(ENABLE_GDBTK)" != x ] ; then \
+		# start-sanitize-gdbtk
+		if [ x"$(ENABLE_GDBTK)" != x ] ; then \
 		  $(SHELL) $(srcdir)/../mkinstalldirs $(datadir)/gdbtcl ; \
-		  if [ x"$(ENABLE_IDE)" = x ]; then \
-		    cd $(srcdir)/gdbtcl ; \
-		    for i in asm.tcl break.xbm breakpoint.tcl command.tcl copyright.tcl expr.tcl file.tcl main.tcl register.tcl source.tcl stop2.gif tclIndex ; \
-		      do \
+		  $(SHELL) $(srcdir)/../mkinstalldirs \
+			$(datadir)/gdbtcl/images \
+			$(datadir)/gdbtcl/images2 ; \
+		  cd $(srcdir)/gdbtcl2 ; \
+		  for i in *.tcl images/*.gif images2/*.gif tclIndex; \
+		    do \
 			$(INSTALL_DATA) $$i $(datadir)/gdbtcl/$$i ; \
-		      done ; \
-		  else \
-		    $(SHELL) $(srcdir)/../mkinstalldirs \
-				$(datadir)/gdbtcl/images \
-				$(datadir)/gdbtcl/images2 ; \
-		    cd $(srcdir)/gdbtcl2 ; \
-		    for i in *.tcl images/*.gif images2/*.gif tclIndex; \
-		      do \
-			$(INSTALL_DATA) $$i $(datadir)/gdbtcl/$$i ; \
-		      done ; \
-		  fi ; \
+		    done ; \
 		else \
 		  true ; \
 		fi
@@ -645,7 +646,7 @@ init.c: $(OBS) $(TSOBS)
 	    -e '/[a-z0-9A-Z_]*-exp.tab.o/d' \
 	    -e 's/\.o/.c/' \
 	    -e 's|\([^  ][^     ]*\)|$(srcdir)/\1|g' | \
-	xargs grep '^_initialize_[a-z_0-9A-Z]* *(' | \
+	while read f; do grep '^_initialize_[a-z_0-9A-Z]* *(' $$f 2>/dev/null; done | \
 	sed -e 's/^.*://' -e 's/^\([a-z_0-9A-Z]*\).*/  {extern void \1 PARAMS ((void)); \1 ();}/' >>init.c-tmp
 	@echo '}' >>init.c-tmp
 	@mv init.c-tmp init.c

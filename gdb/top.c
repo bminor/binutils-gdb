@@ -2813,8 +2813,8 @@ print_gdb_version (stream)
   fprintf_filtered (stream, "\
 GDB is free software, covered by the GNU General Public License, and you are\n\
 welcome to change it and/or distribute copies of it under certain conditions.\n\
-Type \"show copying\" to see the conditions.\n\
-There is absolutely no warranty for GDB.  Type \"show warranty\" for details.\n");
+Type \"show copying\" to see the conditions.  This version of GDB is supported  This version of GDB is supported\n\
+for customers of Cygnus Solutions.  Type \"show warranty\" for details.\n");
 
   /* After the required info we print the configuration information. */
 
@@ -2851,9 +2851,41 @@ print_prompt ()
   printf_unfiltered ("%s", prompt);
   gdb_flush (gdb_stdout);
 }
+
+/* This replaces the above for the frontends: it returns a pointer
+   to the prompt. */
+char *
+get_prompt ()
+{
+  return prompt;
+}
 
+/* If necessary, make the user confirm that we should quit.  Return
+   non-zero if we should quit, zero if we shouldn't.  */
+
+int
+quit_confirm ()
+{
+  if (inferior_pid != 0 && target_has_execution)
+    {
+      char *s;
+
+      if (attach_flag)
+	s = "The program is running.  Quit anyway (and detach it)? ";
+      else
+	s = "The program is running.  Exit anyway? ";
+
+      if (! query (s))
+	return 0;
+    }
+
+  return 1;
+}
+
+/* Quit without asking for confirmation.  */
+
 void
-quit_command (args, from_tty)
+quit_force (args, from_tty)
      char *args;
      int from_tty;
 {
@@ -2871,20 +2903,11 @@ quit_command (args, from_tty)
   if (inferior_pid != 0 && target_has_execution)
     {
       if (attach_flag)
-	{
-	  if (query ("The program is running.  Quit anyway (and detach it)? "))
-	    target_detach (args, from_tty);
-	  else
-	    error ("Not confirmed.");
-	}
+	target_detach (args, from_tty);
       else
-	{
-	  if (query ("The program is running.  Quit anyway (and kill it)? "))
-	    target_kill ();
-	  else
-	    error ("Not confirmed.");
-	}
+	target_kill ();
     }
+
   /* UDI wants this, to kill the TIP.  */
   target_close (1);
 
@@ -2895,6 +2918,18 @@ quit_command (args, from_tty)
   do_final_cleanups(ALL_CLEANUPS);	/* Do any final cleanups before exiting */
 
   exit (exit_code);
+}
+
+/* Handle the quit command.  */
+
+void
+quit_command (args, from_tty)
+     char *args;
+     int from_tty;
+{
+  if (! quit_confirm ())
+    error ("Not confirmed.");
+  quit_force (args, from_tty);
 }
 
 /* Returns whether GDB is running on a terminal and whether the user
