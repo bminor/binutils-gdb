@@ -1,3 +1,7 @@
+Fri May 13 23:25:13 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* bucomm.c: Check ANSI_PROTOTYPES rather than __STDC__.
+
 Tue May 10 18:22:06 1994  Jason Molenda    (crash@sendai.cygnus.com)
 
 	* objcopy.c (copy_section): Set section size correctly if using
