@@ -379,7 +379,9 @@ changequote([,])dnl
 	;;
 
       sparc)
-	AC_DEFINE_UNQUOTED(DEFAULT_ARCH, "${arch}")
+	if test $this_target = $target ; then
+	  AC_DEFINE_UNQUOTED(DEFAULT_ARCH, "${arch}")
+	fi
 	;;
 
       *)
