@@ -1,3 +1,11 @@
+Mon Sep 26 11:40:30 1994  Ian Lance Taylor  (ian@sanguine.cygnus.com)
+
+	* scripttempl/elf.sc: If -N is set, force DATA_ADDR to be ".".
+
+Fri Sep 23 15:05:49 1994  Ken Raeburn  <raeburn@cujo.cygnus.com>
+
+	* configure.in: Handle i386-bsdi* targets like i386-bsd.
+
 Fri Sep 23 00:06:59 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* lexsup.c (parse_args): Add support for -a for HP/UX
