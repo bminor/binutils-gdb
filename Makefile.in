@@ -162,7 +162,7 @@ OTHERS =
 
 # This is set by the configure script to the list of directories which
 # should be built using the target tools.
-TARGET_CONFIGDIRS = libiberty libgloss newlib libio librx libstdc++ libg++ winsup
+TARGET_CONFIGDIRS = libiberty libgloss newlib libio librx libstdc++ libg++ winsup opcodes cygmon
 
 # Target libraries are put under this directory:
 # Changed by configure to $(target_alias) if cross.
@@ -746,7 +746,8 @@ ALL_TARGET_MODULES = \
 	all-target-libgloss \
 	all-target-libiberty \
 	all-target-gperf \
-	all-target-examples
+	all-target-examples \
+	all-target-cygmon
 
 # This is a list of the configure targets for all of the modules which
 # are compiled using the target tools.
@@ -760,7 +761,8 @@ CONFIGURE_TARGET_MODULES = \
 	configure-target-libgloss \
 	configure-target-libiberty \
 	configure-target-gperf \
-	configure-target-examples
+	configure-target-examples \
+	configure-target-cygmon
 
 # This is a list of the check targets for all of the modules which are
 # compiled using $(TARGET_FLAGS_TO_PASS).
@@ -867,7 +869,8 @@ CLEAN_TARGET_MODULES = \
 	clean-target-libgloss \
 	clean-target-libiberty \
 	clean-target-gperf \
-	clean-target-examples
+	clean-target-examples \
+	clean-target-cygmon
 
 # All of the x11 modules that can be cleaned
 CLEAN_X11_MODULES = \
@@ -1446,6 +1449,8 @@ all-binutils: all-libiberty all-opcodes all-bfd all-flex all-bison all-byacc
 all-bison: all-texinfo
 all-byacc:
 all-cvs:
+configure-target-cygmon: $(ALL_GCC)
+all-target-cygmon: configure-target-cygmon all-gas all-ld all-gcc all-target-libiberty all-target-newlib all-target-libio
 all-db:
 all-dejagnu: all-tcl all-expect all-tk
 all-diff: all-libiberty

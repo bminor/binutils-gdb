@@ -1,3 +1,9 @@
+Sun Nov 30 16:12:27 1997  Bob Manson  <manson@charmed.cygnus.com>
+
+	* Makefile.in: Add rules for cygmon.
+
+	* configure.in: Build cygmon for sparc-elf and sparclite-aout.
+
 Wed Nov 26 11:53:33 1997  Keith Seitz  <keiths@onions.cygnus.com>
 
 	* Makefile.in, configure, configure.in: merge with foundry-971118-build

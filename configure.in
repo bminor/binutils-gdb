@@ -89,7 +89,7 @@ native_only="autoconf automake cvs emacs emacs19 fileutils find gawk grep gzip h
 
 # directories to be built in a cross environment only
 #
-cross_only="target-libgloss target-newlib"
+cross_only="target-libgloss target-newlib target-cygmon target-opcodes"
 
 ## All tools belong in one of the four categories, and are assigned above
 ## We assign ${configdirs} this way to remove all embedded newlines.  This
@@ -600,6 +600,16 @@ case "${target}" in
       *) skipdirs=`echo " ${skipdirs} " | sed -e 's/ gprof / /'` ;;
     esac
     noconfigdirs="$noconfigdirs target-libgloss"
+    ;;
+  sparc-*-elf*)
+    if [ x${is_cross_compiler} != xno ] ; then
+	   target_configdirs="${target_configdirs} target-cygmon"
+    fi
+    ;;
+  sparclite-*-aout*)
+    if [ x${is_cross_compiler} != xno ] ; then
+	   target_configdirs="${target_configdirs} target-cygmon"
+    fi
     ;;
   sparc-*-sunos4*)
     if [ x${is_cross_compiler} != xno ] ; then
