@@ -59,7 +59,7 @@ CCLIBFLAGS = -O
 # Version of ar to use when compiling gnulib. 
 OLDAR = ar
 
-version=`awk '{print substr ($$4, 2, length ($$4) - 3); }' $(srcdir)/version.c`
+version=`awk '{print substr ($$4, 2, length ($$4) - 3); }' $(srcdir)/../gcc/version.c`
 
 # Directory where sources are, from where we are.
 srcdir = .
@@ -122,7 +122,7 @@ HOST_LDFLAGS=$(LDFLAGS)
 HOST_CPPFLAGS=$(CPPFLAGS)
 
 # Choose the real default target.
-ALL=as
+ALL=as.new
 
 # End of variables for you to override.
 
@@ -267,7 +267,7 @@ SUBDIR_INCLUDES = -I.. -I../$(srcdir) -I../$(srcdir)/config
 
 # Files to be copied away after each stage in building.
 STAGE_GCC=gcc
-STAGESTUFF = *.o as 
+STAGESTUFF = *.o as.new
 
 # The files that "belong" in CONFIG_H are deliberately omitted
 # because having them there would not be useful in actual practice.
@@ -278,8 +278,9 @@ STAGESTUFF = *.o as
 # CONFIG_H = config.h tm.h
 CONFIG_H =
 
-as: $(OBJS) $(LIBDEPS)
-	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o as $(OBJS) $(LIBS) $(LOADLIBES)
+as.new: $(OBJS) $(LIBDEPS)
+	-mv -f as.new as.old
+	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o as.new $(OBJS) $(LIBS) $(LOADLIBES)
 
 objdump:
 
@@ -381,7 +382,7 @@ obj-format.o : obj-format.c as.h host.h targ-env.h obj-format.h \
 targ-cpu.o : targ-cpu.c targ-env.h obj-format.h \
   targ-cpu.h struc-symbol.h \
   write.h flonum.h bignum.h expr.h frags.h hash.h read.h \
-  symbols.h tc.h obj.h 
+  symbols.h tc.h obj.h $(TARG_CPU_DEPENDENTS)
 
 
 # Compile the libraries to be used by gen*.
@@ -483,7 +484,7 @@ uninstall:
 tags TAGS: force
 	etags $(REAL_SOURCES) $(REAL_HEADERS) README Makefile config/*.[hc]
 	
-bootstrap: as force
+bootstrap: $(ALL) force
 	$(MAKE) stage1
 	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage1/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as
 	$(MAKE) stage2
@@ -494,7 +495,7 @@ bootstrap2: force
 	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage1/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as
 	$(MAKE) stage2
 	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage2/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as
-	$(MAKE) comparison against-stage2
+	$(MAKE) comparison against=stage2
 
 bootstrap3: force
 	$(MAKE) CC="$(CC)" CFLAGS="-O -Bstage2/ $(CFLAGS)" libdir=$(libdir) ALLOCA= as
@@ -504,14 +505,17 @@ bootstrap3: force
 stage1: force
 	-mkdir stage1
 	-mv $(STAGESTUFF) stage1
+	(cd stage1 ; ln as.new as)
 
 stage2: force
 	-mkdir stage2
 	-mv $(STAGESTUFF) stage2
+	(cd stage2 ; ln as.new as)
 
 stage3: force
 	-mkdir stage3
 	-mv $(STAGESTUFF) stage3
+	(cd stage3 ; ln as.new as)
 
 against=stage2
 
@@ -519,15 +523,15 @@ comparison: force
 	for i in $(STAGESTUFF) ; do cmp $$i $(against)/$$i ; done
 
 de-stage1: force
-	- (cd stage1 ; mv -f * ..)
+	- (cd stage1 ; rm as ; mv -f * ..)
 	- rmdir stage1
 
 de-stage2: force
-	- (cd stage2 ; mv -f * ..)
+	- (cd stage2 ; rm as ; mv -f * ..)
 	- rmdir stage2
 
 de-stage3: force
-	- (cd stage3 ; mv -f * ..)
+	- (cd stage3 ; rm as ; mv -f * ..)
 	- rmdir stage3
 
 # Copy just the executable files from a particular stage into a subdirectory,
@@ -571,6 +575,6 @@ Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
 	(cd $(srcdir) ; \
 		./configure +destdir=$(destdir) \
 		+norecurse \
-		`if [ "$(srcdir)" != "." ] ; then echo +f; fi` \
+		`if [ "$(srcdir)" != "." ] ; then echo +subdirs; fi` \
 		$(host) +target=$(target))
 
