@@ -671,9 +671,6 @@ typedef struct bfd_arch_info
   unsigned int EXFUN((*disassemble),(bfd_vma addr, CONST char *data,
 				     PTR stream));
 
-  unsigned int segment_size;
-  unsigned int page_size;
-
   struct bfd_arch_info *next;
 } bfd_arch_info_type;
 CONST char *EXFUN(bfd_printable_name, (bfd *abfd));
@@ -755,7 +752,8 @@ typedef CONST struct reloc_howto_struct
   unsigned int rightshift;
 
         /*  The size of the item to be relocated - 0, is one byte, 1 is 2
-           bytes, 3 is four bytes. */
+           bytes, 3 is four bytes.  A -ve value indicates that the
+	    result is to be subtracted from the data*/
   unsigned int size;
 
         /*  Now obsolete */
