@@ -1,4 +1,9 @@
 start-sanitize-sky
+Thu Aug 6 13:15:05 1998  Ron Unrau  <runrau@cygnus.com>
+
+	* txvu-tdep.c: add VU0/1 control registers
+	* config/mips/tm-txvu.h: ditto
+	
 Tue Aug 4 11:02:50 1998  Ron Unrau  <runrau@cygnus.com>
 
 	* txvu-tdep.c (txvu_insert_breakpoint): make sure CPU context is
