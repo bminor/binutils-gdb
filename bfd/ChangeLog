@@ -1,3 +1,7 @@
+2004-04-21  Andrew Cagney  <cagney@redhat.com>
+
+	* libaout.h (enum machine_type): Add M_POWERPC_NETBSD.
+
 2004-04-21  Eric Botcazou  <ebotcazou@act-europe.fr>
 
 	* elflink.c (elf_gc_mark_dynamic_ref_symbol): New function.

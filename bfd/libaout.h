@@ -273,6 +273,7 @@ enum machine_type
   M_ALPHA_NETBSD = 141,	  /* NetBSD/alpha binary.  */
   M_ARM6_NETBSD = 143,	  /* NetBSD/arm32 binary.  */
   M_SPARCLET_1 = 147,	  /* 0x93, reserved.  */
+  M_POWERPC_NETBSD = 149, /* NetBSD/powerpc (big-endian) binary.  */
   M_VAX4K_NETBSD = 150,	  /* NetBSD/vax 4K pages binary.  */
   M_MIPS1 = 151,          /* MIPS R2000/R3000 binary.  */
   M_MIPS2 = 152,          /* MIPS R4000/R6000 binary.  */
