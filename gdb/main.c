@@ -706,13 +706,6 @@ extern int gdbtk_test (char *);
 #endif
     }
 
-  /* The default command loop. 
-     The WIN32 Gui calls this main to set up gdb's state, and 
-     has its own command loop. */
-#if !defined _WIN32 || defined __GNUC__
-  /* GUIs generally have their own command loop, mainloop, or
-     whatever.  This is a good place to gain control because many
-     error conditions will end up here via longjmp(). */
 #if 0
   /* FIXME: cagney/1999-11-06: The original main loop was like: */
   while (1)
@@ -748,7 +741,6 @@ extern int gdbtk_test (char *);
     {
       catch_errors (captured_command_loop, 0, "", RETURN_MASK_ALL);
     }
-#endif
   /* No exit -- exit is through quit_command.  */
 }
 

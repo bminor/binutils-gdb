@@ -1,3 +1,8 @@
+2001-05-04  Andrew Cagney  <ac131313@redhat.com>
+ 
+ 	* main.c (captured_main): Delete #ifndef _WIN32 conditional for
+ 	WinGDB.
+ 
 2001-05-06  Kevin Buettner  <kevinb@redhat.com>
 
 	* inferior.h (save_inferior_ptid): Declare.
