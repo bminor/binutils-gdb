@@ -1,5 +1,6 @@
 2002-12-13  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/tc-ip2k.c (md_assemble): Warning fix.
 	* config/tc-m32r.c (md_parse_option <arg>): Add ATTRIBUTE_UNUSED.
 	(fill_insn <ignore>): Likewise.
 	(debug_sym <ignore>): Likewise.

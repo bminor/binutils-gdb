@@ -180,14 +180,15 @@ md_assemble (str)
       enum cgen_parse_operand_result result_type;
       long value;
       const char *curpc_plus_2 = ".+2";
+      const char *err;
 
-      errmsg = cgen_parse_address (gas_cgen_cpu_desc, & curpc_plus_2,
-				   IP2K_OPERAND_ADDR16CJP,
-				   BFD_RELOC_IP2K_PC_SKIP,
-				   & result_type, & value);
-      if (errmsg)
+      err = cgen_parse_address (gas_cgen_cpu_desc, & curpc_plus_2,
+				IP2K_OPERAND_ADDR16CJP,
+				BFD_RELOC_IP2K_PC_SKIP,
+				& result_type, & value);
+      if (err)
 	{
-	  as_bad ("%s", errmsg);
+	  as_bad ("%s", err);
 	  return;
 	}
     }
