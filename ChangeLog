@@ -1,3 +1,13 @@
+Thu Aug  8 12:18:59 1996  Klaus Kaempf  <kkaempf@progis.de>
+
+	* make-all.com: Run config-a-gas.
+	* setup.com: Don't copy subdirectory files around.
+
+Tue Jul 30 17:49:31 1996  Brendan Kehoe  <brendan@cygnus.com>
+
+	* configure.in (*-*-ose): Remove exclusion of libgloss for this
+	target, it now compiles correctly.
+
 Sat Jul 27 15:10:43 1996  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-config.in: Generate Mac include for elf/dwarf2.h.

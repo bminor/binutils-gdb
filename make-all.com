@@ -1,4 +1,4 @@
-$! This file is used to build the binutils on openVMS/AXP.
+$! This file is used to build the binutils on openVMS/Alpha.
 $! You must have GNU make for VMS.
 $! Run this script to build nm, size, objdump, and as.
 $ @setup
@@ -11,6 +11,6 @@ $ gmake
 $ set def [-.binutils]
 $ gmake
 $ set def [-.gas]
-$ @config-gas-axp
+$ @config-a-gas
 $ gmake
 $ set def [-]

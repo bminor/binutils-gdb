@@ -1,10 +1,5 @@
-$! setup files for openVMS/AXP
+$! setup files for openVMS/Alpha
 $!
-$ copy [.bfd.hosts]alphavms.h [.bfd]sysdep.h
-$ copy [.bfd.hosts]alphavms.h [.opcodes]sysdep.h
-$ copy [.bfd]bfd.h-vms [.bfd]bfd.h
-$ copy [.libiberty]alloca-norm.h [.libiberty]alloca-conf.h
-$ copy [.binutils]config.h-vms [.binutils]config.h 
 $ define aout [-.INCLUDE.AOUT]
 $ define coff [-.INCLUDE.COFF]
 $ define elf [-.INCLUDE.ELF]
