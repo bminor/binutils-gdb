@@ -1,6 +1,6 @@
-/* savestring.c  */
+/* rlshell.h -- utility functions normally provided by bash. */
 
-/* Copyright (C) 1998 Free Software Foundation, Inc.
+/* Copyright (C) 1999 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library, a library for
    reading lines of text with interactive input and history editing.
@@ -20,14 +20,15 @@
    have a copy of the license, write to the Free Software Foundation,
    59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
-extern char *strcpy ();
-extern char *xmalloc ();
+#if !defined (_RL_SHELL_H_)
+#define _RL_SHELL_H_
 
-/* Backwards compatibility, now that savestring has been removed from
-   all `public' readline header files. */
-char *
-savestring (s)
-     char *s;
-{
-  return ((char *)strcpy (xmalloc (1 + (int)strlen (s)), (s)));
-}
+#include "rlstdc.h"
+
+extern char *single_quote __P((char *));
+extern void set_lines_and_columns __P((int, int));
+extern char *get_env_value __P((char *));
+extern char *get_home_dir __P((void));
+extern int unset_nodelay_mode __P((int));
+
+#endif /* _RL_SHELL_H_ */

@@ -1,6 +1,6 @@
-/* savestring.c  */
+/* xmalloc.h -- memory allocation that aborts on errors. */
 
-/* Copyright (C) 1998 Free Software Foundation, Inc.
+/* Copyright (C) 1999 Free Software Foundation, Inc.
 
    This file is part of the GNU Readline Library, a library for
    reading lines of text with interactive input and history editing.
@@ -20,14 +20,27 @@
    have a copy of the license, write to the Free Software Foundation,
    59 Temple Place, Suite 330, Boston, MA 02111 USA. */
 
-extern char *strcpy ();
-extern char *xmalloc ();
+#if !defined (_XMALLOC_H_)
+#define _XMALLOC_H_
 
-/* Backwards compatibility, now that savestring has been removed from
-   all `public' readline header files. */
-char *
-savestring (s)
-     char *s;
-{
-  return ((char *)strcpy (xmalloc (1 + (int)strlen (s)), (s)));
-}
+#if defined (READLINE_LIBRARY)
+#  include "rlstdc.h"
+#else
+#  include <readline/rlstdc.h>
+#endif
+
+#ifndef PTR_T
+
+#ifdef __STDC__
+#  define PTR_T	void *
+#else
+#  define PTR_T	char *
+#endif
+
+#endif /* !PTR_T */
+
+extern char *xmalloc __P((int));
+extern char *xrealloc __P((void *, int));
+extern void xfree __P((void *));
+
+#endif /* _XMALLOC_H_ */
