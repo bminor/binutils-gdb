@@ -1,3 +1,7 @@
+2002-08-22  Chris Demetriou  <cgd@broadcom.com>
+
+	* compare_igen_models: New script.
+
 2002-06-17  Andrew Cagney  <cagney@redhat.com>
 
 	* gen.c (gen_entry_expand_opcode): Initialize ``value'' to -1 and
