@@ -2545,8 +2545,7 @@ elf64_alpha_adjust_dynamic_symbol (info, h)
   /* Now that we've seen all of the input symbols, finalize our decision
      about whether this symbol should get a .plt entry.  */
 
-  if (h->root.type != bfd_link_hash_undefweak
-      && alpha_elf_dynamic_symbol_p (h, info)
+  if (alpha_elf_dynamic_symbol_p (h, info)
       && ((h->type == STT_FUNC
 	   && !(ah->flags & ALPHA_ELF_LINK_HASH_LU_ADDR))
 	  || (h->type == STT_NOTYPE
