@@ -1,3 +1,15 @@
+Mon May  2 17:09:24 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* subsegs.h (segment_info_type): Use fix_tail field even if
+	BFD_ASSEMBLER.
+	* subsegs.c (subseg_change): Initialize fix_tail field.
+	(subseg_get): Likewise.
+	* write.c (frags_chained): New static variable.
+	(fix_new_internal): If frags_chained is set, use fix_root and
+	fix_tail from seg_info (now_seg), rather than frchain_now.
+	(chain_frchains_together_1): Set fix_tail field.
+	(chain_frchains_together): Set frags_chained.
+
 Thu Apr 28 01:39:15 1994  Ken Raeburn  (raeburn@kr-pc.cygnus.com)
 
 	* config/tc-mips.c (s_option): Only refer to g_switch_* variables

@@ -45,6 +45,14 @@ extern CONST int md_long_jump_size;
 
 int symbol_table_frozen;
 
+#ifdef BFD_ASSEMBLER
+/* We generally attach relocs to frag chains.  However, after we have
+   chained these all together into a segment, any relocs we add after
+   that must be attached to a segment.  This will include relocs added
+   in md_estimate_size_for_relax, for example.  */
+static int frags_chained = 0;
+#endif
+
 #ifndef BFD_ASSEMBLER
 
 #ifndef MANY_SEGMENTS
@@ -144,8 +152,12 @@ fix_new_internal (frag, where, size, add_symbol, sub_symbol, offset, pcrel,
   {
 
 #ifdef BFD_ASSEMBLER
-    fixS **seg_fix_rootP = &frchain_now->fix_root;
-    fixS **seg_fix_tailP = &frchain_now->fix_tail;
+    fixS **seg_fix_rootP = (frags_chained
+			    ? &seg_info (now_seg)->fix_root
+			    : &frchain_now->fix_root);
+    fixS **seg_fix_tailP = (frags_chained
+			    ? &seg_info (now_seg)->fix_tail
+			    : &frchain_now->fix_tail);
 #endif
 
 #ifdef REVERSE_SORT_RELOCS
@@ -301,6 +313,7 @@ chain_frchains_together_1 (section, frchp)
 	  if (seg_info (section)->fix_root == (fixS *) NULL)
 	    seg_info (section)->fix_root = frchp->fix_root;
 	  prev_fix->fx_next = frchp->fix_root;
+	  seg_info (section)->fix_tail = frchp->fix_tail;
 	  prev_fix = frchp->fix_tail;
 	}
 #endif
@@ -327,6 +340,10 @@ chain_frchains_together (abfd, section, xxx)
   if (info != (segment_info_type *) NULL)
    info->frchainP->frch_last
      = chain_frchains_together_1 (section, info->frchainP);
+
+  /* Now that we've chained the frags together, we must add new fixups
+     to the segment, not to the frag chain.  */
+  frags_chained = 1;
 }
 
 #endif
@@ -972,6 +989,7 @@ relax_and_size_all_segments ()
 
 #if defined (BFD_ASSEMBLER) || !defined (BFD)
 
+#ifdef BFD_ASSEMBLER
 static void
 set_symtab ()
 {
@@ -1007,6 +1025,7 @@ set_symtab ()
   assert (result == true);
   symbol_table_frozen = 1;
 }
+#endif
 
 void 
 write_object_file ()
