@@ -1,3 +1,8 @@
+2003-10-10  J. Brobecker  <brobecker@gnat.com>
+
+	* blockframe.c (inside_main_func): No longer use symbol_lookup()
+	to lookup the main function symbol.
+
 2003-10-10  Corinna Vinschen  <vinschen@redhat.com>
 
 	* sh-tdep.c (sh_treat_as_flt_p): New function to recognize float
