@@ -1,3 +1,10 @@
+2003-10-08  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* lin-lwp.c (stop_and_resume_callback): Set the resumed flag
+	for any lwp we resume.
+	(running_callback): Add lwps that have pending status events
+	against them to be considered running.
+
 2003-10-08  Kei Sakamoto  <sakamoto.kei@renesas.com>
 
 	* m32r-tdep.c : Include "dis-asm.h".
