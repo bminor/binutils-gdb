@@ -1,3 +1,22 @@
+2002-12-12  Alexandre Oliva  <aoliva@redhat.com>
+
+	* gas/mips/beq.d: Comment out branches to undefined symbols,
+	no longer supported.
+	* gas/mips/beq.s: Likewise.
+	* gas/mips/bge.d: Likewise.
+	* gas/mips/bge.s: Likewise.
+	* gas/mips/bgeu.d: Likewise.
+	* gas/mips/bgeu.s: Likewise.
+	* gas/mips/blt.d: Likewise.
+	* gas/mips/blt.s: Likewise.
+	* gas/mips/bltu.d: Likewise.
+	* gas/mips/bltu.s: Likewise.
+	* gas/mips/mips.exp: Change branch-misc-2 test to run_list_test.
+	* gas/mips/branch-misc-2.d: Removed.
+	* gas/mips/branch-misc-2.s: Added branches to undefined symbols.
+	* gas/mips/branch-misc-2.l: New.
+
+? gas/testsuite/gas/mips/branch-misc-2.l
 2002-12-09  Aldy Hernandez  <aldyh@redhat.com>
 
 	* gas/ppc/booke.d: Fix msync and mbar to reflect reality.

@@ -57,7 +57,7 @@ if { [istarget mips*-*-*] } then {
     run_dump_test "blt"
     run_dump_test "bltu"
     run_dump_test "branch-misc-1"
-    run_dump_test "branch-misc-2"
+    run_list_test "branch-misc-2" ""
 
     if $ilocks {
 	run_dump_test "div-ilocks"

@@ -7,6 +7,8 @@
 	.globl g5 .text
 	.globl g6 .text
 
+	.globl x1 .text
+
 	.text
 g1:
 	.space 20
@@ -29,6 +31,9 @@ g4:
 g5:
 	.space 20
 g6:
+
+	b	x1
+	b	x2
 
 # Force at least 8 (non-delay-slot) zero bytes, to make 'objdump' print ...
 	.space	8

@@ -23,8 +23,8 @@ text_label:
 	bal	text_label
 
 # Branch to an external label.
-	b	external_label
-	bal	external_label
+#	b	external_label
+#	bal	external_label
 
 # Force at least 8 (non-delay-slot) zero bytes, to make 'objdump' print ...
 	.space	8
