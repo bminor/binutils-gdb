@@ -1,3 +1,9 @@
+Fri Sep 20 11:43:43 1996  Ian Lance Taylor  <ian@cygnus.com>
+
+	* reloc.c (bfd_perform_relocation): Apply the relocation even if
+	it is zero, in case src_mask matters.
+	(bfd_install_relocation): Likewise.
+
 Thu Sep 19 11:03:06 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* xcofflink.c (xcoff_link_add_symbols): Always initialize

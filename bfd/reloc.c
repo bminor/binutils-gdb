@@ -872,20 +872,18 @@ space consuming.  For each target:
       break;
 
     case 1:
-      if (relocation)
-	{
-	  short x = bfd_get_16 (abfd, (bfd_byte *) data + addr);
-	  DOIT (x);
-	  bfd_put_16 (abfd, x, (unsigned char *) data + addr);
-	}
+      {
+	short x = bfd_get_16 (abfd, (bfd_byte *) data + addr);
+	DOIT (x);
+	bfd_put_16 (abfd, x, (unsigned char *) data + addr);
+      }
       break;
     case 2:
-      if (relocation)
-	{
-	  long x = bfd_get_32 (abfd, (bfd_byte *) data + addr);
-	  DOIT (x);
-	  bfd_put_32 (abfd, x, (bfd_byte *) data + addr);
-	}
+      {
+	long x = bfd_get_32 (abfd, (bfd_byte *) data + addr);
+	DOIT (x);
+	bfd_put_32 (abfd, x, (bfd_byte *) data + addr);
+      }
       break;
     case -2:
       {
@@ -911,12 +909,11 @@ space consuming.  For each target:
 
     case 4:
 #ifdef BFD64
-      if (relocation)
-	{
-	  bfd_vma x = bfd_get_64 (abfd, (bfd_byte *) data + addr);
-	  DOIT (x);
-	  bfd_put_64 (abfd, x, (bfd_byte *) data + addr);
-	}
+      {
+	bfd_vma x = bfd_get_64 (abfd, (bfd_byte *) data + addr);
+	DOIT (x);
+	bfd_put_64 (abfd, x, (bfd_byte *) data + addr);
+      }
 #else
       abort ();
 #endif
@@ -1332,20 +1329,18 @@ space consuming.  For each target:
       break;
 
     case 1:
-      if (relocation)
-	{
-	  short x = bfd_get_16 (abfd, (bfd_byte *) data);
-	  DOIT (x);
-	  bfd_put_16 (abfd, x, (unsigned char *) data);
-	}
+      {
+	short x = bfd_get_16 (abfd, (bfd_byte *) data);
+	DOIT (x);
+	bfd_put_16 (abfd, x, (unsigned char *) data);
+      }
       break;
     case 2:
-      if (relocation)
-	{
-	  long x = bfd_get_32 (abfd, (bfd_byte *) data);
-	  DOIT (x);
-	  bfd_put_32 (abfd, x, (bfd_byte *) data);
-	}
+      {
+	long x = bfd_get_32 (abfd, (bfd_byte *) data);
+	DOIT (x);
+	bfd_put_32 (abfd, x, (bfd_byte *) data);
+      }
       break;
     case -2:
       {
@@ -1361,12 +1356,11 @@ space consuming.  For each target:
       break;
 
     case 4:
-      if (relocation)
-	{
-	  bfd_vma x = bfd_get_64 (abfd, (bfd_byte *) data);
-	  DOIT (x);
-	  bfd_put_64 (abfd, x, (bfd_byte *) data);
-	}
+      {
+	bfd_vma x = bfd_get_64 (abfd, (bfd_byte *) data);
+	DOIT (x);
+	bfd_put_64 (abfd, x, (bfd_byte *) data);
+      }
       break;
     default:
       return bfd_reloc_other;
@@ -2246,6 +2240,41 @@ ENUMDOC
   assumed to be 0.
 COMMENT
 {* end-sanitize-d10v *}
+
+COMMENT
+{* start-sanitize-m32r *}
+ENUM
+  BFD_RELOC_M32R_10_PCREL
+ENUMDOC
+  Mitsubishi M32R relocs.
+  This is a 10-bit reloc with the right 2 bits assumed to be 0.
+ENUM
+  BFD_RELOC_M32R_18_PCREL
+ENUMDOC
+  This is an 18-bit reloc with the right 2 bits assumed to be 0.
+ENUM
+  BFD_RELOC_M32R_26_PCREL
+ENUMDOC
+  This is an 26-bit reloc with the right 2 bits assumed to be 0.
+ENUM
+  BFD_RELOC_M32R_24
+ENUMDOC
+  This is a 24 bit reloc.
+COMMENT
+{* end-sanitize-m32r *}
+
+COMMENT
+{* start-sanitize-v850 *}
+ENUM
+  BFD_RELOC_V850_9_PCREL
+ENUMDOC
+  This is a 9-bit reloc
+ENUM
+  BFD_RELOC_V850_22_PCREL
+ENUMDOC
+  This is a 22-bit reloc
+COMMENT
+{* end-sanitize-v850 *}
 
 ENDSENUM
   BFD_RELOC_UNUSED
