@@ -2536,11 +2536,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   gdbarch = gdbarch_alloc (&info, tdep);
   power = arch == bfd_arch_rs6000;
 
-  /* Select instruction printer. */
-  tm_print_insn = arch == power ? print_insn_rs6000 :
-    info.byte_order == BFD_ENDIAN_BIG ? print_insn_big_powerpc :
-      print_insn_little_powerpc;
-
   /* Choose variant. */
   v = find_variant_by_arch (arch, mach);
   if (!v)
@@ -2585,6 +2580,14 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       tdep->regoff[i] = off;
       off += regsize (v->regs + i, wordsize);
     }
+
+  /* Select instruction printer.  Note: tm_print_insn is still used by
+     gdbtk (insight), so we set both tm_print_insn and the gdbarch
+     method.  */
+  tm_print_insn = arch == power ? print_insn_rs6000 :
+    info.byte_order == BFD_ENDIAN_BIG ? print_insn_big_powerpc :
+      print_insn_little_powerpc;
+  set_gdbarch_print_insn (gdbarch, tm_print_insn);
 
   set_gdbarch_read_pc (gdbarch, generic_target_read_pc);
   set_gdbarch_write_pc (gdbarch, generic_target_write_pc);
