@@ -1,3 +1,9 @@
+start-sanitize-m32rx
+Wed Apr  1 14:57:54 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* m32r-opc.c: Fix SATB bit pattern.  Add extra control registers. 
+
+end-sanitize-m32rx
 Tue Mar 31 11:09:08 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	From H.J. Lu <hjl@gnu.org>:

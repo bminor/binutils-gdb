@@ -253,13 +253,22 @@ CGEN_KEYWORD_ENTRY m32r_cgen_opval_h_cr_entries[] =
   { "cr3", 3 },
   { "cr4", 4 },
   { "cr5", 5 },
-  { "cr6", 6 }
+  { "cr6", 6 },
+  { "cr7", 7 },
+  { "cr8", 8 },
+  { "cr9", 9 },
+  { "cr10", 10 },
+  { "cr11", 11 },
+  { "cr12", 12 },
+  { "cr13", 13 },
+  { "cr14", 14 },
+  { "cr15", 15 }
 };
 
 CGEN_KEYWORD m32r_cgen_opval_h_cr = 
 {
   & m32r_cgen_opval_h_cr_entries[0],
-  12
+  21
 };
 
 /* start-sanitize-m32rx */
@@ -516,6 +525,7 @@ static const CGEN_OPERAND_INSTANCE fmt_15_bl24_ops[] = {
   { 0 }
 };
 
+/* start-sanitize-m32rx */
 static const CGEN_OPERAND_INSTANCE fmt_16_bcl8_ops[] = {
   { INPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_VM, & OP_ENT (DISP8), 0 },
@@ -525,6 +535,8 @@ static const CGEN_OPERAND_INSTANCE fmt_16_bcl8_ops[] = {
   { 0 }
 };
 
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
 static const CGEN_OPERAND_INSTANCE fmt_17_bcl24_ops[] = {
   { INPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_VM, & OP_ENT (DISP24), 0 },
@@ -534,6 +546,7 @@ static const CGEN_OPERAND_INSTANCE fmt_17_bcl24_ops[] = {
   { 0 }
 };
 
+/* end-sanitize-m32rx */
 static const CGEN_OPERAND_INSTANCE fmt_18_bra8_ops[] = {
   { INPUT, & HW_ENT (HW_H_IADDR), CGEN_MODE_VM, & OP_ENT (DISP8), 0 },
   { OUTPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
@@ -567,12 +580,14 @@ static const CGEN_OPERAND_INSTANCE fmt_22_cmpui_ops[] = {
   { 0 }
 };
 
+/* start-sanitize-m32rx */
 static const CGEN_OPERAND_INSTANCE fmt_23_cmpz_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
   { OUTPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
   { 0 }
 };
 
+/* end-sanitize-m32rx */
 static const CGEN_OPERAND_INSTANCE fmt_24_div_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
@@ -580,6 +595,7 @@ static const CGEN_OPERAND_INSTANCE fmt_24_div_ops[] = {
   { 0 }
 };
 
+/* start-sanitize-m32rx */
 static const CGEN_OPERAND_INSTANCE fmt_25_jc_ops[] = {
   { INPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
@@ -587,6 +603,7 @@ static const CGEN_OPERAND_INSTANCE fmt_25_jc_ops[] = {
   { 0 }
 };
 
+/* end-sanitize-m32rx */
 static const CGEN_OPERAND_INSTANCE fmt_26_jl_ops[] = {
   { INPUT, & HW_ENT (HW_H_PC), CGEN_MODE_USI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
@@ -688,6 +705,7 @@ static const CGEN_OPERAND_INSTANCE fmt_41_machi_ops[] = {
   { 0 }
 };
 
+/* start-sanitize-m32rx */
 static const CGEN_OPERAND_INSTANCE fmt_42_machi_a_ops[] = {
   { INPUT, & HW_ENT (HW_H_ACCUMS), CGEN_MODE_DI, & OP_ENT (ACC), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
@@ -696,6 +714,7 @@ static const CGEN_OPERAND_INSTANCE fmt_42_machi_a_ops[] = {
   { 0 }
 };
 
+/* end-sanitize-m32rx */
 static const CGEN_OPERAND_INSTANCE fmt_43_mulhi_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
@@ -703,6 +722,7 @@ static const CGEN_OPERAND_INSTANCE fmt_43_mulhi_ops[] = {
   { 0 }
 };
 
+/* start-sanitize-m32rx */
 static const CGEN_OPERAND_INSTANCE fmt_44_mulhi_a_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
@@ -710,6 +730,7 @@ static const CGEN_OPERAND_INSTANCE fmt_44_mulhi_a_ops[] = {
   { 0 }
 };
 
+/* end-sanitize-m32rx */
 static const CGEN_OPERAND_INSTANCE fmt_45_mv_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
@@ -722,12 +743,14 @@ static const CGEN_OPERAND_INSTANCE fmt_46_mvfachi_ops[] = {
   { 0 }
 };
 
+/* start-sanitize-m32rx */
 static const CGEN_OPERAND_INSTANCE fmt_47_mvfachi_a_ops[] = {
   { INPUT, & HW_ENT (HW_H_ACCUMS), CGEN_MODE_DI, & OP_ENT (ACCS), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
+/* end-sanitize-m32rx */
 static const CGEN_OPERAND_INSTANCE fmt_48_mvfc_ops[] = {
   { INPUT, & HW_ENT (HW_H_CR), CGEN_MODE_USI, & OP_ENT (SCR), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
@@ -741,6 +764,7 @@ static const CGEN_OPERAND_INSTANCE fmt_49_mvtachi_ops[] = {
   { 0 }
 };
 
+/* start-sanitize-m32rx */
 static const CGEN_OPERAND_INSTANCE fmt_50_mvtachi_a_ops[] = {
   { INPUT, & HW_ENT (HW_H_ACCUMS), CGEN_MODE_DI, & OP_ENT (ACCS), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
@@ -748,6 +772,7 @@ static const CGEN_OPERAND_INSTANCE fmt_50_mvtachi_a_ops[] = {
   { 0 }
 };
 
+/* end-sanitize-m32rx */
 static const CGEN_OPERAND_INSTANCE fmt_51_mvtc_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
   { OUTPUT, & HW_ENT (HW_H_CR), CGEN_MODE_USI, & OP_ENT (DCR), 0 },
@@ -760,6 +785,7 @@ static const CGEN_OPERAND_INSTANCE fmt_53_rac_ops[] = {
   { 0 }
 };
 
+/* start-sanitize-m32rx */
 static const CGEN_OPERAND_INSTANCE fmt_56_rac_dsi_ops[] = {
   { INPUT, & HW_ENT (HW_H_ACCUMS), CGEN_MODE_DI, & OP_ENT (ACCS), 0 },
   { INPUT, & HW_ENT (HW_H_UINT), CGEN_MODE_USI, & OP_ENT (IMM1), 0 },
@@ -767,6 +793,7 @@ static const CGEN_OPERAND_INSTANCE fmt_56_rac_dsi_ops[] = {
   { 0 }
 };
 
+/* end-sanitize-m32rx */
 static const CGEN_OPERAND_INSTANCE fmt_57_rte_ops[] = {
   { INPUT, & HW_ENT (HW_H_BCOND), CGEN_MODE_VM, 0, 0 },
   { INPUT, & HW_ENT (HW_H_BIE), CGEN_MODE_VM, 0, 0 },
@@ -871,12 +898,15 @@ static const CGEN_OPERAND_INSTANCE fmt_71_unlock_ops[] = {
   { 0 }
 };
 
+/* start-sanitize-m32rx */
 static const CGEN_OPERAND_INSTANCE fmt_74_satb_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
   { OUTPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (DR), 0 },
   { 0 }
 };
 
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
 static const CGEN_OPERAND_INSTANCE fmt_75_sat_ops[] = {
   { INPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SR), 0 },
@@ -884,6 +914,8 @@ static const CGEN_OPERAND_INSTANCE fmt_75_sat_ops[] = {
   { 0 }
 };
 
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
 static const CGEN_OPERAND_INSTANCE fmt_76_sadd_ops[] = {
   { INPUT, & HW_ENT (HW_H_ACCUMS), CGEN_MODE_DI, 0, 0 },
   { INPUT, & HW_ENT (HW_H_ACCUMS), CGEN_MODE_DI, 0, 1 },
@@ -891,6 +923,8 @@ static const CGEN_OPERAND_INSTANCE fmt_76_sadd_ops[] = {
   { 0 }
 };
 
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
 static const CGEN_OPERAND_INSTANCE fmt_77_macwu1_ops[] = {
   { INPUT, & HW_ENT (HW_H_ACCUMS), CGEN_MODE_DI, 0, 1 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
@@ -899,6 +933,8 @@ static const CGEN_OPERAND_INSTANCE fmt_77_macwu1_ops[] = {
   { 0 }
 };
 
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
 static const CGEN_OPERAND_INSTANCE fmt_78_mulwu1_ops[] = {
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC1), 0 },
   { INPUT, & HW_ENT (HW_H_GR), CGEN_MODE_SI, & OP_ENT (SRC2), 0 },
@@ -906,11 +942,14 @@ static const CGEN_OPERAND_INSTANCE fmt_78_mulwu1_ops[] = {
   { 0 }
 };
 
+/* end-sanitize-m32rx */
+/* start-sanitize-m32rx */
 static const CGEN_OPERAND_INSTANCE fmt_79_sc_ops[] = {
   { INPUT, & HW_ENT (HW_H_COND), CGEN_MODE_UBI, 0, 0 },
   { 0 }
 };
 
+/* end-sanitize-m32rx */
 #undef INPUT
 #undef OUTPUT
 
@@ -2381,7 +2420,7 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
     { 1, 1, 1, 1 },
     "satb", "satb",
     { MNEM, ' ', OP (DR), ',', OP (SR), 0 },
-    { 32, 32, 0xf0f0ffff }, 0x80000100,
+    { 32, 32, 0xf0f0ffff }, 0x80600100,
     & fmt_74_satb_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32RX), PIPE_NONE } }
   },
@@ -2392,7 +2431,7 @@ const CGEN_INSN m32r_cgen_insn_table_entries[MAX_INSNS] =
     { 1, 1, 1, 1 },
     "sath", "sath",
     { MNEM, ' ', OP (DR), ',', OP (SR), 0 },
-    { 32, 32, 0xf0f0ffff }, 0x80000200,
+    { 32, 32, 0xf0f0ffff }, 0x80600200,
     & fmt_74_satb_ops[0],
     { CGEN_INSN_NBOOL_ATTRS, 0, { (1<<MACH_M32RX), PIPE_NONE } }
   },
