@@ -2234,13 +2234,6 @@ int signo;
   error ("Erroneous arithmetic operation.");
 }
 
-/* Return whether we are running a batch file or from terminal.  */
-int
-batch_mode ()
-{
-  return !(instream == stdin && ISATTY (stdin));
-}
-
 
 static void
 init_cmd_lists ()

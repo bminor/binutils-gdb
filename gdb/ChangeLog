@@ -1,3 +1,9 @@
+Thu Jun 30 13:59:23 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* infrun.c (wait_for_inferior): Print "Program exited normally"
+	regardless of batch_mode.
+	* defs.h, top.c (batch_mode): Removed.
+
 Wed Jun 29 18:53:36 1994  Stan Shebs  (shebs@andros.cygnus.com)
 
 	* Makefile.in (dcache_h): Remove redundant definition.
