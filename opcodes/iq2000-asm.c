@@ -48,16 +48,22 @@ static const char * parse_insn_normal
 /* -- assembler routines inserted here.  */
 
 /* -- asm.c */
+
+#include "safe-ctype.h"
+
+static int iq2000_cgen_isa_register PARAMS ((const char **));
+static const char * parse_jtargq10 PARAMS ((CGEN_CPU_DESC, const char **, int, int, enum cgen_parse_operand_result *, unsigned long *));
 static const char * parse_mimm PARAMS ((CGEN_CPU_DESC, const char **, int, long *));
 static const char * parse_imm  PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
 static const char * parse_hi16 PARAMS ((CGEN_CPU_DESC, const char **, int, unsigned long *));
 static const char * parse_lo16 PARAMS ((CGEN_CPU_DESC, const char **, int, long *));
+static const char * parse_mlo16 PARAMS ((CGEN_CPU_DESC, const char **, int, long *));
 
 /* Special check to ensure that instruction exists for given machine */
 int
 iq2000_cgen_insn_supported (cd, insn)
      CGEN_CPU_DESC cd;
-     CGEN_INSN *insn;
+     const CGEN_INSN *insn;
 {
   int machs = cd->machs;
 
@@ -88,7 +94,7 @@ static int iq2000_cgen_isa_register (strp)
             return 1;
         }
     }
-  if (**strp == '%' && tolower((*strp)[1]) != 'l' && tolower((*strp)[1]) != 'h')
+  if (**strp == '%' && TOLOWER((*strp)[1]) != 'l' && TOLOWER((*strp)[1]) != 'h')
     return 1;
   return 0;
 }
@@ -103,7 +109,6 @@ parse_mimm (cd, strp, opindex, valuep)
      long *valuep;
 {
   const char *errmsg;
-  long value;
 
   /* Verify this isn't a register */
   if (iq2000_cgen_isa_register (strp))
@@ -116,7 +121,7 @@ parse_mimm (cd, strp, opindex, valuep)
       if (errmsg == NULL)
 	{
 	  long x = (-value) & 0xFFFF0000;
-	  if (x != 0 && x != 0xFFFF0000)
+	  if (x != 0 && x != (long) 0xFFFF0000)
 	    errmsg = _("immediate value out of range");
 	  else
 	    *valuep = (-value & 0xFFFF);
@@ -135,7 +140,6 @@ parse_imm (cd, strp, opindex, valuep)
      unsigned long *valuep;
 {
   const char *errmsg;
-  long value;
 
   if (iq2000_cgen_isa_register (strp))
     errmsg = _("immediate value cannot be register");
@@ -147,7 +151,7 @@ parse_imm (cd, strp, opindex, valuep)
       if (errmsg == NULL)
 	{
 	  long x = value & 0xFFFF0000;
-	  if (x != 0 && x != 0xFFFF0000)
+	  if (x != 0 && x != (long) 0xFFFF0000)
 	    errmsg = _("immediate value out of range");
 	  else
 	    *valuep = (value & 0xFFFF);
@@ -163,8 +167,8 @@ parse_jtargq10 (cd, strp, opindex, reloc, type_addr, valuep)
      CGEN_CPU_DESC cd;
      const char **strp;
      int opindex;
-     int reloc;
-     enum cgen_parse_operand_result *type_addr;
+     int reloc ATTRIBUTE_UNUSED;
+     enum cgen_parse_operand_result *type_addr ATTRIBUTE_UNUSED;
      unsigned long *valuep;
 {
   const char *errmsg;
@@ -345,6 +349,9 @@ iq2000_cgen_parse_operand (cd, opindex, strp, fields)
 
   switch (opindex)
     {
+    case IQ2000_OPERAND__INDEX :
+      errmsg = cgen_parse_unsigned_integer (cd, strp, IQ2000_OPERAND__INDEX, &fields->f_index);
+      break;
     case IQ2000_OPERAND_BASE :
       errmsg = cgen_parse_keyword (cd, strp, & iq2000_cgen_opval_gr_names, & fields->f_rs);
       break;
@@ -384,9 +391,6 @@ iq2000_cgen_parse_operand (cd, opindex, strp, fields)
       break;
     case IQ2000_OPERAND_EXECODE :
       errmsg = cgen_parse_unsigned_integer (cd, strp, IQ2000_OPERAND_EXECODE, &fields->f_excode);
-      break;
-    case IQ2000_OPERAND_F_INDEX :
-      errmsg = cgen_parse_unsigned_integer (cd, strp, IQ2000_OPERAND_F_INDEX, &fields->f_index);
       break;
     case IQ2000_OPERAND_HI16 :
       errmsg = parse_hi16 (cd, strp, IQ2000_OPERAND_HI16, &fields->f_imm);

@@ -92,6 +92,9 @@ iq2000_cgen_print_operand (cd, opindex, xinfo, fields, attrs, pc, length)
 
   switch (opindex)
     {
+    case IQ2000_OPERAND__INDEX :
+      print_normal (cd, info, fields->f_index, 0, pc, length);
+      break;
     case IQ2000_OPERAND_BASE :
       print_keyword (cd, info, & iq2000_cgen_opval_gr_names, fields->f_rs, 0);
       break;
@@ -127,9 +130,6 @@ iq2000_cgen_print_operand (cd, opindex, xinfo, fields, attrs, pc, length)
       break;
     case IQ2000_OPERAND_EXECODE :
       print_normal (cd, info, fields->f_excode, 0, pc, length);
-      break;
-    case IQ2000_OPERAND_F_INDEX :
-      print_normal (cd, info, fields->f_index, 0, pc, length);
       break;
     case IQ2000_OPERAND_HI16 :
       print_normal (cd, info, fields->f_imm, 0, pc, length);

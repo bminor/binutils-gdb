@@ -1,3 +1,11 @@
+2004-10-27  Nick Clifton  <nickc@redhat.com>
+
+	* iq2000m.cpu (pkrlr1, pkrlr30, rbr1, rbr30, rxr1, rxr30, wbr1,
+	wbr1u, wbr30, wbr30u, wxr1, wxr1u, wxr30, wxr30u): Add an index
+	operand.
+	* iq2000.cpu (dnop index): Rename to _index to avoid complications
+	with guile.
+
 2004-08-27  Richard Sandiford  <rsandifo@redhat.com>
 
 	* frv.cpu (cfmovs): Change UNIT attribute to FMALL.

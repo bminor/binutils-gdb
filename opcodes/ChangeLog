@@ -1,3 +1,13 @@
+2004-10-27  Nick Clifton  <nickc@redhat.com>
+
+	* opcodes/iq2000-asm.c: Regenerate.
+	* opcodes/iq2000-desc.c: Regenerate.
+	* opcodes/iq2000-desc.h: Regenerate.
+	* opcodes/iq2000-dis.c: Regenerate.
+	* opcodes/iq2000-ibld.c: Regenerate.
+	* opcodes/iq2000-opc.c: Regenerate.
+	* opcodes/iq2000-opc.h: Regenerate.
+
 2004-10-21  Tomer Levi  <Tomer.Levi@nsc.com>
 
 	* crx-opc.c (crx_instruction): Replace i3, i4, i5 with us3,
