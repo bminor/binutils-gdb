@@ -118,6 +118,9 @@ mkscript.c
 news.sh
 relax.c
 relax.h
+sh.em 
+sh.sc-sh 
+sh.sh
 st2000.em
 st2000.sc-sh
 st2000.sh
@@ -163,7 +166,10 @@ fi
 #
 #
 # $Log$
-# Revision 1.56  1993/04/09 17:44:54  sac
+# Revision 1.57  1993/04/27 01:36:30  sac
+# sh.em, sh.sh, sh.sc-sh: New files supporting Hitachi SH.
+#
+# Revision 1.56  1993/04/09  17:44:54  sac
 # Support for the H8/500
 #
 # Revision 1.55  1993/03/30  23:24:53  pesch
