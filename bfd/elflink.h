@@ -3108,26 +3108,37 @@ elf_link_assign_sym_version (h, data)
 	{
 	  if (strcmp (t->name, p) == 0)
 	    {
+	      int len;
+	      char *alc;
+	      struct bfd_elf_version_expr *d;
+
+	      len = p - h->root.root.string;
+	      alc = bfd_alloc (sinfo->output_bfd, len);
+	      if (alc == NULL)
+	        return false;
+	      strncpy (alc, h->root.root.string, len - 1);
+	      alc[len - 1] = '\0';
+	      if (alc[len - 2] == ELF_VER_CHR)
+	        alc[len - 2] = '\0';
+
 	      h->verinfo.vertree = t;
 	      t->used = true;
+	      d = NULL;
+
+	      if (t->globals != NULL)
+		{
+		  for (d = t->globals; d != NULL; d = d->next)
+		    {
+		      if ((d->match[0] == '*' && d->match[1] == '\0')
+			  || fnmatch (d->match, alc, 0) == 0)
+			break;
+		    }
+		}
 
 	      /* See if there is anything to force this symbol to
                  local scope.  */
-	      if (t->locals != NULL)
+	      if (d == NULL && t->locals != NULL)
 		{
-		  int len;
-		  char *alc;
-		  struct bfd_elf_version_expr *d;
-
-		  len = p - h->root.root.string;
-		  alc = bfd_alloc (sinfo->output_bfd, len);
-		  if (alc == NULL)
-		    return false;
-		  strncpy (alc, h->root.root.string, len - 1);
-		  alc[len - 1] = '\0';
-		  if (alc[len - 2] == ELF_VER_CHR)
-		    alc[len - 2] = '\0';
-
 		  for (d = t->locals; d != NULL; d = d->next)
 		    {
 		      if ((d->match[0] == '*' && d->match[1] == '\0')
@@ -3150,10 +3161,9 @@ elf_link_assign_sym_version (h, data)
 			  break;
 			}
 		    }
-
-		  bfd_release (sinfo->output_bfd, alc);
 		}
 
+	      bfd_release (sinfo->output_bfd, alc);
 	      break;
 	    }
 	}

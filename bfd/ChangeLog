@@ -1,3 +1,8 @@
+Fri Oct 17 00:04:13 1997  Richard Henderson  <rth@cygnus.com>
+
+	* elflink.h (elf_link_assign_sym_version): For explicitly versioned
+	symbols, check globals list before matching on locals.
+
 Thu Oct 16 08:17:06 1997  Michael Meissner  <meissner@cygnus.com>
 
 	* peicode.h (coff_swap_scnhdr_out,pe_print_idata): Fix mangled
