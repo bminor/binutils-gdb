@@ -1,5 +1,9 @@
 2002-08-06  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-ppc.c (ppc64_elf_howto_raw): Zero all src_mask entries.
+
+2002-08-06  Alan Modra  <amodra@bigpond.net.au>
+
 	* libxcoff.h: Use PARAMS on function declarations.
 	* coff-rs6000.c (xcoff_generate_rtinit): Simplify size calc.
 	* coff64-rs6000.c (xcoff64_generate_rtinit): Likewise.
