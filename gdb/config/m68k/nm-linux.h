@@ -35,4 +35,7 @@ extern int kernel_u_size (void);
 
 extern int m68k_linux_register_u_addr (int, int);
 
+/* Override copies of {fetch,store}_inferior_registers in `infptrace.c'.  */
+#define FETCH_INFERIOR_REGISTERS
+
 #endif /* #ifndef NM_LINUX_H */

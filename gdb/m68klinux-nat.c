@@ -32,10 +32,15 @@
 #include <sys/param.h>
 #include <sys/dir.h>
 #include <signal.h>
+#include <sys/ptrace.h>
 #include <sys/user.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <sys/procfs.h>
+
+#ifdef HAVE_SYS_REG_H
+#include <sys/reg.h>
+#endif
 
 #include <sys/file.h>
 #include "gdb_stat.h"
@@ -57,6 +62,34 @@ static const int regmap[] =
   45, 46, 47
 };
 
+/* Which ptrace request retrieves which registers?
+   These apply to the corresponding SET requests as well.  */
+#define NUM_GREGS (18)
+#define MAX_NUM_REGS (NUM_GREGS + 11)
+
+int
+getregs_supplies (int regno)
+{
+  return 0 <= regno && regno < NUM_GREGS;
+}
+
+int
+getfpregs_supplies (int regno)
+{
+  return FP0_REGNUM <= regno && regno <= FPI_REGNUM;
+}
+
+/* Does the current host support the GETREGS request?  */
+int have_ptrace_getregs =
+#ifdef HAVE_PTRACE_GETREGS
+  1
+#else
+  0
+#endif
+;
+
+
+
 /* BLOCKEND is the value of u.u_ar0, and points to the place where GS
    is stored.  */
 
@@ -65,7 +98,151 @@ m68k_linux_register_u_addr (int blockend, int regnum)
 {
   return (blockend + 4 * regmap[regnum]);
 }
+
 
+/* Fetching registers directly from the U area, one at a time.  */
+
+/* FIXME: This duplicates code from `inptrace.c'.  The problem is that we
+   define FETCH_INFERIOR_REGISTERS since we want to use our own versions
+   of {fetch,store}_inferior_registers that use the GETREGS request.  This
+   means that the code in `infptrace.c' is #ifdef'd out.  But we need to
+   fall back on that code when GDB is running on top of a kernel that
+   doesn't support the GETREGS request.  */
+
+#ifndef PT_READ_U
+#define PT_READ_U PTRACE_PEEKUSR
+#endif
+#ifndef PT_WRITE_U
+#define PT_WRITE_U PTRACE_POKEUSR
+#endif
+
+/* Default the type of the ptrace transfer to int.  */
+#ifndef PTRACE_XFER_TYPE
+#define PTRACE_XFER_TYPE int
+#endif
+
+/* Fetch one register.  */
+
+static void
+fetch_register (int regno)
+{
+  /* This isn't really an address.  But ptrace thinks of it as one.  */
+  CORE_ADDR regaddr;
+  char mess[128];		/* For messages */
+  register int i;
+  unsigned int offset;		/* Offset of registers within the u area.  */
+  char buf[MAX_REGISTER_RAW_SIZE];
+  int tid;
+
+  if (CANNOT_FETCH_REGISTER (regno))
+    {
+      memset (buf, '\0', REGISTER_RAW_SIZE (regno));	/* Supply zeroes */
+      supply_register (regno, buf);
+      return;
+    }
+
+  /* Overload thread id onto process id */
+  if ((tid = TIDGET (inferior_ptid)) == 0)
+    tid = PIDGET (inferior_ptid);	/* no thread id, just use process id */
+
+  offset = U_REGS_OFFSET;
+
+  regaddr = register_addr (regno, offset);
+  for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (PTRACE_XFER_TYPE))
+    {
+      errno = 0;
+      *(PTRACE_XFER_TYPE *) & buf[i] = ptrace (PT_READ_U, tid,
+					       (PTRACE_ARG3_TYPE) regaddr, 0);
+      regaddr += sizeof (PTRACE_XFER_TYPE);
+      if (errno != 0)
+	{
+	  sprintf (mess, "reading register %s (#%d)", 
+		   REGISTER_NAME (regno), regno);
+	  perror_with_name (mess);
+	}
+    }
+  supply_register (regno, buf);
+}
+
+/* Fetch register values from the inferior.
+   If REGNO is negative, do this for all registers.
+   Otherwise, REGNO specifies which register (so we can save time). */
+
+void
+old_fetch_inferior_registers (int regno)
+{
+  if (regno >= 0)
+    {
+      fetch_register (regno);
+    }
+  else
+    {
+      for (regno = 0; regno < NUM_REGS; regno++)
+	{
+	  fetch_register (regno);
+	}
+    }
+}
+
+/* Store one register. */
+
+static void
+store_register (int regno)
+{
+  /* This isn't really an address.  But ptrace thinks of it as one.  */
+  CORE_ADDR regaddr;
+  char mess[128];		/* For messages */
+  register int i;
+  unsigned int offset;		/* Offset of registers within the u area.  */
+  int tid;
+
+  if (CANNOT_STORE_REGISTER (regno))
+    {
+      return;
+    }
+
+  /* Overload thread id onto process id */
+  if ((tid = TIDGET (inferior_ptid)) == 0)
+    tid = PIDGET (inferior_ptid);	/* no thread id, just use process id */
+
+  offset = U_REGS_OFFSET;
+
+  regaddr = register_addr (regno, offset);
+  for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (PTRACE_XFER_TYPE))
+    {
+      errno = 0;
+      ptrace (PT_WRITE_U, tid, (PTRACE_ARG3_TYPE) regaddr,
+	      *(PTRACE_XFER_TYPE *) & registers[REGISTER_BYTE (regno) + i]);
+      regaddr += sizeof (PTRACE_XFER_TYPE);
+      if (errno != 0)
+	{
+	  sprintf (mess, "writing register %s (#%d)", 
+		   REGISTER_NAME (regno), regno);
+	  perror_with_name (mess);
+	}
+    }
+}
+
+/* Store our register values back into the inferior.
+   If REGNO is negative, do this for all registers.
+   Otherwise, REGNO specifies which register (so we can save time).  */
+
+void
+old_store_inferior_registers (int regno)
+{
+  if (regno >= 0)
+    {
+      store_register (regno);
+    }
+  else
+    {
+      for (regno = 0; regno < NUM_REGS; regno++)
+	{
+	  store_register (regno);
+	}
+    }
+}
+
 /*  Given a pointer to a general register set in /proc format
    (elf_gregset_t *), unpack the register contents and supply
    them as gdb's idea of the current register values. */
@@ -87,17 +264,87 @@ m68k_linux_register_u_addr (int blockend, int regnum)
 void
 supply_gregset (elf_gregset_t *gregsetp)
 {
+  elf_greg_t *regp = (elf_greg_t *) gregsetp;
   int regi;
 
   for (regi = D0_REGNUM; regi <= SP_REGNUM; regi++)
-    supply_register (regi, (char *) (*gregsetp + regmap[regi]));
-  supply_register (PS_REGNUM, (char *) (*gregsetp + PT_SR));
-  supply_register (PC_REGNUM, (char *) (*gregsetp + PT_PC));
+    supply_register (regi, (char *) &regp[regmap[regi]]);
+  supply_register (PS_REGNUM, (char *) &regp[PT_SR]);
+  supply_register (PC_REGNUM, (char *) &regp[PT_PC]);
 }
 
-/*  Given a pointer to a floating point register set in /proc format
-   (fpregset_t *), unpack the register contents and supply them as gdb's
-   idea of the current floating point register values. */
+/* Fill register REGNO (if it is a general-purpose register) in
+   *GREGSETPS with the value in GDB's register array.  If REGNO is -1,
+   do this for all registers.  */
+void
+fill_gregset (elf_gregset_t *gregsetp, int regno)
+{
+  elf_greg_t *regp = (elf_greg_t *) gregsetp;
+  int i;
+
+  for (i = 0; i < NUM_GREGS; i++)
+    if ((regno == -1 || regno == i))
+      regcache_collect (i, regp + regmap[i]);
+}
+
+#ifdef HAVE_PTRACE_GETREGS
+
+/* Fetch all general-purpose registers from process/thread TID and
+   store their values in GDB's register array.  */
+
+static void
+fetch_regs (int tid)
+{
+  elf_gregset_t regs;
+
+  if (ptrace (PTRACE_GETREGS, tid, 0, (int) &regs) < 0)
+    {
+      if (errno == EIO)
+	{
+	  /* The kernel we're running on doesn't support the GETREGS
+             request.  Reset `have_ptrace_getregs'.  */
+	  have_ptrace_getregs = 0;
+	  return;
+	}
+
+      perror_with_name ("Couldn't get registers");
+    }
+
+  supply_gregset (&regs);
+}
+
+/* Store all valid general-purpose registers in GDB's register array
+   into the process/thread specified by TID.  */
+
+static void
+store_regs (int tid, int regno)
+{
+  elf_gregset_t regs;
+
+  if (ptrace (PTRACE_GETREGS, tid, 0, (int) &regs) < 0)
+    perror_with_name ("Couldn't get registers");
+
+  fill_gregset (&regs, regno);
+
+  if (ptrace (PTRACE_SETREGS, tid, 0, (int) &regs) < 0)
+    perror_with_name ("Couldn't write registers");
+}
+
+#else
+
+static void fetch_regs (int tid) {}
+static void store_regs (int tid, int regno) {}
+
+#endif
+
+
+/* Transfering floating-point registers between GDB, inferiors and cores.  */
+
+/* What is the address of fpN within the floating-point register set F?  */
+#define FPREG_ADDR(f, n) ((char *) &(f)->fpregs[(n) * 3])
+
+/* Fill GDB's register array with the floating-point register values in
+   *FPREGSETP.  */
 
 void
 supply_fpregset (elf_fpregset_t *fpregsetp)
@@ -105,14 +352,180 @@ supply_fpregset (elf_fpregset_t *fpregsetp)
   int regi;
 
   for (regi = FP0_REGNUM; regi < FPC_REGNUM; regi++)
-    supply_register (regi, (char *) &fpregsetp->fpregs[(regi - FP0_REGNUM) * 3]);
+    supply_register (regi, FPREG_ADDR (fpregsetp, regi - FP0_REGNUM));
   supply_register (FPC_REGNUM, (char *) &fpregsetp->fpcntl[0]);
   supply_register (FPS_REGNUM, (char *) &fpregsetp->fpcntl[1]);
   supply_register (FPI_REGNUM, (char *) &fpregsetp->fpcntl[2]);
 }
 
+/* Fill register REGNO (if it is a floating-point register) in
+   *FPREGSETP with the value in GDB's register array.  If REGNO is -1,
+   do this for all registers.  */
+
+void
+fill_fpregset (elf_fpregset_t *fpregsetp, int regno)
+{
+  int i;
+
+  /* Fill in the floating-point registers.  */
+  for (i = FP0_REGNUM; i < FP0_REGNUM + 8; i++)
+    if (regno == -1 || regno == i)
+      memcpy (FPREG_ADDR (fpregsetp, regno - FP0_REGNUM),
+	      &registers[REGISTER_BYTE (regno)],
+	      REGISTER_RAW_SIZE(regno));
+
+  /* Fill in the floating-point control registers.  */
+  for (i = FPC_REGNUM; i <= FPI_REGNUM; i++)
+    if (regno == -1 || regno == i)
+      fpregsetp->fpcntl[regno - FPC_REGNUM]
+	= *(int *) &registers[REGISTER_BYTE (regno)];
+}
+
+#ifdef HAVE_PTRACE_GETREGS
+
+/* Fetch all floating-point registers from process/thread TID and store
+   thier values in GDB's register array.  */
+
+static void
+fetch_fpregs (int tid)
+{
+  elf_fpregset_t fpregs;
+
+  if (ptrace (PTRACE_GETFPREGS, tid, 0, (int) &fpregs) < 0)
+    perror_with_name ("Couldn't get floating point status");
+
+  supply_fpregset (&fpregs);
+}
+
+/* Store all valid floating-point registers in GDB's register array
+   into the process/thread specified by TID.  */
+
+static void
+store_fpregs (int tid, int regno)
+{
+  elf_fpregset_t fpregs;
+
+  if (ptrace (PTRACE_GETFPREGS, tid, 0, (int) &fpregs) < 0)
+    perror_with_name ("Couldn't get floating point status");
+
+  fill_fpregset (&fpregs, regno);
+
+  if (ptrace (PTRACE_SETFPREGS, tid, 0, (int) &fpregs) < 0)
+    perror_with_name ("Couldn't write floating point status");
+}
+
+#else
+
+static void fetch_fpregs (int tid) {}
+static void store_fpregs (int tid, int regno) {}
+
 #endif
 
+#endif
+
+/* Transferring arbitrary registers between GDB and inferior.  */
+
+/* Fetch register REGNO from the child process.  If REGNO is -1, do
+   this for all registers (including the floating point and SSE
+   registers).  */
+
+void
+fetch_inferior_registers (int regno)
+{
+  int tid;
+
+  /* Use the old method of peeking around in `struct user' if the
+     GETREGS request isn't available.  */
+  if (! have_ptrace_getregs)
+    {
+      old_fetch_inferior_registers (regno);
+      return;
+    }
+
+  /* Linux LWP ID's are process ID's.  */
+  if ((tid = TIDGET (inferior_ptid)) == 0)
+    tid = PIDGET (inferior_ptid);		/* Not a threaded program.  */
+
+  /* Use the PTRACE_GETFPXREGS request whenever possible, since it
+     transfers more registers in one system call, and we'll cache the
+     results.  But remember that fetch_fpxregs can fail, and return
+     zero.  */
+  if (regno == -1)
+    {
+      fetch_regs (tid);
+
+      /* The call above might reset `have_ptrace_getregs'.  */
+      if (! have_ptrace_getregs)
+	{
+	  old_fetch_inferior_registers (-1);
+	  return;
+	}
+
+      fetch_fpregs (tid);
+      return;
+    }
+
+  if (getregs_supplies (regno))
+    {
+      fetch_regs (tid);
+      return;
+    }
+
+  if (getfpregs_supplies (regno))
+    {
+      fetch_fpregs (tid);
+      return;
+    }
+
+  internal_error (__FILE__, __LINE__,
+		  "Got request for bad register number %d.", regno);
+}
+
+/* Store register REGNO back into the child process.  If REGNO is -1,
+   do this for all registers (including the floating point and SSE
+   registers).  */
+void
+store_inferior_registers (int regno)
+{
+  int tid;
+
+  /* Use the old method of poking around in `struct user' if the
+     SETREGS request isn't available.  */
+  if (! have_ptrace_getregs)
+    {
+      old_store_inferior_registers (regno);
+      return;
+    }
+
+  /* Linux LWP ID's are process ID's.  */
+  if ((tid = TIDGET (inferior_ptid)) == 0)
+    tid = PIDGET (inferior_ptid);	/* Not a threaded program.  */
+
+  /* Use the PTRACE_SETFPREGS requests whenever possible, since it
+     transfers more registers in one system call.  But remember that
+     store_fpregs can fail, and return zero.  */
+  if (regno == -1)
+    {
+      store_regs (tid, regno);
+      store_fpregs (tid, regno);
+      return;
+    }
+
+  if (getregs_supplies (regno))
+    {
+      store_regs (tid, regno);
+      return;
+    }
+
+  if (getfpregs_supplies (regno))
+    {
+      store_fpregs (tid, regno);
+      return;
+    }
+
+  internal_error (__FILE__, __LINE__,
+		  "Got request to store bad register number %d.", regno);
+}
 
 /* Interpreting register set info found in core files.  */
 

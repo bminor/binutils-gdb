@@ -1,3 +1,9 @@
+2002-01-26  Andreas Schwab  <schwab@suse.de>
+
+	* config/m68k/nm-linux.h (FETCH_INFERIOR_REGISTERS): Define.
+	* m68klinux-nat.c: Update ptrace interface for fetching/storing
+	registers and add support for PTRACE_GETREGS.
+
 2002-01-24  Andrew Cagney  <ac131313@redhat.com>
 
 	GDB 5.1.1 released from 5.1 branch.
