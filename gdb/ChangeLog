@@ -1,5 +1,9 @@
 2002-06-13  Daniel Jacobowitz  <drow@mvista.com>
 
+	* NEWS: Mention multithreaded debug support for gdbserver.
+
+2002-06-13  Daniel Jacobowitz  <drow@mvista.com>
+
 	* MAINTAINERS: Mention NEWS.
 
 2002-06-13  Daniel Jacobowitz  <drow@mvista.com>
