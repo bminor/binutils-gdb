@@ -35,6 +35,7 @@ mh-hp300hpux
 mh-i386mach
 mh-i386sco
 mh-i386v
+mh-i386v4
 mh-i386v-g
 mh-i386v32
 mh-i386v32-g
@@ -81,6 +82,7 @@ mt-hp300hpux
 mt-i386sco
 mt-i386aout
 mt-i386v
+mt-i386v4
 mt-i386v-g
 mt-i386v32
 mt-i386v32-g
