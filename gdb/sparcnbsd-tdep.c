@@ -28,6 +28,7 @@
 
 #include "gdb_string.h"
 
+#include "sparc-tdep.h"
 #include "sparcnbsd-tdep.h"
 #include "nbsd-tdep.h"
 

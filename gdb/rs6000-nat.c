@@ -664,7 +664,9 @@ vmap_symtab (struct vmap *vp)
     /* If symbols are not yet loaded, offsets are not yet valid. */
     return;
 
-  new_offsets = (struct section_offsets *) alloca (SIZEOF_SECTION_OFFSETS);
+  new_offsets =
+    (struct section_offsets *)
+    alloca (SIZEOF_N_SECTION_OFFSETS (objfile->num_sections));
 
   for (i = 0; i < objfile->num_sections; ++i)
     new_offsets->offsets[i] = ANOFFSET (objfile->section_offsets, i);

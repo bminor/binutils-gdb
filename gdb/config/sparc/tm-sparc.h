@@ -22,6 +22,8 @@
    Foundation, Inc., 59 Temple Place - Suite 330,
    Boston, MA 02111-1307, USA.  */
 
+#define GDB_MULTI_ARCH GDB_MULTI_ARCH_PARTIAL
+
 #include "regcache.h"
 
 struct type;
@@ -158,6 +160,8 @@ extern int sparc_intreg_size (void);
                                                                 \
   "y", "psr", "wim", "tbr", "pc", "npc", "fpsr", "cpsr" 	\
 }
+extern const char *legacy_register_name (int i);
+#define REGISTER_NAME legacy_register_name
 
 /* Offset from address of function to start of its code.
    Zero on most machines.  */
@@ -314,8 +318,6 @@ extern int sparc_prologue_frameless_p (CORE_ADDR);
 
 /* Multi-arch the nPC and Y registers.  */
 #define Y_REGNUM              (sparc_y_regnum ())
-extern int sparc_npc_regnum (void);
-extern int sparc_y_regnum (void);
 
 #endif /* GDB_MULTI_ARCH */
 

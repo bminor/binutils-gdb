@@ -1,5 +1,6 @@
 /* ppc-dis.c -- Disassemble PowerPC instructions
-   Copyright 1994, 1995, 2000, 2001, 2002 Free Software Foundation, Inc.
+   Copyright 1994, 1995, 2000, 2001, 2002, 2003
+   Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support
 
 This file is part of GDB, GAS, and the GNU binutils.
@@ -214,7 +215,7 @@ print_insn_powerpc (memaddr, info, bigendian, dialect)
 
 	  /* Extract the value from the instruction.  */
 	  if (operand->extract)
-	    value = (*operand->extract) (insn, dialect, (int *) NULL);
+	    value = (*operand->extract) (insn, dialect, &invalid);
 	  else
 	    {
 	      value = (insn >> operand->shift) & ((1 << operand->bits) - 1);

@@ -780,16 +780,6 @@ typedef struct ptid ptid_t;
 #include "tm.h"
 #endif
 
-/* GDB_MULTI_ARCH is normally set by configure.in using information
-   from configure.tgt or the config/%/%.mt Makefile fragment.  Since
-   some targets have defined it in their "tm.h" file, delay providing
-   a default definition until after "tm.h" has been included.. */
-
-#ifndef GDB_MULTI_ARCH
-#define GDB_MULTI_ARCH 0
-#endif
-
-
 /* If the xm.h file did not define the mode string used to open the
    files, assume that binary files are opened the same way as text
    files */

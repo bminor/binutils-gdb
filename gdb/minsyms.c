@@ -451,12 +451,22 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc, asection *section)
   struct objfile *objfile;
   struct minimal_symbol *msymbol;
   struct minimal_symbol *best_symbol = NULL;
+  struct obj_section *pc_section;
 
   /* pc has to be in a known section. This ensures that anything beyond
      the end of the last segment doesn't appear to be part of the last
      function in the last segment.  */
-  if (find_pc_section (pc) == NULL)
+  pc_section = find_pc_section (pc);
+  if (pc_section == NULL)
     return NULL;
+
+  /* If no section was specified, then just make sure that the PC is in
+     the same section as the minimal symbol we find.  */
+  if (section == NULL)
+    section = pc_section->the_bfd_section;
+
+  /* FIXME drow/2003-07-19: Should we also check that PC is in SECTION
+     if we were passed a non-NULL SECTION argument?  */
 
   for (objfile = object_files;
        objfile != NULL;

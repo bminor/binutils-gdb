@@ -140,23 +140,25 @@ fetch_register (int regno)
 
   if (CANNOT_FETCH_REGISTER (regno))
     {
-      memset (buf, '\0', REGISTER_RAW_SIZE (regno));	/* Supply zeroes */
+      memset (buf, '\0', register_size (current_gdbarch, regno));	/* Supply zeroes */
       supply_register (regno, buf);
       return;
     }
 
   /* Overload thread id onto process id */
-  if ((tid = TIDGET (inferior_ptid)) == 0)
+  tid = TIDGET (inferior_ptid);
+  if (tid == 0)
     tid = PIDGET (inferior_ptid);	/* no thread id, just use process id */
 
   offset = U_REGS_OFFSET;
 
   regaddr = register_addr (regno, offset);
-  for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (PTRACE_XFER_TYPE))
+  for (i = 0; i < register_size (current_gdbarch, regno);
+       i += sizeof (PTRACE_XFER_TYPE))
     {
       errno = 0;
-      *(PTRACE_XFER_TYPE *) & buf[i] = ptrace (PT_READ_U, tid,
-					       (PTRACE_ARG3_TYPE) regaddr, 0);
+      *(PTRACE_XFER_TYPE *) &buf[i] = ptrace (PT_READ_U, tid,
+					      (PTRACE_ARG3_TYPE) regaddr, 0);
       regaddr += sizeof (PTRACE_XFER_TYPE);
       if (errno != 0)
 	{
@@ -207,7 +209,8 @@ store_register (int regno)
     }
 
   /* Overload thread id onto process id */
-  if ((tid = TIDGET (inferior_ptid)) == 0)
+  tid = TIDGET (inferior_ptid);
+  if (tid == 0)
     tid = PIDGET (inferior_ptid);	/* no thread id, just use process id */
 
   offset = U_REGS_OFFSET;
@@ -218,7 +221,8 @@ store_register (int regno)
   regcache_collect (regno, buf);
 
   /* Store the local buffer into the inferior a chunk at the time. */
-  for (i = 0; i < REGISTER_RAW_SIZE (regno); i += sizeof (PTRACE_XFER_TYPE))
+  for (i = 0; i < register_size (current_gdbarch, regno);
+       i += sizeof (PTRACE_XFER_TYPE))
     {
       errno = 0;
       ptrace (PT_WRITE_U, tid, (PTRACE_ARG3_TYPE) regaddr,
@@ -293,7 +297,7 @@ fill_gregset (elf_gregset_t *gregsetp, int regno)
   int i;
 
   for (i = 0; i < NUM_GREGS; i++)
-    if ((regno == -1 || regno == i))
+    if (regno == -1 || regno == i)
       regcache_collect (i, regp + regmap[i]);
 }
 
@@ -380,12 +384,12 @@ fill_fpregset (elf_fpregset_t *fpregsetp, int regno)
   /* Fill in the floating-point registers.  */
   for (i = FP0_REGNUM; i < FP0_REGNUM + 8; i++)
     if (regno == -1 || regno == i)
-      regcache_collect (regno, FPREG_ADDR (fpregsetp, regno - FP0_REGNUM));
+      regcache_collect (i, FPREG_ADDR (fpregsetp, i - FP0_REGNUM));
 
   /* Fill in the floating-point control registers.  */
   for (i = M68K_FPC_REGNUM; i <= M68K_FPI_REGNUM; i++)
     if (regno == -1 || regno == i)
-      regcache_collect (regno, (char *) &fpregsetp->fpcntl[regno - M68K_FPC_REGNUM]);
+      regcache_collect (i, (char *) &fpregsetp->fpcntl[i - M68K_FPC_REGNUM]);
 }
 
 #ifdef HAVE_PTRACE_GETREGS
@@ -450,7 +454,8 @@ fetch_inferior_registers (int regno)
     }
 
   /* GNU/Linux LWP ID's are process ID's.  */
-  if ((tid = TIDGET (inferior_ptid)) == 0)
+  tid = TIDGET (inferior_ptid);
+  if (tid == 0)
     tid = PIDGET (inferior_ptid);		/* Not a threaded program.  */
 
   /* Use the PTRACE_GETFPXREGS request whenever possible, since it
@@ -505,7 +510,8 @@ store_inferior_registers (int regno)
     }
 
   /* GNU/Linux LWP ID's are process ID's.  */
-  if ((tid = TIDGET (inferior_ptid)) == 0)
+  tid = TIDGET (inferior_ptid);
+  if (tid == 0)
     tid = PIDGET (inferior_ptid);	/* Not a threaded program.  */
 
   /* Use the PTRACE_SETFPREGS requests whenever possible, since it

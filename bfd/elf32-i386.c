@@ -2177,7 +2177,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 	    }
 	  else if (h->root.type == bfd_link_hash_undefweak)
 	    ;
-	  else if (info->shared
+	  else if (!info->executable
 		   && !info->no_undefined
 		   && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
 	    ;
@@ -2338,8 +2338,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 		   || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 		   || h->root.type != bfd_link_hash_undefweak)
 	       && (r_type != R_386_PC32
-		   || (h != NULL
-		       && !SYMBOL_CALLS_LOCAL (info, h))))
+		   || !SYMBOL_CALLS_LOCAL (info, h)))
 	      || (ELIMINATE_COPY_RELOCS
 		  && !info->shared
 		  && h != NULL

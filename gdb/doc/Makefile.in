@@ -67,7 +67,7 @@ SET_TEXINPUTS = \
    TEXINPUTS=${TEXIDIR}:.:$(srcdir):$(READLINE_DIR):$(GDBMI_DIR):$$TEXINPUTS
 
 # Files which should be generated via 'info' and installed by 'install-info'
-INFO_DEPS = gdb.info gdbint.info stabs.info
+INFO_DEPS = gdb.info gdbint.info stabs.info annotate.info
 
 # There may be alternate predefined collections of switches to configure
 # the GDB manual.  Normally this is not done in synch with the software
@@ -124,12 +124,23 @@ GDBINT_DOC_FILES = \
 	$(GDBINT_DOC_BUILD_INCLUDES)
 
 # Stabs manual: All files
-STABS_DOC_SOURCE_INCLUDES =
+STABS_DOC_SOURCE_INCLUDES = \
+	$(srcdir)/fdl.texi
 STABS_DOC_BUILD_INCLUDES =
 STABS_DOC_FILES = \
 	$(srcdir)/stabs.texinfo \
 	$(STABS_DOC_SOURCE_INCLUDES) \
 	$(STABS_DOC_BUILD_INCLUDES)
+
+# Annotate migration document
+ANNOTATE_DOC_SOURCE_INCLUDES = \
+	$(srcdir)/fdl.texi
+ANNOTATE_DOC_BUILD_INCLUDES = \
+	gdb-cfg.texi
+ANNOTATE_DOC_FILES = \
+	$(srcdir)/annotate.texinfo \
+	$(ANNOTATE_DOC_SOURCE_INCLUDES) \
+	$(ANNOTATE_DOC_BUILD_INCLUDES)
 
 #### Host, target, and site specific Makefile fragments come in here.
 ###
@@ -137,10 +148,10 @@ STABS_DOC_FILES = \
 all:
 
 info: $(INFO_DEPS)
-dvi: gdb.dvi gdbint.dvi stabs.dvi refcard.dvi
-ps: gdb.ps gdbint.ps stabs.ps refcard.ps
-html: gdb_toc.html gdbint_toc.html stabs_toc.html
-pdf: gdb.pdf gdbint.pdf stabs.pdf
+dvi: gdb.dvi gdbint.dvi stabs.dvi refcard.dvi annotate.dvi
+ps: gdb.ps gdbint.ps stabs.ps refcard.ps annotate.ps
+html: gdb_toc.html gdbint_toc.html stabs_toc.html annotate_toc.html
+pdf: gdb.pdf gdbint.pdf stabs.pdf annotate.pdf
 all-doc: info dvi ps # pdf
 diststuff: info
 
@@ -395,7 +406,7 @@ gdbint_toc.html: $(GDBINT_DOC_FILES)
 	$(MAKEHTML) $(MAKEHTMLFLAGS) $(srcdir)/gdbint.texinfo
 
 stabs.info: $(STABS_DOC_FILES)
-	$(MAKEINFO) -o stabs.info $(srcdir)/stabs.texinfo
+	$(MAKEINFO) -I $(srcdir) -o stabs.info $(srcdir)/stabs.texinfo
 
 # STABS DOCUMENTATION: HTML file
 
@@ -420,6 +431,30 @@ stabs.pdf: $(STABS_DOC_FILES)
 	rm -f $(STABS_TEX_TMPS)
 	$(SET_TEXINPUTS) $(TEXI2DVI) --pdf $(srcdir)/stabs.texinfo
 
+# Clean these up before each run.  Avoids a catch 22 with not being
+# able to re-generate these files (to fix a corruption) because these
+# files contain a corruption.
+ANNOTATE_TEX_TMPS = annotate.aux annotate.cp* annotate.fn* annotate.ky* \
+	annotate.log annotate.pg* annotate.toc annotate.tp* annotate.vr*
+
+# ANNOTATE DOCUMENTATION: TeX dvi file
+annotate.dvi : $(ANNOTATE_DOC_FILES)
+	rm -f $(ANNOTATE_TEX_TMPS)
+	$(SET_TEXINPUTS) $(TEXI2DVI) $(srcdir)/annotate.texinfo
+
+annotate.ps: annotate.dvi
+	$(DVIPS) -o $@ $?
+
+annotate.pdf: $(ANNOTATE_DOC_FILES)
+	rm -f $(ANNOTATE_TEX_TMPS)
+	$(SET_TEXINPUTS) $(TEXI2DVI) --pdf $(srcdir)/annotate.texinfo
+
+annotate.info: $(ANNOTATE_DOC_FILES)
+	$(MAKEINFO)  -I $(srcdir) -o annotate.info $(srcdir)/annotate.texinfo
+
+annotate_toc.html: $(ANNOTATE_DOC_FILES)
+	$(MAKEHTML) $(MAKEHTMLFLAGS) $(srcdir)/annotate.texinfo
+
 force:
 
 Makefile: Makefile.in $(host_makefile_frag) $(target_makefile_frag) config.status
@@ -434,6 +469,7 @@ mostlyclean:
 	rm -f $(GDB_TEX_TMPS)
 	rm -f $(GDBINT_TEX_TMPS)
 	rm -f $(STABS_TEX_TMPS)
+	rm -f $(ANNOTATE_TEX_TMPS)
 	rm -f sedref.dvi sedref.tex tmp.sed
 
 clean: mostlyclean

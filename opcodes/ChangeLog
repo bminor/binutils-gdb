@@ -1,3 +1,114 @@
+2003-08-05  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in (ALL_LINGUAS): Add nl.
+	* configure: Regenerate.
+	* po/nl.po: New Dutch translation.
+
+2003-07-30  Jason Eckhardt  <jle@rice.edu>
+
+        * i860-dis.c: Convert to ISO C90.  Remove superflous prototypes.
+
+2003-07-30  Nick Clifton  <nickc@redhat.com>
+
+	* po/ro.po: Updated Romanian translation.
+
+2003-07-29  Jakub Jelinek  <jakub@redhat.com>
+
+	* ppc-opc.c (insert_mbe, extract_mbe): Shift 1L instead of 1 up.
+
+2003-07-24  Nick Clifton  <nickc@redhat.com>
+
+	* po/fr.po: Updated French translation.
+
+2003-07-18  Nick Clifton  <nickc@redhat.com>
+
+	* arm-dis.c (parse_arm_disassembler_option): Do not expect
+	option string to be NUL terminated.
+        (parse_disassembler_options): Allow options to be space or
+	comma separated.  
+
+2003-07-17  Nick Clifton  <nickc@redhat.com>
+
+	* po/es.po: New Spanish translation.
+	* po/sv.po: New Swedish translation.
+	* po/opcodes.pot: Regenerate.
+
+2003-07-15  Richard Sandiford  <rsandifo@redhat.com>
+
+	* mips-dis.c (mips_arch_choices): Add rm7000 and rm9000 entries.
+
+2003-07-14  Nick Clifton  <nickc@redhat.com>
+
+	* po/tr.po: Update with latest version.
+	* po/POTFILES.in: Regenerate.
+	* Makefile.in: Regenerate.
+
+2003-07-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* po/opcodes.pot: Regenerate.
+
+2003-07-09  Alexandre Oliva  <aoliva@redhat.com>
+
+	2000-05-25  Alexandre Oliva  <aoliva@cygnus.com>
+	* m10300-dis.c (disassemble): Negate negative accumulator's shift.
+	2000-05-24  Alexandre Oliva  <aoliva@cygnus.com>
+	* m10300-dis.c (disassemble, case FSREG, FDREG): Don't assume
+	32-bit longs when sign-extending operands.
+	2000-04-20  Alexandre Oliva  <aoliva@cygnus.com>
+	* m10300-opc.c: Remove MN10300_OPERAND_RELAX from all FSREGs.
+	* m10300-dis.c (HAVE_AM33_2): Define.
+	(disassemble): Use it.
+	(HAVE_AM33): Redefine.
+	(print_insn_mn10300): Fix mask for 5-byte extended insns.
+	2000-04-01  Alexandre Oliva  <aoliva@cygnus.com>
+	* m10300-opc.c: Renamed AM332 to AM33_2.
+	2000-03-31  Alexandre Oliva  <aoliva@cygnus.com>
+	* m10300-opc.c: Defined AM33 2.0 register operands.  Added support
+	for AM33 2.0 `imm8,(abs16)' addressing mode for btst, bset and
+	bclr.  Implemented `fbCC', `flCC', `dcpf' and all FP insns.
+	* m10300-dis.c (print_insn_mn10300): Recognize 5byte extended
+	insn code of AM33 2.0.
+	(disassemble): Recognize FMT_D3.  Print out FP register names.
+
+2003-07-09  Chris Demetriou  <cgd@broadcom.com>
+
+	* mips-dis.c (set_default_mips_dis_options): Get BFD from
+	the disassembler_info's section, rather than from the
+	disassembler_info's symbols pointer.
+
+2003-07-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* ppc-opc.c: Remove NULL pointer checks.  Formatting.  Remove
+	extraneous ATTRIBUTE_UNUSED.
+	* ppc-dis.c (print_insn_powerpc): Always pass a valid address to
+	operand->extract.
+
+2003-07-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* ppc-opc.c: Convert to C90, removing unnecessary prototypes and
+	casts.  Formatting.
+
+	* ppc-opc.c: Remove PARAMS from prototypes.
+	(FXM4): Define.
+	(insert_fxm): New function, used by both FXM and FXM4.
+	(extract_fxm): Likewise.
+	(XFXFXM_MASK): Remove 1 << 20 term.
+	(powerpc_opcodes): Add Power4 version of "mfcr".  Simplify "mtcr" mask.
+
+2003-07-01  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* s390-dis.c (s390_extract_operand): Add support for long displacements.
+	* s390-mkopc.c (s390_opcode_cpu_val): Add support for cpu type z990.
+	* s390-opc.c (D20_20): Add define for 20 bit displacements.
+	(INSTR_RRF_R0RR, INSTR_RSL_R0RD, INSTR_RSY_RRRD, INSTR_RSY_RURD,
+	INSTR_RSY_AARD, INSTR_RXY_RRRD, INSTR_RXY_FRRD, INSTR_SIY_URD): Add
+	new instruction formats.
+	(MASK_RRF_R0RR, MASK_RSL_R0RD, MASK_RSY_RRRD, MASK_RSY_RURD,
+	MASK_RSY_AARD, MASK_RXY_RRRD, MASK_RXY_FRRD, MASK_SIY_URD): Likewise.
+	(s390_opformats): Likewise.
+	* s390-opc.txt: Add new instructions for cpu type z990. Add missing
+	hfp instructions. Add missing instructions pgin, pgout and xsch.
+
 2003-06-23  H.J. Lu <hongjiu.lu@intel.com>
 
 	* i386-dis.c (PNI_Fixup): New. Fix up "mwait" and "monitor" in
@@ -695,7 +806,7 @@
 
 2002-11-06  Aldy Hernandez  <aldyh@redhat.com>
 
-	* opcodes/ppc-opc.c: Change RD to RS for evmerge*.
+	* ppc-opc.c: Change RD to RS for evmerge*.
 
 2002-10-07  Nathan Tallent  <eraxxon@alumni.rice.edu>
 
@@ -1592,7 +1703,7 @@
 
 	* Makefile.am: Run "make dep-am".
 	* Makefile.in: Regenerate.
-	* opcodes/po/POTFILES.in: Regenerate.
+	* po/POTFILES.in: Regenerate.
 
 2002-01-19  Richard Earnshaw  <rearnsha@arm.com>
 
@@ -2157,9 +2268,9 @@
 
 2001-08-23  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
-	* opcodes/s390-opc.c: Add "low or high" and "not low or high"
+	* s390-opc.c: Add "low or high" and "not low or high"
 	branch instructions for gcc 3.0.
-	* opcodes/s390-opc.txt: Likewise.
+	* s390-opc.txt: Likewise.
 
 2001-08-21  Andreas Jaeger  <aj@suse.de>
 

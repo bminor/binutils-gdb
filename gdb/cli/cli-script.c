@@ -1092,11 +1092,12 @@ define_command (char *comname, int from_tty)
 
   if (c)
     {
+      int q;
       if (c->class == class_user || c->class == class_alias)
-	tem = "Redefine command \"%s\"? ";
+	q = query ("Redefine command \"%s\"? ", c->name);
       else
-	tem = "Really redefine built-in command \"%s\"? ";
-      if (!query (tem, c->name))
+	q = query ("Really redefine built-in command \"%s\"? ", c->name);
+      if (!q)
 	error ("Command \"%s\" not redefined.", c->name);
     }
 

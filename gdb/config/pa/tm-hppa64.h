@@ -22,6 +22,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 struct type;
+struct value;
 struct frame_info;
 
 /* PA 64-bit specific definitions.  Override those which are in
@@ -31,9 +32,14 @@ struct frame_info;
    gotten working yet.  */
 #define GDB_TARGET_IS_HPPA_20W
 
-/* FIXME: brobecker 2003-04-21: Although 32bit hppa is partially multiarched,
-   the conversion for hppa64 hasn't been completed yet.  */
-#define GDB_MULTI_ARCH 0
+/* NOTE: cagney/2003-07-27: Using CC='cc +DA2.0W -Ae' configure
+   hppa64-hp-hpux11.00; GDB managed to build / start / break main /
+   run with multi-arch enabled.  Not sure about much else as there
+   appears to be an unrelated problem in the SOM symbol table reader
+   causing GDB to loose line number information.  Since prior to this
+   switch and a other recent tweaks, 64 bit PA hadn't been building
+   for some months, this is probably the lesser of several evils.  */
+#define GDB_MULTI_ARCH GDB_MULTI_ARCH_PARTIAL
 
 /* FIXME: brobecker 2003-05-22: All the definition from this point until
    the include of pa/tm-hppah.h are extracted from tm-hppa.h and tm-hppah.h.
@@ -282,11 +288,6 @@ extern CORE_ADDR hppa_frame_saved_pc (struct frame_info *frame);
 #endif
 
 #if !GDB_MULTI_ARCH
-extern CORE_ADDR hppa_frame_args_address (struct frame_info *fi);
-#define DEPRECATED_FRAME_ARGS_ADDRESS(fi) hppa_frame_args_address (fi)
-#endif
-
-#if !GDB_MULTI_ARCH
 extern CORE_ADDR hppa_frame_locals_address (struct frame_info *fi);
 #define DEPRECATED_FRAME_LOCALS_ADDRESS(fi) hppa_frame_locals_address (fi)
 #endif
@@ -398,20 +399,8 @@ extern CORE_ADDR hppa_target_read_fp (void);
 /* Initializer for an array of names of registers.
    There should be NUM_REGS strings in this initializer.
    They are in rows of eight entries  */
-#undef REGISTER_NAMES
-#define REGISTER_NAMES	\
- {"flags",  "r1",      "rp",      "r3",    "r4",     "r5",      "r6",     "r7",    \
-  "r8",     "r9",      "r10",     "r11",   "r12",    "r13",     "r14",    "r15",   \
-  "r16",    "r17",     "r18",     "r19",   "r20",    "r21",     "r22",    "r23",   \
-  "r24",    "r25",     "r26",     "dp",    "ret0",   "ret1",    "sp",     "r31",   \
-  "sar",    "pcoqh",   "pcsqh",   "pcoqt", "pcsqt",  "eiem",    "iir",    "isr",   \
-  "ior",    "ipsw",    "goto",    "sr4",   "sr0",    "sr1",     "sr2",    "sr3",   \
-  "sr5",    "sr6",     "sr7",     "cr0",   "cr8",    "cr9",     "ccr",    "cr12",  \
-  "cr13",   "cr24",    "cr25",    "cr26",  "mpsfu_high","mpsfu_low","mpsfu_ovflo","pad",\
-  "fpsr",    "fpe1",   "fpe2",    "fpe3",  "fr4",    "fr5",     "fr6",    "fr7", \
-  "fr8",     "fr9",    "fr10",    "fr11",  "fr12",   "fr13",    "fr14",   "fr15", \
-  "fr16",    "fr17",   "fr18",    "fr19",  "fr20",   "fr21",    "fr22",   "fr23", \
-  "fr24",    "fr25",   "fr26",    "fr27",   "fr28",  "fr29",    "fr30",   "fr31"}
+extern const char *hppa64_register_name (int i);
+#define REGISTER_NAME hppa64_register_name
 
 #undef FP0_REGNUM
 #undef FP4_REGNUM
@@ -446,7 +435,7 @@ extern CORE_ADDR hppa_target_read_fp (void);
    alloca; for those, we may need to consult unwind tables.
    jimb: FIXME.  */
 #undef DEPRECATED_FRAME_LOCALS_ADDRESS
-#define DEPRECATED_FRAME_LOCALS_ADDRESS(fi) ((fi)->frame)
+#define DEPRECATED_FRAME_LOCALS_ADDRESS(fi) (get_frame_base (fi))
 
 /* For a number of horrible reasons we may have to adjust the location
    of variables on the stack.  Ugh.  jimb: why? */
@@ -613,13 +602,13 @@ call_dummy
 #undef FRAME_SAVED_PC_IN_SIGTRAMP
 #define FRAME_SAVED_PC_IN_SIGTRAMP(FRAME, TMP) \
 { \
-  *(TMP) = read_memory_integer ((FRAME)->frame + (24 * 4) + 640 + (33 * 8), 8); \
+  *(TMP) = read_memory_integer (get_frame_base (FRAME) + (24 * 4) + 640 + (33 * 8), 8); \
 }
 
 #undef FRAME_BASE_BEFORE_SIGTRAMP
 #define FRAME_BASE_BEFORE_SIGTRAMP(FRAME, TMP) \
 { \
-  *(TMP) = read_memory_integer ((FRAME)->frame + (24 * 4) + 640 + (30 * 8), 8); \
+  *(TMP) = read_memory_integer (get_frame_base (FRAME) + (24 * 4) + 640 + (30 * 8), 8); \
 }
 
 #undef FRAME_FIND_SAVED_REGS_IN_SIGTRAMP
@@ -627,8 +616,8 @@ call_dummy
 { \
   int i; \
   CORE_ADDR TMP1, TMP2; \
-  TMP1 = (FRAME)->frame + (24 * 4) + 640; \
-  TMP2 = (FRAME)->frame + (24 * 4) + 256; \
+  TMP1 = get_frame_base (FRAME) + (24 * 4) + 640; \
+  TMP2 = get_frame_base (FRAME) + (24 * 4) + 256; \
   for (i = 0; i < NUM_REGS; i++) \
     { \
       if (i == SP_REGNUM) \

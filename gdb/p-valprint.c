@@ -661,7 +661,7 @@ common:
       char *demangled_name;
 
       fprintf_filtered (stream, "&");
-      fprintf_filtered (stream, kind);
+      fputs_filtered (kind, stream);
       demangled_name = cplus_demangle (TYPE_FN_FIELD_PHYSNAME (f, j),
 				       DMGL_ANSI | DMGL_PARAMS);
       if (demangled_name == NULL)
@@ -1080,7 +1080,7 @@ pascal_object_print_class_member (char *valaddr, struct type *domain,
   if (i < len)
     {
       const char *name;
-      fprintf_filtered (stream, prefix);
+      fputs_filtered (prefix, stream);
       name = type_name_no_tag (domain);
       if (name)
 	fputs_filtered (name, stream);

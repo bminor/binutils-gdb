@@ -25,11 +25,15 @@
 #include "event-top.h"
 #include "event-loop.h"
 #include "ui-out.h"
+#include "cli-out.h"
 #include "tui/tuiData.h"
 #include "readline/readline.h"
 #include "tui/tuiWin.h"
 #include "tui/tui.h"
 #include "tui/tuiIO.h"
+
+/* Set to 1 when the TUI mode must be activated when we first start gdb.  */
+static int tui_start_enabled = 0;
 
 /* Cleanup the tui before exiting.  */
 
@@ -60,14 +64,32 @@ tui_init (void)
 static int
 tui_resume (void *data)
 {
+  struct ui_file *stream;
+
+  /* gdb_setup_readline will change gdb_stdout.  If the TUI was previously
+     writing to gdb_stdout, then set it to the new gdb_stdout afterwards.  */
+
+  stream = cli_out_set_stream (tui_old_uiout, gdb_stdout);
+  if (stream != gdb_stdout)
+    {
+      cli_out_set_stream (tui_old_uiout, stream);
+      stream = NULL;
+    }
+
   gdb_setup_readline ();
-  tui_enable ();
+
+  if (stream != NULL)
+    cli_out_set_stream (tui_old_uiout, gdb_stdout);
+
+  if (tui_start_enabled)
+    tui_enable ();
   return 1;
 }
 
 static int
 tui_suspend (void *data)
 {
+  tui_start_enabled = tui_active;
   tui_disable ();
   return 1;
 }
@@ -177,4 +199,12 @@ _initialize_tui_interp (void)
   /* Create a default uiout builder for the TUI. */
   tui_out = tui_out_new (gdb_stdout);
   interp_add (interp_new ("tui", NULL, tui_out, &procs));
+  if (interpreter_p && strcmp (interpreter_p, "tui") == 0)
+    tui_start_enabled = 1;
+
+  if (interpreter_p && strcmp (interpreter_p, INTERP_CONSOLE) == 0)
+    {
+      xfree (interpreter_p);
+      interpreter_p = xstrdup ("tui");
+    }
 }

@@ -30,25 +30,6 @@ struct regcache;
 
 #include "frame.h"		/* For enum frame_type.  */
 
-/* Return the frame unwind methods for the function that contains PC,
-   or NULL if this this unwinder can't handle this frame.  */
-
-typedef const struct frame_unwind *(frame_unwind_p_ftype) (CORE_ADDR pc);
-
-/* Add a frame unwinder to the list.  The predicates are polled in the
-   order that they are appended.  The initial list contains the dummy
-   frame's predicate.  */
-
-extern void frame_unwind_append_predicate (struct gdbarch *gdbarch,
-					   frame_unwind_p_ftype *p);
-
-/* Iterate through the list of frame unwinders until one returns an
-   implementation.  */
-
-extern const struct frame_unwind *frame_unwind_find_by_pc (struct gdbarch
-							   *gdbarch,
-							   CORE_ADDR pc);
-
 /* The following unwind functions assume a chain of frames forming the
    sequence: (outer) prev <-> this <-> next (inner).  All the
    functions are called with called with the next frame's `struct
@@ -138,5 +119,23 @@ struct frame_unwind
   frame_this_id_ftype *this_id;
   frame_prev_register_ftype *prev_register;
 };
+
+/* Given the NEXT frame, take a wiff of THIS frame's registers (namely
+   the PC and attributes) and if it is the applicable unwinder return
+   the unwind methods, or NULL if it is not.  */
+
+typedef const struct frame_unwind *(frame_unwind_sniffer_ftype) (struct frame_info *next_frame);
+
+/* Add a frame sniffer to the list.  The predicates are polled in the
+   order that they are appended.  The initial list contains the dummy
+   frame sniffer.  */
+
+extern void frame_unwind_append_sniffer (struct gdbarch *gdbarch,
+					 frame_unwind_sniffer_ftype *sniffer);
+
+/* Iterate through the next frame's sniffers until one returns with an
+   unwinder implementation.  */
+
+extern const struct frame_unwind *frame_unwind_find_by_frame (struct frame_info *next_frame);
 
 #endif

@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2003-06-05 11:34+0100\n"
+"POT-Creation-Date: 2003-07-17 14:54+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -228,7 +228,7 @@ msgstr ""
 msgid "%02x\t\t*unknown*"
 msgstr ""
 
-#: i386-dis.c:1650
+#: i386-dis.c:1699
 msgid "<internal disassembler error>"
 msgstr ""
 
@@ -417,7 +417,7 @@ msgstr ""
 msgid "unknown\t0x%04lx"
 msgstr ""
 
-#: m10300-dis.c:685
+#: m10300-dis.c:766
 #, c-format
 msgid "unknown\t0x%04x"
 msgstr ""
@@ -437,47 +437,47 @@ msgstr ""
 msgid "# <dis error: %08x>"
 msgstr ""
 
-#: mips-dis.c:699
+#: mips-dis.c:703
 msgid "# internal error, incomplete extension sequence (+)"
 msgstr ""
 
-#: mips-dis.c:742
+#: mips-dis.c:746
 #, c-format
 msgid "# internal error, undefined extension sequence (+%c)"
 msgstr ""
 
-#: mips-dis.c:1000
+#: mips-dis.c:1004
 #, c-format
 msgid "# internal error, undefined modifier(%c)"
 msgstr ""
 
-#: mips-dis.c:1751
+#: mips-dis.c:1755
 #, c-format
 msgid "# internal disassembler error, unrecognised modifier (%c)"
 msgstr ""
 
-#: mips-dis.c:1763
+#: mips-dis.c:1767
 msgid ""
 "\n"
 "The following MIPS specific disassembler options are supported for use\n"
 "with the -M switch (multiple options should be separated by commas):\n"
 msgstr ""
 
-#: mips-dis.c:1767
+#: mips-dis.c:1771
 msgid ""
 "\n"
 "  gpr-names=ABI            Print GPR names according to  specified ABI.\n"
 "                           Default: based on binary being disassembled.\n"
 msgstr ""
 
-#: mips-dis.c:1771
+#: mips-dis.c:1775
 msgid ""
 "\n"
 "  fpr-names=ABI            Print FPR names according to specified ABI.\n"
 "                           Default: numeric.\n"
 msgstr ""
 
-#: mips-dis.c:1775
+#: mips-dis.c:1779
 msgid ""
 "\n"
 "  cp0-names=ARCH           Print CP0 register names according to\n"
@@ -485,7 +485,7 @@ msgid ""
 "                           Default: based on binary being disassembled.\n"
 msgstr ""
 
-#: mips-dis.c:1780
+#: mips-dis.c:1784
 msgid ""
 "\n"
 "  hwr-names=ARCH           Print HWR names according to specified \n"
@@ -493,32 +493,32 @@ msgid ""
 "                           Default: based on binary being disassembled.\n"
 msgstr ""
 
-#: mips-dis.c:1785
+#: mips-dis.c:1789
 msgid ""
 "\n"
 "  reg-names=ABI            Print GPR and FPR names according to\n"
 "                           specified ABI.\n"
 msgstr ""
 
-#: mips-dis.c:1789
+#: mips-dis.c:1793
 msgid ""
 "\n"
 "  reg-names=ARCH           Print CP0 register and HWR names according to\n"
 "                           specified architecture.\n"
 msgstr ""
 
-#: mips-dis.c:1793
+#: mips-dis.c:1797
 msgid ""
 "\n"
 "  For the options above, the following values are supported for \"ABI\":\n"
 "   "
 msgstr ""
 
-#: mips-dis.c:1798 mips-dis.c:1806 mips-dis.c:1808
+#: mips-dis.c:1802 mips-dis.c:1810 mips-dis.c:1812
 msgid "\n"
 msgstr ""
 
-#: mips-dis.c:1800
+#: mips-dis.c:1804
 msgid ""
 "\n"
 "  For the options above, The following values are supported for \"ARCH\":\n"
@@ -554,64 +554,84 @@ msgstr ""
 msgid "$<undefined>"
 msgstr ""
 
-#: ppc-opc.c:818 ppc-opc.c:851
+#: ppc-opc.c:781 ppc-opc.c:809
 msgid "invalid conditional option"
 msgstr ""
 
-#: ppc-opc.c:853
+#: ppc-opc.c:811
 msgid "attempt to set y bit when using + or - modifier"
 msgstr ""
 
-#: ppc-opc.c:881
+#: ppc-opc.c:840
+msgid "offset not a multiple of 16"
+msgstr ""
+
+#: ppc-opc.c:860
 msgid "offset not a multiple of 2"
 msgstr ""
 
-#: ppc-opc.c:883
+#: ppc-opc.c:862
 msgid "offset greater than 62"
 msgstr ""
 
-#: ppc-opc.c:904 ppc-opc.c:954 ppc-opc.c:1006
+#: ppc-opc.c:881 ppc-opc.c:927 ppc-opc.c:975
 msgid "offset not a multiple of 4"
 msgstr ""
 
-#: ppc-opc.c:906
+#: ppc-opc.c:883
 msgid "offset greater than 124"
 msgstr ""
 
-#: ppc-opc.c:927
+#: ppc-opc.c:902
 msgid "offset not a multiple of 8"
 msgstr ""
 
-#: ppc-opc.c:929
+#: ppc-opc.c:904
 msgid "offset greater than 248"
 msgstr ""
 
-#: ppc-opc.c:979
+#: ppc-opc.c:950
 msgid "offset not between -2048 and 2047"
 msgstr ""
 
-#: ppc-opc.c:1004
+#: ppc-opc.c:973
 msgid "offset not between -8192 and 8191"
 msgstr ""
 
-#: ppc-opc.c:1032
+#: ppc-opc.c:1011
+msgid "ignoring invalid mfcr mask"
+msgstr ""
+
+#: ppc-opc.c:1059
 msgid "ignoring least significant bits in branch offset"
 msgstr ""
 
-#: ppc-opc.c:1066 ppc-opc.c:1103
+#: ppc-opc.c:1090 ppc-opc.c:1125
 msgid "illegal bitmask"
 msgstr ""
 
-#: ppc-opc.c:1176
+#: ppc-opc.c:1192
 msgid "value out of range"
 msgstr ""
 
-#: ppc-opc.c:1252
+#: ppc-opc.c:1262
 msgid "index register in load range"
 msgstr ""
 
-#: ppc-opc.c:1268
+#: ppc-opc.c:1279
+msgid "source and target register operands must be different"
+msgstr ""
+
+#: ppc-opc.c:1294
 msgid "invalid register operand when updating"
+msgstr ""
+
+#: ppc-opc.c:1335
+msgid "target register operand must be even"
+msgstr ""
+
+#: ppc-opc.c:1350
+msgid "source register operand must be even"
 msgstr ""
 
 #. Mark as non-valid instruction.

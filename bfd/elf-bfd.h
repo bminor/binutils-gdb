@@ -118,11 +118,6 @@ struct elf_link_hash_entry
      one.  Otherwise it is NULL.  */
   struct elf_link_hash_entry *weakdef;
 
-  /* If this symbol is used in the linker created sections, the processor
-     specific backend uses this field to map the field into the offset
-     from the beginning of the section.  */
-  struct elf_linker_section_pointers *linker_section_pointer;
-
   /* Version information.  */
   union
   {
@@ -216,23 +211,12 @@ struct elf_link_hash_entry
    function symbols not defined in an app are set to their .plt entry,
    it's necessary for shared libs to also reference the .plt even
    though the symbol is really local to the shared lib.  */
-#define SYMBOL_REFERENCES_LOCAL(INFO, H)				\
-  ((! (INFO)->shared							\
-    || (INFO)->symbolic							\
-    || (H)->dynindx == -1						\
-    || ELF_ST_VISIBILITY ((H)->other) == STV_INTERNAL			\
-    || ELF_ST_VISIBILITY ((H)->other) == STV_HIDDEN			\
-    || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0)		\
-   && ((H)->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0)
+#define SYMBOL_REFERENCES_LOCAL(INFO, H) \
+  _bfd_elf_symbol_refs_local_p (H, INFO, 0)
 
 /* Will _calls_ to this symbol always call the version in this object?  */
-#define SYMBOL_CALLS_LOCAL(INFO, H)					\
-  ((! (INFO)->shared							\
-    || (INFO)->symbolic							\
-    || (H)->dynindx == -1						\
-    || ELF_ST_VISIBILITY ((H)->other) != STV_DEFAULT			\
-    || ((H)->elf_link_hash_flags & ELF_LINK_FORCED_LOCAL) != 0)		\
-   && ((H)->elf_link_hash_flags & ELF_LINK_HASH_DEF_REGULAR) != 0)
+#define SYMBOL_CALLS_LOCAL(INFO, H) \
+  _bfd_elf_symbol_refs_local_p (H, INFO, 1)
 
 /* Records local symbols to be emitted in the dynamic symbol table.  */
 
@@ -525,6 +509,17 @@ typedef enum {
   ict_irix5,
   ict_irix6
 } irix_compat_t;
+
+/* Mapping of ELF section names and types.  */
+struct bfd_elf_special_section
+{
+  const char *prefix;
+  size_t prefix_length;
+  const char *suffix;
+  size_t suffix_length;
+  int type;
+  int attributes;
+};
 
 struct elf_backend_data
 {
@@ -887,6 +882,9 @@ struct elf_backend_data
 
   const struct elf_size_info *s;
 
+  /* An array of target specific special section map.  */
+  const struct bfd_elf_special_section *special_sections;
+
   /* offset of the _GLOBAL_OFFSET_TABLE_ symbol from the start of the
      .got section */
   bfd_vma got_symbol_offset;
@@ -1022,6 +1020,8 @@ struct bfd_elf_section_data
 };
 
 #define elf_section_data(sec)  ((struct bfd_elf_section_data*)sec->used_by_bfd)
+#define elf_section_type(sec)  (elf_section_data(sec)->this_hdr.sh_type)
+#define elf_section_flags(sec) (elf_section_data(sec)->this_hdr.sh_flags)
 #define elf_group_name(sec)    (elf_section_data(sec)->group.name)
 #define elf_group_id(sec)      (elf_section_data(sec)->group.id)
 #define elf_next_in_group(sec) (elf_section_data(sec)->next_in_group)
@@ -1035,52 +1035,6 @@ struct bfd_elf_section_data
 
 #define get_elf_backend_data(abfd) \
   ((struct elf_backend_data *) (abfd)->xvec->backend_data)
-
-/* Enumeration to specify the special section.  */
-typedef enum elf_linker_section_enum
-{
-  LINKER_SECTION_UNKNOWN,		/* not used */
-  LINKER_SECTION_GOT,			/* .got section for global offset pointers */
-  LINKER_SECTION_PLT,			/* .plt section for generated procedure stubs */
-  LINKER_SECTION_SDATA,			/* .sdata/.sbss section for PowerPC */
-  LINKER_SECTION_SDATA2,		/* .sdata2/.sbss2 section for PowerPC */
-  LINKER_SECTION_MAX			/* # of linker sections */
-} elf_linker_section_enum_t;
-
-/* Sections created by the linker.  */
-
-typedef struct elf_linker_section
-{
-  char *name;				/* name of the section */
-  char *rel_name;			/* name of the associated .rel{,a}. section */
-  char *bss_name;			/* name of a related .bss section */
-  char *sym_name;			/* name of symbol to reference this section */
-  asection *section;			/* pointer to the section */
-  asection *bss_section;		/* pointer to the bss section associated with this */
-  asection *rel_section;		/* pointer to the relocations needed for this section */
-  struct elf_link_hash_entry *sym_hash;	/* pointer to the created symbol hash value */
-  bfd_vma initial_size;			/* initial size before any linker generated allocations */
-  bfd_vma sym_offset;			/* offset of symbol from beginning of section */
-  bfd_vma hole_size;			/* size of reserved address hole in allocation */
-  bfd_vma hole_offset;			/* current offset for the hole */
-  bfd_vma max_hole_offset;		/* maximum offset for the hole */
-  elf_linker_section_enum_t which;	/* which section this is */
-  bfd_boolean hole_written_p;		/* whether the hole has been initialized */
-  unsigned int alignment;		/* alignment for the section */
-  flagword flags;			/* flags to use to create the section */
-} elf_linker_section_t;
-
-/* Linked list of allocated pointer entries.  This hangs off of the symbol lists, and
-   provides allows us to return different pointers, based on different addend's.  */
-
-typedef struct elf_linker_section_pointers
-{
-  struct elf_linker_section_pointers *next;	/* next allocated pointer for this symbol */
-  bfd_vma offset;				/* offset of pointer from beginning of section */
-  bfd_vma addend;				/* addend used */
-  elf_linker_section_enum_t which;		/* which linker section this is */
-  bfd_boolean written_address_p;		/* whether address was written yet */
-} elf_linker_section_pointers_t;
 
 /* This struct is used to pass information to routines called via
    elf_link_hash_traverse which must return failure.  */
@@ -1151,12 +1105,6 @@ struct elf_obj_tdata
   unsigned int symtab_shndx_section;
   unsigned int dynversym_section, dynverdef_section, dynverref_section;
   file_ptr next_file_pos;
-#if 0
-  /* we don't need these inside bfd anymore, and I think
-     these weren't used outside bfd.  */
-  void *prstatus;			/* The raw /proc prstatus structure */
-  void *prpsinfo;			/* The raw /proc prpsinfo structure */
-#endif
   bfd_vma gp;				/* The gp value */
   unsigned int gp_size;			/* The gp size */
 
@@ -1188,10 +1136,6 @@ struct elf_obj_tdata
       bfd_vma *offsets;
       struct got_entry **ents;
     } local_got;
-
-  /* A mapping from local symbols to offsets into the various linker
-     sections added.  This is index by the symbol index.  */
-  elf_linker_section_pointers_t **linker_section_pointers;
 
   /* The linker ELF emulation code needs to let the backend ELF linker
      know what filename should be used for a dynamic object if the
@@ -1263,9 +1207,6 @@ struct elf_obj_tdata
   /* Symbol version references to external objects.  */
   Elf_Internal_Verneed *verref;
 
-  /* Linker sections that we are interested in.  */
-  struct elf_linker_section *linker_section[ (int)LINKER_SECTION_MAX ];
-
   /* The Irix 5 support uses two virtual sections, which represent
      text/data symbols defined in dynamic objects.  */
   asymbol *elf_data_symbol;
@@ -1297,12 +1238,10 @@ struct elf_obj_tdata
 #define elf_local_got_refcounts(bfd) (elf_tdata(bfd) -> local_got.refcounts)
 #define elf_local_got_offsets(bfd) (elf_tdata(bfd) -> local_got.offsets)
 #define elf_local_got_ents(bfd) (elf_tdata(bfd) -> local_got.ents)
-#define elf_local_ptr_offsets(bfd) (elf_tdata(bfd) -> linker_section_pointers)
 #define elf_dt_name(bfd)	(elf_tdata(bfd) -> dt_name)
 #define elf_dt_soname(bfd)	(elf_tdata(bfd) -> dt_soname)
 #define elf_bad_symtab(bfd)	(elf_tdata(bfd) -> bad_symtab)
 #define elf_flags_init(bfd)	(elf_tdata(bfd) -> flags_init)
-#define elf_linker_section(bfd,n) (elf_tdata(bfd) -> linker_section[(int)n])
 
 extern void _bfd_elf_swap_verdef_in
   PARAMS ((bfd *, const Elf_External_Verdef *, Elf_Internal_Verdef *));
@@ -1451,6 +1390,8 @@ extern bfd_boolean _bfd_elf_new_section_hook
   PARAMS ((bfd *, asection *));
 extern bfd_boolean _bfd_elf_init_reloc_shdr
   PARAMS ((bfd *, Elf_Internal_Shdr *, asection *, bfd_boolean));
+extern bfd_boolean _bfd_elf_get_sec_type_attr (bfd *, const char *,
+					       int *, int *);
 
 /* If the target doesn't have reloc handling written yet:  */
 extern void _bfd_elf_no_info_to_howto
@@ -1554,35 +1495,6 @@ extern bfd_boolean _bfd_elfcore_make_pseudosection
 extern char *_bfd_elfcore_strndup
   PARAMS ((bfd *, char *, size_t));
 
-extern elf_linker_section_t *_bfd_elf_create_linker_section
-  PARAMS ((bfd *, struct bfd_link_info *, enum elf_linker_section_enum,
-	   elf_linker_section_t *));
-
-extern elf_linker_section_pointers_t *_bfd_elf_find_pointer_linker_section
-  PARAMS ((elf_linker_section_pointers_t *, bfd_vma,
-	   elf_linker_section_enum_t));
-
-extern bfd_boolean bfd_elf32_create_pointer_linker_section
-  PARAMS ((bfd *, struct bfd_link_info *, elf_linker_section_t *,
-	   struct elf_link_hash_entry *, const Elf_Internal_Rela *));
-
-extern bfd_vma bfd_elf32_finish_pointer_linker_section
-  PARAMS ((bfd *, bfd *, struct bfd_link_info *, elf_linker_section_t *,
-	   struct elf_link_hash_entry *, bfd_vma,
-	   const Elf_Internal_Rela *, int));
-
-extern bfd_boolean bfd_elf64_create_pointer_linker_section
-  PARAMS ((bfd *, struct bfd_link_info *, elf_linker_section_t *,
-	   struct elf_link_hash_entry *, const Elf_Internal_Rela *));
-
-extern bfd_vma bfd_elf64_finish_pointer_linker_section
-  PARAMS ((bfd *, bfd *, struct bfd_link_info *, elf_linker_section_t *,
-	   struct elf_link_hash_entry *, bfd_vma,
-	   const Elf_Internal_Rela *, int));
-
-extern bfd_boolean _bfd_elf_make_linker_section_rela
-  PARAMS ((bfd *, elf_linker_section_t *, int));
-
 extern Elf_Internal_Rela *_bfd_elf_link_read_relocs
   PARAMS ((bfd *, asection *, PTR, Elf_Internal_Rela *, bfd_boolean));
 
@@ -1600,6 +1512,12 @@ extern bfd_boolean _bfd_elf_adjust_dynamic_symbol
 
 extern bfd_boolean _bfd_elf_link_sec_merge_syms
   PARAMS ((struct elf_link_hash_entry *, PTR));
+
+extern bfd_boolean _bfd_elf_dynamic_symbol_p
+  PARAMS ((struct elf_link_hash_entry *, struct bfd_link_info *, bfd_boolean));
+
+extern bfd_boolean _bfd_elf_symbol_refs_local_p
+  PARAMS ((struct elf_link_hash_entry *, struct bfd_link_info *, bfd_boolean));
 
 extern const bfd_target *bfd_elf32_object_p
   PARAMS ((bfd *));

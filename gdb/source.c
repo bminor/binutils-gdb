@@ -1361,7 +1361,7 @@ forward_search_command (char *regex, int from_tty)
 
   msg = (char *) re_comp (regex);
   if (msg)
-    error (msg);
+    error ("%s", msg);
 
   if (current_source_symtab == 0)
     select_source_symtab (0);
@@ -1457,7 +1457,7 @@ reverse_search_command (char *regex, int from_tty)
 
   msg = (char *) re_comp (regex);
   if (msg)
-    error (msg);
+    error ("%s", msg);
 
   if (current_source_symtab == 0)
     select_source_symtab (0);

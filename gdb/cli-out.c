@@ -31,6 +31,7 @@
 struct ui_out_data
   {
     struct ui_file *stream;
+    struct ui_file *original_stream;
     int suppress_output;
   };
 typedef struct ui_out_data cli_out_data;
@@ -64,6 +65,7 @@ static void cli_message (struct ui_out *uiout, int verbosity,
 			 const char *format, va_list args);
 static void cli_wrap_hint (struct ui_out *uiout, char *identstring);
 static void cli_flush (struct ui_out *uiout);
+static int cli_redirect (struct ui_out *uiout, struct ui_file *outstream);
 
 /* This is the CLI ui-out implementation functions vector */
 
@@ -87,6 +89,7 @@ static struct ui_out_impl cli_ui_out_impl =
   cli_message,
   cli_wrap_hint,
   cli_flush,
+  cli_redirect,
   0, /* Does not need MI hacks (i.e. needs CLI hacks).  */
 };
 
@@ -324,6 +327,24 @@ cli_flush (struct ui_out *uiout)
   gdb_flush (data->stream);
 }
 
+int
+cli_redirect (struct ui_out *uiout, struct ui_file *outstream)
+{
+  struct ui_out_data *data = ui_out_data (uiout);
+  if (outstream != NULL)
+    {
+      data->original_stream = data->stream;
+      data->stream = outstream;
+    }
+  else if (data->original_stream != NULL)
+    {
+      data->stream = data->original_stream;
+      data->original_stream = NULL;
+    }
+
+  return 0;
+}
+
 /* local functions */
 
 /* Like cli_field_fmt, but takes a variable number of args
@@ -362,6 +383,7 @@ cli_out_new (struct ui_file *stream)
 
   cli_out_data *data = XMALLOC (cli_out_data);
   data->stream = stream;
+  data->original_stream = NULL;
   data->suppress_output = 0;
   return ui_out_new (&cli_ui_out_impl, data, flags);
 }

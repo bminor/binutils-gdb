@@ -256,7 +256,7 @@ static void *
 init_remote_state (struct gdbarch *gdbarch)
 {
   int regnum;
-  struct remote_state *rs = xmalloc (sizeof (struct remote_state));
+  struct remote_state *rs = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct remote_state);
 
   if (DEPRECATED_REGISTER_BYTES != 0)
     rs->sizeof_g_packet = DEPRECATED_REGISTER_BYTES;
@@ -264,7 +264,8 @@ init_remote_state (struct gdbarch *gdbarch)
     rs->sizeof_g_packet = 0;
 
   /* Assume a 1:1 regnum<->pnum table.  */
-  rs->regs = xcalloc (NUM_REGS + NUM_PSEUDO_REGS, sizeof (struct packet_reg));
+  rs->regs = GDBARCH_OBSTACK_CALLOC (gdbarch, NUM_REGS + NUM_PSEUDO_REGS,
+				     struct packet_reg);
   for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
     {
       struct packet_reg *r = &rs->regs[regnum];
@@ -301,14 +302,6 @@ init_remote_state (struct gdbarch *gdbarch)
   rs->actual_register_packet_size = 0;
 
   return rs;
-}
-
-static void
-free_remote_state (struct gdbarch *gdbarch, void *pointer)
-{
-  struct remote_state *data = pointer;
-  xfree (data->regs);
-  xfree (data);
 }
 
 static struct packet_reg *
@@ -2071,7 +2064,7 @@ remote_cisco_section_offsets (bfd_vma text_addr,
       sprintf_vma (tmp + strlen (tmp), data_addr);
       sprintf (tmp + strlen (tmp), " bss = 0x");
       sprintf_vma (tmp + strlen (tmp), bss_addr);
-      fprintf_filtered (gdb_stdlog, tmp);
+      fputs_filtered (tmp, gdb_stdlog);
       fprintf_filtered (gdb_stdlog,
 			"Reloc offset: text = 0x%s data = 0x%s bss = 0x%s\n",
 			paddr_nz (*text_offs),
@@ -3027,14 +3020,12 @@ Packet: '%s'\n",
 		    p = p1;
 
 		    if (*p++ != ':')
-		      warning ("Malformed packet(b) (missing colon): %s\n\
-Packet: '%s'\n",
-			       p, buf);
+		      error ("Malformed packet(b) (missing colon): %s\nPacket: '%s'\n",
+			     p, buf);
 
 		    if (reg == NULL)
-		      warning ("Remote sent bad register number %s: %s\n\
-Packet: '%s'\n",
-			       phex_nz (pnum, 0), p, buf);
+		      error ("Remote sent bad register number %s: %s\nPacket: '%s'\n",
+			     phex_nz (pnum, 0), p, buf);
 
 		    fieldsize = hex2bin (p, regs, REGISTER_RAW_SIZE (reg->regnum));
 		    p += 2 * fieldsize;
@@ -3044,10 +3035,7 @@ Packet: '%s'\n",
 		  }
 
 		if (*p++ != ';')
-		  {
-		    warning ("Remote register badly formatted: %s", buf);
-		    warning ("            here: %s", p);
-		  }
+		  error ("Remote register badly formatted: %s\nhere: %s", buf, p);
 	      }
 	  }
 	  /* fall through */
@@ -3250,9 +3238,8 @@ remote_async_wait (ptid_t ptid, struct target_waitstatus *status)
 		  {
 		    p1 = (unsigned char *) strchr (p, ':');
 		    if (p1 == NULL)
-		      warning ("Malformed packet(a) (missing colon): %s\n\
-Packet: '%s'\n",
-			       p, buf);
+		      error ("Malformed packet(a) (missing colon): %s\nPacket: '%s'\n",
+			     p, buf);
 		    if (strncmp (p, "thread", p1 - p) == 0)
 		      {
 			p_temp = unpack_varlen_hex (++p1, &thread_num);
@@ -3281,14 +3268,12 @@ Packet: '%s'\n",
 		    struct packet_reg *reg = packet_reg_from_pnum (rs, pnum);
 		    p = p1;
 		    if (*p++ != ':')
-		      warning ("Malformed packet(b) (missing colon): %s\n\
-Packet: '%s'\n",
-			       p, buf);
+		      error ("Malformed packet(b) (missing colon): %s\nPacket: '%s'\n",
+			     p, buf);
 
 		    if (reg == NULL)
-		      warning ("Remote sent bad register number %ld: %s\n\
-Packet: '%s'\n",
-			       pnum, p, buf);
+		      error ("Remote sent bad register number %ld: %s\nPacket: '%s'\n",
+			     pnum, p, buf);
 
 		    fieldsize = hex2bin (p, regs, REGISTER_RAW_SIZE (reg->regnum));
 		    p += 2 * fieldsize;
@@ -3298,10 +3283,8 @@ Packet: '%s'\n",
 		  }
 
 		if (*p++ != ';')
-		  {
-		    warning ("Remote register badly formatted: %s", buf);
-		    warning ("            here: %s", p);
-		  }
+		  error ("Remote register badly formatted: %s\nhere: %s",
+			 buf, p);
 	      }
 	  }
 	  /* fall through */
@@ -3771,42 +3754,45 @@ int
 remote_write_bytes (CORE_ADDR memaddr, char *myaddr, int len)
 {
   unsigned char *buf;
-  int max_buf_size;		/* Max size of packet output buffer */
   unsigned char *p;
   unsigned char *plen;
   long sizeof_buf;
   int plenlen;
   int todo;
   int nr_bytes;
+  int payload_size;
+  unsigned char *payload_start;
 
-  /* Verify that the target can support a binary download */
+  /* Verify that the target can support a binary download.  */
   check_binary_download (memaddr);
 
-  /* Determine the max packet size. */
-  max_buf_size = get_memory_write_packet_size ();
-  sizeof_buf = max_buf_size + 1; /* Space for trailing NUL */
+  /* Compute the size, and then allocate space for the largest
+     possible packet.  Include space for an extra trailing NUL.  */
+  sizeof_buf = get_memory_write_packet_size () + 1;
   buf = alloca (sizeof_buf);
 
-  /* Subtract header overhead from max payload size -  $M<memaddr>,<len>:#nn */
-  max_buf_size -= 2 + hexnumlen (memaddr + len - 1) + 1 + hexnumlen (len) + 4;
+  /* Compute the size of the actual payload by subtracting out the
+     packet header and footer overhead: "$M<memaddr>,<len>:...#nn".  */
+  payload_size = (get_memory_write_packet_size () - (strlen ("$M,:#NN")
+						     + hexnumlen (memaddr)
+						     + hexnumlen (len)));
 
-  /* construct "M"<memaddr>","<len>":" */
-  /* sprintf (buf, "M%lx,%x:", (unsigned long) memaddr, todo); */
-  p = buf;
+  /* Construct the packet header: "[MX]<memaddr>,<len>:".   */
 
-  /* Append [XM].  Compute a best guess of the number of bytes
+  /* Append "[XM]".  Compute a best guess of the number of bytes
      actually transfered. */
+  p = buf;
   switch (remote_protocol_binary_download.support)
     {
     case PACKET_ENABLE:
       *p++ = 'X';
       /* Best guess at number of bytes that will fit. */
-      todo = min (len, max_buf_size);
+      todo = min (len, payload_size);
       break;
     case PACKET_DISABLE:
       *p++ = 'M';
       /* num bytes that will fit */
-      todo = min (len, max_buf_size / 2);
+      todo = min (len, payload_size / 2);
       break;
     case PACKET_SUPPORT_UNKNOWN:
       internal_error (__FILE__, __LINE__,
@@ -3815,20 +3801,25 @@ remote_write_bytes (CORE_ADDR memaddr, char *myaddr, int len)
       internal_error (__FILE__, __LINE__, "bad switch");
     }
   
-  /* Append <memaddr> */
+  /* Append "<memaddr>".  */
   memaddr = remote_address_masked (memaddr);
   p += hexnumstr (p, (ULONGEST) memaddr);
+
+  /* Append ",".  */
   *p++ = ',';
   
-  /* Append <len>.  Retain the location/size of <len>.  It may
-     need to be adjusted once the packet body has been created. */
+  /* Append <len>.  Retain the location/size of <len>.  It may need to
+     be adjusted once the packet body has been created.  */
   plen = p;
   plenlen = hexnumstr (p, (ULONGEST) todo);
   p += plenlen;
+
+  /* Append ":".  */
   *p++ = ':';
   *p = '\0';
   
-  /* Append the packet body. */
+  /* Append the packet body.  */
+  payload_start = p;
   switch (remote_protocol_binary_download.support)
     {
     case PACKET_ENABLE:
@@ -3836,7 +3827,7 @@ remote_write_bytes (CORE_ADDR memaddr, char *myaddr, int len)
 	 increasing byte addresses.  Only escape certain critical
 	 characters.  */
       for (nr_bytes = 0;
-	   (nr_bytes < todo) && (p - buf) < (max_buf_size - 2);
+	   (nr_bytes < todo) && (p - payload_start) < payload_size;
 	   nr_bytes++)
 	{
 	  switch (myaddr[nr_bytes] & 0xff)
@@ -3859,7 +3850,6 @@ remote_write_bytes (CORE_ADDR memaddr, char *myaddr, int len)
 	     and we have actually sent fewer bytes than planned.
 	     Fix-up the length field of the packet.  Use the same
 	     number of characters as before.  */
-	  
 	  plen += hexnumnstr (plen, (ULONGEST) nr_bytes, plenlen);
 	  *plen = ':';  /* overwrite \0 from hexnumnstr() */
 	}
@@ -6069,8 +6059,7 @@ _initialize_remote (void)
   struct cmd_list_element *tmpcmd;
 
   /* architecture specific data */
-  remote_gdbarch_data_handle = register_gdbarch_data (init_remote_state,
-						      free_remote_state);
+  remote_gdbarch_data_handle = register_gdbarch_data (init_remote_state);
 
   /* Old tacky stuff.  NOTE: This comes after the remote protocol so
      that the remote protocol has been initialized.  */

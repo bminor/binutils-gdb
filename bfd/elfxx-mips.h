@@ -112,3 +112,6 @@ extern bfd_boolean _bfd_mips_relax_section
   PARAMS ((bfd *, asection *, struct bfd_link_info *, bfd_boolean *));
 extern bfd_vma _bfd_mips_elf_sign_extend
   PARAMS ((bfd_vma, int));
+
+extern struct bfd_elf_special_section const _bfd_mips_elf_special_sections[];
+#define elf_backend_special_sections _bfd_mips_elf_special_sections

@@ -461,8 +461,8 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
   /* void pointer */
   if ((TYPE_CODE (type) == TYPE_CODE_PTR) && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_VOID))
     {
-      fprintf_filtered (stream,
-			TYPE_NAME (type) ? TYPE_NAME (type) : "pointer");
+      fputs_filtered (TYPE_NAME (type) ? TYPE_NAME (type) : "pointer",
+		      stream);
       return;
     }
   /* When SHOW is zero or less, and there is a valid type name, then always

@@ -455,7 +455,8 @@ write_dollar_variable (struct stoken str)
 
   /* Handle tokens that refer to machine registers:
      $ followed by a register name.  */
-  i = frame_map_name_to_regnum (str.ptr + 1, str.length - 1);
+  i = frame_map_name_to_regnum (deprecated_selected_frame,
+				str.ptr + 1, str.length - 1);
   if (i >= 0)
     goto handle_register;
 

@@ -757,6 +757,7 @@ type @kbd{quit} or @kbd{C-d} to exit.
 * Invoking GDB::                How to start @value{GDBN}
 * Quitting GDB::                How to quit @value{GDBN}
 * Shell Commands::              How to use shell commands inside @value{GDBN}
+* Logging output::              How to log @value{GDBN}'s output to a file
 @end menu
 
 @node Invoking GDB
@@ -1208,6 +1209,32 @@ You do not have to use the @code{shell} command for this purpose in
 @item make @var{make-args}
 Execute the @code{make} program with the specified
 arguments.  This is equivalent to @samp{shell make @var{make-args}}.
+@end table
+
+@node Logging output
+@section Logging output
+@cindex logging @value{GDBN} output
+
+You may want to save the output of @value{GDBN} commands to a file.
+There are several commands to control @value{GDBN}'s logging.
+
+@table @code
+@kindex set logging
+@item set logging on
+Enable logging.
+@item set logging off
+Disable logging.
+@item set logging file @var{file}
+Change the name of the current logfile.  The default logfile is @file{gdb.txt}.
+@item set logging overwrite [on|off]
+By default, @value{GDBN} will append to the logfile.  Set @code{overwrite} if
+you want @code{set logging on} to overwrite the logfile instead.
+@item set logging redirect [on|off]
+By default, @value{GDBN} output will go to both the terminal and the logfile.
+Set @code{redirect} if you want output to go only to the log file.
+@kindex show logging
+@item show logging
+Show the current values of the logging settings.
 @end table
 
 @node Commands
@@ -10719,6 +10746,19 @@ target> gdbserver @var{comm} --attach @var{pid}
 @var{pid} is the process ID of a currently running process.  It isn't necessary
 to point @code{gdbserver} at a binary for the running process.
 
+@pindex pidof
+@cindex attach to a program by name
+You can debug processes by name instead of process ID if your target has the
+@code{pidof} utility:
+
+@smallexample
+target> gdbserver @var{comm} --attach `pidof @var{PROGRAM}`
+@end smallexample
+
+In case more than one copy of @var{PROGRAM} is running, or @var{PROGRAM}
+has multiple threads, most versions of @code{pidof} support the
+@code{-s} option to only return the first process ID.
+
 @item On the host machine,
 connect to your target (@pxref{Connecting,,Connecting to a remote target}).
 For TCP connections, you must start up @code{gdbserver} prior to using
@@ -13817,6 +13857,14 @@ previous layout and the new one.
 
 Think of it as the Emacs @kbd{C-x 2} binding.
 
+@kindex C-x o
+@item C-x o
+Change the active window.  The TUI associates several key bindings
+(like scrolling and arrow keys) to the active window. This command
+gives the focus to the next TUI window.
+
+Think of it as the Emacs @kbd{C-x o} binding.
+
 @kindex C-x s
 @item C-x s
 Use the TUI @emph{SingleKey} keymap that binds single key to gdb commands
@@ -13858,9 +13906,10 @@ Refresh the screen.
 @end table
 
 In the TUI mode, the arrow keys are used by the active window
-for scrolling.  This means they are not available for readline.  It is
-necessary to use other readline key bindings such as @key{C-p}, @key{C-n},
-@key{C-b} and @key{C-f}.
+for scrolling.  This means they are available for readline when the
+active window is the command window.  When the command window
+does not have the focus, it is necessary to use other readline
+key bindings such as @key{C-p}, @key{C-n}, @key{C-b} and @key{C-f}.
 
 @node TUI Single Key Mode
 @section TUI Single Key Mode

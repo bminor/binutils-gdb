@@ -22,7 +22,7 @@
    Boston, MA 02111-1307, USA.  */
 
 #include "defs.h"
-#include "builtin-regs.h"
+#include "user-regs.h"
 #include "frame.h"
 #include "gdbtypes.h"
 #include "value.h"
@@ -147,14 +147,14 @@ _initialize_frame_reg (void)
   /* Frame based $fp, $pc, $sp and $ps.  These only come into play
      when the target does not define its own version of these
      registers.  */
-  add_builtin_reg ("fp", value_of_builtin_frame_fp_reg);
-  add_builtin_reg ("pc", value_of_builtin_frame_pc_reg);
-  add_builtin_reg ("sp", value_of_builtin_frame_sp_reg);
-  add_builtin_reg ("ps", value_of_builtin_frame_ps_reg);
+  user_reg_add_builtin ("fp", value_of_builtin_frame_fp_reg);
+  user_reg_add_builtin ("pc", value_of_builtin_frame_pc_reg);
+  user_reg_add_builtin ("sp", value_of_builtin_frame_sp_reg);
+  user_reg_add_builtin ("ps", value_of_builtin_frame_ps_reg);
 
   /* NOTE: cagney/2002-04-05: For moment leave the $frame / $gdbframe
      / $gdb.frame disabled.  It isn't yet clear which of the many
      options is the best.  */
   if (0)
-    add_builtin_reg ("frame", value_of_builtin_frame_reg);
+    user_reg_add_builtin ("frame", value_of_builtin_frame_reg);
 }

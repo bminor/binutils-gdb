@@ -36,6 +36,7 @@
 #include "gdb_assert.h"
 #include "gdb_string.h"
 
+#include "complaints.h"
 #include "dwarf2-frame.h"
 
 /* Call Frame Information (CFI).  */
@@ -490,15 +491,12 @@ dwarf2_frame_cache (struct frame_info *next_frame, void **this_cache)
      done for "normal" frames and not for resume-type frames (signal
      handlers, sentinel frames, dummy frames).
 
-     We don't do what GCC's does here (yet).  It's not clear how
-     reliable the method is.  There's also a problem with finding the
-     right FDE; see the comment in dwarf_frame_p.  If dwarf_frame_p
-     selected this frame unwinder because it found the FDE for the
-     next function, using the adjusted return address might not yield
-     a FDE at all.  The problem isn't specific to DWARF CFI; other
-     unwinders loose in similar ways.  Therefore it's probably
-     acceptable to leave things slightly broken for now.  */
-  fs->pc = frame_pc_unwind (next_frame);
+     frame_unwind_address_in_block does just this.
+
+     It's not clear how reliable the method is though - there is the
+     potential for the register state pre-call being different to that
+     on return.  */
+  fs->pc = frame_unwind_address_in_block (next_frame);
 
   /* Find the correct FDE.  */
   fde = dwarf2_frame_find_fde (&fs->pc);
@@ -707,16 +705,13 @@ static const struct frame_unwind dwarf2_frame_unwind =
 };
 
 const struct frame_unwind *
-dwarf2_frame_p (CORE_ADDR pc)
+dwarf2_frame_sniffer (struct frame_info *next_frame)
 {
-  /* The way GDB works, this function can be called with PC just after
-     the last instruction of the function we're supposed to return the
-     unwind methods for.  In that case we won't find the correct FDE;
-     instead we find the FDE for the next function, or we won't find
-     an FDE at all.  There is a possible solution (see the comment in
-     dwarf2_frame_cache), GDB doesn't pass us enough information to
-     implement it.  */
-  if (dwarf2_frame_find_fde (&pc))
+  /* Grab an address that is guarenteed to reside somewhere within the
+     function.  frame_pc_unwind(), for a no-return next function, can
+     end up returning something past the end of this function's body.  */
+  CORE_ADDR block_addr = frame_unwind_address_in_block (next_frame);
+  if (dwarf2_frame_find_fde (&block_addr))
     return &dwarf2_frame_unwind;
 
   return NULL;
@@ -747,8 +742,9 @@ static const struct frame_base dwarf2_frame_base =
 };
 
 const struct frame_base *
-dwarf2_frame_base_p (CORE_ADDR pc)
+dwarf2_frame_base_sniffer (struct frame_info *next_frame)
 {
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
   if (dwarf2_frame_find_fde (&pc))
     return &dwarf2_frame_base;
 
@@ -1058,35 +1054,44 @@ add_fde (struct comp_unit *unit, struct dwarf2_fde *fde)
 #define DW64_CIE_ID ~0
 #endif
 
-/* Read a CIE or FDE in BUF and decode it.  */
+static char *decode_frame_entry (struct comp_unit *unit, char *start,
+				 int eh_frame_p);
 
+/* Decode the next CIE or FDE.  Return NULL if invalid input, otherwise
+   the next byte to be processed.  */
 static char *
-decode_frame_entry (struct comp_unit *unit, char *buf, int eh_frame_p)
+decode_frame_entry_1 (struct comp_unit *unit, char *start, int eh_frame_p)
 {
+  char *buf;
   LONGEST length;
   unsigned int bytes_read;
-  int dwarf64_p = 0;
-  ULONGEST cie_id = DW_CIE_ID;
+  int dwarf64_p;
+  ULONGEST cie_id;
   ULONGEST cie_pointer;
-  char *start = buf;
   char *end;
 
+  buf = start;
   length = read_initial_length (unit->abfd, buf, &bytes_read);
   buf += bytes_read;
   end = buf + length;
 
+  /* Are we still within the section? */
+  if (end > unit->dwarf_frame_buffer + unit->dwarf_frame_size)
+    return NULL;
+
   if (length == 0)
     return end;
 
-  if (bytes_read == 12)
-    dwarf64_p = 1;
+  /* Distinguish between 32 and 64-bit encoded frame info.  */
+  dwarf64_p = (bytes_read == 12);
 
-  /* In a .eh_frame section, zero is used to distinguish CIEs from
-     FDEs.  */
+  /* In a .eh_frame section, zero is used to distinguish CIEs from FDEs.  */
   if (eh_frame_p)
     cie_id = 0;
   else if (dwarf64_p)
     cie_id = DW64_CIE_ID;
+  else
+    cie_id = DW_CIE_ID;
 
   if (dwarf64_p)
     {
@@ -1124,7 +1129,8 @@ decode_frame_entry (struct comp_unit *unit, char *buf, int eh_frame_p)
       cie->encoding = encoding_for_size (unit->addr_size);
 
       /* Check version number.  */
-      gdb_assert (read_1_byte (unit->abfd, buf) == DW_CIE_VERSION);
+      if (read_1_byte (unit->abfd, buf) != DW_CIE_VERSION)
+	return NULL;
       buf += 1;
 
       /* Interpret the interesting bits of the augmentation.  */
@@ -1159,6 +1165,8 @@ decode_frame_entry (struct comp_unit *unit, char *buf, int eh_frame_p)
 
 	  length = read_unsigned_leb128 (unit->abfd, buf, &bytes_read);
 	  buf += bytes_read;
+	  if (buf > end)
+	    return NULL;
 	  cie->initial_instructions = buf + length;
 	  augmentation++;
 	}
@@ -1211,15 +1219,19 @@ decode_frame_entry (struct comp_unit *unit, char *buf, int eh_frame_p)
       /* This is a FDE.  */
       struct dwarf2_fde *fde;
 
+      /* In an .eh_frame section, the CIE pointer is the delta between the
+	 address within the FDE where the CIE pointer is stored and the
+	 address of the CIE.  Convert it to an offset into the .eh_frame
+	 section.  */
       if (eh_frame_p)
 	{
-	  /* In an .eh_frame section, the CIE pointer is the delta
-             between the address within the FDE where the CIE pointer
-             is stored and the address of the CIE.  Convert it to an
-             offset into the .eh_frame section.  */
 	  cie_pointer = buf - unit->dwarf_frame_buffer - cie_pointer;
 	  cie_pointer -= (dwarf64_p ? 8 : 4);
 	}
+
+      /* In either case, validate the result is still within the section.  */
+      if (cie_pointer >= unit->dwarf_frame_size)
+	return NULL;
 
       fde = (struct dwarf2_fde *)
 	obstack_alloc (&unit->objfile->psymbol_obstack,
@@ -1252,6 +1264,8 @@ decode_frame_entry (struct comp_unit *unit, char *buf, int eh_frame_p)
 
 	  length = read_unsigned_leb128 (unit->abfd, buf, &bytes_read);
 	  buf += bytes_read + length;
+	  if (buf > end)
+	    return NULL;
 	}
 
       fde->instructions = buf;
@@ -1262,6 +1276,99 @@ decode_frame_entry (struct comp_unit *unit, char *buf, int eh_frame_p)
 
   return end;
 }
+
+/* Read a CIE or FDE in BUF and decode it.  */
+static char *
+decode_frame_entry (struct comp_unit *unit, char *start, int eh_frame_p)
+{
+  enum { NONE, ALIGN4, ALIGN8, FAIL } workaround = NONE;
+  char *ret;
+  const char *msg;
+  ptrdiff_t start_offset;
+
+  while (1)
+    {
+      ret = decode_frame_entry_1 (unit, start, eh_frame_p);
+      if (ret != NULL)
+	break;
+
+      /* We have corrupt input data of some form.  */
+
+      /* ??? Try, weakly, to work around compiler/assembler/linker bugs
+	 and mismatches wrt padding and alignment of debug sections.  */
+      /* Note that there is no requirement in the standard for any
+	 alignment at all in the frame unwind sections.  Testing for
+	 alignment before trying to interpret data would be incorrect.
+
+	 However, GCC traditionally arranged for frame sections to be
+	 sized such that the FDE length and CIE fields happen to be
+	 aligned (in theory, for performance).  This, unfortunately,
+	 was done with .align directives, which had the side effect of
+	 forcing the section to be aligned by the linker.
+
+	 This becomes a problem when you have some other producer that
+	 creates frame sections that are not as strictly aligned.  That
+	 produces a hole in the frame info that gets filled by the 
+	 linker with zeros.
+
+	 The GCC behaviour is arguably a bug, but it's effectively now
+	 part of the ABI, so we're now stuck with it, at least at the
+	 object file level.  A smart linker may decide, in the process
+	 of compressing duplicate CIE information, that it can rewrite
+	 the entire output section without this extra padding.  */
+
+      start_offset = start - unit->dwarf_frame_buffer;
+      if (workaround < ALIGN4 && (start_offset & 3) != 0)
+	{
+	  start += 4 - (start_offset & 3);
+	  workaround = ALIGN4;
+	  continue;
+	}
+      if (workaround < ALIGN8 && (start_offset & 7) != 0)
+	{
+	  start += 8 - (start_offset & 7);
+	  workaround = ALIGN8;
+	  continue;
+	}
+
+      /* Nothing left to try.  Arrange to return as if we've consumed
+	 the entire input section.  Hopefully we'll get valid info from
+	 the other of .debug_frame/.eh_frame.  */
+      workaround = FAIL;
+      ret = unit->dwarf_frame_buffer + unit->dwarf_frame_size;
+      break;
+    }
+
+  switch (workaround)
+    {
+    case NONE:
+      break;
+
+    case ALIGN4:
+      complaint (&symfile_complaints,
+		 "Corrupt data in %s:%s; align 4 workaround apparently succeeded",
+		 unit->dwarf_frame_section->owner->filename,
+		 unit->dwarf_frame_section->name);
+      break;
+
+    case ALIGN8:
+      complaint (&symfile_complaints,
+		 "Corrupt data in %s:%s; align 8 workaround apparently succeeded",
+		 unit->dwarf_frame_section->owner->filename,
+		 unit->dwarf_frame_section->name);
+      break;
+
+    default:
+      complaint (&symfile_complaints,
+		 "Corrupt data in %s:%s",
+		 unit->dwarf_frame_section->owner->filename,
+		 unit->dwarf_frame_section->name);
+      break;
+    }
+
+  return ret;
+}
+
 
 
 /* FIXME: kettenis/20030504: This still needs to be integrated with
@@ -1307,9 +1414,9 @@ dwarf2_build_frame_info (struct objfile *objfile)
       unit.dwarf_frame_section = dwarf_eh_frame_section;
 
       /* FIXME: kettenis/20030602: This is the DW_EH_PE_datarel base
-         that for the i386/amd64 target, which currently is the only
-         target in GCC that supports/uses the DW_EH_PE_datarel
-         encoding.  */
+	 that for the i386/amd64 target, which currently is the only
+	 target in GCC that supports/uses the DW_EH_PE_datarel
+	 encoding.  */
       got = bfd_get_section_by_name (unit.abfd, ".got");
       if (got)
 	unit.dbase = got->vma;

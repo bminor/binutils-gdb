@@ -1,10 +1,15 @@
+2003-07-09  Michael Snyder  <msnyder@redhat.com>
+
+	* configure.in: Add testsuite to extra_subdirs for sh.
+	* configure: Regenerate.
+
 2003-01-23  Nick Clifton  <nickc@redhat.com>
 
 	* Add sh2e support:
 
-	2002-04-02  Alexandre Oliva  <aoliva@redhat.com>
+2002-04-02  Alexandre Oliva  <aoliva@redhat.com>
 
-		* sh/gencode.c: Replace sh3e with sh2e except in fsqrt.
+	* sh/gencode.c: Replace sh3e with sh2e except in fsqrt.
 
 2002-08-24  Geoffrey Keating  <geoffk@redhat.com>
 

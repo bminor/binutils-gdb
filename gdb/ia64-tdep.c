@@ -1520,7 +1520,7 @@ static void
 ia64_store_struct_return (CORE_ADDR addr, CORE_ADDR sp)
 {
   /* FIXME: See above. */
-  /* Note that most of the work was done in ia64_push_arguments() */
+  /* Note that most of the work was done in ia64_push_dummy_call() */
   struct_return_address = addr;
 }
 
@@ -1853,8 +1853,10 @@ find_func_descr (CORE_ADDR faddr, CORE_ADDR *fdaptr)
 }
 
 static CORE_ADDR
-ia64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
-		    int struct_return, CORE_ADDR struct_addr)
+ia64_push_dummy_call (struct gdbarch *gdbarch, CORE_ADDR func_addr,
+		      struct regcache *regcache, CORE_ADDR bp_addr,
+		      int nargs, struct value **args, CORE_ADDR sp,
+		      int struct_return, CORE_ADDR struct_addr)
 {
   int argno;
   struct value *arg;
@@ -1862,7 +1864,9 @@ ia64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   int len, argoffset;
   int nslots, rseslots, memslots, slotnum, nfuncargs;
   int floatreg;
-  CORE_ADDR bsp, cfm, pfs, new_bsp, funcdescaddr;
+  ULONGEST bsp, cfm, pfs, new_bsp;
+  CORE_ADDR funcdescaddr;
+  ULONGEST global_pointer = FIND_GLOBAL_POINTER (func_addr);
 
   nslots = 0;
   nfuncargs = 0;
@@ -1887,21 +1891,21 @@ ia64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   memslots = nslots - rseslots;
 
   /* Allocate a new RSE frame */
-  cfm = read_register (IA64_CFM_REGNUM);
+  regcache_cooked_read_unsigned (regcache, IA64_CFM_REGNUM, &cfm);
 
-  bsp = read_register (IA64_BSP_REGNUM);
+  regcache_cooked_read_unsigned (regcache, IA64_BSP_REGNUM, &bsp);
   bsp = rse_address_add (bsp, cfm & 0x7f);
   new_bsp = rse_address_add (bsp, rseslots);
-  write_register (IA64_BSP_REGNUM, new_bsp);
+  regcache_cooked_write_unsigned (regcache, IA64_BSP_REGNUM, new_bsp);
 
-  pfs = read_register (IA64_PFS_REGNUM);
+  regcache_cooked_read_unsigned (regcache, IA64_PFS_REGNUM, &pfs);
   pfs &= 0xc000000000000000LL;
   pfs |= (cfm & 0xffffffffffffLL);
-  write_register (IA64_PFS_REGNUM, pfs);
+  regcache_cooked_write_unsigned (regcache, IA64_PFS_REGNUM, pfs);
 
   cfm &= 0xc000000000000000LL;
   cfm |= rseslots;
-  write_register (IA64_CFM_REGNUM, cfm);
+  regcache_cooked_write_unsigned (regcache, IA64_CFM_REGNUM, cfm);
   
   /* We will attempt to find function descriptors in the .opd segment,
      but if we can't we'll construct them ourselves.  That being the
@@ -1979,11 +1983,12 @@ ia64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
 	  len = TYPE_LENGTH (type);
 	  while (len > 0 && floatreg < IA64_FR16_REGNUM)
 	    {
-	      ia64_register_convert_to_raw (
-		float_elt_type,
-		floatreg,
-	        VALUE_CONTENTS (arg) + argoffset,
-		&deprecated_registers[REGISTER_BYTE (floatreg)]);
+	      char buf[MAX_REGISTER_SIZE];
+	      ia64_register_convert_to_raw (float_elt_type,
+					    floatreg,
+					    VALUE_CONTENTS (arg) + argoffset,
+					    buf);
+	      regcache_raw_write (regcache, floatreg, buf);
 	      floatreg++;
 	      argoffset += TYPE_LENGTH (float_elt_type);
 	      len -= TYPE_LENGTH (float_elt_type);
@@ -1994,10 +1999,13 @@ ia64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
   /* Store the struct return value in r8 if necessary. */
   if (struct_return)
     {
-      store_unsigned_integer (&deprecated_registers[REGISTER_BYTE (IA64_GR8_REGNUM)],
-			      REGISTER_RAW_SIZE (IA64_GR8_REGNUM),
-			      struct_addr);
+      regcache_cooked_write_unsigned (regcache, IA64_GR8_REGNUM, struct_addr);
     }
+
+  if (global_pointer != 0)
+    regcache_cooked_write_unsigned (regcache, IA64_GR1_REGNUM, global_pointer);
+
+  regcache_cooked_write_unsigned (regcache, IA64_BR0_REGNUM, bp_addr);
 
   /* Sync gdb's idea of what the registers are with the target. */
   target_store_registers (-1);
@@ -2015,18 +2023,6 @@ ia64_push_arguments (int nargs, struct value **args, CORE_ADDR sp,
      to ia64_gdbarch_init() and remove the line below. */
   generic_save_dummy_frame_tos (sp);
 
-  return sp;
-}
-
-static CORE_ADDR
-ia64_push_return_address (CORE_ADDR pc, CORE_ADDR sp)
-{
-  CORE_ADDR global_pointer = FIND_GLOBAL_POINTER (pc);
-
-  if (global_pointer != 0)
-    write_register (IA64_GR1_REGNUM, global_pointer);
-
-  write_register (IA64_BR0_REGNUM, CALL_DUMMY_ADDRESS ());
   return sp;
 }
 
@@ -2164,6 +2160,13 @@ process_note_abi_tag_sections (bfd *abfd, asection *sect, void *obj)
     }
 }
 
+static int
+ia64_print_insn (bfd_vma memaddr, struct disassemble_info *info)
+{
+  info->bytes_per_line = SLOT_MULTIPLIER;
+  return print_insn_ia64 (memaddr, info);
+}
+
 static struct gdbarch *
 ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
@@ -2289,8 +2292,7 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_write_pc (gdbarch, ia64_write_pc);
 
   /* Settings for calling functions in the inferior.  */
-  set_gdbarch_deprecated_push_arguments (gdbarch, ia64_push_arguments);
-  set_gdbarch_deprecated_push_return_address (gdbarch, ia64_push_return_address);
+  set_gdbarch_push_dummy_call (gdbarch, ia64_push_dummy_call);
   set_gdbarch_deprecated_pop_frame (gdbarch, ia64_pop_frame);
 
   set_gdbarch_deprecated_call_dummy_words (gdbarch, ia64_call_dummy_words);
@@ -2318,6 +2320,8 @@ ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_remote_translate_xfer_address (
     gdbarch, ia64_remote_translate_xfer_address);
 
+  set_gdbarch_print_insn (gdbarch, ia64_print_insn);
+
   return gdbarch;
 }
 
@@ -2327,7 +2331,4 @@ void
 _initialize_ia64_tdep (void)
 {
   register_gdbarch_init (bfd_arch_ia64, ia64_gdbarch_init);
-
-  deprecated_tm_print_insn = print_insn_ia64;
-  deprecated_tm_print_insn_info.bytes_per_line = SLOT_MULTIPLIER;
 }

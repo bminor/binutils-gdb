@@ -347,6 +347,10 @@ const struct mips_arch_choice mips_arch_choices[] = {
     mips_cp0_names_numeric, NULL, 0, mips_hwr_names_numeric },
   { "r6000",	1, bfd_mach_mips6000, CPU_R6000, ISA_MIPS2,
     mips_cp0_names_numeric, NULL, 0, mips_hwr_names_numeric },
+  { "rm7000",	1, bfd_mach_mips7000, CPU_RM7000, ISA_MIPS4,
+    mips_cp0_names_numeric, NULL, 0, mips_hwr_names_numeric },
+  { "rm9000",	1, bfd_mach_mips7000, CPU_RM7000, ISA_MIPS4,
+    mips_cp0_names_numeric, NULL, 0, mips_hwr_names_numeric },
   { "r8000",	1, bfd_mach_mips8000, CPU_R8000, ISA_MIPS4,
     mips_cp0_names_numeric, NULL, 0, mips_hwr_names_numeric },
   { "r10000",	1, bfd_mach_mips10000, CPU_R10000, ISA_MIPS4,
@@ -495,11 +499,11 @@ set_default_mips_dis_options (info)
   mips_hwr_names = mips_hwr_names_numeric;
 
   /* If an ELF "newabi" binary, use the n32/(n)64 GPR names.  */
-  if (info->flavour == bfd_target_elf_flavour && info->symbols != NULL)
+  if (info->flavour == bfd_target_elf_flavour && info->section != NULL)
     {
       Elf_Internal_Ehdr *header;
 
-      header = elf_elfheader (bfd_asymbol_bfd (*(info->symbols)));
+      header = elf_elfheader (info->section->owner);
       if (is_newabi (header))
 	mips_gpr_names = mips_gpr_names_newabi;
     }

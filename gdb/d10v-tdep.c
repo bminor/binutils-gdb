@@ -763,7 +763,7 @@ d10v_frame_unwind_cache (struct frame_info *next_frame,
   /* Adjust all the saved registers so that they contain addresses and
      not offsets.  */
   for (i = 0; i < NUM_REGS - 1; i++)
-    if (info->saved_regs[i].addr)
+    if (trad_frame_addr_p (info->saved_regs, i))
       {
 	info->saved_regs[i].addr = (info->prev_sp + info->saved_regs[i].addr);
       }
@@ -776,8 +776,8 @@ d10v_frame_unwind_cache (struct frame_info *next_frame,
 
   /* The previous frame's SP needed to be computed.  Save the computed
      value.  */
-  trad_frame_register_value (info->saved_regs, D10V_SP_REGNUM,
-			     d10v_make_daddr (prev_sp));
+  trad_frame_set_value (info->saved_regs, D10V_SP_REGNUM,
+			d10v_make_daddr (prev_sp));
 
   return info;
 }
@@ -797,9 +797,9 @@ d10v_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
     ULONGEST pc, psw, rpt_s, rpt_e, rpt_c;
     frame_read_unsigned_register (frame, D10V_PC_REGNUM, &pc);
     frame_read_unsigned_register (frame, PSW_REGNUM, &psw);
-    frame_read_unsigned_register (frame, frame_map_name_to_regnum ("rpt_s", -1), &rpt_s);
-    frame_read_unsigned_register (frame, frame_map_name_to_regnum ("rpt_e", -1), &rpt_e);
-    frame_read_unsigned_register (frame, frame_map_name_to_regnum ("rpt_c", -1), &rpt_c);
+    frame_read_unsigned_register (frame, frame_map_name_to_regnum (frame, "rpt_s", -1), &rpt_s);
+    frame_read_unsigned_register (frame, frame_map_name_to_regnum (frame, "rpt_e", -1), &rpt_e);
+    frame_read_unsigned_register (frame, frame_map_name_to_regnum (frame, "rpt_c", -1), &rpt_c);
     fprintf_filtered (file, "PC=%04lx (0x%lx) PSW=%04lx RPT_S=%04lx RPT_E=%04lx RPT_C=%04lx\n",
 		     (long) pc, (long) d10v_make_iaddr (pc), (long) psw,
 		     (long) rpt_s, (long) rpt_e, (long) rpt_c);
@@ -1417,15 +1417,6 @@ d10v_frame_this_id (struct frame_info *next_frame,
 
   id = frame_id_build (base, func);
 
-  /* Check that we're not going round in circles with the same frame
-     ID (but avoid applying the test to sentinel frames which do go
-     round in circles).  Can't use frame_id_eq() as that doesn't yet
-     compare the frame's PC value.  */
-  if (frame_relative_level (next_frame) >= 0
-      && get_frame_type (next_frame) != DUMMY_FRAME
-      && frame_id_eq (get_frame_id (next_frame), id))
-    return;
-
   (*this_id) = id;
 }
 
@@ -1449,7 +1440,7 @@ static const struct frame_unwind d10v_frame_unwind = {
 };
 
 static const struct frame_unwind *
-d10v_frame_p (CORE_ADDR pc)
+d10v_frame_sniffer (struct frame_info *next_frame)
 {
   return &d10v_frame_unwind;
 }
@@ -1589,7 +1580,7 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_print_registers_info (gdbarch, d10v_print_registers_info);
 
-  frame_unwind_append_predicate (gdbarch, d10v_frame_p);
+  frame_unwind_append_sniffer (gdbarch, d10v_frame_sniffer);
   frame_base_set_default (gdbarch, &d10v_frame_base);
 
   /* Methods for saving / extracting a dummy frame's ID.  The ID's

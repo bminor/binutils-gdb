@@ -51,10 +51,11 @@ struct regcache_descr
      for raw and pseudo registers and allow access to both.  */
   int legacy_p;
 
-  /* The raw register cache.  This should contain just [0
-     .. NUM_RAW_REGISTERS).  However, for older targets, it contains
-     space for the full [0 .. NUM_RAW_REGISTERS +
-     NUM_PSEUDO_REGISTERS).  */
+  /* The raw register cache.  Each raw (or hard) register is supplied
+     by the target interface.  The raw cache should not contain
+     redundant information - if the PC is constructed from two
+     registers then those regigisters and not the PC lives in the raw
+     cache.  */
   int nr_raw_registers;
   long sizeof_raw_registers;
   long sizeof_raw_register_valid_p;
@@ -91,12 +92,6 @@ init_legacy_regcache_descr (struct gdbarch *gdbarch,
      ``gdbarch'' as a parameter.  */
   gdb_assert (gdbarch != NULL);
 
-  /* FIXME: cagney/2002-05-11: Shouldn't be including pseudo-registers
-     in the register cache.  Unfortunatly some architectures still
-     rely on this and the pseudo_register_write() method.  */
-  descr->nr_raw_registers = descr->nr_cooked_registers;
-  descr->sizeof_raw_register_valid_p = descr->sizeof_cooked_register_valid_p;
-
   /* Compute the offset of each register.  Legacy architectures define
      REGISTER_BYTE() so use that.  */
   /* FIXME: cagney/2002-11-07: Instead of using REGISTER_BYTE() this
@@ -104,8 +99,10 @@ init_legacy_regcache_descr (struct gdbarch *gdbarch,
      offets at runtime.  This currently isn't possible as some ISAs
      define overlapping register regions - see the mess in
      read_register_bytes() and write_register_bytes() registers.  */
-  descr->sizeof_register = XCALLOC (descr->nr_cooked_registers, long);
-  descr->register_offset = XCALLOC (descr->nr_cooked_registers, long);
+  descr->sizeof_register
+    = GDBARCH_OBSTACK_CALLOC (gdbarch, descr->nr_cooked_registers, long);
+  descr->register_offset
+    = GDBARCH_OBSTACK_CALLOC (gdbarch, descr->nr_cooked_registers, long);
   for (i = 0; i < descr->nr_cooked_registers; i++)
     {
       /* FIXME: cagney/2001-12-04: This code shouldn't need to use
@@ -153,7 +150,7 @@ init_regcache_descr (struct gdbarch *gdbarch)
   gdb_assert (gdbarch != NULL);
 
   /* Create an initial, zero filled, table.  */
-  descr = XCALLOC (1, struct regcache_descr);
+  descr = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct regcache_descr);
   descr->gdbarch = gdbarch;
 
   /* Total size of the register space.  The raw registers are mapped
@@ -163,8 +160,8 @@ init_regcache_descr (struct gdbarch *gdbarch)
   descr->sizeof_cooked_register_valid_p = NUM_REGS + NUM_PSEUDO_REGS;
 
   /* Fill in a table of register types.  */
-  descr->register_type = XCALLOC (descr->nr_cooked_registers,
-				  struct type *);
+  descr->register_type
+    = GDBARCH_OBSTACK_CALLOC (gdbarch, descr->nr_cooked_registers, struct type *);
   for (i = 0; i < descr->nr_cooked_registers; i++)
     {
       if (gdbarch_register_type_p (gdbarch))
@@ -174,23 +171,6 @@ init_regcache_descr (struct gdbarch *gdbarch)
 	}
       else
 	descr->register_type[i] = REGISTER_VIRTUAL_TYPE (i); /* OK */
-    }
-
-  /* If an old style architecture, fill in the remainder of the
-     register cache descriptor using the register macros.  */
-  if (!gdbarch_pseudo_register_read_p (gdbarch)
-      && !gdbarch_pseudo_register_write_p (gdbarch)
-      && !gdbarch_register_type_p (gdbarch))
-    {
-      /* NOTE: cagney/2003-05-02: Don't add a test for REGISTER_BYTE_P
-	 to the above.  Doing that would cause all the existing
-	 architectures to revert back to the legacy regcache
-	 mechanisms, and that is not a good thing.  Instead just,
-	 later, check that the register cache's layout is consistent
-	 with REGISTER_BYTE.  */
-      descr->legacy_p = 1;
-      init_legacy_regcache_descr (gdbarch, descr);
-      return descr;
     }
 
   /* Construct a strictly RAW register cache.  Don't allow pseudo's
@@ -203,6 +183,24 @@ init_regcache_descr (struct gdbarch *gdbarch)
      .. NUM_REGS + NUM_PSEUDO_REGS).  */
   descr->sizeof_raw_register_valid_p = descr->sizeof_cooked_register_valid_p;
 
+  /* If an old style architecture, fill in the remainder of the
+     register cache descriptor using the register macros.  */
+  /* NOTE: cagney/2003-06-29: If either of REGISTER_BYTE or
+     REGISTER_RAW_SIZE are still present, things are most likely
+     totally screwed.  Ex: an architecture with raw register sizes
+     smaller than what REGISTER_BYTE indicates; non monotonic
+     REGISTER_BYTE values.  For GDB 6 check for these nasty methods
+     and fall back to legacy code when present.  Sigh!  */
+  if ((!gdbarch_pseudo_register_read_p (gdbarch)
+       && !gdbarch_pseudo_register_write_p (gdbarch)
+       && !gdbarch_register_type_p (gdbarch))
+      || REGISTER_BYTE_P () || REGISTER_RAW_SIZE_P ())
+    {
+      descr->legacy_p = 1;
+      init_legacy_regcache_descr (gdbarch, descr);
+      return descr;
+    }
+
   /* Lay out the register cache.
 
      NOTE: cagney/2002-05-22: Only register_type() is used when
@@ -212,8 +210,10 @@ init_regcache_descr (struct gdbarch *gdbarch)
 
   {
     long offset = 0;
-    descr->sizeof_register = XCALLOC (descr->nr_cooked_registers, long);
-    descr->register_offset = XCALLOC (descr->nr_cooked_registers, long);
+    descr->sizeof_register
+      = GDBARCH_OBSTACK_CALLOC (gdbarch, descr->nr_cooked_registers, long);
+    descr->register_offset
+      = GDBARCH_OBSTACK_CALLOC (gdbarch, descr->nr_cooked_registers, long);
     for (i = 0; i < descr->nr_cooked_registers; i++)
       {
 	descr->sizeof_register[i] = TYPE_LENGTH (descr->register_type[i]);
@@ -255,19 +255,6 @@ regcache_descr (struct gdbarch *gdbarch)
   return gdbarch_data (gdbarch, regcache_descr_handle);
 }
 
-static void
-xfree_regcache_descr (struct gdbarch *gdbarch, void *ptr)
-{
-  struct regcache_descr *descr = ptr;
-  if (descr == NULL)
-    return;
-  xfree (descr->register_offset);
-  xfree (descr->sizeof_register);
-  descr->register_offset = NULL;
-  descr->sizeof_register = NULL;
-  xfree (descr);
-}
-
 /* Utility functions returning useful register attributes stored in
    the regcache descr.  */
 
@@ -289,8 +276,11 @@ register_size (struct gdbarch *gdbarch, int regnum)
   int size;
   gdb_assert (regnum >= 0 && regnum < (NUM_REGS + NUM_PSEUDO_REGS));
   size = descr->sizeof_register[regnum];
+  /* NB: The deprecated REGISTER_RAW_SIZE, if not provided, defaults
+     to the size of the register's type.  */
   gdb_assert (size == REGISTER_RAW_SIZE (regnum)); /* OK */
-  gdb_assert (size == REGISTER_RAW_SIZE (regnum)); /* OK */
+  /* NB: Don't check the register's virtual size.  It, in say the case
+     of the MIPS, may not match the raw size!  */
   return size;
 }
 
@@ -1427,7 +1417,6 @@ regcache_dump (struct regcache *regcache, struct ui_file *file,
 {
   struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
   struct gdbarch *gdbarch = regcache->descr->gdbarch;
-  struct reggroup *const *groups = reggroups (gdbarch);
   int regnum;
   int footnote_nr = 0;
   int footnote_register_size = 0;
@@ -1598,13 +1587,15 @@ regcache_dump (struct regcache *regcache, struct ui_file *file,
 	    fprintf_unfiltered (file, "Groups");
 	  else
 	    {
-	      int i;
 	      const char *sep = "";
-	      for (i = 0; groups[i] != NULL; i++)
+	      struct reggroup *group;
+	      for (group = reggroup_next (gdbarch, NULL);
+		   group != NULL;
+		   group = reggroup_next (gdbarch, group))
 		{
-		  if (gdbarch_register_reggroup_p (gdbarch, regnum, groups[i]))
+		  if (gdbarch_register_reggroup_p (gdbarch, regnum, group))
 		    {
-		      fprintf_unfiltered (file, "%s%s", sep, reggroup_name (groups[i]));
+		      fprintf_unfiltered (file, "%s%s", sep, reggroup_name (group));
 		      sep = ",";
 		    }
 		}
@@ -1671,8 +1662,7 @@ extern initialize_file_ftype _initialize_regcache; /* -Wmissing-prototype */
 void
 _initialize_regcache (void)
 {
-  regcache_descr_handle = register_gdbarch_data (init_regcache_descr,
-						 xfree_regcache_descr);
+  regcache_descr_handle = register_gdbarch_data (init_regcache_descr);
   REGISTER_GDBARCH_SWAP (current_regcache);
   register_gdbarch_swap (&deprecated_registers, sizeof (deprecated_registers), NULL);
   register_gdbarch_swap (&deprecated_register_valid, sizeof (deprecated_register_valid), NULL);

@@ -304,8 +304,9 @@ static const struct frame_unwind alpha_mdebug_frame_unwind = {
 };
 
 const struct frame_unwind *
-alpha_mdebug_frame_p (CORE_ADDR pc)
+alpha_mdebug_frame_sniffer (struct frame_info *next_frame)
 {
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
   alpha_extra_func_info_t proc_desc;
 
   /* If this PC does not map to a PDR, then clearly this isn't an
@@ -360,8 +361,9 @@ static const struct frame_base alpha_mdebug_frame_base = {
 };
 
 static const struct frame_base *
-alpha_mdebug_frame_base_p (CORE_ADDR pc)
+alpha_mdebug_frame_base_sniffer (struct frame_info *next_frame)
 {
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
   alpha_extra_func_info_t proc_desc;
 
   /* If this PC does not map to a PDR, then clearly this isn't an
@@ -379,6 +381,6 @@ alpha_mdebug_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  frame_unwind_append_predicate (gdbarch, alpha_mdebug_frame_p);
-  frame_base_append_predicate (gdbarch, alpha_mdebug_frame_base_p);
+  frame_unwind_append_sniffer (gdbarch, alpha_mdebug_frame_sniffer);
+  frame_base_append_sniffer (gdbarch, alpha_mdebug_frame_base_sniffer);
 }

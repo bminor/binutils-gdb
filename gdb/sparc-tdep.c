@@ -34,6 +34,8 @@
 #include "regcache.h"
 #include "osabi.h"
 
+#include "sparc-tdep.h"
+
 #ifdef	USE_PROC_FS
 #include <sys/procfs.h>
 /* Prototypes for supply_gregset etc. */
@@ -129,9 +131,6 @@ struct gdbarch_tdep
  *      (TARGET_ARCHITECTURE->mach == bfd_mach_sparc_v9 || \
  *       TARGET_ARCHITECTURE->mach == bfd_mach_sparc_v9a))
  */
-
-/* From infrun.c */
-extern int stop_after_trap;
 
 /* We don't store all registers immediately when requested, since they
    get sent over in large chunks anyway.  Instead, we accumulate most
@@ -2874,6 +2873,22 @@ sparc_print_extra_frame_info (struct frame_info *fi)
 
 /* MULTI_ARCH support */
 
+const char *
+legacy_register_name (int i)
+{
+#ifdef REGISTER_NAMES
+  static char *names[] = REGISTER_NAMES;
+  if (i < 0 || i >= (sizeof (names) / sizeof (*names)))
+    return NULL;
+  else
+    return names[i];
+#else
+  internal_error (__FILE__, __LINE__,
+		  "legacy_register_name: called.");
+  return NULL;
+#endif
+}
+
 static const char *
 sparc32_register_name (int regno)
 {
@@ -3188,7 +3203,7 @@ sparc_call_dummy_address (void)
 
 /* Supply the Y register number to those that need it.  */
 
-static int
+int
 sparc_y_regnum (void)
 {
   return gdbarch_tdep (current_gdbarch)->y_regnum;
@@ -3203,7 +3218,7 @@ sparc_reg_struct_has_addr (int gcc_p, struct type *type)
     return (gcc_p != 1);
 }
 
-static int
+int
 sparc_intreg_size (void)
 {
   return SPARC_INTREG_SIZE;

@@ -22,6 +22,8 @@
 
 #include "defs.h"
 #include "gdbcore.h"
+#include "doublest.h"
+#include "floatformat.h"
 #include "frame.h"
 #include "target.h"
 #include "gdb_string.h"
@@ -51,9 +53,9 @@
    /* moveq #82,d0; notb d0; trap #0 */					\
    || (insn1 == 0x70524600 && (insn2 >> 16) == 0x4e40))
 
-/* Return non-zero if PC points into the signal trampoline.  For the sake
-   of m68k_linux_frame_saved_pc we also distinguish between non-RT and RT
-   signal trampolines.  */
+/* Return non-zero if PC points into the signal trampoline.  For the
+   sake of m68k_linux_get_sigtramp_info we also distinguish between
+   non-RT and RT signal trampolines.  */
 
 static int
 m68k_linux_pc_in_sigtramp (CORE_ADDR pc, char *name)
@@ -87,100 +89,183 @@ m68k_linux_pc_in_sigtramp (CORE_ADDR pc, char *name)
   return 0;
 }
 
-/* Offset to saved PC in sigcontext, from <asm/sigcontext.h>.  */
-#define SIGCONTEXT_PC_OFFSET 26
-
-/* Offset to saved PC in ucontext, from <asm/ucontext.h>.  */
-#define UCONTEXT_PC_OFFSET 88
-
-/* Get saved user PC for sigtramp from sigcontext or ucontext.  */
-
-static CORE_ADDR
-m68k_linux_sigtramp_saved_pc (struct frame_info *frame)
+/* From <asm/sigcontext.h>.  */
+static int m68k_linux_sigcontext_reg_offset[M68K_NUM_REGS] =
 {
-  CORE_ADDR sigcontext_addr;
-  char buf[TARGET_PTR_BIT / TARGET_CHAR_BIT];
-  int ptrbytes = TARGET_PTR_BIT / TARGET_CHAR_BIT;
-  int sigcontext_offs = (2 * TARGET_INT_BIT) / TARGET_CHAR_BIT;
+  2 * 4,			/* %d0 */
+  3 * 4,			/* %d1 */
+  -1,				/* %d2 */
+  -1,				/* %d3 */
+  -1,				/* %d4 */
+  -1,				/* %d5 */
+  -1,				/* %d6 */
+  -1,				/* %d7 */
+  4 * 4,			/* %a0 */
+  5 * 4,			/* %a1 */
+  -1,				/* %a2 */
+  -1,				/* %a3 */
+  -1,				/* %a4 */
+  -1,				/* %a5 */
+  -1,				/* %fp */
+  1 * 4,			/* %sp */
+  5 * 4 + 2,			/* %sr */
+  6 * 4 + 2,			/* %pc */
+  8 * 4,			/* %fp0 */
+  11 * 4,			/* %fp1 */
+  -1,				/* %fp2 */
+  -1,				/* %fp3 */
+  -1,				/* %fp4 */
+  -1,				/* %fp5 */
+  -1,				/* %fp6 */
+  -1,				/* %fp7 */
+  14 * 4,			/* %fpcr */
+  15 * 4,			/* %fpsr */
+  16 * 4			/* %fpiaddr */
+};
+
+/* From <asm/ucontext.h>.  */
+static int m68k_linux_ucontext_reg_offset[M68K_NUM_REGS] =
+{
+  6 * 4,			/* %d0 */
+  7 * 4,			/* %d1 */
+  8 * 4,			/* %d2 */
+  9 * 4,			/* %d3 */
+  10 * 4,			/* %d4 */
+  11 * 4,			/* %d5 */
+  12 * 4,			/* %d6 */
+  13 * 4,			/* %d7 */
+  14 * 4,			/* %a0 */
+  15 * 4,			/* %a1 */
+  16 * 4,			/* %a2 */
+  17 * 4,			/* %a3 */
+  18 * 4,			/* %a4 */
+  19 * 4,			/* %a5 */
+  20 * 4,			/* %fp */
+  21 * 4,			/* %sp */
+  23 * 4,			/* %sr */
+  22 * 4,			/* %pc */
+  27 * 4,			/* %fp0 */
+  30 * 4,			/* %fp1 */
+  33 * 4,			/* %fp2 */
+  36 * 4,			/* %fp3 */
+  39 * 4,			/* %fp4 */
+  42 * 4,			/* %fp5 */
+  45 * 4,			/* %fp6 */
+  48 * 4,			/* %fp7 */
+  24 * 4,			/* %fpcr */
+  25 * 4,			/* %fpsr */
+  26 * 4			/* %fpiaddr */
+};
+
+
+/* Get info about saved registers in sigtramp.  */
+
+static struct m68k_sigtramp_info
+m68k_linux_get_sigtramp_info (struct frame_info *next_frame)
+{
+  CORE_ADDR sp;
+  char buf[4];
+  struct m68k_sigtramp_info info;
+
+  frame_unwind_register (next_frame, M68K_SP_REGNUM, buf);
+  sp = extract_unsigned_integer (buf, 4);
 
   /* Get sigcontext address, it is the third parameter on the stack.  */
-  if (get_next_frame (frame))
-    sigcontext_addr
-      = read_memory_unsigned_integer (get_frame_base (get_next_frame (frame))
-				      + FRAME_ARGS_SKIP
-				      + sigcontext_offs,
-				      ptrbytes);
-  else
-    sigcontext_addr
-      = read_memory_unsigned_integer (read_register (SP_REGNUM)
-				      + sigcontext_offs,
-				      ptrbytes);
+  info.sigcontext_addr = read_memory_unsigned_integer (sp + 8, 4);
 
-  /* Don't cause a memory_error when accessing sigcontext in case the
-     stack layout has changed or the stack is corrupt.  */
-  if (m68k_linux_pc_in_sigtramp (get_frame_pc (frame), 0) == 2)
-    target_read_memory (sigcontext_addr + UCONTEXT_PC_OFFSET, buf, ptrbytes);
+  if (m68k_linux_pc_in_sigtramp (frame_pc_unwind (next_frame), 0) == 2)
+    info.sc_reg_offset = m68k_linux_ucontext_reg_offset;
   else
-    target_read_memory (sigcontext_addr + SIGCONTEXT_PC_OFFSET, buf, ptrbytes);
-  return extract_unsigned_integer (buf, ptrbytes);
+    info.sc_reg_offset = m68k_linux_sigcontext_reg_offset;
+  return info;
 }
 
-/* Return the saved program counter for FRAME.  */
-
-static CORE_ADDR
-m68k_linux_frame_saved_pc (struct frame_info *frame)
-{
-  if (get_frame_type (frame) == SIGTRAMP_FRAME)
-    return m68k_linux_sigtramp_saved_pc (frame);
-
-  return read_memory_unsigned_integer (get_frame_base (frame) + 4, 4);
-}
-
-/* The following definitions are appropriate when using the ELF
-   format, where floating point values are returned in fp0, pointer
-   values in a0 and other values in d0.  */
-
-/* Extract from an array REGBUF containing the (raw) register state a
-   function return value of type TYPE, and copy that, in virtual
-   format, into VALBUF.  */
+/* Extract from an array REGBUF containing the (raw) register state, a
+   function return value of TYPE, and copy that, in virtual format,
+   into VALBUF.  */
 
 static void
-m68k_linux_extract_return_value (struct type *type, char *regbuf, char *valbuf)
+m68k_linux_extract_return_value (struct type *type, struct regcache *regcache,
+				 void *valbuf)
 {
+  int len = TYPE_LENGTH (type);
+  char buf[M68K_MAX_REGISTER_SIZE];
+
+  if (TYPE_CODE (type) == TYPE_CODE_STRUCT
+      && TYPE_NFIELDS (type) == 1)
+    {
+      m68k_linux_extract_return_value (TYPE_FIELD_TYPE (type, 0), regcache,
+				       valbuf);
+      return;
+    }
+
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
-      DEPRECATED_REGISTER_CONVERT_TO_VIRTUAL (FP0_REGNUM, type,
-					      regbuf + REGISTER_BYTE (FP0_REGNUM),
-					      valbuf);
+      regcache_raw_read (regcache, M68K_FP0_REGNUM, buf);
+      convert_typed_floating (buf, builtin_type_m68881_ext, valbuf, type);
     }
   else if (TYPE_CODE (type) == TYPE_CODE_PTR)
-    memcpy (valbuf, regbuf + REGISTER_BYTE (M68K_A0_REGNUM),
-	    TYPE_LENGTH (type));
+    regcache_raw_read (regcache, M68K_A0_REGNUM, valbuf);
   else
-    memcpy (valbuf,
-	    regbuf + (TYPE_LENGTH (type) >= 4 ? 0 : 4 - TYPE_LENGTH (type)),
-	    TYPE_LENGTH (type));
+    {
+      if (len <= 4)
+	{
+	  regcache_raw_read (regcache, M68K_D0_REGNUM, buf);
+	  memcpy (valbuf, buf + (4 - len), len);
+	}
+      else if (len <= 8)
+	{
+	  regcache_raw_read (regcache, M68K_D0_REGNUM, buf);
+	  memcpy (valbuf, buf + (8 - len), len - 4);
+	  regcache_raw_read (regcache, M68K_D1_REGNUM,
+			     (char *) valbuf + (len - 4));
+	}
+      else
+	internal_error (__FILE__, __LINE__,
+			"Cannot extract return value of %d bytes long.", len);
+    }
 }
 
-/* Write into appropriate registers a function return value of type
-   TYPE, given in virtual format.  */
+/* Write into the appropriate registers a function return value stored
+   in VALBUF of type TYPE, given in virtual format.  */
 
 static void
-m68k_linux_store_return_value (struct type *type, char *valbuf)
+m68k_linux_store_return_value (struct type *type, struct regcache *regcache,
+			       const void *valbuf)
 {
+  int len = TYPE_LENGTH (type);
+
+  if (TYPE_CODE (type) == TYPE_CODE_STRUCT
+      && TYPE_NFIELDS (type) == 1)
+    {
+      m68k_linux_store_return_value (TYPE_FIELD_TYPE (type, 0), regcache,
+				     valbuf);
+      return;
+    }
+
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
-      char raw_buffer[REGISTER_RAW_SIZE (FP0_REGNUM)];
-      DEPRECATED_REGISTER_CONVERT_TO_RAW (type, FP0_REGNUM, valbuf, raw_buffer);
-      deprecated_write_register_bytes (REGISTER_BYTE (FP0_REGNUM),
-				       raw_buffer, TYPE_LENGTH (type));
+      char buf[M68K_MAX_REGISTER_SIZE];
+      convert_typed_floating (valbuf, type, buf, builtin_type_m68881_ext);
+      regcache_raw_write (regcache, M68K_FP0_REGNUM, buf);
     }
+  else if (TYPE_CODE (type) == TYPE_CODE_PTR)
+    regcache_raw_write (regcache, M68K_A0_REGNUM, valbuf);
   else
     {
-      if (TYPE_CODE (type) == TYPE_CODE_PTR)
-	deprecated_write_register_bytes (REGISTER_BYTE (M68K_A0_REGNUM),
-					 valbuf, TYPE_LENGTH (type));
-      deprecated_write_register_bytes (0, valbuf, TYPE_LENGTH (type));
+      if (len <= 4)
+	regcache_raw_write_part (regcache, M68K_D0_REGNUM,
+				 4 - len, len, valbuf);
+      else if (len <= 8)
+	{
+	  regcache_raw_write_part (regcache, M68K_D1_REGNUM, 8 - len,
+				   len - 4, valbuf);
+	  regcache_raw_write (regcache, M68K_D0_REGNUM,
+			      (char *) valbuf + (len - 4));
+	}
+      else
+	internal_error (__FILE__, __LINE__,
+			"Cannot store return value of %d bytes long.", len);
     }
 }
 
@@ -189,9 +274,12 @@ m68k_linux_store_return_value (struct type *type, char *valbuf)
    as a CORE_ADDR.  */
 
 static CORE_ADDR
-m68k_linux_extract_struct_value_address (char *regbuf)
+m68k_linux_extract_struct_value_address (struct regcache *regcache)
 {
-  return *(CORE_ADDR *) (regbuf + REGISTER_BYTE (M68K_A0_REGNUM));
+  char buf[4];
+
+  regcache_cooked_read (regcache, M68K_A0_REGNUM, buf);
+  return extract_unsigned_integer (buf, 4);
 }
 
 static void
@@ -201,15 +289,13 @@ m68k_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   tdep->jb_pc = M68K_LINUX_JB_PC;
   tdep->jb_elt_size = M68K_LINUX_JB_ELEMENT_SIZE;
+  tdep->get_sigtramp_info = m68k_linux_get_sigtramp_info;
+  tdep->struct_return = reg_struct_return;
 
-  set_gdbarch_deprecated_frame_saved_pc (gdbarch,
-					 m68k_linux_frame_saved_pc);
-  set_gdbarch_deprecated_extract_return_value (gdbarch,
-					       m68k_linux_extract_return_value);
-  set_gdbarch_deprecated_store_return_value (gdbarch,
-					     m68k_linux_store_return_value);
-  set_gdbarch_deprecated_extract_struct_value_address (gdbarch,
-						       m68k_linux_extract_struct_value_address);
+  set_gdbarch_extract_return_value (gdbarch, m68k_linux_extract_return_value);
+  set_gdbarch_store_return_value (gdbarch, m68k_linux_store_return_value);
+  set_gdbarch_extract_struct_value_address (gdbarch,
+					    m68k_linux_extract_struct_value_address);
 
   set_gdbarch_pc_in_sigtramp (gdbarch, m68k_linux_pc_in_sigtramp);
 

@@ -43,13 +43,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
    contents (0 for non-archive elements).  For archive entries this is the
    first octet in the file, NOT the beginning of the archive header.  */
 
-static size_t real_read PARAMS ((PTR where, size_t a, size_t b, FILE *file));
 static size_t
-real_read (where, a, b, file)
-     PTR where;
-     size_t a;
-     size_t b;
-     FILE *file;
+real_read (void *where, size_t a, size_t b, FILE *file)
 {
   /* FIXME - this looks like an optimization, but it's really to cover
      up for a feature of some OSs (not solaris - sigh) that
@@ -76,10 +71,7 @@ real_read (where, a, b, file)
 /* Return value is amount read.  */
 
 bfd_size_type
-bfd_bread (ptr, size, abfd)
-     PTR ptr;
-     bfd_size_type size;
-     bfd *abfd;
+bfd_bread (void *ptr, bfd_size_type size, bfd *abfd)
 {
   size_t nread;
 
@@ -88,7 +80,7 @@ bfd_bread (ptr, size, abfd)
       struct bfd_in_memory *bim;
       bfd_size_type get;
 
-      bim = (struct bfd_in_memory *) abfd->iostream;
+      bim = abfd->iostream;
       get = size;
       if (abfd->where + get > bim->size)
 	{
@@ -126,16 +118,13 @@ bfd_bread (ptr, size, abfd)
 }
 
 bfd_size_type
-bfd_bwrite (ptr, size, abfd)
-     const PTR ptr;
-     bfd_size_type size;
-     bfd *abfd;
+bfd_bwrite (const void *ptr, bfd_size_type size, bfd *abfd)
 {
   size_t nwrote;
 
   if ((abfd->flags & BFD_IN_MEMORY) != 0)
     {
-      struct bfd_in_memory *bim = (struct bfd_in_memory *) (abfd->iostream);
+      struct bfd_in_memory *bim = abfd->iostream;
       size = (size_t) size;
       if (abfd->where + size > bim->size)
 	{
@@ -147,7 +136,7 @@ bfd_bwrite (ptr, size, abfd)
 	  newsize = (bim->size + 127) & ~(bfd_size_type) 127;
 	  if (newsize > oldsize)
 	    {
-	      bim->buffer = (bfd_byte *) bfd_realloc (bim->buffer, newsize);
+	      bim->buffer = bfd_realloc (bim->buffer, newsize);
 	      if (bim->buffer == 0)
 		{
 		  bim->size = 0;
@@ -174,8 +163,7 @@ bfd_bwrite (ptr, size, abfd)
 }
 
 bfd_vma
-bfd_tell (abfd)
-     bfd *abfd;
+bfd_tell (bfd *abfd)
 {
   file_ptr ptr;
 
@@ -191,8 +179,7 @@ bfd_tell (abfd)
 }
 
 int
-bfd_flush (abfd)
-     bfd *abfd;
+bfd_flush (bfd *abfd)
 {
   if ((abfd->flags & BFD_IN_MEMORY) != 0)
     return 0;
@@ -202,9 +189,7 @@ bfd_flush (abfd)
 /* Returns 0 for success, negative value for failure (in which case
    bfd_get_error can retrieve the error code).  */
 int
-bfd_stat (abfd, statbuf)
-     bfd *abfd;
-     struct stat *statbuf;
+bfd_stat (bfd *abfd, struct stat *statbuf)
 {
   FILE *f;
   int result;
@@ -228,10 +213,7 @@ bfd_stat (abfd, statbuf)
    can retrieve the error code).  */
 
 int
-bfd_seek (abfd, position, direction)
-     bfd *abfd;
-     file_ptr position;
-     int direction;
+bfd_seek (bfd *abfd, file_ptr position, int direction)
 {
   int result;
   FILE *f;
@@ -249,7 +231,7 @@ bfd_seek (abfd, position, direction)
     {
       struct bfd_in_memory *bim;
 
-      bim = (struct bfd_in_memory *) abfd->iostream;
+      bim = abfd->iostream;
 
       if (direction == SEEK_SET)
 	abfd->where = position;
@@ -268,7 +250,7 @@ bfd_seek (abfd, position, direction)
 	      newsize = (bim->size + 127) & ~(bfd_size_type) 127;
 	      if (newsize > oldsize)
 	        {
-		  bim->buffer = (bfd_byte *) bfd_realloc (bim->buffer, newsize);
+		  bim->buffer = bfd_realloc (bim->buffer, newsize);
 		  if (bim->buffer == 0)
 		    {
 		      bim->size = 0;
@@ -359,7 +341,7 @@ FUNCTION
 	bfd_get_mtime
 
 SYNOPSIS
-	long bfd_get_mtime(bfd *abfd);
+	long bfd_get_mtime (bfd *abfd);
 
 DESCRIPTION
 	Return the file modification time (as read from the file system, or
@@ -368,8 +350,7 @@ DESCRIPTION
 */
 
 long
-bfd_get_mtime (abfd)
-     bfd *abfd;
+bfd_get_mtime (bfd *abfd)
 {
   FILE *fp;
   struct stat buf;
@@ -390,7 +371,7 @@ FUNCTION
 	bfd_get_size
 
 SYNOPSIS
-	long bfd_get_size(bfd *abfd);
+	long bfd_get_size (bfd *abfd);
 
 DESCRIPTION
 	Return the file size (as read from file system) for the file
@@ -419,8 +400,7 @@ DESCRIPTION
 */
 
 long
-bfd_get_size (abfd)
-     bfd *abfd;
+bfd_get_size (bfd *abfd)
 {
   FILE *fp;
   struct stat buf;

@@ -771,7 +771,7 @@ h8300_extract_return_value (struct type *type, struct regcache *regcache,
 			    void *valbuf)
 {
   int len = TYPE_LENGTH (type);
-  ULONGEST c;
+  ULONGEST c, addr;
 
   switch (len)
     {
@@ -786,9 +786,17 @@ h8300_extract_return_value (struct type *type, struct regcache *regcache,
 	regcache_cooked_read_unsigned (regcache, E_RET1_REGNUM, &c);
 	store_unsigned_integer ((void*)((char *)valbuf + 2), 2, c);
 	break;
-      case 8:		/* long long, double and long double are all defined
-			   as 4 byte types so far so this shouldn't happen. */
-	error ("I don't know how a 8 byte value is returned.");
+      case 8:	/* long long is now 8 bytes.  */
+	if (TYPE_CODE (type) == TYPE_CODE_INT)
+	  {
+	    regcache_cooked_read_unsigned (regcache, E_RET0_REGNUM, &addr);
+	    c = read_memory_unsigned_integer ((CORE_ADDR) addr, len);
+	    store_unsigned_integer (valbuf, len, c);
+	  }
+	else
+	  {
+	    error ("I don't know how this 8 byte value is returned.");
+	  }
 	break;
     }
 }
@@ -798,7 +806,7 @@ h8300h_extract_return_value (struct type *type, struct regcache *regcache,
 			    void *valbuf)
 {
   int len = TYPE_LENGTH (type);
-  ULONGEST c;
+  ULONGEST c, addr;
 
   switch (len)
     {
@@ -808,9 +816,17 @@ h8300h_extract_return_value (struct type *type, struct regcache *regcache,
 	regcache_cooked_read_unsigned (regcache, E_RET0_REGNUM, &c);
 	store_unsigned_integer (valbuf, len, c);
 	break;
-      case 8:		/* long long, double and long double are all defined
-			   as 4 byte types so far so this shouldn't happen. */
-	error ("I don't know how a 8 byte value is returned.");
+      case 8:	/* long long is now 8 bytes.  */
+	if (TYPE_CODE (type) == TYPE_CODE_INT)
+	  {
+	    regcache_cooked_read_unsigned (regcache, E_RET0_REGNUM, &addr);
+	    c = read_memory_unsigned_integer ((CORE_ADDR) addr, len);
+	    store_unsigned_integer (valbuf, len, c);
+	  }
+	else
+	  {
+	    error ("I don't know how this 8 byte value is returned.");
+	  }
 	break;
     }
 }
@@ -830,19 +846,19 @@ h8300_store_return_value (struct type *type, struct regcache *regcache,
   switch (len)
     {
       case 1:
-      case 2:
+    case 2:	/* short... */
 	val = extract_unsigned_integer (valbuf, len);
 	regcache_cooked_write_unsigned (regcache, E_RET0_REGNUM, val);
 	break;
-      case 4:			/* long, float */
+      case 4:	/* long, float */
 	val = extract_unsigned_integer (valbuf, len);
 	regcache_cooked_write_unsigned (regcache, E_RET0_REGNUM,
 					(val >> 16) &0xffff);
 	regcache_cooked_write_unsigned (regcache, E_RET1_REGNUM, val & 0xffff);
 	break;
-      case 8:		/* long long, double and long double are all defined
-			     as 4 byte types so far so this shouldn't happen. */
-	error ("I don't know how to return a 8 byte value.");
+      case 8:	/* long long, double and long double are all defined
+		   as 4 byte types so far so this shouldn't happen.  */
+	error ("I don't know how to return an 8 byte value.");
 	break;
     }
 }
@@ -858,13 +874,13 @@ h8300h_store_return_value (struct type *type, struct regcache *regcache,
     {
       case 1:
       case 2:
-      case 4:			/* long, float */
+      case 4:	/* long, float */
 	val = extract_unsigned_integer (valbuf, len);
 	regcache_cooked_write_unsigned (regcache, E_RET0_REGNUM, val);
 	break;
-      case 8:		/* long long, double and long double are all defined
-			     as 4 byte types so far so this shouldn't happen. */
-	error ("I don't know how to return a 8 byte value.");
+      case 8:	/* long long, double and long double are all defined
+		   as 4 byte types so far so this shouldn't happen.  */
+	error ("I don't know how to return an 8 byte value.");
 	break;
     }
 }
@@ -1310,12 +1326,15 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_int_bit (gdbarch, 2 * TARGET_CHAR_BIT);
   set_gdbarch_long_bit (gdbarch, 4 * TARGET_CHAR_BIT);
-  set_gdbarch_long_long_bit (gdbarch, 4 * TARGET_CHAR_BIT);
+  set_gdbarch_long_long_bit (gdbarch, 8 * TARGET_CHAR_BIT);
   set_gdbarch_double_bit (gdbarch, 4 * TARGET_CHAR_BIT);
   set_gdbarch_long_double_bit (gdbarch, 4 * TARGET_CHAR_BIT);
 
   /* set_gdbarch_stack_align (gdbarch, SOME_stack_align); */
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
+
+  /* Char is unsigned.  */
+  set_gdbarch_char_signed (gdbarch, 0);
 
   return gdbarch;
 }

@@ -27,6 +27,7 @@
 #include "coff/internal.h"
 #include "libcoff.h"
 #include "opintl.h"
+#include "safe-ctype.h"
 
 /* FIXME: This shouldn't be done here.  */
 #include "elf-bfd.h"
@@ -1152,51 +1153,48 @@ parse_arm_disassembler_option (option)
       option += 10;
 
       for (i = NUM_ARM_REGNAMES; i--;)
-	if (streq (option, regnames[i].name))
+	if (strneq (option, regnames[i].name, strlen (regnames[i].name)))
 	  {
 	    regname_selected = i;
 	    break;
 	  }
 
       if (i < 0)
+	/* XXX - should break 'option' at following delimiter.  */
 	fprintf (stderr, _("Unrecognised register name set: %s\n"), option);
     }
-  else if (streq (option, "force-thumb"))
+  else if (strneq (option, "force-thumb", 11))
     force_thumb = 1;
-  else if (streq (option, "no-force-thumb"))
+  else if (strneq (option, "no-force-thumb", 14))
     force_thumb = 0;
   else
+    /* XXX - should break 'option' at following delimiter.  */
     fprintf (stderr, _("Unrecognised disassembler option: %s\n"), option);
 
   return;
 }
 
-/* Parse the string of disassembler options, spliting it at whitespaces.  */
+/* Parse the string of disassembler options, spliting it at whitespaces
+   or commas.  (Whitespace separators supported for backwards compatibility).  */
 
 static void
 parse_disassembler_options (options)
      char * options;
 {
-  char * space;
-
   if (options == NULL)
     return;
 
-  do
+  while (*options)
     {
-      space = strchr (options, ' ');
+      parse_arm_disassembler_option (options);
 
-      if (space)
-	{
-	  * space = '\0';
-	  parse_arm_disassembler_option (options);
-	  * space = ' ';
-	  options = space + 1;
-	}
-      else
-	parse_arm_disassembler_option (options);
+      /* Skip forward to next seperator.  */
+      while ((*options) && (! ISSPACE (*options)) && (*options != ','))
+	++ options;
+      /* Skip forward past seperators.  */
+      while (ISSPACE (*options) || (*options == ','))
+	++ options;      
     }
-  while (space);
 }
 
 /* NOTE: There are no checks in these routines that

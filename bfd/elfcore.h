@@ -19,23 +19,19 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
 char*
-elf_core_file_failing_command (abfd)
-     bfd *abfd;
+elf_core_file_failing_command (bfd *abfd)
 {
   return elf_tdata (abfd)->core_command;
 }
 
 int
-elf_core_file_failing_signal (abfd)
-     bfd *abfd;
+elf_core_file_failing_signal (bfd *abfd)
 {
   return elf_tdata (abfd)->core_signal;
 }
 
 bfd_boolean
-elf_core_file_matches_executable_p (core_bfd, exec_bfd)
-     bfd *core_bfd;
-     bfd *exec_bfd;
+elf_core_file_matches_executable_p (bfd *core_bfd, bfd *exec_bfd)
 {
   char* corename;
 
@@ -55,7 +51,7 @@ elf_core_file_matches_executable_p (core_bfd, exec_bfd)
 
       execname = execname ? execname + 1 : exec_bfd->filename;
 
-      if (strcmp(execname, corename) != 0)
+      if (strcmp (execname, corename) != 0)
 	return FALSE;
     }
 
@@ -74,8 +70,7 @@ elf_core_file_matches_executable_p (core_bfd, exec_bfd)
     floating point registers (.reg2).  */
 
 const bfd_target *
-elf_core_file_p (abfd)
-     bfd *abfd;
+elf_core_file_p (bfd *abfd)
 {
   Elf_External_Ehdr x_ehdr;	/* Elf file header, external form.  */
   Elf_Internal_Ehdr *i_ehdrp;	/* Elf file header, internal form.  */
@@ -88,8 +83,7 @@ elf_core_file_p (abfd)
   preserve.marker = NULL;
 
   /* Read in the ELF header in external format.  */
-  if (bfd_bread ((PTR) &x_ehdr, (bfd_size_type) sizeof (x_ehdr), abfd)
-      != sizeof (x_ehdr))
+  if (bfd_bread (&x_ehdr, sizeof (x_ehdr), abfd) != sizeof (x_ehdr))
     {
       if (bfd_get_error () != bfd_error_system_call)
 	goto wrong;
@@ -122,15 +116,13 @@ elf_core_file_p (abfd)
       goto wrong;
     }
 
-  /* Give abfd an elf_obj_tdata.  */
-  amt = sizeof (struct elf_obj_tdata);
-  preserve.marker = bfd_zalloc (abfd, amt);
-  if (preserve.marker == NULL)
-    goto fail;
   if (!bfd_preserve_save (abfd, &preserve))
     goto fail;
 
-  elf_tdata (abfd) = preserve.marker;
+  /* Give abfd an elf_obj_tdata.  */
+  if (! (*abfd->xvec->_bfd_set_format[bfd_core]) (abfd))
+    goto fail;
+  preserve.marker = elf_tdata (abfd);
 
   /* Swap in the rest of the header, now that we have the byte order.  */
   i_ehdrp = elf_elfheader (abfd);
@@ -195,7 +187,7 @@ elf_core_file_p (abfd)
 
   /* Allocate space for the program headers.  */
   amt = sizeof (*i_phdrp) * i_ehdrp->e_phnum;
-  i_phdrp = (Elf_Internal_Phdr *) bfd_alloc (abfd, amt);
+  i_phdrp = bfd_alloc (abfd, amt);
   if (!i_phdrp)
     goto fail;
 
@@ -206,8 +198,7 @@ elf_core_file_p (abfd)
     {
       Elf_External_Phdr x_phdr;
 
-      if (bfd_bread ((PTR) &x_phdr, (bfd_size_type) sizeof (x_phdr), abfd)
-	  != sizeof (x_phdr))
+      if (bfd_bread (&x_phdr, sizeof (x_phdr), abfd) != sizeof (x_phdr))
 	goto fail;
 
       elf_swap_phdr_in (abfd, &x_phdr, i_phdrp + phindex);

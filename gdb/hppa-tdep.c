@@ -678,6 +678,88 @@ hppa_breakpoint_from_pc (CORE_ADDR *pc, int *len)
   return breakpoint;
 }
 
+/* Return the name of a register.  */
+
+const char *
+hppa_register_name (int i)
+{
+  static char *names[] = {
+    "flags",  "r1",      "rp",     "r3",
+    "r4",     "r5",      "r6",     "r7",
+    "r8",     "r9",      "r10",    "r11",
+    "r12",    "r13",     "r14",    "r15",
+    "r16",    "r17",     "r18",    "r19",
+    "r20",    "r21",     "r22",    "r23",
+    "r24",    "r25",     "r26",    "dp",
+    "ret0",   "ret1",    "sp",     "r31",
+    "sar",    "pcoqh",   "pcsqh",  "pcoqt",
+    "pcsqt",  "eiem",    "iir",    "isr",
+    "ior",    "ipsw",    "goto",   "sr4",
+    "sr0",    "sr1",     "sr2",    "sr3",
+    "sr5",    "sr6",     "sr7",    "cr0",
+    "cr8",    "cr9",     "ccr",    "cr12",
+    "cr13",   "cr24",    "cr25",   "cr26",
+    "mpsfu_high","mpsfu_low","mpsfu_ovflo","pad",
+    "fpsr",    "fpe1",   "fpe2",   "fpe3",
+    "fpe4",   "fpe5",    "fpe6",   "fpe7",
+    "fr4",     "fr4R",   "fr5",    "fr5R",
+    "fr6",    "fr6R",    "fr7",    "fr7R",
+    "fr8",     "fr8R",   "fr9",    "fr9R",
+    "fr10",   "fr10R",   "fr11",   "fr11R",
+    "fr12",    "fr12R",  "fr13",   "fr13R",
+    "fr14",   "fr14R",   "fr15",   "fr15R",
+    "fr16",    "fr16R",  "fr17",   "fr17R",
+    "fr18",   "fr18R",   "fr19",   "fr19R",
+    "fr20",    "fr20R",  "fr21",   "fr21R",
+    "fr22",   "fr22R",   "fr23",   "fr23R",
+    "fr24",    "fr24R",  "fr25",   "fr25R",
+    "fr26",   "fr26R",   "fr27",   "fr27R",
+    "fr28",    "fr28R",  "fr29",   "fr29R",
+    "fr30",   "fr30R",   "fr31",   "fr31R"
+  };
+  if (i < 0 || i >= (sizeof (names) / sizeof (*names)))
+    return NULL;
+  else
+    return names[i];
+}
+
+const char *
+hppa64_register_name (int i)
+{
+  static char *names[] = {
+    "flags",  "r1",      "rp",     "r3",
+    "r4",     "r5",      "r6",     "r7",
+    "r8",     "r9",      "r10",    "r11",
+    "r12",    "r13",     "r14",    "r15",
+    "r16",    "r17",     "r18",    "r19",
+    "r20",    "r21",     "r22",    "r23",
+    "r24",    "r25",     "r26",    "dp",
+    "ret0",   "ret1",    "sp",     "r31",
+    "sar",    "pcoqh",   "pcsqh",  "pcoqt",
+    "pcsqt",  "eiem",    "iir",    "isr",
+    "ior",    "ipsw",    "goto",   "sr4",
+    "sr0",    "sr1",     "sr2",    "sr3",
+    "sr5",    "sr6",     "sr7",    "cr0",
+    "cr8",    "cr9",     "ccr",    "cr12",
+    "cr13",   "cr24",    "cr25",   "cr26",
+    "mpsfu_high","mpsfu_low","mpsfu_ovflo","pad",
+    "fpsr",    "fpe1",   "fpe2",   "fpe3",
+    "fr4",    "fr5",     "fr6",    "fr7",
+    "fr8",     "fr9",    "fr10",   "fr11",
+    "fr12",   "fr13",    "fr14",   "fr15",
+    "fr16",    "fr17",   "fr18",   "fr19",
+    "fr20",   "fr21",    "fr22",   "fr23",
+    "fr24",    "fr25",   "fr26",   "fr27",
+    "fr28",  "fr29",    "fr30",   "fr31"
+  };
+  if (i < 0 || i >= (sizeof (names) / sizeof (*names)))
+    return NULL;
+  else
+    return names[i];
+}
+
+
+
 /* Return the adjustment necessary to make for addresses on the stack
    as presented by hpread.c.
 
@@ -4940,6 +5022,7 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_deprecated_max_register_raw_size (gdbarch, 4);
   set_gdbarch_deprecated_max_register_virtual_size (gdbarch, 8);
   set_gdbarch_deprecated_register_virtual_type (gdbarch, hppa_register_virtual_type);
+  set_gdbarch_register_name (gdbarch, hppa_register_name);
   set_gdbarch_deprecated_store_struct_return (gdbarch, hppa_store_struct_return);
   set_gdbarch_deprecated_extract_return_value (gdbarch,
                                                hppa_extract_return_value);

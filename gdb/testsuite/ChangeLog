@@ -1,3 +1,170 @@
+2003-08-02  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/annota3.exp: New file.
+	* gdb.base/annota3.c: New file.
+	* gdb.c++/annota3.exp: New file.
+	* gdb.c++/annota3.cc: New file.
+
+2003-07-29  Michael Chastain  <mec@shout.net>
+
+	* gdb.threads/tls.c (spin): Check errno only if sem_wait
+	actually failed.
+	(do_pass): Likewise.
+	* gdb.threads/tls.exp: Always initialize no_of_threads.
+
+2003-07-27  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.threads/print-threads.exp (test_all_threads): Loosen KFAIL
+	pattern.
+	* gdb.threads/tls-shared.exp: Don't use gdb_suppress_entire_file.
+	* gdb.threads/tls.exp: Recognize one case of the host library not
+	supporting TLS.
+
+2003-07-27  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.base/fileio.exp: Use SH when running commands using
+	remote_exec.
+
+2003-07-24  Daniel Jacobowitz  <drow@mvista.com>
+
+	From Kei Sakamoto <sakamoto.kei@renesas.com>:
+	* gdb.base/relocate.c (dummy): New padding array.
+
+2003-07-23  Michael Snyder  <msnyder@redhat.com>
+
+	* gdb.base/return2.exp: Don't test long-long return.
+
+	* gdb.disasm/t01_mov.s: New file, h8300sx disassembly tests.
+	* gdb.disasm/t01_mov.exp: Ditto.
+	* gdb.disasm/t02_mova.s: Ditto.
+	* gdb.disasm/t02_mova.exp: Ditto.
+	* gdb.disasm/t03_add.s: Ditto.
+	* gdb.disasm/t03_add.exp: Ditto.
+	* gdb.disasm/t04_sub.s: Ditto.
+	* gdb.disasm/t04_sub.exp: Ditto.
+	* gdb.disasm/t05_cmp.s: Ditto.
+	* gdb.disasm/t05_cmp.exp: Ditto.
+	* gdb.disasm/t06_ari2.s: Ditto.
+	* gdb.disasm/t06_ari2.exp: Ditto.
+	* gdb.disasm/t07_ari3.s: Ditto.
+	* gdb.disasm/t07_ari3.exp: Ditto.
+	* gdb.disasm/t08_or.s: Ditto.
+	* gdb.disasm/t08_or.exp: Ditto.
+	* gdb.disasm/t09_xor.s: Ditto.
+	* gdb.disasm/t09_xor.exp: Ditto.
+	* gdb.disasm/t10_and.s: Ditto.
+	* gdb.disasm/t10_and.exp: Ditto.
+	* gdb.disasm/t11_logs.s: Ditto.
+	* gdb.disasm/t11_logs.exp: Ditto.
+	* gdb.disasm/t12_bit.s: Ditto.
+	* gdb.disasm/t12_bit.exp: Ditto.
+	* gdb.disasm/t13_otr.s: Ditto.
+	* gdb.disasm/t13_otr.exp: Ditto.
+
+2003-07-22  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.threads/tls.exp :Add kfail for 'info address' case.
+
+2003-07-22  Elena Zannoni  <ezannoni@redhat.com>
+
+        * gdb.threads/tls.c : New file.
+        * gdb.threads/tls.exp : New file.
+        * gdb.threads/tls-main.c : New file.
+        * gdb.threads/tls-shared.c : New file.
+        * gdb.threads/tls-shared.exp : New file.
+
+2003-07-22  Andreas Schwab  <schwab@suse.de>
+
+	* gdb.asm/powerpc.inc (gdbasm_startup): Force alignment.
+
+2003-07-20  Andreas Schwab  <schwab@suse.de>
+
+	* gdb.base/selftest.exp (do_steps_and_nexts): Add more patterns
+	due to insn reordering.
+
+2003-07-15  Andrew Cagney  <cagney@redhat.com>
+
+	* gdb.asm/asm-source.exp: Do not allow "start" in the backtrace.
+
+2003-07-15  Michael Chastain  <mec@shout.net>
+
+	* gdb.base/gdb1250.exp: New file.
+	* gdb.base/gdb1250.c: New file.
+
+2003-07-09  Michal Ludvig  <mludvig@suse.cz>
+
+	* gdb.c++/templates.exp (test_ptype_of_templates): Recognize
+	expansion of size_t to 'unsigned long', not only to 'unsigned'.
+
+2003-07-09  Elena Zannoni  <ezannoni@redhat.com>
+
+        * gdb.threads/tls.c: New file.
+        * gdb.threads/tls.exp: New file.
+        * gdb.threads/tls-main.c: New file.
+        * gdb.threads/tls-shared.c: New file.
+        * gdb.threads/tls-shared.exp: New file.
+
+2003-07-09  Elena Zannoni  <ezannoni@redhat.com>
+
+	* gdb.base/annota1.exp: Make sure that we properly escape the
+	full path of the source file. Xfail more permissive patterns,
+	due to a compiler debug info problem. 
+
+2003-07-07  Andreas Schwab  <schwab@suse.de>
+
+	* gdb.asm/m68k.inc: New file.
+	* gdb.asm/asm-source.exp: Use it for m68k-*-*.
+
+	* gdb.objc/basicclass.exp ("Call an Objective-C method with no
+	arguments"): Also match negative number.
+
+	* gdb.base/float.exp ("info float"): Add test for m68k-*-*.
+
+2003-07-03  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/store.c (charest): New typedef.
+	(add_char): Rename to add_charest, update.
+	(wack_char): Rename to wack_charest, update types.  Return l + r
+	to keep r live across the call.
+	(wack_short, wack_int, wack_long, wack_longest, wack_float)
+	(wack_double, wack_doublest): Return l + r to keep r live across
+	the call.
+	* gdb.base/store.exp: Accomodate store.c changes.
+
+2003-06-30  David Carlton  <carlton@kealia.com>
+
+	* gdb.c++/maint.exp (test_invalid_name): New.
+	(test_first_component): Add tests for invalid names.
+
+2003-06-29  Michael Chastain  <mec@shout.net>
+
+	* gdb.c++/inherit.exp (test_print_svi_classes): Accept gdb
+	output of '<VTT for class>' for virtual base classes.
+
+2003-06-29  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/completion.exp: Tab-complete "complet" instead of
+	"compl".
+	* gdb.base/complex.exp, gdb.base/complex.c: New files.
+
+2003-06-29  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/constvars.exp: Remove most xfails for GCC 3.x.
+	* gdb.base/volatile.exp: Likewise.
+
+2003-06-29  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.threads/print-threads.exp (test_all_threads): Add kfail for
+	gdb/1265.
+
+2003-06-28  Michael Chastain  <mec@shout.net>
+	    Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.base/selftest.exp (do_steps_and_nexts): Increase maximum
+	initial line count of 'captured_main' from 26 to 32.
+	(test_with_self): Allow xmalloc call to be interleaved with the
+	preceding two lines.
+
 2003-06-27  David Carlton  <carlton@kealia.com>
 
 	* carlton_runtest (FASTTESTS): Add gdb.c++/pr-1210.exp.

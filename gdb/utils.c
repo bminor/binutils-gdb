@@ -578,7 +578,7 @@ vwarning (const char *string, va_list args)
       wrap_here ("");		/* Force out any buffered output */
       gdb_flush (gdb_stdout);
       if (warning_pre_print)
-	fprintf_unfiltered (gdb_stderr, warning_pre_print);
+	fputs_unfiltered (warning_pre_print, gdb_stderr);
       vfprintf_unfiltered (gdb_stderr, string, args);
       fprintf_unfiltered (gdb_stderr, "\n");
       va_end (args);
@@ -644,7 +644,7 @@ error_stream (struct ui_file *stream)
   gdb_flush (gdb_stdout);
   annotate_error_begin ();
   if (error_pre_print)
-    fprintf_filtered (gdb_stderr, error_pre_print);
+    fputs_filtered (error_pre_print, gdb_stderr);
   ui_file_put (stream, do_write, gdb_stderr);
   fprintf_filtered (gdb_stderr, "\n");
 
@@ -724,7 +724,7 @@ internal_vproblem (struct internal_problem *problem,
      so that the user knows that they are living on the edge.  */
   {
     char *msg;
-    xasprintf (&msg, fmt, ap);
+    xvasprintf (&msg, fmt, ap);
     xasprintf (&reason, "\
 %s:%d: %s: %s\n\
 A problem internal to GDB has been detected,\n\
@@ -922,7 +922,7 @@ quit (void)
 
   /* Don't use *_filtered; we don't want to prompt the user to continue.  */
   if (quit_pre_print)
-    fprintf_unfiltered (gdb_stderr, quit_pre_print);
+    fputs_unfiltered (quit_pre_print, gdb_stderr);
 
 #ifdef __MSDOS__
   /* No steenking SIGINT will ever be coming our way when the

@@ -45,6 +45,7 @@
 #include "tuiStack.h"
 #include "tuiWin.h"
 #include "tuiSourceWin.h"
+#include "tuiDataWin.h"
 #include "readline/readline.h"
 #include "target.h"
 #include "frame.h"
@@ -210,6 +211,27 @@ tui_rl_delete_other_windows (int notused1, int notused2)
 }
 
 /* TUI readline command.
+   Switch the active window to give the focus to a next window.  */
+static int
+tui_rl_other_window (int count, int key)
+{
+  TuiWinInfoPtr winInfo;
+
+  if (!tui_active)
+    tui_rl_switch_mode (0/*notused*/, 0/*notused*/);
+
+  winInfo = tuiNextWin (tuiWinWithFocus ());
+  if (winInfo)
+    {
+      tuiSetWinFocusTo (winInfo);
+      if (dataWin && dataWin->generic.isVisible)
+        tuiRefreshDataWin ();
+      keypad (cmdWin->generic.handle, (winInfo != cmdWin));
+    }
+  return 0;
+}
+
+/* TUI readline command.
    Execute the gdb command bound to the specified key.  */
 static int
 tui_rl_command_key (int count, int key)
@@ -248,6 +270,9 @@ tui_rl_command_mode (int count, int key)
 static int
 tui_rl_next_keymap (int notused1, int notused2)
 {
+  if (!tui_active)
+    tui_rl_switch_mode (0/*notused*/, 0/*notused*/);
+
   tui_set_key_mode (tui_current_key_mode == tui_command_mode
                     ? tui_single_key_mode : tui_command_mode);
   return 0;
@@ -326,6 +351,8 @@ tui_initialize_readline ()
   rl_bind_key_in_map ('1', tui_rl_delete_other_windows, tui_ctlx_keymap);
   rl_bind_key_in_map ('2', tui_rl_change_windows, emacs_ctlx_keymap);
   rl_bind_key_in_map ('2', tui_rl_change_windows, tui_ctlx_keymap);
+  rl_bind_key_in_map ('o', tui_rl_other_window, emacs_ctlx_keymap);
+  rl_bind_key_in_map ('o', tui_rl_other_window, tui_ctlx_keymap);
   rl_bind_key_in_map ('q', tui_rl_next_keymap, tui_keymap);
   rl_bind_key_in_map ('s', tui_rl_next_keymap, emacs_ctlx_keymap);
   rl_bind_key_in_map ('s', tui_rl_next_keymap, tui_ctlx_keymap);
@@ -390,7 +417,7 @@ tui_enable (void)
 
   /* Restore TUI keymap.  */
   tui_set_key_mode (tui_current_key_mode);
-  refresh ();
+  tuiRefreshAll ();
 
   /* Update gdb's knowledge of its terminal.  */
   target_terminal_save_ours ();

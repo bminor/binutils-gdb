@@ -206,6 +206,7 @@ struct ui_out_impl default_ui_out_impl =
   default_message,
   default_wrap_hint,
   default_flush,
+  NULL,
   0, /* Does not need MI hacks.  */
 };
 
@@ -254,6 +255,7 @@ static void uo_message (struct ui_out *uiout, int verbosity,
 			const char *format, va_list args);
 static void uo_wrap_hint (struct ui_out *uiout, char *identstring);
 static void uo_flush (struct ui_out *uiout);
+static int uo_redirect (struct ui_out *uiout, struct ui_file *outstream);
 
 /* Prototypes for local functions */
 
@@ -638,6 +640,12 @@ ui_out_flush (struct ui_out *uiout)
   uo_flush (uiout);
 }
 
+int
+ui_out_redirect (struct ui_out *uiout, struct ui_file *outstream)
+{
+  return uo_redirect (uiout, outstream);
+}
+
 /* set the flags specified by the mask given */
 int
 ui_out_set_flags (struct ui_out *uiout, int mask)
@@ -979,6 +987,15 @@ uo_flush (struct ui_out *uiout)
   if (!uiout->impl->flush)
     return;
   uiout->impl->flush (uiout);
+}
+
+int
+uo_redirect (struct ui_out *uiout, struct ui_file *outstream)
+{
+  if (!uiout->impl->redirect)
+    return -1;
+  uiout->impl->redirect (uiout, outstream);
+  return 0;
 }
 
 /* local functions */

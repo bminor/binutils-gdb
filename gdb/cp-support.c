@@ -33,6 +33,16 @@
 #include "frame.h"
 #include "symtab.h"
 #include "block.h"
+#include "complaints.h"
+
+/* Functions related to demangled name parsing.  */
+
+static const char *find_last_component (const char *name);
+
+static unsigned int cp_find_first_component_aux (const char *name,
+						 int permissive);
+
+static void demangled_name_complaint (const char *name);
 
 /* Functions/variables related to overload resolution.  */
 
@@ -209,21 +219,32 @@ method_name_from_physname (const char *physname)
    boundary of the first component: so, given 'A::foo' or 'A::B::foo'
    it returns the 1, and given 'foo', it returns 0.  */
 
-/* Well, that's what it should do when called externally, but to make
-   the recursion easier, it also stops if it reaches an unexpected ')'
-   or '>'.  */
+/* The character in NAME indexed by the return value is guaranteed to
+   always be either ':' or '\0'.  */
 
 /* NOTE: carlton/2003-03-13: This function is currently only intended
    for internal use: it's probably not entirely safe when called on
-   user-generated input, because some of the 'index += 2' lines might
-   go past the end of malformed input.  */
+   user-generated input, because some of the 'index += 2' lines in
+   cp_find_first_component_aux might go past the end of malformed
+   input.  */
+
+unsigned int
+cp_find_first_component (const char *name)
+{
+  return cp_find_first_component_aux (name, 0);
+}
+
+/* Helper function for cp_find_first_component.  Like that function,
+   it returns the length of the first component of NAME, but to make
+   the recursion easier, it also stops if it reaches an unexpected ')'
+   or '>' if the value of PERMISSIVE is nonzero.  */
 
 /* Let's optimize away calls to strlen("operator").  */
 
 #define LENGTH_OF_OPERATOR 8
 
-unsigned int
-cp_find_first_component (const char *name)
+static unsigned int
+cp_find_first_component_aux (const char *name, int permissive)
 {
   unsigned int index = 0;
   /* Operator names can show up in unexpected places.  Since these can
@@ -244,11 +265,15 @@ cp_find_first_component (const char *name)
 	     terminating the component or a '::' between two
 	     components.  (Hence the '+ 2'.)  */
 	  index += 1;
-	  for (index += cp_find_first_component (name + index);
+	  for (index += cp_find_first_component_aux (name + index, 1);
 	       name[index] != '>';
-	       index += cp_find_first_component (name + index))
+	       index += cp_find_first_component_aux (name + index, 1))
 	    {
-	      gdb_assert (name[index] == ':');
+	      if (name[index] != ':')
+		{
+		  demangled_name_complaint (name);
+		  return strlen (name);
+		}
 	      index += 2;
 	    }
 	  operator_possible = 1;
@@ -256,17 +281,28 @@ cp_find_first_component (const char *name)
 	case '(':
 	  /* Similar comment as to '<'.  */
 	  index += 1;
-	  for (index += cp_find_first_component (name + index);
+	  for (index += cp_find_first_component_aux (name + index, 1);
 	       name[index] != ')';
-	       index += cp_find_first_component (name + index))
+	       index += cp_find_first_component_aux (name + index, 1))
 	    {
-	      gdb_assert (name[index] == ':');
+	      if (name[index] != ':')
+		{
+		  demangled_name_complaint (name);
+		  return strlen (name);
+		}
 	      index += 2;
 	    }
 	  operator_possible = 1;
 	  break;
 	case '>':
 	case ')':
+	  if (permissive)
+	    return index;
+	  else
+	    {
+	      demangled_name_complaint (name);
+	      return strlen (name);
+	    }
 	case '\0':
 	case ':':
 	  return index;
@@ -323,6 +359,16 @@ cp_find_first_component (const char *name)
 	  break;
 	}
     }
+}
+
+/* Complain about a demangled name that we don't know how to parse.
+   NAME is the demangled name in question.  */
+
+static void
+demangled_name_complaint (const char *name)
+{
+  complaint (&symfile_complaints,
+	     "unexpected demangled name '%s'", name);
 }
 
 /* If NAME is the fully-qualified name of a C++

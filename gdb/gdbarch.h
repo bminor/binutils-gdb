@@ -589,11 +589,6 @@ extern void set_gdbarch_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, gdbarch_d
 #define DWARF2_REG_TO_REGNUM(dwarf2_regnr) (gdbarch_dwarf2_reg_to_regnum (current_gdbarch, dwarf2_regnr))
 #endif
 
-/* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (REGISTER_NAME)
-#define REGISTER_NAME(regnr) (legacy_register_name (regnr))
-#endif
-
 typedef const char * (gdbarch_register_name_ftype) (int regnr);
 extern const char * gdbarch_register_name (struct gdbarch *gdbarch, int regnr);
 extern void set_gdbarch_register_name (struct gdbarch *gdbarch, gdbarch_register_name_ftype *register_name);
@@ -709,6 +704,26 @@ extern void set_gdbarch_deprecated_register_byte (struct gdbarch *gdbarch, gdbar
    DEPRECATED_REGISTER_RAW_SIZE can be deleted.  See: maint print
    registers. */
 
+#if defined (REGISTER_RAW_SIZE)
+/* Legacy for systems yet to multi-arch REGISTER_RAW_SIZE */
+#if !defined (REGISTER_RAW_SIZE_P)
+#define REGISTER_RAW_SIZE_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (REGISTER_RAW_SIZE_P)
+#define REGISTER_RAW_SIZE_P() (0)
+#endif
+
+extern int gdbarch_deprecated_register_raw_size_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_RAW_SIZE_P)
+#error "Non multi-arch definition of REGISTER_RAW_SIZE"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (REGISTER_RAW_SIZE_P)
+#define REGISTER_RAW_SIZE_P() (gdbarch_deprecated_register_raw_size_p (current_gdbarch))
+#endif
+
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (REGISTER_RAW_SIZE)
 #define REGISTER_RAW_SIZE(reg_nr) (generic_register_size (reg_nr))
@@ -728,6 +743,26 @@ extern void set_gdbarch_deprecated_register_raw_size (struct gdbarch *gdbarch, g
    sizes agree with the value computed from REGISTER_TYPE,
    DEPRECATED_REGISTER_VIRTUAL_SIZE can be deleted.  See: maint print
    registers. */
+
+#if defined (REGISTER_VIRTUAL_SIZE)
+/* Legacy for systems yet to multi-arch REGISTER_VIRTUAL_SIZE */
+#if !defined (REGISTER_VIRTUAL_SIZE_P)
+#define REGISTER_VIRTUAL_SIZE_P() (1)
+#endif
+#endif
+
+/* Default predicate for non- multi-arch targets. */
+#if (!GDB_MULTI_ARCH) && !defined (REGISTER_VIRTUAL_SIZE_P)
+#define REGISTER_VIRTUAL_SIZE_P() (0)
+#endif
+
+extern int gdbarch_deprecated_register_virtual_size_p (struct gdbarch *gdbarch);
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (REGISTER_VIRTUAL_SIZE_P)
+#error "Non multi-arch definition of REGISTER_VIRTUAL_SIZE"
+#endif
+#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (REGISTER_VIRTUAL_SIZE_P)
+#define REGISTER_VIRTUAL_SIZE_P() (gdbarch_deprecated_register_virtual_size_p (current_gdbarch))
+#endif
 
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (REGISTER_VIRTUAL_SIZE)
@@ -2904,41 +2939,6 @@ typedef char * (gdbarch_construct_inferior_arguments_ftype) (struct gdbarch *gdb
 extern char * gdbarch_construct_inferior_arguments (struct gdbarch *gdbarch, int argc, char **argv);
 extern void set_gdbarch_construct_inferior_arguments (struct gdbarch *gdbarch, gdbarch_construct_inferior_arguments_ftype *construct_inferior_arguments);
 
-#if defined (DWARF2_BUILD_FRAME_INFO)
-/* Legacy for systems yet to multi-arch DWARF2_BUILD_FRAME_INFO */
-#if !defined (DWARF2_BUILD_FRAME_INFO_P)
-#define DWARF2_BUILD_FRAME_INFO_P() (1)
-#endif
-#endif
-
-/* Default predicate for non- multi-arch targets. */
-#if (!GDB_MULTI_ARCH) && !defined (DWARF2_BUILD_FRAME_INFO_P)
-#define DWARF2_BUILD_FRAME_INFO_P() (0)
-#endif
-
-extern int gdbarch_dwarf2_build_frame_info_p (struct gdbarch *gdbarch);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DWARF2_BUILD_FRAME_INFO_P)
-#error "Non multi-arch definition of DWARF2_BUILD_FRAME_INFO"
-#endif
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) || !defined (DWARF2_BUILD_FRAME_INFO_P)
-#define DWARF2_BUILD_FRAME_INFO_P() (gdbarch_dwarf2_build_frame_info_p (current_gdbarch))
-#endif
-
-/* Default (function) for non- multi-arch platforms. */
-#if (!GDB_MULTI_ARCH) && !defined (DWARF2_BUILD_FRAME_INFO)
-#define DWARF2_BUILD_FRAME_INFO(objfile) (internal_error (__FILE__, __LINE__, "DWARF2_BUILD_FRAME_INFO"), 0)
-#endif
-
-typedef void (gdbarch_dwarf2_build_frame_info_ftype) (struct objfile *objfile);
-extern void gdbarch_dwarf2_build_frame_info (struct gdbarch *gdbarch, struct objfile *objfile);
-extern void set_gdbarch_dwarf2_build_frame_info (struct gdbarch *gdbarch, gdbarch_dwarf2_build_frame_info_ftype *dwarf2_build_frame_info);
-#if (GDB_MULTI_ARCH > GDB_MULTI_ARCH_PARTIAL) && defined (DWARF2_BUILD_FRAME_INFO)
-#error "Non multi-arch definition of DWARF2_BUILD_FRAME_INFO"
-#endif
-#if !defined (DWARF2_BUILD_FRAME_INFO)
-#define DWARF2_BUILD_FRAME_INFO(objfile) (gdbarch_dwarf2_build_frame_info (current_gdbarch, objfile))
-#endif
-
 /* Default (function) for non- multi-arch platforms. */
 #if (!GDB_MULTI_ARCH) && !defined (ELF_MAKE_MSYMBOL_SPECIAL)
 #define ELF_MAKE_MSYMBOL_SPECIAL(sym, msym) (default_elf_make_msymbol_special (sym, msym))
@@ -3227,6 +3227,15 @@ extern struct gdbarch *gdbarch_alloc (const struct gdbarch_info *info, struct gd
 extern void gdbarch_free (struct gdbarch *);
 
 
+/* Helper function.  Allocate memory from the ``struct gdbarch''
+   obstack.  The memory is freed when the corresponding architecture
+   is also freed.  */
+
+extern void *gdbarch_obstack_zalloc (struct gdbarch *gdbarch, long size);
+#define GDBARCH_OBSTACK_CALLOC(GDBARCH, NR, TYPE) ((TYPE *) gdbarch_obstack_zalloc ((GDBARCH), (NR) * sizeof (TYPE)))
+#define GDBARCH_OBSTACK_ZALLOC(GDBARCH, TYPE) ((TYPE *) gdbarch_obstack_zalloc ((GDBARCH), sizeof (TYPE)))
+
+
 /* Helper function. Force an update of the current architecture.
 
    The actual architecture selected is determined by INFO, ``(gdb) set
@@ -3248,9 +3257,11 @@ extern int gdbarch_update_p (struct gdbarch_info info);
 
    The per-architecture data-pointer is either initialized explicitly
    (set_gdbarch_data()) or implicitly (by INIT() via a call to
-   gdbarch_data()).  FREE() is called to delete either an existing
-   data-pointer overridden by set_gdbarch_data() or when the
-   architecture object is being deleted.
+   gdbarch_data()).
+
+   Memory for the per-architecture data shall be allocated using
+   gdbarch_obstack_zalloc.  That memory will be deleted when the
+   corresponding architecture object is deleted.
 
    When a previously created architecture is re-selected, the
    per-architecture data-pointer for that previous architecture is
@@ -3262,10 +3273,7 @@ extern int gdbarch_update_p (struct gdbarch_info info);
 struct gdbarch_data;
 
 typedef void *(gdbarch_data_init_ftype) (struct gdbarch *gdbarch);
-typedef void (gdbarch_data_free_ftype) (struct gdbarch *gdbarch,
-					void *pointer);
-extern struct gdbarch_data *register_gdbarch_data (gdbarch_data_init_ftype *init,
-						   gdbarch_data_free_ftype *free);
+extern struct gdbarch_data *register_gdbarch_data (gdbarch_data_init_ftype *init);
 extern void set_gdbarch_data (struct gdbarch *gdbarch,
 			      struct gdbarch_data *data,
 			      void *pointer);

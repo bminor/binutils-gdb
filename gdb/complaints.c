@@ -60,6 +60,15 @@ struct complain
   struct complain *next;
 };
 
+/* The explanatory message that should accompany the complaint.  The
+   message is in two parts - pre and post - that are printed around
+   the complaint text.  */
+struct explanation
+{
+  const char *prefix;
+  const char *postfix;
+};
+
 struct complaints
 {
   struct complain *root;
@@ -75,20 +84,21 @@ struct complaints
   /* The explanatory messages that should accompany the complaint.
      NOTE: cagney/2002-08-14: In a desperate attempt at being vaguely
      i18n friendly, this is an array of two messages.  When present,
-     EXPLANATION[SERIES] is used to wrap the message.  */
-  const char **explanation;
+     the PRE and POST EXPLANATION[SERIES] are used to wrap the
+     message.  */
+  const struct explanation *explanation;
 };
 
 static struct complain complaint_sentinel;
 
 /* The symbol table complaint table.  */
 
-static const char *symfile_explanations[] = {
-  "During symbol reading, %s.",
-  "During symbol reading...%s...",
-  "%s...",
-  "%s...",
-  NULL
+static struct explanation symfile_explanations[] = {
+  { "During symbol reading, ", "." },
+  { "During symbol reading...", "..."},
+  { "", "..."},
+  { "", "..."},
+  { NULL, NULL }
 };
 
 static struct complaints symfile_complaint_book = {
@@ -192,9 +202,9 @@ vcomplaint (struct complaints **c, const char *file, int line, const char *fmt,
 	  wrap_here ("");
 	  if (series != SUBSEQUENT_MESSAGE)
 	    begin_line ();
-	  fprintf_filtered (gdb_stderr,
-			    complaints->explanation[series],
-			    msg);
+	  fprintf_filtered (gdb_stderr, "%s%s%s",
+			    complaints->explanation[series].prefix, msg,
+			    complaints->explanation[series].postfix);
 	  /* Force a line-break after any isolated message.  For the
              other cases, clear_complaints() takes care of any missing
              trailing newline, the wrap_here() is just a hint.  */

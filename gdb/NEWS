@@ -3,8 +3,12 @@
 
 *** Changes since GDB 6.0:
 
-
 *** Changes in GDB 6.0:
+
+* GDB supports logging output to a file
+
+There are two new commands, "set logging" and "show logging", which can be
+used to capture GDB's output to a file.
 
 * The meaning of "detach" has changed for gdbserver
 
@@ -12,7 +16,7 @@ The "detach" command will now resume the application, as documented.  To
 disconnect from gdbserver and leave it stopped, use the new "disconnect"
 command.
 
-* d10v `regs' command deprecated
+* d10v, m68hc11 `regs' command deprecated
 
 The `info registers' command has been updated so that it displays the
 registers using a format identical to the old `regs' command.
@@ -42,6 +46,7 @@ Fix for gdb/702: a -var-assign that updates the value now shows up
 * Multi-arched targets.
 
 HP/PA HPUX11, 32bit ABI (partial)	hppa*-*-hpux* except hppa*64*-*-hpux11*
+Mitsubishi M32R/D w/simulator			m32r-*-elf*
 
 * OBSOLETE configurations and files
 
@@ -50,7 +55,6 @@ been commented out.  Unless there is activity to revive these
 configurations, the next release of GDB will have their sources
 permanently REMOVED.
 
-Mitsubishi M32R/D w/simulator			m32r-*-elf*
 Z8000 simulator		  		z8k-zilog-none 	  or z8ksim
 Matsushita MN10200 w/simulator			mn10200-*-*
 H8/500 simulator 			h8500-hitachi-hms or h8500hms

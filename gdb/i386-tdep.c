@@ -851,7 +851,7 @@ static const struct frame_unwind i386_frame_unwind =
 };
 
 static const struct frame_unwind *
-i386_frame_p (CORE_ADDR pc)
+i386_frame_sniffer (struct frame_info *next_frame)
 {
   return &i386_frame_unwind;
 }
@@ -929,8 +929,9 @@ static const struct frame_unwind i386_sigtramp_frame_unwind =
 };
 
 static const struct frame_unwind *
-i386_sigtramp_frame_p (CORE_ADDR pc)
+i386_sigtramp_frame_sniffer (struct frame_info *next_frame)
 {
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
   char *name;
 
   /* We shouldn't even bother to try if the OSABI didn't register
@@ -1811,16 +1812,15 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_fetch_pointer_argument (gdbarch, i386_fetch_pointer_argument);
 
   /* Hook in the DWARF CFI frame unwinder.  */
-  frame_unwind_append_predicate (gdbarch, dwarf2_frame_p);
-  set_gdbarch_dwarf2_build_frame_info (gdbarch, dwarf2_build_frame_info);
+  frame_unwind_append_sniffer (gdbarch, dwarf2_frame_sniffer);
 
   frame_base_set_default (gdbarch, &i386_frame_base);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
 
-  frame_unwind_append_predicate (gdbarch, i386_sigtramp_frame_p);
-  frame_unwind_append_predicate (gdbarch, i386_frame_p);
+  frame_unwind_append_sniffer (gdbarch, i386_sigtramp_frame_sniffer);
+  frame_unwind_append_sniffer (gdbarch, i386_frame_sniffer);
 
   return gdbarch;
 }

@@ -483,7 +483,7 @@ mips_error (char *string,...)
   wrap_here ("");		/* Force out any buffered output */
   gdb_flush (gdb_stdout);
   if (error_pre_print)
-    fprintf_filtered (gdb_stderr, error_pre_print);
+    fputs_filtered (error_pre_print, gdb_stderr);
   vfprintf_filtered (gdb_stderr, string, args);
   fprintf_filtered (gdb_stderr, "\n");
   va_end (args);

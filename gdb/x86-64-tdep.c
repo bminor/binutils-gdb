@@ -39,18 +39,7 @@
 #include "x86-64-tdep.h"
 #include "i387-tdep.h"
 
-/* Register numbers of various important registers.  */
-
-#define X86_64_RAX_REGNUM	0 /* %rax */
-#define X86_64_RDX_REGNUM	3 /* %rdx */
-#define X86_64_RDI_REGNUM	5 /* %rdi */
-#define X86_64_RBP_REGNUM	6 /* %rbp */
-#define X86_64_RSP_REGNUM	7 /* %rsp */
-#define X86_64_RIP_REGNUM	16 /* %rip */
-#define X86_64_EFLAGS_REGNUM	17 /* %eflags */
-#define X86_64_ST0_REGNUM	22 /* %st0 */
-#define X86_64_XMM0_REGNUM	38 /* %xmm0 */
-#define X86_64_XMM1_REGNUM	39 /* %xmm1 */
+/* Register information.  */
 
 struct x86_64_register_info
 {
@@ -597,13 +586,14 @@ x86_64_push_arguments (struct regcache *regcache, int nargs,
 {
   int intreg = 0;
   int ssereg = 0;
-  /* For varargs functions we have to pass the total number of SSE arguments
-     in %rax.  So, let's count this number.  */
+  /* For varargs functions we have to pass the total number of SSE
+     registers used in %rax.  So, let's count this number.  */
   int total_sse_args = 0;
   /* Once an SSE/int argument is passed on the stack, all subsequent
      arguments are passed there.  */
   int sse_stack = 0;
   int int_stack = 0;
+  unsigned total_sp;
   int i;
   char buf[8];
   static int int_parameter_registers[INT_REGS] =
@@ -644,7 +634,8 @@ x86_64_push_arguments (struct regcache *regcache, int nargs,
 	    int_stack = 1;
 	  if (ssereg / 2 + needed_sseregs > SSE_REGS)
 	    sse_stack = 1;
-	  total_sse_args += needed_sseregs;
+	  if (!sse_stack)
+	    total_sse_args += needed_sseregs;
 
 	  for (j = 0; j < n; j++)
 	    {
@@ -720,13 +711,29 @@ x86_64_push_arguments (struct regcache *regcache, int nargs,
 	}
     }
 
+  /* We have to make sure that the stack is 16-byte aligned after the
+     setup.  Let's calculate size of arguments first, align stack and
+     then fill in the arguments.  */
+  total_sp = 0;
+  for (i = 0; i < stack_values_count; i++)
+    {
+      struct value *arg = args[stack_values[i]];
+      int len = TYPE_LENGTH (VALUE_ENCLOSING_TYPE (arg));
+      total_sp += (len + 7) & ~7;
+    }
+  /* total_sp is now a multiple of 8, if it is not a multiple of 16,
+     change the stack pointer so that it will be afterwards correctly
+     aligned.  */
+  if (total_sp & 15)
+    sp -= 8;
+    
   /* Push any remaining arguments onto the stack.  */
   while (--stack_values_count >= 0)
     {
       struct value *arg = args[stack_values[stack_values_count]];
       int len = TYPE_LENGTH (VALUE_ENCLOSING_TYPE (arg));
 
-      /* Make sure the stack stays eightbyte-aligned.  */
+      /* Make sure the stack is 8-byte-aligned.  */
       sp -= (len + 7) & ~7;
       write_memory (sp, VALUE_CONTENTS_ALL (arg), len);
     }
@@ -781,7 +788,8 @@ x86_64_store_return_value (struct type *type, struct regcache *regcache,
   else if (TYPE_CODE_FLT == TYPE_CODE (type))
     {
       /* Handle double and float variables.  */
-      regcache_cooked_write (regcache,  X86_64_XMM0_REGNUM, valbuf);
+      regcache_cooked_write_part (regcache, X86_64_XMM0_REGNUM,
+				  0, len, valbuf);
     }
   /* XXX: What about complex floating point types?  */
   else
@@ -1069,7 +1077,7 @@ static const struct frame_unwind x86_64_frame_unwind =
 };
 
 static const struct frame_unwind *
-x86_64_frame_p (CORE_ADDR pc)
+x86_64_frame_sniffer (struct frame_info *next_frame)
 {
   return &x86_64_frame_unwind;
 }
@@ -1141,8 +1149,9 @@ static const struct frame_unwind x86_64_sigtramp_frame_unwind =
 };
 
 static const struct frame_unwind *
-x86_64_sigtramp_frame_p (CORE_ADDR pc)
+x86_64_sigtramp_frame_sniffer (struct frame_info *next_frame)
 {
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
   char *name;
 
   find_pc_partial_function (pc, &name, NULL, NULL);
@@ -1252,8 +1261,8 @@ x86_64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
      in the future.  */
   set_gdbarch_in_solib_call_trampoline (gdbarch, in_plt_section);
 
-  frame_unwind_append_predicate (gdbarch, x86_64_sigtramp_frame_p);
-  frame_unwind_append_predicate (gdbarch, x86_64_frame_p);
+  frame_unwind_append_sniffer (gdbarch, x86_64_sigtramp_frame_sniffer);
+  frame_unwind_append_sniffer (gdbarch, x86_64_frame_sniffer);
   frame_base_set_default (gdbarch, &x86_64_frame_base);
 }
 

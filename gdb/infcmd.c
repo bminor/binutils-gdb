@@ -1651,7 +1651,8 @@ registers_info (char *addr_exp, int fpregs)
 
       /* A register name?  */
       {
-	int regnum = frame_map_name_to_regnum (start, end - start);
+	int regnum = frame_map_name_to_regnum (deprecated_selected_frame,
+					       start, end - start);
 	if (regnum >= 0)
 	  {
 	    gdbarch_print_registers_info (current_gdbarch, gdb_stdout,
@@ -1676,24 +1677,24 @@ registers_info (char *addr_exp, int fpregs)
 
       /* A register group?  */
       {
-	struct reggroup *const *group;
-	for (group = reggroups (current_gdbarch);
-	     (*group) != NULL;
-	     group++)
+	struct reggroup *group;
+	for (group = reggroup_next (current_gdbarch, NULL);
+	     group != NULL;
+	     group = reggroup_next (current_gdbarch, group))
 	  {
 	    /* Don't bother with a length check.  Should the user
 	       enter a short register group name, go with the first
 	       group that matches.  */
-	    if (strncmp (start, reggroup_name ((*group)), end - start) == 0)
+	    if (strncmp (start, reggroup_name (group), end - start) == 0)
 	      break;
 	  }
-	if ((*group) != NULL)
+	if (group != NULL)
 	  {
 	    int regnum;
 	    for (regnum = 0; regnum < NUM_REGS + NUM_PSEUDO_REGS; regnum++)
 	      {
 		if (gdbarch_register_reggroup_p (current_gdbarch, regnum,
-						 (*group)))
+						 group))
 		  gdbarch_print_registers_info (current_gdbarch,
 						gdb_stdout, deprecated_selected_frame,
 						regnum, fpregs);

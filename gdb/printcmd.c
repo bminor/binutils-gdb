@@ -509,7 +509,7 @@ print_scalar_formatted (void *valaddr, struct type *type, int format, int size,
 	strcpy (buf, local_binary_format_prefix ());
 	strcat (buf, cp);
 	strcat (buf, local_binary_format_suffix ());
-	fprintf_filtered (stream, buf);
+	fputs_filtered (buf, stream);
       }
       break;
 
@@ -1264,12 +1264,6 @@ address_info (char *exp, int from_tty)
 			val, REGISTER_NAME (basereg));
       break;
 
-    case LOC_THREAD_LOCAL_STATIC:
-      printf_filtered ("a thread-local variable at offset %ld in the "
-                       "thread-local storage for `%s'",
-                       val, SYMBOL_OBJFILE (sym)->name);
-      break;
-
     case LOC_OPTIMIZED_OUT:
       printf_filtered ("optimized out");
       break;
@@ -2011,7 +2005,7 @@ printf_command (char *arg, int from_tty)
 	current_substring += strlen (current_substring) + 1;
       }
     /* Print the portion of the format string after the last argument.  */
-    printf_filtered (last_arg);
+    puts_filtered (last_arg);
   }
   do_cleanups (old_cleanups);
 }

@@ -2613,9 +2613,9 @@ coff_arm_final_link_postscript (abfd, pfinfo)
 
 #ifndef EXTRA_S_FLAGS
 #ifdef COFF_WITH_PE
-#define EXTRA_S_FLAGS (SEC_LINK_ONCE | SEC_LINK_DUPLICATES)
+#define EXTRA_S_FLAGS (SEC_CODE | SEC_LINK_ONCE | SEC_LINK_DUPLICATES)
 #else
-#define EXTRA_S_FLAGS 0
+#define EXTRA_S_FLAGS SEC_CODE
 #endif
 #endif
 

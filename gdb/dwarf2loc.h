@@ -55,6 +55,10 @@ struct dwarf2_loclist_baton
   unsigned short size;
 
   /* The objfile containing the symbol whose location we're computing.  */
+  /* Used (only???) by thread local variables.  The objfile in which
+     this symbol is defined.  To find a thread-local variable (e.g., a
+     variable declared with the `__thread' storage class), we may need
+     to know which object file it's in.  */
   struct objfile *objfile;
 };
 

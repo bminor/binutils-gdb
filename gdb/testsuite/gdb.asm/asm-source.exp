@@ -99,6 +99,9 @@ switch -glob -- [istarget] {
         set asm-arch v850
         set gdb_wrapper_initialized 1
     }
+    "m68k-*-*" {
+        set asm-arch m68k
+    }
 }
 
 if { "${asm-arch}" == "" } {
@@ -241,7 +244,7 @@ gdb_test "n" "12\[ 	\]*.*foo3" "n in foo2"
 # doesn't fall off the stack.
 
 gdb_test "bt 10" \
-	"\#0.*foo2.*asmsrc2\[.\]s:12.*\#1.*main.*asmsrc1\[.\]s:33(.*\#2.*start\[^\r\n\]*)?" \
+	"\#0.*foo2.*asmsrc2\[.\]s:12.*\#1.*main.*asmsrc1\[.\]s:33" \
 	"bt ALL in foo2"
 
 # See if a capped `bt' prints the right source files.

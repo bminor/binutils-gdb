@@ -63,11 +63,11 @@ proc check_set { t l r new add } {
     gdb_test "print r" " = ${r}" "print old r - ${t}"
     gdb_test "set variable l = 4"
     gdb_test "print l" " = ${new}" "print new l - ${t}"
-    gdb_test "next" "return l;"
+    gdb_test "next" "return l \\+ r;"
     gdb_test "print l" " = ${add}" "print add  - ${t}"
 }
 
-check_set "char" "-1 .*" "-2 .*" "4 ..004." "2 ..002."
+check_set "charest" "-1 .*" "-2 .*" "4 ..004." "2 ..002."
 check_set "short" "-1" "-2" "4" "2"
 check_set "int" "-1" "-2" "4" "2"
 check_set "long" "-1" "-2" "4" "2"
@@ -89,7 +89,7 @@ proc up_set { t l r new } {
     gdb_test "print l" " = ${new}" "up print new l - ${t}"
 }
 
-up_set "char" "-1 .*" "-2 .*" "4 ..004."
+up_set "charest" "-1 .*" "-2 .*" "4 ..004."
 up_set "short" "-1" "-2" "4"
 up_set "int" "-1" "-2" "4"
 up_set "long" "-1" "-2" "4"

@@ -27,7 +27,7 @@
 
 struct ui_out;
 struct ui_out_data;
-
+struct ui_file;
 
 /* the current ui_out */
 
@@ -231,6 +231,8 @@ typedef void (message_ftype) (struct ui_out * uiout, int verbosity,
 			      const char *format, va_list args);
 typedef void (wrap_hint_ftype) (struct ui_out * uiout, char *identstring);
 typedef void (flush_ftype) (struct ui_out * uiout);
+typedef int (redirect_ftype) (struct ui_out * uiout,
+			      struct ui_file * outstream);
 
 /* ui-out-impl */
 
@@ -254,6 +256,7 @@ struct ui_out_impl
     message_ftype *message;
     wrap_hint_ftype *wrap_hint;
     flush_ftype *flush;
+    redirect_ftype *redirect;
     int is_mi_like_p;
   };
 
@@ -265,5 +268,9 @@ extern struct ui_out_data *ui_out_data (struct ui_out *uiout);
 extern struct ui_out *ui_out_new (struct ui_out_impl *impl,
 				  struct ui_out_data *data,
 				  int flags);
+
+/* Redirect the ouptut of a ui_out object temporarily.  */
+
+extern int ui_out_redirect (struct ui_out *uiout, struct ui_file *outstream);
 
 #endif /* UI_OUT_H */

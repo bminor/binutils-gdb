@@ -38,112 +38,60 @@
 
 /* Local insertion and extraction functions.  */
 
-static unsigned long insert_bat
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_bat
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_bba
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_bba
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_bd
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_bd
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_bdm
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_bdm
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_bdp
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_bdp
-  PARAMS ((unsigned long, int, int *));
-static int valid_bo
-  PARAMS ((long, int));
-static unsigned long insert_bo
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_bo
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_boe
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_boe
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_dq
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_dq
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_ds
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_ds
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_de
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_de
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_des
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_des
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_li
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_li
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_mbe
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_mbe
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_mb6
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_mb6
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_nb
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_nb
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_nsi
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_nsi
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_ral
-  PARAMS ((unsigned long, long, int, const char **));
-static unsigned long insert_ram
-  PARAMS ((unsigned long, long, int, const char **));
-static unsigned long insert_raq
-  PARAMS ((unsigned long, long, int, const char **));
-static unsigned long insert_ras
-  PARAMS ((unsigned long, long, int, const char **));
-static unsigned long insert_rbs
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_rbs
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_rsq
-  PARAMS ((unsigned long, long, int, const char **));
-static unsigned long insert_rtq
-  PARAMS ((unsigned long, long, int, const char **));
-static unsigned long insert_sh6
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_sh6
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_spr
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_spr
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_tbr
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_tbr
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_ev2
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_ev2
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_ev4
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_ev4
-  PARAMS ((unsigned long, int, int *));
-static unsigned long insert_ev8
-  PARAMS ((unsigned long, long, int, const char **));
-static long extract_ev8
-  PARAMS ((unsigned long, int, int *));
+static unsigned long insert_bat (unsigned long, long, int, const char **);
+static long extract_bat (unsigned long, int, int *);
+static unsigned long insert_bba (unsigned long, long, int, const char **);
+static long extract_bba (unsigned long, int, int *);
+static unsigned long insert_bd (unsigned long, long, int, const char **);
+static long extract_bd (unsigned long, int, int *);
+static unsigned long insert_bdm (unsigned long, long, int, const char **);
+static long extract_bdm (unsigned long, int, int *);
+static unsigned long insert_bdp (unsigned long, long, int, const char **);
+static long extract_bdp (unsigned long, int, int *);
+static unsigned long insert_bo (unsigned long, long, int, const char **);
+static long extract_bo (unsigned long, int, int *);
+static unsigned long insert_boe (unsigned long, long, int, const char **);
+static long extract_boe (unsigned long, int, int *);
+static unsigned long insert_dq (unsigned long, long, int, const char **);
+static long extract_dq (unsigned long, int, int *);
+static unsigned long insert_ds (unsigned long, long, int, const char **);
+static long extract_ds (unsigned long, int, int *);
+static unsigned long insert_de (unsigned long, long, int, const char **);
+static long extract_de (unsigned long, int, int *);
+static unsigned long insert_des (unsigned long, long, int, const char **);
+static long extract_des (unsigned long, int, int *);
+static unsigned long insert_fxm (unsigned long, long, int, const char **);
+static long extract_fxm (unsigned long, int, int *);
+static unsigned long insert_li (unsigned long, long, int, const char **);
+static long extract_li (unsigned long, int, int *);
+static unsigned long insert_mbe (unsigned long, long, int, const char **);
+static long extract_mbe (unsigned long, int, int *);
+static unsigned long insert_mb6 (unsigned long, long, int, const char **);
+static long extract_mb6 (unsigned long, int, int *);
+static unsigned long insert_nb (unsigned long, long, int, const char **);
+static long extract_nb (unsigned long, int, int *);
+static unsigned long insert_nsi (unsigned long, long, int, const char **);
+static long extract_nsi (unsigned long, int, int *);
+static unsigned long insert_ral (unsigned long, long, int, const char **);
+static unsigned long insert_ram (unsigned long, long, int, const char **);
+static unsigned long insert_raq (unsigned long, long, int, const char **);
+static unsigned long insert_ras (unsigned long, long, int, const char **);
+static unsigned long insert_rbs (unsigned long, long, int, const char **);
+static long extract_rbs (unsigned long, int, int *);
+static unsigned long insert_rsq (unsigned long, long, int, const char **);
+static unsigned long insert_rtq (unsigned long, long, int, const char **);
+static unsigned long insert_sh6 (unsigned long, long, int, const char **);
+static long extract_sh6 (unsigned long, int, int *);
+static unsigned long insert_spr (unsigned long, long, int, const char **);
+static long extract_spr (unsigned long, int, int *);
+static unsigned long insert_tbr (unsigned long, long, int, const char **);
+static long extract_tbr (unsigned long, int, int *);
+static unsigned long insert_ev2 (unsigned long, long, int, const char **);
+static long extract_ev2 (unsigned long, int, int *);
+static unsigned long insert_ev4 (unsigned long, long, int, const char **);
+static long extract_ev4 (unsigned long, int, int *);
+static unsigned long insert_ev8 (unsigned long, long, int, const char **);
+static long extract_ev8 (unsigned long, int, int *);
 
 /* The operands table.
 
@@ -341,10 +289,14 @@ const struct powerpc_operand powerpc_operands[] =
   /* The FXM field in an XFX instruction.  */
 #define FXM FRS + 1
 #define FXM_MASK (0xff << 12)
-  { 8, 12, 0, 0, 0 },
+  { 8, 12, insert_fxm, extract_fxm, 0 },
+
+  /* Power4 version for mfcr.  */
+#define FXM4 FXM + 1
+  { 8, 12, insert_fxm, extract_fxm, PPC_OPERAND_OPTIONAL },
 
   /* The L field in a D or X form instruction.  */
-#define L FXM + 1
+#define L FXM4 + 1
   { 1, 21, 0, 0, PPC_OPERAND_OPTIONAL },
 
   /* The LEV field in a POWER SC form instruction.  */
@@ -598,23 +550,20 @@ const struct powerpc_operand powerpc_operands[] =
 
 /*ARGSUSED*/
 static unsigned long
-insert_bat (insn, value, dialect, errmsg)
-     unsigned long insn;
-     long value ATTRIBUTE_UNUSED;
-     int dialect ATTRIBUTE_UNUSED;
-     const char **errmsg ATTRIBUTE_UNUSED;
+insert_bat (unsigned long insn,
+	    long value ATTRIBUTE_UNUSED,
+	    int dialect ATTRIBUTE_UNUSED,
+	    const char **errmsg ATTRIBUTE_UNUSED)
 {
   return insn | (((insn >> 21) & 0x1f) << 16);
 }
 
 static long
-extract_bat (insn, dialect, invalid)
-     unsigned long insn;
-     int dialect ATTRIBUTE_UNUSED;
-     int *invalid;
+extract_bat (unsigned long insn,
+	     int dialect ATTRIBUTE_UNUSED,
+	     int *invalid)
 {
-  if (invalid != (int *) NULL
-      && ((insn >> 21) & 0x1f) != ((insn >> 16) & 0x1f))
+  if (((insn >> 21) & 0x1f) != ((insn >> 16) & 0x1f))
     *invalid = 1;
   return 0;
 }
@@ -627,23 +576,20 @@ extract_bat (insn, dialect, invalid)
 
 /*ARGSUSED*/
 static unsigned long
-insert_bba (insn, value, dialect, errmsg)
-     unsigned long insn;
-     long value ATTRIBUTE_UNUSED;
-     int dialect ATTRIBUTE_UNUSED;
-     const char **errmsg ATTRIBUTE_UNUSED;
+insert_bba (unsigned long insn,
+	    long value ATTRIBUTE_UNUSED,
+	    int dialect ATTRIBUTE_UNUSED,
+	    const char **errmsg ATTRIBUTE_UNUSED)
 {
   return insn | (((insn >> 16) & 0x1f) << 11);
 }
 
 static long
-extract_bba (insn, dialect, invalid)
-     unsigned long insn;
-     int dialect ATTRIBUTE_UNUSED;
-     int *invalid;
+extract_bba (unsigned long insn,
+	     int dialect ATTRIBUTE_UNUSED,
+	     int *invalid)
 {
-  if (invalid != (int *) NULL
-      && ((insn >> 16) & 0x1f) != ((insn >> 11) & 0x1f))
+  if (((insn >> 16) & 0x1f) != ((insn >> 11) & 0x1f))
     *invalid = 1;
   return 0;
 }
@@ -653,21 +599,19 @@ extract_bba (insn, dialect, invalid)
 
 /*ARGSUSED*/
 static unsigned long
-insert_bd (insn, value, dialect, errmsg)
-     unsigned long insn;
-     long value;
-     int dialect ATTRIBUTE_UNUSED;
-     const char **errmsg ATTRIBUTE_UNUSED;
+insert_bd (unsigned long insn,
+	   long value,
+	   int dialect ATTRIBUTE_UNUSED,
+	   const char **errmsg ATTRIBUTE_UNUSED)
 {
   return insn | (value & 0xfffc);
 }
 
 /*ARGSUSED*/
 static long
-extract_bd (insn, dialect, invalid)
-     unsigned long insn;
-     int dialect ATTRIBUTE_UNUSED;
-     int *invalid ATTRIBUTE_UNUSED;
+extract_bd (unsigned long insn,
+	    int dialect ATTRIBUTE_UNUSED,
+	    int *invalid ATTRIBUTE_UNUSED)
 {
   return ((insn & 0xfffc) ^ 0x8000) - 0x8000;
 }
@@ -687,11 +631,10 @@ extract_bd (insn, dialect, invalid)
 
 /*ARGSUSED*/
 static unsigned long
-insert_bdm (insn, value, dialect, errmsg)
-     unsigned long insn;
-     long value;
-     int dialect;
-     const char **errmsg ATTRIBUTE_UNUSED;
+insert_bdm (unsigned long insn,
+	    long value,
+	    int dialect,
+	    const char **errmsg ATTRIBUTE_UNUSED)
 {
   if ((dialect & PPC_OPCODE_POWER4) == 0)
     {
@@ -709,25 +652,22 @@ insert_bdm (insn, value, dialect, errmsg)
 }
 
 static long
-extract_bdm (insn, dialect, invalid)
-     unsigned long insn;
-     int dialect;
-     int *invalid;
+extract_bdm (unsigned long insn,
+	     int dialect,
+	     int *invalid)
 {
-  if (invalid != (int *) NULL)
+  if ((dialect & PPC_OPCODE_POWER4) == 0)
     {
-      if ((dialect & PPC_OPCODE_POWER4) == 0)
-	{
-	  if (((insn & (1 << 21)) == 0) != ((insn & (1 << 15)) == 0))
-	    *invalid = 1;
-	}
-      else
-	{
-	  if ((insn & (0x17 << 21)) != (0x06 << 21)
-	      && (insn & (0x1d << 21)) != (0x18 << 21))
-	    *invalid = 1;
-	}
+      if (((insn & (1 << 21)) == 0) != ((insn & (1 << 15)) == 0))
+	*invalid = 1;
     }
+  else
+    {
+      if ((insn & (0x17 << 21)) != (0x06 << 21)
+	  && (insn & (0x1d << 21)) != (0x18 << 21))
+	*invalid = 1;
+    }
+
   return ((insn & 0xfffc) ^ 0x8000) - 0x8000;
 }
 
@@ -737,11 +677,10 @@ extract_bdm (insn, dialect, invalid)
 
 /*ARGSUSED*/
 static unsigned long
-insert_bdp (insn, value, dialect, errmsg)
-     unsigned long insn;
-     long value;
-     int dialect;
-     const char **errmsg ATTRIBUTE_UNUSED;
+insert_bdp (unsigned long insn,
+	    long value,
+	    int dialect,
+	    const char **errmsg ATTRIBUTE_UNUSED)
 {
   if ((dialect & PPC_OPCODE_POWER4) == 0)
     {
@@ -759,34 +698,29 @@ insert_bdp (insn, value, dialect, errmsg)
 }
 
 static long
-extract_bdp (insn, dialect, invalid)
-     unsigned long insn;
-     int dialect;
-     int *invalid;
+extract_bdp (unsigned long insn,
+	     int dialect,
+	     int *invalid)
 {
-  if (invalid != (int *) NULL)
+  if ((dialect & PPC_OPCODE_POWER4) == 0)
     {
-      if ((dialect & PPC_OPCODE_POWER4) == 0)
-	{
-	  if (((insn & (1 << 21)) == 0) == ((insn & (1 << 15)) == 0))
-	    *invalid = 1;
-	}
-      else
-	{
-	  if ((insn & (0x17 << 21)) != (0x07 << 21)
-	      && (insn & (0x1d << 21)) != (0x19 << 21))
-	    *invalid = 1;
-	}
+      if (((insn & (1 << 21)) == 0) == ((insn & (1 << 15)) == 0))
+	*invalid = 1;
     }
+  else
+    {
+      if ((insn & (0x17 << 21)) != (0x07 << 21)
+	  && (insn & (0x1d << 21)) != (0x19 << 21))
+	*invalid = 1;
+    }
+
   return ((insn & 0xfffc) ^ 0x8000) - 0x8000;
 }
 
 /* Check for legal values of a BO field.  */
 
 static int
-valid_bo (value, dialect)
-     long value;
-     int dialect;
+valid_bo (long value, int dialect)
 {
   if ((dialect & PPC_OPCODE_POWER4) == 0)
     {
@@ -838,29 +772,25 @@ valid_bo (value, dialect)
    the field to an illegal value.  */
 
 static unsigned long
-insert_bo (insn, value, dialect, errmsg)
-     unsigned long insn;
-     long value;
-     int dialect;
-     const char **errmsg;
+insert_bo (unsigned long insn,
+	   long value,
+	   int dialect,
+	   const char **errmsg)
 {
-  if (errmsg != (const char **) NULL
-      && ! valid_bo (value, dialect))
+  if (!valid_bo (value, dialect))
     *errmsg = _("invalid conditional option");
   return insn | ((value & 0x1f) << 21);
 }
 
 static long
-extract_bo (insn, dialect, invalid)
-     unsigned long insn;
-     int dialect;
-     int *invalid;
+extract_bo (unsigned long insn,
+	    int dialect,
+	    int *invalid)
 {
   long value;
 
   value = (insn >> 21) & 0x1f;
-  if (invalid != (int *) NULL
-      && ! valid_bo (value, dialect))
+  if (!valid_bo (value, dialect))
     *invalid = 1;
   return value;
 }
@@ -870,128 +800,115 @@ extract_bo (insn, dialect, invalid)
    extracting it, we force it to be even.  */
 
 static unsigned long
-insert_boe (insn, value, dialect, errmsg)
-     unsigned long insn;
-     long value;
-     int dialect;
-     const char **errmsg;
+insert_boe (unsigned long insn,
+	    long value,
+	    int dialect,
+	    const char **errmsg)
 {
-  if (errmsg != (const char **) NULL)
-    {
-      if (! valid_bo (value, dialect))
-	*errmsg = _("invalid conditional option");
-      else if ((value & 1) != 0)
-	*errmsg = _("attempt to set y bit when using + or - modifier");
-    }
+  if (!valid_bo (value, dialect))
+    *errmsg = _("invalid conditional option");
+  else if ((value & 1) != 0)
+    *errmsg = _("attempt to set y bit when using + or - modifier");
+
   return insn | ((value & 0x1f) << 21);
 }
 
 static long
-extract_boe (insn, dialect, invalid)
-     unsigned long insn;
-     int dialect;
-     int *invalid;
+extract_boe (unsigned long insn,
+	     int dialect,
+	     int *invalid)
 {
   long value;
 
   value = (insn >> 21) & 0x1f;
-  if (invalid != (int *) NULL
-      && ! valid_bo (value, dialect))
+  if (!valid_bo (value, dialect))
     *invalid = 1;
   return value & 0x1e;
 }
 
-  /* The DQ field in a DQ form instruction.  This is like D, but the
-     lower four bits are forced to zero. */
+/* The DQ field in a DQ form instruction.  This is like D, but the
+   lower four bits are forced to zero. */
 
 /*ARGSUSED*/
 static unsigned long
-insert_dq (insn, value, dialect, errmsg)
-     unsigned long insn;
-     long value;
-     int dialect ATTRIBUTE_UNUSED;
-     const char ** errmsg ATTRIBUTE_UNUSED;
+insert_dq (unsigned long insn,
+	   long value,
+	   int dialect ATTRIBUTE_UNUSED,
+	   const char **errmsg)
 {
-  if ((value & 0xf) != 0 && errmsg != NULL)
+  if ((value & 0xf) != 0)
     *errmsg = _("offset not a multiple of 16");
   return insn | (value & 0xfff0);
 }
 
 /*ARGSUSED*/
 static long
-extract_dq (insn, dialect, invalid)
-     unsigned long insn;
-     int dialect ATTRIBUTE_UNUSED;
-     int *invalid ATTRIBUTE_UNUSED;
+extract_dq (unsigned long insn,
+	    int dialect ATTRIBUTE_UNUSED,
+	    int *invalid ATTRIBUTE_UNUSED)
 {
   return ((insn & 0xfff0) ^ 0x8000) - 0x8000;
 }
 
 static unsigned long
-insert_ev2 (insn, value, dialect, errmsg)
-     unsigned long insn;
-     long value;
-     int dialect ATTRIBUTE_UNUSED;
-     const char ** errmsg ATTRIBUTE_UNUSED;
+insert_ev2 (unsigned long insn,
+	    long value,
+	    int dialect ATTRIBUTE_UNUSED,
+	    const char **errmsg)
 {
-  if ((value & 1) != 0 && errmsg != NULL)
+  if ((value & 1) != 0)
     *errmsg = _("offset not a multiple of 2");
-  if ((value > 62) != 0 && errmsg != NULL)
+  if ((value > 62) != 0)
     *errmsg = _("offset greater than 62");
   return insn | ((value & 0x3e) << 10);
 }
 
 static long
-extract_ev2 (insn, dialect, invalid)
-     unsigned long insn;
-     int dialect ATTRIBUTE_UNUSED;
-     int * invalid ATTRIBUTE_UNUSED;
+extract_ev2 (unsigned long insn,
+	     int dialect ATTRIBUTE_UNUSED,
+	     int *invalid ATTRIBUTE_UNUSED)
 {
   return (insn >> 10) & 0x3e;
 }
 
 static unsigned long
-insert_ev4 (insn, value, dialect, errmsg)
-     unsigned long insn;
-     long value;
-     int dialect ATTRIBUTE_UNUSED;
-     const char ** errmsg ATTRIBUTE_UNUSED;
+insert_ev4 (unsigned long insn,
+	    long value,
+	    int dialect ATTRIBUTE_UNUSED,
+	    const char **errmsg)
 {
-  if ((value & 3) != 0 && errmsg != NULL)
+  if ((value & 3) != 0)
     *errmsg = _("offset not a multiple of 4");
-  if ((value > 124) != 0 && errmsg != NULL)
+  if ((value > 124) != 0)
     *errmsg = _("offset greater than 124");
   return insn | ((value & 0x7c) << 9);
 }
 
 static long
-extract_ev4 (insn, dialect, invalid)
-     unsigned long insn;
-     int dialect ATTRIBUTE_UNUSED;
-     int * invalid ATTRIBUTE_UNUSED;
+extract_ev4 (unsigned long insn,
+	     int dialect ATTRIBUTE_UNUSED,
+	     int *invalid ATTRIBUTE_UNUSED)
 {
   return (insn >> 9) & 0x7c;
 }
 
 static unsigned long
-insert_ev8 (insn, value, dialect, errmsg)
-     unsigned long insn;
-     long value;
-     int dialect ATTRIBUTE_UNUSED;
-     const char ** errmsg ATTRIBUTE_UNUSED;
+insert_ev8 (unsigned long insn,
+	    long value,
+	    int dialect ATTRIBUTE_UNUSED,
+	    const char **errmsg)
 {
-  if ((value & 7) != 0 && errmsg != NULL)
+  if ((value & 7) != 0)
     *errmsg = _("offset not a multiple of 8");
-  if ((value > 248) != 0 && errmsg != NULL)
+  if ((value > 248) != 0)
     *errmsg = _("offset greater than 248");
   return insn | ((value & 0xf8) << 8);
 }
 
 static long
-extract_ev8 (insn, dialect, invalid)
-     unsigned long insn;
-     int dialect ATTRIBUTE_UNUSED;
-     int * invalid ATTRIBUTE_UNUSED;
+extract_ev8 (unsigned long insn,
+	     int dialect ATTRIBUTE_UNUSED,
+	     int *invalid ATTRIBUTE_UNUSED)
 {
   return (insn >> 8) & 0xf8;
 }
@@ -1001,23 +918,21 @@ extract_ev8 (insn, dialect, invalid)
 
 /*ARGSUSED*/
 static unsigned long
-insert_ds (insn, value, dialect, errmsg)
-     unsigned long insn;
-     long value;
-     int dialect ATTRIBUTE_UNUSED;
-     const char **errmsg;
+insert_ds (unsigned long insn,
+	   long value,
+	   int dialect ATTRIBUTE_UNUSED,
+	   const char **errmsg)
 {
-  if ((value & 3) != 0 && errmsg != NULL)
+  if ((value & 3) != 0)
     *errmsg = _("offset not a multiple of 4");
   return insn | (value & 0xfffc);
 }
 
 /*ARGSUSED*/
 static long
-extract_ds (insn, dialect, invalid)
-     unsigned long insn;
-     int dialect ATTRIBUTE_UNUSED;
-     int *invalid ATTRIBUTE_UNUSED;
+extract_ds (unsigned long insn,
+	    int dialect ATTRIBUTE_UNUSED,
+	    int *invalid ATTRIBUTE_UNUSED)
 {
   return ((insn & 0xfffc) ^ 0x8000) - 0x8000;
 }
@@ -1026,23 +941,21 @@ extract_ds (insn, dialect, invalid)
 
 /*ARGSUSED*/
 static unsigned long
-insert_de (insn, value, dialect, errmsg)
-     unsigned long insn;
-     long value;
-     int dialect ATTRIBUTE_UNUSED;
-     const char **errmsg;
+insert_de (unsigned long insn,
+	   long value,
+	   int dialect ATTRIBUTE_UNUSED,
+	   const char **errmsg)
 {
-  if ((value > 2047 || value < -2048) && errmsg != NULL)
+  if (value > 2047 || value < -2048)
     *errmsg = _("offset not between -2048 and 2047");
   return insn | ((value << 4) & 0xfff0);
 }
 
 /*ARGSUSED*/
 static long
-extract_de (insn, dialect, invalid)
-     unsigned long insn;
-     int dialect ATTRIBUTE_UNUSED;
-     int *invalid ATTRIBUTE_UNUSED;
+extract_de (unsigned long insn,
+	    int dialect ATTRIBUTE_UNUSED,
+	    int *invalid ATTRIBUTE_UNUSED)
 {
   return (insn & 0xfff0) >> 4;
 }
@@ -1051,27 +964,85 @@ extract_de (insn, dialect, invalid)
 
 /*ARGSUSED*/
 static unsigned long
-insert_des (insn, value, dialect, errmsg)
-     unsigned long insn;
-     long value;
-     int dialect ATTRIBUTE_UNUSED;
-     const char **errmsg;
+insert_des (unsigned long insn,
+	    long value,
+	    int dialect ATTRIBUTE_UNUSED,
+	    const char **errmsg)
 {
-  if ((value > 8191 || value < -8192) && errmsg != NULL)
+  if (value > 8191 || value < -8192)
     *errmsg = _("offset not between -8192 and 8191");
-  else if ((value & 3) != 0 && errmsg != NULL)
+  else if ((value & 3) != 0)
     *errmsg = _("offset not a multiple of 4");
   return insn | ((value << 2) & 0xfff0);
 }
 
 /*ARGSUSED*/
 static long
-extract_des (insn, dialect, invalid)
-     unsigned long insn;
-     int dialect ATTRIBUTE_UNUSED;
-     int *invalid ATTRIBUTE_UNUSED;
+extract_des (unsigned long insn,
+	     int dialect ATTRIBUTE_UNUSED,
+	     int *invalid ATTRIBUTE_UNUSED)
 {
   return (((insn >> 2) & 0x3ffc) ^ 0x2000) - 0x2000;
+}
+
+/* FXM mask in mfcr and mtcrf instructions.  */
+
+static unsigned long
+insert_fxm (unsigned long insn,
+	    long value,
+	    int dialect,
+	    const char **errmsg)
+{
+  /* If the optional field on mfcr is missing that means we want to use
+     the old form of the instruction that moves the whole cr.  In that
+     case we'll have VALUE zero.  There doesn't seem to be a way to
+     distinguish this from the case where someone writes mfcr %r3,0.  */
+  if (value == 0)
+    ;
+
+  /* If only one bit of the FXM field is set, we can use the new form
+     of the instruction, which is faster.  */
+  else if ((dialect & PPC_OPCODE_POWER4) != 0 && (value & -value) == value)
+    insn |= 1 << 20;
+
+  /* Any other value on mfcr is an error.  */
+  else if ((insn & (0x3ff << 1)) == 19 << 1)
+    {
+      *errmsg = _("ignoring invalid mfcr mask");
+      value = 0;
+    }
+
+  return insn | ((value & 0xff) << 12);
+}
+
+static long
+extract_fxm (unsigned long insn,
+	     int dialect,
+	     int *invalid)
+{
+  long mask = (insn >> 12) & 0xff;
+
+  /* Is this a Power4 insn?  */
+  if ((insn & (1 << 20)) != 0)
+    {
+      if ((dialect & PPC_OPCODE_POWER4) == 0)
+	*invalid = 1;
+      else
+	{
+	  /* Exactly one bit of MASK should be set.  */
+	  if (mask == 0 || (mask & -mask) != mask)
+	    *invalid = 1;
+	}
+    }
+
+  /* Check that non-power4 form of mfcr has a zero MASK.  */
+  else if ((insn & (0x3ff << 1)) == 19 << 1)
+    {
+      if (mask != 0)
+	*invalid = 1;
+    }
+
+  return mask;
 }
 
 /* The LI field in an I form instruction.  The lower two bits are
@@ -1079,23 +1050,21 @@ extract_des (insn, dialect, invalid)
 
 /*ARGSUSED*/
 static unsigned long
-insert_li (insn, value, dialect, errmsg)
-     unsigned long insn;
-     long value;
-     int dialect ATTRIBUTE_UNUSED;
-     const char **errmsg;
+insert_li (unsigned long insn,
+	   long value,
+	   int dialect ATTRIBUTE_UNUSED,
+	   const char **errmsg)
 {
-  if ((value & 3) != 0 && errmsg != (const char **) NULL)
+  if ((value & 3) != 0)
     *errmsg = _("ignoring least significant bits in branch offset");
   return insn | (value & 0x3fffffc);
 }
 
 /*ARGSUSED*/
 static long
-extract_li (insn, dialect, invalid)
-     unsigned long insn;
-     int dialect ATTRIBUTE_UNUSED;
-     int *invalid ATTRIBUTE_UNUSED;
+extract_li (unsigned long insn,
+	    int dialect ATTRIBUTE_UNUSED,
+	    int *invalid ATTRIBUTE_UNUSED)
 {
   return ((insn & 0x3fffffc) ^ 0x2000000) - 0x2000000;
 }
@@ -1106,11 +1075,10 @@ extract_li (insn, dialect, invalid)
    instruction which uses a field of this type.  */
 
 static unsigned long
-insert_mbe (insn, value, dialect, errmsg)
-     unsigned long insn;
-     long value;
-     int dialect ATTRIBUTE_UNUSED;
-     const char **errmsg;
+insert_mbe (unsigned long insn,
+	    long value,
+	    int dialect ATTRIBUTE_UNUSED,
+	    const char **errmsg)
 {
   unsigned long uval, mask;
   int mb, me, mx, count, last;
@@ -1119,8 +1087,7 @@ insert_mbe (insn, value, dialect, errmsg)
 
   if (uval == 0)
     {
-      if (errmsg != (const char **) NULL)
-	*errmsg = _("illegal bitmask");
+      *errmsg = _("illegal bitmask");
       return insn;
     }
 
@@ -1136,7 +1103,7 @@ insert_mbe (insn, value, dialect, errmsg)
   /* me: location of last 1->0 transition */
   /* count: # transitions */
 
-  for (mx = 0, mask = (long) 1 << 31; mx < 32; ++mx, mask >>= 1)
+  for (mx = 0, mask = 1L << 31; mx < 32; ++mx, mask >>= 1)
     {
       if ((uval & mask) && !last)
 	{
@@ -1155,26 +1122,21 @@ insert_mbe (insn, value, dialect, errmsg)
     me = 32;
 
   if (count != 2 && (count != 0 || ! last))
-    {
-      if (errmsg != (const char **) NULL)
-	*errmsg = _("illegal bitmask");
-    }
+    *errmsg = _("illegal bitmask");
 
   return insn | (mb << 6) | ((me - 1) << 1);
 }
 
 static long
-extract_mbe (insn, dialect, invalid)
-     unsigned long insn;
-     int dialect ATTRIBUTE_UNUSED;
-     int *invalid;
+extract_mbe (unsigned long insn,
+	     int dialect ATTRIBUTE_UNUSED,
+	     int *invalid)
 {
   long ret;
   int mb, me;
   int i;
 
-  if (invalid != (int *) NULL)
-    *invalid = 1;
+  *invalid = 1;
 
   mb = (insn >> 6) & 0x1f;
   me = (insn >> 1) & 0x1f;
@@ -1182,15 +1144,15 @@ extract_mbe (insn, dialect, invalid)
     {
       ret = 0;
       for (i = mb; i <= me; i++)
-	ret |= (long) 1 << (31 - i);
+	ret |= 1L << (31 - i);
     }
   else if (mb == me + 1)
     ret = ~0;
   else /* (mb > me + 1) */
     {
-      ret = ~ (long) 0;
+      ret = ~0;
       for (i = me + 1; i < mb; i++)
-	ret &= ~ ((long) 1 << (31 - i));
+	ret &= ~(1L << (31 - i));
     }
   return ret;
 }
@@ -1200,21 +1162,19 @@ extract_mbe (insn, dialect, invalid)
 
 /*ARGSUSED*/
 static unsigned long
-insert_mb6 (insn, value, dialect, errmsg)
-     unsigned long insn;
-     long value;
-     int dialect ATTRIBUTE_UNUSED;
-     const char **errmsg ATTRIBUTE_UNUSED;
+insert_mb6 (unsigned long insn,
+	    long value,
+	    int dialect ATTRIBUTE_UNUSED,
+	    const char **errmsg ATTRIBUTE_UNUSED)
 {
   return insn | ((value & 0x1f) << 6) | (value & 0x20);
 }
 
 /*ARGSUSED*/
 static long
-extract_mb6 (insn, dialect, invalid)
-     unsigned long insn;
-     int dialect ATTRIBUTE_UNUSED;
-     int *invalid ATTRIBUTE_UNUSED;
+extract_mb6 (unsigned long insn,
+	     int dialect ATTRIBUTE_UNUSED,
+	     int *invalid ATTRIBUTE_UNUSED)
 {
   return ((insn >> 6) & 0x1f) | (insn & 0x20);
 }
@@ -1223,11 +1183,10 @@ extract_mb6 (insn, dialect, invalid)
    0.  */
 
 static unsigned long
-insert_nb (insn, value, dialect, errmsg)
-     unsigned long insn;
-     long value;
-     int dialect ATTRIBUTE_UNUSED;
-     const char **errmsg;
+insert_nb (unsigned long insn,
+	   long value,
+	   int dialect ATTRIBUTE_UNUSED,
+	   const char **errmsg)
 {
   if (value < 0 || value > 32)
     *errmsg = _("value out of range");
@@ -1238,10 +1197,9 @@ insert_nb (insn, value, dialect, errmsg)
 
 /*ARGSUSED*/
 static long
-extract_nb (insn, dialect, invalid)
-     unsigned long insn;
-     int dialect ATTRIBUTE_UNUSED;
-     int *invalid ATTRIBUTE_UNUSED;
+extract_nb (unsigned long insn,
+	    int dialect ATTRIBUTE_UNUSED,
+	    int *invalid ATTRIBUTE_UNUSED)
 {
   long ret;
 
@@ -1258,24 +1216,21 @@ extract_nb (insn, dialect, invalid)
 
 /*ARGSUSED*/
 static unsigned long
-insert_nsi (insn, value, dialect, errmsg)
-     unsigned long insn;
-     long value;
-     int dialect ATTRIBUTE_UNUSED;
-     const char **errmsg ATTRIBUTE_UNUSED;
+insert_nsi (unsigned long insn,
+	    long value,
+	    int dialect ATTRIBUTE_UNUSED,
+	    const char **errmsg ATTRIBUTE_UNUSED)
 {
-  return insn | ((- value) & 0xffff);
+  return insn | (-value & 0xffff);
 }
 
 static long
-extract_nsi (insn, dialect, invalid)
-     unsigned long insn;
-     int dialect ATTRIBUTE_UNUSED;
-     int *invalid;
+extract_nsi (unsigned long insn,
+	     int dialect ATTRIBUTE_UNUSED,
+	     int *invalid)
 {
-  if (invalid != (int *) NULL)
-    *invalid = 1;
-  return - (((insn & 0xffff) ^ 0x8000) - 0x8000);
+  *invalid = 1;
+  return -(((insn & 0xffff) ^ 0x8000) - 0x8000);
 }
 
 /* The RA field in a D or X form instruction which is an updating
@@ -1283,11 +1238,10 @@ extract_nsi (insn, dialect, invalid)
    equal the RT field.  */
 
 static unsigned long
-insert_ral (insn, value, dialect, errmsg)
-     unsigned long insn;
-     long value;
-     int dialect ATTRIBUTE_UNUSED;
-     const char **errmsg;
+insert_ral (unsigned long insn,
+	    long value,
+	    int dialect ATTRIBUTE_UNUSED,
+	    const char **errmsg)
 {
   if (value == 0
       || (unsigned long) value == ((insn >> 21) & 0x1f))
@@ -1299,31 +1253,29 @@ insert_ral (insn, value, dialect, errmsg)
    restrictions.  */
 
 static unsigned long
-insert_ram (insn, value, dialect, errmsg)
-     unsigned long insn;
-     long value;
-     int dialect ATTRIBUTE_UNUSED;
-     const char **errmsg;
+insert_ram (unsigned long insn,
+	    long value,
+	    int dialect ATTRIBUTE_UNUSED,
+	    const char **errmsg)
 {
   if ((unsigned long) value >= ((insn >> 21) & 0x1f))
     *errmsg = _("index register in load range");
   return insn | ((value & 0x1f) << 16);
 }
 
-  /* The RA field in the DQ form lq instruction, which has special 
-     value restrictions.  */
+/* The RA field in the DQ form lq instruction, which has special 
+   value restrictions.  */
 
 /*ARGSUSED*/
 static unsigned long
-insert_raq (insn, value, dialect, errmsg)
-     unsigned long insn;
-     long value;
-     int dialect ATTRIBUTE_UNUSED;
-     const char **errmsg;
+insert_raq (unsigned long insn,
+	    long value,
+	    int dialect ATTRIBUTE_UNUSED,
+	    const char **errmsg)
 {
   long rtvalue = (insn & RT_MASK) >> 21;
 
-  if (value == rtvalue && errmsg != NULL)
+  if (value == rtvalue)
     *errmsg = _("source and target register operands must be different");
   return insn | ((value & 0x1f) << 16);
 }
@@ -1333,11 +1285,10 @@ insert_raq (insn, value, dialect, errmsg)
    field may not be zero.  */
 
 static unsigned long
-insert_ras (insn, value, dialect, errmsg)
-     unsigned long insn;
-     long value;
-     int dialect ATTRIBUTE_UNUSED;
-     const char **errmsg;
+insert_ras (unsigned long insn,
+	    long value,
+	    int dialect ATTRIBUTE_UNUSED,
+	    const char **errmsg)
 {
   if (value == 0)
     *errmsg = _("invalid register operand when updating");
@@ -1352,55 +1303,50 @@ insert_ras (insn, value, dialect, errmsg)
 
 /*ARGSUSED*/
 static unsigned long
-insert_rbs (insn, value, dialect, errmsg)
-     unsigned long insn;
-     long value ATTRIBUTE_UNUSED;
-     int dialect ATTRIBUTE_UNUSED;
-     const char **errmsg ATTRIBUTE_UNUSED;
+insert_rbs (unsigned long insn,
+	    long value ATTRIBUTE_UNUSED,
+	    int dialect ATTRIBUTE_UNUSED,
+	    const char **errmsg ATTRIBUTE_UNUSED)
 {
   return insn | (((insn >> 21) & 0x1f) << 11);
 }
 
 static long
-extract_rbs (insn, dialect, invalid)
-     unsigned long insn;
-     int dialect ATTRIBUTE_UNUSED;
-     int *invalid;
+extract_rbs (unsigned long insn,
+	     int dialect ATTRIBUTE_UNUSED,
+	     int *invalid)
 {
-  if (invalid != (int *) NULL
-      && ((insn >> 21) & 0x1f) != ((insn >> 11) & 0x1f))
+  if (((insn >> 21) & 0x1f) != ((insn >> 11) & 0x1f))
     *invalid = 1;
   return 0;
 }
 
-  /* The RT field of the DQ form lq instruction, which has special
-     value restrictions.  */
+/* The RT field of the DQ form lq instruction, which has special
+   value restrictions.  */
 
 /*ARGSUSED*/
 static unsigned long
-insert_rtq (insn, value, dialect, errmsg)
-     unsigned long insn;
-     long value;
-     int dialect ATTRIBUTE_UNUSED;
-     const char **errmsg;
+insert_rtq (unsigned long insn,
+	    long value,
+	    int dialect ATTRIBUTE_UNUSED,
+	    const char **errmsg)
 {
-  if ((value & 1) != 0 && errmsg != NULL)
+  if ((value & 1) != 0)
     *errmsg = _("target register operand must be even");
   return insn | ((value & 0x1f) << 21);
 }
 
-  /* The RS field of the DS form stq instruction, which has special 
-     value restrictions.  */
+/* The RS field of the DS form stq instruction, which has special 
+   value restrictions.  */
 
 /*ARGSUSED*/
 static unsigned long
-insert_rsq (insn, value, dialect, errmsg)
-     unsigned long insn;
-     long value ATTRIBUTE_UNUSED;
-     int dialect ATTRIBUTE_UNUSED;
-     const char **errmsg;
+insert_rsq (unsigned long insn,
+	    long value ATTRIBUTE_UNUSED,
+	    int dialect ATTRIBUTE_UNUSED,
+	    const char **errmsg)
 {
-  if ((value & 1) != 0 && errmsg != NULL)
+  if ((value & 1) != 0)
     *errmsg = _("source register operand must be even");
   return insn | ((value & 0x1f) << 21);
 }
@@ -1409,21 +1355,19 @@ insert_rsq (insn, value, dialect, errmsg)
 
 /*ARGSUSED*/
 static unsigned long
-insert_sh6 (insn, value, dialect, errmsg)
-     unsigned long insn;
-     long value;
-     int dialect ATTRIBUTE_UNUSED;
-     const char **errmsg ATTRIBUTE_UNUSED;
+insert_sh6 (unsigned long insn,
+	    long value,
+	    int dialect ATTRIBUTE_UNUSED,
+	    const char **errmsg ATTRIBUTE_UNUSED)
 {
   return insn | ((value & 0x1f) << 11) | ((value & 0x20) >> 4);
 }
 
 /*ARGSUSED*/
 static long
-extract_sh6 (insn, dialect, invalid)
-     unsigned long insn;
-     int dialect ATTRIBUTE_UNUSED;
-     int *invalid ATTRIBUTE_UNUSED;
+extract_sh6 (unsigned long insn,
+	     int dialect ATTRIBUTE_UNUSED,
+	     int *invalid ATTRIBUTE_UNUSED)
 {
   return ((insn >> 11) & 0x1f) | ((insn << 4) & 0x20);
 }
@@ -1432,20 +1376,18 @@ extract_sh6 (insn, dialect, invalid)
    lower 5 bits are stored in the upper 5 and vice- versa.  */
 
 static unsigned long
-insert_spr (insn, value, dialect, errmsg)
-     unsigned long insn;
-     long value;
-     int dialect ATTRIBUTE_UNUSED;
-     const char **errmsg ATTRIBUTE_UNUSED;
+insert_spr (unsigned long insn,
+	    long value,
+	    int dialect ATTRIBUTE_UNUSED,
+	    const char **errmsg ATTRIBUTE_UNUSED)
 {
   return insn | ((value & 0x1f) << 16) | ((value & 0x3e0) << 6);
 }
 
 static long
-extract_spr (insn, dialect, invalid)
-     unsigned long insn;
-     int dialect ATTRIBUTE_UNUSED;
-     int *invalid ATTRIBUTE_UNUSED;
+extract_spr (unsigned long insn,
+	     int dialect ATTRIBUTE_UNUSED,
+	     int *invalid ATTRIBUTE_UNUSED)
 {
   return ((insn >> 16) & 0x1f) | ((insn >> 6) & 0x3e0);
 }
@@ -1461,11 +1403,10 @@ extract_spr (insn, dialect, invalid)
 #define TB (268)
 
 static unsigned long
-insert_tbr (insn, value, dialect, errmsg)
-     unsigned long insn;
-     long value;
-     int dialect ATTRIBUTE_UNUSED;
-     const char **errmsg ATTRIBUTE_UNUSED;
+insert_tbr (unsigned long insn,
+	    long value,
+	    int dialect ATTRIBUTE_UNUSED,
+	    const char **errmsg ATTRIBUTE_UNUSED)
 {
   if (value == 0)
     value = TB;
@@ -1473,10 +1414,9 @@ insert_tbr (insn, value, dialect, errmsg)
 }
 
 static long
-extract_tbr (insn, dialect, invalid)
-     unsigned long insn;
-     int dialect ATTRIBUTE_UNUSED;
-     int *invalid ATTRIBUTE_UNUSED;
+extract_tbr (unsigned long insn,
+	     int dialect ATTRIBUTE_UNUSED,
+	     int *invalid ATTRIBUTE_UNUSED)
 {
   long ret;
 
@@ -1739,7 +1679,7 @@ extract_tbr (insn, dialect, invalid)
 #define XS_MASK XS (0x3f, 0x1ff, 1)
 
 /* A mask for the FXM version of an XFX form instruction.  */
-#define XFXFXM_MASK (X_MASK | (((unsigned long)1) << 20) | (((unsigned long)1) << 11))
+#define XFXFXM_MASK (X_MASK | (1 << 11))
 
 /* An XFX form instruction with the FXM field filled in.  */
 #define XFXM(op, xop, fxm) \
@@ -3286,7 +3226,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 { "iseleq",  X(31,79),      X_MASK,	PPCISEL,	{ RT, RA, RB } },
 { "isel",    XISEL(31,15),  XISEL_MASK,	PPCISEL,	{ RT, RA, RB, CRB } },
 
-{ "mfcr",    X(31,19),	XRARB_MASK,	COM,		{ RT } },
+{ "mfcr",    X(31,19),	XRARB_MASK,	NOPOWER4,	{ RT } },
+{ "mfcr",    X(31,19),	XFXFXM_MASK,	POWER4,		{ RT, FXM4 } },
 
 { "lwarx",   X(31,20),	X_MASK,		PPC,		{ RT, RA, RB } },
 
@@ -3437,7 +3378,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 { "dcbtstlse",X(31,142),X_MASK,		PPCCHLK64,	{ CT, RA, RB }},
 
-{ "mtcr",    XFXM(31,144,0xff), XFXFXM_MASK|FXM_MASK, COM,	{ RS }},
+{ "mtcr",    XFXM(31,144,0xff), XRARB_MASK, COM,	{ RS }},
 { "mtcrf",   X(31,144),	XFXFXM_MASK,	COM,		{ FXM, RS } },
 
 { "mtmsr",   X(31,146),	XRARB_MASK,	COM,		{ RS } },

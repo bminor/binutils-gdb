@@ -61,6 +61,8 @@ if { [istarget "alpha*-*-*"] } then {
     gdb_test "info float" "R7:.*Status Word:.*Opcode:.*" "info float"
 } elseif [istarget "ia64-*-*"] then {
     gdb_test "info float" "f0.*f1.*f127.*" "info float"
+} elseif [istarget "m68k-*-*"] then {
+    gdb_test "info float" "fp0.*fp1.*fp7.*" "info float"
 } else {
     gdb_test "info float" "No floating.point info available for this processor." "info float"
 }

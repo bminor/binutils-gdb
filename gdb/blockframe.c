@@ -106,6 +106,47 @@ inside_main_func (CORE_ADDR pc)
 	    BLOCK_END (SYMBOL_BLOCK_VALUE (mainsym));
 	}
     }
+
+  /* Not in the normal symbol tables, see if "main" is in the partial
+     symbol table.  If it's not, then give up.  */
+  {
+    struct minimal_symbol *msymbol
+      = lookup_minimal_symbol (main_name (), NULL, symfile_objfile);
+    if (msymbol != NULL && MSYMBOL_TYPE (msymbol) == mst_text)
+      {
+	struct obj_section *osect
+	  = find_pc_sect_section (SYMBOL_VALUE_ADDRESS (msymbol),
+				  msymbol->ginfo.bfd_section);
+	if (osect != NULL)
+	  {
+	    int i;
+	    /* Step over other symbols at this same address, and
+	       symbols in other sections, to find the next symbol in
+	       this section with a different address.  */
+	    for (i = 1; SYMBOL_LINKAGE_NAME (msymbol + i) != NULL; i++)
+	      {
+		if (SYMBOL_VALUE_ADDRESS (msymbol + i) != SYMBOL_VALUE_ADDRESS (msymbol)
+		    && SYMBOL_BFD_SECTION (msymbol + i) == SYMBOL_BFD_SECTION (msymbol))
+		  break;
+	      }
+
+	    symfile_objfile->ei.main_func_lowpc = SYMBOL_VALUE_ADDRESS (msymbol);
+
+	    /* Use the lesser of the next minimal symbol in the same
+	       section, or the end of the section, as the end of the
+	       function.  */
+	    if (SYMBOL_LINKAGE_NAME (msymbol + i) != NULL
+		&& SYMBOL_VALUE_ADDRESS (msymbol + i) < osect->endaddr)
+	      symfile_objfile->ei.main_func_highpc = SYMBOL_VALUE_ADDRESS (msymbol + i);
+	    else
+	      /* We got the start address from the last msymbol in the
+		 objfile.  So the end address is the end of the
+		 section.  */
+	      symfile_objfile->ei.main_func_highpc = osect->endaddr;
+	  }
+      }
+  }
+
   return (symfile_objfile->ei.main_func_lowpc <= pc &&
 	  symfile_objfile->ei.main_func_highpc > pc);
 }
@@ -168,31 +209,6 @@ frameless_look_for_prologue (struct frame_info *frame)
     return 0;
 }
 
-/* return the address of the PC for the given FRAME, ie the current PC value
-   if FRAME is the innermost frame, or the address adjusted to point to the
-   call instruction if not.  */
-
-CORE_ADDR
-frame_address_in_block (struct frame_info *frame)
-{
-  CORE_ADDR pc = get_frame_pc (frame);
-
-  /* If we are not in the innermost frame, and we are not interrupted
-     by a signal, frame->pc points to the instruction following the
-     call. As a consequence, we need to get the address of the previous
-     instruction. Unfortunately, this is not straightforward to do, so
-     we just use the address minus one, which is a good enough
-     approximation.  */
-  /* FIXME: cagney/2002-11-10: Should this instead test for
-     NORMAL_FRAME?  A dummy frame (in fact all the abnormal frames)
-     save the PC value in the block.  */
-  if (get_next_frame (frame) != 0
-      && get_frame_type (get_next_frame (frame)) != SIGTRAMP_FRAME)
-    --pc;
-
-  return pc;
-}
-
 /* Return the innermost lexical block in execution
    in a specified stack frame.  The frame address is assumed valid.
 
@@ -212,7 +228,7 @@ frame_address_in_block (struct frame_info *frame)
 struct block *
 get_frame_block (struct frame_info *frame, CORE_ADDR *addr_in_block)
 {
-  const CORE_ADDR pc = frame_address_in_block (frame);
+  const CORE_ADDR pc = get_frame_address_in_block (frame);
 
   if (addr_in_block)
     *addr_in_block = pc;
@@ -512,7 +528,7 @@ block_innermost_frame (const struct block *block)
       frame = get_prev_frame (frame);
       if (frame == NULL)
 	return NULL;
-      calling_pc = frame_address_in_block (frame);
+      calling_pc = get_frame_address_in_block (frame);
       if (calling_pc >= start && calling_pc < end)
 	return frame;
     }

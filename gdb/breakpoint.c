@@ -47,7 +47,6 @@
 #include "gdb.h"
 #include "ui-out.h"
 #include "cli/cli-script.h"
-#include "dictionary.h"
 #include "gdb_assert.h"
 #include "block.h"
 
@@ -705,7 +704,7 @@ read_memory_nobpt (CORE_ADDR memaddr, char *myaddr, unsigned len)
 
 
 /* A wrapper function for inserting catchpoints.  */
-int
+static int
 insert_catchpoint (struct ui_out *uo, void *args)
 {
   struct breakpoint *b = (struct breakpoint *) args;

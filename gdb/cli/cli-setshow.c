@@ -213,7 +213,7 @@ do_setshow_command (char *arg, int from_tty, struct cmd_list_element *c)
 		    strcat (msg, c->enums[i]);
 		  }
 		strcat (msg, ".");
-		error (msg);
+		error ("%s", msg);
 	      }
 
 	    p = strchr (arg, ' ');

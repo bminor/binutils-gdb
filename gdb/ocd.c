@@ -146,7 +146,7 @@ ocd_error (char *s, int error_code)
       s = buf;
     }
 
-  error (s);
+  error ("%s", s);
 }
 
 /*  Return nonzero if the thread TH is still alive on the remote system.  */

@@ -164,7 +164,9 @@ struct sim_state {
 /* Local version of macros for decoding exit status.  
    (included here rather than try to find target version of wait.h)
 */
-#define SIM_WIFEXITED(V) (((V) & 0xff) == 0)
-#define SIM_WEXITSTATUS(V) ((V) >> 8)
+#define SIM_WIFEXITED(V)	(((V) & 0xff) == 0)
+#define SIM_WIFSTOPPED(V)	(!SIM_WIFEXITED (V))
+#define SIM_WEXITSTATUS(V)	(((V) >> 8) & 0xff)
+#define SIM_WSTOPSIG(V)		((V) & 0x7f)
 
 #endif /* SIM_MAIN_H */

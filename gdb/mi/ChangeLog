@@ -1,3 +1,23 @@
+2003-08-04  Andrew Cagney  <cagney@redhat.com>
+
+	* mi-cmds.h (struct mi_cli): Define.
+	(struct mi_cmd): Change type of "cli" to "struct mi_cli".
+	* mi-cmds.c (mi_cmds): Update table.
+	* mi-parse.c (mi_parse): Update.
+	* mi-main.c (mi_execute_cli_command): Add "args_p" parameter, make
+	others constant.
+	(mi_cmd_execute): Update call.
+	(captured_mi_execute_command): Ditto.
+
+2003-08-04  David Carlton  <carlton@kealia.com>
+
+	* mi-main.c (mi_error_last_message): Add "%s" second argument to
+	xasprintf call.
+
+2003-06-28  Daniel Jacobowitz  <drow@mvista.com>
+
+	* mi-out.c (mi_ui_out_impl): Add NULL for redirect member.
+
 2003-06-17  Daniel Jacobowitz  <drow@mvista.com>
 
         * mi-cmds.c (mi_cmds): Add "-target-disconnect".

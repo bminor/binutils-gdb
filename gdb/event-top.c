@@ -612,7 +612,7 @@ command_line_handler (char *rl)
   if (annotation_level > 1 && instream == stdin)
     {
       printf_unfiltered ("\n\032\032post-");
-      printf_unfiltered (async_annotation_suffix);
+      puts_unfiltered (async_annotation_suffix);
       printf_unfiltered ("\n");
     }
 

@@ -29,6 +29,7 @@
 #include "ax.h"
 #include "ax-gdb.h"
 #include "regcache.h"
+#include "objfiles.h"
 
 #include "elf/dwarf2.h"
 #include "dwarf2expr.h"
@@ -185,6 +186,8 @@ dwarf_expr_tls_address (void *baton, CORE_ADDR offset)
     addr = target_get_thread_local_address (inferior_ptid,
 					    debaton->objfile,
 					    offset);
+  /* It wouldn't be wrong here to try a gdbarch method, too; finding
+     TLS is an ABI-specific thing.  But we don't do that yet.  */
   else
     error ("Cannot find thread-local variables on this target");
 
@@ -406,6 +409,34 @@ locexpr_describe_location (const struct symbol *symbol, struct ui_file *stream)
 			"a variable in register %s", REGISTER_NAME (regno));
       return 1;
     }
+
+  /* The location expression for a TLS variable looks like this (on a
+     64-bit LE machine):
+
+     DW_AT_location    : 10 byte block: 3 4 0 0 0 0 0 0 0 e0
+                        (DW_OP_addr: 4; DW_OP_GNU_push_tls_address)
+     
+     0x3 is the encoding for DW_OP_addr, which has an operand as long
+     as the size of an address on the target machine (here is 8
+     bytes).  0xe0 is the encoding for DW_OP_GNU_push_tls_address.
+     The operand represents the offset at which the variable is within
+     the thread local storage.  */
+
+  if (dlbaton->size > 1 
+      && dlbaton->data[dlbaton->size - 1] == DW_OP_GNU_push_tls_address)
+    if (dlbaton->data[0] == DW_OP_addr)
+      {
+	int bytes_read;
+	CORE_ADDR offset = dwarf2_read_address (&dlbaton->data[1],
+						&dlbaton->data[dlbaton->size - 1],
+						&bytes_read);
+	fprintf_filtered (stream, 
+			  "a thread-local variable at offset %s in the "
+			  "thread-local storage for `%s'",
+			  paddr_nz (offset), dlbaton->objfile->name);
+	return 1;
+      }
+  
 
   fprintf_filtered (stream,
 		    "a variable with complex or multiple locations (DWARF2)");

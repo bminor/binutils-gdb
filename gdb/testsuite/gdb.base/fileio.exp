@@ -52,8 +52,8 @@ if [get_compiler_info ${binfile}] {
     return -1;
 }
 
-remote_exec build "test -r dir2.fileio.test && chmod -f +w dir2.fileio.test"
-remote_exec build "rm -rf *.fileio.test"
+remote_exec build {sh -xc test\ -r\ dir2.fileio.test\ &&\ chmod\ -f\ +w\ dir2.fileio.test}
+remote_exec build {sh -xc rm\ -rf\ *.fileio.test}
 
 set oldtimeout $timeout
 set timeout [expr "$timeout + 60"]
@@ -269,9 +269,8 @@ gdb_test continue \
 send_gdb "quit\n"
 send_gdb "y\n"
 
-remote_exec build "test -r dir2.fileio.test && chmod -f +w dir2.fileio.test"
-remote_exec build "rm -rf *.fileio.test"
+remote_exec build {sh -xc test\ -r\ dir2.fileio.test\ &&\ chmod\ -f\ +w\ dir2.fileio.test}
+remote_exec build {sh -xc rm\ -rf\ *.fileio.test}
 
 set timeout $oldtimeout
 return 0
-

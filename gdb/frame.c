@@ -28,7 +28,7 @@
 #include "regcache.h"
 #include "gdb_assert.h"
 #include "gdb_string.h"
-#include "builtin-regs.h"
+#include "user-regs.h"
 #include "gdb_obstack.h"
 #include "dummy-frame.h"
 #include "sentinel-frame.h"
@@ -229,8 +229,7 @@ get_frame_id (struct frame_info *fi)
       /* Find the unwinder.  */
       if (fi->unwind == NULL)
 	{
-	  fi->unwind = frame_unwind_find_by_pc (current_gdbarch,
-						get_frame_pc (fi));
+	  fi->unwind = frame_unwind_find_by_frame (fi->next);
 	  /* FIXME: cagney/2003-04-02: Rather than storing the frame's
 	     type in the frame, the unwinder's type should be returned
 	     directly.  Unfortunatly, legacy code, called by
@@ -422,8 +421,11 @@ frame_func_unwind (struct frame_info *fi)
 {
   if (!fi->prev_func.p)
     {
+      /* Make certain that this, and not the adjacent, function is
+         found.  */
+      CORE_ADDR addr_in_block = frame_unwind_address_in_block (fi);
       fi->prev_func.p = 1;
-      fi->prev_func.addr = get_pc_function_start (frame_pc_unwind (fi));
+      fi->prev_func.addr = get_pc_function_start (addr_in_block);
       if (frame_debug)
 	fprintf_unfiltered (gdb_stdlog,
 			    "{ frame_func_unwind (fi=%d) -> 0x%s }\n",
@@ -497,7 +499,7 @@ frame_register_unwind (struct frame_info *frame, int regnum,
     {
       fprintf_unfiltered (gdb_stdlog,
 			  "{ frame_register_unwind (frame=%d,regnum=\"%s\",...) ",
-			  frame->level, frame_map_regnum_to_name (regnum));
+			  frame->level, frame_map_regnum_to_name (frame, regnum));
     }
 
   /* Require all but BUFFERP to be valid.  A NULL BUFFERP indicates
@@ -517,8 +519,7 @@ frame_register_unwind (struct frame_info *frame, int regnum,
   /* Find the unwinder.  */
   if (frame->unwind == NULL)
     {
-      frame->unwind = frame_unwind_find_by_pc (current_gdbarch,
-					       get_frame_pc (frame));
+      frame->unwind = frame_unwind_find_by_frame (frame->next);
       /* FIXME: cagney/2003-04-02: Rather than storing the frame's
 	 type in the frame, the unwinder's type should be returned
 	 directly.  Unfortunatly, legacy code, called by
@@ -546,7 +547,7 @@ frame_register_unwind (struct frame_info *frame, int regnum,
       else
 	{
 	  int i;
-	  const char *buf = bufferp;
+	  const unsigned char *buf = bufferp;
 	  fprintf_unfiltered (gdb_stdlog, "[");
 	  for (i = 0; i < register_size (current_gdbarch, regnum); i++)
 	    fprintf_unfiltered (gdb_stdlog, "%02x", buf[i]);
@@ -773,42 +774,15 @@ frame_register_read (struct frame_info *frame, int regnum, void *myaddr)
    includes builtin registers.  */
 
 int
-frame_map_name_to_regnum (const char *name, int len)
+frame_map_name_to_regnum (struct frame_info *frame, const char *name, int len)
 {
-  int i;
-
-  if (len < 0)
-    len = strlen (name);
-
-  /* Search register name space. */
-  for (i = 0; i < NUM_REGS + NUM_PSEUDO_REGS; i++)
-    if (REGISTER_NAME (i) && len == strlen (REGISTER_NAME (i))
-	&& strncmp (name, REGISTER_NAME (i), len) == 0)
-      {
-	return i;
-      }
-
-  /* Try builtin registers.  */
-  i = builtin_reg_map_name_to_regnum (name, len);
-  if (i >= 0)
-    {
-      /* A builtin register doesn't fall into the architecture's
-         register range.  */
-      gdb_assert (i >= NUM_REGS + NUM_PSEUDO_REGS);
-      return i;
-    }
-
-  return -1;
+  return user_reg_map_name_to_regnum (get_frame_arch (frame), name, len);
 }
 
 const char *
-frame_map_regnum_to_name (int regnum)
+frame_map_regnum_to_name (struct frame_info *frame, int regnum)
 {
-  if (regnum < 0)
-    return NULL;
-  if (regnum < NUM_REGS + NUM_PSEUDO_REGS)
-    return REGISTER_NAME (regnum);
-  return builtin_reg_map_regnum_to_name (regnum);
+  return user_reg_map_regnum_to_name (get_frame_arch (frame), regnum);
 }
 
 /* Create a sentinel frame.  */
@@ -1233,7 +1207,7 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
 
   /* Select/initialize both the unwind function and the frame's type
      based on the PC.  */
-  fi->unwind = frame_unwind_find_by_pc (current_gdbarch, pc);
+  fi->unwind = frame_unwind_find_by_frame (fi->next);
   if (fi->unwind->type != UNKNOWN_FRAME)
     fi->type = fi->unwind->type;
   else
@@ -1392,8 +1366,7 @@ legacy_get_prev_frame (struct frame_info *this_frame)
 
       /* Set the unwind functions based on that identified PC.  Ditto
          for the "type" but strongly prefer the unwinder's frame type.  */
-      prev->unwind = frame_unwind_find_by_pc (current_gdbarch,
-					      get_frame_pc (prev));
+      prev->unwind = frame_unwind_find_by_frame (prev->next);
       if (prev->unwind->type == UNKNOWN_FRAME)
 	prev->type = frame_type_from_pc (get_frame_pc (prev));
       else
@@ -1541,8 +1514,7 @@ legacy_get_prev_frame (struct frame_info *this_frame)
              to the new frame code.  Implement FRAME_CHAIN the way the
              new frame will.  */
 	  /* Find PREV frame's unwinder.  */
-	  prev->unwind = frame_unwind_find_by_pc (current_gdbarch,
-						  frame_pc_unwind (this_frame));
+	  prev->unwind = frame_unwind_find_by_frame (this_frame->next);
 	  /* FIXME: cagney/2003-04-02: Rather than storing the frame's
 	     type in the frame, the unwinder's type should be returned
 	     directly.  Unfortunatly, legacy code, called by
@@ -1703,8 +1675,7 @@ legacy_get_prev_frame (struct frame_info *this_frame)
      If there isn't a FRAME_CHAIN, the code above will have already
      done this.  */
   if (prev->unwind == NULL)
-    prev->unwind = frame_unwind_find_by_pc (current_gdbarch,
-					    get_frame_pc (prev));
+    prev->unwind = frame_unwind_find_by_frame (prev->next);
 
   /* If the unwinder provides a frame type, use it.  Otherwize
      continue on to that heuristic mess.  */
@@ -1843,6 +1814,44 @@ get_prev_frame (struct frame_info *this_frame)
       return NULL;
     }
 
+  /* If we're already inside the entry function for the main objfile,
+     then it isn't valid.  Don't apply this test to a dummy frame -
+     dummy frame PC's typically land in the entry func.  Don't apply
+     this test to the sentinel frame.  Sentinel frames should always
+     be allowed to unwind.  */
+  /* NOTE: cagney/2003-02-25: Don't enable until someone has found
+     hard evidence that this is needed.  */
+  /* NOTE: cagney/2003-07-07: Fixed a bug in inside_main_func - wasn't
+     checking for "main" in the minimal symbols.  With that fixed
+     asm-source tests now stop in "main" instead of halting the
+     backtrace in wierd and wonderful ways somewhere inside the entry
+     file.  Suspect that inside_entry_file and inside_entry_func tests
+     were added to work around that (now fixed) case.  */
+  /* NOTE: cagney/2003-07-15: danielj (if I'm reading it right)
+     suggested having the inside_entry_func test use the
+     inside_main_func msymbol trick (along with entry_point_address I
+     guess) to determine the address range of the start function.
+     That should provide a far better stopper than the current
+     heuristics.  */
+  /* NOTE: cagney/2003-07-15: Need to add a "set backtrace
+     beyond-entry-func" command so that this can be selectively
+     disabled.  */
+  if (0
+#if 0
+      && backtrace_beyond_entry_func
+#endif
+      && this_frame->type != DUMMY_FRAME && this_frame->level >= 0
+      && inside_entry_func (get_frame_pc (this_frame)))
+    {
+      if (frame_debug)
+	{
+	  fprintf_unfiltered (gdb_stdlog, "-> ");
+	  fprint_frame (gdb_stdlog, NULL);
+	  fprintf_unfiltered (gdb_stdlog, "// inside entry func }\n");
+	}
+      return NULL;
+    }
+
   /* Only try to do the unwind once.  */
   if (this_frame->prev_p)
     {
@@ -1890,26 +1899,6 @@ get_prev_frame (struct frame_info *this_frame)
     }
 #endif
 
-  /* If we're already inside the entry function for the main objfile,
-     then it isn't valid.  Don't apply this test to a dummy frame -
-     dummy frame PC's typically land in the entry func.  Don't apply
-     this test to the sentinel frame.  Sentinel frames should always
-     be allowed to unwind.  */
-  /* NOTE: cagney/2003-02-25: Don't enable until someone has found
-     hard evidence that this is needed.  */
-  if (0
-      && this_frame->type != DUMMY_FRAME && this_frame->level >= 0
-      && inside_entry_func (get_frame_pc (this_frame)))
-    {
-      if (frame_debug)
-	{
-	  fprintf_unfiltered (gdb_stdlog, "-> ");
-	  fprint_frame (gdb_stdlog, NULL);
-	  fprintf_unfiltered (gdb_stdlog, "// inside entry func }\n");
-	}
-      return NULL;
-    }
-
   /* If any of the old frame initialization methods are around, use
      the legacy get_prev_frame method.  */
   if (legacy_frame_p (current_gdbarch))
@@ -1933,25 +1922,21 @@ get_prev_frame (struct frame_info *this_frame)
     }
 
   /* Check that this frame's ID isn't inner to (younger, below, next)
-     the next frame.  This happens when frame unwind goes backwards.
-     Since the sentinel frame isn't valid, don't apply this if this
-     frame is entier the inner-most or sentinel frame.  */
+     the next frame.  This happens when a frame unwind goes backwards.
+     Since the sentinel frame doesn't really exist, don't compare the
+     inner-most against that sentinel.  */
   if (this_frame->level > 0
       && frame_id_inner (get_frame_id (this_frame),
 			 get_frame_id (this_frame->next)))
-    error ("This frame inner-to next frame (corrupt stack?)");
+    error ("Previous frame inner to this frame (corrupt stack?)");
 
-  /* Check that this and the next frame are different.  If they are
-     not, there is most likely a stack cycle.  As with the inner-than
-     test, avoid the inner-most and sentinel frames.  */
-  /* FIXME: cagney/2003-03-17: Can't yet enable this this check. The
-     frame_id_eq() method doesn't yet use function addresses when
-     comparing frame IDs.  */
-  if (0
-      && this_frame->level > 0
+  /* Check that this and the next frame are not identical.  If they
+     are, there is most likely a stack cycle.  As with the inner-than
+     test above, avoid comparing the inner-most and sentinel frames.  */
+  if (this_frame->level > 0
       && frame_id_eq (get_frame_id (this_frame),
 		      get_frame_id (this_frame->next)))
-    error ("This frame identical to next frame (corrupt stack?)");
+    error ("Previous frame identical to this frame (corrupt stack?)");
 
   /* Allocate the new frame but do not wire it in to the frame chain.
      Some (bad) code in INIT_FRAME_EXTRA_INFO tries to look along
@@ -2037,6 +2022,33 @@ get_frame_pc (struct frame_info *frame)
   return frame_pc_unwind (frame->next);
 }
 
+/* Return an address of that falls within the frame's code block.  */
+
+CORE_ADDR
+frame_unwind_address_in_block (struct frame_info *next_frame)
+{
+  /* A draft address.  */
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
+
+  /* If THIS frame is not inner most (i.e., NEXT isn't the sentinel),
+     and NEXT is `normal' (i.e., not a sigtramp, dummy, ....) THIS
+     frame's PC ends up pointing at the instruction fallowing the
+     "call".  Adjust that PC value so that it falls on the call
+     instruction (which, hopefully, falls within THIS frame's code
+     block.  So far it's proved to be a very good approximation.  See
+     get_frame_type for why ->type can't be used.  */
+  if (next_frame->level >= 0
+      && get_frame_type (next_frame) == NORMAL_FRAME)
+    --pc;
+  return pc;
+}
+
+CORE_ADDR
+get_frame_address_in_block (struct frame_info *this_frame)
+{
+  return frame_unwind_address_in_block (this_frame->next);
+}
+
 static int
 pc_notcurrent (struct frame_info *frame)
 {
@@ -2076,7 +2088,7 @@ get_frame_base_address (struct frame_info *fi)
   if (get_frame_type (fi) != NORMAL_FRAME)
     return 0;
   if (fi->base == NULL)
-    fi->base = frame_base_find_by_pc (current_gdbarch, get_frame_pc (fi));
+    fi->base = frame_base_find_by_frame (fi->next);
   /* Sneaky: If the low-level unwind and high-level base code share a
      common unwinder, let them share the prologue cache.  */
   if (fi->base->unwind == fi->unwind)
@@ -2092,7 +2104,7 @@ get_frame_locals_address (struct frame_info *fi)
     return 0;
   /* If there isn't a frame address method, find it.  */
   if (fi->base == NULL)
-    fi->base = frame_base_find_by_pc (current_gdbarch, get_frame_pc (fi));
+    fi->base = frame_base_find_by_frame (fi->next);
   /* Sneaky: If the low-level unwind and high-level base code share a
      common unwinder, let them share the prologue cache.  */
   if (fi->base->unwind == fi->unwind)
@@ -2110,7 +2122,7 @@ get_frame_args_address (struct frame_info *fi)
     return 0;
   /* If there isn't a frame address method, find it.  */
   if (fi->base == NULL)
-    fi->base = frame_base_find_by_pc (current_gdbarch, get_frame_pc (fi));
+    fi->base = frame_base_find_by_frame (fi->next);
   /* Sneaky: If the low-level unwind and high-level base code share a
      common unwinder, let them share the prologue cache.  */
   if (fi->base->unwind == fi->unwind)
@@ -2149,8 +2161,7 @@ get_frame_type (struct frame_info *frame)
     {
       /* Initialize the frame's unwinder because it is that which
          provides the frame's type.  */
-      frame->unwind = frame_unwind_find_by_pc (current_gdbarch,
-					       get_frame_pc (frame));
+      frame->unwind = frame_unwind_find_by_frame (frame->next);
       /* FIXME: cagney/2003-04-02: Rather than storing the frame's
 	 type in the frame, the unwinder's type should be returned
 	 directly.  Unfortunatly, legacy code, called by

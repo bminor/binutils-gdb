@@ -1,3 +1,31 @@
+2003-08-04  Daniel Jacobowitz  <drow@mvista.com>
+
+	* tui-interp.c: Include "cli-out.h".
+	(tui_resume): Update tui_old_uiout's stream to gdb_stdout.
+
+2003-07-24  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* tui.c (tui_rl_other_window): New function to switch the TUI active
+	window and give focus to a next window.
+	(tui_initialize_readline): Bind it to c-x o.
+	(tui_rl_next_keymap): Activate TUI mode when entering SingleKey mode.
+
+2003-07-23  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* tui.c (tui_enable): Call tuiRefreshAll to make sure the window
+	is accurate.
+
+2003-07-23  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* tui-interp.c (tui_resume): Enable tui when we expected it.
+	(tui_suspend): Remember in which TUI mode we are.
+	(_initialize_tui_interp): Use the tui interpreter even when no
+	other interpreter was set and define in which TUI mode to start.
+
+2003-06-28  Daniel Jacobowitz  <drow@mvista.com>
+
+	* tui-out.c (tui_ui_out_impl): Add NULL for redirect member.
+
 2003-06-22  Daniel Jacobowitz  <drow@mvista.com>
 
 	* tui-hooks.c: Update include order.

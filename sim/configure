@@ -1450,7 +1450,10 @@ case "${target}" in
   mn10200*-*-*)
 	sim_target=mn10200
 	;;
-  sh*-*-*)		sim_target=sh ;;
+  sh*-*-*)
+	sim_target=sh 
+	extra_subdirs="${extra_subdirs} testsuite"
+	;;
   powerpc*-*-eabi* | powerpc*-*-solaris* | powerpc*-*-sysv4* | \
   powerpc*-*-elf* | powerpc*-*-linux* | powerpc*-*-netbsd* )
 	# The PowerPC simulator uses the GCC extension long long as well as

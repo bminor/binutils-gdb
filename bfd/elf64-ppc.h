@@ -17,6 +17,8 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
+void ppc64_elf_init_stub_bfd
+  (bfd *, struct bfd_link_info *);
 bfd_boolean ppc64_elf_mark_entry_syms
   (struct bfd_link_info *);
 bfd_boolean ppc64_elf_edit_opd
@@ -36,7 +38,7 @@ void ppc64_elf_reinit_toc
 bfd_boolean ppc64_elf_next_input_section
   (struct bfd_link_info *, asection *);
 bfd_boolean ppc64_elf_size_stubs
-  (bfd *, bfd *, struct bfd_link_info *, bfd_signed_vma,
+  (bfd *, struct bfd_link_info *, bfd_signed_vma,
    asection *(*) (const char *, asection *), void (*) (void));
 bfd_boolean ppc64_elf_build_stubs
   (bfd_boolean, struct bfd_link_info *, char **);

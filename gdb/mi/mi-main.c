@@ -87,7 +87,8 @@ static char *old_regs;
 extern void _initialize_mi_main (void);
 static enum mi_cmd_result mi_cmd_execute (struct mi_parse *parse);
 
-static void mi_execute_cli_command (const char *cli, char *args);
+static void mi_execute_cli_command (const char *cmd, int args_p,
+				    const char *args);
 static enum mi_cmd_result mi_execute_async_cli_command (char *mi, char *args, int from_tty);
 
 static void mi_exec_async_cli_cmd_continuation (struct continuation_arg *arg);
@@ -101,7 +102,7 @@ void
 mi_error_last_message (void)
 {
   char *s = error_last_message ();
-  xasprintf (&mi_error_message, s);
+  xasprintf (&mi_error_message, "%s", s);
   xfree (s);
 }
 
@@ -1156,9 +1157,7 @@ captured_mi_execute_command (struct ui_out *uiout, void *data)
          mi commands */
       /* echo the command on the console. */
       fprintf_unfiltered (gdb_stdlog, "%s\n", context->command);
-      /* FIXME: If the command string has something that looks like 
-         a format spec (e.g. %s) we will get a core dump */
-      mi_execute_cli_command ("%s", context->command);
+      mi_execute_cli_command (context->command, 0, NULL);
 
       /* If we changed interpreters, DON'T print out anything. */
       if (current_interp_named_p (INTERP_MI)
@@ -1275,12 +1274,13 @@ mi_cmd_execute (struct mi_parse *parse)
 	return parse->cmd->args_func (parse->args, 0 /*from_tty */ );
       return parse->cmd->argv_func (parse->command, parse->argv, parse->argc);
     }
-  else if (parse->cmd->cli != 0)
+  else if (parse->cmd->cli.cmd != 0)
     {
       /* FIXME: DELETE THIS. */
       /* The operation is still implemented by a cli command */
       /* Must be a synchronous one */
-      mi_execute_cli_command (parse->cmd->cli, parse->args);
+      mi_execute_cli_command (parse->cmd->cli.cmd, parse->cmd->cli.args_p,
+			      parse->args);
       return MI_CMD_DONE;
     }
   else
@@ -1301,17 +1301,20 @@ mi_cmd_execute (struct mi_parse *parse)
 /* Use only for synchronous commands */
 
 void
-mi_execute_cli_command (const char *cli, char *args)
+mi_execute_cli_command (const char *cmd, int args_p, const char *args)
 {
-  if (cli != 0)
+  if (cmd != 0)
     {
       struct cleanup *old_cleanups;
       char *run;
-      xasprintf (&run, cli, args);
+      if (args_p)
+	xasprintf (&run, "%s %s", cmd, args);
+      else
+	run = xstrdup (cmd);
       if (mi_debug_p)
 	/* FIXME: gdb_???? */
 	fprintf_unfiltered (gdb_stdout, "cli=%s run=%s\n",
-			    cli, run);
+			    cmd, run);
       old_cleanups = make_cleanup (xfree, run);
       execute_command ( /*ui */ run, 0 /*from_tty */ );
       do_cleanups (old_cleanups);

@@ -1,3 +1,7 @@
+2003-07-09  Michael Snyder  <msnyder@redhat.com>
+
+	* sim/sh: New directory.  Tests for Renesas sh family.
+
 2003-04-13  Michael Snyder  <msnyder@redhat.com>
 
 	* sim/h8300: New directory.  Tests for Renesas h8/300 family.

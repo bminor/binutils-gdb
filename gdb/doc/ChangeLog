@@ -1,3 +1,49 @@
+2003-08-04  Andrew Cagney  <cagney@redhat.com>
+
+	* agentexpr.texi: Delete @bye.
+	* Makefile.in (STABS_DOC_SOURCE_INCLUDES): Add "fdl.texi"
+	(stabs.info): Add $(srcdir) to include search path.
+	(html): Depend on "annotate_toc.html", and not "annotate.html".
+	* stabs.texinfo: Ditto.  Include "fdl.texi".
+	* gdbint.texinfo: Update copyright statement's list of invariant
+	sections.
+
+2003-07-28  Andrew Cagney  <cagney@redhat.com>
+
+	* Makefile.in (INFO_DEPS): Add annotate.info.
+	(dvi, ps, html, pdf): Add annotate.
+	(ANNOTATE_DOC_SOURCE_INCLUDES): New macro.
+	(ANNOTATE_DOC_BUILD_INCLUDES): New macro.
+	(ANNOTATE_DOC_FILES): New macro.
+	(ANNOTATE_TEX_TMPS): New macro.
+	(annotate.info, annotate_toc.html): Specify dependencies.
+	(annotate.ps, annotate.pdf, annotate.dvi): Ditto.
+	* annotate.texinfo: Rename annotate.texi.  Get building.  Add
+	"Migrating to GDB/MI" and "Limitations of the Annotation
+	Interface" chapters.  Mention why it is not part of the user
+	guide.  Update copyright notice.  Include "fdl.texi".
+
+2003-07-26  Stephane Carrez  <stcarrez@nerim.fr>
+
+	* gdb.texinfo (TUI Keys): Document C-x o key to switch active window.
+
+2003-07-24  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdbint.texinfo (libgdb components): Correct a GDB to GDBN.
+
+2003-07-24  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.texinfo (Server): Mention pidof.
+
+2003-07-22  Andrew Cagney  <cagney@redhat.com>
+
+	* gdbint.texinfo (Coding): Add -Wformat-nonliteral to -Werror
+	list.
+
+2003-06-28  Daniel Jacobowitz  <drow@mvista.com>
+
+	* gdb.texinfo (Logging output): New chapter.
+
 2003-06-24  Joel Brobecker  <brobecker@gnat.com>
 
 	* gdb.texinfo (Unsupported languages): New section.

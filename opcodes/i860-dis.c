@@ -44,10 +44,6 @@ static const char *const crnames[] =
   "p0", "p1", "p2", "p3", "--", "--", "--", "--" };
 
 
-/* Prototypes.  */
-static int sign_ext		PARAMS((unsigned int, int)); 
-static void print_br_address	PARAMS((disassemble_info *, bfd_vma, long));
-
 
 /* True if opcode is xor, xorh, and, andh, or, orh, andnot, andnoth.  */
 #define BITWISE_OP(op)  ((op) == 0x30 || (op) == 0x31		\
@@ -60,9 +56,7 @@ static void print_br_address	PARAMS((disassemble_info *, bfd_vma, long));
 
 /* Sign extend N-bit number.  */
 static int
-sign_ext (x, n)
-     unsigned int x;
-     int n;
+sign_ext (unsigned int x, int n)
 {
   int t;
   t = x >> (n - 1);
@@ -74,10 +68,7 @@ sign_ext (x, n)
 /* Print a PC-relative branch offset.  VAL is the sign extended value
    from the branch instruction.  */
 static void
-print_br_address (info, memaddr, val)
-     disassemble_info *info;
-     bfd_vma memaddr;
-     long val;
+print_br_address (disassemble_info *info, bfd_vma memaddr, long val)
 {
 
   long adj = (long)memaddr + 4 + (val << 2);
@@ -96,9 +87,7 @@ print_br_address (info, memaddr, val)
 
 /* Print one instruction.  */
 int
-print_insn_i860 (memaddr, info)
-     bfd_vma memaddr;
-     disassemble_info *info;
+print_insn_i860 (bfd_vma memaddr, disassemble_info *info)
 {
   bfd_byte buff[4];
   unsigned int insn, i;

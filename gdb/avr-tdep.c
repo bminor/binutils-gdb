@@ -774,14 +774,6 @@ avr_scan_prologue (CORE_ADDR pc, struct avr_unwind_cache *info)
   return pc + avr_scan_arg_moves (vpc, prologue);;
 }
 
-/* Returns the return address for a dummy. */
-
-static CORE_ADDR
-avr_call_dummy_address (void)
-{
-  return entry_point_address ();
-}
-
 static CORE_ADDR
 avr_skip_prologue (CORE_ADDR pc)
 {
@@ -804,7 +796,9 @@ avr_skip_prologue (CORE_ADDR pc)
 
       prologue_end = avr_scan_prologue (pc, &info);
 
-      if (info.prologue_type != AVR_PROLOGUE_NONE)
+      if (info.prologue_type == AVR_PROLOGUE_NONE)
+        return pc;
+      else
         {
           sal = find_pc_line (func_addr, 0);
 
@@ -864,76 +858,6 @@ avr_extract_return_value (struct type *type, struct regcache *regcache,
     }
 }
 
-static void
-avr_saved_regs_unwinder (struct frame_info *next_frame,
-                         struct trad_frame_saved_reg *this_saved_regs,
-                         int regnum, int *optimizedp,
-                         enum lval_type *lvalp, CORE_ADDR *addrp,
-                         int *realnump, void *bufferp)
-{
-  if (this_saved_regs[regnum].addr != 0)
-    {
-      *optimizedp = 0;
-      *lvalp = lval_memory;
-      *addrp = this_saved_regs[regnum].addr;
-      *realnump = -1;
-      if (bufferp != NULL)
-        {
-          /* Read the value in from memory.  */
-
-          if (regnum == AVR_PC_REGNUM)
-            {
-              /* Reading the return PC from the PC register is slightly
-                 abnormal.  register_size(AVR_PC_REGNUM) says it is 4 bytes,
-                 but in reality, only two bytes (3 in upcoming mega256) are
-                 stored on the stack.
-
-                 Also, note that the value on the stack is an addr to a word
-                 not a byte, so we will need to multiply it by two at some
-                 point. 
-
-                 And to confuse matters even more, the return address stored
-                 on the stack is in big endian byte order, even though most
-                 everything else about the avr is little endian. Ick!  */
-
-              /* FIXME: number of bytes read here will need updated for the
-                 mega256 when it is available.  */
-
-              ULONGEST pc;
-              unsigned char tmp;
-              unsigned char buf[2];
-
-              read_memory (this_saved_regs[regnum].addr, buf, 2);
-
-              /* Convert the PC read from memory as a big-endian to
-                 little-endian order. */
-              tmp = buf[0];
-              buf[0] = buf[1];
-              buf[1] = tmp;
-
-              pc = (extract_unsigned_integer (buf, 2) * 2);
-              store_unsigned_integer (bufferp,
-                                      register_size (current_gdbarch, regnum),
-                                      pc);
-            }
-          else
-            {
-              read_memory (this_saved_regs[regnum].addr, bufferp,
-                           register_size (current_gdbarch, regnum));
-            }
-        }
-
-      return;
-    }
-
-  /* No luck, assume this and the next frame have the same register
-     value.  If a value is needed, pass the request on down the chain;
-     otherwise just return an indication that the value is in the same
-     register as the next frame.  */
-  frame_register_unwind (next_frame, regnum, optimizedp, lvalp, addrp,
-			 realnump, bufferp);
-}
-
 /* Put here the code to store, into fi->saved_regs, the addresses of
    the saved registers of frame described by FRAME_INFO.  This
    includes special registers such as pc and fp saved in special ways
@@ -965,7 +889,8 @@ avr_frame_unwind_cache (struct frame_info *next_frame,
   if ((pc > 0) && (pc < frame_pc_unwind (next_frame)))
     avr_scan_prologue (pc, info);
 
-  if (info->prologue_type != AVR_PROLOGUE_NONE)
+  if ((info->prologue_type != AVR_PROLOGUE_NONE)
+      && (info->prologue_type != AVR_PROLOGUE_MAIN))
     {
       ULONGEST high_base;       /* High byte of FP */
 
@@ -995,8 +920,7 @@ avr_frame_unwind_cache (struct frame_info *next_frame,
   info->base = avr_make_saddr (this_base);
 
   /* Adjust all the saved registers so that they contain addresses and not
-     offsets.  We need to add one to the addresses since push ops are post
-     decrement on the avr.  */
+     offsets.  */
   for (i = 0; i < NUM_REGS - 1; i++)
     if (info->saved_regs[i].addr)
       {
@@ -1010,6 +934,10 @@ avr_frame_unwind_cache (struct frame_info *next_frame,
     {
       info->saved_regs[AVR_PC_REGNUM].addr = info->prev_sp;
     }  
+
+  /* The previous frame's SP needed to be computed.  Save the computed
+     value.  */
+  trad_frame_set_value (info->saved_regs, AVR_SP_REGNUM, info->prev_sp+1);
 
   return info;
 }
@@ -1077,8 +1005,54 @@ avr_frame_prev_register (struct frame_info *next_frame,
   struct avr_unwind_cache *info
     = avr_frame_unwind_cache (next_frame, this_prologue_cache);
 
-  avr_saved_regs_unwinder (next_frame, info->saved_regs, regnum, optimizedp,
-                           lvalp, addrp, realnump, bufferp);
+  if (regnum == AVR_PC_REGNUM)
+    {
+      if (trad_frame_addr_p (info->saved_regs, regnum))
+        {
+          *optimizedp = 0;
+          *lvalp = lval_memory;
+          *addrp = info->saved_regs[regnum].addr;
+          *realnump = -1;
+          if (bufferp != NULL)
+            {
+              /* Reading the return PC from the PC register is slightly
+                 abnormal.  register_size(AVR_PC_REGNUM) says it is 4 bytes,
+                 but in reality, only two bytes (3 in upcoming mega256) are
+                 stored on the stack.
+
+                 Also, note that the value on the stack is an addr to a word
+                 not a byte, so we will need to multiply it by two at some
+                 point. 
+
+                 And to confuse matters even more, the return address stored
+                 on the stack is in big endian byte order, even though most
+                 everything else about the avr is little endian. Ick!  */
+
+              /* FIXME: number of bytes read here will need updated for the
+                 mega256 when it is available.  */
+
+              ULONGEST pc;
+              unsigned char tmp;
+              unsigned char buf[2];
+
+              read_memory (info->saved_regs[regnum].addr, buf, 2);
+
+              /* Convert the PC read from memory as a big-endian to
+                 little-endian order. */
+              tmp = buf[0];
+              buf[0] = buf[1];
+              buf[1] = tmp;
+
+              pc = (extract_unsigned_integer (buf, 2) * 2);
+              store_unsigned_integer (bufferp,
+                                      register_size (current_gdbarch, regnum),
+                                      pc);
+            }
+        }
+    }
+  else
+    trad_frame_prev_register (next_frame, info->saved_regs, regnum,
+                              optimizedp, lvalp, addrp, realnump, bufferp);
 }
 
 static const struct frame_unwind avr_frame_unwind = {
@@ -1088,7 +1062,7 @@ static const struct frame_unwind avr_frame_unwind = {
 };
 
 const struct frame_unwind *
-avr_frame_p (CORE_ADDR pc)
+avr_frame_sniffer (struct frame_info *next_frame)
 {
   return &avr_frame_unwind;
 }
@@ -1339,7 +1313,6 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_extract_return_value (gdbarch, avr_extract_return_value);
   set_gdbarch_print_insn (gdbarch, print_insn_avr);
 
-  set_gdbarch_call_dummy_address (gdbarch, avr_call_dummy_address);
   set_gdbarch_push_dummy_call (gdbarch, avr_push_dummy_call);
 
   set_gdbarch_address_to_pointer (gdbarch, avr_address_to_pointer);
@@ -1359,7 +1332,7 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frameless_function_invocation (gdbarch,
                                              frameless_look_for_prologue);
 
-  frame_unwind_append_predicate (gdbarch, avr_frame_p);
+  frame_unwind_append_sniffer (gdbarch, avr_frame_sniffer);
   frame_base_set_default (gdbarch, &avr_frame_base);
 
   set_gdbarch_unwind_dummy_id (gdbarch, avr_unwind_dummy_id);

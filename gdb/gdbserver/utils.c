@@ -33,16 +33,13 @@ void
 perror_with_name (char *string)
 {
 #ifndef STDC_HEADERS
-  extern int sys_nerr;
-  extern char *sys_errlist[];
   extern int errno;
 #endif
   const char *err;
   char *combined;
 
-  if (errno < sys_nerr)
-    err = sys_errlist[errno];
-  else
+  err = strerror (errno);
+  if (err == NULL)
     err = "unknown error";
 
   combined = (char *) alloca (strlen (err) + strlen (string) + 3);

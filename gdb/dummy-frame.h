@@ -48,7 +48,7 @@ struct frame_id;
 /* If the PC falls in a dummy frame, return a dummy frame
    unwinder.  */
 
-extern const struct frame_unwind *dummy_frame_p (CORE_ADDR pc);
+extern const struct frame_unwind *dummy_frame_sniffer (struct frame_info *next_frame);
 
 /* Does the PC fall in a dummy frame?
 

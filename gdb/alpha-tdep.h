@@ -82,6 +82,11 @@ struct gdbarch_tdep
      the sigcontext structure for that signal handler.  */
   CORE_ADDR (*sigcontext_addr) (struct frame_info *);
 
+  /* Offset of registers in `struct sigcontext'.  */
+  int sc_pc_offset;
+  int sc_regs_offset;
+  int sc_fpregs_offset;
+
   int jb_pc;			/* Offset to PC value in jump buffer.
 				   If htis is negative, longjmp support
 				   will be disabled.  */

@@ -753,24 +753,20 @@ alpha_sigtramp_frame_unwind_cache (struct frame_info *next_frame,
   return info;
 }
 
-/* Return the address of REGNO in a sigtramp frame.  Since this is all
-   arithmetic, it doesn't seem worthwhile to cache it.  */
-
-#ifndef SIGFRAME_PC_OFF
-#define SIGFRAME_PC_OFF		(2 * 8)
-#define SIGFRAME_REGSAVE_OFF	(4 * 8)
-#define SIGFRAME_FPREGSAVE_OFF	(SIGFRAME_REGSAVE_OFF + 32 * 8 + 8)
-#endif
+/* Return the address of REGNUM in a sigtramp frame.  Since this is
+   all arithmetic, it doesn't seem worthwhile to cache it.  */
 
 static CORE_ADDR
-alpha_sigtramp_register_address (CORE_ADDR sigcontext_addr, unsigned int regno)
+alpha_sigtramp_register_address (CORE_ADDR sigcontext_addr, int regnum)
 { 
-  if (regno < 32)
-    return sigcontext_addr + SIGFRAME_REGSAVE_OFF + regno * 8;
-  if (regno >= ALPHA_FP0_REGNUM && regno < ALPHA_FP0_REGNUM + 32)
-    return sigcontext_addr + SIGFRAME_FPREGSAVE_OFF + regno * 8;
-  if (regno == ALPHA_PC_REGNUM)
-    return sigcontext_addr + SIGFRAME_PC_OFF; 
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
+  if (regnum >= 0 && regnum < 32)
+    return sigcontext_addr + tdep->sc_regs_offset + regnum * 8;
+  else if (regnum >= ALPHA_FP0_REGNUM && regnum < ALPHA_FP0_REGNUM + 32)
+    return sigcontext_addr + tdep->sc_fpregs_offset + regnum * 8;
+  else if (regnum == ALPHA_PC_REGNUM)
+    return sigcontext_addr + tdep->sc_pc_offset; 
 
   return 0;
 }
@@ -862,8 +858,9 @@ static const struct frame_unwind alpha_sigtramp_frame_unwind = {
 };
 
 static const struct frame_unwind *
-alpha_sigtramp_frame_p (CORE_ADDR pc)
+alpha_sigtramp_frame_sniffer (struct frame_info *next_frame)
 {
+  CORE_ADDR pc = frame_pc_unwind (next_frame);
   char *name;
 
   /* We shouldn't even bother to try if the OSABI didn't register
@@ -1203,7 +1200,7 @@ static const struct frame_unwind alpha_heuristic_frame_unwind = {
 };
 
 static const struct frame_unwind *
-alpha_heuristic_frame_p (CORE_ADDR pc)
+alpha_heuristic_frame_sniffer (struct frame_info *next_frame)
 {
   return &alpha_heuristic_frame_unwind;
 }
@@ -1495,6 +1492,9 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   tdep->dynamic_sigtramp_offset = NULL;
   tdep->sigcontext_addr = NULL;
+  tdep->sc_pc_offset = 2 * 8;
+  tdep->sc_regs_offset = 4 * 8;
+  tdep->sc_fpregs_offset = tdep->sc_regs_offset + 32 * 8 + 8;
 
   tdep->jb_pc = -1;	/* longjmp support not enabled by default  */
 
@@ -1572,8 +1572,8 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (tdep->jb_pc >= 0)
     set_gdbarch_get_longjmp_target (gdbarch, alpha_get_longjmp_target);
 
-  frame_unwind_append_predicate (gdbarch, alpha_sigtramp_frame_p);
-  frame_unwind_append_predicate (gdbarch, alpha_heuristic_frame_p);
+  frame_unwind_append_sniffer (gdbarch, alpha_sigtramp_frame_sniffer);
+  frame_unwind_append_sniffer (gdbarch, alpha_heuristic_frame_sniffer);
 
   frame_base_set_default (gdbarch, &alpha_heuristic_frame_base);
 
@@ -1583,9 +1583,8 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 void
 alpha_dwarf2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  frame_unwind_append_predicate (gdbarch, dwarf2_frame_p);
-  frame_base_append_predicate (gdbarch, dwarf2_frame_base_p);
-  set_gdbarch_dwarf2_build_frame_info (gdbarch, dwarf2_build_frame_info);
+  frame_unwind_append_sniffer (gdbarch, dwarf2_frame_sniffer);
+  frame_base_append_sniffer (gdbarch, dwarf2_frame_base_sniffer);
 }
 
 extern initialize_file_ftype _initialize_alpha_tdep; /* -Wmissing-prototypes */

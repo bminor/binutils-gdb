@@ -131,22 +131,6 @@ generic_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   return 0;
 }
 
-const char *
-legacy_register_name (int i)
-{
-#ifdef REGISTER_NAMES
-  static char *names[] = REGISTER_NAMES;
-  if (i < 0 || i >= (sizeof (names) / sizeof (*names)))
-    return NULL;
-  else
-    return names[i];
-#else
-  internal_error (__FILE__, __LINE__,
-		  "legacy_register_name: called.");
-  return NULL;
-#endif
-}
-
 #if defined (CALL_DUMMY)
 LONGEST legacy_call_dummy_words[] = CALL_DUMMY;
 #else
