@@ -1,5 +1,18 @@
 2002-03-05  Chris Demetriou  <cgd@broadcom.com>
 
+	* sim-main.h (status_UX, status_SX, status_KX, status_TS)
+	(status_PX, status_MX, status_CU0, status_CU1, status_CU2)
+	(status_CU3): New definitions.
+
+	* sim-main.h (ExceptionCause): Add new values for MIPS32
+	and MIPS64: MDMX, MCheck, CacheErr.  Update comments
+	for DebugBreakPoint and NMIReset to note their status in
+	MIPS32 and MIPS64.
+	(SignalExceptionMDMX, SignalExceptionWatch, SignalExceptionMCheck)
+	(SignalExceptionCacheErr): New exception macros.
+
+2002-03-05  Chris Demetriou  <cgd@broadcom.com>
+
 	* mips.igen (check_fpu): Enable check for coprocessor 1 usability.
 	* sim-main.h (COP_Usable): Define, but for now coprocessor 1
 	is always enabled.

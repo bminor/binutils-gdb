@@ -534,6 +534,18 @@ struct sim_state {
 #define status_NMI       (1 << 20)      /* NMI */
 #define status_NMI       (1 << 20)      /* NMI */
 
+/* Status bits used by MIPS32/MIPS64.  */
+#define status_UX        (1 <<  5)      /* 64-bit user addrs */
+#define status_SX        (1 <<  6)      /* 64-bit supervisor addrs */
+#define status_KX        (1 <<  7)      /* 64-bit kernel addrs */
+#define status_TS        (1 << 21)      /* TLB shutdown has occurred */
+#define status_PX        (1 << 23)      /* Enable 64 bit operations */
+#define status_MX        (1 << 24)      /* Enable MDMX resources */
+#define status_CU0       (1 << 28)      /* Coprocessor 0 usable */
+#define status_CU1       (1 << 29)      /* Coprocessor 1 usable */
+#define status_CU2       (1 << 30)      /* Coprocessor 2 usable */
+#define status_CU3       (1 << 31)      /* Coprocessor 3 usable */
+
 #define cause_BD ((unsigned)1 << 31)    /* L1 Exception in branch delay slot */
 #define cause_BD2         (1 << 30)     /* L2 Exception in branch delay slot */
 #define cause_CE_mask     0x30000000	/* Coprocessor exception */
@@ -611,9 +623,12 @@ enum ExceptionCause {
   IntegerOverflow         = 12,    /* Arithmetic overflow (IDT monitor raises SIGFPE) */
   Trap                    = 13,
   FPE                     = 15,
-  DebugBreakPoint         = 16,
+  DebugBreakPoint         = 16,    /* Impl. dep. in MIPS32/MIPS64.  */
+  MDMX                    = 22,
   Watch                   = 23,
-  NMIReset                = 31,
+  MCheck                  = 24,
+  CacheErr                = 30,
+  NMIReset                = 31,    /* Reserved in MIPS32/MIPS64.  */
 
 
 /* The following exception code is actually private to the simulator
@@ -660,6 +675,10 @@ void signal_exception (SIM_DESC sd, sim_cpu *cpu, address_word cia, int exceptio
 #define SignalExceptionTLBInvalidStore()     signal_exception (SD, CPU, cia, TLBStore, TLB_INVALID)
 #define SignalExceptionTLBInvalidLoad()      signal_exception (SD, CPU, cia, TLBLoad, TLB_INVALID)
 #define SignalExceptionTLBModification()     signal_exception (SD, CPU, cia, TLBModification)
+#define SignalExceptionMDMX()                signal_exception (SD, CPU, cia, MDMX)
+#define SignalExceptionWatch()               signal_exception (SD, CPU, cia, Watch)
+#define SignalExceptionMCheck()              signal_exception (SD, CPU, cia, MCheck)
+#define SignalExceptionCacheErr()            signal_exception (SD, CPU, cia, CacheErr)
 
 /* Co-processor accesses */
 
