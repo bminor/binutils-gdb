@@ -1,7 +1,7 @@
 .*: Assembler messages:
 .*: Warning: Swapping instruction order
-.*: Warning: Executing nop in reverse serial with btst may not work
-.*: Warning: Executing nop in IU in parallel with bclr may not work
+.*: Warning: Executing btst in IU in reverse serial may not work
+.*: Warning: Executing bclr in IU may not work in parallel execution
 .*: Warning: Executing bset in IU may not work
 .*: Warning: Swapping instruction order
 GAS LISTING .*
@@ -25,10 +25,10 @@ GAS LISTING .*
   13 0010 00F00000 	        nop -> BSET R1, R2, R3 
   13      82201083 
   14 0018 80F00000 	        nop <- BTST F1, R2, R3 
-.*  Warning:Executing nop in reverse serial with btst may not work
+.*  Warning:Executing btst in IU in reverse serial may not work
   14      02001083 
   15 0020 00F00000 	        nop || BCLR R1, R2, R3
-.*  Warning:Executing nop in IU in parallel with bclr may not work
+.*  Warning:Executing bclr in IU may not work in parallel execution
   15      02301083 
   16 0028 00F00000 	        nop -> BNOT R1, R2, R3
   16      82101083 

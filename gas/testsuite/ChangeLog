@@ -1,3 +1,10 @@
+2000-07-05  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/d30v/inst.d: Fix expected results to match current assembler
+	output.
+	* gas/d30v/bittest.l: Fix expected warning messages to match
+	current assembler output.
+
 2000-06-29  Kazu Hirata  <kazu@hxi.com>=0A=
 
 	* gas/h8300/h8300.exp (do_h8300s_mac): Change the registers used
