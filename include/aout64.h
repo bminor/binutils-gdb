@@ -43,14 +43,10 @@ struct external_exec
 
 #define N_TXTOFF(x)	( (N_MAGIC((x)) == ZMAGIC) ? 0 : EXEC_BYTES_SIZE)
 #if ARCH_SIZE==64
-#define PAGE_SIZE 0x2000
 #define OMAGIC 0x1001		/* Code indicating object file  */
 #define ZMAGIC 0x1002		/* Code indicating demand-paged executable.  */
 #define NMAGIC 0x1003		/* Code indicating pure executable.  */
 #else
-#ifndef PAGE_SIZE
-#define PAGE_SIZE 0x2000
-#endif
 #define OMAGIC 0407		/* Code indicating object file or impure executable.  */
 #define NMAGIC 0410		/* Code indicating pure executable.  */
 #define ZMAGIC 0413		/* Code indicating demand-paged executable.  */
@@ -104,6 +100,7 @@ struct internal_nlist {
 #define N_BSS 	8	/* BSS  sym -- defined at offset in zero'd seg */
 #define	N_COMM	0x12	/* Common symbol (visible after shared lib dynlink) */
 #define N_FN	0x1f	/* File name of .o file */
+#define	N_FN_SEQ 0x0C	/* N_FN from Sequent compilers (sigh) */
 /* Note: N_EXT can only be usefully OR-ed with N_UNDF, N_ABS, N_TEXT,
    N_DATA, or N_BSS.  When the low-order bit of other types is set,
    (e.g. N_WARNING versus N_FN), they are two different types.  */
