@@ -1,3 +1,11 @@
+Wed Nov 19 13:25:48 1997  Michael Meissner  <meissner@cygnus.com>
+
+	* sim-alu.h (ALU{32,64}_*): Rewrite 32 and 64 bit ALU support to
+	correctly set the carry and overflow bits for those types.
+	(ALU{8,16,32,64}_{ADD,SUB}_CA): Take VAL argument to add along
+	with carry, so carry is correct after doing both adds.
+	(ALU*): Space out '\' to make it easier to read.
+
 Tue Nov 18 15:53:45 1997  Doug Evans  <devans@canuck.cygnus.com>
 
 	* sim-core.c (sim_core_signal): Use sim_stopped instead of
