@@ -1,5 +1,13 @@
 2003-04-01  Andrew Cagney  <cagney@redhat.com>
 
+	* printcmd.c (print_frame_nameless_args): Delete #ifdef
+	NAMELESS_ARG_VALUE, PRINT_NAMELESS_INTEGER and
+	PRINT_TYPELESS_INTEGER.
+	* config/sparc/tm-sp64.h (DEPRECATED_PUSH_RETURN_ADDRESS): Rename
+	PUSH_RETURN_ADDRESS.
+
+2003-04-01  Andrew Cagney  <cagney@redhat.com>
+
 	* Makefile.in (d10v-tdep.o): Update dependencies.
 	* d10v-tdep.c: Include "frame-base.h".
 	(d10v_frame_unwind): Make constant.

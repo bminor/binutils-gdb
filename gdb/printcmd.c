@@ -1956,28 +1956,13 @@ print_frame_nameless_args (struct frame_info *fi, long start, int num,
   for (i = 0; i < num; i++)
     {
       QUIT;
-#ifdef NAMELESS_ARG_VALUE
-      NAMELESS_ARG_VALUE (fi, start, &arg_value);
-#else
       argsaddr = get_frame_args_address (fi);
       if (!argsaddr)
 	return;
-
       arg_value = read_memory_integer (argsaddr + start, sizeof (int));
-#endif
-
       if (!first)
 	fprintf_filtered (stream, ", ");
-
-#ifdef	PRINT_NAMELESS_INTEGER
-      PRINT_NAMELESS_INTEGER (stream, arg_value);
-#else
-#ifdef PRINT_TYPELESS_INTEGER
-      PRINT_TYPELESS_INTEGER (stream, builtin_type_int, (LONGEST) arg_value);
-#else
       fprintf_filtered (stream, "%ld", arg_value);
-#endif /* PRINT_TYPELESS_INTEGER */
-#endif /* PRINT_NAMELESS_INTEGER */
       first = 0;
       start += sizeof (int);
     }

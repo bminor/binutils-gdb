@@ -108,8 +108,8 @@
 #define CALL_DUMMY_ADDRESS() entry_point_address()
 #undef  FIX_CALL_DUMMY
 #define FIX_CALL_DUMMY(DUMMYNAME, PC, FUN, NARGS, ARGS, TYPE, GCC_P) 
-#undef  PUSH_RETURN_ADDRESS
-#define PUSH_RETURN_ADDRESS(PC, SP) sparc_at_entry_push_return_address (PC, SP)
+#undef  DEPRECATED_PUSH_RETURN_ADDRESS
+#define DEPRECATED_PUSH_RETURN_ADDRESS(PC, SP) sparc_at_entry_push_return_address (PC, SP)
 extern CORE_ADDR sparc_at_entry_push_return_address (CORE_ADDR pc,
 						     CORE_ADDR sp);
 
@@ -176,7 +176,7 @@ void sparc_fix_call_dummy (char *dummy, CORE_ADDR pc, CORE_ADDR fun,
 
 /* The remainder of these will accept the default definition.  */
 #undef  SIZEOF_CALL_DUMMY_WORDS
-#undef  PUSH_RETURN_ADDRESS
+#undef  DEPRECATED_PUSH_RETURN_ADDRESS
 #undef  CALL_DUMMY_ADDRESS
 #undef  STORE_STRUCT_RETURN
 
