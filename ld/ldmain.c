@@ -276,9 +276,9 @@ main (argc, argv)
   if (! link_info.shared)
     {
       if (command_line.filter_shlib)
-	einfo ("%P%F: -F may not be used without -shared\n"));
+	einfo (_("%P%F: -F may not be used without -shared\n"));
       if (command_line.auxiliary_filters)
-	einfo ("%P%F: -f may not be used without -shared\n"));
+	einfo (_("%P%F: -f may not be used without -shared\n"));
     }
 
   /* Treat ld -r -s as ld -r -S -x (i.e., strip all local symbols).  I
