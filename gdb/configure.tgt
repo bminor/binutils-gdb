@@ -249,8 +249,13 @@ tahoe-*-*)		gdb_target=tahoe ;;
 vax-*-*)		gdb_target=vax ;;
 
 # start-sanitize-v850
-v850-*-*)		gdb_target=v850 ;;
-
+v850-*-*)		gdb_target=v850
+			case $gdb_host in
+			windows)
+				CONFIG_OBS="${CONFIG_OBS} v850ice.o"
+				LIBS="${LIBS} v850.lib" ;;
+			esac
+			;;
 # end-sanitize-v850
 w65-*-*)		gdb_target=w65 ;;
 

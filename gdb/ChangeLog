@@ -1,3 +1,68 @@
+Fri Jan  3 12:08:16 1997  Stu Grossman  (grossman@critters.cygnus.com)
+
+	* Makefile.in configure configure.in:  Remove ENABLE_CLIBS,
+	ENABLE_OBS, and THREAD_DB_OBS.  These are consolidated into LIBS
+	and CONFIG_OBS.
+	* configure configure.in:  Clean up test cases around thread support.
+start-sanitize-v850
+	* configure.tgt (v850-*-*):  Include v850ice.o and v850.lib if
+	host is Windows.
+end-sanitize-v850
+	* c-valprint.c ch-valprint.c cp-valprint.c eval.c expprint.c
+	printcmd.c valops.c value.h values.c:  Add bfd_section arg to
+	value_at and value_at_lazy.
+	* coffread.c dbxread.c elfread.c mdebugread.c minsyms.c symtab.h:
+	Add bfd_section arg to prim_record_minimal_symbol_and_info.
+	* corefile.c gdbcore.h printcmd.c valops.c:  Use read_memory_section
+	instead of read_memory.  It takes a bfd_section arg.
+	* coffread.c dbxread.c elfread.c gdb-stabs.h objfiles.h:  Remove
+	unnecessary cast for assignment of struct dbx_symfile_info.
+	Struct objfile now uses a real pointer instead of PTR for this
+	element.
+	* dbxread.c (dbx_symfile_init): Stash bfd section pointers for
+	text, data and bss into dbx_symfile_info.
+	* exec.c (xfer_memory):  Handle transfers for user-specified
+	sections.
+	* findvar.c (read_var_value locate_var_value):  Copy bfd section
+	from the symbol to the value.
+	* gdb-stabs.h:  Add section pointers for text, data and bss
+	sections.
+	* maint.c (translate address command):  Add test code for overlay
+	address translation.
+	* printcmd.c (do_examine do_one_display):  Now takes a bfd section
+	arg.
+	* (print_formatted x_command):  Record current section along with
+	current address for repeated commands.
+	* sparc-nat.c (fetch_inferior_registers):  Change
+	target_xfer_memory to target_{read write}_memory to allow changes
+	to target_xfer_memory interface for section info.
+	* symmisc.c (dump_msymbols print_symbol):  Print section
+	assocaited with symbol.
+	* symtab.c (fixup_symbol_section):  New routine to
+	add section info to symbols returned by lookup_symbol.
+	* symtab.h (struct general_symbol_info):  Add bfd section to
+	symbols.
+	* target.c target.h (target_xfer_memory):  Add bfd section to
+	args.
+	* (target_read_memory_section):  New routine to read data from a
+	specific section.
+	* (target_memory_bfd_section):  New global variable to pass bfd
+	section in to targets.
+	* valarith.c (value_add value_addr value_array):  Preserve bfd
+	section when computing new value.
+	* value.h (struct value):  Add bfd section to values.
+	* values.c (allocate_value value_copy):  Initialize/preserve bfd
+	section.
+	* (unpack_double):  Clean up _MSC_VER conditionals to remove
+	duplicate code.
+start-sanitize-v850
+	* v850ice.c:  New module to support communication with NEC's
+	PC-based ICE.
+	* config/v850/tm-v850.h (REGISTER_NAMES):  Replace sp, gp, fp, and
+	ep names with rxx names.  sp and fp are renamed via a different
+	mechanism.
+end-sanitize-v850
+
 Fri Jan  3 14:20:05 1997  Geoffrey Noer  <noer@cygnus.com>
 
 	* mn10300-tdep.c (mn10300_push_arguments): rewrote

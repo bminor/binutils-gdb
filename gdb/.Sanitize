@@ -88,7 +88,7 @@ else
 	fi
 fi
 
-v850_files="v850-tdep.c"
+v850_files="v850ice.c v850-tdep.c"
 
 if ( echo $* | grep keep\-v850 > /dev/null ) ; then
 	keep_these_too="${v850_files} ${keep_these_too}"

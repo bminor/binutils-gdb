@@ -459,7 +459,8 @@ chill_val_print (type, valaddr, address, stream, format, deref_ref, recurse,
 		value_at
 		  (TYPE_TARGET_TYPE (type),
 		   unpack_pointer (lookup_pointer_type (builtin_type_void),
-				   valaddr));
+				   valaddr),
+		   NULL);
 	      val_print (VALUE_TYPE (deref_val),
 			 VALUE_CONTENTS (deref_val),
 			 VALUE_ADDRESS (deref_val), stream, format,

@@ -47,6 +47,10 @@ AC_C_CONST
 
 AC_CHECK_FUNCS(setpgid sbrk select poll)
 
+dnl List of object files added by configuire.
+
+CONFIG_OBS=
+
 # If we are configured native on Linux, work around problems with sys/procfs.h
 if test "${target}" = "${host}"; then
   case "${host}" in
@@ -154,35 +158,34 @@ dnl Note that we only want this if we are both native (host == target), and
 dnl not doing a canadian cross build (build == host).
 
 if test ${build} = ${host} -a ${host} = ${target} ; then
-	AC_MSG_CHECKING(for Solaris thread debugging library)
-	if test -f /usr/lib/libthread_db.so.1 ; then
-		AC_MSG_RESULT(yes)
-		THREAD_DB_OBS=sol-thread.o
-		AC_DEFINE(HAVE_THREAD_DB_LIB)
-		CONFIG_LDFLAGS="${CONFIG_LDFLAGS} -Xlinker -export-dynamic"
-	else
-		AC_MSG_RESULT(no)
-	fi
 	case ${host_os} in
 	hpux*)
 		AC_MSG_CHECKING(for HPUX/OSF thread support)
 		if test -f /usr/include/dce/cma_config.h ; then
 			AC_MSG_RESULT(yes)
 			AC_DEFINE(HAVE_HPUX_THREAD_SUPPORT)
-			THREAD_DB_OBS=hpux-thread.o
+			CONFIG_OBS="${CONFIG_OJS} hpux-thread.o"
+		else
+			AC_MSG_RESULT(no)
+		fi
+		;;
+	solaris*)
+		AC_MSG_CHECKING(for Solaris thread debugging library)
+		if test -f /usr/lib/libthread_db.so.1 ; then
+			AC_MSG_RESULT(yes)
+			AC_DEFINE(HAVE_THREAD_DB_LIB)
+			CONFIG_OBS="${CONFIG_OBS} sol-thread.o"
+			CONFIG_LDFLAGS="${CONFIG_LDFLAGS} -Xlinker -export-dynamic"
 		else
 			AC_MSG_RESULT(no)
 		fi
 		;;
 	esac
-	AC_SUBST(THREAD_DB_OBS)
 	AC_SUBST(CONFIG_LDFLAGS)
 fi
 
 dnl Handle optional features that can be enabled.
 ENABLE_CFLAGS=
-ENABLE_CLIBS=
-ENABLE_OBS=
 
 AC_ARG_ENABLE(netrom,
 [  --enable-netrom ],
@@ -193,7 +196,7 @@ no)	enable_netrom=no ;;
 esac])
 
 if test "${enable_netrom}" = "yes"; then
-	ENABLE_OBS="${ENABLE_OBS} remote-nrom.o" 
+	CONFIG_OBS="${CONFIG_OBS} remote-nrom.o" 
 fi
 
 # start-sanitize-gm
@@ -202,7 +205,7 @@ ENABLE_GM=
 AC_ARG_ENABLE(gm,
 [  --enable-gm ],
 [case "${enableval}" in
-yes)	ENABLE_OBS="${ENABLE_OBS} gmagic.o"
+yes)	CONFIG_OBS="${CONFIG_OBS} gmagic.o"
 	ENABLE_CFLAGS=-DGENERAL_MAGIC
 	;;
 no)	;;
@@ -265,14 +268,12 @@ if test "${enable_gdbtk}" = "yes"; then
 	   CY_AC_PATH_TCLH
 	   CY_AC_PATH_TKH
 
-	   # Include some libraries that Tcl and Tk want.
-	   LIBS="$LIBS $TK_LIBS"
-
 	   ENABLE_GDBTK=1
 
+	   # Include some libraries that Tcl and Tk want.
 	   TCL_LIBS='$(TCL) $(TK) $(X11_LDFLAGS) $(X11_LIBS)'
-	   ENABLE_CLIBS="${ENABLE_CLIBS} ${TCL_LIBS}"
-	   ENABLE_OBS="${ENABLE_OBS} gdbtk.o"
+	   LIBS="${LIBS} ${TCL_LIBS} ${TK_LIBS}"
+	   CONFIG_OBS="${CONFIG_OBS} gdbtk.o"
 	fi
     fi
 fi
@@ -284,8 +285,8 @@ AC_SUBST(X_LIBS)
 # end-sanitize-gdbtk
 
 AC_SUBST(ENABLE_CFLAGS)
-AC_SUBST(ENABLE_CLIBS)
-AC_SUBST(ENABLE_OBS)
+
+AC_SUBST(CONFIG_OBS)
 
 # Begin stuff to support --enable-shared
 AC_ARG_ENABLE(shared,

@@ -2586,6 +2586,7 @@ parse_partial_symbols (objfile, section_offsets)
 							       mst_file_text,
 							       NULL,
 							       SECT_OFF_TEXT,
+							       NULL,
 							       objfile);
 			}
 		      procaddr = sh.value;
@@ -2633,6 +2634,7 @@ parse_partial_symbols (objfile, section_offsets)
 							       mst_file_data,
 							       NULL,
 							       SECT_OFF_DATA,
+							       NULL,
 							       objfile);
 			  break;
 
@@ -2644,6 +2646,7 @@ parse_partial_symbols (objfile, section_offsets)
 							       mst_file_bss,
 							       NULL,
 							       SECT_OFF_BSS,
+							       NULL,
 							       objfile);
 			  break;
 			}
@@ -2725,7 +2728,8 @@ parse_partial_symbols (objfile, section_offsets)
 		case stStaticProc:
 		  prim_record_minimal_symbol_and_info (name, sh.value,
 						       mst_file_text, NULL,
-						       SECT_OFF_TEXT, objfile);
+						       SECT_OFF_TEXT, NULL,
+						       objfile);
 
 		  /* FALLTHROUGH */
 
@@ -2802,11 +2806,13 @@ parse_partial_symbols (objfile, section_offsets)
 		    prim_record_minimal_symbol_and_info (name, sh.value,
 							 mst_file_data, NULL,
 							 SECT_OFF_DATA,
+							 NULL,
 							 objfile);
 		  else
 		    prim_record_minimal_symbol_and_info (name, sh.value,
 							 mst_file_bss, NULL,
 							 SECT_OFF_BSS,
+							 NULL,
 							 objfile);
 		  class = LOC_STATIC;
 		  break;

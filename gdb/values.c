@@ -91,6 +91,7 @@ allocate_value (type)
   VALUE_REGNO (val) = -1;
   VALUE_LAZY (val) = 0;
   VALUE_OPTIMIZED_OUT (val) = 0;
+  VALUE_BFD_SECTION (val) = NULL;
   val->modifiable = 1;
   return val;
 }
@@ -219,6 +220,7 @@ value_copy (arg)
   VALUE_REGNO (val) = VALUE_REGNO (arg);
   VALUE_LAZY (val) = VALUE_LAZY (arg);
   VALUE_OPTIMIZED_OUT (val) = VALUE_OPTIMIZED_OUT (arg);
+  VALUE_BFD_SECTION (val) = VALUE_BFD_SECTION (arg);
   val->modifiable = arg->modifiable;
   if (!VALUE_LAZY (val))
     {
@@ -675,15 +677,11 @@ unpack_double (type, valaddr, invp)
   else if (nosign)
     {
       /* Unsigned -- be sure we compensate for signed LONGEST.  */
-#ifndef _MSC_VER
-      return (ULONGEST) unpack_long (type, valaddr);
-#else
-#if (_MSC_VER > 900)
+#if !defined (_MSC_VER) || (_MSC_VER > 900)
       return (ULONGEST) unpack_long (type, valaddr);
 #else
       /* FIXME!!! msvc22 doesn't support unsigned __int64 -> double */
       return (LONGEST) unpack_long (type, valaddr);
-#endif
 #endif /* _MSC_VER */
     }
   else
@@ -1318,7 +1316,7 @@ value_being_returned (valtype, retbuf, struct_return)
     addr = EXTRACT_STRUCT_VALUE_ADDRESS (retbuf);
     if (!addr)
       error ("Function return value unknown");
-    return value_at (valtype, addr);
+    return value_at (valtype, addr, NULL);
   }
 #endif
 

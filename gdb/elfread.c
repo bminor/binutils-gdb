@@ -81,6 +81,7 @@ free_elfinfo PARAMS ((void *));
 static struct minimal_symbol *
 record_minimal_symbol_and_info PARAMS ((char *, CORE_ADDR,
 					enum minimal_symbol_type, char *,
+					asection *bfd_section,
 					struct objfile *));
 
 static void
@@ -169,11 +170,13 @@ elf_interpreter (abfd)
 #endif
 
 static struct minimal_symbol *
-record_minimal_symbol_and_info (name, address, ms_type, info, objfile)
+record_minimal_symbol_and_info (name, address, ms_type, info, bfd_section,
+				objfile)
      char *name;
      CORE_ADDR address;
      enum minimal_symbol_type ms_type;
      char *info;		/* FIXME, is this really char *? */
+     asection *bfd_section;
      struct objfile *objfile;
 {
   int section;
@@ -203,7 +206,7 @@ record_minimal_symbol_and_info (name, address, ms_type, info, objfile)
     }
 
   return prim_record_minimal_symbol_and_info
-    (name, address, ms_type, info, section, objfile);
+    (name, address, ms_type, info, section, bfd_section, objfile);
 }
 
 /*
@@ -258,8 +261,7 @@ elf_symtab_read (abfd, addr, objfile, dynamic)
   /* Name of filesym, as saved on the symbol_obstack.  */
   char *filesymname = obsavestring ("", 0, &objfile->symbol_obstack);
 #endif
-  struct dbx_symfile_info *dbx = (struct dbx_symfile_info *)
-				 objfile->sym_stab_info;
+  struct dbx_symfile_info *dbx = objfile->sym_stab_info;
   unsigned long size;
   int stripped = (bfd_get_symcount (abfd) == 0);
  
@@ -320,7 +322,7 @@ elf_symtab_read (abfd, addr, objfile, dynamic)
 	      symaddr += addr;
 	      msym = record_minimal_symbol_and_info
 		((char *) sym -> name, symaddr,
-		mst_solib_trampoline, NULL, objfile);
+		mst_solib_trampoline, NULL, sym -> section, objfile);
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
 	      if (msym != NULL)
 		msym->filename = filesymname;
@@ -531,7 +533,7 @@ elf_symtab_read (abfd, addr, objfile, dynamic)
 	      size = ((elf_symbol_type *) sym) -> internal_elf_sym.st_size;
 	      msym = record_minimal_symbol_and_info
 		((char *) sym -> name, symaddr,
-		 ms_type, (PTR) size, objfile);
+		 ms_type, (PTR) size, sym -> section, objfile);
 #ifdef SOFUN_ADDRESS_MAYBE_MISSING
 	      if (msym != NULL)
 		msym->filename = filesymname;
@@ -671,8 +673,7 @@ free_elfinfo (objp)
      PTR objp;
 {
   struct objfile *objfile = (struct objfile *)objp;
-  struct dbx_symfile_info *dbxinfo = (struct dbx_symfile_info *)
-				     objfile->sym_stab_info;
+  struct dbx_symfile_info *dbxinfo = objfile->sym_stab_info;
   struct stab_section_info *ssi, *nssi;
 
   ssi = dbxinfo->stab_section_info;
@@ -749,8 +750,7 @@ elfstab_offset_sections (objfile, pst)
      struct partial_symtab *pst;
 {
   char *filename = pst->filename;
-  struct dbx_symfile_info *dbx = (struct dbx_symfile_info *)
-				 objfile->sym_stab_info;
+  struct dbx_symfile_info *dbx = objfile->sym_stab_info;
   struct stab_section_info *maybe = dbx->stab_section_info;
   struct stab_section_info *questionable = 0;
   int i;

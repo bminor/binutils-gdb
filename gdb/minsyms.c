@@ -500,7 +500,7 @@ prim_record_minimal_symbol (name, address, ms_type, objfile)
     }
 
   prim_record_minimal_symbol_and_info (name, address, ms_type,
-				       NULL, section, objfile);
+				       NULL, section, NULL, objfile);
 }
 
 /* Record a minimal symbol in the msym bunches.  Returns the symbol
@@ -508,12 +508,13 @@ prim_record_minimal_symbol (name, address, ms_type, objfile)
 
 struct minimal_symbol *
 prim_record_minimal_symbol_and_info (name, address, ms_type, info, section,
-				     objfile)
+				     bfd_section, objfile)
      const char *name;
      CORE_ADDR address;
      enum minimal_symbol_type ms_type;
      char *info;
      int section;
+     asection *bfd_section;
      struct objfile *objfile;
 {
   register struct msym_bunch *new;
@@ -553,6 +554,7 @@ prim_record_minimal_symbol_and_info (name, address, ms_type, info, section,
   SYMBOL_INIT_LANGUAGE_SPECIFIC (msymbol, language_unknown);
   SYMBOL_VALUE_ADDRESS (msymbol) = address;
   SYMBOL_SECTION (msymbol) = section;
+  SYMBOL_BFD_SECTION (msymbol) = bfd_section;
 
   MSYMBOL_TYPE (msymbol) = ms_type;
   /* FIXME:  This info, if it remains, needs its own field.  */

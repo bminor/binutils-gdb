@@ -342,7 +342,8 @@ cp_print_value_fields (type, valaddr, address, stream, format, recurse, pretty,
 		  else
 		    {
 		      v = value_at (TYPE_FIELD_TYPE (type, i),
-				    SYMBOL_VALUE_ADDRESS (sym));
+				    SYMBOL_VALUE_ADDRESS (sym),
+				    NULL);
 		      cp_print_static_field (TYPE_FIELD_TYPE (type, i), v,
 					     stream, format, recurse + 1,
 					     pretty);
