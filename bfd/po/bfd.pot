@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-07-20 16:45+0200\n"
+"POT-Creation-Date: 2000-07-24 10:20-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -326,43 +326,6 @@ msgstr ""
 msgid "Warning: Clearing the interworking flag of %s due to outside request"
 msgstr ""
 
-#: coff-i960.c:136 coff-i960.c:485
-msgid "uncertain calling convention for non-COFF symbol"
-msgstr ""
-
-#: coff-mips.c:875 elf32-mips.c:1416
-msgid "GP relative relocation when _gp not defined"
-msgstr ""
-
-#: coff-mips.c:2433
-msgid "unsupported reloc type"
-msgstr ""
-
-#. No other sections should appear in -membedded-pic
-#. code.
-#: coff-mips.c:2470
-msgid "reloc against unsupported section"
-msgstr ""
-
-#: coff-mips.c:2478
-msgid "reloc not properly aligned"
-msgstr ""
-
-#: coff-tic54x.c:264 coff-tic80.c:445
-#, c-format
-msgid "Unrecognized reloc type 0x%x"
-msgstr ""
-
-#: coff-tic54x.c:377 coffcode.h:4739
-#, c-format
-msgid "%s: warning: illegal symbol index %ld in relocs"
-msgstr ""
-
-#: coff-w65.c:383
-#, c-format
-msgid "ignoring reloc %s\n"
-msgstr ""
-
 #: coffcode.h:2101
 #, c-format
 msgid "Unrecognized TI COFF target id '0x%x'"
@@ -388,6 +351,11 @@ msgstr ""
 msgid "warning: %s: local symbol `%s' has no section"
 msgstr ""
 
+#: coff-tic54x.c:377 coffcode.h:4739
+#, c-format
+msgid "%s: warning: illegal symbol index %ld in relocs"
+msgstr ""
+
 #: coffcode.h:4777
 #, c-format
 msgid "%s: illegal relocation type %d at address 0x%lx"
@@ -401,6 +369,10 @@ msgstr ""
 #: coffgen.c:2098
 #, c-format
 msgid "AUX tagndx %ld ttlsiz 0x%lx lnnos %ld next %ld"
+msgstr ""
+
+#: coff-i960.c:136 coff-i960.c:485
+msgid "uncertain calling convention for non-COFF symbol"
 msgstr ""
 
 #: cofflink.c:526 elflink.h:1575
@@ -421,6 +393,34 @@ msgstr ""
 #: cofflink.c:2636 coffswap.h:883
 #, c-format
 msgid "%s: warning: %s: line number overflow: 0x%lx > 0xffff"
+msgstr ""
+
+#: coff-m68k.c:477 coff-mips.c:2433
+msgid "unsupported reloc type"
+msgstr ""
+
+#: coff-mips.c:875 elf32-mips.c:1416
+msgid "GP relative relocation when _gp not defined"
+msgstr ""
+
+#. No other sections should appear in -membedded-pic
+#. code.
+#: coff-mips.c:2470
+msgid "reloc against unsupported section"
+msgstr ""
+
+#: coff-mips.c:2478
+msgid "reloc not properly aligned"
+msgstr ""
+
+#: coff-tic54x.c:264 coff-tic80.c:445
+#, c-format
+msgid "Unrecognized reloc type 0x%x"
+msgstr ""
+
+#: coff-w65.c:383
+#, c-format
+msgid "ignoring reloc %s\n"
 msgstr ""
 
 #: dwarf2.c:432
@@ -539,6 +539,16 @@ msgid ""
 "      Type: %s"
 msgstr ""
 
+#: elf32-arm.h:1188
+#, c-format
+msgid "%s: Warning: Arm BLX instruction targets Arm function '%s'."
+msgstr ""
+
+#: elf32-arm.h:1377
+#, c-format
+msgid "%s: Warning: Thumb BLX instruction targets thumb function '%s'."
+msgstr ""
+
 #: elf-hppa.h:1336 elf-hppa.h:1369 elf32-arm.h:1825 elf32-i386.c:1419
 #: elf32-ppc.c:3083
 #, c-format
@@ -567,109 +577,6 @@ msgstr ""
 #: elf32-cris.c:435 elf32-d10v.c:491 elf32-fr30.c:663 elf32-m32r.c:1277
 #: elf32-v850.c:1701
 msgid "internal error: unknown error"
-msgstr ""
-
-#: elf.c:327
-#, c-format
-msgid "%s: invalid string offset %u >= %lu for section `%s'"
-msgstr ""
-
-#: elf.c:550
-msgid ""
-"\n"
-"Program Header:\n"
-msgstr ""
-
-#: elf.c:598
-msgid ""
-"\n"
-"Dynamic Section:\n"
-msgstr ""
-
-#: elf.c:727
-msgid ""
-"\n"
-"Version definitions:\n"
-msgstr ""
-
-#: elf.c:750
-msgid ""
-"\n"
-"Version References:\n"
-msgstr ""
-
-#: elf.c:755
-#, c-format
-msgid "  required from %s:\n"
-msgstr ""
-
-#: elf.c:1329
-#, c-format
-msgid "%s: invalid link %lu for reloc section %s (index %u)"
-msgstr ""
-
-#: elf.c:2090
-#, c-format
-msgid ""
-"creating section symbol, name = %s, value = 0x%.8lx, index = %d, section = "
-"0x%.8lx\n"
-msgstr ""
-
-#: elf.c:2693
-#, c-format
-msgid "%s: Not enough room for program headers (allocated %u, need %u)"
-msgstr ""
-
-#: elf.c:2792
-#, c-format
-msgid "%s: Not enough room for program headers, try linking with -N"
-msgstr ""
-
-#: elf.c:2918
-#, c-format
-msgid "Error: First section in segment (%s) starts at 0x%x"
-msgstr ""
-
-#: elf.c:2921
-#, c-format
-msgid "       whereas segment starts at 0x%x"
-msgstr ""
-
-#: elf.c:3194
-#, c-format
-msgid "%s: warning: allocated section `%s' not in segment"
-msgstr ""
-
-#: elf.c:3588
-#, c-format
-msgid "%s: symbol `%s' required but not present"
-msgstr ""
-
-#: elf.c:3597
-#, c-format
-msgid ""
-"elf_symbol_from_bfd_symbol 0x%.8lx, name = %s, sym num = %d, flags = "
-"0x%.8lx%s\n"
-msgstr ""
-
-#: elf.c:3739
-#, c-format
-msgid "%s: warning: Empty loadable segment detected\n"
-msgstr ""
-
-#: elf.c:5054
-#, c-format
-msgid "%s: unsupported relocation type %s"
-msgstr ""
-
-#: elf32-arm.h:1188
-#, c-format
-msgid "%s: Warning: Arm BLX instruction targets Arm function '%s'."
-msgstr ""
-
-#: elf32-arm.h:1377
-#, c-format
-msgid "%s: Warning: Thumb BLX instruction targets thumb function '%s'."
 msgstr ""
 
 #: elf32-arm.h:1934
@@ -996,7 +903,12 @@ msgstr ""
 msgid "%s: %s+0x%lx: jump to stub routine which is not jal"
 msgstr ""
 
-#: elf32-mips.c:7669
+#: elf32-mips.c:7599
+#, c-format
+msgid "Malformed reloc detected for section %s"
+msgstr ""
+
+#: elf32-mips.c:7676
 #, c-format
 msgid "%s: CALL16 reloc at 0x%lx not against global symbol"
 msgstr ""
@@ -1267,6 +1179,99 @@ msgstr ""
 msgid "%s: linking UltraSPARC specific with HAL specific code"
 msgstr ""
 
+#: elf.c:327
+#, c-format
+msgid "%s: invalid string offset %u >= %lu for section `%s'"
+msgstr ""
+
+#: elf.c:550
+msgid ""
+"\n"
+"Program Header:\n"
+msgstr ""
+
+#: elf.c:598
+msgid ""
+"\n"
+"Dynamic Section:\n"
+msgstr ""
+
+#: elf.c:727
+msgid ""
+"\n"
+"Version definitions:\n"
+msgstr ""
+
+#: elf.c:750
+msgid ""
+"\n"
+"Version References:\n"
+msgstr ""
+
+#: elf.c:755
+#, c-format
+msgid "  required from %s:\n"
+msgstr ""
+
+#: elf.c:1329
+#, c-format
+msgid "%s: invalid link %lu for reloc section %s (index %u)"
+msgstr ""
+
+#: elf.c:2090
+#, c-format
+msgid ""
+"creating section symbol, name = %s, value = 0x%.8lx, index = %d, section = "
+"0x%.8lx\n"
+msgstr ""
+
+#: elf.c:2693
+#, c-format
+msgid "%s: Not enough room for program headers (allocated %u, need %u)"
+msgstr ""
+
+#: elf.c:2792
+#, c-format
+msgid "%s: Not enough room for program headers, try linking with -N"
+msgstr ""
+
+#: elf.c:2918
+#, c-format
+msgid "Error: First section in segment (%s) starts at 0x%x"
+msgstr ""
+
+#: elf.c:2921
+#, c-format
+msgid "       whereas segment starts at 0x%x"
+msgstr ""
+
+#: elf.c:3194
+#, c-format
+msgid "%s: warning: allocated section `%s' not in segment"
+msgstr ""
+
+#: elf.c:3588
+#, c-format
+msgid "%s: symbol `%s' required but not present"
+msgstr ""
+
+#: elf.c:3597
+#, c-format
+msgid ""
+"elf_symbol_from_bfd_symbol 0x%.8lx, name = %s, sym num = %d, flags = "
+"0x%.8lx%s\n"
+msgstr ""
+
+#: elf.c:3739
+#, c-format
+msgid "%s: warning: Empty loadable segment detected\n"
+msgstr ""
+
+#: elf.c:5054
+#, c-format
+msgid "%s: unsupported relocation type %s"
+msgstr ""
+
 #: elfcode.h:1067
 #, c-format
 msgid "%s: version count (%ld) does not match symbol count (%ld)"
@@ -1297,17 +1302,17 @@ msgstr ""
 msgid "%s: warning: unexpected redefinition of `%s'"
 msgstr ""
 
-#: elflink.h:3569
+#: elflink.h:3570
 #, c-format
 msgid "warning: type and size of dynamic symbol `%s' are not defined"
 msgstr ""
 
-#: elflink.h:3841
+#: elflink.h:3842
 #, c-format
 msgid "%s: undefined versioned symbol name %s"
 msgstr ""
 
-#: elflink.h:5085
+#: elflink.h:5086
 #, c-format
 msgid "%s: could not find output section %s for input section %s"
 msgstr ""
@@ -1439,21 +1444,6 @@ msgstr ""
 #: osf-core.c:146
 #, c-format
 msgid "Unhandled OSF/1 core file section type %d\n"
-msgstr ""
-
-#: pe-mips.c:657
-#, c-format
-msgid "%s: `ld -r' not supported with PE MIPS objects\n"
-msgstr ""
-
-#: pe-mips.c:820
-#, c-format
-msgid "%s: jump too far away\n"
-msgstr ""
-
-#: pe-mips.c:847
-#, c-format
-msgid "%s: bad pair/reflo after refhi\n"
 msgstr ""
 
 #. XXX code yet to be written.
@@ -1791,6 +1781,21 @@ msgstr ""
 msgid ""
 "\n"
 "Characteristics 0x%x\n"
+msgstr ""
+
+#: pe-mips.c:657
+#, c-format
+msgid "%s: `ld -r' not supported with PE MIPS objects\n"
+msgstr ""
+
+#: pe-mips.c:820
+#, c-format
+msgid "%s: jump too far away\n"
+msgstr ""
+
+#: pe-mips.c:847
+#, c-format
+msgid "%s: bad pair/reflo after refhi\n"
 msgstr ""
 
 #: ppcboot.c:422

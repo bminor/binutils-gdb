@@ -3,7 +3,7 @@
 	* elf32-mips.c (_bfd_mips_elf_check_relocs): Use abfd instead
 	of dynobj for SGI_COMPAT checks.
 
-2000-07-27  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
+2000-07-21  Michael Sokolov  <msokolov@ivan.Harhan.ORG>
 
         * coff-m68k.c (bfd_m68k_coff_create_embedded_relocs): New function.
         * bfd-in.h (bfd_m68k_coff_create_embedded_relocs): Add declaration.

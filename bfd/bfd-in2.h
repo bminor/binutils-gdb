@@ -728,6 +728,10 @@ extern boolean bfd_coff_get_auxent
 extern boolean bfd_coff_set_symbol_class
   PARAMS ((bfd *, struct symbol_cache_entry *, unsigned int));
 
+extern boolean bfd_m68k_coff_create_embedded_relocs
+  PARAMS ((bfd *, struct bfd_link_info *, struct sec *, struct sec *,
+	   char **));
+
 /* ARM Interworking support.  Called from linker.  */
 extern boolean bfd_arm_allocate_interworking_sections
   PARAMS ((struct bfd_link_info *));
