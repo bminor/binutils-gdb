@@ -1,5 +1,8 @@
 Sat Jan 15 10:20:13 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* minsyms.c (prim_record_minimal_symbol_and_info): Make tempstring
+	const char *, not char *.
+
 	* symtab.h (struct symbol): Make section short, not unsigned short.
 
 	* symtab.c (lookup_symbol): Add comment about QUIT here.

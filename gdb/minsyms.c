@@ -328,7 +328,7 @@ prim_record_minimal_symbol_and_info (name, address, ms_type, info, section,
 	return;
 
       {
-	char *tempstring = name;
+	const char *tempstring = name;
 	if (tempstring[0] == bfd_get_symbol_leading_char (objfile->obfd))
 	  ++tempstring;
 	if (STREQN (tempstring, "__gnu_compiled", 14))
