@@ -1,3 +1,8 @@
+2002-09-18  Michal Ludvig  <mludvig@suse.cz>
+
+	* x86-64-linux-nat.c (x86_64_regmap): Added CS and SS
+	registers.
+
 2002-09-17  Andrew Cagney  <ac131313@redhat.com>
 
 	* NEWS: Mention that MIPS $fp behavior changed.
