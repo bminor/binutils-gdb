@@ -1,7 +1,14 @@
+Fri Mar 25 11:44:06 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* hosts/sysv4.h (HAVE_PROCFS): Add comments about ptx4.
+	* config/sysv4.mh: Add comment.
+	* config/symmetry.mh: Change comment.
+	* configure.host: Use sysv4, not symmetry, for i[34]86-sequent-sysv4*.
+
 Fri Mar 25 17:10:45 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	Changes to support linker relaxing of embedded MIPS PIC code to
-	use a five instruction sequence for funtion calls which are out of
+	use a five instruction sequence for function calls which are out of
 	range of the bal instruction.
 	* libecoff.h (struct ecoff_section_tdata): Define.
 	(ecoff_section_data): Define.

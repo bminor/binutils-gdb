@@ -20,15 +20,18 @@ case "${host}" in
 alpha-*-*)		my_host=alphaosf ; host64=true ;;
 a29k-*-*)		my_host=ultra3 ;;
 
-hppa*-hp-hpux*)		my_host=hppahpux ;;
-hppa*-hp-bsd*)		my_host=hppabsd ;;
-hppa*-hp-osf*)		my_host=hppaosf ;;
+hppa*-*-hpux*)		my_host=hppahpux ;;
+hppa*-*-hiux*)		my_host=hppahpux ;;
+hppa*-*-bsd*)		my_host=hppabsd ;;
+hppa*-*-osf*)		my_host=hppaosf ;;
 
+i[34]86-sequent-bsd*)	my_host=symmetry ;;
+i[34]86-sequent-sysv4*)	my_host=sysv4 ;;
+i[34]86-sequent-sysv*)	my_host=symmetry ;;
 i[34]86-*-bsd*)		my_host=i386bsd ;;
-i[34]86-*-netbsd)	my_host=i386bsd ;;
-i[34]86-*-lynx*)	my_host=i386lynx ;;
+i[34]86-*-netbsd*)	my_host=i386bsd ;;
 i[34]86-ncr*-sysv4*)	my_host=ncr3000 ;;
-i[34]86-*-go32*)		my_host=go32 ;;
+i[34]86-*-go32*)	my_host=go32 ;;
 i[34]86-esix-sysv3*)	my_host=esix ;;
 i[34]86-*-sysv4*)	my_host=i386v4 ;;
 i[34]86-*-sysv*)	my_host=i386v ;;
@@ -39,7 +42,7 @@ i[34]86-*-osf1mk*)	my_host=i386osf1mk ;;
 i[34]86-*-msdos*)	my_host=dose ;;
 i[34]86-*-linux*)	my_host=i386linux ;;
 i[34]86-*-lynxos*)	my_host=i386lynx ;;
-i[34]86-*-isc*)		my_host=i386isc ;;
+i[34]86-*-isc*)		my_host=i386sco ;;
 i[34]86-*-aix*)		my_host=i386aix ;;
 
 i860-*-*)		my_host=stratus ;;
@@ -48,8 +51,10 @@ mips-dec-bsd*)          my_host=mipsbsd ;;
 mips-dec-*)		my_host=decstation ;;
 mips-sgi-irix3*)	my_host=irix3 ;;
 mips-sgi-irix4*)	my_host=irix4 ;;
+mips-sgi-irix5*)	my_host=irix5 ;;
 mips-*-sysv*)		my_host=riscos ;;
 mips-*-riscos*)		my_host=riscos ;;
+mips-sony-bsd*)		my_host=news-mips ;;
 
 m68*-apollo*-sysv*)	my_host=apollov68 ;;
 m68*-apollo*-bsd*)	my_host=apollo68 ;;
@@ -59,6 +64,7 @@ m68*-cbm-amigados*)	my_host=amigados ;;
 m68*-cbm-sysv4*)	my_host=amix ;;
 m68*-hp-hpux*)		my_host=hp300 ;;
 m68*-hp-bsd*)		my_host=hp300bsd ;;
+m68*-*-lynxos*)		my_host=m68klynx ;;
 m68*-motorola-sysv*)	my_host=delta68 ;;
 m68*-sony-*)		my_host=news ;;
 m68*-sun-*)		my_host=sun3 ;;
@@ -73,12 +79,15 @@ ns32k-*-mach*)		my_host=i386mach3 ;;
 
 romp-*-*)		my_host=rtbsd ;;
 
+rs6000-*-lynx*)		my_host=rs6000lynx ;;
+
 rs6000-*-*)		my_host=rs6000 ;;
 
+sparc-*-lynxos*)	my_host=sparclynx ;;
 sparc-*-sunos64*)	my_host=sparc-ll ;;
 sparc-*-sysv4*)		my_host=sysv4 ;;
 sparc-*-solaris2*)	my_host=solaris2 ;;
-sparc-*-sysv64*)		my_host=sysv4-ll ;;
+sparc-*-sysv64*)	my_host=sysv4-ll ;;
 sparc-*-*)		my_host=sparc ;;
 
 tahoe-*-*)		my_host=tahoe ;;
