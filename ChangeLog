@@ -1,3 +1,11 @@
+Wed Jun 28 23:57:08 1995  Steve Chamberlain  <sac@slash.cygnus.com>
+
+	* configure.in: Add i386-pe configuration.
+
+Fri Jun 23 14:28:44 1995  Stan Shebs  <shebs@andros.cygnus.com>
+
+	* mpw-build.in (install): Install GDB after LD.
+
 Thu Jun 22 17:10:53 1995  Stan Shebs  <shebs@andros.cygnus.com>
 
 	* mpw-config.in (elf/mips.h): Always forward-include, needed
