@@ -39,7 +39,7 @@ struct vot			/* vax opcode text */
 #define vot_detail detail
 #define vot_name name
 
-static struct vot
+const static struct vot
 votstrs[] =
 {
 {    "halt",	{"",			0x00	} },

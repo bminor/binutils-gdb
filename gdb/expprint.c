@@ -50,7 +50,7 @@ struct op_print
   int right_assoc;
 };
 
-static struct op_print op_print_tab[] =
+const static struct op_print op_print_tab[] =
   {
     {",", BINOP_COMMA, PREC_COMMA, 0},
     {"=", BINOP_ASSIGN, PREC_ASSIGN, 1},
@@ -275,6 +275,7 @@ print_subexp (exp, pos, stream, prec)
 	    op_str = op_print_tab[tem].string;
 	    break;
 	  }
+      break;
 
     case OP_THIS:
       ++(*pos);
