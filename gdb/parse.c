@@ -104,15 +104,9 @@ struct funcall
 
 static struct funcall *funcall_chain;
 
-/* Assign machine-independent names to certain registers 
-   (unless overridden by the REGISTER_NAMES table) */
-
-unsigned num_std_regs = 0;
-struct std_regs *std_regs;
-
 /* The generic method for targets to specify how their registers are
-   named.  The mapping can be derived from three sources:
-   REGISTER_NAME; std_regs; or a target specific alias hook. */
+   named.  The mapping can be derived from two sources: REGISTER_NAME;
+   or builtin regs.  */
 
 int
 target_map_name_to_register (char *str, int len)
@@ -127,13 +121,13 @@ target_map_name_to_register (char *str, int len)
 	return i;
       }
 
-  /* Try standard aliases. */
-  for (i = 0; i < num_std_regs; i++)
-    if (std_regs[i].name && len == strlen (std_regs[i].name)
-	&& STREQN (str, std_regs[i].name, len))
-      {
-	return std_regs[i].regnum;
-      }
+  /* Try builtin registers.  */
+  i = builtin_reg_map_name_to_regnum (str, len);
+  if (i >= 0)
+    {
+      gdb_assert (i >= NUM_REGS + NUM_PSEUDO_REGS);
+      return i;
+    }
 
   /* Try builtin registers.  */
   i = builtin_reg_map_name_to_regnum (str, len);
@@ -1361,63 +1355,6 @@ build_parse (void)
     init_type (TYPE_CODE_INT, 1, 0,
 	       "<variable (not text or data), no debug info>",
 	       NULL);
-
-  /* create the std_regs table */
-
-  num_std_regs = 0;
-#ifdef PC_REGNUM
-  if (PC_REGNUM >= 0)
-    num_std_regs++;
-#endif
-#ifdef FP_REGNUM
-  if (FP_REGNUM >= 0)
-    num_std_regs++;
-#endif
-#ifdef SP_REGNUM
-  if (SP_REGNUM >= 0)
-    num_std_regs++;
-#endif
-#ifdef PS_REGNUM
-  if (PS_REGNUM >= 0)
-    num_std_regs++;
-#endif
-  /* create an empty table */
-  std_regs = xmalloc ((num_std_regs + 1) * sizeof *std_regs);
-  i = 0;
-  /* fill it in */
-#ifdef PC_REGNUM
-  if (PC_REGNUM >= 0)
-    {
-      std_regs[i].name = "pc";
-      std_regs[i].regnum = PC_REGNUM;
-      i++;
-    }
-#endif
-#ifdef FP_REGNUM
-  if (FP_REGNUM >= 0)
-    {
-      std_regs[i].name = "fp";
-      std_regs[i].regnum = FP_REGNUM;
-      i++;
-    }
-#endif
-#ifdef SP_REGNUM
-  if (SP_REGNUM >= 0)
-    {
-      std_regs[i].name = "sp";
-      std_regs[i].regnum = SP_REGNUM;
-      i++;
-    }
-#endif
-#ifdef PS_REGNUM
-  if (PS_REGNUM >= 0)
-    {
-      std_regs[i].name = "ps";
-      std_regs[i].regnum = PS_REGNUM;
-      i++;
-    }
-#endif
-  memset (&std_regs[i], 0, sizeof (std_regs[i]));
 }
 
 void
@@ -1437,8 +1374,6 @@ _initialize_parse (void)
   register_gdbarch_swap (&msym_data_symbol_type, sizeof (msym_data_symbol_type), NULL);
   register_gdbarch_swap (&msym_unknown_symbol_type, sizeof (msym_unknown_symbol_type), NULL);
 
-  register_gdbarch_swap (&num_std_regs, sizeof (std_regs), NULL);
-  register_gdbarch_swap (&std_regs, sizeof (std_regs), NULL);
   register_gdbarch_swap (NULL, 0, build_parse);
 
   add_show_from_set (

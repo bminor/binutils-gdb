@@ -1,3 +1,14 @@
+2002-04-09  Andrew Cagney  <ac131313@redhat.com>
+
+	* frame.c (read_relative_register_raw_bytes_for_frame): Do not
+	override FP_REGNUM with frame->fp.  Update copyright.
+	* parse.c (num_std_regs, std_regs): Delete.
+	(target_map_name_to_register): Do not search std_regs.  Update
+	function description.
+	* parser-defs.h (num_std_regs, std_regs, struct std_regs): Delete
+	declarations.  Update copyright.
+	Fix PR gdb/251.
+	
 2002-04-09  Daniel Jacobowitz  <drow@mvista.com>
 
 	* gdbserver/Makefile.in: Add stamp-h target.

@@ -1,6 +1,7 @@
 /* Cache and manage the values of registers for GDB, the GNU debugger.
-   Copyright 1986, 1987, 1989, 1991, 1994, 1995, 1996, 1998, 2000, 2001
-   Free Software Foundation, Inc.
+
+   Copyright 1986, 1987, 1989, 1991, 1994, 1995, 1996, 1998, 2000,
+   2001, 2002 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -182,24 +183,12 @@ get_saved_register (char *raw_buffer,
 
    Returns 1 if could not be read, 0 if could.  */
 
-/* FIXME: This function increases the confusion between FP_REGNUM
-   and the virtual/pseudo-frame pointer.  */
-
 static int
 read_relative_register_raw_bytes_for_frame (int regnum,
 					    char *myaddr,
 					    struct frame_info *frame)
 {
   int optim;
-  if (regnum == FP_REGNUM && frame)
-    {
-      /* Put it back in target format. */
-      store_address (myaddr, REGISTER_RAW_SIZE (FP_REGNUM),
-		     (LONGEST) FRAME_FP (frame));
-
-      return 0;
-    }
-
   get_saved_register (myaddr, &optim, (CORE_ADDR *) NULL, frame,
 		      regnum, (enum lval_type *) NULL);
 

@@ -1,6 +1,8 @@
 /* Parser definitions for GDB.
-   Copyright 1986, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000 Free Software Foundation, Inc.
+
+   Copyright 1986, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996,
+   1997, 1998, 1999, 2000, 2002 Free Software Foundation, Inc.
+
    Modified from expread.y by the Department of Computer Science at the
    State University of New York at Buffalo.
 
@@ -25,15 +27,6 @@
 #define PARSER_DEFS_H 1
 
 #include "doublest.h"
-
-struct std_regs
-  {
-    char *name;
-    int regnum;
-  };
-
-extern struct std_regs *std_regs;
-extern unsigned num_std_regs;
 
 extern struct expression *expout;
 extern int expout_size;
@@ -208,8 +201,8 @@ struct op_print
   };
 
 /* The generic method for targets to specify how their registers are
-   named.  The mapping can be derived from three sources:
-   REGISTER_NAME; std_regs; or a target specific alias hook. */
+   named.  The mapping can be derived from two sources: REGISTER_NAME;
+   and builtin regs. */
 
 extern int target_map_name_to_register (char *, int);
 
