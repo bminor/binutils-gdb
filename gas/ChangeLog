@@ -1,3 +1,22 @@
+Sat Aug 27 20:26:12 1994  Ken Raeburn  (raeburn@kr-laptop.cygnus.com)
+
+	* config/tc-alpha.c: Added various prototypes for static
+	functions.
+	(in_range): New function, tests whether a value can fit in an
+	N-bit field.
+	(build_mem, build_operate_n): New functions for constructing
+	opcode values.
+	(emit_sll_n, emit_ldah_num, emit_addq_r, emit_lda_n): New
+	functions for emitting single instructions, no longer requiring a
+	recursive call to md_assemble.
+	(emit_add64): New function for expanding a REG:=REG+CONST
+	operation into one or more instructions, to handle wide constants.
+	(clear_insn): New variable.
+	(md_begin): Fill it in with zeros and BFD_RELOC_NONE values.
+	(alpha_ip): Use it to initialize local variable insns.
+	(alpha_ip, label "immediate" and cases 'P', 'G'): Use emit_add64
+	for calculations.
+
 Fri Aug 26 14:46:15 1994  Ken Raeburn  (raeburn@kr-laptop.cygnus.com)
 
 	* subsegs.c (section_symbol): Reverse still-wrong test of

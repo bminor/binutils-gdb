@@ -114,6 +114,23 @@ static void s_base (), s_proc (), s_alpha_set ();
 static void s_gprel32 (), s_rdata (), s_sdata (), s_alpha_comm ();
 static int alpha_ip ();
 
+static void emit_unaligned_io PARAMS ((char *, int, valueT, int));
+static void emit_load_unal PARAMS ((int, valueT, int));
+static void emit_store_unal PARAMS ((int, valueT, int));
+static void emit_byte_manip_r PARAMS ((char *, int, int, int, int, int));
+static void emit_extract_r PARAMS ((int, int, int, int, int));
+static void emit_insert_r PARAMS ((int, int, int, int, int));
+static void emit_mask_r PARAMS ((int, int, int, int, int));
+static void emit_sign_extend PARAMS ((int, int));
+static void emit_bis_r PARAMS ((int, int, int));
+static int build_mem PARAMS ((int, int, int, bfd_signed_vma));
+static int build_operate_n PARAMS ((int, int, int, int, int));
+static void emit_sll_n PARAMS ((int, int, int));
+static void emit_ldah_num PARAMS ((int, bfd_vma, int));
+static void emit_addq_r PARAMS ((int, int, int));
+static void emit_lda_n PARAMS ((int, bfd_vma, int));
+static void emit_add64 PARAMS ((int, int, bfd_vma));
+
 const pseudo_typeS md_pseudo_table[] =
 {
   {"common", s_comm, 0},	/* is this used? */
@@ -412,6 +429,42 @@ s_base ()
   demand_empty_rest_of_line ();
 }
 
+static int in_range (val, nbits, unsignedness)
+     bfd_vma val;
+     int nbits, unsignedness;
+{
+  /* Look at top bit of value that would be stored, figure out how it
+     would be extended by the hardware, and see if that matches the
+     original supplied value.  */
+  bfd_vma mask;
+  bfd_vma one = 1;
+  bfd_vma top_bit, stored_value, missing_bits;
+
+  mask = (one << nbits) - 1;
+  stored_value = val & mask;
+  top_bit = stored_value & (one << nbits - 1);
+  missing_bits = val & ~mask;
+  if (unsignedness)
+    {
+      return missing_bits == 0;
+    }
+  else
+    {
+      /* will sign-extend */
+      if (top_bit)
+	{
+	  /* all remaining bits beyond mask should be one */
+	  missing_bits |= mask;
+	  return missing_bits + 1 == 0;
+	}
+      else
+	{
+	  /* all other bits should be zero */
+	  return missing_bits == 0;
+	}
+    }
+}
+
 static void
 s_gprel32 ()
 {
@@ -555,12 +608,16 @@ load_insn_table (ops, size)
     }
 }
 
+static struct alpha_it clear_insn;
+
 /* This function is called once, at assembler startup time.  It should
    set up all the tables, etc. that the MD part of the assembler will
    need, that can be determined before arguments are parsed.  */
 void
 md_begin ()
 {
+  int i;
+
   op_hash = hash_new ();
   load_insn_table (alpha_opcodes, NUMOPCODES);
 
@@ -594,6 +651,10 @@ md_begin ()
   /* For handling the GP, create a symbol that won't be output in the
      symbol table.  We'll edit it out of relocs later.  */
   gp = symbol_create ("<GP value>", lita_sec, 0x8000, &zero_address_frag);
+
+  memset (&clear_insn, 0, sizeof (clear_insn));
+  for (i = 0; i < MAX_RELOCS; i++)
+    clear_insn.reloc[i].code = BFD_RELOC_NONE;
 }
 
 int optnum = 1;
@@ -930,8 +991,6 @@ getExpression (str, this_insn)
   input_line_pointer = save_in;
 }
 
-/* All of these should soon be changed to just emit words to the
-   output frag...  */
 static void
 emit_unaligned_io (dir, addr_reg, addr_offset, reg)
      char *dir;
@@ -1010,6 +1069,140 @@ emit_bis_r (in1, in2, out)
   md_assemble (buf);
 }
 
+static int
+build_mem (opc, ra, rb, disp)
+     int opc, ra, rb;
+     bfd_signed_vma disp;
+{
+  fprintf (stderr, "build_mem: disp=%lx\n", disp);
+  if ((disp >> 15) != 0
+      && (disp >> 15) + 1 != 0)
+    abort ();
+  return ((opc << 26) | (ra << SA) | (rb << SB) | (disp & 0xffff));
+}
+
+static int
+build_operate_n (opc, fn, ra, lit, rc)
+     int opc, fn, ra, rc;
+     int lit;
+{
+  if (lit & ~0xff)
+    abort ();
+  return ((opc << 26) | (fn << 5) | (ra << SA) | (lit << SN) | (1 << 12) | (rc << SC));
+}
+
+static void
+emit_sll_n (dest, disp, src)
+     int dest, disp, src;
+{
+  struct alpha_it insn = clear_insn;
+  insn.opcode = build_operate_n (0x12, 0x39, src, disp, dest);
+  emit_insn (&insn);
+}
+
+static void
+emit_ldah_num (dest, addend, src)
+     int dest, src;
+     bfd_vma addend;
+{
+  struct alpha_it insn = clear_insn;
+  insn.opcode = build_mem (0x09, dest, src, addend);
+  emit_insn (&insn);
+}
+
+static void
+emit_addq_r (in1, in2, out)
+     int in1, in2, out;
+{
+  struct alpha_it insn = clear_insn;
+  insn.opcode = 0x40000400 | (in1 << SA) | (in2 << SB) | (out << SC);
+  emit_insn (&insn);
+}
+
+static void
+emit_lda_n (dest, addend, src)
+     int dest, src;
+     bfd_vma addend;
+{
+  struct alpha_it insn = clear_insn;
+  insn.opcode = build_mem (0x08, dest, src, addend);
+  emit_insn (&insn);
+}
+
+static void
+emit_add64 (in, out, num)
+     int in, out;
+     bfd_vma num;
+{
+  bfd_signed_vma snum = num;
+
+  if (in_range (num, 16, 0))
+    {
+      emit_lda_n (out, num, in);
+      return;
+    }
+  if ((num & 0xffff) == 0
+      && in == ZERO
+      && in_range (snum >> 16, 16, 0))
+    {
+      emit_ldah_num (out, snum >> 16, in);
+      return;
+    }
+  /* I'm not sure this one is getting invoked when it could.
+  if ((num & 1) == 0 && in == ZERO)
+    {
+      if (in_range (snum >> 1, 16, 0))
+	{
+	  emit_lda_n (out, snum >> 1, in);
+	  emit_addq_r (out, out, out);
+	  return;
+	}
+      else if (num & 0x1fffe == 0
+	       && in_range (snum >> 17, 16, 0))
+	{
+	  emit_ldah_num (out, snum >> 17, in);
+	  emit_addq_r (out, out, out);
+	  return;
+	}
+    }
+  if (in_range (num, 32, 0))
+    {
+      bfd_vma lo = num & 0xffff;
+      if (lo & 0x8000)
+	lo -= 0x10000;
+      num -= lo;
+      emit_ldah_num (out, snum >> 16, in);
+      if (lo)
+	emit_lda_n (out, lo, out);
+      return;
+    }
+
+  if (in != ZERO && in != AT && out != AT && at_ok)
+    {
+      emit_add64 (ZERO, AT, num);
+      emit_addq_r (AT, in, out);
+      return;
+    }
+
+  if (in != ZERO)
+    as_bad ("load expression too complex to expand");
+
+  /* Could check also for loading 16- or 32-bit value and shifting by
+     arbitrary displacement.  */
+
+  {
+    bfd_vma lo = snum & 0xffffffff;
+    if (lo & 0x80000000)
+      lo -= ((bfd_vma)0x10000000 << 4);
+    snum -= lo;
+    printf ("splitting load of 0x%lx: 0x%lx 0x%lx\n", num, snum, lo);
+    emit_add64 (ZERO, out, snum >> 32);
+    emit_sll_n (out, 32, out);
+    if (lo != 0)
+      emit_add64 (out, out, lo);
+  }
+}
+
 /* Note that for now, this function is called recursively (by way of
    calling md_assemble again).  Some of the macros defined as part of
    the assembly language are currently rewritten as sequences of
@@ -1068,11 +1261,8 @@ alpha_ip (str, insns)
     {
       opcode = pattern->match;
       num_gen = 1;
-      memset (insns, 0, sizeof (*insns));
-      for (i = 0; i < MAX_RELOCS; i++)
-	insns[0].reloc[i].code = BFD_RELOC_NONE;
-      for (i = 1; i < MAX_INSNS; i++)
-	insns[i] = insns[0];
+      for (i = 0; i < MAX_INSNS; i++)
+	insns[i] = clear_insn;
 
       /* Build the opcode, checking as we go to make sure that the
 	 operands match.  */
@@ -1335,16 +1525,46 @@ alpha_ip (str, insns)
 		  else if (at_ok && macro_ok)
 		    {
 		      /* Constant value supplied, but it's too large.  */
-		      char buf[50];
-		      char expansion[64];
-		      sprint_value (buf, insns[0].reloc[0].exp.X_add_number);
-		      sprintf (expansion, "lda $%d,%s($%d)", AT, buf, ZERO);
-		      md_assemble (expansion);
-		      opcode |= 0x1000 /* use reg */  | (AT << SB);
+		      emit_add64 (ZERO, AT,
+				  insns[0].reloc[0].exp.X_add_number);
+		      opcode &= ~ 0x1000;
+		      opcode |= (AT << SB);
 		      insns[0].reloc[0].code = BFD_RELOC_NONE;
 		    }
 		  else
 		    as_bad ("overflow in 8-bit literal field in `operate' format insn");
+		}
+	      else if (insns[0].reloc[0].code == BFD_RELOC_16
+		       && insns[0].reloc[0].exp.X_op == O_constant
+		       && !in_range (insns[0].reloc[0].exp.X_add_number,
+				     16, 0))
+		{
+		  bfd_vma val = insns[0].reloc[0].exp.X_add_number;
+		  if (OPCODE (opcode) == 0x08)
+		    {
+		      emit_add64 (ZERO, AT, val);
+		      opcode &= ~0x1000;
+		      opcode |= (AT << SB);
+		      insns[0].reloc[0].code = BFD_RELOC_NONE;
+		    }
+		  else if (OPCODE (opcode) == 0x09
+			   && in_range (val >> 16, 16, 0))
+		    {
+		      /* ldah with high operand - convert to low */
+		      insns[0].reloc[0].exp.X_add_number >>= 16;
+		    }
+		  else
+		    as_bad ("I don't know how to handle 32+ bit constants here yet, sorry.");
+		}
+	      else if (insns[0].reloc[0].code == BFD_RELOC_32
+		       && insns[0].reloc[0].exp.X_op == O_constant)
+		{
+		  bfd_vma val = insns[0].reloc[0].exp.X_add_number;
+		  bfd_signed_vma sval = val;
+		  if (val >> 32 != 0
+		      && sval >> 32 != 0
+		      && sval >> 32 != -1)
+		    as_bad ("I don't know how to handle 64 bit constants here yet, sorry.");
 		}
 	      continue;
 
@@ -1437,34 +1657,25 @@ alpha_ip (str, insns)
 		}
 	      if (insns[0].reloc[0].exp.X_op == O_constant)
 		{
-		  /* This only handles 32bit numbers */
-		  register int val = insns[0].reloc[0].exp.X_add_number;
-		  register short sval;
+		  bfd_vma val = insns[0].reloc[0].exp.X_add_number;
+		  bfd_vma top, low;
 
 		  insns[0].reloc[0].code = BFD_RELOC_NONE;
 		  insns[1].reloc[0].code = BFD_RELOC_NONE;
 
-		  sval = val;
-		  if ((sval != val) && (val & 0x8000))
+		  low = val & 0xffff;
+		  if (low & 0x8000)
+		    low -= 0x10000;
+		  top = val - low;
+		  if (top)
 		    {
-		      val += 0x10000;
-		      sval = val;
-		    }
-
-		  if (optnum && (sval == val))
-		    {
-		      /* optimize away the ldah */
-		      num_gen = 1;
-		      opcode |= (ZERO << SB) | (val & 0xffff);
+		      emit_add64 (ZERO, AT, top);
+		      opcode |= AT << SB;
 		    }
 		  else
-		    {
-		      num_gen = 2;
-		      insns[1].opcode = opcode | (mask << SB) | (val & 0xffff);
-		      opcode = 0x24000000 /*ldah*/  |
-			mask << SA | (ZERO << SB) |
-			((val >> 16) & 0xffff);
-		    }
+		    opcode |= ZERO << SB;
+		  opcode &= ~0x1000;
+		  opcode |= low & 0xffff;
 		}
 	      else if (insns[0].reloc[0].exp.X_op == O_symbol)
 		{
