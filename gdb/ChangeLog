@@ -1,5 +1,11 @@
 2005-01-16  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparc64fbsd-tdep.c: Update copyright year.
+	(sparc64fbsd_collect_gregset, sparc64fbsd_collect_fpregset): New
+	functions.
+	(sparc64fbsd_init_abi): Create register sets with collect
+	functions.
+
 	* sparc64fbsd-nat.c: Include "fbsd-nat.h".
 	(_initialize_sparc64fbsd_nat): Add some extra features to the
 	generic SPARC target.
