@@ -29,6 +29,8 @@ mh-sysv
 mt-a29k
 mt-ebmon29k
 mh-rs6000
+mt-vxworks960
+mt-vxworks68
 Do-last:
 
 echo Done in `pwd`.
