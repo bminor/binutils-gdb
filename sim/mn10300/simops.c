@@ -2253,7 +2253,7 @@ void OP_C800 (insn, extension)
   /* The dispatching code will add 2 after we return, so
      we subtract two here to make things right.  */
   if (PSW & PSW_Z)
-    State.pc += SEXT8 (insn & 0xff) - 2;
+    State.regs[REG_PC] += SEXT8 (insn & 0xff) - 2;
 }
 
 /* bne label:8 */
@@ -2263,7 +2263,7 @@ void OP_C900 (insn, extension)
   /* The dispatching code will add 2 after we return, so
      we subtract two here to make things right.  */
   if (!(PSW & PSW_Z))
-    State.pc += SEXT8 (insn & 0xff) - 2;
+    State.regs[REG_PC] += SEXT8 (insn & 0xff) - 2;
 }
 
 /* bgt label:8 */
@@ -2274,7 +2274,7 @@ void OP_C100 (insn, extension)
      we subtract two here to make things right.  */
   if (!((PSW & PSW_Z)
         || (((PSW & PSW_N) != 0) ^ ((PSW & PSW_V) != 0))))
-    State.pc += SEXT8 (insn & 0xff) - 2;
+    State.regs[REG_PC] += SEXT8 (insn & 0xff) - 2;
 }
 
 /* bge label:8 */
@@ -2284,7 +2284,7 @@ void OP_C200 (insn, extension)
   /* The dispatching code will add 2 after we return, so
      we subtract two here to make things right.  */
   if (!(((PSW & PSW_N) != 0) ^ ((PSW & PSW_V) != 0)))
-    State.pc += SEXT8 (insn & 0xff) - 2;
+    State.regs[REG_PC] += SEXT8 (insn & 0xff) - 2;
 }
 
 /* ble label:8 */
@@ -2295,7 +2295,7 @@ void OP_C300 (insn, extension)
      we subtract two here to make things right.  */
   if ((PSW & PSW_Z)
        || (((PSW & PSW_N) != 0) ^ ((PSW & PSW_V) != 0)))
-    State.pc += SEXT8 (insn & 0xff) - 2;
+    State.regs[REG_PC] += SEXT8 (insn & 0xff) - 2;
 }
 
 /* blt label:8 */
@@ -2305,7 +2305,7 @@ void OP_C000 (insn, extension)
   /* The dispatching code will add 2 after we return, so
      we subtract two here to make things right.  */
   if (((PSW & PSW_N) != 0) ^ ((PSW & PSW_V) != 0))
-    State.pc += SEXT8 (insn & 0xff) - 2;
+    State.regs[REG_PC] += SEXT8 (insn & 0xff) - 2;
 }
 
 /* bhi label:8 */
@@ -2315,7 +2315,7 @@ void OP_C500 (insn, extension)
   /* The dispatching code will add 2 after we return, so
      we subtract two here to make things right.  */
   if (!(((PSW & PSW_C) != 0) || (PSW & PSW_Z) != 0))
-    State.pc += SEXT8 (insn & 0xff) - 2;
+    State.regs[REG_PC] += SEXT8 (insn & 0xff) - 2;
 }
 
 /* bcc label:8 */
@@ -2325,7 +2325,7 @@ void OP_C600 (insn, extension)
   /* The dispatching code will add 2 after we return, so
      we subtract two here to make things right.  */
   if (!(PSW & PSW_C))
-    State.pc += SEXT8 (insn & 0xff) - 2;
+    State.regs[REG_PC] += SEXT8 (insn & 0xff) - 2;
 }
 
 /* bls label:8 */
@@ -2335,7 +2335,7 @@ void OP_C700 (insn, extension)
   /* The dispatching code will add 2 after we return, so
      we subtract two here to make things right.  */
   if (((PSW & PSW_C) != 0) || (PSW & PSW_Z) != 0)
-    State.pc += SEXT8 (insn & 0xff) - 2;
+    State.regs[REG_PC] += SEXT8 (insn & 0xff) - 2;
 }
 
 /* bcs label:8 */
@@ -2345,7 +2345,7 @@ void OP_C400 (insn, extension)
   /* The dispatching code will add 2 after we return, so
      we subtract two here to make things right.  */
   if (PSW & PSW_C)
-    State.pc += SEXT8 (insn & 0xff) - 2;
+    State.regs[REG_PC] += SEXT8 (insn & 0xff) - 2;
 }
 
 /* bvc label:8 */
@@ -2355,7 +2355,7 @@ void OP_F8E800 (insn, extension)
   /* The dispatching code will add 3 after we return, so
      we subtract two here to make things right.  */
   if (!(PSW & PSW_V))
-    State.pc += SEXT8 (insn & 0xff) - 3;
+    State.regs[REG_PC] += SEXT8 (insn & 0xff) - 3;
 }
 
 /* bvs label:8 */
@@ -2365,7 +2365,7 @@ void OP_F8E900 (insn, extension)
   /* The dispatching code will add 3 after we return, so
      we subtract two here to make things right.  */
   if (PSW & PSW_V)
-    State.pc += SEXT8 (insn & 0xff) - 3;
+    State.regs[REG_PC] += SEXT8 (insn & 0xff) - 3;
 }
 
 /* bnc label:8 */
@@ -2375,7 +2375,7 @@ void OP_F8EA00 (insn, extension)
   /* The dispatching code will add 3 after we return, so
      we subtract two here to make things right.  */
   if (!(PSW & PSW_N))
-    State.pc += SEXT8 (insn & 0xff) - 3;
+    State.regs[REG_PC] += SEXT8 (insn & 0xff) - 3;
 }
 
 /* bns label:8 */
@@ -2385,7 +2385,7 @@ void OP_F8EB00 (insn, extension)
   /* The dispatching code will add 3 after we return, so
      we subtract two here to make things right.  */
   if (PSW & PSW_N)
-    State.pc += SEXT8 (insn & 0xff) - 3;
+    State.regs[REG_PC] += SEXT8 (insn & 0xff) - 3;
 }
 
 /* bra label:8 */
@@ -2394,7 +2394,7 @@ void OP_CA00 (insn, extension)
 {
   /* The dispatching code will add 2 after we return, so
      we subtract two here to make things right.  */
-  State.pc += SEXT8 (insn & 0xff) - 2;
+  State.regs[REG_PC] += SEXT8 (insn & 0xff) - 2;
 }
 
 /* leq */
@@ -2485,21 +2485,21 @@ void OP_DB (insn, extension)
 void OP_F0F4 (insn, extension)
      unsigned long insn, extension;
 {
-  State.pc = State.regs[REG_A0 + REG0 (insn)] - 2;
+  State.regs[REG_PC] = State.regs[REG_A0 + REG0 (insn)] - 2;
 }
 
 /* jmp label:16 */
 void OP_CC0000 (insn, extension)
      unsigned long insn, extension;
 {
-  State.pc += SEXT16 (insn & 0xffff) - 3;
+  State.regs[REG_PC] += SEXT16 (insn & 0xffff) - 3;
 }
 
 /* jmp label:32 */
 void OP_DC000000 (insn, extension)
      unsigned long insn, extension;
 {
-  State.pc += (((insn & 0xffffff) << 8) + extension) - 5;
+  State.regs[REG_PC] += (((insn & 0xffffff) << 8) + extension) - 5;
 }
 
 /* call label:16,reg_list,imm8 */
@@ -2510,7 +2510,7 @@ void OP_CD000000 (insn, extension)
   unsigned long mask;
 
   sp = State.regs[REG_SP];
-  next_pc = State.pc + 2;
+  next_pc = State.regs[REG_PC] + 2;
   State.mem[sp] = next_pc & 0xff;
   State.mem[sp+1] = (next_pc & 0xff00) >> 8;
   State.mem[sp+2] = (next_pc & 0xff0000) >> 16;
@@ -2565,7 +2565,7 @@ void OP_CD000000 (insn, extension)
   /* And make sure to update the stack pointer.  */
   State.regs[REG_SP] -= extension;
   State.regs[REG_MDR] = next_pc;
-  State.pc += SEXT16 ((insn & 0xffff00) >> 8) - 5;
+  State.regs[REG_PC] += SEXT16 ((insn & 0xffff00) >> 8) - 5;
 }
 
 /* call label:32,reg_list,imm8*/
@@ -2576,7 +2576,7 @@ void OP_DD000000 (insn, extension)
   unsigned long mask;
 
   sp = State.regs[REG_SP];
-  next_pc = State.pc + 2;
+  next_pc = State.regs[REG_PC] + 2;
   State.mem[sp] = next_pc & 0xff;
   State.mem[sp+1] = (next_pc & 0xff00) >> 8;
   State.mem[sp+2] = (next_pc & 0xff0000) >> 16;
@@ -2631,7 +2631,7 @@ void OP_DD000000 (insn, extension)
   /* And make sure to update the stack pointer.  */
   State.regs[REG_SP] -= (extension & 0xff);
   State.regs[REG_MDR] = next_pc;
-  State.pc += (((insn & 0xffffff) << 8) | ((extension & 0xff0000) >> 16)) - 7;
+  State.regs[REG_PC] += (((insn & 0xffffff) << 8) | ((extension & 0xff0000) >> 16)) - 7;
 }
 
 /* calls (an) */
@@ -2641,13 +2641,13 @@ void OP_F0F0 (insn, extension)
   unsigned int next_pc, sp;
 
   sp = State.regs[REG_SP];
-  next_pc = State.pc + 2;
+  next_pc = State.regs[REG_PC] + 2;
   State.mem[sp] = next_pc & 0xff;
   State.mem[sp+1] = (next_pc & 0xff00) >> 8;
   State.mem[sp+2] = (next_pc & 0xff0000) >> 16;
   State.mem[sp+3] = (next_pc & 0xff000000) >> 24;
   State.regs[REG_MDR] = next_pc;
-  State.pc = State.regs[REG_A0 + REG0 (insn)] - 2;
+  State.regs[REG_PC] = State.regs[REG_A0 + REG0 (insn)] - 2;
 }
 
 /* calls label:16 */
@@ -2657,13 +2657,13 @@ void OP_FAFF0000 (insn, extension)
   unsigned int next_pc, sp;
 
   sp = State.regs[REG_SP];
-  next_pc = State.pc + 4;
+  next_pc = State.regs[REG_PC] + 4;
   State.mem[sp] = next_pc & 0xff;
   State.mem[sp+1] = (next_pc & 0xff00) >> 8;
   State.mem[sp+2] = (next_pc & 0xff0000) >> 16;
   State.mem[sp+3] = (next_pc & 0xff000000) >> 24;
   State.regs[REG_MDR] = next_pc;
-  State.pc += SEXT16 (insn & 0xffff) - 4;
+  State.regs[REG_PC] += SEXT16 (insn & 0xffff) - 4;
 }
 
 /* calls label:32 */
@@ -2673,13 +2673,13 @@ void OP_FCFF0000 (insn, extension)
   unsigned int next_pc, sp;
 
   sp = State.regs[REG_SP];
-  next_pc = State.pc + 6;
+  next_pc = State.regs[REG_PC] + 6;
   State.mem[sp] = next_pc & 0xff;
   State.mem[sp+1] = (next_pc & 0xff00) >> 8;
   State.mem[sp+2] = (next_pc & 0xff0000) >> 16;
   State.mem[sp+3] = (next_pc & 0xff000000) >> 24;
   State.regs[REG_MDR] = next_pc;
-  State.pc += (((insn & 0xffff) << 16) + extension) - 6;
+  State.regs[REG_PC] += (((insn & 0xffff) << 16) + extension) - 6;
 }
 
 /* ret reg_list, imm8 */
@@ -2741,9 +2741,9 @@ void OP_DF0000 (insn, extension)
   State.regs[REG_SP] = sp;
 
   /* Restore the PC value.  */
-  State.pc = (State.mem[sp] | (State.mem[sp+1] << 8)
+  State.regs[REG_PC] = (State.mem[sp] | (State.mem[sp+1] << 8)
 	      | (State.mem[sp+2] << 16) | (State.mem[sp+3] << 24));
-  State.pc -= 3;
+  State.regs[REG_PC] -= 3;
 }
 
 /* retf reg_list,imm8 */
@@ -2755,7 +2755,7 @@ void OP_DE0000 (insn, extension)
 
   sp = State.regs[REG_SP] + (insn & 0xff);
   State.regs[REG_SP] = sp;
-  State.pc = State.regs[REG_MDR] - 3;
+  State.regs[REG_PC] = State.regs[REG_MDR] - 3;
 
   sp = State.regs[REG_SP];
 
@@ -2815,9 +2815,9 @@ void OP_F0FC (insn, extension)
   unsigned int sp;
 
   sp = State.regs[REG_SP];
-  State.pc = (State.mem[sp] | (State.mem[sp+1] << 8)
+  State.regs[REG_PC] = (State.mem[sp] | (State.mem[sp+1] << 8)
 	      | (State.mem[sp+2] << 16) | (State.mem[sp+3] << 24));
-  State.pc -= 2;
+  State.regs[REG_PC] -= 2;
 }
 
 /* rti */

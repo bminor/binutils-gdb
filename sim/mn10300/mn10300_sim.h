@@ -51,6 +51,7 @@ struct simops
   long mask;
   void (*func)();
   int length;
+  int format;
   int numops;
   int operands[16];
 };
@@ -59,9 +60,8 @@ struct simops
 
 struct _state
 {
-  reg_t regs[12];		/* registers, d0-d3, a0-a3, sp, mdr, lar, lir */
-  reg_t sregs[8];		/* system registers, including psw */
-  reg_t pc;
+  reg_t regs[12];		/* registers, d0-d3, a0-a3, sp, pc, mdr, psw,
+				   lir, lar */
   uint8 *mem;			/* main memory */
   int exception;
 } State;
@@ -69,9 +69,9 @@ struct _state
 extern uint32 OP[4];
 extern struct simops Simops[];
 
-#define PC	(State.pc)
+#define PC	(State.regs[9])
 
-#define PSW (State.sregs[0])
+#define PSW (State.regs[11])
 #define PSW_V 0x1
 #define PSW_C 0x2
 #define PSW_N 0x4
@@ -80,9 +80,11 @@ extern struct simops Simops[];
 #define REG_D0 0
 #define REG_A0 4
 #define REG_SP 8
-#define REG_MDR 9
-#define REG_LAR 10
-#define REG_LIR 11
+#define REG_PC 9
+#define REG_MDR 10
+#define REG_PSW 11
+#define REG_LIR 12
+#define REG_LAR 13
 
 #define SEXT3(x)	((((x)&0x7)^(~0x3))+0x4)	
 
@@ -103,18 +105,6 @@ extern struct simops Simops[];
 
 /* sign-extend a 22-bit number */
 #define SEXT22(x)	((((x)&0x3fffff)^(~0x1fffff))+0x200000)
-
-/* sign-extend a 32-bit number */
-#define SEXT32(x)	((((x)&0xffffffffLL)^(~0x7fffffffLL))+0x80000000LL)
-
-/* sign extend a 40 bit number */
-#define SEXT40(x)	((((x)&0xffffffffffLL)^(~0x7fffffffffLL))+0x8000000000LL)
-
-/* sign extend a 44 bit number */
-#define SEXT44(x)	((((x)&0xfffffffffffLL)^(~0x7ffffffffffLL))+0x80000000000LL)
-
-/* sign extend a 60 bit number */
-#define SEXT60(x)	((((x)&0xfffffffffffffffLL)^(~0x7ffffffffffffffLL))+0x800000000000000LL)
 
 #define MAX32	0x7fffffffLL
 #define MIN32	0xff80000000LL

@@ -1,3 +1,11 @@
+Tue Dec 31 16:20:41 1996  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300_sim.h (struct _state): Put all registers into a single
+	array to make gdb implementation easier.
+	(REG_*): Add definitions for all registers in the state array.
+	(SEXT32, SEXT40, SEXT44, SEXT60): Remove unused macros.
+	* simops.c: Related changes.
+
 Wed Dec 18 10:10:45 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* interp.c (sim_resume): Handle 0xff as a single byte insn.
