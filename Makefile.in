@@ -16,7 +16,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #
-# Last Mod Thu Nov 7 18:50:14 PST 1991, by rich@sendai
+# Last Mod Mon Nov 11 01:53:12 PST 1991, by rich@rtl.cygnus.com
 #
 # $Id$
 
@@ -42,6 +42,10 @@ OTHERS =
 ALL = all.normal
 INSTALL_HEADERS = install-headers
 INSTALL_FIXED_INCLUDES = install-fixed-includes
+
+### for debugging
+#GCCVERBOSE=-v
+
 #### host and target specific makefile fragments come in here.
 ###
 
@@ -104,11 +108,12 @@ pass:
 	cp $(srcdir)/gcc/gstdarg.h $(unsubdir)/gas$(subdir)/stdarg.h
 	$(MAKE) subdir_do DO=all "DODIRS=$(SUBDIRS)" \
 		"CC=`pwd`/$(unsubdir)/gcc$(subdir)/$(stagepass)/gcc \
-		-O \
+		-O $(GCCVERBOSE) \
 		-B`pwd`/$(unsubdir)/gcc$(subdir)/$(stagepass)/ \
 		-B`pwd`/$(unsubdir)/gas$(subdir)/$(stagepass)/ \
 		-B`pwd`/$(unsubdir)/ld$(subdir)/$(stagepass)/" \
 		"AR=`pwd`/$(unsubdir)/binutils$(subdir)/$(stagepass)/ar" \
+		"LD=`pwd`/$(unsubdir)/ld$(subdir)/$(stagepass)/ld $(GCCVERBOSE)" \
 		"RANLIB=`pwd`/$(unsubdir)/binutils$(subdir)/$(stagepass)/ranlib" \
 		"LOADLIBES=`pwd`/$(unsubdir)/gnulib$(subdir)/$(stagepass)/gnulib.a /lib/libc.a" \
 		"LDFLAGS=-nostdlib /lib/crt0.o \
