@@ -25,11 +25,7 @@ AC_CONFIG_HEADER(config.h:config.in)
 
 AC_PROG_CC
 AC_AIX
-AC_MINIX
 AC_ISC_POSIX
-
-DLLTOOL=${DLLTOOL-dlltool}
-AC_SUBST(DLLTOOL)
 
 AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/..)
 AC_CANONICAL_SYSTEM
@@ -61,16 +57,15 @@ AC_PROG_INSTALL
 AC_CHECK_TOOL(AR, ar)
 AC_CHECK_TOOL(RANLIB, ranlib, :)
 AC_PROG_YACC
-AC_PROG_AWK
 
 AC_ARG_PROGRAM
 
 AC_TYPE_SIGNAL
 
 AC_HEADER_STDC
-AC_CHECK_HEADERS(ctype.h curses.h endian.h libintl.h limits.h link.h \
+AC_CHECK_HEADERS(ctype.h curses.h endian.h libintl.h link.h \
                  memory.h objlist.h ptrace.h sgtty.h stddef.h stdlib.h \
-                 string.h strings.h sys/procfs.h sys/ptrace.h sys/reg.h \
+                 string.h sys/procfs.h sys/ptrace.h sys/reg.h \
                  term.h termio.h termios.h unistd.h wait.h sys/wait.h \
                  wchar.h wctype.h asm/debugreg.h)
 
@@ -78,8 +73,7 @@ AC_HEADER_STAT
 
 AC_C_CONST
 
-AC_CHECK_FUNCS(setpgid sbrk select poll sigaction isascii bzero bcopy \
-               memcpy btowc)
+AC_CHECK_FUNCS(setpgid sbrk sigaction isascii bzero bcopy btowc)
 AC_FUNC_ALLOCA
 
 BFD_NEED_DECLARATION(malloc)
@@ -360,9 +354,9 @@ do
     if test "x$targ" = "xall" ; then
         all_targets=true
     else
-	t_cpu=`echo $targ | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\1/'`
+	t_cpu=`echo $targ    | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\1/'`
 	t_vendor=`echo $targ | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\2/'`
-	t_os=`echo $targ | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\3/'`
+	t_os=`echo $targ     | sed 's/^\([^-]*\)-\([^-]*\)-\(.*\)$/\3/'`
 	mt=`
 target=$targ
 target_cpu=$t_cpu
@@ -394,7 +388,7 @@ if test x${all_targets} = xfalse ; then
 	ta="$ta ${arch}-tdep.o"
 	# Special cases
 	case "$arch" in
-	dvp)		ta="$ta mips-tdep.o dvp-tdep.o" ;;
+	    dvp)  ta="$ta mips-tdep.o dvp-tdep.o" ;;
 	esac
     done
 
@@ -402,8 +396,8 @@ if test x${all_targets} = xfalse ; then
     f=""
     for i in $ta ; do
 	case " $f " in
-	*" $i "*) ;;
-	*) f="$f $i" ;;
+	    *" $i "*) ;;
+	    *) f="$f $i" ;;
 	esac
     done
     ta="$f"
@@ -412,8 +406,8 @@ if test x${all_targets} = xfalse ; then
     f=""
     for i in $archdefs ; do
 	case " $f " in
-	*" $i "*) ;;
-	*) f="$f $i" ;;
+	    *" $i "*) ;;
+	    *) f="$f $i" ;;
 	esac
     done
     archdefs="$f"
@@ -537,7 +531,9 @@ WIN32LDAPP=
 AC_SUBST(WIN32LIBS)
 AC_SUBST(WIN32LDAPP)
 
+DLLTOOL=${DLLTOOL-dlltool}
 WINDRES=${WINDRES-windres}
+AC_SUBST(DLLTOOL)
 AC_SUBST(WINDRES)
 
 if test x$gdb_cv_os_cygwin32 = xyes; then
@@ -859,4 +855,3 @@ nativefile=$nativefile
 ])
 
 exit 0
-
