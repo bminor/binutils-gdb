@@ -409,6 +409,7 @@ if test "${enable_gdbtk}" = "yes"; then
 	   fi
 
 	   ENABLE_GDBTK=1
+           ENABLE_CFLAGS="${ENABLE_CFLAGS} -DGDBTK"
 
 	   # Include some libraries that Tcl and Tk want.
 	   if test "${enable_ide}" = "yes"; then	

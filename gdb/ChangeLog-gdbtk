@@ -1,3 +1,12 @@
+Mon Jun 29 11:49:17 1998  Keith Seitz  <keiths@cygnus.com>
+
+	* main.c (main): Don't include gdbtk test code if GDBTK is
+	not defined by configure.
+
+	* configure.in: When enabling gdbtk, add "-DGDBTK" to ENABLE_CFLAGS.
+
+	* configure: Regenerate.
+	
 Fri Jun 26 13:56:07 1998  Keith Seitz  <keiths@cygnus.com>
 
 	* gdbtk.c: Change all references to static global "interp" to
