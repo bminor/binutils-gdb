@@ -90,6 +90,17 @@ static char *mips_regmask_frag;
 
 const char *mips_target_format = DEFAULT_TARGET_FORMAT;
 
+/* The name of the readonly data section.  */
+#ifdef OBJ_AOUT
+#define RDATA_SECTION_NAME ".data"
+#endif
+#ifdef OBJ_ECOFF
+#define RDATA_SECTION_NAME ".rdata"
+#endif
+#ifdef OBJ_ELF
+#define RDATA_SECTION_NAME ".rodata"
+#endif
+
 /* These variables are filled in with the masks of registers used.
    The object format code reads them and puts them in the appropriate
    place.  */
@@ -2987,17 +2998,22 @@ macro (ip)
 		  && offset_expr.X_add_number == 0);
 	  macro_build ((char *) NULL, &icnt, &offset_expr, "lwc1", "T,o(b)",
 		       treg, (int) BFD_RELOC_MIPS_LITERAL, GP);
+	  return;
 	}
       else if (mips_pic == SVR4_PIC
 	       || mips_pic == EMBEDDED_PIC)
 	{
 	  assert (imm_expr.X_op == O_constant);
-	  load_register (&icnt, treg, &imm_expr);
+	  load_register (&icnt, AT, &imm_expr);
+	  macro_build ((char *) NULL, &icnt, (expressionS *) NULL,
+		       "mtc1", "t,G", AT, treg);
+	  break;
 	}
       else
-	abort ();
-
-      return;
+	{
+	  abort ();
+	  return;
+	}
 
     case M_LI_D:
       /* We know that sym is in the .rdata section.  First we get the
@@ -3043,7 +3059,12 @@ macro (ip)
 			   treg + 1, (int) BFD_RELOC_LO16, AT);
 	    }
 	}
-	       
+
+      /* To avoid confusion in tc_gen_reloc, we must ensure that this
+	 does not become a variant frag.  */
+      frag_wane (frag_now);
+      frag_new (0);
+
       break;
 
     case M_LI_DD:
@@ -3100,6 +3121,12 @@ macro (ip)
       macro_build ((char *) NULL, &icnt, &offset_expr, "lwc1", "T,o(b)",
 		   byte_order == LITTLE_ENDIAN ? treg + 1 : treg,
 		   (int) r, breg);
+
+      /* To avoid confusion in tc_gen_reloc, we must ensure that this
+	 does not become a variant frag.  */
+      frag_wane (frag_now);
+      frag_new (0);
+
       if (breg != AT)
 	return;
       break;
@@ -4478,10 +4505,12 @@ mips_ip (str, ip)
 		      {
 		      default: /* unused default case avoids warnings.  */
 		      case 'L':
-			newname = (mips_pic != SVR4_PIC ? ".lit8" : ".rdata");
+			newname = (mips_pic != SVR4_PIC
+				   ? ".lit8"
+				   : RDATA_SECTION_NAME);
 			break;
 		      case 'F':
-			newname = ".rdata";
+			newname = RDATA_SECTION_NAME;
 			break;
 		      case 'l':
 			assert (mips_pic == NO_PIC);
@@ -5507,13 +5536,9 @@ s_change_sec (sec)
       break;
 
     case 'r':
-#ifdef OBJ_ECOFF
-      subseg_new (".rdata", (subsegT) get_absolute_expression ());
-      demand_empty_rest_of_line ();
-      break;
-#else /* ! defined (OBJ_ECOFF) */
+      seg = subseg_new (RDATA_SECTION_NAME,
+			(subsegT) get_absolute_expression ());
 #ifdef OBJ_ELF
-      seg = subseg_new (".rodata", (subsegT) get_absolute_expression ());
       bfd_set_section_flags (stdoutput, seg,
 			     (SEC_ALLOC
 			      | SEC_LOAD
@@ -5521,13 +5546,9 @@ s_change_sec (sec)
 			      | SEC_RELOC
 			      | SEC_DATA));
       bfd_set_section_alignment (stdoutput, seg, 4);
+#endif
       demand_empty_rest_of_line ();
       break;
-#else /* ! defined (OBJ_ELF) */
-      s_data (0);
-      break;
-#endif /* ! defined (OBJ_ELF) */
-#endif /* ! defined (OBJ_ECOFF) */
 
     case 's':
 #ifdef GPOPT

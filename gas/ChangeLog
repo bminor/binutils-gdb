@@ -1,3 +1,12 @@
+Mon Jun  6 13:10:54 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* config/tc-mips.c (RDATA_SECTION_NAME): Define.
+	(macro): Correct M_LI_SS SVR4_PIC/EMBEDDED_PIC case.  After M_LI_D
+	or M_L_DOB or label dob, force a new frag to avoid getting
+	confused in tc_gen_reloc.
+	(mips_ip): Use RDATA_SECTION_NAME, not .rdata.
+	(s_change_sec): Likewise.
+
 Fri Jun  3 23:35:36 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
 
 	* read.c (emit_expr): Use memset to zero out memory, rather than
