@@ -1,5 +1,9 @@
 2001-10-04  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-mips.c (mips_elf_record_global_got_symbol): Set got.offset 
+	to 1 rather than 0 to avoid confusing copy_indirect_symbol.
+	(mips_elf_sort_hash_table_f): Compare got.offset against 1.
+
 	* Makefile.am (BFD_H_DEPS): Add symcat.h.  Ensure everything
 	depends on $(BFD_H) $(BFD_H_DEPS) $(LOCAL_H_DEPS), not just those
 	backends we configure.  Run "make dep-am".

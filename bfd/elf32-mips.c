@@ -5502,14 +5502,15 @@ mips_elf_record_global_got_symbol (h, info, g)
       && !bfd_elf32_link_record_dynamic_symbol (info, h))
     return false;
 
-  /* If we've already marked this entry as need GOT space, we don't
+  /* If we've already marked this entry as needing GOT space, we don't
      need to do it again.  */
-  if (h->got.offset != (bfd_vma) - 1)
+  if (h->got.offset != (bfd_vma) -1)
     return true;
 
   /* By setting this to a value other than -1, we are indicating that
-     there needs to be a GOT entry for H.  */
-  h->got.offset = 0;
+     there needs to be a GOT entry for H.  Avoid using zero, as the
+     generic ELF copy_indirect_symbol tests for <= 0.  */
+  h->got.offset = 1;
 
   return true;
 }
@@ -5547,7 +5548,7 @@ mips_elf_sort_hash_table_f (h, data)
   if (h->root.dynindx == -1)
     return true;
 
-  if (h->root.got.offset != 0)
+  if (h->root.got.offset != 1)
     h->root.dynindx = hsd->max_non_got_dynindx++;
   else
     {
