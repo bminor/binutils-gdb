@@ -383,6 +383,7 @@ proc test_stepping {} {
 	# because we are out of the dummy by the first time the inferior
 	# stops.
 	clear_xfail "arm*-*-*"
+	clear_xfail "xscale*-*-*"
 	clear_xfail "d10v*-*-*"
 	clear_xfail "m68*-*-*"
 	clear_xfail "i*86*-*-*"

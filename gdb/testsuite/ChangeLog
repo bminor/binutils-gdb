@@ -1,5 +1,6 @@
 2002-05-02  Michael Snyder  <msnyder@redhat.com>
 
+	* gdb.base/watchpoint.exp: Add xscale target.
 	* gdb.base/long_long.exp: Add xscale target.
 	* gdb.base/default.exp: Add xscale target.
 
