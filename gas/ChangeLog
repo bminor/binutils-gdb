@@ -1,5 +1,10 @@
 2004-11-19  Alan Modra  <amodra@bigpond.net.au>
 
+	* config/tc-msp430.c (struct rcodes_s, MSP430_RLC, msp430_rcodes,
+	struct hcodes_s, msp430_hcodes): From include/opcode/msp430.h.
+
+2004-11-19  Alan Modra  <amodra@bigpond.net.au>
+
 	* config/obj-coff.c (c_dot_file_symbol): Add "app" param.
 	(coff_adjust_symtab): Adjust call.
 	(crawl_symbols): Likewise.
