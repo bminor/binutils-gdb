@@ -346,7 +346,7 @@ while [ $# != 0 ]; do
       :
     else
       echo >config.temp
-      ${srcdir}/install.sh -c -m 644 config.temp $2/COPIED
+      ${srcdir}/install-sh -c -m 644 config.temp $2/COPIED
     fi
 
     # Copy the directory, assuming we have tar.
