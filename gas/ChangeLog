@@ -166,6 +166,13 @@ Thu Jan 29 14:42:44 1998  Pat Rankin  <rankin@eql.caltech.edu>
 	* config/vms-conf.h: Synchronize with current config.in.
 	* Makefile.in: Rebuild.
 
+start-sanitize-d30v
+Thu Jan 29 18:48:19 1998  Bill Moyer  <billm@cygnus.com>
+
+	* config/tc-d30v.c (do_assemble): Added flag_explicitly_parallel.
+	(parallel_ok): Relaxed parallel subinstruction dependency check.
+
+end-sanitize-d30v
 start-sanitize-m32rx
 Wed Jan 28 16:27:27 1998  Nick Clifton  <nickc@cygnus.com>
 
