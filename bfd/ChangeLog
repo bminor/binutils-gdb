@@ -1,5 +1,8 @@
 Tue Apr 16 13:44:08 1996  Ian Lance Taylor  <ian@cygnus.com>
 
+	* aoutx.h (NAME(aout,squirt_out_relocs)): Don't do anything if
+	section->orelocation is NULL.
+
 	* coffgen.c (bfd_coff_get_syment): New function.
 	(bfd_coff_get_auxent): New function.
 	* bfd-in.h (bfd_coff_get_syment): Declare.
