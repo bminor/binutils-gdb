@@ -665,7 +665,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
-  /* A sign-extended 16 bit value relative to _SDA_BASE, for use with
+  /* A sign-extended 16 bit value relative to _SDA_BASE_, for use with
      small data items.  FIXME: Not supported.	 */
   HOWTO (R_PPC_SDAREL16,	/* type */
 	 0,			/* rightshift */
@@ -681,7 +681,6 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 0xffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
-  /* These next 4 relocations were added by Sun. */
   /* 32-bit section relative relocation. FIXME: not supported. */
   HOWTO (R_PPC_SECTOFF,		/* type */
 	 0,			/* rightshift */
@@ -760,7 +759,7 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 0xffffffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
-/* 16 bit value resulting from the addend minus the symbol */
+  /* 16 bit value resulting from the addend minus the symbol */
   HOWTO (R_PPC_EMB_NADDR16,	/* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -817,6 +816,97 @@ static reloc_howto_type ppc_elf_howto_raw[] =
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC_EMB_NADDR16_HA", /* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0xffff,		/* dst_mask */
+	 false),		/* pcrel_offset */
+
+  /* 16 bit value resulting from allocating a 4 byte word to hold an
+     address in the .sdata section, and returning the offset from
+     _SDA_BASE_ for that relocation */
+  HOWTO (R_PPC_EMB_SDAI16,	/* type */
+	 0,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_PPC_EMB_SDAI16",	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0xffff,		/* dst_mask */
+	 false),		/* pcrel_offset */
+
+  /* 16 bit value resulting from allocating a 4 byte word to hold an
+     address in the .sdata2 section, and returning the offset from
+     _SDA2_BASE_ for that relocation */
+  HOWTO (R_PPC_EMB_SDA2I16,	/* type */
+	 0,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_PPC_EMB_SDA2I16",	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0xffff,		/* dst_mask */
+	 false),		/* pcrel_offset */
+
+  /* A sign-extended 16 bit value relative to _SDA2_BASE_, for use with
+     small data items.  FIXME: Not supported.	 */
+  HOWTO (R_PPC_EMB_SDA2REL,	/* type */
+	 0,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_PPC_EMB_SDA2REL",	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0xffff,		/* dst_mask */
+	 false),		/* pcrel_offset */
+
+  /* Relocate against either _SDA_BASE_ or _SDA2_BASE_, filling in the 16 bit
+     signed offset from the appropriate base, and filling in the register
+     field with the appropriate register (0, 2, or 13).  */
+  HOWTO (R_PPC_EMB_SDA21,	/* type */
+	 0,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_PPC_EMB_SDA21",	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0xffff,		/* dst_mask */
+	 false),		/* pcrel_offset */
+
+  /* Relocation not handled: R_PPC_EMB_MRKREF */
+  /* Relocation not handled: R_PPC_EMB_RELSEC16 */
+  /* Relocation not handled: R_PPC_EMB_RELST_LO */
+  /* Relocation not handled: R_PPC_EMB_RELST_HI */
+  /* Relocation not handled: R_PPC_EMB_RELST_HA */
+  /* Relocation not handled: R_PPC_EMB_BIT_FLD */
+
+  /* PC relative relocation against either _SDA_BASE_ or _SDA2_BASE_, filling
+     in the 16 bit signed offset from the appropriate base, and filling in the
+     register field with the appropriate register (0, 2, or 13).  */
+  HOWTO (R_PPC_EMB_RELSDA,	/* type */
+	 0,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 true,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_PPC_EMB_RELSDA",	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
@@ -905,6 +995,22 @@ ppc_elf_reloc_type_lookup (abfd, code)
     case BFD_RELOC_HI16_S_BASEREL:	ppc_reloc = R_PPC_SECTOFF_HA;		break;
     case BFD_RELOC_CTOR:		ppc_reloc = R_PPC_ADDR32;		break;
     case BFD_RELOC_PPC_TOC16:		ppc_reloc = R_PPC_TOC16;		break;
+    case BFD_RELOC_PPC_EMB_NADDR32:	ppc_reloc = R_PPC_EMB_NADDR32;		break;
+    case BFD_RELOC_PPC_EMB_NADDR16:	ppc_reloc = R_PPC_EMB_NADDR16;		break;
+    case BFD_RELOC_PPC_EMB_NADDR16_LO:	ppc_reloc = R_PPC_EMB_NADDR16_LO;	break;
+    case BFD_RELOC_PPC_EMB_NADDR16_HI:	ppc_reloc = R_PPC_EMB_NADDR16_HI;	break;
+    case BFD_RELOC_PPC_EMB_NADDR16_HA:	ppc_reloc = R_PPC_EMB_NADDR16_HA;	break;
+    case BFD_RELOC_PPC_EMB_SDAI16:	ppc_reloc = R_PPC_EMB_SDAI16;		break;
+    case BFD_RELOC_PPC_EMB_SDA2I16:	ppc_reloc = R_PPC_EMB_SDA2I16;		break;
+    case BFD_RELOC_PPC_EMB_SDA2REL:	ppc_reloc = R_PPC_EMB_SDA2REL;		break;
+    case BFD_RELOC_PPC_EMB_SDA21:	ppc_reloc = R_PPC_EMB_SDA21;		break;
+    case BFD_RELOC_PPC_EMB_MRKREF:	ppc_reloc = R_PPC_EMB_MRKREF;		break;
+    case BFD_RELOC_PPC_EMB_RELSEC16:	ppc_reloc = R_PPC_EMB_RELSEC16;		break;
+    case BFD_RELOC_PPC_EMB_RELST_LO:	ppc_reloc = R_PPC_EMB_RELST_LO;		break;
+    case BFD_RELOC_PPC_EMB_RELST_HI:	ppc_reloc = R_PPC_EMB_RELST_HI;		break;
+    case BFD_RELOC_PPC_EMB_RELST_HA:	ppc_reloc = R_PPC_EMB_RELST_HA;		break;
+    case BFD_RELOC_PPC_EMB_BIT_FLD:	ppc_reloc = R_PPC_EMB_BIT_FLD;		break;
+    case BFD_RELOC_PPC_EMB_RELSDA:	ppc_reloc = R_PPC_EMB_RELSDA;		break;
     }
 
   return ppc_elf_howto_table[ (int)ppc_reloc ];

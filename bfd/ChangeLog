@@ -1,3 +1,11 @@
+Mon Jan 15 17:46:27 1996  Michael Meissner  <meissner@tiktok.cygnus.com>
+
+	* reloc.c: Add new PowerPC relocations.
+	* {bfd-in2,libbfd}.h: Regenerate.
+
+	* elf32-ppc.c (ppc_elf_howto_raw): Add more PPC relocations.
+	(ppc_elf_reloc_type_lookup): Lookup new relocations.
+
 Mon Jan 15 14:29:44 1996  Ian Lance Taylor  <ian@cygnus.com>
 
 	* aoutx.h (howto_table_ext): Fix RELOC_BASE10 and RELOC_BASE22
