@@ -42,6 +42,21 @@ MIPS		Ulf Carlsson <ulfc@calypso.engr.sgi.com>
 PPC		Geoff Keating <geoffk@redhat.com>
 SPARC		Jakub Jelinek <jakub@redhat.com>
 
+               --------- CGEN Maintainers -------------
+
+CGEN is a tool for building, amounst other things, assemblers,
+disassemblers and simulators from a single description of a CPU.  It
+creates files in several of the binutils directories, but it is
+mentioned here since there is a single group that maintains CGEN and
+the files that it creates. 
+
+If you have CGEN related problems you can send email to;
+
+             cgen@sources.redhat.com
+
+The current CGEN maintainers are:
+
+  Doug Evans, Ben Elliston, Frank Eigler
 
 	       --------- Write After Approval ---------
 

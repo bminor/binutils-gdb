@@ -1,3 +1,7 @@
+2000-08-03  Nick Clifton  <nickc@cygnus.com>
+
+	* MAINTAINERS: Add information about CGEN maintainers.
+
 2000-08-08  DJ Delorie  <dj@redhat.com>
 
 	* resrc.c: use "gcc -xc" instead of -xc-header
