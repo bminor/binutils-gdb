@@ -11,10 +11,20 @@ beginning and the end of the section.  This is used by glibc.
 contents of the section are displayed as an error message, and the section is
 not copied into the output file.  This is used by glibc.
 
+* When an ELF section named .gnu.warning.SYMBOL is encountered in an input
+file, and the symbol SYMBOL is referenced by some object file, the contents of
+the section are displayed as an error message.  The section is not copied into
+the output file, unless doing a relocateable or shared link.  This is used by
+glibc.
+
 * New options -split-by-reloc and -split-by-file.
 
-* The linker now supports linking PIC compiled code on SPARC SunOS.  It still
-can not create SunOS shared libraries.
+* The linker now supports linking PIC compiled code on SPARC SunOS.  It can
+also create SPARC SunOS shared libraries.  The native SunOS linker will do this
+when linking code which has an undefined symbol, but the GNU linker requires
+the -shared option.  For convenience when used with gcc -shared, the GNU linker
+will also create a shared library when given the -assert pure-text option,
+although this is not really what -assert pure-text should mean.
 
 * The COFF linker now combines debugging information for structs, unions, and
 enums, so that even if the same type is defined in multiple input files it will
