@@ -1441,12 +1441,6 @@ subsegs_finish ()
          if we are generating a listing.  */
       alignment = had_errors () ? 0 : SUB_SEGMENT_ALIGN (now_seg);
 
-      /* The last subsegment gets an aligment corresponding to the
-	 alignment of the section.  This allows proper nop-filling
-	 at the end of code-bearing sections.  */
-      if (!frchainP->frch_next || frchainP->frch_next->frch_seg != now_seg)
-	alignment = get_recorded_alignment (now_seg);
-
       if (subseg_text_p (now_seg))
 	frag_align_code (alignment, 0);
       else
