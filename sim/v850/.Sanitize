@@ -25,6 +25,7 @@ Things-to-keep:
 
 ChangeLog
 Makefile.in
+config.in
 configure
 configure.in
 v850_sim.h
