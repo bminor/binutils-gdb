@@ -1,3 +1,8 @@
+Tue Mar  8 06:56:13 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* irix5-nat.c (find_solib): Cast o_path to CORE_ADDR when using it
+	as one.
+
 Mon Mar  7 13:00:50 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* alpha-tdep.c: Change value to value_ptr.

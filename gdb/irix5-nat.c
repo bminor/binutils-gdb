@@ -547,9 +547,10 @@ find_solib (so_list_ptr)
 		   sizeof (struct obj_list));
       read_memory ((CORE_ADDR) new->ll.data, (char *) &(new -> lm),
 		   sizeof (struct obj));
-      target_read_string (new->lm.o_path, &buffer, INT_MAX, &errcode);
+      target_read_string ((CORE_ADDR)new->lm.o_path, &buffer,
+			  INT_MAX, &errcode);
       if (errcode != 0)
-	memory_error (errcode, new->lm.o_path);
+	memory_error (errcode, (CORE_ADDR)new->lm.o_path);
       new->lm.o_path = buffer;
       solib_map_sections (new);
     }
