@@ -1,3 +1,8 @@
+2002-10-23 Ross Alexander <ross.alexander@uk.neceur.com>
+
+	* elf64-hppa.c: Force DT_FLAGS to always be set.  Required by
+	HPUX 11.00 patch PHSS_26559.
+
 2002-10-22  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elfxx-mips.c (_bfd_mips_elf_modify_segment_map): Don't move
