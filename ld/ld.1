@@ -53,7 +53,7 @@ ld \- the GNU linker
 .I input-format\c
 \&\|] 
 .RB "[\|" \-g "\|]" 
-.RB "[\|" \-G\c
+.RB "[\|" \-G
 .I size\c
 \&\|]
 .RB "[\|" \-\-help "\|]"
@@ -65,10 +65,10 @@ ld \- the GNU linker
 .I searchdir\c
 \&\|] 
 .RB "[\|" \-M "\|]" 
-.RB "[\|" \-Map\c
+.RB "[\|" \-Map
 .I mapfile\c
 \&\|] 
-.RB "[\|" \-m\c
+.RB "[\|" \-m
 .I emulation\c
 \&\|] 
 .RB "[\|" \-n | \-N "\|]" 
@@ -86,7 +86,7 @@ ld \- the GNU linker
 .RB "[\|" \-s "\|]" 
 .RB "[\|" \-shared "\|]" 
 .RB "[\|" \-sort\-common "\|]" 
-.RB "[\|" \-split\-by\-reloc\ "\c
+.RB "[\|" "\-split\-by\-reloc\ "\c
 .I count\c
 \&\|]
 .RB "[\|" \-split\-by\-file "\|]" 
@@ -257,8 +257,7 @@ whitespace, or be given as separate arguments immediately following the
 option that requires them.
 
 .TP
-.BI "-A" "architecture"\c
-\&
+.BI "-A" "architecture"
 In the current release of \c
 .B ld\c
 \&, this option is useful only for the
@@ -314,13 +313,11 @@ You can meaningfully use \c
 \& more than once on a command line, if
 an architecture family allows combination of target architectures; each
 use will add another pair of name variants to search for when \c
-.B \-l\c
-\&
+.B \-l
 specifies a library.
 
 .TP
-.BI "\-b " "input-format"\c
-\&
+.BI "\-b " "input-format"
 Specify the binary format for input object files that follow this option
 on the command line.  You don't usually need to specify this, as
 \c
@@ -376,8 +373,7 @@ definition within the shared library.  This option is only meaningful
 on ELF platforms which support shared libraries.
 
 .TP
-.BI "\-c " "commandfile"\c
-\&
+.BI "\-c " "commandfile"
 Directs \c
 .B ld\c
 \& to read link commands from the file
@@ -407,8 +403,7 @@ line by bracketing it between `\|\c
 .B \-dp
 These three options are equivalent; multiple forms are supported for
 compatibility with other linkers.  Use any of them to make \c
-.B ld\c
-\&
+.B ld
 assign space to common symbols even if a relocatable output file is
 specified (\c
 .B \-r\c
@@ -418,10 +413,7 @@ specified (\c
 \& has the same effect.
 
 .TP
-.BI "-defsym " "symbol"\c
-\& = \c
-.I expression\c
-\&
+.BI "-defsym " "symbol" "\fR = \fP" expression
 Create a global symbol in the output file, containing the absolute
 address given by \c
 .I expression\c
@@ -462,8 +454,7 @@ testsuite/ld-empic for details.
 .TP
 .B \-F
 .TP
-.BI "-F" "format"\c
-\&
+.BI "-F" "format"
 Some older linkers used this option throughout a compilation toolchain
 for specifying object-file format for both input and output object
 files.  \c
@@ -485,8 +476,7 @@ but it accepts (and ignores) the \c
 with scripts written to call the old linker.
 
 .TP
-.BI "\-format " "input\-format"\c
-\&
+.BI "\-format " "input\-format"
 Synonym for \c
 .B \-b\c
 \& \c
@@ -533,13 +523,11 @@ path-list for occurrences of \c
 .I ar\c
 \&.a\c
 \& for every \c
-.I ar\c
-\&
+.I ar
 specified.
 
 .TP
-.BI "\-L" "searchdir"\c
-\& 
+.BI "\-L" "searchdir"
 This command adds path \c
 .I searchdir\c
 \& to the list of paths that
@@ -556,8 +544,7 @@ The default set of paths searched (without being specified with
 \& is using, and in
 some cases also on how it was configured.    The
 paths can also be specified in a link script with the \c
-.B SEARCH_DIR\c
-\&
+.B SEARCH_DIR
 command.
 
 .TP
@@ -629,11 +616,7 @@ tables as necessary.  This may be required if the linker runs out of
 memory space while linking a large executable.
 
 .TP
-.BI "\-o " "output"\c
-\&
-.I output\c
-\&
-\c
+.BI "\-o " "output"
 .I output\c
 \& is a name for the program produced by \c
 .B ld\c
@@ -646,8 +629,7 @@ script command \c
 \& can also specify the output file name.
 
 .TP
-.BI "\-oformat " "output\-format"\c
-\&
+.BI "\-oformat " "output\-format"
 Specify the binary format for the output object file.
 You don't usually need to specify this, as
 \c
@@ -662,10 +644,7 @@ The script command
 can also specify the output format, but this option overrides it.
 
 .TP
-.BI "\-R " "filename"\c
-\&
-.I file\c
-\&
+.BI "\-R " "filename"
 Read symbol names and their addresses from \c
 .I filename\c
 \&, but do not
@@ -778,10 +757,7 @@ Use \c
 \& must be a hexadecimal integer.
 
 .TP
-.BI "\-T " "commandfile"\c
-\&
-.TP
-.BI "\-T" "commandfile"\c
+.BI "\-T " "commandfile"
 Equivalent to \c
 .B \-c \c
 .I commandfile\c
@@ -815,9 +791,7 @@ For anything other than C++ programs, this option is equivalent to
 turn serve as input to \c
 .B ld\c
 \&.  When linking C++ programs, \c
-.B \-Ur\c
-\&
-\c
+.B \-Ur
 .I will\c
 \& resolve references to constructors, unlike \c
 .B \-r\c

@@ -1,3 +1,9 @@
+Fri Oct  6 16:26:16 1995  Ken Raeburn  <raeburn@cygnus.com>
+
+	Mon Sep 25 22:49:32 1995  Andreas Schwab  <schwab@issan.informatik.uni-dortmund.de>
+
+	* ld/ld.1: Fix formatting bugs.
+
 Wed Oct  4 17:37:46 1995  Ian Lance Taylor  <ian@cygnus.com>
 
 	* ldexp.c (exp_get_abs_int): Return bfd_vma, not int.
