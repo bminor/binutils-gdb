@@ -1,3 +1,17 @@
+Mon Nov 25 13:17:16 1996  Fred Fish  <fnf@ninemoons.com>
+
+	From: Paul Eggert <eggert@twinsun.com>
+	* remote-bug.c (wait_strings): Avoid creating a trigraph.
+
+start-sanitize-d10v
+Fri Nov 22 15:55:22 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
+
+	* valops.c (value_at, value_fetch_lazy): Put in D10V call 
+	to fix up address pointers.
+	* values.c (value_from_longest): Removed previous d10v changes.
+	* config/d10v/tm-d10v.h (TARGET_PTR_BIT): Change to 4 bytes.
+	
+end-sanitize-d10v
 Fri Nov 22 10:06:19 1996  Peter Schauer  (pes@regent.e-technik.tu-muenchen.de)
 
 	* config/i386/nm-i386v4.h (LOSING_POLL):  Define, needed for
