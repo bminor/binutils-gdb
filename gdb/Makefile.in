@@ -1,4 +1,4 @@
-##Copyright (C) 1989-1991 Free Software Foundation, Inc.
+##Copyright (C) 1989, 1990, 1991, 1992 Free Software Foundation, Inc.
 
 # This file is part of GDB.
 
@@ -245,7 +245,7 @@ OPCODES = $(OPCODE_DIR1)pn.h  $(OPCODE_DIR1)np1.h \
 REMOTE_EXAMPLES = m68k-stub.c i386-stub.c rem-multi.shar
 
 MALLOCSRC = gmalloc.c mcheck.c mtrace.c mtrace.awk \
-	    ansidecl.h gmalloc.h
+	    gmalloc.h
 
 POSSLIBS_MAINDIR = regex.c regex.h alloca.c $(MALLOCSRC)
 POSSLIBS = $(POSSLIBS_MAINDIR)
