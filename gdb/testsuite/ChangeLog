@@ -1,3 +1,9 @@
+2002-04-18  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.base/cvexpr.c (use): New function.
+	(main): Invoke use() on all global variables to prevent
+	some linkers from deleting these otherwise unused symbols.
+
 2002-04-17  Michael Chastain  <mec@shout.net>
 From David S. Miller  <davem@redhat.com>
 
