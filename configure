@@ -88,6 +88,10 @@ undefinedargs=
 version="$Revision$"
 x11=default
 
+### we might need to use some other shell than /bin/sh for running subshells
+#
+config_shell=${CONFIG_SHELL-}
+
 NO_EDIT="This file was generated automatically by configure.  Do not edit."
 
 ## this is a little touchy and won't always work, but...
@@ -892,21 +896,26 @@ if [ -z "${norecursion}" -a -n "${configdirs}" ] ; then
 ### check for guested configure, otherwise fix possibly relative progname
                         if [ -f ${newsrcdir}/configure ] ; then
                                 recprog=${newsrcdir}/configure
-                        else
+                        elif [ -f ${newsrcdir}/configure.in ] ; then
                                 case "${progname}" in
                                 /*)     recprog=${progname} ;;
                                 *)      recprog=../${progname} ;;
                                 esac
+			else
+				echo No configuration information in ${configdir} ${redirect}
+				recprog=
                         fi
 
 ### The recursion line is here.
-                        if eval ${recprog} ${verbose} --host=${host_alias} --target=${target_alias} \
-                                ${prefixoption} ${tmpdiroption} ${exec_prefixoption} \
-                                ${srcdiroption} ${program_prefixoption} ${program_suffixoption} ${program_transform_nameoption} ${site_option} ${withoptions} ${withoutoptions} ${removing} ${redirect} ; then
-                                true
-                        else
-                                exit 1
-                        fi
+			if [ ! -z "${recprog}" ] ; then
+	                        if eval ${config_shell} ${recprog} ${verbose} --host=${host_alias} --target=${target_alias} \
+        	                        ${prefixoption} ${tmpdiroption} ${exec_prefixoption} \
+                	                ${srcdiroption} ${program_prefixoption} ${program_suffixoption} ${program_transform_nameoption} ${site_option} ${withoptions} ${withoutoptions} ${removing} ${redirect} ; then
+	                                true
+        	                else
+                	                exit 1
+                        	fi
+			fi
 
                         cd ${POPDIR}
                 fi
