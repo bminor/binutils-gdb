@@ -1,3 +1,8 @@
+Mon Apr 28 18:21:20 1997  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* symtab.c: decode_line_1, replace the assignment to 
+	values.sals[0].pc which I accidentally left out on 4/3/97.
+
 Mon Apr 28 17:27:40 1997  Michael Snyder  <msnyder@cleaver.cygnus.com>
 
 	* c-exp.y, java-exp.y: make parse_number reject "123DEADBEEF".
