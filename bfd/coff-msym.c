@@ -22,13 +22,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    library because they will eventually be useful if and when BFD
    supports reading or writing of MIPS symbol tables.
 
-   FLASH!  FIXME!  Unfortunately MIPS has these *%&%&$#^# copyrighted
-   include files defining the symbol format (which I've been politely
-   asking them to release for public use for about a year now).  Since
-   this function can only compile if these include files are available,
-   the config files for MIPS-based hosts configure the Makefile so that
-   this file will be compiled only if on a MIPS-based host.  FIXME!
-
    The routines in this file convert the external representation of
    ECOFF symbol tables to the internal (usual struct) representation.
    On a machine with the same byte-order and the same basic type
@@ -40,10 +33,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
    and such.  */
 
 #include "bfd.h"
-#undef	LANGUAGE_C
-#define	LANGUAGE_C		/* Wierd MIPS crap */
-#include "sym.h"		/* MIPS symbols */
-#include "symconst.h"		/* MIPS symbols */
+#include "coff/sym.h"		/* MIPS symbols */
+#include "coff/symconst.h"	/* MIPS symbols */
 #include "coff/ecoff-ext.h"	/* ECOFF external struct defns */
 
 void
@@ -248,9 +239,11 @@ ecoff_swap_ext_in (abfd, ext_copy, intern)
   if (abfd->xvec->header_byteorder_big_p != false) {
     intern->jmptbl      = 0 != (ext->es_bits1[0] & EXT_BITS1_JMPTBL_BIG);
     intern->cobol_main  = 0 != (ext->es_bits1[0] & EXT_BITS1_COBOL_MAIN_BIG);
+    intern->weakext     = 0 != (ext->es_bits1[0] & EXT_BITS1_WEAKEXT_BIG);
   } else {
     intern->jmptbl      = 0 != (ext->es_bits1[0] & EXT_BITS1_JMPTBL_LITTLE);
     intern->cobol_main  = 0 != (ext->es_bits1[0] & EXT_BITS1_COBOL_MAIN_LITTLE);
+    intern->weakext     = 0 != (ext->es_bits1[0] & EXT_BITS1_WEAKEXT_LITTLE);
   }
 
   intern->ifd           = bfd_h_get_16 (abfd, (bfd_byte *)ext->es_ifd);
