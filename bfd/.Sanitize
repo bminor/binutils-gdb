@@ -412,7 +412,7 @@ else
 	done
 fi
 
-tx49_files="archures.c bfd-in2.h cpu-mips.c"
+tx49_files="archures.c bfd-in2.h cpu-mips.c elf32-mips.c"
 if ( echo $* | grep keep\-tx49 > /dev/null ) ; then
 	for i in $tx49_files ; do
 		if test ! -d $i && (grep sanitize-tx49 $i > /dev/null) ; then
@@ -496,7 +496,7 @@ else
 	done
 fi
 
-vr5400_files="ChangeLog archures.c bfd-in2.h bfd-in.h cpu-mips.c"
+vr5400_files="ChangeLog archures.c bfd-in2.h bfd-in.h cpu-mips.c elf32-mips.c"
 if ( echo $* | grep keep\-vr5400 > /dev/null ) ; then
 	for i in $vr5400_files ; do
 		if test ! -d $i && (grep sanitize-vr5400 $i > /dev/null) ; then
@@ -524,7 +524,7 @@ else
 	done
 fi
 
-vr4320_files="ChangeLog archures.c bfd-in2.h cpu-mips.c"
+vr4320_files="ChangeLog archures.c bfd-in2.h cpu-mips.c elf32-mips.c"
 if ( echo $* | grep keep\-vr4320 > /dev/null ) ; then
 	for i in $vr4320_files ; do
 		if test ! -d $i && (grep sanitize-vr4320 $i > /dev/null) ; then
