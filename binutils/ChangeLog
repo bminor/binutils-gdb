@@ -1,8 +1,8 @@
 Fri Jul 24 16:28:12 1998  Ian Lance Taylor  <ian@cygnus.com>
 
 	* Makefile.am (install-exec-local): Don't remove the file before
-	checking whether $(bindir) == $(tooldir)/bin.  From "Maciej
-	W. Rozycki" <macro@ds2.pg.gda.pl>.
+	checking whether $(bindir) == $(tooldir)/bin.  From Maciej
+	W. Rozycki <macro@ds2.pg.gda.pl>.
 	* Makefile.in: Rebuild.
 
 Fri Jul 24 09:38:59 1998  Nick Clifton  <nickc@cygnus.com>
