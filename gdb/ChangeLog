@@ -1,3 +1,11 @@
+Thu Sep  2 00:07:36 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* config/m88k/xm-dgux.h: Renamed from config/m88k/xm-m88k.h.
+	* config/m88k/xm-m88k.h: New file, with HOST_BYTE_ORDER,
+	MAKEVA_END and MAKEVA_ARG.
+	* config/m88k/xm-*.h: Include m88k/xm-m88k.h.
+	* printcmd.c: Remove __INT_VARARGS_H code; now in xm-m88k.h.
+
 Wed Sep  1 19:31:28 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* remote-udi.c (udi_wait): Call `warning' not `error'.

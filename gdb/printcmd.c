@@ -1480,7 +1480,6 @@ print_frame_args (func, fi, num, stream)
       case LOC_REGPARM:
       case LOC_REGPARM_ADDR:
       case LOC_LOCAL_ARG:
-      case LOC_BASEREG:
       case LOC_BASEREG_ARG:
 	break;
 
@@ -1592,18 +1591,6 @@ print_frame_nameless_args (fi, start, num, first, stream)
       start += sizeof (int);
     }
 }
-
-/* Make makeva* work on an __INT_VARARGS_H machine.  */
-
-#if defined (__INT_VARARGS_H)
-/* This is used on an 88k.  Not sure whether it is used by anything else.  */
-#define MAKEVA_END(list) \
-  va_list retval; \
-  retval.__va_arg = 0; \
-  retval.__va_stk = (int *) (list)->aligner.arg_bytes; \
-  retval.__va_reg = (int *) (list)->aligner.arg_bytes; \
-  return retval;
-#endif
 
 /* This is an interface which allows to us make a va_list.  */
 typedef struct {

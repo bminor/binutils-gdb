@@ -1,5 +1,5 @@
 /* Host-machine dependent parameters for Motorola 88000, for GDB.
-   Copyright 1986, 1987, 1988, 1989, 1990, 1991 Free Software Foundation, Inc.
+   Copyright 1993 Free Software Foundation, Inc.
 
 This file is part of GDB.
 
@@ -19,44 +19,30 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
 #define HOST_BYTE_ORDER BIG_ENDIAN
 
-#if !defined (USG)
-#define USG 1
-#endif
+#define MAKEVA_END(list) \
+  va_list retval; \
+  retval.__va_arg = 0; \
+  retval.__va_stk = (int *) (list)->aligner.arg_bytes; \
+  retval.__va_reg = (int *) (list)->aligner.arg_bytes; \
+  return retval;
 
-#include <sys/param.h>
-
-#ifdef __GNUC__
-#define memcpy __builtin_memcpy
-/* gcc doesn't have this, at least not gcc 1.92.  */
-/* #define memset __builtin_memset */
-#define strcmp __builtin_strcmp
-#endif
-
-#ifdef DGUX
-#define x_foff _x_x._x_offset
-#define x_fname _x_name
-#define USER ptrace_user
-#define _BSD_WAIT_FLAVOR
-#endif
-
-#define HAVE_TERMIO
-
-#ifndef USIZE
-#define USIZE 2048
-#endif
-#define NBPG NBPC
-#define UPAGES USIZE
-
-/* Get rid of any system-imposed stack limit if possible.  */
-
-#define SET_STACK_LIMIT_HUGE
-
-/* This is the amount to subtract from u.u_ar0
-   to get the offset in the core file of the register values.  */
-
-/* Since registers r0 through r31 are stored directly in the struct ptrace_user,
-   (for m88k BCS)
-   the ptrace_user offsets are sufficient and KERNEL_U_ADDRESS can be 0 */
-
-#define KERNEL_U_ADDR 0
-
+/* I don't know whether rounding the arguments to 4 or 8 bytes is correct
+   for the 88k, or whether it is just code borrowed from the pa.  The issue
+   is moot for now, since printf_command only uses argsize of sizeof (int),
+   sizeof (double), or sizeof (long long).  */
+#define MAKEVA_ARG(list, argaddr, argsize) \
+  { \
+    int rounded_argsize; \
+    if (argsize > 8) \
+      /* Currently this never happens; printf_command only uses argsize */ \
+      /* of sizeof (int), sizeof (double), or sizeof (long long).  */ \
+      error ("MAKEVA_ARG not fully written for m88k"); \
+    if (argsize <= 4) \
+      rounded_argsize = 4; \
+    else if (argsize <= 8) \
+      rounded_argsize = 8; \
+    while ((int)(&list->aligner.arg_bytes[list->argindex]) % rounded_argsize) \
+      list->argindex++; \
+    memcpy (&list->aligner.arg_bytes[list->argindex], argaddr, argsize); \
+    list->argindex += rounded_argsize; \
+  }
