@@ -23,13 +23,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "breakpoint.h"
+
 #include "bfd.h"
-#include "symfile.h"
-#include "objfiles.h"
-#include "buildsym.h"
-#include "gdb-stabs.h"
-#include "stabsread.h"
-#include "complaints.h"
 #include <obstack.h>
 
 #include <string.h>
@@ -39,6 +34,13 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "libbfd.h"		/* FIXME secret internal data from BFD */
 #include "coff/internal.h"	/* Internal format of COFF symbols in BFD */
 #include "libcoff.h"		/* FIXME secret internal data from BFD */
+
+#include "symfile.h"
+#include "objfiles.h"
+#include "buildsym.h"
+#include "gdb-stabs.h"
+#include "stabsread.h"
+#include "complaints.h"
 
 struct coff_symfile_info {
   file_ptr min_lineno_offset;		/* Where in file lowest line#s are */

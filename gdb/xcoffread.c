@@ -41,6 +41,10 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include <sys/stat.h>
 #include <sys/debug.h>
 
+#include "coff/internal.h"	/* FIXME, internal data from BFD */
+#include "libcoff.h"		/* FIXME, internal data from BFD */
+#include "coff/rs6000.h"	/* FIXME, raw file-format guts of xcoff */
+
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "symfile.h"
@@ -48,10 +52,6 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #include "buildsym.h"
 #include "stabsread.h"
 #include "complaints.h"
-
-#include "coff/internal.h"	/* FIXME, internal data from BFD */
-#include "libcoff.h"		/* FIXME, internal data from BFD */
-#include "coff/rs6000.h"	/* FIXME, raw file-format guts of xcoff */
 
 /* For interface with stabsread.c.  */
 #include "aout/stab_gnu.h"

@@ -1,3 +1,8 @@
+Fri Jan 21 09:23:33 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* coffread.c, xcoffread.c: Include <coff/internal.h>
+	before "symfile.h".
+
 Thu Jan 20 17:30:55 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
 	* coffread.c (coff_getfilename): Make it not static.
