@@ -1,5 +1,9 @@
 2001-12-15  Andrew Cagney  <ac131313@redhat.com>
 
+	* gdbarch.c: Re-generate.
+	
+2001-12-15  Andrew Cagney  <ac131313@redhat.com>
+
 	* MAINTAINERS: Remove powerpcle-eabi and rs6000-ibm-aix3.2 from
 	target list.
 

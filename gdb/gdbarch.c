@@ -341,7 +341,6 @@ struct gdbarch startup_gdbarch =
   0,
   0,
   0,
-  0,
   generic_get_saved_register,
   0,
   0,
