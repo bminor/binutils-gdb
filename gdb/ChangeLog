@@ -1,5 +1,7 @@
 2004-01-01  Mark Kettenis  <kettenis@gnu.org>
 
+	* sparcnbsd-tdep.c: Update copyright year.
+
 	* sparc-tdep.h: Update copyright year.
 	(sparc_fetch_instruction): New prototype.
 	* sparc-tdep.c: Update copyright year.
