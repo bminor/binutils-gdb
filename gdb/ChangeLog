@@ -1,3 +1,8 @@
+2002-04-30  Andrew Cagney  <ac131313@redhat.com>
+
+	* cris-tdep.c (cris_gdbarch_init): Use arches instead of
+	current_gdbarch.
+
 2002-04-30  Michael Snyder  <msnyder@redhat.com>
 
 	* arm-tdep.c: Whitespace clean-ups.
