@@ -310,6 +310,7 @@ changequote([,])dnl
   powerpc-*-freebsd*)	COREFILE='' ;;
   powerpc-*-netbsd*)	COREFILE=netbsd-core.lo ;;
   powerpc-*-*bsd*)	COREFILE=netbsd-core.lo ;;
+  s390*-*-*)            COREFILE=trad-core.lo ;;	
   sparc-*-netbsd* | sparc-*-openbsd*)
 	COREFILE=netbsd-core.lo
 	;;
