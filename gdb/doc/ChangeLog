@@ -7,6 +7,8 @@
 	shared libraries.
 	(Starting): Fix whitespace; make "elaboration" stand out where it
 	is first used, and add an index entry for the term.
+	(Calling): Expand and elaborate text.  Add "print".  Add the
+	description of problems with weak aliases.
 
 2004-10-12  Andrew Cagney  <cagney@gnu.org>
 

@@ -10048,18 +10048,35 @@ selected stack frame returns naturally.
 @node Calling
 @section Calling program functions
 
-@cindex calling functions
-@kindex call
 @table @code
+@cindex calling functions
+@cindex inferior functions, calling
+@item print @var{expr}
+Evaluate the expression @var{expr} and displaying the resuling value.
+@var{expr} may include calls to functions in the program being
+debugged.
+
+@kindex call
 @item call @var{expr}
 Evaluate the expression @var{expr} without displaying @code{void}
 returned values.
-@end table
 
 You can use this variant of the @code{print} command if you want to
-execute a function from your program, but without cluttering the output
-with @code{void} returned values.  If the result is not void, it
-is printed and saved in the value history.
+execute a function from your program that does not return anything
+(a.k.a.@: @dfn{a void function}), but without cluttering the output
+with @code{void} returned values that @value{GDBN} will otherwise
+print.  If the result is not void, it is printed and saved in the
+value history.
+@end table
+
+@cindex weak alias functions
+Sometimes, a function you wish to call is actually a @dfn{weak alias}
+for another function.  In such case, @value{GDBN} might not pick up
+the type information, including the types of the function arguments,
+which causes @value{GDBN} to call the inferior function incorrectly.
+As a result, the called function will function erroneously and may
+even crash.  A solution to that is to use the name of the aliased
+function instead.
 
 @node Patching
 @section Patching programs
