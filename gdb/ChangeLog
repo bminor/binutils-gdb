@@ -1,3 +1,15 @@
+Thu May 11 19:01:37 1995  Jeff Law  (law@snake.cs.utah.edu)
+
+	* Support debugging using native MACH primitives on hppa*-*-osf*.
+	* configure.in: hppa*-*-osf* != hppa*-*-bsd* anymore.
+	* config/pa/hppaosf.mh: New file.
+	* config/pa/nm-hppao.h: Likewise.
+	* hppam3-nat.c: Likewise.
+	* config/pa/tm-hppao.h (PSW_SS): Define for single-stepping.
+	(MACHINE_CPROC_*_OFFSET): Define.
+	(TRACE_*): Define.
+	(START_INFERIOR_TRAPS_EXPECTED): Delete definition.
+
 Wed May 10 18:59:26 1995  Stu Grossman  (grossman@andros.cygnus.com)
 
 	* hppa-tdep.c (read_unwind_info):  Cosmetic cleanup.

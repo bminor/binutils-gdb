@@ -2,6 +2,28 @@
    Contributed by the Center for Software Science at the
    University of Utah (pa-gdb-bugs@cs.utah.edu).  */
 
+/* Define offsets to access CPROC stack when it does not have
+ * a kernel thread.
+ */
+#define MACHINE_CPROC_SP_OFFSET 20
+#define MACHINE_CPROC_PC_OFFSET 16
+#define MACHINE_CPROC_FP_OFFSET 12
+
+/*
+ * Software defined PSW masks.
+ */
+#define PSW_SS  0x10000000      /* Kernel managed single step */
+
+/* Thread flavors used in re-setting the T bit.
+ * @@ this is also bad for cross debugging.
+ */
+#define TRACE_FLAVOR		HP800_THREAD_STATE
+#define TRACE_FLAVOR_SIZE	HP800_THREAD_STATE_COUNT
+#define TRACE_SET(x,state) \
+	((struct hp800_thread_state *)state)->cr22 |= PSW_SS
+#define TRACE_CLEAR(x,state) \
+  	((((struct hp800_thread_state *)state)->cr22 &= ~PSW_SS), 1)
+
 /* For OSF1 (Should be close if not identical to BSD, but I haven't
    tested it yet):
 
@@ -43,9 +65,6 @@
 	(FSR)->regs[i] = TMP + i * 4; \
     } \
 }
-
-/* OSF1 needs an extra trap.  I assume for the emulator startup (?!?) */
-#define START_INFERIOR_TRAPS_EXPECTED 3
 
 /* OSF1 does not need the pc space queue restored.  */
 #define NO_PC_SPACE_QUEUE_RESTORE

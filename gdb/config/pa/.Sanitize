@@ -25,10 +25,12 @@ hppabsd.mh
 hppabsd.mt
 hppahpux.mh
 hppahpux.mt
+hppaosf.mh
 hppaosf.mt
 hppapro.mt
 nm-hppab.h
 nm-hppah.h
+nm-hppao.h
 tm-hppa.h
 tm-hppab.h
 tm-hppah.h

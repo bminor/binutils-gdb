@@ -159,6 +159,7 @@ hp300ux-nat.c
 hppa-tdep.c
 hppab-nat.c
 hppah-nat.c
+hppam3-nat.c
 hpread.c
 i386-stub.c
 i386-tdep.c

@@ -43,7 +43,7 @@ c[12]-*-*)		gdb_host=convex ;;
 hppa*-*-bsd*)		gdb_host=hppabsd ;;
 hppa*-*-hiux*)		gdb_host=hppahpux ;;
 hppa*-*-hpux*)		gdb_host=hppahpux ;;
-hppa*-*-osf*)		gdb_host=hppabsd ;;
+hppa*-*-osf*)		gdb_host=hppaosf ;;
 
 i[345]86-ncr-*)		gdb_host=ncr3000 ;;
 i[345]86-sequent-bsd*)	gdb_host=symmetry ;;  # dynix
