@@ -1,4 +1,15 @@
+Mon Nov  1 14:20:25 1993  Jim Kingdon  (kingdon@lioth.cygnus.com)
+
+	* mmalloc.texi: Fix typo ("for for" -> "for").
+
 Fri Jul 16 15:27:08 1993  Jim Kingdon  (kingdon@rtl.cygnus.com)
+
+	* test1.c: New file which tests for bug fixed below.
+	* Makefile.in (check): Put in commands to run it (but commented out
+	because it won't work for Canadian cross).
+
+	* mmalloc.c (mmalloc): When extending a free block at the end of the
+	heap, check whether which block is at the end changed.
 
 	* Makefile.in (TAGS): make work when srcdir != objdir.
 
