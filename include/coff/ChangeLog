@@ -1,3 +1,23 @@
+Wed Jan  5 16:58:24 1994  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ecoff.h (NUM_RELOC_SECTIONS): Define.
+
+Tue Dec 21 09:24:56 1993  Ken Raeburn  (raeburn@rtl.cygnus.com)
+
+	* sparc.h (struct external_reloc): Rename field r_addend to
+	r_offset.
+
+Sat Dec 11 16:12:32 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
+
+	* internal.h (R_DISP7, R_SH_IMM16): New reloc types.
+
+Tue Nov 23 14:23:19 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* ecoff.h (struct ecoff_debug_swap): Added *_end fields for all
+	the symbolic information pointers.
+
+	* sym.h: Named the EXTR structure ecoff_extr.
+
 Fri Nov 19 08:21:18 1993  Ken Raeburn  (raeburn@rover.cygnus.com)
 
 	* sparc.h (RELSZ): Use correct size.

@@ -109,6 +109,8 @@ struct ecoff_reginfo
 #define RELOC_SECTION_LITA     13
 #define RELOC_SECTION_ABS      14
 
+#define NUM_RELOC_SECTIONS     15
+
 /********************** STABS **********************/
 
 /* gcc uses mips-tfile to output type information in special stabs
@@ -342,6 +344,25 @@ struct ecoff_debug_info
   PTR external_fdr;	/* struct fdr_ext */
   PTR external_rfd;	/* struct rfd_ext */
   PTR external_ext;	/* struct ext_ext */
+
+  /* When we are linking, the above pointers point to growing buffers.
+     This set of pointers point to the end of the buffers.  */
+  unsigned char *line_end;
+  PTR external_dnr_end;	/* struct dnr_ext */
+  PTR external_pdr_end;	/* struct pdr_ext */
+  PTR external_sym_end;	/* struct sym_ext */
+  PTR external_opt_end;	/* struct opt_ext */
+  union aux_ext *external_aux_end;
+  char *ss_end;
+  char *ssext_end;
+  PTR external_fdr_end;	/* struct fdr_ext */
+  PTR external_rfd_end;	/* struct rfd_ext */
+  PTR external_ext_end;	/* struct ext_ext */
+
+  /* When linking, this field is set to the base FDR index for an
+     input BFD in the output FDR information, and is used when writing
+     out the xternal symbols.  */
+  bfd_size_type ifdbase;
 
   /* The swapped FDR information.  Currently this is never NULL, but
      code using this structure should probably double-check in case
