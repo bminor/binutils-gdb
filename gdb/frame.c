@@ -144,9 +144,10 @@ static unsigned int backtrace_limit = UINT_MAX;
 void
 fprint_frame_id (struct ui_file *file, struct frame_id id)
 {
-  fprintf_unfiltered (file, "{stack=0x%s,code=0x%s}",
+  fprintf_unfiltered (file, "{stack=0x%s,code=0x%s,special=0x%s}",
 		      paddr_nz (id.stack_addr),
-		      paddr_nz (id.code_addr));
+		      paddr_nz (id.code_addr),
+		      paddr_nz (id.special_addr));
 }
 
 static void
@@ -256,12 +257,20 @@ get_frame_id (struct frame_info *fi)
 const struct frame_id null_frame_id; /* All zeros.  */
 
 struct frame_id
-frame_id_build (CORE_ADDR stack_addr, CORE_ADDR code_addr)
+frame_id_build_special (CORE_ADDR stack_addr, CORE_ADDR code_addr,
+                        CORE_ADDR special_addr)
 {
   struct frame_id id;
   id.stack_addr = stack_addr;
   id.code_addr = code_addr;
+  id.special_addr = special_addr;
   return id;
+}
+
+struct frame_id
+frame_id_build (CORE_ADDR stack_addr, CORE_ADDR code_addr)
+{
+  return frame_id_build_special (stack_addr, code_addr, 0);
 }
 
 int
@@ -292,8 +301,14 @@ frame_id_eq (struct frame_id l, struct frame_id r)
   else if (l.code_addr == 0 || r.code_addr == 0)
     /* A zero code addr is a wild card, always succeed.  */
     eq = 1;
-  else if (l.code_addr == r.code_addr)
-    /* The .stack and .code are identical, the ID's are identical.  */
+  else if (l.code_addr != r.code_addr)
+    /* If .code addresses are different, the frames are different.  */
+    eq = 0;
+  else if (l.special_addr == 0 || r.special_addr == 0)
+    /* A zero special addr is a wild card (or unused), always succeed.  */
+    eq = 1;
+  else if (l.special_addr == r.special_addr)
+    /* Frames are equal.  */
     eq = 1;
   else
     /* No luck.  */
@@ -320,7 +335,7 @@ frame_id_inner (struct frame_id l, struct frame_id r)
     /* Only return non-zero when strictly inner than.  Note that, per
        comment in "frame.h", there is some fuzz here.  Frameless
        functions are not strictly inner than (same .stack but
-       different .code).  */
+       different .code and/or .special address).  */
     inner = INNER_THAN (l.stack_addr, r.stack_addr);
   if (frame_debug)
     {

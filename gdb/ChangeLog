@@ -1,3 +1,12 @@
+2003-10-17  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* frame.h (struct frame_id): Add new field: special_addr.
+	(frame_id_build_special): New prototype.
+	* frame.c (frame_id_build_special): New function.
+	(frame_id_build): Change to call frame_id_build_special().
+	(frame_id_eq): Change to also test special_addr field. 
+	(frame_id_inner): Update comment. 
+
 2003-10-17  Andrew Cagney  <cagney@redhat.com>
 
 	* target.c (update_current_target): Perform the target cleanup.
