@@ -339,7 +339,7 @@ coff_mcore_rtype_to_howto (abfd, sec, rel, h, sym, addendp)
   if (rel->r_type == IMAGE_REL_MCORE_RVA)
     * addendp -= pe_data (sec->output_section->owner)->pe_opthdr.ImageBase;
   
-  if (howto->pc_relative)
+  else if (howto->pc_relative)
     {
       * addendp = sec->vma - 2; /* XXX guess - is this right ? */
       
@@ -440,6 +440,8 @@ coff_mcore_relocate_section (output_bfd, info, input_bfd, input_section,
 	  sym = syms + symndx;
 	}
 
+      addend = 0;
+      
       /* Get the howto and initialise the addend.  */
       howto = bfd_coff_rtype_to_howto (input_bfd, input_section, rel, h,
 				       sym, & addend);
@@ -527,7 +529,15 @@ coff_mcore_relocate_section (output_bfd, info, input_bfd, input_section,
 	case IMAGE_REL_MCORE_PCREL_JSR_IMM11BY2:
 	case IMAGE_REL_MCORE_ADDR32:
 	case IMAGE_REL_MCORE_RVA:
+	  /* XXX fixme - shouldn't this be like the code for the RVA reloc ? */
 	  rstat = _bfd_relocate_contents (howto, input_bfd, val, loc);
+	  break;
+	  
+	case IMAGE_REL_MCORE_RVA:
+	  rstat = _bfd_final_link_relocate
+	    (howto, input_bfd,
+	     input_section, contents, rel->r_vaddr - input_section->vma,
+	     val, addend);
 	  break;
 	}
       

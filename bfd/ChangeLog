@@ -1,3 +1,10 @@
+1999-11-18  Nick Clifton  <nickc@cygnus.com>
+
+	* coff-mcore.c (coff_mcore_rtype_to_howto): Special case handling
+	for RVA relocs.
+	(coff_mcore_relocate_section): Initialise addend to 0.
+	Special case processing of RVA reloc.
+
 1999-11-17  Richard Henderson  <rth@cygnus.com>
 
 	* elf-bfd.h (struct elf_backend_data): Reorder collect and
