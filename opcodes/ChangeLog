@@ -1,3 +1,10 @@
+2001-08-13  Kazu Hirata  <kazu@hxi.com>
+
+	* mcore-dis.c: Fix formatting.
+	* mips-dis.c: Likewise.
+	* pj-dis.c: Likewise.
+	* z8k-dis.c: Likewise.
+
 2001-08-12  Richard Henderson  <rth@redhat.com>
 
 	* cgen-ibld.in (extract_normal): Match type of VALUE and MASK

@@ -1,5 +1,5 @@
 /* Disassemble z8000 code.
-   Copyright 1992, 1993, 1998, 2000
+   Copyright 1992, 1993, 1998, 2000, 2001
    Free Software Foundation, Inc.
 
 This file is part of GNU Binutils.
@@ -269,7 +269,6 @@ z8k_lookup_instr (nibbles, info)
       tabl_index++;
     }
   return -1;
-
 }
 
 static void
@@ -334,22 +333,22 @@ unpack_instr (instr_data, is_segmented, info)
 	  switch (datum_value)
 	    {
 	    case ARG_DISP16:
-              instr_data->displacement = instr_data->insn_start + 4 +
-                (signed short) (instr_word & 0xffff);
+	      instr_data->displacement = instr_data->insn_start + 4
+		+ (signed short) (instr_word & 0xffff);
 	      nibl_count += 3;
 	      break;
 	    case ARG_DISP12:
-              if (instr_word & 0x800)
+	      if (instr_word & 0x800)
 		{
 		  /* neg. 12 bit displacement */
 		  instr_data->displacement = instr_data->insn_start + 2
 		    - (signed short) ((instr_word & 0xfff) | 0xf000) * 2;
 		}
-              else
+	      else
 		{
 		  instr_data->displacement = instr_data->insn_start + 2
 		    - (instr_word & 0x0fff) * 2;
-              }
+		}
 	      nibl_count += 2;
 	      break;
 	    default:
@@ -411,15 +410,15 @@ unpack_instr (instr_data, is_segmented, info)
 		  FETCH_DATA (info, nibl_count + 8);
 		  instr_long = (instr_data->words[nibl_count] << 16)
 		    | (instr_data->words[nibl_count + 4]);
-		  instr_data->address = ((instr_word & 0x7f00) << 8) +
-		    (instr_long & 0xffff);
+		  instr_data->address = ((instr_word & 0x7f00) << 8)
+		    + (instr_long & 0xffff);
 		  nibl_count += 7;
-                  seg_length = 2;
+		  seg_length = 2;
 		}
 	      else
 		{
-		  instr_data->address = ((instr_word & 0x7f00) << 8) +
-		    (instr_word & 0x00ff);
+		  instr_data->address = ((instr_word & 0x7f00) << 8)
+		    + (instr_word & 0x00ff);
 		  nibl_count += 3;
 		}
 	    }
@@ -434,11 +433,13 @@ unpack_instr (instr_data, is_segmented, info)
 	  instr_data->ctrl_code = instr_nibl & 0x7;
 	  break;
 	case CLASS_0DISP7:
-	  instr_data->displacement = instr_data->insn_start + 2 - (instr_byte & 0x7f) * 2;
+	  instr_data->displacement =
+	    instr_data->insn_start + 2 - (instr_byte & 0x7f) * 2;
 	  nibl_count += 1;
 	  break;
 	case CLASS_1DISP7:
-	  instr_data->displacement = instr_data->insn_start + 2 - (instr_byte & 0x7f) * 2;
+	  instr_data->displacement =
+	    instr_data->insn_start + 2 - (instr_byte & 0x7f) * 2;
 	  nibl_count += 1;
 	  break;
 	case CLASS_01II:
@@ -459,12 +460,13 @@ unpack_instr (instr_data, is_segmented, info)
 	case CLASS_REGN0:
 	  instr_data->arg_reg[datum_value] = instr_nibl;
 	  break;
-        case CLASS_DISP8:
-	  instr_data->displacement = instr_data->insn_start + 2  + (signed char)instr_byte * 2;
+	case CLASS_DISP8:
+	  instr_data->displacement =
+	    instr_data->insn_start + 2 + (signed char) instr_byte * 2;
 	  nibl_count += 1;
-          break;
+	  break;
 	default:
-          abort ();
+	  abort ();
 	  break;
 	}
 
@@ -566,14 +568,14 @@ unparse_instr (instr_data, is_segmented)
 	  strcat (out_str, tmp_str);
 	  break;
 	case CLASS_PR:
-          if (is_segmented)
-            sprintf (tmp_str, "rr%ld", instr_data->arg_reg[datum_value]);
-          else
-            sprintf (tmp_str, "r%ld", instr_data->arg_reg[datum_value]);
+	  if (is_segmented)
+	    sprintf (tmp_str, "rr%ld", instr_data->arg_reg[datum_value]);
+	  else
+	    sprintf (tmp_str, "r%ld", instr_data->arg_reg[datum_value]);
 	  strcat (out_str, tmp_str);
 	  break;
 	default:
-          abort ();
+	  abort ();
 	  break;
 	}
     }

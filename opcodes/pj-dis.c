@@ -1,5 +1,5 @@
 /* pj-dis.c -- Disassemble picoJava instructions.
-   Copyright 1999, 2000 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001 Free Software Foundation, Inc.
    Contributed by Steve Chamberlain, of Transmeta (sac@pobox.com).
 
 This program is free software; you can redistribute it and/or modify
@@ -33,10 +33,10 @@ get_int (memaddr, iptr, info)
 
   int status = info->read_memory_func (memaddr, ival, 4, info);
 
-  *iptr = (ival[0] << 24) 
-    | (ival[1] << 16) 
-    | (ival[2] << 8) 
-    | (ival[3] << 0) ;
+  *iptr = (ival[0] << 24)
+    | (ival[1] << 16)
+    | (ival[2] << 8)
+    | (ival[3] << 0);
 
   return status;
 }
@@ -72,7 +72,7 @@ print_insn_pj (addr, info)
       fprintf_fn (stream, "%s", op->name);
 
       /* The tableswitch instruction is followed by the default
-	 address, low value, high value and the destinations. */
+	 address, low value, high value and the destinations.  */
 
       if (strcmp (op->name, "tableswitch") == 0)
 	{
@@ -111,8 +111,8 @@ print_insn_pj (addr, info)
 
       /* The lookupswitch instruction is followed by the default
 	 address, element count and pairs of values and
-	 addresses. */
-	    
+	 addresses.  */
+
       if (strcmp (op->name, "lookupswitch") == 0)
 	{
 	  int count;
