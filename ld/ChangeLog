@@ -1,3 +1,8 @@
+2000-11-09  Philip Blundell  <pb@futuretv.com>
+
+	* emultempl/pe.em: Define ___start_SECNAME and ___stop_SECNAME
+	around orphan sections whose names can be represented in C.
+
 2000-11-07  Jim Wilson  <wilson@redhat.com>
 
 	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): New local

@@ -1263,6 +1263,7 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
   const char *secname;
   char *hold_section_name;
   char *dollar = NULL;
+  const char *ps = NULL;
   lang_output_section_statement_type *os;
   lang_statement_list_type add_child;
 
@@ -1354,6 +1355,26 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
       stat_ptr = &add;
       lang_list_init (stat_ptr);
 
+      if (config.build_constructors)
+	{
+	  /* If the name of the section is representable in C, then create
+	     symbols to mark the start and the end of the section.  */
+	  for (ps = outsecname; *ps != '\0'; ps++)
+	    if (! isalnum ((unsigned char) *ps) && *ps != '_')
+	      break;
+	  if (*ps == '\0')
+	    {
+	      char *symname;
+	      etree_type *e_align;
+	      
+	      symname = (char *) xmalloc (ps - outsecname + sizeof "___start_");
+	      sprintf (symname, "___start_%s", outsecname);
+	      e_align = exp_unop (ALIGN_K,
+				  exp_intop ((bfd_vma) 1 << s->alignment_power));
+	      lang_add_assignment (exp_assop ('=', symname, e_align));
+	    }
+	}
+      
       if (link_info.relocateable || (s->flags & (SEC_LOAD | SEC_ALLOC)) == 0)
 	address = exp_intop ((bfd_vma) 0);
       else
@@ -1375,6 +1396,21 @@ gld_${EMULATION_NAME}_place_orphan (file, s)
       lang_leave_output_section_statement
 	((bfd_vma) 0, "*default*",
 	 (struct lang_output_section_phdr_list *) NULL, "*default*");
+
+      if (config.build_constructors && *ps == '\0')
+        {
+	  char *symname;
+
+	  /* lang_leave_ouput_section_statement resets stat_ptr.  Put
+	     stat_ptr back where we want it.  */
+	  if (place != NULL)
+	    stat_ptr = &add;
+	  
+	  symname = (char *) xmalloc (ps - outsecname + sizeof "___stop_");
+	  sprintf (symname, "___stop_%s", outsecname);
+	  lang_add_assignment (exp_assop ('=', symname,
+					  exp_nameop (NAME, ".")));
+	}
 
       stat_ptr = old;
 
