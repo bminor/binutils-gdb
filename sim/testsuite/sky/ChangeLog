@@ -1,3 +1,8 @@
+Thu Apr 16 15:05:51 1998 Jillian Ye <jillian@cygnus.com>
+
+	* t-pke2.trc t-pke2.vif1expect : Update the testcase
+          to work with sce gpu2 lib.
+
 Tue Apr 14 12:20:10 1998 Jillian Ye <jillian@cygnus.com>
 
 	* c_gen.pl: Change the datatype from "long int" to "int"
