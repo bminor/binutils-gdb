@@ -912,7 +912,7 @@ md_parse_option (c, arg)
 		   | PPC_OPCODE_403 | PPC_OPCODE_32);
       else if (strcmp (arg, "440") == 0)
 	ppc_cpu = (PPC_OPCODE_PPC | PPC_OPCODE_BOOKE | PPC_OPCODE_32
-		   | PPC_OPCODE_440);
+		   | PPC_OPCODE_440 | PPC_OPCODE_ISEL | PPC_OPCODE_RFMCI);
       else if (strcmp (arg, "7400") == 0
 	       || strcmp (arg, "7410") == 0
 	       || strcmp (arg, "7450") == 0
