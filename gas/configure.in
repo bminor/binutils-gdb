@@ -6,6 +6,26 @@
 srctrigger=as.c
 srcname="gas"
 
+# assign cpu type
+case $target in
+sun4* | sparc*)
+	cpu_type=sparc
+	;;
+sun3*)
+	cpu_type=m68k
+	;;
+i960*)
+	cpu_type=i960
+	;;
+a29k*)
+	cpu_type=a29k
+	;;
+*)
+	cpu_type=generic
+	;;
+esac
+
+# assign object format
 case $target in
 *-coff)
 	obj_format=coff
@@ -13,11 +33,15 @@ case $target in
 *-bout)
 	obj_format=bout
 	;;
+generic)
+	obj_format=generic
+	;;
 *)
 	obj_format=aout
 	;;
 esac
 
+# assign floating point type
 case $target in
 vax)
 	atof=vax
@@ -27,5 +51,9 @@ vax)
 	;;
 esac
 
-files="ho-${host}.h tc-${cpu_type}.c tc-${cpu_type}.h te-generic.h obj-${obj_format}.h obj-${obj_format}.c atof-${atof}.c"
+files="config/ho-${host}.h config/tc-${cpu_type}.c \
+	config/tc-${cpu_type}.h config/te-generic.h \
+	config/obj-${obj_format}.h config/obj-${obj_format}.c \
+	config/atof-${atof}.c"
+
 links="host.h targ-cpu.c targ-cpu.h targ-env.h obj-format.h obj-format.c atof-targ.c"

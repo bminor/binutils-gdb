@@ -1,11 +1,11 @@
 #
 # Makefile for development tools.
 #
-# Last Mod Tue Apr 2 16:57:52 PST 1991, by rich@sendai
+# Last Mod Mon Apr 8 22:31:28 PDT 1991, by rich@sendai
 #
 
 srcdir = .
-subdir = Host-$(host)/Target-$(target)
+#subdir = Host-$(host)/Target-$(target)
 
 OSLAYER = clib/os-layer
 OSINCLUDE = $(OSLAYER)/include
@@ -22,7 +22,8 @@ SUBDIRS_INCLUDE = machine-dep
 
 TARGETLIB = libc.a
 RANLIB = ranlib
-AR = ar cqv
+AR = ar
+AR_FLAGS = cqv
 
 #### host and target specific makefile fragments come in here.
 
@@ -36,7 +37,7 @@ subdir_do: $(SUBDIRS) $(TARGETDIRS)
 		$(MAKE)  \
 		    "OSLAYER=../$(OSLAYER)" \
 		    "TARGETLIB=../$(srcdir)/$(subdir)/$(TARGETLIB)" \
-		    "AR=$(AR)" \
+		    "AR=$(AR)" "AR_FLAGS=$(AR_FLAGS)" \
 		    "RANLIB=$(RANLIB)" $(DO)) ; \
 	    then true ; \
 	    else exit 1 ; \
@@ -45,7 +46,7 @@ subdir_do: $(SUBDIRS) $(TARGETDIRS)
 
 $(TARGETLIB): FORCE
 	@$(MAKE) subdir_do "DO=all"
-	$(RANLIB) $(TARGETLIB)
+#	$(RANLIB) $(TARGETLIB)
 
 oldlibc.a: $(SUBDIRS) FORCE
 	@$(MAKE) subdir_do DO=all
@@ -111,7 +112,10 @@ Makefile: $(srcdir)/Makefile.in $(srcdir)/configure
 
 #
 # $Log$
-# Revision 1.1  1991/04/04 18:56:39  rich
+# Revision 1.2  1991/04/09 23:52:40  rich
+# First cut config.  builds in place.
+#
+# Revision 1.1  1991/04/04  18:56:39  rich
 # Initial revision
 #
 #

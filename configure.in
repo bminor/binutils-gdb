@@ -3,6 +3,6 @@
 # script appropriate for this directory.  For more information, check
 # any existing configure script.
 
-configdirs="gcc gas bfd binutils ld clib"
-srctrigger=gcc-new
+configdirs="bfd binutils gas gcc"
+srctrigger=gcc
 srcname="gnu development package"
