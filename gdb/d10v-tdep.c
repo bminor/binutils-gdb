@@ -103,7 +103,9 @@ static void do_d10v_pop_frame (struct frame_info *fi);
 static int
 d10v_frame_chain_valid (CORE_ADDR chain, struct frame_info *frame)
 {
-  return ((chain) != 0 && (frame) != 0 && (frame)->pc > IMEM_START);
+  return ((chain) != 0 && (frame) != 0
+	  && (frame)->pc > IMEM_START
+	  && !inside_entry_file (FRAME_SAVED_PC (frame)));
 }
 
 static CORE_ADDR
@@ -122,7 +124,31 @@ d10v_stack_align (CORE_ADDR len)
 static int
 d10v_use_struct_convention (int gcc_p, struct type *type)
 {
-  return (TYPE_LENGTH (type) > 8);
+  long alignment;
+  int i;
+  /* The d10v only passes a struct in a register when that structure
+     has an alignment that matches the size of a register. */
+  /* If the structure doesn't fit in 4 registers, put it on the
+     stack. */
+  if (TYPE_LENGTH (type) > 8)
+    return 1;
+  /* If the struct contains only one field, don't put it on the stack
+     - gcc can fit it in one or more registers. */
+  if (TYPE_NFIELDS (type) == 1)
+    return 0;
+  alignment = TYPE_LENGTH (TYPE_FIELD_TYPE (type, 0));
+  for (i = 1; i < TYPE_NFIELDS (type); i++)
+    {
+      /* If the alignment changes, just assume it goes on the
+         stack. */
+      if (TYPE_LENGTH (TYPE_FIELD_TYPE (type, i)) != alignment)
+	return 1;
+    }
+  /* If the alignment is suitable for the d10v's 16 bit registers,
+     don't put it on the stack. */
+  if (alignment == 2 || alignment == 4)
+    return 0;
+  return 1;
 }
 
 
@@ -1498,7 +1524,7 @@ d10v_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_short_bit (gdbarch, 2 * TARGET_CHAR_BIT);
   set_gdbarch_int_bit (gdbarch, 2 * TARGET_CHAR_BIT);
   set_gdbarch_long_bit (gdbarch, 4 * TARGET_CHAR_BIT);
-  set_gdbarch_long_long_bit (gdbarch, 4 * TARGET_CHAR_BIT);
+  set_gdbarch_long_long_bit (gdbarch, 8 * TARGET_CHAR_BIT);
   /* NOTE: The d10v as a 32 bit ``float'' and ``double''. ``long
      double'' is 64 bits. */
   set_gdbarch_float_bit (gdbarch, 4 * TARGET_CHAR_BIT);

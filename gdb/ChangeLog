@@ -1,3 +1,15 @@
+2001-12-04  Jackie Smith Cashion  <jsmith@redhat.com>
+
+	* MAINTAINERS (write-after-approval): Add self.
+
+	* d10v-tdep.c (d10v_gdbarch_init): Change size of long long to 8 bytes.
+	
+	From Andrew Cagney  <cagney@redhat.com>:
+        * d10v-tdep.c (d10v_frame_chain_valid): Check if the caller's PC
+        is in the entry function.
+        (d10v_use_struct_convention): Store multi-field struct and union
+        return values on the stack.
+	
 2001-12-04  Jim Blandy  <jimb@redhat.com>
 
 	* s390-tdep.c (s390_get_frame_info): Recognize spills of reg
