@@ -61,7 +61,7 @@ BISON = bison
 MAKEINFO = makeinfo
 RANLIB = ranlib
 
-.NOEXPORT
+.NOEXPORT:
 MAKEOVERRIDES=
 
 CC_FOR_BUILD = cc
@@ -120,7 +120,8 @@ clean:
 	rm -f *.[oa] *~ core *.E *.p *.ip aout-params.h gen-aout
 
 distclean mostlyclean realclean: clean
-	rm -f libbfd.a TAGS
+	rm -f TAGS
+	rm -f Makefile config.cache config.log config.status
 
 # Dummy target to force execution of dependent targets.
 #
