@@ -90,13 +90,15 @@ else
 fi
 
 if ( echo $* | grep keep\-29k > /dev/null ) ; then
-	echo Keeping 29k in amdcoff.c and Makefile.in
+	echo Keeping 29k in amdcoff.c and Makefile.in and targets.c
 else
-	echo Sanitizing 29k in amdcoff.c and Makefile.in
+	echo Sanitizing 29k in amdcoff.c and Makefile.in and targets.c
 	rm -f amdcoff.c
 	rm -f new
 	sed -e 's/ amdcoff.[co] / /g' <Makefile.in >new
 	mv new Makefile.in
+	sed -e '/a29kcoff/d' <targets.c >new
+	mv new targets.c
 fi
 
 echo Done in `pwd`.
@@ -104,7 +106,10 @@ echo Done in `pwd`.
 #
 #
 # $Log$
-# Revision 1.11  1991/08/01 01:27:44  gnu
+# Revision 1.12  1991/08/01 05:33:39  gnu
+# Forgot one more place to remove amdcoff.c reference (sigh).
+#
+# Revision 1.11  1991/08/01  01:27:44  gnu
 # Delete CVS.adm from the release!
 #
 # Revision 1.10  1991/07/31  22:28:30  gnu
