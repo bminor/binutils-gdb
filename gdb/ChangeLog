@@ -1,3 +1,7 @@
+Tue Oct  6 12:13:08 1992  John Gilmore  (gnu@cygnus.com)
+
+	* main.c (define_command):  Add forgotten initializer.
+
 Tue Oct  6 02:23:17 1992  John Gilmore  (gnu@cygnus.com)
 
 	* language.c, language.h:  Move saved_language out to global
