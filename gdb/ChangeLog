@@ -1,5 +1,7 @@
 Thu Oct 13 13:24:29 1994  Jim Kingdon  (kingdon@lioth.cygnus.com)
 
+	* NEWS: Add item about if and while.
+
 	* .gdbinit: Restore `end'; it was not excess.  Reindent
 	list-objfiles to make this clear.  Comment out all of
 	list-objfiles because old gdb's choke on it.

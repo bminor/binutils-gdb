@@ -1,6 +1,8 @@
 		What has changed since GDB-3.5?
 		(Organized release by release)
 
+* New "if" and "while" commands.  This makes it possible to write
+somewhat more sophisticated user-defined commands.
 
 *** Changes in GDB-4.13:
 
