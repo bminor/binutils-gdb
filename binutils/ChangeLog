@@ -1,3 +1,7 @@
+2001-06-23  Ben Elliston  <bje@redhat.com>
+
+	* MAINTAINERS: Add myself as M88k maintainer.
+
 2001-06-22  Jocelyn Mayer  <jocelyn.mayer@netgem.com>
 
 	* objcopy.c (strip_main): Support -o or --output-file command lien
