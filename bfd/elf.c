@@ -17,19 +17,25 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
 
+/*
+
+SECTION
+	ELF backends
+
+	BFD support for ELF formats is being worked on.
+	Currently, the best supported back ends are for sparc and i386
+	(running svr4 or Solaris 2).
+
+	Documentation of the internals of the support code still needs
+	to be written.  The code is changing quickly enough that we
+	haven't bothered yet.
+ */
+
 #include "bfd.h"
 #include "sysdep.h"
 #include "libbfd.h"
 #define ARCH_SIZE 0
 #include "libelf.h"
-
-#ifndef INLINE
-#if __GNUC__ >= 2
-#define INLINE __inline__
-#else
-#define INLINE
-#endif
-#endif
 
 /* Standard ELF hash function.  Do not change this function; you will
    cause invalid hash tables to be generated.  (Well, you would if this
@@ -188,18 +194,6 @@ DEFUN (bfd_elf_find_section, (abfd, name),
   return 0;
 }
 
-const struct bfd_elf_arch_map bfd_elf_arch_map[] = {
-  { bfd_arch_sparc, EM_SPARC },
-  { bfd_arch_i386, EM_386 },
-  { bfd_arch_m68k, EM_68K },
-  { bfd_arch_m88k, EM_88K },
-  { bfd_arch_i860, EM_860 },
-  { bfd_arch_mips, EM_MIPS },
-  { bfd_arch_hppa, EM_HPPA },
-};
-
-const int bfd_elf_arch_map_size = sizeof (bfd_elf_arch_map) / sizeof (bfd_elf_arch_map[0]);
-
 const char *const bfd_elf_section_type_names[] = {
   "SHT_NULL", "SHT_PROGBITS", "SHT_SYMTAB", "SHT_STRTAB",
   "SHT_RELA", "SHT_HASH", "SHT_DYNAMIC", "SHT_NOTE",
@@ -232,7 +226,8 @@ bfd_elf_generic_reloc (abfd,
 {
   if (output_bfd != (bfd *) NULL
       && (symbol->flags & BSF_SECTION_SYM) == 0
-      && reloc_entry->addend == 0)
+      && (! reloc_entry->howto->partial_inplace
+	  || reloc_entry->addend == 0))
     {
       reloc_entry->address += input_section->output_offset;
       return bfd_reloc_ok;

@@ -1,3 +1,8 @@
+Tue Dec 28 12:43:54 1993  Ian Lance Taylor  (ian@tweedledumb.cygnus.com)
+
+	* elf.c (bfd_elf_generic_reloc): If this is not an inplace reloc,
+	then skip bfd_perform_relocation even if the addend is non-zero.
+
 Tue Dec 21 09:22:19 1993  Ken Raeburn  (raeburn@rtl.cygnus.com)
 
 	* coffcode.h (coff_write_relocs) [SWAP_OUT_RELOC_OFFSET]: Copy
