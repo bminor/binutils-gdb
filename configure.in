@@ -273,9 +273,12 @@ if [ x"${with_headers}" != x ] && [ x"${with_libs}" != x ]; then
   fi
 fi
 
-# Recognize --without-newlib.
+# Recognize --with-newlib/--without-newlib.
 if [ x${with_newlib} = xno ]; then
   configdirs=`echo " ${configdirs} " | sed -e 's/ newlib / /'`
+elif [ x${with_newlib} = xyes ]; then
+  configdirs=`echo " ${configdirs} " | sed -e 's/ newlib / /'`
+  configdirs="${configdirs} newlib"
 fi
 
 # Handle ${copy_dirs}
@@ -351,8 +354,6 @@ case "${target}" in
     ;;
 # start-sanitize-arc
   arc-*-*)
-    # Leave g++ for later.
-    noconfigdirs="$noconfigdirs libg++ libstdc++ libio librx"
     ;;
 # end-sanitize-arc
 # start-sanitize-psion
@@ -451,7 +452,7 @@ case "${target}" in
     ;;
   sparc-*-sunos4*)
     if [ x${is_cross_compiler} != xno ] ; then
-           noconfigdirs="$noconfigdirs gdb gdbtest newlib sim dejagnu expect tcl"
+           noconfigdirs="$noconfigdirs gdb gdbtest newlib"
     else
            use_gnu_ld=no
     fi
