@@ -1,3 +1,8 @@
+Thu Jun  3 10:40:19 1993  Jeffrey Osier  (jeffrey@cygnus.com)
+
+	* Makefile.in:  added c++filt and objcopy to MANPAGES variable
+	* .Sanitize:  keep c++filt.1 and objcopy.1
+
 Thu Jun  3 00:32:52 1993  david d `zoo' zuhn  (zoo at cirdan.cygnus.com)
 
 	* Makefile.in: rename LOADLIBES to EXTRALIBS

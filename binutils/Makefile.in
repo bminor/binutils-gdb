@@ -76,7 +76,7 @@ version=`./../gcc/gcc -dumpversion`
 # Where to find texinfo.tex to format docn with TeX
 TEXIDIR = $(srcdir)/../texinfo/fsf
 
-MANPAGES= ar nm objdump ranlib size strip
+MANPAGES= ar nm objdump ranlib size strip c++filt objcopy
 
 #CC=gcc -Wall
 # these two are almost the same program
