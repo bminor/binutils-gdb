@@ -2,6 +2,7 @@ Thu Jan 15 13:46:48 1998  Richard Henderson  <rth@cygnus.com>
 
 	* tc-h8300.c (parse_reg): Take the length of the symbol into
 	account when attempting to match a register name.
+	* tc-h8500.c (parse_reg): Likewise.
 
 start-sanitize-vr4111
 Thu Jan 15 09:33:11 1998  Gavin Koch  <gavin@cygnus.com>
