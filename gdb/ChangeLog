@@ -3,6 +3,8 @@ Sat Sep 28 10:02:33 1991  John Gilmore  (gnu at cygnus.com)
 	* eval.c (evaluate_subexp_for_address):  Don't use
 	TYPE_POINTER_TYPE directly (it might be zero if this type has
 	never had a pointer created before); use lookup_pointer_type.
+	* symtab.c (lookup_method_type):  Arguments were swapped in all
+	callers, so fix it here.  I'm amazed this worked at all!
 
 Fri Sep 27 18:09:31 1991  John Gilmore  (gnu at cygnus.com)
 

@@ -437,6 +437,8 @@ lookup_pointer_type (type)
   if (TYPE_FLAGS (type) & TYPE_FLAG_PERM)
     TYPE_FLAGS (ptype) |= TYPE_FLAG_PERM;
   /* We assume the machine has only one representation for pointers!  */
+  /* FIXME:  This confuses host<->target data representations, and is a
+     poor assumption besides. */
   TYPE_LENGTH (ptype) = sizeof (char *);
   TYPE_CODE (ptype) = TYPE_CODE_PTR;
   return ptype;
@@ -548,13 +550,13 @@ allocate_stub_method (type)
   return mtype;
 }
 
-/* Lookup a method type returning type TYPE, belonging
-   to class DOMAIN, and taking a list of arguments ARGS.
+/* Lookup a method type belonging to class DOMAIN, returning type TYPE,
+   and taking a list of arguments ARGS.
    If one is not found, allocate a new one.  */
 
 struct type *
-lookup_method_type (type, domain, args)
-     struct type *type, *domain, **args;
+lookup_method_type (domain, type, args)
+     struct type *domain, *type, **args;
 {
   register struct type *mtype = TYPE_MAIN_VARIANT (type);
   struct type *main_type;
@@ -2597,12 +2599,7 @@ list_symbols (regexp, class, bpt)
 		    /* Typedef that is not a C++ class */
 		    if (class == 2
 			&& SYMBOL_NAMESPACE (sym) != STRUCT_NAMESPACE)
-#ifndef FIXME
-		       /* We haven't integrated this from A. Beers yet */
-		       error ("typedef_print(SYMBOL_TYPE(sym),sym,stdout);");
-#else
-		       typedef_print(SYMBOL_TYPE(sym),sym,stdout);
-#endif
+		       typedef_print (SYMBOL_TYPE(sym), sym, stdout);
 		    /* variable, func, or typedef-that-is-c++-class */
 		    else if (class < 2 || 
 			     (class == 2 && 
