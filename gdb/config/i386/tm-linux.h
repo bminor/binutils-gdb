@@ -1,5 +1,5 @@
 /* Definitions to target GDB to GNU/Linux on 386.
-   Copyright 1992, 1993, 1995, 1996, 1998, 1999, 2000
+   Copyright 1992, 1993, 1995, 1996, 1998, 1999, 2000, 2001
    Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -34,34 +34,6 @@
 /* Use target_specific function to define link map offsets.  */
 extern struct link_map_offsets *i386_linux_svr4_fetch_link_map_offsets (void);
 #define SVR4_FETCH_LINK_MAP_OFFSETS() i386_linux_svr4_fetch_link_map_offsets ()
-
-/* FIXME: kettenis/2000-03-26: We should get rid of this last piece of
-   Linux-specific `long double'-support code, probably by adding code
-   to valprint.c:print_floating() to recognize various extended
-   floating-point formats.  */
-
-#if defined(HAVE_LONG_DOUBLE) && defined(HOST_I386)
-/* The host and target are i386 machines and the compiler supports
-   long doubles. Long doubles on the host therefore have the same
-   layout as a 387 FPU stack register. */
-
-#define TARGET_ANALYZE_FLOATING					\
-  do								\
-    {								\
-      unsigned expon;						\
-								\
-      low = extract_unsigned_integer (valaddr, 4);		\
-      high = extract_unsigned_integer (valaddr + 4, 4);		\
-      expon = extract_unsigned_integer (valaddr + 8, 2);	\
-								\
-      nonnegative = ((expon & 0x8000) == 0);			\
-      is_nan = ((expon & 0x7fff) == 0x7fff)			\
-	&& ((high & 0x80000000) == 0x80000000)			\
-	&& (((high & 0x7fffffff) | low) != 0);			\
-    }								\
-  while (0)
-
-#endif
 
 /* The following works around a problem with /usr/include/sys/procfs.h  */
 #define sys_quotactl 1
